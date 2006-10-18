@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.23 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.24 $
+   $Date: 2006/10/18 04:28:44 $
    $Author: straten $ */
 
 #ifndef __Types_h
@@ -115,6 +115,7 @@ namespace Signal {
   
   Component get_Component (Basis basis, State state, int ipol);
   
+  unsigned State2npol (State s);
   int get_ipol (State state, Component poln);
   
   const char* source_string (Source source);
@@ -122,24 +123,32 @@ namespace Signal {
   const char* basis_string (Basis basis);
 
   const std::string Source2string (Source source);
-  const std::string State2string (State state);
-  const std::string Basis2string (Basis basis);
-  const std::string Scale2string (Scale scale);
+  const std::string State2string  (State state);
+  const std::string Basis2string  (Basis basis);
+  const std::string Scale2string  (Scale scale);
 
-  //! Returns how many polarisations the State most likely is
-  //! This function is for when a user specifies a desired output state and you need to convert to an npol
-  //! Try and not use this function when you actually have data
-  unsigned State2npol(State state);
-
-  Basis string2Basis(std::string ss);
-  Source string2Source(std::string ss);
-  State string2State(std::string ss);
-  Scale string2Scale(std::string ss);
+  Basis  string2Basis  (const std::string& ss);
+  Source string2Source (const std::string& ss);
+  State  string2State  (const std::string& ss);
+  Scale  string2Scale  (const std::string& ss);
 
   //! Tells you if your state is consistent with your npol and ndim
-  bool valid_state(State state,unsigned ndim,unsigned npol, std::string& reason);
+  bool valid_state (State state, unsigned ndim, unsigned npol,
+		    std::string& reason);
   
 }
+
+std::ostream& operator << (std::ostream& ostr, Signal::Source source);
+std::istream& operator >> (std::istream& is, Signal::Source& source);
+
+std::ostream& operator << (std::ostream& ostr, Signal::State state);
+std::istream& operator >> (std::istream& is, Signal::State& state);
+
+std::ostream& operator << (std::ostream& ostr, Signal::Scale scale);
+std::istream& operator >> (std::istream& is, Signal::Scale& scale);
+
+/* note that Basis extraction and insertion operators are defined in
+   Conventions.h */
 
 #endif
 

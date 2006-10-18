@@ -13,10 +13,15 @@
 Pulsar::ArchiveTI::ArchiveTI ()
 {
   add( &Archive::get_filename, "file",  "Name of the file" );
+
   add( &Archive::get_nbin,     "nbin",  "Number of pulse phase bins" );
   add( &Archive::get_nchan,    "nchan", "Number of frequency channels" );
   add( &Archive::get_npol,     "npol",  "Number of polarizations" );
   add( &Archive::get_nsubint,  "nsub",  "Number of sub-integrations" );
+
+  add( &Archive::get_type,
+       &Archive::set_type,
+       "type", "Observation type (Pulsar, PolnCal, etc.)" );
 
   add( &Archive::get_telescope_code,
        &Archive::set_telescope_code,
@@ -25,6 +30,14 @@ Pulsar::ArchiveTI::ArchiveTI ()
   add( &Archive::get_source,
        &Archive::set_source,
        "name", "Name of the source" );
+
+#if 0
+  //! Get the coordinates of the source
+  virtual sky_coord get_coordinates () const = 0;
+  //! Set the coordinates of the source
+  virtual void set_coordinates (const sky_coord& coordinates) = 0;
+
+#endif
 
   add( &Archive::get_centre_frequency,
        &Archive::set_centre_frequency,
@@ -54,32 +67,16 @@ Pulsar::ArchiveTI::ArchiveTI ()
        &Archive::set_poln_calibrated,
        "polc", "Polarization calibrated (boolean)" );
 
-#if 0
-  //! Get the coordinates of the source
-  virtual sky_coord get_coordinates () const = 0;
-  //! Set the coordinates of the source
-  virtual void set_coordinates (const sky_coord& coordinates) = 0;
+  add( &Archive::get_scale,
+       &Archive::set_scale,
+       "scale", "Units of profile amplitudes" );
 
-  //! Get the state of the profile data
-  virtual Signal::State get_state () const = 0;
-  //! Set the state of the profile data
-  virtual void set_state (Signal::State state) = 0;
-  
-  //! Get the scale in which flux density is measured
-  virtual Signal::Scale get_scale () const = 0;
-  //! Set the scale in which flux density is measured
-  virtual void set_scale (Signal::Scale scale) = 0;
-  
-  //! Get the observation type (psr, cal)
-  virtual Signal::Source get_type () const = 0;
-  //! Set the observation type (psr, cal)
-  virtual void set_type (Signal::Source type) = 0;
-
-#endif
-
+  add( &Archive::get_state,
+       &Archive::set_state,
+       "state", "State of profile amplitudes" );
 
   import( "rcvr", Pulsar::ReceiverTI(), 
-	  (Receiver*(Archive::*)()) &Archive::get<Receiver>);
+	  (Receiver*(Archive::*)()) &Archive::get<Receiver> );
 
   import( "be", Pulsar::BackendTI(),
 	  (Backend*(Archive::*)()) &Archive::get<Backend> );

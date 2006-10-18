@@ -7,6 +7,7 @@
 
 #include "Types.h"
 #include "Error.h"
+#include "tostring.h"
 
 using namespace std;
 
@@ -210,34 +211,6 @@ const char* Signal::state_string (State state)
   }
 }
 
-const string Signal::State2string (State state)
-{
-  switch (state)  {
-  case Nyquist:
-    return "Nyquist";
-  case Analytic:
-    return "Analytic";
-  case Stokes:
-    return "Stokes";
-  case Coherence:
-    return "Coherence";
-  case PPQQ:
-    return "PPQQ";
-  case Intensity:
-    return "Intensity";
-  case NthPower:
-    return "NthPower";
-  case Invariant:
-    return "Invariant";
-  case PP_State:
-    return "PP";
-  case QQ_State:
-    return "QQ";
-  default:
-    return "Invalid";
-  }
-}
-
 const char* Signal::source_string(Source source)
 {
   switch( source ){
@@ -272,63 +245,8 @@ const char* Signal::basis_string(Basis basis)
   }
 }
 
-const string Signal::Source2string (Source source){ return source_string(source); }
-const string Signal::Basis2string (Basis basis){ return basis_string(basis); }
-
-
-Signal::Basis Signal::string2Basis(string ss){
-  if(ss=="Circular")
-    return Signal::Circular;
-  if(ss=="Linear")
-    return Signal::Linear;
-  if(ss=="Elliptical")
-    return Signal::Elliptical;
-  return (Signal::Basis) -1;
-}
-
-Signal::Source Signal::string2Source(string ss){
-  if(ss=="Pulsar")
-    return Pulsar;
-  else if(ss=="PolnCal")
-    return PolnCal;
-  else if(ss=="FluxCal-Off")
-    return FluxCalOff;
-  else if(ss=="FluxCal-On")
-    return FluxCalOn;
-  else if(ss=="Calibrator")
-    return Calibrator;
-  return Unknown;
-}
-
-Signal::State Signal::string2State(string ss){
-  if(ss=="Nyquist")
-    return Nyquist;
-  else if(ss=="Analytic")
-    return Analytic;
-  else if(ss=="Intensity")
-    return Intensity;
-  else if (ss=="NthPower")
-    return NthPower;
-  else if(ss=="PPQQ")
-    return PPQQ;
-  else if(ss=="Coherence")
-    return Coherence;
-  else if(ss=="Stokes")
-    return Stokes;
-  else if(ss=="PP")
-    return PP_State;
-  else if(ss=="QQ")
-    return QQ_State;
-  
-  throw Error(InvalidState,"string2State()",
-	      "Unknown state- '%s'",ss.c_str());
-  return Invariant;  // Because you gotta return something
-}
-
-//! Returns how many polarisations the State most likely is
-//! This function is for when a user specifies a desired output state and you need to convert to an npol
-//! Try and not use this function when you actually have data
-unsigned Signal::State2npol(State s){
+unsigned Signal::State2npol (State s)
+{
   if( s==Nyquist || s==Analytic || s==PPQQ )
     return 2;
   if( s==Coherence || s==Stokes || s==Invariant )
@@ -403,54 +321,192 @@ bool Signal::valid_state(Signal::State state,unsigned ndim,unsigned npol, string
   return true;
 }
 
-const string Signal::Scale2string (Scale scale){
-  switch( scale ) {
+// //////////////////////////////////////////////////////////////////////////
+//
+// Signal::State
+//
+// //////////////////////////////////////////////////////////////////////////
 
-    //! Uncalibrated voltage
-  case EMF:
-    return "EMF";
-    
-    //! Calibrated voltage
-  case Volts:
-    return "Volts";
-    
-      //! Uncalibrated energy
-  case Energy:
-    return "Energy";
-
-      //! Calibrated energy
-  case Joules:
-    return "Joules";
-
-      //! Uncalibrated flux density
-  case FluxDensity:
-    return "FluxDensity";
-    
-    //! Reference flux density
-  case ReferenceFluxDensity:
-    return "ReferenceFluxDensity";
-    
-    //! Calibrated flux density
-  case Jansky:
-    return "Jansky";
-
+const string Signal::State2string (State state)
+{
+  switch (state)  {
+  case Nyquist:
+    return "Nyquist";
+  case Analytic:
+    return "Analytic";
+  case Stokes:
+    return "Stokes";
+  case Coherence:
+    return "Coherence";
+  case PPQQ:
+    return "PPQQ";
+  case Intensity:
+    return "Intensity";
+  case NthPower:
+    return "NthPower";
+  case Invariant:
+    return "Invariant";
+  case PP_State:
+    return "PP";
+  case QQ_State:
+    return "QQ";
   default:
-    return "Unknown";
-
+    return "Invalid";
   }
 }
 
-Signal::Scale Signal::string2Scale(string ss){
-  if( ss=="EMF" ) return EMF;
-  else if( ss=="Volts" ) return Volts;
-  else if( ss=="Energy" ) return Energy;
-  else if( ss=="Joules" ) return Joules;
-  else if( ss=="FluxDensity" ) return FluxDensity;
-  else if( ss=="ReferenceFluxDensity" ) return ReferenceFluxDensity;
-  else if( ss=="Jansky" ) return Jansky;
-
-  throw Error(InvalidParam,"Signal::string2Scale()",
-	      "Could not parse '%s' as a Signal::Scale",
-	      ss.c_str());
+Signal::State Signal::string2State (const string& ss)
+{
+  if(ss=="Nyquist")
+    return Nyquist;
+  if(ss=="Analytic")
+    return Analytic;
+  if(ss=="Intensity")
+    return Intensity;
+  if (ss=="NthPower")
+    return NthPower;
+  if(ss=="PPQQ")
+    return PPQQ;
+  if(ss=="Coherence")
+    return Coherence;
+  if(ss=="Stokes")
+    return Stokes;
+  if(ss=="PP")
+    return PP_State;
+  if(ss=="QQ")
+    return QQ_State;
+  
+  throw Error (InvalidState, "Signal::string2State",
+	       "Unknown state '" + ss + "'");
 }
 
+std::ostream& operator<< (std::ostream& ostr, Signal::State state)
+{
+  return ostr << State2string(state);
+}
+
+std::istream& operator >> (std::istream& is, Signal::State& state)
+{
+  return extraction (is, state, Signal::string2State);
+}
+
+// //////////////////////////////////////////////////////////////////////////
+//
+// Signal::Basis
+//
+// //////////////////////////////////////////////////////////////////////////
+
+const string Signal::Basis2string (Basis basis)
+{
+  return basis_string(basis);
+}
+
+Signal::Basis Signal::string2Basis (const string& ss)
+{
+  if(ss=="Circular")
+    return Signal::Circular;
+  if(ss=="Linear")
+    return Signal::Linear;
+  if(ss=="Elliptical")
+    return Signal::Elliptical;
+
+  throw Error (InvalidState, "Signal::string2Basis",
+	       "Unknown basis '" + ss + "'");
+}
+
+// //////////////////////////////////////////////////////////////////////////
+//
+// Signal::Source
+//
+// //////////////////////////////////////////////////////////////////////////
+
+const string Signal::Source2string (Source source)
+{
+  return source_string(source);
+}
+
+Signal::Source Signal::string2Source (const string& ss)
+{
+  if(ss=="Pulsar")
+    return Pulsar;
+  if(ss=="PolnCal")
+    return PolnCal;
+  if(ss=="FluxCal-Off")
+    return FluxCalOff;
+  if(ss=="FluxCal-On")
+    return FluxCalOn;
+  if(ss=="Calibrator")
+    return Calibrator;
+
+  throw Error (InvalidState, "Signal::string2Source",
+	       "Unknown source '" + ss + "'");
+}
+
+std::ostream& operator<< (std::ostream& ostr, Signal::Source source)
+{
+  return ostr << Source2string(source);
+}
+
+std::istream& operator >> (std::istream& is, Signal::Source& source)
+{
+  return extraction (is, source, Signal::string2Source);
+}
+
+// //////////////////////////////////////////////////////////////////////////
+//
+// Signal::Scale
+//
+// //////////////////////////////////////////////////////////////////////////
+
+const string Signal::Scale2string (Scale scale)
+{
+  switch( scale ) {
+  case EMF:
+    return "EMF";
+  case Volts:
+    return "Volts";
+  case Energy:
+    return "Energy";
+  case Joules:
+    return "Joules";
+  case FluxDensity:
+    return "FluxDensity";
+  case ReferenceFluxDensity:
+    return "ReferenceFluxDensity";
+  case Jansky:
+    return "Jansky";
+  default:
+    return "Unknown";
+  }
+}
+
+Signal::Scale Signal::string2Scale (const string& ss)
+{
+  if( ss=="EMF" )
+    return EMF;
+  if( ss=="Volts" ) 
+    return Volts;
+  if( ss=="Energy" )
+    return Energy;
+  if( ss=="Joules" )
+    return Joules;
+  if( ss=="FluxDensity" )
+    return FluxDensity;
+  if( ss=="ReferenceFluxDensity" )
+    return ReferenceFluxDensity;
+  if( ss=="Jansky" )
+    return Jansky;
+
+  throw Error (InvalidState, "Signal::string2Scale",
+	       "Unknown scale '" + ss + "'");
+}
+
+std::ostream& operator<< (std::ostream& ostr, Signal::Scale scale)
+{
+  return ostr << Scale2string(scale);
+}
+
+std::istream& operator >> (std::istream& is, Signal::Scale& scale)
+{
+  return extraction (is, scale, Signal::string2Scale);
+}
