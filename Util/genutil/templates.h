@@ -106,7 +106,6 @@ void minmax (const I& it1, const I& it2, T& min, T& max, bool follow = false)
       max = *it;
     if (*it < min)
       min = *it;
-    it ++;
   }
 }
 
