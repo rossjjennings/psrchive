@@ -6,12 +6,14 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.8 $
+   $Date: 2006/10/18 04:28:59 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H
 #define __TOSTRING_H
+
+#include "Error.h"
 
 #include <string>
 #include <sstream>
@@ -57,6 +59,35 @@ inline std::string fromstring<std::string> (const std::string& input)
 {
   return input;
 }
+
+
+/*
+  If you've already written a function that converts string to Type,
+  and this function throws an exception of type Error when the string
+  cannot be parsed, then you can use this template to implement an
+  extraction operator (operator >>).  See Util/genutil/Types.C for an
+  example. 
+*/
+template<typename Type, typename String2Type>
+std::istream& extraction (std::istream& is, Type& t, String2Type string2type)
+{
+  std::streampos pos = is.tellg();
+  std::string ss;
+
+  try {
+    is >> ss;
+    t = string2type (ss);
+  }
+  catch (Error& e) {
+    is.setstate(std::istream::failbit);
+    is.seekg(pos);
+  }
+  return is;
+}
+
+
+
+
 
 
 #endif
