@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.25 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.26 $
+   $Date: 2006/10/19 15:49:10 $
    $Author: straten $ */
 
 #ifndef __GENUTIL_MJD_H
@@ -144,7 +144,8 @@ class MJD {
   const char * printfs()     const;
   const char * strtempo() const; 
 
-  // returns a string formatted as in 'strftime()'
+  // returns a string formatted by strftime
+  // e.g. format = "%Y-%m-%d %H:%M:%S"
   char* datestr (char* dstr, int len, const char* format) const;
 
 #ifdef HAVE_MPI
