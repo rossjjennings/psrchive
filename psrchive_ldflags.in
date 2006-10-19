@@ -2,20 +2,20 @@
 
 # @configure_input@
 
-echo -LPREFIX/lib -lpsrmore -lpsrbase -lpsrutil
+echo -n " -LPREFIX/lib -lpsrmore -lpsrbase -lpsrutil "
 
-echo @FFT_LIBS@ @SLA_LIBS@ @CFITSIO_LIBS@
+echo -n " @FFT_LIBS@ @SLA_LIBS@ @CFITSIO_LIBS@ "
 
 for arg in $* ; do
 
 case $arg in
 
 pgplot)
-  echo @PGPLOT_LIBS@
+  echo -n " @PGPLOT_LIBS@ "
 ;;
 
 qt)
-  echo @QT_LIBS@
+  echo -n " @QT_LIBS@ "
 ;;
 
 esac
