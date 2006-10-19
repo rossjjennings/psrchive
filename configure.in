@@ -172,7 +172,9 @@ AC_CONFIG_FILES([Util/Makefile
 		More/Polarimetry/iri2001/Makefile
 		More/rhythm/Makefile
 		More/Applications/Makefile
-		Makefile])
+		Makefile
+		psrchive_ldflags
+		psrchive_cflags])
 
 AC_OUTPUT
 
