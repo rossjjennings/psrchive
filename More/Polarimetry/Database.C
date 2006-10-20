@@ -944,10 +944,12 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
     feed_ext -> set_transformation ( feed->evaluate() );
   }
 
-  if (entry.obsType == Signal::Calibrator)
-    cerr << "CAL OF TYPE " <<  Calibrator::Type2str (entry.calType) << endl;
-  else
-    cerr << "FILE OF TYPE " << Signal::Source2string (entry.obsType);
+  if (verbose > 2) {
+    if (entry.obsType == Signal::Calibrator)
+      cerr << "CAL OF TYPE " <<  Calibrator::Type2str (entry.calType) << endl;
+    else
+      cerr << "FILE OF TYPE " << Signal::Source2string (entry.obsType) << endl;
+  }
 
   if (entry.obsType == Signal::Calibrator)
     // if a solved model, return the solution
@@ -982,10 +984,10 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
     
   }
   
-  if (m == Pulsar::Calibrator::Hybrid)
+  if (m == Pulsar::Calibrator::Hybrid)  {
+    cerr << "Pulsar::Database::generatePolnCalibrator Hybrid" << endl;
     return generateHybridCalibrator (ref_cal, arch);
-
-
+  }
 
   return ref_cal.release();
 }
