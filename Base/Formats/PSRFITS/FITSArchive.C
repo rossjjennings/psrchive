@@ -747,24 +747,31 @@ try {
     if (ext) 
       unload (fptr, ext);
 
-    else {
+  }
 
-      const Backend* backend = get<Backend>();
+  {
+    const Backend* backend = get<Backend>();
 
-      if (backend) {
-
-	if (verbose == 3)
-	  cerr << "FITSArchive::unload " << backend->get_extension_name()
-	       << " name=" << backend->get_name() << endl;
-
-	psrfits_update_key (fptr, "BACKEND",  backend->get_name());
-	psrfits_update_key (fptr, "BE_PHASE", (int)backend->get_argument());
-	psrfits_update_key (fptr, "BE_HAND",  (int)backend->get_hand());
-
-      }
+    if (backend) {
+      
+      if (verbose == 3)
+	cerr << "FITSArchive::unload " << backend->get_extension_name()
+	     << " name=" << backend->get_name() << endl;
+      
+      psrfits_update_key (fptr, "BACKEND",  backend->get_name());
+      
+      int be_dcc = backend->get_downconversion_corrected();
+      psrfits_update_key (fptr, "BE_DCC", be_dcc);
+ 
+      int be_phase = 0;
+      if (backend->get_argument() == Signal::Conventional)
+	be_phase = -1;
+      if (backend->get_argument() == Signal::Conjugate)
+	be_phase = 1;
+      psrfits_update_key (fptr, "BE_PHASE", be_phase);
 
     }
-
+    
   }
 
   {
