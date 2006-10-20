@@ -4,10 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* various endian modification functions for the tid PC control program
+
+/* endian modification functions
  *
- * NOTE: for general use the macros in endian.h are probably the best
- * thing to use since they do the preprocessor stuff. just use one of
+ * NOTE: for general use the macros in machine_endian.h are probably
+ * the best thing to use since they do the preprocessor stuff. just
+ * use one of
  *
  * [to|from][Big|Little]Endian(void *object, int nbytes)
  *
@@ -17,17 +19,16 @@
 #include <stdlib.h>
 
 /* function to change endian-ness of a data, maximum 8 bytes long */
-void
-changeEndian(void *num, int nbytes)
+void changeEndian(void *num, int nbytes)
 {
-	unsigned char tmp[8];
-	unsigned char *numPtr = (unsigned char *)num;
-	int i;
+  unsigned char tmp[8];
+  unsigned char *numPtr = (unsigned char *)num;
+  int i;
 
-	for (i=0; i < nbytes; i++)
-		tmp[i] = numPtr[nbytes-i-1];
-
-	memcpy((void *)num, (void *)tmp, nbytes);
+  for (i=0; i < nbytes; i++)
+    tmp[i] = numPtr[nbytes-i-1];
+  
+  memcpy((void *)num, (void *)tmp, nbytes);
 }
 
 void array_changeEndian (int count, void *p, int element_size)
