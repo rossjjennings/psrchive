@@ -7,14 +7,13 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Error.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/23 15:55:54 $
+   $Revision: 1.6 $
+   $Date: 2006/10/23 17:00:28 $
    $Author: straten $ */
 
 #ifndef __Error_h
 #define __Error_h
 
-#include "tostring.h"
 #include <iostream>
 #include <vector>
 
@@ -95,11 +94,7 @@ class Error {
   
   //! Add to the Error message
   template<class T>
-  friend Error& operator<< (Error& error, const T& t)
-  {
-    error.message += tostring(t);
-    return error;
-  }
+  friend Error& operator<< (Error& error, const T& t);
 
 protected:
 
@@ -123,5 +118,13 @@ protected:
 //! Convenience output operator in global namespace
 std::ostream& operator<< (std::ostream& ostr, const Error& error);
 
+#include "tostring.h"
+
+template<class T>
+Error& operator<< (Error& error, const T& t)
+{
+  error.message += tostring(t);
+  return error;
+}
 
 #endif
