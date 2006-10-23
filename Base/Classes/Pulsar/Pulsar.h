@@ -7,18 +7,23 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Pulsar.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.5 $
+   $Date: 2006/10/23 18:22:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Pulsar_h
 #define __Pulsar_Pulsar_h
 
-//! Contains everything pulsar related
+#include "Warning.h"
+
+//! Defines the PSRCHIVE library
 namespace Pulsar {
 
   //! Container classes should check array indeces at the cost of performance
   extern bool range_checking_enabled;
+
+  //! Warning messages filter
+  extern Warning warning;
 
 }
 
