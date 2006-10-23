@@ -4,12 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "Error.h"
+
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
-
-#include "Error.h"
 
 using namespace std;
 
