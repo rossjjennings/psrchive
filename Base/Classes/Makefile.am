@@ -47,7 +47,8 @@ libClasses_la_SOURCES = \
         Integration_resize.C \
         IntegrationTI.C \
         Profile_average.C \
-        Profile.C
+        Profile.C \
+	Pulsar.C
 
 #############################################################################
 #
