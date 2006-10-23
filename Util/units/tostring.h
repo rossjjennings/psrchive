@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/18 04:28:59 $
+   $Revision: 1.9 $
+   $Date: 2006/10/23 16:11:16 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H
@@ -22,27 +22,31 @@
 template<class T>
 std::string tostring (const T& input)
 {
-  std::ostringstream ost;
-  ost << input;
-  return ost.str();
+  extern std::ostringstream tostring_ost;
+  tostring_ost.str("");
+  tostring_ost << input;
+  return tostring_ost.str();
 }
 
 template<class T>
 std::string tostring (const T& input, unsigned precision)
 {
-  std::ostringstream ost;
-  ost << std::setprecision( precision ) << input;
-  return ost.str();
+  extern std::ostringstream tostring_ost;
+  tostring_ost.str("");
+  tostring_ost << std::setprecision( precision ) << input;
+  return tostring_ost.str();
 }
 
 template<class T>
 T fromstring (const std::string& input)
 {
-  std::stringstream iost;
-  iost << input;
+  extern std::istringstream fromstring_ist;
+
+  fromstring_ist.clear();
+  fromstring_ist.str(input);
 
   T retval;
-  iost >> retval;
+  fromstring_ist >> retval;
 
   return retval;
 }
