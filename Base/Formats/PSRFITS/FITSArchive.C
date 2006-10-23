@@ -763,11 +763,7 @@ try {
       int be_dcc = backend->get_downconversion_corrected();
       psrfits_update_key (fptr, "BE_DCC", be_dcc);
  
-      int be_phase = 0;
-      if (backend->get_argument() == Signal::Conventional)
-	be_phase = -1;
-      if (backend->get_argument() == Signal::Conjugate)
-	be_phase = 1;
+      int be_phase = backend->get_argument();
       psrfits_update_key (fptr, "BE_PHASE", be_phase);
 
     }

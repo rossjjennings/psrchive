@@ -9,8 +9,9 @@
 #include "Pulsar/FITSHdrExtension.h"
 #include "psrfitsio.h"
 
-#include "strutil.h"
 #include "RegularExpression.h"
+#include "templates.h"
+#include "strutil.h"
 
 using namespace std;
 
@@ -41,10 +42,7 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
   {
     int temp;
     psrfits_read_key (fptr, "BE_PHASE", &temp, 0, verbose == 3);
-    if (temp == -1)
-      ext->set_argument( Signal::Conventional );
-    if (temp == 1)
-      ext->set_argument( Signal::Conjugate );
+    ext->set_argument( (Signal::Argument) temp );
 
     psrfits_read_key (fptr, "BE_DCC",  &temp, 0, verbose == 3);
     ext->set_downconversion_corrected( temp );
@@ -116,40 +114,35 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
       cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
 	"  undefined BE_PHASE; checking " << ext->configfile; // << endl;
     
-    static char* conj_config = getenv ("WBCCONJCFG");
-    static vector<string> conj_configs;
-    if (conj_config)  {
+    static char* conv_config = getenv ("WBCCONVCFG");
+    static vector<string> conv_configs;
+    if (conv_config)  {
 
       if (verbose > 1)
 	cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
-	  "  loading " << conj_config << endl;
+	  "  loading " << conv_config << endl;
 
-      stringfload (&conj_configs, conj_config);
-      conj_config = 0; // load it only once
-      if (verbose > 2 && conj_configs.size()) {
-	cerr << "WBCORR conj configurations:" << endl;
-	for (unsigned i=0; i < conj_configs.size(); i++)
-	  cerr << conj_configs[i] << endl;
+      stringfload (&conv_configs, conv_config);
+
+      conv_config = 0; // load it only once
+
+      if (verbose > 2 && conv_configs.size()) {
+	cerr << "WBCORR conv configurations:" << endl;
+	for (unsigned i=0; i < conv_configs.size(); i++)
+	  cerr << conv_configs[i] << endl;
       }
 
     }
 
-    static RegularExpression conj_grep ("wb.*_c");
+    static RegularExpression conv_grep ("wb.*_c");
 
-    bool in_list = find (conj_configs.begin(), conj_configs.end(),
-			 ext->configfile) != conj_configs.end();
+    bool in_list = found (ext->configfile, conv_configs);
 
-    if (conj_grep.get_match(ext->configfile) || in_list)  {
-      
+    if (conv_grep.get_match(ext->configfile) || in_list)
+      ext->set_argument( Signal::Conventional );
+    else
       ext->set_argument( Signal::Conjugate );
-      
-      if (verbose > 1)
-	cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
-	  "  correcting data with version=" << hdr_ext->hdrver
-	     << " config=" << ext->configfile << endl;
-      
-    }
-    
+
   }
   
 }
