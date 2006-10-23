@@ -4,9 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "Pulsar/Pulsar.h"
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/WidebandCorrelator.h"
 #include "Pulsar/FITSHdrExtension.h"
+
 #include "psrfitsio.h"
 
 #include "RegularExpression.h"
@@ -107,43 +109,54 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
 	   << hdr_ext->hdrver << endl;
     
   }
-  
+    
+  static char* conv_config = getenv ("WBCCONVCFG");
+  static vector<string> conv_configs;
+
+  if (conv_config)  {
+    
+    if (verbose > 1)
+      cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
+	"  loading " << conv_config << endl;
+    
+    stringfload (&conv_configs, conv_config);
+    
+    conv_config = 0; // load it only once
+    
+    if (verbose > 2 && conv_configs.size()) {
+      cerr << "WBCORR conv configurations:" << endl;
+      for (unsigned i=0; i < conv_configs.size(); i++)
+	cerr << conv_configs[i] << endl;
+    }
+    
+  }
+
+  static RegularExpression conv_grep ("wb.*_c");
+
+  bool in_grep = conv_grep.get_match(ext->configfile);
+  bool in_list = found (ext->configfile, conv_configs);
+
+  bool conventional = in_grep || in_list;
+
   if (ext->get_argument() == (Signal::Argument) 0) {
     
-    if (verbose > 2)
-      cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
-	"  undefined BE_PHASE; checking " << ext->configfile; // << endl;
-    
-    static char* conv_config = getenv ("WBCCONVCFG");
-    static vector<string> conv_configs;
-    if (conv_config)  {
-
-      if (verbose > 1)
-	cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
-	  "  loading " << conv_config << endl;
-
-      stringfload (&conv_configs, conv_config);
-
-      conv_config = 0; // load it only once
-
-      if (verbose > 2 && conv_configs.size()) {
-	cerr << "WBCORR conv configurations:" << endl;
-	for (unsigned i=0; i < conv_configs.size(); i++)
-	  cerr << conv_configs[i] << endl;
-      }
-
-    }
-
-    static RegularExpression conv_grep ("wb.*_c");
-
-    bool in_list = found (ext->configfile, conv_configs);
-
-    if (conv_grep.get_match(ext->configfile) || in_list)
+    if (conventional)
       ext->set_argument( Signal::Conventional );
     else
       ext->set_argument( Signal::Conjugate );
 
+    if (verbose > 2)
+      cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
+	"  set BE_PHASE=" << ext->get_argument()
+	   << " for WBCORR config=" << ext->configfile << endl;
+
   }
+  else if ( (conventional && ext->get_argument() != Signal::Conventional) ||
+	    (!conventional && ext->get_argument() != Signal::Conjugate) )
+
+    warning << "Pulsar::FITSArchive::load_WidebandCorrelator"
+      " config=" << ext->configfile << " but BE_PHASE=" << ext->get_argument()
+	    << endl;
   
 }
 
