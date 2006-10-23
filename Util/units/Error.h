@@ -7,19 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Error.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.5 $
+   $Date: 2006/10/23 15:55:54 $
    $Author: straten $ */
 
 #ifndef __Error_h
 #define __Error_h
 
-class Error;
-
+#include "tostring.h"
 #include <iostream>
-#include <sstream>
 #include <vector>
-#include <string>
 
 //! List of error types
 enum ErrorCode {
@@ -100,9 +97,7 @@ class Error {
   template<class T>
   friend Error& operator<< (Error& error, const T& t)
   {
-    std::ostringstream ostr;
-    ostr << t;
-    error.message += ostr.str();
+    error.message += tostring(t);
     return error;
   }
 
