@@ -313,5 +313,3 @@ bool Pulsar::Archive::state_is_valid(string& reason) const{
   return Signal::valid_state(get_state(),1,get_npol(),reason);
 }
 
-bool Pulsar::range_checking_enabled = true;
-
