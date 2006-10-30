@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/WidebandCorrelator.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.6 $
+   $Date: 2006/10/30 13:05:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_WideBandCorrelator_h
@@ -48,21 +48,6 @@ namespace Pulsar {
     { return new WidebandCorrelator( *this ); }
 
     //////////////////////////////////////////////////////////////////////
-    //
-    // Backend implementation
-    //
-    //////////////////////////////////////////////////////////////////////
-    
-    //! Get the name of the backend
-    std::string get_name () const { return name; }
-
-    //! Set the name of the backend
-    void set_name (const std::string& _name) { name = _name; }
-
-    //////////////////////////////////////////////////////////////////////
-
-    //! The name of the backend
-    std::string name;
 
     //! Name of the configuration file used (if any)
     std::string configfile;

@@ -13,7 +13,6 @@
 
 #include "Pulsar/ProcHistory.h"
 #include "Pulsar/Backend.h"
-#include "Pulsar/BackendName.h"
 
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/PeriastronOrder.h"
@@ -101,8 +100,7 @@ void usage()
     "  -o centre_freq   Change the frequency labels \n"
     "  --type type      Change the 'type' parameter where 'type' is one of:\n"
     "                   'Pulsar', 'PolnCal', 'FluxCalOn', 'FluxCalOff', 'Calibrator'\n"
-    "  --inst inst      Change the instrument name (Archive must have\n"
-    "                   'BackendName' extension for this to work)\n"
+    "  --inst inst      Change the instrument name \n"
     "  --site site      Correct 'site' of telescope (One letter tempo code- GBT=1, PKS=7 etc)\n"
     "  --name name      Change source name\n"
     "\n"
@@ -268,7 +266,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.68 2006/10/06 21:37:47 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.69 2006/10/30 13:05:18 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -662,9 +660,9 @@ int main (int argc, char *argv[]) try {
 	arch->set_type( new_type );
 
       if( instrument != string() ){
-	Pulsar::BackendName* b = arch->get<Pulsar::BackendName>();
+	Pulsar::Backend* b = arch->get<Pulsar::Backend>();
 	if( !b )
-	  fprintf(stderr,"Could not change instrument name- archive does not have BackendName extension\n");
+	  fprintf(stderr,"Could not change instrument name- archive does not have Backend extension\n");
 	else
 	  b->set_name(instrument);
       }

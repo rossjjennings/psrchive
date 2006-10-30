@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Backend.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.8 $
+   $Date: 2006/10/30 13:05:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Backend_h
@@ -26,7 +26,7 @@ namespace Pulsar {
   public:
     
     //! Default constructor
-    Backend (const char* name);
+    Backend (const std::string& ext_name = "Backend");
 
     //! Copy constructor
     Backend (const Backend&);
@@ -34,8 +34,21 @@ namespace Pulsar {
     //! Operator =
     const Backend& operator= (const Backend&);
 
+    //! Clone method
+    Backend* clone () const
+    { return new Backend( *this ); }
+
+    //////////////////////////////////////////////////////////////////////
+    //
+    // Backend implementation
+    //
+    //////////////////////////////////////////////////////////////////////
+
     //! Return the name of the Backend
-    virtual std::string get_name () const = 0;
+    std::string get_name () const;
+
+    //! Set the name of the backend
+    void set_name (const std::string& name);
 
     //! Get the hand of the backend
     Signal::Hand get_hand () const;
@@ -56,6 +69,9 @@ namespace Pulsar {
     void set_downconversion_corrected (bool corrected = true);
 
   protected:
+
+    //! The name of the backend
+    std::string name;
 
     //! The bandend hand
     Signal::Hand hand;

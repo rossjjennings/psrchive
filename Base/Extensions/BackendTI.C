@@ -8,6 +8,10 @@
 
 Pulsar::BackendTI::BackendTI ()
 {
+  add( &Backend::get_name,
+       &Backend::set_name,
+       "name", "Name of the backend instrument" );
+
   add( &Backend::get_argument,
        &Backend::set_argument,
        "phase", "Phase convention of backend" );

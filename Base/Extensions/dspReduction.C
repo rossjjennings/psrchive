@@ -11,8 +11,6 @@ using namespace std;
 Pulsar::dspReduction::dspReduction ()
   : Backend ("dspReduction")
 {
-  recorder_name = "unknown";
-
   total_samples = 0;
   block_size = 0;
   overlap = 0;
@@ -54,8 +52,6 @@ Pulsar::dspReduction* Pulsar::dspReduction::clone () const
 const Pulsar::dspReduction&
 Pulsar::dspReduction::operator= (const dspReduction& dsp)
 {
-  recorder_name = dsp.recorder_name;
-
   total_samples = dsp.total_samples;
   block_size = dsp.block_size;
   overlap = dsp.overlap;

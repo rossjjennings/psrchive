@@ -3,7 +3,6 @@ noinst_LTLIBRARIES = libExtensions.la
 
 nobase_include_HEADERS = \
         Pulsar/Backend.h \
-        Pulsar/BackendName.h \
         Pulsar/BackendTI.h \
         Pulsar/BinaryPhaseOrder.h \
         Pulsar/BinLngAscOrder.h \
@@ -44,7 +43,6 @@ nobase_include_HEADERS = \
 
 libExtensions_la_SOURCES = \
         Backend.C \
-        BackendName.C \
         BackendTI.C \
         BinaryPhaseOrder.C \
         BinLngAscOrder.C \

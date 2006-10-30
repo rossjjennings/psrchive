@@ -7,8 +7,10 @@
 #include "Pulsar/Backend.h"
 
 //! Default constructor
-Pulsar::Backend::Backend (const char* name) : Extension (name) 
+Pulsar::Backend::Backend (const std::string& ext_name) 
+  : Extension (ext_name.c_str()) 
 {
+  name = "unknown";
   hand = Signal::Right;
   argument = Signal::Conventional;
   downconversion_corrected = false;
@@ -23,10 +25,23 @@ Pulsar::Backend::Backend (const Backend& backend) : Extension (backend)
 //! Operator =
 const Pulsar::Backend& Pulsar::Backend::operator= (const Backend& backend)
 {
+  name = backend.name;
   hand = backend.hand;
   argument = backend.argument;
   downconversion_corrected = backend.downconversion_corrected;
   return *this;
+}
+
+//! Return the name of the Backend
+std::string Pulsar::Backend::get_name () const
+{
+  return name;
+}
+
+//! Set the name of the backend
+void Pulsar::Backend::set_name (const std::string& n)
+{
+  name = n;
 }
 
 //! Get the hand of the backend

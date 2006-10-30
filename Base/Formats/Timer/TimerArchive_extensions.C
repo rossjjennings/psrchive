@@ -8,7 +8,7 @@
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Receiver.h"
 #include "Pulsar/TapeInfo.h"
-#include "Pulsar/BackendName.h"
+#include "Pulsar/Backend.h"
 
 using namespace std;
 
@@ -32,7 +32,7 @@ void Pulsar::TimerArchive::unpack_extensions ()
   Backend* backend = get<Backend>();
 
   if (!backend) {
-    BackendName* ben = getadd<BackendName>();
+    Backend* ben = getadd<Backend>();
     ben->set_name (hdr.machine_id);
     backend = ben;
   }
