@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/Pulsar.h"
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/WidebandCorrelator.h"
 #include "Pulsar/FITSHdrExtension.h"
@@ -151,12 +151,6 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
 	   << " for WBCORR config=" << ext->configfile << endl;
 
   }
-  else if ( (conventional && ext->get_argument() != Signal::Conventional) ||
-	    (!conventional && ext->get_argument() != Signal::Conjugate) )
 
-    warning << "Pulsar::FITSArchive::load_WidebandCorrelator"
-      " config=" << ext->configfile << " but BE_PHASE=" << ext->get_argument()
-	    << endl;
-  
 }
 
