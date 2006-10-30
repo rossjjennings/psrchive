@@ -4,9 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/Pulsar.h"
+
+using namespace std;
 
 /*!
   The defaraday method corrects the Faraday rotation between
@@ -22,7 +25,7 @@ void Pulsar::Archive::defaraday ()
     return;
 
   if (!get_poln_calibrated() && verbose)
-    cerr << "Pulsar::Archive::defaraday WARNING data not calibrated" << endl;
+    warning << "Pulsar::Archive::defaraday data not calibrated" << endl;
 
   for (unsigned i = 0; i < get_nsubint(); i++)
     get_Integration(i)->defaraday ();
