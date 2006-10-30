@@ -407,21 +407,19 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     ::load( fptr, &(history->rows[i]) );
   }
 
-  set_nbin ((history->get_last()).nbin);
-  set_npol ((history->get_last()).npol);
-  set_centre_frequency ((history->get_last()).ctr_freq);
-  set_nchan ((history->get_last()).nchan);
+  set_nbin (history->get_last().nbin);
+  set_npol (history->get_last().npol);
+  set_centre_frequency (history->get_last().ctr_freq);
+  set_nchan (history->get_last().nchan);
 
-  chanbw = (history->get_last()).chanbw;
+  chanbw = history->get_last().chanbw;
   set_bandwidth(get_nchan()*chanbw);
 
-  if ((history->get_last()).cal_mthd == "SingleAxis" || (history->get_last()).cal_mthd == "SelfCAL" ||
-      (history->get_last()).cal_mthd == "Polar" || (history->get_last()).cal_mthd == "Other") {
-    set_poln_calibrated(true);
-    history->set_cal_mthd((history->get_last()).cal_mthd);
-  }
+  if (history->get_last().cal_mthd == "NONE")
+    set_poln_calibrated (false);
   else {
-    set_poln_calibrated(false);
+    set_poln_calibrated (true);
+    history->set_cal_mthd(history->get_last().cal_mthd);
   }
 
   history->set_sc_mthd (history->get_last().sc_mthd);
@@ -430,7 +428,7 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   history->set_ifr_mthd(history->get_last().ifr_mthd);
 
   set_scale ( history->get_last().scale );
-  string polstr = (history->get_last()).pol_type;
+  string polstr = history->get_last().pol_type;
 
   if(polstr == "XXYY") {
     set_state ( Signal::PPQQ );
@@ -515,9 +513,9 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   }
 
 
-  if((history->get_last()).dedisp == 1)
+  if(history->get_last().dedisp == 1)
     set_dedispersed (true);
-  else if((history->get_last()).dedisp == 0)
+  else if(history->get_last().dedisp == 0)
     set_dedispersed (false);
   else {
     if (verbose == 3) {
