@@ -83,7 +83,11 @@ SWIN_LIB_IPP
 # Check that at least one FFT library is available
 #
 if test x"$have_fftw" = xno -a x"$have_fftw3" = xno -a x"$have_mkl" = xno; then
-  AC_MSG_ERROR([Neither FFTW-2, FFTW-3, nor MKL FFT libraries were found])
+  AC_MSG_ERROR([No suitable FFT library was found.
+
+Please see http://psrchive.sourceforge.net/third/fftw
+
+])
 fi
 
 AC_SUBST(FFT_LIBS)
