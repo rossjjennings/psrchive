@@ -7,9 +7,11 @@ rhythm_SOURCES = rhythm.C menubar.C toolbar.C command_line.C \
 	find_standard.C qt_psrParameter.C qt_psrephem.C \
 	qt_editParams.C qt_toglParams.C qt_fileParams.C 
 
-nodist_rhythm_SOURCES = moc_rhythm.C moc_Options.C moc_toaPlot.C \
+CLEANFILES = moc_rhythm.C moc_Options.C moc_toaPlot.C \
 	moc_qt_psrephem.C moc_qt_editParams.C \
 	moc_qt_toglParams.C moc_qt_fileParams.C
+
+nodist_rhythm_SOURCES = $(CLEANFILES)
 
 #############################################################################
 #
