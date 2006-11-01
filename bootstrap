@@ -1,38 +1,23 @@
 #! /bin/csh -f
 
-echo Running aclocal
-aclocal -I config
-if ( $status ) goto abort
+echo "Running the GNU autotools.  Please be patient ..."
 
-echo Running libtoolize
-libtoolize --force --copy
-if ( $status ) goto abort
+autoreconf --install --force
 
-aclocal -I config
-if ( $status ) goto abort
+if ( ! $status ) then
 
-echo Running autoheader
-autoheader
-if ( $status ) goto abort
-
-echo Running automake
-automake --add-missing --copy -Woverride
-if ( $status ) goto abort
-
-echo Running autoconf
-autoconf
-if ( $status ) goto abort
-
-echo
-echo Bootstrap complete. Please run the configure script before make
-echo
-
-exit 0
-
-abort:
   echo
-  echo An error occured while running the GNU autotools.
-  echo Please see http://psrchive.sourceforge.net/third/autotools
+  echo "Bootstrap complete.  You can now run the configure script."
   echo
+  exit 0
 
-exit -1
+else
+
+  echo
+  echo "An error occured while running the GNU autotools."
+  echo "Please see http://psrchive.sourceforge.net/third/autotools"
+  echo
+  exit -1
+
+endif
+
