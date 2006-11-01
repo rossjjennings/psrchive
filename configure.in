@@ -72,7 +72,7 @@ fi
 AC_CHECK_LIB([m], [sin])
 SWIN_LIB_SLA([],AC_MSG_ERROR([SLALIB Positional Astronomy Library not found.
 
-Please see http://psrchive.sourceforge.net/third/slalib
+  Please see http://psrchive.sourceforge.net/third/slalib
 
 ]))
 SWIN_LIB_FFTW
@@ -85,7 +85,7 @@ SWIN_LIB_IPP
 if test x"$have_fftw" = xno -a x"$have_fftw3" = xno -a x"$have_mkl" = xno; then
   AC_MSG_ERROR([No suitable FFT library was found.
 
-Please see http://psrchive.sourceforge.net/third/fftw
+  Please see http://psrchive.sourceforge.net/third/fftw
 
 ])
 fi
@@ -120,11 +120,6 @@ SWIN_LIB_QTDRIV
 
 fi
 
-# 
-# For developers: ensure that the config directory m4 macros are parsed
-#
-ACLOCAL="$ACLOCAL -I config"
-
 #
 # For developers: preserve file modification times
 #
@@ -134,7 +129,6 @@ install_sh="CPPROG='cp -p' ${install_sh}"
 #
 # For developers: provide the ability to compile a lean version of the code
 #
-
 AC_ARG_WITH([lean], AC_HELP_STRING([--enable-lean],
 				   [compile a lean version of the library]))
 
@@ -209,6 +203,7 @@ fi
 if test x"$have_pgplot" != xyes; then
    echo "The PGPLOT library was not found:"
    echo "  PSRCHIVE applications will not be able to plot."
+   echo "  Please see http://psrchive.sourceforge.net/third/pgplot"
 fi
 
 if test x"$have_qt" != xyes; then
