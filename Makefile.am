@@ -1,4 +1,6 @@
 
+ACLOCAL_AMFLAGS = -I config
+
 SUBDIRS	= Util Base More
 
 bin_SCRIPTS = psrchive_cflags psrchive_ldflags
