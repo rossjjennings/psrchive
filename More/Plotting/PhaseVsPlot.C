@@ -4,14 +4,22 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/PhaseVsPlot.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
 #include <cpgplot.h>
 
-#include <values.h>
 #include <algorithm>
+
+#if HAVE_VALUES_H
+#include <values.h>
+#endif
 
 using namespace std;
 

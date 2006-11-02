@@ -4,6 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/PowerSpectra.h"
 #include "Pulsar/PlotFrame.h"
 #include "Pulsar/Archive.h"
@@ -14,7 +19,10 @@
 #include "median_smooth.h"
 
 #include <cpgplot.h>
+
+#if HAVE_VALUES_H
 #include <values.h>
+#endif
 
 using namespace std;
 
