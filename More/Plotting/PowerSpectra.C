@@ -5,10 +5,6 @@
  *
  ***************************************************************************/
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "Pulsar/PowerSpectra.h"
 #include "Pulsar/PlotFrame.h"
 #include "Pulsar/Archive.h"
@@ -20,9 +16,7 @@
 
 #include <cpgplot.h>
 
-#if HAVE_VALUES_H
-#include <values.h>
-#endif
+#include <float.h>
 
 using namespace std;
 
@@ -54,7 +48,7 @@ void Pulsar::PowerSpectra::prepare (const Archive* data)
   unsigned i_min, i_max;
   get_scale()->get_range (data, i_min, i_max);
 
-  float min = MAXFLOAT;
+  float min = FLT_MAX;
   float max = 0;
 
   for (unsigned iprof=0; iprof < spectra.size(); iprof++) {

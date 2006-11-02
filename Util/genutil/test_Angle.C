@@ -4,22 +4,16 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 
 #include "sky_coord.h"
 #include "coord.h"
 
+#include <slalib.h>
+
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
-
-#if HAVE_VALUES_H
-#include <values.h>
-#endif
-
-#include <slalib.h>
+#include <float.h>
 
 using namespace std;
 
@@ -44,7 +38,7 @@ Angle oldAngularSeparation(const AnglePair& a1, const AnglePair& a2)
 int main ()
 {
   cerr << "If this process appears to hang, then fix Angle::wrap" << endl;
-  Angle big (MAXFLOAT*0.5);
+  Angle big (FLT_MAX*0.5);
   cerr << "big=" << big << endl;
   cerr << "Angle::wrap test passed" << endl;
 

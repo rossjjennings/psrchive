@@ -5,10 +5,6 @@
  *
  ***************************************************************************/
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "Pulsar/PhaseVsPlot.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
@@ -17,9 +13,7 @@
 
 #include <algorithm>
 
-#if HAVE_VALUES_H
-#include <values.h>
-#endif
+#include <float.h>
 
 using namespace std;
 
@@ -73,7 +67,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   unsigned min_row, max_row;
   get_frame()->get_y_scale()->get_range (nrow, min_row, max_row);
 
-  float min = MAXFLOAT;
+  float min = FLT_MAX;
   float max = FLT_MIN;
 
   vector<float> plotarray (nbin * nrow);
