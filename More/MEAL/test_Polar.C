@@ -20,14 +20,18 @@ int main ()
   MEAL::Boost boost;
   boost.set_param (0, sinh(beta));
 
-  if ( boost.evaluate()(0,0) != exp(beta) ||
-       boost.evaluate()(1,1) != exp(-beta) )
-    {
-      cerr << "MEAL::Boost w/ beta=" << beta << " = " << boost.evaluate();
-      cerr << "\nexp("<<beta<<")=" << exp(beta)
-	   << "  exp("<<-beta<<")=" << exp(-beta) << endl;
-      return -1;
-    }
+  double b00 = boost.evaluate()(0,0).real();
+  double b11 = boost.evaluate()(1,1).real();
+  double d0 = fabs(b00 - exp(beta));
+  double d1 = fabs(b11 - exp(-beta));
+
+  if ( d0 > 1e-10 || d1 > 1e-10) {
+    cerr << "MEAL::Boost w/ beta=" << beta << " = " << boost.evaluate();
+    cerr << "\nexp("<<beta<<")=" << exp(beta)
+         << "  exp("<<-beta<<")=" << exp(-beta) 
+         << "  d0=" << d0 << " d1=" << d1 << endl;
+    return -1;
+  }
 
 
   double phi = 0.145;
