@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.14 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.15 $
+   $Date: 2006/11/02 22:36:13 $
    $Author: straten $ */
 
 /*
@@ -119,6 +119,26 @@ typedef struct {double f1; double f2;} float128;
 #define ORDER_BIG_ENDIAN    0
 
 #endif
+
+/* ********************************************** FreeBSD */
+#ifdef __FreeBSD__
+typedef int int32;
+typedef unsigned uint32;
+typedef long long int64;
+typedef unsigned long long uint64;
+typedef struct {double f1;double f2;} float128;
+
+/* for parsing a long */
+#define I64 "%Ld"
+#define UI64 "%Lu"
+#define I32 "%ld"
+
+#define ORDER_LITTLE_ENDIAN 1
+#define ORDER_BIG_ENDIAN    0
+
+#endif
+
+
 
 /* ********************************************** Darwin */
 #if defined(__APPLE__) && defined(__POWERPC__) 
