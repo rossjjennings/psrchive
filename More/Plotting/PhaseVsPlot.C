@@ -74,7 +74,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   get_frame()->get_y_scale()->get_range (nrow, min_row, max_row);
 
   float min = MAXFLOAT;
-  float max = MINFLOAT;
+  float max = FLT_MIN;
 
   vector<float> plotarray (nbin * nrow);
   for (unsigned irow = 0; irow < nrow; irow++) {
