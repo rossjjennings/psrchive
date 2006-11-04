@@ -40,7 +40,6 @@ nobase_include_HEADERS = \
         Pulsar/PolnProfileFit.h \
         Pulsar/PolnProfile.h \
         Pulsar/PolnProfileStats.h \
-        Pulsar/Profile_utils.h \
         Pulsar/ProfileWeightFunction.h \
         Pulsar/RFIMitigation.h \
         Pulsar/ScatteredPowerCorrection.h \
