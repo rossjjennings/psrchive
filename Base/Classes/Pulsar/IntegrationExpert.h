@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExpert.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.6 $
+   $Date: 2006/11/04 13:10:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationExpert_h
@@ -74,6 +74,10 @@ namespace Pulsar {
     //! Combine the data from 'from' into 'this'
     void combine (const Integration* from)
     { instance->combine (from); }
+
+    //! Convert polarimetric data to the specified state
+    void convert_state (Signal::State state)
+    { instance->convert_state (state); }
 
   private:
 
