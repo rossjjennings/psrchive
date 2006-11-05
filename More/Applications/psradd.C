@@ -153,7 +153,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.42 2006/10/06 21:37:49 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.43 2006/11/05 16:36:24 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -400,7 +400,9 @@ int main (int argc, char **argv) try {
 	  .phase( archive->get_Integration(isub)->get_epoch() ) << endl;
 
     if (check_has_data && archive->integration_length() == 0) {
-      cerr << "psradd: archive [" << filenames[ifile] << "] has no data\n";
+      cerr << "psradd: archive [" << filenames[ifile] << "]"
+              "  integration length is zero.\n"
+              "  (use -F to disable this check)" << endl;
       continue;
     }
 
