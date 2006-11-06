@@ -8,6 +8,7 @@
 #ifndef _Util_genutil_templates_h
 #define _Util_genutil_templates_h
 
+#include <algorithm>
 #include <vector>
 #include <assert.h>
 
@@ -56,14 +57,21 @@ T sqr (const T& x)
   return x * x;
 }
 
+//! Return the sum of all values on [i1, i2)
+template <class T, class I>
+T sum (const I& it1, const I& it2)
+{
+  T the_sum = 0.0;
+  for (I it=it1; it != it2; it++)
+    the_sum += T(*it);
+  return the_sum;
+}
+
 // return the sum of all elements in a vector
 template <class T>
 T sum (const std::vector<T>& x)
 {
-  T the_sum = 0.0;
-  for (unsigned i=0; i<x.size(); i++)
-    the_sum += x[i];
-  return the_sum;
+  return sum<T>(x.begin(), x.end());
 }
 
 template <class T>
