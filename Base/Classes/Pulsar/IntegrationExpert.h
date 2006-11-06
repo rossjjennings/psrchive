@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExpert.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/11/04 13:10:17 $
+   $Revision: 1.7 $
+   $Date: 2006/11/06 17:15:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationExpert_h
@@ -75,9 +75,21 @@ namespace Pulsar {
     void combine (const Integration* from)
     { instance->combine (from); }
 
+    //! Perform the congruence transformation on each polarimetric profile
+    void transform (const Jones<float>& response)
+    { instance->transform (response); }
+
+    //! Perform frequency response on each polarimetric profile
+    void transform (const std::vector< Jones<float> >& response)
+    { instance->transform (response); }
+
     //! Convert polarimetric data to the specified state
     void convert_state (Signal::State state)
     { instance->convert_state (state); }
+
+    //! Use with care
+    std::vector< std::vector< Reference::To<Profile> > >& profiles ()
+    { return instance->profiles; }
 
   private:
 
