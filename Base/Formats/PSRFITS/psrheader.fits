@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '2.4             '   / Header version 
+HDRVER  = '2.5             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -115,36 +115,6 @@ END
 #
 ###############################################################################
 #
-# Digitiser Statistics Binary Table Extension
-#
-###############################################################################
-#
-XTENSION= BINTABLE             / ***** Digitiser statistics *****
-BITPIX  =                    8 / N/A
-NAXIS   =                    2 / 2-dimensional binary table
-NAXIS1  =                    * / Width of table in bytes
-NAXIS2  =                    * / Number of rows in table (NSUBINT)
-PCOUNT  =                    0 / Size of special data area
-GCOUNT  =                    1 / One data group (required keyword)
-TFIELDS =                    1 / Number of fields per row
-#
-DIG_MODE= '                '   / Digitiser mode
-NDIGR   = *                    / Number of digitised channels (I)
-NPAR    = *                    / Number of digitiser parameters
-NCYCSUB = *                    / Number of correlator cycles per subint
-DIGLEV  = '                '   / Digitiser level-setting mode (AUTO, FIX)
-EXTNAME = DIG_STAT             / Name of this binary table extension
-#
-TTYPE#  = ATTEN                / Attenuator settings
-TFORM#  = E                    / NDIGR floats
-TUNIT#  = db                   / Units of field
-TTYPE#  = DATA                 / Digitiser statistics
-TDIM#   = (*,*,*)              / Data table dimensions (NLEV,NDIGR,NCYCSUB)
-TFORM#  = E                    / NPAR*NDIGR*NCYCSUB floats
-END
-#
-###############################################################################
-#
 # Digitiser Counts Binary Table Extension
 #
 ###############################################################################
@@ -196,7 +166,7 @@ EXTNAME = BANDPASS             / name of this binary table extension
 #
 TTYPE#  = DAT_OFFS             / Data offset for each bandpass
 TFORM#  = E                    / BP_NPOL floats
-TTYPE#  = DAT_SCL              / Data scale factor for each bandpass
+TTYPE#  = DAT_SCL              / Data scale factor: Val = Data*DAT_SCL + DAT_OFFS
 TFORM#  = E                    / BP_NPOL floats
 TTYPE#  = DATA                 / Bandpass for autocorrelations
 TDIM#   = (*,*)                / Data table dimensions = (NCH_ORIG,BP_NPOL)
@@ -797,10 +767,33 @@ TDIM#   = (*,*,*)              / Dimensions of data table = (NBIN,NCH_FILE,NPOL)
 TFORM#  = I                    / NBIN*NCH_FILE*NPOL integers
 TUNIT#  = Jy                   / Units of subint data
 END
-
-
-
-
-
-
-
+#
+###############################################################################
+#
+# Digitiser Statistics Binary Table Extension
+#
+###############################################################################
+#
+XTENSION= BINTABLE             / ***** Digitiser statistics *****
+BITPIX  =                    8 / N/A
+NAXIS   =                    2 / 2-dimensional binary table
+NAXIS1  =                    * / Width of table in bytes
+NAXIS2  =                    * / Number of rows in table (NSUBINT)
+PCOUNT  =                    0 / Size of special data area
+GCOUNT  =                    1 / One data group (required keyword)
+TFIELDS =                    1 / Number of fields per row
+#
+DIG_MODE= '                '   / Digitiser mode
+NDIGR   = *                    / Number of digitised channels (I)
+NPAR    = *                    / Number of digitiser parameters
+NCYCSUB = *                    / Number of correlator cycles per subint
+DIGLEV  = '                '   / Digitiser level-setting mode (AUTO, FIX)
+EXTNAME = DIG_STAT             / Name of this binary table extension
+#
+TTYPE#  = ATTEN                / Attenuator settings
+TFORM#  = E                    / NDIGR floats
+TUNIT#  = db                   / Units of field
+TTYPE#  = DATA                 / Digitiser statistics
+TDIM#   = (*,*,*)              / Data table dimensions (NPAR,NDIGR,NCYCSUB)
+TFORM#  = E                    / NPAR*NDIGR*NCYCSUB floats
+END
