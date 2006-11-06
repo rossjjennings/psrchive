@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '2.5             '   / Header version 
+HDRVER  = '2.6             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -166,7 +166,7 @@ EXTNAME = BANDPASS             / name of this binary table extension
 #
 TTYPE#  = DAT_OFFS             / Data offset for each bandpass
 TFORM#  = E                    / BP_NPOL floats
-TTYPE#  = DAT_SCL              / Data scale factor: Val = Data*DAT_SCL + DAT_OFFS
+TTYPE#  = DAT_SCL              / Data scale factor: Val=Data*DAT_SCL + DAT_OFFS
 TFORM#  = E                    / BP_NPOL floats
 TTYPE#  = DATA                 / Bandpass for autocorrelations
 TDIM#   = (*,*)                / Data table dimensions = (NCH_ORIG,BP_NPOL)
