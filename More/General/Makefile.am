@@ -2,6 +2,7 @@
 noinst_LTLIBRARIES = libGeneral.la
 
 nobase_include_HEADERS = \
+	find_spike_edges.h \
         model_profile.h \
         morphological_difference.h \
 	Pulsar/counter_drift.h \
@@ -61,6 +62,7 @@ nobase_include_HEADERS = \
 libGeneral_la_SOURCES = \
 	counter_drift.C \
 	denoise.C \
+	find_spike_edges.C \
         model_profile.C \
 	morphological_difference.C \
         AdaptiveSNR.C \
