@@ -54,7 +54,6 @@ nobase_include_HEADERS = \
 	Pulsar/StandardCandles.h \
         Pulsar/StandardSNR.h \
         Pulsar/SyntheticPolnProfile.h \
-        Pulsar/SyntheticProfile.h \
         Pulsar/Transformation.h \
         Pulsar/Transposer.h \
         Pulsar/Weight.h
