@@ -100,7 +100,7 @@ bin_PROGRAMS = getMJD
 
 getMJD_SOURCES = getMJD.C
 
-TESTS = test_coord test_Cartesian test_MJD test_ja98 test_endian
+TESTS = test_coord test_Cartesian test_MJD test_ja98 test_endian test_sum
 
 check_PROGRAMS = $(TESTS) test_CommandParser test_Angle
 
@@ -110,6 +110,7 @@ test_Angle_SOURCES		= test_Angle.C
 test_CommandParser_SOURCES      = test_CommandParser.C
 test_CommandParser_LDADD	= $(LDADD) @READLINE_LIBS@
 test_ja98_SOURCES		= test_ja98.C
+test_sum_SOURCES		= test_sum.C
 
 #############################################################################
 #
