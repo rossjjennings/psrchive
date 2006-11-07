@@ -19,6 +19,9 @@ else
   fi
 fi
 
+# Check if the user has set compiler options
+SWIN_OPTIONS_SET
+
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_DISABLE_SHARED
 
@@ -44,16 +47,16 @@ AC_F77_WRAPPERS
 _STAR_RESTFP_FIX
 
 #
+# Disable the debugging information option, -g
+#
+SWIN_DEBUG
+
+#
 # Check C++ template compilation
 #
 SWIN_BEST_PARTIAL_SPECIALIZATION
 SWIN_DEFAULT_PARTIAL_SPECIALIZATION
 SWIN_COMPLEX_TEMPLATE
-
-#
-# Disable the debugging information option, -g
-#
-SWIN_DEBUG
 
 #
 # Set up for standard pulsar installation
