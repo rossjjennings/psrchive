@@ -30,11 +30,26 @@ int test (T exp, const string& txt)
 
 int main ()
 {
-  if (test (3, "3"))
+  cerr << "numeric_limits<int>::digits10="
+       << numeric_limits<int>::digits10 << endl;
+
+  if (test ((int)12345678, "12345678"))
     return -1;
 
-  if (test (3.56, "3.56"))
+  cerr << "numeric_limits<float>::digits10="
+       << numeric_limits<float>::digits10 << endl;
+
+  if (test ((float)3.5678, "3.5678"))
     return -1;
+
+  cerr << "numeric_limits<double>::digits10="
+       << numeric_limits<double>::digits10 << endl;
+
+  if (test ((double)1.234567890123, "1.234567890123"))
+    return -1;
+
+  cerr << "numeric_limits<string>::digits10="
+       << numeric_limits<string>::digits10 << endl;
 
   if (test (string("string test"), "string test"))
     return -1;

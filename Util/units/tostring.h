@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/23 16:11:16 $
+   $Revision: 1.10 $
+   $Date: 2006/11/08 17:37:11 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H
@@ -18,22 +18,18 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <limits>
 
 template<class T>
-std::string tostring (const T& input)
+std::string tostring (const T& input,
+		      unsigned precision = std::numeric_limits<T>::digits10)
 {
   extern std::ostringstream tostring_ost;
+  tostring_ost.precision(precision);
+
   tostring_ost.str("");
   tostring_ost << input;
-  return tostring_ost.str();
-}
 
-template<class T>
-std::string tostring (const T& input, unsigned precision)
-{
-  extern std::ostringstream tostring_ost;
-  tostring_ost.str("");
-  tostring_ost << std::setprecision( precision ) << input;
   return tostring_ost.str();
 }
 
@@ -53,7 +49,7 @@ T fromstring (const std::string& input)
 
 // string class specializations
 template<>
-inline std::string tostring (const std::string& input)
+inline std::string tostring (const std::string& input, unsigned)
 {
   return input;
 }
