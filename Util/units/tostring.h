@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/11/08 17:37:11 $
+   $Revision: 1.11 $
+   $Date: 2006/11/08 21:20:24 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H
@@ -60,6 +60,11 @@ inline std::string fromstring<std::string> (const std::string& input)
   return input;
 }
 
+// char* specialization
+inline std::string tostring (const char* input)
+{
+  return input;
+}
 
 /*
   If you've already written a function that converts string to Type,
