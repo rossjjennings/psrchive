@@ -4,8 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "ephio.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "psrephem.h"
+#include "tempo++.h"
+#include "ephio.h"
 #include "strutil.h"
 #include "dirutil.h"
 
@@ -33,8 +38,7 @@ vector<string> psrephem::extensions ()
   return retval;
 }
 
-char* psrephem::tempo_pardir = NULL;
-int   psrephem::verbose = 0;
+bool psrephem::verbose = 0;
 
 static char ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
 
@@ -238,65 +242,21 @@ int psrephem::old_unload (const char* filename) const
   return 0;
 }
 
-static string directory;
-
-string psrephem::get_directory ()
-{
-  char* unknown = "unknown";
-
-  if (!directory.length()) {
-    char* userid = getenv ("USER");
-    if (!userid)
-      userid = unknown;
-
-    directory = string ("/tmp/tempo/") + userid;
-  }
-
-  if (makedir (directory.c_str()) < 0)  {
-
-    if (verbose)
-      cerr << "get_directory failure creating '" << directory << "'" << endl;
-
-    char* home = getenv ("HOME");
-
-    if (home)
-      directory = home;
-    else
-      directory = ".";
-
-    directory += "/tempo.tmp";
-
-    if (makedir (directory.c_str()) < 0)
-      throw Error (InvalidState, "Tempo::get_directory",
-		   "cannot create a temporary working directory");
-  }
-
-  return directory;
-}
-
 string psrephem::par_lookup (const char* name, int use_cwd)
 {
-  string filename;
   string psr_name;
-  struct stat finfo;
 
-  if (name[0] == 'J')
+  if (name[0] == 'J' || name[0] == 'B')
     psr_name = name + 1;
   else
     psr_name = name;
-
-  // these string literals are assigned to char* to work around a
-  // bug in the Sun C4.2 compiler
-  char* tempo_cfg = "/tempo.cfg";
-  char* psrinfo_cmd = "psrinfo -e ";
-  char* psrcat_cmd = "psrcat -e ";
 
   if (use_cwd) {
     vector <string> exts = extensions ();
     for (unsigned iext=0; iext < exts.size(); iext++) {
       /* Look for jname.ext in current directory */
-      filename = psr_name + exts[iext];
-      if (stat (filename.c_str(), &finfo) == 0) {
+      string filename = psr_name + exts[iext];
+      if (file_exists(filename.c_str())) {
 	if (verbose)
 	  cerr << "psrephem::Using " << filename << " from cwd" << endl;
 	return filename;
@@ -304,124 +264,83 @@ string psrephem::par_lookup (const char* name, int use_cwd)
     }
   }
 
-  if (tempo_pardir == NULL) {
-    if (verbose)
-      fprintf(stderr,"psrephem::par_lookup load tempo .par directory\n");
-    /* Find PARDIR - the TEMPO directory for name.par files */
-    char* tpodir = (char *) getenv("TEMPO");
-    if (tpodir == NULL) {
-      fprintf(stderr,"psrephem::TEMPO environment variable not defined\n");
-    }
-    else {
-      filename = tpodir;
-      filename += tempo_cfg;
-      FILE* fptr = fopen(filename.c_str(),"r");
-      if (fptr == NULL) {
-	fprintf (stderr, "psrephem::par_lookup error fopen(%s)",
-		 filename.c_str());
-	perror ("");
-      }
-      else {
-	char* readline = new char[100];
-	char* whitespace = " \t\n";
-	while (fgets (readline, 100, fptr) != NULL) {
-	  char* token = strtok (readline, whitespace);
-	  if (strcmp (token, "PARDIR") == 0) {
-	    token = strtok (NULL, whitespace);
-	    if (token)
-	      tempo_pardir = strdup (token);
-	  }
-	} // end while reading new lines from tempo.cfg
-	delete [] readline;
-	if (tempo_pardir == NULL) {
-	  if (verbose)
-	    fprintf (stderr,
-		     "psrephem:: PARDIR not defined in $TEMPO/tempo.cfg\n");
-	}
-      } // else if $TEMPO/tempo.cfg file opened successfully
-    } // else if $TEMPO environment variable is defined
-  } // end if tempo_pardir == NULL
+  string tempo_pardir = Tempo::get_configuration("PARDIR");
 
-  if (tempo_pardir != NULL) {
-    if (verbose)
-      fprintf(stderr,"psrephem::par_lookup using TEMPO .par = '%s'\n",
-	      tempo_pardir);
-    filename = tempo_pardir + psr_name + ".par";
-    if (stat (filename.c_str(), &finfo) == 0) {
+  if (tempo_pardir.length()) {
+
+    vector <string> exts = extensions ();
+    for (unsigned iext=0; iext < exts.size(); iext++) {
+
+      string filename = tempo_pardir + psr_name + exts[iext];
+
       if (verbose)
-	cerr << "psrephem:: Using " << filename 
-	     << " from PARDIR:" << tempo_pardir << endl;
-      return filename;
+	cerr << "psrephem::par_lookup in TEMPO PARDIR '" 
+	     << filename << "'" << endl;
+
+      if (file_exists(filename.c_str())) {
+	if (verbose)
+	  cerr << "psrephem:: Using " << filename 
+	       << " from PARDIR:" << tempo_pardir << endl;
+	return filename;
+      }
+
     }
-    if (verbose)
-      fprintf(stderr,"psrephem::par_lookup using TEMPO .eph = '%s'\n",
-	      tempo_pardir);
-    filename = tempo_pardir + psr_name + ".eph";
-    if (stat (filename.c_str(), &finfo) == 0) {
-      if (verbose)
-	cerr << "psrephem:: Using " << filename 
-	     << " from PARDIR:" << tempo_pardir << endl;
-      return filename;
-    }
+
   }
   
   /* Create name.eph in local directory */ 
-  
-  filename = psrinfo_cmd + psr_name;
+
+#ifdef HAVE_PSRCAT
+
+  string command = "psrcat -e " + psr_name + " > " + psr_name + ".eph";
+  string catalogue = "psrcat";
+
+#else
+
+  string command = "psrinfo -e " + psr_name;
   string catalogue = "psrinfo";
 
-#if 0
-  This issue should be resolved external to the library
-  if( get_host().substr(0,4)!="cpsr" && get_host().substr(0,6)!="gbcpsr" ){
-    string nobj = psr_name;
-    frontchomp(nobj,"J");
-    frontchomp(nobj,"B");
-    filename = psrcat_cmd + psr_name + " | perl -i -p -e 'if(/PSRJ/){s/(.*\\s)J/\\1/}' > " + nobj + ".eph";
-    catalogue = "psrcat";
-  }
 #endif
 
   if (verbose)
-    cerr << "psrephem:: Creating ephemeris by " << catalogue << " -e " << psr_name <<endl;
+    cerr << "psrephem:: Creating ephemeris by " << catalogue 
+	 << " -e " << psr_name <<endl;
 
   // start with a clean working directory
-  removedir (get_directory().c_str());
+  removedir (Tempo::get_directory().c_str());
 
   char cwd[FILENAME_MAX];
 
   if (getcwd (cwd, FILENAME_MAX) == NULL)
     throw Error (FailedSys, "psrephem", "failed getcwd");
-  
-  if (chdir (get_directory().c_str()) != 0)
+
+  // note that Tempo::get_directory creates the directory if it doesn't exist
+  if (chdir (Tempo::get_directory().c_str()) != 0)
     throw Error (FailedSys, "psrephem",
-		 "failed chdir(" + get_directory() + ")");
+		 "failed chdir(" + Tempo::get_directory() + ")");
 
-
-  int retval = system(filename.c_str());
+  int retval = system(command.c_str());
 
   if (chdir (cwd) != 0)
     throw Error (FailedSys, "psrephem", "failed chdir(%s)", cwd);
 
   if (retval != 0) {
-
-    cerr << "psrephem:: Error executing system (" + filename + ")" << endl;
-    filename.erase();
-    return filename;
-
+    cerr << "psrephem:: Error executing system (" + command + ")" << endl;
+    return "";
   }
 
   vector<string> filenames;
-  dirglob (&filenames, get_directory() + "/*.eph");
+  dirglob (&filenames, Tempo::get_directory() + "/*.eph");
 
   if (filenames.size() != 1)
     throw Error (InvalidState, "psrephem", "%s created %d files",
 		 catalogue.c_str(),filenames.size());
 
-  filename = filenames[0];
+  string filename = filenames[0];
 
-  if (stat (filename.c_str(), &finfo) == 0) {
+  if (file_exists(filename.c_str())) {
     if (verbose)
-      printf("psrephem:: Using '%s'\n", filename.c_str());
+      cerr << "psrephem:: Using '" + filename + "'" << endl;
     return filename;
   }
 
@@ -429,8 +348,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
     fprintf (stderr, "psrephem:: Cannot find %s after call to %s.\n", 
 	     filename.c_str(),catalogue.c_str());
 
-  filename.erase();
-  return filename;
+  return "";
 }
 
 string psrephem::psrname() const

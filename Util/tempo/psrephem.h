@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.36 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.37 $
+   $Date: 2006/11/09 18:03:37 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -34,6 +34,9 @@ class psrephem : public Reference::Able
   friend class psrParams;
 
  public:
+
+  // verbosity flag
+  static bool verbose;
 
   // this string needs to be long enough to hold the above-defined MACRO
   static std::vector<std::string> extensions();
@@ -233,17 +236,15 @@ class psrephem : public Reference::Able
   std::string get_directory ();
 
   std::string par_lookup (const char* name, int use_cwd);
-  static char* tempo_pardir;
-  static int   verbose;
 
-	// this is specifically for the older style ephemeris file
-	// inserts the ephemeris values into the val_str, val_double,
-	// and val_int depending on the type of each ephemeris value.
-	void read_old_ephem_str(std::vector<std::string> lines, 
-	                                int *pstatus,
-                                  std::string *val_str, 
-																	double *val_double, 
-																	int *val_int);
+  // this is specifically for the older style ephemeris file
+  // inserts the ephemeris values into the val_str, val_double,
+  // and val_int depending on the type of each ephemeris value.
+  void read_old_ephem_str (std::vector<std::string> lines, 
+			   int *pstatus,
+			   std::string *val_str, 
+			   double *val_double, 
+			   int *val_int);
 
  protected:
 
