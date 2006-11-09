@@ -55,7 +55,11 @@ void usage ()
     "  -l            Plot with lines instead of steps\n"
     "  -b factor     Sum groups of \"factor\" adjacent bins before plotting results\n"
     "  -s filename   Write analytic standard to given filename [Default: paas.std]\n"
-    "  -i            interactively select components \n";
+    "  -i            Interactively select components \n"
+    "  -C            Centre profile using ephemeris\n"
+    "  -p            Rotate profile to place peak at centre\n"
+    "  -R phase      Rotate profile by specified number of turns\n"
+    "  -a            After loading a model, rotate it to align to profile\n";
 
 }
 
@@ -74,6 +78,7 @@ public:
   void remove_component(int icomp);
   ScaledVonMises *get_component(int icomp);
   int get_ncomponents() const;
+  void align(const Profile *profile);
 
   // Fitting
   void set_infit(int icomponent, int iparam, bool infit);
@@ -207,6 +212,30 @@ ComponentModel::get_ncomponents() const
 {
   return components.size();
 }
+
+
+void 
+ComponentModel::align(const Profile *profile)
+{
+  Profile modelprof(*profile);
+
+  evaluate(modelprof.get_amps(), modelprof.get_nbin());
+
+  Estimate<double> shift = profile->shift(modelprof);
+
+  printf("Shift=%.5lf\n", shift.val);
+  int icomp;
+  for (icomp=0; icomp < components.size(); icomp++)
+  {
+    Estimate<double> centre = components[icomp].get_centre()+  shift*M_PI*2.0;
+    if (centre.val >= M_PI)
+      centre -= M_PI*2.0;
+    if (centre.val < -M_PI)
+      centre += M_PI*2.0;
+    components[icomp].set_centre(centre);
+  }
+}
+
 
 void
 ComponentModel::set_infit(int icomponent, int iparam, bool infit)
@@ -471,7 +500,7 @@ ComponentModel::clear()
 
 int main (int argc, char** argv) 
 {
-  const char* args = "hb:r:w:c:fF:it:d:Dl:Ws:";
+  const char* args = "hb:r:w:c:fF:it:d:Dl:Ws:CpR:a";
   string model_filename_in, model_filename_out;
   bool fit=false;
   vector<string> new_components;
@@ -486,6 +515,9 @@ int main (int argc, char** argv)
   bool fit_deriv=false;
   bool line_plot=false;
   bool interactive = false;
+  bool centre_model = false, centre_peak=false;
+  float rotate_amount = 0.0;
+  bool align = false;
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -544,7 +576,23 @@ int main (int argc, char** argv)
       strcpy(std_filename, optarg);
       break;
 
-    default:
+    case 'C':
+      centre_model = true;
+      break;
+
+    case 'p':
+      centre_peak = true;
+      break;
+
+    case 'R':
+      rotate_amount = atof(optarg);
+      break;
+
+    case 'a':
+      align = true;
+      break;
+
+   default:
       cerr << "invalid param '" << c << "'" << endl;
     }
 
@@ -564,10 +612,15 @@ int main (int argc, char** argv)
     archive->fscrunch();
     archive->tscrunch();
     archive->pscrunch();
-    if (archive->has_model())
+
+    // phase up as requested
+    if (centre_model)
       archive->centre();
-    else
-      archive->centre_max_bin (); 
+    else if (centre_peak)
+      archive->centre_max_bin(); 
+
+    if (rotate_amount != 0.0)
+      archive->rotate_phase(-rotate_amount);
 
     archive->remove_baseline();
 
@@ -576,7 +629,13 @@ int main (int argc, char** argv)
 
     // load from file if specified
     if (!model_filename_in.empty())
+    {
       model.load(model_filename_in.c_str());
+
+      // align to profile first if asked
+      if (align)
+	model.align(archive->get_Integration(0)->get_Profile(0,0));
+    }
 
     // add any new components specified
     int ic, nc=new_components.size();
