@@ -11,6 +11,7 @@
 #include "strutil.h"
 #include "fsleep.h"
 
+#include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -89,7 +90,7 @@ float Tempo::get_version ()
   return version;
 }
 
-void Tempo::set_system (const char* sys_call)
+void Tempo::set_system (const string& sys_call)
 {
   system_call = sys_call;
   get_system_version ();
@@ -100,28 +101,10 @@ string Tempo::get_system ()
   return system_call;
 }
 
-void Tempo::set_directory (const char* dir)
-{
-  directory = dir;
-}
-
-
-// the shittest of shit
-// SUN CC 5.0 compiler cannot distinguish these overloaded functions
-// from the const char* version given above
-#if !defined (sun) 
-void Tempo::set_system (const string& sys_call)
-{
-  system_call = sys_call;
-  get_system_version ();
-}
-
 void Tempo::set_directory (const string& dir)
 {
   directory = dir;
 }
-#endif
-
 
 string Tempo::get_directory ()
 {
@@ -157,6 +140,49 @@ string Tempo::get_directory ()
   }
 
   return directory;
+}
+
+// get the specified tempo configuration parameter
+std::string Tempo::get_configuration (const std::string& parameter)
+{
+  static char* tpodir = getenv("TEMPO");
+
+  if (!tpodir)
+    throw (InvalidState, "Tempo::get_configuration",
+	   "TEMPO environment variable not defined");
+
+  string filename = tpodir;
+  filename += "/tempo.cfg";
+
+  ifstream input (filename.c_str());
+  if (!input)
+    throw Error (FailedSys, "Tempo::get_configuration",
+		 "ifstream (" + filename + ")");
+
+  string line;
+
+  while (!input.eof()) {
+
+    getline (input, line);
+    line = stringtok (&line, "#\n", false);  // get rid of comments
+
+    if (!line.length())
+      continue;
+
+    // the first key loaded should be the name of the instance
+    string key = stringtok (&line, " \t");
+
+    if (verbose)
+      cerr << "Tempo::get_configuration key=" << key << endl;
+
+    if (key == parameter)
+      return stringtok (&line, " \t");
+
+  }
+
+  throw Error (InvalidParam, "Tempo::get_configuration",
+	   "configuration parameter '" + parameter + "' not found");
+
 }
 
 static int lock_fd = -1;

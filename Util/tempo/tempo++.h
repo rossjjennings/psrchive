@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.19 $
-   $Date: 2006/10/15 23:33:20 $
+   $Revision: 1.20 $
+   $Date: 2006/11/09 18:03:41 $
    $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
@@ -22,16 +22,19 @@
 
 namespace Tempo {
   
-  // set the system call used to run tempo
-  void   set_system (const char* system_call);
-  // get the system call used to run tempo
-  std::string get_system ();
-
   // get the tempo version
   float  get_version ();
 
+  // get the specified tempo configuration parameter
+  std::string get_configuration (const std::string& parameter);
+
+  // set the system call used to run tempo
+  void   set_system (const std::string& system_call);
+  // get the system call used to run tempo
+  std::string get_system ();
+
   // set the directory in which tempo system calls will be made
-  void   set_directory (const char* directory);
+  void   set_directory (const std::string& directory);
   // get the directory in which tempo system calls will be made
   std::string get_directory ();
 
