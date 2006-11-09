@@ -32,6 +32,7 @@ nobase_include_HEADERS = \
         MEAL/FunctionPolicy.h \
         MEAL/Gain.h \
         MEAL/Gaussian.h \
+        MEAL/PowerLaw.h \
         MEAL/GaussJordan.h \
         MEAL/GroupRule.h \
         MEAL/Invariant.h \
@@ -119,6 +120,7 @@ libMEAL_la_SOURCES = \
         Function_print.C \
         Gain.C \
         Gaussian.C \
+        PowerLaw.C \
         header_PromoteTraits \
         Invariant.C \
         MatrixTest.h \
