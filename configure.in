@@ -28,8 +28,9 @@ AC_DISABLE_SHARED
 # Enable large-file support
 AC_SYS_LARGEFILE
 
-# Ensure the SIGPROC find does not over-ride the standard
+# Ensure that SIGPROC find does not over-ride the standard
 SWIN_PROG_FIND
+SWIN_PSRCAT
 
 # Enable convenience compiler selection
 SWIN_COMPILER
