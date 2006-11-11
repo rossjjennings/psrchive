@@ -22,14 +22,22 @@ fi
 # Check if the user has set compiler options
 SWIN_OPTIONS_SET
 
+# Initialize automake to place object files in sub-directories
 AM_INIT_AUTOMAKE([subdir-objects])
+
+# Create static libraries by default
 AC_DISABLE_SHARED
 
 # Enable large-file support
 AC_SYS_LARGEFILE
 
+# Determine the machine endian
+AC_C_BIGENDIAN
+
 # Ensure that SIGPROC find does not over-ride the standard
 SWIN_PROG_FIND
+
+# Check which version of the pulsar catalog is installed
 SWIN_PSRCAT
 
 # Enable convenience compiler selection
@@ -69,6 +77,12 @@ if test "$PSRHOME"; then
  CPPFLAGS="-I$PSRHOME/packages/$LOGIN_ARCH/include $CPPFLAGS"
  LDFLAGS="-L$PSRHOME/packages/$LOGIN_ARCH/lib $LDFLAGS"
 fi
+
+#
+# Checks for header files.
+#
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS([sys/statvfs.h sys/vfs.h sys/mount.h])
 
 #
 # Checks for essential libraries
