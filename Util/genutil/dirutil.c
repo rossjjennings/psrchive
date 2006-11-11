@@ -5,33 +5,33 @@
  *
  ***************************************************************************/
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "dirutil.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef linux
- #include <sys/vfs.h>
-#else
-#if defined (__FreeBSD__) || defined(__MACH__)
-  #include <sys/param.h>
-  #include <sys/mount.h>
- #else
-  #include <sys/statvfs.h>
-  #define VFS
- #endif
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#ifdef HAVE_SYS_STATVFS_H
+#include <sys/statvfs.h>
+#endif
+
+#ifdef HAVE_SYS_VFS_H
+#include <sys/vfs.h>
+#endif
+
+#ifdef HAVE_SYS_MOUNT_H
+#include <sys/param.h>
+#include <sys/mount.h>
 #endif
 
 #include <dirent.h>
-
-#include "environ.h"
 
 int file_exists (const char* filename)
 {
@@ -221,26 +221,19 @@ int disk_free_space (const char* path, double* space)
 /* returns the disk space in bytes */
 int dirspace (const char* path, double* space)
 {
-  int error;
-#ifdef VFS
+
+#ifdef HAVE_SYS_STATVFS_H
   struct statvfs info;
+  int error = statvfs (path, &info);
 #else
   struct statfs info;
+  int error = statfs (path, &info);
 #endif
 
-#ifdef VFS
-  error = statvfs (path, &info);
-#else
-  error = statfs (path, &info);
-#endif
   if (error == -1)
     return (-1);
 
-#if defined(linux) || defined(__FreeBSD__) || defined(__MACH__)
   *space = (double) info.f_bavail * (double) info.f_bsize;
-#else
-  *space = (double) info.f_bavail * (double) info.f_frsize;
-#endif
 
   return (0);
 }
