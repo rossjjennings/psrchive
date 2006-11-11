@@ -26,7 +26,7 @@ int main ()
 
   double expect = 27.0;
 
-  if ((fsum != dsum) || fabs(dsum - expect) > 1e-6) {
+  if (fabs(fsum - dsum) > 1e-6 || fabs(dsum - expect) > 1e-6) {
     cerr << "sum template error" << endl;
     cerr << "fsum=" << fsum << " dsum=" << dsum << " expect=" << expect
          << " diff=" << dsum-expect << endl;
