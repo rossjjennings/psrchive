@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 1999 by Willem van Straten
+ *   Copyright (C) 1998 by Stuart Anderson
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -29,7 +29,7 @@
 void
 swapx2( void *arg )
 {
-#ifdef MACHINE_LITTLE_ENDIAN
+#if MACHINE_LITTLE_ENDIAN
     char tmp;
     char *ptr = (char*)arg;
 
@@ -44,7 +44,7 @@ swapx2( void *arg )
 void
 swapx8( void *arg )
 {
-#ifdef MACHINE_LITTLE_ENDIAN
+#if MACHINE_LITTLE_ENDIAN
     char tmp;
     char *ptr = (char*)arg;
 
