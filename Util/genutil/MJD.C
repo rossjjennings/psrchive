@@ -336,56 +336,6 @@ int MJD::println (FILE *stream) {
   return(0);
 }
 
-
-#ifdef sun
-int parse_float128 (long double mjd, double* ndays, double* seconds, 
-		    double* fracseconds)
-{
-  unsigned long intdays = (unsigned long) mjd;
-  long double back_again = (long double) intdays;
-  if (back_again > mjd) {
-    back_again  -= 1.0;
-  }
-  *ndays = (double) back_again;
-
-  /* calculate number of seconds left */
-  mjd = (mjd - back_again) * 86400;
-  unsigned long intseconds = (unsigned long) mjd;
-  back_again = (long double) intseconds;
-  if (back_again > mjd) {
-    back_again  -= 1.0;
-  }
-  *seconds = (double) back_again;
-
-  /* and fractional seconds left */
-  *fracseconds = (double) (mjd - back_again);
-  return 0;
-}
-
-MJD::MJD(float128 mjd) {
-  if (verbose)
-    cerr << "MJD (float128)" << endl;
-  double ndays = 0.0, seconds = 0.0, fracseconds = 0.0;
-  parse_float128 ((long double)mjd, &ndays, &seconds, &fracseconds);
-  *this = MJD (ndays,seconds,fracseconds);
-}
-
-#else
-
-MJD::MJD(float128 mjd) {
-  double ndays = 0.0, fracdays = 0.0;
-
-  /* Stuart's ieee.C function */
-  if (cnvrt_long_double ((u_char*) &mjd, &ndays, &fracdays) < 0)  {
-    fprintf (stderr, "MJD::MJD(float128 mjd) error cnvrt_long_double\n");
-    throw (string("MJD conversion"));
-  }
-  
-  *this = MJD ((int)ndays, fracdays);
-}
-
-#endif
-
 MJD::MJD (double dd, double ss, double fs)
 {
   cerr.precision(15);

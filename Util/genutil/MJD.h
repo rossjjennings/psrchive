@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.26 $
-   $Date: 2006/10/19 15:49:10 $
+   $Revision: 1.27 $
+   $Date: 2006/11/11 19:04:45 $
    $Author: straten $ */
 
 #ifndef __GENUTIL_MJD_H
@@ -54,9 +54,6 @@ class MJD {
 
   // construct from a C string of the form "50312.4569"
   MJD (const char* mjdstring);
-
-  // construct from a long double given in days
-  MJD (float128 mjd);
 
   // some standard C time formats
   MJD (time_t time);                // returned by time()
