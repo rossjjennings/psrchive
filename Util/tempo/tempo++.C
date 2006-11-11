@@ -21,7 +21,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#if defined(__FreeBSD__) || defined(__MACH__)
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #else
 #include <wait.h>
