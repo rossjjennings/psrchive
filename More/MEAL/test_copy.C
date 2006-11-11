@@ -18,6 +18,9 @@ template <class Type> void test_copy (Type* copy, Type* instance,
                  "copy.nparam=%d != nparam=%d after %s copy constructor",
                  copy->get_nparam(), instance->get_nparam(), name.c_str());
 
+  cerr << "test_copy: "<< name <<" testing equality of "
+       << instance->get_nparam() << " parameters" << endl;
+
   for (unsigned i=0; i<instance->get_nparam(); i++)
     if (copy->get_param (i) != instance->get_param(i))
       throw Error (InvalidState, "test_copy",
