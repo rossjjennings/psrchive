@@ -148,8 +148,8 @@ std::string Tempo::get_configuration (const std::string& parameter)
   static char* tpodir = getenv("TEMPO");
 
   if (!tpodir)
-    throw (InvalidState, "Tempo::get_configuration",
-	   "TEMPO environment variable not defined");
+    throw Error (InvalidState, "Tempo::get_configuration",
+		 "TEMPO environment variable not defined");
 
   string filename = tpodir;
   filename += "/tempo.cfg";
