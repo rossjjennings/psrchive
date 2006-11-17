@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.16 $
-   $Date: 2006/11/11 19:04:52 $
+   $Revision: 1.17 $
+   $Date: 2006/11/17 11:57:12 $
    $Author: straten $ */
 
 /*
@@ -35,10 +35,10 @@ typedef int64_t   int64;
 typedef uint64_t  uint64;
 
 /* for parsing */
-#define I32  PRIi32
-#define UI32 PRIu32
+#define I32  "%"PRIi32
+#define UI32 "%"PRIu32
 
-#define I64  PRIi64
-#define UI64 PRIu64
+#define I64  "%"PRIi64
+#define UI64 "%"PRIu64
 
 #endif /* ENVIRON_H */
