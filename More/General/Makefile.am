@@ -120,6 +120,7 @@ libGeneral_la_SOURCES = \
         IterativeBaseline.C \
         LastSignificant.C \
         NoiseStatistics.C \
+	OnPulseThreshold.C \
         PhaseWeight.C \
         Profile_convolve.C \
         Profile_dedisperse.C \
