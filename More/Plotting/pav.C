@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pav.C,v 1.123 2006/10/06 21:41:57 straten Exp $
+// $Id: pav.C,v 1.124 2006/11/28 18:31:14 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -426,7 +426,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.123 2006/10/06 21:41:57 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.124 2006/11/28 18:31:14 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -1294,7 +1294,7 @@ int main (int argc, char** argv)
 
 	  for (unsigned ip=0; ip<npol; ip++) {
 	    min = max = tempmin = tempmax = 0;
-	    minmaxval(nchan, &(pband[ip].front()), &tempmin, &tempmax);
+	    minmax(nchan, &(pband[ip].front()), &tempmin, &tempmax);
 	    if (tempmin < min)
 	      min = tempmin;
 	    if (tempmax > max)

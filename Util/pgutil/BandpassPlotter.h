@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/BandpassPlotter.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/15 23:33:16 $
+   $Revision: 1.3 $
+   $Date: 2006/11/28 18:32:51 $
    $Author: straten $*/
 
 #ifndef __fft_BandpassPlotter_h
@@ -59,7 +59,7 @@ void fft::BandpassPlotter<Data,Info>::plot (Data* data, Info* info) const
   for (ipol=0; ipol<npol; ipol++) {
     std::vector<float> pband = data->get_passband (ipol);
     this->preprocess (pband);
-    minmaxval (pband, min, max, ipol);
+    minmax (pband, min, max, ipol);
   }
   
   if (user_max)

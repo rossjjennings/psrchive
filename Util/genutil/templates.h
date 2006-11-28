@@ -172,7 +172,7 @@ void minmax (const I& it1, const I& it2, T& min, T& max, bool follow = false)
 
 //! Returns the maximum and minimum values found in container c
 template <class T, class C>
-void minmaxval (const C& c, T& min, T& max, bool follow = false)
+void minmax (const C& c, T& min, T& max, bool follow = false)
 {
   minmax (c.begin(), c.end(), min, max, follow);
 }

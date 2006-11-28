@@ -566,8 +566,8 @@ void toaPlot::autoscale ()
     ypts[i] = float(data[i].y);
   }
   
-  minmaxval(xpts, xmin, xmax);
-  minmaxval(ypts, ymin, ymax);
+  minmax(xpts, xmin, xmax);
+  minmax(ypts, ymin, ymax);
   
   float xdiff = xmax - xmin;
   float ydiff = ymax - ymin;

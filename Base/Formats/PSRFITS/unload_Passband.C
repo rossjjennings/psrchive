@@ -59,7 +59,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   // Calculate the quantities
   
   for (int i = 0; i < npol; i++) {
-    minmaxval(bandpass->get_passband(i), min, max);
+    minmax(bandpass->get_passband(i), min, max);
     data_offsets[i] = 0.5 * (max + min);
     data_scales[i] = (max - min) / max_int;
   }

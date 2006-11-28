@@ -234,7 +234,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 	cerr << "npol  = " << a << endl;
       }
 
-      minmaxval(temparray1, min, max);
+      minmax(temparray1, min, max);
 
       if (save_signed)
 	offset = 0.5 * (max + min);
