@@ -9,7 +9,9 @@
 #define _Util_genutil_templates_h
 
 #include <algorithm>
+#include <iterator>
 #include <vector>
+
 #include <assert.h>
 
 template <class T>
@@ -58,38 +60,89 @@ T sqr (const T& x)
 }
 
 //! Return the sum of all values on [i1, i2)
-template <class T, class I>
-T sum (const I& it1, const I& it2)
+/*! Use this version when you want a different return type than
+  iterator value_type */
+template <class I, class T> T
+sum (const I& it1, const I& it2, T& the_sum)
 {
-  T the_sum = 0.0;
+  the_sum = 0.0;
+
   for (I it=it1; it != it2; it++)
     the_sum += T(*it);
+
   return the_sum;
 }
 
-// return the sum of all elements in a vector
-template <class T>
-T sum (const std::vector<T>& x)
+//! Return the sum of all values on [i1, i2)
+template <class I> typename std::iterator_traits<I>::value_type
+sum (const I& it1, const I& it2)
 {
-  return sum<T>(x.begin(), x.end());
+  typename std::iterator_traits<I>::value_type t;
+  return sum (it1, it2, t);
 }
 
-template <class T>
-T mean (const std::vector<T>& x)
+// return the sum of all elements in an STL container
+template <class C> typename C::value_type
+sum (const C& x)
 {
-  return sum(x)/x.size();
+  return sum (x.begin(), x.end());
 }
 
-template <class T>
-T variance (const std::vector<T>& x)
+//! Return the mean of all values on [i1, i2)
+/*! Use this version when you want a different return type than
+  iterator value_type */
+template <class I, class T> T
+mean (const I& it1, const I& it2, T& the_mean)
 {
-  T the_mean = mean(x);
-  T var = 0.0;
+  the_mean = sum(it1, it2, the_mean) / (it2 - it1);
+  return the_mean;
+}
+
+//! Return the mean of all values on [i1, i2)
+template <class I> typename std::iterator_traits<I>::value_type
+mean (const I& it1, const I& it2)
+{
+  typename std::iterator_traits<I>::value_type t;
+  return mean (it1, it2, t);
+}
+
+// return the mean of all elements in an STL container
+template <class C> typename C::value_type
+mean (const C& x)
+{
+  return mean (x.begin(), x.end());
+}
+
+//! Return the variance of all values on [i1, i2)
+/*! Use this version when you want a different return type than
+  iterator value_type */
+template <class I, class T> T
+variance (const I& it1, const I& it2, T& the_variance)
+{
+  T the_mean = mean (it1, it2, the_mean);
+  the_variance = 0.0;
   
-  for (unsigned i = 0; i < x.size(); i++)
-    var += sqr(x[i] - the_mean);
-  
-  return var / T(x.size() - 1);
+  for (I it=it1; it != it2; it++)
+    the_variance += sqr( T(*it) - the_mean );
+
+  the_variance /= (it2 - it1 - 1);
+
+  return the_variance;
+}
+
+//! Return the variance of all values on [i1, i2)
+template <class I> typename std::iterator_traits<I>::value_type 
+variance (const I& it1, const I& it2)
+{
+  typename std::iterator_traits<I>::value_type t;
+  return variance (it1, it2, t);
+}
+
+// return the variance of all elements in an STL container
+template <class C> typename C::value_type 
+variance (const C& x)
+{
+  return variance (x.begin(), x.end());
 }
 
 // normalize each element of a vector by the sum of all elements in it
