@@ -21,18 +21,31 @@ int main ()
   x[3] = 7.8;
   x[4] = 9.0;
 
-  double dsum = sum<double>(x.begin(),x.end());
+  double dsum = sum(x.begin(),x.end(),dsum);
   float fsum = sum(x);
 
-  double expect = 27.0;
+  double esum = 27.0;
 
-  if (fabs(fsum - dsum) > 1e-6 || fabs(dsum - expect) > 1e-6) {
+  if (fabs(fsum - dsum) > 1e-6 || fabs(dsum - esum) > 1e-6) {
     cerr << "sum template error" << endl;
-    cerr << "fsum=" << fsum << " dsum=" << dsum << " expect=" << expect
-         << " diff=" << dsum-expect << endl;
+    cerr << "fsum=" << fsum << " dsum=" << dsum << " expect=" << esum
+         << " diff=" << dsum-esum << endl;
     return -1;
   }
 
-  cerr << "sum template passes all tests" << endl;
+  double dvar = variance(x.begin(),x.end(),dvar);
+  float fvar = variance(x);
+
+  double evar = 10.1;
+
+  if (fabs(fvar - dvar) > 1e-6 || fabs(dvar - evar) > 1e-6) {
+    cerr << "var template error" << endl;
+    cerr << "fvar=" << fvar << " dvar=" << dvar << " expect=" << evar
+         << " diff=" << dvar-evar << endl;
+    return -1;
+  }
+
+  cerr << "sum and variance templates pass all tests" << endl;
+
   return 0;
 }
