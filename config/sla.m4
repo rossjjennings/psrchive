@@ -66,20 +66,30 @@ AC_DEFUN([SWIN_LIB_SLA],
 
   AC_MSG_RESULT([$have_sla])
 
+
   if test "$have_sla" != no; then
+
     AC_DEFINE([HAVE_SLA], [1], [Define to 1 if you have the SLA library])
-    AH_TEMPLATE([SLA_FUNC], [Fortran name mangling in libsla])
     AC_DEFINE_UNQUOTED([SLA_FUNC(name,NAME)],$sla_def)
     [$1]
+
   else
+
+    # Set up to compile using SLALIB code in Util/third/star
     SLA_CFLAGS=""
-    SLA_LIBS=""
+    SLA_LIBS="\$(top_builddir)/Util/third/libthird.la"
+    sla_def="F77_FUNC_(name,NAME)"
     [$2]
+
   fi
 
   AC_SUBST(SLA_CFLAGS)
   AC_SUBST(SLA_LIBS)
 
+  AH_TEMPLATE([SLA_FUNC], [Fortran name mangling in libsla])
+  AC_DEFINE_UNQUOTED([SLA_FUNC(name,NAME)],[$sla_def])
+
   AM_CONDITIONAL(HAVE_SLA_FORTRAN, [test x"$sla_def" != x])
+  AM_CONDITIONAL(HAVE_SLA, [test "$have_sla" != no])
 
 ])
