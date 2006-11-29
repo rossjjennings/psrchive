@@ -21,7 +21,7 @@ psrgui_SOURCES = psrgui.C
 INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@ @QT_CXXFLAGS@
 
 LDADD = libpsrgui.la $(top_builddir)/More/libpsrmore.la \
-        ../libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
+        $(top_builddir)/Base/libpsrbase.la \
         $(top_builddir)/Util/libpsrutil.la \
         @QT_LIBS@ @PGPLOT_LIBS@
 

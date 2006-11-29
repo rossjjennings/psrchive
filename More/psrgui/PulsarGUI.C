@@ -1,5 +1,7 @@
 #include "PulsarGUI.h"
 
+using namespace std;
+
 Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename) 
   : QMainWindow(0, 0, WDestructiveClose)
 {
