@@ -25,6 +25,16 @@ std::string Alias::get_name (const std::string& alias) const
   return it->second;
 }
 
+std::string Alias::substitute (const std::string& alias) const
+{
+  std::map<std::string, std::string>::const_iterator it = aliases.find(alias);
+
+  if (it != aliases.end())
+    return it->second;
+  else
+    return alias;
+}
+
 //! Given a name, return the alias
 std::string Alias::get_alias (const std::string& name) const
 {

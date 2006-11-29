@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Alias.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/11/29 05:05:45 $
+   $Revision: 1.2 $
+   $Date: 2006/11/29 05:37:49 $
    $Author: straten $ */
 
 #ifndef __Alias_h
@@ -30,6 +30,9 @@ public:
 
   //! Given an alias, return the name
   std::string get_name (const std::string& alias) const;
+
+  //! Given a word that may be an alias, return the associated name or the word
+  std::string substitute (const std::string& alias) const;
 
   //! Given a name, return the alias
   std::string get_alias (const std::string& name) const;
