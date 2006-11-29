@@ -6,6 +6,7 @@
  ***************************************************************************/
 #include "TextInterface.h"
 #include "Functor.h"
+#include "Alias.h"
 
 #include <iostream>
 using namespace std;
@@ -242,6 +243,16 @@ int main () try {
 
   teststring = "test of TextInterface::import Element passed";
   Test.get_extension()->set_text (teststring);
+
+  Alias alias;
+  alias.add ("extext", "ext:text");
+
+  getset.set_aliases (&alias);
+
+  if (getset.get_value("extext") != teststring) {
+    cerr << "test_TextInterface Alias ERROR!" << endl;
+    return -1;
+  }
 
   tester_array Array (5);
 

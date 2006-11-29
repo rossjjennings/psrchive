@@ -7,8 +7,9 @@
 #ifndef __TextInterface_h
 #define __TextInterface_h
 
-#include "Reference.h"
+#include "Alias.h"
 #include "Error.h"
+
 #include "tostring.h"
 #include "stringtok.h"
 #include "separate.h"
@@ -578,6 +579,9 @@ namespace TextInterface {
     //! Set the indentation that precedes the output of a call to process
     void set_indentation (const std::string& indent) { indentation = indent; }
 
+    //! Set aliases for attribute names
+    void set_aliases (const Alias* alias) { aliases = alias; }
+
     //! Return the list of available attributes
     std::string help (bool show_default_values = false);
 
@@ -601,6 +605,9 @@ namespace TextInterface {
 
     //! The indentation that precedes the output of a call to process
     std::string indentation;
+
+    //! The aliases for the attribute names
+    Reference::To<const Alias> aliases;
 
   };
 
@@ -813,8 +820,13 @@ TextInterface::To<C>::find (const std::string& param, bool throw_ex) const
 	    << attributes.size() << endl;
 #endif
 
+  std::string key = param;
+
+  if (aliases)
+    key = aliases->substitute (key);
+
   for (unsigned i=0; i<attributes.size(); i++) {
-    if (attributes[i]->matches (param)) {
+    if (attributes[i]->matches (key)) {
 #ifdef _DEBUG
       std::cerr << "To::find attribute[" << i << "]=" 
 		<< attributes[i]->get_name() << " matches" << std::endl;
@@ -824,7 +836,7 @@ TextInterface::To<C>::find (const std::string& param, bool throw_ex) const
   }
 
   if (throw_ex)
-    throw Error (InvalidParam, "TextInterface::Class<C>::find",
+    throw Error (InvalidParam, "TextInterface::To<C>::find",
 		 "no attribute named " + param);
 
   return 0;
