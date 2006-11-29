@@ -10,6 +10,8 @@
 #include "Pulsar/BackendTI.h"
 #include "Pulsar/IntegrationTI.h"
 
+#include "Pulsar/FITSAlias.h"
+
 Pulsar::ArchiveTI::ArchiveTI ()
 {
   add( &Archive::get_filename, "file",  "Name of the file" );
@@ -84,6 +86,8 @@ Pulsar::ArchiveTI::ArchiveTI ()
   import( "int", IntegrationTI(), 
 	  (Integration*(Archive::*)(unsigned)) &Archive::get_Integration,
 	  &Archive::get_nsubint );
+
+  set_aliases( new FITSAlias );
 
 }
 
