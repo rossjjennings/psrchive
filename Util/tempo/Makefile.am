@@ -82,3 +82,9 @@ LDADD = libtempo.la $(top_builddir)/Util/genutil/libgenutil.la \
 
 include $(top_srcdir)/config/Makefile.include
 
+#
+# builddir != srcdir fix: g77 version 3 looks for header files
+# (like keyinfo.com) only in the same path as the source code file.
+#
+AM_FFLAGS = -I.
+
