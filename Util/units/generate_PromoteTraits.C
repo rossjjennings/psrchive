@@ -24,15 +24,27 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
-int main () {
+int main (int argc, char** argv) {
+
+  bool verbose = false;
+
+  if (argc > 1)
+    verbose = true;
 
   // it is assumed that header_PromoteTraits.h is copied to PromoteTraits.h
   // before this program is run
   ofstream out ("PromoteTraits.h", ios::app);
   
+  if (!out) {
+    cerr << "generate_PromoteTraits: could not open PromoteTraits.h" << endl;
+    perror ("");
+    return -1;
+  }
+
   vector<string> types;
 
   // types are added in order of increasing precedence
@@ -57,5 +69,7 @@ int main () {
   out << "#endif // !__MEAL_PromoteTraits_h\n" << endl;
 
   out.close ();
+
+  return 0;
 
 };
