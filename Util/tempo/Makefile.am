@@ -55,17 +55,18 @@ endif
 # Assembly of include files
 #
 
-$(srcdir)/keyinfo.com: $(srcdir)/keys.dat ./keys2fort
-	abs_builddir=`pwd` && cd $(srcdir) && $$abs_builddir/keys2fort
+keyinfo.com: $(srcdir)/keys.dat ./keys2fort
+	./keys2fort $(srcdir)/keys.dat
 
-$(srcdir)/ephio.h: $(srcdir)/keys.dat ./keys2c
-	abs_builddir=`pwd` && cd $(srcdir) && $$abs_builddir/keys2c
+ephio.h: $(srcdir)/keys.dat ./keys2c
+	./keys2c $(srcdir)/keys.dat
 
 # Depend on constructed include files
-ephio.lo: $(srcdir)/keyinfo.com
-ephio_c.lo: $(srcdir)/ephio.h
+ephio.lo: keyinfo.com
+ephio_c.lo: ephio.h
 
-BUILT_SOURCES = ephio.h
+BUILT_SOURCES = ephio.h keyinfo.com
+
 keys2fort_LDADD = 
 keys2c_LDADD =  
 
