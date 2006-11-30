@@ -2,10 +2,13 @@
 bin_PROGRAMS = rhythm
 
 rhythm_SOURCES = rhythm.C menubar.C toolbar.C command_line.C \
-	Options.C toaPlot.C Options.h rhythm.h toaPlot.h pulsar.xpm \
-	psrParams.C psrParams.h psrParameter.C psrParameter.h \
+	Options.C toaPlot.C psrParams.C psrParameter.C \
 	find_standard.C qt_psrParameter.C qt_psrephem.C \
 	qt_editParams.C qt_toglParams.C qt_fileParams.C 
+
+EXTRA_DIST = rhythm.h Options.h toaPlot.h psrParams.h psrParameter.h \
+	find_standard.h qt_psrParameter.h qt_psrephem.h \
+	qt_editParams.h qt_toglParams.h qt_fileParams.h pulsar.xpm 
 
 CLEANFILES = moc_rhythm.C moc_Options.C moc_toaPlot.C \
 	moc_qt_psrephem.C moc_qt_editParams.C \
