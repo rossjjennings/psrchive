@@ -192,11 +192,9 @@ AC_CONFIG_FILES([Util/Makefile
 
 AC_OUTPUT
 
-echo
-echo
-
 if test x"$enable_lean" == xyes; then
 
+   echo
    echo "********************************************"
    echo "A lean version of PSRCHIVE will be compiled."
    echo "This means that the polarimetric calibration"
@@ -207,22 +205,26 @@ if test x"$enable_lean" == xyes; then
 else
 
 if test x"$have_cfitsio" != xyes; then
+   echo
    echo "The CFITSIO library was not found:"
    echo "  PSRCHIVE applications will not be able to load PSRFITS files."
 fi
 
 if test x"$have_pgplot" != xyes; then
+   echo
    echo "The PGPLOT library was not found:"
    echo "  PSRCHIVE applications will not be able to plot."
    echo "  Please see http://psrchive.sourceforge.net/third/pgplot"
 fi
 
 if test x"$have_qt" != xyes; then
+   echo
    echo "The Qt library was not found:"
    echo "  PSRCHIVE graphical user interfaces will not be compiled."
 fi
 
 if test x"$have_qtdriv" != xyes; then
+   echo
    echo "The qtdriv device handler is not installed:"
    echo "  rhythm will not be compiled."
 fi
@@ -230,4 +232,6 @@ fi
 fi
 
 echo
+echo "PSRCHIVE is now ready to be compiled.  Please run 'make'"
 echo
+
