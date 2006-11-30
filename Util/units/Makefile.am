@@ -122,6 +122,7 @@ endif
 
 PromoteTraits.h: $(srcdir)/header_PromoteTraits ./generate_PromoteTraits
 	cp $(srcdir)/header_PromoteTraits PromoteTraits.h
+	chmod u+w PromoteTraits.h
 	./generate_PromoteTraits
 
 # Depend on constructed include files
