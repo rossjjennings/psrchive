@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 #include "FITSError.h"
-#include "environ.h"
+#include "dirutil.h"
 
 #include <fitsio.h>
 
@@ -213,5 +213,11 @@ void test_template (const char* template_file, bool populate, bool verbose)
   fits_close_file (fptr, &status);
   if (status)
     throw FITSError (status, "test_template", "fits_close_file");
+
+  if (!file_exists("test_template.psrfits"))
+    throw Error (InvalidState, "test_template", "file not created");
+
+  if (remove("test_template.psrfits") < 0)
+    throw Error (FailedSys, "test_template", "could not remove file");
 
 }
