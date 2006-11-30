@@ -21,7 +21,7 @@
 #define FATAL_3(s1,s2,s3) {fprintf(stderr, "Fatal: "); fprintf(stderr, s1,s2,s3); exit(1);}
 
 int
-main()
+main(int argc, char** argv)
 {
 	FILE *fin, *fout;
 	char key[1024][64];
@@ -29,7 +29,9 @@ main()
 	int type[1024], err[1024];
 	int i, nelem, len, maxlen = 0;
 
-	fin = fopen("keys.dat", "r");
+	if (argc < 2)
+	  FATAL_1("Must specify path to keys.dat");
+	fin = fopen(argv[1], "r");
 	if (!fin)
 		FATAL_1("Couldn't open keys.dat");
 	fout = fopen("keyinfo.com", "w");
