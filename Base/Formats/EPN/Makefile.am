@@ -9,4 +9,9 @@ libepn_la_SOURCES = EPNArchive.C epnio.c rwepn.f epnhdr.inc epnio.h
 
 INCLUDES = -I$(top_builddir)/include
 
+#
+# builddir != srcdir fix: unlike g77 version 3, gfortran does not look
+# for header files (like epnhdr.inc) in the same path as the source code file.
+#
 AM_FFLAGS = -I$(srcdir)
+
