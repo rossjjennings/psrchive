@@ -5,6 +5,8 @@ SUBDIRS	= Util Base More
 
 bin_SCRIPTS = psrchive_cflags psrchive_ldflags
 
+EXTRA_DIST = config/install-intermediate
+
 libs: install-binSCRIPTS
 	$(MAKE) RECURSIVE_TARGETS="all-recursive libs-recursive" libs-recursive
 
