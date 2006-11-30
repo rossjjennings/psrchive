@@ -18,25 +18,44 @@ AC_DEFUN([SWIN_PSRCAT],
     have_psrcat="psrinfo"
   ;;
   *)
+    have_psrcat="test"
+  esac
+
+  if test $have_psrcat = "test"; then
+
     # Test if psrcat can be executed
-    psrcat_version=`psrcat -v`
-    case "$psrcat_version" in
-    "Catalogue version number"*)
-      have_psrcat="psrcat"
-    ;;
-    *)
-      # Test if psrinfo can be executed
+
+    psrcat=`which psrcat 2> /dev/null`
+
+    if test x"$psrcat" != x; then
+      psrcat_version=`psrcat -v`
+      case "$psrcat_version" in
+      "Catalogue version number"*)
+        have_psrcat="psrcat"
+      esac
+    fi
+
+  fi
+
+  if test $have_psrcat = "test"; then
+
+    # Test if psrinfo can be executed
+
+    psrinfo=`which psrinfo 2> /dev/null`
+
+    if test x"$psrinfo" != x; then
       psrcat_version=`psrinfo -V`
       case "$psrcat_version" in
       *psrinfo.c*)
         have_psrcat="psrinfo"
-      ;;
-      *)
-        have_psrcat="not found"
       esac
-    esac
+    fi
 
-  esac
+  fi
+
+  if test $have_psrcat = "test"; then
+    have_psrcat="not found"
+  fi
 
   AC_MSG_RESULT([$have_psrcat])
 
