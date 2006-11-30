@@ -65,7 +65,7 @@ ephio.h: $(srcdir)/keys.dat ./keys2c
 ephio.lo: keyinfo.com
 ephio_c.lo: ephio.h
 
-BUILT_SOURCES = ephio.h keyinfo.com
+BUILT_SOURCES = ephio.h keyinfo.com ephio_def.c
 
 keys2fort_LDADD = 
 keys2c_LDADD =  
