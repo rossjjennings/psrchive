@@ -36,11 +36,18 @@ int main ()
   double dvar = variance(x.begin(),x.end(),dvar);
   float fvar = variance(x);
 
+  if (fabs(fvar - dvar) > 1e-5) {
+    cerr << "var template error" << endl;
+    cerr << "fvar=" << fvar << " dvar=" << dvar
+         << " diff=" << dvar-fvar << endl;
+    return -1;
+  }
+
   double evar = 10.1;
 
-  if (fabs(fvar - dvar) > 1e-6 || fabs(dvar - evar) > 1e-6) {
+  if (fabs(dvar - evar) > 1e-6) {
     cerr << "var template error" << endl;
-    cerr << "fvar=" << fvar << " dvar=" << dvar << " expect=" << evar
+    cerr << " dvar=" << dvar << " expect=" << evar
          << " diff=" << dvar-evar << endl;
     return -1;
   }
