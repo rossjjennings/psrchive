@@ -121,9 +121,7 @@ libMEAL_la_SOURCES = \
         Gain.C \
         Gaussian.C \
         PowerLaw.C \
-        header_PromoteTraits \
         Invariant.C \
-        MatrixTest.h \
 	MuellerTransformation.C \
         NormalizeStokes.C \
         OneParameter.C \
