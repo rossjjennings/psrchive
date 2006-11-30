@@ -1,6 +1,8 @@
 
 bin_SCRIPTS = psrhelp
 
+EXTRA_DIST = psrhelp
+
 bin_PROGRAMS = pam pascii pat paz psradd psrsh psrwt fluxcal pac pcm
 
 pam_SOURCES = pam.C
