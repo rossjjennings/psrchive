@@ -64,7 +64,7 @@ void help_frame_options (const char* name);
 
 void cpg_next ()
 {
-  cpgsvp (0.1, 0.9, 0.15, 0.9);
+  cpgsvp (0.15, 0.9, 0.15, 0.9);
   cpgpage ();
 }
 
