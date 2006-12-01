@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/ArchiveTI.h"
+#include "Pulsar/Check.h"
 
 #include "dirutil.h"
 #include "strutil.h"
@@ -56,6 +57,11 @@ int main (int argc, char** argv) try {
 
   // suppress warnings by default
   Pulsar::Archive::set_verbosity (0);
+
+  // disable certain sanity checks
+  Pulsar::Archive::Check::disable ("Dedispersed");
+  Pulsar::Archive::Check::disable ("DeFaradayed");
+
   bool verbose = false;
 
   vector <string> commands;
