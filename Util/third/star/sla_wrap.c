@@ -4,10 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 /*
-  This file provides C wrappers to the Fortran SLALIB bindings.  It is
-  compiled and included in the library only if the C bindings are not
-  present in slalib.a
+  This file provides C wrappers to the Fortran SLALIB bindings.
 */
 
 #ifdef HAVE_CONFIG_H
@@ -16,7 +15,8 @@
 
 /* *********************************************************************** */
 
-#define SLA_altaz SLA_FUNC(sla_altaz,slaAltaz)
+#define SLA_altaz F77_FUNC_(sla_altaz,slaAltaz)
+
 void SLA_altaz (double*, double*, double*, double*, double*, double*,
 		double*, double*, double*, double*, double*, double*);
 
@@ -34,7 +34,8 @@ void slaAltaz (double ha, double dec, double phi,
 
 /* *********************************************************************** */
 
-#define SLA_dcs2c SLA_FUNC(sla_dcs2c,slaDcs2c)
+#define SLA_dcs2c F77_FUNC_(sla_dcs2c,slaDcs2c)
+
 void SLA_dcs2c (double* ra, double* dec, double* v);
 
 void slaDcs2c (double a, double b, double v[3])
@@ -45,7 +46,8 @@ void slaDcs2c (double a, double b, double v[3])
 
 /* *********************************************************************** */
 
-#define SLA_dmxv SLA_FUNC(sla_dmxv,slaDmxv)
+#define SLA_dmxv F77_FUNC_(sla_dmxv,slaDmxv)
+
 void SLA_dmxv (double* dm, double* va, double* vb);
 
 void slaDmxv (double dm[3][3], double va[3], double vb[3])
@@ -55,7 +57,8 @@ void slaDmxv (double dm[3][3], double va[3], double vb[3])
 
 /* *********************************************************************** */
 
-#define SLA_dsep SLA_FUNC(sla_dsep,slaDsep)
+#define SLA_dsep F77_FUNC_(sla_dsep,slaDsep)
+
 double SLA_dsep (double *, double *, double *, double*);
 
 double slaDsep (double a1, double b1, double a2, double b2)
@@ -65,7 +68,8 @@ double slaDsep (double a1, double b1, double a2, double b2)
 
 /* *********************************************************************** */
 
-#define SLA_dtt SLA_FUNC(sla_dtt,slaDtt)
+#define SLA_dtt F77_FUNC_(sla_dtt,slaDtt)
+
 double SLA_dtt (double* mjd);
 
 double slaDtt (double dju)
@@ -75,7 +79,8 @@ double slaDtt (double dju)
 
 /* *********************************************************************** */
 
-#define SLA_dvdv SLA_FUNC(sla_dvdv,slaDvdv)
+#define SLA_dvdv F77_FUNC_(sla_dvdv,slaDvdv)
+
 double SLA_dvdv (double* va, double* vb);
 
 double slaDvdv (double va[3], double vb[3])
@@ -85,7 +90,8 @@ double slaDvdv (double va[3], double vb[3])
 
 /* *********************************************************************** */
 
-#define SLA_epj SLA_FUNC(sla_epj,slaEpj)
+#define SLA_epj F77_FUNC_(sla_epj,slaEpj)
+
 double SLA_epj (double* mjd);
 
 double slaEpj (double date)
@@ -95,7 +101,8 @@ double slaEpj (double date)
 
 /* *********************************************************************** */
 
-#define SLA_eqgal SLA_FUNC(sla_eqgal,slaEqgal)
+#define SLA_eqgal F77_FUNC_(sla_eqgal,slaEqgal)
+
 void SLA_eqgal (double *, double *, double *, double *);
 
 void slaEqgal (double dr, double dd, double *dl, double *db)
@@ -105,7 +112,8 @@ void slaEqgal (double dr, double dd, double *dl, double *db)
 
 /* *********************************************************************** */
 
-#define SLA_evp SLA_FUNC(sla_evp,slaEvp)
+#define SLA_evp F77_FUNC_(sla_evp,slaEvp)
+
 void SLA_evp (double* tdb, double* ep,
               double* dvb, double* dpb,
               double* dvh, double* dph);
@@ -119,7 +127,8 @@ void slaEvp (double date, double deqx,
 
 /* *********************************************************************** */
 
-#define SLA_galeq SLA_FUNC(sla_galeq,slaGaleq)
+#define SLA_galeq F77_FUNC_(sla_galeq,slaGaleq)
+
 void SLA_galeq (double *, double *, double *, double *);
 
 void slaGaleq (double dl, double db, double *dr, double *dd)
@@ -129,7 +138,8 @@ void slaGaleq (double dl, double db, double *dr, double *dd)
 
 /* *********************************************************************** */
 
-#define SLA_gmst SLA_FUNC(sla_gmst,slaGmst)
+#define SLA_gmst F77_FUNC_(sla_gmst,slaGmst)
+
 double SLA_gmst (double* mjd);
 
 double slaGmst (double ut1)
@@ -139,7 +149,8 @@ double slaGmst (double ut1)
 
 /* *********************************************************************** */
 
-#define SLA_pa SLA_FUNC(sla_pa,slaPa)
+#define SLA_pa F77_FUNC_(sla_pa,slaPa)
+
 double SLA_pa (double* HA, double* DEC, double* PHI);
 
 double slaPa (double ha, double dec, double phi)
@@ -149,7 +160,8 @@ double slaPa (double ha, double dec, double phi)
 
 /* *********************************************************************** */
 
-#define SLA_prec SLA_FUNC(sla_prec,slaPrec)
+#define SLA_prec F77_FUNC_(sla_prec,slaPrec)
+
 void SLA_prec (double* ep0, double* ep1, double* rmatp);
 
 void slaPrec (double ep0, double ep1, double rmatp[3][3])
