@@ -39,6 +39,7 @@ libClasses_la_SOURCES = \
         Archive_verbose.C \
         BasicArchive.C \
         BasicIntegration.C \
+	Check.C \
         Config.C \
         ExampleArchive.C \
 	FITSAlias.C \
