@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Check.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/10/17 23:04:41 $
+   $Revision: 1.2 $
+   $Date: 2006/12/01 22:46:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Check_h
@@ -27,18 +27,20 @@ namespace Pulsar {
     
     // Return the name of the check
     virtual std::string get_name () = 0;
-    
+
+    // Disable the named check
+    static void disable (const std::string& name);
+
   protected:
 
-    // Checks registered for uses in Archive::load
+    // Checks registered for use in Archive::load and Archive::unload
     static Registry::List<Check> registry;
       
     // Declare friends with Registry::Entry<Check> so it can access registry
     friend class Registry::Entry<Check>;
 
-    // Declare friends with Archive so Archive::load can access registry
+    // Declare friends with Archive so load and unload can access registry
     friend class Archive;
-
 
   };
 
