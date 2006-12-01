@@ -88,8 +88,6 @@ AC_CHECK_HEADERS([sys/statvfs.h sys/vfs.h sys/mount.h])
 # Checks for essential libraries
 #
 AC_CHECK_LIB([m], [sin])
-SWIN_LIB_SLA([],AC_MSG_WARN([SLALIB Positional Astronomy Library not found.
-PSRCHIVE will compile SLALIB code in Util/third/star.]))
 SWIN_LIB_FFTW
 SWIN_LIB_MKL
 SWIN_LIB_IPP

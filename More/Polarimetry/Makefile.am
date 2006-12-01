@@ -138,7 +138,7 @@ libPolarimetry_la_SOURCES += \
 bin_PROGRAMS += pafit
 
 pafit_SOURCES		= pafit.C 
-pafit_LDADD		= $(LDADD) @PGPLOT_LIBS@ @SLA_LIBS@
+pafit_LDADD		= $(LDADD) @PGPLOT_LIBS@
 
 endif
 
@@ -161,15 +161,12 @@ test_TotalCovariance_SOURCES	= test_TotalCovariance.C
 test_copy_SOURCES		= test_copy.C
 test_IRIonosphere_SOURCES	= test_IRIonosphere.C
 
-test_Parallactic_LDADD		= $(LDADD) @SLA_LIBS@
-test_ReceptionModel_LDADD	= $(LDADD) @SLA_LIBS@
-
 #############################################################################
 #
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@ @SLA_CFLAGS@
+INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@
 
 LDADD = libPolarimetry.la $(top_builddir)/More/MEAL/libMEAL.la \
 	$(top_builddir)/Util/libpsrutil.la

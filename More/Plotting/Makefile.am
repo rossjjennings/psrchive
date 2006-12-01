@@ -67,7 +67,7 @@ endif
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@ @SLA_CFLAGS@
+INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.include
 

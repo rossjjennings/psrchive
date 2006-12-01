@@ -21,7 +21,6 @@ check_PROGRAMS = test_ephio test_polyco_io test_Phase	\
 
 ephepo_SOURCES = ephepo.C
 ephtex_SOURCES = ephtex.C
-ephtex_LDADD   = $(LDADD) @SLA_LIBS@
 
 test_polyco_io_SOURCES		= test_polyco_io.C
 test_Phase_SOURCES		= test_Phase.C
@@ -75,10 +74,12 @@ keys2c_LDADD =
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include @CFITSIO_CFLAGS@ @SLA_CFLAGS@
+INCLUDES = -I$(top_builddir)/include @CFITSIO_CFLAGS@
 
-LDADD = libtempo.la $(top_builddir)/Util/genutil/libgenutil.la \
-	$(top_builddir)/Util/units/libunits.la @FLIBS@
+LDADD = libtempo.la \
+	$(top_builddir)/Util/genutil/libgenutil.la \
+	$(top_builddir)/Util/units/libunits.la \
+	$(top_builddir)/Util/third/libthird.la @FLIBS@
 
 include $(top_srcdir)/config/Makefile.include
 
