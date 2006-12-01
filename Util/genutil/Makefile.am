@@ -81,14 +81,6 @@ libgenutil_la_SOURCES = \
         Types.C \
         utc.c
 
-if HAVE_SLA_FORTRAN
-
-# build the C wrappers to the Fortran SLALIB bindings
-include_HEADERS += slalib.h
-libgenutil_la_SOURCES += sla_wrap.c
-
-endif
-
 if HAVE_PGPLOT
 
 include_HEADERS += JenetAnderson98Plot.h
@@ -121,8 +113,6 @@ test_sum_SOURCES		= test_sum.C
 INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@
 
 LDADD = libgenutil.la $(top_builddir)/Util/units/libunits.la
-
-libgenutil_la_LIBADD = @SLA_LIBS@
 
 include $(top_srcdir)/config/Makefile.include
 
