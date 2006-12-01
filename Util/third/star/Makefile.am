@@ -6,5 +6,9 @@ libstar_la_SOURCES = altaz.f cldj.f dat.f dcc2s.f dcs2c.f deuler.f	\
 	dvdv.f dvxv.f epj.f eqgal.f evp.f galeq.f geoc.f gmst.f pa.f	\
 	prec.f pvobs.f
 
+# C wrappers to the Fortran SLALIB bindings
+include_HEADERS = slalib.h
+libstar_la_SOURCES += sla_wrap.c
+
 include $(top_srcdir)/config/Makefile.include
 
