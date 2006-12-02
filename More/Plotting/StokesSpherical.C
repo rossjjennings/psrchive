@@ -10,7 +10,7 @@
 Pulsar::StokesSpherical::StokesSpherical ()
 {
   manage ("flux", &flux);
-  set_viewport ( "flux", 0,1, 0,.5);
+  flux.get_frame()->set_viewport (0,1, 0,.5);
 
   flux.set_plot_values  ("Ip");
   flux.set_plot_colours ("12");
@@ -20,7 +20,7 @@ Pulsar::StokesSpherical::StokesSpherical ()
   flux.get_frame()->get_label_above()->set_all ("");
 
   manage ("pa", &orientation);
-  set_viewport ( "pa", 0,1, .5,.75);
+  orientation.get_frame()->set_viewport (0,1, .5,.75);
 
   // shorten the y label
   orientation.get_frame()->get_y_axis()->set_label("\\gh (deg.)");
@@ -33,7 +33,7 @@ Pulsar::StokesSpherical::StokesSpherical ()
   orientation.get_frame()->get_label_above()->set_all ("");
 
   manage ("ell", &ellipticity);
-  set_viewport ( "ell", 0,1, .75,1);
+  ellipticity.get_frame()->set_viewport (0,1, .75,1);
 
   // shorten the y label
   ellipticity.get_frame()->get_y_axis()->set_label("\\ge (deg.)");

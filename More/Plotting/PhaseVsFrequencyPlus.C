@@ -15,10 +15,12 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   ///////////////////////////////////////////////////////////////////////
 
   manage ("freq", &freq);
-  set_viewport ( "freq", 0,.7, 0,.7);
 
+  // freq plotter shares the x-axis and y-axis
   freq.get_frame()->set_x_scale (get_frame()->get_x_scale());
   freq.get_frame()->set_y_scale (get_frame()->get_y_scale());
+
+  freq.get_frame()->set_viewport (0,.7, 0,.7);
 
   // remove the alternative labeling
   freq.get_frame()->get_y_axis()->add_pgbox_opt ('C');
@@ -29,10 +31,11 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   ///////////////////////////////////////////////////////////////////////
 
   manage ("flux", &flux);
-  set_viewport ( "flux", 0,.7, .7,1);
 
   // flux plotter shares the x axis
   flux.get_frame()->set_x_scale (get_frame()->get_x_scale());
+
+  flux.get_frame()->set_viewport (0,.7, .7,1);
 
   // tell the flux plotter to integrate over all frequencies
   flux.set_chan (PlotIndex (0, true));
@@ -48,15 +51,17 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   // remove the above frame labels
   flux.get_frame()->get_label_above()->set_all ("");
   // put the filename in the upper left
-  flux.get_frame()->get_label_above()->set_left ("=file");
+  flux.get_frame()->get_label_above()->set_left ("$file");
 
   ///////////////////////////////////////////////////////////////////////
 
   manage ("psd", &psd);
-  set_viewport ( "psd", .7,1, 0,.7);
 
   // spectrum plotter shares the y axis on its x axis
   psd.get_frame()->set_x_scale (get_frame()->get_y_scale());
+
+  // set only the y viewport
+  psd.get_frame()->get_y_scale()->set_viewport (std::pair<float,float>(.7,1));
 
   // tell the spectrum plotter to sum over all phase bins
   psd.set_bin (PlotIndex (0, true));
@@ -76,6 +81,7 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
 
   // transpose the frame
   psd.get_frame()->set_transpose ();
+
 }
 
 //! Get the text interface to the configuration attributes

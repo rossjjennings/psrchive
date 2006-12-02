@@ -10,7 +10,7 @@
 Pulsar::StokesCylindrical::StokesCylindrical ()
 {
   manage ("flux", &flux);
-  set_viewport ( "flux", 0,1, 0,.7);
+  flux.get_frame()->set_viewport (0,1, 0,.7);
 
   flux.set_plot_values  ("ILV");
   flux.set_plot_colours ("124");
@@ -20,7 +20,7 @@ Pulsar::StokesCylindrical::StokesCylindrical ()
   flux.get_frame()->get_label_above()->set_all ("");
 
   manage ("pa", &orientation);
-  set_viewport ( "pa", 0,1, .7,1);
+  orientation.get_frame()->set_viewport (0,1, .7,1);
 
   // shorten the y label
   orientation.get_frame()->get_y_axis()->set_label("P.A. (deg.)");
