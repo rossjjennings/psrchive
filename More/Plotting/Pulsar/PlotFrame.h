@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.20 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.21 $
+   $Date: 2006/12/02 05:12:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -41,6 +41,9 @@ namespace Pulsar {
     public:
       Interface (PlotFrame* = 0);
     };
+
+    //! Set the viewport (normalized device coordinates)
+    void set_viewport (float x0, float x1, float y0, float y1);
 
     //! Get the x-scale
     PlotScale* get_x_scale (bool allow_transpose = false);
