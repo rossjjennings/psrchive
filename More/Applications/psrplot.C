@@ -31,18 +31,21 @@ void usage ()
     "\n"
     "psrplot [options] filename[s]\n"
     "options:\n"
-    " -D device        plot device \n"
-    " -N x,y           plot panels \n"
-    "\n"
-    " -c cfg[,cfg2...] plot options \n"
-    " -j job[,job2...] preprocessing jobs \n"
-    " -J jobs          multiple preprocessing jobs in 'jobs' file \n"
-    " -p plot          plot type \n"
-    " -s style         multiple plot options in 'style' file \n"
     "\n"
     " -P               Help: list available plot types \n"
     " -C plot          Help: list options specific to 'plot' \n"
     " -A plot          Help: list common options for 'plot'\n"
+    "\n"
+    " -D device        plot device \n"
+    " -N x,y           plot panels \n"
+    " -O               overlay plots \n"
+    "\n"
+    " -p plot          plot type \n"
+    " -c cfg[,cfg2...] plot options \n"
+    " -s style         multiple plot options in 'style' file \n"
+    "\n"
+    " -j job[,job2...] preprocessing jobs \n"
+    " -J jobs          multiple preprocessing jobs in 'jobs' file \n"
     "\n"
     " -h               This help page \n"
     " -M metafile      Specify list of archive filenames in metafile \n"
@@ -62,12 +65,14 @@ void help_plot_options (const char* name);
 // -F help
 void help_frame_options (const char* name);
 
-void cpg_next ()
-{
-  cpgsvp (0.15, 0.9, 0.15, 0.9);
-  cpgpage ();
-}
+// load the vector of options into the specified plot
+void set_options (Pulsar::Plot* plot, const vector<string>& options);
 
+// load the string of options into one of the plots
+void specific_options (string optarg, vector<Plot*>& plots);
+
+// load the style file into one of the plots
+void specific_style (string optarg, vector<Plot*>& plots);
 
 int main (int argc, char** argv) try {
 
@@ -86,13 +91,16 @@ int main (int argc, char** argv) try {
   // Preprocessing jobs
   vector<string> jobs;
 
+  // Overlay plots (do not clear page between different plot types)
+  bool overlay = false;
+
   // verbosity
   bool verbose = false;
 
   int n1 = 1;
   int n2 = 1;
 
-  static char* args = "A:c:C:D:hj:J:M:N:p:Pqs:vV";
+  static char* args = "A:c:C:D:hj:J:M:N:Op:Pqs:vV";
 
   char c = 0;
   while ((c = getopt (argc, argv, args)) != -1) 
@@ -108,7 +116,10 @@ int main (int argc, char** argv) try {
       return 0;
 
     case 'c':
-      separate (optarg, options, ",");
+      if (optarg[0] == ':')
+	specific_options (optarg, plots);
+      else
+	separate (optarg, options, ",");
       break;
       
     case 'C': 
@@ -116,7 +127,10 @@ int main (int argc, char** argv) try {
       return 0;
 
     case 's':
-      loadlines (optarg, options);
+      if (optarg[0] == ':')
+	specific_style (optarg, plots);
+      else
+	loadlines (optarg, options);
       break;
 
     case 'D':
@@ -149,6 +163,10 @@ int main (int argc, char** argv) try {
 	return -1;
       }
 
+    case 'O':
+      overlay = true;
+      break;
+
     case 'q':
       Archive::set_verbosity (0);
       break;
@@ -172,30 +190,9 @@ int main (int argc, char** argv) try {
     return -1;
   } 
 
-  if (options.size()) {
-    for (unsigned iplot=0; iplot < plots.size(); iplot++) {
-
-      TextInterface::Class* tui = plots[iplot]->get_interface();
-      TextInterface::Class* fui = plots[iplot]->get_frame_interface();
-
-      for (unsigned j = 0; j < options.size(); j++) {
-	bool processed = false;
-	try {
-	  tui->process (options[j]);
-	  processed = true;
-	}
-	catch (Error& error) {}
-	if (!processed) try {
-	  fui->process (options[j]);
-	}
-	catch (Error& error) {
-	  cerr << "psrplot: Invalid option '" << options[j] << "' " 
-	       << error.get_message() << endl;
-	  return -1;
-	}	  
-      }
-    }
-  }
+  if (options.size())
+    for (unsigned iplot=0; iplot < plots.size(); iplot++)
+      set_options (plots[iplot], options);
 
   vector <string> filenames;
 
@@ -239,10 +236,15 @@ int main (int argc, char** argv) try {
     if (verbose)
       cerr << "psrplot: plotting " << filenames[ifile] << endl;
 
+    if (overlay)
+      cpgpage();
+
     for (unsigned iplot=0; iplot < plots.size(); iplot++) {
-      cpg_next();
+      if (!overlay)
+	cpgpage ();
       plots[iplot]->plot (archive);
     }
+
 
   }
   catch (Error& error) {
@@ -280,4 +282,66 @@ void help_frame_options (const char* name)
 {
   Plot* plot = factory.construct(name);
   help_options( plot->get_frame_interface() );
+}
+
+void set_options (Pulsar::Plot* plot, const vector<string>& options)
+{
+  TextInterface::Class* tui = plot->get_interface();
+  TextInterface::Class* fui = plot->get_frame_interface();
+
+  for (unsigned j = 0; j < options.size(); j++) {
+    try {
+      tui->process (options[j]);
+    }
+    catch (Error& error) {
+      try {
+	fui->process (options[j]);
+      }
+      catch (Error& error) {
+	cerr << "psrplot: Invalid option '" << options[j] << "' " 
+	     << error.get_message() << endl;
+	exit (-1);
+      }
+    }
+  }
+}
+
+// parses index from optarg and removes it from the string
+unsigned get_index (string& optarg, vector<Plot*>& plots)
+{
+  unsigned index = fromstring<unsigned> ( stringtok (optarg, ":") );
+  if (index >= plots.size()) {
+    cerr << "psrplot: invalid plot index = " << index
+	 << " nplot=" << plots.size() << endl;
+    exit(-1);
+  }
+  return index;
+}
+
+// load the string of options into one of the plots
+void specific_options (string optarg, vector<Plot*>& plots)
+{
+  // get the plot index
+  unsigned index = get_index (optarg, plots);
+
+  // separate the options
+  vector<string> options;
+  separate (optarg, options, ",");
+
+  // set them for the specified plot
+  set_options (plots[index], options);
+}
+
+// load the style file into one of the plots
+void specific_style (string optarg, vector<Plot*>& plots)
+{
+  // get the plot index
+  unsigned index = get_index (optarg, plots);
+
+  // load the options
+  vector<string> options;
+  loadlines (optarg, options);
+
+  // set them for the specified plot
+  set_options (plots[index], options);
 }
