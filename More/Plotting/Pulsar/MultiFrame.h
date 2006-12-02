@@ -7,15 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiFrame.h,v $
-   $Revision: 1.13 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.14 $
+   $Date: 2006/12/02 05:12:13 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiFrame_h
 #define __Pulsar_MultiFrame_h
 
-#include "Pulsar/PlotAttributes.h"
-#include "Pulsar/PlotFrameSize.h"
+#include "Pulsar/PlotFrame.h"
 #include <map>
 
 namespace Pulsar {
@@ -31,11 +30,17 @@ namespace Pulsar {
       Interface (MultiFrame* = 0);
     };
 
-    //! Construct a new PlotFrameSize from the given PlotFrame and map it
-    PlotFrameSize* manage (const std::string& name, PlotFrame*);
+    //! Manage the given PlotFrame
+    void manage (const std::string& name, PlotFrame*);
 
     //! Return a previously mapped plot frame
-    PlotFrameSize* get_frame (const std::string& name);
+    PlotFrame* get_frame (const std::string& name);
+
+    //! Return the x-edge
+    PlotEdge* get_x_edge() { return &x_edge; }
+
+    //! Return the y-edge
+    PlotEdge* get_y_edge() { return &y_edge; }
 
     //! Return the shared x-scale
     PlotScale* get_shared_x_scale() { return x_scale; }
@@ -61,7 +66,10 @@ namespace Pulsar {
 
   protected:
 
-    std::map< std::string, Reference::To<PlotFrameSize> > frames;
+    std::map< std::string, Reference::To<PlotFrame> > frames;
+
+    PlotEdge x_edge;
+    PlotEdge y_edge;
 
     Reference::To<PlotScale> x_scale;
     Reference::To<PlotScale> y_scale;

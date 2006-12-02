@@ -6,17 +6,14 @@
  ***************************************************************************/
 #include "Pulsar/MultiFrame.h"
 
-Pulsar::PlotFrameSize* 
-Pulsar::MultiFrame::manage (const std::string& name, PlotFrame* frame)
+void Pulsar::MultiFrame::manage (const std::string& name, PlotFrame* frame)
 {
-  Reference::To<PlotFrameSize> sized = new PlotFrameSize (frame);
-  frames[name] = sized;
-  return sized;
+  frames[name] = frame;
 }
 
-Pulsar::PlotFrameSize* Pulsar::MultiFrame::get_frame (const std::string& name)
+Pulsar::PlotFrame* Pulsar::MultiFrame::get_frame (const std::string& name)
 {
-  std::map< std::string, Reference::To<PlotFrameSize> >::iterator frame;
+  std::map< std::string, Reference::To<PlotFrame> >::iterator frame;
   frame = frames.find (name);
 
   if (frame == frames.end())
