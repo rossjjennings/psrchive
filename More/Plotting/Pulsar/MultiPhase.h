@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPhase.h,v $
-   $Revision: 1.12 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.13 $
+   $Date: 2006/12/02 05:12:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiPhase_h
@@ -36,9 +36,6 @@ namespace Pulsar {
     //! Get the text interface to the configuration attributes
     TextInterface::Class* get_interface ()
     { return new Interface (this); }
-
-    //! Manage a plot
-    void manage (const std::string& name, Plot* plot);
 
     //! Get the scale
     PhaseScale* get_scale ();

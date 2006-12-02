@@ -6,17 +6,11 @@
  ***************************************************************************/
 #include "Pulsar/MultiPhase.h"
 
+using namespace std;
+
 Pulsar::MultiPhase::MultiPhase ()
 {
-  get_frame()->set_x_scale( new PhaseScale );
-  frames.set_shared_x_scale (get_frame()->get_x_scale());
-}
-
-//! Manage a plot
-void Pulsar::MultiPhase::manage (const std::string& name, Plot* plot)
-{
-  plot->get_frame()->set_x_scale( frames.get_shared_x_scale() );
-  MultiPlot::manage (name, plot);
+  frames.set_shared_x_scale (new PhaseScale);
 }
 
 //! Get the scale
