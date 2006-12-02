@@ -12,6 +12,8 @@ Pulsar::PlotScale::Interface::Interface (PlotScale* instance)
   if (instance)
     set_instance (instance);
 
+  import( PlotEdge::Interface() );
+
   add( &PlotScale::get_range_norm,
        &PlotScale::set_range_norm,
        "range", "Normalized value range" );

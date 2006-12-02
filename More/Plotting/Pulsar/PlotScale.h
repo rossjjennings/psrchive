@@ -7,23 +7,21 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotScale.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.11 $
+   $Date: 2006/12/02 05:12:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotScale_h
 #define __Pulsar_PlotScale_h
 
-#include "TextInterface.h"
-
-#include <utility>
+#include "Pulsar/PlotEdge.h"
 
 namespace Pulsar {
 
   class Archive;
 
   //! The scale on an axis
-  class PlotScale : public Reference::Able {
+  class PlotScale : public PlotEdge {
 
   public:
 
@@ -47,6 +45,7 @@ namespace Pulsar {
 
     //! Set the world-normalized range on the axis
     void set_range_norm (const std::pair<float,float>& f) { range_norm = f; }
+
     //! Get the world-normalized range on the axis
     std::pair<float,float> get_range_norm () const { return range_norm; }
 
@@ -56,15 +55,16 @@ namespace Pulsar {
 
     //! Set the world-normalized buffer space on either side of the axis
     void set_buf_norm (float f) { buf_norm = f; }
+
     //! Get the world-normalized buffer space on either side of the axis
     float get_buf_norm () const { return buf_norm; }
 
   protected:
 
-    float minval;
-    float maxval;
     std::pair<float,float> range_norm;
     float buf_norm;
+    float minval;
+    float maxval;
 
   };
 
