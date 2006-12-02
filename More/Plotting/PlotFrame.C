@@ -36,8 +36,15 @@ Pulsar::PlotFrame::~PlotFrame ()
 {
 }
 
+#include "iopair.h"
+
 void Pulsar::PlotFrame::focus (const Archive* data)
 {
+  std::pair<float,float> xvp = get_x_scale(true)->get_viewport ();
+  std::pair<float,float> yvp = get_y_scale(true)->get_viewport ();
+
+  cpgsvp (xvp.first, xvp.second, yvp.first, yvp.second);
+
   float x_min, x_max;
   get_x_scale(true)->get_range (data, x_min, x_max);
 
@@ -157,7 +164,6 @@ void Pulsar::PlotFrame::set_label_below (PlotLabel* label)
   below = label;
 }
 
-
 void Pulsar::PlotFrame::set_publication_quality (bool flag)
 {
   PlotAttributes::set_publication_quality (flag);
@@ -166,4 +172,12 @@ void Pulsar::PlotFrame::set_publication_quality (bool flag)
     get_label_above()->set_centre(PlotLabel::unset);
   else
     get_label_above()->set_centre("$file");
+}
+
+//! Set the viewport (normalized device coordinates)
+void Pulsar::PlotFrame::set_viewport (float x0, float x1,
+				      float y0, float y1)
+{
+  get_x_scale()->set_viewport( std::pair<float,float> (x0,x1) );
+  get_y_scale()->set_viewport( std::pair<float,float> (y0,y1) );
 }
