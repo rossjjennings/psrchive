@@ -48,6 +48,13 @@ void stretch (const std::pair<T,T>& norm, T& min, T& max)
   min = min + norm.first * diff;
 }
 
+// Stretch range to normalized range
+template<typename T>
+void stretch (const std::pair<T,T>& norm, std::pair<T,T>& range)
+{
+  stretch (norm, range.first, range.second);
+}
+
 template<typename T, typename U>
 bool compair1 (const std::pair<T,U>& a, const std::pair<T,U>& b)
 {
