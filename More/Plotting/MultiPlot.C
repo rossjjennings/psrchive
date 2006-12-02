@@ -6,8 +6,11 @@
  ***************************************************************************/
 #include "Pulsar/MultiPlot.h"
 #include "Pulsar/MultiFrame.h"
+#include "iopair.h"
 
 #include <cpgplot.h>
+
+using namespace std;
 
 Pulsar::MultiPlot::MultiPlot ()
 {
@@ -21,15 +24,17 @@ TextInterface::Class* Pulsar::MultiPlot::get_frame_interface ()
 
 void Pulsar::MultiPlot::plot (const Archive* data)
 {
-  float x0, x1, y0, y1;
-  cpgqvp (0, &x0, &x1, &y0, &y1);
-
   prepare (data);
 
   std::map< std::string, Reference::To<Plot> >::iterator ptr;
   for (ptr = plots.begin(); ptr != plots.end(); ptr++) {
 
     Plot* plot = ptr->second;
+    PlotFrame* frame = plot->get_frame();
+
+    // set the viewport of the frame
+    std::pair<float,float> xvp, yvp;
+    set_viewport (frame, xvp, yvp);
 
     // prepare the plot
     prepare (plot);
@@ -37,29 +42,45 @@ void Pulsar::MultiPlot::plot (const Archive* data)
     // plot
     plot->plot(data);
 
-    // restore the viewport
-    cpgsvp (x0,x1, y0,y1);
+    // restore the viewport of the frame
+    frame->get_x_scale()->set_viewport( xvp );
+    frame->get_y_scale()->set_viewport( yvp );
 
   }
+}
+
+void Pulsar::MultiPlot::set_viewport (PlotFrame* frame, 
+				      std::pair<float,float>& sub_xvp,
+				      std::pair<float,float>& sub_yvp)
+{
+  // get the total viewport allocated to the multiple plots
+  std::pair<float,float> xvp = frames.get_x_edge()->get_viewport();
+  std::pair<float,float> yvp = frames.get_y_edge()->get_viewport();
+
+  // get the fraction allocated to this sub-plot
+  sub_xvp = frame->get_x_scale()->get_viewport();
+  sub_yvp = frame->get_y_scale()->get_viewport();
+
+  // calculate the total viewport allocated to this sub-plot
+  stretch (sub_xvp, xvp);
+  stretch (sub_yvp, yvp);
+
+  // set the viewport accordingly
+  frame->get_x_scale()->set_viewport( xvp );
+  frame->get_y_scale()->set_viewport( yvp );
 }
 
 //! Manage a plot
 void Pulsar::MultiPlot::manage (const std::string& name, Plot* plot)
 {
-  plot->set_frame( frames.manage (name, plot->get_frame()) );
+  frames.manage (name, plot->get_frame());
 
   if (frames.has_shared_x_scale())
     plot->get_frame()->set_x_scale( frames.get_shared_x_scale() );
 
+  if (frames.has_shared_y_scale())
+    plot->get_frame()->set_y_scale( frames.get_shared_y_scale() );
+
   plots[name] = plot;
 }
 
-//! Set the viewport of the named plot
-void Pulsar::MultiPlot::set_viewport (const std::string& name,
-				      float x0, float x1,
-				      float y0, float y1)
-{
-  PlotFrameSize* frame = frames.get_frame(name);
-  frame->set_x_range( std::pair<float,float> (x0,x1) );
-  frame->set_y_range( std::pair<float,float> (y0,y1) );
-}

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPlot.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.5 $
+   $Date: 2006/12/02 05:12:20 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiPlot_h
@@ -42,10 +42,6 @@ namespace Pulsar {
     //! Derived classes may wish to prepare before each plot is used
     virtual void prepare (Plot*) {}
 
-    //! Set the viewport of the named plot
-    void set_viewport (const std::string& name, 
-		       float x0, float x1, float y0, float y1);
-
   protected:
 
     //! The plot frames
@@ -53,6 +49,10 @@ namespace Pulsar {
 
     //! The plots
     std::map< std::string, Reference::To<Plot> > plots;
+
+    void set_viewport (PlotFrame* frame, 
+		       std::pair<float,float>& sub_xvp,
+		       std::pair<float,float>& sub_yvp);
 
   };
 
