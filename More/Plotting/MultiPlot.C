@@ -43,8 +43,8 @@ void Pulsar::MultiPlot::plot (const Archive* data)
     plot->plot(data);
 
     // restore the viewport of the frame
-    frame->get_x_scale()->set_viewport( xvp );
-    frame->get_y_scale()->set_viewport( yvp );
+    frame->get_x_scale(true)->set_viewport( xvp );
+    frame->get_y_scale(true)->set_viewport( yvp );
 
   }
 }
@@ -58,16 +58,16 @@ void Pulsar::MultiPlot::set_viewport (PlotFrame* frame,
   std::pair<float,float> yvp = frames.get_y_edge()->get_viewport();
 
   // get the fraction allocated to this sub-plot
-  sub_xvp = frame->get_x_scale()->get_viewport();
-  sub_yvp = frame->get_y_scale()->get_viewport();
+  sub_xvp = frame->get_x_scale(true)->get_viewport();
+  sub_yvp = frame->get_y_scale(true)->get_viewport();
 
   // calculate the total viewport allocated to this sub-plot
   stretch (sub_xvp, xvp);
   stretch (sub_yvp, yvp);
 
   // set the viewport accordingly
-  frame->get_x_scale()->set_viewport( xvp );
-  frame->get_y_scale()->set_viewport( yvp );
+  frame->get_x_scale(true)->set_viewport( xvp );
+  frame->get_y_scale(true)->set_viewport( yvp );
 }
 
 //! Manage a plot
