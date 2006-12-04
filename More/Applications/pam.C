@@ -266,7 +266,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.69 2006/10/30 13:05:18 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.70 2006/12/04 01:08:14 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -387,7 +387,7 @@ int main (int argc, char *argv[]) try {
 	  cout << "That is not a valid rotation phase" << endl;
 	  return -1;
 	}
-	if (rphase <= 0.0 || rphase >= 1.0) {
+	if (rphase <= -1.0 || rphase >= 1.0) {
 	  cout << "That is not a valid rotation phase" << endl;
 	  return -1;
 	}
