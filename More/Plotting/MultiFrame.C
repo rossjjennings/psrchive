@@ -24,7 +24,7 @@ Pulsar::PlotFrame* Pulsar::MultiFrame::get_frame (const std::string& name)
 }
 
 template<typename Iterator, typename UnaryMemberFunction, typename T>
-void for_each (Iterator begin, Iterator end,
+void foreach (Iterator begin, Iterator end,
 	       UnaryMemberFunction func, T value)
 {
   for (Iterator i = begin; i != end; i++)
@@ -35,28 +35,42 @@ void for_each (Iterator begin, Iterator end,
 void Pulsar::MultiFrame::set_character_height (float height)
 {
   character_height = height;
-  for_each( frames.begin(), frames.end(), 
-	    &PlotFrame::set_character_height, character_height );
+  foreach( frames.begin(), frames.end(), 
+	   &PlotFrame::set_character_height, character_height );
 }
 
 //! Set the character font
 void Pulsar::MultiFrame::set_character_font (int font)
 {
   character_font = font;
-  for_each( frames.begin(), frames.end(), 
-	    &PlotFrame::set_character_font, character_font );
+  foreach( frames.begin(), frames.end(), 
+	   &PlotFrame::set_character_font, character_font );
 }
 
 //! Set the line width
 void Pulsar::MultiFrame::set_line_width (int width)
 {
   line_width = width;
-  for_each( frames.begin(), frames.end(), 
-	    &PlotFrame::set_line_width, line_width );
+  foreach( frames.begin(), frames.end(), 
+	   &PlotFrame::set_line_width, line_width );
 }
 
-void Pulsar::MultiFrame::set_publication_quality (bool flag)
+template<typename Iterator, typename GeneratorMemberFunction>
+void foreach (Iterator begin, Iterator end,
+	       GeneratorMemberFunction func)
 {
-  for_each( frames.begin(), frames.end(), 
-	    &PlotFrame::set_publication_quality, flag );
+  for (Iterator i = begin; i != end; i++)
+    (i->second->*func)();
+}
+
+void Pulsar::MultiFrame::publication_quality ()
+{
+  foreach( frames.begin(), frames.end(), 
+	   &PlotFrame::publication_quality );
+}
+
+void Pulsar::MultiFrame::no_labels ()
+{
+  foreach( frames.begin(), frames.end(), 
+	   &PlotFrame::no_labels );
 }

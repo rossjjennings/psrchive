@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiFrame.h,v $
-   $Revision: 1.14 $
-   $Date: 2006/12/02 05:12:13 $
+   $Revision: 1.15 $
+   $Date: 2006/12/04 17:09:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiFrame_h
@@ -61,8 +61,11 @@ namespace Pulsar {
     //! Set the line width
     void set_line_width (int width);
  
-    //! Set publication quality character height and font and line width
-    void set_publication_quality (bool flag = true);
+    //! Set publication_quality in all sub-plots
+    void publication_quality ();
+
+    //! Set no_labels in all sub-plots
+    void no_labels ();
 
   protected:
 
