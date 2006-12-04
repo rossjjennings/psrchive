@@ -269,7 +269,7 @@ void help_plot_types ()
 
 void help_options (TextInterface::Class* tui)
 {
-  cout << tui->help() << endl;
+  cout << tui->help(true) << endl;
 }
 
 void help_plot_options (const char* name)
