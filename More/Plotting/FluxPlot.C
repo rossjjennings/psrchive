@@ -195,3 +195,22 @@ void Pulsar::FluxPlot::plot_error_box (const Archive* data)
   cpgdraw (x1,y2);
   cpgdraw (x1,y1);
 }
+
+#include "Pulsar/InfoLabel.h"
+
+void Pulsar::FluxPlot::set_info_label (bool flag)
+{
+  if (flag) {
+    info_label = new InfoLabel (this);
+    get_frame()->set_label_above( info_label );
+    get_frame()->get_label_below()->set_all(PlotLabel::unset);
+  }
+  else
+    get_frame()->set_label_above( new PlotLabel );
+}
+
+bool Pulsar::FluxPlot::get_info_label () const
+{
+  return info_label;
+}
+

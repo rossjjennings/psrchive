@@ -30,6 +30,10 @@ Pulsar::FluxPlot::Interface::Interface (FluxPlot* instance)
        &FluxPlot::set_auto_zoom,
        "zoom", "Auto zoom on on-pulse" );
 
+  add( &FluxPlot::get_info_label,
+       &FluxPlot::set_info_label,
+       "info", "Use informative label" );
+
   add( &FluxPlot::get_plot_error_box,
        &FluxPlot::set_plot_error_box,
        "ebox", "Plot error box" );

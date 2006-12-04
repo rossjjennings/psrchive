@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.20 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.21 $
+   $Date: 2006/12/04 17:09:48 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -21,6 +21,7 @@
 namespace Pulsar {
 
   class Profile;
+  class InfoLabel;
 
   //! Plots flux profiles
   class FluxPlot : public PhasePlot {
@@ -79,6 +80,10 @@ namespace Pulsar {
     void set_auto_zoom (float zoom) { auto_zoom = zoom; }
     float get_auto_zoom () const { return auto_zoom; }
 
+    //! Use an informative label above the plot
+    void set_info_label (bool flag = true);
+    bool get_info_label () const;
+
     //! Plot an error box on the baseline
     void set_plot_error_box (bool flag = true) { plot_ebox = flag; }
     bool get_plot_error_box () const { return plot_ebox; }
@@ -114,6 +119,9 @@ namespace Pulsar {
     float auto_zoom;
 
     unsigned original_nchan;
+
+    Reference::To<InfoLabel> info_label;
+
   };
 
 }
