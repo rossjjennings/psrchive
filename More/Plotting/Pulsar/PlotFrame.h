@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.22 $
-   $Date: 2006/12/04 01:08:21 $
+   $Revision: 1.23 $
+   $Date: 2006/12/04 17:09:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -61,11 +61,11 @@ namespace Pulsar {
     //! Get the x-axis
     PlotAxis* get_y_axis (bool allow_transpose = false);
 
-    //! Set publication quality character height and font and line width
-    void set_publication_quality (bool flag = true);
+    //! Remove labels from above the plot
+    void publication_quality ();
 
-    //! Set to false to disable all labels
-    void set_plot_labels (bool flag = true);
+    //! Remove all labels
+    void no_labels ();
 
     //! Get the above-frame label
     PlotLabel* get_label_above () { return above; }

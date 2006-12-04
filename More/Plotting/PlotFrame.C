@@ -164,30 +164,25 @@ void Pulsar::PlotFrame::set_label_below (PlotLabel* label)
   below = label;
 }
 
-void Pulsar::PlotFrame::set_publication_quality (bool flag)
+void Pulsar::PlotFrame::publication_quality ()
 {
-  PlotAttributes::set_publication_quality (flag);
+  PlotAttributes::publication_quality ();
 
-  if (flag)
-    get_label_above()->set_centre(PlotLabel::unset);
-  else
-    get_label_above()->set_centre("$file");
+  get_label_above()->set_all(PlotLabel::unset);
 }
 
-void Pulsar::PlotFrame::set_plot_labels (bool flag)
+void Pulsar::PlotFrame::no_labels ()
 {
-  PlotAttributes::set_plot_labels (flag);
+  PlotAttributes::no_labels ();
  
-  if (!flag) {
-    get_x_axis()->rem_pgbox_opt('N');
-    get_y_axis()->rem_pgbox_opt('N');
-
-    get_x_axis()->set_label(" ");
-    get_y_axis()->set_label(" ");
-
-    get_label_above()->set_all(PlotLabel::unset);
-    get_label_below()->set_all(PlotLabel::unset);
-  }
+  get_x_axis()->rem_pgbox_opt('N');
+  get_y_axis()->rem_pgbox_opt('N');
+  
+  get_x_axis()->set_label(" ");
+  get_y_axis()->set_label(" ");
+  
+  get_label_above()->set_all(PlotLabel::unset);
+  get_label_below()->set_all(PlotLabel::unset);
 }
 
 //! Set the viewport (normalized device coordinates)
