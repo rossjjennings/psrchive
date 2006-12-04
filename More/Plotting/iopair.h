@@ -7,6 +7,14 @@
 #include <utility>
 #include <iostream>
 
+namespace std {
+  template<typename T>
+    class numeric_limits< std::pair<T,T> > {
+    public:
+    static const int digits10 = numeric_limits<T>::digits10;
+  };
+}
+
 template<class T, class U>
 std::ostream& operator << (std::ostream& os, std::pair<T,U> vals)
 {
