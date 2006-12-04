@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.21 $
-   $Date: 2006/12/02 05:12:28 $
+   $Revision: 1.22 $
+   $Date: 2006/12/04 01:08:21 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -63,6 +63,9 @@ namespace Pulsar {
 
     //! Set publication quality character height and font and line width
     void set_publication_quality (bool flag = true);
+
+    //! Set to false to disable all labels
+    void set_plot_labels (bool flag = true);
 
     //! Get the above-frame label
     PlotLabel* get_label_above () { return above; }
