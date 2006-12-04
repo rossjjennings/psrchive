@@ -22,9 +22,9 @@ Pulsar::StokesPlot::Interface::Interface (StokesPlot* instance)
 
   add( &StokesPlot::get_plot_colours,
        &StokesPlot::set_plot_colours,
-       "sci", "PGPLOT colour index for each value" );
+       "ci", "PGPLOT colour index for each value" );
 
   add( &StokesPlot::get_plot_lines,
        &StokesPlot::set_plot_lines,
-       "sls", "PGPLOT line style for each value" );
+       "ls", "PGPLOT line style for each value" );
 }
