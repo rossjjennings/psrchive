@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotAttributes.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.4 $
+   $Date: 2006/12/04 01:08:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotAttributes_h
@@ -50,6 +50,14 @@ namespace Pulsar {
     //! Set publication quality character height and font and line width
     virtual void set_publication_quality (bool flag = true);
     bool get_publication_quality () const { return false; }
+
+    //! Set to false to disable all labels
+    virtual void set_plot_labels (bool flag = true);
+    bool get_plot_labels () const { return true; }
+
+    //! Apply a named set of commands (a shortcut)
+    virtual void apply_set (const std::string& name);
+    std::string get_applied () const { return "none"; }
 
   protected:
 

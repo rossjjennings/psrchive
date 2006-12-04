@@ -31,3 +31,19 @@ void Pulsar::PlotAttributes::set_publication_quality (bool flag)
     set_line_width (1);
   }
 }
+
+void Pulsar::PlotAttributes::set_plot_labels (bool flag)
+{
+}
+
+//! Apply a named set of commands (a shortcut)
+void Pulsar::PlotAttributes::apply_set (const std::string& name)
+{
+  if (name == "pub")
+    set_publication_quality (true);
+  else if (name == "blank")
+    set_plot_labels (false);
+  else
+    throw Error (InvalidParam, "Pulsar::PlotAttributes::apply_set",
+		 "unrecognized set name '" + name + "'");
+}

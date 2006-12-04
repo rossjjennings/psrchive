@@ -23,7 +23,7 @@ Pulsar::PlotAttributes::Interface::Interface (PlotAttributes* instance)
        &PlotAttributes::set_line_width,
        "lw", "Line width" );
 
-  add( &PlotAttributes::get_publication_quality,
-       &PlotAttributes::set_publication_quality,
-       "pub", "Publication quality" );
+  add( &PlotAttributes::get_applied,
+       &PlotAttributes::apply_set,
+       "set", "Apply a shortcut (set of options)" );
 }
