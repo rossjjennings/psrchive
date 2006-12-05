@@ -112,7 +112,9 @@ test_sum_SOURCES		= test_sum.C
 
 INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@
 
-LDADD = libgenutil.la $(top_builddir)/Util/units/libunits.la
+LDADD = libgenutil.la \
+	$(top_builddir)/Util/units/libunits.la \
+	$(top_builddir)/Util/third/libthird.la
 
 include $(top_srcdir)/config/Makefile.include
 
