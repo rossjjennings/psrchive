@@ -7,11 +7,14 @@
 #include "FTransform.h"
 #include "BoxMuller.h"
 
+#include <iostream>
 #include <stdio.h>
 #include <math.h>
 
-int main (int argc, char** argv)
-{
+using namespace std;
+
+int main (int argc, char** argv) try {
+
   fprintf (stderr, "Test of real-to-complex and complex-to-real ...\n");
 
   int idat, ndat = 16 * 1024;  // 16kpt set of random, Gaussian noise
@@ -79,6 +82,11 @@ int main (int argc, char** argv)
     }
   }
 
+  cerr << "test_real_complex PASS" << endl;
   return 0;
+}
+catch (Error& e) {
+  cerr << "test_real_complex ERROR" << e << endl;
+  return -1;
 }
 
