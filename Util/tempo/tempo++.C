@@ -277,6 +277,10 @@ void Tempo::tempo (const string& arguments, const string& input)
   int retries = 3;
   string errstr;
 
+  if (!system(NULL))
+    throw Error (InvalidState, "Tempo::tempo",
+                 "shell not available; insufficient resources");
+
   while (retries) {    
 
     if (chdir (get_directory().c_str()) != 0)
