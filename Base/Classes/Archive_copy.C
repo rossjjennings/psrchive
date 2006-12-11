@@ -43,10 +43,16 @@ void Pulsar::Archive::copy (const Archive& archive,
     get_Integration(isub) -> archive = this;
   }
   
-  if (archive.ephemeris)
+  if (archive.ephemeris) {
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::copy ephemeris" << endl;
     ephemeris = new psrephem (*(archive.ephemeris));
-  else
+  } 
+  else {
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::copy no ephemeris" << endl;
     ephemeris = 0;
+  }
 
   if (archive.model)
     model = new polyco (*(archive.model));
@@ -58,21 +64,28 @@ void Pulsar::Archive::copy (const Archive& archive,
   set_nbin( archive.get_nbin() );
   set_nchan( archive.get_nchan() );
   set_npol( archive.get_npol() );
+
   set_telescope_code( archive.get_telescope_code() );
+
   set_state( archive.get_state() );
   set_scale( archive.get_scale() );
   set_type( archive.get_type() );
+
   set_source( archive.get_source() );
   set_coordinates( archive.get_coordinates() );
-  set_bandwidth( archive.get_bandwidth() );
+
   set_centre_frequency( archive.get_centre_frequency() );
+  set_bandwidth( archive.get_bandwidth() );
+
   set_dispersion_measure( archive.get_dispersion_measure() );
-  
-  set_faraday_corrected( archive.get_faraday_corrected() );
   set_dedispersed( archive.get_dedispersed() );
+
+  set_rotation_measure( archive.get_rotation_measure() );
+  set_faraday_corrected( archive.get_faraday_corrected() );
+
   set_poln_calibrated( archive.get_poln_calibrated() );
 
-	set_filename( archive.get_filename());
+  set_filename( archive.get_filename() );
 
   // Using a Reference::To<Extension> ensures that the cloned
   // Extension will be deleted if the derived class chooses not to
