@@ -68,14 +68,27 @@ SWIN_DEFAULT_PARTIAL_SPECIALIZATION
 SWIN_COMPLEX_TEMPLATE
 
 #
-# Set up for standard pulsar installation
+# Set up to use the standard package installation directory
 #
-CPPFLAGS="-I/usr/local/include $CPPFLAGS"
-LDFLAGS="-L/usr/local/lib $LDFLAGS"
+if test -d /usr/local; then
+  CPPFLAGS="-I/usr/local/include $CPPFLAGS"
+  LDFLAGS="-L/usr/local/lib $LDFLAGS"
+fi
 
-if test "$PSRHOME"; then
- CPPFLAGS="-I$PSRHOME/packages/$LOGIN_ARCH/include $CPPFLAGS"
- LDFLAGS="-L$PSRHOME/packages/$LOGIN_ARCH/lib $LDFLAGS"
+#
+# Set up to use the fink package installation directory
+#
+if test -d /sw; then
+  CPPFLAGS="-I/sw/include $CPPFLAGS"
+  LDFLAGS="-L/sw/lib $LDFLAGS"
+fi
+
+#
+# Set up to use the pulsar group package installation directory
+#
+if test -d $PSRHOME/packages/$LOGIN_ARCH; then
+  CPPFLAGS="-I$PSRHOME/packages/$LOGIN_ARCH/include $CPPFLAGS"
+  LDFLAGS="-L$PSRHOME/packages/$LOGIN_ARCH/lib $LDFLAGS"
 fi
 
 #
