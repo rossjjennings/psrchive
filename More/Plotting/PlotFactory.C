@@ -28,28 +28,28 @@
 Pulsar::PlotFactory::PlotFactory ()
 {
   add ( new PlotFactory::Advocate<ProfilePlot>
-	('p', "flux", "Single plot of flux") );
+	('D', "flux", "Single plot of flux") );
 
   add ( new PlotFactory::Advocate<StokesPlot>
-	('S', "stokes", "Stokes parameters") );
+	('s', "stokes", "Stokes parameters") );
 
   add ( new PlotFactory::Advocate<StokesCylindrical>
-	('c', "Scyl",   "Stokes; vector in cylindrical") );
+	('S', "Scyl",   "Stokes; vector in cylindrical") );
 
   add ( new PlotFactory::Advocate<StokesSpherical>
-	('s', "Ssph",   "Stokes; vector in spherical") );
+	('m', "Ssph",   "Stokes; vector in spherical") );
 
   add ( new PlotFactory::Advocate<StokesFluctPlot>
-	('f', "Sfluct", "Stokes; fluctuation power spectra") );
+	('U', "Sfluct", "Stokes; fluctuation power spectra") );
 
   add ( new PlotFactory::Advocate<PhaseVsFrequency>
-	('F', "freq", "Phase vs. frequency image of flux") );
+	('G', "freq", "Phase vs. frequency image of flux") );
 
   add ( new PlotFactory::Advocate<PhaseVsFrequencyPlus>
-	('+', "freq+", "freq + integrated profile and spectrum") );
+	('F', "freq+", "freq + integrated profile and spectrum") );
 
   add ( new PlotFactory::Advocate<PhaseVsTime>
-	('T', "time", "Phase vs. time image of flux") );
+	('Y', "time", "Phase vs. time image of flux") );
 
   add ( new PlotFactory::Advocate<PosAngPlot>
 	('o', "pa", "Orientation (Position) angle") );
