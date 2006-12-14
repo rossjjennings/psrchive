@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/TemporaryFile.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/12/14 22:50:29 $
+   $Revision: 1.2 $
+   $Date: 2006/12/14 23:08:05 $
    $Author: straten $ */
 
 #ifndef __TemporaryFile_h
@@ -22,6 +22,9 @@ class TemporaryFile {
 
  public:
 
+  //! Abort after processing any signals
+  static bool abort;
+  
   //! Construct a temporary file with the specified basename
   TemporaryFile (const std::string& basename);
 

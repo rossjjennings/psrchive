@@ -17,6 +17,9 @@ using namespace std;
 //! Set true when the signal handler has been installed
 bool TemporaryFile::signal_handler_installed = false;
 
+//! Abort after processing any signals
+bool TemporaryFile::abort = true;
+
 void TemporaryFile::install_signal_handler ()
 {
   struct sigaction sa;
@@ -27,6 +30,8 @@ void TemporaryFile::install_signal_handler ()
   // "man 7 signal" to see which signals are being handled
   for (unsigned i=1; i<16; i++)
     sigaction (i, &sa, NULL);
+
+  signal_handler_installed = true;
 }
 
 void remove_instance (TemporaryFile* file)
@@ -35,9 +40,14 @@ void remove_instance (TemporaryFile* file)
 }
 
 //! The signal handler ensures that all temporary files are removed
-void TemporaryFile::signal_handler (int)
+void TemporaryFile::signal_handler (int sig)
 {
+  cerr << strsignal(sig) << " signal received." << endl;
+
   for_each (instances.begin(), instances.end(), remove_instance);
+
+  if (abort)
+    ::abort ();
 }
 
 //! The current temporary file instances
@@ -55,7 +65,7 @@ TemporaryFile::TemporaryFile (const string& basename)
     throw Error (FailedSys, "TemporaryFile",
 		 "failed mkstemp(" + filename + ")");
 
-  if (signal_handler_installed)
+  if (!signal_handler_installed)
     install_signal_handler ();
 
   removed = false;
