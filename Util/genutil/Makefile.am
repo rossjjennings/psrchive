@@ -31,9 +31,11 @@ include_HEADERS = \
         strutil.h \
         Telescope.h \
         templates.h \
+	TemporaryFile.h \
         Types.h \
         typeutil.h \
-        utc.h
+        utc.h \
+	VirtualMemory.h
 
 
 libgenutil_la_SOURCES = \
@@ -77,9 +79,11 @@ libgenutil_la_SOURCES = \
         stringtok.C \
         strutil.C \
         Telescope.C \
+	TemporaryFile.C \
 	time_string.C \
         Types.C \
-        utc.c
+        utc.c \
+	VirtualMemory.C
 
 if HAVE_PGPLOT
 
@@ -93,7 +97,7 @@ bin_PROGRAMS = getMJD
 getMJD_SOURCES = getMJD.C
 
 TESTS = test_coord test_Cartesian test_MJD test_ja98 \
-	test_endian test_environ test_sum
+	test_endian test_environ test_sum test_TemporaryFile
 
 check_PROGRAMS = $(TESTS) test_CommandParser test_Angle
 
@@ -104,6 +108,7 @@ test_CommandParser_SOURCES      = test_CommandParser.C
 test_CommandParser_LDADD	= $(LDADD) @READLINE_LIBS@
 test_ja98_SOURCES		= test_ja98.C
 test_sum_SOURCES		= test_sum.C
+test_TemporaryFile_SOURCES	= test_TemporaryFile.C
 
 #############################################################################
 #
