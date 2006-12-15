@@ -552,7 +552,7 @@ void Pulsar::PolnProfile::get_rss (Profile* rss,
 
   for (ibin=0; ibin<nbin; ibin++)
     if (amps[ibin] < 0.0)
-      amps[ibin] = 0.0;
+      amps[ibin] = -sqrt(-amps[ibin]);
     else
       amps[ibin] = sqrt(amps[ibin]);
 }
