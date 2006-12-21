@@ -54,3 +54,14 @@ void Pulsar::StokesPlot::get_profiles (const Archive* data)
   }
 }
 
+extern bool pav_backward_compatibility;
+
+void Pulsar::StokesPlot::set_pav_bias (bool flag)
+{
+  pav_backward_compatibility = flag;
+}
+
+bool Pulsar::StokesPlot::get_pav_bias () const
+{
+  return pav_backward_compatibility;
+}

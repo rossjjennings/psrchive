@@ -513,6 +513,8 @@ void Pulsar::PolnProfile::invint (Profile* invint) const
   invint->set_weight ( get_Profile(0)->get_centre_frequency() );
 }
 
+bool pav_backward_compatibility = false;
+
 /*!
   rss stands for root-sum-squared
 
@@ -547,14 +549,22 @@ void Pulsar::PolnProfile::get_rss (Profile* rss,
       amps[ibin] += a[ibin]*a[ibin];
   }
 
-  float min_phase = rss->find_min_phase();
-  rss->offset(-rss->mean (min_phase));
+  if (!pav_backward_compatibility) {
+    float min_phase = rss->find_min_phase();
+    rss->offset(-rss->mean (min_phase));
+  }
 
   for (ibin=0; ibin<nbin; ibin++)
     if (amps[ibin] < 0.0)
       amps[ibin] = -sqrt(-amps[ibin]);
     else
       amps[ibin] = sqrt(amps[ibin]);
+
+  if (pav_backward_compatibility) {
+    float min_phase = rss->find_min_phase();
+    rss->offset(-rss->mean (min_phase));
+  }
+
 }
 
 void Pulsar::PolnProfile::get_polarized (Profile* polarized) const

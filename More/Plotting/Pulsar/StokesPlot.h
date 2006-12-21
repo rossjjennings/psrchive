@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesPlot.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.10 $
+   $Date: 2006/12/21 16:10:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesPlot_h
@@ -49,6 +49,10 @@ namespace Pulsar {
     //! Set the line style for each value plotted
     void set_plot_lines (const std::string& plot) { plot_lines = plot; }
     std::string get_plot_lines () const { return plot_lines; }
+
+    //! Correct the bias to L and p as is done in pav
+    void set_pav_bias (bool flag);
+    bool get_pav_bias () const;
 
   protected:
 
