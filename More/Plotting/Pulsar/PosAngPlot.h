@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PosAngPlot.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.10 $
+   $Date: 2006/12/21 15:07:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PosAngPlot_h
@@ -22,6 +22,9 @@ namespace Pulsar {
   class PosAngPlot : public AnglePlot {
 
   public:
+
+    //! Default constructor
+    PosAngPlot ();
 
     //! Return the default label for the y axis
     std::string get_ylabel (const Archive* data);

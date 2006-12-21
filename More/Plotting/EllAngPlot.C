@@ -8,6 +8,11 @@
 #include "Pulsar/Polarization.h"
 #include "Pulsar/PolnProfile.h"
 
+Pulsar::EllAngPlot::EllAngPlot ()
+{
+  set_span (90.0);
+}
+
 void Pulsar::EllAngPlot::get_angles (const Archive* data)
 {
   Reference::To<const PolnProfile> profile = get_Stokes (data,isubint,ichan);

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/EllAngPlot.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.7 $
+   $Date: 2006/12/21 15:07:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_EllAngPlot_h
@@ -22,6 +22,9 @@ namespace Pulsar {
   class EllAngPlot : public AnglePlot {
 
   public:
+
+    //! Default constructor
+    EllAngPlot ();
 
     //! Return the default label for the y axis
     std::string get_ylabel (const Archive* data);
