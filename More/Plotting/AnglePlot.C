@@ -17,8 +17,8 @@
 Pulsar::AnglePlot::AnglePlot()
 {
   error_bars = true;
-  threshold = 3.0;
-  range = 0.0;
+  threshold = 4.0;
+  span = 0.0;
 
   isubint = 0;
   ichan = 0;
@@ -41,9 +41,9 @@ void Pulsar::AnglePlot::prepare (const Archive* data)
   float min = 0;
   float max = 0;
 
-  if (range) {
+  if (span) {
     // keep pgplot from drawing the 90 or 180 at the edge
-    float half = 0.5 * range - 0.0001;
+    float half = 0.5 * span - 0.0001;
     min = -half;
     max = half;
   }
@@ -66,8 +66,8 @@ void Pulsar::AnglePlot::draw (const Archive *data)
   float offset = 0;
   unsigned times = 1;
 
-  if (range) {
-    offset = -range;
+  if (span) {
+    offset = -span;
     times = 3;
   }
 
@@ -81,7 +81,7 @@ void Pulsar::AnglePlot::draw (const Archive *data)
 	else
 	  cpgpt1 (phases[ibin], angles[ibin].get_value() + offset, 17);
   
-    offset += range;
+    offset += span;
 
   }
 
