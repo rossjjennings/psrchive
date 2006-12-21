@@ -31,8 +31,8 @@ Pulsar::AnglePlot::Interface::Interface (AnglePlot* instance)
        &AnglePlot::set_threshold,
        "cut", "Plot only points with R > cut * sigma_R" );
 
-  add( &AnglePlot::get_range,
-       &AnglePlot::set_range,
-       "range", "Range of angles in plot (degrees)" );
+  add( &AnglePlot::get_span,
+       &AnglePlot::set_span,
+       "span", "Span of angles in plot (degrees)" );
 
 }

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/AnglePlot.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.12 $
+   $Date: 2006/12/21 15:07:48 $
    $Author: straten $ */
 
 #ifndef __Pulsar_AnglePlot_h
@@ -65,9 +65,9 @@ namespace Pulsar {
     void set_threshold (float t) { threshold = t; }
     float get_threshold () const { return threshold; }
 
-    //! range of value in degrees
-    void set_range (float t) { range = t; }
-    float get_range () const { return range; }
+    //! span of value in degrees
+    void set_span (float t) { span = t; }
+    float get_span () const { return span; }
 
   protected:
 
@@ -77,8 +77,8 @@ namespace Pulsar {
     //! Noise threshold
     float threshold;
 
-    //! Range of values in degrees
-    float range;
+    //! Span of values in degrees
+    float span;
 
     //! The angles
     std::vector< Estimate<double> > angles;
