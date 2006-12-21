@@ -224,14 +224,14 @@ int main (int argc, char** argv) try {
     Reference::To<Archive> archive;
     archive = Archive::load( filenames[ifile] );
 
-    archive->remove_baseline();
-
     if (jobs.size()) {
       if (verbose)
 	cerr << "psrplot: preprocessing " << filenames[ifile] << endl;
       preprocessor.set(archive);
       preprocessor.script(jobs);
     }
+
+    archive->remove_baseline();
 
     if (verbose)
       cerr << "psrplot: plotting " << filenames[ifile] << endl;
