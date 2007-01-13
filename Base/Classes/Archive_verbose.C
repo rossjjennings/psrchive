@@ -14,15 +14,14 @@
 
 void Pulsar::Archive::set_verbosity (unsigned level)
 {
-  // level 4
-  Profile::verbose  = (level >= 4);
-
   // level 3
-  Integration::verbose = (level >= 3);
-
+  Profile::verbose  = (level >= 3);
   Tempo::verbose    = (level >= 3);
   psrephem::verbose = (level >= 3);
   polyco::verbose   = (level >= 3);
+
+  // level 2
+  Integration::verbose = (level >= 2);
 
   // all levels
   Archive::verbose = level;
