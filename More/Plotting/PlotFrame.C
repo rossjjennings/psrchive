@@ -40,16 +40,19 @@ Pulsar::PlotFrame::~PlotFrame ()
 
 void Pulsar::PlotFrame::focus (const Archive* data)
 {
+  get_x_scale(true)->init (data);
+  get_y_scale(true)->init (data);
+
   std::pair<float,float> xvp = get_x_scale(true)->get_viewport ();
   std::pair<float,float> yvp = get_y_scale(true)->get_viewport ();
 
   cpgsvp (xvp.first, xvp.second, yvp.first, yvp.second);
 
   float x_min, x_max;
-  get_x_scale(true)->get_range (data, x_min, x_max);
+  get_x_scale(true)->get_range (x_min, x_max);
 
   float y_min, y_max;
-  get_y_scale(true)->get_range (data, y_min, y_max);
+  get_y_scale(true)->get_range (y_min, y_max);
 
   if (Plot::verbose)
     cerr << "Pulsar::PlotFrame::focus xmin=" << x_min << " xmax=" << x_max
@@ -66,6 +69,18 @@ void Pulsar::PlotFrame::draw_axes (const Archive* data)
 {
   cpgsls (1);
   cpgsci (1);
+
+  float x_min, x_max;
+  get_x_scale(true)->get_range_external (x_min, x_max);
+
+  float y_min, y_max;
+  get_y_scale(true)->get_range_external (y_min, y_max);
+
+  if (Plot::verbose)
+    cerr << "Pulsar::PlotFrame::draw_axes xmin=" << x_min << " xmax=" << x_max
+	 << " ymin=" << y_min << " ymax=" << y_max << endl;
+
+  cpgswin (x_min, x_max, y_min, y_max);
 
   if (Plot::verbose)
     cerr << "Pulsar::PlotFrame::draw_axes"

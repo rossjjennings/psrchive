@@ -16,6 +16,8 @@ void Pulsar::SimplePlot::plot (const Archive* data)
     cerr << "Pulsar::SimplePlot::plot focus" << endl;
   get_frame()->focus (data);
 
+  draw (data);
+
   if (verbose)
     cerr << "Pulsar::SimplePlot::plot draw axes" << endl;
   get_frame()->draw_axes (data);
@@ -27,7 +29,5 @@ void Pulsar::SimplePlot::plot (const Archive* data)
   if (verbose)
     cerr << "Pulsar::SimplePlot::plot decorate frame" << endl;
   get_frame()->decorate (data);
-
-  draw (data);
 }
 

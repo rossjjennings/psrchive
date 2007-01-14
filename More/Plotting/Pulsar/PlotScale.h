@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotScale.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/12/02 05:12:31 $
+   $Revision: 1.12 $
+   $Date: 2007/01/14 22:52:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotScale_h
@@ -34,17 +34,26 @@ namespace Pulsar {
       Interface (PlotScale* = 0);
     };
 
+    //! Initialize internal attributes according to Archive data
+    virtual void init (const Archive*);
+
     //! Set the minimum and maximum value in the data
-    virtual void set_minmax (float min, float max);
+    void set_minmax (float min, float max);
 
-    //! Return min and max scaled according to range_norm and buf_norm
-    virtual void get_range (const Archive*, float& min, float& max) const;
+    //! Get the minimum and maximum value in the data
+    void get_minmax (float& min, float& max) const;
 
-    //! Return 0 < imin and imax < n, scaled according to range_norm
-    virtual void get_range (unsigned n, unsigned& imin, unsigned& imax) const;
+    //! Return min and max scaled according to zoom attributes
+    void get_range (float& min, float& max) const;
+
+    //! Return 0 < imin and imax < n, scaled according to zoom attributes
+    void get_range (unsigned n, unsigned& imin, unsigned& imax) const;
+
+    //! Return min and max scaled according to zoom attributes
+    void get_range_external (float& min, float& max) const;
 
     //! Set the world-normalized range on the axis
-    void set_range_norm (const std::pair<float,float>& f) { range_norm = f; }
+    void set_range_norm (const std::pair<float,float>& f);
 
     //! Get the world-normalized range on the axis
     std::pair<float,float> get_range_norm () const { return range_norm; }
@@ -59,10 +68,28 @@ namespace Pulsar {
     //! Get the world-normalized buffer space on either side of the axis
     float get_buf_norm () const { return buf_norm; }
 
+    //! Set the world coordinate range in the viewport
+    void set_world (const std::pair<float,float>& f);
+
+    //! Get the world coordinate range in the viewport
+    std::pair<float,float> get_world () const { return world; }
+
+    //! Set the world coordinate range printed on the axis
+    void set_world_external (const std::pair<float,float>& f);
+
+    //! Get the world coordinate range printed on the axis
+    std::pair<float,float> get_world_external () const;
+
   protected:
 
+    std::pair<float,float> world;
+
     std::pair<float,float> range_norm;
+
+    std::pair<float,float> world_external;
+
     float buf_norm;
+
     float minval;
     float maxval;
 
