@@ -12,13 +12,12 @@ Pulsar::FrequencyScale::FrequencyScale ()
 {
 }
 
-void Pulsar::FrequencyScale::get_range (const Archive* data,
-					float& min, float& max) const
+void Pulsar::FrequencyScale::init (const Archive* data)
 {
   double freq = data->get_centre_frequency();
   double bw = data->get_bandwidth();
-  const_cast<FrequencyScale*>(this)->set_minmax (freq-0.5*bw, freq+0.5*bw);
-  PlotScale::get_range (data, min, max);
+ 
+  set_minmax (freq - 0.5*bw, freq + 0.5*bw);
 }
 
 void Pulsar::FrequencyScale::get_range (const Archive* data, 

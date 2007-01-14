@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseScale.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.12 $
+   $Date: 2007/01/14 22:52:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseScale_h
@@ -37,11 +37,8 @@ namespace Pulsar {
       Interface (PhaseScale* = 0);
     };
 
-    //! Disable set_minmax
-    void set_minmax (float min, float max);
-
-    //! Return the min and max in the current units
-    void get_range (const Archive*, float& min, float& max) const;
+    //! Initialize internal attributes according to Archive data
+    void init (const Archive*);
 
     //! Return the min and max as the phase bin index
     void get_range (const Archive*, unsigned& min, unsigned& max) const;

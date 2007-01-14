@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FrequencyScale.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.5 $
+   $Date: 2007/01/14 22:52:48 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FrequencyScale_h
@@ -28,8 +28,8 @@ namespace Pulsar {
     //! Default constructor
     FrequencyScale ();
 
-    //! Return the min and max in the current units
-    void get_range (const Archive*, float& min, float& max) const;
+    //! Initialize internal attributes according to Archive data
+    void init (const Archive*);
 
     //! Return the min and max as the phase bin index
     void get_range (const Archive*, unsigned& min, unsigned& max) const;

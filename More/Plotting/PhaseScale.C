@@ -14,22 +14,17 @@ Pulsar::PhaseScale::PhaseScale ()
   origin_norm = 0;
 }
 
-void Pulsar::PhaseScale::set_minmax (float min, float max)
+void Pulsar::PhaseScale::init (const Archive* data)
 {
-}
-
-void Pulsar::PhaseScale::get_range (const Archive* data,
-				    float& min, float& max) const
-{
-  PlotScale::get_range (data, min, max);
-
   float scale = get_scale (data);
 
-  min += origin_norm;
-  max += origin_norm;
+  float min = origin_norm;
+  float max = 1 + origin_norm;
 
   min *= scale;
   max *= scale;
+
+  set_minmax (min, max);
 }
 
 void Pulsar::PhaseScale::get_range (const Archive* data, 
