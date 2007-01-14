@@ -47,15 +47,15 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
 
   float x_min = 0.0;
   float x_max = 1.0;
-  get_frame()->get_x_scale()->PlotScale::set_minmax (x_min, x_max);
-  get_frame()->get_x_scale()->PlotScale::get_range (data, x_min, x_max);
+  get_frame()->get_x_scale()->PlotScale::get_minmax (x_min, x_max);
+  //get_frame()->get_x_scale()->PlotScale::get_range (x_min, x_max);
 
   float y_min = 0.0;
   float y_max = 1.0;
-  get_frame()->get_y_scale()->PlotScale::set_minmax (y_min, y_max);
-  get_frame()->get_y_scale()->PlotScale::get_range (data, y_min, y_max);
+  get_frame()->get_y_scale()->PlotScale::get_minmax (y_min, y_max);
+  //get_frame()->get_y_scale()->PlotScale::get_range (y_min, y_max);
 
-  cpgswin (x_min, x_max, y_min, y_max);
+  //cpgswin (x_min, x_max, y_min, y_max);
 
   // Fill the image data
   unsigned nbin = data->get_nbin();
@@ -90,22 +90,32 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   // X = TR(0) + TR(1)*I + TR(2)*J
   // Y = TR(3) + TR(4)*I + TR(5)*J
 
-  float x_res = 1.0/nbin;
-  float y_res = 1.0/nrow;
+  float x_res = (x_max-x_min)/nbin;
+  float y_res = (y_max-y_min)/nrow;
 
-  float trf[6] = { -0.5*x_res, x_res, 0.0,
-		   -0.5*y_res, 0.0, y_res };
+  float trf[6] = { x_min-0.5*x_res, x_res, 0.0,
+		   y_min-0.5*y_res, 0.0, y_res };
 
-  
   get_z_scale()->set_minmax (min, max);
-  get_z_scale()->get_range (data, min, max);
+  get_z_scale()->get_range (min, max);
 
   cpgimag(&plotarray[0], nbin, nrow, 1, nbin, 1, nrow, min, max, trf);
 
-  if (get_frame()->get_y_axis()->get_alternate())  {
-    y_min *= nrow;
-    y_max *= nrow;
-    cpgswin (x_min, x_max, y_min, y_max);
+  if (get_frame()->get_y_axis()->get_alternate()) {
+
+    float min, max;
+    get_frame()->get_y_scale()->PlotScale::get_range (min, max);
+
+    float length = y_max - y_min;
+
+    min = (min - y_min) / length;
+    max = (max - y_min) / length;
+
+    min *= nrow;
+    max *= nrow;
+
+    cpgswin (x_min, x_max, min, max);
+
     cpgbox (" ", 0.0, 0, "CMIST", 0.0, 0);
     cpgmtxt("R", 2.6, 0.5, 0.5, "Index");
   }
