@@ -180,7 +180,7 @@ void Pulsar::FluxPlot::plot_error_box (const Archive* data)
   float x_min = 0;
   float x_max = 0;
 
-  get_scale()->get_range (data, x_min, x_max);
+  get_scale()->PlotScale::get_range (x_min, x_max);
 
   float xscale = get_scale()->get_scale (data);
 
