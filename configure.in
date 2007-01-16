@@ -22,6 +22,9 @@ fi
 # Check if the user has set compiler options
 SWIN_OPTIONS_SET
 
+# Enable convenience compiler selection
+SWIN_COMPILER
+
 # Initialize automake to place object files in sub-directories
 AM_INIT_AUTOMAKE([subdir-objects])
 
@@ -31,29 +34,26 @@ AC_DISABLE_SHARED
 # Enable large-file support
 AC_SYS_LARGEFILE
 
-# Determine the machine endian
-AC_C_BIGENDIAN
-
 # Ensure that SIGPROC find does not over-ride the standard
 SWIN_PROG_FIND
 
 # Check which version of the pulsar catalog is installed
 SWIN_PSRCAT
 
-# Enable convenience compiler selection
-SWIN_COMPILER
-
 # Checks for programs.
-AC_PROG_CXX
-AC_PROG_CXXCPP
 AC_PROG_CC
 AC_PROG_CPP
 AM_PROG_CC_C_O
+AC_PROG_CXX
+AC_PROG_CXXCPP
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AC_PROG_FC
 AC_F77_WRAPPERS
 _STAR_RESTFP_FIX
+
+# Determine the machine endian
+AC_C_BIGENDIAN
 
 #
 # Disable the debugging information option, -g
@@ -68,19 +68,19 @@ SWIN_DEFAULT_PARTIAL_SPECIALIZATION
 SWIN_COMPLEX_TEMPLATE
 
 #
-# Set up to use the standard package installation directory
-#
-if test -d /usr/local; then
-  CPPFLAGS="-I/usr/local/include $CPPFLAGS"
-  LDFLAGS="-L/usr/local/lib $LDFLAGS"
-fi
-
-#
 # Set up to use the fink package installation directory
 #
 if test -d /sw; then
   CPPFLAGS="-I/sw/include $CPPFLAGS"
   LDFLAGS="-L/sw/lib $LDFLAGS"
+else
+  #
+  # Set up to use the standard package installation directory
+  #
+  if test -d /usr/local; then
+    CPPFLAGS="-I/usr/local/include $CPPFLAGS"
+    LDFLAGS="-L/usr/local/lib $LDFLAGS"
+  fi
 fi
 
 #
