@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Transposer.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.9 $
+   $Date: 2007/01/16 22:26:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Transposer_h
 #define __Pulsar_Transposer_h
 
-#include "Algorithm.h"
+#include "Pulsar/Algorithm.h"
+
 #include "Reference.h"
 #include "Types.h"
 
