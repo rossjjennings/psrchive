@@ -21,3 +21,5 @@ qt)
 esac
 
 done
+
+echo -n " @FLIBS@ "
