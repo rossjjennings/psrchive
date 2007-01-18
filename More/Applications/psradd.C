@@ -28,7 +28,7 @@
 
 using namespace std;
 
-static const char* psradd_args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tT:UvVZ:";
+static const char* psradd_args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tT:UvVwZ:";
 
 void reorder(Reference::To<Pulsar::Archive> arch);
 
@@ -73,6 +73,7 @@ void usage () {
 // returns the phase of the mid-point of the on cal hi
 float mid_hi (Pulsar::Archive* archive);
 
+extern bool tscrunch_weighted_midtime;
 
 int main (int argc, char **argv) try {
 
@@ -153,7 +154,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.43 2006/11/05 16:36:24 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.44 2007/01/18 23:04:00 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -316,6 +317,9 @@ int main (int argc, char **argv) try {
       vverbose = true;
       verbose = true;
       break;
+
+    case 'w':
+      tscrunch_weighted_midtime = true;
 
     case 'Z': 
       required_archive_length = atof(optarg); 

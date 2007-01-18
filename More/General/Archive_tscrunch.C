@@ -11,6 +11,7 @@ using namespace std;
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
+bool tscrunch_weighted_midtime = false;
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -149,16 +150,24 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
     MJD mjd;
     double duration = 0.0;
-    int count = 0;
+    double total_weight = 0.0;
 
     for (unsigned iadd=0; iadd < nscrunch; iadd++) {
       
-      count++;
-      
-      Integration* cur = get_Integration (start+iadd);
-      
+      Integration* cur = get_Integration (start+iadd);      
       duration += cur->get_duration();
-      mjd      += cur->get_epoch();
+
+      if (tscrunch_weighted_midtime) {
+	double weight = 0;
+	for (unsigned ichan=0; ichan < cur->get_nchan(); ichan++)
+	  weight += cur->get_weight (ichan);
+	mjd += weight * cur->get_epoch();
+	total_weight += weight;
+      }
+      else {
+	mjd += cur->get_epoch();
+	total_weight += 1.0;
+      }
 
       if (iadd == 0)
         // transfer the Extensions from the start Integration to the result
@@ -171,7 +180,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
     }
 
-    mjd /= double (count);
+    mjd /= total_weight;
     
     result->set_duration (duration);
 
@@ -197,7 +206,11 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	
 	// Subtract one period times phase difference from mjd      
 	mjd -= dphase.fracturns() * first_period;
-	
+
+	if (verbose)
+	  cerr << "Archive::tscrunch result phase = " << model->phase(mjd)
+	       << endl;
+
 	result->set_folding_period (model->period(mjd));
 	
 	// The original code did not include the number of 
