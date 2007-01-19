@@ -4,14 +4,15 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
-bool tscrunch_weighted_midtime = false;
+using namespac std;
+
+bool tscrunch_weighted_midtime = true;
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -59,7 +60,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   if (nsub % nscrunch)
     newsub += 1;
   
-  if (verbose == 3) cerr << "Pulsar::Archive::tscrunch - scrunching " 
+  if (verbose > 2) cerr << "Pulsar::Archive::tscrunch - scrunching " 
 		    << nsub << " Integrations by " << nscrunch << endl;
   
   double dm = get_dispersion_measure();
@@ -74,18 +75,107 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
     
     for (unsigned isub=0; isub < newsub; isub++) {
       
-      if (verbose == 3) cerr << "Pulsar::Archive::tscrunch resulting subint " 
+      if (verbose > 2) cerr << "Pulsar::Archive::tscrunch resulting subint " 
 			<< isub+1 << "/" << newsub << endl;
-      
+
+      Integration* result = get_Integration (isub);
+
       unsigned start = isub * nscrunch;
       
       // the last Integration may have less than nscrunch contributions
       if (start+nscrunch >= nsub)
 	nscrunch = nsub - start;
 
+      // //////////////////////////////////////////////////////////////////////
+      //
+      //  compute the new duration and weighted mid-time of the result
+      //
+      // //////////////////////////////////////////////////////////////////////
+
+      double duration = 0.0;
+      double total_weight = 0.0;
+
+      for (unsigned iadd=0; iadd < nscrunch; iadd++) {
+
+        Integration* cur = get_Integration (start+iadd);
+
+        duration += cur->get_duration();
+
+        if (tscrunch_weighted_midtime)
+          for (unsigned ichan=0; ichan < cur->get_nchan(); ichan++)
+            total_weight += cur->get_weight (ichan);
+        else
+          total_weight += 1.0;
+  
+      }
+
+      result->set_duration (duration);
+
+      MJD epoch;
+
+      for (unsigned iadd=0; iadd < nscrunch; iadd++) {
+
+        Integration* cur = get_Integration (start+iadd);
+
+        if (tscrunch_weighted_midtime) {
+          double weight = 0;
+          for (unsigned ichan=0; ichan < cur->get_nchan(); ichan++)
+            weight += cur->get_weight (ichan);
+          epoch += weight/total_weight * cur->get_epoch();
+        }
+        else
+          epoch += 1.0/total_weight * cur->get_epoch();
+  
+      }
+
+      // //////////////////////////////////////////////////////////////////////
+      //
+      // round epoch to nearest integer period
+      //
+      // //////////////////////////////////////////////////////////////////////
+  
+      if (get_type() == Signal::Pulsar) {
+  
+        // ensure that the polyco includes the new integration time
+        update_model (epoch);
+  
+        if (model) {
+  
+          // get the time of the first subint to be integrated into isub
+          MJD firstmjd = get_Integration (start) -> get_epoch ();
+          // get the phase at the time of the first subint
+          Phase first_phase = model->phase(firstmjd);
+  
+          // get the phase at the midtime of the result
+          Phase mid_phase = model->phase (epoch);
+          // get the period at the midtime of the result
+          double period = model->period (epoch);
+  
+          // set the phase at the midtime equal to that of the first subint
+          Phase desired (mid_phase.intturns(), first_phase.fracturns());
+          epoch = model->iphase (desired);
+  
+          if (verbose > 2)
+            cerr << "Archive::tscrunch result phase = "
+                 << model->phase(epoch) << endl;
+
+          result->set_folding_period (period);
+
+        }
+
+      }
+
+      result->set_epoch (epoch);
+
+      // //////////////////////////////////////////////////////////////////////
+      //
+      // integrate Profile data
+      //
+      // //////////////////////////////////////////////////////////////////////
+
       for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
 	
-	if (verbose == 3) 
+	if (verbose > 2) 
 	  cerr << "Pulsar::Archive::tscrunch weighted_frequency chan="
 	       << ichan << endl;
 	
@@ -93,7 +183,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
 	reference_frequency = weighted_frequency (ichan, start,start+nscrunch);
 	
-	if (verbose == 3) 
+	if (verbose > 2) 
 	  cerr << "Pulsar::Archive::tscrunch ichan=" << ichan
 	       << " new frequency=" << reference_frequency << endl;
 
@@ -112,7 +202,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
 	}
 	
-	if (verbose == 3) 
+	if (verbose > 2) 
 	  cerr <<  "Pulsar::Archive::tscrunch sum profiles" << endl;
 	
 	for (unsigned ipol=0; ipol < get_npol(); ++ipol) {
@@ -128,114 +218,49 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	  }
 	  
 	} // for each poln
+
       } // for each channel
+
+      // //////////////////////////////////////////////////////////////////////
+      //
+      // integrate Extension data
+      //
+      // //////////////////////////////////////////////////////////////////////
+
+      for (unsigned iadd=0; iadd < nscrunch; iadd++) {
+
+        Integration* cur = get_Integration (start+iadd);
+
+        if (iadd == 0)
+          // transfer the Extensions from the start Integration to the result
+          for (unsigned iext = 0; iext < cur->get_nextension(); iext++)
+            result->add_extension( cur->get_extension(iext) );
+        else
+          // integrate the Extensions into the result
+          for (unsigned iext = 0; iext < result->get_nextension(); iext++)
+            result->get_extension(iext)->integrate (cur);
+
+      }
+
+      // //////////////////////////////////////////////////////////////////////
+      //
+      // update all Extensions
+      //
+      // //////////////////////////////////////////////////////////////////////
+
+      for (unsigned iext = 0; iext < result->get_nextension(); iext++) {
+        Integration::Extension* ext = result->get_extension(iext);
+        ext->update (result);
+      }
+
     } // for each integrated result
+
   } // end try block
   
   catch (Error& err) {
     throw err += "Pulsar::Archive::tscrunch";
   }
 
-  nscrunch = save_nscrunch;
-
-  for (unsigned isub=0; isub < newsub; isub++) {
-    
-    unsigned start = isub * nscrunch;
-    
-    // the last Integration may have less than nscrunch contributions
-    if (start+nscrunch >= nsub)
-      nscrunch = nsub - start;
-
-    double duration = 0.0;
-    double total_weight = 0.0;
-
-    for (unsigned iadd=0; iadd < nscrunch; iadd++) {
-      
-      Integration* cur = get_Integration (start+iadd);      
-
-      duration += cur->get_duration();
-
-      if (tscrunch_weighted_midtime)
-	for (unsigned ichan=0; ichan < cur->get_nchan(); ichan++)
-	  total_weight += cur->get_weight (ichan);
-      else
-	total_weight += 1.0;
-
-    }
-
-    Integration* result = get_Integration(isub);
-    result->set_duration (duration);
-
-    MJD result_epoch;
-
-    for (unsigned iadd=0; iadd < nscrunch; iadd++) {
-      
-      Integration* cur = get_Integration (start+iadd);      
-
-      if (tscrunch_weighted_midtime) {
-	double weight = 0;
-	for (unsigned ichan=0; ichan < cur->get_nchan(); ichan++)
-	  weight += cur->get_weight (ichan);
-	result_epoch += weight/total_weight * cur->get_epoch();
-      }
-      else
-	result_epoch += 1.0/total_weight * cur->get_epoch();
-
-      if (iadd == 0)
-        // transfer the Extensions from the start Integration to the result
-        for (unsigned iext = 0; iext < cur->get_nextension(); iext++)
-          result->add_extension( cur->get_extension(iext) );
-      else
-        // integrate the Extensions into the result
-        for (unsigned iext = 0; iext < result->get_nextension(); iext++)
-	  result->get_extension(iext)->integrate (cur);
-
-    }
-
-    if (get_type() == Signal::Pulsar) {
-      
-      // ensure that the polyco includes the new integration time
-      update_model (result_epoch);
-      
-      if (model) {
-	
-	// get the time of the first subint to be integrated into isub
-	MJD firstmjd = get_Integration (start) -> get_epoch ();
-	  // get the period at the time of the first subint
-	double first_period = model->period(firstmjd);
-	// get the phase at the time of the first subint
-	Phase first_phase = model->phase(firstmjd);
-	
-	// get the phase at the midtime of the result
-	Phase mid_phase = model->phase (result_epoch); 
-	
-	// calculate the phase difference
-	Phase dphase = mid_phase - first_phase;
-	
-	// Subtract one period times phase difference from mjd      
-	result_epoch -= dphase.fracturns() * first_period;
-
-	if (verbose)
-	  cerr << "Archive::tscrunch result phase = "
-	       << model->phase(result_epoch) << endl;
-
-	result->set_folding_period (model->period(result_epoch));
-	
-	// The original code did not include the number of 
-	// integer turns when computing the shift_time
-      }
-      
-    }
-
-    result->set_epoch (result_epoch);
-
-    for (unsigned iext = 0; iext < result->get_nextension(); iext++) {
-      Integration::Extension* ext = result->get_extension(iext);
-      ext->update (result);
-    }
-    
-  }
-  
   resize (newsub);
 }
 
@@ -287,7 +312,7 @@ double Pulsar::Archive::weighted_frequency (unsigned ichan,
       double freq   = prof->get_centre_frequency();
       double weight = prof->get_weight();
       
-      //if (verbose == 3)
+      //if (verbose > 2)
       //cerr << "Pulsar::Archive::weighted_frequency [" << isubint << "]"
       //  " freq=" << freq << " wt=" << weight << endl;
       
