@@ -10,7 +10,7 @@
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
-using namespac std;
+using namespace std;
 
 bool tscrunch_weighted_midtime = true;
 
