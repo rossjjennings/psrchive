@@ -146,28 +146,40 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
     if (start+nscrunch >= nsub)
       nscrunch = nsub - start;
 
-    Integration* result = get_Integration(isub);
-
-    MJD mjd;
     double duration = 0.0;
     double total_weight = 0.0;
 
     for (unsigned iadd=0; iadd < nscrunch; iadd++) {
       
       Integration* cur = get_Integration (start+iadd);      
+
       duration += cur->get_duration();
+
+      if (tscrunch_weighted_midtime)
+	for (unsigned ichan=0; ichan < cur->get_nchan(); ichan++)
+	  total_weight += cur->get_weight (ichan);
+      else
+	total_weight += 1.0;
+
+    }
+
+    Integration* result = get_Integration(isub);
+    result->set_duration (duration);
+
+    MJD result_epoch;
+
+    for (unsigned iadd=0; iadd < nscrunch; iadd++) {
+      
+      Integration* cur = get_Integration (start+iadd);      
 
       if (tscrunch_weighted_midtime) {
 	double weight = 0;
 	for (unsigned ichan=0; ichan < cur->get_nchan(); ichan++)
 	  weight += cur->get_weight (ichan);
-	mjd += weight * cur->get_epoch();
-	total_weight += weight;
+	result_epoch += weight/total_weight * cur->get_epoch();
       }
-      else {
-	mjd += cur->get_epoch();
-	total_weight += 1.0;
-      }
+      else
+	result_epoch += 1.0/total_weight * cur->get_epoch();
 
       if (iadd == 0)
         // transfer the Extensions from the start Integration to the result
@@ -180,14 +192,10 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
     }
 
-    mjd /= total_weight;
-    
-    result->set_duration (duration);
-
     if (get_type() == Signal::Pulsar) {
       
       // ensure that the polyco includes the new integration time
-      update_model (mjd);
+      update_model (result_epoch);
       
       if (model) {
 	
@@ -199,19 +207,19 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	Phase first_phase = model->phase(firstmjd);
 	
 	// get the phase at the midtime of the result
-	Phase mid_phase = model->phase (mjd); 
+	Phase mid_phase = model->phase (result_epoch); 
 	
 	// calculate the phase difference
 	Phase dphase = mid_phase - first_phase;
 	
 	// Subtract one period times phase difference from mjd      
-	mjd -= dphase.fracturns() * first_period;
+	result_epoch -= dphase.fracturns() * first_period;
 
 	if (verbose)
-	  cerr << "Archive::tscrunch result phase = " << model->phase(mjd)
-	       << endl;
+	  cerr << "Archive::tscrunch result phase = "
+	       << model->phase(result_epoch) << endl;
 
-	result->set_folding_period (model->period(mjd));
+	result->set_folding_period (model->period(result_epoch));
 	
 	// The original code did not include the number of 
 	// integer turns when computing the shift_time
@@ -219,7 +227,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
       
     }
 
-    result->set_epoch (mjd);
+    result->set_epoch (result_epoch);
 
     for (unsigned iext = 0; iext < result->get_nextension(); iext++) {
       Integration::Extension* ext = result->get_extension(iext);
