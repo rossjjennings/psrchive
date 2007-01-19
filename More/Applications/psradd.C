@@ -154,7 +154,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.45 2007/01/18 23:05:58 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.46 2007/01/19 17:42:21 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -319,7 +319,7 @@ int main (int argc, char **argv) try {
       break;
 
     case 'w':
-      tscrunch_weighted_midtime = true;
+      tscrunch_weighted_midtime = false;
       break;
 
     case 'Z': 
