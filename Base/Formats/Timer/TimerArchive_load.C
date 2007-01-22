@@ -8,6 +8,7 @@
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Telescope.h"
+#include "Pulsar/Pointing.h"
 #include "Error.h"
 
 #include "timer++.h"
@@ -378,6 +379,30 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
   
   /* set a flag to indicate ROS 1 second error has been corrected */
   if (strcmp(hdr.machine_id, "S2")==0 && !hdr.corrected) hdr.corrected = 1;
+
+  /* Unpack the Pointing class attributes */
+
+  for (int isub=0; isub < hdr.nsub_int; isub++) { 
+
+    Pointing* pointing = get_Integration(isub)->get<Pointing>();
+    if (!pointing)
+      continue;
+
+    Angle angle;
+
+    angle.setRadians (hdr.ra);
+    pointing->set_right_ascension (angle);
+
+    angle.setRadians (hdr.dec);
+    pointing->set_declination (angle);
+
+    angle.setDegrees (hdr.l);
+    pointing->set_galactic_latitude (angle);
+
+    angle.setDegrees (hdr.b);
+    pointing->set_galactic_longitude (angle);
+
+  }
 
   if (verbose == 3) 
     cerr << "TimerArchive::subint_load - exiting" << endl;
