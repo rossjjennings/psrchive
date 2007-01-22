@@ -6,6 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Pointing.h"
 #include "Error.h"
 
 #include "convert_endian.h"
@@ -46,10 +47,35 @@ void Pulsar::TimerIntegration::load (FILE* fptr, int extra, bool big_endian)
   else
     mini_fromLittleEndian(&mini);
 
+  unpack_Pointing ();
+
   if (extra)
     load_extra (fptr, big_endian);
   else
     load_old (fptr, big_endian);
+}
+
+void Pulsar::TimerIntegration::unpack_Pointing ()
+{
+  Angle angle;
+
+  Reference::To<Pointing> pointing = new Pointing;
+
+  pointing->set_local_sidereal_time (mini.lst_start);
+
+  angle.setDegrees (mini.feed_ang);
+  pointing->set_feed_angle (angle);
+
+  angle.setDegrees (mini.para_angle);
+  pointing->set_parallactic_angle (angle);
+
+  angle.setDegrees (mini.tel_az);
+  pointing->set_telescope_azimuth (angle);
+
+  angle.setDegrees (mini.tel_zen);
+  pointing->set_telescope_zenith (angle);
+
+  add_extension (pointing);
 }
 
 /*! This method is called for archives that store weights for each channel,

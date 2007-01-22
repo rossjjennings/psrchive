@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerIntegration.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.8 $
+   $Date: 2007/01/22 23:05:53 $
    $Author: straten $ */
 
 /*
@@ -132,6 +132,12 @@ namespace Pulsar {
 
     //! Load in the "old-style"
     void load_old (FILE* fptr, bool big_endian);
+
+    //! Unpack the Pointing extension attributes after loading mini header
+    void unpack_Pointing ();
+
+    //! Pack the Pointing extension attributes before unloading mini header
+    void pack_Pointing () const;
 
   };
 

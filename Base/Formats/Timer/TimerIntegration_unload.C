@@ -6,6 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Pointing.h"
 #include "Error.h"
 
 #include "convert_endian.h"
@@ -16,6 +17,8 @@ using namespace std;
 void Pulsar::TimerIntegration::unload (FILE* fptr) const
 {
   if (verbose) cerr << "TimerIntegration::unload" << endl;
+
+  pack_Pointing ();
 
   struct mini* outmini = const_cast<struct mini*>(&mini);
 
@@ -72,4 +75,23 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
   
   if (verbose) cerr << "TimerIntegration::unload exit" << endl;
 
+}
+
+void Pulsar::TimerIntegration::pack_Pointing () const
+{
+  Reference::To<const Pointing> pointing = get<Pointing>();
+  if (!pointing)
+    return;
+
+  struct mini* outmini = const_cast<struct mini*>(&mini);
+
+  outmini->lst_start = pointing->get_local_sidereal_time();
+
+  outmini->feed_ang = pointing->get_feed_angle().getDegrees();
+
+  outmini->para_angle = pointing->get_parallactic_angle().getDegrees();
+
+  outmini->tel_az = pointing->get_telescope_azimuth().getDegrees();
+
+  outmini->tel_zen = pointing->get_telescope_zenith().getDegrees();
 }
