@@ -7,9 +7,21 @@ AC_INIT([PSRCHIVE],[6.0],[psrchive@sourceforge.net])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_SRCDIR([Util/Makefile.am])
 
+#
+# Set the default installation directory
+#
+
+if test -d /sw; then
+  DEFAULT_INSTALL=/sw
+elif test -d /usr/local; then
+  DEFAULT_INSTALL=/usr/local
+else
+  DEFAULT_INSTALL=/
+fi
+
 AC_ARG_VAR([PSRHOME],[Standard pulsar home directory])
 AC_ARG_VAR([LOGIN_ARCH],[Architecture-dependent sub-directory of PSRHOME])
-AC_PREFIX_DEFAULT([${PSRHOME:-"/usr/local"}${PSRHOME:+"/$LOGIN_ARCH"}])
+AC_PREFIX_DEFAULT([${PSRHOME:-`sh -c "ls -1df /sw /usr/local / | head -1"`}${PSRHOME:+"/$LOGIN_ARCH"}])
 
 if test -z "$PSRHOME"; then
   AC_MSG_WARN([The PSRHOME environment variable is not set])
@@ -68,20 +80,10 @@ SWIN_DEFAULT_PARTIAL_SPECIALIZATION
 SWIN_COMPLEX_TEMPLATE
 
 #
-# Set up to use the fink package installation directory
+# Set up to use the standard package installation directory
 #
-if test -d /sw; then
-  CPPFLAGS="-I/sw/include $CPPFLAGS"
-  LDFLAGS="-L/sw/lib $LDFLAGS"
-else
-  #
-  # Set up to use the standard package installation directory
-  #
-  if test -d /usr/local; then
-    CPPFLAGS="-I/usr/local/include $CPPFLAGS"
-    LDFLAGS="-L/usr/local/lib $LDFLAGS"
-  fi
-fi
+CPPFLAGS="-I$DEFAULT_INSTALL/include $CPPFLAGS"
+LDFLAGS="-L$DEFAULT_INSTALL/lib $LDFLAGS"
 
 #
 # Set up to use the pulsar group package installation directory
