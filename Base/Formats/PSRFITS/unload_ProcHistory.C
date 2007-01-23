@@ -341,8 +341,6 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const ProcHistory* history)
     throw FITSError (status, "FITSArchive::unload ProcHistory",
                      "fits_movnam_hdu HISTORY");
   
-  fits_delete_rows (fptr, 1, 1, &status);
-  
   fits_insert_rows (fptr, 0, numrows, &status);
 
   if (status != 0)

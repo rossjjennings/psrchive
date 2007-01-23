@@ -28,8 +28,6 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   
   // Initialise a new row
   
-  fits_delete_rows (fptr, 1, 1, &status);
-  
   fits_insert_rows (fptr, 0, 1, &status);
   if (status != 0)
     throw FITSError (status, "FITSArchive::bandpass::unload", 

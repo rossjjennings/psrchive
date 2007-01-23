@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '2.6             '   / Header version 
+HDRVER  = '2.7             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -59,7 +59,7 @@ XTENSION= BINTABLE             / ***** Processing history *****
 BITPIX  =                    8 / N/A
 NAXIS   =                    2 / 2-dimensional binary table
 NAXIS1  =                    * / width of table in bytes
-NAXIS2  =                    1 / number of rows
+NAXIS2  =                    * / number of rows
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                   21 / number of fields per row
@@ -123,7 +123,7 @@ XTENSION= BINTABLE             / ***** Digitiser counts *****
 BITPIX  =                    8 / N/A
 NAXIS   =                    2 / 2-dimensional binary table
 NAXIS1  =                    * / Width of table in bytes
-NAXIS2  =                    1 / Number of rows in table
+NAXIS2  =                    * / Number of rows in table
 PCOUNT  =                    0 / Size of special data area
 GCOUNT  =                    1 / One data group (required keyword)
 TFIELDS =                    3 / Number of fields per row
@@ -155,7 +155,7 @@ XTENSION= BINTABLE             / ***** Original bandpasses *****
 BITPIX  =                    8 / N/A
 NAXIS   =                    2 / 2-dimensional binary table
 NAXIS1  =                    * / width of table in bytes
-NAXIS2  =                    1 / number of rows in table
+NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    3 / number of fields per row
@@ -184,7 +184,7 @@ XTENSION= BINTABLE             / ***** Coherent Dedispersion Parameters *****
 BITPIX  =                    8 / N/A
 NAXIS   =                    2 / 2-dimensional binary table
 NAXIS1  =                    * / width of table in bytes
-NAXIS2  =                    1 / number of rows in table (NCHAN)
+NAXIS2  =                    * / number of rows in table (NCHAN)
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    3 / number of fields per row
@@ -426,7 +426,7 @@ TNULL#  = 0                    / Default = False
 TTYPE#  = DILATEFREQ           / Correct obs frequency for time dilation 
 TFORM#  = 1I                   / Integer flag
 TNULL#  = 1                    / Default = True
-TTYPE#  = NO_SS_SHAPIRO        / Turn of all solar system Shapiro delays
+TTYPE#  = NO_SS_SHAPIRO        / Turn off all solar system Shapiro delays
 TFORM#  = 1I                   / Integer flag
 TNULL#  = 0                    / Default = False
 TTYPE#  = PLANET_SHAPIRO       / Account for planetary Shapiro delays 
@@ -597,7 +597,7 @@ XTENSION= BINTABLE             / ***** Flux Calibration Data *****
 BITPIX  =                    8 / N/A 
 NAXIS   =                    2 / 2-dimensional binary table
 NAXIS1  =                    * / width of table in bytes
-NAXIS2  =                    1 / number of rows in table
+NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    6 / Number of fields per row
@@ -642,7 +642,7 @@ XTENSION= BINTABLE             / ***** Artificial Calibrator Stokes Data *****
 BITPIX  =                    8 / N/A 
 NAXIS   =                    2 / 2-dimensional binary table
 NAXIS1  =                    * / width of table in bytes
-NAXIS2  =                    1 / number of rows in table
+NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    3 / Number of fields per row
@@ -668,7 +668,7 @@ XTENSION= BINTABLE             / ***** Feed Cross-Coupling parameters *****
 BITPIX  =                    8 / N/A 
 NAXIS   =                    2 / 2-dimensional binary table
 NAXIS1  =                    * / width of table in bytes
-NAXIS2  =                    1 / number of rows in table
+NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    3 / Number of fields per row
@@ -708,9 +708,14 @@ GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                   19 / Number of fields per row
 # 
 INT_TYPE= '                  ' / Time axis (TIME, BINPHSPERI, BINLNGASC, etc)
-INT_UNIT= '                  ' / Unit of time axis (SEC, PHS (0-1), DEG)    
+INT_UNIT= '                  ' / Unit of time axis (SEC, PHS (0-1), DEG) 
+TSAMP   =                    * / [s] Sample interval for SEARCH-mode data 
+NBIN    =                    * / Nr of bins (1 for SEARCH-mode data)
 NCH_FILE=                    * / Number of channels/sub-bands in this file
 NCH_STRT=                    * / Start channel/sub-band number (0 to NCHAN-1)
+NPOL    =                    * / Nr of polarisations in table
+NSBLK   =                    * / Samples/row (each NPOL*NCH_FILE, SEARCH mode) 
+#
 EXTNAME = SUBINT               / name of this binary table extension
 #
 TTYPE#  = ISUBINT              / Subint number
@@ -728,10 +733,10 @@ TFORM#  = 1D                   / Double
 TUNIT#  = s                    / Units of field
 TTYPE#  = RA_SUB               / RA (J2000) at subint centre
 TFORM#  = 1D                   / Double 
-TUNIT#  = turns                / Units of field
-TTYPE#  = DEC_SUB              / [turns] Dec (J2000) at subint centre
+TUNIT#  = deg                  / Units of field
+TTYPE#  = DEC_SUB              / Dec (J2000) at subint centre
 TFORM#  = 1D                   / Double 
-TUNIT#  = turns                / Units of field
+TUNIT#  = deg                  / Units of field
 TTYPE#  = GLON_SUB             / [deg] Gal longitude at subint centre
 TFORM#  = 1D                   / Double 
 TUNIT#  = deg                  / Units of field
@@ -763,8 +768,8 @@ TFORM#  = E                    / NCH_FILE*NPOL floats
 TTYPE#  = DAT_SCL              / Data scale factor for each channel
 TFORM#  = E                    / NCH_FILE*NPOL floats
 TTYPE#  = DATA                 / Subint data table
-TDIM#   = (*,*,*)              / Dimensions of data table = (NBIN,NCH_FILE,NPOL)
-TFORM#  = I                    / NBIN*NCH_FILE*NPOL integers
+TDIM#   = (*,*,*,*)            / Dimensions (NBIN,NCH_FILE,NPOL,NSBLK)
+TFORM#  = I                    / NBIN*NCH_FILE*NPOL*NSBLK int, byte or nX 
 TUNIT#  = Jy                   / Units of subint data
 END
 #

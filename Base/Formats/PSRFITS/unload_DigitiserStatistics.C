@@ -79,15 +79,8 @@ Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserStatistics* dstats)
     throw FITSError (status, "FITSArchive::unload_digistat", 
 		     "fits_movnam_hdu DIG_STAT");
   
-  long numrows = 0;
-  fits_get_num_rows (fptr, &numrows, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_digistat", 
-                     "fits_get_num_rows DIG_STAT");
-  
-  fits_delete_rows (fptr, 1, numrows, &status);
-  
+  // Insert some new rows
+
   fits_insert_rows (fptr, 0, (dstats->rows).size(), &status);
   
   if (status != 0)

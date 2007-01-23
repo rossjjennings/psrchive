@@ -33,10 +33,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
     throw FITSError (status, "FITSArchive::unload CalibratorStokes", 
 		     "fits_movnam_hdu CAL_POLN");
   
-  // Initialise a new row
-  
-  fits_delete_rows (fptr, 1, 1, &status);
-  
+  // Insert a new row
+
   fits_insert_rows (fptr, 0, 1, &status);
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload CalibratorStokes", 

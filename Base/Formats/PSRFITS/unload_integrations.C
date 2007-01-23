@@ -21,17 +21,12 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
 		     "fits_movnam_hdu SUBINT");
-      
-  // Delete all information in the data HDU to ensure
-  // no conflicts with the new state
+
+  // Insert nsubint rows
 
   if (verbose == 3)
     cerr << "FITSArchive::unload_integrations nsubint=" << nsubint << endl;
 
-  long oldrownum = 0;
-
-  fits_get_num_rows (ffptr, &oldrownum, &status);
-  fits_delete_rows (ffptr, 1, oldrownum, &status);
   fits_insert_rows (ffptr, 0, nsubint, &status);
 
   if (verbose == 3) {
