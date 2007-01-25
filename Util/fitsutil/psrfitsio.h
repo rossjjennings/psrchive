@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.4 $
+   $Date: 2007/01/25 05:20:28 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
@@ -17,6 +17,9 @@
 #include "FITSError.h"
 #include <fitsio.h>
 #include <string>
+
+//! Remove any existing rows from the current binary table
+void psrfits_clean_rows (fitsfile*);
 
 //! Empty template class requires specialization 
 template<typename T> struct FITS_traits { };

@@ -8,6 +8,25 @@
 
 using namespace std;
 
+void psrfits_clean_rows (fitsfile* ffptr)
+{
+  long rows = 0;
+  int status = 0;
+
+  fits_get_num_rows (ffptr, &rows, &status);
+
+  if (status)
+    throw FITSError (status, "psrfits_clean_rows", "fits_get_num_rows");
+
+  if (!rows)
+    return;
+
+  fits_delete_rows (ffptr, 1, rows, &status);
+
+  if (status)
+    throw FITSError (status, "psrfits_clean_rows", "fits_delete_rows");
+}
+
 //! Specialization for string
 void psrfits_update_key (fitsfile* fptr, const char* name, const string& txt)
 {
