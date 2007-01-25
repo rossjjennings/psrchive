@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/CalibratorStokes.h"
-#include "FITSError.h"
+#include "psrfitsio.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -33,6 +33,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
     throw FITSError (status, "FITSArchive::unload CalibratorStokes", 
 		     "fits_movnam_hdu CAL_POLN");
   
+  psrfits_clean_rows (fptr);
+
   // Insert a new row
 
   fits_insert_rows (fptr, 0, 1, &status);

@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/ProcHistory.h"
-#include "FITSError.h"
+#include "psrfitsio.h"
 
 using namespace std;
 
@@ -341,6 +341,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const ProcHistory* history)
     throw FITSError (status, "FITSArchive::unload ProcHistory",
                      "fits_movnam_hdu HISTORY");
   
+  psrfits_clean_rows (fptr);
+
   fits_insert_rows (fptr, 0, numrows, &status);
 
   if (status != 0)

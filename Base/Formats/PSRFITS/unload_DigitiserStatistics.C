@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/DigitiserStatistics.h"
-#include "FITSError.h"
+#include "psrfitsio.h"
 
 using namespace std;
 
@@ -79,6 +79,8 @@ Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserStatistics* dstats)
     throw FITSError (status, "FITSArchive::unload_digistat", 
 		     "fits_movnam_hdu DIG_STAT");
   
+  psrfits_clean_rows (fptr);
+
   // Insert some new rows
 
   fits_insert_rows (fptr, 0, (dstats->rows).size(), &status);

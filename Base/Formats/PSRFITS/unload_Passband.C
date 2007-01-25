@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Passband.h"
-#include "FITSError.h"
+#include "psrfitsio.h"
 #include "templates.h"
 
 using namespace std;
@@ -26,6 +26,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
     throw FITSError (status, "FITSArchive::bandpass::unload", 
 		     "fits_movnam_hdu BANDPASS");
   
+  psrfits_clean_rows (fptr);
+
   // Initialise a new row
   
   fits_insert_rows (fptr, 0, 1, &status);

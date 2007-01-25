@@ -29,6 +29,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
                      "Pulsar::FITSArchive::unload FluxCalibratorExtension", 
 		     "fits_movnam_hdu FLUX_CAL");
   
+  psrfits_clean_rows (fptr);
+
   // Initialise a new row
   
   fits_insert_rows (fptr, 0, 1, &status);

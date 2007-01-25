@@ -7,6 +7,7 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "CalibratorExtensionIO.h"
+#include "psrfitsio.h"
 
 #include <assert.h>
 
@@ -28,6 +29,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
     throw FITSError (status, "FITSArchive::unload PolnCalibratorExtension", 
 		     "fits_movnam_hdu FEEDPAR");
   
+  psrfits_clean_rows (fptr);
+
   // Initialise a new row
   
   fits_insert_rows (fptr, 0, 1, &status);

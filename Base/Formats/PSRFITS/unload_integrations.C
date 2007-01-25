@@ -7,6 +7,7 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "FITSError.h"
+#include "psrfitsio.h"
 
 using namespace std;
 
@@ -21,6 +22,8 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
 		     "fits_movnam_hdu SUBINT");
+
+  psrfits_clean_rows (ffptr);
 
   // Insert nsubint rows
 
