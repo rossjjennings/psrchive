@@ -10,7 +10,7 @@ EXTRA_DIST = config/install-intermediate
 libs: install-binSCRIPTS
 	$(MAKE) RECURSIVE_TARGETS="all-recursive libs-recursive" libs-recursive
 
-libs-am:
+libs-am: install-exec-hook
 	@echo
 	@echo PSRCHIVE libraries have been installed in ${prefix}/lib
 	@echo
