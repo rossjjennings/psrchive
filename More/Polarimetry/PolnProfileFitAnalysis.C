@@ -14,6 +14,7 @@
 #include "MEAL/ProductRule.h"
 
 #include "Pauli.h"
+#include "Jacobi.h"
 
 #include <fstream>
 #include <assert.h>
@@ -443,6 +444,45 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
     insert_basis ();
 }
 
+template<unsigned M, typename T>
+Matrix<M,M,T> align (const Vector<M,T>& v)
+{
+  Matrix<M,M,T> result;
+  matrix_identity (result);
+
+  Vector<M,T> copy = v;
+
+  for (unsigned m=1; m<M; m++) {
+
+    unsigned j = M-m;
+    unsigned i = j-1;
+
+    T x = copy[i];
+    T y = copy[j];
+    
+    T theta = atan2 (y, x);
+
+    Matrix<M,M,T> temp;
+    matrix_identity (temp);
+
+    temp[i][i] = temp[j][j] = cos(theta);
+    temp[j][i] = - sin(theta);
+    temp[i][j] = - temp[j][i];
+
+    cerr << "\nTEMP=\n" << temp << endl;
+
+    copy = temp * copy;
+
+    cerr << "\nCOPY=\n" << copy << endl;
+
+    result = temp * result;
+
+    cerr << "\nRESULT=\n" << result << endl;
+  }
+
+  return result;
+}
+
 //! Computes the above three numbers
 void Pulsar::PolnProfileFitAnalysis::build (bool only_relative_error)
 {
@@ -465,7 +505,29 @@ void Pulsar::PolnProfileFitAnalysis::build (bool only_relative_error)
 
     // partition the covariance matrix
     conformal_partition (covariance, c_varphi, C_varphiJ, C_JJ);
-    
+
+    Matrix<7,7,double> copy = C_JJ;
+    Matrix<7,7,double> evec;
+    Vector<7,double> eval;
+
+    Jacobi (copy, evec, eval);
+
+    cerr << "evec=\n" << evec << "\neval=\n" << eval << endl << endl;
+
+    cerr << "C_varphiJ=\n" << C_varphiJ << endl << endl;
+
+    cerr << "evec*C_varphiJ=\n" << evec * C_varphiJ << endl << endl;
+
+    cerr << "evec*C_JJ*evec=\n" << evec * C_JJ * herm(evec) << endl << endl;
+
+    Matrix<7,7,double> A = align(C_varphiJ);
+
+    cerr << "A=\n" << A << endl << endl;
+
+    cerr << "A*inv(A)=\n" << A*herm(A) << endl << endl;
+
+    cerr << "A*C_varphiJ=\n" << A * C_varphiJ << endl << endl;
+
     // calculate the inverse of the Jones parameter covariance matrix
     inv_C_JJ = inv(C_JJ);
     
@@ -891,6 +953,7 @@ Pulsar::PolnProfileFitAnalysis::get_C_varphi (std::vector<double>* grad)
   return C_varphi;
 }
 
+#if 0
 
 void Pulsar::PolnProfileFitAnalysis::output_C_varphi (const char* filename)
 {
@@ -912,6 +975,8 @@ void Pulsar::PolnProfileFitAnalysis::output_C_varphi (const char* filename)
 	   << "\t" << relative_error.get_error() << endl;
   }
 }
+
+#endif
 
 //! Get the correlation coefficients
 Matrix<8,8,double> Pulsar::PolnProfileFitAnalysis::get_correlation () const
