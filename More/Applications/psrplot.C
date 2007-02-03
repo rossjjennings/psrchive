@@ -10,6 +10,10 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Interpreter.h"
 
+#include "Pulsar/GaussianBaseline.h"
+#include "Pulsar/PhaseWeight.h"
+#include "Pulsar/Profile.h"
+
 #include "TextInterface.h"
 #include "strutil.h"
 #include "dirutil.h"
@@ -231,7 +235,27 @@ int main (int argc, char** argv) try {
       preprocessor.script(jobs);
     }
 
+#if 1
     archive->remove_baseline();
+#else
+
+    Pulsar::GaussianBaseline mask;
+    Pulsar::PhaseWeight weight;
+    
+    mask.set_Profile (archive->get_Profile(0,0,0));
+    mask.get_weight (weight);
+
+    for (unsigned ipol=0; ipol < archive->get_npol(); ipol++) {
+
+      Pulsar::Profile* profile = archive->get_Profile(0,ipol,0);
+
+      double mean, variance;
+      weight.stats (profile, &mean, &variance);
+      profile->offset(-mean);
+    }
+
+#endif
+
 
     if (verbose)
       cerr << "psrplot: plotting " << filenames[ifile] << endl;
