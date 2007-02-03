@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/Archive.h"
+#include "TemporaryFile.h"
 #include "Error.h"
 
 #include <stdlib.h>
@@ -36,36 +37,22 @@ void Pulsar::Archive::unload (const char* filename) const
   if (verbose == 3)
     cerr << "Pulsar::Archive::unload (" << unload_to_filename << ")" << endl;
 
-  // create the temporary filename
-  string temp_filename = unload_to_filename + ".XXXXXXXX";
-
-  int fd = mkstemp (const_cast<char*> (temp_filename.c_str()));
-  if (fd < 0)
-    throw Error (FailedSys, "Pulsar::Archive::unload", "failed mkstemp");
-  close (fd);
-
-  if (verbose == 3)
-    cerr << "Pulsar::Archive::unload calling unload_file "
-      "(" << temp_filename << ")" << endl;
+  TemporaryFile temp (unload_to_filename);
 
   try {
-    unload_file (temp_filename.c_str());
+    unload_file (temp.get_filename().c_str());
   }
   catch (Error& error) {
-    remove (temp_filename.c_str());
     throw error += "Pulsar::Archive::unload";
-  }
-  catch (...) {
-    remove (temp_filename.c_str());
-    throw Error (FailedCall, "Pulsar::Archive::unload", "failed unload_file "
-		 "(" + temp_filename + ")");
   }
 
   // rename the temporary file with the requested filename
-  int ret = rename (temp_filename.c_str(), unload_to_filename.c_str());
+  int ret = rename (temp.get_filename().c_str(), unload_to_filename.c_str());
 
   if (ret < 0)
     throw Error (FailedSys, "Pulsar::Archive::unload", "failed rename");
+
+  temp.set_removed (true);
 
   ret = chmod (unload_to_filename.c_str(), 0666 & ~getumask());
 
