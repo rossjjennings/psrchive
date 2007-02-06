@@ -7,6 +7,7 @@ nobase_include_HEADERS = \
         MEAL/ArgumentPolicyAdapter.h \
         MEAL/ArgumentPolicy.h \
         MEAL/Axis.h \
+	MEAL/BasisRule.h \
         MEAL/BinaryRule.h \
         MEAL/BinaryScalar.h \
         MEAL/Boost.h \
@@ -44,6 +45,7 @@ nobase_include_HEADERS = \
         MEAL/NoParameters.h \
         MEAL/NormalizeStokes.h \
         MEAL/NotCached.h \
+	MEAL/Null.h \
         MEAL/OneParameter.h \
         MEAL/ParameterPolicy.h \
         MEAL/Parameters.h \
@@ -124,6 +126,7 @@ libMEAL_la_SOURCES = \
         Invariant.C \
 	MuellerTransformation.C \
         NormalizeStokes.C \
+	Null.C \
         OneParameter.C \
         ParameterPolicy.C \
         Parameters.C \
@@ -172,21 +175,22 @@ bin_PROGRAMS = lmfit
 
 lmfit_SOURCES = lmfit.C
 
-check_PROGRAMS = \
-	test_copy test_Axis test_Projection test_Composite test_Scalar	\
-	test_Complex2Product test_Polar test_Rotation test_Invariant \
-	test_CyclicParameter test_Univariate test_StokesError \
-	test_StokesCovariance
+check_PROGRAMS =							  \
+	test_copy test_Axis test_Projection test_Composite test_BasisRule \
+	test_Scalar test_Complex2Product test_Polar test_Rotation	  \
+	test_Invariant test_CyclicParameter test_Univariate		  \
+	test_StokesError test_StokesCovariance
 
 TESTS = $(check_PROGRAMS)
 
 test_copy_SOURCES		= test_copy.C
-test_Polar_SOURCES		= test_Polar.C
 test_Axis_SOURCES		= test_Axis.C
 test_Projection_SOURCES		= test_Projection.C
 test_Composite_SOURCES		= test_Composite.C
+test_BasisRule_SOURCES		= test_BasisRule.C
 test_Scalar_SOURCES		= test_Scalar.C
 test_Complex2Product_SOURCES	= test_Complex2Product.C
+test_Polar_SOURCES		= test_Polar.C
 test_Rotation_SOURCES		= test_Rotation.C
 test_CyclicParameter_SOURCES    = test_CyclicParameter.C
 test_Univariate_SOURCES		= test_Univariate.C
