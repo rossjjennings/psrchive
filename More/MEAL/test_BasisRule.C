@@ -64,6 +64,9 @@ int main (int argc, char** argv) try {
       return -1;
     }
 
+  Matrix<7,7,double> xform;
+  basis.set_transformation (xform);
+
   cerr << "BasisRule template passes all tests" << endl;
   return 0;
 } 
