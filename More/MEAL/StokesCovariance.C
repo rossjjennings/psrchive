@@ -11,6 +11,7 @@
 MEAL::StokesCovariance::StokesCovariance ()
 {
   built = true;
+  matrix_identity (xform);
 }
 
 //! Set the variances of the input Stokes parameters
