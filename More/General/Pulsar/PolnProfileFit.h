@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.26 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.27 $
+   $Date: 2007/02/06 22:08:45 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -148,8 +148,8 @@ namespace Pulsar {
 
   protected:
 
-    friend class PolnProfileFitAnalysis;
-    friend class ScalarProfileFitAnalysis;
+    friend class MTMAnalysis;
+    friend class STMAnalysis;
 
     //! The maximum number of harmonics to include in the fit
     unsigned maximum_harmonic;

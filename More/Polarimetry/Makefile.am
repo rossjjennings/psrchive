@@ -91,7 +91,6 @@ libPolarimetry_la_SOURCES = \
         PolnCalibratorExt.C \
         PolnCalibratorInfo.C \
         PolnProfile.C \
-        PolnProfileFitAnalysis.C \
         PolnProfileFit.C \
         PolnProfileStats.C \
         PulsarCalibrator.C \

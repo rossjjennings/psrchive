@@ -37,7 +37,6 @@ nobase_include_HEADERS = \
         Pulsar/PhaseWeightFunction.h \
         Pulsar/PhaseWeight.h \
         Pulsar/Polarization.h \
-        Pulsar/PolnProfileFitAnalysis.h \
         Pulsar/PolnProfileFit.h \
         Pulsar/PolnProfile.h \
         Pulsar/PolnProfileStats.h \
