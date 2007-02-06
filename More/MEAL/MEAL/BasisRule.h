@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/BasisRule.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/02/06 22:10:53 $
+   $Revision: 1.2 $
+   $Date: 2007/02/06 22:45:10 $
    $Author: straten $ */
 
 #ifndef __MEAL_BasisRule_H
@@ -49,7 +49,7 @@ namespace MEAL {
     void set_model (T* model);
 
     //! Set the basis transformation
-    void set_transformation (Matrix<N,N,double>& xform);
+    void set_transformation (const Matrix<N,N,double>& xform);
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -130,10 +130,40 @@ void MEAL::BasisRule<N,T>::set_model (T* _model)
 
   composite.map (model);
 
-  for (unsigned i=0; i<N; i++)
+  Vector<N,double> params;
+
+  for (unsigned i=0; i<N; i++) {
+
     model->set_infit (i, false);
+    params[i] = model->get_param(i);
+
+  }
+
+  params = inv(transformation) * params;
+
+  for (unsigned i=0; i<N; i++)
+    parameters.set_param(i, params[i]);
+
 }
 
+template<unsigned N, class T>
+void MEAL::BasisRule<N,T>::set_transformation (const Matrix<N,N,double>& xform)
+{
+  transformation = xform;
+
+  if (!model)
+    return;
+
+  Vector<N,double> params;
+
+  for (unsigned i=0; i<N; i++)
+    params[i] = model->get_param(i);
+
+  params = inv(transformation) * params;
+
+  for (unsigned i=0; i<N; i++)
+    parameters.set_param(i, params[i]);
+}
 
 template<unsigned N, class T>
 void MEAL::BasisRule<N,T>::calculate (Result& result,
