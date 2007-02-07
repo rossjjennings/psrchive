@@ -637,8 +637,14 @@ int MJD::Construct (const char* mjdstr)
   return 0;
 }
 
-ostream& operator << (ostream& ostr, const MJD& mjd)  {
-  return ostr << mjd.printdays(MJD::ostream_precision); 
+ostream& operator << (ostream& ostr, const MJD& mjd)
+{
+  unsigned precision = ostr.precision();
+
+  if (!precision)
+    precision = MJD::ostream_precision;
+
+  return ostr << mjd.printdays(precision);
 }
 
 istream& operator >> (istream& istr, MJD& mjd)
