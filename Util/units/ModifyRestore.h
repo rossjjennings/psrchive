@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ModifyRestore.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.4 $
+   $Date: 2007/02/07 21:51:01 $
    $Author: straten $ */
 
 #ifndef __ModifyRestore_h
@@ -23,6 +23,10 @@ class ModifyRestore
   //! Modify constructor
   ModifyRestore (T& value, const T& modified_value) : the_value (value)
     { restore_value = value; the_value = modified_value; }
+
+  //! Modify constructor
+  ModifyRestore (T& value) : the_value (value)
+    { restore_value = value; }
 
   //! Restore destructor
   ~ModifyRestore ()
