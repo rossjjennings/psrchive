@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/11/08 21:20:24 $
+   $Revision: 1.12 $
+   $Date: 2007/02/07 22:43:13 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H
@@ -20,12 +20,18 @@
 #include <iomanip>
 #include <limits>
 
+extern unsigned tostring_precision;
+
 template<class T>
 std::string tostring (const T& input,
 		      unsigned precision = std::numeric_limits<T>::digits10)
 {
   extern std::ostringstream tostring_ost;
-  tostring_ost.precision(precision);
+
+  if (tostring_precision)
+    tostring_ost.precision(tostring_precision);
+  else
+    tostring_ost.precision(precision);
 
   tostring_ost.str("");
   tostring_ost << input;
