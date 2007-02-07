@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.27 $
-   $Date: 2006/11/11 19:04:45 $
+   $Revision: 1.28 $
+   $Date: 2007/02/07 22:53:16 $
    $Author: straten $ */
 
 #ifndef __GENUTIL_MJD_H
@@ -162,6 +162,15 @@ inline double cast_double(const MJD&m) {return m.in_days();}
 
 std::ostream& operator<< (std::ostream& ostr, const MJD& mjd);
 std::istream& operator>> (std::istream& istr, MJD& mjd);
+
+// Enable use of the MJD class with std C++ numeric_limits traits
+namespace std {
+  template<>
+  class numeric_limits<MJD> {
+    public:
+    static const int digits10 = 15;
+  };
+}
 
 #endif  /* not __MJD_H defined */
 
