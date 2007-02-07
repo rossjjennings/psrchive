@@ -822,10 +822,10 @@ std::string TextInterface::To<C>::get_value (const std::string& name) const
   if (dot == std::string::npos)
     return find(name)->get_value(instance);
 
-  ModifyRestore<unsigned> temp (tostring_precision,
-				fromstring<unsigned> (name.substr (dot+1));
+  ModifyRestore<unsigned> temp ( tostring_precision,
+				 fromstring<unsigned> (name.substr(dot+1)) );
 
-  return find(name.substr (0, dot))->get_value(instance);
+  return find(name.substr(0,dot))->get_value(instance);
 }
 
 template<class C>
