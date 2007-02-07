@@ -184,6 +184,20 @@ int main () try {
     return -1;
   }
 
+  if (getset.get_value("value.2") != "3.5") {
+    cerr <<
+      "test_TextInterface ERROR precision:\n"
+      "value.2 = " << getset.get_value("value.2") << endl;
+    return -1;
+  }
+
+  if (getset.get_value("value") != "3.456") {
+    cerr <<
+      "test_TextInterface ERROR after precision:\n"
+      "value = " << getset.get_value("value") << endl;
+    return -1;
+  }
+
   // test ElementGetSet all elements in the vector
   getset.set_value("element", "5.67");
   for (unsigned i=0; i<Test.get_nelement(); i++) {

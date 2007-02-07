@@ -7,6 +7,7 @@
 #ifndef __TextInterface_h
 #define __TextInterface_h
 
+#include "ModifyRestore.h"
 #include "Alias.h"
 #include "Error.h"
 
@@ -626,9 +627,7 @@ namespace TextInterface {
     To () { import_filter = false; }
 
     //! Get the value of the attribute
-    std::string get_value (const std::string& name) const
-      { if (!instance) return "N/A";
-        else return find(name)->get_value(instance); }
+    std::string get_value (const std::string& name) const;
 
     //! Set the value of the attribute
     void set_value (const std::string& name, const std::string& value)
@@ -812,12 +811,36 @@ namespace TextInterface {
 }
 
 template<class C>
+//! Get the value of the attribute
+std::string TextInterface::To<C>::get_value (const std::string& name) const
+{ 
+  if (!instance)
+    return "N/A";
+
+  std::string::size_type dot = name.find('.');
+
+  if (dot == std::string::npos)
+    return find(name)->get_value(instance);
+
+  ModifyRestore<unsigned> restore (tostring_precision);
+
+  // parse the precision and remove it from the name
+  tostring_precision = fromstring<unsigned> (name.substr (dot+1));
+  std::cerr << "precision=" << tostring_precision << std::endl;
+
+  std::string preceding = name.substr (0, dot);
+  std::cerr << "preceding=" << preceding << std::endl;
+
+  return find(preceding)->get_value(instance);
+}
+
+template<class C>
 TextInterface::Attribute<C>* 
 TextInterface::To<C>::find (const std::string& param, bool throw_ex) const
 {
 #ifdef _DEBUG
-  std::cerr << "To::find (" << param << ") size=" 
-	    << attributes.size() << endl;
+  std::cerr << "To::find (" << param << ") size=" << attributes.size() 
+	    << std::endl;
 #endif
 
   std::string key = param;
@@ -1005,8 +1028,7 @@ template<class C,class Get,class Size>
 }
 
 template<class C, class G, class S> 
-std::string
-TextInterface::ElementGet<C,G,S>::get_value (const C* ptr) const
+std::string TextInterface::ElementGet<C,G,S>::get_value (const C* ptr) const
 {
   std::vector<unsigned> ind;
   parse_indeces (ind, range, (ptr->*(size))());
