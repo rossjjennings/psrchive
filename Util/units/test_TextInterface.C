@@ -184,10 +184,10 @@ int main () try {
     return -1;
   }
 
-  if (getset.get_value("value.2") != "3.5") {
+  if (getset.get_value("value%2") != "3.5") {
     cerr <<
       "test_TextInterface ERROR precision:\n"
-      "value.2 = " << getset.get_value("value.2") << endl;
+      "value;2 = " << getset.get_value("value%2") << endl;
     return -1;
   }
 

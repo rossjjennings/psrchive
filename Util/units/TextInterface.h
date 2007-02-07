@@ -817,7 +817,7 @@ std::string TextInterface::To<C>::get_value (const std::string& name) const
   if (!instance)
     return "N/A";
 
-  std::string::size_type dot = name.find('.');
+  std::string::size_type dot = name.find('%');
 
   if (dot == std::string::npos)
     return find(name)->get_value(instance);
