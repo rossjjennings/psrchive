@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.18 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.19 $
+   $Date: 2007/02/07 13:04:06 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -227,6 +227,48 @@ const Matrix<Rows,Columns,T> outer (const Vector<Rows,T>& a,
       result[i][j] = a[i] * b[j];
 
   return result;
+}
+
+//! Partition a matrix into four regions
+template<unsigned M, unsigned N, unsigned U, unsigned V, typename T>
+void partition (const Matrix<M,N,T>& A,
+		Matrix<U,V,T>& upper_left,
+		Matrix<M-U,V,T>& bottom_left,
+		Matrix<U,N-V,T>& upper_right,
+		Matrix<M-U,N-V,T>& bottom_right)
+{
+  unsigned i, j;
+
+  for (i=0; i<U; i++) {
+    for (j=0; j<V; j++)
+      upper_left[i][j]=A[i][j];
+    for (; j<N; j++)
+      upper_right[i][j-V]=A[i][j];
+  }
+
+  for (; i<M; i++) {
+    for (j=0; j<V; j++)
+      bottom_left[i-U][j]=A[i][j];
+    for (; j<N; j++)
+      bottom_right[i-U][j-V]=A[i][j];
+  }
+}
+
+//! Convenience interface for square, symmetric matrices
+template<unsigned M, typename T>
+void partition (const Matrix<M,M,T>& covariance,
+		T& c_varphi,
+		Vector <M-1,T>& C_varphiJ,
+		Matrix <M-1,M-1,T>& C_JJ)
+{
+  Matrix<1,1,T> ul;
+  Matrix<M-1,1,T> bl;
+  Matrix<1,M-1,T> ur;
+
+  partition (covariance, ul, bl, ur, C_JJ);
+
+  c_varphi  = ul[0][0];
+  C_varphiJ = ur[0];
 }
 
 //! Useful for printing the components
