@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.19 $
-   $Date: 2007/02/07 13:04:06 $
+   $Revision: 1.20 $
+   $Date: 2007/02/07 21:50:55 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -230,45 +230,70 @@ const Matrix<Rows,Columns,T> outer (const Vector<Rows,T>& a,
 }
 
 //! Partition a matrix into four regions
-template<unsigned M, unsigned N, unsigned U, unsigned V, typename T>
-void partition (const Matrix<M,N,T>& A,
-		Matrix<U,V,T>& upper_left,
-		Matrix<M-U,V,T>& bottom_left,
-		Matrix<U,N-V,T>& upper_right,
-		Matrix<M-U,N-V,T>& bottom_right)
+template<unsigned U, unsigned L, unsigned B, unsigned R, typename T>
+void partition (const Matrix<U+B,L+R,T>& A,
+		Matrix<U,L,T>& upper_left,
+		Matrix<U,R,T>& upper_right,
+		Matrix<B,L,T>& bottom_left,
+		Matrix<B,R,T>& bottom_right)
 {
   unsigned i, j;
 
   for (i=0; i<U; i++) {
-    for (j=0; j<V; j++)
-      upper_left[i][j]=A[i][j];
-    for (; j<N; j++)
-      upper_right[i][j-V]=A[i][j];
+    for (j=0; j<L; j++)
+      upper_left[i][j] = A[i][j];
+    for (j=0; j<R; j++)
+      upper_right[i][j] = A[i][j+L];
   }
 
-  for (; i<M; i++) {
-    for (j=0; j<V; j++)
-      bottom_left[i-U][j]=A[i][j];
-    for (; j<N; j++)
-      bottom_right[i-U][j-V]=A[i][j];
+  for (i=0; i<B; i++) {
+    for (j=0; j<L; j++)
+      bottom_left[i][j] = A[i+U][j];
+    for (j=0; j<R; j++)
+      bottom_right[i][j] = A[i+U][j+L];
+  }
+}
+
+//! Merge four matrices into one
+template<unsigned U, unsigned L, unsigned B, unsigned R, typename T>
+void merge (Matrix<U+B,L+R,T>& A,
+	    const Matrix<U,L,T>& upper_left,
+	    const Matrix<U,R,T>& upper_right,
+	    const Matrix<B,L,T>& bottom_left,
+	    const Matrix<B,R,T>& bottom_right)
+{
+  unsigned i, j;
+
+  for (i=0; i<U; i++) {
+    for (j=0; j<L; j++)
+      A[i][j] = upper_left[i][j];
+    for (j=0; j<R; j++)
+      A[i][j+L] = upper_right[i][j];
+  }
+
+  for (i=0; i<B; i++) {
+    for (j=0; j<L; j++)
+      A[i+U][j] = bottom_left[i][j];
+    for (j=0; j<R; j++)
+      A[i+U][j+L] = bottom_right[i][j];
   }
 }
 
 //! Convenience interface for square, symmetric matrices
 template<unsigned M, typename T>
-void partition (const Matrix<M,M,T>& covariance,
-		T& c_varphi,
-		Vector <M-1,T>& C_varphiJ,
-		Matrix <M-1,M-1,T>& C_JJ)
+void partition (const Matrix<M+1,M+1,T>& covariance,
+		T& variance,
+		Vector <M,T>& cov_vector,
+		Matrix <M,M,T>& cov_matrix)
 {
   Matrix<1,1,T> ul;
-  Matrix<M-1,1,T> bl;
-  Matrix<1,M-1,T> ur;
+  Matrix<M,1,T> bl;
+  Matrix<1,M,T> ur;
 
-  partition (covariance, ul, bl, ur, C_JJ);
+  partition (covariance, ul, ur, bl, cov_matrix);
 
-  c_varphi  = ul[0][0];
-  C_varphiJ = ur[0];
+  variance  = ul[0][0];
+  cov_vector = ur[0];
 }
 
 //! Useful for printing the components
