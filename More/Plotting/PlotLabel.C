@@ -7,6 +7,7 @@
 #include "Pulsar/PlotLabel.h"
 #include "Pulsar/ArchiveTI.h"
 #include "substitute.h"
+#include "evaluate.h"
 
 #include <cpgplot.h>
 
@@ -43,6 +44,7 @@ Pulsar::PlotLabel::plot (const Archive* data, const string& label, float side)
 
   for (unsigned i=0; i < labels.size(); i++) {
     labels[i] = substitute (labels[i], get_interface(data));
+    labels[i] = evaluate (labels[i]);
     row (labels[i], i, labels.size(), side);
   }
 
