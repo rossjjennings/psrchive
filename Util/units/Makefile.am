@@ -43,6 +43,7 @@ libunits_la_SOURCES = \
         Configuration.C \
         Conventions.C \
         Error.C \
+	evaluate.C \
         HeapTracked.C \
         pad.C \
         Pauli.C \
@@ -63,7 +64,7 @@ check_PROGRAMS = test_Alias test_tostring test_Conventions		\
 	test_Warning test_Error test_Configuration			\
 	test_HeapTracked test_Reference test_circular_Reference		\
 	test_Registry test_Functor test_Callback test_separate		\
-	test_substitute test_Mueller test_inner_product			\
+	test_substitute test_evaluate test_Mueller test_inner_product	\
 	test_Basis test_Stokes						\
         test_TextInterface test_parse_indeces test_Estimate test_Vector	\
         test_Matrix test_Jacobi test_eigen test_Jones test_Quaternion	\
@@ -86,6 +87,10 @@ test_Functor_SOURCES		= test_Functor.C
 test_Callback_SOURCES		= test_Callback.C
 test_separate_SOURCES		= test_separate.C
 test_substitute_SOURCES		= test_substitute.C
+
+test_evaluate_SOURCES		= test_evaluate.C
+test_evaluate_LDADD = $(LDADD) $(top_builddir)/Util/third/libthird.la
+
 test_Estimate_SOURCES		= test_Estimate.C
 test_Vector_SOURCES		= test_Vector.C
 test_Matrix_SOURCES		= test_Matrix.C
