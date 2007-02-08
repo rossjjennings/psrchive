@@ -194,9 +194,15 @@ int main (int argc, char** argv) try {
     return -1;
   } 
 
-  if (options.size())
+  if (options.size()) {
+    if (verbose)
+      cerr << "psrplot: parsing options" << endl;
     for (unsigned iplot=0; iplot < plots.size(); iplot++)
       set_options (plots[iplot], options);
+  }
+
+  if (verbose)
+    cerr << "psrplot: parsing filenames" << endl;
 
   vector <string> filenames;
 
