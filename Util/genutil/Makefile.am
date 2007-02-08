@@ -12,6 +12,7 @@ include_HEADERS = \
         coord_parse.h \
         dirutil.h \
         environ.h \
+	evaluate.h \
         fcomp.h \
 	format_it.h \
         fsleep.h \
@@ -55,6 +56,7 @@ libgenutil_la_SOURCES = \
         eccentric_anomaly.c \
         endian.c \
         errscale.c \
+	evaluate.C \
         fcomp.C \
 	filesize.c \
 	format_it.C \
@@ -96,11 +98,12 @@ bin_PROGRAMS = getMJD
 
 getMJD_SOURCES = getMJD.C
 
-TESTS = test_coord test_Cartesian test_MJD test_ja98 \
+TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98 \
 	test_endian test_environ test_sum test_TemporaryFile
 
 check_PROGRAMS = $(TESTS) test_CommandParser test_Angle
 
+test_evaluate_SOURCES           = test_evaluate.C
 test_Cartesian_SOURCES		= test_Cartesian.C
 test_MJD_SOURCES		= test_MJD.C
 test_Angle_SOURCES		= test_Angle.C
