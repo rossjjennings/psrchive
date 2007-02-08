@@ -1,13 +1,13 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/substitute.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.6 $
+   $Date: 2007/02/08 02:55:40 $
    $Author: straten $ */
 
 #ifndef __UTILS_UNITS_SUBSTITUTE_H
@@ -20,7 +20,7 @@
 //! Return true if c may belong to a valid TextInterface variable name
 inline bool isvar (char c) 
 {
-  static std::string valid = "_[,-]:";
+  static std::string valid = "_[,-]:%";
   return isalnum(c) || valid.find(c) != std::string::npos;
 }
 
