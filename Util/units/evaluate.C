@@ -4,6 +4,7 @@
 
 // evaluateExpression from Parsifal Software
 #include "evaldefs.h"
+#include "substitute.h"
 
 #include <string>
 #include <iostream>
@@ -16,7 +17,9 @@ string evaluate (const string& text, char cstart, char cend)
 
   string::size_type start;
   string::size_type end;
-  
+
+  int(*pred)(int) = isdigit;
+
   while ( (start = remain.find(cstart)) != string::npos &&
 	  (end = remain.find(cend, start)) != string::npos ) {
 
@@ -26,7 +29,20 @@ string evaluate (const string& text, char cstart, char cend)
     // string preceding the variable substitution
     string before = remain.substr (0, start);
 
-     string after = remain.substr (end+1);
+    end ++;
+
+    unsigned precision = 0;
+
+    if (remain[end] == '%') {
+      end ++;
+      string::size_type pend = find_first_not_if (remain, pred, end);
+      string::size_type len = (pend != string::npos ) ? pend-end : pend;
+      precision = fromstring<unsigned> (remain.substr (end, len));
+      end = pend;
+    }
+
+    // string following the variable substitution
+    string after = (end != string::npos) ? remain.substr (end) : "";
 
     string result = "result";
     string expression = result + " = (" + eval + ")";
@@ -45,7 +61,14 @@ string evaluate (const string& text, char cstart, char cend)
       if (variable[i].name == result)
 	value = variable[i].value;
 
-    remain = before + tostring(value) + after;
+    string subst;
+
+    if (precision)
+      subst = tostring (value, precision);
+    else
+      subst = tostring (value);
+
+    remain = before + subst + after;
   }
 
   return remain;
