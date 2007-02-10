@@ -23,6 +23,7 @@ include_HEADERS = \
         JenetAnderson98.h \
         machine_endian.h \
         MJD.h \
+	normal.h \
         orbital.h \
         Physical.h \
         Plugin.h \
@@ -67,6 +68,7 @@ libgenutil_la_SOURCES = \
         JenetAnderson98A5.C \
         JenetAnderson98.C \
         MJD.C \
+	normal.c \
         Physical.C \
         Plugin.C \
         RealTimer.C \
@@ -99,7 +101,7 @@ bin_PROGRAMS = getMJD
 getMJD_SOURCES = getMJD.C
 
 TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98 \
-	test_endian test_environ test_sum test_TemporaryFile
+	test_endian test_environ test_sum test_normal test_TemporaryFile
 
 check_PROGRAMS = $(TESTS) test_CommandParser test_Angle
 
