@@ -14,7 +14,7 @@ using namespace MEAL;
 int main (int argc, char** argv) try {
 
   //Function::very_verbose = true;
-  //Function::verbose = true;
+  Function::verbose = true;
 
   cerr << "Instantiating BasisRule<7,Complex2>" << endl;
   BasisRule<7, Complex2> basis;
@@ -65,6 +65,8 @@ int main (int argc, char** argv) try {
     }
 
   Matrix<7,7,double> xform;
+  matrix_identity (xform);
+
   basis.set_transformation (xform);
 
   cerr << "BasisRule template passes all tests" << endl;
