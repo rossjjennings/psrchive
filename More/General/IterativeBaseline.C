@@ -4,13 +4,15 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/IterativeBaseline.h"
 #include "Pulsar/BaselineWindow.h"
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 
 #include <math.h>
+
+using namespace std;
 
 // #define _DEBUG 1
 
@@ -90,6 +92,7 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
 
     initial_baseline->set_Profile (profile);
     initial_baseline->get_weight (weight);
+    initial_bounds = true;
 
   }
   catch (Error& error) {
@@ -106,6 +109,8 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
   for (iter=0; iter < max_iterations; iter++) {
 
     get_bounds (weight, lower, upper);
+
+    initial_bounds = false;
 
     if (lower == upper) {
 #ifndef _DEBUG
@@ -162,6 +167,8 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
 
   }
 
+#if 0
+
   if (iter >= max_iterations)
     throw Error (InvalidState, "Pulsar::IterativeBaseline::get_weight",
 		 "did not converge in %d iterations", max_iterations);
@@ -178,5 +185,14 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
 
     }
 
+#endif
+
+#ifdef _DEBUG
+  unsigned total = 0;
+  for (unsigned ibin=0; ibin<nbin; ibin++)
+    if (weight[ibin])
+      total ++;
+  cerr << "total bins = " << total << endl;
+#endif
 
 }

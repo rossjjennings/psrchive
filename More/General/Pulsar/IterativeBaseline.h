@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/IterativeBaseline.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.8 $
+   $Date: 2007/02/12 17:41:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IterativeBaseline_h
@@ -37,7 +37,7 @@ namespace Pulsar {
     BaselineEstimator* get_initial_baseline () const;
 
     //! Set the threshold below which samples are included in the baseline
-    void set_threshold (float sigma);
+    virtual void set_threshold (float sigma);
 
     //! Set the maximum number of iterations
     void set_max_iterations (unsigned iterations);
@@ -58,6 +58,14 @@ namespace Pulsar {
 
     //! The BaselineEstimator used to find the initial baseline
     Reference::To<BaselineEstimator> initial_baseline;
+
+    //! Provide access to derived classes
+    bool get_initial_bounds () const { return initial_bounds; }
+
+  private:
+
+    //! Flag set true on the first call to get_bounds
+    bool initial_bounds;
 
   };
 
