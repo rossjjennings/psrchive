@@ -35,23 +35,6 @@ int main ()
     return -1;
   }
 
-  if (normal_moment2 (a) >= normal_moment2 (a+1)) {
-    fprintf (stderr, "moment2 is not increasing\n");
-    return -1;
-  }
-
-  if (fabs(normal_moment2 (a) + normal_moment2 (-a)) > 1e-12) {
-    fprintf (stderr, "moment2 is not anti-symmetric\n");
-    fprintf (stderr, "a=%lf; moment2(a)=%lf; moment2(-a)=%lf\n", a,
-	     normal_moment2 (a), normal_moment2 (-a));
-    return -1;
-  }
-
-  if (normal_moment2 (0) != 0.0) {
-    fprintf (stderr, "moment2(0) != 0.0\n");
-    return -1;
-  }
-
   fprintf (stderr, "all normal distribution functions pass tests\n");
 
   return 0;
