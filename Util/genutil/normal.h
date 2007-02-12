@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/normal.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/02/10 18:36:04 $
+   $Revision: 1.2 $
+   $Date: 2007/02/12 17:06:40 $
    $Author: straten $ */
 
 #ifndef __genutil_normal_H
@@ -19,12 +19,14 @@ extern "C" {
   /* Returns the standard normal probability function */
   double normal_probability (double x);
 
+  /* Returns the integral of the probability density from 0 to x */
+  double normal_distribution (double x);
+
   /* Returns the standard normal cummulative distribution function */
   double normal_cummulative (double x);
 
-  /* Returns the indefinite integral of the second moment of standard
-     normal probability function */
-  double normal_moment2 (double x);
+  /* Returns the expectation value of x^2, for x < threshold */
+  double normal_moment2 (double threshold);
 
 #ifdef __cplusplus
            }
