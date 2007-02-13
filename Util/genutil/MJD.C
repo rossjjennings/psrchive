@@ -640,11 +640,15 @@ int MJD::Construct (const char* mjdstr)
 ostream& operator << (ostream& ostr, const MJD& mjd)
 {
   unsigned precision = ostr.precision();
-
   if (!precision)
     precision = MJD::ostream_precision;
 
-  return ostr << mjd.printdays(precision);
+  if (precision < std::numeric_limits<double>::digits10)
+    return ostr << mjd.in_days();
+  else {
+    unsigned digits = unsigned(log(mjd.in_days())/log(10.0)) + 1;
+    return ostr << mjd.printdays(precision-digits);
+  }
 }
 
 istream& operator >> (istream& istr, MJD& mjd)
