@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.12 $
+   $Date: 2007/02/14 18:35:01 $
    $Author: straten $ */
 
 #ifndef __FITSHdrExtension_h
@@ -61,9 +61,12 @@ namespace Pulsar {
     //! File creation date
     std::string creation_date;
 
-    //! Coordinate mode (J2000, Gal, Ecliptic, AZEL, HADEC)
+    //! Coordinate mode (EQUAT, GAL, ECLIP, AZEL, HADEC)
     std::string coordmode;
     
+    //! Equinox of coordinates
+    std::string equinox;
+
     //! Track mode (TRACK, SCANGC, SCANLAT)
     std::string trk_mode;
 

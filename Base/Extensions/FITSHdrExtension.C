@@ -17,6 +17,7 @@ Pulsar::FITSHdrExtension::FITSHdrExtension ()
   hdrver = "UNSET";
   creation_date = "UNSET";
   coordmode = "UNSET";
+  equinox  = "UNSET";
   trk_mode = "UNSET";
   stt_date = "UNSET";
   stt_time = "UNSET";
@@ -27,14 +28,7 @@ Pulsar::FITSHdrExtension::FITSHdrExtension ()
 Pulsar::FITSHdrExtension::FITSHdrExtension (const FITSHdrExtension& extension)
   : Extension ("FITSHdrExtension")
 {
-  start_time = extension.start_time;
-  hdrver = extension.hdrver;
-  creation_date = extension.creation_date;
-  coordmode = extension.coordmode;
-  trk_mode = extension.trk_mode;
-  stt_date = extension.stt_date;
-  stt_time = extension.stt_time;
-  stt_lst = extension.stt_lst;
+  operator=(extension);
 }
 
 //! Operator =
@@ -45,6 +39,7 @@ Pulsar::FITSHdrExtension::operator= (const FITSHdrExtension& extension)
   hdrver = extension.hdrver;
   creation_date = extension.creation_date;
   coordmode = extension.coordmode;
+  equinox = extension.equinox;
   trk_mode = extension.trk_mode;
   stt_date = extension.stt_date;
   stt_time = extension.stt_time;
@@ -60,7 +55,7 @@ Pulsar::FITSHdrExtension::~FITSHdrExtension ()
 
 void Pulsar::FITSHdrExtension::set_coord_mode (const string mode)
 {
-  if (mode == "J2000" || mode == "Gal" || mode == "Ecliptic" ||
+  if (mode == "EQUAT" || mode == "GAL" || mode == "ECLIP" ||
         mode == "AZEL" || mode == "HADEC") {
     coordmode = mode;
   }
@@ -80,7 +75,7 @@ void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
 {
   AnglePair newcoord;
   
-  if (coordmode == "J2000") {
+  if (coordmode == "EQUAT") {
     
     newcoord = coordinates.getRaDec();
     
@@ -91,18 +86,18 @@ void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
 
   }
 
-  if (coordmode == "Gal") {
+  if (coordmode == "GAL") {
     
     newcoord = coordinates.getGalactic();
     
-    coord1 = stringprintf ("%f", newcoord.angle1.getDegrees());
-    coord2 = stringprintf ("%f", newcoord.angle2.getDegrees());
+    coord1 = tostring (newcoord.angle1.getDegrees());
+    coord2 = tostring (newcoord.angle2.getDegrees());
     
     return;
 
   }
 
-  cerr << "WARNING: FITSHdrExtension::get_coord_string COORD_MD = "
-       << coordmode << " not implimented" << endl;
+  cerr << "FITSHdrExtension::get_coord_string WARNING COORD_MD = "
+       << coordmode << " not implemented" << endl;
 
 }
