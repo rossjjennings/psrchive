@@ -748,10 +748,13 @@ try {
   fits_update_key (fptr, TSTRING, "SRC_NAME",
 		   const_cast<char*>(source.c_str()), comment, &status);
     
-  string coord1, coord2;
+  AnglePair radec = get_coordinates().getRaDec();
+  string RA = radec.angle1.getHMS();
+  string DEC = radec.angle2.getDMS();
 
+  string coord1, coord2;
   const FITSHdrExtension* hdr_ext = get<FITSHdrExtension>();
-  
+
   if (hdr_ext) {
     
     if (verbose == 3)
@@ -764,16 +767,19 @@ try {
   
   else {
 
-    AnglePair radec = get_coordinates().getRaDec();
-    
-    coord1 = radec.angle1.getHMS();
-    coord2 = radec.angle2.getDMS();
-
     // If no FITSHdrExtension is present, assume J2000 Equatorial
+
+    coord1 = RA;
+    coord2 = DEC;
+
     psrfits_update_key (fptr, "COORD_MD", "EQUAT");
     psrfits_update_key (fptr, "EQUINOX", "J2000");
 
   }
+
+  // Virtual Observatory compatibility (redundant)
+  psrfits_update_key (fptr, "RA", RA);
+  psrfits_update_key (fptr, "DEC", DEC); 
 
   psrfits_update_key (fptr, "STT_CRD1", coord1);
   psrfits_update_key (fptr, "STT_CRD2", coord2); 
