@@ -60,7 +60,9 @@ std::string Angle::getHMS (int places) const
 
 int Angle::setHMS(const char *str)
 {
-  return str2ra(&radians, str);
+  int ret = str2ra (&radians, str);
+  setWrapPoint (2*M_PI);
+  return ret;
 }
 
 int Angle::setDMS(const char *str)
@@ -71,6 +73,7 @@ int Angle::setDMS(const char *str)
 void Angle::setHMS (int hours, int minutes, double seconds)
 {
   radians = M_PI * ( hours/12.0 + minutes/720.0 + seconds/43200.0 );
+  setWrapPoint (2*M_PI);
 }
 
 void Angle::getHMS (int& hours, int& minutes, double& seconds) const
@@ -341,11 +344,14 @@ AnglePair::AnglePair (const std::string& astr)
   if (str2coord (&angle1.radians, &angle2.radians, astr.c_str()) < 0)
     throw Error (InvalidParam, "AnglePair::AnglePair",
 		 "str2coord(" + astr + ") failure");
+  angle1.setWrapPoint (2*M_PI);
 }
 
 int AnglePair::setHMSDMS(const char *astr)
 { 
-  return str2coord (&angle1.radians, &angle2.radians, astr);
+  int ret = str2coord (&angle1.radians, &angle2.radians, astr);
+  angle1.setWrapPoint (2*M_PI);
+  return ret;
 }
 
 int AnglePair::setHMSDMS(const string& s1, const string& s2)
