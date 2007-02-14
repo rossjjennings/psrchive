@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '2.7             '   / Header version 
+HDRVER  = '2.8             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -27,8 +27,16 @@ BE_DCC  = *                    / 0/1 BE downconversion conjugation corrected
 TCYCLE  = *                    / [s] On-line cycle time (D)
 NRCVR   = *                    / Number of receiver channels (I)
 OBS_MODE= '                '   / (PSR, CAL, SEARCH)
+DATE-OBS= '                '   / Date of observation (YYYY-MM-DDThh:mm:ss UTC)
+OBSFREQ = *                    / [MHz] Centre frequency for observation
 SRC_NAME= '                '   / Source or scan ID 
-COORD_MD= '                '   / Coordinate mode (J2000, Gal, Ecliptic, etc.)
+COORD_MD= '                '   / Coordinate mode (EQUAT, GAL, ECLIP, etc.)
+EQUINOX = '                '   / Equinox of coords (J2000, B1950) 
+RA      = '                '   / Right ascension (hh:mm:ss.ssss)
+DEC     = '                '   / Declination (-dd:mm:ss.sss)
+BMAJ    = *                    / [deg] Beam major axis length
+BMIN    = *                    / [deg] Beam minor axis length
+BPA     = *                    / [deg] Beam position angle
 STT_CRD1= '                '   / Start coord 1 (hh:mm:ss.sss or ddd.ddd)
 STT_CRD2= '                '   / Start coord 2 (-dd:mm:ss.sss or -dd.ddd) 
 TRK_MODE= '                '   / Track mode (TRACK, SCANGC, SCANLAT)
@@ -41,8 +49,6 @@ CAL_MODE= '                '   / Cal mode (OFF, SYNC, EXT1, EXT2)
 CAL_FREQ= *                    / [Hz] Cal modulation frequency (E)
 CAL_DCYC= *                    / Cal duty cycle (E)
 CAL_PHS = *                    / Cal phase (wrt start time) (E)
-STT_DATE= '                '   / Start UT date (YYYY-MM-DD)
-STT_TIME= '                '   / Start UT (hh:mm:ss)
 STT_IMJD= *                    / Start MJD (UTC days) (J - long integer)
 STT_SMJD= *                    / [s] Start time (sec past UTC 00h) (J)
 STT_OFFS= *                    / [s] Start time offset (D)   
@@ -710,11 +716,12 @@ TFIELDS =                   19 / Number of fields per row
 INT_TYPE= '                  ' / Time axis (TIME, BINPHSPERI, BINLNGASC, etc)
 INT_UNIT= '                  ' / Unit of time axis (SEC, PHS (0-1), DEG) 
 TSAMP   =                    * / [s] Sample interval for SEARCH-mode data 
-NBIN    =                    * / Nr of bins (1 for SEARCH-mode data)
+NBIN    =                    * / Nr of bins (PSR/CAL mode; else 1)
+NBITS   =                    * / Nr of bits/datum (SEARCH mode 'X' data, else 1)
 NCH_FILE=                    * / Number of channels/sub-bands in this file
 NCH_STRT=                    * / Start channel/sub-band number (0 to NCHAN-1)
 NPOL    =                    * / Nr of polarisations in table
-NSBLK   =                    * / Samples/row (each NPOL*NCH_FILE, SEARCH mode) 
+NSBLK   =                    * / Samples/row (SEARCH mode, else 1) 
 #
 EXTNAME = SUBINT               / name of this binary table extension
 #
@@ -768,8 +775,8 @@ TFORM#  = E                    / NCH_FILE*NPOL floats
 TTYPE#  = DAT_SCL              / Data scale factor for each channel
 TFORM#  = E                    / NCH_FILE*NPOL floats
 TTYPE#  = DATA                 / Subint data table
-TDIM#   = (*,*,*,*)            / Dimensions (NBIN,NCH_FILE,NPOL,NSBLK)
-TFORM#  = I                    / NBIN*NCH_FILE*NPOL*NSBLK int, byte or nX 
+TDIM#   = (*,*,*,*)            / Dimensions (NBITS or NBIN,NCH_FILE,NPOL,NSBLK)
+TFORM#  = I                    / NBIN*NCH_FILE*NPOL*NSBLK int, byte(B) or bit(X)
 TUNIT#  = Jy                   / Units of subint data
 END
 #
