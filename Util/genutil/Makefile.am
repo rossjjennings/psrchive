@@ -102,7 +102,7 @@ getMJD_SOURCES = getMJD.C
 
 TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98 \
 	test_endian test_environ test_sum test_normal \
-	test_TemporaryFile test_moment2 test_MJD_ostream
+	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord
 
 check_PROGRAMS = $(TESTS) test_CommandParser test_Angle
 
@@ -118,6 +118,7 @@ test_sum_SOURCES		= test_sum.C
 test_TemporaryFile_SOURCES	= test_TemporaryFile.C
 test_moment2_SOURCES		= test_moment2.C
 test_MJD_ostream_SOURCES	= test_MJD_ostream.C
+test_sky_coord_SOURCES		= test_sky_coord.C
 
 #############################################################################
 #
