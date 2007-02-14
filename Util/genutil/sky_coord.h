@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/sky_coord.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/10/15 23:33:03 $
+   $Revision: 1.11 $
+   $Date: 2007/02/14 20:43:03 $
    $Author: straten $ */
 
 #ifndef __SKY_COORD_H
@@ -23,7 +23,7 @@ class sky_coord  : public AnglePair
  public:
    sky_coord ();
 
-   sky_coord (const char* astr);
+   sky_coord (const std::string& astr);
    sky_coord (const sky_coord & co);
 
    sky_coord (const AnglePair & co);

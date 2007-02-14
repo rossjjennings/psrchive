@@ -4,10 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "sky_coord.h"
+
 #include <stdio.h>
 #include <math.h>
-
-#include "sky_coord.h"
 
 void sky_coord::init ()
 {
@@ -19,7 +19,7 @@ sky_coord::sky_coord ()
   init ();
 }
 
-sky_coord::sky_coord (const char* astr) : AnglePair(astr)
+sky_coord::sky_coord (const std::string& astr) : AnglePair(astr)
 {
   init ();
 }
