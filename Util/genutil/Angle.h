@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.23 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.24 $
+   $Date: 2007/02/14 20:42:49 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -153,6 +153,7 @@ class AnglePair
 
   // HMS and DMS in separate strings
   int    setHMSDMS (const char *, const char *);
+  int    setHMSDMS (const std::string&, const std::string&);
   void   getHMSDMS (char* s1, char* s2, int places1=3, int places2=2) const;
   std::string getHMSDMS (int places1 = 3, int places2 = 2) const;
 
@@ -172,9 +173,15 @@ class AnglePair
 
   AnglePair & operator=  (const AnglePair &);
   AnglePair & operator*= (const double);
-  AnglePair (const Angle &, const Angle &);
+
+  // default constructor
   AnglePair (const double = 0.0, const double = 0.0);
-  AnglePair (const char* astr);
+
+  // copy constructor
+  AnglePair (const AnglePair&);
+
+  AnglePair (const Angle &, const Angle &);
+  AnglePair (const std::string& astr);
 
   friend AnglePair operator * (const AnglePair&, const double);
 

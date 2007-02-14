@@ -4,16 +4,17 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-// redwards 17 Mar 99 -- Time for a definitive C++ suite of
-// angle and sky coordinate functions
 
 #include "Angle.h"
 #include "Cartesian.h"
 #include "coord_parse.h"
+#include "Error.h"
 
 #include <math.h>
 #include <limits.h>
 #include <float.h>
+
+using namespace std;
 
 bool Angle::verbose = false;
 Angle::Type Angle::default_type = Angle::Radians;
@@ -122,7 +123,7 @@ std::string Angle::getDMS(int places) const
 Angle& Angle::operator= (const Angle & a)
 {
   radians = a.radians;
-  wrap();
+  wrap_point = a.wrap_point;
   return *this;
 }
 
@@ -314,33 +315,42 @@ std::istream& operator >> (std::istream& is, Angle& angle)
 }
 
 
-
+AnglePair::AnglePair (const AnglePair& a)
+{
+  angle1 = a.angle1;
+  angle2 = a.angle2;
+}
 
 
 // AnglePair stuff for convenience
 
-AnglePair::AnglePair(const Angle & a1, const Angle & a2){
+AnglePair::AnglePair(const Angle & a1, const Angle & a2)
+{
   angle1 = a1;
   angle2 = a2;
 }
 
-AnglePair::AnglePair(const double d1, const double d2){
+AnglePair::AnglePair(const double d1, const double d2)
+{
   angle1 = d1;
   angle2 = d2;
 }
 
-AnglePair::AnglePair (const char *astr)
+AnglePair::AnglePair (const std::string& astr)
 { 
-  if (str2coord (&angle1.radians, &angle2.radians, astr) < 0) {
-    std::string error ("AnglePair::AnglePair str2coord failure");
-    std::cerr << error;
-    throw error;
-  }
+  if (str2coord (&angle1.radians, &angle2.radians, astr.c_str()) < 0)
+    throw Error (InvalidParam, "AnglePair::AnglePair",
+		 "str2coord(" + astr + ") failure");
 }
 
 int AnglePair::setHMSDMS(const char *astr)
 { 
   return str2coord (&angle1.radians, &angle2.radians, astr);
+}
+
+int AnglePair::setHMSDMS(const string& s1, const string& s2)
+{
+  setHMSDMS (s1.c_str(), s2.c_str());
 }
 
 int AnglePair::setHMSDMS(const char *s1, const char *s2)
