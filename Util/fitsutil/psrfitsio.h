@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/01/25 05:20:28 $
+   $Revision: 1.5 $
+   $Date: 2007/02/14 18:35:12 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
@@ -64,6 +64,9 @@ void psrfits_update_key (fitsfile* fptr, const char* name, T data)
 //! Specialization for string
 void psrfits_update_key (fitsfile* fptr, const char* name,
 			 const std::string& data);
+
+//! Specialization for C string constants
+void psrfits_update_key (fitsfile* fptr, const char* name, const char* data);
 
 //! Worker function does not handle status
 template<typename T>

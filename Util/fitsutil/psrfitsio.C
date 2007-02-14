@@ -27,6 +27,11 @@ void psrfits_clean_rows (fitsfile* ffptr)
     throw FITSError (status, "psrfits_clean_rows", "fits_delete_rows");
 }
 
+void psrfits_update_key (fitsfile* fptr, const char* name, const char* data)
+{
+  psrfits_update_key (fptr, name, string(data));
+}
+
 //! Specialization for string
 void psrfits_update_key (fitsfile* fptr, const char* name, const string& txt)
 {
