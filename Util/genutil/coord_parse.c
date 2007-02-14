@@ -242,13 +242,28 @@ int unit2str (char* unit_string, unsigned unit_strlen,
     }
     else {
 
-      /* trick to avoid rounding ugliness in string */
-      if (ifield+1 < nfields && field_precision[ifield+1]) {
+#ifdef _DEBUG
+      fprintf (stderr, "no precision. unit=%lf\n", unit);
+#endif
+
+      /* tricks to avoid rounding ugliness in string */
+      if (ifield+1 == nfields)
+	unit = round (unit);
+      else if (field_precision[ifield+1]) {
 	field_value = pow (10.0,-(field_precision[ifield+1]+3));
 	unit += field_value/field_scale[ifield+1];
+#ifdef _DEBUG
+	fprintf (stderr, "rounding trick field_value=%lf unit=%lf\n",
+		 field_value, unit);
+#endif
       }
 
       field_value = floor (unit);
+
+#ifdef _DEBUG
+      fprintf (stderr, "field_value=%lf\n", field_value);
+#endif
+
       printed = snprintf (unit_string, end_string-unit_string, "%.*d",
 			  field_width[ifield], (int) field_value);
     }
