@@ -330,19 +330,45 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (verbose == 3)
     cerr << "Got coordinate type: " << tempstr << endl;
 
+  if (verbose == 3)
+    cerr << "FITSArchive::load_header reading equinox" << endl;
+
+  dfault = "pre version 2.8";
+  psrfits_read_key (fptr, "EQUINOX", &tempstr, dfault, verbose == 3);
+
+  if (tempstr == dfault) {
+
+    //
+    // The file was created before the EQUINOX attribute was added
+    //
+    if (hdr_ext->coordmode == "J2000")
+      hdr_ext->coordmode = "EQUAT";
+    else if (hdr_ext->coordmode == "Gal")
+      hdr_ext->coordmode = "GAL";
+
+    hdr_ext->equinox = "J2000";
+
+  }
+  else {
+    hdr_ext->equinox = tempstr;
+
+    if (verbose == 3)
+      cerr << "Got equinox: " << tempstr << endl;
+  }
+
   sky_coord coord;
   
-  if (hdr_ext->coordmode == "J2000") {
+  if (hdr_ext->coordmode == "EQUAT") {
 
     dfault = "";
 
     psrfits_read_key (fptr, "STT_CRD1", &tempstr, dfault, verbose == 3);
     string hms = tempstr;
     psrfits_read_key (fptr, "STT_CRD2", &tempstr, dfault, verbose == 3);
-    coord.setHMSDMS(hms.c_str(),tempstr.c_str());
+    coord.setHMSDMS (hms.c_str(),tempstr.c_str());
 
   }     
-  else if (hdr_ext->coordmode == "Gal") {
+  else if (hdr_ext->coordmode == "GAL") {
 
     double dfault = 0.0;
     double co_ord1, co_ord2;
@@ -373,23 +399,59 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   psrfits_read_key (fptr, "TRK_MODE", &tempstr, dfault, verbose == 3);
   hdr_ext->trk_mode = tempstr;
 
-  // Read the start UT date
+  //
+  // Since PSRFITS version 2.8, the UTC date and time are stored in one string
+  //
 
   if (verbose == 3)
-    cerr << "FITSArchive::load_header reading start date" << endl;
+    cerr << "FITSArchive::load_header reading obervation date" << endl;
 
-  dfault = hdr_ext->stt_date;
-  psrfits_read_key (fptr, "STT_DATE", &tempstr, dfault, verbose == 3);
-  hdr_ext->stt_date = tempstr;
-  
-  // Read the start UT
+  dfault = "pre version 2.8";
+  psrfits_read_key (fptr, "DATE-OBS", &tempstr, dfault, verbose == 3);
 
-  if (verbose == 3)
-    cerr << "FITSArchive::load_header reading start UT" << endl;
+  if (tempstr == dfault) {
 
-  dfault = hdr_ext->stt_time;
-  psrfits_read_key (fptr, "STT_TIME", &tempstr, dfault, verbose == 3);
-  hdr_ext->stt_time = tempstr;
+    //
+    // Before version 2.8, the UTC date and time were stored separately
+    //
+
+    // Read the start UT date
+
+    if (verbose == 3)
+      cerr << "FITSArchive::load_header reading start date" << endl;
+
+    dfault = hdr_ext->stt_date;
+    psrfits_read_key (fptr, "STT_DATE", &tempstr, dfault, verbose == 3);
+    hdr_ext->stt_date = tempstr;
+    
+    // Read the start UT
+
+    if (verbose == 3)
+      cerr << "FITSArchive::load_header reading start UT" << endl;
+    
+    dfault = hdr_ext->stt_time;
+    psrfits_read_key (fptr, "STT_TIME", &tempstr, dfault, verbose == 3);
+
+    // strip off any fractional seconds, if present
+    unsigned decimal = tempstr.find('.');
+    if (decimal != string::npos)
+      tempstr = tempstr.substr (0, decimal);
+
+    hdr_ext->stt_time = tempstr;
+    
+  }
+  else {
+
+    const unsigned date_length = strlen ("YYYY-MM-DD");
+    hdr_ext->stt_date = tempstr.substr(0,date_length);
+    hdr_ext->stt_time = tempstr.substr(date_length+1);
+
+    if (verbose == 3)
+      cerr << "FITSArchive::load_header DATE-0BS parsed into\n"
+	" date='" << hdr_ext->stt_date << "'\n"
+	" time='" << hdr_ext->stt_time << "'\n";
+
+  }
 
   // /////////////////////////////////////////////////////////////////
   
@@ -697,6 +759,7 @@ try {
     
     unload (fptr, hdr_ext);
     hdr_ext->get_coord_string( get_coordinates(), coord1, coord2 );
+
   }
   
   else {
@@ -706,16 +769,14 @@ try {
     coord1 = radec.angle1.getHMS();
     coord2 = radec.angle2.getDMS();
 
-    // If no FITSHdrExtension is present, assume J2000
-    char* j2000 = "J2000";
-    fits_update_key (fptr, TSTRING, "COORD_MD", j2000, comment, &status);
+    // If no FITSHdrExtension is present, assume J2000 Equatorial
+    psrfits_update_key (fptr, "COORD_MD", "EQUAT");
+    psrfits_update_key (fptr, "EQUINOX", "J2000");
 
   }
 
-  fits_update_key (fptr, TSTRING, "STT_CRD1",
-		   const_cast<char*>(coord1.c_str()), comment, &status);
-  fits_update_key (fptr, TSTRING, "STT_CRD2",
-		   const_cast<char*>(coord2.c_str()), comment, &status); 
+  psrfits_update_key (fptr, "STT_CRD1", coord1);
+  psrfits_update_key (fptr, "STT_CRD2", coord2); 
 
   string obs_mode;
   
