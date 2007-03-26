@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '2.9             '   / Header version 
+HDRVER  = '2.10             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -546,7 +546,7 @@ END
 #
 ###############################################################################
 #
-XTENSION= BINTABLE             / ***** Tempo2 Predictor history *****
+XTENSION= BINTABLE             / ***** Tempo2 Predictor *****
 BITPIX  =                    8 / N/A 
 NAXIS   =                    2 / 2-dimensional binary table
 NAXIS1  =                    * / width of table in bytes
@@ -555,10 +555,10 @@ PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    1 / Number of fields per row
 #
-EXTNAME = T2PREDICT            / name of this binary table extension
+EXTNAME = T2PREDICT            / Name of this binary table extension
 #
-TTYPE#  = PREDICT              / Whole text file is stored verbatim
-TFORM#  = A 
+TTYPE#  = PREDICT              / Text file stored row by row
+TFORM#  = 128A                 / Allow 128 char per row
 END
 #
 ###############################################################################
