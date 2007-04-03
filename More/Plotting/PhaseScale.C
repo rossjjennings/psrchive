@@ -37,9 +37,12 @@ void Pulsar::PhaseScale::get_range (const Archive* data,
 void Pulsar::PhaseScale::get_ordinates (const Archive* data,
 					std::vector<float>& axis) const
 {
-  axis.resize (data->get_nbin());
-
-  float scale = get_scale (data);
+  float scale = 1.0;
+ 
+  if (data != 0) {
+    axis.resize (data->get_nbin());
+    scale = get_scale (data);
+  }
 
   for (unsigned ibin = 0; ibin < axis.size(); ibin++) {
     axis[ibin] = scale * (origin_norm + (float(ibin) + 0.5) / axis.size());

@@ -72,8 +72,17 @@ void Pulsar::FluxPlot::plot_profile (const Profile* data)
   plotter.minmax (get_frame());
 
   get_frame()->focus (0);
+
+  // AWH 03/04/2007: Added this line because the call to draw(data)
+  // results in a segmentation fault when looking for the address of 
+  // the first element of the vector x, which is not yet created.
+
+  (plotter.x).resize(data->get_nbin());
+
   get_scale()->get_ordinates (0, plotter.x);
+
   plotter.draw (data);
+
 }
 
 //! Scale in on the on-pulse region
