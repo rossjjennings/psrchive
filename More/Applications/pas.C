@@ -100,7 +100,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.25 2006/10/06 21:41:57 straten Exp $" << endl;
+      cout << "$Id: pas.C,v 1.26 2007/04/03 06:43:13 ahotan Exp $" << endl;
       return 0;
 
     case 'r':
@@ -147,6 +147,10 @@ int main (int argc, char** argv)
 
   //open new standard profile
   Reference::To<Pulsar::Archive> stdarch = Pulsar::Archive::load(stdname[0]);
+  stdarch->fscrunch();
+  stdarch->pscrunch();
+  stdarch->tscrunch();
+  stdarch->remove_baseline();
   Reference::To<Pulsar::Profile> stdprof=stdarch->get_Profile(0, 0, 0);
 
   if(verbose) cout << "new standard archives loaded" << endl;
@@ -489,7 +493,7 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
   cpgsvp (0.1, 0.9, 0.03, 0.05);
   cpgswin (xmin, xmax, 0, 1);
   cpgsci(ci_tex);
-  cout << "xmax-xmin=" <<xmax-xmin <<endl;
+
   if(xmax-xmin>0.2)
     cpgbox("BNTS", 0.1, 5, "", 0.0, 0);
   else
@@ -511,6 +515,7 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
 
   Pulsar::ProfilePlot plotter;
   plotter.get_frame()->get_x_scale()->set_range_norm (xmin, xmax);
+  plotter.get_frame()->set_viewport (0.1, 0.9, 0.05, 0.68);
 
   if(refflag == true) {
     cpgsci (ci_ref);
