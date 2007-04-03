@@ -57,6 +57,7 @@ void usage ()
     "  -d               Zero weight chans using mean offset rejection\n"
     "  -C cutoff        Zero weight chans based on S/N (std optional)\n"
     "  -P stdfile       Use this standard profile\n"
+    "  -o cutoff sigma  Zero weight subints with negative dropouts\n"
     "  -R size          Set the size of the median smoothing window\n"
     "  -8               Attempts to fix ATNF WBCORR 8 bin problem (see also -p)\n"
     "\n"
@@ -109,6 +110,9 @@ int main (int argc, char *argv[]) {
   bool periodic_zap = false;
   int periodic_zap_period=8, periodic_zap_phase=0;
   
+  bool dropout_zap = false;
+  float dropout_sigma = 5.0;
+
   string ext;
   
   int placeholder;
@@ -121,7 +125,7 @@ int main (int argc, char *argv[]) {
   Pulsar::ChannelZapMedian* median_zapper = 0;
   Pulsar::ChannelZapModulation* modulation_zapper = 0;
 
-  const char* args = "8C:dDe:E:hIik:mnp:P:rR:s:S:u:vVw:W:x:X:z:Z:";
+  const char* args = "8C:dDe:E:hIik:mno:p:P:rR:s:S:u:vVw:W:x:X:z:Z:";
 
   string command = "paz";
 
@@ -139,7 +143,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.36 2006/10/02 20:18:11 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.37 2007/04/03 05:01:28 ahotan Exp $" << endl;
       return 0;
 
     case 'm':
@@ -371,6 +375,16 @@ int main (int argc, char *argv[]) {
       command += optarg;
       break;
 
+    case 'o':
+      dropout_zap = true;
+      if (sscanf(optarg, "%f", &dropout_sigma) != 1) {
+  cerr << "Invalid parameter to option -o" << endl;
+        return (-1);
+      }
+      command += " -o ";
+      command += optarg;
+      break;
+
     case 'P':
       try {
   Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(optarg);
@@ -592,12 +606,41 @@ int main (int argc, char *argv[]) {
       double theston = 0.0;
       arch->pscrunch();
       for (unsigned isub = 0; isub < arch->get_nsubint(); isub++) {
-  for (unsigned ichan = 0; ichan < arch->get_nchan(); ichan++) {
-    theston = arch->get_Profile(isub,0,ichan)->snr();
-    if (theston < ston_cutoff) {
-      arch->get_Integration(isub)->set_weight(ichan, 0.0);
-    } 
-  }
+	for (unsigned ichan = 0; ichan < arch->get_nchan(); ichan++) {
+	  theston = arch->get_Profile(isub,0,ichan)->snr();
+	  if (theston < ston_cutoff) {
+	    arch->get_Integration(isub)->set_weight(ichan, 0.0);
+	  } 
+	}
+      }
+    }
+
+    if (dropout_zap) {
+      Reference::To<Pulsar::Archive> cloned = arch->clone();
+      Reference::To<Pulsar::Profile> testprof = 0;
+
+      cloned->pscrunch();
+      cloned->fscrunch();
+      cloned->remove_baseline();
+
+      vector<double> mins;
+      for (unsigned isub = 0; isub < arch->get_nsubint(); isub++) {
+	testprof = cloned->get_Profile(isub,0,0);
+	mins.push_back(fabs(testprof->min()));
+      }
+
+      cloned -> tscrunch();
+
+      double mean, vari, varm;
+
+      testprof = cloned->get_Profile(0,0,0);
+      testprof -> stats(&mean, &vari, &varm);
+      
+      for (unsigned isub = 0; isub < arch->get_nsubint(); isub++) {
+	if (mins[isub] > dropout_sigma*sqrt(vari)) {
+	  cerr << "Zapping integration " << isub << endl;
+	  arch->get_Integration(isub)->uniform_weight(0.0);
+	}
       }
     }
     
