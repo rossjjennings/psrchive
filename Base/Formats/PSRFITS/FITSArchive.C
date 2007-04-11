@@ -336,10 +336,11 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   dfault = "pre version 2.8";
   psrfits_read_key (fptr, "EQUINOX", &tempstr, dfault, verbose == 3);
 
-  if (tempstr == dfault) {
+  if ((tempstr == dfault) || (tempstr.empty())) {
 
     //
-    // The file was created before the EQUINOX attribute was added
+    // The file was created before the EQUINOX attribute was added,
+    // or was mistakenly created with a null equinox.
     //
     if (hdr_ext->coordmode == "J2000")
       hdr_ext->coordmode = "EQUAT";
@@ -409,7 +410,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   dfault = "pre version 2.8";
   psrfits_read_key (fptr, "DATE-OBS", &tempstr, dfault, verbose == 3);
 
-  if (tempstr == dfault) {
+  if ((tempstr == dfault) || (tempstr.empty())) {
 
     //
     // Before version 2.8, the UTC date and time were stored separately
