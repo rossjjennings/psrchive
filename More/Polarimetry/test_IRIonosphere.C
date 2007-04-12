@@ -17,7 +17,7 @@ int main ()
   horizon.set_observatory_latitude  (-33 * M_PI/180);
   horizon.set_epoch (52690.39);
 
-  horizon.set_source_coordinates ("07:38:32.4-40:42:41.1");
+  horizon.set_source_coordinates (sky_coord("07:38:32.4-40:42:41.1"));
 
   Calibration::IRIonosphere ionosphere;
 
