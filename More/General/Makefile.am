@@ -1,6 +1,8 @@
 
 noinst_LTLIBRARIES = libGeneral.la
 
+dist_data_DATA = fluxcal.cfg
+
 nobase_include_HEADERS = \
 	find_spike_edges.h \
         model_profile.h \
