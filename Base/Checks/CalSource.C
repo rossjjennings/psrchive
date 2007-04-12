@@ -15,10 +15,10 @@ using namespace std;
 
 static string get_default (string which)
 {
-  char* psrhome = getenv ("PSRHOME");
+  char* psrchive = getenv ("PSRCHIVE");
 
-  if (psrhome)
-    return psrhome + string ("/runtime/psrchive/fluxcal.") + which;
+  if (psrchive)
+    return psrchive + string ("/share/fluxcal.") + which;
   else
     return "fluxcal." + which;
 }
