@@ -15,12 +15,7 @@ using namespace std;
 
 static string get_default (string which)
 {
-  char* psrchive = getenv ("PSRCHIVE");
-
-  if (psrchive)
-    return psrchive + string ("/share/fluxcal.") + which;
-  else
-    return "fluxcal." + which;
+  return Pulsar::Config::get_runtime() + "/fluxcal." + which;
 }
 
 Pulsar::CalSource::CalSource ()
