@@ -1,6 +1,8 @@
 
 noinst_LTLIBRARIES = libChecks.la
 
+dist_data_DATA = fluxcal.on fluxcal.off
+
 nobase_include_HEADERS = \
         Pulsar/CalSource.h \
 	Pulsar/Dedispersed.h \
