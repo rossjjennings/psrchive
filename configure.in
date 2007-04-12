@@ -167,6 +167,12 @@ AM_CONDITIONAL(MAKE_LEAN, [test x"$enable_lean" == xyes])
 #
 SWIN_FUNC_GETOPT_LONG
 
+#
+# By default, runtime files will be found in the installation directory
+#
+AC_DEFINE_UNQUOTED([PACKAGE_INSTALL], ["${prefix}"],
+                   [PSRCHIVE installation directory.])
+
 AM_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([Util/Makefile
 		Util/third/Makefile
