@@ -15,6 +15,7 @@ nobase_include_HEADERS = \
 	Pulsar/Correction.h \
         Pulsar/ExampleArchive.h \
 	Pulsar/FITSAlias.h \
+	Pulsar/Home.h \
         Pulsar/IntegrationExpert.h \
         Pulsar/Integration.h \
         Pulsar/IntegrationManagerExpert.h \
@@ -43,6 +44,7 @@ libClasses_la_SOURCES = \
         Config.C \
         ExampleArchive.C \
 	FITSAlias.C \
+	Home.C \
         Integration.C \
         Integration_combine.C \
         IntegrationManager.C \
