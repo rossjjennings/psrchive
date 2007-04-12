@@ -22,10 +22,10 @@ bool Pulsar::StandardCandles::verbose = false;
 
 static std::string get_default ()
 {
-  char* psrhome = getenv ("PSRHOME");
+  char* psrchive = getenv ("PSRCHIVE");
 
-  if (psrhome)
-    return psrhome + std::string ("/runtime/psrchive/fluxcal.cfg");
+  if (psrchive)
+    return psrchive + std::string ("/share/fluxcal.cfg");
   else
     return "fluxcal.cfg";
 }
