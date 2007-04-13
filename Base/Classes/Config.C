@@ -20,7 +20,12 @@ Pulsar::Config Pulsar::config;
 
 Pulsar::Config::Config ()
 {
-  load (get_home() + "/psrchive.cfg");
+  try {
+    load (get_home() + "/psrchive.cfg");
+  }
+  catch (Error& error) {
+    // use of a configuration file is optional
+  }
 }
 
 string Pulsar::Config::get_runtime ()
