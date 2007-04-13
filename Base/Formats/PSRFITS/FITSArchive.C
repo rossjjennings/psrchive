@@ -405,7 +405,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   //
 
   if (verbose == 3)
-    cerr << "FITSArchive::load_header reading obervation date" << endl;
+    cerr << "FITSArchive::load_header reading observation date" << endl;
 
   dfault = "pre version 2.8";
   psrfits_read_key (fptr, "DATE-OBS", &tempstr, dfault, verbose == 3);
@@ -439,13 +439,15 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
       tempstr = tempstr.substr (0, decimal);
 
     hdr_ext->stt_time = tempstr;
-    
+
   }
   else {
 
     const unsigned date_length = strlen ("YYYY-MM-DD");
-    hdr_ext->stt_date = tempstr.substr(0,date_length);
-    hdr_ext->stt_time = tempstr.substr(date_length+1);
+    if (tempstr.length() >= date_length)
+      hdr_ext->stt_date = tempstr.substr(0,date_length);
+    if (tempstr.length() > date_length)
+      hdr_ext->stt_time = tempstr.substr(date_length+1);
 
     if (verbose == 3)
       cerr << "FITSArchive::load_header DATE-0BS parsed into\n"
