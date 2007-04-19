@@ -1,7 +1,7 @@
 
 noinst_LTLIBRARIES = libgnu.la
 
-libgnu_la_SOURCES =
+libgnu_la_SOURCES = dummy.c
 include_HEADERS =
 
 if !HAVE_GETOPT_LONG
