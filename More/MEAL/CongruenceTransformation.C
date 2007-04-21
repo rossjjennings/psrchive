@@ -18,6 +18,11 @@ MEAL::CongruenceTransformation::~CongruenceTransformation ()
 {
 }
 
+string MEAL::CongruenceTransformation::get_name () const
+{
+  return "CongruenceTransformation";
+}
+
 /*! This method unmaps the old transformation before mapping xform */
 void MEAL::CongruenceTransformation::set_transformation (Complex2* xform)
 {
