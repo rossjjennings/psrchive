@@ -28,14 +28,14 @@
 
 using namespace std;
 
-static const char* psradd_args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tT:UvVwZ:";
+static const char* args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tTUvVwZ:z:";
 
 void reorder(Reference::To<Pulsar::Archive> arch);
 
 void usage () {
   cout <<
     "A program for adding Pulsar::Archives together \n"
-    "USAGE: psradd [" << psradd_args << "] filenames \n"
+    "USAGE: psradd [" << args << "] filenames \n"
     " -h          This help page \n"
     " -i          Show revision information \n"
     " -q          Quiet mode (suppress warnings) \n"
@@ -51,9 +51,9 @@ void usage () {
     " -M meta     Filename with list of files \n"
     " -P          Phase align archive with total before adding \n"
     " -r freq     Add archive only if it has this centre frequency \n"
-    " -s          Tscrunch result after each new file (nice on RAM) \n"
     " -t          Make no changes to file system (testing mode) \n"
-    " -T tempo    System call to tempo \n"
+    " -T          Tscrunch result after each new file (nice on RAM) \n"
+    " -z tempo    System call to tempo \n"
     " -Z time     Only add archives that are time (+/- 0.5) seconds long \n"
     "\n"
     "AUTO ADD options:\n"
@@ -146,7 +146,7 @@ int main (int argc, char **argv) try {
   vector<string> jobs;
 
   int c;  
-  while ((c = getopt(argc, argv, psradd_args)) != -1)  {
+  while ((c = getopt(argc, argv, args)) != -1)  {
     switch (c)  {
 
     case 'h':
@@ -154,7 +154,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.46 2007/01/19 17:42:21 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.47 2007/04/23 05:29:11 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -287,19 +287,15 @@ int main (int argc, char **argv) try {
       command += optarg;
       break;
 
+      // lower-case 's' kept for backward-compatibility
     case 's':
+    case 'T':
       tscrunch_total = true;
-      command += " -s";
+      command += " -T";
       break;
 
     case 't':
       testing = true;
-      break;
-
-    case 'T':
-      Tempo::set_system (optarg);
-      command += " -T ";
-      command += optarg;
       break;
 
     case 'U':
@@ -326,7 +322,13 @@ int main (int argc, char **argv) try {
       required_archive_length = atof(optarg); 
       command += " -Z ";
       command += optarg;
+      break;
 
+      // used to be -T
+    case 'z':
+      Tempo::set_system (optarg);
+      command += " -z ";
+      command += optarg;
       break;
 
     } 
