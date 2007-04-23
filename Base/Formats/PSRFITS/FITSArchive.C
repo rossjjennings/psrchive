@@ -8,6 +8,7 @@
 #include <config.h>
 #endif
 
+#include "Pulsar/Config.h"
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -687,14 +688,33 @@ try {
 
   // To create a new file we need a FITS file template to provide the format
 
-  char* template_file = getenv ("PSRFITSDEFN");
-  if (!template_file)
-    throw Error (FailedCall,
-  		 "FITSArchive::unload_file", "PSRFITSDEFN not defined");
- 
+  static char* template_defn = getenv ("PSRFITSDEFN");
+
+  string template_name;
+
+  if (template_defn) {
+
+    if (verbose > 2)
+      cerr << "FITSArchive::unload_file using template at:\n"
+	"  PSRFITSDEFN=" << template_defn << endl;
+
+    template_name = template_defn;
+
+  }
+  else {
+
+    // load the definition from the configured installation directory
+    template_name = Pulsar::Config::get_runtime() + "/psrheader.fits";
+
+    if (verbose > 2)
+      cerr << "FITSArchive::unload_file using installed template:\n"
+	"  " << template_name << endl;
+
+  }
+  
   if (verbose == 3)
     cerr << "FITSArchive::unload_file creating file " 
-	 << filename << endl << "   using template " << template_file << endl;
+	 << filename << endl << "   using template " << template_name << endl;
 
   string clobbername = "!";
   clobbername += filename;
@@ -723,12 +743,12 @@ try {
 
   if (verbose == 3)
     cerr << "FITSArchive::unload_file call fits_execute_template "
-      "(" << template_file << ")" << endl;
+      "(" << template_name << ")" << endl;
 
-  fits_execute_template (fptr, template_file, &status);
+  fits_execute_template (fptr, (char*)template_name.c_str(), &status);
   if (status)
     throw FITSError (status, "FITSArchive::unload_file",
-		     "fits_execute_template (%s)", template_file);
+		     "fits_execute_template (%s)", template_name.c_str());
 
   fits_movabs_hdu (fptr, 1, 0, &status);
   if (status)
