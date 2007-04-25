@@ -411,6 +411,13 @@ unsigned Pulsar::PolnProfileFit::get_fit_nfree () const
   return model->get_fit_nfree();
 }
 
+//! Get the covariance matrix of the last fit
+void 
+Pulsar::PolnProfileFit::get_fit_covariance (vector<vector<double> >& c) const
+{
+  model->get_fit_covariance (c);
+}
+
 //! Get the phase offset between the observation and the standard
 Estimate<double> Pulsar::PolnProfileFit::get_phase () const
 {

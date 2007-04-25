@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.27 $
-   $Date: 2007/02/06 22:08:45 $
+   $Revision: 1.28 $
+   $Date: 2007/04/25 23:26:25 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -110,6 +110,9 @@ namespace Pulsar {
 
     //! The chi-squared in last call to fit method
     float get_fit_chisq () const;
+
+    //! Get the covariance matrix of the last fit
+    void get_fit_covariance (std::vector< std::vector<double> >& c) const;
 
     //! Get the phase offset between the standard and the observation
     Estimate<double> get_phase () const;
