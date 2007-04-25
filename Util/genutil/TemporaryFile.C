@@ -47,7 +47,7 @@ void TemporaryFile::signal_handler (int sig)
   for_each (instances.begin(), instances.end(), remove_instance);
 
   if (abort)
-    ::abort ();
+    exit (-1);
 }
 
 //! The current temporary file instances
