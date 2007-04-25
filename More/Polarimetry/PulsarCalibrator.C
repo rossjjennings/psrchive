@@ -9,7 +9,7 @@
 
 #include "Pulsar/ArchiveMatch.h"
 #include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/PolnProfileFit.h"
 
 #include "Pulsar/Instrument.h"
@@ -138,6 +138,25 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan)
 
   model.resize (model_nchan);
 
+  unsigned chosen_maximum_harmonic;
+
+  if (choose_maximum_harmonic) {
+    
+    Reference::To<Integration> clone = integration->clone();
+    clone->expert()->fscrunch ();
+
+    PolnProfileFit temp;
+    temp.choose_maximum_harmonic = true;
+    temp.set_standard ( clone->new_PolnProfile (0) );
+
+    chosen_maximum_harmonic = temp.get_nharmonic();
+
+    // if (verbose > 2)
+      cerr << "Pulsar::PulsarCalibrator::build max harmonic="
+	   << chosen_maximum_harmonic << endl;
+
+  }
+
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
     if (verbose > 2)
@@ -159,7 +178,7 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan)
     model[ichan] = new PolnProfileFit;
 
     if (choose_maximum_harmonic)
-      model[ichan]->choose_maximum_harmonic = true;
+      model[ichan]->set_maximum_harmonic( chosen_maximum_harmonic );
     else if (maximum_harmonic)
       model[ichan]->set_maximum_harmonic( maximum_harmonic );
 
@@ -450,3 +469,10 @@ void Pulsar::PulsarCalibrator::calculate_transformation ()
   transformation.resize( nchan );
   update_solution ();
 }
+
+const Pulsar::PolnProfileFit*
+Pulsar::PulsarCalibrator::get_model (unsigned ichan) const
+{
+  return model[ichan];
+}
+
