@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.19 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.20 $
+   $Date: 2007/04/25 23:26:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -74,6 +74,9 @@ namespace Pulsar {
 
     //! File to which arrival time estimates should be written
     void set_tim_file (FILE* fptr) { tim_file = fptr; }
+
+    //! The model used to fit the specified channel
+    const PolnProfileFit* get_model (unsigned ichan) const;
 
   protected:
     
