@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ArchiveSort.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.7 $
+   $Date: 2007/04/26 03:11:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveSort_h
@@ -27,6 +27,9 @@ namespace Pulsar {
   class ArchiveSort {
 
   public:
+
+    //! Verbosity flag
+    static bool verbose;
 
     //! Default constructor
     ArchiveSort ();
