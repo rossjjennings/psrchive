@@ -22,21 +22,40 @@ Pulsar::ArchiveSort::ArchiveSort (istream& input)
     throw Error (InvalidState, "Pulsar::ArchiveSort", "error on stream");
 }
 
+bool Pulsar::ArchiveSort::verbose = false;
+
 bool Pulsar::operator < (const ArchiveSort& a, const ArchiveSort& b)
 {
   if (a.source < b.source) {
-    // cerr << a.source << " < " << b.source << endl;
+    if (ArchiveSort::verbose)
+      cerr << a.source << " < " << b.source << endl;
     return true;
   }
+  else if (a.source > b.source) {
+    if (ArchiveSort::verbose)
+      cerr << a.source << " > " << b.source << endl;
+    return false;
+  }
+
   if (a.centre_frequency < b.centre_frequency) {
-    // cerr << a.centre_frequency << " < " << b.centre_frequency << endl;
+    if (ArchiveSort::verbose)
+      cerr << a.centre_frequency << " < " << b.centre_frequency << endl;
     return true;
   }
+  else if (a.centre_frequency > b.centre_frequency) {
+    if (ArchiveSort::verbose)
+      cerr << a.centre_frequency << " > " << b.centre_frequency << endl;
+    return false;
+  }
+
   if (a.epoch < b.epoch) {
-    // cerr << a.epoch << " < " << b.epoch << endl;
+    if (ArchiveSort::verbose)
+      cerr << a.epoch.printdays(5) << " < " << b.epoch.printdays(5) << endl;
     return true;
   }
-  // cerr << "not less than" << endl;
+
+  if (ArchiveSort::verbose)
+    cerr << "not less than" << endl;
   return false;
 }
 
