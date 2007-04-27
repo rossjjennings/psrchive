@@ -16,16 +16,18 @@ nodist_libtempo_la_SOURCES = ephio_def.c
 
 bin_PROGRAMS = keys2c keys2fort ephepo ephtex
 
-check_PROGRAMS = test_ephio test_polyco_io test_Phase	\
+check_PROGRAMS = test_ephio test_polyco_io test_Phase \
 	test_get_configuration test_psrephem
+
+TESTS = test_polyco_io test_psrephem
 
 ephepo_SOURCES = ephepo.C
 ephtex_SOURCES = ephtex.C
 
-test_polyco_io_SOURCES		= test_polyco_io.C
+test_polyco_io_SOURCES		= test_polyco_io.C test.polyco
 test_Phase_SOURCES		= test_Phase.C
 test_get_configuration_SOURCES	= test_get_configuration.C
-test_psrephem_SOURCES		= test_psrephem.C
+test_psrephem_SOURCES		= test_psrephem.C test.psrephem
 
 # ######################################################################
 #
