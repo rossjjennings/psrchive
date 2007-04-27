@@ -4,12 +4,14 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* ADVICE!:  Do not include this file directly.  Instead, #include "ephio.h"
+/* 
+   ADVICE!:  Do not include this file directly.  Instead, #include "ephio.h"
 
    $Source: /cvsroot/psrchive/psrchive/Util/tempo/ephio_func.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:55 $
-   $Author: straten $ */
+   $Revision: 1.4 $
+   $Date: 2007/04/27 03:23:11 $
+   $Author: straten $ 
+*/
 
 #ifndef __EPHIO_FUNC_H
 #define __EPHIO_FUNC_H
@@ -51,14 +53,9 @@ extern "C" {
 		  double* error, int* convert,
 		  int* isOldEphem, char* parsethis);
   
-  int convertunits_ (double* value, double* error, int* status, int* convert);
-  
   /* writes a string into buffer that could be parsed by rd_eph_str */
   int wr_eph_str (char *buffer, int buflen, int ephind, int parmStatus, 
 		  char* value_str, double value, int integer, double error);
-
-  extern int length_(char *, int);  /* Fortan string length, in ephio.f */
-
 
 #ifdef __cplusplus
 	   }
