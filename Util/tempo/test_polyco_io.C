@@ -14,7 +14,15 @@ using namespace std;
 
 int main (int argc, char** argv)
 {
-  string filename = "test.polyco";
+  string filename;
+
+  /* The srcdir environment variable is set by automake */
+  char* srcdir = getenv ("srcdir");
+  if (srcdir)
+    filename = string(srcdir) + "/";
+
+  filename += "test.polyco";
+
   bool verbose = false;
 
   int c;
