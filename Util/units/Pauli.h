@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.26 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.27 $
+   $Date: 2007/04/27 03:23:00 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -67,7 +67,7 @@ const Jones<T> convert (const Stokes< std::complex<T> >& stokes)
   Quaternion<std::complex<T>,Hermitian> q;
   q.set_scalar (stokes.get_scalar());
   q.set_vector (Pauli::basis.get_out(stokes.get_vector()));
-  return convert (0.5*q);
+  return convert (T(0.5)*q);
 }
 
 // convert Stokes parameters to Jones matrix
@@ -76,7 +76,7 @@ const Jones<T> convert (const Stokes<T>& stokes)
 {
   Quaternion<T,Hermitian> q (stokes.get_scalar(),
                              Pauli::basis.get_out(stokes.get_vector()));
-  return convert (0.5*q);
+  return convert (T(0.5)*q);
 }
 
 // convert Stokes parameters to natural basis

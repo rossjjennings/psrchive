@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.13 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.14 $
+   $Date: 2007/04/27 03:23:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
@@ -153,10 +153,6 @@ namespace Pulsar {
       // unload ascii string
       void unload (std::string& str);
       
-      friend bool operator < (const Entry& a, const Entry& b);
-
-      friend bool operator == (const Entry& a, const Entry& b);
-
     protected:
       
       //! Clean slate
@@ -240,6 +236,9 @@ namespace Pulsar {
 
   };
 
+  bool operator < (const Database::Entry& a, const Database::Entry& b);
+
+  bool operator == (const Database::Entry& a, const Database::Entry& b);
 
 }
 

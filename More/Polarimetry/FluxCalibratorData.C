@@ -9,6 +9,8 @@
 #include "MEAL/ScalarParameter.h"
 #include "MEAL/ScalarConstant.h"
 
+#include "templates.h"
+
 #include <iostream>
 using namespace std;
 
