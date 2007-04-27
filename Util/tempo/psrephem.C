@@ -25,6 +25,14 @@
 #include <iostream>
 using namespace std;
 
+
+/* convertunits declaration removed from header file; needs config.h to be
+   defined on every architecture */
+
+#define convertunits F77_FUNC (convertunits,CONVERTUNITS)
+extern "C" int convertunits (double* value, double* error,
+			     int* status, int* convert);
+
 psrephem::~psrephem(){ destroy(); }
 
 // defines the recognized filename extensions used for pulsar ephemeris files
@@ -206,8 +214,16 @@ int psrephem::unload (const char* filename) const
 //   if (!tempo11)
 //     return old_unload (filename);
 
-  for (int ieph=0; ieph<EPH_NUM_KEYS; ieph++)
+  if (verbose)
+    cerr << "psrephem::unload copying strings" << endl;
+
+  for (int ieph=0; ieph<EPH_NUM_KEYS; ieph++) {
+    assert (value_str[ieph].length() < EPH_STR_LEN -1);
     strcpy (ephemstr[ieph], value_str[ieph].c_str());
+  }
+
+  if (verbose)
+    cerr << "psrephem::unload calling wr_eph" << endl;
 
   int istat = wr_eph (const_cast<char*>(filename), parmStatus, ephemstr,
 		      value_double, value_integer, error_double);
@@ -545,6 +561,18 @@ static void prepare_static_load_area ()
     ephemblock[c] = ' ';
 }
 
+void f2cstr (char* str, unsigned length)
+{
+  unsigned i = length-1;
+ 
+  while (str[i] == ' ') {
+    str[i] = '\0';
+    if (i == 0)
+      break;
+    i--;
+  }
+}
+
 int psrephem::load (string* instr)
 {
   if (verbose)
@@ -564,7 +592,7 @@ int psrephem::load (string* instr)
     // get the next line from the incoming text
     string line ( stringtok (instr, "\n") );
     if (verbose)
-      cerr << "psrParams::load '" << line << "' len=" << line.length() 
+      cerr << "psrephem::load '" << line << "' len=" << line.length() 
 	   << " instr.len=" << instr -> length() << endl;
 
     if (line.length() < 1)
@@ -577,10 +605,11 @@ int psrephem::load (string* instr)
 		error_double, correct, &old_ephem, 
 		const_cast<char*>( line.c_str() ));
   }
-  // convertUnits_ defined in ephio.f
-  convertunits_ (value_double, error_double, parmStatus, correct);
+
+  // convertunits_ defined in ephio.f
+  convertunits (value_double, error_double, parmStatus, correct);
   if (verbose)
-    cerr << "psrParams::load units converted" << endl;
+    cerr << "psrephem::load units converted" << endl;
 
   bool all_zero = 1;
   for (int ieph=0; ieph<EPH_NUM_KEYS; ieph++)  {
@@ -588,12 +617,9 @@ int psrephem::load (string* instr)
       continue;
 
     char* strval = ephemblock + ieph * EPH_STR_LEN;
-    // length_ defined in ephio.f
-    int length = length_ (strval, EPH_STR_LEN);
-    if (length != 0) {
-      strval[length] = '\0';
-      value_str[ieph] = strval;
-    }
+    f2cstr (strval, EPH_STR_LEN);
+    value_str[ieph] = strval;
+
     all_zero = 0;
   }
   
