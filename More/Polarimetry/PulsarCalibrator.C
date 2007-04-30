@@ -349,8 +349,12 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 
   }
   catch (Error& error) {
-    cerr << "Pulsar::PulsarCalibrator::solve ichan="
-	 << ichan << " error " << error.get_message() << endl;
+    cerr << "Pulsar::PulsarCalibrator::solve ichan=" << ichan 
+         << " error" << endl;
+    if (verbose > 2)
+      cerr << error << endl;
+    else
+      cerr << error.get_message() << endl;
     transformation[ichan] = 0;
     solution[ichan] = 0;
   }
