@@ -44,7 +44,7 @@ FTransform::MKL::Plan::Plan (size_t n_fft, type t)
   int e;
   if ( frexp((double) n_fft, &e) != 0.5 )
     throw Error (InvalidParam, "FTransform::MKL::Plan",
-                 "Transform length %d is not a power of two", n_fft");
+                 "Transform length %d is not a power of two", n_fft);
 
   if( t & real )
     mkl_plan = new float[2*n_fft+2];
