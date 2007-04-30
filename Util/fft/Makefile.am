@@ -9,8 +9,8 @@ libpsrfft_la_SOURCES = FTransformAgent.C FTransformAgent.h FTransformPlan.h \
 	FTransform.C IPP_Transform.C MKL_Transform.C FFTW3_Transform.C \
 	FFTW_Transform.C QuaternionFT.C shift.C fccf.f ffft.f
 
-TESTS = test_enum test_normalization test_interpolate test_real_complex \
-	test_QuaternionFT
+TESTS = test_frexp test_enum test_normalization test_interpolate \
+	test_real_complex test_QuaternionFT
 
 check_PROGRAMS = $(TESTS)
 
