@@ -117,6 +117,9 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   fourier->resize( standard->get_nbin() );
 
   standard_fourier = fourier;
+  if (verbose)
+    cerr << "Pulsar::PolnProfileFit::set_standard nbin = " 
+         << fourier->get_nbin() << endl;
 
   set_noise_mask ();
 
@@ -271,6 +274,8 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   Reference::To<PolnProfile> fourier = fourier_transform (observation);
   fourier->convert_state (Signal::Stokes);
+  // Drop the Nyquist bin
+  fourier->resize( observation->get_nbin() );
 
   unsigned nbin_std = standard->get_nbin();
   unsigned nbin_obs = observation->get_nbin();
