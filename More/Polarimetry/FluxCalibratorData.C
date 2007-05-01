@@ -195,6 +195,7 @@ void Pulsar::FluxCalibrator::Data::compute ()
     
   }  // end for each receptor
 
+  calculated = true;
 }
 
 void Pulsar::FluxCalibrator::Data::calculate () const 
