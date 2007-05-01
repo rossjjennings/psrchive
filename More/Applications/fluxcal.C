@@ -7,7 +7,9 @@
 #include "Pulsar/psrchive.h"
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/StandardCandles.h"
+
 #include "Pulsar/FixFluxCal.h"
+#include "Pulsar/CalSource.h"
 
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/OffPulseCalibrator.h"
@@ -81,17 +83,21 @@ catch (Error& error) {
        << error.get_message() << endl;
 }
 
+// print configuration information to cerr
+void configuration_report (Reference::To<Pulsar::StandardCandles>);
 
 int main (int argc, char** argv) try {
+
+  bool verbose = false;
 
   bool self_calibrate
     = Pulsar::config.get<bool> ("fluxcal::self_calibrate", false);
 
   bool offpulse_calibrator = false;
 
-  Pulsar::StandardCandles* standards = 0;
+  Reference::To<Pulsar::StandardCandles> standards;
 
-  Pulsar::FixFluxCal* fix = 0;
+  Reference::To<Pulsar::FixFluxCal> fix;
 
   string database_filename;
 
@@ -105,9 +111,11 @@ int main (int argc, char** argv) try {
       return 0;
     case 'V':
       Pulsar::Archive::set_verbosity (3);
+      verbose = true;
       break;
     case 'v':
       Pulsar::Archive::set_verbosity (2);
+      verbose = true;
       break;
     case 'q':
       Pulsar::Archive::set_verbosity (0);
@@ -157,6 +165,8 @@ int main (int argc, char** argv) try {
       break;
     } 
 
+  if (verbose)
+    configuration_report (standards);
 
   vector<string> filenames;
   for (int ai=optind; ai<argc; ai++)
@@ -204,7 +214,6 @@ int main (int argc, char** argv) try {
 
   }
 
-
   Reference::To<Pulsar::Archive> last;
   Reference::To<Pulsar::Archive> archive;
   Reference::To<Pulsar::FluxCalibrator> fluxcal;
@@ -215,8 +224,14 @@ int main (int argc, char** argv) try {
     
     archive = Pulsar::Archive::load(filenames[ifile]);
 
-    if (fix)
+    if (fix) {
+
       fix->apply (archive);
+
+      if (verbose && fix->get_changes() != "none")
+	cerr << "fluxcal: type fixed to " << fix->get_changes() << endl;
+
+    }
 
     if (self_calibrate) {
 
@@ -244,9 +259,13 @@ int main (int argc, char** argv) try {
 
     }
 
+    if (verbose)
+      cerr << "fluxcal: processing " << archive->get_type() 
+	   << " observation" << endl;
+
     if (fluxcal) {
 
-      if (Pulsar::Archive::verbose > 1)
+      if (verbose)
         cerr << "fluxcal: adding observation to FluxCalibrator" << endl;
 
       try {
@@ -298,4 +317,24 @@ int main (int argc, char** argv) try {
 catch (Error& error) {
   cerr << "fluxcal: error" << error << endl;
   return -1;
+}
+
+void configuration_report (Reference::To<Pulsar::StandardCandles> standards)
+{
+  if (!standards)
+    standards = new Pulsar::StandardCandles;
+
+  cerr << "fluxcal: " << standards->size() 
+       << " standard candles loaded from\n  "
+       << standards->get_filename() << endl;
+
+  Reference::To<Pulsar::CalSource> correct = new Pulsar::CalSource;
+
+  cerr << "fluxcal: " << correct->get_on_size()
+       << " FluxCal-On aliases loaded from\n  "
+       << correct->get_on_filename () << endl;
+
+  cerr << "fluxcal: " << correct->get_off_size()
+       << " FluxCal-Off aliases loaded from\n  "
+       << correct->get_off_filename () << endl;
 }
