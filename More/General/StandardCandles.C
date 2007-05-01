@@ -73,8 +73,7 @@ void Pulsar::StandardCandles::Entry::load (const string& str)
 
     if( words.size() < 5 )
       throw Error(InvalidState,"Pulsar::StandardCandles::Entry::load",
-		  "Couldn't parse spectral coefficients as line '%s' didn't have enough words in it",
-		  str.c_str());
+		  "could not parse five words from '"+temp+"'");
 
     source_name.push_back( words[0] );
 
@@ -185,7 +184,6 @@ Pulsar::StandardCandles::StandardCandles (const std::string& f)
 //! Loads an entire database from a file
 void Pulsar::StandardCandles::load (const std::string& filename)
 {
-
   std::ifstream input (filename.c_str());
   if (!input)
     throw Error (FailedSys, "Pulsar::StandardCandles::load",
@@ -234,6 +232,7 @@ void Pulsar::StandardCandles::load (const std::string& filename)
 
   }
 
+  loaded_filename = filename;
 }
 
 //! Unloads entire database to file

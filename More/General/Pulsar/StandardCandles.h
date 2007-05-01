@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardCandles.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.10 $
+   $Date: 2007/05/01 05:50:12 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StandardCandles_h
@@ -57,6 +57,8 @@ namespace Pulsar {
     //! Returns the number of entries in the database
     unsigned size () const { return entries.size(); }
  
+    //! Returns the filename of the database
+    std::string get_filename () const { return loaded_filename; }
 
     //! Standard Candle Database Entry
     /*! Entries have two modes of storage:
@@ -129,6 +131,9 @@ namespace Pulsar {
     
     //! vector of entries in the database
     std::vector<Entry> entries;
+
+    //! name of the file from which the entries were loaded
+    std::string loaded_filename;
     
   };
 
