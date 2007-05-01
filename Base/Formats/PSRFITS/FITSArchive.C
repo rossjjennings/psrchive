@@ -338,18 +338,11 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   psrfits_read_key (fptr, "EQUINOX", &tempstr, dfault, verbose == 3);
 
   if ((tempstr == dfault) || (tempstr.empty())) {
-
     //
     // The file was created before the EQUINOX attribute was added,
     // or was mistakenly created with a null equinox.
     //
-    if (hdr_ext->coordmode == "J2000")
-      hdr_ext->coordmode = "EQUAT";
-    else if (hdr_ext->coordmode == "Gal")
-      hdr_ext->coordmode = "GAL";
-
-    hdr_ext->equinox = "J2000";
-
+    hdr_ext->equinox = "2000.0";
   }
   else {
     hdr_ext->equinox = tempstr;
@@ -358,9 +351,35 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
       cerr << "Got equinox: " << tempstr << endl;
   }
 
+  //
+  // PSRFITS definitons versions before 2.8 have
+  //   COORD_MD = J2000
+  //   and no EQUINOX attribute
+  //
+  // PSRFITS definition versions 2.8 to 2.10 have
+  //   COORD_MD = EQUAT
+  //   EQUINOX = J2000
+  //
+  // PSRFITS definition version 2.11 has
+  //   COORD_MD = J2000 (again)
+  //   EQUINOX = 2000.0
+  //
+
+  if (hdr_ext->coordmode == "EQUAT")
+    hdr_ext->coordmode = "J2000";
+
+  if (hdr_ext->equinox == "J2000")
+    hdr_ext->equinox = "2000.0";
+
+  //
+  // ... also, since PSRFITS definition version 2.8, "Gal" is "GAL"
+  //
+  if (hdr_ext->coordmode == "Gal")
+    hdr_ext->coordmode = "GAL";
+
   sky_coord coord;
   
-  if (hdr_ext->coordmode == "EQUAT") {
+  if (hdr_ext->coordmode == "J2000") {
 
     dfault = "";
 
@@ -444,6 +463,13 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   }
   else {
 
+    //
+    // Since version 2.8, the UTC date and time are stored as one string
+    //
+
+    //
+    // Separate the date and time at the expected point in the string
+    //
     const unsigned date_length = strlen ("YYYY-MM-DD");
     if (tempstr.length() >= date_length)
       hdr_ext->stt_date = tempstr.substr(0,date_length);
@@ -795,8 +821,8 @@ try {
     coord1 = RA;
     coord2 = DEC;
 
-    psrfits_update_key (fptr, "COORD_MD", "EQUAT");
-    psrfits_update_key (fptr, "EQUINOX", "J2000");
+    psrfits_update_key (fptr, "COORD_MD", "J2000");
+    psrfits_update_key (fptr, "EQUINOX", "2000.0");
 
   }
 

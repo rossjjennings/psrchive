@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '2.10             '   / Header version 
+HDRVER  = '2.11             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -30,8 +30,8 @@ OBS_MODE= '                '   / (PSR, CAL, SEARCH)
 DATE-OBS= '                '   / Date of observation (YYYY-MM-DDThh:mm:ss UTC)
 OBSFREQ = *                    / [MHz] Centre frequency for observation
 SRC_NAME= '                '   / Source or scan ID 
-COORD_MD= '                '   / Coordinate mode (EQUAT, GAL, ECLIP, etc.)
-EQUINOX = '                '   / Equinox of coords (J2000, B1950) 
+COORD_MD= '                '   / Coordinate mode (J2000, GAL, ECLIP, etc.)
+EQUINOX = '                '   / Equinox of coords (e.g. 2000.0) 
 RA      = '                '   / Right ascension (hh:mm:ss.ssss)
 DEC     = '                '   / Declination (-dd:mm:ss.sss)
 BMAJ    = *                    / [deg] Beam major axis length
