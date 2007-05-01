@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.29 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.30 $
+   $Date: 2007/05/01 06:44:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -26,32 +26,6 @@ namespace Pulsar {
     
   public:
 
-    //! FluxCalibrator parameter communication
-    class Info : public Calibrator::Info {
-      
-    public:
-      //! Constructor
-      Info (const FluxCalibrator* cal) { instance = cal; }
- 
-      //! Return the number of parameter classes
-      unsigned get_nclass () const { return 2; }
-    
-      //! Return the name of the specified class
-      const char* get_name (unsigned iclass) const;
-    
-      //! Return the number of parameters in the specified class
-      unsigned get_nparam (unsigned iclass) const;
-      
-      //! Return the estimate of the specified parameter
-      Estimate<float> get_param (unsigned ichan, unsigned iclass,
-				 unsigned iparam) const;
-
-    protected:
-    
-      Reference::To<const FluxCalibrator> instance;
-      
-    };
-
     //! Default constructor
     FluxCalibrator (const Archive* archive = 0);
 
@@ -61,11 +35,17 @@ namespace Pulsar {
     //! Return Calibrator::Flux
     Type get_type () const;
 
+    //! FluxCalibrator parameter communication
+    class Info;
+
     //! Return the FluxCalibrator information
-    FluxCalibrator::Info* get_Info () const;
+    Calibrator::Info* get_Info () const;
     
     //! Return a new FluxCalibratorExtension
     CalibratorExtension* new_Extension () const;
+
+    //! Return information about the standard candle used
+    std::string get_standard_candle_info () const;
 
     //! Return the system temperature in Kelvin
     double meanTsys ();
@@ -136,12 +116,41 @@ namespace Pulsar {
     //! FluxCal-Off data available
     bool have_off;
 
+    //! Information stored about the standard candle
+    std::string standard_candle_info;
+
     //! Initialize attributes
     void init ();
 
     //! Set up the data array with standard candle flux density
     void setup ();
 
+  };
+
+  //! FluxCalibrator parameter communication
+  class FluxCalibrator::Info : public Calibrator::Info {
+      
+  public:
+    //! Constructor
+    Info (const FluxCalibrator* cal) { instance = cal; }
+    
+    //! Return the number of parameter classes
+    unsigned get_nclass () const { return 2; }
+    
+    //! Return the name of the specified class
+    const char* get_name (unsigned iclass) const;
+    
+    //! Return the number of parameters in the specified class
+    unsigned get_nparam (unsigned iclass) const;
+    
+    //! Return the estimate of the specified parameter
+    Estimate<float> get_param (unsigned ichan, unsigned iclass,
+			       unsigned iparam) const;
+    
+  protected:
+    
+    Reference::To<const FluxCalibrator> instance;
+      
   };
 
 }

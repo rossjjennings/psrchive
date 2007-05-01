@@ -67,6 +67,11 @@ void Pulsar::FluxCalibrator::init ()
   calculated = have_on = have_off = false;
 }
 
+string Pulsar::FluxCalibrator::get_standard_candle_info () const
+{
+  return standard_candle_info;
+}
+
 double Pulsar::FluxCalibrator::meanTsys ()
 {
   MeanEstimate<double> mean;
@@ -365,6 +370,12 @@ void Pulsar::FluxCalibrator::setup () try {
   
   const Integration* subint = get_calibrator()->get_Integration(0);
 
+  double MHz = subint->get_centre_frequency();
+
+  standard_candle_info = entry.source_name[0] + " -- at " 
+    + tostring(MHz,4) + " MHz, S = "
+    + tostring(entry.get_flux_mJy(MHz)/1e3,4) + " Jy";
+
   for (unsigned ichan=0; ichan<nchan; ++ichan) {
 
     double frequency = subint->get_centre_frequency(ichan);
@@ -448,7 +459,7 @@ Estimate<float> Pulsar::FluxCalibrator::Info::get_param (unsigned ichan,
   return retval;
 }
 
-Pulsar::FluxCalibrator::Info* Pulsar::FluxCalibrator::get_Info () const
+Pulsar::Calibrator::Info* Pulsar::FluxCalibrator::get_Info () const
 {
   const_cast<FluxCalibrator*>(this)->setup();
   return new FluxCalibrator::Info (this);
