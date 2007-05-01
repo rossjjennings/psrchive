@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibratorData.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.4 $
+   $Date: 2007/05/01 06:44:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibratorData_H
@@ -47,8 +47,8 @@ namespace Pulsar {
     //! Set the data validity flag
     void set_valid (bool f = true) { valid = f; }
     
-    //! Get the flux density of the standard candle
-    bool get_valid () const { return valid; }
+    //! Get the data validity flag
+    bool get_valid () const { return valid && calculated; }
     
     //! Return the total system equivalent flux density
     Estimate<double> get_S_sys () const;
