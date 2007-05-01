@@ -24,6 +24,7 @@ nobase_include_HEADERS = \
         Pulsar/Dispersion.h \
         Pulsar/DurationWeight.h \
         Pulsar/ExponentialBaseline.h \
+	Pulsar/FixFluxCal.h \
         Pulsar/Fourier.h \
         Pulsar/FourierSNR.h \
         Pulsar/FrequencyIntegrate.h \
@@ -98,6 +99,7 @@ libGeneral_la_SOURCES = \
         DispersionDelay.C \
         DurationWeight.C \
         ExponentialBaseline.C \
+	FixFluxCal.C \
         Fourier.C \
         FourierSNR.C \
         FrequencyIntegrate.C \
