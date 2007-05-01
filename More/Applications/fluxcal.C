@@ -7,6 +7,7 @@
 #include "Pulsar/psrchive.h"
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/StandardCandles.h"
+#include "Pulsar/FixFluxCal.h"
 
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/OffPulseCalibrator.h"
@@ -43,6 +44,7 @@ void usage ()
     "  -C           calibrate flux calibrator observation with itself \n"
     "  -d database  get FluxCal archives from database and file solutions\n"
     "  -e extension filename extension added to output archives\n"
+    "  -f           fix the type and name attributes, based on coordinates\n"
     "  -i minutes   maximum number of minutes between archives in same set\n"
     "\n"
     "By default, standard candle information is read from \n" 
@@ -88,10 +90,13 @@ int main (int argc, char** argv) try {
   bool offpulse_calibrator = false;
 
   Pulsar::StandardCandles* standards = 0;
+
+  Pulsar::FixFluxCal* fix = 0;
+
   string database_filename;
 
   char c;
-  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:i:")) != -1) 
+  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:fi:")) != -1) 
 
     switch (c)  {
 
@@ -135,6 +140,10 @@ int main (int argc, char** argv) try {
     case 'e':
       output_ext = optarg;
       cerr << "fluxcal: output file extension: " << output_ext << endl;
+      break;
+
+    case 'f':
+      fix = new Pulsar::FixFluxCal;
       break;
 
     case 'i':
@@ -205,6 +214,9 @@ int main (int argc, char** argv) try {
     cerr << "fluxcal: loading " << filenames[ifile] << endl;
     
     archive = Pulsar::Archive::load(filenames[ifile]);
+
+    if (fix)
+      fix->apply (archive);
 
     if (self_calibrate) {
 
