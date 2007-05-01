@@ -825,31 +825,11 @@ catch (Error& error) {
 // //////////////////////////////////////////////////////////////////////
 //
 string Pulsar::Interpreter::fix (const string& args)
-try { 
+try {
+
   if (args == "fluxcal") {
-    if (!fluxcals)
-      fluxcals = new StandardCandles;
-
-    Archive* data = get();
-
-    sky_coord coord = data->get_coordinates ();
-    string name = data->get_source ();
-
-    Signal::Source type = fluxcals->guess (name, coord);
-
-    if (type == Signal::Unknown)
-      return response (Fail, "name="+name+" coord="+coord.getHMSDMS()+
-		       " type unknown");
-
-    string name_change;
-
-    if (name != data->get_source ()) {
-      name_change = " and name " + data->get_source() + " -> " + name;
-      data->set_source (name);
-    }
-
-    data->set_type (type);
-    return response (Good, Signal::Source2string(type) + name_change);
+    fix_flux_cal.apply (get());
+    return response (Good, fix_flux_cal.get_changes());
   }
 
   return response (Fail, "unrecognized fix '"+args+"'");
