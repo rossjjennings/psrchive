@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Checks/Pulsar/CalSource.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/10/17 23:06:49 $
+   $Revision: 1.2 $
+   $Date: 2007/05/01 05:49:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CalSource_h
@@ -35,6 +35,18 @@ namespace Pulsar {
     //! Correct the Signal::Source type attribute of the Archive
     void apply (Archive* archive);
 
+    //! Get the number of FluxCalOn aliases
+    unsigned get_on_size () const { return fluxcal_on.size(); }
+
+    //! Get the number of FluxCalOff aliases
+    unsigned get_off_size () const { return fluxcal_off.size(); }
+
+    //! Get the filename from which FluxCalOn aliases were read
+    std::string get_on_filename () const { return on_filename; }
+
+    //! Get the filename from which FluxCalOff aliases were read
+    std::string get_off_filename () const { return off_filename; }
+
   protected:
 
     //! Source names matching FluxCalOn
@@ -42,6 +54,12 @@ namespace Pulsar {
 
     //! Source names matching FluxCalOff
     std::vector<std::string> fluxcal_off;
+
+    //! Name of file from which FluxCalOn aliases were read
+    std::string on_filename;
+
+    //! Name of file from which FluxCalOff aliases were read
+    std::string off_filename;
 
   };
  
