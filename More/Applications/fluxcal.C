@@ -58,12 +58,21 @@ void usage ()
        << endl;
 }
 
+static bool verbose = false;
 
 void unload (Pulsar::FluxCalibrator* fluxcal) try {
 
   Reference::To<Pulsar::Archive> archive;
   cerr << "fluxcal: creating " << archive_class << " Archive" << endl;
   archive = fluxcal->new_solution (archive_class);
+
+  if (verbose)
+    cerr << endl
+	 << "fluxcal: standard candle " 
+	 << fluxcal->get_standard_candle_info()
+	 << "\nfluxcal: mean system equivalent flux density = "
+	 << tostring(fluxcal->meanTsys()/1e3,4) << " Jy" << endl
+	 << endl;
 
   string newname = fluxcal->get_filenames ();
   char* whitespace = " ,\t\n";
@@ -87,8 +96,6 @@ catch (Error& error) {
 void configuration_report (Reference::To<Pulsar::StandardCandles>);
 
 int main (int argc, char** argv) try {
-
-  bool verbose = false;
 
   bool self_calibrate
     = Pulsar::config.get<bool> ("fluxcal::self_calibrate", false);
@@ -324,7 +331,8 @@ void configuration_report (Reference::To<Pulsar::StandardCandles> standards)
   if (!standards)
     standards = new Pulsar::StandardCandles;
 
-  cerr << "fluxcal: " << standards->size() 
+  cerr << endl
+       << "fluxcal: " << standards->size() 
        << " standard candles loaded from\n  "
        << standards->get_filename() << endl;
 
@@ -336,5 +344,6 @@ void configuration_report (Reference::To<Pulsar::StandardCandles> standards)
 
   cerr << "fluxcal: " << correct->get_off_size()
        << " FluxCal-Off aliases loaded from\n  "
-       << correct->get_off_filename () << endl;
+       << correct->get_off_filename () << endl
+       << endl;
 }
