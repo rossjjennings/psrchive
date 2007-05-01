@@ -20,11 +20,11 @@ static string get_default (string which)
 
 Pulsar::CalSource::CalSource ()
 {
-  stringfload (&fluxcal_on, 
-	       Pulsar::config.get<string> ("fluxcal.on", get_default("on")));
+  on_filename = config.get<string> ("fluxcal.on", get_default("on"));
+  stringfload (&fluxcal_on, on_filename);
 
-  stringfload (&fluxcal_off,
-	       Pulsar::config.get<string> ("fluxcal.off", get_default("off")));
+  off_filename = config.get<string> ("fluxcal.off", get_default("off"));
+  stringfload (&fluxcal_off, off_filename);
 }
 
 void Pulsar::CalSource::apply (Archive* archive)
