@@ -7,16 +7,20 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/02/14 18:35:12 $
+   $Revision: 1.6 $
+   $Date: 2007/05/02 21:11:41 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
 #define __psrfitsio_h
 
 #include "FITSError.h"
+#include "fitsutil.h"
+
 #include <fitsio.h>
+
 #include <string>
+#include <vector>
 
 //! Remove any existing rows from the current binary table
 void psrfits_clean_rows (fitsfile*);
@@ -32,6 +36,7 @@ template<> struct FITS_traits<double> {
 //! Template specialization for float
 template<> struct FITS_traits<float> {
   static inline int datatype() { return TFLOAT; }
+  static inline float null () { return fits_nullfloat; }
 };
 
 //! Template specialization for int
@@ -112,6 +117,54 @@ void psrfits_read_key (fitsfile* fptr, const char* name, T* data,
     }
     *data = dfault;
   }
+}
+
+
+template<typename T>
+void psrfits_write_col (fitsfile* fptr, const char* name, std::vector<T>& data,
+		       int row = 1)
+{
+  //
+  // Get the number of the named column
+
+  int colnum = 0;
+  int status = 0;
+
+  fits_get_colnum (fptr, CASEINSEN, const_cast<char*>(name), &colnum, &status);
+
+  fits_modify_vector_len (fptr, colnum, data.size(), &status);
+
+  fits_write_col (fptr, FITS_traits<T>::datatype(),
+		  colnum, row,
+		  1, data.size(),
+		  &(data[0]), &status);
+
+  if (status)
+    throw FITSError (status, "psrfits_write_col", name);
+
+}
+
+template<typename T>
+void psrfits_read_col (fitsfile* fptr, const char* name, std::vector<T>& data,
+		       int row = 1, T null = FITS_traits<T>::null())
+{
+  //
+  // Get the number of the named column
+
+  int colnum = 0;
+  int status = 0;
+
+  fits_get_colnum (fptr, CASEINSEN, const_cast<char*>(name), &colnum, &status);
+
+  int anynul = 0;
+  fits_read_col (fptr, FITS_traits<T>::datatype(),
+		 colnum, row,
+		 1, data.size(),
+		 &null, &(data[0]),
+		 &anynul, &status);
+
+  if (status)
+    throw FITSError (status, "psrfits_read_col", name);
 }
 
 #endif
