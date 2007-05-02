@@ -55,13 +55,21 @@ Pulsar::FITSHdrExtension::~FITSHdrExtension ()
 
 void Pulsar::FITSHdrExtension::set_coord_mode (const string mode)
 {
-  if (mode == "EQUAT" || mode == "GAL" || mode == "ECLIP" ||
-        mode == "AZEL" || mode == "HADEC") {
+  if (mode == "EQUAT")
+    coordmode = "J2000";
+
+  else if (mode == "Gal")
+    coordmode = "GAL";
+
+  else if (mode == "J2000" ||
+	   mode == "GAL" ||
+	   mode == "ECLIP" ||
+	   mode == "AZEL" ||
+	   mode == "HADEC")
     coordmode = mode;
-  }
-  else {
+
+  else
     coordmode = "UNSET";
-  }
 }
 
 void Pulsar::FITSHdrExtension::set_date_str (const string date)
@@ -75,7 +83,7 @@ void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
 {
   AnglePair newcoord;
   
-  if (coordmode == "EQUAT") {
+  if (coordmode == "J2000") {
     
     newcoord = coordinates.getRaDec();
     
