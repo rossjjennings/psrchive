@@ -507,11 +507,12 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
-void Pulsar::Interpreter::initialize_interface()
+void Pulsar::Interpreter::initialize_interface (bool need_archive)
 {
   if (!interface)
     interface = new Variables;
-  interface->set_instance (get());
+  if (need_archive)
+    interface->set_instance (get());
 }
 
 string Pulsar::Interpreter::edit (const string& args)
@@ -521,11 +522,20 @@ try {
   if (!arguments.size())
     return response (Fail, "please specify at least one editor command");
 
+  // replace variable names with values
+  if (args == "help") {
+    initialize_interface (false);
+    return interface->help (true);
+  }
+
   initialize_interface();
 
   string retval;
-  for (unsigned icmd=0; icmd < arguments.size(); icmd++)
+  for (unsigned icmd=0; icmd < arguments.size(); icmd++) {
+    if (icmd)
+      retval += " ";
     retval += interface->process (arguments[icmd]);
+  }
 
   return retval;
 }
@@ -537,10 +547,12 @@ string Pulsar::Interpreter::test (const string& args)
 try { 
 
   // replace variable names with values
-  initialize_interface();
-
-  if (args == "help")
+  if (args == "help") {
+    initialize_interface (false);
     return interface->help (true);
+  }
+
+  initialize_interface();
 
   string test = substitute (args, interface.get());
 
