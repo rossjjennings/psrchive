@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([PSRCHIVE],[6.0],[psrchive@sourceforge.net])
+AC_INIT([PSRCHIVE],[6.1],[psrchive@sourceforge.net])
 
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_SRCDIR([Util/Makefile.am])
@@ -170,7 +170,13 @@ SWIN_FUNC_GETOPT_LONG
 #
 # By default, runtime files will be found in the installation directory
 #
-AC_DEFINE_UNQUOTED([PACKAGE_INSTALL], ["${prefix}"],
+if test "x$prefix" != xNONE; then
+  PACKAGE_INSTALL=$prefix
+else
+  PACKAGE_INSTALL=$ac_default_prefix
+fi
+
+AC_DEFINE_UNQUOTED([PACKAGE_INSTALL], ["${PACKAGE_INSTALL}"],
                    [PSRCHIVE installation directory.])
 
 AM_CONFIG_HEADER([config.h])
