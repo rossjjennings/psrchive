@@ -25,11 +25,6 @@ void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow)
   
   // Get DIG_MODE
   
-  int colnum = 0;
-  int initflag = 0;
-  float nullfloat = 0.0;
-  char* comment = 0;
-  
   psrfits_read_key (fptr, "DIG_MODE", &(drow->dig_mode));
 
   if (Pulsar::Archive::verbose > 2)
@@ -59,7 +54,9 @@ void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow)
   // Read the data itself
   
   drow->data.resize( drow->nlev * drow->ndigr * drow->ncycsub );  
-  psrfits_read_col (fptr, "DATA", drow->data, row, float(0.0));
+
+  float nullfloat = 0.0;
+  psrfits_read_col (fptr, "DATA", drow->data, row, nullfloat);
 
   if (Pulsar::Archive::verbose > 2)
     cerr << "FITSArchive::load_digistat_row exiting" << endl;
