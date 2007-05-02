@@ -189,7 +189,7 @@ namespace Pulsar {
     Reference::To<ArchiveTI> interface;
 
     //! initialize the interface attribute
-    void initialize_interface();
+    void initialize_interface (bool need_archive = true);
 
     //! operate on data "in place", otherwise make a copy
     bool inplace;
