@@ -127,6 +127,7 @@ FFT_CFLAGS="$MKL_CFLAGS $FFTW_CFLAGS $FFTW3_CFLAGS $IPP_CFLAGS"
 # Checks for optional libraries
 #
 SWIN_LIB_CFITSIO
+SWIN_LIB_TEMPO2
 SWIN_LIB_MPI
 SWIN_LIB_READLINE
 SWIN_LIB_PTHREAD
@@ -229,6 +230,12 @@ if test x"$enable_lean" == xyes; then
    echo "********************************************"
 
 else
+
+if test x"$have_tempo2" != xyes; then
+   echo
+   echo "The TEMPO2 Predictor library was not found:"
+   echo "  PSRCHIVE applications will not be able to use TEMPO2 predictors."
+fi
 
 if test x"$have_cfitsio" != xyes; then
    echo
