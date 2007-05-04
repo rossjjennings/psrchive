@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Attic/Predictor.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/05/03 21:05:34 $
+   $Revision: 1.2 $
+   $Date: 2007/05/04 23:34:53 $
    $Author: straten $ */
 
 #ifndef __PulsarPredictor_h
@@ -27,8 +27,20 @@ namespace Pulsar {
 
   public:
 
-    //! Set the radio frequency at which predictions will be made
-    virtual void set_radio_frequency (double MHz) = 0;
+    //! Return a new, copy constructed instance of self
+    virtual Predictor* clone () const = 0;
+
+    //! Add the information from the supplied predictor to self
+    virtual void insert (const Predictor*) = 0;
+
+    //! Return true if the supplied predictor is equal to self
+    virtual bool equals (const Predictor*) const = 0;
+
+    //! Set the observing frequency at which phase and time are related
+    virtual void set_observing_frequency (long double MHz) = 0;
+
+    //! Get the observing frequency at which phase and epoch are related
+    virtual long double get_observing_frequency () const = 0;
 
     //! Return the phase, given the epoch
     virtual Phase phase (const MJD& t) const = 0;
@@ -37,7 +49,10 @@ namespace Pulsar {
     virtual MJD iphase (const Phase& phase) const = 0;
 
     //! Return the spin frequency, given the epoch
-    virtual double frequency (const MJD& t) const = 0;
+    virtual long double frequency (const MJD& t) const = 0;
+
+    //! Return the phase correction for dispersion delay
+    virtual Phase dispersion (const MJD &t, long double MHz) const = 0;
 
   };
 
