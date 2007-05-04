@@ -58,7 +58,7 @@ AC_DEFUN([SWIN_LIB_QTDRIV],
     fi
 
     LIBS="$ac_save_LIBS"
-    CFLAGS="$ac_save_CFLAGS"
+    CXXFLAGS="$ac_save_CXXFLAGS"
 
   fi
 
