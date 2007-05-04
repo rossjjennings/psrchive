@@ -7,12 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.33 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.34 $
+   $Date: 2007/05/04 23:35:08 $
    $Author: straten $ */
 
 #ifndef __POLY_H
 #define __POLY_H
+
+#include "Predictor.h"
 
 #include <string>
 #include <vector>
@@ -24,10 +26,6 @@
 #ifdef HAVE_CFITSIO
 #include <fitsio.h>
 #endif
-
-#include "Phase.h"
-#include "MJD.h"
-#include "ReferenceAble.h"
 
 class polynomial {
   
@@ -85,6 +83,8 @@ protected:
 
 public:
 
+  static double precision;
+
   //! Reference rotation frequency, F0 (Hz)
   double f0;
 
@@ -121,16 +121,16 @@ public:
   double period (const MJD &t) const;
 
   //! Returns the pulse phase (in turns) at the given time
-  Phase  phase (const MJD &t) const;
-
-  //! Returns the pulse phase at the given time and observing frequency
-  Phase  phase (const MJD &t, float obs_freq) const;
+  Phase phase (const MJD &t) const;
 
   //! Returns the time at the given pulse phase
-  MJD    iphase (const Phase& p) const;
+  MJD iphase (const Phase& p) const;
 
   //! Returns the spin frequency (in Hz) at the given time
-  double frequency (const MJD &t) const;
+  long double frequency (const MJD &t) const;
+
+  //! Return the phase correction for dispersion delay
+  Phase dispersion (const MJD &t, long double MHz) const;
 
   //! Returns the spin frequency derivative (in Hz/s) at the given time 
   double chirp (const MJD &t) const;
@@ -142,25 +142,27 @@ public:
   char   get_telescope     () const {return telescope; }
   double get_freq          () const {return freq; }
   MJD    get_reftime       () const {return reftime; }
+  Phase  get_refphase      () const {return ref_phase; }
+  double get_reffrequency  () const {return f0; }
   double get_nspan         () const {return nspan_mins; }
   float  get_dm            () const {return dm; }
   int    get_ncoeff        () const {return (int) coefs.size(); }
   double get_doppler_shift () const {return doppler_shift / 1e4; }
-  std::string get_psrname       () const {return psrname; }
+  std::string get_psrname  () const {return psrname; }
   bool   get_binary        () const {return binary; } 
   double get_binph         () const {return binph; }
 
   static double flexibility;
 
   MJD start_time () const
-    { return reftime - nspan_mins * (1.0+flexibility) * 60.0/2.0; };
+  { return reftime - nspan_mins * (1.0+flexibility) * 60.0/2.0; };
   MJD end_time () const 
-    { return reftime + nspan_mins * (1.0+flexibility) * 60.0/2.0; };
+  { return reftime + nspan_mins * (1.0+flexibility) * 60.0/2.0; };
 
   Phase start_phase () const
-    { return phase (start_time()); };
+  { return phase (start_time()); };
   Phase end_phase () const
-    { return phase (end_time()); };
+  { return phase (end_time()); };
   
   friend int operator == (const polynomial &, const polynomial &);
   friend int operator != (const polynomial &, const polynomial &);
@@ -188,16 +190,11 @@ public:
   double predicted_phase;
 };
 
-class polyco : public Reference::Able {
+class polyco : public Pulsar::Predictor {
 
- protected:
-  //! null value of pulsar name
-  static std::string anyPsr;
-
- public:
+public:
   static bool verbose;
   static bool debug;
-  static double precision;
 
   //! The polynomial sets
   std::vector<polynomial> pollys;
@@ -206,27 +203,61 @@ class polyco : public Reference::Able {
   polyco () {}
   polyco (const polyco& poly) { operator = (poly); }
 
+  //
+  // Pulsar::Predictor implementation
+  //
+
+  //! Return a new, copy constructed instance of self
+  Predictor* clone () const;
+
+  //! Add the information from the supplied predictor to self
+  void insert (const Predictor*);
+
+  //! Return true if the supplied predictor is equal to self
+  bool equals (const Predictor*) const;
+
+  //! Set the observing frequency at which predictions will be made
+  void set_observing_frequency (long double MHz);
+
+  //! Get the observing frequency at which phase and epoch are related
+  long double get_observing_frequency () const;
+
+  //! Return the phase, given the epoch
+  Phase phase (const MJD& t) const
+  { return best(t).phase(t); }
+
+  //! Return the epoch, given the phase
+  MJD iphase (const Phase& phase) const
+  { return best(phase).iphase(phase); }
+
+  //! Return the spin frequency, given the epoch
+  long double frequency (const MJD& t) const
+  { return best(t).frequency(t); }
+
+  //! Return the phase correction for dispersion delay
+  Phase dispersion (const MJD &t, long double MHz) const
+  { return best(t).dispersion(t,MHz); }
+
+  //
+  // the rest
+  //
+
   //! Hack constructor for use on search data
   polyco(MJD _reftime, float _dm, double _f0, int _telescope=7){ pollys.push_back( polynomial(_reftime,_dm,_f0,_telescope) ); } 
 
   //! Load in polycos
-  polyco (const char* id);
   polyco (const std::string& id);
   polyco& operator = (const polyco& poly);
 
   virtual ~polyco() {}
 
   //! these functions return the number of polynomials successfully loaded
-  int load (const char* filename, size_t nbytes=0);
-  int load (const std::string& filename, size_t nbytes=0)
-	{ return load (filename.c_str(), nbytes); }
+  int load (const std::string& filename, size_t nbytes=0);
   int load (FILE * fp, size_t nbytes=0);
   int load (std::string* instr);
 
   // these functions return -1 upon error
-  int unload (const char* filename) const ;
-  int unload (const std::string& filename) const
-        { return unload (filename.c_str()); }
+  int unload (const std::string& filename) const;
 
   // these functions return the number of bytes unloaded (-1 on error)
   int unload (std::string *outstr) const;
@@ -234,43 +265,27 @@ class polyco : public Reference::Able {
 
   void append (const polyco& poly);
 
-  void  prettyprint  () const;
+  void  prettyprint () const;
 
-  const polynomial* 
-  nearest (const MJD &t, const std::string& psrname=anyPsr) const;
+  const polynomial* nearest (const MJD &t) const;
 
-  const polynomial& best (const MJD &t, const std::string& psr=anyPsr) const;
-  const polynomial& best (const Phase &p, const std::string& psr=anyPsr) const;
+  const polynomial& best (const MJD &t) const;
+  const polynomial& best (const Phase &p) const;
 
-  virtual int
-  i_nearest (const MJD &t, const std::string& psrname=anyPsr) const;
-  virtual int
-  i_nearest (const Phase &p, const std::string& psrname=anyPsr) const;
+  virtual int i_nearest (const MJD &t) const;
+  virtual int i_nearest (const Phase &p) const;
 
-  double doppler_shift (const MJD& t, const std::string& psr=anyPsr) const
-    { return best(t, psr).get_doppler_shift(); };
+  double doppler_shift (const MJD& t) const
+  { return best(t).get_doppler_shift(); };
 
-  Phase phase (const MJD& t, const std::string& psr = anyPsr) const
-    { return best(t, psr).phase(t); };
+  double period(const MJD& t) const
+  { return best(t).period(t); };
 
-  Phase 
-  phase (const MJD& t, float obs_freq, const std::string& psr=anyPsr) const
-    { return best(t, psr).phase(t, obs_freq); };
+  double chirp(const MJD& t) const
+  { return best(t).chirp(t); };
 
-  MJD iphase (const Phase& phase, const std::string& psr = anyPsr) const
-    { return best(phase, psr).iphase(phase); };
-
-  double period(const MJD& t, const std::string& psr = anyPsr) const
-    { return best(t, psr).period(t); };
-
-  double frequency(const MJD& t, const std::string& psr = anyPsr) const
-    { return best(t, psr).frequency(t); };
-
-  double chirp(const MJD& t, const std::string& psr = anyPsr) const
-    { return best(t, psr).chirp(t); };
-
-  double accel(const MJD& t, const std::string& psr = anyPsr) const
-    { return best(t, psr).accel(t); };
+  double accel(const MJD& t) const
+  { return best(t).accel(t); };
 
   char   get_telescope () const;
   double get_freq      () const;
@@ -307,8 +322,10 @@ class polyco : public Reference::Able {
 
 };
 
-inline std::ostream& operator<< (std::ostream& ostr, const polyco& p) {
-  std::string out; p.unload(&out); return ostr << out; }
+inline std::ostream& operator<< (std::ostream& ostr, const polyco& p)
+{
+  std::string out; p.unload(&out); return ostr << out;
+}
 
 #endif
 
