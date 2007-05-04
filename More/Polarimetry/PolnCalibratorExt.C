@@ -34,6 +34,7 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
     throw Error (InvalidParam, "Pulsar::PolnCalibratorExtension",
                  "null PolnCalibrator*");
 
+  init ();
   try {
 
     if (Archive::verbose == 3)
