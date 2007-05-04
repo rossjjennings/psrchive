@@ -8,16 +8,17 @@ using namespace std;
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Predictor.h"
 
-void Pulsar::Archive::set_model (const polyco& new_model)
+void Pulsar::Archive::set_model (const Predictor* new_model)
 {
   if (!good_model (new_model))
     throw Error (InvalidParam, "Pulsar::Archive::set_model",
                  "supplied model does not span Integrations");
 
   // swap the old with the new
-  Reference::To<polyco> oldmodel = model;
-  model = new polyco (new_model);
+  Reference::To<Predictor> oldmodel = model;
+  model = new_model->clone();
 
   if (verbose == 3)
     cerr << "Pulsar::Archive::set_model apply the new model" << endl;

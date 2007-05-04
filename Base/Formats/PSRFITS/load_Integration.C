@@ -141,7 +141,7 @@ try {
     // Set the folding period, using the polyco from the file header
     // This was taken out of the condition clause below because period
     // wasn't set when TSUB was 0
-    integ->set_folding_period (hdr_model->period(epoch));
+    integ->set_folding_period (1.0 / hdr_model->frequency(epoch));
 
     if (duration) {
 

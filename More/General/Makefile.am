@@ -68,6 +68,7 @@ libGeneral_la_SOURCES = \
 	morphological_difference.C \
         AdaptiveSNR.C \
         Archive_append.C \
+	Archive_apply_model.C \
         Archive_bscrunch.C \
         Archive_centre.C \
         Archive_centre_max_bin.C \
@@ -77,6 +78,7 @@ libGeneral_la_SOURCES = \
         Archive_find.C \
         Archive_fold.C \
         Archive_fscrunch.C \
+	Archive_good_model.C \
         Archive_invint.C \
         Archive_match.C \
         ArchiveMatch.C \

@@ -12,6 +12,7 @@
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
+#include "polyco.h"
 #include "Error.h"
 
 #include "timer++.h"
@@ -114,8 +115,8 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
 
   struct timer* header = const_cast<struct timer*> (&hdr);
 
-
-  if (!model)
+  const polyco* t1model = dynamic_cast<const polyco*> (model.ptr());
+  if (!t1model)
     header->nbytespoly = 0;
 
   else {
@@ -123,7 +124,7 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
     if (verbose == 3)
       cerr << "TimerArchive::hdr_unload get polyco size" << endl;
 
-    header->nbytespoly = model->unload (&text);
+    header->nbytespoly = t1model->unload (&text);
     if (hdr.nbytespoly < 0)
       throw Error (FailedCall, "TimerArchive::hdr_unload", "polyco::unload");
     
@@ -170,12 +171,14 @@ void Pulsar::TimerArchive::backend_unload (FILE* fptr) const
 
 void Pulsar::TimerArchive::psr_unload (FILE* fptr) const
 {
-  if (model && hdr.nbytespoly > 0) {
+  const polyco* t1model = dynamic_cast<const polyco*> (model.ptr());
+
+  if (t1model && hdr.nbytespoly > 0) {
     if (verbose == 3)
       cerr << "TimerArchive::psr_unload "
 	   << hdr.nbytespoly << " bytes in polyco" << endl;
 
-    if (model->unload (fptr) != hdr.nbytespoly)
+    if (t1model->unload (fptr) != hdr.nbytespoly)
       throw Error (FailedCall, "TimerArchive::psr_unload",
 		   "polyco::unload != %d bytes", hdr.nbytespoly);
   }

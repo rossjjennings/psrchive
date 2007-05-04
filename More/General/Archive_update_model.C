@@ -1,16 +1,18 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2007 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
-#include <iostream>
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Error.h"
 #include "Predict.h"
+#include "T2Predictor.h"
+
+#include <iostream>
+using namespace std;
 
 // ///////////////////////////////////////////////////////////////////////
 //
@@ -57,7 +59,7 @@ try {
   if (verbose == 3)
     cerr << "\n\n\nPulsar::Archive::update_model nsubint=" << nsubint << endl;
 
-  Reference::To<polyco> oldmodel;
+  Reference::To<Predictor> oldmodel;
 
   if( !runtime_model ){
     // store the old model
@@ -138,6 +140,13 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
   if (verbose == 3) cerr << "Pulsar::Archive::update_model time=" << time 
 			 << " clear=" << clear_model << endl;
 
+  Tempo2::Predictor* t2model = dynamic_cast<Tempo2::Predictor*> (model.ptr());
+  if (t2model)
+    throw Error (InvalidState, "Pulsar::Archive::update_model",
+		 "TEMPO2 Predictors not yet supported");
+
+  polyco* t1model = dynamic_cast<polyco*> (model.ptr());
+  
   if (!ephemeris)
     return;
 
@@ -148,15 +157,15 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
   predict.set_asite ( get_telescope_code() );
   predict.set_maxha ( 12 );
 
-  if (model && model->pollys.size() > 0) {
+  if (t1model && t1model->pollys.size() > 0) {
 
-    predict.set_nspan ( (int) model->get_nspan() );
-    predict.set_ncoef ( model->get_ncoeff() );
+    predict.set_nspan ( (int) t1model->get_nspan() );
+    predict.set_ncoef ( t1model->get_ncoeff() );
 
   }
   else {
 
-    model = new polyco;
+    model = t1model = new polyco;
 
     predict.set_nspan ( 960 );
     predict.set_ncoef ( 12 );
@@ -164,143 +173,16 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
   }
 
   if (clear_model)
-    model = new polyco;
-
-  if ( model->i_nearest (time) == -1 ) {
+    model = t1model = new polyco;
+  
+  if ( t1model->i_nearest (time) == -1 ) {
     if (verbose > 2)
       cerr << "Pulsar::Archive::update_model no model for " << time << endl;
     // no match, create a new polyco for the specified time
     polyco part = predict.get_polyco (time, time);
-    model->append (part);
+    t1model->append (part);
   }
 }
 
 
-// ///////////////////////////////////////////////////////////////////////
-//
-// Archive::apply_model
-//
-/*!
-  This method aligns the Integration to the current polyco, as stored
-  in the model attribute.  The Integration is rotated by the difference
-  between the phase predicted by the current model and that predicted by
-  the old model.
-  \param old the old polyco used to describe subint
-  \param subint pointer to the Integration to be aligned to the current model
-*/
-void Pulsar::Archive::apply_model (Integration* subint, const polyco* old)
-{
-  if ( !model )
-    throw Error (InvalidState, "Pulsar::Archive::apply_model", "no polyco");
 
-  if ( old && model->get_telescope() != old->get_telescope() ) {
-    cerr << "Pulsar::Archive::apply_model telescope mismatch" << endl;
-    old = 0;
-  }
-
-  try {
-
-    // get the MJD of the rising edge of bin zero
-    MJD subint_mjd = subint -> get_epoch();
-
-    // get the phase shift due to differing observing frequencies between
-    // old and current polyco
-    Phase freq_shift_phase = 0;
-
-    if (old)
-      model->phase (subint_mjd, old->get_freq()) - model->phase (subint_mjd);
-
-    // get the phase of the rising edge of bin zero
-    Phase phase = model->phase (subint_mjd);
-    
-    // the Integration is rotated by -phase to bring zero phase to bin zero
-    Phase dphase = freq_shift_phase - phase;
-    
-    double period = model->period (subint_mjd);
-    double shift_time = dphase.fracturns() * period;
-    
-    if (verbose == 3) {
-
-      Phase old_phase = (old) ? old->phase(subint_mjd) : 0;
-
-      cerr << "Pulsar::Archive::apply_model"
-	   << "\n  old MJD " << subint_mjd;
-
-      if (old)
-	cerr << "\n  old polyco phase " << old_phase
-	     << "\n  old freq " << old->get_freq();
-
-      cerr << "\n  new polyco phase " << phase
-	   << "\n  new freq " << model->get_freq()
-	   << "\n  freq phase shift " << freq_shift_phase
-	
-	   << "\n  time shift " << shift_time/86400.0 << " days" 
-           << "\n             " << shift_time << " seconds "
-	   << "\n  total phase shift " << dphase << endl; 
-    }
-
-    subint -> set_folding_period (period);  
-    subint -> rotate (shift_time);
-    subint -> zero_phase_aligned = true;
-
-    if (verbose == 3) {
-      subint_mjd = subint -> get_epoch();
-      phase = model->phase(subint_mjd);
-      cerr << "Pulsar::Archive::apply_model"
-	   << "\n  new MJD "   << subint_mjd
-	   << "\n  new phase " << phase
-	   << endl;
-
-    }
-  }
-  catch (Error& err) {
-    throw err += "Pulsar::Archive::apply_model";
-  }
-
-}
-
-// ///////////////////////////////////////////////////////////////////////
-//
-// Archive::good_model
-//
-/*!
-  This method tests if the given model has a polynomial that applies
-  to each Integration, returning false if a match is not found.
-  \param test_model the polyco to be tested
- */
-bool Pulsar::Archive::good_model (const polyco& test_model) const
-{
-  if (verbose == 3)
-    cerr << "Pulsar::Archive::good_model testing polyco on " << get_nsubint()
-	 << " integrations" << endl;
-
-  unsigned isub=0;
-  for (isub=0; isub < get_nsubint(); isub++)
-    try {
-      if ( test_model.i_nearest (get_Integration(isub)->get_epoch()) == -1 ) {
-	if (verbose == 3) cerr << "Pulsar::Archive::good_model"
-                             " polyco::i_nearest returns none" << endl;
-	break;
-      }
-    }
-    catch (...) {
-      if (verbose == 3) cerr << "Pulsar::Archive::good_model"
-                           " polyco::i_nearest throws exception" << endl;
-      break;
-    }
-  
-  if (isub < get_nsubint()) {
-
-    if (verbose == 3)
-      cerr << "Pulsar::Archive::good_model polyco failed on integration "
-	   << isub << endl;
-
-    return false;
-
-  }
-
-  if (verbose == 3)
-    cerr << "Pulsar::Archive::good_model polyco passes test" << endl;
-
-  return true;
-}

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.23 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.24 $
+   $Date: 2007/05/04 23:33:47 $
    $Author: straten $ */
 
 #ifndef __TOA_H
@@ -155,7 +155,9 @@ namespace Tempo {
     char   get_telescope () const { return telescope; };
     std::string get_auxilliary_text () const { return auxinfo; };
 
+#if POLYCO_INTERFACE_RESTORED
     double shift (const polyco & poly) const;
+#endif
 
     // loading and unloading to/from file and string
     int    load   (FILE* instream);

@@ -9,6 +9,7 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Pointing.h"
+#include "polyco.h"
 #include "Error.h"
 
 #include "timer++.h"
@@ -451,13 +452,14 @@ void Pulsar::TimerArchive::psr_load (FILE* fptr)
       cerr << "TimerArchive::psr_load "
 	   << hdr.nbytespoly << " bytes in polyco" << endl;
 
-    model = new polyco;
+    polyco* t1model = new polyco;
+    model = t1model;
 
-    if (model->load (fptr, hdr.nbytespoly) <= 0)
+    if (t1model->load (fptr, hdr.nbytespoly) <= 0)
       throw Error (FailedCall, "TimerArchive::psr_load", "polyco::load");
 
     if (verbose == 3) {
-      cerr << "TimerArchive::psr_load read in polyco:\n" << *model << endl;
+      cerr << "TimerArchive::psr_load read in polyco:\n" << *t1model << endl;
       cerr << "TimerArchive::psr_load end of polyco" << endl;
     }
   }

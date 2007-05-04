@@ -4,10 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Predictor.h"
+
+using namespace std;
 
 /*!
   Uses the polyco model, as well as the centre frequency and mid-time of
@@ -30,8 +32,8 @@ void Pulsar::Archive::centre ()
     Integration* subint = get_Integration(isub);
 
     // Rotate according to polyco prediction
-    Phase phase = model->phase (subint -> get_epoch(),
-                                subint -> get_centre_frequency());
+    Phase phase = model->phase (subint->get_epoch()) +
+      model->dispersion (subint->get_epoch(), subint->get_centre_frequency());
 
     if (verbose == 3)
       cerr << "Pulsar::Archive::center phase=" << phase << endl;

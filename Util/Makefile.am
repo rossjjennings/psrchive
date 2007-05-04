@@ -13,6 +13,11 @@ endif
 
 SUBDIRS += tempo
 
+if HAVE_TEMPO2
+  SUBDIRS += tempo2
+  libpsrutil_la_LIBADD += tempo2/libtempo2.la
+endif
+
 if HAVE_PGPLOT
   SUBDIRS += pgutil
   libpsrutil_la_LIBADD += pgutil/libpgutil.la

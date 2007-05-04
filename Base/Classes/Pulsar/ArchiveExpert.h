@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveExpert.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:05:49 $
+   $Revision: 1.4 $
+   $Date: 2007/05/04 23:33:47 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveExpert_h
@@ -60,7 +60,7 @@ namespace Pulsar {
     { instance->resize_Integration (integration); }
     
     //! Apply the current model to the Integration
-    void apply_model (Integration* subint, const polyco* old = 0)
+    void apply_model (Integration* subint, const Predictor* old = 0)
     { instance->apply_model (subint, old); }
 
   private:

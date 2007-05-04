@@ -8,6 +8,7 @@
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Telescope.h"
 #include "Horizon.h"
+#include "polyco.h"
 
 #include "Error.h"
 
@@ -661,9 +662,10 @@ void Pulsar::TimerArchive::correct () try {
   hdr.ndump_sub_int = 1;
 
   // correct the polyco parameters
-  if (model) {
-    hdr.nspan = (int) model->get_nspan();
-    hdr.ncoeff = model->get_ncoeff();
+  polyco* t1model = dynamic_cast<polyco*> (model.ptr());
+  if (t1model) {
+    hdr.nspan = (int) t1model->get_nspan();
+    hdr.ncoeff = t1model->get_ncoeff();
   }
   else
     hdr.nspan = hdr.ncoeff = 0;

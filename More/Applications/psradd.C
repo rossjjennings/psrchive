@@ -154,7 +154,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.47 2007/04/23 05:29:11 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.48 2007/05/04 23:33:47 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -403,8 +403,7 @@ int main (int argc, char **argv) try {
     if (vverbose)
       for (unsigned isub=0; isub < archive->get_nsubint(); isub++)
 	cerr << isub << ": " 
-	     << archive->get_model()
-	  .phase( archive->get_Integration(isub)->get_epoch() ) << endl;
+	     << archive->get_model()->phase( archive->get_Integration(isub)->get_epoch() ) << endl;
 
     if (check_has_data && archive->integration_length() == 0) {
       cerr << "psradd: archive [" << filenames[ifile] << "]"

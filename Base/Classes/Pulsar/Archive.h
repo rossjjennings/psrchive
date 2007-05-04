@@ -7,17 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.158 $
-   $Date: 2006/10/17 23:04:36 $
+   $Revision: 1.159 $
+   $Date: 2007/05/04 23:33:47 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.158 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.159 $"
 
 #include "IntegrationManager.h"
-#include "polyco.h"
 #include "psrephem.h"
 #include "sky_coord.h"
 #include "Estimate.h"
@@ -33,6 +32,7 @@ namespace Pulsar {
   class Receiver;
   class Integration;
   class Profile;
+  class Predictor;
 
   //! The primary interface to pulsar observational data
   /*! This virtual base class implements the primary interface to pulsar
@@ -283,13 +283,13 @@ namespace Pulsar {
 
     // //////////////////////////////////////////////////////////////////
     //
-    // Pulsar Ephemeris and Polyco
+    // Pulsar Ephemeris and Predictor
     //
     // //////////////////////////////////////////////////////////////////
 
     /** @name TEMPO Interface
      *
-     *  These methods provide access to the pulsar ephemeris and polyco
+     *  These methods provide access to the pulsar ephemeris and predictor
      *  as used by TEMPO.
      */
     //@{
@@ -300,16 +300,16 @@ namespace Pulsar {
     //! Return a copy of the current archive ephemeris
     const psrephem get_ephemeris() const;
 
-    //! Install the given polyco and shift profiles to align
-    void set_model (const polyco& model);
+    //! Install the given predictor and shift profiles to align
+    void set_model (const Predictor* model);
 
-    //! Return a copy of the current archive polyco
-    const polyco get_model() const;
+    //! Return a copy of the current archive predictor
+    const Predictor* get_model() const;
 
     //! Returns true if the archive has a model
     bool has_model() const { return model; }
 
-    //! Create a new polyco and align the Integrations to the new model
+    //! Create a new predictor and align the Integrations to the new model
     void update_model ();
 
     //@}
@@ -626,7 +626,7 @@ namespace Pulsar {
     Reference::To<psrephem> ephemeris;
 
     //! The pulsar phase model, as created using TEMPO
-    Reference::To<polyco> model;
+    Reference::To<Predictor> model;
 
     //! Initialize an Integration to reflect Archive attributes.
     void init_Integration (Integration* subint);
@@ -635,19 +635,19 @@ namespace Pulsar {
     void resize_Integration (Integration* integration);
     
     //! Apply the current model to the Integration
-    void apply_model (Integration* subint, const polyco* old = 0);
+    void apply_model (Integration* subint, const Predictor* old = 0);
 
-    //! Update the polyco model and correct the Integration set
+    //! Update the predictor model and correct the Integration set
     void update_model (unsigned old_nsubint);
 
-    //! Update the polyco to include the specifed MJD
+    //! Update the predictor to include the specifed MJD
     void update_model (const MJD& time, bool clear_model = false);
 
     //! Creates polynomials to span the Integration set
     void create_updated_model (bool clear_model);
 
     //! Returns true if the given model spans the Integration set
-    bool good_model (const polyco& test_model) const;
+    bool good_model (const Predictor* test_model) const;
 
     //! Expert interface
     Reference::To<Expert> expert_interface;
@@ -660,7 +660,7 @@ namespace Pulsar {
     //! This flag may be raised only by Archive::update_model.
     /*!
       As it is set only during run-time, this flag makes it known that
-      the current polyco was created by the currently available
+      the current predictor was created by the currently available
       version of tempo and its run-time configuration files.
     */
     bool runtime_model;

@@ -33,7 +33,7 @@
 #include "Pulsar/Telescope.h"
 
 #include "psrfitsio.h"
-
+#include "polyco.h"
 #include "Telescope.h"
 #include "strutil.h"
 #include "ephio.h"
@@ -569,9 +569,11 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
   if (status == 0) {
 
-    model = new polyco;
-    model->load (fptr, &extra_polyco);
-    hdr_model = new polyco (*model);
+    Reference::To<polyco> t1model = new polyco;
+    t1model->load (fptr, &extra_polyco);
+
+    model = t1model;
+    hdr_model = model->clone();
 
     if (verbose == 3)
       cerr << "FITSArchive::load_header polyco loaded" << endl;
@@ -988,9 +990,10 @@ try {
 
   // Write the polyco to the FITS file
 
-  if (model) { 
+  const polyco* t1model = dynamic_cast<const polyco*> (model.ptr());
+  if (t1model) { 
 
-   model->unload(fptr);
+   t1model->unload(fptr);
   
    if (verbose == 3)
      cerr << "FITSArchive::unload_file polyco written" << endl;

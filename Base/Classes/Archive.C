@@ -10,6 +10,7 @@
 #include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/Receiver.h"
 
+#include "Predictor.h"
 #include "Types.h"
 #include "Error.h"
 #include "typeutil.h"
@@ -256,12 +257,12 @@ const psrephem Pulsar::Archive::get_ephemeris () const
   return *ephemeris;
 }
 
-const polyco Pulsar::Archive::get_model () const
+const Pulsar::Predictor* Pulsar::Archive::get_model () const
 {
   if (!model)
     throw Error (InvalidState, "Pulsar::Archive::get_model", "no model");
 		 
-  return *model;
+  return model;
 }
 
 MJD Pulsar::Archive::start_time() const

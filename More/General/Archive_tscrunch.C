@@ -8,6 +8,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
+#include "Predictor.h"
 #include "Error.h"
 
 using namespace std;
@@ -149,7 +150,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
           // get the phase at the midtime of the result
           Phase mid_phase = model->phase (epoch);
           // get the period at the midtime of the result
-          double period = model->period (epoch);
+          double period = 1.0 / model->frequency (epoch);
   
           // set the phase at the midtime equal to that of the first subint
           Phase desired (mid_phase.intturns(), first_phase.fracturns());

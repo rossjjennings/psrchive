@@ -7,6 +7,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
+#include "Predictor.h"
 
 using namespace std;
 
@@ -55,7 +56,7 @@ void Pulsar::Archive::copy (const Archive& archive,
   }
 
   if (archive.model)
-    model = new polyco (*(archive.model));
+    model = archive.model->clone();
   else
     model = 0;
 

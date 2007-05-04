@@ -584,6 +584,7 @@ int Tempo::toa::Tempo_unload (char* outstring) const
   }
 }
 
+#if POLYCO_INTERFACE_RESTORED
 
 // ////////////////////////////////////////////////////////////////////////
 //
@@ -599,6 +600,8 @@ double Tempo::toa::shift (const polyco& poly) const
   if (toashift >.5) toashift -= 1.0;
   return (toashift*poly.period (this->arrival));
 }
+
+#endif
 
 // ////////////////////////////////////////////////////////////////////////
 //

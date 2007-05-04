@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.38 $
-   $Date: 2006/10/17 14:59:21 $
+   $Revision: 1.39 $
+   $Date: 2007/05/04 23:33:47 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -16,6 +16,7 @@
 
 #include "Pulsar/BasicArchive.h"
 #include "Pulsar/Agent.h"
+#include "polyco.h"
 
 #include <fitsio.h>
 
@@ -204,7 +205,7 @@ namespace Pulsar {
     FITSPolyco extra_polyco;
 
     //! The polyco parsed from the PSRFITS file
-    Reference::To<polyco> hdr_model;
+    Reference::To<Predictor> hdr_model;
 
   private:
 

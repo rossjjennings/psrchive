@@ -10,6 +10,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
+#include "Predictor.h"
 #include "Error.h"
 
 using namespace std;
@@ -132,7 +133,7 @@ void Pulsar::Archive::append (const Archive* arch)
 
   /* if the polycos are equivalent and the Integrations are already
      properly phased to the polycos, then no corrections are needed */
-  if (model && arch->model && *model == *(arch->model)) {
+  if (model && arch->model && model->equals(arch->model)) {
     bool zero_aligned = true;
     for (unsigned isub=0; isub < old_nsubint; isub++)
       if (!get_Integration(isub)->zero_phase_aligned)
