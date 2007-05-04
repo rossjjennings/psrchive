@@ -19,9 +19,8 @@
   \param dm the dispersion measure in \f$ {\rm pc\,cm}^{-3} \f$
   \param ref_freq the frequency (in MHz) to which the delay is referenced
   \param freq the frequency (in MHz) of the delayed band
-*/
 
-/*! Although the value:
+  Although the value:
 
   \f$ DM\,({\rm pc\,cm^{-3}})=2.410331(2)\times10^{-4}D\,({\rm s\,MHz^{2}}) \f$
 
