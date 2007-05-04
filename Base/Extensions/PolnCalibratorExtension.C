@@ -7,6 +7,8 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 using namespace std;
 
+#include <assert.h>
+
 //! Default constructor
 Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
   : CalibratorExtension ("PolnCalibratorExtension")
