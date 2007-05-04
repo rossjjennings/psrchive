@@ -13,9 +13,16 @@
 
 using namespace std;
 
+void unload_variances (fitsfile*, const Pulsar::PolnCalibratorExtension*,
+		       int ncpar, vector<float>& data);
+
+void unload_covariances (fitsfile*, const Pulsar::PolnCalibratorExtension*,
+			 int ncovar, vector<float>& data);
+
 void Pulsar::FITSArchive::unload (fitsfile* fptr, 
 				  const PolnCalibratorExtension* pce)
-{
+try {
+
   int status = 0;
 
   if (verbose == 3)
@@ -39,11 +46,11 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 		     "fits_insert_rows FEEDPAR");
 
   int nchan = pce->get_nchan();
-  int ncpar = 0;
-  
-  for (int i = 0; i < nchan; i++)
-    if (pce->get_valid(i))
-      ncpar = pce->get_transformation(i)->get_nparam(); 
+  int ncpar = pce->get_nparam();
+  int ncovar = 0;
+
+  if (pce->get_has_covariance())
+    ncovar = ncpar * (ncpar+1) / 2;
 
   if (ncpar == 0)
     throw Error (InvalidState, "FITSArchive::unload PolnCalibratorExtension",
@@ -51,33 +58,34 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 
   if (verbose == 3)
     cerr << "FITSArchive::unload PolnCalibratorExtension nchan=" 
-	 << nchan <<  " nparam=" << ncpar << endl;
+	 << nchan <<  " nparam=" << ncpar << " ncovar=" << ncovar << endl;
 
-  char* comment = 0;
-
-  char* cal_mthd= const_cast<char*>( Calibrator::Type2str( pce->get_type() ) );
+  string cal_mthd = Calibrator::Type2str( pce->get_type() );
 
   // Write CAL_MTHD
-  fits_update_key (fptr, TSTRING, "CAL_MTHD", cal_mthd, comment, &status);
+  psrfits_update_key (fptr, "CAL_MTHD", cal_mthd);
 
   // Write NCPAR
-  fits_update_key (fptr, TINT, "NCPAR", &ncpar, comment, &status);
+  psrfits_update_key (fptr, "NCPAR", ncpar);
+
+  // Write NCOVAR
+  psrfits_update_key (fptr, "NCOVAR", ncovar);
 
   Pulsar::unload (fptr, pce);
 
   long dimension = nchan * ncpar;  
-  auto_ptr<float> data ( new float[dimension] );
+  vector<float> data ( dimension );
 
   int count = 0;
   for (count = 0; count < dimension; count++)
-    data.get()[count] = fits_nullfloat;
+    data[count] = fits_nullfloat;
 
   count = 0;
   for (int ichan = 0; ichan < nchan; ichan++) {
 
     if (pce->get_valid(ichan)) {
       for (int j = 0; j < ncpar; j++) {
-	data.get()[count] = pce->get_transformation(ichan)->get_param(j);
+	data[count] = pce->get_transformation(ichan)->get_param(j);
 	count++;
       }
     }
@@ -92,39 +100,78 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 
   assert (count == dimension);
 
-  int colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status);
-  fits_modify_vector_len (fptr, colnum, dimension, &status);
-  fits_write_col (fptr, TFLOAT, colnum, 1, 1, dimension,
-		  data.get(), &status);
+  psrfits_write_col (fptr, "DATA", data);
 
-  if (status)
-    throw FITSError (status, "FITSArchive::unload PolnCalibratorExtension", 
-		     "fits_write_col DATA");
+  if (ncovar)
+    unload_covariances (fptr, pce, ncovar, data);
+  else
+    unload_variances (fptr, pce, ncpar, data);
 
-  // Write the variance of the model parameters
-    
-  count = 0;
+  if (verbose == 3)
+    cerr << "FITSArchive::unload PolnCalibratorExtension exiting" << endl; 
+
+}
+ catch (Error& error) {
+   throw error += "FITSArchive::unload PolnCalibratorExtension";
+ }
+
+void unload_variances (fitsfile* fptr,
+		       const Pulsar::PolnCalibratorExtension* pce,
+		       int ncpar, vector<float>& data)
+{
+  unsigned nchan = pce->get_nchan();
+
+  data.resize( ncpar * nchan );
+
+  unsigned count = 0;
   for (int i = 0; i < nchan; i++)
     if (pce->get_valid(i))
       for (int j = 0; j < ncpar; j++) {
-	data.get()[count] = sqrt(pce->get_transformation(i)->get_variance(j));
+	data[count] = sqrt(pce->get_transformation(i)->get_variance(j));
 	count++;
       }
     else
       count += ncpar;
 
-  assert (count == dimension);
+  assert (count == data.size());
 
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DATAERR", &colnum, &status);
-  fits_modify_vector_len (fptr, colnum, dimension, &status);
-  fits_write_col (fptr, TFLOAT, colnum, 1, 1, dimension,
-		  data.get(), &status);
+  psrfits_write_col (fptr, "DATAERR", data);
+}
 
-  if (status)
-    throw FITSError (status, "FITSArchive::unload PolnCalibratorExtension", 
-		     "fits_write_col DATAERR");
-  if (verbose == 3)
-    cerr << "FITSArchive::unload PolnCalibratorExtension exiting" << endl; 
+void unload_covariances (fitsfile* fptr,
+			 const Pulsar::PolnCalibratorExtension* pce,
+			 int ncovar, vector<float>& data)
+{
+  unsigned nchan = pce->get_nchan();
+
+  if (Pulsar::Archive::verbose == 3)
+    cerr << "FITSArchive::unload PolnCalibratorExtension"
+      " ncovar = " << ncovar << endl;
+
+  data.resize( ncovar * nchan );
+
+  vector<double> covar;
+  unsigned count = 0;
+
+  for (int ichan = 0; ichan < nchan; ichan++) {
+
+    if (!pce->get_valid(ichan)) {
+      count += ncovar;
+      continue;
+    }
+
+    pce->get_transformation(ichan)->get_covariance (covar);
+
+    assert (covar.size() == ncovar);
+
+    for (int j = 0; j < ncovar; j++) {
+      data[count] = covar[j];
+      count++;
+    }
+
+  }
+
+  assert (count == data.size());
+
+  psrfits_write_col (fptr, "COVAR", data);
 }

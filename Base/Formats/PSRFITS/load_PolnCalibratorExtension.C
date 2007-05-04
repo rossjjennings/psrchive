@@ -7,14 +7,22 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "CalibratorExtensionIO.h"
+#include "psrfitsio.h"
 
 #include <stdlib.h>
 #include <assert.h>
 
 using namespace std;
 
+void load_variances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
+		     int ncpar, vector<float>& data);
+
+void load_covariances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
+		       int ncovar, vector<float>& data);
+
 void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
-{
+try {
+
   int status = 0;
  
   if (verbose == 3)
@@ -52,13 +60,16 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
 
   // Get NCPAR 
   int ncpar = 0;
-  fits_read_key (fptr, TINT, "NCPAR", &ncpar, comment, &status);
+  psrfits_read_key (fptr, "NCPAR", &ncpar, 0, verbose == 3);
   if (ncpar < 0)
     ncpar = 0;
 
+  int ncovar = 0;
+  psrfits_read_key (fptr, "NCOVAR", &ncovar, 0, verbose == 3);
+
   // Get NCH_FDPR (old versions of PSRFITS header)
   int nch_fdpr = 0;
-  fits_read_key (fptr, TINT, "NCH_FDPR", &nch_fdpr, comment, &status);
+  psrfits_read_key (fptr, "NCH_FDPR", &nch_fdpr, 0, verbose == 3);
   
   if (status == 0 && nch_fdpr >= 0)
     pce->set_nchan(nch_fdpr);
@@ -86,19 +97,9 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
       pce->set_valid (ichan, false);
     }
 
-  auto_ptr<float> data ( new float[dimension] );
+  vector<float> data (dimension);
   
-  // Read the data  
-  int colnum = 0;
-  int initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status);
-
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &fits_nullfloat, 
-		 data.get(), &initflag, &status);
-
-  if (status)
-    throw FITSError (status, "FITSArchive::load PolnCalibratorExtension", 
-		     "fits_read_col DATA");
+  psrfits_read_col (fptr, "DATA", data);
 
   if (verbose == 3)
     cerr << "FITSArchive::load_PolnCalibratorExtension data read" << endl;
@@ -108,10 +109,10 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
     if (pce->get_valid(ichan)) {
       bool valid = true;
       for (int j = 0; j < ncpar; j++) {
-	if (!finite(data.get()[count]))
+	if (!finite(data[count]))
 	  valid = false;
 	else
-	  pce->get_transformation(ichan)->set_param(j,data.get()[count]);
+	  pce->get_transformation(ichan)->set_param(j,data[count]);
 	count++;
       }
       if (!valid)
@@ -120,23 +121,36 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
     else
       count += ncpar;
 
-
   assert (count == dimension);
 
-  fits_get_colnum (fptr, CASEINSEN, "DATAERR", &colnum, &status);
+  if (ncovar)
+    load_covariances (fptr, pce, ncovar, data);
+  else
+    load_variances (fptr, pce, ncpar, data);
 
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &fits_nullfloat, 
-		 data.get(), &initflag, &status);
-
-  if (status)
-    throw FITSError (status, "FITSArchive::load PolnCalibratorExtension", 
-		     "fits_read_col DATAERR");
-
+  add_extension (pce);
+  
   if (verbose == 3)
+    cerr << "FITSArchive::load_PolnCalibratorExtension exiting" << endl;
+
+}
+ catch (Error& error) {
+   throw error += "FITSArchive::load PolnCalibratorExtension";
+ }
+
+void load_variances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
+		     int ncpar, vector<float>& data)
+{
+  data.resize( ncpar * pce->get_nchan() );
+
+  psrfits_read_col (fptr, "DATAERR", data);
+
+  if (Pulsar::Archive::verbose > 2)
     cerr << "FITSArchive::load_PolnCalibratorExtension dataerr read" << endl;
   
-  count = 0;
-  for (ichan = 0; ichan < pce->get_nchan(); ichan++) {
+  int count = 0;
+
+  for (unsigned ichan = 0; ichan < pce->get_nchan(); ichan++) {
     if (pce->get_valid(ichan)) {
 
       bool valid = true;
@@ -144,7 +158,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
 
       for (int j = 0; j < ncpar; j++) {
 
-	float err = data.get()[count];
+	float err = data[count];
 
 	if (!finite(err))
 	  valid = false;
@@ -158,7 +172,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
       }
 
       if (zeroes == ncpar) {
-	if (verbose > 1)
+	if (Pulsar::Archive::verbose > 1)
 	  cerr << "Pulsar::FITSArchive::load_PolnCalibratorExtension WARNING\n"
 	    "  ichan=" << ichan << " flagged invalid: "
 	    "zero error in all parameters" << endl;
@@ -173,10 +187,44 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
       count += ncpar;
   }
 
-  assert (count == dimension);
+  assert (count == data.size());
+}
 
-  add_extension (pce);
-  
-  if (verbose == 3)
-    cerr << "FITSArchive::load_PolnCalibratorExtension exiting" << endl;
+void load_covariances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
+		       int ncovar, vector<float>& data)
+{
+  if (Pulsar::Archive::verbose > 2)
+    cerr << "FITSArchive::load_PolnCalibratorExtension"
+      " ncovar=" << ncovar << endl;
+
+  unsigned nchan = pce->get_nchan();
+
+  data.resize( ncovar * nchan );
+
+  psrfits_read_col (fptr, "COVAR", data);
+
+  if (Pulsar::Archive::verbose > 2)
+    cerr << "FITSArchive::load_PolnCalibratorExtension COVAR read" << endl;
+
+  vector<double> covar (ncovar);
+  unsigned count = 0;
+
+  for (int ichan = 0; ichan < nchan; ichan++) {
+
+    if (!pce->get_valid(ichan)) {
+      count += ncovar;
+      continue;
+    }
+
+    for (int j = 0; j < ncovar; j++) {
+      covar[j] = data[count];
+      count++;
+    }
+
+    pce->get_transformation(ichan)->set_covariance (covar);
+
+  }
+
+  assert (count == data.size());
+
 }

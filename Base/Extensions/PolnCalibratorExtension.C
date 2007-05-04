@@ -11,8 +11,14 @@ using namespace std;
 Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
   : CalibratorExtension ("PolnCalibratorExtension")
 {
+  init ();
+}
+
+void Pulsar::PolnCalibratorExtension::init ()
+{
   type = Calibrator::SingleAxis;
   nparam = 3;
+  has_covariance = false;
 }
 
 //! Copy constructor
@@ -31,9 +37,13 @@ Pulsar::PolnCalibratorExtension::operator=
   if (this == &copy)
     return *this;
 
+  if (Archive::verbose == 3)
+    cerr << "Pulsar::PolnCalibratorExtension::operator=" << endl;
+
   type = copy.get_type();
   epoch = copy.get_epoch();
   nparam = copy.get_nparam();
+  has_covariance = copy.get_has_covariance();
 
   unsigned nchan = copy.get_nchan();
   set_nchan (nchan);
@@ -104,6 +114,16 @@ void Pulsar::PolnCalibratorExtension::set_valid (unsigned ichan, bool valid)
 unsigned Pulsar::PolnCalibratorExtension::get_nparam () const
 {
   return nparam;
+}
+
+bool Pulsar::PolnCalibratorExtension::get_has_covariance () const
+{
+  return has_covariance;
+}
+
+void Pulsar::PolnCalibratorExtension::set_has_covariance (bool has)
+{
+  has_covariance = has;
 }
 
 //! Get the transformation for the specified frequency channel
@@ -236,4 +256,67 @@ bool PolnCalibratorExtension::Transformation::get_valid () const
 void PolnCalibratorExtension::Transformation::set_valid (bool flag)
 {
   valid = flag;
+}
+
+//! Get the covariance matrix of the model paramters
+vector< vector<double> >
+PolnCalibratorExtension::Transformation::get_covariance () const
+{
+  unsigned nparam = get_nparam();
+
+  unsigned size = nparam * (nparam+1) / 2;
+  if (size != covariance.size())
+    throw Error (InvalidState,
+		 "PolnCalibratorExtension::Transformation::get_covariance",
+		 "covariance vector has incorrect length = %u (expect %u)",
+		 covariance.size(), size);
+
+  vector<vector<double> > matrix (nparam, vector<double>(nparam));
+
+  unsigned count = 0;
+  for (unsigned i=0; i<nparam; i++)
+    for (unsigned j=i; j<nparam; j++) {
+      matrix[i][j] = matrix[j][i] = covariance[count];
+      count ++;
+    }
+
+  assert (count == covariance.size());
+
+  return matrix;
+}
+
+//! Set the covariance matrix of the model paramters
+void PolnCalibratorExtension::Transformation::set_covariance 
+(const vector< vector<double> >& covar)
+{
+  unsigned nparam = get_nparam();
+
+  assert (nparam == covar.size());
+
+  covariance.resize( nparam * (nparam+1) / 2 );
+
+  unsigned count = 0;
+  for (unsigned i=0; i<nparam; i++) {
+    assert (nparam == covar[i].size());
+    for (unsigned j=i; j<nparam; j++) {
+      covariance[count] = covar[i][j];
+      count ++;
+    }
+  }
+
+  assert (count == covariance.size());
+}
+
+//! Get the covariance matrix efficiently
+void PolnCalibratorExtension::Transformation::get_covariance 
+(vector<double>& covar) const
+{
+  covar = covariance;
+}
+
+//! Set the covariance matrix efficiently
+void PolnCalibratorExtension::Transformation::set_covariance
+(const vector<double>& covar)
+{
+  covariance = covar;
 }

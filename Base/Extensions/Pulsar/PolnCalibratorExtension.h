@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.21 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.22 $
+   $Date: 2007/05/04 23:34:33 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -58,6 +58,11 @@ namespace Pulsar {
     //! Get the number of parameters describing each transformation
     unsigned get_nparam () const;
 
+    //! Get if the covariances of the transformation parameters
+    bool get_has_covariance () const;
+    //! Set if the covariances of the transformation parameters
+    void set_has_covariance (bool);
+
     //! Return true if the transformation for the specified channel is valid
     bool get_valid (unsigned ichan) const;
     void set_valid (unsigned ichan, bool valid);
@@ -77,8 +82,15 @@ namespace Pulsar {
     //! The number of parameters that describe the transformation
     unsigned nparam;
 
+    //! The covariances of the transformation parameters are available
+    bool has_covariance;
+
     //! Construct the response array according to the current attributes
     void construct ();
+
+  private:
+
+    void init ();
 
   };
  
@@ -105,6 +117,16 @@ namespace Pulsar {
     //! Set the variance of the specified model parameter
     void set_variance (unsigned, double);
 
+    //! Get the covariance matrix of the model paramters
+    std::vector< std::vector<double> > get_covariance () const;
+    //! Set the covariance matrix of the model paramters
+    void set_covariance (const std::vector< std::vector<double> >&);
+
+    //! Get the covariance matrix efficiently
+    void get_covariance (std::vector<double>&) const;
+    //! Set the covariance matrix efficiently
+    void set_covariance (const std::vector<double>&);
+
     //! Get the value and variance of the specified model parameter
     Estimate<double> get_Estimate (unsigned) const;
     //! Set the value and variance of the specified model parameter
@@ -118,6 +140,9 @@ namespace Pulsar {
   protected:
 
     std::vector< Estimate<double> > params;
+
+    std::vector<double> covariance;
+
     bool valid;
 
   };

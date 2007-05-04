@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '2.11             '   / Header version 
+HDRVER  = '2.12            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -650,6 +650,7 @@ TFIELDS =                    3 / Number of fields per row
 EXTNAME = FEEDPAR              / Name of this binary table extension
 CAL_MTHD= '                  ' / Cross-coupling method
 NCPAR   =                    * / Number of coupling parameters
+NCOVAR  =                    * / Number of parameter covariances
 NCHAN   =                    * / Nr of channels in Feed coupling data
 EPOCH   = '                  ' / [MJD] Epoch of calibration obs
 #
@@ -664,6 +665,9 @@ TFORM#  = E                    / NCHAN*NCPAR floats
 TTYPE#  = DATAERR              / Estimated error of cross-coupling data
 TDIM#   = (*,*)                / Dimensions (NCHAN,NCPAR)
 TFORM#  = E                    / NCHAN*NCPAR floats
+TTYPE#  = COVAR                / Formal covariances of coupling data
+TDIM#   = (*,*)                / Dimensions (NCHAN,NCOVAR)
+TFORM#  = E                    / NCHAN*NCOVAR floats
 END
 #
 ###############################################################################
