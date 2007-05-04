@@ -24,8 +24,6 @@ check_PROGRAMS = test_ephio test_polyco_io test_Phase \
 
 TESTS = test_polyco_io test_psrephem
 
-CLEANFILES = test.psrephem.out1 test.psrephem.out2 test.psrephem.out3
-
 test_polyco_io_SOURCES		= test_polyco_io.C test.polyco
 test_Phase_SOURCES		= test_Phase.C
 test_get_configuration_SOURCES	= test_get_configuration.C
@@ -92,4 +90,9 @@ include $(top_srcdir)/config/Makefile.include
 # (like keyinfo.com) only in the same path as the source code file.
 #
 AM_FFLAGS = -I.
+
+#
+# keep 'make distclean' happy
+#
+CLEANFILES += $(top_builddir)/Util/tempo/test.psrephem.out*
 
