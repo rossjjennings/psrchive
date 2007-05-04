@@ -34,40 +34,24 @@ void Pulsar::Archive::apply_model (Integration* subint, const Predictor* old)
     // get the MJD of the rising edge of bin zero
     MJD epoch = subint -> get_epoch();
 
-    // get the observing frequency
-    double freq = subint -> get_centre_frequency ();
-
-    // get the phase shift due to differing reference frequencies
-    Phase freq_shift_phase = 0;
-
-    if (old)
-      freq_shift_phase = model->dispersion (epoch, freq) 
-	- old->dispersion (epoch, freq);
-
     // get the phase of the rising edge of bin zero
     Phase phase = model->phase (epoch);
     
     // the Integration is rotated by -phase to bring zero phase to bin zero
-    Phase dphase = freq_shift_phase - phase;
+    Phase dphase = - phase;
     
     long double period = 1.0 / model->frequency (epoch);
     long double shift_time = dphase.fracturns() * period;
     
     if (verbose == 3) {
 
-      Phase old_phase = (old) ? old->phase(epoch) : 0;
-
       cerr << "Pulsar::Archive::apply_model"
 	   << "\n  old MJD " << epoch;
 
       if (old)
-	cerr << "\n  old predictor phase " << old_phase;
-	  //	     << "\n  old freq " << old->get_freq();
+	cerr << "\n  old predictor phase " << old->phase(epoch);
 
       cerr << "\n  new predictor phase " << phase
-	//	   << "\n  new freq " << model->get_freq()
-	   << "\n  freq phase shift " << freq_shift_phase
-	
 	   << "\n  time shift " << shift_time/86400.0 << " days" 
            << "\n             " << shift_time << " seconds "
 	   << "\n  total phase shift " << dphase << endl; 
