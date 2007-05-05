@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/05/05 09:55:39 $
+   $Revision: 1.3 $
+   $Date: 2007/05/05 11:40:32 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
@@ -33,6 +33,9 @@ namespace Tempo2 {
 
     //! Return true if the supplied predictor is equal to self
     bool equals (const Pulsar::Predictor*) const;
+
+    //! Add the information from the supplied predictor to self
+    void insert (const Pulsar::Predictor*);
 
     //! Set the observing frequency at which predictions will be made
     void set_observing_frequency (long double MHz);

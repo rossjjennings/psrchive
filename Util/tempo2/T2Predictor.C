@@ -20,6 +20,12 @@ bool Tempo2::Predictor::equals (const Pulsar::Predictor*) const
   throw Error (InvalidState, "Tempo2::Predictor::equals", "not implemented");
 }
 
+//! Add the information from the supplied predictor to self
+void Tempo2::Predictor::insert (const Pulsar::Predictor*)
+{
+  throw Error (InvalidState, "Tempo2::Predictor::insert", "not implemented");
+}
+
 //! Set the observing frequency at which predictions will be made
 void Tempo2::Predictor::set_observing_frequency (long double MHz)
 {
