@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/inverse_phase.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/05/03 21:04:09 $
+   $Revision: 1.2 $
+   $Date: 2007/05/05 23:25:08 $
    $Author: straten $ */
 
 #ifndef __Predictor_h
@@ -25,6 +25,16 @@ namespace Pulsar {
   PHASE = p (TIME)
 
   for TIME, given PHASE.
+
+  This function requires Predictor to implement:
+
+  static double precision;
+
+  MJD get_reftime() const;
+  Phase get_refphase() const;
+  long double get_reffrequency() const;
+  Phase phase (const MJD&) const;
+  long double frequency (const MJD&) const;
   */
 
   template<typename Predictor>
@@ -39,7 +49,7 @@ namespace Pulsar {
     double converge_faster = 1.0;  // kludge!!
     double converge_factor = 0.5;
   
-    double lprecision = max (Predictor::precision, MJD::precision);
+    double lprecision = std::max (Predictor::precision, MJD::precision);
 
     for (gi=0; gi<10000; gi++) {
       dt = (predictor.phase(guess) - p) / predictor.frequency(guess);
