@@ -8,10 +8,26 @@
 #include "T2Predictor.h"
 #include "Error.h"
 
+Tempo2::Predictor::Predictor ()
+{
+  T2Predictor_Init (&predictor);
+}
+
+Tempo2::Predictor::Predictor (const Predictor& copy)
+{
+  T2Predictor_Init (&predictor);
+  T2Predictor_Copy (&predictor, &copy.predictor);
+}
+
+Tempo2::Predictor::~Predictor ()
+{
+  T2Predictor_Destroy (&predictor);
+}
+
 //! Return a new, copy constructed instance of self
 Pulsar::Predictor* Tempo2::Predictor::clone () const
 {
-  throw Error (InvalidState, "Tempo2::Predictor::clone", "not implemented");
+  return new Predictor (*this);
 }
 
 //! Return true if the supplied predictor is equal to self
@@ -21,9 +37,14 @@ bool Tempo2::Predictor::equals (const Pulsar::Predictor*) const
 }
 
 //! Add the information from the supplied predictor to self
-void Tempo2::Predictor::insert (const Pulsar::Predictor*)
+void Tempo2::Predictor::insert (const Pulsar::Predictor* from)
 {
-  throw Error (InvalidState, "Tempo2::Predictor::insert", "not implemented");
+  const Predictor* t2p = dynamic_cast<const Predictor*>(from);
+  if (!t2p)
+    throw Error (InvalidParam, "Tempo2::Predictor::insert",
+		 "Predictor is not a Tempo2 Predictor");
+
+  T2Predictor_Insert (&predictor, &t2p->predictor);
 }
 
 //! Set the observing frequency at which predictions will be made
@@ -88,6 +109,9 @@ Phase Tempo2::Predictor::dispersion (const MJD &t, long double MHz) const
 void Tempo2::Predictor::load (FILE* fptr)
 {
   T2Predictor_FRead (&predictor, fptr);
+
+  observing_frequency = 0.5L *
+    (T2Predictor_GetStartFreq(&predictor)+T2Predictor_GetEndFreq(&predictor));
 }
 
 void Tempo2::Predictor::unload (FILE* fptr) const

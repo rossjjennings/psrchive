@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/05/05 13:41:27 $
+   $Revision: 1.6 $
+   $Date: 2007/05/05 14:42:44 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
@@ -27,6 +27,15 @@ namespace Tempo2 {
   class Predictor : public Pulsar::Predictor {
 
   public:
+
+    //! Default constructor
+    Predictor ();
+
+    //! Copy constructor
+    Predictor (const Predictor&);
+
+    //! Destructor
+    ~Predictor ();
 
     //! Return a new, copy constructed instance of self
     Pulsar::Predictor* clone () const;
