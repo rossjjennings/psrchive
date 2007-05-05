@@ -11,19 +11,6 @@
 
 using namespace std;
 
-typedef struct 
-{
-  fitsfile* fptr;
-  int colnum;
-  int nrow;
-  int row;
-
-  char* buffer;
-  int offset;
-} fitstream;
-
-int fitstream_readrow (void *, char *, int);
-
 void Pulsar::FITSArchive::load_T2Predictor (fitsfile* fptr)
 {
   if (verbose == 3)
@@ -57,81 +44,31 @@ void Pulsar::FITSArchive::load_T2Predictor (fitsfile* fptr)
 		 "PREDICT typecode != TSTRING");
 
   vector<char> text (repeat);
-  char* nul = " ";
   char* temp = &(text[0]);
 
-  fitstream input;
-  input.fptr = fptr;
-  input.colnum = colnum;
-  input.nrow = numrows;
-  input.row = 1;
-  input.buffer = &(text[0]);
-  input.offset = 0;
+  FILE* stream = tmpfile();
 
-  FILE* stream = fropen (&input, fitstream_readrow);
-  if (!stream)
-    throw Error (SysCall, "FITSArchive::load T2Predictor", "fropen");
+  for (int row=1; row <= numrows; row++) {
+
+    int anynul = 0;
+    fits_read_col (fptr, TSTRING, colnum, row, 1, 1, 0, 
+                   &temp, &anynul, &status);
+    if (status)
+      throw FITSError (status, "FITSArchive::load T2Predictor",
+		       "fits_read_col");
+
+    fprintf (stream, "%s\n", temp);
+  }
+
+  fseek (stream, 0, SEEK_SET);
 
   Reference::To<Tempo2::Predictor> predictor = new Tempo2::Predictor;
-
   predictor->load (stream);
+
+  model = predictor;
 
   if (verbose == 3)
     cerr << "FITSArchive::load_T2Predictor exiting" << endl;
 }
 
-int fitstream_readrow (void* cookie, char* text, int toread)
-{
-  cerr << "toread=" << toread << endl;
 
-  fitstream* c = (fitstream*) cookie;
-
-  int haveread = 0;
-
-  while (haveread < toread) {
-
-    int left_to_read = toread - haveread;
-
-    if (c->offset == 0) {
-
-      if (c->row > c->nrow)
-	break;
-
-      int anynul = 0;
-      int status = 0;
-      fits_read_col (c->fptr, TSTRING, c->colnum, c->row, 1, 1, 0, 
-		     &(c->buffer), &anynul, &status);
-      if (status != 0)
-	throw FITSError (status, "fitstream_readrow", 
-			 "fits_read_col");
-
-      cerr << "loaded\n" << c->buffer << endl;
-
-      c->row ++;
-    }
-
-    int length = strlen (c->buffer);
-    int available = length - c->offset;
-
-    if (available > left_to_read)
-      available = left_to_read;
-      
-    memcpy (text + haveread, c->buffer + c->offset, available);
-
-    c->offset += available;
-    haveread += available;
-
-    left_to_read -= available;
-
-    if (c->offset == length) {
-
-      if (left_to_read) {
-	text[haveread] = '\n';
-	haveread ++;
-      }
-
-      c->offset = 0;
-    }
-  }
-  return haveread;
-}
