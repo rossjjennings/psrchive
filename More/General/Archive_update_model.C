@@ -145,8 +145,27 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     throw Error (InvalidState, "Pulsar::Archive::update_model",
 		 "not a pulsar observation");
 
-  if (verbose == 3) cerr << "Pulsar::Archive::update_model time=" << time 
+  if (verbose == 3) cerr << "Pulsar::Archive::update_model epoch=" << time 
 			 << " clear=" << clear_model << endl;
+
+  if (model) try {
+
+    model->phase (time);
+
+    if (verbose == 3)
+      cerr << "Pulsar::Archive::update_model current model spans epoch"
+	   << endl;
+
+    return;
+
+  }
+  catch (...) {
+
+    if (verbose == 3)
+      cerr << "Pulsar::Archive::update_model current model doesn't span epoch"
+	   << endl;
+
+  }
 
 #ifdef HAVE_TEMPO2
   Tempo2::Predictor* t2model = dynamic_cast<Tempo2::Predictor*> (model.ptr());
