@@ -23,6 +23,10 @@ libpsrfits_la_SOURCES = CalibratorExtensionIO.h FITSArchive.C \
 	delete_hdu.C update_history.C unload_integrations.C \
 	CalibratorExtensionIO.C FITSAgent.C
 
+if HAVE_TEMPO2
+libpsrfits_la_SOURCES += load_T2Predictor.C
+endif
+
 check_PROGRAMS = test_template
 TESTS = $(check_PROGRAMS)
 
@@ -34,7 +38,8 @@ test_template_SOURCES = test_template.C
 #
 
 INCLUDES = -I$(top_builddir)/include \
-	-I$(top_srcdir)/More/Polarimetry @CFITSIO_CFLAGS@ @MPI_CFLAGS@
+	-I$(top_srcdir)/More/Polarimetry \
+	@CFITSIO_CFLAGS@ @MPI_CFLAGS@ @TEMPO2_CFLAGS@
 
 LDADD = libpsrfits.la $(top_builddir)/Util/libpsrutil.la @CFITSIO_LIBS@
 

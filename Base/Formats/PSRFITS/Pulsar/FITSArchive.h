@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.39 $
-   $Date: 2007/05/04 23:33:47 $
+   $Revision: 1.40 $
+   $Date: 2007/05/05 11:40:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -182,11 +182,12 @@ namespace Pulsar {
     void load_FluxCalibratorExtension (fitsfile*);
     void load_CalibratorStokes (fitsfile*);
     void load_Pointing (fitsfile* fptr, int row,
-				   Pulsar::Integration* integ);
+			Pulsar::Integration* integ);
     void load_Receiver (fitsfile*);
     void load_ITRFExtension (fitsfile*);
     void load_CalInfoExtension (fitsfile*);
     void load_WidebandCorrelator (fitsfile*);
+    void load_T2Predictor (fitsfile*);
 
     //! Delete the HDU with the specified name
     void delete_hdu (fitsfile* fptr, char* hdu_name) const;
