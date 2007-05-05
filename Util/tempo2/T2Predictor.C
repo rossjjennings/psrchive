@@ -85,4 +85,7 @@ Phase Tempo2::Predictor::dispersion (const MJD &t, long double MHz) const
 	       "not implemented"); 
 }
 
-
+void Tempo2::Predictor::load (FILE* fptr)
+{
+  T2Predictor_FRead (&predictor, fptr);
+}

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/05/05 11:40:32 $
+   $Revision: 1.4 $
+   $Date: 2007/05/05 13:11:37 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
@@ -54,6 +54,9 @@ namespace Tempo2 {
 
     //! Return the phase correction for dispersion delay
     Phase dispersion (const MJD &t, long double MHz) const;
+
+    //! Load from an open stream
+    void load (FILE*);
 
   private:
 
