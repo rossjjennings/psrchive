@@ -43,7 +43,18 @@ void Pulsar::FITSArchive::load_T2Predictor (fitsfile* fptr)
   fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);  
 
   if (typecode != TSTRING)
-    cerr << "FITSArchive::load T2Predictor typecode != TSTRING" << endl;
+    throw Error (InvalidState, "FITSArchive::load T2Predictor",
+		 "PREDICT typecode != TSTRING");
+
+  vector<char> text (repeat);
+
+  int anynul = 0;
+  for (int row=1; row <= numrows; row++) {
+    fits_read_col (fptr, TSTRING, colnum, row, 1, 1, 0, 
+		   &(text[0]), &anynul, &status);
+    string str = &(text[0]);
+    cerr << str << endl;
+  }
 
   if (verbose == 3)
     cerr << "FITSArchive::load_T2Predictor exiting" << endl;
