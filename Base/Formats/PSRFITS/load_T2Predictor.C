@@ -21,8 +21,7 @@ void Pulsar::FITSArchive::load_T2Predictor (fitsfile* fptr)
   fits_movnam_hdu (fptr, BINARY_TBL, "T2PREDICT", 0, &status);
   
   if (status != 0)
-    throw FITSError (status, "FITSArchive::load_T2Predictor", 
-                     "fits_movnam_hdu T2PREDICT");
+    return;
 
   Reference::To<Tempo2::Predictor> history = new Tempo2::Predictor;
 
@@ -47,13 +46,14 @@ void Pulsar::FITSArchive::load_T2Predictor (fitsfile* fptr)
 		 "PREDICT typecode != TSTRING");
 
   vector<char> text (repeat);
+  char* nul = " ";
+  char* temp = &(text[0]);
 
   int anynul = 0;
   for (int row=1; row <= numrows; row++) {
-    fits_read_col (fptr, TSTRING, colnum, row, 1, 1, 0, 
-		   &(text[0]), &anynul, &status);
-    string str = &(text[0]);
-    cerr << str << endl;
+    fits_read_col (fptr, TSTRING, colnum, row, 1, 1, nul, 
+                   &temp, &anynul, &status);
+    cerr << temp << endl;
   }
 
   if (verbose == 3)
