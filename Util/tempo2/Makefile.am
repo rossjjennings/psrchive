@@ -17,4 +17,6 @@ LDADD = libtempo2.la \
 	$(top_builddir)/Util/units/libunits.la \
 	$(top_builddir)/Util/third/libthird.la @FLIBS@
 
+libtempo2_la_LIBADD = @TEMPO2_LIBS@
+
 include $(top_srcdir)/config/Makefile.include
