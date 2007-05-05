@@ -156,7 +156,7 @@ libGeneral_la_SOURCES = \
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include
+INCLUDES = -I$(top_builddir)/include @TEMPO2_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.include
 

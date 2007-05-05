@@ -5,11 +5,19 @@
  *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Error.h"
 #include "Predict.h"
+#include "Predictor.h"
+
+#ifdef HAVE_TEMPO2
 #include "T2Predictor.h"
+#endif
 
 #include <iostream>
 using namespace std;
@@ -140,10 +148,12 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
   if (verbose == 3) cerr << "Pulsar::Archive::update_model time=" << time 
 			 << " clear=" << clear_model << endl;
 
+#ifdef HAVE_TEMPO2
   Tempo2::Predictor* t2model = dynamic_cast<Tempo2::Predictor*> (model.ptr());
   if (t2model)
     throw Error (InvalidState, "Pulsar::Archive::update_model",
 		 "TEMPO2 Predictors not yet supported");
+#endif
 
   polyco* t1model = dynamic_cast<polyco*> (model.ptr());
   
