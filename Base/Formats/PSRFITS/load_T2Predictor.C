@@ -65,10 +65,15 @@ void Pulsar::FITSArchive::load_T2Predictor (fitsfile* fptr)
   Reference::To<Tempo2::Predictor> predictor = new Tempo2::Predictor;
   predictor->load (stream);
 
+  fclose (stream);
+
   model = predictor;
 
-  if (verbose == 3)
-    cerr << "FITSArchive::load_T2Predictor exiting" << endl;
+  if (verbose == 3) {
+    cerr << "FITSArchive::load T2Predictor loaded" << endl;
+    predictor->unload (stderr);
+  }
+
 }
 
 
