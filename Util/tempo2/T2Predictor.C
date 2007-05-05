@@ -89,3 +89,8 @@ void Tempo2::Predictor::load (FILE* fptr)
 {
   T2Predictor_FRead (&predictor, fptr);
 }
+
+void Tempo2::Predictor::unload (FILE* fptr) const
+{
+  T2Predictor_FWrite (&predictor, fptr);
+}

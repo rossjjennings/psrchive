@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/05/05 13:11:37 $
+   $Revision: 1.5 $
+   $Date: 2007/05/05 13:41:27 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
@@ -57,6 +57,9 @@ namespace Tempo2 {
 
     //! Load from an open stream
     void load (FILE*);
+
+    //! Unload to an open stream
+    void unload (FILE*) const;
 
   private:
 
