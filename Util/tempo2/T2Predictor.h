@@ -7,14 +7,17 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/05/04 22:58:25 $
+   $Revision: 1.2 $
+   $Date: 2007/05/05 09:55:39 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
 #define __Tempo2Predictor_h
 
 #include "Predictor.h"
+
+// From the TEMPO2 distribution
+#include "tempo2pred.h"
 
 namespace Tempo2 {
 
@@ -48,6 +51,14 @@ namespace Tempo2 {
 
     //! Return the phase correction for dispersion delay
     Phase dispersion (const MJD &t, long double MHz) const;
+
+  private:
+
+    //! The class is implemented by the T2Predictor library
+    T2Predictor predictor;
+
+    //! The observing frequency to be passed to GetPhase and GetFrequency
+    long double observing_frequency;
 
   };
 

@@ -10,7 +10,7 @@ libtempo2_la_SOURCES = T2Predictor.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include
+INCLUDES = -I$(top_builddir)/include @TEMPO2_CFLAGS@
 
 LDADD = libtempo2.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \

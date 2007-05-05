@@ -6,45 +6,77 @@
  ***************************************************************************/
 
 #include "T2Predictor.h"
+#include "Error.h"
 
 //! Return a new, copy constructed instance of self
 Pulsar::Predictor* Tempo2::Predictor::clone () const
 {
+  throw Error (InvalidState, "Tempo2::Predictor::clone", "not implemented");
 }
 
 //! Return true if the supplied predictor is equal to self
 bool Tempo2::Predictor::equals (const Pulsar::Predictor*) const
 {
+  throw Error (InvalidState, "Tempo2::Predictor::equals", "not implemented");
 }
 
 //! Set the observing frequency at which predictions will be made
 void Tempo2::Predictor::set_observing_frequency (long double MHz)
 {
+  observing_frequency = MHz;
 }
 
 //! Get the observing frequency at which phase and epoch are related
 long double Tempo2::Predictor::get_observing_frequency () const
 {
+  return observing_frequency;
+}
+
+//! convert an MJD to long double
+long double from_MJD (const MJD& t)
+{
+  const long double secs_in_day = 86400.0L;
+
+  return 
+    (long double) (t.intday()) +
+    (long double) (t.get_secs()) / secs_in_day +
+    (long double) (t.get_fracsec()) / secs_in_day;
+}
+
+//! convert a long double to Phase
+Phase to_Phase (long double p)
+{
+  int64 turns = int64 (p);
+  double fturns = p - turns;
+
+  return Phase (turns, fturns);
 }
 
 //! Return the phase, given the epoch
 Phase Tempo2::Predictor::phase (const MJD& t) const
 {
+  return to_Phase( T2Predictor_GetPhase (&predictor, from_MJD (t),
+					 observing_frequency) );
 }
 
 //! Return the epoch, given the phase
 MJD Tempo2::Predictor::iphase (const Phase& phase) const
 {
+  throw Error (InvalidState, "Tempo2::Predictor::iphase", "not implemented");
 }
 
 //! Return the spin frequency, given the epoch
 long double Tempo2::Predictor::frequency (const MJD& t) const
 {
+  return T2Predictor_GetFrequency (&predictor, from_MJD (t),
+				   observing_frequency);
 }
 
 //! Return the phase correction for dispersion delay
 Phase Tempo2::Predictor::dispersion (const MJD &t, long double MHz) const
 {
+  throw Error (InvalidState, "Tempo2::Predictor::dispersion",
+	       "not implemented"); 
 }
 
 
