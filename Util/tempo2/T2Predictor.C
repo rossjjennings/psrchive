@@ -81,7 +81,7 @@ MJD to_MJD (long double t)
 {
   long double ld = floorl(t);
   t -= ld;
-  long double lsec = ld * 86400.0L;
+  long double lsec = t * 86400.0L;
   long double ls = floorl(lsec);
   lsec -= ls;
 
