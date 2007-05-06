@@ -67,7 +67,7 @@ void Pulsar::FITSArchive::load_T2Predictor (fitsfile* fptr)
 
   fclose (stream);
 
-  model = predictor;
+  hdr_model = model = predictor;
 
   if (verbose == 3) {
     cerr << "FITSArchive::load T2Predictor loaded" << endl;
