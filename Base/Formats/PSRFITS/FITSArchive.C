@@ -588,9 +588,11 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
   }
 
+#ifdef HAVE_TEMPO2
   if (!model)
     // Load the Tempo2 Predictor, if any
     load_T2Predictor (fptr);
+#endif
 
   if (correct_P236_reference_epoch)
     P236_reference_epoch_correction ();
