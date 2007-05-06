@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.34 $
-   $Date: 2007/05/04 23:35:08 $
+   $Revision: 1.35 $
+   $Date: 2007/05/06 23:04:42 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -124,7 +124,7 @@ public:
   Phase phase (const MJD &t) const;
 
   //! Returns the time at the given pulse phase
-  MJD iphase (const Phase& p) const;
+  MJD iphase (const Phase& p, const MJD*) const;
 
   //! Returns the spin frequency (in Hz) at the given time
   long double frequency (const MJD &t) const;
@@ -226,9 +226,13 @@ public:
   Phase phase (const MJD& t) const
   { return best(t).phase(t); }
 
+  //! Return the phase plus the dispersion delay
+  Phase phase (const MJD& t, long double MHz) const
+  { const polynomial& b = best(t); return b.phase(t) + b.dispersion(t,MHz); }
+
   //! Return the epoch, given the phase
-  MJD iphase (const Phase& phase) const
-  { return best(phase).iphase(phase); }
+  MJD iphase (const Phase& phase, const MJD* guess) const
+  { return best(phase).iphase(phase, guess); }
 
   //! Return the spin frequency, given the epoch
   long double frequency (const MJD& t) const

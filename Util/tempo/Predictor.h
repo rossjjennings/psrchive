@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Attic/Predictor.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/05/04 23:34:53 $
+   $Revision: 1.3 $
+   $Date: 2007/05/06 23:04:42 $
    $Author: straten $ */
 
 #ifndef __PulsarPredictor_h
@@ -45,8 +45,8 @@ namespace Pulsar {
     //! Return the phase, given the epoch
     virtual Phase phase (const MJD& t) const = 0;
 
-    //! Return the epoch, given the phase
-    virtual MJD iphase (const Phase& phase) const = 0;
+    //! Return the epoch, given the phase and, optionally, a first guess
+    virtual MJD iphase (const Phase& phase, const MJD* guess = 0) const = 0;
 
     //! Return the spin frequency, given the epoch
     virtual long double frequency (const MJD& t) const = 0;

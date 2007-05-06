@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/05/05 14:42:44 $
+   $Revision: 1.7 $
+   $Date: 2007/05/06 23:04:42 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
@@ -56,7 +56,7 @@ namespace Tempo2 {
     Phase phase (const MJD& t) const;
 
     //! Return the epoch, given the phase
-    MJD iphase (const Phase& phase) const;
+    MJD iphase (const Phase& phase, const MJD* guess) const;
 
     //! Return the spin frequency, given the epoch
     long double frequency (const MJD& t) const;

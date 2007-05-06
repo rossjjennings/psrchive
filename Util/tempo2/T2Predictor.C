@@ -120,7 +120,7 @@ public:
   Phase phase (const MJD&) const;
   long double frequency (const MJD&) const;
 
-  MJD iphase (const Phase&) const;
+  MJD iphase (const Phase&, const MJD*) const;
 
 protected:
 
@@ -151,9 +151,9 @@ Phase cheby_interface::phase (const MJD& t) const
  return to_Phase( ChebyModel_GetPhase (model, from_MJD (t), obs_freq) );
 }
 
-MJD cheby_interface::iphase (const Phase& phase) const
+MJD cheby_interface::iphase (const Phase& phase, const MJD* guess) const
 {
-  return Pulsar::inverse_phase (*this, phase);
+  return Pulsar::inverse_phase (*this, phase, guess);
 }
 
 long double cheby_interface::frequency (const MJD& t) const
@@ -162,7 +162,7 @@ long double cheby_interface::frequency (const MJD& t) const
 }
 
 //! Return the epoch, given the phase
-MJD Tempo2::Predictor::iphase (const Phase& phase) const
+MJD Tempo2::Predictor::iphase (const Phase& phase, const MJD* guess) const
 {
   vector<cheby_interface> chebys ( predictor.modelset.cheby.nsegments );
 
@@ -184,7 +184,7 @@ MJD Tempo2::Predictor::iphase (const Phase& phase) const
 
   MJD result;
   if (imin > 0)
-    result = chebys[imin].iphase (phase);
+    result = chebys[imin].iphase (phase, guess);
 }
 
 //! Return the spin frequency, given the epoch
