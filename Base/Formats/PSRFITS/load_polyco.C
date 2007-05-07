@@ -10,11 +10,12 @@
 #endif
 
 #include "polyco.h"
+#include "FITSError.h"
 
 using namespace std;
 
 Pulsar::Predictor*
-load_polyco (fitsfile* fptr, FITSPolyco* extra, bool verbose)
+load_polyco (fitsfile* fptr, double* pred_phs, bool verbose)
 {
   if (verbose)
     cerr << "load_polyco entered" << endl;
@@ -31,10 +32,28 @@ load_polyco (fitsfile* fptr, FITSPolyco* extra, bool verbose)
   }
 
   Reference::To<polyco> model = new polyco;
-  model->load (fptr, extra);
+  model->load (fptr);
 
   if (verbose)
     cerr << "load_polyco loaded\n" << *model << endl;
+
+  if (pred_phs) {
+
+    // ask for the number of rows in the binary table
+    long nrows = 0;
+    fits_get_num_rows (fptr, &nrows, &status);
+    if (status != 0)
+      throw FITSError (status, "load_polyco", "fits_get_num_rows");
+    
+    long firstelem = 1;
+    long onelement = 1;
+    int colnum = 0;
+    int anynul = 0;
+    fits_get_colnum (fptr, CASEINSEN, "PRED_PHS", &colnum, &status);
+    fits_read_col (fptr, TDOUBLE, colnum, nrows, firstelem, onelement,
+		   NULL, pred_phs, &anynul, &status);
+
+  }
 
   return model.release();
 }
