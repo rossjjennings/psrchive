@@ -1,33 +1,34 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2007 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/FITSArchive.h"
-#include "T2Predictor.h"
 
+#include "T2Predictor.h"
 #include "FITSError.h"
+
+#include <fitsio.h>
 
 using namespace std;
 
-void Pulsar::FITSArchive::load_T2Predictor (fitsfile* fptr)
+Pulsar::Predictor* load_T2Predictor (fitsfile* fptr, bool verbose)
 {
-  if (verbose == 3)
-    cerr << "FITSArchive::load_T2Predictor entered" << endl;
+  if (verbose)
+    cerr << "load_T2Predictor entered" << endl;
 
   // Move to the T2PREDICT HDU
   int status = 0;
   fits_movnam_hdu (fptr, BINARY_TBL, "T2PREDICT", 0, &status);
   
   if (status != 0)
-    return;
+    return 0;
 
   long numrows = 0;
   fits_get_num_rows (fptr, &numrows, &status);
   
   if (status != 0)
-    throw FITSError (status, "FITSArchive::load_T2Predictor", 
+    throw FITSError (status, "load_T2Predictor", 
                      "fits_get_num_rows T2PREDICT");
 
   int colnum = 0;
@@ -40,7 +41,7 @@ void Pulsar::FITSArchive::load_T2Predictor (fitsfile* fptr)
   fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);  
 
   if (typecode != TSTRING)
-    throw Error (InvalidState, "FITSArchive::load T2Predictor",
+    throw Error (InvalidState, "load_T2Predictor",
 		 "PREDICT typecode != TSTRING");
 
   vector<char> text (repeat);
@@ -54,7 +55,7 @@ void Pulsar::FITSArchive::load_T2Predictor (fitsfile* fptr)
     fits_read_col (fptr, TSTRING, colnum, row, 1, 1, 0, 
                    &temp, &anynul, &status);
     if (status)
-      throw FITSError (status, "FITSArchive::load T2Predictor",
+      throw FITSError (status, "load_T2Predictor",
 		       "fits_read_col");
 
     fprintf (stream, "%s\n", temp);
@@ -67,13 +68,12 @@ void Pulsar::FITSArchive::load_T2Predictor (fitsfile* fptr)
 
   fclose (stream);
 
-  hdr_model = model = predictor;
-
-  if (verbose == 3) {
-    cerr << "FITSArchive::load T2Predictor loaded" << endl;
+  if (verbose) {
+    cerr << "load_T2Predictor loaded" << endl;
     predictor->unload (stderr);
   }
 
+  return predictor.release();
 }
 
 
