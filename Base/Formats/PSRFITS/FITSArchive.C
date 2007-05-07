@@ -33,7 +33,6 @@
 #include "Pulsar/Telescope.h"
 
 #include "psrfitsio.h"
-#include "polyco.h"
 #include "Telescope.h"
 #include "strutil.h"
 #include "ephio.h"
@@ -562,37 +561,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
   }
 
-  // Load the polyco from the FITS file
-
-  status = 0;
-  fits_movnam_hdu (fptr, BINARY_TBL, "POLYCO", 0, &status);
-
-  if (status == 0) {
-
-    Reference::To<polyco> t1model = new polyco;
-    t1model->load (fptr, &extra_polyco);
-
-    model = t1model;
-    hdr_model = model->clone();
-
-    if (verbose == 3)
-      cerr << "FITSArchive::load_header polyco loaded" << endl;
-
-  }
-  else {
-
-    hdr_model = model = 0;
-
-    if (verbose == 3)
-      cerr << "FITSArchive::load_header no polyco" << endl;
-
-  }
-
-#ifdef HAVE_TEMPO2
-  if (!model)
-    // Load the Tempo2 Predictor, if any
-    load_T2Predictor (fptr);
-#endif
+  load_Predictor (fptr);
 
   if (correct_P236_reference_epoch)
     P236_reference_epoch_correction ();

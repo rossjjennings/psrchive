@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.40 $
-   $Date: 2007/05/05 11:40:26 $
+   $Revision: 1.41 $
+   $Date: 2007/05/07 00:53:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -165,7 +165,13 @@ namespace Pulsar {
     virtual void unload_file (const char* filename) const;
     
     // //////////////////////////////////////////////////////////////////////
-    
+
+    // load the Pulsar::Predictor model
+    void load_Predictor (fitsfile*);
+
+    // unload the Pulsar::Predictor model
+    void unload_Predictor (fitsfile*) const;
+
     // Channel bandwidth
     double chanbw;
     
@@ -187,7 +193,6 @@ namespace Pulsar {
     void load_ITRFExtension (fitsfile*);
     void load_CalInfoExtension (fitsfile*);
     void load_WidebandCorrelator (fitsfile*);
-    void load_T2Predictor (fitsfile*);
 
     //! Delete the HDU with the specified name
     void delete_hdu (fitsfile* fptr, char* hdu_name) const;
