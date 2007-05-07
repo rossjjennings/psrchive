@@ -20,8 +20,8 @@ libpsrfits_la_SOURCES = CalibratorExtensionIO.h FITSArchive.C \
 	unload_Passband.C load_Passband.C \
 	unload_Pointing.C load_Pointing.C \
 	unload_Integration.C load_Integration.C \
-	load_Predictor.C \
-	load_polyco.C \
+	unload_Predictor.C load_Predictor.C \
+	unload_polyco.C load_polyco.C \
 	delete_hdu.C update_history.C unload_integrations.C \
 	CalibratorExtensionIO.C FITSAgent.C
 

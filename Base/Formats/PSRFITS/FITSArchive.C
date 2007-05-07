@@ -962,20 +962,7 @@ try {
   else
     delete_hdu (fptr, "PSREPHEM");
 
-
-  // Write the polyco to the FITS file
-
-  const polyco* t1model = dynamic_cast<const polyco*> (model.ptr());
-  if (t1model) { 
-
-   t1model->unload(fptr);
-  
-   if (verbose == 3)
-     cerr << "FITSArchive::unload_file polyco written" << endl;
-
-  }
-  else
-    delete_hdu (fptr, "POLYCO");
+  unload_Predictor (fptr);
 
   // Unload some of the other HDU's
 
