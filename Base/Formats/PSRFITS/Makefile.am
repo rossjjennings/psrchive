@@ -23,7 +23,8 @@ libpsrfits_la_SOURCES = CalibratorExtensionIO.h FITSArchive.C \
 	unload_Predictor.C load_Predictor.C \
 	unload_polyco.C load_polyco.C \
 	delete_hdu.C update_history.C unload_integrations.C \
-	CalibratorExtensionIO.C FITSAgent.C
+	CalibratorExtensionIO.C FITSAgent.C \
+	P236_reference_epoch_correction.C
 
 if HAVE_TEMPO2
 libpsrfits_la_SOURCES += load_T2Predictor.C

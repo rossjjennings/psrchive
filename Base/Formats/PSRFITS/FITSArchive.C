@@ -32,6 +32,7 @@
 #include "Pulsar/BinLngPeriOrder.h"
 #include "Pulsar/Telescope.h"
 
+#include "Predictor.h"
 #include "psrfitsio.h"
 #include "Telescope.h"
 #include "strutil.h"
@@ -562,6 +563,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   }
 
   load_Predictor (fptr);
+  hdr_model = model;
 
   if (correct_P236_reference_epoch)
     P236_reference_epoch_correction ();
@@ -630,43 +632,6 @@ catch (Error& error) {
 // End of load_header function
 // /////////////////////////////////////////////////////////////////////
 // /////////////////////////////////////////////////////////////////////
-
-/* This correction applies only to pulsar observations made during the
-   commissioning of the WBC.  As far as I know, this affects only P236.  
-
-   Symptom: The pulses from different archives line up, despite the fact
-   that the phases predicted by the polyco for the reference epochs do not.
-   Consequently, if you try to line them up using the polyco, they do not.
-
-   Remedy: Truncate the phase of the reference epoch to zero.
-*/
-
-void Pulsar::FITSArchive::P236_reference_epoch_correction ()
-{
-   FITSHdrExtension*  hdr_ext  = get<FITSHdrExtension>();
-
-   if (!hdr_ext) {
-     throw Error (InvalidParam, "FITSArchive::P236_reference_epoch_correction",
-		  "No FITSHdrExtension found");
-   }
-
-  if (!model || get_type() != Signal::Pulsar)
-    return;
-
-  MJD original_reference_epoch = hdr_ext->start_time;
-  Phase original_phase = model->phase(hdr_ext->start_time);
-
-  hdr_ext->start_time = model->iphase( original_phase.Floor() );
-
-  if(verbose == 3)
-    cerr << "Pulsar::FITSArchive::P236_reference_epoch_correction"
-    "\n   original reference epoch=" << original_reference_epoch <<
-    "\n                      phase=" << original_phase <<
-    "\n  corrected reference epoch=" << hdr_ext->start_time <<
-    "\n                      phase=" << model->phase(hdr_ext->start_time)
-	 << endl;  
-}
-
 
 // /////////////////////////////////////////////////////////////////////
 // /////////////////////////////////////////////////////////////////////
@@ -914,6 +879,7 @@ try {
     day = (long)(hdr_epoch.intday());
     sec = (long)(hdr_epoch.get_secs());
     frac = hdr_epoch.get_fracsec();
+
   }
 
   fits_update_key (fptr, TLONG, "STT_IMJD", &day, comment, &status);
