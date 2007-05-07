@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.41 $
-   $Date: 2007/05/07 00:53:10 $
+   $Revision: 1.42 $
+   $Date: 2007/05/07 04:31:21 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -207,8 +207,8 @@ namespace Pulsar {
     //! Unload Integration data to the SUBINT HDU of the specified FITS file
     void unload_integrations (fitsfile*) const;
 
-    //! Extra polyco information
-    FITSPolyco extra_polyco;
+    //! Extra polyco information stored in POLYCO HDU
+    double predicted_phase;
 
     //! The polyco parsed from the PSRFITS file
     Reference::To<Predictor> hdr_model;

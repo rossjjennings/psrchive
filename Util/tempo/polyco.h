@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.35 $
-   $Date: 2007/05/06 23:04:42 $
+   $Revision: 1.36 $
+   $Date: 2007/05/07 04:31:21 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -183,13 +183,6 @@ public:
 
 };
 
-//! The POLYCO HDU of the PSRFITS definition contains additional information
-class FITSPolyco {
-public:
-  //! The PRED_PHS column
-  double predicted_phase;
-};
-
 class polyco : public Pulsar::Predictor {
 
 public:
@@ -320,7 +313,7 @@ public:
 #endif
 
 #ifdef HAVE_CFITSIO
-  void load (fitsfile* fptr, FITSPolyco* extra = 0, int back=0);
+  void load (fitsfile* fptr, int back=0);
   void unload (fitsfile* fptr, int back=0) const;
 #endif
 

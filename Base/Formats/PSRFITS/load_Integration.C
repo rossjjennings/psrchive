@@ -158,7 +158,7 @@ try {
 
       if (verbose == 3)
       	cerr << "Pulsar::FITSArchive::load_Integration row=" << row <<
-	  "\n  PRED_PHS=" << extra_polyco.predicted_phase <<
+	  "\n  PRED_PHS=" << predicted_phase <<
 	  "\n  reference epoch=" << hdr_ext->start_time <<
 	  "\n  reference phase=" << stt_phs <<
 	  "\n      input phase=" << off_phs <<
