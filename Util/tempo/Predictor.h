@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Attic/Predictor.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/05/06 23:04:42 $
+   $Revision: 1.4 $
+   $Date: 2007/05/07 00:53:28 $
    $Author: straten $ */
 
 #ifndef __PulsarPredictor_h
 #define __PulsarPredictor_h
 
-#include "ReferenceAble.h"
+#include "Reference.h"
 #include "Phase.h"
 #include "MJD.h"
 
