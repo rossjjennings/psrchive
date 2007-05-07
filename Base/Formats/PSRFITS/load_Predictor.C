@@ -22,14 +22,25 @@ Pulsar::Predictor* load_T2Predictor (fitsfile* fptr, bool verbose);
 
 void Pulsar::FITSArchive::load_Predictor (fitsfile* fptr)
 {
+  if (verbose > 2)
+    cerr << "Pulsar::FITSArchive::load_Predictor try POLYCO" << endl;
+
   model = load_polyco (fptr, &predicted_phase, verbose > 2);
 
+  if (model)
+    return;
+
 #ifdef HAVE_TEMPO2
-  if (!model)
-    // Load the Tempo2 Predictor, if any
-    model = load_T2Predictor (fptr, verbose > 2);
+
+  if (verbose > 2)
+    cerr << "Pulsar::FITSArchive::load_Predictor try T2PREDICT" << endl;
+
+  model = load_T2Predictor (fptr, verbose > 2);
+
+  if (model)
+    return;
+
 #endif
 
-  hdr_model = model;
 }
 

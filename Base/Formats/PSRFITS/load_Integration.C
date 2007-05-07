@@ -16,6 +16,7 @@
 #include "Pulsar/Pointing.h"
 #include "Pulsar/FITSHdrExtension.h"
 
+#include "Predictor.h"
 #include "FITSError.h"
 
 using namespace std;
@@ -142,6 +143,10 @@ try {
     // This was taken out of the condition clause below because period
     // wasn't set when TSUB was 0
     integ->set_folding_period (1.0 / hdr_model->frequency(epoch));
+
+    if (verbose > 2)
+      cerr << "Pulsar::FITSArchive::load_Integration folding_period = "
+      	   << integ->get_folding_period () << endl;
 
     if (duration) {
 
