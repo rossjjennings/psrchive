@@ -143,7 +143,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   // fill in the next spot in the file.
   
   for(unsigned i = 0; i < nsubint; i++)
-    unload_integration(i+1, get_Integration(i), ffptr);
+    unload_Integration (i+1, get_Integration(i), ffptr);
 
   if (verbose == 3)
     cerr << "FITSArchive::unload_integrations exit" << endl;
