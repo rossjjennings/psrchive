@@ -27,7 +27,7 @@ libpsrfits_la_SOURCES = CalibratorExtensionIO.h FITSArchive.C \
 	P236_reference_epoch_correction.C
 
 if HAVE_TEMPO2
-libpsrfits_la_SOURCES += load_T2Predictor.C
+libpsrfits_la_SOURCES += unload_T2Predictor.C load_T2Predictor.C
 endif
 
 check_PROGRAMS = test_template

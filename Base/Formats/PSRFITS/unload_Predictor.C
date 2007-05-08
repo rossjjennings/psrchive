@@ -36,8 +36,7 @@ void Pulsar::FITSArchive::unload_Predictor (fitsfile* fptr) const
   const Tempo2::Predictor* t2model;
   t2model = dynamic_cast<const Tempo2::Predictor*> (model.ptr());
   if (t2model)
-    throw Error (InvalidState, "Tempo2::Predictor unload", "not implemented");
-    // unload_T2Predictor (fptr, t2model, verbose > 2);
+    unload_T2Predictor (fptr, t2model, verbose > 2);
   else
     delete_hdu (fptr, "T2PREDICT");
 
