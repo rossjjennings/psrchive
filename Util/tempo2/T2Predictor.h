@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/05/06 23:04:42 $
+   $Revision: 1.8 $
+   $Date: 2007/05/08 06:57:12 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
@@ -20,6 +20,8 @@
 #include "tempo2pred.h"
 
 namespace Tempo2 {
+
+  class Generator;
 
   //! Functions that predict pulse phase
   /*! This pure virtual base class defines the interface to pulse
@@ -71,6 +73,8 @@ namespace Tempo2 {
     void unload (FILE*) const;
 
   private:
+
+    friend class Generator;
 
     //! The class is implemented by the T2Predictor library
     T2Predictor predictor;
