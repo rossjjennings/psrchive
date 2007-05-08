@@ -850,12 +850,14 @@ try {
 
   if (hdr_ext)
     hdr_epoch = hdr_ext->start_time;
-  
-  for (unsigned jsubint; jsubint < get_nsubint(); jsubint++)
+
+  // take the epoch of the first Integration with a duration
+  for (unsigned jsubint = 0; jsubint < get_nsubint(); jsubint++) {
     if (get_Integration(jsubint)->get_duration() != 0.0) {
       hdr_epoch = get_Integration(jsubint)->get_epoch();
       break;
     }
+  }
 
   if (hdr_epoch == MJD::zero && verbose)
     cerr << "FITSArchive::unload_file WARNING reference epoch == 0" << endl;
