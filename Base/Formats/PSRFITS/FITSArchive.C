@@ -846,41 +846,26 @@ try {
       unload (fptr, ext);
   }
   
-  long day    = 0;
-  long sec    = 0;
-  double frac = 0.0;
- 
-  if (hdr_ext) {
+  MJD hdr_epoch;
 
-    MJD hdr_epoch = hdr_ext->start_time;
-
-    if (model) {
-
-      unsigned jsubint = 0;
-      for (; jsubint < get_nsubint(); jsubint++)
-	if (get_Integration(jsubint)->get_duration() != 0.0)
-	  break;
-
-      if (jsubint < get_nsubint()) {
-
-	const Integration* integ = get_Integration(jsubint);
-
-	Phase stt_phs = model->phase(integ->get_epoch());
-	Phase off_phs = model->phase(hdr_epoch);
-	Phase dphase  = off_phs - stt_phs;
-      
-	double dtime = dphase.fracturns() * integ->get_folding_period();
-	hdr_epoch -= dtime;
-
-      }
-
+  if (hdr_ext)
+    hdr_epoch = hdr_ext->start_time;
+  
+  for (unsigned jsubint; jsubint < get_nsubint(); jsubint++)
+    if (get_Integration(jsubint)->get_duration() != 0.0) {
+      hdr_epoch = get_Integration(jsubint)->get_epoch();
+      break;
     }
 
-    day = (long)(hdr_epoch.intday());
-    sec = (long)(hdr_epoch.get_secs());
-    frac = hdr_epoch.get_fracsec();
+  if (hdr_epoch == MJD::zero && verbose)
+    cerr << "FITSArchive::unload_file WARNING reference epoch == 0" << endl;
 
-  }
+  // for use in unload_Integration.C
+  const_cast<FITSArchive*>(this)->reference_epoch = hdr_epoch;
+
+  long day = reference_epoch.intday();
+  long sec = reference_epoch.get_secs();
+  double frac = reference_epoch.get_fracsec();
 
   fits_update_key (fptr, TLONG, "STT_IMJD", &day, comment, &status);
   fits_update_key (fptr, TLONG, "STT_SMJD", &sec, comment, &status);

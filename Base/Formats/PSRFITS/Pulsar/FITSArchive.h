@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.43 $
-   $Date: 2007/05/07 11:05:13 $
+   $Revision: 1.44 $
+   $Date: 2007/05/08 00:39:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -201,7 +201,7 @@ namespace Pulsar {
     // Necessary global definitions for FITS file I/O
     
     // Helper function to write an integration to a file
-    void unload_integration (int, const Integration*, fitsfile*) const;
+    void unload_Integration (int, const Integration*, fitsfile*) const;
 
     //! Unload Integration data to the SUBINT HDU of the specified FITS file
     void unload_integrations (fitsfile*) const;
@@ -219,6 +219,11 @@ namespace Pulsar {
 
     // Correct the reference epoch in WBC data taken during commissioning
     bool correct_P236_reference_epoch;
+
+    // Reference epoch is used during unload_Integration
+    /* This attribute enables proper handling of time stamps when there
+       is no FITSHdrExtension in use (as is the case in psrconv) */
+    MJD reference_epoch;
 
     int truthval (bool) const;
     void init ();

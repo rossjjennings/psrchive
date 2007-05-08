@@ -24,7 +24,7 @@ using namespace std;
 // ////////////////////////////////////////////////////////////////////
 //! A function to write an integration to a row in a FITS file on disk.
 
-void Pulsar::FITSArchive::unload_integration (int row, 
+void Pulsar::FITSArchive::unload_Integration (int row, 
 					      const Integration* integ, 
 					      fitsfile* thefptr) const
 {
@@ -101,12 +101,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
     cerr << "FITSArchive::unload_integration row=" << row
          << " epoch=" << integ->get_epoch () << endl;
 
-  double time = 0.0;
-
-  const FITSHdrExtension* hdr_ext = get<FITSHdrExtension>();
-
-  if (duration != 0 && hdr_ext)
-    time = (integ->get_epoch () - hdr_ext->start_time).in_seconds();
+  double time = (integ->get_epoch () - reference_epoch).in_seconds();
 
   fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &time, &status);
   
