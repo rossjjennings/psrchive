@@ -11,6 +11,11 @@
 
 using namespace std;
 
+void Pulsar::Archive::copy (const Archive* archive)
+{
+  copy (*archive);
+}
+
 void Pulsar::Archive::copy (const Archive& archive)
 {
   if (verbose == 3)
