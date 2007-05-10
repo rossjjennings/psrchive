@@ -48,8 +48,10 @@ void Pulsar::Archive::resize (unsigned nsubint, unsigned npol,
     get<Pulsar::IntegrationOrder>()->resize(nsubint);
   }
 
-  for (unsigned isub=0; isub<nsubint; isub++){
-    init_Integration( get_Integration(isub) );
+  for (unsigned isub=0; isub<nsubint; isub++) {
+    // initialize only the new Integrations (preserve internal book-keeping)
+    if (isub >= cur_nsub)
+      init_Integration( get_Integration(isub) );
     get_Integration(isub) -> resize (npol, nchan, nbin);
   }
 
