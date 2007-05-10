@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.58 $
-   $Date: 2006/10/06 21:41:57 $
+   $Revision: 1.59 $
+   $Date: 2007/05/10 04:22:31 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -90,12 +90,14 @@ void usage ()
        << endl;
 }
 
+// defined in More/Polarimetry/choose.C
 void choose (vector<unsigned>& bins, Pulsar::Archive* archive);
 
 void auto_select (Pulsar::ReceptionCalibrator& model,
 		  Pulsar::Archive* archive,
 		  unsigned maxbins)
 {
+  cerr << "pcm: choosing up to " << maxbins << " pulse phase bins" << endl;
   vector<unsigned> bins (maxbins);
 
   choose (bins, archive);
@@ -103,7 +105,7 @@ void auto_select (Pulsar::ReceptionCalibrator& model,
   sort (bins.begin(), bins.end());
 
   for (unsigned ibin=0; ibin < bins.size(); ibin++) {
-    cerr << "pcm: adding phase bin " << bins[ibin] << endl;
+    // cerr << "pcm: adding phase bin " << bins[ibin] << endl;
     model.add_state (bins[ibin]);
   }
 
@@ -198,6 +200,15 @@ void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
     cpgbeg (0, "states.ps/CPS", 0, 0);
 
   for (; ichan < nchan; ichan+=incr) {
+
+    // don't try to plot if the equation for this channel has no data
+    while (plotter.get_calibrator()->get_ndata (ichan) == 0) {
+      ichan ++;
+      if (ichan >= nchan) {
+	cpgend();
+	return;
+      }
+    }
 
     if (nstate > 1) {
       char filename [256];
@@ -606,7 +617,6 @@ int main (int argc, char *argv[]) try {
 
   cerr << "pcm: set calibrators" << endl;
   model.set_calibrators (cal_filenames);
-  
 
   Reference::To<Pulsar::Archive> autobin;
 
