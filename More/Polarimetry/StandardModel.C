@@ -224,6 +224,15 @@ void Calibration::StandardModel::update ()
 
 void Calibration::StandardModel::check_constraints ()
 {
+  /* for now, do nothing.  in the future, might implement the code
+     that follows.  it currently causes problems down the line
+     (equal_ellipticities sets both ellipticity parameters equal to a
+     new parameter using the chain rule, which increases the number of
+     parameters, and causes MEAL::Function::copy to fail when writing
+     out the result). */
+
+  return;
+
   if (!fluxcal_backend) {
 
     /*
