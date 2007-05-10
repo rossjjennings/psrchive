@@ -121,7 +121,7 @@ void Calibration::Instrument::set_diff_phase (const Estimate<double>& phi)
 
 //! Set the orientation
 void Calibration::Instrument::set_orientation (unsigned ir,
-					 const Estimate<double>& theta)
+					       const Estimate<double>& theta)
 {
   if (orientations)
     orientations->set_value (theta);
@@ -131,7 +131,7 @@ void Calibration::Instrument::set_orientation (unsigned ir,
 
 //! Set the ellipticity
 void Calibration::Instrument::set_ellipticity (unsigned ir,
-				       const Estimate<double>& chi)
+					       const Estimate<double>& chi)
 {
   if (ellipticities)
     ellipticities->set_value (chi);
@@ -155,8 +155,8 @@ void Calibration::Instrument::equal_orientations ()
     return;
 
   orientations = new MEAL::ScalarParameter;
-  chain->set_constraint (0, orientations);
-  chain->set_constraint (2, orientations);
+  chain->set_constraint (1, orientations);
+  chain->set_constraint (3, orientations);
 }
 
 void Calibration::Instrument::set_cyclic (bool flag)
