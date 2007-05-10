@@ -53,7 +53,7 @@ void MEAL::NormalizeStokes::normalize (Stokes<Estimate<double> >& stokes)
   Estimate<double> invint = stokes.invariant();
 
   if ( invint.val < stokes[0].var )
-    throw Error (InvalidParam, "MEAL::NormalizeStokes::normalize",
+    throw Error (InvalidPolnState, "MEAL::NormalizeStokes::normalize",
 		 "invariant=%lf < variance=%lf", invint.val, stokes[0].var);
 
   Stokes< Estimate<double> > normalized;
