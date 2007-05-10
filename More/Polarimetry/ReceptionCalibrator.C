@@ -56,6 +56,8 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type)
   unique = 0;
 
   PA_min = PA_max = 0.0;
+  add_data_fail = 0;
+  add_data_call = 0;
 }
 
 Pulsar::ReceptionCalibrator::~ReceptionCalibrator()
@@ -130,7 +132,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
   if (receiver) {
     to_receptor = new MEAL::Complex2Constant (receiver->get_transformation());
     cerr << "Pulsar::ReceptionCalibrator known receiver transformation\n"
-	"\t" << to_receptor->evaluate() << endl;
+      "\t" << setprecision(4) << to_receptor->evaluate() << endl;
   }
 
   MEAL::Complex2* to_feed = 0;
@@ -203,7 +205,7 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
     
     try {
 
-      cerr << "Pulsar::ReceptionCalibrator::load_calibrators loading "
+      cerr << "Pulsar::ReceptionCalibrator::load_calibrators loading\n\t"
 	   << calibrator_filenames[ifile] << endl;
 
       Reference::To<Archive> archive;
@@ -319,6 +321,12 @@ unsigned Pulsar::ReceptionCalibrator::get_nchan () const
   return model.size();
 }
 
+unsigned Pulsar::ReceptionCalibrator::get_ndata (unsigned ichan) const
+{
+  assert (ichan < model.size());
+  return model[ichan]->get_equation()->get_ndata ();
+}
+
 MJD Pulsar::ReceptionCalibrator::get_epoch () const
 {
   return 0.5 * (start_epoch + end_epoch);
@@ -419,6 +427,9 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
 
+  add_data_fail = 0;
+  add_data_call = 0;
+
   for (unsigned isub=0; isub<nsub; isub++) {
 
     const Integration* integration = data->get_Integration (isub);
@@ -432,8 +443,9 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     model[0]->parallactic.set_epoch (epoch);
     Angle PA = model[0]->parallactic.get_parallactic_angle ();
 
-    cerr << "Pulsar::ReceptionCalibrator::add_observation parallactic angle="
-	 << PA.getDegrees() << "deg" << endl;
+    cerr << "Pulsar::ReceptionCalibrator::add_observation\n\t"
+      "parallactic angle=" << setprecision(4) << PA.getDegrees() 
+	 << " deg" << endl;
 
     if (PA < PA_min)
       PA_min = PA.getRadians();
@@ -525,6 +537,11 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     }
 
   }
+
+  if (add_data_fail)
+    cerr << "\t" << add_data_fail << " failures in " << add_data_call
+	 << " data points" << endl;
+
 }
 
 void
@@ -536,6 +553,8 @@ Pulsar::ReceptionCalibrator::add_data
   Stokes<float>& variance
   )
 {
+  add_data_call ++;
+
   unsigned nchan = data->get_nchan ();
 
   // sanity check
@@ -584,8 +603,10 @@ Pulsar::ReceptionCalibrator::add_data
 
   }
   catch (Error& error) {
-    cerr << "Pulsar::ReceptionCalibrator::add_data ichan=" << ichan 
-	 << " ibin=" << ibin << " error\n\t" << error.get_message() << endl;
+    if (error.get_code() != InvalidPolnState)
+      cerr << "Pulsar::ReceptionCalibrator::add_data ichan=" << ichan 
+	   << " ibin=" << ibin << " error\n\t" << error.get_message() << endl;
+    add_data_fail ++;
   }
 }
 
@@ -986,28 +1007,24 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 
   if (only_ichan >= 0)
     start_chan = only_ichan;
-#if 0
-  else
-    cerr << "Pulsar::ReceptionCalibrator::solve CPSR-II aliasing issue:\n"
-          "WARNING not solving the first " << start_chan << " channels" <<endl;
-#endif
+
+  Calibration::ReceptionModel::report_chisq = true;
 
   for (unsigned ichan=start_chan; ichan<nchan; ichan++) try {
 
     cerr << "Pulsar::ReceptionCalibrator::solve ichan=" << ichan;
+
     if (!model[ichan]->valid) {
       cerr << " flagged invalid" << endl;
       continue;
     }
+    else
+      cerr << endl;
 
     if (Calibrator::verbose)
       model[ichan]->get_equation()->set_fit_debug();
 
     model[ichan]->get_equation()->solve ();
-
-    cerr << " reduced chisq=" <<
-      model[ichan]->get_equation()->get_fit_chisq() /
-      model[ichan]->get_equation()->get_fit_nfree() << endl;
 
     if (only_ichan >= 0)
       break;
@@ -1055,6 +1072,14 @@ void Pulsar::ReceptionCalibrator::initialize ()
 
   for (unsigned ichan=0; ichan<model.size(); ichan++) {
 
+    if (get_ndata(ichan) == 0) {
+      if (verbose)
+	cerr << "Pulsar::ReceptionCalibrator::solve warning ichan=" << ichan 
+	     << " has no data" << endl;
+      model[ichan]->valid = false;
+      continue;
+    }
+
     // sanity check
     double I = calibrator_estimate.source[ichan]->get_stokes()[0].get_value();
     if (fabs(I-1.0) > 1e-5)
@@ -1062,6 +1087,8 @@ void Pulsar::ReceptionCalibrator::initialize ()
            << " reference flux=" << I << " != 1" << endl;
 
     model[ichan]->convert.set_reference_epoch ( epoch );
+
+    model[ichan]->check_constraints ();
 
     if (!previous)
       model[ichan]->update ();

@@ -222,6 +222,29 @@ void Calibration::StandardModel::update ()
     fluxcal_backend_estimate.update (fluxcal_backend);
 }
 
+void Calibration::StandardModel::check_constraints ()
+{
+  if (!fluxcal_backend) {
+
+    /*
+      Flux calibrator observations are used to constrain the boost
+      component of the degeneracy along the Stokes V axis.  If there
+      no such observations, then it is assumed that the boost is 
+      zero ...
+    */
+    if (polar)
+      polar->set_infit (3, false);
+
+    /*
+      ... in the phenomenological parameterization, no boost along
+      the Stokes V axis means that the ellipticities are equal.
+    */
+    if (physical)
+      physical->equal_ellipticities();
+
+  }
+}
+
 void 
 Calibration::StandardModel::set_transformation (const MEAL::Complex2* xform)
 {

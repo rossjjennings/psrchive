@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.7 $
+   $Date: 2007/05/10 04:22:56 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -53,6 +53,9 @@ namespace Calibration {
 
     //! Update the relevant estimate
     void update ();
+
+    //! Check all relevant constraints
+    void check_constraints ();
 
     //! Add a new signal path for the poln calibrator observations
     void add_polncal_backend ();
