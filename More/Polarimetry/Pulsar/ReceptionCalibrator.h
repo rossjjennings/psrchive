@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.73 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.74 $
+   $Date: 2007/05/10 04:23:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -127,7 +127,10 @@ namespace Pulsar {
     
     //! Get the number of frequency channels
     unsigned get_nchan () const;
-    
+
+    //! Get the number of data in the given frequency channels
+    unsigned get_ndata (unsigned ichan) const;
+
     //! Set the calibrator observations to be loaded during initial_observation
     void set_calibrators (const std::vector<std::string>& filenames);
     
@@ -197,6 +200,12 @@ namespace Pulsar {
     //! Minimum and maximum values of parallactic angle (informational)
     float PA_min, PA_max;
 
+    // counts the number of times that add_data failed
+    unsigned add_data_fail;
+
+    // counts the number of times that add_data is called
+    unsigned add_data_call;
+
     //! Set the initial guesses and update the reference epoch
     void initialize ();
 
@@ -228,7 +237,6 @@ namespace Pulsar {
 		   const Integration* data,
 		   Stokes<float>& variance);
 
-
     //! Communicates flux and reference calibrator parameters
     class CalInfo : public Calibrator::Info {
       
@@ -259,7 +267,7 @@ namespace Pulsar {
 
       //! The ReceptionCalibrator
       Reference::To<const ReceptionCalibrator> calibrator;
-      
+
     };
 
     friend class CalInfo;
