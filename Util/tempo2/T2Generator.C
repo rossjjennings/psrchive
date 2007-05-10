@@ -50,6 +50,8 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
 
   Tempo2::Predictor* pred = new Tempo2::Predictor;
   pred->predictor.modelset.cheby = cms;
+
+  return pred;
 }
 
 
