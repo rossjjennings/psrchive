@@ -517,15 +517,8 @@ void polyco::insert (const Predictor* other)
   const polyco* like = dynamic_cast<const polyco*> (other);
   if (!like)
     throw Error (InvalidParam, "polyco::insert",
-		 "Predictor is not a TEMPO1 polyco");
+		 "Predictor is not a TEMPO polyco");
   append (*like);
-}
-
-//! Return true if the supplied predictor is equal to self
-bool polyco::equals (const Pulsar::Predictor* test) const
-{
-  const polyco* like = dynamic_cast<const polyco*> (test);
-  return test && (*like == *this);
 }
 
 void polyco::set_observing_frequency (long double MHz)
@@ -723,10 +716,21 @@ int polyco::unload (FILE* fptr) const
 
 void polyco::append (const polyco& poly)
 {
-  for (unsigned i=0; i<poly.pollys.size(); ++i) 
-    pollys.push_back (poly.pollys[i]);
-}
+  if (verbose)
+    cerr << "polyco::append have=" << pollys.size() << " get="
+	 << poly.pollys.size() << " polynomials" << endl;
 
+  for (unsigned iget=0; iget<poly.pollys.size(); ++iget) {
+    bool is_new = true;
+    for (unsigned ihave=0; ihave<pollys.size(); ihave++)
+      if (pollys[ihave] == poly.pollys[iget])
+	is_new = false;
+    if (is_new)
+      pollys.push_back (poly.pollys[iget]);
+    else if (verbose)
+      cerr << "polyco::append already have iget=" << iget << endl;
+  }
+}
 
 void polyco::prettyprint() const 
 {
