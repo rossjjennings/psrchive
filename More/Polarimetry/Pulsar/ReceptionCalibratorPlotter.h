@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/ReceptionCalibratorPlotter.h,v $
-   $Revision: 1.18 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.19 $
+   $Date: 2007/05/10 04:23:24 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibratorPlotter_H
@@ -46,6 +46,9 @@ namespace Pulsar {
 
     //! Cause the above to plot the residual
     void set_plot_residual (bool val) { plot_residual = val; }
+
+    //! Return the calibrator to be plotted
+    const ReceptionCalibrator* get_calibrator () const { return calibrator; }
 
   protected:
 
