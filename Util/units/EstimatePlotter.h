@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.15 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.16 $
+   $Date: 2007/05/10 04:23:54 $
    $Author: straten $ */
 
 #ifndef __EstimatePlotter_h
@@ -173,7 +173,8 @@ void EstimatePlotter::add_plot (const std::vector< Estimate<T> >& data)
       mean += data[ipt];
   }
 
-  std::cerr << "Mean = " << mean << std::endl;
+  // useful at times, excessive at others ...
+  // std::cerr << "Mean = " << mean << std::endl;
 
   minmax (xrange_set, x_min, x_max, yrange_set, y_min, y_max, x, y, ye);
 }
