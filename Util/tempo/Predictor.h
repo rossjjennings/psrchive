@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Attic/Predictor.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/05/07 00:53:28 $
+   $Revision: 1.5 $
+   $Date: 2007/05/10 04:23:30 $
    $Author: straten $ */
 
 #ifndef __PulsarPredictor_h
@@ -31,10 +31,8 @@ namespace Pulsar {
     virtual Predictor* clone () const = 0;
 
     //! Add the information from the supplied predictor to self
+    /*! This method should check to avoid inconsistency and duplication */
     virtual void insert (const Predictor*) = 0;
-
-    //! Return true if the supplied predictor is equal to self
-    virtual bool equals (const Predictor*) const = 0;
 
     //! Set the observing frequency at which phase and time are related
     virtual void set_observing_frequency (long double MHz) = 0;

@@ -36,12 +36,6 @@ Pulsar::Predictor* Tempo2::Predictor::clone () const
   return new Predictor (*this);
 }
 
-//! Return true if the supplied predictor is equal to self
-bool Tempo2::Predictor::equals (const Pulsar::Predictor*) const
-{
-  throw Error (InvalidState, "Tempo2::Predictor::equals", "not implemented");
-}
-
 //! Add the information from the supplied predictor to self
 void Tempo2::Predictor::insert (const Pulsar::Predictor* from)
 {
@@ -198,7 +192,7 @@ long double Tempo2::Predictor::frequency (const MJD& t) const
 Phase Tempo2::Predictor::dispersion (const MJD &t, long double MHz) const
 {
   throw Error (InvalidState, "Tempo2::Predictor::dispersion",
-	       "not implemented"); 
+	       "Tempo2::Predictor dispersion not implemented"); 
 }
 
 void Tempo2::Predictor::load (FILE* fptr)

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/05/08 06:57:12 $
+   $Revision: 1.9 $
+   $Date: 2007/05/10 04:23:30 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
@@ -41,9 +41,6 @@ namespace Tempo2 {
 
     //! Return a new, copy constructed instance of self
     Pulsar::Predictor* clone () const;
-
-    //! Return true if the supplied predictor is equal to self
-    bool equals (const Pulsar::Predictor*) const;
 
     //! Add the information from the supplied predictor to self
     void insert (const Pulsar::Predictor*);
