@@ -38,13 +38,14 @@ double Pulsar::Archive::append_max_overlap
 void Pulsar::Archive::append (const Archive* arch)
 {
   if (verbose == 3)
-    cerr << "\n\nPulsar::Archive::append entered with nsub=" << get_nsubint() << "\n";
+    cerr << "Pulsar::Archive::append current nsub=" << get_nsubint()
+	 << " adding nsub=" << arch->get_nsubint() << endl;
 
   if (arch->get_nsubint() == 0)
     return;
   
-  if( get_nsubint() == 0 ){
-    operator=( *arch );
+  if (get_nsubint() == 0) {
+    copy (arch);
     return;
   }
 
@@ -84,7 +85,7 @@ void Pulsar::Archive::append (const Archive* arch)
   }
 
   if (verbose == 3)
-    cerr << "Pulsar::Archive::append compare\n";
+    cerr << "Pulsar::Archive::append compare" << endl;
   
   string reason;
   if (append_must_match) {
@@ -103,13 +104,17 @@ void Pulsar::Archive::append (const Archive* arch)
     
     MJD curlast  = end_time ();
     MJD newfirst = arch->start_time();
-    
+
     if (curlast > newfirst + append_max_overlap)
-      throw Error (InvalidState, "Archive::append", 
+      throw Error (InvalidState, "Archive::append",
 		   "startime overlaps or precedes endtime");
-    
+
   }
-  
+
+  /* if the Integrations are already properly phased to the polycos,
+     then no corrections are needed */
+  bool phase_aligned = zero_phase_aligned () && arch->zero_phase_aligned ();
+
   unsigned old_nsubint = get_nsubint();
 
   if (verbose == 3)
@@ -120,45 +125,57 @@ void Pulsar::Archive::append (const Archive* arch)
   // if observation is not a pulsar, no further checks required
   if (get_type() != Signal::Pulsar) {
     if (verbose == 3)
-      cerr << "Pulsar::Archive::append no pulsar; no polyco to correct" << endl;
+      cerr << "Pulsar::Archive::append no pulsar; no predictor to correct"
+	   << endl;
     return;
   }
   
   // if neither archive has a polyco, no correction needed
   if (!model && !arch->model) {
     if (verbose == 3)    
-      cerr << "Pulsar::Archive::append no polyco to correct" << endl;
+      cerr << "Pulsar::Archive::append no predictor to correct" << endl;
     return;
   }
 
-  /* if the polycos are equivalent and the Integrations are already
-     properly phased to the polycos, then no corrections are needed */
-  if (model && arch->model && model->equals(arch->model)) {
-    bool zero_aligned = true;
-    for (unsigned isub=0; isub < old_nsubint; isub++)
-      if (!get_Integration(isub)->zero_phase_aligned)
-	zero_aligned = false;
+  bool equal_ephemerides = ephemeris && arch->ephemeris 
+    && *ephemeris == *arch->ephemeris;
 
-    for (unsigned jsub=0; jsub < arch->get_nsubint(); jsub++)
-      if (!arch->get_Integration(jsub)->zero_phase_aligned)
-	zero_aligned = false;
+  /*
+    If all of the old and new integrations have been zero phase
+    aligned according to the phase predictor models of both archives,
+    and the parameter files from which those predictors were generated
+    are equal, then keep this information and do not generate any new
+    predictors.
+  */
 
-    if (zero_aligned) {
-      if (verbose == 3)
-	cerr << "Pulsar::Archive::append identical polycos [optimized]" <<endl;
-
-      for (unsigned isub=old_nsubint; isub < get_nsubint(); isub++)
-	get_Integration(isub)->zero_phase_aligned = true;
-
-      return;
-    }
+  if (verbose == 3) {
+    if (!phase_aligned)
+      cerr << "Pulsar::Archive::append "
+	"zero phase aligned flags not set" << endl;
+    if (!equal_ephemerides)
+      cerr << "Pulsar::Archive::append "
+	"archives have different ephemerides" << endl;
   }
 
-  if( has_model() && !ephemeris.ptr() )
+  if (phase_aligned && equal_ephemerides) {
+
+    if (verbose == 3)
+      cerr << "Pulsar::Archive::append "
+	"zero phase aligned and equal ephemerides" << endl;
+ 
+    model->insert (arch->model);
+
+    for (unsigned isub=0; isub < get_nsubint(); isub++)
+      get_Integration(isub)->zero_phase_aligned = true;
+
+    return;
+  }
+
+  if (model && !ephemeris)
     return;
 
   if (verbose == 3)
-    cerr << "Pulsar::Archive::append update polyco" << endl;
+    cerr << "Pulsar::Archive::append update predictor" << endl;
 
   update_model (old_nsubint);
   
@@ -167,7 +184,7 @@ void Pulsar::Archive::append (const Archive* arch)
 
   // correct the new subints against their old model
   for (unsigned isub=old_nsubint; isub < get_nsubint(); isub++)
-    apply_model (get_Integration(isub), arch->model.ptr());
+    apply_model (get_Integration(isub), arch->model);
 
   if (verbose == 3)
     cerr << "Pulsar::Archive::append exit" << endl;
