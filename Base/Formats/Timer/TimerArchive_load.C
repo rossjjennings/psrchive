@@ -152,8 +152,6 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
       throw Error (InvalidState, "TimerArchive::subint_load",
 		   "Integration[%d] is not a TimerIntegration", isub);
 
-    // initialize some of the subint
-    init_Integration (subint);
     subint -> load (fptr, hdr.wts_and_bpass, big_endian);
 
     if (verbose == 3)
@@ -272,7 +270,6 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 
     }
 
-
     if (reverse_U && !Profile::no_amps) {
       if (verbose == 3)
 	cerr << "TimerArchive::subint_load reversing sign of ipol=2" 
@@ -288,6 +285,9 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
       for (int ichan=0; ichan<hdr.nsub_band; ichan++)
 	*(subint->profiles[3][ichan]) *= -1.0;
     }
+
+    // initialize book-keeping attributes
+    init_Integration (subint, true);
 
   } // end for each sub_int
 
