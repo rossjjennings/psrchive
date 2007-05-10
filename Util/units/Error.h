@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Error.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/23 17:00:28 $
+   $Revision: 1.7 $
+   $Date: 2007/05/10 04:23:48 $
    $Author: straten $ */
 
 #ifndef __Error_h
@@ -40,9 +40,7 @@ enum ErrorCode {
   //! failure of a function called from another lib
   FailedCall,
   //! failure of a system call that sets errno
-  FailedSys,
-  //! signal received from kernel
-  SignalReceived
+  FailedSys
 };
 
 //! A convenient exception handling class
@@ -91,7 +89,10 @@ class Error {
 
   //! Get the error message
   const std::string get_message() const;
-  
+
+  //! Get the error code
+  ErrorCode get_code () const { return code; }
+
   //! Add to the Error message
   template<class T>
   friend Error& operator<< (Error& error, const T& t);

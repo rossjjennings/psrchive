@@ -148,7 +148,6 @@ const char* Error::err2str (ErrorCode code)
     CASESTR(FileNotFound);
     CASESTR(FailedCall);
     CASESTR(FailedSys);
-    CASESTR(SignalReceived);
   default: return "invalid";
   }
 #undef CASESTR
