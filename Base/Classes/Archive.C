@@ -66,7 +66,7 @@ string Pulsar::Archive::get_revision (const char* revision)
 Pulsar::Archive&
 Pulsar::Archive::operator = (const Archive& a)
 {
-  copy (a); 
+  copy (&a); 
   return *this;
 }
 
@@ -236,19 +236,6 @@ Pulsar::Archive::get_Profile (unsigned sub, unsigned pol, unsigned chan) const
   return get_Integration (sub) -> get_Profile (pol, chan);
 }
 
-Pulsar::Integration* Pulsar::Archive::load_Integration (unsigned isubint)
-{
-  if (verbose == 3)
-    cerr << "Pulsar::Archive::load_Integration" << endl;
-
-  if (!__load_filename.length())
-    throw Error (InvalidState, "Pulsar::Archive::load_Integration",
-                 "internal error: instance not loaded from file");
-
-  return load_Integration (__load_filename.c_str(), isubint);
-}
-
-
 const psrephem Pulsar::Archive::get_ephemeris () const
 {
   if (!ephemeris)
@@ -314,3 +301,21 @@ bool Pulsar::Archive::state_is_valid(string& reason) const{
   return Signal::valid_state(get_state(),1,get_npol(),reason);
 }
 
+bool Pulsar::Archive::zero_phase_aligned () const
+{
+  if (!model)
+    return false;
+
+  unsigned nsubint = get_nsubint ();
+  for (unsigned isub=0; isub < nsubint; isub++)
+    if (!get_Integration(isub)->zero_phase_aligned) {
+      if (verbose > 2)
+	cerr << "Pulsar::Archive::zero_phase_aligned false on isub=" 
+	     << isub << endl;
+      return false;
+    }
+
+  if (verbose > 2)
+    cerr << "Pulsar::Archive::zero_phase_aligned true" << endl;
+  return true;
+}
