@@ -73,8 +73,6 @@ try {
     throw FITSError (status, "FITSArchive::load_Integration", 
 		     "fits_movnam_hdu SUBINT");
 
-  init_Integration ( integ );
-
   if (get<Pulsar::IntegrationOrder>()) {
     colnum = 0;
     fits_get_colnum (sfptr, CASEINSEN, "INDEXVAL", &colnum, &status);

@@ -135,7 +135,6 @@ Pulsar::ASCIIArchive::load_Integration (const char* filename, unsigned subint)
 
   Pulsar::BasicIntegration* integration = new BasicIntegration;
   resize_Integration (integration);
-  init_Integration (integration);
 
   float* I = integration->get_Profile (0, 0) -> get_amps();
   float* Q = integration->get_Profile (1, 0) -> get_amps();

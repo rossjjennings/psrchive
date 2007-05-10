@@ -445,7 +445,6 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
 
   BasicIntegration* integration = new BasicIntegration;
   resize_Integration (integration);
-  init_Integration (integration);
 
   MJD epoch (line3.epoch);
   epoch += sub_line1.tstart[0] * 1e-6;
