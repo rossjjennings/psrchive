@@ -69,6 +69,8 @@ float lmcoff (// input
   return chisq;
 }
 
+bool Calibration::ReceptionModel::report_chisq = false;
+
 /*! Uses the Levenberg-Marquardt algorithm of non-linear least-squares
     minimization in order to find the best fit to the observations. */
 void Calibration::ReceptionModel::solve_work (bool solve_verbose)
@@ -280,11 +282,15 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
 
   float reduced_chisq = best_chisq / nfree;
 
-  if (maximum_reduced && reduced_chisq > maximum_reduced) {
+  if (report_chisq)
+    cerr << "  reduced chisq " << reduced_chisq << endl;
+
+  if (!finite(reduced_chisq) ||
+      maximum_reduced && reduced_chisq > maximum_reduced) {
     for (iparm=0; iparm < get_nparam(); iparm++)
       set_Estimate (iparm, 0.0);
     throw Error (InvalidState, "Calibration::ReceptionModel::solve",
-		 "bad solution reduced chisq=%f", reduced_chisq);
+		 "bad reduced chisq=%f (nfree=%d)", reduced_chisq, nfree);
   }
 
   if (verbose)

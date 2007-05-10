@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModel.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.9 $
+   $Date: 2007/05/10 04:23:06 $
    $Author: straten $ */
 
 #ifndef __ReceptionModel_H
@@ -72,6 +72,9 @@ namespace Calibration {
 
     //! Wait for all of the solve threads to return
     static void solve_wait ();
+
+    //! solve_work should report the reduced chisq on completion
+    static bool report_chisq;
 
     //! Solve the measurement equations by least squares minimization
     void solve ();
