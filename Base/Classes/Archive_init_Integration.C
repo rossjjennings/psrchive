@@ -6,16 +6,21 @@
  ***************************************************************************/
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Predictor.h"
 
 // Integration Extension classes used to store state information
 #include "Pulsar/DeFaraday.h"
 #include "Pulsar/Dedisperse.h"
 
-/*!
-  This method may be useful during load, as only the Archive base class
-  has access to the Integration::archive attribute.
+#include <iostream>
+using namespace std;
+
+/*!  
+  After an Integration has been loaded from disk, this method
+  ensures that various internal book-keeping attributes are
+  initialized.
 */
-void Pulsar::Archive::init_Integration (Integration* subint)
+void Pulsar::Archive::init_Integration (Integration* subint, bool check_phase)
 {
   subint->archive = this;
 
@@ -34,4 +39,20 @@ void Pulsar::Archive::init_Integration (Integration* subint)
   }
 
   subint->zero_phase_aligned = false;
+
+  if (check_phase && model) {
+    MJD epoch = subint->get_epoch();
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::init_Integration epoch = " << epoch << endl;
+    Phase phase = model->phase( epoch );
+
+    double frac = std::min( fabs(phase.fracturns()),
+			    fabs(1.0-phase.fracturns()) );
+
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::init_Integration phase = " << frac << endl;
+
+    subint->zero_phase_aligned = frac < 1e-8;;
+  }
+
 }
