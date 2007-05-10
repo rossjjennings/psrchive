@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.159 $
-   $Date: 2007/05/04 23:33:47 $
+   $Revision: 1.160 $
+   $Date: 2007/05/10 04:22:13 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.159 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.160 $"
 
 #include "IntegrationManager.h"
 #include "psrephem.h"
@@ -127,7 +127,8 @@ namespace Pulsar {
     //@{
 
     //! Copy all base class attributes, Extensions, and Integrations
-    void copy (const Archive& archive);
+    void copy (const Archive&);
+    void copy (const Archive*);
 
     //! Copy all base class attributes, Extensions, and selected Integrations
     virtual void copy (const Archive&, const std::vector<unsigned>& subints);
@@ -438,7 +439,6 @@ namespace Pulsar {
     float rms_baseline (float dc = 0.4);
 
     //! A dsp::Transformation into an Archive must be able to call this
-    //! This calls Signal::valid_state() to see if the state is consistent with the ndim, npol
     bool state_is_valid (std::string& reason) const;
 
 
@@ -629,7 +629,7 @@ namespace Pulsar {
     Reference::To<Predictor> model;
 
     //! Initialize an Integration to reflect Archive attributes.
-    void init_Integration (Integration* subint);
+    void init_Integration (Integration* subint, bool check_phase = false);
 
     //! Provide Integration::resize access to Archive-derived classes
     void resize_Integration (Integration* integration);
@@ -683,6 +683,9 @@ namespace Pulsar {
 
     //! Perform all known verification operations listed in Check::registry
     void verify () const;
+
+    //! Return true if all Integration::zero_phase_aligned flags are set
+    bool zero_phase_aligned () const;
 
     // Advocates the use of an Archive derived class
     class Agent;
