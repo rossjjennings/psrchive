@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Projection.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.8 $
+   $Date: 2007/05/11 22:59:39 $
    $Author: straten $ */
 
 #ifndef __Projection_H
@@ -36,6 +36,9 @@ namespace MEAL {
     //! Return the mapped index
     unsigned get_imap (unsigned index) const;
 
+    //! Return all mapped indeces
+    void get_imap (std::vector<unsigned>& get) const { get = imap; }
+
     //! Return the model
     Function* get_Function();
 
@@ -55,23 +58,23 @@ namespace MEAL {
   };
 
 
-  //! Template combines a reference to a Function type and its Projection
-  template<class Function>
-  class Project : public Reference::To<Function> {
+  //! Template combines a reference to a Component and its Projection
+  template<class Component>
+  class Project : public Reference::To<Component> {
 
   public:
 
     //! Default constructor
-    Project (Function* model = 0)
+    Project (Component* model = 0)
     { 
-      Reference::To<Function>::operator = (model);
+      Reference::To<Component>::operator = (model);
       projection = new Projection (model);
     }
 
     //! Assignment operator
-    const Project& operator = (Function* model) 
+    const Project& operator = (Component* model) 
     {
-      Reference::To<Function>::operator = (model);
+      Reference::To<Component>::operator = (model);
       projection->set_Function (model);
       return *this; 
     }
