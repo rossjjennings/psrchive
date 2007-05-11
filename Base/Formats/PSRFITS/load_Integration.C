@@ -35,6 +35,7 @@ try {
 		 "filename unspecified");
 
   Pulsar::Integration* integ = new_Integration();
+  init_Integration (integ);
 
   int row = isubint + 1;
   
