@@ -122,6 +122,13 @@ void Pulsar::ReceptionCalibratorPlotter::plotcal ()
 
 }
 
+//! Return the calibrator to be plotted
+const Pulsar::ReceptionCalibrator* 
+Pulsar::ReceptionCalibratorPlotter::get_calibrator () const
+{
+  return calibrator;
+}
+
 Pulsar::ReceptionCalibrator::CalInfo::CalInfo (ReceptionCalibrator* cal)
 {
   calibrator = cal;
