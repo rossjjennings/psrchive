@@ -859,7 +859,7 @@ try {
     }
   }
 
-  if (hdr_epoch == MJD::zero && verbose)
+  if (hdr_epoch == MJD::zero && verbose > 1)
     cerr << "FITSArchive::unload_file WARNING reference epoch == 0" << endl;
 
   // for use in unload_Integration.C
