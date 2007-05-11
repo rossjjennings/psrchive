@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.59 $
-   $Date: 2007/05/10 04:22:31 $
+   $Revision: 1.60 $
+   $Date: 2007/05/11 00:55:20 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -511,7 +511,7 @@ int main (int argc, char *argv[]) try {
   Pulsar::ReceptionCalibrator model (model_name);
 
   if (measure_cal_V)
-    cerr << "pcm: assuming that System + Hydra A Stokes V = 0" << endl;
+    cerr << "pcm: allowing CAL Stokes V to vary" << endl;
   else
     cerr << "pcm: assuming that CAL Stokes V = 0" << endl;
 
@@ -568,7 +568,7 @@ int main (int argc, char *argv[]) try {
     MJD mid = 0.5 * (end + start);
 
     cerr << "pcm: constructing Calibration::Database from\n" 
-            "     " << dbfile << endl;
+            "\t" << dbfile << endl;
 
     Pulsar::Database database (dbfile);
 
@@ -909,6 +909,7 @@ int main (int argc, char *argv[]) try {
     cpgsvp (.1,.9, .1,.9);
 
     total->fscrunch();
+    total->remove_baseline();
 
     cerr << "pcm: plotting calibrated pulsar total stokes" << endl;
     Pulsar::StokesSpherical plot;
