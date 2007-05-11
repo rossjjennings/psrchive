@@ -31,6 +31,7 @@ libClasses_la_SOURCES = \
 	Archive_correct.C \
         Archive_copy.C \
         Archive_init_Integration.C \
+	Archive_load_Integration.C \
         Archive_load.C \
         Archive_resize.C \
 	Archive_verify.C \
