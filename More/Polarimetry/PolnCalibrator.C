@@ -180,6 +180,20 @@ Pulsar::PolnCalibrator::get_transformation (unsigned ichan)
   return transformation[ichan];
 }
 
+//! Return true if parameter covariances are stored
+bool Pulsar::PolnCalibrator::has_covariance () const
+{
+  return (covariance.size() == get_nchan());
+}
+
+//! Return the covariance matrix vector for the specified channel
+void Pulsar::PolnCalibrator::get_covariance (unsigned ichan,
+					     std::vector<double>& c) const
+{
+  assert (ichan < covariance.size());
+  c = covariance[ichan];
+}
+
 void Pulsar::PolnCalibrator::setup_transformation () const
 {
   if (receiver)
@@ -202,8 +216,15 @@ void Pulsar::PolnCalibrator::calculate_transformation ()
   unsigned nchan = poln_extension->get_nchan();
   transformation.resize (nchan);
 
-  for (unsigned ichan=0; ichan < nchan; ichan++)
-    transformation[ichan] = new_transformation (poln_extension, ichan);
+  if (poln_extension->get_has_covariance())
+    covariance.resize(nchan);
+
+  for (unsigned i=0; i < nchan; i++) {
+    transformation[i] = new_transformation (poln_extension, i);
+    if (poln_extension->get_has_covariance())
+      poln_extension->get_transformation(i)->get_covariance(covariance[i]);
+  }
+
 }
 
 void Pulsar::PolnCalibrator::build (unsigned nchan) try {

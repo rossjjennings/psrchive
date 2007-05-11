@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.43 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.44 $
+   $Date: 2007/05/11 22:59:47 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -85,6 +85,12 @@ namespace Pulsar {
     //! Return the transformation for the specified channel
     MEAL::Complex2* get_transformation (unsigned ichan);
 
+    //! Return true if parameter covariances are stored
+    bool has_covariance () const;
+
+    //! Return the covariance matrix vector for the specified channel
+    void get_covariance (unsigned ichan, std::vector<double>&) const;
+
     // ///////////////////////////////////////////////////////////////////
     //
     // Pulsar::Calibrator implementation
@@ -152,7 +158,10 @@ namespace Pulsar {
 
     //! The array of transformation Model instances
     std::vector< Reference::To< MEAL::Complex2 > > transformation;
-    
+
+    //! The array of covariance matrix vectors
+    std::vector< std::vector<double> > covariance;
+
     //! Set up to call calculate_transformation
     void setup_transformation () const;
 
