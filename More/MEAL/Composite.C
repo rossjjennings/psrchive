@@ -191,7 +191,7 @@ void MEAL::Composite::add_component (Function* model,
     cerr << class_name() + "add_component [" <<model->get_name()<< "]" << endl;
 
   const Constant* constant = 0;
-  constant = dynamic_cast<const Constant*>(get_parameter_policy(model));
+  constant = dynamic_cast<const Constant*>(model->get_parameter_policy());
 
   if (constant) {
     if (Function::very_verbose)
@@ -200,7 +200,7 @@ void MEAL::Composite::add_component (Function* model,
   }
 
   const Composite* meta = 0;
-  meta = dynamic_cast<const Composite*>(get_parameter_policy(model));
+  meta = dynamic_cast<const Composite*>(model->get_parameter_policy());
 
   if (meta) {
 
@@ -297,7 +297,7 @@ void MEAL::Composite::remove_component (Function* model)
     cerr << class_name() + "remove_component" << endl;
 
   const Constant* constant = 0;
-  constant = dynamic_cast<const Constant*>(get_parameter_policy(model));
+  constant = dynamic_cast<const Constant*>(model->get_parameter_policy());
 
   if (constant) {
     if (Function::very_verbose)
@@ -307,7 +307,7 @@ void MEAL::Composite::remove_component (Function* model)
   }
 
   const Composite* meta = 0;
-  meta = dynamic_cast<const Composite*>(get_parameter_policy(model));
+  meta = dynamic_cast<const Composite*>(model->get_parameter_policy());
 
   if (meta) {
 
@@ -453,10 +453,8 @@ unsigned MEAL::Composite::find_Function (Function* model) const
 
   for (unsigned imodel=0; imodel < models.size(); imodel++)  {
     reference_check (imodel, "find_Function");
-    if ((models[imodel])) {
-      if ((models[imodel]).get() == model)
-	return imodel;
-    }
+    if (models[imodel] && models[imodel].get() == model)
+      return imodel;
   }
   return models.size();
 }
@@ -468,10 +466,78 @@ unsigned MEAL::Composite::find_Projection (Projection* modelmap) const
 			 << maps.size() << endl;
 
   for (unsigned imap=0; imap < maps.size(); imap++) {
-    if ((maps[imap]))
-      if ((maps[imap]).get() == modelmap)
-	return imap;
+    if (maps[imap] && maps[imap].get() == modelmap)
+      return imap;
   }
   
   return maps.size();
 }
+
+//! Map the Function indeces
+/*! If you haven't added the Function using a Projection, but still
+  want to know its mapping, call this function. */
+
+void MEAL::Composite::get_imap (const Function* model,
+				vector<unsigned>::iterator& imap) const
+{
+  if (!model)
+    return;
+
+  const Constant* constant = 0;
+  constant = dynamic_cast<const Constant*>(model->get_parameter_policy());
+
+  if (constant)
+    return;
+
+  const Composite* meta = 0;
+  meta = dynamic_cast<const Composite*>(model->get_parameter_policy());
+
+  if (meta) {
+    unsigned nmodel = meta->get_nmodel();
+    for (unsigned imodel=0; imodel<nmodel; imodel++)
+      get_imap (meta->models[imodel], imap);
+    return;
+  }
+
+  unsigned iparam = 0;
+  unsigned imodel = 0;
+
+  for (imodel = 0; imodel < models.size(); imodel++)  {  
+    reference_check (imodel, "get_imap");
+    if (models[imodel].ptr() == model)
+      break;
+    iparam += models[imodel]->get_nparam();
+  }
+
+  // the model was not found in the list
+  if (imodel == models.size())
+    throw Error (InvalidParam, "MEAL::Composite::get_imap",
+		 model->get_name() + " is not mapped by this Composite");
+  
+  unsigned nparam = model->get_nparam();
+
+  // add the mapped indeces (works for both cases: new model or old model)
+  for (unsigned jparam=0; jparam < nparam; jparam++) {
+    *imap = iparam + jparam;
+    imap ++;
+  }
+}
+
+void MEAL::get_imap (const Function* composite,
+		     const Function* component,
+		     std::vector<unsigned>& imap)
+{
+  const Composite* policy = 0;
+  policy = dynamic_cast<const Composite*>(composite->get_parameter_policy());
+
+  if (!policy)
+    throw Error (InvalidParam, "MEAL::get_imap",
+		 composite->get_name() + " is not a Composite");
+
+  imap.resize( component->get_nparam() );
+  vector<unsigned>::iterator imapi = imap.begin();
+  policy->get_imap( component, imapi );
+
+  assert ( imapi == imap.end() );
+}
+
