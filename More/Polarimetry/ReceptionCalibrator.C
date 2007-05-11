@@ -1038,6 +1038,54 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 
   Calibration::ReceptionModel::solve_wait ();
 
+  vector< vector<double> > Ctotal;
+  vector< unsigned > imap;
+
+  covariance.resize (nchan);
+
+  for (unsigned ichan=start_chan; ichan < nchan; ichan++) try {
+
+    if (!model[ichan]->valid)
+      continue;
+
+    model[ichan]->get_equation()->get_fit_covariance (Ctotal);
+
+    if (Ctotal.size() != model[ichan]->get_equation()->get_nparam()) {
+      cerr << "covariance matrix size=" << Ctotal.size() << " != nparam="
+	   << model[ichan]->get_equation()->get_nparam() << endl;
+      covariance.resize(0);
+      break;
+    }
+
+    // extract the indeces of the transformation within the model
+    MEAL::get_imap (model[ichan]->get_equation(),
+		    model[ichan]->get_transformation(), imap);
+
+    unsigned nparam = model[ichan]->get_transformation()->get_nparam();
+    unsigned ncovar = nparam * (nparam+1) / 2;
+
+    covariance[ichan].resize (ncovar);
+    unsigned count = 0;
+
+    for (unsigned i=0; i<nparam; i++)
+      for (unsigned j=i; j<nparam; j++) {
+	covariance[ichan][count] = Ctotal[imap[i]][imap[j]];
+	count ++;
+      }
+
+    if (count != ncovar) {
+      cerr << "count=" << count << " != ncovar=" << ncovar << endl;
+      covariance.resize(0);
+      break;
+    }
+
+  }
+  catch (Error& error) {
+    cerr << error << endl;
+    covariance.resize(0);
+    break;
+  }
+
   is_fit = true;
 }
 
