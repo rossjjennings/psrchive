@@ -9,6 +9,7 @@
 #include "MEAL/ArgumentPolicyAdapter.h"
 
 #include "Error.h"
+#include <assert.h>
 
 using namespace std;
 
