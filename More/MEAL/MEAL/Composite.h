@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Composite.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.7 $
+   $Date: 2007/05/11 22:59:28 $
    $Author: straten $ */
 
 #ifndef __Composite_H
@@ -99,6 +99,10 @@ namespace MEAL {
     //! Remove the Projection from the composite mapping
     void unmap (Projection* model, bool signal_changes = true);
 
+    //! Get the mapping for the given Function
+    void get_imap (const Function* model,
+		   std::vector<unsigned>::iterator& imap) const;
+
   protected:
 
     //! Provide access to Projection base class
@@ -149,6 +153,9 @@ namespace MEAL {
     void reference_check (unsigned imodel, char* method) const;
 
   };
+
+  void get_imap (const Function* composite, const Function* component,
+		 std::vector<unsigned>& imap);
 
 }
 
