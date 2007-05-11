@@ -278,8 +278,11 @@ int main (int argc, char** argv) try {
 
   }
   catch (Error& error) {
-    cerr << "Error while handling '" << filenames[ifile] << "'" << endl
-	 << error.get_message() << endl;
+    cerr << "Error while handling '" << filenames[ifile] << "'" << endl;
+    if (verbose)
+      cerr << error << endl;
+    else
+      cerr << error.get_message() << endl;
   }
 
   cpgend();
