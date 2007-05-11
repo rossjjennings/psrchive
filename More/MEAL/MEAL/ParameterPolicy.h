@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ParameterPolicy.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.6 $
+   $Date: 2007/05/11 22:59:34 $
    $Author: straten $ */
 
 #ifndef __MEAL_ParameterPolicy_H
@@ -25,9 +25,6 @@ namespace MEAL {
 
     //! Default destructor
     ParameterPolicy (Function* context);
-
-    //! Provide access to the parameter_policy attribute
-    const ParameterPolicy* get_parameter_policy (const Function*) const;
 
   public:
 

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Function.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.7 $
+   $Date: 2007/05/11 22:59:34 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -158,6 +158,10 @@ namespace MEAL {
 
     //! Return true if the Function evaluation has changed
     bool get_evaluation_changed () const { return evaluation_changed; }
+
+    //! Provide access to the parameter_policy attribute
+    const ParameterPolicy* get_parameter_policy () const
+    { return parameter_policy; }
 
    protected:
 
