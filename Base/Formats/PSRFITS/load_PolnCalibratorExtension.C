@@ -227,4 +227,6 @@ void load_covariances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
 
   assert (count == data.size());
 
+  pce->set_has_covariance( true );
+
 }
