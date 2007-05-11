@@ -321,4 +321,17 @@ void PolnCalibratorExtension::Transformation::set_covariance
 (const vector<double>& covar)
 {
   covariance = covar;
+
+  unsigned nparam = get_nparam();
+  unsigned icovar = 0;
+
+  // set the variance stored in the transformation
+  for (unsigned i=0; i<nparam; i++)
+    for (unsigned j=i; j<nparam; j++) {
+      if (i==j)
+	set_variance (j,covar[icovar]);
+      icovar++;
+    }
+
+  assert (icovar == covar.size());
 }
