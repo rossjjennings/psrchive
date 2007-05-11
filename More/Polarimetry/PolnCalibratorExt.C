@@ -41,16 +41,29 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
       cerr << "Pulsar::PolnCalibratorExtension(PolnCalibrator*)" << endl;
 
     CalibratorExtension::build (calibrator);
+    has_covariance = calibrator->has_covariance();
+
+    vector<double> covariance;
 
     unsigned nchan = get_nchan();
-    for (unsigned ichan=0; ichan < nchan; ichan++)
+    for (unsigned ichan=0; ichan < nchan; ichan++) {
+
       if ( calibrator->get_transformation_valid(ichan) ) {
         copy( get_transformation(ichan), 
 	      calibrator->get_transformation(ichan) );
 	set_valid (ichan, true);
       }
-      else
+      else {
         set_valid (ichan, false);
+	continue;
+      }
+
+      if ( has_covariance ) {
+	calibrator->get_covariance( ichan, covariance );
+	get_transformation(ichan)->set_covariance( covariance );
+      }
+
+    }
 
   }
   catch (Error& error) {
