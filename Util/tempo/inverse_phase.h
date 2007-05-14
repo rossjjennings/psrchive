@@ -7,12 +7,12 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/inverse_phase.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/05/14 21:20:33 $
+   $Revision: 1.5 $
+   $Date: 2007/05/14 23:47:12 $
    $Author: straten $ */
 
-#ifndef __Predictor_h
-#define __Predictor_h
+#ifndef __P_inverse_phase_h
+#define __P_inverse_phase_h
 
 #include "MJD.h"
 #include "Phase.h"
@@ -29,9 +29,9 @@ namespace Pulsar {
 
   for TIME, given PHASE.
 
-  This function requires Predictor to implement the following interface:
+  This function requires P to implement the following interface:
 
-  class Predictor {
+  class P {
   public:
     static double precision;
 
@@ -48,24 +48,22 @@ namespace Pulsar {
   extern unsigned inverse_phase_calls;
   //! Total number of iterations
   extern unsigned inverse_phase_iterations;
-  //! Inverse phase verbosity
-  extern bool inverse_phase_verbose;
 
-  template<typename Predictor>
-  MJD inverse_phase (const Predictor& predictor,
+  template<typename P>
+  MJD inverse_phase (const P& predictor,
 		     const Phase& p, const MJD* first_guess = 0)
   {
     MJD guess;
 
     if (first_guess)  {
       guess = *first_guess;
-      if (inverse_phase_verbose)
+      if (Pulsar::Predictor::verbose)
         std::cerr << "inverse_phase: given guess = " << guess << std::endl;
     } 
     else  {
       guess = predictor.get_reftime()
 	+ (p - predictor.get_refphase()) / predictor.get_reffrequency();
-      if (inverse_phase_verbose)
+      if (Pulsar::Predictor::verbose)
 	std::cerr << "inverse_phase: first guess = " << guess << std::endl;
     }
 
@@ -77,9 +75,10 @@ namespace Pulsar {
     double converge_factor = 0.5;
 #endif
 
-    double lprecision = std::max (Predictor::precision, MJD::precision);
-    if (inverse_phase_verbose)
-      std::cerr << "inverse_phase: precision=" << lprecision * 1e6 << " us" << std::endl;
+    double precision = std::max (P::precision, MJD::precision);
+    if (Pulsar::Predictor::verbose)
+      std::cerr << "inverse_phase: precision=" << precision*1e6 
+	        << " us" << std::endl;
 
     inverse_phase_calls ++;
 
@@ -91,7 +90,7 @@ namespace Pulsar {
       
       guess -= dt; // * converge_faster;
 
-      if (inverse_phase_verbose)
+      if (Pulsar::Predictor::verbose)
         std::cerr << "inverse_phase: guess=" << guess.printdays(20)
 		  << " dt=" << dt.in_seconds()*1e6 << " us" << std::endl;
 
@@ -101,7 +100,7 @@ namespace Pulsar {
 	converge_faster *= converge_factor;
 #endif
       
-      if (fabs (dt.in_seconds()) < lprecision)
+      if (fabs (dt.in_seconds()) < precision)
 	return guess;
     }
     

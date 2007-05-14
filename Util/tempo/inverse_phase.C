@@ -5,9 +5,9 @@
  *
  ***************************************************************************/
 
+#include "Predictor.h"
 #include "inverse_phase.h"
 
 unsigned Pulsar::inverse_phase_calls = 0;
 unsigned Pulsar::inverse_phase_iterations = 0;
-bool Pulsar::inverse_phase_verbose = false;
 

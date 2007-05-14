@@ -22,7 +22,7 @@
 
 using namespace std;
 
-bool polyco::verbose = false;
+bool Pulsar::Predictor::verbose = false;
 bool polyco::debug = false;
 
 // not going to get > ns precision out of a routine based in minutes

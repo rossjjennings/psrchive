@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.37 $
-   $Date: 2007/05/10 04:23:30 $
+   $Revision: 1.38 $
+   $Date: 2007/05/14 23:47:12 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -186,7 +186,6 @@ public:
 class polyco : public Pulsar::Predictor {
 
 public:
-  static bool verbose;
   static bool debug;
 
   //! The polynomial sets
