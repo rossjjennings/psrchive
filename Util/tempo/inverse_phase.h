@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/inverse_phase.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/05/06 23:04:42 $
+   $Revision: 1.4 $
+   $Date: 2007/05/14 21:20:33 $
    $Author: straten $ */
 
 #ifndef __Predictor_h
@@ -48,6 +48,8 @@ namespace Pulsar {
   extern unsigned inverse_phase_calls;
   //! Total number of iterations
   extern unsigned inverse_phase_iterations;
+  //! Inverse phase verbosity
+  extern bool inverse_phase_verbose;
 
   template<typename Predictor>
   MJD inverse_phase (const Predictor& predictor,
@@ -55,14 +57,19 @@ namespace Pulsar {
   {
     MJD guess;
 
-    if (first_guess)
+    if (first_guess)  {
       guess = *first_guess;
-    else
+      if (inverse_phase_verbose)
+        std::cerr << "inverse_phase: given guess = " << guess << std::endl;
+    } 
+    else  {
       guess = predictor.get_reftime()
 	+ (p - predictor.get_refphase()) / predictor.get_reffrequency();
+      if (inverse_phase_verbose)
+	std::cerr << "inverse_phase: first guess = " << guess << std::endl;
+    }
 
     MJD dt;
-  
     int gi = 0;
 
 #if 0
@@ -71,6 +78,8 @@ namespace Pulsar {
 #endif
 
     double lprecision = std::max (Predictor::precision, MJD::precision);
+    if (inverse_phase_verbose)
+      std::cerr << "inverse_phase: precision=" << lprecision * 1e6 << " us" << std::endl;
 
     inverse_phase_calls ++;
 
@@ -81,6 +90,10 @@ namespace Pulsar {
       dt = (predictor.phase(guess) - p) / predictor.frequency(guess);
       
       guess -= dt; // * converge_faster;
+
+      if (inverse_phase_verbose)
+        std::cerr << "inverse_phase: guess=" << guess.printdays(20)
+		  << " dt=" << dt.in_seconds()*1e6 << " us" << std::endl;
 
 #if 0
       // every six iterations, give the convergence a little bump
