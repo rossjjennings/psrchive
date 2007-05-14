@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Attic/Predictor.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/05/10 04:23:30 $
+   $Revision: 1.6 $
+   $Date: 2007/05/14 23:47:06 $
    $Author: straten $ */
 
 #ifndef __PulsarPredictor_h
@@ -26,6 +26,9 @@ namespace Pulsar {
   class Predictor : public Reference::Able {
 
   public:
+
+    //! Verbosity flag
+    static bool verbose;
 
     //! Return a new, copy constructed instance of self
     virtual Predictor* clone () const = 0;
