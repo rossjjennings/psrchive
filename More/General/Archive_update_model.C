@@ -33,7 +33,7 @@ using namespace std;
 */
 void Pulsar::Archive::update_model() 
 {
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::Archive::update_model" << endl;
 
   runtime_model = false;
@@ -62,10 +62,10 @@ void Pulsar::Archive::update_model()
 
   \param nsubint the number of Integrations to correct
 */
-void Pulsar::Archive::update_model (unsigned nsubint)
-try {
-  if (verbose == 3)
-    cerr << "\n\n\nPulsar::Archive::update_model nsubint=" << nsubint << endl;
+void Pulsar::Archive::update_model (unsigned nsubint) try {
+
+  if (verbose > 2)
+    cerr << "Pulsar::Archive::update_model nsubint=" << nsubint << endl;
 
   Reference::To<Predictor> oldmodel;
 
@@ -77,14 +77,14 @@ try {
   // if the model has not already been updated, create a completely new polyco
   create_updated_model (!runtime_model);
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::Archive::update_model checking first " 
          << nsubint << " Integrations" << endl;
 
   // correct the old Integrations with the old model
   for (unsigned isub = 0; isub < nsubint; isub++){
     if (!get_Integration(isub)->zero_phase_aligned)  {
-      if (verbose == 3)
+      if (verbose > 2)
         cerr << "Pulsar::Archive::update_model phasing isub=" << isub << endl;
       apply_model (get_Integration(isub), oldmodel.ptr());
     }
@@ -145,14 +145,14 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     throw Error (InvalidState, "Pulsar::Archive::update_model",
 		 "not a pulsar observation");
 
-  if (verbose == 3) cerr << "Pulsar::Archive::update_model epoch=" << time 
+  if (verbose > 2) cerr << "Pulsar::Archive::update_model epoch=" << time 
 			 << " clear=" << clear_model << endl;
 
   if (model && !clear_model) try {
 
     model->phase (time);
 
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "Pulsar::Archive::update_model current model spans epoch"
 	   << endl;
 
@@ -161,7 +161,7 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
   }
   catch (...) {
 
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "Pulsar::Archive::update_model current model doesn't span epoch"
 	   << endl;
 
@@ -206,7 +206,8 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
   
   if ( t1model->i_nearest (time) == -1 ) {
     if (verbose > 2)
-      cerr << "Pulsar::Archive::update_model no model for " << time << endl;
+      cerr << "Pulsar::Archive::update_model generating new predictor for"
+	" epoch=" << time << endl;
     // no match, create a new polyco for the specified time
     polyco part = predict.get_polyco (time, time);
     t1model->append (part);

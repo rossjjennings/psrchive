@@ -45,11 +45,15 @@ void Pulsar::Archive::apply_model (Integration* subint, const Predictor* old)
     
     if (verbose == 3) {
 
+      Phase old_phase;
+      if (old) 
+	old_phase = old->phase(epoch);
+
       cerr << "Pulsar::Archive::apply_model"
 	   << "\n  old MJD " << epoch;
 
       if (old)
-	cerr << "\n  old predictor phase " << old->phase(epoch);
+	cerr << "\n  old predictor phase " << old_phase << endl;
 
       cerr << "\n  new predictor phase " << phase
 	   << "\n  time shift " << shift_time/86400.0 << " days" 
