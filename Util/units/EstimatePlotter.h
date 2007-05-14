@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.16 $
-   $Date: 2007/05/10 04:23:54 $
+   $Revision: 1.17 $
+   $Date: 2007/05/14 06:58:55 $
    $Author: straten $ */
 
 #ifndef __EstimatePlotter_h
@@ -23,6 +23,9 @@
 class EstimatePlotter {
 
  public:
+
+  //! Flag controls verbosity
+  static bool report_mean;
 
   //! Default constructor
   EstimatePlotter ();
@@ -69,7 +72,7 @@ class EstimatePlotter {
   template<class T> void add_plot (const std::vector< Estimate<T> >& data);
 
   template<class Xt, class Yt>
-  void add_plot (const std::vector<Xt>& xdata, const std::vector< Estimate<Yt> >& ydata);
+  void add_plot (const std::vector<Xt>&, const std::vector< Estimate<Yt> >&);
 
   //! Plot the specified data set
   template<class T> void plot (const std::vector< Estimate<T> >& data);
@@ -174,7 +177,8 @@ void EstimatePlotter::add_plot (const std::vector< Estimate<T> >& data)
   }
 
   // useful at times, excessive at others ...
-  // std::cerr << "Mean = " << mean << std::endl;
+  if (report_mean)
+    std::cerr << "Mean = " << mean << std::endl;
 
   minmax (xrange_set, x_min, x_max, yrange_set, y_min, y_max, x, y, ye);
 }

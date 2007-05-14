@@ -9,6 +9,8 @@
 
 #include <cpgplot.h>
 
+bool EstimatePlotter::report_mean = false;
+
 EstimatePlotter::EstimatePlotter ()
 {
   x_border = 0.02;
