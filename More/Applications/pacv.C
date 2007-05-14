@@ -57,6 +57,9 @@ void usage ()
 
 int main (int argc, char** argv) 
 {
+  // report the Mean for each plot
+  EstimatePlotter::report_mean = true;
+
   // use the Single Axis model
   bool single_axis = true;
 
