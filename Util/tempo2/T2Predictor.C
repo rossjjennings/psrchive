@@ -127,7 +127,8 @@ protected:
   
 };
 
-double cheby_interface::precision = 1e-15;
+// Half nanosecond precision
+double cheby_interface::precision = 5e-10;
 
 void cheby_interface::construct (ChebyModel* _model, long double _obs_freq)
 {
@@ -166,6 +167,9 @@ MJD Tempo2::Predictor::iphase (const Phase& phase, const MJD* guess) const
 
   for (icheby=0; icheby<chebys.size(); icheby ++)  {
 
+    if (verbose)
+      cerr << "Tempo2::Predictor::iphase icheby=" << icheby << endl;
+
     chebys[icheby].construct( predictor.modelset.cheby.segments + icheby,
 			      observing_frequency );
 
@@ -176,9 +180,11 @@ MJD Tempo2::Predictor::iphase (const Phase& phase, const MJD* guess) const
     }
   }
 
-  MJD result;
-  if (imin > 0)
-    result = chebys[imin].iphase (phase, guess);
+  if (imin < 0)
+    throw Error (InvalidParam, "Tempo2::Predictor::iphase",
+                 "no cheby for phase");
+
+  return chebys[imin].iphase (phase, guess);
 }
 
 //! Return the spin frequency, given the epoch
