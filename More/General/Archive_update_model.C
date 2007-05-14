@@ -148,7 +148,7 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
   if (verbose == 3) cerr << "Pulsar::Archive::update_model epoch=" << time 
 			 << " clear=" << clear_model << endl;
 
-  if (model) try {
+  if (model && !clear_model) try {
 
     model->phase (time);
 
@@ -176,7 +176,7 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
 
   polyco* t1model = dynamic_cast<polyco*> (model.ptr());
   
-  if (!ephemeris)
+  if (!ephemeris || !t1model)
     return;
 
   static Tempo::Predict predict;
