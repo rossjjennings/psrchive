@@ -53,7 +53,6 @@ void TemporaryFile::signal_handler (int sig)
 //! The current temporary file instances
 std::set<TemporaryFile*> TemporaryFile::instances;
 
-
 //! Construct with regular expression
 TemporaryFile::TemporaryFile (const string& basename)
 {
@@ -94,10 +93,10 @@ void TemporaryFile::close ()
 
 void TemporaryFile::remove ()
 {
+  close ();
+
   if (removed)
     return;
-
-  close ();
 
   if (unlink (filename.c_str()) < 0)
     throw Error (FailedSys, "TemporaryFile",
