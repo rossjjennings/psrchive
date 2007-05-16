@@ -9,7 +9,7 @@
 #include <config.h>
 #endif
 
-#include "polyco.h"
+#include "fitsio_tempo.h"
 #include "FITSError.h"
 
 using namespace std;
@@ -32,7 +32,7 @@ load_polyco (fitsfile* fptr, double* pred_phs, bool verbose)
   }
 
   Reference::To<polyco> model = new polyco;
-  model->load (fptr);
+  load (fptr, model);
 
   if (verbose)
     cerr << "load_polyco loaded\n" << *model << endl;

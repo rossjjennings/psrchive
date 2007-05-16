@@ -24,16 +24,20 @@ libpsrfits_la_SOURCES = CalibratorExtensionIO.h FITSArchive.C \
 	unload_polyco.C load_polyco.C \
 	delete_hdu.C update_history.C unload_integrations.C \
 	CalibratorExtensionIO.C FITSAgent.C \
-	P236_reference_epoch_correction.C
+	P236_reference_epoch_correction.C \
+	fitsio_psrephem.C fitsio_polyco.C fitsio_tempo.h
 
 if HAVE_TEMPO2
 libpsrfits_la_SOURCES += unload_T2Predictor.C load_T2Predictor.C
 endif
 
-check_PROGRAMS = test_template
+check_PROGRAMS = test_template test_psrephem_fitsio test_polyco_fitsio
+
 TESTS = $(check_PROGRAMS)
 
 test_template_SOURCES = test_template.C
+test_psrephem_fitsio_SOURCES = test_psrephem_fitsio.C
+test_polyco_fitsio_SOURCES = test_polyco_fitsio.C
 
 #############################################################################
 #

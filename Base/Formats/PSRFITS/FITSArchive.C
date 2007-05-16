@@ -33,6 +33,8 @@
 #include "Pulsar/Telescope.h"
 
 #include "Predictor.h"
+#include "fitsio_tempo.h"
+
 #include "psrfitsio.h"
 #include "Telescope.h"
 #include "strutil.h"
@@ -454,7 +456,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     psrfits_read_key (fptr, "STT_TIME", &tempstr, dfault, verbose == 3);
 
     // strip off any fractional seconds, if present
-    unsigned decimal = tempstr.find('.');
+    size_t decimal = tempstr.find('.');
     if (decimal != string::npos)
       tempstr = tempstr.substr (0, decimal);
 
@@ -543,7 +545,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (status == 0 && get_type() == Signal::Pulsar) {
 
     ephemeris = new psrephem;
-    ephemeris->load(fptr);
+    ::load (fptr, ephemeris);
     set_dispersion_measure( ephemeris->get_dm() );
     set_rotation_measure( ephemeris->get_double(EPH_RM) );
 
@@ -906,7 +908,7 @@ try {
     ephemeris->set_dm(dispersion_measure);
     ephemeris->set_double (EPH_RM, rotation_measure);
 
-    ephemeris->unload(fptr);
+    ::unload (fptr, ephemeris);
 
     if (verbose == 3)
       cerr << "FITSArchive::unload_file ephemeris written" << endl;

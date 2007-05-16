@@ -9,7 +9,7 @@
 #include <config.h>
 #endif
 
-#include "polyco.h"
+#include "fitsio_tempo.h"
 #include "FITSError.h"
 
 using namespace std;
@@ -21,7 +21,7 @@ void unload_polyco (fitsfile* fptr, const polyco* poly,
     cerr << "unload_polyco entered" << endl;
 
   // Unload the polyco to the FITS file
-  poly->unload (fptr);
+  unload (fptr, poly);
 
   if (verbose)
     cerr << "unload_polyco unloaded" << endl;
