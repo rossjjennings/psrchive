@@ -94,10 +94,54 @@ Phase to_Phase (long double p)
 //! Return the phase, given the epoch
 Phase Tempo2::Predictor::phase (const MJD& t) const
 {
-  return to_Phase( T2Predictor_GetPhase (&predictor, from_MJD (t),
-					 observing_frequency) );
+  long double p = T2Predictor_GetPhase ( &predictor, from_MJD (t),
+					 observing_frequency );
+  if (ChebyModelSet_OutOfRange)
+    throw Error (InvalidParam, "Tempo2::Predictor::phase",
+		 "epoch %s not spanned by ChebyModelSet",
+		 t.printdays(20).c_str());
+
+  return to_Phase( p );
 }
 
+//! Return the spin frequency, given the epoch
+long double Tempo2::Predictor::frequency (const MJD& t) const
+{
+  long double f = T2Predictor_GetFrequency (&predictor, from_MJD (t),
+					    observing_frequency);
+
+  if (ChebyModelSet_OutOfRange)
+    throw Error (InvalidParam, "Tempo2::Predictor::frequency",
+		 "epoch %s not spanned by ChebyModelSet",
+		 t.printdays(20).c_str());
+
+  return f;
+}
+
+//! Return the phase correction for dispersion delay
+Phase Tempo2::Predictor::dispersion (const MJD &t, long double MHz) const
+{
+  throw Error (InvalidState, "Tempo2::Predictor::dispersion",
+	       "Tempo2::Predictor dispersion not implemented"); 
+}
+
+void Tempo2::Predictor::load (FILE* fptr)
+{
+  T2Predictor_FRead (&predictor, fptr);
+
+  observing_frequency = 0.5L *
+    (T2Predictor_GetStartFreq(&predictor)+T2Predictor_GetEndFreq(&predictor));
+}
+
+void Tempo2::Predictor::unload (FILE* fptr) const
+{
+  T2Predictor_FWrite (&predictor, fptr);
+}
+
+//
+// The rest of this code implements an interface to the inverse_phase
+// template method, which is used to implement Tempo2::Predictor::iphase.
+//
 
 class cheby_interface {
 
@@ -146,14 +190,14 @@ Phase cheby_interface::phase (const MJD& t) const
  return to_Phase( ChebyModel_GetPhase (model, from_MJD (t), obs_freq) );
 }
 
-MJD cheby_interface::iphase (const Phase& phase, const MJD* guess) const
-{
-  return Pulsar::inverse_phase (*this, phase, guess);
-}
-
 long double cheby_interface::frequency (const MJD& t) const
 {
  return ChebyModel_GetFrequency (model, from_MJD (t), obs_freq);
+}
+
+MJD cheby_interface::iphase (const Phase& phase, const MJD* guess) const
+{
+  return Pulsar::inverse_phase (*this, phase, guess);
 }
 
 //! Return the epoch, given the phase
@@ -187,29 +231,3 @@ MJD Tempo2::Predictor::iphase (const Phase& phase, const MJD* guess) const
   return chebys[imin].iphase (phase, guess);
 }
 
-//! Return the spin frequency, given the epoch
-long double Tempo2::Predictor::frequency (const MJD& t) const
-{
-  return T2Predictor_GetFrequency (&predictor, from_MJD (t),
-				   observing_frequency);
-}
-
-//! Return the phase correction for dispersion delay
-Phase Tempo2::Predictor::dispersion (const MJD &t, long double MHz) const
-{
-  throw Error (InvalidState, "Tempo2::Predictor::dispersion",
-	       "Tempo2::Predictor dispersion not implemented"); 
-}
-
-void Tempo2::Predictor::load (FILE* fptr)
-{
-  T2Predictor_FRead (&predictor, fptr);
-
-  observing_frequency = 0.5L *
-    (T2Predictor_GetStartFreq(&predictor)+T2Predictor_GetEndFreq(&predictor));
-}
-
-void Tempo2::Predictor::unload (FILE* fptr) const
-{
-  T2Predictor_FWrite (&predictor, fptr);
-}
