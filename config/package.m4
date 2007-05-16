@@ -16,9 +16,6 @@ AC_DEFUN([SWIN_PACKAGE_OPTIONS],
               AC_HELP_STRING([--with-[$1]-lib-dir=DIR],
                              [[$1] library is in DIR]))
 
-  CFITSIO_CFLAGS=""
-  CFITSIO_LIBS=""
-
   if test x"$with_[$1]_dir" = x"no" ||
      test x"$with_[$1]_include-dir" = x"no" ||
      test x"$with_[$1]_lib_dir" = x"no"; then
@@ -51,13 +48,29 @@ AC_DEFUN([SWIN_PACKAGE_OPTIONS],
 
 ])
 
+dnl @synopsis SWIN_PACKAGE_FIND(name,file)
+dnl 
+AC_DEFUN([SWIN_PACKAGE_FIND],
+[
+  AC_PROVIDE([SWIN_PACKAGE_FIND])
+
+  swin_[$1]_found=""
+
+  if test x"$PACKAGES" != x; then
+    for cf_file in `find $PACKAGES -name "[$2]"`; do
+      cf_path=`dirname $cf_file`
+      swin_[$1]_found="$cf_path $swin_[$1]_found"
+    done
+  fi
+])
+
 dnl @synopsis SWIN_PACKAGE_TRY_COMPILE(name,includes,function body)
 dnl 
 AC_DEFUN([SWIN_PACKAGE_TRY_COMPILE],
 [
   AC_PROVIDE([SWIN_PACKAGE_TRY_COMPILE])
 
-  cf_include_path_list="$with_[$1]_include_dir $found_[$1]_include_dir [$4] ."
+  cf_include_path_list="$with_[$1]_include_dir $swin_[$1]_found [$4] ."
 
   ac_save_CFLAGS="$CFLAGS"
 
@@ -81,7 +94,7 @@ AC_DEFUN([SWIN_PACKAGE_TRY_LINK],
 [
   AC_PROVIDE([SWIN_PACKAGE_TRY_LINK])
 
-  cf_lib_path_list="$with_[$1]_lib_dir $found_[$1]_lib_dir [$5] ."
+  cf_lib_path_list="$with_[$1]_lib_dir $swin_[$1]_found [$5] ."
 
   ac_save_CFLAGS="$CFLAGS"
   CFLAGS="$[$1]_CFLAGS $ac_save_CFLAGS"
