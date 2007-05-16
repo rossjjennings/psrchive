@@ -30,19 +30,19 @@ AC_DEFUN([SWIN_PACKAGE_OPTIONS],
 
     # "yes" is not a specification
     if test x"$with_[$1]_dir" = xyes; then
-      with_[$1]_dir=
+      with_[$1]_dir=""
     fi
 
     if test x"$with_[$1]_include_dir" = xyes; then
-      with_[$1]_include_dir=
+      with_[$1]_include_dir=""
     fi
 
     if test x"$with_[$1]_lib_dir" = xyes; then
-      with_[$1]_lib_dir=
+      with_[$1]_lib_dir=""
     fi
 
     # _dir overrides include_dir and lib_dir    
-    if test x"with_[$1]_dir" != x; then
+    if test x"$with_[$1]_dir" != x; then
       with_[$1]_include_dir=$with_[$1]_dir/include
       with_[$1]_lib_dir=$with_[$1]_dir/lib
     fi
