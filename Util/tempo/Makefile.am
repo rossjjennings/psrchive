@@ -60,7 +60,7 @@ endif
 keyinfo.com: $(srcdir)/keys.dat ./keys2fort
 	./keys2fort $(srcdir)/keys.dat
 
-ephio.h: $(srcdir)/keys.dat ./keys2c
+ephio_def.c ephio.h: $(srcdir)/keys.dat ./keys2c
 	./keys2c $(srcdir)/keys.dat
 
 # Depend on constructed include files
