@@ -11,8 +11,10 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
 
   if test "$have_cfitsio" != "user disabled"; then
 
+    SWIN_PACKAGE_FIND([cfitsio],[fitsio.h])
     SWIN_PACKAGE_TRY_COMPILE([cfitsio],[#include <fitsio.h>])
 
+    SWIN_PACKAGE_FIND([cfitsio],[libcfitsio.*])
     SWIN_PACKAGE_TRY_LINK([cfitsio],[#include <fitsio.h>],
                           [fits_movnam_hdu(0,0,0,0,0);],
                           [-lcfitsio $SOCKET_LIBS])
@@ -26,7 +28,7 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
     [$1]
   else
     AC_MSG_WARN([The PSRFITS code will not be compiled])
-   [$2]
+    [$2]
   fi
 
   CFITSIO_LIBS="$cfitsio_LIBS"
