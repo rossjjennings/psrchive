@@ -36,7 +36,7 @@ void polynomial::init()
   dm = 0;
   doppler_shift = 0;
   log_rms_resid = 0;
-  f0 = 0;
+  ref_freq = 0;
   telescope = '\0';
   nspan_mins = 0.0;
   freq = 0;
@@ -44,23 +44,6 @@ void polynomial::init()
   binfreq = 0;
   binary = 0;
   tempov11 = 0;
-}
-
-// Hack constructor for use on search data
-polynomial::polynomial(MJD _reftime, float _dm, double _f0, int _telescope){
-  init();
-
-  reftime = _reftime;
-  dm = _dm;
-  f0 = _f0;
-  telescope = _telescope;
-
-  psrname = "0000+0000";
-  date = "dd-MMM-yy";
-  utc = "hhmmss.ss";
-  nspan_mins = 1440.0;
-
-  coefs.resize(12,0.0);
 }
 
 polynomial & polynomial::operator = (const polynomial & in_poly)
@@ -71,12 +54,12 @@ polynomial & polynomial::operator = (const polynomial & in_poly)
   psrname = in_poly.psrname;
   date = in_poly.date;
   utc = in_poly.utc;
-  reftime = in_poly.reftime;
+  ref_time = in_poly.ref_time;
   dm = in_poly.dm;
   doppler_shift = in_poly.doppler_shift;
   log_rms_resid = in_poly.log_rms_resid;
   ref_phase = in_poly.ref_phase;
-  f0 = in_poly.f0;
+  ref_freq = in_poly.ref_freq;
   telescope = in_poly.telescope;
   nspan_mins = in_poly.nspan_mins;
   freq = in_poly.freq;
@@ -183,7 +166,7 @@ int polynomial::load (string* instr)
 	 << "+" << frac_mjd << " dm=" << dm << " dop=" << doppler_shift
 	 << " rms=" << log_rms_resid << endl;
 
-  reftime = MJD(mjd_day_num, frac_mjd);
+  ref_time = MJD(mjd_day_num, frac_mjd);
 
   if (scanned < 5)
     tempov11 = 0;
@@ -219,7 +202,7 @@ int polynomial::load (string* instr)
 
   char teletxt[8];
   scanned = sscanf (line.c_str(), "%lf %s %lf %d %lf %lf %lf\n",
-  	    &f0, teletxt, &nspan_mins, &ncoeftmp, &freq, &binph, &binfreq);
+  	    &ref_freq, teletxt, &nspan_mins, &ncoeftmp, &freq, &binph, &binfreq);
 
   if (scanned < 5) {
     fprintf (stderr, "polynomial::load(string*) error stage 2 parsing '%s'\n",
@@ -293,7 +276,7 @@ int polynomial::unload (string* outstr) const
 #endif
 
     bytes += sprintf(numstr, "%-10.10s %9.9s%12.12s%22s%19f%7.3lf%7.3lf\n",
-          psrname.c_str(), date.c_str(), utc.c_str(), reftime.strtempo(),
+          psrname.c_str(), date.c_str(), utc.c_str(), ref_time.strtempo(),
           dm, doppler_shift, log_rms_resid);
   }
   else  {
@@ -301,7 +284,7 @@ int polynomial::unload (string* outstr) const
       cerr << "polynomial::unload not tempo11" << endl;
 #endif
     bytes += sprintf(numstr, "%-10.9s%9.9s%12.12s%22s%19f\n",
-          psrname.c_str(), date.c_str(), utc.c_str(), reftime.strtempo(),dm); 
+          psrname.c_str(), date.c_str(), utc.c_str(), ref_time.strtempo(),dm); 
   }
 
   *outstr += numstr;
@@ -313,12 +296,12 @@ int polynomial::unload (string* outstr) const
 #endif
 
     bytes += sprintf(numstr, "%20s%18.12lf    %c%5.0lf%5d%10.3f%7.4f%9.4f\n", 
-	    ref_phase.strprint(6).c_str(), f0, telescope, nspan_mins, 
+	    ref_phase.strprint(6).c_str(), ref_freq, telescope, nspan_mins, 
 	    coefs.size(), freq, binph, binfreq);
   }
   else 
     bytes += sprintf(numstr, "%20s%18.12lf    %c%5.0lf%5d%10.3f\n", 
-	    ref_phase.strprint(6).c_str(), f0, telescope, nspan_mins, 
+	    ref_phase.strprint(6).c_str(), ref_freq, telescope, nspan_mins, 
 	    coefs.size(), freq);
 
   *outstr += numstr;
@@ -374,7 +357,7 @@ int polynomial::unload (FILE* fptr) const
 Phase polynomial::phase(const MJD& t) const
 {
   Phase dp (0.0);
-  MJD dt = t - reftime;
+  MJD dt = t - ref_time;
   long double tm = dt.in_minutes();
 
   long double poweroft = 1.0;
@@ -382,7 +365,7 @@ Phase polynomial::phase(const MJD& t) const
     dp += double(coefs[i]*poweroft);
     poweroft *= tm;
   }
-  dp += double(tm*f0*60.0);
+  dp += double(tm*ref_freq*60.0);
 
   return ref_phase + dp;
 }
@@ -398,7 +381,7 @@ MJD polynomial::iphase(const Phase& p, const MJD* guess) const
 long double polynomial::frequency (const MJD& t) const
 {  
   long double dp = 0;                // dphase/dt starts as phase per minute.
-  MJD dt = t - reftime;
+  MJD dt = t - ref_time;
   long double tm = dt.in_minutes();
 
   long double poweroft = 1.0;
@@ -407,14 +390,14 @@ long double polynomial::frequency (const MJD& t) const
     poweroft *= tm;
   }
   dp /= (long double) 60.0;          // Phase per second
-  dp += f0;
+  dp += ref_freq;
   return dp;
 }
 
 double polynomial::chirp(const MJD& t) const
 {
   double d2p = 0;                    // d^2phase/dt^2 starts as phase/minute^2
-  MJD dt = t - reftime;
+  MJD dt = t - ref_time;
   double tm = dt.in_minutes();
 
   double poweroft = 1.0;
@@ -446,14 +429,14 @@ void polynomial::prettyprint() const {
   cout << "PSR Name\t\t\t" << psrname << endl;
   cout << "Date\t\t\t\t" << date << endl;
   cout << "UTC\t\t\t\t" << utc << endl;
-  cout << "Ref. Time\t\t\t" << reftime.strtempo() << endl;
+  cout << "Ref. Time\t\t\t" << ref_time.strtempo() << endl;
   cout << "DM\t\t\t\t" << dm << endl;
   if(tempov11){
     cout << "Doppler Shift\t\t\t" << doppler_shift << endl;
     cout << "Log RMS Residuals\t\t" << log_rms_resid << endl;
   }
   cout << "Ref. Phase\t\t\t" << ref_phase.intturns() << ref_phase.fracturns() << endl;
-  cout << "Ref. Rotation Frequency\t\t" << f0 << endl;
+  cout << "Ref. Rotation Frequency\t\t" << ref_freq << endl;
   cout << "Telescope\t\t\t" << telescope << endl;
   cout << "Span in Minutes\t\t\t" << nspan_mins << endl;
   cout << "Number of Coefficients\t\t" << coefs.size() << endl;
@@ -470,7 +453,7 @@ int operator == (const polynomial & p1, const polynomial & p2){
   if(p1.dm != p2.dm ||
      p1.doppler_shift != p2.doppler_shift ||
      p1.log_rms_resid != p2.log_rms_resid ||
-     p1.f0 != p2.f0 ||
+     p1.ref_freq != p2.ref_freq ||
      p1.telescope != p2.telescope ||
      p1.nspan_mins != p2.nspan_mins ||
      p1.freq != p2.freq ||
@@ -567,7 +550,7 @@ double polyco::get_refperiod () const
     return 0.0;
   }
   else {
-    return 1.0/pollys.front().f0;
+    return 1.0/pollys.front().ref_freq;
   }
 }
 
@@ -780,11 +763,14 @@ int polyco::i_nearest (const MJD &t) const
 
   for (unsigned ipolly=0; ipolly<pollys.size(); ipolly ++)  {
 
-    float dist = fabs ( (pollys[ipolly].reftime - t).in_minutes() );
+    float dist = fabs ( (pollys[ipolly].ref_time - t).in_minutes() );
 
-    if (verbose)
-      cerr << "polyco::i_nearest ipolly=" << ipolly << " dist=" << dist
-	   << " min_dist=" << min_dist << endl; 
+    if (verbose)  {
+      cerr << "polyco::i_nearest distance=" << dist << " minutes";
+      if (min_dist != FLT_MAX)
+        cerr << " (min=" << min_dist << ")";
+      cerr << endl;
+    }
 
     if (dist < min_dist) {
       imin = ipolly;
@@ -815,11 +801,13 @@ int polyco::i_nearest (const MJD &t) const
   if ( (t > start_time()) && (t < end_time()) )
     return imin;
 #endif
+
   // the time is out of range of the nearest polynomial
   if (verbose) {
-    cerr << "polyco::i_nearest - no polynomial for MJD " << t.printdays(15)
-	 << "\npolyco::i_nearest - range " << start_time().printdays(5) 
-	 << " - " << end_time().printdays(5) << endl;
+    cerr << "polyco::i_nearest none for MJD " << t.printdays(15) << endl;
+    for (unsigned i=0; i < pollys.size(); i++)
+      cerr << "\t" << i << " range " << pollys[i].start_time().printdays(15) 
+	   << " - " << pollys[i].end_time().printdays(15) << endl;
   }
 
   return -1;
@@ -874,37 +862,4 @@ int operator != (const polyco & p1, const polyco & p2){
   if(p1==p2) return(0);
   return(1);
 }
-
-//! Constructor for soft_swin/baseband/realsearch/CandidateGenerator.C
-polynomial::polynomial (std::string _psrname,std::string _date,std::string _utc,
-			MJD _reftime, double _f0,
-			char _telescope, double _freq,
-			float _dm, std::vector<double> _coefs)
-{  
-  psrname = _psrname;
-  date = _date;
-  utc = _utc;
-  reftime = _reftime;
-  f0 = _f0;
-  telescope = _telescope;
-  freq = _freq;
-  binary = false;
-  binph = 0.0;
-  binfreq = 10.0;
-  dm = _dm;
-  nspan_mins = 960;
-  tempov11 = true;
-  doppler_shift = 0.0;
-  log_rms_resid = log10f(1.0);
-  coefs = _coefs;
-}
-
-
-
-
-
-
-
-
-
 

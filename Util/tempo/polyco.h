@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.39 $
-   $Date: 2007/05/16 19:52:44 $
+   $Revision: 1.40 $
+   $Date: 2007/05/17 00:01:51 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -21,10 +21,6 @@
 
 #ifdef HAVE_MPI
 #include <mpi.h>
-#endif
-
-#ifdef HAVE_CFITSIO
-#include <fitsio.h>
 #endif
 
 class polynomial {
@@ -45,8 +41,11 @@ protected:
   //! The pulsar phase at reftime
   Phase ref_phase;
 
+  //! Reference rotation frequency, F0 (Hz)
+  double ref_freq;
+
   //! The epoch to which the polynomial is referenced
-  MJD reftime;
+  MJD ref_time;
 
   //! TEMPO telescope id code
   char telescope;
@@ -78,33 +77,25 @@ protected:
   //! log of the r.m.s residual between polynomial and model
   double log_rms_resid;
 
+  //! polynomial coefficients
+  std::vector<double> coefs;
+
   //! intializes all values to null
   void init();
 
 public:
 
+  //! Interface for setting attributes
+  class Expert;
+  friend class Expert;
+
   static double precision;
-
-  //! Reference rotation frequency, F0 (Hz)
-  double f0;
-
-  //! polynomial coefficients
-  std::vector<double> coefs;
 
   //! null constructor
   polynomial() { init(); }
 
   //! copy constructor
   polynomial (const polynomial& poly) { operator = (poly); }
-
-  //! Hack constructor for making a search-data polyco
-  polynomial(MJD _reftime, float _dm, double _f0, int _telescope=7);
-
-  //! Constructor for soft_swin/baseband/realsearch/CandidateGenerator.C
-  polynomial (std::string _psrname,std::string _date,std::string _utc,
-	      MJD _reftime, double _f0,
-	      char _telescope, double _freq,
-	      float _dm, std::vector<double> _coefs);
 
   //! destructor
   ~polynomial() {}
@@ -141,9 +132,9 @@ public:
   bool   is_tempov11       () const {return tempov11; }
   char   get_telescope     () const {return telescope; }
   double get_freq          () const {return freq; }
-  MJD    get_reftime       () const {return reftime; }
+  MJD    get_reftime       () const {return ref_time; }
   Phase  get_refphase      () const {return ref_phase; }
-  double get_reffrequency  () const {return f0; }
+  double get_reffrequency  () const {return ref_freq; }
   double get_nspan         () const {return nspan_mins; }
   float  get_dm            () const {return dm; }
   int    get_ncoeff        () const {return (int) coefs.size(); }
@@ -155,9 +146,9 @@ public:
   static double flexibility;
 
   MJD start_time () const
-  { return reftime - nspan_mins * (1.0+flexibility) * 60.0/2.0; };
+  { return ref_time - nspan_mins * (1.0+flexibility) * 60.0/2.0; };
   MJD end_time () const 
-  { return reftime + nspan_mins * (1.0+flexibility) * 60.0/2.0; };
+  { return ref_time + nspan_mins * (1.0+flexibility) * 60.0/2.0; };
 
   Phase start_phase () const
   { return phase (start_time()); };
@@ -176,12 +167,32 @@ public:
 			polynomial*, MPI_Comm comm);
 #endif
 
-#ifdef HAVE_CFITSIO
-  void load (fitsfile* fptr, long row);
-  void unload (fitsfile* fptr, long row) const;
-#endif
-
 };
+
+class polynomial::Expert {
+
+public:
+  Expert (polynomial* p) { instance = p; }
+
+  void set_tempov11      (bool v) { instance->tempov11 = v; }
+  void set_telescope     (char v) { instance->telescope = v; }
+  void set_freq          (double v) { instance->freq = v; }
+  void set_reftime       (const MJD& v) { instance->ref_time = v; }
+  void set_refphase      (const Phase& v) { instance->ref_phase = v; }
+  void set_reffrequency  (double v) { instance->ref_freq = v; }
+  void set_nspan         (double v) { instance->nspan_mins = v; }
+  void set_dm            (float v) { instance->dm = v; }
+  void set_ncoef         (unsigned v) { instance->coefs.resize(v); }
+  void set_doppler_shift (double v) { instance->doppler_shift = v * 1e4; }
+  void set_psrname       (const std::string& v) { instance->psrname = v; }
+  void set_binary        (bool v) { instance->binary = v; }
+  void set_binph         (double v) { instance->binph = v; }
+
+  double* get_coefs () { return &(instance->coefs[0]); }
+
+  polynomial* instance;
+};
+
 
 class polyco : public Pulsar::Predictor {
 
@@ -234,9 +245,6 @@ public:
   //
   // the rest
   //
-
-  //! Hack constructor for use on search data
-  polyco(MJD _reftime, float _dm, double _f0, int _telescope=7){ pollys.push_back( polynomial(_reftime,_dm,_f0,_telescope) ); } 
 
   //! Load in polycos
   polyco (const std::string& id);
@@ -306,11 +314,6 @@ public:
 			int* position, MPI_Comm comm);
   friend int mpiUnpack (void* inbuf, int insize, int* position, 
 			polyco*, MPI_Comm comm);
-#endif
-
-#ifdef HAVE_CFITSIO
-  void load (fitsfile* fptr, int back=0);
-  void unload (fitsfile* fptr, int back=0) const;
 #endif
 
 };
