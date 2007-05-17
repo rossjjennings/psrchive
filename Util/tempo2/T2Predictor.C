@@ -17,12 +17,14 @@ using namespace std;
 Tempo2::Predictor::Predictor ()
 {
   T2Predictor_Init (&predictor);
+  observing_frequency = 0;
 }
 
 Tempo2::Predictor::Predictor (const Predictor& copy)
 {
   T2Predictor_Init (&predictor);
   T2Predictor_Copy (&predictor, &copy.predictor);
+  observing_frequency = copy.observing_frequency;
 }
 
 Tempo2::Predictor::~Predictor ()
@@ -33,6 +35,8 @@ Tempo2::Predictor::~Predictor ()
 //! Return a new, copy constructed instance of self
 Pulsar::Predictor* Tempo2::Predictor::clone () const
 {
+  if (verbose)
+    cerr << "Tempo2::Predictor::clone" << endl;
   return new Predictor (*this);
 }
 
@@ -131,6 +135,10 @@ void Tempo2::Predictor::load (FILE* fptr)
 
   observing_frequency = 0.5L *
     (T2Predictor_GetStartFreq(&predictor)+T2Predictor_GetEndFreq(&predictor));
+
+  if (verbose)
+    cerr << "Tempo2::Predictor::load observing_frequency="
+         << observing_frequency << endl;
 }
 
 void Tempo2::Predictor::unload (FILE* fptr) const
@@ -183,6 +191,7 @@ void cheby_interface::construct (ChebyModel* _model, long double _obs_freq)
   t0 = to_MJD( tmid );
   p0 = to_Phase( ChebyModel_GetPhase (model, tmid, obs_freq) );
   f0 = ChebyModel_GetFrequency (model, tmid, obs_freq);
+  // cerr << "t0=" << t0 << " p0=" << p0 << " f0=" << f0 << endl;
 }
 
 Phase cheby_interface::phase (const MJD& t) const
@@ -208,6 +217,10 @@ MJD Tempo2::Predictor::iphase (const Phase& phase, const MJD* guess) const
   float min_dist = 0;
   int imin = -1;
   unsigned icheby = 0;
+
+  if (verbose)
+    cerr << "Tempo2::Predictor::iphase observing_frequency=" 
+	 << observing_frequency << endl;
 
   for (icheby=0; icheby<chebys.size(); icheby ++)  {
 
