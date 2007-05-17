@@ -32,28 +32,6 @@ test_psrephem_SOURCES		= test_psrephem.C test.psrephem
 
 # ######################################################################
 #
-# PSRFITS specific code
-#
-if HAVE_CFITSIO
-
-libtempo_la_SOURCES += fitsio_psrephem.C fitsio_polyco.C
-
-check_PROGRAMS += test_psrephem_fitsio test_polyco_fitsio
-
-test_psrephem_fitsio_SOURCES = test_psrephem_fitsio.C
-test_polyco_fitsio_SOURCES = test_polyco_fitsio.C
-test_psrephem_fitsio_LDADD = $(LDFITS)
-test_polyco_fitsio_LDADD = $(LDFITS)
-
-LDFITS = libtempo.la $(top_builddir)/Util/fitsutil/libfitsutil.la \
-	$(top_builddir)/Util/genutil/libgenutil.la \
-	$(top_builddir)/Util/units/libunits.la @CFITSIO_LIBS@ @FLIBS@
-
-endif
-
-
-# ######################################################################
-#
 # Assembly of include files
 #
 

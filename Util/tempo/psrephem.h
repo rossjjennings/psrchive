@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.37 $
-   $Date: 2006/11/09 18:03:37 $
+   $Revision: 1.38 $
+   $Date: 2007/05/17 00:02:05 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -18,10 +18,6 @@
 
 #include <vector>
 #include <string>
-
-#ifdef HAVE_CFITSIO
-#include <fitsio.h>
-#endif
 
 #include "Error.h"
 
@@ -80,13 +76,6 @@ class psrephem : public Reference::Able
 
   int load   (std::string* str);
   int unload (std::string* str) const;
-
-#ifdef HAVE_CFITSIO
-  void load   (fitsfile* fptr, long row=0);
-  void unload (fitsfile* fptr, long row=0) const;
-
-  void fits_map (fitsfile* fptr, std::vector<int>& ephind, int& maxstrlen) const;
-#endif
 
   // set fitting attributes
   void   nofit();
