@@ -22,7 +22,7 @@ INCLUDES = -I$(top_builddir)/include \
 	-I$(top_srcdir)/Base/Formats/Timer \
 	-I$(top_srcdir)/Base/Formats/EPN \
 	-I$(top_srcdir)/Base/Formats/ASCII \
-	-I$(top_srcdir)/Base/Formats/PSRFITS
+	-I$(top_srcdir)/Base/Formats/PSRFITS @CFITSIO_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.local
 
