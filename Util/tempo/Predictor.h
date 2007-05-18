@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Attic/Predictor.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/05/14 23:47:06 $
+   $Revision: 1.7 $
+   $Date: 2007/05/18 21:24:24 $
    $Author: straten $ */
 
 #ifndef __PulsarPredictor_h
@@ -17,6 +17,8 @@
 #include "Reference.h"
 #include "Phase.h"
 #include "MJD.h"
+
+#include <stdio.h>
 
 namespace Pulsar {
 
@@ -54,6 +56,21 @@ namespace Pulsar {
 
     //! Return the phase correction for dispersion delay
     virtual Phase dispersion (const MJD &t, long double MHz) const = 0;
+
+    //! Load from an open stream
+    virtual void load (FILE*) = 0;
+
+    //! Unload to an open stream
+    virtual void unload (FILE*) const = 0;
+
+    //! Factory creates an instance of a new Predictor
+    static Predictor* factory (FILE*);
+
+    //! Factory creates an instance of a new Predictor
+    static Predictor* factory (FILE*, size_t nbytes);
+
+    //! Report the number of bytes
+    static size_t nbytes (const Predictor*);
 
   };
 
