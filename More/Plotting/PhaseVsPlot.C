@@ -43,19 +43,13 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
 {
   colour_map.apply ();
 
-  // Forget about the actual max and min, and draw in normalized coordinates
-
   float x_min = 0.0;
   float x_max = 1.0;
   get_frame()->get_x_scale()->PlotScale::get_minmax (x_min, x_max);
-  //get_frame()->get_x_scale()->PlotScale::get_range (x_min, x_max);
 
   float y_min = 0.0;
   float y_max = 1.0;
   get_frame()->get_y_scale()->PlotScale::get_minmax (y_min, y_max);
-  //get_frame()->get_y_scale()->PlotScale::get_range (y_min, y_max);
-
-  //cpgswin (x_min, x_max, y_min, y_max);
 
   // Fill the image data
   unsigned nbin = data->get_nbin();
