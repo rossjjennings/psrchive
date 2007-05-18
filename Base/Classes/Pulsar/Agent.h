@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Agent.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/17 23:04:32 $
+   $Revision: 1.3 $
+   $Date: 2007/05/18 21:23:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Agent_h
@@ -75,9 +75,6 @@ namespace Pulsar {
     // Load plugins from the plugin_path
     static void plugin_load ();
 
-    // Ensure that Advocate classes are linked into executables
-    static void static_load ();
-
     // Report to cerr on the status of the plugins
     static void plugin_report ();
 
@@ -114,7 +111,7 @@ namespace Pulsar {
 
   };
 
-#ifdef _PSRCHIVE_DYNAMIC
+#ifdef PSRCHIVE_PLUGIN
   template<class Plugin>
     Registry::List<Archive::Agent>::Enter<typename Plugin::Agent> 
     Archive::Advocate<Plugin>::entry;

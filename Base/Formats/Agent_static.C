@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#define PSRCHIVE_PLUGIN
 #include "Pulsar/Agent.h"
 
 #ifdef HAVE_CONFIG_H
@@ -13,10 +14,6 @@
 using namespace Pulsar;
 
 Registry::List<Archive::Agent> Archive::Agent::registry;
-
-template<class Type>
-Registry::List<Archive::Agent>::Enter<typename Type::Agent>
-Archive::Advocate<Type>::entry;
 
 #include "Pulsar/TimerArchive.h"
 
@@ -51,9 +48,4 @@ Archive::Advocate<FITSArchive>::entry;
 template
 Registry::List<Archive::Agent>::Enter<ASCIIArchive::Agent>
 Archive::Advocate<ASCIIArchive>::entry;
-
-void Archive::Agent::static_load ()
-{
-
-}
 
