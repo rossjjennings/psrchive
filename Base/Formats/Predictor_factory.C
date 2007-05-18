@@ -9,7 +9,7 @@
 
 #include "polyco.h"
 #include "T2Predictor.h"
-// #include "SimplePredictor.h"
+// #include "Pulsar/SimplePredictor.h"
 
 #include "strutil.h"
 #include <vector>
@@ -23,6 +23,7 @@ Pulsar::Predictor* Pulsar::Predictor::factory (FILE* fptr)
   vector< Reference::To<Predictor> > candidates;
   candidates.push_back (new polyco);
   candidates.push_back (new Tempo2::Predictor);
+  // candidates.push_back (new Pulsar::SimplePredictor);
 
   for (unsigned i=0; i < candidates.size(); i++) {
 
@@ -33,7 +34,9 @@ Pulsar::Predictor* Pulsar::Predictor::factory (FILE* fptr)
       candidates[i]->load (fptr);
       return candidates[i].release();
     }
-    catch (...) {
+    catch (Error& error) {
+      if (verbose)
+        cerr << "Pulsar::Predictor::factory " << error.get_message() << endl;
     }
 
   }
@@ -47,7 +50,7 @@ Pulsar::Predictor* Pulsar::Predictor::factory (FILE* fptr, size_t nbytes)
   if (!temp)
     throw Error (FailedSys, "Pulsar::Predictor::factor", "tmpfile");
 
-  copy (fptr, temp, nbytes);
+  ::copy (fptr, temp, nbytes);
 
   Predictor* model = 0;
 

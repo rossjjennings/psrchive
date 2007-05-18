@@ -456,10 +456,14 @@ void Pulsar::TimerArchive::psr_load (FILE* fptr)
 
     model = Pulsar::Predictor::factory (fptr, hdr.nbytespoly);
 
-    if (model && verbose == 3) {
-      cerr << "TimerArchive::psr_load read in predictor:" << endl;
-      model->unload (stderr);
-      cerr << "TimerArchive::psr_load end of predictor" << endl;
+    if (verbose == 3) {
+      if (model) {
+        cerr << "TimerArchive::psr_load read in predictor:" << endl;
+        model->unload (stderr);
+        cerr << "TimerArchive::psr_load end of predictor" << endl;
+      }
+      else
+        cerr << "TimerArchive::psr_load failed to read in predictor" << endl;
     }
   }
   else if (verbose == 3)
