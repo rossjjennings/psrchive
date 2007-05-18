@@ -9,9 +9,11 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Pointing.h"
-#include "polyco.h"
+
+#include "Predictor.h"
 #include "Error.h"
 
+#include "strutil.h"
 #include "timer++.h"
 #include "mini++.h"
 #include "Horizon.h"
@@ -452,21 +454,16 @@ void Pulsar::TimerArchive::psr_load (FILE* fptr)
       cerr << "TimerArchive::psr_load "
 	   << hdr.nbytespoly << " bytes in polyco" << endl;
 
-    polyco* t1model = new polyco;
-    model = t1model;
+    model = Pulsar::Predictor::factory (fptr, hdr.nbytespoly);
 
-    if (t1model->load (fptr, hdr.nbytespoly) <= 0)
-      throw Error (FailedCall, "TimerArchive::psr_load", "polyco::load");
-
-    if (verbose == 3) {
-      cerr << "TimerArchive::psr_load read in polyco:\n" << *t1model << endl;
-      cerr << "TimerArchive::psr_load end of polyco" << endl;
+    if (model && verbose == 3) {
+      cerr << "TimerArchive::psr_load read in predictor:" << endl;
+      model->unload (stderr);
+      cerr << "TimerArchive::psr_load end of predictor" << endl;
     }
   }
-  else {
-    if (verbose == 3)
-      cerr << "TimerArchive::psr_load no polyco" << endl;
-  }
+  else if (verbose == 3)
+    cerr << "TimerArchive::psr_load no predictor" << endl;
 
   if (hdr.nbytesephem > 0) {
     if (verbose == 3) 
