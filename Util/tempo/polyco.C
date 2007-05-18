@@ -788,19 +788,9 @@ int polyco::i_nearest (const MJD &t) const
     return -1;
   }
 
-  // the use of polynomial::flexibility should mimic an ideal world
-#define IDEAL_WORLD 1
-
-#ifdef IDEAL_WORLD
   // return if the time is within the range of the matched polynomial
   if ( (t > pollys[imin].start_time()) && (t < pollys[imin].end_time()) )
     return imin;
-#else
-  // TEMPO sometimes leaves holes between its polynomials.
-  // Let's just be happy if it is within the range of the polyco
-  if ( (t > start_time()) && (t < end_time()) )
-    return imin;
-#endif
 
   // the time is out of range of the nearest polynomial
   if (verbose) {
@@ -819,7 +809,17 @@ int polyco::i_nearest (const Phase& phase) const
   int imin = -1;
 
   for (unsigned ipolly=0; ipolly<pollys.size(); ipolly ++)  {
+
     float dist = fabs ( (pollys[ipolly].ref_phase - phase).in_turns() );
+
+    if (verbose)  {
+      cerr << "polyco::i_nearest distance=" << dist << " turns";
+      if (min_dist != FLT_MAX)
+        cerr << " (min=" << min_dist << ")";
+      cerr << endl;
+    }
+
+
     if (dist < min_dist) {
       imin = ipolly;
       min_dist = dist;
@@ -833,14 +833,19 @@ int polyco::i_nearest (const Phase& phase) const
     return -1;
   }
 
-  if ( (phase > start_phase()) && (phase < end_phase()) )
+  // return imin if the phase is within the range of the matched polynomial
+  if ( (phase > pollys[imin].start_phase()) &&
+       (phase < pollys[imin].end_phase()) )
     return imin;
 
   // the time is out of range of the nearest polynomial
   if (verbose)
-    cerr << "polyco::i_nearest - no polynomial for MJD " << phase.strprint(15)
-	 << "\npolyco::i_nearest - range " << start_phase().strprint(15)
-	 << " - " << end_phase().strprint(15) << endl;
+    cerr << "polyco::i_nearest - no polynomial for Phase "
+	 << phase.strprint(15)
+	 << "\npolyco::i_nearest - closest range "
+	 << pollys[imin].start_phase().strprint(15)
+	 << " - "
+	 << pollys[imin].end_phase().strprint(15) << endl;
 
   return -1;
 }
