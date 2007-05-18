@@ -11,7 +11,7 @@
 #include <vector>
 using namespace std;
 
-void copy (FILE* from, FILE* to, size_t nbytes)
+void copy (FILE* from, FILE* to, ssize_t nbytes)
 {
   vector<char> buffer (256);
 
