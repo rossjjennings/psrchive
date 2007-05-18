@@ -173,7 +173,7 @@ int main (int argc, char** argv) try {
       }
       else {
 	string name = archive->get_filename();
-	unsigned index = name.find_last_of(".");
+	size_t index = name.find_last_of(".");
 	if (index == string::npos)
 	  index = name.length();    
 	name = name.substr(0, index) + "." + save_ext;

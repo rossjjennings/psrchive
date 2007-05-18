@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
     string newname = input->get_filename();
 
-    unsigned index = newname.find_last_of(".",newname.length());
+    size_t index = newname.find_last_of(".",newname.length());
 
     if (index == string::npos)
       index = newname.length();
