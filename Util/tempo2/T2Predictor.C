@@ -131,7 +131,9 @@ Phase Tempo2::Predictor::dispersion (const MJD &t, long double MHz) const
 
 void Tempo2::Predictor::load (FILE* fptr)
 {
-  T2Predictor_FRead (&predictor, fptr);
+  if (T2Predictor_FRead (&predictor, fptr) < 0)
+    throw Error (InvalidParam, "Tempo2::Predictor::load",
+                 "failed T2Predictor_FRead");
 
   observing_frequency = 0.5L *
     (T2Predictor_GetStartFreq(&predictor)+T2Predictor_GetEndFreq(&predictor));
