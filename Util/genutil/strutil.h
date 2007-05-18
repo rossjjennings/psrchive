@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/strutil.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/17 23:04:49 $
+   $Revision: 1.4 $
+   $Date: 2007/05/18 21:24:19 $
    $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
@@ -61,6 +61,11 @@ stringload (std::string* str, std::istream &istr, std::streamsize nbytes=0);
 // ///////////////////////////////////////////////////////////
 ssize_t 
 stringload (std::string* str, FILE* fptr, size_t nbytes=0);
+
+//
+// copy up to nbytes (or to eof) from 'from' to 'to'
+//
+void copy (FILE* from, FILE* to, size_t nbytes=-1);
 
 // ///////////////////////////////////////////////////////////
 // fills a vector of std::string with the first word from each line

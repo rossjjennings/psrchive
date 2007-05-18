@@ -51,6 +51,7 @@ libgenutil_la_SOURCES = \
         compressed_io.C \
         coord.c \
         coord_parse.c \
+	copy.C \
         dirglob.C \
 	dirglobtree.C \
         dirutil.c \
