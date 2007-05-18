@@ -594,7 +594,7 @@ string polyco::get_psrname () const
   }
 }
 
-int polyco::load (const string& polyco_filename, size_t nbytes)
+int polyco::load (const string& polyco_filename)
 {
   if (verbose)
     cerr << "polyco::load (" << polyco_filename << ")" << endl;
@@ -606,33 +606,29 @@ int polyco::load (const string& polyco_filename, size_t nbytes)
     return -1;
   }
 
-  int ret = load (fptr, nbytes);
+  load (fptr);
   fclose (fptr);
 
-  if (verbose)
-    cerr << "polyco::load (" << polyco_filename << ") return " << ret << endl;
-
-  return ret;
+  return pollys.size();
 }
 
-int polyco::load (FILE* fptr, size_t nbytes)
+void polyco::load (FILE* fptr)
 {
   if (verbose)
     cerr << "polyco::load FILE*" << endl;
 
   string total;
-  if (stringload (&total, fptr, nbytes) < 0)  {
-    fprintf (stderr, "polyco::load stringload error\n");
-    return -1;
-  }
+  if (stringload (&total, fptr) < 0)
+    throw Error (FailedSys, "polyco::load(FILE*)", "stringload error");
 
-  return load (&total);
+  if (load (&total) <= 0)
+    throw Error (InvalidState, "polyco::load(FILE*)", "no polynomials loaded");
 }
 
 int polyco::load (string* instr)
 {
   if (verbose)
-    cerr << "polyco::load string* '" << endl;
+    cerr << "polyco::load string*" << endl;
 
   int npollys = 0;
   pollys.clear();
@@ -644,7 +640,7 @@ int polyco::load (string* instr)
   }
 
   if (verbose)
-    cerr << "polyco::load (string*) return npollys" << endl;
+    cerr << "polyco::load (string*) return npollys=" << npollys << endl;
 
   return npollys;
 }
@@ -657,7 +653,13 @@ int polyco::unload (const string& filename) const
         << strerror (errno) << endl;
     return -1;
   }
-  return unload (fptr);
+  try {
+    unload (fptr);
+    return 0;
+  }
+  catch (...) {
+    return -1;
+  }
 }
 
 // ///////////////////////////////////////////////////////////////////
@@ -679,22 +681,25 @@ int polyco::unload (string* outstr) const {
   return bytes;
 }
 
-int polyco::unload (FILE* fptr) const
+void polyco::unload (FILE* fptr) const
 {
+  if (verbose)
+    cerr << "polyco::unload(FILE*)" << endl;
+
   string out;
   if (unload(&out) < 0)
-    return -1;
+    throw Error (InvalidState, "polyco::unload(FILE*)",
+		 "polyco::unload (string*) failed");
 
   int size = (int) out.length();
   int bout = fprintf (fptr, out.c_str());
-  if (bout < size)  {
-    fprintf (stderr, "polyco::unload(FILE*) ERROR fprintf only %d/%d",
-        bout, size);
-    perror ("");
-    return -1;
-  }
-  fflush (fptr);
-  return bout;
+
+  if (verbose)
+    cerr << "polyco::unload(FILE*) size=" << size << " wrote=" << bout << endl;
+
+  if (bout < size)
+    throw Error (FailedSys, "polyco::unload(FILE*)",
+		 "fprintf only %d/%d bytes written", bout, size);
 }
 
 void polyco::append (const polyco& poly)

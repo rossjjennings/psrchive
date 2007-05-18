@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.40 $
-   $Date: 2007/05/17 00:01:51 $
+   $Revision: 1.41 $
+   $Date: 2007/05/18 21:25:43 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -242,6 +242,12 @@ public:
   Phase dispersion (const MJD &t, long double MHz) const
   { return best(t).dispersion(t,MHz); }
 
+  //! Load from an open stream
+  void load (FILE*);
+
+  //! Unload to an open stream
+  void unload (FILE*) const;
+
   //
   // the rest
   //
@@ -253,8 +259,7 @@ public:
   virtual ~polyco() {}
 
   //! these functions return the number of polynomials successfully loaded
-  int load (const std::string& filename, size_t nbytes=0);
-  int load (FILE * fp, size_t nbytes=0);
+  int load (const std::string& filename);
   int load (std::string* instr);
 
   // these functions return -1 upon error
@@ -262,7 +267,6 @@ public:
 
   // these functions return the number of bytes unloaded (-1 on error)
   int unload (std::string *outstr) const;
-  int unload (FILE* fptr) const;
 
   void append (const polyco& poly);
 
