@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ITRFExtension.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:05:50 $
-   $Author: straten $ */
+   $Revision: 1.5 $
+   $Date: 2007/05/20 23:32:10 $
+   $Author: nopeer $ */
 
 #ifndef __ITRFExtension_h
 #define __ITRFExtension_h
@@ -40,6 +40,11 @@ namespace Pulsar {
     
     //! Clone method
     ITRFExtension* clone () const { return new ITRFExtension( *this ); }
+    
+    // get methods
+    double get_ant_x() const { return ant_x; }
+    double get_ant_y() const { return ant_y; }
+    double get_ant_z() const { return ant_z; }
 
     ////////////////////////////////////////////////////////////////
 
