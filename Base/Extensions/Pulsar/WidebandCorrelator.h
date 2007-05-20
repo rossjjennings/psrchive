@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/WidebandCorrelator.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/30 13:05:18 $
-   $Author: straten $ */
+   $Revision: 1.7 $
+   $Date: 2007/05/20 23:35:20 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_WideBandCorrelator_h
 #define __Pulsar_WideBandCorrelator_h
@@ -49,6 +49,15 @@ namespace Pulsar {
 
     //////////////////////////////////////////////////////////////////////
 
+    //! Get the configuration file name
+    std::string get_config() const { return configfile; }
+    
+    //! Get the tcycle
+    double get_tcycle() const { return tcycle; }
+    
+    //! Get the number of receiver channels
+    int get_nrcvr() const { return nrcvr; }
+    
     //! Name of the configuration file used (if any)
     std::string configfile;
     
