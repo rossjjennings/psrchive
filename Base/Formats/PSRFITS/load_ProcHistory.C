@@ -407,9 +407,17 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     ::load( fptr, &(history->rows[i]) );
   }
 
+  if( history->rows.size() == 0 )
+  {
+  	cerr << "No rows present" << endl;
+	return;
+  }
+
   set_nbin (history->get_last().nbin);
   set_npol (history->get_last().npol);
-  set_centre_frequency (history->get_last().ctr_freq);
+
+  if( (history->get_last()).ctr_freq != 0 )
+  	set_centre_frequency (history->get_last().ctr_freq);
   set_nchan (history->get_last().nchan);
 
   chanbw = history->get_last().chanbw;
@@ -529,6 +537,9 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
 
   if (verbose == 3)
     cerr << "FITSArchive::load_ProcHistory exiting" << endl;
+    
+    
+    
 }
 
 
