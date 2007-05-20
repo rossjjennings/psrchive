@@ -149,7 +149,8 @@ libGeneral_la_SOURCES = \
         StandardCandles.C \
         StandardSNR.C \
         Transposer.C \
-        Weight.C
+        Weight.C \
+	ZapInterpreter.C
 
 #############################################################################
 #
