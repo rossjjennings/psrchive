@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.18 $
-   $Date: 2006/10/06 21:05:50 $
-   $Author: straten $ */
+   $Revision: 1.19 $
+   $Date: 2007/05/20 23:30:36 $
+   $Author: nopeer $ */
 
 #ifndef __ReceiverExtension_h
 #define __ReceiverExtension_h
@@ -60,6 +60,9 @@ namespace Pulsar {
       //! Constant Galactic position angle
       Galactic
     };
+    
+    //! Get the feed track mode
+    std::string get_fd_mode () const;
 
     //! Get the tracking mode of the receiver platform
     Tracking get_tracking_mode () const { return tracking_mode; }
@@ -78,6 +81,7 @@ namespace Pulsar {
 
     //! Get the basis of the feed receptors
     Signal::Basis get_basis () const { return state->get_basis(); }
+    
     //! Set the basis of the feed receptors
     void set_basis (Signal::Basis basis);
 
