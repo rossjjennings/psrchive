@@ -26,6 +26,12 @@ CommandParser::~CommandParser()
     delete commands[icmd];
 }
 
+void CommandParser::import (CommandParser* other)
+{
+  for (unsigned icmd=0; icmd < other->commands.size(); icmd++)
+    add_command (other->commands[icmd]);
+}
+
 void CommandParser::script (const string& filename)
 {
   vector<string> cmds;
@@ -171,18 +177,51 @@ string CommandParser::help (const string& command)
   unsigned icmd = 0;
 
   if (command.empty()) {
-    string help_str = "Available commands:\n\n";
 
+    bool have_shortcuts = false;
     unsigned maxlen = 0;
-    for (icmd=0; icmd < commands.size(); icmd++)
+
+    /* determine the maximum command string length, 
+       and if any shortcut keys are enabled */
+
+    for (icmd=0; icmd < commands.size(); icmd++) {
       if (commands[icmd]->command.length() > maxlen)
 	maxlen = commands[icmd]->command.length();
+      if (commands[icmd]->shortcut)
+	have_shortcuts = true;
+    }
 
-    maxlen += 3;
+    /* include a space after the command column */
+    maxlen ++;
 
-    for (icmd=0; icmd < commands.size(); icmd++)
-      help_str += pad(maxlen, commands[icmd]->command) + commands[icmd]->help
-	+ "\n";
+    string help_str = "Available commands";
+
+    if (have_shortcuts)
+      help_str += " (shortcut keys in [] brackets)";
+
+    help_str += ":\n\n";
+
+    for (icmd=0; icmd < commands.size(); icmd++) {
+
+      /* pad command strings with spaces on the right, up to the maximum
+	 command string length (plus one space) */
+      help_str += pad(maxlen, commands[icmd]->command);
+
+      /* if any shortcut keys are enabled, print these */
+      if (have_shortcuts) {
+	if (commands[icmd]->shortcut)
+	  help_str += string("[") + commands[icmd]->shortcut + "] ";
+	else
+	  help_str += "    ";
+      }
+
+      /* then print the help string */
+      help_str += commands[icmd]->help + "\n";
+    }
+
+    /* no shortcut keys used for the built-in commands */
+    if (have_shortcuts)
+      maxlen += 4;
 
     help_str += "\n" 
       + pad(maxlen, "quit")    + "quit program\n"
