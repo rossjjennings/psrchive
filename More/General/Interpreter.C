@@ -4,9 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Interpreter.h"
+#include "Pulsar/InterpreterExtension.h"
 #include "Pulsar/InterpreterVariables.h"
+#include "Pulsar/ZapInterpreter.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -24,6 +26,8 @@ using namespace std;
 
 // evaluateExpression from Parsifal Software
 #include "evaldefs.h"
+
+using namespace std;
 
 void Pulsar::Interpreter::init()
 {
@@ -217,6 +221,7 @@ void Pulsar::Interpreter::init()
       "clobber", "toggle overwrite permission",
       "usage: clobber \n");
 
+  import( new ZapInterpreter );
 }
 
 Pulsar::Interpreter::Interpreter()
@@ -234,6 +239,17 @@ Pulsar::Interpreter::Interpreter (int &argc, char** &argv)
 Pulsar::Interpreter::~Interpreter ()
 {
 
+}
+
+void Pulsar::Interpreter::import (Extension* ext)
+{
+  if (ext->interpreter)
+    throw Error (InvalidState, "Pulsar::Interpreter::import",
+		 "Extension already owned by another Interpreter");
+
+  ext->interpreter = this;
+
+  CommandParser::import (ext);
 }
 
 string Pulsar::Interpreter::get_report (const string& args)
