@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ObsExtension.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:05:50 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2007/05/20 23:33:45 $
+   $Author: nopeer $ */
 
 #ifndef __ObsExtension_h
 #define __ObsExtension_h
@@ -41,6 +41,12 @@ namespace Pulsar {
 
     //! Clone method
     ObsExtension* clone () const { return new ObsExtension( *this ); }
+    
+    // get methods
+    std::string get_observer() const { return observer; }
+    std::string get_affiliate() const { return affiliation; }
+    std::string get_project_ID() const { return project_ID; }
+    std::string get_telescope() const { return telescope; }
 
     //////////////////////////////////////////////////////////////
 
