@@ -4,8 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#ifndef __Archive_Processor_h
-#define __Archive_Processor_h
+#ifndef __Pulsar_Interpreter_h
+#define __Pulsar_Interpreter_h
 
 #include "Pulsar/FourierSNR.h"
 #include "Pulsar/StandardSNR.h"
@@ -60,7 +60,7 @@ namespace Pulsar {
     //! An enhanced text interface to the Archive class
     class Variables;
 
-    //! null constructor
+    //! default constructor
     Interpreter ();
 
     //! construct from command line arguments
@@ -176,6 +176,12 @@ namespace Pulsar {
 
     //! toggle the clober flag
     std::string toggle_clobber (const std::string& args);
+
+    //! Extensions to the Interpreter
+    class Extension;
+
+    //! Import the Extension
+    void import (Extension*);
 
   protected:
     
