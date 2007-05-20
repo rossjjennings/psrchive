@@ -18,10 +18,13 @@ nobase_include_HEADERS = \
         Pulsar/ExampleExtension.h \
         Pulsar/FeedExtension.h \
         Pulsar/FITSHdrExtension.h \
+	Pulsar/FITSHdrExtensionTI.h \
         Pulsar/FluxCalibratorExtension.h \
         Pulsar/IntegrationOrder.h \
         Pulsar/ITRFExtension.h \
+	Pulsar/ITRFExtensionTI.h \
         Pulsar/ObsExtension.h \
+	Pulsar/ObsExtensionTI.h \
         Pulsar/Parkes.h \
         Pulsar/Passband.h \
         Pulsar/PeriastronOrder.h \
@@ -39,7 +42,8 @@ nobase_include_HEADERS = \
         Pulsar/Telescope.h \
         Pulsar/TimeSortedOrder.h \
         Pulsar/TwoBitStats.h \
-        Pulsar/WidebandCorrelator.h
+        Pulsar/WidebandCorrelator.h \
+        Pulsar/WidebandCorrelatorTI.h
 
 libExtensions_la_SOURCES = \
         Backend.C \
@@ -59,11 +63,14 @@ libExtensions_la_SOURCES = \
         ExampleExtension.C \
         FeedExtension.C \
         FITSHdrExtension.C \
+	FITSHdrExtensionTI.C \
         FluxCalibratorExtension_build.C \
         FluxCalibratorExtension.C \
         IntegrationOrder.C \
         ITRFExtension.C \
+        ITRFExtensionTI.C \
         ObsExtension.C \
+	ObsExtensionTI.C \
         Parkes.C \
         Passband.C \
         PeriastronOrder.C \
@@ -72,15 +79,16 @@ libExtensions_la_SOURCES = \
         PolnCalibratorExtension.C \
         ProcHistory.C \
         Receiver.C \
+        ReceiverTI.C \
         Receiver_Field.C \
         Receiver_Linear.C \
         Receiver_Native.C \
-        ReceiverTI.C \
         TapeInfo.C \
         Telescope.C \
         TimeSortedOrder.C \
         TwoBitStats.C \
-        WidebandCorrelator.C
+        WidebandCorrelator.C \
+        WidebandCorrelatorTI.C
 
 #############################################################################
 #
