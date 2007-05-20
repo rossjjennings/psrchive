@@ -77,6 +77,14 @@ void Pulsar::FITSHdrExtension::set_date_str (const string date)
   creation_date = date;
 }
 
+
+
+void Pulsar::FITSHdrExtension::set_obs_mode( const string _obs_mode )
+{
+	obs_mode = _obs_mode;
+}
+
+
 void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
 						 string& coord1,
 						 string& coord2) const
@@ -109,3 +117,65 @@ void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
        << coordmode << " not implemented" << endl;
 
 }
+
+
+
+double Pulsar::FITSHdrExtension::get_obsfreq( void ) const
+{
+	return obsfreq;
+}
+
+
+std::string Pulsar::FITSHdrExtension::get_hdrver( void ) const
+{
+	return hdrver;
+}
+
+
+std::string Pulsar::FITSHdrExtension::get_creation_date( void ) const
+{
+	return creation_date;
+}
+
+
+std::string Pulsar::FITSHdrExtension::get_obs_mode( void ) const
+{
+	return obs_mode;
+}
+
+
+
+std::string Pulsar::FITSHdrExtension::get_coordmode( void ) const
+{
+	return coordmode;
+}
+
+std::string Pulsar::FITSHdrExtension::get_equinox( void ) const
+{
+	return equinox;
+}
+
+
+std::string Pulsar::FITSHdrExtension::get_trk_mode( void ) const
+{
+	return trk_mode;
+}
+
+
+void Pulsar::FITSHdrExtension::set_end_coordinates( sky_coord _end_coord )
+{
+	end_coord = _end_coord;
+}
+
+
+sky_coord Pulsar::FITSHdrExtension::get_end_coordinates( void ) const
+{
+	return end_coord;
+}
+
+
+
+
+
+
+
