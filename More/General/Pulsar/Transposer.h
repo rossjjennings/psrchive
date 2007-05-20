@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Transposer.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/01/16 22:26:52 $
+   $Revision: 1.10 $
+   $Date: 2007/05/20 10:52:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Transposer_h
@@ -53,7 +53,7 @@ namespace Pulsar {
     Dimensions get_stride () const;
 
     //! Returns amplitude data; ordered according to the specified dimension
-    void get_amps (vector<float>& amps) const;
+    void get_amps (std::vector<float>& amps) const;
 
     //! Fill the array according to the dimensions specified by stride
     void get_amps (const Integration*, float*, const Dimensions& stride) const;
