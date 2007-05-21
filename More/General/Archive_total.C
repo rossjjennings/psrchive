@@ -27,6 +27,7 @@ try {
 
   copy->set_nchan( 1 );
   copy->set_npol( 1 );
+  copy->set_state( Signal::Intensity );
 
   if (verbose == 3)
     cerr << "Pulsar::Archive::total adding " << get_nsubint()
