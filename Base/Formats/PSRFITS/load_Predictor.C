@@ -10,6 +10,7 @@
 #endif
 
 #include "Pulsar/FITSArchive.h"
+#include "Pulsar/Pulsar.h"
 #include "Predictor.h"
 
 using namespace std;
@@ -39,6 +40,15 @@ void Pulsar::FITSArchive::load_Predictor (fitsfile* fptr)
 
   if (model)
     return;
+
+#else
+
+  // See if the T2PREDICT HDU
+  int status = 0;
+  fits_movnam_hdu (fptr, BINARY_TBL, "T2PREDICT", 0, &status);
+  
+  if (status == 0)
+    warning << "Pulsar::FITSArchive does not support T2PREDICT" << endl;
 
 #endif
 
