@@ -42,8 +42,7 @@ void usage (const string& script)
     "the first file must be the script, and all subseqent archive files \n"
     "will be processed using this script \n"
     "\n"
-    "See "PSRCHIVE_HTTP"/manuals/psrsh for more details \n"
-			     << endl;
+    "See "PSRCHIVE_HTTP"/manuals/psrsh for more details \n" << endl;
 }
 
 void commands ()
