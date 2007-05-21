@@ -45,29 +45,34 @@ AM_INIT_AUTOMAKE([subdir-objects])
 # Create static libraries by default
 AC_DISABLE_SHARED
 
-# Enable large-file support
-AC_SYS_LARGEFILE
-
 # Ensure that SIGPROC find does not over-ride the standard
 SWIN_PROG_FIND
 
-# Check which version of the pulsar catalog is installed
-SWIN_PSRCAT
-
 # Checks for programs.
+
+AC_PROG_CXX
+AC_PROG_FC
+SWIN_TEST_CXXF77
+
 AC_PROG_CC
 AC_PROG_CPP
-AM_PROG_CC_C_O
-AC_PROG_CXX
 AC_PROG_CXXCPP
+AM_PROG_CC_C_O
+
 AC_PROG_INSTALL
 AC_PROG_LIBTOOL
-AC_PROG_FC
+
 AC_F77_WRAPPERS
 _STAR_RESTFP_FIX
 
 # Determine the machine endian
 AC_C_BIGENDIAN
+
+# Enable large-file support
+AC_SYS_LARGEFILE
+
+# Check which version of the pulsar catalog is installed
+SWIN_PSRCAT
 
 #
 # Disable the debugging information option, -g
