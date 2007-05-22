@@ -1,41 +1,33 @@
 
 ACLOCAL_AMFLAGS = -I config
 
-SUBDIRS	= Util Base More
-
-bin_SCRIPTS = psrchive_cflags psrchive_ldflags
+SUBDIRS	= Util Base More Management
 
 EXTRA_DIST = config/install-intermediate
 
-libs: install-binSCRIPTS
+libs:
 	$(MAKE) RECURSIVE_TARGETS="all-recursive libs-recursive" libs-recursive
 
-libs-am: fix_prefix
+libs-am:
 	@echo
-	@echo PSRCHIVE libraries have been installed in ${prefix}/lib
+	@echo
+	@echo "PSRCHIVE libraries have been installed in ${prefix}/lib"
+	@echo
 	@echo
 
 include: install-data
 
-install-exec-hook: fix_prefix message
+all-am:
+	@echo
+	@echo
+	@echo "PSRCHIVE successfully compiled.  Remember to \"make install\""
+	@echo
+	@echo
 
-#
-# The following lines ensure that the psrchive_cflags and psrchive_ldflags
-# scripts are up-to-date with respect to where the software was installed.
-#
-
-FIX_PREFIX := ${prefix}/bin/psrchive_ldflags ${prefix}/bin/psrchive_cflags
-
-fix_prefix:
-	perl -p -i -e "s|PREFIX|${prefix}|" ${FIX_PREFIX}
-
-#
-# The following lines print a message to the user after the installation
-# is completed.
-#
-
-message:
+install-am:
+	@echo
 	@echo
 	@echo "PSRCHIVE has been installed in ${prefix}"
+	@echo
 	@echo
 
