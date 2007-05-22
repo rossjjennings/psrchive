@@ -1,0 +1,88 @@
+#!/bin/csh -e -f
+
+if ( "$1" == "" || "$1" == "-h" || "$1" == "--help" ) then
+  echo
+  echo "psrchive_install: system installation of psrchive"
+  echo
+  echo "usage:"
+  echo "  psrchive_install VERSION"
+  echo
+  echo "where:"
+  echo "  VERSION is a sourceforge release version number"
+  echo
+  exit
+endif
+
+if ( ! $?PSRCHIVE_SYSTEM ) then
+  echo
+  echo "psrchive_install: the PSRCHIVE_SYSTEM environment variable must be set"
+  echo
+  exit
+endif
+
+
+# The path in which the psrchive distribution will be installed
+#
+set installation_path=$PSRCHIVE_SYSTEM/$1
+
+if (-d $installation_path/bin) then
+  echo
+  echo "psrchive_install: version $1 already installed in $PSRCHIVE_SYSTEM"
+  echo
+  exit
+endif
+
+echo "Will install psrchive $1 in $installation_path"
+
+# The name of the sourcecode distribution file
+#
+set tarfile=psrchive-$1.tar.gz
+
+
+# The sourceforge download server will redirect to the nearest mirror
+#
+set sourceforge=http://downloads.sourceforge.net
+
+
+# curl options used:
+#   -L  follow any mirror location specified by the server
+#   -f  fail silently
+#   -O  write to file named like remote file
+#
+echo "Downloading $tarfile from sourceforge ..."
+curl --connect-timeout 30 -f -L -O $sourceforge/psrchive/$tarfile
+
+
+echo "Unpacking $tarfile ..."
+gunzip -c $tarfile | tar xf -
+
+
+echo "Configuring distribution ..."
+cd psrchive-$1
+./configure --prefix=$installation_path
+
+echo "Compiling ..."
+make
+
+echo "Checking ..."
+make check
+
+echo "Installing ..."
+make install
+
+echo "Setting permissions ..."
+
+# chmod and chgrp options used:
+#   -R  change all files in all directories
+#   -L  follow all symbollic links
+#
+chmod -R -L $installation_path
+
+if ($?PSRCHIVE_SYSGRP) then
+
+  echo "Setting group ownership to $PSRCHIVE_SYSGRP"
+  chgrp -R -L $installation_path
+
+endif
+
+echo "Installation in $installation_path completed."
