@@ -242,9 +242,6 @@ double Pulsar::BasicArchive::get_dispersion_measure () const
 //! Set the centre frequency of the observation
 void Pulsar::BasicArchive::set_dispersion_measure (double dm)
 {
-  if (ephemeris)
-    ephemeris->set_dm(dm);
-
   dispersion_measure = dm;
 }
 
