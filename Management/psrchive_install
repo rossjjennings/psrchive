@@ -32,6 +32,9 @@ if (-d $installation_path/bin) then
   exit
 endif
 
+mkdir -p $installation_path/src
+cd $installation_path/src
+
 echo "Will install psrchive $1 in $installation_path"
 
 # The name of the sourcecode distribution file
@@ -90,3 +93,4 @@ cd $PSRCHIVE_SYSTEM
 ln -sf $1 current
 
 echo "Installation in $installation_path completed."
+
