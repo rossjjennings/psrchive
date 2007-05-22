@@ -5,10 +5,8 @@
  *
  ***************************************************************************/
 
-#include "MatrixTest.h"
 #include "Jacobi.h"
-
-using namespace std;
+#include "MatrixTest.h"
 
 // specialize for complex matrices
 template <unsigned RC, typename T>
@@ -23,8 +21,6 @@ void test_Jacobi (Matrix<RC,RC,T>& matrix, float tolerance)
       matrix[i][j] = conj(matrix[j][i]);
   }
 
-  //cerr << "matrix = " << matrix << endl << endl;
-
   // make a copy
   Matrix<RC, RC, T> temp = matrix;
 
@@ -32,14 +28,7 @@ void test_Jacobi (Matrix<RC,RC,T>& matrix, float tolerance)
   Vector<RC, double> eigenvalues;
 
   Jacobi (temp, eigenvectors, eigenvalues);
-
-  //cerr << "vec=" << eigenvectors << endl;
-  //cerr << "val=" << eigenvalues << endl;
-
-  //temp = herm(eigenvectors) * matrix * eigenvectors;
   temp = eigenvectors * matrix * herm(eigenvectors);
-
-  //cerr << "temp=" << temp << endl;
 
   // ensure that the result is diagonal and that the diagonal elements
   // are equal to the eigenvalues
@@ -52,13 +41,13 @@ void test_Jacobi (Matrix<RC,RC,T>& matrix, float tolerance)
 	should_be = eigenvalues[i];
 
       if (norm(temp[i][j] - should_be) > tolerance) {
-	cerr << "test_Jacobi t[" << i << "][" << j << "]=" << temp[i][j]
-	     << " != " << should_be << endl;
+	std::cerr << "test_Jacobi t[" << i << "][" << j << "]=" << temp[i][j]
+		  << " != " << should_be << std::endl;
 
-	cerr << "P = " << eigenvectors << endl;
-	cerr << "P^T A P = " << temp << endl;
+	std::cerr << "P = " << eigenvectors << std::endl;
+	std::cerr << "P^T A P = " << temp << std::endl;
 
-	throw string ("test_Jacobi error");
+	throw std::string ("test_Jacobi error");
       }
     }
 
@@ -67,7 +56,7 @@ void test_Jacobi (Matrix<RC,RC,T>& matrix, float tolerance)
 template<typename T, unsigned dim> 
 void runtest (unsigned loops, float tolerance)
 {
-  cerr << loops << " " << dim << "x" << dim << " Jacobi solutions" << endl;
+  std::cerr << loops << " " << dim << "x" << dim << " Jacobi solutions" << std::endl;
 
   for (unsigned iloop=0; iloop<loops; iloop++) {
 
@@ -84,17 +73,17 @@ int main () try {
   unsigned loops = 100000;
   float tolerance = 1e-12;
 
-  cerr << "Testing symmetric: ";
+  std::cerr << "Testing symmetric: ";
   runtest<double,7> (loops, tolerance);
 
-  cerr << "Testing Hermitian: ";
+  std::cerr << "Testing Hermitian: ";
   runtest<std::complex<double>,5> (loops, tolerance);
 
-  cerr << "Successful tests" << endl;
+  std::cerr << "Successful tests" << std::endl;
   return 0;
 
 }
-catch (string& error) {
-  cerr << "test_Jacobi error "<< error << endl;
+catch (std::string& error) {
+  std::cerr << "test_Jacobi error "<< error << std::endl;
   return -1;
 }
