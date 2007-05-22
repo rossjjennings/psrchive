@@ -1,6 +1,7 @@
 
 noinst_LTLIBRARIES = libFormats.la
-libFormats_la_SOURCES = Agent_static.C Predictor_factory.C
+libFormats_la_SOURCES = Agent_static.C \
+	Predictor_children.C Parameters_children.C
 
 SUBDIRS = Timer EPN ASCII
 
