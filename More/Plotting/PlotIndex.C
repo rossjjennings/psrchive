@@ -65,7 +65,8 @@ Pulsar::get_Profile (const Archive* data,
     
     // ensure that no one destroys the profile when they go out of scope
     integration.release();
-    integration_clone.release();
+    if (integration_clone)
+      integration_clone.release();
 
     return profile.release();
 
@@ -150,7 +151,8 @@ Pulsar::get_Stokes (const Archive* data, PlotIndex subint, PlotIndex chan)
     }
     
     // ensure that profile_clone doesn't destroy as it goes out of scope
-    profile_clone.release();
+    if (profile_clone)
+      profile_clone.release();
     
     return profile.release();
 
