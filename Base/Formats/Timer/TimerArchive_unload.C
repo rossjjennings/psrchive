@@ -12,8 +12,10 @@
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
-#include "Predictor.h"
-#include "Error.h"
+
+#include "Pulsar/Predictor.h"
+#include "Pulsar/Parameters.h"
+#include "factory.h"
 
 #include "timer++.h"
 #include "mini++.h"
@@ -116,29 +118,20 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
   struct timer* header = const_cast<struct timer*> (&hdr);
 
   if (model)
-    header->nbytespoly = Predictor::nbytes (model);
+    header->nbytespoly = nbytes<Predictor> (model);
   else
     header->nbytespoly = 0;
 
   if (verbose == 3) cerr << "TimerArchive::hdr_unload predictor size = " 
 			 << hdr.nbytespoly << " bytes" << endl;
 
-  if (!ephemeris)
+  if (ephemeris)
+    header->nbytesephem = nbytes<Parameters> (ephemeris);
+  else
     header->nbytesephem = 0;
 
-  else {
-
-    if (verbose == 3)
-      cerr << "TimerArchive::hdr_unload get psrephem size" << endl;
-    
-    header->nbytesephem = ephemeris->unload (&text);
-    if (hdr.nbytesephem < 0)
-      throw Error (FailedCall, "TimerArchive::hdr_unload", "psrephem::unload");
-    
-    if (verbose == 3) cerr << "TimerArchive::hdr_unload psrephem size = " 
-		      << hdr.nbytesephem << " bytes" << endl;
-
-  }
+  if (verbose == 3) cerr << "TimerArchive::hdr_unload parameters size = " 
+			 << hdr.nbytesephem << " bytes" << endl;
 
   if (get_nsubint() == 1)
     header->sub_int_time = integration_length();
@@ -166,13 +159,14 @@ void Pulsar::TimerArchive::psr_unload (FILE* fptr) const
       cerr << "TimerArchive::psr_unload "
 	   << hdr.nbytespoly << " bytes in predictor" << endl;
 
-    long current = ftell(fptr);
-
+    long before = ftell(fptr);
     model->unload (fptr);
+    long after = ftell(fptr);
 
-    if (ftell(fptr) - current != hdr.nbytespoly)
+    if (after - before != hdr.nbytespoly)
       throw Error (FailedCall, "TimerArchive::psr_unload",
-		   "Predictor::unload != %d bytes", hdr.nbytespoly);
+		   "Predictor::unload wrote %d != %d bytes",
+		   after - before, hdr.nbytespoly);
   }
 
   if (ephemeris && hdr.nbytesephem > 0) {
@@ -180,9 +174,14 @@ void Pulsar::TimerArchive::psr_unload (FILE* fptr) const
       cerr << "TimerArchive::psr_unload "
 	   << hdr.nbytesephem << " bytes in ephemeris" << endl;
 
-    if (ephemeris->unload (fptr) != hdr.nbytesephem)
+    long before = ftell(fptr);
+    ephemeris->unload (fptr);
+    long after = ftell(fptr);
+
+    if (after - before != hdr.nbytesephem)
       throw Error (FailedCall, "TimerArchive::psr_unload",
-		   "psrephem::unload != %d bytes", hdr.nbytesephem);
+		   "Paremeters::unload wrote %d != %d bytes",
+		   after - before, hdr.nbytesephem);
   }
 }
 

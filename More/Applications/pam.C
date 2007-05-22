@@ -9,6 +9,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+#include "Pulsar/Parameters.h"
+
 // Extensions this program understands
 
 #include "Pulsar/ProcHistory.h"
@@ -25,6 +27,7 @@
 #include "Pulsar/FaradayRotation.h"
 #include "Pulsar/counter_drift.h"
 
+#include "factory.h"
 #include "dirutil.h"
 #include "strutil.h"
 #include "Error.h"
@@ -266,7 +269,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.70 2006/12/04 01:08:14 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.71 2007/05/22 23:57:57 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -677,12 +680,11 @@ int main (int argc, char *argv[]) try {
 	arch->set_source( name );
 
       if (new_eph) {
-	if (!eph_file.empty()) {
-	  psrephem eph;
-	  if (eph.load(eph_file) == 0)
-	    arch->set_ephemeris(eph);
-	  else
-	    cerr << "Could not load new ephemeris" << endl;
+	if (!eph_file.empty()) try {
+	  arch->set_ephemeris( factory<Pulsar::Parameters>(eph_file) );
+	}
+	catch (Error& error) {
+	  cerr << "Could not load new ephemeris from " << eph_file << endl;
 	}
       }
 

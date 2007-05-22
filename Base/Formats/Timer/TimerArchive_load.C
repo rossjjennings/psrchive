@@ -10,8 +10,9 @@
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Pointing.h"
 
-#include "Predictor.h"
-#include "Error.h"
+#include "Pulsar/Predictor.h"
+#include "Pulsar/Parameters.h"
+#include "factory.h"
 
 #include "strutil.h"
 #include "timer++.h"
@@ -454,16 +455,16 @@ void Pulsar::TimerArchive::psr_load (FILE* fptr)
       cerr << "TimerArchive::psr_load "
 	   << hdr.nbytespoly << " bytes in polyco" << endl;
 
-    model = Pulsar::Predictor::factory (fptr, hdr.nbytespoly);
+    model = factory<Pulsar::Predictor> (fptr, hdr.nbytespoly);
 
     if (verbose == 3) {
       if (model) {
-        cerr << "TimerArchive::psr_load read in predictor:" << endl;
+        cerr << "TimerArchive::psr_load read predictor:" << endl;
         model->unload (stderr);
         cerr << "TimerArchive::psr_load end of predictor" << endl;
       }
       else
-        cerr << "TimerArchive::psr_load failed to read in predictor" << endl;
+        cerr << "TimerArchive::psr_load failed to read predictor" << endl;
     }
   }
   else if (verbose == 3)
@@ -474,16 +475,16 @@ void Pulsar::TimerArchive::psr_load (FILE* fptr)
       cerr << "TimerArchive::psr_load "
 	   << hdr.nbytesephem << " bytes in ephemeris" << endl;
 
-    ephemeris = new psrephem;
+    ephemeris = factory<Pulsar::Parameters> (fptr, hdr.nbytesephem);
 
-    if (ephemeris->load (fptr, hdr.nbytesephem) < 0)
-      throw Error (FailedCall, "TimerArchive::psr_load", "psrephem::load");
-    
     if (verbose == 3) {
-      cerr << "TimerArchive::psr_load read in psrephem:\n"<< *ephemeris 
-	   << endl;
-      cerr << "TimerArchive::psr_load end of psrephem" 
-	   << endl;
+      if (ephemeris) {
+	cerr << "TimerArchive::psr_load read parameters:" << endl;
+	ephemeris->unload (stderr);
+	cerr << "TimerArchive::psr_load end of parameters" << endl;
+      }
+      else
+	cerr << "TimerArchive::psr_load failed to read parameters" << endl;
     }
   }
   else {

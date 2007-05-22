@@ -7,17 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.160 $
-   $Date: 2007/05/10 04:22:13 $
+   $Revision: 1.161 $
+   $Date: 2007/05/22 23:57:57 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.160 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.161 $"
 
 #include "IntegrationManager.h"
-#include "psrephem.h"
 #include "sky_coord.h"
 #include "Estimate.h"
 
@@ -32,7 +31,9 @@ namespace Pulsar {
   class Receiver;
   class Integration;
   class Profile;
+
   class Predictor;
+  class Parameters;
 
   //! The primary interface to pulsar observational data
   /*! This virtual base class implements the primary interface to pulsar
@@ -296,10 +297,10 @@ namespace Pulsar {
     //@{
 
     //! Install the given ephemeris and call update_model
-    void set_ephemeris (const psrephem& ephemeris, bool update = true);
+    void set_ephemeris (const Parameters* ephemeris, bool update = true);
 
     //! Return a copy of the current archive ephemeris
-    const psrephem get_ephemeris() const;
+    const Parameters* get_ephemeris() const;
 
     //! Install the given predictor and shift profiles to align
     void set_model (const Predictor* model);
@@ -623,7 +624,7 @@ namespace Pulsar {
     //@}
 
     //! The pulsar ephemeris, as used by TEMPO
-    Reference::To<psrephem> ephemeris;
+    Reference::To<Parameters> ephemeris;
 
     //! The pulsar phase model, as created using TEMPO
     Reference::To<Predictor> model;

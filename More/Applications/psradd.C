@@ -8,14 +8,16 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+
+#include "Pulsar/Parameters.h"
+#include "Pulsar/Predictor.h"
+
 #include "Pulsar/ProcHistory.h"
 #include "Pulsar/TimeSortedOrder.h"
 
 #include "Pulsar/Interpreter.h"
 
-#include "tempo++.h"
-#include "Error.h"
-
+#include "factory.h"
 #include "dirutil.h"
 #include "strutil.h"
 #include "separate.h"
@@ -28,7 +30,7 @@
 
 using namespace std;
 
-static const char* args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tTUvVwZ:z:";
+static const char* args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tTUvVwZ:";
 
 void reorder(Reference::To<Pulsar::Archive> arch);
 
@@ -154,7 +156,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.48 2007/05/04 23:33:47 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.49 2007/05/22 23:57:57 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -324,13 +326,6 @@ int main (int argc, char **argv) try {
       command += optarg;
       break;
 
-      // used to be -T
-    case 'z':
-      Tempo::set_system (optarg);
-      command += " -z ";
-      command += optarg;
-      break;
-
     } 
   }
 
@@ -348,19 +343,29 @@ int main (int argc, char **argv) try {
     cerr << "psradd ignores -f when AUTO ADD features are used\n";
 
 
-  psrephem neweph;
+  Reference::To<Pulsar::Parameters> ephemeris;
+
   if (!parname.empty()) {
 
     if (verbose)
       cerr << "psradd: loading ephemeris from '"<< parname <<"'" << endl;
 
-    if (neweph.load (parname.c_str()) < 0) {
-      cerr << "psradd could not load ephemeris from '"<< parname <<"'" << endl;
+    try {
+
+      ephemeris = factory<Pulsar::Parameters> (parname);
+
+    }
+    catch (Error& error) {
+      cerr << "psradd could not load ephemeris from '" << parname << "'\n" 
+	   << error.get_message() << endl;
       return -1;
     }
 
-    if (vverbose)
-      cerr << "psradd: ephemeris loaded=\n" << neweph << endl;
+    if (vverbose) {
+      cerr << "psradd: ephemeris loaded=" << endl;
+      ephemeris->unload(stderr); 
+      cerr << endl;
+    }
 
   }
 
@@ -401,9 +406,11 @@ int main (int argc, char **argv) try {
     archive = Pulsar::Archive::load (filenames[ifile]);
 
     if (vverbose)
-      for (unsigned isub=0; isub < archive->get_nsubint(); isub++)
-	cerr << isub << ": " 
-	     << archive->get_model()->phase( archive->get_Integration(isub)->get_epoch() ) << endl;
+      for (unsigned isub=0; isub < archive->get_nsubint(); isub++) {
+	MJD epoch = archive->get_Integration(isub)->get_epoch();
+	cerr << isub << ": phase=" 
+	     << archive->get_model()->phase( epoch ) << endl;
+      }
 
     if (check_has_data && archive->integration_length() == 0) {
       cerr << "psradd: archive [" << filenames[ifile] << "]"
@@ -484,12 +491,12 @@ int main (int argc, char **argv) try {
       if (verbose)
 	cerr << "psradd: New filename: '" << newname << "'" << endl;
 
-      if (!parname.empty()) try {
+      if (ephemeris) try {
 
         if (verbose)
           cerr << "psradd: Installing new ephemeris" << endl;
 
-	total->set_ephemeris (neweph);
+	total->set_ephemeris (ephemeris);
 
       }
       catch (Error& error) {

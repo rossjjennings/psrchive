@@ -10,7 +10,9 @@
 #include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/Receiver.h"
 
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
+#include "Pulsar/Parameters.h"
+
 #include "Types.h"
 #include "Error.h"
 #include "typeutil.h"
@@ -236,18 +238,20 @@ Pulsar::Archive::get_Profile (unsigned sub, unsigned pol, unsigned chan) const
   return get_Integration (sub) -> get_Profile (pol, chan);
 }
 
-const psrephem Pulsar::Archive::get_ephemeris () const
+const Pulsar::Parameters* Pulsar::Archive::get_ephemeris () const
 {
-  if (!ephemeris)
-    throw Error (InvalidState,"Pulsar::Archive::get_ephemeris","no ephemeris");
+  if (!ephemeris) 
+    throw Error (InvalidState, 
+		 "Pulsar::Archive::get_ephemeris", "no ephemeris");
 
-  return *ephemeris;
+  return ephemeris;
 }
 
 const Pulsar::Predictor* Pulsar::Archive::get_model () const
 {
   if (!model)
-    throw Error (InvalidState, "Pulsar::Archive::get_model", "no model");
+    throw Error (InvalidState,
+		 "Pulsar::Archive::get_model", "no model");
 		 
   return model;
 }

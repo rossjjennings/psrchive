@@ -10,7 +10,10 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
-#include "Predictor.h"
+
+#include "Pulsar/Parameters.h"
+#include "Pulsar/Predictor.h"
+
 #include "Error.h"
 
 using namespace std;
@@ -138,7 +141,7 @@ void Pulsar::Archive::append (const Archive* arch)
   }
 
   bool equal_ephemerides = ephemeris && arch->ephemeris 
-    && *ephemeris == *arch->ephemeris;
+    && ephemeris->equals (arch->ephemeris);
 
   /*
     If all of the old and new integrations have been zero phase

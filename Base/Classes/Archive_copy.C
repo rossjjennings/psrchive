@@ -7,7 +7,9 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
-#include "Predictor.h"
+
+#include "Pulsar/Predictor.h"
+#include "Pulsar/Parameters.h"
 
 using namespace std;
 
@@ -52,7 +54,7 @@ void Pulsar::Archive::copy (const Archive& archive,
   if (archive.ephemeris) {
     if (verbose > 2)
       cerr << "Pulsar::Archive::copy ephemeris" << endl;
-    ephemeris = new psrephem (*(archive.ephemeris));
+    ephemeris = archive.ephemeris->clone();
   } 
   else {
     if (verbose > 2)
