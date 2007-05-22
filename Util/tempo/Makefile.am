@@ -1,9 +1,11 @@
 
 noinst_LTLIBRARIES = libtempo.la
 
+nobase_include_HEADERS = Pulsar/Predictor.h Pulsar/Parameters.h
+
 include_HEADERS = psrephem.h ephio_func.h psrephem_orbital.h \
 	polyco.h Phase.h toa.h residual.h resio.h tempo++.h Predict.h \
-	Generator.h Predictor.h inverse_phase.h
+	Generator.h inverse_phase.h
 
 nodist_include_HEADERS = ephio.h
 
