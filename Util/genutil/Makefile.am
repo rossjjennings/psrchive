@@ -13,6 +13,7 @@ include_HEADERS = \
         dirutil.h \
         environ.h \
 	evaluate.h \
+	factory.h \
         fcomp.h \
 	format_it.h \
         fsleep.h \
