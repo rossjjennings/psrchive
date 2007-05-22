@@ -13,7 +13,7 @@
 #include "Pulsar/Integration.h"
 #include "Error.h"
 #include "Predict.h"
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
 
 #ifdef HAVE_TEMPO2
 #include "T2Predictor.h"
@@ -175,14 +175,16 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
 #endif
 
   polyco* t1model = dynamic_cast<polyco*> (model.ptr());
-  
-  if (!ephemeris || !t1model)
+
+  psrephem* t1eph = dynamic_cast<psrephem*> (ephemeris.ptr());
+
+  if (!t1eph)
     return;
 
   static Tempo::Predict predict;
 
   predict.set_frequency ( get_centre_frequency() );
-  predict.set_parameters ( *ephemeris );
+  predict.set_parameters ( *t1eph );
   predict.set_asite ( get_telescope_code() );
   predict.set_maxha ( 12 );
 

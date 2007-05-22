@@ -66,13 +66,18 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
   // Pad to avoid thorwing exceptions when get_Integration is called
   indices.resize(arch->get_nsubint());
 
+  const psrephem* eph = dynamic_cast<const psrephem*>( arch->get_ephemeris() );
+  if (!eph)
+    throw Error (InvalidState, "Pulsar::BinLngAscOrder::organise",
+		 "Pulsar::Archive::ephemeris is not a tempo psrephem");
+
   for (unsigned i = 0; i < arch->get_nsubint(); i++) {
     lngs.push_back(get_binlng_asc((arch->get_Integration(i)->get_epoch()).in_days(),
-				  arch->get_ephemeris(), 
+				  *eph, 
 				  arch->get_Integration(i)->get_centre_frequency(),
 				  arch->get_telescope_code()));
     if (lngs[i] != lngs[i]) {
-      throw Error(FailedCall, "PeriastronOrder::organise",
+      throw Error(FailedCall, "BinLngAscOrder::organise",
 		  "get_binlng_asc returned nan");
     }
     

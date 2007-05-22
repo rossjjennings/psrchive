@@ -32,7 +32,7 @@
 #include "Pulsar/BinLngPeriOrder.h"
 #include "Pulsar/Telescope.h"
 
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
 #include "fitsio_tempo.h"
 
 #include "psrfitsio.h"
@@ -544,10 +544,13 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
   if (status == 0 && get_type() == Signal::Pulsar) {
 
-    ephemeris = new psrephem;
-    ::load (fptr, ephemeris);
-    set_dispersion_measure( ephemeris->get_dm() );
-    set_rotation_measure( ephemeris->get_double(EPH_RM) );
+    psrephem* eph = new psrephem;
+
+    ::load (fptr, eph);
+    set_dispersion_measure( eph->get_dm() );
+    set_rotation_measure( eph->get_double(EPH_RM) );
+
+    ephemeris = eph;
 
     if (verbose == 3)
       cerr << "FITSArchive::load_header ephemeris loaded" << endl;
@@ -905,10 +908,16 @@ try {
   
   if (ephemeris) {
 
-    ephemeris->set_dm(dispersion_measure);
-    ephemeris->set_double (EPH_RM, rotation_measure);
+    psrephem* eph = dynamic_cast<psrephem*>( ephemeris.get() );
 
-    ::unload (fptr, ephemeris);
+    if (eph) {
+      eph->set_dm(dispersion_measure);
+      eph->set_double (EPH_RM, rotation_measure);
+      ::unload (fptr, eph);
+    }
+    else
+      warning << "FITSArchive::unload_file"
+	" non-tempo parameters not yet supported" << endl;
 
     if (verbose == 3)
       cerr << "FITSArchive::unload_file ephemeris written" << endl;

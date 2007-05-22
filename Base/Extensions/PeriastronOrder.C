@@ -64,9 +64,14 @@ void Pulsar::PeriastronOrder::organise (Archive* arch, unsigned newsub)
   // Pad to avoid thorwing exceptions when get_Integration is called
   indices.resize(arch->get_nsubint());
   
+  const psrephem* eph = dynamic_cast<const psrephem*>( arch->get_ephemeris() );
+  if (!eph)
+    throw Error (InvalidState, "Pulsar::PeriastronOrder::organise",
+		 "Pulsar::Archive::ephemeris is not a tempo psrephem");
+
   for (unsigned i = 0; i < arch->get_nsubint(); i++) {
     phases.push_back(get_binphs_peri((arch->get_Integration(i)->get_epoch()).in_days(),
-				       arch->get_ephemeris(), 
+				       *eph, 
 				       arch->get_Integration(i)->get_centre_frequency(),
 				       arch->get_telescope_code()));
     if (phases[i]!=phases[i]) {
