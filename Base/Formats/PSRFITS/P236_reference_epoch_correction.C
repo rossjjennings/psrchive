@@ -7,7 +7,7 @@
 
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/FITSHdrExtension.h"
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
 
 using namespace std;
 

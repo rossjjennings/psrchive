@@ -16,7 +16,7 @@
 #include "Pulsar/Pointing.h"
 #include "Pulsar/FITSHdrExtension.h"
 
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
 #include "FITSError.h"
 
 using namespace std;

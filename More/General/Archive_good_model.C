@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
 
 #include <iostream>
 using namespace std;

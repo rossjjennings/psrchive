@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
 
 // Integration Extension classes used to store state information
 #include "Pulsar/DeFaraday.h"

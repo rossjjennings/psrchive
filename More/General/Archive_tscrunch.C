@@ -8,7 +8,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
 #include "Error.h"
 
 using namespace std;

@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
 #include "inverse_phase.h"
 
 unsigned Pulsar::inverse_phase_calls = 0;

@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/05/10 04:23:30 $
+   $Revision: 1.10 $
+   $Date: 2007/05/22 23:57:52 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
 #define __Tempo2Predictor_h
 
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
 
 // From the TEMPO2 distribution
 #include "tempo2pred.h"

@@ -8,7 +8,7 @@ using namespace std;
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
 
 void Pulsar::Archive::set_model (const Predictor* new_model)
 {

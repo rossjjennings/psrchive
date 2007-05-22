@@ -11,7 +11,7 @@
 
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Pulsar.h"
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
 
 using namespace std;
 

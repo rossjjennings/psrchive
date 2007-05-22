@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.41 $
-   $Date: 2007/05/18 21:25:43 $
+   $Revision: 1.42 $
+   $Date: 2007/05/22 23:57:52 $
    $Author: straten $ */
 
 #ifndef __POLY_H
 #define __POLY_H
 
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
 
 #include <string>
 #include <vector>

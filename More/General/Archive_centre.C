@@ -7,7 +7,7 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
-#include "Predictor.h"
+#include "Pulsar/Predictor.h"
 
 using namespace std;
 
