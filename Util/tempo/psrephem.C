@@ -513,33 +513,43 @@ void psrephem::efac (float fac)
     if (parmStatus[i]==2) error_double[i]*=fac;
 }
 
-int psrephem::load (FILE* fptr, size_t nbytes)
+Pulsar::Parameters* psrephem::clone () const
 {
-  string total;
-  if (stringload (&total, fptr, nbytes) < 0)  {
-    fprintf (stderr, "psrephem::load(FILE*) error\n");
-    return -1;
-  }
-  return load (&total);
+  return new psrephem (*this);
 }
 
-int psrephem::unload (FILE* fptr) const
+bool psrephem::equals (const Pulsar::Parameters* p)
+{
+  const psrephem* that = dynamic_cast<const psrephem*>(p);
+  if (!that)
+    return false;
+  return *this == *that;
+}
+
+void psrephem::load (FILE* fptr)
+{
+  string total;
+  if (stringload (&total, fptr) < 0)
+    throw Error (FailedSys, "psrephem::load(FILE*)", "stringload");
+
+  load (&total);
+}
+
+void psrephem::unload (FILE* fptr) const
 {
   string out;
   if (!tempo11)
     out = nontempo11;
   else if (unload(&out) < 0)
-    return -1;
+    throw Error (FailedCall, "psrephem::unload(FILE*)",
+		 "unload(string*) failed");
 
   size_t size = out.length();
   size_t bout = fwrite (out.c_str(), 1, size, fptr);
-  if (bout < size)  {
-    cerr << "psrephem::unload(FILE*) ERROR fprintf " << bout << "/" << size;
-    perror ("");
-    return -1;
-  }
+  if (bout < size)
+    throw Error (FailedSys, "psrephem::unload(FILE*)", "fprintf");
+
   fflush (fptr);
-  return (int) bout;
 }
 
 static char* ephemblock = NULL;

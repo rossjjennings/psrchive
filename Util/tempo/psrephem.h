@@ -7,25 +7,23 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.38 $
-   $Date: 2007/05/17 00:02:05 $
+   $Revision: 1.39 $
+   $Date: 2007/05/22 23:58:58 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
 #define __PSREPHEM_H
 
-#include <stdio.h>
+#include "Pulsar/Parameters.h"
+#include "MJD.h"
+#include "Angle.h"
+
+#include "Error.h"
 
 #include <vector>
 #include <string>
 
-#include "Error.h"
-
-#include "MJD.h"
-#include "Angle.h"
-#include "Reference.h"
-
-class psrephem : public Reference::Able
+class psrephem : public Pulsar::Parameters
 {
   friend class psrParams;
 
@@ -33,6 +31,18 @@ class psrephem : public Reference::Able
 
   // verbosity flag
   static bool verbose;
+
+  //! Return a new, copy constructed instance of self
+  Parameters* clone () const;
+
+  //! Return true if *this == *that
+  bool equals (const Parameters* that);
+
+  //! Load from an open stream
+  void load (FILE*);
+
+  //! Unload to an open stream
+  void unload (FILE*) const;
 
   // this string needs to be long enough to hold the above-defined MACRO
   static std::vector<std::string> extensions();
@@ -50,7 +60,7 @@ class psrephem : public Reference::Able
   std::string nontempo11;
 
   psrephem() { init (); };
-  virtual ~psrephem();
+  ~psrephem();
 
   psrephem (const psrephem &);
 
@@ -70,9 +80,6 @@ class psrephem : public Reference::Able
 
   int unload (const char* filename) const;
   int unload (const std::string& fname) const { return unload (fname.c_str()); }
-
-  int load   (FILE* instream, size_t bytes);
-  int unload (FILE* outstream) const;
 
   int load   (std::string* str);
   int unload (std::string* str) const;
