@@ -85,4 +85,8 @@ if ($?PSRCHIVE_SYSGRP) then
 
 endif
 
+echo "Setting current to $1."
+cd $PSRCHIVE_SYSTEM
+ln -sf $1 current
+
 echo "Installation in $installation_path completed."
