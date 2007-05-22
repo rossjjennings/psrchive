@@ -7,13 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.20 $
-   $Date: 2007/02/07 21:50:55 $
+   $Revision: 1.21 $
+   $Date: 2007/05/22 08:05:59 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
 #define __Matrix_H
 
+#include "Traits.h"
 #include "Vector.h"
 #include "Error.h"
 
@@ -210,7 +211,7 @@ const Matrix< Columns, Rows,T> herm (const Matrix<Rows, Columns,T>& m)
 
   for (unsigned i=0; i<Rows; i++)
     for (unsigned j=0; j<Columns; j++)
-      result[j][i] = conj( m[i][j] );
+      result[j][i] = myconj( m[i][j] );
 
   return result;
 }

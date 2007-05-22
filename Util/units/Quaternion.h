@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.31 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.32 $
+   $Date: 2007/05/22 08:05:59 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -191,29 +191,6 @@ template<typename T, QBasis B> struct DatumTraits< Quaternion<T,B> >
   static inline const T& element (const Quaternion<T,B>& t, unsigned idim)
   { return t[idim]; }
 };
-
-
-//! Quick multiplication of a complex number by i
-template<typename T>
-std::complex<T> ci (const std::complex<T>& c)
-{
-  return std::complex<T> (-c.imag(), c.real());
-}
-
-//! Quick multiplication of a real number by i
-template<typename T>
-std::complex<T> ci (const T& real)
-{
-  return std::complex<T> (0.0, real);
-}
-
-//! Return the conjugate of a real number
-template<typename T>
-T myconj (const T& x) { return x; };
-
-//! Return the conjugate of a complex number
-template<typename T>
-std::complex<T> myconj (const std::complex<T>& z) { return std::conj(z); };
 
 //! Multiplication of two Biquaternions in the Hermitian basis
 template<typename T, typename U>

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Traits.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.5 $
+   $Date: 2007/05/22 08:05:59 $
    $Author: straten $ */
 
 /*
@@ -31,9 +31,8 @@
 #include <complex>
 
 //! Traits of an element type
-template< class E > class ElementTraits
+template< class E > struct ElementTraits
 {
-public:
   //! How to cast a complex type to the element type
   template< class T >
   static inline E from_complex (const std::complex<T>& value)
@@ -41,6 +40,10 @@ public:
 
   //! How to cast an element type to real
   static inline double to_real (const E& element)
+  { return element; }
+
+  //! The complex conjugate
+  static inline E conjugate (const E& element)
   { return element; }
 };
 
@@ -56,6 +59,10 @@ template< class E > struct ElementTraits< std::complex<E> >
   static inline double to_real (const std::complex<E>& element)
   { return element.real(); }
 
+  //! The complex conjugate
+  template< class T >
+  static inline std::complex<E> conjugate (const std::complex<T>& value)
+  { return std::conj(value); }
 };
 
 //! Traits of the data type
@@ -68,6 +75,24 @@ template< class T, class E = ElementTraits<T> > struct DatumTraits
   static inline T& element (T& t, unsigned idim) { return t; }
   static inline const T& element (const T& t, unsigned idim) { return t; }
 };
+
+//! Quick multiplication of a complex number by i
+template<typename T>
+std::complex<T> ci (const std::complex<T>& c)
+{
+  return std::complex<T> (-c.imag(), c.real());
+}
+
+//! Quick multiplication of a real number by i
+template<typename T>
+std::complex<T> ci (const T& real)
+{
+  return std::complex<T> (0.0, real);
+}
+
+//! Return the conjugate of a real number
+template<typename T>
+T myconj (const T& x) { return ElementTraits<T>::conjugate(x); };
 
 #endif
 
