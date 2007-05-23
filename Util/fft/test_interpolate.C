@@ -69,7 +69,7 @@ int main (int argc, char** argv)
     }
 
     diff = fabs(var-var_0);
-    tol = 5e-5;
+    tol = 1e-4;
 
     if ( diff > tol ) {
       cerr << "Variance:  input=" << var_0 << " output=" <<  var

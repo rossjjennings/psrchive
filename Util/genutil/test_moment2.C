@@ -23,9 +23,11 @@ using namespace std;
 
 int main ()
 {
+  cerr << "Testing BoxMuller for basic shape of distribution" << endl;
+
   BoxMuller gasdev;
 
-  unsigned nsamples = 100000;
+  unsigned nsamples = 1000000;
   unsigned nbins = 300;
 
   vector<double>   sumsq (nbins, 0);
@@ -63,7 +65,7 @@ int main ()
     cout << bound << " " << exp << " " << var << " " << err
 	 << " " << count[ibin] << endl;
 
-    if ( fabs( var - exp ) > err ) {
+    if ( fabs( var - exp ) > err * 2.0 ) {
       cerr << "unexpected result:\n"
 	" threshold=" << bound << " variance=" << var << " +/- " << err <<
 	" expected=" << exp << endl;
@@ -75,7 +77,7 @@ int main ()
   double percentage_error = double(errors) / double(nbins) * 100.0;
   cerr << "Percentage error = " << percentage_error << " %" << endl;
 
-  if (percentage_error > 10.0) {
+  if (percentage_error > 5.0) {
     cerr << "Unacceptable error" << endl;
     return -1;
   }
