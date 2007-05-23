@@ -89,6 +89,7 @@ endif
 
 echo "Setting current to $1."
 cd $PSRCHIVE_SYSTEM
+rm -f current
 ln -sf $1 current
 
 echo "Installation in $installation_path completed."
