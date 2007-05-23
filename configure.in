@@ -90,8 +90,14 @@ SWIN_TEST_LIMITS
 #
 # Set up to use the standard package installation directory
 #
-CPPFLAGS="-I$DEFAULT_INSTALL/include $CPPFLAGS"
-LDFLAGS="-L$DEFAULT_INSTALL/lib $LDFLAGS"
+AC_ARG_ENABLE([local],
+              AC_HELP_STRING([--disable-local],
+	                     [Don't look for dependencies in /usr/local]))
+
+if test x"$enable_local" != x"no"; then
+  CPPFLAGS="-I$DEFAULT_INSTALL/include $CPPFLAGS"
+  LDFLAGS="-L$DEFAULT_INSTALL/lib $LDFLAGS"
+fi
 
 #
 # Set up to use the pulsar group package installation directory
