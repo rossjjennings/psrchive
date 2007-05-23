@@ -92,3 +92,18 @@ string remove_all (string input, char c)
       i ++;
   return input;
 }
+
+void string_split ( string source, string &before, string &after, string delimiter )
+{
+  string::size_type pos = source.find( delimiter );
+
+  before = "";
+  after = "";
+
+  if( pos != string::npos )
+  {
+    before = source.substr( 0, pos );
+    after = source.substr( pos + delimiter.size() );
+  }
+}
+

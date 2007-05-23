@@ -6,9 +6,9 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/strutil.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/05/18 22:17:57 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2007/05/23 03:48:52 $
+   $Author: nopeer $ */
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
@@ -101,6 +101,15 @@ std::string stringtok (std::string* instr, char delimiter,
 // like sprintf, but returns a string
 // ///////////////////////////////////////////////////////////
 std::string stringprintf(char *fmt ...);
+
+// //////////////////////////////////////////////////////////
+// string_split splits a string setting parameters before and after
+// to the contents before and after the delimiter string
+// before and after will be empty if the delimiter does not exist
+// //////////////////////////////////////////////////////////
+
+void string_split( std::string source, std::string &before, std::string &after, std::string delimiter );
+
 
 
 #endif
