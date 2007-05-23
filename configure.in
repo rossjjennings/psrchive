@@ -198,7 +198,6 @@ AM_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([Util/Makefile
 		Util/third/Makefile
 		Util/third/parsifal/Makefile
-		Util/third/taygeta/Makefile
 		Util/third/star/Makefile
 		Util/third/gnu/Makefile
 		Util/units/Makefile
