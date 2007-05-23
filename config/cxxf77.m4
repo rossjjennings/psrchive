@@ -33,18 +33,15 @@ AC_DEFUN([SWIN_TEST_CXXF77],
   if test x"$can_cxxf77" = xno; then
 
 AC_MSG_ERROR([
+
 The flags required to link the Fortran runtime libraries:
 
 FLIBS=$FLIBS
 
 cause the linker to choose the wrong standard C++ libraries.
-This is a common problem when g77 is used with g++ version 4 and higher.
 
-If gfortran is also installed on your system, please set F77=gfortran
-and run the configure script again.
+Please see http://psrchive.sourceforge.net/third/cxx#f77
 
-Alternatively, set the CXX environment variable to point to a g++
-compiler earlier than version 4.
 ])
 
   fi
