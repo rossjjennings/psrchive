@@ -32,6 +32,7 @@ nobase_include_HEADERS = \
         Pulsar/InstrumentInfo.h \
         Pulsar/IntegrationWeight.h \
         Pulsar/Interpreter.h \
+	Pulsar/InterpreterExtension.h \
         Pulsar/InterpreterVariables.h \
         Pulsar/IterativeBaseline.h \
         Pulsar/NoiseStatistics.h \
