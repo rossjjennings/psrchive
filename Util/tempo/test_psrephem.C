@@ -43,7 +43,7 @@ int main (int argc, char** argv)
   fprintf (stderr, "Unloading to '%s'\n", tfile.c_str());
   if (eph->unload (tfile.c_str()) < 0)  {
     fprintf (stderr, "Error unloading ephemeris\n");
-    return 0;
+    return -1;
   }
 
   fprintf (stderr, "Test operator=\n");
@@ -57,14 +57,15 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  int nbytes;
   fprintf (stderr, "An example of writing an ephemeris to an open file\n");
   fprintf (fptr, "An example of writing an ephemeris to an open file\n");
-  if ((nbytes = eph2.unload (fptr)) < 0)  {
-    fprintf (stderr, "Error unloading ephemeris\n");
-    return 0;
+  try {
+    eph2.unload (fptr);
   }
-  fprintf (fptr, "\n%d bytes unloaded\n", nbytes);
+  catch (...) {
+    fprintf (stderr, "Error unloading ephemeris\n");
+    return -1;
+  }
 
   fseek (fptr, 0L, SEEK_SET);
   fprintf (stderr, "An example of reading an ephemeris from an open file\n");
@@ -75,20 +76,20 @@ int main (int argc, char** argv)
   }
   fprintf (stderr, "read from file: %s\n", some);
 
-  if (eph->load (fptr, nbytes) < 0)  {
+  try {
+    eph->load (fptr);
+  }
+  catch (...) {
     fprintf (stderr, "Error loading ephemeris\n");
-    return 0;
+    return -1;
   }
 
   if (eph->unload ("test.psrephem.out3") < 0)  {
     fprintf (stderr, "Error unloading ephemeris\n");
-    return 0;
+    return -1;
   }
 
-  if ((nbytes = eph->unload (stdout)) < 0)  {
-    fprintf (stderr, "Error unloading ephemeris\n");
-    return 0;
-  }
+  eph->unload (stdout);
 
   delete eph;
 
