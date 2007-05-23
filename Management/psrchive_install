@@ -77,14 +77,13 @@ echo "Setting permissions ..."
 
 # chmod and chgrp options used:
 #   -R  change all files in all directories
-#   -L  follow all symbollic links
 #
-chmod -R -L a-w $installation_path
+chmod -R a-w $installation_path
 
 if ($?PSRCHIVE_SYSGRP) then
 
   echo "Setting group ownership to $PSRCHIVE_SYSGRP"
-  chgrp -R -L $PSRCHIVE_SYSGRP $installation_path
+  chgrp -R $PSRCHIVE_SYSGRP $installation_path
 
 endif
 
