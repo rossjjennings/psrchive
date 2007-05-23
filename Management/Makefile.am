@@ -1,5 +1,7 @@
 
-bin_SCRIPTS = psrchive_cflags psrchive_ldflags psrchive_install
+bin_SCRIPTS = psrchive_cflags psrchive_ldflags
+
+dist_bin_SCRIPTS = psrchive_install
 
 dist_data_DATA = psrchive_version
 
