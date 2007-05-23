@@ -8,6 +8,7 @@
 #include "VirtualMemory.h"
 #include "Error.h"
 
+#include <unistd.h>
 #include <sys/mman.h>
 
 using namespace std;
