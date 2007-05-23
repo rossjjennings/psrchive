@@ -58,7 +58,8 @@ nobase_include_HEADERS = \
         Pulsar/SyntheticPolnProfile.h \
         Pulsar/Transformation.h \
         Pulsar/Transposer.h \
-        Pulsar/Weight.h
+        Pulsar/Weight.h \
+        Pulsar/ZapInterpreter.h
 
 libGeneral_la_SOURCES = \
 	counter_drift.C \
