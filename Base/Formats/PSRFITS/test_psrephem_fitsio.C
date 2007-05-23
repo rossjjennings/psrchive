@@ -11,8 +11,7 @@
 #include <iostream>
 #include <string>
 
-#include <fitsio.h>
-#include "psrephem.h"
+#include "fitsio_tempo.h"
 #include "ephio.h"
 #include "Error.h"
 
@@ -22,7 +21,9 @@ int main (int argc, char** argv)
 {
   bool verbose = false;
   int arg=1;
-  string first = argv[arg];
+  string first;
+  if ( argc > 1 )
+    first = argv[arg];
 
   if ( argc < 2 || first == "-h" ) {
     cerr << "USAGE: test_fitsio inputfilename" << endl;
@@ -53,7 +54,7 @@ int main (int argc, char** argv)
   }
 
   psrephem eph;
-  eph.load (fptr);
+  load (fptr, &eph);
 
   cerr << "Ephemeris loaded." << endl;
   fits_close_file (fptr, &status);
@@ -89,7 +90,7 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  eph.unload (fptr);
+  unload (fptr, &eph);
 
   cerr << "Ephemeris written." << endl;
   fits_close_file (fptr, &status);
@@ -108,7 +109,7 @@ int main (int argc, char** argv)
   }
 
   psrephem eph2;
-  eph2.load (fptr);
+  load (fptr, &eph2);
 
   cerr << "Ephemeris re-loaded." << endl;
   fits_close_file (fptr, &status);

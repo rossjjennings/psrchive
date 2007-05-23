@@ -8,10 +8,7 @@
 #include <config.h>
 #endif
 
-#include "polyco.h"
-#include "Error.h"
-
-#include <fitsio.h>
+#include "fitsio_tempo.h"
 
 using namespace std;
 
@@ -19,7 +16,9 @@ int main (int argc, char** argv)
 {
   bool verbose = false;
   int arg=1;
-  string first = argv[arg];
+  string first;
+  if ( argc > 1 )
+    first = argv[arg];
 
   if ( argc < 2 || first == "-h" ) {
     cerr << "USAGE: test_fitsio inputfilename" << endl;
@@ -50,7 +49,7 @@ int main (int argc, char** argv)
   }
 
   polyco poly;
-  poly.load (fptr);
+  load (fptr, &poly);
 
   cerr << "Polyco loaded." << endl;
   fits_close_file (fptr, &status);
@@ -86,7 +85,7 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  poly.unload (fptr);
+  unload (fptr, &poly);
 
   cerr << "Polyco written." << endl;
   fits_close_file (fptr, &status);
@@ -105,7 +104,7 @@ int main (int argc, char** argv)
   }
 
   polyco poly2;
-  poly2.load (fptr);
+  load (fptr, &poly2);
 
   cerr << "Polyco re-loaded." << endl;
   fits_close_file (fptr, &status);
