@@ -33,7 +33,7 @@ endif
 
 check_PROGRAMS = test_template test_psrephem_fitsio test_polyco_fitsio
 
-TESTS = $(check_PROGRAMS)
+TESTS = test_template
 
 test_template_SOURCES = test_template.C
 test_psrephem_fitsio_SOURCES = test_psrephem_fitsio.C
