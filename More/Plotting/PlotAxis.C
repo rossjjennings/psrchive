@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/PlotAxis.h"
 #include "Pulsar/PlotLabel.h"
-#include "iopair.h"
+#include "pairutil.h"
 
 Pulsar::PlotAxis::PlotAxis ()
 {

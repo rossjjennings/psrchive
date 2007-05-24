@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/PlotEdge.h"
-#include "iopair.h"
+#include "pairutil.h"
 
 Pulsar::PlotEdge::Interface::Interface (PlotEdge* instance)
 {

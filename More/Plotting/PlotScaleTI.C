@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/PlotScale.h"
-#include "iopair.h"
+#include "pairutil.h"
 
 Pulsar::PlotScale::Interface::Interface (PlotScale* instance)
 {

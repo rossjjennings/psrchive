@@ -36,7 +36,7 @@ Pulsar::PlotFrame::~PlotFrame ()
 {
 }
 
-#include "iopair.h"
+#include "pairutil.h"
 
 void Pulsar::PlotFrame::focus (const Archive* data)
 {

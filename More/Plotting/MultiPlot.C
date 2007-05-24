@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/MultiPlot.h"
 #include "Pulsar/MultiFrame.h"
-#include "iopair.h"
+#include "pairutil.h"
 
 #include <cpgplot.h>
 
