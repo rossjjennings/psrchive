@@ -6,6 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/Agent.h"
 #include "Error.h"
+#include "dirutil.h"
 
 using namespace std;
 
@@ -21,11 +22,13 @@ using namespace std;
 */
 Pulsar::Archive* Pulsar::Archive::load (const string& filename)
 {
+  string use_filename = expand (filename);
+
   // check if file can be opened for reading
-  FILE* fptr = fopen (filename.c_str(), "r");
+  FILE* fptr = fopen (use_filename.c_str(), "r");
 
   if (!fptr) throw Error (FailedSys, "Pulsar::Archive::load",
-			  "cannot open '%s'", filename.c_str());
+			  "cannot open '%s'", use_filename.c_str());
   fclose (fptr);
   
   if (Agent::registry.size() == 0)
@@ -44,7 +47,7 @@ Pulsar::Archive* Pulsar::Archive::load (const string& filename)
       cerr << "Pulsar::Archive::load testing "
            << Agent::registry[agent]->get_name() << endl;
 
-    if (Agent::registry[agent]->advocate (filename.c_str())) {
+    if (Agent::registry[agent]->advocate (use_filename.c_str())) {
 
       if (verbose == 3)
         cerr << "Pulsar::Archive::load using " 
@@ -52,9 +55,9 @@ Pulsar::Archive* Pulsar::Archive::load (const string& filename)
 
       archive = Agent::registry[agent]->new_Archive();
       
-      archive -> __load_filename = filename;
-      archive -> load_header (filename.c_str());
-      archive -> set_filename (filename);
+      archive -> __load_filename = use_filename;
+      archive -> load_header (use_filename.c_str());
+      archive -> set_filename (use_filename);
 
       // perform all checks
       archive->correct();
@@ -76,6 +79,6 @@ Pulsar::Archive* Pulsar::Archive::load (const string& filename)
   // none of the registered agents advocates the use of a derived
   // class for the interpretation of this file
   throw Error (InvalidParam, "Pulsar::Archive::load", 
-	       "'%s' not a recognized file format", filename.c_str());
+	       "'%s' not a recognized file format", use_filename.c_str());
 }
 

@@ -576,10 +576,12 @@ Pulsar::Database::~Database ()
 //! Loads an entire database from a file
 void Pulsar::Database::load (const string& dbase_filename)
 {
-  FILE* fptr = fopen (dbase_filename.c_str(), "r");
+  string use_filename = expand (dbase_filename);
+
+  FILE* fptr = fopen (use_filename.c_str(), "r");
   if (!fptr)
     throw Error (FailedCall, "Pulsar::Database::load",
-		 "fopen (" + dbase_filename + ")");
+		 "fopen (" + use_filename + ")");
 
   bool old_style = false;
 
@@ -592,7 +594,7 @@ void Pulsar::Database::load (const string& dbase_filename)
       cerr << "Pulsar::Database::load old database summmary file" << endl;
     else
       throw Error (InvalidParam, "Pulsar::Database::load",
-                   dbase_filename + " is not a database file");
+                   use_filename + " is not a database file");
     old_style = true;
   }
 

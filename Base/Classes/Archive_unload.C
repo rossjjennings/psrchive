@@ -6,6 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/Archive.h"
 #include "TemporaryFile.h"
+#include "dirutil.h"
 #include "Error.h"
 
 #include <stdlib.h>
@@ -32,7 +33,7 @@ void Pulsar::Archive::unload (const char* filename) const
 
   string unload_to_filename = unload_filename;
   if (filename)
-    unload_to_filename = filename;
+    unload_to_filename = expand(filename);
 
   if (verbose == 3)
     cerr << "Pulsar::Archive::unload (" << unload_to_filename << ")" << endl;
