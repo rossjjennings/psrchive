@@ -57,6 +57,9 @@ class CommandParser : public Reference::Able {
   //! verbose operation enabled by "verbose"
   bool verbose;
 
+  //! Pure virtual base class of interface to parser methods
+  class Method;
+
  protected:
 
   //! Flag raised whenever a parsing error or other fault occurs
@@ -87,14 +90,11 @@ class CommandParser : public Reference::Able {
 
   //! Import a nested CommandParser
   void import (CommandParser*,
-	       const std::string& command,
-	       const std::string& help,
-	       char shortcut = 0);
+               const std::string& command,
+               const std::string& help,
+               char shortcut = 0);
 
-  //! Pure virtual base class of interface to parser methods
-  class Method;
-
-  //! Nested CommandParser Method implementatin
+  //! Nested CommandParser Method implementation
   class Nested;
 
   //! Add Method instance
