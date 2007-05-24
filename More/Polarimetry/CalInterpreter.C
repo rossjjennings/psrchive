@@ -18,53 +18,51 @@ using namespace std;
 Pulsar::CalInterpreter::CalInterpreter ()
 {
   // default calibrator type
-  type = Calibrator::SingleAxis;
+  caltype = Calibrator::SingleAxis;
 
   add_command 
-    ( &CalInterpreter::cal, 'c',
-      "cal", "calibrate data using various models",
-      "usage:\n"
-      "  cal                    calibrate the current archive \n"
-      "  cal type <name>        select the type of calibrator \n"
-      "    string name          name of the calibrator type \n"
-      "  cal load <filename>    load the database or calibrator \n"
-      "    string filename      filename of database or calibrator \n" );
+    ( &CalInterpreter::type,
+      "type", "set or get the calibrator model type",
+      "usage: type <name>\n"
+      "    string name          name of the calibrator type" );
+
+  add_command
+    ( &CalInterpreter::load,
+      "load", "load the database or calibrator",
+      "usage: load <filename>\n"
+      "    string filename      filename of database or calibrator" );
+
+  add_command 
+    ( &CalInterpreter::cal,
+      "", "calibrate the current archive using the current settings" );
+
 }
 
 Pulsar::CalInterpreter::~CalInterpreter ()
 {
 }
 
-
-string Pulsar::CalInterpreter::cal (const string& args)
+string Pulsar::CalInterpreter::type (const string& args)
 {
-  vector<string> arguments = setup (args);
+  if (args.empty())
+    return response (Good, "type is " + tostring(caltype));
 
-  if (arguments.size() == 2 && arguments[0] == "load")
-    return load ( arguments[1] );
-
-  if (arguments.size() == 2 && arguments[0] == "type") {
-    type = fromstring<Calibrator::Type>( arguments[1].c_str() );
+  caltype = fromstring<Calibrator::Type>( args );
+  if (caltype != (Calibrator::Type)-1)
     return response (Good);
-  }
 
-  if (arguments.size() == 1 && arguments[0] == "type")
-    return response (Good, "type is " + tostring(type));
-
-  if (arguments.size() == 0)
-    return calibrate ();
-  
-  return response (Fail, help("cal"));
+  return response (Fail, "unrecognized type '" + args + "'");
 }
 
 
-string Pulsar::CalInterpreter::load (const string& arg)
+string Pulsar::CalInterpreter::load (const string& args)
 {
+  string filename = setup<string>(args);
   string dbase_error;
 
   try {
     // try to load the file as a database
-    database = new Database( arg );
+    database = new Database( filename );
     calibrator = 0;
     return response (Good);
   }
@@ -74,7 +72,7 @@ string Pulsar::CalInterpreter::load (const string& arg)
 
   try {
     // try to load the file as a single calibrator
-    Reference::To<Archive> archive = Archive::load( arg );
+    Reference::To<Archive> archive = Archive::load( filename );
     calibrator = new PolnCalibrator (archive);
     database = 0;
     return response (Good);
@@ -87,7 +85,7 @@ string Pulsar::CalInterpreter::load (const string& arg)
 
 }
 
-string Pulsar::CalInterpreter::calibrate () try {
+string Pulsar::CalInterpreter::cal (const string& arg) try {
 
   Reference::To<PolnCalibrator> use_cal;
 
@@ -97,7 +95,7 @@ string Pulsar::CalInterpreter::calibrate () try {
   if (calibrator)
     use_cal = calibrator;
   else
-    use_cal = database -> generatePolnCalibrator( get(), type );
+    use_cal = database -> generatePolnCalibrator( get(), caltype );
 
   use_cal->calibrate( get() );
 

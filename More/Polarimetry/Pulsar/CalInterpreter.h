@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalInterpreter.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/05/24 10:54:35 $
+   $Revision: 1.2 $
+   $Date: 2007/05/24 22:16:48 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CalInterpreter_h
@@ -32,19 +32,19 @@ namespace Pulsar {
     //! Destructor
     ~CalInterpreter ();
 
-    //! cal command interface
+    // calibrate the current top of the stack using the current state
     std::string cal (const std::string& args);
+
+    //! cal command interface
+    std::string type (const std::string& args);
 
     //! load the specifed file (database or calibrator)
     std::string load (const std::string& arg);
 
-    //! calibrate the current top of the stack using the current state
-    std::string calibrate ();
-
   protected:
 
     //! The type of calibrator to be used
-    Calibrator::Type type;
+    Calibrator::Type caltype;
 
     //! Calibrator database
     Reference::To<Database> database;
