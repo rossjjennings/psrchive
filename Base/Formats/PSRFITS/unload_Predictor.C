@@ -40,6 +40,10 @@ void Pulsar::FITSArchive::unload_Predictor (fitsfile* fptr) const
   else
     delete_hdu (fptr, "T2PREDICT");
 
+#else
+
+  delete_hdu (fptr, "T2PREDICT");
+
 #endif
 }
 
