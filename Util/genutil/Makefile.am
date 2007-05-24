@@ -26,6 +26,7 @@ include_HEADERS = \
         MJD.h \
 	normal.h \
         orbital.h \
+	pairutil.h \
         Physical.h \
         Plugin.h \
         RealTimer.h \
