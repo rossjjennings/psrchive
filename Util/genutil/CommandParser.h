@@ -7,7 +7,7 @@
 #ifndef __CommandParser_h
 #define __CommandParser_h
 
-#include "ReferenceAble.h"
+#include "Reference.h"
 #include "Error.h"
 
 #include <vector>
@@ -23,9 +23,6 @@ class CommandParser : public Reference::Able {
 
   //! the prompt shown to the user
   std::string prompt;
-
-  //! Pure virtual base class of interface to parser methods
-  class Method;
 
   //! null constructor
   CommandParser ();
@@ -46,7 +43,7 @@ class CommandParser : public Reference::Able {
   virtual void script (const std::vector<std::string>& commands);
 
   //! return a help string
-  std::string help (const std::string& command);
+  std::string help (const std::string& command = "");
 
   //! parse a command and arguments in one string
   std::string parse (const std::string& commandargs);
@@ -65,6 +62,9 @@ class CommandParser : public Reference::Able {
   //! Flag raised whenever a parsing error or other fault occurs
   bool fault;
 
+  //! Name of command parser when nested
+  std::string nested;
+
   //! Derived classes add commands to the list using this method
   template <class Parser>
     void add_command (std::string (Parser::*method)(const std::string&),
@@ -73,7 +73,7 @@ class CommandParser : public Reference::Able {
 		      const std::string& detailed_help = "",
 		      char shortcut = 0);
 
-  //! So that the shortcut key is not lost
+  //! Derived classes add commands with shortcut keys using this method
   template <class Parser>
     void add_command (std::string (Parser::*method)(const std::string&),
 		      char shortcut,
@@ -81,6 +81,21 @@ class CommandParser : public Reference::Able {
 		      const std::string& help,
 		      const std::string& detailed_help = "")
     { add_command (method, command, help, detailed_help, shortcut); }
+
+  //! Copy the commands from another CommandParser
+  void import (CommandParser*);
+
+  //! Import a nested CommandParser
+  void import (CommandParser*,
+	       const std::string& command,
+	       const std::string& help,
+	       char shortcut = 0);
+
+  //! Pure virtual base class of interface to parser methods
+  class Method;
+
+  //! Nested CommandParser Method implementatin
+  class Nested;
 
   //! Add Method instance
   void add_command (Method*);
@@ -90,9 +105,6 @@ class CommandParser : public Reference::Able {
 
   //! Get the help string of the current command
   std::string usage () { return help(current_command); }
-
-  //! Copy the commands from another CommandParser
-  void import (CommandParser*);
 
  private:
 
@@ -115,16 +127,30 @@ class CommandParser::Method {
  public:
   Method() {}
   virtual ~Method () {}
+
   virtual std::string execute (const std::string& command) = 0;
+
+  virtual std::string detail () const = 0;
 
   //! The command string corresponding to this method
   std::string command;
   //! The help string for this method
   std::string help;
-  //! The detailed help string for this method
-  std::string detail;
   //! The shortcut character corresponding to this method
   char shortcut;
+};
+
+//! Nested CommandParser Method implementation
+class CommandParser::Nested : public Method {
+ public:
+  Nested( CommandParser*,
+	  const std::string& command,
+	  const std::string& help,
+	  char shortcut );
+  std::string execute (const std::string& command);
+  std::string detail () const;
+ protected:
+  Reference::To<CommandParser, false> parser;
 };
 
 //! Stores a pointer to a CommandParser sub-class and one of its methods
@@ -140,19 +166,21 @@ template <class Parser> class Command : public CommandParser::Method
 	   const std::string& _help, const std::string& _detailed_help,
 	   char _shortcut)
     {
-      instance = _instance;
-      method   = _method;
       command  = _command;
       help     = _help;
-      detail   = _detailed_help;
       shortcut = _shortcut;
+
+      detailed_help = _detailed_help;
+      instance      = _instance;
+      method        = _method;
     }
 
   //! Execute method
   std::string execute (const std::string& args)
-    {
-      return (instance->*method) (args);
-    }
+    { return (instance->*method) (args); }
+
+  std::string detail () const
+    { return detailed_help; }
 
  protected:
   //! Method of the sub-class to execute
@@ -160,6 +188,9 @@ template <class Parser> class Command : public CommandParser::Method
 
   //! Instance through which method is called
   Parser* instance;
+
+  //! The detailed help string for this method
+  std::string detailed_help;
 
 };
 

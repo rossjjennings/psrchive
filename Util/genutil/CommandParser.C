@@ -67,13 +67,13 @@ string CommandParser::parse (const string& commandargs)
   return parse (command, cmdargs);
 }
 
-
 string CommandParser::parse (const string& command, const string& arguments)
 {
   if (debug)
     cerr << "CommandParser::parse '"<< command <<"' '"<< arguments <<"'"<<endl;
 
-  if (command.empty())
+  // nested CommandParsers may support empty command strings
+  if (command.empty() && nested.empty())
     return "";
 
   if (debug)
@@ -90,7 +90,6 @@ string CommandParser::parse (const string& command, const string& arguments)
 
   if (debug)
     cerr << "CommandParser::parse command not quit" << endl;
-
 
   if (command == "verbose") {
     verbose = !verbose;
@@ -111,6 +110,12 @@ string CommandParser::parse (const string& command, const string& arguments)
 
   bool shortcut = command.length() == 1;
   unsigned icmd = 0;
+
+  // add new lines to output only if this CommandParser is not nested
+  string newline;
+  if (nested.empty())
+    newline = "\n";
+
   for (icmd=0; icmd < commands.size(); icmd++)
 
     if ( (shortcut && command[0] == commands[icmd]->shortcut)
@@ -124,12 +129,12 @@ string CommandParser::parse (const string& command, const string& arguments)
       string reply = commands[icmd]->execute (arguments);
 
       if (debug)
-	cerr << "CommandParser::parse execute returns '" << reply <<"'"<<endl;
+	cerr << "CommandParser::parse execute reply '" << reply << "'" << endl;
 
       if (reply.empty())
 	return "";
       else
-	return reply + "\n";
+	return reply + newline;
     }
 
   // special case: command may be a string of shortcut keys
@@ -147,7 +152,7 @@ string CommandParser::parse (const string& command, const string& arguments)
 
   if (ikey != length)  {
     fault = true;
-    return "invalid command: " + command + "\n";
+    return "invalid command: " + command + newline;
   }
 
   // otherwise, every character in the command is a shortcut key
@@ -181,31 +186,50 @@ string CommandParser::help (const string& command)
     bool have_shortcuts = false;
     unsigned maxlen = 0;
 
+    /* if the CommandParser is nested, then prefix its name to all
+       command names printed in the help */
+
+    string nested_prefix = "";
+    if (nested.length())
+      nested_prefix = nested + " ";
+
     /* determine the maximum command string length, 
        and if any shortcut keys are enabled */
 
     for (icmd=0; icmd < commands.size(); icmd++) {
-      if (commands[icmd]->command.length() > maxlen)
-	maxlen = commands[icmd]->command.length();
+      string cmd = nested_prefix + commands[icmd]->command;
+      if (cmd.length() > maxlen)
+	maxlen = cmd.length();
       if (commands[icmd]->shortcut)
 	have_shortcuts = true;
     }
 
     /* include a space after the command column */
-    maxlen ++;
+    if (have_shortcuts)
+      maxlen ++;
+    else
+      maxlen += 3;  // looks better with a bit more space
 
-    string help_str = "Available commands";
+    string help_str;
+
+    if (nested.empty())
+      help_str = "Available commands";
+    else
+      help_str = "usage";
 
     if (have_shortcuts)
       help_str += " (shortcut keys in [] brackets)";
 
-    help_str += ":\n\n";
+    help_str += ":\n";
+
+    if (nested.empty())
+      help_str += "\n";
 
     for (icmd=0; icmd < commands.size(); icmd++) {
 
       /* pad command strings with spaces on the right, up to the maximum
 	 command string length (plus one space) */
-      help_str += pad(maxlen, commands[icmd]->command);
+      help_str += pad(maxlen, nested_prefix + commands[icmd]->command);
 
       /* if any shortcut keys are enabled, print these */
       if (have_shortcuts) {
@@ -223,12 +247,16 @@ string CommandParser::help (const string& command)
     if (have_shortcuts)
       maxlen += 4;
 
-    help_str += "\n" 
-      + pad(maxlen, "quit")    + "quit program\n"
-      + pad(maxlen, "verbose") + "toggle verbosity\n\n"
-      "Type \"help command\" to get detailed help on each command\n";
+    if (nested.empty())
+      help_str += "\n" +
+	pad(maxlen, "quit")    + "quit program\n" +
+	pad(maxlen, "verbose") + "toggle verbosity\n";
 
-    return help_str + "\n";
+    help_str += "\n"
+      "Type \"" + nested_prefix + "help <command>\" "
+      "to get detailed help on each command\n";
+
+    return help_str;
   }
 
   // a command was specified
@@ -242,10 +270,10 @@ string CommandParser::help (const string& command)
   for (icmd=0; icmd < commands.size(); icmd++)
     if (command == commands[icmd]->command) {
       string help_str = command +": "+ commands[icmd]->help +"\n\n";
-      if (commands[icmd]->detail.empty())
+      if (commands[icmd]->detail().empty())
 	return help_str + "\t no detailed help available\n";
       else
-	return help_str + commands[icmd]->detail + "\n";
+	return help_str + commands[icmd]->detail() + "\n";
     }
       
   return "invalid command: " + command + "\n";
@@ -266,4 +294,36 @@ void CommandParser::add_command (Method* command)
   }
 
   commands.push_back (command);
+}
+
+CommandParser::Nested::Nested( CommandParser* _parser,
+			       const string& _command,
+			       const string& _help,
+			       char _shortcut )
+{
+  command  = _command;
+  help     = _help;
+  shortcut = _shortcut;
+
+  parser   = _parser;
+
+  parser->nested = command;
+}
+
+string CommandParser::Nested::execute (const string& command)
+{
+  return parser->parse(command);
+}
+
+string CommandParser::Nested::detail () const
+{
+  return parser->help();
+}
+
+void CommandParser::import (CommandParser* parser,
+			    const string& command,
+			    const string& help,
+			    char shortcut)
+{
+  add_command( new Nested(parser, command, help, shortcut) );
 }
