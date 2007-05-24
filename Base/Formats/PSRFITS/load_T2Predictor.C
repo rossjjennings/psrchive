@@ -31,6 +31,9 @@ Pulsar::Predictor* load_T2Predictor (fitsfile* fptr, bool verbose)
     throw FITSError (status, "load_T2Predictor", 
                      "fits_get_num_rows T2PREDICT");
 
+  if (!numrows)
+    return 0;
+
   int colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "PREDICT", &colnum, &status);
 
