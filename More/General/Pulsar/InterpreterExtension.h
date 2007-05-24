@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/InterpreterExtension.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/05/24 08:42:30 $
+   $Revision: 1.3 $
+   $Date: 2007/05/24 22:16:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Interpreter_Extension_h
@@ -26,10 +26,18 @@ namespace Pulsar {
 
     //! get the current Pulsar
     Archive* get ()
-      { return interpreter->get(); }
+    { return interpreter->get(); }
 
     std::vector<std::string> setup (const std::string& text)
-      { return interpreter->setup (text); }
+    { return interpreter->setup (text); }
+
+    //! Parses arguments as a single instance of T
+    template<typename T> T setup (const std::string& args)
+    { return interpreter->setup<T> (args); }
+
+    //! Parses arguments as an optional single instance of T
+    template<typename T> T setup (const std::string& args, T default_value)
+    { return interpreter->setup<T> (args, default_value); }
 
     std::string response (Status s, const std::string& text = "")
       { return interpreter->response ((Interpreter::Status)s, text); }
@@ -39,7 +47,7 @@ namespace Pulsar {
     friend class Interpreter;
 
     //! The parent Interpreter
-    Reference::To<Interpreter> interpreter;
+    Reference::To<Interpreter, false> interpreter;
 
   };
 
