@@ -60,6 +60,7 @@ libgenutil_la_SOURCES = \
         eccentric_anomaly.c \
         endian.c \
         errscale.c \
+	expand.C \
 	evaluate.C \
         fcomp.C \
 	filesize.c \
@@ -107,7 +108,7 @@ TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98 \
 	test_endian test_environ test_sum test_normal \
 	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord
 
-check_PROGRAMS = $(TESTS) test_CommandParser test_Angle
+check_PROGRAMS = $(TESTS) test_CommandParser test_Angle test_expand
 
 test_evaluate_SOURCES           = test_evaluate.C
 test_Cartesian_SOURCES		= test_Cartesian.C
@@ -122,6 +123,7 @@ test_TemporaryFile_SOURCES	= test_TemporaryFile.C
 test_moment2_SOURCES		= test_moment2.C
 test_MJD_ostream_SOURCES	= test_MJD_ostream.C
 test_sky_coord_SOURCES		= test_sky_coord.C
+test_expand_SOURCES		= test_expand.C
 
 #############################################################################
 #

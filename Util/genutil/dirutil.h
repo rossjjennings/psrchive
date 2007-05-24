@@ -47,6 +47,9 @@ void dirglobtree (std::vector<std::string>* filenames,
 void dirglobtree (std::vector<std::string>* filenames, 
 		  const std::string& root, const std::string& pattern);
 
+// expands ~
+std::string expand (const std::string& filename);
+
 extern "C" {
 #endif /* #ifdef __cplusplus */
 
