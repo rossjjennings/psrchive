@@ -57,7 +57,8 @@ int main (int argc, char** argv)
   bool help = false;
 
   Pulsar::Interpreter interpreter;
-  interpreter.import( new Pulsar::CalInterpreter );
+  interpreter.import( new Pulsar::CalInterpreter,
+		      "cal", "polarimetric calibration" );
 
   char c;
   while ((c = getopt(argc, argv, "hHM:qvV")) != -1) 
