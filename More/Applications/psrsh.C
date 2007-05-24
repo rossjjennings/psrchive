@@ -7,6 +7,8 @@
 
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Interpreter.h"
+#include "Pulsar/CalInterpreter.h"
+
 #include "Pulsar/Archive.h"
 
 #include "strutil.h"
@@ -45,11 +47,7 @@ void usage (const string& script)
     "See "PSRCHIVE_HTTP"/manuals/psrsh for more details \n" << endl;
 }
 
-void commands ()
-{
-  Pulsar::Interpreter interpreter;
-  cout << interpreter.help("") << endl;
-}
+
 
 int main (int argc, char** argv)
 {
@@ -57,6 +55,9 @@ int main (int argc, char** argv)
   char* metafile = NULL;
   // help requested
   bool help = false;
+
+  Pulsar::Interpreter interpreter;
+  interpreter.import( new Pulsar::CalInterpreter );
 
   char c;
   while ((c = getopt(argc, argv, "hHM:qvV")) != -1) 
@@ -68,7 +69,7 @@ int main (int argc, char** argv)
       break;
 
     case 'H':
-      commands();
+      cout << interpreter.help("") << endl;
       return 0;
 
     case 'M':
@@ -107,8 +108,6 @@ int main (int argc, char** argv)
   else
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
-
-  Pulsar::Interpreter interpreter;
 
   if (filenames.empty()) {
 
