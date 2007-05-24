@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.14 $
-   $Date: 2007/04/27 03:23:00 $
+   $Revision: 1.15 $
+   $Date: 2007/05/24 10:54:39 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
@@ -17,7 +17,6 @@
 #include "Pulsar/Calibrator.h"
 #include "MEAL/Complex2.h"
 
-#include "ReferenceAble.h"
 #include "sky_coord.h"
 #include "MJD.h"
 #include "Types.h"
@@ -32,7 +31,7 @@ namespace Pulsar {
   class Archive;
 
   //! Pulsar Observation Database
-  class Database {
+  class Database : public Reference::Able {
 
   public:
 
