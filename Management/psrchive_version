@@ -9,7 +9,7 @@
 # Original: 1999/07/01 by Mark Calabretta
 # Adapted and modified: 2007/05/22 by Willem van Straten
 #
-# $Id: psrchive_version,v 1.1 2007/05/22 02:33:36 straten Exp $
+# $Id: psrchive_version,v 1.2 2007/05/24 06:49:54 straten Exp $
 #-----------------------------------------------------------------------------
 
 if (! $?PSRCHIVE_SYSTEM) then
@@ -19,8 +19,10 @@ endif
 
 if (! $?PSRCHIVE_VERSION) then
 
+  #
   # If the version is not set, assume that this is the first time that
-  # this script was sourced and try to set PSRCHIVE_VERSION to current
+  # this script was sourced and set PSRCHIVE_VERSION to current
+  #
 
   if (-d $PSRCHIVE_SYSTEM/current/bin) then
 
@@ -38,19 +40,24 @@ if (! $?PSRCHIVE_VERSION) then
 
 else
 
+  #
+  # If the version is set, then either report it or change it
+  #
+
+  # If no version is selected, then report the current version
   if (! $?psrchive_version) set psrchive_version = ""
   if ("$psrchive_version" == "" || "$psrchive_version" == ".") then
-     echo "PSRCHIVE system: $PSRCHIVE_SYSTEM version: $PSRCHIVE_VERSION"
+     echo "PSRCHIVE System: $PSRCHIVE_SYSTEM Version: $PSRCHIVE_VERSION"
      exit
   endif
 
-  # Check legitimacy.
+  # Check legitimacy of selected version
   if (! -d $PSRCHIVE_SYSTEM/$psrchive_version/bin) then
      echo "Error: $PSRCHIVE_SYSTEM/$psrchive_version does not exist."
      exit
   endif
 
-  # Modify PATH.
+  # Modify PATH
   setenv PATH `echo $PATH | sed -e "s|$PSRCHIVE_SYSTEM/$PSRCHIVE_VERSION|$PSRCHIVE_SYSTEM/$psrchive_version|"`
 
   # Redefine PSRCHIVE_VERSION.
