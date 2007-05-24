@@ -1,0 +1,19 @@
+#!/bin/csh -fe
+
+if ( "$1" == "" || "$1" == "-h" || "$1" == "--help" ) then
+  echo
+  echo "developer: updates CVS administration files with developer name"
+  echo
+  echo "usage:"
+  echo "  Management/developer USER"
+  echo
+  echo "where:"
+  echo "  USER is a sourceforge user name"
+  echo
+  exit
+endif
+
+echo "Changing developer name to $1"
+
+find . -name Root | awk -v name=$1 '{print "echo "name"@psrchive.cvs.sourceforge.net:/cvsroot/psrchive > "$1}' | csh -f
+
