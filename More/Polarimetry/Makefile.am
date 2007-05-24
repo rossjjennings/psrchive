@@ -5,6 +5,7 @@ nobase_include_HEADERS = \
         Pulsar/Calibrator.h \
         Pulsar/CalibratorPlotter.h \
         Pulsar/CalibratorStokesInfo.h \
+	Pulsar/CalInterpreter.h \
         Pulsar/CoherencyMeasurement.h \
         Pulsar/CoherencyMeasurementSet.h \
         Pulsar/ConvertMJD.h \
@@ -54,6 +55,7 @@ nobase_include_HEADERS = \
 libPolarimetry_la_SOURCES = \
         Calibrator.C \
         CalibratorStokesInfo.C \
+	CalInterpreter.C \
         choose.C \
         CoherencyMeasurement.C \
         CoherencyMeasurementSet.C \
