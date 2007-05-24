@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.31 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.32 $
+   $Date: 2007/05/24 10:54:31 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -185,6 +185,12 @@ namespace Pulsar {
   };
 
 }
+
+//! Calibrator::Type output operator
+std::ostream& operator << (std::ostream&, Pulsar::Calibrator::Type);
+
+//! Calibrator::Type input operator
+std::istream& operator >> (std::istream&, Pulsar::Calibrator::Type&);
 
 #endif
 

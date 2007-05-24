@@ -126,3 +126,25 @@ Pulsar::Calibrator::new_solution (const string& archive_class) const
   return output.release();
 }
 
+//! Calibrator::Type output operator
+std::ostream& operator << (std::ostream& os, Pulsar::Calibrator::Type type)
+{
+  return os << Pulsar::Calibrator::Type2str (type);
+}
+
+//! Calibrator::Type input operator
+std::istream& operator >> (std::istream& is, Pulsar::Calibrator::Type& type)
+{
+  std::streampos pos = is.tellg();
+  std::string ss;
+
+  is >> ss;
+  type = Pulsar::Calibrator::str2Type (ss.c_str());
+
+  if (type == (Pulsar::Calibrator::Type) -1) {
+    is.setstate(std::istream::failbit);
+    is.seekg(pos);
+  }
+
+  return is;
+}
