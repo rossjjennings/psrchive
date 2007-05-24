@@ -4,22 +4,25 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <iostream>
-#include <vector>
-
-#include "ReferenceAble.h"
 
 // #define _DEBUG 1
 
+#include "ReferenceAble.h"
+
+using namespace std;
+
 #if _DEBUG
-std::vector<Reference::Able*> Reference::Able::null_ables(){
-  std::vector<Able*> nullie;
+
+#include <iostream>
+
+vector<Reference::Able*> Reference::Able::null_ables(){
+  vector<Able*> nullie;
   return nullie;
 }
 
 int Reference::Able::instantiation_count = 0;
 int Reference::Able::full_count = 0;
-std::vector<Reference::Able*> Reference::Able::ables = Reference::Able::null_ables();
+vector<Reference::Able*> Reference::Able::ables = Reference::Able::null_ables();
 #endif
 
 //////////////////////////////////////////////////////////////////////////
@@ -63,7 +66,7 @@ Reference::Able::~Able ()
        << " references" <<endl;
 #endif
 
-  std::vector<Able**>::iterator it = __reference_list.begin();
+  vector<Able**>::iterator it = __reference_list.begin();
   while (it != __reference_list.end()) {
     *(*it) = 0;
     it ++;
@@ -117,7 +120,7 @@ void Reference::Able::__remove_reference (bool active, Able** ref_address,
   // function is declared const, but __reference_list must be modified
   Able* thiz = const_cast<Able*> (this);
 
-  std::vector<Able**>::iterator it = thiz->__reference_list.begin();
+  vector<Able**>::iterator it = thiz->__reference_list.begin();
   while (it != thiz->__reference_list.end())  {
     if (*it == ref_address) {
       thiz->__reference_list.erase(it);
@@ -139,7 +142,7 @@ void Reference::Able::__remove_reference (bool active, Able** ref_address,
   if (active && auto_delete && __is_on_heap() && __reference_count == 0) {
 
 #ifdef _DEBUG
-  cerr << "Reference::Able::__remove_reference delete this" << endl;
+    cerr << "Reference::Able::__remove_reference delete this=" << this << endl;
 #endif
 
     delete this;
