@@ -252,6 +252,20 @@ void Pulsar::Interpreter::import (Extension* ext)
   CommandParser::import (ext);
 }
 
+//! Import a nested Extension
+void Pulsar::Interpreter::import (Extension* ext, 
+				  const std::string& command, 
+				  const std::string& help)
+{
+  if (ext->interpreter)
+    throw Error (InvalidState, "Pulsar::Interpreter::import",
+		 "Extension already owned by another Interpreter");
+
+  ext->interpreter = this;
+
+  CommandParser::import (ext, command, help);
+}
+
 string Pulsar::Interpreter::get_report (const string& args)
 {
   Pulsar::Archive::agent_report ();

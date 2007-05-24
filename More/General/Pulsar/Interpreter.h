@@ -183,6 +183,11 @@ namespace Pulsar {
     //! Import the Extension
     void import (Extension*);
 
+    //! Import a nested Extension
+    void import (Extension*, 
+		 const std::string& command, 
+		 const std::string& help);
+
   protected:
     
     //! the Archive stack
