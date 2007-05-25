@@ -278,4 +278,7 @@ T Pulsar::Interpreter::setup (const std::string& args, T default_value)
     return default_value;
 }
 
+// standard shell constructor defined in More/Polarimetry/standard_shell.C
+Pulsar::Interpreter* standard_shell ();
+
 #endif
