@@ -8,7 +8,6 @@
 #include "Pulsar/Interpreter.h"
 #include "Pulsar/InterpreterExtension.h"
 #include "Pulsar/InterpreterVariables.h"
-#include "Pulsar/ZapInterpreter.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -220,8 +219,6 @@ void Pulsar::Interpreter::init()
     ( &Interpreter::toggle_clobber,
       "clobber", "toggle overwrite permission",
       "usage: clobber \n");
-
-  import( new ZapInterpreter );
 }
 
 Pulsar::Interpreter::Interpreter()
@@ -541,22 +538,26 @@ void Pulsar::Interpreter::initialize_interface (bool need_archive)
 {
   if (!interface)
     interface = new Variables;
+
+  interface->set_indentation (" ");
+
   if (need_archive)
     interface->set_instance (get());
 }
 
 string Pulsar::Interpreter::edit (const string& args)
 try { 
-  vector<string> arguments = setup (args);
-
-  if (!arguments.size())
-    return response (Fail, "please specify at least one editor command");
 
   // replace variable names with values
   if (args == "help") {
     initialize_interface (false);
     return interface->help (true);
   }
+
+  vector<string> arguments = setup (args);
+
+  if (!arguments.size())
+    return response (Fail, "please specify at least one editor command");
 
   initialize_interface();
 
