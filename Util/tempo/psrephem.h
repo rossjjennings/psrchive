@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.39 $
-   $Date: 2007/05/22 23:58:58 $
+   $Revision: 1.40 $
+   $Date: 2007/05/25 00:06:52 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -28,9 +28,6 @@ class psrephem : public Pulsar::Parameters
   friend class psrParams;
 
  public:
-
-  // verbosity flag
-  static bool verbose;
 
   //! Return a new, copy constructed instance of self
   Parameters* clone () const;
