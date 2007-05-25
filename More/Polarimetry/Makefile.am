@@ -112,6 +112,7 @@ libPolarimetry_la_SOURCES = \
         SingleAxisPolynomial.C \
         SingleAxisSolver.C \
         SourceInfo.C \
+	standard_shell.C \
         StandardModel.C \
         SystemCalibrator.C \
         TemplateUncertainty.C \

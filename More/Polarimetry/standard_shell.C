@@ -1,0 +1,23 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2007 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+
+#include "Pulsar/ZapInterpreter.h"
+#include "Pulsar/CalInterpreter.h"
+
+Pulsar::Interpreter* standard_shell ()
+{
+  Reference::To<Pulsar::Interpreter> interpreter = new Pulsar::Interpreter;
+
+  interpreter->import( new Pulsar::ZapInterpreter,
+		       "zap", "zap data using the specified method" );
+
+  interpreter->import( new Pulsar::CalInterpreter,
+		       "cal", "polarimetric calibration" );
+
+  return interpreter.release();
+}
+
