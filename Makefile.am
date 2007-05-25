@@ -31,3 +31,8 @@ install-am:
 	@echo
 	@echo
 
+where:
+	@echo
+	@echo "PSRCHIVE will be installed in ${prefix}"
+	@echo
+
