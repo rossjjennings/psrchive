@@ -128,14 +128,9 @@ int main(int argc, char** argv)
 					} else {
 						mouseY_channel = time_get_channel(mouseY, int_length, num_subints);
 						mouseY2_channel = time_get_channel(mouseY2, int_length, num_subints);
-						cout << "mY chan: " << mouseY_channel << " mY2 chan: " << mouseY2_channel << endl;
-						cout << "mY : " << mouseY << " mY2: " << mouseY2 << endl;
 
 						if ((mouseY_channel - mouseY2_channel < -1) || (mouseY_channel - mouseY2_channel > 1)) {
 							zoomed = true;
-
-							cout << "join option returns: " << join_option(mouseY, mouseY2, bandwidth, plot_type) << endl;
-
 							time_fui->set_value("y:win", join_option(mouseY, mouseY2, bandwidth, plot_type));
 							redraw(mod_archive, time_orig_plot, time_mod_plot, zoomed);
 						}
@@ -237,12 +232,6 @@ int main(int argc, char** argv)
 					}
 				}
 				break;
-
-			case 'w':
-				cout << "X: " << mouseX2 << "Y: " << mouseY2 << endl;
-				cout << "base nbins: " << base_archive->get_nbin() << "mod nbins: " << mod_archive->get_nbin() << endl;
-				break;
-
 		}
 	}
 }
