@@ -61,6 +61,8 @@ AC_DEFUN([SWIN_DEBUG],
       AC_MSG_NOTICE([   FFLAGS set by user.])
     fi
 
+    rm -f .ac_strip_g
+
   else
     AC_MSG_WARN([Debugging information not disabled.  Binaries may be large.])
   fi
