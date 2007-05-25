@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/ArchiveTI.h"
+#include "Pulsar/Profile.h"
 #include "Pulsar/Check.h"
 
 #include "dirutil.h"
@@ -52,13 +53,16 @@ using namespace Pulsar;
 
 int main (int argc, char** argv) try {  
 
+  // load files quickly (no data)
+  Pulsar::Profile::no_amps = true;
+
   // print in degrees
   Angle::default_type = Angle::Degrees;
 
   // suppress warnings by default
   Pulsar::Archive::set_verbosity (0);
 
-  // disable certain sanity checks
+  // disable sanity checks that try to load Integration data
   Pulsar::Archive::Check::disable ("Dedispersed");
   Pulsar::Archive::Check::disable ("DeFaradayed");
 
@@ -71,11 +75,17 @@ int main (int argc, char** argv) try {
   // so that a space precedes each parameter processed
   tui.set_indentation (" ");
 
+  // print the name of each file processed
+  bool output_filename = true;
+
+  // save processed files
   bool save = false;
+
+  // save with a new extension
   string save_ext;
 
   int gotc;
-  while ((gotc = getopt (argc, argv, "c:e:hHmvV")) != -1)
+  while ((gotc = getopt (argc, argv, "c:e:hHmqvV")) != -1)
     switch (gotc) {
 
     case 'c':
@@ -117,6 +127,10 @@ int main (int argc, char** argv) try {
       save = true;
       break;
 
+    case 'q':
+      output_filename = false;
+      break;
+
     case 'v':
       verbose = true;
       Pulsar::Archive::set_verbosity(2);
@@ -152,7 +166,8 @@ int main (int argc, char** argv) try {
     Reference::To<Pulsar::Archive> archive;
     archive = Pulsar::Archive::load(filenames[ifile]);
 
-    cout << archive->get_filename();
+    if (output_filename)
+      cout << archive->get_filename();
 
     tui.set_instance (archive);
 
