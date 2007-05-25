@@ -18,6 +18,26 @@ Pulsar::ChannelZapMedian::ChannelZapMedian ()
   window_size = 21;
 }
 
+//! Get the text interface to the configuration attributes
+TextInterface::Class* Pulsar::ChannelZapMedian::get_interface ()
+{
+  return new Interface (this);
+}
+
+Pulsar::ChannelZapMedian::Interface::Interface (ChannelZapMedian* instance)
+{
+  if (instance)
+    set_instance (instance);
+
+  add( &ChannelZapMedian::get_window_size,
+       &ChannelZapMedian::set_window_size,
+       "window", "Size of median smoothing window" );
+
+  add( &ChannelZapMedian::get_cutoff_threshold,
+       &ChannelZapMedian::set_cutoff_threshold,
+       "cutoff", "Cutoff threshold" );
+}
+
 //! Set integration weights
 void Pulsar::ChannelZapMedian::weight (Integration* integration)
 {
