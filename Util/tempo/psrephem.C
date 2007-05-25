@@ -46,7 +46,7 @@ vector<string> psrephem::extensions ()
   return retval;
 }
 
-bool psrephem::verbose = 0;
+bool Pulsar::Parameters::verbose = 0;
 
 static char ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
 
