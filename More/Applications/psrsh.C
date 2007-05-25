@@ -7,7 +7,6 @@
 
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Interpreter.h"
-#include "Pulsar/CalInterpreter.h"
 
 #include "Pulsar/Archive.h"
 
@@ -56,9 +55,7 @@ int main (int argc, char** argv)
   // help requested
   bool help = false;
 
-  Pulsar::Interpreter interpreter;
-  interpreter.import( new Pulsar::CalInterpreter,
-		      "cal", "polarimetric calibration" );
+  Pulsar::Interpreter* interpreter = standard_shell();
 
   char c;
   while ((c = getopt(argc, argv, "hHM:qvV")) != -1) 
@@ -70,7 +67,7 @@ int main (int argc, char** argv)
       break;
 
     case 'H':
-      cout << interpreter.help("") << endl;
+      cout << interpreter->help("") << endl;
       return 0;
 
     case 'M':
@@ -118,11 +115,11 @@ int main (int argc, char** argv)
     }
 
     // no arguments: interactive mode
-    interpreter.initialize_readline ("psrsh");
-    interpreter.set_reply( true );
+    interpreter->initialize_readline ("psrsh");
+    interpreter->set_reply( true );
     
-    while (!interpreter.quit)
-      cout << interpreter.parse( interpreter.readline() );
+    while (!interpreter->quit)
+      cout << interpreter->parse( interpreter->readline() );
 
   }
   else {
@@ -135,8 +132,8 @@ int main (int argc, char** argv)
     // two or more arguments: script mode
 
     for (int i=0; i<filenames.size(); i++) try {
-      interpreter.set( Pulsar::Archive::load (filenames[i]) );
-      interpreter.script( script );
+      interpreter->set( Pulsar::Archive::load (filenames[i]) );
+      interpreter->script( script );
     }
     catch (Error& error) {
       cerr << "psrsh: error while processing " << filenames[i] << ":\n"
