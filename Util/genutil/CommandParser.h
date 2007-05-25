@@ -51,6 +51,9 @@ class CommandParser : public Reference::Able {
   //! parse a command and its arguments
   std::string parse (const std::string& command, const std::string& args);
 
+  //! string returned on an empty command
+  virtual std::string empty ();
+
   //! quit flag raised by "quit"
   bool quit;
 

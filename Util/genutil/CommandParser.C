@@ -67,6 +67,11 @@ string CommandParser::parse (const string& commandargs)
   return parse (command, cmdargs);
 }
 
+string CommandParser::empty ()
+{
+  return "";
+}
+
 string CommandParser::parse (const string& command, const string& arguments)
 {
   if (debug)
@@ -74,7 +79,7 @@ string CommandParser::parse (const string& command, const string& arguments)
 
   // nested CommandParsers may support empty command strings
   if (command.empty() && nested.empty())
-    return "";
+    return empty();
 
   if (debug)
     cerr << "CommandParser::parse command not empty" << endl;
@@ -140,6 +145,10 @@ string CommandParser::parse (const string& command, const string& arguments)
   // special case: command may be a string of shortcut keys
 
   unsigned length = command.length();
+
+  if (length == 0)
+    return empty();
+
   unsigned ikey = 0;
 
   for (ikey=0; ikey < length; ikey++) {
