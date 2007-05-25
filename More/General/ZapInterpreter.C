@@ -14,20 +14,81 @@
 
 using namespace std;
 
+string index_help (const string& cmd)
+{
+  return
+    "usage: " + cmd + " iex1 [iex2 ...]\n"
+    "  string iexN   unsigned index exression: [i|i1-i2|-iend|istart-]";
+}
+
+string pair_help (const string& cmd)
+{
+  return
+    "usage: " + cmd + " i1,j1 [i2,j2 ...]\n"
+    "  string i1,j1  unsigned index pair";
+}
+
 Pulsar::ZapInterpreter::ZapInterpreter ()
 {
   add_command 
-    ( &ZapInterpreter::zap, 'z',
-      "zap", "zap data using the specified algorithm",
-      "usage: zap <median|chan|int> [indeces]\n"
-      "  median            median smooth the passband and zap spikes \n"
-      "  chan              zap channels specified by [indeces] \n"
-      "  subint            zap integrations specified by [indeces] \n"
-      "  such              zap only (subint,chan) specified in [indeces] \n");
+    ( &ZapInterpreter::median, 
+      "median", "median smooth the passband and zap spikes",
+      "usage: median <TI> \n"
+      "  type 'median help' for text interface help \n" );
+
+  add_command
+    ( &ZapInterpreter::chan,
+      "chan", "zap specified channels",
+      index_help("chan") );
+
+  add_command
+    ( &ZapInterpreter::subint,
+      "subint", "zap specified integrationss",
+      index_help("subint") );
+
+  add_command
+    ( &ZapInterpreter::such,
+      "such", "zap specified integration and channel",
+      pair_help("such") );
+
 }
 
 Pulsar::ZapInterpreter::~ZapInterpreter ()
 {
+}
+
+
+string Pulsar::ZapInterpreter::median (const string& args) try
+{ 
+  vector<string> arguments = setup (args);
+
+  if (!zap_median)
+    zap_median = new ChannelZapMedian;
+
+  if (!arguments.size()) {
+    zap_median->ChannelWeight::weight( get() );
+    return response (Good);
+  }
+
+  //! Zap median interface
+  Reference::To<TextInterface::Class> interface = zap_median->get_interface();
+
+  string retval;
+  for (unsigned icmd=0; icmd < arguments.size(); icmd++) {
+    if (icmd)
+      retval += " ";
+    retval += interface->process (arguments[icmd]);
+  }
+
+  return retval;
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::ZapInterpreter::empty ()
+{
+  return response (Fail, help());
 }
 
 void parse_indeces (vector<unsigned>& indeces,
@@ -35,9 +96,52 @@ void parse_indeces (vector<unsigned>& indeces,
 		    unsigned limit)
 {
   // note that the first argument is the command name
-  for (unsigned i=1; i<arguments.size(); i++)
+  for (unsigned i=0; i<arguments.size(); i++)
     TextInterface::parse_indeces (indeces, "[" + arguments[i] + "]", limit);
 }
+
+string Pulsar::ZapInterpreter::chan (const string& args) try 
+{
+  vector<string> arguments = setup (args);
+
+  vector<unsigned> channels;
+  parse_indeces (channels, arguments, get()->get_nchan());
+
+  // zap selected channels in all sub-integrations
+  unsigned nsubint = get()->get_nsubint();
+  for (unsigned isub=0; isub<nsubint; isub++) {
+    Integration* subint = get()->get_Integration(isub);
+    for (unsigned i=0; i<channels.size(); i++)
+      subint->set_weight( channels[i], 0.0 );
+  }
+  
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
+
+string Pulsar::ZapInterpreter::subint (const string& args) try 
+{
+  vector<string> arguments = setup (args);
+
+  vector<unsigned> subints;
+  parse_indeces (subints, arguments, get()->get_nsubint());
+
+  // zap all channels in selected sub-integrations
+  unsigned nchan = get()->get_nchan();
+  for (unsigned i=0; i<subints.size(); i++) {
+    Integration* subint = get()->get_Integration( subints[i] );
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+      subint->set_weight( ichan, 0.0 );
+  }
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
 
 template<typename T, typename U>
 void parse_pairs (vector< pair<T,U> >& pairs,
@@ -45,11 +149,11 @@ void parse_pairs (vector< pair<T,U> >& pairs,
 		  T limit_first, const string& name_first,
 		  U limit_second, const string& name_second)
 {
-  pairs.resize( arguments.size() - 1);
+  pairs.resize( arguments.size() );
 
   for (unsigned i=0; i<pairs.size(); i++) {
 
-    pairs[i] = fromstring< pair<T,U> > ( arguments[i+1] );
+    pairs[i] = fromstring< pair<T,U> > ( "(" + arguments[i] + ")" );
     
     if (pairs[i].first >= limit_first) {
       Error error (InvalidParam, "parse_pairs");
@@ -69,65 +173,18 @@ void parse_pairs (vector< pair<T,U> >& pairs,
   }
 }
 
-string Pulsar::ZapInterpreter::zap (const string& args)
-try { 
+string Pulsar::ZapInterpreter::such (const string& args) try 
+{
   vector<string> arguments = setup (args);
 
-  if (!arguments.size())
-    return response (Fail, "please specify zapping method");
-
-  if (arguments[0] == "median") {
-    if (!zap_median)
-      zap_median = new ChannelZapMedian;
-    
-    zap_median->ChannelWeight::weight( get() );
-  }
-
-  else if (arguments[0] == "chan") {
-
-    vector<unsigned> channels;
-    parse_indeces (channels, arguments, get()->get_nchan());
-
-    // zap selected channels in all sub-integrations
-    unsigned nsubint = get()->get_nsubint();
-    for (unsigned isub=0; isub<nsubint; isub++) {
-      Integration* subint = get()->get_Integration(isub);
-      for (unsigned i=0; i<channels.size(); i++)
-	subint->set_weight( channels[i], 0.0 );
-    }
-
-  }
-
-  else if (arguments[0] == "subint") {
-
-    vector<unsigned> subints;
-    parse_indeces (subints, arguments, get()->get_nsubint());
-
-    // zap all channels in selected sub-integrations
-    unsigned nchan = get()->get_nchan();
-    for (unsigned i=0; i<subints.size(); i++) {
-      Integration* subint = get()->get_Integration( subints[i] );
-      for (unsigned ichan=0; ichan<nchan; ichan++)
-	subint->set_weight( ichan, 0.0 );
-    }
-
-  }
-
-  else if (arguments[0] == "such") {
-
-    vector< pair<unsigned,unsigned> > pairs;
-    parse_pairs (pairs, arguments,
-		 get()->get_nsubint(), "subint",
-		 get()->get_nchan(), "chan");
-
-    for (unsigned i=0; i<pairs.size(); i++)
-      get()->get_Integration(pairs[i].first)->set_weight(pairs[i].second,0.0);
-
-  }
-
-  else
-    return response (Fail, "unrecognized zapping method '" + args + "'");
-
+  vector< pair<unsigned,unsigned> > pairs;
+  parse_pairs (pairs, arguments,
+	       get()->get_nsubint(), "subint",
+	       get()->get_nchan(), "chan");
+  
+  for (unsigned i=0; i<pairs.size(); i++)
+    get()->get_Integration(pairs[i].first)->set_weight(pairs[i].second,0.0);
+  
   return response (Good);
 }
 catch (Error& error) {

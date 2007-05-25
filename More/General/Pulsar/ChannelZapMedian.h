@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ChannelZapMedian.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.5 $
+   $Date: 2007/05/25 10:59:59 $
    $Author: straten $ */
 
 #ifndef _Pulsar_ChannelZapMedian_H
 #define _Pulsar_ChannelZapMedian_H
 
 #include "Pulsar/ChannelWeight.h"
+#include "TextInterface.h"
 
 namespace Pulsar {
   
@@ -25,6 +26,15 @@ namespace Pulsar {
     
     //! Default constructor
     ChannelZapMedian ();
+
+    //! Get the text interface to the configuration attributes
+    TextInterface::Class* get_interface ();
+
+    // Text interface to the ChannelZapMedian class
+    class Interface : public TextInterface::To<ChannelZapMedian> {
+    public:
+      Interface (ChannelZapMedian* = 0);
+    };
 
     //! Set integration weights
     void weight (Integration* integration);
