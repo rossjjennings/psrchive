@@ -17,6 +17,9 @@ bool TextInterface::label_elements = false;
 
 string TextInterface::Class::process (const string& command)
 {
+  if (command == "help")
+    return help ();
+
   string::size_type set = command.find('=');
 
   // if no equals sign is present, assume that command is get key
