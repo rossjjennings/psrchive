@@ -44,7 +44,7 @@ void usage()
 
 int freq_get_channel(float mouseY, double bandwidth, int num_chans, double centre_freq);
 int time_get_channel(float mouseY, double int_length, int num_subints);
-string join_option(float y, float y2, double bandwidth);
+string join_option(float y, float y2, double bandwidth, string type);
 void freq_zap_chan(Pulsar::Archive* arch, int zap_chan);
 void time_zap_subint(Pulsar::Integration* integ);
 void redraw(Pulsar::Archive* arch, Plot* orig_plot, Plot* mod_plot, bool zoom);
@@ -120,7 +120,7 @@ int main(int argc, char** argv)
 
 						if ((mouseY_channel - mouseY2_channel < -1) || (mouseY_channel - mouseY2_channel > 1)) {
 							zoomed = true;
-							freq_fui->set_value("y:win", join_option(mouseY, mouseY2, bandwidth));
+							freq_fui->set_value("y:win", join_option(mouseY, mouseY2, bandwidth, plot_type));
 							redraw(mod_archive, freq_orig_plot, freq_mod_plot, zoomed);
 						}
 						mouseY = 0;
@@ -128,10 +128,15 @@ int main(int argc, char** argv)
 					} else {
 						mouseY_channel = time_get_channel(mouseY, int_length, num_subints);
 						mouseY2_channel = time_get_channel(mouseY2, int_length, num_subints);
+						cout << "mY chan: " << mouseY_channel << " mY2 chan: " << mouseY2_channel << endl;
+						cout << "mY : " << mouseY << " mY2: " << mouseY2 << endl;
 
 						if ((mouseY_channel - mouseY2_channel < -1) || (mouseY_channel - mouseY2_channel > 1)) {
 							zoomed = true;
-							time_fui->set_value("y:win", join_option(mouseY, mouseY2, bandwidth));
+
+							cout << "join option returns: " << join_option(mouseY, mouseY2, bandwidth, plot_type) << endl;
+
+							time_fui->set_value("y:win", join_option(mouseY, mouseY2, bandwidth, plot_type));
 							redraw(mod_archive, time_orig_plot, time_mod_plot, zoomed);
 						}
 						mouseY = 0;
@@ -232,6 +237,12 @@ int main(int argc, char** argv)
 					}
 				}
 				break;
+
+			case 'w':
+				cout << "X: " << mouseX2 << "Y: " << mouseY2 << endl;
+				cout << "base nbins: " << base_archive->get_nbin() << "mod nbins: " << mod_archive->get_nbin() << endl;
+				break;
+
 		}
 	}
 }
@@ -250,18 +261,17 @@ int time_get_channel(float mouseY, double int_length, int num_subints)
 	return (int)channel;
 }
 
-string join_option(float y, float y2, double bandwidth)
+string join_option(float y, float y2, double bandwidth, string type)
 {
 	string option = "(";
 	char add[5];
-	if ((bandwidth < 0 && y < y2) || (bandwidth > 0 && y > y2)) {
+	if ((type == "time" && y > y2) || (type == "freq" && y < y2 && bandwidth < 0)) {
 		sprintf(add, "%2.2f", y2);
 		option += add;
 		option += ",";
 		sprintf(add, "%2.2f", y);
 		option += add;
 		option += ")";
-
 	} else {
 		sprintf(add, "%2.2f", y);
 		option += add;
@@ -270,6 +280,7 @@ string join_option(float y, float y2, double bandwidth)
 		option += add;
 		option += ")";
 	}
+
 	return option;
 }
 
