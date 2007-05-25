@@ -21,7 +21,7 @@ if ( ! $?PSRCHIVE_SYSTEM ) then
 endif
 
 
-# The path in which the psrchive distribution will be installed
+# path in which the psrchive distribution will be installed
 #
 set installation_path=$PSRCHIVE_SYSTEM/$1
 
@@ -37,12 +37,12 @@ cd $installation_path/src
 
 echo "Will install psrchive $1 in $installation_path"
 
-# The name of the sourcecode distribution file
+# name of the sourcecode distribution file
 #
 set tarfile=psrchive-$1.tar.gz
 
 
-# The sourceforge download server will redirect to the nearest mirror
+# the SourceForge download server will redirect to the nearest mirror
 #
 set sourceforge=http://downloads.sourceforge.net
 
@@ -87,10 +87,25 @@ if ($?PSRCHIVE_SYSGRP) then
 
 endif
 
-echo "Setting current to $1."
+echo "Linking stable to $1."
 cd $PSRCHIVE_SYSTEM
+
+#
+# for those familiar with atcsver
+#
 rm -f current
 ln -sf $1 current
+
+#
+# for us pulsar astronomers
+#
+rm -f stable
+ln -sf $1 stable
+
+#
+# note that the "next" and "develop" symbolic links always point to the
+# development area, and must be set manually
+#
 
 echo "Installation in $installation_path completed."
 
