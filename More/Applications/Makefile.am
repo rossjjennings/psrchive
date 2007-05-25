@@ -33,7 +33,7 @@ pcm_LDADD = $(LDADD) @PGPLOT_LIBS@ @PTHREAD_LIBS@
 #
 if HAVE_PGPLOT
 
-bin_PROGRAMS += psrplot paas pas psrdiff pacv
+bin_PROGRAMS += psrplot paas pas psrdiff pacv pazi
 
 psrplot_SOURCES = psrplot.C
 psrplot_LDADD = $(LDADD) @PGPLOT_LIBS@
@@ -49,6 +49,9 @@ psrdiff_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 pacv_SOURCES = pacv.C
 pacv_LDADD = $(LDADD) @PGPLOT_LIBS@
+
+pazi_SOURCES = pazi.C
+pazi_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 endif
 
