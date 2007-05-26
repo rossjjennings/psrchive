@@ -1,0 +1,62 @@
+//-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2007 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+
+/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/ThreadContext.h.in,v $
+   $Revision: 1.1 $
+   $Date: 2007/05/26 23:25:49 $
+   $Author: straten $ */
+
+#ifndef __ThreadContext_h
+#define __ThreadContext_h
+
+#ifdef HAVE_PTHREAD
+#undef HAVE_PTHREAD
+#endif
+
+// the configure script sets this variable
+#define HAVE_PTHREAD @HAVE_PTHREAD@
+
+#if HAVE_PTHREAD
+#include <pthread.h>
+
+class ThreadContext {
+
+public:
+
+  //! Default constructor
+  ThreadContext ();
+
+  //! Destructor
+  ~ThreadContext ();
+
+  //! Obtain the mutual exclusion lock
+  void lock ();
+
+  //! Release the mutual exclusion lock
+  void unlock ();
+
+  //! Wait for a condition
+  void wait ();
+
+  //! Signal a condition
+  void signal ();
+
+protected:
+
+  //! condition signaling
+  pthread_cond_t cond;
+
+  //! mutual exclusion locking
+  pthread_mutex_t mutex;
+
+};
+
+
+#endif // !HAVE_PTHREAD
+
+#endif // !defined(__ThreadContext_h)
