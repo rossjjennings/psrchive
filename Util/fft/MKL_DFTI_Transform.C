@@ -13,8 +13,6 @@
 #include "MKL_DFTI_Transform.h"
 #include "Error.h"
 
-#include <mkl_dfti.h>
-
 using namespace std;
 
 /* ***********************************************************************
@@ -43,7 +41,7 @@ FTransform::MKL_DFTI::Plan::Plan (size_t n, type t)
   else
     status = DftiCreateDescriptor( &plan, DFTI_SINGLE, DFTI_COMPLEX, 1, n );
 
-  if (! DftiErrorClass(Status, DFTI_NO_ERROR))
+  if (! DftiErrorClass(status, DFTI_NO_ERROR))
     throw Error (InvalidState, "FTransform::MKL_DFTI::Plan ctor",
 		 "fail DftiCreateDescriptor");
 
@@ -55,7 +53,7 @@ FTransform::MKL_DFTI::Plan::Plan (size_t n, type t)
     status = DftiSetValue
       ( plan, DFTI_CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX );
 
-    if (! DftiErrorClass(Status, DFTI_NO_ERROR))
+    if (! DftiErrorClass(status, DFTI_NO_ERROR))
       throw Error (InvalidState, "FTransform::MKL_DFTI::Plan ctor",
 		   "fail DftiSetValue DFTI_CONJUGATE_EVEN_STORAGE");
   }
@@ -63,12 +61,12 @@ FTransform::MKL_DFTI::Plan::Plan (size_t n, type t)
 #endif
 
   status = DftiSetValue( plan, DFTI_PLACEMENT, DFTI_NOT_INPLACE );
-  if (! DftiErrorClass(Status, DFTI_NO_ERROR))
+  if (! DftiErrorClass(status, DFTI_NO_ERROR))
     throw Error (InvalidState, "FTransform::MKL_DFTI::Plan ctor",
 		 "fail DftiSetValue DFTI_PLACEMENT");
 
   status = DftiCommitDescriptor( plan );
-  if (! DftiErrorClass(Status, DFTI_NO_ERROR))
+  if (! DftiErrorClass(status, DFTI_NO_ERROR))
     throw Error (InvalidState, "FTransform::MKL_DFTI::Plan ctor",
 		 "fail DftiCommitDescriptor");
 
@@ -80,25 +78,25 @@ FTransform::MKL_DFTI::Plan::Plan (size_t n, type t)
 void FTransform::MKL_DFTI::Plan::frc1d (size_t nfft, float* dest, 
 					const float* src)
 {
-  DftiComputeForward( plan, src, dest );
+  DftiComputeForward( plan, (void*) src, dest );
 }
 
 void FTransform::MKL_DFTI::Plan::fcc1d (size_t nfft, float* dest,
 					const float* src)
 {
-  DftiComputeForward( plan, src, dest );
+  DftiComputeForward( plan, (void*) src, dest );
 }
 
 void FTransform::MKL_DFTI::Plan::bcc1d (size_t nfft, float* dest,
 					const float* src)
 {
-  DftiComputeBackward( plan, src, dest );
+  DftiComputeBackward( plan, (void*) src, dest );
 }
 
 void FTransform::MKL_DFTI::Plan::bcr1d (size_t nfft, float* dest,
 					const float* src)
 {
-  DftiComputeBackward( plan, src, dest );
+  DftiComputeBackward( plan, (void*) src, dest );
 }
 
 #if 0

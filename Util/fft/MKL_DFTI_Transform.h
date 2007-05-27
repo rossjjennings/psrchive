@@ -11,6 +11,8 @@
 
 #include "FTransformAgent.h"
 
+#include <mkl_dfti.h>
+
 namespace FTransform {
 
   class MKL_DFTI {
@@ -31,7 +33,7 @@ namespace FTransform {
       
     protected:
       
-      void* plan;
+      DFTI_DESCRIPTOR_HANDLE plan;
 
     };
 
