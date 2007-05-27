@@ -203,6 +203,7 @@ AC_CONFIG_FILES([Util/Makefile
 		Util/units/Makefile
 		Util/fft/Makefile
 		Util/genutil/Makefile
+		Util/genutil/ThreadContext.h
 		Util/pgutil/Makefile
 		Util/qtutil/Makefile
 		Util/fitsutil/Makefile
