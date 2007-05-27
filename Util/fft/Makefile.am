@@ -5,10 +5,29 @@ include_HEADERS = interpolate.h median_smooth.h FTransform.h \
 	IPP_Transform.h MKL_Transform.h MKL_DFTI_Transform.h \
 	FFTW3_Transform.h FFTW_Transform.h QuaternionFT.h
 
-libpsrfft_la_SOURCES = FTransformAgent.C FTransformAgent.h FTransformPlan.h \
-	FTransform.C IPP_Transform.C MKL_Transform.C MKL_DFTI_Transform.C   \
-	FFTW3_Transform.C FFTW_Transform.C QuaternionFT.C		    \
+libpsrfft_la_SOURCES = FTransformAgent.C FTransformAgent.h \
+	FTransformPlan.h FTransform.C QuaternionFT.C	   \
 	shift.C fccf.f ffft.f
+
+if HAVE_MKL_DFTI
+libpsrfft_la_SOURCES += MKL_DFTI_Transform.C
+endif
+
+if HAVE_MKL
+libpsrfft_la_SOURCES += MKL_Transform.C
+endif
+
+if HAVE_IPP
+libpsrfft_la_SOURCES += IPP_Transform.C
+endif
+
+if HAVE_FFTW
+libpsrfft_la_SOURCES += FFTW_Transform.C
+endif
+
+if HAVE_FFTW3
+libpsrfft_la_SOURCES += FFTW3_Transform.C
+endif
 
 TESTS = test_frexp test_enum test_normalization test_interpolate \
 	test_real_complex test_QuaternionFT
