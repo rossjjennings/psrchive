@@ -10,6 +10,10 @@
 
 #include "FTransformAgent.h"
 
+#ifdef HAVE_MKL_DFTI
+#include "MKL_DFTI_Transform.h"
+#endif
+
 #ifdef HAVE_MKL
 #include "MKL_Transform.h"
 #endif
@@ -38,6 +42,10 @@ static int initialise()
 {
 #ifdef HAVE_MKL
   FTransform::MKL::Agent::enlist ();
+#endif
+
+#ifdef HAVE_MKL_DFTI
+  FTransform::MKL_DFTI::Agent::enlist ();
 #endif
 
 #ifdef HAVE_FFTW3
