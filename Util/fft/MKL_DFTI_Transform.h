@@ -49,7 +49,7 @@ namespace FTransform {
 
     protected:
 
-      void* plan;
+      DFTI_DESCRIPTOR_HANDLE plan;
 
     };
 
