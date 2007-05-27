@@ -9,7 +9,9 @@
 
 // #define _DEBUG 1
 
-std::vector<const void*> Reference::HeapTracked::__heap_addresses;
+using namespace std;
+
+vector<const void*> Reference::HeapTracked::__heap_addresses;
 
 bool Reference::verbose = false;
 
@@ -65,10 +67,14 @@ bool Reference::HeapTracked::__is_on_heap ()
     return __heap_state == is_on_heap;
   }
 
+#ifdef _DEBUG
+  cerr << "Reference::HeapTracked::is_on_heap this=" << this << endl;
+#endif
+
   const void* raw_address = dynamic_cast<const void*>(this);
 
 #ifdef _DEBUG
-  cerr << "Reference::HeapTracked::is_on_heap this=" << this << " void*=" 
+  cerr << "Reference::HeapTracked::is_on_heap void*=" 
        << raw_address << endl;
 #endif
 
@@ -76,7 +82,7 @@ bool Reference::HeapTracked::__is_on_heap ()
     throw Error (InvalidPointer, "Reference::HeapTracked::is_on_heap",
 		 "failed dynamic_cast<const void*>(%p)", this);
   
-  std::vector<const void*>::iterator it;
+  vector<const void*>::iterator it;
 
   for (it = __heap_addresses.begin(); it != __heap_addresses.end(); it++) {
 
