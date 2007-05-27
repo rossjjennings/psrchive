@@ -92,22 +92,46 @@ Parent* factory (const std::string& filename)
   }
 }
 
-template<class Parent>
-size_t nbytes (const Parent* model)
+//
+// the following functions are not really factories, but were inspired
+// by the ideas implemented above
+//
+template<class Any>
+Any* load (const std::string& filename)
+{
+  FILE* temp = fopen (filename.c_str(), "r");
+  if (!temp)
+    throw Error (FailedSys, "Any* load (std::string&)",
+		 "fopen (%s)", filename.c_str());
+
+  try {
+    Any* any = new Any;
+    any -> load (temp);
+    fclose (temp);
+    return any;
+  }
+  catch (Error& error) {
+    fclose (temp);
+    throw error += "Any* load (std::string&)";
+  }
+}
+
+template<class Any>
+size_t nbytes (const Any* any)
 {
   FILE* temp = tmpfile();
   if (!temp)
-    throw Error (FailedSys, "nbytes (Parent*)", "tmpfile");
+    throw Error (FailedSys, "nbytes (Any*)", "tmpfile");
 
   size_t nbytes = 0;
   try {
-    model->unload (temp);
+    any->unload (temp);
     nbytes = ftell(temp);
   }
   catch (Error& error)
     {
       fclose (temp);
-      throw error += "nbytes (Parent*)";
+      throw error += "nbytes (Any*)";
     }
 
   fclose (temp);
