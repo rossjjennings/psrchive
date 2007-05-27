@@ -33,6 +33,20 @@ else
   fi
 fi
 
+#
+# By default, runtime files will be found in the installation directory
+#
+if test "x$prefix" != xNONE; then
+  PSRCHIVE_INSTALL=$prefix
+else
+  PSRCHIVE_INSTALL=$ac_default_prefix
+fi
+
+PSRCHIVE_HTTP="http://psrchive.sourceforge.net"
+
+AC_SUBST(PSRCHIVE_INSTALL)
+AC_SUBST(PSRCHIVE_HTTP)
+
 # Check if the user has set compiler options
 SWIN_OPTIONS_SET
 
@@ -182,20 +196,10 @@ AM_CONDITIONAL(MAKE_LEAN, [test x"$enable_lean" == xyes])
 #
 SWIN_FUNC_GETOPT_LONG
 
-#
-# By default, runtime files will be found in the installation directory
-#
-if test "x$prefix" != xNONE; then
-  PACKAGE_INSTALL=$prefix
-else
-  PACKAGE_INSTALL=$ac_default_prefix
-fi
-
-AC_DEFINE_UNQUOTED([PACKAGE_INSTALL], ["${PACKAGE_INSTALL}"],
-                   [PSRCHIVE installation directory.])
-
 AM_CONFIG_HEADER([config.h])
-AC_CONFIG_FILES([Util/Makefile
+AC_CONFIG_FILES([
+		Util/genutil/ThreadContext.h
+		Util/Makefile
 		Util/third/Makefile
 		Util/third/parsifal/Makefile
 		Util/third/star/Makefile
@@ -203,7 +207,6 @@ AC_CONFIG_FILES([Util/Makefile
 		Util/units/Makefile
 		Util/fft/Makefile
 		Util/genutil/Makefile
-		Util/genutil/ThreadContext.h
 		Util/pgutil/Makefile
 		Util/qtutil/Makefile
 		Util/fitsutil/Makefile
@@ -231,6 +234,7 @@ AC_CONFIG_FILES([Util/Makefile
 		Management/Makefile
 		Management/psrchive_ldflags
 		Management/psrchive_cflags
+		Management/psrchive_install.h
 		Makefile])
 
 AC_OUTPUT
