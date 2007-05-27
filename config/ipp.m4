@@ -33,5 +33,8 @@ AC_DEFUN([SWIN_LIB_IPP],
 
   AC_SUBST(IPP_CFLAGS)
   AC_SUBST(IPP_LIBS)
+
+  AM_CONDITIONAL(HAVE_IPP,[test "$have_ipp" = old])
+
 ])
 
