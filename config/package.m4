@@ -48,6 +48,37 @@ AC_DEFUN([SWIN_PACKAGE_OPTIONS],
 
 ])
 
+dnl @synopsis SWIN_PACKAGE_LIB_OPTIONS(
+dnl 
+AC_DEFUN([SWIN_PACKAGE_LIB_OPTIONS],
+[
+  AC_PROVIDE([SWIN_PACKAGE_LIB_OPTIONS])
+
+  AC_ARG_WITH([[$1]-dir],
+              AC_HELP_STRING([--with-[$1]-dir=DIR],
+                             [[$1] is in DIR]))
+
+  if test x"$with_[$1]_dir" = x"no"; then
+
+    # user disabled [$1]. Leave cache alone.
+    have_[$1]="user disabled"
+
+  else
+
+    # "yes" is not a specification
+    if test x"$with_[$1]_dir" = xyes; then
+      with_[$1]_dir=""
+    fi
+
+    # _dir overrides include_dir and lib_dir    
+    if test x"$with_[$1]_dir" != x; then
+      with_[$1]_lib_dir=$with_[$1]_dir
+    fi
+
+  fi
+
+])
+
 dnl @synopsis SWIN_PACKAGE_FIND(name,file)
 dnl 
 AC_DEFUN([SWIN_PACKAGE_FIND],
