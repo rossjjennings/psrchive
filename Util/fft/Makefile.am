@@ -1,13 +1,14 @@
 
 noinst_LTLIBRARIES = libpsrfft.la
 
-include_HEADERS = interpolate.h median_smooth.h \
-	   FTransform.h IPP_Transform.h MKL_Transform.h FFTW3_Transform.h \
-	   FFTW_Transform.h QuaternionFT.h
+include_HEADERS = interpolate.h median_smooth.h FTransform.h \
+	IPP_Transform.h MKL_Transform.h MKL_DFTI_Transform.h \
+	FFTW3_Transform.h FFTW_Transform.h QuaternionFT.h
 
 libpsrfft_la_SOURCES = FTransformAgent.C FTransformAgent.h FTransformPlan.h \
-	FTransform.C IPP_Transform.C MKL_Transform.C FFTW3_Transform.C \
-	FFTW_Transform.C QuaternionFT.C shift.C fccf.f ffft.f
+	FTransform.C IPP_Transform.C MKL_Transform.C MKL_DFTI_Transform.C   \
+	FFTW3_Transform.C FFTW_Transform.C QuaternionFT.C		    \
+	shift.C fccf.f ffft.f
 
 TESTS = test_frexp test_enum test_normalization test_interpolate \
 	test_real_complex test_QuaternionFT
