@@ -32,7 +32,6 @@ namespace FTransform {
     protected:
       
       void* plan;
-      float* tmp;
 
     };
 

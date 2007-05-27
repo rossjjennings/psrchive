@@ -35,8 +35,6 @@ FTransform::FFTW::Plan::~Plan()
 
   }
 
-  if (tmp) delete [] tmp;
-
   // cerr << "FFTW::Plan destroyed" << endl;
 }
 
@@ -46,8 +44,6 @@ FTransform::FFTW::Plan::Plan (size_t n_fft, type t)
   cerr << "FTransform::FFTW::Plan nfft=" << n_fft
        << " call='" << fft_call << "'" << endl;
 #endif
-
-  tmp = 0;
 
   fftw_direction wdir;
 
@@ -63,8 +59,6 @@ FTransform::FFTW::Plan::Plan (size_t n_fft, type t)
   if (t & real) {
     int int_nfft = n_fft;
     plan = rfftwnd_create_plan (1, &int_nfft, wdir, flags);
-    tmp = new float[n_fft+2];
-    assert( tmp != 0 );
   }
   else
     plan = fftw_create_plan (n_fft, wdir, flags);
