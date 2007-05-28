@@ -47,7 +47,7 @@ AC_DEFUN([SWIN_LIB_PTHREAD],
     [$1]
   else
     AC_MSG_WARN([POSIX threads will not be used])
-    EXPORT_HAVE_PTRHEAD=0
+    EXPORT_HAVE_PTHREAD=0
     PTHREAD_CFLAGS=""
     PTHREAD_LIBS=""
     [$2]
