@@ -11,7 +11,13 @@
 
 using namespace std;
 
-vector<const void*> Reference::HeapTracked::__heap_addresses;
+// static ensures read-only access via get_heap_queue_size
+static vector<const void*> heap_addresses;
+
+uint64_t Reference::HeapTracked::get_heap_queue_size ()
+{
+  return heap_addresses.size();
+}
 
 bool Reference::verbose = false;
 
@@ -34,7 +40,7 @@ void* Reference::HeapTracked::operator new (size_t size, void* ptr)
        << " ptr=" << ptr << endl;
 #endif
 
-  __heap_addresses.push_back (ptr);
+  heap_addresses.push_back (ptr);
 
   return ptr;
 }
@@ -84,7 +90,7 @@ bool Reference::HeapTracked::__is_on_heap ()
   
   vector<const void*>::iterator it;
 
-  for (it = __heap_addresses.begin(); it != __heap_addresses.end(); it++) {
+  for (it = heap_addresses.begin(); it != heap_addresses.end(); it++) {
 
 #ifdef _DEBUG
     unsigned long itl = (unsigned long) *it;
@@ -98,9 +104,9 @@ bool Reference::HeapTracked::__is_on_heap ()
       break;
   }
 
-  if ( it != __heap_addresses.end() ) {
+  if ( it != heap_addresses.end() ) {
 
-    __heap_addresses.erase (it);
+    heap_addresses.erase (it);
     __heap_state = is_on_heap;
 
 #ifdef _DEBUG
@@ -111,7 +117,7 @@ bool Reference::HeapTracked::__is_on_heap ()
     return true;
   }
 
-  __heap_state = ~is_on_heap;
+  __heap_state = 0x04;
 
 #ifdef _DEBUG
     cerr << "Reference::HeapTracked::is_on_heap false heap_state="

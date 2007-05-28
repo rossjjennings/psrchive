@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/HeapTracked.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.5 $
+   $Date: 2007/05/28 19:40:58 $
    $Author: straten $ */
 
 #ifndef __ReferenceHeapTracked_h
@@ -77,13 +77,15 @@ namespace Reference {
     //! Return true if this instance is found in heap addresses
     bool __is_on_heap ();
 
+    //! Return the number of heap addresses awaiting processing
+    static uint64_t get_heap_queue_size ();
+
   private:
+
+    friend class Able;
 
     //! State of this instance allocated on the heap
     char __heap_state;
-
-    //! Addresses of dynamically allocated Reference::HeapTracked instances
-    static std::vector <const void*> __heap_addresses;
 
   };
 
