@@ -43,11 +43,11 @@ AC_DEFUN([SWIN_LIB_PTHREAD],
 
   if test x"$have_pthread" = xyes; then
     AC_DEFINE([HAVE_PTHREAD], [1], [Define if POSIX threads are available])
-    HAVE_PTHREAD=1
+    EXPORT_HAVE_PTHREAD=1
     [$1]
   else
     AC_MSG_WARN([POSIX threads will not be used])
-    HAVE_PTRHEAD=0
+    EXPORT_HAVE_PTRHEAD=0
     PTHREAD_CFLAGS=""
     PTHREAD_LIBS=""
     [$2]
@@ -55,7 +55,7 @@ AC_DEFUN([SWIN_LIB_PTHREAD],
 
   AC_SUBST(PTHREAD_CFLAGS)
   AC_SUBST(PTHREAD_LIBS)
-  AC_SUBST(HAVE_PTHREAD)
+  AC_SUBST(EXPORT_HAVE_PTHREAD)
   AM_CONDITIONAL(HAVE_PTHREAD, [test x"$have_pthread" = xyes])
 
 ])

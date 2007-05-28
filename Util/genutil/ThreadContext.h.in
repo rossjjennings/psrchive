@@ -23,8 +23,8 @@
 
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/ThreadContext.h.in,v $
-   $Revision: 1.2 $
-   $Date: 2007/05/27 00:25:57 $
+   $Revision: 1.3 $
+   $Date: 2007/05/28 00:38:00 $
    $Author: straten $ */
 
 #ifndef __ThreadContext_h
@@ -35,7 +35,7 @@
 #endif
 
 // the configure script sets this variable
-#define HAVE_PTHREAD @HAVE_PTHREAD@
+#define HAVE_PTHREAD @EXPORT_HAVE_PTHREAD@
 
 #if HAVE_PTHREAD
 #include <pthread.h>
