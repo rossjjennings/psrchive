@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceAble.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.6 $
+   $Date: 2007/05/28 19:41:08 $
    $Author: straten $ */
 
 #ifndef __ReferenceAble_h
@@ -41,17 +41,6 @@ namespace Reference {
 
   public:
 
-#if _DEBUG
-    static std::vector<Able*> null_ables();
-
-    //! Counts how many Reference::Able's are in existence
-    static int instantiation_count;
-    //! How many Able's have ever been in existence
-    static int full_count;
-    //! Stores pointers to every Able that has ever been in existence
-    static std::vector<Able*> ables;
-#endif
-
     //! Default constructor
     Able ();
 
@@ -67,8 +56,11 @@ namespace Reference {
     /*! Invalidates all Reference::To references to this instance. */
     virtual ~Able();
     
-    //! Returns the number of references there are
+    //! Returns the number of references there are to this
     unsigned get_reference_count() const { return __reference_count; }
+
+    //! Returns the current number instances in existence
+    static uint64_t get_instance_count ();
 
   protected:
 
