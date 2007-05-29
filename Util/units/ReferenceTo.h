@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceTo.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.5 $
+   $Date: 2007/05/29 00:50:08 $
    $Author: straten $ */
 
 #ifndef __ReferenceTo_h
 #define __ReferenceTo_h
 
-#include "Reference.h"
+#include "ReferenceAble.h"
 #include <typeinfo>
 #include <string>
 
@@ -47,13 +47,13 @@ namespace Reference {
     To& operator = (Type *);
     
     //! Object dereferencing operator
-    Type& operator * () const;
+    Type& operator * () const { return *get(); }
     
     //! Member dereferencing operator
-    Type* operator -> () const { return this -> operator Type* (); }
+    Type* operator -> () const { return get(); }
     
     //! Cast to Type* operator
-    operator Type* () const;
+    operator Type* () const { return get(); }
 
     //! Return the pointer
     Type* get () const;
@@ -62,33 +62,110 @@ namespace Reference {
     Type* release ();
     
     //! Return pointer without testing for validity
-    const Type* ptr () const { return obj_reference; }
+    const Type* ptr () const;
 
     //! Return pointer without testing for validity
-    Type* ptr () { return obj_reference; }
+    Type* ptr ();
 
     //! Return the name of the object, as returned by typeid
     std::string name () const;
 
   private:
 
-    void unhookRef ();
+    //! Set to an existing handle
+    void handle (const Able::Handle*);
 
-    void hookRef ();
+    //! Set to an existing instance
+    void handle (const Able*);
 
-    //! The reference to the object
-    Type* obj_reference;
+    //! Unhandle
+    void unhandle (bool auto_delete = true);
+
+    //! The handle to the object
+    Able::Handle* the_handle;
     
   };
 }
 
 template<class Type, bool active>
+void Reference::To<Type,active>::unhandle (bool auto_delete)
+{
+#ifdef _DEBUG
+  cerr << "Reference::To<"+name()+">::unhandle handle=" << the_handle << endl;
+#endif
+
+  if (!the_handle)
+    return;
+
+  if (the_handle->count == 1 && the_handle->pointer)
+    // the handle is about to be deleted, ensure that Able knows it
+    the_handle->pointer->__reference_handle = 0;
+
+  if (active && the_handle->pointer)
+    // decrease the active reference count
+    the_handle->pointer->__dereference (auto_delete);
+
+  // decrease the total reference count
+  the_handle->count --;
+
+  // delete the handle
+  if (the_handle->count == 0)
+    delete the_handle;
+
+#ifdef _DEBUG
+  cerr << "Reference::To<"+name()+">::unhandle count=" << the_handle->count << endl;
+#endif
+
+  the_handle = 0;
+}
+
+template<class Type, bool active>
+void Reference::To<Type,active>::handle (const Able::Handle* _handle)
+{
+#ifdef _DEBUG
+  cerr << "Reference::To<"+name()+">::handle handle=" << _handle << endl;
+#endif
+
+  the_handle = const_cast<Able::Handle*>( _handle );
+
+  if (!the_handle)
+    return;
+
+  if (the_handle->pointer)
+    handle (the_handle->pointer);
+  else // still have to keep the handle alive
+    the_handle->count ++;
+
+#ifdef _DEBUG
+  cerr << "Reference::To<"+name()+">::handle count=" << the_handle->count << endl;
+#endif
+}
+
+template<class Type, bool active>
+void Reference::To<Type,active>::handle (const Able* pointer)
+{
+#ifdef _DEBUG
+  cerr << "Reference::To<"+name()+">::handle Able*="<< pointer << endl;
+#endif
+
+  if (!pointer)
+    the_handle = 0;
+
+  else {
+    the_handle = pointer->__reference (active);
+    the_handle->count ++;
+
+#ifdef _DEBUG
+  cerr << "Reference::To<"+name()+">::handle Able* count=" << the_handle->count << endl;
+#endif
+  }
+
+}
+
+template<class Type, bool active>
 std::string Reference::To<Type,active>::name () const
 {
-  if (obj_reference)
-    return typeid(obj_reference).name();
-  else
-    return typeid(Type).name();
+  return typeid(Type).name();
 }
 
 template<class Type, bool active>
@@ -98,8 +175,7 @@ Reference::To<Type,active>::To (Type* ref_pointer)
   cerr << "Reference::To<"+name()+">::To (Type*="<< ref_pointer <<")"<< endl;
 #endif
 
-  obj_reference = ref_pointer;
-  hookRef();
+  handle (ref_pointer);
 }
 
 template<class Type, bool active>
@@ -109,7 +185,7 @@ Reference::To<Type,active>::~To ()
   cerr << "Reference::To<"+name()+">::~To" << endl;
 #endif
 
-  unhookRef();
+  unhandle ();
 }
 
 template<class Type, bool active>
@@ -119,7 +195,7 @@ bool Reference::To<Type,active>::operator ! () const
   cerr << "Reference::To<"+name()+">::operator !" << endl;
 #endif
 
-  return obj_reference == 0;
+  return !the_handle || the_handle->pointer == 0;
 }
 
 template<class Type, bool active>
@@ -129,19 +205,17 @@ Reference::To<Type,active>::operator bool () const
   cerr << "Reference::To<"+name()+">::operator bool" << endl;
 #endif
 
-  return obj_reference != 0;
+  return the_handle && the_handle->pointer;
 }
 
 template<class Type, bool active>
 Reference::To<Type,active>::To (const To& another_reference)
 {
-  obj_reference = another_reference.obj_reference;
-
 #ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::To (To<Type>->" << obj_reference << ")" << endl;
+  cerr << "Reference::To<"+name()+">::To (To<Type>)" << endl;
 #endif
 
-  hookRef();
+  handle (another_reference.the_handle);
 }
 
 
@@ -151,16 +225,16 @@ Reference::To<Type,active>&
 Reference::To<Type,active>::operator = (const To& oref)
 {
 #ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::operator = (To<Type>->" 
-       << oref.obj_reference << ")" << endl;
+  cerr << "Reference::To<"+name()+">::operator = (To<Type>)" << endl;
 #endif
 
-  if (obj_reference == oref.obj_reference)
+  if (the_handle == oref.the_handle)
     return *this;
 
-  unhookRef();
-  obj_reference = oref.obj_reference;
-  hookRef();
+  unhandle ();
+
+  handle (oref.the_handle);
+
   return *this;
 }
 
@@ -173,41 +247,14 @@ Reference::To<Type,active>::operator = (Type* ref_pointer)
   cerr << "Reference::To<"+name()+">::operator = (Type*=" << ref_pointer <<")"<<endl;
 #endif
 
-  if (obj_reference == ref_pointer)
+  if (the_handle && the_handle->pointer == ref_pointer)
     return *this;
 
-  unhookRef();
-  obj_reference = ref_pointer;
-  hookRef();
+  unhandle ();
+
+  handle (ref_pointer);
+
   return *this;
-}
-
-// de-To operators
-template<class Type, bool active>
-Type& Reference::To<Type,active>::operator * () const
-{
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::operator *" << endl;
-#endif
-
-  if (obj_reference == 0) {
-    throw Error (InvalidPointer, "Reference::To<"+name()+">::operator *");
-  }
-
-  return *obj_reference;
-}
-
-template<class Type, bool active>
-Reference::To<Type,active>::operator Type* () const
-{
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::operator Type*" << endl;
-#endif
-
-  if (obj_reference == 0)
-    throw Error (InvalidPointer, "Reference::To<"+name()+">::operator Type*");
-
-  return obj_reference;
 }
 
 template<class Type, bool active>
@@ -217,9 +264,10 @@ Type* Reference::To<Type,active>::get () const
   cerr << "Reference::To<"+name()+">::get" << endl;
 #endif
 
-  if (obj_reference == 0)
+  if (!the_handle || the_handle->pointer == 0)
     throw Error (InvalidPointer, "Reference::To<"+name()+">::get");
-  return obj_reference;
+
+  return reinterpret_cast<Type*>( the_handle->pointer );
 }
 
 
@@ -230,43 +278,34 @@ Type* Reference::To<Type,active>::release ()
   cerr << "Reference::To<"+name()+">::release" << endl;
 #endif
 
-  if (obj_reference == 0)
+  if (!the_handle || the_handle->pointer == 0)
     throw Error (InvalidPointer, "Reference::To<"+name()+">::release");
 
-  Type* copy = obj_reference;
+  Type* copy = reinterpret_cast<Type*>( the_handle->pointer );
 
-  obj_reference->__remove_reference (active, (Able**)&obj_reference, false);
-  obj_reference = 0;
+  unhandle (false);
 
   return copy;
 }
 
+    //! Return pointer without testing for validity
 template<class Type, bool active>
-void Reference::To<Type,active>::unhookRef ()
+const Type* Reference::To<Type,active>::ptr () const
 {
-#ifdef _DEBUG
-  cerr<<"Reference::To<"+name()+">::unhookRef obj_reference="<< obj_reference <<endl;
-#endif
-
-  if (!obj_reference)
-    return;
-
-  obj_reference->__remove_reference (active, (Able**)&obj_reference);
-
-  obj_reference = 0;
+  if (the_handle)
+    return reinterpret_cast<const Type*>( the_handle->pointer );
+  else
+    return 0;
 }
 
+    //! Return pointer without testing for validity
 template<class Type, bool active>
-void Reference::To<Type,active>::hookRef ()
+Type* Reference::To<Type,active>::ptr ()
 {
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::hookRef obj_reference="<< obj_reference <<endl;
-#endif
-
-  if (!obj_reference)
-    return;
-
-  obj_reference->__add_reference (active, (Able**)&obj_reference);
+  if (the_handle)
+    return reinterpret_cast<Type*>( the_handle->pointer );
+  else
+    return 0;
 }
 
 template<class Type, bool active>

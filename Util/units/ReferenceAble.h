@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceAble.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/05/28 19:41:08 $
+   $Revision: 1.7 $
+   $Date: 2007/05/29 00:50:08 $
    $Author: straten $ */
 
 #ifndef __ReferenceAble_h
@@ -64,20 +64,31 @@ namespace Reference {
 
   protected:
 
+    //! Shared handle an instance
+    class Handle;
+
     //! Add the address of a reference to this object
-    void __add_reference (bool active, Able** ref_address) const;
+    Handle* __reference (bool active) const;
 
     //! Remove the address of a reference to this object
-    void __remove_reference (bool active, Able** ref_address,
-			     bool auto_delete = true) const;
+    void __dereference (bool auto_delete = true) const;
 
   private:
 
-    //! Addresses of all references to this instance
-    std::vector <Able**> __reference_list;
+    //! Pointer to the shared handle to this instance
+    Handle* __reference_handle;
 
     //! Count of active references to this instance
     unsigned __reference_count;
+  };
+
+  /*! Reference::To<> instances share this handle to an Able instance */
+  class Able::Handle {
+  public:
+    //! Pointer to Able instance
+    Able* pointer;
+    //! Count of all references to this handle
+    unsigned count;
   };
 
 }
