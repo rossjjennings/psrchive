@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.28 $
-   $Date: 2007/02/07 22:53:16 $
+   $Revision: 1.29 $
+   $Date: 2007/05/29 11:53:30 $
    $Author: straten $ */
 
 #ifndef __GENUTIL_MJD_H
@@ -18,6 +18,7 @@
 #include "utc.h"
 
 #include <iostream>
+#include <limits>
 #include <string>
 #include <stdio.h>
 
