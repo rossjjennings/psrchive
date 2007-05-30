@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.40 $
-   $Date: 2007/05/25 00:06:52 $
+   $Revision: 1.41 $
+   $Date: 2007/05/30 09:13:44 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -40,6 +40,18 @@ class psrephem : public Pulsar::Parameters
 
   //! Unload to an open stream
   void unload (FILE*) const;
+
+  //! Return the name of the source
+  std::string get_name () const;
+  
+  //! Return the coordinates of the source
+  sky_coord get_coordinates () const;
+  
+  //! Return the dispersion measure
+  double get_dispersion_measure () const;
+  
+  //! Return the rotation measure
+  double get_rotation_measure () const;
 
   // this string needs to be long enough to hold the above-defined MACRO
   static std::vector<std::string> extensions();

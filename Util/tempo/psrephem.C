@@ -392,9 +392,6 @@ double psrephem::get_dm() const
 
 void psrephem::set_dm( double dm )
 {
-//   if (!tempo11)
-//     return;
-
   if (!parmStatus[EPH_DM])
     parmStatus[EPH_DM] = 1;
 
@@ -403,11 +400,7 @@ void psrephem::set_dm( double dm )
 
 double psrephem::jra() const
 {
-	// Removed tempo11 check because it's now possible
-	// to obtain raj for pre-tempo11 ephemeris files
-//  if (tempo11 && parmStatus[EPH_RAJ])
-  
-	if (parmStatus[EPH_RAJ])
+  if (parmStatus[EPH_RAJ])
     return value_double[EPH_RAJ];
   
   throw Error(InvalidParam, "psrephem::jra",
@@ -416,11 +409,7 @@ double psrephem::jra() const
 
 double psrephem::jdec() const
 {
-	// Removed tempo11 check because it's now possible
-	// to obtain decj for pre-tempo11 ephemeris files
-//  if (tempo11 && parmStatus[EPH_DECJ])
-  
-	if (parmStatus[EPH_DECJ])
+  if (parmStatus[EPH_DECJ])
     return value_double[EPH_DECJ];
   
   throw Error(InvalidParam, "psrephem::jdec",
@@ -551,6 +540,43 @@ void psrephem::unload (FILE* fptr) const
 
   fflush (fptr);
 }
+
+//! Return the name of the source
+std::string psrephem::get_name () const
+{
+  return psrname ();
+}
+  
+//! Return the coordinates of the source
+sky_coord psrephem::get_coordinates () const
+{
+  return sky_coord ( jra()*2.0*M_PI, jdec()*2.0*M_PI );
+}
+
+//! Return the dispersion measure
+double psrephem::get_dispersion_measure () const
+{
+  if (parmStatus[EPH_DM])
+    return value_double[EPH_DM];
+
+  return 0;
+}
+
+//! Return the rotation measure
+double psrephem::get_rotation_measure () const
+{
+  if (parmStatus[EPH_RM])
+    return value_double[EPH_RM];
+
+  return 0;
+}
+
+
+
+
+
+
+
 
 static char* ephemblock = NULL;
 static int*  correct    = NULL;
