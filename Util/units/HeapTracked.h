@@ -7,13 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/HeapTracked.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/05/28 19:40:58 $
+   $Revision: 1.6 $
+   $Date: 2007/05/30 09:06:57 $
    $Author: straten $ */
 
 #ifndef __ReferenceHeapTracked_h
 #define __ReferenceHeapTracked_h
 
+#include "environ.h"
 #include <vector>
 
 namespace Reference {
@@ -78,7 +79,7 @@ namespace Reference {
     bool __is_on_heap ();
 
     //! Return the number of heap addresses awaiting processing
-    static uint64_t get_heap_queue_size ();
+    static uint64 get_heap_queue_size ();
 
   private:
 
