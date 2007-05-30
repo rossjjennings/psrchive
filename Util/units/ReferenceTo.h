@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceTo.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/05/29 00:50:08 $
+   $Revision: 1.6 $
+   $Date: 2007/05/30 09:41:13 $
    $Author: straten $ */
 
 #ifndef __ReferenceTo_h
@@ -369,7 +369,11 @@ bool operator == (const Type2* instance, const Reference::To<Type,active>& ref)
   return ref.ptr() == instance;
 }
 
-
+template<typename C, typename P, bool A>
+C* dynamic_kast (Reference::To<P,A>& p)
+{
+  return dynamic_cast<C*> (p.ptr());
+}
 
 #endif // #ifndef __ReferenceTo_h
 
