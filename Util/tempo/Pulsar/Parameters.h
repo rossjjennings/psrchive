@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Parameters.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/05/22 22:27:38 $
+   $Revision: 1.2 $
+   $Date: 2007/05/30 09:13:48 $
    $Author: straten $ */
 
 #ifndef __PulsarParameters_h
 #define __PulsarParameters_h
 
 #include "Reference.h"
+#include "sky_coord.h"
 
 #include <stdio.h>
 
@@ -41,6 +42,25 @@ namespace Pulsar {
 
     //! Unload to an open stream
     virtual void unload (FILE*) const = 0;
+
+    // ***********************************************************************
+    //
+    // Please add attributes sparingly.  Every pure virtual method added will
+    // impact on at least two other derived classes.
+    //
+    // ***********************************************************************
+
+    //! Return the name of the source
+    virtual std::string get_name () const = 0;
+
+    //! Return the coordinates of the source
+    virtual sky_coord get_coordinates () const = 0;
+
+    //! Return the dispersion measure
+    virtual double get_dispersion_measure () const = 0;
+
+    //! Return the rotation measure
+    virtual double get_rotation_measure () const = 0;
 
     //! Factory helper creates a vector of pointers to derived class instances
     static void children (std::vector< Reference::To<Parameters> >&);
