@@ -358,7 +358,7 @@ void print_command(vector<int>& freq_chans, vector<int> subints)
 		}
 
 		if (subints.size()) {
-			cout << "-X \"";
+			cout << "-w \"";
 
 			for (int i = 0; i< subints.size() - 1; i++) {
 				cout << subints[i] << " ";
