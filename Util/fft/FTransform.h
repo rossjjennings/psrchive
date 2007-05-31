@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+class ThreadContext;
+
 //! Defines a single interface to a variety of Fourier transform libraries
 namespace FTransform {
 
@@ -39,6 +41,9 @@ namespace FTransform {
 
   //! Whether to optimize or not
   extern bool optimize;
+
+  //! Set for multi-threaded applications
+  extern ThreadContext* context;
 
   //! Returns the name of the currently selected library
   std::string get_library ();
