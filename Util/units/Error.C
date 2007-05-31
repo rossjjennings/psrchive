@@ -58,8 +58,9 @@ void Error::construct (ErrorCode c, const string& func, const char* msg)
   errno_check();
 
   if (verbose)
-    cerr << *this << endl;
-  if( complete_abort )
+    cerr << "Error::construct" << *this << endl;
+
+  if (complete_abort)
     abort ();
 }
 
