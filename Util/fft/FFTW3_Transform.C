@@ -19,6 +19,8 @@
 
 using namespace std;
 
+// #define _DEBUG 1
+
 /* ***********************************************************************
 
    One-dimensional interface
@@ -28,8 +30,7 @@ using namespace std;
 FTransform::FFTW3::Plan::Plan (size_t n_fft, type t)
 {
 #ifdef _DEBUG
-  cerr << "FTransform::FFTW3::Plan nfft=" << n_fft
-       << " call='" << fft_call << "'" << endl;
+  cerr << "FTransform::FFTW3::Plan nfft=" << n_fft << " t=" << t << endl;
 #endif
 
   int direction_flags = 0;
@@ -74,6 +75,10 @@ FTransform::FFTW3::Plan::Plan (size_t n_fft, type t)
 
   delete [] in;
   delete [] out;
+
+#ifdef _DEBUG
+  cerr << "FTransform::FFTW3::Plan ctor done" << endl;
+#endif
 }
 
 FTransform::FFTW3::Plan::~Plan()
@@ -85,28 +90,54 @@ FTransform::FFTW3::Plan::~Plan()
 void FTransform::FFTW3::Plan::frc1d (size_t nfft,
 				     float* dest, const float* src)
 {
+#ifdef _DEBUG
+  cerr << "FTransform::FFTW3::Plan::frc1d" << endl;
+#endif
+
   fftwf_execute_dft_r2c ((fftwf_plan)plan,
 			 (float*)src, (fftwf_complex*)dest);
+
+#ifdef _DEBUG
+  cerr << "FTransform::FFTW3::Plan::frc1d done" << endl;
+#endif
 }
 
 void FTransform::FFTW3::Plan::fcc1d (size_t nfft,
 				     float* dest, const float* src)
 {
+#ifdef _DEBUG
+  cerr << "FTransform::FFTW3::Plan::fcc1d" << endl;
+#endif
   fftwf_execute_dft ((fftwf_plan)plan,
 		     (fftwf_complex*) src, (fftwf_complex*) dest);
+#ifdef _DEBUG
+  cerr << "FTransform::FFTW3::Plan::fcc1d done" << endl;
+#endif
 }
 
 void FTransform::FFTW3::Plan::bcc1d (size_t nfft,
 				     float* dest, const float* src)
 {
+#ifdef _DEBUG
+  cerr << "FTransform::FFTW3::Plan::bcc1d" << endl;
+#endif
   fftwf_execute_dft ((fftwf_plan)plan, 
 		     (fftwf_complex*) src, (fftwf_complex*) dest);
+#ifdef _DEBUG
+  cerr << "FTransform::FFTW3::Plan::bcc1d done" << endl;
+#endif
 }
 
 void FTransform::FFTW3::Plan::bcr1d (size_t nfft,
 				     float* dest, const float* src)
 {
+#ifdef _DEBUG
+  cerr << "FTransform::FFTW3::Plan::bcr1d" << endl;
+#endif
   fftwf_execute_dft_c2r ((fftwf_plan)plan, (fftwf_complex*)src, dest);
+#ifdef _DEBUG
+  cerr << "FTransform::FFTW3::Plan::bcr1d done" << endl;
+#endif
 }
 
 
