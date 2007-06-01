@@ -10,6 +10,7 @@
 #define __FTransformAgent_h_
 
 #include "FTransformPlan.h"
+#include "ThreadContext.h"
 
 namespace FTransform {
 
@@ -50,6 +51,9 @@ namespace FTransform {
 
     //! The currently installed agent
     static Reference::To<Agent> current;
+
+    //! For use in multithreaded programs
+    static ThreadContext* context;
 
   protected:
 
@@ -119,6 +123,8 @@ namespace FTransform {
   typename Library::Plan*
   PlanAgent<Library>::get_plan (size_t nfft, type t)
   {
+    ThreadContext::Lock lock (Agent::context);
+
     for (unsigned iplan=0; iplan<plans.size(); iplan++)
       if (plans[iplan]->matches (nfft, t))
 	return plans[iplan];

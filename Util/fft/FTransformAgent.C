@@ -68,6 +68,8 @@ static int initialise()
   return 0;
 }
 
+ThreadContext* FTransform::Agent::context = 0;
+
 void FTransform::Agent::add ()
 { 
   libraries.push_back (this);

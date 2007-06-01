@@ -6,7 +6,6 @@
  ***************************************************************************/
 
 #include "FTransformAgent.h"
-#include "ThreadContext.h"
 #include "Error.h"
 
 #include <stdlib.h>
@@ -27,18 +26,11 @@ static FTransform::Plan* last_fcc1d = 0;
 static FTransform::Plan* last_bcc1d = 0;
 static FTransform::Plan* last_bcr1d = 0;
 
-ThreadContext* FTransform::context = 0;
-
 // Use of this macro decreases the margin for error
 #define FT_1D(TYPE) \
-  FTransform::Plan* current = 0; \
-  { \
-  ThreadContext::Lock lock (context); \
   if (!(last_ ## TYPE ## 1d && last_ ## TYPE ## 1d->matches(nfft, TYPE))) \
     last_## TYPE ## 1d = Agent::current->get_plan (nfft, TYPE); \
-  current = last_## TYPE ## 1d; \
-  } \
-  current -> TYPE ## 1d (nfft, into, from)
+  last_## TYPE ## 1d -> TYPE ## 1d (nfft, into, from)
 
 //! Forward real-to-complex FFT 
 void FTransform::frc1d (size_t nfft, float* into, const float* from)
