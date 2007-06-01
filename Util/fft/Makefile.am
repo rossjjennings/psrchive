@@ -1,13 +1,14 @@
 
 noinst_LTLIBRARIES = libpsrfft.la
 
-include_HEADERS = interpolate.h median_smooth.h FTransform.h \
+include_HEADERS = interpolate.h median_smooth.h \
+	FTransform.h FTransformAgent.h FTransformPlan.h \
 	IPP_Transform.h MKL_Transform.h MKL_DFTI_Transform.h \
 	FFTW3_Transform.h FFTW_Transform.h QuaternionFT.h
 
-libpsrfft_la_SOURCES = FTransformAgent.C FTransformAgent.h \
-	FTransformPlan.h FTransform.C QuaternionFT.C	   \
-	shift.C fccf.f ffft.f
+libpsrfft_la_SOURCES = shift.C fccf.f ffft.f \
+	FTransformAgent.C FTransform.C QuaternionFT.C
+
 
 if HAVE_MKL_DFTI
 libpsrfft_la_SOURCES += MKL_DFTI_Transform.C
