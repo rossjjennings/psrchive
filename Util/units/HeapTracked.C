@@ -14,7 +14,7 @@ using namespace std;
 // static ensures read-only access via get_heap_queue_size
 static vector<const void*> heap_addresses;
 
-uint64 Reference::HeapTracked::get_heap_queue_size ()
+size_t Reference::HeapTracked::get_heap_queue_size ()
 {
   return heap_addresses.size();
 }
