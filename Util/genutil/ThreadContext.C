@@ -67,3 +67,13 @@ void ThreadContext::signal ()
 #endif
 }
 
+void ThreadContext::broadcast ()
+{
+#if HAVE_PTHREAD
+  errno = pthread_cond_broadcast (&cond);
+  if (errno != 0)
+    throw Error (FailedSys, "Calibration::ReceptionModel::solve",
+		 "pthread_cond_broadcast");
+#endif
+}
+
