@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Plot.h,v $
-   $Revision: 1.12 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.13 $
+   $Date: 2007/06/04 19:38:08 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Plot_h
@@ -41,6 +41,9 @@ namespace Pulsar {
     //! Get the text interface to the frame attributes
     virtual TextInterface::Class* get_frame_interface ();
 
+    //! Process a configuration command
+    virtual void configure (const std::string&);
+
     //! Get the attributes
     virtual PlotAttributes* get_attributes ();
 
@@ -66,6 +69,12 @@ namespace Pulsar {
 
     //! The plot frame
     Reference::To<PlotFrame> frame;
+
+  private:
+
+    // used by the configure method
+    Reference::To<TextInterface::Class> tui;
+    Reference::To<TextInterface::Class> fui;
 
   };
 

@@ -20,6 +20,23 @@ TextInterface::Class* Pulsar::Plot::get_frame_interface ()
   return new PlotFrame::Interface (get_frame());
 }
 
+void Pulsar::Plot::configure (const std::string& option)
+{
+  try {
+    tui = get_interface();
+    tui->process (option);
+  }
+  catch (Error& error) {
+    try {
+      fui = get_frame_interface();
+      fui->process (option);
+    }
+    catch (Error& error) {
+      throw error += "Pulsar::Plot::configure";
+    }
+  }
+}
+
 //! Get the attributes
 Pulsar::PlotAttributes* Pulsar::Plot::get_attributes ()
 {
