@@ -319,22 +319,14 @@ void help_frame_options (const char* name)
 
 void set_options (Pulsar::Plot* plot, const vector<string>& options)
 {
-  TextInterface::Class* tui = plot->get_interface();
-  TextInterface::Class* fui = plot->get_frame_interface();
-
   for (unsigned j = 0; j < options.size(); j++) {
     try {
-      tui->process (options[j]);
+      plot->configure (options[j]);
     }
     catch (Error& error) {
-      try {
-	fui->process (options[j]);
-      }
-      catch (Error& error) {
-	cerr << "psrplot: Invalid option '" << options[j] << "' " 
-	     << error.get_message() << endl;
-	exit (-1);
-      }
+      cerr << "psrplot: Invalid option '" << options[j] << "' " 
+	   << error.get_message() << endl;
+      exit (-1);
     }
   }
 }
