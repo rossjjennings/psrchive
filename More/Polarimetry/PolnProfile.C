@@ -510,7 +510,7 @@ void Pulsar::PolnProfile::invint (Profile* invint) const
 
   invint->set_state (Signal::Inv);
   invint->set_centre_frequency ( get_Profile(0)->get_centre_frequency() );
-  invint->set_weight ( get_Profile(0)->get_centre_frequency() );
+  invint->set_weight ( get_Profile(0)->get_weight() );
 }
 
 bool pav_backward_compatibility = false;
