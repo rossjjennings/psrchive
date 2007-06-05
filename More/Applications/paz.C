@@ -54,11 +54,12 @@ void usage ()
     "Automatic zapping algorithms:\n"
     "  -n               Zap channels with excessive normalized rms\n"
     "  -r               Zap channels using median smoothed difference\n"
+    "  -R size          Set the size of the median smoothing window\n"
+    "  -b               Zap median smoothing of each phase bin spectra\n"
     "  -d               Zero weight chans using mean offset rejection\n"
     "  -C cutoff        Zero weight chans based on S/N (std optional)\n"
     "  -P stdfile       Use this standard profile\n"
     "  -o cutoff sigma  Zero weight subints with negative dropouts\n"
-    "  -R size          Set the size of the median smoothing window\n"
     "  -8               Attempts to fix ATNF WBCORR 8 bin problem (see also -p)\n"
     "\n"
     "The format of the kill file used with the -k option is simply\n"
@@ -125,7 +126,7 @@ int main (int argc, char *argv[]) {
   Pulsar::ChannelZapMedian* median_zapper = 0;
   Pulsar::ChannelZapModulation* modulation_zapper = 0;
 
-  const char* args = "8C:dDe:E:hIik:mno:p:P:rR:s:S:u:vVw:W:x:X:z:Z:";
+  const char* args = "8bC:dDe:E:hIik:mno:p:P:rR:s:S:u:vVw:W:x:X:z:Z:";
 
   string command = "paz";
 
@@ -143,7 +144,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.37 2007/04/03 05:01:28 ahotan Exp $" << endl;
+      cout << "$Id: paz.C,v 1.38 2007/06/05 09:07:08 straten Exp $" << endl;
       return 0;
 
     case 'm':
@@ -169,10 +170,10 @@ int main (int argc, char *argv[]) {
       key = strtok (optarg, whitespace);
       zero_channels = true;
       while (key) {
-  if (sscanf(key, "%d", &placeholder) == 1) {
-    chans_to_zap.push_back(placeholder);
-  }
-  key = strtok (NULL, whitespace);
+	if (sscanf(key, "%d", &placeholder) == 1) {
+	  chans_to_zap.push_back(placeholder);
+	}
+	key = strtok (NULL, whitespace);
       }
       break;
 
@@ -193,28 +194,29 @@ int main (int argc, char *argv[]) {
       {
       periodic_zap = true;
 
-  if (sscanf(optarg, "%d %d", &periodic_zap_period, 
-       &periodic_zap_phase) != 2) {
-    cerr << "Invalid parameter to option -Z" << endl;
-    return (-1);
-  }
+      if (sscanf(optarg, "%d %d", &periodic_zap_period, 
+		 &periodic_zap_phase) != 2) {
+	cerr << "Invalid parameter to option -Z" << endl;
+	return (-1);
+      }
       command += " -p ";
       command += optarg;
-  break;
+      break;
       }
+
     case 'Z':
       {
-  unsigned first = 1;
-  unsigned last = 0;
-
-  zero_channels = true;
-  if (sscanf(optarg, "%d %d", &first, &last) != 2) {
-    cerr << "Invalid parameter to option -Z" << endl;
-    return (-1);
-  }
-  
-  for( unsigned i=first; i<=last; i++)
-    chans_to_zap.push_back( i );
+	unsigned first = 1;
+	unsigned last = 0;
+	
+	zero_channels = true;
+	if (sscanf(optarg, "%d %d", &first, &last) != 2) {
+	  cerr << "Invalid parameter to option -Z" << endl;
+	  return (-1);
+	}
+	
+	for( unsigned i=first; i<=last; i++)
+	  chans_to_zap.push_back( i );
       }
       command += " -Z ";
       command += optarg;
@@ -226,26 +228,26 @@ int main (int argc, char *argv[]) {
       key = strtok (optarg, whitespace);
       nozap_subints = true;
       while (key) {
-  if (sscanf(key, "%d", &placeholder) == 1) {
-    subs_nozap.push_back(placeholder);
-  }
-  key = strtok (NULL, whitespace);
+	if (sscanf(key, "%d", &placeholder) == 1) {
+	  subs_nozap.push_back(placeholder);
+	}
+	key = strtok (NULL, whitespace);
       }
       break;
 
     case 'X':
       {
-  unsigned first = 1;
-  unsigned last = 0;
-
-  nozap_subints = true;
-  if (sscanf(optarg, "%d %d", &first, &last) != 2) {
-    cerr << "Invalid parameter to option -X" << endl;
-    return (-1);
-  }
-  
-  for( unsigned i=first; i<=last; i++)
-    subs_nozap.push_back( i );
+	unsigned first = 1;
+	unsigned last = 0;
+	
+	nozap_subints = true;
+	if (sscanf(optarg, "%d %d", &first, &last) != 2) {
+	  cerr << "Invalid parameter to option -X" << endl;
+	  return (-1);
+	}
+	
+	for( unsigned i=first; i<=last; i++)
+	  subs_nozap.push_back( i );
       }
       command += " -X ";
       command += optarg;
@@ -258,13 +260,20 @@ int main (int argc, char *argv[]) {
 
     case 'n':
       if (!modulation_zapper)
-  modulation_zapper = new Pulsar::ChannelZapModulation;
+	modulation_zapper = new Pulsar::ChannelZapModulation;
       command += " -n";
+      break;
+
+    case 'b':
+      if (!median_zapper)
+	median_zapper = new Pulsar::ChannelZapMedian;
+      median_zapper->set_bybin( true );
+      command += " -b";
       break;
 
     case 'r':
       if (!median_zapper)
-  median_zapper = new Pulsar::ChannelZapMedian;
+	median_zapper = new Pulsar::ChannelZapMedian;
       command += " -r";
       break;
 
@@ -272,7 +281,7 @@ int main (int argc, char *argv[]) {
       unsigned window = atoi (optarg);
       
       if (!median_zapper)
-  median_zapper = new Pulsar::ChannelZapMedian;
+	median_zapper = new Pulsar::ChannelZapMedian;
 
       median_zapper->set_window_size ( window );
       command += " -R ";
@@ -283,7 +292,7 @@ int main (int argc, char *argv[]) {
     case 'u':
       ulpath = optarg;
       if (ulpath.substr(ulpath.length()-1,1) != "/")
-  ulpath += "/";
+	ulpath += "/";
       command += " -u ";
       command += optarg;
       break;
