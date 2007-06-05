@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ChannelZapMedian.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/05/25 10:59:59 $
+   $Revision: 1.6 $
+   $Date: 2007/06/05 09:02:17 $
    $Author: straten $ */
 
 #ifndef _Pulsar_ChannelZapMedian_H
@@ -51,6 +51,12 @@ namespace Pulsar {
     //! Get the cut-off threshold
     float get_cutoff_threshold () const { return cutoff_threshold; }
 
+    //! Run the algorithm on the spectra of each bin
+    void set_bybin (bool t) { bybin = t; }
+
+    //! Run the algorithm on the spectra of each bin
+    bool get_bybin () const { return bybin; }
+
   protected:
 
     //! The size of the window over which median will be computed
@@ -58,6 +64,9 @@ namespace Pulsar {
 
     //! The cut-off threshold
     float cutoff_threshold;
+
+    //! Median smooth the spectra of each bin
+    bool bybin;
 
   };
   
