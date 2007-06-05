@@ -17,9 +17,9 @@ using namespace std;
 #endif
 
 // static ensures read-only access via get_instance_count
-static uint64_t instance_count = 0;
+static size_t instance_count = 0;
 
-uint64_t Reference::Able::get_instance_count ()
+size_t Reference::Able::get_instance_count ()
 {
   return instance_count;
 }

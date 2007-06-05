@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceAble.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/05/29 00:50:08 $
+   $Revision: 1.8 $
+   $Date: 2007/06/05 08:29:13 $
    $Author: straten $ */
 
 #ifndef __ReferenceAble_h
@@ -60,7 +60,7 @@ namespace Reference {
     unsigned get_reference_count() const { return __reference_count; }
 
     //! Returns the current number instances in existence
-    static uint64_t get_instance_count ();
+    static size_t get_instance_count ();
 
   protected:
 
