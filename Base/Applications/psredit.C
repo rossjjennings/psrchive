@@ -53,9 +53,6 @@ using namespace Pulsar;
 
 int main (int argc, char** argv) try {  
 
-  // load files quickly (no data)
-  Pulsar::Profile::no_amps = true;
-
   // print in degrees
   Angle::default_type = Angle::Degrees;
 
@@ -156,6 +153,10 @@ int main (int argc, char** argv) try {
     cout << "psredit: changes will not be saved."
       " Use -m or -e to write results to disk" << endl;
   }
+
+  if (!save)
+    // load files quickly (no data)
+    Pulsar::Profile::no_amps = true;
 
   vector<string> filenames;
   for (int ai=optind; ai<argc; ai++)
