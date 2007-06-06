@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceAble.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/06/05 08:29:13 $
-   $Author: straten $ */
+   $Revision: 1.9 $
+   $Date: 2007/06/06 04:47:16 $
+   $Author: ahotan $ */
 
 #ifndef __ReferenceAble_h
 #define __ReferenceAble_h
@@ -18,6 +18,7 @@
 #include <string>
 
 #include "HeapTracked.h"
+#include "environ.h"
 
 namespace Reference {
 
