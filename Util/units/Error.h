@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Error.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/05/10 04:23:48 $
+   $Revision: 1.8 $
+   $Date: 2007/06/06 05:31:10 $
    $Author: straten $ */
 
 #ifndef __Error_h
@@ -16,6 +16,7 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 
 //! List of error types
 enum ErrorCode {
