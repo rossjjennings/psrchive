@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/inverse_phase.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/05/14 23:47:12 $
+   $Revision: 1.6 $
+   $Date: 2007/06/06 05:31:05 $
    $Author: straten $ */
 
 #ifndef __P_inverse_phase_h
@@ -64,7 +64,10 @@ namespace Pulsar {
       guess = predictor.get_reftime()
 	+ (p - predictor.get_refphase()) / predictor.get_reffrequency();
       if (Pulsar::Predictor::verbose)
-	std::cerr << "inverse_phase: first guess = " << guess << std::endl;
+	std::cerr << "inverse_phase: reftime=" << predictor.get_reftime() 
+		  << " refphase=" << predictor.get_refphase() 
+		  << " reffreq=" << predictor.get_reffrequency() 
+		  << " first guess = " << guess << std::endl;
     }
 
     MJD dt;
@@ -87,7 +90,11 @@ namespace Pulsar {
       inverse_phase_iterations ++;
 
       dt = (predictor.phase(guess) - p) / predictor.frequency(guess);
-      
+
+      if (!finite(dt.in_seconds()))
+        throw Error (InvalidState, "inverse_phase",
+                     "dt not finite; freq=%lf", predictor.frequency(guess));
+ 
       guess -= dt; // * converge_faster;
 
       if (Pulsar::Predictor::verbose)
@@ -104,7 +111,7 @@ namespace Pulsar {
 	return guess;
     }
     
-    std::cerr << "polynomial::iphase maximum iterations exceeded - error="
+    std::cerr << "inverse_phase maximum iterations exceeded - error="
 	      << dt.in_seconds() * 1e6 << "us" << std::endl;
     
     return guess;
