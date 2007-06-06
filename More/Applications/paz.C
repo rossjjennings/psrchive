@@ -52,10 +52,9 @@ void usage ()
     "  -p \"p i\"         Interpolate over every p-th phase bin, starting at i\n"
     "\n"
     "Automatic zapping algorithms:\n"
-    "  -n               Zap channels with excessive normalized rms\n"
     "  -r               Zap channels using median smoothed difference\n"
     "  -R size          Set the size of the median smoothing window\n"
-    "  -b               Zap median smoothing of each phase bin spectra\n"
+    "  -b               Like -r, but for each phase bin and all Stokes\n"
     "  -d               Zero weight chans using mean offset rejection\n"
     "  -C cutoff        Zero weight chans based on S/N (std optional)\n"
     "  -P stdfile       Use this standard profile\n"
@@ -144,7 +143,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.38 2007/06/05 09:07:08 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.39 2007/06/06 04:58:00 straten Exp $" << endl;
       return 0;
 
     case 'm':
@@ -256,12 +255,6 @@ int main (int argc, char *argv[]) {
     case 'd':
       simple = true;
       command += " -d";
-      break;
-
-    case 'n':
-      if (!modulation_zapper)
-	modulation_zapper = new Pulsar::ChannelZapModulation;
-      command += " -n";
       break;
 
     case 'b':
