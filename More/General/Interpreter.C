@@ -149,6 +149,11 @@ void Pulsar::Interpreter::init()
       "  unsigned bins     number of desired phase bins\n" );
 
   add_command 
+    ( &Interpreter::invint, 'I',
+      "invint", "form the Stokes invariant interval profile",
+      "usage: invint \n" );
+  
+  add_command 
     ( &Interpreter::centre, 'C',
       "centre", "centre profiles using polyco or max",
       "usage: centre <max> \n"
@@ -382,14 +387,27 @@ try {
   if (arguments.size() > 2)
     return response (Fail, "invalid number of arguments");
 
-  if (arguments.size() == 2)
-    getmap( arguments[0] )->unload( arguments[1] );
-  else if (arguments.size() == 1)
-    get()->unload( arguments[0] );
-  else
-    get()->unload();
+  string mapname;
+  string filename;
 
-  return response (Good);
+  if (arguments.size() == 2) {
+    mapname = arguments[0];
+    filename = arguments[1];
+  }
+  else if (arguments.size() == 1)
+    filename = arguments[0];
+  else
+    filename = get()->get_filename();
+
+  if ( filename.substr(0,4) == "ext=" )
+    filename = replace_extension( get()->get_filename(), filename.substr(4) );
+  
+  if ( mapname.length() )
+    getmap( mapname )->unload( filename );
+  else
+    get()->unload( filename );
+
+  return response (Good, "data written to " + filename);
 }
 catch (Error& error) {
   return response (Fail, error.get_message());
@@ -676,7 +694,7 @@ catch (Error& error) {
 
 // //////////////////////////////////////////////////////////////////////
 //
-// pscrunch <string> <int>
+// pscrunch
 //
 string Pulsar::Interpreter::pscrunch (const string& args)
 try {
@@ -699,6 +717,23 @@ try {
     return response (Fail, "invalid number of bins");
 
   get() -> bscrunch_to_nbin (scrunch_to);
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
+// //////////////////////////////////////////////////////////////////////
+//
+// invint
+//
+string Pulsar::Interpreter::invint (const string& args)
+try {
+  if (args.length())
+    return response (Fail, "accepts no arguments");
+
+  get() -> invint();
+
   return response (Good);
 }
 catch (Error& error) {
