@@ -102,9 +102,10 @@ include_HEADERS += JenetAnderson98Plot.h
 libgenutil_la_SOURCES += JenetAnderson98Plot.C
 endif
 
-bin_PROGRAMS = getMJD
+bin_PROGRAMS = getMJD getHorizon
 
 getMJD_SOURCES = getMJD.C
+getHorizon_SOURCES = getHorizon.C
 
 TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98 \
 	test_endian test_environ test_sum test_normal \
