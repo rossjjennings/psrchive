@@ -99,7 +99,7 @@ double Horizon::get_elevation () const
 double Horizon::get_zenith () const
 {
   build ();
-  return M_PI - elevation;
+  return 0.5 * M_PI - elevation;
 }
 
 void Horizon::do_build ()
