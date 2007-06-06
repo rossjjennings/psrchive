@@ -9,7 +9,7 @@
 # Original: 1999/07/01 by Mark Calabretta
 # Adapted and modified: 2007/05/22 by Willem van Straten
 #
-# $Id: psrchive_version,v 1.2 2007/05/24 06:49:54 straten Exp $
+# $Id: psrchive_version,v 1.3 2007/06/06 05:07:31 straten Exp $
 #-----------------------------------------------------------------------------
 
 if (! $?PSRCHIVE_SYSTEM) then
@@ -21,20 +21,20 @@ if (! $?PSRCHIVE_VERSION) then
 
   #
   # If the version is not set, assume that this is the first time that
-  # this script was sourced and set PSRCHIVE_VERSION to current
+  # this script was sourced and set PSRCHIVE_VERSION to stable
   #
 
-  if (-d $PSRCHIVE_SYSTEM/current/bin) then
+  if (-d $PSRCHIVE_SYSTEM/stable/bin) then
 
     # Use the current version by default
-    setenv PSRCHIVE_VERSION current
+    setenv PSRCHIVE_VERSION stable
 
     # Add the system installation directory to the front of the PATH  
-    setenv PATH $PSRCHIVE_SYSTEM/current/bin:$PATH
+    setenv PATH $PSRCHIVE_SYSTEM/stable/bin:$PATH
 
     # Set up the alias
     alias psrchive_version "set psrchive_version=\!* ;"\
-         "source $PSRCHIVE_SYSTEM/current/share/psrchive_version"
+         "source $PSRCHIVE_SYSTEM/stable/share/psrchive_version"
 
   endif
 
