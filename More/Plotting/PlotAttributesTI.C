@@ -25,5 +25,5 @@ Pulsar::PlotAttributes::Interface::Interface (PlotAttributes* instance)
 
   add( &PlotAttributes::get_applied,
        &PlotAttributes::apply_set,
-       "set", "Apply an option set (pub,blank,info)" );
+       "set", "Apply an option set ('pub' or 'blank')" );
 }
