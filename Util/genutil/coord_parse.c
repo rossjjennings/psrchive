@@ -10,6 +10,8 @@
 #include <math.h>
 #include <ctype.h>
 
+// #define _DEBUG 1
+
 #include "coord_parse.h"
 
 /*! Parses a string containing RA/DEC coordinates to produce ra and
@@ -247,8 +249,12 @@ int unit2str (char* unit_string, unsigned unit_strlen,
 #endif
 
       /* tricks to avoid rounding ugliness in string */
-      if (ifield+1 == nfields)
-	unit = round (unit);
+      if (ifield+1 == nfields) {
+	unit = lround (unit);
+#ifdef _DEBUG
+	fprintf (stderr, "last field. unit=%lf\n", unit);
+#endif
+      }
       else if (field_precision[ifield+1]) {
 	field_value = pow (10.0,-(field_precision[ifield+1]+3));
 	unit += field_value/field_scale[ifield+1];
