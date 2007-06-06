@@ -52,6 +52,8 @@ void zap (vector<bool>& mask, vector<float>& spectrum,
 //! Set integration weights
 void Pulsar::ChannelZapMedian::weight (Integration* integration)
 {
+  Integration* modify = integration;
+
   Reference::To<Integration> clone;
 
   if (bybin && !integration->get_dedispersed()) {
@@ -79,14 +81,10 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
   vector<bool> mask (nchan, false);
 
   for (ichan=0; ichan < nchan; ichan++) {
-
-    double polsum = 0;
-    for (ipol=0; ipol<npol; ipol++) {
-      double temp = integration->get_Profile (ipol, ichan) -> sum();
-      polsum += temp * temp;
-    }
-    spectrum[ichan] = sqrt(polsum);
-
+    spectrum[ichan] = integration->get_Profile (0, ichan) -> sum();
+    if (integration->get_state() == Signal::PPQQ ||
+        integration->get_state() == Signal::Coherence)
+      spectrum[ichan] += integration->get_Profile (1, ichan) -> sum();
   }
 
   zap (mask, spectrum, window_size, cutoff_threshold);
@@ -120,7 +118,7 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
   for (ichan=0; ichan < nchan; ichan++)
     if (mask[ichan]) {
 
-      integration->set_weight (ichan, 0.0);
+      modify->set_weight (ichan, 0.0);
       
       if (total_zapped)
         oss << " ";
