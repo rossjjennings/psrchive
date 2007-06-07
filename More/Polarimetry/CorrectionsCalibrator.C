@@ -107,7 +107,7 @@ void Pulsar::CorrectionsCalibrator::calibrate (Archive* archive)
     return;
   }
 
-  if (!archive->get_poln_calibrated() && Archive::verbose) 
+  if (!archive->get_poln_calibrated() && Archive::verbose > 1) 
     cerr << "Pulsar::CorrectionsCalibrator " 
       "WARNING: correcting without calibrator" << endl;
 
@@ -222,7 +222,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
     // verify self-consistency of attributes
 
-    if (Archive::verbose)
+    if (Archive::verbose > 1)
       cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
 	"  Pointing position_angle=" << pointing->get_position_angle() 
            << " != feed_angle+parallactic_angle="
@@ -277,7 +277,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
     if (pointing && !equal_pi( pointing->get_parallactic_angle(), pa ))  {
 
-      if (Archive::verbose)
+      if (Archive::verbose > 1)
         cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
 	  "  Pointing parallactic angle="
 	     << pointing->get_parallactic_angle().getDegrees() << "deg "
