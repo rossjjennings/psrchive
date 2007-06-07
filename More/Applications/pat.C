@@ -11,10 +11,7 @@
 #include "Pulsar/denoise.h"
 #include "Pulsar/shift_methods.h"
 
-#include "Pulsar/PolnProfile.h"
-#include "Pulsar/PolnProfileFit.h"
-
-#include "MEAL/Polar.h"
+#include "Pulsar/PulsarCalibrator.h"
 
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/Backend.h"
@@ -64,7 +61,7 @@ void usage ()
     "  -c               Choose the maximum harmonic \n"
     "  -n harmonics     Use up to the specified number of harmonics\n"
     "  -p               Enable matrix template matching \n"
-    "  -P               Perform two separate fits: 1) xform; 2) phase \n"
+    "  -P               Do not fscrunch the standard \n"
     "\n"
     "Algorithm Selection:\n"
     "  -A name          Select shift algorithm [default: PGS] \n"
@@ -92,7 +89,12 @@ int main (int argc, char *argv[]) try {
   bool std_given = false;
   bool std_multiple = false;
   bool gaussian = false;
-  bool full_poln = false;
+  bool full_freq = false;
+
+  // the reception calibration class
+  Pulsar::PulsarCalibrator* full_poln = 0;
+  bool choose_maximum_harmonic = false;
+  unsigned maximum_harmonic = 0;
 
   bool fscrunch = false;
   bool tscrunch = false;
@@ -110,8 +112,6 @@ int main (int argc, char *argv[]) try {
   Reference::To<Profile> prof;
 
   int gotc = 0;
-
-  PolnProfileFit fit;
 
   float chisq_max = 2.0;
 
@@ -158,7 +158,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'c':
-      fit.choose_maximum_harmonic = true;
+      choose_maximum_harmonic = true;
       break;
 
     case 'D':
@@ -188,20 +188,22 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.71 2006/10/06 21:37:49 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.72 2007/06/07 02:02:33 straten Exp $" << endl;
       return 0;
 
     case 'n':
-      fit.set_maximum_harmonic( atoi(optarg) );
+      maximum_harmonic = atoi(optarg);
       break;
 
     case 'P':
-      fit.set_separate_fits();
-    case 'p':
-      full_poln = true;
+      full_freq = true;
       break;
 
-    case 'q':
+    case 'p':
+      full_poln = new Pulsar::PulsarCalibrator;
+      break;
+
+   case 'q':
       Archive::set_verbosity(0);
       break;
 
@@ -225,10 +227,8 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'V':
-      verbose = true;
       Archive::set_verbosity(3);
-      MEAL::Function::verbose = true;
-      Pulsar::PolnProfileFit::verbose = true;
+      verbose = true;
       break;
 
     case 'x':
@@ -257,14 +257,15 @@ int main (int argc, char *argv[]) try {
     return -1;
   }
 
-  Reference::To<PolnProfile> poln_profile;
-
   if (!std_multiple && !gaussian) try {
 
     // If only using one standard profile ...
 
     stdarch = Archive::load(std);
-    stdarch->fscrunch();
+
+    if (!full_freq)
+      stdarch->fscrunch();
+
     stdarch->tscrunch();
     
     if (denoise)
@@ -273,13 +274,22 @@ int main (int argc, char *argv[]) try {
     if (full_poln) {
       
       cerr << "pat: using full polarization" << endl;
-      fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
-      fit.set_transformation( new MEAL::Polar );
-      cerr << "pat: last harmonic = " << fit.get_nharmonic() << endl;
+
+      if (maximum_harmonic)
+	full_poln->set_maximum_harmonic (maximum_harmonic);
+
+      full_poln->set_choose_maximum_harmonic (choose_maximum_harmonic);
+
+      full_poln->set_tim_file (stdout);
+
+      stdarch->convert_state (Signal::Stokes);
+      full_poln->set_standard( stdarch );
+
+      cerr << "pat: last harmonic = " << full_poln->get_nharmonic() << endl;
 
     }
     else
-      stdarch->convert_state(Signal::Intensity);
+      stdarch->pscrunch();
 
   }
   catch (Error& error) {
@@ -291,9 +301,6 @@ int main (int argc, char *argv[]) try {
   // Give format information for Tempo2 output 
   if (strcasecmp(outFormat.c_str(),"tempo2")==0)
     cout << "FORMAT 1" << endl;
-
-  // optimization: remember the last successful MTM fit
-  MEAL::Polar backup;
 
   for (unsigned i = 0; i < archives.size(); i++) {
     
@@ -312,34 +319,8 @@ int main (int argc, char *argv[]) try {
 
       if (full_poln) try {
 
-	Integration* integration = arch->get_Integration(0);
-	poln_profile = integration->new_PolnProfile(0);
-
-        fit.get_transformation()->copy( &backup );
-
-	Tempo::toa toa = fit.get_toa (poln_profile,
-				      integration->get_epoch(),
-				      integration->get_folding_period(),
-				      arch->get_telescope_code());
-
-        backup.copy( fit.get_transformation() );
-
-        string aux = basename( arch->get_filename() );
-        float chisq = fit.get_fit_chisq() / fit.get_fit_nfree();
-
-        if (verbose)
-          cerr << "pat: " << aux << " chisq=" << chisq << endl;
-
-	if (chisq_max == 0.0 || chisq < chisq_max) {
-
-	  if (arch->get_dedispersed())
-	    toa.set_frequency (arch->get_centre_frequency());
-	  
-	  toa.set_auxilliary_text (aux);
-	  
-	  toa.unload(stdout);
-
-	}
+	arch->convert_state (Signal::Stokes);
+	full_poln->add_observation( arch );
 
       }
       catch (Error& error) {
@@ -371,16 +352,7 @@ int main (int argc, char *argv[]) try {
           if (denoise)
             Pulsar::denoise(stdarch);
 	
-  
-	  if (full_poln) {
-	    
-	    cerr << "pat: full polarization fitting with " << std << endl;
-	    fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
-	    fit.set_transformation( new MEAL::Polar );
-	    
-	  }
-	  else
-	    stdarch->convert_state(Signal::Intensity);
+	  stdarch->convert_state(Signal::Intensity);
 	}
 	if (strcasecmp(outFormat.c_str(),"parkes")==0)
 	  {
