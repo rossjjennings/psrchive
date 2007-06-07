@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.20 $
-   $Date: 2007/04/25 23:26:35 $
+   $Revision: 1.21 $
+   $Date: 2007/06/07 02:02:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -37,7 +37,7 @@ namespace Pulsar {
   public:
     
     //! Constructor
-    PulsarCalibrator (Calibrator::Type model);
+    PulsarCalibrator (Calibrator::Type model = Calibrator::Britton);
 
     //! Destructor
     ~PulsarCalibrator ();
@@ -56,6 +56,9 @@ namespace Pulsar {
 
     //! Allow software to choose the maximum harmonic
     void set_choose_maximum_harmonic (bool flag = true);
+
+    //! Get the number of harmonics in use
+    unsigned get_nharmonic () const;
 
     //! Ignore fluctuations in pulsar flux
     void set_normalize_gain (bool flag = true);
@@ -108,6 +111,9 @@ namespace Pulsar {
 
     //! When set, the software will choose the maximum harmonic
     bool choose_maximum_harmonic;
+
+    //! The maximum harmonic chosen
+    unsigned chosen_maximum_harmonic;
 
     //! When true, calculate_transformation will return the mean solution
     bool mean_solution;

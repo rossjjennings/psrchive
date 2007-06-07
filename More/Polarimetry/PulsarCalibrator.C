@@ -27,6 +27,7 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)
 {
   model_type = model;
   maximum_harmonic = 0;
+  chosen_maximum_harmonic = 0;
   choose_maximum_harmonic = false;
   mean_solution = true;
   tim_file = 0;
@@ -114,14 +115,25 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
   
   CorrectionsCalibrator correct;
   if (correct.needs_correction(data)) {
-    cerr << "Pulsar::PulsarCalibrator::set_standard correcting instrument" 
-         << endl;
+    if (verbose > 2)
+      cerr << "Pulsar::PulsarCalibrator::set_standard correcting instrument" 
+	   << endl;
     correct.calibrate( clone );
   }
 
   if (clone->get_nchan () > 1)
     build (clone->get_nchan());
 
+}
+
+unsigned Pulsar::PulsarCalibrator::get_nharmonic () const
+{
+  if (choose_maximum_harmonic)
+    return chosen_maximum_harmonic;
+  else if (maximum_harmonic)
+    return maximum_harmonic;
+  else
+    return get_calibrator()->get_nbin()/2;
 }
 
 void Pulsar::PulsarCalibrator::build (unsigned nchan)
@@ -138,8 +150,6 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan)
 
   model.resize (model_nchan);
 
-  unsigned chosen_maximum_harmonic;
-
   if (choose_maximum_harmonic) {
     
     Reference::To<Integration> clone = integration->clone();
@@ -150,8 +160,8 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan)
     temp.set_standard ( clone->new_PolnProfile (0) );
 
     chosen_maximum_harmonic = temp.get_nharmonic();
-
-    // if (verbose > 2)
+    
+    if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::build max harmonic="
 	   << chosen_maximum_harmonic << endl;
 
@@ -169,7 +179,7 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan)
       continue;
 
     if (integration->get_weight (ichan) == 0) {
-      if (verbose)
+      if (verbose > 2)
 	cerr << "Pulsar::PulsarCalibrator::build ichan="
 	     << ichan << " flagged invalid" << endl;
       continue;
@@ -391,8 +401,9 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 
     toa.unload (tim_file);
 
-    cerr << aux << " freq = " << freq << " chisq = " << reduced_chisq 
-	 << " phase = " << phase.val << " +/- " << phase.get_error() << endl;
+    if (verbose > 2)
+      cerr << aux << " freq = " << freq << " chisq = " << reduced_chisq 
+	   << " phase = " << phase.val << " +/- " << phase.get_error() << endl;
 
   }
 
