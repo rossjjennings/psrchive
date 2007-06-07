@@ -66,6 +66,8 @@ string get_scale(Pulsar::Archive* arch);
 
 string vertical_join_option(float x, float x2);
 
+static bool dedispersed = true;
+
 int main(int argc, char** argv)
 {
 	if (argc < 2) {
@@ -84,7 +86,6 @@ int main(int argc, char** argv)
 	char ch;
 	bool zoomed = false;
 	bool vertical = false;
-	bool dedispersed = false;
 	bool centered = false;
 
 	string plot_type = "time";
@@ -113,6 +114,8 @@ int main(int argc, char** argv)
 	base_archive->remove_baseline();
 
 	Reference::To<Pulsar::Archive> mod_archive = base_archive->clone();
+	mod_archive->dedisperse ();
+
 	Reference::To<Pulsar::Archive> backup_base_archive = base_archive->clone();
 	Reference::To<Pulsar::Archive> scrunched_archive = base_archive->clone();
 	mod_archive->fscrunch();
@@ -226,10 +229,11 @@ int main(int argc, char** argv)
 					redraw(mod_archive, time_orig_plot, time_mod_plot, zoomed, centered);
 				}
 
+				update_total(scrunched_archive, base_archive, total_plot, centered);
+
 				break;
 
 			case 'f': // frequency plot
-				dedispersed = false;
 				mouseY = 0;
 				plot_type = "freq";
 				zoomed = false;
@@ -438,6 +442,10 @@ void redraw(Pulsar::Archive* arch, Plot* orig_plot, Plot* mod_plot, bool zoom, b
 void freq_redraw(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* orig_plot, Plot* mod_plot, bool zoom, bool centered)
 {
 	*arch = *old_arch;
+	if (!dedispersed)
+	  arch->set_dispersion_measure(0);
+	else
+	  arch->dedisperse();
 	arch->tscrunch();
 	redraw(arch, orig_plot, mod_plot, zoom, centered);
 }
@@ -445,6 +453,8 @@ void freq_redraw(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* orig_pl
 void time_redraw(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* orig_plot, Plot* mod_plot, bool zoom, bool centered)
 {
 	*arch = *old_arch;
+	if (!dedispersed)
+	  arch->set_dispersion_measure(0);
 	arch->fscrunch();
 	redraw(arch, orig_plot, mod_plot, zoom, centered);
 }
@@ -452,6 +462,8 @@ void time_redraw(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* orig_pl
 void update_total(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* plot, bool centered)
 {
 	*arch = *old_arch;
+	if (!dedispersed)
+	  arch->set_dispersion_measure(0);
 	arch->tscrunch();
 	arch->fscrunch();
 
@@ -549,12 +561,14 @@ void print_command(vector<int>& freq_chans, vector<int> subints, string extensio
 void set_dedispersion(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &dedispersed)
 {
 	if (!dedispersed) {
+		dedispersed = true;
 		*arch = *old_arch;
 		arch->dedisperse();
-		dedispersed = true;
 	} else {
 		dedispersed = false;
 		*arch = *old_arch;
+		arch->set_dispersion_measure(0);
+		arch->dedisperse();
 	}
 }
 
