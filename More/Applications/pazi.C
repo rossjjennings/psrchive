@@ -49,7 +49,9 @@ int freq_get_channel(float mouseY, double bandwidth, int num_chans, double centr
 int time_get_channel(float mouseY, double int_length, int num_subints, string scale);
 string join_option(float y, float y2, double bandwidth, string type);
 void freq_zap_chan(Pulsar::Archive* arch, int zap_chan);
+void freq_unzap_chan(Pulsar::Archive* arch, Pulsar::Archive* backup, int zap_chan);
 void time_zap_subint(Pulsar::Integration* integ);
+void time_unzap_subint(Pulsar::Integration* integ, Pulsar::Integration* backup);
 void redraw(Pulsar::Archive* arch, Plot* orig_plot, Plot* mod_plot, bool zoom, bool centered);
 void freq_redraw(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* orig_plot, Plot* mod_plot, bool zoom, bool centered);
 void time_redraw(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* orig_plot, Plot* mod_plot, bool zoom, bool centered);
@@ -57,8 +59,8 @@ void update_total(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* plot, 
 void freq_channel_limits(int &lower_chan, int &upper_chan, float mouseY, float mouseY2, double bandwidth, int num_chan, double centre_freq);
 void time_channel_limits(int &lower_chan, int &upper_chan, float mouseY, float mouseY2, double int_length, int num_subints, string scale);
 void swap_chans(int &chan1, int &chan2);
-void add_channel(int chan, vector<int>& delete_channels);
-void remove_channel(int chan, vector<int>& delete_channels);
+bool add_channel(int chan, vector<int>& delete_channels);
+bool remove_channel(int chan, vector<int>& delete_channels);
 void print_command(vector<int>& freq_chans, vector<int> subints, string extension, string filename);
 void set_dedispersion(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &dedispersed);
 void set_centre(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &centered, string type, bool dedispersed);
@@ -67,6 +69,8 @@ string get_scale(Pulsar::Archive* arch);
 string vertical_join_option(float x, float x2);
 
 static bool dedispersed = true;
+static vector<int> channels_to_zap;
+static vector<int> subints_to_zap;
 
 int main(int argc, char** argv)
 {
@@ -86,7 +90,7 @@ int main(int argc, char** argv)
 	char ch;
 	bool zoomed = false;
 	bool vertical = false;
-	bool centered = false;
+	bool centered = true;
 
 	string plot_type = "time";
 	string filename = argv[1];
@@ -106,19 +110,21 @@ int main(int argc, char** argv)
 	string write_filename = filename + ".";
 	write_filename += extension;
 
-	vector<int> channels_to_zap;
-	vector<int> subints_to_zap;
-
 	Reference::To<Pulsar::Archive> base_archive = Archive::load(argv[1]);
 	base_archive->pscrunch();
 	base_archive->remove_baseline();
 
 	Reference::To<Pulsar::Archive> mod_archive = base_archive->clone();
 	mod_archive->dedisperse ();
-
-	Reference::To<Pulsar::Archive> backup_base_archive = base_archive->clone();
-	Reference::To<Pulsar::Archive> scrunched_archive = base_archive->clone();
+	mod_archive->centre();
 	mod_archive->fscrunch();
+
+	Reference::To<Pulsar::Archive> backup_archive = base_archive->clone();
+
+	Reference::To<Pulsar::Archive> scrunched_archive = mod_archive->clone();
+	scrunched_archive->tscrunch();
+
+
 	Pulsar::Integration* integ;
 
 	double centre_freq = base_archive->get_centre_frequency();
@@ -150,8 +156,11 @@ int main(int argc, char** argv)
 	cpgopen("2/XS");
 
 	cpgask(0);
-	scrunched_archive->tscrunch();
-	scrunched_archive->fscrunch();
+
+	cerr << endl <<
+	  "Total S/N = " << scrunched_archive->get_Profile(0,0,0)->snr()
+	     << endl << endl;
+
 	total_plot->plot(scrunched_archive);
 
 	cpgslct(1);
@@ -159,9 +168,9 @@ int main(int argc, char** argv)
 
 	while (1) {
 		if (!vertical) {
-			cpgband(3, 0, mouseX, mouseY, &mouseX2, &mouseY2, &ch);
+			cpgband(5, 0, mouseX, mouseY, &mouseX2, &mouseY2, &ch);
 		} else {
-			cpgband(4, 0, mouseX, mouseY, &mouseX2, &mouseY2, &ch);
+			cpgband(6, 0, mouseX, mouseY, &mouseX2, &mouseY2, &ch);
 		}
 
 		switch (ch) {
@@ -271,8 +280,33 @@ int main(int argc, char** argv)
 				break;
 
 			case 'u': // restore target channel's original weight
-				*base_archive = *backup_base_archive;
-				*mod_archive = *base_archive;
+				if (mouseY) {
+					mouseY = 0;
+				} else {
+					if (plot_type == "freq") {
+						remove_channel(freq_get_channel(mouseY2, bandwidth, num_chan, centre_freq), channels_to_zap);
+						freq_unzap_chan(base_archive, backup_archive, freq_get_channel(mouseY2, bandwidth, num_chan, centre_freq));
+						freq_redraw(mod_archive, base_archive, freq_orig_plot, freq_mod_plot, zoomed, centered);
+					} else {
+						remove_channel(time_get_channel(mouseY2, int_length, num_subints, scale), subints_to_zap);
+						integ = base_archive->get_Integration(time_get_channel(mouseY2, int_length, num_subints, scale));
+						time_unzap_subint(integ, backup_archive->get_Integration(time_get_channel(mouseY2, int_length, num_subints, scale)));
+						time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot, zoomed, centered);
+					}
+				}
+				update_total(scrunched_archive, base_archive, total_plot, centered);
+				break;
+
+
+
+
+
+
+
+
+
+
+
 
 				if (plot_type == "freq") {
 					mod_archive->tscrunch();
@@ -288,7 +322,6 @@ int main(int argc, char** argv)
 				if (mouseY) {
 					mouseY = 0;
 				} else {
-					*backup_base_archive = *base_archive;
 					if (plot_type == "freq") {
 						add_channel(freq_get_channel(mouseY2, bandwidth, num_chan, centre_freq), channels_to_zap);
 						freq_zap_chan(base_archive, freq_get_channel(mouseY2, bandwidth, num_chan, centre_freq));
@@ -305,7 +338,6 @@ int main(int argc, char** argv)
 
 			case 'z': // zap multiple channels
 				if (mouseY) {
-					*backup_base_archive = *base_archive;
 					if (plot_type == "freq") {
 						freq_channel_limits(lower_channel, upper_channel, mouseY, mouseY2, bandwidth, num_chan, centre_freq);
 
@@ -426,6 +458,45 @@ void time_zap_subint(Pulsar::Integration* integ)
 		integ->get_Profile(0,i)->set_weight(0);
 }
 
+bool is_zapped (vector<int>& zapped, int index)
+{
+  for (unsigned i=0; i<zapped.size(); i++)
+    if (zapped[i] == index)
+      return true;
+  return false;
+}
+
+void freq_unzap_chan(Pulsar::Archive* arch, Pulsar::Archive* backup, int zap_chan)
+{
+  Pulsar::Integration* integ;
+  Pulsar::Integration* binteg;
+  int nsubint = arch->get_nsubint();
+  int nchan = arch->get_nchan();
+
+  for (int i = 0; i < nsubint; i++) {
+
+    if (is_zapped(subints_to_zap, i))
+      continue;
+
+    for (int j = 0; j < nchan; j++) {
+      if (j == zap_chan) {
+	integ = arch->get_Integration(i);
+	binteg = backup->get_Integration(i);
+	integ->get_Profile(0,j)->set_weight(binteg->get_weight(j));
+      }
+    }
+
+  }
+}
+
+void time_unzap_subint(Pulsar::Integration* integ, Pulsar::Integration* backup)
+{
+  int nchan = integ->get_nchan();
+  for (int i = 0; i < nchan; i++)
+    if (!is_zapped(channels_to_zap,i))
+      integ->get_Profile(0,i)->set_weight( backup->get_weight(i) );
+}
+
 void redraw(Pulsar::Archive* arch, Plot* orig_plot, Plot* mod_plot, bool zoom, bool centered)
 {
 	if (centered) {
@@ -504,31 +575,24 @@ void swap_chans(int &chan1, int &chan2)
 	chan2 = temp;
 }
 
-void add_channel(int chan, vector<int>& delete_channels)
+bool add_channel(int chan, vector<int>& delete_channels)
 {
-    bool found = 0;
-	for (int i = 0; i < delete_channels.size(); i++) {
-		if (chan == delete_channels[i]) {
-			found = 1;
-			break;
-		}
-	}
-
-	if (!found) {
-		delete_channels.push_back(chan);
-    }
+  if (!is_zapped(delete_channels, chan)) {
+    delete_channels.push_back(chan);
+    return true;
+  }
+  return false;
 }
 
-void remove_channel(int chan, vector<int>& delete_channels)
+bool remove_channel(int chan, vector<int>& delete_channels)
 {
-	bool found = 0;
-	for (vector<int>::iterator it = delete_channels.begin(); it != delete_channels.end(); ++it) {
-		if (*it == chan) {
-			cout << "removing channel: " << *it << endl;
-			it = delete_channels.erase(it);
-			break;
-		}
-	}
+  for (vector<int>::iterator it = delete_channels.begin(); it != delete_channels.end(); ++it) {
+    if (*it == chan) {
+      it = delete_channels.erase(it);
+      return true;
+    }
+  }
+  return false;
 }
 
 void print_command(vector<int>& freq_chans, vector<int> subints, string extension, string filename)
