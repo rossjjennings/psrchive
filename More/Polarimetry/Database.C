@@ -1028,9 +1028,8 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
 
     }
     catch (Error& error) {
-      if (verbose)
-	cerr << "  No full polarimetric models found" << endl;
-      return 0;
+      throw Error (InvalidState, "Pulsar::Database::generateHybridCalibrator",
+		   "No complete polarimetric model (pcm output) found");
     }
     
   }
