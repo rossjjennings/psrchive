@@ -31,11 +31,21 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
 
   // ensure that no labels are printed inside the frame
   get_frame()->get_label_below()->set_all (PlotLabel::unset);
+
+  style = "image";
 }
  
 TextInterface::Class* Pulsar::PhaseVsPlot::get_interface ()
 {
   return new Interface (this);
+}
+
+void Pulsar::PhaseVsPlot::set_style (const string& s)
+{
+  if (s != "image" && s != "line")
+    throw Error (InvalidParam, "Pulsar::PhaseVsPlot::set_style",
+		 "invalid style '" + s + "'");
+  style = s;
 }
 
 //! Derived classes must draw in the current viewport
@@ -81,19 +91,46 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
 
   }
 
-  // X = TR(0) + TR(1)*I + TR(2)*J
-  // Y = TR(3) + TR(4)*I + TR(5)*J
-
   float x_res = (x_max-x_min)/nbin;
   float y_res = (y_max-y_min)/nrow;
+    
+  if (style == "image") {
 
-  float trf[6] = { x_min-0.5*x_res, x_res, 0.0,
-		   y_min-0.5*y_res, 0.0, y_res };
+    get_z_scale()->set_minmax (min, max);
+    get_z_scale()->get_range (min, max);
 
-  get_z_scale()->set_minmax (min, max);
-  get_z_scale()->get_range (min, max);
+    // X = TR(0) + TR(1)*I + TR(2)*J
+    // Y = TR(3) + TR(4)*I + TR(5)*J
+    
+    float trf[6] = { x_min-0.5*x_res, x_res, 0.0,
+		     y_min-0.5*y_res, 0.0, y_res };
+    
+    cpgimag(&plotarray[0], nbin, nrow, 1, nbin, 1, nrow, min, max, trf);
 
-  cpgimag(&plotarray[0], nbin, nrow, 1, nbin, 1, nrow, min, max, trf);
+  }
+  else if (style == "line") {
+
+    get_z_scale()->set_minmax (0, max);
+    get_z_scale()->get_range (min, max);
+
+    vector<float> xaxis;
+    get_scale()->get_ordinates (data, xaxis);
+
+    float yscale = y_res/max;
+
+    for (unsigned irow = min_row; irow < max_row; irow++) {
+      bool all_zero = true;
+      for (unsigned ibin=0; ibin<nbin; ibin++) {
+	float amp = plotarray[irow*nbin + ibin];
+	if (amp != 0.0)
+	  all_zero = false;
+	plotarray[irow*nbin + ibin] = amp * yscale + y_min + y_res * irow;
+      }
+      if (!all_zero)
+	cpgline (nbin, &xaxis[0], &plotarray[irow*nbin]);
+    }
+
+  }
 
   if (get_frame()->get_y_axis()->get_alternate()) {
 

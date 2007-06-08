@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.12 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.13 $
+   $Date: 2007/06/08 00:40:24 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsPlot_h
@@ -53,11 +53,19 @@ namespace Pulsar {
     //! Provide access to the colour map
     pgplot::ColourMap* get_colour_map () { return &colour_map; }
 
+    //! Set the style
+    void set_style (const std::string&);
+    //! Get the style
+    std::string get_style () const { return style; }
+
   protected:
 
     PlotScale z_scale;
 
     pgplot::ColourMap colour_map;
+
+    //! The style in which the data will be plotted
+    std::string style;
 
   };
 
