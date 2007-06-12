@@ -29,6 +29,7 @@ nobase_include_HEADERS = \
         Pulsar/FourierSNR.h \
         Pulsar/FrequencyIntegrate.h \
         Pulsar/GaussianBaseline.h \
+	Pulsar/InstallInterpreter.h \
         Pulsar/InstrumentInfo.h \
         Pulsar/IntegrationWeight.h \
         Pulsar/Interpreter.h \
@@ -108,6 +109,7 @@ libGeneral_la_SOURCES = \
         FourierSNR.C \
         FrequencyIntegrate.C \
         GaussianBaseline.C \
+	InstallInterpreter.C \
         Integration_cal_levels.C \
         Integration_convert_state.C \
         Integration_dedisperse.C \
