@@ -8,6 +8,7 @@
 #include "Reference.h"
 #include "Error.h"
 #include "strutil.h"
+#include "dirutil.h"
 
 #include <vector>
 
@@ -75,11 +76,13 @@ Parent* factory (FILE* fptr, size_t nbytes)
 template<class Parent>
 Parent* factory (const std::string& filename)
 {
-  FILE* temp = fopen (filename.c_str(), "r");
+  std::string use_filename = expand (filename);
+
+  FILE* temp = fopen (use_filename.c_str(), "r");
 
   if (!temp)
     throw Error (FailedSys, "factory (std::string&)",
-		 "fopen (%s)", filename.c_str());
+		 "fopen (%s)", use_filename.c_str());
 
   try {
     Parent* model = factory<Parent> (temp);
@@ -99,10 +102,12 @@ Parent* factory (const std::string& filename)
 template<class Any>
 Any* load (const std::string& filename)
 {
-  FILE* temp = fopen (filename.c_str(), "r");
+  std::string use_filename = expand (filename);
+
+  FILE* temp = fopen (use_filename.c_str(), "r");
   if (!temp)
     throw Error (FailedSys, "Any* load (std::string&)",
-		 "fopen (%s)", filename.c_str());
+		 "fopen (%s)", use_filename.c_str());
 
   try {
     Any* any = new Any;
