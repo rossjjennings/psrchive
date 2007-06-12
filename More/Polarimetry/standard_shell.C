@@ -7,6 +7,7 @@
 
 #include "Pulsar/ZapInterpreter.h"
 #include "Pulsar/CalInterpreter.h"
+#include "Pulsar/InstallInterpreter.h"
 
 Pulsar::Interpreter* standard_shell ()
 {
@@ -17,6 +18,9 @@ Pulsar::Interpreter* standard_shell ()
 
   interpreter->import( new Pulsar::CalInterpreter,
 		       "cal", "polarimetric calibration" );
+
+  interpreter->import( new Pulsar::InstallInterpreter,
+		       "install", "install auxilliary data" );
 
   return interpreter.release();
 }
