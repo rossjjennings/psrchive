@@ -51,6 +51,11 @@ Pulsar::ZapInterpreter::ZapInterpreter ()
       "such", "zap specified integration and channel",
       pair_help("such") );
 
+  add_command
+    ( &ZapInterpreter::edge,
+      "edge", "zap fraction of band edges",
+      "usage: edge <fraction> \n"
+      "  float <fraction>  fraction of band zapped on each edge \n");
 }
 
 Pulsar::ZapInterpreter::~ZapInterpreter ()
@@ -192,3 +197,34 @@ catch (Error& error) {
 }
 
 
+// //////////////////////////////////////////////////////////////////////
+//
+string Pulsar::ZapInterpreter::edge (const string& args)
+try {
+
+  float fraction = setup<float> (args);
+
+  if (fraction <= 0.0 || fraction >= 0.5)
+    return response (Fail, "invalid fraction " + tostring(fraction));
+
+  Archive* archive = get();
+
+  unsigned isub,  nsub = archive->get_nsubint();
+  unsigned ichan, nchan = archive->get_nchan();
+
+  unsigned nedge = nchan * fraction;
+
+  for (isub=0; isub < nsub; isub++) {
+    Integration* subint = archive->get_Integration (isub);
+    for (ichan=0; ichan < nedge; ichan++)
+      subint->set_weight (ichan, 0.0);
+    for (ichan=nchan-nedge; ichan < nchan; ichan++)
+      subint->set_weight (ichan, 0.0);
+  }
+
+  return response (Good);
+
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}

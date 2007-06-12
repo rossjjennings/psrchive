@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ZapInterpreter.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/05/25 10:59:55 $
+   $Revision: 1.4 $
+   $Date: 2007/06/12 05:53:22 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ZapInterpreter_h
@@ -41,6 +41,9 @@ namespace Pulsar {
 
     //! zap the specified integration,channel
     std::string such (const std::string& args);
+
+    //! zap the specified fraction of the band at the edges
+    std::string edge (const std::string& args);
 
     //! no empty commands
     std::string empty ();
