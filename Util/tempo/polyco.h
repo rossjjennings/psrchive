@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.42 $
-   $Date: 2007/05/22 23:57:52 $
+   $Revision: 1.43 $
+   $Date: 2007/06/13 11:52:39 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -203,8 +203,8 @@ public:
   std::vector<polynomial> pollys;
 
   //! null initializer
-  polyco () {}
-  polyco (const polyco& poly) { operator = (poly); }
+  polyco () { init(); }
+  polyco (const polyco& poly) { init(); operator = (poly); }
 
   //
   // Pulsar::Predictor implementation
@@ -319,6 +319,21 @@ public:
   friend int mpiUnpack (void* inbuf, int insize, int* position, 
 			polyco*, MPI_Comm comm);
 #endif
+
+protected:
+
+  // these attributes enable optimized i_nearest
+  int last_index;
+
+  MJD last_epoch;
+  double last_span_epoch;
+
+  Phase last_phase;
+  double last_span_phase;
+
+  void init();
+  void set_last (int i) const;
+  void set_last_work (int i);
 
 };
 
