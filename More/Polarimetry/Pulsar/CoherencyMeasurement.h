@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CoherencyMeasurement.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.9 $
+   $Date: 2007/06/13 05:28:14 $
    $Author: straten $ */
 
 #ifndef __Calibration_CoherencyMeasurement_H
@@ -83,7 +83,7 @@ namespace Calibration {
     Stokes<double> variance;
 
     //! The uncertainty of the measurement
-    const Uncertainty* uncertainty;
+    Reference::To<const Uncertainty> uncertainty;
 
   };
 
