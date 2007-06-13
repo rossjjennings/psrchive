@@ -176,7 +176,6 @@ int main (int argc, char** argv) try {
       break;
 
     case 'v':
-      Archive::set_verbosity (2);
       verbose = true;
       break;
 
