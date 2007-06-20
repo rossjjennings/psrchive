@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Pointing.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:05:50 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2007/06/20 03:04:53 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_Pointing_h
 #define __Pulsar_Pointing_h
@@ -17,6 +17,7 @@
 #include "Pulsar/Integration.h"
 #include "Angle.h"
 #include "Estimate.h"
+#include "TextInterface.h"
 
 namespace Pulsar {
   
@@ -39,6 +40,9 @@ namespace Pulsar {
 
     //! Clone method
     Pointing* clone () const { return new Pointing( *this ); }
+    
+    //! Return a text interfaces that can be used to access this instance
+    Reference::To< TextInterface::Class > get_text_interface();
 
     //! Addition operator
     const Pointing& operator += (const Pointing& extension);

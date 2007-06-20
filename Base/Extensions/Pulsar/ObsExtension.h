@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ObsExtension.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/05/20 23:33:45 $
+   $Revision: 1.7 $
+   $Date: 2007/06/20 03:04:53 $
    $Author: nopeer $ */
 
 #ifndef __ObsExtension_h
@@ -41,6 +41,9 @@ namespace Pulsar {
 
     //! Clone method
     ObsExtension* clone () const { return new ObsExtension( *this ); }
+    
+    //! Return a text interfaces that can be used to access this instance
+    Reference::To< TextInterface::Class > get_text_interface();
     
     // get methods
     std::string get_observer() const { return observer; }

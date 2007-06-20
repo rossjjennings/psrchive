@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.22 $
-   $Date: 2007/05/04 23:34:33 $
-   $Author: straten $ */
+   $Revision: 1.23 $
+   $Date: 2007/06/20 03:04:53 $
+   $Author: nopeer $ */
 
 #ifndef __PolnCalibratorExtension_h
 #define __PolnCalibratorExtension_h
@@ -42,6 +42,18 @@ namespace Pulsar {
     //! Clone method
     PolnCalibratorExtension* clone () const
     { return new PolnCalibratorExtension( *this ); }
+    
+    //! get the text ineterface 
+    Reference::To< TextInterface::Class > get_text_interface();
+    
+    //! set the ncpar
+    void set_ncpar( int s_ncpar ) { ncpar = s_ncpar; }
+    
+    //! get the ncpar
+    int get_ncpar( void ) const { return ncpar; }
+    
+    //! set the epoch
+    //void set_epoch( 
 
     //! Construct from a PolnCalibrator instance
     PolnCalibratorExtension (const PolnCalibrator*);
@@ -89,6 +101,8 @@ namespace Pulsar {
     void construct ();
 
   private:
+    
+    int ncpar;
 
     void init ();
 

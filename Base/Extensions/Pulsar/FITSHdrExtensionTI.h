@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Attic/FITSHdrExtensionTI.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/05/20 23:37:32 $
+   $Revision: 1.2 $
+   $Date: 2007/06/20 03:04:53 $
    $Author: nopeer $ */
 
 
@@ -17,13 +17,19 @@
 
 
 
-namespace Pulsar {
+namespace Pulsar
+{
+  class FITSHdrExtensionTI : public TextInterface::To< FITSHdrExtension >
+  {
+  public:
+    FITSHdrExtensionTI();
+    FITSHdrExtensionTI( FITSHdrExtension *c );
+    void SetupMethods( void );
+    
+    virtual std::string get_interface_name() { return "FITSHdrExtensionTI"; }
 
-	class FITSHdrExtensionTI : public TextInterface::To< FITSHdrExtension > {
-	
-		public:
-			FITSHdrExtensionTI();	
-	};
+    TextInterface::Class *clone(); 
+  };
 }
 
 

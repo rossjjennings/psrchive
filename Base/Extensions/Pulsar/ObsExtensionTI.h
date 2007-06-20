@@ -7,12 +7,20 @@
 
 
 
-namespace Pulsar {
+namespace Pulsar
+{
 
-	class ObsExtensionTI : public TextInterface::To< ObsExtension > {
-	
-		public:
-			ObsExtensionTI();
-	};
+  class ObsExtensionTI : public TextInterface::To< ObsExtension >
+  {
+
+  public:
+    ObsExtensionTI();
+    ObsExtensionTI( ObsExtension *c );
+    void SetupMethods( void );
+    
+    virtual std::string get_interface_name() { return "ObsExtensionTI"; }
+
+    TextInterface::Class *clone();
+  };
 }
 

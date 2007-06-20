@@ -33,6 +33,9 @@ namespace Pulsar {
     
     //! Clone method
     ProcHistory* clone () const { return new ProcHistory( *this ); }
+    
+    //! Get the text interface
+    Reference::To< TextInterface::Class > get_text_interface();
 
     ///////////////////////////////////////////////////////////////
     // The information container
@@ -101,6 +104,10 @@ namespace Pulsar {
     std::string get_rfi_mthd ();
     void   set_ifr_mthd (std::string str);
     std::string get_ifr_mthd ();
+    
+    int get_last_nbin_prd( void ) const { return rows.back().nbin_prd; }
+    double get_last_tbin( void ) const { return rows.back().tbin; }
+    double get_last_chan_bw( void ) const { return rows.back().chanbw; }
 
     void   add_blank_row ();
     

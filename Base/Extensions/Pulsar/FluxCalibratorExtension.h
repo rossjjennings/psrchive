@@ -7,27 +7,29 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FluxCalibratorExtension.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:05:50 $
-   $Author: straten $ */
+   $Revision: 1.8 $
+   $Date: 2007/06/20 03:04:53 $
+   $Author: nopeer $ */
 
 #ifndef __FluxCalibratorExtension_h
 #define __FluxCalibratorExtension_h
 
 #include "Pulsar/CalibratorExtension.h"
 
-namespace Pulsar {
+namespace Pulsar
+{
 
   class FluxCalibrator;
   //! Flux Calibrator Extension
   /*! This Extension implements the storage of FluxCalibrator data. */
-  
-  class FluxCalibratorExtension : public CalibratorExtension {
-    
+
+  class FluxCalibratorExtension : public CalibratorExtension
+  {
+
     friend class FluxCalibrator;
 
   public:
-    
+
     //! Default constructor
     FluxCalibratorExtension ();
 
@@ -42,7 +44,10 @@ namespace Pulsar {
 
     //! Clone method
     FluxCalibratorExtension* clone () const
-    { return new FluxCalibratorExtension( *this ); }
+      { return new FluxCalibratorExtension( *this ); }
+
+    //! Return a text interfaces that can be used to access this instance
+    Reference::To< TextInterface::Class > get_text_interface();
 
     //! Construct from a FluxCalibrator instance
     FluxCalibratorExtension (const FluxCalibrator*);
@@ -50,11 +55,20 @@ namespace Pulsar {
     //! Set the number of frequency channels
     void set_nchan (unsigned nchan);
 
+    //! Get the number of frequency channels
+    unsigned int get_nchan( void ) const;
+
     //! Set the number of receptors
     void set_nreceptor (unsigned nreceptor);
 
     //! Get the number of receptors
     unsigned get_nreceptor () const;
+
+    //! Set Epoch
+    void set_epoch( double s_epoch );
+
+    //! Get Epoch
+    double get_epoch ( void ) const;
 
     //! Set the system equivalent flux density of the specified channel
     void set_S_sys (unsigned chan, unsigned receptor, const Estimate<double>&);
@@ -76,9 +90,9 @@ namespace Pulsar {
     /*! in mJy */
     std::vector< std::vector< Estimate<double> > > S_cal;
 
-
+    double epoch;
   };
- 
+
 
 }
 

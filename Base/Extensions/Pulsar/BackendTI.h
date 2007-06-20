@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Attic/BackendTI.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:05:50 $
-   $Author: straten $ */
+   $Revision: 1.5 $
+   $Date: 2007/06/20 03:04:53 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_BackendTI_h
 #define __Pulsar_BackendTI_h
@@ -17,16 +17,23 @@
 #include "Pulsar/Backend.h"
 #include "TextInterface.h"
 
-namespace Pulsar {
+namespace Pulsar
+{
 
   //! Provides a text interface to get and set Backend attributes
-  class BackendTI : public TextInterface::To<Backend> {
+  class BackendTI : public TextInterface::To<Backend>
+  {
 
   public:
 
     //! Constructor
     BackendTI ();
+    BackendTI ( Backend *c );
+    void SetupMethods( void );
 
+    virtual std::string get_interface_name() { return "BackendTI"; }
+
+    TextInterface::Class *clone();
   };
 
 }

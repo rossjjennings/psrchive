@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Backend.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/30 13:05:17 $
-   $Author: straten $ */
+   $Revision: 1.9 $
+   $Date: 2007/06/20 03:04:53 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_Backend_h
 #define __Pulsar_Backend_h
@@ -37,6 +37,9 @@ namespace Pulsar {
     //! Clone method
     Backend* clone () const
     { return new Backend( *this ); }
+    
+    //! Return a text interfaces that can be used to access this instance
+    Reference::To< TextInterface::Class > get_text_interface();
 
     //////////////////////////////////////////////////////////////////////
     //

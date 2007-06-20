@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/WidebandCorrelator.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/05/20 23:35:20 $
+   $Revision: 1.8 $
+   $Date: 2007/06/20 03:04:54 $
    $Author: nopeer $ */
 
 #ifndef __Pulsar_WideBandCorrelator_h
@@ -33,6 +33,9 @@ namespace Pulsar {
 
     //! Assignment operator
     const WidebandCorrelator& operator= (const WidebandCorrelator& extension);
+    
+    //! Return a text interfaces that can be used to access this instance
+    Reference::To< TextInterface::Class > get_text_interface();
 
     //! Destructor
     ~WidebandCorrelator ();

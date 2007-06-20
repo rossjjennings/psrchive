@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FeedExtension.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:05:50 $
-   $Author: straten $ */
+   $Revision: 1.5 $
+   $Date: 2007/06/20 03:04:53 $
+   $Author: nopeer $ */
 
 #ifndef __FeedExtension_h
 #define __FeedExtension_h
@@ -17,16 +17,18 @@
 #include "Pulsar/Archive.h"
 #include "Jones.h"
 
-namespace Pulsar {
+namespace Pulsar
+{
 
   //! Stores a known feed transformation
   /*! The FeedExtension class is used to add an arbitrary transformation to
     a PolnCalibrator instance.  The transformation is included between the
     backend and the receiver platform. */
-  class FeedExtension : public Archive::Extension {
+  class FeedExtension : public Archive::Extension
+  {
 
   public:
-    
+
     //! Default constructor
     FeedExtension ();
 
@@ -42,6 +44,9 @@ namespace Pulsar {
     //! Clone method
     FeedExtension* clone () const { return new FeedExtension( *this ); }
 
+    //! Get the a text interface
+    Reference::To< TextInterface::Class > get_text_interface();
+
     //! Return the transformation
     Jones<double> get_transformation () const { return transformation; }
 
@@ -53,7 +58,7 @@ namespace Pulsar {
     Jones<double> transformation;
 
   };
- 
+
 
 }
 

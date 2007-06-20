@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Passband.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:05:50 $
-   $Author: straten $ */
+   $Revision: 1.7 $
+   $Date: 2007/06/20 03:04:53 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_Passband_h
 #define __Pulsar_Passband_h
@@ -38,6 +38,9 @@ namespace Pulsar {
 
     //! Clone method
     Passband* clone () const { return new Passband( *this ); }
+    
+    //! Return a text interfaces that can be used to access this instance
+    Reference::To< TextInterface::Class > get_text_interface();
 
     //! Get the number of frequency channels in each passband
     unsigned get_nchan () const;
