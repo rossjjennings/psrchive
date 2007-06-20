@@ -3,7 +3,7 @@ bin_SCRIPTS = psrhelp
 
 EXTRA_DIST = psrhelp
 
-bin_PROGRAMS = pam pascii pat paz psradd psrsh psrwt fluxcal pac pcm
+bin_PROGRAMS = pam pascii pat paz psradd psrsh psrwt fluxcal pac pcm pdv
 
 pam_SOURCES = pam.C
 
@@ -26,6 +26,9 @@ pac_SOURCES = pac.C
 # Note that pcm uses PGPLOT only if it is available
 pcm_SOURCES = pcm.C
 pcm_LDADD = $(LDADD) @PGPLOT_LIBS@ @PTHREAD_LIBS@
+
+pdv_SOURCES = pdv.C
+
 
 # ######################################################################
 #
