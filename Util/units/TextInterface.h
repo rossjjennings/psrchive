@@ -576,7 +576,13 @@ namespace TextInterface {
 
     //! Process a command
     virtual std::string process (const std::string& command);
+    
+    //! Get the name of this interface
+    virtual std::string get_interface_name( void ) { return ""; }
 
+    //! clone
+    virtual Class *clone() { return NULL; }
+    
     //! Set the indentation that precedes the output of a call to process
     void set_indentation (const std::string& indent) { indentation = indent; }
 
