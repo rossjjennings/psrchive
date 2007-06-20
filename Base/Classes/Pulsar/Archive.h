@@ -7,14 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.161 $
-   $Date: 2007/05/22 23:57:57 $
-   $Author: straten $ */
+   $Revision: 1.162 $
+   $Date: 2007/06/20 03:07:27 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.161 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.162 $"
+#include <iostream>
+#include <TextInterface.h>
 
 #include "IntegrationManager.h"
 #include "sky_coord.h"
@@ -26,7 +28,8 @@
 
 template<typename T> class Jones;
 
-namespace Pulsar {
+namespace Pulsar
+{
 
   class Receiver;
   class Integration;
@@ -40,7 +43,8 @@ namespace Pulsar {
     observational data, including the pulse profiles, integrations, and all
     auxilliary data.  All file I/O and various data reduction algorithms are
     accessed via this class. */
-  class Archive : public IntegrationManager {
+  class Archive : public IntegrationManager
+  {
 
   public:
 
@@ -54,7 +58,7 @@ namespace Pulsar {
 
     //! Copy constructor
     Archive (const Archive& archive);
-    
+
     //! Destructor
     virtual ~Archive ();
 
@@ -93,13 +97,13 @@ namespace Pulsar {
 
     //! Convenience interface to Archive::unload (const char*)
     void unload (const std::string& filename) const
-    { unload (filename.c_str()); }
+      { unload (filename.c_str()); }
 
     //! Get the name of the file to which the archive will be unloaded
     std::string get_filename () const { return unload_filename; }
 
     //! Set the filename of the Archive
-    /*! The filename is the name of the file to which the archive will be 
+    /*! The filename is the name of the file to which the archive will be
       written on the next call to Archive::unload, if no arguments are given
       to the Archive::unload method. */
     void set_filename (const std::string& filename)
@@ -167,7 +171,7 @@ namespace Pulsar {
     //! Get the number of frequency channels used
     virtual unsigned get_nchan () const = 0;
 
-    //! Get the number of frequency channels used
+    //! Get the number of polarizations
     virtual unsigned get_npol () const = 0;
 
     //! Resize the Integration vector with new_Integration instances
@@ -350,7 +354,7 @@ namespace Pulsar {
     void centre ();
 
     //! Phase rotate pulsar Integrations so centre the maximum amplitude
-    void centre_max_bin (); 
+    void centre_max_bin ();
 
     //! Convert data to the specified state
     void convert_state (Signal::State state);
@@ -363,12 +367,12 @@ namespace Pulsar {
 
     //! Correct the Faraday rotation of Q into U
     void defaraday ();
-    
+
     //! Fit Profiles to the standard and return toas
     void toas (std::vector<Tempo::toa>& toas, const Archive* std,
-		       std::string arguments = "",
-		       Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
-    
+               std::string arguments = "",
+               Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
+
     //! Perform the transformation on each polarimetric profile
     void transform (const Jones<float>& transformation);
 
@@ -380,7 +384,7 @@ namespace Pulsar {
 
     //! Transform Stokes I,Q,U,V into the polarimetric invariant interval
     void invint ();
- 
+
     //! Remove the baseline from all profiles
     void remove_baseline (float phase = -1.0, float dc = 0.15);
 
@@ -401,7 +405,7 @@ namespace Pulsar {
 
     //! Computes the weighted channel frequency over an Integration interval.
     double weighted_frequency (unsigned ichan,
-			       unsigned start, unsigned end) const;
+                               unsigned start, unsigned end) const;
 
     //! Call bscrunch with the appropriate value
     void bscrunch_to_nbin (unsigned new_nbin);
@@ -411,9 +415,15 @@ namespace Pulsar {
 
     //! Call tscrunch with the appropriate value
     void tscrunch_to_nsub (unsigned new_nsub);
-    
+
     //! Return the MJD at the start of the first sub-integration
     MJD  start_time () const;
+    
+    //! Get the start time MJD day
+    int start_time_day() const;
+    
+    //! Get the start time MJD faction of a day
+    double start_time_fracday() const;
 
     //! Return the MJD at the end of the last sub-integration
     MJD  end_time () const;
@@ -449,18 +459,19 @@ namespace Pulsar {
     //
     // //////////////////////////////////////////////////////////////////
 
-    /** @name Extension Interface 
+    /** @name Extension Interface
      *
      * Derived classes can provide access to the additional
      * information available in their associated file format through
      * use of Extension classes. 
      */
     //@{
-    
+
     //! Adds features or data to Archive instances
     /* Archive-derived classes may provide access to additional informaton
        through Extension-derived objects. */
-    class Extension : public Reference::Able {
+  class Extension : public Reference::Able
+    {
 
     public:
 
@@ -472,6 +483,10 @@ namespace Pulsar {
 
       //! Return a new copy-constructed instance identical to this instance
       virtual Extension* clone () const = 0;
+
+      //! Return a text interfaces that can be used to access this instance
+      virtual Reference::To< TextInterface::Class > get_text_interface ()
+      { Reference::To<TextInterface::Class> ret; return ret; }
 
       //! Return the name of the Extension
       std::string get_extension_name () const;
@@ -520,7 +535,7 @@ namespace Pulsar {
     //! Return the revision number of the Archive base class definition
     /*! This string is automatically generated by CVS.  Do not edit. */
     static std::string get_revision ()
-    { return get_revision(PULSAR_ARCHIVE_REVISION); }
+  { return get_revision(PULSAR_ARCHIVE_REVISION); }
 
     //! Report on the status of the plugins
     static void agent_report ();
@@ -569,7 +584,7 @@ namespace Pulsar {
 
     //! Parses the revision number out of the CVS Revision string
     static std::string get_revision (const char* revision);
- 
+
     // //////////////////////////////////////////////////////////////////
     //
     // File I/O
@@ -634,7 +649,7 @@ namespace Pulsar {
 
     //! Provide Integration::resize access to Archive-derived classes
     void resize_Integration (Integration* integration);
-    
+
     //! Apply the current model to the Integration
     void apply_model (Integration* subint, const Predictor* old = 0);
 
@@ -701,29 +716,30 @@ namespace Pulsar {
   /*! e.g. MyExtension* ext = archive->get<MyExtension>(); */
   template<class ExtensionType>
   const ExtensionType* Archive::get () const
-  {
-    const ExtensionType* extension = 0;
+    {
+      const ExtensionType* extension = 0;
 
-    for (unsigned iext=0; iext<get_nextension(); iext++) {
+      for (unsigned iext=0; iext<get_nextension(); iext++)
+      {
 
-      const Extension* ext = get_extension (iext);
+        const Extension* ext = get_extension (iext);
 
-      if (verbose == 3)
-	std::cerr << "Pulsar::Archive::get<Ext> name=" 
-	          << ext->get_extension_name() << std::endl;
+        if (verbose == 3)
+          std::cerr << "Pulsar::Archive::get<Ext> name="
+          << ext->get_extension_name() << std::endl;
 
-      extension = dynamic_cast<const ExtensionType*>( ext );
+        extension = dynamic_cast<const ExtensionType*>( ext );
 
-      if (extension)
-	return extension;
+        if (extension)
+          return extension;
+      }
+
+      if (verbose==3)
+        std::cerr << "Pulsar::Archive::get<Ext> failed to find extension of type "
+        << typeid(extension).name() << std::endl;
+
+      return extension;
     }
-
-    if (verbose==3)
-      std::cerr << "Pulsar::Archive::get<Ext> failed to find extension of type "
-	        << typeid(extension).name() << std::endl;
-
-    return extension;
-  }
 
   template<class ExtensionType>
   ExtensionType* Archive::get ()
@@ -744,12 +760,14 @@ namespace Pulsar {
     if (retv)
       return retv;
 
-    try {
+    try
+    {
       Reference::To<ExtensionType> add_ext = new ExtensionType;
       add_extension (add_ext);
       return add_ext;
     }
-    catch (Error& error) {
+    catch (Error& error)
+    {
       return retv;
     }
 

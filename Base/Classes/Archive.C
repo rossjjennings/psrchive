@@ -31,27 +31,27 @@ void Pulsar::Archive::init ()
 //! Provide access to the expert interface
 Pulsar::Archive::Expert* Pulsar::Archive::expert ()
 {
-  return expert_interface; 
+  return expert_interface;
 }
 
-Pulsar::Archive::Archive () 
-{ 
+Pulsar::Archive::Archive ()
+{
   if (verbose == 3)
     cerr << "Pulsar::Archive::null constructor" << endl;
 
-  init(); 
+  init();
 }
 
 //! The Archive copy constructor must never be called, call Archive::copy
 Pulsar::Archive::Archive (const Archive& archive)
 {
   throw Error (Undefined, "Pulsar::Archive copy constructor",
-	       "sub-classes must define copy constructor");
+               "sub-classes must define copy constructor");
 }
 
 
-Pulsar::Archive::~Archive () 
-{ 
+Pulsar::Archive::~Archive ()
+{
   if (verbose == 3)
     cerr << "Pulsar::Archive::destructor" << endl;
 }
@@ -68,7 +68,7 @@ string Pulsar::Archive::get_revision (const char* revision)
 Pulsar::Archive&
 Pulsar::Archive::operator = (const Archive& a)
 {
-  copy (&a); 
+  copy (&a);
   return *this;
 }
 
@@ -77,14 +77,14 @@ Pulsar::Archive* Pulsar::Archive::new_Archive (const string& class_name)
 {
   if (Agent::registry.size() == 0)
     throw Error (InvalidState, "Pulsar::Archive::new_Archive",
-		 "no Agents loaded");
+                 "no Agents loaded");
 
   for (unsigned agent=0; agent<Agent::registry.size(); agent++)
     if (Agent::registry[agent]->get_name() == class_name)
       return Agent::registry[agent]->new_Archive();
 
   throw Error (InvalidParam, "Pulsar::Archive::new_Archive",
-		 "no Agent named '" + class_name + "'");
+               "no Agent named '" + class_name + "'");
 }
 
 void Pulsar::Archive::agent_report ()
@@ -117,8 +117,7 @@ Pulsar::Archive::Extension::Extension (const char* _name)
 }
 
 Pulsar::Archive::Extension::~Extension ()
-{
-}
+{}
 
 string Pulsar::Archive::Extension::get_extension_name () const
 {
@@ -132,7 +131,7 @@ Pulsar::Archive::get_extension (unsigned iext) const
 {
   if ( iext >= extension.size() )
     throw Error (InvalidRange, "Pulsar::Archive::get_extension",
-		 "index=%d >= nextension=%d", iext, extension.size());
+                 "index=%d >= nextension=%d", iext, extension.size());
 
   if ( !extension[iext] )
     return 0;
@@ -146,7 +145,7 @@ Pulsar::Archive::get_extension (unsigned iext)
 {
   if ( iext >= extension.size() )
     throw Error (InvalidRange, "Pulsar::Archive::get_extension",
-		 "index=%d >= nextension=%d", iext, extension.size());
+                 "index=%d >= nextension=%d", iext, extension.size());
 
   if ( !extension[iext] )
     return 0;
@@ -177,25 +176,27 @@ void Pulsar::Archive::add_extension (Extension* ext)
     // once, otherwise each IntegrationOrder class would have to know
     // how to convert from all of its fellows and this would get very
     // complicated... AWH 29/12/2003
-    
+
     for (unsigned i = 0; i < extension.size(); i++)
       if (dynamic_cast<Pulsar::IntegrationOrder*>(extension[i].get()))
-	throw Error(InvalidState, "Archive::add_extension",
-		    "Stacking IntegrationOrder Extensions is not supported");
-  
+        throw Error(InvalidState, "Archive::add_extension",
+                    "Stacking IntegrationOrder Extensions is not supported");
+
   // If we reach here, there are no IntegrationOrder conflicts.
   // Continue as normal... AWH 29/12/2003
-  
+
   unsigned index = find (extension, ext);
 
-  if (index < extension.size())  {
+  if (index < extension.size())
+  {
     if (verbose == 3)
       cerr << "Pulsar::Archive::add_extension replacing" << endl;
     extension[index] = ext;
   }
-  else {
+  else
+  {
     if (verbose == 3)
-      cerr << "Pulsar::Archive::add_extension appending" << endl; 
+      cerr << "Pulsar::Archive::add_extension appending" << endl;
     extension.push_back(ext);
   }
 }
@@ -204,9 +205,9 @@ void Pulsar::Archive::refresh()
 {
   if (verbose == 3)
     cerr << "Pulsar::Archive::refresh" << endl;
-  
+
   IntegrationManager::resize(0);
-  
+
   load_header (__load_filename.c_str());
 }
 
@@ -226,13 +227,13 @@ void Pulsar::Archive::update()
   \param chan the index of the requested frequency channel
   \return pointer to Profile instance
 */
-Pulsar::Profile* 
+Pulsar::Profile*
 Pulsar::Archive::get_Profile (unsigned sub, unsigned pol, unsigned chan)
 {
   return get_Integration (sub) -> get_Profile (pol, chan);
 }
 
-const Pulsar::Profile* 
+const Pulsar::Profile*
 Pulsar::Archive::get_Profile (unsigned sub, unsigned pol, unsigned chan) const
 {
   return get_Integration (sub) -> get_Profile (pol, chan);
@@ -240,9 +241,9 @@ Pulsar::Archive::get_Profile (unsigned sub, unsigned pol, unsigned chan) const
 
 const Pulsar::Parameters* Pulsar::Archive::get_ephemeris () const
 {
-  if (!ephemeris) 
-    throw Error (InvalidState, 
-		 "Pulsar::Archive::get_ephemeris", "no ephemeris");
+  if (!ephemeris)
+    throw Error (InvalidState,
+                 "Pulsar::Archive::get_ephemeris", "no ephemeris");
 
   return ephemeris;
 }
@@ -251,8 +252,8 @@ const Pulsar::Predictor* Pulsar::Archive::get_model () const
 {
   if (!model)
     throw Error (InvalidState,
-		 "Pulsar::Archive::get_model", "no model");
-		 
+                 "Pulsar::Archive::get_model", "no model");
+
   return model;
 }
 
@@ -260,7 +261,7 @@ MJD Pulsar::Archive::start_time() const
 {
   if (get_nsubint() < 1)
     throw Error (InvalidState, "Pulsar::Archive::start_time",
-		 "no Integrations");
+                 "no Integrations");
 
   return get_Integration(0) -> get_start_time();
 }
@@ -269,7 +270,7 @@ MJD Pulsar::Archive::end_time() const
 {
   if (get_nsubint() < 1)
     throw Error (InvalidState, "Pulsar::Archive::end_time",
-		 "no Integrations");
+                 "no Integrations");
 
   return get_Integration(get_nsubint()-1) -> get_end_time();
 }
@@ -278,7 +279,8 @@ double Pulsar::Archive::integration_length() const
 {
   double total = 0.0;
 
-  for (unsigned i = 0; i < get_nsubint(); i++) {
+  for (unsigned i = 0; i < get_nsubint(); i++)
+  {
     total = total + get_Integration(i) -> get_duration();
   }
 
@@ -301,7 +303,8 @@ void Pulsar::Archive::uniform_weight (float new_weight)
 }
 
 //! A dsp::Transformation into an Archive must be able to call this
-bool Pulsar::Archive::state_is_valid(string& reason) const{
+bool Pulsar::Archive::state_is_valid(string& reason) const
+{
   return Signal::valid_state(get_state(),1,get_npol(),reason);
 }
 
@@ -312,10 +315,11 @@ bool Pulsar::Archive::zero_phase_aligned () const
 
   unsigned nsubint = get_nsubint ();
   for (unsigned isub=0; isub < nsubint; isub++)
-    if (!get_Integration(isub)->zero_phase_aligned) {
+    if (!get_Integration(isub)->zero_phase_aligned)
+    {
       if (verbose > 2)
-	cerr << "Pulsar::Archive::zero_phase_aligned false on isub=" 
-	     << isub << endl;
+        cerr << "Pulsar::Archive::zero_phase_aligned false on isub="
+        << isub << endl;
       return false;
     }
 
@@ -323,3 +327,18 @@ bool Pulsar::Archive::zero_phase_aligned () const
     cerr << "Pulsar::Archive::zero_phase_aligned true" << endl;
   return true;
 }
+
+//! Get the start time MJD day
+int Pulsar::Archive::start_time_day() const
+{
+  MJD stime = start_time();
+  return stime.intday();
+}
+
+//! Get the start time MJD faction of a day
+double Pulsar::Archive::start_time_fracday() const
+{
+  MJD stime = start_time();
+  return stime.fracday();
+}
+
