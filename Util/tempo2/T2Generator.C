@@ -7,12 +7,26 @@
 
 #include "T2Generator.h"
 #include "T2Predictor.h"
+#include "T2Parameters.h"
+
 #include "Error.h"
 
 #include "tempo2pred_int.h"
 
+using namespace std;
+
 Tempo2::Generator::Generator ()
 {
+  epoch1 = epoch2 = 0;
+  freq1 = freq2 = 0;
+  strcpy (sitename, "7");
+
+  ntimecoeff = 12;
+  nfreqcoeff = 2;
+
+  // one hour
+  segment_length = 1.0/24.0;
+
 }
 
 Tempo2::Generator::Generator (const Generator& copy)
@@ -23,33 +37,58 @@ Tempo2::Generator::~Generator ()
 {
 }
 
+//! Set the parameters used to generate the predictor
+void Tempo2::Generator::set_parameters (const Parameters* p)
+{
+  parameters = p;
+}
+
+//! Set the range of epochs over which to generate
+void Tempo2::Generator::set_time_span (const MJD& start, const MJD& finish)
+{
+  epoch1 = from_MJD (start);
+  epoch2 = from_MJD (finish);
+}
+
+//! Set the range of frequencies over which to generate
+void Tempo2::Generator::set_frequency_span (long double low, long double high)
+{
+  freq1 = low;
+  freq2 = high;
+}
+
 //! Return a new, copy constructed instance of self
 Pulsar::Predictor* Tempo2::Generator::generate () const
 {
-  // how to initialize?
-  pulsar* psr = 0;
+  Tempo2::Predictor* pred = new Tempo2::Predictor;
 
-  // length of each segment in days
-  long double seg_length;
-  int ntimecoeff, nfreqcoeff;
-  char sitename[64];
-  long double mjd_start, mjd_end;
-  long double freq_start, freq_end;
+  const pulsar* psr = &parameters->psr;    
+  ChebyModelSet* cms = &pred->predictor.modelset.cheby;
+  pred->predictor.kind = Cheby;
 
-  ChebyModelSet cms;
-  ChebyModelSet_Construct(&cms, psr, sitename, mjd_start, mjd_end,
-			  seg_length, seg_length*0.1, 
-			  freq_start, freq_end, ntimecoeff, nfreqcoeff);
+  if (Predictor::verbose)
+    cerr << "Tempo2::Generator::generate call ChebyModelSet_Construct\n" 
+      " sitename=" << sitename <<
+      " epoch1=" << epoch1 << " epoch2=" << epoch2 << "\n"
+      " segment_length=" << segment_length <<
+      " freq1=" << freq1 << " freq2=" << freq2 << "\n"
+      " coeffs: ntime=" << ntimecoeff << " nfreq=" << nfreqcoeff
+	 << endl;
 
+  ChebyModelSet_Construct( cms, psr, sitename, epoch1, epoch2,
+			   segment_length, segment_length*0.1, 
+			   freq1, freq2, ntimecoeff, nfreqcoeff );
+
+  if (Predictor::verbose)
+    cerr << "Tempo2::Generator::generate ChebyModelSet_Construct ok" << endl;
+
+#if 1
   long double rms, mav;
-  ChebyModelSet_Test(&cms, psr, ntimecoeff*5*cms.nsegments, 
-		     nfreqcoeff*5*cms.nsegments, &rms, &mav);
-  printf("Predictive model constructed and written to t2pred.dat.\n");
+  ChebyModelSet_Test( cms, psr, ntimecoeff*5*cms->nsegments, 
+		      nfreqcoeff*5*cms->nsegments, &rms, &mav );
   printf("RMS error = %.3Lg s MAV= %.3Lg s\n", 
 	 rms/psr[0].param[param_f].val[0], mav/psr[0].param[param_f].val[0]);
-
-  Tempo2::Predictor* pred = new Tempo2::Predictor;
-  pred->predictor.modelset.cheby = cms;
+#endif
 
   return pred;
 }
