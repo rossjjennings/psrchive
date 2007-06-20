@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/05/22 23:57:52 $
+   $Revision: 1.11 $
+   $Date: 2007/06/20 15:57:14 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
@@ -82,5 +82,11 @@ namespace Tempo2 {
   };
 
 }
+
+//! convert an MJD to long double
+long double from_MJD (const MJD& t);
+
+//! convert a long double to an MJD
+MJD to_MJD (long double t);
 
 #endif
