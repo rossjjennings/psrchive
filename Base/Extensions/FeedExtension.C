@@ -5,6 +5,8 @@
  *
  ***************************************************************************/
 #include "Pulsar/FeedExtension.h"
+#include "Pulsar/FeedExtensionTI.h"
+
 
 //! Default constructor
 Pulsar::FeedExtension::FeedExtension ()
@@ -31,3 +33,12 @@ Pulsar::FeedExtension::operator= (const FeedExtension& extension)
 Pulsar::FeedExtension::~FeedExtension ()
 {
 }
+
+
+//! Get the text interface
+
+Reference::To< TextInterface::Class > Pulsar::FeedExtension::get_text_interface()
+{
+  return new FeedExtensionTI( this );
+}
+

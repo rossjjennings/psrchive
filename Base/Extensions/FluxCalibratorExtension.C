@@ -5,12 +5,14 @@
  *
  ***************************************************************************/
 #include "Pulsar/FluxCalibratorExtension.h"
+#include "Pulsar/FluxCalibratorExtensionTI.h"
 
 //! Default constructor
 Pulsar::FluxCalibratorExtension::FluxCalibratorExtension ()
   : CalibratorExtension ("FluxCalibratorExtension")
 {
   type = Calibrator::Flux;
+  epoch = 0.0;
 }
 
 //! Copy constructor
@@ -48,6 +50,13 @@ void Pulsar::FluxCalibratorExtension::set_nchan (unsigned nchan)
 
   S_cal.resize( nchan );
   S_sys.resize( nchan );
+}
+
+
+//! Get the number of frequency channels
+unsigned int Pulsar::FluxCalibratorExtension::get_nchan( void ) const
+{
+	return S_cal.size();
 }
 
 //! Set the number of frequency channels
@@ -99,3 +108,24 @@ FluxCalibratorExtension::get_S_cal (unsigned ichan, unsigned ireceptor) const
   range_check (ichan, "Pulsar::FluxCalibratorExtension::get_S_cal");
   return S_cal[ichan][ireceptor];
 }
+
+
+void FluxCalibratorExtension::set_epoch( double s_epoch )
+{
+	epoch = s_epoch;
+}
+
+
+double FluxCalibratorExtension::get_epoch( void ) const
+{
+	return epoch;
+}
+
+
+Reference::To< TextInterface::Class > FluxCalibratorExtension::get_text_interface()
+{
+  return new FluxCalibratorExtensionTI( this );
+}
+
+
+

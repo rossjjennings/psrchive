@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/Pointing.h"
+#include "Pulsar/PointingTI.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Telescope.h"
@@ -261,5 +262,12 @@ void Pulsar::Pointing::integrate (const Integration* subint)
     cerr << "Pulsar::Pointing::integrate other Pointing" << endl;
 
   operator += (*useful);
+}
+
+
+//! Return a text interfaces that can be used to access this instance
+Reference::To< TextInterface::Class > Pulsar::Pointing::get_text_interface()
+{
+	return new PointingTI( this );
 }
 

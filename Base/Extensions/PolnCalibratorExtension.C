@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/PolnCalibratorExtensionTI.h"
 using namespace std;
 
 #include <assert.h>
@@ -335,3 +336,12 @@ void PolnCalibratorExtension::Transformation::set_covariance
 
   assert (icovar == covar.size());
 }
+
+//! Get the text interface 
+Reference::To< TextInterface::Class > PolnCalibratorExtension::get_text_interface()
+{
+  return new PolnCalibratorExtensionTI( this );
+}
+
+
+

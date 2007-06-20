@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "Pulsar/DigitiserStatistics.h"
+#include "Pulsar/DigitiserStatisticsTI.h"
 
 // //////////////////////////////////////////////////
 // DigitiserStatistics methods
@@ -74,4 +75,12 @@ void Pulsar::DigitiserStatistics::row::init ()
   ncycsub = 0;
 
   data.resize(0);
+}
+
+
+
+//! Return a text interfaces that can be used to access this instance
+Reference::To< TextInterface::Class > Pulsar::DigitiserStatistics::get_text_interface()
+{
+	return new DigitiserStatisticsTI( this );
 }

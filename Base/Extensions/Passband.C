@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/Passband.h"
+#include "Pulsar/PassbandTI.h"
 
 using namespace std;
 
@@ -134,6 +135,14 @@ void Pulsar::Passband::range_check (unsigned ipol, unsigned iband,
 
 }
 
+
+
+//! Return a text interfaces that can be used to access this instance
+
+Reference::To< TextInterface::Class > Pulsar::Passband::get_text_interface( void )
+{
+	return new PassbandTI( this );
+}
 
 
 

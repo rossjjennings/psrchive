@@ -5,10 +5,11 @@
  *
  ***************************************************************************/
 #include "Pulsar/ObsExtension.h"
+#include "Pulsar/ObsExtensionTI.h"
 
 //! Default constructor
 Pulsar::ObsExtension::ObsExtension ()
-  : Extension ("ObsExtension")
+    : Extension ("ObsExtension")
 {
   observer = "UNSET";
   affiliation = "UNSET";
@@ -18,7 +19,7 @@ Pulsar::ObsExtension::ObsExtension ()
 
 //! Copy constructor
 Pulsar::ObsExtension::ObsExtension (const ObsExtension& extension)
-  : Extension ("ObsExtension")
+    : Extension ("ObsExtension")
 {
   observer = extension.observer;
   affiliation = extension.affiliation;
@@ -40,5 +41,12 @@ Pulsar::ObsExtension::operator= (const ObsExtension& extension)
 
 //! Destructor
 Pulsar::ObsExtension::~ObsExtension ()
+{}
+
+
+//! Ge text interface
+Reference::To< TextInterface::Class > Pulsar::ObsExtension::get_text_interface()
 {
+  return new ObsExtensionTI( this );
+
 }

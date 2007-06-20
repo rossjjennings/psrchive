@@ -7,6 +7,7 @@
  ***************************************************************************/
 
 #include "Pulsar/ProcHistory.h"
+#include "Pulsar/ProcHistoryTI.h"
 
 using namespace std;
 
@@ -163,3 +164,14 @@ void Pulsar::ProcHistory::row::init ()
   dedisp   = 0;
   scale    = Signal::FluxDensity;
 }
+
+
+Reference::To< TextInterface::Class > Pulsar::ProcHistory::get_text_interface() 
+{
+  return new ProcHistoryTI( this );
+}
+
+
+
+
+

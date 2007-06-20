@@ -5,10 +5,11 @@
  *
  ***************************************************************************/
 #include "Pulsar/Backend.h"
+#include "Pulsar/BackendTI.h"
 
 //! Default constructor
-Pulsar::Backend::Backend (const std::string& ext_name) 
-  : Extension (ext_name.c_str()) 
+Pulsar::Backend::Backend (const std::string& ext_name)
+    : Extension (ext_name.c_str())
 {
   name = "unknown";
   hand = Signal::Right;
@@ -17,7 +18,7 @@ Pulsar::Backend::Backend (const std::string& ext_name)
 }
 
 //! Copy constructor
-Pulsar::Backend::Backend (const Backend& backend) : Extension (backend) 
+Pulsar::Backend::Backend (const Backend& backend) : Extension (backend)
 {
   operator=(backend);
 }
@@ -30,6 +31,13 @@ const Pulsar::Backend& Pulsar::Backend::operator= (const Backend& backend)
   argument = backend.argument;
   downconversion_corrected = backend.downconversion_corrected;
   return *this;
+}
+
+//! Return a text interfaces that can be used to access this instance
+
+Reference::To< TextInterface::Class > Pulsar::Backend::get_text_interface()
+{
+  return new BackendTI( this );
 }
 
 //! Return the name of the Backend

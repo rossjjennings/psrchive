@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/WidebandCorrelator.h"
+#include "Pulsar/WidebandCorrelatorTI.h"
 
 //! Default constructor
 Pulsar::WidebandCorrelator::WidebandCorrelator ()
@@ -38,4 +39,11 @@ Pulsar::WidebandCorrelator::operator= (const WidebandCorrelator& extension)
 //! Destructor
 Pulsar::WidebandCorrelator::~WidebandCorrelator ()
 {
+}
+
+
+//! Return a text interfaces that can be used to access this instance
+Reference::To< TextInterface::Class > Pulsar::WidebandCorrelator::get_text_interface()
+{
+	return new WidebandCorrelatorTI( this );
 }

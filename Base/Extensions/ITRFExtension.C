@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/ITRFExtension.h"
+#include "Pulsar/ITRFExtensionTI.h"
 
 //! Default constructor
 Pulsar::ITRFExtension::ITRFExtension ()
@@ -38,4 +39,11 @@ Pulsar::ITRFExtension::operator= (const ITRFExtension& extension)
 //! Destructor
 Pulsar::ITRFExtension::~ITRFExtension ()
 {
+}
+
+
+//! Return a text interfaces that can be used to access this instance
+Reference::To< TextInterface::Class > Pulsar::ITRFExtension::get_text_interface()
+{
+	return new ITRFExtensionTI( this );
 }

@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/Receiver.h"
+#include "Pulsar/ReceiverTI.h"
 
 #include "Pulsar/Receiver_Native.h"
 #include "Pulsar/Receiver_Field.h"
@@ -243,4 +244,10 @@ std::string Pulsar::Receiver::get_fd_mode() const
 	};
 	
 	return mode;
+}
+
+
+Reference::To< TextInterface::Class > Pulsar::Receiver::get_text_interface()
+{
+	return new ReceiverTI( this );
 }
