@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "T2Parameters.h"
+#include "T2Generator.h"
 
 using namespace std;
 
@@ -45,6 +46,11 @@ Tempo2::Parameters::Parameters (const Parameters&)
 Pulsar::Parameters* Tempo2::Parameters::clone () const
 {
   return new Parameters (*this);
+}
+
+Pulsar::Generator* Tempo2::Parameters::generator () const
+{
+  return new Generator (this);
 }
 
 //! Return true if *this == *that
