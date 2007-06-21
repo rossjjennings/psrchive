@@ -22,7 +22,10 @@ nobase_include_HEADERS = \
         Pulsar/ColdPlasma.h \
         Pulsar/DispersionDelay.h \
         Pulsar/Dispersion.h \
+	Pulsar/Divided.h \
         Pulsar/DurationWeight.h \
+	Pulsar/EvenlySpaced.h \
+	Pulsar/EvenlyWeighted.h \
         Pulsar/ExponentialBaseline.h \
 	Pulsar/FixFluxCal.h \
         Pulsar/Fourier.h \
@@ -31,6 +34,7 @@ nobase_include_HEADERS = \
         Pulsar/GaussianBaseline.h \
 	Pulsar/InstallInterpreter.h \
         Pulsar/InstrumentInfo.h \
+	Pulsar/Integrate.h \
         Pulsar/IntegrationWeight.h \
         Pulsar/Interpreter.h \
 	Pulsar/InterpreterExtension.h \
@@ -58,6 +62,7 @@ nobase_include_HEADERS = \
 	Pulsar/StandardCandles.h \
         Pulsar/StandardSNR.h \
         Pulsar/SyntheticPolnProfile.h \
+	Pulsar/TimeIntegrate.h \
         Pulsar/Transformation.h \
         Pulsar/Transposer.h \
         Pulsar/Weight.h \
@@ -152,6 +157,7 @@ libGeneral_la_SOURCES = \
         SquareWave.C \
         StandardCandles.C \
         StandardSNR.C \
+	TimeIntegrate.C \
         Transposer.C \
         Weight.C \
 	ZapInterpreter.C
