@@ -10,6 +10,8 @@
 
 #include "psrephem.h"
 #include "tempo++.h"
+#include "Predict.h"
+
 #include "ephio.h"
 #include "strutil.h"
 #include "dirutil.h"
@@ -505,6 +507,11 @@ void psrephem::efac (float fac)
 Pulsar::Parameters* psrephem::clone () const
 {
   return new psrephem (*this);
+}
+
+Pulsar::Generator* psrephem::generator () const
+{
+  return new Tempo::Predict (this);
 }
 
 bool psrephem::equals (const Pulsar::Parameters* p)

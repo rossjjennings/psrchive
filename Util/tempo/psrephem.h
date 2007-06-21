@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.41 $
-   $Date: 2007/05/30 09:13:44 $
+   $Revision: 1.42 $
+   $Date: 2007/06/21 17:32:38 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -31,6 +31,9 @@ class psrephem : public Pulsar::Parameters
 
   //! Return a new, copy constructed instance of self
   Parameters* clone () const;
+
+  //! Return a new Generator set up to produce a new Predictor
+  Pulsar::Generator* generator () const;
 
   //! Return true if *this == *that
   bool equals (const Parameters* that);
