@@ -4,9 +4,22 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Integration.h"
 #include "Pulsar/FrequencyIntegrate.h"
+
+using namespace std;
+
+Pulsar::FrequencyIntegrate operation;
+Pulsar::FrequencyIntegrate::EvenlySpaced policy;
+
+int static_init ()
+{
+  operation.set_range_policy( &policy );
+}
+
+static int init = static_init ();
+
 
 /*!
   \param nscrunch number of neighbouring frequency channels to
@@ -14,8 +27,6 @@ using namespace std;
  */
 void Pulsar::Integration::fscrunch (unsigned nscrunch)
 {
-  FrequencyIntegrate fscr;
-
-  fscr.set_nscrunch (nscrunch);
-  fscr.transform (this);
+  policy.set_nintegrate (nscrunch);
+  operation.transform (this);
 }

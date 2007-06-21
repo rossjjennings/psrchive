@@ -46,8 +46,11 @@ void Pulsar::DeltaRM::refine ()
   Reference::To<Integration> clone = data->get_Integration(0)->clone();
 
   FrequencyIntegrate fscr;
-  fscr.set_nchan (2);
-  fscr.set_range_policy (new FrequencyIntegrate::EvenlyDistributed);
+  FrequencyIntegrate::EvenlyWeighted policy;
+
+  policy.set_ndivide (2);
+  fscr.set_range_policy ( &policy );
+
   fscr.transform (clone);
 
   /*
