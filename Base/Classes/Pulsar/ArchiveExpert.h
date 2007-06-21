@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveExpert.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/05/04 23:33:47 $
+   $Revision: 1.5 $
+   $Date: 2007/06/21 17:31:57 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveExpert_h
@@ -62,6 +62,14 @@ namespace Pulsar {
     //! Apply the current model to the Integration
     void apply_model (Integration* subint, const Predictor* old = 0)
     { instance->apply_model (subint, old); }
+
+    //! Update the model
+    void update_model (const MJD& mjd)
+    { instance->update_model (mjd); }
+
+    //! Return true if all Integration::zero_phase_aligned flags are set
+    bool zero_phase_aligned () const
+    { return instance->zero_phase_aligned(); }
 
   private:
 
