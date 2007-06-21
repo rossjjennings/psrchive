@@ -7,15 +7,16 @@
 #include "Telescope.h"
 #include <string.h>
 
-  const char Parkes = '7';
-  const char ATCA = '2';
-  const char Tidbinbilla = '6';
-  const char Arecibo = '3';
-  const char Hobart = '4';
+using namespace std;
 
 //! Convert a telescope name to a code
-char Telescope::code (const char* name)
+char Telescope::code (const string& code)
 {
+  const char* name = code.c_str();
+
+  if (strlen(name) == 1)
+    return name[0];
+
   if (strcasecmp (name, "pks") == 0 || strcasecmp (name, "parkes") == 0)
     return Parkes;
 
@@ -28,8 +29,14 @@ char Telescope::code (const char* name)
   if (strcasecmp (name, "Arecibo") == 0)
     return Arecibo;
 
-  if (strcasecmp (name, "Hobart") == 0)
+  if (strcasecmp (name, "Hobart") == 0 || strcasecmp (name, "DSS43") == 0)
     return Hobart;
+
+  if (strcasecmp (name, "AAT") == 0 || strcasecmp (name, "UAO") == 0)
+    return AAT;
+
+  if (strcasecmp (name, "GBT") || strcasecmp (name, "Greenbank") == 0)
+    return Greenbank;
 
   return 0;
 }
