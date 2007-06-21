@@ -10,6 +10,7 @@
 #include "psrephem.h"
 #include "polyco.h"
 
+#include "Telescope.h"
 #include "Error.h"
 #include "strutil.h"
 
@@ -18,15 +19,48 @@
 
 using namespace std;
 
-Tempo::Predict::Predict ()
+Tempo::Predict::Predict (const psrephem* parameters)
 {
   nspan  = 960;
   ncoef = 12;
-  maxha  = 8;
+  maxha  = 12;
   asite  = '7';
   frequency = 1400.0;
 
   verify = true;
+
+  if (parameters)
+    set_parameters (parameters);
+}
+
+//! Set the parameters used to generate the predictor
+void Tempo::Predict::set_parameters (const Pulsar::Parameters* p)
+{
+  const psrephem* ephem = dynamic_cast<const psrephem*> (p);
+  if (!ephem)
+    throw Error (InvalidState, "Tempo::Predict::set_parameters",
+		 "Parameters are not psrephem");
+
+  set_parameters( *ephem );
+}
+
+//! Set the range of epochs over which to generate
+void Tempo::Predict::set_time_span (const MJD& start, const MJD& finish)
+{
+  m1 = start;
+  m2 = finish;
+}
+
+//! Set the range of frequencies over which to generate
+void Tempo::Predict::set_frequency_span (long double low, long double high)
+{
+  set_frequency ( 0.5 * (low + high) );
+}
+
+//! Set the site at which the signal is observed
+void Tempo::Predict::set_site (const std::string& site)
+{
+  set_asite( Telescope::code(site) );
 }
 
 void Tempo::Predict::set_asite (char code)
@@ -142,7 +176,23 @@ void Tempo::Predict::write_tzin () const
 
 
 //! Returns a polyco valid over the range in MJD specified by m1 and m2
-polyco Tempo::Predict::get_polyco (const MJD& m1, const MJD& m2) const
+polyco Tempo::Predict::get_polyco (const MJD& _m1, const MJD& _m2)
+{
+  m1 = _m1;
+  m2 = _m2;
+
+  return generate_work ();
+}
+
+//! Return a new Predictor instance
+Pulsar::Predictor* Tempo::Predict::generate () const
+{
+  Reference::To<polyco> result = new polyco;
+  *result = generate_work ();
+  return result;
+}
+
+polyco Tempo::Predict::generate_work () const
 {
   if (cached && cached->start_time() < m1 && cached->end_time() > m2  ) {
 

@@ -7,12 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Predict.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.7 $
+   $Date: 2007/06/21 17:32:33 $
    $Author: straten $ */
 
 #ifndef __Tempo_Predict_h
 #define __Tempo_Predict_h
+
+#include "Pulsar/Generator.h"
 
 #include "psrephem.h"
 #include "polyco.h"
@@ -20,12 +22,35 @@
 namespace Tempo {
 
   //! Uses tempo orediction mode to produce polynomial ephemerides (polyco)
-  class Predict  {
+  class Predict : public Pulsar::Generator {
 
   public:
 
     //! Default constructor
-    Predict ();
+    Predict (const psrephem* parameters = 0);
+
+    //
+    // Pulsar::Generator interface
+    //
+
+    //! Set the parameters used to generate the predictor
+    void set_parameters (const Pulsar::Parameters*);
+
+    //! Set the range of epochs over which to generate
+    void set_time_span (const MJD& start, const MJD& finish);
+
+    //! Set the range of frequencies over which to generate
+    void set_frequency_span (long double low, long double high);
+
+    //! Set the site at which the signal is observed
+    void set_site (const std::string&);
+
+    //! Return a new Predictor instance
+    Pulsar::Predictor* generate () const;
+
+    //
+    // Original interface
+    //
 
     //! Set the observatory site code
     /*! Correponds to ASITE in tz.in */
@@ -54,7 +79,7 @@ namespace Tempo {
     void set_verify (bool verify);
 
     //! Returns a polyco valid over the range in MJD specified by m1 and m2
-    polyco get_polyco (const MJD& m1, const MJD& m2) const;
+    polyco get_polyco (const MJD& m1, const MJD& m2);
 
     //! Write the tz.in file according to the tempo definition
     void write_tzin () const;
@@ -84,6 +109,11 @@ namespace Tempo {
 
     //! Verify the time spanned by polynomial ephemerides
     bool verify;
+
+    MJD m1, m2;
+
+    //! Does the work for the two different interfaces
+    polyco generate_work () const;
 
   private:
 
