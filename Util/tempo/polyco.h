@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.43 $
-   $Date: 2007/06/13 11:52:39 $
+   $Revision: 1.44 $
+   $Date: 2007/06/21 17:32:35 $
    $Author: straten $ */
 
 #ifndef __POLY_H
 #define __POLY_H
 
 #include "Pulsar/Predictor.h"
+#include "Pulsar/Generator.h"
 
 #include <string>
 #include <vector>
@@ -212,6 +213,9 @@ public:
 
   //! Return a new, copy constructed instance of self
   Predictor* clone () const;
+
+  //! Set up Generator to produce a new Predictor like self
+  void match (Pulsar::Generator*) const;
 
   //! Add the information from the supplied predictor to self
   void insert (const Predictor*);

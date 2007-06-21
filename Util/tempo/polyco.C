@@ -1,10 +1,13 @@
 /***************************************************************************
  *
  *   Copyright (C) 1998 by Russell Edwards
+ *   Copyright (C) 2007 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 #include "polyco.h"
+#include "Predict.h"
+
 #include "strutil.h"
 #include "Error.h"
 
@@ -500,6 +503,18 @@ polyco::polyco (const string& filename)
 Pulsar::Predictor* polyco::clone () const
 {
   return new polyco (*this);
+}
+
+//! Set up Generator to produce a new Predictor like self
+void polyco::match (Pulsar::Generator* generator) const
+{
+  Tempo::Predict* predict = dynamic_cast<Tempo::Predict*> (generator);
+  if (!predict)
+    throw Error (InvalidParam, "polyco::match",
+		 "Generator is not a TEMPO Predict");
+
+  predict->set_nspan( (int) get_nspan() );
+  predict->set_ncoef( get_ncoeff() );
 }
 
 //! Add the information from the supplied predictor to self
