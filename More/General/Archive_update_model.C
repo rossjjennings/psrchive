@@ -5,21 +5,15 @@
  *
  ***************************************************************************/
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
-#include "Error.h"
-#include "Predict.h"
+
+#include "Pulsar/Parameters.h"
+#include "Pulsar/Generator.h"
 #include "Pulsar/Predictor.h"
 
-#ifdef HAVE_TEMPO2
-#include "T2Predictor.h"
-#endif
+#include "Error.h"
 
-#include <iostream>
 using namespace std;
 
 // ///////////////////////////////////////////////////////////////////////
@@ -159,61 +153,39 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     return;
 
   }
-  catch (...) {
+  catch (Error& error) {
 
     if (verbose > 2)
       cerr << "Pulsar::Archive::update_model current model doesn't span epoch"
-	   << endl;
+	"\n\t" << error.get_message() << endl;
 
   }
 
-#ifdef HAVE_TEMPO2
-  Tempo2::Predictor* t2model = dynamic_cast<Tempo2::Predictor*> (model.ptr());
-  if (t2model)
+  if (!ephemeris)
     throw Error (InvalidState, "Pulsar::Archive::update_model",
-		 "TEMPO2 Predictors not yet supported");
-#endif
+		 "no Pulsar::Parameters available");
 
-  polyco* t1model = dynamic_cast<polyco*> (model.ptr());
+  Reference::To<Generator> generator = ephemeris->generator();
+  if (model)
+    model->match( generator );
 
-  psrephem* t1eph = dynamic_cast<psrephem*> (ephemeris.ptr());
+  double frequency = get_centre_frequency ();
+  double bandwidth = get_bandwidth ();
 
-  if (!t1eph)
-    return;
+  generator->set_frequency_span( frequency - 0.5 * bandwidth,
+				 frequency + 0.5 * bandwidth );
 
-  static Tempo::Predict predict;
+  generator->set_time_span( time, time );
 
-  predict.set_frequency ( get_centre_frequency() );
-  predict.set_parameters ( *t1eph );
-  predict.set_asite ( get_telescope_code() );
-  predict.set_maxha ( 12 );
+  generator->set_site( get_telescope_code() );
 
-  if (t1model && t1model->pollys.size() > 0) {
-
-    predict.set_nspan ( (int) t1model->get_nspan() );
-    predict.set_ncoef ( t1model->get_ncoeff() );
-
-  }
-  else {
-
-    model = t1model = new polyco;
-
-    predict.set_nspan ( 960 );
-    predict.set_ncoef ( 12 );
-
-  }
+  Reference::To<Predictor> predictor = generator->generate();
 
   if (clear_model)
-    model = t1model = new polyco;
-  
-  if ( t1model->i_nearest (time) == -1 ) {
-    if (verbose > 2)
-      cerr << "Pulsar::Archive::update_model generating new predictor for"
-	" epoch=" << time << endl;
-    // no match, create a new polyco for the specified time
-    polyco part = predict.get_polyco (time, time);
-    t1model->append (part);
-  }
+    model = predictor;
+  else
+    model->insert (predictor);
+
 }
 
 
