@@ -185,37 +185,19 @@ Pulsar::TimerArchive::load_Integration (const char* filename, unsigned isubint)
 }
 
 
-char Pulsar::TimerArchive::get_telescope_code () const
+std::string Pulsar::TimerArchive::get_telescope_code () const
 {
-  // if there is only one character, assume that this is the code
-  if (strlen (hdr.telid) == 1)
-    return hdr.telid[0];
-
-  // Parkes by default
-  char site = '7';
-
-  if (!strncmp (hdr.telid, "PARKES", 6))
-    site = '7';
-  if (!strncmp (hdr.telid, "PKS", 3))
-    site = '7';
-  else if (!strcmp (hdr.telid, "AAT"))
-    site = '5';
-  else if (!strcmp(hdr.telid, "UAO"))
-    site = '5';
-  else if (!strcmp (hdr.telid, "ATCA"))
-    site = '2';
-  else if (!strcmp (hdr.telid, "DSS43"))
-    site = '6';
-  else if (!strcmp (hdr.telid, "GBT"))
-    site = '1';
-
-  return site;
+  return hdr.telid;
 }
 
-void Pulsar::TimerArchive::set_telescope_code (char code)
+void Pulsar::TimerArchive::set_telescope_code (const std::string& code)
 {
-  hdr.telid[0] = code;
-  hdr.telid[1] = '\0';
+  if (code.length() > TELID_STRLEN-1)
+    throw Error (InvalidParam, "Pulsar::TimerArchive::set_telescope_code",
+		 "code string='%s' length > TELID_STRLEN=%d",
+		 code.c_str(), TELID_STRLEN);
+
+  strncpy (hdr.telid, code.c_str(), TELID_STRLEN);
 }
 
 Signal::Source Pulsar::TimerArchive::get_type () const

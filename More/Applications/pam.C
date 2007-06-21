@@ -269,7 +269,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.71 2007/05/22 23:57:57 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.72 2007/06/21 17:32:05 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -670,12 +670,9 @@ int main (int argc, char *argv[]) try {
 	  b->set_name(instrument);
       }
 
-      if( site != string() ){
-	if( site.size() != 1 )
-	  throw Error(InvalidState,"main()",
-		      "You can only use a single character for the telescope site code!");
-	arch->set_telescope_code( site[0] );
-      }
+      if( site != string() )
+	arch->set_telescope_code( site );
+
       if( name != string() )
 	arch->set_source( name );
 

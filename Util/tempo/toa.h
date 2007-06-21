@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.24 $
-   $Date: 2007/05/04 23:33:47 $
+   $Revision: 1.25 $
+   $Date: 2007/06/21 17:32:05 $
    $Author: straten $ */
 
 #ifndef __TOA_H
@@ -139,7 +139,7 @@ namespace Tempo {
     void set_frequency (double freq) { frequency = freq; };
     void set_arrival   (MJD arrived) { arrival = arrived; };
     void set_error     (float err)   { error = err; };
-    void set_telescope (char telcode) { telescope = telcode; };
+    void set_telescope (const std::string& telcode);
     void set_auxilliary_text (const std::string& text) { auxinfo = text; };
 
     Format get_format    () const { return format; };

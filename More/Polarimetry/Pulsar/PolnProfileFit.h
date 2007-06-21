@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.28 $
-   $Date: 2007/04/25 23:26:25 $
+   $Revision: 1.29 $
+   $Date: 2007/06/21 17:32:05 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -122,7 +122,8 @@ namespace Pulsar {
 
     //! Get the arrival time estimate
     Tempo::toa get_toa (const PolnProfile* observation,
-			const MJD& mjd, double period, char nsite);
+			const MJD& mjd, double period,
+			const std::string& nsite);
 
     //! Return the PSD of the Fourier Transform of the PolnProfile
     PolnProfile* fourier_psd (const PolnProfile* fourier) const;

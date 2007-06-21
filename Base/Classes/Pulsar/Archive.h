@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.162 $
-   $Date: 2007/06/20 03:07:27 $
-   $Author: nopeer $ */
+   $Revision: 1.163 $
+   $Date: 2007/06/21 17:32:05 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.162 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.163 $"
 #include <iostream>
 #include <TextInterface.h>
 
@@ -196,9 +196,9 @@ namespace Pulsar
     //@{
 
     //! Get the tempo code of the telescope used
-    virtual char get_telescope_code () const = 0;
+    virtual std::string get_telescope_code () const = 0;
     //! Set the tempo code of the telescope used
-    virtual void set_telescope_code (char tempo_isite) = 0;
+    virtual void set_telescope_code (const std::string& code) = 0;
 
     //! Get the state of the profile data
     virtual Signal::State get_state () const = 0;
@@ -665,6 +665,9 @@ namespace Pulsar
     //! Returns true if the given model spans the Integration set
     bool good_model (const Predictor* test_model) const;
 
+    //! Return true if all Integration::zero_phase_aligned flags are set
+    bool zero_phase_aligned () const;
+
     //! Expert interface
     Reference::To<Expert> expert_interface;
 
@@ -699,9 +702,6 @@ namespace Pulsar
 
     //! Perform all known verification operations listed in Check::registry
     void verify () const;
-
-    //! Return true if all Integration::zero_phase_aligned flags are set
-    bool zero_phase_aligned () const;
 
     // Advocates the use of an Archive derived class
     class Agent;

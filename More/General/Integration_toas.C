@@ -4,15 +4,17 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+
+using namespace std;
 
 /*! This method currently produces a toa for the first polarization state,
   be it the total intensity, XX, invariant interval, etc. */
 void Pulsar::Integration::toas (vector<Tempo::toa>& toas,
 				const Integration& std_subint,
-				char nsite, string arguments,
+				const string& nsite, string arguments,
 				Tempo::toa::Format fmt,
 				bool discard_bad) const
 {

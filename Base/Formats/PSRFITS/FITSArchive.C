@@ -263,10 +263,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (verbose == 3)
     cerr << "Got telescope: " << obs_ext->telescope << endl;
   
-  if ((obs_ext->telescope).length() == 1)
-    set_telescope_code ( obs_ext->telescope.at(0) );
-  else
-    set_telescope_code ( ::Telescope::code(obs_ext->telescope.c_str()) );
+  set_telescope_code ( obs_ext->telescope );
 
   Telescope* telescope = getadd<Telescope>();
   telescope->set_coordinates (get_telescope_code());
@@ -735,7 +732,7 @@ try {
   // Write the source name
 
   char* telescope;
-  telescope = const_cast<char*>(::Telescope::name(get_telescope_code()));
+  telescope = const_cast<char*>( telescope_code.c_str() );
 
   fits_update_key (fptr, TSTRING, "TELESCOP", telescope, comment, &status);
 

@@ -75,7 +75,7 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
     lngs.push_back(get_binlng_asc((arch->get_Integration(i)->get_epoch()).in_days(),
 				  *eph, 
 				  arch->get_Integration(i)->get_centre_frequency(),
-				  arch->get_telescope_code()));
+				  arch->get_telescope_code()[0]));
     if (lngs[i] != lngs[i]) {
       throw Error(FailedCall, "BinLngAscOrder::organise",
 		  "get_binlng_asc returned nan");

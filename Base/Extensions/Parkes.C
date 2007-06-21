@@ -7,6 +7,7 @@
 #include "Pulsar/Parkes.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Receiver.h"
+#include "Telescope.h"
 
 using namespace std;
 
@@ -38,9 +39,9 @@ void Pulsar::Parkes::COAX10_50 (Receiver* receiver)
 //! Initialize the Receiver Extension with Parkes best guess
 void Pulsar::Parkes::guess (Receiver* receiver, Archive* archive)
 {
-  if ( archive->get_telescope_code() != '7' )
+  if ( Telescope::code(archive->get_telescope_code()) != Telescope::Parkes )
     throw Error (InvalidParam, "Pulsar::Parkes::guess",
-		 "telescope=%c != Parkes=7", archive->get_telescope_code());
+		 "telescope=" + archive->get_telescope_code() + " != Parkes");
 
   if ( receiver->get_basis() == Signal::Linear ) {
 

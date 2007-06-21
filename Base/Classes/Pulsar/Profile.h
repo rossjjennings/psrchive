@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.101 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.102 $
+   $Date: 2007/06/21 17:32:05 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -183,7 +183,8 @@ namespace Pulsar {
 
     //! fit to the standard and return a Tempo::toa object
     Tempo::toa toa (const Profile& std, const MJD& mjd, 
-		    double period, char nsite, std::string arguments = "",
+		    double period, const std::string& nsite, 
+		    std::string arguments = "",
 		    Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
 
     //! get the number of bins

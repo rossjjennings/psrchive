@@ -5,8 +5,10 @@
  *
  ***************************************************************************/
 #include "toa.h"
-#include "strutil.h"
 #include "polyco.h"
+#include "Telescope.h"
+
+#include "strutil.h"
 #include "Error.h"
 
 #include <iostream>
@@ -68,6 +70,11 @@ Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
   resid = in_toa.resid;
 
   return *this;
+}
+
+void Tempo::toa::set_telescope (const std::string& telcode)
+{
+  telescope = Telescope::code( telcode );
 }
 
 // ////////////////////////////////////////////////////////////////////////

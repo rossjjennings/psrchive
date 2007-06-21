@@ -114,12 +114,12 @@ Pulsar::EPNArchive::extract (const vector<unsigned>& subints) const
 }
 
 
-char Pulsar::EPNArchive::get_telescope_code () const
+std::string Pulsar::EPNArchive::get_telescope_code () const
 {
-  return '7';
+  return "7";
 }
 
-void Pulsar::EPNArchive::set_telescope_code (char code)
+void Pulsar::EPNArchive::set_telescope_code (const std::string& code)
 {
 
 }

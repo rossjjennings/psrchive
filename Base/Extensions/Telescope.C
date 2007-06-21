@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/Telescope.h"
+#include "Telescope.h"
 #include "coord.h"
 
 //! Default constructor
@@ -48,22 +49,21 @@ Pulsar::Telescope::~Telescope ()
 }
 
 //! Set the coordinates of the telescope based on known tempo codes
-void Pulsar::Telescope::set_coordinates (char tempo_isite)
+void Pulsar::Telescope::set_coordinates (const std::string& code)
 {
+  char isite = ::Telescope::code (code);
+
+  if (isite == 0)
+    throw Error (InvalidParam, "Pulsar::Telescope::set_coordinates",
+		 "code='" + code + "' could not be converted to tempo isite");
 
   float lat, lon;
 
-  int ret = telescope_coords (tempo_isite, &lat, &lon, &elevation);
-  if (ret < 0){
-    latitude.setDegrees( 0.0 );
-    longitude.setDegrees( 0.0 );
-    fprintf(stderr,"Hacked coords because failed to understand telescope site\n");
-
-    //    throw Error (FailedCall, "Pulsar::Telescope::set_coordinates",
-    //	 "tempo code=%c", tempo_isite);
-  }
+  int ret = telescope_coords (isite, &lat, &lon, &elevation);
+  if (ret < 0)
+    throw Error (FailedCall, "Pulsar::Telescope::set_coordinates",
+		 "unrecognized code='%s' == isite=%c", code.c_str(), isite);
 
   latitude.setDegrees( lat );
   longitude.setDegrees( lon );
-
 }

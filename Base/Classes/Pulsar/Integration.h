@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.88 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.89 $
+   $Date: 2007/06/21 17:32:05 $
    $Author: straten $ */
 
 /*
@@ -115,7 +115,7 @@ namespace Pulsar {
     
     //! Return a vector of tempo++ toa objects
     void toas (std::vector<Tempo::toa>& toas, const Integration& std_subint,
-	       char nsite, std::string arguments = "", 
+	       const std::string& nsite, std::string arguments = "", 
 	       Tempo::toa::Format fmt = Tempo::toa::Parkes,
 	       bool discard_bad = false) const;
     
@@ -464,8 +464,6 @@ namespace Pulsar {
 
     //! The Archive that manages this integration
     Reference::To<const Archive, false> archive;
-
-    friend class FrequencyIntegrate;
 
     //! Dedispersion worker function
     void dedisperse (unsigned ichan, unsigned kchan,

@@ -441,7 +441,8 @@ void Pulsar::PolnProfileFit::set_phase (const Estimate<double>& value)
 */
 Tempo::toa Pulsar::PolnProfileFit::get_toa (const PolnProfile* observation,
 					    const MJD& mjd, 
-					    double period, char nsite) try 
+					    double period,
+					    const string& nsite) try 
 {
   if (verbose)
     cerr << "Pulsar::PolnProfileFit::get_toa" << endl;

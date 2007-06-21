@@ -17,8 +17,6 @@ void Pulsar::BasicArchive::ensure_linkage ()
 
 Pulsar::BasicArchive::BasicArchive () 
 { 
-  telescope_code = -1;
-
   state = Signal::Intensity;
   scale = Signal::FluxDensity;
   type = Signal::Pulsar;
@@ -140,13 +138,13 @@ void Pulsar::BasicArchive::set_nbin (unsigned numbins)
 }
 
 //! Get the tempo code of the telescope used
-char Pulsar::BasicArchive::get_telescope_code () const
+std::string Pulsar::BasicArchive::get_telescope_code () const
 {
   return telescope_code;
 }
 
 //! Set the tempo code of the telescope used
-void Pulsar::BasicArchive::set_telescope_code (char telcode)
+void Pulsar::BasicArchive::set_telescope_code (const std::string& telcode)
 {
   telescope_code = telcode;
 }

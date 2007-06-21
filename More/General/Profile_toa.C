@@ -4,9 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Profile.h"
 #include "Error.h"
+
+using namespace std;
 
 /*!
   Calculates the shift between observed and template profiles.
@@ -14,7 +16,7 @@ using namespace std;
 */
 
 Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd,
-				 double period, char nsite, string arguments,
+				 double period, const string& nsite, string arguments,
 				 Tempo::toa::Format fmt) const
 {
   Tempo::toa retval (fmt);

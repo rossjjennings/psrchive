@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.22 $
-   $Date: 2006/10/17 14:59:21 $
+   $Revision: 1.23 $
+   $Date: 2007/06/21 17:32:05 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -62,9 +62,9 @@ namespace Pulsar {
     TimerArchive* extract (const std::vector<unsigned>& subints) const;
 
     //! Get the tempo code of the telescope used
-    virtual char get_telescope_code () const;
+    virtual std::string get_telescope_code () const;
     //! Set the tempo code of the telescope used
-    virtual void set_telescope_code (char telescope_code);
+    virtual void set_telescope_code (const std::string& telescope_code);
 
     //! Get the state of the profiles
     virtual Signal::State get_state () const;
