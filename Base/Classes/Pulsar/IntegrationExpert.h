@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExpert.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/11/06 17:15:58 $
+   $Revision: 1.8 $
+   $Date: 2007/06/21 17:31:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationExpert_h
@@ -65,6 +65,14 @@ namespace Pulsar {
     //! Integrate profiles from single polarizations into one total intensity
     void pscrunch ()
     { instance->pscrunch (); }
+
+    //! Dedispersion worker function
+    void dedisperse (unsigned ichan, unsigned kchan, double dm, double f0)
+    { instance->dedisperse (ichan, kchan, dm, f0); }
+
+    //! Defaraday worker function
+    void defaraday (unsigned ichan, unsigned kchan, double rm, double f0)
+    { instance->defaraday (ichan, kchan, rm, f0); }
 
     //! Swap the two specified Profiles
     void swap_profiles (unsigned ipol, unsigned ichan,
