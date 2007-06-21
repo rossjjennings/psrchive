@@ -15,11 +15,10 @@
 
 using namespace std;
 
-Tempo2::Generator::Generator ()
+Tempo2::Generator::Generator (const Parameters* parameters)
 {
   epoch1 = epoch2 = 0;
   freq1 = freq2 = 0;
-  strcpy (sitename, "7");
 
   ntimecoeff = 12;
   nfreqcoeff = 2;
@@ -27,6 +26,8 @@ Tempo2::Generator::Generator ()
   // one hour
   segment_length = 1.0/24.0;
 
+  if (parameters)
+    set_parameters( parameters );
 }
 
 Tempo2::Generator::Generator (const Generator& copy)
@@ -38,9 +39,14 @@ Tempo2::Generator::~Generator ()
 }
 
 //! Set the parameters used to generate the predictor
-void Tempo2::Generator::set_parameters (const Parameters* p)
+void Tempo2::Generator::set_parameters (const Pulsar::Parameters* p)
 {
-  parameters = p;
+  const Parameters* t2p = dynamic_cast<const Parameters*> (p);
+  if (!t2p)
+    throw Error (InvalidState, "Tempo2::Generator::set_parameters",
+		 "Parameters are not Tempo2::Parameters");
+
+  parameters = t2p;
 }
 
 //! Set the range of epochs over which to generate
@@ -55,6 +61,30 @@ void Tempo2::Generator::set_frequency_span (long double low, long double high)
 {
   freq1 = low;
   freq2 = high;
+}
+
+//! Set the site at which the signal is observed
+void Tempo2::Generator::set_site (const std::string& site)
+{
+  sitename = site;
+}
+
+//! Set the number of time coefficients
+void Tempo2::Generator::set_time_ncoeff (unsigned ncoeff)
+{
+  ntimecoeff = ncoeff;
+}
+
+//! Set the number of frequency coefficients
+void Tempo2::Generator::set_frequency_ncoeff (unsigned ncoeff)
+{
+  nfreqcoeff = ncoeff;
+}
+
+//! Set the length of each polynomial segment in days
+void Tempo2::Generator::set_segment_length (long double days)
+{
+  segment_length = days;
 }
 
 //! Return a new, copy constructed instance of self
@@ -75,7 +105,7 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
       " coeffs: ntime=" << ntimecoeff << " nfreq=" << nfreqcoeff
 	 << endl;
 
-  ChebyModelSet_Construct( cms, psr, sitename, epoch1, epoch2,
+  ChebyModelSet_Construct( cms, psr, sitename.c_str(), epoch1, epoch2,
 			   segment_length, segment_length*0.1, 
 			   freq1, freq2, ntimecoeff, nfreqcoeff );
 
