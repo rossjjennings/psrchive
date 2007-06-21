@@ -6,12 +6,13 @@
  ***************************************************************************/
 
 #include "T2Predictor.h"
-#include "Error.h"
+#include "T2Generator.h"
 
 #include "tempo2pred_int.h"
 #include "inverse_phase.h"
+#include "Error.h"
 
-#include <vector>
+//#include <vector>
 using namespace std;
 
 Tempo2::Predictor::Predictor ()
@@ -38,6 +39,44 @@ Pulsar::Predictor* Tempo2::Predictor::clone () const
   if (verbose)
     cerr << "Tempo2::Predictor::clone" << endl;
   return new Predictor (*this);
+}
+
+//! Set up Generator to produce a new Predictor like self
+void Tempo2::Predictor::match (Pulsar::Generator* generator) const
+{
+  Tempo2::Generator* t2g = dynamic_cast<Tempo2::Generator*> (generator);
+  if (!t2g)
+    throw Error (InvalidParam, "polyco::match",
+		 "Generator is not a Tempo2::Generator");
+
+  t2g->set_time_ncoeff( get_time_ncoeff() );
+  t2g->set_frequency_ncoeff( get_frequency_ncoeff() );
+  t2g->set_segment_length( get_segment_length() );
+}
+
+//! Set the number of time coefficients
+unsigned Tempo2::Predictor::get_time_ncoeff () const
+{
+  if (predictor.modelset.cheby.nsegments < 1)
+    return 0;
+  return predictor.modelset.cheby.segments[0].cheby.nx;
+}
+
+//! Set the number of frequency coefficients
+unsigned Tempo2::Predictor::get_frequency_ncoeff () const
+{
+  if (predictor.modelset.cheby.nsegments < 1)
+    return 0;
+  return predictor.modelset.cheby.segments[0].cheby.ny;
+}
+
+//! Set the length of each polynomial segment in days
+long double Tempo2::Predictor::get_segment_length () const
+{
+  if (predictor.modelset.cheby.nsegments < 1)
+    return 0;
+  return predictor.modelset.cheby.segments[0].mjd_end
+    - predictor.modelset.cheby.segments[0].mjd_start;
 }
 
 //! Add the information from the supplied predictor to self

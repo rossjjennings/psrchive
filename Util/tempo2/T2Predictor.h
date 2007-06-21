@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/06/20 15:57:14 $
+   $Revision: 1.12 $
+   $Date: 2007/06/21 17:32:51 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
@@ -41,6 +41,18 @@ namespace Tempo2 {
 
     //! Return a new, copy constructed instance of self
     Pulsar::Predictor* clone () const;
+
+    //! Set up Generator to produce a new Predictor like self
+    void match (Pulsar::Generator*) const;
+
+    //! Get the number of time coefficients
+    unsigned get_time_ncoeff () const;
+
+    //! Get the number of frequency coefficients
+    unsigned get_frequency_ncoeff () const;
+
+    //! Get the length of each polynomial segment in days
+    long double get_segment_length () const;
 
     //! Add the information from the supplied predictor to self
     void insert (const Pulsar::Predictor*);
