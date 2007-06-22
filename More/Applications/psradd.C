@@ -156,7 +156,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.49 2007/05/22 23:57:57 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.50 2007/06/22 12:02:15 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -500,9 +500,12 @@ int main (int argc, char **argv) try {
 
       }
       catch (Error& error) {
-	cerr << "psradd: Error installing ephemeris\n"
-	  "  " << error.get_message() << "\n"
-	  "  in " << total->get_filename() << endl;
+	cerr << "psradd: Error installing ephemeris in "
+             << total->get_filename() << endl;
+        if (verbose)
+          cerr << error << endl;
+        else
+	  cerr << "  " << error.get_message() << endl;
 
 	if (!auto_add)
 	  return -1;

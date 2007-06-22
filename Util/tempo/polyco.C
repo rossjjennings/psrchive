@@ -491,6 +491,12 @@ polyco & polyco::operator = (const polyco & in_poly)
   return *this;
 }
 
+polyco::~polyco ()
+{
+  if (verbose)
+    cerr << "polyco dtor" << endl;
+}
+
 polyco::polyco (const string& filename)
 {
   init ();

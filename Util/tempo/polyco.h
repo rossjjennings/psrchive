@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.44 $
-   $Date: 2007/06/21 17:32:35 $
+   $Revision: 1.45 $
+   $Date: 2007/06/22 12:03:26 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -203,9 +203,14 @@ public:
   //! The polynomial sets
   std::vector<polynomial> pollys;
 
-  //! null initializer
+  //! Default constructor
   polyco () { init(); }
+
+  //! Copy constructor
   polyco (const polyco& poly) { init(); operator = (poly); }
+
+  //! Destructor
+  ~polyco ();
 
   //
   // Pulsar::Predictor implementation
@@ -259,8 +264,6 @@ public:
   //! Load in polycos
   polyco (const std::string& id);
   polyco& operator = (const polyco& poly);
-
-  virtual ~polyco() {}
 
   //! these functions return the number of polynomials successfully loaded
   int load (const std::string& filename);
