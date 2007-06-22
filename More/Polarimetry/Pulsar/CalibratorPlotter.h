@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalibratorPlotter.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.11 $
+   $Date: 2007/06/22 01:41:12 $
    $Author: straten $ */
 
 #ifndef __CalibratorPlotter_H
 #define __CalibratorPlotter_H
 
-#include "Calibrator.h"
+#include "Pulsar/Calibrator.h"
 
 namespace Pulsar {
 
