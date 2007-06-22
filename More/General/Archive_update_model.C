@@ -166,8 +166,12 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
 		 "no Pulsar::Parameters available");
 
   Reference::To<Generator> generator = ephemeris->generator();
-  if (model)
+  if (model) {
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::update_model matching generator "
+              "to current predictor" << endl;
     model->match( generator );
+  }
 
   double frequency = get_centre_frequency ();
   double bandwidth = get_bandwidth ();
@@ -181,7 +185,7 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
 
   Reference::To<Predictor> predictor = generator->generate();
 
-  if (clear_model)
+  if (clear_model || !model)
     model = predictor;
   else
     model->insert (predictor);
