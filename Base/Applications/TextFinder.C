@@ -10,7 +10,7 @@
 #include "TextFinder.h"
 #include <iostream>
 #include <Pulsar/ExtensionRegister.h>
-#include <Util/genutil/strutil.h>
+#include <strutil.h>
 #include <Pulsar/ArchiveTI.h>
 #include <Pulsar/ProcHistory.h>
 #include <Pulsar/FITSHdrExtension.h>
