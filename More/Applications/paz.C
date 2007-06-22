@@ -20,6 +20,8 @@
 
 #include <unistd.h>
 
+#include "BoxMuller.h"
+
 using namespace std;
 
 void usage ()
@@ -72,8 +74,12 @@ void usage ()
 }
 
 void zap_periodic_spikes(Pulsar::Profile* profile, int period, int phase);
+void binzap(Pulsar::Archive* arch, Pulsar::Integration* integ, int subint, int lower_bin, int upper_bin, int lower_range, int upper_range);
 
 int main (int argc, char *argv[]) {
+
+  bool bin_zap = false;
+  vector<int> bins_to_zap;
   
   bool verbose = false;
   bool write = false;
@@ -125,7 +131,8 @@ int main (int argc, char *argv[]) {
   Pulsar::ChannelZapMedian* median_zapper = 0;
   Pulsar::ChannelZapModulation* modulation_zapper = 0;
 
-  const char* args = "8bC:dDe:E:hIik:mno:p:P:rR:s:S:u:vVw:W:x:X:z:Z:";
+  //const char* args = "8bC:dDe:E:hIik:mno:p:P:rR:s:S:u:vVw:W:x:X:z:Z:";
+  const char* args = "8bC:B:dDe:E:hIik:mno:p:P:rR:s:S:u:vVw:W:x:X:z:Z:";
 
   string command = "paz";
 
@@ -143,7 +150,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.39 2007/06/06 04:58:00 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.40 2007/06/22 03:50:28 jonathan_khoo Exp $" << endl;
       return 0;
 
     case 'm':
@@ -175,6 +182,19 @@ int main (int argc, char *argv[]) {
 	key = strtok (NULL, whitespace);
       }
       break;
+
+	case 'B':
+	command += " -B ";
+	command += optarg;
+	key = strtok (optarg, whitespace);
+	bin_zap = true;
+	while (key) {
+		if (sscanf(key, "%d", &placeholder) == 1) {
+			bins_to_zap.push_back(placeholder);
+		}
+		key = strtok (NULL, whitespace);
+	}
+	break;
 
     case 'e':
       write = true;
@@ -558,7 +578,12 @@ int main (int argc, char *argv[]) {
       vector<float> mask(nchan, 0.0);
       zapper->zap_very_specific(arch,mask,subs_to_zap);
     }
-      
+
+	if (bin_zap && bins_to_zap.size()) {
+	  for (int i = 0; i + 5 <= bins_to_zap.size(); i += 5)
+		binzap(arch, arch->get_Integration(bins_to_zap[i]), bins_to_zap[i], bins_to_zap[i+1], bins_to_zap[i+2], bins_to_zap[i+3], bins_to_zap[i+4]);
+	}
+
     if (zero_channels) {
       if (!killfile.empty()) {
   vector<int> some_chans;
@@ -694,3 +719,47 @@ int main (int argc, char *argv[]) {
 
   return 0;
 }
+
+void binzap(Pulsar::Archive* arch, Pulsar::Integration* integ, int subint, int lower_range, int upper_range, int lower_bin, int upper_bin)
+{
+	BoxMuller gasdev;
+	float mean;
+	float deviation;
+	float* this_int;
+
+	for (int i = 0; i < arch->get_npol(); i++) {
+		int j;
+		for (int k = 0; k < arch->get_nchan(); k++) {
+			this_int = integ->get_Profile(i,k)->get_amps();
+			mean = 0;
+			deviation = 0;
+
+			// calculate mean across the bins, excluding bins to be zapped
+
+			for (j = lower_range; j < lower_bin; j++)
+				mean += this_int[j];
+
+			for (j = upper_bin; j < upper_range; j++)
+				mean += this_int[j];
+
+			mean = mean / ((upper_range - lower_range) - (upper_bin - lower_bin));
+
+			for (j = lower_range; j < lower_bin; j++)
+				deviation += (this_int[j] - mean) * (this_int[j] - mean);
+
+			for (j = upper_bin; j < upper_range; j++)
+				deviation += (this_int[j] - mean) * (this_int[j] - mean);
+
+			deviation = deviation / ((upper_range - lower_range) - (upper_bin - lower_bin - 1));
+			deviation = sqrt(deviation);
+
+			// assign a new value based on the mean, random Gaussian number
+			// and variance to the bins being zapped
+
+			for (j = lower_bin; j < upper_bin; j++)
+				this_int[j] = mean + (gasdev() * deviation);
+		}
+	}
+}
+
+
