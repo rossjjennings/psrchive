@@ -2,7 +2,6 @@
 noinst_LTLIBRARIES = libPolarimetry.la
 
 nobase_include_HEADERS = \
-        Pulsar/Calibrator.h \
         Pulsar/CalibratorPlotter.h \
         Pulsar/CalibratorStokesInfo.h \
 	Pulsar/CalInterpreter.h \
@@ -53,7 +52,6 @@ nobase_include_HEADERS = \
         Pulsar/TotalCovariance.h
 
 libPolarimetry_la_SOURCES = \
-        Calibrator.C \
         CalibratorStokesInfo.C \
 	CalInterpreter.C \
         choose.C \

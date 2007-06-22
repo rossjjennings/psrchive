@@ -6,9 +6,9 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.32 $
-   $Date: 2007/05/24 10:54:31 $
+/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Calibrator.h,v $
+   $Revision: 1.1 $
+   $Date: 2007/06/22 01:35:07 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
