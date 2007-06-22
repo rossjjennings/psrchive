@@ -189,7 +189,7 @@ Pulsar::Predictor* Tempo::Predict::generate () const
 {
   Reference::To<polyco> result = new polyco;
   *result = generate_work ();
-  return result;
+  return result.release();
 }
 
 polyco Tempo::Predict::generate_work () const
