@@ -357,7 +357,6 @@ void ProcArgs( int argc, char *argv[] )
     case 'c':
       separate (optarg, commands, " ,");
       break;
-
     case 'h':
       PrintBasicHlp();
       break;
@@ -412,7 +411,7 @@ void ProcessArchive( string filename )
   vector< string >::iterator it;
   for( it = commands.begin(); it != commands.end(); it ++ )
   {
-    current_row.push_back( tf.FetchValue( (*it) ) );
+    current_row.push_back( tf.FetchValue( lowercase((*it)) ) );
   }
 
   results.push_back( current_row );
