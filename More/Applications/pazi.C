@@ -44,7 +44,8 @@ void usage()
 		"print paz command:         'p'\n"
 		"center pulse:              'c'\n"
 		"undo last:                 'u'\n"
-		"toggle dedispersion:       'd'\n";
+		"toggle dedispersion:       'd'\n"
+		"binzap:                    'b'\n";
 }
 
 int freq_get_channel(float mouseY, double bandwidth, int num_chans, double centre_freq);
@@ -74,7 +75,8 @@ static bool dedispersed = true;
 static vector<int> channels_to_zap;
 static vector<int> subints_to_zap;
 static vector<int> bins_to_zap;
-static bool centered = true;
+//static bool centered = true;
+static bool centered = false;
 
 int main(int argc, char** argv)
 {
@@ -120,13 +122,15 @@ int main(int argc, char** argv)
 
 	Reference::To<Pulsar::Archive> mod_archive = base_archive->clone();
 	mod_archive->dedisperse();
-	mod_archive->centre();
-	mod_archive->fscrunch();
 
+	//mod_archive->centre();
+	//printf("centre\n");
+	
+	mod_archive->fscrunch();
+	
 	Reference::To<Pulsar::Archive> backup_archive = base_archive->clone();
 	Reference::To<Pulsar::Archive> scrunched_archive = mod_archive->clone();
 	scrunched_archive->tscrunch();
-
 	Pulsar::Integration* integ;
 
 	double centre_freq = base_archive->get_centre_frequency();
@@ -165,7 +169,6 @@ int main(int argc, char** argv)
 	cpgopen("2/XS");
 
 	cpgask(0);
-	scrunched_archive->tscrunch();
 
 	cerr << endl << "Total S/N = " << scrunched_archive->get_Profile(0,0,0)->snr() << endl << endl;
 	total_plot->plot(scrunched_archive);
@@ -242,7 +245,7 @@ int main(int argc, char** argv)
 				}
 					break;
 
-			case 'c': // center pulse
+			/*case 'c': // center pulse
 				set_centre(mod_archive, base_archive, centered, plot_type, dedispersed);
 
 				if (plot_type == "freq")
@@ -251,7 +254,7 @@ int main(int argc, char** argv)
 					redraw(mod_archive, time_orig_plot, time_mod_plot, zoomed);
 
 				update_total(scrunched_archive, base_archive, total_plot);
-				break;
+				break;*/
 
 			case 'd': // toggle dedispersion on/off
 				set_dedispersion(mod_archive, base_archive, dedispersed);
