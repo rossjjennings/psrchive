@@ -42,7 +42,8 @@ include_HEADERS = \
         Types.h \
         typeutil.h \
         utc.h \
-	VirtualMemory.h
+	VirtualMemory.h \
+	table_stream.h
 
 
 libgenutil_la_SOURCES = \
@@ -95,7 +96,8 @@ libgenutil_la_SOURCES = \
 	time_string.C \
         Types.C \
         utc.c \
-	VirtualMemory.C
+	VirtualMemory.C \
+	table_stream.C
 
 if HAVE_PGPLOT
 include_HEADERS += JenetAnderson98Plot.h
