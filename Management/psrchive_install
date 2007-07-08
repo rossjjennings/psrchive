@@ -33,24 +33,10 @@ if (-d $installation_path/bin) then
 endif
 
 
-# program to be used to download source code
-#
-
-if ( `which curl` != "" ) set psrchive_download = curl
-if ( `which lynx` != "" ) set psrchive_download = lynx
-
-if ( ! $?psrchive_download ) then
-  echo
-  echo "psrchive_install: no suitable download program (curl or lynx)"
-  echo
-  exit -1
-endif
-
-
 # make the path to which the source code will be downloaded
 #
-mkdir -fp $installation_path/src
-cd $installation_path/src
+
+if ( ! -d $installation_path/src ) mkdir -p $installation_path/src
 
 echo "Will install psrchive $1 in $installation_path"
 
@@ -60,28 +46,55 @@ echo "Will install psrchive $1 in $installation_path"
 set tarfile=psrchive-$1.tar.gz
 
 
-# the SourceForge download server will redirect to the nearest mirror
-#
-set sourceforge=http://downloads.sourceforge.net
+if ( -f $tarfile ) then
 
-echo -n "Downloading $tarfile from sourceforge "
+  echo "Copying ./$tarfile ..."
+  cp $tarfile $installation_path/src
 
-if ( $psrchive_download == "curl" ) then
-  # curl options used:
-  #   -L  follow any mirror location specified by the server
-  #   -f  fail silently
-  #   -O  write to file named like remote file
-
-  echo "using curl ..."
-  curl --connect-timeout 30 -f -L -O $sourceforge/psrchive/$tarfile
 endif
 
-if ( $psrchive_download == "lynx" ) then
-  echo "using lynx ..."
-  lynx -dump $sourceforge/psrchive/$tarfile > $tarfile
-endif
+cd $installation_path/src
 
-if ( $status != 0 ) exit -1
+if ( ! -f $tarfile ) then
+
+  # program to be used to download source code
+  #
+
+  if ( `which curl` != "" ) set psrchive_download = curl
+  if ( `which lynx` != "" ) set psrchive_download = lynx
+
+  if ( ! $?psrchive_download ) then
+    echo
+    echo "psrchive_install: no suitable download program (curl or lynx)"
+    echo
+    exit -1
+  endif
+
+
+  # the SourceForge download server will redirect to the nearest mirror
+  #
+  set sourceforge=http://downloads.sourceforge.net
+
+  echo -n "Downloading $tarfile from sourceforge "
+
+  if ( $psrchive_download == "curl" ) then
+    # curl options used:
+    #   -L  follow any mirror location specified by the server
+    #   -f  fail silently
+    #   -O  write to file named like remote file
+
+    echo "using curl ..."
+    curl --connect-timeout 30 -f -L -O $sourceforge/psrchive/$tarfile
+  endif
+
+  if ( $psrchive_download == "lynx" ) then
+    echo "using lynx ..."
+    lynx -dump $sourceforge/psrchive/$tarfile > $tarfile
+  endif
+
+  if ( $status != 0 ) exit -1
+
+endif
 
 echo "Unpacking $tarfile ..."
 gunzip -c $tarfile | tar xf -
