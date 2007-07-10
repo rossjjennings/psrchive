@@ -23,13 +23,20 @@
 #include <Pulsar/ProcHistory.h>
 #include <Pulsar/Parameters.h>
 #include <Pulsar/Predictor.h>
+#include <Pulsar/Pointing.h>
 #include <TextInterface.h>
+#include <Pulsar/Passband.h>
+#include <Pulsar/PolnCalibratorExtension.h>
+#include <Pulsar/DigitiserStatistics.h>
+#include <Pulsar/DigitiserCounts.h>
+#include <Pulsar/FITSSUBHdrExtension.h>
 
 #include <dirutil.h>
 #include <strutil.h>
 #include "remap.h"
-#include "tostring.h"
+#include <tostring.h>
 #include <Angle.h>
+#include <table_stream.h>
 
 
 #include "TextFinder.h"
@@ -39,10 +46,1233 @@
 #include <sstream>
 
 
-
+/**
+ * For the sake of cleanliness, readability and common sense, I decided to concede that the text interfaces
+ * don't provide the facilities requested of the old vap. So if you are going to try to clean up this code
+ * be forewarned that my attempt to clean the code resulted in far more code to deal with all the exceptions
+ * that arise, as well as a great deal of lost time. KISS
+ * 
+ * David Smith nopeer@gmail.com
+ **/
 
 using namespace std;
 using namespace Pulsar;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// PRECISION FOR tostring
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+unsigned int old_precision;
+bool old_places;
+
+void set_precision( unsigned int num_digits, unsigned int places = true )
+{
+  old_precision = tostring_precision;
+  old_places = tostring_places;
+
+  tostring_precision = num_digits;
+  tostring_places = places;
+}
+
+
+void restore_precision( void )
+{
+  tostring_precision = old_precision;
+  tostring_places = old_places;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// FUNCTIONS FOR RETREIVING Achive PARAMETERS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+string get_name( Reference::To< Archive > archive )
+{
+  return archive->get_source();
+}
+
+
+string get_nbin( Reference::To< Archive > archive )
+{
+  return tostring<unsigned int>( archive->get_nbin() );
+}
+
+
+string get_nchan( Reference::To< Archive > archive )
+{
+  return tostring<unsigned int>( archive->get_nchan() );
+}
+
+string get_npol( Reference::To< Archive > archive )
+{
+  return tostring<unsigned int>( archive->get_npol() );
+}
+
+string get_nsub( Reference::To< Archive > archive )
+{
+  return tostring<unsigned int>( archive->get_nsubint() );
+}
+
+string get_stime( Reference::To< Archive > archive )
+{
+  return string("TODO");
+}
+
+string get_etime( Reference::To< Archive > archive )
+{
+  return string("TODO" );
+}
+
+string get_length( Reference::To< Archive > archive )
+{
+  tostring_precision = 6;
+  return tostring<double>( archive->integration_length() );
+}
+
+string get_rm( Reference::To< Archive > archive )
+{
+  return tostring<double>( archive->get_rotation_measure() );
+}
+
+string get_state( Reference::To< Archive > archive )
+{
+  return tostring<Signal::State>( archive->get_state() );
+}
+
+
+string get_scale( Reference::To< Archive > archive )
+{
+  return tostring<Signal::Scale>( archive->get_scale() );
+}
+
+
+string get_type( Reference::To< Archive > archive )
+{
+  return tostring<Signal::Source>( archive->get_type() );
+}
+
+
+string get_dmc( Reference::To< Archive > archive )
+{
+  return tostring<bool>( archive->get_dedispersed() );
+}
+
+
+string get_rmc( Reference::To< Archive > archive )
+{
+  return tostring<bool>( archive->get_faraday_corrected() );
+}
+
+
+string get_polc( Reference::To< Archive > archive )
+{
+  return tostring<bool>( archive->get_poln_calibrated() );
+}
+
+
+string get_freq( Reference::To< Archive > archive )
+{
+  ostringstream result;
+
+  double cf = archive->get_centre_frequency();
+  result << setiosflags( ios::fixed ) << setprecision(3) << cf;
+
+  return result.str();
+}
+
+string get_bw( Reference::To< Archive > archive )
+{
+  set_precision( 3 );
+
+  string result = tostring<double>( archive->get_bandwidth() );
+
+  restore_precision();
+
+  return result;
+}
+
+
+string get_intmjd( Reference::To< Archive > archive )
+{
+  return tostring<int>( archive->start_time_day() );
+}
+
+
+string get_fracmjd( Reference::To< Archive > archive )
+{
+  return tostring<double>( archive->start_time_fracday() );
+}
+
+
+string get_para( Reference::To< Archive > archive )
+{
+  stringstream result;
+
+  int nsubs = archive->get_nsubint();
+
+  if( nsubs != 0 )
+  {
+    Reference::To< Integration > integration = archive->get_Integration( nsubs / 2 );
+    if( integration )
+    {
+      Reference::To< Pointing > ext = integration->get<Pointing>();
+
+      if( ext )
+      {
+        result << ext->get_parallactic_angle().getDegrees();
+      }
+    }
+  }
+
+  return result.str();
+}
+
+
+string get_tsub( Reference::To< Archive > archive )
+{
+  string result;
+
+  int nsubs = archive->get_nsubint();
+  if( nsubs != 0 )
+  {
+    Reference::To< Integration > first_int = archive->get_first_Integration();
+    if( first_int )
+    {
+      set_precision( 6 );
+      result = tostring<double>( first_int->get_duration() );
+      restore_precision();
+    }
+  }
+
+  return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// OBSERVER FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+string get_observer( Reference::To<Archive> archive )
+{
+  string result;
+  Reference::To< ObsExtension > ext = archive->get<ObsExtension>();
+
+  if( !ext )
+  {
+    result = "UNDEF";
+  }
+  else
+  {
+    result = ext->get_observer();
+  }
+
+  return result;
+}
+
+
+
+string get_projid( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<ObsExtension> ext = archive->get<ObsExtension>();
+
+  if( !ext )
+  {
+    result = "UNDEF";
+  }
+  else
+  {
+    result = ext->get_project_ID();
+  }
+
+  return result;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// RECEIVER FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+string get_ta( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<Receiver> recv = archive->get<Receiver>();
+
+  if( !recv )
+    result = "UNDEF";
+  else
+    result = tostring<Angle>( recv->get_tracking_angle() );
+
+  return result;
+}
+
+string get_fac( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<Receiver> recv = archive->get<Receiver>();
+
+  if( !recv )
+    result = "UNDEF";
+  else
+    result = tostring<bool>( recv->get_feed_corrected() );
+
+  return result;
+}
+
+string get_basis( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<Receiver> recv = archive->get<Receiver>();
+
+  if( !recv )
+    result = "UNDEF";
+  else
+    result = tostring<Signal::Basis>( recv->get_basis() );
+
+  return result;
+}
+
+string get_hand( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<Receiver> recv = archive->get<Receiver>();
+
+  if( !recv )
+    result = "UNDEF";
+  else
+    result = tostring<Signal::Hand>( recv->get_hand() );
+
+  return result;
+}
+
+string get_rph( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<Receiver> recv = archive->get<Receiver>();
+
+  if( !recv )
+    result = "UNDEF";
+  else
+    result = tostring<Angle>( recv->get_reference_source_phase() );
+
+  return result;
+}
+
+string get_oa( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<Receiver> recv = archive->get<Receiver>();
+
+  if( !recv )
+    result = "UNDEF";
+  else
+    result = tostring<Angle>( recv->get_orientation() );
+
+  return result;
+}
+
+string get_recv_ra( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<Receiver> recv = archive->get<Receiver>();
+
+  if( !recv )
+    result = "UNDEF";
+  else
+    result = tostring<Angle>( recv->get_field_orientation() );
+
+  return result;
+}
+
+string get_xo( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<Receiver> recv = archive->get<Receiver>();
+
+  if( !recv )
+    result = "UNDEF";
+  else
+    result = tostring<Angle>( recv->get_X_offset() );
+
+  return result;
+}
+
+string get_yo( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<Receiver> recv = archive->get<Receiver>();
+
+  if( !recv )
+    result = "UNDEF";
+  else
+    result = tostring<Angle>( recv->get_Y_offset() );
+
+  return result;
+}
+
+string get_co( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<Receiver> recv = archive->get<Receiver>();
+
+  if( !recv )
+    result = "UNDEF";
+  else
+    result = tostring<Angle>( recv->get_calibrator_offset() );
+
+  return result;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// TELESCOPE FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+string get_ant_x( Reference::To< Archive > archive )
+{
+  string result = "";
+  Reference::To<ITRFExtension> ext = archive->get<ITRFExtension>();
+
+  set_precision( 6 );
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<double>( ext->ant_x );
+
+  restore_precision();
+
+  return result;
+}
+
+string get_ant_y( Reference::To< Archive > archive )
+{
+  string result = "";
+  Reference::To<ITRFExtension> ext = archive->get<ITRFExtension>();
+
+  set_precision( 3, false );
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<double>( ext->ant_y );
+
+  restore_precision();
+
+  return result;
+}
+
+string get_ant_z( Reference::To< Archive > archive )
+{
+  string result = "";
+  Reference::To<ITRFExtension> ext = archive->get<ITRFExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<double>( ext->ant_z );
+
+  if( tostring_places == true ) return "f";
+
+  return result;
+}
+
+string get_telescop( Reference::To< Archive > archive )
+{
+  string result = "";
+  Reference::To<ObsExtension> ext = archive->get<ObsExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_telescope();
+
+  return result;
+}
+
+string get_site( Reference::To< Archive > archive )
+{
+  string result = archive->get_telescope_code();
+
+  return result;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// BACKEND FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+string get_backend( Reference::To< Archive > archive )
+{
+  string result = "";
+
+  Reference::To<Backend> ext;
+  ext = archive->get<Backend>();
+  if( !ext )
+  {
+    ext = archive->get<WidebandCorrelator>();
+  }
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_name();
+
+  return result;
+}
+
+string get_be_dcc( Reference::To< Archive > archive )
+{
+  string result = "";
+  Reference::To<Backend> ext;
+  ext = archive->get<Backend>();
+  if( !ext )
+  {
+    ext = archive->get<WidebandCorrelator>();
+  }
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<bool>( ext->get_downconversion_corrected() );
+
+  return result;
+}
+
+string get_be_phase( Reference::To< Archive > archive )
+{
+  string result = "TODO";
+  Reference::To<Backend> ext;
+  ext = archive->get<Backend>();
+  if( !ext )
+  {
+    ext = archive->get<WidebandCorrelator>();
+  }
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<Signal::Argument>( ext->get_argument() );
+
+  return result;
+}
+
+string get_beconfig( Reference::To< Archive > archive )
+{
+  string result = "TODO";
+  Reference::To<WidebandCorrelator> ext = archive->get<WidebandCorrelator>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_config();
+
+  return result;
+}
+
+string get_tcycle( Reference::To< Archive > archive )
+{
+  string result = "TODO";
+  Reference::To<WidebandCorrelator> ext = archive->get<WidebandCorrelator>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<double>( ext->get_tcycle() );
+
+  return result;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// PSRFITS SPECIFIC FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+string get_obs_mode( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_obs_mode();
+
+  return result;
+}
+
+
+string get_hdrver( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_hdrver();
+
+  return result;
+}
+
+string get_stt_date( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_stt_date();
+
+  return result;
+}
+
+string get_stt_time( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_stt_time();
+
+  return result;
+}
+
+string get_coord_md( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_coordmode();
+
+  return result;
+}
+
+string get_equinox( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_equinox();
+
+  return result;
+}
+
+string get_trk_mode( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_trk_mode();
+
+  return result;
+}
+
+string get_bpa( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<double>( ext->get_bpa() );
+
+  return result;
+}
+
+string get_bmaj( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  set_precision(3);
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<double>( ext->get_bmaj() );
+  restore_precision();
+
+  return result;
+}
+
+string get_bmin( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  set_precision( 3 );
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<double>( ext->get_bmin() );
+  restore_precision();
+
+  return result;
+}
+
+string get_stt_imjd( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_stt_imjd() );
+
+  return result;
+}
+
+string get_stt_smjd( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_stt_smjd() );
+
+  return result;
+}
+
+string get_stt_offs( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<double>( ext->get_stt_offs() );
+
+  return result;
+}
+
+string get_ra( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_ra();
+
+  return result;
+}
+
+string get_dec( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_dec();
+
+  return result;
+}
+
+string get_stt_crd1( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_stt_crd1();
+
+  return result;
+}
+
+string get_stt_crd2( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_stt_crd2();
+
+  return result;
+}
+
+string get_stp_crd1( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_stp_crd1();
+
+  return result;
+}
+
+string get_stp_crd2( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_stp_crd2();
+
+  return result;
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// FLUXCAL FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+string get_nchan_fluxcal( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<FluxCalibratorExtension> ext = archive->get<FluxCalibratorExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_nchan() );
+
+  return result;
+}
+
+string get_nrcvr_fluxcal( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FluxCalibratorExtension> ext = archive->get<FluxCalibratorExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_nreceptor() );
+
+  return result;
+}
+
+string get_epoch_fluxcal( Reference::To<Archive> archive )
+{
+  string result = "";
+  Reference::To<FluxCalibratorExtension> ext = archive->get<FluxCalibratorExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<double>( ext->get_epoch() );
+
+  return result;
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// HISTORY FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+string get_nbin_prd( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_last_nbin_prd() );
+
+  return result;
+}
+
+string get_tbin( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<double>( ext->get_last_tbin() );
+
+  return result;
+}
+
+string get_chbw( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<double>( ext->get_last_chan_bw() );
+
+  return result;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// BANDPASS FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+string get_npol_bp( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<Passband> ext = archive->get<Passband>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_npol() );
+
+  return result;
+}
+
+string get_nch_bp( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<Passband> ext = archive->get<Passband>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_nchan() );
+
+  return result;
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// FEED FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+string get_npar_feed( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<PolnCalibratorExtension> ext = archive->get<PolnCalibratorExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_ncpar() );
+
+  return result;
+}
+
+string get_nchan_feed( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<PolnCalibratorExtension> ext = archive->get<PolnCalibratorExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_nchan() );
+
+  return result;
+}
+
+string get_MJD_feed( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<PolnCalibratorExtension> ext = archive->get<PolnCalibratorExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<MJD>( ext->get_epoch() );
+
+  return result;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// DIGITISER STATISTICS FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+string get_ndigstat( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_ndigr() );
+
+  return result;
+}
+
+string get_npar_digstat( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_npar() );
+
+  return result;
+}
+
+string get_ncycsub( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_ncycsub() );
+
+  return result;
+}
+
+string get_levmode_digstat( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<string>( ext->get_diglev() );
+
+  return result;
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// DIGITISER COUNTS FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+string get_dig_mode( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<string>( ext->get_dig_mode() );
+
+  return result;
+}
+
+string get_nlev_digcnts( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_nlev() );
+
+  return result;
+}
+
+string get_npthist( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_npthist() );
+
+  return result;
+}
+
+string get_levmode_digcnts( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<string>( ext->get_diglev() );
+
+  return result;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// SUBINT FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+string get_subint_type( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_int_type();
+
+  return result;
+}
+
+string get_subint_unit( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_int_unit();
+
+  return result;
+}
+
+string get_tsamp( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<double>( ext->get_tsamp() );
+
+  return result;
+}
+
+string get_nbin_subint( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_nbin() );
+
+  return result;
+}
+
+string get_nbits( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_nbits() );
+
+  return result;
+}
+
+string get_nch_file( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_nch_file() );
+
+  return result;
+}
+
+string get_nch_strt( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_nch_strt() );
+
+  return result;
+}
+
+string get_npol_subint( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_npol() );
+
+  return result;
+}
+
+string get_nsblk( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<unsigned int>( ext->get_nsblk() );
+
+  return result;
+}
+
+
+//     AddMap( "subint_type", "FITSSUBHdrExtensionTI-int_type" );
+//     AddMap( "subint_unit", "FITSSUBHdrExtensionTI-int_unit" );
+//     AddMap( "tsamp", "FITSSUBHdrExtensionTI-tsamp" );
+//     AddMap( "nbin_subint", "FITSSUBHdrExtensionTI-nbin" );
+//     AddMap( "nbits", "FITSSUBHdrExtensionTI-nbits" );
+//     AddMap( "nch_file", "FITSSUBHdrExtensionTI-nch_file" );
+//     AddMap( "nch_strt", "FITSSUBHdrExtensionTI-nch_strt" );
+//     AddMap( "npol_subint", "FITSSUBHdrExtensionTI-npol" );
+//     AddMap( "nsblk", "FITSSUBHdrExtensionTI-nsblk" );
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 
@@ -55,6 +1285,9 @@ bool hide_headers = false;
 vector< string > commands;
 vector< vector< string > > results;
 vector< string > current_row;
+bool new_new_vap = false;
+
+table_stream ts(&cout);
 
 
 
@@ -70,7 +1303,7 @@ public:
     AddMap( "nchan", "ArchiveTI-nchan" );
     AddMap( "npol", "ArchiveTI-npol" );
     AddMap( "nsub", "ArchiveTI-nsub" );
-    AddMap( "stime", "ArchiveTI-stime" );
+    //AddMap( "stime", "ArchiveTI-stime" );
     //AddMap( "etime", "ArchiveTI-etime" );
     AddMap( "length", "ArchiveTI-length" );
     AddMap( "rm", "ArchiveTI-rm" );
@@ -203,86 +1436,6 @@ bool is_numeric( string src )
 }
 
 
-// NOTE - These methods are just for formatting the output, In future I will create a class derived from ostream
-//        that overrides the << operators and automatically places all the data into a table, then outputs it
-//        correctly formatted when you call flush.
-
-void FixColumnWidths( vector< vector< string > > &all_rows, vector< int > &col_widths )
-{
-  if( !results.size() )
-    return;
-  // start off setting the column widths to the size of the headings
-
-  vector< string >::iterator hit;
-  for( hit = (*all_rows.begin()).begin(); hit != (*all_rows.begin()).end(); hit ++ )
-  {
-    string heading = (*hit).substr( 0, (*hit).find_last_of('=') );
-    col_widths.push_back( heading.size() + 1);
-  }
-
-  // check every cell, if the col width is to small for that cell, set it to the
-  // cell width.
-
-  vector< vector< string > >::iterator row_it;
-  for( row_it = all_rows.begin(); row_it != all_rows.end(); row_it ++ )
-  {
-    int col = 0;
-    vector< string >::iterator col_it;
-    for( col_it = (*row_it).begin(); col_it != (*row_it).end(); col_it ++ )
-    {
-      string data = (*col_it).substr((*col_it).find_last_of('=')+1);
-      if( data.size() + 1 > col_widths[col] )
-        col_widths[col] = data.size() + 1;
-      col ++;
-    }
-  }
-}
-
-
-void OutputTable( vector< vector< string > > &all_rows, vector< int > &col_widths )
-{
-  if( !results.size() )
-    return;
-
-  int col = 0;
-  if( !hide_headers )
-  {
-    vector< string >::iterator hit;
-    for( hit = (*all_rows.begin()).begin(); hit != (*all_rows.begin()).end(); hit ++ )
-    {
-      string heading = (*hit).substr( 0, (*hit).find_last_of('=') );
-      cout << pad( col_widths[col], heading ) << ' ';
-      col ++;
-    }
-    cout << endl;
-  }
-
-  vector< vector< string > >::iterator row_it;
-  for( row_it = all_rows.begin(); row_it != all_rows.end(); row_it ++ )
-  {
-    col = 0;
-    vector< string >::iterator col_it;
-    for( col_it = (*row_it).begin(); col_it != (*row_it).end(); col_it ++ )
-    {
-      string data = (*col_it).substr((*col_it).find_last_of('=')+1);
-      if( is_numeric( data ) )
-      {
-        for( int i = 0; i < col_widths[col] - data.size(); i ++ )
-          cout << ' ';
-        cout << data;
-      }
-      else
-        cout << pad( col_widths[col], data );
-      cout << ' ';
-      col ++;
-    }
-    cout << endl;
-  }
-}
-
-
-/////////////////////////////////////////////////////////////////////////
-
 
 
 
@@ -342,7 +1495,7 @@ void PrintExtdHlp( void )
 void ProcArgs( int argc, char *argv[] )
 {
   int gotc;
-  while ((gotc = getopt (argc, argv, "nc:sEphHvVtT")) != -1)
+  while ((gotc = getopt (argc, argv, "nc:sEphHvVtTX")) != -1)
     switch (gotc)
     {
 
@@ -363,6 +1516,10 @@ void ProcArgs( int argc, char *argv[] )
 
     case 'H':
       PrintExtdHlp();
+      break;
+
+    case 'X':
+      new_new_vap = true;
       break;
 
     case 'v':
@@ -392,30 +1549,150 @@ void ProcArgs( int argc, char *argv[] )
 
 
 
+
+string FetchValue( Reference::To< Archive > archive, string command )
+{
+  try
+  {
+    if( command == "name" ) return get_name( archive );
+    else if( command == "nbin" ) return get_nbin( archive );
+    else if( command == "nchan" ) return get_nchan( archive );
+    else if( command == "npol" ) return get_npol( archive );
+    else if( command == "nsub" ) return get_nsub( archive );
+    else if( command == "stime" ) return get_stime( archive );
+    else if( command == "etime" ) return get_etime( archive );
+    else if( command == "length" ) return get_length( archive );
+    else if( command == "rm" ) return get_rm( archive );
+    else if( command == "state" ) return get_state( archive );
+    else if( command == "scale" ) return get_scale( archive );
+    else if( command == "type" ) return get_type( archive );
+    else if( command == "dmc" ) return get_dmc( archive );
+    else if( command == "rmc" ) return get_rmc( archive );
+    else if( command == "polc" ) return get_polc( archive );
+    else if( command == "freq" ) return get_freq( archive );
+    else if( command == "bw" ) return get_bw( archive );
+    else if( command == "intmjd" ) return get_intmjd( archive );
+    else if( command == "fracmjd" ) return get_fracmjd( archive );
+    else if( command == "para" ) return get_para( archive );
+    else if( command == "tsub" ) return get_tsub( archive );
+    else if( command == "observer" ) return get_observer( archive );
+    else if( command == "projid" ) return get_projid( archive );
+    else if( command == "ta" ) return get_ta( archive );
+    else if( command == "fac" ) return get_fac( archive );
+    else if( command == "basis" ) return get_basis( archive );
+    else if( command == "hand" ) return get_hand( archive );
+    else if( command == "rph" ) return get_rph( archive );
+    else if( command == "oa" ) return get_oa( archive );
+    else if( command == "recv_ra" ) return get_recv_ra( archive );
+    else if( command == "xo" ) return get_xo( archive );
+    else if( command == "yo" ) return get_yo( archive );
+    else if( command == "co" ) return get_co( archive );
+    else if( command == "ant_x" ) return get_ant_x( archive );
+    else if( command == "ant_y" ) return get_ant_y( archive );
+    else if( command == "ant_z" ) return get_ant_z( archive );
+    else if( command == "telescop" ) return get_telescop( archive );
+    else if( command == "site" ) return get_site( archive );
+    else if( command == "backend" ) return get_backend( archive );
+    else if( command == "be_dcc" ) return get_be_dcc( archive );
+    else if( command == "be_phase" ) return get_be_phase( archive );
+    else if( command == "beconfig" ) return get_beconfig( archive );
+    else if( command == "tcycle" ) return get_tcycle( archive );
+    else if( command == "obs_mode" ) return get_obs_mode( archive );
+    else if( command == "hdrver" ) return get_hdrver( archive );
+    else if( command == "stt_date" ) return get_stt_date( archive );
+    else if( command == "stt_time" ) return get_stt_time( archive );
+    else if( command == "coord_md" ) return get_coord_md( archive );
+    else if( command == "equinox" ) return get_equinox( archive );
+    else if( command == "trk_mode" ) return get_trk_mode( archive );
+    else if( command == "bpa" ) return get_bpa( archive );
+    else if( command == "bmaj" ) return get_bmaj( archive );
+    else if( command == "bmin" ) return get_bmin( archive );
+    else if( command == "stt_imjd" ) return get_stt_imjd( archive );
+    else if( command == "stt_smjd" ) return get_stt_smjd( archive );
+    else if( command == "stt_offs" ) return get_stt_offs( archive );
+    else if( command == "ra" ) return get_ra( archive );
+    else if( command == "dec" ) return get_dec( archive );
+    else if( command == "stt_crd1" ) return get_stt_crd1( archive );
+    else if( command == "stt_crd2" ) return get_stt_crd2( archive );
+    else if( command == "stp_crd1" ) return get_stp_crd1( archive );
+    else if( command == "stp_crd2" ) return get_stp_crd2( archive );
+    else if( command == "nbin_prd" ) return get_nbin_prd( archive );
+    else if( command == "tbin" ) return get_tbin( archive );
+    else if( command == "chbw" ) return get_chbw( archive );
+    else if( command == "npol_bp" ) return get_npol_bp( archive );
+    else if( command == "nch_bp" ) return get_nch_bp( archive );
+    else if( command == "npar_feed" ) return get_npar_feed( archive );
+    else if( command == "nchan_feed" ) return get_nchan_feed( archive );
+    else if( command == "mjd_feed" ) return get_MJD_feed( archive );
+    else if( command == "ndigstat" ) return get_ndigstat( archive );
+    else if( command == "npar_digstat" ) return get_npar_digstat( archive );
+    else if( command == "ncycsub" ) return get_ncycsub( archive );
+    else if( command == "levmode_digstat" ) return get_levmode_digstat( archive );
+    else if( command == "dig_mode" ) return get_dig_mode( archive );
+    else if( command == "nlev_digcnts" ) return get_nlev_digcnts( archive );
+    else if( command == "npthist" ) return get_npthist( archive );
+    else if( command == "levmode_digcnts" ) return get_levmode_digcnts( archive );
+    else if( command == "subint_type" ) return get_subint_type( archive );
+    else if( command == "subint_unit" ) return get_subint_unit( archive );
+    else if( command == "tsamp" ) return get_tsamp( archive );
+    else if( command == "nbin_subint" ) return get_nbin_subint( archive );
+    else if( command == "nbits" ) return get_nbits( archive );
+    else if( command == "nch_file" ) return get_nch_file( archive );
+    else if( command == "nch_strt" ) return get_nch_strt( archive );
+    else if( command == "npol_subint" ) return get_npol_subint( archive );
+    else if( command == "nsblk" ) return get_nsblk( archive );
+
+    else return "UNDEF";
+  }
+  catch( Error e )
+  {
+    return "*error*";
+  }
+
+
+}
+
+
+
 /**
  * ProcessArchive - load an archive and process all the command line parameters using the text finder.
  **/
 
 void ProcessArchive( string filename )
 {
-  Reference::To< Archive > archive = Archive::load( filename );
+  Reference::To< Archive > archive;
+  try
+  {
+    archive = Archive::load( filename );
+  }
+  catch ( Error e )
+  {
+    cerr << e << endl;
+    exit(1);
+  }
 
   if( !archive )
     return;
 
-  current_row.push_back( string("File=") + filename );
-
   VapTextFinder tf;
   tf.SetArchive( archive );
+
+  ts << filename;
 
   vector< string >::iterator it;
   for( it = commands.begin(); it != commands.end(); it ++ )
   {
-    current_row.push_back( tf.FetchValue( lowercase((*it)) ) );
+    if( !new_new_vap )
+      ts << tf.FetchValue( lowercase((*it)) );
+    else
+    {
+      string val = FetchValue( archive, lowercase((*it)) );
+      if ( val == "" ) val = "*";
+      ts << val;
+    }
   }
 
-  results.push_back( current_row );
-  current_row.clear();
+  ts << endrow;
 }
 
 
@@ -485,13 +1762,21 @@ int main( int argc, char *argv[] )
 {
   tostring_precision = 4;
   Angle::default_type = Angle::Degrees;
-  
+
   ProcArgs( argc, argv );
 
   vector< string > filenames;
   for (int ai=optind; ai<argc; ai++)
     dirglob (&filenames, argv[ai]);
 
+  // first heading is always the filename
+  ts << "filename";
+
+  // add the commands as headings for the table.
+  vector< string >::iterator it;
+  for( it = commands.begin(); it != commands.end(); it ++ )
+    ts << (*it);
+  ts << endrow;
 
   if( filenames.size() )
   {
@@ -504,10 +1789,7 @@ int main( int argc, char *argv[] )
     else
       for_each( filenames.begin(), filenames.end(), ProcessArchive );
 
-    vector< int > column_widths;
-
-    FixColumnWidths( results, column_widths );
-    OutputTable( results, column_widths );
+    ts.flush();
   }
 
   return 0;
