@@ -33,13 +33,10 @@
 
 #include <dirutil.h>
 #include <strutil.h>
-#include "remap.h"
 #include <tostring.h>
 #include <Angle.h>
 #include <table_stream.h>
 
-
-#include "TextFinder.h"
 
 #include <unistd.h>
 
@@ -1292,128 +1289,7 @@ table_stream ts(&cout);
 
 
 
-class VapTextFinder : public ArchiveTextFinder
-{
-public:
-  VapTextFinder() : ArchiveTextFinder()
-  {
-    AddGrp( "COMMON PARAMETERS" );
-    AddMap( "name", "ArchiveTI-name" );
-    AddMap( "nbin", "ArchiveTI-nbin" );
-    AddMap( "nchan", "ArchiveTI-nchan" );
-    AddMap( "npol", "ArchiveTI-npol" );
-    AddMap( "nsub", "ArchiveTI-nsub" );
-    //AddMap( "stime", "ArchiveTI-stime" );
-    //AddMap( "etime", "ArchiveTI-etime" );
-    AddMap( "length", "ArchiveTI-length" );
-    AddMap( "rm", "ArchiveTI-rm" );
-    AddMap( "state", "ArchiveTI-state" );
-    AddMap( "scale", "ArchiveTI-scale" );
-    AddMap( "type", "ArchiveTI-type" );
-    AddMap( "dmc", "ArchiveTI-dmc" );
-    AddMap( "rmc", "ArchiveTI-rmc" );
-    AddMap( "polc", "ArchiveTI-polc" );
-    AddMap( "freq", "ArchiveTI-freq" );
-    AddMap( "bw", "ArchiveTI-bw" );
-    AddMap( "intmjd", "ArchiveTI-intmjd" );
-    AddMap( "fracmjd", "ArchiveTI-fracmjd" );
-    AddMap( "para", "ArchiveTI-para" );
-    AddMap( "tsub", "ArchiveTI-tsub" );
 
-    AddGrp( "OBSERVER PARAMETERS" );
-    AddMap( "observer", "ObsExtensionTI-observer" );
-    AddMap( "projid", "ObsExtensionTI-projid" );
-
-    AddGrp( "RECEIVER PARAMETERS" );
-    AddMap( "ta", "ReceiverTI-ta" );
-    AddMap( "fac", "ReceiverTI-fac" );
-    AddMap( "basis", "ReceiverTI-basis" );
-    AddMap( "hand", "ReceiverTI-hand" );
-    AddMap( "rph", "ReceiverTI-rph" );
-    AddMap( "oa", "ReceiverTI-oa" );
-    AddMap( "recv_ra", "ReceiverTI-ra" );
-    AddMap( "xo", "ReceiverTI-xo" );
-    AddMap( "yo", "ReceiverTI-yo" );
-    AddMap( "co", "ReceiverTI-co" );
-
-    AddGrp( "TELESCOPE PARAMETERS" );
-    AddMap( "ant_x", "ITRFExtensionTI-ant_x" );
-    AddMap( "ant_y", "ITRFExtensionTI-ant_y" );
-    AddMap( "ant_z", "ITRFExtensionTI-ant_z" );
-    AddMap( "telescop", "ObsExtensionTI-telescop" );
-    AddMap( "site", "ArchiveTI-site" );
-
-    AddGrp( "BACKEND PARAMETERS" );
-    AddMap( "backend", "BackendTI-name" );
-    AddMap( "be_dcc", "BackendTI-dcc" );
-    AddMap( "be_phase", "BackendTI-phase" );
-    AddMap( "beconfig", "WidebandCorrelatorTI-beconfig" );
-    AddMap( "tcycle", "WidebandCorrelatorTI-tcycle" );
-
-    AddGrp( "PSRFITS PARAMETERS" );
-    AddMap( "obs_mode", "FITSHdrExtensionTI-obs_mode" );
-    AddMap( "hdrver", "FITSHdrExtensionTI-hdrver" );
-    AddMap( "stt_date", "FITSHdrExtensionTI-stt_date" );
-    AddMap( "stt_time", "FITSHdrExtensionTI-stt_time" );
-    AddMap( "coord_md", "FITSHdrExtensionTI-coord_md" );
-    AddMap( "equinox", "FITSHdrExtensionTI-equinox" );
-    AddMap( "trk_mode", "FITSHdrExtensionTI-trk_mode" );
-    AddMap( "bpa", "FITSHdrExtensionTI-bpa" );
-    AddMap( "bmaj", "FITSHdrExtensionTI-bmaj" );
-    AddMap( "bmin", "FITSHdrExtensionTI-bmin" );
-    AddMap( "stt_imjd", "FITSHdrExtensionTI-stt_imjd" );
-    AddMap( "stt_smjd", "FITSHdrExtensionTI-stt_smjd" );
-    AddMap( "stt_offs", "FITSHdrExtensionTI-stt_offs" );
-    AddMap( "ra", "FITSHdrExtensionTI-ra" );
-    AddMap( "dec", "FITSHdrExtensionTI-dec" );
-    AddMap( "stt_crd1", "FITSHdrExtensionTI-stt_crd1" );
-    AddMap( "stt_crd2", "FITSHdrExtensionTI-stt_crd2" );
-    AddMap( "stp_crd1", "FITSHdrExtensionTI-stp_crd1" );
-    AddMap( "stp_crd2", "FITSHdrExtensionTI-stp_crd2" );
-
-    AddGrp( "FLUXCAL" );
-    AddMap( "nchan_fluxcal", "FluxCalibratorExtensionTI-nchan" );
-    AddMap( "nrcvr_fluxcal", "FluxCalibratorExtensionTI-nrcvr" );
-    AddMap( "epoch_fluxcal", "FluxCalibratorExtensionTI-epoch" );
-
-    AddGrp( "HISTORY" );
-    AddMap( "nbin_prd", "ProcHistoryTI-nbin_prd" );
-    AddMap( "tbin", "ProcHistoryTI-tbin" );
-    AddMap( "chbw", "ProcHistoryTI-chan_bw" );
-
-    AddGrp( "BANDPASS" );
-    AddMap( "npol_bp", "PassbandTI-npol" );
-    AddMap( "nch_bp", "PassbandTI-nchan" );
-
-    AddGrp( "FEED PARAMETERS" );
-    AddMap( "npar_feed", "PolnCalibratorExtensionTI-npar" );
-    AddMap( "nchan_feed", "PolnCalibratorExtensionTI-nchan" );
-    AddMap( "MJD_feed", "PolnCalibratorExtensionTI-epoch" );
-
-    AddGrp( "DIGITISER STATISTICS PARAMETERS" );
-    AddMap( "ndigstat", "DigitiserStatisticsTI-ndigr" );
-    AddMap( "npar_digstat", "DigitiserStatisticsTI-npar" );
-    AddMap( "ncycsub", "DigitiserStatisticsTI-ncycsub" );
-    AddMap( "levmode_digstat", "DigitiserStatisticsTI-diglev" );
-
-    AddGrp( "DIGITISER COUNTS PARAMETERS" );
-    AddMap( "dig_mode", "DigitiserCountsTI-dig_mode" );
-    AddMap( "nlev_digcnts", "DigitiserCountsTI-nlev" );
-    AddMap( "npthist", "DigitiserCountsTI-npthist" );
-    AddMap( "levmode_digcnts", "DigitiserCountsTI-diglev" );
-
-    AddGrp( "SUBINT PARAMETERS" );
-    AddMap( "subint_type", "FITSSUBHdrExtensionTI-int_type" );
-    AddMap( "subint_unit", "FITSSUBHdrExtensionTI-int_unit" );
-    AddMap( "tsamp", "FITSSUBHdrExtensionTI-tsamp" );
-    AddMap( "nbin_subint", "FITSSUBHdrExtensionTI-nbin" );
-    AddMap( "nbits", "FITSSUBHdrExtensionTI-nbits" );
-    AddMap( "nch_file", "FITSSUBHdrExtensionTI-nch_file" );
-    AddMap( "nch_strt", "FITSSUBHdrExtensionTI-nch_strt" );
-    AddMap( "npol_subint", "FITSSUBHdrExtensionTI-npol" );
-    AddMap( "nsblk", "FITSSUBHdrExtensionTI-nsblk" );
-  }
-};
 
 
 // NOTE - who would have thought is_numeric would be so complicated, need to find a better one, this comes nowhere
@@ -1482,15 +1358,142 @@ void PrintBasicHlp( void )
 
 void PrintExtdHlp( void )
 {
-  VapTextFinder tf;
-  tf.DisplayHelp();
+  cout << "" << endl;
+
+  cout << "BACKEND PARAMETERS" << endl;
+  cout << "backend                         Name of the backend instrument" << endl;
+  cout << "be_dcc                          Downconversion conjugation corrected" << endl;
+  cout << "be_phase                        Phase convention of backend" << endl;
+  cout << "beconfig                        Backend Config file" << endl;
+  cout << "tcycle                          Get the correlator cycle time" << endl;
+  cout << "" << endl;
+
+  cout << "BANDPASS" << endl;
+  cout << "nch_bp                          Number of channels in original bandpass" << endl;
+  cout << "npol_bp                         Number of polarizations in bandpass" << endl;
+  cout << "" << endl;
+
+  cout << "COMMON PARAMETERS" << endl;
+  cout << "bw                              Bandwidth (MHz)" << endl;
+  cout << "dmc                             Dispersion corrected (boolean)" << endl;
+  cout << "fracmjd                         MJD faction of day" << endl;
+  cout << "freq                            Centre frequency (MHz)" << endl;
+  cout << "intmjd                          MJD day" << endl;
+  cout << "length                          The full duration of the observation (s)" << endl;
+  cout << "name                            Name of the source" << endl;
+  cout << "nbin                            Number of pulse phase bins" << endl;
+  cout << "nchan                           Number of frequency channels" << endl;
+  cout << "npol                            Number of polarizations" << endl;
+  cout << "nsub                            Number of sub-integrations" << endl;
+  cout << "para                            Parallactic angle at archive mid point" << endl;
+  cout << "polc                            Polarization calibrated (boolean)" << endl;
+  cout << "rm                              Rotation measure (rad/m^2)" << endl;
+  cout << "rmc                             Faraday Rotation corrected (boolean)" << endl;
+  cout << "scale                           Units of profile amplitudes" << endl;
+  cout << "state                           State of profile amplitudes" << endl;
+  cout << "tsub                            The duration of the first subint (s)" << endl;
+  cout << "type                            Observation type (Pulsar, PolnCal, etc.)" << endl;
+  cout << "" << endl;
+
+  cout << "DIGITISER COUNTS PARAMETERS" << endl;
+  cout << "dig_mode                        Digitiser mode" << endl;
+  cout << "levmode_digcnts                 Digitiser level-setting mode (AUTO, FIX)" << endl;
+  cout << "nlev_digcnts                    Number of digitiser levels" << endl;
+  cout << "npthist                         Number of points in histogram (I)" << endl;
+  cout << "" << endl;
+
+  cout << "DIGITISER STATISTICS PARAMETERS" << endl;
+  cout << "levmode_digstat                 Digitiser level-setting mode (AUTO, FIX)" << endl;
+  cout << "ncycsub                         Number of correlator cycles per subint" << endl;
+  cout << "ndigstat                        Number of digitised channels (I)" << endl;
+  cout << "npar_digstat                    Number of digitiser parameters" << endl;
+  cout << "" << endl;
+
+  cout << "FEED PARAMETERS" << endl;
+  cout << "MJD_feed                        [MJD] Epoch of calibration obs" << endl;
+  cout << "nchan_feed                      Nr of channels in Feed coupling data" << endl;
+  cout << "npar_feed                       Number of coupling parameters" << endl;
+  cout << "" << endl;
+
+  cout << "FLUXCAL" << endl;
+  cout << "epoch_fluxcal                   [MJD] Epoch of calibration obs" << endl;
+  cout << "nchan_fluxcal                   Nr of frequency channels (I)" << endl;
+  cout << "nrcvr_fluxcal                   Number of receiver channels (I)" << endl;
+  cout << endl;
+
+  cout << "HISTORY" << endl;
+  cout << "chbw                            Channel bandwidth" << endl;
+  cout << "nbin_prd                        Nr of bins per period" << endl;
+  cout << "tbin                            Time per bin or sample" << endl;
+  cout << endl;
+
+  cout << "OBSERVER PARAMETERS" << endl;
+  cout << "observer                        Observer name(s)" << endl;
+  cout << "projid                          Project name" << endl;
+  cout << endl;
+
+  cout << "PSRFITS PARAMETERS" << endl;
+  cout << "bmaj                            [deg] beam major axis" << endl;
+  cout << "bmin                            [deg] beam minor axis" << endl;
+  cout << "bpa                             [deg] beam position angle" << endl;
+  cout << "coord_md                        The coordinate mode (EQUAT, GAL, ECLIP, etc )." << endl;
+  cout << "dec                             Declination (-dd:mm:ss.sss)" << endl;
+  cout << "equinox                         Equinox of coords (J2000, B1950)" << endl;
+  cout << "hdrver                          Header Version" << endl;
+  cout << "obs_mode                        Observation Mode (PSR, CAL, SEARCH)" << endl;
+  cout << "ra                              Right ascension (hh:mm:ss.ssss)" << endl;
+  cout << "stp_crd1                        Stop coord 1 (hh:mm:ss.sss or ddd.ddd)" << endl;
+  cout << "stp_crd2                        Stop coord 2 (-dd:mm:ss.sss or -dd.ddd)" << endl;
+  cout << "stt_crd1                        Start coord 1 (hh:mm:ss.sss or ddd.ddd)" << endl;
+  cout << "stt_crd2                        Start coord 2 (-dd:mm:ss.sss or -dd.ddd)" << endl;
+  cout << "stt_date                        Start UT date (YYYY-MM-DD)" << endl;
+  cout << "stt_imjd                        Start MJD (UTC days) (J - long integer)" << endl;
+  cout << "stt_offs                        [s] Start time offset (D)" << endl;
+  cout << "stt_smjd                        [s] Start time (sec past UTC 00h) (J)" << endl;
+  cout << "stt_time                        Start UT (hh:mm:ss)" << endl;
+  cout << "trk_mode                        Track mode ( TRACK, SCANGC, SCANLAT )" << endl;
+  cout << endl;
+
+  cout << "RECEIVER PARAMETERS" << endl;
+  cout << "basis                           Basis of receptors" << endl;
+  cout << "co                              Offset of calibrator wrt nominal value" << endl;
+  cout << "fac                             Feed angle corrected" << endl;
+  cout << "hand                            Hand of receptor basis" << endl;
+  cout << "oa                              Orientation angle of receptors in feed" << endl;
+  cout << "recv_ra                         Orientation angle of reference field vector" << endl;
+  cout << "rph                             Reference source phase" << endl;
+  cout << "ta                              Tracking angle of feed" << endl;
+  cout << "xo                              Offset of feed X-axis wrt platform zero" << endl;
+  cout << "yo                              Offset of feed Y-axis wrt nominal value" << endl;
+  cout << endl;
+
+  cout << "SUBINT PARAMETERS" << endl;
+  cout << "nbin_subint                     Nr of bins (PSR/CAL mode; else 1)" << endl;
+  cout << "nbits                           Nr of bits/datum (SEARCH mode 'X' data, else 1)" << endl;
+  cout << "nch_file                        Number of channels/sub-bands in this file" << endl;
+  cout << "nch_strt                        Start channel/sub-band number (0 to NCHAN-1)" << endl;
+  cout << "npol_subint                     Nr of polarisations in table" << endl;
+  cout << "nsblk                           Samples/row (SEARCH mode, else 1)" << endl;
+  cout << "subint_type                     Time axis (TIME, BINPHSPERI, BINLNGASC, etc)" << endl;
+  cout << "subint_unit                     Unit of time axis (SEC, PHS (0-1), DEG)" << endl;
+  cout << "tsamp                           [s] Sample interval for SEARCH-mode data" << endl;
+  cout << endl;
+
+  cout << "TELESCOPE PARAMETERS" << endl;
+  cout << "ant_x                           ITRF X coordinate." << endl;
+  cout << "ant_y                           ITRF Y coordinate." << endl;
+  cout << "ant_z                           ITRF Z coordinate." << endl;
+  cout << "site                            Telescope tempo code" << endl;
+  cout << "telescop                        Telescope name" << endl;
+  cout << endl;
+
 }
 
 
 
 /**
- * Process the command line options, return the index into argv of the first non option.
- **/
+* Process the command line options, return the index into argv of the first non option.
+**/
 
 void ProcArgs( int argc, char *argv[] )
 {
@@ -1516,10 +1519,6 @@ void ProcArgs( int argc, char *argv[] )
 
     case 'H':
       PrintExtdHlp();
-      break;
-
-    case 'X':
-      new_new_vap = true;
       break;
 
     case 'v':
@@ -1655,8 +1654,8 @@ string FetchValue( Reference::To< Archive > archive, string command )
 
 
 /**
- * ProcessArchive - load an archive and process all the command line parameters using the text finder.
- **/
+* ProcessArchive - load an archive and process all the command line parameters using the text finder.
+**/
 
 void ProcessArchive( string filename )
 {
@@ -1674,22 +1673,14 @@ void ProcessArchive( string filename )
   if( !archive )
     return;
 
-  VapTextFinder tf;
-  tf.SetArchive( archive );
-
   ts << filename;
 
   vector< string >::iterator it;
   for( it = commands.begin(); it != commands.end(); it ++ )
   {
-    if( !new_new_vap )
-      ts << tf.FetchValue( lowercase((*it)) );
-    else
-    {
-      string val = FetchValue( archive, lowercase((*it)) );
-      if ( val == "" ) val = "*";
-      ts << val;
-    }
+    string val = FetchValue( archive, lowercase((*it)) );
+    if ( val == "" ) val = "*";
+    ts << val;
   }
 
   ts << endrow;
@@ -1699,8 +1690,8 @@ void ProcessArchive( string filename )
 
 
 /**
- * ExtractPolyco - Get the polyco data from the archive, this will be moved elsewhere
- **/
+* ExtractPolyco - Get the polyco data from the archive, this will be moved elsewhere
+**/
 
 void ExtractPolyco( string filename )
 {
@@ -1717,8 +1708,8 @@ void ExtractPolyco( string filename )
 
 
 /**
- * ExtractEphemeris - Get the ephemeris, this will be moved elsewhere.
- **/
+* ExtractEphemeris - Get the ephemeris, this will be moved elsewhere.
+**/
 
 void ExtractEphemeris( string filename )
 {
@@ -1735,8 +1726,8 @@ void ExtractEphemeris( string filename )
 
 
 /**
- * ShowExtensions - a simple debugging routine for showing the extensions available on an archive.
- **/
+* ShowExtensions - a simple debugging routine for showing the extensions available on an archive.
+**/
 
 void ShowExtensions( string filename )
 {
@@ -1755,8 +1746,8 @@ void ShowExtensions( string filename )
 
 
 /**
- * main - 
- **/
+* main -
+**/
 
 int main( int argc, char *argv[] )
 {

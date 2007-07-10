@@ -5,7 +5,7 @@ psredit_SOURCES			= psredit.C
 psrtxt_SOURCES			= psrtxt.C
 psrconv_SOURCES			= psrconv.C
 vip_SOURCES			= vip.C
-vap_SOURCES			= vap.C remap.C TextFinder.C VAPTI.C
+vap_SOURCES			= vap.C
 
 #############################################################################
 
