@@ -21,6 +21,8 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
   
   char* comment = 0;
 
+  cerr << "loading base calibrator" << endl;
+  
   // Get NCHAN
   {
     int nchan = 0;
@@ -52,7 +54,10 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
   if (status == 0) {
     MJD mjd (epoch);
     ext->set_epoch (mjd);
-  }
+  } 
+  
+  cerr << "read epoch of " << epoch << endl;
+  cerr << "stored as " << ext->get_epoch() << endl;
 
   delete [] epoch;
   status = 0;

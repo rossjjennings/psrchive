@@ -13,10 +13,12 @@ libpsrfits_la_SOURCES = CalibratorExtensionIO.h FITSArchive.C \
 	unload_ITRFExtension.C load_ITRFExtension.C \
 	unload_ProcHistory.C load_ProcHistory.C \
 	unload_DigitiserStatistics.C load_DigitiserStatistics.C \
+	unload_DigitiserCounts.C load_DigitiserCounts.C \
 	unload_CalibratorExtension.C load_CalibratorExtension.C \
 	unload_PolnCalibratorExtension.C load_PolnCalibratorExtension.C \
 	unload_FluxCalibratorExtension.C load_FluxCalibratorExtension.C \
 	unload_CalibratorStokes.C load_CalibratorStokes.C \
+	load_FITSSUBHdrExtension.C \
 	unload_Passband.C load_Passband.C \
 	unload_Pointing.C load_Pointing.C \
 	unload_Integration.C load_Integration.C \

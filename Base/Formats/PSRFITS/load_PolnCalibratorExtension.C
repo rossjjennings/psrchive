@@ -63,6 +63,19 @@ try {
   psrfits_read_key (fptr, "NCPAR", &ncpar, 0, verbose == 3);
   if (ncpar < 0)
     ncpar = 0;
+  pce->set_ncpar( ncpar );
+//   
+//   // Get NCHAN
+//   int nchan = 0;
+//   psrfits_read_key( fptr, "NCHAN", &nchan, 0, verbose == 3 );
+//   if( nchan < 0 )
+//     nchan = 0;
+//   pce->set_nchan( nchan );
+//   
+//   // Get EPOCH
+//   double epoch;
+//   psrfits_read_key( fptr, "EPOCH", &epoch, 0.0, verbose == 3 );
+//   pce->set_epoch( epoch );
 
   int ncovar = 0;
   psrfits_read_key (fptr, "NCOVAR", &ncovar, 0, verbose == 3);

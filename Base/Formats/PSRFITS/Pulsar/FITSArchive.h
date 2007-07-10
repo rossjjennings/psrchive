@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.44 $
-   $Date: 2007/05/08 00:39:23 $
-   $Author: straten $ */
+   $Revision: 1.45 $
+   $Date: 2007/07/10 01:14:55 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_FITSArchive_h
 #define __Pulsar_FITSArchive_h
@@ -34,6 +34,8 @@ namespace Pulsar {
   class PolnCalibratorExtension;
   class FluxCalibratorExtension;
   class CalibratorStokes;
+  class DigitiserCounts;
+  class FITSSUBHdrExtension;
  
   //! Loads and unloads PSRFITS archives
 
@@ -93,7 +95,7 @@ namespace Pulsar {
     
     //! Unload FITSHdrExtension to the current HDU of the specified FITS file
     static void unload (fitsfile* fptr, const FITSHdrExtension* ext);
-    
+
     //! Unload Pointing to the specified row of the subint table
     static void unload (fitsfile* fptr, const Pointing* ext, int row);
 
@@ -120,6 +122,9 @@ namespace Pulsar {
     
     //! Unload DigitiserStatistics to the DIG_STAT HDU
     static void unload (fitsfile* fptr, const DigitiserStatistics* ext);
+    
+    //! Unload DigitiserCounts to DIG_CNTS HDU
+    static void unload (fitsfile* fptr, const DigitiserCounts *ext);
     
     //! Unload PolnCalibratorExtension to the FEEDPAR HDU
     static void unload (fitsfile* fptr, const PolnCalibratorExtension* ext);
@@ -182,6 +187,7 @@ namespace Pulsar {
     // Extension I/O routines
     void load_ProcHistory (fitsfile*);
     void load_DigitiserStatistics (fitsfile*);
+    void load_DigitiserCounts(fitsfile*);
     void load_Passband (fitsfile*);
     void load_PolnCalibratorExtension (fitsfile*);
     void load_FluxCalibratorExtension (fitsfile*);
@@ -192,6 +198,7 @@ namespace Pulsar {
     void load_ITRFExtension (fitsfile*);
     void load_CalInfoExtension (fitsfile*);
     void load_WidebandCorrelator (fitsfile*);
+    void load_FITSSUBHdrExtension ( fitsfile * );
 
     //! Delete the HDU with the specified name
     void delete_hdu (fitsfile* fptr, char* hdu_name) const;

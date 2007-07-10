@@ -451,7 +451,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     
     dfault = hdr_ext->stt_time;
     psrfits_read_key (fptr, "STT_TIME", &tempstr, dfault, verbose == 3);
-
+    
     // strip off any fractional seconds, if present
     size_t decimal = tempstr.find('.');
     if (decimal != string::npos)
@@ -481,6 +481,42 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 	" time='" << hdr_ext->stt_time << "'\n";
 
   }
+  
+      // Read the bpa
+   
+  if(verbose == 3 )
+    cerr << "FITSArchive::load_header reading BPA" << endl;
+    
+  dfault = "0.0";
+  psrfits_read_key( fptr, "BPA", &tempstr, dfault, verbose == 3 );
+  if( tempstr == "*" )
+    hdr_ext->set_bpa( std::numeric_limits<double>::quiet_NaN() );
+  else
+    hdr_ext->set_bpa( fromstring<double>(tempstr) );
+    
+    // Read the bmaj
+    
+  if(verbose == 3 )
+    cerr << "FITSArchive::load_header reading BMAJ" << endl;
+    
+  dfault = "0.0";
+  psrfits_read_key( fptr, "BMAJ", &tempstr, dfault, verbose == 3 );
+  if( tempstr == "*" )
+    hdr_ext->set_bmaj( std::numeric_limits<double>::quiet_NaN() );
+  else
+    hdr_ext->set_bmaj( fromstring<double>(tempstr) );
+    
+    // Read the bmin
+    
+  if(verbose == 3 )
+    cerr << "FITSArchive::load_header reading BMIN" << endl;
+    
+  dfault = "0.0";
+  psrfits_read_key( fptr, "BMIN", &tempstr, dfault, verbose == 3 );
+  if( tempstr == "*" )
+    hdr_ext->set_bmin( std::numeric_limits<double>::quiet_NaN() );
+  else
+    hdr_ext->set_bmin( fromstring<double>(tempstr) );
 
   // /////////////////////////////////////////////////////////////////
   
@@ -524,6 +560,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   // Load the digitiser statistics
   load_DigitiserStatistics (fptr);
   
+  // Load the digitiser counts
+  load_DigitiserCounts(fptr );
+  
   // Load the original bandpass data
   load_Passband (fptr);
 
@@ -535,6 +574,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
   // Load the calibration model description
   load_PolnCalibratorExtension (fptr);
+  
+  // Load the parameters from the SUBINT HDU
+  load_FITSSUBHdrExtension( fptr );
 
   // Load the ephemeris from the FITS file
   fits_movnam_hdu (fptr, BINARY_TBL, "PSREPHEM", 0, &status);
