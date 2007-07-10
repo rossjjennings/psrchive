@@ -355,7 +355,7 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow)
       hrow->scale = Signal::ReferenceFluxDensity;
     else if (strcmp (temp.get(), "Jansky") == 0)
       hrow->scale = Signal::Jansky;
-    else if (Pulsar::Archive::verbose)
+    else if (Pulsar::Archive::verbose == 3)
       cerr << "load ProcHistory::row WARNING unrecognized SCALE" << endl;
   }
 
