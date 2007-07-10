@@ -20,6 +20,11 @@ libtimer_la_SOURCES = BasebandArchive.C ScintArchive.C TimerArchive.C \
 	TimerProfile_load.C TimerProfile_unload.C TimerAgent.C mini++.C \
 	timer++.C convert_endian.c convert_endian.h
 
+check_PROGRAMS = baseband_header_size timer_size
+TESTS = $(check_PROGRAMS)
+
+baseband_header_size_SOURCES = baseband_header_size.C
+
 #############################################################################
 #
 # Dependencies should never be changed
@@ -28,8 +33,5 @@ libtimer_la_SOURCES = BasebandArchive.C ScintArchive.C TimerArchive.C \
 INCLUDES = -I$(top_builddir)/include \
 	-I$(top_srcdir)/psrchive/Polarimetry
 
-check_PROGRAMS = baseband_header_size timer_size
-TESTS = $(check_PROGRAMS)
-
-baseband_header_size_SOURCES = baseband_header_size.C
+include $(top_srcdir)/config/Makefile.include
 

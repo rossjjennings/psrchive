@@ -47,8 +47,9 @@ test_polyco_fitsio_SOURCES = test_polyco_fitsio.C
 #
 
 INCLUDES = -I$(top_builddir)/include \
-	-I$(top_srcdir)/More/Polarimetry \
 	@CFITSIO_CFLAGS@ @MPI_CFLAGS@ @TEMPO2_CFLAGS@
+
+include $(top_srcdir)/config/Makefile.include
 
 LDADD = libpsrfits.la $(top_builddir)/Util/libpsrutil.la @CFITSIO_LIBS@
 
