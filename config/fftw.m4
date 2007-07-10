@@ -29,23 +29,23 @@ AC_DEFUN([SWIN_LIB_FFTW],
 
   if test $have_fftw = yes; then
 
+    AC_MSG_CHECKING([for FFTW-2 real-to-complex library])
+
+    # SWIN_PACKAGE_FIND([fftw],[fftw.h])
+    SWIN_PACKAGE_TRY_LINK([fftw],[#include <fftw.h>],
+                          [rfftw_create_plan(64,FFTW_FORWARD,FFTW_ESTIMATE);],
+                          [-lrfftw -lfftw])
+
+    AC_MSG_RESULT($have_fftw)
+
+  fi
+
+  if test $have_fftw = yes; then
+
     AC_DEFINE(HAVE_FFTW,1,[Define if the FFTW library is installed])
 
     FFTW_CFLAGS="$fftw_CFLAGS"
     FFTW_LIBS="$fftw_LIBS"
-
-    AC_MSG_CHECKING([for FFTW-2 real-to-complex library])
-
-    SWIN_PACKAGE_TRY_LINK([rfftw],[#include <fftw.h>],
-                          [rfftw_create_plan(64,FFTW_FORWARD,FFTW_ESTIMATE);],
-                          [-lrfftw -lfftw])
-
-    AC_MSG_RESULT($have_rfftw)
-
-    if test $have_rfftw = yes; then
-      AC_DEFINE(HAVE_RFFTW,1,[Define if the FFTW real library is installed])
-      FFTW_LIBS="$rfftw_LIBS"
-    fi
 
   fi
 
