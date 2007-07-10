@@ -11,3 +11,5 @@ std::ostringstream tostring_ost;
 std::istringstream fromstring_ist;
 
 unsigned tostring_precision = 0;
+bool tostring_places = false;
+

@@ -6,9 +6,9 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.12 $
-   $Date: 2007/02/07 22:43:13 $
-   $Author: straten $ */
+   $Revision: 1.13 $
+   $Date: 2007/07/10 05:25:06 $
+   $Author: nopeer $ */
 
 #ifndef __TOSTRING_H
 #define __TOSTRING_H
@@ -20,7 +20,9 @@
 #include <iomanip>
 #include <limits>
 
+
 extern unsigned tostring_precision;
+extern bool tostring_places;
 
 template<class T>
 std::string tostring (const T& input,
@@ -28,6 +30,11 @@ std::string tostring (const T& input,
 {
   extern std::ostringstream tostring_ost;
 
+  if( tostring_places )
+    tostring_ost << setiosflags( std::ios::fixed );
+  else
+    tostring_ost << resetiosflags( std::ios::fixed );
+  
   if (tostring_precision)
     tostring_ost.precision(tostring_precision);
   else
