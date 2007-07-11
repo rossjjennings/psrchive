@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/IonosphereCalibrator.h"
 #include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationExpert.h"
 
 #include "Pulsar/Telescope.h"
 #include "Pulsar/ProcHistory.h"
@@ -67,7 +67,7 @@ void Pulsar::IonosphereCalibrator::calibrate (Archive* archive)
 
     Jones<float> xform = inv( ionosphere.evaluate () );
       
-    Calibrator::calibrate (integration, xform);
+    integration->expert()->transform (xform);
 
   }
 

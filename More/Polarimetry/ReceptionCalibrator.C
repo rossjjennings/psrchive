@@ -18,7 +18,7 @@
 #include "Pulsar/Pointing.h"
 
 #include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationExpert.h"
 
 #include "MEAL/PhysicalCoherency.h"
 #include "MEAL/Complex2Constant.h"
@@ -946,7 +946,7 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 
     }
 
-    Calibrator::calibrate (integration, response);
+    integration->expert()->transform (response);
 
     
   }

@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/CorrectionsCalibrator.h"
 #include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationExpert.h"
 
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Receiver.h"
@@ -119,7 +119,7 @@ void Pulsar::CorrectionsCalibrator::calibrate (Archive* archive)
       
     Jones<float> xform = inv( get_transformation (archive, isub) );
       
-    Calibrator::calibrate (integration, xform);
+    integration->expert()->transform (xform);
 
   }
 
