@@ -57,10 +57,12 @@ void table_stream::flush( void )
   determine_widths();
   determine_justifications();
 
-  vector<string>::iterator it;
-  for( it = headings.begin(); it != headings.end(); it ++ )
+  
+  for( int col = 0; col < headings.size(); col ++ )
   {
-    (*target) << (*it) << " ";
+    (*target) << " " << headings[col];
+    int padding = column_widths[col] - headings[col].length();
+    for( int i = 0; i < padding; i ++ ) (*target) << " ";
   }
   (*target) << endl << endl;
 
@@ -70,10 +72,12 @@ void table_stream::flush( void )
     {
       int padding = column_widths[col] - data[row][col].length();
       
+      (*target) << " ";
+      
       if( justifications[col] == right )
 	for( int i = 0; i < padding; i ++ ) (*target) << " ";
       
-      (*target) << data[row][col] << " ";
+      (*target) << data[row][col];
       
       if( justifications[col] == left )
 	for( int i = 0; i < padding; i ++ ) (*target) << " ";
@@ -118,7 +122,7 @@ void table_stream::determine_widths( void )
   column_widths.resize( headings.size() );
   for( int col = 0; col < headings.size(); col ++ )
   {
-    column_widths[col] = headings[col].length();
+    column_widths[col] = headings[col].length() + 1;
   }
 
   // go through each row, updating the column width for each header if the data
