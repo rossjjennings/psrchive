@@ -59,20 +59,6 @@ void Pulsar::Calibrator::set_calibrator (const Archive* archive)
   calibrator = archive;
 }
 
-//! Provide access to Integration::transform
-void Pulsar::Calibrator::calibrate (Integration* integration,
-				    const vector< Jones<float> >& response)
-{
-  integration->transform (response);
-}
-
-//! Provide access to Integration::transform
-void Pulsar::Calibrator::calibrate (Integration* integration,
-				    const Jones<float>& response)
-{
-  integration->transform (response);
-}
-
 //! Return a string containing the file information
 string Pulsar::Calibrator::get_filenames () const
 {

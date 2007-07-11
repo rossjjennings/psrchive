@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Calibrator.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/06/22 01:35:07 $
+   $Revision: 1.2 $
+   $Date: 2007/07/11 19:06:09 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -153,14 +153,6 @@ namespace Pulsar {
     virtual Info* get_Info () const { return 0; }
 
   protected:
-
-    //! Provide access to Integration::transform
-    virtual void calibrate (Integration* integration,
-			    const std::vector< Jones<float> >& response);
-
-    //! Provide access to Integration::transform
-    virtual void calibrate (Integration* integration,
-			    const Jones<float>& response);
 
     //! The CalibratorExtension of the Archive passed during construction
     Reference::To<const CalibratorExtension> extension;
