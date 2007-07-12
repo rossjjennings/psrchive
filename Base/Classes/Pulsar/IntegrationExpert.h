@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExpert.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/06/21 17:31:59 $
+   $Revision: 1.9 $
+   $Date: 2007/07/12 05:58:29 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationExpert_h
@@ -94,6 +94,10 @@ namespace Pulsar {
     //! Convert polarimetric data to the specified state
     void convert_state (Signal::State state)
     { instance->convert_state (state); }
+
+    //! Leading edge of phase bin zero = polyco predicted phase zero
+    void set_zero_phase_aligned (bool flag)
+    { instance->zero_phase_aligned = flag; }
 
     //! Use with care
     std::vector< std::vector< Reference::To<Profile> > >& profiles ()
