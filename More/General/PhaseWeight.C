@@ -13,6 +13,18 @@ Pulsar::PhaseWeight::PhaseWeight ()
   built = false;
 }
 
+Pulsar::PhaseWeight::PhaseWeight (unsigned nbin)
+  : weight (nbin)
+{
+  built = false;
+}
+
+Pulsar::PhaseWeight::PhaseWeight (unsigned nbin, float set_all)
+  : weight (nbin, set_all)
+{
+  built = false;
+}
+
 Pulsar::PhaseWeight::PhaseWeight (const PhaseWeight& pm)
 {
   weight = pm.weight;
