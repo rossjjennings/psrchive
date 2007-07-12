@@ -15,10 +15,10 @@ using namespace std;
 
 void Pulsar::FITSArchive::load_DigitiserCounts (fitsfile* fptr)
 {
-  int status;
+  int status = 0;
 
   if (verbose > 2)
-    cerr << "FITSArchive::load_digistat entered" << endl;
+    cerr << "FITSArchive::load_DigitiserCounts entered" << endl;
 
   // Move to the DIG_STAT HDU
 
