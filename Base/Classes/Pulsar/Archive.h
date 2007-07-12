@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.163 $
-   $Date: 2007/06/21 17:32:05 $
+   $Revision: 1.164 $
+   $Date: 2007/07/12 05:58:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.163 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.164 $"
 #include <iostream>
 #include <TextInterface.h>
 
@@ -303,16 +303,19 @@ namespace Pulsar
     //! Install the given ephemeris and call update_model
     void set_ephemeris (const Parameters* ephemeris, bool update = true);
 
-    //! Return a copy of the current archive ephemeris
+    //! Return a pointer to the current archive ephemeris
     const Parameters* get_ephemeris() const;
+
+    //! Return true if the Archive has an ephemeris
+    bool has_ephemeris () const { return ephemeris; }
 
     //! Install the given predictor and shift profiles to align
     void set_model (const Predictor* model);
 
-    //! Return a copy of the current archive predictor
+    //! Return a pointer to the current phase predictor
     const Predictor* get_model() const;
 
-    //! Returns true if the archive has a model
+    //! Returns true if the Archive has a model
     bool has_model() const { return model; }
 
     //! Create a new predictor and align the Integrations to the new model
@@ -555,28 +558,12 @@ namespace Pulsar
     //
     // //////////////////////////////////////////////////////////////////
 
-    /** @name Control Flags
-     *
-     * These flags control the default behaviour of Archive methods.
-     */
-    //@{
-
-    //! Archive::append should enforce chronological order
-    static bool append_chronological;
-
-    //! Archive::append should throw exception if Archive::match fails
-    static bool append_must_match;
-
-    //! Amount by which integration intervals may overlap in Archive::append
-    static double append_max_overlap;
-
-    //@}
-
     //! Provides access to certain protected and private methods
     class Expert;
 
     //! Provide access to the expert interface
     Expert* expert ();
+    const Expert* expert () const;
 
   protected:
 
@@ -643,6 +630,9 @@ namespace Pulsar
 
     //! The pulsar phase model, as created using TEMPO
     Reference::To<Predictor> model;
+
+    //! Return the given Integration ready for use
+    Integration* use_Integration (Integration*);
 
     //! Initialize an Integration to reflect Archive attributes.
     void init_Integration (Integration* subint, bool check_phase = false);
