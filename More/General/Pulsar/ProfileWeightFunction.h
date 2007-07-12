@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileWeightFunction.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.4 $
+   $Date: 2007/07/12 05:59:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileWeightFunction_h
@@ -20,9 +20,7 @@ namespace Pulsar {
 
   class Profile;
 
-  //! PhaseWeight algorithms that compute profile baselines
-  /*! This pure virtual base class defines the interface through which
-      various baseline finding algorithms are accessed */
+  //! PhaseWeight algorithms that receive an input Profile 
   class ProfileWeightFunction : public PhaseWeightFunction {
 
   public:
