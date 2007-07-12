@@ -141,6 +141,9 @@ namespace Pulsar {
     //! bin scrunch an archive in the stack
     std::string bscrunch (const std::string& args);
     
+    //! fold an archive in the stack
+    std::string fold (const std::string& args);
+    
     //! centre an archive in the stack
     std::string centre (const std::string& args);
     

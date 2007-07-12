@@ -148,6 +148,12 @@ void Pulsar::Interpreter::init()
       "usage: bscrunch bins \n"
       "  unsigned bins     number of desired phase bins\n" );
 
+  add_command
+    ( &Interpreter::fold,
+      "fold", "fold archive profiles",
+      "usage: fold factor \n"
+      "  unsigned factor   folding factor \n" );
+
   add_command 
     ( &Interpreter::invint, 'I',
       "invint", "form the Stokes invariant interval profile",
@@ -717,6 +723,21 @@ try {
     return response (Fail, "invalid number of bins");
 
   get() -> bscrunch_to_nbin (scrunch_to);
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
+
+string Pulsar::Interpreter::fold (const string& args)
+try {
+  unsigned factor = setup<unsigned> (args);
+  
+  if (!factor)
+    return response (Fail, "invalid fold factor");
+
+  get() -> fold (factor);
   return response (Good);
 }
 catch (Error& error) {
