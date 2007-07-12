@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveExpert.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/06/21 17:31:57 $
+   $Revision: 1.6 $
+   $Date: 2007/07/12 05:58:25 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveExpert_h
@@ -16,6 +16,7 @@
 
 #include "Pulsar/IntegrationManagerExpert.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/Predictor.h"
 
 namespace Pulsar {
 
@@ -66,6 +67,14 @@ namespace Pulsar {
     //! Update the model
     void update_model (const MJD& mjd)
     { instance->update_model (mjd); }
+
+    //! Update the predictor model and correct the Integration set
+    void update_model (unsigned old_nsubint)
+    { instance->update_model (old_nsubint); }
+
+    //! Return a non-const pointer to the current phase predictor
+    Predictor* get_model()
+    { return instance->model; }
 
     //! Return true if all Integration::zero_phase_aligned flags are set
     bool zero_phase_aligned () const
