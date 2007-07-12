@@ -15,6 +15,12 @@
 #include <iostream>
 using namespace std;
 
+Pulsar::Integration* Pulsar::Archive::use_Integration (Integration* subint)
+{
+  init_Integration (subint);
+  return subint;
+}
+
 /*!  
   After an Integration has been loaded from disk, this method
   ensures that various internal book-keeping attributes are

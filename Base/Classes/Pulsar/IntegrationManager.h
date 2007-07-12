@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.14 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.15 $
+   $Date: 2007/07/12 05:58:20 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationManager_h
@@ -63,6 +63,9 @@ namespace Pulsar {
     //! Construct new Integration instance
     virtual Integration* new_Integration (Integration* copy_this = 0) = 0;
 
+    //! Use the given Integration instance
+    virtual Integration* use_Integration (Integration* use_this) = 0;
+
     //! Load new Integration instance
     virtual Integration* load_Integration (unsigned isubint) = 0;
 
@@ -90,6 +93,9 @@ namespace Pulsar {
 
     //! Append new_Integration copies of Integration objects to self
     void append (const IntegrationManager* more_subints);
+
+    //! Append use_Integration modifications of Integration objects to self
+    void manage (IntegrationManager* more_subints);
 
     //! Directly append the Integration instance (no copy)
     void manage (Integration* integration);

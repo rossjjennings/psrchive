@@ -101,11 +101,19 @@ void Pulsar::IntegrationManager::append (const IntegrationManager* more)
     subints.push_back ( new_Integration (more->subints[isub]) );
 
   set_nsubint (subints.size());
+}
+
+void Pulsar::IntegrationManager::manage (IntegrationManager* more)
+{
+  for (unsigned isub=0; isub<more->subints.size(); isub++)
+    subints.push_back ( use_Integration (more->subints[isub]) );
+
+  set_nsubint (subints.size());
 }  
 
 void Pulsar::IntegrationManager::manage (Integration* integration)
 {
-  subints.push_back( integration );
+  subints.push_back( use_Integration (integration) );
   set_nsubint( subints.size() );
 }
 
