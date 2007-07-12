@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Smooth.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.8 $
+   $Date: 2007/07/12 05:59:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Smooth_h
@@ -37,6 +37,12 @@ namespace Pulsar {
     //! Get the width of the window used to smooth
     float get_duty_cycle () const;
 
+    //! Set the number of phase bins in the window used to smooth
+    void set_window (unsigned);
+
+    //! Get the number of phase bins in the window used to smooth
+    unsigned get_window () const;
+
     //! Smooth the given Profile
     void transform (Profile* profile);
 
@@ -54,6 +60,9 @@ namespace Pulsar {
 
     //! The width of the window used to smooth
     float duty_cycle;
+
+    //! The number of phase bins in the window used to smooth
+    unsigned window;
 
   };
 

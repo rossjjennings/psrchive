@@ -13,6 +13,7 @@ using namespace std;
 Pulsar::Smooth::Smooth ()
 {
   duty_cycle = Pulsar::Profile::default_duty_cycle;
+  window = 0;
 }
 
 Pulsar::Smooth::~Smooth ()
@@ -34,15 +35,35 @@ float Pulsar::Smooth::get_duty_cycle () const
   return duty_cycle;
 }
 
+//! Set the number of phase bins in the window used to smooth
+void Pulsar::Smooth::set_window (unsigned w)
+{
+  window = w;
+}
+
+//! Get the number of phase bins in the window used to smooth
+unsigned Pulsar::Smooth::get_window () const
+{
+  return window;
+}
+
 void Pulsar::Smooth::transform (Profile* profile)
 {
   unsigned nbin = profile->get_nbin();
+  unsigned halfwidth = 0;
+  unsigned width = 0;
 
-  // one half of the window over which the mean will be calculated
-  const unsigned halfwidth = unsigned (duty_cycle * nbin) / 2;
+  if (window) {
+    width = window;
+    halfwidth = window / 2;
+  }
+  else {
+    // one half of the window over which the mean will be calculated
+    halfwidth = unsigned (duty_cycle * nbin) / 2;
 
-  // the complete width of the window
-  const unsigned width = 2*halfwidth + 1;
+    // the complete width of the window (made odd)
+    width = 2*halfwidth + 1;
+  }
 
   if (halfwidth == 0)
     throw Error (InvalidParam, "Pulsar::Smooth::transform",
