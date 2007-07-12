@@ -5,6 +5,8 @@
  *
  ***************************************************************************/
 #include "Pulsar/psrchive.h"
+
+#include "Pulsar/TimeAppend.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -79,6 +81,9 @@ extern bool tscrunch_weighted_midtime;
 
 int main (int argc, char **argv) try {
 
+  // append in the time direction
+  bool time_direction = true;
+
   // do not make changes to file system when true
   bool testing = false;
 
@@ -147,6 +152,9 @@ int main (int argc, char **argv) try {
   // Preprocessing jobs
   vector<string> jobs;
 
+  // The append algorithm
+  Pulsar::TimeAppend time;
+
   int c;  
   while ((c = getopt(argc, argv, args)) != -1)  {
     switch (c)  {
@@ -156,7 +164,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.50 2007/06/22 12:02:15 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.51 2007/07/12 05:58:39 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -211,8 +219,8 @@ int main (int argc, char **argv) try {
       break;
 
     case 'F':
-      Pulsar::Archive::append_chronological = false;
-      Pulsar::Archive::append_must_match = false;
+      time.chronological = false;
+      time.must_match = false;
       check_has_data = false;
       
       command += " -F";
@@ -597,7 +605,12 @@ int main (int argc, char **argv) try {
 
 	}
 
-	total->append (archive);
+	if (time_direction)
+	  time.append (total, archive);
+#if 0
+	else
+	  frequency.append (total, archive);
+#endif
 
       }
       catch (Error& error) {
