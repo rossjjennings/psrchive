@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManagerExpert.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.4 $
+   $Date: 2007/07/12 05:58:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationManagerExpert_h
@@ -41,6 +41,10 @@ namespace Pulsar {
     //! Append new_Integration copies of Integration objects to instance
     void append (const IntegrationManager* more_subints)
     { instance->append (more_subints); }
+
+    //! Append use_Integration modified Integration objects to instance
+    void manage (IntegrationManager* more_subints)
+    { instance->manage (more_subints); }
 
     //! Directly append the Integration to instance (no copy)
     void manage (Integration* integration)
