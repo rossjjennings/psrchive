@@ -34,6 +34,12 @@ Pulsar::Archive::Expert* Pulsar::Archive::expert ()
   return expert_interface;
 }
 
+//! Provide access to the expert interface
+const Pulsar::Archive::Expert* Pulsar::Archive::expert () const
+{
+  return expert_interface;
+}
+
 Pulsar::Archive::Archive ()
 {
   if (verbose == 3)
