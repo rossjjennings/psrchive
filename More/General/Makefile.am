@@ -7,6 +7,7 @@ nobase_include_HEADERS = \
 	find_spike_edges.h \
         model_profile.h \
         morphological_difference.h \
+	Pulsar/Append.h \
 	Pulsar/counter_drift.h \
 	Pulsar/denoise.h \
 	Pulsar/shift_methods.h \
@@ -40,10 +41,13 @@ nobase_include_HEADERS = \
 	Pulsar/InterpreterExtension.h \
         Pulsar/InterpreterVariables.h \
         Pulsar/IterativeBaseline.h \
+	Pulsar/MaskSmooth.h \
         Pulsar/NoiseStatistics.h \
         Pulsar/OnPulseEstimator.h \
         Pulsar/OnPulseThreshold.h \
         Pulsar/PhaseWeightFunction.h \
+	Pulsar/PhaseWeightModifier.h \
+	Pulsar/PhaseWeightSmooth.h \
         Pulsar/PhaseWeight.h \
         Pulsar/Polarization.h \
         Pulsar/PolnProfileFit.h \
@@ -62,6 +66,7 @@ nobase_include_HEADERS = \
 	Pulsar/StandardCandles.h \
         Pulsar/StandardSNR.h \
         Pulsar/SyntheticPolnProfile.h \
+	Pulsar/TimeAppend.h \
 	Pulsar/TimeIntegrate.h \
         Pulsar/Transformation.h \
         Pulsar/Transposer.h \
@@ -75,6 +80,7 @@ libGeneral_la_SOURCES = \
         model_profile.C \
 	morphological_difference.C \
         AdaptiveSNR.C \
+	Append.C \
         Archive_append.C \
 	Archive_apply_model.C \
         Archive_bscrunch.C \
@@ -133,8 +139,10 @@ libGeneral_la_SOURCES = \
 	InterpreterVariables.C \
         IterativeBaseline.C \
         LastSignificant.C \
+	MaskSmooth.C \
         NoiseStatistics.C \
 	OnPulseThreshold.C \
+	PhaseWeightModifier.C \
         PhaseWeight.C \
         Profile_convolve.C \
         Profile_dedisperse.C \
@@ -157,6 +165,7 @@ libGeneral_la_SOURCES = \
         SquareWave.C \
         StandardCandles.C \
         StandardSNR.C \
+	TimeAppend.C \
 	TimeIntegrate.C \
         Transposer.C \
         Weight.C \
