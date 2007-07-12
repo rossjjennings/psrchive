@@ -514,7 +514,7 @@ Pulsar::Generator* psrephem::generator () const
   return new Tempo::Predict (this);
 }
 
-bool psrephem::equals (const Pulsar::Parameters* p)
+bool psrephem::equals (const Pulsar::Parameters* p) const
 {
   const psrephem* that = dynamic_cast<const psrephem*>(p);
   if (!that)

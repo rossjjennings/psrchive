@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.42 $
-   $Date: 2007/06/21 17:32:38 $
+   $Revision: 1.43 $
+   $Date: 2007/07/12 05:59:40 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -36,7 +36,7 @@ class psrephem : public Pulsar::Parameters
   Pulsar::Generator* generator () const;
 
   //! Return true if *this == *that
-  bool equals (const Parameters* that);
+  bool equals (const Parameters* that) const;
 
   //! Load from an open stream
   void load (FILE*);

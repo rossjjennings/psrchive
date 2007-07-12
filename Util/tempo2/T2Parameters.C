@@ -54,7 +54,7 @@ Pulsar::Generator* Tempo2::Parameters::generator () const
 }
 
 //! Return true if *this == *that
-bool Tempo2::Parameters::equals (const Pulsar::Parameters* that)
+bool Tempo2::Parameters::equals (const Pulsar::Parameters* that) const
 {
   const Parameters* like = dynamic_cast<const Parameters*>( that );
   throw Error (InvalidState, "Tempo2::Parameters::equals", "not implemented");

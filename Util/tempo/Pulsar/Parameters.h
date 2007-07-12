@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Parameters.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/06/21 17:32:41 $
+   $Revision: 1.4 $
+   $Date: 2007/07/12 05:59:40 $
    $Author: straten $ */
 
 #ifndef __PulsarParameters_h
@@ -40,7 +40,7 @@ namespace Pulsar {
     virtual Generator* generator () const = 0;
 
     //! Return true if *this == *that
-    virtual bool equals (const Parameters* that) = 0;
+    virtual bool equals (const Parameters* that) const = 0;
 
     //! Load from an open stream
     virtual void load (FILE*) = 0;

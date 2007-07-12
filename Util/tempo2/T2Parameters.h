@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Parameters.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/06/21 17:32:49 $
+   $Revision: 1.3 $
+   $Date: 2007/07/12 05:59:40 $
    $Author: straten $ */
 
 #ifndef __Tempo2Parameters_h
@@ -45,7 +45,7 @@ namespace Tempo2 {
     Pulsar::Generator* generator () const;
 
     //! Return true if *this == *that
-    bool equals (const Pulsar::Parameters* that);
+    bool equals (const Pulsar::Parameters* that) const;
 
     //! Load from an open stream
     void load (FILE*);
