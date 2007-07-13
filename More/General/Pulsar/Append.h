@@ -7,13 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Append.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/07/12 05:59:04 $
+   $Revision: 1.2 $
+   $Date: 2007/07/13 06:28:45 $
    $Author: straten $ */
 
 #ifndef _Pulsar_Append_H
 #define _Pulsar_Append_H
 
+#include "ArchiveMatch.h"
 #include "Reference.h"
 
 namespace Pulsar {
@@ -42,7 +43,19 @@ namespace Pulsar {
     virtual void check (Archive* into, const Archive* from);
 
     //! Add the data in 'from' to 'into'
+    /*! 
+
+    The combine method should not make copies of the data in 'from';
+    rather, 'into' should be made to point to the data in 'from'. 
+
+    By sharing the data in 'from', it can be corrected through the
+    'from' interface without concern for how the data is incorporated
+    in 'into'.
+
+    */
     virtual void combine (Archive* into, Archive* from) = 0;
+
+    ArchiveMatch match;
 
   };
   
