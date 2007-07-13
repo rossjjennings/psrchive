@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.89 $
-   $Date: 2007/06/21 17:32:05 $
+   $Revision: 1.90 $
+   $Date: 2007/07/13 06:28:31 $
    $Author: straten $ */
 
 /*
@@ -402,6 +402,9 @@ namespace Pulsar {
 
     //! Set the dimensions of the data container
     virtual void resize (unsigned npol=0, unsigned nchan=0, unsigned nbin=0);
+
+    //! Inserts Profiles from Integration into this
+    virtual void insert (Integration*);
 
     //@}
 

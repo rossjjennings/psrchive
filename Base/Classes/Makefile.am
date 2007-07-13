@@ -47,8 +47,9 @@ libClasses_la_SOURCES = \
         ExampleArchive.C \
 	FITSAlias.C \
         Integration.C \
-        Integration_combine.C \
         IntegrationManager.C \
+        Integration_combine.C \
+	Integration_insert.C \
         Integration_mixable.C \
         Integration_resize.C \
         IntegrationTI.C \

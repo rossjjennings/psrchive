@@ -40,6 +40,32 @@ void Pulsar::TimerIntegration::resize (unsigned _npol,
   }
 }
 
+void Pulsar::TimerIntegration::insert (Integration* from)
+{
+  unsigned original_nchan = get_nchan();
+
+  Integration::insert (from);
+
+  TimerIntegration* timer = dynamic_cast<TimerIntegration*> (from);
+  if (!timer)
+    return;
+
+  unsigned from_nchan = from->get_nchan();
+
+  wts.resize (original_nchan + from_nchan);
+  for (unsigned ichan=0; ichan < from_nchan; ichan++)
+    wts[original_nchan+ichan] = timer->wts[ichan];
+
+  for (unsigned ipol=0; ipol < npol; ipol++) {
+    med[ipol].resize (original_nchan + from_nchan);
+    bpass[ipol].resize (original_nchan + from_nchan);
+    for (unsigned ichan=0; ichan < from_nchan; ichan++) {
+      med[ipol][original_nchan+ichan] = timer->med[ipol][ichan];
+      bpass[ipol][original_nchan+ichan] = timer->bpass[ipol][ichan];
+    }
+  }
+}
+
 Pulsar::TimerIntegration::~TimerIntegration ()
 {
   if (verbose)

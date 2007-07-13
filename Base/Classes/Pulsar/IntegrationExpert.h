@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExpert.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/07/12 05:58:29 $
+   $Revision: 1.10 $
+   $Date: 2007/07/13 06:28:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationExpert_h
@@ -49,6 +49,10 @@ namespace Pulsar {
     //! Set the dimensions of the data container
     void resize (unsigned npol=0, unsigned nchan=0, unsigned nbin=0)
     { instance->resize (npol, nchan, nbin); }
+
+    //! Inserts Profiles from Integration into this
+    void insert (Integration* from)
+    { instance->insert (from); }
 
     //! Rotate each profile by time (in seconds); updates the epoch attribute
     void rotate (double time)

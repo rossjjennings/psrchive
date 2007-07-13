@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerIntegration.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/01/22 23:05:53 $
+   $Revision: 1.9 $
+   $Date: 2007/07/13 06:28:31 $
    $Author: straten $ */
 
 /*
@@ -89,6 +89,9 @@ namespace Pulsar {
 
     //! Resizes the dimensions of the data area
     virtual void resize (unsigned npol, unsigned nchan, unsigned nbin);
+
+    //! Inserts Profiles from Integration into this
+    virtual void insert (Integration*);
 
   protected:
 
