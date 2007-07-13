@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2007 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -19,6 +19,8 @@ using namespace std;
 Pulsar::FrequencyAppend::FrequencyAppend ()
 {
   match.set_check_centre_frequency (false);
+  match.set_check_bandwidth (false);
+  match.set_check_nchan (false);
 }
 
 bool Pulsar::FrequencyAppend::stop (Archive* into, const Archive* from)
