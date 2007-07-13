@@ -7,6 +7,8 @@
 #include "Pulsar/psrchive.h"
 
 #include "Pulsar/TimeAppend.h"
+#include "Pulsar/FrequencyAppend.h"
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -32,7 +34,7 @@
 
 using namespace std;
 
-static const char* args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tTUvVwZ:";
+static const char* args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:p:PqRr:sS:tTUvVwZ:";
 
 void reorder(Reference::To<Pulsar::Archive> arch);
 
@@ -54,6 +56,7 @@ void usage () {
     " -L          Log results in source.log \n"
     " -M meta     Filename with list of files \n"
     " -P          Phase align archive with total before adding \n"
+    " -R          Append data in the frequency direction \n"
     " -r freq     Add archive only if it has this centre frequency \n"
     " -t          Make no changes to file system (testing mode) \n"
     " -T          Tscrunch result after each new file (nice on RAM) \n"
@@ -152,8 +155,9 @@ int main (int argc, char **argv) try {
   // Preprocessing jobs
   vector<string> jobs;
 
-  // The append algorithm
+  // The append algorithms
   Pulsar::TimeAppend time;
+  Pulsar::FrequencyAppend frequency;
 
   int c;  
   while ((c = getopt(argc, argv, args)) != -1)  {
@@ -164,7 +168,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.51 2007/07/12 05:58:39 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.52 2007/07/13 06:28:21 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -219,8 +223,12 @@ int main (int argc, char **argv) try {
       break;
 
     case 'F':
+
       time.chronological = false;
       time.must_match = false;
+
+      frequency.must_match = false;
+
       check_has_data = false;
       
       command += " -F";
@@ -291,6 +299,10 @@ int main (int argc, char **argv) try {
       Pulsar::Archive::set_verbosity (0);
       break;
 
+    case 'R':
+      time_direction = false;
+      break;
+
     case 'r':
       centre_frequency = atof(optarg);
       command += " -r ";
@@ -338,12 +350,17 @@ int main (int argc, char **argv) try {
   }
 
   if (!auto_add && !newname.length()) {
-    cerr << "psradd requires a new filename on the command line (use -f)\n";
+    cerr << "psradd requires a new filename on the command line (use -f) \n";
+    return -1;
+  }
+
+  if (auto_add && !time_direction) {
+    cerr << "psradd cannot combine AUTO ADD features with -R option \n";
     return -1;
   }
 
   if (auto_add && interval && tscrunch_total) {
-    cerr << "psradd cannot combine AUTO ADD -G with tscrunch -s\n";
+    cerr << "psradd cannot combine AUTO ADD -G with tscrunch -s \n";
     return -1;
   }
 
@@ -607,10 +624,8 @@ int main (int argc, char **argv) try {
 
 	if (time_direction)
 	  time.append (total, archive);
-#if 0
 	else
 	  frequency.append (total, archive);
-#endif
 
       }
       catch (Error& error) {
@@ -713,7 +728,10 @@ int main (int argc, char **argv) try {
 			<< " seconds of data." << endl;
       total->tscrunch();
     }
-    
+
+    if (!time_direction)
+      total->update_model ();
+
     if (verbose)
       cerr << "psradd: Unloading archive: '" << newname << "'" << endl;
     

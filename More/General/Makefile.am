@@ -31,6 +31,7 @@ nobase_include_HEADERS = \
 	Pulsar/FixFluxCal.h \
         Pulsar/Fourier.h \
         Pulsar/FourierSNR.h \
+	Pulsar/FrequencyAppend.h \
         Pulsar/FrequencyIntegrate.h \
         Pulsar/GaussianBaseline.h \
 	Pulsar/InstallInterpreter.h \
@@ -118,6 +119,7 @@ libGeneral_la_SOURCES = \
 	FixFluxCal.C \
         Fourier.C \
         FourierSNR.C \
+	FrequencyAppend.C \
         FrequencyIntegrate.C \
         GaussianBaseline.C \
 	InstallInterpreter.C \
