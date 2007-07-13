@@ -30,8 +30,7 @@ void Pulsar::Archive::update_model()
   if (verbose > 2)
     cerr << "Pulsar::Archive::update_model" << endl;
 
-  runtime_model = false;
-  update_model (get_nsubint());
+  update_model (get_nsubint(), true);
 }
 
 
@@ -43,33 +42,26 @@ void Pulsar::Archive::update_model()
   This method economizes on the number of times that the polyco is
   re-created and the Integrations are re-aligned to the model.
 
-  By setting the Archive::runtime_model attribute, the polyco is
-  flagged as created by the currently available version of tempo and
-  its run-time configuration files.
-
   By setting the Integration::zero_phase_aligned attribute, each
   sub-integration is flagged as no longer in need of alignment.
 
-  If Archive::runtime_model or Integration::zero_phase_aligned is
-  false, then the Integration is re-aligned using the difference
-  between the old and new models.  (see Archive::apply_model)
+  If Integration::zero_phase_aligned is false, then the Integration is
+  re-aligned to the new model (see Archive::apply_model).
 
   \param nsubint the number of Integrations to correct
+  \param clear if true, clear the current model
 */
-void Pulsar::Archive::update_model (unsigned nsubint) try {
+void Pulsar::Archive::update_model (unsigned nsubint, bool clear) try {
 
   if (verbose > 2)
     cerr << "Pulsar::Archive::update_model nsubint=" << nsubint << endl;
 
   Reference::To<Predictor> oldmodel;
 
-  if( !runtime_model ){
-    // store the old model
+  if (clear)
     oldmodel = model;
-  }
 
-  // if the model has not already been updated, create a completely new polyco
-  create_updated_model (!runtime_model);
+  create_updated_model (clear);
 
   if (verbose > 2)
     cerr << "Pulsar::Archive::update_model checking first " 
@@ -84,7 +76,6 @@ void Pulsar::Archive::update_model (unsigned nsubint) try {
     }
   }
 
-  runtime_model = true;
 }
 catch (Error& error) {
   throw error += "Pulsar::Archive::update_model";

@@ -23,11 +23,8 @@ void Pulsar::Archive::set_model (const Predictor* new_model)
   if (verbose == 3)
     cerr << "Pulsar::Archive::set_model apply the new model" << endl;
 
-  // correct Integrations against the old model
+  // correct Integrations
   for (unsigned isub = 0; isub < get_nsubint(); isub++)
     apply_model (get_Integration(isub), oldmodel.ptr());
-
-  // it may not be true the that supplied model was generated at runtime
-  runtime_model = false;
 }
 

@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.164 $
-   $Date: 2007/07/12 05:58:15 $
+   $Revision: 1.165 $
+   $Date: 2007/07/13 06:28:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.164 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.165 $"
 #include <iostream>
 #include <TextInterface.h>
 
@@ -644,7 +644,7 @@ namespace Pulsar
     void apply_model (Integration* subint, const Predictor* old = 0);
 
     //! Update the predictor model and correct the Integration set
-    void update_model (unsigned old_nsubint);
+    void update_model (unsigned old_nsubint, bool clear_model = false);
 
     //! Update the predictor to include the specifed MJD
     void update_model (const MJD& time, bool clear_model = false);
@@ -665,14 +665,6 @@ namespace Pulsar
 
     //! The Extensions added to this Archive instance
     std::vector< Reference::To<Extension> > extension;
-
-    //! This flag may be raised only by Archive::update_model.
-    /*!
-      As it is set only during run-time, this flag makes it known that
-      the current predictor was created by the currently available
-      version of tempo and its run-time configuration files.
-    */
-    bool runtime_model;
 
     //! Store the name of the file from which the current instance was loaded
     /*! Although the logical name of the file may be changed with

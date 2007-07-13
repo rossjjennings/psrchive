@@ -25,7 +25,6 @@ void Pulsar::Archive::init ()
     cerr << "Pulsar::Archive::init" << endl;
 
   expert_interface = new Expert (this);
-  runtime_model = false;
 }
 
 //! Provide access to the expert interface
