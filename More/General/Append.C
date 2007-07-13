@@ -23,6 +23,8 @@ using namespace std;
 Pulsar::Append::Append ()
 {
   must_match = Pulsar::config.get<bool>("append_must_match", true);
+
+  match.set_check_mixable ();
 }
 
 bool Pulsar::Append::stop (Archive* into, const Archive* from)
@@ -46,16 +48,14 @@ void Pulsar::Append::check (Archive* into, const Archive* from)
 {
   if (Archive::verbose == 3)
     cerr << "Pulsar::Append::append compare" << endl;
-  
+
   string reason;
-  if (must_match) {
-    if (!into->mixable (from, reason))
-      throw Error (InvalidState, "Append::append", reason);
-  }
-  else {
-    if (!into->standard_match (from, reason))
-      throw Error (InvalidState, "Append::append", reason);
-  }
+
+  if (must_match && !match.match (into, from))
+    throw Error (InvalidState, "Append::append", match.get_reason ());
+
+  else if (!into->standard_match (from, reason))
+    throw Error (InvalidState, "Append::append", reason);
 }
 
 /*! 
@@ -104,6 +104,9 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
   bool equal_ephemerides = into->has_ephemeris() && from->has_ephemeris()
     && into->get_ephemeris()->equals (from->get_ephemeris());
 
+  bool equal_models = into->has_model() && from->has_model()
+    && into->get_model()->matches (from->get_model());
+
   /*
     If all of the old and new integrations have been zero phase
     aligned according to the phase predictor models of both archives,
@@ -119,9 +122,12 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
     if (!equal_ephemerides)
       cerr << "Pulsar::Append::append "
 	"archives have different ephemerides" << endl;
+    if (!equal_models)
+      cerr << "Pulsar::Append::append "
+	"archives have different phase models" << endl;
   }
 
-  if (aligned && equal_ephemerides) {
+  if (aligned && equal_ephemerides && equal_models) {
 
     if (Archive::verbose == 3)
       cerr << "Pulsar::Append::append "
@@ -130,7 +136,7 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
     into->expert()->get_model()->insert (from->get_model());
 
     for (unsigned isub=0; isub < into->get_nsubint(); isub++)
-      into->get_Integration(isub)->expert()->set_zero_phase_aligned(true);
+      into->get_Integration(isub)->expert()->set_zero_phase_aligned (true);
 
     return;
   }
@@ -146,7 +152,11 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
   if (Archive::verbose == 3)
     cerr << "Pulsar::Append::append phasing new integrations" << endl;
 
-  // correct the new subints
+  /* Correct the new subints:
+
+    At this point, 'into' includes pointers to the data in 'clone'.
+    By correcting the data in 'clone', 'into' is also corrected.  */
+
   for (unsigned isub=0; isub < clone->get_nsubint(); isub++)
     into->expert()->apply_model (clone->get_Integration(isub),
 				 from->get_model());
