@@ -533,6 +533,20 @@ void polyco::insert (const Predictor* other)
   append (*like);
 }
 
+//! Add the information from the supplied predictor to self
+bool polyco::matches (const Predictor* other) const
+{
+  const polyco* like = dynamic_cast<const polyco*> (other);
+  if (!like)
+    return false;
+
+  return
+    get_telescope () == like->get_telescope() &&
+    get_freq() == like->get_freq() &&
+    get_psrname() == like->get_psrname() &&
+    get_dm() == like->get_dm();
+}
+
 void polyco::set_observing_frequency (long double MHz)
 {
 }

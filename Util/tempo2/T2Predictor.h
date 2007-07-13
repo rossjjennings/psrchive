@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.12 $
-   $Date: 2007/06/21 17:32:51 $
+   $Revision: 1.13 $
+   $Date: 2007/07/13 06:28:49 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
@@ -54,8 +54,26 @@ namespace Tempo2 {
     //! Get the length of each polynomial segment in days
     long double get_segment_length () const;
 
+    //! Get the name of the pulsar
+    std::string get_psrname () const;
+
+    //! Get the name of the observatory
+    std::string get_sitename () const;
+
+    //! Get the start frequency in MHz
+    long double get_freq_start () const;
+
+    //! Get the end frequency in MHz
+    long double get_freq_end () const;
+
+    //! Get the disersion constant
+    long double get_dispersion_constant () const;
+
     //! Add the information from the supplied predictor to self
     void insert (const Pulsar::Predictor*);
+
+    //! Return true if the Predictor configuration matches this
+    bool matches (const Pulsar::Predictor*) const;
 
     //! Set the observing frequency at which predictions will be made
     void set_observing_frequency (long double MHz);

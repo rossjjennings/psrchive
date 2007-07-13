@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.45 $
-   $Date: 2007/06/22 12:03:26 $
+   $Revision: 1.46 $
+   $Date: 2007/07/13 06:28:49 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -224,6 +224,9 @@ public:
 
   //! Add the information from the supplied predictor to self
   void insert (const Predictor*);
+
+  //! Return true if the Predictor configuration matches this
+  bool matches (const Predictor*) const;
 
   //! Set the observing frequency at which predictions will be made
   void set_observing_frequency (long double MHz);

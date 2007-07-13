@@ -90,6 +90,56 @@ void Tempo2::Predictor::insert (const Pulsar::Predictor* from)
   T2Predictor_Insert (&predictor, &t2p->predictor);
 }
 
+string Tempo2::Predictor::get_psrname () const
+{
+  if (predictor.modelset.cheby.nsegments < 1)
+    return "";
+  return predictor.modelset.cheby.segments[0].psrname;
+}
+
+string Tempo2::Predictor::get_sitename () const
+{
+  if (predictor.modelset.cheby.nsegments < 1)
+    return "";
+  return predictor.modelset.cheby.segments[0].sitename;
+}
+
+long double Tempo2::Predictor::get_freq_start () const
+{
+  if (predictor.modelset.cheby.nsegments < 1)
+    return 0;
+  return predictor.modelset.cheby.segments[0].freq_start;
+}
+
+long double Tempo2::Predictor::get_freq_end () const
+{
+  if (predictor.modelset.cheby.nsegments < 1)
+    return 0;
+  return predictor.modelset.cheby.segments[0].freq_end;
+}
+
+long double Tempo2::Predictor::get_dispersion_constant () const
+{
+  if (predictor.modelset.cheby.nsegments < 1)
+    return 0;
+  return predictor.modelset.cheby.segments[0].dispersion_constant;
+}
+
+bool Tempo2::Predictor::matches (const Pulsar::Predictor* other) const
+{
+  const Predictor* t2p = dynamic_cast<const Predictor*>(other);
+  if (!t2p)
+    return false;
+
+  return 
+    get_psrname () == t2p->get_psrname() &&
+    get_sitename () == t2p->get_sitename() &&
+    get_freq_start () == t2p->get_freq_start() &&
+    get_freq_end () == t2p->get_freq_end() &&
+    get_dispersion_constant () == t2p->get_dispersion_constant();
+
+}
+
 //! Set the observing frequency at which predictions will be made
 void Tempo2::Predictor::set_observing_frequency (long double MHz)
 {

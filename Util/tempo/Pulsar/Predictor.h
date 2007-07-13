@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Predictor.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/06/21 17:32:43 $
+   $Revision: 1.3 $
+   $Date: 2007/07/13 06:28:49 $
    $Author: straten $ */
 
 #ifndef __PulsarPredictor_h
@@ -43,6 +43,9 @@ namespace Pulsar {
     //! Add the information from the supplied predictor to self
     /*! This method should check to avoid inconsistency and duplication */
     virtual void insert (const Predictor*) = 0;
+
+    //! Return true if the Predictor configuration matches this
+    virtual bool matches (const Predictor*) const = 0;
 
     //! Set the observing frequency at which phase and time are related
     virtual void set_observing_frequency (long double MHz) = 0;
