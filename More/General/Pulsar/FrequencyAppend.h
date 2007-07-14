@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2007 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FrequencyAppend.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/07/13 06:28:21 $
+   $Revision: 1.2 $
+   $Date: 2007/07/14 22:05:12 $
    $Author: straten $ */
 
 #ifndef _Pulsar_FrequencyAppend_H
