@@ -178,7 +178,9 @@ libGeneral_la_SOURCES = \
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include @TEMPO2_CFLAGS@
+INCLUDES = -I$(top_builddir)/include \
+	-I$(top_srcdir)/More/Polarimetry \
+	-I$(top_srcdir)/More/MEAL @TEMPO2_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.include
 
