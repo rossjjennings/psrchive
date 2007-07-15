@@ -168,7 +168,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.52 2007/07/13 06:28:21 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.53 2007/07/15 23:37:15 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -729,8 +729,20 @@ int main (int argc, char **argv) try {
       total->tscrunch();
     }
 
-    if (!time_direction)
+    if (!time_direction) {
+
+      // dedisperse to the new centre frequency
+      if (total->get_dedispersed())
+	total->dedisperse();
+
+      // correct Faraday rotation to the new centre frequency
+      if (total->get_faraday_corrected())
+	total->defaraday();
+
+      // re-compute the phase predictor to the new centre frequency
       total->update_model ();
+
+    }
 
     if (verbose)
       cerr << "psradd: Unloading archive: '" << newname << "'" << endl;

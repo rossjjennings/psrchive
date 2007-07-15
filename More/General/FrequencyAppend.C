@@ -6,6 +6,8 @@
  ***************************************************************************/
 
 #include "Pulsar/FrequencyAppend.h"
+#include "Pulsar/Dispersion.h"
+#include "Pulsar/FaradayRotation.h"
 
 #include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/IntegrationExpert.h"
@@ -85,4 +87,23 @@ void Pulsar::FrequencyAppend::combine (Integration* into, Integration* from)
       from->set_weight( ichan, from->get_weight(ichan) * weight_ratio );
 
   into->expert()->insert(from);
+
+  if (into->get_dedispersed()) {
+
+    Dispersion xform;
+    xform.set_reference_frequency( into->get_centre_frequency() );
+    xform.set_dispersion_measure( into->get_dispersion_measure() );
+    xform.execute1 (from);
+
+  }
+
+  if (into->get_faraday_corrected()) {
+
+    FaradayRotation xform;
+    xform.set_reference_frequency( into->get_centre_frequency() );
+    xform.set_rotation_measure( into->get_rotation_measure() );
+    xform.execute1 (from);
+
+  }
+
 }
