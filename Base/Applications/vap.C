@@ -1,11 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Aidan Hotan
+ *   Copyright (C) 2007 by David Smith
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include <Pulsar/Archive.h>
+#include <Pulsar/Profile.h>
+
 #include <Pulsar/FITSHdrExtension.h>
 #include <Pulsar/ObsExtension.h>
 #include <Pulsar/ITRFExtension.h>
@@ -1753,6 +1755,9 @@ int main( int argc, char *argv[] )
 {
   tostring_precision = 4;
   Angle::default_type = Angle::Degrees;
+
+  // load files more quickly by ignoring profile data
+  Pulsar::Profile::no_amps = true;
 
   ProcArgs( argc, argv );
 
