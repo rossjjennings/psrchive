@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.60 $
-   $Date: 2007/05/11 00:55:20 $
+   $Revision: 1.61 $
+   $Date: 2007/07/18 06:57:41 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -623,11 +623,12 @@ int main (int argc, char *argv[]) try {
   if (binfile) try {
     autobin = Pulsar::Archive::load (binfile);
     reflections.operate (autobin);
-    autobin->dedisperse ();
     autobin->fscrunch ();
     autobin->tscrunch ();
     autobin->convert_state (Signal::Stokes);
     autobin->remove_baseline ();
+    autobin->dedisperse ();
+    autobin->centre ();
   }
   catch (Error& error) {
     cerr << "pcm: could not load constraint archive " << binfile << endl
@@ -666,9 +667,10 @@ int main (int argc, char *argv[]) try {
 	  cerr << "pcm: dedispersing and removing baseline from pulsar data"
                << endl;
 	
-        archive->dedisperse ();
 	archive->convert_state (Signal::Stokes);
         archive->remove_baseline ();
+	archive->dedisperse ();
+	archive->centre ();
       }
 
       if (model.get_nstate_pulsar() == 0) {
