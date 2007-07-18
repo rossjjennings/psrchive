@@ -154,6 +154,10 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   
           // set the phase at the midtime equal to that of the first subint
           Phase desired (mid_phase.intturns(), first_phase.fracturns());
+
+	  if (verbose > 2)
+            cerr << "Archive::tscrunch desired phase=" << desired << endl;
+
           epoch = model->iphase (desired);
   
           if (verbose > 2)
