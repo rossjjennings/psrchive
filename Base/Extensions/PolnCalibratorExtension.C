@@ -323,6 +323,11 @@ void PolnCalibratorExtension::Transformation::set_covariance
 {
   covariance = covar;
 
+  if (covar.size() == 0) {
+    valid = false;
+    return;
+  }
+
   unsigned nparam = get_nparam();
   unsigned expect = nparam * (nparam+1) / 2;
   if (covar.size() != expect)
@@ -350,7 +355,8 @@ void PolnCalibratorExtension::Transformation::set_covariance
 }
 
 //! Get the text interface 
-Reference::To< TextInterface::Class > PolnCalibratorExtension::get_text_interface()
+Reference::To< TextInterface::Class >
+PolnCalibratorExtension::get_text_interface()
 {
   return new PolnCalibratorExtensionTI( this );
 }
