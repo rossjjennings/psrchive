@@ -89,7 +89,7 @@ if ( ! -f $tarfile ) then
 
   if ( $psrchive_download == "lynx" ) then
     echo "using lynx ..."
-    lynx -dump $sourceforge/psrchive/$tarfile > $tarfile
+    lynx -source $sourceforge/psrchive/$tarfile > $tarfile
   endif
 
   if ( $status != 0 ) exit -1
