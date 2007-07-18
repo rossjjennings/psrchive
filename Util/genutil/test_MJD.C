@@ -69,7 +69,7 @@ int main ()
 
   double precision = pow (1.0, -numeric_limits<long double>::digits10);
 
-  for (long double time = 0; time < 6.0 * seconds_in_day; time += M_PI)
+  for (long double time = 0; time < 6000.0 * seconds_in_day; time += 100*M_PI)
     {
       MJD epoch = mjd0 + time;
       long double epochs = mjds + time;
