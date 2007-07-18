@@ -375,7 +375,7 @@ void AnglePair::getHMSDMS(char *s1, char *s2, int places1, int places2) const
 std::string
 AnglePair::getHMSDMS(int places1, int places2) const
 { 
-  return angle1.getHMS(places1) + ' ' + angle2.getDMS(places2);
+  return angle1.getHMS(places1) + angle2.getDMS(places2);
 }
 
 void 
