@@ -65,3 +65,16 @@ sky_coord hmsdms (const std::string& ra, const std::string& dec)
   return r;
 }
 
+std::ostream& operator << (std::ostream& ostr, const sky_coord& coord)
+{
+  return ostr << coord.getHMSDMS ();
+}
+
+std::istream& operator >> (std::istream& istr, sky_coord& coord)
+{
+  std::string parse;
+  istr >> parse;
+  if (coord.setHMSDMS (parse.c_str()) < 0)
+    istr.setstate (std::ios::failbit);
+  return istr;
+}

@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/sky_coord.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/02/14 20:43:03 $
+   $Revision: 1.12 $
+   $Date: 2007/07/18 02:51:32 $
    $Author: straten $ */
 
 #ifndef __SKY_COORD_H
@@ -56,6 +56,12 @@ class sky_coord  : public AnglePair
    void init ();
 
 };
+
+//! insertion operator
+std::ostream& operator<< (std::ostream& ostr, const sky_coord& coord);
+
+//! extraction operator
+std::istream& operator>> (std::istream& istr, sky_coord& coord);
 
 //! construct from right ascension and declination
 sky_coord hmsdms (const std::string& ra, const std::string& dec);
