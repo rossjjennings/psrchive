@@ -37,12 +37,16 @@ void Pulsar::ArchiveTI::setup( void )
          "type", "Observation type (Pulsar, PolnCal, etc.)" );
 
   add( &Archive::get_telescope_code,
-         &Archive::set_telescope_code,
-         "site", "Telescope tempo code" );
+       &Archive::set_telescope_code,
+       "site", "Telescope code" );
 
   add( &Archive::get_source,
-         &Archive::set_source,
-         "name", "Name of the source" );
+       &Archive::set_source,
+       "name", "Name of the source" );
+
+  add( &Archive::get_coordinates,
+       &Archive::set_coordinates,
+       "coord", "Coordinates of the source" );
 
 #if 0
   //! Get the coordinates of the source
