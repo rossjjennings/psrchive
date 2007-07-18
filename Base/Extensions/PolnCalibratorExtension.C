@@ -324,6 +324,13 @@ void PolnCalibratorExtension::Transformation::set_covariance
   covariance = covar;
 
   unsigned nparam = get_nparam();
+  unsigned expect = nparam * (nparam+1) / 2;
+  if (covar.size() != expect)
+    throw Error (InvalidParam,
+		 "PolnCalibratorExtension::Transformation::set_covariance",
+		 "covariance vector length=%u != expected=%u=%u*(%u+1)/2",
+		 covar.size(), expect, nparam, nparam);
+
   unsigned icovar = 0;
 
   // set the variance stored in the transformation
@@ -334,7 +341,12 @@ void PolnCalibratorExtension::Transformation::set_covariance
       icovar++;
     }
 
-  assert (icovar == covar.size());
+  if (icovar != covar.size())
+    throw Error (InvalidState,
+		 "PolnCalibratorExtension::Transformation::set_covariance",
+		 "covariance vector length=%u != icovar=%u",
+		 covar.size(), icovar);
+
 }
 
 //! Get the text interface 
