@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.61 $
-   $Date: 2007/07/18 06:57:41 $
+   $Revision: 1.62 $
+   $Date: 2007/07/19 00:41:31 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -24,6 +24,7 @@
 #include "Pulsar/SourceInfo.h"
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Profile.h"
 #include "Pulsar/ReflectStokes.h"
 
 #include "RealTimer.h"
@@ -54,7 +55,7 @@ void usage ()
     "\n"
     "  -h         this help page \n"
     "  -V level   set verbosity level [0->4] \n"
-    "  -a archive set the output archive class name \n"
+    "  -A archive set the output archive class name \n"
     "  -m model   model: Britton [default] or Hamaker \n"
     "\n"
     "  -C meta    filename with list of calibrator files \n"
@@ -71,6 +72,7 @@ void usage ()
     "  -p pA,pB   set the phase window from which to choose input states \n"
     "  -c archive choose best input states from input archive \n"
     "\n"
+    "  -a align   set the threshold for testing input data phase alignment \n"
     "  -r         enforce physically realizable Stokes parameters \n"
     "  -s         normalize Stokes parameters by invariant interval \n"
     "  -g         allow absolute gain to vary in Pulsar observations \n"
@@ -280,9 +282,24 @@ Pulsar::ReflectStokes reflections;
 // Name of file to which arrival time estimates will be written
 char* tim_file = 0;
 
-int main (int argc, char *argv[]) try {
+int actual_main (int argc, char *argv[]);
 
-  Error::verbose = false;
+int main (int argc, char *argv[]) {
+
+  size_t in = Reference::Able::get_instance_count();
+
+  int ret = actual_main (argc, argv);
+
+  size_t out = Reference::Able::get_instance_count();
+
+#ifdef _DEBUG
+  cerr << "Leaked: " << out - in << endl;
+#endif
+
+  return ret;
+}
+
+int actual_main (int argc, char *argv[]) try {
 
   // name of file containing list of Archive filenames
   char* metafile = NULL;
@@ -301,6 +318,9 @@ int main (int argc, char *argv[]) try {
 
   // number of hours over which CALs will be found from Database
   float hours = 12.0;
+
+  // significance of phase shift required to fail test
+  float alignment_threshold = 4.0; // sigma
 
   //! The pulse phase window to use
   float phmin, phmax;
@@ -325,12 +345,16 @@ int main (int argc, char *argv[]) try {
   bool publication_plots = false;
 
   int gotc = 0;
-  const char* args = "a:b:c:C:d:Df:gHhIM:m:N:n:OPp:qrsS:t:T:uvV:";
+  const char* args = "A:a:b:c:C:d:Df:gHhIM:m:N:n:OPp:qrsS:t:T:uvV:";
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
 
-    case 'a':
+    case 'A':
       archive_class = optarg;
+      break;
+
+    case 'a':
+      alignment_threshold = atof (optarg);
       break;
 
     case 'b': {
@@ -618,17 +642,26 @@ int main (int argc, char *argv[]) try {
   cerr << "pcm: set calibrators" << endl;
   model.set_calibrators (cal_filenames);
 
+  // archive from which pulse phase bins will be chosen
   Reference::To<Pulsar::Archive> autobin;
 
+  // total instensity profile of first archive used to check for phase jumps
+  Reference::To<Pulsar::Profile> phase_std;
+
   if (binfile) try {
+
     autobin = Pulsar::Archive::load (binfile);
     reflections.operate (autobin);
+
     autobin->fscrunch ();
     autobin->tscrunch ();
     autobin->convert_state (Signal::Stokes);
     autobin->remove_baseline ();
     autobin->dedisperse ();
     autobin->centre ();
+
+    phase_std = autobin->get_Profile (0,0,0);
+
   }
   catch (Error& error) {
     cerr << "pcm: could not load constraint archive " << binfile << endl
@@ -637,105 +670,115 @@ int main (int argc, char *argv[]) try {
   }
 
   Reference::To<Pulsar::Archive> total;
-  
+
   cerr << "pcm: loading archives" << endl;
   
-  for (unsigned i = 0; i < filenames.size(); i++) {
-    
-    try {
+  for (unsigned i = 0; i < filenames.size(); i++) try {
 
-      if (!archive) {
+    if (!archive) {
 
-	if (verbose)
-	  cerr << "pcm: loading " << filenames[i] << endl;
+      if (verbose)
+	cerr << "pcm: loading " << filenames[i] << endl;
 	
-	archive = Pulsar::Archive::load(filenames[i]);
-        reflections.operate (archive);
+      archive = Pulsar::Archive::load(filenames[i]);
+      reflections.operate (archive);
 
-        if (!archive) {
-          cerr << "pcm: error loading " << filenames[i] << endl;
-          continue;
-        }
-
-	cout << "pcm: loaded archive: " << filenames[i] << endl;
+      cout << "pcm: loaded archive: " << filenames[i] << endl;
       
-      }
+    }
 
-      if (archive->get_type() == Signal::Pulsar)  {
+    if (archive->get_type() == Signal::Pulsar)  {
 	
-	if (verbose)
-	  cerr << "pcm: dedispersing and removing baseline from pulsar data"
-               << endl;
-	
-	archive->convert_state (Signal::Stokes);
-        archive->remove_baseline ();
-	archive->dedisperse ();
-	archive->centre ();
-      }
-
-      if (model.get_nstate_pulsar() == 0) {
-
-	if (autobin) {
-
-#if 0
-	  string reason;
-	  if ( ! archive->mixable (autobin, reason) ) {
-	    cerr << "pcm: cannot choose constraints from " << binfile
-		 << endl << reason << endl;
-	    return -1;
-	  }
-#endif
-
-	  auto_select (model, autobin, maxbins);
-
-	}
-
-	else
-	  range_select (model, archive, phmin, phmax, maxbins);
-
-        cerr << "pcm: " << model.get_nstate_pulsar() << " states" << endl;
-        if ( model.get_nstate_pulsar() == 0 )
-          return -1;
-
-      }
-
-
-      model.add_observation( archive );
-
-      if (archive->get_type() == Signal::Pulsar && only_ichan < 0)  {
-
-	if (verbose)
-	  cerr << "pcm: calibrate with current best guess" << endl;
-
-	model.precalibrate (archive);
-
-	if (verbose)
-	  cerr << "pcm: correct and add to total" << endl;
-
-	Pulsar::CorrectionsCalibrator correct;
-	correct.calibrate(archive);
-
-	if (!total)
-	  total = archive;
-	else {
-	  total->append (archive);
-	  total->tscrunch ();
-	}
-      }
-
-      archive = 0;
+      if (verbose)
+	cerr << "pcm: dedispersing and removing baseline from pulsar data"
+	     << endl;
+      
+      archive->convert_state (Signal::Stokes);
+      archive->remove_baseline ();
+      archive->dedisperse ();
+      archive->centre ();
 
     }
-    catch (Error& error) {
-      cerr << error << endl;
+    
+    if (model.get_nstate_pulsar() == 0) {
+      
+      if (autobin)
+	auto_select (model, autobin, maxbins);
+      
+      else {
+	
+	range_select (model, archive, phmin, phmax, maxbins);
+
+	// store an fscrunched and tscrunched clone for phase check
+	autobin = archive->total();
+	phase_std = autobin->get_Profile (0,0,0);	
+
+      }
+      
+      cerr << "pcm: " << model.get_nstate_pulsar() << " states" << endl;
+      if ( model.get_nstate_pulsar() == 0 )
+	return -1;
+      
     }
+    
+    if (phase_std) {
+
+      Reference::To<Pulsar::Archive> total = archive->total();
+      Estimate<double> shift = total->get_Profile(0,0,0)->shift (*phase_std);
+
+      /* if the shift is greater than 1 phase bin and significantly
+	 more than the error, then there may be a problem */
+
+      if (shift.get_value() > 1.0 / phase_std->get_nbin() &&
+	  shift.get_value() > alignment_threshold * shift.get_error()) {
+
+	cerr << endl <<
+	  "pcm: ERROR apparent phase shift between archives = "
+	     << shift.get_value() << " +/- " << shift.get_error () 
+	     << endl << endl;
+
+	return -1;
+      }
+
+    }
+
+    model.add_observation( archive );
+    
+    if (archive->get_type() == Signal::Pulsar && only_ichan < 0)  {
+      
+      if (verbose)
+	cerr << "pcm: calibrate with current best guess" << endl;
+      
+      model.precalibrate (archive);
+      
+      if (verbose)
+	cerr << "pcm: correct and add to total" << endl;
+      
+      Pulsar::CorrectionsCalibrator correct;
+      correct.calibrate(archive);
+      
+      if (!total)
+	total = archive;
+      else {
+	total->append (archive);
+	total->tscrunch ();
+      }
+    }
+    
+    archive = 0;
+    
   }
-
+  catch (Error& error) {
+    cerr << "pcm: error while handling " << filenames[i] << endl;
+    cerr << error << endl;
+    archive = 0;
+  }
+  
   if (total)  {
     cerr << "pcm: writing total uncalibrated pulsar archive" << endl;
     total->unload ("first.ar");
   }
-
+  
 #if HAVE_PGPLOT
 
   Pulsar::ReceptionCalibratorPlotter plotter (&model);
