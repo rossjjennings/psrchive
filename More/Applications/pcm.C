@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.63 $
-   $Date: 2007/07/19 01:14:59 $
+   $Revision: 1.64 $
+   $Date: 2007/07/19 06:46:54 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -660,7 +660,8 @@ int actual_main (int argc, char *argv[]) try {
     autobin->dedisperse ();
     autobin->centre ();
 
-    phase_std = autobin->get_Profile (0,0,0);
+    if (alignment_threshold)
+      phase_std = autobin->get_Profile (0,0,0);
 
   }
   catch (Error& error) {
@@ -709,9 +710,11 @@ int actual_main (int argc, char *argv[]) try {
 	
 	range_select (model, archive, phmin, phmax, maxbins);
 
-	// store an fscrunched and tscrunched clone for phase check
-	autobin = archive->total();
-	phase_std = autobin->get_Profile (0,0,0);	
+	if (alignment_threshold) { 
+	  // store an fscrunched and tscrunched clone for phase check
+	  autobin = archive->total();
+	  phase_std = autobin->get_Profile (0,0,0);	
+        }
 
       }
       
