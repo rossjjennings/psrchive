@@ -338,8 +338,8 @@ bool Pulsar::ArchiveMatch::match (const Archive* a, const Archive* b)
 
   // Data has been flux calibrated
   if (check_scale && a->get_scale() != b->get_scale()) {
-    reason += separator
-      + stringprintf ("scale mismatch");
+    reason += separator + "scale mismatch: "
+      + tostring(a->get_scale()) + " != " + tostring(b->get_scale());
     result = false;
   }
 
