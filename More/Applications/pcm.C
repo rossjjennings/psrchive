@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.62 $
-   $Date: 2007/07/19 00:41:31 $
+   $Revision: 1.63 $
+   $Date: 2007/07/19 01:14:59 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -726,18 +726,23 @@ int actual_main (int argc, char *argv[]) try {
       Reference::To<Pulsar::Archive> total = archive->total();
       Estimate<double> shift = total->get_Profile(0,0,0)->shift (*phase_std);
 
+      double abs_shift = fabs( shift.get_value() );
+
       /* if the shift is greater than 1 phase bin and significantly
 	 more than the error, then there may be a problem */
 
-      if (shift.get_value() > 1.0 / phase_std->get_nbin() &&
-	  shift.get_value() > alignment_threshold * shift.get_error()) {
+      if (abs_shift > 1.0 / phase_std->get_nbin() &&
+	  abs_shift > alignment_threshold * shift.get_error()) {
 
 	cerr << endl <<
-	  "pcm: ERROR apparent phase shift between archives = "
-	     << shift.get_value() << " +/- " << shift.get_error () 
-	     << endl << endl;
+	  "pcm: ERROR apparent phase shift between input archives\n"
+	  "\tshift = " << shift.get_value() << " +/- " << shift.get_error () <<
+	  "  =  " << int(shift.get_value() * phase_std->get_nbin()) <<
+	  " phase bins" << endl << endl;
 
-	return -1;
+	archive = 0;
+	continue;
+
       }
 
     }
