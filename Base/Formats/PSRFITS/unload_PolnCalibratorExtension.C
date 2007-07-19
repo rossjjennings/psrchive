@@ -162,6 +162,11 @@ void unload_covariances (fitsfile* fptr,
 
     pce->get_transformation(ichan)->get_covariance (covar);
 
+    if (covar.size() == 0) {
+      count += ncovar;
+      continue;
+    }
+
     assert (covar.size() == ncovar);
 
     for (int j = 0; j < ncovar; j++) {
