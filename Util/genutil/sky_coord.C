@@ -67,7 +67,7 @@ sky_coord hmsdms (const std::string& ra, const std::string& dec)
 
 std::ostream& operator << (std::ostream& ostr, const sky_coord& coord)
 {
-  return ostr << coord.getHMSDMS ();
+  return ostr << coord.getHMSDMS (3,2,false);
 }
 
 std::istream& operator >> (std::istream& istr, sky_coord& coord)
