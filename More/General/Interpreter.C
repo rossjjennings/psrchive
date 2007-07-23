@@ -926,7 +926,9 @@ catch (Error& error) {
 string Pulsar::Interpreter::fix (const string& args)
 try {
 
-  if (args == "fluxcal") {
+  string what = setup<string>(args);
+
+  if (what == "fluxcal") {
     fix_flux_cal.apply (get());
     return response (Good, fix_flux_cal.get_changes());
   }
