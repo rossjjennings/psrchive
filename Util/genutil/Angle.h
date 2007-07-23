@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.24 $
-   $Date: 2007/02/14 20:42:49 $
+   $Revision: 1.25 $
+   $Date: 2007/07/23 02:20:23 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -155,7 +155,7 @@ class AnglePair
   int    setHMSDMS (const char *, const char *);
   int    setHMSDMS (const std::string&, const std::string&);
   void   getHMSDMS (char* s1, char* s2, int places1=3, int places2=2) const;
-  std::string getHMSDMS (int places1 = 3, int places2 = 2) const;
+  std::string getHMSDMS (int places1 = 3, int places2 = 2, bool space = true) const;
 
   void   setDegrees (double, double);
   void   getDegrees (double *, double *) const;
