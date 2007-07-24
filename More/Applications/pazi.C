@@ -31,7 +31,7 @@ static PlotFactory factory;
 
 void usage()
 {
-	cout << "Pazi: A user-interactive program for zapping subints and frequency channels.\n"
+	cout << endl << "Pazi: A user-interactive program for zapping subints and frequency channels.\n"
 		"Usage: pazi <filename>\n\n"
 		"zoom:                      left click twice\n"
 		"zap:                       right click\n"
@@ -53,8 +53,8 @@ int time_get_channel(float mouseY, double int_length, int num_subints, string sc
 string join_option(float y, float y2, double bandwidth, string type);
 void freq_zap_chan(Pulsar::Archive* arch, int zap_chan);
 void freq_unzap_chan(Pulsar::Archive* arch, Pulsar::Archive* backup, int zap_chan);
-void time_zap_subint(Pulsar::Integration* integ);
-void time_unzap_subint(Pulsar::Integration* integ, Pulsar::Integration* backup);
+void time_zap_subint(Pulsar::Archive* arch, int zap_subint);
+void time_unzap_subint(Pulsar::Archive* arch, Pulsar::Archive* backup, int zap_subint);
 void redraw(Pulsar::Archive* arch, Plot* orig_plot, Plot* mod_plot, bool zoom);
 void freq_redraw(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* orig_plot, Plot* mod_plot, bool zoom);
 void time_redraw(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* orig_plot, Plot* mod_plot, bool zoom);
@@ -97,10 +97,8 @@ int main(int argc, char** argv)
 	char ch;
 	bool zoomed = false;
 	bool fscrunched = true;
-
 	string plot_type = "time";
 	string filename = argv[1];
-
 	string extension = filename.substr(filename.length() - 2, 2);
 
 	if ((extension != "rf") && (extension != "cf")) {
@@ -117,21 +115,19 @@ int main(int argc, char** argv)
 	write_filename += extension;
 
 	Reference::To<Pulsar::Archive> base_archive = Archive::load(argv[1]);
-	base_archive->pscrunch();
-	base_archive->remove_baseline();
-
+	Reference::To<Pulsar::Archive> backup_archive = base_archive->clone();
+	
 	Reference::To<Pulsar::Archive> mod_archive = base_archive->clone();
+	mod_archive->pscrunch();
+	mod_archive->remove_baseline();
 	mod_archive->dedisperse();
+	mod_archive->fscrunch();
 
 	//mod_archive->centre();
 	//printf("centre\n");
 	
-	mod_archive->fscrunch();
-	
-	Reference::To<Pulsar::Archive> backup_archive = base_archive->clone();
 	Reference::To<Pulsar::Archive> scrunched_archive = mod_archive->clone();
 	scrunched_archive->tscrunch();
-	Pulsar::Integration* integ;
 
 	double centre_freq = base_archive->get_centre_frequency();
 	double bandwidth = base_archive->get_bandwidth();
@@ -142,7 +138,7 @@ int main(int argc, char** argv)
 	int num_bins = base_archive->get_nbin();
 	string scale = get_scale(base_archive);
 
-	int upper_range = base_archive->get_nbin() - 1;
+	int upper_range = num_bins - 1;
 	int lower_range = 0;
 
 	if (bandwidth < 0)
@@ -167,7 +163,6 @@ int main(int argc, char** argv)
 
 	cpgopen("1/XS");
 	cpgopen("2/XS");
-
 	cpgask(0);
 
 	cerr << endl << "Total S/N = " << scrunched_archive->get_Profile(0,0,0)->snr() << endl << endl;
@@ -229,6 +224,8 @@ int main(int argc, char** argv)
 					*mod_archive = *base_archive;
 					mod_archive->set_dispersion_measure(0);
 					mod_archive->fscrunch();
+					mod_archive->pscrunch();
+					mod_archive->remove_baseline();
 					subint = time_get_channel(mouseY2, int_length, num_subints, scale);
 
 					char add[3];
@@ -277,7 +274,7 @@ int main(int argc, char** argv)
 				freq_redraw(mod_archive, base_archive, freq_orig_plot, freq_mod_plot, zoomed);
 				break;
 
-			case 'o':
+			case 'o': // toggle frequency scrunching on/off
 				if (plot_type == "time") {
 					if (fscrunched) {
 						fscrunched = false;
@@ -335,19 +332,19 @@ int main(int argc, char** argv)
 						freq_redraw(mod_archive, base_archive, freq_orig_plot, freq_mod_plot, zoomed);
 					} else if (plot_type == "time") {
 						remove_channel(time_get_channel(mouseY2, int_length, num_subints, scale), subints_to_zap);
-						time_unzap_subint(backup_archive->get_Integration(time_get_channel(mouseY2, int_length, num_subints, scale)), backup_archive->get_Integration(time_get_channel(mouseY2, int_length, num_subints, scale)));
+						time_unzap_subint(base_archive, backup_archive, time_get_channel(mouseY2, int_length, num_subints, scale));
 						time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot, zoomed);
-					} else {
-						if (bins_to_zap.size()) {
-							printf("harroh!\n");
-
+					} else { // this most likely doesn't work as desired...
+						if (bins_to_zap.size()) { 
 							bins_to_zap.erase(bins_to_zap.end() - 5, bins_to_zap.end());
 
 							*base_archive = *backup_archive;
 							*mod_archive = *backup_archive;
 
 							mod_archive->set_dispersion_measure(0);
+							mod_archive->pscrunch();
 							mod_archive->fscrunch();
+							mod_archive->remove_baseline();
 							redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
 						}
 					}
@@ -369,7 +366,7 @@ int main(int argc, char** argv)
 
 					} else if (plot_type == "time") {
 						add_channel(time_get_channel(mouseY2, int_length, num_subints, scale), subints_to_zap);
-						time_zap_subint(base_archive->get_Integration(time_get_channel(mouseY2, int_length, num_subints, scale)));
+						time_zap_subint(base_archive, time_get_channel(mouseY2, int_length, num_subints, scale));
 						time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot, zoomed);
 
 					} else {
@@ -412,8 +409,7 @@ int main(int argc, char** argv)
 
 							for (int i = lower_channel; i <= upper_channel; i++) {
 								subints_to_zap.push_back(i);
-								integ = base_archive->get_Integration(i);
-								time_zap_subint(integ);
+								time_zap_subint(base_archive, i);
 							}
 							time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot, zoomed);
 						}
@@ -438,15 +434,13 @@ int time_get_channel(float mouseY, double int_length, int num_subints, string sc
 {
 	double channel;
 	if (scale == "days")
-		channel = (mouseY * 60 * 60 * 24) / int_length * num_subints;
+		return (int)((mouseY * 60 * 60 * 24) / int_length * num_subints);
 	else if (scale == "hours")
-		channel = (mouseY * 60 * 60) / int_length * num_subints;
+		return (int)((mouseY * 60 * 60) / int_length * num_subints);
 	else if (scale == "minutes")
-		channel = (mouseY * 60) / int_length * num_subints;
+		return (int)((mouseY * 60) / int_length * num_subints);
 	else
-		channel = mouseY / int_length * num_subints;
-
-	return (int)channel;
+		return (int)(mouseY / int_length * num_subints);
 }
 
 string join_option(float y, float y2, double bandwidth, string type)
@@ -482,8 +476,8 @@ string vertical_join_option(float x, float x2, int &upper_chan, int &lower_chan,
 		sprintf(add, "%2.2f", x);
 		option += add;
 		option += ")";
-		upper_chan = static_cast<int>(x * num_bins);
-		lower_chan = static_cast<int>(x2 * num_bins);
+		upper_chan = (int)(x * num_bins);
+		lower_chan = (int)(x2 * num_bins);
 	} else {
 		sprintf(add, "%2.2f", x);
 		option += add;
@@ -491,30 +485,32 @@ string vertical_join_option(float x, float x2, int &upper_chan, int &lower_chan,
 		sprintf(add, "%2.2f", x2);
 		option += add;
 		option += ")";
-		upper_chan = static_cast<int>(x2 * num_bins);
-		lower_chan = static_cast<int>(x * num_bins);
+		upper_chan = (int)(x2 * num_bins);
+		lower_chan = (int)(x * num_bins);
 	}
 	return option;
 }
 
 void freq_zap_chan(Pulsar::Archive* arch, int zap_chan)
 {
-	Pulsar::Integration* integ;
-
-	for (int i = 0; i < arch->get_nsubint(); i++) {
-		for (int j = 0; j < arch->get_nchan(); j++) {
-			if (j == zap_chan) {
-				integ = arch->get_Integration(i);
-				integ->get_Profile(0,j)->set_weight(0);
+	for (int pol = 0; pol < arch->get_npol(); pol++ ) {
+		for (int sub = 0; sub < arch->get_nsubint(); sub++) {
+			for (int chan = 0; chan < arch->get_nchan(); chan++) {
+				if (chan == zap_chan) {
+					arch->get_Profile(sub,pol,chan)->set_weight(0);
+				}
 			}
 		}
 	}
 }
 
-void time_zap_subint(Pulsar::Integration* integ)
+void time_zap_subint(Pulsar::Archive* arch, int zap_subint)
 {
-	for (int i = 0; i < integ->get_nchan(); i++)
-		integ->get_Profile(0,i)->set_weight(0);
+	for (int pol = 0; pol < arch->get_npol(); pol++ ) {
+		for (int chan = 0; chan < arch->get_nchan(); chan++) {
+			arch->get_Profile(zap_subint,pol,chan)->set_weight(0);
+		}
+	}
 }
 
 bool is_zapped (vector<int>& zapped, int index)
@@ -527,36 +523,40 @@ bool is_zapped (vector<int>& zapped, int index)
 
 void freq_unzap_chan(Pulsar::Archive* arch, Pulsar::Archive* backup, int zap_chan)
 {
-    Pulsar::Integration* integ;
-    Pulsar::Integration* binteg;
+	int npol = arch->get_npol();
+	int nsub = arch->get_nsubint();
+	int nchan = arch->get_nchan();
 
-    for (int i = 0; i < arch->get_nsubint(); i++) {
-		if (is_zapped(subints_to_zap, i))
-			continue;
+	for (int pol = 0; pol < npol; pol++ ) {
+		for (int sub = 0; sub < nsub; sub++) {
+			if (is_zapped(subints_to_zap, sub))
+				continue;
 
-		for (int j = 0; j < arch->get_nchan(); j++) {
-			if (j == zap_chan) {
-				integ = arch->get_Integration(i);
-				binteg = backup->get_Integration(i);
-				integ->get_Profile(0,j)->set_weight(binteg->get_weight(j));
+			for (int chan = 0; chan < nchan; chan++) {
+				if (chan == zap_chan)
+					arch->get_Profile(sub,pol,chan)->set_weight(backup->get_Profile(sub,pol,chan)->get_weight());
 			}
 		}
-
-    }
+	}
 }
 
-void time_unzap_subint(Pulsar::Integration* integ, Pulsar::Integration* backup)
+void time_unzap_subint(Pulsar::Archive* arch, Pulsar::Archive* backup, int zap_subint)
 {
-    for (int i = 0; i < integ->get_nchan(); i++)
-		if (!is_zapped(channels_to_zap,i))
-		    integ->get_Profile(0,i)->set_weight( backup->get_weight(i) );
+    int npol = arch->get_npol();
+    int nsub = arch->get_nsubint();
+    int nchan = arch->get_nchan();
+
+	for (int pol = 0; pol < npol; pol++ )
+		for (int sub = 0; sub < nsub; sub++)
+			for (int chan = 0; chan < nchan; chan++)
+				if (!is_zapped(channels_to_zap,chan))
+					arch->get_Profile(sub,pol,chan)->set_weight(backup->get_Profile(sub,pol,chan)->get_weight());
 }
 
 void redraw(Pulsar::Archive* arch, Plot* orig_plot, Plot* mod_plot, bool zoom)
 {
-	if (centered) {
+	if (centered)
 		arch->centre();
-	}
 
 	cpgeras();
 	if (zoom)
@@ -573,6 +573,8 @@ void freq_redraw(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* orig_pl
 	else
 	    arch->dedisperse();
 
+	arch->pscrunch();
+	arch->remove_baseline();
 	arch->tscrunch();
 	redraw(arch, orig_plot, mod_plot, zoom);
 }
@@ -583,6 +585,8 @@ void time_redraw(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* orig_pl
 	if (!dedispersed)
 	    arch->set_dispersion_measure(0);
 
+	arch->pscrunch();
+	arch->remove_baseline();
 	arch->fscrunch();
 	redraw(arch, orig_plot, mod_plot, zoom);
 }
@@ -593,6 +597,8 @@ void update_total(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* plot)
 	if (!dedispersed)
 		arch->set_dispersion_measure(0);
 
+	arch->pscrunch();
+	arch->remove_baseline();
 	arch->tscrunch();
 	arch->fscrunch();
 
@@ -710,6 +716,8 @@ void set_centre(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &centered
 		} else {
 			centered = false;
 			*arch = *old_arch;
+			arch->pscrunch();
+			arch->remove_baseline();
 
 			if (type == "freq") {
 				arch->tscrunch();
@@ -749,35 +757,38 @@ void binzap(Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint, int lo
 	float deviation;
 	float* this_int;
 	int j;
-	Pulsar::Integration* integ = old_arch->get_Integration(subint);
+	int npol = old_arch->get_npol();
+	int nchan = old_arch->get_nchan();
 
 	if (lower_bin > upper_bin)
 		swap_chans(upper_bin, lower_bin);
 
-	for (int i = 0; i < old_arch->get_nchan(); i++) {
-		this_int = integ->get_Profile(0,i)->get_amps();
-		mean = 0;
-		deviation = 0;
+	for (int pol = 0; pol < npol; pol++) {
+		for (int chan = 0; chan < old_arch->get_nchan(); chan++) {
+			this_int = old_arch->get_Profile(subint,pol,chan)->get_amps();
+			mean = 0;
+			deviation = 0;
 
-		for (j = lower_range; j < lower_bin; j++)
-			mean += this_int[j];
+			for (j = lower_range; j < lower_bin; j++)
+				mean += this_int[j];
 
-		for (j = upper_bin; j < upper_range; j++)
-			mean += this_int[j];
+			for (j = upper_bin; j < upper_range; j++)
+				mean += this_int[j];
 
-		mean = mean / ((upper_range - lower_range) - (upper_bin - lower_bin));
+			mean = mean / ((upper_range - lower_range) - (upper_bin - lower_bin));
 
-		for (j = lower_range; j < lower_bin; j++)
-			deviation += (this_int[j] - mean) * (this_int[j] - mean);
+			for (j = lower_range; j < lower_bin; j++)
+				deviation += (this_int[j] - mean) * (this_int[j] - mean);
 
-		for (j = upper_bin; j < upper_range; j++)
-			deviation += (this_int[j] - mean) * (this_int[j] - mean);
+			for (j = upper_bin; j < upper_range; j++)
+				deviation += (this_int[j] - mean) * (this_int[j] - mean);
 
-		deviation = deviation / ((upper_range - lower_range) - (upper_bin - lower_bin - 1));
-		deviation = sqrt(deviation);
+			deviation = deviation / ((upper_range - lower_range) - (upper_bin - lower_bin - 1));
+			deviation = sqrt(deviation);
 
-		for (j = lower_bin; j < upper_bin; j++)
-			this_int[j] = mean + (gasdev() * deviation);
+			for (j = lower_bin; j < upper_bin; j++)
+				this_int[j] = mean + (gasdev() * deviation);
+		}
 	}
 
 	bins_to_zap.push_back(subint);
@@ -788,5 +799,7 @@ void binzap(Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint, int lo
 
 	*arch = *old_arch;
 	arch->set_dispersion_measure(0);
+	arch->pscrunch();
+	arch->remove_baseline();
 	arch->fscrunch();
 }
