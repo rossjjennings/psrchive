@@ -5,23 +5,21 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/PlotFactory.h"
-#include "Pulsar/Plot.h"
-
-#include "Pulsar/Archive.h"
-#include "Pulsar/GaussianBaseline.h"
-
-#include "TextInterface.h"
-#include "strutil.h"
-
 #include <cpgplot.h>
 #include <unistd.h>
 #include <string.h>
 
+#include "Pulsar/psrchive.h"
+#include "Pulsar/PlotFactory.h"
+#include "Pulsar/Plot.h"
+#include "Pulsar/Archive.h"
+#include "Pulsar/GaussianBaseline.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Integration.h"
 
+#include "TextInterface.h"
+#include "strutil.h"
 #include "BoxMuller.h"
 
 using namespace Pulsar;
@@ -31,21 +29,28 @@ static PlotFactory factory;
 
 void usage()
 {
-	cout << endl << "Pazi: A user-interactive program for zapping subints and frequency channels.\n"
-		"Usage: pazi <filename>\n\n"
-		"zoom:                      left click twice\n"
-		"zap:                       right click\n"
-		"zap (multiple):            left click and 'z'\n"
-		"reset zoom:                'r'\n"
-		"frequency:                 'f'\n"
-		"time:                      't'\n"
-		"save (<filename>.pazi):    's'\n"
-		"quit:                      'q'\n"
-		"print paz command:         'p'\n"
-		"center pulse:              'c'\n"
-		"undo last:                 'u'\n"
-		"toggle dedispersion:       'd'\n"
-		"binzap:                    'b'\n";
+	cout << endl << "A user-interactive program for zapping subints, channels and bins.\n"
+		"Usage: pazi [options] filename\n\n"
+		"Options.\n"
+		"  -h                         This help page.\n\n"
+		"The following are the possible mouse and keyboard commands.\n"
+		"  zoom:                      left click twice\n"
+		"  zap:                       right click\n"
+		"  zap (multiple):            left click and 'z'\n"
+		"  reset zoom:                'r'\n"
+		"  frequency:                 'f'\n"
+		"  time:                      't'\n"
+		"  save (<filename>.pazi):    's'\n"
+		"  quit:                      'q'\n"
+		"  print paz command:         'p'\n"
+		"  center pulse:              'c'\n"
+		"  undo last:                 'u'\n"
+		"  toggle dedispersion:       'd'\n"
+		"  binzap:                    'b'\n"
+		"\n"
+
+		"See "PSRCHIVE_HTTP"/manuals/pazi for more details\n"
+			<< endl;
 }
 
 int freq_get_channel(float mouseY, double bandwidth, int num_chans, double centre_freq);
@@ -78,11 +83,20 @@ static vector<int> bins_to_zap;
 //static bool centered = true;
 static bool centered = false;
 
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
 	if (argc < 2) {
 		usage();
 		return EXIT_SUCCESS;
+	}
+
+	int gotc = 0;
+	while ((gotc = getopt(argc, argv, "h")) != -1) {
+		switch (gotc) {
+			case 'h':
+				usage();
+				return EXIT_SUCCESS;
+		}
 	}
 
 	float mouseX = 0;
@@ -116,7 +130,7 @@ int main(int argc, char** argv)
 
 	Reference::To<Pulsar::Archive> base_archive = Archive::load(argv[1]);
 	Reference::To<Pulsar::Archive> backup_archive = base_archive->clone();
-	
+
 	Reference::To<Pulsar::Archive> mod_archive = base_archive->clone();
 	mod_archive->pscrunch();
 	mod_archive->remove_baseline();
@@ -125,7 +139,7 @@ int main(int argc, char** argv)
 
 	//mod_archive->centre();
 	//printf("centre\n");
-	
+
 	Reference::To<Pulsar::Archive> scrunched_archive = mod_archive->clone();
 	scrunched_archive->tscrunch();
 
@@ -166,6 +180,7 @@ int main(int argc, char** argv)
 	cpgask(0);
 
 	cerr << endl << "Total S/N = " << scrunched_archive->get_Profile(0,0,0)->snr() << endl << endl;
+
 	total_plot->plot(scrunched_archive);
 	cpgslct(1);
 	time_orig_plot->plot(mod_archive);
@@ -371,7 +386,7 @@ int main(int argc, char** argv)
 
 					} else {
 						if (((upper_range + 1 == base_archive->get_nbin()) && (upper_range - 1 - lower_range > 0)) || ((upper_range + 1 != base_archive->get_nbin()) && (upper_range - lower_range > 0))) {
-							int bin = static_cast<int>(mouseX2 * num_bins);
+							int bin = (int)(mouseX2 * num_bins);
 							binzap(mod_archive, base_archive, subint, lower_range, upper_range, bin, bin+1);
 							redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
 						}
@@ -383,7 +398,7 @@ int main(int argc, char** argv)
 			case 'z': // zap multiple channels
 				if (plot_type == "subint") {
 					if (mouseX) {
-						binzap(mod_archive, base_archive, subint, lower_range, upper_range, static_cast<int>(mouseX * num_bins), static_cast<int>(mouseX2 * num_bins));
+						binzap(mod_archive, base_archive, subint, lower_range, upper_range, (int)(mouseX * num_bins), (int)(mouseX2 * num_bins));
 						redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
 						update_total(scrunched_archive, base_archive, total_plot);
 						mouseX = 0;
