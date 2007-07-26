@@ -1,3 +1,8 @@
+
+%
+% Tim and Vanessa: 044 8075 488
+%
+
 \documentclass[12pt]{article}
 \usepackage{amsfonts}
 
@@ -6,13 +11,10 @@
 
 \begin{document}
 
-\section{Mean value of position angle change}
+\section{Mean value of position angle change \\ Mark II}
 
-This memo documents the propagation of error when estimating the
-change in position angle, $\Delta\Psi$, between two polarization
-profiles.
-
-Let
+This memo documents an updated model for estimating the change in
+position angle, $\Delta\Psi$, and its uncertainty. Let
 \begin{equation}
 P_k = Q_k + i U_k = L_k \exp i2\Psi_k
 \end{equation}
@@ -20,57 +22,64 @@ represent the linear polarization of the $k$th phase bin in one profile and
 \begin{equation}
 P^\prime_k = Q^\prime_k + i U^\prime_k = L^\prime_k \exp i2\Psi^\prime_k
 \end{equation}
-the same in the other profile.  To find the mean value of $\Delta\Psi$,
+the same in the other profile.  
+
+Consider the {\bf weighted} cross-correlation,
+$\bar{Z}=\bar{C}+i\bar{S}$, where $\bar C$ and $\bar S$ are the
+weighted mean values of the real and imaginary components of
 \begin{equation}
-\bar\Psi = {1\over N}\sum_{k=1}^N \Psi^\prime_k - \Psi_k
+z_k = c_k + i s_k 
+    = P^*_k P^\prime_k = L_k L^\prime_k \exp i2(\Psi^\prime_k - \Psi_k).
 \end{equation}
-use the cross-correlation
+That is, where
 \begin{equation}
-Z = \sum_{k=1}^N P^*_k P^\prime_k 
-  = \sum_{k=1}^N L_k L^\prime_k \exp i2(\Psi^\prime_k - \Psi_k)
+c_k = Q_kQ^\prime_k + U_kU^\prime_k,
+\hspace{1cm}
+s_k = Q_kU^\prime_k - U_kQ^\prime_k,
 \end{equation}
-such that
+and
+\begin{eqnarray}
+\sigma_{c_k}^2 & = &
+ Q^{\prime2}_k\sigma_{Q_k}^2 + U^{\prime2}_k\sigma_{U_k}^2 +
+ Q^2_k\sigma_{Q^\prime_k}^2 + U^2_k\sigma_{U^\prime_k}^2 \\
+\sigma_{s_k}^2 & = &
+ U^{\prime2}_k\sigma_{Q_k}^2 + Q^{\prime2}_k\sigma_{U_k}^2 +
+ U^2_k\sigma_{Q^\prime_k}^2 + Q^2_k\sigma_{U^\prime_k}^2 \\
+\sigma_{s_k c_k} & = &
+ Q^\prime_k U^\prime_k (\sigma_{Q_k}^2 - \sigma_{U_k}^2) +
+ Q_kU_k (\sigma_{U^\prime_k}^2 -\sigma_{Q^\prime_k}^2)
+\end{eqnarray}
+the weighted means and their variances and covariance are given by
 \begin{equation}
-\bar\Psi
-={1\over2}\tan^{-1}\left({\imag[Z]\over\real[Z]}\right).
-\end{equation}
-The variance of this estimate
-\begin{equation}
-\sigma_{\bar\Psi}^2 = \sum_{k=1}^N 
-\left({\partial\bar\Psi\over\partial Q_k}\right)^2 \sigma_Q^2 +
-\left({\partial\bar\Psi\over\partial U_k}\right)^2 \sigma_U^2 +
-\left({\partial\bar\Psi\over\partial Q^\prime_k}\right)^2 \sigma_Q^{\prime2} +
-\left({\partial\bar\Psi\over\partial U^\prime_k}\right)^2 \sigma_U^{\prime2}.
-\end{equation}
-To compute the partial derivatives, let
-\begin{equation}
-C = \real[Z] = \sum_{k=1}^N Q_kQ^\prime_k + U_kU^\prime_k,
-\end{equation}
-\begin{equation}
-S = \imag[Z] = \sum_{k=1}^N Q_kU^\prime_k - Q^\prime_kU_k,
+\bar C = \sigma_{\bar C}^2 \sum_{k=1}^N { c_k \over \sigma_{c_k}^2 }
+\hspace{1cm}
+\bar S = \sigma_{\bar S}^2 \sum_{k=1}^N { s_k \over \sigma_{s_k}^2 }
 \end{equation}
 and
 \begin{equation}
-T = {S\over C},
+\sigma_{\bar C}^2 = \left[ \sum_{k=1}^N{1\over\sigma_{c_k}^2} \right]^{-1}
+\hspace{5mm}
+\sigma_{\bar S}^2 = \left[ \sum_{k=1}^N{1\over\sigma_{s_k}^2} \right]^{-1}
+\hspace{5mm}
+\sigma_{\bar S \bar C} = \sum_{k=1}^N
+\left[\sigma_{\bar S}\sigma_{\bar C}\over\sigma_{s_k}\sigma_{c_k}\right]^2
+                         \sigma_{s_k c_k}
 \end{equation}
-so that
+
+\newpage
+
+\noindent
+The expectation value of $\Delta\Psi=\Psi^\prime_k - \Psi_k$ is given by
 \begin{equation}
-{\partial\bar\Psi\over\partial Q_k} 
-= {1\over1+T^2} \left( {U^\prime_k \over C} - {S Q^\prime_k\over C^2} \right)
-= { C U^\prime_k - S Q^\prime_k \over C^2 + S^2 }
+\langle\Delta\Psi\rangle
+={1\over2}\tan^{-1}\left({\bar S\over\bar C}\right).
 \end{equation}
-Similarly
+and the variance of the expectation value
 \begin{equation}
-{\partial\bar\Psi\over\partial U_k} 
-= { -C Q^\prime_k - S U^\prime_k \over C^2 + S^2 }
-\end{equation}
-\begin{equation}
-{\partial\bar\Psi\over\partial Q^\prime_k} 
-= { -C U_k - S Q_k \over C^2 + S^2 }
-\end{equation}
-\begin{equation}
-{\partial\bar\Psi\over\partial U^\prime_k} 
-= { C Q_k - S U_k \over C^2 + S^2 }
+{\mathrm{var}}(\langle\Delta\Psi\rangle) = 
+{ \bar C^2\sigma_{\bar S}^2 + \bar S^2\sigma_{\bar C}^2
+  + 2 \bar S\bar C \sigma_{\bar S \bar C} \over 
+  \left(\bar C^2 + \bar S^2\right)^2 }
 \end{equation}
 
 \end{document}
