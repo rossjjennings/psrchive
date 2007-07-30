@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineEstimator.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.6 $
+   $Date: 2007/07/30 06:03:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BaselineFunction_h
@@ -18,10 +18,13 @@
 
 namespace Pulsar {
 
-  class Profile;
-
   //! ProfileWeight algorithms that compute profile baselines
   class BaselineEstimator : public ProfileWeightFunction {
+
+  public:
+
+    //! Returns a new PhaseWeight instance
+    PhaseWeight* baseline (const Profile*);
 
   };
 
