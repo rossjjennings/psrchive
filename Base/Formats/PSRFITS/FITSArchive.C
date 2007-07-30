@@ -50,6 +50,7 @@ using namespace std;
 void Pulsar::FITSArchive::init ()
 {
   chanbw = 0.0; 
+  hdrver = 0.0;
 
   scale_cross_products = false;
   correct_P236_reference_epoch = false;
@@ -59,7 +60,7 @@ void Pulsar::FITSArchive::init ()
 //
 //
 Pulsar::FITSArchive::FITSArchive()
-{
+{ 
   if (verbose == 3)
     cerr << "FITSArchive default construct" << endl;
 
@@ -75,7 +76,7 @@ Pulsar::FITSArchive::FITSArchive (const FITSArchive& arch)
 {
   if (verbose == 3)
     cerr << "FITSArchive copy construct" << endl;
-
+  
   init ();
   Archive::copy (arch); // results in call to FITSArchive::copy
 }
@@ -210,6 +211,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   dfault = hdr_ext->hdrver;
   psrfits_read_key (fptr, "HDRVER", &tempstr, dfault, verbose == 3);
   hdr_ext->hdrver = tempstr;
+  hdrver = fromstring<float>( tempstr );
   if (sscanf (hdr_ext->hdrver.c_str(), "%d.%d", 
 	      &hdr_ext->major_version, &hdr_ext->minor_version) != 2)
     throw Error (InvalidParam, "FITSARchive::load_header",
@@ -625,6 +627,19 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     fits_get_num_rows (fptr, &numrows, &status);
 
     set_nsubint(numrows);
+    
+    // we have already loaded the proc history
+    // if the proc history contained only 1 row, set nsub in proc history so
+    // that for files pre 2.13 the observed nsub is correct.
+    
+    Reference::To<ProcHistory> hist = get<ProcHistory>();
+    if( hist )
+    {
+      if( hist->rows.size() == 1 )
+      {
+	hist->rows[0].nsub = get_nsubint();
+      }
+    }
     
     if (verbose == 3)
       cerr << "FITSArchive::load_header there are " << numrows << " subints"

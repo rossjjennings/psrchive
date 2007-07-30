@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '2.12            '   / Header version 
+HDRVER  = '2.13            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -80,6 +80,8 @@ TTYPE#  = SCALE               / Units (FluxDen/RefFlux/Jansky)
 TFORM#  = 8A                  / 8-char string
 TTYPE#  = POL_TYPE            / Polarisation identifier
 TFORM#  = 8A                  / 8-char string
+TTYPE#  = NSUB                / Number of Sub-Integrations
+TFORM#  = 1I                  / Integer
 TTYPE#  = NPOL                / Number of polarisations
 TFORM#  = 1I                  / Integer
 TTYPE#  = NBIN                / Nr of bins per product (0 for SEARCH mode)

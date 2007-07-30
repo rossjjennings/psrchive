@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.45 $
-   $Date: 2007/07/10 01:14:55 $
+   $Revision: 1.46 $
+   $Date: 2007/07/30 05:10:35 $
    $Author: nopeer $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -218,6 +218,10 @@ namespace Pulsar {
 
     //! The polyco parsed from the PSRFITS file
     Reference::To<Predictor> hdr_model;
+    
+    // The version of the psrfits file, can be used to make decisions about
+    // how we treat older files
+    float hdrver;
 
   private:
 
@@ -231,7 +235,7 @@ namespace Pulsar {
     /* This attribute enables proper handling of time stamps when there
        is no FITSHdrExtension in use (as is the case in psrconv) */
     MJD reference_epoch;
-
+    
     int truthval (bool) const;
     void init ();
 
