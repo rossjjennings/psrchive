@@ -54,6 +54,7 @@ namespace Pulsar {
       std::string date_pro;
       std::string proc_cmd;
       std::string pol_type;
+      int nsub;
       int npol;
       int nbin;
       int nbin_prd;
