@@ -45,6 +45,8 @@ Pulsar::Receiver::Receiver () : Extension ("Receiver")
 
   atten_a = 0.0;
   atten_b = 0.0;
+  
+  nrcvr = 0;
 }
 
 //! Copy constructor

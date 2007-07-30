@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.20 $
-   $Date: 2007/06/20 03:04:54 $
+   $Revision: 1.21 $
+   $Date: 2007/07/30 05:00:25 $
    $Author: nopeer $ */
 
 #ifndef __ReceiverExtension_h
@@ -81,6 +81,11 @@ namespace Pulsar {
     const std::string get_name () const { return name; }
     //! Set the name of the receiver
     void set_name (const std::string& _name) { name = _name; }
+    
+    //! Get the number of receptors
+    int get_nrcvr( void ) { return nrcvr; }
+    //! Set the number of receptors
+    void set_nrcvr( const int s_nrcvr ) { nrcvr = s_nrcvr; }
 
     //! Get the basis of the feed receptors
     Signal::Basis get_basis () const { return state->get_basis(); }
@@ -211,6 +216,9 @@ namespace Pulsar {
 
     //! Name of the receiver
     std::string name;
+    
+    //! Number of receptors
+    int nrcvr;
 
     //! State of the receiver
     Reference::To<State> state;
