@@ -12,7 +12,7 @@
 
 using namespace std;
 
-void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow)
+void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow )
 {
   int row = hrow->index;
   
@@ -90,6 +90,28 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow)
   if (status != 0)
     throw FITSError (status, "load ProcHistory::row", 
                      "fits_read_col POL_TYPE");
+  
+  // Get NSUB
+  
+
+  colnum = 0;
+  initflag = 0;
+  fits_get_colnum (fptr, CASEINSEN, "NSUB", &colnum, &status);
+  
+  if( status )
+  {
+    hrow->nsub = 0;
+    status = 0;
+  }
+  else
+  {
+    fits_read_col (fptr, TINT, colnum, row, 1, 1, &nullint,
+		  &(hrow->nsub), &initflag, &status);
+  
+    if (status != 0)
+      throw FITSError (status, "load ProcHistory::row",
+		      "fits_read_col NSUB");
+  }
   
   // Get NPOL
   

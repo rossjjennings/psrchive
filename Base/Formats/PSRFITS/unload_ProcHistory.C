@@ -76,6 +76,18 @@ void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow)
     throw FITSError (status, "FITSArchive::unload_hist_row", 
                      "fits_write_col POL_TYPE");
   
+  // Write NSUB
+  
+  colnum = 0;
+  fits_get_colnum (fptr, CASEINSEN, "NSUB", &colnum, &status);
+  
+  tempint = hrow->nsub;
+  fits_write_col (fptr, TINT, colnum, row, 1, 1, &tempint, &status);
+  
+  if (status != 0)
+    throw FITSError (status, "FITSArchive::unload_hist_row", 
+		     "fits_write_col NSUB");
+  
   // Write NPOL
   
   colnum = 0;

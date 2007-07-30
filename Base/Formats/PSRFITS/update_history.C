@@ -45,6 +45,7 @@ void Pulsar::FITSArchive::update_history()
   else
     history->get_last().pol_type = "UNKNOWN";
 
+  history->get_last().nsub = get_nsubint();
   history->get_last().npol = get_npol();
   history->get_last().nbin = get_nbin();
   history->get_last().nbin_prd = get_nbin();
