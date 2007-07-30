@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeight.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/07/12 05:59:27 $
+   $Revision: 1.11 $
+   $Date: 2007/07/30 06:44:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeight_h
@@ -64,6 +64,12 @@ namespace Pulsar {
     //! Get the number of weights in the array
     unsigned get_nbin () const { return weight.size(); }
 
+    //! Get the reference frequency
+    double get_frequency () const { return reference_frequency; }
+
+    //! Set the reference frequency
+    void set_frequency (double f) { reference_frequency = f; }
+
     //! Set all weights to the specified value
     void set_all (float weight);
   
@@ -96,7 +102,16 @@ namespace Pulsar {
 		double* mean, double* variance=0, 
 		double* varmean=0, double* varvar=0) const;
 
+    //! Return the base address of the weights array
+    float* get_weights () { return &(weight[0]); }
+
+    //! Return the base address of the weights array
+    const float* get_weights() const { return &(weight[0]); }
+
   protected:
+
+    //! The reference frequency
+    double reference_frequency;
 
     //! The weights
     std::vector<float> weight;
@@ -115,6 +130,9 @@ namespace Pulsar {
 
     //! Compute the mean and variance attributes
     void build ();
+
+    //! Initialize attributes to default values
+    void init ();
 
   };
 

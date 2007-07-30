@@ -4,37 +4,45 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 
+using namespace std;
+
+void Pulsar::PhaseWeight::init ()
+{
+  reference_frequency = 0.0;
+  built = false;
+}
+
 Pulsar::PhaseWeight::PhaseWeight ()
 {
-  built = false;
+  init ();
 }
 
 Pulsar::PhaseWeight::PhaseWeight (unsigned nbin)
   : weight (nbin)
 {
-  built = false;
+  init ();
 }
 
 Pulsar::PhaseWeight::PhaseWeight (unsigned nbin, float set_all)
   : weight (nbin, set_all)
 {
-  built = false;
+  init ();
 }
 
 Pulsar::PhaseWeight::PhaseWeight (const PhaseWeight& pm)
 {
-  weight = pm.weight;
-  built = false;
+  init ();
+  operator = (pm);
 }
 
 Pulsar::PhaseWeight::PhaseWeight (const vector<float>& _weight)
 {
+  init ();
   weight = _weight;
-  built = false;
 }
 
 Pulsar::PhaseWeight::~PhaseWeight ()
@@ -45,6 +53,7 @@ const Pulsar::PhaseWeight&
 Pulsar::PhaseWeight::operator = (const PhaseWeight& pm)
 {
   weight = pm.weight;
+  reference_frequency = pm.reference_frequency;
   built = false;
   return *this;
 }
