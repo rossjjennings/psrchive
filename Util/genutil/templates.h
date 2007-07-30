@@ -32,6 +32,25 @@ void scrunch (std::vector<T>& vals, unsigned factor, bool mean = true)
   vals.resize (vals.size()/factor);
 }
 
+//! inplace shift
+template<typename T>
+void shift (unsigned size, unsigned shift, T* array)
+{
+  T* temp = new T[shift];
+  memcpy (temp, array, shift*sizeof(T));
+  memmove (array, array+shift, (size-shift)*sizeof(T));
+  memcpy (array+size-shift, temp, shift*sizeof(T));
+  delete [] temp;
+}
+
+//! outofplace shift
+template<typename T>
+void shift (unsigned size, unsigned shift, T* result, const T* input)
+{
+  memcpy (result, input+shift, (size-shift)*sizeof(T));
+  memcpy (result+size-shift, input, shift*sizeof(T));
+}
+
 // returns the mean "bin" of a histogram
 template <class T>
 T histomean (const std::vector<T>& vals)
