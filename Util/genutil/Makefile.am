@@ -27,6 +27,7 @@ include_HEADERS = \
         JenetAnderson98.h \
         machine_endian.h \
         MJD.h \
+	FITSUTC.h \
 	normal.h \
         orbital.h \
 	pairutil.h \
@@ -76,6 +77,7 @@ libgenutil_la_SOURCES = \
         JenetAnderson98A5.C \
         JenetAnderson98.C \
         MJD.C \
+	FITSUTC.C \
 	normal.c \
         Physical.C \
         Plugin.C \
