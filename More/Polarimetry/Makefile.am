@@ -32,6 +32,10 @@ nobase_include_HEADERS = \
         Pulsar/OffPulseCalibrator.h \
         Pulsar/Parallactic.h \
         Pulsar/PolarCalibrator.h \
+        Pulsar/Polarization.h \
+        Pulsar/PolnProfile.h \
+        Pulsar/PolnProfileFit.h \
+        Pulsar/PolnProfileStats.h \
         Pulsar/PolnCalibrator.h \
         Pulsar/PulsarCalibrator.h \
         Pulsar/ReceptionCalibrator.h \
@@ -110,7 +114,6 @@ libPolarimetry_la_SOURCES = \
         SingleAxisPolynomial.C \
         SingleAxisSolver.C \
         SourceInfo.C \
-	standard_shell.C \
         StandardModel.C \
         SystemCalibrator.C \
         TemplateUncertainty.C \
