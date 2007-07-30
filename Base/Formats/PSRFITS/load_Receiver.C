@@ -40,6 +40,21 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   else
     ext->set_name (tempstr.get());
   
+  // Number of receptors
+  
+  fits_read_key ( fptr, TSTRING, "NRCVR", tempstr.get(), comment, &status );
+  if( status != 0 ){
+    if (verbose == 3)
+      cerr << FITSError (status, "FITSArchive::load_Receiver",
+			 "fits_read_key NRCVR").warning() << endl;
+    status = 0;
+    ext->set_nrcvr( 0 );
+  }
+  else
+  {
+    ext->set_nrcvr( fromstring<int>( string( tempstr.get() ) ) );
+  }
+  
   // Read the feed configuration
 
   if (verbose == 3)
