@@ -212,7 +212,7 @@ try {
   unsigned isub,  nsub = archive->get_nsubint();
   unsigned ichan, nchan = archive->get_nchan();
 
-  unsigned nedge = nchan * fraction;
+  unsigned nedge = unsigned( nchan * fraction );
 
   for (isub=0; isub < nsub; isub++) {
     Integration* subint = archive->get_Integration (isub);
