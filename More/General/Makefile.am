@@ -16,6 +16,7 @@ nobase_include_HEADERS = \
         Pulsar/ArchiveMatch.h \
         Pulsar/ArchiveSort.h \
         Pulsar/BaselineEstimator.h \
+	Pulsar/BaselineInterpreter.h \
         Pulsar/BaselineWindow.h \
         Pulsar/ChannelWeight.h \
         Pulsar/ChannelZapMedian.h \
@@ -48,6 +49,7 @@ nobase_include_HEADERS = \
         Pulsar/OnPulseThreshold.h \
         Pulsar/PhaseWeightFunction.h \
 	Pulsar/PhaseWeightModifier.h \
+	Pulsar/PhaseWeightShift.h \
 	Pulsar/PhaseWeightSmooth.h \
         Pulsar/PhaseWeight.h \
         Pulsar/ProfileWeightFunction.h \
@@ -105,6 +107,8 @@ libGeneral_la_SOURCES = \
         Archive_transform.C \
         Archive_tscrunch.C \
         Archive_update_model.C \
+	BaselineEstimator.C \
+	BaselineInterpreter.C \
         BaselineWindow.C \
         ChannelZapMedian.C \
         ChannelZapModulation.C \
@@ -141,7 +145,9 @@ libGeneral_la_SOURCES = \
         NoiseStatistics.C \
 	OnPulseThreshold.C \
 	PhaseWeightModifier.C \
+	PhaseWeightShift.C \
         PhaseWeight.C \
+	Profile_baseline.C \
         Profile_convolve.C \
         Profile_dedisperse.C \
         Profile_fftconv.C \
@@ -161,6 +167,7 @@ libGeneral_la_SOURCES = \
         SmoothMedian.C \
         SNRWeight.C \
         SquareWave.C \
+	standard_shell.C \
         StandardCandles.C \
         StandardSNR.C \
 	TimeAppend.C \
@@ -174,9 +181,8 @@ libGeneral_la_SOURCES = \
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include \
-	-I$(top_srcdir)/More/Polarimetry \
-	-I$(top_srcdir)/More/MEAL @TEMPO2_CFLAGS@
+INCLUDES = -I$(top_srcdir)/More/Polarimetry -I$(top_srcdir)/More/MEAL \
+	-I$(top_builddir)/include @TEMPO2_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.include
 
