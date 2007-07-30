@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.102 $
-   $Date: 2007/06/21 17:32:05 $
+   $Revision: 1.103 $
+   $Date: 2007/07/30 06:35:09 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -21,6 +21,8 @@
 #include "Estimate.h"
 
 namespace Pulsar {
+
+  class PhaseWeight;
 
   //! The basic observed quantity; the pulse profile.
   /*! The Pulsar::Profile class implements a useful, yet minimal, set
@@ -68,9 +70,6 @@ namespace Pulsar {
 
     //! copy constructor
     Profile (const Profile* profile) { init(); operator = (*profile); }
-
-    //! generates a profile containing a hat function
-    Pulsar::Profile* hat_profile(int nbin, float duty_cycle);
 
     //! destructor destroys the data area
     virtual ~Profile ();
@@ -166,8 +165,14 @@ namespace Pulsar {
     //! Returns the bin number with the minimum amplitude
     int find_min_bin (int bin_start=0, int bin_end=0) const;
 
+    //! The default implementation of the baseline finding algorithm
+    static Functor< PhaseWeight* (const Profile*) > baseline_strategy;
+
+    //! Return a new PhaseWeight instance with the baseline phase bins masked
+    PhaseWeight* baseline () const;
+
     //! The default implementation of the snr method
-    static Functor<float(const Pulsar::Profile*)> snr_strategy;
+    static Functor< float (const Pulsar::Profile*) > snr_strategy;
 
     //! Returns the signal to noise ratio of the profile
     float snr () const;
@@ -232,9 +237,6 @@ namespace Pulsar {
 
     //! cross-correlates this with the given profile in time domain
     void correlate (const Profile* profile); 
-
-    //! smears this by convolution with a hat function of given duty cycle
-    void smear(float duty_cycle);
 
     //! integrate neighbouring phase bins in profile
     void bscrunch (unsigned nscrunch);
