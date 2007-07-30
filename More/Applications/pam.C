@@ -115,6 +115,8 @@ void usage()
 
 // PAM: A command line tool for modifying archives
 
+void smear (Pulsar::Profile*, float duty_cycle);
+
 int main (int argc, char *argv[]) try {
   
     bool verbose = false;
@@ -148,7 +150,6 @@ int main (int argc, char *argv[]) try {
     bool reset_weights = false;
     float new_weight = 1.0;
 
-    bool smear = false;
     float smear_dc = 0.0;
 
     bool rotate = false;
@@ -269,7 +270,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.72 2007/06/21 17:32:05 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.73 2007/07/30 06:35:17 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -376,7 +377,6 @@ int main (int argc, char *argv[]) try {
 	command += optarg;
 	break;
       case 's':
-	smear = true;
 	if (sscanf(optarg, "%f", &smear_dc) != 1) {
 	  cout << "That is not a valid smearing duty cycle" << endl;
 	  return -1;
@@ -918,11 +918,11 @@ int main (int argc, char *argv[]) try {
 	}
       }     
 
-      if (smear) {
+      if (smear_dc) {
 	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
 	  for (unsigned j = 0; j < arch->get_npol(); j++) {
 	    for (unsigned k = 0; k < arch->get_nchan(); k++) {
-	      arch->get_Profile(i,j,k)->smear(smear_dc);
+	      smear (arch->get_Profile(i,j,k), smear_dc);
 	    }
 	  }
 	}
@@ -1013,6 +1013,65 @@ catch(...)
   fprintf(stderr,"Unknown exception caught\n");
   return -1;
 }
+
+
+
+
+Pulsar::Profile* hat_profile (int nbin, float duty_cycle)
+{
+  if (duty_cycle >= 1.0 || duty_cycle <= 0.0)
+    throw Error (InvalidParam, 
+		 "hat_profile invalid duty cycle");
+  
+  if (nbin <= 0)
+    throw Error (InvalidParam, "hat_profile invalid nbin");
+  
+  Pulsar::Profile* ptr = new Pulsar::Profile();
+
+  ptr->set_centre_frequency(0.0);
+  ptr->set_weight(1.0);
+  ptr->set_state(Signal::None);
+
+  ptr->resize(nbin);
+
+  for (int i = 0; i < nbin; i++) {
+    ptr->get_amps()[i] = 0.0;
+  }
+
+  int width = int(float(nbin) * duty_cycle);
+
+  if (nbin % 2 == 0) {
+
+    if (width %2 != 0)
+      width += 1;
+    
+    int start_bin = (nbin / 2) - (width / 2);
+    int end_bin = start_bin + (width);
+
+    for (int i = start_bin; i < end_bin; i++) 
+      ptr->get_amps()[i] = 1.0;
+  }
+  else {
+    
+    if (width %2 == 0)
+      width += 1;
+    
+    int start_bin = ((nbin - 1) / 2) - ((width - 1) / 2);
+    int end_bin = start_bin + width;
+
+    for (int i = start_bin; i < end_bin; i++) 
+      ptr->get_amps()[i] = 1.0;
+  }
+
+  return ptr;
+}
+
+
+void smear (Pulsar::Profile* profile, float duty_cycle)
+{
+  profile->fft_convolve( hat_profile(profile->get_nbin(), duty_cycle) );
+}
+
 
 
 
