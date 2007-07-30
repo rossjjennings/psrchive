@@ -42,7 +42,12 @@ void Pulsar::Interpreter::init()
     (&Interpreter::get_report,
      "report", "display plugin information",
      "no arguments required\n");
-  
+
+  add_command 
+    ( &Interpreter::toggle_clobber,
+      "clobber", "toggle overwrite permission",
+      "usage: clobber \n");
+
   add_command 
     ( &Interpreter::load,
       "load", "load archive from file",
@@ -221,15 +226,6 @@ void Pulsar::Interpreter::init()
       "spc", "apply scattered power correction",
       "usage: spc \n");
 
-  add_command 
-    ( &Interpreter::screen_dump,
-      "screendump", "display raw data points",
-      "usage: screendump \n");
-  
-  add_command 
-    ( &Interpreter::toggle_clobber,
-      "clobber", "toggle overwrite permission",
-      "usage: clobber \n");
 }
 
 Pulsar::Interpreter::Interpreter()
