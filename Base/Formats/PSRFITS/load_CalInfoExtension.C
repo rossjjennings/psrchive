@@ -17,7 +17,7 @@ void Pulsar::FITSArchive::load_CalInfoExtension (fitsfile* fptr)
 
   // do not return comments in fits_read_key
   char* comment = 0;
-
+  
   // Read detailed CAL information
 
   if (verbose == 3)
@@ -25,11 +25,11 @@ void Pulsar::FITSArchive::load_CalInfoExtension (fitsfile* fptr)
   
   CalInfoExtension* ext = new CalInfoExtension;
 
-  fits_read_key (fptr, TFLOAT, "CAL_FREQ", &(ext->cal_frequency),
+  fits_read_key (fptr, TDOUBLE, "CAL_FREQ", &(ext->cal_frequency),
 		 comment, &status);
-  fits_read_key (fptr, TFLOAT, "CAL_DCYC", &(ext->cal_dutycycle),
+  fits_read_key (fptr, TDOUBLE, "CAL_DCYC", &(ext->cal_dutycycle),
 		 comment, &status);
-  fits_read_key (fptr, TFLOAT, "CAL_PHS", &(ext->cal_phase),
+  fits_read_key (fptr, TDOUBLE, "CAL_PHS", &(ext->cal_phase),
 		 comment, &status);
     
   if (status == 0)
