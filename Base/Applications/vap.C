@@ -32,6 +32,7 @@
 #include <Pulsar/DigitiserStatistics.h>
 #include <Pulsar/DigitiserCounts.h>
 #include <Pulsar/FITSSUBHdrExtension.h>
+#include <Pulsar/CalInfoExtension.h>
 
 #include <dirutil.h>
 #include <strutil.h>
@@ -43,6 +44,10 @@
 #include <unistd.h>
 
 #include <sstream>
+
+#include <ctime>
+#include <utc.h>
+#include <FITSUTC.h>
 
 
 /**
@@ -84,7 +89,7 @@ void restore_precision( void )
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-// FUNCTIONS FOR RETREIVING Achive PARAMETERS
+// FUNCTIONS FOR RETREIVING OBSERVATION PARAMETERS
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -92,28 +97,6 @@ void restore_precision( void )
 string get_name( Reference::To< Archive > archive )
 {
   return archive->get_source();
-}
-
-
-string get_nbin( Reference::To< Archive > archive )
-{
-  return tostring<unsigned int>( archive->get_nbin() );
-}
-
-
-string get_nchan( Reference::To< Archive > archive )
-{
-  return tostring<unsigned int>( archive->get_nchan() );
-}
-
-string get_npol( Reference::To< Archive > archive )
-{
-  return tostring<unsigned int>( archive->get_npol() );
-}
-
-string get_nsub( Reference::To< Archive > archive )
-{
-  return tostring<unsigned int>( archive->get_nsubint() );
 }
 
 string get_stime( Reference::To< Archive > archive )
@@ -130,6 +113,73 @@ string get_length( Reference::To< Archive > archive )
 {
   tostring_precision = 6;
   return tostring<double>( archive->integration_length() );
+}
+
+string get_nbin_obs( Reference::To<Archive> archive )
+{
+  string result = "UNDEF";
+
+  Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
+
+  if( ext )
+  {
+    ProcHistory::row first;
+    first = ( *(ext->rows.begin()) );
+    result = tostring<int>( first.nbin );
+  }
+
+  return result;
+}
+
+string get_nchan_obs( Reference::To<Archive> archive )
+{
+  string result = "UNDEF";
+
+  Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
+
+  if( ext )
+  {
+    ProcHistory::row first;
+    first = ( *(ext->rows.begin()) );
+    result = tostring<int>( first.nchan );
+  }
+
+  return result;
+}
+
+string get_npol_obs( Reference::To<Archive> archive )
+{
+  string result = "UNDEF";
+
+  Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
+
+  if( ext )
+  {
+    ProcHistory::row first;
+    first = ( *(ext->rows.begin()) );
+    result = tostring<int>( first.npol );
+  }
+
+  return result;
+}
+
+string get_nsub_obs( Reference::To<Archive> archive )
+{
+  string result = "UNDEF";
+
+  Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
+
+  if( ext )
+  {
+    ProcHistory::row first;
+    first = ( *(ext->rows.begin()) );
+    if( first.nsub == 0 )
+      result = "*";
+    else
+      result = tostring<int>( first.nsub );
+  }
+
+  return result;
 }
 
 string get_rm( Reference::To< Archive > archive )
@@ -207,7 +257,7 @@ string get_fracmjd( Reference::To< Archive > archive )
 }
 
 
-string get_para( Reference::To< Archive > archive )
+string get_parang( Reference::To< Archive > archive )
 {
   stringstream result;
 
@@ -296,6 +346,34 @@ string get_projid( Reference::To<Archive> archive )
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 
+string get_rcvr( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+
+  Reference::To<Receiver> ext = archive->get<Receiver>();
+
+  if( ext )
+  {
+    result = ext->get_name();
+  }
+
+  return result;
+}
+
+string get_nrcvr( Reference::To<Archive> archive )
+{
+  string result = "TODO";
+
+  Reference::To<Receiver> ext = archive->get<Receiver>();
+
+  if( ext )
+  {
+    result = tostring<int>( ext->get_nrcvr() );
+  }
+
+  return result;
+}
+
 string get_ta( Reference::To<Archive> archive )
 {
   string result = "";
@@ -335,7 +413,7 @@ string get_basis( Reference::To<Archive> archive )
   return result;
 }
 
-string get_hand( Reference::To<Archive> archive )
+string get_fd_hand( Reference::To<Archive> archive )
 {
   string result = "";
   Reference::To<Receiver> recv = archive->get<Receiver>();
@@ -348,7 +426,7 @@ string get_hand( Reference::To<Archive> archive )
   return result;
 }
 
-string get_rph( Reference::To<Archive> archive )
+string get_fd_xyph( Reference::To<Archive> archive )
 {
   string result = "";
   Reference::To<Receiver> recv = archive->get<Receiver>();
@@ -374,7 +452,7 @@ string get_oa( Reference::To<Archive> archive )
   return result;
 }
 
-string get_recv_ra( Reference::To<Archive> archive )
+string get_fd_sang( Reference::To<Archive> archive )
 {
   string result = "";
   Reference::To<Receiver> recv = archive->get<Receiver>();
@@ -387,7 +465,7 @@ string get_recv_ra( Reference::To<Archive> archive )
   return result;
 }
 
-string get_xo( Reference::To<Archive> archive )
+string get_xoffset( Reference::To<Archive> archive )
 {
   string result = "";
   Reference::To<Receiver> recv = archive->get<Receiver>();
@@ -489,6 +567,20 @@ string get_telescop( Reference::To< Archive > archive )
     result = "UNDEF";
   else
     result = ext->get_telescope();
+
+  return result;
+}
+
+string get_date( Reference::To< Archive > archive )
+{
+  string result = "";
+
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = ext->get_creation_date();
 
   return result;
 }
@@ -644,6 +736,22 @@ string get_stt_time( Reference::To<Archive> archive )
     result = "UNDEF";
   else
     result = ext->get_stt_time();
+
+  return result;
+}
+
+
+string get_stt_lst( Reference::To<Archive> archive )
+{
+  string result = "UNDEF";
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
+
+  set_precision( 10 );
+
+  if( ext )
+    result = tostring<double>( ext->get_stt_lst() );
+
+  restore_precision();
 
   return result;
 }
@@ -903,12 +1011,10 @@ string get_epoch_fluxcal( Reference::To<Archive> archive )
 
 string get_nbin_prd( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result = "UNDEF";
   Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
 
-  if( !ext )
-    result = "UNDEF";
-  else
+  if( ext )
     result = tostring<unsigned int>( ext->get_last_nbin_prd() );
 
   return result;
@@ -916,12 +1022,10 @@ string get_nbin_prd( Reference::To<Archive> archive )
 
 string get_tbin( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result = "UNDEF";
   Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
 
-  if( !ext )
-    result = "UNDEF";
-  else
+  if( ext )
     result = tostring<double>( ext->get_last_tbin() );
 
   return result;
@@ -929,15 +1033,33 @@ string get_tbin( Reference::To<Archive> archive )
 
 string get_chbw( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result = "UNDEF";
   Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
 
-  if( !ext )
-    result = "UNDEF";
-  else
+  if( ext )
     result = tostring<double>( ext->get_last_chan_bw() );
 
   return result;
+}
+
+string get_nbin( Reference::To< Archive > archive )
+{
+  return tostring<unsigned int>( archive->get_nbin() );
+}
+
+string get_nchan( Reference::To< Archive > archive )
+{
+  return tostring<unsigned int>( archive->get_nchan() );
+}
+
+string get_npol( Reference::To< Archive > archive )
+{
+  return tostring<unsigned int>( archive->get_npol() );
+}
+
+string get_nsub( Reference::To< Archive > archive )
+{
+  return tostring<unsigned int>( archive->get_nsubint() );
 }
 
 
@@ -1258,20 +1380,77 @@ string get_nsblk( Reference::To<Archive> archive )
 }
 
 
-//     AddMap( "subint_type", "FITSSUBHdrExtensionTI-int_type" );
-//     AddMap( "subint_unit", "FITSSUBHdrExtensionTI-int_unit" );
-//     AddMap( "tsamp", "FITSSUBHdrExtensionTI-tsamp" );
-//     AddMap( "nbin_subint", "FITSSUBHdrExtensionTI-nbin" );
-//     AddMap( "nbits", "FITSSUBHdrExtensionTI-nbits" );
-//     AddMap( "nch_file", "FITSSUBHdrExtensionTI-nch_file" );
-//     AddMap( "nch_strt", "FITSSUBHdrExtensionTI-nch_strt" );
-//     AddMap( "npol_subint", "FITSSUBHdrExtensionTI-npol" );
-//     AddMap( "nsblk", "FITSSUBHdrExtensionTI-nsblk" );
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-//
+// CALIBRATION FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+string get_cal_mode( Reference::To<Archive> archive )
+{
+  string result = "UNDEF";
+
+  Reference::To<CalInfoExtension> ext = archive->get<CalInfoExtension>();
+
+  if( ext )
+  {
+    result = ext->cal_mode;
+  }
+
+  return result;
+}
+
+
+string get_cal_freq( Reference::To<Archive> archive )
+{
+  string result = "UNDEF";
+
+  Reference::To<CalInfoExtension> ext = archive->get<CalInfoExtension>();
+
+  if( ext )
+  {
+    set_precision( 3 );
+    result = tostring<double>( ext->cal_frequency );
+    restore_precision();
+  }
+
+
+  return result;
+}
+
+
+string get_cal_dcyc( Reference::To<Archive> archive )
+{
+  string result = "UNDEF";
+
+  Reference::To<CalInfoExtension> ext = archive->get<CalInfoExtension>();
+
+  if( ext )
+  {
+    set_precision(3);
+    result = tostring<double>( ext->cal_dutycycle );
+    restore_precision();
+  }
+
+  return result;
+}
+
+
+string get_cal_phs( Reference::To<Archive> archive )
+{
+  string result = "UNDEF";
+
+  Reference::To<CalInfoExtension> ext = archive->get<CalInfoExtension>();
+
+  if( ext )
+  {
+    set_precision(3);
+    result = tostring<double>( ext->cal_phase );
+    restore_precision();
+  }
+
+  return result;
+}
 
 
 
@@ -1367,27 +1546,24 @@ void PrintExtdHlp( void )
   cout << "be_dcc                          Downconversion conjugation corrected" << endl;
   cout << "be_phase                        Phase convention of backend" << endl;
   cout << "beconfig                        Backend Config file" << endl;
-  cout << "tcycle                          Get the correlator cycle time" << endl;
+  cout << "tcycle                          Correlator cycle time" << endl;
   cout << "" << endl;
 
-  cout << "BANDPASS" << endl;
+  cout << "BANDPASS PARAMETERS" << endl;
   cout << "nch_bp                          Number of channels in original bandpass" << endl;
   cout << "npol_bp                         Number of polarizations in bandpass" << endl;
   cout << "" << endl;
 
-  cout << "COMMON PARAMETERS" << endl;
+  cout << "OBSERVATION PARAMETERS" << endl;
   cout << "bw                              Bandwidth (MHz)" << endl;
   cout << "dmc                             Dispersion corrected (boolean)" << endl;
-  cout << "fracmjd                         MJD faction of day" << endl;
-  cout << "freq                            Centre frequency (MHz)" << endl;
-  cout << "intmjd                          MJD day" << endl;
   cout << "length                          The full duration of the observation (s)" << endl;
   cout << "name                            Name of the source" << endl;
-  cout << "nbin                            Number of pulse phase bins" << endl;
-  cout << "nchan                           Number of frequency channels" << endl;
-  cout << "npol                            Number of polarizations" << endl;
-  cout << "nsub                            Number of sub-integrations" << endl;
-  cout << "para                            Parallactic angle at archive mid point" << endl;
+  cout << "nbin_obs                        Number of pulse phase bins" << endl;
+  cout << "nchan_obs                       Number of frequency channels" << endl;
+  cout << "npol_obs                        Number of polarizations" << endl;
+  cout << "nsub_obs                        Number of Sub-Integrations" << endl;
+  cout << "obs_mode                        Observation Mode (PSR, CAL, SEARCH)" << endl;
   cout << "polc                            Polarization calibrated (boolean)" << endl;
   cout << "rm                              Rotation measure (rad/m^2)" << endl;
   cout << "rmc                             Faraday Rotation corrected (boolean)" << endl;
@@ -1395,14 +1571,14 @@ void PrintExtdHlp( void )
   cout << "state                           State of profile amplitudes" << endl;
   cout << "tsub                            The duration of the first subint (s)" << endl;
   cout << "type                            Observation type (Pulsar, PolnCal, etc.)" << endl;
-  cout << "" << endl;
+  cout << endl;
 
   cout << "DIGITISER COUNTS PARAMETERS" << endl;
   cout << "dig_mode                        Digitiser mode" << endl;
   cout << "levmode_digcnts                 Digitiser level-setting mode (AUTO, FIX)" << endl;
   cout << "nlev_digcnts                    Number of digitiser levels" << endl;
   cout << "npthist                         Number of points in histogram (I)" << endl;
-  cout << "" << endl;
+  cout << endl;
 
   cout << "DIGITISER STATISTICS PARAMETERS" << endl;
   cout << "levmode_digstat                 Digitiser level-setting mode (AUTO, FIX)" << endl;
@@ -1411,11 +1587,11 @@ void PrintExtdHlp( void )
   cout << "npar_digstat                    Number of digitiser parameters" << endl;
   cout << "" << endl;
 
-  cout << "FEED PARAMETERS" << endl;
+  cout << "FEED COUPLING PARAMETERS" << endl;
   cout << "MJD_feed                        [MJD] Epoch of calibration obs" << endl;
   cout << "nchan_feed                      Nr of channels in Feed coupling data" << endl;
   cout << "npar_feed                       Number of coupling parameters" << endl;
-  cout << "" << endl;
+  cout << endl;
 
   cout << "FLUXCAL" << endl;
   cout << "epoch_fluxcal                   [MJD] Epoch of calibration obs" << endl;
@@ -1425,7 +1601,12 @@ void PrintExtdHlp( void )
 
   cout << "HISTORY" << endl;
   cout << "chbw                            Channel bandwidth" << endl;
+  cout << "freq                            Centre frequency (MHz)" << endl;
+  cout << "nchan                           Number of frequency channels" << endl;
+  cout << "nbin                            Number of pulse phase bins" << endl;
   cout << "nbin_prd                        Nr of bins per period" << endl;
+  cout << "npol                            Number of polarizations" << endl;
+  cout << "nsub                            Number of sub-integrations" << endl;
   cout << "tbin                            Time per bin or sample" << endl;
   cout << endl;
 
@@ -1434,15 +1615,13 @@ void PrintExtdHlp( void )
   cout << "projid                          Project name" << endl;
   cout << endl;
 
-  cout << "PSRFITS PARAMETERS" << endl;
-  cout << "bmaj                            [deg] beam major axis" << endl;
-  cout << "bmin                            [deg] beam minor axis" << endl;
-  cout << "bpa                             [deg] beam position angle" << endl;
-  cout << "coord_md                        The coordinate mode (EQUAT, GAL, ECLIP, etc )." << endl;
+  cout << "COORDINATES & TIMES" << endl;
+  cout << "coord_md                        The coordinate mode (J2000, GAL, ECLIP, etc )." << endl;
   cout << "dec                             Declination (-dd:mm:ss.sss)" << endl;
-  cout << "equinox                         Equinox of coords (J2000, B1950)" << endl;
-  cout << "hdrver                          Header Version" << endl;
-  cout << "obs_mode                        Observation Mode (PSR, CAL, SEARCH)" << endl;
+  cout << "equinox                         Equinox of coords (2000.0)" << endl;
+  cout << "fracmjd                         MJD faction of day" << endl;
+  cout << "intmjd                          MJD day" << endl;
+  cout << "parang                          Parallactic angle at archive mid point" << endl;
   cout << "ra                              Right ascension (hh:mm:ss.ssss)" << endl;
   cout << "stp_crd1                        Stop coord 1 (hh:mm:ss.sss or ddd.ddd)" << endl;
   cout << "stp_crd2                        Stop coord 2 (-dd:mm:ss.sss or -dd.ddd)" << endl;
@@ -1450,30 +1629,30 @@ void PrintExtdHlp( void )
   cout << "stt_crd2                        Start coord 2 (-dd:mm:ss.sss or -dd.ddd)" << endl;
   cout << "stt_date                        Start UT date (YYYY-MM-DD)" << endl;
   cout << "stt_imjd                        Start MJD (UTC days) (J - long integer)" << endl;
+  cout << "stt_lst                         Start LST (hh:mm:ss)" << endl;
   cout << "stt_offs                        [s] Start time offset (D)" << endl;
   cout << "stt_smjd                        [s] Start time (sec past UTC 00h) (J)" << endl;
   cout << "stt_time                        Start UT (hh:mm:ss)" << endl;
   cout << "trk_mode                        Track mode ( TRACK, SCANGC, SCANLAT )" << endl;
   cout << endl;
 
-  cout << "RECEIVER PARAMETERS" << endl;
+  cout << "FEED & RECEIVER PARAMETERS" << endl;
+  cout << "rcvr                            Name of receiver" << endl;
   cout << "basis                           Basis of receptors" << endl;
-  cout << "co                              Offset of calibrator wrt nominal value" << endl;
   cout << "fac                             Feed angle corrected" << endl;
-  cout << "hand                            Hand of receptor basis" << endl;
-  cout << "oa                              Orientation angle of receptors in feed" << endl;
-  cout << "recv_ra                         Orientation angle of reference field vector" << endl;
-  cout << "rph                             Reference source phase" << endl;
+  cout << "fd_hand                         Hand of receptor basis" << endl;
+  cout << "fd_sang                         Feed symmetry angle (rcvr:ra)" << endl;
+  cout << "fd_xyph                         Reference source phase (rcvr:rph)" << endl;
+  cout << "nrcpt                           Number of receptors" << endl;
   cout << "ta                              Tracking angle of feed" << endl;
-  cout << "xo                              Offset of feed X-axis wrt platform zero" << endl;
-  cout << "yo                              Offset of feed Y-axis wrt nominal value" << endl;
+  cout << "xoffset                         Offset of feed X-axis wrt platform zero" << endl;
   cout << endl;
 
   cout << "SUBINT PARAMETERS" << endl;
-  cout << "nbin_subint                     Nr of bins (PSR/CAL mode; else 1)" << endl;
-  cout << "nbits                           Nr of bits/datum (SEARCH mode 'X' data, else 1)" << endl;
   cout << "nch_file                        Number of channels/sub-bands in this file" << endl;
   cout << "nch_strt                        Start channel/sub-band number (0 to NCHAN-1)" << endl;
+  cout << "nbin_subint                     Nr of bins (PSR/CAL mode; else 1)" << endl;
+  cout << "nbits                           Nr of bits/datum (SEARCH mode 'X' data, else 1)" << endl;
   cout << "npol_subint                     Nr of polarisations in table" << endl;
   cout << "nsblk                           Samples/row (SEARCH mode, else 1)" << endl;
   cout << "subint_type                     Time axis (TIME, BINPHSPERI, BINLNGASC, etc)" << endl;
@@ -1481,16 +1660,41 @@ void PrintExtdHlp( void )
   cout << "tsamp                           [s] Sample interval for SEARCH-mode data" << endl;
   cout << endl;
 
-  cout << "TELESCOPE PARAMETERS" << endl;
+  cout << "FILE & TELESCOPE PARAMETERS" << endl;
   cout << "ant_x                           ITRF X coordinate." << endl;
   cout << "ant_y                           ITRF Y coordinate." << endl;
   cout << "ant_z                           ITRF Z coordinate." << endl;
+  cout << "bmaj                            [deg] beam major axis" << endl;
+  cout << "bmin                            [deg] beam minor axis" << endl;
+  cout << "bpa                             [deg] beam position angle" << endl;
+  cout << "date                            File creation date" << endl;
+  cout << "hdrver                          Header Version" << endl;
   cout << "site                            Telescope tempo code" << endl;
   cout << "telescop                        Telescope name" << endl;
   cout << endl;
 
+  cout << "CALIBRATION PARAMETERS" << endl;
+  cout << "cal_dcyc                        Cal duty cycle (E)" << endl;
+  cout << "cal_freq                        [Hz] Cal modulation frequency (E)" << endl;
+  cout << "cal_mode                        Cal mode (OFF, SYNC, EXT1, EXT2)" << endl;
+  cout << "cal_phs                         Cal phase (wrt start time) (E)" << endl;
+  cout << endl;
+
 }
 
+
+
+
+void Test( void )
+{
+  string src = "2007-07-24T06:35:26";
+
+  FITSUTC thetime( src );
+  cout << thetime << endl;
+
+  MJD target = FITSUTC( string("2007-07-24T06:35:26") );
+  cout << FITSUTC( target ) << endl;
+}
 
 
 /**
@@ -1542,6 +1746,10 @@ void ProcArgs( int argc, char *argv[] )
       show_extensions = true;
       break;
 
+    case 't':
+      Test();
+      break;
+
     default:
       cerr << "Unknown command line option" << endl;
       return;
@@ -1563,6 +1771,10 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "stime" ) return get_stime( archive );
     else if( command == "etime" ) return get_etime( archive );
     else if( command == "length" ) return get_length( archive );
+    else if( command == "nbin_obs" ) return get_nbin_obs( archive );
+    else if( command == "nchan_obs" ) return get_nchan_obs( archive );
+    else if( command == "npol_obs" ) return get_npol_obs( archive );
+    else if( command == "nsub_obs" ) return get_nsub_obs( archive );
     else if( command == "rm" ) return get_rm( archive );
     else if( command == "state" ) return get_state( archive );
     else if( command == "scale" ) return get_scale( archive );
@@ -1574,18 +1786,20 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "bw" ) return get_bw( archive );
     else if( command == "intmjd" ) return get_intmjd( archive );
     else if( command == "fracmjd" ) return get_fracmjd( archive );
-    else if( command == "para" ) return get_para( archive );
+    else if( command == "parang" ) return get_parang( archive );
     else if( command == "tsub" ) return get_tsub( archive );
     else if( command == "observer" ) return get_observer( archive );
     else if( command == "projid" ) return get_projid( archive );
     else if( command == "ta" ) return get_ta( archive );
     else if( command == "fac" ) return get_fac( archive );
+    else if( command == "rcvr" ) return get_rcvr( archive );
+    else if( command == "nrcvr" ) return get_nrcvr( archive );
     else if( command == "basis" ) return get_basis( archive );
-    else if( command == "hand" ) return get_hand( archive );
-    else if( command == "rph" ) return get_rph( archive );
+    else if( command == "fd_hand" ) return get_fd_hand( archive );
+    else if( command == "fd_xyph" ) return get_fd_xyph( archive );
     else if( command == "oa" ) return get_oa( archive );
-    else if( command == "recv_ra" ) return get_recv_ra( archive );
-    else if( command == "xo" ) return get_xo( archive );
+    else if( command == "fd_sang" ) return get_fd_sang( archive );
+    else if( command == "xoffset" ) return get_xoffset( archive );
     else if( command == "yo" ) return get_yo( archive );
     else if( command == "co" ) return get_co( archive );
     else if( command == "ant_x" ) return get_ant_x( archive );
@@ -1602,6 +1816,7 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "hdrver" ) return get_hdrver( archive );
     else if( command == "stt_date" ) return get_stt_date( archive );
     else if( command == "stt_time" ) return get_stt_time( archive );
+    else if( command == "stt_lst" ) return get_stt_lst( archive );
     else if( command == "coord_md" ) return get_coord_md( archive );
     else if( command == "equinox" ) return get_equinox( archive );
     else if( command == "trk_mode" ) return get_trk_mode( archive );
@@ -1642,6 +1857,11 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "nch_strt" ) return get_nch_strt( archive );
     else if( command == "npol_subint" ) return get_npol_subint( archive );
     else if( command == "nsblk" ) return get_nsblk( archive );
+    else if( command == "date" ) return get_date( archive );
+    else if( command == "cal_mode" ) return get_cal_mode( archive );
+    else if( command == "cal_freq" ) return get_cal_freq( archive );
+    else if( command == "cal_dcyc" ) return get_cal_dcyc( archive );
+    else if( command == "cal_phs" ) return get_cal_phs( archive );
 
     else return "UNDEF";
   }
@@ -1702,9 +1922,11 @@ void ExtractPolyco( string filename )
   if( !archive )
     return;
 
-  cout << endl << filename << endl;
+  cout << filename << " has polyco:" << endl << endl;
 
   archive->get_model()->unload( stdout );
+  
+  cout << endl;
 }
 
 
@@ -1783,9 +2005,10 @@ int main( int argc, char *argv[] )
     else if( show_extensions )
       for_each( filenames.begin(), filenames.end(), ShowExtensions );
     else
+    {
       for_each( filenames.begin(), filenames.end(), ProcessArchive );
-
-    ts.flush();
+      ts.flush();
+    }
   }
 
   return 0;
