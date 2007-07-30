@@ -4,14 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::rotate
-//
 
 #include "Pulsar/Profile.h"
 #include "FTransform.h"
+#include "templates.h"
 
 #include <memory>
 #include <math.h>
@@ -54,11 +50,7 @@ void Pulsar::Profile::rotate_phase (double phase)
     if (verbose)
       cerr << "Pulsar::Profile::rotate " << binshift << " bins" << endl;
 
-    float* temp = new float[binshift];
-    memcpy (temp, amps, binshift*sizeof(float));
-    memmove (amps, amps+binshift, (nbin-binshift)*sizeof(float));
-    memcpy (amps+nbin-binshift, temp, binshift*sizeof(float));
-    delete [] temp;
+    ::shift (nbin, binshift, amps);
 
   }
 
