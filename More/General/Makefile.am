@@ -50,10 +50,6 @@ nobase_include_HEADERS = \
 	Pulsar/PhaseWeightModifier.h \
 	Pulsar/PhaseWeightSmooth.h \
         Pulsar/PhaseWeight.h \
-        Pulsar/Polarization.h \
-        Pulsar/PolnProfileFit.h \
-        Pulsar/PolnProfile.h \
-        Pulsar/PolnProfileStats.h \
         Pulsar/ProfileWeightFunction.h \
         Pulsar/RFIMitigation.h \
         Pulsar/ScatteredPowerCorrection.h \
