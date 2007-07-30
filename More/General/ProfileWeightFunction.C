@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/ProfileWeightFunction.h"
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
@@ -19,7 +19,8 @@ void Pulsar::ProfileWeightFunction::set_Profile (const Profile* _profile)
 void Pulsar::ProfileWeightFunction::get_weight (PhaseWeight& weight)
 {
   calculate (weight);
-  weight.set_Profile (profile);
+  weight.set_frequency( profile->get_centre_frequency () );
+  weight.set_Profile( profile );
 }
 
 
