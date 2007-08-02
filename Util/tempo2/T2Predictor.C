@@ -214,8 +214,7 @@ long double Tempo2::Predictor::frequency (const MJD& t) const
 //! Return the phase correction for dispersion delay
 Phase Tempo2::Predictor::dispersion (const MJD &t, long double MHz) const
 {
-  throw Error (InvalidState, "Tempo2::Predictor::dispersion",
-	       "Tempo2::Predictor dispersion not implemented"); 
+  return get_dispersion_constant() / (MHz*MHz);
 }
 
 void Tempo2::Predictor::load (FILE* fptr)
