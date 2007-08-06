@@ -1942,8 +1942,6 @@ void ExtractEphemeris( string filename )
   if( !archive )
     return;
 
-  cout << endl << filename << endl;
-
   archive->get_ephemeris()->unload( stdout );
 }
 
