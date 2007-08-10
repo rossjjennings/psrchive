@@ -168,7 +168,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.53 2007/07/15 23:37:15 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.54 2007/08/10 00:16:38 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -360,13 +360,15 @@ int main (int argc, char **argv) try {
   }
 
   if (auto_add && interval && tscrunch_total) {
-    cerr << "psradd cannot combine AUTO ADD -G with tscrunch -s \n";
+    cerr << "psradd cannot combine AUTO ADD -G with tscrunch -T \n";
     return -1;
   }
 
   if (auto_add && newname.length())
     cerr << "psradd ignores -f when AUTO ADD features are used\n";
 
+  if (integrated_path.length() && newname.length())
+    cerr << "psradd ignores -O when -f is used \n";
 
   Reference::To<Pulsar::Parameters> ephemeris;
 
