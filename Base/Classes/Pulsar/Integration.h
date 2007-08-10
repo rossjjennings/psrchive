@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.90 $
-   $Date: 2007/07/13 06:28:31 $
+   $Revision: 1.91 $
+   $Date: 2007/08/10 00:25:36 $
    $Author: straten $ */
 
 /*
@@ -145,7 +145,7 @@ namespace Pulsar {
     //@{
 
     //! Return pointer to a new copy of self
-    virtual Integration* clone (int npol=-1, int nchan=-1) const = 0;
+    virtual Integration* clone () const = 0;
 
     //! Return the pointer to a new fscrunched and pscrunched copy of self
     Integration* total () const;
@@ -420,7 +420,7 @@ namespace Pulsar {
     bool mixable (const Integration* integ, std::string& reason) const;
 
     //! Copy the profiles and attributes through set_ get_ methods
-    virtual void copy (const Integration& subint, int npol=-1, int nchan=-1);
+    virtual void copy (const Integration* subint, bool management = true);
 
     //! Swap the two specified profiles
     void swap_profiles (unsigned ipol, unsigned ichan,
