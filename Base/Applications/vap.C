@@ -182,6 +182,11 @@ string get_nsub_obs( Reference::To<Archive> archive )
   return result;
 }
 
+string get_dm( Reference::To< Archive > archive )
+{
+  return tostring<double>( archive->get_dispersion_measure() );
+}
+
 string get_rm( Reference::To< Archive > archive )
 {
   return tostring<double>( archive->get_rotation_measure() );
@@ -1775,6 +1780,7 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "nchan_obs" ) return get_nchan_obs( archive );
     else if( command == "npol_obs" ) return get_npol_obs( archive );
     else if( command == "nsub_obs" ) return get_nsub_obs( archive );
+    else if( command == "dm" ) return get_dm( archive );
     else if( command == "rm" ) return get_rm( archive );
     else if( command == "state" ) return get_state( archive );
     else if( command == "scale" ) return get_scale( archive );
