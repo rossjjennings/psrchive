@@ -16,7 +16,9 @@ using namespace std;
   will be constructed.  If any of the supplied paramaters is equal to zero,
   the dimension is left unchanged.
   */
-void Pulsar::Integration::resize (unsigned new_npol, unsigned new_nchan, unsigned new_nbin)
+void Pulsar::Integration::resize (unsigned new_npol,
+				  unsigned new_nchan, 
+				  unsigned new_nbin)
 {
   unsigned cur_npol = get_npol();
   unsigned cur_nchan = get_nchan();
