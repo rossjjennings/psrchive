@@ -124,7 +124,7 @@ void Pulsar::BinaryPhaseOrder::organise (Archive* arch, unsigned newsub)
       if ((phases[j] >= (minphs + (i*PhaseGap))) && 
 	  (phases[j] <= (minphs + ((i+1)*PhaseGap))) && !used[j]) {
 	if (first) {
-	  *(arch->get_Integration(i)) = *(copy->get_Integration(j));
+	  arch->get_Integration(i)->expert()->copy(copy->get_Integration(j),false);
 	  set_Index(i, phases[j]);
 	  used[j] = true;
 	  tally += 1;

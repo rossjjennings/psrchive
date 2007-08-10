@@ -167,7 +167,7 @@ void Pulsar::BinLngPeriOrder::combine (Archive* arch, unsigned nscr)
 
   unsigned count = 0;
   for (unsigned i = 0; i < newsub; i++) {
-    *(arch->get_Integration(i)) = *(arch->new_Integration(copy->get_Integration(count)));
+    arch->get_Integration(i)->expert()->copy(copy->get_Integration(count),false);
     count++;
     for (unsigned j = 1; j < nscr; j++) {
       if (count >= copy->get_nsubint())
