@@ -73,40 +73,37 @@ Pulsar::TimerIntegration::~TimerIntegration ()
 }
 
 //! Copy constructor
-Pulsar::TimerIntegration::TimerIntegration (const TimerIntegration& t_subint,
-					    int _npol, int _nchan)
+Pulsar::TimerIntegration::TimerIntegration (const TimerIntegration& t_subint)
 {
   if (verbose)
     cerr << "TimerIntegration construct copy TimerIntegration" << endl;
 
   init();
-  TimerIntegration::copy (t_subint, _npol, _nchan);
+  TimerIntegration::copy (&t_subint);
 }
 
 //! General copy constructor
-Pulsar::TimerIntegration::TimerIntegration (const Integration& subint,
-					    int _npol, int _nchan)
+Pulsar::TimerIntegration::TimerIntegration (const Integration& subint)
 {
   if (verbose)
     cerr << "TimerIntegration construct copy Integration" << endl;
 
   init();
-  TimerIntegration::copy (subint, _npol, _nchan);
+  TimerIntegration::copy (&subint);
 }
 
-void Pulsar::TimerIntegration::copy (const Integration& subint,
-				     int _npol, int _nchan)
+void Pulsar::TimerIntegration::copy (const Integration* subint, bool manage)
 {
   if (verbose)
     cerr << "TimerIntegration::copy" << endl;
 
-  if (this == &subint)
+  if (this == subint)
     return;
 
-  Integration::copy (subint, _npol, _nchan);
+  Integration::copy (subint, manage);
 
   const TimerIntegration* t_subint;
-  t_subint = dynamic_cast<const TimerIntegration*> (&subint);
+  t_subint = dynamic_cast<const TimerIntegration*> (subint);
 
   if (!t_subint)
     return;
@@ -122,9 +119,9 @@ void Pulsar::TimerIntegration::copy (const Integration& subint,
 
 //! Return the pointer to a new copy of self
 Pulsar::Integration*
-Pulsar::TimerIntegration::clone (int npol, int nchan) const
+Pulsar::TimerIntegration::clone () const
 {
-  return new TimerIntegration (*this, npol, nchan);
+  return new TimerIntegration (*this);
 }
 
 MJD Pulsar::TimerIntegration::get_epoch () const

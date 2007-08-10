@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicIntegration.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/06 21:05:49 $
+   $Revision: 1.10 $
+   $Date: 2007/08/10 00:16:33 $
    $Author: straten $ */
 
 #ifndef __BasicIntegration_h
@@ -26,13 +26,13 @@ namespace Pulsar {
     BasicIntegration () { init(); }
 
     //! copy constructor
-    BasicIntegration (const Integration& subint, int _npol=0, int _nchan=0);
+    BasicIntegration (const Integration& subint);
 
     //! destructor
     virtual ~BasicIntegration () { }
 
     //! Return the pointer to a new copy of self
-    virtual Integration* clone (int npol=0, int nchan=0) const;
+    virtual Integration* clone () const;
 
     //! Get the number of chans
     /*! This attribute may be set only through Integration::resize */

@@ -15,23 +15,22 @@ void Pulsar::BasicIntegration::init ()
   duration = pfold = 0.0;
 }
 
-Pulsar::BasicIntegration::BasicIntegration (const Integration& subint,
-					    int _npol, int _nchan)
+Pulsar::BasicIntegration::BasicIntegration (const Integration& subint)
 {
   if (Pulsar::Integration::verbose)
     cerr << "Pulsar::BasicIntegration::BasicIntegration entered" << endl;
   
   init ();
-  Integration::copy (subint);
+  Integration::copy (&subint);
 }
 
 //! Return the pointer to a new copy of self
 Pulsar::Integration* 
-Pulsar::BasicIntegration::clone (int npol, int nchan) const
+Pulsar::BasicIntegration::clone () const
 {
   if (Pulsar::Integration::verbose)
     cerr << "Pulsar::BasicIntegration::clone entered" << endl;
   
-  return new BasicIntegration (*this, npol, nchan);
+  return new BasicIntegration (*this);
 }
 

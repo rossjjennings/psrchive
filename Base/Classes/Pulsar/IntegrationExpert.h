@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExpert.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/07/13 06:28:31 $
+   $Revision: 1.11 $
+   $Date: 2007/08/10 00:16:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationExpert_h
@@ -82,6 +82,10 @@ namespace Pulsar {
     void swap_profiles (unsigned ipol, unsigned ichan,
 			unsigned jpol, unsigned jchan)
     { instance->swap_profiles (ipol, ichan, jpol, jchan); }
+
+    //! Copy the data from 'from' into 'this'
+    void copy (const Integration* subint, bool management = true)
+    { instance->copy (subint, management); }
 
     //! Combine the data from 'from' into 'this'
     void combine (const Integration* from)

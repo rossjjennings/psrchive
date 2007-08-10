@@ -104,7 +104,7 @@ Pulsar::Integration::Integration (const Integration& subint)
 
 Pulsar::Integration& Pulsar::Integration::operator= (const Integration& subint)
 {
-  copy (subint);
+  copy (&subint);
   return *this;
 }
 
@@ -143,61 +143,51 @@ Pulsar::Profile* Pulsar::Integration::new_Profile ()
 /*!
   Copy the common information from another Integration
 */
-void Pulsar::Integration::copy (const Integration& subint,
-				int _npol, int _nchan)
+void Pulsar::Integration::copy (const Integration* subint, bool management)
 {
   if (Pulsar::Integration::verbose)
     cerr << "Pulsar::Integration::copy entered" << endl;
 
-  if (this == &subint)
+  if (this == subint)
     return;
 
-  if (_npol < 0)
-    _npol = subint.get_npol();
+  unsigned npol = subint->get_npol();
+  unsigned nchan = subint->get_nchan();
 
-  if (_nchan < 0)
-    _nchan = subint.get_nchan();
+  resize (npol, nchan, subint->get_nbin());
 
-  if (unsigned(_npol) > subint.get_npol())
-    throw Error (InvalidRange, "Integration copy constructor",
-		 "requested npol=%d.  npol=%d", _npol, subint.get_npol());
-  
-  if (unsigned(_nchan) > subint.get_nchan())
-    throw Error (InvalidRange, "Integration copy constructor",
-		 "requested nchan=%d.  nchan=%d", _nchan, subint.get_nchan());
-
-  resize (_npol, _nchan, subint.get_nbin());
-
-  for (int ipol=0; ipol<_npol; ipol++)
-    for (int ichan=0; ichan<_nchan; ichan++)
-      *(profiles[ipol][ichan]) = *(subint.profiles[ipol][ichan]);
+  for (int ipol=0; ipol<npol; ipol++)
+    for (int ichan=0; ichan<nchan; ichan++)
+      *(profiles[ipol][ichan]) = *(subint->profiles[ipol][ichan]);
 
   // Using a Reference::To<Extension> ensures that the cloned
   // Extension will be deleted if the derived class chooses not to
   // manage it.
 
   if (verbose)
-    cerr << "Pulsar::Integration::copy " << subint.get_nextension()
+    cerr << "Pulsar::Integration::copy " << subint->get_nextension()
 	 << " Extensions" << endl;
 
   extension.resize (0);
 
-  for (unsigned iext=0; iext < subint.get_nextension(); iext++) {
+  for (unsigned iext=0; iext < subint->get_nextension(); iext++) {
 
     if (verbose)
       cerr << "Pulsar::Integration::copy clone " 
-	   << subint.get_extension(iext)->get_name() << endl;
+	   << subint->get_extension(iext)->get_name() << endl;
 
-    Reference::To<Extension> ext = subint.get_extension(iext)->clone();
+    Reference::To<Extension> ext = subint->get_extension(iext)->clone();
     add_extension (ext);
 
   }
 
-  set_epoch ( subint.get_epoch());
-  set_duration ( subint.get_duration());
-  set_folding_period ( subint.get_folding_period() );
+  set_epoch ( subint->get_epoch());
+  set_duration ( subint->get_duration());
+  set_folding_period ( subint->get_folding_period() );
 
-  archive = subint.archive;
+  if (management)
+    archive = subint->archive;
+
   zero_phase_aligned = false;
 }
 

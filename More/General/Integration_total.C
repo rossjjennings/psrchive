@@ -28,22 +28,17 @@ Pulsar::Integration* Pulsar::Integration::total () const
     throw Error (InvalidState, "Pulsar::Integration::total",
                  "npol=%d nchan=%d", get_npol(), get_nchan());
 
-  int npol_keep = 1;
-  if (get_state() == Signal::Coherence || get_state() == Signal::PPQQ)
-    npol_keep = 2;
-
-  Reference::To<Integration> copy;
-
   try {
-    copy = clone (npol_keep);
+
+    Reference::To<Integration> copy = clone ();
     copy->pscrunch ();
     copy->dedisperse();
     copy->fscrunch ();
+    return copy.release();
+
   }
   catch (Error& err) {
     throw err += "Integration::total";
   }
-
-  return copy.release();
 }
 

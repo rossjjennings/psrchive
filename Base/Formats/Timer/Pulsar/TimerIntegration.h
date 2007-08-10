@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerIntegration.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/07/13 06:28:31 $
+   $Revision: 1.10 $
+   $Date: 2007/08/10 00:16:33 $
    $Author: straten $ */
 
 /*
@@ -38,21 +38,19 @@ namespace Pulsar {
     TimerIntegration () { init(); }
 
     //! Copy constructor
-    TimerIntegration (const TimerIntegration& t_subint,
-		      int npol=-1, int nchan=-1);
+    TimerIntegration (const TimerIntegration& t_subint);
 
     //! General copy constructor
-    TimerIntegration (const Integration& subint,
-		      int npol=-1, int nchan=-1);
+    TimerIntegration (const Integration& subint);
 
     //! Destructor deletes data area
     virtual ~TimerIntegration ();
 
     //! Copy an Integration
-    virtual void copy (const Integration& subint, int npol=-1, int nchan=-1);
+    virtual void copy (const Integration* subint, bool management = false);
 
     //! Return the pointer to a new copy of self
-    virtual Integration* clone (int npol=-1, int nchan=-1) const;
+    virtual Integration* clone () const;
 
     //! Get the number of chans
     /*! This attribute may be set only through Integration::resize */
