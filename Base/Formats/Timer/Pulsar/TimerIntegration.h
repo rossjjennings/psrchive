@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerIntegration.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/08/10 00:16:33 $
+   $Revision: 1.11 $
+   $Date: 2007/08/10 03:53:04 $
    $Author: straten $ */
 
 /*
@@ -47,7 +47,7 @@ namespace Pulsar {
     virtual ~TimerIntegration ();
 
     //! Copy an Integration
-    virtual void copy (const Integration* subint, bool management = false);
+    virtual void copy (const Integration* subint, bool management = true);
 
     //! Return the pointer to a new copy of self
     virtual Integration* clone () const;
