@@ -1,11 +1,51 @@
+###########################################################################
+#
+# Rules for making intermediate header file directory
+#
+###########################################################################
 
-HEADERS_TEMP = $(addprefix $(top_builddir)/include/, $(HEADERS))
+local_includedir = $(top_builddir)/local_include
 
-all-local: $(HEADERS_TEMP)
+LOCAL_INCLUDE = $(addprefix $(local_includedir)/, $(HEADERS))
 
-$(HEADERS_TEMP) : $(top_builddir)/include/% : %
+all-local: $(LOCAL_INCLUDE)
+
+$(LOCAL_INCLUDE) : $(local_includedir)/% : %
 	@$(top_srcdir)/config/install-intermediate $< $@
 
-CLEANFILES = $(HEADERS_TEMP) $(MOC_SOURCES) $(BUILT_SOURCES)
+CLEANFILES = $(LOCAL_INCLUDE) $(MOC_SOURCES) $(BUILT_SOURCES)
 
-AM_CPPFLAGS = -I$(top_builddir)/include
+AM_CPPFLAGS = -I$(local_includedir)
+
+
+###########################################################################
+#
+# Rules for making PDF from LaTeX
+#
+###########################################################################
+
+#
+# convert Postscript to Abobe Acrobat Portable Document Format
+#
+%.pdf: %.ps
+	ps2pdf $<
+
+#
+# convert dvi file format to Postscript using Adobe safe ligatures
+#
+%.ps: %.dvi
+	dvips -Ppdf -G0 -o $@ $<
+
+#
+# generate dvi file from LaTeX input
+#
+%.dvi: %.tex
+# Get new refs
+	latex $*
+# Generate tex for em
+	bibtex $* ; date
+# Tell latex about them
+	latex $*
+# Second pass to fix cross-references
+	latex $*
+

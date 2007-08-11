@@ -30,8 +30,5 @@ baseband_header_size_SOURCES = baseband_header_size.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include \
-	-I$(top_srcdir)/psrchive/Polarimetry
-
 include $(top_srcdir)/config/Makefile.include
 

@@ -58,7 +58,7 @@ keys2c_LDADD =
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include @CFITSIO_CFLAGS@
+INCLUDES = @CFITSIO_CFLAGS@
 
 LDADD = libtempo.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \

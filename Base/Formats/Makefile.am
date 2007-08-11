@@ -19,7 +19,7 @@ SUBDIRS += .
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include \
+INCLUDES = -I$(top_builddir)/local_include \
 	-I$(top_srcdir)/Base/Formats/Timer \
 	-I$(top_srcdir)/Base/Formats/EPN \
 	-I$(top_srcdir)/Base/Formats/ASCII \

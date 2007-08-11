@@ -46,8 +46,7 @@ test_polyco_fitsio_SOURCES = test_polyco_fitsio.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include \
-	@CFITSIO_CFLAGS@ @MPI_CFLAGS@ @TEMPO2_CFLAGS@
+INCLUDES = @CFITSIO_CFLAGS@ @MPI_CFLAGS@ @TEMPO2_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.include
 

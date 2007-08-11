@@ -14,7 +14,7 @@ test_T2Generator_SOURCES = test_T2Generator.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include @TEMPO2_CFLAGS@
+INCLUDES = @TEMPO2_CFLAGS@
 
 LDADD = libtempo_2.la \
 	$(top_builddir)/Util/tempo/libtempo.la \

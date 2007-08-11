@@ -62,7 +62,7 @@ libClasses_la_SOURCES = \
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include -I$(top_srcdir)/Base/Extensions
+INCLUDES = -I$(top_srcdir)/Base/Extensions
 
 include $(top_srcdir)/config/Makefile.include
 

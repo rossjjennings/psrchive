@@ -18,7 +18,7 @@ psrgui_SOURCES = psrgui.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@ @QT_CXXFLAGS@
+INCLUDES = @PGPLOT_CFLAGS@ @QT_CXXFLAGS@
 
 LDADD = libpsrgui.la $(top_builddir)/More/libpsrmore.la \
         $(top_builddir)/Base/libpsrbase.la \

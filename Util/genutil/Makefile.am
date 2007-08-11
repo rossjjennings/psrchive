@@ -137,7 +137,7 @@ test_expand_SOURCES		= test_expand.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@
+INCLUDES = @PGPLOT_CFLAGS@
 
 LDADD = libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \

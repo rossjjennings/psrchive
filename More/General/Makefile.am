@@ -182,7 +182,7 @@ libGeneral_la_SOURCES = \
 #
 
 INCLUDES = -I$(top_srcdir)/More/Polarimetry -I$(top_srcdir)/More/MEAL \
-	-I$(top_builddir)/include @TEMPO2_CFLAGS@
+	@TEMPO2_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.include
 
