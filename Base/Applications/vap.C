@@ -1571,6 +1571,7 @@ void PrintExtdHlp( void )
   cout << "obs_mode                        Observation Mode (PSR, CAL, SEARCH)" << endl;
   cout << "polc                            Polarization calibrated (boolean)" << endl;
   cout << "rm                              Rotation measure (rad/m^2)" << endl;
+  cout << "dm                              Dispersion measure" << endl;
   cout << "rmc                             Faraday Rotation corrected (boolean)" << endl;
   cout << "scale                           Units of profile amplitudes" << endl;
   cout << "state                           State of profile amplitudes" << endl;
@@ -1894,8 +1895,11 @@ void ProcessArchive( string filename )
   }
   catch ( Error e )
   {
-    cerr << e << endl;
-    exit(1);
+    cerr << "failed to load archive " << filename << endl;
+    if( verbose )
+    {
+      cerr << e << endl;
+    }
   }
 
   if( !archive )
