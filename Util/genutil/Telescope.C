@@ -38,6 +38,9 @@ char Telescope::code (const string& code)
   if (strcasecmp (name, "GBT") || strcasecmp (name, "Greenbank") == 0)
     return Greenbank;
 
+  if (strcasecmp (name, "WSRT") || strcasecmp (name, "Westerbork") == 0)
+    return WSRT;
+  
   return 0;
 }
 
@@ -59,6 +62,9 @@ const char* Telescope::name (char code)
 
   case Hobart:
     return "Hobart";
+
+  case WSRT:
+    return "WSRT";
 
   default:
     return "";
