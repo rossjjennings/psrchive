@@ -33,7 +33,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Pointing* ext, int row)
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "RA_SUB", &colnum, &status);
   
-  tempdouble = ext->get_right_ascension().getTurns();
+  tempdouble = ext->get_right_ascension().getDegrees();
   fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
   
   if (status != 0)
@@ -43,7 +43,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Pointing* ext, int row)
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "DEC_SUB", &colnum, &status);
   
-  tempdouble = ext->get_declination().getTurns();
+  tempdouble = ext->get_declination().getDegrees();
   fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
   
   if (status != 0)

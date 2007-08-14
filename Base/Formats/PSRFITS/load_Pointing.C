@@ -10,6 +10,35 @@
 
 using namespace std;
 
+Angle angle_units (fitsfile* fptr, int colnum, double angle, const char* name)
+{
+  char keyword [FLEN_KEYWORD+1];
+  char value   [FLEN_VALUE+1];
+ 
+  char* comment = 0;
+  int status = 0;
+
+  fits_make_keyn ("TUNIT", colnum, keyword, &status);
+  fits_read_key (fptr, TSTRING, keyword, value, comment, &status);
+
+  Angle retval;
+
+  if (status == 0 && string(value) == "deg") {
+    if (name)
+      cerr << "Pulsar::FITSArchive::load_Pointing " << name << " in degrees"
+	   << endl;
+    retval.setDegrees (angle);
+  }
+  else {
+    if (name)
+      cerr << "Pulsar::FITSArchive::load_Pointing " << name << " in turns"
+	   << endl;
+    retval.setTurns (angle);  
+  }
+
+  return retval;
+}
+
 /*!
   \pre The current HDU is the SUBINT HDU
 */
@@ -57,8 +86,8 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col RA_SUB");
 
-  angle.setTurns (double_angle);  
-  ext->set_right_ascension (angle);
+  double RA_angle = double_angle;
+  int RA_colnum = colnum;
 
   initflag = 0;
   colnum = 0;
@@ -74,8 +103,8 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col DEC_SUB");
   
-  angle.setTurns (double_angle);
-  ext->set_declination (angle);
+  double DEC_angle = double_angle;
+  int DEC_colnum = colnum;
 
   initflag = 0;
   colnum = 0;
@@ -196,18 +225,14 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   angle.setDegrees (float_angle);
   ext->set_telescope_zenith (angle);
 
-  if (status == 0) {
-    integ->add_extension (ext);
-    return;
-  }
+  ext->set_right_ascension( angle_units (fptr, RA_colnum, RA_angle,
+					 (verbose) ? "RA_SUB" : 0) );
 
-  if (verbose == 3)
-    cerr << FITSError (status, "FITSArchive::load_Pointing").warning() 
-	 << endl;
+  ext->set_declination( angle_units (fptr, DEC_colnum, DEC_angle,
+				     (verbose) ? "DEC_SUB" : 0) );
+
+  integ->add_extension (ext);
 
 }
-
-
-
 
 
