@@ -156,13 +156,20 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     throw Error (InvalidState, "Pulsar::Archive::update_model",
 		 "no Pulsar::Parameters available");
 
-  Reference::To<Generator> generator = ephemeris->generator();
+  Reference::To<Generator> generator;
   if (model) {
     if (verbose > 2)
-      cerr << "Pulsar::Archive::update_model matching generator "
-              "to current predictor" << endl;
-    model->match( generator );
+      cerr << "Pulsar::Archive::update_model get matching generator "
+              "from current predictor" << endl;
+    generator = model->generator();
   }
+  else {
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::update_model using default generator" << endl;
+    generator = Generator::get_default();
+  }
+
+  generator->set_parameters (ephemeris);
 
   double frequency = get_centre_frequency ();
   double bandwidth = get_bandwidth ();
