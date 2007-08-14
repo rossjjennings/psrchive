@@ -42,11 +42,30 @@ Tempo2::Generator::~Generator ()
 void Tempo2::Generator::set_parameters (const Pulsar::Parameters* p)
 {
   const Parameters* t2p = dynamic_cast<const Parameters*> (p);
-  if (!t2p)
-    throw Error (InvalidState, "Tempo2::Generator::set_parameters",
-		 "Parameters are not Tempo2::Parameters");
 
-  parameters = t2p;
+  if (t2p) {
+    parameters = t2p;
+    return;
+  }
+
+  // attempt to convert to Tempo2::Parameters
+  FILE* temp = tmpfile();
+  if (!temp)
+    throw Error (FailedSys, "Tempo2::Generator::set_parameters", "tmpfile");
+  
+  try {
+    Reference::To<Parameters> param = new Parameters;
+    p->unload(temp);
+    rewind (temp);
+    param->load(temp);
+    fclose (temp);
+    parameters = param;
+  }
+  catch (Error& error) {
+    fclose (temp);
+    throw error += "Tempo2::Generator::set_parameters conversion";
+  }
+  
 }
 
 //! Set the range of epochs over which to generate
