@@ -226,10 +226,10 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   ext->set_telescope_zenith (angle);
 
   ext->set_right_ascension( angle_units (fptr, RA_colnum, RA_angle,
-					 (verbose) ? "RA_SUB" : 0) );
+					 (verbose > 2) ? "RA_SUB" : 0) );
 
   ext->set_declination( angle_units (fptr, DEC_colnum, DEC_angle,
-				     (verbose) ? "DEC_SUB" : 0) );
+				     (verbose > 2) ? "DEC_SUB" : 0) );
 
   integ->add_extension (ext);
 
