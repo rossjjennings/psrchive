@@ -93,6 +93,8 @@ SWIN_PSRCAT
 #
 SWIN_DEBUG
 
+ATNF_DISABLE_OPTIMIZE
+
 #
 # Check C++ template compilation
 #
