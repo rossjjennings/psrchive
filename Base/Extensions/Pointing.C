@@ -204,25 +204,28 @@ void Pulsar::Pointing::update (const Integration* subint)
     throw (InvalidState, "Pulsar::Pointing::update",
 	   "parent Archive has no telescope Extension");
 
+  sky_coord coord( get_right_ascension(), get_declination() );
+
   if (Integration::verbose)
-    cerr << "Pulsar::Pointing::update before:\n"
-         "  lst=" << get_local_sidereal_time()/3600.0 << " hours\n"
-         "   az=" << get_telescope_azimuth().getDegrees() << " deg\n"
-         "  zen=" << get_telescope_zenith().getDegrees() << " deg\n"
-         " para=" << get_parallactic_angle().getDegrees() << " deg\n"
-         " posa=" << get_position_angle().getDegrees() << " deg\n"
-         "Pulsar::Pointing::update using:\n"
-         " r.a.=" << get_right_ascension().getDegrees() << " deg\n"
-         " dec.=" << get_declination().getDegrees() << " deg\n"
-         "Pulsar::Pointing::update parent:\n"
-         " r.a.=" << archive->get_coordinates().ra().getDegrees() << " deg\n"
-         " dec.=" << archive->get_coordinates().dec().getDegrees() << " deg"
-          << endl;
+    cerr << 
+      "Pulsar::Pointing::update before:\n"
+      "  lst=" << get_local_sidereal_time()/3600.0 << " hours\n"
+      "   az=" << get_telescope_azimuth().getDegrees() << " deg\n"
+      "  zen=" << get_telescope_zenith().getDegrees() << " deg\n"
+      " para=" << get_parallactic_angle().getDegrees() << " deg\n"
+      " posa=" << get_position_angle().getDegrees() << " deg\n"
+      "Pulsar::Pointing::update using:\n"
+      " r.a.=" << get_right_ascension().getDegrees() << " deg\n"
+      " dec.=" << get_declination().getDegrees() << " deg\n"
+      " pos.=" << coord << "\n"
+      "Pulsar::Pointing::update parent:\n"
+      " r.a.=" << archive->get_coordinates().ra().getDegrees() << " deg\n"
+      " dec.=" << archive->get_coordinates().dec().getDegrees() << " deg"
+	 << endl;
 
 
   Horizon horizon;
 
-  sky_coord coord( get_right_ascension(), get_declination() );
   horizon.set_source_coordinates( coord );
   horizon.set_observatory_latitude( telescope->get_latitude().getRadians() );
   horizon.set_observatory_longitude( telescope->get_longitude().getRadians() );
