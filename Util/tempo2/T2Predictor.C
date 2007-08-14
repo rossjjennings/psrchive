@@ -41,17 +41,15 @@ Pulsar::Predictor* Tempo2::Predictor::clone () const
   return new Predictor (*this);
 }
 
-//! Set up Generator to produce a new Predictor like self
-void Tempo2::Predictor::match (Pulsar::Generator* generator) const
+Pulsar::Generator* Tempo2::Predictor::generator () const
 {
-  Tempo2::Generator* t2g = dynamic_cast<Tempo2::Generator*> (generator);
-  if (!t2g)
-    throw Error (InvalidParam, "polyco::match",
-		 "Generator is not a Tempo2::Generator");
+  Tempo2::Generator* t2g = new Tempo2::Generator;
 
   t2g->set_time_ncoeff( get_time_ncoeff() );
   t2g->set_frequency_ncoeff( get_frequency_ncoeff() );
   t2g->set_segment_length( get_segment_length() );
+
+  return t2g;
 }
 
 //! Set the number of time coefficients

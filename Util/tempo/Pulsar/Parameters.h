@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Parameters.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/07/12 05:59:40 $
+   $Revision: 1.5 $
+   $Date: 2007/08/14 22:15:58 $
    $Author: straten $ */
 
 #ifndef __PulsarParameters_h
@@ -20,8 +20,6 @@
 #include <stdio.h>
 
 namespace Pulsar {
-
-  class Generator;
 
   //! Storage of pulsar parameters used to create a Predictor
   /*! This pure virtual base class defines the interface to pulsar
@@ -35,9 +33,6 @@ namespace Pulsar {
 
     //! Return a new, copy constructed instance of self
     virtual Parameters* clone () const = 0;
-
-    //! Return a new Generator set up to produce a new Predictor
-    virtual Generator* generator () const = 0;
 
     //! Return true if *this == *that
     virtual bool equals (const Parameters* that) const = 0;

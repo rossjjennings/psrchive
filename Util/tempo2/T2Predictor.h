@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.13 $
-   $Date: 2007/07/13 06:28:49 $
+   $Revision: 1.14 $
+   $Date: 2007/08/14 22:15:58 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
@@ -42,8 +42,8 @@ namespace Tempo2 {
     //! Return a new, copy constructed instance of self
     Pulsar::Predictor* clone () const;
 
-    //! Set up Generator to produce a new Predictor like self
-    void match (Pulsar::Generator*) const;
+    //! Return a new Generator set up to produce a new Predictor like self
+    Pulsar::Generator* generator () const;
 
     //! Get the number of time coefficients
     unsigned get_time_ncoeff () const;

@@ -6,7 +6,6 @@
  ***************************************************************************/
 
 #include "T2Parameters.h"
-#include "T2Generator.h"
 
 using namespace std;
 
@@ -48,11 +47,6 @@ Pulsar::Parameters* Tempo2::Parameters::clone () const
   return new Parameters (*this);
 }
 
-Pulsar::Generator* Tempo2::Parameters::generator () const
-{
-  return new Generator (this);
-}
-
 //! Return true if *this == *that
 bool Tempo2::Parameters::equals (const Pulsar::Parameters* that) const
 {
@@ -63,9 +57,11 @@ bool Tempo2::Parameters::equals (const Pulsar::Parameters* that) const
 //! Load from an open stream
 void Tempo2::Parameters::load (FILE* fptr)
 {
-  cerr << "Tempo2::Parameters::load (FILE*)" << endl;
+  if (verbose)
+    cerr << "Tempo2::Parameters::load (FILE*)" << endl;
   readSimpleParfile (fptr, &psr);
-  cerr << "Tempo2::Parameters::load readSimpleParfile completed" << endl;
+  if (verbose)
+    cerr << "Tempo2::Parameters::load readSimpleParfile completed" << endl;
 }
 
 //! Unload to an open stream

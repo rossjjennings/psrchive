@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Predictor.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/07/13 06:28:49 $
+   $Revision: 1.4 $
+   $Date: 2007/08/14 22:15:58 $
    $Author: straten $ */
 
 #ifndef __PulsarPredictor_h
@@ -37,8 +37,8 @@ namespace Pulsar {
     //! Return a new, copy constructed instance of self
     virtual Predictor* clone () const = 0;
 
-    //! Set up Generator to produce a new Predictor like self
-    virtual void match (Generator*) const = 0;
+    //! Return a new Generator set up to produce a new Predictor like self
+    virtual Generator* generator () const = 0;
 
     //! Add the information from the supplied predictor to self
     /*! This method should check to avoid inconsistency and duplication */

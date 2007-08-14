@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Parameters.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/07/12 05:59:40 $
+   $Revision: 1.4 $
+   $Date: 2007/08/14 22:15:58 $
    $Author: straten $ */
 
 #ifndef __Tempo2Parameters_h
@@ -40,9 +40,6 @@ namespace Tempo2 {
 
     //! Return a new, copy constructed instance of self
     Pulsar::Parameters* clone () const;
-
-    //! Return a new Generator set up to produce a new Predictor
-    Pulsar::Generator* generator () const;
 
     //! Return true if *this == *that
     bool equals (const Pulsar::Parameters* that) const;

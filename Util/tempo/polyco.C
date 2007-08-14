@@ -511,17 +511,15 @@ Pulsar::Predictor* polyco::clone () const
   return new polyco (*this);
 }
 
-//! Set up Generator to produce a new Predictor like self
-void polyco::match (Pulsar::Generator* generator) const
+Pulsar::Generator* polyco::generator () const
 {
-  Tempo::Predict* predict = dynamic_cast<Tempo::Predict*> (generator);
-  if (!predict)
-    throw Error (InvalidParam, "polyco::match",
-		 "Generator is not a TEMPO Predict");
-
+  Tempo::Predict* predict = new Tempo::Predict;
   predict->set_nspan( (int) get_nspan() );
   predict->set_ncoef( get_ncoeff() );
+  return predict;
 }
+
+
 
 //! Add the information from the supplied predictor to self
 void polyco::insert (const Predictor* other)
