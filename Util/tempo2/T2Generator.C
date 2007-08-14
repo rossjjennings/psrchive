@@ -109,35 +109,45 @@ void Tempo2::Generator::set_segment_length (long double days)
 //! Return a new, copy constructed instance of self
 Pulsar::Predictor* Tempo2::Generator::generate () const
 {
+  if (Predictor::verbose)
+    tempo2_verbose = 3;
+
   Tempo2::Predictor* pred = new Tempo2::Predictor;
 
   const pulsar* psr = &parameters->psr;    
   ChebyModelSet* cms = &pred->predictor.modelset.cheby;
   pred->predictor.kind = Cheby;
 
+  long double use_epoch1 = epoch1;
+  long double use_epoch2 = epoch2;
+
+  if (epoch1 == epoch2) {
+    use_epoch1 -= 0.4 * segment_length;
+    use_epoch2 += 0.4 * segment_length;
+  }
+
   if (Predictor::verbose)
     cerr << "Tempo2::Generator::generate call ChebyModelSet_Construct\n" 
       " sitename=" << sitename <<
-      " epoch1=" << epoch1 << " epoch2=" << epoch2 << "\n"
+      " epoch1=" << use_epoch1 << " epoch2=" << use_epoch2 << "\n"
       " segment_length=" << segment_length <<
       " freq1=" << freq1 << " freq2=" << freq2 << "\n"
       " coeffs: ntime=" << ntimecoeff << " nfreq=" << nfreqcoeff
 	 << endl;
 
-  ChebyModelSet_Construct( cms, psr, sitename.c_str(), epoch1, epoch2,
+  ChebyModelSet_Construct( cms, psr, sitename.c_str(), use_epoch1, use_epoch2,
 			   segment_length, segment_length*0.1, 
 			   freq1, freq2, ntimecoeff, nfreqcoeff );
 
   if (Predictor::verbose)
-    cerr << "Tempo2::Generator::generate ChebyModelSet_Construct ok" << endl;
+    cerr << "Tempo2::Generator::generate ChebyModelSet_Construct nsegment=" 
+         << cms->nsegments << endl;
 
-#if 1
   long double rms, mav;
   ChebyModelSet_Test( cms, psr, ntimecoeff*5*cms->nsegments, 
 		      nfreqcoeff*5*cms->nsegments, &rms, &mav );
   printf("RMS error = %.3Lg s MAV= %.3Lg s\n", 
 	 rms/psr[0].param[param_f].val[0], mav/psr[0].param[param_f].val[0]);
-#endif
 
   return pred;
 }
