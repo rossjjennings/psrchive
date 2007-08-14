@@ -1,4 +1,6 @@
-# This file sets all the defined parameters
+#
+# This file defines all pulsar parameters understood by the psrephem class
+#
 # Each line consists of a keyword name followed by a code specifying
 # the format of the data associated with it. The codes are as follows:
 #         0 = string, 
@@ -193,3 +195,41 @@ NITS 5 0
 
 # Special Kopeikin 96 flag takes out derivatives due to proper motion
 K96 5 0
+
+#
+# New parameters for TEMPO2
+#
+EPHVER           0 0      # Ephemeris version string
+ECLOBL           1 1      # Ecliptic obliquity 
+IPM              5 0      # Correct for interplanetary dispersion 
+TEMPO1           5 0      # Tempo1 emulation mode 
+DILATEFREQ       5 0      # Correct obs frequency for time dilation 
+NO_SS_SHAPIRO    5 0      # Turn off all solar system Shapiro delays
+PLANET_SHAPIRO   5 0      # Account for planetary Shapiro delays 
+CORRECT_TROPO    5 0      # Correct for tropospheric delays 
+UNITS            0 0      # Units for SSB timescale (SI, TDB) 
+NE1AU            1 1      # Solar electron density scale @1AU [cm**(-3) pc]
+TIMEEPH          0 0      # Time ephemeris code to use (IF99, fb90)
+T2CMETHOD        0 0      # Polar Motion/Prec/Nut code (IAU2000B, TEMPO)
+DMFACTOR         1 1      # DM/Dispersion Constant [cm**(-3) pc s**(-3)]
+DMEPOCH          1 0      # Epoch for DM 
+FDDC             1 1      # Scale of freq-dependent delay [s MHz**(-FDDI)]
+FDDI             1 1      # Spectral index of freq-dependent delay
+MSS              5 0      # Use Wex 1988 "MSS" in T2 binary model 
+BINIT            5 0      # Iterate to invert binary timing formula
+SHAPMAX          1 1      # -ln(1-sini) Shapiro delay parameter
+KMPRA            1 1      # PMRA for Kopeikin term [mas/yr]
+KPMDEC           1 1      # PMDEC for Kopeikin term [mas/yr]
+KPMELONG         1 1      # PMELONG for Kopeikin term [mas/yr]
+KPMELAT          1 1      # PMELAT for Kopeikin term [mas/yr]
+RV               1 1      # Radial velocity [km/s]
+RVS              1 1      # Radial velocity for Shklovskii-dot term [km/s]
+VT               1 1      # Transverse velocity for Doppler term [m s**(-2)]
+RACC             1 1      # Radial acceleration [m s**(-2)]
+PMACC            1 1      # Accel parallel to proper motion [m s**(-2)]
+D_SHK            1 1      # Distance for Shklovskii term [kpc]
+D_AOP            1 1      # Distance for annual-orbital parallax [kpc]
+D_OP             1 1      # Distance for orbital parallax [kpc]
+WAVE_FREQ        1 1      # Fundamental FITWAVE frequency [Hz]
+WAVES_1          1 1      # FITWAVE sine component amplitude [s]
+WAVEC_1          1 1      # FITWAVE cosine component amplitude [s]
