@@ -361,7 +361,7 @@ Pulsar::EPNArchive::new_Integration (Integration* subint)
   BasicIntegration* integration;
 
   if (subint)
-    integration = new BasicIntegration (*subint);
+    integration = new BasicIntegration (subint);
   else
     integration = new BasicIntegration;
 

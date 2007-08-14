@@ -79,7 +79,7 @@ Pulsar::BasicArchive::new_Integration (Integration* subint)
   Integration* integration;
 
   if (subint)
-    integration = new BasicIntegration (*subint);
+    integration = new BasicIntegration (subint);
   else
     integration = new BasicIntegration;
 

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicIntegration.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/08/10 00:16:33 $
+   $Revision: 1.11 $
+   $Date: 2007/08/14 05:21:06 $
    $Author: straten $ */
 
 #ifndef __BasicIntegration_h
@@ -26,7 +26,10 @@ namespace Pulsar {
     BasicIntegration () { init(); }
 
     //! copy constructor
-    BasicIntegration (const Integration& subint);
+    BasicIntegration (const BasicIntegration& subint);
+
+    //! copy constructor
+    BasicIntegration (const Integration* subint);
 
     //! destructor
     virtual ~BasicIntegration () { }
