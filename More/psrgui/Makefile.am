@@ -17,13 +17,13 @@ psrgui_SOURCES = psrgui.C
 #
 # Dependencies should never be changed
 #
+INCLUDES = -I$(top_builddir)/local_include @PGPLOT_CFLAGS@ @QT_CXXFLAGS@
 
-INCLUDES = @PGPLOT_CFLAGS@ @QT_CXXFLAGS@
-
-LDADD = libpsrgui.la $(top_builddir)/More/libpsrmore.la \
+LDADD = libpsrgui.la \
+        $(top_builddir)/More/libpsrmore.la \
         $(top_builddir)/Base/libpsrbase.la \
         $(top_builddir)/Util/libpsrutil.la \
-        @QT_LIBS@ @PGPLOT_LIBS@
+        @QT_LIBS@ @PGPLOT_LIBS@ 
 
 include $(top_srcdir)/config/Makefile.Qt
 
