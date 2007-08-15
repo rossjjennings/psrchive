@@ -6,10 +6,15 @@ Pulsar::interfacePanel::interfacePanel(QWidget* parent,
 {
   ti = ui;
 
-  QVBoxLayout* layout = new QVBoxLayout(this);
+  QVBoxLayout* base = new QVBoxLayout(this);
 
-  QPushButton* updateMe = new QPushButton("&Update", this);
-  layout->addWidget(updateMe);
+  QGroupBox* layout = new QGroupBox(5, Qt::Horizontal, "Interface Panel", this);
+  base->addWidget(layout);
+
+  QButtonGroup* buttons = new QButtonGroup(2, Qt::Horizontal, "Actions", this);
+  base->addWidget(buttons);
+
+  QPushButton* updateMe = new QPushButton("&Update", buttons);
   QObject::connect(updateMe, SIGNAL(clicked()), this, SLOT(processRequest()));
   updateMe->setDefault(true);
 
@@ -18,17 +23,17 @@ Pulsar::interfacePanel::interfacePanel(QWidget* parent,
     useful1 = ti->get_name(i);
     useful2 = ti->get_value(useful1.ascii());
     
-    parameters.push_back(new QLineEdit(useful1 + " = " + useful2, this));
-    layout->addWidget(parameters[i]);
+    parameters.push_back(new QLineEdit(useful1 + " = " + useful2, layout));
   }
   
-  QPushButton* closeMe = new QPushButton("Close", this);
-  layout->addWidget(closeMe);
+  QPushButton* closeMe = new QPushButton("Close", buttons);
   QObject::connect(closeMe, SIGNAL(clicked()), this, SLOT(accept()));
   closeMe->setDefault(false);
 
+  layout->adjustSize();
+
   setSizeGripEnabled(true);
-  //setMinimumSize(childrenRect().width(), childrenRect().height());
+  adjustSize();
 }
 
 void Pulsar::interfacePanel::processRequest()

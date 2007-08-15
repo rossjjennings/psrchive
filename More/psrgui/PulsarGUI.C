@@ -28,9 +28,32 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename)
 
   connect(confGraphAction, SIGNAL(activated()), this, SLOT(confGraph()));
 
-  // Look after the placement of Widgets
-  QVBox* layout = new QVBox(this);
+  QAction* confProcAction = new QAction("Data", "&Data", CTRL+Key_D,
+                                        this, "Data");
+
+  connect(confProcAction, SIGNAL(activated()), this, SLOT(confProc()));
+
+  // Look after the global placement of Widgets
+  QGroupBox* layout = new QGroupBox(4, Qt::Vertical, "Control Panel", this);
   setCentralWidget(layout);
+
+  // Nest a section for the pre-processor options
+  QGroupBox* prebox = new QGroupBox(1, Qt::Horizontal, "Pre-processor Options",
+                                    layout);
+
+  // Construct a LineEdit for the pre-processor
+  ppLe = new QLineEdit(prebox);
+
+  connect(ppLe, SIGNAL(returnPressed()), this, SLOT(preProcess()));
+
+  // Baseline removal selector
+  autoBase = new QCheckBox("Automatic Baseline Removal", prebox);
+  autoBase->setChecked(true);
+
+  QPushButton* refreshButton = new QPushButton("Undo All", prebox);
+  connect(refreshButton, SIGNAL(clicked()), this, SLOT(undoChanges()));
+
+  ppengine = new Pulsar::Interpreter();
 
   // Construct a radio button group to hold the plot options
   psrButtons = new QButtonGroup(1, Qt::Horizontal, 
@@ -55,7 +78,7 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename)
 
   confFrameAction->addTo(confMenu);
   confGraphAction->addTo(confMenu);
-
+  confProcAction->addTo(confMenu);
   
   // Construct available plot styles
   static PlotFactory factory;
@@ -73,7 +96,7 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename)
   // Allow the user to open a pgplot window and draw the active plot
   QPushButton* launcher = new QPushButton("Draw Plot", layout);
   QObject::connect(launcher, SIGNAL(clicked()), this, SLOT(plotGraph()));
-  
+ 
   // Load a file if a name was given on the command line
   if (filename.isEmpty()) {
     arch = 0;
@@ -95,6 +118,11 @@ void Pulsar::PulsarGUI::readFile(QString& filename)
 {
   try {
     arch = Pulsar::Archive::load(filename);
+    if (autoBase->isChecked())
+      arch->remove_baseline();
+    preti = new Pulsar::ArchiveTI(arch);
+    ppengine->set(arch);
+    preProcess();
   }
   catch (Error& error) {
     QErrorMessage* em = new QErrorMessage(this);
@@ -143,6 +171,42 @@ void Pulsar::PulsarGUI::confGraph()
   }
 }
 
+
+void Pulsar::PulsarGUI::confProc()
+{
+  if (preti) {
+    interfacePanel* panl = new interfacePanel(this, preti);
+    panl->show();
+  }
+}
+
+void Pulsar::PulsarGUI::preProcess()
+{
+  QString jobs = ppLe->text();
+  if (jobs.isEmpty())
+    return;
+
+  vector<string> joblist;
+
+  try {
+    separate(jobs.ascii(), joblist, ",");
+    ppengine->script(joblist);
+  }
+  catch(Error& error) {
+    QErrorMessage* em = new QErrorMessage(this);
+    QString useful = "Failed to process: ";
+    useful += (error.get_message()).c_str();
+    em->message(useful);
+  }
+}
+
+void Pulsar::PulsarGUI::undoChanges()
+{
+  arch->refresh();
+  if (autoBase->isChecked())
+    arch->remove_baseline();
+}
+
 void Pulsar::PulsarGUI::plotGraph()
 {
   try {
@@ -150,7 +214,7 @@ void Pulsar::PulsarGUI::plotGraph()
     pi = dynamic_cast<plotItem*> (psrButtons->selected());
     
     if (pi) {
-      cpgopen("/xs");
+      cpgopen("323/xs");
       cpgsvp(0.1,0.9,0.1,0.9);
       pi->getPlot()->plot(arch);
       cpgclos();
@@ -161,5 +225,6 @@ void Pulsar::PulsarGUI::plotGraph()
     QString useful = "Failed to construct plot: ";
     useful += (error.get_message()).c_str();
     em->message(useful);
+    cpgclos();
   }
 }

@@ -5,6 +5,8 @@
 #include "qpushbutton.h"
 #include "qdialog.h"
 #include "qlayout.h"
+#include "qgroupbox.h"
+#include "qbuttongroup.h"
 #include "qlineedit.h"
 #include "qstring.h"
 

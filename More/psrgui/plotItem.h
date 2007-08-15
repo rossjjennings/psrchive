@@ -22,7 +22,7 @@ namespace Pulsar {
       protected:
 
 	// Store a pointer to a specific plot style
-	Pulsar::Plot* figStyle;
+	Reference::To<Pulsar::Plot> figStyle;
 
       private:
 

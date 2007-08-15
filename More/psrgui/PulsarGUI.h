@@ -10,10 +10,14 @@
 #include "qmenubar.h"
 #include "qtoolbar.h"
 #include "qaction.h"
+#include "qgroupbox.h"
+#include "qcheckbox.h"
 
 #include "Pulsar/Plot.h"
 #include "Pulsar/PlotFactory.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveTI.h"
+#include "Pulsar/Interpreter.h"
 
 #include "plotItem.h"
 #include "interfacePanel.h"
@@ -43,12 +47,21 @@ namespace Pulsar {
 
 	void confFrame();
 	void confGraph();
+        void confProc();
 
 	void plotGraph();
+
+        void preProcess();
+        void undoChanges();
 
       protected:
 
 	Reference::To<Pulsar::Archive> arch;
+        Reference::To<Pulsar::ArchiveTI> preti;
+        Reference::To<Pulsar::Interpreter> ppengine;
+
+        QLineEdit* ppLe;
+        QCheckBox* autoBase;
 
 	QButtonGroup* psrButtons;
 
