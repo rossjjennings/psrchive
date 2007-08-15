@@ -109,9 +109,6 @@ void Tempo2::Generator::set_segment_length (long double days)
 //! Return a new, copy constructed instance of self
 Pulsar::Predictor* Tempo2::Generator::generate () const
 {
-  if (Predictor::verbose)
-    tempo2_verbose = 3;
-
   Tempo2::Predictor* pred = new Tempo2::Predictor;
 
   const pulsar* psr = &parameters->psr;    
