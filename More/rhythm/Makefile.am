@@ -21,11 +21,12 @@ nodist_rhythm_SOURCES = $(CLEANFILES)
 # Dependencies should never be changed
 #
 
-INCLUDES = @QTDRIV_CFLAGS@
+INCLUDES = -I$(top_builddir)/local_include @QTDRIV_CFLAGS@
 
 LDADD = $(top_builddir)/More/libpsrmore.la \
         $(top_builddir)/Base/libpsrbase.la \
         $(top_builddir)/Util/libpsrutil.la @QTDRIV_LIBS@
 
 include $(top_srcdir)/config/Makefile.Qt
+
 
