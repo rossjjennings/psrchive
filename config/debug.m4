@@ -44,13 +44,13 @@ AC_DEFUN([SWIN_DEBUG],
     echo 's/-g$//g' >> .ac_strip_g
 
     if test x"$swin_cxxflags_set" != xyes; then
-      CXXFLAGS=`echo $CXXFLAGS | sed -f .ac_strip_g`
+      CXXFLAGS="`echo $CXXFLAGS | sed -f .ac_strip_g` -Wall"
     else
       AC_MSG_NOTICE([   CXXFLAGS set by user.])
     fi
 
     if test x"$swin_cflags_set" != xyes; then
-      CFLAGS=`echo $CFLAGS | sed -f .ac_strip_g`
+      CFLAGS="`echo $CFLAGS | sed -f .ac_strip_g` -Wall"
     else
       AC_MSG_NOTICE([   CFLAGS set by user.])
     fi
