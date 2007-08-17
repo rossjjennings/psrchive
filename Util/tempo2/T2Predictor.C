@@ -185,12 +185,28 @@ Phase to_Phase (long double p)
 //! Return the phase, given the epoch
 Phase Tempo2::Predictor::phase (const MJD& t) const
 {
+  if (verbose)
+    cerr << "Tempo2::Predictor::phase epoch=" << t << " frequency=" 
+	 << observing_frequency << endl;
+
+  if (observing_frequency <= 0)
+    Error error (InvalidState, "Tempo2::Predictor::phase",
+		 "observing_frequency=%lf", (double) observing_frequency);
+
   long double p = T2Predictor_GetPhase ( &predictor, from_MJD (t),
 					 observing_frequency );
+
   if (ChebyModelSet_OutOfRange)
     throw Error (InvalidParam, "Tempo2::Predictor::phase",
 		 "epoch %s not spanned by ChebyModelSet",
 		 t.printdays(20).c_str());
+
+  if (!finite(p)) {
+    Error error (InvalidState, "Tempo2::Predictor::phase",
+		 "T2Predictor_GetPhase result = ");
+    error << p;
+    throw error;
+  }
 
   return to_Phase( p );
 }
