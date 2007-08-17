@@ -109,9 +109,13 @@ void Tempo2::Generator::set_segment_length (long double days)
 //! Return a new, copy constructed instance of self
 Pulsar::Predictor* Tempo2::Generator::generate () const
 {
+  if (Predictor::verbose)
+    debugFlag = 1;
+
   Tempo2::Predictor* pred = new Tempo2::Predictor;
 
-  const pulsar* psr = &parameters->psr;    
+  const pulsar* psr = &parameters->psr;
+
   ChebyModelSet* cms = &pred->predictor.modelset.cheby;
   pred->predictor.kind = Cheby;
 
@@ -145,6 +149,8 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
 		      nfreqcoeff*5*cms->nsegments, &rms, &mav );
   printf("RMS error = %.3Lg s MAV= %.3Lg s\n", 
 	 rms/psr[0].param[param_f].val[0], mav/psr[0].param[param_f].val[0]);
+
+  pred->set_observing_frequency (0.5L * (freq1 + freq2));
 
   return pred;
 }
