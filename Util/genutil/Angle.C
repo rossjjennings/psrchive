@@ -285,6 +285,7 @@ std::ostream& operator << (std::ostream& os, const Angle& angle)
   case Angle::Turns:
     return os << angle.getTurns() << "trn";
   }
+  return os;
 }
 
 std::istream& operator >> (std::istream& is, Angle& angle)
@@ -356,7 +357,7 @@ int AnglePair::setHMSDMS(const char *astr)
 
 int AnglePair::setHMSDMS(const string& s1, const string& s2)
 {
-  setHMSDMS (s1.c_str(), s2.c_str());
+  return setHMSDMS (s1.c_str(), s2.c_str());
 }
 
 int AnglePair::setHMSDMS(const char *s1, const char *s2)

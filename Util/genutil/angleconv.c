@@ -84,9 +84,8 @@ int dms2rad ( char * instr, double * radval)
 
 int dmserr2rad ( char * instr, char * inerr, double * radval)
 {
-    auto int isign = 1, 
-	     id,                     
-	     im,i,
+    auto int id,                     
+	     im,
 	     nfound;
     char    * ptr ;
     double secs ;
@@ -193,7 +192,7 @@ char * crad2dms( double pos, int ra, char * name )
 char * crad2dmse( double pos, double err, int ra, char * name )
 {
   double sec, sece, tmp, tmpe;
-  int deg, min, ip, is;
+  int deg, min, ip;
   char isign;
   char * it, fmt[16];
   int expo,i;

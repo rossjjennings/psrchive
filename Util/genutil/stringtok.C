@@ -12,9 +12,9 @@ using namespace std;
 string stringtok (string* instr, const string& delimiters,
 		  bool skip_leading, bool strip_leading_remain)
 {
-  ssize_t first = instr->find_first_not_of (delimiters);
-  ssize_t start = (skip_leading) ? first : 0;
-  ssize_t last = instr->find_first_of(delimiters, start);
+  string::size_type first = instr->find_first_not_of (delimiters);
+  string::size_type start = (skip_leading) ? first : 0;
+  string::size_type last = instr->find_first_of(delimiters, start);
   if (last == string::npos)
     last = instr->length();
 

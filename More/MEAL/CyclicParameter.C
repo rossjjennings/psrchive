@@ -21,9 +21,9 @@ MEAL::CyclicParameter::CyclicParameter (Function* context)
 
 MEAL::CyclicParameter::CyclicParameter (const CyclicParameter& p)
   : OneParameter (p),
-    period(p.period), 
     lower_bound(p.lower_bound),
-    upper_bound(p.upper_bound)
+    upper_bound(p.upper_bound),
+    period(p.period)
 {
 }
 

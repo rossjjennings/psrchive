@@ -161,7 +161,7 @@ void load_variances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
   if (Pulsar::Archive::verbose > 2)
     cerr << "FITSArchive::load_PolnCalibratorExtension dataerr read" << endl;
   
-  int count = 0;
+  unsigned count = 0;
 
   for (unsigned ichan = 0; ichan < pce->get_nchan(); ichan++) {
     if (pce->get_valid(ichan)) {
@@ -222,7 +222,7 @@ void load_covariances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
   vector<double> covar (ncovar);
   unsigned count = 0;
 
-  for (int ichan = 0; ichan < nchan; ichan++) {
+  for (unsigned ichan = 0; ichan < nchan; ichan++) {
 
     if (!pce->get_valid(ichan)) {
       count += ncovar;

@@ -8,22 +8,29 @@
 #include "MEAL/Cached.h"
 #include "MEAL/NotCached.h"
 
+using namespace std;
+
 /*! The class name is used in the output of template classes and methods */
 const char* MEAL::Scalar::Name = "Scalar";
 
 MEAL::Scalar::Scalar ()
 {
+  if (verbose)
+    cerr << "MEAL::Scalar ctor" << endl;
   evaluation_policy = new Cached<Scalar> (this);
 }
 
 MEAL::Scalar::Scalar (const Scalar& copy) : Function (copy)
 {
+  if (verbose)
+    cerr << "MEAL::Scalar copy ctor" << endl;
   evaluation_policy = new Cached<Scalar> (this);
 }
 
 MEAL::Scalar& MEAL::Scalar::operator = (const Scalar& copy)
 {
   Function::operator = (copy);
+  return *this;
 }
 
 void MEAL::Scalar::evaluate (Estimate<double>& value) const

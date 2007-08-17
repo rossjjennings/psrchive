@@ -34,6 +34,6 @@ void VirtualMemory::destroy ()
 
 void* VirtualMemory::mmap (size_t length)
 {
-
+  return 0;
 }
 

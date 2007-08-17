@@ -195,14 +195,14 @@ void Pulsar::Pointing::update (const Integration* subint)
   const Archive* archive = get_parent (subint);
 
   if (!archive)
-    throw (InvalidState, "Pulsar::Pointing::update",
-	   "Integration has no parent Archive");
+    throw Error (InvalidState, "Pulsar::Pointing::update",
+	         "Integration has no parent Archive");
 
   const Telescope* telescope = archive->get<Telescope>();
 
   if (!telescope)
-    throw (InvalidState, "Pulsar::Pointing::update",
-	   "parent Archive has no telescope Extension");
+    throw Error (InvalidState, "Pulsar::Pointing::update",
+	         "parent Archive has no telescope Extension");
 
   sky_coord coord( get_right_ascension(), get_declination() );
 

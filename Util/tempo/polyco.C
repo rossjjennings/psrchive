@@ -295,17 +295,19 @@ int polynomial::unload (string* outstr) const
   if(binary)  {
 
 #ifdef _DEBUG
-      cerr << "polynomial::unload binary" << endl;
+    cerr << "polynomial::unload binary" << endl;
 #endif
 
-    bytes += sprintf(numstr, "%20s%18.12lf    %c%5.0lf%5d%10.3f%7.4f%9.4f\n", 
-	    ref_phase.strprint(6).c_str(), ref_freq, telescope, nspan_mins, 
-	    coefs.size(), freq, binph, binfreq);
+    bytes += sprintf (numstr, "%20s%18.12lf    %c%5.0lf%5d%10.3f%7.4f%9.4f\n", 
+		      ref_phase.strprint(6).c_str(),
+		      ref_freq, telescope, nspan_mins, 
+		      (int) coefs.size(), freq, binph, binfreq);
   }
   else 
-    bytes += sprintf(numstr, "%20s%18.12lf    %c%5.0lf%5d%10.3f\n", 
-	    ref_phase.strprint(6).c_str(), ref_freq, telescope, nspan_mins, 
-	    coefs.size(), freq);
+    bytes += sprintf (numstr, "%20s%18.12lf    %c%5.0lf%5d%10.3f\n", 
+		      ref_phase.strprint(6).c_str(),
+		      ref_freq, telescope, nspan_mins, 
+		      (int) coefs.size(), freq);
 
   *outstr += numstr;
 

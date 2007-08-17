@@ -37,7 +37,6 @@ int main (int argc, char** argv) try {
 
   bool phase_chosen = false;
   float phase = 0.0;
-  float rot_phase = 0.0;
 
   int cbin  = -1;
   int cchan = -1;

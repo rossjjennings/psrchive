@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Brent.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.3 $
+   $Date: 2007/08/17 06:10:02 $
    $Author: straten $ */
 
 #ifndef __BrentMethod
@@ -51,7 +51,7 @@ template<typename T, class Unary>
 
   for (unsigned iter=0; iter<iter_max; iter++) {
 
-    T d, e;
+    T d=0, e=0;
 
     if ((fb > 0.0 && fc > 0.0) || (fb < 0.0 && fc < 0.0)) {
       c=a;

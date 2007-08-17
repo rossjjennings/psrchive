@@ -192,6 +192,7 @@ std::ostream& pgplot::operator << (std::ostream& os, ColourMap::Name name)
   case ColourMap::Test:
     return os << "test";
   }
+  return os;
 }
 
 std::istream& pgplot::operator >> (std::istream& is, ColourMap::Name& name)

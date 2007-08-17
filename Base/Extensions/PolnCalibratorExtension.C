@@ -78,6 +78,9 @@ void Pulsar::PolnCalibratorExtension::set_type (Calibrator::Type _type)
   case Calibrator::Hamaker:
   case Calibrator::Britton:
     nparam = 7; break;
+  default:
+    throw Error (InvalidParam, "Pulsar::PolnCalibratorExtension::set_type",
+                 "unhandled Calibrator::Type");
   }
 }
 
@@ -174,10 +177,9 @@ const char* Pulsar::Calibrator::Type2str (Type type)
     return "Hybrid";
   case Corrections:
     return "Corrections";
+  default:
+    return "Invalid";
   }
-
-  return "Invalid";
-
 }
 
 

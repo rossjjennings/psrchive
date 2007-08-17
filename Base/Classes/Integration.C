@@ -146,7 +146,8 @@ Pulsar::Profile* Pulsar::Integration::new_Profile ()
 void Pulsar::Integration::copy (const Integration* subint, bool management)
 {
   if (Pulsar::Integration::verbose)
-    cerr << "Pulsar::Integration::copy entered" << endl;
+    cerr << "Pulsar::Integration::copy entered; management="
+	 << management << endl;
 
   if (this == subint)
     return;
@@ -156,8 +157,8 @@ void Pulsar::Integration::copy (const Integration* subint, bool management)
 
   resize (npol, nchan, subint->get_nbin());
 
-  for (int ipol=0; ipol<npol; ipol++)
-    for (int ichan=0; ichan<nchan; ichan++)
+  for (unsigned ipol=0; ipol<npol; ipol++)
+    for (unsigned ichan=0; ichan<nchan; ichan++)
       *(profiles[ipol][ichan]) = *(subint->profiles[ipol][ichan]);
 
   // Using a Reference::To<Extension> ensures that the cloned

@@ -98,7 +98,7 @@ void  MEAL::VelocityModel::set_omega(double _omega) {
 
 double MEAL::VelocityModel::get_omega () const {
 
-   get_param(4);
+   return get_param(4);
 
 }
 
@@ -178,7 +178,6 @@ void MEAL::VelocityModel::calculate_velocities (double theta, double& theta_vel,
 void MEAL::VelocityModel::calculate (double& result, std::vector<double>* grad) {
    
     double angle;
-    double value;
     double theta_vel,rad_vel;
 
     // the current parameters

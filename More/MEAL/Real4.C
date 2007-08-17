@@ -25,5 +25,6 @@ MEAL::Real4::Real4 (const Real4& copy) : Function (copy)
 MEAL::Real4& MEAL::Real4::operator = (const Real4& copy)
 {
   Function::operator = (copy);
+  return *this;
 }
 

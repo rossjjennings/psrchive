@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFactory.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.9 $
+   $Date: 2007/08/17 06:10:02 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFactory_h
@@ -65,6 +65,9 @@ namespace Pulsar {
 
     Agent (char c, std::string n, std::string d)
       : shortcut(c), name (n), description (d) {}
+
+    //! Virtual destructor
+    virtual ~Agent () { }
 
     //! Return a new instance of Plot class
     virtual Plot* construct () = 0;

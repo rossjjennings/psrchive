@@ -44,6 +44,7 @@ string Pulsar::InstallInterpreter::parameters (const string& args) try
 { 
   string filename = setup<string> (args);
   get()->set_ephemeris( factory<Parameters> (filename) );
+  return response (Good);
 }
 catch (Error& error) {
   return response (Fail, error.get_message());
@@ -53,6 +54,7 @@ string Pulsar::InstallInterpreter::predictor (const string& args) try
 { 
   string filename = setup<string> (args);
   get()->set_model( factory<Predictor> (filename) );
+  return response (Good);
 }
 catch (Error& error) {
   return response (Fail, error.get_message());
@@ -62,6 +64,7 @@ string Pulsar::InstallInterpreter::receiver (const string& args) try
 { 
   string filename = setup<string> (args);
   get()->add_extension( Receiver::load (filename) );
+  return response (Good);
 }
 catch (Error& error) {
   return response (Fail, error.get_message());

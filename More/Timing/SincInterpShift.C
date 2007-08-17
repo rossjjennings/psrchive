@@ -139,8 +139,6 @@ static void
 find_peak(float *f, unsigned n, 
 	  double *xmax, float *ymax)
 {
-  unsigned i;
-
   // find peak bin
   unsigned imax = std::max_element(f, f+n)-f;
 
@@ -152,7 +150,7 @@ find_peak(float *f, unsigned n,
 
 
   int iter;
-  double a,b,d,etemp,p,q,r,tol1,tol2,u,v,w,x,xm;
+  double a,b,d=0,etemp,p,q,r,tol1,tol2,u,v,w,x,xm;
   float fu,fv,fw,fx;
   double e=0.0;
   const int ITMAX = 100;

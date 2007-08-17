@@ -221,7 +221,7 @@ void TextInterface::parse_indeces (vector<unsigned>& index,
 
       check_range (start, size, "start");
 
-      for (int i=start; i < size; i++)
+      for (unsigned i=start; i < size; i++)
 	index.push_back (i);
 
     }

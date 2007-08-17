@@ -124,7 +124,7 @@ void unload_variances (fitsfile* fptr,
   data.resize( ncpar * nchan );
 
   unsigned count = 0;
-  for (int i = 0; i < nchan; i++)
+  for (unsigned i = 0; i < nchan; i++)
     if (pce->get_valid(i))
       for (int j = 0; j < ncpar; j++) {
 	data[count] = sqrt(pce->get_transformation(i)->get_variance(j));
@@ -153,7 +153,7 @@ void unload_covariances (fitsfile* fptr,
   vector<double> covar;
   unsigned count = 0;
 
-  for (int ichan = 0; ichan < nchan; ichan++) {
+  for (unsigned ichan = 0; ichan < nchan; ichan++) {
 
     if (!pce->get_valid(ichan)) {
       count += ncovar;
@@ -167,7 +167,7 @@ void unload_covariances (fitsfile* fptr,
       continue;
     }
 
-    assert (covar.size() == ncovar);
+    assert (covar.size() == unsigned(ncovar));
 
     for (int j = 0; j < ncovar; j++) {
       data[count] = covar[j];

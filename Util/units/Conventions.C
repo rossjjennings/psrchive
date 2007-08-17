@@ -20,6 +20,7 @@ ostream& Signal::operator << (ostream& os, Basis basis)
   case Elliptical:
     return os << "ell";
   }
+  return os;
 }
 
 istream& Signal::operator >> (istream& is, Basis& basis)

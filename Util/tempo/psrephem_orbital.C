@@ -56,8 +56,7 @@ double get_binphs_asc(double mjd, const psrephem& eph, double freq, char site)
 // Binary longitude wrt periastron at UTC MJD
 double get_binlng_peri(double mjd, const psrephem& eph, double freq, char site)
 {
-  int itmax=10;
-  double bcmjd, ma, ea, ta, omega, binlng;
+  double bcmjd, ma, ea, ta, binlng;
 
   // mjd to TDB 
   if((bcmjd = get_bcmjd(mjd, eph, freq, site)) < 0.){
@@ -83,7 +82,6 @@ double get_binlng_peri(double mjd, const psrephem& eph, double freq, char site)
 
 double get_binlng_asc(double mjd, const psrephem& eph, double freq, char site)
 {
-  int itmax=10;
   double bcmjd, ma, ea, ta, omega, binlng;
 
   // mjd to TDB 

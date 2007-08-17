@@ -46,7 +46,6 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
   double chan_bw = data->get_bandwidth() / nchan;
   double DM = data->get_dispersion_measure();
   double time_resolution = data->get_folding_period() / nbin;
-  double time_smear = 0;
 
   for (unsigned ichan = 0; ichan < nchan; ichan++) {
     double c_freq= data->get_centre_frequency(ichan);
@@ -56,8 +55,6 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
 		   "smearing in ichan=%u = %lf > time resolution = %lf",
 		   ichan, time_smear, time_resolution);
   }
-
-  double maxdiff = 0.0;
 
   for (unsigned ipol = 0; ipol < npol; ipol++) {
 

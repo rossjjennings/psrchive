@@ -70,8 +70,6 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   double rm = get_rotation_measure();
   bool must_defaraday = rm != 0 && !get_faraday_corrected() && get_npol() == 4;
 
-  unsigned save_nscrunch = nscrunch;
-
   try {
     
     for (unsigned isub=0; isub < newsub; isub++) {

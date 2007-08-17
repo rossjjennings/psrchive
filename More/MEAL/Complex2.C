@@ -25,6 +25,7 @@ MEAL::Complex2::Complex2 (const Complex2& copy) : Function (copy)
 MEAL::Complex2& MEAL::Complex2::operator = (const Complex2& copy)
 {
   Function::operator = (copy);
+  return *this;
 }
 
 void MEAL::Complex2::calculate (Complex2* other, Jones<double>& result,

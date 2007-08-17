@@ -20,7 +20,7 @@ void copy (FILE* from, FILE* to, ssize_t nbytes)
   while (!feof(from) && (nbytes != 0)) {
 
     size_t to_read = buffer.size();
-    if (nbytes > 0 && nbytes < buffer.size())
+    if (nbytes > 0 && unsigned(nbytes) < buffer.size())
       to_read = nbytes;
 
     // cerr << "to read=" << to_read << endl;

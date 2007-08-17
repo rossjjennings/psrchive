@@ -57,7 +57,7 @@ string evaluate (const string& text, char cstart, char cend)
 		   pad (errorRecord.column-10, "^", false).c_str());
     
     double value = -1;
-    for (unsigned i = 0; i < nVariables; i++)
+    for (int i = 0; i < nVariables; i++)
       if (variable[i].name == result)
 	value = variable[i].value;
 

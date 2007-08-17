@@ -215,7 +215,6 @@ int main (int argc, char *argv[]) try {
     const int RR   = 1214;
     const int SPC  = 1215;
     const int RM   = 1216;
-    const int INF  = 1217;
     const int MULT = 1218;
     const int PERIOD=1219;
 
@@ -270,7 +269,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.73 2007/07/30 06:35:17 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.74 2007/08/17 06:10:02 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;

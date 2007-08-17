@@ -14,8 +14,8 @@ std::pair<float,float> unset_range_norm (0.0, 1.0);
 std::pair<float,float> unset_world (0.0, 0.0);
 
 Pulsar::PlotScale::PlotScale () :
-  range_norm (unset_range_norm),
   world (unset_world),
+  range_norm (unset_range_norm),
   world_external (unset_world)
 {
   buf_norm = 0.0;

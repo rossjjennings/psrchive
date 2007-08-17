@@ -36,7 +36,6 @@ void unload_polyco (fitsfile* fptr, const polyco* poly,
   long firstelem = 1;
   long onelement = 1;
   int colnum = 0;
-  int anynul = 0;
   fits_get_colnum (fptr, CASEINSEN, "PRED_PHS", &colnum, &status);
   fits_write_col (fptr, TDOUBLE, colnum, nrows, firstelem, onelement,
 		  &pred_phs, &status);

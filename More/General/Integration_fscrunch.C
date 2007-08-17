@@ -16,6 +16,7 @@ Pulsar::FrequencyIntegrate::EvenlySpaced policy;
 int static_init ()
 {
   operation.set_range_policy( &policy );
+  return 0;
 }
 
 static int init = static_init ();

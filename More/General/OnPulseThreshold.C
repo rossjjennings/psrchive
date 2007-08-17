@@ -115,7 +115,7 @@ try {
 
   float cutoff = threshold * rms.get_value();
 
-  for (unsigned ibin=start; ibin<stop; ibin++)
+  for (int ibin=start; ibin<stop; ibin++)
     if ( amps[ibin % nbin] - mean.get_value() > cutoff )
       weight[ibin] = 1.0;
 

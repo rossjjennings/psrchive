@@ -212,12 +212,6 @@ int removedir (const char *path)
 }
 
 
-/* for backward compatibility */
-int disk_free_space (const char* path, double* space)
-{
-  return dirspace (path, space);
-}
-
 /* returns the disk space in bytes */
 int dirspace (const char* path, double* space)
 {
@@ -236,6 +230,12 @@ int dirspace (const char* path, double* space)
   *space = (double) info.f_bavail * (double) info.f_bsize;
 
   return (0);
+}
+
+/* for backward compatibility */
+int disk_free_space (const char* path, double* space)
+{
+  return dirspace (path, space);
 }
 
 int diruse (const char *path, double* bytes)

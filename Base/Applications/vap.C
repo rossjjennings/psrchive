@@ -1483,7 +1483,7 @@ table_stream ts(&cout);
 
 bool is_numeric( string src )
 {
-  for( int i =0; i < src.size(); i ++ )
+  for( unsigned i =0; i < src.size(); i ++ )
   {
     char next_char = src[i];
     if( next_char != '.' &&
