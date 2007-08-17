@@ -28,6 +28,10 @@ bool Pulsar::Profile::rotate_in_phase_domain = false;
 */
 void Pulsar::Profile::rotate_phase (double phase)
 {
+  if (!finite(phase))
+    throw Error (InvalidParam, "Pulsar::Profile::rotate_phase",
+		 "non-finite phase = %lf\n", phase);
+
   if (verbose)
     cerr << "Pulsar::Profile::rotate phase=" << phase 
 	 << " nbin=" << nbin << endl;
