@@ -22,13 +22,13 @@ using namespace std;
   related to the baseline.
  */
 float Pulsar::Profile::default_duty_cycle
-= Pulsar::config.get<float>("baseline_duty_cycle", 0.15);
+= Pulsar::Config::get<float>("baseline_duty_cycle", 0.15);
 
 /*!  
   When true, Profile methods will output debugging information on cerr
 */
 bool Pulsar::Profile::verbose
-= Pulsar::config.get<bool>("Profile::verbose", false);
+= Pulsar::Config::get<bool>("Profile::verbose", false);
 
 /*! 
   Do not allocate memory for the amps

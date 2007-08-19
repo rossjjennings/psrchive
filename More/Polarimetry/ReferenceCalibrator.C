@@ -23,7 +23,7 @@
 using namespace std;
 
 bool Pulsar::ReferenceCalibrator::smooth_bandpass
-= Pulsar::config.get<bool>("smooth_bandpass", false);
+= Pulsar::Config::get<bool>("smooth_bandpass", false);
 
 Pulsar::ReferenceCalibrator::~ReferenceCalibrator ()
 {

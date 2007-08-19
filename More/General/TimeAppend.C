@@ -16,8 +16,8 @@ using namespace std;
 
 Pulsar::TimeAppend::TimeAppend ()
 {
-  chronological = Pulsar::config.get<bool>("append_chronological", false);
-  max_overlap = Pulsar::config.get<double>("append_max_overlap", 30.0);
+  chronological = Pulsar::Config::get<bool>("append_chronological", false);
+  max_overlap = Pulsar::Config::get<double>("append_max_overlap", 30.0);
 }
 
 bool Pulsar::TimeAppend::stop (Archive* into, const Archive* from)

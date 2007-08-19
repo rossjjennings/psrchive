@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Config.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/04/12 05:08:07 $
+   $Revision: 1.5 $
+   $Date: 2007/08/19 19:55:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Config_h
@@ -19,12 +19,9 @@
 namespace Pulsar {
 
   //! Stores PSRCHIVE configuration parameters
-  class Config : public Configuration {
+  class Config {
 
   public:
-
-    //! Default constructor loads psrchive.cfg from the installation directory
-    Config ();
 
     // Return the name of the installation directory
     static std::string get_home ();
@@ -32,10 +29,25 @@ namespace Pulsar {
     // Return the name of the runtime directory
     static std::string get_runtime ();
 
-  };
+    //! Get the value for the specified key
+    template<typename T> 
+    static T get (const std::string& key, T default_value)
+    {
+      if (!config)
+	load_config ();
 
-  //! Global configuration
-  extern Config config;
+      return config->get (key, default_value);
+    }
+
+  protected:
+
+    //! The global configuration file
+    static Configuration* config;
+    
+    //! Load the global configuration file
+    static void load_config ();
+
+  };
 
 }
 

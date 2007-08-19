@@ -98,7 +98,7 @@ void configuration_report (Reference::To<Pulsar::StandardCandles>);
 int main (int argc, char** argv) try {
 
   bool self_calibrate
-    = Pulsar::config.get<bool> ("fluxcal::self_calibrate", false);
+    = Pulsar::Config::get<bool> ("fluxcal::self_calibrate", false);
 
   bool offpulse_calibrator = false;
 

@@ -15,7 +15,7 @@ using namespace std;
   Interpolate by this factor when using ZeroPadShift
 */
 unsigned Pulsar::ZPSF
-= Pulsar::config.get<unsigned>("zero_pad_interpolate", 64);
+= Pulsar::Config::get<unsigned>("zero_pad_interpolate", 64);
 
 /* This algorithm uses zero padding in the fourier domain to
    interpolate the cross correlation function in the time domain. The

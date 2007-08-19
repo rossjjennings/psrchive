@@ -16,13 +16,13 @@ using namespace std;
   Maximum frequency difference in MHz
 */
 double Pulsar::ArchiveMatch::max_frequency_difference 
-= Pulsar::config.get<double>("max_frequency_difference", 0.1);
+= Pulsar::Config::get<double>("max_frequency_difference", 0.1);
 
 /*!
   Allow observations with opposite sidebands to match
 */
 bool Pulsar::ArchiveMatch::opposite_sideband
-= Pulsar::config.get<bool>("opposite_sideband", false);
+= Pulsar::Config::get<bool>("opposite_sideband", false);
 
 /*!
   Added between match report strings in reason attribute

@@ -45,15 +45,15 @@ bool Pulsar::Database::verbose = false;
 
 /*! By default, the long time scale is set to four weeks. */
 double Pulsar::Database::long_time_scale
-= Pulsar::config.get<double> ("Database::long_time_scale", 60.0 * 24 * 28);
+= Pulsar::Config::get<double> ("Database::long_time_scale", 60.0 * 24 * 28);
 
 /*! By default, the short time scale is set to two hours. */
 double Pulsar::Database::short_time_scale
-= Pulsar::config.get<double> ("Database::short_time_scale", 120.0);
+= Pulsar::Config::get<double> ("Database::short_time_scale", 120.0);
 
 /*! By default, the maximum angular separation is 5 degrees */
 double Pulsar::Database::max_angular_separation
-= Pulsar::config.get<double> ("Database::max_angular_separation", 5.0);
+= Pulsar::Config::get<double> ("Database::max_angular_separation", 5.0);
 
 /*! This null parameter is intended only to improve code readability */
 const Pulsar::Archive* Pulsar::Database::any = 0;
@@ -646,7 +646,8 @@ void Pulsar::Database::unload (const string& filename)
 		 "fopen (" + filename + ")");
   
   fprintf (fptr, "Pulsar::Database::path %s\n", path.c_str());
-  fprintf (fptr, "Pulsar::Database # of entries = %d\n", entries.size());
+  fprintf (fptr, "Pulsar::Database # of entries = %u\n", 
+	   (unsigned)entries.size());
 
   string out;
   for (unsigned ie=0; ie<entries.size(); ie++) {

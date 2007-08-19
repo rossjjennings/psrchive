@@ -22,7 +22,7 @@ using namespace std;
 
 Pulsar::Append::Append ()
 {
-  must_match = Pulsar::config.get<bool>("append_must_match", true);
+  must_match = Pulsar::Config::get<bool>("append_must_match", true);
 
   match.set_check_mixable ();
 }

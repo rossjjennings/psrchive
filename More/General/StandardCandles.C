@@ -27,13 +27,13 @@ static std::string get_default ()
 
 std::string
 Pulsar::StandardCandles::default_filename 
-= Pulsar::config.get<std::string> ("fluxcal::database", get_default());
+= Pulsar::Config::get<std::string> ("fluxcal::database", get_default());
 
 float Pulsar::StandardCandles::on_radius
-= Pulsar::config.get<float> ("fluxcal:on_radius", 0.25);
+= Pulsar::Config::get<float> ("fluxcal:on_radius", 0.25);
 
 float Pulsar::StandardCandles::off_radius
-= Pulsar::config.get<float> ("fluxcal:off_radius", 2.5);
+= Pulsar::Config::get<float> ("fluxcal:off_radius", 2.5);
 
 // //////////////////////////////////////////////////////////////////////
 //
