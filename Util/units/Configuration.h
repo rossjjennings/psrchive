@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Configuration.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.5 $
+   $Date: 2007/08/19 19:55:49 $
    $Author: straten $ */
 
 #ifndef __Configuration_h
@@ -17,6 +17,7 @@
 #include "tostring.h"
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 //! Stores keyword-value pairs from a configuration file
 /*! The Configuration class enables convenient, distributed access to
@@ -35,7 +36,10 @@ public:
   class Entry;
 
   //! Get the value for the specified key
-  template<typename T> T get (const char* key, T default_value) const;
+  template<typename T> T get (const std::string& key, T default_value) const;
+
+  //! Find the entry with the specified key
+  Entry* find (const std::string& key) const;
 
 protected:
 
@@ -52,17 +56,34 @@ public:
 
 //! Get the value for the specified key
 template<typename T> 
-T Configuration::get (const char* key, T default_value) const
+T Configuration::get (const std::string& key, T default_value) const
 {
-  for (unsigned i=0; i<entries.size(); i++)
-    if (entries[i].key == key) {
-      T value = fromstring<T> (entries[i].value);
+  Entry* entry = find (key);
+  if (entry) {
+
 #ifdef _DEBUG
-      std::cerr << "Configuration::get found " << key 
+    std::cerr << "Configuration::get found entry->value=" << entry->value 
+	      << std::endl;
+#endif
+
+    /* IMPORTANT NOTE:
+       cannot call fromstring because it uses a global variable that may
+       not be initialized at the time that this template function is called
+    */
+
+    std::istringstream ist;
+    ist.str (entry->value);
+
+    T value;
+    ist >> value;
+
+#ifdef _DEBUG
+    std::cerr << "Configuration::get found " << key 
                 << " = " << value << std::endl;
 #endif
-      return value;
-    }
+
+    return value;
+  }
 
 #ifdef _DEBUG
   std::cerr << "Configuration::get default " << key 
