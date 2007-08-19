@@ -50,7 +50,7 @@ try {
     return get_calibrator()->start_time();
 }
 catch (Error& error) {
-  error += "Pulsar::PulsarCalibrator::get_epoch";
+  throw error += "Pulsar::PulsarCalibrator::get_epoch";
 }
 
 //! Return Calibrator::Hamaker or Calibrator::Britton
@@ -334,7 +334,6 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 
     model[mchan]->fit( data->new_PolnProfile (ichan) );
 
-    unsigned iterations = model[mchan]->get_fit_iterations ();
     unsigned nfree = model[mchan]->get_fit_nfree ();
     float chisq = model[mchan]->get_fit_chisq ();
 
