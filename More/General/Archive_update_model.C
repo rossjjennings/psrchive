@@ -156,8 +156,12 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     throw Error (InvalidState, "Pulsar::Archive::update_model",
 		 "no Pulsar::Parameters available");
 
+  if (verbose > 2)
+    cerr << "Pulsar::Archive::update_model Predictor::policy=" 
+	 << Predictor::policy << endl;
+
   Reference::To<Generator> generator;
-  if (model) {
+  if (model && Pulsar::Predictor::policy == "input") {
     if (verbose > 2)
       cerr << "Pulsar::Archive::update_model get matching generator "
               "from current predictor" << endl;
