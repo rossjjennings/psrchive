@@ -12,7 +12,7 @@ nobase_include_HEADERS = \
 	Pulsar/PlotEdge.h \
 	Pulsar/PlotScale.h Pulsar/PhaseScale.h Pulsar/FrequencyScale.h	\
 	Pulsar/PlotAxis.h Pulsar/PlotLabel.h Pulsar/PlotAttributes.h	\
-	Pulsar/PlotFrame.h Pulsar/MultiFrame.h	\
+	Pulsar/PlotFrame.h Pulsar/MultiFrame.h Pulsar/FramedPlot.h	\
 	Pulsar/SimplePlot.h Pulsar/FrequencyPlot.h Pulsar/PhasePlot.h	\
 	Pulsar/PowerSpectra.h Pulsar/SpectrumPlot.h			\
 	Pulsar/FluxPlot.h Pulsar/ProfilePlot.h Pulsar/StokesPlot.h	\
@@ -26,7 +26,7 @@ nobase_include_HEADERS = \
 	Pulsar/TwoBitPlot.h Pulsar/CalibratorSpectrum.h \
 	Pulsar/InfoLabel.h
 
-libPlotting_la_SOURCES = Plot.C PlotFactory.C \
+libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
 	PlotIndex.C \
 	PlotEdgeTI.C \
 	PlotScale.C PlotScaleTI.C \
