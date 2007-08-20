@@ -9,16 +9,13 @@
 
 Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
 {
-  get_frame()->set_x_scale( new PhaseScale );
-  get_frame()->set_y_scale( new FrequencyScale );
-
   ///////////////////////////////////////////////////////////////////////
 
   manage ("freq", &freq);
 
   // freq plotter shares the x-axis and y-axis
-  freq.get_frame()->set_x_scale (get_frame()->get_x_scale());
-  freq.get_frame()->set_y_scale (get_frame()->get_y_scale());
+  freq.get_frame()->set_x_scale (&xaxis);
+  freq.get_frame()->set_y_scale (&yaxis);
 
   freq.get_frame()->set_viewport (0,.7, 0,.7);
 
@@ -33,7 +30,7 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   manage ("flux", &flux);
 
   // flux plotter shares the x axis
-  flux.get_frame()->set_x_scale (get_frame()->get_x_scale());
+  flux.get_frame()->set_x_scale (&xaxis);
 
   flux.get_frame()->set_viewport (0,.7, .7,1);
 
@@ -58,7 +55,7 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   manage ("psd", &psd);
 
   // spectrum plotter shares the y axis on its x axis
-  psd.get_frame()->set_x_scale (get_frame()->get_y_scale());
+  psd.get_frame()->set_x_scale (&yaxis);
 
   // set only the y viewport
   psd.get_frame()->get_y_scale()->set_viewport (std::pair<float,float>(.7,1));
@@ -82,6 +79,9 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   // transpose the frame
   psd.get_frame()->set_transpose ();
 
+  frames.set_shared_x_scale (&xaxis);
+  frames.set_shared_y_scale (&yaxis);
+
 }
 
 //! Get the text interface to the configuration attributes
@@ -100,10 +100,5 @@ void Pulsar::PhaseVsFrequencyPlus::prepare (const Archive*)
 //! Get the scale
 Pulsar::PhaseScale* Pulsar::PhaseVsFrequencyPlus::get_scale ()
 {
-  PhaseScale* scale = 0;
-  scale = dynamic_cast<PhaseScale*>( get_frame()->get_x_scale() );
-  if (!scale)
-    throw Error (InvalidState, "Pulsar::MultiPhase::get_scale",
-		 "x scale is not a PhaseScale");
-  return scale;
+  return &xaxis;
 }

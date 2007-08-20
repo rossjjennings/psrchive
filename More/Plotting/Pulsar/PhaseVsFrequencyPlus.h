@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsFrequencyPlus.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.8 $
+   $Date: 2007/08/20 06:35:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsFrequencyPlus_h
@@ -65,6 +65,9 @@ namespace Pulsar {
 
     PlotIndex isubint;
     PlotIndex ipol;
+
+    PhaseScale xaxis;
+    FrequencyScale yaxis;
 
     template<class T> void prepare (T* plot)
     {
