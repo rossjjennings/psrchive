@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/SimplePlot.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.5 $
+   $Date: 2007/08/20 06:35:22 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SimplePlot_h
 #define __Pulsar_SimplePlot_h
 
-#include "Pulsar/Plot.h"
+#include "Pulsar/FramedPlot.h"
 
 namespace Pulsar {
 
@@ -32,7 +32,7 @@ namespace Pulsar {
     <LI> change the line style within the plot frame
     </UL>
   */
-  class SimplePlot : public Plot {
+  class SimplePlot : public FramedPlot {
 
   public:
 

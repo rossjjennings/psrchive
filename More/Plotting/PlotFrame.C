@@ -4,6 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#include "Pulsar/PlotFrame.h"
 #include "Pulsar/Plot.h"
 
 #include <cpgplot.h>

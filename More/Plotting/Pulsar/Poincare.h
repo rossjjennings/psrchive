@@ -7,21 +7,21 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Poincare.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.5 $
+   $Date: 2007/08/20 06:35:22 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Poincare_h
 #define __Pulsar_Poincare_h
 
-#include "Pulsar/Plot.h"
+#include "Pulsar/FramedPlot.h"
 #include "Pulsar/PlotIndex.h"
 #include "Pulsar/PlotScale.h"
 
 namespace Pulsar {
 
   //! Plots the Stokes vector in three-dimensional Poincare space
-  class Poincare : public Plot {
+  class Poincare : public FramedPlot {
 
   public:
 
@@ -40,9 +40,6 @@ namespace Pulsar {
     //! Get the text interface to the configuration attributes
     TextInterface::Class* get_interface ()
     { return new Interface (this); }
-
-    //! Get the text interface to the frame attributes
-    //TextInterface::Class* get_frame_interface ();
 
     //! Set the longitude of the camera
     void set_longitude (float f) { longitude = f; }
