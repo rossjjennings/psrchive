@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPlot.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/12/02 05:12:20 $
+   $Revision: 1.6 $
+   $Date: 2007/08/20 06:35:14 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiPlot_h
@@ -19,7 +19,9 @@
 
 namespace Pulsar {
 
-  //! Plots multiple viewports with pulse phase along the shared x-axis
+  class FramedPlot;
+
+  //! Plots multiple viewports
   class MultiPlot : public Plot {
 
   public:
@@ -34,13 +36,13 @@ namespace Pulsar {
     void plot (const Archive*);
 
     //! Manage a plot
-    void manage (const std::string& name, Plot* plot);
+    void manage (const std::string& name, FramedPlot* plot);
 
     //! Derived classes may wish to prepare before plotting
     virtual void prepare (const Archive*) {}
 
     //! Derived classes may wish to prepare before each plot is used
-    virtual void prepare (Plot*) {}
+    virtual void prepare (FramedPlot*) {}
 
   protected:
 
@@ -48,7 +50,7 @@ namespace Pulsar {
     MultiFrame frames;
 
     //! The plots
-    std::map< std::string, Reference::To<Plot> > plots;
+    std::map< std::string, Reference::To<FramedPlot> > plots;
 
     void set_viewport (PlotFrame* frame, 
 		       std::pair<float,float>& sub_xvp,

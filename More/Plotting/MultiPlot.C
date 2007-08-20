@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/MultiPlot.h"
+#include "Pulsar/FramedPlot.h"
 #include "Pulsar/MultiFrame.h"
 #include "pairutil.h"
 
@@ -14,7 +15,6 @@ using namespace std;
 
 Pulsar::MultiPlot::MultiPlot ()
 {
-  set_attributes( &frames );
 }
 
 TextInterface::Class* Pulsar::MultiPlot::get_frame_interface ()
@@ -26,10 +26,10 @@ void Pulsar::MultiPlot::plot (const Archive* data)
 {
   prepare (data);
 
-  std::map< std::string, Reference::To<Plot> >::iterator ptr;
+  std::map< std::string, Reference::To<FramedPlot> >::iterator ptr;
   for (ptr = plots.begin(); ptr != plots.end(); ptr++) {
 
-    Plot* plot = ptr->second;
+    FramedPlot* plot = ptr->second;
     PlotFrame* frame = plot->get_frame();
 
     // set the viewport of the frame
@@ -71,7 +71,7 @@ void Pulsar::MultiPlot::set_viewport (PlotFrame* frame,
 }
 
 //! Manage a plot
-void Pulsar::MultiPlot::manage (const std::string& name, Plot* plot)
+void Pulsar::MultiPlot::manage (const std::string& name, FramedPlot* plot)
 {
   frames.manage (name, plot->get_frame());
 
