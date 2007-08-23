@@ -57,7 +57,7 @@ int main (int argc, char** argv) try
   }
 
   psrephem ephemeris (input_ephemeris);
-  MJD epoch (epoch);
+  MJD epoch (input_epoch);
 
   Tempo::Predict predict;
 
