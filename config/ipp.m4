@@ -3,33 +3,36 @@ dnl
 AC_DEFUN([SWIN_LIB_IPP],
 [
   AC_PROVIDE([SWIN_LIB_IPP])
+
+  SWIN_PACKAGE_OPTIONS([ipp])
+
   AC_MSG_CHECKING([for IPP installation])
 
-  IPP_LIBS=""
-  IPP_CFLAGS=""
+  if test "$have_ipp" != "user disabled"; then
 
-  ac_save_LIBS="$LIBS"
-  ac_save_CPPFLAGS="$CPPFLAGS"
+    SWIN_PACKAGE_FIND([ipp],[ipps.h])
+    SWIN_PACKAGE_TRY_COMPILE([ipp],[#include <ipps.h>])
 
-  ac_test_LIBS="-L/usr/local/intel/ipp41/ia32_itanium/sharedlib -lipps"
-  ac_test_CPPFLAGS="-I/usr/local/intel/ipp41/ia32_itanium/include"
+    SWIN_PACKAGE_FIND([ipp],[libippsem64t.so])
+    SWIN_PACKAGE_TRY_LINK([ipp],[#include <ipps.h>],
+                          [ippsMalloc_32f(1);],
+			  [-lippsem64t -lippcoreem64t -lpthread])
 
-  LIBS="$ac_save_LIBS $ac_test_LIBS"
-  CPPFLAGS="$ac_save_CPPFLAGS $ac_test_CPPFLAGS"
 
-  AC_TRY_LINK([#include <ipps.h>],
-              [ippsMalloc_32f(1);],
-              have_ipp=yes, have_ipp=no)
-  if test x"$have_ipp" = xyes; then
-    IPP_LIBS="$ac_test_LIBS"
-    AC_DEFINE(HAVE_IPP,1,[Define if IPP library is installed])
-    IPP_CFLAGS="$ac_test_CPPFLAGS"
   fi
 
-  LIBS="$ac_save_LIBS"
-  CPPFLAGS="$ac_save_CPPFLAGS"
-
   AC_MSG_RESULT([$have_ipp])
+
+  if test x"$have_ipp" = xyes; then
+    AC_DEFINE(HAVE_IPP,1,[Define if IPP library is installed])
+    [$1]
+  else
+    :
+    [$2]
+  fi
+
+  IPP_LIBS="$ipp_LIBS"
+  IPP_CFLAGS="$ipp_CFLAGS"
 
   AC_SUBST(IPP_CFLAGS)
   AC_SUBST(IPP_LIBS)
