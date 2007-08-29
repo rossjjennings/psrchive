@@ -168,7 +168,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.54 2007/08/10 00:16:38 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.55 2007/08/29 04:14:07 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -432,12 +432,16 @@ int main (int argc, char **argv) try {
     
     archive = Pulsar::Archive::load (filenames[ifile]);
 
-    if (vverbose)
+    if (vverbose) {
+      cerr << "psradd: after load, instance count = " 
+	   << Reference::Able::get_instance_count() << endl;
+
       for (unsigned isub=0; isub < archive->get_nsubint(); isub++) {
 	MJD epoch = archive->get_Integration(isub)->get_epoch();
 	cerr << isub << ": phase=" 
 	     << archive->get_model()->phase( epoch ) << endl;
       }
+    }
 
     if (check_has_data && archive->integration_length() == 0) {
       cerr << "psradd: archive [" << filenames[ifile] << "]"
@@ -483,9 +487,16 @@ int main (int argc, char **argv) try {
     }
 
     if (reset_total_next_load) {
+
       if (verbose) cerr << "psradd: Setting total" << endl;
       total = archive;
+
+      if (vverbose)
+	cerr << "psradd: after reset total, instance count = " 
+	     << Reference::Able::get_instance_count() << endl;
+
       correct_total = true;
+
     }
 
     if (correct_total) {
@@ -629,6 +640,10 @@ int main (int argc, char **argv) try {
 	else
 	  frequency.append (total, archive);
 
+	if (vverbose)
+	  cerr << "psradd: after append, instance count = " 
+	       << Reference::Able::get_instance_count() << endl;
+
       }
       catch (Error& error) {
 	cerr << "psradd: Archive::append exception:\n" << error << endl;
@@ -686,6 +701,11 @@ int main (int argc, char **argv) try {
 
       // tscrunch the archive
       total->tscrunch();
+
+      if (vverbose)
+	cerr << "psradd: after tscrunch, instance count = " 
+	     << Reference::Able::get_instance_count() << endl;
+
     }
 
     /////////////////////////////////////////////////////////////////
@@ -704,6 +724,10 @@ int main (int argc, char **argv) try {
 
       total->tscrunch();
 
+      if (vverbose)
+	cerr << "psradd: after tscrunch, instance count = " 
+	     << Reference::Able::get_instance_count() << endl;
+
       if (!testing){
 	reorder( total );
 	total->unload (newname);
@@ -714,6 +738,9 @@ int main (int argc, char **argv) try {
 	  cerr << "psradd: Auto add - reset total to current" << endl;
 	total = archive;
 	correct_total = true;
+	if (vverbose)
+	  cerr << "psradd: after reset total, instance count = " 
+	       << Reference::Able::get_instance_count() << endl;
       }
     }
   }
