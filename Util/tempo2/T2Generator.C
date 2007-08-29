@@ -114,7 +114,11 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
 
   Tempo2::Predictor* pred = new Tempo2::Predictor;
 
-  const pulsar* psr = &parameters->psr;
+  if (!parameters->psr)
+    throw Error (InvalidState, "Tempo2::Generator::generate",
+		 "Tempo2::Parameters not properly initialized");
+
+  const pulsar* psr = parameters->psr;
 
   ChebyModelSet* cms = &pred->predictor.modelset.cheby;
   pred->predictor.kind = Cheby;
