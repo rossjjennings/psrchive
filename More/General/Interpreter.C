@@ -329,10 +329,16 @@ void Pulsar::Interpreter::set (Archive* data)
     theStack.push (data);
   else
     theStack.top() = data;
+
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::Interpreter::set stack size=" << theStack.size() << endl;
 }
 
 Pulsar::Archive* Pulsar::Interpreter::get ()
 {
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::Interpreter::get stack size=" << theStack.size() << endl;
+
   if (theStack.empty() || !theStack.top())
     throw Error (InvalidState, "Pulsar::Interpreter::get",
 		 "no archive in stack");
