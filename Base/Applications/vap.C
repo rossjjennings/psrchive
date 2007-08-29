@@ -1987,12 +1987,14 @@ void ShowExtensions( string filename )
  * ExpandMetafile - open the metafile and add all the filenames in it to the vector of filenames given.
  **/
 
-void ExpandMetafile( string filename, vector< string > &filenames )
+void ExpandMetafile( string meta_filename, vector< string > &filenames )
 {
   ifstream infile;
-  infile.open( filename.c_str() );
+  infile.open( meta_filename.c_str() );
   if( infile.fail() )
-    return;
+  {
+    cerr << "Failed to open metafile " << meta_filename << endl;
+  }
 
   string next_filename;
   while( 1 )
