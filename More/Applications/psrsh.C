@@ -131,7 +131,7 @@ int main (int argc, char** argv)
 
     // two or more arguments: script mode
 
-    for (int i=0; i<filenames.size(); i++) try {
+    for (unsigned i=0; i<filenames.size(); i++) try {
       interpreter->set( Pulsar::Archive::load (filenames[i]) );
       interpreter->script( script );
     }
