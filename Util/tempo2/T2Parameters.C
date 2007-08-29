@@ -15,24 +15,14 @@ Tempo2::Parameters::Parameters ()
   if (verbose)
     cerr << "Tempo2::Parameters constructor" << endl;
 
-  int noWarnings = 1;
-  int fullSetup = 0;
-
-  initialiseOne (&psr, noWarnings, fullSetup);
-
-  if (verbose)
-    cerr << "Tempo2::Parameters initialiseOne completed" << endl;
-
-  if (setupParameterFileDefaults (&psr) < 0)
-    throw Error (InvalidState, "Tempo2::Parameters ctor", TEMPO2_ERROR);
-
-  if (verbose)
-    cerr << "Tempo2::Parameters setupParameterFileDefaults completed" << endl;
+  psr = 0;
 }
 
 //! Destructor
 Tempo2::Parameters::~Parameters ()
 {
+  if (psr)
+    destroyOne (psr);
 }
 
 //! Copy constructor
@@ -59,7 +49,29 @@ void Tempo2::Parameters::load (FILE* fptr)
 {
   if (verbose)
     cerr << "Tempo2::Parameters::load (FILE*)" << endl;
-  readSimpleParfile (fptr, &psr);
+
+  if (!psr) {
+
+    psr = new pulsar;
+
+    int noWarnings = 1;
+    int fullSetup = 0;
+
+    initialiseOne (psr, noWarnings, fullSetup);
+
+    if (verbose)
+      cerr << "Tempo2::Parameters::load initialiseOne completed" << endl;
+
+    if (setupParameterFileDefaults (psr) < 0)
+      throw Error (InvalidState, "Tempo2::Parameters::load", TEMPO2_ERROR);
+
+    if (verbose)
+      cerr << "Tempo2::Parameters::load setupParameterFileDefaults completed"
+	   << endl;
+
+  }
+
+  readSimpleParfile (fptr, psr);
   if (verbose)
     cerr << "Tempo2::Parameters::load readSimpleParfile completed" << endl;
 }

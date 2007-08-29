@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Parameters.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/08/14 22:15:58 $
+   $Revision: 1.5 $
+   $Date: 2007/08/29 07:13:58 $
    $Author: straten $ */
 
 #ifndef __Tempo2Parameters_h
@@ -67,7 +67,7 @@ namespace Tempo2 {
     friend class Generator;
 
     // the tempo2 pulsar structure defined in tempo2.h
-    pulsar psr;
+    pulsar* psr;
 
   };
 
