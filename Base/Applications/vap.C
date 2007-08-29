@@ -39,6 +39,7 @@
 #include <tostring.h>
 #include <Angle.h>
 #include <table_stream.h>
+#include <fstream>
 
 
 #include <unistd.h>
@@ -61,6 +62,25 @@
 
 using namespace std;
 using namespace Pulsar;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// GLOBALS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+bool ephemmode = false;
+bool polycmode = false;
+bool verbose = false;
+bool show_extensions = false;
+bool hide_headers = false;
+vector< string > commands;
+vector< vector< string > > results;
+vector< string > current_row;
+bool new_new_vap = false;
+string meta_filename = "";
+
+table_stream ts(&cout);
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -1464,17 +1484,7 @@ string get_cal_phs( Reference::To<Archive> archive )
 
 
 
-bool ephemmode = false;
-bool polycmode = false;
-bool verbose = false;
-bool show_extensions = false;
-bool hide_headers = false;
-vector< string > commands;
-vector< vector< string > > results;
-vector< string > current_row;
-bool new_new_vap = false;
 
-table_stream ts(&cout);
 
 
 
@@ -1536,6 +1546,8 @@ void PrintBasicHlp( void )
   "-E  is used to print the most recent ephemeris in an archive\n"
   "\n"
   "-p  is used to print the set of polynomial coefficients\n"
+  "\n"
+  "-M  extract list of files from metafile\n"
   "\n"
   "-s show the extensions present in an archive\n"
   << endl;
@@ -1696,18 +1708,6 @@ void PrintExtdHlp( void )
 
 
 
-void Test( void )
-{
-  string src = "2007-07-24T06:35:26";
-
-  FITSUTC thetime( src );
-  cout << thetime << endl;
-
-  MJD target = FITSUTC( string("2007-07-24T06:35:26") );
-  cout << FITSUTC( target ) << endl;
-}
-
-
 /**
 * Process the command line options, return the index into argv of the first non option.
 **/
@@ -1715,7 +1715,7 @@ void Test( void )
 void ProcArgs( int argc, char *argv[] )
 {
   int gotc;
-  while ((gotc = getopt (argc, argv, "nc:sEphHvVtTX")) != -1)
+  while ((gotc = getopt (argc, argv, "nc:sEphHvVtTXM:")) != -1)
     switch (gotc)
     {
 
@@ -1757,8 +1757,8 @@ void ProcArgs( int argc, char *argv[] )
       show_extensions = true;
       break;
 
-    case 't':
-      Test();
+    case 'M':
+      meta_filename = optarg;
       break;
 
     default:
@@ -1941,7 +1941,7 @@ void ExtractPolyco( string filename )
   cout << filename << " has polyco:" << endl << endl;
 
   archive->get_model()->unload( stdout );
-  
+
   cout << endl;
 }
 
@@ -1984,6 +1984,30 @@ void ShowExtensions( string filename )
 
 
 /**
+ * ExpandMetafile - open the metafile and add all the filenames in it to the vector of filenames given.
+ **/
+
+void ExpandMetafile( string filename, vector< string > &filenames )
+{
+  ifstream infile;
+  infile.open( filename.c_str() );
+  if( infile.fail() )
+    return;
+
+  string next_filename;
+  while( 1 )
+  {
+    infile >> next_filename;
+    if( infile.fail() )
+      break;
+    filenames.push_back( next_filename );
+  }
+  infile.close();
+}
+
+
+
+/**
 * main -
 **/
 
@@ -2000,6 +2024,11 @@ int main( int argc, char *argv[] )
   vector< string > filenames;
   for (int ai=optind; ai<argc; ai++)
     dirglob (&filenames, argv[ai]);
+
+  if( meta_filename != "" )
+  {
+    ExpandMetafile( meta_filename, filenames );
+  }
 
   // first heading is always the filename
   ts << "filename";
