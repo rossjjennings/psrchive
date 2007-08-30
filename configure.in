@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([PSRCHIVE],[7.3],[psrchive@sourceforge.net])
+AC_INIT([PSRCHIVE],[7.4+],[psrchive-developers@lists.sourceforge.net])
 
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_SRCDIR([Util/Makefile.am])
@@ -231,8 +231,9 @@ AC_CONFIG_FILES([
 		More/Timing/Makefile
 		More/Polarimetry/Makefile
 		More/Polarimetry/iri2001/Makefile
-		More/rhythm/Makefile
 		More/Applications/Makefile
+		More/rhythm/Makefile
+		More/psrgui/Makefile
 		Management/Makefile
 		Management/psrchive_ldflags
 		Management/psrchive_cflags
