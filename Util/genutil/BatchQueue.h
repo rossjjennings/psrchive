@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/BatchQueue.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/08/31 23:39:13 $
+   $Revision: 1.2 $
+   $Date: 2007/08/31 23:52:02 $
    $Author: straten $ */
 
 #ifndef __BatchQueue_h
@@ -23,6 +23,12 @@
 class BatchQueue {
 
 public:
+
+  //! Default constructor
+  BatchQueue ();
+
+  //! Destructor
+  ~BatchQueue ();
 
   //! Set the number of tasks that may run at one time
   void resize (unsigned nthread);
@@ -49,7 +55,7 @@ protected:
   void remove (Job*);
 
   //! Mutual exclusion and condition variables used to coordinate the queue
-  ThreadContext context;
+  ThreadContext* context;
 
   //! The active jobs
   std::vector<Job*> active;

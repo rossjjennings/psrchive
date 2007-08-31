@@ -21,7 +21,9 @@ int main () try {
 
   BatchQueue queue;
 
+#if HAVE_PTHREAD
   queue.resize (8);
+#endif
 
   unsigned total = 123;
 

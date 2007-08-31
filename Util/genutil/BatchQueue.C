@@ -12,11 +12,27 @@
 
 using namespace std;
 
+BatchQueue::BatchQueue ()
+{
+#if HAVE_PTHREAD
+  context = new ThreadContext;
+#else
+  context = 0;
+#endif
+}
+
+BatchQueue::~BatchQueue ()
+{
+  if (context)
+    delete context;
+}
+
+
 #if HAVE_PTHREAD
 
 void BatchQueue::resize (unsigned nthread)
 {
-  ThreadContext::Lock lock (&context);
+  ThreadContext::Lock lock (context);
 
   unsigned jthread = 0;
 
@@ -68,7 +84,7 @@ void BatchQueue::Job::run ()
 
 void BatchQueue::remove (Job* job)
 {
-  ThreadContext::Lock lock (&context);
+  ThreadContext::Lock lock (context);
 
   unsigned ithread = 0;
 
@@ -81,12 +97,12 @@ void BatchQueue::remove (Job* job)
   assert ( ithread < active.size() );
 
   // signal completion to waiting scheduler
-  context.signal();
+  context->signal();
 }
 
 void BatchQueue::add (Job* job)
 {
-  ThreadContext::Lock lock (&context);
+  ThreadContext::Lock lock (context);
 
   unsigned ithread = 0;
 
@@ -117,7 +133,7 @@ void BatchQueue::add (Job* job)
     cerr << "BatchQueue::solve waiting for next available thread" << endl;
 #endif
 
-    context.wait ();
+    context->wait ();
 
   }
 
@@ -131,7 +147,7 @@ void BatchQueue::add (Job* job)
 //! Wait for all of the solutions to return
 void BatchQueue::wait ()
 {
-  ThreadContext::Lock lock (&context);
+  ThreadContext::Lock lock (context);
   
   while ( active.size() ) {
 
@@ -148,7 +164,7 @@ void BatchQueue::wait ()
     cerr << "BatchQueue::wait waiting for " << current << " threads" << endl;
 #endif
 
-    context.wait ();
+    context->wait ();
 
   }
 }
@@ -183,7 +199,7 @@ void BatchQueue::submit (Job* job)
 //! Set the number of instances that may be solved simultaneously
 void BatchQueue::submit (Job* job)
 {
-  job->run();
+  job->execute();
 }
 
 void BatchQueue::wait ()
