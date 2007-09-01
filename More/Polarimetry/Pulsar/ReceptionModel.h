@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModel.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/05/10 04:23:06 $
+   $Revision: 1.10 $
+   $Date: 2007/09/01 02:12:54 $
    $Author: straten $ */
 
 #ifndef __ReceptionModel_H
@@ -67,20 +67,11 @@ namespace Calibration {
     //
     // ///////////////////////////////////////////////////////////////////
 
-    //! Set the number of instances that may be solved simultaneously
-    static void set_nsolve (unsigned nthread);
-
-    //! Wait for all of the solve threads to return
-    static void solve_wait ();
-
     //! solve_work should report the reduced chisq on completion
     static bool report_chisq;
 
     //! Solve the measurement equations by least squares minimization
     void solve ();
-
-    //! Solve the measurement equations by least squares minimization
-    void solve_work (bool verbose = false);
 
     //! Set the maximum number of iterations in fit algorithm
     void set_fit_maximum_iterations (unsigned maximum_iterations);

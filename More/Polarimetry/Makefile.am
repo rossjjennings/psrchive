@@ -105,7 +105,6 @@ libPolarimetry_la_SOURCES = \
         ReceptionCalibrator_get_solution.C \
         ReceptionModel.C \
         ReceptionModel_solve.C \
-        ReceptionModel_solve_thread.C \
         ReferenceCalibrator.C \
         ReflectStokes.C \
         Simulation.C \
