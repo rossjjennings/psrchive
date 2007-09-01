@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/BatchQueue.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/08/31 23:52:02 $
+   $Revision: 1.3 $
+   $Date: 2007/09/01 02:02:53 $
    $Author: straten $ */
 
 #ifndef __BatchQueue_h
@@ -25,7 +25,7 @@ class BatchQueue {
 public:
 
   //! Default constructor
-  BatchQueue ();
+  BatchQueue (unsigned nthread = 1);
 
   //! Destructor
   ~BatchQueue ();
@@ -42,6 +42,14 @@ public:
   //! Submit a job for processing
   template<class Class, typename Method>
   void submit (Class* instance, Method method);
+
+  //! Submit a job for processing
+  template<class Class, typename Method, typename Argument>
+  void submit (Class* instance, Method method, Argument argument);
+
+  //! Submit a job for processing
+  template<class Class, typename Method, typename Arg1, typename Arg2>
+  void submit (Class* instance, Method method, Arg1 a1, Arg2 a2);
 
   //! Wait for completion of all active jobs
   void wait ();
@@ -88,13 +96,43 @@ void BatchQueue::submit (Class* instance, Method method)
 {
   class Job0 : public Job {
     Functor< void() > functor;
+    void execute () { functor (); }
   public:
     Job0 (Class* instance, Method method) : functor (instance, method) {}
-    void execute () { functor (); }
   };
   
   submit (new Job0( instance, method ));
 }
 
+template<class Class, typename Method, typename Argument>
+void BatchQueue::submit (Class* instance, Method method, Argument arg)
+{
+  class Job1 : public Job {
+    Functor< void(Argument) > functor;
+    Argument argument;
+    void execute () { functor (argument); }
+  public:
+    Job1 (Class* instance, Method method, Argument arg)
+      : functor (instance, method) { argument = arg; }
+  };
+  
+  submit (new Job1( instance, method, arg ));
+}
+
+template<class Class, typename Method, typename Arg1, typename Arg2>
+void BatchQueue::submit (Class* instance, Method method, Arg1 a1, Arg2 a2)
+{
+  class Job2 : public Job {
+    Functor< void(Arg1, Arg2) > functor;
+    Arg1 arg1;
+    Arg2 arg2;
+    void execute () { functor (arg1, arg2); }
+  public:
+    Job2 (Class* instance, Method method, Arg1 a1, Arg2 a2)
+      : functor (instance, method) { arg1 = a1; arg2 = a2; }
+  };
+  
+  submit (new Job2( instance, method, a1, a2 ));
+}
 
 #endif // !defined(__BatchQueue_h)
