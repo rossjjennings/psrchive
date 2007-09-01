@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ColdPlasma.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/07/14 22:05:18 $
+   $Revision: 1.7 $
+   $Date: 2007/09/01 02:40:24 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ColdPlasma_h
@@ -17,12 +17,10 @@
 #include "Pulsar/Transformation.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/Profile.h"
 #include "Physical.h"
 
 namespace Pulsar {
-
-  class Integration;
-  class Archive;
 
   //! Corrects dielectric effects in cold plasma
   /*! Corrections are performed with respect to a reference frequency.
@@ -30,6 +28,14 @@ namespace Pulsar {
     however, it is possible to correct with respect to an arbitrary
     frequency or wavelength (including zero wavelength = infinite
     frequency).
+
+    The main point to this template base class is the standardization
+    of dispersion and Faraday rotation corrections.  The data to be
+    corrected may have already been corrected once before, with a
+    different dispersion/rotation measure and/or refererence
+    wavelength.  This class ensures that past corrections are treated
+    properly, through use of a History class (an Integration::Extension).
+
   */
   template<class Corrector, class History>
   class ColdPlasma : public Transformation<Integration> {
@@ -40,7 +46,7 @@ namespace Pulsar {
     ColdPlasma () { name = "ColdPlasma"; }
 
     //! Derived classes must return the measure to be passed to the Corrector
-    virtual double correction_measure (Integration*) = 0;
+    virtual double correction_measure (const Integration*) = 0;
 
     //! Derived classes must define the identity
     virtual typename Corrector::Return get_identity () = 0;
@@ -56,7 +62,19 @@ namespace Pulsar {
 
     //! Set up internal variables before execution
     /* \post reference_frequency = Integration::get_centre_frequency. */
-    void setup (Integration*);
+    void setup (const Integration*);
+
+    //! Correct internal variables before execution
+    /* \post reference_frequency = Integration::get_centre_frequency. */
+    void correct (const Integration*);
+
+    //! Calls setup then correct
+    virtual void set (const Integration* data)
+    { setup (data); correct (data); }
+
+    //! Set the frequency for which the correction will be computed
+    virtual void set_Profile (const Profile* data)
+    { corrector.set_frequency( data->get_centre_frequency () ); }
 
     //! Execute the correction
     /* \post All data will be corrected to the reference frequency */
@@ -100,13 +118,16 @@ namespace Pulsar {
 
     //! The name of the correction measure
     std::string val;
+
+  private:
+    double backup_measure;
   };
 
 }
 
 
 template<class C, class H>
-void Pulsar::ColdPlasma<C,H>::setup (Integration* data)
+void Pulsar::ColdPlasma<C,H>::setup (const Integration* data)
 {
   set_reference_frequency( data->get_centre_frequency() );
   set_measure( correction_measure(data) );
@@ -166,34 +187,46 @@ double Pulsar::ColdPlasma<C,H>::get_measure () const
 }
 
 template<class C, class History>
-void Pulsar::ColdPlasma<C,History>::execute1 (Integration* data) try
+void Pulsar::ColdPlasma<C,History>::correct (const Integration* data) try
 {
-  double measure = get_measure();
-  History* corrected = data->template get<History>();
+  backup_measure = get_measure();
+  const History* corrected = data->template get<History>();
  
   if ( corrected ) {
 
     double corrected_measure = corrected->get_measure();
     double lambda = corrected->get_reference_wavelength();
 
-    if (corrected_measure == measure && lambda == get_reference_wavelength()) {
-      if (Integration::verbose)
-	std::cerr << "Pulsar::" + name + "::execute1 data are corrected."
-	  " measure=" << corrected_measure << " lambda=" << lambda 
-		  << std::endl;
-      return;
-    }
+    if (corrected_measure == backup_measure &&
+	lambda == get_reference_wavelength())
+      {
+	if (Integration::verbose)
+	  std::cerr << "Pulsar::" + name + "::execute1 data are corrected."
+	    " measure=" << corrected_measure << " lambda=" << lambda 
+		    << std::endl;
+	return;
+      }
 
-    // calculate the rotation arising from the new centre frequency, if any
+    // calculate the correction due to the new centre frequency, if any
     corrector.set_wavelength( lambda );
     delta = corrector.evaluate();
 
-    // set the effective rotation measure to the difference
-    set_measure( measure - corrected_measure );
+    // set the effective correction measure to the difference
+    set_measure( backup_measure - corrected_measure );
 
   }
   else
     delta = get_identity();
+}
+catch (Error& error) {
+  throw error += "Pulsar::"+name+"::correct";
+}
+
+
+template<class C, class History>
+void Pulsar::ColdPlasma<C,History>::execute1 (Integration* data) try
+{
+  correct (data);
 
   if (Integration::verbose)
     std::cerr << "Pulsar::"+name+"::execute1"
@@ -202,16 +235,13 @@ void Pulsar::ColdPlasma<C,History>::execute1 (Integration* data) try
 
   range (data, 0, data->get_nchan());
 
-  // restore the original rotation measure
-  set_measure( measure );
+  // restore the original correction measure
+  set_measure( backup_measure );
 
-  if (!corrected) {
-    corrected = new History;
-    data->add_extension( corrected );
-  }
-
-  corrected->set_measure( measure );
+  History* corrected = new History;
+  corrected->set_measure( backup_measure );
   corrected->set_reference_wavelength( get_reference_wavelength() );
+  data->add_extension( corrected );
 
 }
 catch (Error& error) {
@@ -219,16 +249,16 @@ catch (Error& error) {
 }
 
 
-/*! This worker method corrects Faraday rotation without asking many
-  questions.
+/*! This worker method performs the correction on a specified range
+    of frequency channels
 
-   \param ichan the first channel to be corrected
-   \param kchan one more than the last channel to be corrected
+    \param ichan the first channel to be corrected
+    \param kchan one more than the last channel to be corrected
 
-   \pre the measure and reference_wavelength attributes will
-   have been set prior to calling this method
+    \pre the measure and reference_wavelength attributes will
+    have been set prior to calling this method
 
-   \pre the delta attribute will have been properly set or reset
+    \pre the delta attribute will have been properly set or reset
 */
 template<class C, class H>
 void Pulsar::ColdPlasma<C,H>::range (Integration* data,
