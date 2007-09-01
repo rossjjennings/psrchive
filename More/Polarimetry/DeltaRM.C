@@ -20,6 +20,7 @@ using namespace std;
 
 Pulsar::DeltaRM::DeltaRM ()
 {
+  threshold = 3.0;
 }
 
 Pulsar::DeltaRM::~DeltaRM ()
@@ -32,10 +33,6 @@ void Pulsar::DeltaRM::set_data (Archive* archive)
   data = archive;
   data->defaraday();
 }
-
-void get_PA (Pulsar::Integration *data, unsigned ichan,
-	     vector<double>& phases, vector< Estimate<double> >& PAs,
-	     float threshold);
 
 //! Refine the rotation measure estimate
 void Pulsar::DeltaRM::refine ()
@@ -81,6 +78,8 @@ void Pulsar::DeltaRM::refine ()
   Reference::To<PolnProfile> profile1 = clone->new_PolnProfile(1);
 
   Pulsar::DeltaPA delta_pa;
+
+  delta_pa.set_threshold (threshold);
 
   Estimate<double> delta_PA = delta_pa.get (profile0, profile1);
   Estimate<double> delta_RM = delta_PA/(lambda_1*lambda_1-lambda_0*lambda_0);
