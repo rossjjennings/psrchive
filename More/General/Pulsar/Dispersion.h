@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Dispersion.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.4 $
+   $Date: 2007/09/01 02:40:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Dispersion_h
@@ -34,10 +34,13 @@ namespace Pulsar {
     Dispersion ();
 
     //! Return the dispersion measure
-    double correction_measure (Integration*);
+    double correction_measure (const Integration*);
 
     //! Return zero delay
     double get_identity () { return 0; }
+
+    //! Setup all necessary attributes
+    void set (const Integration*);
 
     //! Phase rotate each profile by the correction
     void apply (Integration*, unsigned channel);
@@ -52,6 +55,13 @@ namespace Pulsar {
     //! Get the dispersion measure
     double get_dispersion_measure () const
     { return get_measure (); }
+
+    //! Get the phase shift
+    double get_shift () const;
+
+  protected:
+
+    double folding_period;
 
   };
 

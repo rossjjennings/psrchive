@@ -17,7 +17,7 @@ Pulsar::Dispersion::Dispersion ()
   val = "DM";
 }
 
-double Pulsar::Dispersion::correction_measure (Integration* data)
+double Pulsar::Dispersion::correction_measure (const Integration* data)
 {
   return data->get_dispersion_measure ();
 }
@@ -32,17 +32,28 @@ void Pulsar::Dispersion::execute (Archive* arch)
 
 void Pulsar::Dispersion::apply (Integration* data, unsigned ichan) try
 {
-  double pfold = data->get_folding_period();
-  if (pfold == 0)
-    throw Error (InvalidState, "Pulsar::Dispersion::execute",
-		 "folding period unknown");
-
-  double delay = delta + corrector.evaluate ();
+  folding_period = data->get_folding_period();
 
   for (unsigned ipol=0; ipol < data->get_npol(); ipol++)
-    data->get_Profile(ipol,ichan) -> rotate_phase (delay / pfold);
+    data->get_Profile(ipol,ichan) -> rotate_phase( get_shift() );
 }
 catch (Error& error) {
   throw error += "Pulsar::Dispersion::apply";
 }
 
+//! Execute the correction for an entire Pulsar::Archive
+void Pulsar::Dispersion::set (const Integration* data)
+{
+  ColdPlasma<DispersionDelay,Dedisperse>::set (data);
+  folding_period = data->get_folding_period ();
+}
+
+//! Get the phase shift
+double Pulsar::Dispersion::get_shift () const
+{
+  if (folding_period <= 0)
+    throw Error (InvalidState, "Pulsar::Dispersion::get_shift",
+		 "folding period unknown");
+
+  return (delta + corrector.evaluate()) / folding_period;
+}
