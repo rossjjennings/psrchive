@@ -29,6 +29,7 @@
 #include "MEAL/Tracer.h"
 
 #include "Pauli.h"
+#include "BatchQueue.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -58,6 +59,7 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type)
   PA_min = PA_max = 0.0;
   add_data_fail = 0;
   add_data_call = 0;
+  nthread = 1;
 }
 
 Pulsar::ReceptionCalibrator::~ReceptionCalibrator()
@@ -829,8 +831,6 @@ try {
 
     assert (model.size() == nchan);
 
-    const MEAL::Complex2* xform;
-
     for (unsigned ich = 0; ich<nchan; ich++) {
 
       if (!p->get_transformation_valid (ich))
@@ -897,15 +897,18 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 
       switch ( data->get_type() )  {
       case Signal::Pulsar:
+	// cerr << "Pulsar::ReceptionCalibrator::precalibrate Pulsar" << endl;
         equation->set_transformation_index (model[ichan]->get_pulsar_path());
         signal_path = equation->get_transformation ();
 	parallactic_corrected = true;
 	break;
       case Signal::PolnCal:
+	// cerr << "Pulsar::ReceptionCalibrator::precalibrate PolnCal" << endl;
         equation->set_transformation_index (model[ichan]->get_polncal_path());
         signal_path = equation->get_transformation ();
 	break;
       case Signal::FluxCalOn:
+	// cerr << "Pulsar::ReceptionCalibrator::precalibrate FluxCal" << endl;
         equation->set_transformation_index (model[ichan]->get_fluxcal_path());
         signal_path = equation->get_transformation ();
         break;
@@ -923,6 +926,10 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 
       try {
 	model[ichan]->time.set_value( integration->get_epoch() );
+#ifdef _DEBUG
+	cerr << "para=" << model[ichan]->parallactic.get_parallactic_angle()
+	     << endl;
+#endif
 	response[ichan] = signal_path->evaluate();
       }
       catch (Error& error) {
@@ -947,8 +954,7 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
     }
 
     integration->expert()->transform (response);
-
-    
+   
   }
 
   data->set_poln_calibrated (true);
@@ -989,6 +995,18 @@ bool Pulsar::ReceptionCalibrator::get_solved () const
   return is_fit;
 }
 
+void Pulsar::ReceptionCalibrator::set_nthread (unsigned n)
+{
+#if HAVE_PTHREAD
+  nthread = n;
+#else
+  if (n > 1)
+    throw Error (InvalidState, "Pulsar::ReceptionCalibrator::set_nthread",
+		 "threads are not available");
+#endif
+}
+
+
 void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 {
   if (!is_initialized)
@@ -1010,6 +1028,8 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 
   Calibration::ReceptionModel::report_chisq = true;
 
+  BatchQueue queue (nthread);
+
   for (unsigned ichan=start_chan; ichan<nchan; ichan++) try {
 
     cerr << "Pulsar::ReceptionCalibrator::solve ichan=" << ichan;
@@ -1024,7 +1044,8 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
     if (Calibrator::verbose)
       model[ichan]->get_equation()->set_fit_debug();
 
-    model[ichan]->get_equation()->solve ();
+    queue.submit( model[ichan]->get_equation(),
+		  &Calibration::ReceptionModel::solve );
 
     if (only_ichan >= 0)
       break;
@@ -1036,7 +1057,7 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
     model[ichan]->valid = false;
   }
 
-  Calibration::ReceptionModel::solve_wait ();
+  queue.wait ();
 
   vector< vector<double> > Ctotal;
   vector< unsigned > imap;

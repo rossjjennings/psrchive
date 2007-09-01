@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.74 $
-   $Date: 2007/05/10 04:23:18 $
+   $Revision: 1.75 $
+   $Date: 2007/09/01 02:13:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -143,6 +143,9 @@ namespace Pulsar {
     //! Add the ReferenceCalibrator observation to the set of constraints
     void add_calibrator (const ReferenceCalibrator* polncal);
     
+    //! Set the number of channels that may be simultaneously solved
+    void set_nthread (unsigned nthread);
+
     //! Solve equation for each frequency
     void solve (int only_ichan = -1);
     
@@ -205,6 +208,9 @@ namespace Pulsar {
 
     // counts the number of times that add_data is called
     unsigned add_data_call;
+
+    //! The number of channels that may be simultaneously solved
+    unsigned nthread;
 
     //! Set the initial guesses and update the reference epoch
     void initialize ();
