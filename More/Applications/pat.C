@@ -188,7 +188,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.72 2007/06/07 02:02:33 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.73 2007/09/01 02:40:06 straten Exp $" << endl;
       return 0;
 
     case 'n':
@@ -449,7 +449,7 @@ void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<
 	}
       if (n != ncomp)
 	{
-	  cout << "Warning: number of Gaussian components " << 
+	  cerr << "Warning: number of Gaussian components " << 
 	    ncomp << " does not equal components provided " << n << endl;
 	  ncomp = n;
 	}
