@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FaradayRotation.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.8 $
+   $Date: 2007/09/01 02:12:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FaradayRotation_h
@@ -40,7 +40,7 @@ namespace Pulsar {
     FaradayRotation ();
 
     //! Return the rotation measure
-    double correction_measure (Integration*);
+    double correction_measure (const Integration*);
 
     //! Return the identity matrix
     Jones<double> get_identity () { return 1; }

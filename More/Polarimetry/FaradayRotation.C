@@ -16,7 +16,7 @@ Pulsar::FaradayRotation::FaradayRotation ()
   val = "RM";
 }
 
-double Pulsar::FaradayRotation::correction_measure (Integration* data)
+double Pulsar::FaradayRotation::correction_measure (const Integration* data)
 {
   return data->get_rotation_measure ();
 }
