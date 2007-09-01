@@ -514,7 +514,7 @@ int runtest (Calibration::Parallactic& parallactic)
   try {
     if (verbose)
       cerr << "runtest call MeasurementEquation::solve" << endl;
-    model.solve_work();
+    model.solve ();
   }
   catch (Error& error) {
     cerr << error << endl;

@@ -216,7 +216,7 @@ int main (int argc, char** argv)
     system.equal_ellipticities ();
 
     cerr << "Solving the sytem" << endl;
-    model.solve_work();
+    model.solve ();
 
     cerr << "\nResults:" <<
       "\n\nStokes parameters of source:" <<

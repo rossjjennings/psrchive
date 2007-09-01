@@ -368,7 +368,7 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
     for (unsigned i=0; i<transformation->get_nparam(); i++)
       transformation->set_infit (i, true);
 
-    model->solve_work ();
+    model->solve ();
 
     // then fit only for the phase
     phase->set_infit (1, true);
@@ -377,7 +377,7 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   }
 
-  model->solve_work ();
+  model->solve ();
 
   clock.stop();
 

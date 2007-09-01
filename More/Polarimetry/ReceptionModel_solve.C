@@ -73,7 +73,7 @@ bool Calibration::ReceptionModel::report_chisq = false;
 
 /*! Uses the Levenberg-Marquardt algorithm of non-linear least-squares
     minimization in order to find the best fit to the observations. */
-void Calibration::ReceptionModel::solve_work (bool solve_verbose)
+void Calibration::ReceptionModel::solve ()
 {
   if (verbose)
     cerr << "Calibration::ReceptionModel::solve count free parameters" << endl;
@@ -157,8 +157,9 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
 
   // the engine used to find the chi-squared minimum
   MEAL::LevenbergMarquardt< Jones<double> > fit;
-  if (solve_verbose)
+#ifdef _DEBUG
     fit.verbose = 1;
+#endif
 
   // The abscissa, ordinate and ordinate error are contained in
   // Calibration::CoherencyMeasurementSet
