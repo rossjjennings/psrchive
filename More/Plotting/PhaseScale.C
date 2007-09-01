@@ -74,6 +74,7 @@ std::string Pulsar::PhaseScale::get_label () const
   case Degrees: return "Phase (deg.)";
   case Radians: return "Phase (rad.)";
   case Milliseconds: return "Time (ms)";
+  default: return "Unknown";
   }
 }
 
@@ -88,6 +89,8 @@ std::ostream& Pulsar::operator << (std::ostream& os, PhaseScale::Units units)
     return os << "rad";
   case PhaseScale::Milliseconds:
     return os << "ms";
+  default:
+    return os << "unknown";
   }
 }
 
