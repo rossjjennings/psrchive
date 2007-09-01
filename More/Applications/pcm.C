@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.64 $
-   $Date: 2007/07/19 06:46:54 $
+   $Revision: 1.65 $
+   $Date: 2007/09/01 02:40:13 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -282,17 +282,21 @@ Pulsar::ReflectStokes reflections;
 // Name of file to which arrival time estimates will be written
 char* tim_file = 0;
 
+// Number of threads used to solve equations
+unsigned nthread = 1;
+
 int actual_main (int argc, char *argv[]);
 
 int main (int argc, char *argv[]) {
 
+#ifdef _DEBUG
   size_t in = Reference::Able::get_instance_count();
+#endif
 
   int ret = actual_main (argc, argv);
 
-  size_t out = Reference::Able::get_instance_count();
-
 #ifdef _DEBUG
+  size_t out = Reference::Able::get_instance_count();
   cerr << "Leaked: " << out - in << endl;
 #endif
 
@@ -448,20 +452,16 @@ int actual_main (int argc, char *argv[]) try {
       stdfile = optarg;
       break;
 
-    case 't':  {
+    case 't':
 
-      unsigned nthreads = atoi (optarg);
-      if (nthreads == 0)  {
-        cerr << "pcm: invalid number of threads = " << nthreads << endl;
+      nthread = atoi (optarg);
+      if (nthread == 0)  {
+        cerr << "pcm: invalid number of threads = " << nthread << endl;
         return -1;
       }
 
-      Calibration::ReceptionModel::set_nsolve (nthreads);
-
-      cerr << "pcm: solving using " << nthreads << " threads" << endl;
+      cerr << "pcm: solving using " << nthread << " threads" << endl;
       break;
-
-    }
 
     case 'T':
       tim_file = optarg;
@@ -533,6 +533,8 @@ int actual_main (int argc, char *argv[]) try {
 
   // the reception calibration class
   Pulsar::ReceptionCalibrator model (model_name);
+
+  model.set_nthread (nthread);
 
   if (measure_cal_V)
     cerr << "pcm: allowing CAL Stokes V to vary" << endl;
@@ -930,9 +932,6 @@ int actual_main (int argc, char *argv[]) try {
         if (verbose)
           cerr << "pcm: correct and add to calibrated total" << endl;
 
-	Pulsar::CorrectionsCalibrator correct;
-	correct.calibrate(archive);
-
         if (!total)
           total = archive;
         else {
@@ -985,6 +984,8 @@ int mode_B (const char* standard_filename,
 {
   // the reception calibration class
   Pulsar::PulsarCalibrator model (model_name);
+
+  model.set_nthread (nthread);
 
   if (maxbins_set)
     model.set_maximum_harmonic (maxbins);
