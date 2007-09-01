@@ -12,12 +12,16 @@
 
 using namespace std;
 
-BatchQueue::BatchQueue ()
+BatchQueue::BatchQueue (unsigned nthread)
 {
 #if HAVE_PTHREAD
   context = new ThreadContext;
+  resize (nthread);
 #else
   context = 0;
+  if (nthread != 1)
+    throw Error (InvalidState, "BatchQueue constructor",
+		 "threads are not availalbe and nthread=%u", nthread);
 #endif
 }
 
@@ -90,6 +94,7 @@ void BatchQueue::remove (Job* job)
 
   for (ithread = 0; ithread < active.size(); ithread++)
     if ( active[ithread] == job ) {
+      delete job;
       active[ithread] = 0;
       break;
     }
