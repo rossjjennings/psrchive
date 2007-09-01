@@ -17,6 +17,7 @@
 
 #include "MEAL/Complex2Math.h"
 
+#include "BatchQueue.h"
 #include "toa.h"
 #include "strutil.h"
 
@@ -32,6 +33,7 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)
   mean_solution = true;
   tim_file = 0;
   archive = 0;
+  nthread = 1;
 }
 
 //! Constructor
@@ -201,6 +203,17 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan)
 
 }
 
+void Pulsar::PulsarCalibrator::set_nthread (unsigned n)
+{
+#if HAVE_PTHREAD
+  nthread = n;
+#else
+  if (n > 1)
+    throw Error (InvalidState, "Pulsar::PulsarCalibrator::set_nthread",
+		 "threads are not available");
+#endif
+}
+
 //! Add the observation to the set of constraints
 void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try 
 {
@@ -244,6 +257,8 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try
   if (tim_file)
     archive = data;
 
+  BatchQueue queue (nthread);
+
   for (unsigned isub=0; isub<nsub; isub++) {
 
     // cerr << "solving isub=" << isub << " ..." << endl;
@@ -260,12 +275,16 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
-      solve (integration, ichan);
+      queue.submit( this, &Pulsar::PulsarCalibrator::solve,
+		    integration, ichan );
 
       // the current mean is no longer providing a good first guess; clear it!
       if (big_difference >= clean_mean) {
 	cerr << "Pulsar::PulsarCalibrator::add_observation"
 	  " clearing the current mean" << endl;
+
+	queue.wait ();
+
 	for (unsigned jchan=ichan+1; jchan<nchan; jchan++)
 	  solution[jchan] = 0;
 	big_difference = 0;
@@ -273,9 +292,47 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try
 
     }
 
+    queue.wait ();
+
+    if (!tim_file)
+      continue;
+
+    // produce a TOA!
+
+    for (unsigned ichan=0; ichan<nchan; ichan++) {
+
+      unsigned nfree = model[ichan]->get_fit_nfree ();
+      float chisq = model[ichan]->get_fit_chisq ();
+
+      float reduced_chisq = chisq / nfree;
+
+      Tempo::toa toa (Tempo::toa::Parkes);
+
+      double freq = integration->get_centre_frequency (ichan);
+      toa.set_frequency (freq);
+
+      double period = integration->get_folding_period();
+      Estimate<double> phase = model[ichan]->get_phase();
+
+      toa.set_arrival   (integration->get_epoch() + phase.val * period);
+      toa.set_error     (sqrt(phase.var) * period * 1e6);
+
+      toa.set_telescope (archive->get_telescope_code());
+      
+      string aux = basename (archive->get_filename());
+      toa.set_auxilliary_text (aux);
+
+      toa.unload (tim_file);
+      
+      if (verbose > 2)
+	cerr << aux << " freq = " << freq << " chisq = " << reduced_chisq 
+	     << " phase = " << phase.val << " +/- " << phase.get_error() << endl;
+    }
+
   }
 
   built = false;
+
 }
 catch (Error& error) {
   throw error += "Pulsar::PulsarCalibrator::add_observation";
@@ -339,9 +396,6 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 
     reduced_chisq = chisq / nfree;
 
-    string out;
-    transformation[ichan]->print (out);
-
     if (reduced_chisq < 2.0)
       break;
 
@@ -377,34 +431,6 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 	 << endl;
 
 #endif
-
-  if (tim_file) {
-
-    // produce a TOA!
-
-    Tempo::toa toa (Tempo::toa::Parkes);
-
-    double freq = data->get_centre_frequency (ichan);
-    toa.set_frequency (freq);
-
-    double period = data->get_folding_period();
-    Estimate<double> phase = model[mchan]->get_phase();
-
-    toa.set_arrival   (data->get_epoch() + phase.val * period);
-    toa.set_error     (sqrt(phase.var) * period * 1e6);
-
-    toa.set_telescope (archive->get_telescope_code());
-
-    string aux = basename (archive->get_filename());
-    toa.set_auxilliary_text (aux);
-
-    toa.unload (tim_file);
-
-    if (verbose > 2)
-      cerr << aux << " freq = " << freq << " chisq = " << reduced_chisq 
-	   << " phase = " << phase.val << " +/- " << phase.get_error() << endl;
-
-  }
 
   if (solution[ichan]) {
 

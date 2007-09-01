@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.21 $
-   $Date: 2007/06/07 02:02:44 $
+   $Revision: 1.22 $
+   $Date: 2007/09/01 02:40:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -81,6 +81,9 @@ namespace Pulsar {
     //! The model used to fit the specified channel
     const PolnProfileFit* get_model (unsigned ichan) const;
 
+    //! Set the number of channels that may be simultaneously solved
+    void set_nthread (unsigned nthread);
+
   protected:
     
     //! Initialize the PolnCalibration::transformation attribute
@@ -137,6 +140,9 @@ namespace Pulsar {
 
     //! Archive instance that is currently in use
     const Archive* archive;
+
+    //! The number of channels that may be simultaneously solved
+    unsigned nthread;
 
     //! Build the arrays
     void build (unsigned nchan);
