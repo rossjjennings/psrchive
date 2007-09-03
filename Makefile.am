@@ -1,7 +1,7 @@
 
 ACLOCAL_AMFLAGS = -I config
 
-SUBDIRS	= Util Base More Management
+SUBDIRS	= config Util Base More Management
 
 EXTRA_DIST = config/install-intermediate
 
