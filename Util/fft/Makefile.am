@@ -6,7 +6,7 @@ include_HEADERS = interpolate.h median_smooth.h \
 	IPP_Transform.h MKL_Transform.h MKL_DFTI_Transform.h \
 	FFTW3_Transform.h FFTW_Transform.h QuaternionFT.h
 
-libpsrfft_la_SOURCES = shift.C fccf.f ffft.f \
+libpsrfft_la_SOURCES = test_libraries.h shift.C fccf.f ffft.f \
 	FTransformAgent.C FTransform.C QuaternionFT.C
 
 
