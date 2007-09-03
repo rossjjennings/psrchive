@@ -1,9 +1,13 @@
 
+bin_PROGRAMS = psrchive_info
+
+psrchive_info_SOURCES = psrchive_info.C
+
 bin_SCRIPTS = psrchive_cflags psrchive_ldflags
 
 dist_bin_SCRIPTS = psrchive_install
 
-dist_data_DATA = psrchive_version
+dist_data_DATA = psrchive_version psrchive.cfg
 
 libs: install-binSCRIPTS fix_prefix
 
@@ -19,3 +23,12 @@ FIX_PREFIX := ${prefix}/bin/psrchive_ldflags ${prefix}/bin/psrchive_cflags
 fix_prefix:
 	perl -p -i -e "s|PREFIX|${prefix}|" ${FIX_PREFIX}
 
+#############################################################################
+#
+# Dependencies should never be changed
+#
+
+LDADD = $(top_builddir)/Base/libpsrbase.la \
+	$(top_builddir)/Util/libpsrutil.la
+
+include $(top_srcdir)/config/Makefile.include
