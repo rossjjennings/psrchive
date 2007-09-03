@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 
+#include "test_libraries.h"
 #include "interpolate.h"
 #include "BoxMuller.h"
 #include <iostream>
@@ -26,11 +27,16 @@ void meanvar (double& mean, double& var, vector<float>& data)
   var -= mean*mean;
 }
 
+void runtest ();
+
 int main (int argc, char** argv)
 {
-  cerr << "Test of Fourier interpolation with " 
-       << FTransform::get_library() << endl;
+  FTransform::test_libraries (runtest, "interpolation");
+  return 0;
+}
 
+void runtest ()
+{
   // from 8kpt
   int ndat = 8 * 1024;
   cerr << "Generating " << ndat << " random numbers" << endl;
@@ -65,7 +71,7 @@ int main (int argc, char** argv)
     if ( diff > tol ) {
       cerr << "Mean:  input=" << mean_0 << " output=" << mean 
            << " diff=" << diff << " tol=" << tol << endl;
-      return -1;
+      exit(-1);
     }
 
     diff = fabs(var-var_0);
@@ -74,7 +80,7 @@ int main (int argc, char** argv)
     if ( diff > tol ) {
       cerr << "Variance:  input=" << var_0 << " output=" <<  var
            << " diff=" << diff << " tol=" << tol << endl;
-      return -1;
+      exit(-1);
     }
 
     bigger *= 4;

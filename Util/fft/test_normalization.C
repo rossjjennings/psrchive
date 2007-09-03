@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 
-#include "FTransform.h"
+#include "test_libraries.h"
 #include "BoxMuller.h"
 #include "Error.h"
 
@@ -15,45 +15,11 @@
 
 using namespace std;
 
-void runtest (int ndat);
-
-int main (int argc, char** argv) try {
-
-  unsigned nlib = FTransform::get_num_libraries ();
-
-  for (unsigned ilib=0; ilib < nlib; ilib++) {
-
-    string name = FTransform::get_library_name (ilib);
-
-    FTransform::set_library (name);
- 
-    cerr << "Test of normalization factors with "
-	 << FTransform::get_library() << endl;
-  
-    // from 16kpt
-    int ndat = 16 * 1024;
-    
-    for (unsigned i=0; i < 3; i++) {
-      runtest (ndat);
-      ndat *= 4;
-    }
-
-    FTransform::clean_plans ();
-
-  }
-
-  cerr << "All normalization tests passed" << endl;
-}
-catch (Error& error) {
-  cerr << "test_normalization error " << error << endl;
-  return -1;
-}
-
 double power (unsigned ndat, float* data);
 
 void runtest2 (int ntrans, double powerin, float* fft1, float* data = 0);
 
-void runtest (int ndat)
+void runtest1 (int ndat)
 {
   float* data = new float [ndat];
   float* fft1 = new float [ndat + 2];
@@ -167,8 +133,6 @@ void runtest2 (int ntrans, double powerin, float* fft1, float* data)
       powerout += chan_power;
     }
 
-    double factor2 = powerout/powerin;
-
     expect1 = get_scale (ntrans, fcc);
     expect2 = expect1*get_scale (bdat, bcc);
     expect1 *= expect1; // dealing with power
@@ -179,3 +143,29 @@ void runtest2 (int ntrans, double powerin, float* fft1, float* data)
   }
 
 }
+
+void runtest () try {
+
+  // from 16kpt
+  int ndat = 16 * 1024;
+    
+  for (unsigned i=0; i < 3; i++) {
+    runtest1 (ndat);
+    ndat *= 4;
+  }
+
+  FTransform::clean_plans ();
+  
+}
+catch (Error& error) {
+  cerr << "test_normalization error " << error << endl;
+  exit (-1);
+}
+
+
+int main (int argc, char** argv) 
+{
+  FTransform::test_libraries (runtest, "normalization factors");
+  return 0;
+}
+
