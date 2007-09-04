@@ -35,19 +35,21 @@ void Pulsar::AnglePlot::prepare (const Archive* data)
 
   if (angles.size() != data->get_nbin())
     throw Error (InvalidState, "Pulsar::AnglePlot::prepare",
-		 "angles vector size=%u != nbin=%u",
-		 angles.size(), data->get_nbin());
+                 "angles vector size=%u != nbin=%u",
+                 angles.size(), data->get_nbin());
 
   float min = 0;
   float max = 0;
 
-  if (span) {
+  if (span)
+  {
     // keep pgplot from drawing the 90 or 180 at the edge
     float half = 0.5 * span - 0.0001;
     min = -half;
     max = half;
   }
-  else {
+  else
+  {
     unsigned i_min, i_max;
     get_scale()->get_range (data, i_min, i_max);
 
@@ -63,30 +65,39 @@ void Pulsar::AnglePlot::draw (const Archive *data)
   std::vector<float> phases;
   get_scale()->get_ordinates (data, phases);
 
-  float offset = 0;
-  unsigned times = 1;
+  // Added by DS, draw the angles repeatedly over the zoom range given
+  float sx, ex;
+  get_frame()->get_x_scale()->get_range( sx, ex );
 
-  if (span) {
-    offset = -span;
-    times = 3;
-  }
+  for( int xoff = int(sx)-1; xoff < int(ex)+1; xoff ++ )
+  {
+    float offset = 0;
+    unsigned times = 1;
 
-  for (unsigned ioff=0; ioff < times; ioff++) {
+    if (span)
+    {
+      offset = -span;
+      times = 3;
+    }
+    
+    for (unsigned ioff=0; ioff < times; ioff++)
+    {
 
-    for (unsigned ibin=0; ibin < phases.size(); ibin++)
-      if (angles[ibin].get_variance() != 0)
-	if (error_bars)
-	  cpgerr1 (6, phases[ibin], angles[ibin].get_value() + offset,
-		   angles[ibin].get_error(), 1.0);
-	else
-	  cpgpt1 (phases[ibin], angles[ibin].get_value() + offset, 17);
-  
-    offset += span;
+      for (unsigned ibin=0; ibin < phases.size(); ibin++)
+        if (angles[ibin].get_variance() != 0)
+          if (error_bars)
+            cpgerr1 (6, phases[ibin]+xoff, angles[ibin].get_value() + offset,
+                     angles[ibin].get_error(), 1.0);
+          else
+            cpgpt1 (phases[ibin]+xoff, angles[ibin].get_value() + offset, 17);
 
+      offset += span;
+    }
   }
 
 #if 0
-  if (degrees) {
+  if (degrees)
+  {
     float half_range = (max_phase - min_phase) * 180;
     cpgswin (-half_range, +half_range, -pa_range, pa_range + plus_half);
   }
