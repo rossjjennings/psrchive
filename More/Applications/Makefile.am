@@ -9,6 +9,7 @@ pam_SOURCES = pam.C
 
 pascii_SOURCES = pascii.C
 pat_SOURCES = pat.C
+pat_LDADD = $(LDADD) @PTHREAD_LIBS@
 
 paz_SOURCES = paz.C zap_periodic_spikes.C
 
