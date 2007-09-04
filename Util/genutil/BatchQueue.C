@@ -9,6 +9,7 @@
 #include "Error.h"
 
 #include <errno.h>
+#include <assert.h>
 
 using namespace std;
 
