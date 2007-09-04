@@ -39,7 +39,9 @@ void Pulsar::FluctPlot::prepare (const Archive* data)
 /*! The ProfileVectorPlotter class draws the profile */
 void Pulsar::FluctPlot::draw (const Archive* data)
 {
-  plotter.draw ();
+  float minx, maxx;
+  get_frame()->get_x_scale()->get_range( minx, maxx );
+  plotter.draw ( minx, maxx );
 }
 
 //! Return the label for the y-axis

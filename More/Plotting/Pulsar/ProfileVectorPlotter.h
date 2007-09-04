@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/ProfileVectorPlotter.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+   $Revision: 1.4 $
+   $Date: 2007/09/04 05:46:18 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_ProfileVectorPlotter_h
 #define __Pulsar_ProfileVectorPlotter_h
@@ -33,10 +33,10 @@ namespace Pulsar {
     void minmax (PlotFrame* frame) const;
 
     //! draw all profiles
-    void draw ();
+    void draw ( float sx, float ex );
 
     //! draw the profile in the current viewport and window
-    void draw (const Profile*) const;
+    void draw (const Profile*, float sx, float ex ) const;
 
     //! the vector of profiles to be drawn
     std::vector< Reference::To<const Profile> > profiles;

@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/ProfilePlot.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/10/07 13:50:19 $
-   $Author: straten $ */
+   $Revision: 1.12 $
+   $Date: 2007/09/04 05:46:18 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_ProfilePlot_h
 #define __Pulsar_ProfilePlot_h
@@ -46,7 +46,7 @@ namespace Pulsar {
     bool get_plot_cal_transitions () const { return plot_cal_transitions; }
 
     //! Draw the profile transitions in the current viewport and window
-    void draw_transitions (const Profile* profile) const;
+    void draw_transitions (const Profile* profile);
 
   protected:
 

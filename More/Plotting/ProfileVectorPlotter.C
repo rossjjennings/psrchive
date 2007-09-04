@@ -9,6 +9,18 @@
 #include "Pulsar/Profile.h"
 
 #include <cpgplot.h>
+#include <vector>
+
+using namespace std;
+
+
+double mod( double dividend, double quotient )
+{
+  return dividend - double(int(dividend/quotient));
+}
+
+
+
 
 Pulsar::ProfileVectorPlotter::ProfileVectorPlotter ()
 {
@@ -42,7 +54,7 @@ void Pulsar::ProfileVectorPlotter::minmax (PlotFrame* frame) const
   frame->get_y_scale()->set_minmax (min, max);
 }
 
-void Pulsar::ProfileVectorPlotter::draw ()
+void Pulsar::ProfileVectorPlotter::draw ( float sx, float ex )
 {
   for (unsigned iprof=0; iprof < profiles.size(); iprof++) {
 
@@ -62,15 +74,51 @@ void Pulsar::ProfileVectorPlotter::draw ()
     else
       cpgsls (iprof+1);
 
-    draw (profiles[iprof]);
+    draw (profiles[iprof], sx, ex );
   }
 }
 
 //! draw the profile in the current viewport and window
-void Pulsar::ProfileVectorPlotter::draw (const Profile* profile) const
+void Pulsar::ProfileVectorPlotter::draw (const Profile* profile, float sx, float ex ) const
 {
-  if (plot_histogram)
-    cpgbin (profile->get_nbin(), &x[0], profile->get_amps(), true);
+  vector< float > data;
+  profile->get_amps( data );
+  int data_pts = data.size();
+  
+  int total_pts = int( ( ex - sx ) * data_pts );
+  
+  float xs[total_pts];
+  float ys[total_pts];
+  
+  // Fill the xs array with the x coordinates
+  float dx = ( ex - sx ) / float(total_pts);
+  float next_x = sx;
+  for( int i = 0; i < total_pts; i ++ )
+  {
+    xs[i] = next_x;
+    next_x += dx;
+  }
+
+  // calculate the starting point index
+  float r = mod( sx, 1 );
+  int pt_index;
+  if( r >= 0 )
+    pt_index = int( data_pts * r );
   else
-    cpgline (profile->get_nbin(), &x[0], profile->get_amps());
+    pt_index = data_pts + int( data_pts * r );
+
+    // fill the ypts array with the points from our data set repeatedly
+  for( int i = 0; i < total_pts; i ++ )
+  {
+    ys[i] = data[pt_index++];
+    if( pt_index > data_pts )
+      pt_index = 0;
+  }
+
+  // cpgline( total_pts, xs, ys );
+  
+  if (plot_histogram)
+    cpgbin (total_pts, xs, ys, true);
+  else
+    cpgline (total_pts, xs, ys );
 }

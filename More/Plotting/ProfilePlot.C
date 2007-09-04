@@ -38,20 +38,20 @@ void Pulsar::ProfilePlot::draw (const Archive* data)
 /*!  Plots the calibrator hi/lo levels using the transitions
  determined by Profile::find_transitions.  Plots in the currently open
  pgplot device using the current viewport and window.  */
-void Pulsar::ProfilePlot::draw_transitions (const Profile* profile) const
+void Pulsar::ProfilePlot::draw_transitions (const Profile* profile)
 {
   int hightolow, lowtohigh, buffer;
   profile->find_transitions (hightolow, lowtohigh, buffer);
 
   double mean_hi, var_hi;
   profile->stats (&mean_hi, &var_hi, 0,
-		  lowtohigh + buffer,
-		  hightolow - buffer);
+                  lowtohigh + buffer,
+                  hightolow - buffer);
 
   double mean_lo, var_lo;
   profile->stats (&mean_lo, &var_lo, 0,
-		  hightolow + buffer,
-		  lowtohigh - buffer);
+                  hightolow + buffer,
+                  lowtohigh - buffer);
 
   int st_low = 0;
   if (lowtohigh < hightolow)
@@ -65,7 +65,7 @@ void Pulsar::ProfilePlot::draw_transitions (const Profile* profile) const
 
   int colour=0, line=0;
 
-  cpgqci(&colour);    
+  cpgqci(&colour);
   cpgqls(&line);
 
   float nbin = profile->get_nbin();
@@ -80,27 +80,36 @@ void Pulsar::ProfilePlot::draw_transitions (const Profile* profile) const
 
   float space = float(buffer)/nbin;
 
-  for (int i=0; i<3; i++) {
 
-    float yp[2];
-    yp[st_low] = hip[i];
-    yp[!st_low] = lop[i];
+  // Added by DS, add xoff(set) to repeat if we are zooming outside 0 to 1
 
-    cpgsci (cp[0]);
-    cpgmove (xp[1]+space-1.0,yp[0]);
-    cpgdraw (xp[0]-space,yp[0]);
+  float sx, ex;
+  get_frame()->get_x_scale()->get_range( sx, ex );
 
-    cpgsci (cp[1]);
-    cpgmove (xp[0]+space,yp[1]);
-    cpgdraw (xp[1]-space,yp[1]);
+  for( int xoff = int(sx)-1; xoff < int(ex)+1; xoff ++ )
+  {
+    cpgsls(1);
+    for (int i=0; i<3; i++)
+    {
+      float yp[2];
+      yp[st_low] = hip[i];
+      yp[!st_low] = lop[i];
 
-    cpgsci (cp[0]);
-    cpgmove (xp[1]+space,yp[0]);
-    cpgdraw (xp[1]-space+1.0,yp[0]);
+      cpgsci (cp[0]);
+      cpgmove (xp[1]+space-1.0 + xoff,yp[0]);
+      cpgdraw (xp[0]-space + xoff,yp[0]);
 
-    // draw the error bars dotted
-    cpgsls(2);
+      cpgsci (cp[1]);
+      cpgmove (xp[0]+space + xoff,yp[1]);
+      cpgdraw (xp[1]-space + xoff,yp[1]);
 
+      cpgsci (cp[0]);
+      cpgmove (xp[1]+space + xoff,yp[0]);
+      cpgdraw (xp[0]-space+1.0 + xoff,yp[0]);
+
+      // draw the error bars dotted
+      cpgsls(2);
+    }
   }
 
   // restore the colour and line attributes

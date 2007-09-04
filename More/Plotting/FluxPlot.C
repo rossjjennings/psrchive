@@ -57,7 +57,9 @@ void Pulsar::FluxPlot::draw (const Archive* data)
   // PhaseScale::get_ordinates fills the x-axis with turns/deg/milliseconds ...
   get_scale()->get_ordinates (data, plotter.x);
 
-  plotter.draw ();
+  float minx, maxx;
+  get_frame()->get_x_scale()->get_range( minx, maxx );
+  plotter.draw ( minx, maxx );
 
   cpgsci (1);
   if (plot_ebox)
@@ -81,7 +83,9 @@ void Pulsar::FluxPlot::plot_profile (const Profile* data)
 
   get_scale()->get_ordinates (0, plotter.x);
 
-  plotter.draw (data);
+  float minx, maxx;
+  get_frame()->get_x_scale()->get_range( minx, maxx );
+  plotter.draw (data, minx, maxx );
 
 }
 
