@@ -1,6 +1,6 @@
 
 intermediate-libs:
-	AM_MAKEFLAGS="$(AM_MAKEFLAGS) PROGRAMS= HEADERS=" $(MAKE) all-recursive
+	AM_MAKEFLAGS="$(AM_MAKEFLAGS) PROGRAMS=" $(MAKE) all-recursive
 
 libs: intermediate-libs install-libLTLIBRARIES
 
