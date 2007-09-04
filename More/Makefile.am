@@ -35,8 +35,10 @@ if HAVE_QTDRIV
 SUBDIRS += rhythm
 endif
 
+if HAVE_PGPLOT
 if HAVE_QT
 SUBDIRS += psrgui
+endif
 endif
 
 include $(top_srcdir)/config/Makefile.local
