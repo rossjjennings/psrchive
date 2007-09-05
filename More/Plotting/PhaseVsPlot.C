@@ -138,7 +138,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
         float amp = plotarray[irow*nbin + ibin];
         if (amp != 0.0)
           all_zeroes[irow] = false;
-	float new_amp = amp * yscale + y_min + y_res * irow;
+        float new_amp = amp * yscale + y_min + y_res * irow;
         plotarray[irow*nbin + ibin] = new_amp;
       }
     }
@@ -152,6 +152,14 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       {
         if (!all_zeroes[irow])
           cpgline (nbin, &xaxis_adjusted[0], &plotarray[irow*nbin]);
+
+	// fill in the gap between iterations
+	float pxs[2], pys[2];
+	pxs[0] = xaxis_adjusted[nbin-1];
+	pxs[1] = pxs[0] + ( 1.0 / float(nbin) );
+	pys[0] = plotarray[irow*nbin + nbin - 1];
+	pys[1] = plotarray[irow*nbin];
+	cpgline( 2, pxs, pys );
       }
     }
   }
