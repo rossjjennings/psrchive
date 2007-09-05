@@ -34,7 +34,7 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
 
   style = "image";
 }
- 
+
 TextInterface::Class* Pulsar::PhaseVsPlot::get_interface ()
 {
   return new Interface (this);
@@ -44,7 +44,7 @@ void Pulsar::PhaseVsPlot::set_style (const string& s)
 {
   if (s != "image" && s != "line")
     throw Error (InvalidParam, "Pulsar::PhaseVsPlot::set_style",
-		 "invalid style '" + s + "'");
+                 "invalid style '" + s + "'");
   style = s;
 }
 
@@ -75,7 +75,8 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   float max = FLT_MIN;
 
   vector<float> plotarray (nbin * nrow);
-  for (unsigned irow = 0; irow < nrow; irow++) {
+  for (unsigned irow = 0; irow < nrow; irow++)
+  {
     vector<float> amps  = get_Profile (data, irow) -> get_weighted_amps();
     for (unsigned ibin=0; ibin<nbin; ibin++)
       plotarray[irow*nbin + ibin] = amps[ibin];
@@ -84,55 +85,79 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       continue;
 
     min = std::min (min, *std::min_element (amps.begin()+min_bin,
-					    amps.begin()+max_bin) );
+                                            amps.begin()+max_bin) );
 
     max = std::max (max, *std::max_element (amps.begin()+min_bin,
-					    amps.begin()+max_bin) );
+                                            amps.begin()+max_bin) );
 
   }
 
   float x_res = (x_max-x_min)/nbin;
   float y_res = (y_max-y_min)/nrow;
-    
-  if (style == "image") {
+
+  if (style == "image")
+  {
+
 
     get_z_scale()->set_minmax (min, max);
     get_z_scale()->get_range (min, max);
 
     // X = TR(0) + TR(1)*I + TR(2)*J
     // Y = TR(3) + TR(4)*I + TR(5)*J
-    
-    float trf[6] = { x_min-0.5*x_res, x_res, 0.0,
-		     y_min-0.5*y_res, 0.0, y_res };
-    
-    cpgimag(&plotarray[0], nbin, nrow, 1, nbin, 1, nrow, min, max, trf);
+
+    for( int i = int(x_min)-1; i < int(x_max)+1; i ++ )
+    {
+      float trf[6] = { i + x_min-0.5*x_res, x_res, 0.0,
+                       y_min-0.5*y_res, 0.0, y_res };
+
+      cpgimag(&plotarray[0], nbin, nrow, 1, nbin, 1, nrow, min, max, trf);
+    }
 
   }
-  else if (style == "line") {
-
+  else if (style == "line")
+  {
     get_z_scale()->set_minmax (0, max);
     get_z_scale()->get_range (min, max);
 
     vector<float> xaxis;
     get_scale()->get_ordinates (data, xaxis);
 
+    vector<float> xaxis_adjusted;
+    xaxis_adjusted.resize( nbin );
+
     float yscale = y_res/max;
 
-    for (unsigned irow = min_row; irow < max_row; irow++) {
-      bool all_zero = true;
-      for (unsigned ibin=0; ibin<nbin; ibin++) {
-	float amp = plotarray[irow*nbin + ibin];
-	if (amp != 0.0)
-	  all_zero = false;
-	plotarray[irow*nbin + ibin] = amp * yscale + y_min + y_res * irow;
+    vector<bool> all_zeroes;
+    all_zeroes.resize( max_row );
+
+    for ( unsigned irow = min_row; irow < max_row; irow ++ )
+    {
+      all_zeroes[irow] = true;
+      for( unsigned ibin=0; ibin < nbin; ibin ++ )
+      {
+        float amp = plotarray[irow*nbin + ibin];
+        if (amp != 0.0)
+          all_zeroes[irow] = false;
+	float new_amp = amp * yscale + y_min + y_res * irow;
+        plotarray[irow*nbin + ibin] = new_amp;
       }
-      if (!all_zero)
-	cpgline (nbin, &xaxis[0], &plotarray[irow*nbin]);
     }
 
+    for( int xoff = int(x_min)-1; xoff < int( x_max )+1; xoff ++ )
+    {
+      for( int b = 0; b < nbin; b ++ )
+        xaxis_adjusted[b] = xaxis[b] + xoff;
+
+      for (unsigned irow = min_row; irow < max_row; irow++)
+      {
+        if (!all_zeroes[irow])
+          cpgline (nbin, &xaxis_adjusted[0], &plotarray[irow*nbin]);
+      }
+    }
   }
 
-  if (get_frame()->get_y_axis()->get_alternate()) {
+  if (get_frame()->get_y_axis()->get_alternate())
+  {
 
     float min, max;
     get_frame()->get_y_scale()->PlotScale::get_range (min, max);
