@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPlot.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/08/20 06:35:14 $
+   $Revision: 1.7 $
+   $Date: 2007/09/06 01:10:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiPlot_h
@@ -43,6 +43,12 @@ namespace Pulsar {
 
     //! Derived classes may wish to prepare before each plot is used
     virtual void prepare (FramedPlot*) {}
+
+    //! Get the frame
+    virtual MultiFrame* get_frame () { return &frames; }
+
+    //! Get the frame
+    virtual const MultiFrame* get_frame () const { return &frames; }
 
   protected:
 
