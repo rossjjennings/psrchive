@@ -23,7 +23,8 @@ nobase_include_HEADERS = \
 	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h		\
 	Pulsar/FluctPlot.h Pulsar/StokesFluctPlot.h			\
 	Pulsar/Poincare.h Pulsar/ProfileVectorPlotter.h			\
-	Pulsar/TwoBitPlot.h Pulsar/CalibratorSpectrum.h \
+	Pulsar/TwoBitPlot.h Pulsar/CalibratorSpectrum.h 		\
+	Pulsar/LinePhasePlot.h						\
 	Pulsar/InfoLabel.h
 
 libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
@@ -59,6 +60,7 @@ libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
 	TwoBitPlot.C TwoBitPlotTI.C \
 	Poincare.C PoincareTI.C \
 	ProfileVectorPlotter.C \
+	LinePhasePlot.C \
 	CalibratorSpectrum.C CalibratorSpectrumTI.C
 
 endif
