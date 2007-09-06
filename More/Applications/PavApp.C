@@ -997,7 +997,7 @@ int PavApp::run( int argc, char *argv[] )
 	break;
       }
       case 'i':
-	cout << "pav VERSION $Id: PavApp.C,v 1.2 2007/09/04 06:22:58 nopeer Exp $" << endl << endl;
+	cout << "pav VERSION $Id: PavApp.C,v 1.3 2007/09/06 01:24:12 nopeer Exp $" << endl << endl;
 	return 0;
 	break;
       case 'M':
@@ -1074,8 +1074,8 @@ int PavApp::run( int argc, char *argv[] )
 	keep_baseline = true;
 	break;
       case 'R':
-	plot_line_phase_subints = true;
-      // keep_baseline = true;
+	keep_baseline = true;
+	plots.push_back( factory.construct( "line" ) );
 	break;
       case 'm':
 	plot_spherical = true;
@@ -1176,7 +1176,7 @@ int PavApp::run( int argc, char *argv[] )
     };
   }
 
-  if (plots.empty() && !plot_bandpass && !plot_line_phase_subints && !plot_spherical && !plot_snr_spectrum
+  if (plots.empty() && !plot_bandpass && !plot_spherical && !plot_snr_spectrum
       && !perform_test )
   {
     cout << "pav: please choose at least one plot style" << endl;
@@ -1316,17 +1316,10 @@ int PavApp::run( int argc, char *argv[] )
       myio->organise(archive, ronsub);
     }
 
-//     if( perform_test )
-//     {
-//       Test( archive );
-//     }
+
     if( plot_bandpass )
     {
       bandpass( archive );
-    }
-    else if ( plot_line_phase_subints )
-    {
-      line_phase_subints( archive );
     }
     else if ( plot_spherical )
     {
