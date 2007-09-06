@@ -20,6 +20,7 @@
 #include "Pulsar/TwoBitPlot.h"
 #include "Pulsar/Poincare.h"
 #include "Pulsar/CalibratorSpectrum.h"
+#include "Pulsar/LinePhasePlot.h"
 
 #include "Error.h"
 #include "pad.h"
@@ -68,6 +69,9 @@ Pulsar::PlotFactory::PlotFactory ()
 
   add ( new PlotFactory::Advocate<CalibratorSpectrum>
 	('C', "cal", "Calibrator Spectrum") );
+  
+  add ( new PlotFactory::Advocate<LinePhasePlot>
+        ('R', "line", "Line phase subints" ) );
 }
 
 //! Return a new instance of the named plotter
