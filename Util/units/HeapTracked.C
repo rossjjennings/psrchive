@@ -4,8 +4,17 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "HeapTracked.h"
 #include "Error.h"
+
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+#endif
 
 // #define _DEBUG 1
 
@@ -13,6 +22,10 @@ using namespace std;
 
 // static ensures read-only access via get_heap_queue_size
 static vector<const void*> heap_addresses;
+
+#ifdef HAVE_PTHREAD
+static pthread_mutex_t heap_mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
 
 size_t Reference::HeapTracked::get_heap_queue_size ()
 {
@@ -33,6 +46,10 @@ void* Reference::HeapTracked::operator new (size_t size, void* ptr)
     return ptr;
   }
   
+#ifdef HAVE_PTHREAD
+  pthread_mutex_lock (&heap_mutex);
+#endif
+
   ptr = ::operator new (size);
 
 #ifdef _DEBUG
@@ -41,6 +58,18 @@ void* Reference::HeapTracked::operator new (size_t size, void* ptr)
 #endif
 
   heap_addresses.push_back (ptr);
+
+#if 0
+  static unsigned max_size = 0;
+  if (heap_addresses.size() > max_size) {
+    max_size = heap_addresses.size();
+    cerr << "max. size=" << heap_addresses.size() << endl;
+  }
+#endif
+
+#ifdef HAVE_PTHREAD
+  pthread_mutex_unlock (&heap_mutex);
+#endif
 
   return ptr;
 }
@@ -90,6 +119,10 @@ bool Reference::HeapTracked::__is_on_heap ()
   
   vector<const void*>::iterator it;
 
+#ifdef HAVE_PTHREAD
+  pthread_mutex_lock (&heap_mutex);
+#endif
+
   for (it = heap_addresses.begin(); it != heap_addresses.end(); it++) {
 
 #ifdef _DEBUG
@@ -114,6 +147,10 @@ bool Reference::HeapTracked::__is_on_heap ()
          << (int)__heap_state << endl;
 #endif
 
+#ifdef HAVE_PTHREAD
+  pthread_mutex_unlock (&heap_mutex);
+#endif
+
     return true;
   }
 
@@ -122,6 +159,10 @@ bool Reference::HeapTracked::__is_on_heap ()
 #ifdef _DEBUG
     cerr << "Reference::HeapTracked::is_on_heap false heap_state="
          << (int)__heap_state << endl;
+#endif
+
+#ifdef HAVE_PTHREAD
+  pthread_mutex_unlock (&heap_mutex);
 #endif
 
   return false;
