@@ -9,7 +9,7 @@ dist_bin_SCRIPTS = psrchive_install
 
 dist_data_DATA = psrchive_version psrchive.cfg
 
-libs: install-binSCRIPTS fix_prefix
+libs: fix_prefix
 
 install-exec-hook: fix_prefix
 
@@ -20,7 +20,7 @@ install-exec-hook: fix_prefix
 
 FIX_PREFIX := ${prefix}/bin/psrchive_ldflags ${prefix}/bin/psrchive_cflags
 
-fix_prefix:
+fix_prefix: install-binSCRIPTS
 	perl -p -i -e "s|PREFIX|${prefix}|" ${FIX_PREFIX}
 
 #############################################################################
