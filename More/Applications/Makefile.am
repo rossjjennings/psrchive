@@ -57,7 +57,7 @@ pacv_LDADD = $(LDADD) @PGPLOT_LIBS@
 pazi_SOURCES = pazi.C
 pazi_LDADD = $(LDADD) @PGPLOT_LIBS@
 
-pav_SOURCES = pav.C PavApp.C
+pav_SOURCES = pav.C PavApp.C PavApp.h
 pav_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 endif
