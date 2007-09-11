@@ -35,7 +35,8 @@ libs:
 # C Util/genutil/ThreadContext.h
 #
 # This target fixes up this problem by removing the old file and checking 
-# out the new
+# out the new; it also removes ThreadContext.h from the the build directory
+# if top_builddir != top_srcdir
 #
 11-09-2007:
 	@if test -f $(file_11092007); then \
@@ -44,6 +45,9 @@ libs:
 	  cd $(top_srcdir)/Util/genutil && \
 	  rm -f ThreadContext.h && cvs update ThreadContext.h; \
 	fi; fi
+	if test $(top_builddir) != $(top_srcdir); then \
+	  rm -f $(top_builddir)/Util/genutil/ThreadContext.h; \
+	fi
 
 file_11092007 := $(top_srcdir)/Util/genutil/CVS/Entries
 
