@@ -160,7 +160,11 @@ SWIN_LIB_CFITSIO
 SWIN_LIB_TEMPO2
 SWIN_LIB_MPI
 SWIN_LIB_READLINE
-SWIN_LIB_PTHREAD
+
+ACX_PTHREAD
+LIBS="$PTHREAD_LIBS $LIBS"
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"
 
 if test x"$enable_lean" == xyes; then
 
@@ -201,7 +205,6 @@ SWIN_FUNC_GETOPT_LONG
 AM_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
 		config/Makefile
-		Util/genutil/ThreadContext.h
 		Util/Makefile
 		Util/third/Makefile
 		Util/third/parsifal/Makefile
