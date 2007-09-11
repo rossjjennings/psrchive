@@ -6,40 +6,13 @@
  *
  ***************************************************************************/
 
-
-/* <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*>
-
-
-  IMPORTANT NOTICE:
-
-  @configure_input@
-
-  Do not edit ThreadContext.h directly, or your modifications may be lost.
-
-  Please edit ThreadContext.h.in
-
-
-<*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> <*> */
-
-
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/ThreadContext.h.in,v $
-   $Revision: 1.5 $
-   $Date: 2007/06/04 19:41:00 $
+/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/ThreadContext.h,v $
+   $Revision: 1.1 $
+   $Date: 2007/09/11 00:43:46 $
    $Author: straten $ */
 
 #ifndef __ThreadContext_h
 #define __ThreadContext_h
-
-#ifdef HAVE_PTHREAD
-#undef HAVE_PTHREAD
-#endif
-
-// the configure script sets this variable
-#define HAVE_PTHREAD @EXPORT_HAVE_PTHREAD@
-
-#if HAVE_PTHREAD
-#include <pthread.h>
-#endif
 
 class ThreadContext {
 
@@ -71,28 +44,26 @@ public:
 
 protected:
 
-#if HAVE_PTHREAD
-
-  //! condition signaling
-  pthread_cond_t cond;
-
-  //! mutual exclusion locking
-  pthread_mutex_t mutex;
-
-#endif
-
+  void* cond;
+  void* mutex;
 
 };
 
 class ThreadContext::Lock {
+
 public:
+
   //! The constructor obtains the mutual exclusion lock ...
   Lock (ThreadContext* t) { if (t) t->lock(); context = t; }
+
   //! And the destructor releases it
   ~Lock () { if (context) context->unlock(); }
+
 protected:
+
   //! The context in which the lock is held
   ThreadContext* context;
+
 };
 
 #endif // !defined(__ThreadContext_h)
