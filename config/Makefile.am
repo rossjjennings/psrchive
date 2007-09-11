@@ -45,7 +45,7 @@ libs:
 	  cd $(top_srcdir)/Util/genutil && \
 	  rm -f ThreadContext.h && cvs update ThreadContext.h; \
 	fi; fi
-	if test $(top_builddir) != $(top_srcdir); then \
+	@if test $(top_builddir) != $(top_srcdir); then \
 	  rm -f $(top_builddir)/Util/genutil/ThreadContext.h; \
 	fi
 
