@@ -38,11 +38,12 @@ libs:
 # out the new
 #
 11-09-2007:
-	@have=`$(FGREP) ThreadContext.h $(file_11092007)`; \
+	@if test -f $(file_11092007); then \
+	have=`$(FGREP) ThreadContext.h $(file_11092007)`; \
 	if test -z "$$have"; then \
 	  cd $(top_srcdir)/Util/genutil && \
 	  rm -f ThreadContext.h && cvs update ThreadContext.h; \
-	fi
+	fi; fi
 
 file_11092007 := $(top_srcdir)/Util/genutil/CVS/Entries
 
