@@ -36,3 +36,9 @@ where:
 	@echo "PSRCHIVE will be installed in ${prefix}"
 	@echo
 
+#
+# Persist after an autoconf macro file is removed
+#
+$(top_srcdir)/config/%.m4:
+	@echo Ignoring dependency on $@
+
