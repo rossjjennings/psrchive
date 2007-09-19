@@ -33,8 +33,8 @@ void Pulsar::ArchiveTI::setup( void )
   add( &Archive::get_nsubint,  "nsub",  "Number of sub-integrations" );
 
   add( &Archive::get_type,
-         &Archive::set_type,
-         "type", "Observation type (Pulsar, PolnCal, etc.)" );
+       &Archive::set_type,
+       "type", "Observation type (Pulsar, PolnCal, etc.)" );
 
   add( &Archive::get_telescope_code,
        &Archive::set_telescope_code,
@@ -48,55 +48,45 @@ void Pulsar::ArchiveTI::setup( void )
        &Archive::set_coordinates,
        "coord", "Coordinates of the source" );
 
-#if 0
-  //! Get the coordinates of the source
-  virtual sky_coord get_coordinates () const = 0;
-  //! Set the coordinates of the source
-  virtual void set_coordinates (const sky_coord& coordinates) = 0;
-
-#endif
-
   add( &Archive::get_centre_frequency,
-         &Archive::set_centre_frequency,
-         "freq", "Centre frequency (MHz)" );
+       &Archive::set_centre_frequency,
+       "freq", "Centre frequency (MHz)" );
 
   add( &Archive::get_bandwidth,
-         &Archive::set_bandwidth,
-         "bw", "Bandwidth (MHz)" );
+       &Archive::set_bandwidth,
+       "bw", "Bandwidth (MHz)" );
 
   add( &Archive::get_dispersion_measure,
-         &Archive::set_dispersion_measure,
-         "dm", "Dispersion measure (pc/cm^3)" );
+       &Archive::set_dispersion_measure,
+       "dm", "Dispersion measure (pc/cm^3)" );
 
   add( &Archive::get_rotation_measure,
-         &Archive::set_rotation_measure,
-         "rm", "Rotation measure (rad/m^2)" );
+       &Archive::set_rotation_measure,
+       "rm", "Rotation measure (rad/m^2)" );
 
   add( &Archive::get_dedispersed,
-         &Archive::set_dedispersed,    \
-         "dmc", "Dispersion corrected (boolean)");
+       &Archive::set_dedispersed,    \
+       "dmc", "Dispersion corrected (boolean)");
 
   add( &Archive::get_faraday_corrected,
-         &Archive::set_faraday_corrected,
-         "rmc", "Faraday Rotation corrected (boolean)" );
+       &Archive::set_faraday_corrected,
+       "rmc", "Faraday Rotation corrected (boolean)" );
 
   add( &Archive::get_poln_calibrated,
-         &Archive::set_poln_calibrated,
-         "polc", "Polarization calibrated (boolean)" );
+       &Archive::set_poln_calibrated,
+       "polc", "Polarization calibrated (boolean)" );
 
   add( &Archive::get_scale,
-         &Archive::set_scale,
-         "scale", "Units of profile amplitudes" );
+       &Archive::set_scale,
+       "scale", "Units of profile amplitudes" );
 
   add( &Archive::get_state,
-         &Archive::set_state,
-         "state", "State of profile amplitudes" );
+       &Archive::set_state,
+       "state", "State of profile amplitudes" );
   
-  add( &Archive::integration_length, "length", "The full duration of the observation (s)" );
+  add( &Archive::integration_length,
+       "length", "The full duration of the observation (s)" );
   
-  add( &Archive::start_time_day, "intmjd", "MJD day" );
-  add( &Archive::start_time_fracday, "fracmjd", "MJD faction of day" );
-
   import( "rcvr", Pulsar::ReceiverTI(),
           (Receiver*(Archive::*)()) &Archive::get<Receiver> );
 

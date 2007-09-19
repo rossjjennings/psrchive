@@ -333,17 +333,3 @@ bool Pulsar::Archive::zero_phase_aligned () const
   return true;
 }
 
-//! Get the start time MJD day
-int Pulsar::Archive::start_time_day() const
-{
-  MJD stime = start_time();
-  return stime.intday();
-}
-
-//! Get the start time MJD faction of a day
-double Pulsar::Archive::start_time_fracday() const
-{
-  MJD stime = start_time();
-  return stime.fracday();
-}
-
