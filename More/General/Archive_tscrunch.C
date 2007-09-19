@@ -94,18 +94,23 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
       double duration = 0.0;
       double total_weight = 0.0;
 
+      bool weight_midtime = tscrunch_weighted_midtime;
+
       for (unsigned iadd=0; iadd < nscrunch; iadd++) {
 
         Integration* cur = get_Integration (start+iadd);
 
         duration += cur->get_duration();
 
-        if (tscrunch_weighted_midtime)
+        if (weight_midtime)
           for (unsigned ichan=0; ichan < cur->get_nchan(); ichan++)
             total_weight += cur->get_weight (ichan);
-        else
-          total_weight += 1.0;
   
+      }
+
+      if (total_weight == 0) {
+	total_weight = nscrunch;
+	weight_midtime = false;
       }
 
       result->set_duration (duration);
@@ -116,7 +121,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
         Integration* cur = get_Integration (start+iadd);
 
-        if (tscrunch_weighted_midtime) {
+        if (weight_midtime) {
           double weight = 0;
           for (unsigned ichan=0; ichan < cur->get_nchan(); ichan++)
             weight += cur->get_weight (ichan);
