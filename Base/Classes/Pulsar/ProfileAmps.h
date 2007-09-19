@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ProfileAmps.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/09/19 12:36:23 $
+   $Revision: 1.2 $
+   $Date: 2007/09/19 13:35:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileAmps_h
@@ -60,7 +60,12 @@ namespace Pulsar {
     //! set the amplitudes array equal to the contents of the data array
     template <typename T> void get_amps (std::vector<T>& data) const;
 
+    //! expert interface
+    class Expert;
+
   private:
+
+    friend class Expert;
 
     //! number of bins in the profile
     unsigned nbin;
