@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManagerExpert.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/07/12 05:58:35 $
+   $Revision: 1.5 $
+   $Date: 2007/09/19 00:03:24 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationManagerExpert_h
@@ -49,6 +49,10 @@ namespace Pulsar {
     //! Directly append the Integration to instance (no copy)
     void manage (Integration* integration)
     { instance->manage (integration); }
+
+    //! Return the size of the subints vector
+    unsigned get_size () const
+    { return instance->subints.size(); }
 
   private:
 

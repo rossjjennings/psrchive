@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 
@@ -21,7 +21,7 @@ using namespace std;
 void Pulsar::Archive::resize (unsigned nsubint, unsigned npol,
 			      unsigned nchan, unsigned nbin)
 {
-  unsigned cur_nsub = get_nsubint();
+  unsigned cur_nsub = expert()->get_size();
   unsigned cur_npol = get_npol();
   unsigned cur_nchan = get_nchan();
   unsigned cur_nbin = get_nbin();
