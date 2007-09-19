@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.103 $
-   $Date: 2007/07/30 06:35:09 $
+   $Revision: 1.104 $
+   $Date: 2007/09/19 12:40:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
 
-#include "Pulsar/Container.h"
+#include "Pulsar/ProfileAmps.h"
 #include "toa.h"
 #include "Types.h"
 #include "Functor.h"
@@ -37,7 +37,7 @@ namespace Pulsar {
     contained.  The data in each Profile may still be manipulated through
     public methods.
   */
-  class Profile : public Container {
+  class Profile : public ProfileAmps {
 
   public:
 
@@ -59,9 +59,6 @@ namespace Pulsar {
     //! fraction of total power used to find peak
     static float peak_edge_threshold;
 
-    //! When true, no memory is allocated for amps
-    static bool no_amps;
-
     //! Default constructor
     Profile (unsigned nbin = 0);
 
@@ -71,9 +68,6 @@ namespace Pulsar {
     //! copy constructor
     Profile (const Profile* profile) { init(); operator = (*profile); }
 
-    //! destructor destroys the data area
-    virtual ~Profile ();
-    
     //! returns a pointer to a new copy of self
     virtual Profile* clone () const;
 
@@ -192,28 +186,10 @@ namespace Pulsar {
 		    std::string arguments = "",
 		    Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
 
-    //! get the number of bins
-    /*! Note that there is no set_nbin; this attribute may be set only
-      through Profile::resize */
-    unsigned get_nbin () const { return nbin; }
-
-    //! returns a pointer to the start of the array of amplitudes
-    const float* get_amps () const { return amps; }
-    float* get_amps () { return amps; }
-    
     /*! returns a vector representation of the array of amplitudes,
      with all zero-weighted points cleaned out */
     std::vector<float> get_weighted_amps () const;
     
-    //! set the amplitudes array equal to the contents of the data array
-    template <typename T> void set_amps (const T* data);
-
-    //! set the amplitudes array equal to the contents of the data array
-    template <typename T> void set_amps (const std::vector<T>& data);
-
-    //! set the amplitudes array equal to the contents of the data array
-    template <typename T> void get_amps (std::vector<T>& data) const;
-
     //! get the centre frequency (in MHz)
     double get_centre_frequency () const { return centrefreq; }
     //! set the centre frequency (in MHz)
@@ -244,9 +220,6 @@ namespace Pulsar {
     //! integrate neighbouring sections of the profile
     void fold (unsigned nfold);
 
-    //! resize the data area
-    virtual void resize (unsigned nbin);
-
     //! halves the number of bins like bscrunch(2^nhalve)
     void halvebins (unsigned nhalve);
     
@@ -265,15 +238,6 @@ namespace Pulsar {
     //! initializes all values to null
     void init ();
 
-    //! number of bins in the profile
-    unsigned nbin;
-
-    //! amplitudes at each pulse phase
-    float *amps;
-
-    //! size of the amps array (always >= nbin)
-    unsigned amps_size;
-
     //! centre frequency of profile (in MHz)
     double centrefreq;
 
@@ -291,36 +255,6 @@ namespace Pulsar {
 }
 
 
-/*! 
-  \param data pointer to the data elements to be copied.
-  \pre data must point to at least get_nbin() elements */
-template <typename T>
-void Pulsar::Profile::set_amps (const T* data)
-{
-  for (unsigned ibin=0; ibin<nbin; ibin++)
-    amps[ibin] = static_cast<float>( data[ibin] );
-}
 
-/*! 
-  \param data vector of amps
-*/
-template <typename T>
-void Pulsar::Profile::set_amps (const std::vector<T>& data)
-{
-  resize (data.size());
-  for (unsigned ibin=0; ibin<nbin; ibin++)
-    amps[ibin] = static_cast<float>( data[ibin] );
-}
-
-/*! 
-  \param data vector of amps
-*/
-template <typename T>
-void Pulsar::Profile::get_amps (std::vector<T>& data) const
-{
-  data.resize (nbin);
-  for (unsigned ibin=0; ibin<nbin; ibin++)
-    data[ibin] = static_cast<T>( amps[ibin] );
-}
 
 #endif // !defined __Pulsar_Profile_h

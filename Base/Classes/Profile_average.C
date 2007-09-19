@@ -25,9 +25,10 @@ using namespace std;
 const Pulsar::Profile& Pulsar::Profile::average (const Profile* profile, 
 						 double sign)
 {
-  if (nbin != profile->get_nbin())
+  if (get_nbin() != profile->get_nbin())
     throw Error (InvalidRange, "Pulsar::Profile::average",
-		 "nbin=%d != profile.nbin=%d", nbin, profile->get_nbin());
+		 "nbin=%d != profile.nbin=%d",
+		 get_nbin(), profile->get_nbin());
 
   try {
 
@@ -35,7 +36,7 @@ const Pulsar::Profile& Pulsar::Profile::average (const Profile* profile,
     if (state != profile->get_state())
       state = Signal::None;
     
-    float* amps1 = amps;
+    float* amps1 = this->get_amps();
     const float* amps2 = profile->get_amps();
     
     double weight1 = weight;
@@ -47,6 +48,7 @@ const Pulsar::Profile& Pulsar::Profile::average (const Profile* profile,
     if (weight != 0)
       norm = 1.0 / weight;
     
+    unsigned nbin = get_nbin();
     for (unsigned ibin=0; ibin<nbin; ibin++) {
       *amps1 = norm * ( double(*amps1)*weight1 + sign*double(*amps2)*weight2 );
       amps1 ++; amps2 ++;

@@ -30,10 +30,6 @@ float Pulsar::Profile::default_duty_cycle
 bool Pulsar::Profile::verbose
 = Pulsar::Config::get<bool>("Profile::verbose", false);
 
-/*! 
-  Do not allocate memory for the amps
-*/
-bool Pulsar::Profile::no_amps = false;
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -55,60 +51,21 @@ void nbinify (int& istart, int& iend, int nbin)
 //
 void Pulsar::Profile::init()
 {
-  nbin   = 0;
   state  = Signal::None;
   weight = 1.0;
   centrefreq = -1.0;
-
-  amps = NULL;
-  amps_size = 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Profile default constructor
 //
-Pulsar::Profile::Profile (unsigned nbin)
+Pulsar::Profile::Profile (unsigned nbin) : ProfileAmps (nbin)
 {
   init();
-  resize(nbin);
   zero();
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile destructor
-//
-
-Pulsar::Profile::~Profile () 
-{
-  if (amps != NULL) delete [] amps;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::resize
-//
-void Pulsar::Profile::resize (unsigned _nbin)
-{
-  nbin = _nbin;
-
-  if (amps_size >= nbin && nbin != 0)
-    return;
-
-  if (amps) delete [] amps; amps = NULL;
-  amps_size = 0;
-
-  if (nbin == 0)
-    return;
-
-  if (!no_amps) {
-    amps = new float [nbin];
-    if (!amps)
-      throw Error (BadAllocation, "Pulsar::Profile::resize");
-    amps_size = nbin;
-  }
-}
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -136,9 +93,9 @@ const Pulsar::Profile& Pulsar::Profile::operator = (const Profile& input)
     return *this;
 
   try {
-    resize (input.nbin);
-
+    resize( input.get_nbin() );
     set_amps( input.get_amps() );
+
     set_weight ( input.get_weight() );
     set_centre_frequency ( input.get_centre_frequency() );
     set_state ( input.get_state() );
@@ -192,12 +149,16 @@ const Pulsar::Profile& Pulsar::Profile::operator *= (float factor)
 
 void Pulsar::Profile::offset (double factor)
 {
+  unsigned nbin = get_nbin();
+  float* amps = get_amps();
   for (unsigned i=0;i<nbin;i++)
     amps[i] += factor;
 }
 
 void Pulsar::Profile::scale (double factor)
 {
+  unsigned nbin = get_nbin();
+  float* amps = get_amps();
   for (unsigned i=0;i<nbin;i++)
     amps[i] *= factor;
 }
@@ -231,6 +192,9 @@ vector<float> Pulsar::Profile::get_weighted_amps () const
 {
   vector<float> wamps;
   
+  unsigned nbin = get_nbin();
+  const float* amps = get_amps();
+
   if (weight == 0.0)
     for (unsigned i = 0; i < nbin; i++)
       wamps.push_back(0.0);
@@ -247,6 +211,9 @@ vector<float> Pulsar::Profile::get_weighted_amps () const
 //
 void Pulsar::Profile::zero()
 {
+  unsigned nbin = get_nbin();
+  float* amps = get_amps();
+
   weight = 0;
   for (unsigned ibin = 0; ibin < nbin; ibin++)
     amps[ibin] = 0;
@@ -261,6 +228,9 @@ void Pulsar::Profile::square_root ()
   if (verbose)
     cerr << "Pulsar::Profile::square_root" << endl;
   
+  unsigned nbin = get_nbin();
+  float* amps = get_amps();
+
   for (unsigned ibin=0; ibin<nbin; ++ibin) {
     float sign = (amps[ibin]>0) ? 1.0 : -1.0;
     amps[ibin] = sign * sqrt(float(sign * amps[ibin]));
@@ -276,6 +246,9 @@ void Pulsar::Profile::absolute ()
   if (verbose)
     cerr << "Pulsar::Profile::absolute" << endl;
   
+  unsigned nbin = get_nbin();
+  float* amps = get_amps();
+
   for (unsigned ibin=0; ibin<nbin; ++ibin)
     amps[ibin] = fabs(amps[ibin]);
 
@@ -293,6 +266,9 @@ void Pulsar::Profile::logarithm (double base, double threshold)
   // cerr << "threshold = " << log_threshold << endl;
 
   unsigned under = 0;
+
+  unsigned nbin = get_nbin();
+  float* amps = get_amps();
 
   for (unsigned ibin=0; ibin<nbin; ++ibin)
     if (amps[ibin] > threshold)
@@ -315,6 +291,9 @@ void Pulsar::Profile::fold (unsigned nfold)
   if (verbose)
     cerr << "Pulsar::Profile::fold" << endl;
   
+  unsigned nbin = get_nbin();
+  float* amps = get_amps();
+
   if (nbin % nfold)
     throw Error (InvalidRange, "Pulsar::Profile::fold",
 		 "nbin=%d %% nfold=%d != 0", nbin, nfold);
@@ -346,6 +325,9 @@ void Pulsar::Profile::bscrunch (unsigned nscrunch) { try
     throw Error (InvalidParam, "",
 		 "nscrunch cannot be less than unity");
   
+  unsigned nbin = get_nbin();
+  float* amps = get_amps();
+
   if (nbin % nscrunch)
     throw Error (InvalidRange, "",
 		 "Scrunch factor does not divide number of bins");
@@ -376,6 +358,9 @@ void Pulsar::Profile::halvebins (unsigned nhalve)
   if (verbose)
     cerr << "Pulsar::Profile::halvebins" << endl;
   
+  unsigned nbin = get_nbin();
+  float* amps = get_amps();
+
   for (unsigned i=0; i<nhalve && nbin>1; i++) {
 
     if (nbin % 2)
@@ -425,7 +410,7 @@ int Pulsar::Profile::find_max_bin (int istart, int iend) const
     cerr << "Pulsar::Profile::find_max_bin" << endl;
   
   int imax=0;
-  minmax (nbin, amps, &imax, 0, true, istart, iend);
+  minmax (get_nbin(), get_amps(), &imax, 0, true, istart, iend);
   return imax;
 }
 
@@ -439,7 +424,7 @@ int Pulsar::Profile::find_min_bin (int istart, int iend) const
     cerr << "Pulsar::Profile::find_min_bin" << endl;
   
   int imin=0;
-  minmax (nbin, amps, &imin, 0, false, istart, iend);
+  minmax (get_nbin(), get_amps(), &imin, 0, false, istart, iend);
   return imin;
 }
 
@@ -454,7 +439,7 @@ float Pulsar::Profile::max (int istart, int iend) const
     cerr << "Pulsar::Profile::max" << endl;
   
   float maxval=0;
-  minmax (nbin, amps, 0, &maxval, true, istart, iend);
+  minmax (get_nbin(), get_amps(), 0, &maxval, true, istart, iend);
   return maxval;
 }
 
@@ -468,7 +453,7 @@ float Pulsar::Profile::min (int istart, int iend) const
     cerr << "Pulsar::Profile::min" << endl;
   
   float minval=0;
-  minmax (nbin, amps, 0, &minval, false, istart, iend);
+  minmax (get_nbin(), get_amps(), 0, &minval, false, istart, iend);
   return minval;
 }
 
@@ -480,6 +465,9 @@ double Pulsar::Profile::sum (int istart, int iend) const
 {
   if (verbose)
     cerr << "Pulsar::Profile::sum" << endl;
+
+  unsigned nbin = get_nbin();
+  const float* amps = get_amps();
 
   nbinify (istart, iend, nbin);
 
@@ -500,6 +488,9 @@ double Pulsar::Profile::sumfabs (int istart, int iend) const
   if (verbose)
     cerr << "Pulsar::Profile::sum" << endl;
 
+  unsigned nbin = get_nbin();
+  const float* amps = get_amps();
+
   nbinify (istart, iend, nbin);
 
   double tot = 0;
@@ -518,6 +509,9 @@ double Pulsar::Profile::sumsq (int istart, int iend) const
   if (verbose)
     cerr << "Pulsar::Profile::sumsq" << endl;
   
+  unsigned nbin = get_nbin();
+  const float* amps = get_amps();
+
   nbinify (istart, iend, nbin);
 
   double tot = 0;
