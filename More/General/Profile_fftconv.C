@@ -4,9 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Profile.h"
 #include "model_profile.h"
+
+using namespace std;
 
 void Pulsar::Profile::fftconv (const Profile& std, 
 			       double& shift, float& eshift, 
@@ -15,8 +17,12 @@ void Pulsar::Profile::fftconv (const Profile& std,
   double scale, sigma_scale;
   double dshift, sigma_dshift;
   double chisq;
-  
-  int ret = model_profile (nbin, 1, &amps, &(std.amps), &scale, &sigma_scale, 
+
+  unsigned nbin = get_nbin();
+  const float* obsamps = get_amps();
+  const float* stdamps = std.get_amps();
+
+  int ret = model_profile (nbin, 1, &obsamps, &stdamps, &scale, &sigma_scale, 
 			   &dshift, &sigma_dshift, &chisq, verbose);
   
   if (ret != 0)

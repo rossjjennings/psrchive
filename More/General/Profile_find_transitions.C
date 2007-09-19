@@ -32,6 +32,9 @@ float Pulsar::Profile::transition_duty_cycle = 0.15;
 void Pulsar::Profile::find_transitions (int& hi2lo, int& lo2hi, int& width)
   const
 {
+  unsigned nbin = get_nbin();
+  const float* amps = get_amps();
+
   // half the sliding window width
   int buffer = int (0.5 * transition_duty_cycle * float(nbin));
 

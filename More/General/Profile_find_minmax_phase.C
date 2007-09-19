@@ -23,7 +23,7 @@ float Pulsar::Profile::find_min_phase (float duty_cycle) const try {
   BaselineWindow mean;
   mean.set_duty_cycle (duty_cycle);
   mean.set_find_minimum ();
-  return mean.find_phase (nbin, amps);
+  return mean.find_phase (get_nbin(), get_amps());
 }
 catch (Error& error) {
   throw error += "Pulsar::Profile::find_min_phase";
@@ -45,7 +45,7 @@ float Pulsar::Profile::find_max_phase (float duty_cycle) const try {
   BaselineWindow mean;
   mean.set_duty_cycle (duty_cycle);
   mean.set_find_maximum ();
-  return mean.find_phase (nbin, amps);
+  return mean.find_phase (get_nbin(), get_amps());
 }
 catch (Error& error) {
   throw error += "Pulsar::Profile::find_max_phase";

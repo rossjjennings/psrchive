@@ -34,6 +34,9 @@ void Pulsar::Profile::stats (double* mean, double* variance, double* varmean,
   double tot = 0;
   double totsq = 0;
 
+  unsigned nbin = get_nbin();
+  const float* amps = get_amps();
+
   nbinify (istart, iend, nbin);
 
   if (verbose) cerr << "Pulsar::Profile::stats"
@@ -97,6 +100,8 @@ void Pulsar::Profile::stats (float phase,
 {
   if (verbose) cerr << "Pulsar::Profile::stats phase=" << phase
 		    << " duty_cycle=" << duty_cycle << endl;
+
+  unsigned nbin = get_nbin();
 
   int start_bin = int ((phase - 0.5 * duty_cycle) * nbin);
   int stop_bin = int ((phase + 0.5 * duty_cycle) * nbin);

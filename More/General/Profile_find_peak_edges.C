@@ -4,10 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
-#include "Pulsar/Profile.h"
 
-//#include "cpgplot.h"
+#include "Pulsar/Profile.h"
+using namespace std;
 
 /*! 
   Fractional pulse phase window used to calculate the transitions in
@@ -50,6 +49,9 @@ float Pulsar::Profile::peak_edge_threshold = 0.1;
 */
 void Pulsar::Profile::find_peak_edges (int& rise, int& fall, bool choose) const
 {
+  unsigned nbin = get_nbin();
+  const float* amps = get_amps();
+
   if (verbose)
     cerr << "Pulsar::Profile::find_peak_edges nbin=" << nbin <<
       " baseline duty_cycle=" << default_duty_cycle << endl;

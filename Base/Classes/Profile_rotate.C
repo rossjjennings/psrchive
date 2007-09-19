@@ -34,7 +34,7 @@ void Pulsar::Profile::rotate_phase (double phase)
 
   if (verbose)
     cerr << "Pulsar::Profile::rotate phase=" << phase 
-	 << " nbin=" << nbin << endl;
+	 << " nbin=" << get_nbin() << endl;
 
   if (phase == 0.0)
     return;
@@ -42,6 +42,9 @@ void Pulsar::Profile::rotate_phase (double phase)
   // Ensure that phase runs from 0 to 1.  This step may help to
   // preserve precision if both phase and nbin are large.
   phase -= floor (phase);
+
+  unsigned nbin = get_nbin();
+  float* amps = get_amps();
 
   if (!rotate_in_phase_domain) {
     FTransform::shift (nbin, amps, phase*double(nbin));
