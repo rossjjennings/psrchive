@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.165 $
-   $Date: 2007/07/13 06:28:26 $
+   $Revision: 1.166 $
+   $Date: 2007/09/19 12:45:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.165 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.166 $"
 #include <iostream>
 #include <TextInterface.h>
 
@@ -422,12 +422,6 @@ namespace Pulsar
     //! Return the MJD at the start of the first sub-integration
     MJD  start_time () const;
     
-    //! Get the start time MJD day
-    int start_time_day() const;
-    
-    //! Get the start time MJD faction of a day
-    double start_time_fracday() const;
-
     //! Return the MJD at the end of the last sub-integration
     MJD  end_time () const;
 
