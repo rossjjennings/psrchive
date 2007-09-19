@@ -224,7 +224,7 @@ doc: MEAL.pdf
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@
+INCLUDES = @PGPLOT_CFLAGS@
 
 LDADD = libMEAL.la $(top_builddir)/Util/units/libunits.la @PGPLOT_LIBS@
 

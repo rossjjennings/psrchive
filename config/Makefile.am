@@ -4,9 +4,27 @@
 # that break the other GNU autotools-generated Makefiles
 #
 
-all-local: 03-09-2007 11-09-2007
+all-local: 11-08-2007 03-09-2007 11-09-2007
 
 libs:
+
+#############################################################################
+#
+# 11 August 2007 - straten
+#
+# In the top build directory, the intermediate header file directory
+# was renamed from include/ to local_include/ in order to avoid conflicts
+# when $top_builddir == $prefix
+#
+# This target removes the old $top_builddir/include directory.
+#
+11-08-2007:
+	@if test -d $(top_includedir) -a $(top_builddir) != $(prefix); \
+	  then echo Removing old intermediate header file directory; \
+	  rm -rf $(top_includedir); \
+	fi
+
+top_includedir := $(top_builddir)/include
 
 #############################################################################
 #
