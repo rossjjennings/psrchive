@@ -6,6 +6,8 @@ echo -n " -LPREFIX/lib -lpsrmore -lpsrbase -lpsrutil "
 
 echo -n " @FFT_LIBS@ @CFITSIO_LIBS@ @TEMPO2_LIBS@ "
 
+echo -n " @PTHREAD_CFLAGS@ @PTHREAD_LIBS@ "
+
 for arg in $* ; do
 
 case $arg in
