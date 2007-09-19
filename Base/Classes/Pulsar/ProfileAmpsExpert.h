@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ProfileAmpsExpert.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/09/19 13:35:19 $
+   $Revision: 1.2 $
+   $Date: 2007/09/19 13:56:42 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileAmpsExpert_h
@@ -35,7 +35,7 @@ namespace Pulsar {
     { instance = inst; }
 
     //! Set the amplitudes pointer
-    void set_amps_ptr (float* amps) const
+    static void set_amps_ptr (ProfileAmps* instance, float* amps)
     { instance->amps = amps; }
 
   private:

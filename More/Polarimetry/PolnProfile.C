@@ -378,9 +378,9 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
       float* Q = profile[2]->get_amps();
       float* U = profile[3]->get_amps();
 
-      ProfileAmps::Expert(profile[1]).set_amps_ptr( Q );
-      ProfileAmps::Expert(profile[2]).set_amps_ptr( U );
-      ProfileAmps::Expert(profile[3]).set_amps_ptr( V );
+      ProfileAmps::Expert::set_amps_ptr( profile[1], Q );
+      ProfileAmps::Expert::set_amps_ptr( profile[2], U );
+      ProfileAmps::Expert::set_amps_ptr( profile[3], V );
     }
 
     // record the new state
@@ -396,9 +396,9 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
       float* ImLR   = profile[2]->get_amps();
       float* diffLR = profile[3]->get_amps();
 
-      ProfileAmps::Expert(profile[1]).set_amps_ptr( diffLR );
-      ProfileAmps::Expert(profile[2]).set_amps_ptr( ReLR );
-      ProfileAmps::Expert(profile[3]).set_amps_ptr( ImLR );
+      ProfileAmps::Expert::set_amps_ptr( profile[1], diffLR );
+      ProfileAmps::Expert::set_amps_ptr( profile[2], ReLR );
+      ProfileAmps::Expert::set_amps_ptr( profile[3], ImLR );
     }
 
     sum_difference (profile[0], profile[1]);
@@ -476,9 +476,9 @@ void Pulsar::PolnProfile::convert_basis (Signal::Basis to) {
       float* Q = profile[2]->get_amps();
       float* U = profile[3]->get_amps();
 
-      ProfileAmps::Expert(profile[1]).set_amps_ptr( Q );
-      ProfileAmps::Expert(profile[2]).set_amps_ptr( U );
-      ProfileAmps::Expert(profile[3]).set_amps_ptr( V );
+      ProfileAmps::Expert::set_amps_ptr( profile[1], Q );
+      ProfileAmps::Expert::set_amps_ptr( profile[2], U );
+      ProfileAmps::Expert::set_amps_ptr( profile[3], V );
     }  
   } 
 }
