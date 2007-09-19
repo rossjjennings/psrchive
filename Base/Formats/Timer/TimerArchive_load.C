@@ -358,14 +358,16 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
     if(!(hdr.calibrated & FB_CALIBRATED)){
       if(verbose == 3) 
 	cerr << "Setting FB calibration" << endl;
-      for(unsigned i=0;i<get_nsubint();i++)
-	for(unsigned j=0; j<get_npol(); ++j)
-	  for(unsigned k=0; k<get_nchan(); ++k){
-	    // Scale to counts per sample and by sqrt of channel bandwidth 
-	    // and sample time. Data were summed for original dump time and  
-	    // this scaling is preserved by tscrunch and fscrunch.
-	    *get_Profile(i,j,k) *= hdr.tsmp / tdmp * sqrt(chbw * hdr.tsmp);
+      if (!Profile::no_amps)
+        for(unsigned i=0;i<get_nsubint();i++)
+	  for(unsigned j=0; j<get_npol(); ++j)
+	    for(unsigned k=0; k<get_nchan(); ++k){
+	      // Scale to counts per sample and by sqrt of channel bandwidth 
+	      // and sample time. Data were summed for original dump time and  
+	      // this scaling is preserved by tscrunch and fscrunch.
+	      *get_Profile(i,j,k) *= hdr.tsmp / tdmp * sqrt(chbw * hdr.tsmp);
 	  }
+
       if(verbose == 3) 
 	cerr << "ndmp:" <<hdr.ndump_sub_int << " tsmp:" << hdr.tsmp 
 	     << " tsub_int:" << hdr.sub_int_time
