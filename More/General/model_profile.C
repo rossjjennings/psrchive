@@ -30,7 +30,7 @@ extern "C" {
 int Pulsar::max_harmonic = 0;
 
 int Pulsar::model_profile (int npts, int narrays, 
-                           float* const * prf, float* const* std,
+                           const float* const * prf, const float* const* std,
 		           double* scale, double* sigma_scale, 
 		           double* shift, double* sigma_shift,
 		           double* chisq, int verbose)

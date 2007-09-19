@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/model_profile.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.9 $
+   $Date: 2007/09/19 13:06:36 $
    $Author: straten $ */
 
 #ifndef __model_profile_h
@@ -21,7 +21,7 @@ namespace Pulsar {
                  float ** xcorr_amps, float ** xcorr_phases, int nsum);
   
   int model_profile (int nbin, int narrays,
-                     float * const * prf, float * const * std,
+                     const float * const * prf, const float * const * std,
                      double * scale, double * sigma_scale,
                      double * shift, double * sigma_shift, double * chisq,
                      int verbose);
