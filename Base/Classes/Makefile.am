@@ -22,6 +22,7 @@ nobase_include_HEADERS = \
         Pulsar/IntegrationManager.h \
         Pulsar/IntegrationTI.h \
         Pulsar/Profile.h \
+	Pulsar/ProfileAmps.h \
         Pulsar/Pulsar.h \
 	Pulsar/Verification.h
 
@@ -55,6 +56,7 @@ libClasses_la_SOURCES = \
         IntegrationTI.C \
         Profile_average.C \
         Profile.C \
+	ProfileAmps.C \
 	Pulsar.C
 
 #############################################################################
