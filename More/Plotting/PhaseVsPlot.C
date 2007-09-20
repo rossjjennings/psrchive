@@ -145,7 +145,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
 
     for( int xoff = int(x_min)-1; xoff < int( x_max )+1; xoff ++ )
     {
-      for( int b = 0; b < nbin; b ++ )
+      for( unsigned b = 0; b < nbin; b ++ )
         xaxis_adjusted[b] = xaxis[b] + xoff;
 
       for (unsigned irow = min_row; irow < max_row; irow++)
