@@ -79,8 +79,6 @@ void Pulsar::AnglePlot::draw (const Archive *data)
 
     float xoff = float(range) * get_scale()->get_scale(data);
 
-    cerr << xoff << endl;
-
     if (span)
     {
       yoff = -span;
