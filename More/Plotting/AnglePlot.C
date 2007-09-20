@@ -14,6 +14,8 @@
 #include <cpgplot.h>
 #include <algorithm>
 
+using namespace std;
+
 Pulsar::AnglePlot::AnglePlot()
 {
   error_bars = true;
@@ -65,18 +67,23 @@ void Pulsar::AnglePlot::draw (const Archive *data)
   std::vector<float> phases;
   get_scale()->get_ordinates (data, phases);
 
-  // Added by DS, draw the angles repeatedly over the zoom range given
-  float sx, ex;
-  get_frame()->get_x_scale()->get_range( sx, ex );
+  pair<float,float> range = get_frame()->get_x_scale()->get_range_norm();
 
-  for( int xoff = int(sx)-1; xoff < int(ex)+1; xoff ++ )
+  int range_start = int(floor(range.first));
+  int range_end = int(ceil(range.second));
+
+  for( int range = range_start; range < range_end; range ++ )
   {
-    float offset = 0;
+    float yoff = 0;
     unsigned times = 1;
+
+    float xoff = float(range) * get_scale()->get_scale(data);
+
+    cerr << xoff << endl;
 
     if (span)
     {
-      offset = -span;
+      yoff = -span;
       times = 3;
     }
     
@@ -86,13 +93,15 @@ void Pulsar::AnglePlot::draw (const Archive *data)
       for (unsigned ibin=0; ibin < phases.size(); ibin++)
         if (angles[ibin].get_variance() != 0)
           if (error_bars)
-            cpgerr1 (6, phases[ibin]+xoff, angles[ibin].get_value() + offset,
+            cpgerr1 (6, phases[ibin]+xoff, angles[ibin].get_value() + yoff,
                      angles[ibin].get_error(), 1.0);
           else
-            cpgpt1 (phases[ibin]+xoff, angles[ibin].get_value() + offset, 17);
+            cpgpt1 (phases[ibin]+xoff, angles[ibin].get_value() + yoff, 17);
 
-      offset += span;
+      yoff += span;
+
     }
+
   }
 
 #if 0
