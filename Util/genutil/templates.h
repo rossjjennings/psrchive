@@ -196,6 +196,20 @@ void minmax (const C& c, T& min, T& max, bool follow = false)
   minmax (c.begin(), c.end(), min, max, follow);
 }
 
+//! Returns the maximum and minimum values found in container c
+template <class T, class C>
+  void cyclic_minmax (const C& c, unsigned i1, unsigned i2, T& min, T& max,
+		      bool follow = false)
+{
+  if (i2 < c.size())
+    minmax (c.begin()+i1, c.begin()+i2, min, max, follow);
+  else {
+    i2 -= c.size();
+    minmax (c.begin()+i1, c.end(), min, max, follow);
+    minmax (c.begin(), c.begin()+i2, min, max, true);
+  }
+}
+
 //! Returns true if element x is inside container c
 template <class T, class C>
 bool found (const T& x, const C& c)
