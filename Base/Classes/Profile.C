@@ -305,7 +305,8 @@ void Pulsar::Profile::fold (unsigned nfold)
     for (unsigned j=1; j<nfold; j++)
       amps[i] += amps[i+j*newbin];
 
-  nbin = newbin;
+  // note that ProfileAmps::resize will not lose data when newbin < nbin
+  resize (newbin);
 
   operator *= (1.0/float(nfold));
 }
@@ -341,7 +342,8 @@ void Pulsar::Profile::bscrunch (unsigned nscrunch) { try
       amps[i] += amps[i*nscrunch+j];
   }
 
-  nbin = newbin;
+  // note that ProfileAmps::resize will not lose data when newbin < nbin
+  resize (newbin);
 
   operator *= (1.0/float(nscrunch));
 }
