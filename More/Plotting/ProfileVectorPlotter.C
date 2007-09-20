@@ -58,12 +58,6 @@ void Pulsar::ProfileVectorPlotter::draw ( float sx, float ex )
 {
   for (unsigned iprof=0; iprof < profiles.size(); iprof++) {
 
-    if (x.size() != profiles[iprof]->get_nbin()) {
-      x.resize(profiles[iprof]->get_nbin());
-      for (unsigned i=0; i<x.size(); i++)
-	x[i] = i;
-    }
-	       
     if (plot_sci.size() == profiles.size())
       cpgsci (plot_sci[iprof]);
     else
@@ -79,40 +73,38 @@ void Pulsar::ProfileVectorPlotter::draw ( float sx, float ex )
 }
 
 //! draw the profile in the current viewport and window
-void Pulsar::ProfileVectorPlotter::draw (const Profile* profile, float sx, float ex ) const
+void Pulsar::ProfileVectorPlotter::draw( const Profile* profile, 
+					 float start_x, float end_x )
 {
-  vector< float > data;
-  profile->get_amps( data );
-  int data_pts = data.size();
-  
-  int total_pts = int( ( ex - sx ) * data_pts );
+  const float* amps =  profile->get_amps();
+  unsigned nbin = profile->get_nbin();
+
+  if (ordinates.size() != nbin) {
+    ordinates.resize (nbin);
+    for (unsigned i=0; i<nbin; i++)
+      ordinates[i] = i;
+  }
+
+  if (start_x > end_x)
+    throw Error (InvalidParam, "Pulsar::ProfileVectorPlotter::draw",
+		 "start_x=%f greater than end_x=%f", start_x, end_x);
+
+  unsigned total_pts = unsigned( ( end_x - start_x ) * nbin );
   
   float xs[total_pts];
   float ys[total_pts];
   
-  // Fill the xs array with the x coordinates
-  float dx = ( ex - sx ) / float(total_pts);
-  float next_x = sx;
-  for( int i = 0; i < total_pts; i ++ )
-  {
-    xs[i] = next_x;
-    next_x += dx;
-  }
+  // Ensure that 0 <= start_x < 1
+  start_x -= floor (start_x);
 
-  // calculate the starting point index
-  float r = mod( sx, 1 );
-  int pt_index;
-  if( r >= 0 )
-    pt_index = int( data_pts * r );
-  else
-    pt_index = data_pts + int( data_pts * r );
+  unsigned start_index = unsigned( start_x * nbin );
 
-    // fill the ypts array with the points from our data set repeatedly
-  for( int i = 0; i < total_pts; i ++ )
+  // cyclically fill the temporary data arrays
+  for (unsigned i = 0; i < total_pts; i ++ )
   {
-    ys[i] = data[pt_index++];
-    if( pt_index > data_pts )
-      pt_index = 0;
+    unsigned index = (i + start_index) % nbin;
+    ys[i] = amps[index];
+    xs[i] = ordinates[index];
   }
 
   // cpgline( total_pts, xs, ys );
