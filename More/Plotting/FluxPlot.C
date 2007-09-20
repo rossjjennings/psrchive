@@ -55,7 +55,7 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
 void Pulsar::FluxPlot::draw (const Archive* data)
 {
   // PhaseScale::get_ordinates fills the x-axis with turns/deg/milliseconds ...
-  get_scale()->get_ordinates (data, plotter.x);
+  get_scale()->get_ordinates (data, plotter.ordinates);
 
   pair<float,float> range = get_frame()->get_x_scale()->get_range_norm();
   plotter.draw ( range.first, range.second );
@@ -74,13 +74,7 @@ void Pulsar::FluxPlot::plot_profile (const Profile* data)
 
   get_frame()->focus (0);
 
-  // AWH 03/04/2007: Added this line because the call to draw(data)
-  // results in a segmentation fault when looking for the address of 
-  // the first element of the vector x, which is not yet created.
-
-  (plotter.x).resize(data->get_nbin());
-
-  get_scale()->get_ordinates (0, plotter.x);
+  get_scale()->get_ordinates (0, plotter.ordinates);
 
   pair<float,float> range = get_frame()->get_x_scale()->get_range_norm();
   plotter.draw ( data, range.first, range.second );
