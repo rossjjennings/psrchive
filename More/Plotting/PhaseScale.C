@@ -27,10 +27,11 @@ void Pulsar::PhaseScale::init (const Archive* data)
   set_minmax (min, max);
 }
 
-void Pulsar::PhaseScale::get_range (const Archive* data, 
-				    unsigned& min, unsigned& max) const
+void Pulsar::PhaseScale::get_indeces (const Archive* data, 
+				      unsigned& min, unsigned& max) const
 {
-  PlotScale::get_range (data->get_nbin(), min, max);
+  bool cyclic = true;
+  PlotScale::get_indeces (data->get_nbin(), min, max, cyclic);
 }
 
 

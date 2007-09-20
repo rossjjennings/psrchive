@@ -37,18 +37,15 @@ void Pulsar::ProfileVectorPlotter::minmax (PlotFrame* frame) const
 
   unsigned i_min, i_max;
 
-  frame->get_x_scale()->get_range (nbin, i_min, i_max);
+  bool cyclic = true;
+  frame->get_x_scale()->get_indeces (nbin, i_min, i_max, cyclic);
 
   float min = profiles[0]->min(i_min, i_max);
   float max = profiles[0]->max(i_min, i_max);
 
   for (unsigned iprof=1; iprof < profiles.size(); iprof++) {
-    float pmin = profiles[iprof]->min(i_min, i_max);
-    float pmax = profiles[iprof]->max(i_min, i_max);
-    if (pmin < min)
-      min = pmin;
-    if (pmax > max)
-      max = pmax;
+    min = std::min( min, profiles[iprof]->min(i_min, i_max) );
+    max = std::max( max, profiles[iprof]->max(i_min, i_max) );
   }
 
   frame->get_y_scale()->set_minmax (min, max);

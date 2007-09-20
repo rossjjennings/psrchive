@@ -8,6 +8,8 @@
 #include "Pulsar/PlotLabel.h"
 #include "pairutil.h"
 
+#include <math.h>
+
 using namespace std;
 
 std::pair<float,float> unset_range_norm (0.0, 1.0);
@@ -97,11 +99,14 @@ Pulsar::PlotScale::get_range_external (float& min, float& max) const
   }
 }
 
-void 
-Pulsar::PlotScale::get_range (unsigned n, unsigned& imin, unsigned& imax) const
+void Pulsar::PlotScale::get_indeces (unsigned n,
+				     unsigned& imin, unsigned& imax,
+				     bool cyclic) const
 {
+  // by default, the zoom is defined by the range_norm attribute
   std::pair<float,float> zoom = range_norm;
 
+  // however, it can also be over-ridden by set_world
   if (world != unset_world) {
 
     float wmin = 0.0;
@@ -120,17 +125,35 @@ Pulsar::PlotScale::get_range (unsigned n, unsigned& imin, unsigned& imax) const
 
   stretch (zoom, min, max);
 
-  if (min < 0)
-    min = 0;
-  if (max < 0)
-    max = 0;
+  if (cyclic) {
+
+    // fold onto 0->1
+    min -= floor (min);
+    max -= floor (max);
+
+    // and ensure that max > min
+    if (max < min)
+      max += 1.0;
+  }
+  else {
+
+    if (min < 0)
+      min = 0;
+    if (max < 0)
+      max = 0;
+
+  }
 
   imin = unsigned( min * n );
   imax = unsigned( max * n );
 
-  if (imin > n)
-    imin = n;
+  if (!cyclic) {
 
-  if (imax > n)
-    imax = n;
+    if (imin > n)
+      imin = n;
+
+    if (imax > n)
+      imax = n;
+
+  }
 }

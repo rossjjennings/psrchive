@@ -8,6 +8,7 @@
 #include "Pulsar/PhaseVsPlot.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
+#include "templates.h"
 
 #include <cpgplot.h>
 
@@ -65,11 +66,12 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   unsigned nbin = data->get_nbin();
   unsigned nrow = get_nrow (data);
 
+  bool cyclic = true;
   unsigned min_bin, max_bin;
-  get_frame()->get_x_scale()->get_range (nbin, min_bin, max_bin);
+  get_frame()->get_x_scale()->get_indeces (nbin, min_bin, max_bin, cyclic);
 
   unsigned min_row, max_row;
-  get_frame()->get_y_scale()->get_range (nrow, min_row, max_row);
+  get_frame()->get_y_scale()->get_indeces (nrow, min_row, max_row);
 
   float min = FLT_MAX;
   float max = FLT_MIN;
@@ -84,12 +86,8 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     if (irow < min_row || irow >= max_row)
       continue;
 
-    min = std::min (min, *std::min_element (amps.begin()+min_bin,
-                                            amps.begin()+max_bin) );
-
-    max = std::max (max, *std::max_element (amps.begin()+min_bin,
-                                            amps.begin()+max_bin) );
-
+    bool follow = true;
+    cyclic_minmax (amps, min_bin, max_bin, min, max, follow);
   }
 
   float x_res = (x_max-x_min)/nbin;

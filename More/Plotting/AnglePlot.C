@@ -10,6 +10,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
+#include "templates.h"
 
 #include <cpgplot.h>
 #include <algorithm>
@@ -53,10 +54,11 @@ void Pulsar::AnglePlot::prepare (const Archive* data)
   else
   {
     unsigned i_min, i_max;
-    get_scale()->get_range (data, i_min, i_max);
-
-    min = min_element(angles.begin()+i_min, angles.begin()+i_max)->val;
-    max = max_element(angles.begin()+i_min, angles.begin()+i_max)->val;
+    get_scale()->get_indeces (data, i_min, i_max);
+    Estimate<double> e_min, e_max;
+    cyclic_minmax (angles, i_min, i_max, e_min, e_max);
+    min = e_min.get_value();
+    max = e_max.get_value();
   }
 
   get_frame()->get_y_scale()->set_minmax (min, max);

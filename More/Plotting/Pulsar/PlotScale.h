@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotScale.h,v $
-   $Revision: 1.12 $
-   $Date: 2007/01/14 22:52:55 $
+   $Revision: 1.13 $
+   $Date: 2007/09/20 12:25:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotScale_h
@@ -43,13 +43,14 @@ namespace Pulsar {
     //! Get the minimum and maximum value in the data
     void get_minmax (float& min, float& max) const;
 
-    //! Return min and max scaled according to zoom attributes
+    //! Return min and max scaled according to zoom
     void get_range (float& min, float& max) const;
 
-    //! Return 0 < imin and imax < n, scaled according to zoom attributes
-    void get_range (unsigned n, unsigned& imin, unsigned& imax) const;
+    //! Return indeces scaled according to zoom
+    void get_indeces (unsigned n, unsigned& imin, unsigned& imax,
+		      bool cyclic = false) const;
 
-    //! Return min and max scaled according to zoom attributes
+    //! Return min and max scaled according to zoom
     void get_range_external (float& min, float& max) const;
 
     //! Set the world-normalized range on the axis
