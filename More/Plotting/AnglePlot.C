@@ -67,7 +67,7 @@ void Pulsar::AnglePlot::draw (const Archive *data)
   std::vector<float> phases;
   get_scale()->get_ordinates (data, phases);
 
-  pair<float,float> range = get_frame()->get_x_scale()->get_range_norm();
+  pair<float,float> range = get_scale()->get_range_norm();
 
   int range_start = int(floor(range.first));
   int range_end = int(ceil(range.second));
