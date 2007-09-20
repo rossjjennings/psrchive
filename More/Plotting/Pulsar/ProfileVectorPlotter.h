@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/ProfileVectorPlotter.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/09/04 05:46:18 $
-   $Author: nopeer $ */
+   $Revision: 1.5 $
+   $Date: 2007/09/20 04:14:22 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_ProfileVectorPlotter_h
 #define __Pulsar_ProfileVectorPlotter_h
@@ -36,13 +36,13 @@ namespace Pulsar {
     void draw ( float sx, float ex );
 
     //! draw the profile in the current viewport and window
-    void draw (const Profile*, float sx, float ex ) const;
+    void draw (const Profile*, float sx, float ex );
 
     //! the vector of profiles to be drawn
     std::vector< Reference::To<const Profile> > profiles;
 
     //! the shared ordinates
-    std::vector<float> x;
+    std::vector<float> ordinates;
 
     //! the PGPLOT colour for each profile
     std::vector< int > plot_sci;
