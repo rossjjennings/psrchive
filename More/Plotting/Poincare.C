@@ -30,7 +30,7 @@ void Pulsar::Poincare::plot (const Archive* data)
 
   unsigned i_min, i_max, nbin = profile->get_nbin();
 
-  get_phase_scale()->get_range (nbin, i_min, i_max);
+  get_phase_scale()->get_indeces (nbin, i_min, i_max);
 
   float max = 0;
 

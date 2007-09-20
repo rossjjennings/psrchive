@@ -46,7 +46,7 @@ void Pulsar::PowerSpectra::prepare (const Archive* data)
 		 "Spectra array empty after call to get_spectra");
 
   unsigned i_min, i_max;
-  get_scale()->get_range (data, i_min, i_max);
+  get_scale()->get_indeces (data, i_min, i_max);
 
   float min = FLT_MAX;
   float max = 0;

@@ -20,10 +20,10 @@ void Pulsar::FrequencyScale::init (const Archive* data)
   set_minmax (freq - 0.5*bw, freq + 0.5*bw);
 }
 
-void Pulsar::FrequencyScale::get_range (const Archive* data, 
-					unsigned& min, unsigned& max) const
+void Pulsar::FrequencyScale::get_indeces (const Archive* data, 
+					  unsigned& min, unsigned& max) const
 {
-  PlotScale::get_range (data->get_nchan(), min, max);
+  PlotScale::get_indeces (data->get_nchan(), min, max);
 }
 
 std::string Pulsar::FrequencyScale::get_label ()

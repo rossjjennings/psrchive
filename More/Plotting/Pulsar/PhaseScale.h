@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseScale.h,v $
-   $Revision: 1.12 $
-   $Date: 2007/01/14 22:52:49 $
+   $Revision: 1.13 $
+   $Date: 2007/09/20 12:25:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseScale_h
@@ -41,7 +41,7 @@ namespace Pulsar {
     void init (const Archive*);
 
     //! Return the min and max as the phase bin index
-    void get_range (const Archive*, unsigned& min, unsigned& max) const;
+    void get_indeces (const Archive*, unsigned& min, unsigned& max) const;
 
     //! Get the ordinate values
     void get_ordinates (const Archive* data, std::vector<float>& axis) const;
