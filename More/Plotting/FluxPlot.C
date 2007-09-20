@@ -82,9 +82,8 @@ void Pulsar::FluxPlot::plot_profile (const Profile* data)
 
   get_scale()->get_ordinates (0, plotter.x);
 
-  float minx, maxx;
-  get_frame()->get_x_scale()->get_range( minx, maxx );
-  plotter.draw (data, minx, maxx );
+  pair<float,float> range = get_frame()->get_x_scale()->get_range_norm();
+  plotter.draw ( data, range.first, range.second );
 
 }
 
