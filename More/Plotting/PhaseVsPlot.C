@@ -98,17 +98,23 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   if (style == "image")
   {
 
-
     get_z_scale()->set_minmax (min, max);
     get_z_scale()->get_range (min, max);
 
-    // X = TR(0) + TR(1)*I + TR(2)*J
-    // Y = TR(3) + TR(4)*I + TR(5)*J
+    pair<float,float> range = get_scale()->get_range_norm();
 
-    for( int i = int(x_min)-1; i < int(x_max)+1; i ++ )
+    int range_start = int(floor(range.first));
+    int range_end = int(ceil(range.second));
+
+    for( int range = range_start; range < range_end; range ++ )
     {
-      float trf[6] = { i + x_min-0.5*x_res, x_res, 0.0,
-                       y_min-0.5*y_res, 0.0, y_res };
+      float xoff = float(range) * get_scale()->get_scale(data);
+
+      // X = TR(0) + TR(1)*I + TR(2)*J
+      // Y = TR(3) + TR(4)*I + TR(5)*J
+
+      float trf[6] = { xoff + x_min - 0.5*x_res, x_res, 0.0,
+                       y_min - 0.5*y_res,        0.0, y_res };
 
       cpgimag(&plotarray[0], nbin, nrow, 1, nbin, 1, nrow, min, max, trf);
     }
