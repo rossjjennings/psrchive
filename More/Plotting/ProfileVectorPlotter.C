@@ -93,22 +93,32 @@ void Pulsar::ProfileVectorPlotter::draw( const Profile* profile,
   
   float xs[total_pts];
   float ys[total_pts];
+
+  // calculate the span of the ordinates
+  double span = (ordinates[nbin-1]-ordinates[0]) * double(nbin)/double(nbin-1);
   
-  // Ensure that 0 <= start_x < 1
+  // calculate the offset applied to the ordinates in the first region
+  double xoff = floor(start_x) * span;
+
+  // set 0 <= start_x < 1
   start_x -= floor (start_x);
 
-  unsigned start_index = unsigned( start_x * nbin );
-
+  unsigned index = unsigned( start_x * nbin );
+  
   // cyclically fill the temporary data arrays
   for (unsigned i = 0; i < total_pts; i ++ )
   {
-    unsigned index = (i + start_index) % nbin;
     ys[i] = amps[index];
-    xs[i] = ordinates[index];
+    xs[i] = ordinates[index] + xoff;
+
+    index ++;
+
+    if (index == nbin) {
+      index = 0;
+      xoff += span;
+    }
   }
 
-  // cpgline( total_pts, xs, ys );
-  
   if (plot_histogram)
     cpgbin (total_pts, xs, ys, true);
   else
