@@ -7,14 +7,17 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/FaradayRotation.h"
 
-static Pulsar::FaradayRotation xform;
+static Pulsar::FaradayRotation* xform = 0;
 
 /*! 
   Calls FaradayRotation::transform
 */
 void Pulsar::Integration::defaraday () try {
 
-  xform.transform (this);
+  if (!xform)
+    xform = new FaradayRotation;
+
+  xform->transform (this);
 
 }
 catch (Error& error) {
@@ -34,13 +37,16 @@ void Pulsar::Integration::defaraday (unsigned ichan, unsigned kchan,
                                      double rm, double f0)
 try {
 
-  xform.set_rotation_measure( rm );
-  xform.set_reference_frequency( f0 );
+  if (!xform)
+    xform = new FaradayRotation;
+
+  xform->set_rotation_measure( rm );
+  xform->set_reference_frequency( f0 );
 
   // ensure that delta is equal to the identity matrix
-  xform.set_delta( 1.0 );
+  xform->set_delta( 1.0 );
 
-  xform.range (this, ichan, kchan);
+  xform->range (this, ichan, kchan);
 
 }
 catch (Error& error) {
