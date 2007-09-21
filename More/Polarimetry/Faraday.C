@@ -17,7 +17,6 @@ Calibration::Faraday::Faraday () :
   MEAL::OneParameter* parm = new MEAL::OneParameter (this);
   parm->set_param_name (0, "RM");
 
-
   reference_wavelength = 0.0;
   wavelength = 0.0;
 }
@@ -136,6 +135,11 @@ void Calibration::Faraday::calculate (Jones<double>& result,
 
   rotation.set_phi ( -get_rotation() );
   result = rotation.evaluate (grad);
+
+#ifdef _DEBUG
+  cerr << "rotation=" << rotation.get_phi() 
+       << " det(J)=" << det(result) << endl;
+#endif
 
   if (!grad)
     return;

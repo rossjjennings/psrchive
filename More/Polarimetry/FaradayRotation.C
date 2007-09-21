@@ -10,6 +10,13 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
 
+// #define _DEBUG 1
+
+#ifdef _DEBUG
+#include <iostream>
+using namespace std;
+#endif
+
 Pulsar::FaradayRotation::FaradayRotation ()
 {
   name = "FaradayRotation";
@@ -32,7 +39,15 @@ void Pulsar::FaradayRotation::execute (Archive* arch)
 void Pulsar::FaradayRotation::apply (Integration* data, unsigned ichan) try
 {
   Reference::To<PolnProfile> poln_profile = data->new_PolnProfile (ichan);
-  poln_profile->transform( inv(delta * corrector.evaluate()) );
+
+  Jones<double> xform = inv(delta * corrector.evaluate());
+
+#ifdef _DEBUG
+  cerr << "Pulsar::FaradayRotation::apply ichan=" << ichan 
+       << " det(xform)=" << det(corrector.evaluate()) << endl;
+#endif
+
+  poln_profile->transform( xform );
 }
 catch (Error& error) {
   throw error += "Pulsar::FaradayRotation::apply";
