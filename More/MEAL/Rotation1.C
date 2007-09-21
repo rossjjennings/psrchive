@@ -14,7 +14,7 @@ MEAL::Rotation1::Rotation1 (const Vector<3,double>& _axis)
 {
   OneParameter* param = new OneParameter (this);
   param->set_param_name ("rotation");
-  axis = _axis;
+  set_axis( _axis );
 }
 
 //! Return the name of the class
@@ -25,6 +25,10 @@ std::string MEAL::Rotation1::get_name () const
 
 void MEAL::Rotation1::set_axis (const Vector<3,double>& _axis)
 {
+  if (normsq(_axis) == 0.0)
+    throw Error (InvalidState, "MEAL::Rotation1::set_axis",
+		 "invalid rotation axis = 0");
+
   axis = _axis;
 }
 
