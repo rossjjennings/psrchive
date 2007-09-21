@@ -213,9 +213,9 @@ polyco Tempo::Predict::generate_work () const
     to_tempo_m2 += half_day;
   }
 
-  bool satisfied = false;
+  unsigned retries = 5;
   
-  while (!satisfied) {
+  for (unsigned trial=0; trial < retries; trial++) {
     
     /* TEMPO will often return a polyco that does not span the range of
        MJDs requested (even when you give it half a day of forgiveness on
@@ -329,9 +329,11 @@ polyco Tempo::Predict::generate_work () const
       return *cached;
 
     }  // end else polyco OK
+
   }  // end while not satisfied
 
-  throw Error (InvalidState, "Tempo::Predict::get_polyco", "no polyco");
+  throw Error (InvalidState, "Tempo::Predict::get_polyco",
+	       "could not generate a good polyco in %d retries", retries);
 
 }
 
