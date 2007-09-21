@@ -132,7 +132,7 @@ void Pulsar::PlotScale::get_indeces (unsigned n,
     max -= floor (max);
 
     // and ensure that max > min
-    if (max < min)
+    if (max <= min)
       max += 1.0;
   }
   else {
