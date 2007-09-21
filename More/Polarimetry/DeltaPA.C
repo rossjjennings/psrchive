@@ -11,7 +11,7 @@
 #include <iostream>
 using namespace std;
 
-// #define _DEBUG 1
+#define _DEBUG 1
 
 template <typename T, typename U = T>
 class MeanArc
@@ -133,9 +133,19 @@ Pulsar::DeltaPA::get (const PolnProfile* p0, const PolnProfile* p1) const
   double var_u0 = p0->get_variance (2, min_phase);
   float cutoff0 = threshold * sqrt (0.5*(var_q0 + var_u0));
 
+#ifdef _DEBUG
+  cerr << "0: var q=" << var_q0 << " u=" << var_u0 << " cut=" 
+       << cutoff0 << endl;
+#endif
+
   double var_q1 = p1->get_variance (1, min_phase);
   double var_u1 = p1->get_variance (2, min_phase);
   float cutoff1 = threshold * sqrt (0.5*(var_q1 + var_u1));
+
+#ifdef _DEBUG
+  cerr << "1: var q=" << var_q1 << " u=" << var_u1 << " cut=" 
+       << cutoff1 << endl;
+#endif
 
   const float *q0 = p0->get_Profile(1)->get_amps(); 
   const float *u0 = p0->get_Profile(2)->get_amps(); 
@@ -144,6 +154,7 @@ Pulsar::DeltaPA::get (const PolnProfile* p0, const PolnProfile* p1) const
   const float *u1 = p1->get_Profile(2)->get_amps(); 
 
   unsigned nbin = p0->get_nbin();
+  unsigned used_bins = 0;
 
   double cos_delta_PA = 0.0;
   double sin_delta_PA = 0.0;
@@ -171,12 +182,23 @@ Pulsar::DeltaPA::get (const PolnProfile* p0, const PolnProfile* p1) const
         fprintf (fptr, "%u  %lf  %lf\n", ibin,
 			delta_pa.get_value(), delta_pa.get_error());
 
+#ifdef _DEBUG
+	cerr << "ibin=" << ibin << " dPA=" << delta_pa << endl;
+#endif
+
       arc += arc1; 
+      used_bins ++;
 
     }
 
   if (fptr)
     fclose (fptr);
+
+  if (used_bins == 0)
+    throw Error( InvalidParam, "Pulsar::DeltaPA::get",
+		 "linear polarization did not exceed thresholds\n\t"
+		 "threshold=%f  cutoff0=%f  cutoff1=%f",
+		 threshold, cutoff0, cutoff1);
 
   double one = cos_delta_PA*cos_delta_PA + sin_delta_PA*sin_delta_PA;
   cos_delta_PA /= one;
@@ -210,7 +232,7 @@ Pulsar::DeltaPA::get (const PolnProfile* p0, const PolnProfile* p1) const
 
   Estimate<double> radians( atan2(sin_delta_PA,cos_delta_PA), var_delta_PA );
 
-  cerr << "radians=" << radians << " arc=" << arc.get_Estimate() << endl;
+  cerr << "radians old=" << radians << " new=" << arc.get_Estimate() << endl;
 
   // return the answer in P.A. = 1/2 radians
   return 0.5 * arc.get_Estimate();
