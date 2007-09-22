@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ColdPlasma.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/09/01 02:40:24 $
+   $Revision: 1.8 $
+   $Date: 2007/09/22 09:38:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ColdPlasma_h
@@ -61,16 +61,16 @@ namespace Pulsar {
     void transform (Integration*);
 
     //! Set up internal variables before execution
-    /* \post reference_frequency = Integration::get_centre_frequency. */
+    /*! \post reference_frequency = Integration::get_centre_frequency */
     void setup (const Integration*);
 
-    //! Correct internal variables before execution
-    /* \post reference_frequency = Integration::get_centre_frequency. */
-    void correct (const Integration*);
+    //! update internal variables before execution
+    /*! \post get_measure -= corrected_measure */
+    void update (const Integration*);
 
-    //! Calls setup then correct
+    //! Calls setup then update
     virtual void set (const Integration* data)
-    { setup (data); correct (data); }
+    { setup (data); update (data); }
 
     //! Set the frequency for which the correction will be computed
     virtual void set_Profile (const Profile* data)
@@ -131,6 +131,11 @@ void Pulsar::ColdPlasma<C,H>::setup (const Integration* data)
 {
   set_reference_frequency( data->get_centre_frequency() );
   set_measure( correction_measure(data) );
+
+  if (Integration::verbose)
+    std::cerr << "Pulsar::" + name + "::setup lambda=" 
+	      << get_reference_wavelength() << " measure=" << get_measure()
+	      << std::endl;
 }
  
 template<class C, class H>
@@ -187,9 +192,10 @@ double Pulsar::ColdPlasma<C,H>::get_measure () const
 }
 
 template<class C, class History>
-void Pulsar::ColdPlasma<C,History>::correct (const Integration* data) try
+void Pulsar::ColdPlasma<C,History>::update (const Integration* data) try
 {
   backup_measure = get_measure();
+
   const History* corrected = data->template get<History>();
  
   if ( corrected ) {
@@ -197,36 +203,37 @@ void Pulsar::ColdPlasma<C,History>::correct (const Integration* data) try
     double corrected_measure = corrected->get_measure();
     double lambda = corrected->get_reference_wavelength();
 
-    if (corrected_measure == backup_measure &&
-	lambda == get_reference_wavelength())
-      {
-	if (Integration::verbose)
-	  std::cerr << "Pulsar::" + name + "::execute1 data are corrected."
-	    " measure=" << corrected_measure << " lambda=" << lambda 
-		    << std::endl;
-	return;
-      }
+    if (Integration::verbose)
+      std::cerr << "Pulsar::" + name + "::update corrected"
+	" measure=" << corrected_measure << " lambda=" << lambda 
+		<< std::endl;
 
     // calculate the correction due to the new centre frequency, if any
     corrector.set_wavelength( lambda );
     delta = corrector.evaluate();
 
+    double effective_measure = backup_measure - corrected_measure;
+
+    if (Integration::verbose)
+      std::cerr << "Pulsar::" + name + "::update effective_measure="
+		<< effective_measure << std::endl;
+
     // set the effective correction measure to the difference
-    set_measure( backup_measure - corrected_measure );
+    set_measure( effective_measure );
 
   }
   else
     delta = get_identity();
 }
 catch (Error& error) {
-  throw error += "Pulsar::"+name+"::correct";
+  throw error += "Pulsar::"+name+"::update";
 }
 
 
 template<class C, class History>
 void Pulsar::ColdPlasma<C,History>::execute1 (Integration* data) try
 {
-  correct (data);
+  update (data);
 
   if (Integration::verbose)
     std::cerr << "Pulsar::"+name+"::execute1"
