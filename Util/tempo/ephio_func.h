@@ -8,8 +8,8 @@
    ADVICE!:  Do not include this file directly.  Instead, #include "ephio.h"
 
    $Source: /cvsroot/psrchive/psrchive/Util/tempo/ephio_func.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/04/27 03:23:11 $
+   $Revision: 1.5 $
+   $Date: 2007/09/22 20:42:18 $
    $Author: straten $ 
 */
 
@@ -20,41 +20,41 @@
 extern "C" {
 #endif
   
-  extern int rd_eph (char* filename, int* parmStatus,
+  extern int eph_rd (char* filename, int* parmStatus,
 		     char strs[EPH_NUM_KEYS][EPH_STR_LEN],
 		     double* value, int* integer, double* error);
   
-  extern int rd_eph_lun (int lun, int* parmStatus,
+  extern int eph_rd_lun (int lun, int* parmStatus,
 			 char strs[EPH_NUM_KEYS][EPH_STR_LEN],
 			 double* value, int* integer, double* error);
   
-  extern int wr_eph (char* filename, int* parmStatus,
+  extern int eph_wr (char* filename, int* parmStatus,
 		     char strs[EPH_NUM_KEYS][EPH_STR_LEN],
 		     double* value, int* integer, double* error);
   
-  extern int wr_eph_lun (int lun, int* parmStatus,
+  extern int eph_wr_lun (int lun, int* parmStatus,
 			 char strs[EPH_NUM_KEYS][EPH_STR_LEN],
 			 double* value, int* integer, double* error);
   
   /* ***********************************************************************
-     rd_eph_str - parse from a string
+     eph_rd_str - parse from a string
      
      Use this function to parse one string at a time.
-     As with rd_eph*, the user must supply arrays of size EPH_NUM_KEYS.
+     As with eph_rd*, the user must supply arrays of size EPH_NUM_KEYS.
      This function will parse the values into the appropriate element of the
      arrays.
      
      The user must initialize the arrays before repeatedly calling this routine
      and call 'convertUnits_' to correct the units after completion
   */
-  int rd_eph_str (int* parmStatus,
+  int eph_rd_str (int* parmStatus,
 		  char* strs,
 		  double* value, int* integer,
 		  double* error, int* convert,
 		  int* isOldEphem, char* parsethis);
   
-  /* writes a string into buffer that could be parsed by rd_eph_str */
-  int wr_eph_str (char *buffer, int buflen, int ephind, int parmStatus, 
+  /* writes a string into buffer that could be parsed by eph_rd_str */
+  int eph_wr_str (char *buffer, int buflen, int ephind, int parmStatus, 
 		  char* value_str, double value, int integer, double error);
 
 #ifdef __cplusplus

@@ -167,9 +167,9 @@ int psrephem::load (const char* filename)
   size_dataspace();
   
   if (verbose)
-    cerr << "psrephem::load rd_eph (" << filename << ")" << endl;
+    cerr << "psrephem::load eph_rd (" << filename << ")" << endl;
 
-  rd_eph (const_cast<char*>(filename), parmStatus, ephemstr, value_double, 
+  eph_rd (const_cast<char*>(filename), parmStatus, ephemstr, value_double, 
 	  value_integer, error_double);
 
   int all_zero = 1;
@@ -224,12 +224,12 @@ int psrephem::unload (const char* filename) const
   }
 
   if (verbose)
-    cerr << "psrephem::unload calling wr_eph" << endl;
+    cerr << "psrephem::unload calling eph_wr" << endl;
 
-  int istat = wr_eph (const_cast<char*>(filename), parmStatus, ephemstr,
+  int istat = eph_wr (const_cast<char*>(filename), parmStatus, ephemstr,
 		      value_double, value_integer, error_double);
   if (!istat) {
-    fprintf (stderr, "psrephem::unload error wr_eph '%s'\n", filename);
+    fprintf (stderr, "psrephem::unload error eph_wr '%s'\n", filename);
     return -1;
   }
 
@@ -638,7 +638,7 @@ int psrephem::load (string* instr)
 		// store the line in a vector for processing later
 		eph_lines.push_back(line);
 
-    rd_eph_str (parmStatus, ephemblock, value_double, value_integer,
+    eph_rd_str (parmStatus, ephemblock, value_double, value_integer,
 		error_double, correct, &old_ephem, 
 		const_cast<char*>( line.c_str() ));
   }
@@ -882,7 +882,7 @@ int psrephem::unload (string* outstr) const
 
     strcpy (ephstr, value_str[ieph].c_str());
 
-    wr_eph_str (buffer, buflen, ieph, parmStatus[ieph], 
+    eph_wr_str (buffer, buflen, ieph, parmStatus[ieph], 
 		ephstr, value_double[ieph], value_integer[ieph],
 		error_double[ieph]);
 
