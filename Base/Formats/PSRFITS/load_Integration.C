@@ -143,6 +143,16 @@ try {
     // wasn't set when TSUB was 0
     integ->set_folding_period (1.0 / hdr_model->frequency(epoch));
 
+    if (integ->get_folding_period() <= 0.0)
+      throw Error( InvalidState, "Pulsar::FITSArchive::load_Integration",
+		   "header polyco/predictor corrupted; "
+		   "period(epoch=%s)=%lf", epoch.printdays(5).c_str(),
+		   integ->get_folding_period() );
+
+    if (integ->get_folding_period() < 1.0e-3)
+      warning << "Pulsar::FITSArchive::load_Integration folding_period=" 
+	      << integ->get_folding_period() << " is less than 1ms" << endl;
+
     if (verbose > 2)
       cerr << "Pulsar::FITSArchive::load_Integration folding_period = "
       	   << integ->get_folding_period () << endl;
