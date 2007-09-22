@@ -75,6 +75,10 @@ Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
 void Tempo::toa::set_telescope (const std::string& telcode)
 {
   telescope = Telescope::code( telcode );
+
+  if (verbose)
+    cerr << "Tempo::toa::set_telescope name=" << telcode
+	 << " code=" << telescope << endl;
 }
 
 // ////////////////////////////////////////////////////////////////////////
