@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/OnPulseEstimator.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.4 $
+   $Date: 2007/09/24 08:53:13 $
    $Author: straten $ */
 
 #ifndef __Pulsar_OnPulseEstimator_h
@@ -17,8 +17,6 @@
 #include "Pulsar/ProfileWeightFunction.h"
 
 namespace Pulsar {
-
-  class Profile;
 
   //! ProfileWeight algorithms that compute on-pulse phase bins
   class OnPulseEstimator : public ProfileWeightFunction {
