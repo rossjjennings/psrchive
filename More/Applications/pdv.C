@@ -7,21 +7,27 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.1 $
-   $Date: 2007/06/20 00:18:05 $
-   $Author: nopeer $ */
+   $Revision: 1.2 $
+   $Date: 2007/09/24 08:52:17 $
+   $Author: straten $ */
 
 
-#include <Pulsar/Archive.h>
-#include <Pulsar/Integration.h>
-#include <Pulsar/IntegrationExpert.h>
-#include <Pulsar/Profile.h>
+#include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
+
+#include "Pulsar/PolnProfile.h"
+#include "Pulsar/Profile.h"
+#include "Pulsar/PhaseWeight.h"
+
+#include "Pulsar/OnPulseThreshold.h"
+#include "Pulsar/GaussianBaseline.h"
+#include "Pulsar/BaselineWindow.h"
+
+#include "strutil.h"
+#include "dirutil.h"
+
 #include <iostream>
 #include <vector>
-#include <strutil.h>
-#include <dirutil.h>
-
-
 
 
 using namespace std;
@@ -30,21 +36,27 @@ using namespace Pulsar;
 
 bool cmd_text = false;
 bool cmd_flux = false;
-float dc;
+bool cmd_poln = false;
+
+
+// default duty cycle
+float dc = 0.15;
 
 
 
 
 void Usage( void )
 {
-  cout << "A program for extracting archive data in text form" << endl;
-  cout << "Usage:" << endl;
-  cout << "     pdv [-f dc] [-t] filenames" << endl;
-  cout << "Where:" << endl;
-  cout << "   -f dcyc     Show pulse widths and mean flux density (mJy)" << endl;
-  cout << "               with baseline width dcyc" << endl;
-  cout << "   -t          Print out profiles as ASCII text" << endl;
-  cout << endl;
+  cout << 
+    "A program for extracting archive data in text form \n"
+    "Usage: \n"
+    "     pdv [-f dc] [-t] filenames \n"
+    "Where: \n"
+    "   -f dcyc     Show pulse widths and mean flux density (mJy) \n"
+    "               with baseline width dcyc \n"
+    "   -p          Print polarization summary \n"
+    "   -t          Print out profiles as ASCII text \n"
+       << endl;
 }
 
 
@@ -223,8 +235,9 @@ void Flux( Reference::To< Archive > archive )
   archive->centre();
 
   if (archive->get_npol() == 4)
-    archive->convert_state(Signal::Stokes);
-  archive->remove_baseline( -1, dc );
+    archive->convert_state (Signal::Stokes);
+
+  archive->remove_baseline ();
 
   cout << "File\t\t\tSub\tChan\tPol\tFlux\tUnit\t10\% Width\t50\% Width"
   << endl;
@@ -256,7 +269,84 @@ void Flux( Reference::To< Archive > archive )
 }
 
 
+Reference::To<OnPulseEstimator> onpulse;
 
+Reference::To<BaselineEstimator> baseline;
+
+void Poln( Reference::To< Archive > archive )
+{
+  archive->convert_state(Signal::Stokes);
+  archive->remove_baseline();
+
+  if (!onpulse)
+    onpulse = new OnPulseThreshold;
+
+  if (!baseline)
+    baseline = new GaussianBaseline;
+
+  PhaseWeight onmask;
+  PhaseWeight offmask;
+
+  for (unsigned isub = 0; isub < archive->get_nsubint(); isub++)
+  {
+    for (unsigned ichan = 0; ichan < archive->get_nchan(); ichan++)
+    {
+
+      Reference::To<PolnProfile> prof;
+      prof = archive->get_Integration(isub)->new_PolnProfile(ichan);
+
+      cout << archive->get_source();
+
+      cout.setf(ios::showpoint);
+
+      onpulse->set_Profile( prof->get_Profile(0) );
+      onpulse->get_weight( onmask );
+
+      Estimate<double> total_flux = onmask.get_mean ();
+      cout << " <I>=" << total_flux.get_value();
+
+      Profile linear;
+      prof->get_linear( &linear );
+      onmask.set_Profile( &linear );
+      
+      Estimate<double> linear_flux = onmask.get_mean ();
+      cout << " <L>=" << linear_flux.get_value();
+
+      // profile[3] = Stokes V
+      onmask.set_Profile( prof->get_Profile(3) );
+
+      Estimate<double> circular_flux = onmask.get_mean ();
+      cout << " <V>=" << circular_flux.get_value();
+
+      Profile circular;
+      prof->get_circular( &circular );
+      onmask.set_Profile( &circular );
+
+      Estimate<double> abs_circular_flux = onmask.get_mean ();
+      cout << " <|V|>=" << abs_circular_flux.get_value();
+
+      baseline->set_Profile( prof->get_Profile(0) );
+      baseline->get_weight( offmask );
+
+      cout << " sigma=" << offmask.get_variance().get_value();
+
+      cout << " ";
+      if (archive->get_scale() == Signal::Jansky)
+	cout << "mJy";
+      else
+	cout << "Arb";
+
+      float junk = 0;
+
+      double W10 = width( prof->get_Profile(0),junk, 10,dc);
+      cout << " W10=" << W10 * 360.0 << "deg";
+
+      double W50 = width( prof->get_Profile(0),junk, 50,dc);
+      cout << " W50=" << W50 * 360.0 << "deg" << endl;
+
+    }
+  }
+}
 
 
 
@@ -277,7 +367,7 @@ vector< string > GetFilenames ( int argc, char *argv[] )
 
 void ProcessArchive( string filename )
 {
-  Reference::To< Pulsar::Archive > archive = Pulsar::Archive::load( filename );
+  Reference::To< Archive > archive = Archive::load( filename );
 
   if( archive )
   {
@@ -285,20 +375,27 @@ void ProcessArchive( string filename )
       OutputDataAsText( archive );
     if( cmd_flux )
       Flux( archive );
+    if( cmd_poln )
+      Poln( archive );
   }
 }
 
 
 
 
-int main( int argc, char *argv[] )
-{
+int main( int argc, char *argv[] ) try {
+
   int i;
 
-  while( ( i = getopt( argc, argv, "tf:h" )) != -1 )
+  while( ( i = getopt( argc, argv, "tf:ph" )) != -1 )
   {
     switch( i )
     {
+
+    case 'p':
+      cmd_poln = true;
+      break;
+
     case 't':
       cmd_text = true;
       break;
@@ -321,6 +418,10 @@ int main( int argc, char *argv[] )
 
   return 0;
 }
+ catch (Error& error) {
+   cerr << error << endl;
+   return -1;
+ }
 
 
 
