@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/DeltaRM.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/09/01 02:12:45 $
+   $Revision: 1.6 $
+   $Date: 2007/09/24 11:29:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_DeltaRM_h
@@ -40,6 +40,9 @@ namespace Pulsar {
     Estimate<double> get_rotation_measure () const
     { return rotation_measure; }
 
+    //! Get the number of phase bins used in last call to refine
+    unsigned get_used_bins () { return used_bins; }
+
     //! Set the archive from which to derive the refined rotation measure
     void set_data (Archive*);
 
@@ -53,6 +56,7 @@ namespace Pulsar {
   protected:
 
     float threshold;
+    unsigned used_bins;
 
     //! The rotation measure
     Estimate<double> rotation_measure;

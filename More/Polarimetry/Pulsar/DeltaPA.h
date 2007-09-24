@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/DeltaPA.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.3 $
+   $Date: 2007/09/24 11:29:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_DeltaPA_h
@@ -20,7 +20,7 @@ namespace Pulsar {
 
   class PolnProfile;
 
-  //! Calculates the position angle change using complex cross-correlation
+  //! Computes mean position angle difference from weighted cross-correlation
   class DeltaPA  {
 
   public:
@@ -31,8 +31,11 @@ namespace Pulsar {
     //! Destructor
     ~DeltaPA () { }
 
-    //! Get the rotation measure 
+    //! Get the position angle difference mean
     Estimate<double> get (const PolnProfile* p0, const PolnProfile* p1) const;
+
+    //! Get the number of phase bins used in the last call to get
+    unsigned get_used_bins () const { return used_bins; }
 
     //! Set the cutoff threshold in units of the baseline noise
     void set_threshold (float t) { threshold = t; }
@@ -41,6 +44,7 @@ namespace Pulsar {
   protected:
 
     float threshold;
+    mutable unsigned used_bins;
 
   };
 
