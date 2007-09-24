@@ -4,15 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PlotFactory.h"
 #include "Pulsar/Plot.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Interpreter.h"
-
-#include "Pulsar/GaussianBaseline.h"
-#include "Pulsar/PhaseWeight.h"
-#include "Pulsar/Profile.h"
 
 #include "TextInterface.h"
 #include "strutil.h"
@@ -226,7 +223,7 @@ int main (int argc, char** argv) try {
   if (n1 > 1 || n2 > 1)
     cpgsubp(n1,n2);
 
-  Interpreter preprocessor;
+  Pulsar::Interpreter* preprocessor = standard_shell();
 
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
@@ -236,31 +233,11 @@ int main (int argc, char** argv) try {
     if (jobs.size()) {
       if (verbose)
 	cerr << "psrplot: preprocessing " << filenames[ifile] << endl;
-      preprocessor.set(archive);
-      preprocessor.script(jobs);
+      preprocessor->set(archive);
+      preprocessor->script(jobs);
     }
 
-#if 1
     archive->remove_baseline();
-#else
-
-    Pulsar::GaussianBaseline mask;
-    Pulsar::PhaseWeight weight;
-    
-    mask.set_Profile (archive->get_Profile(0,0,0));
-    mask.get_weight (weight);
-
-    for (unsigned ipol=0; ipol < archive->get_npol(); ipol++) {
-
-      Pulsar::Profile* profile = archive->get_Profile(0,ipol,0);
-
-      double mean, variance;
-      weight.stats (profile, &mean, &variance);
-      profile->offset(-mean);
-    }
-
-#endif
-
 
     if (verbose)
       cerr << "psrplot: plotting " << filenames[ifile] << endl;
@@ -273,7 +250,6 @@ int main (int argc, char** argv) try {
 	cpgpage ();
       plots[iplot]->plot (archive);
     }
-
 
   }
   catch (Error& error) {
