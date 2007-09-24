@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.104 $
-   $Date: 2007/09/19 12:40:17 $
+   $Revision: 1.105 $
+   $Date: 2007/09/24 08:52:09 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -23,6 +23,7 @@
 namespace Pulsar {
 
   class PhaseWeight;
+  class RiseFall;
 
   //! The basic observed quantity; the pulse profile.
   /*! The Pulsar::Profile class implements a useful, yet minimal, set
@@ -56,8 +57,8 @@ namespace Pulsar {
     //! fractional phase window used in most functions
     static float default_duty_cycle;
 
-    //! fraction of total power used to find peak
-    static float peak_edge_threshold;
+    //! Algorithm used by find_peak_edges
+    static Reference::To<RiseFall> peak_edges;
 
     //! Default constructor
     Profile (unsigned nbin = 0);
@@ -152,7 +153,7 @@ namespace Pulsar {
     void find_transitions (int& highlow, int& lowhigh, int& width) const;
 
     //! Find the bin numbers at which the cumulative power crosses thresholds
-    void find_peak_edges (int& rise, int& fall, bool choose = true) const;
+    void find_peak_edges (int& rise, int& fall) const;
     
     //! Returns the bin number with the maximum amplitude
     int find_max_bin (int bin_start=0, int bin_end=0) const;
