@@ -53,6 +53,7 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   ///////////////////////////////////////////////////////////////////////
 
   manage ("psd", &psd);
+  plot_psd = true;
 
   // spectrum plotter shares the y axis on its x axis
   psd.get_frame()->set_x_scale (&yaxis);
@@ -101,4 +102,23 @@ void Pulsar::PhaseVsFrequencyPlus::prepare (const Archive*)
 Pulsar::PhaseScale* Pulsar::PhaseVsFrequencyPlus::get_scale ()
 {
   return &xaxis;
+}
+
+//! Plot the power spectral density
+void Pulsar::PhaseVsFrequencyPlus::set_plot_psd (bool _plot)
+{
+  if (plot_psd == _plot)
+    return;
+
+  plot_psd = _plot;
+  if (plot_psd)
+    manage ("psd", &psd);
+  else
+    unmanage (&psd);
+}
+
+//! Plot the power spectral density
+bool Pulsar::PhaseVsFrequencyPlus::get_plot_psd () const
+{
+  return plot_psd;
 }

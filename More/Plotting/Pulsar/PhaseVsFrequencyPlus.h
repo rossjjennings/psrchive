@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsFrequencyPlus.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/08/20 06:35:18 $
+   $Revision: 1.9 $
+   $Date: 2007/09/24 22:39:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsFrequencyPlus_h
@@ -51,6 +51,10 @@ namespace Pulsar {
     void set_pol (const PlotIndex& _ipol) { ipol = _ipol; }
     PlotIndex get_pol () const { return ipol; }
 
+    //! Plot the power spectral density
+    void set_plot_psd (bool _plot);
+    bool get_plot_psd () const;
+
     PhaseVsFrequency* get_freq () { return &freq; }
     ProfilePlot* get_flux () { return &flux; }
     SpectrumPlot* get_psd () { return &psd; }
@@ -68,6 +72,8 @@ namespace Pulsar {
 
     PhaseScale xaxis;
     FrequencyScale yaxis;
+
+    bool plot_psd;
 
     template<class T> void prepare (T* plot)
     {

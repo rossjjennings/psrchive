@@ -24,6 +24,10 @@ Pulsar::PhaseVsFrequencyPlus::Interface::Interface
        &PhaseVsFrequencyPlus::set_pol,
        "pol", "Polarization to plot" );
 
+  add( &PhaseVsFrequencyPlus::get_plot_psd,
+       &PhaseVsFrequencyPlus::set_plot_psd,
+       "psd", "Plot the power spectral density" );
+
   import( "x", PhaseScale::Interface(), &PhaseVsFrequencyPlus::get_scale );
 
   // when this is set, import will filter out attributes with identical names
