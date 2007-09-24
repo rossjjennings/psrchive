@@ -8,6 +8,7 @@
 #include "Pulsar/GaussianBaseline.h"
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/SmoothMean.h"
 #include "normal.h"
 
 #include <iostream>
@@ -21,7 +22,7 @@ Pulsar::GaussianBaseline::GaussianBaseline ()
   // constructor.  This call sets the moment_correction attribute
   // accordingly.
 
-  set_threshold (threshold);
+  set_threshold (1.0);
 }
 
 //! Set the threshold below which samples are included in the baseline
@@ -29,12 +30,12 @@ void Pulsar::GaussianBaseline::set_threshold (float sigma)
 {
   IterativeBaseline::set_threshold (sigma);
 
-  moment_correction = 0.5 / normal_moment2 (threshold);
+  moment_correction = 1.0 / normal_moment2 (threshold);
 #ifndef _DEBUG
   if (Profile::verbose)
 #endif
-    cerr << "Pulsar::GaussianBaseline::set_threshold correction = "
-	 << moment_correction << endl;
+    cerr << "Pulsar::GaussianBaseline::set_threshold sigma=" << sigma
+	 << " correction=" << moment_correction << endl;
 }
 
 void Pulsar::GaussianBaseline::get_bounds (PhaseWeight& weight, 
@@ -65,6 +66,33 @@ void Pulsar::GaussianBaseline::get_bounds (PhaseWeight& weight,
 	 << " baseline mean=" << mean << " cutoff=" << cutoff
 	 << " = " << threshold << " sigma" << endl;
 
-  lower = mean - cutoff;
-  upper = mean + cutoff;
+  last_lower = lower = mean - cutoff;
+  last_upper = upper = mean + cutoff;
+}
+
+void Pulsar::GaussianBaseline::postprocess (PhaseWeight& weight, 
+					    const Profile& profile)
+{
+  SmoothMean smoother;
+  smoother.set_window (4);
+  
+  Profile smoothed (profile);
+  smoother.transform (&smoothed);
+
+#ifdef _DEBUG
+  cerr << "lower=" << last_lower << " upper=" << last_upper << endl;
+#endif
+
+  unsigned nbin = profile.get_nbin();
+
+  for (unsigned ibin=0; ibin < nbin; ibin++) {
+
+    float val = smoothed.get_amps()[ibin];
+    weight[ibin] = val > last_lower && val < last_upper;
+
+#ifdef _DEBUG
+    cerr << "weight["<< ibin <<"]=" << weight[ibin] << " val=" << val << endl;
+#endif
+
+  }
 }

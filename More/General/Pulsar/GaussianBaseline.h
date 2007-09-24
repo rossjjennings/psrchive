@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/GaussianBaseline.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/02/12 17:40:58 $
+   $Revision: 1.5 $
+   $Date: 2007/09/24 08:52:37 $
    $Author: straten $ */
 
 #ifndef __Pulsar_GaussianBaseline_h
@@ -33,8 +33,16 @@ namespace Pulsar {
 
     void get_bounds (PhaseWeight& weight, float& lower, float& upper);
 
+    void postprocess (PhaseWeight& weight, const Profile& profile);
+
     //! Adjustment when computing variance of samples below threshold
     float moment_correction;
+
+    //! Value of lower last returned by get_bounds
+    float last_lower;
+
+    //! Value of upper last returned by get_bounds
+    float last_upper;
 
   };
 
