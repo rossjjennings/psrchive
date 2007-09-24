@@ -51,9 +51,14 @@ catch (Error& error) {
 }
 
 
-string Pulsar::BaselineInterpreter::empty ()
-{
-  return response (Fail, help());
+string Pulsar::BaselineInterpreter::empty () try
+{ 
+  get()->remove_baseline();
+  return response (Good);
 }
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
 
 
