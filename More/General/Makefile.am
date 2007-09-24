@@ -11,10 +11,12 @@ nobase_include_HEADERS = \
 	Pulsar/counter_drift.h \
 	Pulsar/denoise.h \
 	Pulsar/shift_methods.h \
+	Pulsar/Accumulate.h \
         Pulsar/AdaptiveSNR.h \
         Pulsar/Algorithm.h \
         Pulsar/ArchiveMatch.h \
         Pulsar/ArchiveSort.h \
+	Pulsar/ArchiveTemplates.h \
         Pulsar/BaselineEstimator.h \
 	Pulsar/BaselineInterpreter.h \
         Pulsar/BaselineWindow.h \
@@ -22,6 +24,7 @@ nobase_include_HEADERS = \
         Pulsar/ChannelZapMedian.h \
         Pulsar/ChannelZapModulation.h \
         Pulsar/ColdPlasma.h \
+	Pulsar/Differentiate.h \
         Pulsar/DispersionDelay.h \
         Pulsar/Dispersion.h \
 	Pulsar/Divided.h \
@@ -35,9 +38,9 @@ nobase_include_HEADERS = \
 	Pulsar/FrequencyAppend.h \
         Pulsar/FrequencyIntegrate.h \
         Pulsar/GaussianBaseline.h \
+	Pulsar/Integrate.h \
 	Pulsar/InstallInterpreter.h \
         Pulsar/InstrumentInfo.h \
-	Pulsar/Integrate.h \
         Pulsar/IntegrationWeight.h \
         Pulsar/Interpreter.h \
 	Pulsar/InterpreterExtension.h \
@@ -47,12 +50,16 @@ nobase_include_HEADERS = \
         Pulsar/NoiseStatistics.h \
         Pulsar/OnPulseEstimator.h \
         Pulsar/OnPulseThreshold.h \
+	Pulsar/PeakConsecutive.h \
+	Pulsar/PeakCumulative.h \
         Pulsar/PhaseWeightFunction.h \
 	Pulsar/PhaseWeightModifier.h \
 	Pulsar/PhaseWeightShift.h \
 	Pulsar/PhaseWeightSmooth.h \
         Pulsar/PhaseWeight.h \
+	Pulsar/ProfileInterpreter.h \
         Pulsar/ProfileWeightFunction.h \
+	Pulsar/RiseFall.h \
         Pulsar/RFIMitigation.h \
         Pulsar/ScatteredPowerCorrection.h \
         Pulsar/SimPolnTiming.h \
@@ -78,8 +85,10 @@ libGeneral_la_SOURCES = \
 	find_spike_edges.C \
         model_profile.C \
 	morphological_difference.C \
+	Accumulate.C \
         AdaptiveSNR.C \
 	Append.C \
+	ArchiveTemplates.C \
         Archive_append.C \
 	Archive_apply_model.C \
         Archive_bscrunch.C \
@@ -112,6 +121,7 @@ libGeneral_la_SOURCES = \
         BaselineWindow.C \
         ChannelZapMedian.C \
         ChannelZapModulation.C \
+	Differentiate.C \
         Dispersion.C \
         DispersionDelay.C \
         DurationWeight.C \
@@ -144,9 +154,12 @@ libGeneral_la_SOURCES = \
 	MaskSmooth.C \
         NoiseStatistics.C \
 	OnPulseThreshold.C \
+	PeakConsecutive.C \
+	PeakCumulative.C \
 	PhaseWeightModifier.C \
 	PhaseWeightShift.C \
         PhaseWeight.C \
+	ProfileInterpreter.C \
 	Profile_baseline.C \
         Profile_convolve.C \
         Profile_dedisperse.C \
@@ -160,6 +173,7 @@ libGeneral_la_SOURCES = \
         Profile_stats.C \
         Profile_toa.C \
         ProfileWeightFunction.C \
+	RiseFall.C \
         RFIMitigation.C \
         ScatteredPowerCorrection.C \
         Smooth.C \
