@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/IterativeBaseline.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/02/12 17:41:04 $
+   $Revision: 1.9 $
+   $Date: 2007/09/24 08:52:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IterativeBaseline_h
@@ -17,6 +17,8 @@
 #include "Pulsar/BaselineEstimator.h"
 
 namespace Pulsar {
+
+  class PhaseWeightSmooth;
 
   //! Finds a Profile baseline using an interative bounding method
   class IterativeBaseline : public BaselineEstimator {
@@ -36,6 +38,10 @@ namespace Pulsar {
     void set_initial_baseline (BaselineEstimator*);
     BaselineEstimator* get_initial_baseline () const;
 
+    //! Set the PhaseWeightSmooth used to modify the result
+    void set_smoothing_function (PhaseWeightSmooth*);
+    PhaseWeightSmooth* get_smoothing_function () const;
+
     //! Set the threshold below which samples are included in the baseline
     virtual void set_threshold (float sigma);
 
@@ -50,6 +56,8 @@ namespace Pulsar {
     //! Derived classes must define the bounds
     virtual void get_bounds (PhaseWeight&, float& lower, float& upper) = 0;
 
+    virtual void postprocess (PhaseWeight& weight, const Profile& profile) { }
+    
     //! The threshold below which samples are included in the baseline
     float threshold;
 
@@ -58,6 +66,9 @@ namespace Pulsar {
 
     //! The BaselineEstimator used to find the initial baseline
     Reference::To<BaselineEstimator> initial_baseline;
+
+    //! The PhaseWeightSmooth used to smooth the final answer
+    Reference::To<PhaseWeightSmooth> smoothing_function;
 
     //! Provide access to derived classes
     bool get_initial_bounds () const { return initial_bounds; }

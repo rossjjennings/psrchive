@@ -10,6 +10,8 @@
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 
+#include "Pulsar/MaskSmooth.h"
+
 #include <math.h>
 
 using namespace std;
@@ -22,6 +24,7 @@ Pulsar::IterativeBaseline::IterativeBaseline ()
   window->set_duty_cycle (Profile::default_duty_cycle);
 
   set_initial_baseline (window);
+  set_smoothing_function (new MaskSmooth);
 
   threshold = 2.0;
   max_iterations = 100;
@@ -40,6 +43,17 @@ Pulsar::BaselineEstimator*
 Pulsar::IterativeBaseline::get_initial_baseline () const
 {
   return initial_baseline;
+}
+
+void Pulsar::IterativeBaseline::set_smoothing_function (PhaseWeightSmooth* s)
+{
+  smoothing_function = s;
+}
+
+Pulsar::PhaseWeightSmooth*
+Pulsar::IterativeBaseline::get_smoothing_function () const
+{
+  return smoothing_function;
 }
 
 void Pulsar::IterativeBaseline::set_threshold (float sigma)
@@ -79,9 +93,6 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
   if (!profile)
     throw Error (InvalidState, "Pulsar::IterativeBaseline::calculate",
 		 "no Profile supplied (use set_Profile)");
-
-  // the mean, variance, and variance of the mean
-  double mean, var, var_mean;
 
   if (initial_baseline) try {
 
@@ -167,25 +178,16 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
 
   }
 
-#if 0
-
   if (iter >= max_iterations)
     throw Error (InvalidState, "Pulsar::IterativeBaseline::get_weight",
 		 "did not converge in %d iterations", max_iterations);
 
-  // fill in the blank spots (otherwise, will underestimate variance)
-  for (unsigned ibin=0; ibin<nbin; ibin++)
-    if (!weight[ibin] && weight[(ibin+1)%nbin]) {
+  postprocess (weight, *profile);
 
-#ifdef _DEBUG
-      cerr << "x ibin=" << ibin << " v=" << amps[ibin] << endl;
-#endif
-
-      weight[ibin] = 1.0;
-
-    }
-
-#endif
+  if (smoothing_function) {
+    smoothing_function->set_weight( &weight );
+    smoothing_function->get_weight( weight );
+  }
 
 #ifdef _DEBUG
   unsigned total = 0;
