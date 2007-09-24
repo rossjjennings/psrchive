@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 
+#include "Pulsar/ProfileInterpreter.h"
 #include "Pulsar/BaselineInterpreter.h"
 #include "Pulsar/ZapInterpreter.h"
 #include "Pulsar/CalInterpreter.h"
@@ -13,6 +14,9 @@
 Pulsar::Interpreter* standard_shell ()
 {
   Reference::To<Pulsar::Interpreter> interpreter = new Pulsar::Interpreter;
+
+  interpreter->import( new Pulsar::ProfileInterpreter,
+		       "profile", "profile transformations" );
 
   interpreter->import( new Pulsar::BaselineInterpreter,
 		       "baseline", "baseline removal" );
