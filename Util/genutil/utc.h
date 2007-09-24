@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/utc.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.7 $
+   $Date: 2007/09/24 08:53:28 $
    $Author: straten $ */
 
 /* ************************************************************************
@@ -39,9 +39,6 @@ char*  utcstrfill (char* str, utc_t time, int fill_chars);
 int    utc_diff   (utc_t time1, utc_t time2);
 int    utc_inc    (utc_t *time, int seconds);
 int    utc_dec    (utc_t *time, int seconds);
-
-/* function to fill the fields of a C 'struct tm' - replaces str2cal */
-int str2tm (struct tm* time, const char* str);
 
 int tm2utc (utc_t *time, struct tm caltime);
 int utc2tm (struct tm *caltim, utc_t time);
