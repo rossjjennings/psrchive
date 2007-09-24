@@ -585,6 +585,15 @@ catch (Error& error) {
   throw error += "Pulsar::PolnProfile::get_linear";
 }
 
+void Pulsar::PolnProfile::get_circular (Profile* absV) const
+try {
+  absV->operator=( *get_Profile(3) );
+  absV->absolute();
+}
+catch (Error& error) {
+  throw error += "Pulsar::PolnProfile::get_circular";
+}
+
 /*!
   This worker function checks that the mean is less than the r.m.s.
   and prints a warning if it appears that the baseline has not been removed 

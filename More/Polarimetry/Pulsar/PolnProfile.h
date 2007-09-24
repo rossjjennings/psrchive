@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfile.h,v $
-   $Revision: 1.36 $
-   $Date: 2006/12/15 12:44:17 $
+   $Revision: 1.37 $
+   $Date: 2007/09/24 08:53:24 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -122,6 +122,9 @@ namespace Pulsar {
 
     //! Return the linear polarization profile
     void get_linear (Profile* linear) const;
+
+    //! Return the absolute circular polarization profile
+    void get_circular (Profile* circular) const;
 
     //! Return the total polarization profile
     void get_polarized (Profile* polarized) const;
