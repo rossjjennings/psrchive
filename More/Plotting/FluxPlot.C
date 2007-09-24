@@ -9,6 +9,9 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/PhaseWeight.h"
+
+#include "Pulsar/SmoothMean.h"
 
 #include "Physical.h"
 
@@ -20,6 +23,7 @@ Pulsar::FluxPlot::FluxPlot ()
 {
   isubint = ichan = ipol = 0;
   auto_zoom = 0;
+  baseline_zoom = 0;
   original_nchan = 0;
   plot_ebox = false;
 
@@ -47,8 +51,23 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
   if (auto_zoom)
     auto_scale_phase (plotter.profiles[0], auto_zoom);
 
-  plotter.minmax (get_frame());
+  if (baseline_zoom)
+    selection = plotter.profiles[0]->baseline();
+
+  if (selection) {
+    if (verbose)
+      cerr << "Pulsar::FluxPlot::prepare using selected bins" << endl;
+
+    frame->get_y_scale()->set_minmax (selection->get_min(),
+				      selection->get_max());
+  }
+  else {
+    if (verbose)
+      cerr << "Pulsar::FluxPlot::prepare using all bins" << endl;
+    plotter.minmax (get_frame());
+  }
 }
+
 
 
 /*! The ProfileVectorPlotter class draws the profile */
@@ -63,6 +82,61 @@ void Pulsar::FluxPlot::draw (const Archive* data)
   cpgsci (1);
   if (plot_ebox)
     plot_error_box (data);
+
+  if (selection)
+    plot_selection (data);
+  
+}
+
+void Pulsar::FluxPlot::plot_selection (const Archive* data)
+{
+  vector<float> x;
+  get_scale()->get_ordinates (data, x);
+
+  const float* amps = plotter.profiles[0]->get_amps();
+
+  pair<float,float> range = get_scale()->get_range_norm();
+
+  int range_start = int(floor(range.first));
+  int range_end = int(ceil(range.second));
+
+  cpgsci (5);
+
+  for( int range = range_start; range < range_end; range ++ )
+  {
+    float xoff = float(range) * get_scale()->get_scale(data);
+
+    for (unsigned i=0; i<x.size(); i++)
+      if ((*selection)[i])
+	cpgpt1 (x[i] + xoff, amps[i], 17);
+  }
+
+  float x_min = 0;
+  float x_max = 0;
+  get_scale()->PlotScale::get_range (x_min, x_max);
+
+  Estimate<double> mean = selection->get_mean ();
+  Estimate<double> var = selection->get_variance ();
+  double error = sqrt (mean.get_variance() + var.get_value());
+
+  cpgsci (4);
+  cpgmove (x_min, mean.get_value());
+  cpgdraw (x_max, mean.get_value());
+
+  cpgsls (2);
+
+  for (double offset=-2*error; offset <= 2*error; offset+=error) {
+    cpgmove (x_min, mean.get_value() + offset);
+    cpgdraw (x_max, mean.get_value() + offset);
+  }
+
+
+
+}
+
+void Pulsar::FluxPlot::set_selection (PhaseWeight* w)
+{
+  selection = w; 
 }
 
 /*! The ProfileVectorPlotter class draws the profile */
@@ -78,7 +152,6 @@ void Pulsar::FluxPlot::plot_profile (const Profile* data)
 
   pair<float,float> range = get_frame()->get_x_scale()->get_range_norm();
   plotter.draw ( data, range.first, range.second );
-
 }
 
 //! Scale in on the on-pulse region
@@ -87,22 +160,22 @@ void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)
   int rise, fall;
   profile->find_peak_edges (rise, fall);
 
-  cerr << "AUTO ZOOM rise=" << rise << " fall=" << fall << endl;
-
   float nbin = profile->get_nbin ();
-
   float start = rise / nbin;
   float stop = fall / nbin;
-
-  cerr << "AUTO ZOOM phase rise=" << start << " fall=" << stop << endl;
 
   if (start > stop)
     stop += 1.0;
 
-  buf = (stop - start) * buf;
-  
-  stop += buf;
-  start -= buf;
+  cerr << "AUTO ZOOM rise=" << rise << " fall=" << fall 
+       << " nbin=" << nbin << endl
+       << "AUTO ZOOM phase rise=" << start << " fall=" << stop << endl;
+
+  double mean = (stop + start) * 0.5;
+  double diff = (stop - start) * 0.5;
+
+  start = mean - buf * diff;
+  stop  = mean + buf * diff;
 
   cerr << "AUTO ZOOM fixed rise=" << start << " fall=" << stop << endl;
 

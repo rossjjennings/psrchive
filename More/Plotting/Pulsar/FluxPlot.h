@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.21 $
-   $Date: 2006/12/04 17:09:48 $
+   $Revision: 1.22 $
+   $Date: 2007/09/24 08:53:20 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -21,6 +21,7 @@
 namespace Pulsar {
 
   class Profile;
+  class PhaseWeight;
   class InfoLabel;
 
   //! Plots flux profiles
@@ -80,6 +81,10 @@ namespace Pulsar {
     void set_auto_zoom (float zoom) { auto_zoom = zoom; }
     float get_auto_zoom () const { return auto_zoom; }
 
+    //! Automatically zoom in on the baseline
+    void set_baseline_zoom (float zoom) { baseline_zoom = zoom; }
+    float get_baseline_zoom () const { return baseline_zoom; }
+
     //! Use an informative label above the plot
     void set_info_label (bool flag = true);
     bool get_info_label () const;
@@ -107,6 +112,9 @@ namespace Pulsar {
     //! Provide limited access to the plotter
     const ProfileVectorPlotter* get_plotter () const { return &plotter; }
 
+    //! Set the selected profiles
+    void set_selection (PhaseWeight*);
+
   protected:
 
     ProfileVectorPlotter plotter;
@@ -117,10 +125,13 @@ namespace Pulsar {
 
     bool plot_ebox;
     float auto_zoom;
-
+    float baseline_zoom;
     unsigned original_nchan;
 
     Reference::To<InfoLabel> info_label;
+    Reference::To<PhaseWeight> selection;
+
+    void plot_selection (const Archive* data);
 
   };
 
