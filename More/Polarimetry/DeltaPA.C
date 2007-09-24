@@ -103,6 +103,8 @@ protected:
 
 };
 
+#include "Pulsar/GaussianBaseline.h"
+#include "Pulsar/PhaseWeight.h"
 
 Estimate<double> 
 Pulsar::DeltaPA::get (const PolnProfile* p0, const PolnProfile* p1) const
@@ -116,30 +118,23 @@ Pulsar::DeltaPA::get (const PolnProfile* p0, const PolnProfile* p1) const
   Profile linear1;
   p1->get_linear (&linear1);
 
-  float min_phase0 = linear0.find_min_phase();
-  float min_phase1 = linear1.find_min_phase();
-  MeanRadian<double> mean;
-  mean += Estimate<double> (min_phase0 * 2.0 * M_PI, 1);
-  mean += Estimate<double> (min_phase1 * 2.0 * M_PI, 1);
+  Pulsar::GaussianBaseline mask;
+  Pulsar::PhaseWeight weight;
+    
+  mask.set_Profile (p0->get_Profile(0));
+  mask.get_weight (weight);
 
-#ifdef _DEBUG
-  cerr << "MC=" << mean.get_cos() << endl;
-  cerr << "MS=" << mean.get_sin() << endl;
-#endif
+  double mu_q0 = 0.0, var_q0 = 0.0;
+  weight.stats (p0->get_Profile(1), &mu_q0, &var_q0);
+  double mu_u0 = 0.0, var_u0 = 0.0;
+  weight.stats (p0->get_Profile(2), &mu_u0, &var_u0);
 
-  float min_phase = mean.get_Estimate().get_value() / (2.0*M_PI);
+  double mu_q1 = 0.0, var_q1 = 0.0;
+  weight.stats (p1->get_Profile(1), &mu_q1, &var_q1);
+  double mu_u1 = 0.0, var_u1 = 0.0;
+  weight.stats (p1->get_Profile(2), &mu_u1, &var_u1);
 
-  double var_q0 = p0->get_variance (1, min_phase);
-  double var_u0 = p0->get_variance (2, min_phase);
   float cutoff0 = threshold * sqrt (0.5*(var_q0 + var_u0));
-
-#ifdef _DEBUG
-  cerr << "0: var q=" << var_q0 << " u=" << var_u0 << " cut=" 
-       << cutoff0 << endl;
-#endif
-
-  double var_q1 = p1->get_variance (1, min_phase);
-  double var_u1 = p1->get_variance (2, min_phase);
   float cutoff1 = threshold * sqrt (0.5*(var_q1 + var_u1));
 
 #ifdef _DEBUG
@@ -154,7 +149,7 @@ Pulsar::DeltaPA::get (const PolnProfile* p0, const PolnProfile* p1) const
   const float *u1 = p1->get_Profile(2)->get_amps(); 
 
   unsigned nbin = p0->get_nbin();
-  unsigned used_bins = 0;
+  used_bins = 0;
 
   double cos_delta_PA = 0.0;
   double sin_delta_PA = 0.0;
