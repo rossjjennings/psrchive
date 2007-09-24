@@ -53,15 +53,21 @@ void Pulsar::MaskSmooth::calculate (PhaseWeight* weight)
   unsigned iwindow = nbin * window * 0.5;
   unsigned imasked = iwindow * masked;
 
-  cerr << "iwindow=" << iwindow << endl;
+#ifdef _DEBUG
+  cerr << "Pulsar::MaskSmooth::calculate iwindow=" << iwindow << endl;
+#endif
 
   for (unsigned ibin=0; ibin < nbin; ibin++) {
 
+#ifdef _DEBUG
     cerr << ibin << " " << (*input_weight)[ibin] << ": ";
+#endif
 
     if ((*input_weight)[ibin]) {
       (*weight)[ibin] = true;
+#ifdef _DEBUG
       cerr << "t" << endl;
+#endif
       continue;
     }
 
@@ -71,10 +77,14 @@ void Pulsar::MaskSmooth::calculate (PhaseWeight* weight)
       if ((*input_weight)[ (ibin + jbin - iwindow + nbin ) % nbin ])
 	nmasked ++;
 
+#ifdef _DEBUG
     cerr << nmasked << " ";
+#endif
 
     if (nmasked < imasked) {
+#ifdef _DEBUG
       cerr << endl;
+#endif
       continue;
     }
 
@@ -84,14 +94,20 @@ void Pulsar::MaskSmooth::calculate (PhaseWeight* weight)
       if ((*input_weight)[ (ibin + jbin + 1 + nbin ) % nbin ])
 	nmasked ++;
 
+#ifdef _DEBUG
     cerr << nmasked << " ";
+#endif
 
     if (nmasked < imasked) {
+#ifdef _DEBUG
       cerr << endl;
+#endif
       continue;
     }
 
+#ifdef _DEBUG
     cerr << "Pulsar::MaskSmooth::calculate filling ibin=" << ibin << endl;
+#endif
     (*weight)[ibin] = true;
 
   }

@@ -55,5 +55,11 @@ double Pulsar::Dispersion::get_shift () const
     throw Error (InvalidState, "Pulsar::Dispersion::get_shift",
 		 "folding period unknown");
 
-  return (delta + corrector.evaluate()) / folding_period;
+  double shift = delta + corrector.evaluate();
+
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::Dispersion::get_shift delay=" << shift 
+	 << " period=" << folding_period << endl;
+
+  return shift / folding_period;
 }

@@ -16,8 +16,10 @@ using namespace std;
 void Pulsar::SmoothMean::smooth_data (unsigned nbin, float* output,
 				      unsigned width, float* input)
 {
+#ifdef _DEBUG
   cerr << "Pulsar::SmoothMean::smooth_data nbin=" << nbin 
        << " width=" << width << endl;
+#endif
 
   unsigned ibin;
   register double sum = 0.0;

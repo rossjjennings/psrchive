@@ -95,7 +95,7 @@ Pulsar::TimerIntegration::TimerIntegration (const Integration& subint)
 void Pulsar::TimerIntegration::copy (const Integration* subint, bool manage)
 {
   if (verbose)
-    cerr << "TimerIntegration::copy" << endl;
+    cerr << "TimerIntegration::copy management=" << manage << endl;
 
   if (this == subint)
     return;

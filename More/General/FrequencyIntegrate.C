@@ -36,9 +36,12 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
     rm != 0 && !integration->get_faraday_corrected();
 
   if (Integration::verbose)
-    cerr << "Pulsar::FrequencyIntegrate::transform nchan"
-      " input=" << subint_nchan << " output=" << output_nchan <<
-      " dm=" << dm << " rm=" << rm << endl;
+    cerr << 
+      "Pulsar::FrequencyIntegrate::transform nchan"
+      " input=" << subint_nchan << " output=" << output_nchan << endl <<
+      "Pulsar::FrequencyIntegrate::transform"
+      " dm=" << dm << " fix=" << must_dedisperse <<
+      " rm=" << rm << " fix=" << must_defaraday << endl;
 
   unsigned start = 0;
   unsigned stop = 0;

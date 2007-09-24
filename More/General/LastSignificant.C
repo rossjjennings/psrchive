@@ -33,7 +33,9 @@ using namespace std;
 
     unsigned count = 0;
 
-    // cerr << "THRESHOLD=" << threshold  << endl;
+#ifdef _DEBUG
+    cerr << "THRESHOLD=" << threshold  << endl;
+#endif
 
     for (unsigned ibin=1; ibin<n_harmonic; ibin++) {
 
@@ -42,16 +44,21 @@ using namespace std;
       else
 	count = 0;
 
-      // cerr << count << " " << ibin << " " << amps[ibin]  <<endl;
+#ifdef _DEBUG
+      cerr << count << " " << ibin << " " << amps[ibin]  <<endl;
+#endif
 
       if (count > 2 && ibin > max_harmonic)
 	max_harmonic = ibin;
 
     }
     
-    // cerr << "max_harmonic = " << max_harmonic << endl;
+#ifdef _DEBUG
+    cerr << "max_harmonic = " << max_harmonic << endl;
+#endif
 
   }
 
   return max_harmonic;
 }
+
