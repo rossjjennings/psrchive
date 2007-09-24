@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/OnPulseThreshold.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.4 $
+   $Date: 2007/09/24 08:53:16 $
    $Author: straten $ */
 
 #ifndef __Pulsar_OnPulseThreshold_h
@@ -32,9 +32,6 @@ namespace Pulsar {
 
     //! Default constructor
     OnPulseThreshold ();
-
-    //! Set the Profile from which the on-pulse PhaseWeight will be derived
-    void set_Profile (const Profile* profile);
 
     //! Set the threshold
     void set_threshold (float threshold);
