@@ -7,24 +7,25 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.166 $
-   $Date: 2007/09/19 12:45:36 $
+   $Revision: 1.167 $
+   $Date: 2007/09/24 08:52:05 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.166 $"
-#include <iostream>
-#include <TextInterface.h>
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.167 $"
 
 #include "IntegrationManager.h"
-#include "sky_coord.h"
-#include "Estimate.h"
+#include "TextInterface.h"
 
+#include "sky_coord.h"
+#include "toa.h"
+
+#include "Estimate.h"
 #include "Types.h"
 
-#include "toa.h"
+#include <iostream>
 
 template<typename T> class Jones;
 
@@ -34,6 +35,7 @@ namespace Pulsar
   class Receiver;
   class Integration;
   class Profile;
+  class PhaseWeight;
 
   class Predictor;
   class Parameters;
@@ -388,8 +390,11 @@ namespace Pulsar
     //! Transform Stokes I,Q,U,V into the polarimetric invariant interval
     void invint ();
 
+    //! Return a new PhaseWeight instance with the baseline phase bins masked
+    PhaseWeight* baseline () const;
+
     //! Remove the baseline from all profiles
-    void remove_baseline (float phase = -1.0, float dc = 0.15);
+    void remove_baseline ();
 
     //! Set the weight of each profile to the given number
     void uniform_weight (float new_weight = 1.0);

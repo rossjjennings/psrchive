@@ -1,14 +1,22 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2007 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/Profile.h"
+#include "Pulsar/PhaseWeight.h"
 
 using namespace std;
+
+Pulsar::PhaseWeight* Pulsar::Archive::baseline () const
+{
+  Reference::To<const Archive> total = this->total();
+  return total->get_Profile(0,0,0)->baseline ();
+}
 
 /*!
   If phase is not specified, this method calls
@@ -18,13 +26,12 @@ using namespace std;
   each of the Integrations.
   */
 
-void Pulsar::Archive::remove_baseline (float phase, float duty_cycle) try {
-  
-  if (phase < 0.0)
-    phase = find_min_phase (duty_cycle);
+void Pulsar::Archive::remove_baseline () try {
+
+  Reference::To<PhaseWeight> baseline = this->baseline();
   
   for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> remove_baseline (phase, duty_cycle);
+    get_Integration(isub) -> remove_baseline (baseline);
   
 }
 catch (Error& error) {

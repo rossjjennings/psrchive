@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.91 $
-   $Date: 2007/08/10 00:25:36 $
+   $Revision: 1.92 $
+   $Date: 2007/09/24 08:52:05 $
    $Author: straten $ */
 
 /*
@@ -37,6 +37,7 @@ namespace Pulsar {
 
   class Profile;
   class PolnProfile;
+  class PhaseWeight;
   class Archive;
 
   //! Array of Profiles integrated over the same time interval
@@ -95,6 +96,9 @@ namespace Pulsar {
     //! Returns the centre phase of the region with minimum total intensity
     float find_min_phase (float dc = 0.10) const;
 
+    //! Return a new PhaseWeight instance with the baseline phase bins masked
+    PhaseWeight* baseline () const;
+
     //! Return the statistics of every profile baseline
     void baseline_stats (std::vector< std::vector< Estimate<double> > >* mean,
 			 std::vector< std::vector<double> >* variance = 0) const;
@@ -102,6 +106,9 @@ namespace Pulsar {
     //! Return the statistics of every profile baseline
     void baseline_stats (std::vector< std::vector< Estimate<double> > >& mean,
 			 std::vector< std::vector< Estimate<double> > >& variance) const;
+
+    //! Remove the baseline from all profiles
+    void remove_baseline (const PhaseWeight* baseline = 0);
 
     //! Returns the mean hi/lo and variance of the mean hi/lo of every profile
     void cal_levels (std::vector< std::vector< Estimate<double> > >& hi,
@@ -119,9 +126,6 @@ namespace Pulsar {
 	       Tempo::toa::Format fmt = Tempo::toa::Parkes,
 	       bool discard_bad = false) const;
     
-    //! Remove the baseline from all profiles
-    void remove_baseline (float phase = -1.0, float dc = 0.15);
-
     //! Set the weight of each profile to the given number
     void uniform_weight (float new_weight = 1.0);
     
