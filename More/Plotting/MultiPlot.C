@@ -84,3 +84,12 @@ void Pulsar::MultiPlot::manage (const std::string& name, FramedPlot* plot)
   plots[name] = plot;
 }
 
+void Pulsar::MultiPlot::unmanage (FramedPlot* plot)
+{
+  std::map< std::string, Reference::To<FramedPlot> >::iterator ptr;
+  for (ptr = plots.begin(); ptr != plots.end(); ptr++)
+    if (ptr->second.ptr() == plot) {
+      plots.erase (ptr);
+      return;
+    }
+}

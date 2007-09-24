@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPlot.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/09/06 01:10:55 $
+   $Revision: 1.8 $
+   $Date: 2007/09/24 22:39:24 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiPlot_h
@@ -36,7 +36,10 @@ namespace Pulsar {
     void plot (const Archive*);
 
     //! Manage a plot
-    void manage (const std::string& name, FramedPlot* plot);
+    void manage (const std::string& name, FramedPlot*);
+
+    //! Stop managing a plot
+    void unmanage (FramedPlot*);
 
     //! Derived classes may wish to prepare before plotting
     virtual void prepare (const Archive*) {}
