@@ -4,6 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/DeltaRM.h"
 #include "Pulsar/DeltaPA.h"
 
@@ -21,6 +26,7 @@ using namespace std;
 Pulsar::DeltaRM::DeltaRM ()
 {
   threshold = 3.0;
+  used_bins = 0;
 }
 
 Pulsar::DeltaRM::~DeltaRM ()
@@ -34,13 +40,38 @@ void Pulsar::DeltaRM::set_data (Archive* archive)
   data->defaraday();
 }
 
+#if HAVE_PGPLOT
+
+#include "Pulsar/StokesCylindrical.h"
+#include <cpgplot.h>
+
+static void plot (const Pulsar::Archive* archive, unsigned chan)
+{
+  string name = "band" + tostring(chan) + ".ps/cps";
+
+  cpgbeg (0, name.c_str(), 0, 0);
+  cpgslw(2);
+  cpgsvp (.1,.9, .1,.9);
+  
+  Pulsar::StokesCylindrical plot;
+
+  plot.set_chan (chan);
+  plot.plot (archive);
+
+  cpgend();
+}
+
+#endif
+
 //! Refine the rotation measure estimate
 void Pulsar::DeltaRM::refine ()
 {
   if (!data)
     throw Error (InvalidState, "Pulsar::DeltaRM::refine", "no data");
 
-  Reference::To<Integration> clone = data->get_Integration(0)->clone();
+  Reference::To<Archive> archive_clone = data->clone();
+
+  Reference::To<Integration> clone = archive_clone->get_Integration(0);
 
   FrequencyIntegrate fscr;
   FrequencyIntegrate::EvenlyWeighted policy;
@@ -49,6 +80,16 @@ void Pulsar::DeltaRM::refine ()
   fscr.set_range_policy ( &policy );
 
   fscr.transform (clone);
+
+#if HAVE_PGPLOT
+
+  cerr << "Pulsar::DeltaRM::refine plotting half-band integrated profiles"
+       << endl;
+
+  plot (archive_clone, 0);
+  plot (archive_clone, 1);
+
+#endif
 
   /*
     remove the remaining Faraday rotation, so that residual delta_PA
@@ -89,5 +130,7 @@ void Pulsar::DeltaRM::refine ()
   cerr << "delta PA = <PA_1 - PA_0> = " << 180.0/M_PI * delta_PA << " deg.\n"
        << "delta RM = " << delta_RM << endl
        << "final RM = " << rotation_measure << endl;
+
+  used_bins = delta_pa.get_used_bins();
 }
 
