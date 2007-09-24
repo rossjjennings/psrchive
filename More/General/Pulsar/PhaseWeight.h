@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeight.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/07/30 06:44:50 $
+   $Revision: 1.12 $
+   $Date: 2007/09/24 08:52:56 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeight_h
@@ -94,6 +94,12 @@ namespace Pulsar {
     //! Get the weighted mean of the Profile amplitudes
     Estimate<double> get_mean () const;
 
+    //! Get the minimum amplitude with non-zero weight
+    float get_min () const;
+
+    //! Get the minimum amplitude with non-zero weight
+    float get_max () const;
+
     //! Get the weighted variance of the Profile amplitudes
     Estimate<double> get_variance () const;
 
@@ -133,6 +139,12 @@ namespace Pulsar {
 
     //! Initialize attributes to default values
     void init ();
+
+    //! Check that the profile attribute is set
+    void check_Profile (const char* method) const;
+
+    //! Check that the size of the weights vector is equal to nbin
+    void check_weight (unsigned nbin, const char* method) const;
 
   };
 

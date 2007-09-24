@@ -8,6 +8,8 @@
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 
+#include <float.h>
+
 using namespace std;
 
 void Pulsar::PhaseWeight::init ()
@@ -120,6 +122,42 @@ double Pulsar::PhaseWeight::get_weight_max () const
   return max;
 }
 
+float Pulsar::PhaseWeight::get_max () const
+{
+  check_Profile ("get_max");
+
+  unsigned nbin = profile->get_nbin();
+
+  check_weight (nbin, "get_max");
+
+  const float* amps = profile->get_amps();
+
+  float max = FLT_MIN;
+  for (unsigned i=0; i<nbin; i++)
+    if (weight[i] && amps[i] > max)
+      max = amps[i];
+
+  return max;
+}
+
+float Pulsar::PhaseWeight::get_min () const
+{
+  check_Profile ("get_min");
+
+  unsigned nbin = profile->get_nbin();
+
+  check_weight (nbin, "get_min");
+
+  const float* amps = profile->get_amps();
+
+  float min = FLT_MAX;
+  for (unsigned i=0; i<nbin; i++)
+    if (weight[i] && amps[i] < min)
+      min = amps[i];
+
+  return min;
+}
+
 //! Set the Profile to which the weights apply
 void Pulsar::PhaseWeight::set_Profile (const Profile* _profile)
 {
@@ -166,13 +204,33 @@ Estimate<double> Pulsar::PhaseWeight::get_variance () const
   return variance;
 }
 
-void Pulsar::PhaseWeight::build ()
+void
+Pulsar::PhaseWeight::check_Profile (const char* method) const
 {
   if (!profile)
-    throw Error (InvalidState, "Pulsar::PhaseWeight::build",
+    throw Error (InvalidState, "Pulsar::PhaseWeight::" + string(method),
 		 "Profile not set");
+}
+
+void
+Pulsar::PhaseWeight::check_weight (unsigned nbin, const char* method) const
+{
+  if (nbin != weight.size())
+    throw Error (InvalidState, "Pulsar::PhaseWeight::" + string(method),
+		 "weight size=%d != profile nbin=%d",
+		 weight.size(), nbin);
+}
+
+void Pulsar::PhaseWeight::build ()
+{
+  check_Profile ("build");
 
   stats (profile, &(mean.val), &(variance.val), &(mean.var), &(variance.var));
+
+  if (Profile::verbose)
+    cerr << "Pulsar::PhaseWeight::build mean=" << mean << " var=" << variance
+	 << endl;
+
   built = true;
 }
 
@@ -181,10 +239,7 @@ void Pulsar::PhaseWeight::weight_Profile (Profile* data) const
 {
   unsigned nbin = data->get_nbin();
 
-  if (nbin != weight.size())
-    throw Error (InvalidState, "Pulsar::PhaseWeight::stats",
-		 "weight size=%d != profile nbin=%d",
-		 weight.size(), nbin);
+  check_weight (nbin, "weight_Profile");
 
   float* amps = data->get_amps();
 
@@ -196,25 +251,46 @@ void Pulsar::PhaseWeight::stats (const Profile* profile,
 				 double* mean, double* var,
 				 double* varmean, double* varvar) const
 {
-  if (Profile::verbose) cerr << "Pulsar::PhaseWeight::stats" << endl;
+  if (Profile::verbose)
+    cerr << "Pulsar::PhaseWeight::stats" << endl;
   
   unsigned nbin = profile->get_nbin();
   unsigned ibin = 0;
 
-  if (nbin != weight.size())
-    throw Error (InvalidState, "Pulsar::PhaseWeight::stats",
-		 "weight size=%d != profile nbin=%d",
-		 weight.size(), nbin);
+  check_weight (nbin, "stats");
 
   const float* amps = profile->get_amps();
 
   double totwt = 0; 
   double mu   = 0;
 
+  unsigned count = 0;
+
   for (ibin=0; ibin < nbin; ibin++) {
+
     double value = double(weight[ibin]) * double(amps[ibin]);
+
     mu += value;
     totwt += weight[ibin];
+
+    if (weight[ibin])
+      count ++;
+  }
+
+  if (totwt == 0) {
+
+    if (Profile::verbose)
+      cerr << "Pulsar::PhaseWeight::stats total weight == 0" << endl;
+ 
+    if (mean)
+      *mean = 0;
+    if (var)
+      *var = 0;
+    if (varmean)
+      *varmean = 0;
+    if (varvar)
+      *varvar = 0;
+    return;
   }
 
   // cerr << "weight=" << totwt << " sum=" << get_weight_sum() << endl;
@@ -234,11 +310,17 @@ void Pulsar::PhaseWeight::stats (const Profile* profile,
   mu2 /= totwt;
   mu4 /= totwt;
 
-  double totwt_1 = totwt - 1.0;
+  // bias-corrected sample variance
+  double correction = totwt;
+  if (count > 1)
+    correction = double(count) / double(count-1);
+
+  double var_x = mu2 * correction;
+
   double totwt3 = totwt * totwt * totwt;
 
-  // bias-corrected sample variance
-  double var_x = mu2 * totwt/totwt_1;
+  double totwt_1 = totwt / correction;
+
   double var_var = (totwt_1*totwt_1*mu4 - totwt_1*(totwt-3)*mu2*mu2)/totwt3;
 
   if (mean)
