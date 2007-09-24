@@ -26,11 +26,6 @@ Pulsar::OnPulseThreshold::OnPulseThreshold ()
   baseline_estimator = new BaselineWindow;
 }
 
-void Pulsar::OnPulseThreshold::set_Profile (const Profile* _profile)
-{
-  profile = _profile;
-}
-
 //! Set the duty cycle
 void Pulsar::OnPulseThreshold::set_threshold (float _threshold)
 {
@@ -77,17 +72,18 @@ try {
     throw Error (InvalidState, "Pulsar::OnPulseThreshold::calculate",
 		 "Profile not set");
 
-  if (!baseline_estimator)
-    throw Error (InvalidState, "Pulsar::OnPulseThreshold::calculate",
-		 "BaselineEstimator not set");
+  Reference::To<PhaseWeight> baseline;
 
-  baseline_estimator->set_Profile (profile);   
+  if (baseline_estimator) {
+    baseline = new PhaseWeight;
+    baseline_estimator->set_Profile (profile);
+    baseline_estimator->get_weight (*baseline);
+  }
+  else
+    baseline = profile->baseline();
 
-  PhaseWeight baseline;
-  baseline_estimator->get_weight (baseline);
-
-  Estimate<double> mean = baseline.get_mean ();
-  Estimate<double> rms  = sqrt(baseline.get_variance ());
+  Estimate<double> mean = baseline->get_mean ();
+  Estimate<double> rms  = sqrt(baseline->get_variance ());
 
   if (Profile::verbose)
     cerr << "Pulsar::OnPulseThreshold::calculate baseline"
