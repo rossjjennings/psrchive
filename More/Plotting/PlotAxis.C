@@ -11,23 +11,25 @@
 Pulsar::PlotAxis::PlotAxis ()
 {
   label = PlotLabel::unset;
-  pgbox_opt = "BCNST";
+  opt = "BCNST";
+  tick = 0.0;
+  nsub = 0;
   alternate = false;
 }
 
 //! Add to the options to be passed to pgbox for this axis
-void Pulsar::PlotAxis::add_pgbox_opt (char opt)
+void Pulsar::PlotAxis::add_opt (char o)
 {
-  std::string::size_type found = pgbox_opt.find(opt);
+  std::string::size_type found = opt.find(o);
   if (found == std::string::npos)
-    pgbox_opt += opt;
+    opt += o;
 }
 
 //! Remove from the options to be passed to pgbox for this axis
-void Pulsar::PlotAxis::rem_pgbox_opt (char opt)
+void Pulsar::PlotAxis::rem_opt (char o)
 {
-  std::string::size_type found = pgbox_opt.find(opt);
+  std::string::size_type found = opt.find(o);
   if (found != std::string::npos)
-    pgbox_opt.erase (found, 1);
+    opt.erase (found, 1);
 }
 

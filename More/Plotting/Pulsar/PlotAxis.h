@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotAxis.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.11 $
+   $Date: 2007/09/25 13:16:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotAxis_h
@@ -43,20 +43,33 @@ namespace Pulsar {
     bool get_alternate () const { return alternate; }
 
     //! Set the options to be passed to pgbox for this axis
-    void set_pgbox_opt (const std::string& opt) { pgbox_opt = opt; }
+    void set_opt (const std::string& o) { opt = o; }
     //! Get the label to be drawn on the axis
-    std::string get_pgbox_opt () const { return pgbox_opt; }
+    std::string get_opt () const { return opt; }
+
+    //! Set the tick to be passed to pgbox for this axis
+    void set_tick (float f) { tick = f; }
+    //! 
+    float get_tick () const { return tick; }
+
+    //! Set the nsub to be passed to pgbox for this axis
+    void set_nsub (unsigned f) { nsub = f; }
+    //! 
+    unsigned get_nsub () const { return nsub; }
 
     //! Add to the options to be passed to pgbox for this axis
-    void add_pgbox_opt (char opt);
+    void add_opt (char opt);
 
     //! Remove from the options to be passed to pgbox for this axis
-    void rem_pgbox_opt (char opt);
+    void rem_opt (char opt);
 
   protected:
 
     std::string label;
-    std::string pgbox_opt;
+    std::string opt;
+    float tick;
+    unsigned nsub;
+
     bool alternate;
 
   };
