@@ -27,7 +27,7 @@ Pulsar::StokesSpherical::StokesSpherical ()
   // remove the x label
   orientation.get_frame()->get_x_axis()->set_label("");
   // remove the x enumeration
-  orientation.get_frame()->get_x_axis()->rem_pgbox_opt('N');
+  orientation.get_frame()->get_x_axis()->rem_opt('N');
   // remove the below frame labels
   orientation.get_frame()->get_label_below()->set_all ("");
   orientation.get_frame()->get_label_above()->set_all ("");
@@ -40,13 +40,13 @@ Pulsar::StokesSpherical::StokesSpherical ()
   // remove the x label
   ellipticity.get_frame()->get_x_axis()->set_label("");
   // remove the x enumeration
-  ellipticity.get_frame()->get_x_axis()->rem_pgbox_opt('N');
+  ellipticity.get_frame()->get_x_axis()->rem_opt('N');
   // remove the below frame labels
   ellipticity.get_frame()->get_label_below()->set_all ("");
 
 }
 
-    //! Get the text interface to the configuration attributes
+//! Get the text interface to the configuration attributes
 TextInterface::Class* Pulsar::StokesSpherical::get_interface ()
 {
   return new Interface (this);

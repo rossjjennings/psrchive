@@ -20,7 +20,7 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   freq.get_frame()->set_viewport (0,.7, 0,.7);
 
   // remove the alternative labeling
-  freq.get_frame()->get_y_axis()->add_pgbox_opt ('C');
+  freq.get_frame()->get_y_axis()->add_opt ('C');
   freq.get_frame()->get_y_axis()->set_alternate (false);
   // remove the above frame labels
   freq.get_frame()->get_label_above()->set_all ("");
@@ -38,11 +38,11 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   flux.set_chan (PlotIndex (0, true));
   
   // remove the x enumeration
-  flux.get_frame()->get_x_axis()->rem_pgbox_opt('N');
+  flux.get_frame()->get_x_axis()->rem_opt('N');
   // remove the x label
   flux.get_frame()->get_x_axis()->set_label("");
   // remove the y enumeration
-  flux.get_frame()->get_y_axis()->rem_pgbox_opt('N');
+  flux.get_frame()->get_y_axis()->rem_opt('N');
   // remove the y label
   flux.get_frame()->get_y_axis()->set_label("");
   // remove the above frame labels
@@ -65,11 +65,11 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   psd.set_bin (PlotIndex (0, true));
 
   // remove the x enumeration
-  psd.get_frame()->get_x_axis()->rem_pgbox_opt('N');
+  psd.get_frame()->get_x_axis()->rem_opt('N');
   // remove the x label
   psd.get_frame()->get_x_axis()->set_label("");
   // remove the y enumeration
-  //psd.get_frame()->get_y_axis()->rem_pgbox_opt('N');
+  //psd.get_frame()->get_y_axis()->rem_opt('N');
   // shorten the y label
   psd.get_frame()->get_y_axis()->set_label("Power");
   // remove the below frame labels

@@ -27,7 +27,7 @@ Pulsar::StokesCylindrical::StokesCylindrical ()
   // remove the x label
   orientation.get_frame()->get_x_axis()->set_label("");
   // remove the x enumeration
-  orientation.get_frame()->get_x_axis()->rem_pgbox_opt('N');
+  orientation.get_frame()->get_x_axis()->rem_opt('N');
   // remove the below frame labels
   orientation.get_frame()->get_label_below()->set_all ("");
 

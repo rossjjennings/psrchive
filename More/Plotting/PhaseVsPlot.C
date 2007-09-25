@@ -23,9 +23,9 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
   colour_map.set_name( pgplot::ColourMap::Heat );
 
   // default is to invert the axis tick marks
-  get_frame()->get_x_axis()->set_pgbox_opt ("BCINTS");
+  get_frame()->get_x_axis()->set_opt ("BCINTS");
 
-  get_frame()->get_y_axis()->set_pgbox_opt ("BINTS");
+  get_frame()->get_y_axis()->set_opt ("BINTS");
   get_frame()->get_y_axis()->set_alternate (true);
 
   get_frame()->get_label_above()->set_offset (1.0);
