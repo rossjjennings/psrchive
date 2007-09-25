@@ -23,8 +23,8 @@ void nbinify (int& istart, int& iend, int nbin);
 //! Default constructor
 Pulsar::PeakConsecutive::PeakConsecutive ()
 {
-  threshold = 3.0;  // 3 sigma
-  consecutive = 3;  // pretty unlikely by chance
+  threshold = 2.0;  // 3 sigma
+  consecutive = 4;  // pretty unlikely by chance
 
   bin_start = bin_end = 0;
   range_specified = false;
@@ -176,7 +176,7 @@ void Pulsar::PeakConsecutive::build ()
 
     if (consecutive_on == consecutive) {
       if (current == off_pulse) {
-	on_transitions.push_back ((ibin+1-consecutive*2+nbin)%nbin);
+	on_transitions.push_back (ibin+1-consecutive);
 #ifdef _DEBUG
 	cerr << "TURNED ON" << endl;
 #endif
@@ -186,7 +186,7 @@ void Pulsar::PeakConsecutive::build ()
 
     if (consecutive_on == 0) {
       if (current == on_pulse) {
-	off_transitions.push_back (ibin-1+consecutive);
+	off_transitions.push_back (ibin-1);
 #ifdef _DEBUG
 	cerr << "TURNED OFF" << endl;
 #endif
@@ -213,7 +213,7 @@ void Pulsar::PeakConsecutive::build ()
 
   // if the pulse was on in the first phase bin, then shift and correct
   if (started == on_pulse)
-    cyclic_shift (on_transitions);
+    cyclic_shift (off_transitions);
 
   // choose the grouping of peaks that minimizes their collective width
 
