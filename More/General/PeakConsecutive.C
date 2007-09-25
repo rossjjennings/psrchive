@@ -23,7 +23,7 @@ void nbinify (int& istart, int& iend, int nbin);
 //! Default constructor
 Pulsar::PeakConsecutive::PeakConsecutive ()
 {
-  threshold = 3.0;  // 3 sigma
+  threshold = 2.0;  // 2 sigma
   consecutive = 3;  // pretty unlikely by chance
 
   bin_start = bin_end = 0;
