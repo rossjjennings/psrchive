@@ -19,7 +19,7 @@ using namespace std;
 
 Pulsar::AnglePlot::AnglePlot()
 {
-  error_bars = true;
+  marker = ErrorBar;
   threshold = 4.0;
   span = 0.0;
 
@@ -89,17 +89,30 @@ void Pulsar::AnglePlot::draw (const Archive *data)
       yoff = -span;
       times = 3;
     }
-    
+
+    bool err1 = false;
+    float terminal = 0.0;
+
+    if (marker & ErrorBar) {
+      terminal = 1.0;
+      err1 = true;
+    }
+
+    if (marker & ErrorTick) {
+      terminal = 0.0;
+      err1 = true;
+    }
+
     for (unsigned ioff=0; ioff < times; ioff++)
     {
-
       for (unsigned ibin=0; ibin < phases.size(); ibin++)
-        if (angles[ibin].get_variance() != 0)
-          if (error_bars)
+        if (angles[ibin].get_variance() != 0) {
+          if (err1)
             cpgerr1 (6, phases[ibin]+xoff, angles[ibin].get_value() + yoff,
-                     angles[ibin].get_error(), 1.0);
-          else
+                     angles[ibin].get_error(), terminal);
+	  if (marker & Dot)
             cpgpt1 (phases[ibin]+xoff, angles[ibin].get_value() + yoff, 17);
+	}
 
       yoff += span;
 
@@ -114,3 +127,39 @@ std::string Pulsar::AnglePlot::get_flux_label (const Archive* data)
 {
   return "P.A. (deg.)";
 }
+
+void Pulsar::AnglePlot::set_marker (const std::string& code)
+{
+  if (code == "dot" | marker & Dot)
+    marker = Dot;
+  else
+    marker = 0;
+
+  if (code == "bar")
+    marker |= ErrorBar;
+
+  if (code == "tick")
+    marker |= ErrorTick;
+}
+  
+std::string Pulsar::AnglePlot::get_marker () const
+{
+  string retval;
+
+  if (marker & Dot)
+    retval = "dot";
+
+  string error;
+
+  if (marker & ErrorBar)
+    error = "bar";
+
+  if (marker & ErrorTick)
+    error = "tick";
+
+  retval += (marker & Dot)?"+":"" + error;
+
+  return retval;
+}
+
+

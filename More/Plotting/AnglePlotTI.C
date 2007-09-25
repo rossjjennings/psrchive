@@ -23,9 +23,9 @@ Pulsar::AnglePlot::Interface::Interface (AnglePlot* instance)
   // import the interface of the base class
   import( PhasePlot::Interface() );
 
-  add( &AnglePlot::get_error_bars,
-       &AnglePlot::set_error_bars,
-       "ebar", "Plot estimated error bars" );
+  add( &AnglePlot::get_marker,
+       &AnglePlot::set_marker,
+       "mark", "Marker used for each datum" );
 
   add( &AnglePlot::get_threshold,
        &AnglePlot::set_threshold,

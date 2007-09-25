@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/AnglePlot.h,v $
-   $Revision: 1.12 $
-   $Date: 2006/12/21 15:07:48 $
+   $Revision: 1.13 $
+   $Date: 2007/09/25 14:12:06 $
    $Author: straten $ */
 
 #ifndef __Pulsar_AnglePlot_h
@@ -25,6 +25,8 @@ namespace Pulsar {
   class AnglePlot : public PhasePlot {
 
   public:
+
+    enum Mark { ErrorTick=0x01, ErrorBar=0x02, Dot=0x04 };
 
     //! Default constructor
     AnglePlot ();
@@ -57,9 +59,9 @@ namespace Pulsar {
     void set_chan (const PlotIndex& _ichan) { ichan = _ichan; }
     PlotIndex get_chan () const { return ichan; }
 
-    //! will draw the error bar on each point
-    void set_error_bars (bool bars) { error_bars = bars; }
-    bool get_error_bars () const { return error_bars; }
+    //! the mark to be used
+    void set_marker (const std::string&);
+    std::string get_marker () const;
 
     //! will draw only those points with linear > threshold * sigma
     void set_threshold (float t) { threshold = t; }
@@ -71,8 +73,8 @@ namespace Pulsar {
 
   protected:
 
-    //! Draw error bars
-    bool error_bars;
+    //! Marker used to plot each point
+    int marker;
 
     //! Noise threshold
     float threshold;
