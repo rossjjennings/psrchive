@@ -22,7 +22,7 @@ using namespace std;
 Pulsar::FluxPlot::FluxPlot ()
 {
   isubint = ichan = ipol = 0;
-  auto_zoom = 0;
+  peak_zoom = 0;
   baseline_zoom = 0;
   original_nchan = 0;
   plot_ebox = false;
@@ -48,8 +48,8 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
   // derived classes fill the plotter.profiles attribute
   get_profiles (data);
 
-  if (auto_zoom)
-    auto_scale_phase (plotter.profiles[0], auto_zoom);
+  if (peak_zoom)
+    auto_scale_phase (plotter.profiles[0], peak_zoom);
 
   if (baseline_zoom)
     selection = plotter.profiles[0]->baseline();
@@ -177,6 +177,16 @@ void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)
   if (start > stop)
     stop += 1.0;
 
+  float snr = profile->snr();
+  float adjust = 1.0;
+  if (snr > 0)
+    adjust = exp(20.0/snr);
+  if (adjust > 4.0)
+    adjust = 4.0;
+
+  cerr << "SNR=" << snr << " adjust=" << adjust << endl;
+  buf *= adjust;
+
   cerr << "AUTO ZOOM rise=" << rise << " fall=" << fall 
        << " nbin=" << nbin << endl
        << "AUTO ZOOM phase rise=" << start << " fall=" << stop << endl;
@@ -187,7 +197,7 @@ void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)
   start = mean - buf * diff;
   stop  = mean + buf * diff;
 
-  cerr << "AUTO ZOOM fixed rise=" << start << " fall=" << stop << endl;
+  cerr << "AUTO ZOOM scaled rise=" << start << " fall=" << stop << endl;
 
   get_frame()->get_x_scale()->set_range_norm (start, stop);
 }
