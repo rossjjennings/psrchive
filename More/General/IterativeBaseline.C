@@ -94,6 +94,9 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
     throw Error (InvalidState, "Pulsar::IterativeBaseline::calculate",
 		 "no Profile supplied (use set_Profile)");
 
+  bool  drift_detected = false;
+  float drift_threshold = 0.0;
+
   if (initial_baseline) try {
 
 #ifndef _DEBUG
@@ -103,6 +106,17 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
 
     initial_baseline->set_Profile (profile);
     initial_baseline->get_weight (weight);
+
+    Estimate<double> initial_mean = weight.get_mean();
+    Estimate<double> initial_rms  = sqrt( weight.get_variance() );
+
+#ifndef _DEBUG
+    if (Profile::verbose)
+#endif
+    cerr << "initial mean=" << initial_mean << " rms=" << initial_rms << endl;
+
+    drift_threshold = initial_mean.get_value() + initial_rms.get_value();
+
     initial_bounds = true;
 
   }
@@ -176,6 +190,19 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
       break;
     }
 
+    if (drift_detected)
+      break;
+
+    if (drift_threshold != 0.0 && weight.get_mean() > drift_threshold) {
+
+#ifdef _DEBUG
+      cerr << "drift detected" << endl;
+#endif
+
+      drift_detected = true;
+      initial_baseline->get_weight (weight);
+    }
+
   }
 
   if (iter >= max_iterations)
@@ -184,12 +211,18 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
 
   postprocess (weight, *profile);
 
+#ifdef _DEBUG
+  cerr << "after postprocessing, mean=" << weight.get_mean() << endl;
+#endif
+
   if (smoothing_function) {
     smoothing_function->set_weight( &weight );
     smoothing_function->get_weight( weight );
   }
 
 #ifdef _DEBUG
+  cerr << "after smoothing, mean=" << weight.get_mean() << endl;
+
   unsigned total = 0;
   for (unsigned ibin=0; ibin<nbin; ibin++)
     if (weight[ibin])
