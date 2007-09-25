@@ -127,6 +127,8 @@ void Pulsar::PlotScale::get_indeces (unsigned n,
 
   if (cyclic) {
 
+    double diff = max - min;
+
     // fold onto 0->1
     min -= floor (min);
     max -= floor (max);
@@ -134,6 +136,11 @@ void Pulsar::PlotScale::get_indeces (unsigned n,
     // and ensure that max > min
     if (max <= min)
       max += 1.0;
+
+    // and ensure that the difference is preserved
+    if (diff > 0 && (max - min) < diff)
+      max += 1.0;
+
   }
   else {
 
