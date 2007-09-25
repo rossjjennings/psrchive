@@ -58,8 +58,18 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
     if (verbose)
       cerr << "Pulsar::FluxPlot::prepare using selected bins" << endl;
 
-    frame->get_y_scale()->set_minmax (selection->get_min(),
-				      selection->get_max());
+    double min = selection->get_min();
+    double max = selection->get_max();
+
+    if (baseline_zoom) {
+      Estimate<double> mean = selection->get_mean();
+      Estimate<double> rms = sqrt(selection->get_variance());
+      min = std::min( min, mean.get_value() - baseline_zoom*rms.get_value() );
+      max = std::max( max, mean.get_value() + baseline_zoom*rms.get_value() );
+    }
+
+    frame->get_y_scale()->set_minmax (min, max);
+
   }
   else {
     if (verbose)
