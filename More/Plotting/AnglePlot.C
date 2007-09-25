@@ -25,6 +25,9 @@ Pulsar::AnglePlot::AnglePlot()
 
   isubint = 0;
   ichan = 0;
+
+  get_frame()->get_y_axis()->set_tick( 60.0 );
+  get_frame()->get_y_axis()->set_nsub( 3 );
 }
 
 TextInterface::Class* Pulsar::AnglePlot::get_interface ()
@@ -104,18 +107,6 @@ void Pulsar::AnglePlot::draw (const Archive *data)
 
   }
 
-#if 0
-  if (degrees)
-  {
-    float half_range = (max_phase - min_phase) * 180;
-    cpgswin (-half_range, +half_range, -pa_range, pa_range + plus_half);
-  }
-
-  if (publn)
-    cpgbox("bcst",0,0,"bcnst",60,6);
-  else
-    cpgbox("bcst",0,0,"bcnvst",30,3);
-#endif
 }
 
 //! Return the label for the y-axis

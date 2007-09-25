@@ -86,11 +86,18 @@ void Pulsar::PlotFrame::draw_axes (const Archive* data)
 
   if (Plot::verbose)
     cerr << "Pulsar::PlotFrame::draw_axes"
-      " xopt='" << get_x_axis(true)->get_pgbox_opt() << "'"
-      " yopt='" << get_y_axis(true)->get_pgbox_opt() << "'" << endl;
+      " xopt='" << get_x_axis(true)->get_opt() << "'"
+      " yopt='" << get_y_axis(true)->get_opt() << "'" << endl;
 
-  cpgbox( get_x_axis(true)->get_pgbox_opt().c_str(), 0.0, 0,
-	  get_y_axis(true)->get_pgbox_opt().c_str(), 0.0, 0 );
+  PlotAxis* xAxis = get_x_axis(true);
+  PlotAxis* yAxis = get_y_axis(true);
+
+  cpgbox( xAxis->get_opt().c_str(),
+	  xAxis->get_tick(),
+	  xAxis->get_nsub(),
+	  yAxis->get_opt().c_str(),
+	  yAxis->get_tick(),
+	  yAxis->get_nsub() );
 }
 
 void Pulsar::PlotFrame::label_axes (const string& default_x,
@@ -192,8 +199,8 @@ void Pulsar::PlotFrame::no_labels ()
 {
   PlotAttributes::no_labels ();
  
-  get_x_axis()->rem_pgbox_opt('N');
-  get_y_axis()->rem_pgbox_opt('N');
+  get_x_axis()->rem_opt('N');
+  get_y_axis()->rem_opt('N');
   
   get_x_axis()->set_label(" ");
   get_y_axis()->set_label(" ");
