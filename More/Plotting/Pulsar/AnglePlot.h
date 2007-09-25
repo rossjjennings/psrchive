@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/AnglePlot.h,v $
-   $Revision: 1.13 $
-   $Date: 2007/09/25 14:12:06 $
+   $Revision: 1.14 $
+   $Date: 2007/09/25 14:46:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_AnglePlot_h
@@ -26,7 +26,7 @@ namespace Pulsar {
 
   public:
 
-    enum Mark { ErrorTick=0x01, ErrorBar=0x02, Dot=0x04 };
+    enum Marker { ErrorTick=0x01, ErrorBar=0x02, Dot=0x04 };
 
     //! Default constructor
     AnglePlot ();
@@ -60,8 +60,8 @@ namespace Pulsar {
     PlotIndex get_chan () const { return ichan; }
 
     //! the mark to be used
-    void set_marker (const std::string&);
-    std::string get_marker () const;
+    void set_marker (Marker m) { marker = m; }
+    Marker get_marker () const { return marker; }
 
     //! will draw only those points with linear > threshold * sigma
     void set_threshold (float t) { threshold = t; }
@@ -74,7 +74,7 @@ namespace Pulsar {
   protected:
 
     //! Marker used to plot each point
-    int marker;
+    Marker marker;
 
     //! Noise threshold
     float threshold;
@@ -88,6 +88,9 @@ namespace Pulsar {
     PlotIndex ichan;
     PlotIndex isubint;
   };
+
+  std::ostream& operator << (std::ostream& os, AnglePlot::Marker);
+  std::istream& operator >> (std::istream& is, AnglePlot::Marker&);
 
 }
 

@@ -128,38 +128,51 @@ std::string Pulsar::AnglePlot::get_flux_label (const Archive* data)
   return "P.A. (deg.)";
 }
 
-void Pulsar::AnglePlot::set_marker (const std::string& code)
+std::ostream& Pulsar::operator << (std::ostream& os, AnglePlot::Marker marker)
 {
-  if (code == "dot" | marker & Dot)
-    marker = Dot;
+  if (marker & AnglePlot::Dot) {
+    os << "dot";
+    if (marker & ~AnglePlot::Dot)
+      os << "+";
+  }
+
+  if (marker & AnglePlot::ErrorBar)
+    os << "bar";
+
+  if (marker & AnglePlot::ErrorTick)
+    os << "tick";
+
+  return os;
+}
+
+std::istream& Pulsar::operator >> (std::istream& is, AnglePlot::Marker& marker)
+{
+  std::string input;
+  is >> input;
+
+  marker = (AnglePlot::Marker) 0;
+
+  if (input == "dot") {
+    marker = AnglePlot::Dot;
+    return is;
+  }
+
+  if (input.substr(0,4) == "dot+") {
+    marker = AnglePlot::Dot;
+    input.erase(0,4);
+  }
+
+  if (input == "bar")
+    marker = (AnglePlot::Marker) (marker | AnglePlot::ErrorBar);
+
+  else if (input == "tick")
+    marker = (AnglePlot::Marker) (marker | AnglePlot::ErrorTick);
+
   else
-    marker = 0;
+    throw Error (InvalidParam, "operator >> AnglePlot::Marker",
+		 "invalid code = " + input);
 
-  if (code == "bar")
-    marker |= ErrorBar;
-
-  if (code == "tick")
-    marker |= ErrorTick;
+  return is;
 }
   
-std::string Pulsar::AnglePlot::get_marker () const
-{
-  string retval;
-
-  if (marker & Dot)
-    retval = "dot";
-
-  string error;
-
-  if (marker & ErrorBar)
-    error = "bar";
-
-  if (marker & ErrorTick)
-    error = "tick";
-
-  retval += (marker & Dot)?"+":"" + error;
-
-  return retval;
-}
-
 
