@@ -29,7 +29,6 @@ void Pulsar::Differentiate::transform (Profile* profile)
 
   for (unsigned i=span; i<nbin+span; i++) {
     difference[i%nbin] = amps[(i+span)%nbin] - amps[i-span];
-    cerr << i%nbin << " " << (i+span)%nbin << " " << i-span << " " << difference[i%nbin] << endl;
   }
 
   profile->set_amps (difference);
