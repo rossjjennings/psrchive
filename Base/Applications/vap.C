@@ -82,6 +82,8 @@ string meta_filename = "";
 
 table_stream ts(&cout);
 
+bool full_paths = false;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // PRECISION FOR tostring
@@ -1715,7 +1717,7 @@ void PrintExtdHlp( void )
 void ProcArgs( int argc, char *argv[] )
 {
   int gotc;
-  while ((gotc = getopt (argc, argv, "nc:sEphHvVtTXM:")) != -1)
+  while ((gotc = getopt (argc, argv, "nc:sEphHvVtTXM:R")) != -1)
     switch (gotc)
     {
 
@@ -1759,6 +1761,10 @@ void ProcArgs( int argc, char *argv[] )
 
     case 'M':
       meta_filename = optarg;
+      break;
+
+    case 'R':
+      full_paths = true;
       break;
 
     default:
@@ -1911,7 +1917,10 @@ void ProcessArchive( string filename )
   if( !archive )
     return;
 
-  ts << filename;
+  if( full_paths )
+    ts << filename;
+  else
+    ts << basename( filename );
 
   vector< string >::iterator it;
   for( it = commands.begin(); it != commands.end(); it ++ )
@@ -1938,7 +1947,12 @@ void ExtractPolyco( string filename )
   if( !archive )
     return;
 
-  cout << filename << " has polyco:" << endl << endl;
+  if( !full_paths )
+    cout << basename(filename);
+  else
+    cout << filename;
+
+  cout << " has polyco:" << endl << endl;
 
   archive->get_model()->unload( stdout );
 
@@ -2006,6 +2020,7 @@ void ExpandMetafile( string meta_filename, vector< string > &filenames )
   }
   infile.close();
 }
+
 
 
 
