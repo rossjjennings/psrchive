@@ -179,10 +179,10 @@ void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)
 
   float snr = profile->snr();
   float adjust = 1.0;
-  if (snr > 0)
-    adjust = exp(20.0/snr);
-  if (adjust > 4.0)
-    adjust = 4.0;
+
+  float s0 = 30;
+  if (snr < s0)
+    adjust = s0 / snr;
 
   cerr << "SNR=" << snr << " adjust=" << adjust << endl;
   buf *= adjust;
@@ -194,8 +194,13 @@ void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)
   double mean = (stop + start) * 0.5;
   double diff = (stop - start) * 0.5;
 
-  start = mean - buf * diff;
-  stop  = mean + buf * diff;
+  double span = buf * diff;
+
+  if (span > 0.5)
+    span = 0.5;
+
+  start = mean - span;
+  stop  = mean + span;
 
   cerr << "AUTO ZOOM scaled rise=" << start << " fall=" << stop << endl;
 
