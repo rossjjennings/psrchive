@@ -1551,6 +1551,8 @@ void PrintBasicHlp( void )
   "\n"
   "-M  extract list of files from metafile\n"
   "\n"
+  "-R  show relative path names\n"
+  "\n"
   "-s show the extensions present in an archive\n"
   << endl;
 }
