@@ -28,7 +28,7 @@ Pulsar::FluxPlot::Interface::Interface (FluxPlot* instance)
 
   add( &FluxPlot::get_auto_zoom,
        &FluxPlot::set_auto_zoom,
-       "zoom", "Auto zoom on on-pulse" );
+       "peak", "Auto zoom on peak" );
 
   add( &FluxPlot::get_baseline_zoom,
        &FluxPlot::set_baseline_zoom,
