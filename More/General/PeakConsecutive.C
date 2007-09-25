@@ -23,7 +23,7 @@ void nbinify (int& istart, int& iend, int nbin);
 //! Default constructor
 Pulsar::PeakConsecutive::PeakConsecutive ()
 {
-  threshold = 2.0;  // 2 sigma
+  threshold = 3.0;  // 3 sigma
   consecutive = 3;  // pretty unlikely by chance
 
   bin_start = bin_end = 0;
@@ -105,6 +105,8 @@ void cyclic_shift (vector<C>& array)
   array[array.size()-1] = temp;
 }
 
+// #define _DEBUG
+
 void Pulsar::PeakConsecutive::build ()
 {
   if (!profile)
@@ -135,7 +137,7 @@ void Pulsar::PeakConsecutive::build ()
   const float* amps = profile->get_amps();
 
   int start = 0;
-  int stop = nbin+consecutive-1;
+  int stop = nbin+consecutive;
 
   if (range_specified) {
     start = bin_start;
@@ -157,20 +159,38 @@ void Pulsar::PeakConsecutive::build ()
 
   for (int ibin=start; ibin < stop; ibin++) {
 
+#ifdef _DEBUG
+    cerr << "ibin=" << ibin << " ";
+    if (current == on_pulse)
+      cerr << "on" << endl;
+    if (current == off_pulse)
+      cerr << "off" << endl;
+    if (current == undefined)
+      cerr << "?" << endl;
+#endif
+
     if (amps[ibin%nbin] > cutoff)
       consecutive_on ++;
     else
       consecutive_on = 0;
 
     if (consecutive_on == consecutive) {
-      if (current == off_pulse)
-	on_transitions.push_back (ibin+1-consecutive);
+      if (current == off_pulse) {
+	on_transitions.push_back ((ibin+1-consecutive*2+nbin)%nbin);
+#ifdef _DEBUG
+	cerr << "TURNED ON" << endl;
+#endif
+      }
       current = on_pulse;
     }
 
     if (consecutive_on == 0) {
-      if (current == on_pulse)
-	off_transitions.push_back (ibin-1);
+      if (current == on_pulse) {
+	off_transitions.push_back (ibin-1+consecutive);
+#ifdef _DEBUG
+	cerr << "TURNED OFF" << endl;
+#endif
+      }
       current = off_pulse;
     }
 
@@ -185,15 +205,15 @@ void Pulsar::PeakConsecutive::build ()
 		 on_transitions.size(),
 		 off_transitions.size());
 
+#ifndef _DEBUG
   if (Profile::verbose)
+#endif
     cerr << "Pulsar::PeakConsecutive::build transitions="
 	 << on_transitions.size() << endl;
 
   // if the pulse was on in the first phase bin, then shift and correct
-  if (started == on_pulse) {
+  if (started == on_pulse)
     cyclic_shift (on_transitions);
-    off_transitions[0] += nbin;
-  }
 
   // choose the grouping of peaks that minimizes their collective width
 
@@ -204,11 +224,23 @@ void Pulsar::PeakConsecutive::build ()
   for (unsigned i=0; i < number; i++) {
 
     unsigned last = (i+offset) % number;
-    unsigned width = off_transitions[last] - on_transitions[i];
+
+    unsigned on = on_transitions[i];
+    unsigned off = off_transitions[last];
+    if (off < on)
+      off += nbin;
+
+    unsigned width = off - on;
+
+#ifdef _DEBUG
+    cerr << "i=" << i << " last=" << last << " on=" << on
+	 << " off=" << off << " width=" << width << endl;
+#endif
+
     if (width < min_width) {
       min_width = width;
-      bin_rise = on_transitions[i];
-      bin_fall = off_transitions[last];
+      bin_rise = on;
+      bin_fall = off;
     }
 
   }
