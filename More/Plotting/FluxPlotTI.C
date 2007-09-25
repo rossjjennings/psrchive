@@ -26,8 +26,8 @@ Pulsar::FluxPlot::Interface::Interface (FluxPlot* instance)
 
   import( PhasePlot::Interface() );
 
-  add( &FluxPlot::get_auto_zoom,
-       &FluxPlot::set_auto_zoom,
+  add( &FluxPlot::get_peak_zoom,
+       &FluxPlot::set_peak_zoom,
        "peak", "Auto zoom on peak" );
 
   add( &FluxPlot::get_baseline_zoom,
