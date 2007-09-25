@@ -269,6 +269,16 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
   Telescope* telescope = getadd<Telescope>();
   telescope->set_coordinates (get_telescope_code());
+  
+  // RA
+    
+  psrfits_read_key( fptr, "RA", &tempstr, dfault, verbose == 3 );
+  hdr_ext->set_ra( tempstr );
+  
+  // DEC
+  
+  psrfits_read_key( fptr, "DEC", &tempstr, dfault, verbose == 3 );
+  hdr_ext->set_dec( tempstr );
 
   // Antenna ITRF coordinates
 
@@ -289,6 +299,8 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
   psrfits_read_key (fptr, "OBS_MODE", &tempstr);
   string obs_mode = tempstr;
+  
+  hdr_ext->set_obs_mode( obs_mode );
 
   // Read the name of the source
 
