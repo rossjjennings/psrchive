@@ -47,14 +47,22 @@ double Pulsar::MaskSmooth::get_masked () const
   return masked;
 }
 
+// #define _DEBUG 1
+
 void Pulsar::MaskSmooth::calculate (PhaseWeight* weight)
 {
   unsigned nbin = input_weight->get_nbin();
   unsigned iwindow = nbin * window * 0.5;
   unsigned imasked = iwindow * masked;
 
+  if (imasked == 0) {
+    imasked = 1;
+    iwindow = unsigned (float(imasked)/masked);
+  }
+
 #ifdef _DEBUG
-  cerr << "Pulsar::MaskSmooth::calculate iwindow=" << iwindow << endl;
+  cerr << "Pulsar::MaskSmooth::calculate iwindow=" << iwindow 
+       << " imasked=" << imasked << endl;
 #endif
 
   for (unsigned ibin=0; ibin < nbin; ibin++) {
