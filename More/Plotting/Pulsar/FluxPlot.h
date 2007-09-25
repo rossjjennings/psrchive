@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.23 $
-   $Date: 2007/09/25 09:34:31 $
+   $Revision: 1.24 $
+   $Date: 2007/09/25 14:12:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -125,6 +125,7 @@ namespace Pulsar {
 
     bool plot_ebox;
     float peak_zoom;
+    bool peak_centre_origin;
     float baseline_zoom;
     unsigned original_nchan;
 

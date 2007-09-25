@@ -22,10 +22,14 @@ using namespace std;
 Pulsar::FluxPlot::FluxPlot ()
 {
   isubint = ichan = ipol = 0;
+
   peak_zoom = 0;
+  peak_centre_origin = true;
+
   baseline_zoom = 0;
-  original_nchan = 0;
   plot_ebox = false;
+
+  original_nchan = 0;
 
   get_frame()->get_y_scale()->set_buf_norm(0.05);
 }
@@ -205,6 +209,10 @@ void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)
   cerr << "AUTO ZOOM scaled rise=" << start << " fall=" << stop << endl;
 
   get_frame()->get_x_scale()->set_range_norm (start, stop);
+
+  if (peak_centre_origin)
+    get_scale()->set_origin_norm( -0.5 * (start+stop) );
+
 }
 
 template<typename T> T sqr (T x) { return x*x; }
