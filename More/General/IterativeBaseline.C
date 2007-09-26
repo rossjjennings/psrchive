@@ -10,7 +10,7 @@
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 
-#include "Pulsar/MaskSmooth.h"
+#include "Pulsar/ConvertIsolated.h"
 
 #include <math.h>
 
@@ -24,7 +24,7 @@ Pulsar::IterativeBaseline::IterativeBaseline ()
   window->set_duty_cycle (Profile::default_duty_cycle);
 
   set_initial_baseline (window);
-  set_smoothing_function (new MaskSmooth);
+  set_smoothing_function (new ConvertIsolated);
 
   threshold = 2.0;
   max_iterations = 100;
