@@ -108,9 +108,13 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_on_pulse () const
 	 << " var=" << variance << endl;
 
   return Estimate<double> (on_pulse.get_weighted_sum(), 
-			   variance * sqrt(navg));
+			   variance * navg);
 }
 
+Estimate<double> Pulsar::PolnProfileStats::get_baseline_variance () const
+{
+  return baseline_variance;
+}
 
 void Pulsar::PolnProfileStats::build ()
 try {
@@ -124,6 +128,8 @@ try {
 
   baseline_estimator->set_Profile (profile->get_Profile(0));
   baseline_estimator->get_weight (baseline);
+
+  baseline_variance = baseline.get_variance();
 
   if (Profile::verbose)
     cerr << "Pulsar::PolnProfileStats::build nbin=" << profile->get_nbin()
