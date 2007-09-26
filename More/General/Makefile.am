@@ -24,6 +24,7 @@ nobase_include_HEADERS = \
         Pulsar/ChannelZapMedian.h \
         Pulsar/ChannelZapModulation.h \
         Pulsar/ColdPlasma.h \
+	Pulsar/ConvertIsolated.h \
 	Pulsar/Differentiate.h \
         Pulsar/DispersionDelay.h \
         Pulsar/Dispersion.h \
@@ -121,6 +122,7 @@ libGeneral_la_SOURCES = \
         BaselineWindow.C \
         ChannelZapMedian.C \
         ChannelZapModulation.C \
+	ConvertIsolated.C \
 	Differentiate.C \
         Dispersion.C \
         DispersionDelay.C \
