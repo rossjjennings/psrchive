@@ -225,6 +225,8 @@ int main (int argc, char** argv) try {
 
   Pulsar::Interpreter* preprocessor = standard_shell();
 
+  preprocessor->parse("baseline normal");
+
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
     Reference::To<Archive> archive;
