@@ -720,6 +720,7 @@ void set_dedispersion(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &de
 		arch->set_dispersion_measure(0);
 		arch->dedisperse();
 	}
+	arch->remove_baseline();
 }
 
 void set_centre(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &centered, string type, bool dedispersed)
