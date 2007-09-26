@@ -38,7 +38,7 @@ float Pulsar::ConvertIsolated::get_neighbourhood () const
 void Pulsar::ConvertIsolated::calculate (PhaseWeight* weight)
 {
   unsigned nbin = input_weight->get_nbin();
-  unsigned ncheck = nbin * neighbourhood;
+  unsigned ncheck = unsigned( nbin * neighbourhood );
 
   if (ncheck < 2)
     ncheck = 2;
