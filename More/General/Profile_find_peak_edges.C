@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/Profile.h"
-#include "Pulsar/PeakCumulative.h"
+#include "Pulsar/PeakConsecutive.h"
 #include "Error.h"
 
 Reference::To<Pulsar::RiseFall> Pulsar::Profile::peak_edges;
@@ -19,7 +19,7 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
 try {
 
   if (!peak_edges)
-    peak_edges = new Pulsar::PeakCumulative;
+    peak_edges = new Pulsar::PeakConsecutive;
 
   peak_edges->set_Profile (this);
   peak_edges->get_indeces (rise, fall);
