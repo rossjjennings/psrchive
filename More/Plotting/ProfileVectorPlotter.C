@@ -79,7 +79,7 @@ void Pulsar::ProfileVectorPlotter::draw( const Profile* profile,
   if (ordinates.size() != nbin) {
     ordinates.resize (nbin);
     for (unsigned i=0; i<nbin; i++)
-      ordinates[i] = i;
+      ordinates[i] = (double(i)+0.5) / double(nbin);
   }
 
   if (start_x > end_x)
@@ -88,6 +88,8 @@ void Pulsar::ProfileVectorPlotter::draw( const Profile* profile,
 
   unsigned total_pts = unsigned( ( end_x - start_x ) * nbin );
   
+  // cerr << "total pts=" << total_pts << endl;
+
   float xs[total_pts];
   float ys[total_pts];
 
