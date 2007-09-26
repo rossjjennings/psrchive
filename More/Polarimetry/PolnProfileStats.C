@@ -8,17 +8,15 @@
 #include "Pulsar/PolnProfile.h"
 
 #include "Pulsar/OnPulseThreshold.h"
-#include "Pulsar/BaselineEstimator.h"
+#include "Pulsar/GaussianBaseline.h"
 
 using namespace std;
 
 //! Default constructor
 Pulsar::PolnProfileStats::PolnProfileStats (const PolnProfile* _profile)
 {
-  OnPulseThreshold* threshold = new OnPulseThreshold;
-
-  set_on_pulse_estimator (threshold);
-  set_baseline_estimator (threshold->get_baseline_estimator());
+  set_on_pulse_estimator (new OnPulseThreshold);
+  set_baseline_estimator (new GaussianBaseline);
 
   set_profile (_profile);
 }
@@ -67,7 +65,6 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_polarized () const
   profile->get_polarized (&polarized);
 
   setup (&polarized);
-  polarized -= baseline.get_mean().get_value();
 
   return get_total_on_pulse ();
 }
@@ -79,7 +76,6 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_linear () const
   profile->get_linear (&linear);
 
   setup (&linear);
-  linear -= baseline.get_mean().get_value();
 
   return get_total_on_pulse ();
 }
@@ -94,11 +90,10 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_circular () const
 //! Returns the total absolute value of circularly polarized flux
 Estimate<double> Pulsar::PolnProfileStats::get_total_abs_circular () const
 {
-  Profile abs_circular (*(profile->get_Profile(3)));
-  abs_circular.absolute ();
+  Profile circular;
+  profile->get_circular (&circular);
 
-  setup (&abs_circular);
-  abs_circular -= baseline.get_mean().get_value();
+  setup (&circular);
 
   return get_total_on_pulse ();
 }
