@@ -12,6 +12,7 @@
 #include <Pulsar/Archive.h>
 #include <Pulsar/Integration.h>
 #include <float.h>
+#include <cpgplot.h>
 
 
 
@@ -64,7 +65,7 @@ unsigned LinePhasePlot::get_nrow (const Archive* arch)
 
 const Profile* LinePhasePlot::get_Profile (const Archive* arch, unsigned row)
 {
-    return &data[row];
+    return data[row].ptr();
 }
 
 
@@ -101,58 +102,69 @@ void LinePhasePlot::prepare (const Archive* arch )
     //   for each amp
     //     multiply the amp by the bias times the profile index
     //   set the amps for the profile to the new amps
+  
+  try
+  {
 
-//     int ipol = 0;
-//     int ichan = 100;
-//     int isubint = -1;
-// 
-//     int nsub = arch->get_nsubint();
-//     int nbin = arch->get_nbin();
-// 
-//     int fsub = 0;
-//     int lsub = nsub - 1;
-// 
-//     float max_amp = FLT_MIN;
-//     float min_amp = FLT_MAX;
-// 
-//     data.resize( nsub );
-// 
-//     for( int s = fsub; s <= lsub; s ++ )
-//     {
-//         const float *orig_amps = arch->get_Integration(s)->get_Profile( ipol, ichan )->get_amps();
-//         vector<float> new_amps( nbin );
-// 
-//         for( int a = 0; a < nbin; a ++ )
-//         {
-//             new_amps[a] = orig_amps[a];
-//             if( new_amps[a] > max_amp )
-//                 max_amp = new_amps[a];
-//             if( new_amps[a] < min_amp )
-//                 min_amp = new_amps[a];
-//         }
-//         data[s-fsub].set_amps( new_amps );
-//     }
-//     
-//     // TODO: fix up this hack for setting the scale.
-//     get_frame()->get_y_scale()->set_minmax( min_amp, max_amp );
-// 
-//     float bias = max_amp / 3.0;
-// 
-//     for( int p = 0; p < data.size(); p ++ )
-//     {
-//         const float *next_amps = data[p].get_amps();
-//         vector<float> adj_amps(nbin);
-//         for( int a = 0; a < nbin; a ++ )
-//         {
-//             adj_amps[a] = next_amps[a] + p * bias;
-//         }
-//         data[p].set_amps( adj_amps );
-//     }
+    int ipol = 0;
+    int ichan = 0;
+    int isubint = -1;
+
+    int nsub = arch->get_nsubint();
+    int nbin = arch->get_nbin();
+
+    int fsub = 0;
+    int lsub = nsub - 1;
+
+    float max_amp = FLT_MIN;
+    float min_amp = FLT_MAX;
+
+    data.empty();
+
+    for( int s = fsub; s <= lsub; s ++ )
+    {
+        const float *orig_amps = arch->get_Integration(s)->get_Profile( ipol, ichan )->get_amps();
+        vector<float> new_amps( nbin );
+
+        for( int a = 0; a < nbin; a ++ )
+        {
+            new_amps[a] = orig_amps[a];
+            if( new_amps[a] > max_amp )
+                max_amp = new_amps[a];
+            if( new_amps[a] < min_amp )
+                min_amp = new_amps[a];
+        }
+	Reference::To<Profile> new_profile = new Profile();  
+	new_profile->set_amps( new_amps );
+	data.push_back( new_profile );
+	
+	cerr << "( " << min_amp << ", " << max_amp << " )" << endl;
+    }
+    
+    // TODO: fix up this hack for setting the scale.
+    get_frame()->get_y_scale()->set_minmax( min_amp, max_amp );
+
+    float bias = (max_amp - min_amp) / 3;
+
+    for( int p = 0; p < data.size(); p ++ )
+    {
+        const float *next_amps = data[p]->get_amps();
+        vector<float> adj_amps(nbin);
+        for( int a = 0; a < nbin; a ++ )
+        {
+            adj_amps[a] = next_amps[a] + p * bias;
+        }
+        data[p]->set_amps( adj_amps );
+    }
+
+  }
+  catch( Error e )
+  {
+    cerr << "preparing LinePhasePlot failed with exception " << e << endl;
+  }
 
 
-
-
-
+  set_line_colour( 7 );
 
 
 
@@ -233,6 +245,23 @@ void LinePhasePlot::prepare (const Archive* arch )
             }
           data[i].set_amps( &amps[i*nbin] );
         }*/
+}
+
+
+
+/**
+ * get_interface
+ *
+ * DOES     - Returns a text interface to this object
+ * RECEIVES - Nothing
+ * RETURNS  - text interface
+ * THROWS   - Nothing
+ * TODO     - Nothing
+ **/
+
+TextInterface::Class *LinePhasePlot::get_interface()
+{
+  return new Interface( this );
 }
 
 

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/LinePhasePlot.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/09/06 01:22:26 $
+   $Revision: 1.2 $
+   $Date: 2007/09/28 06:11:15 $
    $Author: nopeer $ */
 
 
@@ -34,16 +34,31 @@ namespace Pulsar
     LinePhasePlot();
     ~LinePhasePlot();
 
-    //! Derived classes must provide the number of rows
-    virtual unsigned get_nrow (const Archive* arch);
+    unsigned get_nrow (const Archive* arch);
 
-    //! Derived classes must provide the Profile for the specified row
-    virtual const Profile* get_Profile (const Archive* arch, unsigned row);
-    
-    virtual void prepare (const Archive* data);
+    const Profile* get_Profile (const Archive* arch, unsigned row);
+
+    void prepare (const Archive* data);
+
+  class Interface : public TextInterface::To<LinePhasePlot>
+    {
+    public:
+      Interface( LinePhasePlot *target = NULL );
+    };
+
+    TextInterface::Class *get_interface();
+
+    int get_isub( void ) const { return isub; }
+    void set_isub( int s_isub ) { isub = s_isub; }
+
+    int get_ipol( void ) const { return ipol; }
+    void set_ipol( int s_ipol ) { ipol = s_ipol; }
 
   private:
-    vector< Profile > data;
+    vector< Reference::To<Profile> > data;
+    int ipol;
+    int ichan;
+    int isub;
   };
 }
 
