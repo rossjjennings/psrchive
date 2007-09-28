@@ -60,7 +60,7 @@ libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
 	TwoBitPlot.C TwoBitPlotTI.C \
 	Poincare.C PoincareTI.C \
 	ProfileVectorPlotter.C \
-	LinePhasePlot.C \
+	LinePhasePlot.C LinePhasePlotTI.C \
 	CalibratorSpectrum.C CalibratorSpectrumTI.C
 
 endif
