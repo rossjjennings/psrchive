@@ -22,6 +22,8 @@
 #include "Pulsar/CalibratorSpectrum.h"
 #include "Pulsar/LinePhasePlot.h"
 #include "Pulsar/DynamicSNSpectrum.h"
+#include "Pulsar/FreqVsSNRPlot.h"
+#include "Pulsar/CalPhVFreqPlot.h"
 
 #include "Error.h"
 #include "pad.h"
@@ -76,6 +78,12 @@ Pulsar::PlotFactory::PlotFactory ()
   
   add ( new PlotFactory::Advocate<DynamicSNSpectrum>
         ( 'j', "dspec", "Dynamic SN Spectrum" ) );
+  
+  add ( new PlotFactory::Advocate<FreqVsSNRPlot>
+        ( 'n', "snrspec", "S/N ratio" ) );
+  
+  add ( new PlotFactory::Advocate<CalPhVFreqPlot>
+        ( 'V', "calphvf", "Calibrator phase vs frequency plot" ) );
 }
 
 //! Return a new instance of the named plotter
