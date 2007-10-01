@@ -21,6 +21,7 @@
 #include "Pulsar/Poincare.h"
 #include "Pulsar/CalibratorSpectrum.h"
 #include "Pulsar/LinePhasePlot.h"
+#include "Pulsar/DynamicSNSpectrum.h"
 
 #include "Error.h"
 #include "pad.h"
@@ -72,6 +73,9 @@ Pulsar::PlotFactory::PlotFactory ()
   
   add ( new PlotFactory::Advocate<LinePhasePlot>
         ('R', "line", "Line phase subints" ) );
+  
+  add ( new PlotFactory::Advocate<DynamicSNSpectrum>
+        ( 'j', "dspec", "Dynamic SN Spectrum" ) );
 }
 
 //! Return a new instance of the named plotter

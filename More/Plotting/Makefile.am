@@ -25,6 +25,7 @@ nobase_include_HEADERS = \
 	Pulsar/Poincare.h Pulsar/ProfileVectorPlotter.h			\
 	Pulsar/TwoBitPlot.h Pulsar/CalibratorSpectrum.h 		\
 	Pulsar/LinePhasePlot.h						\
+	Pulsar/DynamicSNSpectrum.h					\
 	Pulsar/InfoLabel.h
 
 libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
@@ -61,6 +62,7 @@ libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
 	Poincare.C PoincareTI.C \
 	ProfileVectorPlotter.C \
 	LinePhasePlot.C LinePhasePlotTI.C \
+	DynamicSNSpectrum.C DynamicSNSpectrumTI.C \
 	CalibratorSpectrum.C CalibratorSpectrumTI.C
 
 endif
