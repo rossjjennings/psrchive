@@ -34,6 +34,7 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
   get_frame()->get_label_below()->set_all (PlotLabel::unset);
 
   style = "image";
+  line_colour = -1;
 }
 
 TextInterface::Class* Pulsar::PhaseVsPlot::get_interface ()
@@ -120,6 +121,9 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   }
   else if (style == "line")
   {
+    if( line_colour != -1 )
+      cpgsci( line_colour );
+    
     get_z_scale()->set_minmax (0, max);
     get_z_scale()->get_range (min, max);
 
@@ -166,6 +170,9 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
 	cpgline( 2, pxs, pys );
       }
     }
+    
+    if( line_colour != -1 )
+      cpgsci( 1 );
   }
 
   if (get_frame()->get_y_axis()->get_alternate())

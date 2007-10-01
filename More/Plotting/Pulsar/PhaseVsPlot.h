@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.13 $
-   $Date: 2007/06/08 00:40:24 $
-   $Author: straten $ */
+   $Revision: 1.14 $
+   $Date: 2007/10/01 09:55:30 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_PhaseVsPlot_h
 #define __Pulsar_PhaseVsPlot_h
@@ -57,6 +57,11 @@ namespace Pulsar {
     void set_style (const std::string&);
     //! Get the style
     std::string get_style () const { return style; }
+    
+    //! Set the line colour
+    void set_line_colour( int new_colour ) { line_colour = new_colour; }
+    //! Get the line colour
+    int get_line_colour( void ) { return line_colour; }
 
   protected:
 
@@ -66,6 +71,9 @@ namespace Pulsar {
 
     //! The style in which the data will be plotted
     std::string style;
+    
+    //! The colour to draw the lines
+    int line_colour;
 
   };
 
