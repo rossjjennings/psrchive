@@ -26,6 +26,8 @@ nobase_include_HEADERS = \
 	Pulsar/TwoBitPlot.h Pulsar/CalibratorSpectrum.h 		\
 	Pulsar/LinePhasePlot.h						\
 	Pulsar/DynamicSNSpectrum.h					\
+	Pulsar/FreqVsSNRPlot.h						\
+	Pulsar/CalPhVFreqPlot.h						\
 	Pulsar/InfoLabel.h
 
 libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
@@ -63,7 +65,9 @@ libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
 	ProfileVectorPlotter.C \
 	LinePhasePlot.C LinePhasePlotTI.C \
 	DynamicSNSpectrum.C DynamicSNSpectrumTI.C \
-	CalibratorSpectrum.C CalibratorSpectrumTI.C
+	CalibratorSpectrum.C CalibratorSpectrumTI.C \
+	FreqVsSNRPlot.C FreqVsSNRPlotTI.C \
+	CalPhVFreqPlot.C CalPhVFreqPlotTI.C
 
 endif
 
