@@ -168,7 +168,7 @@ test_IRIonosphere_SOURCES	= test_IRIonosphere.C
 # Dependencies should never be changed
 #
 
-INCLUDES = @PGPLOT_CFLAGS@
+INCLUDES = -I$(top_srcdir)/More/Plotting @PGPLOT_CFLAGS@
 
 LDADD = libPolarimetry.la $(top_builddir)/More/MEAL/libMEAL.la \
 	$(top_builddir)/Util/libpsrutil.la
