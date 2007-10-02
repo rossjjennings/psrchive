@@ -6,6 +6,7 @@
 
 
 #include "PavApp.h"
+#include <tostring.h>
 
 
 
@@ -645,6 +646,9 @@ bool PavApp::device_is_printer( string devname )
 
 int PavApp::run( int argc, char *argv[] )
 {
+  tostring_places = true;
+  tostring_precision = 3;
+  
   vector< string > filenames;
 
   // name of file containing list of Archive filenames
@@ -730,7 +734,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.6 2007/10/02 23:23:20 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.7 2007/10/02 23:50:22 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
