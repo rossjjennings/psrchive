@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/RiseFall.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/09/24 08:53:04 $
+   $Revision: 1.2 $
+   $Date: 2007/10/02 05:19:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_RiseFall_h
@@ -22,6 +22,9 @@ namespace Pulsar {
   class RiseFall : public OnPulseEstimator {
 
   public:
+
+    //! Return the rise and fall as a pair
+    virtual std::pair<int, int> get_rise_fall (const Profile*);
 
     //! Return the pulse phase bins in which the pulse rises and falls
     virtual void get_indeces (int& rise, int& fall) const = 0;

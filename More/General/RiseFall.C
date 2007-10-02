@@ -27,3 +27,17 @@ void Pulsar::RiseFall::calculate (PhaseWeight& weight)
   for (int ibin=bin_rise; ibin<bin_fall; ibin++)
     weight[ibin % nbin] = 1.0;
 }
+
+std::pair<int,int> Pulsar::RiseFall::get_rise_fall (const Profile* profile)
+{
+  set_Profile (profile);
+
+  int rise, fall;
+  get_indeces (rise, fall);
+
+  std::pair<int,int> result;
+  result.first = rise;
+  result.second = fall;
+
+  return result;
+}
