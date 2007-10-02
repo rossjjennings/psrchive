@@ -13,6 +13,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+#include "Pulsar/Config.h"
+
 #include "Pulsar/ScatteredPowerCorrection.h"
 #include "Pulsar/DurationWeight.h"
 #include "Pulsar/SNRWeight.h"
@@ -127,7 +129,15 @@ void Pulsar::Interpreter::init()
       "  test $snr > 10 \n"
       "\n"
       "For a full list of variable names, type \"test help\" \n" );
-  
+
+  add_command
+    ( &Interpreter::config,
+      "config", "set a configuration parameter",
+      "usage: config name = value \n"
+      "\n"
+      "For a full list of configuration parameter names,"
+      " type \"config help\" \n" );
+
   add_command 
     ( &Interpreter::fscrunch, 'F',
       "fscrunch", "integrate archive in frequency",
@@ -179,14 +189,6 @@ void Pulsar::Interpreter::init()
     ( &Interpreter::defaraday, 'R',
       "defaraday", "apply faraday rotation correction",
       "usage: defaraday \n" );
-
-  add_command 
-    ( &Interpreter::snr,
-      "snr", "select the S/N method",
-      "usage: snr <fourier|adaptive|std name> \n"
-      "  fourier           in the fourier domain \n"
-      "  adaptive          use an adaptive baseline algorithm \n"
-      "  std name          use the named archive as a standard \n");
 
   add_command 
     ( &Interpreter::weight, 'w',
@@ -645,6 +647,33 @@ catch (Error& error) {
 }
 
 
+string Pulsar::Interpreter::config (const string& args)
+try { 
+
+  // replace variable names with values
+  if (args == "help")
+    return Config::get_interface()->help (true);
+
+  vector<string> arguments = setup (args);
+
+  if (!arguments.size())
+    return response (Fail, "please specify at least one parameter name");
+
+  string retval;
+  for (unsigned icmd=0; icmd < arguments.size(); icmd++) {
+    if (icmd)
+      retval += " ";
+    retval += Config::get_interface()->process (arguments[icmd]);
+  }
+
+  return retval;
+
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
+
 string Pulsar::Interpreter::append (const string& args)
 try { 
   vector<string> arguments = setup (args);
@@ -941,37 +970,6 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
-
-// //////////////////////////////////////////////////////////////////////
-//
-string Pulsar::Interpreter::snr (const string& args)
-try { 
-  vector<string> arguments = setup (args);
-
-  if (!arguments.size())
-    return response (Fail, "please specify weighting scheme");
-
-  if (arguments.size() == 1 && arguments[0] == "fourier")
-    Profile::snr_strategy.set (&fourier_snr, &FourierSNR::get_snr);
-      
-  else if (arguments.size() == 1 && arguments[0] == "adaptive")
-    Profile::snr_strategy.set (&adaptive_snr, &AdaptiveSNR::get_snr);
-
-  if (arguments.size() == 1 && arguments[0] == "cal")
-    Profile::snr_strategy.set (&cal_snr, &SquareWave::get_snr);
-
-  else if (arguments.size() == 2 && arguments[0] == "std") {
-    Profile::snr_strategy.set (&standard_snr, &StandardSNR::get_snr);
-    standard_snr.set_standard( getmap(arguments[1])->get_Profile (0,0,0) );
-  }
-  else
-    return response (Fail, "unrecognized S/N method '" + args + "'");
-
-  return response (Good);
-}
-catch (Error& error) {
-  return response (Fail, error.get_message());
-}
 
 // //////////////////////////////////////////////////////////////////////
 //

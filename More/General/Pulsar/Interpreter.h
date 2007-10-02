@@ -7,10 +7,6 @@
 #ifndef __Pulsar_Interpreter_h
 #define __Pulsar_Interpreter_h
 
-#include "Pulsar/FourierSNR.h"
-#include "Pulsar/StandardSNR.h"
-#include "Pulsar/AdaptiveSNR.h"
-#include "Pulsar/SquareWave.h"
 #include "Pulsar/FixFluxCal.h"
 
 #include "CommandParser.h"
@@ -123,6 +119,9 @@ namespace Pulsar {
     //! test a boolean expression
     std::string test (const std::string& args);
 
+    //! edit the configuration parameters
+    std::string config (const std::string& args);
+
     //! append one archive to another
     std::string append (const std::string& args);
 
@@ -152,9 +151,6 @@ namespace Pulsar {
 
     //! correct for faraday rotation
     std::string defaraday (const std::string& args);
-
-    //! set the method used to calculate the S/N
-    std::string snr (const std::string& args);
 
     //! weight each profile according to the named scheme
     std::string weight (const std::string& args);
@@ -240,15 +236,6 @@ namespace Pulsar {
 
     //! Parses arguments as an optional single instance of T
     template<typename T> T setup (const std::string& args, T default_value);
-
-    //! Calculates S/N in the fourier domain
-    FourierSNR fourier_snr;
-    //! Calculates S/N using a standard profile as reference
-    StandardSNR standard_snr;
-    //! Calculates S/N using an adaptive baseline finder
-    AdaptiveSNR adaptive_snr;
-    //! Calculates S/N using (on-off)/rms
-    SquareWave cal_snr;
 
     FixFluxCal fix_flux_cal;
 
