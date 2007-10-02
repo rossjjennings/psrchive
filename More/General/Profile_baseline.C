@@ -6,14 +6,26 @@
  ***************************************************************************/
 
 #include "Pulsar/Profile.h"
-#include "Pulsar/BaselineWindow.h"
+#include "Pulsar/BaselineInterpreter.h"
 
-/*! This use of the Functor template implements the Strategy design
- pattern (ghjv94 p.315) for calculating the profile baseline mask. */
+using namespace Pulsar;
 
-Functor< Pulsar::PhaseWeight* (const Pulsar::Profile*) >
-Pulsar::Profile::baseline_strategy ( new Pulsar::BaselineWindow,
-				     &Pulsar::BaselineEstimator::baseline );
+/*! 
+  This use of the Functor template implements the Strategy design
+  pattern (ghjv94 p.315) for calculating the profile baseline mask.
+*/
+Functor< PhaseWeight* (const Profile*) > Profile::baseline_strategy;
+
+
+/*!  
+  The BaselineInterpreter class sets the baseline_strategy
+  attribute according to commands specified either in the
+  configuration file or via the psrsh interpreter.  It enables
+  convenient experimentation with the baseline estimation algorithm.
+*/
+static Pulsar::Option<CommandParser>
+baseline ( new Pulsar::BaselineInterpreter, "Profile::baseline", "minimum" );
+
 
 //! Return a PhaseWeight mask with the baseline phase bins enabled
 Pulsar::PhaseWeight* Pulsar::Profile::baseline () const try
