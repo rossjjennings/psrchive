@@ -57,14 +57,13 @@ string CommandParser::parse (const string& commandargs)
   if (debug)
     cerr << "CommandParser::parse '" << commandargs << "'" << endl;
 
-
   string cmdargs = commandargs;
   string command = stringtok (&cmdargs, whitespace);
 
   if (debug)
-  cerr << "CommandParser::parse '"<< command <<"' '"<< cmdargs <<"'"<<endl;
+    cerr << "CommandParser::parse '"<< command <<"' '"<< cmdargs <<"'"<<endl;
 
-  return parse (command, cmdargs);
+  return parse2 (command, cmdargs);
 }
 
 string CommandParser::empty ()
@@ -72,7 +71,7 @@ string CommandParser::empty ()
   return "";
 }
 
-string CommandParser::parse (const string& command, const string& arguments)
+string CommandParser::parse2 (const string& command, const string& arguments)
 {
   if (debug)
     cerr << "CommandParser::parse '"<< command <<"' '"<< arguments <<"'"<<endl;

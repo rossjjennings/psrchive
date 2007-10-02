@@ -49,7 +49,7 @@ class CommandParser : public Reference::Able {
   std::string parse (const std::string& commandargs);
 
   //! parse a command and its arguments
-  std::string parse (const std::string& command, const std::string& args);
+  std::string parse2 (const std::string& command, const std::string& args);
 
   //! string returned on an empty command
   virtual std::string empty ();
