@@ -31,7 +31,7 @@ libpsrfft_la_SOURCES += FFTW3_Transform.C
 endif
 
 TESTS = test_frexp test_enum test_normalization test_interpolate \
-	test_real_complex test_threads test_QuaternionFT
+	test_real_complex test_QuaternionFT
 
 check_PROGRAMS = $(TESTS)
 
@@ -40,7 +40,6 @@ test_normalization_SOURCES	= test_normalization.C
 test_interpolate_SOURCES	= test_interpolate.C
 test_interpolate_LDADD		= $(LDADD) ../units/libunits.la
 test_real_complex_SOURCES	= test_real_complex.C
-test_threads_SOURCES		= test_threads.C
 test_QuaternionFT_SOURCES	= test_QuaternionFT.C
 
 #############################################################################
