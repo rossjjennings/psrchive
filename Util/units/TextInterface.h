@@ -17,166 +17,34 @@
 
 // #define _DEBUG 1
 
-#ifdef _DEBUG
-#include <iostream>
-#endif
-
 namespace TextInterface {
 
-  //! Text interface to a value of undefined type
-  class Value : public Reference::Able {
-
-  public:
-    
-    //! Get the name of the value
-    virtual std::string get_name () const = 0;
-
-    //! Get the description of the value
-    virtual std::string get_description () const = 0;
-
-    //! Get the value as text
-    virtual std::string get_value () const = 0;
-
-    //! Set the value as text
-    virtual void set_value (const std::string& value) = 0;
-
-    //! Set the description of the value
-    virtual void set_description (const std::string&) = 0;
-
-    //! Return true if the name argument matches the value name
-    virtual bool matches (const std::string& name) const
-    { return name == get_name(); }
-
-  };
-
-
-  //! Text interface to a value of type T
-  template<class T>
-  class Atom : public Value {
-
-  public:
-    
-    //! Set all attributes on construction
-    Atom (T* ptr, const std::string& _name, const std::string& _description)
-      { value_ptr = ptr; name = _name; description = _description; }
-
-    //! Get the name of the value
-    std::string get_name () const
-      { return name; }
-
-    //! Get the description of the value
-    std::string get_description () const
-      { return description; }
-
-    //! Get the value as text
-    std::string get_value () const
-      { return tostring (*value_ptr); }
-
-    //! Set the value as text
-    void set_value (const std::string& text)
-      { *value_ptr = fromstring<T>(text); }
-
-    //! Set the description of the value
-    void set_description (const std::string& text)
-      { description = text; }
-       
-  protected:
-
-    std::string name;
-    std::string description;
-    T* value_ptr;
-
-  };
-
-  //! Text interface to a text interpreter
-  /*! In this template: I is a the interpreter class; Get is the
-    method of I that returns a string; and Set is the method of I that
-    accepts a string */
-  template<class I, class Get, class Set>
-  class Interpreter : public Value {
-
-  public:
-    
-    //! Set all attributes on construction
-    Interpreter (const std::string& _name, I* ptr, Get _get, Set _set)
-    { name = _name, interpreter = ptr, get = _get; set = _set; }
-
-    //! Get the name of the value
-    std::string get_name () const
-      { return name; }
-
-    //! Get the description of the value
-    std::string get_description () const
-      { return description; }
-
-    //! Get the value as text
-    std::string get_value () const
-      { return (interpreter->*get)(); }
-
-    //! Set the value as text
-    void set_value (const std::string& text)
-      { (interpreter->*set)(text); }
-
-    //! Set the description of the value
-    void set_description (const std::string& text)
-      { description = text; }
-       
-  protected:
-
-    std::string name;
-    std::string description;
-    I* interpreter;
-    Get get;
-    Set set;
-
-  };
-
-  template<class I, class Get, class Set>
-    Interpreter<I,Get,Set>* 
-    new_Interpreter (const std::string& n, I* i, Get g, Set s)
-    {
-      return new Interpreter<I,Get,Set> (n, i, g, s);
-    }
-
-  template<class I, class Get, class Set>
-    Interpreter<I,Get,Set>* 
-    new_Interpreter (const std::string& n, const std::string& d, 
-		     I* i, Get g, Set s)
-    {
-      Interpreter<I,Get,Set>* result = new Interpreter<I,Get,Set> (n, i, g, s);
-      result->set_description (d);
-      return result;
-    }
-
-  //! Text interface to a class attribute of undefined type
+  //! Abstract base class of attribute text interface
   template<class C>
-  class Attribute : public Value {
+  class Attribute : public Reference::Able {
 
   public:
-
-    //! Default constructor
-    Attribute ()
-      { instance = 0; }
-
-    //! Get the value of the attribute
-    std::string get_value () const
-      { if (!instance) return "N/A"; else return get_value (instance); }
-
-    //! Set the value of the attribute
-    void set_value (const std::string& value)
-      { if (instance) set_value (instance, value); }
-
+    
     //! Retun a newly constructed copy
     virtual Attribute* clone () const = 0;
 
+    //! Get the name of the attribute
+    virtual std::string get_name () const = 0;
+
+    //! Get the description of the attribute
+    virtual std::string get_description () const = 0;
+
     //! Get the value of the attribute
-    virtual std::string get_value (const C*) const = 0;
+    virtual std::string get_value (const C* ptr) const = 0;
 
     //! Set the value of the attribute
-    virtual void set_value (C*, const std::string& value) = 0;
+    virtual void set_value (C* ptr, const std::string& value) = 0;
 
-    //! Pointer to the instance from which attribute value will be obtained
-    mutable C* instance;
+    //! Set the description of the attribute
+    virtual void set_description (const std::string&) = 0;
+
+    //! Return true if the name argument matches
+    virtual bool matches (const std::string& name) const;
 
   };
 
@@ -702,80 +570,58 @@ namespace TextInterface {
   };
 
   //! Abstract base class of class text interface
-  class Parser : public Reference::Able {
+  class Class : public Reference::Able {
 
   public:
-
-    //! Get the named value
-    std::string get_value (const std::string& name) const;
-
-    //! Set the named value
-    void set_value (const std::string& name, const std::string& value);
-
-    //! Find the named value
-    Value* find (const std::string& name, bool throw_exception = true) const;
-
-    //! Allow derived types to setup a Value instance before use
-    virtual void setup (const Value*) { }
-
-    //! Get the number of values
-    unsigned get_nvalue () const;
-
-    //! Get the name of the value
-    std::string get_name (unsigned) const;
-
-    //! Get the description of the value
-    std::string get_description (unsigned) const;
 
     //! Process a command
     virtual std::string process (const std::string& command);
     
-    //! Return the list of available values
-    virtual std::string help (bool show_default_values = false);
-
     //! Get the name of this interface
-    virtual std::string get_interface_name () { return ""; }
+    virtual std::string get_interface_name( void ) { return ""; }
 
+    //! clone
+    virtual Class *clone() { return NULL; }
+    
     //! Set the indentation that precedes the output of a call to process
     void set_indentation (const std::string& indent) { indentation = indent; }
 
-    //! Set aliases for value names
+    //! Set aliases for attribute names
     void set_aliases (const Alias* alias) { aliases = alias; }
+
+    //! Return the list of available attributes
+    std::string help (bool show_default_values = false);
+
+    //! Get the value of the attribute
+    virtual std::string get_value (const std::string& name) const = 0;
+
+    //! Set the value of the attribute
+    virtual void set_value (const std::string& name, 
+			    const std::string& value) = 0;
+
+    //! Get the number of attributes
+    virtual unsigned get_nattribute () const = 0;
+
+    //! Get the name of the attribute
+    virtual std::string get_name (unsigned) const = 0;
+
+    //! Get the description of the attribute
+    virtual std::string get_description (unsigned) const = 0;
 
   protected:
 
     //! The indentation that precedes the output of a call to process
     std::string indentation;
 
-    //! The aliases for the value names
+    //! The aliases for the attribute names
     Reference::To<const Alias> aliases;
-
-    //! Add a new value interface
-    void add_value (Value* value) { values.push_back (value); }
-
-    //! Remove the named value interface
-    void remove (const std::string& name) { delete find (name); clean (); }
-
-    //! Clean up invalid references in values vector
-    void clean () 
-      {
-	unsigned i=0; 
-	while ( i < values.size() )
-	  if (!values[i])
-	    values.erase( values.begin() + i );
-	  else 
-	    i++;
-      }
-
-    //! The vector of values
-    std::vector< Reference::To<Value> > values;
 
   };
 
 
   //! Class text interface: an instance of C and a vector of Attribute<C>
   template<class C>
-  class To : public Parser {
+  class To : public Class {
 
   public:
 
@@ -786,13 +632,30 @@ namespace TextInterface {
     //! Default constructor
     To () { import_filter = false; }
 
+    //! Get the value of the attribute
+    std::string get_value (const std::string& name) const;
+
+    //! Set the value of the attribute
+    void set_value (const std::string& name, const std::string& value)
+      { find(name)->set_value(instance, value); }
+
+    //! Get the number of attributes
+    unsigned get_nattribute () const { return attributes.size(); }
+
+    //! Get the name of the attribute
+    std::string get_name (unsigned i) const 
+      { return attributes[i]->get_name(); }
+
+    //! Get the description of the attribute
+    std::string get_description (unsigned i) const
+      { return attributes[i]->get_description(); }
+
+    //! Return a pointer to the named class attribute interface
+    Attribute<C>* find (const std::string& name, bool ex = true) const;
+
     //! Set the instance
     virtual void set_instance (C* c) 
       { instance = c; }
-
-    //! Set the instance of the Attribute<C>
-    void setup (const Value* value)
-      { dynamic_cast<const Attribute<C>*>(value)->instance = instance.ptr(); }
 
     //! Import the attribute interfaces from a parent text interface
     template<class P> 
@@ -800,7 +663,7 @@ namespace TextInterface {
       {
 	for (unsigned i=0; i < parent->size(); i++)
 	  if (!import_filter || !find(parent->get(i)->get_name(),false))
-	    add_value( new IsAProxy<C,P>(parent->get(i)) );
+	    add( new IsAProxy<C,P>(parent->get(i)) );
       }
 
     //! Import the attribute interfaces from a member text interface
@@ -811,7 +674,7 @@ namespace TextInterface {
       {
 	for (unsigned i=0; i < member->size(); i++)
 	  if (!import_filter || !find(member->get(i)->get_name(),false))
-	    add_value( new HasAProxy<C,M,G>(name, member->get(i),get) );
+	    add(new HasAProxy<C,M,G>(name, member->get(i),get));
       }
 
     //! Import the attribute interfaces from a vector element text interface
@@ -824,7 +687,7 @@ namespace TextInterface {
       {
 	for (unsigned i=0; i < member->size(); i++)
 	  if (!import_filter || !find(member->get(i)->get_name(),false))
-	    add_value(new VectorOfProxy<C,E,G,S>(name, member->get(i), g, s));
+	    add(new VectorOfProxy<C,E,G,S>(name, member->get(i), g, s));
       }
 
     //! Import the attribute interfaces from a map data text interface
@@ -836,7 +699,7 @@ namespace TextInterface {
       {
 	for (unsigned i=0; i < member->size(); i++)
 	  if (!import_filter || !find(member->get(i)->get_name(),false))
-	    add_value( new MapOfProxy<C,K,E,G>(name, member->get(i), g) );
+	    add( new MapOfProxy<C,K,E,G>(name, member->get(i), g) );
       }
 
     //! Import the attribute interfaces from a parent text interface
@@ -858,11 +721,10 @@ namespace TextInterface {
       { import (name, k, &element, g); }
 
     //! Return the number of attributes
-    unsigned size () const { return values.size(); }
+    unsigned size () const { return attributes.size(); }
 
     //! Provide access to the attributes
-    const Attribute<C>* get (unsigned i) const
-      { return dynamic_cast< const Attribute<C>* >( values[i].get() ); }
+    const Attribute<C>* get (unsigned i) const { return attributes[i]; }
 
   protected:
 
@@ -878,7 +740,7 @@ namespace TextInterface {
 	Attribute<C>* getset = gen (name, get);
 	if (description)
 	  getset->set_description (description);
-	add_value (getset);
+	add (getset);
       }
 
     //! Factory generates a new AttributeGetSet instance with description
@@ -890,7 +752,7 @@ namespace TextInterface {
 	Attribute<C>* getset = gen (name, get, set);
 	if (description)
 	  getset->set_description (description);
-	add_value (getset);
+	add (getset);
       }
 
     //! Factory generates a new AttributeGetSet instance with description
@@ -902,7 +764,7 @@ namespace TextInterface {
 	Attribute<C>* getset = gen (name, get, set);
 	if (description)
 	  getset->set_description (description);
-	add_value (getset);
+	add (getset);
       }
 
 
@@ -913,8 +775,28 @@ namespace TextInterface {
 	Attribute<C>* fget = new UnaryGet<C,U> (name, get);
 	if (description)
 	  fget->set_description (description);
-	add_value (fget);
+	add (fget);
       }
+
+    //! Add a new attribute interface
+    void add (Attribute<C>* att) { attributes.push_back (att); }
+
+    //! Remove the named attribute interface
+    void remove (const std::string& name) { delete find (name); clean (); }
+
+    //! Clean up invalid references in attributes vector
+    void clean () 
+      {
+	unsigned i=0; 
+	while ( i < attributes.size() )
+	  if (!attributes[i])
+	    attributes.erase( attributes.begin() + i );
+	  else 
+	    i++;
+      }
+
+    //! The named class attribute interfaces
+    std::vector< Reference::To< Attribute<C> > > attributes;
 
     //! The instance of the class with which this interfaces
     Reference::To<C> instance;
@@ -934,6 +816,55 @@ namespace TextInterface {
 
 }
 
+template<class C>
+//! Get the value of the attribute
+std::string TextInterface::To<C>::get_value (const std::string& name) const
+{ 
+  if (!instance)
+    return "N/A";
+
+  std::string::size_type dot = name.find('%');
+
+  if (dot == std::string::npos)
+    return find(name)->get_value(instance);
+
+  ModifyRestore<unsigned> temp ( tostring_precision,
+				 fromstring<unsigned> (name.substr(dot+1)) );
+
+  return find(name.substr(0,dot))->get_value(instance);
+}
+
+template<class C>
+TextInterface::Attribute<C>* 
+TextInterface::To<C>::find (const std::string& param, bool throw_ex) const
+{
+#ifdef _DEBUG
+  std::cerr << "To::find (" << param << ") size=" << attributes.size() 
+	    << std::endl;
+#endif
+
+  std::string key = param;
+
+  if (aliases)
+    key = aliases->substitute (key);
+
+  for (unsigned i=0; i<attributes.size(); i++) {
+    if (attributes[i]->matches (key)) {
+#ifdef _DEBUG
+      std::cerr << "To::find attribute[" << i << "]=" 
+		<< attributes[i]->get_name() << " matches" << std::endl;
+#endif
+      return attributes[i];
+    }
+  }
+
+  if (throw_ex)
+    throw Error (InvalidParam, "TextInterface::To<C>::find",
+		 "no attribute named " + param);
+
+  return 0;
+}
+
 template<class V, class E, class G, class S> 
 std::string
 TextInterface::VectorOfProxy<V,E,G,S>::get_value (const V* ptr) const
@@ -950,8 +881,8 @@ TextInterface::VectorOfProxy<V,E,G,S>::get_value (const V* ptr) const
 
     E* element = (const_cast<V*>(ptr)->*get)(ind[i]);
 #ifdef _DEBUG
-    std::cerr << "VectorOfProxy[" << prefix << "]::get_value (" 
-	      << ptr << ") element=" << element << std::endl;
+  std::cerr << "VectorOfProxy[" << prefix << "]::get (" 
+	    << sub_name << ") element=" << element << std::endl;
 #endif
     ost << attribute->get_value (element);
   }
@@ -969,8 +900,8 @@ void TextInterface::VectorOfProxy<V,E,G,S>::set_value (V* ptr,
   for (unsigned i=0; i<ind.size(); i++) {
     E* element = (ptr->*get)(ind[i]);
 #ifdef _DEBUG
-    std::cerr << "VectorOfProxy[" << prefix << "]::set_value (" 
-	      << ptr << "," << val << ")" << std::endl;
+    std::cerr << "ElementGetSet[" << name << "]::set " 
+	      << sub_name << "=" << value << std::endl;
 #endif
     attribute->set_value (element, val);
   }
@@ -1062,6 +993,12 @@ template<class M, class K, class E, class G>
     return false;
 
   return attribute->matches (remainder);
+}
+
+template<class C>
+bool TextInterface::Attribute<C>::matches (const std::string& name) const
+{
+  return name == get_name();
 }
 
 #include <string.h>

@@ -14,11 +14,10 @@
 
 #include "Pulsar/Instrument.h"
 #include "Pulsar/MeanInstrument.h"
-#include "Pulsar/Fourier.h"
 
 #include "MEAL/Complex2Math.h"
-#include "MEAL/Complex2Value.h"
 
+#include "BatchQueue.h"
 #include "toa.h"
 #include "strutil.h"
 
@@ -34,6 +33,7 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)
   mean_solution = true;
   tim_file = 0;
   archive = 0;
+  nthread = 1;
 }
 
 //! Constructor
@@ -158,10 +158,6 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan)
     clone->expert()->fscrunch ();
 
     PolnProfileFit temp;
-
-    if (verbose > 2)
-      PolnProfileFit::verbose = true;
-
     temp.choose_maximum_harmonic = true;
     temp.set_standard ( clone->new_PolnProfile (0) );
 
@@ -207,9 +203,15 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan)
 
 }
 
-void Pulsar::PulsarCalibrator::set_nthread (unsigned nthread)
+void Pulsar::PulsarCalibrator::set_nthread (unsigned n)
 {
-  queue.resize (nthread);
+#if HAVE_PTHREAD
+  nthread = n;
+#else
+  if (n > 1)
+    throw Error (InvalidState, "Pulsar::PulsarCalibrator::set_nthread",
+		 "threads are not available");
+#endif
 }
 
 //! Add the observation to the set of constraints
@@ -255,13 +257,17 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try
   if (tim_file)
     archive = data;
 
+  BatchQueue queue (nthread);
+
   for (unsigned isub=0; isub<nsub; isub++) {
 
     // cerr << "solving isub=" << isub << " ..." << endl;
 
     const Integration* integration = data->get_Integration (isub);
 
-    corrections = correct.get_transformation( data, isub );
+    Jones<double> jones;
+    jones = correct.get_transformation( data, isub );
+    corrections.set_value( jones );
 
     // if 5% of the solutions diverge from the mean, clear the mean
     unsigned clean_mean = nchan/20;
@@ -291,7 +297,7 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try
     if (!tim_file)
       continue;
 
-    // produce TOAs!
+    // produce a TOA!
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
@@ -358,7 +364,7 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 
   if (data->get_weight (ichan) == 0) {
     if (verbose > 2)
-      cerr << "Pulsar::PulsarCalibrator::solve observation ichan="
+      cerr << "Pulsar::PulsarCalibrator::solve ichan="
 	   << ichan << " flagged invalid" << endl;
     transformation[ichan] = 0;
     return;
@@ -375,26 +381,15 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
       set_model = true;
     }
 
-    if (one_channel || set_model) {
-      Reference::To<MEAL::Complex2> c = new MEAL::Complex2Value(corrections);
-      model[mchan]->set_transformation (transformation[ichan] * c);
-    }
+    if (one_channel || set_model)
+      model[mchan]->set_transformation (transformation[ichan] * &corrections);
 
     if (solution[ichan])
       solution[ichan]->update( transformation[ichan] );
-
-#if 0
-    else if (ichan>0 && tries==0 && solution[ichan-1]) {
-      // cerr << "Pulsar::PulsarCalibrator::solve copy solution[" << ichan-1 << "]" << endl;
+    else if (ichan>0 && tries==0 && solution[ichan-1])
       solution[ichan-1]->update( transformation[ichan] );
-    }
-#endif
-
-    cerr << "Pulsar::PulsarCalibrator::solve fitting model[" << mchan << "]" << endl;
 
     model[mchan]->fit( data->new_PolnProfile (ichan) );
-
-    cerr << "submitted!" << endl;
 
     unsigned nfree = model[mchan]->get_fit_nfree ();
     float chisq = model[mchan]->get_fit_chisq ();
@@ -418,13 +413,11 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
   }
   catch (Error& error) {
     cerr << "Pulsar::PulsarCalibrator::solve ichan=" << ichan 
-         << " error" << error << endl;
-#if 0
+         << " error" << endl;
     if (verbose > 2)
       cerr << error << endl;
     else
       cerr << error.get_message() << endl;
-#endif
     transformation[ichan] = 0;
     solution[ichan] = 0;
   }
@@ -472,7 +465,7 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 
   if (normalize_gain) {
     Calibration::Instrument* inst;
-    inst = dynamic_kast<Calibration::Instrument>(transformation[ichan]);
+    inst = dynamic_cast<Calibration::Instrument*>(transformation[ichan].get());
     if (!inst)
       throw Error (InvalidState, "Pulsar::PulsarCalibrator::solve",
 		   "transformation[%d] is not an Instrument", ichan);

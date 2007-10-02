@@ -60,18 +60,12 @@ libClasses_la_SOURCES = \
 	ProfileAmps.C \
 	Pulsar.C
 
-check_PROGRAMS = test_Config
-
-test_Config_SOURCES = test_Config.C
-
 #############################################################################
 #
 # Dependencies should never be changed
 #
 
 INCLUDES = -I$(top_srcdir)/Base/Extensions
-
-LDADD = libClasses.la $(top_builddir)/Util/libpsrutil.la
 
 include $(top_srcdir)/config/Makefile.include
 
