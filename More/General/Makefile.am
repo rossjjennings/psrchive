@@ -51,6 +51,7 @@ nobase_include_HEADERS = \
         Pulsar/NoiseStatistics.h \
         Pulsar/OnPulseEstimator.h \
         Pulsar/OnPulseThreshold.h \
+	Pulsar/PeakEdgesInterpreter.h \
 	Pulsar/PeakConsecutive.h \
 	Pulsar/PeakCumulative.h \
         Pulsar/PhaseWeightFunction.h \
@@ -67,6 +68,7 @@ nobase_include_HEADERS = \
         Pulsar/Smooth.h \
         Pulsar/SmoothMean.h \
         Pulsar/SmoothMedian.h \
+	Pulsar/SNRatioInterpreter.h \
         Pulsar/SNRWeight.h \
         Pulsar/SourceInfo.h \
         Pulsar/SquareWave.h \
@@ -156,6 +158,7 @@ libGeneral_la_SOURCES = \
 	MaskSmooth.C \
         NoiseStatistics.C \
 	OnPulseThreshold.C \
+	PeakEdgesInterpreter.C \
 	PeakConsecutive.C \
 	PeakCumulative.C \
 	PhaseWeightModifier.C \
@@ -181,6 +184,7 @@ libGeneral_la_SOURCES = \
         Smooth.C \
         SmoothMean.C \
         SmoothMedian.C \
+	SNRatioInterpreter.C \
         SNRWeight.C \
         SquareWave.C \
 	standard_shell.C \
