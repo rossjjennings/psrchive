@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceAble.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/10/02 05:19:48 $
+   $Revision: 1.12 $
+   $Date: 2007/10/02 05:45:49 $
    $Author: straten $ */
 
 #ifndef __ReferenceAble_h
@@ -76,29 +76,19 @@ namespace Reference {
   private:
 
     //! Pointer to the shared handle to this instance
-    mutable Handle* __reference_handle;
+    Handle* __reference_handle;
 
     //! Count of active references to this instance
-    mutable unsigned __reference_count;
-
+    unsigned __reference_count;
   };
 
   /*! Reference::To<> instances share this handle to an Able instance */
   class Able::Handle {
   public:
-
     //! Pointer to Able instance
     Able* pointer;
-
     //! Count of all references to this handle
     unsigned count;
-
-    //! Thread-safe decrement and delete
-    void decrement (bool active, bool auto_delete);
-
-    //! Thread-safe copy and increment
-    static void copy (Handle* &to, Handle* const &from, bool active);
-
   };
 
 }
