@@ -19,7 +19,7 @@ Pulsar::interfacePanel::interfacePanel(QWidget* parent,
   updateMe->setDefault(true);
 
   QString useful1, useful2;
-  for (unsigned i = 0; i < ui->get_nattribute(); i++) {
+  for (unsigned i = 0; i < ui->get_nvalue(); i++) {
     useful1 = ti->get_name(i);
     useful2 = ti->get_value(useful1.ascii());
     
