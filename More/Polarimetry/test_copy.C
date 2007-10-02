@@ -53,16 +53,15 @@ template <class Type> void test_copy (Type* instance,
     instance->set_param (i, double(i));
 
   cerr << "test_copy: " << name << " default constructor" << endl;
-  Reference::To<Type> default_instance = new Type;
-
+  Type* default_instance = new Type;
   cerr << "test_copy: " << name << " operator =" << endl;
   *default_instance = *instance;
-  test_copy (default_instance.get(), instance, name);
+  test_copy (default_instance, instance, name);
 
   cerr << "test_copy: " << name << " copy constructor" << endl;
 
-  Reference::To<Type> copy = new Type (*instance);
-  test_copy (copy.get(), instance, name);
+  Type* copy = new Type (*instance);
+  test_copy (copy, instance, name);
 
   unsigned nparam = copy->get_nparam();
 
@@ -81,20 +80,6 @@ template <class Type> void test_copy (Type* instance,
   vinstance.resize ( 128 );
 }
 
-template <class Type> void test_leak (Type* instance,
-				      const string& name)
-{
-  uint64_t instances = Reference::Able::get_instance_count();
-
-  test_copy (instance, name);
-
-  if (instances < Reference::Able::get_instance_count()) {
-    Error error (InvalidState, "test_leak");
-    error << "memory leak in=" << instances << " out="
-	  << Reference::Able::get_instance_count();
-    throw error;
-  }
-}
 
 int main (int argc, char** argv)
 { try {
@@ -102,16 +87,16 @@ int main (int argc, char** argv)
   // Calibration::Model::verbose = true;
 
   cerr << "test_copy: testing MEAL::Polynomial" << endl;
-  test_leak (new MEAL::Polynomial(12), "MEAL::Polynomial");
+  test_copy (new MEAL::Polynomial(12), "MEAL::Polynomial");
 
   cerr << "test_copy: testing MEAL::Polar" << endl;
-  test_leak (new MEAL::Polar, "MEAL::Polar");
+  test_copy (new MEAL::Polar, "MEAL::Polar");
 
   cerr << "test_copy: testing Calibration::Feed" << endl;
-  test_leak (new Calibration::Feed, "Calibration::Feed");
+  test_copy (new Calibration::Feed, "Calibration::Feed");
 
   cerr << "test_copy: testing Calibration::SingleAxisPolynomial" << endl;
-  test_leak (new Calibration::SingleAxisPolynomial(5),
+  test_copy (new Calibration::SingleAxisPolynomial(5),
 	     "Calibration::SingleAxisPolynomial");
 
 } catch (Error& error) {

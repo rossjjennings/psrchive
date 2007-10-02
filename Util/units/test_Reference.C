@@ -42,8 +42,6 @@ child* create (int val)
 {
   Reference::To<child> ref = new child (val);
 
-  cerr << "create: created new child" << endl;
-
   // other things can happen that cause an exception to be thrown, at
   // which time the destructor of ref will result in the automatic
   // deletion of the new child to which it points.  However, when returning
@@ -193,8 +191,6 @@ int runtest ()
     return -1;
   }
 
-  cerr << "HI!" << endl;
-
   child_ptr = 0;
 
   // and attempts to dereference should throw an exception
@@ -211,7 +207,6 @@ int runtest ()
         " child* assigned after exception thrown" << endl;
       return -1;
     }
-    cerr << "Caught expected exception: child* = failed_create" << endl;
   }
 
   child_ref = 0;
@@ -230,8 +225,6 @@ int runtest ()
         " Refernce::To<child> assigned after exception thrown" << endl;
       return -1;
     }
-    cerr << "Caught expected exception: Reference::To<child> = failed_create"
-	 << endl; 
   }
 
   // ////////////////////////////////////////////////////////////////////////
@@ -300,11 +293,11 @@ int runtest ()
   //
   // ////////////////////////////////////////////////////////////////////////
 
-  cerr << "\ntest - dynamic_kast<child> (Reference::To<parent>&)" << endl;
+  cerr << "\ntest - child* Reference::To<parent>::cast()" << endl;
   parent_ref = new child (6);
 
   cerr << "\ntest - Reference::To<child> = parent* (= new child)" << endl;
-  child_ref = dynamic_kast<child> (parent_ref);
+  child_ref = dynamic_cast<child*> (parent_ref.get());
 
   cerr << "\ntest - Reference::To<child>::operator !" << endl;
 
@@ -317,7 +310,7 @@ int runtest ()
 
   parent* parent_ptr = new parent (6);
 
-  cerr << "\ntest - dynamic_cast<child*> (parent*)" << endl;
+  cerr << "\ntest - child* Reference::To<parent>::cast()" << endl;
   child_ref = dynamic_cast<child*> (parent_ptr);
 
 
