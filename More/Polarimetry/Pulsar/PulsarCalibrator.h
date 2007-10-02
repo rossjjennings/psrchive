@@ -7,16 +7,17 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.23 $
-   $Date: 2007/10/02 05:19:48 $
+   $Revision: 1.24 $
+   $Date: 2007/10/02 05:44:12 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
 #define __Pulsar_PulsarCalibrator_H
 
 #include "Pulsar/PolnCalibrator.h"
+
+#include "MEAL/Complex2Value.h"
 #include "MEAL/Mean.h"
-#include "BatchQueue.h"
 
 #include <stdio.h>
 
@@ -103,7 +104,7 @@ namespace Pulsar {
     std::vector< Reference::To<MeanXform> > solution;
 
     //! The known instrumental corrections
-    Jones<double> corrections;
+    MEAL::Complex2Value corrections;
 
     //! The model specified on construction
     Calibrator::Type model_type;
@@ -140,8 +141,8 @@ namespace Pulsar {
     //! Archive instance that is currently in use
     const Archive* archive;
 
-    //! Controls the number of channels that may be simultaneously solved
-    BatchQueue queue;
+    //! The number of channels that may be simultaneously solved
+    unsigned nthread;
 
     //! Build the arrays
     void build (unsigned nchan);
