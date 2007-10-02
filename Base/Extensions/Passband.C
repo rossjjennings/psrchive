@@ -139,7 +139,7 @@ void Pulsar::Passband::range_check (unsigned ipol, unsigned iband,
 
 //! Return a text interfaces that can be used to access this instance
 
-Reference::To< TextInterface::Class > Pulsar::Passband::get_text_interface( void )
+TextInterface::Parser* Pulsar::Passband::get_interface( void )
 {
 	return new PassbandTI( this );
 }

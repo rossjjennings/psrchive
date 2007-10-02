@@ -24,7 +24,7 @@ void Pulsar::FeedExtensionTI::SetupMethods( void )
 }
 
 
-TextInterface::Class *Pulsar::FeedExtensionTI::clone()
+TextInterface::Parser *Pulsar::FeedExtensionTI::clone()
 {
   if( instance )
     return new FeedExtensionTI( instance );

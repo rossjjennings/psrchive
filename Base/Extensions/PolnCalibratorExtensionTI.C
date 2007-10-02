@@ -26,7 +26,7 @@ void Pulsar::PolnCalibratorExtensionTI::SetupMethods( void )
   add( &PolnCalibratorExtension::get_nchan, "nchan", "Nr of channels in Feed coupling data" );
 }
 
-TextInterface::Class *Pulsar::PolnCalibratorExtensionTI::clone()
+TextInterface::Parser *Pulsar::PolnCalibratorExtensionTI::clone()
 {
   if( instance )
     return new PolnCalibratorExtensionTI( instance );

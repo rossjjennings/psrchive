@@ -54,7 +54,7 @@ void Pulsar::PointingTI::SetupMethods( void )
 }
 
 
-TextInterface::Class *Pulsar::PointingTI::clone()
+TextInterface::Parser *Pulsar::PointingTI::clone()
 {
   if( instance )
     return new PointingTI( instance );

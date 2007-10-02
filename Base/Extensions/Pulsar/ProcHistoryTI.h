@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Attic/ProcHistoryTI.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/06/20 03:04:54 $
-   $Author: nopeer $ */
+   $Revision: 1.2 $
+   $Date: 2007/10/02 04:50:09 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_ProcHistoryTI_h
 #define __Pulsar_ProcHistoryTI_h
@@ -32,7 +32,7 @@ namespace Pulsar
 
     virtual std::string get_interface_name() { return "ProcHistoryTI"; }
 
-    TextInterface::Class *clone();
+    TextInterface::Parser *clone();
   };
 
 }

@@ -269,7 +269,7 @@ void Pulsar::Pointing::integrate (const Integration* subint)
 
 
 //! Return a text interfaces that can be used to access this instance
-Reference::To< TextInterface::Class > Pulsar::Pointing::get_text_interface()
+TextInterface::Parser* Pulsar::Pointing::get_interface()
 {
 	return new PointingTI( this );
 }

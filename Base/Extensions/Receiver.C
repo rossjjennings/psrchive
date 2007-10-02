@@ -249,7 +249,7 @@ std::string Pulsar::Receiver::get_fd_mode() const
 }
 
 
-Reference::To< TextInterface::Class > Pulsar::Receiver::get_text_interface()
+TextInterface::Parser* Pulsar::Receiver::get_interface()
 {
 	return new ReceiverTI( this );
 }

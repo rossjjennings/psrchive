@@ -28,7 +28,7 @@ namespace Pulsar
     add( &ObsExtension::get_telescope, "telescop", "Telescope name" );
   }
 
-  TextInterface::Class *Pulsar::ObsExtensionTI::clone()
+  TextInterface::Parser *Pulsar::ObsExtensionTI::clone()
   {
     if( instance )
       return new ObsExtensionTI( instance );

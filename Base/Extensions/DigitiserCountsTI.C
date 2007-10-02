@@ -15,7 +15,7 @@ void Pulsar::DigitiserCountsTI::setup( void )
   add( &DigitiserCounts::get_diglev, "diglev", "Digitiser level-setting mode (AUTO, FIX)" );
 }
 
-TextInterface::Class *Pulsar::DigitiserCountsTI::clone()
+TextInterface::Parser *Pulsar::DigitiserCountsTI::clone()
 {
   if( instance )
     return new DigitiserCountsTI( instance );

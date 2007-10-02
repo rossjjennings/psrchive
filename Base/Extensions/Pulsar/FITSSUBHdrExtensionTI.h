@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Attic/FITSSUBHdrExtensionTI.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/06/20 03:04:53 $
-   $Author: nopeer $ */
+   $Revision: 1.2 $
+   $Date: 2007/10/02 04:50:09 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_FITSSUBHdrExtensionTI_h
 #define __Pulsar_FITSSUBHdrExtensionTI_h
@@ -30,7 +30,7 @@ namespace Pulsar
 // 
 //     virtual std::string get_interface_name() = 0;
 // 
-//     TextInterface::Class *clone()
+//     TextInterface::Parser *clone()
 //     {
 //       if( instance )
 //         return new ExtensionTI( instance );
@@ -55,7 +55,7 @@ namespace Pulsar
 
     virtual std::string get_interface_name() { return "FITSSUBHdrExtensionTI"; }
 
-    TextInterface::Class *clone();
+    TextInterface::Parser *clone();
   };
 
 }

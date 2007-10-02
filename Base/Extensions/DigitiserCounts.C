@@ -46,7 +46,7 @@ DigitiserCounts::~DigitiserCounts ()
 {}
 
 
-Reference::To< TextInterface::Class > DigitiserCounts::get_text_interface()
+TextInterface::Parser* DigitiserCounts::get_interface()
 {
   return new DigitiserCountsTI( this );
 }

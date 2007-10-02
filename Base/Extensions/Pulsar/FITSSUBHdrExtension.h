@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSSUBHdrExtension.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/06/20 03:04:53 $
-   $Author: nopeer $ */
+   $Revision: 1.2 $
+   $Date: 2007/10/02 04:50:09 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_FITSSUBHdrExtension_h
 #define __Pulsar_FITSSUBHdrExtension_h
@@ -40,7 +40,7 @@ namespace Pulsar
     FITSSUBHdrExtension* clone () const { return new FITSSUBHdrExtension( *this ); }
 
     //! Get the text interface
-    Reference::To< TextInterface::Class > get_text_interface();
+    TextInterface::Parser* get_interface();
 
     std::string get_int_type( void ) const { return int_type; }
     std::string get_int_unit( void ) const { return int_unit; }

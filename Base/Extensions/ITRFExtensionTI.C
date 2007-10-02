@@ -26,7 +26,7 @@ namespace Pulsar
     add( &ITRFExtension::get_ant_z, "ant_z", "ITRF Z coordinate." );
   }
   
-  TextInterface::Class *Pulsar::ITRFExtensionTI::clone()
+  TextInterface::Parser *Pulsar::ITRFExtensionTI::clone()
   {
     if( instance )
       return new ITRFExtensionTI( instance );

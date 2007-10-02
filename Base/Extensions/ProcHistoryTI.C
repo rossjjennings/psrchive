@@ -26,7 +26,7 @@ void Pulsar::ProcHistoryTI::setup( void )
   add( &ProcHistory::get_last_chan_bw, "chan_bw", "Channel bandwidth" );
 }
 
-TextInterface::Class *Pulsar::ProcHistoryTI::clone()
+TextInterface::Parser *Pulsar::ProcHistoryTI::clone()
 {
   if( instance )
     return new ProcHistoryTI( instance );

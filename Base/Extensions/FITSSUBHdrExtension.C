@@ -51,7 +51,7 @@ FITSSUBHdrExtension::~FITSSUBHdrExtension ()
 {}
 
 
-Reference::To< TextInterface::Class > FITSSUBHdrExtension::get_text_interface()
+TextInterface::Parser* FITSSUBHdrExtension::get_interface()
 {
   return new FITSSUBHdrExtensionTI( this );
 }

@@ -43,7 +43,7 @@ Pulsar::ITRFExtension::~ITRFExtension ()
 
 
 //! Return a text interfaces that can be used to access this instance
-Reference::To< TextInterface::Class > Pulsar::ITRFExtension::get_text_interface()
+TextInterface::Parser* Pulsar::ITRFExtension::get_interface()
 {
 	return new ITRFExtensionTI( this );
 }

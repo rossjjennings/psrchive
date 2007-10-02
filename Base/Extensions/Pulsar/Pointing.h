@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Pointing.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/06/20 03:04:53 $
-   $Author: nopeer $ */
+   $Revision: 1.7 $
+   $Date: 2007/10/02 04:50:09 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Pointing_h
 #define __Pulsar_Pointing_h
@@ -42,7 +42,7 @@ namespace Pulsar {
     Pointing* clone () const { return new Pointing( *this ); }
     
     //! Return a text interfaces that can be used to access this instance
-    Reference::To< TextInterface::Class > get_text_interface();
+    TextInterface::Parser* get_interface();
 
     //! Addition operator
     const Pointing& operator += (const Pointing& extension);

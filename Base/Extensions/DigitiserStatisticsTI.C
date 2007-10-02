@@ -33,7 +33,7 @@ void DigitiserStatisticsTI::SetupMethods( void )
 }
 
 
-TextInterface::Class *Pulsar::DigitiserStatisticsTI::clone()
+TextInterface::Parser *Pulsar::DigitiserStatisticsTI::clone()
 {
   if( instance )
     return new DigitiserStatisticsTI( instance );

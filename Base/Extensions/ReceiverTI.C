@@ -67,7 +67,7 @@ void Pulsar::ReceiverTI::SetupMethods( void )
 }
 
 
-TextInterface::Class *Pulsar::ReceiverTI::clone()
+TextInterface::Parser *Pulsar::ReceiverTI::clone()
 {
   if( instance )
     return new ReceiverTI( instance );

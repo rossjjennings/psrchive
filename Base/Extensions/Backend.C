@@ -35,7 +35,7 @@ const Pulsar::Backend& Pulsar::Backend::operator= (const Backend& backend)
 
 //! Return a text interfaces that can be used to access this instance
 
-Reference::To< TextInterface::Class > Pulsar::Backend::get_text_interface()
+TextInterface::Parser* Pulsar::Backend::get_interface()
 {
   return new BackendTI( this );
 }

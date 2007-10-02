@@ -38,7 +38,7 @@ namespace Pulsar
       { return new DigitiserStatistics( *this ); }
 
     //! Return a text interfaces that can be used to access this instance
-    Reference::To< TextInterface::Class > get_text_interface();
+    TextInterface::Parser* get_interface();
 
     //! set ndigr
     void set_ndigr( int s_ndigr ) { ndigr = s_ndigr; }

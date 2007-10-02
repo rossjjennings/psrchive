@@ -45,7 +45,7 @@ Pulsar::ObsExtension::~ObsExtension ()
 
 
 //! Ge text interface
-Reference::To< TextInterface::Class > Pulsar::ObsExtension::get_text_interface()
+TextInterface::Parser* Pulsar::ObsExtension::get_interface()
 {
   return new ObsExtensionTI( this );
 

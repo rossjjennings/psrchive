@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Attic/BackendTI.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/06/20 03:04:53 $
-   $Author: nopeer $ */
+   $Revision: 1.6 $
+   $Date: 2007/10/02 04:50:09 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_BackendTI_h
 #define __Pulsar_BackendTI_h
@@ -33,7 +33,7 @@ namespace Pulsar
 
     virtual std::string get_interface_name() { return "BackendTI"; }
 
-    TextInterface::Class *clone();
+    TextInterface::Parser *clone();
   };
 
 }

@@ -357,8 +357,7 @@ void PolnCalibratorExtension::Transformation::set_covariance
 }
 
 //! Get the text interface 
-Reference::To< TextInterface::Class >
-PolnCalibratorExtension::get_text_interface()
+TextInterface::Parser* PolnCalibratorExtension::get_interface()
 {
   return new PolnCalibratorExtensionTI( this );
 }

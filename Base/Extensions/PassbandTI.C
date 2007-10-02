@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Attic/PassbandTI.C,v $
-   $Revision: 1.1 $
-   $Date: 2007/06/20 03:06:46 $
-   $Author: nopeer $ */
+   $Revision: 1.2 $
+   $Date: 2007/10/02 04:50:09 $
+   $Author: straten $ */
 
 
 
@@ -43,7 +43,7 @@ void PassbandTI::setup( void )
 }
 
 
-TextInterface::Class *PassbandTI::clone()
+TextInterface::Parser *PassbandTI::clone()
 {
   if( instance )
     return new PassbandTI( instance );

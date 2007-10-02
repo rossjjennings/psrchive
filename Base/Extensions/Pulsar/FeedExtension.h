@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FeedExtension.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/06/20 03:04:53 $
-   $Author: nopeer $ */
+   $Revision: 1.6 $
+   $Date: 2007/10/02 04:50:09 $
+   $Author: straten $ */
 
 #ifndef __FeedExtension_h
 #define __FeedExtension_h
@@ -45,7 +45,7 @@ namespace Pulsar
     FeedExtension* clone () const { return new FeedExtension( *this ); }
 
     //! Get the a text interface
-    Reference::To< TextInterface::Class > get_text_interface();
+    TextInterface::Parser* get_interface();
 
     //! Return the transformation
     Jones<double> get_transformation () const { return transformation; }

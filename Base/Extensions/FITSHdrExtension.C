@@ -56,7 +56,7 @@ Pulsar::FITSHdrExtension::~FITSHdrExtension ()
 
 
 
-Reference::To< TextInterface::Class > Pulsar::FITSHdrExtension::get_text_interface()
+TextInterface::Parser* Pulsar::FITSHdrExtension::get_interface()
 {
   return new FITSHdrExtensionTI( this );
 }

@@ -122,7 +122,7 @@ double FluxCalibratorExtension::get_epoch( void ) const
 }
 
 
-Reference::To< TextInterface::Class > FluxCalibratorExtension::get_text_interface()
+TextInterface::Parser* FluxCalibratorExtension::get_interface()
 {
   return new FluxCalibratorExtensionTI( this );
 }

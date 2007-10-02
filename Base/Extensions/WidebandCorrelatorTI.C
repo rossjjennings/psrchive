@@ -27,7 +27,7 @@ namespace Pulsar
     add( &WidebandCorrelator::get_tcycle, "tcycle", "Get the correlator cycle time" );
   }
 
-  TextInterface::Class *Pulsar::WidebandCorrelatorTI::clone()
+  TextInterface::Parser *Pulsar::WidebandCorrelatorTI::clone()
   {
     if( instance )
       return new WidebandCorrelatorTI( instance );

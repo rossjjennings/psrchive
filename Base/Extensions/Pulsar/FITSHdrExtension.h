@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.14 $
-   $Date: 2007/06/20 03:04:53 $
-   $Author: nopeer $ */
+   $Revision: 1.15 $
+   $Date: 2007/10/02 04:50:09 $
+   $Author: straten $ */
 
 #ifndef __FITSHdrExtension_h
 #define __FITSHdrExtension_h
@@ -43,7 +43,7 @@ namespace Pulsar
     FITSHdrExtension* clone () const { return new FITSHdrExtension( *this ); }
 
     //! Return a text interfaces that can be used to access this instance
-    Reference::To< TextInterface::Class > get_text_interface();
+    TextInterface::Parser* get_interface();
 
     //! Return two strings based on coordmode attribute
     void get_coord_string (const sky_coord& coordinates,

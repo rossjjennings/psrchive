@@ -35,7 +35,7 @@ namespace Pulsar {
     ProcHistory* clone () const { return new ProcHistory( *this ); }
     
     //! Get the text interface
-    Reference::To< TextInterface::Class > get_text_interface();
+    TextInterface::Parser* get_interface();
 
     ///////////////////////////////////////////////////////////////
     // The information container

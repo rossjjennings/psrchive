@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.21 $
-   $Date: 2007/07/30 05:00:25 $
-   $Author: nopeer $ */
+   $Revision: 1.22 $
+   $Date: 2007/10/02 04:50:09 $
+   $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
 #define __ReceiverExtension_h
@@ -49,7 +49,7 @@ namespace Pulsar {
     Receiver* clone () const { return new Receiver(*this); }
     
     //! Return a text interfaces that can be used to access this instance
-    Reference::To< TextInterface::Class > get_text_interface();
+    TextInterface::Parser* get_interface();
 
     //! Parses the value of a Receiver attribute from a string
     void parse (std::string text);

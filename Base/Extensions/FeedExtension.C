@@ -37,7 +37,7 @@ Pulsar::FeedExtension::~FeedExtension ()
 
 //! Get the text interface
 
-Reference::To< TextInterface::Class > Pulsar::FeedExtension::get_text_interface()
+TextInterface::Parser* Pulsar::FeedExtension::get_interface()
 {
   return new FeedExtensionTI( this );
 }

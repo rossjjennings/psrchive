@@ -28,7 +28,7 @@ namespace Pulsar
 
     virtual std::string get_interface_name() { return "DigitiserStatisticsTI"; }
 
-    TextInterface::Class *clone();
+    TextInterface::Parser *clone();
   };
 }
 

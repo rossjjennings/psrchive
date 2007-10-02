@@ -48,7 +48,7 @@ namespace Pulsar
     add( &FITSHdrExtension::get_dec, "dec", "Declination (-dd:mm:ss.sss)" );
   }
 
-  TextInterface::Class *FITSHdrExtensionTI::clone()
+  TextInterface::Parser *FITSHdrExtensionTI::clone()
   {
     FITSHdrExtensionTI *cl = new FITSHdrExtensionTI();
     if( instance )

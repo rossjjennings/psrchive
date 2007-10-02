@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Attic/PassbandTI.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/06/20 03:04:53 $
-   $Author: nopeer $ */
+   $Revision: 1.2 $
+   $Date: 2007/10/02 04:50:09 $
+   $Author: straten $ */
 
 
 
@@ -31,7 +31,7 @@ public:
   
   virtual std::string get_interface_name() { return "PassbandTI"; }
 
-  TextInterface::Class *clone();
+  TextInterface::Parser *clone();
 };
 
 #endif

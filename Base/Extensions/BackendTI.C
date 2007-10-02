@@ -34,7 +34,7 @@ void Pulsar::BackendTI::SetupMethods( void )
          "dcc", "Downconversion conjugation corrected" );
 }
 
-TextInterface::Class *Pulsar::BackendTI::clone()
+TextInterface::Parser *Pulsar::BackendTI::clone()
 {
   if( instance )
     return new BackendTI( instance );

@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/DigitiserCounts.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/06/20 03:04:53 $
-   $Author: nopeer $ */
+   $Revision: 1.2 $
+   $Date: 2007/10/02 04:50:09 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_DigitiserCounts_h
 #define __Pulsar_DigitiserCounts_h
@@ -40,7 +40,7 @@ namespace Pulsar
     DigitiserCounts* clone () const { return new DigitiserCounts( *this ); }
 
     //! Get the text interface
-    Reference::To< TextInterface::Class > get_text_interface();
+    TextInterface::Parser* get_interface();
 
     void set_dig_mode( std::string s_dig_mode ) { dig_mode = s_dig_mode; }
     void set_nlev( int s_nlev ) { nlev = s_nlev; }

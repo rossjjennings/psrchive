@@ -41,7 +41,7 @@ void Pulsar::FITSSUBHdrExtensionTI::setup( void )
   add( &FITSSUBHdrExtension::get_nsblk, "nsblk", "Samples/row (SEARCH mode, else 1)" );
 }
 
-TextInterface::Class *Pulsar::FITSSUBHdrExtensionTI::clone()
+TextInterface::Parser *Pulsar::FITSSUBHdrExtensionTI::clone()
 {
   if( instance )
     return new FITSSUBHdrExtensionTI( instance );

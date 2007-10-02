@@ -167,7 +167,7 @@ void Pulsar::ProcHistory::row::init ()
 }
 
 
-Reference::To< TextInterface::Class > Pulsar::ProcHistory::get_text_interface() 
+TextInterface::Parser* Pulsar::ProcHistory::get_interface() 
 {
   return new ProcHistoryTI( this );
 }

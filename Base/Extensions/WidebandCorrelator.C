@@ -43,7 +43,7 @@ Pulsar::WidebandCorrelator::~WidebandCorrelator ()
 
 
 //! Return a text interfaces that can be used to access this instance
-Reference::To< TextInterface::Class > Pulsar::WidebandCorrelator::get_text_interface()
+TextInterface::Parser* Pulsar::WidebandCorrelator::get_interface()
 {
 	return new WidebandCorrelatorTI( this );
 }

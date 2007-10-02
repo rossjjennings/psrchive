@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/FluxCalibratorExtensionTI.C,v $
-   $Revision: 1.1 $
-   $Date: 2007/06/20 03:06:46 $
-   $Author: nopeer $ */
+   $Revision: 1.2 $
+   $Date: 2007/10/02 04:50:09 $
+   $Author: straten $ */
 
 
 
@@ -44,7 +44,7 @@ void FluxCalibratorExtensionTI::setup( void )
 }
 
 
-TextInterface::Class *FluxCalibratorExtensionTI::clone()
+TextInterface::Parser *FluxCalibratorExtensionTI::clone()
 {
   if( instance )
     return new FluxCalibratorExtensionTI( instance );
