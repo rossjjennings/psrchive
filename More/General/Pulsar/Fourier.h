@@ -7,14 +7,12 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Fourier.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/10/02 05:19:48 $
+   $Revision: 1.4 $
+   $Date: 2007/10/02 05:41:11 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Fourier_h
 #define __Pulsar_Fourier_h
-
-#include "FTransformAgent.h"
 
 namespace Pulsar {
 
@@ -32,9 +30,6 @@ namespace Pulsar {
 
   //! Square-law detect the input PolnProfile
   void detect (PolnProfile* input);
-
-  //! If set, fourier_transform functions use this plan without question
-  extern FTransform::Plan* fourier_transform_plan;
 
 }
 
