@@ -103,13 +103,17 @@ Calibration::Feed::~Feed ()
 
 void Calibration::Feed::set_cyclic (bool flag)
 {
+  // disable automatic installation so that copy can be made
+  ModifyRestore<bool> (MEAL::ParameterPolicy::auto_install, false);
+
   if (flag) {
+
 
     for (unsigned ir=0; ir<2; ir++) {
 
       // set up the cyclic boundary for orientation
       MEAL::CyclicParameter* o_cyclic = 0;
-      o_cyclic = new MEAL::CyclicParameter;
+      o_cyclic = new MEAL::CyclicParameter (orientation[ir]);
 
       o_cyclic->set_period (M_PI);
       o_cyclic->set_upper_bound (M_PI/2);
@@ -119,7 +123,7 @@ void Calibration::Feed::set_cyclic (bool flag)
 
       // set up the cyclic boundary for ellipticity
       MEAL::CyclicParameter* e_cyclic = 0;
-      e_cyclic = new MEAL::CyclicParameter;
+      e_cyclic = new MEAL::CyclicParameter (ellipticity[ir]);
 
       e_cyclic->set_period (M_PI);
       e_cyclic->set_upper_bound (M_PI/4);
@@ -128,21 +132,20 @@ void Calibration::Feed::set_cyclic (bool flag)
 
       ellipticity[ir]->set_parameter_policy (e_cyclic);
 
+
     }
 
   }
   else {
 
-    cerr << "huh?" << endl;
-
     MEAL::OneParameter* noncyclic = 0;
 
     for (unsigned ir=0; ir<2; ir++) {
 
-      noncyclic = new MEAL::OneParameter;
+      noncyclic = new MEAL::OneParameter (ellipticity[ir]);
       ellipticity[ir]->set_parameter_policy (noncyclic);
 
-      noncyclic = new MEAL::OneParameter;
+      noncyclic = new MEAL::CyclicParameter (orientation[ir]);
       orientation[ir]->set_parameter_policy (noncyclic);
 
     }
