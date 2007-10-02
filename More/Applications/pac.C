@@ -29,7 +29,7 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:BbCcDd:e:fFGhiIJM:m:n:Oop:PqRr:sSt:Tu:vVwZ";
+const char* args = "A:BbCcDd:e:fFGhiIM:m:n:Oop:Pqr:sSt:Tu:vVwZ";
 
 void usage ()
 {
@@ -58,10 +58,6 @@ void usage ()
     "Rough Alignment options [not recommended]: \n"
     "  -B                     Fix the off-pulse baseline statistics \n"
     "  -D                     Fix the reference degree of polarization \n"
-    "\n"
-    "Off-pulse polarimetry options: \n"
-    "  -R                     Disable baseline removal \n"
-    "  -J                     Disable deparallactification \n"
     "\n"
     "Matching options: \n"
     "  -m [b|a]               Use only calibrator before|after observation\n"
@@ -103,9 +99,6 @@ int main (int argc, char *argv[]) {
   bool new_database = true;
   bool do_fluxcal = true;
   bool do_polncal = true;
-
-  bool remove_baseline = true;
-  bool deparallactify = true;
 
   bool write_database_file = false;
   bool check_flags = true;
@@ -172,7 +165,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.80 2007/10/02 05:19:48 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.81 2007/10/02 05:40:09 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -247,10 +240,6 @@ int main (int argc, char *argv[]) {
 
     case 'I':
       ionosphere = new Pulsar::IonosphereCalibrator;
-      break;
-
-    case 'J':
-      deparallactify = false;
       break;
 
     case 'M':
@@ -360,10 +349,6 @@ int main (int argc, char *argv[]) {
 	// just take the rest of the string safely
         command += optarg_str.substr(index+1, optarg_str.length()); 
       }
-      break;
-
-    case 'R':
-      remove_baseline = false;
       break;
 
     case 's':
@@ -523,10 +508,7 @@ int main (int argc, char *argv[]) {
       cerr << "pac: Loading " << filenames[i] << endl;
     
     Reference::To<Pulsar::Archive> arch = Pulsar::Archive::load(filenames[i]);
-
-    if (remove_baseline)
-      arch->remove_baseline ();
-
+    
     cout << "pac: Loaded archive " << filenames[i] << endl;
     
     bool successful_polncal = false;
