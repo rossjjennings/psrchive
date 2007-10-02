@@ -154,8 +154,6 @@ void Pulsar::PeakCumulative::build ()
   if (!choose)
     ntries = 1;
 
-  double min_amp = mean.get_value();
-
   for (unsigned itry=0; itry<ntries; itry++) {
 
     // space to hold the cumulative sum
