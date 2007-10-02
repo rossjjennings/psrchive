@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/CyclicParameter.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/10/02 05:19:48 $
+   $Revision: 1.6 $
+   $Date: 2007/10/02 05:42:23 $
    $Author: straten $ */
 
 #ifndef __CyclicParameter_H
@@ -28,7 +28,7 @@ namespace MEAL {
   public:
 
     //! Default constructor
-    CyclicParameter (Function* context = 0);
+    CyclicParameter (Function* context);
 
     //! Copy constructor
     CyclicParameter (const CyclicParameter& np);

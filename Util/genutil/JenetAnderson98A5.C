@@ -57,7 +57,6 @@ double JenetAnderson98::EquationA5::evaluate (double mean_Phi)
 
     for (unsigned nlo=nlo_start; nlo>1 && nlo<L; nlo += increment) {
 
-      // compute equation A4
       double f = mean_Phi * losq[nlo] + (1-mean_Phi) * hisq[nlo];
       double df_dmean_Phi = losq[nlo] - hisq[nlo];
 
