@@ -8,6 +8,7 @@
 #include "Pulsar/ArchiveTI.h"
 #include "substitute.h"
 #include "evaluate.h"
+#include "Pulsar/InterpreterVariables.h"
 
 #include <cpgplot.h>
 
@@ -26,7 +27,7 @@ Pulsar::PlotLabel::~PlotLabel ()
 {
 }
 
-void Pulsar::PlotLabel::plot (const Archive* data)
+void Pulsar::PlotLabel::plot ( const Archive* data)
 {
   plot (data, get_left(),   0.0);
   plot (data, get_centre(), 0.5);
@@ -34,16 +35,18 @@ void Pulsar::PlotLabel::plot (const Archive* data)
 }
 
 void 
-Pulsar::PlotLabel::plot (const Archive* data, const string& label, float side)
+Pulsar::PlotLabel::plot ( const Archive* data, const string& label, float side)
 {
   if (label == PlotLabel::unset)
     return;
-
+  
   vector<string> labels;
   separate (label, labels, ".");
 
   for (unsigned i=0; i < labels.size(); i++) {
-    labels[i] = substitute (labels[i], get_interface(data));
+    Reference::To< Interpreter::Variables > extended_ti = new Interpreter::Variables();
+    extended_ti->set_instance( const_cast<Archive*>(data) );
+    labels[i] = substitute (labels[i], extended_ti.ptr() );
     labels[i] = evaluate (labels[i]);
     row (labels[i], i, labels.size(), side);
   }
