@@ -11,7 +11,7 @@ Pulsar::PhasePlot::PhasePlot ()
   get_frame()->set_x_scale( new PhaseScale );
 }
 
-TextInterface::Class* Pulsar::PhasePlot::get_interface ()
+TextInterface::Parser* Pulsar::PhasePlot::get_interface ()
 {
   return new Interface (this);
 }

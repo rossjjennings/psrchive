@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/CalibratorSpectrum.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.5 $
+   $Date: 2007/10/02 05:08:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CalibratorSpectrum_h
@@ -31,7 +31,7 @@ namespace Pulsar {
     CalibratorSpectrum ();
 
     //! Return the text interface
-    TextInterface::Class* get_interface ();
+    TextInterface::Parser* get_interface ();
 
     // Text interface to the CalibratorSpectrum class
     class Interface : public TextInterface::To<CalibratorSpectrum> {

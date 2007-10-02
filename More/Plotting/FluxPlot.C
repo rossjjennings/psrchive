@@ -38,7 +38,7 @@ Pulsar::FluxPlot::~FluxPlot ()
 {
 }
 
-TextInterface::Class* Pulsar::FluxPlot::get_interface ()
+TextInterface::Parser* Pulsar::FluxPlot::get_interface ()
 {
   return new Interface (this);
 }
@@ -143,8 +143,6 @@ void Pulsar::FluxPlot::plot_selection (const Archive* data)
     cpgmove (x_min, mean.get_value() + offset);
     cpgdraw (x_max, mean.get_value() + offset);
   }
-
-
 
 }
 

@@ -99,7 +99,7 @@ string FreqVsSNRPlot::get_ylabel( const Archive *data )
 
 
 
-TextInterface::Class *FreqVsSNRPlot::get_interface( void )
+TextInterface::Parser *FreqVsSNRPlot::get_interface( void )
 {
   return new Interface( this );
 }

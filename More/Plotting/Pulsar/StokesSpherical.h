@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesSpherical.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.10 $
+   $Date: 2007/10/02 05:08:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesSpherical_h
@@ -30,7 +30,7 @@ namespace Pulsar {
     StokesSpherical ();
 
     //! Get the text interface to the configuration attributes
-    TextInterface::Class* get_interface ();
+    TextInterface::Parser* get_interface ();
 
     // Text interface to the StokesSpherical class
     class Interface : public TextInterface::To<StokesSpherical> {

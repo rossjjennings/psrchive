@@ -18,7 +18,7 @@ Pulsar::StokesPlot::StokesPlot ()
   plot_lines   = "1111";
 }
 
-TextInterface::Class* Pulsar::StokesPlot::get_interface ()
+TextInterface::Parser* Pulsar::StokesPlot::get_interface ()
 {
   return new Interface (this);
 }

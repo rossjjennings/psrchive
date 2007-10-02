@@ -30,7 +30,7 @@ Pulsar::AnglePlot::AnglePlot()
   get_frame()->get_y_axis()->set_nsub( 3 );
 }
 
-TextInterface::Class* Pulsar::AnglePlot::get_interface ()
+TextInterface::Parser* Pulsar::AnglePlot::get_interface ()
 {
   return new Interface (this);
 }

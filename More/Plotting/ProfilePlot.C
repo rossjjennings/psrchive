@@ -16,7 +16,7 @@ Pulsar::ProfilePlot::ProfilePlot ()
   plot_cal_transitions = true;
 }
 
-TextInterface::Class* Pulsar::ProfilePlot::get_interface ()
+TextInterface::Parser* Pulsar::ProfilePlot::get_interface ()
 {
   return new Interface (this);
 }

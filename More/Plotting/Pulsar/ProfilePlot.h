@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/ProfilePlot.h,v $
-   $Revision: 1.12 $
-   $Date: 2007/09/04 05:46:18 $
-   $Author: nopeer $ */
+   $Revision: 1.13 $
+   $Date: 2007/10/02 05:08:15 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_ProfilePlot_h
 #define __Pulsar_ProfilePlot_h
@@ -27,7 +27,7 @@ namespace Pulsar {
     ProfilePlot ();
 
     //! Get the text interface to the configuration attributes
-    TextInterface::Class* get_interface ();
+    TextInterface::Parser* get_interface ();
 
     // Text interface to the ProfilePlot class
     class Interface : public TextInterface::To<ProfilePlot> {

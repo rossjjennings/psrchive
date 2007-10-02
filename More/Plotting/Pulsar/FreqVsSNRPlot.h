@@ -36,7 +36,7 @@ class Interface : public TextInterface::To<FreqVsSNRPlot>
     Interface( FreqVsSNRPlot *s_instance );
   };
 
-  TextInterface::Class *get_interface( void );
+  TextInterface::Parser *get_interface( void );
   
   void set_pol( int new_pol ) { pol = new_pol; }
   void set_subint( int new_subint ) { subint = new_subint; }

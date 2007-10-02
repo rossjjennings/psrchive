@@ -41,7 +41,7 @@ public:
     Interface( DynamicSNSpectrum *s_instance ); 
   };
   
-  TextInterface::Class *get_interface() { return new Interface(this); }
+  TextInterface::Parser *get_interface() { return new Interface(this); }
   
   
 

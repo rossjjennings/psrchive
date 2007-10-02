@@ -86,7 +86,7 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
 }
 
 //! Get the text interface to the configuration attributes
-TextInterface::Class* Pulsar::PhaseVsFrequencyPlus::get_interface ()
+TextInterface::Parser* Pulsar::PhaseVsFrequencyPlus::get_interface ()
 {
   return new Interface (this);
 }

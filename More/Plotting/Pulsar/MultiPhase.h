@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPhase.h,v $
-   $Revision: 1.13 $
-   $Date: 2006/12/02 05:12:17 $
+   $Revision: 1.14 $
+   $Date: 2007/10/02 05:08:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiPhase_h
@@ -34,7 +34,7 @@ namespace Pulsar {
     };
 
     //! Get the text interface to the configuration attributes
-    TextInterface::Class* get_interface ()
+    TextInterface::Parser* get_interface ()
     { return new Interface (this); }
 
     //! Get the scale

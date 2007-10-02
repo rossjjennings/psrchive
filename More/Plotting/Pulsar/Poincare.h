@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Poincare.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/08/20 06:35:22 $
+   $Revision: 1.6 $
+   $Date: 2007/10/02 05:08:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Poincare_h
@@ -38,7 +38,7 @@ namespace Pulsar {
     };
 
     //! Get the text interface to the configuration attributes
-    TextInterface::Class* get_interface ()
+    TextInterface::Parser* get_interface ()
     { return new Interface (this); }
 
     //! Set the longitude of the camera

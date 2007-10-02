@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsFrequencyPlus.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/09/24 22:39:27 $
+   $Revision: 1.10 $
+   $Date: 2007/10/02 05:08:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsFrequencyPlus_h
@@ -32,7 +32,7 @@ namespace Pulsar {
     PhaseVsFrequencyPlus ();
 
     //! Get the text interface to the configuration attributes
-    TextInterface::Class* get_interface ();
+    TextInterface::Parser* get_interface ();
 
     // Text interface to the PhaseVsFrequencyPlus class
     class Interface : public TextInterface::To<PhaseVsFrequencyPlus> {

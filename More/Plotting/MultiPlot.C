@@ -17,7 +17,7 @@ Pulsar::MultiPlot::MultiPlot ()
 {
 }
 
-TextInterface::Class* Pulsar::MultiPlot::get_frame_interface ()
+TextInterface::Parser* Pulsar::MultiPlot::get_frame_interface ()
 {
   return new MultiFrame::Interface (&frames);
 }

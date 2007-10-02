@@ -47,7 +47,7 @@ Pulsar::StokesSpherical::StokesSpherical ()
 }
 
 //! Get the text interface to the configuration attributes
-TextInterface::Class* Pulsar::StokesSpherical::get_interface ()
+TextInterface::Parser* Pulsar::StokesSpherical::get_interface ()
 {
   return new Interface (this);
 }

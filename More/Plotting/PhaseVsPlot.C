@@ -37,7 +37,7 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
   line_colour = -1;
 }
 
-TextInterface::Class* Pulsar::PhaseVsPlot::get_interface ()
+TextInterface::Parser* Pulsar::PhaseVsPlot::get_interface ()
 {
   return new Interface (this);
 }

@@ -259,7 +259,7 @@ void LinePhasePlot::prepare (const Archive* arch )
  * TODO     - Nothing
  **/
 
-TextInterface::Class *LinePhasePlot::get_interface()
+TextInterface::Parser *LinePhasePlot::get_interface()
 {
   return new Interface( this );
 }

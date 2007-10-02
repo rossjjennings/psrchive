@@ -13,7 +13,7 @@ Pulsar::FramedPlot::FramedPlot ()
 }
 
 //! Get the text interface to the frame attributes
-TextInterface::Class* Pulsar::FramedPlot::get_frame_interface ()
+TextInterface::Parser* Pulsar::FramedPlot::get_frame_interface ()
 {
   return new PlotFrame::Interface (get_frame());
 }

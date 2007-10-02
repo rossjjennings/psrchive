@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.14 $
-   $Date: 2007/10/01 09:55:30 $
-   $Author: nopeer $ */
+   $Revision: 1.15 $
+   $Date: 2007/10/02 05:08:15 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsPlot_h
 #define __Pulsar_PhaseVsPlot_h
@@ -30,7 +30,7 @@ namespace Pulsar {
     PhaseVsPlot ();
 
     //! Get the text interface to the configuration attributes
-    TextInterface::Class* get_interface ();
+    TextInterface::Parser* get_interface ();
 
     // Text interface to the PhaseVsPlot class
     class Interface : public TextInterface::To<PhaseVsPlot> {

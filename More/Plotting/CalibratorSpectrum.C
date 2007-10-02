@@ -27,7 +27,7 @@ Pulsar::CalibratorSpectrum::CalibratorSpectrum ()
   plotter.set_control_viewport (false);
 }
  
-TextInterface::Class* Pulsar::CalibratorSpectrum::get_interface ()
+TextInterface::Parser* Pulsar::CalibratorSpectrum::get_interface ()
 {
   return new Interface (this);
 }

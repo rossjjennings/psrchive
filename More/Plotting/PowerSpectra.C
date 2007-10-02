@@ -29,7 +29,7 @@ Pulsar::PowerSpectra::PowerSpectra ()
   get_frame()->get_y_scale()->set_buf_norm(0.05);
 }
  
-TextInterface::Class* Pulsar::PowerSpectra::get_interface ()
+TextInterface::Parser* Pulsar::PowerSpectra::get_interface ()
 {
   return new Interface (this);
 }

@@ -23,7 +23,7 @@ namespace Pulsar
     CalPhVFreqPlot();
 
     //! Get the text interface to the configuration attributes
-    TextInterface::Class* get_interface ();
+    TextInterface::Parser* get_interface ();
 
     //! Get the default label for the x axis
     std::string get_xlabel (const Archive*);

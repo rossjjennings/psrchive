@@ -37,7 +37,7 @@ CalPhVFreqPlot::CalPhVFreqPlot()
 
 
 
-TextInterface::Class* CalPhVFreqPlot::get_interface ()
+TextInterface::Parser* CalPhVFreqPlot::get_interface ()
 {
     return new CalPhVFreqPlot::Interface( this );
 }

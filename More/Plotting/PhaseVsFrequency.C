@@ -17,7 +17,7 @@ Pulsar::PhaseVsFrequency::PhaseVsFrequency ()
   ipol = 0;
 }
 
-TextInterface::Class* Pulsar::PhaseVsFrequency::get_interface ()
+TextInterface::Parser* Pulsar::PhaseVsFrequency::get_interface ()
 {
   return new Interface (this);
 }

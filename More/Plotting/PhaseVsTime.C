@@ -15,7 +15,7 @@ Pulsar::PhaseVsTime::PhaseVsTime ()
   ipol = 0;
 }
 
-TextInterface::Class* Pulsar::PhaseVsTime::get_interface ()
+TextInterface::Parser* Pulsar::PhaseVsTime::get_interface ()
 {
   return new Interface (this);
 }

@@ -11,7 +11,7 @@ Pulsar::TwoBitPlot::TwoBitPlot ()
 {
 }
 
-TextInterface::Class* Pulsar::TwoBitPlot::get_interface ()
+TextInterface::Parser* Pulsar::TwoBitPlot::get_interface ()
 {
   return new Interface (this);
 }

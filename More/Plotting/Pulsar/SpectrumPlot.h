@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/SpectrumPlot.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/07 13:50:19 $
+   $Revision: 1.7 $
+   $Date: 2007/10/02 05:08:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SpectrumPlot_h
@@ -30,7 +30,7 @@ namespace Pulsar {
     };
 
     //! Get the text interface to the configuration attributes
-    TextInterface::Class* get_interface ()
+    TextInterface::Parser* get_interface ()
     { return new Interface (this); }
 
     //! Load the spectra

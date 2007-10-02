@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/LinePhasePlot.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/09/28 06:11:15 $
-   $Author: nopeer $ */
+   $Revision: 1.3 $
+   $Date: 2007/10/02 05:08:15 $
+   $Author: straten $ */
 
 
 
@@ -46,7 +46,7 @@ namespace Pulsar
       Interface( LinePhasePlot *target = NULL );
     };
 
-    TextInterface::Class *get_interface();
+    TextInterface::Parser *get_interface();
 
     int get_isub( void ) const { return isub; }
     void set_isub( int s_isub ) { isub = s_isub; }
