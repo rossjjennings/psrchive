@@ -4,21 +4,27 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
-#include <math.h>
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::snr
-//
 
 #include "Pulsar/Profile.h"
+#include "Pulsar/SNRatioInterpreter.h"
+
+#include <math.h>
+
+using namespace std;
 
 /*! This use of the Functor template implements the Strategy design
  pattern (ghjv94 p.315) for calculating the signal-to-noise ratio
  (S/N).  By default, the S/N is calculated using Pulsar::snr_phase */
-Functor<float(const Pulsar::Profile*)> 
-Pulsar::Profile::snr_strategy (&snr_phase);
+Functor<float(const Pulsar::Profile*)> Pulsar::Profile::snr_strategy;
+
+/*!  
+  The SNRatioInterpreter class sets the snr_strategy
+  attribute according to commands specified either in the
+  configuration file or via the psrsh interpreter.  It enables
+  convenient experimentation with the S/N estimation algorithm.
+*/
+static Pulsar::Option<CommandParser>
+snr( new Pulsar::SNRatioInterpreter, "Profile::snr", "phase" );
 
 /*! This method calls Profile::snr_strategy */
 float Pulsar::Profile::snr() const try {
