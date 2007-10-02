@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.23 $
-   $Date: 2006/12/04 17:09:54 $
+   $Revision: 1.24 $
+   $Date: 2007/10/02 05:07:09 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -69,15 +69,15 @@ namespace Pulsar {
 
     //! Get the above-frame label
     PlotLabel* get_label_above () { return above; }
-    //! Get the above-frame label
+    //! Set the above-frame label
     void set_label_above (PlotLabel*);
 
     //! Get the below-frame label
     PlotLabel* get_label_below () { return below; }
-    //! Get the below-frame label
+    //! Set the below-frame label
     void set_label_below (PlotLabel*);
 
-    //! transpose the x and y axes
+    //! Transpose the x and y axes
     void set_transpose (bool flag = true) { transpose = flag; }
     bool get_transpose () const { return transpose; }
  
