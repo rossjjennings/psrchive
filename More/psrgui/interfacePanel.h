@@ -20,12 +20,12 @@ namespace Pulsar {
 	
       public:
 
-        interfacePanel(QWidget* parent, TextInterface::Class* ui);
+        interfacePanel(QWidget* parent, TextInterface::Parser* ui);
 
       protected:
 
 	std::vector<QLineEdit*> parameters;
-	TextInterface::Class* ti;
+	TextInterface::Parser* ti;
 
       protected slots:
 

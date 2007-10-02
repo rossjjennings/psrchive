@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Attic/ArchiveTI.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/06/20 03:07:27 $
-   $Author: nopeer $ */
+   $Revision: 1.12 $
+   $Date: 2007/10/02 05:19:26 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveTI_h
 #define __Pulsar_ArchiveTI_h
@@ -36,7 +36,7 @@ namespace Pulsar
     void setup( void );
     
     //! clone this ti
-    TextInterface::Class *clone();
+    TextInterface::Parser *clone();
     
     //! Get the interface name
     std::string get_interface_name() { return "ArchiveTI"; }

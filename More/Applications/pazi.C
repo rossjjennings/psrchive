@@ -160,18 +160,18 @@ int main(int argc, char* argv[])
 
 	Plot *time_orig_plot = factory.construct("time");
 	Plot *time_mod_plot = factory.construct("time");
-	TextInterface::Class* time_fui = time_mod_plot->get_frame_interface();
+	TextInterface::Parser* time_fui = time_mod_plot->get_frame_interface();
 
 	Plot *freq_orig_plot = factory.construct("freq");
 	Plot *freq_mod_plot = factory.construct("freq");
-	TextInterface::Class* freq_fui = freq_mod_plot->get_frame_interface();
+	TextInterface::Parser* freq_fui = freq_mod_plot->get_frame_interface();
 
 	Plot *total_plot = factory.construct("flux");
 	total_plot->configure("info=1");
 
 	Plot *subint_orig_plot = factory.construct("flux");
 	Plot *subint_mod_plot = factory.construct("flux");
-	TextInterface::Class* subint_fui = subint_mod_plot->get_frame_interface();
+	TextInterface::Parser* subint_fui = subint_mod_plot->get_frame_interface();
 	subint_orig_plot->configure("info=1");
 	subint_mod_plot->configure("info=1");
 

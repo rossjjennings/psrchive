@@ -15,7 +15,7 @@ using namespace std;
 
 bool TextInterface::label_elements = false;
 
-string TextInterface::Class::process (const string& command)
+string TextInterface::Parser::process (const string& command)
 {
   if (command == "help")
     return help ();
@@ -38,7 +38,7 @@ string TextInterface::Class::process (const string& command)
   return "";
 }
 
-string TextInterface::Class::help (bool default_value)
+string TextInterface::Parser::help (bool default_value)
 {
   unsigned i = 0;
 
@@ -50,7 +50,7 @@ string TextInterface::Class::help (bool default_value)
   unsigned max_descriptionlen = description_label.length();
 
   // find the maximum string length of the name and description
-  for (i=0; i<get_nattribute(); i++) {
+  for (i=0; i<get_nvalue(); i++) {
     if (get_name(i).length() > max_namelen)
       max_namelen = get_name(i).length();
     if (get_description(i).length() > max_descriptionlen)
@@ -69,7 +69,7 @@ string TextInterface::Class::help (bool default_value)
     pad(max_descriptionlen, description_label) + value_label + "\n" +
     sep + "\n";
 
-  for (i=0; i<get_nattribute(); i++)
+  for (i=0; i<get_nvalue(); i++)
     help_str += 
       pad(max_namelen, get_name(i)) + 
       pad(max_descriptionlen, get_description(i)) +
@@ -77,6 +77,83 @@ string TextInterface::Class::help (bool default_value)
 
   return help_str;
 }
+
+
+
+//! Get the value of the value
+string TextInterface::Parser::get_value (const string& name) const
+{
+  // an optional precision may be specified
+  std::string::size_type dot = name.find('%');
+
+  if (dot == std::string::npos)
+    return find(name)->get_value();
+
+  ModifyRestore<unsigned> temp ( tostring_precision,
+				 fromstring<unsigned> (name.substr(dot+1)) );
+
+  return find(name.substr(0,dot))->get_value();
+}
+
+//! Set the value of the value
+void TextInterface::Parser::set_value (const string& name, const string& value)
+{
+  find(name)->set_value(value);
+}
+
+//! Get the number of values
+unsigned TextInterface::Parser::get_nvalue () const
+{
+  return values.size(); 
+}
+
+//! Get the name of the value
+string TextInterface::Parser::get_name (unsigned i) const 
+{
+  return values[i]->get_name();
+}
+
+//! Get the description of the value
+string TextInterface::Parser::get_description (unsigned i) const
+{
+  return values[i]->get_description();
+}
+
+//! Return a pointer to the named class value interface
+TextInterface::Value* 
+TextInterface::Parser::find (const string& name, bool throw_exception) const
+{
+#ifdef _DEBUG
+  cerr << "TextInterface::Parser::find (" << name << ") size=" << values.size() 
+	    << endl;
+#endif
+
+  string key = name;
+
+  if (aliases)
+    key = aliases->substitute (key);
+
+  for (unsigned i=0; i<values.size(); i++) {
+    if (values[i]->matches (key)) {
+#ifdef _DEBUG
+      cerr << "TextInterface::Parser::find value[" << i << "]=" 
+		<< values[i]->get_name() << " matches" << endl;
+#endif
+      const_cast<Parser*>(this)->setup( values[i] );
+      return values[i];
+    }
+  }
+
+  if (throw_exception)
+    throw Error (InvalidParam, "TextInterface::Parser::find",
+		 "no value named " + name);
+
+  return 0;
+}
+
+
+
+
 
 /*! Parses text into key, range, and remainder
   \retval true if key matches name

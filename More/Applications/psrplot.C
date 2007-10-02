@@ -277,7 +277,7 @@ void help_plot_types ()
   cout << "Available Plots:\n" << factory.help() << endl;
 }
 
-void help_options (TextInterface::Class* tui)
+void help_options (TextInterface::Parser* tui)
 {
   cout << tui->help(true) << endl;
 }

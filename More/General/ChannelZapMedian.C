@@ -23,7 +23,7 @@ Pulsar::ChannelZapMedian::ChannelZapMedian ()
 }
 
 //! Get the text interface to the configuration attributes
-TextInterface::Class* Pulsar::ChannelZapMedian::get_interface ()
+TextInterface::Parser* Pulsar::ChannelZapMedian::get_interface ()
 {
   return new Interface (this);
 }

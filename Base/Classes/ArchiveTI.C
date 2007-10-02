@@ -102,7 +102,7 @@ void Pulsar::ArchiveTI::setup( void )
 }
 
 
-TextInterface::Class *Pulsar::ArchiveTI::clone()
+TextInterface::Parser *Pulsar::ArchiveTI::clone()
 {
   if( instance )
     return new ArchiveTI( instance );

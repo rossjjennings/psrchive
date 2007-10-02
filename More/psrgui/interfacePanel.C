@@ -1,7 +1,7 @@
 #include "interfacePanel.h"
 
 Pulsar::interfacePanel::interfacePanel(QWidget* parent, 
-				       TextInterface::Class* ui)
+				       TextInterface::Parser* ui)
   : QDialog(parent)
 {
   ti = ui;

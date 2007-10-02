@@ -76,7 +76,7 @@ string Pulsar::ZapInterpreter::median (const string& args) try
   }
 
   //! Zap median interface
-  Reference::To<TextInterface::Class> interface = zap_median->get_interface();
+  Reference::To<TextInterface::Parser> interface = zap_median->get_interface();
 
   string retval;
   for (unsigned icmd=0; icmd < arguments.size(); icmd++) {

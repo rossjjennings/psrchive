@@ -106,7 +106,7 @@ int main (int argc, char** argv) try {
 	  "-------------------------------------------------"
 	     << endl;
   
-      for (unsigned i=0; i<tui.get_nattribute(); i++)
+      for (unsigned i=0; i<tui.get_nvalue(); i++)
 	cout << pad(16,tui.get_name(i)) 
              << " " << tui.get_description(i) << endl;
   

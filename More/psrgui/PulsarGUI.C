@@ -140,7 +140,7 @@ void Pulsar::PulsarGUI::fileQuit()
 void Pulsar::PulsarGUI::confFrame()
 {
   plotItem* pi = 0;
-  TextInterface::Class* ui = 0;
+  TextInterface::Parser* ui = 0;
 
   pi = dynamic_cast<plotItem*> (psrButtons->selected());
 
@@ -157,7 +157,7 @@ void Pulsar::PulsarGUI::confFrame()
 void Pulsar::PulsarGUI::confGraph()
 {
   plotItem* pi = 0;
-  TextInterface::Class* ui = 0;
+  TextInterface::Parser* ui = 0;
 
   pi = dynamic_cast<plotItem*> (psrButtons->selected());
 

@@ -760,7 +760,7 @@ void PavApp::SetStokesPlotToQU( vector< Reference::To<Plot> > &plots )
         Reference::To<StokesCylindrical> sp = dynamic_cast<StokesCylindrical*>( (*it).get() );
         if( sp )
         {
-            Reference::To<TextInterface::Class> ti_base = sp->get_interface();
+            Reference::To<TextInterface::Parser> ti_base = sp->get_interface();
             Reference::To<StokesCylindrical::Interface> ti = dynamic_cast<StokesCylindrical::Interface*>( ti_base.get() );
 
             if( ti )
@@ -789,7 +789,7 @@ void PavApp::SetPhaseZoom( double min_phase, double max_phase, vector< Reference
     vector< Reference::To<Plot> >::iterator it;
     for( it = plots.begin(); it != plots.end(); it ++ )
     {
-        Reference::To<TextInterface::Class> ti = (*it)->get_frame_interface();
+        Reference::To<TextInterface::Parser> ti = (*it)->get_frame_interface();
 
         try
         {
@@ -861,7 +861,7 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq, vector< Reference::T
     vector< Reference::To<Plot> >::iterator it;
     for( it = plots.begin(); it != plots.end(); it ++ )
     {
-        Reference::To<TextInterface::Class> ti = (*it)->get_frame_interface();
+        Reference::To<TextInterface::Parser> ti = (*it)->get_frame_interface();
 
         try
         {
@@ -1001,7 +1001,7 @@ int PavApp::run( int argc, char *argv[] )
                 break;
             }
         case 'i':
-            cout << "pav VERSION $Id: PavApp.C,v 1.4 2007/10/01 10:42:36 nopeer Exp $" << endl << endl;
+            cout << "pav VERSION $Id: PavApp.C,v 1.5 2007/10/02 05:19:26 straten Exp $" << endl << endl;
             return 0;
             break;
         case 'M':
@@ -1091,7 +1091,7 @@ int PavApp::run( int argc, char *argv[] )
         case 'j':
             {
                 plots.push_back( factory.construct( "dspec" ) );
-                TextInterface::Class *ti = plots.back()->get_interface();
+                TextInterface::Parser *ti = plots.back()->get_interface();
                 keep_baseline = true;
             }
             break;

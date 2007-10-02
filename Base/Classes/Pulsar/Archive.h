@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.167 $
-   $Date: 2007/09/24 08:52:05 $
+   $Revision: 1.168 $
+   $Date: 2007/10/02 05:19:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.167 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.168 $"
 
 #include "IntegrationManager.h"
 #include "TextInterface.h"
@@ -486,9 +486,9 @@ namespace Pulsar
       //! Return a new copy-constructed instance identical to this instance
       virtual Extension* clone () const = 0;
 
-      //! Return a text interfaces that can be used to access this instance
-      virtual Reference::To< TextInterface::Class > get_text_interface ()
-      { Reference::To<TextInterface::Class> ret; return ret; }
+      //! Return a text interface that can be used to access this instance
+      virtual TextInterface::Parser* get_interface ()
+      { return 0; }
 
       //! Return the name of the Extension
       std::string get_extension_name () const;
