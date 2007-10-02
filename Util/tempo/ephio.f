@@ -108,6 +108,7 @@ c     Convert any units from old input files
       rd_eph_lun = convertUnits(value_double, error_double,
      +     parmStatus, convert)
 
+ 20   continue
       return
 
       end
@@ -254,7 +255,7 @@ c     Handle old ephemeris position values (RAJ and DECJ)
                if ((isOldEphem.eq.1) .and. 
      +              ((keypos.eq.EPH_RAJ)
      +              .or.(keypos.eq.EPH_DECJ))) then
-                  read(tok(1:toklen),'(i10)', err=61), tmp
+                  read(tok(1:toklen),'(i)', err=61), tmp
                   error_double(keypos) = dfloat(tmp)*prec
                else
                   read(tok(1:toklen),*, err=65)
@@ -438,9 +439,9 @@ c     For all parameters, write out info...
      +           error_double(parnum), parmStatus(parnum))
 
 c     write to file
-            write(un,'(a)') line(1:length(line)) 
+            write(un,"(a)") line(1:length(line)) 
          end if
-      enddo
+ 250  enddo
       wr_eph_lun = 1
       return
       end
@@ -781,7 +782,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       real*8 d,f1,f2,f3
       character*(*) s
       character*32 word
-      integer v1, v2
+      integer v1, v2, slen
       real*8 v3
 
       v1 = int(d/f1)
@@ -793,7 +794,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       if (d.lt.0.0) s(1:1) = "-"  ! Sign 
 
       s(4:4) = ":"
-
+      slen = slen + 1
 c     The following two fields use 'word' to write into since we need to
 c     ignore the first column for the sign (since they are positive, ' ')
       write(word,'(i3)') v2
