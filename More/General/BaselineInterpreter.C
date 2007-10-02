@@ -15,50 +15,52 @@ using namespace std;
 Pulsar::BaselineInterpreter::BaselineInterpreter ()
 {
   add_command 
-    ( &BaselineInterpreter::gaussian,
+    ( &BaselineInterpreter::normal,
       "normal", "install GaussianBaseline algorithm",
-      "usage: normal\n" );
+      "usage: normal \n" );
 
   add_command 
     ( &BaselineInterpreter::minimum,
-      "min", "install BaselineWindow algorithm (default)",
-      "usage: min \n" );
+      "minimum", "install BaselineWindow algorithm (default)",
+      "usage: minimum \n" );
+
 }
 
-Pulsar::BaselineInterpreter::~BaselineInterpreter ()
+string Pulsar::BaselineInterpreter::normal (const string& args) try
 {
-}
+  if (!normal_functor)
+    normal_functor.set( new GaussianBaseline, &BaselineEstimator::baseline );
 
-
-string Pulsar::BaselineInterpreter::gaussian (const string& args) try
-{
-  Profile::baseline_strategy = Functor< PhaseWeight* (const Profile*) >
-    ( new GaussianBaseline, &BaselineEstimator::baseline );
-  return response (Good);
+  Profile::baseline_strategy = normal_functor;
+  return "";
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return error.get_message();
 }
 
 string Pulsar::BaselineInterpreter::minimum (const string& args) try
 { 
-  Profile::baseline_strategy = Functor< PhaseWeight* (const Profile*) >
-    ( new BaselineWindow, &BaselineEstimator::baseline );
-  return response (Good);
+  if (!minimum_functor)
+    minimum_functor.set( new BaselineWindow, &BaselineEstimator::baseline );
+
+  Profile::baseline_strategy = minimum_functor;
+  return "";
 }
 catch (Error& error) {
-  return response (Fail, error.get_message());
+  return error.get_message();
 }
-
-
-string Pulsar::BaselineInterpreter::empty () try
+    
+string Pulsar::BaselineInterpreter::empty ()
 { 
-  get()->remove_baseline();
-  return response (Good);
+  if (Profile::baseline_strategy == normal_functor)
+    return "normal";
+
+  if (Profile::baseline_strategy == minimum_functor)
+    return "minimum";
+
+  return "unknown";
 }
-catch (Error& error) {
-  return response (Fail, error.get_message());
-}
+
 
 
 
