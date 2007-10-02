@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Config.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/10/02 05:19:32 $
+   $Revision: 1.7 $
+   $Date: 2007/10/02 06:47:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Config_h
@@ -16,8 +16,7 @@
 
 #include "Configuration.h"
 #include "TextInterface.h"
-
-class CommandParser;
+#include "CommandParser.h"
 
 namespace Pulsar {
 
@@ -105,7 +104,14 @@ namespace Pulsar {
 
   // specialization for CommandParser classes
   template<>
-  TextInterface::Value* new_interface (Option<CommandParser>* option);
+  TextInterface::Value* new_interface (Option<CommandParser>* option)
+  {
+    return TextInterface::new_Interpreter( option->name,
+		                           option->description,
+					   option->value,
+					   &CommandParser::empty,
+					   &CommandParser::parse );
+  }
 
   class Config::Interface : public TextInterface::Parser {
 
@@ -149,7 +155,7 @@ void Pulsar::Option<T>::init (T* ptr,
   std::cerr << "Pulsar::Option<T>::init get configuration" << std::endl;
 #endif
 
-  *value = Config::get_configuration()->get<T> (name, default_value);
+  *value = Config::get_configuration()->get (name, default_value);
   
 #ifdef _DEBUG
   std::cerr << "Pulsar::Option<T>::init add to interface" << std::endl;
@@ -172,8 +178,7 @@ Pulsar::Option<T>::Option (CommandParser* ptr,
   description = "no description";
   value = ptr;
 
-  value->parse( Config::get_configuration()->get<std::string> 
-		(name, default_value) );
+  value->parse( Config::get_configuration()->get (name, default_value) );
   
   Config::get_interface()->add (this);
 }

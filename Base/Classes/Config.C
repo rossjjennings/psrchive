@@ -90,13 +90,3 @@ Pulsar::Config::Interface* Pulsar::Config::get_interface ()
   return interface;
 }
 
-// specialization for CommandParser classes
-template<>
-TextInterface::Value* Pulsar::new_interface (Option<CommandParser>* option)
-{ 
-  return TextInterface::new_Interpreter( option->name,
-					 option->description,
-					 option->value,
-					 &CommandParser::empty,
-					 &CommandParser::parse);
-}
