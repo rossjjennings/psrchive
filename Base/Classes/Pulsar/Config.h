@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Config.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/10/02 06:47:52 $
+   $Revision: 1.8 $
+   $Date: 2007/10/02 06:57:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Config_h
@@ -77,6 +77,8 @@ namespace Pulsar {
     std::string description;
     T* value;
 
+    class InterfaceGenerator;
+
   protected:
 
     void init (T* ptr,
@@ -95,23 +97,29 @@ namespace Pulsar {
   { return istr >> *(option.value); }
 
   template<typename T>
-  TextInterface::Value* new_interface (Option<T>* option)
-  { 
-    return new TextInterface::Atom<T>( option->value,
-				       option->name,
-				       option->description );
-  }
+  class Option<T>::InterfaceGenerator {
+    public:
+    TextInterface::Value* operator() (Option<T>* option)
+    { 
+      return new TextInterface::Atom<T>( option->value,
+				         option->name,
+				         option->description );
+    }
+  };
 
   // specialization for CommandParser classes
   template<>
-  TextInterface::Value* new_interface (Option<CommandParser>* option)
-  {
-    return TextInterface::new_Interpreter( option->name,
-		                           option->description,
-					   option->value,
-					   &CommandParser::empty,
-					   &CommandParser::parse );
-  }
+  class Option<CommandParser>::InterfaceGenerator {
+    public:
+    TextInterface::Value* operator() (Option<CommandParser>* option)
+    {
+      return TextInterface::new_Interpreter( option->name,
+		                             option->description,
+					     option->value,
+					     &CommandParser::empty,
+					     &CommandParser::parse );
+    }
+  };
 
   class Config::Interface : public TextInterface::Parser {
 
@@ -122,7 +130,8 @@ namespace Pulsar {
     template<typename T>
     void add (Option<T>* option)
     {
-      add_value ( new_interface(option) );
+      typename Option<T>::InterfaceGenerator generator;
+      add_value ( generator(option) );
     }
 
 
