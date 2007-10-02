@@ -33,7 +33,6 @@ include_HEADERS = \
         stringtok.h \
         substitute.h \
         TextInterface.h \
-	ThreadStream.h \
         tostring.h \
         Traits.h \
         Vector.h \
@@ -53,7 +52,6 @@ libunits_la_SOURCES = \
 	test.cfg \
 	tostring.C \
         TextInterface.C \
-	ThreadStream.C \
 	Warning.C
 
 EXTRA_DIST = header_PromoteTraits MatrixTest.h
@@ -70,7 +68,7 @@ TESTS = test_Alias test_tostring test_Conventions		\
 	test_Basis test_Stokes						\
         test_TextInterface test_parse_indeces test_Estimate test_Vector	\
         test_Matrix test_Jacobi test_eigen test_Jones test_Quaternion	\
-        test_Pauli test_ModifyRestore test_Reference_to_pointer
+        test_Pauli test_ModifyRestore
 
 check_PROGRAMS = $(TESTS) many_references many_calls
 
@@ -106,7 +104,6 @@ test_parse_indeces_SOURCES	= test_parse_indeces.C
 test_ModifyRestore_SOURCES      = test_ModifyRestore.C
 test_Mueller_SOURCES		= test_Mueller.C
 test_inner_product_SOURCES	= test_inner_product.C 
-test_Reference_to_pointer_SOURCES	= test_Reference_to_pointer.C
 
 many_references_SOURCES		= many_references.C
 many_calls_SOURCES		= many_calls.C

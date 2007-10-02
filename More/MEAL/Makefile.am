@@ -120,7 +120,6 @@ libMEAL_la_SOURCES = \
         Function_new_Function.C \
         Function_parse.C \
         Function_print.C \
-	FunctionPolicy.C \
         Gain.C \
         Gaussian.C \
         PowerLaw.C \
