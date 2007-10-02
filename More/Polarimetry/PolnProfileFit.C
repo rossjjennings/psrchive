@@ -273,7 +273,6 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 		 obs_harmonic, n_harmonic);
 
   Reference::To<PolnProfile> fourier = fourier_transform (observation);
-
   fourier->convert_state (Signal::Stokes);
   // Drop the Nyquist bin
   fourier->resize( observation->get_nbin() );
