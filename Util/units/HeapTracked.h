@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/HeapTracked.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/10/02 05:19:48 $
+   $Revision: 1.9 $
+   $Date: 2007/10/02 05:45:12 $
    $Author: straten $ */
 
 #ifndef __ReferenceHeapTracked_h
@@ -85,7 +85,7 @@ namespace Reference {
     friend class Able;
 
     //! State of this instance allocated on the heap
-    mutable char __heap_state;
+    char __heap_state;
 
   };
 

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Function.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/10/02 05:19:48 $
+   $Revision: 1.9 $
+   $Date: 2007/10/02 05:42:36 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -181,9 +181,6 @@ namespace MEAL {
 
     //! Copy the parameter policy of another instance
     void copy_parameter_policy (const Function*);
-
-    //! Set the parameter policy
-    void set_parameter_policy (ParameterPolicy* policy);
 
   private:
 
