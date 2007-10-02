@@ -6,10 +6,22 @@
  ***************************************************************************/
 
 #include "Pulsar/Profile.h"
-#include "Pulsar/PeakConsecutive.h"
+#include "Pulsar/PeakEdgesInterpreter.h"
 #include "Error.h"
 
-Reference::To<Pulsar::RiseFall> Pulsar::Profile::peak_edges;
+//! The default implementation of the baseline finding algorithm
+Functor< std::pair<int,int> (const Pulsar::Profile*) > 
+Pulsar::Profile::peak_edges_strategy;
+
+/*!  
+  The PeakEdgesInterpreter class sets the peak_edges_strategy
+  attribute according to commands specified either in the
+  configuration file or via the psrsh interpreter.  It enables
+  convenient experimentation with the peak edges estimation algorithm.
+*/
+static Pulsar::Option<CommandParser>
+cfg( new Pulsar::PeakEdgesInterpreter, "Profile::peak_edges", "cumulative" );
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -18,11 +30,9 @@ Reference::To<Pulsar::RiseFall> Pulsar::Profile::peak_edges;
 void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
 try {
 
-  if (!peak_edges)
-    peak_edges = new Pulsar::PeakConsecutive;
-
-  peak_edges->set_Profile (this);
-  peak_edges->get_indeces (rise, fall);
+  std::pair<int,int> edges = peak_edges_strategy (this);
+  rise = edges.first;
+  fall = edges.second;
 
 }
 catch (Error& error) {
