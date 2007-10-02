@@ -5,6 +5,8 @@
  *
  ***************************************************************************/
 
+// #define _DEBUG 1
+
 #include "Pulsar/CalSource.h"
 #include "Pulsar/Config.h"
 
@@ -13,17 +15,34 @@
 
 using namespace std;
 
+#ifdef _DEBUG
+static int runme () { cerr << "CalSource: init" << endl; return 0; }
+static int test = runme ();
+#endif
+
 static string get_default (string which)
 {
-  return Pulsar::Config::get_runtime() + "/fluxcal." + which;
+  string result = Pulsar::Config::get_runtime() + "/fluxcal." + which;
+#ifdef _DEBUG
+  cerr << "CalSource::get_default=" << result << endl;
+#endif
+  return result;
 }
 
-Pulsar::CalSource::CalSource ()
+Pulsar::CalSource::CalSource () 
 {
-  on_filename = Config::get<string> ("fluxcal.on", get_default("on"));
+  Configuration* config = Config::get_configuration();
+
+  on_filename = config->get ("fluxcal::on",  get_default("on"));
+#ifdef _DEBUG
+  cerr << "Pulsar::CalSource on_filename=" << on_filename << endl;
+#endif
   stringfload (&fluxcal_on, on_filename);
 
-  off_filename = Config::get<string> ("fluxcal.off", get_default("off"));
+  off_filename = config->get ("fluxcal::off",  get_default("off"));
+#ifdef _DEBUG
+  cerr << "Pulsar::CalSource off_filename=" << off_filename << endl;
+#endif
   stringfload (&fluxcal_off, off_filename);
 }
 

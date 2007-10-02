@@ -9,6 +9,7 @@
 #ifndef __Pulsar_shift_methods_h
 #define __Pulsar_shift_methods_h
 
+#include "Pulsar/Config.h"
 #include "Estimate.h"
 
 namespace Pulsar {
@@ -23,7 +24,8 @@ namespace Pulsar {
 
   /*! Fourier domain zero-pad interpolation */
   Estimate<double> ZeroPadShift (const Profile& std, const Profile& ephase);
-  extern unsigned ZPSF;
+
+  extern Option<unsigned> ZPSF;
 
   /*! Fourier domain phase gradient fit */
   Estimate<double> PhaseGradShift (const Profile& std, const Profile& ephase); 

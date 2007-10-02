@@ -7,16 +7,17 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Calibrator.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/07/11 19:06:09 $
+   $Revision: 1.3 $
+   $Date: 2007/10/02 05:19:32 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
 #define __Calibrator_H
 
+#include "Pulsar/Config.h"
+
 #include <vector>
 
-#include "Reference.h"
 #include "Estimate.h"
 #include "Jones.h"
 #include "MJD.h"
@@ -69,16 +70,16 @@ namespace Pulsar {
     //@}
 
     //! Verbosity level
-    static unsigned verbose;
+    static Pulsar::Option<unsigned> verbose;
 
     //! Fractional bandwidth of the window used in median filter
-    static float median_smoothing;
+    static Pulsar::Option<float> median_smoothing;
 
     //! Fractional bandwidth over which interpolation will be performed
-    static float interpolating;
+    static Pulsar::Option<float> interpolating;
 
     //! Tolerance to non-physical values of the coherency matrix
-    static float physical_det_threshold;
+    static Pulsar::Option<float> det_threshold;
 
     //! Default constructor
     Calibrator ();

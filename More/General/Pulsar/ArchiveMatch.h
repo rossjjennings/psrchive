@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/ArchiveMatch.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.4 $
+   $Date: 2007/10/02 05:19:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveMatch_h
 #define __Pulsar_ArchiveMatch_h
 
-#include <string>
+#include "Pulsar/Config.h"
 
 namespace Pulsar {
 
@@ -99,10 +99,10 @@ namespace Pulsar {
     bool get_check_bandwidth () const;
 
     //! The maximum amount by which the centre frequency may differ, in MHz
-    static double max_frequency_difference;
+    static Option<double> max_frequency_difference;
 
     //! Allow opposite sidebands to match
-    static bool opposite_sideband;
+    static Option<bool> opposite_sideband;
 
     //! String used to separate mismatch messages
     static std::string separator;

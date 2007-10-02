@@ -7,14 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReferenceCalibrator.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.9 $
+   $Date: 2007/10/02 05:19:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReferenceCalibrator_H
 #define __Pulsar_ReferenceCalibrator_H
 
 #include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/Config.h"
+
 #include "Estimate.h"
 #include "Stokes.h"
 #include "Types.h"
@@ -29,7 +31,7 @@ namespace Pulsar {
   public:
 
     //! If true, then a median filter is run on the calibrator bandpass
-    static bool smooth_bandpass;
+    static Option<bool> smooth_bandpass;
 
     //! Construct from an single PolnCal Pulsar::Archive
     ReferenceCalibrator (const Archive* archive);

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ChannelZapMedian.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/06/05 09:02:17 $
+   $Revision: 1.7 $
+   $Date: 2007/10/02 05:19:32 $
    $Author: straten $ */
 
 #ifndef _Pulsar_ChannelZapMedian_H
@@ -28,7 +28,7 @@ namespace Pulsar {
     ChannelZapMedian ();
 
     //! Get the text interface to the configuration attributes
-    TextInterface::Class* get_interface ();
+    TextInterface::Parser* get_interface ();
 
     // Text interface to the ChannelZapMedian class
     class Interface : public TextInterface::To<ChannelZapMedian> {

@@ -14,7 +14,9 @@
 
 using namespace std;
 
-bool Pulsar::Profile::rotate_in_phase_domain = false;
+Pulsar::Option<bool>
+Pulsar::Profile::rotate_in_phase_domain
+("Profile::rotate_in_phase_domain", false);
 
 /*!  
   Rotate the profile by the specified phase.  The profile will be

@@ -5,7 +5,6 @@
  *
  ***************************************************************************/
 #include "Pulsar/StandardCandles.h"
-#include "Pulsar/Config.h"
 
 #include "Error.h"
 #include "strutil.h"
@@ -25,15 +24,14 @@ static std::string get_default ()
   return Pulsar::Config::get_runtime() + "/fluxcal.cfg";
 }
 
-std::string
-Pulsar::StandardCandles::default_filename 
-= Pulsar::Config::get<std::string> ("fluxcal::database", get_default());
+Pulsar::Option<string>
+Pulsar::StandardCandles::default_filename ("fluxcal::database", get_default());
 
-float Pulsar::StandardCandles::on_radius
-= Pulsar::Config::get<float> ("fluxcal:on_radius", 0.25);
+Pulsar::Option<float>
+Pulsar::StandardCandles::on_radius ("fluxcal::on_radius", 0.25);
 
-float Pulsar::StandardCandles::off_radius
-= Pulsar::Config::get<float> ("fluxcal:off_radius", 2.5);
+Pulsar::Option<float>
+Pulsar::StandardCandles::off_radius ("fluxcal::off_radius", 2.5);
 
 // //////////////////////////////////////////////////////////////////////
 //

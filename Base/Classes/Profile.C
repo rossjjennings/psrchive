@@ -4,11 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+// #define _DEBUG 1
+
 #include "Pulsar/Profile.h"
-#include "Pulsar/Config.h"
+
 #include "Physical.h"
 #include "Error.h"
-#include "FTransform.h"
 
 #include <iostream>
 #include <string>
@@ -21,14 +23,14 @@ using namespace std;
   Default fractional pulse phase window used to calculate statistics
   related to the baseline.
  */
-float Pulsar::Profile::default_duty_cycle
-= Pulsar::Config::get<float>("baseline_duty_cycle", 0.15);
+Pulsar::Option<float>
+Pulsar::Profile::default_duty_cycle ("Profile::default_duty_cycle", 0.15);
 
 /*!  
   When true, Profile methods will output debugging information on cerr
 */
-bool Pulsar::Profile::verbose
-= Pulsar::Config::get<bool>("Profile::verbose", false);
+Pulsar::Option<bool>
+Pulsar::Profile::verbose ("Profile::verbose", false);
 
 
 

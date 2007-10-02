@@ -20,9 +20,11 @@
 #include <iostream>
 using namespace std;
 
+Pulsar::Option<bool> default_must_match ("Append::must_match", true);
+
 Pulsar::Append::Append ()
 {
-  must_match = Pulsar::Config::get<bool>("append_must_match", true);
+  must_match = default_must_match;
 
   match.set_check_mixable ();
 }

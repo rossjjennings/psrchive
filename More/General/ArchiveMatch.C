@@ -4,25 +4,28 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/ArchiveMatch.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Receiver.h"
-#include "Pulsar/Config.h"
 
 #include "strutil.h"  // for stringprintf
+
+using namespace std;
 
 /*!
   Maximum frequency difference in MHz
 */
-double Pulsar::ArchiveMatch::max_frequency_difference 
-= Pulsar::Config::get<double>("max_frequency_difference", 0.1);
+Pulsar::Option<double> 
+Pulsar::ArchiveMatch::max_frequency_difference 
+("Match::max_frequency_difference", 0.1);
 
 /*!
   Allow observations with opposite sidebands to match
 */
-bool Pulsar::ArchiveMatch::opposite_sideband
-= Pulsar::Config::get<bool>("opposite_sideband", false);
+Pulsar::Option<bool>
+Pulsar::ArchiveMatch::opposite_sideband
+("Match::opposite_sideband", false);
 
 /*!
   Added between match report strings in reason attribute

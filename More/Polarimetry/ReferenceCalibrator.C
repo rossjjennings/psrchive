@@ -11,7 +11,6 @@
 
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Backend.h"
-#include "Pulsar/Config.h"
 
 #include "MEAL/Invariant.h"
 #include "Pauli.h"
@@ -22,8 +21,9 @@
 
 using namespace std;
 
-bool Pulsar::ReferenceCalibrator::smooth_bandpass
-= Pulsar::Config::get<bool>("smooth_bandpass", false);
+Pulsar::Option<bool>
+Pulsar::ReferenceCalibrator::smooth_bandpass
+("ReferenceCalibrator::smooth_bandpass", false);
 
 Pulsar::ReferenceCalibrator::~ReferenceCalibrator ()
 {
@@ -328,7 +328,7 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
       bad = true;
     }
 
-    if (physical_det_threshold > 0 && npol == 4) {
+    if (det_threshold > 0 && npol == 4) {
 
       // this class correctly handles the propagation of error and bias
       static MEAL::Invariant invariant;
@@ -345,18 +345,18 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
 	where:
 	inv = inv.get_value()
 	err = inv.get_error()
-	T   = physical_det_threshold
+	T   = det_threshold
 
       */
 
-      double cutoff = physical_det_threshold * (bias - inv.get_error());
+      double cutoff = det_threshold * (bias - inv.get_error());
 
       if (inv.get_value() < cutoff)  {
 	if (verbose)
 	  cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
 	    " ichan=" << ichan << "\n  invariant=" << inv.get_value()
 	       << " < cutoff=" << cutoff << 
-	    " (threshold=" << physical_det_threshold 
+	    " (threshold=" << det_threshold 
 	       << " error=" << inv.get_error() 
 	       << " bias=" << bias << ")" << endl;
 	bad = true;

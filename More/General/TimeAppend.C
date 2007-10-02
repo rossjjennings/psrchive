@@ -14,10 +14,13 @@
 
 using namespace std;
 
+Pulsar::Option<bool> dflt_chronological ("TimeAppend::chronological", false);
+Pulsar::Option<double> dflt_max_overlap ("TimeAppend::max_overlap", 30.0);
+
 Pulsar::TimeAppend::TimeAppend ()
 {
-  chronological = Pulsar::Config::get<bool>("append_chronological", false);
-  max_overlap = Pulsar::Config::get<double>("append_max_overlap", 30.0);
+  chronological = dflt_chronological;
+  max_overlap = dflt_max_overlap;
 }
 
 bool Pulsar::TimeAppend::stop (Archive* into, const Archive* from)

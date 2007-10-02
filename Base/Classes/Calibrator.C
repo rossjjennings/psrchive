@@ -4,32 +4,39 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+// #define _DEBUG 1
+
 #include "Pulsar/Calibrator.h"
 #include "Pulsar/CalibratorExtension.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
-#include "Pulsar/Config.h"
 
 using namespace std;
 
-unsigned Pulsar::Calibrator::verbose
-= Pulsar::Config::get<bool> ("Calibrator::verbose", 0);
+#ifdef _DEBUG
+static int runme () { cerr << "Calibrator: init" << endl; return 0; }
+static int test = runme ();
+#endif
+
+Pulsar::Option<unsigned> 
+Pulsar::Calibrator::verbose ("Calibrator::verbose", 0);
 
 /*! The size of the window used during median filtering is given by
    the number of frequency channels, nchan, multiplied by
    median_smoothing.  If set to zero, no smoothing is performed.  A
    sensible value is around 0.05. */
-float Pulsar::Calibrator::median_smoothing
-= Pulsar::Config::get<float> ("Calibrator::median_smoothing", 0.0);
+Pulsar::Option<float>
+Pulsar::Calibrator::median_smoothing ("Calibrator::median_smoothing", 0.0);
 
 /*! The maximum number of channels over which a linear interpolation will be
   performed */
-float Pulsar::Calibrator::interpolating 
-= Pulsar::Config::get<float> ("Calibrator::interpolating", 0.0);
+Pulsar::Option<float>
+Pulsar::Calibrator::interpolating ("Calibrator::interpolating", 0.0);
 
 /*! Although a very sensible constraint, this option is disabled by default */
-float Pulsar::Calibrator::physical_det_threshold
-= Pulsar::Config::get<float>("Calibrator::physical_det_threshold", 0.0);
+Pulsar::Option<float>
+Pulsar::Calibrator::det_threshold ("Calibrator::det_threshold", 0.0);
 
 
 Pulsar::Calibrator::Calibrator ()

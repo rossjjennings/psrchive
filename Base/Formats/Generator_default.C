@@ -5,6 +5,8 @@
  *
  ***************************************************************************/
 
+// #define _DEBUG 1
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -19,15 +21,27 @@
 
 using namespace std;
 
+#ifdef _DEBUG
+static int runme () { cerr << "Generator_default: init" << endl; return 0; }
+static int test = runme ();
+#endif
+
 /*!
   policy == "input"   -> new predictors will have same type as input
   policy == "default" -> new predictors will be of the default type
 */
-string Pulsar::Predictor::policy
-= Pulsar::Config::get<string>("Predictor::policy", "input");
+string Pulsar::Predictor::policy;
 
-string Pulsar::Predictor::default_type
-= Pulsar::Config::get<string>("Predictor::default", "polyco");
+Pulsar::Option<string> 
+policy_config_wrapper (&Pulsar::Predictor::policy, 
+		       "Predictor::policy", "input");
+
+string Pulsar::Predictor::default_type;
+
+Pulsar::Option<string>
+default_type_config_wrapper (&Pulsar::Predictor::default_type,
+			     "Predictor::default", "polyco");
+
 
 Pulsar::Generator* Pulsar::Generator::get_default ()
 {

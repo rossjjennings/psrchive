@@ -7,14 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.15 $
-   $Date: 2007/05/24 10:54:39 $
+   $Revision: 1.16 $
+   $Date: 2007/10/02 05:19:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
 #define __Pulsar_Database_h
 
 #include "Pulsar/Calibrator.h"
+#include "Pulsar/Config.h"
+
 #include "MEAL/Complex2.h"
 
 #include "sky_coord.h"
@@ -39,13 +41,13 @@ namespace Pulsar {
     static bool verbose;
 
     //! Time scale over which calibrator flux and cross-coupling remain stable
-    static double long_time_scale;
+    static Option<double> long_time_scale;
 
     //! Time scale over which differential gain and phase remain stable
-    static double short_time_scale;
+    static Option<double> short_time_scale;
 
     //! The maximum angular separation between calibrator and pulsar
-    static double max_angular_separation;
+    static Option<double> max_angular_separation;
 
     //! Pass this to the criterion methods to retrieve any or all matches
     static const Pulsar::Archive* any;

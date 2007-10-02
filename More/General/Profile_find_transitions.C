@@ -4,14 +4,18 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Profile.h"
+
+using namespace std;
 
 /*! 
   Fractional pulse phase window used to calculate the transitions in
   Pulsar::Profile::find_cal_transition
  */
-float Pulsar::Profile::transition_duty_cycle = 0.15;
+Pulsar::Option<float>
+Pulsar::Profile::transition_duty_cycle
+("Profile::transition_duty_cycle", 0.15);
 
 /////////////////////////////////////////////////////////////////////////////
 //

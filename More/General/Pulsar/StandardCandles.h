@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardCandles.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/05/01 05:50:12 $
+   $Revision: 1.11 $
+   $Date: 2007/10/02 05:19:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StandardCandles_h
 #define __Pulsar_StandardCandles_h
 
-#include "Reference.h"
+#include "Pulsar/Config.h"
+
 #include "sky_coord.h"
 #include "Types.h"
 
@@ -31,13 +32,13 @@ namespace Pulsar {
     static bool verbose;
 
     //! Default location of flux calibrator information
-    static std::string default_filename;
+    static Option<std::string> default_filename;
 
     //! Radius (in degrees) within which a pointing is considered FluxCalOn
-    static float on_radius;
+    static Option<float> on_radius;
 
     //! Radius (in degrees) within which a pointing is considered FluxCalOff
-    static float off_radius;
+    static Option<float> off_radius;
 
     //! Default construct from default_filename
     StandardCandles ();
