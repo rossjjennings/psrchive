@@ -7,14 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.105 $
-   $Date: 2007/09/24 08:52:09 $
+   $Revision: 1.106 $
+   $Date: 2007/10/02 05:18:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
 
 #include "Pulsar/ProfileAmps.h"
+#include "Pulsar/Config.h"
+
 #include "toa.h"
 #include "Types.h"
 #include "Functor.h"
@@ -23,7 +25,6 @@
 namespace Pulsar {
 
   class PhaseWeight;
-  class RiseFall;
 
   //! The basic observed quantity; the pulse profile.
   /*! The Pulsar::Profile class implements a useful, yet minimal, set
@@ -46,19 +47,16 @@ namespace Pulsar {
     friend class Integration;
 
     //! flag controls the amount output to stderr by Profile methods
-    static bool verbose;
+    static Option<bool> verbose;
 
     //! When true, Profile::rotate shifts bins in the phase domain
-    static bool rotate_in_phase_domain;
+    static Option<bool> rotate_in_phase_domain;
 
     //! fractional phase window used to find rise and fall of running mean
-    static float transition_duty_cycle;
+    static Option<float> transition_duty_cycle;
 
     //! fractional phase window used in most functions
-    static float default_duty_cycle;
-
-    //! Algorithm used by find_peak_edges
-    static Reference::To<RiseFall> peak_edges;
+    static Option<float> default_duty_cycle;
 
     //! Default constructor
     Profile (unsigned nbin = 0);
@@ -152,14 +150,17 @@ namespace Pulsar {
     //! Find the bin numbers at which the mean power transits
     void find_transitions (int& highlow, int& lowhigh, int& width) const;
 
-    //! Find the bin numbers at which the cumulative power crosses thresholds
-    void find_peak_edges (int& rise, int& fall) const;
-    
     //! Returns the bin number with the maximum amplitude
     int find_max_bin (int bin_start=0, int bin_end=0) const;
     //! Returns the bin number with the minimum amplitude
     int find_min_bin (int bin_start=0, int bin_end=0) const;
 
+    //! The default implementation of the baseline finding algorithm
+    static Functor< std::pair<int,int> (const Profile*) > peak_edges_strategy;
+
+    //! Find the bin numbers at which the cumulative power crosses thresholds
+    void find_peak_edges (int& rise, int& fall) const;
+    
     //! The default implementation of the baseline finding algorithm
     static Functor< PhaseWeight* (const Profile*) > baseline_strategy;
 
