@@ -38,7 +38,8 @@ MEAL::OneParameter::operator = (const OneParameter& np)
   fit = np.fit;
   name = np.name;
 
-  get_context()->set_evaluation_changed ();
+  if (get_context())
+    get_context()->set_evaluation_changed ();
 
   return *this;
 }
@@ -51,6 +52,8 @@ void MEAL::OneParameter::set_param (double value)
     return;
 
   param.val = value;
-  get_context()->set_evaluation_changed ();
+
+  if (get_context())
+    get_context()->set_evaluation_changed ();
 }
 

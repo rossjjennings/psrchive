@@ -4,10 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Reference.h"
-#include <iostream>
 
+#define _DEBUG 1
+
+#include <iostream>
 using namespace std;
+
+#include "Reference.h"
 
 class Manager;
 
@@ -29,7 +32,7 @@ public:
 
   void manage (ManageAble* manage_this) 
   {
-    cerr << "Manager::manage set ManageAble::manage_this" << endl;
+    cerr << "Manager::manage set ManageAble::my_manager" << endl;
     manage_this->my_manager = this;
     cerr << "Manager::manage my_managed.push_back" << endl;
     my_managed.push_back (manage_this);

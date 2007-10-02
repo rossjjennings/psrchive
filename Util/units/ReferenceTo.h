@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceTo.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/05/30 09:41:13 $
+   $Revision: 1.7 $
+   $Date: 2007/10/02 05:19:48 $
    $Author: straten $ */
 
 #ifndef __ReferenceTo_h
@@ -17,6 +17,11 @@
 #include "ReferenceAble.h"
 #include <typeinfo>
 #include <string>
+
+#ifdef _DEBUG
+#include <iostream>
+using namespace std;
+#endif
 
 namespace Reference {
 
@@ -72,14 +77,11 @@ namespace Reference {
 
   private:
 
-    //! Set to an existing handle
-    void handle (const Able::Handle*);
-
     //! Set to an existing instance
-    void handle (const Able*);
+    void hook (const Able*);
 
     //! Unhandle
-    void unhandle (bool auto_delete = true);
+    void unhook (bool auto_delete = true);
 
     //! The handle to the object
     Able::Handle* the_handle;
@@ -88,61 +90,25 @@ namespace Reference {
 }
 
 template<class Type, bool active>
-void Reference::To<Type,active>::unhandle (bool auto_delete)
+void Reference::To<Type,active>::unhook (bool auto_delete)
 {
 #ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::unhandle handle=" << the_handle << endl;
+  cerr << "Reference::To<"+name()+">::unhook handle=" << the_handle << endl;
 #endif
 
   if (!the_handle)
     return;
 
-  if (the_handle->count == 1 && the_handle->pointer)
-    // the handle is about to be deleted, ensure that Able knows it
-    the_handle->pointer->__reference_handle = 0;
-
-  if (active && the_handle->pointer)
-    // decrease the active reference count
-    the_handle->pointer->__dereference (auto_delete);
-
-  // decrease the total reference count
-  the_handle->count --;
-
-  // delete the handle
-  if (the_handle->count == 0)
-    delete the_handle;
-
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::unhandle count=" << the_handle->count << endl;
-#endif
+  Able::Handle* temp = the_handle;
 
   the_handle = 0;
+
+  // thread-safe handle detachment
+  temp->decrement (active, auto_delete);
 }
 
 template<class Type, bool active>
-void Reference::To<Type,active>::handle (const Able::Handle* _handle)
-{
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::handle handle=" << _handle << endl;
-#endif
-
-  the_handle = const_cast<Able::Handle*>( _handle );
-
-  if (!the_handle)
-    return;
-
-  if (the_handle->pointer)
-    handle (the_handle->pointer);
-  else // still have to keep the handle alive
-    the_handle->count ++;
-
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::handle count=" << the_handle->count << endl;
-#endif
-}
-
-template<class Type, bool active>
-void Reference::To<Type,active>::handle (const Able* pointer)
+void Reference::To<Type,active>::hook (const Able* pointer)
 {
 #ifdef _DEBUG
   cerr << "Reference::To<"+name()+">::handle Able*="<< pointer << endl;
@@ -151,21 +117,18 @@ void Reference::To<Type,active>::handle (const Able* pointer)
   if (!pointer)
     the_handle = 0;
 
-  else {
+  else
     the_handle = pointer->__reference (active);
-    the_handle->count ++;
-
-#ifdef _DEBUG
-  cerr << "Reference::To<"+name()+">::handle Able* count=" << the_handle->count << endl;
-#endif
-  }
-
 }
 
 template<class Type, bool active>
 std::string Reference::To<Type,active>::name () const
 {
+#ifdef _DEBUG
+  return "T";
+#else
   return typeid(Type).name();
+#endif
 }
 
 template<class Type, bool active>
@@ -175,7 +138,7 @@ Reference::To<Type,active>::To (Type* ref_pointer)
   cerr << "Reference::To<"+name()+">::To (Type*="<< ref_pointer <<")"<< endl;
 #endif
 
-  handle (ref_pointer);
+  hook (ref_pointer);
 }
 
 template<class Type, bool active>
@@ -185,7 +148,7 @@ Reference::To<Type,active>::~To ()
   cerr << "Reference::To<"+name()+">::~To" << endl;
 #endif
 
-  unhandle ();
+  unhook ();
 }
 
 template<class Type, bool active>
@@ -215,7 +178,9 @@ Reference::To<Type,active>::To (const To& another_reference)
   cerr << "Reference::To<"+name()+">::To (To<Type>)" << endl;
 #endif
 
-  handle (another_reference.the_handle);
+  // thread-safe copy
+  Able::Handle::copy (the_handle, another_reference.the_handle, active);
+
 }
 
 
@@ -231,9 +196,10 @@ Reference::To<Type,active>::operator = (const To& oref)
   if (the_handle == oref.the_handle)
     return *this;
 
-  unhandle ();
+  unhook ();
 
-  handle (oref.the_handle);
+  // thread-safe copy
+  Able::Handle::copy (the_handle, oref.the_handle, active);
 
   return *this;
 }
@@ -250,9 +216,9 @@ Reference::To<Type,active>::operator = (Type* ref_pointer)
   if (the_handle && the_handle->pointer == ref_pointer)
     return *this;
 
-  unhandle ();
+  unhook ();
 
-  handle (ref_pointer);
+  hook (ref_pointer);
 
   return *this;
 }
@@ -283,7 +249,7 @@ Type* Reference::To<Type,active>::release ()
 
   Type* copy = reinterpret_cast<Type*>( the_handle->pointer );
 
-  unhandle (false);
+  unhook (false);
 
   return copy;
 }

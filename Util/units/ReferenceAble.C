@@ -7,17 +7,61 @@
 
 // #define _DEBUG 1
 
-#include "ReferenceAble.h"
-#include <assert.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
+#include "ReferenceAble.h"
+
+#include <iostream>
 using namespace std;
 
-#if _DEBUG
-#include <iostream>
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+#endif
+
+#include <assert.h>
+
+#ifdef _DEBUG
+
+#include "ThreadStream.h"
+
+static ThreadStream* mtcerr = 0;
+
+static ostream& get_mtcerr ()
+{
+  if (!mtcerr)
+    mtcerr = new ThreadStream;
+  return (*mtcerr)();
+}
+
+#define cerr get_mtcerr()
+
 #endif
 
 // static ensures read-only access via get_instance_count
 static size_t instance_count = 0;
+
+
+#ifdef HAVE_PTHREAD
+
+// returns a mutex that may be used recursively
+static pthread_mutex_t recursive_mutex ()
+{
+  pthread_mutexattr_t attr;
+  pthread_mutexattr_init (&attr);
+  pthread_mutexattr_settype (&attr, PTHREAD_MUTEX_RECURSIVE);
+
+  pthread_mutex_t mutex;
+  pthread_mutex_init (&mutex, &attr);
+  
+  return mutex;
+}
+
+// protect mutable attributes in multi-threaded applications
+static pthread_mutex_t mutex = recursive_mutex ();
+
+#endif
 
 size_t Reference::Able::get_instance_count ()
 {
@@ -62,7 +106,7 @@ Reference::Able::~Able ()
     __reference_handle->pointer = 0;
 
 #ifdef _DEBUG
-  cerr << "Reference::Able::~Able instances=" << instance_count <<endl;
+  cerr << "Reference::Able::~Able instances=" << instance_count << endl;
 #endif
 
 }
@@ -73,34 +117,46 @@ Reference::Able::~Able ()
 Reference::Able::Handle*
 Reference::Able::__reference (bool active) const
 {
-
 #ifdef _DEBUG
   cerr << "Reference::Able::__reference this=" << this 
        << " active=" << active << endl;
 #endif
 
-  // function is declared const, but private attributes are modified
-  Able* thiz = const_cast<Able*> (this);
+#ifdef HAVE_PTHREAD
+  pthread_mutex_lock (&mutex);
+#endif
 
-  thiz->__is_on_heap();
+  __is_on_heap();
 
   if (!__reference_handle) {
+
+    __reference_handle = new Handle;
+    __reference_handle->pointer = const_cast<Able*>(this);
+
 #ifdef _DEBUG
-  cerr << "Reference::Able::__reference new handle" << endl;
+    cerr << "Reference::Able::__reference this=" << this 
+         << " new handle=" << __reference_handle << endl;
 #endif
-    thiz->__reference_handle = new Handle;
-    thiz->__reference_handle->pointer = thiz;
+
   }
 
-  if (active)
-    thiz->__reference_count ++;
+  __reference_handle->count ++;
 
-#ifdef _DEBUG
-  cerr << "Reference::Able::__reference count="
-       << __reference_count << endl;
+  if (active)
+    __reference_count ++;
+
+#ifdef HAVE_PTHREAD
+  pthread_mutex_unlock (&mutex);
 #endif
 
-  return thiz->__reference_handle;
+#ifdef _DEBUG
+  cerr << "Reference::Able::__reference this=" << this 
+       << " count=" << __reference_count << endl;
+#endif
+
+  assert (__reference_handle);
+
+  return __reference_handle;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -110,10 +166,7 @@ void Reference::Able::__dereference (bool auto_delete) const
 { 
   assert (__reference_count > 0);
 
-  // function is declared const, but __reference_list must be modified
-  Able* thiz = const_cast<Able*> (this);
-
-  thiz->__reference_count --;
+  __reference_count --;
 
 #ifdef _DEBUG
   cerr << "Reference::Able::__dereference this=" << this
@@ -127,13 +180,100 @@ void Reference::Able::__dereference (bool auto_delete) const
     cerr << "Reference::Able::__dereference delete this=" << this << endl;
 #endif
 
-    thiz->__heap_state = 0x02;
+    assert (__heap_state != 0x02);
+
+    __heap_state = 0x02;
 
     if (__reference_handle)
-      thiz->__reference_handle->pointer = 0;
+      __reference_handle->pointer = 0;
 
     delete this;
+    return;
+  }
+
+#ifdef _DEBUG
+    cerr << "Reference::Able::__dereference exit this=" << this << endl;
+#endif
+
+}
+
+void Reference::Able::Handle::decrement (bool active, bool auto_delete)
+{
+#ifdef HAVE_PTHREAD
+  pthread_mutex_lock (&mutex);
+#endif
+
+  if (pointer) {
+
+    if (count == 1)
+      // this instance is about to be deleted, ensure that Able knows it
+      pointer->__reference_handle = 0;
+
+    if (active)
+      // decrease the active reference count
+      pointer->__dereference (auto_delete);
 
   }
 
+  // decrease the total reference count
+  count --;
+
+#ifdef _DEBUG
+  cerr << "Reference::Able::Handle::decrement count=" << count << endl;
+#endif
+
+  // delete the handle
+  if (count == 0) {
+
+#ifdef HAVE_PTHREAD
+    pthread_mutex_unlock (&mutex);
+#endif
+
+#ifdef _DEBUG
+    cerr << "Reference::Able::Handle::decrement delete this=" << this << endl;
+#endif
+
+    delete this;
+    return;
+  }
+
+#ifdef HAVE_PTHREAD
+  pthread_mutex_unlock (&mutex);
+#endif
+}
+
+
+void
+Reference::Able::Handle::copy (Handle* &to, Handle* const &from, bool active)
+{
+#ifdef HAVE_PTHREAD
+  pthread_mutex_lock (&mutex);
+#endif
+
+#ifdef _DEBUG
+  cerr << "Reference::Able::Handle::copy from=" << from << endl;
+#endif
+
+  if (!from) {
+    to = 0;
+#ifdef HAVE_PTHREAD
+    pthread_mutex_unlock (&mutex);
+#endif
+    return;
+  }
+
+  assert (from->count > 0);
+
+  to = const_cast<Handle*>( from );
+
+  if (to->pointer)
+    to->pointer->__reference (active);
+
+#ifdef _DEBUG
+  cerr << "Reference::Able::Handle::copy count=" << to->count << endl;
+#endif
+
+#ifdef HAVE_PTHREAD
+  pthread_mutex_unlock (&mutex);
+#endif
 }

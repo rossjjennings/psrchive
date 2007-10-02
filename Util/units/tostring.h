@@ -6,9 +6,9 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.13 $
-   $Date: 2007/07/10 05:25:06 $
-   $Author: nopeer $ */
+   $Revision: 1.14 $
+   $Date: 2007/10/02 05:19:48 $
+   $Author: straten $ */
 
 #ifndef __TOSTRING_H
 #define __TOSTRING_H
@@ -28,34 +28,40 @@ template<class T>
 std::string tostring (const T& input,
 		      unsigned precision = std::numeric_limits<T>::digits10)
 {
-  extern std::ostringstream tostring_ost;
+  extern std::ostringstream* tostring_ost;
+
+  if (!tostring_ost)
+    tostring_ost = new std::ostringstream;
 
   if( tostring_places )
-    tostring_ost << setiosflags( std::ios::fixed );
+    *tostring_ost << setiosflags( std::ios::fixed );
   else
-    tostring_ost << resetiosflags( std::ios::fixed );
+    *tostring_ost << resetiosflags( std::ios::fixed );
   
   if (tostring_precision)
-    tostring_ost.precision(tostring_precision);
+    tostring_ost->precision(tostring_precision);
   else
-    tostring_ost.precision(precision);
+    tostring_ost->precision(precision);
 
-  tostring_ost.str("");
-  tostring_ost << input;
+  tostring_ost->str("");
+  *tostring_ost << input;
 
-  return tostring_ost.str();
+  return tostring_ost->str();
 }
 
 template<class T>
 T fromstring (const std::string& input)
 {
-  extern std::istringstream fromstring_ist;
+  extern std::istringstream* fromstring_ist;
 
-  fromstring_ist.clear();
-  fromstring_ist.str(input);
+  if (!fromstring_ist)
+    fromstring_ist = new std::istringstream;
+
+  fromstring_ist->clear();
+  fromstring_ist->str(input);
 
   T retval;
-  fromstring_ist >> retval;
+  *fromstring_ist >> retval;
 
   return retval;
 }

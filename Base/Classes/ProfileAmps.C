@@ -62,6 +62,7 @@ void Pulsar::ProfileAmps::resize (unsigned _nbin)
       throw Error (BadAllocation, "Pulsar::ProfileAmps::resize");
     amps_size = nbin;
   }
+
 }
 
 //! Return a pointer to the amplitudes array

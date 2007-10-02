@@ -7,12 +7,19 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/FaradayRotation.h"
 
+#include <iostream>
+using namespace std;
+
 static Pulsar::FaradayRotation* xform = 0;
 
 /*! 
   Calls FaradayRotation::transform
 */
 void Pulsar::Integration::defaraday () try {
+
+  if (verbose)
+    cerr << "Pulsar::Integration::defaraday RM=" << get_rotation_measure()
+	 << " fixed=" << get_faraday_corrected() << endl;
 
   if (!xform)
     xform = new FaradayRotation;

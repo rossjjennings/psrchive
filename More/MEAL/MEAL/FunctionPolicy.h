@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/FunctionPolicy.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.4 $
+   $Date: 2007/10/02 05:19:48 $
    $Author: straten $ */
 
 #ifndef __MEAL_FunctionPolicy_H
@@ -20,16 +20,16 @@ namespace MEAL {
 
   class Function;
 
-  //! Abstract base class of Function policies
+  //! Policies that customize Function behaviours
   class FunctionPolicy : public Reference::Able {
 
   public:
 
     //! Default constructor
-    FunctionPolicy (Function* _context = 0) { context = _context; }
+    FunctionPolicy (Function* context=0);
 
-    //! Virtual destructor
-    virtual ~FunctionPolicy () { }
+    //! Destructor
+    ~FunctionPolicy ();
 
   protected:
 
@@ -37,6 +37,8 @@ namespace MEAL {
     Function* get_context () const { return context; }
 
   private:
+
+    friend class Function;
 
     //! The context
     Function* context;

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.65 $
-   $Date: 2007/09/01 02:40:13 $
+   $Revision: 1.66 $
+   $Date: 2007/10/02 05:19:48 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -976,6 +976,10 @@ int actual_main (int argc, char *argv[]) try {
 }
 catch (Error& error) {
   cerr << "pcm: error" << error << endl;
+  return -1;
+}
+catch (const char* error) {
+  cerr << "pcm: error " << error << endl;
   return -1;
 }
 

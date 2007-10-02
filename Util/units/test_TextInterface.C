@@ -82,11 +82,11 @@ public:
     add (&tester::get_value, "same",  "description");
 
     VGenerator<double> generator;
-    add( generator("element", "an array of elements",
-		   &tester::get_element,
-		   &tester::set_element,
-		   &tester::get_nelement) );
-
+    add_value( generator("element", "an array of elements",
+			 &tester::get_element,
+			 &tester::set_element,
+			 &tester::get_nelement) );
+    
   }
 
 };
@@ -225,17 +225,17 @@ int main () try {
 
   getset.import ( "ext", extensionTUI(), &tester::get_extension );
 
-  unsigned nattribute = getset.get_nattribute();
+  unsigned nvalue = getset.get_nvalue();
 
-  cerr << "TextInterface::To<> has " << nattribute
+  cerr << "TextInterface::To<> has " << nvalue
        << " attributes after import" << endl;
 
-  if (nattribute != 4) {
+  if (nvalue != 4) {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
 
-  for (unsigned i=0; i < nattribute; i++)
+  for (unsigned i=0; i < nvalue; i++)
     cerr << "  " << getset.get_name (i) << endl;
 
   std::string teststring = "test of TextInterface::import Component passed";
@@ -268,6 +268,21 @@ int main () try {
     return -1;
   }
 
+  cerr << "testing Interface template" << endl;
+
+  TextInterface::Value* value 
+    = TextInterface::new_Interpreter ("extension", Test.get_extension(),
+				      &extension::get_text,
+				      &extension::set_text);
+
+  teststring = "test of Interface::set_value";
+  value->set_value (teststring);
+
+  if (Test.get_extension()->get_text () != teststring) {
+    cerr << "test_TextInterface Interpreter ERROR!" << endl;
+    return -1;
+  }
+
   tester_array Array (5);
 
   Array.array[3] = Test;
@@ -278,17 +293,17 @@ int main () try {
 			&tester_array::element,
 			&tester_array::size );
 
-  nattribute = array_getset.get_nattribute();
+  nvalue = array_getset.get_nvalue();
 
-  cerr << "TextInterface::To<test_array> has " << nattribute 
+  cerr << "TextInterface::To<test_array> has " << nvalue 
        << " attributes after import" << endl;
 
-  if (nattribute != 4) {
+  if (nvalue != 4) {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
 
-  for (unsigned i=0; i < nattribute; i++)
+  for (unsigned i=0; i < nvalue; i++)
     cerr << "  " << array_getset.get_name (i) << endl;
 
   gotstring = array_getset.get_value("tester[3]:ext:text");
@@ -313,9 +328,13 @@ int main () try {
     return -1;
   }
 
+  cerr << "testing childTUI" << endl;
+
   childTUI child_tui;
   child ch;
   child_tui.set_instance( &ch );
+
+  cerr << "calling childTUI::get_value" << endl;
 
   cerr << child_tui.get_value ("value") << endl;
 
