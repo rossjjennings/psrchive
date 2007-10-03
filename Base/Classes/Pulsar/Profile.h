@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.106 $
-   $Date: 2007/10/02 05:18:53 $
+   $Revision: 1.107 $
+   $Date: 2007/10/03 06:14:13 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -47,7 +47,7 @@ namespace Pulsar {
     friend class Integration;
 
     //! flag controls the amount output to stderr by Profile methods
-    static Option<bool> verbose;
+    static bool verbose;
 
     //! When true, Profile::rotate shifts bins in the phase domain
     static Option<bool> rotate_in_phase_domain;

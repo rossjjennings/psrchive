@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Calibrator.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/10/02 05:19:32 $
+   $Revision: 1.4 $
+   $Date: 2007/10/03 06:14:13 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -70,7 +70,7 @@ namespace Pulsar {
     //@}
 
     //! Verbosity level
-    static Pulsar::Option<unsigned> verbose;
+    static unsigned verbose;
 
     //! Fractional bandwidth of the window used in median filter
     static Pulsar::Option<float> median_smoothing;
