@@ -508,11 +508,11 @@ void PavApp::SetPhaseZoom( double min_phase, double max_phase, vector< Reference
     }
     catch( Error e )
     {
-        Reference::To<TextInterface::Parser> ti = (*it)->get_frame_interface();
+        Reference::To<TextInterface::Parser> fti = (*it)->get_frame_interface();
 
         try
         {
-            ti->process( range_cmd );
+            fti->process( range_cmd );
         }
         catch( Error e )
         {
@@ -589,11 +589,11 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq, vector< Reference::T
     }
     catch( Error e )
     {
-        Reference::To<TextInterface::Parser> ti = (*it)->get_frame_interface();
+        Reference::To<TextInterface::Parser> fti = (*it)->get_frame_interface();
 
         try
         {
-            ti->process( range_cmd );
+            fti->process( range_cmd );
         }
         catch( Error e )
         {
@@ -610,10 +610,6 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq, vector< Reference::T
 
 bool PavApp::device_is_printer( string devname )
 {
-  // build a list of known printer names
-  // if the device name is in our list
-  //   its a printer
-  
   devname = uppercase( devname );
 
   vector<string> printer_names;
@@ -734,7 +730,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.7 2007/10/02 23:50:22 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.8 2007/10/03 05:35:34 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -801,18 +797,19 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'S':
       top_label = "pa:above:c";
-      plots.push_back( factory.construct( "Scyl" ) );
+      options.push_back( "pa:mark=dot+tick" );
+      plots.push_back( factory.construct( "S" ) );
       break;
     case 'X':
       keep_baseline = true;
-      plots.push_back( factory.construct( "calphvf" ) );
+      plots.push_back( factory.construct( "X" ) );
       break;
     case 'B':
       plot_bandpass = true;
       keep_baseline = true;
       break;
     case 'R':
-      keep_baseline = true;
+      //keep_baseline = true;
       plots.push_back( factory.construct( "line" ) );
       break;
     case 'm':
