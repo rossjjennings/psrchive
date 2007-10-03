@@ -756,6 +756,9 @@ namespace TextInterface {
 
   public:
 
+    //! Default constructor
+    Parser ();
+
     //! Get the named value
     std::string get_value (const std::string& name) const;
 
@@ -797,25 +800,20 @@ namespace TextInterface {
     //! The indentation that precedes the output of a call to process
     std::string indentation;
 
+    //! Maintain alphabetical order of parameter names
+    bool alphabetical;
+
     //! The aliases for the value names
     Reference::To<const Alias> aliases;
 
     //! Add a new value interface
-    void add_value (Value* value) { values.push_back (value); }
+    void add_value (Value* value);
 
     //! Remove the named value interface
-    void remove (const std::string& name) { delete find (name); clean (); }
+    void remove (const std::string& name);
 
     //! Clean up invalid references in values vector
-    void clean () 
-      {
-	unsigned i=0; 
-	while ( i < values.size() )
-	  if (!values[i])
-	    values.erase( values.begin() + i );
-	  else 
-	    i++;
-      }
+    void clean ();
 
     //! The vector of values
     std::vector< Reference::To<Value> > values;

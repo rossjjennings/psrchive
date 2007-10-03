@@ -78,7 +78,43 @@ string TextInterface::Parser::help (bool default_value)
   return help_str;
 }
 
+static bool alphabetical_lt (const Reference::To<TextInterface::Value>& v1, 
+				const Reference::To<TextInterface::Value>& v2)
+{
+  return v1->get_name() < v2->get_name();
+}
 
+
+//! Add a new value interface
+void TextInterface::Parser::add_value (Value* value)
+{
+  values.push_back (value);
+
+  if (alphabetical)
+    sort (values.begin(), values.end(), alphabetical_lt);
+}
+
+//! Remove the named value interface
+void TextInterface::Parser::remove (const std::string& name)
+{
+  delete find (name);
+  clean ();
+}
+
+void TextInterface::Parser::clean () 
+{
+  unsigned i=0; 
+  while ( i < values.size() )
+    if (!values[i])
+      values.erase( values.begin() + i );
+    else 
+      i++;
+}
+
+TextInterface::Parser::Parser ()
+{
+  alphabetical = false;
+}
 
 //! Get the value of the value
 string TextInterface::Parser::get_value (const string& name) const
