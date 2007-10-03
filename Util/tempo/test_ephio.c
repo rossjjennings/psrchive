@@ -25,12 +25,12 @@ int main(int argc, char** argv)
      outfname = argv[2];
 
    fprintf (stderr, "ephtest: Loading from '%s'\n", infname);
-   rd_eph(infname, statuses, strs, doubles, ints, errors);
+   eph_rd(infname, statuses, strs, doubles, ints, errors);
 
    fprintf (stderr, "ephtest: Writing to '%s'\n", outfname);
-   wr_eph(outfname, statuses, strs, doubles, ints, errors);
+   eph_wr(outfname, statuses, strs, doubles, ints, errors);
 
-   wr_eph_lun(6, statuses, strs, doubles, ints, errors);
+   eph_wr_lun(6, statuses, strs, doubles, ints, errors);
    
    return 0;
 }
