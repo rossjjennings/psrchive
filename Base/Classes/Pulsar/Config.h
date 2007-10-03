@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Config.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/10/02 06:57:32 $
+   $Revision: 1.9 $
+   $Date: 2007/10/03 06:14:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Config_h
@@ -53,19 +53,25 @@ namespace Pulsar {
   };
 
   //! Configuration option
-  template<typename T>
+  template<typename T, bool Mutable = true>
   class Option {
 
   public:
 
-    Option (const std::string& name, const T& default_value)
-    { init (0, name, "no description", default_value); }
+    Option (const std::string& name, const T& default_value,
+	    const std::string& description = "none",
+	    const std::string& detailed_description = "none" )
+    { init (0, name, default_value, description, detailed_description); }
 
-    Option (T* ptr, const std::string& name, const T& default_value)
-    { init (ptr, name, "no description", default_value); }
+    Option (T* ptr, const std::string& name, const T& default_value,
+	    const std::string& description = "none",
+	    const std::string& detailed_description = "none")
+    { init (ptr, name, default_value, description, detailed_description); }
 
     Option (CommandParser* ptr,
-	    const std::string& _name, const std::string& default_value);
+	    const std::string& _name, const std::string& default_value,
+	    const std::string& description = "none",
+	    const std::string& detailed_description = "none");
 
     //! Cast to T& operator
     operator T& () { return *value; }
@@ -75,46 +81,64 @@ namespace Pulsar {
 
     std::string name;
     std::string description;
+    std::string detailed_description;
     T* value;
-
-    class InterfaceGenerator;
 
   protected:
 
-    void init (T* ptr,
-	       const std::string& name,
+    void init (T* ptr, const std::string& name, const T& default_value,
 	       const std::string& description,
-	       const T& default_value);
+	       const std::string& detailed_description);
 
   };
 
-  template<typename T>
-  std::ostream& operator << (std::ostream& ostr, const Option<T>& option)
-  { return ostr << *(option.value); }
+  template<typename T, bool Mutable>
+  std::ostream& operator << (std::ostream& ostr, const Option<T,Mutable>& o)
+  { return ostr << *(o.value); }
 
-  template<typename T>
-  std::istream& operator >> (std::istream& istr, Option<T>& option)
+  template<typename T, bool Mutable>
+  std::istream& operator >> (std::istream& istr, Option<T,Mutable>& option)
   { return istr >> *(option.value); }
 
-  template<typename T>
-  class Option<T>::InterfaceGenerator {
-    public:
-    TextInterface::Value* operator() (Option<T>* option)
+  template<typename T, bool Mutable>
+  class OptionInterfaceGenerator {
+  public:
+    TextInterface::Value* operator() (Option<T,Mutable>* option)
     { 
-      return new TextInterface::Atom<T>( option->value,
-				         option->name,
-				         option->description );
+      TextInterface::ValueGetSet<T>* value;
+      value = new TextInterface::ValueGetSet<T>( option->value,
+						 option->name,
+						 option->description );
+      value -> set_detailed_description ( option->detailed_description );
+      return value;
     }
   };
 
-  // specialization for CommandParser classes
-  template<>
-  class Option<CommandParser>::InterfaceGenerator {
+  // specialization for read-only parameters
+  template<typename T>
+  class OptionInterfaceGenerator<T,false> {
     public:
-    TextInterface::Value* operator() (Option<CommandParser>* option)
+    TextInterface::Value* operator() (Option<T,false>* option)
+    { 
+      TextInterface::ValueGet<T>* value;
+      value = new TextInterface::ValueGet<T>( option->value,
+					      option->name,
+					      option->description );
+      value -> set_detailed_description ( option->detailed_description );
+      return value;
+    }
+  };
+
+
+  // specialization for CommandParser classes
+  template<bool Mutable>
+  class OptionInterfaceGenerator<CommandParser,Mutable> {
+    public:
+    TextInterface::Value* operator() (Option<CommandParser,Mutable>* option)
     {
       return TextInterface::new_Interpreter( option->name,
 		                             option->description,
+					     option->detailed_description,
 					     option->value,
 					     &CommandParser::empty,
 					     &CommandParser::parse );
@@ -127,10 +151,10 @@ namespace Pulsar {
 
     ~Interface () { std::cerr << "Config::Interface destructor" << std::endl; }
 
-    template<typename T>
-    void add (Option<T>* option)
+    template<typename T, bool Mutable>
+    void add (Option<T,Mutable>* option)
     {
-      typename Option<T>::InterfaceGenerator generator;
+      OptionInterfaceGenerator<T,Mutable> generator;
       add_value ( generator(option) );
     }
 
@@ -140,11 +164,11 @@ namespace Pulsar {
 }
 
 
-template<typename T>
-void Pulsar::Option<T>::init (T* ptr,
-			      const std::string& _name,
-			      const std::string& _description,
-			      const T& default_value)
+template<typename T,bool Mutable>
+void Pulsar::Option<T,Mutable>::init (T* ptr, const std::string& _name,
+				      const T& default_value,
+				      const std::string& _description,
+				      const std::string& _detailed_description)
 {
 #ifdef _DEBUG
   std::cerr << "Pulsar::Option<T>::init ptr=" << ptr << " name=" << _name
@@ -154,6 +178,7 @@ void Pulsar::Option<T>::init (T* ptr,
 
   name = _name;
   description = _description;
+  detailed_description = _detailed_description;
 
   if (!ptr)
     value = new T;
@@ -178,13 +203,16 @@ void Pulsar::Option<T>::init (T* ptr,
 
 }
 
-template<typename T>
-Pulsar::Option<T>::Option (CommandParser* ptr,
-			   const std::string& _name,
-			   const std::string& default_value)
+template<typename T,bool Mutable>
+Pulsar::Option<T,Mutable>::Option (CommandParser* ptr,
+				   const std::string& _name,
+				   const std::string& default_value,
+				   const std::string& _description,
+				   const std::string& _detailed_description)
 {
   name = _name;
-  description = "no description";
+  description = _description;
+  detailed_description = _detailed_description;
   value = ptr;
 
   value->parse( Config::get_configuration()->get (name, default_value) );
