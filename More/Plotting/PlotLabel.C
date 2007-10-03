@@ -44,6 +44,8 @@ Pulsar::PlotLabel::plot ( const Archive* data, const string& label, float side)
   separate (label, labels, ".");
 
   for (unsigned i=0; i < labels.size(); i++) {
+    tostring_places = true;
+    tostring_precision = 3;
     Reference::To< Interpreter::Variables > extended_ti = new Interpreter::Variables();
     extended_ti->set_instance( const_cast<Archive*>(data) );
     labels[i] = substitute (labels[i], extended_ti.ptr() );
