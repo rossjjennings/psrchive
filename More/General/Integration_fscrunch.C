@@ -10,17 +10,16 @@
 
 using namespace std;
 
-Pulsar::FrequencyIntegrate operation;
-Pulsar::FrequencyIntegrate::EvenlySpaced policy;
+static Pulsar::FrequencyIntegrate* operation = 0;
+static Pulsar::FrequencyIntegrate::EvenlySpaced* policy = 0;
 
-int static_init ()
+static void static_init ()
 {
-  operation.set_range_policy( &policy );
-  return 0;
+  operation = new Pulsar::FrequencyIntegrate;
+  policy    = new Pulsar::FrequencyIntegrate::EvenlySpaced;
+
+  operation->set_range_policy( policy );
 }
-
-static int init = static_init ();
-
 
 /*!
   \param nscrunch number of neighbouring frequency channels to
@@ -28,6 +27,9 @@ static int init = static_init ();
  */
 void Pulsar::Integration::fscrunch (unsigned nscrunch)
 {
-  policy.set_nintegrate (nscrunch);
-  operation.transform (this);
+  if (!policy)
+    static_init ();
+
+  policy->set_nintegrate (nscrunch);
+  operation->transform (this);
 }
