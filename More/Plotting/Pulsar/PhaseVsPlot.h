@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.15 $
-   $Date: 2007/10/02 05:08:15 $
-   $Author: straten $ */
+   $Revision: 1.16 $
+   $Date: 2007/10/03 06:45:14 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_PhaseVsPlot_h
 #define __Pulsar_PhaseVsPlot_h
@@ -62,7 +62,7 @@ namespace Pulsar {
     void set_line_colour( int new_colour ) { line_colour = new_colour; }
     //! Get the line colour
     int get_line_colour( void ) { return line_colour; }
-
+    
   protected:
 
     PlotScale z_scale;
@@ -74,6 +74,12 @@ namespace Pulsar {
     
     //! The colour to draw the lines
     int line_colour;
+    
+    //! The gap between profiles
+    float y_res;
+    
+    //! The scale factor for the data
+    float y_scale;
 
   };
 

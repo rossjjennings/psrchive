@@ -35,6 +35,9 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
 
   style = "image";
   line_colour = -1;
+  
+  y_res = -1;
+  y_scale = -1;
 }
 
 TextInterface::Parser* Pulsar::PhaseVsPlot::get_interface ()
@@ -87,12 +90,14 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     if (irow < min_row || irow >= max_row)
       continue;
 
-    bool follow = true;
-    cyclic_minmax (amps, min_bin, max_bin, min, max, follow);
+    cyclic_minmax (amps, min_bin, max_bin, min, max, true );
   }
 
   float x_res = (x_max-x_min)/nbin;
-  float y_res = (y_max-y_min)/nrow;
+  if( y_res == -1 )
+    y_res = (y_max-y_min)/nrow;
+  
+  
 
   if (style == "image")
   {
@@ -123,7 +128,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   {
     if( line_colour != -1 )
       cpgsci( line_colour );
-    
+
     get_z_scale()->set_minmax (0, max);
     get_z_scale()->get_range (min, max);
 
@@ -133,7 +138,10 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     vector<float> xaxis_adjusted;
     xaxis_adjusted.resize( nbin );
 
-    float yscale = y_res/max;
+    if( y_scale != -1 )
+      y_scale = y_res/max;
+    else
+      y_scale = 1;
 
     vector<bool> all_zeroes;
     all_zeroes.resize( max_row );
@@ -146,7 +154,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
         float amp = plotarray[irow*nbin + ibin];
         if (amp != 0.0)
           all_zeroes[irow] = false;
-        float new_amp = amp * yscale + y_min + y_res * irow;
+        float new_amp = amp * y_scale + y_res * irow;
         plotarray[irow*nbin + ibin] = new_amp;
       }
     }
@@ -156,7 +164,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       for( unsigned b = 0; b < nbin; b ++ )
         xaxis_adjusted[b] = xaxis[b] + xoff;
 
-      for (unsigned irow = min_row; irow < max_row; irow++)
+      for ( unsigned irow = min_row; irow < max_row; irow++ )
       {
         if (!all_zeroes[irow])
           cpgline (nbin, &xaxis_adjusted[0], &plotarray[irow*nbin]);
@@ -170,7 +178,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
 	cpgline( 2, pxs, pys );
       }
     }
-    
+
     if( line_colour != -1 )
       cpgsci( 1 );
   }
