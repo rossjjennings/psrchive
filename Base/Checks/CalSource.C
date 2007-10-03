@@ -15,11 +15,6 @@
 
 using namespace std;
 
-#ifdef _DEBUG
-static int runme () { cerr << "CalSource: init" << endl; return 0; }
-static int test = runme ();
-#endif
-
 static string get_default (string which)
 {
   string result = Pulsar::Config::get_runtime() + "/fluxcal." + which;
@@ -33,16 +28,36 @@ Pulsar::CalSource::CalSource ()
 {
   Configuration* config = Config::get_configuration();
 
-  on_filename = config->get ("fluxcal::on",  get_default("on"));
+  Option<string,false> cfgon
+    ( &on_filename,
+      "fluxcal::on", get_default("on"),
+
+      "Standard candle on-source aliases filename",
+
+      "The name of the file from which commonly used source name alises for\n"
+      "on-source flux calibrator observation are read."
+    );
+
 #ifdef _DEBUG
   cerr << "Pulsar::CalSource on_filename=" << on_filename << endl;
 #endif
+
   stringfload (&fluxcal_on, on_filename);
 
-  off_filename = config->get ("fluxcal::off",  get_default("off"));
+  Option<string,false> cfgoff
+    ( &off_filename,
+      "fluxcal::off", get_default("off"),
+
+      "Standard candle off-source aliases filename",
+
+      "The name of the file from which commonly used source name alises for\n"
+      "off-source flux calibrator observation are read."
+    );
+
 #ifdef _DEBUG
   cerr << "Pulsar::CalSource off_filename=" << off_filename << endl;
 #endif
+
   stringfload (&fluxcal_off, off_filename);
 }
 
