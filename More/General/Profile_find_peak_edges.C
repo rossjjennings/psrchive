@@ -19,8 +19,16 @@ Pulsar::Profile::peak_edges_strategy;
   configuration file or via the psrsh interpreter.  It enables
   convenient experimentation with the peak edges estimation algorithm.
 */
-static Pulsar::Option<CommandParser>
-cfg( new Pulsar::PeakEdgesInterpreter, "Profile::peak_edges", "cumulative" );
+static Pulsar::Option<CommandParser> cfg
+(
+ new Pulsar::PeakEdgesInterpreter,
+ "Profile::peak_edges", "cumulative",
+
+ "Algorithm used to find peak edges",
+
+ "The name of the algorithm used to estimate the rise and fall of the peak\n"
+ "in the pulse profile. Possible values: cumulative, consecutive"
+);
 
 
 /////////////////////////////////////////////////////////////////////////////

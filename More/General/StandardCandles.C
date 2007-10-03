@@ -25,13 +25,37 @@ static std::string get_default ()
 }
 
 Pulsar::Option<string>
-Pulsar::StandardCandles::default_filename ("fluxcal::database", get_default());
+Pulsar::StandardCandles::default_filename 
+(
+ "fluxcal::database", get_default(),
+
+ "Standard candle input filename",
+
+ "The name of the file from which flux densities, reference frequencies,\n"
+ "and spectral indeces of commonly used flux calibrator sources are read."
+);
 
 Pulsar::Option<float>
-Pulsar::StandardCandles::on_radius ("fluxcal::on_radius", 0.25);
+Pulsar::StandardCandles::on_radius
+(
+ "fluxcal::on_radius", 0.25,
+
+ "Maximum distance to on-source [degrees]",
+
+ "The maximum separation between the sky coordinates of an 'on-source'\n"
+ "observation and those of the standard candle."
+);
 
 Pulsar::Option<float>
-Pulsar::StandardCandles::off_radius ("fluxcal::off_radius", 2.5);
+Pulsar::StandardCandles::off_radius
+(
+ "fluxcal::off_radius", 2.5,
+
+ "Maximum distance to off-source [degrees]",
+
+ "The maximum separation between the sky coordinates of an 'off-source'\n"
+ "observation and those of the standard candle."
+);
 
 // //////////////////////////////////////////////////////////////////////
 //

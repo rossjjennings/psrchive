@@ -14,29 +14,44 @@
 
 using namespace std;
 
-#ifdef _DEBUG
-static int runme () { cerr << "Calibrator: init" << endl; return 0; }
-static int test = runme ();
-#endif
+unsigned Pulsar::Calibrator::verbose = 0;
 
-Pulsar::Option<unsigned> 
-Pulsar::Calibrator::verbose ("Calibrator::verbose", 0);
-
-/*! The size of the window used during median filtering is given by
-   the number of frequency channels, nchan, multiplied by
-   median_smoothing.  If set to zero, no smoothing is performed.  A
-   sensible value is around 0.05. */
 Pulsar::Option<float>
-Pulsar::Calibrator::median_smoothing ("Calibrator::median_smoothing", 0.0);
+Pulsar::Calibrator::median_smoothing
+(
+ "Calibrator::median_smoothing", 0.0,
 
-/*! The maximum number of channels over which a linear interpolation will be
-  performed */
-Pulsar::Option<float>
-Pulsar::Calibrator::interpolating ("Calibrator::interpolating", 0.0);
+ "Size of median filtering window [band fraction]",
 
-/*! Although a very sensible constraint, this option is disabled by default */
+ "The size of the window used during median filtering is given by the \n"
+ "number of frequency channels, nchan, multiplied by median_smoothing.\n"
+ "If set to zero, no smoothing is performed.  A sensible value is around 0.05."
+);
+
 Pulsar::Option<float>
-Pulsar::Calibrator::det_threshold ("Calibrator::det_threshold", 0.0);
+Pulsar::Calibrator::interpolating 
+(
+ "Calibrator::interpolating", 0.0,
+
+ "Maximum interpolation window [band fraction]",
+
+ "The maximum number of channels over which a linear interpolation will \n"
+ "be performed is given by the number of frequency channels, nchan, \n"
+ "multiplied by interpolating.  If set to zero, no interpolation is performed."
+);
+
+Pulsar::Option<float>
+Pulsar::Calibrator::det_threshold
+(
+ "Calibrator::det_threshold", 0.0,
+
+ "Tolerance to non-physical interval [sigma]",
+
+ "Non-physical values of the determinant of the coherency matrix are \n"
+ "defined as less than -(det_threshold * sigma), where sigma is the error \n"
+ "in the estimate of the determinant due to noise.  If set to zero, \n"
+ "no check is performed."
+);
 
 
 Pulsar::Calibrator::Calibrator ()

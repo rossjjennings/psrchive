@@ -45,17 +45,41 @@ bool Pulsar::Database::verbose = false;
 /*! By default, the long time scale is set to four weeks. */
 Pulsar::Option<double> 
 Pulsar::Database::long_time_scale
-("Database::long_time_scale", 60.0 * 24 * 28);
+(
+ "Database::long_time_scale", 60.0 * 24 * 28,
+
+ "Maximum time to flux calibrator [minutes]",
+
+ "The maximum amount of time allowed between the epoch of an observation \n"
+ "and the epoch of the flux calibrator and/or reception calibrator used to \n"
+ "calibrate it.  By default, the long time scale is set to four weeks."
+);
 
 /*! By default, the short time scale is set to two hours. */
 Pulsar::Option<double> 
 Pulsar::Database::short_time_scale
-("Database::short_time_scale", 120.0);
+(
+ "Database::short_time_scale", 120.0,
+
+ "Maximum time to poln calibrator [minutes]",
+
+ "The maximum amount of time allowed between the epoch of an observation \n"
+ "and the epoch of the reference calibrator used to calibrate it. \n"
+ "By default, the long time scale is set to two hours."
+);
 
 /*! By default, the maximum angular separation is 5 degrees */
 Pulsar::Option<double> 
 Pulsar::Database::max_angular_separation 
-("Database::max_angular_separation", 5.0);
+(
+ "Database::max_angular_separation", 5.0,
+
+ "Maximum distance to poln calibrator [degrees]",
+
+ "The maximum separation between the sky coordinates of an observations \n"
+ "and those of the reference calibrator used to calibrate it."
+);
+
 
 /*! This null parameter is intended only to improve code readability */
 const Pulsar::Archive* Pulsar::Database::any = 0;

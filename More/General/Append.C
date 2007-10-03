@@ -20,7 +20,16 @@
 #include <iostream>
 using namespace std;
 
-Pulsar::Option<bool> default_must_match ("Append::must_match", true);
+Pulsar::Option<bool> default_must_match 
+(
+ "Append::must_match", true,
+
+ "Ensure that Archive parameters match [boolean]",
+
+ "If true, then TimeAppend and FrequencyAppend (used by psradd) will fail\n"
+ "if certain observational parameters do not match (see ArchiveMatch)"
+);
+
 
 Pulsar::Append::Append ()
 {
@@ -28,6 +37,7 @@ Pulsar::Append::Append ()
 
   match.set_check_mixable ();
 }
+
 
 bool Pulsar::Append::stop (Archive* into, const Archive* from)
 {

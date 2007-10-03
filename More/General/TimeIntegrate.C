@@ -95,16 +95,25 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
 
     double duration = 0.0;
     double total_weight = 0.0;
-    
+    unsigned count = 0;
+
+    bool weight_midtime = true;
+
     for (unsigned iadd=start; iadd < stop; iadd++) {
       
       Integration* cur = archive->get_Integration (iadd);
       
       duration += cur->get_duration();
-      total_weight += weight(cur);
-      
+      total_weight += weight (cur);
+      count ++;
+
     }
     
+    if (total_weight == 0) {
+      total_weight = count;
+      weight_midtime = false;
+    }
+
     result->set_duration (duration);
     
     MJD epoch;
@@ -112,7 +121,10 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
     for (unsigned iadd=start; iadd < stop; iadd++) {
       
       Integration* cur = archive->get_Integration (iadd);
-      epoch += (weight(cur)/total_weight) * cur->get_epoch();
+
+      double cur_weight = (weight_midtime) ? weight(cur) : 1.0;
+
+      epoch += cur_weight/total_weight * cur->get_epoch();
       
     }
     
@@ -143,6 +155,7 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
 	
 	// set the phase at the midtime equal to that of the first subint
 	Phase desired (mid_phase.intturns(), first_phase.fracturns());
+
 	epoch = model->iphase (desired);
   
 	if (Archive::verbose > 2)
@@ -247,13 +260,11 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
 
   } // for each integrated result
 
-
-
   archive->resize (output_nsub);
 }
 
 catch (Error& err) {
   throw err += "Pulsar::TimeIntegrate::transform";
- }
+}
 
 

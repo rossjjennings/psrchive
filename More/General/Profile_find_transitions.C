@@ -15,7 +15,16 @@ using namespace std;
  */
 Pulsar::Option<float>
 Pulsar::Profile::transition_duty_cycle
-("Profile::transition_duty_cycle", 0.15);
+(
+ "Profile::transition_duty_cycle", 0.15,
+
+ "Duty cycle used to find transitions [turns]",
+
+ "When searching for transitions between high and low states in a square \n"
+ "wave, such as an observation of the reference source (linear noise diode),\n"
+ "a sliding window is used to compute the running mean.  The size of this \n"
+ "window is given by transition_duty_cycle times the number of bins"
+);
 
 /////////////////////////////////////////////////////////////////////////////
 //

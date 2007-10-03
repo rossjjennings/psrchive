@@ -33,14 +33,34 @@ static int test = runme ();
 string Pulsar::Predictor::policy;
 
 Pulsar::Option<string> 
-policy_config_wrapper (&Pulsar::Predictor::policy, 
-		       "Predictor::policy", "input");
+policy_config_wrapper 
+(
+ &Pulsar::Predictor::policy, 
+ "Predictor::policy", "input",
+
+ "Policy for generating new predictors",
+
+ "The type of predictor constructed when generating a new \n"
+ "pulse phase prediction model (in Archive::update_model). \n"
+ "There are currently two policies for choosing the type of \n"
+ "the new predictor: \n"
+ "\n"
+ " 'input'   - same as the currently installed predictor \n"
+ " 'default' - determined by Predictor::default"
+);
 
 string Pulsar::Predictor::default_type;
 
 Pulsar::Option<string>
-default_type_config_wrapper (&Pulsar::Predictor::default_type,
-			     "Predictor::default", "polyco");
+default_type_config_wrapper
+(
+ &Pulsar::Predictor::default_type,
+ "Predictor::default", "polyco",
+
+ "Default predictor type",
+
+ "The default phase predictor model type: 'polyco' or 'tempo2'"
+);
 
 
 Pulsar::Generator* Pulsar::Generator::get_default ()

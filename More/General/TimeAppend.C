@@ -14,8 +14,26 @@
 
 using namespace std;
 
-Pulsar::Option<bool> dflt_chronological ("TimeAppend::chronological", false);
-Pulsar::Option<double> dflt_max_overlap ("TimeAppend::max_overlap", 30.0);
+Pulsar::Option<bool> dflt_chronological
+(
+ "TimeAppend::chronological", false,
+
+ "Ensure chronological order [bool]",
+
+ "If true, then TimeAppend::transform (used by psradd and Archive::append)\n"
+ "will fail if sub-integrations are not appended in chronological order."
+);
+
+Pulsar::Option<double> dflt_max_overlap 
+(
+ "TimeAppend::max_overlap", 30.0,
+
+ "Maximum time overlap [seconds]",
+
+ "If TimeAppend::chronological is set, then this parameter determines\n"
+ "the maximum time by which the start time of a sub-integration may precede\n"
+ "the end time of the previous sub-integration."
+);
 
 Pulsar::TimeAppend::TimeAppend ()
 {

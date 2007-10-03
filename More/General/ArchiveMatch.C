@@ -18,14 +18,28 @@ using namespace std;
 */
 Pulsar::Option<double> 
 Pulsar::ArchiveMatch::max_frequency_difference 
-("Match::max_frequency_difference", 0.1);
+(
+ "Match::max_frequency_difference", 0.1,
+
+ "Maximum frequency difference [MHz]",
+ 
+ "When comparing centre frequencies to determine if two archives match,\n"
+ "allow them to differ at most by this value"
+);
 
 /*!
   Allow observations with opposite sidebands to match
 */
 Pulsar::Option<bool>
 Pulsar::ArchiveMatch::opposite_sideband
-("Match::opposite_sideband", false);
+(
+ "Match::opposite_sideband", false,
+
+ "Allow sideband mixing [bool]",
+ 
+ "When comparing bandwidths to determine if two archives match,\n"
+ "allow them to have opposite signs"
+);
 
 /*!
   Added between match report strings in reason attribute

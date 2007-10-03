@@ -24,13 +24,20 @@ using namespace std;
   related to the baseline.
  */
 Pulsar::Option<float>
-Pulsar::Profile::default_duty_cycle ("Profile::default_duty_cycle", 0.15);
+Pulsar::Profile::default_duty_cycle 
+(
+ "Profile::default_duty_cycle", 0.15,
+
+ "Duty cycle of baseline [turns]",
+
+ "The default width of the window used to find the off-pulse baseline\n"
+ "and compute its statistics"
+);
 
 /*!  
   When true, Profile methods will output debugging information on cerr
 */
-Pulsar::Option<bool>
-Pulsar::Profile::verbose ("Profile::verbose", false);
+bool Pulsar::Profile::verbose = false;
 
 
 

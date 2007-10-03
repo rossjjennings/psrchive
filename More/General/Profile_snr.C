@@ -23,8 +23,17 @@ Functor<float(const Pulsar::Profile*)> Pulsar::Profile::snr_strategy;
   configuration file or via the psrsh interpreter.  It enables
   convenient experimentation with the S/N estimation algorithm.
 */
-static Pulsar::Option<CommandParser>
-snr( new Pulsar::SNRatioInterpreter, "Profile::snr", "phase" );
+static Pulsar::Option<CommandParser> snr
+(
+ new Pulsar::SNRatioInterpreter,
+ "Profile::snr", "phase",
+
+ "Algorithm used to compute S/N",
+
+ "The name of the algorithm used to estimate the signal-to-noise ratio\n"
+ "of the pulse profile. Possible values: phase, fourier, square, adaptive, \n"
+ "and standard <filename.ar>"
+);
 
 /*! This method calls Profile::snr_strategy */
 float Pulsar::Profile::snr() const try {

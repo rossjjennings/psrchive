@@ -23,8 +23,16 @@ Functor< PhaseWeight* (const Profile*) > Profile::baseline_strategy;
   configuration file or via the psrsh interpreter.  It enables
   convenient experimentation with the baseline estimation algorithm.
 */
-static Pulsar::Option<CommandParser>
-baseline ( new Pulsar::BaselineInterpreter, "Profile::baseline", "minimum" );
+static Pulsar::Option<CommandParser> cfg
+(
+ new Pulsar::BaselineInterpreter,
+ "Profile::baseline", "minimum",
+
+ "Baseline estimation algorithm",
+
+ "The name of the algorithm used to estimate the off-pulse baseline.\n"
+ "Possible values: minimum, normal"
+);
 
 
 //! Return a PhaseWeight mask with the baseline phase bins enabled
