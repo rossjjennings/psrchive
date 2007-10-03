@@ -1,7 +1,8 @@
 
-bin_PROGRAMS = psrchive_info
+bin_PROGRAMS = psrchive_info psrchive_config
 
-psrchive_info_SOURCES = psrchive_info.C
+psrchive_info_SOURCES   = psrchive_info.C
+psrchive_config_SOURCES = psrchive_config.C
 
 bin_SCRIPTS = psrchive_cflags psrchive_ldflags
 
@@ -28,7 +29,9 @@ fix_prefix: install-binSCRIPTS
 # Dependencies should never be changed
 #
 
-LDADD = $(top_builddir)/Base/libpsrbase.la \
+LDADD = $(top_builddir)/More/libpsrmore.la \
+	$(top_builddir)/Base/libpsrbase.la \
 	$(top_builddir)/Util/libpsrutil.la
+
 
 include $(top_srcdir)/config/Makefile.include
