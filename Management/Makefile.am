@@ -8,7 +8,7 @@ bin_SCRIPTS = psrchive_cflags psrchive_ldflags
 
 dist_bin_SCRIPTS = psrchive_install
 
-dist_data_DATA = psrchive_version psrchive.cfg
+dist_data_DATA = psrchive_version
 
 libs: fix_prefix
 
