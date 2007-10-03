@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Config.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/10/03 06:14:17 $
+   $Revision: 1.10 $
+   $Date: 2007/10/03 12:30:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Config_h
@@ -149,7 +149,7 @@ namespace Pulsar {
 
   public:
 
-    ~Interface () { std::cerr << "Config::Interface destructor" << std::endl; }
+    Interface () { alphabetical = true; }
 
     template<typename T, bool Mutable>
     void add (Option<T,Mutable>* option)
