@@ -80,8 +80,6 @@ void usage () {
 // returns the phase of the mid-point of the on cal hi
 float mid_hi (Pulsar::Archive* archive);
 
-extern bool tscrunch_weighted_midtime;
-
 int main (int argc, char **argv) try {
 
   // append in the time direction
@@ -168,7 +166,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.55 2007/08/29 04:14:07 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.56 2007/10/03 06:14:21 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -334,10 +332,6 @@ int main (int argc, char **argv) try {
       Pulsar::Archive::set_verbosity (3);
       vverbose = true;
       verbose = true;
-      break;
-
-    case 'w':
-      tscrunch_weighted_midtime = false;
       break;
 
     case 'Z': 
