@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Configuration.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/08/19 19:55:49 $
+   $Revision: 1.6 $
+   $Date: 2007/10/04 21:01:21 $
    $Author: straten $ */
 
 #ifndef __Configuration_h
@@ -41,8 +41,12 @@ public:
   //! Find the entry with the specified key
   Entry* find (const std::string& key) const;
 
+  //! Get the names of the configuration files in the order they were parsed
+  const std::vector<std::string>& get_filenames () const { return filenames; }
+
 protected:
 
+  std::vector<std::string> filenames;
   std::vector<Entry> entries;
 
 };
@@ -66,23 +70,8 @@ T Configuration::get (const std::string& key, T default_value) const
 	      << std::endl;
 #endif
 
-    /* IMPORTANT NOTE:
-       cannot call fromstring because it uses a global variable that may
-       not be initialized at the time that this template function is called
-    */
+    return fromstring<T> (entry->value);
 
-    std::istringstream ist;
-    ist.str (entry->value);
-
-    T value;
-    ist >> value;
-
-#ifdef _DEBUG
-    std::cerr << "Configuration::get found " << key 
-                << " = " << value << std::endl;
-#endif
-
-    return value;
   }
 
 #ifdef _DEBUG
