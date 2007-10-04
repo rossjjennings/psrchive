@@ -73,7 +73,8 @@ void Configuration::load (const string& filename)
     }
 
   }
-  
+
+  filenames.push_back( filename );
 }
 
 
