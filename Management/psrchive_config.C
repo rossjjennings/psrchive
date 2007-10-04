@@ -41,13 +41,12 @@ string find_and_replace (string text, string replace, string with)
 
 int main (int argc, char** argv)
 {
-  // this simply ensures that all symbols are loaded
-  Pulsar::Interpreter* interpreter = standard_shell();
+  /*
+    The following call ensures that all configuration symbols are linked.
+  */
+  standard_shell();
 
   Pulsar::Config::Interface* interface = Pulsar::Config::get_interface();
-
-  string header (75, '#');
-  header += "\n";
 
   // find the maximum string length of the name and description
   for (unsigned i=0; i<interface->get_nvalue(); i++) {
@@ -60,15 +59,15 @@ int main (int argc, char** argv)
 
     // insert comment symbols in front of new lines
     detail = find_and_replace (detail, "\n", "\n# ");
-
-    cout << 
-      header <<
+    
+    cout << string(75, '#') << "\n"
       "#\n"
       "# " << value->get_name() << " - " << value->get_description() << "\n"
       "#\n"
       "# " << detail << "\n"
-      "#\n" <<
-      value->get_name() << " = " << value->get_value() << endl << endl;
+      "#\n"
+      "# " << value->get_name() << " = " << value->get_value() << "\n"
+	 << endl;
 
   }
 
