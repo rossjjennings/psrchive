@@ -59,14 +59,20 @@ int main (int argc, char** argv)
 
     // insert comment symbols in front of new lines
     detail = find_and_replace (detail, "\n", "\n# ");
-    
+
+    string commented = "# ";
+
+    // if the value has been configured in a file, do not comment its entry
+    if ( Pulsar::Config::get_configuration()->find(name) )
+      commented = "";
+
     cout << string(75, '#') << "\n"
       "#\n"
       "# " << value->get_name() << " - " << value->get_description() << "\n"
       "#\n"
       "# " << detail << "\n"
-      "#\n"
-      "# " << value->get_name() << " = " << value->get_value() << "\n"
+      "#\n" <<
+      commented << value->get_name() << " = " << value->get_value() << "\n"
 	 << endl;
 
   }
