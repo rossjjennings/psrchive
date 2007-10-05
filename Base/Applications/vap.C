@@ -80,6 +80,7 @@ vector< string > current_row;
 bool new_new_vap = false;
 string meta_filename = "";
 
+bool neat_table = true;
 table_stream ts(&cout);
 
 bool full_paths = false;
@@ -1553,7 +1554,9 @@ void PrintBasicHlp( void )
   "\n"
   "-R  show relative path names\n"
   "\n"
-  "-s show the extensions present in an archive\n"
+  "-s  show the extensions present in an archive\n"
+  "\n"
+  "-q  quickly show parameters as files are loaded (no table formatting)\n" 
   << endl;
 }
 
@@ -1719,7 +1722,7 @@ void PrintExtdHlp( void )
 void ProcArgs( int argc, char *argv[] )
 {
   int gotc;
-  while ((gotc = getopt (argc, argv, "nc:sEphHvVtTXM:R")) != -1)
+  while ((gotc = getopt (argc, argv, "nc:sEphHvVtTXM:Rq")) != -1)
     switch (gotc)
     {
 
@@ -1767,6 +1770,10 @@ void ProcArgs( int argc, char *argv[] )
 
     case 'R':
       full_paths = true;
+      break;
+
+    case 'q':
+      neat_table = false;
       break;
 
     default:
@@ -1900,42 +1907,60 @@ string FetchValue( Reference::To< Archive > archive, string command )
 * ProcessArchive - load an archive and process all the command line parameters using the text finder.
 **/
 
-void ProcessArchive( string filename )
+template<typename OS>
+void ProcessArchiveImplementation( OS& os, string filename )
 {
   Reference::To< Archive > archive;
   try
   {
     archive = Archive::load( filename );
   }
-  catch ( Error e )
+  catch ( Error& e )
   {
-    cerr << "failed to load archive " << filename << endl;
+    cerr << "failed to load archive " << filename;
     if( verbose )
     {
       cerr << e << endl;
     }
+    else
+    {
+      cerr << e.get_message() << endl;
+    }
+  }
+  catch ( ... )
+  {
+    cerr << "failed to load archive " << filename << endl;
   }
 
   if( !archive )
     return;
 
   if( full_paths )
-    ts << filename;
+    os << filename;
   else
-    ts << basename( filename );
+    os << basename( filename );
 
   vector< string >::iterator it;
   for( it = commands.begin(); it != commands.end(); it ++ )
   {
+    if (!neat_table)
+      os << "\t";
+
     string val = FetchValue( archive, lowercase((*it)) );
     if ( val == "" ) val = "*";
-    ts << val;
+    os << val;
   }
 
-  ts << endrow;
+  os << endl;
 }
 
-
+void ProcessArchive( string filename )
+{
+  if (neat_table)
+    ProcessArchiveImplementation( ts, filename );
+  else
+    ProcessArchiveImplementation( cout, filename );
+}
 
 
 /**
@@ -2024,7 +2049,22 @@ void ExpandMetafile( string meta_filename, vector< string > &filenames )
 }
 
 
+template<typename OS>
+void Header( OS& os )
+{
+  // first heading is always the filename
+  os << "filename";
 
+  // add the commands as headings for the table.
+  vector< string >::iterator it;
+  for( it = commands.begin(); it != commands.end(); it ++ ) {
+    if (!neat_table)
+      os << "\t";
+    os << (*it);
+  }
+
+  os << endl;
+}
 
 /**
 * main -
@@ -2049,14 +2089,10 @@ int main( int argc, char *argv[] )
     ExpandMetafile( meta_filename, filenames );
   }
 
-  // first heading is always the filename
-  ts << "filename";
-
-  // add the commands as headings for the table.
-  vector< string >::iterator it;
-  for( it = commands.begin(); it != commands.end(); it ++ )
-    ts << (*it);
-  ts << endrow;
+  if( neat_table )
+    Header( ts );
+  else
+    Header( cout );
 
   if( filenames.size() )
   {
