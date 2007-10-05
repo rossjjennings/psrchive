@@ -23,7 +23,8 @@ public:
   table_stream( std::ostream *set_target );
   void set_stream( std::ostream *set_target );
 
-  enum token_type { newline };
+  typedef std::ostream& (*token_type) ( std::ostream& os );
+
   enum justification { left, right, centre };
 
   void add_string( std::string );
@@ -46,14 +47,8 @@ private:
   std::vector< justification > justifications;
 };
 
-namespace std
-{
-  extern table_stream::token_type endrow;
-};
-
-
 extern table_stream &operator<<( table_stream &rhs, const std::string &lhs );
-extern table_stream &operator<<( table_stream &rhs, const table_stream::token_type &lhs );
+extern table_stream &operator<<( table_stream &rhs, table_stream::token_type);
 
 
 

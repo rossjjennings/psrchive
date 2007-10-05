@@ -21,10 +21,12 @@ table_stream &operator<<( table_stream &rhs, const std::string &lhs )
   return rhs;
 }
 
+static table_stream::token_type newline = std::endl;
 
-extern table_stream &operator<<( table_stream &rhs, const table_stream::token_type &lhs )
+extern table_stream &operator<<( table_stream &rhs, 
+				 table_stream::token_type lhs )
 {
-  if( lhs == table_stream::newline )
+  if( lhs == newline )
     rhs.add_row();
 
   return rhs;
@@ -34,9 +36,6 @@ extern table_stream &operator<<( table_stream &rhs, const table_stream::token_ty
 
 
 using namespace std;
-
-
-table_stream::token_type std::endrow = table_stream::newline;
 
 
 table_stream::table_stream( ostream *set_target )
@@ -58,7 +57,7 @@ void table_stream::flush( void )
   determine_justifications();
 
   
-  for( int col = 0; col < headings.size(); col ++ )
+  for( unsigned col = 0; col < headings.size(); col ++ )
   {
     (*target) << " " << headings[col];
     int padding = column_widths[col] - headings[col].length();
@@ -66,9 +65,9 @@ void table_stream::flush( void )
   }
   (*target) << endl << endl;
 
-  for( int row = 0; row < data.size(); row ++ )
+  for( unsigned row = 0; row < data.size(); row ++ )
   {
-    for( int col = 0; col < data[row].size(); col ++ )
+    for( unsigned col = 0; col < data[row].size(); col ++ )
     {
       int padding = column_widths[col] - data[row][col].length();
       
@@ -120,7 +119,7 @@ void table_stream::determine_widths( void )
   // use the heading widths to initialise the column widths
 
   column_widths.resize( headings.size() );
-  for( int col = 0; col < headings.size(); col ++ )
+  for( unsigned col = 0; col < headings.size(); col ++ )
   {
     column_widths[col] = headings[col].length() + 1;
   }
@@ -128,10 +127,10 @@ void table_stream::determine_widths( void )
   // go through each row, updating the column width for each header if the data
   // in a cell is wider than the current width
 
-  for( int row = 0; row < data.size(); row ++ )
+  for( unsigned row = 0; row < data.size(); row ++ )
   {
     vector< string > next_row = data[row];
-    for( int col = 0; col < next_row.size(); col ++ )
+    for( unsigned col = 0; col < next_row.size(); col ++ )
     {
       int next_length = data[row][col].length() + 1;
       if( next_length > column_widths[col] )
@@ -146,7 +145,7 @@ void table_stream::determine_widths( void )
 
 bool table_stream::is_numeric( string src )
 {
-  for( int i =0; i < src.size(); i ++ )
+  for( unsigned i =0; i < src.size(); i ++ )
   {
     char next_char = src[i];
     if( next_char != '.' &&
@@ -166,7 +165,7 @@ void table_stream::determine_justifications( void )
 {
   justifications.resize( headings.size() );
   
-  for( int col = 0; col < data[0].size(); col ++ )
+  for( unsigned col = 0; col < data[0].size(); col ++ )
   {
     if( is_numeric( data[0][col] ) )
       justifications[col] = right;
