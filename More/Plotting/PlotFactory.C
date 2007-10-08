@@ -83,7 +83,7 @@ Pulsar::PlotFactory::PlotFactory ()
         ( 'n', "snrspec", "S/N ratio" ) );
   
   add ( new PlotFactory::Advocate<CalPhVFreqPlot>
-        ( 'V', "calphvf", "Calibrator phase vs frequency plot" ) );
+        ( 'X', "calphvf", "Calibrator phase vs frequency plot" ) );
 }
 
 //! Return a new instance of the named plotter

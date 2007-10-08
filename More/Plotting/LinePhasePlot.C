@@ -24,6 +24,7 @@ using namespace Pulsar;
 LinePhasePlot::LinePhasePlot()
 {
     style = "line";
+    set_line_colour( 7 );
 }
 
 
@@ -63,7 +64,7 @@ unsigned LinePhasePlot::get_nrow (const Archive* arch)
 
 const Profile* LinePhasePlot::get_Profile (const Archive* arch, unsigned row)
 {
-    return data[row].ptr();
+  return data[row].ptr();
 }
 
 
@@ -75,55 +76,89 @@ const Profile* LinePhasePlot::get_Profile (const Archive* arch, unsigned row)
  * RECEIVES - The Archive to extract from
  * RETURNS  - Nothing
  * THROWS   - Nothing
- * TODO     - Compact the lines together like the old pav
+ * TODO     - Could make the spacing between integrations configurable
  **/
 
 void LinePhasePlot::prepare (const Archive* arch )
 {
   try
   {
-    int ipol = 0;
-    int ichan = 0;
-    int isubint = -1;
-
     int nsub = arch->get_nsubint();
     int nbin = arch->get_nbin();
 
     int fsub = 0;
     int lsub = nsub - 1;
-
+    
     float max_amp = FLT_MIN;
     float min_amp = FLT_MAX;
 
-    data.empty();
-
+    data.clear();
+    
+    vector< vector< float > > all_data;
+    
+    all_data.resize( nsub );
+    
+    // create a massive data table with all the profiles we are looking at
+    // while at it, determine the min and max amplitude from the whole table
     for( int s = fsub; s <= lsub; s ++ )
     {
-        const float *orig_amps = arch->get_Integration(s)->get_Profile( ipol, ichan )->get_amps();
-        vector<float> new_amps( nbin );
-
-        for( int a = 0; a < nbin; a ++ )
-        {
-            new_amps[a] = orig_amps[a];
-            if( new_amps[a] > max_amp )
-                max_amp = new_amps[a];
-            if( new_amps[a] < min_amp )
-                min_amp = new_amps[a];
-        }
-	Reference::To<Profile> new_profile = new Profile();  
-	new_profile->set_amps( new_amps );
-	data.push_back( new_profile );	
+      const float *src_amps = arch->get_Integration(s)->get_Profile( ipol, ichan )->get_amps();
+      
+      all_data[s-fsub].resize( nbin );
+      for( int d = 0; d < nbin; d ++ )
+      {
+        all_data[s-fsub][d] = src_amps[d];
+	if( src_amps[d] > max_amp )
+	  max_amp = src_amps[d];
+	if( src_amps[d] < min_amp )
+	  min_amp = src_amps[d];
+      }
+    }
+    
+    float data_range = max_amp - min_amp;
+    
+    // scale all the data so that 1/3 of the data range will = 1
+    // ie there is (1) between each profile and this represents 1/3 of the max range
+    // put the resulting profiles into the data vector
+    
+    float dscale = 1 / data_range;
+    for( int s = fsub; s <= lsub; s ++ )
+    {
+      for( int d = 0; d < nbin; d ++ )
+      {
+	all_data[s-fsub][d] *= dscale;
+	all_data[s-fsub][d] += s;
+      }
+      Reference::To< Profile > new_profile = new Profile();
+      new_profile->set_amps( all_data[s-fsub] );
+      data.push_back( new_profile );
     }
 
-    // Set the scale and bias
-    float range = max_amp - min_amp;
-    get_frame()->get_y_scale()->set_minmax( min_amp - range * .4, max_amp + (range * 0.4)*nsub );
-    float bias = (range) / 3;
-
-    y_res = bias;
+    // set the range we want to look
+    
+    float target_min = fsub + (min_amp * dscale);
+    float target_max = lsub + (max_amp * dscale);
+    float target_range = target_max - target_min;
+    
+    // get the range specified by the user
+    
+    float set_min, set_max;
+    get_frame()->get_y_scale()->get_range( set_min, set_max );
+    
+    // scale out target range according to the users set range
+    
+    float new_min = target_min + set_min * target_range;
+    float new_max = target_max - (1-set_max) * target_range + (lsub);
+    get_frame()->get_y_scale()->set_minmax( target_min, target_max );
+    
     y_scale = -1;
-
-    set_line_colour( 7 );
+    y_res = 0;
+    
+    // Don't draw an alternate axis, and label the y axis and set tick marks to 1 (ie we don't have 1/2 a subint)
+    
+    get_frame()->get_y_axis()->set_alternate( false );
+    get_frame()->get_y_axis()->set_tick( 1.0 );
+    get_frame()->get_y_axis()->set_label( "Sub Integration" );
   }
   catch( Error e )
   {

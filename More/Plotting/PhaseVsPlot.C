@@ -202,5 +202,9 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     cpgbox (" ", 0.0, 0, "CMIST", 0.0, 0);
     cpgmtxt("R", 2.6, 0.5, 0.5, "Index");
   }
+  else
+  {
+    cpgbox( " ", 0.0, 0, "C", 0.0, 0 );
+  }
 
 }
