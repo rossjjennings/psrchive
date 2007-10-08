@@ -74,11 +74,10 @@ public:
   void SetStokesPlotToQU( vector< Reference::To<Plot> > &plots );
   void SetPhaseZoom( double min_phase, double max_phase, vector< Reference::To<Plot> > &plots );
   void SetFreqZoom( double min_freq, double max_freq, vector< Reference::To<Plot> > &plots, Reference::To<Archive> archive );
-  bool device_is_printer( string devname );
 
   int run( int argc, char *argv[] );
 private:
-  bool printing;
+  bool have_colour;
   int ipol;
   int fsub, lsub;
   int isubint;
@@ -86,6 +85,7 @@ private:
   double rot_phase;
   bool svp;
   bool publn;
+  bool publnc;
   bool axes;
   bool labels;
   unsigned int n1, n2;

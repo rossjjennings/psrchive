@@ -7,12 +7,17 @@
 
 #include "PavApp.h"
 #include <tostring.h>
+#include <templates.h>
+
+
+
+
 
 
 
 PavApp::PavApp()
 {
-  printing = false;
+  have_colour = true;
   ipol = 0;
   fsub = 0, lsub = 0;
   isubint = 0;
@@ -60,7 +65,7 @@ void PavApp::PrintUsage( void )
   cout << " -t src    Tscrunch scr Integrations together" << endl;
   cout << " -T        Tscrunch all Integrations" << endl;
   cout << " -p        Add all polarisations together" << endl;
-  cout << " -x clip   Truncate data at max*peak" << endl;
+  cout << " -x clip   Truncate data to range min*peak to max*peak" << endl;
   cout << endl;
   cout << "Configuration options:" << endl;
   cout << " -K dev    Manually specify a plot device" << endl;
@@ -88,8 +93,8 @@ void PavApp::PrintUsage( void )
   cout << " -j        Display a simple dynamic spectrum image" << endl;
   cout << endl;
   cout << "Other plotting options:" << endl;
-  cout << "# --publn        Publication quality plot (B&W)  L dashed, V dots" << endl;
-  cout << "# --publnc       Publication quality plot (colour)" << endl;
+  cout << " --publn        Publication quality plot (B&W)  L dashed, V dots" << endl;
+  cout << " --publnc       Publication quality plot (colour)" << endl;
   cout << " --cmap index   Select a colour map for PGIMAG style plots" << endl;
   cout << "                The available indices are: (maybe 4-6 not needed)" << endl;
   cout << "                  0 -> Greyscale" << endl;
@@ -104,10 +109,10 @@ void PavApp::PrintUsage( void )
   cout << " --plot_qu      Plot Stokes Q and Stokes U in '-S' option instead of degree of linear" << endl;
   cout << endl;
   cout << "Integration re-ordering (nsub = final # of subints) (used with pav Y for binary pulsars):" << endl;
-  cout << "# --convert_binphsperi   nsub" << endl;
-  cout << "# --convert_binphsasc    nsub" << endl;
-  cout << "# --convert_binlngperi   nsub" << endl;
-  cout << "# --convert_binlngasc    nsub" << endl;
+  cout << " --convert_binphsperi   nsub" << endl;
+  cout << " --convert_binphsasc    nsub" << endl;
+  cout << " --convert_binlngperi   nsub" << endl;
+  cout << " --convert_binlngasc    nsub" << endl;
   cout << endl;
   cout << "Utility options:" << endl;
   cout << " -a              Print available plugin information" << endl;
@@ -115,43 +120,8 @@ void PavApp::PrintUsage( void )
   cout << " -i              Show revision information" << endl;
   cout << " -v              Verbose output" << endl;
   cout << " -V              Very verbose output" << endl;
-  cout << "# -w              Use stopwatch (for benchmarking)" << endl;
   cout << endl << endl;
 }
-
-
-const void PavApp::d_minmaxval ( vector<double> thearray, double &min, double &max)
-{
-  min = thearray[0];
-  max = thearray[0];
-
-  int n = thearray.size();
-  for(int i = 1; i < n; i++)
-  {
-    if(thearray[i] > max)
-      max = thearray[i];
-    if(thearray[i] < min)
-      min = thearray[i];
-  }
-}
-
-
-const void PavApp::minmaxval( vector<float> thearray, float &min, float &max )
-{
-  min = thearray[0];
-  max = thearray[0];
-
-  int n = thearray.size();
-  for( int i = 1; i < n; i ++ )
-  {
-    if( thearray[i] > max )
-      max = thearray[i];
-    if( thearray[i] < min )
-      min = thearray[i];
-  }
-}
-
-
 
 
 
@@ -186,7 +156,8 @@ void PavApp::bandpass (const Archive* data)
   // Plot the bandpass
 
   double min=0.0, max=0.0;
-  d_minmaxval ( mean, min, max );
+  // d_minmaxval ( mean, min, max );
+  minmax( mean, min, max );
 
   cpgsvp(0.1, 0.9, 0.4, 0.9);
   cpgswin (0,copy->get_nchan(),min-(min/20.0),max+(max/20));
@@ -220,7 +191,8 @@ void PavApp::bandpass (const Archive* data)
   // Plot the weights array
 
   float fmin=0.0, fmax=0.0;
-  minmaxval (weights, fmin, fmax);
+  // minmaxval (weights, fmin, fmax);
+  minmax( weights, fmin, fmax );
 
   cpgsvp(0.1, 0.9, 0.05, 0.3);
   cpgswin (0,copy->get_nchan(),fmin-(fmin/20.0),fmax+(fmax/20));
@@ -463,6 +435,18 @@ void PavApp::spherical_wrapper (const Archive* data)
 
 
 
+/**
+ * SetTokesPlotToQU
+ *
+ * DOES     - in response to the --plot_qu option, find any stokes cylindrical plots in the list
+ *            and set the flux values to plot to be IQUV, give them different colours and if printing
+ *            use different line styles
+ * RECEIVES - A vector of plots to set the option on
+ * RETURNS  - Nothing
+ * THROWS   - Nothing
+ * TODO     - Nothing
+ **/
+
 void PavApp::SetStokesPlotToQU( vector< Reference::To<Plot> > &plots )
 {
   vector< Reference::To<Plot> >::iterator it;
@@ -477,11 +461,17 @@ void PavApp::SetStokesPlotToQU( vector< Reference::To<Plot> > &plots )
       if( ti )
       {
         ti->process( "flux:val=IQUV" );
-        ti->process( "flux:ci=1234" );
-        if( printing )
+        
+        if( !have_colour )
+	{
+	  ti->process( "flux:ci=1111" );
           ti->process( "flux:ls=1234" );
+	}
         else
+	{
+	  ti->process( "flux:ci=1234" );
           ti->process( "flux:ls=1111" );
+	}
       }
     }
   }
@@ -499,38 +489,13 @@ void PavApp::SetPhaseZoom( double min_phase, double max_phase, vector< Reference
 
   vector< Reference::To<Plot> >::iterator it;
   for( it = plots.begin(); it != plots.end(); it ++ )
-  {
-    Reference::To<TextInterface::Parser> ti = (*it)->get_frame_interface();
-
-    try
-    {
-      ti->process( range_cmd );
-    }
-    catch( Error e )
-    {
-        Reference::To<TextInterface::Parser> fti = (*it)->get_frame_interface();
-
-        try
-        {
-            fti->process( range_cmd );
-        }
-        catch( Error e )
-        {
-            // assume the user knows what they are doing and tell every plot to zoom
-            // if x:range didn't exist or any other error occured, just tell the user
-            // probably just using -z with wrong plot type
-            cerr << "Failed to set zoom, is this a X vs phase plot?" << endl;
-        }
-    }
-  }
+    (*it)->configure( range_cmd );
 }
 
 
 
 void PavApp::SetFreqZoom( double min_freq, double max_freq, vector< Reference::To<Plot> > &plots, Reference::To<Archive> archive )
 {
-  cerr << "zooming to " << min_freq << ", " << max_freq << endl;
-
   // get the centre frequency and bandwidth
 
   double ctr_freq = archive->get_centre_frequency();
@@ -542,19 +507,12 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq, vector< Reference::T
     bw_abs = 0 - bw;
   }
 
-  cerr << "ctr_freq is " << ctr_freq << endl;
-  cerr << "bw is " << bw << endl;
-
   double actual_min = ctr_freq - bw_abs / 2.0;
-
-  cerr << "actual min is " << actual_min << endl;
 
   // convert the min and max freq values to (0-1)
 
   min_freq -= actual_min;
   max_freq -= actual_min;
-
-  cerr << "range before / is  " << min_freq << " - " << max_freq << endl;
 
   min_freq /= bw_abs;
   max_freq /= bw_abs;
@@ -566,8 +524,6 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq, vector< Reference::T
     max_freq = tmp;
   }
 
-  cerr << "adjusted range is " << min_freq << " - " << max_freq << endl;
-
   // construct the command to set the range, the same for all plots (for current plots)
 
   string range_cmd = "y:range=(";
@@ -576,67 +532,13 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq, vector< Reference::T
   range_cmd += tostring<double>( max_freq );
   range_cmd += string(")" );
 
-  cerr << "frequency range command is " << range_cmd << endl;
-
   vector< Reference::To<Plot> >::iterator it;
   for( it = plots.begin(); it != plots.end(); it ++ )
-  {
-    Reference::To<TextInterface::Parser> ti = (*it)->get_frame_interface();
-
-    try
-    {
-      ti->process( range_cmd );
-    }
-    catch( Error e )
-    {
-        Reference::To<TextInterface::Parser> fti = (*it)->get_frame_interface();
-
-        try
-        {
-            fti->process( range_cmd );
-        }
-        catch( Error e )
-        {
-            // assume the user knows what they are doing and tell every plot to zoom
-            // if x:rage didn't exist or any other error occured, just tell the user
-            // probably just using -z with wrong plot type
-            cerr << "Failed to set zoom, is this a freq vs X plot?" << endl;
-        }
-    }
-  }
+    (*it)->configure( range_cmd );
 }
 
 
 
-bool PavApp::device_is_printer( string devname )
-{
-  devname = uppercase( devname );
-
-  vector<string> printer_names;
-
-  printer_names.push_back( "/CANON" );
-  printer_names.push_back( "/CW6320" );
-  printer_names.push_back( "/HPGL" );
-  printer_names.push_back( "/VHPGL" );
-  printer_names.push_back( "/HP7221" );
-  printer_names.push_back( "/LIPS2" );
-  printer_names.push_back( "/VLIPS2" );
-  printer_names.push_back( "/LATEX" );
-  printer_names.push_back( "/PS" );
-  printer_names.push_back( "/VPS" );
-
-
-  vector<string>::iterator it;
-  for( it = printer_names.begin(); it != printer_names.end(); it ++ )
-  {
-    if( strstr( devname.c_str(), (*it).c_str() ) != NULL )
-    {
-      return true;
-    }
-  }
-
-  return false;
-}
 
 
 
@@ -661,9 +563,6 @@ int PavApp::run( int argc, char *argv[] )
 
   // Preprocessing jobs
   vector<string> jobs;
-
-  // Overlay plots (do not clear page between different plot types)
-  bool overlay = false;
 
   // verbosity
   bool verbose = false;
@@ -695,23 +594,26 @@ int PavApp::run( int argc, char *argv[] )
   const int BINPHLP          = 1005;
   const int BINPHLA          = 1006;
   const int PUBLN            = 1007;
+  const int PUBLNC           = 1008;
 
   static struct option long_options[] =
     {
-      { "convert_binphsperi", 1, 0, BINPHSP
-      },
+      { "convert_binphsperi", 1, 0, BINPHSP },
       { "convert_binphsasc",  1, 0, BINPHSA },
       { "convert_binlngperi", 1, 0, BINPHLP },
       { "convert_binlngasc",  1, 0, BINPHLA },
       { "plot_qu",            0, 0, PLOT_QU },
       { "cmap",               1, 0, CMAP_IND },
       { "publn",              0, 0, PUBLN },
+      { "publnc",             0, 0, PUBLNC },
       { 0,0,0,0 }
     };
 
     string top_label = "above:c";
+    string top_left_label = "below:l";
+    string clip_string = "y:range";
 
-  char valid_args[] = "z:hb:M:K:DCcdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax";
+  char valid_args[] = "z:hb:M:K:DCcdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:";
 
   int c = '\0';
   while( (c = getopt_long( argc, argv, valid_args, long_options, &option_index )) != -1 )
@@ -730,12 +632,11 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.8 2007/10/03 05:35:34 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.9 2007/10/08 06:36:12 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
       metafile = optarg;
-      cout << "loading filenames from meta file " << metafile << endl;
       break;
     case 'K':
       plot_device = optarg;
@@ -792,11 +693,13 @@ int PavApp::run( int argc, char *argv[] )
       plots.push_back( factory.construct( "freq" ) );
       break;
     case 'Y':
-      keep_baseline = true;
+      //keep_baseline = true;
       plots.push_back( factory.construct( "time" ) );
       break;
     case 'S':
       top_label = "pa:above:c";
+      top_left_label = "pa:below:l";
+      clip_string = "flux:y:range";
       options.push_back( "pa:mark=dot+tick" );
       plots.push_back( factory.construct( "S" ) );
       break;
@@ -813,7 +716,6 @@ int PavApp::run( int argc, char *argv[] )
       plots.push_back( factory.construct( "line" ) );
       break;
     case 'm':
-      top_label = "?:above:c";
       plot_spherical = true;
       break;
     case 'n':
@@ -855,7 +757,6 @@ int PavApp::run( int argc, char *argv[] )
         string_split( optarg, s1, s2, "," );
         n1 = fromstring<unsigned int>( s1 );
         n2 = fromstring<unsigned int>( s2 );
-        //overlay = true;
       }
       break;
     case 'k':
@@ -928,16 +829,31 @@ int PavApp::run( int argc, char *argv[] )
       publn = true;
       options.push_back( "set=pub" );
       break;
+    case PUBLNC:
+      publnc = true;
+      options.push_back( "set=pubc" );
+      break;
     case 'x':
-      truncate_amp = fromstring<float>( optarg );
+      string s1,s2;
+      string_split( optarg, s1, s2, "," );
+      clip_string += string("=(") + s1 + string(",") + s2 + ")";
       break;
     };
   }
 
   // Set the top label
-  //options.push_back( "$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: >snr" );
+  // options.push_back( "$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: >snr" );
   
-  options.push_back( top_label + string( "=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
+  if( !publn && !publnc )
+  {
+      options.push_back( top_label + string( "=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
+      options.push_back( top_left_label + string( "=" ) );
+  }
+  
+  if( clip_string != "y:clip" )
+  {
+    options.push_back( clip_string );
+  }
 
   if (plots.empty() && !plot_bandpass && !plot_spherical && !plot_snr_spectrum
       && !perform_test )
@@ -958,15 +874,17 @@ int PavApp::run( int argc, char *argv[] )
     return -1;
   }
 
-  if( device_is_printer( plot_device ) )
-  {
-    printing = true;
-  }
-
   if (cpgopen(plot_device.c_str()) < 0)
   {
     cout << "pav: Could not open plot device" << endl;
     return -1;
+  }
+  else
+  {
+    int first_index, last_index;
+    cpgqcol( &first_index, &last_index );
+    if( first_index == last_index )
+      have_colour = false;
   }
 
   Interpreter preprocessor;
@@ -980,8 +898,6 @@ int PavApp::run( int argc, char *argv[] )
 
       Reference::To<Archive> archive;
       archive = Archive::load( filenames[ifile] );
-
-
 
       if (jobs.size())
       {
@@ -1011,11 +927,6 @@ int PavApp::run( int argc, char *argv[] )
       if (verbose)
         cerr << "pav: plotting " << filenames[ifile] << endl;
 
-      //       if (!overlay)
-      //         cpgpage();
-
-
-
       // if we are plotting qu with -S, go through each of the plots and find the stokes plot
       // and set it to plot QU
       if( plot_qu )
@@ -1024,7 +935,8 @@ int PavApp::run( int argc, char *argv[] )
       }
 
 
-      if( printing && !plot_qu )
+      // TODO check this.
+      if( !have_colour && !plot_qu )
       {
         vector< Reference::To<Plot> >::iterator it;
         for( it = plots.begin(); it != plots.end(); it ++ )
@@ -1093,8 +1005,7 @@ int PavApp::run( int argc, char *argv[] )
       {
         for (unsigned iplot=0; iplot < plots.size(); iplot++)
         {
-          if (!overlay)
-            cpgpage ();
+          cpgpage ();
           plots[iplot]->plot (archive);
         }
       }
