@@ -80,10 +80,8 @@ const Profile* LinePhasePlot::get_Profile (const Archive* arch, unsigned row)
 
 void LinePhasePlot::prepare (const Archive* arch )
 {
-
   try
   {
-
     int ipol = 0;
     int ichan = 0;
     int isubint = -1;
@@ -114,42 +112,23 @@ void LinePhasePlot::prepare (const Archive* arch )
         }
 	Reference::To<Profile> new_profile = new Profile();  
 	new_profile->set_amps( new_amps );
-	data.push_back( new_profile );
-	
-	// cerr << "( " << min_amp << ", " << max_amp << " )" << endl;
+	data.push_back( new_profile );	
     }
-    cerr << "( " << min_amp << ", " << max_amp << " )" << endl;
 
-
-    // TODO: fix up this hack for setting the scale.
+    // Set the scale and bias
     float range = max_amp - min_amp;
     get_frame()->get_y_scale()->set_minmax( min_amp - range * .4, max_amp + (range * 0.4)*nsub );
-    // get_frame()->get_y_scale()->set_range_norm( 0, 1 );
-
-    float bias = (max_amp - min_amp) / 3;
+    float bias = (range) / 3;
 
     y_res = bias;
     y_scale = -1;
 
-//     for( int p = 0; p < data.size(); p ++ )
-//     {
-//         const float *next_amps = data[p]->get_amps();
-//         vector<float> adj_amps(nbin);
-//         for( int a = 0; a < nbin; a ++ )
-//         {
-//             adj_amps[a] = next_amps[a];
-//         }
-//         data[p]->set_amps( adj_amps );
-//     }
-
+    set_line_colour( 7 );
   }
   catch( Error e )
   {
     cerr << "preparing LinePhasePlot failed with exception " << e << endl;
   }
-
-
-  set_line_colour( 7 );
 }
 
 
