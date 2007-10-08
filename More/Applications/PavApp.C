@@ -25,6 +25,7 @@ PavApp::PavApp()
   rot_phase = 0.0;
   svp = true;
   publn = false;
+  publnc = false;
   axes = true;
   labels = true;
   n1 = 1;
@@ -632,7 +633,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.10 2007/10/08 22:52:08 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.11 2007/10/08 23:43:06 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
