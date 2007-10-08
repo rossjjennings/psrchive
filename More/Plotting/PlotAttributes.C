@@ -12,6 +12,7 @@ Pulsar::PlotAttributes::PlotAttributes ()
   character_height = 1.0;
   character_font = 1;
   line_width = 1;
+  set_applied = "none";
 }
 
 Pulsar::PlotAttributes::~PlotAttributes ()
@@ -23,10 +24,12 @@ void Pulsar::PlotAttributes::publication_quality ()
   set_character_height (1.5);
   set_character_font (2);
   set_line_width (3);
+  set_applied = "pub";
 }
 
 void Pulsar::PlotAttributes::no_labels ()
 {
+  set_applied = "blank";
 }
 
 //! Apply a named set of commands (a shortcut)
