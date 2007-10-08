@@ -65,7 +65,7 @@ void PavApp::PrintUsage( void )
   cout << " -t src    Tscrunch scr Integrations together" << endl;
   cout << " -T        Tscrunch all Integrations" << endl;
   cout << " -p        Add all polarisations together" << endl;
-  cout << " -x clip   Truncate data to range min*peak to max*peak" << endl;
+  cout << " -x y1,y2  Truncate data to range min*peak to max*peak" << endl;
   cout << endl;
   cout << "Configuration options:" << endl;
   cout << " -K dev    Manually specify a plot device" << endl;
@@ -632,7 +632,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.9 2007/10/08 06:36:12 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.10 2007/10/08 22:52:08 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
