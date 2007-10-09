@@ -34,6 +34,7 @@ nobase_include_HEADERS = \
 	Pulsar/EvenlyWeighted.h \
         Pulsar/ExponentialBaseline.h \
 	Pulsar/FixFluxCal.h \
+	Pulsar/FortranSNR.h \
         Pulsar/Fourier.h \
         Pulsar/FourierSNR.h \
 	Pulsar/FrequencyAppend.h \
@@ -131,6 +132,7 @@ libGeneral_la_SOURCES = \
         DurationWeight.C \
         ExponentialBaseline.C \
 	FixFluxCal.C \
+	FortranSNR.C \
         Fourier.C \
         FourierSNR.C \
 	FrequencyAppend.C \
