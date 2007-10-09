@@ -37,7 +37,10 @@ pdv_SOURCES = pdv.C
 #
 if HAVE_PGPLOT
 
-bin_PROGRAMS += psrplot paas pas psrdiff pacv pazi pav
+bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi pav
+
+pdmp_SOURCES = pdmp.C
+pdmp_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 psrplot_SOURCES = psrplot.C
 psrplot_LDADD = $(LDADD) @PGPLOT_LIBS@
