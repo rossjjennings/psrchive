@@ -189,7 +189,7 @@ int main (int argc, char** argv)
 	return -1;
       }
 
-      smooth->set_duty_cycle (duty_cycle);
+      smooth->set_turns (duty_cycle);
 
       cerr << "psrwt: smooth duty_cycle= " << duty_cycle << endl;
       break;

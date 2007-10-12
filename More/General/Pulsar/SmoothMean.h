@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2007 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SmoothMean.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.5 $
+   $Date: 2007/10/12 02:45:16 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SmoothMean_h
@@ -19,13 +19,16 @@
 namespace Pulsar {
 
   //! Smooths a Profile using the mean over a boxcar
+  /*! 
+    This method smooths the profile by setting each amplitude equal to
+    the mean calculated over the region centred at that point and with
+    width specified by bins or turns.
+  */
   class SmoothMean : public Smooth {
 
-  protected:
+  public:
 
-    //! The smoothing function
-    void smooth_data (unsigned nbin, float* output,
-		      unsigned wbin, float* input);
+    void transform (Profile*);
 
   };
 

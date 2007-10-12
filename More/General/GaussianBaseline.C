@@ -74,7 +74,7 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight& weight,
 					    const Profile& profile)
 {
   SmoothMean smoother;
-  smoother.set_window (4);
+  smoother.set_bins (4);
   
   Profile smoothed (profile);
   smoother.transform (&smoothed);

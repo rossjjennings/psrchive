@@ -1,36 +1,43 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2007 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/SmoothMedian.h"
+#include "Pulsar/Profile.h"
 
 #include <algorithm>
-#include <iostream>
 
 using namespace std;
 
-/*! This method smooths the profile by setting each amplitude equal to
-  the median calculated over the region centred at that point and with
-  width specified by width.
-*/
-void Pulsar::SmoothMedian::smooth_data (unsigned nbin, float* output,
-					unsigned width, float* input)
+void Pulsar::SmoothMedian::transform (Profile* profile)
 {
-  cerr << "Pulsar::SmoothMedian::smooth_data nbin=" << nbin 
-       << " width=" << width << endl;
+  unsigned nbin = profile->get_nbin();
+  float* amps = profile->get_amps();
+
+  unsigned width = (unsigned) get_bins (profile);
+
+  if (width < 3)
+    width = 3;
+  else if (width % 2 == 0)
+    width ++;
 
   unsigned middle = width/2;
+
+  vector<float> result (nbin);
   vector<float> window (width);
 
   for (unsigned ibin=0; ibin<nbin; ibin++) {
 
     for (unsigned jbin=0; jbin<width; jbin++)
-      window[jbin] = input[ibin+jbin];
+      window[jbin] = amps[((ibin+jbin+nbin)-middle)%nbin];
 
-    sort (window.begin(), window.end());
-    output[ibin] = window[middle];
+    std::sort (window.begin(), window.end());
+    result[ibin] = window[middle];
 
   }
+
+  profile->set_amps(result);
 }

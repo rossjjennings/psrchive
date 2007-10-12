@@ -1,36 +1,55 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2007 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/SmoothMean.h"
 
-#include <iostream>
+#include "Pulsar/SmoothMean.h"
+#include "Pulsar/Profile.h"
+
+#include <math.h>
+
 using namespace std;
 
-/*! This method smooths the profile by setting each amplitude equal to
-  the mean calculated over the region centred at that point and with
-  width specified by wbin.
-*/
-void Pulsar::SmoothMean::smooth_data (unsigned nbin, float* output,
-				      unsigned width, float* input)
+void Pulsar::SmoothMean::transform (Profile* profile)
 {
-#ifdef _DEBUG
-  cerr << "Pulsar::SmoothMean::smooth_data nbin=" << nbin 
-       << " width=" << width << endl;
-#endif
+  unsigned nbin = profile->get_nbin();
+  float* amps = profile->get_amps();
 
-  unsigned ibin;
-  register double sum = 0.0;
-  
-  for (ibin=0; ibin < width; ibin++)
-    sum += input[ibin];
+  float bin_width = get_bins (profile);
 
-  output[0] = sum/width;
+  if (bin_width <= 1.0)
+    bin_width = 2.0;
 
-  for (ibin=1; ibin<nbin; ibin++) {
-    sum += input[ibin+width-1] - input[ibin-1];
-    output[ibin] = sum/width;
+  unsigned iwidth = (unsigned) ceil( bin_width );
+
+  if (iwidth < 3)
+    iwidth = 3;
+  else if (iwidth % 2 == 0)
+    iwidth ++;
+
+  vector<float> weights (iwidth, 1.0);
+
+  if (iwidth != bin_width) {
+    float half_remainder = 0.5 * (bin_width - iwidth + 2);
+    weights[0] = weights[iwidth-1] = half_remainder;
   }
+
+  unsigned middle = iwidth / 2;
+
+  vector<float> result (nbin);
+
+  for (unsigned ibin=0; ibin<nbin; ibin++) {
+
+    double total = 0.0;
+
+    for (unsigned jbin=0; jbin<iwidth; jbin++)
+      total += weights[jbin] * amps[((ibin+jbin+nbin)-middle)%nbin];
+
+    result[ibin] = total / bin_width;
+
+  }
+
+  profile->set_amps( result );
 }
