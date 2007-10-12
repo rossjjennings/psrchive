@@ -8,7 +8,10 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/denoise.h"
+
+#include "Pulsar/ArchiveTemplates.h"
+#include "Pulsar/SmoothSinc.h"
+
 #include "Pulsar/shift_methods.h"
 
 #include "Pulsar/PulsarCalibrator.h"
@@ -99,7 +102,8 @@ int main (int argc, char *argv[]) try {
   bool fscrunch = false;
   bool tscrunch = false;
 
-  bool denoise = false;
+  Pulsar::SmoothSinc* sinc = 0;
+
   string std,gaussFile;
   string outFormat("parkes"),outFormatFlags;
 
@@ -162,7 +166,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'D':
-      denoise = true;
+      sinc = new Pulsar::SmoothSinc;
       break;
 
     case 'F':
@@ -188,7 +192,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.73 2007/09/01 02:40:06 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.74 2007/10/12 03:24:29 straten Exp $" << endl;
       return 0;
 
     case 'n':
@@ -268,8 +272,8 @@ int main (int argc, char *argv[]) try {
 
     stdarch->tscrunch();
     
-    if (denoise)
-      Pulsar::denoise(stdarch);
+    if (sinc)
+      Pulsar::foreach (stdarch, sinc);
     
     if (full_poln) {
       
@@ -349,8 +353,8 @@ int main (int argc, char *argv[]) try {
 	  stdarch->fscrunch();
 	  stdarch->tscrunch();
 	
-          if (denoise)
-            Pulsar::denoise(stdarch);
+          if (sinc)
+            Pulsar::foreach (stdarch, sinc);
 	
 	  stdarch->convert_state(Signal::Intensity);
 	}
