@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/InterpreterExtension.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/05/24 22:16:44 $
+   $Revision: 1.4 $
+   $Date: 2007/10/12 02:46:08 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Interpreter_Extension_h
@@ -24,9 +24,13 @@ namespace Pulsar {
 
     enum Status { Good, Warn, Fail };
 
-    //! get the current Pulsar
+    //! get the current Archive
     Archive* get ()
     { return interpreter->get(); }
+
+    //! get the named Archive
+    Archive* getmap (const std::string& name)
+    { return interpreter->getmap(name); }
 
     std::vector<std::string> setup (const std::string& text)
     { return interpreter->setup (text); }
