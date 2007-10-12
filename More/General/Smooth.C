@@ -4,16 +4,16 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Smooth.h"
 #include "Pulsar/Profile.h"
 
-#include <memory>
+using namespace std;
 
 Pulsar::Smooth::Smooth ()
 {
-  duty_cycle = Pulsar::Profile::default_duty_cycle;
-  window = 0;
+  turns = Pulsar::Profile::default_duty_cycle;
+  bins = 0;
 }
 
 Pulsar::Smooth::~Smooth ()
@@ -21,77 +21,51 @@ Pulsar::Smooth::~Smooth ()
 
 }
 
-void Pulsar::Smooth::set_duty_cycle (float _duty_cycle)
+void Pulsar::Smooth::set_turns (float _turns)
 {
-  if (_duty_cycle <= 0 || _duty_cycle >= 1.0)
-    throw Error (InvalidParam, "Pulsar::Smooth::set_duty_cycle",
-		 "invalid duty_cycle = %f", _duty_cycle);
+  if (_turns <= 0 || _turns >= 1.0)
+    throw Error (InvalidParam, "Pulsar::Smooth::set_turns",
+		 "invalid turns = %f", _turns);
 
-  duty_cycle = _duty_cycle;
+  turns = _turns;
+  bins = 0;
 }
 
-float Pulsar::Smooth::get_duty_cycle () const
+float Pulsar::Smooth::get_turns () const
 {
-  return duty_cycle;
+  return turns;
 }
 
-//! Set the number of phase bins in the window used to smooth
-void Pulsar::Smooth::set_window (unsigned w)
+//! Set the number of phase bins in the bins used to smooth
+void Pulsar::Smooth::set_bins (float _bins)
 {
-  window = w;
+  if (_bins <= 1 )
+    throw Error (InvalidParam, "Pulsar::Smooth::set_bins",
+		 "invalid bins = %f", _bins);
+
+  bins = _bins;
+  turns = 0;
 }
 
-//! Get the number of phase bins in the window used to smooth
-unsigned Pulsar::Smooth::get_window () const
+//! Get the number of phase bins in the bins used to smooth
+float Pulsar::Smooth::get_bins () const
 {
-  return window;
+  return bins;
 }
 
-void Pulsar::Smooth::transform (Profile* profile)
+float Pulsar::Smooth::get_bins (const Profile* profile)
 {
-  unsigned nbin = profile->get_nbin();
-  unsigned halfwidth = 0;
-  unsigned width = 0;
-
-  if (window) {
-    width = window;
-    halfwidth = window / 2;
-  }
-  else {
-    // one half of the window over which the mean will be calculated
-    halfwidth = unsigned (duty_cycle * nbin) / 2;
-
-    // the complete width of the window (made odd)
-    width = 2*halfwidth + 1;
-  }
-
-  if (halfwidth == 0)
-    throw Error (InvalidParam, "Pulsar::Smooth::transform",
-		 "duty_cycle=%f and nbin=%d results in width=%d",
-		 duty_cycle, width, nbin);
-
-  if (Pulsar::Profile::verbose)
-    cerr << "Pulsar::Smooth::transform duty_cycle=" << duty_cycle
-	 << " width=" << width << endl;
-
-  auto_ptr<float> temp( new float [nbin + 2*halfwidth] );
-  float* amps = profile->get_amps();
-
-  unsigned ibin;
-
-  // copy the last halfwidth points to the front of the temporary array
-  for (ibin=0; ibin < halfwidth; ibin++)
-    temp.get()[ibin] = amps[nbin-halfwidth+ibin];
-
-  // append the entire profile, starting with the first bin
-  for (ibin=0; ibin < nbin; ibin++)
-    temp.get()[halfwidth+ibin] = amps[ibin];
-
-  // append the first halfwidth points
-  for (ibin=0; ibin < halfwidth; ibin++)
-    temp.get()[nbin+halfwidth+ibin] = amps[ibin];
-
-  smooth_data (nbin, amps, width, temp.get());
-
+  if (bins)
+    return bins;
+  else
+    return turns * float( profile->get_nbin() );
+}
+ 
+float Pulsar::Smooth::get_turns (const Profile* profile)
+{
+  if (turns)
+    return turns;
+  else
+    return bins / float( profile->get_nbin() );
 }
  

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Smooth.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/07/12 05:59:31 $
+   $Revision: 1.9 $
+   $Date: 2007/10/12 02:45:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Smooth_h
@@ -31,38 +31,31 @@ namespace Pulsar {
     //! Destructor
     virtual ~Smooth ();
 
-    //! Set the width of the window used to smooth
-    void set_duty_cycle (float duty_cycle);
+    //! Set the width of the smoothing window in turns
+    void set_turns (float);
 
-    //! Get the width of the window used to smooth
-    float get_duty_cycle () const;
+    //! Get the width of the smoothing window in turns
+    float get_turns () const;
 
-    //! Set the number of phase bins in the window used to smooth
-    void set_window (unsigned);
+    //! Set the width of the smoothing window in phase bins
+    void set_bins (float);
 
-    //! Get the number of phase bins in the window used to smooth
-    unsigned get_window () const;
-
-    //! Smooth the given Profile
-    void transform (Profile* profile);
+    //! Get the width of the smoothing window in phase bins
+    float get_bins () const;
 
   protected:
 
-    //! The smoothing function
-    /*! Derived classes are passed the array into which the output
-     must be written and the unwrapped input data array.
-     \param nbin   size of output array
-     \param output output array
-     \param wbin   size of the smoothing window (always odd)
-     \param input  input data with wbin/2 wrap-around points added to ends */
-    virtual void smooth_data (unsigned nbin, float* output,
-			      unsigned wbin, float* input) = 0;
+    //! Get the width of the smoothing window in phase bins
+    float get_bins (const Profile*);
 
-    //! The width of the window used to smooth
-    float duty_cycle;
+    //! Get the width of the smoothing window in turns
+    float get_turns (const Profile*);
 
-    //! The number of phase bins in the window used to smooth
-    unsigned window;
+    //! The width of the bins used to smooth
+    float turns;
+
+    //! The number of phase bins in the bins used to smooth
+    float bins;
 
   };
 
