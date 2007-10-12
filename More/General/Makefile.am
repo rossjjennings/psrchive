@@ -9,7 +9,6 @@ nobase_include_HEADERS = \
         morphological_difference.h \
 	Pulsar/Append.h \
 	Pulsar/counter_drift.h \
-	Pulsar/denoise.h \
 	Pulsar/shift_methods.h \
 	Pulsar/Accumulate.h \
         Pulsar/AdaptiveSNR.h \
@@ -24,6 +23,7 @@ nobase_include_HEADERS = \
         Pulsar/ChannelZapMedian.h \
         Pulsar/ChannelZapModulation.h \
         Pulsar/ColdPlasma.h \
+	Pulsar/Combination.h \
 	Pulsar/ConvertIsolated.h \
 	Pulsar/Differentiate.h \
         Pulsar/DispersionDelay.h \
@@ -69,12 +69,14 @@ nobase_include_HEADERS = \
         Pulsar/Smooth.h \
         Pulsar/SmoothMean.h \
         Pulsar/SmoothMedian.h \
+	Pulsar/SmoothSinc.h \
 	Pulsar/SNRatioInterpreter.h \
         Pulsar/SNRWeight.h \
         Pulsar/SourceInfo.h \
         Pulsar/SquareWave.h \
 	Pulsar/StandardCandles.h \
         Pulsar/StandardSNR.h \
+	Pulsar/Subtract.h \
         Pulsar/SyntheticPolnProfile.h \
 	Pulsar/TimeAppend.h \
 	Pulsar/TimeIntegrate.h \
@@ -85,7 +87,6 @@ nobase_include_HEADERS = \
 
 libGeneral_la_SOURCES = \
 	counter_drift.C \
-	denoise.C \
 	find_spike_edges.C \
         model_profile.C \
 	morphological_difference.C \
@@ -186,12 +187,14 @@ libGeneral_la_SOURCES = \
         Smooth.C \
         SmoothMean.C \
         SmoothMedian.C \
+	SmoothSinc.C \
 	SNRatioInterpreter.C \
         SNRWeight.C \
         SquareWave.C \
 	standard_shell.C \
         StandardCandles.C \
         StandardSNR.C \
+	Subtract.C \
 	TimeAppend.C \
 	TimeIntegrate.C \
         Transposer.C \
