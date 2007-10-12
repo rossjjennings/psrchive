@@ -225,7 +225,7 @@ int main (int argc, char** argv) try {
 
   Pulsar::Interpreter* preprocessor = standard_shell();
 
-  preprocessor->parse("baseline normal");
+  preprocessor->allow_infinite_frequency = true;
 
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 

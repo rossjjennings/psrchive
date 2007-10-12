@@ -190,6 +190,9 @@ namespace Pulsar {
 		 const std::string& command, 
 		 const std::string& help);
 
+    //! allow dedispersion or Faraday rotation correction to infinite frequency
+    bool allow_infinite_frequency;
+
   protected:
     
     //! the Archive stack

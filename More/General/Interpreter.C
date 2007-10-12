@@ -16,6 +16,9 @@
 #include "Pulsar/Config.h"
 
 #include "Pulsar/ScatteredPowerCorrection.h"
+#include "Pulsar/Dispersion.h"
+#include "Pulsar/FaradayRotation.h"
+
 #include "Pulsar/DurationWeight.h"
 #include "Pulsar/SNRWeight.h"
 #include "Pulsar/Transposer.h"
@@ -38,6 +41,8 @@ void Pulsar::Interpreter::init()
   stopwatch = false;
   reply = false;
   
+  allow_infinite_frequency = false;
+
   prompt = "psrsh> ";
   
   add_command
@@ -816,15 +821,29 @@ catch (Error& error) {
 
 string Pulsar::Interpreter::dedisperse (const string& args)
 try {
-  if (args.length())
-    return response (Fail, "accepts no arguments");
 
-  if (get()->get_dedispersed())
-    return response (Warn, "already dedispersed");
+  if (!args.length()) {
+    get()->dedisperse();
+    return response (Good);
+  }
 
-  get()->dedisperse();
+  double frequency = setup<double> (args);
+
+  Pulsar::Dispersion xform;
+
+  if (frequency)
+    xform.set_reference_frequency( get()->get_centre_frequency() );
+  else {
+    if (!allow_infinite_frequency)
+      return response (Fail, "sorry, infinite frequency is not allowed");
+    xform.set_reference_wavelength( 0 );
+  }
+
+  xform.set_measure( get()->get_dispersion_measure() );
+  xform.execute( get() );
 
   return response (Good);
+
 }
 catch (Error& error) {
   return response (Fail, error.get_message());
@@ -834,15 +853,29 @@ catch (Error& error) {
 //
 string Pulsar::Interpreter::defaraday (const string& args)
 try {
-  if (args.length())
-    return response (Fail, "accepts no arguments");
 
-  if (get()->get_faraday_corrected())
-    return response (Warn, "already corrected");
+  if (!args.length()) {
+    get()->defaraday();
+    return response (Good);
+  }
 
-  get()->defaraday();
+  double frequency = setup<double> (args);
+
+  FaradayRotation xform;
+
+  if (frequency)
+    xform.set_reference_frequency( get()->get_centre_frequency() );
+  else {
+    if (!allow_infinite_frequency)
+      return response (Fail, "sorry, infinite frequency is not allowed");
+    xform.set_reference_wavelength( 0 );
+  }
+
+  xform.set_measure( get()->get_rotation_measure() );
+  xform.execute( get() );
 
   return response (Good);
+
 }
 catch (Error& error) {
   return response (Fail, error.get_message());
