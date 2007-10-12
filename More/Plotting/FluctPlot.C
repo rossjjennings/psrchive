@@ -30,8 +30,14 @@ void Pulsar::FluctPlot::prepare (const Archive* data)
   if (!plotter.profiles.size())
     return;
 
+  unsigned nbin = plotter.profiles[0]->get_nbin();
+
   // set the x-axis to run from 0 to nbin
-  get_frame()->get_x_scale()->set_minmax (0, plotter.profiles[0]->get_nbin());
+  get_frame()->get_x_scale()->set_minmax (0, nbin);
+
+  plotter.ordinates.resize (nbin);
+  for (unsigned i=0; i<nbin; i++)
+    plotter.ordinates[i] = i;
 
   plotter.minmax (get_frame());
 }
@@ -39,9 +45,8 @@ void Pulsar::FluctPlot::prepare (const Archive* data)
 /*! The ProfileVectorPlotter class draws the profile */
 void Pulsar::FluctPlot::draw (const Archive* data)
 {
-  float minx, maxx;
-  get_frame()->get_x_scale()->get_range( minx, maxx );
-  plotter.draw ( minx, maxx );
+  std::pair<float,float> range = get_frame()->get_x_scale()->get_range_norm();
+  plotter.draw ( range.first, range.second );
 }
 
 //! Return the label for the y-axis
