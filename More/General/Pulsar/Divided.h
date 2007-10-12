@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Divided.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/06/21 17:32:23 $
+   $Revision: 1.2 $
+   $Date: 2007/10/12 02:46:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Divided_h
@@ -105,7 +105,7 @@ void Pulsar::Integrate<C>::Divided::divide (unsigned input_ndivide,
 
   if (ndivide) {
 
-    if (C::verbose)
+    if (C::verbose > 2)
       std::cerr << "Pulsar::Integrate::Divided::divide ndivide=" << ndivide
 		<< std::endl;
 
@@ -119,7 +119,7 @@ void Pulsar::Integrate<C>::Divided::divide (unsigned input_ndivide,
   }
   else if (nintegrate) {
 
-    if (C::verbose)
+    if (C::verbose > 2)
       std::cerr << "Pulsar::Integrate::Divided::divide nintegrate="
 		<< nintegrate << std::endl; 
 
@@ -132,7 +132,7 @@ void Pulsar::Integrate<C>::Divided::divide (unsigned input_ndivide,
 
   }
 
-  if (C::verbose)
+  if (C::verbose > 2)
     std::cerr << "Pulsar::Integrate::Divided::divide into " << output_ndivide 
 	      << " ranges with " << output_nintegrate << " elements per range"
 	      << std::endl;
