@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileInterpreter.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/09/24 08:04:55 $
+   $Revision: 1.2 $
+   $Date: 2007/10/12 02:45:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileInterpreter_h
@@ -17,6 +17,8 @@
 #include "Pulsar/InterpreterExtension.h"
 
 namespace Pulsar {
+
+  class Smooth;
 
   class ProfileInterpreter : public Interpreter::Extension {
 
@@ -40,8 +42,18 @@ namespace Pulsar {
     //! Form the median smoothed profile
     std::string median (const std::string& args);
 
+    //! Form the low-pass filtered profile
+    std::string sinc (const std::string& args);
+
+    //! Subtract profiles from the named archive
+    std::string subtract (const std::string& args);
+
     //! No empty arguments
     std::string empty ();
+
+  protected:
+
+    std::string smooth (Smooth*, const std::string& args);
 
   };
 

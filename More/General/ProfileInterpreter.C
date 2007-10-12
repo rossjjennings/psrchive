@@ -12,20 +12,36 @@
 #include "Pulsar/Differentiate.h"
 #include "Pulsar/SmoothMean.h"
 #include "Pulsar/SmoothMedian.h"
+#include "Pulsar/SmoothSinc.h"
+#include "Pulsar/Subtract.h"
 
 using namespace std;
+
+string help_smooth (const string& method)
+{
+  return
+    "usage: " + method + " <factor> \n"
+    "where: <factor> is the width of the smoothing function \n"
+    "       if factor < 1, then it is interpreted as turns \n"
+    "       if factor > 1, then it is interpreted as phase bins \n";
+}
 
 Pulsar::ProfileInterpreter::ProfileInterpreter ()
 {
   add_command 
     ( &ProfileInterpreter::mean,
       "mean", "form the mean smoothed profile",
-      "usage: mean <duty_cycle | bins>\n" );
+      help_smooth ("mean") );
 
   add_command 
     ( &ProfileInterpreter::median,
       "median", "form the median smoothed profile",
-      "usage: median <duty_cycle | bins>\n" );
+      help_smooth ("median") );
+
+  add_command 
+    ( &ProfileInterpreter::sinc,
+      "sinc", "form the low-pass filtered profile",
+      help_smooth ("sinc") );
 
   add_command 
     ( &ProfileInterpreter::cumulative,
@@ -36,6 +52,11 @@ Pulsar::ProfileInterpreter::ProfileInterpreter ()
     ( &ProfileInterpreter::difference,
       "difference", "form the difference profile",
       "usage: difference \n" );
+
+  add_command 
+    ( &ProfileInterpreter::subtract,
+      "subtract", "subtract profiles from the named archive",
+      "usage: subtract <name>\n" );
 }
 
 Pulsar::ProfileInterpreter::~ProfileInterpreter ()
@@ -61,23 +82,51 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
-string Pulsar::ProfileInterpreter::mean (const string& args) try
+string Pulsar::ProfileInterpreter::mean (const string& args)
 { 
-  foreach (get(), new SmoothMean);
+  return smooth (new SmoothMean, args);
+}
+
+string Pulsar::ProfileInterpreter::median (const string& args)
+{ 
+  return smooth (new SmoothMedian, args);
+}
+
+string Pulsar::ProfileInterpreter::sinc (const string& args)
+{ 
+  return smooth (new SmoothSinc, args);
+}
+
+string Pulsar::ProfileInterpreter::smooth (Smooth* smooth, const string& args)
+try {
+
+  Reference::To<Smooth> smooth_ref = smooth;
+
+  float factor = setup<float> (args);
+
+  if (factor < 1.0)
+    smooth->set_turns (factor);
+  else
+    smooth->set_bins (factor);
+
+  foreach( get(), smooth );
+  return response (Good);
+
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::ProfileInterpreter::subtract (const string& args) try
+{ 
+  string name = setup<string> (args);
+  foreach (get(), getmap(name), new Subtract);
   return response (Good);
 }
 catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
-string Pulsar::ProfileInterpreter::median (const string& args) try
-{ 
-  foreach (get(), new SmoothMedian);
-  return response (Good);
-}
-catch (Error& error) {
-  return response (Fail, error.get_message());
-}
 
 string Pulsar::ProfileInterpreter::empty ()
 {
