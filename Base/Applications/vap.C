@@ -281,7 +281,11 @@ string get_intmjd( Reference::To< Archive > archive )
 
 string get_fracmjd( Reference::To< Archive > archive )
 {
-  return tostring( archive->start_time().fracday() );
+  set_precision( 14 );
+  string fracmjd = tostring( archive->start_time().fracday() );
+  restore_precision();
+  
+  return fracmjd;
 }
 
 string get_mjd( Reference::To< Archive > archive )
