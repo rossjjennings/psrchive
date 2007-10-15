@@ -24,6 +24,9 @@
 #include "Pulsar/DynamicSNSpectrum.h"
 #include "Pulsar/FreqVsSNRPlot.h"
 #include "Pulsar/CalPhVFreqPlot.h"
+#include "Pulsar/BandpassPlot.h"
+#include "Pulsar/ChannelWeightsPlot.h"
+#include "Pulsar/BandpassChannelWeightPlot.h"
 
 #include "Error.h"
 #include "pad.h"
@@ -84,6 +87,15 @@ Pulsar::PlotFactory::PlotFactory ()
   
   add ( new PlotFactory::Advocate<CalPhVFreqPlot>
         ( 'X', "calphvf", "Calibrator phase vs frequency plot" ) );
+  
+  add ( new PlotFactory::Advocate<BandpassPlot>
+        ( 'd', "bandpass", "Display off-pulse bandpass & channel weights" ) );
+  
+  add ( new PlotFactory::Advocate<ChannelWeightsPlot>
+        ( 'c', "chweight", "Display Channel Weights" ) );
+  
+  add ( new PlotFactory::Advocate<BandpassChannelWeightPlot>
+        ( 'B', "bpcw", "Plot off-pulse bandpass and channel weights" ) );
 }
 
 //! Return a new instance of the named plotter

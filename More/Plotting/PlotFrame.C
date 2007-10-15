@@ -32,6 +32,8 @@ Pulsar::PlotFrame::PlotFrame ()
   get_label_below()->set_spacing( -get_label_below()->get_spacing() );
 
   transpose = false;
+  
+  draw_box = true;
 }
 
 Pulsar::PlotFrame::~PlotFrame ()
@@ -92,12 +94,13 @@ void Pulsar::PlotFrame::draw_axes (const Archive* data)
   PlotAxis* xAxis = get_x_axis(true);
   PlotAxis* yAxis = get_y_axis(true);
 
-  cpgbox( xAxis->get_opt().c_str(),
-	  xAxis->get_tick(),
-	  xAxis->get_nsub(),
-	  yAxis->get_opt().c_str(),
-	  yAxis->get_tick(),
-	  yAxis->get_nsub() );
+  if( draw_box )
+    cpgbox( xAxis->get_opt().c_str(),
+	    xAxis->get_tick(),
+	    xAxis->get_nsub(),
+	    yAxis->get_opt().c_str(),
+	    yAxis->get_tick(),
+	    yAxis->get_nsub() );
 }
 
 void Pulsar::PlotFrame::label_axes (const string& default_x,

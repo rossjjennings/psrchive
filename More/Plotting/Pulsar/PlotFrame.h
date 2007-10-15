@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.24 $
-   $Date: 2007/10/02 05:07:09 $
-   $Author: straten $ */
+   $Revision: 1.25 $
+   $Date: 2007/10/15 01:24:34 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_PlotFrame_h
 #define __Pulsar_PlotFrame_h
@@ -95,6 +95,7 @@ namespace Pulsar {
     /*! By default a frame exists in the current viewport */
     virtual void focus (const Archive*);
 
+    void hide_axes( void ) { draw_box = false; }
   protected:
 
     Reference::To<PlotScale> x_scale;
@@ -107,6 +108,8 @@ namespace Pulsar {
     Reference::To<PlotLabel> below;
 
     bool  transpose;
+    
+    bool draw_box;
 
   };
 

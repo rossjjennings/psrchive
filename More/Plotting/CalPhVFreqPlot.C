@@ -33,7 +33,9 @@ const void CalPhVFreqPlot::minmaxval( vector<float> thearray, float &min, float 
 
 
 CalPhVFreqPlot::CalPhVFreqPlot()
-{}
+{
+  get_frame()->hide_axes();
+}
 
 
 
@@ -62,92 +64,96 @@ string CalPhVFreqPlot::get_ylabel (const Archive*)
 //! prepare for rendering
 void CalPhVFreqPlot::prepare ( const Archive *data )
 {
-    copy = data->clone();
 
-    if (copy->get_state() != Signal::Coherence)
-    {
-        // convert back to original
-        copy->convert_state(Signal::Coherence);
-    }
-
-    copy->tscrunch();
-
-    nchan = copy->get_nchan();
-    npol = copy->get_npol();
-
-    vector<vector<Estimate<double> > > calon;
-    vector<vector<Estimate<double> > > caloff;
-
-    copy->get_Integration(0)->cal_levels(calon, caloff);
-
-    // Form calon = calon - caloff
-    for( unsigned n=0; n<npol; n++)
-    {
-        for(unsigned i=0; i<nchan; i++)
-        {
-            calon[n][i] -= caloff[n][i];
-        }
-    }
-
-    cal.resize(nchan);
-    sys.resize(nchan);
-    xx.resize(nchan);
-
-
-
-
-    for(unsigned i=0; i<nchan; i++)
-    {
-        xx[i] = (float)i;
-    }
 
     for(unsigned n=0; n<npol; n++)
     {
 
-        for(unsigned i=0; i<nchan; i++)
-        {
-            if(n < 2)
-            {
-                cal[i] = (float)(calon[n][i].val);
-                sys[i] = (float)(caloff[n][i].val);
-            }
-            else
-            {
-                // Cal Cross
-                double x = calon[2][i].val;
-                double y = calon[3][i].val;
-                if(n == 2)
-                {
-                    cal[i] = (float)(sqrt(x*x + y*y));
-                }
-                else
-                {
-                    cal[i] = (float)(180.0/M_PI * atan2(y,x));
-                }
-                // System Cross
-                x = caloff[2][i].val;
-                y = caloff[3][i].val;
-                if(n == 2)
-                {
-                    sys[i] = (float)(sqrt(x*x + y*y));
-                }
-                else
-                {
-                    sys[i] = (float)(180.0/M_PI * atan2(y,x));
-                }
-            }
-        }
+
     }
 }
 
 //! draw the angle as a function of pulse phase
 void CalPhVFreqPlot::draw (const Archive *data )
 {
+  copy = data->clone();
+
+  if (copy->get_state() != Signal::Coherence)
+  {
+        // convert back to original
+    copy->convert_state(Signal::Coherence);
+  }
+
+  copy->tscrunch();
+
+  nchan = copy->get_nchan();
+  npol = copy->get_npol();
+
+  vector<vector<Estimate<double> > > calon;
+  vector<vector<Estimate<double> > > caloff;
+
+  copy->get_Integration(0)->cal_levels(calon, caloff);
+
+    // Form calon = calon - caloff
+  for( unsigned n=0; n<npol; n++)
+  {
+    for(unsigned i=0; i<nchan; i++)
+    {
+      calon[n][i] -= caloff[n][i];
+    }
+  }
+
+  cal.resize(nchan);
+  sys.resize(nchan);
+  xx.resize(nchan);
+
+
+
+
+  for(unsigned i=0; i<nchan; i++)
+  {
+    xx[i] = (float)i;
+  }
+
+  
     for(unsigned n=0; n<npol; n++)
     {
 
-        for(unsigned i=0; i<nchan; i++)
-        {
+      for(unsigned i=0; i<nchan; i++)
+      {
+	if(n < 2)
+	{
+	  cal[i] = (float)(calon[n][i].val);
+	  sys[i] = (float)(caloff[n][i].val);
+	}
+	else
+	{
+                // Cal Cross
+	  double x = calon[2][i].val;
+	  double y = calon[3][i].val;
+	  if(n == 2)
+	  {
+	    cal[i] = (float)(sqrt(x*x + y*y));
+	  }
+	  else
+	  {
+	    cal[i] = (float)(180.0/M_PI * atan2(y,x));
+	  }
+                // System Cross
+	  x = caloff[2][i].val;
+	  y = caloff[3][i].val;
+	  if(n == 2)
+	  {
+	    sys[i] = (float)(sqrt(x*x + y*y));
+	  }
+	  else
+	  {
+	    sys[i] = (float)(180.0/M_PI * atan2(y,x));
+	  }
+	}
+      }
+//         for(unsigned i=0; i<nchan; i++)
+//         {
             char cpol[4];
 
             if(n < 3)
@@ -221,7 +227,7 @@ void CalPhVFreqPlot::draw (const Archive *data )
                 cpgtext((float)(0.02*nchan), 130., cpol);
 
             }
-        }
+//         }
 
         if( n == npol - 1 )
         {
