@@ -8,6 +8,10 @@
 #include "PavApp.h"
 #include <tostring.h>
 #include <templates.h>
+#include <Pulsar/StokesCylindrical.h>
+#include <Pulsar/BandpassChannelWeightPlot.h>
+
+
 
 
 
@@ -25,7 +29,6 @@ PavApp::PavApp()
   rot_phase = 0.0;
   svp = true;
   publn = false;
-  publnc = false;
   axes = true;
   labels = true;
   n1 = 1;
@@ -95,7 +98,7 @@ void PavApp::PrintUsage( void )
   cout << endl;
   cout << "Other plotting options:" << endl;
   cout << " --publn        Publication quality plot (B&W)  L dashed, V dots" << endl;
-  cout << " --publnc       Publication quality plot (colour)" << endl;
+  // cout << " --publnc       Publication quality plot (colour)" << endl;
   cout << " --cmap index   Select a colour map for PGIMAG style plots" << endl;
   cout << "                The available indices are: (maybe 4-6 not needed)" << endl;
   cout << "                  0 -> Greyscale" << endl;
@@ -123,96 +126,6 @@ void PavApp::PrintUsage( void )
   cout << " -V              Very verbose output" << endl;
   cout << endl << endl;
 }
-
-
-
-
-
-
-//! Plot an off-pulse bandpass
-void PavApp::bandpass (const Archive* data)
-{
-  Reference::To<Pulsar::Archive> copy = data->clone();
-
-  // Define a vector to hold the bandpass
-  vector<double> mean;
-  mean.resize(copy->get_nchan());
-
-  // Define a vector to hold the weights array
-  vector<float> weights;
-  weights.resize(copy->get_nchan());
-
-  float phase = 0.0;
-  Pulsar::Profile* profile = 0;
-
-
-  for (unsigned i = 0; i < copy->get_nchan(); i++)
-  {
-    profile = copy->get_Integration(isubint)->get_Profile(ipol, i);
-    phase = profile->find_min_phase();
-    mean[i] = profile->mean(phase);
-    weights[i] = profile->get_weight();
-  }
-
-  // Plot the bandpass
-
-  double min=0.0, max=0.0;
-  // d_minmaxval ( mean, min, max );
-  minmax( mean, min, max );
-
-  cpgsvp(0.1, 0.9, 0.4, 0.9);
-  cpgswin (0,copy->get_nchan(),min-(min/20.0),max+(max/20));
-
-  cpgslw(3);
-  cpgsci(2);
-  cpgsch(1.0);
-
-  cpgmove(0, mean[0]);
-  for (unsigned i = 1; i < copy->get_nchan(); i++)
-  {
-    cpgdraw(i, mean[i]);
-  }
-
-  cpgslw(1);
-  cpgsci(1);
-
-  float major = 5;
-  if (copy->get_nchan() > 50)
-    major = 10;
-  if (copy->get_nchan() > 200)
-    major = 50;
-  if (copy->get_nchan() > 500)
-    major = 100;
-
-  cpgbox("BCINTS", major, 10, "BCINTS", 0.0, 0);
-
-  string title = "Bandpass: " + data->get_filename();
-  cpglab("Frequency Channel", "Amplitude (Arbitrary)", title.c_str());
-
-  // Plot the weights array
-
-  float fmin=0.0, fmax=0.0;
-  // minmaxval (weights, fmin, fmax);
-  minmax( weights, fmin, fmax );
-
-  cpgsvp(0.1, 0.9, 0.05, 0.3);
-  cpgswin (0,copy->get_nchan(),fmin-(fmin/20.0),fmax+(fmax/20));
-
-  cpgsci(6);
-  cpgsch(0.5);
-  for (unsigned i = 1; i < copy->get_nchan(); i++)
-  {
-    cpgpt1(i, weights[i], 4);
-  }
-
-  cpgsci(1);
-  cpgsch(1.0);
-  cpgbox("", 0.0, 0, "NT", 0.0, 0);
-  cpglab("", "Weight", "");
-  cpgsch(1.0);
-}
-
-
 
 
 
@@ -462,21 +375,25 @@ void PavApp::SetStokesPlotToQU( vector< Reference::To<Plot> > &plots )
       if( ti )
       {
         ti->process( "flux:val=IQUV" );
-        
+
         if( !have_colour )
-	{
-	  ti->process( "flux:ci=1111" );
+        {
+          ti->process( "flux:ci=1111" );
           ti->process( "flux:ls=1234" );
-	}
+        }
         else
-	{
-	  ti->process( "flux:ci=1234" );
+        {
+          ti->process( "flux:ci=1234" );
           ti->process( "flux:ls=1111" );
-	}
+        }
       }
     }
   }
 }
+
+
+
+
 
 
 
@@ -547,7 +464,7 @@ int PavApp::run( int argc, char *argv[] )
 {
   tostring_places = true;
   tostring_precision = 3;
-  
+
   vector< string > filenames;
 
   // name of file containing list of Archive filenames
@@ -574,8 +491,6 @@ int PavApp::run( int argc, char *argv[] )
   // Keep the baseline before plotting
   bool keep_baseline = false;
 
-  bool plot_bandpass = false;
-
   bool plot_line_phase_subints = false;
 
   bool plot_spherical = false;
@@ -584,9 +499,9 @@ int PavApp::run( int argc, char *argv[] )
 
   bool plot_qu = false;
 
-  bool perform_test = false;
-
   int option_index;
+  
+  bool clear_labels = true;
 
   const int PLOT_QU          = 1001;
   const int CMAP_IND         = 1002;
@@ -606,13 +521,13 @@ int PavApp::run( int argc, char *argv[] )
       { "plot_qu",            0, 0, PLOT_QU },
       { "cmap",               1, 0, CMAP_IND },
       { "publn",              0, 0, PUBLN },
-      { "publnc",             0, 0, PUBLNC },
       { 0,0,0,0 }
     };
 
-    string top_label = "above:c";
-    string top_left_label = "below:l";
-    string clip_string = "y:range";
+  string top_label = "above:c";
+
+  string clip_command = "y:range";
+  string clip_value = "=(0,1)";
 
   char valid_args[] = "z:hb:M:K:DCcdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:";
 
@@ -633,7 +548,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.11 2007/10/08 23:43:06 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.12 2007/10/15 01:26:22 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -691,41 +606,46 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "pscrunch" );
       break;
     case 'G':
-      plots.push_back( factory.construct( "freq" ) );
+      plots.push_back( factory.construct( "G" ) );
       break;
     case 'Y':
       //keep_baseline = true;
-      plots.push_back( factory.construct( "time" ) );
+      plots.push_back( factory.construct( "Y" ) );
       break;
     case 'S':
       top_label = "pa:above:c";
-      top_left_label = "pa:below:l";
-      clip_string = "flux:y:range";
+      clip_command = "flux:y:range";
       options.push_back( "pa:mark=dot+tick" );
       plots.push_back( factory.construct( "S" ) );
+      SetPlotOptions<StokesCylindrical>( plots, "pa:below:l=" );
+      SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
+      clear_labels = false;
       break;
     case 'X':
       keep_baseline = true;
       plots.push_back( factory.construct( "X" ) );
       break;
     case 'B':
-      plot_bandpass = true;
       keep_baseline = true;
+      plots.push_back( factory.construct( "B" ) );
+      top_label = "band:above:c";
+      SetPlotOptions<BandpassChannelWeightPlot>( plots, "band:below:l=" );
+      clear_labels = false;
       break;
     case 'R':
       //keep_baseline = true;
-      plots.push_back( factory.construct( "line" ) );
+      plots.push_back( factory.construct( "R" ) );
       break;
     case 'm':
       plot_spherical = true;
       break;
     case 'n':
-      plots.push_back( factory.construct("snrspec") );
+      plots.push_back( factory.construct("n") );
       keep_baseline = true;
       break;
     case 'j':
       {
-        plots.push_back( factory.construct( "dspec" ) );
+        plots.push_back( factory.construct( "j" ) );
         TextInterface::Parser *ti = plots.back()->get_interface();
         keep_baseline = true;
       }
@@ -830,38 +750,45 @@ int PavApp::run( int argc, char *argv[] )
       publn = true;
       options.push_back( "set=pub" );
       break;
-    case PUBLNC:
-      publnc = true;
-      options.push_back( "set=pubc" );
-      break;
     case 'x':
       string s1,s2;
       string_split( optarg, s1, s2, "," );
-      clip_string += string("=(") + s1 + string(",") + s2 + ")";
+      clip_value = string("=(") + s1 + string(",") + s2 + ")";
       break;
     };
   }
 
-  // Set the top label
-  // options.push_back( "$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: >snr" );
-  
-  if( !publn && !publnc )
-  {
-      options.push_back( top_label + string( "=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
-      options.push_back( top_left_label + string( "=" ) );
-  }
-  
-  if( clip_string != "y:clip" )
-  {
-    options.push_back( clip_string );
-  }
+  // If we haven't put any plots into the plot array, output an error.
 
-  if (plots.empty() && !plot_bandpass && !plot_spherical && !plot_snr_spectrum
-      && !perform_test )
+  if (plots.empty() && !plot_spherical )
   {
     cout << "pav: please choose at least one plot style" << endl;
     return -1;
   }
+
+  // Blank out any top left corner labels
+  
+  if( clear_labels )
+  {
+    SetPlotOptions<FramedPlot>( plots, "below:l=" );
+  }
+
+  // If this is not a publication plot, output a thourough title for the plot
+
+  if( !publn )
+  {
+    options.push_back( top_label + string( "=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
+  }
+  else
+  {
+    options.push_back( top_label  + string( "=" ) );
+  }
+
+  // Set the y range
+
+  options.push_back( clip_command + clip_value );
+
+  // If we were given a metafile, extract the filenames from it
 
   if (metafile)
     stringfload (&filenames, metafile);
@@ -869,36 +796,53 @@ int PavApp::run( int argc, char *argv[] )
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
+  // If we still don't have any filenames
+  //   output an error and exit
+
   if (filenames.empty())
   {
     cout << "pav: please specify filename[s]" << endl;
     return -1;
   }
 
+  // If we can't open the pgplot device
+  //   output an error and exit
+
   if (cpgopen(plot_device.c_str()) < 0)
   {
     cout << "pav: Could not open plot device" << endl;
     return -1;
   }
+
+  // Determine if the device supports colour or not
+  // TODO: in future, might check that it has enough colours, not just that it has colour
+
+  int first_index, last_index;
+  cpgqcol( &first_index, &last_index );
+  if( first_index == last_index )
+    have_colour = false;
   else
   {
-    int first_index, last_index;
-    cpgqcol( &first_index, &last_index );
-    if( first_index == last_index )
+    float red,green,blue;
+    cpgqcr( 2, &red, &green, &blue );
+    if( red == green && green == blue )
       have_colour = false;
   }
-
-  Interpreter preprocessor;
+  
+  // If we received a -N option, divide the pgplot window into n1,n2 panels.
 
   if (n1 > 1 || n2 > 1)
     cpgsubp(n1,n2);
 
+  Interpreter preprocessor;
+
   for (unsigned ifile=0; ifile < filenames.size(); ifile++)
     try
     {
-
       Reference::To<Archive> archive;
       archive = Archive::load( filenames[ifile] );
+
+      // If we have processing jobs, pass them to the interpreter to perform them
 
       if (jobs.size())
       {
@@ -909,47 +853,41 @@ int PavApp::run( int argc, char *argv[] )
       }
 
       // set options for all the plots
-      if( plots.size() )
-      {
-        vector< Reference::To<Plot> >::iterator it;
-        for( it = plots.begin(); it != plots.end(); it ++ )
-        {
-          vector<string>::iterator oit;
-          for( oit = options.begin(); oit != options.end(); oit ++ )
-          {
-            (*it)->configure( (*oit) );
-          }
-        }
-      }
+
+      vector<string>::iterator it;
+      for( it = options.begin(); it != options.end(); it ++ )
+        SetPlotOptions<Plot>( plots, (*it) );
+
+      // if we aren't keeping the baseline
+      //   remove it
 
       if( !keep_baseline )
         archive->remove_baseline();
 
-      if (verbose)
-        cerr << "pav: plotting " << filenames[ifile] << endl;
+
 
       // if we are plotting qu with -S, go through each of the plots and find the stokes plot
       // and set it to plot QU
+
       if( plot_qu )
-      {
-        SetStokesPlotToQU( plots );
-      }
+        SetPlotOptions<StokesCylindrical>( plots, "flux:val=IQUV" );
 
+      // Set some specific plot options on linestyles and colour indices based on wether we are
+      // printing to a colour printer or not.
 
-      // TODO check this.
-      if( !have_colour && !plot_qu )
+      if( !have_colour )
       {
-        vector< Reference::To<Plot> >::iterator it;
-        for( it = plots.begin(); it != plots.end(); it ++ )
-        {
-          Plot *ptr = (*it).get();
-          Reference::To<StokesCylindrical> p = dynamic_cast<StokesCylindrical*>( ptr );
-          if( p )
-          {
-            //p->set_printing( true );
-          }
-        }
+        SetPlotOptions<StokesCylindrical>( plots, "flux:ci=1111" );
+        SetPlotOptions<StokesCylindrical>( plots, "flux:ls=1234" );
       }
+//       else
+//       {
+//         SetPlotOptions<StokesCylindrical>( plots, "flux:ci=1234" );
+//         SetPlotOptions<StokesCylindrical>( plots, "flux:ls=1111" );
+//       }
+      
+        // If the plots array contains any StokesCylindrical plots, remove the label in the top left corner of the flux plot
+      SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" ); 
 
       SetPhaseZoom( min_phase, max_phase, plots );
 
@@ -958,12 +896,9 @@ int PavApp::run( int argc, char *argv[] )
         SetFreqZoom( min_freq, max_freq, plots, archive );
       }
 
-
       pgplot::ColourMap cmap;
       cmap.set_name ( colour_map );
       cmap.apply();
-
-
 
       if (cbppo)
       {
@@ -993,17 +928,15 @@ int PavApp::run( int argc, char *argv[] )
         myio->organise(archive, ronsub);
       }
 
-
-      if( plot_bandpass )
-      {
-        bandpass( archive );
-      }
-      else if ( plot_spherical )
+      if ( plot_spherical )
       {
         spherical_wrapper( archive );
       }
       else
       {
+        if (verbose)
+          cerr << "pav: plotting " << filenames[ifile] << endl;
+
         for (unsigned iplot=0; iplot < plots.size(); iplot++)
         {
           cpgpage ();

@@ -62,7 +62,7 @@ public:
   const void d_minmaxval ( vector<double> thearray, double &min, double &max);
   const void minmaxval( vector<float> thearray, float &min, float &max );
 
-  void bandpass (const Archive* data);
+  //void bandpass (const Archive* data);
   void line_phase_subints (const Pulsar::Archive* data);
   void spherical ( const Profile* I,
                    const Profile* Q,
@@ -77,6 +77,20 @@ public:
 
   int run( int argc, char *argv[] );
 private:
+
+  template< class PC > void SetPlotOptions( vector< Reference::To<Plot> > &plots, string cmd )
+  {
+    vector< Reference::To<Plot> >::iterator it;
+    for( it = plots.begin(); it != plots.end(); it ++ )
+    {
+      Reference::To<PC> sp = dynamic_cast<PC*>( (*it).get() );
+      if( sp )
+      {
+	sp->configure( cmd );
+      }
+    }
+  }
+
   bool have_colour;
   int ipol;
   int fsub, lsub;
@@ -85,7 +99,6 @@ private:
   double rot_phase;
   bool svp;
   bool publn;
-  bool publnc;
   bool axes;
   bool labels;
   unsigned int n1, n2;
