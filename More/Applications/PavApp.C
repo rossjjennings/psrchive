@@ -69,7 +69,7 @@ void PavApp::PrintUsage( void )
   cout << " -t src    Tscrunch scr Integrations together" << endl;
   cout << " -T        Tscrunch all Integrations" << endl;
   cout << " -p        Add all polarisations together" << endl;
-  cout << " -x y1,y2  Truncate data to range min*peak to max*peak" << endl;
+  cout << " -x  max   Zoom into the data between 0 and max (normalized coords)" << endl;
   cout << endl;
   cout << "Configuration options:" << endl;
   cout << " -K dev    Manually specify a plot device" << endl;
@@ -98,7 +98,6 @@ void PavApp::PrintUsage( void )
   cout << endl;
   cout << "Other plotting options:" << endl;
   cout << " --publn        Publication quality plot (B&W)  L dashed, V dots" << endl;
-  // cout << " --publnc       Publication quality plot (colour)" << endl;
   cout << " --cmap index   Select a colour map for PGIMAG style plots" << endl;
   cout << "                The available indices are: (maybe 4-6 not needed)" << endl;
   cout << "                  0 -> Greyscale" << endl;
@@ -491,11 +490,11 @@ int PavApp::run( int argc, char *argv[] )
   // Keep the baseline before plotting
   bool keep_baseline = false;
 
-  bool plot_line_phase_subints = false;
+  //bool plot_line_phase_subints = false;
 
   bool plot_spherical = false;
 
-  bool plot_snr_spectrum = false;
+  //bool plot_snr_spectrum = false;
 
   bool plot_qu = false;
 
@@ -548,7 +547,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.12 2007/10/15 01:26:22 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.13 2007/10/15 03:50:17 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -751,9 +750,9 @@ int PavApp::run( int argc, char *argv[] )
       options.push_back( "set=pub" );
       break;
     case 'x':
-      string s1,s2;
-      string_split( optarg, s1, s2, "," );
-      clip_value = string("=(") + s1 + string(",") + s2 + ")";
+      clip_value = "=(0,";
+      clip_value += string( optarg );
+      clip_value += ")";
       break;
     };
   }
