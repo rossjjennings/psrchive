@@ -939,28 +939,12 @@ string get_stt_offs( Reference::To<Archive> archive )
 
 string get_ra( Reference::To<Archive> archive )
 {
-  string result = "TODO";
-  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
-
-  if( !ext )
-    result = "UNDEF";
-  else
-    result = ext->get_ra();
-
-  return result;
+  return archive->get_coordinates().ra().getHMS();
 }
 
 string get_dec( Reference::To<Archive> archive )
 {
-  string result = "TODO";
-  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
-
-  if( !ext )
-    result = "UNDEF";
-  else
-    result = ext->get_dec();
-
-  return result;
+  return archive->get_coordinates().dec().getDMS();
 }
 
 string get_stt_crd1( Reference::To<Archive> archive )
