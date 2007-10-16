@@ -925,7 +925,7 @@ string get_stt_offs( Reference::To<Archive> archive )
   string result = "TODO";
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
-  set_precision( 14 );
+  set_precision( 9 );
   
   if( !ext )
     result = "UNDEF";
