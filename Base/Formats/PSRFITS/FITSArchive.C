@@ -397,8 +397,12 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     dfault = "";
 
     psrfits_read_key (fptr, "STT_CRD1", &tempstr, dfault, verbose == 3);
+    if( tempstr == "" )
+      psrfits_read_key ( fptr, "RA", &tempstr, dfault, verbose == 3 );
     string hms = tempstr;
     psrfits_read_key (fptr, "STT_CRD2", &tempstr, dfault, verbose == 3);
+    if( tempstr == "" )
+      psrfits_read_key ( fptr, "DEC", &tempstr, dfault, verbose == 3 );
     coord.setHMSDMS (hms.c_str(),tempstr.c_str());
 
   }     
