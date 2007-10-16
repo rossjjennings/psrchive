@@ -89,7 +89,7 @@ Pulsar::PlotFactory::PlotFactory ()
         ( 'X', "calphvf", "Calibrator phase vs frequency plot" ) );
   
   add ( new PlotFactory::Advocate<BandpassPlot>
-        ( 'd', "bandpass", "Display off-pulse bandpass & channel weights" ) );
+        ( 'd', "bandpass", "Display off-pulse bandpass" ) );
   
   add ( new PlotFactory::Advocate<ChannelWeightsPlot>
         ( 'c', "chweight", "Display Channel Weights" ) );
