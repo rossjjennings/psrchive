@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/EvenlySpaced.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/06/21 17:32:23 $
-   $Author: straten $ */
+   $Revision: 1.2 $
+   $Date: 2007/10/16 23:21:22 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_EvenlySpaced_h
 #define __Pulsar_EvenlySpaced_h
@@ -67,7 +67,7 @@ void Pulsar::Integrate<C>::EvenlySpaced::get_range (unsigned irange,
   if (stop > input_size)
     stop = input_size;
 
-  if (C::verbose)
+  if (C::verbose > 2)
     std::cerr << "Pulsar::Integrate::EvenlySpaced::get_range\n "
       " irange=" << irange << " output_nintegrate=" << output_nintegrate <<
       " input_size=" << input_size <<
