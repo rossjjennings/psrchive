@@ -5,10 +5,10 @@
  *
  ***************************************************************************/
 #include "Pulsar/PlotLabel.h"
-#include "Pulsar/ArchiveTI.h"
+#include "Pulsar/InterpreterVariables.h"
+
 #include "substitute.h"
 #include "evaluate.h"
-#include "Pulsar/InterpreterVariables.h"
 
 #include <cpgplot.h>
 
@@ -42,15 +42,13 @@ Pulsar::PlotLabel::plot ( const Archive* data, const string& label, float side)
   
   vector<string> labels;
   separate (label, labels, ".");
-
+  
   for (unsigned i=0; i < labels.size(); i++) {
-    tostring_places = true;
-    tostring_precision = 3;
-    Reference::To< Interpreter::Variables > extended_ti = new Interpreter::Variables();
-    extended_ti->set_instance( const_cast<Archive*>(data) );
-    labels[i] = substitute (labels[i], extended_ti.ptr() );
-    labels[i] = evaluate (labels[i]);
+
+    labels[i] = substitute( labels[i], get_interface(data) );
+    labels[i] = evaluate( labels[i] );
     row (labels[i], i, labels.size(), side);
+
   }
 
 }
@@ -82,7 +80,7 @@ void Pulsar::PlotLabel::row (const string& label,
 Pulsar::ArchiveTI* Pulsar::PlotLabel::get_interface (const Archive* data)
 {
   if (!archive_interface)
-    archive_interface = new ArchiveTI;
+    archive_interface = new Interpreter::Variables;
   archive_interface->set_instance( const_cast<Archive*>(data) );
   return archive_interface;
 }
