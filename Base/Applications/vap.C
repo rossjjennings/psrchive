@@ -275,14 +275,24 @@ string get_bw( Reference::To< Archive > archive )
 
 string get_intmjd( Reference::To< Archive > archive )
 {
-  return tostring( archive->start_time().intday() );
+  string intmjd = "*";
+  
+  Reference::To<FITSHdrExtension> hdr = archive->get<FITSHdrExtension>();
+  if( hdr )
+    intmjd = tostring<int>( hdr->start_time.intday() );
+  
+  return intmjd;
 }
 
 
 string get_fracmjd( Reference::To< Archive > archive )
 {
+  string fracmjd;
+  
   set_precision( 14 );
-  string fracmjd = tostring( archive->start_time().fracday() );
+  Reference::To<FITSHdrExtension> hdr_ext = archive->get<FITSHdrExtension>();
+  if( hdr_ext )
+    fracmjd = tostring( hdr_ext->start_time.fracday() );
   restore_precision();
   
   return fracmjd;
@@ -290,7 +300,17 @@ string get_fracmjd( Reference::To< Archive > archive )
 
 string get_mjd( Reference::To< Archive > archive )
 {
-  return archive->start_time().printdays(10);
+  string mjd = "*";
+  
+  set_precision(10);
+  
+  Reference::To<FITSHdrExtension> hdr_ext = archive->get<FITSHdrExtension>();
+  if( hdr_ext )
+    mjd = hdr_ext->start_time.printdays(10);
+  
+  restore_precision();
+  
+  return mjd;
 }
 
 string get_parang( Reference::To< Archive > archive )
@@ -905,11 +925,15 @@ string get_stt_offs( Reference::To<Archive> archive )
   string result = "TODO";
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
+  set_precision( 14 );
+  
   if( !ext )
     result = "UNDEF";
   else
     result = tostring( ext->get_stt_offs() );
-
+  
+  restore_precision();
+  
   return result;
 }
 
