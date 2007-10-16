@@ -68,7 +68,7 @@ Pulsar::PlotFactory::PlotFactory ()
 	('P', "p3d", "Stokes vector in Poincare space") );
 
   add ( new PlotFactory::Advocate<SpectrumPlot>
-	('b', "psd", "Total power spectrum (bandpass)") );
+	('b', "psd", "Pulsed power spectrum") );
 
   add ( new PlotFactory::Advocate<TwoBitPlot>
 	('2', "2bit", "Two-bit distribution") );

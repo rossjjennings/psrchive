@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/SpectrumPlot.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/10/02 05:08:15 $
+   $Revision: 1.8 $
+   $Date: 2007/10/16 02:50:11 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SpectrumPlot_h
@@ -22,6 +22,9 @@ namespace Pulsar {
   class SpectrumPlot : public PowerSpectra {
 
   public:
+
+    // Default constructor
+    SpectrumPlot ();
 
     // Text interface to the SpectrumPlot class
     class Interface : public TextInterface::To<SpectrumPlot> {

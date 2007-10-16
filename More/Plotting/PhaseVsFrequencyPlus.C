@@ -61,9 +61,6 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   // set only the y viewport
   psd.get_frame()->get_y_scale()->set_viewport (std::pair<float,float>(.7,1));
 
-  // tell the spectrum plotter to sum over all phase bins
-  psd.set_bin (PlotIndex (0, true));
-
   // remove the x enumeration
   psd.get_frame()->get_x_axis()->rem_opt('N');
   // remove the x label

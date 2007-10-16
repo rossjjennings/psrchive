@@ -9,6 +9,11 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
+Pulsar::SpectrumPlot::SpectrumPlot ()
+  : ibin (0, true) // sum over all phase bins by default
+{
+}
+
 void Pulsar::SpectrumPlot::get_spectra (const Archive* data)
 {
   unsigned nchan = data->get_nchan();
