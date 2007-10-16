@@ -61,8 +61,6 @@ void ChannelWeightsPlot::prepare( const Archive *data )
       weights_minmax.second = weights[i];
   }
   
-  cerr << "weights range from " << weights_minmax.first << " to " << weights_minmax.second << endl;
-  
   float min_y, max_y;
   
   if( weights_minmax.first == weights_minmax.second )
