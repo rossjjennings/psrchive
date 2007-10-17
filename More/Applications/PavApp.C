@@ -490,11 +490,7 @@ int PavApp::run( int argc, char *argv[] )
   // Keep the baseline before plotting
   bool keep_baseline = false;
 
-  //bool plot_line_phase_subints = false;
-
   bool plot_spherical = false;
-
-  //bool plot_snr_spectrum = false;
 
   bool plot_qu = false;
 
@@ -547,7 +543,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.13 2007/10/15 03:50:17 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.14 2007/10/17 00:02:07 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
