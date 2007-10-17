@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.2 $
-   $Date: 2007/09/24 08:52:17 $
-   $Author: straten $ */
+   $Revision: 1.3 $
+   $Date: 2007/10/17 01:59:25 $
+   $Author: nopeer $ */
 
 
 #include "Pulsar/Archive.h"
@@ -25,6 +25,7 @@
 
 #include "strutil.h"
 #include "dirutil.h"
+#include <tostring.h>
 
 #include <iostream>
 #include <vector>
@@ -37,6 +38,7 @@ using namespace Pulsar;
 bool cmd_text = false;
 bool cmd_flux = false;
 bool cmd_poln = false;
+bool per_channel_headers = false;
 
 
 // default duty cycle
@@ -56,6 +58,7 @@ void Usage( void )
     "               with baseline width dcyc \n"
     "   -p          Print polarization summary \n"
     "   -t          Print out profiles as ASCII text \n"
+    "   -T          Print out profiles as ASCII text (with per channel headers) \n"
        << endl;
 }
 
@@ -69,20 +72,33 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
   unsigned npol = archive->get_npol();
   unsigned nbin = archive->get_nbin();
 
+  tostring_places = true; 
+  
   try
   {
     if( nsub > 0 )
     {
       archive->remove_baseline();
 
-      cout << "Filename: " << archive->get_filename();
-      cout << "  Nsub: " << nsub << "  Nchan: " << nchn <<
+      cout << "File: " << archive->get_filename();
+      cout << " Source: " << archive->get_source();
+      cout << " Nsub: " << nsub << " Nchan: " << nchn <<
       "  Npol: " << npol << "  Nbin: " << nbin << endl;
       for (unsigned isub = 0; isub < nsub; isub++)
       {
         Integration* intg = archive->get_Integration(isub);
         for (unsigned ichn = 0; ichn < nchn; ichn++)
         {
+	  if( per_channel_headers )
+	  {
+	    tostring_precision = 14;
+	    cout << "MJD(mid): " << intg->get_epoch().printdays(14);
+	    cout << " Tsubint: " << intg->get_start_time().printdays(14);
+	    tostring_precision = 3;
+	    cout << " ChanFreq: " << tostring<double>( intg->get_centre_frequency( ichn ) );
+	    cout << " ChanBW: " << intg->get_bandwidth() / nchn;
+	    cout << endl;
+	  }
           for (unsigned ibin = 0; ibin < nbin; ibin++)
           {
             cout << isub << " " << ichn << " " << ibin;
@@ -387,7 +403,7 @@ int main( int argc, char *argv[] ) try {
 
   int i;
 
-  while( ( i = getopt( argc, argv, "tf:ph" )) != -1 )
+  while( ( i = getopt( argc, argv, "tTf:ph" )) != -1 )
   {
     switch( i )
     {
@@ -398,6 +414,10 @@ int main( int argc, char *argv[] ) try {
 
     case 't':
       cmd_text = true;
+      break;
+    case 'T':
+      cmd_text = true;
+      per_channel_headers = true;
       break;
     case 'f':
       if (sscanf(optarg, "%f", &dc) != 1)
