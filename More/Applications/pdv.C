@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.3 $
-   $Date: 2007/10/17 01:59:25 $
+   $Revision: 1.4 $
+   $Date: 2007/10/17 04:20:50 $
    $Author: nopeer $ */
 
 
@@ -81,8 +81,8 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
       archive->remove_baseline();
 
       cout << "File: " << archive->get_filename();
-      cout << " Source: " << archive->get_source();
-      cout << " Nsub: " << nsub << " Nchan: " << nchn <<
+      cout << " Src: " << archive->get_source();
+      cout << " Nsub: " << nsub << " Nch: " << nchn <<
       "  Npol: " << npol << "  Nbin: " << nbin << endl;
       for (unsigned isub = 0; isub < nsub; isub++)
       {
@@ -91,12 +91,11 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
         {
 	  if( per_channel_headers )
 	  {
-	    tostring_precision = 14;
-	    cout << "MJD(mid): " << intg->get_epoch().printdays(14);
-	    cout << " Tsubint: " << intg->get_start_time().printdays(14);
+	    cout << "MJD(mid): " << intg->get_epoch().printdays(12);
 	    tostring_precision = 3;
-	    cout << " ChanFreq: " << tostring<double>( intg->get_centre_frequency( ichn ) );
-	    cout << " ChanBW: " << intg->get_bandwidth() / nchn;
+	    cout << " Tsub: " << tostring<double>( intg->get_duration() );
+	    cout << " ChFreq: " << tostring<double>( intg->get_centre_frequency( ichn ) );
+	    cout << " ChBW: " << intg->get_bandwidth() / nchn;
 	    cout << endl;
 	  }
           for (unsigned ibin = 0; ibin < nbin; ibin++)
