@@ -31,17 +31,61 @@ set project=$1
 
 cd $SOURCEFORGE_CVS_BACKUP
 
-if ( ! -d $project ) mkdir $project
+##############################################################################
+#
+# rsync the current state of the repository
+#
+##############################################################################
 
-cd $project
+if ( ! -d $project/current ) mkdir -p $project/current
+
+cd $project/current
 
 echo "Running rsync ${project}.cvs.sourceforge.net ..."
 
 rsync -av "rsync://${project}.cvs.sourceforge.net/cvsroot/${project}/*" .
 
+
+##############################################################################
+#
+# create a compressed archive
+#
+##############################################################################
+
 set file=`date +%Y_%m_%d_cvs_backup.tar.gz`
 
 echo "Creating $file ..."
 
-tar zcf `date +%Y_%m_%d_cvs_backup.tar.gz` *
+tar zcf $file *
+
+cd ..
+
+##############################################################################
+#
+# catalog appropriately
+#
+##############################################################################
+
+if ( ! -d past ) mkdir past
+
+if ( `date +%a` == "Sun" ) then
+
+  set dir=past/weekly
+  if ( ! -d $dir ) mkdir -p $dir
+  cp current/$file $dir/$file
+
+endif
+
+if ( `date +%d` == "01" ) then
+
+  set dir=past/monthly
+  if ( ! -d $dir ) mkdir -p $dir
+  cp current/$file $dir/$file
+
+endif
+
+set dir=past/daily
+if ( ! -d $dir ) mkdir -p $dir
+
+mv current/$file $dir/$file
 
