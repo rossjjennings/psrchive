@@ -47,6 +47,7 @@ void usage ()
     "\n"
     " -j job[,job2...] preprocessing jobs \n"
     " -J jobs          multiple preprocessing jobs in 'jobs' file \n"
+    " -x               disable default preprocessing \n"
     "\n"
     " -h               This help page \n"
     " -M metafile      Specify list of archive filenames in metafile \n"
@@ -95,13 +96,16 @@ int main (int argc, char** argv) try {
   // Overlay plots (do not clear page between different plot types)
   bool overlay = false;
 
+  // Allow plot classes to preprocess data before plotting
+  bool preprocess = true;
+
   // verbosity
   bool verbose = false;
 
   int n1 = 1;
   int n2 = 1;
 
-  static char* args = "A:c:C:D:hj:J:M:N:Op:Pqs:vV";
+  static char* args = "A:c:C:D:hj:J:K:M:N:Op:Pqs:vVx";
 
   char c = 0;
   while ((c = getopt (argc, argv, args)) != -1) 
@@ -134,6 +138,8 @@ int main (int argc, char** argv) try {
 	loadlines (optarg, options);
       break;
 
+    case 'K':
+      // for backward compatibility with pav ...
     case 'D':
       plot_device = optarg;
       break;
@@ -180,6 +186,10 @@ int main (int argc, char** argv) try {
       Archive::set_verbosity (3);
       Plot::verbose = true;
       verbose = true;
+      break;
+
+    case 'x':
+      preprocess = false;
       break;
 
    } 
@@ -239,18 +249,27 @@ int main (int argc, char** argv) try {
       preprocessor->script(jobs);
     }
 
-    archive->remove_baseline();
-
     if (verbose)
       cerr << "psrplot: plotting " << filenames[ifile] << endl;
 
     if (overlay)
       cpgpage();
 
+    Reference::To<Archive> toplot = archive;
+
     for (unsigned iplot=0; iplot < plots.size(); iplot++) {
+
       if (!overlay)
 	cpgpage ();
-      plots[iplot]->plot (archive);
+
+      if (plots.size() > 1)
+	toplot = archive->clone();
+
+      if (preprocess)
+	plots[iplot]->preprocess (toplot);
+
+      plots[iplot]->plot (toplot);
+
     }
 
   }

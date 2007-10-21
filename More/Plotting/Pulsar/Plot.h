@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Plot.h,v $
-   $Revision: 1.15 $
-   $Date: 2007/10/02 05:08:15 $
+   $Revision: 1.16 $
+   $Date: 2007/10/21 23:21:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Plot_h
@@ -27,6 +27,9 @@ namespace Pulsar {
 
     //! Verbosity flag
     static bool verbose;
+
+    //! Process the Archive as needed before calling plot
+    virtual void preprocess (Archive*);
 
     //! Plot in the current viewport
     virtual void plot (const Archive*) = 0;
