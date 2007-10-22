@@ -52,6 +52,8 @@ Pulsar::dspReduction* Pulsar::dspReduction::clone () const
 const Pulsar::dspReduction&
 Pulsar::dspReduction::operator= (const dspReduction& dsp)
 {
+  Backend::operator=(dsp);
+
   total_samples = dsp.total_samples;
   block_size = dsp.block_size;
   overlap = dsp.overlap;
