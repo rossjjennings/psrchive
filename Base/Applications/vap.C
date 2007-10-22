@@ -300,17 +300,10 @@ string get_fracmjd( Reference::To< Archive > archive )
 
 string get_mjd( Reference::To< Archive > archive )
 {
-  string mjd = "*";
-  
-  set_precision(10);
-  
-  Reference::To<FITSHdrExtension> hdr_ext = archive->get<FITSHdrExtension>();
-  if( hdr_ext )
-    mjd = hdr_ext->start_time.printdays(10);
-  
+  set_precision( 14 );
+  string result = tostring( archive->start_time(), 15 );
   restore_precision();
-  
-  return mjd;
+  return result;
 }
 
 string get_parang( Reference::To< Archive > archive )
