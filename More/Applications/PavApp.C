@@ -547,7 +547,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.16 2007/10/22 01:33:55 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.17 2007/10/22 03:18:22 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -787,7 +787,7 @@ int PavApp::run( int argc, char *argv[] )
 
   if( !publn )
   {
-    SetPlotOptions<FramedPlot>( plots, top_label + string( "=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
+    SetPlotOptions<Plot>( plots, top_label + string( "=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
   }
   else
   {
@@ -798,8 +798,6 @@ int PavApp::run( int argc, char *argv[] )
     SetPlotOptions<StokesCylindrical>( plots, "flux:below:r=$freq MHz" );
     tostring_precision = 1;
   }
-
-  // Set the y range
 
   // options.push_back( clip_command + clip_value );
   SetPlotOptions<FramedPlot>( plots, clip_command + clip_value );
