@@ -86,16 +86,17 @@ void PavApp::PrintUsage( void )
   cout << " -I subint Select which sub-integration to display" << endl;
   cout << endl;
   cout << "Plotting options:" << endl;
+  cout << " -B        Display off-pulse bandpass & channel weights" << endl;
   cout << " -D        Plot a single profile (chan 0, poln 0, subint 0 by default)" << endl;
   cout << " -G        Plot an image of amplitude against frequency & phase" << endl;
-  cout << " -Y        Plot colour map of sub-integrations against pulse phase" << endl;
-  cout << " -S        Plot polarization parameters (I,L,V,PA)" << endl;
-  cout << " -X        Plot cal amplitude and phase vs frequency channel" << endl;
-  cout << " -B        Display off-pulse bandpass & channel weights" << endl;
-  cout << " -R        Plot stacked sub-integration profiles" << endl;
+  cout << " -g        Plot Digitiser Statistics" << endl;
+  cout << " -j        Display a simple dynamic spectrum image" << endl;
   cout << " -m        Plot Poincare vector in spherical coordinates" << endl;
   cout << " -n        Plot S/N against frequency" << endl;
-  cout << " -j        Display a simple dynamic spectrum image" << endl;
+  cout << " -R        Plot stacked sub-integration profiles" << endl;
+  cout << " -S        Plot polarization parameters (I,L,V,PA)" << endl;
+  cout << " -X        Plot cal amplitude and phase vs frequency channel" << endl;
+  cout << " -Y        Plot colour map of sub-integrations against pulse phase" << endl;
   cout << endl;
   cout << "Other plotting options:" << endl;
   cout << " --publn        Publication quality plot (B&W)  L dashed, V dots" << endl;
@@ -480,7 +481,7 @@ int PavApp::run( int argc, char *argv[] )
   string clip_command = "y:range";
   string clip_value = "=(0,1)";
 
-  char valid_args[] = "z:hb:M:K:DCcdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:";
+  char valid_args[] = "z:hb:M:K:DCcdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g";
 
   int c = '\0';
   while( (c = getopt_long( argc, argv, valid_args, long_options, &option_index )) != -1 )
@@ -499,7 +500,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.18 2007/10/22 04:24:25 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.19 2007/10/22 06:18:16 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -559,6 +560,9 @@ int PavApp::run( int argc, char *argv[] )
     case 'G':
       plots.push_back( factory.construct( "G" ) );
       break;
+    case 'g':
+      plots.push_back( factory.construct( "g" ) );
+      break;
     case 'Y':
       //keep_baseline = true;
       plots.push_back( factory.construct( "Y" ) );
@@ -570,7 +574,7 @@ int PavApp::run( int argc, char *argv[] )
       plots.push_back( factory.construct( "S" ) );
       SetPlotOptions<StokesCylindrical>( plots, "pa:below:l=" );
       SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
-      SetPlotOptions<StokesCylindrical>( plots, "flux:y:buf=0.1" );
+      SetPlotOptions<StokesCylindrical>( plots, "flux:y:buf=0.07" );
       clear_labels = false;
       break;
     case 'X':
@@ -581,7 +585,8 @@ int PavApp::run( int argc, char *argv[] )
       keep_baseline = true;
       plots.push_back( factory.construct( "B" ) );
       top_label = "band:above:c";
-      SetPlotOptions<BandpassChannelWeightPlot>( plots, "band:below:l=" );
+      SetPlotOptions<BandpassChannelWeightPlot>( plots, "band:below:l=$name" );
+      SetPlotOptions<BandpassChannelWeightPlot>( plots, "band:below:r=$freq MHz" );
       clear_labels = false;
       break;
     case 'R':
@@ -749,6 +754,7 @@ int PavApp::run( int argc, char *argv[] )
     SetPlotOptions<FramedPlot>( plots, "below:r=$freq MHz" );
     SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=$name" );
     SetPlotOptions<StokesCylindrical>( plots, "flux:below:r=$freq MHz" );
+    SetPlotOptions<Plot>( plots, "ch=1.2" );
     tostring_precision = 1;
   }
 
@@ -916,8 +922,11 @@ int PavApp::run( int argc, char *argv[] )
 
 
         // set the precision that plot will use for labels
-        tostring_places = true;
-        tostring_precision = 3;
+	tostring_places = true;
+	if( !publn )
+          tostring_precision = 3;
+	else
+	  tostring_precision = 1;
 
         for (unsigned iplot=0; iplot < plots.size(); iplot++)
         {
