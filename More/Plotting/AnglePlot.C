@@ -111,7 +111,13 @@ void Pulsar::AnglePlot::draw (const Archive *data)
             cpgerr1 (6, phases[ibin]+xoff, angles[ibin].get_value() + yoff,
                      angles[ibin].get_error(), terminal);
 	  if (marker & Dot)
+	  {
+	    float old_ch;
+	    cpgqch( &old_ch );
+	    cpgsch( 0.5 );
             cpgpt1 (phases[ibin]+xoff, angles[ibin].get_value() + yoff, 17);
+	    cpgsch( old_ch );
+	  }
 	}
 
       yoff += span;
