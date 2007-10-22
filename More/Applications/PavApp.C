@@ -98,6 +98,7 @@ void PavApp::PrintUsage( void )
   cout << endl;
   cout << "Other plotting options:" << endl;
   cout << " --publn        Publication quality plot (B&W)  L dashed, V dots" << endl;
+  cout << " --publnc       Publication quality plot (keep in colour if device supports it)" << endl;
   cout << " --cmap index   Select a colour map for PGIMAG style plots" << endl;
   cout << "                The available indices are: (maybe 4-6 not needed)" << endl;
   cout << "                  0 -> Greyscale" << endl;
@@ -546,7 +547,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.15 2007/10/22 00:04:28 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.16 2007/10/22 01:33:55 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -768,6 +769,12 @@ int PavApp::run( int argc, char *argv[] )
     cout << "pav: please choose at least one plot style" << endl;
     return -1;
   }
+  
+  // set options for all the plots
+
+  vector<string>::iterator it;
+  for( it = options.begin(); it != options.end(); it ++ )
+    SetPlotOptions<Plot>( plots, (*it) );
 
   // Blank out any top left corner labels
 
@@ -780,16 +787,22 @@ int PavApp::run( int argc, char *argv[] )
 
   if( !publn )
   {
-    options.push_back( top_label + string( "=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
+    SetPlotOptions<FramedPlot>( plots, top_label + string( "=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
   }
   else
   {
-    options.push_back( top_label  + string( "=" ) );
+    SetPlotOptions<FramedPlot>( plots, top_label + string( "=" ) );
+    SetPlotOptions<FramedPlot>( plots, "below:l=$name" );
+    SetPlotOptions<FramedPlot>( plots, "below:r=$freq MHz" );
+    SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=$name" );
+    SetPlotOptions<StokesCylindrical>( plots, "flux:below:r=$freq MHz" );
+    tostring_precision = 1;
   }
 
   // Set the y range
 
-  options.push_back( clip_command + clip_value );
+  // options.push_back( clip_command + clip_value );
+  SetPlotOptions<FramedPlot>( plots, clip_command + clip_value );
 
   // If we were given a metafile, extract the filenames from it
 
@@ -856,11 +869,7 @@ int PavApp::run( int argc, char *argv[] )
         preprocessor.script(jobs);
       }
 
-      // set options for all the plots
 
-      vector<string>::iterator it;
-      for( it = options.begin(); it != options.end(); it ++ )
-        SetPlotOptions<Plot>( plots, (*it) );
 
       // if we aren't keeping the baseline
       //   remove it
@@ -904,7 +913,7 @@ int PavApp::run( int argc, char *argv[] )
       //       }
 
       // If the plots array contains any StokesCylindrical plots, remove the label in the top left corner of the flux plot
-      SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
+      //SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
 
       SetPhaseZoom( min_phase, max_phase, plots );
 
