@@ -39,6 +39,12 @@ namespace Pulsar
 
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
+    
+    class Interface : public TextInterface::To<DigitiserStatistics>
+    {
+      public:
+	Interface( DigitiserStatistics *s_instance = NULL );
+    };
 
     //! set ndigr
     void set_ndigr( int s_ndigr ) { ndigr = s_ndigr; }

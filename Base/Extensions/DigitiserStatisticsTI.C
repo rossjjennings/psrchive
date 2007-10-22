@@ -6,26 +6,19 @@
 
 
 
-#include <Pulsar/DigitiserStatisticsTI.h>
+#include <Pulsar/DigitiserStatistics.h>
 
 
 
 using namespace Pulsar;
 
-DigitiserStatisticsTI::DigitiserStatisticsTI()
-{
-  SetupMethods();
-}
 
 
-DigitiserStatisticsTI::DigitiserStatisticsTI( DigitiserStatistics *c )
+DigitiserStatistics::Interface::Interface( DigitiserStatistics *s_instance )
 {
-  SetupMethods();
-  set_instance( c );
-}
+  if( s_instance )
+    set_instance( s_instance );
 
-void DigitiserStatisticsTI::SetupMethods( void )
-{
   add( &DigitiserStatistics::get_ndigr, "ndigr", "Number of digitised channels (I)" );
   add( &DigitiserStatistics::get_npar, "npar", "Number of digitiser parameters" );
   add( &DigitiserStatistics::get_ncycsub, "ncycsub", "Number of correlator cycles per subint" );
@@ -33,13 +26,6 @@ void DigitiserStatisticsTI::SetupMethods( void )
 }
 
 
-TextInterface::Parser *Pulsar::DigitiserStatisticsTI::clone()
-{
-  if( instance )
-    return new DigitiserStatisticsTI( instance );
-  else
-    return new DigitiserStatisticsTI();
-}
 
 
 

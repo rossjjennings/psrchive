@@ -82,5 +82,5 @@ void Pulsar::DigitiserStatistics::row::init ()
 //! Return a text interfaces that can be used to access this instance
 TextInterface::Parser* Pulsar::DigitiserStatistics::get_interface()
 {
-	return new DigitiserStatisticsTI( this );
+	return new Interface( this );
 }
