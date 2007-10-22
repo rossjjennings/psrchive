@@ -21,7 +21,7 @@
 
 PavApp::PavApp()
 {
-  have_colour = true;
+  have_colour = false;
   ipol = 0;
   fsub = 0, lsub = 0;
   isubint = 0;
@@ -360,35 +360,35 @@ void PavApp::spherical_wrapper (const Archive* data)
  * TODO     - Nothing
  **/
 
-void PavApp::SetStokesPlotToQU( vector< Reference::To<Plot> > &plots )
-{
-  vector< Reference::To<Plot> >::iterator it;
-  for( it = plots.begin(); it != plots.end(); it ++ )
-  {
-    Reference::To<StokesCylindrical> sp = dynamic_cast<StokesCylindrical*>( (*it).get() );
-    if( sp )
-    {
-      Reference::To<TextInterface::Parser> ti_base = sp->get_interface();
-      Reference::To<StokesCylindrical::Interface> ti = dynamic_cast<StokesCylindrical::Interface*>( ti_base.get() );
-
-      if( ti )
-      {
-        ti->process( "flux:val=IQUV" );
-
-        if( !have_colour )
-        {
-          ti->process( "flux:ci=1111" );
-          ti->process( "flux:ls=1234" );
-        }
-        else
-        {
-          ti->process( "flux:ci=1234" );
-          ti->process( "flux:ls=1111" );
-        }
-      }
-    }
-  }
-}
+// void PavApp::SetStokesPlotToQU( vector< Reference::To<Plot> > &plots )
+// {
+//   vector< Reference::To<Plot> >::iterator it;
+//   for( it = plots.begin(); it != plots.end(); it ++ )
+//   {
+//     Reference::To<StokesCylindrical> sp = dynamic_cast<StokesCylindrical*>( (*it).get() );
+//     if( sp )
+//     {
+//       Reference::To<TextInterface::Parser> ti_base = sp->get_interface();
+//       Reference::To<StokesCylindrical::Interface> ti = dynamic_cast<StokesCylindrical::Interface*>( ti_base.get() );
+//
+//       if( ti )
+//       {
+//         ti->process( "flux:val=IQUV" );
+//
+//         if( !have_colour )
+//         {
+//           ti->process( "flux:ci=1111" );
+//           ti->process( "flux:ls=1234" );
+//         }
+//         else
+//         {
+//           ti->process( "flux:ci=1234" );
+//           ti->process( "flux:ls=1111" );
+//         }
+//       }
+//     }
+//   }
+// }
 
 
 
@@ -495,8 +495,10 @@ int PavApp::run( int argc, char *argv[] )
   bool plot_qu = false;
 
   int option_index;
-  
+
   bool clear_labels = true;
+
+  bool force_bw = false;
 
   const int PLOT_QU          = 1001;
   const int CMAP_IND         = 1002;
@@ -516,6 +518,7 @@ int PavApp::run( int argc, char *argv[] )
       { "plot_qu",            0, 0, PLOT_QU },
       { "cmap",               1, 0, CMAP_IND },
       { "publn",              0, 0, PUBLN },
+      { "publnc",             0, 0, PUBLNC },
       { 0,0,0,0 }
     };
 
@@ -543,7 +546,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.14 2007/10/17 00:02:07 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.15 2007/10/22 00:04:28 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -742,6 +745,11 @@ int PavApp::run( int argc, char *argv[] )
       ronsub = fromstring<unsigned int>( optarg );
       break;
     case PUBLN:
+      force_bw = true;
+      publn = true;
+      options.push_back( "set=pub" );
+      break;
+    case PUBLNC:
       publn = true;
       options.push_back( "set=pub" );
       break;
@@ -762,7 +770,7 @@ int PavApp::run( int argc, char *argv[] )
   }
 
   // Blank out any top left corner labels
-  
+
   if( clear_labels )
   {
     SetPlotOptions<FramedPlot>( plots, "below:l=" );
@@ -812,18 +820,19 @@ int PavApp::run( int argc, char *argv[] )
   // Determine if the device supports colour or not
   // TODO: in future, might check that it has enough colours, not just that it has colour
 
-  int first_index, last_index;
-  cpgqcol( &first_index, &last_index );
-  if( first_index == last_index )
-    have_colour = false;
-  else
+  if( !force_bw )
   {
-    float red,green,blue;
-    cpgqcr( 2, &red, &green, &blue );
-    if( red == green && green == blue )
-      have_colour = false;
+    int first_index, last_index;
+    cpgqcol( &first_index, &last_index );
+    if( first_index != last_index )
+    {
+      float red,green,blue;
+      cpgqcr( 2, &red, &green, &blue );
+      if( !( red == green && green == blue ) )
+        have_colour = true;
+    }
   }
-  
+
   // If we received a -N option, divide the pgplot window into n1,n2 panels.
 
   if (n1 > 1 || n2 > 1)
@@ -865,7 +874,20 @@ int PavApp::run( int argc, char *argv[] )
       // and set it to plot QU
 
       if( plot_qu )
+      {
         SetPlotOptions<StokesCylindrical>( plots, "flux:val=IQUV" );
+
+        if( !have_colour )
+        {
+          SetPlotOptions<StokesCylindrical>( plots, "flux:ci=1111" );
+          SetPlotOptions<StokesCylindrical>( plots, "flux:ls=1234" );
+        }
+        else
+        {
+          SetPlotOptions<StokesCylindrical>( plots, "flux:ci=1234" );
+          SetPlotOptions<StokesCylindrical>( plots, "flux:ls=1111" );
+        }
+      }
 
       // Set some specific plot options on linestyles and colour indices based on wether we are
       // printing to a colour printer or not.
@@ -875,14 +897,14 @@ int PavApp::run( int argc, char *argv[] )
         SetPlotOptions<StokesCylindrical>( plots, "flux:ci=1111" );
         SetPlotOptions<StokesCylindrical>( plots, "flux:ls=1234" );
       }
-//       else
-//       {
-//         SetPlotOptions<StokesCylindrical>( plots, "flux:ci=1234" );
-//         SetPlotOptions<StokesCylindrical>( plots, "flux:ls=1111" );
-//       }
-      
-        // If the plots array contains any StokesCylindrical plots, remove the label in the top left corner of the flux plot
-      SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" ); 
+      //       else
+      //       {
+      //         SetPlotOptions<StokesCylindrical>( plots, "flux:ci=1234" );
+      //         SetPlotOptions<StokesCylindrical>( plots, "flux:ls=1111" );
+      //       }
+
+      // If the plots array contains any StokesCylindrical plots, remove the label in the top left corner of the flux plot
+      SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
 
       SetPhaseZoom( min_phase, max_phase, plots );
 
