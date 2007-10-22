@@ -103,6 +103,9 @@ void Pulsar::AnglePlot::draw (const Archive *data)
       err1 = true;
     }
 
+    float old_ch;
+    cpgqch( &old_ch );
+    cpgsch( 0.5 );
     for (unsigned ioff=0; ioff < times; ioff++)
     {
       for (unsigned ibin=0; ibin < phases.size(); ibin++)
@@ -112,18 +115,13 @@ void Pulsar::AnglePlot::draw (const Archive *data)
                      angles[ibin].get_error(), terminal);
 	  if (marker & Dot)
 	  {
-	    float old_ch;
-	    cpgqch( &old_ch );
-	    cpgsch( 0.5 );
             cpgpt1 (phases[ibin]+xoff, angles[ibin].get_value() + yoff, 17);
-	    cpgsch( old_ch );
 	  }
 	}
 
       yoff += span;
-
     }
-
+    cpgsch( old_ch );
   }
 
 }
