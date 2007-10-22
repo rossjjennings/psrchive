@@ -10,6 +10,7 @@
 #include <templates.h>
 #include <Pulsar/StokesCylindrical.h>
 #include <Pulsar/BandpassChannelWeightPlot.h>
+#include <limits>
 
 
 
@@ -349,60 +350,12 @@ void PavApp::spherical_wrapper (const Archive* data)
 
 
 
-/**
- * SetTokesPlotToQU
- *
- * DOES     - in response to the --plot_qu option, find any stokes cylindrical plots in the list
- *            and set the flux values to plot to be IQUV, give them different colours and if printing
- *            use different line styles
- * RECEIVES - A vector of plots to set the option on
- * RETURNS  - Nothing
- * THROWS   - Nothing
- * TODO     - Nothing
- **/
-
-// void PavApp::SetStokesPlotToQU( vector< Reference::To<Plot> > &plots )
-// {
-//   vector< Reference::To<Plot> >::iterator it;
-//   for( it = plots.begin(); it != plots.end(); it ++ )
-//   {
-//     Reference::To<StokesCylindrical> sp = dynamic_cast<StokesCylindrical*>( (*it).get() );
-//     if( sp )
-//     {
-//       Reference::To<TextInterface::Parser> ti_base = sp->get_interface();
-//       Reference::To<StokesCylindrical::Interface> ti = dynamic_cast<StokesCylindrical::Interface*>( ti_base.get() );
-//
-//       if( ti )
-//       {
-//         ti->process( "flux:val=IQUV" );
-//
-//         if( !have_colour )
-//         {
-//           ti->process( "flux:ci=1111" );
-//           ti->process( "flux:ls=1234" );
-//         }
-//         else
-//         {
-//           ti->process( "flux:ci=1234" );
-//           ti->process( "flux:ls=1111" );
-//         }
-//       }
-//     }
-//   }
-// }
-
-
-
-
-
-
-
 void PavApp::SetPhaseZoom( double min_phase, double max_phase, vector< Reference::To<Plot> > &plots )
 {
   string range_cmd = string("x:range=(") +
-                     tostring<double>( min_phase ) +
+                     tostring< double >(min_phase ) +
                      string(",") +
-                     tostring<double>( max_phase ) +
+                     tostring< double >( max_phase ) +
                      string( ")");
 
   vector< Reference::To<Plot> >::iterator it;
@@ -462,8 +415,7 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq, vector< Reference::T
 
 int PavApp::run( int argc, char *argv[] )
 {
-  tostring_places = true;
-  tostring_precision = 3;
+
 
   vector< string > filenames;
 
@@ -547,7 +499,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.17 2007/10/22 03:18:22 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.18 2007/10/22 04:24:25 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -618,6 +570,7 @@ int PavApp::run( int argc, char *argv[] )
       plots.push_back( factory.construct( "S" ) );
       SetPlotOptions<StokesCylindrical>( plots, "pa:below:l=" );
       SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
+      SetPlotOptions<StokesCylindrical>( plots, "flux:y:buf=0.1" );
       clear_labels = false;
       break;
     case 'X':
@@ -769,7 +722,7 @@ int PavApp::run( int argc, char *argv[] )
     cout << "pav: please choose at least one plot style" << endl;
     return -1;
   }
-  
+
   // set options for all the plots
 
   vector<string>::iterator it;
@@ -960,6 +913,11 @@ int PavApp::run( int argc, char *argv[] )
       {
         if (verbose)
           cerr << "pav: plotting " << filenames[ifile] << endl;
+
+
+        // set the precision that plot will use for labels
+        tostring_places = true;
+        tostring_precision = 3;
 
         for (unsigned iplot=0; iplot < plots.size(); iplot++)
         {
