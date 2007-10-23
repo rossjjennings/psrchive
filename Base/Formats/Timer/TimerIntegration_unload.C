@@ -16,7 +16,7 @@ using namespace std;
 //! unload the subint to file
 void Pulsar::TimerIntegration::unload (FILE* fptr) const
 {
-  if (verbose) cerr << "TimerIntegration::unload" << endl;
+  if (verbose) cerr << "TimerIntegration::unload epoch=" << get_epoch() << endl;
 
   pack_Pointing ();
 
@@ -63,7 +63,7 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
     for (unsigned ichan=0; ichan<nchan; ichan++) try {
 	
       if (verbose) cerr << "TimerIntegration::unload ipol=" << ipol 
-                        << "\t ichan=" << ichan << "\r";
+                        << "\t ichan=" << ichan << endl;
 	
       TimerProfile_unload (fptr, profiles[ipol][ichan]);
 	

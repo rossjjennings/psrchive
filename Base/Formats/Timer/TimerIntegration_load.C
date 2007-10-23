@@ -47,6 +47,9 @@ void Pulsar::TimerIntegration::load (FILE* fptr, int extra, bool big_endian)
   else
     mini_fromLittleEndian(&mini);
 
+  if (verbose)
+    cerr << "Pulsar::TimerIntegration::load epoch=" << get_epoch().printdays(15) << endl;
+
   unpack_Pointing ();
 
   if (extra)

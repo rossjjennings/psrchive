@@ -68,6 +68,10 @@ void Pulsar::TimerArchive::load (FILE* fptr)
 
   subint_load (fptr);
 
+  if (verbose > 2 && get_nsubint())
+    cerr << "TimerArchive::load epoch[0]=" 
+         << get_Integration(0)->get_epoch().printdays(15) << endl;
+
   valid = true;
 
   if (verbose == 3)
