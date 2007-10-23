@@ -166,7 +166,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.56 2007/10/03 06:14:21 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.57 2007/10/23 18:52:21 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -426,7 +426,7 @@ int main (int argc, char **argv) try {
     
     archive = Pulsar::Archive::load (filenames[ifile]);
 
-    if (vverbose) {
+    if (vverbose && archive->has_model()) {
       cerr << "psradd: after load, instance count = " 
 	   << Reference::Able::get_instance_count() << endl;
 
