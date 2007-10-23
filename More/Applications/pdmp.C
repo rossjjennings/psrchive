@@ -277,11 +277,11 @@ void plotPhaseFreq(const Archive * archive, Plot* phase_plot, TextInterface::Par
 
 // Finds the best gradient that fits the corrected set of
 // profiles for each frequency channel
-void drawBestFitPhaseFreq(const Archive * archive, Plot* phase_plot);
+void drawBestFitPhaseFreq(const Archive * archive);
 
 // Finds the best gradient that fits the correct set of
 // profiles for each subintegration
-void drawBestFitPhaseTime(const Archive * archive, Plot* plot);
+void drawBestFitPhaseTime(const Archive * archive);
 
 // These methods help to get the number after the decimal point
 // Obtained from http://www.merrymeet.com/minow/sunclock/Astro.java
@@ -306,6 +306,8 @@ void printResults(const Archive * archive);
 
 // Writes important information into output files
 void writeResultFiles(Archive * archive);
+
+string get_scale(const Archive * archive);
 
 //////////////////////////////////
 ///
@@ -425,6 +427,7 @@ void usage (bool verbose_usage)
     " -dr  <dm half-range>           DM half-range in pc/cm^3  (default=natural)\n"
     " -ds  <dm step>                 DM step in pc/cm^3        (default=natural)\n"
 		" -f , --force                   Force the program to compute without prompting\n"
+		" -j                             Calculate using multiple achive files\n"
 		" -mc, --maxchannels <max chan>  Archive frequency channels will be \n"
 		"                                partially scrunched to <= this maximum\n"
 		"                                before computing \n"
@@ -733,7 +736,7 @@ int main (int argc, char** argv)
 		return -1;
     }
 
-	for( unsigned i=beginFilenamesIndex; i<argc; i++){
+	for(int i = beginFilenamesIndex; i<argc; i++){
 		filenames.push_back( argv[i] );
 		breakup_archives.push_back( false );
 	}
@@ -748,8 +751,6 @@ int main (int argc, char** argv)
 
 	Reference::To<Pulsar::Archive> archive;
 	Reference::To<Pulsar::Archive> joined_archive;
-
-	cout << "join: " << join << endl;
 
 	if (join && filenames.size() > 1) {
 		finished = false;
@@ -854,8 +855,6 @@ int main (int argc, char** argv)
 
 			cpgslw(1);
 			cpgsci(1);
-
-			cout << "..." << phaseFreqCopy->get_source() << endl;
 
 			printResults(partiallyScrunchedCopy);
 			writeResultFiles(partiallyScrunchedCopy);
@@ -1074,10 +1073,17 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 	dmError = computeDMError(archive);
 
 	// Now that the period step is initialised, init the freqError
-	if (nsub == 1 || periodStep_us <= 0)
+	if (nsub == 1 || periodStep_us <= 0) {
 		freqError = 0;
-	else
+	} else {
 		freqError = fabs((periodError_ms/(double)MICROSEC)/pow((bestPeriod_bc_us/(double)MICROSEC), 2));
+		freqError *= 1000;
+	}
+
+	// multiply errors by 3
+	periodError_ms *= 3;
+	dmError *= 3;
+	freqError *= 3;
 
 	float trf [6] = {(float)(-periodStep_us - periodHalfRange_us) + periodOffset_us, (float)periodStep_us, 0.0, (float)(minDM - 0.5*dmStep), 0.0, (float)dmStep};
 
@@ -1110,8 +1116,8 @@ void solve_and_plot(const Archive* archive, ProfilePlot* total_plot, TextInterfa
 
 void scrunchPartially(Archive * scrunchedCopy) {
 
-	unsigned nsub = scrunchedCopy->get_nsubint();
-	unsigned nchan = scrunchedCopy->get_nchan();
+	int nsub = scrunchedCopy->get_nsubint();
+	int nchan = scrunchedCopy->get_nchan();
 
 	if (nsub > maxSubints && maxSubints > 1) {
 
@@ -1287,9 +1293,9 @@ float getRMS (const Archive * archive) {
 
 	double ss = 0;
 
-	for (int is = 0; is < nsub ; is++) {
+	for (unsigned is = 0; is < nsub ; is++) {
 
-		for (int ic = 0; ic < nchan; ic++) {
+		for (unsigned ic = 0; ic < nchan; ic++) {
 
 			// find the min mean
 			smin = -1;
@@ -1299,10 +1305,10 @@ float getRMS (const Archive * archive) {
 			vector<double> amps;
 			profile->get_amps(amps);
 
-			for (int ib = 0; ib < nbin; ib++) {
+			for (unsigned ib = 0; ib < nbin; ib++) {
 				s = 0;
 
-				for (int j = ib; j < ib + nbin/2; j++)
+				for (unsigned j = ib; j < ib + nbin/2; j++)
 					s += amps[j%nbin];
 
 				if ((s < smin) || (smin < 0)) {
@@ -1313,10 +1319,10 @@ float getRMS (const Archive * archive) {
 
 			minMean = smin / (nbin/2);
 
-			for (int i = 0; i < nbin; i++)
+			for (unsigned i = 0; i < nbin; i++)
 				amps[i] -= minMean;
 
-			for (int i = itmin; i < itmin + nbin/2 - 1; i++)
+			for (unsigned i = itmin; i < itmin + nbin/2 - 1; i++)
 				ss += pow(amps[i%nbin], 2);
 		}
 	}
@@ -1649,7 +1655,7 @@ double getDopplerFactor(const Archive * archive) {
 	// This hardcoded bit might not be such a good idea.
 	// Counting on the fact that these values don't change
 
-	string CTEL [] = { "GBT XYZ"          , "NARRABRI CS08",
+	/*string CTEL [] = { "GBT XYZ"          , "NARRABRI CS08",
 	                   "ARECIBO XYZ (JPL)", "Hobart, Tasmania",
 	                   "Nanshan,Urumqi"   , "DSS 43 XYZ",
 										 "PARKES XYZ (JER)" , "JODRELL BANK XYZ",
@@ -1687,7 +1693,7 @@ double getDopplerFactor(const Archive * archive) {
 										 835.8              , 3554871.4,
 										 25                 , 500.0,
 										 4670132.83         , 4900430.8,
-										 78                 , 0};
+										 78                 , 0};*/
 
 	// Astronomical units
 	double AUS     = 499.004786;
@@ -1699,7 +1705,6 @@ double getDopplerFactor(const Archive * archive) {
 	double dpb[3];
 	double dvh[3];
 	double dph[3];
-	double dpve[6];
 
 	int hours, degrees, minutes;
 	double seconds, ra_secs, ra_degs, dec_degs;
@@ -1965,6 +1970,13 @@ void printHeader(const Archive * archive,
 	// Print the header
 	//
 
+	double gal_long;
+ 	double gal_lat;
+
+	AnglePair myPair = (archive->get_coordinates()).getGalactic();
+	myPair.getDegrees(&gal_long, &gal_lat);
+	gal_long += 360; // convert longitude range from (-180 - 180) to (0 - 360)
+
 	float lineHeight = 0.16;
 	char temp [1024];
 	string temp_str;
@@ -2026,7 +2038,7 @@ void printHeader(const Archive * archive,
 	liney -= lineHeight;
 
 	///////////////////////////////
-	/// Print the MJF and frequency
+	/// Print the MJD and frequency
 
 	// Newline
 	sprintf(temp, "Ref BC MJD = %.6f" ,
@@ -2038,6 +2050,10 @@ void printHeader(const Archive * archive,
 
 	sprintf(temp, "Bandwidth (MHz) = %3.9g",
 	copy->get_bandwidth());
+	temp_str += space + temp;
+
+	sprintf(temp, "Galactic coordinates (deg) = (%.3f, %.3f)" ,
+	gal_long, gal_lat);
 	temp_str += space + temp;
 
 	cpgtext(linex, liney, temp_str.c_str());
@@ -2110,7 +2126,8 @@ void printResults(const Archive * archive) {
 	const float HORIZONTAL = 0;
 
 	// Firstly print out the first column of labels
-	cpgtext(bestValues_x, bestValues_y, "Best BC period (ms):");
+	//cpgtext(bestValues_x, bestValues_y, "Best BC period (ms):");
+	cpgtext(bestValues_x, bestValues_y, "BC period (ms):");
 
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Correction (ms):");
@@ -2122,22 +2139,23 @@ void printResults(const Archive * archive) {
 	bestValues_x += colWidth*1.7;
 	bestValues_y = 1;
 
-	sprintf(temp, "%3.9f", bestPeriod_bc_us / MILLISEC);
+	sprintf(temp, "%3.10f", bestPeriod_bc_us / MILLISEC);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 	bestValues_y -= lineHeight;
-	sprintf(temp, "%3.9f", (bestPeriod_bc_us-refP_us) / MILLISEC);
+	sprintf(temp, "%3.10f", (bestPeriod_bc_us-refP_us) / MILLISEC);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 	bestValues_y -= lineHeight;
-	sprintf(temp, "%3.9f", periodError_ms);
+	sprintf(temp, "%3.10f", periodError_ms);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 	// New column
 	bestValues_x += colWidth * 0.1;
 	bestValues_y = 1;
 
-	cpgtext(bestValues_x, bestValues_y, "Best TC period (ms):");
+	//cpgtext(bestValues_x, bestValues_y, "Best TC period (ms):");
+	cpgtext(bestValues_x, bestValues_y, "TC period (ms):");
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Correction (ms):");
 	bestValues_y -= lineHeight;
@@ -2146,22 +2164,23 @@ void printResults(const Archive * archive) {
 	bestValues_x += colWidth * 1.7;
 	bestValues_y = 1;
 
-	sprintf(temp, "%3.9f", dopplerFactor * bestPeriod_bc_us / MILLISEC);
+	sprintf(temp, "%3.10f", dopplerFactor * bestPeriod_bc_us / MILLISEC);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 	bestValues_y -= lineHeight;
-	sprintf(temp, "%3.9f", (dopplerFactor * bestPeriod_bc_us / MILLISEC) - getPeriod(copy) * MILLISEC);
+	sprintf(temp, "%3.10f", (dopplerFactor * bestPeriod_bc_us / MILLISEC) - getPeriod(copy) * MILLISEC);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 	bestValues_y -= lineHeight;
-	sprintf(temp, "%3.9f", periodError_ms);
+	sprintf(temp, "%3.10f", periodError_ms);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 
 	// New column
 	bestValues_x += colWidth * 0.1;
 	bestValues_y = 1;
-	cpgtext(bestValues_x, bestValues_y, "Best DM:");
+	//cpgtext(bestValues_x, bestValues_y, "Best DM:");
+	cpgtext(bestValues_x, bestValues_y, "DM:");
 
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Correction:");
@@ -2188,56 +2207,61 @@ void printResults(const Archive * archive) {
 	bestValues_x += colWidth * 0.1;
 	bestValues_y = 1;
 
-	cpgtext(bestValues_x, bestValues_y, "Best BC freq (Hz):");
+	//cpgtext(bestValues_x, bestValues_y, "Best BC freq (Hz):");
+	cpgtext(bestValues_x, bestValues_y, "BC freq (Hz):");
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Freq error (Hz):");
 	bestValues_y -= lineHeight;
-	cpgtext(bestValues_x, bestValues_y, "Pulse width (ms):");
+	//cpgtext(bestValues_x, bestValues_y, "Pulse width (ms):");
+	cpgtext(bestValues_x, bestValues_y, "Width (ms):");
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Best SNR:");
 
 	bestValues_x += colWidth * 0.8;
 	bestValues_y = 1;
 
-	sprintf(temp, "%-3.9f", bestFreq);
+	sprintf(temp, "%-3.10f", bestFreq);
 	cpgtext(bestValues_x, bestValues_y, temp);
 
 	bestValues_y -= lineHeight;
-	sprintf(temp, "%-3.9f", freqError);
+	sprintf(temp, "%-3.10f", freqError);
 	cpgtext(bestValues_x, bestValues_y, temp);
 
 	bestValues_y -= lineHeight;
-	sprintf(temp, "%3.3f", bestPulseWidth * tbin);
+	//sprintf(temp, "%3.3f", bestPulseWidth * tbin);
+	sprintf(temp, "%3.2f", bestPulseWidth * tbin);
 	cpgtext(bestValues_x, bestValues_y, temp);
 
 	bestValues_y -= lineHeight;
-	sprintf(temp, "%-3.3f", bestSNR);
+	//sprintf(temp, "%-3.3f", bestSNR);
+	sprintf(temp, "%-3.2f", bestSNR);
 	cpgtext(bestValues_x, bestValues_y, temp);
 
 
 	// Print out the results on the console
 	if (!silent) {
 
-		cout << "\n\nBest S/N = " << bestSNR << endl;
+		printf("\n\nBest S/N = %.2f\n", bestSNR);
 
 		printf("Ref BC MJD = %.6f\n", start.intday() + start.fracday());
 
-		printf("Ref BC Period (ms) = %3.15g  Ref TC Period (ms) =  %3.10g  Ref DM = %3.10g\n",
+		printf("Ref BC Period (ms) = %3.10g  Ref TC Period (ms) =  %3.10g  Ref DM = %3.3g\n",
 						bcPeriod_s * MILLISEC,	getPeriod(copy) * MILLISEC, getDM(copy));
 
-		printf("Best BC Period (ms) = %3.15g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n",
+		printf("Best BC Period (ms) = %3.10g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n",
 						bestPeriod_bc_us / MILLISEC,	(bestPeriod_bc_us-refP_us) / MILLISEC, periodError_ms / MILLISEC);
 
-		printf("Best TC Period (ms) = %3.15g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n",
+		printf("Best TC Period (ms) = %3.10g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n",
 						dopplerFactor * bestPeriod_bc_us / MILLISEC,
 						(dopplerFactor * bestPeriod_bc_us / MILLISEC) - (getPeriod(copy) * MILLISEC),
 						periodError_ms / MILLISEC);
 
-		printf("Best DM = %3.15g  Correction = %3.10g  Error = %3.10g\n",
+		printf("Best DM = %3.3g  Correction = %3.3g  Error = %3.3g\n",
 	        	bestDM, bestDM-refDM, dmError);
 
-		printf("Best BC Frequency (Hz) = %3.15g  Error (Hz) = %3.10g\n",
+		printf("Best BC Frequency (Hz) = %3.10g  Error (Hz) = %3.10g\n",
 	        	bestFreq, freqError);
+
 		printf("Pulse width (bins) = %d\n",
 	        	bestPulseWidth);
 	}
@@ -2273,7 +2297,7 @@ void writeResultFiles(Archive * archive) {
 	file = fopen("pdmp.per", "at");
 
 	if (file != NULL) {
-		fprintf(file, " %3.6f\t%3.20f\t%3.20f\t%3.6f\t%3.6f\t%3.3f\t%3.3f\t%s\n",
+		fprintf(file, " %3.6f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%3.2f\t%3.2f\t%s\n",
 		archive->start_time().intday() + archive->start_time().fracday(),
 		bestPeriod_bc_us/MILLISEC,
 		periodError_ms,
@@ -2288,7 +2312,6 @@ void writeResultFiles(Archive * archive) {
 	fclose(file);
 }
 
-//void plotProfile(const Profile * profile, ProfilePlot* plot, TextInterface::Class* flui) {
 void plotProfile(const Profile * profile, ProfilePlot* plot, TextInterface::Parser* flui) {
 
 	cpgsch(0.7);
@@ -2310,7 +2333,6 @@ void plotProfile(const Profile * profile, ProfilePlot* plot, TextInterface::Pars
 	cpgbox ("BINTS", 0.0, 0, "BNTSI", tickSpace, 0);
 }
 
-//void plotPhaseFreq(const Archive * archive, Plot* phase_plot, TextInterface::Class* fui) {
 void plotPhaseFreq(const Archive * archive, Plot* phase_plot, TextInterface::Parser* fui) {
 	Reference::To<Archive> phase_freq_copy = archive->clone();
 
@@ -2333,13 +2355,11 @@ void plotPhaseFreq(const Archive * archive, Plot* phase_plot, TextInterface::Par
 	phase_plot->plot(phase_freq_copy);
 
 	// Draw the line of best fit of the original
-	drawBestFitPhaseFreq(phase_freq_copy, phase_plot);
-
+	drawBestFitPhaseFreq(phase_freq_copy);
 	cpgsci(6);
 	cpgslw(8);
 }
 
-//void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Class* tui) {
 void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* tui) {
 
 	Reference::To<Archive> phase_time_copy = archive->clone();
@@ -2363,7 +2383,7 @@ void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* t
 	plot->plot(phase_time_copy);
 
 	// Draw the line of best fit of the original
-	drawBestFitPhaseTime(phase_time_copy, plot);
+	drawBestFitPhaseTime(phase_time_copy);
 
 	cpgsci(6);
 	cpgslw(8);
@@ -2371,11 +2391,9 @@ void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* t
 	// reset the colour and size of the line back to its original
 	cpgslw(1);
 	cpgsci(1);
-
 }
 
-
-void drawBestFitPhaseFreq(const Archive * archive, Plot* phase_plot) {
+void drawBestFitPhaseFreq(const Archive * archive) {
 
 	Reference::To<Archive> copy = archive->clone();
 
@@ -2448,8 +2466,19 @@ void drawBestFitPhaseFreq(const Archive * archive, Plot* phase_plot) {
 
 }
 
+void drawBestFitPhaseTime(const Archive * archive) {
 
-void drawBestFitPhaseTime(const Archive * archive, Plot* plot) {
+	string scale = get_scale(archive);
+	int divisor = 1;
+
+	if (scale == "days")
+		divisor = 60 * 60 * 24;
+	else if (scale == "hours")
+		divisor = 60 * 60;
+	else if (scale == "minutes")
+		divisor = 60;
+
+	double intLength = archive->integration_length();
 
 	Reference::To<Archive> copy = archive->clone();
 	Reference::To<Profile> profile;
@@ -2501,7 +2530,7 @@ void drawBestFitPhaseTime(const Archive * archive, Plot* plot) {
 	// Second point is the point on the last subint
 	// which is offseted by delta phase
 	xpoints.push_back(refPhase + deltaPhase);
-	ypoints.push_back(nsub);
+	ypoints.push_back(intLength / divisor);
 
 	if (verbose) {
 		printf("Drawing line of best fit for phase time with coords: (%3.10g, %3.10g) to (%3.10g, %3.10g)\n",
@@ -2568,10 +2597,10 @@ void drawBestValuesCrossHair( const Archive * archive,
 	cpgsci(1);
 }
 
-void reorder(Reference::To<Pulsar::Archive> arch)
+void reorder(Reference::To<Pulsar::Archive> archive)
 {
 	Reference::To<Pulsar::TimeSortedOrder> tso = new Pulsar::TimeSortedOrder;
-	tso->organise(arch,0);
+	tso->organise(archive,0);
 }
 
 void draw_colour_map (float *plotarray, int rows, int cols, double minx,
@@ -2622,4 +2651,21 @@ void minmaxval (int n, const float *thearray, float *min, float *max)
 
 	*max = themax;
 	*min = themin;
+}
+
+string get_scale(const Archive * archive)
+{
+    double range = (archive->end_time() - archive->start_time()).in_days();
+
+    const float mjd_hours = 1.0 / 24.0;
+    const float mjd_minutes = mjd_hours / 60.0;
+
+    if (range > 1.0)
+        return "days";
+    else if (range > mjd_hours)
+        return "hours";
+    else if (range > mjd_minutes)
+        return "minutes";
+    else
+        return "seconds";
 }
