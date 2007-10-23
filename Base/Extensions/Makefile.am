@@ -15,7 +15,6 @@ nobase_include_HEADERS = \
         Pulsar/DeFaraday.h \
         Pulsar/DigitiserStatistics.h \
 	Pulsar/DigitiserCounts.h \
-	Pulsar/DigitiserCountsTI.h \
         Pulsar/dspReduction.h \
         Pulsar/ExampleExtension.h \
         Pulsar/FeedExtension.h \
