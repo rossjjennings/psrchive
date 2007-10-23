@@ -7,7 +7,7 @@
 
 
 #include "Pulsar/DigitiserCounts.h"
-#include "Pulsar/DigitiserCountsTI.h"
+
 
 
 
@@ -48,5 +48,5 @@ DigitiserCounts::~DigitiserCounts ()
 
 TextInterface::Parser* DigitiserCounts::get_interface()
 {
-  return new DigitiserCountsTI( this );
+  return new Interface( this );
 }

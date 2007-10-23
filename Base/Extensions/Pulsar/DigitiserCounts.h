@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/DigitiserCounts.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/10/23 01:15:27 $
+   $Revision: 1.4 $
+   $Date: 2007/10/23 01:25:45 $
    $Author: nopeer $ */
 
 #ifndef __Pulsar_DigitiserCounts_h
@@ -41,11 +41,21 @@ namespace Pulsar
 
     //! Get the text interface
     TextInterface::Parser* get_interface();
-    
+
     class Interface : public TextInterface::To<DigitiserCounts>
     {
       public:
 	Interface( DigitiserCounts *s_instance );
+    };
+    
+    //! class to represent a row 
+    class row
+    {
+      public:
+	row();
+	~row();
+	
+	std::vector<float> data;
     };
 
     void set_dig_mode( std::string s_dig_mode ) { dig_mode = s_dig_mode; }

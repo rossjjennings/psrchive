@@ -9,7 +9,7 @@
 #include <string.h>
 
 #include "Pulsar/DigitiserStatistics.h"
-#include "Pulsar/DigitiserStatisticsTI.h"
+
 
 // //////////////////////////////////////////////////
 // DigitiserStatistics methods
@@ -17,19 +17,27 @@
 
 Pulsar::DigitiserStatistics::DigitiserStatistics () 
   : Extension ("DigitiserStatistics")
-{ 
+{
   init(); 
 }
  
 Pulsar::DigitiserStatistics::DigitiserStatistics (const DigitiserStatistics& extension)
   : Extension ("DigitiserStatistics")
 {
+  ndigr = extension.ndigr;
+  npar = extension.npar;
+  ncycsub = extension.ncycsub;
+  diglev = extension.diglev;
   rows = extension.rows;
 }
 
 const Pulsar::DigitiserStatistics& 
 Pulsar::DigitiserStatistics::operator= (const DigitiserStatistics& extension)
 {
+  ndigr = extension.ndigr;
+  npar = extension.npar;
+  ncycsub = extension.ncycsub;
+  diglev = extension.diglev;
   rows = extension.rows;
   return *this;
 }
