@@ -95,6 +95,7 @@ void PavApp::PrintUsage( void )
   cout << " -n        Plot S/N against frequency" << endl;
   cout << " -R        Plot stacked sub-integration profiles" << endl;
   cout << " -S        Plot polarization parameters (I,L,V,PA)" << endl;
+  cout << " -t        Plot Digitiser Counts histogram" << endl;
   cout << " -X        Plot cal amplitude and phase vs frequency channel" << endl;
   cout << " -Y        Plot colour map of sub-integrations against pulse phase" << endl;
   cout << endl;
@@ -416,8 +417,6 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq, vector< Reference::T
 
 int PavApp::run( int argc, char *argv[] )
 {
-
-
   vector< string > filenames;
 
   // name of file containing list of Archive filenames
@@ -481,7 +480,7 @@ int PavApp::run( int argc, char *argv[] )
   string clip_command = "y:range";
   string clip_value = "=(0,1)";
 
-  char valid_args[] = "z:hb:M:K:DCcdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g";
+  char valid_args[] = "Az:hb:M:K:DCcdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g";
 
   int c = '\0';
   while( (c = getopt_long( argc, argv, valid_args, long_options, &option_index )) != -1 )
@@ -500,7 +499,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.19 2007/10/22 06:18:16 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.20 2007/10/23 01:39:37 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -576,6 +575,9 @@ int PavApp::run( int argc, char *argv[] )
       SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
       SetPlotOptions<StokesCylindrical>( plots, "flux:y:buf=0.07" );
       clear_labels = false;
+      break;
+    case 'A':
+      plots.push_back( factory.construct( "A" ) );
       break;
     case 'X':
       keep_baseline = true;
@@ -854,20 +856,19 @@ int PavApp::run( int argc, char *argv[] )
           SetPlotOptions<StokesCylindrical>( plots, "flux:ls=1111" );
         }
       }
-
-      // Set some specific plot options on linestyles and colour indices based on wether we are
-      // printing to a colour printer or not.
-
-      if( !have_colour )
+      else
       {
-        SetPlotOptions<StokesCylindrical>( plots, "flux:ci=1111" );
-        SetPlotOptions<StokesCylindrical>( plots, "flux:ls=1234" );
+	if( !have_colour )
+	{
+	  SetPlotOptions<StokesCylindrical>( plots, "flux:ci=111" );
+	  SetPlotOptions<StokesCylindrical>( plots, "flux:ls=124" );
+	}
+	else
+	{
+	  SetPlotOptions<StokesCylindrical>( plots, "flux:ci=123" );
+	  SetPlotOptions<StokesCylindrical>( plots, "flux:ls=111" );
+	}
       }
-      //       else
-      //       {
-      //         SetPlotOptions<StokesCylindrical>( plots, "flux:ci=1234" );
-      //         SetPlotOptions<StokesCylindrical>( plots, "flux:ls=1111" );
-      //       }
 
       // If the plots array contains any StokesCylindrical plots, remove the label in the top left corner of the flux plot
       //SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
