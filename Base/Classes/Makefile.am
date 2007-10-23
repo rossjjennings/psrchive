@@ -25,6 +25,7 @@ nobase_include_HEADERS = \
 	Pulsar/ProfileAmps.h \
 	Pulsar/ProfileAmpsExpert.h \
         Pulsar/Pulsar.h \
+	Pulsar/SimplePredictor.h \
 	Pulsar/Verification.h
 
 libClasses_la_SOURCES = \
@@ -58,7 +59,8 @@ libClasses_la_SOURCES = \
         Profile_average.C \
         Profile.C \
 	ProfileAmps.C \
-	Pulsar.C
+	Pulsar.C \
+	SimplePredictor.C
 
 #############################################################################
 #

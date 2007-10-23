@@ -15,7 +15,7 @@
 #include "T2Predictor.h"
 #endif
 
-// #include "Pulsar/SimplePredictor.h"
+#include "Pulsar/SimplePredictor.h"
 
 using namespace std;
 
@@ -29,9 +29,11 @@ void Pulsar::Predictor::children (vector< Reference::To<Predictor> >& child)
     the two based on class type 
   */
 
+  child.push_back (new Pulsar::SimplePredictor);
+
   child.push_back (new polyco);
+
 #ifdef HAVE_TEMPO2
   child.push_back (new Tempo2::Predictor);
 #endif
-  // child.push_back (new Pulsar::SimplePredictor);
 }
