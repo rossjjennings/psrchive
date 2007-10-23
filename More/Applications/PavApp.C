@@ -1,7 +1,9 @@
-/*
- * Copyright (c) 2007 by David Smith
+/***************************************************************************
+ *
+ *   Copyright (C) 2007 by David Smith
  *   Licensed under the Academic Free License version 2.1
- */
+ *
+ ***************************************************************************/
 
 
 
@@ -499,7 +501,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.20 2007/10/23 01:39:37 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.21 2007/10/23 04:53:45 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -852,26 +854,26 @@ int PavApp::run( int argc, char *argv[] )
         }
         else
         {
-          SetPlotOptions<StokesCylindrical>( plots, "flux:ci=1234" );
+          SetPlotOptions<StokesCylindrical>( plots, "flux:ci=1264" );
           SetPlotOptions<StokesCylindrical>( plots, "flux:ls=1111" );
         }
       }
       else
       {
-	if( !have_colour )
-	{
-	  SetPlotOptions<StokesCylindrical>( plots, "flux:ci=111" );
-	  SetPlotOptions<StokesCylindrical>( plots, "flux:ls=124" );
-	}
-	else
-	{
-	  SetPlotOptions<StokesCylindrical>( plots, "flux:ci=123" );
-	  SetPlotOptions<StokesCylindrical>( plots, "flux:ls=111" );
-	}
+        if( !have_colour )
+        {
+          SetPlotOptions<StokesCylindrical>( plots, "flux:ci=111" );
+          SetPlotOptions<StokesCylindrical>( plots, "flux:ls=124" );
+        }
+        else
+        {
+          SetPlotOptions<StokesCylindrical>( plots, "flux:ci=124" );
+          SetPlotOptions<StokesCylindrical>( plots, "flux:ls=111" );
+        }
       }
 
       // If the plots array contains any StokesCylindrical plots, remove the label in the top left corner of the flux plot
-      //SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
+      // SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
 
       SetPhaseZoom( min_phase, max_phase, plots );
 
@@ -923,11 +925,11 @@ int PavApp::run( int argc, char *argv[] )
 
 
         // set the precision that plot will use for labels
-	tostring_places = true;
-	if( !publn )
+        tostring_places = true;
+        if( !publn )
           tostring_precision = 3;
-	else
-	  tostring_precision = 1;
+        else
+          tostring_precision = 1;
 
         for (unsigned iplot=0; iplot < plots.size(); iplot++)
         {
