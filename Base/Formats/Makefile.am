@@ -14,6 +14,11 @@ endif
 
 SUBDIRS += .
 
+check_PROGRAMS = test_Parameters_factory test_Predictor_factory
+
+test_Parameters_factory_SOURCES = test_Parameters_factory.C
+test_Predictor_factory_SOURCES = test_Predictor_factory.C
+
 #############################################################################
 #
 # Dependencies should never be changed
@@ -27,4 +32,6 @@ INCLUDES = -I$(top_builddir)/local_include \
 	@CFITSIO_CFLAGS@ @TEMPO2_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.local
+
+LDADD = libFormats.la $(top_builddir)/Base/Classes/libClasses.la $(top_builddir)/Util/libpsrutil.la
 
