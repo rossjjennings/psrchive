@@ -9,9 +9,7 @@ AC_DEFUN([ATNF_DISABLE_OPTIMIZE],
 			[disable optimization, usefull if -O2 conflicts with -g ] ),
 			[optimize=yes])
 
-	if test x"$optimize" != xyes; then
-		AC_MSG_WARN( [ Compiling for optimization (-O2), if also using (-g) you may have problems when debugging ] )
-	else
+	if test x"$optimize" = xyes; then
 		echo 's/-O2 //g' > .ac_strip_O2
 		echo 's/-O2$//g' >> .ac_strip_O2
 
