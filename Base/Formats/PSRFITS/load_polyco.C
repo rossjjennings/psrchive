@@ -27,7 +27,19 @@ load_polyco (fitsfile* fptr, double* pred_phs, bool verbose)
 
   if (status) {
     if (verbose)
-      cerr << "load_polyco no polyco" << endl;
+      cerr << "load_polyco no POLYCO HDU" << endl;
+    return 0;
+  }
+
+  // ask for the number of rows in the binary table
+  long nrows = 0;
+  fits_get_num_rows (fptr, &nrows, &status);
+  if (status != 0)
+    throw FITSError (status, "load_polyco", "fits_get_num_rows");
+
+  if (nrows == 0) {
+    if (verbose)
+      cerr << "load_polyco no rows in POLYCO HDU" << endl;
     return 0;
   }
 
