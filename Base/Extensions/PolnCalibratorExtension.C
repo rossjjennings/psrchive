@@ -80,7 +80,7 @@ void Pulsar::PolnCalibratorExtension::set_type (Calibrator::Type _type)
     nparam = 7; break;
   default:
     throw Error (InvalidParam, "Pulsar::PolnCalibratorExtension::set_type",
-                 "unhandled Calibrator::Type");
+                 "unhandled Calibrator::Type=%s", Calibrator::Type2str (type));
   }
 }
 

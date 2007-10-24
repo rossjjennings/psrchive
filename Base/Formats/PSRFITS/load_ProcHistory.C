@@ -445,9 +445,14 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   chanbw = history->get_last().chanbw;
   set_bandwidth(get_nchan()*chanbw);
 
-  if (history->get_last().cal_mthd == "NONE")
+  if (history->get_last().cal_mthd == "NONE") {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_header not calibrated" << endl;
     set_poln_calibrated (false);
+  }
   else {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_header calibrated" << endl;
     set_poln_calibrated (true);
     history->set_cal_mthd(history->get_last().cal_mthd);
   }
