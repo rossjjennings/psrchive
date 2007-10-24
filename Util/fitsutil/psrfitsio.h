@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/05/02 21:11:41 $
-   $Author: straten $ */
+   $Revision: 1.7 $
+   $Date: 2007/10/24 06:54:20 $
+   $Author: nopeer $ */
 
 #ifndef __psrfitsio_h
 #define __psrfitsio_h
@@ -165,6 +165,25 @@ void psrfits_read_col (fitsfile* fptr, const char* name, std::vector<T>& data,
 
   if (status)
     throw FITSError (status, "psrfits_read_col", name);
+}
+
+
+template< typename T >
+    void psrfits_read_col ( fitsfile *fptr, const char *name, T *data, int row = 1, T null = FITS_traits<T>::null )
+{ 
+  int colnum = 0;
+  int status = 0;
+
+  fits_get_colnum (fptr, CASEINSEN, const_cast<char*>(name), &colnum, &status);
+  
+  int anynul = 0;
+  fits_read_col( fptr, FITS_traits<T>::datatype(),
+		 colnum, row,
+		 1, 1, &null, data, 
+		 &anynul, &status );
+  
+  if( status )
+    throw  FITSError ( status, "psrfits_read_col", name );
 }
 
 #endif
