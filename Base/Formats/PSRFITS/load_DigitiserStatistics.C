@@ -4,10 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#include "Pulsar/Pulsar.h"
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/DigitiserStatistics.h"
+
 #include "psrfitsio.h"
-#include <tostring.h>
+#include "tostring.h"
 
 using namespace std;
 
@@ -36,6 +39,8 @@ void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow)
 
   psrfits_read_key (fptr, "NDIGR", &(drow->ndigr));
 
+  if (Pulsar::Archive::verbose > 2)
+    cerr << "Read NDIGR = " << drow->ndigr << endl;
 
   // Get NPAR (called NLEV prior to version 2.3)
 
@@ -57,6 +62,9 @@ void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow)
 
   drow->data.resize( drow->nlev * drow->ndigr * drow->ncycsub );
 
+  if (Pulsar::Archive::verbose > 2)
+    cerr << "load DigitiserStatistics::row size=" << drow->data.size() << endl;
+ 
   float nullfloat = 0.0;
   psrfits_read_col (fptr, "DATA", drow->data, row, nullfloat);
 
@@ -87,8 +95,6 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
     throw FITSError (status, "FITSArchive::load_digistat",
                      "fits_movnam_hdu DIG_STAT");
 
-
-
   long numrows = 0;
   fits_get_num_rows (fptr, &numrows, &status);
 
@@ -96,11 +102,13 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
     throw FITSError (status, "FITSArchive::load_digistat",
                      "fits_get_num_rows DIG_STAT");
 
+  if (verbose > 2)
+    cerr << "Pulsar::FITSArchive::load_DigitiserStatistics rows=" 
+         << numrows << endl;
 
   Reference::To<DigitiserStatistics> dstats = new DigitiserStatistics();
 
   string s_data;
-
 
   // load the DIGLEV from HDU
   psrfits_read_key( fptr, "DIGLEV", &s_data );
@@ -111,7 +119,7 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
   {
     psrfits_read_key( fptr, "NPAR", &s_data );
   }
-  catch( Error e )
+  catch( Error& e )
   {
     psrfits_read_key( fptr, "NLEV", &s_data );
   }
@@ -125,14 +133,22 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
   psrfits_read_key( fptr, "NDIGR", &s_data );
   dstats->set_ndigr( fromstring<unsigned int>(s_data) );
 
-
   dstats->rows.resize(numrows);
 
-  for (int i = 0; i < numrows; i++)
-  {
-    dstats->rows[i] = DigitiserStatistics::row();
-    dstats->rows[i].index = i+1;
-    ::load( fptr, &(dstats->rows[i]) );
+  try  {
+
+    for (int i = 0; i < numrows; i++)
+    {
+      dstats->rows[i] = DigitiserStatistics::row();
+      dstats->rows[i].index = i+1;
+      ::load( fptr, &(dstats->rows[i]) );
+    }
+
+  }
+  catch (Error& error) {
+    warning << "WARNING FITSArchive::load_DigitiserStatistics failed. "
+            << error.get_message() << endl;
+    return;
   }
 
   add_extension (dstats);
