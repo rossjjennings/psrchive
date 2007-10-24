@@ -50,7 +50,20 @@ try {
   // Get CAL_MTHD
   
   char* cal_mthd = new char[80];
-  fits_read_key (fptr, TSTRING, "CAL_MTHD", cal_mthd, comment, &status);  
+  fits_read_key (fptr, TSTRING, "CAL_MTHD", cal_mthd, comment, &status);
+
+  if (verbose > 2)
+    cerr << "FITSArchive::load_PolnCalibratorExtension "
+            "CAL_MTHD='" << cal_mthd << "'" << endl;
+
+  if (cal_mthd[0] == '\0')  {
+    if (verbose == 3)
+      cerr << "Pulsar::FITSArchive::load_PolnCalibratorExtension"
+        " empty CAL_MTHD" << endl;
+    delete[] cal_mthd;
+    return;
+  }
+
   pce->set_type( Calibrator::str2Type (cal_mthd) );
   delete[] cal_mthd;
 
