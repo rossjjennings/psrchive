@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) {} 2007 by David Smith
+ *   Copyright (C) 2007 by David Smith
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -20,7 +20,7 @@ using namespace Pulsar;
 
 //Default constructor
 DigitiserCounts::DigitiserCounts ()
-    : Extension( "DigitiserCounts" ), nlev(0), npthist(0)
+    : Extension( "DigitiserCounts" ), nlev(0), npthist(0), ndigr(0)
 {}
 
 // Copy constructor
@@ -37,6 +37,8 @@ const DigitiserCounts& DigitiserCounts::operator= (const DigitiserCounts& extens
   nlev = extension.nlev;
   npthist = extension.npthist;
   diglev = extension.diglev;
+  ndigr = extension.ndigr;
+  rows = extension.rows;
 
   return *this;
 }
@@ -50,3 +52,20 @@ TextInterface::Parser* DigitiserCounts::get_interface()
 {
   return new Interface( this );
 }
+
+
+
+
+/////////////////////// row
+
+DigitiserCounts::row::row()
+{
+}
+
+
+
+DigitiserCounts::row::~row()
+{
+}
+
+

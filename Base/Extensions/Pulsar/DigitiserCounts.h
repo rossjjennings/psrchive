@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/DigitiserCounts.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/10/23 01:25:45 $
+   $Revision: 1.5 $
+   $Date: 2007/10/24 06:55:53 $
    $Author: nopeer $ */
 
 #ifndef __Pulsar_DigitiserCounts_h
@@ -55,22 +55,29 @@ namespace Pulsar
 	row();
 	~row();
 	
+	float data_offs;
+	float data_scl;
+	
 	std::vector<float> data;
     };
+    std::vector<row> rows;
 
     void set_dig_mode( std::string s_dig_mode ) { dig_mode = s_dig_mode; }
     void set_nlev( int s_nlev ) { nlev = s_nlev; }
     void set_npthist( int s_npthist ) { npthist = s_npthist; }
     void set_diglev( std::string s_diglev ) { diglev = s_diglev; }
+    void set_ndigr( int s_ndigr ) { ndigr = s_ndigr; }
 
     std::string get_dig_mode( void ) const { return dig_mode; }
     int get_nlev( void ) const { return nlev; }
     int get_npthist( void ) const { return npthist; }
     std::string get_diglev( void ) const { return diglev; }
+    int get_ndigr( void ) const { return ndigr; }
   private:
     std::string dig_mode;
     int nlev;
     int npthist;
+    int ndigr;
     std::string diglev;
   };
 }
