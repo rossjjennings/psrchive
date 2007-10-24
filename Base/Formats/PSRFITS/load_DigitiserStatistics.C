@@ -106,6 +106,9 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
     cerr << "Pulsar::FITSArchive::load_DigitiserStatistics rows=" 
          << numrows << endl;
 
+  if (!numrows)
+    return;
+
   Reference::To<DigitiserStatistics> dstats = new DigitiserStatistics();
 
   string s_data;
@@ -156,3 +159,4 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
   if (verbose > 2)
     cerr << "FITSArchive::load_digistat exiting" << endl;
 }
+
