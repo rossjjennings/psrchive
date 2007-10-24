@@ -32,6 +32,7 @@ nobase_include_HEADERS = \
 	Pulsar/ChannelWeightsPlot.h					\
 	Pulsar/BandpassChannelWeightPlot.h				\
 	Pulsar/DigitiserStatsPlot.h					\
+	Pulsar/DigitiserCountsPlot.h					\
 	Pulsar/InfoLabel.h
 
 libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
@@ -75,6 +76,7 @@ libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
 	ChannelWeightsPlot.C ChannelWeightsPlotTI.C \
 	BandpassChannelWeightPlot.C BandpassChannelWeightPlotTI.C \
 	DigitiserStatsPlot.C DigitiserStatsPlotTI.C \
+	DigitiserCountsPlot.C DigitiserCountsPlotTI.C \
 	CalPhVFreqPlot.C CalPhVFreqPlotTI.C
 
 endif
