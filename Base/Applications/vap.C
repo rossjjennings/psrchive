@@ -1757,7 +1757,6 @@ void ProcArgs( int argc, char *argv[] )
 
     case 'V':
       verbose = true;
-      Error::verbose = true;
       Pulsar::Archive::set_verbosity(3);
       break;
 
