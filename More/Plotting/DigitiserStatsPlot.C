@@ -1,4 +1,9 @@
-
+/***************************************************************************
+ *
+ *   Copyright (C) 2007 by David Smith
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 
 
@@ -36,7 +41,6 @@ void DigitiserStatsPlot::draw( const Archive *data )
 
   if( ext )
   {
-    cout << ext->get_ndigr() << endl;
     TextInterface::Parser *iface = ext->get_interface();
     if( iface )
     {
