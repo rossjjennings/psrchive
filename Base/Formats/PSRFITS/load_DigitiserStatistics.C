@@ -97,7 +97,7 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
                      "fits_get_num_rows DIG_STAT");
 
 
-  Reference::To<DigitiserStatistics> dstats = new DigitiserStatistics;
+  Reference::To<DigitiserStatistics> dstats = new DigitiserStatistics();
 
   string s_data;
 
@@ -126,7 +126,7 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
   dstats->set_ndigr( fromstring<unsigned int>(s_data) );
 
 
-  (dstats->rows).resize(numrows);
+  dstats->rows.resize(numrows);
 
   for (int i = 0; i < numrows; i++)
   {

@@ -17,6 +17,8 @@ void Pulsar::FITSArchive::load_DigitiserCounts (fitsfile* fptr)
 {
   int status = 0;
 
+  float nullfloat = 0.0;
+  
   if (verbose > 2)
     cerr << "FITSArchive::load_DigitiserCounts entered" << endl;
 
@@ -61,6 +63,34 @@ void Pulsar::FITSArchive::load_DigitiserCounts (fitsfile* fptr)
 
   psrfits_read_key( fptr, "DIGLEV", &s_data );
   ext->set_diglev( s_data );
+  
+  psrfits_read_key( fptr, "NDIGR", &s_data );
+  ext->set_ndigr( fromstring<int>( s_data ) );
+  
+  // load the rows of data
+  int num_rows;
+  psrfits_read_key( fptr, "NAXIS2", &s_data );
+  num_rows = fromstring<int>( s_data );
+  
+ 
+  ext->rows.resize( num_rows );
+  
+  int data_length = ext->get_npthist() * ext->get_ndigr();
+  
+  for( int i = 0; i < num_rows; i ++ )
+  {
+    psrfits_read_col( fptr, "DAT_OFFS", &(ext->rows[i].data_offs), i+1, 0.0f );
+    psrfits_read_col( fptr, "DAT_SCL", &(ext->rows[i].data_scl), i+1, 0.0f );
+
+    ext->rows[i].data.resize( ext->get_ndigr() * ext->get_npthist() );
+    psrfits_read_col( fptr, "DATA", ext->rows[i].data, i+1, nullfloat );
+    
+    for( int d = 0; d < data_length; d ++ )
+    {
+      ext->rows[i].data[d] *= ext->rows[i].data_scl;
+      ext->rows[i].data[d] += ext->rows[i].data_offs;
+    }
+  }
 
   add_extension( ext );
 }
