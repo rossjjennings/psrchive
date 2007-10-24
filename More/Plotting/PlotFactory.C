@@ -28,6 +28,7 @@
 #include "Pulsar/ChannelWeightsPlot.h"
 #include "Pulsar/BandpassChannelWeightPlot.h"
 #include "Pulsar/DigitiserStatsPlot.h"
+#include "Pulsar/DigitiserCountsPlot.h"
 
 #include "Error.h"
 #include "pad.h"
@@ -99,7 +100,10 @@ Pulsar::PlotFactory::PlotFactory ()
         ( 'B', "bpcw", "Plot off-pulse bandpass and channel weights" ) );
   
   add ( new PlotFactory::Advocate<DigitiserStatsPlot>
-      ( 'g', "digstats", "Digitiser Statistics" ) );
+        ( 'g', "digstats", "Digitiser Statistics" ) );
+  
+  add ( new PlotFactory::Advocate<DigitiserCountsPlot>
+        ( 'A', "digcnts", "Digitiser Counts histogram" ) );
 }
 
 //! Return a new instance of the named plotter
