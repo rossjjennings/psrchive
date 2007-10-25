@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.17 $
-   $Date: 2007/05/14 06:58:55 $
+   $Revision: 1.18 $
+   $Date: 2007/10/25 05:40:12 $
    $Author: straten $ */
 
 #ifndef __EstimatePlotter_h
@@ -168,12 +168,19 @@ void EstimatePlotter::add_plot (const std::vector< Estimate<T> >& data)
   MeanEstimate<T> mean;
 
   for (ipt=0; ipt<npt; ipt++) {
-    ye[ipt] = sqrt (data[ipt].var);
-    x[ipt] = xrange_min + xscale * double(ipt);
-    y[ipt] = data[ipt].val;
 
-    if (data[ipt].var)
-      mean += data[ipt];
+    x[ipt] = xrange_min + xscale * double(ipt);
+
+    if (!isfinite( data[ipt].val ))
+      ye[ipt] = 0;
+    else {
+      y[ipt] = data[ipt].val;
+      ye[ipt] = sqrt (data[ipt].var);
+
+      if (data[ipt].var)
+	mean += data[ipt];
+    }
+
   }
 
   // useful at times, excessive at others ...
