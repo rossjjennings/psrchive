@@ -97,7 +97,7 @@ void PavApp::PrintUsage( void )
   cout << " -n        Plot S/N against frequency" << endl;
   cout << " -R        Plot stacked sub-integration profiles" << endl;
   cout << " -S        Plot polarization parameters (I,L,V,PA)" << endl;
-  cout << " -t        Plot Digitiser Counts histogram" << endl;
+  cout << " -A        Plot Digitiser Counts histogram" << endl;
   cout << " -X        Plot cal amplitude and phase vs frequency channel" << endl;
   cout << " -Y        Plot colour map of sub-integrations against pulse phase" << endl;
   cout << endl;
@@ -501,7 +501,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.21 2007/10/23 04:53:45 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.22 2007/10/25 23:35:04 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
