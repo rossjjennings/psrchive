@@ -12,6 +12,8 @@
 
 #include <cpgplot.h>
 
+// #define _DEBUG 1
+
 using namespace std;
 
 bool Pulsar::CalibratorPlotter::verbose = false;
@@ -62,9 +64,15 @@ try {
     return;
   }
 
+#ifdef _DEBUG
+  cerr << "Pulsar::CalibratorPlotter::plot nchan=" << nchan << endl;
+#endif
+
   unsigned nplot = info->get_nclass();
 
+#ifndef _DEBUG
   if (verbose)
+#endif
     cerr << "Pulsar::CalibratorPlotter::plot nchan=" << nchan 
 	 << " nplot=" << nplot << " cfreq=" << cfreq << " bw=" << bw << endl;
 
@@ -103,6 +111,11 @@ try {
 
   for (unsigned iplot=0; iplot < info->get_nclass(); iplot++) {
 
+#ifdef _DEBUG
+    cerr << "Pulsar::CalibratorPlotter::plot " 
+	 << iplot << "/" << info->get_nclass() << endl;
+#endif
+
     if (ipanel % npanel == 0) {
 
       xaxis = "bcnst";
@@ -125,15 +138,21 @@ try {
 
     unsigned nparam = info->get_nparam( iplot );
 
-    if (verbose) cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
-		      << " nparam=" << nparam << endl;
+#ifndef _DEBUG
+    if (verbose)
+#endif
+      cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
+	   << " nparam=" << nparam << endl;
 
     unsigned iparam = 0;
 
     for (iparam=0; iparam<nparam; iparam++) {
 
-      if (verbose) cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
-                      << " iparam=" << iparam << endl;
+#ifndef _DEBUG
+      if (verbose)
+#endif
+	cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
+	     << " iparam=" << iparam << endl;
 
       for (unsigned ichan=0; ichan<nchan; ichan++)
 	data[ichan] = info->get_param (ichan, iplot, iparam);
@@ -142,8 +161,11 @@ try {
 
     }
 
-    if (verbose) cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
-                      << " plots initialized" << endl;
+#ifndef _DEBUG
+    if (verbose)
+#endif
+      cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
+	   << " plots initialized" << endl;
 
     cpgsvp (xmin, xmax, ybottom, ybottom + yheight);
 
@@ -162,11 +184,23 @@ try {
 
     if (plotted > 0) {
 
-      if (verbose) cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
-                        << " plot axis" << endl;
+#ifndef _DEBUG
+      if (verbose)
+#endif
+	cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
+	     << " plot axis" << endl;
 
       cpgsci (1);
+
+#ifdef _DEBUG
+      cerr << "cpgbox (" << xaxis << ")" << endl;
+#endif
+
       cpgbox(xaxis.c_str(),0,0,"bcvnst",0,2);
+
+#ifdef _DEBUG
+      cerr << "cpgmtxt (" << info->get_name(iplot) << ")" << endl;
+#endif
 
       cpgmtxt("L",3.5,.5,.5, info->get_name(iplot));
       
@@ -178,12 +212,20 @@ try {
 
     }
 
+#ifdef _DEBUG
+    cerr << "Pulsar::Calibrator::plot end " << iplot << "/" 
+	 << info->get_nclass() << endl;
+#endif
+
   }
 
   // restore the viewport
   cpgsvp (xmin, xmax, ymin, ymax);
 
-  if (verbose) cerr << "Pulsar::CalibratorPlotter::plot return" << endl;
+#ifndef _DEBUG
+  if (verbose)
+#endif
+    cerr << "Pulsar::CalibratorPlotter::plot return" << endl;
 
 }
 catch (Error& error) {
