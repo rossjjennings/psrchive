@@ -54,7 +54,7 @@ SWIN_OPTIONS_SET
 SWIN_COMPILER
 
 # Initialize automake to place object files in sub-directories
-AM_INIT_AUTOMAKE([subdir-objects])
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 # Create static libraries by default
 AC_DISABLE_SHARED
