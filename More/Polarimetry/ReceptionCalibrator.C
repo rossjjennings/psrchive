@@ -391,6 +391,9 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
   Signal::Source type = data->get_type();
 
   if (type == Signal::PolnCal || type == Signal::FluxCalOn) {
+    //
+    // note that ReferenceCalibrator::set_calibrator calls correct_backend
+    //
     add_calibrator (data);
     return;
   }
@@ -877,6 +880,8 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
   vector< Jones<float> > response (nchan);
 
   bool parallactic_corrected = false;
+
+  correct_backend (data);
 
   for (unsigned isub=0; isub<nsub; isub++) {
 
