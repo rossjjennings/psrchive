@@ -26,10 +26,11 @@ include_HEADERS = \
         machine_endian.h \
         MJD.h \
 	FITSUTC.h \
-	normal.h \
+	NormalDistribution.h \
         orbital.h \
 	pairutil.h \
         Physical.h \
+	Probability.h \
         Plugin.h \
         RealTimer.h \
         RegularExpression.h \
@@ -78,8 +79,9 @@ libgenutil_la_SOURCES = \
         JenetAnderson98.C \
         MJD.C \
 	FITSUTC.C \
-	normal.c \
+	NormalDistribution.C \
         Physical.C \
+	Probability.C \
         Plugin.C \
         RealTimer.C \
         RegularExpression.C \
@@ -112,7 +114,7 @@ getMJD_SOURCES = getMJD.C
 getHorizon_SOURCES = getHorizon.C
 
 TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98 \
-	test_endian test_environ test_sum test_normal \
+	test_endian test_environ test_sum test_NormalDistribution \
 	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord
 
 #	test_BatchQueue
@@ -133,6 +135,7 @@ test_moment2_SOURCES		= test_moment2.C
 test_MJD_ostream_SOURCES	= test_MJD_ostream.C
 test_sky_coord_SOURCES		= test_sky_coord.C
 test_expand_SOURCES		= test_expand.C
+test_NormalDistribution_SOURCES = test_NormalDistribution.C
 
 # test_BatchQueue_SOURCES		= test_BatchQueue.C
 
