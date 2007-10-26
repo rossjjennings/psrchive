@@ -262,13 +262,18 @@ Calibration::StandardModel::set_transformation (const MEAL::Complex2* xform)
     polar_solution = dynamic_cast<const MEAL::Polar*>( xform );
     if (polar_solution)
       polar->copy( polar_solution );
+    else
+      throw Error (InvalidState, "StandardModel::set_transformation",
+		   "solution is not of the required type");
   }
 
   if (physical) {
     const Instrument* instrument = dynamic_cast<const Instrument*>( xform );
     if (instrument)
       physical->copy( instrument );
-  }
+    else
+      throw Error (InvalidState, "StandardModel::set_transformation",
+		   "solution is not of the required type");  }
 }
 
 void 
