@@ -240,7 +240,7 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
   }
 
   if (previous && previous->get_nchan() == nchan) {
-    cerr << "Setting to previous solution" << endl;
+    cerr << "Using previous solution" << endl;
     for (unsigned ichan=0; ichan<nchan; ichan++)
       model[ichan]->set_transformation (previous->get_transformation(ichan));
   }
@@ -1133,6 +1133,8 @@ void Pulsar::ReceptionCalibrator::initialize ()
     " to " << PA_max << " degrees" << endl;
 
   if (previous_cal) {
+    cerr << "Pulsar::ReceptionCalibrator::solve using previous CAL solution"
+	 << endl;
     for (unsigned ichan=0; ichan<model.size(); ichan++)
       calibrator_estimate.source[ichan]
 	-> set_stokes( (Stokes< Estimate<double> >)
