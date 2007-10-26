@@ -9,7 +9,7 @@
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/SmoothMean.h"
-#include "normal.h"
+#include "NormalDistribution.h"
 
 #include <iostream>
 using namespace std;
@@ -30,7 +30,9 @@ void Pulsar::GaussianBaseline::set_threshold (float sigma)
 {
   IterativeBaseline::set_threshold (sigma);
 
-  moment_correction = 1.0 / normal_moment2 (threshold);
+  NormalDistribution normal;
+
+  moment_correction = 1.0 / normal.moment2 (-threshold, threshold);
 #ifndef _DEBUG
   if (Profile::verbose)
 #endif
