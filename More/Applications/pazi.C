@@ -83,7 +83,7 @@ static vector<int> bins_to_zap;
 //static bool centered = true;
 static bool centered = false;
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv[]) try
 {
 	if (argc < 2) {
 		usage();
@@ -435,7 +435,16 @@ int main(int argc, char* argv[])
 				break;
 		}
 	}
+
+  return 0;
+
+} // end main
+
+catch (Error& error) {
+  cerr << "pazi: " << error << endl;
+  return -1;
 }
+
 
 int freq_get_channel(float mouseY, double bandwidth, int num_chans, double centre_freq)
 {
