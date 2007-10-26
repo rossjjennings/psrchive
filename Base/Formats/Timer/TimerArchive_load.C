@@ -9,6 +9,7 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Pointing.h"
+#include "Pulsar/Backend.h"
 
 #include "Pulsar/Predictor.h"
 #include "Pulsar/Parameters.h"
@@ -136,15 +137,37 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
     }
   }
 
-  // Before psrdisp v.18.1, lower sideband data did not have their sign
-  // of Stokes V properly flipped.
-  // HSK: According to Willem all archives (psrdisp and baseband/dsp; Stokes and coherency) need reverse_v = true
-  if (baseband && version<18.1 && hdr.banda.npol==4 && hdr.banda.bw < 0.0)  {
-    hdr.version = 18.0;
-    hdr.minorversion = 0.1;
-    reverse_V = true;
-  }    
-  
+  Backend* backend = get<Backend>();
+  if (!backend)
+    throw Error (InvalidState, "TimerArchive::subint_load",
+		 "no Backend extension");
+
+  if ( baseband && hdr.banda.npol==4 && hdr.banda.bw < 0.0 &&
+       !backend->get_downconversion_corrected() )  {
+    
+    if ( version < 18.1 )  {
+
+      // Before psrdisp v.18.1, lower sideband data did not have their sign
+      // of Stokes V (linear) or Stokes U (circular) properly flipped.
+ 
+      if (verbose == 3)
+	cerr << "TimerArchive::subint_load"
+	  " correcting lower-sideband downconversion" << endl;
+      
+      hdr.version = 18.0;
+      hdr.minorversion = 0.1;
+      reverse_V = true;
+
+    }    
+
+    if (verbose == 3)
+      cerr << "TimerArchive::subint_load"
+	" setting downconversion corrected" << endl;
+
+    backend->set_downconversion_corrected (true);
+
+  }
+
   for (unsigned isub=0; isub < get_nsubint(); isub++) { 
     if (verbose == 3)
       cerr << "TimerArchive::subint_load " 
