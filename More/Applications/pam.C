@@ -9,8 +9,6 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
-#include "Pulsar/Parameters.h"
-
 // Extensions this program understands
 
 #include "Pulsar/ProcHistory.h"
@@ -27,7 +25,9 @@
 #include "Pulsar/FaradayRotation.h"
 #include "Pulsar/counter_drift.h"
 
-#include "factory.h"
+#include "psrephem.h"
+#include "ephio.h"
+
 #include "dirutil.h"
 #include "strutil.h"
 #include "Error.h"
@@ -269,7 +269,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.74 2007/08/17 06:10:02 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.75 2007/10/26 05:48:23 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -675,13 +675,27 @@ int main (int argc, char *argv[]) try {
       if( name != string() )
 	arch->set_source( name );
 
-      if (new_eph) {
-	if (!eph_file.empty()) try {
-	  arch->set_ephemeris( factory<Pulsar::Parameters>(eph_file) );
+      if (new_eph && !eph_file.empty()) try {
+
+	psrephem* eph = new psrephem (eph_file.c_str());
+
+	if (eph->parmStatus[EPH_DM]) {
+	  arch->set_dispersion_measure( eph->value_double[EPH_DM] );
+	  if (arch->get_dedispersed())
+	    arch->dedisperse();  // dedisperse to the new DM
 	}
-	catch (Error& error) {
-	  cerr << "Could not load new ephemeris from " << eph_file << endl;
+
+	if (eph->parmStatus[EPH_RM]) {
+	  arch->set_dispersion_measure( eph->value_double[EPH_RM] );
+	  if (arch->get_faraday_corrected())
+	    arch->defaraday();  // defaraday to the new RM
 	}
+
+	arch->set_ephemeris(eph);
+
+      }
+      catch (Error& error) {
+	cerr << "Could not load new ephemeris from " << eph_file << endl;
       }
 
       if (flipsb) {
