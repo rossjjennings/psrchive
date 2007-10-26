@@ -6,14 +6,14 @@
  ***************************************************************************/
 
 /*
-  This program tests that the expected value of the variance as a function
-  of threshold, as predicted by normal_moment2, matches the variance as 
-  a function of threshold measured in a simple simulation of normally
-  distributed random data. 
+  This program tests that the expected value of the variance as a
+  function of threshold, as predicted by NormalDistribution::moment2,
+  matches the variance as a function of threshold measured in a simple
+  simulation of normally distributed random data.
 */
 
 #include "BoxMuller.h"
-#include "normal.h"
+#include "NormalDistribution.h"
 
 #include <vector>
 #include <iostream>
@@ -54,10 +54,12 @@ int main ()
 
   unsigned errors = 0;
 
+  NormalDistribution normal;
+
   for (unsigned ibin=0; ibin < nbins; ibin++) {
 
     double bound = 0.01 * (ibin + 1);
-    double exp = normal_moment2(bound);
+    double exp = normal.moment2(-bound,bound);
 
     double var = sumsq[ibin]/count[ibin];
     double err = var * sqrt(2.0/count[ibin]);
