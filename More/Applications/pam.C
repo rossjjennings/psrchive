@@ -269,7 +269,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.75 2007/10/26 05:48:23 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.76 2007/10/26 12:53:33 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -686,7 +686,7 @@ int main (int argc, char *argv[]) try {
 	}
 
 	if (eph->parmStatus[EPH_RM]) {
-	  arch->set_dispersion_measure( eph->value_double[EPH_RM] );
+	  arch->set_rotation_measure( eph->value_double[EPH_RM] );
 	  if (arch->get_faraday_corrected())
 	    arch->defaraday();  // defaraday to the new RM
 	}
