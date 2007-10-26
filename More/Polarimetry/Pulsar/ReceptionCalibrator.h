@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.75 $
-   $Date: 2007/09/01 02:13:10 $
+   $Revision: 1.76 $
+   $Date: 2007/10/26 21:51:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -143,6 +143,9 @@ namespace Pulsar {
     //! Add the ReferenceCalibrator observation to the set of constraints
     void add_calibrator (const ReferenceCalibrator* polncal);
     
+    //! Set the first guess to a previous solution
+    void set_previous (const Archive* data);
+
     //! Set the number of channels that may be simultaneously solved
     void set_nthread (unsigned nthread);
 

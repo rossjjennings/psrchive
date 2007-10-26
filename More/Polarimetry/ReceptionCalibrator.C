@@ -347,6 +347,11 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::add_calibrator",
 		 "No Archive containing pulsar data has yet been added");
 
+  if (data->get_type() == Signal::Calibrator) {
+    set_previous (data);
+    return;
+  }
+
   Reference::To<ReferenceCalibrator> polncal;
 
   if (model_type == Calibrator::Hamaker) {
@@ -380,6 +385,18 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
 
 bool equal_pi (const Angle& a, const Angle& b, float tolerance = 0.01);
 
+
+void Pulsar::ReceptionCalibrator::set_previous (const Archive* data)
+{
+  const PolnCalibratorExtension* ext = data->get<PolnCalibratorExtension>();
+  if (ext->get_type() == get_type()) {
+    cerr << "Pulsar::ReceptionCalibrator::set_previous solution of same type"
+	 << endl;
+    previous = new PolnCalibrator (data);
+    previous_cal = data->get<CalibratorStokes>();
+  }
+}
+
 //! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 {
@@ -399,13 +416,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
   }
 
   if (type == Signal::Calibrator) {
-    const PolnCalibratorExtension* ext = data->get<PolnCalibratorExtension>();
-    if (ext->get_type() == get_type()) {
-      cerr << "Pulsar::ReceptionCalibrator::add_observation previous solution"
-	   << endl;
-      previous = new PolnCalibrator (data);
-      previous_cal = data->get<CalibratorStokes>();
-    }
+    set_previous (data);
     return;
   }
 
