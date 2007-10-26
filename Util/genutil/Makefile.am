@@ -14,6 +14,7 @@ include_HEADERS = \
         dirutil.h \
         environ.h \
 	evaluate.h \
+	ExponentialDistribution.h \
 	factory.h \
         fcomp.h \
 	format_it.h \
@@ -68,6 +69,7 @@ libgenutil_la_SOURCES = \
         errscale.c \
 	expand.C \
 	evaluate.C \
+	ExponentialDistribution.C \
         fcomp.C \
 	filesize.c \
 	format_it.C \
