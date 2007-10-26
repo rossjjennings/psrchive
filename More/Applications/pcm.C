@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.67 $
-   $Date: 2007/10/02 05:40:23 $
+   $Revision: 1.68 $
+   $Date: 2007/10/26 08:50:48 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -79,6 +79,7 @@ void usage ()
     "\n"
     "  -q         assume that CAL Stokes Q = 0 (linear feeds only)\n"
     "  -v         assume that CAL Stokes V = 0 (linear feeds only)\n"
+    "  -L hours   maximum time between middle of experiment and calibrators\n"
     "\n"
     "MODE B: Fit single observations of known source \n"
     "\n"
@@ -349,7 +350,7 @@ int actual_main (int argc, char *argv[]) try {
   bool publication_plots = false;
 
   int gotc = 0;
-  const char* args = "A:a:b:c:C:d:Df:gHhIM:m:N:n:OPp:qrsS:t:T:uvV:";
+  const char* args = "A:a:b:c:C:d:Df:gHhIL:M:m:N:n:OPp:qrsS:t:T:uvV:";
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
 
@@ -399,6 +400,10 @@ int actual_main (int argc, char *argv[]) try {
 
     case 'I':
       normalize_gain = true;
+      break;
+
+    case 'L':
+      hours = atof (optarg);
       break;
 
     case 'm':
@@ -611,7 +616,7 @@ int actual_main (int argc, char *argv[]) try {
     Pulsar::Database::Criterion criterion;
     criterion = database.criterion (archive, Signal::PolnCal);
     criterion.entry.time = mid;
-    criterion.minutes_apart = 0.5 * hours * 60.0;
+    criterion.minutes_apart = hours * 60.0;
 
     vector<Pulsar::Database::Entry> oncals;
     database.all_matching (criterion, oncals);
@@ -976,6 +981,10 @@ int actual_main (int argc, char *argv[]) try {
 }
 catch (Error& error) {
   cerr << "pcm: error" << error << endl;
+  return -1;
+}
+catch (const char* error) {
+  cerr << "pcm: error " << error << endl;
   return -1;
 }
 
