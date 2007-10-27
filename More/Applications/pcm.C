@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.68 $
-   $Date: 2007/10/26 08:50:48 $
+   $Revision: 1.69 $
+   $Date: 2007/10/27 04:22:13 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -658,7 +658,7 @@ int actual_main (int argc, char *argv[]) try {
   if (binfile) try {
 
     autobin = Pulsar::Archive::load (binfile);
-    reflections.operate (autobin);
+    reflections.transform (autobin);
 
     autobin->fscrunch ();
     autobin->tscrunch ();
@@ -689,7 +689,7 @@ int actual_main (int argc, char *argv[]) try {
 	cerr << "pcm: loading " << filenames[i] << endl;
 	
       archive = Pulsar::Archive::load(filenames[i]);
-      reflections.operate (archive);
+      reflections.transform (archive);
 
       cout << "pcm: loaded archive: " << filenames[i] << endl;
       
@@ -912,7 +912,7 @@ int actual_main (int argc, char *argv[]) try {
 	cerr << "pcm: loading " << filenames[i] << endl;
 
       archive = Pulsar::Archive::load(filenames[i]);
-      reflections.operate (archive);
+      reflections.transform (archive);
 
       cout << "pcm: loaded archive: " << filenames[i] << endl;
       
@@ -1017,7 +1017,7 @@ int mode_B (const char* standard_filename,
 
   standard = Pulsar::Archive::load (standard_filename);
   standard->convert_state (Signal::Stokes);
-  reflections.operate (standard);
+  reflections.transform (standard);
 
   RealTimer clock;
 
@@ -1043,7 +1043,7 @@ int mode_B (const char* standard_filename,
     
     archive = Pulsar::Archive::load(filenames[i]);
     archive->convert_state (Signal::Stokes);
-    reflections.operate (archive);
+    reflections.transform (archive);
 
     cout << "pcm: loaded archive: " << filenames[i] << endl;
 

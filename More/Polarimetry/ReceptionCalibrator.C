@@ -217,7 +217,7 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
 
       Reference::To<Archive> archive;
       archive = Pulsar::Archive::load(calibrator_filenames[ifile]);
-      reflections.operate (archive);
+      reflections.transform (archive);
       add_calibrator (archive);
 
     }

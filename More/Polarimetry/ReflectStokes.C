@@ -18,7 +18,7 @@ static void sign_flip (Pulsar::Archive* archive, unsigned ipol)
 {
   for (unsigned isub=0; isub<archive->get_nsubint(); isub++)
     for (unsigned ichan=0; ichan<archive->get_nchan(); ichan++)
-      *(archive->get_Profile (isub, ipol, ichan)) *= -1.0;
+      archive->get_Profile(isub, ipol, ichan) -> scale( -1.0 );
 }
 
 Pulsar::ReflectStokes::ReflectStokes ()
@@ -26,7 +26,7 @@ Pulsar::ReflectStokes::ReflectStokes ()
   reflect = 0;
 }
 
-void Pulsar::ReflectStokes::operate (Pulsar::Archive* arch)
+void Pulsar::ReflectStokes::transform (Pulsar::Archive* arch)
 {
   if (!reflect)
     return;
@@ -70,6 +70,9 @@ void Pulsar::ReflectStokes::add_reflection (char stokes)
       reflect |= Stokes_V;
       break;
 
+    default:
+      throw Error (InvalidParam, "Pulsar::ReflectStokes::add_reflection",
+		   "unknown Stokes parameter '%c'", stokes);
   }
 }
 
