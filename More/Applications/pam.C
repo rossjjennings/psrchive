@@ -23,6 +23,8 @@
 
 #include "Pulsar/ScatteredPowerCorrection.h"
 #include "Pulsar/FaradayRotation.h"
+#include "Pulsar/ReflectStokes.h"
+
 #include "Pulsar/counter_drift.h"
 
 #include "psrephem.h"
@@ -204,6 +206,8 @@ int main (int argc, char *argv[]) try {
     Reference::To<Pulsar::IntegrationOrder> myio;
     Reference::To<Pulsar::Receiver> install_receiver;
 
+    Pulsar::ReflectStokes reflections;
+
     int c = 0;
 
     const int TYPE = 1208;
@@ -246,7 +250,7 @@ int main (int argc, char *argv[]) try {
 	{0, 0, 0, 0}
       };
     
-      c = getopt_long(argc, argv, "hqvViM:ma:e:E:TFpIt:f:b:d:o:s:r:u:w:DSBLCx:R:",
+      c = getopt_long(argc, argv, "hqvViM:mn:a:e:E:TFpIt:f:b:d:o:s:r:u:w:DSBLCx:R:",
 		      long_options, &options_index);
     
       if (c == -1)
@@ -269,7 +273,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.76 2007/10/26 12:53:33 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.77 2007/10/27 04:22:09 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -321,6 +325,15 @@ int main (int argc, char *argv[]) try {
 	command += " -f ";
 	command += optarg;
 	break;
+	
+      case 'n':
+
+	reflections.add_reflection( optarg[0] );
+
+	command += " -n ";
+	command += optarg;
+	break;
+
       case 'o':
 	new_cfreq = true;
 	if (sscanf(optarg, "%f", &new_fr) != 1) {
@@ -641,6 +654,8 @@ int main (int argc, char *argv[]) try {
 	  }
 	}
       }
+
+      reflections.transform( arch );
 
       if (new_cfreq) {
 	float nc = arch->get_nchan();
