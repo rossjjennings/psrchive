@@ -7,21 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.4 $
-   $Date: 2007/10/17 04:20:50 $
-   $Author: nopeer $ */
+   $Revision: 1.5 $
+   $Date: 2007/10/27 03:27:28 $
+   $Author: straten $ */
 
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
-
-#include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/PhaseWeight.h"
-
-#include "Pulsar/OnPulseThreshold.h"
-#include "Pulsar/GaussianBaseline.h"
-#include "Pulsar/BaselineWindow.h"
 
 #include "strutil.h"
 #include "dirutil.h"
@@ -37,9 +30,8 @@ using namespace Pulsar;
 
 bool cmd_text = false;
 bool cmd_flux = false;
-bool cmd_poln = false;
 bool per_channel_headers = false;
-
+bool cal_parameters = false;
 
 // default duty cycle
 float dc = 0.15;
@@ -52,11 +44,11 @@ void Usage( void )
   cout << 
     "A program for extracting archive data in text form \n"
     "Usage: \n"
-    "     pdv [-f dc] [-t] filenames \n"
+    "     pdv [-f dc] [-t] [-c] filenames \n"
     "Where: \n"
+    "   -c          Print out calibrator (square wave) parameters \n"
     "   -f dcyc     Show pulse widths and mean flux density (mJy) \n"
     "               with baseline width dcyc \n"
-    "   -p          Print polarization summary \n"
     "   -t          Print out profiles as ASCII text \n"
     "   -T          Print out profiles as ASCII text (with per channel headers) \n"
        << endl;
@@ -64,6 +56,22 @@ void Usage( void )
 
 
 
+void Header( Reference::To< Pulsar::Archive > archive )
+{
+  cout << "File: " << archive->get_filename()
+       << " Src: " << archive->get_source()
+       << " Nsub: " << archive->get_nsubint()
+       << " Nch: " << archive->get_nchan()
+       << " Npol: " << archive->get_npol()
+       << " Nbin: " << archive->get_nbin() << endl;
+}
+
+void IntegrationHeader( Reference::To< Pulsar::Integration > intg )
+{
+  cout << "MJD(mid): " << intg->get_epoch().printdays(12);
+  tostring_precision = 3;
+  cout << " Tsub: " << tostring<double>( intg->get_duration() );
+}
 
 void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 {
@@ -79,11 +87,8 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
     if( nsub > 0 )
     {
       archive->remove_baseline();
+      Header( archive );
 
-      cout << "File: " << archive->get_filename();
-      cout << " Src: " << archive->get_source();
-      cout << " Nsub: " << nsub << " Nch: " << nchn <<
-      "  Npol: " << npol << "  Nbin: " << nbin << endl;
       for (unsigned isub = 0; isub < nsub; isub++)
       {
         Integration* intg = archive->get_Integration(isub);
@@ -91,9 +96,7 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
         {
 	  if( per_channel_headers )
 	  {
-	    cout << "MJD(mid): " << intg->get_epoch().printdays(12);
-	    tostring_precision = 3;
-	    cout << " Tsub: " << tostring<double>( intg->get_duration() );
+	    IntegrationHeader( intg );
 	    cout << " ChFreq: " << tostring<double>( intg->get_centre_frequency( ichn ) );
 	    cout << " ChBW: " << intg->get_bandwidth() / nchn;
 	    cout << endl;
@@ -243,6 +246,53 @@ float width (const Profile* profile, float& error, float pc, float dc)
 }
 
 
+void CalParameters( Reference::To< Archive > archive )
+{
+  if (archive->get_npol() == 4)
+    archive->convert_state (Signal::Stokes);
+
+  Header( archive );
+
+  vector< vector< Estimate<double> > > hi;
+  vector< vector< Estimate<double> > > lo;
+
+  for (unsigned isub = 0; isub < archive->get_nsubint(); isub++)
+  {
+    Integration* intg = archive->get_Integration (isub);
+
+    intg->cal_levels(hi,lo);
+    IntegrationHeader( intg );
+    cout << endl;
+
+    cout << "isub ichan freq hi_err";
+    for (unsigned ipol = 0; ipol < archive->get_npol(); ipol++)
+      cout << " hi_pol" << ipol;
+    cout << " lo_err";
+    for (unsigned ipol = 0; ipol < archive->get_npol(); ipol++)
+      cout << " lo_pol" << ipol;
+    cout << endl;
+    
+    for (unsigned ichan = 0; ichan < archive->get_nchan(); ichan++)
+    {
+      cout << isub << " " 
+	   << ichan << " " << intg->get_centre_frequency( ichan ) << " "
+	   << hi[0][ichan].get_error();
+
+      for (unsigned ipol = 0; ipol < archive->get_npol(); ipol++)
+	cout << " " << hi[ipol][ichan].get_value();
+
+      cout << " " << lo[0][ichan].get_error();
+
+      for (unsigned ipol = 0; ipol < archive->get_npol(); ipol++)
+	cout << " " << lo[ipol][ichan].get_value();
+
+      cout << endl;
+
+    }
+
+  }
+
+}
 
 
 void Flux( Reference::To< Archive > archive )
@@ -284,84 +334,8 @@ void Flux( Reference::To< Archive > archive )
 }
 
 
-Reference::To<OnPulseEstimator> onpulse;
 
-Reference::To<BaselineEstimator> baseline;
 
-void Poln( Reference::To< Archive > archive )
-{
-  archive->convert_state(Signal::Stokes);
-  archive->remove_baseline();
-
-  if (!onpulse)
-    onpulse = new OnPulseThreshold;
-
-  if (!baseline)
-    baseline = new GaussianBaseline;
-
-  PhaseWeight onmask;
-  PhaseWeight offmask;
-
-  for (unsigned isub = 0; isub < archive->get_nsubint(); isub++)
-  {
-    for (unsigned ichan = 0; ichan < archive->get_nchan(); ichan++)
-    {
-
-      Reference::To<PolnProfile> prof;
-      prof = archive->get_Integration(isub)->new_PolnProfile(ichan);
-
-      cout << archive->get_source();
-
-      cout.setf(ios::showpoint);
-
-      onpulse->set_Profile( prof->get_Profile(0) );
-      onpulse->get_weight( onmask );
-
-      Estimate<double> total_flux = onmask.get_mean ();
-      cout << " <I>=" << total_flux.get_value();
-
-      Profile linear;
-      prof->get_linear( &linear );
-      onmask.set_Profile( &linear );
-      
-      Estimate<double> linear_flux = onmask.get_mean ();
-      cout << " <L>=" << linear_flux.get_value();
-
-      // profile[3] = Stokes V
-      onmask.set_Profile( prof->get_Profile(3) );
-
-      Estimate<double> circular_flux = onmask.get_mean ();
-      cout << " <V>=" << circular_flux.get_value();
-
-      Profile circular;
-      prof->get_circular( &circular );
-      onmask.set_Profile( &circular );
-
-      Estimate<double> abs_circular_flux = onmask.get_mean ();
-      cout << " <|V|>=" << abs_circular_flux.get_value();
-
-      baseline->set_Profile( prof->get_Profile(0) );
-      baseline->get_weight( offmask );
-
-      cout << " sigma=" << offmask.get_variance().get_value();
-
-      cout << " ";
-      if (archive->get_scale() == Signal::Jansky)
-	cout << "mJy";
-      else
-	cout << "Arb";
-
-      float junk = 0;
-
-      double W10 = width( prof->get_Profile(0),junk, 10,dc);
-      cout << " W10=" << W10 * 360.0 << "deg";
-
-      double W50 = width( prof->get_Profile(0),junk, 50,dc);
-      cout << " W50=" << W50 * 360.0 << "deg" << endl;
-
-    }
-  }
-}
 
 
 
@@ -386,12 +360,12 @@ void ProcessArchive( string filename )
 
   if( archive )
   {
+    if( cal_parameters )
+      CalParameters( archive );
     if( cmd_text )
       OutputDataAsText( archive );
     if( cmd_flux )
       Flux( archive );
-    if( cmd_poln )
-      Poln( archive );
   }
 }
 
@@ -402,13 +376,13 @@ int main( int argc, char *argv[] ) try {
 
   int i;
 
-  while( ( i = getopt( argc, argv, "tTf:ph" )) != -1 )
+  while( ( i = getopt( argc, argv, "ctTf:ph" )) != -1 )
   {
     switch( i )
     {
 
-    case 'p':
-      cmd_poln = true;
+    case 'c':
+      cal_parameters = true;
       break;
 
     case 't':
