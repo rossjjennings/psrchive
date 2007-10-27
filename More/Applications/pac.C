@@ -15,9 +15,9 @@
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/IonosphereCalibrator.h"
 #include "Pulsar/CorrectionsCalibrator.h"
+#include "Pulsar/ReflectStokes.h"
 
 #include "Pulsar/ProcHistory.h"
-
 #include "Pulsar/Feed.h"
 
 #include "Error.h"
@@ -29,7 +29,7 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:BbCcDd:e:fFGhiIM:m:n:Oop:Pqr:sSt:Tu:vVwZ";
+const char* args = "A:BbCcDd:e:fFGhiIJM:m:n:Oop:PqRr:sSt:Tu:vVwZ";
 
 void usage ()
 {
@@ -59,6 +59,10 @@ void usage ()
     "  -B                     Fix the off-pulse baseline statistics \n"
     "  -D                     Fix the reference degree of polarization \n"
     "\n"
+    "Off-pulse polarimetry options: \n"
+    "  -R                     Remove baseline \n"
+    "  -J                     Disable deparallactification \n"
+    "\n"
     "Matching options: \n"
     "  -m [b|a]               Use only calibrator before|after observation\n"
     "  -c                     Do not try to match sky coordinates\n"
@@ -82,23 +86,15 @@ void usage ()
        << endl;
 }
 
-#define Stokes_Q 0x01
-#define Stokes_U 0x02
-#define Stokes_V 0x04
-
-void sign_flip (Pulsar::Archive* archive, unsigned ipol)
-{
-  for (unsigned isub=0; isub<archive->get_nsubint(); isub++)
-    for (unsigned ichan=0; ichan<archive->get_nchan(); ichan++)
-      *(archive->get_Profile (isub, ipol, ichan)) *= -1.0;
-}
-
 int main (int argc, char *argv[]) {
     
   bool verbose = false;
   bool new_database = true;
   bool do_fluxcal = true;
   bool do_polncal = true;
+
+  bool remove_baseline = false;
+  bool deparallactify = true;
 
   bool write_database_file = false;
   bool check_flags = true;
@@ -131,11 +127,11 @@ int main (int argc, char *argv[]) {
 
   string command = "pac ";
 
-  unsigned char flip_sign = 0x00;
-
   unsigned int index;
   
   string optarg_str;
+
+  Pulsar::ReflectStokes reflections;
 
   while ((gotc = getopt(argc, argv, args)) != -1) 
 
@@ -165,7 +161,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.81 2007/10/02 05:40:09 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.82 2007/10/27 04:22:04 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -242,6 +238,10 @@ int main (int argc, char *argv[]) {
       ionosphere = new Pulsar::IonosphereCalibrator;
       break;
 
+    case 'J':
+      deparallactify = false;
+      break;
+
     case 'M':
       metafile = optarg;
       break;
@@ -261,28 +261,12 @@ int main (int argc, char *argv[]) {
 
     case 'n': {
 
-      switch (optarg[0]) {
-
-      case 'Q':
-      case 'q':
-	flip_sign |= Stokes_Q;
-	break;
-
-      case 'U':
-      case 'u':
-	flip_sign |= Stokes_U;
-	break;
-
-      case 'V':
-      case 'v':
-	flip_sign |= Stokes_V;
-	break;
-
-      }
+      reflections.add_reflection( optarg[0] );
 
       command += " -n ";
       command += optarg;
       break;
+
     }
 
     case 'O':
@@ -349,6 +333,10 @@ int main (int argc, char *argv[]) {
 	// just take the rest of the string safely
         command += optarg_str.substr(index+1, optarg_str.length()); 
       }
+      break;
+
+    case 'R':
+      remove_baseline = true;
       break;
 
     case 's':
@@ -508,7 +496,10 @@ int main (int argc, char *argv[]) {
       cerr << "pac: Loading " << filenames[i] << endl;
     
     Reference::To<Pulsar::Archive> arch = Pulsar::Archive::load(filenames[i]);
-    
+
+    if (remove_baseline)
+      arch->remove_baseline ();
+
     cout << "pac: Loaded archive " << filenames[i] << endl;
     
     bool successful_polncal = false;
@@ -628,30 +619,7 @@ int main (int argc, char *argv[]) {
     if (verbose)
       cerr << "pac: Calibrated Archive name '" << newname << "'" << endl;
     
-
-    if (flip_sign) {
-
-      cerr << "pac: Flipping the sign of Stokes";
-      arch->convert_state (Signal::Stokes);
-
-      if (flip_sign & Stokes_Q) {
-	cerr << " Q";
-	sign_flip (arch, 1);
-      }
-
-      if (flip_sign & Stokes_U) {
-	cerr << " U";
-	sign_flip (arch, 2);
-      }
-
-      if (flip_sign & Stokes_V) {
-	cerr << " V";
-	sign_flip (arch, 3);
-      }
-
-      cerr << endl;
-
-    }
+    reflections.transform (arch);
 
     // See if the archive contains a history that should be updated
     
