@@ -11,6 +11,7 @@
 Pulsar::PlotAxis::PlotAxis ()
 {
   label = PlotLabel::unset;
+  displacement = 2.5;
   opt = "BCNST";
   tick = 0.0;
   nsub = 0;
