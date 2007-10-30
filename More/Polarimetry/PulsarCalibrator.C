@@ -13,11 +13,17 @@
 #include "Pulsar/PolnProfileFit.h"
 
 #include "Pulsar/Instrument.h"
+#include "Pulsar/SingleAxis.h"
+#include "Pulsar/Feed.h"
 #include "Pulsar/MeanInstrument.h"
 
-#include "MEAL/Complex2Math.h"
+#include "Pulsar/ReceptionModel.h"
+#include "Pulsar/Fourier.h"
 
-#include "BatchQueue.h"
+#include "MEAL/Complex2Math.h"
+#include "MEAL/Complex2Value.h"
+#include "MEAL/GimbalLockMonitor.h"
+
 #include "toa.h"
 #include "strutil.h"
 
@@ -31,9 +37,9 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)
   chosen_maximum_harmonic = 0;
   choose_maximum_harmonic = false;
   mean_solution = true;
+  monitor_gimbal_lock = true;
   tim_file = 0;
   archive = 0;
-  nthread = 1;
 }
 
 //! Constructor
@@ -117,7 +123,7 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
   
   CorrectionsCalibrator correct;
   if (correct.needs_correction(data)) {
-    if (verbose > 2)
+    // if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::set_standard correcting instrument" 
 	   << endl;
     correct.calibrate( clone );
@@ -158,14 +164,18 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan)
     clone->expert()->fscrunch ();
 
     PolnProfileFit temp;
+
+    if (verbose > 2)
+      PolnProfileFit::verbose = true;
+
     temp.choose_maximum_harmonic = true;
     temp.set_standard ( clone->new_PolnProfile (0) );
 
     chosen_maximum_harmonic = temp.get_nharmonic();
     
-    if (verbose > 2)
+    if (verbose)
       cerr << "Pulsar::PulsarCalibrator::build max harmonic="
-	   << chosen_maximum_harmonic << endl;
+	   << chosen_maximum_harmonic << "/" << clone->get_nbin()/2 << endl;
 
   }
 
@@ -203,15 +213,9 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan)
 
 }
 
-void Pulsar::PulsarCalibrator::set_nthread (unsigned n)
+void Pulsar::PulsarCalibrator::set_nthread (unsigned nthread)
 {
-#if HAVE_PTHREAD
-  nthread = n;
-#else
-  if (n > 1)
-    throw Error (InvalidState, "Pulsar::PulsarCalibrator::set_nthread",
-		 "threads are not available");
-#endif
+  queue.resize (nthread);
 }
 
 //! Add the observation to the set of constraints
@@ -244,6 +248,14 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try
     cerr << "Pulsar::PulsarCalibrator::add_observation warning:\n"
       "  data has already been calibrated" << endl;
 
+  Reference::To<Archive> clone;
+
+  if (must_correct_backend (data) ) {
+    clone = data->clone();
+    correct_backend (clone);
+    data = clone;
+  }
+
   CorrectionsCalibrator correct;
 
   unsigned nsub = data->get_nsubint ();
@@ -257,17 +269,13 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try
   if (tim_file)
     archive = data;
 
-  BatchQueue queue (nthread);
-
   for (unsigned isub=0; isub<nsub; isub++) {
 
     // cerr << "solving isub=" << isub << " ..." << endl;
 
     const Integration* integration = data->get_Integration (isub);
 
-    Jones<double> jones;
-    jones = correct.get_transformation( data, isub );
-    corrections.set_value( jones );
+    corrections = correct.get_transformation( data, isub );
 
     // if 5% of the solutions diverge from the mean, clear the mean
     unsigned clean_mean = nchan/20;
@@ -297,12 +305,12 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try
     if (!tim_file)
       continue;
 
-    // produce a TOA!
+    // produce TOAs!
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
-      unsigned nfree = model[ichan]->get_fit_nfree ();
-      float chisq = model[ichan]->get_fit_chisq ();
+      unsigned nfree = model[ichan]->get_model()->get_fit_nfree ();
+      float chisq = model[ichan]->get_model()->get_fit_chisq ();
 
       float reduced_chisq = chisq / nfree;
 
@@ -338,13 +346,35 @@ catch (Error& error) {
   throw error += "Pulsar::PulsarCalibrator::add_observation";
 }
 
+Functor< bool(float) >
+gimbal_lock( Calibration::Instrument* instrument, unsigned receptor )
+{
+  Calibration::Feed* feed = instrument->get_feed();
+  Calibration::SingleAxis* backend = instrument->get_backend();
 
-MEAL::Complex2* Pulsar::PulsarCalibrator::new_transformation () const
+  MEAL::GimbalLockMonitor* condition = new MEAL::GimbalLockMonitor;
+  condition->set_yaw  ( feed->get_orientation_transformation( receptor ) );
+  condition->set_pitch( feed->get_ellipticity_transformation( receptor ) );
+  condition->set_roll ( backend->get_rotation_transformation() );
+
+  return Functor< bool(float) > ( condition,
+				  &MEAL::GimbalLockMonitor::all_clear );
+}
+
+MEAL::Complex2* Pulsar::PulsarCalibrator::new_transformation (unsigned ichan)
 {
   Calibration::Instrument* instrument = new Calibration::Instrument;
   instrument->set_cyclic();
+
+  if (monitor_gimbal_lock)
+    for (unsigned i=0; i<2; i++)
+      model[ichan]->get_model()->add_fit_convergence_condition
+	( gimbal_lock(instrument, i) );
+
   return instrument;
 }
+
+float reduced_chisq = 0;
 
 void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 {
@@ -364,37 +394,45 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 
   if (data->get_weight (ichan) == 0) {
     if (verbose > 2)
-      cerr << "Pulsar::PulsarCalibrator::solve ichan="
+      cerr << "Pulsar::PulsarCalibrator::solve observation ichan="
 	   << ichan << " flagged invalid" << endl;
     transformation[ichan] = 0;
     return;
   }
-
-  float reduced_chisq = 0.0;
 
   for (unsigned tries=0 ; tries < 2; tries ++) try {
 
     bool set_model = false;
 
     if (!transformation[ichan]) {
-      transformation[ichan] = new_transformation();
+      transformation[ichan] = new_transformation(ichan);
       set_model = true;
     }
 
-    if (one_channel || set_model)
-      model[mchan]->set_transformation (transformation[ichan] * &corrections);
+    if (one_channel || set_model) {
+      Reference::To<MEAL::Complex2> c = new MEAL::Complex2Value(corrections);
+      model[mchan]->set_transformation (transformation[ichan] * c);
+    }
 
     if (solution[ichan])
       solution[ichan]->update( transformation[ichan] );
-    else if (ichan>0 && tries==0 && solution[ichan-1])
+
+    else if (ichan>0 && tries==0 && solution[ichan-1] && reduced_chisq < 1.2)
       solution[ichan-1]->update( transformation[ichan] );
+
+    if (verbose)
+      cerr << "Pulsar::PulsarCalibrator::solve chan=" << mchan << endl;
 
     model[mchan]->fit( data->new_PolnProfile (ichan) );
 
-    unsigned nfree = model[mchan]->get_fit_nfree ();
-    float chisq = model[mchan]->get_fit_chisq ();
+    unsigned nfree = model[mchan]->get_model()->get_fit_nfree ();
+    float chisq = model[mchan]->get_model()->get_fit_chisq ();
 
     reduced_chisq = chisq / nfree;
+
+    if (verbose)
+      cerr << "Pulsar::PulsarCalibrator::solve chisq=" << chisq 
+	   << "/nfree=" << nfree << " = " << reduced_chisq << endl;
 
     if (reduced_chisq < 2.0)
       break;
@@ -413,11 +451,13 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
   }
   catch (Error& error) {
     cerr << "Pulsar::PulsarCalibrator::solve ichan=" << ichan 
-         << " error" << endl;
+         << " error" << error << endl;
+#if 0
     if (verbose > 2)
       cerr << error << endl;
     else
       cerr << error.get_message() << endl;
+#endif
     transformation[ichan] = 0;
     solution[ichan] = 0;
   }
@@ -465,7 +505,7 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 
   if (normalize_gain) {
     Calibration::Instrument* inst;
-    inst = dynamic_cast<Calibration::Instrument*>(transformation[ichan].get());
+    inst = dynamic_kast<Calibration::Instrument>(transformation[ichan]);
     if (!inst)
       throw Error (InvalidState, "Pulsar::PulsarCalibrator::solve",
 		   "transformation[%d] is not an Instrument", ichan);
@@ -488,7 +528,7 @@ void Pulsar::PulsarCalibrator::update_solution ()
   for (unsigned ichan=0; ichan < nchan; ichan++) {
     if (solution[ichan]) {
       if (!transformation[ichan])
-	transformation[ichan] = new_transformation ();
+	transformation[ichan] = new_transformation (ichan);
       solution[ichan]->update( transformation[ichan] );
     }
   }
