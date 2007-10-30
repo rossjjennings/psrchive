@@ -202,6 +202,13 @@ void Calibration::ReceptionModel::set_fit_maximum_iterations (unsigned max)
   maximum_iterations = max;
 }
 
+//! Add a convergence conditions
+void Calibration::ReceptionModel::add_fit_convergence_condition
+( Functor< bool(float) > condition )
+{
+  convergence_condition.push_back( condition );
+}
+
 //! Set the convergence threshold
 void Calibration::ReceptionModel::set_fit_convergence_threshold (float ct,
 								 bool exact)

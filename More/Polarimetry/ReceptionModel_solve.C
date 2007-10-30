@@ -157,9 +157,15 @@ void Calibration::ReceptionModel::solve ()
 
   // the engine used to find the chi-squared minimum
   MEAL::LevenbergMarquardt< Jones<double> > fit;
-#ifdef _DEBUG
-    fit.verbose = 1;
-#endif
+
+  // get info from all of the MEAL classes
+  // MEAL::Function::verbose = 1;
+
+  // get info from the LevenbergMarquardt algorithm
+  // fit.verbose = 3
+
+  // get info from this method
+  // fit_debug = true;
 
   // The abscissa, ordinate and ordinate error are contained in
   // Calibration::CoherencyMeasurementSet
@@ -212,6 +218,14 @@ void Calibration::ReceptionModel::solve ()
 
     if (chisq < best_chisq)
       best_chisq = chisq;
+
+    bool reiterate = false;
+    for (unsigned i=0; i < convergence_condition.size(); i++)
+      if ( !convergence_condition[i](reduced_chisq) )
+	reiterate = true;
+
+    if (reiterate)
+      continue;
 
     if (fit.lamda == 0.0 && fabs(delta_chisq) < 1.0 && delta_chisq <= 0)  {
       if (fit_debug)

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModel.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/09/01 02:12:54 $
+   $Revision: 1.11 $
+   $Date: 2007/10/30 02:31:48 $
    $Author: straten $ */
 
 #ifndef __ReceptionModel_H
@@ -76,6 +76,9 @@ namespace Calibration {
     //! Set the maximum number of iterations in fit algorithm
     void set_fit_maximum_iterations (unsigned maximum_iterations);
 
+    //! Add a convergence conditions
+    void add_fit_convergence_condition( Functor< bool(float) > );
+
     //! Set the convergence threshold
     void set_fit_convergence_threshold (float delta_chi_squared,
 					bool exact_solution = false);
@@ -124,6 +127,9 @@ namespace Calibration {
 
     //! The convergence threshold;
     float convergence_threshold;
+
+    //! Additional convergence conditions
+    std::vector< Functor< bool(float) > > convergence_condition;
 
     //! The maximum reduced chi-squared allowed
     float maximum_reduced;
