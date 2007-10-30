@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.69 $
-   $Date: 2007/10/27 04:22:13 $
+   $Revision: 1.70 $
+   $Date: 2007/10/30 02:30:27 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -496,7 +496,6 @@ int actual_main (int argc, char *argv[]) try {
       if (level > 2) 
         Calibration::ReceptionModel::verbose = true;
 
-
       Pulsar::Calibrator::verbose = level;
       Pulsar::Archive::set_verbosity (level);
 
@@ -860,7 +859,7 @@ int actual_main (int argc, char *argv[]) try {
 
   Reference::To<Pulsar::Archive> solution = model.new_solution (archive_class);
 
-  cerr << "pcm: unloading solution to " << solution->get_filename() << endl;
+  cerr << "pcm: unloading solution to pcm.fits" << endl;
   solution->unload( "pcm.fits" );
 
 #if HAVE_PGPLOT
@@ -1015,6 +1014,8 @@ int mode_B (const char* standard_filename,
 
   Reference::To<Pulsar::Archive> standard;
 
+  cerr << "pcm: loading and setting standard" << endl;
+
   standard = Pulsar::Archive::load (standard_filename);
   standard->convert_state (Signal::Stokes);
   reflections.transform (standard);
@@ -1026,7 +1027,7 @@ int mode_B (const char* standard_filename,
   model.set_standard (standard);
 
   clock.stop();
-  cerr << "pcm: set_standard completed in " << clock << endl;
+  cerr << "pcm: standard set in " << clock << endl;
 
   if (verbose)
     cerr << "pcm: loading " << filenames.size() << " files" << endl;
@@ -1045,10 +1046,18 @@ int mode_B (const char* standard_filename,
     archive->convert_state (Signal::Stokes);
     reflections.transform (archive);
 
-    cout << "pcm: loaded archive: " << filenames[i] << endl;
+    cerr << "pcm: loaded archive: " << filenames[i] << endl;
+
+    cerr << "pcm: performing fit in each channel ..." << endl;
+
+    clock.start();
 
     model.add_observation( archive );
     solution = model.new_solution (archive_class);
+
+    clock.stop();
+
+    cerr << "pcm: fit completed in " << clock << endl;
 
     string filename = replace_extension (filenames[i], ".pfit");
     cerr << "pcm: unloading solution to " << filename << endl;
