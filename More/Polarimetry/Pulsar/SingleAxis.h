@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxis.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.9 $
+   $Date: 2007/10/30 02:31:51 $
    $Author: straten $ */
 
 #ifndef __Calibration_SingleAxis_H
@@ -106,6 +106,15 @@ namespace Calibration {
 
     //! Return the name of the class
     std::string get_name () const;
+
+    //! Get the gain transformation
+    MEAL::Gain* get_gain_transformation ();
+
+    //! Get the boost transformation
+    MEAL::Boost1* get_boost_transformation ();
+
+    //! Get the rotation transformation
+    MEAL::Rotation1* get_rotation_transformation ();
 
   protected:
 

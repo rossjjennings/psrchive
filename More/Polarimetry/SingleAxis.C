@@ -279,3 +279,21 @@ Calibration::SingleAxis::operator *= (const SingleAxis& other)
 
   return *this;
 }
+
+//! Get the gain transformation
+MEAL::Gain* Calibration::SingleAxis::get_gain_transformation ()
+{
+  return gain;
+}
+
+    //! Get the boost transformation
+MEAL::Boost1* Calibration::SingleAxis::get_boost_transformation ()
+{
+  return boost;
+}
+
+//! Get the rotation transformation
+MEAL::Rotation1* Calibration::SingleAxis::get_rotation_transformation ()
+{
+  return rotation;
+}
