@@ -79,6 +79,12 @@ void MEAL::Function::copy_parameter_policy (const Function* function)
   parameter_policy = function->parameter_policy;
 }
 
+void MEAL::Function::set_parameter_policy (ParameterPolicy* policy)
+{
+  parameter_policy = policy;
+  parameter_policy->context = this;
+}
+
 Estimate<double> MEAL::Function::get_Estimate (unsigned index) const
 {
   return Estimate<double> ( get_param(index), get_variance(index) );
