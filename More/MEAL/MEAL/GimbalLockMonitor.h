@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/GimbalLockMonitor.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/10/30 03:26:55 $
+   $Revision: 1.2 $
+   $Date: 2007/10/30 03:29:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_GimbalLockMonitor_h
 #define __Pulsar_GimbalLockMonitor_h
 
-#include "Meal/Rotation1.h"
+#include "MEAL/Rotation1.h"
 
 namespace MEAL {
 
