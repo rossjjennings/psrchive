@@ -103,17 +103,13 @@ Calibration::Feed::~Feed ()
 
 void Calibration::Feed::set_cyclic (bool flag)
 {
-  // disable automatic installation so that copy can be made
-  ModifyRestore<bool> (MEAL::ParameterPolicy::auto_install, false);
-
   if (flag) {
-
 
     for (unsigned ir=0; ir<2; ir++) {
 
       // set up the cyclic boundary for orientation
       MEAL::CyclicParameter* o_cyclic = 0;
-      o_cyclic = new MEAL::CyclicParameter (orientation[ir]);
+      o_cyclic = new MEAL::CyclicParameter;
 
       o_cyclic->set_period (M_PI);
       o_cyclic->set_upper_bound (M_PI/2);
@@ -123,7 +119,7 @@ void Calibration::Feed::set_cyclic (bool flag)
 
       // set up the cyclic boundary for ellipticity
       MEAL::CyclicParameter* e_cyclic = 0;
-      e_cyclic = new MEAL::CyclicParameter (ellipticity[ir]);
+      e_cyclic = new MEAL::CyclicParameter;
 
       e_cyclic->set_period (M_PI);
       e_cyclic->set_upper_bound (M_PI/4);
@@ -131,7 +127,6 @@ void Calibration::Feed::set_cyclic (bool flag)
       e_cyclic->set_azimuth (o_cyclic);
 
       ellipticity[ir]->set_parameter_policy (e_cyclic);
-
 
     }
 
@@ -142,10 +137,10 @@ void Calibration::Feed::set_cyclic (bool flag)
 
     for (unsigned ir=0; ir<2; ir++) {
 
-      noncyclic = new MEAL::OneParameter (ellipticity[ir]);
+      noncyclic = new MEAL::OneParameter;
       ellipticity[ir]->set_parameter_policy (noncyclic);
 
-      noncyclic = new MEAL::CyclicParameter (orientation[ir]);
+      noncyclic = new MEAL::OneParameter;
       orientation[ir]->set_parameter_policy (noncyclic);
 
     }
@@ -188,3 +183,16 @@ Estimate<double> Calibration::Feed::get_orientation (unsigned ireceptor) const
   return orientation[ireceptor]->get_Estimate (0);
 }
 
+//! Get the orientation tranformation for the specified receptor
+MEAL::Rotation1* Calibration::Feed::get_orientation_transformation (unsigned i)
+{
+  assert( i < 2 );
+  return orientation[i];
+}
+
+//! Get the ellipticity tranformation for the specified i
+MEAL::Rotation1* Calibration::Feed::get_ellipticity_transformation (unsigned i)
+{
+  assert( i < 2 );
+  return ellipticity[i];
+}

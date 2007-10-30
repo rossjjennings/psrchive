@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Feed.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.8 $
+   $Date: 2007/10/30 02:31:27 $
    $Author: straten $ */
 
 #ifndef __Calibration_Feed_H
@@ -72,6 +72,12 @@ namespace Calibration {
 
     //! Return the name of the class
     std::string get_name () const;
+
+    //! Get the orientation tranformation for the specified receptor
+    MEAL::Rotation1* get_orientation_transformation( unsigned receptor );
+
+    //! Get the ellipticity tranformation for the specified receptor
+    MEAL::Rotation1* get_ellipticity_transformation( unsigned receptor );
 
   protected:
 
