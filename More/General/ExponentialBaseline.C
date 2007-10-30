@@ -8,6 +8,7 @@
 #include "Pulsar/ExponentialBaseline.h"
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
+#include "ExponentialDistribution.h"
 
 #include <iostream>
 using namespace std;
@@ -16,7 +17,22 @@ using namespace std;
 
 Pulsar::ExponentialBaseline::ExponentialBaseline ()
 {
-  threshold = 3.0;
+  set_threshold (1.0);
+}
+
+//! Set the threshold below which samples are included in the baseline
+void Pulsar::ExponentialBaseline::set_threshold (float sigma)
+{
+  IterativeBaseline::set_threshold (sigma);
+
+  ExponentialDistribution exponential;
+
+  moment_correction = 1.0 / exponential.cumulative_mean (threshold);
+#ifndef _DEBUG
+  if (Profile::verbose)
+#endif
+    cerr << "Pulsar::ExponentialBaseline::set_threshold sigma=" << sigma
+	 << " correction=" << moment_correction << endl;
 }
 
 void Pulsar::ExponentialBaseline::get_bounds (PhaseWeight& weight, 
@@ -31,4 +47,8 @@ void Pulsar::ExponentialBaseline::get_bounds (PhaseWeight& weight,
 
   lower = 0.0;
   upper = threshold * weight.get_mean().get_value();
+
+  if (!get_initial_bounds())
+    upper *= moment_correction;
+
 }
