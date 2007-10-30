@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/OneParameter.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/10/02 05:43:00 $
+   $Revision: 1.8 $
+   $Date: 2007/10/30 02:30:51 $
    $Author: straten $ */
 
 #ifndef __OneParameter_H
@@ -26,7 +26,7 @@ namespace MEAL {
   public:
 
     //! Default constructor
-    OneParameter (Function* context);
+    OneParameter (Function* context = 0);
 
     //! Copy constructor
     OneParameter (const OneParameter& np);

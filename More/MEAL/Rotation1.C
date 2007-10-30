@@ -53,9 +53,12 @@ Estimate<double> MEAL::Rotation1::get_phi () const
 
 void MEAL::Rotation1::set_parameter_policy (OneParameter* policy)
 {
-  OneParameter* current = dynamic_cast<OneParameter*>(parameter_policy.get());
-  *policy = *current;
-  parameter_policy = policy;
+  if (policy) {
+    OneParameter* current = dynamic_kast<OneParameter>(parameter_policy);
+    if (current)
+      *policy = *current;
+  }
+  Function::set_parameter_policy( policy );
 }
 
 //! Calculate the Jones matrix and its gradient
@@ -64,15 +67,15 @@ void MEAL::Rotation1::calculate (Jones<double>& result,
 {
   double phi = get_param(0);
 
-  if (verbose)
-    cerr << "MEAL::Rotation1::calculate axis=" << axis 
-	 << " phi=" << phi << endl;
-
   double sin_phi = sin (phi);
   double cos_phi = cos (phi);
 
   Quaternion<double, Unitary> rotation (cos_phi, sin_phi*axis);
   result = convert (rotation);
+
+  if (verbose)
+    cerr << "MEAL::Rotation1::calculate axis=" << axis 
+	 << " phi=" << phi << " det(J)=" << det(result) << endl;
 
   if (!grad)
     return;
