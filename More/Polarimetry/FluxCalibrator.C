@@ -290,12 +290,19 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
 
   gain.resize (nchan);
 
+  unsigned successful = 0;
+
   for (unsigned ichan=0; ichan<nchan; ++ichan) try {
     gain[ichan] = data[ichan].get_S_cal().get_value();
+    successful ++;
   }
   catch (Error& error) {
     gain[ichan] = 0;
   }
+
+  if (!successful)
+    throw Error (InvalidState, "Pulsar::FluxCalibrator::create",
+		 "failed in all %u channels", nchan);
 
   resize (required_nchan);
 
