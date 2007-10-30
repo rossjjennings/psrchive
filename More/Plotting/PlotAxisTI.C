@@ -15,6 +15,10 @@ Pulsar::PlotAxis::Interface::Interface (PlotAxis* instance)
        &PlotAxis::set_label,
        "lab", "Label to be drawn on axis" );
 
+  add( &PlotAxis::get_displacement,
+       &PlotAxis::set_displacement,
+       "disp", "Displacement between label and axis" );
+
   add( &PlotAxis::get_opt,
        &PlotAxis::set_opt,
        "opt", "Options passed to PGBOX" );
