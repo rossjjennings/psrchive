@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesFluctPlot.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/10/02 05:08:15 $
+   $Revision: 1.6 $
+   $Date: 2007/10/30 02:31:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesFluctPlot_h
@@ -36,6 +36,12 @@ namespace Pulsar {
     public:
       Interface (StokesFluctPlot* = 0);
     };
+
+    //! Perform any preprocessing steps
+    void prepare (const Archive* data);
+
+    //! Get the default label for the y axis
+    std::string get_ylabel (const Archive*);
 
     //! Return the fluctuation power spectra to be plotted
     void get_profiles (const Archive*);

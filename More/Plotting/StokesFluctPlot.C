@@ -9,6 +9,9 @@
 #include "Pulsar/Polarization.h"
 #include "Pulsar/Fourier.h"
 
+#include "Pulsar/ExponentialBaseline.h"
+#include "Pulsar/PhaseWeight.h"
+
 using namespace std;
 
 Pulsar::StokesFluctPlot::StokesFluctPlot ()
@@ -16,11 +19,47 @@ Pulsar::StokesFluctPlot::StokesFluctPlot ()
   plot_values  = "Ip";
   plot_colours = "123";
   plot_lines   = "111";
+
+  PlotFrame* frame = get_frame();
+
+  // logarithmic axis
+  frame->get_y_axis()->add_opt ('L');
+  // vertical labels
+  frame->get_y_axis()->add_opt ('V');
+  // exponential notation
+  frame->get_y_axis()->add_opt ('2');
+  // increase the space between the label and the axis
+  frame->get_y_axis()->set_displacement (3.0);
+
+  // increase the space between the y-axis and the data
+  frame->get_x_scale()->set_buf_norm (0.04);
+
+  PlotLabel* below = frame->get_label_below();
+
+  // swap the label from the left to the right
+  below->set_right( below->get_left() );
+  below->set_left( PlotLabel::unset );
+
 }
 
 TextInterface::Parser* Pulsar::StokesFluctPlot::get_interface ()
 {
   return new Interface (this);
+}
+
+void Pulsar::StokesFluctPlot::prepare (const Archive* data)
+{
+  FluctPlot::prepare (data);
+
+  float min, max;
+  get_frame()->get_y_scale()->get_minmax (min, max);
+  get_frame()->get_y_scale()->set_minmax (0.0, max);    
+}
+
+//! Return the label for the y-axis
+std::string Pulsar::StokesFluctPlot::get_ylabel (const Archive* data)
+{
+  return "Signal-to-Noise Ratio";
 }
 
 Pulsar::Profile* new_Fluct (const Pulsar::PolnProfile* data, char code)
@@ -109,7 +148,14 @@ void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
       prof = new_Fluct (fft, plot_values[ipol]);
     }
 
+    ExponentialBaseline baseline;
+    Reference::To<PhaseWeight> weight = baseline.baseline( prof );
+    float log_noise = log(weight->get_mean().get_value()) / log(10.0);
+
     prof->logarithm();
+
+    prof->offset( -log_noise );
+
     plotter.profiles[ipol] = prof;
     plotter.plot_sci[ipol] = plot_colours[ipol] - '0';
     plotter.plot_sls[ipol] = plot_lines[ipol] - '0';
