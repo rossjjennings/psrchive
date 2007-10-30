@@ -14,6 +14,8 @@
 #include "Pauli.h"
 #include "ModifyRestore.h"
 
+#include <assert.h>
+
 using namespace std;
 
 #define FEED_BOTH 0
@@ -161,11 +163,13 @@ void Calibration::Feed::set_ellipticity (unsigned ireceptor,
   if (verbose)
     cerr << "Calibration::Feed::set_ellipticity " << chi << endl;
 
+  assert( ireceptor < 2 );
   ellipticity[ireceptor]->set_Estimate (0, chi);
 }
 
 Estimate<double> Calibration::Feed::get_ellipticity (unsigned ireceptor) const
 {
+  assert( ireceptor < 2 );
   return ellipticity[ireceptor]->get_Estimate (0);
 }
 
@@ -175,11 +179,13 @@ void Calibration::Feed::set_orientation (unsigned ireceptor,
   if (verbose)
     cerr << "Calibration::Feed::set_orientation " << theta << endl;
 
+  assert( ireceptor < 2 );
   orientation[ireceptor]->set_Estimate (0, theta);
 }
 
 Estimate<double> Calibration::Feed::get_orientation (unsigned ireceptor) const
 {
+  assert( ireceptor < 2 );
   return orientation[ireceptor]->get_Estimate (0);
 }
 
