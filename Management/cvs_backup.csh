@@ -68,14 +68,6 @@ cd ..
 
 if ( ! -d past ) mkdir past
 
-if ( `date +%a` == "Sun" ) then
-
-  set dir=past/weekly
-  if ( ! -d $dir ) mkdir -p $dir
-  cp current/$file $dir/$file
-
-endif
-
 if ( `date +%d` == "01" ) then
 
   set dir=past/monthly
@@ -84,8 +76,21 @@ if ( `date +%d` == "01" ) then
 
 endif
 
+if ( `date +%a` == "Sun" ) then
+
+  set dir=past/weekly
+  if ( ! -d $dir ) mkdir -p $dir
+  cp current/$file $dir/$file
+
+  # delete all weekly backups older than two months
+  rm `find $dir -ctime +57`
+
+endif
+
 set dir=past/daily
 if ( ! -d $dir ) mkdir -p $dir
-
 mv current/$file $dir/$file
+
+# delete all daily backups older than one week
+rm `find $dir -ctime +5`
 
