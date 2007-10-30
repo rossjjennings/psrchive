@@ -6,8 +6,12 @@
  ***************************************************************************/
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/ProfileAmpsExpert.h"
 
+#include "Pulsar/ProfileAmpsExpert.h"
+#include "Pulsar/ExponentialBaseline.h"
+#include "Pulsar/PhaseWeight.h"
+
+#include "ModifyRestore.h"
 #include "Pauli.h"
 #include "Error.h"
 
@@ -552,8 +556,8 @@ void Pulsar::PolnProfile::get_rss (Profile* rss,
   }
 
   if (!pav_backward_compatibility) {
-    float min_phase = rss->find_min_phase();
-    rss->offset(-rss->mean (min_phase));
+    Reference::To<PhaseWeight> baseline = rss->baseline();
+    rss->offset( -baseline->get_mean().get_value() );
   }
 
   for (ibin=0; ibin<nbin; ibin++)
@@ -563,8 +567,8 @@ void Pulsar::PolnProfile::get_rss (Profile* rss,
       amps[ibin] = sqrt(amps[ibin]);
 
   if (pav_backward_compatibility) {
-    float min_phase = rss->find_min_phase();
-    rss->offset(-rss->mean (min_phase));
+    Reference::To<PhaseWeight> baseline = rss->baseline();
+    rss->offset( -baseline->get_mean().get_value() );
   }
 
 }
@@ -579,7 +583,17 @@ catch (Error& error) {
 
 void Pulsar::PolnProfile::get_linear (Profile* linear) const
 try {
+
+  // create a functor equal to ExponentialBaseline::baseline
+  static Functor< PhaseWeight* (const Profile*) > exponential_baseline
+    ( new ExponentialBaseline, &BaselineEstimator::baseline );
+
+  // temporarily set the baseline strategy
+  ModifyRestore< Functor< PhaseWeight* (const Profile*) > > 
+    ( Profile::baseline_strategy, exponential_baseline );
+
   get_rss (linear, 1,2);
+
 }
 catch (Error& error) {
   throw error += "Pulsar::PolnProfile::get_linear";
