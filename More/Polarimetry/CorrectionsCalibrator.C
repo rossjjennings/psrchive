@@ -303,6 +303,10 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
      
   }
 
+  if (verbose > 2)
+    cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
+      " result\n  " << xform << endl;
+
   return xform;
 
 }
