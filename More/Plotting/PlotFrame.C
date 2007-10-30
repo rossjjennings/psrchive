@@ -120,8 +120,8 @@ void Pulsar::PlotFrame::label_axes (const string& default_x,
   if (transpose)
     swap (xlabel, ylabel);
 
-  cpgmtxt ("L",2.5,.5,.5, ylabel.c_str());
-  cpgmtxt ("B",2.5,.5,.5, xlabel.c_str());
+  cpgmtxt ("L",get_y_axis()->get_displacement(),.5,.5, ylabel.c_str());
+  cpgmtxt ("B",get_x_axis()->get_displacement(),.5,.5, xlabel.c_str());
 }
 
 void Pulsar::PlotFrame::decorate (const Archive* data)

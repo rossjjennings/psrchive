@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotAxis.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/09/25 13:16:49 $
+   $Revision: 1.12 $
+   $Date: 2007/10/30 02:31:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotAxis_h
@@ -36,6 +36,12 @@ namespace Pulsar {
     void set_label (const std::string& _label) { label = _label; }
     //! Get the label to be drawn on the axis
     std::string get_label () const { return label; }
+
+    //! Set the label displacement from edge of viewport
+    /*! In units of the character height (see PGMTXT documentation) */
+    void set_displacement (float d) { displacement = d; }
+    //! Get the label displacement from edge of viewport
+    float get_displacement () const { return displacement; }
 
     //! Set if the frame opposite the axis may have an alternate scale
     void set_alternate (bool f) { alternate = f; }
@@ -66,6 +72,8 @@ namespace Pulsar {
   protected:
 
     std::string label;
+    float displacement;
+
     std::string opt;
     float tick;
     unsigned nsub;
