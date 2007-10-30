@@ -405,6 +405,12 @@ Calibration::ReceptionModel* Pulsar::PolnProfileFit::get_model ()
   return model;
 }
 
+//! Get the measurement equation used to model the fit
+const Calibration::ReceptionModel* Pulsar::PolnProfileFit::get_model () const
+{
+  return model;
+}
+
 //! Get the phase offset between the observation and the standard
 Estimate<double> Pulsar::PolnProfileFit::get_phase () const
 {

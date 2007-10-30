@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.30 $
-   $Date: 2007/10/30 02:31:40 $
+   $Revision: 1.31 $
+   $Date: 2007/10/30 12:03:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -104,6 +104,7 @@ namespace Pulsar {
 
     //! Get the measurement equation used to model the fit
     Calibration::ReceptionModel* get_model ();
+    const Calibration::ReceptionModel* get_model () const;
 
     //! Get the phase offset between the standard and the observation
     Estimate<double> get_phase () const;
