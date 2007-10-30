@@ -7,17 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.24 $
-   $Date: 2007/10/02 05:44:12 $
+   $Revision: 1.25 $
+   $Date: 2007/10/30 02:31:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
 #define __Pulsar_PulsarCalibrator_H
 
 #include "Pulsar/PolnCalibrator.h"
-
-#include "MEAL/Complex2Value.h"
 #include "MEAL/Mean.h"
+#include "BatchQueue.h"
 
 #include <stdio.h>
 
@@ -84,19 +83,19 @@ namespace Pulsar {
     //! Set the number of channels that may be simultaneously solved
     void set_nthread (unsigned nthread);
 
+    //! Set true to detect gimbal lock when rotations are not quaternion
+    bool monitor_gimbal_lock;
+
   protected:
     
     //! Initialize the PolnCalibration::transformation attribute
     virtual void calculate_transformation ();
 
     //! Return a pointer to a newly constructed/initialized transformation
-    MEAL::Complex2* new_transformation () const;
+    MEAL::Complex2* new_transformation (unsigned ichan);
 
     //! The calibration model as a function of frequency
     std::vector< Reference::To<PolnProfileFit> > model;
-
-    //! The array of transformation Model instances
-    // vector< Reference::To<MEAL::Complex2> > transformation;
 
     typedef MEAL::Mean< MEAL::Complex2 > MeanXform;
 
@@ -104,7 +103,7 @@ namespace Pulsar {
     std::vector< Reference::To<MeanXform> > solution;
 
     //! The known instrumental corrections
-    MEAL::Complex2Value corrections;
+    Jones<double> corrections;
 
     //! The model specified on construction
     Calibrator::Type model_type;
@@ -141,8 +140,8 @@ namespace Pulsar {
     //! Archive instance that is currently in use
     const Archive* archive;
 
-    //! The number of channels that may be simultaneously solved
-    unsigned nthread;
+    //! Controls the number of channels that may be simultaneously solved
+    BatchQueue queue;
 
     //! Build the arrays
     void build (unsigned nchan);
