@@ -18,10 +18,6 @@ using namespace std;
 
 Pulsar::GaussianBaseline::GaussianBaseline ()
 {
-  // The threshold attribute is already set by the IterativeBaseline
-  // constructor.  This call sets the moment_correction attribute
-  // accordingly.
-
   set_threshold (1.0);
 }
 
@@ -47,7 +43,8 @@ void Pulsar::GaussianBaseline::get_bounds (PhaseWeight& weight,
 
   weight.stats (profile, &mean, &var, &var_mean);
 
-  double effective_variance = var + var_mean;
+  // note that stats computes an unbiased estimate of the variance
+  double effective_variance = var;
 
   if (!get_initial_bounds())
     effective_variance *= moment_correction;
