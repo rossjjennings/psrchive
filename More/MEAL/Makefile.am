@@ -33,8 +33,8 @@ nobase_include_HEADERS = \
         MEAL/FunctionPolicy.h \
         MEAL/Gain.h \
         MEAL/Gaussian.h \
-        MEAL/PowerLaw.h \
         MEAL/GaussJordan.h \
+	MEAL/GimbalLockMonitor.h \
         MEAL/GroupRule.h \
         MEAL/Invariant.h \
         MEAL/InverseRule.h \
@@ -55,9 +55,10 @@ nobase_include_HEADERS = \
         MEAL/Polar.h \
         MEAL/Polynomial.h \
         MEAL/PositionAngles.h \
-        MEAL/ProductRule.h \
-        MEAL/ProjectGradient.h \
-        MEAL/Projection.h \
+        MEAL/PowerLaw.h \
+	MEAL/ProductRule.h \
+	MEAL/ProjectGradient.h \
+	MEAL/Projection.h \
 	MEAL/RandomPolar.h \
 	MEAL/Real4.h \
 	MEAL/Real4Value.h \
@@ -120,8 +121,10 @@ libMEAL_la_SOURCES = \
         Function_new_Function.C \
         Function_parse.C \
         Function_print.C \
+	FunctionPolicy.C \
         Gain.C \
         Gaussian.C \
+	GimbalLockMonitor.C \
         PowerLaw.C \
         Invariant.C \
 	MuellerTransformation.C \
