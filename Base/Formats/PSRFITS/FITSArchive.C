@@ -877,8 +877,13 @@ try {
   {
 
     const WidebandCorrelator* ext = get<WidebandCorrelator>();
-    if (ext) 
+    if (ext) {
+
+      if (verbose == 3)
+	cerr << "FITSArchive::unload WidebandCorrelator extension" << endl;
       unload (fptr, ext);
+
+    }
 
   }
 
@@ -889,7 +894,9 @@ try {
       
       if (verbose == 3)
 	cerr << "FITSArchive::unload " << backend->get_extension_name()
-	     << " name=" << backend->get_name() << endl;
+	     << " BACKEND=" << backend->get_name() 
+	     << " BE_DCC=" << backend->get_downconversion_corrected()
+	     << " BE_PHASE=" << backend->get_argument() << endl;
       
       psrfits_update_key (fptr, "BACKEND",  backend->get_name());
       

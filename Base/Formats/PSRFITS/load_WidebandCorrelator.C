@@ -28,17 +28,18 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
     string temp;
     string dfault;
 
-    if (verbose == 3)
-      cerr << "FITSArchive::load_WidebandCorrelator instrument name" << endl;
-    
     psrfits_read_key (fptr, "BACKEND", &temp, dfault, verbose == 3);
     ext->set_name(temp);
     
     if (verbose == 3)
-      cerr << "FITSArchive::load_WidebandCorrelator instrument config" << endl;
+      cerr << "FITSArchive::load_WidebandCorrelator BACKEND=" << temp << endl;
     
     psrfits_read_key (fptr, "BECONFIG", &temp, dfault, verbose == 3);
     ext->configfile = temp;
+
+    if (verbose == 3)
+      cerr << "FITSArchive::load_WidebandCorrelator BECONFIG=" << temp << endl;
+    
   }
 
   {
@@ -46,8 +47,15 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
     psrfits_read_key (fptr, "BE_PHASE", &temp, 0, verbose == 3);
     ext->set_argument( (Signal::Argument) temp );
 
+    if (verbose == 3)
+      cerr << "FITSArchive::load_WidebandCorrelator BE_PHASE=" << temp << endl;
+    
     psrfits_read_key (fptr, "BE_DCC",  &temp, 0, verbose == 3);
     ext->set_downconversion_corrected( temp );
+
+    if (verbose == 3)
+      cerr << "FITSArchive::load_WidebandCorrelator BE_DCC=" << temp << endl;
+    
   }
 
   if (verbose == 3)
