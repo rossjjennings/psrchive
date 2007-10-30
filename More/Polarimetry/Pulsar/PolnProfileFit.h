@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.29 $
-   $Date: 2007/06/21 17:32:05 $
+   $Revision: 1.30 $
+   $Date: 2007/10/30 02:31:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -102,17 +102,8 @@ namespace Pulsar {
     //! Get the number of harmonics to be included
     unsigned get_nharmonic () const { return n_harmonic; }
 
-    //! The number of iterations in last call to fit method
-    unsigned get_fit_iterations () const;
-
-    //! The number of free parameters in last call to fit method
-    unsigned get_fit_nfree () const;
-
-    //! The chi-squared in last call to fit method
-    float get_fit_chisq () const;
-
-    //! Get the covariance matrix of the last fit
-    void get_fit_covariance (std::vector< std::vector<double> >& c) const;
+    //! Get the measurement equation used to model the fit
+    Calibration::ReceptionModel* get_model ();
 
     //! Get the phase offset between the standard and the observation
     Estimate<double> get_phase () const;

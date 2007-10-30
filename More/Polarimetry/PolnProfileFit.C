@@ -273,6 +273,7 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 		 obs_harmonic, n_harmonic);
 
   Reference::To<PolnProfile> fourier = fourier_transform (observation);
+
   fourier->convert_state (Signal::Stokes);
   // Drop the Nyquist bin
   fourier->resize( observation->get_nbin() );
@@ -391,36 +392,17 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   if (verbose)
     cerr << "Pulsar::PolnProfileFit::fit solved in " << clock << "."
-      " chisq=" << get_fit_chisq() / get_fit_nfree() << endl;
+      " chisq=" << model->get_fit_chisq() / model->get_fit_nfree() << endl;
 
 }
 catch (Error& error) {
   throw error += "Pulsar::PolnProfileFit::fit";
 }
 
-//! The number of iterations in last call to solve method
-unsigned Pulsar::PolnProfileFit::get_fit_iterations () const
+//! Get the measurement equation used to model the fit
+Calibration::ReceptionModel* Pulsar::PolnProfileFit::get_model ()
 {
-  return model->get_fit_iterations();
-}
-
-//! The chi-squared in last call to solve method
-float Pulsar::PolnProfileFit::get_fit_chisq () const
-{
-  return model->get_fit_chisq();
-}
-
-//! The number of free parameters in last call to solve method
-unsigned Pulsar::PolnProfileFit::get_fit_nfree () const
-{
-  return model->get_fit_nfree();
-}
-
-//! Get the covariance matrix of the last fit
-void 
-Pulsar::PolnProfileFit::get_fit_covariance (vector<vector<double> >& c) const
-{
-  model->get_fit_covariance (c);
+  return model;
 }
 
 //! Get the phase offset between the observation and the standard
