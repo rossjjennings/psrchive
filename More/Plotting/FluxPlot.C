@@ -58,19 +58,18 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
   if (baseline_zoom)
     selection = plotter.profiles[0]->baseline();
 
-  if (selection) {
+  if (selection && baseline_zoom) {
+
     if (verbose)
       cerr << "Pulsar::FluxPlot::prepare using selected bins" << endl;
 
     double min = selection->get_min();
     double max = selection->get_max();
 
-    if (baseline_zoom) {
-      Estimate<double> mean = selection->get_mean();
-      Estimate<double> rms = sqrt(selection->get_variance());
-      min = std::min( min, mean.get_value() - baseline_zoom*rms.get_value() );
-      max = std::max( max, mean.get_value() + baseline_zoom*rms.get_value() );
-    }
+    Estimate<double> mean = selection->get_mean();
+    Estimate<double> rms = sqrt(selection->get_variance());
+    min = std::min( min, mean.get_value() - baseline_zoom*rms.get_value() );
+    max = std::max( max, mean.get_value() + baseline_zoom*rms.get_value() );
 
     frame->get_y_scale()->set_minmax (min, max);
 
@@ -98,14 +97,18 @@ void Pulsar::FluxPlot::draw (const Archive* data)
     plot_error_box (data);
 
   if (selection)
-    plot_selection (data);
+    plot_selection ();
   
 }
 
-void Pulsar::FluxPlot::plot_selection (const Archive* data)
+void Pulsar::FluxPlot::plot_selection ()
 {
-  vector<float> x;
-  get_scale()->get_ordinates (data, x);
+#ifdef _DEBUG
+  cerr << "Pulsar::FluxPlot::plot_selection" << endl;
+#endif
+
+  vector<float> x = plotter.ordinates;
+  float scale = ((x.back() - x.front()) * x.size()) / (x.size()-1);
 
   const float* amps = plotter.profiles[0]->get_amps();
 
@@ -118,12 +121,15 @@ void Pulsar::FluxPlot::plot_selection (const Archive* data)
 
   for( int range = range_start; range < range_end; range ++ )
   {
-    float xoff = float(range) * get_scale()->get_scale(data);
+    float xoff = float(range) * scale;
 
     for (unsigned i=0; i<x.size(); i++)
       if ((*selection)[i])
 	cpgpt1 (x[i] + xoff, amps[i], 17);
   }
+
+  if (!baseline_zoom)
+    return;
 
   float x_min = 0;
   float x_max = 0;
@@ -164,6 +170,9 @@ void Pulsar::FluxPlot::plot_profile (const Profile* data)
 
   pair<float,float> range = get_frame()->get_x_scale()->get_range_norm();
   plotter.draw ( data, range.first, range.second );
+
+  if (selection)
+    plot_selection ();  
 }
 
 //! Scale in on the on-pulse region
