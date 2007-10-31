@@ -120,6 +120,17 @@ void Pulsar::PlotFrame::label_axes (const string& default_x,
   if (transpose)
     swap (xlabel, ylabel);
 
+#ifdef _DEBUG
+  cerr << "x label='" << xlabel << "'" << endl;
+  cerr << "y label='" << ylabel << "'" << endl;
+#endif
+
+  if (xlabel.empty())
+    xlabel = " ";
+
+  if (ylabel.empty())
+    ylabel = " ";
+
   cpgmtxt ("L",get_y_axis()->get_displacement(),.5,.5, ylabel.c_str());
   cpgmtxt ("B",get_x_axis()->get_displacement(),.5,.5, xlabel.c_str());
 }
