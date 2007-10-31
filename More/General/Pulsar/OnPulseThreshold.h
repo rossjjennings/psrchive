@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/OnPulseThreshold.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/09/24 08:53:16 $
+   $Revision: 1.5 $
+   $Date: 2007/10/31 11:34:20 $
    $Author: straten $ */
 
 #ifndef __Pulsar_OnPulseThreshold_h
@@ -39,6 +39,9 @@ namespace Pulsar {
     //! Get the threshold
     float get_threshold () const;
 
+    //! Allow negative on-pulse phase bins
+    void set_allow_negative (bool);
+
     //! Set the BaselineEstimator used to find the off-pulse phase bins
     void set_baseline_estimator (BaselineEstimator*);
 
@@ -56,6 +59,9 @@ namespace Pulsar {
 
     //! The threshold
     float threshold;
+
+    //! Take the absolute value
+    bool allow_negative;
 
     //! The first bin in the selected range
     int bin_start;

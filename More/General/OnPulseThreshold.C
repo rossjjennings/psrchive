@@ -19,6 +19,7 @@ void nbinify (int& istart, int& iend, int nbin);
 Pulsar::OnPulseThreshold::OnPulseThreshold ()
 {
   threshold = 3.0; // sigma
+  allow_negative = false;
 
   bin_start = bin_end = 0;
   range_specified = false;
@@ -35,6 +36,12 @@ void Pulsar::OnPulseThreshold::set_threshold (float _threshold)
 float Pulsar::OnPulseThreshold::get_threshold () const
 {
   return threshold;
+}
+
+//! Allow negative on-pulse phase bins
+void Pulsar::OnPulseThreshold::set_allow_negative (bool flag)
+{
+  allow_negative = flag;
 }
 
 //! Set the BaselineEstimator used to find the off-pulse phase bins
@@ -107,9 +114,16 @@ try {
 
   float cutoff = threshold * rms.get_value();
 
-  for (int ibin=start; ibin<stop; ibin++)
-    if ( amps[ibin % nbin] - mean.get_value() > cutoff )
+  for (int ibin=start; ibin<stop; ibin++) {
+
+    float diff = amps[ibin % nbin] - mean.get_value();
+    if (allow_negative)
+      diff = fabs(diff);
+
+    if ( diff > cutoff )
       weight[ibin] = 1.0;
+
+  }
 
 }
 catch (Error& error) {
