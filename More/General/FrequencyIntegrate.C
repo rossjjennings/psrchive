@@ -13,6 +13,36 @@
 
 using namespace std;
 
+//! Default constructor
+Pulsar::FrequencyIntegrate::FrequencyIntegrate ()
+{
+  set_range_policy( new EvenlySpaced );
+  dedisperse = true;
+  defaraday = true;
+}
+
+//! Correct dispersion before integrating, if necessary
+void Pulsar::FrequencyIntegrate::set_dedisperse (bool flag)
+{
+  dedisperse = flag;
+}
+
+bool Pulsar::FrequencyIntegrate::get_dedisperse () const
+{
+  return dedisperse;
+}
+
+//! Correct Faraday rotation before integrating, if necessary
+void Pulsar::FrequencyIntegrate::set_defaraday (bool flag)
+{
+  defaraday = flag;
+}
+
+bool Pulsar::FrequencyIntegrate::get_defaraday () const
+{
+  return defaraday;
+}
+
 void Pulsar::FrequencyIntegrate::transform (Integration* integration)
 {
   unsigned subint_nchan = integration->get_nchan();
@@ -29,10 +59,11 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
   }
 
   double dm = integration->get_dispersion_measure();
-  bool must_dedisperse = dm != 0 && !integration->get_dedispersed();
+  bool must_dedisperse = dedisperse && 
+    dm != 0 && !integration->get_dedispersed();
 
   double rm = integration->get_rotation_measure();
-  bool must_defaraday = subint_npol == 4 &&
+  bool must_defaraday = defaraday && subint_npol == 4 &&
     rm != 0 && !integration->get_faraday_corrected();
 
   if (Integration::verbose)

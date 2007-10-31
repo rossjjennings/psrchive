@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FrequencyIntegrate.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/06/21 17:32:15 $
+   $Revision: 1.7 $
+   $Date: 2007/10/31 05:59:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FrequencyIntegrate_h
@@ -43,14 +43,30 @@ namespace Pulsar {
 
   public:
 
+    //! Default constructor
+    FrequencyIntegrate ();
+
     //! The frequency integration operation
     void transform (Integration*);
+
+    //! Correct dispersion before integrating, if necessary
+    void set_dedisperse (bool);
+    bool get_dedisperse () const;
+
+    //! Correct Faraday rotation before integrating, if necessary
+    void set_defaraday (bool flag);
+    bool get_defaraday () const;
 
     //! Policy for producing evenly spaced frequency channel ranges
     class EvenlySpaced;
 
     //! Policy for producing evenly distributed frequency channel ranges
     class EvenlyWeighted;
+
+  protected:
+
+    bool dedisperse;
+    bool defaraday;
 
   };
 
