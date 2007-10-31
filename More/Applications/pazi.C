@@ -13,8 +13,12 @@
 #include "Pulsar/PlotFactory.h"
 #include "Pulsar/Plot.h"
 #include "Pulsar/Archive.h"
-#include "Pulsar/GaussianBaseline.h"
+
 #include "Pulsar/IntegrationExpert.h"
+#include "Pulsar/LawnMower.h"
+#include "Pulsar/ProfilePlot.h"
+#include "Pulsar/PhaseWeight.h"
+
 #include "Pulsar/Profile.h"
 #include "Pulsar/Integration.h"
 
@@ -29,28 +33,30 @@ static PlotFactory factory;
 
 void usage()
 {
-	cout << endl << "A user-interactive program for zapping subints, channels and bins.\n"
-		"Usage: pazi [options] filename\n\n"
-		"Options.\n"
-		"  -h                         This help page.\n\n"
-		"The following are the possible mouse and keyboard commands.\n"
-		"  zoom:                      left click twice\n"
-		"  zap:                       right click\n"
-		"  zap (multiple):            left click and 'z'\n"
-		"  reset zoom:                'r'\n"
-		"  frequency:                 'f'\n"
-		"  time:                      't'\n"
-		"  save (<filename>.pazi):    's'\n"
-		"  quit:                      'q'\n"
-		"  print paz command:         'p'\n"
-		"  center pulse:              'c'\n"
-		"  undo last:                 'u'\n"
-		"  toggle dedispersion:       'd'\n"
-		"  binzap:                    'b'\n"
-		"\n"
+  cout << endl <<
 
-		"See "PSRCHIVE_HTTP"/manuals/pazi for more details\n"
-			<< endl;
+    "A user-interactive program for zapping subints, channels and bins.\n"
+    "Usage: pazi [options] filename\n\n"
+    "Options.\n"
+    "  -h                         This help page.\n\n"
+    "The following are the possible mouse and keyboard commands.\n"
+    "  zoom:                      left click twice\n"
+    "  zap:                       right click\n"
+    "  zap (multiple):            left click and 'z'\n"
+    "  reset zoom:                'r'\n"
+    "  frequency:                 'f'\n"
+    "  time:                      't'\n"
+    "  save (<filename>.pazi):    's'\n"
+    "  quit:                      'q'\n"
+    "  print paz command:         'p'\n"
+    "  center pulse:              'c'\n"
+    "  undo last:                 'u'\n"
+    "  toggle dedispersion:       'd'\n"
+    "  binzap:                    'b'\n"
+    "  mow the lawn:              'm'\n"
+    "\n"
+    
+    "See "PSRCHIVE_HTTP"/manuals/pazi for more details\n" << endl;
 }
 
 int freq_get_channel(float mouseY, double bandwidth, int num_chans, double centre_freq);
@@ -75,6 +81,7 @@ void set_centre(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &centered
 string get_scale(Pulsar::Archive* arch);
 string vertical_join_option(float x, float x2, int &upper_chan, int &lower_chan, int num_bins);
 void binzap(Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint, int lower_range, int upper_range, int lower_bin, int upper_bin);
+void mowlawn (Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint);
 
 static bool dedispersed = true;
 static vector<int> channels_to_zap;
@@ -107,7 +114,7 @@ int main(int argc, char* argv[]) try
 	int mouseY2_chan;
 	int lower_channel;
 	int upper_channel;
-	int subint;
+	int subint = 0;
 	char ch;
 	bool zoomed = false;
 	bool fscrunched = true;
@@ -128,9 +135,15 @@ int main(int argc, char* argv[]) try
 	string write_filename = filename + ".";
 	write_filename += extension;
 
+	cerr << "pazi: loading data" << endl;
 	Reference::To<Pulsar::Archive> base_archive = Archive::load(argv[1]);
+
+	if (base_archive->get_npol() == 4)
+	  base_archive->convert_state( Signal::Stokes );
+
 	Reference::To<Pulsar::Archive> backup_archive = base_archive->clone();
 
+	cerr << "pazi: making fscrunched clone" << endl;
 	Reference::To<Pulsar::Archive> mod_archive = base_archive->clone();
 	mod_archive->pscrunch();
 	mod_archive->remove_baseline();
@@ -230,6 +243,10 @@ int main(int argc, char* argv[]) try
 				}
 				break;
 
+		case 'h':
+		  usage();
+		  break;
+
 			case 'b': // plot specific subint
 				if (plot_type == "time") {
 					centered = false;
@@ -288,6 +305,24 @@ int main(int argc, char* argv[]) try
 				zoomed = false;
 				freq_redraw(mod_archive, base_archive, freq_orig_plot, freq_mod_plot, zoomed);
 				break;
+
+                case 'm':
+
+                  if (plot_type != "subint") {
+                    cerr << "pazi: can only mow lawn of subint" << endl;
+                    continue;
+                  }
+		  
+		  cerr << "pazi: mowing lawn" << endl;
+                  mowlawn (mod_archive, base_archive, subint);
+
+		  cerr << "pazi: replotting" << endl;
+                  redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
+		  cerr << "pazi: updating total" << endl;
+                  update_total(scrunched_archive, base_archive, total_plot);
+                  mouseX = 0;
+
+                  break;
 
 			case 'o': // toggle frequency scrunching on/off
 				if (plot_type == "time") {
@@ -827,4 +862,54 @@ void binzap(Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint, int lo
 	arch->pscrunch();
 	arch->remove_baseline();
 	arch->fscrunch();
+}
+
+static Pulsar::LawnMower* mower = 0;
+
+bool accept_mow (Pulsar::Profile* profile, Pulsar::PhaseWeight* weight)
+{
+  Pulsar::ProfilePlot plotter;
+
+  cerr << "mow";
+
+  for (unsigned i=0; i<weight->get_nbin(); i++)
+    if ( (*weight)[i] )
+      cerr << " " << i;
+
+  cerr << endl;
+
+  plotter.set_selection (weight);
+  plotter.plot_profile (profile);
+
+  cerr << "agreed? (y/n)" << endl;
+
+  float x = 0;
+  float y = 0;
+  char c = 0;
+  cpgcurs (&x, &y, &c);
+
+  if (c == 'y')
+    return true;
+  else
+    return false;
+}
+
+
+void mowlawn (Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint)
+{
+  if (!mower) {
+    mower = new Pulsar::LawnMower;
+    
+    mower->add_precondition
+      ( Functor<bool(Pulsar::Profile*,Pulsar::PhaseWeight*)>( &accept_mow ) );
+    
+  }
+
+  mower->transform( old_arch->get_Integration(subint) );
+
+  *arch = *old_arch;
+  arch->set_dispersion_measure(0);
+  arch->pscrunch();
+  arch->remove_baseline();
+  arch->fscrunch();
 }
