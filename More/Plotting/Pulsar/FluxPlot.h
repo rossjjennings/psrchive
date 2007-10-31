@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.25 $
-   $Date: 2007/10/02 05:08:15 $
+   $Revision: 1.26 $
+   $Date: 2007/10/31 05:59:47 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -132,7 +132,7 @@ namespace Pulsar {
     Reference::To<InfoLabel> info_label;
     Reference::To<PhaseWeight> selection;
 
-    void plot_selection (const Archive* data);
+    void plot_selection ();
 
   };
 
