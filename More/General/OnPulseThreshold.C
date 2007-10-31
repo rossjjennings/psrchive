@@ -89,10 +89,6 @@ try {
     cerr << "Pulsar::OnPulseThreshold::calculate baseline"
       " mean=" << mean << " rms=" << rms << endl;
 
-  if ( abs(mean.get_value()) > rms.get_value() )
-    cerr << "Pulsar::OnPulseThreshold::calculate WARNING baseline mean="
-	 << mean.get_value() << " > rms=" << rms.get_value() << endl;
-
   unsigned nbin = profile->get_nbin();
 
   weight.resize( nbin );
