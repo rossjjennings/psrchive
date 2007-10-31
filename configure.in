@@ -235,6 +235,7 @@ AC_CONFIG_FILES([
 		More/Timing/Makefile
 		More/Polarimetry/Makefile
 		More/Polarimetry/iri2001/Makefile
+		More/RFIMitigation/Makefile
 		More/Applications/Makefile
 		More/rhythm/Makefile
 		More/psrgui/Makefile
