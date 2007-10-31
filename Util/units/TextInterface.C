@@ -265,16 +265,18 @@ void TextInterface::parse_indeces (vector<unsigned>& index,
 
   string::size_type length = name.length();
 
+  string range = name;
+  
   // look for the opening and closing braces
-  if (name.length() < 3 || name[0] != '[' || name[length-1] != ']')
+  if (name[0] == '[' && name[length-1] == ']')
+    range = name.substr (1,length-2);
+  else if (name[0] == '[' || name[length-1] == ']')
     throw Error (InvalidParam, "TextInterface::parse_indeces",
-		 "no range in '" + name + "'");
+		 "unbalanced brackets in '" + name + "'");
 
 #ifdef _DEBUG
   cerr << "TextInterface::parse_indeces range started" << endl;
 #endif
-
-  string range = name.substr (1,length-2);
 
   if (range.empty())
     throw Error (InvalidParam, "TextInterface::parse_indeces",
