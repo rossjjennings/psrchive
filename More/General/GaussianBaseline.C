@@ -19,6 +19,12 @@ using namespace std;
 Pulsar::GaussianBaseline::GaussianBaseline ()
 {
   set_threshold (1.0);
+  smooth_bins = 0;
+}
+
+void Pulsar::GaussianBaseline::set_smoothing (unsigned i)
+{
+  smooth_bins = i;
 }
 
 //! Set the threshold below which samples are included in the baseline
@@ -72,8 +78,11 @@ void Pulsar::GaussianBaseline::get_bounds (PhaseWeight& weight,
 void Pulsar::GaussianBaseline::postprocess (PhaseWeight& weight, 
 					    const Profile& profile)
 {
+  if (!smooth_bins)
+    return;
+
   SmoothMean smoother;
-  smoother.set_bins (4);
+  smoother.set_bins (smooth_bins);
   
   Profile smoothed (profile);
   smoother.transform (&smoothed);
