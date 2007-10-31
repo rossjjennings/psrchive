@@ -20,6 +20,9 @@ libpsrmore_la_LIBADD += MEAL/libMEAL.la
 SUBDIRS += Timing
 libpsrmore_la_LIBADD += Timing/libTiming.la
 
+SUBDIRS += RFIMitigation
+libpsrmore_la_LIBADD += RFIMitigation/libRFIMitigation.la
+
 SUBDIRS += Polarimetry
 libpsrmore_la_LIBADD += Polarimetry/libPolarimetry.la
 endif #
