@@ -254,14 +254,27 @@ void Calibration::StandardModel::check_constraints ()
   }
 }
 
+void copy_param (MEAL::Function* to, const MEAL::Function* from)
+{
+  unsigned nparam = to->get_nparam ();
+
+  if (nparam != from->get_nparam())
+    throw Error (InvalidParam, "copy_param", "to.nparam=%d != from.nparam=%d",
+		 nparam, from->get_nparam());
+
+  for (unsigned iparam=0; iparam<nparam; iparam++)
+    to->set_param( iparam, from->get_param(iparam) );
+}
+
+
 void 
-Calibration::StandardModel::set_transformation (const MEAL::Complex2* xform)
+Calibration::StandardModel::copy_transformation (const MEAL::Complex2* xform)
 {
   if (polar) {
     const MEAL::Polar* polar_solution;
     polar_solution = dynamic_cast<const MEAL::Polar*>( xform );
     if (polar_solution)
-      polar->copy( polar_solution );
+      copy_param( polar, polar_solution );
     else
       throw Error (InvalidState, "StandardModel::set_transformation",
 		   "solution is not of the required type");
@@ -270,10 +283,11 @@ Calibration::StandardModel::set_transformation (const MEAL::Complex2* xform)
   if (physical) {
     const Instrument* instrument = dynamic_cast<const Instrument*>( xform );
     if (instrument)
-      physical->copy( instrument );
+      copy_param( physical, instrument );
     else
       throw Error (InvalidState, "StandardModel::set_transformation",
-		   "solution is not of the required type");  }
+		   "solution is not of the required type");
+  }
 }
 
 void 
