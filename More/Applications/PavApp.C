@@ -21,6 +21,15 @@
 
 
 
+/**
+ * Constructor
+ *
+ *  DOES     - Inititialization
+ *  RECEIVES - Nothing
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
 
 PavApp::PavApp()
 {
@@ -58,6 +67,16 @@ PavApp::PavApp()
 }
 
 
+
+/**
+ * PrintUsage
+ *
+ *  DOES     - Display the help text to stdout
+ *  RECEIVES - Nothing
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
 
 void PavApp::PrintUsage( void )
 {
@@ -135,6 +154,16 @@ void PavApp::PrintUsage( void )
 
 
 
+
+/**
+ * spherical
+ *
+ *  DOES     - Draws a spherical plot
+ *  RECEIVES - N/A
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - Implement this as a Plot derived class
+ **/
 
 void PavApp::spherical ( const Profile* I,
                          const Profile* Q,
@@ -331,6 +360,15 @@ void PavApp::spherical ( const Profile* I,
 
 
 
+/**
+ * spherical_wrapper
+ *
+ *  DOES     - calls the spherical function to do a spherical plot
+ *  RECEIVES - Nothing
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - Implement this as a Plot derived class.
+ **/
 
 void PavApp::spherical_wrapper (const Archive* data)
 {
@@ -354,7 +392,17 @@ void PavApp::spherical_wrapper (const Archive* data)
 
 
 
-void PavApp::SetPhaseZoom( double min_phase, double max_phase, vector< Reference::To<Plot> > &plots )
+/**
+ * SetPhaseZoom
+ *
+ *   DOES     - creates a command string that sets the x zoom in normalised coords.
+ *   RECEIVES - Nothing
+ *   RETURNS  - Nothing
+ *   THROWS   - Nothing
+ *   TODO     - Nothing
+ **/
+
+void PavApp::SetPhaseZoom( double min_phase, double max_phase  )
 {
   string range_cmd = string("x:range=(") +
                      tostring< double >(min_phase ) +
@@ -362,60 +410,182 @@ void PavApp::SetPhaseZoom( double min_phase, double max_phase, vector< Reference
                      tostring< double >( max_phase ) +
                      string( ")");
 
-  vector< Reference::To<Plot> >::iterator it;
-  for( it = plots.begin(); it != plots.end(); it ++ )
-    (*it)->configure( range_cmd );
+  SetPlotOptions<Plot>( range_cmd );
 }
 
 
 
-void PavApp::SetFreqZoom( double min_freq, double max_freq, vector< Reference::To<Plot> > &plots, Reference::To<Archive> archive )
+/**
+ * SetFreqZoom
+ *
+ *  DOES     - creates a command string that sets the y zoom in normalised coords based
+ *             on a target frequency range in Mhz.
+ *  RECEIVES - Nothing
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
+
+void PavApp::SetFreqZoom( double min_freq, double max_freq )
 {
-  // get the centre frequency and bandwidth
-
-  double ctr_freq = archive->get_centre_frequency();
-  double bw = archive->get_bandwidth();
-  double bw_abs = bw;
-
-  if( bw < 0 )
+  for( int i = 0; i < plots.size(); i ++ )
   {
-    bw_abs = 0 - bw;
+    Reference::To<Archive> archive = plots[i].archive;
+
+    // get the centre frequency and bandwidth
+
+    double ctr_freq = archive->get_centre_frequency();
+    double bw = archive->get_bandwidth();
+    double bw_abs = bw;
+
+    if( bw < 0 )
+    {
+      bw_abs = 0 - bw;
+    }
+
+    double actual_min = ctr_freq - bw_abs / 2.0;
+
+    // convert the min and max freq values to (0-1)
+
+    min_freq -= actual_min;
+    max_freq -= actual_min;
+
+    min_freq /= bw_abs;
+    max_freq /= bw_abs;
+
+    if( bw < 0 )
+    {
+      double tmp = 1 - min_freq;
+      min_freq = 1 - max_freq;
+      max_freq = tmp;
+    }
+
+    // construct the command to set the range, the same for all plots (for current plots)
+
+    string range_cmd = "y:range=(";
+    range_cmd += tostring<double>( min_freq );
+    range_cmd += string(",");
+    range_cmd += tostring<double>( max_freq );
+    range_cmd += string(")" );
+
+    SetPlotOptions<Plot>( range_cmd );
+  }
+}
+
+
+
+/**
+ * PavSpecificOptions
+ *
+ *  DOES     - Sets all the options that are only for pav, ie blanks out labels that we don't want to see here
+ *             but still want them present in psrplot and other programs.
+ *  RECEIVES - Nothing
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
+
+void PavApp::PavSpecificOptions( void )
+{
+  SetPlotOptions<BandpassChannelWeightPlot>( "band:below:l=$name" );
+  SetPlotOptions<BandpassChannelWeightPlot>( "band:below:r=$freq MHz" );
+
+  SetPlotOptions<StokesCylindrical>( "pa:below:l=" );
+  SetPlotOptions<StokesCylindrical>( "flux:below:l=" );
+  SetPlotOptions<StokesCylindrical>( "flux:y:buf=0.07" );
+}
+
+
+
+/**
+ * CreatePlotsList
+ *
+ *  DOES     - given lists of filenames and plot identifiers, create a plotlist
+ *  RECEIVES - vector of filenames, vector of plot ids
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
+
+void PavApp::CreatePlotsList( vector< string > filenames,   vector< string > plot_ids )
+{
+  PlotFactory factory;
+
+  for( int i = 0; i < filenames.size(); i ++ )
+  {
+    FilePlots new_fplot;
+    new_fplot.filename = filenames[i];
+    for( int p = 0; p < plot_ids.size(); p ++ )
+    {
+      new_fplot.plots.push_back( factory.construct( plot_ids[p] ) );
+    }
+    new_fplot.archive = Archive::load( filenames[i] );
+    plots.push_back( new_fplot );
+  }
+}
+
+
+
+/**
+ * SetCmdLineOptions
+ *
+ *  DOES     - Set all of the options given on all the plots
+ *  RECEIVES - vector of option strings
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
+
+void PavApp::SetCmdLineOptions( vector< string > options )
+{
+  vector<string>::iterator it;
+  for( it = options.begin(); it != options.end(); it ++ )
+    SetPlotOptions<Plot>( (*it) );
+}
+
+
+
+/**
+ * CheckColour
+ *
+ *  DOES     - Probe the device to determine if it suppots colour.
+ *  RECEIVES - Nothing
+ *  RETURNS  - Boolean true for colour support, false otherwise
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
+
+bool PavApp::CheckColour( void )
+{
+  bool have_colour = false;
+
+  int first_index, last_index;
+  cpgqcol( &first_index, &last_index );
+  if( first_index != last_index )
+  {
+    float red,green,blue;
+    cpgqcr( 2, &red, &green, &blue );
+    if( !( red == green && green == blue ) )
+      have_colour = true;
   }
 
-  double actual_min = ctr_freq - bw_abs / 2.0;
-
-  // convert the min and max freq values to (0-1)
-
-  min_freq -= actual_min;
-  max_freq -= actual_min;
-
-  min_freq /= bw_abs;
-  max_freq /= bw_abs;
-
-  if( bw < 0 )
-  {
-    double tmp = 1 - min_freq;
-    min_freq = 1 - max_freq;
-    max_freq = tmp;
-  }
-
-  // construct the command to set the range, the same for all plots (for current plots)
-
-  string range_cmd = "y:range=(";
-  range_cmd += tostring<double>( min_freq );
-  range_cmd += string(",");
-  range_cmd += tostring<double>( max_freq );
-  range_cmd += string(")" );
-
-  vector< Reference::To<Plot> >::iterator it;
-  for( it = plots.begin(); it != plots.end(); it ++ )
-    (*it)->configure( range_cmd );
+  return have_colour;
 }
 
 
 
 
 
+/**
+ * run
+ *
+ *  DOES     - equivelent of main, so testing programs can create multiple instances of
+ *             PavApp and test them with different arguments.
+ *  RECEIVES - argc, cargv
+ *  RETURNS  - 1 if error, 0 otherwise
+ *  THROWS   - Nothing, catches any error and returns 1 on error.
+ *  TODO     - Nothing
+ **/
 
 int PavApp::run( int argc, char *argv[] )
 {
@@ -427,9 +597,6 @@ int PavApp::run( int argc, char *argv[] )
   // PGPLOT device name
   string plot_device = "/xs";
 
-  // Plot classes to be used
-  vector< Reference::To< Plot > > plots;
-
   // Options to be set
   vector<string> options;
 
@@ -439,9 +606,6 @@ int PavApp::run( int argc, char *argv[] )
   // verbosity
   bool verbose = false;
 
-  // Available plots
-  static PlotFactory factory;
-
   // Keep the baseline before plotting
   bool keep_baseline = false;
 
@@ -449,11 +613,15 @@ int PavApp::run( int argc, char *argv[] )
 
   bool plot_qu = false;
 
-  int option_index;
-
   bool clear_labels = true;
 
   bool force_bw = false;
+
+  vector< string > plot_ids;
+
+  int option_index;
+
+
 
   const int PLOT_QU          = 1001;
   const int CMAP_IND         = 1002;
@@ -501,7 +669,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.22 2007/10/25 23:35:04 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.23 2007/10/31 04:20:11 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -511,7 +679,8 @@ int PavApp::run( int argc, char *argv[] )
       plot_device = optarg;
       break;
     case 'D':
-      plots.push_back( factory.construct( "flux" ) );
+      plot_ids.push_back( "D" );
+      // plots.push_back( factory.construct( "flux" ) );
       break;
     case 'C':
       jobs.push_back( "centre" );
@@ -559,55 +728,59 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "pscrunch" );
       break;
     case 'G':
-      plots.push_back( factory.construct( "G" ) );
+      plot_ids.push_back( "G" );
+      //plots.push_back( factory.construct( "G" ) );
       break;
     case 'g':
-      plots.push_back( factory.construct( "g" ) );
+      plot_ids.push_back( "g" );
+      //plots.push_back( factory.construct( "g" ) );
       break;
     case 'Y':
       //keep_baseline = true;
-      plots.push_back( factory.construct( "Y" ) );
+      plot_ids.push_back( "y" );
+      //plots.push_back( factory.construct( "Y" ) );
       break;
     case 'S':
       top_label = "pa:above:c";
       clip_command = "flux:y:range";
       options.push_back( "pa:mark=dot+tick" );
-      plots.push_back( factory.construct( "S" ) );
-      SetPlotOptions<StokesCylindrical>( plots, "pa:below:l=" );
-      SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
-      SetPlotOptions<StokesCylindrical>( plots, "flux:y:buf=0.07" );
+      plot_ids.push_back( "S" );
+      // plots.push_back( factory.construct( "S" ) );
       clear_labels = false;
       break;
     case 'A':
-      plots.push_back( factory.construct( "A" ) );
+      plot_ids.push_back( "A" );
+      //plots.push_back( factory.construct( "A" ) );
       break;
     case 'X':
       keep_baseline = true;
-      plots.push_back( factory.construct( "X" ) );
+      plot_ids.push_back( "X" );
+      //plots.push_back( factory.construct( "X" ) );
       break;
     case 'B':
       keep_baseline = true;
-      plots.push_back( factory.construct( "B" ) );
+      plot_ids.push_back( "B" );
+      //plots.push_back( factory.construct( "B" ) );
       top_label = "band:above:c";
-      SetPlotOptions<BandpassChannelWeightPlot>( plots, "band:below:l=$name" );
-      SetPlotOptions<BandpassChannelWeightPlot>( plots, "band:below:r=$freq MHz" );
       clear_labels = false;
       break;
     case 'R':
       //keep_baseline = true;
-      plots.push_back( factory.construct( "R" ) );
+      plot_ids.push_back( "R" );
+      //plots.push_back( factory.construct( "R" ) );
       break;
     case 'm':
       plot_spherical = true;
       break;
     case 'n':
-      plots.push_back( factory.construct("n") );
+      //plots.push_back( factory.construct("n") );
+      plot_ids.push_back( "n" );
       keep_baseline = true;
       break;
     case 'j':
       {
-        plots.push_back( factory.construct( "j" ) );
-        TextInterface::Parser *ti = plots.back()->get_interface();
+        //plots.push_back( factory.construct( "j" ) );
+        plot_ids.push_back( "j" );
         keep_baseline = true;
       }
       break;
@@ -724,6 +897,21 @@ int PavApp::run( int argc, char *argv[] )
     };
   }
 
+
+  // Create a list of FilePlots with the archives and a vector of plots for each
+
+  if (metafile)
+    stringfload (&filenames, metafile);
+  else
+    for (int ai=optind; ai<argc; ai++)
+      dirglob (&filenames, argv[ai]);
+
+
+  CreatePlotsList( filenames, plot_ids );
+
+  PavSpecificOptions();
+
+
   // If we haven't put any plots into the plot array, output an error.
 
   if (plots.empty() && !plot_spherical )
@@ -734,44 +922,38 @@ int PavApp::run( int argc, char *argv[] )
 
   // set options for all the plots
 
-  vector<string>::iterator it;
-  for( it = options.begin(); it != options.end(); it ++ )
-    SetPlotOptions<Plot>( plots, (*it) );
+  SetCmdLineOptions( options );
+
+
 
   // Blank out any top left corner labels
 
   if( clear_labels )
   {
-    SetPlotOptions<FramedPlot>( plots, "below:l=" );
+    SetPlotOptions<FramedPlot>( "below:l=" );
   }
 
   // If this is not a publication plot, output a thourough title for the plot
 
   if( !publn )
   {
-    SetPlotOptions<Plot>( plots, top_label + string( "=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
+    SetPlotOptions<Plot>( top_label + string( "=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
   }
   else
   {
-    SetPlotOptions<FramedPlot>( plots, top_label + string( "=" ) );
-    SetPlotOptions<FramedPlot>( plots, "below:l=$name" );
-    SetPlotOptions<FramedPlot>( plots, "below:r=$freq MHz" );
-    SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=$name" );
-    SetPlotOptions<StokesCylindrical>( plots, "flux:below:r=$freq MHz" );
-    SetPlotOptions<Plot>( plots, "ch=1.2" );
+    SetPlotOptions<FramedPlot>( top_label + string( "=" ) );
+    SetPlotOptions<FramedPlot>( "below:l=$name" );
+    SetPlotOptions<FramedPlot>( "below:r=$freq MHz" );
+    SetPlotOptions<StokesCylindrical>( "flux:below:l=$name" );
+    SetPlotOptions<StokesCylindrical>( "flux:below:r=$freq MHz" );
+    SetPlotOptions<Plot>( "ch=1.2" );
     tostring_precision = 1;
   }
 
   // options.push_back( clip_command + clip_value );
-  SetPlotOptions<FramedPlot>( plots, clip_command + clip_value );
+  SetPlotOptions<FramedPlot>( clip_command + clip_value );
 
-  // If we were given a metafile, extract the filenames from it
 
-  if (metafile)
-    stringfload (&filenames, metafile);
-  else
-    for (int ai=optind; ai<argc; ai++)
-      dirglob (&filenames, argv[ai]);
 
   // If we still don't have any filenames
   //   output an error and exit
@@ -796,15 +978,7 @@ int PavApp::run( int argc, char *argv[] )
 
   if( !force_bw )
   {
-    int first_index, last_index;
-    cpgqcol( &first_index, &last_index );
-    if( first_index != last_index )
-    {
-      float red,green,blue;
-      cpgqcr( 2, &red, &green, &blue );
-      if( !( red == green && green == blue ) )
-        have_colour = true;
-    }
+    have_colour = CheckColour();
   }
 
   // If we received a -N option, divide the pgplot window into n1,n2 panels.
@@ -812,139 +986,122 @@ int PavApp::run( int argc, char *argv[] )
   if (n1 > 1 || n2 > 1)
     cpgsubp(n1,n2);
 
+  // if we are plotting qu with -S, go through each of the plots and find the stokes plot
+  // and set it to plot QU
+
+  if( plot_qu )
+  {
+    SetPlotOptions<StokesCylindrical>( "flux:val=IQUV" );
+
+    if( !have_colour )
+    {
+      SetPlotOptions<StokesCylindrical>( "flux:ci=1111" );
+      SetPlotOptions<StokesCylindrical>( "flux:ls=1234" );
+    }
+    else
+    {
+      SetPlotOptions<StokesCylindrical>( "flux:ci=1264" );
+      SetPlotOptions<StokesCylindrical>( "flux:ls=1111" );
+    }
+  }
+  else
+  {
+    if( !have_colour )
+    {
+      SetPlotOptions<StokesCylindrical>( "flux:ci=111" );
+      SetPlotOptions<StokesCylindrical>( "flux:ls=124" );
+    }
+    else
+    {
+      SetPlotOptions<StokesCylindrical>( "flux:ci=124" );
+      SetPlotOptions<StokesCylindrical>( "flux:ls=111" );
+    }
+  }
+
+  // If the plots array contains any StokesCylindrical plots, remove the label in the top left corner of the flux plot
+  // SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
+
+  SetPhaseZoom( min_phase, max_phase );
+
+  if( min_freq != max_freq )
+  {
+    SetFreqZoom( min_freq, max_freq );
+  }
+
+  pgplot::ColourMap cmap;
+  cmap.set_name ( colour_map );
+  cmap.apply();
+
+
   Interpreter preprocessor;
 
-  for (unsigned ifile=0; ifile < filenames.size(); ifile++)
+  for (unsigned i = 0; i < plots.size(); i++)
+  {
     try
     {
-      Reference::To<Archive> archive;
-      archive = Archive::load( filenames[ifile] );
-
-      // If we have processing jobs, pass them to the interpreter to perform them
-
       if (jobs.size())
       {
-        if (verbose)
-          cerr << "pav: preprocessing " << filenames[ifile] << endl;
-        preprocessor.set(archive);
-        preprocessor.script(jobs);
+        preprocessor.set( plots[i].archive );
+        preprocessor.script( jobs );
       }
-
-
-
-      // if we aren't keeping the baseline
-      //   remove it
 
       if( !keep_baseline )
-        archive->remove_baseline();
-
-
-
-      // if we are plotting qu with -S, go through each of the plots and find the stokes plot
-      // and set it to plot QU
-
-      if( plot_qu )
-      {
-        SetPlotOptions<StokesCylindrical>( plots, "flux:val=IQUV" );
-
-        if( !have_colour )
-        {
-          SetPlotOptions<StokesCylindrical>( plots, "flux:ci=1111" );
-          SetPlotOptions<StokesCylindrical>( plots, "flux:ls=1234" );
-        }
-        else
-        {
-          SetPlotOptions<StokesCylindrical>( plots, "flux:ci=1264" );
-          SetPlotOptions<StokesCylindrical>( plots, "flux:ls=1111" );
-        }
-      }
-      else
-      {
-        if( !have_colour )
-        {
-          SetPlotOptions<StokesCylindrical>( plots, "flux:ci=111" );
-          SetPlotOptions<StokesCylindrical>( plots, "flux:ls=124" );
-        }
-        else
-        {
-          SetPlotOptions<StokesCylindrical>( plots, "flux:ci=124" );
-          SetPlotOptions<StokesCylindrical>( plots, "flux:ls=111" );
-        }
-      }
-
-      // If the plots array contains any StokesCylindrical plots, remove the label in the top left corner of the flux plot
-      // SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
-
-      SetPhaseZoom( min_phase, max_phase, plots );
-
-      if( min_freq != max_freq )
-      {
-        SetFreqZoom( min_freq, max_freq, plots, archive );
-      }
-
-      pgplot::ColourMap cmap;
-      cmap.set_name ( colour_map );
-      cmap.apply();
+        plots[i].archive->remove_baseline();
 
       if (cbppo)
       {
         Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
-        archive->add_extension(myio);
-        myio->organise(archive, ronsub);
+        plots[i].archive->add_extension(myio);
+        myio->organise(plots[i].archive, ronsub);
       }
 
       if (cbpao)
       {
         Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
-        archive->add_extension(myio);
-        myio->organise(archive, ronsub);
+        plots[i].archive->add_extension(myio);
+        myio->organise(plots[i].archive, ronsub);
       }
 
       if (cblpo)
       {
         Pulsar::IntegrationOrder* myio = new Pulsar::BinLngPeriOrder();
-        archive->add_extension(myio);
-        myio->organise(archive, ronsub);
+        plots[i].archive->add_extension(myio);
+        myio->organise(plots[i].archive, ronsub);
       }
 
       if (cblao)
       {
         Pulsar::IntegrationOrder* myio = new Pulsar::BinLngAscOrder();
-        archive->add_extension(myio);
-        myio->organise(archive, ronsub);
+        plots[i].archive->add_extension(myio);
+        myio->organise(plots[i].archive, ronsub);
       }
-
       if ( plot_spherical )
       {
-        spherical_wrapper( archive );
+        spherical_wrapper( plots[i].archive );
       }
       else
       {
-        if (verbose)
-          cerr << "pav: plotting " << filenames[ifile] << endl;
-
-
         // set the precision that plot will use for labels
         tostring_places = true;
         if( !publn )
           tostring_precision = 3;
         else
           tostring_precision = 1;
-
-        for (unsigned iplot=0; iplot < plots.size(); iplot++)
+        for (unsigned p=0; p < plots[i].plots.size(); p++)
         {
           cpgpage ();
-          plots[iplot]->plot (archive);
+          plots[i].plots[p]->plot ( plots[i].archive );
         }
       }
     }
     catch( Error e )
     {
-      cerr << "Exception occured " << e << endl;
+      cerr << e << endl;
     }
+  }
+
 
   cpgclos();
-
 
   return 0;
 }

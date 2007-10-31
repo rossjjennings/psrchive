@@ -70,26 +70,50 @@ public:
                    const Profile* V,
                    bool calibrated );
   void spherical_wrapper (const Archive* data);
-  
-  void SetStokesPlotToQU( vector< Reference::To<Plot> > &plots );
-  void SetPhaseZoom( double min_phase, double max_phase, vector< Reference::To<Plot> > &plots );
-  void SetFreqZoom( double min_freq, double max_freq, vector< Reference::To<Plot> > &plots, Reference::To<Archive> archive );
+
+  void SetStokesPlotToQU( void );
+  void SetPhaseZoom( double min_phase, double max_phase );
+  void SetFreqZoom( double min_freq, double max_freq );
 
   int run( int argc, char *argv[] );
 private:
 
-  template< class PC > void SetPlotOptions( vector< Reference::To<Plot> > &plots, string cmd )
+  struct FilePlots
   {
-    vector< Reference::To<Plot> >::iterator it;
-    for( it = plots.begin(); it != plots.end(); it ++ )
+    string filename;
+    Reference::To<Archive> archive;
+    vector< Reference::To<Plot> > plots;
+  };
+
+  vector< FilePlots > plots;
+
+  template< class PC > void SetPlotOptions( string cmd )
+  {
+    vector< FilePlots >::iterator fit;
+    for( fit = plots.begin(); fit != plots.end(); fit ++ )
     {
-      Reference::To<PC> sp = dynamic_cast<PC*>( (*it).get() );
-      if( sp )
+      vector< Reference::To<Plot> >::iterator pit;
+      for( pit = (*fit).plots.begin(); pit != (*fit).plots.end(); pit ++ )
       {
-	sp->configure( cmd );
+        Reference::To<PC> sp = dynamic_cast<PC*>( (*pit).get() );
+        if( sp )
+        {
+          sp->configure( cmd );
+        }
       }
     }
   }
+  
+  
+  void PavSpecificOptions( void );
+  void CreatePlotsList( vector< string > filenames, vector< string > plot_ids );
+  void SetCmdLineOptions( vector< string > options );
+  bool CheckColour( void );
+
+
+
+
+
 
   bool have_colour;
   int ipol;
