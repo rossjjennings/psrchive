@@ -12,6 +12,9 @@
 #include "Pulsar/DigitiserStatsPlot.h"
 #include <Pulsar/DigitiserStatistics.h>
 #include <iostream>
+#include <float.h>
+#include <cpgplot.h>
+#include <tostring.h>
 
 
 
@@ -21,38 +24,269 @@ using namespace Pulsar;
 
 
 
+
+/**
+ * Constructor
+ *
+ *  DOES     - Inititialization
+ *  RECEIVES - Nothing
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
+
 DigitiserStatsPlot::DigitiserStatsPlot()
 {
+  subint = -1;
+  fsub = -1;
+  lsub = -1;
+  valid_archive = false;
 }
 
 
 
-void DigitiserStatsPlot::prepare( const Archive *data )
+/**
+ * AdjustSubRange
+ *
+ *  DOES     - Looks at subint,fsub and lsub to determine the correct subint range.
+ *  RECEIVES - Nothing
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
+
+void DigitiserStatsPlot::AdjustSubRange( void )
 {
-}
-
-
-
-void DigitiserStatsPlot::draw( const Archive *data )
-{
-  Reference::To<Archive> clone = data->clone();
-
-  Reference::To<DigitiserStatistics> ext = clone->get<DigitiserStatistics>();
-
-  if( ext )
+  // Make sure fsub,lsub have the subint range we want to display
+  if( fsub == -1 && lsub == -1 )
   {
-    TextInterface::Parser *iface = ext->get_interface();
-    if( iface )
+    if( subint == -1 )
     {
-      cout << iface->process( "ndigr" ) << endl;
-      cout << iface->process( "npar" ) << endl;
-      cout << iface->process( "ncycsub" ) << endl;
-      cout << iface->process( "diglev" ) << endl;
+      fsub = 0;
+      lsub = nsub -1;
+    }
+    else
+    {
+      fsub = subint;
+      lsub = subint;
+    }
+  }
+
+  if( fsub < 0 )
+    throw Error( InvalidParam,
+                 "DigitiserStatsPlot::AdjustSubRange",
+                 (string("bad fsub value: ") + tostring<int>(fsub)).c_str() );
+
+  if( lsub >= nsub )
+    throw Error( InvalidParam,
+                 "DigitiserStatsPlot::AdjustSubRange",
+                 (string("bad lsub value: ") + tostring<int>(lsub)).c_str() );
+}
+
+
+
+/**
+ * CheckStats
+ *
+ *  DOES     - Checks that the pointer points to a valid DigitiserStatistics extension
+ *  RECEIVES - The extension to examine
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
+
+bool DigitiserStatsPlot::CheckStats( Reference::To<DigitiserStatistics> ext )
+{
+  if( !ext )
+  {
+    cerr << "No digitiser Satistics extension" << endl;
+    return false;
+  }
+  
+  if( ext->rows.size() == 0 )
+  {
+    cerr << "Digitiser Satistics extension has zero rows" << endl;
+    return false;
+  }
+  
+  return true;
+}
+
+
+
+
+/**
+ * prepare
+ *
+ *  DOES     - Store all the data into our multidimensional vector (data), determine the x and y ranges
+ *  RECEIVES - The archive to examine
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - There are a few ways we could improve the performance of this plot, the first would be to
+ *             place it in the new structure when loading it in the extension in the first place,
+ *             have to check what other code makes use of DigitiserStatistics first. Or, we could
+ *             cache the min and max values while loading from disk, this would mean 1 processing
+ *             step before rendering instead of 2. We still have to loop through the data once
+ *             to increase y values in order to separate data from different subintegrations.
+ **/
+
+void DigitiserStatsPlot::prepare( const Archive *const_arch )
+{
+  Reference::To<Archive> arch = const_cast<Archive*>( const_arch );
+
+  Reference::To<DigitiserStatistics> ext = arch->get<DigitiserStatistics>();
+
+  if( CheckStats( ext ) )
+  {
+    ncycsub = ext->get_ncycsub();
+    ndigr = ext->get_ndigr();
+    npar = ext->get_npar();
+    nsub = ext->rows.size();
+
+    AdjustSubRange();
+
+    y_min = FLT_MAX;
+    y_max = -FLT_MAX;
+    
+    // The data in the file isn't how we would like it. [p1][p2][p3] etc what we want
+    // is all the p1 values sequentially, then all the p2 etc. So create an array of
+    // profiles [subint][digitiser channel][parameter] then we just pass it to cpgline
+    // when we want to draw them. Grab the min and max while we're doing this. 
+
+    profiles.resize( nsub );
+    for( int s = fsub; s <= lsub; s ++ )
+    {
+      profiles[s].resize( ndigr );
+      for( int g = 0; g < ndigr; g ++ )
+      {
+        profiles[s][g].resize( npar );
+        for( int p = 0; p < npar; p ++ )
+        {
+          profiles[s][g][p].resize( ncycsub );
+          for( int c = 0; c < ncycsub; c ++ )
+          {
+            float next_val = ext->rows[s].data[c*ndigr*npar + g*npar + p];
+            if( next_val < y_min )
+              y_min = next_val;
+            if( next_val > y_max )
+              y_max = next_val;
+            profiles[s][g][p][c] = next_val;
+          }
+        }
+      }
+    }
+
+    if( !(y_min == 0 && y_max == 0) )
+    {
+      valid_archive = true;
+
+      // adjust the viewport to show all the data, don't overlap the subints, looks crap.
+
+      get_frame()->get_y_scale()->set_minmax( y_min + fsub*(y_max-y_min), y_max + lsub * (y_max-y_min) );
+      get_frame()->get_x_scale()->set_minmax( 0, ndigr );
+      get_frame()->get_y_scale()->set_buf_norm( .07 );
+
+      get_frame()->hide_axes();
+    }
+    else
+    {
+      cerr << "Digitiser Stats values are all zero" << endl;
     }
   }
 }
 
 
+
+/**
+ * draw
+ *
+ *  DOES     - Draws the vector data as, sets of npar lines, increasing in y with subint
+ *             increasing in x with digitiser channel
+ *  RECEIVES - The archive to render
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
+
+void DigitiserStatsPlot::draw( const Archive *const_arch )
+{
+  Reference::To<Archive> arch = const_cast<Archive*>( const_arch );
+  Reference::To<DigitiserStatistics> ext = arch->get<DigitiserStatistics>();
+  if( CheckStats( ext ) && valid_archive )
+  {
+    vector<float> xs( ncycsub );
+
+    float y_step = (y_max - y_min);
+    for( int g = 0; g < ndigr; g ++ )
+    {
+      // adjust the xs array for this digitiser channel
+      float x_step = 1.0 / (ncycsub-1);
+      for( int i = 0; i < ncycsub; i ++ )
+      {
+        xs[i] = g + i * x_step;
+      }
+
+      // draw the profiles.
+      for( int s = fsub; s <= lsub; s ++ )
+      {
+        float y_inc = s * y_step;
+        for( int p = 0; p < npar; p ++ )
+        {
+          for( int c = 0; c < ncycsub; c ++ )
+            profiles[s][g][p][c] += y_inc;
+          cpgsci( p + 2 );
+          cpgline( ncycsub, &xs[0], &profiles[s][g][p][0] );
+        }
+      }
+    }
+
+    cpgsci( 1 );
+
+    // get the viewport range including buffer
+    float vp_y1, vp_y2;
+    get_frame()->get_y_scale()->get_range_external( vp_y1, vp_y2 );
+
+    // Save the current viewport, so that we can adjust relative to it and restore it later.
+    float tx_min, tx_max, ty_min, ty_max;
+    cpgqvp( 0, &tx_min, &tx_max, &ty_min, &ty_max );
+
+    // For each digitiser channel
+    //   set the viewport to cover that channel
+    //   set the window to have x ranging from -256 to 255
+    //   draw a box around the viewport
+    float nx = tx_min;
+    float xw = (tx_max-tx_min) * (1.0/ndigr);
+    for( int c = 0; c < ndigr; c ++ )
+    {
+      cpgsvp( nx, nx + xw, ty_min, ty_max );
+      float y_range = lsub - fsub + 1;
+      cpgswin( 0, 1, fsub-0.5-(0.035*y_range), lsub+0.5+0.035*(y_range) );
+      if( nx == tx_min )
+        cpgbox("bc", 0.0, 0, "bcnt", 1.0, 0);
+      else
+        cpgbox("bc", 0.0, 0, "bct", 1.0, 0 );
+      string dig_label = string("Dig ") + tostring<int>(c);
+      cpgmtxt( "T", -1, 0.01, 0, dig_label.c_str() );
+      nx += xw;
+    }
+
+    // Restore the original viewport
+    cpgsvp( tx_min, tx_max, ty_min, ty_max );
+  }
+}
+
+
+
+
+/**
+ * get_interface
+ *
+ *  DOES     - Creates a text interfaces to this object
+ *  RECEIVES - Nothing
+ *  RETURNS  - a DigitiserCountsPlot::Interface pointer
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
 
 TextInterface::Parser *DigitiserStatsPlot::get_interface()
 {
@@ -61,16 +295,37 @@ TextInterface::Parser *DigitiserStatsPlot::get_interface()
 
 
 
+/**
+ * get_xlabel
+ *
+ *  DOES     - Returns label for x axis
+ *  RECEIVES - The archive
+ *  RETURNS  - "subint"
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
+
 std::string DigitiserStatsPlot::get_xlabel( const Archive * data )
 {
-  return "phase";
+  return "Digitiser Channel";
 }
 
 
 
+
+/**
+ * get_ylabel
+ *
+ *  DOES     - Returns the label for y axis
+ *  RECEIVES - The archive
+ *  RETURNS  - "Digitiser Channel"
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
+
 std::string DigitiserStatsPlot::get_ylabel( const Archive *data )
 {
-  return "Digitiser Stats";
+  return "Subint";
 }
 
 
