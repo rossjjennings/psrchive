@@ -18,6 +18,7 @@
 
 #include <math.h>
 #include <time.h>
+#include <assert.h>
 
 using namespace std;
 
