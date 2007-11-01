@@ -35,7 +35,7 @@ Pulsar::LawnMower::LawnMower ()
   float correction = baseline->get_variance_correction ();
 
   mower -> set_baseline_estimator( baseline );
-  mower -> set_threshold( 5.0 * correction );
+  mower -> set_threshold( 4.0 * correction );
   mower -> set_allow_negative (true);
 
   broadband = true;
