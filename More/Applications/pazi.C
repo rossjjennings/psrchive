@@ -75,7 +75,7 @@ void time_get_limits(int &lower_chan, int &upper_chan, float mouseY, float mouse
 void swap_chans(int &chan1, int &chan2);
 bool add_channel(int chan, vector<int>& delete_channels);
 bool remove_channel(int chan, vector<int>& delete_channels);
-void print_command(vector<int>& freq_chans, vector<int> subints, string extension, string filename);
+void print_command(vector<int>& freq_chans, vector<int>& subints, string extension, string filename);
 void set_dedispersion(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &dedispersed);
 void set_centre(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &centered, string type, bool dedispersed);
 string get_scale(Pulsar::Archive* arch);
@@ -87,6 +87,8 @@ static bool dedispersed = true;
 static vector<int> channels_to_zap;
 static vector<int> subints_to_zap;
 static vector<int> bins_to_zap;
+static vector<int> subints_to_mow;
+
 //static bool centered = true;
 static bool centered = false;
 
@@ -715,41 +717,50 @@ bool remove_channel(int chan, vector<int>& delete_channels)
     return false;
 }
 
-void print_command(vector<int>& freq_chans, vector<int> subints, string extension, string filename)
+void print_command (vector<int>& freq_chans, vector<int>& subints, 
+		    string extension, string filename)
 {
-	if (freq_chans.size() || subints.size() || bins_to_zap.size()) {
+  if( freq_chans.size() || subints.size() ||
+      bins_to_zap.size() || subints_to_mow.size() ) {
 
-		cout << "paz ";
+    cout << "paz ";
 
-		if (freq_chans.size()) {
-			cout << "-z \"";
+    if (freq_chans.size()) {
+      cout << "-z \"";
 
-			for (int i = 0; i < freq_chans.size() - 1; i++) {
-				cout << freq_chans[i] << " ";
-			}
-			cout << freq_chans[freq_chans.size()-1] << "\" ";
-		}
+      for (unsigned i = 0; i < freq_chans.size() - 1; i++) {
+	cout << freq_chans[i] << " ";
+      }
+      cout << freq_chans[freq_chans.size()-1] << "\" ";
+    }
 
-		if (subints.size()) {
-			cout << "-w \"";
+    if (subints.size()) {
+      cout << "-w \"";
 
-			for (int i = 0; i< subints.size() - 1; i++) {
-				cout << subints[i] << " ";
-			}
-			cout << subints[subints.size() - 1] << "\" ";
-		}
+      for (unsigned i = 0; i< subints.size() - 1; i++) {
+	cout << subints[i] << " ";
+      }
+      cout << subints[subints.size() - 1] << "\" ";
+    }
 
-		if (bins_to_zap.size()) {
-			cout << "-B \"";
+    if (bins_to_zap.size()) {
+      cout << "-B \"";
 
-			for (int i = 0; i < bins_to_zap.size() - 1; i++) {
-				cout << bins_to_zap[i] << " ";
-			}
-			cout << bins_to_zap[bins_to_zap.size() - 1] << "\" ";
-		}
+      for (unsigned i = 0; i < bins_to_zap.size() - 1; i++) {
+	cout << bins_to_zap[i] << " ";
+      }
+      cout << bins_to_zap[bins_to_zap.size() - 1] << "\" ";
+    }
 
-		cout << "-e " << extension << " " << filename << endl;
-	}
+    if (subints_to_mow.size()) {
+
+      for (unsigned i = 0; i < subints_to_mow.size(); i++)
+	cout << "-l " << subints_to_mow[i] << " ";
+
+    }
+
+    cout << "-e " << extension << " " << filename << endl;
+  }
 }
 
 void set_dedispersion(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &dedispersed)
@@ -824,7 +835,7 @@ void binzap(Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint, int lo
 		swap_chans(upper_bin, lower_bin);
 
 	for (int pol = 0; pol < npol; pol++) {
-		for (int chan = 0; chan < old_arch->get_nchan(); chan++) {
+		for (int chan = 0; chan < nchan; chan++) {
 			this_int = old_arch->get_Profile(subint,pol,chan)->get_amps();
 			mean = 0;
 			deviation = 0;
@@ -865,6 +876,7 @@ void binzap(Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint, int lo
 }
 
 static Pulsar::LawnMower* mower = 0;
+unsigned mowing_subint = 0;
 
 bool accept_mow (Pulsar::Profile* profile, Pulsar::PhaseWeight* weight)
 {
@@ -879,6 +891,8 @@ bool accept_mow (Pulsar::Profile* profile, Pulsar::PhaseWeight* weight)
   cerr << endl;
 
   plotter.set_selection (weight);
+
+  cpgeras ();
   plotter.plot_profile (profile);
 
   cerr << "agreed? (y/n)" << endl;
@@ -888,8 +902,10 @@ bool accept_mow (Pulsar::Profile* profile, Pulsar::PhaseWeight* weight)
   char c = 0;
   cpgcurs (&x, &y, &c);
 
-  if (c == 'y')
+  if (c == 'y') {
+    subints_to_mow.push_back( mowing_subint );
     return true;
+  }
   else
     return false;
 }
@@ -905,6 +921,7 @@ void mowlawn (Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint)
     
   }
 
+  mowing_subint = subint;
   mower->transform( old_arch->get_Integration(subint) );
 
   *arch = *old_arch;
