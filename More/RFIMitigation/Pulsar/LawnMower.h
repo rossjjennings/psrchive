@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/RFIMitigation/Pulsar/LawnMower.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/10/31 05:45:08 $
+   $Revision: 1.2 $
+   $Date: 2007/11/01 04:05:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_LawnMower_h
@@ -57,8 +57,11 @@ namespace Pulsar {
     //! Masks all points above a threshold
     Reference::To<OnPulseThreshold> mower;
 
-    //! Mask
-    Reference::To<PhaseWeight> mask;
+    //! Points to be mowed
+    Reference::To<PhaseWeight> mowed;
+
+    //! Points to be included in baseline estimator used by mower
+    Reference::To<PhaseWeight> include;
 
     //! Create mask and return true if all preconditions are satisfied
     bool build_mask (Profile* profile);
