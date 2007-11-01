@@ -7,9 +7,12 @@
 // A simple command line tool for zapping RFI
 
 #include "Pulsar/psrchive.h"
+
 #include "Pulsar/RFIMitigation.h"
 #include "Pulsar/ChannelZapModulation.h"
 #include "Pulsar/ChannelZapMedian.h"
+#include "Pulsar/LawnMower.h"
+
 #include "Pulsar/StandardSNR.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -56,7 +59,8 @@ void usage ()
     "Automatic zapping algorithms:\n"
     "  -r               Zap channels using median smoothed difference\n"
     "  -R size          Set the size of the median smoothing window\n"
-    "  -b               Like -r, but for each phase bin and all Stokes\n"
+    "  -l subint        Mow the lawn of the specified subint \n"
+    "  -L               Mow the lawn of all subints \n"
     "  -d               Zero weight chans using mean offset rejection\n"
     "  -C cutoff        Zero weight chans based on S/N (std optional)\n"
     "  -P stdfile       Use this standard profile\n"
@@ -126,13 +130,15 @@ int main (int argc, char *argv[]) {
   int gotc = 0;
   char* key = NULL;
   char whitespace[5] = " \n\t";
-  
+
+  Pulsar::LawnMower* mower = 0;
+  vector<unsigned> subints_to_mow;
+
   Pulsar::StandardSNR standard_snr;
   Pulsar::ChannelZapMedian* median_zapper = 0;
   Pulsar::ChannelZapModulation* modulation_zapper = 0;
 
-  //const char* args = "8bC:dDe:E:hIik:mno:p:P:rR:s:S:u:vVw:W:x:X:z:Z:";
-  const char* args = "8bC:B:dDe:E:hIik:mno:p:P:rR:s:S:u:vVw:W:x:X:z:Z:";
+  const char* args = "8bC:B:dDe:E:hIik:l:Lmno:p:P:rR:s:S:u:vVw:W:x:X:z:Z:";
 
   string command = "paz";
 
@@ -150,7 +156,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.40 2007/06/22 03:50:28 jonathan_khoo Exp $" << endl;
+      cout << "$Id: paz.C,v 1.41 2007/11/01 04:05:42 straten Exp $" << endl;
       return 0;
 
     case 'm':
@@ -168,6 +174,12 @@ int main (int argc, char *argv[]) {
       zero_channels = true;
       command += " -k ";
       command += optarg;
+      break;
+
+    case 'l':
+      subints_to_mow.push_back( atoi(optarg) );
+    case 'L':
+      mower = new Pulsar::LawnMower;
       break;
 
     case 'z':
@@ -580,7 +592,7 @@ int main (int argc, char *argv[]) {
     }
 
 	if (bin_zap && bins_to_zap.size()) {
-	  for (int i = 0; i + 5 <= bins_to_zap.size(); i += 5)
+	  for (unsigned i = 0; i + 5 <= bins_to_zap.size(); i += 5)
 		binzap(arch, arch->get_Integration(bins_to_zap[i]), bins_to_zap[i], bins_to_zap[i+1], bins_to_zap[i+2], bins_to_zap[i+3], bins_to_zap[i+4]);
 	}
 
@@ -670,7 +682,26 @@ int main (int argc, char *argv[]) {
 	}
       }
     }
-    
+
+    if (mower) {
+
+      vector<unsigned> mowing;
+
+      if (subints_to_mow.size())
+	mowing = subints_to_mow;
+      else {
+	mowing.resize( arch->get_nsubint() );
+	for (unsigned isub = 0; isub < arch->get_nsubint(); isub++)
+	  mowing[isub] = isub;
+      }
+
+      for (unsigned isub = 0; isub < mowing.size(); isub++) {
+	cerr << "paz: mowing subint " << mowing[isub] << endl;
+	mower->transform( arch->get_Integration( mowing[isub] ) );
+      }
+
+    }
+
     if (!write)
       continue;
     
@@ -727,9 +758,9 @@ void binzap(Pulsar::Archive* arch, Pulsar::Integration* integ, int subint, int l
 	float deviation;
 	float* this_int;
 
-	for (int i = 0; i < arch->get_npol(); i++) {
+	for (unsigned i = 0; i < arch->get_npol(); i++) {
 		int j;
-		for (int k = 0; k < arch->get_nchan(); k++) {
+		for (unsigned k = 0; k < arch->get_nchan(); k++) {
 			this_int = integ->get_Profile(i,k)->get_amps();
 			mean = 0;
 			deviation = 0;
