@@ -107,6 +107,14 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
     initial_baseline->set_Profile (profile);
     initial_baseline->get_weight (weight);
 
+    if (include) {
+#ifndef _DEBUG
+    if (Profile::verbose)
+#endif
+      cerr << "Pulsar::IterativeBaseline::calculate mask include" << endl;
+      weight *= *include;
+    }
+
     Estimate<double> initial_mean = weight.get_mean();
     Estimate<double> initial_rms  = sqrt( weight.get_variance() );
 
@@ -137,15 +145,9 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
 
     initial_bounds = false;
 
-    if (lower == upper) {
-#ifndef _DEBUG
-      if (Profile::verbose)
-#endif
-	cerr << "Pulsar::IterativeBaseline::get_weight "
-	  "lower bound equals upper bound = " << upper << endl;
-
-      break;
-    }
+    if (lower == upper)
+      throw Error (InvalidState, "Pulsar::IterativeBaseline::get_weight",
+		   "lower bound equals upper bound = %f", upper);
 
     unsigned added = 0;
     unsigned subtracted = 0;
@@ -154,7 +156,7 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
 
       if ( amps[ibin] > lower && amps[ibin] < upper )  {
 	
-	if (weight[ibin] == 0.0) {
+	if (weight[ibin] == 0.0 && (!include || (*include)[ibin])) {
 	  added ++;
 #ifdef _DEBUG
 	  cerr << "+ ibin=" << ibin << " v=" << amps[ibin] << endl;
@@ -166,7 +168,7 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
       }
       else {
 	
-	if (weight[ibin] == 1.0) {
+	if (weight[ibin] == 1.0 && (!include || (*include)[ibin])) {
 	  subtracted ++;
 #ifdef _DEBUG
 	  cerr << "- ibin=" << ibin << " v=" << amps[ibin] << endl;

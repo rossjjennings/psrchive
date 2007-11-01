@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineEstimator.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/07/30 06:03:28 $
+   $Revision: 1.7 $
+   $Date: 2007/11/01 04:05:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BaselineFunction_h
@@ -25,6 +25,14 @@ namespace Pulsar {
 
     //! Returns a new PhaseWeight instance
     PhaseWeight* baseline (const Profile*);
+
+    //! Include only the specified phase bins for consideration
+    void set_include (PhaseWeight* include);
+
+  protected:
+
+    //! Excluded phase bins
+    Reference::To<PhaseWeight> include;
 
   };
 

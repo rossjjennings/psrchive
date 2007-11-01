@@ -17,3 +17,9 @@ Pulsar::BaselineEstimator::baseline (const Profile* profile)
   return weight.release();
 }
 
+//! Include only the specified phase bins for consideration
+void Pulsar::BaselineEstimator::set_include (PhaseWeight* _include)
+{
+  include = _include;
+}
+
