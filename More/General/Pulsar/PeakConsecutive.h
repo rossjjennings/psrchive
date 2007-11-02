@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PeakConsecutive.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/09/24 08:04:04 $
+   $Revision: 1.2 $
+   $Date: 2007/11/02 04:25:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PeakConsecutive_h
@@ -94,5 +94,10 @@ namespace Pulsar {
 
 }
 
+void regions( unsigned ndat, const float* data, 
+	      unsigned istart, unsigned istop,
+	      unsigned region_size, float cutoff,
+	      std::vector<unsigned>& on_transitions,
+	      std::vector<unsigned>& off_transitions );
 
 #endif // !defined __Pulsar_PeakConsecutive_h

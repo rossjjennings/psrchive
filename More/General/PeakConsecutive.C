@@ -107,6 +107,80 @@ void cyclic_shift (vector<C>& array)
 
 // #define _DEBUG
 
+void regions( unsigned ndat, const float* data, 
+	      unsigned istart, unsigned istop,
+	      unsigned region_size, float cutoff,
+	      std::vector<unsigned>& on_transitions,
+	      std::vector<unsigned>& off_transitions )
+{
+  const int on_pulse = 1;
+  const int undefined = 0;
+  const int off_pulse = -1;
+
+  int current = undefined;
+  int started = undefined;
+
+  unsigned consecutive_on = 0;
+
+  for (unsigned idat=istart; idat < istop+region_size; idat++) {
+
+#ifdef _DEBUG
+    cerr << "idat=" << idat << " ";
+    if (current == on_pulse)
+      cerr << "on" << endl;
+    if (current == off_pulse)
+      cerr << "off" << endl;
+    if (current == undefined)
+      cerr << "?" << endl;
+#endif
+
+    if (data[idat%ndat] > cutoff)
+      consecutive_on ++;
+    else
+      consecutive_on = 0;
+
+    if (consecutive_on == region_size) {
+      if (current == off_pulse) {
+	on_transitions.push_back (idat+1-region_size);
+#ifdef _DEBUG
+	cerr << "TURNED ON" << endl;
+#endif
+      }
+      current = on_pulse;
+    }
+
+    if (consecutive_on == 0) {
+      if (current == on_pulse) {
+	off_transitions.push_back (idat-1);
+#ifdef _DEBUG
+	cerr << "TURNED OFF" << endl;
+#endif
+      }
+      current = off_pulse;
+    }
+
+    if (started == undefined && current != undefined)
+      started = current;
+
+  }
+
+  if (on_transitions.size() != off_transitions.size())
+    throw Error (InvalidState, "Pulsar::PeakConsecutive::build",
+		 "transitions on=%u != off=%u",
+		 on_transitions.size(),
+		 off_transitions.size());
+
+#ifndef _DEBUG
+    cerr << "Pulsar::PeakConsecutive::build transitions="
+	 << on_transitions.size() << endl;
+#endif
+
+  // if the pulse was on in the first phase bin, then shift and correct
+  if (started == on_pulse)
+    cyclic_shift (off_transitions);
+}
+
+
 void Pulsar::PeakConsecutive::build ()
 {
   if (!profile)
@@ -134,7 +208,7 @@ void Pulsar::PeakConsecutive::build ()
   const float* amps = profile->get_amps();
 
   int start = 0;
-  int stop = nbin+consecutive;
+  int stop = nbin;
 
   if (range_specified) {
     start = bin_start;
@@ -142,75 +216,11 @@ void Pulsar::PeakConsecutive::build ()
     nbinify (start, stop, nbin);
   }
 
-  const int on_pulse = 1;
-  const int undefined = 0;
-  const int off_pulse = -1;
-
-  int current = undefined;
-  int started = undefined;
-
-  unsigned consecutive_on = 0;
-
   vector<unsigned> on_transitions;
   vector<unsigned> off_transitions;
 
-  for (int ibin=start; ibin < stop; ibin++) {
-
-#ifdef _DEBUG
-    cerr << "ibin=" << ibin << " ";
-    if (current == on_pulse)
-      cerr << "on" << endl;
-    if (current == off_pulse)
-      cerr << "off" << endl;
-    if (current == undefined)
-      cerr << "?" << endl;
-#endif
-
-    if (amps[ibin%nbin] > cutoff)
-      consecutive_on ++;
-    else
-      consecutive_on = 0;
-
-    if (consecutive_on == consecutive) {
-      if (current == off_pulse) {
-	on_transitions.push_back (ibin+1-consecutive);
-#ifdef _DEBUG
-	cerr << "TURNED ON" << endl;
-#endif
-      }
-      current = on_pulse;
-    }
-
-    if (consecutive_on == 0) {
-      if (current == on_pulse) {
-	off_transitions.push_back (ibin-1);
-#ifdef _DEBUG
-	cerr << "TURNED OFF" << endl;
-#endif
-      }
-      current = off_pulse;
-    }
-
-    if (started == undefined && current != undefined)
-      started = current;
-
-  }
-
-  if (on_transitions.size() != off_transitions.size())
-    throw Error (InvalidState, "Pulsar::PeakConsecutive::build",
-		 "transitions on=%u != off=%u",
-		 on_transitions.size(),
-		 off_transitions.size());
-
-#ifndef _DEBUG
-  if (Profile::verbose)
-#endif
-    cerr << "Pulsar::PeakConsecutive::build transitions="
-	 << on_transitions.size() << endl;
-
-  // if the pulse was on in the first phase bin, then shift and correct
-  if (started == on_pulse)
-    cyclic_shift (off_transitions);
+  regions (nbin, amps, start, stop, consecutive, cutoff,
+	   on_transitions, off_transitions);
 
   // choose the grouping of peaks that minimizes their collective width
 
