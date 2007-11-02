@@ -9,6 +9,7 @@
 #include "Pulsar/BaselineWindow.h"
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/SmoothMedian.h"
 
 #include "Pulsar/ConvertIsolated.h"
 
@@ -21,12 +22,16 @@ using namespace std;
 Pulsar::IterativeBaseline::IterativeBaseline ()
 {
   BaselineWindow* window = new BaselineWindow;
-  window->set_duty_cycle (Profile::default_duty_cycle);
 
-  set_initial_baseline (window);
-  set_smoothing_function (new ConvertIsolated);
+  window->set_smooth( new SmoothMedian );
+  window->set_median_cut( 4.0 );
+  window->get_smooth()->set_turns( Profile::default_duty_cycle );
 
-  threshold = 2.0;
+  set_initial_baseline( window );
+
+  set_median_cut( 4.0 );
+
+  threshold = 1.0;
   max_iterations = 100;
 }
 
@@ -43,17 +48,6 @@ Pulsar::BaselineEstimator*
 Pulsar::IterativeBaseline::get_initial_baseline () const
 {
   return initial_baseline;
-}
-
-void Pulsar::IterativeBaseline::set_smoothing_function (PhaseWeightSmooth* s)
-{
-  smoothing_function = s;
-}
-
-Pulsar::PhaseWeightSmooth*
-Pulsar::IterativeBaseline::get_smoothing_function () const
-{
-  return smoothing_function;
 }
 
 void Pulsar::IterativeBaseline::set_threshold (float sigma)
@@ -83,7 +77,7 @@ void Pulsar::IterativeBaseline::set_Profile (const Profile* _profile)
 }
 
 
-void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
+void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
 {
 #ifndef _DEBUG
   if (Profile::verbose)
@@ -109,14 +103,14 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
 
     if (include) {
 #ifndef _DEBUG
-    if (Profile::verbose)
+      if (Profile::verbose)
 #endif
-      cerr << "Pulsar::IterativeBaseline::calculate mask include" << endl;
-      weight *= *include;
+	cerr << "Pulsar::IterativeBaseline::calculate mask include" << endl;
+      (*weight) *= *include;
     }
 
-    Estimate<double> initial_mean = weight.get_mean();
-    Estimate<double> initial_rms  = sqrt( weight.get_variance() );
+    Estimate<double> initial_mean = weight->get_mean();
+    Estimate<double> initial_rms  = sqrt( weight->get_variance() );
 
 #ifndef _DEBUG
     if (Profile::verbose)
@@ -156,26 +150,26 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
 
       if ( amps[ibin] > lower && amps[ibin] < upper )  {
 	
-	if (weight[ibin] == 0.0 && (!include || (*include)[ibin])) {
+	if ((*weight)[ibin] == 0.0 && (!include || (*include)[ibin])) {
 	  added ++;
 #ifdef _DEBUG
 	  cerr << "+ ibin=" << ibin << " v=" << amps[ibin] << endl;
 #endif
 	}
 	
-	weight[ibin] = 1.0;
+	(*weight)[ibin] = 1.0;
 	
       }
       else {
 	
-	if (weight[ibin] == 1.0 && (!include || (*include)[ibin])) {
+	if ((*weight)[ibin] == 1.0 && (!include || (*include)[ibin])) {
 	  subtracted ++;
 #ifdef _DEBUG
 	  cerr << "- ibin=" << ibin << " v=" << amps[ibin] << endl;
 #endif
 	}
 	
-	weight[ibin] = 0.0;
+	(*weight)[ibin] = 0.0;
 	
       }
       
@@ -195,7 +189,7 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
     if (drift_detected)
       break;
 
-    if (drift_threshold != 0.0 && weight.get_mean() > drift_threshold) {
+    if (drift_threshold != 0.0 && weight->get_mean() > drift_threshold) {
 
 #ifdef _DEBUG
       cerr << "drift detected" << endl;
@@ -211,25 +205,45 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
     throw Error (InvalidState, "Pulsar::IterativeBaseline::get_weight",
 		 "did not converge in %d iterations", max_iterations);
 
-  postprocess (weight, *profile);
+  postprocess (weight, profile);
 
 #ifdef _DEBUG
-  cerr << "after postprocessing, mean=" << weight.get_mean() << endl;
-#endif
-
-  if (smoothing_function) {
-    smoothing_function->set_weight( &weight );
-    smoothing_function->get_weight( weight );
-  }
-
-#ifdef _DEBUG
-  cerr << "after smoothing, mean=" << weight.get_mean() << endl;
-
   unsigned total = 0;
   for (unsigned ibin=0; ibin<nbin; ibin++)
-    if (weight[ibin])
+    if ((*weight)[ibin])
       total ++;
   cerr << "total bins = " << total << endl;
+#endif
+
+}
+
+void Pulsar::IterativeBaseline::postprocess 
+(PhaseWeight* weight, const Profile* profile)
+{
+  ConvertIsolated convert;
+
+#ifdef _DEBUG
+  cerr << "before postprocessing, mean=" << weight->get_mean() << endl;
+#endif
+
+  convert.set_weight( weight );
+
+  // convert isolated ones to zeros
+  convert.set_test( 1.0 );
+  convert.set_convert( 0.0 );
+  convert.set_like_fraction( 0.5 );
+  convert.get_weight( weight );
+
+  // convert isolated zeros to ones
+  convert.set_test( 0.0 );
+  convert.set_convert( 1.0 );
+  convert.set_like_fraction( 1.0 );
+  convert.get_weight( weight );
+
+
+
+#ifdef _DEBUG
+  cerr << "after postprocessing, mean=" << weight->get_mean() << endl;
 #endif
 
 }
