@@ -4,9 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Profile.h"
+#include "Pulsar/Smooth.h"
 #include "Pulsar/BaselineWindow.h"
+
+using namespace std;
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -21,7 +24,7 @@ float Pulsar::Profile::find_min_phase (float duty_cycle) const try {
     cerr << "Pulsar::Profile::find_min_phase" << endl;
 
   BaselineWindow mean;
-  mean.set_duty_cycle (duty_cycle);
+  mean.get_smooth()->set_turns (duty_cycle);
   mean.set_find_minimum ();
   return mean.find_phase (get_nbin(), get_amps());
 }
@@ -43,7 +46,7 @@ float Pulsar::Profile::find_max_phase (float duty_cycle) const try {
     cerr << "Pulsar::Profile::find_max_phase" << endl;
   
   BaselineWindow mean;
-  mean.set_duty_cycle (duty_cycle);
+  mean.get_smooth()->set_turns (duty_cycle);
   mean.set_find_maximum ();
   return mean.find_phase (get_nbin(), get_amps());
 }

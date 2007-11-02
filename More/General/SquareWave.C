@@ -4,11 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
 
 #include "Pulsar/SquareWave.h"
 #include "Pulsar/BaselineWindow.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Smooth.h"
+
+using namespace std;
 
 Pulsar::SquareWave::SquareWave ()
 {
@@ -115,7 +117,7 @@ void Pulsar::SquareWave::get_transitions (const Profile* profile,
   // find the phase window in which the mean is closest to zero
   BaselineWindow window;
   window.set_find_mean (0.0);
-  window.set_duty_cycle (0.2);
+  window.get_smooth()->set_turns (0.2);
   float zero = window.find_phase (nbin, amps);
 
   // get the noise statistics of the zero mean region
