@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineEstimator.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/11/01 04:05:50 $
+   $Revision: 1.8 $
+   $Date: 2007/11/02 04:24:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BaselineFunction_h
@@ -23,16 +23,27 @@ namespace Pulsar {
 
   public:
 
+    //! Default constructor
+    BaselineEstimator ();
+
     //! Returns a new PhaseWeight instance
     PhaseWeight* baseline (const Profile*);
 
+    //! Returns a new PhaseWeight instance
+    PhaseWeight* operator () (const Profile*);
+
     //! Include only the specified phase bins for consideration
     void set_include (PhaseWeight* include);
+
+    //! Cut samples from baseline with median difference over threshold
+    void set_median_cut (float threshold);
 
   protected:
 
     //! Excluded phase bins
     Reference::To<PhaseWeight> include;
+
+    float median_cut;
 
   };
 
