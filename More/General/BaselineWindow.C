@@ -4,9 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/BaselineWindow.h"
 #include "Pulsar/PhaseWeight.h"
+#include "Pulsar/SmoothMean.h"
 #include "Pulsar/Profile.h"
 
 // #define _DEBUG 1
@@ -22,21 +23,39 @@ void nbinify (int& istart, int& iend, int nbin);
 //! Default constructor
 Pulsar::BaselineWindow::BaselineWindow ()
 {
-  duty_cycle = 0.15;
-
   bin_start = bin_end = 0;
 
   range_specified = false;
 
   find_max = false;
-
   find_mean = false;
 
   mean = 0;
+
+  /* The default smoothing algorithm is not set in the constructor
+     because the Smooth constructor uses a Pulsar::Config attribute
+     that may not be initialized at the time of construction of this
+     instance.
+  */
+}
+
+//! Set the smoothing function
+void Pulsar::BaselineWindow::set_smooth (Smooth* function)
+{
+  smooth = function;
+}
+
+//! Get the smoothing function
+Pulsar::Smooth* Pulsar::BaselineWindow::get_smooth ()
+{
+  if (!smooth)
+    smooth = new SmoothMean;
+
+  return smooth;
 }
 
 //! Retrieve the PhaseWeight
-void Pulsar::BaselineWindow::calculate (PhaseWeight& weight)
+void Pulsar::BaselineWindow::calculate (PhaseWeight* weight)
 {
   if (!profile)
     throw Error (InvalidState, "Pulsar::BaselineWindow::calculate",
@@ -45,30 +64,21 @@ void Pulsar::BaselineWindow::calculate (PhaseWeight& weight)
   unsigned nbin = profile->get_nbin();
 
   float centre = find_phase (nbin, profile->get_amps());
+  float bins = get_smooth()->get_last_bins();
 
-  unsigned ibin1 = unsigned (nbin * (1.0 + centre - 0.5 * duty_cycle));
-  unsigned ibin2 = unsigned (nbin * (1.0 + centre + 0.5 * duty_cycle));
+  unsigned ibin1 = nbin + unsigned (nbin * centre - 0.5 * bins);
+  unsigned ibin2 = nbin + unsigned (nbin * centre + 0.5 * bins);
 
-  weight.resize( nbin );
-  weight.set_all( 0.0 );
+#ifdef _DEBUG
+  cerr << "Pulsar::BaselineWindow::calculate centre=" << centre
+       << " bins=" << bins << " ibin1=" << ibin1 << " ibin2=" << ibin2 << endl;
+#endif
+
+  weight->resize( nbin );
+  weight->set_all( 0.0 );
 
   for (unsigned ibin=ibin1; ibin<ibin2; ibin++)
-    weight[ibin%nbin] = 1.0;
-}
-
-//! Set the duty cycle
-void Pulsar::BaselineWindow::set_duty_cycle (float _duty_cycle)
-{
-  if (_duty_cycle <= 0 || _duty_cycle >= 1)
-    throw Error (InvalidParam, "Pulsar::BaselineWindow::set_duty_cycle",
-		 "invalid duty_cycle=%f", _duty_cycle);
-
-  duty_cycle = _duty_cycle;
-}
-
-float Pulsar::BaselineWindow::get_duty_cycle () const
-{
-  return duty_cycle;
+    (*weight)[ibin%nbin] = 1.0;
 }
 
 //! Set to find the minimum mean
@@ -104,97 +114,58 @@ float Pulsar::BaselineWindow::find_phase (const std::vector<float>& amps)
 
 //! Return the phase at which minimum or maximum mean is found
 float Pulsar::BaselineWindow::find_phase (unsigned nbin, const float* amps)
-{
-  unsigned boxwidth = unsigned (.5 * duty_cycle * nbin);
-  unsigned found_bin = 0;
+try {
 
-  if (boxwidth >= nbin/2 || boxwidth == 0) {
-
-    // quick and dirty minimum bin
-    float found_val = amps[0];
-    for (unsigned ibin=1; ibin < nbin; ibin++)
-      if ( (find_max && amps[ibin] > found_val) || 
-	   (!find_max && amps[ibin] < found_val) ) {
-	found_val = amps[ibin];
-	found_bin = ibin;
-      }
-    
-    return float(found_bin%nbin) / float(nbin);
-
-  }
+  Profile temp (nbin);
+  temp.set_amps (amps);
 
 #ifdef _DEBUG
-  cerr << "Pulsar::BaselineWindow::find_phase duty_cycle=" << duty_cycle
-       << " boxwidth=" << boxwidth*2+1 << endl;
+  cerr << "Pulsar::BaselineWindow::find_phase" << endl;
 #endif
-  
-  unsigned left = nbin-boxwidth;
-  unsigned right = nbin+boxwidth+1;
+
+  get_smooth()->transform( &temp );
+
+  unsigned start = 0;
+  unsigned stop = nbin;
   
   if (range_specified) {
     nbinify (bin_start, bin_end, nbin);
-    left = bin_start;
-    found_bin = bin_start + boxwidth;
-    right = bin_start + 2*boxwidth+1;
+    start = bin_start;
+    stop = bin_end;
   }
   
 #ifdef _DEBUG
-  cerr << "Pulsar::BaselineWindow::find_phase init left=" << left 
-       << " found=" << found_bin << " right=" << right << endl;
-#endif
-  
-  double sum = 0.0;
-  for (unsigned ibin=left; ibin<right; ibin++)
-    sum += amps[ibin % nbin];
-  
-  unsigned stop = 2*nbin-boxwidth;
-  if (range_specified)
-    stop = bin_end - (2*boxwidth+1);
-  
-  double found_val = sum;
-
-  // The sum to be found if find_mean is true
-  double find_sum = (right - left) * mean;
-
-  if (find_mean)
-    found_val = fabs(found_val - find_sum);
-
-#ifdef _DEBUG
-  cerr << "Pulsar::BaselineWindow::find_phase search stop=" << stop 
-       << " found_val=" << found_val << endl;
+  cerr << "Pulsar::BaselineWindow::find_phase init"
+    " start=" << start << " stop=" << stop << endl;
 #endif
 
-  while (left < stop)  {
+  bool first = true;
+  float found_val = 0;
+  unsigned found_bin = 0;
 
-#ifdef _DEBUG
-    cerr << "add=" << right%nbin << " sub=" << left%nbin << endl;
-#endif
+  for (unsigned ibin=start; ibin < stop; ibin++) {
 
-    sum += amps[right%nbin] - amps[left%nbin];
-
-    left++;
-    right++;
+    float value = temp.get_amps()[ibin%nbin];
 
     if ( find_mean ) {
-      double diff = fabs( sum - find_sum );
-      if ( diff < found_val ) {
+      double diff = fabs( value - mean );
+      if ( first || diff < found_val ) {
 	found_val = diff;
-	found_bin = left + boxwidth;
+	found_bin = ibin;
       }
       continue;
     }
 
 
-    if ( (find_max && sum > found_val) || (!find_max && sum < found_val) ) {
+    if ( first ||
+	 (find_max && value>found_val) || (!find_max && value<found_val) ) {
 
-      found_val = sum;
-      found_bin = left + boxwidth;
-
-#ifdef _DEBUG
-      cerr << "new=" << found_val << " bin=" << found_bin << endl;
-#endif
+      found_val = value;
+      found_bin = ibin;
 
     }
+
+    first = false;
 
   }
 
@@ -207,4 +178,6 @@ float Pulsar::BaselineWindow::find_phase (unsigned nbin, const float* amps)
   return phase;
 
 }
- 
+catch (Error& error) {
+  throw error += "Pulsar::BaselineWindow::find_phase";
+}

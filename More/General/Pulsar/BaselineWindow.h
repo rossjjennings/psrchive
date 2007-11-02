@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineWindow.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.9 $
+   $Date: 2007/11/02 04:24:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BaselineWindow_h
@@ -19,8 +19,9 @@
 namespace Pulsar {
 
   class Profile;
+  class Smooth;
 
-  //! Finds the phase window in which the Profile mean is an extremum
+  //! Finds the phase window in which the smoothed Profile is an extremum
   class BaselineWindow : public BaselineEstimator {
 
   public:
@@ -28,11 +29,11 @@ namespace Pulsar {
     //! Default constructor
     BaselineWindow ();
 
-    //! Set the duty cycle
-    void set_duty_cycle (float duty_cycle);
+    //! Set the smoothing function
+    void set_smooth (Smooth*);
 
-    //! Get the duty cycle
-    float get_duty_cycle () const;
+    //! Get the smoothing function
+    Smooth* get_smooth ();
 
     //! Set to find the minimum mean
     void set_find_minimum ();
@@ -46,9 +47,6 @@ namespace Pulsar {
     //! Set the start and end bins of the search
     void set_range (int bin_start, int bin_end);
 
-    //! Get the phase at the centre of the window
-    void get_phase () const;
-
     //! Return the phase at which minimum or maximum mean is found
     float find_phase (const std::vector<float>& amps);
 
@@ -58,10 +56,10 @@ namespace Pulsar {
   protected:
 
     //! Calculate the PhaseWeight
-    void calculate (PhaseWeight& weight);
+    void calculate (PhaseWeight* weight);
 
-    //! The width of the window over which the mean is computed
-    float duty_cycle;
+    //! The smoothing function
+    Reference::To<Smooth> smooth;
 
     //! Set true when algorithm finds max
     bool find_max;
