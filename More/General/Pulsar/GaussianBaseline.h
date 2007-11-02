@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/GaussianBaseline.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/10/31 05:59:23 $
+   $Revision: 1.7 $
+   $Date: 2007/11/02 04:25:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_GaussianBaseline_h
@@ -37,9 +37,9 @@ namespace Pulsar {
 
   protected:
 
-    void get_bounds (PhaseWeight& weight, float& lower, float& upper);
+    void get_bounds (PhaseWeight* weight, float& lower, float& upper);
 
-    void postprocess (PhaseWeight& weight, const Profile& profile);
+    void postprocess (PhaseWeight* weight, const Profile* profile);
 
     //! Adjustment when computing variance of samples below threshold
     float moment_correction;
@@ -49,6 +49,9 @@ namespace Pulsar {
 
     //! Value of upper last returned by get_bounds
     float last_upper;
+
+    //! Last mean computed during get_bounds
+    float last_mean;
 
     //! Smoothing factor used in postprocessing
     unsigned smooth_bins;

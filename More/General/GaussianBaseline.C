@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/GaussianBaseline.h"
+#include "Pulsar/PeakConsecutive.h"
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/SmoothMean.h"
@@ -19,12 +20,12 @@ using namespace std;
 Pulsar::GaussianBaseline::GaussianBaseline ()
 {
   set_threshold (1.0);
-  smooth_bins = 0;
+  smooth_bins = 4;
 }
 
-void Pulsar::GaussianBaseline::set_smoothing (unsigned i)
+void Pulsar::GaussianBaseline::set_smoothing (unsigned nbins)
 {
-  smooth_bins = i;
+  smooth_bins = nbins;
 }
 
 //! Set the threshold below which samples are included in the baseline
@@ -42,12 +43,12 @@ void Pulsar::GaussianBaseline::set_threshold (float sigma)
 	 << " correction=" << moment_correction << endl;
 }
 
-void Pulsar::GaussianBaseline::get_bounds (PhaseWeight& weight, 
+void Pulsar::GaussianBaseline::get_bounds (PhaseWeight* weight, 
 					   float& lower, float& upper)
 {
   double mean, var, var_mean;
 
-  weight.stats (profile, &mean, &var, &var_mean);
+  weight->stats (profile, &mean, &var, &var_mean);
 
   // note that stats computes an unbiased estimate of the variance
   double effective_variance = var;
@@ -71,15 +72,36 @@ void Pulsar::GaussianBaseline::get_bounds (PhaseWeight& weight,
 	 << " baseline mean=" << mean << " cutoff=" << cutoff
 	 << " = " << threshold << " sigma" << endl;
 
+  last_mean = mean;
   last_lower = lower = mean - cutoff;
   last_upper = upper = mean + cutoff;
 }
 
-void Pulsar::GaussianBaseline::postprocess (PhaseWeight& weight, 
-					    const Profile& profile)
+void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight, 
+					    const Profile* profile)
 {
+  IterativeBaseline::postprocess (weight, profile);
+
   if (!smooth_bins)
     return;
+
+  assert (weight != 0);
+  assert (profile != 0);
+
+  std::vector<unsigned> on_transitions;
+  std::vector<unsigned> off_transitions;
+
+  unsigned nbin = weight->get_nbin();
+  unsigned consecutive = 0.01 * nbin;
+  float transition = 0.5;
+
+  regions( weight->get_nbin(), weight->get_weights(), 0, nbin,
+	   consecutive, transition, on_transitions, off_transitions );
+
+#ifdef _DEBUG
+  cerr << "Pulsar::GaussianBaseline::postprocess smooth bins=" << smooth_bins
+       << endl;
+#endif
 
   SmoothMean smoother;
   smoother.set_bins (smooth_bins);
@@ -87,20 +109,40 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight& weight,
   Profile smoothed (profile);
   smoother.transform (&smoothed);
 
-#ifdef _DEBUG
-  cerr << "lower=" << last_lower << " upper=" << last_upper << endl;
+#ifdef _DEGUG
+  cerr << "before peel mean=" << weight->get_mean() << endl;
 #endif
 
-  unsigned nbin = profile.get_nbin();
+  for (unsigned ioff=0; ioff < off_transitions.size(); ioff++) {
 
-  for (unsigned ibin=0; ibin < nbin; ibin++) {
-
-    float val = smoothed.get_amps()[ibin];
-    weight[ibin] = val > last_lower && val < last_upper;
-
-#ifdef _DEBUG
-    cerr << "weight["<< ibin <<"]=" << weight[ibin] << " val=" << val << endl;
+    unsigned ibin=off_transitions[ioff];
+    while ( smoothed.get_amps()[ibin%nbin] > last_mean ) {
+#ifdef _DEGUG
+      cerr << "after peel " << ibin%nbin << endl;
 #endif
+      (*weight)[ibin%nbin] = 0.0;
+      ibin ++;
+    }
 
   }
+
+  for (unsigned ion=0; ion < on_transitions.size(); ion++) {
+
+    unsigned ibin=on_transitions[ion] + nbin;
+    while ( smoothed.get_amps()[ibin%nbin] > last_mean ) {
+#ifdef _DEGUG
+      cerr << "before peel " << ibin%nbin << endl;
+#endif
+      (*weight)[ibin%nbin] = 0.0;
+      ibin --;
+    }
+
+  }
+
+  weight->set_Profile (profile);
+
+#ifdef _DEGUG
+  cerr << "after peel mean=" << weight->get_mean() << endl;
+#endif
+
 }
