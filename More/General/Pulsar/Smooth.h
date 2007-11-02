@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Smooth.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/10/12 02:45:59 $
+   $Revision: 1.10 $
+   $Date: 2007/11/02 04:25:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Smooth_h
@@ -37,11 +37,17 @@ namespace Pulsar {
     //! Get the width of the smoothing window in turns
     float get_turns () const;
 
+    //! Get the width of the smoothing window in turns from the last transform
+    float get_last_turns () const;
+
     //! Set the width of the smoothing window in phase bins
     void set_bins (float);
 
     //! Get the width of the smoothing window in phase bins
     float get_bins () const;
+
+    //! Get the width of the smoothing window in turns from the last transform
+    float get_last_bins () const;
 
   protected:
 
@@ -56,6 +62,8 @@ namespace Pulsar {
 
     //! The number of phase bins in the bins used to smooth
     float bins;
+
+    float last_turns, last_bins;
 
   };
 
