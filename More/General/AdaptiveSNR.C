@@ -42,7 +42,7 @@ float Pulsar::AdaptiveSNR::get_snr (const Profile* profile)
 
   PhaseWeight weight;
 
-  baseline->get_weight (weight);
+  baseline->get_weight (&weight);
 
   weight.set_Profile (profile);
 

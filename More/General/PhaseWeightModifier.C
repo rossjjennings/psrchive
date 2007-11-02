@@ -17,7 +17,7 @@ void Pulsar::PhaseWeightModifier::set_weight (const PhaseWeight* _weight)
 }
 
 //! Returns a PhaseWeight with the Weight attribute set
-void Pulsar::PhaseWeightModifier::get_weight (PhaseWeight& weight)
+void Pulsar::PhaseWeightModifier::get_weight (PhaseWeight* weight)
 {
   unsigned nbin = input_weight->get_nbin();
 
@@ -25,7 +25,7 @@ void Pulsar::PhaseWeightModifier::get_weight (PhaseWeight& weight)
   cerr << "Pulsar::PhaseWeightModifier::get_weight nbin=" << nbin << endl;
 #endif
 
-  Reference::To<PhaseWeight> output_weight = &weight;
+  Reference::To<PhaseWeight> output_weight = weight;
 
   if (output_weight == input_weight)
     output_weight = new PhaseWeight (nbin);
@@ -42,6 +42,6 @@ void Pulsar::PhaseWeightModifier::get_weight (PhaseWeight& weight)
   cerr << "Pulsar::PhaseWeightModifier::get_weight done calculate" << endl;
 #endif
 
-  if (output_weight != &weight)
-    weight = *output_weight;
+  if (output_weight != weight)
+    *weight = *output_weight;
 }

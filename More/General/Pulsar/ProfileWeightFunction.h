@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileWeightFunction.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/07/12 05:59:36 $
+   $Revision: 1.5 $
+   $Date: 2007/11/02 04:25:39 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileWeightFunction_h
@@ -29,7 +29,7 @@ namespace Pulsar {
     virtual void set_Profile (const Profile*);
 
     //! Returns a PhaseWeight with the Profile attribute set
-    virtual void get_weight (PhaseWeight& weight);
+    virtual void get_weight (PhaseWeight* weight);
 
   protected:
 
@@ -37,7 +37,7 @@ namespace Pulsar {
     Reference::To<const Profile> profile;
 
     //! Derived classes implement the PhaseWeight calculation
-    virtual void calculate (PhaseWeight& weight) = 0;
+    virtual void calculate (PhaseWeight* weight) = 0;
 
   };
 

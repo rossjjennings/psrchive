@@ -16,11 +16,11 @@ void Pulsar::ProfileWeightFunction::set_Profile (const Profile* _profile)
 }
 
 //! Returns a PhaseWeight with the Profile attribute set
-void Pulsar::ProfileWeightFunction::get_weight (PhaseWeight& weight)
+void Pulsar::ProfileWeightFunction::get_weight (PhaseWeight* weight)
 {
   calculate (weight);
-  weight.set_frequency( profile->get_centre_frequency () );
-  weight.set_Profile( profile );
+  weight->set_frequency( profile->get_centre_frequency () );
+  weight->set_Profile( profile );
 }
 
 

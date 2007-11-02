@@ -122,7 +122,7 @@ Pulsar::DeltaPA::get (const PolnProfile* p0, const PolnProfile* p1) const
   Pulsar::PhaseWeight weight;
     
   mask.set_Profile (p0->get_Profile(0));
-  mask.get_weight (weight);
+  mask.get_weight (&weight);
 
   double mu_q0 = 0.0, var_q0 = 0.0;
   weight.stats (p0->get_Profile(1), &mu_q0, &var_q0);

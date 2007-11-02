@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/OnPulseThreshold.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/10/31 11:34:20 $
+   $Revision: 1.6 $
+   $Date: 2007/11/02 04:25:39 $
    $Author: straten $ */
 
 #ifndef __Pulsar_OnPulseThreshold_h
@@ -55,7 +55,7 @@ namespace Pulsar {
   protected:
 
     //! Calculate the PhaseWeight
-    void calculate (PhaseWeight& weight);
+    void calculate (PhaseWeight* weight);
 
     //! The threshold
     float threshold;

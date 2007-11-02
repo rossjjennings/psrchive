@@ -71,7 +71,7 @@ void Pulsar::Integration::remove_baseline (const PhaseWeight* baseline) try
     dispersion.set_Profile( profiles[0][ichan] );
 
     // get the shifted PhaseWeight mask
-    shift.get_weight( shifted_baseline );
+    shift.get_weight( &shifted_baseline );
 
     for (unsigned ipol=0; ipol<get_npol(); ipol++) {
 
@@ -157,7 +157,7 @@ try {
     dispersion.set_Profile( profiles[0][ichan] );
 
     // get the shifted PhaseWeight mask
-    shift.get_weight( shifted_baseline );
+    shift.get_weight( &shifted_baseline );
 
     for (unsigned ipol=0; ipol<npol; ipol++) {
 

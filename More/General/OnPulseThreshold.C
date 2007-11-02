@@ -72,7 +72,7 @@ void Pulsar::OnPulseThreshold::set_range (int start, int end)
 }
 
 //! Retrieve the PhaseWeight
-void Pulsar::OnPulseThreshold::calculate (PhaseWeight& weight)
+void Pulsar::OnPulseThreshold::calculate (PhaseWeight* weight)
 try {
 
   if (!profile)
@@ -81,11 +81,8 @@ try {
 
   Reference::To<PhaseWeight> baseline;
 
-  if (baseline_estimator) {
-    baseline = new PhaseWeight;
-    baseline_estimator->set_Profile (profile);
-    baseline_estimator->get_weight (*baseline);
-  }
+  if (baseline_estimator)
+    baseline = baseline_estimator->baseline (profile);
   else
     baseline = profile->baseline();
 
@@ -98,8 +95,8 @@ try {
 
   unsigned nbin = profile->get_nbin();
 
-  weight.resize( nbin );
-  weight.set_all( 0.0 );
+  weight->resize( nbin );
+  weight->set_all( 0.0 );
 
   int start = 0;
   int stop = nbin;
@@ -121,7 +118,7 @@ try {
       diff = fabs(diff);
 
     if ( diff > cutoff )
-      weight[ibin] = 1.0;
+      (*weight)[ibin] = 1.0;
 
   }
 

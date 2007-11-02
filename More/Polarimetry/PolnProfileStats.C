@@ -124,10 +124,10 @@ try {
 		 "input PolnProfile is not in the Stokes state");
 
   on_pulse_estimator->set_Profile (profile->get_Profile(0));
-  on_pulse_estimator->get_weight (on_pulse);
+  on_pulse_estimator->get_weight (&on_pulse);
 
   baseline_estimator->set_Profile (profile->get_Profile(0));
-  baseline_estimator->get_weight (baseline);
+  baseline_estimator->get_weight (&baseline);
 
   baseline_variance = baseline.get_variance();
 

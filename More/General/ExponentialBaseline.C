@@ -35,10 +35,10 @@ void Pulsar::ExponentialBaseline::set_threshold (float sigma)
 	 << " correction=" << moment_correction << endl;
 }
 
-void Pulsar::ExponentialBaseline::get_bounds (PhaseWeight& weight, 
+void Pulsar::ExponentialBaseline::get_bounds (PhaseWeight* weight, 
 					      float& lower, float& upper)
 {
-  weight.set_Profile (profile);
+  weight->set_Profile (profile);
 
 #ifdef _DEBUG
   cerr << "Pulsar::ExponentialBaseline::get_bounds mean=" << weight.get_mean()
@@ -46,7 +46,7 @@ void Pulsar::ExponentialBaseline::get_bounds (PhaseWeight& weight,
 #endif
 
   lower = 0.0;
-  upper = threshold * weight.get_mean().get_value();
+  upper = threshold * weight->get_mean().get_value();
 
   if (!get_initial_bounds())
     upper *= moment_correction;

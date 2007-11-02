@@ -104,11 +104,8 @@ void Pulsar::PeakCumulative::build ()
 
   Reference::To<PhaseWeight> baseline;
 
-  if (baseline_estimator) {
-    baseline = new PhaseWeight;
-    baseline_estimator->set_Profile (profile);
-    baseline_estimator->get_weight (*baseline);
-  }
+  if (baseline_estimator)
+    baseline = baseline_estimator->baseline (profile);
   else
     baseline = profile->baseline();
 

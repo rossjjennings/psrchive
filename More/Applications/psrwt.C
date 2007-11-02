@@ -257,7 +257,7 @@ int main (int argc, char** argv)
       Pulsar::BaselineWindow* bw;
       bw = dynamic_cast<Pulsar::BaselineWindow*>(mask.get_initial_baseline());
       if (bw)
-	bw->set_duty_cycle (duty_cycle);
+	bw->get_smooth()->set_turns (duty_cycle);
 
       break;
     }
@@ -364,7 +364,7 @@ int main (int argc, char** argv)
 	    Pulsar::PhaseWeight weight;
 
 	    mask.set_Profile (profile);
-	    mask.get_weight (weight);
+	    mask.get_weight (&weight);
 
 	    weight.stats (profile, &mean, &variance);
 

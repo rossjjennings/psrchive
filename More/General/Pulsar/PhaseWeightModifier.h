@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeightModifier.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/07/12 05:59:13 $
+   $Revision: 1.2 $
+   $Date: 2007/11/02 04:25:39 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeightModifier_h
@@ -29,7 +29,7 @@ namespace Pulsar {
     virtual void set_weight (const PhaseWeight*);
 
     //! Returns a PhaseWeight 
-    virtual void get_weight (PhaseWeight& weight);
+    virtual void get_weight (PhaseWeight* weight);
 
   protected:
 

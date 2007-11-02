@@ -479,7 +479,7 @@ void Pulsar::PolnProfileFit::set_noise_mask () try
   for (unsigned ipol=0; ipol < npol; ipol++) {
 
     finder.set_Profile( input_psd->get_Profile(ipol) );
-    finder.get_weight( mask );
+    finder.get_weight( &mask );
 
     if (verbose)
       cerr << "Pulsar::PolnProfileFit::set_noise_mask ipol=" << ipol

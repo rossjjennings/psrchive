@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/RiseFall.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/10/02 05:19:17 $
+   $Revision: 1.3 $
+   $Date: 2007/11/02 04:25:39 $
    $Author: straten $ */
 
 #ifndef __Pulsar_RiseFall_h
@@ -32,7 +32,7 @@ namespace Pulsar {
   protected:
 
     //! Set the weights between rise and fall
-    void calculate (PhaseWeight& weight);
+    void calculate (PhaseWeight* weight);
 
   };
 

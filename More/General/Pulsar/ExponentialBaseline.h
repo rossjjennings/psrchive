@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ExponentialBaseline.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/10/30 02:30:35 $
+   $Revision: 1.6 $
+   $Date: 2007/11/02 04:25:39 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ExponentialBaseline_h
@@ -34,7 +34,7 @@ namespace Pulsar {
     //! Adjustment when computing variance of samples below threshold
     float moment_correction;
 
-    void get_bounds (PhaseWeight& weight, float& lower, float& upper);
+    void get_bounds (PhaseWeight* weight, float& lower, float& upper);
 
   };
 
