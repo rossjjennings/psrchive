@@ -10,10 +10,13 @@
 
 using namespace std;
 
+// #define _DEBUG 1
+
 //! Default constructor
 Pulsar::ConvertIsolated::ConvertIsolated ()
 {
   neighbourhood = 0.01;
+  like_fraction = 1.0;
   test_value = 0.0;
   convert_value = 1.0;
 }
@@ -33,15 +36,32 @@ float Pulsar::ConvertIsolated::get_neighbourhood () const
   return neighbourhood;
 }
 
+void Pulsar::ConvertIsolated::set_like_fraction (float fraction)
+{
+  if (fraction <= 0.0 || fraction > 1.0)
+    throw Error (InvalidParam, "Pulsar::ConvertIsolated::set_like_fraction",
+		 "invalid like_fraction fraction = %lf", fraction);
+  like_fraction = fraction;
+}
+
+float Pulsar::ConvertIsolated::get_like_fraction () const
+{
+  return like_fraction;
+}
+
 // #define _DEBUG 1
 
 void Pulsar::ConvertIsolated::calculate (PhaseWeight* weight)
 {
   unsigned nbin = input_weight->get_nbin();
   unsigned ncheck = unsigned( nbin * neighbourhood );
+  unsigned nlike = unsigned( nbin * neighbourhood * like_fraction );
 
   if (ncheck < 2)
     ncheck = 2;
+
+  if (nlike < 1)
+    nlike = 1;
 
 #ifdef _DEBUG
   cerr << "Pulsar::ConvertIsolated::calculate ncheck=" << ncheck << endl;
@@ -49,8 +69,6 @@ void Pulsar::ConvertIsolated::calculate (PhaseWeight* weight)
 
   for (unsigned ibin=0; ibin < nbin; ibin++)
     (*weight)[ibin] = (*input_weight)[ibin];
-
-  bool skipped = false;
 
   for (unsigned ibin=0; ibin < nbin; ibin++) {
 
@@ -62,57 +80,55 @@ void Pulsar::ConvertIsolated::calculate (PhaseWeight* weight)
 #ifdef _DEBUG
       cerr << endl;
 #endif
-      skipped = false;
       continue;
     }
 
     // count the equal elements following this bin
-    unsigned nequal = 0;
-    for (unsigned jbin=0; jbin < ncheck; jbin++)
-      if ((*input_weight)[ (ibin+jbin+nbin+1) % nbin ] == test_value)
-	nequal ++;
-
+    unsigned nright = 0;
+    for (unsigned jbin=0; jbin < ncheck; jbin++) {
+      unsigned itest = (ibin+jbin+nbin+1) % nbin;
 #ifdef _DEBUG
-    cerr << nequal << " ";
+      cerr << " " << itest << "=" << (*input_weight)[ itest ];
+#endif
+      if ((*input_weight)[ itest ] == test_value)
+	nright ++;
+    }
+#ifdef _DEBUG
+    cerr << " : " << nright << " ";
 #endif
 
-    if (nequal == ncheck) {
+    if (nright >= nlike) {
 #ifdef _DEBUG
-      cerr << "a" << endl;
+      cerr << "r" << endl;
 #endif
-      ibin += ncheck + 1;
-      skipped = true;
       continue;
     }
-
-    // if have previously skipped, then the following test is true by def'n
-    if (skipped) {
-      skipped = false;
-      continue;
-    }
-
-    skipped = false;
 
     // count the equal elements preceding this bin
-    nequal = 0;
-    for (unsigned jbin=0; jbin < ncheck; jbin++)
-      if ( (*input_weight)[ ((ibin+jbin+nbin) - ncheck) % nbin ] == test_value)
-	nequal ++;
+    unsigned nleft = 0;
+    for (unsigned jbin=0; jbin < ncheck; jbin++) {
+      unsigned itest = ((ibin+jbin+nbin) - ncheck) % nbin;
+#ifdef _DEBUG
+      cerr << " " << itest << "=" << (*input_weight)[ itest ];
+#endif
+      if ( (*input_weight)[ itest ] == test_value)
+	nleft ++;
+    }
 
 #ifdef _DEBUG
-    cerr << nequal << " ";
+    cerr << " : " << nleft << " ";
 #endif
 
-    if (nequal == ncheck) {
+    if (nleft >= nlike) {
 #ifdef _DEBUG
-      cerr << "b" << endl;
+      cerr << "l" << endl;
 #endif
       continue;
     }
 
 #ifdef _DEBUG
     cerr << "Pulsar::ConvertIsolated::calculate converting ibin=" 
-	 << ibin << endl;
+	 << ibin << "/" << nbin << endl;
 #endif
 
     (*weight)[ibin] = convert_value;
