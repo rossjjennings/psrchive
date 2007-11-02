@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/median_smooth.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.6 $
+   $Date: 2007/11/02 04:25:31 $
    $Author: straten $*/
 
 #ifndef __fft_smooth_h
@@ -59,30 +59,34 @@ namespace fft {
     std::vector<T> result (data.size());
 
     unsigned truncated = 0;
-
+    unsigned tmid = 0;
     // deal with leading edge
     for (ipt=0; ipt < middle; ipt++) {
       truncated = middle + 1 + ipt;
+      tmid = truncated / 2;
       for (jpt=0; jpt < truncated; jpt++)
 	window[jpt] = data[jpt];
-      sort (window.begin(), window.begin()+truncated);
-      result[ipt] = window[truncated/2];
+      std::nth_element (window.begin(), window.begin()+tmid, 
+			window.begin()+truncated);
+      result[ipt] = window[tmid];
     }
 
     for (ipt=0; ipt < rsize; ipt++) {
       for (jpt=0; jpt<wsize; jpt++)
 	window[jpt] = data[ipt+jpt];
-      sort (window.begin(), window.end());
+      std::nth_element (window.begin(), window.begin()+middle, window.end());
       result[ipt+middle] = window[middle];
     }
 
     // deal with trailing edge
     for (ipt=rsize; ipt < data.size()-middle; ipt++) {
       truncated = data.size() - ipt;
+      tmid = truncated / 2;
       for (jpt=0; jpt < truncated; jpt++)
 	window[jpt] = data[ipt+jpt];
-      sort (window.begin(), window.begin()+truncated);
-      result[ipt+middle] = window[truncated/2];
+      std::nth_element (window.begin(), window.begin()+tmid,
+			window.begin()+truncated);
+      result[ipt+middle] = window[tmid];
     }
 
     for (ipt=0; ipt < data.size(); ipt++)

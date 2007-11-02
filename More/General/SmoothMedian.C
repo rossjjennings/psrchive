@@ -24,6 +24,11 @@ void Pulsar::SmoothMedian::transform (Profile* profile)
   else if (width % 2 == 0)
     width ++;
 
+#ifdef _DEBUG
+  cerr << "Pulsar::SmoothMedian::transform nbin=" << nbin 
+       << " width=" << width << endl;
+#endif
+
   unsigned middle = width/2;
 
   vector<float> result (nbin);
@@ -34,7 +39,7 @@ void Pulsar::SmoothMedian::transform (Profile* profile)
     for (unsigned jbin=0; jbin<width; jbin++)
       window[jbin] = amps[((ibin+jbin+nbin)-middle)%nbin];
 
-    std::sort (window.begin(), window.end());
+    std::nth_element (window.begin(), window.begin()+middle, window.end());
     result[ibin] = window[middle];
 
   }
