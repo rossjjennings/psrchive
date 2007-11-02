@@ -12,6 +12,7 @@
 #include "Pulsar/SmoothMean.h"
 #include "NormalDistribution.h"
 
+#include <assert.h>
 #include <iostream>
 using namespace std;
 
@@ -92,7 +93,7 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight,
   std::vector<unsigned> off_transitions;
 
   unsigned nbin = weight->get_nbin();
-  unsigned consecutive = 0.01 * nbin;
+  unsigned consecutive = unsigned( 0.01 * nbin );
   float transition = 0.5;
 
   regions( weight->get_nbin(), weight->get_weights(), 0, nbin,
