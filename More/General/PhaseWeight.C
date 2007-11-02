@@ -16,6 +16,10 @@ void Pulsar::PhaseWeight::init ()
 {
   reference_frequency = 0.0;
   built = false;
+  median_computed = false;
+  median = 0;
+  median_diff_computed = false;
+  median_diff = 0;
 }
 
 Pulsar::PhaseWeight::PhaseWeight ()
@@ -158,11 +162,72 @@ float Pulsar::PhaseWeight::get_min () const
   return min;
 }
 
+//! fill the non_zero vector
+void Pulsar::PhaseWeight::fill_non_zero (const char* method) const
+{
+  check_Profile (method);
+  unsigned nbin = profile->get_nbin();
+  check_weight (nbin, method);
+
+  const float* amps = profile->get_amps();
+
+  non_zero.resize( 0 );
+  for (unsigned i=0; i<nbin; i++)
+    if (weight[i])
+      non_zero.push_back( amps[i] );
+}
+
+//! Get the median amplitude with non-zero weight
+float Pulsar::PhaseWeight::get_median () const
+{
+  if (median_computed)
+    return median;
+
+  fill_non_zero ("get_median");
+
+  unsigned size = non_zero.size();
+
+  if (!size)
+    median = 0;
+  else {
+    unsigned mid = size/2;
+    std::nth_element( non_zero.begin(), non_zero.begin()+mid, non_zero.end() );
+    median = non_zero[ mid ];
+  }
+
+  median_computed = true;
+  return median;
+}
+
+//! Get the median difference between the median and non-zero amplitudes
+float Pulsar::PhaseWeight::get_median_difference () const
+{
+  get_median ();
+
+  unsigned size = non_zero.size();
+
+  for (unsigned i=0; i<size; i++)
+    non_zero[i] = fabs( non_zero[i] - median );
+
+  if (!size)
+    median_diff = 0;
+  else {
+    unsigned mid = size/2;
+    std::nth_element( non_zero.begin(), non_zero.begin()+mid, non_zero.end() );
+    median_diff = non_zero[ mid ];
+  }
+
+  median_diff_computed = true;
+  return median_diff;
+}
+
 //! Set the Profile to which the weights apply
 void Pulsar::PhaseWeight::set_Profile (const Profile* _profile)
 {
   profile = _profile;
   built = false;
+  median_computed = false;
+  median_diff_computed = false;
 }
 
 //! Get the weighted total of the Profile amplitudes

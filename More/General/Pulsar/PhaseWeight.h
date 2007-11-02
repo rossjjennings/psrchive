@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeight.h,v $
-   $Revision: 1.12 $
-   $Date: 2007/09/24 08:52:56 $
+   $Revision: 1.13 $
+   $Date: 2007/11/02 04:25:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeight_h
@@ -100,6 +100,12 @@ namespace Pulsar {
     //! Get the minimum amplitude with non-zero weight
     float get_max () const;
 
+    //! Get the median amplitude with non-zero weight
+    float get_median () const;
+
+    //! Get the median difference between the median and non-zero amplitudes
+    float get_median_difference () const;
+
     //! Get the weighted variance of the Profile amplitudes
     Estimate<double> get_variance () const;
 
@@ -133,6 +139,20 @@ namespace Pulsar {
 
     //! The weighted variance of the Profile
     Estimate<double> variance;
+
+    //! The median of all phase bins with non-zero weight
+    mutable float median;
+    mutable bool median_computed;
+
+    //! The median difference of all phase bins with non-zero weight
+    mutable float median_diff;
+    mutable bool median_diff_computed;
+
+    //! working space for median computation
+    mutable std::vector<float> non_zero;
+
+    //! fill the non_zero vector
+    void fill_non_zero (const char* method) const;
 
     //! Compute the mean and variance attributes
     void build ();
