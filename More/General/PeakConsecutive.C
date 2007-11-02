@@ -170,7 +170,7 @@ void regions( unsigned ndat, const float* data,
 		 on_transitions.size(),
 		 off_transitions.size());
 
-#ifndef _DEBUG
+#ifdef _DEBUG
     cerr << "Pulsar::PeakConsecutive::build transitions="
 	 << on_transitions.size() << endl;
 #endif
