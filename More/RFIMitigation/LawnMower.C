@@ -26,18 +26,28 @@ using namespace std;
 
 Pulsar::LawnMower::LawnMower ()
 {
-  mower = new OnPulseThreshold;
-
+  // baseline estimator used to find off-pulse mean and variance
   GaussianBaseline* baseline = new GaussianBaseline;
-  baseline->set_smoothing_function (0);
-  baseline->set_threshold (3.0);
+
+  /* By including points up to 3 sigma, the actual distribution of the
+     data will not matter so much.  This is important because the
+     difference between the profile and its median smoothed self is
+     searched, and the result is not normally distributed. */
+  baseline->set_threshold( 3.0 );
+
+  /* Also, a relatively large number of samples in the median smoothed
+     difference profile will be equal to zero.  It is important to 
+     remove these points from the computation of the variance. */
   baseline->set_include( include = new PhaseWeight );
 
-  float correction = baseline->get_variance_correction ();
+  mower = new OnPulseThreshold;
 
   mower -> set_baseline_estimator( baseline );
-  mower -> set_threshold( 4.0 * correction );
+  mower -> set_threshold( 4.0 );
   mower -> set_allow_negative (true);
+
+  // risk smoothing out 2% duty cycle profiles
+  median_smoothing_turns = 0.02;
 
   broadband = true;
 
@@ -63,6 +73,11 @@ void Pulsar::LawnMower::set_threshold (float sigma)
   mower->set_threshold( sigma );
 }
 
+void Pulsar::LawnMower::set_median_smoothing (float turns)
+{
+  median_smoothing_turns = turns;
+}
+
 void Pulsar::LawnMower::set_broadband (bool flag)
 {
   broadband = flag;
@@ -79,34 +94,52 @@ bool Pulsar::LawnMower::build_mask (Profile* profile)
 {
   assert (profile != 0);
 
-  Reference::To<Profile> smoothed = new Profile( *profile );
-  SmoothMedian median;
-  median.set_bins (11);
-  median( smoothed );
-
-  Reference::To<Profile> difference = new Profile( *profile );
-  *difference -= *smoothed;
-
-  /*
-    The difference between the profile and its median smoothed
-    difference can contain a large number of zeros (where the profile
-    happens to equal the median).  These zeros cause the variance to
-    be underestimated, which can mess up the IterativeBaseline
-    algorithm; therefore, they should be excluded from consideration.
-  */
   unsigned nbin = profile->get_nbin();
   include->resize (nbin);
   include->set_all (1.0);
-  for (unsigned ibin=0; ibin<nbin; ibin++)
-    if (difference->get_amps()[ibin] == 0.0)
-      (*include)[ibin] = 0;
 
-  mower->set_Profile( difference );
+  if (median_smoothing_turns) {
+
+#ifndef _DEBUG
+    if (Profile::verbose)
+#endif
+      cerr << "Pulsar::LawnMower::build_mask median smoothing" << endl;
+    
+    Reference::To<Profile> smoothed = new Profile( *profile );
+    SmoothMedian median;
+    median.set_turns( median_smoothing_turns );
+    median( smoothed );
+
+    Reference::To<Profile> difference = new Profile( *profile );
+    *difference -= *smoothed;
+
+    /*
+      The difference between the profile and its median smoothed
+      difference can contain a large number of zeros (where the profile
+      happens to equal the median).  These zeros cause the variance to
+      be underestimated, which can mess up the IterativeBaseline
+      algorithm; therefore, they should be excluded from consideration.
+    */
+    for (unsigned ibin=0; ibin<nbin; ibin++)
+      if (difference->get_amps()[ibin] == 0.0)
+	(*include)[ibin] = 0;
+    
+    mower->set_Profile( difference );
+
+  }
+
+  else
+    mower->set_Profile( profile );
 
   if (!mowed)
     mowed = new PhaseWeight;
 
-  mower->get_weight( *mowed );
+#ifndef _DEBUG
+  if (Profile::verbose)
+#endif
+    cerr << "Pulsar::LawnMower::build_mask computing zap mask" << endl;
+  
+  mower->get_weight( mowed );
 
   unsigned total_mowed = 0;
   for (unsigned ibin=0; ibin<nbin; ibin++)
@@ -146,11 +179,8 @@ void Pulsar::LawnMower::transform (Integration* subint)
   }
 
   GaussianBaseline baseline;
-  baseline.set_smoothing_function (0);
-  float correction = baseline.get_variance_correction ();
-
   SmoothMedian median;
-  median.set_bins (11);
+  median.set_turns( median_smoothing_turns );
 
   for (unsigned ichan=0; ichan < subint->get_nchan(); ichan++) try {
 
@@ -165,25 +195,21 @@ void Pulsar::LawnMower::transform (Integration* subint)
       continue;
 
     Reference::To<PhaseWeight> base = 
-      baseline.baseline( subint->get_Profile (0,ichan) );
+      baseline( subint->get_Profile (0,ichan) );
 
     for (unsigned ipol=0; ipol < subint->get_npol(); ipol++) {
 
       Reference::To<Profile> profile = subint->get_Profile (ipol, ichan);
 
+      base->set_Profile( profile );
+      double rms = sqrt( base->get_variance().get_value() );
+
       Reference::To<Profile> smoothed = new Profile( *profile );
       median( smoothed );
 
-      base->set_Profile( profile );
-
-      double variance = base->get_variance().get_value();
-      if (ipol == 0)
-	variance *= correction;
-      double rms = sqrt(variance);
 
 #ifdef _DEBUG
-      cerr << ipol << " " << ichan << " rms=" << rms
-	   << " cor=" << correction << endl;
+      cerr << ipol << " " << ichan << " rms=" << rms << endl;
 #endif
 
       float* amps = profile->get_amps();

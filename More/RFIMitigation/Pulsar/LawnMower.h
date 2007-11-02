@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/RFIMitigation/Pulsar/LawnMower.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/11/01 04:05:54 $
+   $Revision: 1.3 $
+   $Date: 2007/11/02 04:25:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_LawnMower_h
@@ -46,6 +46,9 @@ namespace Pulsar {
     //! Set the threshold above which samples are mown
     virtual void set_threshold (float sigma);
 
+    //! Set the size of the window used during median smoothing
+    virtual void set_median_smoothing (float turns);
+
     //! If set, search for spikes in fscrunched (DM=0) total
     virtual void set_broadband (bool);
 
@@ -68,6 +71,8 @@ namespace Pulsar {
 
     //! Search for spikes in fscrunch (DM=0) total
     bool broadband;
+
+    float median_smoothing_turns;
 
     //! Preconditions
     std::vector< Functor< bool(Profile*,PhaseWeight*) > > precondition;
