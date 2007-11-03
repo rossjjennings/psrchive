@@ -167,6 +167,7 @@ int main (int argc, char *argv[]) try {
 
     case 'D':
       sinc = new Pulsar::SmoothSinc;
+      sinc -> set_bins (8);
       break;
 
     case 'F':
@@ -192,7 +193,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.74 2007/10/12 03:24:29 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.75 2007/11/03 20:05:17 straten Exp $" << endl;
       return 0;
 
     case 'n':
