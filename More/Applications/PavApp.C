@@ -664,7 +664,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.25 2007/11/05 02:44:33 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.26 2007/11/05 03:33:05 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -728,7 +728,7 @@ int PavApp::run( int argc, char *argv[] )
       plot_ids.push_back( "K" );
       break;
     case 'Y':
-      plot_ids.push_back( "y" );
+      plot_ids.push_back( "Y" );
       break;
     case 'S':
       top_label = "pa:above:c";
