@@ -94,7 +94,7 @@ void PavApp::PrintUsage( void )
   cout << " -x  max   Zoom into the data between 0 and max (normalized coords)" << endl;
   cout << endl;
   cout << "Configuration options:" << endl;
-  cout << " -K dev    Manually specify a plot device" << endl;
+  cout << " -g dev    Manually specify a plot device" << endl;
   cout << " -M meta   Read a meta-file containing the files to use" << endl;
   cout << endl;
   cout << "Selection options:" << endl;
@@ -110,7 +110,7 @@ void PavApp::PrintUsage( void )
   cout << " -B        Display off-pulse bandpass & channel weights" << endl;
   cout << " -D        Plot a single profile (chan 0, poln 0, subint 0 by default)" << endl;
   cout << " -G        Plot an image of amplitude against frequency & phase" << endl;
-  cout << " -g        Plot Digitiser Statistics" << endl;
+  cout << " -K        Plot Digitiser Statistics" << endl;
   cout << " -j        Display a simple dynamic spectrum image" << endl;
   cout << " -m        Plot Poincare vector in spherical coordinates" << endl;
   cout << " -n        Plot S/N against frequency" << endl;
@@ -645,7 +645,7 @@ int PavApp::run( int argc, char *argv[] )
   string clip_command = "y:range";
   string clip_value = "=(0,1)";
 
-  char valid_args[] = "Az:hb:M:K:DCcdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g";
+  char valid_args[] = "Az:hb:M:KDCcdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g:";
 
   int c = '\0';
   while( (c = getopt_long( argc, argv, valid_args, long_options, &option_index )) != -1 )
@@ -664,13 +664,13 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.24 2007/11/05 02:05:58 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.25 2007/11/05 02:44:33 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
       metafile = optarg;
       break;
-    case 'K':
+    case 'g':
       plot_device = optarg;
       break;
     case 'D':
@@ -724,8 +724,8 @@ int PavApp::run( int argc, char *argv[] )
     case 'G':
       plot_ids.push_back( "G" );
       break;
-    case 'g':
-      plot_ids.push_back( "g" );
+    case 'K':
+      plot_ids.push_back( "K" );
       break;
     case 'Y':
       plot_ids.push_back( "y" );
