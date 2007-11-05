@@ -25,6 +25,7 @@ public:
   FreqVsSNRPlot();
 
   void prepare( const Pulsar::Archive * );
+  virtual void preprocess( Pulsar::Archive * ) {}
   void draw( const Pulsar::Archive * );
 
   std::string get_xlabel( const Pulsar::Archive * );
@@ -37,7 +38,7 @@ class Interface : public TextInterface::To<FreqVsSNRPlot>
   };
 
   TextInterface::Parser *get_interface( void );
-  
+
   void set_pol( int new_pol ) { pol = new_pol; }
   void set_subint( int new_subint ) { subint = new_subint; }
   int get_pol( void ) const { return pol; }
