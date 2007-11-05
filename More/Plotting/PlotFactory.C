@@ -100,7 +100,7 @@ Pulsar::PlotFactory::PlotFactory ()
         ( 'B', "bpcw", "Plot off-pulse bandpass and channel weights" ) );
   
   add ( new PlotFactory::Advocate<DigitiserStatsPlot>
-        ( 'g', "digstats", "Digitiser Statistics" ) );
+        ( 'K', "digstats", "Digitiser Statistics" ) );
   
   add ( new PlotFactory::Advocate<DigitiserCountsPlot>
         ( 'A', "digcnts", "Digitiser Counts histogram" ) );
