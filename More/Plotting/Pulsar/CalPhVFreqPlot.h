@@ -34,6 +34,9 @@ namespace Pulsar
     //! do some preparation ???
     void prepare (const Archive*);
 
+    //! preprocess, overriden to not remove baseline
+    virtual void preprocess (Archive* archive) {}
+
     //! draw the angle as a function of pulse phase
     void draw (const Archive*);
 
