@@ -46,8 +46,8 @@ void MEAL::GimbalLockMonitor::set_pitch_limits (double lower, double upper)
   upper_pitch_limit = upper;
 }
 
-//! Return true if no gimbal lock is detected
-bool MEAL::GimbalLockMonitor::all_clear (float chisq)
+//! Return true if gimbal lock is detected
+bool MEAL::GimbalLockMonitor::lock_detected ()
 {
   double pitch_rad = pitch->get_param(0);
   double yaw_rad = yaw->get_param(0);
@@ -72,7 +72,7 @@ bool MEAL::GimbalLockMonitor::all_clear (float chisq)
 
   }
 
-  return true;
+  return gimbal_lock_detected;
 }
 
     

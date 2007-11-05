@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/GimbalLockMonitor.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/10/30 03:29:10 $
+   $Revision: 1.3 $
+   $Date: 2007/11/05 00:26:09 $
    $Author: straten $ */
 
 #ifndef __Pulsar_GimbalLockMonitor_h
@@ -38,8 +38,8 @@ namespace MEAL {
     //! Set the limits on the pitch rotation
     void set_pitch_limits (double lower, double upper);
 
-    //! Return true if no gimbal lock is detected
-    bool all_clear (float chisq);
+    //! Return true if gimbal lock is detected
+    bool lock_detected ();
 
   protected:
 
