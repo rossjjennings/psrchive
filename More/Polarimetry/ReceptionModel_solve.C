@@ -4,7 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/ReceptionModel.h"
+#include "Pulsar/ReceptionModelReport.h"
 #include "Pulsar/CoherencyMeasurementSet.h"
 #include "MEAL/LevenbergMarquardt.h"
 
@@ -221,7 +223,7 @@ void Calibration::ReceptionModel::solve ()
 
     bool reiterate = false;
     for (unsigned i=0; i < convergence_condition.size(); i++)
-      if ( !convergence_condition[i](reduced_chisq) )
+      if ( !convergence_condition[i](this) )
 	reiterate = true;
 
     if (reiterate)
@@ -342,5 +344,9 @@ void Calibration::ReceptionModel::solve ()
     set_variance (iparm, covariance[iparm][iparm]);
   }
 
+  for (unsigned i=0; i < acceptance_condition.size(); i++)
+    if ( !acceptance_condition[i](this) )
+      throw Error (InvalidState, "Calibration::ReceptionModel::solve",
+		   "model not accepted by condition #%u", i);
 }
 

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModel.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/10/30 02:31:48 $
+   $Revision: 1.12 $
+   $Date: 2007/11/05 00:26:25 $
    $Author: straten $ */
 
 #ifndef __ReceptionModel_H
@@ -63,6 +63,18 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
+    // Add conditions the model
+    //
+    // ///////////////////////////////////////////////////////////////////
+
+    //! Add a convergence condition
+    void add_convergence_condition( Functor< bool(ReceptionModel*) > );
+
+    //! Add an acceptance condition
+    void add_acceptance_condition( Functor< bool(ReceptionModel*) > );
+
+    // ///////////////////////////////////////////////////////////////////
+    //
     // Fit the model
     //
     // ///////////////////////////////////////////////////////////////////
@@ -75,9 +87,6 @@ namespace Calibration {
 
     //! Set the maximum number of iterations in fit algorithm
     void set_fit_maximum_iterations (unsigned maximum_iterations);
-
-    //! Add a convergence conditions
-    void add_fit_convergence_condition( Functor< bool(float) > );
 
     //! Set the convergence threshold
     void set_fit_convergence_threshold (float delta_chi_squared,
@@ -129,7 +138,10 @@ namespace Calibration {
     float convergence_threshold;
 
     //! Additional convergence conditions
-    std::vector< Functor< bool(float) > > convergence_condition;
+    std::vector< Functor< bool(ReceptionModel*) > > convergence_condition;
+
+    //! Additional acceptance conditions
+    std::vector< Functor< bool(ReceptionModel*) > > acceptance_condition;
 
     //! The maximum reduced chi-squared allowed
     float maximum_reduced;

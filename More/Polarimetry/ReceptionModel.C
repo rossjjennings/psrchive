@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/ReceptionModel.h"
 #include "Pulsar/CoherencyMeasurementSet.h"
 
@@ -173,7 +174,6 @@ void Calibration::ReceptionModel::delete_data ()
   data.resize (0);
 }
 
-
 //! Get the number of CoherencyMeasurementSet
 unsigned Calibration::ReceptionModel::get_ndata () const
 {
@@ -203,10 +203,17 @@ void Calibration::ReceptionModel::set_fit_maximum_iterations (unsigned max)
 }
 
 //! Add a convergence conditions
-void Calibration::ReceptionModel::add_fit_convergence_condition
-( Functor< bool(float) > condition )
+void Calibration::ReceptionModel::add_convergence_condition
+( Functor< bool(ReceptionModel*) > condition )
 {
   convergence_condition.push_back( condition );
+}
+
+//! Add a report
+void Calibration::ReceptionModel::add_acceptance_condition
+( Functor< bool(ReceptionModel*) > condition )
+{
+  acceptance_condition.push_back( condition );
 }
 
 //! Set the convergence threshold
