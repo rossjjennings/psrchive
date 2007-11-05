@@ -45,9 +45,7 @@ void FreqVsSNRPlot::draw( const Archive *data )
 
   vector <float> snrs(nchan);
 
-
-
-  for (unsigned i = 0; i < data->get_nchan(); i++)
+  for (unsigned i = 0; i < nchan; i++)
   {
     snrs[i] = data->get_Profile(subint, pol, i)->snr();
   }
