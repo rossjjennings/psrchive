@@ -232,7 +232,7 @@ void DigitiserStatsPlot::draw( const Archive *const_arch )
       // for each parameter, draw the profile
       for( int p = 0; p < npar; p ++ )
       {
-        cpgsci( p + 2 );
+        cpgsci( (p + 1)* 2 );
         cpgline( ncycsub*nsub, &xs[0], &profiles[g][p][0] );
       }
     }
