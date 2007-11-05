@@ -33,6 +33,7 @@ public:
   int get_lsub( void ) const { return lsub; }
   
   void prepare( const Pulsar::Archive *data );
+  virtual void preprocess( Pulsar::Archive *data ) {}
   void draw( const Pulsar::Archive *data );
   
   class Interface : public TextInterface::To<DynamicSNSpectrum>
