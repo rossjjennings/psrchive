@@ -327,7 +327,7 @@ std::string DigitiserStatsPlot::get_xlabel( const Archive * data )
 
 std::string DigitiserStatsPlot::get_ylabel( const Archive *data )
 {
-  return "Subint";
+  return "Digitiser Counts";
 }
 
 
