@@ -606,9 +606,6 @@ int PavApp::run( int argc, char *argv[] )
   // verbosity
   bool verbose = false;
 
-  // Keep the baseline before plotting
-  bool keep_baseline = false;
-
   bool plot_spherical = false;
 
   bool plot_qu = false;
@@ -620,8 +617,6 @@ int PavApp::run( int argc, char *argv[] )
   vector< string > plot_ids;
 
   int option_index;
-
-
 
   const int PLOT_QU          = 1001;
   const int CMAP_IND         = 1002;
@@ -669,7 +664,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.23 2007/10/31 04:20:11 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.24 2007/11/05 02:05:58 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -680,13 +675,12 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'D':
       plot_ids.push_back( "D" );
-      // plots.push_back( factory.construct( "flux" ) );
       break;
     case 'C':
       jobs.push_back( "centre" );
       break;
     case 'c':
-      keep_baseline = true;
+      //keep_baseline = true;
       break;
     case 'd':
       jobs.push_back( "dedisperse" );
@@ -729,60 +723,45 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'G':
       plot_ids.push_back( "G" );
-      //plots.push_back( factory.construct( "G" ) );
       break;
     case 'g':
       plot_ids.push_back( "g" );
-      //plots.push_back( factory.construct( "g" ) );
       break;
     case 'Y':
-      //keep_baseline = true;
       plot_ids.push_back( "y" );
-      //plots.push_back( factory.construct( "Y" ) );
       break;
     case 'S':
       top_label = "pa:above:c";
       clip_command = "flux:y:range";
       options.push_back( "pa:mark=dot+tick" );
       plot_ids.push_back( "S" );
-      // plots.push_back( factory.construct( "S" ) );
       clear_labels = false;
       break;
     case 'A':
       plot_ids.push_back( "A" );
-      //plots.push_back( factory.construct( "A" ) );
       break;
     case 'X':
-      keep_baseline = true;
+      //keep_baseline = true;
       plot_ids.push_back( "X" );
-      //plots.push_back( factory.construct( "X" ) );
       break;
     case 'B':
-      keep_baseline = true;
+      //keep_baseline = true;
       plot_ids.push_back( "B" );
-      //plots.push_back( factory.construct( "B" ) );
       top_label = "band:above:c";
       clear_labels = false;
       break;
     case 'R':
-      //keep_baseline = true;
       plot_ids.push_back( "R" );
-      //plots.push_back( factory.construct( "R" ) );
       break;
     case 'm':
       plot_spherical = true;
       break;
     case 'n':
-      //plots.push_back( factory.construct("n") );
       plot_ids.push_back( "n" );
-      keep_baseline = true;
+      //keep_baseline = true;
       break;
     case 'j':
-      {
-        //plots.push_back( factory.construct( "j" ) );
-        plot_ids.push_back( "j" );
-        keep_baseline = true;
-      }
+      plot_ids.push_back( "j" );
       break;
     case 'P':
       ipol = fromstring<int>( optarg );
@@ -1045,9 +1024,6 @@ int PavApp::run( int argc, char *argv[] )
         preprocessor.script( jobs );
       }
 
-      if( !keep_baseline )
-        plots[i].archive->remove_baseline();
-
       if (cbppo)
       {
         Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
@@ -1090,6 +1066,7 @@ int PavApp::run( int argc, char *argv[] )
         for (unsigned p=0; p < plots[i].plots.size(); p++)
         {
           cpgpage ();
+          plots[i].plots[p]->preprocess( plots[i].archive );
           plots[i].plots[p]->plot ( plots[i].archive );
         }
       }
