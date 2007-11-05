@@ -346,19 +346,25 @@ catch (Error& error) {
   throw error += "Pulsar::PulsarCalibrator::add_observation";
 }
 
-Functor< bool(float) >
+class interface : public MEAL::GimbalLockMonitor
+{
+public:
+  bool check (Calibration::ReceptionModel*) { lock_detected(); return true; }
+};
+
+Functor< bool(Calibration::ReceptionModel*) >
 gimbal_lock( Calibration::Instrument* instrument, unsigned receptor )
 {
   Calibration::Feed* feed = instrument->get_feed();
   Calibration::SingleAxis* backend = instrument->get_backend();
 
-  MEAL::GimbalLockMonitor* condition = new MEAL::GimbalLockMonitor;
+  interface* condition = new interface;
   condition->set_yaw  ( feed->get_orientation_transformation( receptor ) );
   condition->set_pitch( feed->get_ellipticity_transformation( receptor ) );
   condition->set_roll ( backend->get_rotation_transformation() );
 
-  return Functor< bool(float) > ( condition,
-				  &MEAL::GimbalLockMonitor::all_clear );
+  return Functor< bool(Calibration::ReceptionModel*) >
+    ( condition, &interface::check );
 }
 
 MEAL::Complex2* Pulsar::PulsarCalibrator::new_transformation (unsigned ichan)
@@ -368,7 +374,7 @@ MEAL::Complex2* Pulsar::PulsarCalibrator::new_transformation (unsigned ichan)
 
   if (monitor_gimbal_lock)
     for (unsigned i=0; i<2; i++)
-      model[ichan]->get_model()->add_fit_convergence_condition
+      model[ichan]->get_model()->add_convergence_condition
 	( gimbal_lock(instrument, i) );
 
   return instrument;
