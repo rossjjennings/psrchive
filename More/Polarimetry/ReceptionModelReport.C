@@ -59,8 +59,10 @@ bool Calibration::ReceptionModelReport::report (ReceptionModel* model)
       
 	Stokes<double> ms = coherency( model->evaluate() );
 
+#ifdef _DEBUG
 	if (input == 0)
 	  cerr << "model=" << ms << "\ndata=" << datum << endl;
+#endif
 
 	for (unsigned ipol=0; ipol<4; ipol++) {
 	  double diff = datum[ipol].get_value() - ms[ipol];
