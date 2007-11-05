@@ -43,6 +43,7 @@ nobase_include_HEADERS = \
         Pulsar/ReceptionModelAxisPlotter.h \
         Pulsar/ReceptionModel.h \
         Pulsar/ReceptionModelPlotter.h \
+	Pulsar/ReceptionModelReport.h \
         Pulsar/ReferenceCalibrator.h \
         Pulsar/ReflectStokes.h \
         Pulsar/Simulation.h \
@@ -105,6 +106,7 @@ libPolarimetry_la_SOURCES = \
         ReceptionCalibrator_get_solution.C \
         ReceptionModel.C \
         ReceptionModel_solve.C \
+	ReceptionModelReport.C \
         ReferenceCalibrator.C \
         ReflectStokes.C \
         Simulation.C \

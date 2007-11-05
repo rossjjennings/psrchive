@@ -10,6 +10,7 @@
 #endif
 
 #include "Pulsar/ReceptionCalibrator.h"
+#include "Pulsar/ReceptionModelReport.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -1063,11 +1064,19 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
     else
       cerr << endl;
 
-    if (Calibrator::verbose)
-      model[ichan]->get_equation()->set_fit_debug();
+    Calibration::ReceptionModel* eq = model[ichan]->get_equation();
 
-    queue.submit( model[ichan]->get_equation(),
-		  &Calibration::ReceptionModel::solve );
+    string report_name = "pcm_report_" + tostring(ichan) + ".txt";
+
+    eq->add_acceptance_condition
+      ( Functor< bool(Calibration::ReceptionModel*) >
+	( new Calibration::ReceptionModelReport (report_name),
+	  &Calibration::ReceptionModelReport::report ) );
+
+    if (Calibrator::verbose)
+      eq->set_fit_debug();
+
+    queue.submit( eq, &Calibration::ReceptionModel::solve );
 
     if (only_ichan >= 0)
       break;
