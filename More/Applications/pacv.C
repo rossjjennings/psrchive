@@ -40,7 +40,21 @@ void usage ()
 {
   cout << "pacv - Pulsar Archive Calibrator Viewer\n"
     "usage: pacv [options] file1 [file2 ...]\n"
-    "where:\n"
+    "options:\n"
+    "\n"
+    " -n name      add the named plot to the output \n"
+    "              'name' is a three-character string of the form:\n"
+    "                 [which][what][when]  \n"
+    "              where: \n"
+    "                 which = 'c' for CAL (on-pulse minus off-pulse) \n"
+    "                       = 's' for SYS (off-pulse) \n"
+    "              and \n"
+    "                 what  = 's' for Stokes parameters \n"
+    "                       = 'p' for total and polarized flux \n"
+    "              and \n"
+    "                 when  = 'c' for calibrated data \n"
+    "                       = 'u' for uncalibrated data \n"
+    "\n"
     " -a archive   set the output archive class name\n"
     " -c [i|j-k]   mark channel or range of channels as bad\n"
     " -C           plot only calibrator Stokes\n"
@@ -66,6 +80,12 @@ int main (int argc, char** argv)
   // use the Degree of Polarization Calibrator
   bool dop_calibrator = false;
 
+  bool CAL[2][2] = { { false, false }, { false, false } };
+  bool SYS[2][2] = { { false, false }, { false, false } };
+
+  const unsigned Stokes = 0;
+  const unsigned Ip = 1;
+
   // treat all of the Archives as one FluxCalibrator observation set
   Reference::To<Pulsar::FluxCalibrator> fluxcal;
 
@@ -81,7 +101,9 @@ int main (int argc, char** argv)
   // produce publication quality plots
   bool publication = false;
 
+  bool plot_calibrator_solution = false;
   bool plot_calibrator_stokes = false;
+  bool plot_specified = false;
 
   //
   float cross_scale_factor = 1.0;
@@ -98,7 +120,7 @@ int main (int argc, char** argv)
   bool verbose = false;
   char c;
 
-  while ((c = getopt(argc, argv, "2:a:c:CD:dfhM:Pr:S:pqvV")) != -1)  {
+  while ((c = getopt(argc, argv, "2:a:c:CD:dfhM:n:Pr:S:pqvV")) != -1)  {
 
     switch (c)  {
 
@@ -161,6 +183,41 @@ int main (int argc, char** argv)
       metafile = optarg;
       break;
 
+    case 'n': {
+
+      unsigned when = 0;
+      switch (optarg[2]) {
+      case 'c':
+	when = 1; break;
+      case 'u':
+	when = 0; break;
+      default:
+	cerr << "invalid plot 'when' code=" << optarg[2] << endl; return -1;
+      }
+
+      unsigned what = 0;
+      switch (optarg[1]) {
+      case 's':
+	what = Stokes; break;
+      case 'p':
+	what = Ip; break;
+      default:
+	cerr << "invalid plot 'what' code=" << optarg[1] << endl; return -1;
+      }
+
+      switch (optarg[0]) {
+      case 'c':
+	CAL[what][when] = true; break;
+      case 's':
+	SYS[what][when] = true; break;
+      default:
+	cerr << "invalid plot 'which' code=" << optarg[0] << endl; return -1;
+      }
+
+      plot_specified = true;
+      break;
+    }
+
     case 'P':
       publication = true;
       break;
@@ -207,6 +264,9 @@ int main (int argc, char** argv)
 
     } 
   }
+
+  if (!plot_specified)
+    plot_calibrator_solution = true;
 
   if (!metafile && optind >= argc) {
     cerr << "pacv requires a list of archive filenames as parameters.\n";
@@ -345,86 +405,94 @@ int main (int argc, char** argv)
       continue;
     }
 
-    if (verbose)
-      cerr << "pacv: Plotting Uncalibrated Spectrum" << endl;
-    cpgpage ();
-    archplot.plot (input);
-
-    if (verbose)
-      cerr << "pacv: Plotting Total and Polarized Calibrator Flux" << endl;
-    cpgpage ();
-    archplot.set_plot_Ip (true);
-    archplot.plot (input);
-
-    if (verbose)
-      cerr << "pacv: Plotting Off-Pulse Total and Polarized Flux" << endl;
-    cpgpage ();
-    archplot.set_plot_low (true);    
-    archplot.plot (input);
-    archplot.set_plot_low (false);    
-
-    if (verbose)
-      cerr << "pacv: Plotting On-Pulse Total and Polarized Flux" << endl;
-    cpgpage ();
-    archplot.set_plot_total (true);    
-    archplot.plot (input);
-    archplot.set_plot_total (false);    
-
-    archplot.set_plot_Ip (false);
-
-    if (verbose)
-      cerr << "pacv: Constructing PolnCalibrator" << endl;
-
-    if (hybrid) {
-      hybrid -> set_reference_observation 
-	( new Pulsar::SingleAxisCalibrator (input) );
-      calibrator = hybrid;
-    }
-    else if (dop_calibrator)
-      calibrator = new Pulsar::DoPCalibrator (input);
-    else if (single_axis)
-      calibrator = new Pulsar::SingleAxisCalibrator (input);
-    else
-      calibrator = new Pulsar::PolarCalibrator (input);
-    
-    if (verbose)
-      cerr << "pacv: Calibrating Archive" << endl;
-
-    calibrator -> calibrate (input);
-
-    if (verbose)
-      cerr << "pacv: Plotting PolnCalibrator" << endl;
-
-    cpgpage ();
-    plotter.plot (calibrator);
-
-    if (verbose)
-      cerr << "pacv: Plotting Calibrated Spectrum" << endl;
-    cpgpage ();
-
     input->convert_state (Signal::Stokes);
-    archplot.plot (input);
 
-    if (verbose)
-      cerr << "pacv: Plotting Off-Pulse Total and Polarized Flux" << endl;
-    cpgpage ();
-    archplot.set_plot_low (true);    
-    archplot.plot (input);
-    archplot.set_plot_low (false);    
+    string cal = "uncalibrated";
 
-    if (dop_calibrator)
-      continue;
+    for (unsigned ical=0; ical < 2; ical++) {
 
-    cerr << "pacv: Creating " << archive_class << " Archive" << endl;
-  
-    output = calibrator->new_solution (archive_class);
+      if (CAL[Stokes][ical]) {
+	cerr << "pacv: Plotting " << cal << " CAL Stokes parameters" << endl;
+	cpgpage ();
+	archplot.plot (input);
+      }
+      
+      if (CAL[Ip][ical]) {
+	cerr << "pacv: Plotting " << cal << " CAL total and polarized flux"
+	     << endl;
+	cpgpage ();
+	archplot.set_plot_Ip (true);
+	archplot.plot (input);
+	archplot.set_plot_Ip (false);
+      }
+      
+      if (SYS[Stokes][ical]) {
+	cerr << "pacv: Plotting " << cal << " SYS Stokes parameters"
+	     << endl;
+	cpgpage ();
+	archplot.set_plot_low (true);    
+	archplot.plot (input);
+	archplot.set_plot_low (false);    
+      }
+      
+      if (SYS[Ip][ical]) {
+	cerr << "pacv: Plotting " << cal << " SYS total and polarized flux"
+	     << endl;
+	cpgpage ();
+	archplot.set_plot_Ip (true);
+	archplot.set_plot_low (true);    
+	archplot.plot (input);
+	archplot.set_plot_Ip (false);
+	archplot.set_plot_low (false);    
+      }
+      
+      if (ical)
+	break;
+      
+      if (verbose)
+	cerr << "pacv: Constructing PolnCalibrator" << endl;
+      
+      if (hybrid) {
+	hybrid -> set_reference_observation 
+	  ( new Pulsar::SingleAxisCalibrator (input) );
+	calibrator = hybrid;
+      }
+      else if (dop_calibrator)
+	calibrator = new Pulsar::DoPCalibrator (input);
+      else if (single_axis)
+	calibrator = new Pulsar::SingleAxisCalibrator (input);
+      else
+	calibrator = new Pulsar::PolarCalibrator (input);
+      
+      if (verbose)
+	cerr << "pacv: Calibrating Archive" << endl;
+      
+      calibrator -> calibrate (input);
 
-    int index = filenames[ifile].find_first_of(".", 0);
-    string newname = filenames[ifile].substr(0, index) + ".pacv";
-    
-    cerr << "pacv: Unloading " << newname << endl;
-    output -> unload (newname);
+      if (plot_calibrator_solution) {
 
+	cerr << "pacv: Plotting calibrator solution parameters" << endl;
+	cpgpage ();
+	plotter.plot (calibrator);
+      
+      }
+
+      if (dop_calibrator)
+	continue;
+      
+      cerr << "pacv: Creating " << archive_class << " Archive" << endl;
+      
+      output = calibrator->new_solution (archive_class);
+      
+      int index = filenames[ifile].find_first_of(".", 0);
+      string newname = filenames[ifile].substr(0, index) + ".pacv";
+      
+      cerr << "pacv: Unloading " << newname << endl;
+      output -> unload (newname);
+
+    }
+
+      
   }
   catch (Error& error) {
     cerr << "pacv: Error during " << filenames[ifile] << error << endl;
@@ -433,8 +501,7 @@ int main (int argc, char** argv)
   catch (...)  {
     cerr << "pacv: An unknown exception was thrown" << endl;
   }
-
-
+  
   if (fluxcal) try {
     cerr << "pacv: Plotting FluxCalibrator" << endl;
     plotter.plot (fluxcal);
