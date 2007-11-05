@@ -32,6 +32,7 @@ namespace Pulsar
     TextInterface::Parser *get_interface();
 
     void prepare( const Archive *data );
+    virtual void preprocess( Archive *data ) {}
     void draw( const Archive *data );
   private:
     

@@ -34,6 +34,8 @@ namespace Pulsar
 
     void prepare( const Archive *data );
     
+    virtual void preprocess( Archive *data ) {};
+    
     BandpassPlot *get_band() { return &band; }
     ChannelWeightsPlot *get_weights() { return &weights; }
     

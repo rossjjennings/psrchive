@@ -30,6 +30,8 @@ namespace Pulsar
 
     void prepare( const Archive * );
     
+    virtual void preprocess( Archive *arch ) {}
+    
     void draw( const Archive * );
   private:
     std::vector<double> means;
