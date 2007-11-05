@@ -171,9 +171,12 @@ void regions( unsigned ndat, const float* data,
 		 off_transitions.size());
 
 #ifdef _DEBUG
-    cerr << "Pulsar::PeakConsecutive::build transitions="
-	 << on_transitions.size() << endl;
+  cerr << "Pulsar::PeakConsecutive::build transitions="
+       << on_transitions.size() << endl;
 #endif
+
+  if (off_transitions.size() == 0)
+    return;
 
   // if the pulse was on in the first phase bin, then shift and correct
   if (started == on_pulse)
