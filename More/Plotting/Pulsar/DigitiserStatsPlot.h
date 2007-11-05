@@ -49,7 +49,7 @@ namespace Pulsar
     int get_lsub() const { return lsub; }
   private:
     float y_min, y_max;
-    vector< vector< vector< vector< float > > > > profiles;
+    vector< vector< vector< float > > > profiles;
     bool valid_archive;
 
     int subint;
