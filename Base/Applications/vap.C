@@ -33,6 +33,7 @@
 #include <Pulsar/DigitiserCounts.h>
 #include <Pulsar/FITSSUBHdrExtension.h>
 #include <Pulsar/CalInfoExtension.h>
+#include <Pulsar/TapeInfo.h>
 
 #include <dirutil.h>
 #include <strutil.h>
@@ -276,11 +277,11 @@ string get_bw( Reference::To< Archive > archive )
 string get_intmjd( Reference::To< Archive > archive )
 {
   string intmjd = "*";
-  
+
   Reference::To<FITSHdrExtension> hdr = archive->get<FITSHdrExtension>();
   if( hdr )
     intmjd = tostring<int>( hdr->start_time.intday() );
-  
+
   return intmjd;
 }
 
@@ -288,13 +289,13 @@ string get_intmjd( Reference::To< Archive > archive )
 string get_fracmjd( Reference::To< Archive > archive )
 {
   string fracmjd;
-  
+
   set_precision( 14 );
   Reference::To<FITSHdrExtension> hdr_ext = archive->get<FITSHdrExtension>();
   if( hdr_ext )
     fracmjd = tostring( hdr_ext->start_time.fracday() );
   restore_precision();
-  
+
   return fracmjd;
 }
 
@@ -555,7 +556,7 @@ string get_co( Reference::To<Archive> archive )
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-// TELESCOPE FUNCTIONS
+// FILE AND TELESCOPE FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 string get_ant_x( Reference::To< Archive > archive )
@@ -640,6 +641,34 @@ string get_site( Reference::To< Archive > archive )
 
   return result;
 }
+
+string get_file( Reference::To<Archive > archive )
+{
+  string result = "";
+
+  Reference::To<TapeInfo> ext = archive->get<TapeInfo>();
+  if( ext )
+  {
+    int file_num = ext->get_file_number();
+
+    if( file_num != -1 )
+      result = tostring<int>( file_num );
+  }
+
+  return result;
+}
+
+string get_tlabel( Reference::To<Archive > archive )
+{
+  string result = "";
+
+  Reference::To<TapeInfo> ext = archive->get<TapeInfo>();
+  if( ext )
+    result = ext->get_tape_label();
+
+  return result;
+}
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -919,14 +948,14 @@ string get_stt_offs( Reference::To<Archive> archive )
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   set_precision( 9 );
-  
+
   if( !ext )
     result = "UNDEF";
   else
     result = tostring( ext->get_stt_offs() );
-  
+
   restore_precision();
-  
+
   return result;
 }
 
@@ -1561,7 +1590,7 @@ void PrintBasicHlp( void )
   "\n"
   "-s  show the extensions present in an archive\n"
   "\n"
-  "-q  quickly show parameters as files are loaded (no table formatting)\n" 
+  "-q  quickly show parameters as files are loaded (no table formatting)\n"
   << endl;
 }
 
@@ -1706,6 +1735,8 @@ void PrintExtdHlp( void )
   cout << "hdrver                          Header Version" << endl;
   cout << "site                            Telescope tempo code" << endl;
   cout << "telescop                        Telescope name" << endl;
+  cout << "file                            The file number (FB data only)" << endl;
+  cout << "tlabel                          Tape label (FB data only)" << endl;
   cout << endl;
 
   cout << "CALIBRATION PARAMETERS" << endl;
@@ -1894,6 +1925,8 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "cal_freq" ) return get_cal_freq( archive );
     else if( command == "cal_dcyc" ) return get_cal_dcyc( archive );
     else if( command == "cal_phs" ) return get_cal_phs( archive );
+    else if( command == "file" ) return get_file( archive );
+    else if( command == "tlabel" ) return get_tlabel ( archive );
 
     else return "UNDEF";
   }
@@ -2061,7 +2094,8 @@ void Header( OS& os )
 
   // add the commands as headings for the table.
   vector< string >::iterator it;
-  for( it = commands.begin(); it != commands.end(); it ++ ) {
+  for( it = commands.begin(); it != commands.end(); it ++ )
+  {
     if (!neat_table)
       os << "\t";
     os << (*it);
