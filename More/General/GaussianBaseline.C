@@ -94,10 +94,21 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight,
 
   unsigned nbin = weight->get_nbin();
   unsigned consecutive = unsigned( 0.01 * nbin );
+  if (!consecutive)
+    consecutive = 1;
+
   float transition = 0.5;
+
+#ifdef _DEBUG
+  cerr << "Pulsar::GaussianBaseline::postprocess find regions; consecutive="
+       << consecutive << endl;
+#endif
 
   regions( weight->get_nbin(), weight->get_weights(), 0, nbin,
 	   consecutive, transition, on_transitions, off_transitions );
+
+  if (off_transitions.size() == 0)
+    return;
 
 #ifdef _DEBUG
   cerr << "Pulsar::GaussianBaseline::postprocess smooth bins=" << smooth_bins
