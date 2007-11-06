@@ -133,10 +133,14 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight,
     unsigned ibin=off_transitions[ioff];
     while ( smoothed.get_amps()[ibin%nbin] > last_mean ) {
 #ifdef _DEBUG
-      cerr << "after peel " << ibin%nbin << endl;
+      cerr << "right peel " << ibin%nbin << endl;
 #endif
       (*weight)[ibin%nbin] = 0.0;
       ibin ++;
+      if (ibin > off_transitions[ioff] + nbin)
+        throw Error (InvalidState, "Pulsar::GaussianBaseline::postprocess",
+                     "right peel failure on %u transitions",
+		      off_transitions.size() );
     }
 
   }
@@ -146,10 +150,15 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight,
     unsigned ibin=on_transitions[ion] + nbin;
     while ( smoothed.get_amps()[ibin%nbin] > last_mean ) {
 #ifdef _DEBUG
-      cerr << "before peel " << ibin%nbin << endl;
+      cerr << "left peel " << ibin%nbin << endl;
 #endif
       (*weight)[ibin%nbin] = 0.0;
       ibin --;
+      if (ibin < on_transitions[ion] + 1)
+        throw Error (InvalidState, "Pulsar::GaussianBaseline::postprocess",
+                     "right peel failure on %u transitions",
+                     on_transitions.size() );
+
     }
 
   }
