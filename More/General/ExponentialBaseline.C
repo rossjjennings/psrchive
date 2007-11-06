@@ -41,8 +41,8 @@ void Pulsar::ExponentialBaseline::get_bounds (PhaseWeight* weight,
   weight->set_Profile (profile);
 
 #ifdef _DEBUG
-  cerr << "Pulsar::ExponentialBaseline::get_bounds mean=" << weight.get_mean()
-       << " sigma=" << sqrt(weight.get_variance()) << endl;
+  cerr << "Pulsar::ExponentialBaseline::get_bounds mean=" << weight->get_mean()
+       << " sigma=" << sqrt(weight->get_variance()) << endl;
 #endif
 
   lower = 0.0;
