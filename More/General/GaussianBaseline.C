@@ -122,9 +122,12 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight,
   smoother (&smoothed);
 
 #ifdef _DEBUG
-  cerr << "before peel mean=" << weight->get_mean() << endl;
+  cerr << "before peel mean=" << weight->get_mean() 
+       << " last_mean=" << last_mean 
+       << " transitions=" << off_transitions.size() << endl;
 #endif
 
+  
   for (unsigned ioff=0; ioff < off_transitions.size(); ioff++) {
 
     unsigned ibin=off_transitions[ioff];

@@ -44,13 +44,16 @@ void Pulsar::StokesPlot::get_profiles (const Archive* data)
 
   Reference::To<const PolnProfile> profile = get_Stokes (data, isubint, ichan);
 
-  if (verbose)
-    cerr << "Pulsar::StokesPlot::get_profiles filling vector" << endl;
-
   for (unsigned ipol=0; ipol < plotter.profiles.size(); ipol++) {
+
+    if (verbose)
+      cerr << "Pulsar::StokesPlot::get_profiles"
+	      " new_Profile[" << plot_values[ipol] << "]" << endl;
+
     plotter.profiles[ipol] = new_Profile (profile, plot_values[ipol]);
     plotter.plot_sci[ipol] = plot_colours[ipol] - '0';
     plotter.plot_sls[ipol] = plot_lines[ipol] - '0';
+
   }
 }
 
