@@ -119,9 +119,9 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight,
   smoother.set_bins (smooth_bins);
   
   Profile smoothed (profile);
-  smoother.transform (&smoothed);
+  smoother (&smoothed);
 
-#ifdef _DEGUG
+#ifdef _DEBUG
   cerr << "before peel mean=" << weight->get_mean() << endl;
 #endif
 
@@ -129,7 +129,7 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight,
 
     unsigned ibin=off_transitions[ioff];
     while ( smoothed.get_amps()[ibin%nbin] > last_mean ) {
-#ifdef _DEGUG
+#ifdef _DEBUG
       cerr << "after peel " << ibin%nbin << endl;
 #endif
       (*weight)[ibin%nbin] = 0.0;
@@ -142,7 +142,7 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight,
 
     unsigned ibin=on_transitions[ion] + nbin;
     while ( smoothed.get_amps()[ibin%nbin] > last_mean ) {
-#ifdef _DEGUG
+#ifdef _DEBUG
       cerr << "before peel " << ibin%nbin << endl;
 #endif
       (*weight)[ibin%nbin] = 0.0;
@@ -153,7 +153,7 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight,
 
   weight->set_Profile (profile);
 
-#ifdef _DEGUG
+#ifdef _DEBUG
   cerr << "after peel mean=" << weight->get_mean() << endl;
 #endif
 
