@@ -166,7 +166,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.57 2007/10/23 18:52:21 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.58 2007/11/06 23:02:06 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -610,9 +610,6 @@ int main (int argc, char **argv) try {
 
     if (!reset_total_current) {
 
-      if (verbose)
-	cerr << "psradd: appending archive to total" << endl;
-
       try {
 
 	if (phase_align) {
@@ -628,6 +625,20 @@ int main (int argc, char **argv) try {
 	  archive->rotate_phase( obs->shift(std).get_value() );
 
 	}
+
+	if (archive->get_state() != total->get_state()) {
+
+	  if (verbose)
+	    cerr << "psradd: converting state" 
+		 << " from " << archive->get_state()
+		 << " to " << total->get_state() << endl;
+	  
+	  archive->convert_state( total->get_state() );
+
+	}
+
+	if (verbose)
+	  cerr << "psradd: appending archive to total" << endl;
 
 	if (time_direction)
 	  time.append (total, archive);
