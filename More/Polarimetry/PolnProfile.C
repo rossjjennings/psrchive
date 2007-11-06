@@ -521,6 +521,17 @@ void Pulsar::PolnProfile::invint (Profile* invint) const
 
 bool pav_backward_compatibility = false;
 
+void remove_baseline (Pulsar::Profile* profile, 
+		      Pulsar::BaselineEstimator* estimator)
+{
+  Reference::To<Pulsar::PhaseWeight> baseline;
+  if (estimator)
+    baseline = estimator->baseline( profile );
+  else
+    baseline = profile->baseline();
+  profile->offset( -baseline->get_mean().get_value() );
+}
+
 /*!
   rss stands for root-sum-squared
 
@@ -535,8 +546,9 @@ bool pav_backward_compatibility = false;
   \post The bias due to noise is removed before the square root is taken
 
  */
-void Pulsar::PolnProfile::get_rss (Profile* rss,
-				   unsigned jpol, unsigned kpol) const
+void Pulsar::PolnProfile::get_rss 
+( Profile* rss, unsigned jpol, unsigned kpol,
+  BaselineEstimator* baseline_estimator) const
 {
   if (state != Signal::Stokes)
     throw Error (InvalidState, "Pulsar::PolnProfile::get_sqrt_sumsq",
@@ -555,10 +567,8 @@ void Pulsar::PolnProfile::get_rss (Profile* rss,
       amps[ibin] += a[ibin]*a[ibin];
   }
 
-  if (!pav_backward_compatibility) {
-    Reference::To<PhaseWeight> baseline = rss->baseline();
-    rss->offset( -baseline->get_mean().get_value() );
-  }
+  if (!pav_backward_compatibility)
+    remove_baseline (rss, baseline_estimator);
 
   for (ibin=0; ibin<nbin; ibin++)
     if (amps[ibin] < 0.0)
@@ -566,10 +576,8 @@ void Pulsar::PolnProfile::get_rss (Profile* rss,
     else
       amps[ibin] = sqrt(amps[ibin]);
 
-  if (pav_backward_compatibility) {
-    Reference::To<PhaseWeight> baseline = rss->baseline();
-    rss->offset( -baseline->get_mean().get_value() );
-  }
+  if (pav_backward_compatibility)
+    remove_baseline (rss, baseline_estimator);
 
 }
 
@@ -584,15 +592,8 @@ catch (Error& error) {
 void Pulsar::PolnProfile::get_linear (Profile* linear) const
 try {
 
-  // create a functor equal to ExponentialBaseline::baseline
-  static Functor< PhaseWeight* (const Profile*) > exponential_baseline
-    ( new ExponentialBaseline, &BaselineEstimator::baseline );
-
-  // temporarily set the baseline strategy
-  ModifyRestore< Functor< PhaseWeight* (const Profile*) > > 
-    ( Profile::baseline_strategy, exponential_baseline );
-
-  get_rss (linear, 1,2);
+  ExponentialBaseline estimator;
+  get_rss (linear, 1,2, &estimator);
 
 }
 catch (Error& error) {

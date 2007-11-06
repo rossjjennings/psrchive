@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfile.h,v $
-   $Revision: 1.37 $
-   $Date: 2007/09/24 08:53:24 $
+   $Revision: 1.38 $
+   $Date: 2007/11/06 03:17:29 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -21,6 +21,8 @@
 #include "Matrix.h"
 
 namespace Pulsar {
+
+  class BaselineEstimator;
 
   //! Polarimetric pulse profile transformations and derivations
   /*! This class uses references to Profile objects in order to manipulate
@@ -159,7 +161,8 @@ namespace Pulsar {
     Profile* get_profile (unsigned ipol);
 
     //! Does the work for get_polarized and get_linear
-    void get_rss (Profile* rss, unsigned jpol, unsigned kpol) const;
+    void get_rss( Profile* rss, unsigned jpol, unsigned kpol,
+		  BaselineEstimator* baseline_estimator = 0 ) const;
 
   };
 
