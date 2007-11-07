@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Parameters.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.9 $
+   $Date: 2007/11/07 18:38:49 $
    $Author: straten $ */
 
 #ifndef __Parameters_H
@@ -74,6 +74,9 @@ namespace MEAL {
 
     //! Set the value of the specified parameter
     void set_param (unsigned index, double value);
+
+    //! Swap the value of the specified parameter
+    void swap_param (unsigned index, double& value);
 
     //! Return the variance of the specified parameter
     double get_variance (unsigned index) const

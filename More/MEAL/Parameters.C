@@ -68,6 +68,12 @@ void MEAL::Parameters::set_param (unsigned index, double value)
   get_context()->set_evaluation_changed ();
 }
 
+void MEAL::Parameters::swap_param (unsigned index, double& value)
+{
+  double temp = get_param (index);
+  set_param (index, value);
+  value = temp;
+}
 
 void MEAL::Parameters::resize (unsigned nparam)
 {
