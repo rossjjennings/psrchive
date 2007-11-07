@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Scalar.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.7 $
+   $Date: 2007/11/07 18:39:21 $
    $Author: straten $ */
 
 #ifndef __MEAL_Scalar_H
@@ -41,12 +41,18 @@ namespace MEAL {
     //! Assignment operator
     Scalar& operator = (const Scalar&);
 
+    //! Clone
+    virtual Scalar* clone () const;
+
     //! Return the scalar value (and its gradient, if requested)
     double evaluate (std::vector<double>* grad=0) const
     { return evaluation_policy->evaluate (grad); }
 
     //! Return the scalar value and its variance
     virtual void evaluate (Estimate<double>& value) const;
+
+    //! Return the scalar value and its variance
+    Estimate<double> estimate () const;
 
   protected:
 

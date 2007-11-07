@@ -33,6 +33,12 @@ MEAL::Scalar& MEAL::Scalar::operator = (const Scalar& copy)
   return *this;
 }
 
+//! Clone
+MEAL::Scalar* MEAL::Scalar::clone () const
+{
+  throw Error (InvalidState, "MEAL::Scalar::clone", "not implemented" );
+}
+
 void MEAL::Scalar::evaluate (Estimate<double>& value) const
 {
   std::vector<double> gradient;
@@ -48,6 +54,14 @@ void MEAL::Scalar::evaluate (Estimate<double>& value) const
   for (unsigned iparam=0; iparam<nparam; iparam++)
     value.var += gradient[iparam] * gradient[iparam] * get_variance(iparam);
 
+}
+
+//! Return the scalar value and its variance
+Estimate<double> MEAL::Scalar::estimate () const
+{
+  Estimate<double> ret;
+  evaluate (ret);
+  return ret;
 }
 
 void MEAL::Scalar::copy_evaluation_policy (const Scalar* function)
