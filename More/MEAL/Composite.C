@@ -161,11 +161,13 @@ void MEAL::Composite::map (Projection* modelmap, bool signal_changes)
       maps.push_back (modelmap);
       modelmap->meta = this;
     }
-    
-    if (Function::very_verbose) 
-      cerr << class_name() + "map send changed ParameterCount" << endl;
 
-    get_context()->changed.send (Function::ParameterCount);
+    if (signal_changes) {
+      if (Function::very_verbose) 
+	cerr << class_name() + "map send changed ParameterCount" << endl;
+
+      get_context()->changed.send (Function::ParameterCount);
+    }
 
     if (Function::very_verbose) 
       cerr << class_name() + "map set_evaluation_changed" << endl;
@@ -182,8 +184,7 @@ void MEAL::Composite::map (Projection* modelmap, bool signal_changes)
 
 
 //! Map the Function indeces
-void MEAL::Composite::add_component (Function* model,
-                                     vector<unsigned>& imap)
+void MEAL::Composite::add_component (Function* model, vector<unsigned>& imap)
 {
   if (!model)
     return;
@@ -270,7 +271,7 @@ void MEAL::Composite::unmap (Projection* modelmap, bool signal_changes)
   // erase the mapping
   unsigned imap = find_Projection (modelmap);
   if (imap == maps.size()) {
-    if (Function::very_verbose)
+    //if (Function::very_verbose)
       cerr << class_name() + "unmap Projection not found" << endl;
     return;
   }
@@ -344,6 +345,11 @@ void MEAL::Composite::remove_component (Function* model)
 void MEAL::Composite::remap (bool signal_changes)
 { 
   if (Function::very_verbose)
+    cerr << class_name() << "remap remove indirect Function instances" << endl;
+
+  models.resize (0);
+
+  if (Function::very_verbose)
     cerr << class_name() << "remap remap Projection instances" << endl;
 
   try {
@@ -364,7 +370,8 @@ void MEAL::Composite::remap (bool signal_changes)
   }
 
   if (Function::very_verbose)
-    cerr << class_name() << "remap send changed ParameterCount" << endl;
+    cerr << class_name() << "remap send changed ParameterCount nparam=" 
+	 << nparameters << endl;
   
   get_context()->changed.send (Function::ParameterCount);
   

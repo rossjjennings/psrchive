@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Composite.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/05/11 22:59:28 $
+   $Revision: 1.8 $
+   $Date: 2007/11/07 18:38:35 $
    $Author: straten $ */
 
 #ifndef __Composite_H
@@ -135,10 +135,10 @@ namespace MEAL {
     void attribute_changed (Function::Attribute attribute);
 
     //! Recursive function does the work for map
-    void add_component (Function* model, std::vector<unsigned>& imap);
+    void add_component (Function*, std::vector<unsigned>& imap);
 
     //! Recursive function does the work for unmap
-    void remove_component (Function* model);
+    void remove_component (Function*);
 
     //! Remap the parameter indeces
     void remap (bool signal_changes = true);
