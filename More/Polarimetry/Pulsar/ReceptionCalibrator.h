@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.77 $
-   $Date: 2007/11/07 18:47:10 $
+   $Revision: 1.78 $
+   $Date: 2007/11/07 19:15:57 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -82,9 +82,6 @@ namespace Pulsar {
 
     //! Descructor
     ~ReceptionCalibrator ();
-
-    //! Return a new PolnCalibratorExtension
-    CalibratorExtension* new_Extension () const;
 
     //! Set the time variation of absolute gain
     void set_gain_variation( MEAL::Univariate<MEAL::Scalar>* );
