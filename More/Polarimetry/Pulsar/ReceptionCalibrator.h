@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.76 $
-   $Date: 2007/10/26 21:51:40 $
+   $Revision: 1.77 $
+   $Date: 2007/11/07 18:47:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -82,6 +82,18 @@ namespace Pulsar {
 
     //! Descructor
     ~ReceptionCalibrator ();
+
+    //! Return a new PolnCalibratorExtension
+    CalibratorExtension* new_Extension () const;
+
+    //! Set the time variation of absolute gain
+    void set_gain_variation( MEAL::Univariate<MEAL::Scalar>* );
+
+    //! Set the time variation of differential gain
+    void set_diff_gain_variation( MEAL::Univariate<MEAL::Scalar>* );
+
+    //! Set the time variation of differential phase
+    void set_diff_phase_variation( MEAL::Univariate<MEAL::Scalar>* );
 
     //! Return the reference epoch of the calibration experiment
     MJD get_epoch () const;
@@ -166,6 +178,15 @@ namespace Pulsar {
     //! The calibration model as a function of frequency
     std::vector< Reference::To<Calibration::StandardModel> > model;
 
+    //! Time variation of absolute gain
+    Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
+
+    //! Time variation of differential gain
+    Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
+
+    //! Time variation of differential phase
+    Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
+
     //! A previous solution, if availabe
     Reference::To<const PolnCalibrator> previous;
     Reference::To<const CalibratorStokes> previous_cal;
@@ -193,7 +214,10 @@ namespace Pulsar {
     
     //! The calibrators to be loaded during initial_observation
     std::vector<std::string> calibrator_filenames;
-    
+
+    //! The epochs of all loaded calibrators
+    std::vector<MJD> calibrator_epochs;
+
     //! Routine for normalizing the Stokes parameters
     MEAL::NormalizeStokes normalizer;
 

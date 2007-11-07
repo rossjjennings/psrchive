@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/10/31 19:59:31 $
+   $Revision: 1.9 $
+   $Date: 2007/11/07 18:47:10 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -23,6 +23,7 @@
 #include "Pulsar/Parallactic.h"
 #include "Pulsar/ConvertMJD.h"
 
+#include "MEAL/Polynomial.h"
 #include "MEAL/Polar.h"
 #include "MEAL/Axis.h"
 
@@ -35,8 +36,6 @@ namespace Calibration {
   //! Stores the various elements related to the calibration model
   class StandardModel : public Reference::Able {
 
-    // friend class Pulsar::ReceptionCalibrator;
-
   public:
     
     //! Default constructor
@@ -48,8 +47,17 @@ namespace Calibration {
     //! Set the transformation from the platform to the feed basis
     void set_platform_transformation (MEAL::Complex2* xform);
 
-    //! Set the order of the differential phase polynomial
-    void set_differential_phase_order (unsigned order);
+    //! Set gain to the univariate function of time
+    void set_gain (MEAL::Univariate<MEAL::Scalar>*);
+
+    //! Set differential gain to the univariate function of time
+    void set_diff_gain (MEAL::Univariate<MEAL::Scalar>*);
+
+    //! Set differential phase to the univariate function of time
+    void set_diff_phase (MEAL::Univariate<MEAL::Scalar>*);
+
+    //! Remove all time variations and set the Instrument to the given epoch
+    void disengage_time_variations (const MJD& epoch);
 
     //! Update the relevant estimate
     void update ();
@@ -127,6 +135,13 @@ namespace Calibration {
     //! The best estimate of the polar model
     Calibration::MeanPolar polar_estimate;
 
+    Reference::To< MEAL::Scalar > gain;
+    Reference::To< MEAL::Scalar > diff_gain;
+    Reference::To< MEAL::Scalar > diff_phase;
+
+    void integrate_parameter (MEAL::Scalar* function, double value);
+    void update_parameter (MEAL::Scalar* function, double value);
+
     // ////////////////////////////////////////////////////////////////////
     //
     //! Phenomenological decomposition of instrumental response (Britton)
@@ -158,9 +173,6 @@ namespace Calibration {
     //! The platform transformation
     Reference::To<MEAL::Complex2> platform_transformation;
     
-    //! The order of the polynomial for differential phase
-    unsigned differential_phase_order;
-
   private:
 
     //! built flag

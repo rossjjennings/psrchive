@@ -72,12 +72,29 @@ Pulsar::ReceptionCalibrator::~ReceptionCalibrator()
 {
 }
 
+using namespace MEAL;
+
+void Pulsar::ReceptionCalibrator::set_gain_variation( Univariate<Scalar>* f )
+{
+  gain_variation = f;
+}
+
+void
+Pulsar::ReceptionCalibrator::set_diff_gain_variation( Univariate<Scalar>* f )
+{
+  diff_gain_variation = f;
+}
+
+void 
+Pulsar::ReceptionCalibrator::set_diff_phase_variation( Univariate<Scalar>* f )
+{
+  diff_phase_variation = f;
+}
+
 void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& n)
 {
   calibrator_filenames = n;
 }
-
-
 
 void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 {
@@ -188,6 +205,15 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
     model[ichan]->parallactic.set_source_coordinates(coordinates);
     model[ichan]->parallactic.set_observatory_coordinates(latitude,longitude);
+
+    if (gain_variation)
+      model[ichan]->set_gain( gain_variation->clone() );
+
+    if (diff_gain_variation)
+      model[ichan]->set_diff_gain( diff_gain_variation->clone() );
+
+    if (diff_phase_variation)
+      model[ichan]->set_diff_phase( diff_phase_variation->clone() );
 
   }
 
@@ -846,6 +872,8 @@ try {
       calibrator_estimate.source_guess[ichan].integrate (cal_stokes);
 
     }
+
+    calibrator_epochs.push_back( epoch );
   }
 
   if (p->get_nchan() == nchan)  {
@@ -1245,4 +1273,20 @@ void Pulsar::SourceEstimate::update_source ()
          << endl << error.warning() << endl;
     valid[ichan] = false;
   }
+}
+
+Pulsar::CalibratorExtension*
+Pulsar::ReceptionCalibrator::new_Extension () const
+{
+  cerr << "Pulsar::ReceptionCalibrator::new_Extension" << endl;
+
+  /* the chain rule employed to model time variations increases the
+     number of free parameters in the instrument transformation, which
+     causes copy methods to fail */
+
+  for (unsigned ichan=0; ichan < model.size(); ichan++)
+    model[ichan]->disengage_time_variations( get_epoch() );
+
+  return PolnCalibrator::new_Extension ();
+
 }

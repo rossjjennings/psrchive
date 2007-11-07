@@ -9,6 +9,7 @@
 #include "Pulsar/Feed.h"
 
 #include "MEAL/Polynomial.h"
+#include "MEAL/Steps.h"
 
 #include <iostream>
 using namespace std;
@@ -34,13 +35,13 @@ Calibration::StandardModel::StandardModel (bool britton)
     polar = new MEAL::Polar;
   }
 
-  differential_phase_order = 0;
   valid = true;
   built = false;
+
+  time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
 }
 
-void 
-Calibration::StandardModel::set_feed_transformation (MEAL::Complex2* x)
+void Calibration::StandardModel::set_feed_transformation (MEAL::Complex2* x)
 {
   feed_transformation = x;
 }
@@ -49,12 +50,6 @@ void
 Calibration::StandardModel::set_platform_transformation (MEAL::Complex2* x)
 {
   platform_transformation = x;
-}
-
-void
-Calibration::StandardModel::set_differential_phase_order (unsigned order)
-{
-  differential_phase_order = order;
 }
 
 //! Get the measurement equation solver
@@ -106,28 +101,6 @@ void Calibration::StandardModel::build ()
     return;
 
   instrument = new MEAL::ProductRule<MEAL::Complex2>;
-
-  if (differential_phase_order) {
-
-    MEAL::Complex2* operation;
-    operation = new MEAL::Rotation1 (Vector<3, double>::basis(0));
-
-    MEAL::Polynomial* poly;
-    poly = new MEAL::Polynomial (differential_phase_order+1);
-
-    poly -> set_infit (0, false);
-    poly -> set_argument (0, &convert);
-
-    MEAL::ChainRule<MEAL::Complex2>* backend;
-    backend = new MEAL::ChainRule<MEAL::Complex2>;
-
-    backend -> set_model (operation);
-    backend -> set_constraint (0, poly);
-
-    *instrument *= backend;
-    time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
-
-  }
 
   if (polar)
     *instrument *= polar;
@@ -216,11 +189,36 @@ void Calibration::StandardModel::update ()
 {
   if (polar)
     polar_estimate.update (polar);
-  if (physical)
-    physical_estimate.update (physical->get_backend());
+
   if (fluxcal_backend)
     fluxcal_backend_estimate.update (fluxcal_backend);
+
+  if (physical) {
+
+    Calibration::SingleAxis* backend = physical->get_backend();
+
+    physical_estimate.update (backend);
+
+    if (gain)
+      update_parameter( gain, backend->get_gain().get_value() );
+      
+    if (diff_gain)
+      update_parameter( diff_gain, backend->get_diff_gain().get_value() );
+    
+    if (diff_phase)
+      update_parameter( diff_phase, backend->get_diff_phase().get_value() );
+
+  }
 }
+
+void Calibration::StandardModel::update_parameter (MEAL::Scalar* function,
+						   double value)
+{
+  MEAL::Polynomial* polynomial = dynamic_cast<MEAL::Polynomial*>( function );
+  if (polynomial)
+    polynomial->set_param( 0, value );
+}
+
 
 void Calibration::StandardModel::check_constraints ()
 {
@@ -291,6 +289,21 @@ Calibration::StandardModel::copy_transformation (const MEAL::Complex2* xform)
 }
 
 void 
+Calibration::StandardModel::integrate_parameter (MEAL::Scalar* function,
+						 double value)
+{
+  MEAL::Steps* steps = dynamic_cast<MEAL::Steps*>( function );
+  if (!steps)
+    return;
+
+  unsigned istep = steps->get_step();
+
+  cerr << "StandardModel set step " << istep << endl;
+
+  steps->set_param( istep, value );
+}
+
+void 
 Calibration::StandardModel::integrate_calibrator (const MEAL::Complex2* xform,
 						  bool flux_calibrator)
 {
@@ -312,13 +325,92 @@ Calibration::StandardModel::integrate_calibrator (const MEAL::Complex2* xform,
 
     sa = dynamic_cast<const Calibration::SingleAxis*>( xform );
 
-    if (sa) {
-      if (flux_calibrator)
-	fluxcal_backend_estimate.integrate( sa );
-      else
-	physical_estimate.integrate( sa );
-    }
+    if (!sa)
+      return;
 
+    if (flux_calibrator)
+      fluxcal_backend_estimate.integrate( sa );
+    else {
+      physical_estimate.integrate( sa );
+
+      if (gain)
+	integrate_parameter( gain, sa->get_gain().get_value() );
+      
+      if (diff_gain)
+	integrate_parameter( diff_gain, sa->get_diff_gain().get_value() );
+      
+      if (diff_phase)
+	integrate_parameter( diff_phase, sa->get_diff_phase().get_value() );
+      
+    }
   }
+
+}
+
+using namespace MEAL;
+
+void Calibration::StandardModel::set_gain (Univariate<Scalar>* function)
+{
+  if (!physical)
+    throw Error (InvalidState, "Calibration::StandardModel::set_gain",
+		 "cannot set gain variation in polar model");
+
+  physical -> set_gain( function );
+  function -> set_argument (0, &convert);
+  gain = function;
+}
+
+void Calibration::StandardModel::set_diff_gain (Univariate<Scalar>* function)
+{
+  if (!physical)
+    throw Error (InvalidState, "Calibration::StandardModel::set_diff_gain",
+		 "cannot set gain variation in polar model");
+
+  physical -> set_diff_gain( function );
+  function -> set_argument (0, &convert);
+  diff_gain = function;
+}
+
+void Calibration::StandardModel::set_diff_phase (Univariate<Scalar>* function)
+{
+  if (!physical)
+    throw Error (InvalidState, "Calibration::StandardModel::set_diff_phase",
+		 "cannot set diff_phase variation in polar model");
+
+  physical -> set_diff_phase( function );
+  function -> set_argument (0, &convert);
+  diff_phase = function;
+}
+
+void Calibration::StandardModel::disengage_time_variations (const MJD& epoch)
+{
+  if (!physical)
+    return;
+
+  time.set_value (epoch);
+
+  Univariate<Scalar>* zero = 0;
+
+  cerr << "before disengage nparam = " << physical->get_nparam() << endl;
+
+  if (gain) {
+    cerr << "disengage gain" << endl;
+    physical->set_gain( zero );
+    physical->set_gain( gain->estimate() );
+  }
+
+  if (diff_gain) {
+    cerr << "disengage diff_gain" << endl;
+    physical->set_diff_gain( zero );
+    physical->set_diff_gain( diff_gain->estimate() );
+  }
+
+  if (diff_phase) {
+    cerr << "disengage diff_phase" << endl;
+    physical->set_diff_phase( zero );
+    physical->set_diff_phase( diff_phase->estimate() );
+  }
+
+  cerr << "after disengage nparam = " << physical->get_nparam() << endl;
 
 }
