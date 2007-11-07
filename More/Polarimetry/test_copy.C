@@ -29,13 +29,15 @@ template <class Type> void test_copy (Type* copy, Type* instance,
 {
   if (instance->get_nparam() != copy->get_nparam())
     throw Error (InvalidState, "test_copy",
-                 "copy.nparam=%d != nparam=%d after %s copy constructor",
+                 "copy.nparam=%d != nparam=%d after %s",
                  copy->get_nparam(), instance->get_nparam(), name.c_str());
 
   for (unsigned i=0; i<instance->get_nparam(); i++)
     if (copy->get_param (i) != instance->get_param(i))
       throw Error (InvalidState, "test_copy",
-                   "unequal parameters after " + name + " copy constructor");
+                   "unequal param[%d] %lf!=%lf after %s",
+		   i, copy->get_param(i), instance->get_param(i),
+		   name.c_str());
 }
 
 
@@ -57,12 +59,12 @@ template <class Type> void test_copy (Type* instance,
 
   cerr << "test_copy: " << name << " operator =" << endl;
   *default_instance = *instance;
-  test_copy (default_instance.get(), instance, name);
+  test_copy (default_instance.get(), instance, name + " assignment operator");
 
   cerr << "test_copy: " << name << " copy constructor" << endl;
 
   Reference::To<Type> copy = new Type (*instance);
-  test_copy (copy.get(), instance, name);
+  test_copy (copy.get(), instance, name + " copy constructor");
 
   unsigned nparam = copy->get_nparam();
 
