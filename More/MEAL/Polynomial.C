@@ -45,6 +45,12 @@ MEAL::Polynomial& MEAL::Polynomial::operator = (const Polynomial& copy)
   return *this;
 }
 
+//! Clone operator
+MEAL::Polynomial* MEAL::Polynomial::clone () const
+{
+  return new Polynomial( *this );
+}
+
 //! Return the name of the class
 string MEAL::Polynomial::get_name () const
 {

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Steps.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/11/06 04:33:49 $
+   $Revision: 1.2 $
+   $Date: 2007/11/07 18:39:00 $
    $Author: straten $ */
 
 #ifndef __Steps_H
@@ -38,11 +38,17 @@ namespace MEAL {
     //! Assignment operator
     Steps& operator = (const Steps&);
 
+    //! Clone operator
+    Steps* clone () const;
+
     //! Add a step at the given point on the abscissa
     void add_step (double x);
 
     //! Set the abscissa value
     void set_abscissa (double value);
+
+    //! Get the current step index
+    unsigned get_step () const;
 
     // ///////////////////////////////////////////////////////////////////
     //

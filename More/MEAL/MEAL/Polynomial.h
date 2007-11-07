@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Polynomial.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.9 $
+   $Date: 2007/11/07 18:39:00 $
    $Author: straten $ */
 
 #ifndef __Polynomial_H
@@ -33,6 +33,9 @@ namespace MEAL {
 
     //! Assignment operator
     Polynomial& operator = (const Polynomial&);
+
+    //! Clone operator
+    Polynomial* clone () const;
 
     //! Construct from array of polynomial coefficients
     template<class T>

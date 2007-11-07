@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Univariate.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.8 $
+   $Date: 2007/11/07 18:39:00 $
    $Author: straten $ */
 
 #ifndef __MEAL_Univariate_H
@@ -35,8 +35,12 @@ namespace MEAL {
     //! Assignment operator
     Univariate& operator = (const Univariate& copy);
 
+    //! Clone
+    Univariate<T>* clone () const
+    { throw Error (InvalidState, "Univariate<T>::clone", "not implemented"); }
+
     //! Set the abscissa value
-    void set_abscissa (double value)
+    virtual void set_abscissa (double value)
     { univariate_policy->set_abscissa(value); }
 
     //! Get the abscissa value
