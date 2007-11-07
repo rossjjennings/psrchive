@@ -88,6 +88,7 @@ nobase_include_HEADERS = \
         MEAL/ScalarValue.h \
         MEAL/ScaledVonMisesDeriv.h \
         MEAL/ScaledVonMises.h \
+	MEAL/Steps.h \
 	MEAL/StokesCovariance.h \
 	MEAL/StokesError.h \
         MEAL/SumRule.h \
@@ -166,6 +167,7 @@ libMEAL_la_SOURCES = \
         ScalarValue.C \
         ScaledVonMises.C \
         ScaledVonMisesDeriv.C \
+	Steps.C \
 	StokesCovariance.C \
 	StokesError.C \
         Tracer.C \
