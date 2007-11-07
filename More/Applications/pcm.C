@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.70 $
-   $Date: 2007/10/30 02:30:27 $
+   $Revision: 1.71 $
+   $Date: 2007/11/07 18:46:23 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -20,6 +20,7 @@
 #include "Pulsar/PulsarCalibrator.h"
 #include "Pulsar/CorrectionsCalibrator.h"
 #include "Pulsar/Database.h"
+#include "MEAL/Steps.h"
 
 #include "Pulsar/SourceInfo.h"
 
@@ -66,6 +67,14 @@ void usage ()
     "\n"
     "  -f chan    solve for only the specified channel \n"
     "  -t nproc   solve using nproc threads \n"
+    "\n"
+    "  -u PAR     model PAR with a step at each CAL \n"
+    "  -o PAR:N   model PAR as N degree polyomial \n"
+    "             where PAR is one of \n"
+    "               g = absolute gain \n"
+    "               b = differential gain \n"
+    "               r = differential phase \n"
+    "               a = all of the above \n"
     "\n"
     "  -b bin     add phase bin to constraints \n"
     "  -n nbin    set the number of phase bins to choose as input states \n"
@@ -304,6 +313,36 @@ int main (int argc, char *argv[]) {
   return ret;
 }
 
+Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
+Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
+Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
+
+void set_time_variation (char code, MEAL::Univariate<MEAL::Scalar>* function)
+{
+  switch (code) {
+  case 'g':
+    cerr << "gain" << endl;
+    gain_variation = function;
+    return;
+  case 'b':
+    cerr << "differential gain" << endl;
+    diff_gain_variation = function;
+    return;
+  case 'r':
+    cerr << "differential phase" << endl;
+    diff_phase_variation = function;
+    return;
+  case 'a':
+    cerr << "all backend parameters" << endl;
+    gain_variation = function;
+    diff_gain_variation = function;
+    diff_phase_variation = function;
+    return;
+  }
+  throw Error (InvalidParam, "set_time_variation",
+	       "unrecognized PAR code = %c", code);
+}
+
 int actual_main (int argc, char *argv[]) try {
 
   // name of file containing list of Archive filenames
@@ -350,7 +389,7 @@ int actual_main (int argc, char *argv[]) try {
   bool publication_plots = false;
 
   int gotc = 0;
-  const char* args = "A:a:b:c:C:d:Df:gHhIL:M:m:N:n:OPp:qrsS:t:T:uvV:";
+  const char* args = "A:a:b:c:C:d:Df:gHhIL:M:m:N:n:o:Pp:qrsS:t:T:u:vV:";
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
 
@@ -432,13 +471,25 @@ int actual_main (int argc, char *argv[]) try {
       reflections.add_reflection (optarg[0]);
       break;
 
+    case 'o': {
+      char code;
+      unsigned order;
+      if( sscanf (optarg, "%c:%u", &code, &order) != 2 ) {
+	cerr << "pcm: error parsing '" << optarg << "' as PAR:N" << endl;
+	return -1;
+      }
+      cerr << "pcm: using a polynomial of degree " << order << " to model ";
+      set_time_variation( code, new MEAL::Polynomial (order+1) );
+      break;
+    }
+
     case 'P':
       publication_plots = true;
       break;
 
     case 'p':
       if (sscanf (optarg, "%f,%f", &phmin, &phmax) != 2) {
-	cerr << "pcm: error parsing " << optarg << " as window" << endl;
+	cerr << "pcm: error parsing " << optarg << " as phase range" << endl;
 	return -1;
       }
       cerr << "pcm: selecting input states from " << phmin << " to " << phmax
@@ -470,6 +521,11 @@ int actual_main (int argc, char *argv[]) try {
 
     case 'T':
       tim_file = optarg;
+      break;
+
+    case 'u':
+      cerr << "pcm: using a multiple-step function to model ";
+      set_time_variation( optarg[0], new MEAL::Steps );
       break;
 
     case 'q':
@@ -537,6 +593,15 @@ int actual_main (int argc, char *argv[]) try {
 
   // the reception calibration class
   Pulsar::ReceptionCalibrator model (model_name);
+
+  if (gain_variation)
+    model.set_gain_variation( gain_variation );
+
+  if (diff_gain_variation)
+    model.set_diff_gain_variation( diff_gain_variation );
+
+  if (diff_phase_variation)
+    model.set_diff_phase_variation( diff_phase_variation );
 
   model.set_nthread (nthread);
 
