@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "MEAL/Steps.h"
+#include <assert.h>
 
 using namespace std;
 
