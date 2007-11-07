@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Instrument.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.7 $
+   $Date: 2007/11/07 18:46:37 $
    $Author: straten $ */
 
 #ifndef __CalibrationInstrument_H
@@ -93,6 +93,15 @@ namespace Calibration {
     const Feed* get_feed () const;
     Feed* get_feed ();
 
+    //! Set the instrumental gain variation
+    void set_gain (MEAL::Scalar*);
+
+    //! Set the differential gain variation
+    void set_diff_gain (MEAL::Scalar*);
+    
+    //! Set the differential phase variation
+    void set_diff_phase (MEAL::Scalar*);
+
     // ///////////////////////////////////////////////////////////////////
     //
     // Model implementation
@@ -110,8 +119,20 @@ namespace Calibration {
     //! Feed model: \f$\theta_0-1\f$ and \f$\chi_0-1\f$
     Reference::To<Feed> feed;
 
+    //! ChainRule used to model Backend parameter variations
+    Reference::To< MEAL::ChainRule<MEAL::Complex2> > backend_chain;
+
+    //! Scalar function used to model gain variation
+    Reference::To<MEAL::Scalar> gain_variation;
+
+    //! Scalar function used to model differential gain variation
+    Reference::To<MEAL::Scalar> diff_gain_variation;
+
+    //! Scalar function used to model differential phase variation
+    Reference::To<MEAL::Scalar> diff_phase_variation;
+
     //! ChainRule used to bind Feed parameters
-    Reference::To< MEAL::ChainRule<MEAL::Complex2> > chain;
+    Reference::To< MEAL::ChainRule<MEAL::Complex2> > feed_chain;
 
     //! ScalarParameter used to bind ellipticities
     Reference::To<MEAL::ScalarParameter> ellipticities;

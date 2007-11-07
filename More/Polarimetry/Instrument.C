@@ -15,19 +15,18 @@ using namespace std;
 
 void Calibration::Instrument::init ()
 {
-  // name = "Instrument";
-
   backend = new Calibration::SingleAxis;
-  // backend->name = "Instrument::backend";
-  add_model (backend);
+  backend_chain = new MEAL::ChainRule<MEAL::Complex2>;
+  backend_chain->set_model( backend );
+
+  add_model( backend_chain );
+
 
   feed = new Calibration::Feed;
-  // feed->name = "Instrument::feed";
+  feed_chain = new MEAL::ChainRule<MEAL::Complex2>;
+  feed_chain->set_model( feed );
 
-  chain = new MEAL::ChainRule<MEAL::Complex2>;
-  chain->set_model (feed);
-
-  add_model (chain);
+  add_model( feed_chain );
 }
 
 Calibration::Instrument::Instrument ()
@@ -67,19 +66,28 @@ string Calibration::Instrument::get_name () const
 //! Get the instrumental gain, \f$ G \f$, in calibrator flux units
 Estimate<double> Calibration::Instrument::get_gain () const
 {
-  return backend->get_gain ();
+  if (gain_variation)
+    return gain_variation->estimate();
+  else
+    return backend->get_gain ();
 }
 
 //! Get the differential gain, \f$ \gamma \f$, in hyperbolic radians
 Estimate<double> Calibration::Instrument::get_diff_gain () const
 {
-  return backend->get_diff_gain ();
+  if (diff_gain_variation)
+    return diff_gain_variation->estimate();
+  else
+    return backend->get_diff_gain ();
 }
 
 //! Get the differential phase, \f$ \phi \f$, in radians
 Estimate<double> Calibration::Instrument::get_diff_phase () const
 {
-  return backend->get_diff_phase ();
+  if (diff_phase_variation)
+    return diff_phase_variation->estimate();
+  else
+    return backend->get_diff_phase ();
 }
 
 //! Get the orientation
@@ -104,18 +112,30 @@ Estimate<double> Calibration::Instrument::get_ellipticity (unsigned ir) const
 //! Set the instrumental gain, \f$ G \f$, in calibrator flux units
 void Calibration::Instrument::set_gain (const Estimate<double>& g)
 {
+  if (gain_variation)
+    throw Error (InvalidState, "Calibration::Instrument::set_gain",
+		 "cannot set gain when it is constrained by a function");
+
   backend->set_gain (g);
 }
 
 //! Set the differential gain, \f$ \gamma \f$, in hyperbolic radians
 void Calibration::Instrument::set_diff_gain (const Estimate<double>& gamma)
 {
+  if (diff_gain_variation)
+    throw Error (InvalidState, "Calibration::Instrument::set_diff_gain",
+		 "cannot set diff_gain when it is constrained by a function");
+
   backend->set_diff_gain (gamma);
 }
    
 //! Set the differential phase, \f$ \phi \f$, in radians
 void Calibration::Instrument::set_diff_phase (const Estimate<double>& phi)
 {
+  if (diff_phase_variation)
+    throw Error (InvalidState, "Calibration::Instrument::set_diff_phase",
+		 "cannot set diff_phase when it is constrained by a function");
+
   backend->set_diff_phase (phi);
 }
 
@@ -145,8 +165,8 @@ void Calibration::Instrument::equal_ellipticities ()
     return;
 
   ellipticities = new MEAL::ScalarParameter;
-  chain->set_constraint (0, ellipticities);
-  chain->set_constraint (2, ellipticities);
+  feed_chain->set_constraint (0, ellipticities);
+  feed_chain->set_constraint (2, ellipticities);
 }
 
 void Calibration::Instrument::equal_orientations ()
@@ -155,8 +175,8 @@ void Calibration::Instrument::equal_orientations ()
     return;
 
   orientations = new MEAL::ScalarParameter;
-  chain->set_constraint (1, orientations);
-  chain->set_constraint (3, orientations);
+  feed_chain->set_constraint (1, orientations);
+  feed_chain->set_constraint (3, orientations);
 }
 
 void Calibration::Instrument::set_cyclic (bool flag)
@@ -183,4 +203,25 @@ const Calibration::Feed* Calibration::Instrument::get_feed () const
 const Calibration::SingleAxis* Calibration::Instrument::get_backend () const
 {
   return backend;
+}
+
+//! Set the instrumental gain variation
+void Calibration::Instrument::set_gain (MEAL::Scalar* function)
+{
+  gain_variation = function;
+  backend_chain->set_constraint (0, function);
+}
+
+//! Set the differential gain variation
+void Calibration::Instrument::set_diff_gain (MEAL::Scalar* function)
+{
+  diff_gain_variation = function;
+  backend_chain->set_constraint (1, function);
+}
+
+//! Set the differential phase variation
+void Calibration::Instrument::set_diff_phase (MEAL::Scalar* function)
+{
+  diff_phase_variation = function;
+  backend_chain->set_constraint (2, function);
 }
