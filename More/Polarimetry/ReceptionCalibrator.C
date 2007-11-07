@@ -1137,6 +1137,8 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
       break;
     }
 
+    model[ichan]->disengage_time_variations( get_epoch() );
+
     // extract the indeces of the transformation within the model
     MEAL::get_imap (model[ichan]->get_equation(),
 		    model[ichan]->get_transformation(), imap);
@@ -1275,18 +1277,3 @@ void Pulsar::SourceEstimate::update_source ()
   }
 }
 
-Pulsar::CalibratorExtension*
-Pulsar::ReceptionCalibrator::new_Extension () const
-{
-  cerr << "Pulsar::ReceptionCalibrator::new_Extension" << endl;
-
-  /* the chain rule employed to model time variations increases the
-     number of free parameters in the instrument transformation, which
-     causes copy methods to fail */
-
-  for (unsigned ichan=0; ichan < model.size(); ichan++)
-    model[ichan]->disengage_time_variations( get_epoch() );
-
-  return PolnCalibrator::new_Extension ();
-
-}
