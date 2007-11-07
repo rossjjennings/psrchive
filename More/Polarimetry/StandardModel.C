@@ -391,26 +391,36 @@ void Calibration::StandardModel::disengage_time_variations (const MJD& epoch)
 
   Univariate<Scalar>* zero = 0;
 
+#ifdef _DEBUG
   cerr << "before disengage nparam = " << physical->get_nparam() << endl;
+#endif
 
   if (gain) {
+#ifdef _DEBUG
     cerr << "disengage gain" << endl;
+#endif
     physical->set_gain( zero );
     physical->set_gain( gain->estimate() );
   }
 
   if (diff_gain) {
+#ifdef _DEBUG
     cerr << "disengage diff_gain" << endl;
+#endif
     physical->set_diff_gain( zero );
     physical->set_diff_gain( diff_gain->estimate() );
   }
 
   if (diff_phase) {
+#ifdef _DEBUG
     cerr << "disengage diff_phase" << endl;
+#endif
     physical->set_diff_phase( zero );
     physical->set_diff_phase( diff_phase->estimate() );
   }
 
+#ifdef _DEBUG
   cerr << "after disengage nparam = " << physical->get_nparam() << endl;
+#endif
 
 }
