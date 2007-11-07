@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ChainRule.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.8 $
+   $Date: 2007/11/07 18:39:34 $
    $Author: straten $ */
 
 #ifndef __MEAL_ChainRule_H
@@ -24,14 +24,18 @@ namespace MEAL {
   class ConstrainedParameter {
 
   public:
-    ConstrainedParameter (unsigned iparam, Scalar* func)
+    ConstrainedParameter (unsigned iparam, bool infit, Scalar* func)
       : scalar (func)
     {
+      previously_infit = infit;
       parameter = iparam;
     }
 
     //! The index of the Function parameter constrained by scalar
     unsigned parameter;
+
+    //! The value of the fit flag before the parameter was constrained
+    bool previously_infit;
 
     //! The constraining Scalar instance
     Project<Scalar> scalar;
@@ -130,10 +134,10 @@ template<class T>
 void MEAL::ChainRule<T>::set_constraint (unsigned iparam, Scalar* scalar)
 {
   if (T::verbose) 
-    std::cerr << "MEAL::ChainRule::set_constraint iprm=" << iparam << std::endl;
+    std::cerr << "MEAL::ChainRule::set_constraint iparam=" << iparam
+	      << std::endl;
 
-  if (!scalar)
-    return;
+  bool signal = !scalar;
 
   // only one scalar may control a parameter
   for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++) {
@@ -142,18 +146,33 @@ void MEAL::ChainRule<T>::set_constraint (unsigned iparam, Scalar* scalar)
 
       if (T::verbose)
 	std::cerr << "MEAL::ChainRule::set_constraint"
-	  " replace param=" << iparam << std::endl;
+	  " remove param=" << iparam << std::endl;
 
-      composite.unmap (constraints[ifunc].scalar, false);
-      constraints[ifunc].scalar = scalar;
-      composite.map (constraints[ifunc].scalar);
+      composite.unmap (constraints[ifunc].scalar, signal);
 
-      return;
+      if (model)
+	model->set_infit (iparam, constraints[ifunc].previously_infit);
+
+      constraints.erase (constraints.begin() + ifunc);
+      break;
 
     }
   }
 
-  constraints.push_back (ConstrainedParameter (iparam, scalar));
+  if (!scalar)
+    return;
+
+  bool infit = false;
+
+  if (model)
+    infit = model->get_infit (iparam);
+
+  constraints.push_back (ConstrainedParameter (iparam, infit, scalar));
+
+  if (T::verbose)
+    std::cerr << "MEAL::ChainRule::set_constraint"
+      " add param=" << iparam << std::endl;
+
   composite.map (constraints.back().scalar);
 
   if (model)
@@ -182,8 +201,11 @@ void MEAL::ChainRule<T>::set_model (T* _model)
 
   composite.map (model);
 
-  for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++)
-    model->set_infit (constraints[ifunc].parameter, false);
+  for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++) {
+    unsigned iparam = constraints[ifunc].parameter;
+    constraints[ifunc].previously_infit = model->get_infit (iparam);
+    model->set_infit (iparam, false);
+  }
 }
 
 template<class T>
