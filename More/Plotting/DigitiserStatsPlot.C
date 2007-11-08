@@ -99,13 +99,15 @@ bool DigitiserStatsPlot::CheckStats( Reference::To<DigitiserStatistics> ext )
 {
   if( !ext )
   {
-    cerr << "No digitiser Satistics extension" << endl;
+    if( verbose > 1 )
+      cerr << "No digitiser Satistics extension" << endl;
     return false;
   }
 
   if( ext->rows.size() == 0 )
   {
-    cerr << "Digitiser Satistics extension has zero rows" << endl;
+    if( verbose > 1 )
+      cerr << "Digitiser Satistics extension has zero rows" << endl;
     return false;
   }
 
@@ -190,7 +192,8 @@ void DigitiserStatsPlot::prepare( const Archive *const_arch )
     }
     else
     {
-      cerr << "Digitiser Stats values are all zero" << endl;
+      if( verbose > 1 )
+        cerr << "Digitiser Stats values are all zero" << endl;
     }
   }
 }
@@ -225,8 +228,8 @@ void DigitiserStatsPlot::draw( const Archive *const_arch )
       float next_x = g;
       for( int i = 0; i < ncycsub*nsub; i ++ )
       {
-	xs[i] = next_x;
-	next_x += x_step;
+        xs[i] = next_x;
+        next_x += x_step;
       }
 
       // for each parameter, draw the profile
