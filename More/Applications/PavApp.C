@@ -12,6 +12,7 @@
 #include <templates.h>
 #include <Pulsar/StokesCylindrical.h>
 #include <Pulsar/BandpassChannelWeightPlot.h>
+#include <Pulsar/StokesSpherical.h>
 #include <limits>
 
 
@@ -492,6 +493,8 @@ void PavApp::PavSpecificOptions( void )
   SetPlotOptions<StokesCylindrical>( "pa:below:l=" );
   SetPlotOptions<StokesCylindrical>( "flux:below:l=" );
   SetPlotOptions<StokesCylindrical>( "flux:y:buf=0.07" );
+  
+  SetPlotOptions<StokesSpherical>( "flux:below:l=" );
 }
 
 
@@ -672,7 +675,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.27 2007/11/08 03:55:19 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.28 2007/11/08 05:30:45 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -754,10 +757,12 @@ int PavApp::run( int argc, char *argv[] )
       clear_labels = false;
       break;
     case 'R':
-      plot_ids.push_back( "R" );
+      plot_ids.push_back( tostring<char>(c) );
       break;
     case 'm':
-      plot_spherical = true;
+      plot_ids.push_back( tostring<char>(c) );
+      top_label = "ell:above:c";
+      //plot_spherical = true;
       break;
     case 'n':
       plot_ids.push_back( "n" );
