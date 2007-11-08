@@ -26,13 +26,13 @@ using namespace Pulsar;
 
 DynamicSNSpectrum::DynamicSNSpectrum()
 {
-    isubint = -1;
-    pol = -1;
+  isubint = -1;
+  pol = -1;
 
-    fsub = -1;
-    lsub = -1;
+  fsub = -1;
+  lsub = -1;
 
-    get_frame()->set_y_scale( new FrequencyScale );
+  get_frame()->set_y_scale( new FrequencyScale );
 }
 
 
@@ -65,40 +65,40 @@ void DynamicSNSpectrum::prepare( const Archive *data )
 
 void DynamicSNSpectrum::draw( const Archive *data )
 {
-    // Take the total
+  // Take the total
 
-    StandardSNR standard_snr;
+  StandardSNR standard_snr;
 
-    Reference::To<Archive> data_std = data->total();
-    standard_snr.set_standard( data_std->get_Profile(0,0,0) );
+  Reference::To<Archive> data_std = data->total();
+  standard_snr.set_standard( data_std->get_Profile(0,0,0) );
 
-    // Get the x and y scales to determine if we are zooming in x or y
+  // Get the x and y scales to determine if we are zooming in x or y
 
-    PlotScale *xs = get_frame()->get_x_scale();
-    PlotScale *ys = get_frame()->get_y_scale();
+  PlotScale *xs = get_frame()->get_x_scale();
+  PlotScale *ys = get_frame()->get_y_scale();
 
-    float xmin, xmax, ymin, ymax;
+  float xmin, xmax, ymin, ymax;
 
   xs->get_range( xmin, xmax );
   ys->get_range( ymin, ymax );
 
-    if( isubint > -1 )
-    {
-        fsub = lsub = isubint;
-    }
-    else if( fsub == -1 )
-    {
-        fsub = 0;
-        lsub = data->get_nsubint() - 1;
-    }
-  
+  if( isubint > -1 )
+  {
+    fsub = lsub = isubint;
+  }
+  else if( fsub == -1 )
+  {
+    fsub = 0;
+    lsub = data->get_nsubint() - 1;
+  }
+
   float centre_freq = data->get_centre_frequency();
   float bw = data->get_bandwidth();
-  
+
   // calculate the first and last channels
-  
+
   int total_num_chans = data->get_nchan();
-  
+
   if( bw < 0 )
   {
     bw = 0 - bw;
@@ -106,53 +106,53 @@ void DynamicSNSpectrum::draw( const Archive *data )
     ymin = ymax;
     ymax = tmp;
   }
-  
+
   float min_freq = centre_freq - bw / 2;
   float max_freq = centre_freq + bw / 2;
   float freq_range = max_freq - min_freq;
-  
+
   int fchan = ( ymin - min_freq ) / freq_range * total_num_chans;
   int lchan = ( ymax - min_freq ) / freq_range * total_num_chans;
-  
+
   if( lchan == total_num_chans )
     lchan -= 1;
-  
+
   int num_chans_displayed = lchan - fchan + 1;
 
-    if( pol < 0 )
-        pol = 0;
+  if( pol < 0 )
+    pol = 0;
 
-    int num_subs = lsub - fsub + 1;
+  int num_subs = lsub - fsub + 1;
 
   float plot_array[ num_subs * data->get_nchan() ];
 
-    float min_snr = FLT_MAX;
-    float max_snr = FLT_MIN;
+  float min_snr = FLT_MAX;
+  float max_snr = -FLT_MAX;
 
-    unsigned int plot_index = 0;
+  unsigned int plot_index = 0;
 
-    for( int next_chan = fchan; next_chan <= lchan; next_chan ++ )
+  for( int next_chan = fchan; next_chan <= lchan; next_chan ++ )
+  {
+    for( int next_sub = fsub; next_sub <= lsub; next_sub ++ )
     {
-        for( int next_sub = fsub; next_sub <= lsub; next_sub ++ )
-        {
-            Reference::To<const Profile> next_profile = data->get_Profile ( next_sub, pol, next_chan);
+      Reference::To<const Profile> next_profile = data->get_Profile ( next_sub, pol, next_chan);
 
-            float next_snr = standard_snr.get_snr( next_profile );
+      float next_snr = standard_snr.get_snr( next_profile );
 
-            plot_array[plot_index++] = next_snr;
+      plot_array[plot_index++] = next_snr;
 
-            if( next_snr < min_snr )
-                min_snr = next_snr;
-            if( next_snr > max_snr )
-                max_snr = next_snr;
-        }
+      if( next_snr < min_snr )
+        min_snr = next_snr;
+      if( next_snr > max_snr )
+        max_snr = next_snr;
     }
+  }
 
   float dy = freq_range / total_num_chans;
-  
+
   cpgswin( fsub, lsub+1, fchan, lchan+1 );
 
-    get_frame()->get_x_scale()->set_minmax( fsub, lsub + 1 );
+  get_frame()->get_x_scale()->set_minmax( fsub, lsub + 1 );
 
   float transform[6] = { fsub -.5, 1, 0.0, fchan, 0.0, 1 };
 
@@ -174,7 +174,7 @@ void DynamicSNSpectrum::draw( const Archive *data )
 
 std::string DynamicSNSpectrum::get_ylabel (const Archive*)
 {
-    return "Frequency (Mhz)";
+  return "Frequency (Mhz)";
 }
 
 
@@ -191,7 +191,7 @@ std::string DynamicSNSpectrum::get_ylabel (const Archive*)
 
 std::string DynamicSNSpectrum::get_xlabel (const Archive*)
 {
-    return "Sub Integration";
+  return "Sub Integration";
 }
 
 
