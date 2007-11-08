@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Axis.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.7 $
+   $Date: 2007/11/08 20:55:07 $
    $Author: straten $ */
 
 #ifndef __MEAL_Axis_Header
@@ -85,10 +85,18 @@ namespace MEAL {
     Value get_Value (const Type& value) { return Value(value, this); }
 
     //! Set the value of the argument represented by this axis
-    void set_value (const Type& value) { signal.send (value); }
+    void set_value (const Type& value)
+    { signal.send (value); current_value = value; }
+
+    //! Get the value of the argument represented by this axis
+    Type get_value () const { return current_value; }
 
     //! The mechanism by which methods are connected
     Callback<Type> signal;
+
+  protected:
+
+    Type current_value;
 
   };
 
