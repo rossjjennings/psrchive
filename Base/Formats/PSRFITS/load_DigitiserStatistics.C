@@ -8,69 +8,62 @@
 #include "Pulsar/Pulsar.h"
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/DigitiserStatistics.h"
+#include <Error.h>
 
 #include "psrfitsio.h"
 #include "tostring.h"
 
+
+
 using namespace std;
+using namespace Pulsar;
 
-void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow)
+
+
+void load_dig_stats_rows( fitsfile *fptr, DigitiserStatistics *ext )
 {
-  int row = drow->index;
+  long num_rows;
+  int status = 0;
 
-  if (row <= 0)
-    throw Error (InvalidParam, "load (Pulsar::DigitiserStatistics::row*)",
-                 "invalid row number=%d", row);
+  if( !ext )
+    throw Error( InvalidPointer, "load_dig_stats_rows", "called with null ext" );
 
-  if (Pulsar::Archive::verbose > 2)
+  fits_get_num_rows( fptr, &num_rows, &status );
+
+  if( status )
+    throw FITSError( status, "load_dig_stats_rows", "fits_get_num_rows DIG_STAT" );
+
+  int ndigr = ext->get_ndigr();
+  int npar = ext->get_npar();
+  int ncycsub = ext->get_ncycsub();
+
+  ext->rows.resize( num_rows );
+  for( int r = 0; r < num_rows; r ++ )
   {
-    cerr << "FITSArchive::load_digistat_row entered" << endl;
-    cerr << "loading row #" << row << endl;
+    // read in the ATTEN value
+    // We may get an exception if the table doesn't contain the correct (ndigr) number of values.
+    // psrchive hasn't saved ATTEN correctly for some time so there are a lot of files around in
+    // that situation. I'll just fill those attenuation values with zeroes.
+    try
+    {
+      ext->rows[r].atten.resize( ndigr );
+      psrfits_read_col( fptr, "ATTEN", ext->rows[r].atten, r+1 );
+    }
+    catch( Error e )
+    {
+      if( Archive::verbose > 1 )
+        cerr << "load_dig_stats_rows: Failed to read in ATTEN values, filling with zeroes" << endl;
+      for( int i = 0; i < ndigr; i ++ )
+	ext->rows[r].atten[i] = 0.0;
+    }
+
+    // read in the DATA vector
+    ext->rows[r].data.resize( ndigr * npar * ncycsub );
+    psrfits_read_col( fptr, "DATA", ext->rows[r].data, r+1 );
+    ext->rows[r].index = r+1;
   }
-
-  // Get DIG_MODE
-
-  psrfits_read_key (fptr, "DIG_MODE", &(drow->dig_mode));
-
-  if (Pulsar::Archive::verbose > 2)
-    cerr << "Read DIG_MODE = " << drow->dig_mode << endl;
-
-  // Get NDIGR
-
-  psrfits_read_key (fptr, "NDIGR", &(drow->ndigr));
-
-  if (Pulsar::Archive::verbose > 2)
-    cerr << "Read NDIGR = " << drow->ndigr << endl;
-
-  // Get NPAR (called NLEV prior to version 2.3)
-
-  psrfits_read_key (fptr, "NLEV", &(drow->nlev), 0,
-                    Pulsar::Archive::verbose > 2);
-
-  if (!(drow->nlev))
-    psrfits_read_key (fptr, "NPAR", &(drow->nlev));
-
-  // Get NCYCSUB
-
-  psrfits_read_key (fptr, "NCYCSUB", &(drow->ncycsub));
-
-  // Get DIGLEV
-
-  psrfits_read_key (fptr, "DIGLEV", &(drow->diglev));
-
-  // Read the data itself
-
-  drow->data.resize( drow->nlev * drow->ndigr * drow->ncycsub );
-
-  if (Pulsar::Archive::verbose > 2)
-    cerr << "load DigitiserStatistics::row size=" << drow->data.size() << endl;
- 
-  float nullfloat = 0.0;
-  psrfits_read_col (fptr, "DATA", drow->data, row, nullfloat);
-
-  if (Pulsar::Archive::verbose > 2)
-    cerr << "FITSArchive::load_digistat_row exiting" << endl;
 }
+
 
 void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
 {
@@ -91,25 +84,10 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
     return;
   }
 
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_digistat",
-                     "fits_movnam_hdu DIG_STAT");
-
-  long numrows = 0;
-  fits_get_num_rows (fptr, &numrows, &status);
-
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_digistat",
-                     "fits_get_num_rows DIG_STAT");
-
-  if (verbose > 2)
-    cerr << "Pulsar::FITSArchive::load_DigitiserStatistics rows=" 
-         << numrows << endl;
-
-  if (!numrows)
-    return;
-
   Reference::To<DigitiserStatistics> dstats = new DigitiserStatistics();
+
+  if( !dstats )
+    throw Error( Undefined, "load_DigitiserStatistics", "Failed to create DigitiserStatistics extension" );
 
   string s_data;
 
@@ -127,7 +105,7 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
     psrfits_read_key( fptr, "NLEV", &s_data );
   }
   dstats->set_npar( fromstring<unsigned int>(s_data) );
-  
+
   // load the NCYCSUB from the HDU
   psrfits_read_key( fptr, "NCYCSUB", &s_data );
   dstats->set_ncycsub( fromstring<unsigned int>(s_data) );
@@ -136,23 +114,11 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
   psrfits_read_key( fptr, "NDIGR", &s_data );
   dstats->set_ndigr( fromstring<unsigned int>(s_data) );
 
-  dstats->rows.resize(numrows);
+  // load the DIG_MODE
+  psrfits_read_key (fptr, "DIG_MODE", &s_data );
+  dstats->set_dig_mode( s_data );
 
-  try  {
-
-    for (int i = 0; i < numrows; i++)
-    {
-      dstats->rows[i] = DigitiserStatistics::row();
-      dstats->rows[i].index = i+1;
-      ::load( fptr, &(dstats->rows[i]) );
-    }
-
-  }
-  catch (Error& error) {
-    warning << "WARNING FITSArchive::load_DigitiserStatistics failed. "
-            << error.get_message() << endl;
-    return;
-  }
+  load_dig_stats_rows( fptr, dstats );
 
   add_extension (dstats);
 
