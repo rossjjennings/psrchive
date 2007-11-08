@@ -35,7 +35,6 @@ void Calibration::Feed::init ()
     string rname (1, char('0' + ir));
 
     receptor = new MEAL::ProductRule<MEAL::Complex2>;
-    // receptor->name = "Feed::receptor[" + rname + "]";
 
     Jones<double> select_jones;
     select_jones(ir, ir) = 1.0;
@@ -55,6 +54,9 @@ void Calibration::Feed::init ()
     // construct the orientation matrix
     orientation[ir] = new MEAL::Rotation1 (Vector<3, double>::basis(2));
 #endif
+
+    ellipticity[ir]->set_param_name( "el" + rname );
+    orientation[ir]->set_param_name( "or" + rname );
 
     receptor->add_model (ellipticity[ir]);
     receptor->add_model (orientation[ir]);
