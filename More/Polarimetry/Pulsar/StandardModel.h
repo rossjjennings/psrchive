@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/11/07 18:47:10 $
+   $Revision: 1.10 $
+   $Date: 2007/11/08 05:17:22 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -56,9 +56,6 @@ namespace Calibration {
     //! Set differential phase to the univariate function of time
     void set_diff_phase (MEAL::Univariate<MEAL::Scalar>*);
 
-    //! Remove all time variations and set the Instrument to the given epoch
-    void disengage_time_variations (const MJD& epoch);
-
     //! Update the relevant estimate
     void update ();
 
@@ -101,6 +98,9 @@ namespace Calibration {
     //! Get the full signal path experienced by the pulsar
     const MEAL::Complex2* get_pulsar_transformation () const;
 
+    //! Get the covariance vector at the specified epoch
+    void get_covariance( std::vector<double>& covar, const MJD& epoch );
+
     //! The parallactic angle rotation
     Calibration::Parallactic parallactic;
 
@@ -141,6 +141,14 @@ namespace Calibration {
 
     void integrate_parameter (MEAL::Scalar* function, double value);
     void update_parameter (MEAL::Scalar* function, double value);
+
+    //! Remove all time variations and set the Instrument to the given epoch
+    void disengage_time_variations (const MJD& epoch);
+
+    void compute_covariance( unsigned index, 
+			     std::vector< std::vector<double> >& covar,
+			     std::vector<unsigned>& function_imap, 
+			     MEAL::Scalar* function );
 
     // ////////////////////////////////////////////////////////////////////
     //
