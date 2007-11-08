@@ -479,10 +479,16 @@ void Calibration::StandardModel::get_covariance( vector<double>& covar,
   if (diff_phase)
     MEAL::get_imap( get_equation(), diff_phase, diff_phase_imap );
 
+  vector< unsigned > feed_imap;
+  if (physical)
+    MEAL::get_imap( get_equation(), physical->get_feed(), feed_imap );
+
   disengage_time_variations( epoch );
 
+  MEAL::Complex2* xform = get_transformation();
+
   // extract the indeces of the transformation within the model
-  MEAL::get_imap( get_equation(), get_transformation(), imap );
+  MEAL::get_imap( get_equation(), xform, imap );
 
   if (gain)
     compute_covariance( imap[0], Ctotal, gain_imap, gain );
@@ -493,18 +499,28 @@ void Calibration::StandardModel::get_covariance( vector<double>& covar,
   if (diff_phase)
     compute_covariance( imap[2], Ctotal, diff_phase_imap, diff_phase );
 
-  unsigned nparam = get_transformation()->get_nparam();
+  if (physical) {
+    unsigned ifeed = 3;
+    for (unsigned i=0; i<feed_imap.size(); i++)
+      imap[ifeed+i] = feed_imap[i];
+  }
+
+  unsigned nparam = xform->get_nparam();
   unsigned ncovar = nparam * (nparam+1) / 2;
 
   covar.resize (ncovar);
   unsigned count = 0;
 
-  for (unsigned i=0; i<nparam; i++)
+  for (unsigned i=0; i<nparam; i++) {
+#ifdef _DEBUG
+    cerr << i << ":" << imap[i] << " " << xform->get_param_name(i) << endl;
+#endif
     for (unsigned j=i; j<nparam; j++) {
       assert( count < ncovar );
       covar[count] = Ctotal[imap[i]][imap[j]];
       count ++;
     }
+  }
 
   if (count != ncovar)
     throw Error( InvalidState, "Calibration::StandardModel::get_covariance",
