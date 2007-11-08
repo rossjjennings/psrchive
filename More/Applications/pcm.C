@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.71 $
-   $Date: 2007/11/07 18:46:23 $
+   $Revision: 1.72 $
+   $Date: 2007/11/08 11:11:17 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -1040,6 +1040,8 @@ int actual_main (int argc, char *argv[]) try {
   }
 
 #endif // HAVE_PGPLOT
+
+  cerr << "pcm: finished" << endl;
 
   return 0;
 }
