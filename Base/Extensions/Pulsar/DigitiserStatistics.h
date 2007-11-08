@@ -70,7 +70,11 @@ namespace Pulsar
     //! get diglev
     std::string get_diglev( void ) const { return diglev; }
 
-
+    //! set dig_mode
+    void set_dig_mode( std::string s_dig_mode ) { dig_mode = s_dig_mode; }
+    
+    //! get dig_mode
+    std::string get_dig_mode( void ) const { return dig_mode; }
 
 
 
@@ -87,12 +91,7 @@ namespace Pulsar
 
       int index;
 
-      std::string dig_mode;
-      int ndigr;
-      int nlev;
-      int ncycsub;
-      std::string diglev;
-
+      std::vector<float> atten;
       std::vector<float> data;
 
     private:
@@ -114,6 +113,7 @@ namespace Pulsar
     int npar;
     int ncycsub;
     std::string diglev;
+    std::string dig_mode;
 
     void init ();
 

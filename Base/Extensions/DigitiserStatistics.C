@@ -75,12 +75,12 @@ Pulsar::DigitiserStatistics::row::~row ()
 
 void Pulsar::DigitiserStatistics::row::init ()
 {
-  dig_mode = "unknown";
-  diglev   = "unknown";
-
-  ndigr   = 0;
-  nlev    = 0;
-  ncycsub = 0;
+//   dig_mode = "unknown";
+//   diglev   = "unknown";
+// 
+//   ndigr   = 0;
+//   nlev    = 0;
+//   ncycsub = 0;
 
   data.resize(0);
 }
