@@ -20,6 +20,7 @@
 #include "Pulsar/Receiver.h"
 #include "Pulsar/WidebandCorrelator.h"
 #include "Pulsar/DigitiserStatistics.h"
+#include "Pulsar/DigitiserCounts.h"
 #include "Pulsar/ProcHistory.h"
 #include "Pulsar/Passband.h"
 #include "Pulsar/PolnCalibratorExtension.h"
@@ -1007,11 +1008,21 @@ try {
 
   // Unload some of the other HDU's
 
+  try
+  {
   const DigitiserStatistics* digistats = get<DigitiserStatistics>();
   if (digistats)
     unload (fptr, digistats);
   else
     delete_hdu (fptr, "DIG_STAT");
+  } catch( Error e ) {
+    cerr << e << endl;
+  }
+  const DigitiserCounts *dig_counts = get<DigitiserCounts>();
+  if( dig_counts )
+    unload( fptr, dig_counts );
+  else
+    delete_hdu( fptr, "DIG_CNTS" );
 
   const Passband* passband = get<Passband>();
   if (passband)
