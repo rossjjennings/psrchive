@@ -1168,6 +1168,10 @@ void Pulsar::ReceptionCalibrator::initialize ()
   MJD epoch = 0.5 * (end_epoch + start_epoch);
   cerr << "Pulsar::ReceptionCalibrator::solve epoch=" << epoch << endl;
 
+  std::sort( calibrator_epochs.begin(), calibrator_epochs.end() );
+  if (!calibrator_epochs.size() || start_epoch < calibrator_epochs.front())
+    calibrator_epochs.insert( calibrator_epochs.begin(), start_epoch );
+
   for (unsigned ichan=0; ichan<model.size(); ichan++) {
 
     if (get_ndata(ichan) == 0) {
@@ -1185,6 +1189,8 @@ void Pulsar::ReceptionCalibrator::initialize ()
            << " reference flux=" << I << " != 1" << endl;
 
     model[ichan]->convert.set_reference_epoch ( epoch );
+
+    model[ichan]->set_calibrator_epochs ( calibrator_epochs );
 
     model[ichan]->check_constraints ();
 

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/11/08 05:17:22 $
+   $Revision: 1.11 $
+   $Date: 2007/11/08 20:55:32 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -55,6 +55,12 @@ namespace Calibration {
 
     //! Set differential phase to the univariate function of time
     void set_diff_phase (MEAL::Univariate<MEAL::Scalar>*);
+
+    //! Set the epochs of the calibrator observations
+    void set_calibrator_epochs( std::vector<MJD>& epochs );
+
+    //! Add a step if Scalar is a Steps
+    void add_step (MEAL::Scalar* function, double step);
 
     //! Update the relevant estimate
     void update ();

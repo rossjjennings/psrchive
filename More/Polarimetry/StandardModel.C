@@ -384,6 +384,31 @@ void Calibration::StandardModel::set_diff_phase (Univariate<Scalar>* function)
   diff_phase = function;
 }
 
+void Calibration::StandardModel::set_calibrator_epochs( vector<MJD>& epochs )
+{
+  for (unsigned i=0; i < epochs.size(); i++) {
+
+    time.set_value( epochs[i] );
+
+    if (gain)
+      add_step( gain, convert.get_value() );
+
+    if (diff_gain)
+      add_step( diff_gain, convert.get_value() );
+
+    if (diff_phase)
+      add_step( diff_phase, convert.get_value() );
+
+  }
+}
+
+void Calibration::StandardModel::add_step (Scalar* function, double step)
+{
+  Steps* steps = dynamic_cast<Steps*> (function);
+  if (steps)
+    steps->add_step (step);
+}
+
 void Calibration::StandardModel::disengage_time_variations (const MJD& epoch)
 {
   if (!physical)
