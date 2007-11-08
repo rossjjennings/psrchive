@@ -26,7 +26,6 @@ FreqVsSNRPlot::FreqVsSNRPlot()
 {
   subint = 0;
   pol = 0;
-  //get_frame()->set_x_scale( new FrequencyScale );
 }
 
 
@@ -39,26 +38,29 @@ void FreqVsSNRPlot::prepare( const Archive *data )
 
 void FreqVsSNRPlot::draw( const Archive *data )
 {
-  bool svp = true;
-  
   int nchan = data -> get_nchan();
 
   vector <float> snrs(nchan);
 
   for (unsigned i = 0; i < nchan; i++)
   {
-    snrs[i] = data->get_Profile(subint, pol, i)->snr();
+    const Profile *next_profile = data->get_Profile( subint, pol, i );
+    if( next_profile )
+    {
+      snrs[i] = next_profile->snr();
+    }
+    else
+      snrs[i] = 0;
   }
 
   float snr_min = FLT_MAX;
-  float snr_max = FLT_MIN;
+  float snr_max = -FLT_MAX;
   
   snr_min = min( snr_min, *std::min_element (snrs.begin(), snrs.end() ) );
   
   snr_max = max( snr_max, *std::max_element (snrs.begin(), snrs.end() ) );
-
-  if (svp)
-    cpgsvp(0.1, 0.9, 0.1, 0.9);
+  
+  cpgsvp(0.1, 0.9, 0.1, 0.9);
   cpgswin (0, data->get_nchan(), snr_min - (snr_min/10), snr_max + (snr_max/10));
   cpgslw(1);
   cpgsch(1.0);

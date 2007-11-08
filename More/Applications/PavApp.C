@@ -83,7 +83,6 @@ void PavApp::PrintUsage( void )
   cout << "Preprocessing options:" << endl;
   cout << " -b scr    Bscrunch scr phase bins together" << endl;
   cout << " -C        Centre the profiles on phase zero" << endl;
-  cout << " -c        Don't remove baseline before plotting" << endl;
   cout << " -d        Dedisperse all channels" << endl;
   cout << " -r phase  Rotate all profiles by phase (in turns)" << endl;
   cout << " -f scr    Fscrunch scr frequency channels together" << endl;
@@ -513,14 +512,23 @@ void PavApp::CreatePlotsList( vector< string > filenames,   vector< string > plo
 
   for( int i = 0; i < filenames.size(); i ++ )
   {
-    FilePlots new_fplot;
-    new_fplot.filename = filenames[i];
-    for( int p = 0; p < plot_ids.size(); p ++ )
+    try
     {
-      new_fplot.plots.push_back( factory.construct( plot_ids[p] ) );
+      FilePlots new_fplot;
+      new_fplot.filename = filenames[i];
+      for( int p = 0; p < plot_ids.size(); p ++ )
+      {
+        new_fplot.plots.push_back( factory.construct( plot_ids[p] ) );
+      }
+      new_fplot.archive = Archive::load( filenames[i] );
+      plots.push_back( new_fplot );
     }
-    new_fplot.archive = Archive::load( filenames[i] );
-    plots.push_back( new_fplot );
+    catch ( Error e )
+    {
+      cerr << "Unable to load archive " << filenames[i] << endl;
+      cerr << "The following exception was encountered" << endl;
+      cerr << e << endl;
+    }
   }
 }
 
@@ -645,7 +653,7 @@ int PavApp::run( int argc, char *argv[] )
   string clip_command = "y:range";
   string clip_value = "=(0,1)";
 
-  char valid_args[] = "Az:hb:M:KDCcdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g:";
+  char valid_args[] = "Az:hb:M:KDCdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g:";
 
   int c = '\0';
   while( (c = getopt_long( argc, argv, valid_args, long_options, &option_index )) != -1 )
@@ -664,7 +672,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.26 2007/11/05 03:33:05 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.27 2007/11/08 03:55:19 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -678,9 +686,6 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'C':
       jobs.push_back( "centre" );
-      break;
-    case 'c':
-      //keep_baseline = true;
       break;
     case 'd':
       jobs.push_back( "dedisperse" );
@@ -741,11 +746,9 @@ int PavApp::run( int argc, char *argv[] )
       plot_ids.push_back( "A" );
       break;
     case 'X':
-      //keep_baseline = true;
       plot_ids.push_back( "X" );
       break;
     case 'B':
-      //keep_baseline = true;
       plot_ids.push_back( "B" );
       top_label = "band:above:c";
       clear_labels = false;
@@ -758,7 +761,6 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'n':
       plot_ids.push_back( "n" );
-      //keep_baseline = true;
       break;
     case 'j':
       plot_ids.push_back( "j" );
@@ -1073,6 +1075,8 @@ int PavApp::run( int argc, char *argv[] )
     }
     catch( Error e )
     {
+      cerr << "Unable to plot " << plots[i].filename << endl;
+      cerr << "The following exception was encountered" << endl;
       cerr << e << endl;
     }
   }
