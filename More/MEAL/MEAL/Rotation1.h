@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Rotation1.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.3 $
+   $Date: 2007/11/08 11:11:29 $
    $Author: straten $ */
 
 #ifndef __MEAL_Rotation1_H
@@ -45,6 +45,9 @@ namespace MEAL {
 
     //! Set the parameter management policy
     void set_parameter_policy (OneParameter* policy);
+
+    //! Set the name of the parameters
+    void set_param_name (const std::string& name);
 
     // ///////////////////////////////////////////////////////////////////
     //

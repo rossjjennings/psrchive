@@ -23,6 +23,13 @@ std::string MEAL::Rotation1::get_name () const
   return "Rotation1";
 }
 
+void MEAL::Rotation1::set_param_name (const string& name) 
+{
+  OneParameter* current = dynamic_kast<OneParameter>(parameter_policy);
+  if (current)
+    current->set_param_name (name);
+}
+
 void MEAL::Rotation1::set_axis (const Vector<3,double>& _axis)
 {
   if (normsq(_axis) == 0.0)
