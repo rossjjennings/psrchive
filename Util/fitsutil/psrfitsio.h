@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/10/24 06:54:20 $
+   $Revision: 1.8 $
+   $Date: 2007/11/08 03:34:45 $
    $Author: nopeer $ */
 
 #ifndef __psrfitsio_h
@@ -140,8 +140,24 @@ void psrfits_write_col (fitsfile* fptr, const char* name, std::vector<T>& data,
 		  &(data[0]), &status);
 
   if (status)
-    throw FITSError (status, "psrfits_write_col", name);
+    throw FITSError (status, "psrfits_write_col(vector<T>)", name);
+}
 
+template<typename T>
+    void psrfits_write_col( fitsfile *fptr, const char *name, T &data, int row = 1 )
+{
+  int colnum = 0;
+  int status = 0;
+  
+  fits_get_colnum (fptr, CASEINSEN, const_cast<char*>(name), &colnum, &status );
+  
+  fits_write_col (fptr, FITS_traits<T>::datatype(),
+		  colnum, row,
+		  1, 1,
+		  &data, &status);
+
+  if (status)
+    throw FITSError (status, "psrfits_write_col(T)", name);
 }
 
 template<typename T>
