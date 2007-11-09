@@ -34,11 +34,25 @@ int main () try {
 
   unsigned nparam = instrument.get_nparam();
 
+  for (unsigned iparam=0; iparam < nparam; iparam++)
+    cerr << instrument.get_param_name(iparam) << endl;
+
   banner ("set gain to polynomial");
 
-  instrument.set_gain( new Polynomial(3) );
+  Polynomial* polynomial = new Polynomial(3);
+
+  instrument.set_gain( polynomial );
 
   if (instrument.get_nparam() != nparam + 3) {
+    cerr << "Chain Rule error map" << endl;
+    return -1;
+  }
+
+  banner ("resize polynomial");
+
+  polynomial->resize(6);
+
+  if (instrument.get_nparam() != nparam + 6) {
     cerr << "Chain Rule error map" << endl;
     return -1;
   }
@@ -55,6 +69,9 @@ int main () try {
   }
 
   banner ("nested Composite map/unmap test passed");
+
+  for (unsigned iparam=0; iparam < nparam; iparam++)
+    cerr << instrument.get_param_name(iparam) << endl;
 
   return 0;
 }
