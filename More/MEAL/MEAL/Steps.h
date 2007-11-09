@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Steps.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/11/07 18:39:00 $
+   $Revision: 1.3 $
+   $Date: 2007/11/09 05:26:10 $
    $Author: straten $ */
 
 #ifndef __Steps_H
@@ -43,6 +43,15 @@ namespace MEAL {
 
     //! Add a step at the given point on the abscissa
     void add_step (double x);
+
+    //! Set the abscissa of the specified step
+    void set_step (unsigned istep, double x);
+
+    //! Get the abscissa of the specified step
+    double get_step (unsigned istep) const;
+
+    //! Get the number of steps
+    unsigned get_nstep () const;
 
     //! Set the abscissa value
     void set_abscissa (double value);

@@ -68,6 +68,7 @@ void MEAL::Steps::add_step (double x)
 
   step[i] = x;
   parameters.set_param(i, 0.0);
+  current_step = i;
 
   // c) and shift the remaining values to the right.
   for (i++; i < size+1; i++) {
@@ -76,12 +77,37 @@ void MEAL::Steps::add_step (double x)
   }
 }
 
+//! Set the abscissa of the specified step
+void MEAL::Steps::set_step (unsigned istep, double x)
+{
+  assert( istep < step.size() );
+  step[istep] = x;
+  current_step = -1;
+}
+
+//! Get the abscissa of the specified step
+double MEAL::Steps::get_step (unsigned istep) const
+{
+  assert( istep < step.size() );
+  return step[istep];
+}
+
+//! Get the number of steps
+unsigned MEAL::Steps::get_nstep () const
+{
+  return step.size();
+}
+
 //! Set the abscissa value
 void MEAL::Steps::set_abscissa (double value)
 {
   // A) search backward for the last step abscissa less than value
   int nstep = step.size();
   int istep = nstep - 1;
+
+  if (verbose)
+    cerr << "MEAL::Steps::set_abscissa value=" << value 
+	 << " nstep=" << nstep << endl;
 
   while (istep >= 0) {
     if (step[istep] < value)
@@ -92,6 +118,9 @@ void MEAL::Steps::set_abscissa (double value)
   // B) if found, set the abscissa
   if (istep >= 0)
     Univariate<Scalar>::set_abscissa (step[istep]);
+
+  if (verbose)
+    cerr << "MEAL::Steps::set_abscissa step=" << istep << endl;
 
   current_step = istep;
 }
