@@ -578,6 +578,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
       }
 
       model[ichan]->get_equation()->add_data (measurements);
+      model[ichan]->add_observation_epoch (epoch);
 
     }
     catch (Error& error) {
@@ -844,6 +845,8 @@ try {
 	  measurements.set_transformation_index
 	    ( model[ichan]->get_polncal_path() );
 
+	  model[ichan]->add_calibrator_epoch (epoch);
+
         }
 
         model[ichan]->get_equation()->add_data (measurements);
@@ -851,7 +854,7 @@ try {
       }
       catch (Error& error) {
         cerr << "Pulsar::ReceptionCalibrator::add_calibrator ichan="
-             << ichan << " error\n" << error.get_message() << endl;
+             << ichan << " error\n" << error << endl;
       }
 
       Jones< Estimate<double> > correct;
@@ -873,7 +876,6 @@ try {
 
     }
 
-    calibrator_epochs.push_back( epoch );
   }
 
   if (p->get_nchan() == nchan)  {
@@ -1168,10 +1170,6 @@ void Pulsar::ReceptionCalibrator::initialize ()
   MJD epoch = 0.5 * (end_epoch + start_epoch);
   cerr << "Pulsar::ReceptionCalibrator::solve epoch=" << epoch << endl;
 
-  std::sort( calibrator_epochs.begin(), calibrator_epochs.end() );
-  if (!calibrator_epochs.size() || start_epoch < calibrator_epochs.front())
-    calibrator_epochs.insert( calibrator_epochs.begin(), start_epoch );
-
   for (unsigned ichan=0; ichan<model.size(); ichan++) {
 
     if (get_ndata(ichan) == 0) {
@@ -1188,9 +1186,7 @@ void Pulsar::ReceptionCalibrator::initialize ()
       cerr << "Pulsar::ReceptionCalibrator::solve warning ichan=" << ichan
            << " reference flux=" << I << " != 1" << endl;
 
-    model[ichan]->convert.set_reference_epoch ( epoch );
-
-    model[ichan]->set_calibrator_epochs ( calibrator_epochs );
+    model[ichan]->set_reference_epoch ( epoch );
 
     model[ichan]->check_constraints ();
 
