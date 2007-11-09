@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/11/08 20:55:32 $
+   $Revision: 1.12 $
+   $Date: 2007/11/09 04:48:24 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -56,11 +56,14 @@ namespace Calibration {
     //! Set differential phase to the univariate function of time
     void set_diff_phase (MEAL::Univariate<MEAL::Scalar>*);
 
-    //! Set the epochs of the calibrator observations
-    void set_calibrator_epochs( std::vector<MJD>& epochs );
+    //! Add a step if any of the above functions require it
+    void add_calibrator_epoch (const MJD&);
 
-    //! Add a step if Scalar is a Steps
-    void add_step (MEAL::Scalar* function, double step);
+    //! Record the epochs of observations
+    void add_observation_epoch (const MJD&);
+
+    //! Set the reference epoch
+    void set_reference_epoch (const MJD& epoch);
 
     //! Update the relevant estimate
     void update ();
@@ -113,9 +116,6 @@ namespace Calibration {
     //! The time axis
     MEAL::Axis<MJD> time;
 
-    //! Used to convert MJD to double
-    Calibration::ConvertMJD convert;
-
     //! validity flag
     bool valid;
 
@@ -123,6 +123,9 @@ namespace Calibration {
 
     //! ReceptionModel
     Reference::To< Calibration::ReceptionModel > equation;
+
+    //! Used to convert MJD to double
+    Calibration::ConvertMJD convert;
 
     //! The signal path experienced by the calibrator
     Reference::To< MEAL::ProductRule<MEAL::Complex2> > pcal_path;
@@ -156,6 +159,15 @@ namespace Calibration {
 			     std::vector<unsigned>& function_imap, 
 			     MEAL::Scalar* function );
 
+    //! Set the minimum step if Scalar is a Steps
+    void set_min_step (MEAL::Scalar* function, double minimum);
+
+    //! Offset the steps if Scalar is a Steps
+    void offset_steps (MEAL::Scalar* function, double offset);
+
+    //! Add a step if Scalar is a Steps
+    void add_step (MEAL::Scalar* function, double step);
+
     // ////////////////////////////////////////////////////////////////////
     //
     //! Phenomenological decomposition of instrumental response (Britton)
@@ -186,7 +198,9 @@ namespace Calibration {
 
     //! The platform transformation
     Reference::To<MEAL::Complex2> platform_transformation;
-    
+
+    MJD min_epoch, max_epoch;
+
   private:
 
     //! built flag

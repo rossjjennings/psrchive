@@ -300,7 +300,7 @@ Calibration::StandardModel::integrate_parameter (MEAL::Scalar* function,
 
   unsigned istep = steps->get_step();
 
-  cerr << "StandardModel set step " << istep << endl;
+  // cerr << "StandardModel set step " << istep << endl;
 
   steps->set_param( istep, value );
 }
@@ -358,7 +358,7 @@ void Calibration::StandardModel::set_gain (Univariate<Scalar>* function)
 		 "cannot set gain variation in polar model");
 
   physical -> set_gain( function );
-  function -> set_argument (0, &convert);
+  convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
   gain = function;
 }
 
@@ -369,7 +369,7 @@ void Calibration::StandardModel::set_diff_gain (Univariate<Scalar>* function)
 		 "cannot set gain variation in polar model");
 
   physical -> set_diff_gain( function );
-  function -> set_argument (0, &convert);
+  convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
   diff_gain = function;
 }
 
@@ -380,26 +380,100 @@ void Calibration::StandardModel::set_diff_phase (Univariate<Scalar>* function)
 		 "cannot set diff_phase variation in polar model");
 
   physical -> set_diff_phase( function );
-  function -> set_argument (0, &convert);
+  convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
   diff_phase = function;
 }
 
-void Calibration::StandardModel::set_calibrator_epochs( vector<MJD>& epochs )
+void Calibration::StandardModel::set_reference_epoch (const MJD& epoch)
 {
-  for (unsigned i=0; i < epochs.size(); i++) {
+  MJD current_epoch = convert.get_reference_epoch();
+  convert.set_reference_epoch( epoch );
 
-    time.set_value( epochs[i] );
+  time.set_value (current_epoch);
+  double offset = convert.get_value();
 
-    if (gain)
-      add_step( gain, convert.get_value() );
+  if (gain)
+    offset_steps( gain, offset );
+  
+  if (diff_gain)
+    offset_steps( diff_gain, offset );
+  
+  if (diff_phase)
+    offset_steps( diff_phase, offset );
+}
 
-    if (diff_gain)
-      add_step( diff_gain, convert.get_value() );
+void Calibration::StandardModel::offset_steps (Scalar* function, double offset)
+{
+  Steps* steps = dynamic_cast<Steps*> (function);
+  if (!steps)
+    return;
 
-    if (diff_phase)
-      add_step( diff_phase, convert.get_value() );
+  for (unsigned i=0; i < steps->get_nstep(); i++)
+    steps->set_step( i, steps->get_step(i) + offset );
+}
 
-  }
+void Calibration::StandardModel::add_observation_epoch (const MJD& epoch)
+{
+  MJD zero;
+
+  if (min_epoch == zero || epoch < min_epoch) 
+    min_epoch = epoch;
+
+  if (max_epoch == zero || epoch > max_epoch) 
+    max_epoch = epoch;
+
+  MJD one_minute (0.0, 60.0, 0.0);
+  time.set_value (min_epoch - one_minute);
+
+  double min_step = convert.get_value();
+
+  if (gain)
+    set_min_step( gain, min_step );
+  
+  if (diff_gain)
+    set_min_step( diff_gain, min_step );
+  
+  if (diff_phase)
+    set_min_step( diff_phase, min_step );
+}
+
+void Calibration::StandardModel::set_min_step (Scalar* function, double step)
+{
+  Steps* steps = dynamic_cast<Steps*> (function);
+  if (!steps)
+    return;
+
+  if (!steps->get_nstep())
+    steps->add_step( step );
+  
+  else if (step < steps->get_step(0))
+    steps->set_step( 0, step );
+}
+
+void Calibration::StandardModel::add_calibrator_epoch (const MJD& epoch)
+{
+  MJD zero;
+
+  if (convert.get_reference_epoch() == zero)
+    convert.set_reference_epoch ( epoch );
+
+#ifdef _DEBUG
+  cerr << "Calibration::StandardModel::add_calibrator_epoch epoch="
+       << epoch << endl;
+#endif
+
+  MJD one_minute (0.0, 60.0, 0.0);
+
+  time.set_value( epoch-one_minute );
+
+  if (gain)
+    add_step( gain, convert.get_value() );
+  
+  if (diff_gain)
+    add_step( diff_gain, convert.get_value() );
+  
+  if (diff_phase)
+    add_step( diff_phase, convert.get_value() );
 }
 
 void Calibration::StandardModel::add_step (Scalar* function, double step)
