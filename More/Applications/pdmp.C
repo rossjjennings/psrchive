@@ -41,6 +41,8 @@
 #include "Pulsar/StandardSNR.h"
 #include "Pulsar/TimeSortedOrder.h"
 
+#include <sys/stat.h>
+
 #ifdef HAVE_CONFIG_H
 #include<config.h>
 #endif
@@ -71,8 +73,7 @@ void minmaxval (int n, const float *thearray, float *min, float *max);
 // Initialises all the global variables to default values.
 void init();
 
-vector<Reference::To<Pulsar::Archive> > get_archives(string filename,
-						     bool breakup_archive);
+vector<Reference::To<Pulsar::Archive> > get_archives(string filename);
 
 // Finds the optimal DM and Period
 // If any of the offset, half-range and step values are < 0,
@@ -94,7 +95,6 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 // refDM: The reference DM
 // refP: The reference Period in microseconds
 
-//void solve_and_plot(const Archive* archive, ProfilePlot* total_plot, TextInterface::Class* flui);
 void solve_and_plot(const Archive* archive, ProfilePlot* total_plot, TextInterface::Parser* flui);
 
 // Gets the natural DM step if none was provided
@@ -407,6 +407,8 @@ int beginFilenamesIndex = -1;
 
 unsigned bestFitLineColour = DEFAULT_BEST_FIT_LINE_COLOUR;
 
+vector<string> filenames;
+
 // The mappings between the site code and the array index used to get
 // the site's x,y,z coordinates and name
 
@@ -427,7 +429,7 @@ void usage (bool verbose_usage)
     " -dr  <dm half-range>           DM half-range in pc/cm^3  (default=natural)\n"
     " -ds  <dm step>                 DM step in pc/cm^3        (default=natural)\n"
 		" -f , --force                   Force the program to compute without prompting\n"
-		" -j                             Calculate using multiple achive files\n"
+		" -j                             Combine multiple archives\n"
 		" -mc, --maxchannels <max chan>  Archive frequency channels will be \n"
 		"                                partially scrunched to <= this maximum\n"
 		"                                before computing \n"
@@ -712,11 +714,6 @@ int main (int argc, char** argv)
 
 	string option;
 
-	vector<string> filenames;
-
-	// bools of whether archive should be broken up into its subints
-	vector<int> breakup_archives;
-
 	pgplot::ColourMap::Name colour_map = pgplot::ColourMap::Heat;
 
 	// Get the command line parameters
@@ -736,10 +733,8 @@ int main (int argc, char** argv)
 		return -1;
     }
 
-	for(int i = beginFilenamesIndex; i<argc; i++){
-		filenames.push_back( argv[i] );
-		breakup_archives.push_back( false );
-	}
+	for (int i = beginFilenamesIndex; i < argc; i++)
+		dirglob (&filenames, argv[i]);
 
 	if (filenames.size() == 0) {
 		cerr << "pdmp: please specify filename[s]" << endl;
@@ -753,18 +748,25 @@ int main (int argc, char** argv)
 	Reference::To<Pulsar::Archive> joined_archive;
 
 	if (join && filenames.size() > 1) {
+		cout << "entered join" << endl;
 		finished = false;
 		archive = Pulsar::Archive::load (filenames[0]);
 		joined_archive = archive->clone();
 
+		cout << endl << "Loading archive: " << filenames[0] << endl;
+
 		for (unsigned ifile = 1; ifile < filenames.size(); ifile++) {
-			cout << "loading: " << filenames[ifile] << endl;
+			cout << "Loading archive: " << filenames[ifile] << endl;
 			archive = Pulsar::Archive::load (filenames[ifile]);
 			joined_archive->append(archive);
 		}
-
+		
+		cout << endl;
+		
 		reorder(joined_archive);
 		// total->unload(newname); // THIS IS BROKEN!!!
+	} else {
+		join = false;
 	}
 
 	clock.start();
@@ -773,7 +775,7 @@ int main (int argc, char** argv)
 	for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try {
 
 		vector<Reference::To<Pulsar::Archive> > archives =
-		get_archives(filenames[ifile],breakup_archives[ifile]);
+		get_archives(filenames[ifile]);
 
 		for( unsigned iarch = 0; iarch < archives.size() && !finished; iarch++){
 
@@ -787,11 +789,9 @@ int main (int argc, char** argv)
 			} else
 				archive = archives[iarch];
 
-			//Reference::To<Pulsar::Archive> archive = archives[iarch];
-
 			dopplerFactor = getDopplerFactor(archive);
 
-			if (!silent) {
+			if (!silent && !join) {
 				cout << "\nWorking on archive " << archive->get_source() <<
 				": " << archive->get_filename() <<
 				endl;
@@ -875,23 +875,22 @@ int main (int argc, char** argv)
 	return 0;
 }
 
-vector<Reference::To<Pulsar::Archive> > get_archives(string filename,
-						     bool breakup_archive) {
+vector<Reference::To<Pulsar::Archive> > get_archives(string filename) {
 	vector<Reference::To<Pulsar::Archive> > archives;
 	Reference::To<Pulsar::Archive> arch( Pulsar::Archive::load(filename) );
 
-	if( !breakup_archive ){
+	//if( !breakup_archive ){
 		archives.push_back( arch );
 		return archives;
-	}
+	//}
 
-	for( unsigned isub=0; isub<arch->get_nsubint(); isub++){
+	/*for( unsigned isub=0; isub<arch->get_nsubint(); isub++){
 		vector<unsigned> subints(1,isub);
 		archives.push_back( arch->extract(subints) );
 		archives.back()->set_filename( arch->get_filename() + " subint " + MAKE_STRING(isub) );
 	}
 
-	return archives;
+	return archives;*/
 }
 
 
@@ -1042,6 +1041,8 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 
 				freqError = fabs((periodStep_us/(double)MICROSEC)/pow((bestPeriod_bc_us/(double)MICROSEC), 2));
 
+				periodLoopCopy->remove_baseline();
+
 				bestProfile = periodLoopCopy->get_Profile(FIRST_SUBINT, FIRST_POL, FIRST_CHAN);
 
 				// get the width of the pulse
@@ -1108,7 +1109,6 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 }
 
 // Use the the default natural values for offset, step and half-range
-//void solve_and_plot(const Archive* archive, ProfilePlot* total_plot, TextInterface::Class* flui) {
 void solve_and_plot(const Archive* archive, ProfilePlot* total_plot, TextInterface::Parser* flui) {
 	solve_and_plot(archive, 0,-1,-1, 0,-1,-1, total_plot, flui);
 }
@@ -1655,7 +1655,7 @@ double getDopplerFactor(const Archive * archive) {
 	// This hardcoded bit might not be such a good idea.
 	// Counting on the fact that these values don't change
 
-	/*string CTEL [] = { "GBT XYZ"          , "NARRABRI CS08",
+	string CTEL [] = { "GBT XYZ"          , "NARRABRI CS08",
 	                   "ARECIBO XYZ (JPL)", "Hobart, Tasmania",
 	                   "Nanshan,Urumqi"   , "DSS 43 XYZ",
 										 "PARKES XYZ (JER)" , "JODRELL BANK XYZ",
@@ -1693,7 +1693,7 @@ double getDopplerFactor(const Archive * archive) {
 										 835.8              , 3554871.4,
 										 25                 , 500.0,
 										 4670132.83         , 4900430.8,
-										 78                 , 0};*/
+										 78                 , 0};
 
 	// Astronomical units
 	double AUS     = 499.004786;
@@ -1763,10 +1763,18 @@ double getDopplerFactor(const Archive * archive) {
 	double y = Y[index];
 	double z = Z[index];*/
 
-	Reference::To<ITRFExtension> ext = copy->get<ITRFExtension>();
-	double x = ext->ant_x;
-	double y = ext->ant_y;
-	double z = ext->ant_z;
+	double x = X[7];
+	double y = Y[7];
+	double z = Z[7];
+
+	try {
+		Reference::To<ITRFExtension> ext = copy->get<ITRFExtension>();
+		x = ext->ant_x;
+		y = ext->ant_y;
+		z = ext->ant_z;
+	} catch (Error &error) {
+		cerr << "\nSelecting Parkes as default telescope site";
+	}
 
 	// Convert to DCS
 	slaDcs2c (R2000, D2000, dps);
@@ -1966,6 +1974,7 @@ void printHeader(const Archive * archive,
 								 double dmStep,
 								 double dmHalfRange) {
 
+
 	/////////////////////////////////////////////////
 	// Print the header
 	//
@@ -1973,9 +1982,11 @@ void printHeader(const Archive * archive,
 	double gal_long;
  	double gal_lat;
 
-	AnglePair myPair = (archive->get_coordinates()).getGalactic();
-	myPair.getDegrees(&gal_long, &gal_lat);
-	gal_long += 360; // convert longitude range from (-180 - 180) to (0 - 360)
+	AnglePair glgb = (archive->get_coordinates()).getGalactic();
+	glgb.getDegrees(&gal_long, &gal_lat);
+
+	if (gal_long < 0)
+		gal_long += 360;
 
 	float lineHeight = 0.16;
 	char temp [1024];
@@ -1987,8 +1998,25 @@ void printHeader(const Archive * archive,
 
 	Reference::To<Archive> copy = archive->clone();
 
+	if (join) {
+		temp_str = copy->get_source() + ": ";
+		if (filenames.size() > 5) {
+			for (int i = 0; i < 6; i++) {
+				temp_str = temp_str + " " + filenames[i];
+			}
+			temp_str = temp_str + " ...";
+
+		} else {
+			for (int i = 0; i < filenames.size(); i++) {
+				temp_str = temp_str + " " + filenames[i];
+			}
+		}
+
+	} else {
+		temp_str = copy->get_source() + ": " + copy->get_filename();
+	}
+
 	// Display the pulsar name and archive file
-	temp_str = copy->get_source() + ": " + copy->get_filename();
 	cpgtext(linex, 0.85, temp_str.c_str());
 
 	// reset the y ordinate for the text when looping over archives
@@ -2052,7 +2080,7 @@ void printHeader(const Archive * archive,
 	copy->get_bandwidth());
 	temp_str += space + temp;
 
-	sprintf(temp, "Galactic coordinates (deg) = (%.3f, %.3f)" ,
+	sprintf(temp, "Gal.l = %.3f Gal.b = %.3f",
 	gal_long, gal_lat);
 	temp_str += space + temp;
 
@@ -2126,7 +2154,6 @@ void printResults(const Archive * archive) {
 	const float HORIZONTAL = 0;
 
 	// Firstly print out the first column of labels
-	//cpgtext(bestValues_x, bestValues_y, "Best BC period (ms):");
 	cpgtext(bestValues_x, bestValues_y, "BC period (ms):");
 
 	bestValues_y -= lineHeight;
@@ -2154,7 +2181,6 @@ void printResults(const Archive * archive) {
 	bestValues_x += colWidth * 0.1;
 	bestValues_y = 1;
 
-	//cpgtext(bestValues_x, bestValues_y, "Best TC period (ms):");
 	cpgtext(bestValues_x, bestValues_y, "TC period (ms):");
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Correction (ms):");
@@ -2179,7 +2205,6 @@ void printResults(const Archive * archive) {
 	// New column
 	bestValues_x += colWidth * 0.1;
 	bestValues_y = 1;
-	//cpgtext(bestValues_x, bestValues_y, "Best DM:");
 	cpgtext(bestValues_x, bestValues_y, "DM:");
 
 	bestValues_y -= lineHeight;
@@ -2188,7 +2213,7 @@ void printResults(const Archive * archive) {
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Error:");
 
-  // New column: Print out all the values
+	// New column: Print out all the values
 	bestValues_x += colWidth * 0.8;
 	bestValues_y = 1;
 	sprintf(temp, "%3.3f", bestDM);
@@ -2207,12 +2232,10 @@ void printResults(const Archive * archive) {
 	bestValues_x += colWidth * 0.1;
 	bestValues_y = 1;
 
-	//cpgtext(bestValues_x, bestValues_y, "Best BC freq (Hz):");
 	cpgtext(bestValues_x, bestValues_y, "BC freq (Hz):");
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Freq error (Hz):");
 	bestValues_y -= lineHeight;
-	//cpgtext(bestValues_x, bestValues_y, "Pulse width (ms):");
 	cpgtext(bestValues_x, bestValues_y, "Width (ms):");
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Best SNR:");
@@ -2228,12 +2251,10 @@ void printResults(const Archive * archive) {
 	cpgtext(bestValues_x, bestValues_y, temp);
 
 	bestValues_y -= lineHeight;
-	//sprintf(temp, "%3.3f", bestPulseWidth * tbin);
-	sprintf(temp, "%3.2f", bestPulseWidth * tbin);
+	sprintf(temp, "%3.3f", bestPulseWidth * tbin);
 	cpgtext(bestValues_x, bestValues_y, temp);
 
 	bestValues_y -= lineHeight;
-	//sprintf(temp, "%-3.3f", bestSNR);
 	sprintf(temp, "%-3.2f", bestSNR);
 	cpgtext(bestValues_x, bestValues_y, temp);
 
@@ -2282,22 +2303,32 @@ void writeResultFiles(Archive * archive) {
 
 	glgb.getDegrees(&glong, &glat);
 
-	ofstream posnFile("pdmp.posn", ios::out | ios::app);
+	if (glong < 0)
+		glong += 360;
 
-	if (posnFile.is_open()) {
-		posnFile << archive->get_source() << "\t" << glong << "\t" << glat << "\t" << bestSNR << "\t" <<
-		archive->start_time() << "\t" << bestPeriod_bc_us << "\t" << periodError_ms << "\t" <<
-		bestDM << "\t" << dmError << "\t" << archive->get_filename() << endl;
+	file = fopen("pdmp.posn", "at");
 
-		posnFile.close();
+	if (file != NULL) {
+		fprintf(file, " %s\t%3.3f\t%3.3f\t%3.2f\t%3.5f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%s\n",
+		archive->get_source().c_str(),
+		glong,
+		glat,
+		bestSNR,
+		archive->start_time().intday() + archive->start_time().fracday(),
+		bestPeriod_bc_us/MILLISEC,
+		periodError_ms,
+		bestDM,
+		dmError,
+		archive->get_filename().c_str());
 	} else {
 		cerr << "pdmp: Failed to open file pdmp.posn for writing results\n";
 	}
+	fclose(file);
 
 	file = fopen("pdmp.per", "at");
 
 	if (file != NULL) {
-		fprintf(file, " %3.6f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%3.2f\t%3.2f\t%s\n",
+		fprintf(file, " %3.6f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%3.3f\t%3.2f\t%s\n",
 		archive->start_time().intday() + archive->start_time().fracday(),
 		bestPeriod_bc_us/MILLISEC,
 		periodError_ms,
@@ -2314,12 +2345,15 @@ void writeResultFiles(Archive * archive) {
 
 void plotProfile(const Profile * profile, ProfilePlot* plot, TextInterface::Parser* flui) {
 
+// ---------------
+
 	cpgsch(0.7);
 	cpgslw(1);
 
 	flui->set_value("ch", "0.8");
 	flui->set_value("x:view", "(0.05, 0.95)");
 	flui->set_value("y:view", "(0.05, 0.205");
+	flui->set_value("x:range", "(0, 1.2)");
 	plot->plot_profile(profile);
 	double min, max;
 
