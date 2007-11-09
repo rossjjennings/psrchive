@@ -25,6 +25,11 @@ void Calibration::ConvertMJD::set_reference_epoch (const MJD& mjd)
   reference_epoch = mjd;
 }
 
+MJD Calibration::ConvertMJD::get_reference_epoch () const
+{
+  return reference_epoch;
+}
+
 //! Set the scale to be used during conversion
 void Calibration::ConvertMJD::set_scale (double _scale)
 {

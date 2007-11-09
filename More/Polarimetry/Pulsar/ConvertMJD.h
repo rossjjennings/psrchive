@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ConvertMJD.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.4 $
+   $Date: 2007/11/09 04:48:14 $
    $Author: straten $ */
 
 #ifndef __Calibration_ConvertMJD_Header
@@ -28,10 +28,13 @@ namespace Calibration {
     ConvertMJD ();
 
     //! Set the epoch
-    void set_epoch (const MJD& epoch);
+    void set_epoch (const MJD&);
 
-    //! Set the reference MJD
-    void set_reference_epoch (const MJD& reference_epoch);
+    //! Set the reference epoch
+    void set_reference_epoch (const MJD&);
+
+    //! Get the reference epoch
+    MJD get_reference_epoch () const;
 
     //! Set the scale to be used during conversion
     void set_scale (double scale);
