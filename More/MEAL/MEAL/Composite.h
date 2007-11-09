@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Composite.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/11/07 18:38:35 $
+   $Revision: 1.9 $
+   $Date: 2007/11/09 04:48:09 $
    $Author: straten $ */
 
 #ifndef __Composite_H
@@ -123,13 +123,13 @@ namespace MEAL {
     std::vector< Reference::To<Function> > models;
     
     //! The total number of Function parameters
-    unsigned nparameters;
+    mutable unsigned nparameters;
     
     //! Optimization: keep track of the current model
-    unsigned current_model;
+    mutable unsigned current_model;
 
     //! Optimization: keep track of the base index of the current model
-    unsigned current_index;
+    mutable unsigned current_index;
 
     //! Method called when a Function attribute has changed
     void attribute_changed (Function::Attribute attribute);
@@ -142,6 +142,9 @@ namespace MEAL {
 
     //! Remap the parameter indeces
     void remap (bool signal_changes = true);
+
+    //! Recount the number of parameters
+    void recount () const;
 
     //! Get the const Function that corresponds to the given index
     const Function* get_Function (unsigned& index) const;
