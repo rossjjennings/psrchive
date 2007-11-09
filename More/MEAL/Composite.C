@@ -217,6 +217,9 @@ void MEAL::Composite::add_component (Function* model, vector<unsigned>& imap)
     for (unsigned imodel=0; imodel<nmodel; imodel++)
       add_component (meta->models[imodel], imap);
 
+    if (imap.size() != meta->get_nparam())
+      meta->recount();
+
   }
   else {
     
@@ -341,6 +344,15 @@ void MEAL::Composite::remove_component (Function* model)
 
 }
 
+void MEAL::Composite::recount () const
+{
+  nparameters = 0;
+  for (unsigned imodel=0; imodel < models.size(); imodel++)  {
+    reference_check (imodel, "recount");
+    nparameters += models[imodel]->get_nparam();
+  }
+}
+
 //! Recount the number of parameters
 void MEAL::Composite::remap (bool signal_changes)
 { 
@@ -363,11 +375,7 @@ void MEAL::Composite::remap (bool signal_changes)
   if (Function::very_verbose)
     cerr << class_name() << "remap recount parameters" << endl;
 
-  nparameters = 0;
-  for (unsigned imodel=0; imodel < models.size(); imodel++)  {
-    reference_check (imodel, "remap");
-    nparameters += models[imodel]->get_nparam();
-  }
+  recount ();
 
   if (Function::very_verbose)
     cerr << class_name() << "remap send changed ParameterCount nparam=" 
