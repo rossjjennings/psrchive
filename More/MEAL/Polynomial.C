@@ -51,6 +51,14 @@ MEAL::Polynomial* MEAL::Polynomial::clone () const
   return new Polynomial( *this );
 }
 
+void MEAL::Polynomial::resize (unsigned ncoef)
+{
+  parameters.resize (ncoef);
+  double backup = x_0;
+  init ();
+  x_0 = backup;
+}
+
 //! Return the name of the class
 string MEAL::Polynomial::get_name () const
 {
