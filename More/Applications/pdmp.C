@@ -748,7 +748,6 @@ int main (int argc, char** argv)
 	Reference::To<Pulsar::Archive> joined_archive;
 
 	if (join && filenames.size() > 1) {
-		cout << "entered join" << endl;
 		finished = false;
 		archive = Pulsar::Archive::load (filenames[0]);
 		joined_archive = archive->clone();
@@ -982,6 +981,8 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 	// Begin the search for optimum DM and Period
 	// Foreach DM
 
+	Reference::To<Archive> periodLoopCopy;
+
 	for (int dmBin = 0; dmBin < dmBins ; dmBin++) {
 
 		Reference::To<Archive> dmLoopCopy = copy->clone();
@@ -1005,7 +1006,7 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 			printf("%3d%%", displayPercentage*SHOW_EVERY_PERCENT_COMPLETE);
 
 			// Create a new (unscrunched) copy so the values can be testedget
-			Reference::To<Archive> periodLoopCopy = dmLoopCopy->clone();
+			periodLoopCopy = dmLoopCopy->clone();
 
 			// set the trial period and dm value and update
 			double newFoldingPeriod = currP/(double)MICROSEC;
@@ -1773,7 +1774,7 @@ double getDopplerFactor(const Archive * archive) {
 		y = ext->ant_y;
 		z = ext->ant_z;
 	} catch (Error &error) {
-		cerr << "\nSelecting Parkes as default telescope site";
+		cerr << "Selecting Parkes as default telescope site\n";
 	}
 
 	// Convert to DCS
