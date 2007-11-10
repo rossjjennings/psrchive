@@ -84,7 +84,7 @@ void BatchQueue::Job::run ()
     execute ();
   }
   catch (Error& e) {
-    cerr << e << endl;
+    cerr << e.get_message() << endl;
   }
 
   queue->remove (this);
