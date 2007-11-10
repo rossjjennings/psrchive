@@ -127,7 +127,7 @@ int main (int argc, char *argv[]) {
 
   string command = "pac ";
 
-  unsigned int index;
+  string::size_type index;
   
   string optarg_str;
 
@@ -161,7 +161,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.82 2007/10/27 04:22:04 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.83 2007/11/10 11:31:36 straten Exp $" << endl;
       return 0;
 
     case 'A':
