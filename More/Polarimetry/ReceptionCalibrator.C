@@ -774,6 +774,8 @@ try {
   vector<vector<Estimate<double> > > cal_hi;
   vector<vector<Estimate<double> > > cal_lo;
 
+  vector<bool> epoch_added (nchan, false);
+
   for (unsigned isub=0; isub<nsub; isub++) {
 
     const Integration* integration = cal->get_Integration (isub);
@@ -845,7 +847,10 @@ try {
 	  measurements.set_transformation_index
 	    ( model[ichan]->get_polncal_path() );
 
-	  model[ichan]->add_calibrator_epoch (epoch);
+	  if (!epoch_added[ichan]) {
+	    model[ichan]->add_calibrator_epoch (epoch);
+	    epoch_added[ichan] = true;
+	  }
 
         }
 
@@ -986,8 +991,9 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 	response[ichan] = signal_path->evaluate();
       }
       catch (Error& error) {
-        cerr << "Pulsar::ReceptionCalibrator::precalibrate ichan=" << ichan
-             << endl << error.warning () << endl;
+	if (verbose > 2)
+	  cerr << "Pulsar::ReceptionCalibrator::precalibrate ichan=" << ichan
+	       << endl << error.get_message() << endl;
         integration->set_weight (ichan, 0.0);
         response[ichan] = Jones<float>::identity();
 	continue;
