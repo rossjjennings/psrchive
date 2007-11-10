@@ -28,6 +28,7 @@ void unload_counts_table ( fitsfile *fptr, const DigitiserCounts *const_ext )
 
     if( !ext )
     {
+      if (Archive::verbose > 2)
       cerr << "Failed to fetch digitiser counts ext" << endl;
       return;
     }
@@ -41,7 +42,7 @@ void unload_counts_table ( fitsfile *fptr, const DigitiserCounts *const_ext )
     }
     catch( Error e )
     {
-      cerr << e << endl;
+      if (Archive::verbose > 2) cerr << e << endl;
     }
   }
 }
@@ -56,12 +57,14 @@ void unload_counts_keys( fitsfile *fptr, const DigitiserCounts *ext )
   int nlev = ext->get_nlev();
   float dyn_levt = ext->get_dyn_levt();
 
+  if (Archive::verbose > 2) {
   cerr << "saving dyn_levt" << dyn_levt << endl;
   cerr << "saving ndigr " << ndigr << endl;
   cerr << "saving diglev " << diglev << endl;
   cerr << "saving dig_mode " << dig_mode << endl;
   cerr << "saving npthist " << npthist << endl;
   cerr << "saving nlev " << nlev << endl;
+  }
 
   char *nullstring = NULL;
 
@@ -72,6 +75,7 @@ void unload_counts_keys( fitsfile *fptr, const DigitiserCounts *ext )
   psrfits_update_key( fptr, "NPTHIST", npthist );
   psrfits_update_key( fptr, "NLEV", nlev );
 
+  if (Archive::verbose > 2)
   cerr << "digitiser counts keys unloaded" << endl;
 }
 
