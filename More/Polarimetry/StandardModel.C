@@ -526,6 +526,18 @@ void Calibration::StandardModel::disengage_time_variations (const MJD& epoch)
 
 }
 
+void Calibration::StandardModel::solve () try {
+
+  get_equation()->solve();
+
+}
+catch (Error& error) {
+  cerr << "Calibration::StandardModel::solve failure \n\t"
+       << error.get_message() << endl;
+  valid = false;
+}
+
+
 void Calibration::StandardModel::compute_covariance
 ( unsigned index, vector< vector<double> >& covar,
   vector<unsigned>& function_imap, MEAL::Scalar* function )
