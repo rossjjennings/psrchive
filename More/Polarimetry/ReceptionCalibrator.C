@@ -250,7 +250,7 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
     }
     catch (Error& error) {
       cerr << "Pulsar::ReceptionCalibrator::load_calibrators ERROR" 
-	   << endl << error.warning() << endl;
+	   << endl << error.get_message() << endl;
     }
 
   }
@@ -1112,7 +1112,7 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
     if (Calibrator::verbose)
       eq->set_fit_debug();
 
-    queue.submit( eq, &Calibration::ReceptionModel::solve );
+    queue.submit( model[ichan].get(), &Calibration::StandardModel::solve );
 
     if (only_ichan >= 0)
       break;
@@ -1120,7 +1120,7 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
   }
   catch (Error& error) {
     cerr << "Pulsar::ReceptionCalibrator::solve failure ichan=" << ichan
-         << endl << error.warning() << endl;
+         << endl << error.get_message() << endl;
     model[ichan]->valid = false;
   }
 
@@ -1137,10 +1137,14 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 
   }
   catch (Error& error) {
-    cerr << error << endl;
-    covariance.resize(0);
-    break;
+    if (verbose)
+      cerr << "Pulsar::ReceptionCalibrator::solve failure " 
+           << error.get_message() << endl;
+    model[ichan]->valid = false;
   }
+
+  // ensure that calculate_transformation is called again
+  transformation.resize( 0 );
 
   is_fit = true;
 }
@@ -1246,7 +1250,7 @@ void Pulsar::SourceEstimate::update_source ()
   }
   catch (Error& error) {
     cerr << "Pulsar::SourceEstimate::update_source error ichan=" << ichan
-         << endl << error.warning() << endl;
+         << endl << error.get_message() << endl;
     valid[ichan] = false;
   }
 }
