@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModelAxisPlotter.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.8 $
+   $Date: 2007/11/11 01:01:01 $
    $Author: straten $ */
 
 #ifndef __Calibration_ReceptionModelAxisPlotter_H
@@ -70,6 +70,7 @@ void Calibration::ReceptionModelAxisPlotter<Type>::plot_model ()
 {
   Type step = (max - min) / (npt - 1);
 
+  model->set_transformation_index (ipath);
   model->set_input_index (isource);
 
   for (unsigned ipt=0; ipt<npt; ipt++) {
