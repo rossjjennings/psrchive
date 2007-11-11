@@ -57,24 +57,6 @@ class PavApp
 public:
   PavApp();
 
-  void PrintUsage( void );
-
-  const void d_minmaxval ( vector<double> thearray, double &min, double &max);
-  const void minmaxval( vector<float> thearray, float &min, float &max );
-
-  //void bandpass (const Archive* data);
-  void line_phase_subints (const Pulsar::Archive* data);
-  void spherical ( const Profile* I,
-                   const Profile* Q,
-                   const Profile* U,
-                   const Profile* V,
-                   bool calibrated );
-  void spherical_wrapper (const Archive* data);
-
-  void SetStokesPlotToQU( void );
-  void SetPhaseZoom( double min_phase, double max_phase );
-  void SetFreqZoom( double min_freq, double max_freq );
-
   int run( int argc, char *argv[] );
 private:
 
@@ -98,22 +80,23 @@ private:
         Reference::To<PC> sp = dynamic_cast<PC*>( (*pit).get() );
         if( sp )
         {
-          sp->configure( cmd );
+	  try { sp->configure( cmd ); } catch( Error e ) {}
         }
       }
     }
   }
   
   
+  void PrintUsage( void );
+
+  void SetStokesPlotToQU( void );
+  void SetPhaseZoom( double min_phase, double max_phase );
+  void SetFreqZoom( double min_freq, double max_freq );
   void PavSpecificOptions( void );
   void CreatePlotsList( vector< string > filenames, vector< string > plot_ids );
   void SetCmdLineOptions( vector< string > options );
   bool CheckColour( void );
-
-
-
-
-
+  void SetPublicationOptions( void );
 
   bool have_colour;
   int ipol;
