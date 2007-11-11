@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.13 $
-   $Date: 2007/11/10 12:14:50 $
+   $Revision: 1.14 $
+   $Date: 2007/11/11 01:00:55 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -122,6 +122,12 @@ namespace Calibration {
     //! validity flag
     bool valid;
 
+    //! Deactivate time variations and set the Instrument to the given epoch
+    void disengage_time_variations (const MJD& epoch);
+
+    //! Activate time varations
+    void engage_time_variations ();
+
  protected:
 
     //! ReceptionModel
@@ -154,9 +160,6 @@ namespace Calibration {
     void integrate_parameter (MEAL::Scalar* function, double value);
     void update_parameter (MEAL::Scalar* function, double value);
 
-    //! Remove all time variations and set the Instrument to the given epoch
-    void disengage_time_variations (const MJD& epoch);
-
     void compute_covariance( unsigned index, 
 			     std::vector< std::vector<double> >& covar,
 			     std::vector<unsigned>& function_imap, 
@@ -170,6 +173,8 @@ namespace Calibration {
 
     //! Add a step if Scalar is a Steps
     void add_step (MEAL::Scalar* function, double step);
+
+    bool time_variations_engaged;
 
     // ////////////////////////////////////////////////////////////////////
     //

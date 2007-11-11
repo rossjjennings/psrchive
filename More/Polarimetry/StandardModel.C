@@ -40,6 +40,7 @@ Calibration::StandardModel::StandardModel (bool britton)
   valid = true;
   built = false;
 
+  time_variations_engaged = true;
   time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
 }
 
@@ -483,8 +484,55 @@ void Calibration::StandardModel::add_step (Scalar* function, double step)
     steps->add_step (step);
 }
 
+
+
+void Calibration::StandardModel::engage_time_variations ()
+{
+  if (time_variations_engaged)
+    return;
+
+  time_variations_engaged = true;
+
+  if (!physical)
+    return;
+
+#ifdef _DEBUG
+  cerr << "before engage nparam = " << physical->get_nparam() << endl;
+#endif
+
+  if (gain) {
+#ifdef _DEBUG
+    cerr << "engage gain" << endl;
+#endif
+    physical->set_gain( gain );
+  }
+
+  if (diff_gain) {
+#ifdef _DEBUG
+    cerr << "engage diff_gain" << endl;
+#endif
+    physical->set_diff_gain( diff_gain );
+  }
+
+  if (diff_phase) {
+#ifdef _DEBUG
+    cerr << "engage diff_phase" << endl;
+#endif
+    physical->set_diff_phase( diff_phase );
+  }
+
+#ifdef _DEBUG
+  cerr << "after engage nparam = " << physical->get_nparam() << endl;
+#endif
+}
+
 void Calibration::StandardModel::disengage_time_variations (const MJD& epoch)
 {
+  if (!time_variations_engaged)
+    return;
+
+  time_variations_engaged = false;
+
   if (!physical)
     return;
 
