@@ -13,6 +13,9 @@
 #include <Pulsar/StokesCylindrical.h>
 #include <Pulsar/BandpassChannelWeightPlot.h>
 #include <Pulsar/StokesSpherical.h>
+#include <Pulsar/PhaseVsTime.h>
+#include <Pulsar/PhaseVsFrequency.h>
+#include <Pulsar/DynamicSNSpectrum.h>
 #include <limits>
 
 
@@ -156,243 +159,6 @@ void PavApp::PrintUsage( void )
 
 
 /**
- * spherical
- *
- *  DOES     - Draws a spherical plot
- *  RECEIVES - N/A
- *  RETURNS  - Nothing
- *  THROWS   - Nothing
- *  TODO     - Implement this as a Plot derived class
- **/
-
-void PavApp::spherical ( const Profile* I,
-                         const Profile* Q,
-                         const Profile* U,
-                         const Profile* V,
-                         bool calibrated )
-{
-  const float* q = Q->get_amps();
-  const float* u = U->get_amps();
-  const float* v = V->get_amps();
-
-  unsigned nbin = I->get_nbin();
-
-  vector<float> phase (nbin);
-  vector<float> orientation (nbin);
-  vector<float> ellipticity (nbin);
-  vector<float> polarization (nbin);
-  vector<float> linear (nbin);
-
-  double reference_orientation_turns = reference_position_angle / 180.0;
-
-  for (unsigned ibin=0; ibin<nbin; ibin++)
-  {
-
-    phase[ibin] = float(ibin)/float(nbin-1) - rot_phase;
-    // ensure that phase runs from 0 to 1
-    phase[ibin] -= floor (phase[ibin]);
-
-    float Lsq = q[ibin]*q[ibin] + u[ibin]*u[ibin];
-    float Psq = Lsq + v[ibin]*v[ibin];
-
-    linear[ibin] = sqrt (Lsq);
-    polarization[ibin] = sqrt (Psq);
-
-    double orientation_turns = atan2 (u[ibin], q[ibin]) / (2.0*M_PI);
-    orientation_turns -= reference_orientation_turns;
-    orientation_turns -= floor (orientation_turns);
-
-    orientation[ibin] = 180.0 * orientation_turns;
-
-  }
-
-  float baseline_phase = I->find_min_phase();
-  Profile temp_profile;
-
-  temp_profile.set_amps (linear);
-  temp_profile -= temp_profile.mean (baseline_phase);
-  temp_profile.get_amps (linear);
-
-  temp_profile.set_amps (polarization);
-  temp_profile -= temp_profile.mean (baseline_phase);
-
-  for (unsigned ibin=0; ibin<nbin; ibin++)
-    ellipticity[ibin] = 90.0/M_PI * atan2 (v[ibin], linear[ibin]);
-
-  float x1, x2, y1, y2;
-  cpgsci(1);
-  cpgqvp (0, &x1, &x2, &y1, &y2);
-
-  float height1 = position_angle_height*(y2-y1);
-
-  // //////////////////////////////////////////////////////////////////////
-  // //////////////////////////////////////////////////////////////////////
-  // plot the orientation
-  cpgsvp (x1, x2, y2-height1, y2);
-
-  cpgswin (min_phase, max_phase, 0.001, 179.999);
-  cpgsch(1.2);
-  cpgbox("bcst",0,0,"bcnvst",60,3);
-
-  if (labels)
-  {
-    cpgsch(1.5);
-    cpgmtxt("L",2.5,.5,.5,"\\gh (deg.)");
-  }
-
-  cpgpt (nbin, &phase[0], &orientation[0], 1);
-
-  // //////////////////////////////////////////////////////////////////////
-  // //////////////////////////////////////////////////////////////////////
-  // plot the ellipticity
-  cpgsvp (x1, x2, y2-height1*2.0, y2-height1);
-
-  cpgswin (min_phase, max_phase, -44.999, 44.999);
-  cpgsch(1.2);
-  cpgbox("bcst",0,0,"bcnvst",30,3);
-
-  if (labels)
-  {
-    cpgsch(1.5);
-    cpgmtxt("L",2.5,.5,.5,"\\ge (deg.)");
-  }
-
-  cpgpt (nbin, &phase[0], &ellipticity[0], 1);
-
-  bool logarithmic = true;
-
-  Reference::To<Profile> tempI;
-
-  if (logarithmic)
-  {
-
-    double variance;
-    I->stats (baseline_phase, 0, &variance);
-
-    float rms = sqrt(variance);
-    float log_rms = log(rms)/log(10.0);
-
-    tempI = new Profile (*I);
-    tempI->logarithm (10.0, rms);
-    *tempI -= log_rms;
-    I = tempI;
-
-    temp_profile.logarithm (10.0, rms);
-    temp_profile -= log_rms;
-
-  }
-
-  // //////////////////////////////////////////////////////////////////////
-  // //////////////////////////////////////////////////////////////////////
-  // set the viewport to plot the rest
-  cpgsvp (x1, x2, y1, y2-height1*2.0);
-
-  float ymin = 0.0;
-  float ymax = I->max() * y_max;
-  float ybuf = border * (ymax-ymin);
-
-  cpgswin (min_phase, max_phase, ymin, ymax+ybuf);
-
-
-  // //////////////////////////////////////////////////////////////////////
-  // plot total intensity
-  if (dark)
-  {
-    // white, solid line
-    cpgsci(1);
-    cpgsls(1);
-  }
-  else
-  {
-    // black, dotted line
-    cpgsci(1);
-    cpgsls(1);
-  }
-
-  I->get_amps (linear);
-  cpgpt (nbin, &phase[0], &linear[0], 1);
-
-
-  // I->draw (rot_phase);
-
-
-  // //////////////////////////////////////////////////////////////////////
-  // plot total polarization
-  if (dark)
-  {
-    // red, solid line
-    cpgsci(2);
-    cpgsls(1);
-  }
-  else
-  {
-    // red, dashed line
-    cpgsci(2);
-    cpgsls(2);
-  }
-
-  temp_profile.get_amps (linear);
-  cpgpt (nbin, &phase[0], &linear[0], 1);
-
-
-  // //////////////////////////////////////////////////////////////////////
-  // plot some labels
-
-  cpgsci(1);
-  cpgsls(1);
-
-  cpgsch(1.2);
-  cpgbox("bcnst",0.0,0,"bcnlstv",0.0,0);
-
-  cpgsch(1.5);
-  if (labels)
-  {
-    cpgmtxt("L",2.5,.5,.5,"Flux (\\fi\\gs\\fr\\d0\\u)");
-    cpgmtxt("B",2.5,.5,.5,"Pulse Phase");
-  }
-
-  cpgsch(1);
-
-  // restore the viewport
-  cpgsvp (x1, x2, y1, y2);
-
-}
-
-
-
-/**
- * spherical_wrapper
- *
- *  DOES     - calls the spherical function to do a spherical plot
- *  RECEIVES - Nothing
- *  RETURNS  - Nothing
- *  THROWS   - Nothing
- *  TODO     - Implement this as a Plot derived class.
- **/
-
-void PavApp::spherical_wrapper (const Archive* data)
-{
-  Reference::To<Archive> clone = data->clone();
-
-  // convert to Stokes parameters
-  clone->convert_state (Signal::Stokes);
-  // remove the baseline
-  clone->remove_baseline();
-
-  data = clone;
-
-  const Profile* I = data->get_Profile (isubint, 0, ichan);
-  const Profile* Q = data->get_Profile (isubint, 1, ichan);
-  const Profile* U = data->get_Profile (isubint, 2, ichan);
-  const Profile* V = data->get_Profile (isubint, 3, ichan);
-
-  spherical (I,Q,U,V,data->get_scale() == Signal::Jansky);
-}
-
-
-
-
-/**
  * SetPhaseZoom
  *
  *   DOES     - creates a command string that sets the x zoom in normalised coords.
@@ -493,8 +259,7 @@ void PavApp::PavSpecificOptions( void )
   SetPlotOptions<StokesCylindrical>( "pa:below:l=" );
   SetPlotOptions<StokesCylindrical>( "flux:below:l=" );
   SetPlotOptions<StokesCylindrical>( "flux:y:buf=0.07" );
-  
-  SetPlotOptions<StokesSpherical>( "flux:below:l=" );
+  SetPlotOptions<StokesCylindrical>( "pa:mark=dot+tick" );
 }
 
 
@@ -585,6 +350,49 @@ bool PavApp::CheckColour( void )
 
 
 
+/**
+ * SetPublicationOptions
+ *
+ *  DOES     - Modifies labels etc for publication printing.
+ *  RECEIVES - Nothing
+ *  RETURNS  - Nothing
+ *  THROWS   - Nothing
+ *  TODO     - Nothing
+ **/
+
+void PavApp::SetPublicationOptions( void )
+{
+  // blank out the top center label and put name,freq in the top left,top right corners of the frame
+  SetPlotOptions<FramedPlot>( "above:c=" );
+  SetPlotOptions<FramedPlot>( "below:l=$name" );
+  SetPlotOptions<FramedPlot>( "below:r=$freq MHz" );
+  SetPlotOptions<StokesCylindrical>( "pa:above:c=" );
+
+  // Now set the name,freq labels to be above the frame for all image plots
+  SetPlotOptions<PhaseVsTime>( "below:l=" );
+  SetPlotOptions<PhaseVsTime>( "below:r=" );
+  SetPlotOptions<PhaseVsTime>( "above:l=$name" );
+  SetPlotOptions<PhaseVsTime>( "above:r=$freq Mhz" );
+  
+  SetPlotOptions<PhaseVsFrequency>( "below:l=" );
+  SetPlotOptions<PhaseVsFrequency>( "below:r=" );
+  SetPlotOptions<PhaseVsFrequency>( "above:l=$name" );
+  SetPlotOptions<PhaseVsFrequency>( "above:r=$freq Mhz" );
+  
+  SetPlotOptions<DynamicSNSpectrum>( "below:l=" );
+  SetPlotOptions<DynamicSNSpectrum>( "below:r=" );
+  SetPlotOptions<DynamicSNSpectrum>( "above:l=$name" );
+  SetPlotOptions<DynamicSNSpectrum>( "above:r=$freq Mhz" );
+
+  // Set the above and below labels for all the plots that don't understand above:? and below:?
+  SetPlotOptions<StokesCylindrical>( "flux:below:l=$name" );
+  SetPlotOptions<StokesCylindrical>( "flux:below:r=$freq MHz" );
+
+  SetPlotOptions<Plot>( "ch=1.2" );
+}
+
+
+
 
 
 /**
@@ -616,8 +424,6 @@ int PavApp::run( int argc, char *argv[] )
 
   // verbosity
   bool verbose = false;
-
-  bool plot_spherical = false;
 
   bool plot_qu = false;
 
@@ -675,7 +481,7 @@ int PavApp::run( int argc, char *argv[] )
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.29 2007/11/11 22:00:55 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.30 2007/11/11 23:25:45 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -739,9 +545,7 @@ int PavApp::run( int argc, char *argv[] )
       plot_ids.push_back( "Y" );
       break;
     case 'S':
-      top_label = "pa:above:c";
       clip_command = "flux:y:range";
-      options.push_back( "pa:mark=dot+tick" );
       plot_ids.push_back( "S" );
       clear_labels = false;
       break;
@@ -762,7 +566,6 @@ int PavApp::run( int argc, char *argv[] )
     case 'm':
       plot_ids.push_back( tostring<char>(c) );
       top_label = "ell:above:c";
-      //plot_spherical = true;
       break;
     case 'n':
       plot_ids.push_back( "n" );
@@ -900,7 +703,7 @@ int PavApp::run( int argc, char *argv[] )
 
   // If we haven't put any plots into the plot array, output an error.
 
-  if (plots.empty() && !plot_spherical )
+  if (plots.empty() )
   {
     cout << "pav: please choose at least one plot style" << endl;
     return -1;
@@ -923,16 +726,12 @@ int PavApp::run( int argc, char *argv[] )
 
   if( !publn )
   {
-    SetPlotOptions<Plot>( top_label + string( "=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
+    //SetPlotOptions<Plot>( top_label + string( "=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
+    SetPlotOptions<Plot>( string( "above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
   }
   else
   {
-    SetPlotOptions<FramedPlot>( top_label + string( "=" ) );
-    SetPlotOptions<FramedPlot>( "below:l=$name" );
-    SetPlotOptions<FramedPlot>( "below:r=$freq MHz" );
-    SetPlotOptions<StokesCylindrical>( "flux:below:l=$name" );
-    SetPlotOptions<StokesCylindrical>( "flux:below:r=$freq MHz" );
-    SetPlotOptions<Plot>( "ch=1.2" );
+    SetPublicationOptions();
     tostring_precision = 1;
   }
 
@@ -1058,24 +857,18 @@ int PavApp::run( int argc, char *argv[] )
         plots[i].archive->add_extension(myio);
         myio->organise(plots[i].archive, ronsub);
       }
-      if ( plot_spherical )
-      {
-        spherical_wrapper( plots[i].archive );
-      }
+
+      // set the precision that plot will use for labels
+      tostring_places = true;
+      if( !publn )
+        tostring_precision = 3;
       else
+        tostring_precision = 1;
+      for (unsigned p=0; p < plots[i].plots.size(); p++)
       {
-        // set the precision that plot will use for labels
-        tostring_places = true;
-        if( !publn )
-          tostring_precision = 3;
-        else
-          tostring_precision = 1;
-        for (unsigned p=0; p < plots[i].plots.size(); p++)
-        {
-          cpgpage ();
-          plots[i].plots[p]->preprocess( plots[i].archive );
-          plots[i].plots[p]->plot ( plots[i].archive );
-        }
+        cpgpage ();
+        plots[i].plots[p]->preprocess( plots[i].archive );
+        plots[i].plots[p]->plot ( plots[i].archive );
       }
     }
     catch( Error e )
