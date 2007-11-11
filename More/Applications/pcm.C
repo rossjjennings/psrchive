@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2007 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.72 $
-   $Date: 2007/11/08 11:11:17 $
+   $Revision: 1.73 $
+   $Date: 2007/11/11 01:00:30 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -233,16 +233,18 @@ void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
     else
       cpgsvp (.25,.75,.15,.95);
 
+    plotter.plot_cal_constraints (ichan);
+
     // cerr << "pcm: nstate=" << nstate << endl;
     for (unsigned istate=0; istate<nstate; istate++) {
+
+      cpgpage();
 
       unsigned plot_state = istate+start_state;
 
       // cerr << "ichan=" << ichan << " istate=" << plot_state << endl;
       plotter.plot_psr_constraints (ichan, plot_state);
 
-      if (istate+1 < nstate)
-	cpgpage();
     }
 
     if (nstate > 1)
