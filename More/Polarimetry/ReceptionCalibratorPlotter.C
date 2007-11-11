@@ -58,6 +58,8 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 
   Calibration::ReceptionModelAxisPlotter<MJD> plotter;
 
+  calibrator->model[ichan]->engage_time_variations();
+
   plotter.set_model( calibrator->model[ichan]->get_equation() );
   plotter.set_model_solved( calibrator->get_solved() );
   plotter.set_plot_residual( plot_residual );
