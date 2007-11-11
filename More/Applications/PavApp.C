@@ -671,11 +671,11 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'b':
       {
-        jobs.push_back( "bscrunch" );
+        jobs.push_back( string("bscrunch ") + string( optarg ) );
         break;
       }
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.28 2007/11/08 05:30:45 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.29 2007/11/11 22:00:55 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
