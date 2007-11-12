@@ -476,7 +476,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.31 2007/11/12 00:09:08 straten Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.32 2007/11/12 04:04:35 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -484,9 +484,6 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'g':
       plot_device = optarg;
-      break;
-    case 'D':
-      plot_ids.push_back( "D" );
       break;
     case 'C':
       jobs.push_back( "centre" );
@@ -530,43 +527,29 @@ int PavApp::run( int argc, char *argv[] )
     case 'p':
       jobs.push_back( "pscrunch" );
       break;
-    case 'G':
-      plot_ids.push_back( "G" );
-      break;
-    case 'K':
-      plot_ids.push_back( "K" );
-      break;
-    case 'Y':
-      plot_ids.push_back( "Y" );
-      break;
+      
     case 'S':
       clip_command = "flux:y:range";
-      plot_ids.push_back( "S" );
       clear_labels = false;
-      break;
     case 'A':
-      plot_ids.push_back( "A" );
-      break;
     case 'X':
-      plot_ids.push_back( "X" );
+    case 'D':
+    case 'G':
+    case 'K':
+    case 'Y':
+    case 'R':
+    case 'n':
+    case 'j':
+      plot_ids.push_back( tostring<char>(c) );
       break;
     case 'B':
-      plot_ids.push_back( "B" );
+      plot_ids.push_back( tostring<char>(c) );
       top_label = "band:above:c";
       clear_labels = false;
-      break;
-    case 'R':
-      plot_ids.push_back( tostring<char>(c) );
       break;
     case 'm':
       plot_ids.push_back( tostring<char>(c) );
       top_label = "ell:above:c";
-      break;
-    case 'n':
-      plot_ids.push_back( "n" );
-      break;
-    case 'j':
-      plot_ids.push_back( "j" );
       break;
     case 'P':
       ipol = fromstring<int>( optarg );
