@@ -273,7 +273,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.77 2007/10/27 04:22:09 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.78 2007/11/12 00:15:16 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -755,10 +755,8 @@ int main (int argc, char *argv[]) try {
 	  cout << "All profile weights set to " << new_weight << endl;
       }
       
-      if (rotate) {
-	double period = arch->get_Integration(0)->get_folding_period();
-	arch->rotate(period*rphase);
-      }
+      if (rotate)
+	arch->rotate_phase (rphase);
 
       if (scattered_power_correction) {
 
