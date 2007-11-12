@@ -520,6 +520,9 @@ void Pulsar::EPNArchive::unload_file (const char* filename) const
 {
   // unload all BasicArchive and EPNArchive attributes as well as
   // BasicIntegration attributes and data to filename
+
+  throw Error( InvalidState, "Pulsar::EPNArchive::unload_file",
+	       "EPN unload not implemented" );
 }
 
 
