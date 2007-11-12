@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.6 $
-   $Date: 2007/11/12 04:03:52 $
+   $Revision: 1.7 $
+   $Date: 2007/11/12 04:59:23 $
    $Author: nopeer $ */
 
 
@@ -157,8 +157,8 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
   {
     if( nsub > 0 )
     {
-      if( !keep_baseline )
-        archive->remove_baseline();
+//       if( !keep_baseline )
+//         archive->remove_baseline();
       Header( archive );
 
       for (unsigned s = fsub; s <= lsub; s++)
@@ -169,7 +169,6 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 	  vector< Estimate<double> > PAs;
 	  if( show_pa )
 	  {
-	    vector< Estimate<double> > PAs;
 	    Reference::To<Pulsar::PolnProfile> profile;
 	    profile = intg->new_PolnProfile(c);
 	    profile->get_orientation (PAs, 3.0);
@@ -412,8 +411,8 @@ void Flux( Reference::To< Archive > archive )
   if (archive->get_npol() == 4)
     archive->convert_state (Signal::Stokes);
 
-  if( !keep_baseline )
-    archive->remove_baseline ();
+//   if( !keep_baseline )
+//     archive->remove_baseline ();
 
   cout << "File\t\t\tSub\tChan\tPol\tFlux\tUnit\t10\% Width\t50\% Width"
   << endl;
@@ -486,6 +485,9 @@ void ProcessArchive( string filename )
   Interpreter preprocessor;
   preprocessor.set( archive );
   preprocessor.script( jobs );
+  
+  if( !keep_baseline )
+    archive->remove_baseline();
 
   if( archive->get_state() != Signal::Stokes && (show_pol_frac || show_lin_frac || show_circ_frac || show_pa ) )
     archive->convert_state(Signal::Stokes);
