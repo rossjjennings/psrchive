@@ -753,12 +753,25 @@ catch (Error& error) {
 
 string Pulsar::Interpreter::bscrunch (const string& args)
 try {
-  unsigned scrunch_to = setup<unsigned> (args);
-  
-  if (!scrunch_to)
-    return response (Fail, "invalid number of bins");
 
-  get() -> bscrunch_to_nbin (scrunch_to);
+  bool scrunch_by = false;
+  string temp = args;
+
+  if (args[0] == 'x') {
+    scrunch_by = true;
+    temp.erase (0,1);
+  }
+
+  unsigned scrunch = setup<unsigned> (temp, 0);
+  
+  if (!scrunch)
+    return response (Fail, "invalid bscrunch argument");
+
+  if (scrunch_by)
+    get() -> bscrunch (scrunch);
+  else
+    get() -> bscrunch_to_nbin (scrunch);
+
   return response (Good);
 }
 catch (Error& error) {
