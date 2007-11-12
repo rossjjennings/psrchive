@@ -7,14 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.5 $
-   $Date: 2007/10/27 03:27:28 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2007/11/12 04:03:52 $
+   $Author: nopeer $ */
 
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Interpreter.h"
+#include "Pulsar/PolnProfile.h"
 
 #include "strutil.h"
 #include "dirutil.h"
@@ -22,6 +24,27 @@
 
 #include <iostream>
 #include <vector>
+
+
+#define HELP_KEY             'h'
+#define IBIN_KEY             'b'
+#define ICHAN_KEY            'n'
+#define ISUB_KEY             'i'
+#define PHASE_KEY            'r'
+#define FSCRUNCH_KEY         'F'
+#define TSCRUNCH_KEY         'T'
+#define PSCRUNCH_KEY         'P'
+#define CENTRE_KEY           'C'
+#define BSCRUNCH_KEY         'B'
+#define STOKES_FRACPOL_KEY   'x'
+#define STOKES_FRACLIN_KEY   'y'
+#define STOKES_FRACCIR_KEY   'z'
+#define STOKES_POSANG_KEY    'Z'
+#define CALIBRATOR_KEY       'c'
+#define PULSE_WIDTHS_KEY     'f'
+#define BASELINE_KEY         'R'
+#define TEXT_KEY             't'
+#define TEXT_HEADERS_KEY     'A'
 
 
 using namespace std;
@@ -32,6 +55,19 @@ bool cmd_text = false;
 bool cmd_flux = false;
 bool per_channel_headers = false;
 bool cal_parameters = false;
+bool keep_baseline = false;
+
+bool show_pol_frac = false;
+bool show_lin_frac = false;
+bool show_circ_frac = false;
+bool show_pa = false;
+
+int ichan = -1;
+int ibin = -1;
+int isub = -1;
+float phase = 0.0;
+
+vector<string> jobs;
 
 // default duty cycle
 float dc = 0.15;
@@ -41,17 +77,31 @@ float dc = 0.15;
 
 void Usage( void )
 {
-  cout << 
-    "A program for extracting archive data in text form \n"
-    "Usage: \n"
-    "     pdv [-f dc] [-t] [-c] filenames \n"
-    "Where: \n"
-    "   -c          Print out calibrator (square wave) parameters \n"
-    "   -f dcyc     Show pulse widths and mean flux density (mJy) \n"
-    "               with baseline width dcyc \n"
-    "   -t          Print out profiles as ASCII text \n"
-    "   -T          Print out profiles as ASCII text (with per channel headers) \n"
-       << endl;
+  cout <<
+  "A program for extracting archive data in text form \n"
+  "Usage: \n"
+  "     pdv [-f dc] [-t] [-c] filenames \n"
+  "Where: \n"
+  "   -" << IBIN_KEY <<           " ibin     select a single phase bin, from 0 to nbin-1 \n"
+  "   -" << ICHAN_KEY <<          " ichan    select a single frequency channel, from 0 to nchan-1 \n"
+  "   -" << ISUB_KEY <<           " isub     select a single integration, from 0 to nsubint-1 \n"
+  "   -" << PHASE_KEY <<          " phase    rotate the profiles by phase before printing \n"
+  "   -" << FSCRUNCH_KEY <<       "          Fscrunch first \n"
+  "   -" << TSCRUNCH_KEY <<       "          Tscrunch first \n"
+  "   -" << PSCRUNCH_KEY <<       "          Pscrunch first \n"
+  "   -" << CENTRE_KEY <<         "          Centre first \n"
+  "   -" << BSCRUNCH_KEY <<       " factor   Bscrunch by this factor first \n"
+  "   -" << STOKES_FRACPOL_KEY << "          Convert to Stokes and also print fraction polarisation \n"
+  "   -" << STOKES_FRACLIN_KEY << "          Convert to Stokes and also print fraction linear \n"
+  "   -" << STOKES_FRACCIR_KEY << "          Convert to Stokes and also print fraction circular \n"
+  "   -" << STOKES_POSANG_KEY <<  "          Convert to Stokes and also print position angle \n"
+  "   -" << CALIBRATOR_KEY <<     "          Print out calibrator (square wave) parameters \n"
+  "   -" << PULSE_WIDTHS_KEY <<   " dcyc     Show pulse widths and mean flux density (mJy) \n"
+  "                                          with baseline width dcyc \n"
+  "   -" << BASELINE_KEY <<       "          Do not remove baseline \n"
+  "   -" << TEXT_KEY <<           "          Print out profiles as ASCII text \n"
+  "   -" << TEXT_HEADERS_KEY <<   "          Print out profiles as ASCII text (with per channel headers) \n"
+  << endl;
 }
 
 
@@ -59,11 +109,11 @@ void Usage( void )
 void Header( Reference::To< Pulsar::Archive > archive )
 {
   cout << "File: " << archive->get_filename()
-       << " Src: " << archive->get_source()
-       << " Nsub: " << archive->get_nsubint()
-       << " Nch: " << archive->get_nchan()
-       << " Npol: " << archive->get_npol()
-       << " Nbin: " << archive->get_nbin() << endl;
+  << " Src: " << archive->get_source()
+  << " Nsub: " << archive->get_nsubint()
+  << " Nch: " << archive->get_nchan()
+  << " Npol: " << archive->get_npol()
+  << " Nbin: " << archive->get_nbin() << endl;
 }
 
 void IntegrationHeader( Reference::To< Pulsar::Integration > intg )
@@ -76,39 +126,85 @@ void IntegrationHeader( Reference::To< Pulsar::Integration > intg )
 void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 {
   unsigned nsub = archive->get_nsubint();
-  unsigned nchn = archive->get_nchan();
   unsigned npol = archive->get_npol();
+  unsigned nchn = archive->get_nchan();
   unsigned nbin = archive->get_nbin();
 
-  tostring_places = true; 
-  
+  int fchan = 0, lchan = nchn - 1;
+  if( ichan != -1 && ichan <= lchan && ichan >= fchan)
+  {
+    fchan = ichan;
+    lchan = ichan;
+  }
+
+  int fbin = 0, lbin = archive->get_nbin() - 1;
+  if( ibin <= lbin && ibin >= fbin )
+  {
+    fbin = ibin;
+    lbin = ibin;
+  }
+
+  int fsub = 0, lsub = archive->get_nsubint() - 1;
+  if( isub <= lsub && isub >= fsub )
+  {
+    fsub = isub;
+    lsub = isub;
+  }
+
+  tostring_places = true;
+
   try
   {
     if( nsub > 0 )
     {
-      archive->remove_baseline();
+      if( !keep_baseline )
+        archive->remove_baseline();
       Header( archive );
 
-      for (unsigned isub = 0; isub < nsub; isub++)
+      for (unsigned s = fsub; s <= lsub; s++)
       {
-        Integration* intg = archive->get_Integration(isub);
-        for (unsigned ichn = 0; ichn < nchn; ichn++)
+        Integration* intg = archive->get_Integration(s);
+        for (unsigned c = fchan; c <= lchan; c++)
         {
-	  if( per_channel_headers )
+	  vector< Estimate<double> > PAs;
+	  if( show_pa )
 	  {
-	    IntegrationHeader( intg );
-	    cout << " ChFreq: " << tostring<double>( intg->get_centre_frequency( ichn ) );
-	    cout << " ChBW: " << intg->get_bandwidth() / nchn;
-	    cout << endl;
+	    vector< Estimate<double> > PAs;
+	    Reference::To<Pulsar::PolnProfile> profile;
+	    profile = intg->new_PolnProfile(c);
+	    profile->get_orientation (PAs, 3.0);
 	  }
-          for (unsigned ibin = 0; ibin < nbin; ibin++)
+	  
+          if( per_channel_headers )
           {
-            cout << isub << " " << ichn << " " << ibin;
+            IntegrationHeader( intg );
+            cout << " ChFreq: " << tostring<double>( intg->get_centre_frequency( c ) );
+            cout << " ChBW: " << intg->get_bandwidth() / nchn;
+            cout << endl;
+          }
+          for (unsigned b = fbin; b <= lbin; b++)
+          {
+            cout << s << " " << c << " " << b;
             for(unsigned ipol=0; ipol<npol; ipol++)
             {
-              Profile *p = intg->get_Profile( ipol, ichn );
-              cout << " " << p->get_amps()[ibin];
+              Profile *p = intg->get_Profile( ipol, c );
+              cout << " " << p->get_amps()[b];
             }
+	    if( show_pol_frac || show_lin_frac || show_circ_frac || show_pa ){
+	      float stokesI = intg->get_Profile(0,c)->get_amps()[b];
+	      float stokesQ = intg->get_Profile(1,c)->get_amps()[b];
+	      float stokesU = intg->get_Profile(2,c)->get_amps()[b];
+	      float stokesV = intg->get_Profile(3,c)->get_amps()[b];
+
+	      float frac_lin  = sqrt(stokesQ*stokesQ + stokesU*stokesU)/stokesI;
+	      float frac_circ = fabs(stokesV)/stokesI;
+	      float frac_pol  = sqrt(stokesQ*stokesQ + stokesU*stokesU + stokesV*stokesV)/stokesI;
+
+	      if( show_pol_frac )  cout << " " << frac_pol;
+	      if( show_lin_frac )  cout << " " << frac_lin;
+	      if( show_circ_frac ) cout << " " << frac_circ;
+	      if( show_pa )        cout << " " << PAs[b].get_value();
+	    }
             cout << endl;
           }
         }
@@ -251,14 +347,28 @@ void CalParameters( Reference::To< Archive > archive )
   if (archive->get_npol() == 4)
     archive->convert_state (Signal::Stokes);
 
+  int fchan = 0, lchan = archive->get_nchan() - 1;
+  if( ichan != -1 && ichan <= lchan && ichan >= fchan)
+  {
+    fchan = ichan;
+    lchan = ichan;
+  }
+
+  int fsub = 0, lsub = archive->get_nsubint() - 1;
+  if( isub <= lsub && isub >= fsub )
+  {
+    fsub = isub;
+    lsub = isub;
+  }
+
   Header( archive );
 
   vector< vector< Estimate<double> > > hi;
   vector< vector< Estimate<double> > > lo;
 
-  for (unsigned isub = 0; isub < archive->get_nsubint(); isub++)
+  for (unsigned s = fsub; s <= lsub; s++)
   {
-    Integration* intg = archive->get_Integration (isub);
+    Integration* intg = archive->get_Integration (s);
 
     intg->cal_levels(hi,lo);
     IntegrationHeader( intg );
@@ -271,20 +381,20 @@ void CalParameters( Reference::To< Archive > archive )
     for (unsigned ipol = 0; ipol < archive->get_npol(); ipol++)
       cout << " lo_pol" << ipol;
     cout << endl;
-    
-    for (unsigned ichan = 0; ichan < archive->get_nchan(); ichan++)
+
+    for (unsigned c = fchan; c <= lchan; c++)
     {
-      cout << isub << " " 
-	   << ichan << " " << intg->get_centre_frequency( ichan ) << " "
-	   << hi[0][ichan].get_error();
+      cout << s << " "
+      << c << " " << intg->get_centre_frequency( c ) << " "
+      << hi[0][c].get_error();
 
       for (unsigned ipol = 0; ipol < archive->get_npol(); ipol++)
-	cout << " " << hi[ipol][ichan].get_value();
+        cout << " " << hi[ipol][c].get_value();
 
-      cout << " " << lo[0][ichan].get_error();
+      cout << " " << lo[0][c].get_error();
 
       for (unsigned ipol = 0; ipol < archive->get_npol(); ipol++)
-	cout << " " << lo[ipol][ichan].get_value();
+        cout << " " << lo[ipol][c].get_value();
 
       cout << endl;
 
@@ -302,31 +412,46 @@ void Flux( Reference::To< Archive > archive )
   if (archive->get_npol() == 4)
     archive->convert_state (Signal::Stokes);
 
-  archive->remove_baseline ();
+  if( !keep_baseline )
+    archive->remove_baseline ();
 
   cout << "File\t\t\tSub\tChan\tPol\tFlux\tUnit\t10\% Width\t50\% Width"
   << endl;
 
+  int fchan = 0, lchan = archive->get_nchan() - 1;
+  if( ichan <= lchan && ichan >= fchan)
+  {
+    fchan = ichan;
+    lchan = ichan;
+  }
+
+  int fsub = 0, lsub = archive->get_nsubint() - 1;
+  if( isub <= lsub && isub >= fsub )
+  {
+    fsub = isub;
+    lsub = isub;
+  }
+
   float junk;
 
-  for (unsigned i = 0; i < archive->get_nsubint(); i++)
+  for (unsigned s = fsub; s <= lsub; s++)
   {
-    for (unsigned j = 0; j < archive->get_nchan(); j++)
+    for (unsigned c = fchan; c <= lchan; c++)
     {
       for (unsigned k = 0; k < archive->get_npol(); k++)
       {
         cout << archive->get_filename() << "\t";
-        cout << i << "\t" << j << "\t" << k << "\t";
+        cout << s << "\t" << c << "\t" << k << "\t";
         cout.setf(ios::showpoint);
-        cout << flux(archive->get_Profile(i,k,j),dc, -1);
+        cout << flux(archive->get_Profile(s,k,c),dc, -1);
         if (archive->get_scale() == Signal::Jansky)
           cout << "\t" << "mJy";
         else
           cout << "\t" << "Arb";
-        cout << "\t" << width(archive->get_Profile(i,k,j),junk, 10,dc);
-        if (width(archive->get_Profile(i,k,j),junk, 10,dc) == 0)
+        cout << "\t" << width(archive->get_Profile(s,k,c),junk, 10,dc);
+        if (width(archive->get_Profile(s,k,c),junk, 10,dc) == 0)
           cout << "\t";
-        cout << "\t" << width(archive->get_Profile(i,k,j),junk, 50,dc)
+        cout << "\t" << width(archive->get_Profile(s,k,c),junk, 50,dc)
         << endl;
       }
     }
@@ -358,6 +483,13 @@ void ProcessArchive( string filename )
 {
   Reference::To< Archive > archive = Archive::load( filename );
 
+  Interpreter preprocessor;
+  preprocessor.set( archive );
+  preprocessor.script( jobs );
+
+  if( archive->get_state() != Signal::Stokes && (show_pol_frac || show_lin_frac || show_circ_frac || show_pa ) )
+    archive->convert_state(Signal::Stokes);
+
   if( archive )
   {
     if( cal_parameters )
@@ -370,29 +502,50 @@ void ProcessArchive( string filename )
 }
 
 
-
-
-int main( int argc, char *argv[] ) try {
+int main( int argc, char *argv[] ) try
+{
+  string args;
+  args += HELP_KEY;
+  args += CALIBRATOR_KEY;
+  args += IBIN_KEY; args += ':';
+  args += ICHAN_KEY; args += ':';
+  args += ISUB_KEY; args += ':';
+  args += PHASE_KEY; args += ':';
+  args += FSCRUNCH_KEY;
+  args += TSCRUNCH_KEY;
+  args += PSCRUNCH_KEY;
+  args += CENTRE_KEY;
+  args += BSCRUNCH_KEY; args += ':';
+  args += STOKES_FRACPOL_KEY;
+  args += STOKES_FRACLIN_KEY;
+  args += STOKES_FRACCIR_KEY;
+  args += STOKES_POSANG_KEY;
+  args += CALIBRATOR_KEY;
+  args += BASELINE_KEY;
+  args += PULSE_WIDTHS_KEY; args += ':';
+  args += TEXT_KEY;
+  args += TEXT_HEADERS_KEY;
 
   int i;
-
-  while( ( i = getopt( argc, argv, "ctTf:ph" )) != -1 )
+  while( ( i = getopt( argc, argv, args.c_str() ) ) != -1 )
   {
     switch( i )
     {
 
-    case 'c':
+    case CALIBRATOR_KEY:
       cal_parameters = true;
       break;
-
-    case 't':
+    case BASELINE_KEY:
+      keep_baseline = true;
+      break;
+    case TEXT_KEY:
       cmd_text = true;
       break;
-    case 'T':
+    case TEXT_HEADERS_KEY:
       cmd_text = true;
       per_channel_headers = true;
       break;
-    case 'f':
+    case PULSE_WIDTHS_KEY:
       if (sscanf(optarg, "%f", &dc) != 1)
       {
         cerr << "Invalid duty cycle" << endl;
@@ -400,21 +553,68 @@ int main( int argc, char *argv[] ) try {
       }
       cmd_flux = true;
       break;
-    case 'h':
+    case HELP_KEY:
       Usage();
-      return 0;
+      break;
+    case ICHAN_KEY:
+      ichan = fromstring<int>( string(optarg) );
+      break;
+    case IBIN_KEY:
+      ibin = fromstring<int>( string(optarg) );
+      break;
+    case ISUB_KEY:
+      isub = fromstring<int>( string(optarg) );
+      break;
+    case PHASE_KEY:
+      phase = fromstring<float>( string(optarg) );
+      jobs.push_back( string("rotate ") + tostring<float>( phase ) );
+      break;
+    case FSCRUNCH_KEY:
+      jobs.push_back( "fscrunch" );
+      break;
+    case TSCRUNCH_KEY:
+      jobs.push_back( "tscrunch" );
+      break;
+    case PSCRUNCH_KEY:
+      jobs.push_back( "pscrunch" );
+      break;
+    case BSCRUNCH_KEY:
+      jobs.push_back( "bscrunch x" + string(optarg) );
+      break;
+    case CENTRE_KEY:
+      jobs.push_back( "centre" );
+      break;
+    case STOKES_FRACPOL_KEY:
+      show_pol_frac = true;
+      break;
+    case STOKES_FRACLIN_KEY:
+      show_lin_frac = true;
+      break;
+    case STOKES_FRACCIR_KEY:
+      show_circ_frac = true;
+      break;
+    case STOKES_POSANG_KEY:
+      show_pa = true;
+      break;
+    default:
+      cerr << "Unknown option " << char(i) << endl;
+      break;
     };
   }
 
-  vector< string > filenames = GetFilenames( argc, argv );
-  for_each( filenames.begin(), filenames.end(), ProcessArchive );
+  if( cal_parameters || cmd_text || cmd_flux )
+  {
+    vector< string > filenames = GetFilenames( argc, argv );
+    for_each( filenames.begin(), filenames.end(), ProcessArchive );
+  }
 
   return 0;
 }
- catch (Error& error) {
-   cerr << error << endl;
-   return -1;
- }
+catch (Error& error)
+{
+  cerr << error << endl;
+  return -1;
+}
 
 
 
