@@ -194,7 +194,7 @@ void PavApp::SetPhaseZoom( double min_phase, double max_phase  )
 
 void PavApp::SetFreqZoom( double min_freq, double max_freq )
 {
-  for( int i = 0; i < plots.size(); i ++ )
+  for( unsigned i = 0; i < plots.size(); i ++ )
   {
     Reference::To<Archive> archive = plots[i].archive;
 
@@ -278,13 +278,13 @@ void PavApp::CreatePlotsList( vector< string > filenames,   vector< string > plo
 {
   PlotFactory factory;
 
-  for( int i = 0; i < filenames.size(); i ++ )
+  for( unsigned i = 0; i < filenames.size(); i ++ )
   {
     try
     {
       FilePlots new_fplot;
       new_fplot.filename = filenames[i];
-      for( int p = 0; p < plot_ids.size(); p ++ )
+      for( unsigned p = 0; p < plot_ids.size(); p ++ )
       {
         new_fplot.plots.push_back( factory.construct( plot_ids[p] ) );
       }
@@ -422,9 +422,6 @@ int PavApp::run( int argc, char *argv[] )
   // Preprocessing jobs
   vector<string> jobs;
 
-  // verbosity
-  bool verbose = false;
-
   bool plot_qu = false;
 
   bool clear_labels = true;
@@ -476,12 +473,10 @@ int PavApp::run( int argc, char *argv[] )
       PrintUsage();
       break;
     case 'b':
-      {
-        jobs.push_back( string("bscrunch ") + string( optarg ) );
-        break;
-      }
+      jobs.push_back( "bscrunch x" + string(optarg) );
+      break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.30 2007/11/11 23:25:45 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.31 2007/11/12 00:09:08 straten Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
