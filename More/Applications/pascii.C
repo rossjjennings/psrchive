@@ -203,7 +203,7 @@ int main (int argc, char** argv){ try {
       
       vector< Estimate<double> > PAs;
       if( show_pa ){
-	vector< Estimate<double> > PAs;
+	// vector< Estimate<double> > PAs;
 	Reference::To<Pulsar::PolnProfile> profile;
 	profile = integration->new_PolnProfile(ichan);
         profile->get_orientation (PAs, 3.0);
