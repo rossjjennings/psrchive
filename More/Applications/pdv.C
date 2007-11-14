@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.7 $
-   $Date: 2007/11/12 04:59:23 $
+   $Revision: 1.8 $
+   $Date: 2007/11/14 00:29:40 $
    $Author: nopeer $ */
 
 
@@ -157,8 +157,6 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
   {
     if( nsub > 0 )
     {
-//       if( !keep_baseline )
-//         archive->remove_baseline();
       Header( archive );
 
       for (unsigned s = fsub; s <= lsub; s++)
