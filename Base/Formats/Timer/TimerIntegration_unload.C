@@ -16,7 +16,9 @@ using namespace std;
 //! unload the subint to file
 void Pulsar::TimerIntegration::unload (FILE* fptr) const
 {
-  if (verbose) cerr << "TimerIntegration::unload epoch=" << get_epoch() << endl;
+  if (verbose) 
+    cerr << "TimerIntegration::unload epoch=" << get_epoch() 
+         << " period=" << mini.pfold << endl;
 
   pack_Pointing ();
 
