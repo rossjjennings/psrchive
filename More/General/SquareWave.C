@@ -14,7 +14,7 @@ using namespace std;
 
 Pulsar::SquareWave::SquareWave ()
 {
-  risetime = 0.015;
+  risetime = 0.03;
   threshold = 6.0;
   use_nbin = 256;
 }
@@ -43,8 +43,6 @@ float Pulsar::SquareWave::get_snr (const Profile* profile)
 
 Pulsar::Profile* differentiate (const Pulsar::Profile* profile, unsigned off=1)
 {
-  cerr << "OFFSET=" << off << endl;
-
   Reference::To<Pulsar::Profile> difference = profile->clone();
 
   unsigned nbin = profile->get_nbin();
@@ -98,16 +96,20 @@ void Pulsar::SquareWave::get_transitions (const Profile* profile,
 					  vector<unsigned>& down)
 {
   unsigned nbin = profile->get_nbin();
+  unsigned scrunch = 1;
 
   Reference::To<Profile> clone;
   if (use_nbin && nbin > use_nbin) {
     clone = profile->clone();
-    clone->bscrunch(nbin/use_nbin);
+    scrunch = nbin/use_nbin;
+    clone->bscrunch(scrunch);
     profile = clone;
     nbin = profile->get_nbin();
   }
 
   unsigned offset = (unsigned) (risetime * nbin);
+
+cerr << "nbin=" << nbin << " offset=" << offset << endl;
 
   // differentiate the profile
   Reference::To<Profile> difference = differentiate (profile, offset);
@@ -125,6 +127,8 @@ void Pulsar::SquareWave::get_transitions (const Profile* profile,
   double variance = 0;
   difference->stats (zero, &mean, &variance);
 
+cerr << "mean=" << mean << " rms=" << sqrt(variance) << endl;
+
   // check that the mean is actually zero
   double rms = sqrt(variance);
   if (mean > rms)
@@ -135,7 +139,6 @@ void Pulsar::SquareWave::get_transitions (const Profile* profile,
 
   find_transitions (nbin, amps, up, cutoff);
   find_transitions (nbin, amps, down, -cutoff);
-
 }
 
 unsigned Pulsar::SquareWave::count_transitions (const Profile* profile)
