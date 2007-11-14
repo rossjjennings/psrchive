@@ -96,7 +96,6 @@ private:
   void CreatePlotsList( vector< string > filenames, vector< string > plot_ids );
   void SetCmdLineOptions( vector< string > options );
   bool CheckColour( void );
-  void SetPublicationOptions( void );
 
   bool have_colour;
   int ipol;
@@ -126,6 +125,8 @@ private:
   bool cbpao;
   bool cblpo;
   bool cblao;
+  
+  bool label_degrees;
 
   unsigned int ronsub;
 };
