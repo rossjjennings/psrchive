@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.168 $
-   $Date: 2007/10/02 05:19:26 $
+   $Revision: 1.169 $
+   $Date: 2007/11/14 05:56:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.168 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.169 $"
 
 #include "IntegrationManager.h"
 #include "TextInterface.h"
@@ -312,7 +312,7 @@ namespace Pulsar
     bool has_ephemeris () const { return ephemeris; }
 
     //! Install the given predictor and shift profiles to align
-    void set_model (const Predictor* model);
+    void set_model (const Predictor* model, bool apply = true);
 
     //! Return a pointer to the current phase predictor
     const Predictor* get_model() const;

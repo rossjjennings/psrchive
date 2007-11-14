@@ -10,7 +10,7 @@ using namespace std;
 #include "Pulsar/Integration.h"
 #include "Pulsar/Predictor.h"
 
-void Pulsar::Archive::set_model (const Predictor* new_model)
+void Pulsar::Archive::set_model (const Predictor* new_model, bool apply)
 {
   if (!good_model (new_model))
     throw Error (InvalidParam, "Pulsar::Archive::set_model",
@@ -19,6 +19,9 @@ void Pulsar::Archive::set_model (const Predictor* new_model)
   // swap the old with the new
   Reference::To<Predictor> oldmodel = model;
   model = new_model->clone();
+
+  if (!apply)
+    return;
 
   if (verbose == 3)
     cerr << "Pulsar::Archive::set_model apply the new model" << endl;
