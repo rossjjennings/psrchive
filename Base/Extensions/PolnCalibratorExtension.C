@@ -343,8 +343,12 @@ void PolnCalibratorExtension::Transformation::set_covariance
   // set the variance stored in the transformation
   for (unsigned i=0; i<nparam; i++)
     for (unsigned j=i; j<nparam; j++) {
-      if (i==j)
+      if (i==j) {
+#ifdef _DEBUG
+	cerr << j << " " << covar[icovar] << endl;
+#endif
 	set_variance (j,covar[icovar]);
+      }
       icovar++;
     }
 
