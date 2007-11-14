@@ -88,7 +88,10 @@ void Pulsar::ProfileVectorPlotter::draw( const Profile* profile,
 
   unsigned total_pts = unsigned( ( end_x - start_x ) * nbin );
   
-  // cerr << "total pts=" << total_pts << endl;
+#ifdef _DEBUG
+  cerr << "start_x=" << start_x << " end_x=" << end_x 
+       << " total pts=" << total_pts << endl;
+#endif
 
   float xs[total_pts];
   float ys[total_pts];
@@ -99,16 +102,26 @@ void Pulsar::ProfileVectorPlotter::draw( const Profile* profile,
   // calculate the offset applied to the ordinates in the first region
   double xoff = floor(start_x) * span;
 
+#ifdef _DEBUG
+  cerr << "span=" << span << " xoff=" << xoff << endl;
+#endif
+
   // set 0 <= start_x < 1
   start_x -= floor (start_x);
 
   unsigned index = unsigned( start_x * nbin );
-  
+
   // cyclically fill the temporary data arrays
   for (unsigned i = 0; i < total_pts; i ++ )
   {
     ys[i] = amps[index];
     xs[i] = ordinates[index] + xoff;
+
+#ifdef _DEBUG
+    cerr << "index=" << index
+	 << " x[" << i << "]=" << xs[i] 
+	 << " y[" << i << "]=" << ys[i] << endl;
+#endif
 
     index ++;
 
