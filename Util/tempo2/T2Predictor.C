@@ -310,7 +310,10 @@ long double cheby_interface::frequency (const MJD& t) const
 
 MJD cheby_interface::iphase (const Phase& phase, const MJD* guess) const
 {
-  return Pulsar::inverse_phase (*this, phase, guess);
+  if (guess)
+    return Pulsar::inverse_phase (*this, phase, *guess);
+  else
+    return Pulsar::inverse_phase (*this, phase);
 }
 
 //! Return the epoch, given the phase

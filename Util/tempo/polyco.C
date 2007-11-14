@@ -380,7 +380,10 @@ Phase polynomial::phase(const MJD& t) const
 
 MJD polynomial::iphase(const Phase& p, const MJD* guess) const
 {
-  return Pulsar::inverse_phase (*this, p, guess);
+  if (guess)
+    return Pulsar::inverse_phase (*this, p, *guess);
+  else
+    return Pulsar::inverse_phase (*this, p);
 }
 
 long double polynomial::frequency (const MJD& t) const

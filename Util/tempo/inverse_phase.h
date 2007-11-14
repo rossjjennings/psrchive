@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/inverse_phase.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/06/06 05:31:05 $
+   $Revision: 1.7 $
+   $Date: 2007/11/14 03:08:26 $
    $Author: straten $ */
 
 #ifndef __P_inverse_phase_h
@@ -50,33 +50,26 @@ namespace Pulsar {
   extern unsigned inverse_phase_iterations;
 
   template<typename P>
-  MJD inverse_phase (const P& predictor,
-		     const Phase& p, const MJD* first_guess = 0)
+  MJD inverse_phase (const P& predictor, const Phase& p)
   {
-    MJD guess;
+    MJD guess = predictor.get_reftime()
+      + (p - predictor.get_refphase()) / predictor.get_reffrequency();
 
-    if (first_guess)  {
-      guess = *first_guess;
-      if (Pulsar::Predictor::verbose)
-        std::cerr << "inverse_phase: given guess = " << guess << std::endl;
-    } 
-    else  {
-      guess = predictor.get_reftime()
-	+ (p - predictor.get_refphase()) / predictor.get_reffrequency();
-      if (Pulsar::Predictor::verbose)
-	std::cerr << "inverse_phase: reftime=" << predictor.get_reftime() 
-		  << " refphase=" << predictor.get_refphase() 
-		  << " reffreq=" << predictor.get_reffrequency() 
-		  << " first guess = " << guess << std::endl;
-    }
+    if (Pulsar::Predictor::verbose)
+      std::cerr << "inverse_phase: reftime=" << predictor.get_reftime() 
+		<< " refphase=" << predictor.get_refphase() 
+		<< " reffreq=" << predictor.get_reffrequency() 
+		<< " first guess = " << guess << std::endl;
+
+    return inverse_phase (predictor, p, guess);
+  }
+
+  template<typename P>
+  MJD inverse_phase (const P& predictor, const Phase& p, MJD guess)
+  {
 
     MJD dt;
     int gi = 0;
-
-#if 0
-    double converge_faster = 1.0;  // kludge!!
-    double converge_factor = 0.5;
-#endif
 
     double precision = std::max (P::precision, MJD::precision);
     if (Pulsar::Predictor::verbose)
@@ -101,12 +94,6 @@ namespace Pulsar {
         std::cerr << "inverse_phase: guess=" << guess.printdays(20)
 		  << " dt=" << dt.in_seconds()*1e6 << " us" << std::endl;
 
-#if 0
-      // every six iterations, give the convergence a little bump
-      if (gi && !(gi % 6))
-	converge_faster *= converge_factor;
-#endif
-      
       if (fabs (dt.in_seconds()) < precision)
 	return guess;
     }
