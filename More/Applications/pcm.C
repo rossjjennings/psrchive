@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.74 $
-   $Date: 2007/11/14 03:08:09 $
+   $Revision: 1.75 $
+   $Date: 2007/11/14 23:55:05 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -51,7 +51,7 @@ static string Hamaker = "Hamaker";
 
 void usage ()
 {
-  cout << "A program for performing self-calibration \n"
+  cout << "pcm - polarimetric calibration model \n"
     "Usage: pcm [options] [filenames] \n"
     "\n"
     "  -h         this help page \n"
@@ -295,12 +295,12 @@ Pulsar::ReflectStokes reflections;
 char* tim_file = 0;
 
 // Number of threads used to solve equations
-unsigned nthread = 1;
+unsigned nthread = 0;
 
 int actual_main (int argc, char *argv[]);
 
-int main (int argc, char *argv[]) {
-
+int main (int argc, char *argv[])
+{
 #ifdef _DEBUG
   size_t in = Reference::Able::get_instance_count();
 #endif
