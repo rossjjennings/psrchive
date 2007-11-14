@@ -48,6 +48,7 @@ void load (fitsfile* fptr, polyco* model, int back)
   int colnum = 0;
   int anynul = 0;
 
+  // ask for the number of coefficient sets belonging to the last polyco
   int npoly = 0;
   fits_get_colnum (fptr, CASEINSEN, "NPBLK", &colnum, &status);
   fits_read_col (fptr, TINT, colnum, nrows, firstelem, onelement,
@@ -230,7 +231,8 @@ void unload (fitsfile* fptr, const polyco* model, int back)
   if (back == 0)
     rows ++;
   else {
-    cerr << "unload polyco WARNING back not implemented. deleting old rows" << endl;
+    cerr << "unload polyco WARNING back not implemented. deleting old rows" 
+	 << endl;
     fits_delete_rows (fptr, 1, rows, &status);
     if (status != 0)
       throw FITSError (status, "unload polyco", "fits_delete_rows");
