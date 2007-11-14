@@ -40,6 +40,9 @@ namespace FTransform {
   //! Whether to optimize or not
   extern bool optimize;
 
+  //! Whether to use SIMD or not
+  extern bool simd;
+
   //! Returns the name of the currently selected library
   std::string get_library ();
   

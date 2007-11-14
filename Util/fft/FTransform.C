@@ -14,6 +14,7 @@
 using namespace std;
 
 bool FTransform::optimize = false;
+bool FTransform::simd = false;
 
 // ////////////////////////////////////////////////////////////////////
 //

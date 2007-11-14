@@ -21,6 +21,8 @@ using namespace std;
 
 // #define _DEBUG 1
 
+#define CHECK_ALIGN(x) assert ( ( ((uintptr_t)x) & 15 ) == 0 )
+
 /* ***********************************************************************
 
    One-dimensional interface
@@ -39,7 +41,15 @@ FTransform::FFTW3::Plan::Plan (size_t n_fft, type t)
   else
     direction_flags |= FFTW_BACKWARD;
 
-  int flags = FFTW_UNALIGNED;
+  int flags = 0;
+
+  if (!simd)
+    flags = FFTW_UNALIGNED;
+#ifdef _DEBUG
+  else
+    cerr << "FFTW3: Building for SIMD" << endl;
+#endif
+
   if (optimize)
     flags |= FFTW_MEASURE;
   else
@@ -53,6 +63,11 @@ FTransform::FFTW3::Plan::Plan (size_t n_fft, type t)
 
   float* in = new float[floats_req];
   float* out = new float[floats_req];
+
+  if (simd) {
+    CHECK_ALIGN(in);
+    CHECK_ALIGN(out);
+  }
 
   if( !in || !out )
     throw Error(InvalidState, "FTransform::FFTW3::Plan::FFTW3::Plan",
@@ -94,6 +109,11 @@ void FTransform::FFTW3::Plan::frc1d (size_t nfft,
   cerr << "FTransform::FFTW3::Plan::frc1d" << endl;
 #endif
 
+  if (simd) {
+    CHECK_ALIGN(dest);
+    CHECK_ALIGN(src);
+  }
+
   fftwf_execute_dft_r2c ((fftwf_plan)plan,
 			 (float*)src, (fftwf_complex*)dest);
 
@@ -108,6 +128,12 @@ void FTransform::FFTW3::Plan::fcc1d (size_t nfft,
 #ifdef _DEBUG
   cerr << "FTransform::FFTW3::Plan::fcc1d" << endl;
 #endif
+
+  if (simd) {
+    CHECK_ALIGN(dest);
+    CHECK_ALIGN(src);
+  }
+
   fftwf_execute_dft ((fftwf_plan)plan,
 		     (fftwf_complex*) src, (fftwf_complex*) dest);
 #ifdef _DEBUG
@@ -121,6 +147,12 @@ void FTransform::FFTW3::Plan::bcc1d (size_t nfft,
 #ifdef _DEBUG
   cerr << "FTransform::FFTW3::Plan::bcc1d" << endl;
 #endif
+
+  if (simd) {
+    CHECK_ALIGN(dest);
+    CHECK_ALIGN(src);
+  }
+
   fftwf_execute_dft ((fftwf_plan)plan, 
 		     (fftwf_complex*) src, (fftwf_complex*) dest);
 #ifdef _DEBUG
@@ -134,7 +166,14 @@ void FTransform::FFTW3::Plan::bcr1d (size_t nfft,
 #ifdef _DEBUG
   cerr << "FTransform::FFTW3::Plan::bcr1d" << endl;
 #endif
+
+  if (simd) {
+    CHECK_ALIGN(dest);
+    CHECK_ALIGN(src);
+  }
+
   fftwf_execute_dft_c2r ((fftwf_plan)plan, (fftwf_complex*)src, dest);
+
 #ifdef _DEBUG
   cerr << "FTransform::FFTW3::Plan::bcr1d done" << endl;
 #endif
