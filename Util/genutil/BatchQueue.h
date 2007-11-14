@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/BatchQueue.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/09/01 02:02:53 $
+   $Revision: 1.4 $
+   $Date: 2007/11/14 23:55:17 $
    $Author: straten $ */
 
 #ifndef __BatchQueue_h
@@ -25,7 +25,7 @@ class BatchQueue {
 public:
 
   //! Default constructor
-  BatchQueue (unsigned nthread = 1);
+  BatchQueue (unsigned nthread = 0);
 
   //! Destructor
   ~BatchQueue ();
