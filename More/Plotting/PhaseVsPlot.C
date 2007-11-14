@@ -174,6 +174,9 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       last_x = int(x_max / 360) * 360;
       x_step = 360;
     }
+    else
+      throw Error( InvalidState, "Pulsar::PhaseVsPlot::draw",
+		   "unhandled PhaseScale::Units" );
 
     for( int xoff = first_x; xoff < last_x; xoff += x_step )
     {
