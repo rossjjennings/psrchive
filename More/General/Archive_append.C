@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/TimeAppend.h"
 
@@ -21,8 +22,7 @@ void Pulsar::Archive::append (const Archive* arch) try
   TimeAppend append;
   append.append (this, arch);
 }
- catch (Error& error)
-   {
-     throw error += "Pulsar::Archive::append";
-   }
-
+catch (Error& error)
+{
+  throw error += "Pulsar::Archive::append";
+}

@@ -4,9 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Integration.h"
 #include "Pulsar/Dispersion.h"
+
+using namespace std;
 
 static Pulsar::Dispersion xform;
 

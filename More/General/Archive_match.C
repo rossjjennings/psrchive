@@ -4,9 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/ArchiveMatch.h"
+
+using namespace std;
 
 bool Pulsar::Archive::mixable (const Archive* archive, string& reason) const
 {
