@@ -156,7 +156,7 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
 	// set the phase at the midtime equal to that of the first subint
 	Phase desired (mid_phase.intturns(), first_phase.fracturns());
 
-	epoch = model->iphase (desired);
+	epoch = model->iphase (desired, &epoch);
   
 	if (Archive::verbose > 2)
 	  cerr << "TimeIntegrate::transform result phase = "
