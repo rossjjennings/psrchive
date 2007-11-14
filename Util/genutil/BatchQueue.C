@@ -185,6 +185,14 @@ void BatchQueue::submit (Job* job)
   cerr << "BatchQueue::solve using " << active.size() << " threads" << endl;
 #endif
 
+  if (active.size() == 0) {
+#ifdef _DEBUG
+    cerr << "BatchQueue::solve calling Job::execute" << endl;
+#endif
+    job->execute();
+    return;
+  }
+
   add (job);
 
   job->queue = this;
@@ -218,7 +226,7 @@ void BatchQueue::wait ()
 
 void BatchQueue::resize (unsigned nthread)
 {                 
-  if (nthread > 1)
+  if (nthread > 0)
     throw Error (InvalidParam, "BatchQueue::resize", "threads unavailable");
 }
 
