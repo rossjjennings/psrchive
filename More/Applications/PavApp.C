@@ -67,6 +67,8 @@ PavApp::PavApp()
   cblpo = false;
   cblao = false;
 
+  label_degrees = false;
+
   ronsub = 0;
 }
 
@@ -138,6 +140,7 @@ void PavApp::PrintUsage( void )
   cout << "                  7 -> Test" << endl;
   cout << endl;
   cout << " --plot_qu      Plot Stokes Q and Stokes U in '-S' option instead of degree of linear" << endl;
+  cout << " --ld           Label phase axes in degrees" << endl;
   cout << endl;
   cout << "Integration re-ordering (nsub = final # of subints) (used with pav Y for binary pulsars):" << endl;
   cout << " --convert_binphsperi   nsub" << endl;
@@ -170,13 +173,16 @@ void PavApp::PrintUsage( void )
 
 void PavApp::SetPhaseZoom( double min_phase, double max_phase  )
 {
-  string range_cmd = string("x:range=(") +
+  string range_str = string("(") +
                      tostring< double >(min_phase ) +
                      string(",") +
                      tostring< double >( max_phase ) +
                      string( ")");
 
-  SetPlotOptions<Plot>( range_cmd );
+  // Now set the range for all the plots that have phase on the x axis.
+  
+  SetPlotOptions<PhasePlot>( string("x:range=") + range_str );
+  SetPlotOptions<MultiPhase>( string("x:range=") + range_str );
 }
 
 
@@ -253,13 +259,96 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq )
 
 void PavApp::PavSpecificOptions( void )
 {
-  SetPlotOptions<BandpassChannelWeightPlot>( "band:below:l=$name" );
-  SetPlotOptions<BandpassChannelWeightPlot>( "band:below:r=$freq MHz" );
+  // There are a few things we can set for publication regardless of what we are plotting.
+
+  if( publn )
+  {
+    tostring_precision = 1;
+    SetPlotOptions<Plot>( "ch=1.2" );
+    SetPlotOptions<FramedPlot>( "below:l=$name" );
+    SetPlotOptions<FramedPlot>( "below:r=$freq MHz" );
+  }
+  else
+  {
+    SetPlotOptions<FramedPlot>( "above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
+    SetPlotOptions<FramedPlot>( "below:l=" );
+  }
+
+  // bandpass channel weights plot config.
+
+  if( !publn )
+  {
+    SetPlotOptions<BandpassChannelWeightPlot>( "band:below:l=" );
+    SetPlotOptions<BandpassChannelWeightPlot>( "band:below:r=" );
+    SetPlotOptions<BandpassChannelWeightPlot>( "band:above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
+  }
+  else
+  {
+    SetPlotOptions<BandpassChannelWeightPlot>( "band:below:l=$name" );
+    SetPlotOptions<BandpassChannelWeightPlot>( "band:below:r=$freq MHz" );
+    SetPlotOptions<BandpassChannelWeightPlot>( "band:above:c=" );
+  }
+
+  // stokes cylindrical plot config
 
   SetPlotOptions<StokesCylindrical>( "pa:below:l=" );
   SetPlotOptions<StokesCylindrical>( "flux:below:l=" );
   SetPlotOptions<StokesCylindrical>( "flux:y:buf=0.07" );
   SetPlotOptions<StokesCylindrical>( "pa:mark=dot+tick" );
+  if( !publn )
+  {
+    SetPlotOptions<StokesCylindrical>( "pa:above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
+  }
+  else
+  {
+    SetPlotOptions<StokesCylindrical>( "pa:above:c=" );
+    SetPlotOptions<StokesCylindrical>( "flux:below:l=$name" );
+    SetPlotOptions<StokesCylindrical>( "flux:below:r=$freq MHz" );
+  }
+
+  // PhasVsTime plot config
+
+  SetPlotOptions<PhaseVsTime>( "below:l=" );
+  SetPlotOptions<PhaseVsTime>( "below:r=" );
+  if( publn )
+  {
+    SetPlotOptions<PhaseVsTime>( "above:l=$name" );
+    SetPlotOptions<PhaseVsTime>( "above:r=$freq Mhz" );
+  }
+
+  // PhaseVsFrequency plot config
+
+  SetPlotOptions<PhaseVsFrequency>( "below:l=" );
+  SetPlotOptions<PhaseVsFrequency>( "below:r=" );
+  if( publn )
+  {
+    SetPlotOptions<PhaseVsFrequency>( "above:l=$name" );
+    SetPlotOptions<PhaseVsFrequency>( "above:r=$freq Mhz" );
+  }
+
+  // DynamicSNSpectrum plot config
+
+  SetPlotOptions<DynamicSNSpectrum>( "below:l=" );
+  SetPlotOptions<DynamicSNSpectrum>( "below:r=" );
+  if( publn )
+  {
+    SetPlotOptions<DynamicSNSpectrum>( "above:l=$name" );
+    SetPlotOptions<DynamicSNSpectrum>( "above:r=$freq Mhz" );
+  }
+  
+  // StokesSpherical plot config
+  
+  SetPlotOptions<StokesSpherical>( "flux:below:l=" );
+  if( publn )
+  {
+    SetPlotOptions<StokesSpherical>( "ell:above:c=" );
+    SetPlotOptions<StokesSpherical>( "flux:below:l=$name" );
+    SetPlotOptions<StokesSpherical>( "flux:below:r=$freq Mhz" );
+  }
+  else
+  {
+    SetPlotOptions<StokesSpherical>( "ell:above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
+  }
 }
 
 
@@ -350,49 +439,6 @@ bool PavApp::CheckColour( void )
 
 
 
-/**
- * SetPublicationOptions
- *
- *  DOES     - Modifies labels etc for publication printing.
- *  RECEIVES - Nothing
- *  RETURNS  - Nothing
- *  THROWS   - Nothing
- *  TODO     - Nothing
- **/
-
-void PavApp::SetPublicationOptions( void )
-{
-  // blank out the top center label and put name,freq in the top left,top right corners of the frame
-  SetPlotOptions<FramedPlot>( "above:c=" );
-  SetPlotOptions<FramedPlot>( "below:l=$name" );
-  SetPlotOptions<FramedPlot>( "below:r=$freq MHz" );
-  SetPlotOptions<StokesCylindrical>( "pa:above:c=" );
-
-  // Now set the name,freq labels to be above the frame for all image plots
-  SetPlotOptions<PhaseVsTime>( "below:l=" );
-  SetPlotOptions<PhaseVsTime>( "below:r=" );
-  SetPlotOptions<PhaseVsTime>( "above:l=$name" );
-  SetPlotOptions<PhaseVsTime>( "above:r=$freq Mhz" );
-  
-  SetPlotOptions<PhaseVsFrequency>( "below:l=" );
-  SetPlotOptions<PhaseVsFrequency>( "below:r=" );
-  SetPlotOptions<PhaseVsFrequency>( "above:l=$name" );
-  SetPlotOptions<PhaseVsFrequency>( "above:r=$freq Mhz" );
-  
-  SetPlotOptions<DynamicSNSpectrum>( "below:l=" );
-  SetPlotOptions<DynamicSNSpectrum>( "below:r=" );
-  SetPlotOptions<DynamicSNSpectrum>( "above:l=$name" );
-  SetPlotOptions<DynamicSNSpectrum>( "above:r=$freq Mhz" );
-
-  // Set the above and below labels for all the plots that don't understand above:? and below:?
-  SetPlotOptions<StokesCylindrical>( "flux:below:l=$name" );
-  SetPlotOptions<StokesCylindrical>( "flux:below:r=$freq MHz" );
-
-  SetPlotOptions<Plot>( "ch=1.2" );
-}
-
-
-
 
 
 /**
@@ -440,6 +486,7 @@ int PavApp::run( int argc, char *argv[] )
   const int BINPHLA          = 1006;
   const int PUBLN            = 1007;
   const int PUBLNC           = 1008;
+  const int LAB_DEG          = 1009;
 
   static struct option long_options[] =
     {
@@ -451,6 +498,7 @@ int PavApp::run( int argc, char *argv[] )
       { "cmap",               1, 0, CMAP_IND },
       { "publn",              0, 0, PUBLN },
       { "publnc",             0, 0, PUBLNC },
+      { "ld",                 0, 0, LAB_DEG },
       { 0,0,0,0 }
     };
 
@@ -476,7 +524,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.32 2007/11/12 04:04:35 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.33 2007/11/14 00:21:27 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -527,7 +575,7 @@ int PavApp::run( int argc, char *argv[] )
     case 'p':
       jobs.push_back( "pscrunch" );
       break;
-      
+
     case 'S':
       clip_command = "flux:y:range";
       clear_labels = false;
@@ -656,75 +704,15 @@ int PavApp::run( int argc, char *argv[] )
       publn = true;
       options.push_back( "set=pub" );
       break;
+    case LAB_DEG:
+      label_degrees = true;
+      break;
     case 'x':
       clip_value = "=(0,";
       clip_value += string( optarg );
       clip_value += ")";
       break;
     };
-  }
-
-
-  // Create a list of FilePlots with the archives and a vector of plots for each
-
-  if (metafile)
-    stringfload (&filenames, metafile);
-  else
-    for (int ai=optind; ai<argc; ai++)
-      dirglob (&filenames, argv[ai]);
-
-
-  CreatePlotsList( filenames, plot_ids );
-
-  PavSpecificOptions();
-
-
-  // If we haven't put any plots into the plot array, output an error.
-
-  if (plots.empty() )
-  {
-    cout << "pav: please choose at least one plot style" << endl;
-    return -1;
-  }
-
-  // set options for all the plots
-
-  SetCmdLineOptions( options );
-
-
-
-  // Blank out any top left corner labels
-
-  if( clear_labels )
-  {
-    SetPlotOptions<FramedPlot>( "below:l=" );
-  }
-
-  // If this is not a publication plot, output a thourough title for the plot
-
-  if( !publn )
-  {
-    //SetPlotOptions<Plot>( top_label + string( "=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
-    SetPlotOptions<Plot>( string( "above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" ) );
-  }
-  else
-  {
-    SetPublicationOptions();
-    tostring_precision = 1;
-  }
-
-  // options.push_back( clip_command + clip_value );
-  SetPlotOptions<FramedPlot>( clip_command + clip_value );
-
-
-
-  // If we still don't have any filenames
-  //   output an error and exit
-
-  if (filenames.empty())
-  {
-    cout << "pav: please specify filename[s]" << endl;
-    return -1;
   }
 
   // If we can't open the pgplot device
@@ -743,6 +731,58 @@ int PavApp::run( int argc, char *argv[] )
   {
     have_colour = CheckColour();
   }
+
+  // Create a list of FilePlots with the archives and a vector of plots for each
+
+  if (metafile)
+    stringfload (&filenames, metafile);
+  else
+    for (int ai=optind; ai<argc; ai++)
+      dirglob (&filenames, argv[ai]);
+
+  // If we still don't have any filenames
+  //   output an error and exit
+
+  if (filenames.empty())
+  {
+    cout << "pav: please specify filename[s]" << endl;
+    return -1;
+  }
+
+
+  CreatePlotsList( filenames, plot_ids );
+
+  // If we haven't put any plots into the plot array, output an error.
+
+  if (plots.empty() )
+  {
+    cout << "pav: please choose at least one plot style" << endl;
+    return -1;
+  }
+
+  // Adjust the labels etc to the way we want to see them in pav.
+
+  PavSpecificOptions();
+
+  // set options for all the plots
+
+  SetCmdLineOptions( options );
+
+
+
+  // TODO ??
+
+  SetPlotOptions<FramedPlot>( clip_command + clip_value );
+
+  if( label_degrees )
+  {
+    //SetPlotOptions<StokesCylindrical>( "x:unit=deg" );
+    SetPlotOptions<PhasePlot>( "x:unit=deg" );
+    SetPlotOptions<MultiPhase>( "x:unit=deg" );
+  }
+
+
+
 
   // If we received a -N option, divide the pgplot window into n1,n2 panels.
 
@@ -780,9 +820,6 @@ int PavApp::run( int argc, char *argv[] )
       SetPlotOptions<StokesCylindrical>( "flux:ls=111" );
     }
   }
-
-  // If the plots array contains any StokesCylindrical plots, remove the label in the top left corner of the flux plot
-  // SetPlotOptions<StokesCylindrical>( plots, "flux:below:l=" );
 
   SetPhaseZoom( min_phase, max_phase );
 
