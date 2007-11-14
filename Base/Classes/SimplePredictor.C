@@ -7,11 +7,14 @@
 
 #include "Pulsar/SimplePredictor.h"
 
+#include "inverse_phase.h"
 #include "Physical.h"
 #include "strutil.h"
 #include "Error.h"
 
 using namespace std;
+
+double Pulsar::SimplePredictor::precision = 1e-10;
 
 Pulsar::SimplePredictor::SimplePredictor (const char* filename)
 {
@@ -225,7 +228,11 @@ void Pulsar::SimplePredictor::unload (FILE* fptr) const
 MJD 
 Pulsar::SimplePredictor::iphase (const Phase& phase, const MJD* guess) const
 {
-  return reference_epoch;
+  if (!guess)
+    throw Error (InvalidState, "Pulsar::SimplePredictor::iphase",
+		 "cannot compute inverse phase without a first guess");
+
+  return Pulsar::inverse_phase (*this, phase, *guess);
 }
 
 Pulsar::Generator* Pulsar::SimplePredictor::generator () const

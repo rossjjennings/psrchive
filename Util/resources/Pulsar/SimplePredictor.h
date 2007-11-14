@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/resources/Pulsar/SimplePredictor.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/10/23 18:52:03 $
+   $Revision: 1.2 $
+   $Date: 2007/11/14 03:08:06 $
    $Author: straten $ */
 
 #ifndef __SimplePredictor_h
@@ -26,6 +26,9 @@ namespace Pulsar {
   class SimplePredictor : public Predictor {
 
   public:
+
+    //! The precision of the prediction in seconds
+    static double precision;
 
     //! Default constructor
     SimplePredictor (const char* filename = 0);
