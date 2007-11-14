@@ -7,12 +7,12 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.73 $
-   $Date: 2007/11/11 01:00:30 $
+   $Revision: 1.74 $
+   $Date: 2007/11/14 03:08:09 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
-#include<config.h>
+#include <config.h>
 #endif
 
 #include "Pulsar/psrchive.h"
@@ -82,9 +82,9 @@ void usage ()
     "  -c archive choose best input states from input archive \n"
     "\n"
     "  -a align   set the threshold for testing input data phase alignment \n"
-    "  -r         enforce physically realizable Stokes parameters \n"
+    "  -g         unique absolute gain for each pulsar observation [DEVEL]\n"
+    "  -r         enforce physically realizable Stokes parameters [DEVEL]\n"
     "  -s         normalize Stokes parameters by invariant interval \n"
-    "  -g         allow absolute gain to vary in Pulsar observations \n"
     "\n"
     "  -q         assume that CAL Stokes Q = 0 (linear feeds only)\n"
     "  -v         assume that CAL Stokes V = 0 (linear feeds only)\n"
