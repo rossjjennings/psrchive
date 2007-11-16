@@ -8,7 +8,7 @@
 #include "Pulsar/ProcHistory.h"
 #include "Pulsar/Receiver.h"
 
-#include "FITSError.h"
+#include "psrfitsio.h"
 
 using namespace std;
 
@@ -16,372 +16,99 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow )
 {
   int row = hrow->index;
   
-  int status = 0;
-
-  if (Pulsar::Archive::verbose == 3)
+  if (Pulsar::Archive::verbose > 2)
     cerr << "load ProcHistory::row entered" << endl;
 
-  int colnum = 0;
-  int initflag = 0;
-  int nullint = 0;
-  double nulld = 0.0;
-  static char* nullstr = strdup(" ");
-  
-  auto_ptr<char> temp( new char[128] );
-  char* temp_ptr = temp.get();
+  string empty = "";
 
-  // Get DATE_PRO
-  
-  fits_get_colnum (fptr, CASEINSEN, "DATE_PRO", &colnum, &status);
-  
-  // Read the value from the specified row
-  
-  fits_read_col (fptr, TSTRING, colnum, row, 1, 1, nullstr, 
-                 &temp_ptr, &initflag, &status);
-  
-  if (status != 0) {
-    if (Pulsar::Archive::verbose)
-      cerr << "load ProcHistory::row WARNING DATE_PRO not found" << endl;
-    hrow->date_pro = "";
-    status = 0;
-  }
-  else {
-    if (Pulsar::Archive::verbose == 3)
-      cerr << "Read DATE_PRO = " << temp.get() << endl;
-    hrow->date_pro = temp.get();
-  }
-  
-  // Get PROC_CMD
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "PROC_CMD", &colnum, &status);
-  
-  fits_read_col (fptr, TSTRING, colnum, row, 1, 1, &nullstr, 
-                 &temp_ptr, &initflag, &status);
-  if (Pulsar::Archive::verbose == 3)
-    cerr << "Read PROC_CMD = " << temp.get() << endl;
-  hrow->proc_cmd = temp.get();
+  //
+  // in the following, if a value cannot be read from file:
+  // A) if no default is given, an exception will be thrown; or
+  // B) if a default is given, the value will be set to it
+  //
 
-  if (status != 0) {
-    if (Pulsar::Archive::verbose)
-      cerr << "load ProcHistory::row WARNING PROC_CMD not found" << endl;
-    status = 0;
-    hrow->proc_cmd = "";
-  }
-  else {
-    if (Pulsar::Archive::verbose == 3)
-      cerr << "Read PROC_CMD = " << temp.get() << endl;
-    hrow->proc_cmd = temp.get();
-  }
+  psrfits_read_col (fptr, "DATE_PRO", &(hrow->date_pro), row,
+		    empty, empty, Pulsar::Archive::verbose > 2);
 
-  // Get POL_TYPE
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "POL_TYPE", &colnum, &status);
-  
-  fits_read_col (fptr, TSTRING, colnum, row, 1, 1, &nullstr, 
-                 &temp_ptr, &initflag, &status);
-  if (Pulsar::Archive::verbose == 3)
-    cerr << "Read POL_TYPE = " << temp.get() << endl;
-  hrow->pol_type = temp.get();
-  
-  if (status != 0)
-    throw FITSError (status, "load ProcHistory::row", 
-                     "fits_read_col POL_TYPE");
-  
-  // Get NSUB
-  
+  psrfits_read_col (fptr, "PROC_CMD", &(hrow->proc_cmd), row,
+		    empty, empty, Pulsar::Archive::verbose > 2);
 
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "NSUB", &colnum, &status);
-  
-  if( status )
-  {
-    hrow->nsub = 0;
-    status = 0;
-  }
-  else
-  {
-    fits_read_col (fptr, TINT, colnum, row, 1, 1, &nullint,
-		  &(hrow->nsub), &initflag, &status);
-  
-    if (status != 0)
-      throw FITSError (status, "load ProcHistory::row",
-		      "fits_read_col NSUB");
-  }
-  
-  // Get NPOL
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "NPOL", &colnum, &status);
-  
-  fits_read_col (fptr, TINT, colnum, row, 1, 1, &nullint, 
-                 &(hrow->npol), &initflag, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "load ProcHistory::row", 
-                     "fits_read_col NPOL");
-  
-  // Get NBIN
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "NBIN", &colnum, &status);
-  
-  fits_read_col (fptr, TINT, colnum, row, 1, 1, &nullint, 
-                 &(hrow->nbin), &initflag, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "load ProcHistory::row", 
-                     "fits_read_col NBIN");
-  
-  // Get NBIN_PRD
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "NBIN_PRD", &colnum, &status);
-  
-  fits_read_col (fptr, TINT, colnum, row, 1, 1, &nullint, 
-                 &(hrow->nbin_prd), &initflag, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "load ProcHistory::row", 
-                     "fits_read_col NBIN_PRD");
-  
-  // Get TBIN
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "TBIN", &colnum, &status);
-  
-  fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulld, 
-                 &(hrow->tbin), &initflag, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "load ProcHistory::row", 
-                     "fits_read_col TBIN");
-  
-  // Get CTR_FREQ
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "CTR_FREQ", &colnum, &status);
-  
-  fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulld, 
-                 &(hrow->ctr_freq), &initflag, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "load ProcHistory::row", 
-                     "fits_read_col CTR_FREQ");
-  
-  // Get NCHAN
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "NCHAN", &colnum, &status);
-  
-  fits_read_col (fptr, TINT, colnum, row, 1, 1, &nullint, 
-                 &(hrow->nchan), &initflag, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "load ProcHistory::row", 
-                     "fits_read_col NCHAN");
-  // Get CHAN_BW
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "CHAN_BW", &colnum, &status);
-  
-  fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulld, 
-                 &(hrow->chanbw), &initflag, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "load ProcHistory::row", 
-                     "fits_read_col CHAN_BW");
-  
-  // Get PAR_CORR
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "PAR_CORR", &colnum, &status);
-  
-  fits_read_col (fptr, TINT, colnum, row, 1, 1, &nullint, 
-                 &(hrow->par_corr), &initflag, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "load ProcHistory::row", 
-                     "fits_read_col PAR_CORR");
-  
-  // Get FA_CORR
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "FA_CORR", &colnum, &status);
-  
-  fits_read_col (fptr, TINT, colnum, row, 1, 1, &nullint, 
-                 &(hrow->fa_corr), &initflag, &status);
-  
-  if (status != 0) {
-    if (Pulsar::Archive::verbose > 1)
-      cerr << "load ProcHistory::row WARNING assuming uncorrected feed angle"
-	   << endl;
-    hrow->fa_corr = 0;
-  }
-  
-  // Get RM_CORR
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "RM_CORR", &colnum, &status);
-  
-  fits_read_col (fptr, TINT, colnum, row, 1, 1, &nullint, 
-                 &(hrow->rm_corr), &initflag, &status);
-  
-  if (status != 0)  {
-    if (Pulsar::Archive::verbose > 1)
-      cerr << "load ProcHistory::row WARNING assuming uncorrected RM" << endl;
-    hrow->rm_corr = 0;
-    status = 0;
-  }
-  
-  // Get DEDISP
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DEDISP", &colnum, &status);
-  
-  fits_read_col (fptr, TINT, colnum, row, 1, 1, &nullint, 
-                 &(hrow->dedisp), &initflag, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "load ProcHistory::row", 
-                     "fits_read_col DEDISP");
-  
-  // Get SC_MTHD
-  
-  fits_get_colnum (fptr, CASEINSEN, "SC_MTHD", &colnum, &status);
-  
-  // Read the value from the specified row
-  
-  fits_read_col (fptr, TSTRING, colnum, row, 1, 1, &nullstr, 
-                 &temp_ptr, &initflag, &status);
-  if (Pulsar::Archive::verbose == 3)
-    cerr << "Read SC_MTHD = " << temp.get() << endl;
-  hrow->sc_mthd = temp.get();
-  
-  if (status != 0)
-    throw FITSError (status, "load ProcHistory::row", 
-                     "fits_read_col SC_MTHD");
-  
-  // Get CAL_MTHD
-  
-  fits_get_colnum (fptr, CASEINSEN, "CAL_MTHD", &colnum, &status);
-  
-  // Read the value from the specified row
-  
-  fits_read_col (fptr, TSTRING, colnum, row, 1, 1, &nullstr, 
-                 &temp_ptr, &initflag, &status);
-  if (Pulsar::Archive::verbose == 3)
-    cerr << "Read CAL_MTHD = " << temp.get() << endl;
-  hrow->cal_mthd = temp.get();
-  
-  if (status != 0)
-    throw FITSError (status, "load ProcHistory::row", 
-                     "fits_read_col CAL_MTHD");
-  
-  // Get CAL_FILE
-  
-  fits_get_colnum (fptr, CASEINSEN, "CAL_FILE", &colnum, &status);
-  
-  // Read the value from the specified row
-  
-  fits_read_col (fptr, TSTRING, colnum, row, 1, 1, &nullstr, 
-                 &temp_ptr, &initflag, &status);
-  if (Pulsar::Archive::verbose == 3)
-    cerr << "Read CAL_FILE = " << temp.get() << endl;
-  hrow->cal_file = temp.get();
+  psrfits_read_col (fptr, "POL_TYPE", &(hrow->pol_type), row);
 
-  if (status != 0)
-    throw FITSError (status, "load ProcHistory::row", 
-                     "fits_read_col CAL_FILE");
-  
-  // Get RFI_MTHD
-  
-  fits_get_colnum (fptr, CASEINSEN, "RFI_MTHD", &colnum, &status);
-  
-  // Read the value from the specified row
-  
-  fits_read_col (fptr, TSTRING, colnum, row, 1, 1, &nullstr, 
-                 &temp_ptr, &initflag, &status);
-  if (Pulsar::Archive::verbose == 3)
-    cerr << "Read RFI_MTHD = " << temp.get() << endl;
-  hrow->rfi_mthd = temp.get();
+  psrfits_read_col (fptr, "NSUB", &(hrow->nsub), row,
+		    0, 0, Pulsar::Archive::verbose > 2);
 
-  if (status != 0) {
-    if (Pulsar::Archive::verbose)
-      cerr << "load ProcHistory::row WARNING RFI_MTHD not found" << endl;
-    status = 0;
-    //throw FITSError (status, "load ProcHistory::row", 
-    //       "fits_read_col RFI_MTHD");
-  }
+  psrfits_read_col (fptr, "NPOL", &(hrow->npol), row);
 
-  // Get IFR_MTHD
-  
-  fits_get_colnum (fptr, CASEINSEN, "IFR_MTHD", &colnum, &status);
-  
-  // Read the value from the specified row
-  
-  fits_read_col (fptr, TSTRING, colnum, row, 1, 1, &nullstr, 
-                 &temp_ptr, &initflag, &status);
-  if (Pulsar::Archive::verbose == 3)
-    cerr << "Read IFR_MTHD = " << temp.get() << endl;
-  hrow->ifr_mthd = temp.get();
+  psrfits_read_col (fptr, "NBIN", &(hrow->nbin), row);
 
-  if (status != 0) {
-    if (Pulsar::Archive::verbose == 3)
-      cerr << "load ProcHistory::row WARNING IFR_MTHD not found" << endl;
-    status = 0;
-    //throw FITSError (status, "load ProcHistory::row", 
-    //       "fits_read_col IFR_MTHD");
-  }
+  psrfits_read_col (fptr, "NBIN_PRD", &(hrow->nbin_prd), row, 
+		    0, hrow->nbin, Pulsar::Archive::verbose > 2);
 
-  // Get SCALE
-  
-  fits_get_colnum (fptr, CASEINSEN, "SCALE", &colnum, &status);
-  
-  // Read the value from the specified row
-  
-  fits_read_col (fptr, TSTRING, colnum, row, 1, 1, &nullstr, 
-                 &temp_ptr, &initflag, &status);
+  double zero = 0.0;
+  psrfits_read_col (fptr, "TBIN", &(hrow->tbin), row, 
+		    zero, zero, Pulsar::Archive::verbose > 2);
 
-  if (status != 0) {
-    
+  psrfits_read_col (fptr, "CTR_FREQ", &(hrow->ctr_freq), row);
+
+  psrfits_read_col (fptr, "NCHAN", &(hrow->nchan), row);
+
+  psrfits_read_col (fptr, "CHAN_BW", &(hrow->chanbw), row);
+
+  psrfits_read_col (fptr, "PAR_CORR", &(hrow->par_corr), row,
+		    0, 0, Pulsar::Archive::verbose > 2);
+
+  psrfits_read_col (fptr, "FA_CORR", &(hrow->fa_corr), row,
+		    0, 0, Pulsar::Archive::verbose > 2);
+
+  psrfits_read_col (fptr, "RM_CORR", &(hrow->rm_corr), row,
+		    0, 0, Pulsar::Archive::verbose > 2);
+
+  psrfits_read_col (fptr, "DEDISP", &(hrow->dedisp), row,
+		    0, 0, Pulsar::Archive::verbose > 2);
+
+  empty = "NONE";
+
+  psrfits_read_col (fptr, "SC_MTHD", &(hrow->sc_mthd), row,
+		    empty, empty, Pulsar::Archive::verbose > 2);
+
+  psrfits_read_col (fptr, "CAL_MTHD", &(hrow->cal_mthd), row,
+		    empty, empty, Pulsar::Archive::verbose > 2);
+
+  psrfits_read_col (fptr, "CAL_FILE", &(hrow->cal_file), row,
+		    empty, empty, Pulsar::Archive::verbose > 2);
+
+  psrfits_read_col (fptr, "RFI_MTHD", &(hrow->rfi_mthd), row,
+		    empty, empty, Pulsar::Archive::verbose > 2);
+
+  psrfits_read_col (fptr, "IFR_MTHD", &(hrow->ifr_mthd), row,
+		    empty, empty, Pulsar::Archive::verbose > 2);
+
+  std::string temp;
+  psrfits_read_col (fptr, "SCALE", &temp, row,
+		    empty, empty, Pulsar::Archive::verbose > 2);
+
+  if (temp == empty) {
     if (Pulsar::Archive::verbose > 1)
       cerr << "load ProcHistory::row error reading SCALE" <<endl;
-    status = 0;
-    hrow->scale = Signal::FluxDensity;
-    
+    hrow->scale = Signal::FluxDensity;    
   }
   else {
 
-    if (Pulsar::Archive::verbose == 3)
-      cerr << "load ProcHistory::row SCALE = " << temp.get() << endl;
+    if (Pulsar::Archive::verbose > 2)
+      cerr << "load ProcHistory::row SCALE = " << temp << endl;
 
-    if (strcmp (temp.get(), "FluxDen") == 0)
+    if (temp == "FluxDen")
       hrow->scale = Signal::FluxDensity;
-    else if (strcmp (temp.get(), "RefFlux") == 0)
+    else if (temp == "RefFlux")
       hrow->scale = Signal::ReferenceFluxDensity;
-    else if (strcmp (temp.get(), "Jansky") == 0)
+    else if (temp == "Jansky")
       hrow->scale = Signal::Jansky;
-    else if (Pulsar::Archive::verbose == 3)
+    else if (Pulsar::Archive::verbose > 2)
       cerr << "load ProcHistory::row WARNING unrecognized SCALE" << endl;
   }
 
-  if (Pulsar::Archive::verbose == 3)
+  if (Pulsar::Archive::verbose > 2)
     cerr << "load ProcHistory::row exiting" << endl;
 }
 
@@ -391,9 +118,7 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow )
 
 void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
 {
-  int status = 0;
-
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::load_ProcHistory entered" << endl;
 
   // some processing flags are stored in the Receiver extension
@@ -404,12 +129,14 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
 
   // Move to the HISTORY HDU
 
+  int status = 0;
   fits_movnam_hdu (fptr, BINARY_TBL, "HISTORY", 0, &status);
   
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_ProcHistory", 
-                     "fits_movnam_hdu HISTORY");
-
+  if (status != 0) {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_ProcHistory no HISTORY table" << endl;
+    return;
+  }
 
   Reference::To<ProcHistory> history = new ProcHistory;
 
@@ -419,8 +146,8 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_ProcHistory", 
                      "fits_get_num_rows HISTORY");
-
-  (history->rows).resize(numrows);   
+  
+  history->rows.resize(numrows);   
   
   for (int i = 0; i < numrows; i++) {
     history->rows[i] = ProcHistory::row();
@@ -467,28 +194,28 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
 
   if(polstr == "XXYY") {
     set_state ( Signal::PPQQ );
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "FITSArchive:load_header setting Signal::PPQQ" << endl;
   }
   else if(polstr == "STOKE") {
     set_state ( Signal::Stokes );
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "FITSArchive:load_header setting Signal::Stokes" << endl;
   }
   else if(polstr == "XXYYCRCI") {
     set_state ( Signal::Coherence );
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "FITSArchive:load_header setting Signal::Coherence" << endl;
   }
   else if(polstr == "INTEN") {
     set_state ( Signal::Intensity );
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "FITSArchive:load_header setting Signal::Intensity" << endl;
   }
   else if(polstr == "INVAR")
     set_state ( Signal::Invariant );
   else {
-    if (verbose == 3) {
+    if (verbose > 2) {
       cerr << "FITSArchive:load_header WARNING unknown POL_TYPE = "
            << polstr <<endl;
       cerr << "FITSArchive:load_header setting Signal::Intensity"
@@ -511,7 +238,7 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     set_faraday_corrected (false);
 
   else {
-    if (verbose == 3) {
+    if (verbose > 2) {
       cerr << "FITSArchive:load_header unexpected value in RM_CORR flag"
            << endl;
     }
@@ -525,7 +252,7 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     receiver->set_platform_corrected (false);
 
   else {
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "FITSArchive::load_header unexpected PAR_CORR flag"
            << endl;
 
@@ -540,7 +267,7 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     receiver->set_feed_corrected (false);
 
   else {
-    if (verbose == 3) {
+    if (verbose > 2) {
       cerr << "FITSArchive::load_header unexpected FA_CORR flag"
            << endl;
     }
@@ -553,7 +280,7 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   else if(history->get_last().dedisp == 0)
     set_dedispersed (false);
   else {
-    if (verbose == 3) {
+    if (verbose > 2) {
       cerr << "FITSArchive::load unexpected DEDISP flag"
            << endl;
     }
@@ -562,7 +289,7 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
 
   add_extension (history);
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::load_ProcHistory exiting" << endl;
     
     

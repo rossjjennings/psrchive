@@ -65,9 +65,12 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &lst_in_seconds, &initflag, &status);
 
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_Pointing", 
-		     "fits_read_col LST_SUB");
+  if (status != 0) {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Pointing WARNING no LST_SUB" << endl;
+    lst_in_seconds = 0;
+    status = 0;
+  }
 
   ext->set_local_sidereal_time (lst_in_seconds);
 
@@ -82,9 +85,12 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &double_angle, &initflag, &status);
   
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_Pointing", 
-		     "fits_read_col RA_SUB");
+  if (status != 0) {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Pointing WARNING no RA_SUB" << endl;
+    double_angle = 0;
+    status = 0;
+  }
 
   double RA_angle = double_angle;
   int RA_colnum = colnum;
@@ -99,9 +105,12 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &double_angle, &initflag, &status);
   
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_Pointing", 
-		     "fits_read_col DEC_SUB");
+  if (status != 0) {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Pointing WARNING no DEC_SUB" << endl;
+    double_angle = 0;
+    status = 0;
+  }
   
   double DEC_angle = double_angle;
   int DEC_colnum = colnum;
@@ -116,9 +125,12 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &double_angle, &initflag, &status);
   
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_Pointing", 
-		     "fits_read_col GLON_SUB");
+  if (status != 0) {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Pointing WARNING no GLON_SUB" << endl;
+    double_angle = 0;
+    status = 0;
+  }
   
   angle.setDegrees (double_angle);
   ext->set_galactic_longitude (angle);
@@ -133,9 +145,12 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &double_angle, &initflag, &status);
   
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_Pointing", 
-		     "fits_read_col GLAT_SUB");
+  if (status != 0) {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Pointing WARNING no GLAT_SUB" << endl;
+    double_angle = 0;
+    status = 0;
+  }
   
   angle.setDegrees (double_angle);
   ext->set_galactic_latitude (angle);
@@ -150,9 +165,12 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_read_col (fptr, TFLOAT, colnum, row, 1, 1, &nullfloat,
 		 &float_angle, &initflag, &status);
   
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_Pointing", 
-		     "fits_read_col FD_ANG");
+  if (status != 0) {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Pointing WARNING no FD_ANG" << endl;
+    float_angle = 0;
+    status = 0;
+  }
   
   angle.setDegrees (float_angle);
   ext->set_feed_angle (angle);
@@ -167,9 +185,12 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_read_col (fptr, TFLOAT, colnum, row, 1, 1, &nullfloat,
 		 &float_angle, &initflag, &status);
   
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_Pointing", 
-		     "fits_read_col POS_ANG");
+  if (status != 0) {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Pointing WARNING no POS_ANG" << endl;
+    float_angle = 0;
+    status = 0;
+  }
   
   angle.setDegrees (float_angle);
   ext->set_position_angle (angle);
@@ -184,9 +205,12 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_read_col (fptr, TFLOAT, colnum, row, 1, 1, &nullfloat,
 		 &float_angle, &initflag, &status);
   
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_Pointing", 
-		     "fits_read_col PAR_ANG");
+  if (status != 0) {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Pointing WARNING no PAR_ANG" << endl;
+    float_angle = 0;
+    status = 0;
+  }
   
   angle.setDegrees (float_angle);
   ext->set_parallactic_angle (angle);
@@ -201,9 +225,12 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_read_col (fptr, TFLOAT, colnum, row, 1, 1, &nullfloat,
 		 &float_angle, &initflag, &status);
   
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_Pointing", 
-		     "fits_read_col TEL_AZ");
+  if (status != 0) {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Pointing WARNING no TEL_AZ" << endl;
+    float_angle = 0;
+    status = 0;
+  }
   
   angle.setDegrees (float_angle);
   ext->set_telescope_azimuth (angle);
@@ -218,10 +245,13 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_read_col (fptr, TFLOAT, colnum, row, 1, 1, &nullfloat,
 		 &float_angle, &initflag, &status);
   
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_Pointing", 
-		     "fits_read_col TEL_ZEN");
-  
+  if (status != 0) {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Pointing WARNING no TEL_ZEN" << endl;
+    float_angle = 0;
+    status = 0;
+  }
+
   angle.setDegrees (float_angle);
   ext->set_telescope_zenith (angle);
 
