@@ -62,3 +62,27 @@ void psrfits_read_key_work (fitsfile* fptr, const char* name, string* data,
   if (*status == 0)
     *data = temp;
 }
+
+//! Specialization for string
+void psrfits_read_col_work( fitsfile *fptr, const char *name,
+			    string *data,
+			    int row, string& null, int* status)
+{
+  int colnum = 0;
+  fits_get_colnum (fptr, CASEINSEN, const_cast<char*>(name), &colnum, status);
+  
+  char* nullstr = const_cast<char*>( null.c_str() );
+  
+  auto_ptr<char> temp( new char[FLEN_VALUE] );
+  char* temp_ptr = temp.get();
+
+  int anynul = 0;
+  fits_read_col( fptr, TSTRING,
+		 colnum, row,
+		 1, 1, &nullstr, &temp_ptr, 
+		 &anynul, status );
+
+  if (*status == 0)
+    *data = temp.get();
+}
+
