@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.46 $
-   $Date: 2007/07/30 05:10:35 $
-   $Author: nopeer $ */
+   $Revision: 1.47 $
+   $Date: 2007/11/16 05:47:11 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
 #define __Pulsar_FITSArchive_h
@@ -167,7 +167,11 @@ namespace Pulsar {
     
     //! Unload the FITSArchive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;
-    
+
+    //! Load data of any type
+    template<typename T>
+    void load_amps (fitsfile*, Integration*, unsigned isubint, int colnum);
+
     // //////////////////////////////////////////////////////////////////////
 
     // load the Pulsar::Predictor model
@@ -186,6 +190,8 @@ namespace Pulsar {
     
     // Extension I/O routines
     void load_ProcHistory (fitsfile*);
+    void no_ProcHistory (fitsfile*);
+
     void load_DigitiserStatistics (fitsfile*);
     void load_DigitiserCounts(fitsfile*);
     void load_Passband (fitsfile*);

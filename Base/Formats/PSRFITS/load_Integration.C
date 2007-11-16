@@ -17,7 +17,8 @@
 #include "Pulsar/FITSHdrExtension.h"
 
 #include "Pulsar/Predictor.h"
-#include "FITSError.h"
+
+#include "psrfitsio.h"
 
 using namespace std;
 
@@ -47,7 +48,6 @@ try {
   
   double nulldouble = 0.0;
   float nullfloat = 0.0;
-  int16 nullshort = -1;
   
   int initflag = 0;
   int colnum = 0;
@@ -75,6 +75,7 @@ try {
 		     "fits_movnam_hdu SUBINT");
 
   if (get<Pulsar::IntegrationOrder>()) {
+
     colnum = 0;
     fits_get_colnum (sfptr, CASEINSEN, "INDEXVAL", &colnum, &status);
     
@@ -222,7 +223,8 @@ try {
   
   if ( all_ones ) {
     if (verbose == 3)
-      cerr << "FITSArchive::load_Integration all frequencies unity - reseting" << endl;
+      cerr << "FITSArchive::load_Integration all frequencies unity - reseting"
+	   << endl;
     for (unsigned j = 0; j < get_nchan(); j++) {
       integ->set_centre_frequency (j, get_centre_frequency()
 				   -0.5*(get_bandwidth()+chanbw)+j*chanbw);
@@ -265,52 +267,6 @@ try {
   
   if (!Profile::no_amps)
   {
-    if (verbose == 3)
-      cerr << "Pulsar::FITSArchive::load_Integration reading offsets" 
-	   << endl;
-  
-    vector < vector < float > > offsets(get_npol(),vector<float>(get_nchan()));
-  
-    colnum = 0;
-    fits_get_colnum (sfptr, CASEINSEN, "DAT_OFFS", &colnum, &status);
-  
-    counter = 1;
-    for (unsigned a = 0; a < get_npol(); a++) {
-      fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(), &nullfloat, 
-		     &(offsets[a][0]), &initflag, &status);
-      counter += nchan;
-    }
-
-    // Load the profile scale factors
-  
-    if (verbose == 3)
-      cerr << "Pulsar::FITSArchive::load_Integration reading scale factors" 
-	   << endl;
-
-    vector < vector < float > > scales(get_npol(),vector<float>(get_nchan()));
-
-    colnum = 0;
-    fits_get_colnum (sfptr, CASEINSEN, "DAT_SCL", &colnum, &status);
-  
-    counter = 1;
-    for (unsigned a = 0; a < get_npol(); a++) {
-      fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(), &nullfloat, 
-		     &(scales[a][0]), &initflag, &status);
-      counter += nchan;
-    }
-
-    // Load the data
-  
-    if (verbose == 3)
-      cerr << "Pulsar::FITSArchive::load_Integration reading profiles" 
-	   << endl;
-  
-    counter = 1;
-    Profile* p = 0;
-    int16* temparray = new int16 [get_nbin()];
-    float* fltarray = new float [get_nbin()];
-    Signal::Component polmeas = Signal::None;
-  
     colnum = 0;
     fits_get_colnum (sfptr, CASEINSEN, "DATA", &colnum, &status);
   
@@ -320,39 +276,18 @@ try {
   
     fits_get_coltype (sfptr, colnum, &typecode, &repeat, &width, &status);  
 
-    for (unsigned a = 0; a < get_npol(); a++) {
-      for (unsigned b = 0; b < get_nchan(); b++) {
-      
-	p = integ->get_Profile(a,b);
-      
-	fits_read_col (sfptr, TSHORT, colnum, row, counter, get_nbin(), 
-		       &nullshort, temparray, &initflag, &status);
-      
-	if (status != 0) {
-	  throw FITSError (status, "FITSArchive::load_Integration",
-			   "Error reading subint data"
-			   " ipol=%d/%d ichan=%d/%d counter=%d",
-			   a, get_npol(), b, get_nchan(), counter);
-	}
-      
-	counter += get_nbin();
-      
-	for(unsigned j = 0; j < get_nbin(); j++) {
-	  fltarray[j] = temparray[j] * scales[a][b] + offsets[a][b];
-	  if (integ->get_state() == Signal::Coherence) {
-	    if (scale_cross_products && (a == 2 || a == 3))
-	      fltarray[j] *= 2;
-	  }
-	}
-      
-	p->set_amps(fltarray);
-	p->set_state(polmeas);
+    if (status != 0)
+      throw FITSError (status, "FITSArchive::load_Integration", 
+		       "fits_get_coltype DATA");
+    
+    if (typecode == TSHORT)
+      load_amps<short> (sfptr, integ, isubint, colnum);
+    else if (typecode == TFLOAT)
+      load_amps<float> (sfptr, integ, isubint, colnum);
+    else
+      throw Error( InvalidState, "FITSArchive::load_Integration",
+		   "unhandled DATA typecode=%s", fits_datatype_str(typecode) );
 
-      }  
-    }
-  
-    delete [] temparray; 
-    delete [] fltarray;
   }
   else // Profile::no_amps
   {
@@ -378,3 +313,109 @@ try {
 catch (Error& error) {
   throw error += "Pulsar::FITSArchive::load_Integration";
 }
+
+
+template<typename T>
+void Pulsar::FITSArchive::load_amps (fitsfile* fptr,
+				     Integration* integ,
+				     unsigned isubint,
+				     int data_colnum)
+try {
+
+  unsigned nchan = get_nchan();
+  unsigned npol = get_npol();
+  unsigned nbin = get_nbin();
+
+  float nullfloat = 0.0;
+  int row = isubint + 1;
+  
+  if (verbose == 3)
+    cerr << "Pulsar::FITSArchive::load_amps<> reading offsets" << endl;
+  
+  vector<float> offsets;
+  psrfits_read_col (fptr, "DAT_OFFS", offsets, row, nullfloat);
+
+  if (verbose == 3)
+    cerr << "Pulsar::FITSArchive::load_amps<> reading scales" << endl;
+
+  vector<float> scales;
+  psrfits_read_col (fptr, "DAT_SCL", scales, row, nullfloat);
+
+  if (offsets.size() != scales.size())
+    throw Error( InvalidState, "Pulsar::FITSArchive::load_amps<>",
+		 "DAT_OFFS size=%d != DAT_SCL size=%d",
+		 offsets.size(), scales.size() );
+
+  //
+  // the DAT_SCL and DAT_OFFS array size may be either npol*nchan or nchan
+  //
+  bool npol_by_nchan = false;
+  if (offsets.size() == npol * nchan)
+    npol_by_nchan = true;
+  else if (offsets.size() == nchan)
+    npol_by_nchan = false;
+  else
+    throw Error( InvalidState, "Pulsar::FITSArchive::load_amps<>",
+		 "DAT_OFFS/DAT_SCL size=%d != nchan=%d or nchan*npol=%d",
+		 offsets.size(), nchan, nchan*npol );
+
+  // Load the data
+  
+  vector<T> temparray (nbin);
+  vector<float> fltarray (nbin);
+
+  if (verbose == 3)
+    cerr << "Pulsar::FITSArchive::load_amps<> reading data" << endl;
+  
+  T null = FITS_traits<T>::null();
+
+  int initflag = 0;
+  int status = 0;  
+  int counter = 1;
+
+  for (unsigned ipol = 0; ipol < npol; ipol++) {
+    for (unsigned ichan = 0; ichan < nchan; ichan++) {
+      
+      Profile* p = integ->get_Profile(ipol,ichan);
+      
+      fits_read_col (fptr, FITS_traits<T>::datatype(),
+		     data_colnum, row, counter, nbin, 
+		     &null, &(temparray[0]), &initflag, &status);
+
+      if (status != 0)
+	throw FITSError( status, "FITSArchive::load_amps",
+			 "Error reading subint data"
+			 " ipol=%d/%d ichan=%d/%d\n\t"
+			 "colnum=%d firstrow=%d firstelem=%d nelements=%d",
+			 ipol, npol, ichan, nchan, 
+			 data_colnum, row, counter, nbin );
+      
+      counter += nbin;
+
+      float scale = scales[ichan];
+      float offset = offsets[ichan];
+
+      if (npol_by_nchan)
+      {
+	scale = scales[ipol*nchan + ichan];
+	offset = offsets[ipol*nchan + ichan];
+      }
+
+      for(unsigned j = 0; j < nbin; j++) {
+	fltarray[j] = temparray[j] * scale + offset;
+	if (integ->get_state() == Signal::Coherence) {
+	  if (scale_cross_products && (ipol == 2 || ipol == 3))
+	    fltarray[j] *= 2;
+	}
+      }
+      
+      p->set_amps(fltarray);
+      p->set_state(Signal::None);
+      
+    }  
+  }
+}
+catch (Error& error) {
+  throw error += "Pulsar::FITSArchive::load_amps<>";
+}
+
