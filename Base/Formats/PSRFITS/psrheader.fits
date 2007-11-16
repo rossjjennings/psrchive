@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '2.13            '   / Header version 
+HDRVER  = '2.14            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -687,6 +687,7 @@ PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                   19 / Number of fields per row
 # 
+EPOCHS  = '                  ' / Epochs defined by STT_MJD+OFFS_SUB are VALID
 INT_TYPE= '                  ' / Time axis (TIME, BINPHSPERI, BINLNGASC, etc)
 INT_UNIT= '                  ' / Unit of time axis (SEC, PHS (0-1), DEG) 
 TSAMP   =                    * / [s] Sample interval for SEARCH-mode data 
