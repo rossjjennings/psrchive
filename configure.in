@@ -157,6 +157,7 @@ FFT_CFLAGS="$MKL_CFLAGS $FFTW_CFLAGS $FFTW3_CFLAGS $IPP_CFLAGS"
 # Checks for optional libraries
 #
 SWIN_LIB_CFITSIO
+SWIN_LIB_PUMA
 SWIN_LIB_TEMPO2
 SWIN_LIB_MPI
 SWIN_LIB_READLINE
@@ -226,6 +227,7 @@ AC_CONFIG_FILES([
 		Base/Formats/EPN/Makefile
 		Base/Formats/Timer/Makefile
 		Base/Formats/PSRFITS/Makefile
+		Base/Formats/PuMa/Makefile
                 Base/Formats/ASCII/Makefile
 		Base/Applications/Makefile
 		More/Makefile
