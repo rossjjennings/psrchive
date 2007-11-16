@@ -16,6 +16,8 @@
 #include "tostring.h"
 
 #include <fftw3.h>
+#include <assert.h>
+#include <stdint.h>
 
 using namespace std;
 
