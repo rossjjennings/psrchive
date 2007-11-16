@@ -11,7 +11,7 @@ libpsrfits_la_SOURCES = CalibratorExtensionIO.h FITSArchive.C \
 	unload_WidebandCorrelator.C load_WidebandCorrelator.C \
 	unload_CalInfoExtension.C load_CalInfoExtension.C \
 	unload_ITRFExtension.C load_ITRFExtension.C \
-	unload_ProcHistory.C load_ProcHistory.C \
+	unload_ProcHistory.C load_ProcHistory.C no_ProcHistory.C \
 	unload_DigitiserStatistics.C load_DigitiserStatistics.C \
 	unload_DigitiserCounts.C load_DigitiserCounts.C \
 	unload_CalibratorExtension.C load_CalibratorExtension.C \

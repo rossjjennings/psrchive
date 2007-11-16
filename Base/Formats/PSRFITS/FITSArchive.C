@@ -657,14 +657,19 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 	hist->rows[0].nsub = get_nsubint();
       }
     }
-    
+    else
+      no_ProcHistory (fptr);
+
     if (verbose == 3)
       cerr << "FITSArchive::load_header there are " << numrows << " subints"
 	   << endl;
 
     dfault = "";
     psrfits_read_key (fptr, "INT_TYPE", &tempstr, dfault, verbose == 3);
-    
+
+    if (verbose > 2)
+      cerr << "FITSArchive::load_header INT_TYPE=" << tempstr << endl;
+
     if (tempstr != "TIME" && tempstr != "") {
 
       if (tempstr == "BINPHSPERI")
