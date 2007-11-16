@@ -35,16 +35,15 @@ try {
     throw Error (InvalidParam, "FITSArchive::load_Integration",
 		 "filename unspecified");
 
-  Pulsar::Integration* integ = new_Integration();
+  Reference::To<Pulsar::Integration> integ = new_Integration();
   init_Integration (integ);
 
   int row = isubint + 1;
   
   int status = 0;  
 
-  if (verbose == 3) {
+  if (verbose > 2)
     cerr << "FITSArchive::load_Integration number " << isubint << endl;
-  }
   
   double nulldouble = 0.0;
   float nullfloat = 0.0;
@@ -54,13 +53,13 @@ try {
   
   // Open the file
 
-  fitsfile* sfptr = 0;
+  fitsfile* fptr = 0;
   
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::load_Integration fits_open_file (" 
 	 << filename << ")" << endl;
   
-  fits_open_file(&sfptr, filename, READONLY, &status);
+  fits_open_file(&fptr, filename, READONLY, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Integration", 
@@ -69,19 +68,34 @@ try {
 
   // Move to the SUBINT Header Data Unit
   
-  fits_movnam_hdu (sfptr, BINARY_TBL, "SUBINT", 0, &status);
+  fits_movnam_hdu (fptr, BINARY_TBL, "SUBINT", 0, &status);
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Integration", 
 		     "fits_movnam_hdu SUBINT");
 
+
+  // Load the convention for the epoch definition
+  string epoch_definition;
+  string default_definition = "STT_MJD";
+  psrfits_read_key (fptr, "EPOCHS", &epoch_definition,
+		    default_definition, verbose > 2);
+
+  bool correct_epoch_phase = true;
+
+  if (epoch_definition == "VALID") {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Integration epochs are VALID" << endl;
+    correct_epoch_phase = false;
+  }
+
   if (get<Pulsar::IntegrationOrder>()) {
 
     colnum = 0;
-    fits_get_colnum (sfptr, CASEINSEN, "INDEXVAL", &colnum, &status);
+    fits_get_colnum (fptr, CASEINSEN, "INDEXVAL", &colnum, &status);
     
     double value = 0.0;
 
-    fits_read_col (sfptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
+    fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		   &value, &initflag, &status);
     
     if (status != 0)
@@ -102,11 +116,11 @@ try {
   // Set the duration of the integration
   
   colnum = 0;
-  fits_get_colnum (sfptr, CASEINSEN, "TSUBINT", &colnum, &status);
+  fits_get_colnum (fptr, CASEINSEN, "TSUBINT", &colnum, &status);
   
   double duration = 0.0;
   
-  fits_read_col (sfptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
+  fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &duration, &initflag, &status);
   
   integ->set_duration (duration);
@@ -116,10 +130,10 @@ try {
   initflag = 0;
   colnum = 0;
   
-  fits_get_colnum (sfptr, CASEINSEN, "OFFS_SUB", &colnum, &status);
+  fits_get_colnum (fptr, CASEINSEN, "OFFS_SUB", &colnum, &status);
   
   double time = 0.0;
-  fits_read_col (sfptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
+  fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &time, &initflag, &status);
   
   if (status != 0)
@@ -129,7 +143,7 @@ try {
 
   MJD epoch = hdr_ext->start_time + time;
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::FITSArchive::load_Integration reference_epoch=" 
 	 << hdr_ext->start_time << "\n  offset=" << time << "s epoch=" << epoch
 	 << endl;
@@ -158,7 +172,7 @@ try {
       cerr << "Pulsar::FITSArchive::load_Integration folding_period = "
       	   << integ->get_folding_period () << endl;
 
-    if (duration) {
+    if (duration && correct_epoch_phase) {
 
       // Set the toa epoch, correcting for phase offset, ensuring that the
       // new epoch of the integration is at the same phase as the archive
@@ -171,7 +185,7 @@ try {
       epoch -= dtime;
       integ->set_epoch (epoch);
 
-      if (verbose == 3)
+      if (verbose > 2)
       	cerr << "Pulsar::FITSArchive::load_Integration row=" << row <<
 	  "\n  PRED_PHS=" << predicted_phase <<
 	  "\n  reference epoch=" << hdr_ext->start_time <<
@@ -187,7 +201,7 @@ try {
 
   // Load other useful info
 
-  load_Pointing(sfptr,row,integ);
+  load_Pointing(fptr,row,integ);
 
   // Set up the data vector, only Pulsar::Archive base class is friend
 
@@ -195,7 +209,7 @@ try {
 
   // Load the channel centre frequencies
   
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::FITSArchive::load_Integration reading channel freqs" 
 	 << endl;
   
@@ -203,14 +217,14 @@ try {
   vector < float >  chan_freqs(get_nchan());
   
   colnum = 0;
-  fits_get_colnum (sfptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
+  fits_get_colnum (fptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
   
-  fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(),
+  fits_read_col (fptr, TFLOAT, colnum, row, counter, get_nchan(),
 		 &nullfloat, &(chan_freqs[0]), &initflag, &status);
   
   // Set the profile channel centre frequencies
   
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::FITSArchive::load_Integration setting frequencies" 
 	 << endl;
 
@@ -222,7 +236,7 @@ try {
   double chanbw = get_bandwidth() / get_nchan();
   
   if ( all_ones ) {
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "FITSArchive::load_Integration all frequencies unity - reseting"
 	   << endl;
     for (unsigned j = 0; j < get_nchan(); j++) {
@@ -238,7 +252,7 @@ try {
   
   // Load the profile weights
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::FITSArchive::load_Integration reading weights" 
 	 << endl;
   
@@ -246,17 +260,17 @@ try {
   vector < float >  weights(get_nchan());
   
   colnum = 0;
-  fits_get_colnum (sfptr, CASEINSEN, "DAT_WTS", &colnum, &status);
+  fits_get_colnum (fptr, CASEINSEN, "DAT_WTS", &colnum, &status);
   
   for(unsigned b = 0; b < get_nchan(); b++) {
-    fits_read_col (sfptr, TFLOAT, colnum, row, counter, 1, &nullfloat, 
+    fits_read_col (fptr, TFLOAT, colnum, row, counter, 1, &nullfloat, 
 		   &weights[b], &initflag, &status);
     counter ++;
   }
   
   // Set the profile weights
   
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::FITSArchive::load_Integration setting weights" 
 	 << endl;
   
@@ -268,22 +282,22 @@ try {
   if (!Profile::no_amps)
   {
     colnum = 0;
-    fits_get_colnum (sfptr, CASEINSEN, "DATA", &colnum, &status);
+    fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status);
   
     int typecode = 0;
     long repeat = 0;
     long width = 0;
   
-    fits_get_coltype (sfptr, colnum, &typecode, &repeat, &width, &status);  
+    fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);  
 
     if (status != 0)
       throw FITSError (status, "FITSArchive::load_Integration", 
 		       "fits_get_coltype DATA");
     
     if (typecode == TSHORT)
-      load_amps<short> (sfptr, integ, isubint, colnum);
+      load_amps<short> (fptr, integ, isubint, colnum);
     else if (typecode == TFLOAT)
-      load_amps<float> (sfptr, integ, isubint, colnum);
+      load_amps<float> (fptr, integ, isubint, colnum);
     else
       throw Error( InvalidState, "FITSArchive::load_Integration",
 		   "unhandled DATA typecode=%s", fits_datatype_str(typecode) );
@@ -301,14 +315,14 @@ try {
     }
   }
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::FITSArchive::load_Integration load complete" << endl;  
   
   // Finished with the file for now
   
-  fits_close_file(sfptr,&status);
+  fits_close_file (fptr, &status);
 
-  return integ;
+  return integ.release();
 }
 catch (Error& error) {
   throw error += "Pulsar::FITSArchive::load_Integration";
@@ -329,13 +343,13 @@ try {
   float nullfloat = 0.0;
   int row = isubint + 1;
   
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::FITSArchive::load_amps<> reading offsets" << endl;
   
   vector<float> offsets;
   psrfits_read_col (fptr, "DAT_OFFS", offsets, row, nullfloat);
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::FITSArchive::load_amps<> reading scales" << endl;
 
   vector<float> scales;
@@ -364,7 +378,7 @@ try {
   vector<T> temparray (nbin);
   vector<float> fltarray (nbin);
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::FITSArchive::load_amps<> reading data" << endl;
   
   T null = FITS_traits<T>::null();
