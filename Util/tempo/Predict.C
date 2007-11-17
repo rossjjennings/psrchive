@@ -19,6 +19,8 @@
 
 using namespace std;
 
+unsigned Tempo::Predict::minimum_nspan = 0;
+
 Tempo::Predict::Predict (const psrephem* parameters)
 {
   nspan  = 960;
@@ -94,6 +96,15 @@ void Tempo::Predict::set_nspan (unsigned minutes)
 {
   if (nspan != minutes)
     cached = 0;
+
+  if (minimum_nspan && minutes < minimum_nspan)
+  {
+    if (Tempo::verbose)
+      cerr << "Tempo::Predict::set_nspan avoiding 'Nspan too small' feature"
+	"\n\t(nspan requested=" << minutes << " minimum=" << minimum_nspan
+	   << ")" << endl;
+    minutes = minimum_nspan;
+  }
 
   nspan = minutes;
 }

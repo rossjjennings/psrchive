@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Predict.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/06/21 17:32:33 $
+   $Revision: 1.8 $
+   $Date: 2007/11/17 21:01:32 $
    $Author: straten $ */
 
 #ifndef __Tempo_Predict_h
@@ -25,6 +25,9 @@ namespace Tempo {
   class Predict : public Pulsar::Generator {
 
   public:
+
+    //! The minimum value of nspan allowed
+    static unsigned minimum_nspan;
 
     //! Default constructor
     Predict (const psrephem* parameters = 0);
