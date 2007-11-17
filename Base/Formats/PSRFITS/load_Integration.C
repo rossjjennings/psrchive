@@ -198,6 +198,23 @@ try {
     }
 
   }
+  else
+  {
+    fits_get_colnum (fptr, CASEINSEN, "PERIOD", &colnum, &status);
+
+    double period = 0.0;
+    fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
+                   &period, &initflag, &status);
+
+    if (status != 0)
+      throw FITSError (status, "FITSArchive::load_Integration",
+                       "fits_read_col PERIOD (no phase model)");
+
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Integration PERIOD=" << period << endl;
+
+    integ->set_folding_period (period);
+  }
 
   // Load other useful info
 
@@ -389,7 +406,7 @@ try {
 
   for (unsigned ipol = 0; ipol < npol; ipol++) {
     for (unsigned ichan = 0; ichan < nchan; ichan++) {
-      
+    
       Profile* p = integ->get_Profile(ipol,ichan);
       
       fits_read_col (fptr, FITS_traits<T>::datatype(),
