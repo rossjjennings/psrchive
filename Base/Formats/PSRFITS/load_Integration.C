@@ -15,6 +15,7 @@
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Pointing.h"
 #include "Pulsar/FITSHdrExtension.h"
+#include "Pulsar/CalInfoExtension.h"
 
 #include "Pulsar/Predictor.h"
 
@@ -200,20 +201,30 @@ try {
   }
   else
   {
-    fits_get_colnum (fptr, CASEINSEN, "PERIOD", &colnum, &status);
+    CalInfoExtension* calinfo = get<CalInfoExtension>();
+    if (calinfo)
+    {
+      cerr << "FITSArchive::load_Integration CAL_FREQ=" 
+	   << calinfo->cal_frequency << endl;
+      integ->set_folding_period( 1.0/calinfo->cal_frequency );
+    }
 
     double period = 0.0;
+    status = 0;
+    fits_get_colnum (fptr, CASEINSEN, "PERIOD", &colnum, &status);
     fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
                    &period, &initflag, &status);
 
-    if (status != 0)
+    if (status == 0)
+    {
+      if (verbose > 2)
+	cerr << "FITSArchive::load_Integration PERIOD=" << period << endl;
+      integ->set_folding_period (period);
+    }
+
+    if (status && !calinfo)
       throw FITSError (status, "FITSArchive::load_Integration",
-                       "fits_read_col PERIOD (no phase model)");
-
-    if (verbose > 2)
-      cerr << "FITSArchive::load_Integration PERIOD=" << period << endl;
-
-    integ->set_folding_period (period);
+                       "folding period unknown: no model, CAL_FREQ or PERIOD");
   }
 
   // Load other useful info
