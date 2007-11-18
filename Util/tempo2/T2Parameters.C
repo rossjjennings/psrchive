@@ -74,6 +74,11 @@ void Tempo2::Parameters::load (FILE* fptr)
   readSimpleParfile (fptr, psr);
   if (verbose)
     cerr << "Tempo2::Parameters::load readSimpleParfile completed" << endl;
+
+  preProcess (psr, 1, 0, 0);
+  if (verbose)
+    cerr << "Tempo2::Parameters::load preProcess completed" << endl;
+
 }
 
 //! Unload to an open stream
