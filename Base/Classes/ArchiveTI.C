@@ -25,12 +25,12 @@ Pulsar::ArchiveTI::ArchiveTI( Archive *c )
 
 void Pulsar::ArchiveTI::setup( void )
 {
-  add( &Archive::get_filename, "file",  "Name of the file" );
+  add( &Archive::get_filename, "file",    "Name of the file" );
 
-  add( &Archive::get_nbin,     "nbin",  "Number of pulse phase bins" );
-  add( &Archive::get_nchan,    "nchan", "Number of frequency channels" );
-  add( &Archive::get_npol,     "npol",  "Number of polarizations" );
-  add( &Archive::get_nsubint,  "nsub",  "Number of sub-integrations" );
+  add( &Archive::get_nbin,     "nbin",    "Number of pulse phase bins" );
+  add( &Archive::get_nchan,    "nchan",   "Number of frequency channels" );
+  add( &Archive::get_npol,     "npol",    "Number of polarizations" );
+  add( &Archive::get_nsubint,  "nsubint", "Number of sub-integrations" );
 
   add( &Archive::get_type,
        &Archive::set_type,
