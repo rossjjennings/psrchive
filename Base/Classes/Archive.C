@@ -8,6 +8,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/ArchiveExpert.h"
+#include "Pulsar/ArchiveTI.h"
 #include "Pulsar/Receiver.h"
 
 #include "Pulsar/Predictor.h"
@@ -37,6 +38,12 @@ Pulsar::Archive::Expert* Pulsar::Archive::expert ()
 const Pulsar::Archive::Expert* Pulsar::Archive::expert () const
 {
   return expert_interface;
+}
+
+//! Return a text interface that can be used to access this instance
+TextInterface::Parser* Pulsar::Archive::get_interface ()
+{
+  return new ArchiveTI( this );
 }
 
 Pulsar::Archive::Archive ()
