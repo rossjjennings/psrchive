@@ -7,6 +7,8 @@
 
 #include "TextIndex.h"
 
+#include <assert.h>
+
 using namespace std;
 
 TextIndex::TextIndex (const std::string& named_range)
