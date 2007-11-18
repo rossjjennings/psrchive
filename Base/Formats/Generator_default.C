@@ -26,6 +26,12 @@ static int runme () { cerr << "Generator_default: init" << endl; return 0; }
 static int test = runme ();
 #endif
 
+/* ***********************************************************************
+
+   Predictor::policy configuration
+
+   *********************************************************************** */
+
 /*!
   policy == "input"   -> new predictors will have same type as input
   policy == "default" -> new predictors will be of the default type
@@ -48,6 +54,12 @@ policy_config_wrapper
  " 'input'   - same as the currently installed predictor \n"
  " 'default' - determined by Predictor::default"
 );
+
+/* ***********************************************************************
+
+   Predictor::default_type configuration
+
+   *********************************************************************** */
 
 string Pulsar::Predictor::default_type;
 
@@ -76,3 +88,25 @@ Pulsar::Generator* Pulsar::Generator::get_default ()
 
   return new Tempo::Predict;
 }
+
+/* ***********************************************************************
+
+   Tempo::Predict::minimum_nspan configuration
+
+   *********************************************************************** */
+
+Pulsar::Option<unsigned>
+minimum_nspan_config_wrapper
+(
+ &Tempo::Predict::minimum_nspan,
+ "Tempo::minimum_nspan", 0,
+
+ "Minimum value of 'nspan' [minutes]",
+
+ "When generating a polyco with 'tempo -z', the following error can occur\n"
+ "\n"
+ "  STOP  Nspan too small statement executed\n"
+ "\n"
+ "This parameter, if set, puts a lower limit on the value of 'nspan' used."
+);
+
