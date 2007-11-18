@@ -393,9 +393,17 @@ try {
   //
   bool npol_by_nchan = false;
   if (offsets.size() == npol * nchan)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::FITSArchive::load_amps<> ipol scaled" << endl;
     npol_by_nchan = true;
+  }
   else if (offsets.size() == nchan)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::FITSArchive::load_amps<> npol scaled" << endl;
     npol_by_nchan = false;
+  }
   else
     throw Error( InvalidState, "Pulsar::FITSArchive::load_amps<>",
 		 "DAT_OFFS/DAT_SCL size=%d != nchan=%d or nchan*npol=%d",
@@ -442,6 +450,13 @@ try {
 	scale = scales[ipol*nchan + ichan];
 	offset = offsets[ipol*nchan + ichan];
       }
+
+#ifdef _DEBUG
+      cerr << " ipol=" << ipol << " ichan=" << ichan
+	   << " scale=" << scale << " offset=" << offset << endl;
+#endif
+      if (scale == 0.0)
+	scale = 1.0;
 
       for(unsigned j = 0; j < nbin; j++) {
 	fltarray[j] = temparray[j] * scale + offset;
