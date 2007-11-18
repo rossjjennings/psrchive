@@ -32,6 +32,7 @@ include_HEADERS = \
         Stokes.h \
         stringtok.h \
         substitute.h \
+	TextIndex.h \
         TextInterface.h \
         tostring.h \
         Traits.h \
@@ -51,6 +52,7 @@ libunits_la_SOURCES = \
         stringtok.C \
 	test.cfg \
 	tostring.C \
+	TextIndex.C \
         TextInterface.C \
 	Warning.C
 
@@ -61,14 +63,15 @@ nodist_include_HEADERS = PromoteTraits.h
 
 
 TESTS = test_Alias test_tostring test_Conventions		\
-	test_Warning test_Error test_Configuration			\
-	test_HeapTracked test_Reference test_circular_Reference		\
-	test_Registry test_Functor test_Callback test_separate		\
-	test_substitute test_Mueller test_inner_product	\
-	test_Basis test_Stokes						\
-        test_TextInterface test_parse_indeces test_Estimate test_Vector	\
-        test_Matrix test_Jacobi test_eigen test_Jones test_Quaternion	\
-        test_Pauli test_ModifyRestore
+	test_Warning test_Error test_Configuration		\
+	test_HeapTracked test_Reference test_circular_Reference	\
+	test_Registry test_Functor test_Callback test_separate	\
+	test_substitute test_Mueller test_inner_product		\
+	test_Basis test_Stokes test_Estimate			\
+        test_TextInterface test_parse_indeces test_TextIndex	\
+	test_Vector test_Matrix test_Jacobi test_eigen		\
+	test_Jones test_Quaternion test_Pauli			\
+	test_ModifyRestore
 
 check_PROGRAMS = $(TESTS) many_references many_calls
 
@@ -100,6 +103,7 @@ test_Stokes_SOURCES		= test_Stokes.C
 
 test_TextInterface_SOURCES	= test_TextInterface.C
 test_parse_indeces_SOURCES	= test_parse_indeces.C
+test_TextIndex_SOURCES		= test_TextIndex.C
 
 test_ModifyRestore_SOURCES      = test_ModifyRestore.C
 test_Mueller_SOURCES		= test_Mueller.C
