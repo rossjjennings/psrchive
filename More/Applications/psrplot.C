@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/PlotFactory.h"
+#include "Pulsar/PlotLoop.h"
 #include "Pulsar/Plot.h"
 
 #include "Pulsar/Archive.h"
@@ -48,6 +49,8 @@ void usage ()
     " -j job[,job2...] preprocessing jobs \n"
     " -J jobs          multiple preprocessing jobs in 'jobs' file \n"
     " -x               disable default preprocessing \n"
+    "\n"
+    " -l name:range    loop over the range of the specified dimension \n"
     "\n"
     " -h               This help page \n"
     " -M metafile      Specify list of archive filenames in metafile \n"
@@ -93,8 +96,8 @@ int main (int argc, char** argv) try {
   // Preprocessing jobs
   vector<string> jobs;
 
-  // Overlay plots (do not clear page between different plot types)
-  bool overlay = false;
+  // Indeces over which to loop
+  PlotLoop loop;
 
   // Allow plot classes to preprocess data before plotting
   bool preprocess = true;
@@ -105,7 +108,7 @@ int main (int argc, char** argv) try {
   int n1 = 1;
   int n2 = 1;
 
-  static char* args = "A:c:C:D:hj:J:K:M:N:Op:Pqs:vVx";
+  static char* args = "A:c:C:D:hj:J:K:l:M:N:Op:Pqs:vVx";
 
   char c = 0;
   while ((c = getopt (argc, argv, args)) != -1) 
@@ -160,6 +163,10 @@ int main (int argc, char** argv) try {
       loadlines (optarg, jobs);
       break;
 
+    case 'l':
+      loop.add_index( new TextIndex(optarg) );
+      break;
+
     case 'M':
       metafile = optarg;
       break;
@@ -171,7 +178,7 @@ int main (int argc, char** argv) try {
       }
 
     case 'O':
-      overlay = true;
+      loop.set_overlay( true );
       break;
 
     case 'q':
@@ -252,15 +259,12 @@ int main (int argc, char** argv) try {
     if (verbose)
       cerr << "psrplot: plotting " << filenames[ifile] << endl;
 
-    if (overlay)
+    if( loop.get_overlay() )
       cpgpage();
 
     Reference::To<Archive> toplot = archive;
 
     for (unsigned iplot=0; iplot < plots.size(); iplot++) {
-
-      if (!overlay)
-	cpgpage ();
 
       if (plots.size() > 1)
 	toplot = archive->clone();
@@ -268,7 +272,9 @@ int main (int argc, char** argv) try {
       if (preprocess)
 	plots[iplot]->preprocess (toplot);
 
-      plots[iplot]->plot (toplot);
+      loop.set_Archive (toplot);
+      loop.set_Plot (plots[iplot]);
+      loop.plot();
 
     }
 
