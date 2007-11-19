@@ -204,8 +204,9 @@ try {
     CalInfoExtension* calinfo = get<CalInfoExtension>();
     if (calinfo)
     {
-      cerr << "FITSArchive::load_Integration CAL_FREQ=" 
-	   << calinfo->cal_frequency << endl;
+      if (verbose > 2)
+        cerr << "FITSArchive::load_Integration CAL_FREQ=" 
+	     << calinfo->cal_frequency << endl;
       integ->set_folding_period( 1.0/calinfo->cal_frequency );
     }
 
@@ -455,6 +456,7 @@ try {
       cerr << " ipol=" << ipol << " ichan=" << ichan
 	   << " scale=" << scale << " offset=" << offset << endl;
 #endif
+
       if (scale == 0.0)
 	scale = 1.0;
 

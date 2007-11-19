@@ -940,18 +940,21 @@ try {
     hdr_epoch = hdr_ext->start_time;
 
   // take the epoch of the first Integration with a duration
-  for (unsigned jsubint = 0; jsubint < get_nsubint(); jsubint++) {
-    if (get_Integration(jsubint)->get_duration() != 0.0) {
+  for (unsigned jsubint = 0; jsubint < get_nsubint(); jsubint++)
+    if (get_Integration(jsubint)->get_duration() != 0.0)
+    {
       hdr_epoch = get_Integration(jsubint)->get_epoch();
+      if (verbose > 2)
+        cerr << "FITSArchive::unload_file reference epoch subint=" << jsubint
+             << " eopch=" << hdr_epoch.printdays (13);
       break;
     }
-  }
 
   if (hdr_epoch == MJD::zero && verbose > 1)
     cerr << "FITSArchive::unload_file WARNING reference epoch == 0" << endl;
 
   // for use in unload_Integration.C
-  const_cast<FITSArchive*>(this)->reference_epoch = hdr_epoch;
+  reference_epoch = hdr_epoch;
 
   long day = reference_epoch.intday();
   long sec = reference_epoch.get_secs();
