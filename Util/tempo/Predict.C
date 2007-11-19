@@ -235,6 +235,8 @@ polyco Tempo::Predict::generate_work () const
 
     lock ();
 
+    clean ();
+
     write_tzin();
 
     string ephname = get_directory() + "/" + ephem_filename;
