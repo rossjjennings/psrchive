@@ -70,10 +70,18 @@ void psrfits_read_col_work( fitsfile *fptr, const char *name,
 {
   int colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, const_cast<char*>(name), &colnum, status);
+ 
+  int typecode = 0;
+  long repeat = 0;
+  long width = 0;
   
+  fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, status);
+  if (*status != 0)
+    return; 
+ 
   char* nullstr = const_cast<char*>( null.c_str() );
   
-  auto_ptr<char> temp( new char[FLEN_VALUE] );
+  auto_ptr<char> temp( new char[repeat + 1] );
   char* temp_ptr = temp.get();
 
   int anynul = 0;
