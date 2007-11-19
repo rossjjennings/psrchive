@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.20 $
-   $Date: 2006/11/09 18:03:41 $
+   $Revision: 1.21 $
+   $Date: 2007/11/19 17:21:49 $
    $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
@@ -45,6 +45,8 @@ namespace Tempo {
   void lock ();
   // unlock the tempo working directory
   void unlock ();
+  // clean the tempo working directory
+  void clean ();
 
   // convenience overloads
   void   set_system (const std::string& system_call);
