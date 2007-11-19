@@ -30,8 +30,14 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow )
   psrfits_read_col (fptr, "DATE_PRO", &(hrow->date_pro), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);
 
+  if (Pulsar::Archive::verbose > 2)
+    cerr << "load ProcHistory::row DATE_PRO=" << hrow->date_pro << endl;
+
   psrfits_read_col (fptr, "PROC_CMD", &(hrow->proc_cmd), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);
+
+  if (Pulsar::Archive::verbose > 2)
+    cerr << "load ProcHistory::row PROC_CMD=" << hrow->proc_cmd << endl;
 
   psrfits_read_col (fptr, "POL_TYPE", &(hrow->pol_type), row);
 
