@@ -76,18 +76,25 @@ try {
 
 
   // Load the convention for the epoch definition
-  string epoch_definition;
-  string default_definition = "STT_MJD";
-  psrfits_read_key (fptr, "EPOCHS", &epoch_definition,
-		    default_definition, verbose > 2);
+  string epoch_def;
+  string default_def = "STT_MJD";
+  psrfits_read_key (fptr, "EPOCHS", &epoch_def,
+		    default_def, verbose > 2);
 
+  if (verbose > 2)
+    cerr << "FITSArchive::load_Integration epochs are " << epoch_def << endl;
+
+  // By default, the epochs will be corrected using the phase model
   bool correct_epoch_phase = true;
 
-  if (epoch_definition == "VALID") {
-    if (verbose > 2)
-      cerr << "FITSArchive::load_Integration epochs are VALID" << endl;
-    correct_epoch_phase = false;
-  }
+  // By default, they will be corrected such that phase(epoch)=phase(start)
+  bool phase_match_start_time = true;
+
+  if (epoch_def == "VALID")
+    correct_epoch_phase = phase_match_start_time = false;
+
+  if (epoch_def == "MIDTIME")
+    phase_match_start_time = false;
 
   if (get<Pulsar::IntegrationOrder>()) {
 
@@ -152,6 +159,15 @@ try {
   // Set a preliminary epoch to avoid problems loading the polyco
   integ->set_epoch (epoch);
 
+  // Set the folding period to 0 until one of three possible methods succeeds
+  integ->set_folding_period (0.0);
+
+  /* **********************************************************************
+
+     METHOD 1: folding period defined by a pulse phase model
+
+     ********************************************************************** */
+
   if (hdr_model) {
 
     // Set the folding period, using the polyco from the file header
@@ -169,40 +185,64 @@ try {
       warning << "Pulsar::FITSArchive::load_Integration folding_period=" 
 	      << integ->get_folding_period() << " is less than 1ms" << endl;
 
-    if (verbose > 2)
+    else if (verbose > 2)
       cerr << "Pulsar::FITSArchive::load_Integration folding_period = "
       	   << integ->get_folding_period () << endl;
 
-    if (duration && correct_epoch_phase) {
+    if (duration && correct_epoch_phase)
+    {
 
-      // Set the toa epoch, correcting for phase offset, ensuring that the
-      // new epoch of the integration is at the same phase as the archive
-      // start time
-      Phase stt_phs = hdr_model->phase(hdr_ext->start_time);
+      if (verbose > 2)
+	cerr << "Pulsar::FITSArchive::load_Integration correcting epoch phase"
+	     << endl;
+
+      Phase reference_phs = 0.0;
+
+      if (phase_match_start_time)
+      {
+	// Correct epoch such that its phase equals that of the start time
+	if (verbose > 2)
+	  cerr << "Pulsar::FITSArchive::load_Integration matching phase(start)"
+	       << endl;
+
+	reference_phs = hdr_model->phase(hdr_ext->start_time);
+      }
+
       Phase off_phs = hdr_model->phase(epoch);
-      Phase dphase  = off_phs - stt_phs;
+      Phase dphase  = off_phs - reference_phs;
       
       double dtime = dphase.fracturns() * integ->get_folding_period();
       epoch -= dtime;
       integ->set_epoch (epoch);
 
       if (verbose > 2)
+      {
       	cerr << "Pulsar::FITSArchive::load_Integration row=" << row <<
-	  "\n  PRED_PHS=" << predicted_phase <<
-	  "\n  reference epoch=" << hdr_ext->start_time <<
-	  "\n  reference phase=" << stt_phs <<
+	  "\n  PRED_PHS=" << predicted_phase;
+	if (phase_match_start_time)
+	  cerr << "\n  reference epoch=" << hdr_ext->start_time;
+	cerr <<
+	  "\n  reference phase=" << reference_phs <<
 	  "\n      input phase=" << off_phs <<
 	  "\n     phase offset=" << dphase << " = " << dtime << "s" 
 	  "\n     subint epoch=" << epoch << 
 	  "\n     subint phase=" << hdr_model->phase(epoch) << endl;
+      }
 
     }
 
   }
   else
   {
+
+    /* *******************************************************************
+
+       METHOD 2: folding period defined by CAL_FREQ in primary header
+
+       ******************************************************************* */
+
     CalInfoExtension* calinfo = get<CalInfoExtension>();
-    if (calinfo)
+    if (calinfo && calinfo->cal_frequency > 0.0)
     {
       if (verbose > 2)
         cerr << "FITSArchive::load_Integration CAL_FREQ=" 
@@ -210,20 +250,26 @@ try {
       integ->set_folding_period( 1.0/calinfo->cal_frequency );
     }
 
+    /* *******************************************************************
+
+       METHOD 3: folding period defined by PERIOD column of SUBINT HDU
+
+       ******************************************************************* */
+
     double period = 0.0;
     status = 0;
     fits_get_colnum (fptr, CASEINSEN, "PERIOD", &colnum, &status);
     fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
                    &period, &initflag, &status);
 
-    if (status == 0)
+    if (status == 0 && period > 0.0)
     {
       if (verbose > 2)
 	cerr << "FITSArchive::load_Integration PERIOD=" << period << endl;
       integ->set_folding_period (period);
     }
 
-    if (status && !calinfo)
+    if (integ->get_folding_period() == 0.0)
       throw FITSError (status, "FITSArchive::load_Integration",
                        "folding period unknown: no model, CAL_FREQ or PERIOD");
   }
