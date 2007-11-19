@@ -272,7 +272,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.79 2007/11/17 21:08:26 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.80 2007/11/19 17:25:46 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -714,8 +714,9 @@ int main (int argc, char *argv[]) try {
 
       }
       catch (Error& error) {
-	cerr << "Error while installing new ephemeris" 
+	cerr << "Error while installing new ephemeris: " 
 	     << error.get_message() << endl;
+        continue;
       }
 
       if (flipsb) {
