@@ -250,10 +250,20 @@ string Tempo::get_lockfile ()
   return get_directory() + "/.lock";
 }
 
+/* This command should be run only after a lock is obtained */
+void Tempo::clean ()
+{
+  string clean_command = "rm -f " + get_directory() + "/*";
+  system (clean_command.c_str());
+}
 
 // run tempo with the given arguments
 void Tempo::tempo (const string& arguments, const string& input)
 {
+  if (!getenv("TEMPO"))
+    throw Error (InvalidState, "Tempo::tempo",
+                 "TEMPO environment variable not defined");
+
   char cwd[FILENAME_MAX];
 
   if (getcwd (cwd, FILENAME_MAX) == NULL)
