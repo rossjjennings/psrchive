@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2007 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "FITSError.h"
@@ -22,6 +23,9 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
 		     "fits_movnam_hdu SUBINT");
+
+  char* valid = "VALID";
+  fits_update_key (ffptr, TSTRING, "EPOCHS", valid, comment, &status);
 
   psrfits_clean_rows (ffptr);
 
