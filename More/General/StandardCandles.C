@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/StandardCandles.h"
+#include "Pulsar/Pulsar.h"
 
 #include "Error.h"
 #include "strutil.h"
@@ -166,18 +167,41 @@ bool Pulsar::StandardCandles::Entry::matches (const string& name) const
 
 double Pulsar::StandardCandles::Entry::get_flux_mJy (double MHz)
 {
-  if( !spectral_coeffs.empty() ){
-    double ret = spectral_coeffs[0];
-    double log_freq = log(MHz)/log(10.0);
+  if( !spectral_coeffs.empty() )
+  {
+    /*
+
+    From http://www.vla.nrao.edu/astro/calib/manual/baars.html
+
+    Below we provide the current (1999.2) best analytic
+    expression for their flux densities.
+
+    Log S = A + B * Log v + C * (Log v)**2 + D * (Log v)**3
+
+    where S is the flux density in Jy and v is the frequency in GHz.
+    These expressions are valid between 300 MHz and 50 GHz.
+
+    */
+
+    if (MHz < 300 | MHz > 50e3)
+      warning << "Pulsar::StandardCandles::Entry::get_flux_mJy\n"
+	"\tfrequency=" << MHz << " MHz outside of range of validity" << endl;
+
+    double GHz = MHz * 1e-3;
+
+    double log_freq = log(GHz)/log(10.0);
+
+    double log_flux = spectral_coeffs[0];
+    for( unsigned i=1; i<spectral_coeffs.size(); i++)
+      log_flux += spectral_coeffs[i] * pow(log_freq, double(i));
 
     if( verbose )
-      fprintf(stderr,"Pulsar::StandardCandles::Entry::get_flux_mJy Got f=%f MHz and log(f)=%f and ret=%f\n",
-	      MHz, log_freq, ret);
+      cerr << "Pulsar::StandardCandles::Entry::get_flux_mJy"
+	" f=" << GHz << "GHz; log(f)=" << log_freq 
+	   << "; log(S)=" << log_flux << endl;
 
-    for( unsigned i=1; i<spectral_coeffs.size(); i++)
-      ret += spectral_coeffs[i]*pow(log_freq,double(i));
-
-    return 1000.0*pow(10.0,ret);
+    // return in mJy
+    return 1e3 * pow(10.0,log_flux);
   }
 
   return pow (MHz/reference_frequency, -spectral_index) * reference_flux * 1e3;
