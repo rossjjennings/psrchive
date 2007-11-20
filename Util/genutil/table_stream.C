@@ -5,15 +5,8 @@
  *
  ***************************************************************************/
 
-
-
-
-
-
-
-
 #include "table_stream.h"
-
+#include <assert.h>
 
 table_stream &operator<<( table_stream &rhs, const std::string &lhs )
 {
