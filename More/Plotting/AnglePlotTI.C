@@ -6,6 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/AnglePlot.h"
 #include "Pulsar/PhasePlot.h"
+#include "pairutil.h"
 
 Pulsar::AnglePlot::Interface::Interface (AnglePlot* instance)
 {
@@ -34,5 +35,9 @@ Pulsar::AnglePlot::Interface::Interface (AnglePlot* instance)
   add( &AnglePlot::get_span,
        &AnglePlot::set_span,
        "span", "Span of angles in plot (degrees)" );
+  
+  add( &AnglePlot::get_ang_range,
+       &AnglePlot::set_ang_range,
+       "range", "Range of angles in plot (degrees)" );
 
 }
