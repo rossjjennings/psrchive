@@ -84,12 +84,14 @@ Reference::Able::__reference (bool active) const
 
   thiz->__is_on_heap();
 
-  if (!__reference_handle) {
+  if (!__reference_handle)
+  {
 #ifdef _DEBUG
   cerr << "Reference::Able::__reference new handle" << endl;
 #endif
     thiz->__reference_handle = new Handle;
     thiz->__reference_handle->pointer = thiz;
+    thiz->__reference_handle->count = 0;
   }
 
   if (active)
