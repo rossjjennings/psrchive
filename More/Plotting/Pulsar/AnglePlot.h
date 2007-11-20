@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/AnglePlot.h,v $
-   $Revision: 1.15 $
-   $Date: 2007/10/02 05:08:15 $
-   $Author: straten $ */
+   $Revision: 1.16 $
+   $Date: 2007/11/20 00:11:42 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_AnglePlot_h
 #define __Pulsar_AnglePlot_h
@@ -70,6 +70,10 @@ namespace Pulsar {
     //! span of value in degrees
     void set_span (float t) { span = t; }
     float get_span () const { return span; }
+    
+    //! range of values in degrees
+    void set_ang_range( const std::pair<float,float> &s_range ) { range = s_range; }
+    std::pair<float,float> get_ang_range() const { return range; }
 
   protected:
 
@@ -81,6 +85,9 @@ namespace Pulsar {
 
     //! Span of values in degrees
     float span;
+    
+    //! Range of values in degrees
+    std::pair<float,float> range;
 
     //! The angles
     std::vector< Estimate<double> > angles;
