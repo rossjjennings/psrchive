@@ -165,6 +165,11 @@ void table_stream::determine_justifications( void )
 {
   justifications.resize( headings.size() );
   
+  if (!data.size())
+    return;
+
+  assert (data[0].size() == justifications.size());
+
   for( unsigned col = 0; col < data[0].size(); col ++ )
   {
     if( is_numeric( data[0][col] ) )
