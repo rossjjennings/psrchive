@@ -31,7 +31,7 @@ Pulsar::Integration::Extension::~Extension ()
 {
 }
 
-string Pulsar::Integration::Extension::get_name () const
+string Pulsar::Integration::Extension::get_extension_name () const
 {
   return name;
 }
@@ -175,7 +175,7 @@ void Pulsar::Integration::copy (const Integration* subint, bool management)
 
     if (verbose)
       cerr << "Pulsar::Integration::copy clone " 
-	   << subint->get_extension(iext)->get_name() << endl;
+	   << subint->get_extension(iext)->get_extension_name() << endl;
 
     Reference::To<Extension> ext = subint->get_extension(iext)->clone();
     add_extension (ext);

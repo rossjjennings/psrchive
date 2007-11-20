@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.92 $
-   $Date: 2007/09/24 08:52:05 $
+   $Revision: 1.93 $
+   $Date: 2007/11/20 04:55:13 $
    $Author: straten $ */
 
 /*
@@ -331,7 +331,7 @@ namespace Pulsar {
       virtual void update (const Integration* subint) { }
 
       //! Return the name of the Extension
-      std::string get_name () const;
+      std::string get_extension_name () const;
       
     protected:
       
@@ -504,8 +504,8 @@ namespace Pulsar {
       const Extension* ext = get_extension (iext);
 
       if (verbose)
-	std::cerr << "Pulsar::Integration::get<T> name=" << ext->get_name() 
-                  << std::endl;
+	std::cerr << "Pulsar::Integration::get<T> name=" 
+                  << ext->get_extension_name() << std::endl;
 
       extension = dynamic_cast<const ExtensionType*>( ext );
 
