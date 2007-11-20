@@ -26,9 +26,6 @@ Pulsar::AnglePlot::AnglePlot()
 
   isubint = 0;
   ichan = 0;
-  
-  range.first = 0;
-  range.second = 0;
 
   get_frame()->get_y_axis()->set_tick( 60.0 );
   get_frame()->get_y_axis()->set_nsub( 3 );
@@ -51,13 +48,7 @@ void Pulsar::AnglePlot::prepare (const Archive* data)
   float min = 0;
   float max = 0;
 
-  if( range.first != range.second )
-  {
-    // keep pgplot from drawing the 90 or 180 at the end
-    min = range.first - 0.0001;
-    max = range.second;
-  }
-  else if (span)
+  if (span)
   {
     // keep pgplot from drawing the 90 or 180 at the edge
     float half = 0.5 * span - 0.0001;
