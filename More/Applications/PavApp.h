@@ -126,7 +126,12 @@ private:
   bool cblpo;
   bool cblao;
   
+  bool pa_ext;
+  
+  bool plot_error_box;
+
   bool label_degrees;
+  bool centre_profile;
 
   unsigned int ronsub;
 };
