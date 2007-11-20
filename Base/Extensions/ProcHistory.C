@@ -58,6 +58,10 @@ void Pulsar::ProcHistory::init ()
 
 Pulsar::ProcHistory::row& Pulsar::ProcHistory::get_last ()
 {
+  if (rows.size() == 0)
+    throw Error (InvalidState, "Pulsar::ProcHistory::get_last",
+		 "history is empty");
+
   return rows.back();
 }
 
