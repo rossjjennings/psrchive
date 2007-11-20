@@ -2143,7 +2143,8 @@ int main( int argc, char *argv[] )
     else
     {
       for_each( filenames.begin(), filenames.end(), ProcessArchive );
-      ts.flush();
+      if( neat_table )
+	ts.flush();
     }
   }
 
