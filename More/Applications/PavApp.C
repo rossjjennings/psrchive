@@ -16,6 +16,8 @@
 #include <Pulsar/PhaseVsTime.h>
 #include <Pulsar/PhaseVsFrequency.h>
 #include <Pulsar/DynamicSNSpectrum.h>
+#include <Pulsar/ProfilePlot.h>
+#include <Pulsar/PosAngPlot.h>
 #include <limits>
 
 
@@ -61,11 +63,16 @@ PavApp::PavApp()
   y_min = 0.0;
   truncate_amp = 0.0;
   colour_map = pgplot::ColourMap::Heat;
+  centre_profile = false;
+
+  plot_error_box = false;
 
   cbppo = false;
   cbpao = false;
   cblpo = false;
   cblao = false;
+
+  pa_ext = false;
 
   label_degrees = false;
 
@@ -141,6 +148,8 @@ void PavApp::PrintUsage( void )
   cout << endl;
   cout << " --plot_qu      Plot Stokes Q and Stokes U in '-S' option instead of degree of linear" << endl;
   cout << " --ld           Label phase axes in degrees" << endl;
+  cout << " --ebox         Plot an error box, for -D and -S " << endl;
+  cout << " --pa_ext       Plot position angle plot from -90 deg to 180 deg, instead of -90,90" << endl;
   cout << endl;
   cout << "Integration re-ordering (nsub = final # of subints) (used with pav Y for binary pulsars):" << endl;
   cout << " --convert_binphsperi   nsub" << endl;
@@ -180,7 +189,7 @@ void PavApp::SetPhaseZoom( double min_phase, double max_phase  )
                      string( ")");
 
   // Now set the range for all the plots that have phase on the x axis.
-  
+
   SetPlotOptions<PhasePlot>( string("x:range=") + range_str );
   SetPlotOptions<MultiPhase>( string("x:range=") + range_str );
 }
@@ -335,9 +344,9 @@ void PavApp::PavSpecificOptions( void )
     SetPlotOptions<DynamicSNSpectrum>( "above:l=$name" );
     SetPlotOptions<DynamicSNSpectrum>( "above:r=$freq Mhz" );
   }
-  
+
   // StokesSpherical plot config
-  
+
   SetPlotOptions<StokesSpherical>( "flux:below:l=" );
   if( publn )
   {
@@ -348,6 +357,19 @@ void PavApp::PavSpecificOptions( void )
   else
   {
     SetPlotOptions<StokesSpherical>( "ell:above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
+  }
+
+  // if we want to plot error bars
+
+  if( plot_error_box )
+  {
+    SetPlotOptions<ProfilePlot>( "ebox=1" );
+  }
+
+  // if we are plotting position angles between -90 and 180, set  config for PosAnglePlot
+  if( pa_ext )
+  {
+    SetPlotOptions<StokesCylindrical>( "pa:y:range=(0,1.5)" );
   }
 }
 
@@ -487,6 +509,8 @@ int PavApp::run( int argc, char *argv[] )
   const int PUBLN            = 1007;
   const int PUBLNC           = 1008;
   const int LAB_DEG          = 1009;
+  const int EBOX             = 1010;
+  const int PAEXT            = 1011;
 
   static struct option long_options[] =
     {
@@ -499,6 +523,8 @@ int PavApp::run( int argc, char *argv[] )
       { "publn",              0, 0, PUBLN },
       { "publnc",             0, 0, PUBLNC },
       { "ld",                 0, 0, LAB_DEG },
+      { "ebox",               0, 0, EBOX },
+      { "pa_ext",             0, 0, PAEXT },
       { 0,0,0,0 }
     };
 
@@ -524,7 +550,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.33 2007/11/14 00:21:27 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.34 2007/11/20 00:42:08 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -534,7 +560,8 @@ int PavApp::run( int argc, char *argv[] )
       plot_device = optarg;
       break;
     case 'C':
-      jobs.push_back( "centre" );
+      //jobs.push_back( "centre" );
+      centre_profile = true;
       break;
     case 'd':
       jobs.push_back( "dedisperse" );
@@ -707,6 +734,12 @@ int PavApp::run( int argc, char *argv[] )
     case LAB_DEG:
       label_degrees = true;
       break;
+    case EBOX:
+      plot_error_box = true;
+      break;
+    case PAEXT:
+      pa_ext = true;
+      break;
     case 'x':
       clip_value = "=(0,";
       clip_value += string( optarg );
@@ -843,6 +876,36 @@ int PavApp::run( int argc, char *argv[] )
       {
         preprocessor.set( plots[i].archive );
         preprocessor.script( jobs );
+      }
+
+      if( centre_profile )
+      {
+        Reference::To<Archive> copy = plots[i].archive->clone();
+        //copy->remove_baseline();
+
+        int nbin = copy->get_nbin();
+
+        int p1, p2;
+        copy->find_peak_edges( p1, p2 );
+
+        float first = float(p1) / float(nbin);
+        float second = float(p2) / float(nbin);
+        float centre = first + (second - first) / 2.0;
+
+        if( centre > 0.5 )
+        {
+          float rot = (centre - 0.5);
+          cerr << "rotating by " << rot << endl;
+          plots[i].archive->rotate_phase( rot );
+        }
+        else
+          plots[i].archive->rotate_phase( .5 - centre );
+
+        cerr << "peak edges were " << first << ", " << second << endl;
+        cerr << "centre is " << centre << endl;
+
+        //plots[i].archive->rotate_phase( 1.0 );
+
       }
 
       if (cbppo)
