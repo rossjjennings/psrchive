@@ -550,7 +550,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.34 2007/11/20 00:42:08 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.35 2007/11/20 00:57:57 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -880,33 +880,36 @@ int PavApp::run( int argc, char *argv[] )
 
       if( centre_profile )
       {
-        Reference::To<Archive> copy = plots[i].archive->clone();
-        //copy->remove_baseline();
-
-        int nbin = copy->get_nbin();
-
-        int p1, p2;
-        copy->find_peak_edges( p1, p2 );
-
-        float first = float(p1) / float(nbin);
-        float second = float(p2) / float(nbin);
-        float centre = first + (second - first) / 2.0;
-
-        if( centre > 0.5 )
-        {
-          float rot = (centre - 0.5);
-          cerr << "rotating by " << rot << endl;
-          plots[i].archive->rotate_phase( rot );
-        }
-        else
-          plots[i].archive->rotate_phase( .5 - centre );
-
-        cerr << "peak edges were " << first << ", " << second << endl;
-        cerr << "centre is " << centre << endl;
+	preprocessor.set( plots[i].archive );
+	preprocessor.parse( "centre" );
+// 	Reference::To<Archive> copy = plots[i].archive->clone();
+//         //copy->remove_baseline();
+// 
+// 	int nbin = copy->get_nbin();
+// 
+// 	int p1, p2;
+// 	copy->find_peak_edges( p1, p2 );
+// 
+// 	float first = float(p1) / float(nbin);
+// 	float second = float(p2) / float(nbin);
+// 	float centre = first + (second - first) / 2.0;
+// 
+// 	if( centre > 0.5 )
+// 	{
+// 	  float rot = (centre - 0.5);
+// 	  cerr << "rotating by " << rot << endl;
+// 	  plots[i].archive->rotate_phase( rot );
+// 	}
+// 	else
+// 	  plots[i].archive->rotate_phase( .5 - centre );
+// 
+// 	cerr << "peak edges were " << first << ", " << second << endl;
+// 	cerr << "centre is " << centre << endl;
 
         //plots[i].archive->rotate_phase( 1.0 );
 
       }
+
 
       if (cbppo)
       {
