@@ -11,6 +11,8 @@
 
 #include <cpgplot.h>
 
+using namespace std;
+
 //! Default constructor
 Pulsar::PlotLoop::PlotLoop ()
 {
@@ -68,11 +70,19 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
 
   index->set_container( const_cast<Archive*>(archive.get())->get_interface() );
 
-  for (unsigned i=0; i<index->size(); i++)
+  for (unsigned i=0; i<index->size(); i++) try
   {
     the_plot->configure( index->get_index(i) );
     plot (indeces);
   }
+  catch (Error& error)
+  {
+    cerr << "Pulsar::PlotLoop::plot error plotting " << index->get_index(i) 
+         << " of "
+         << "\n\t" << archive->get_filename()
+         << "\n\t" << error.get_message() << endl;
+  }
 
   indeces.push( index );
 }
+

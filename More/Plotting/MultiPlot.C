@@ -27,7 +27,8 @@ void Pulsar::MultiPlot::plot (const Archive* data)
   prepare (data);
 
   std::map< std::string, Reference::To<FramedPlot> >::iterator ptr;
-  for (ptr = plots.begin(); ptr != plots.end(); ptr++) {
+  for (ptr = plots.begin(); ptr != plots.end(); ptr++)
+  {
 
     FramedPlot* plot = ptr->second;
     PlotFrame* frame = plot->get_frame();
@@ -36,15 +37,29 @@ void Pulsar::MultiPlot::plot (const Archive* data)
     std::pair<float,float> xvp, yvp;
     set_viewport (frame, xvp, yvp);
 
-    // prepare the plot
-    prepare (plot);
+    Error* to_throw = 0;
 
-    // plot
-    plot->plot(data);
+    try {
+      // prepare the plot
+      prepare (plot);
+
+      // plot
+      plot->plot(data);
+    }
+    catch (Error& error)
+    {
+      error += "Pulsar::MultiPlot::plot";
+      error << " (in " << ptr->first << ")";
+      to_throw = new Error (error);
+    }
 
     // restore the viewport of the frame
     frame->get_x_scale(true)->set_viewport( xvp );
     frame->get_y_scale(true)->set_viewport( yvp );
+
+    // this could cause a memory leak
+    if (to_throw)
+      throw *to_throw;
 
   }
 }
