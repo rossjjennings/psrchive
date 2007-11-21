@@ -185,11 +185,22 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   fits_read_col (fptr, TFLOAT, colnum, row, 1, 1, &nullfloat,
 		 &float_angle, &initflag, &status);
   
-  if (status != 0) {
+  if (status || initflag)
+  {
+    /* 
+      Rationale for aborting: POS_ANG is currently the only attribute
+      of the Pointing class that is actually used by anything.
+
+      Furthermore, the existence of a Pointing extension will cause
+      the value of FA_REQ to be overridden by POS_ANG, which is not
+      desireable if FA_REQ is set to something sensible.
+    */
+
     if (verbose > 2)
-      cerr << "FITSArchive::load_Pointing WARNING no POS_ANG" << endl;
-    float_angle = 0;
-    status = 0;
+      cerr << "FITSArchive::load_Pointing WARNING no POS_ANG (aborting)" 
+           << endl;
+
+    return;
   }
   
   angle.setDegrees (float_angle);
