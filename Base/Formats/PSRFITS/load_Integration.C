@@ -84,10 +84,10 @@ try {
   if (verbose > 2)
     cerr << "FITSArchive::load_Integration epochs are " << epoch_def << endl;
 
-  // By default, the epochs will be corrected using the phase model
+  // By default, correct epochs using the phase model
   bool correct_epoch_phase = true;
 
-  // By default, they will be corrected such that phase(epoch)=phase(start)
+  // By default, correct epochs such that phase(epoch)=phase(start)
   bool phase_match_start_time = true;
 
   if (epoch_def == "VALID")
