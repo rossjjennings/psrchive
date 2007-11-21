@@ -42,8 +42,8 @@ void Pulsar::FITSArchive::clean_Pointing_columns (fitsfile* fptr) const
   {
     int status = 0;
     int colnum = 0;
-
-    fits_get_colnum (fptr, CASEINSEN, "LST_SUB", &colnum, &status);
+    char* key = const_cast<char*>( columns[icol].c_str() );
+    fits_get_colnum (fptr, CASEINSEN, key, &colnum, &status);
     fits_delete_col (fptr, colnum, &status);
   }
 }
