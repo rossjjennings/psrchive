@@ -27,6 +27,8 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   char* valid = "VALID";
   fits_update_key (ffptr, TSTRING, "EPOCHS", valid, comment, &status);
 
+  clean_Pointing_columns (ffptr);
+
   psrfits_clean_rows (ffptr);
 
   // Insert nsubint rows

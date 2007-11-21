@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.48 $
-   $Date: 2007/11/19 15:17:13 $
+   $Revision: 1.49 $
+   $Date: 2007/11/21 07:12:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -218,6 +218,9 @@ namespace Pulsar {
 
     //! Unload Integration data to the SUBINT HDU of the specified FITS file
     void unload_integrations (fitsfile*) const;
+
+    //! Delete Pointing related columns, if not needed
+    void clean_Pointing_columns (fitsfile*) const;
 
     //! Extra polyco information stored in POLYCO HDU
     double predicted_phase;
