@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.25 $
-   $Date: 2007/07/23 02:20:23 $
+   $Revision: 1.26 $
+   $Date: 2007/11/21 05:01:27 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -19,6 +19,7 @@
 
 #include <string>
 #include <iostream>
+#include <limits>
 #include <math.h>
 
 static const double MilliSecin12Hours = 4.32e7;
@@ -131,6 +132,13 @@ class Angle
 std::ostream& operator << (std::ostream& os, const Angle& angle);
 std::istream& operator >> (std::istream& is, Angle& angle);
 
+namespace std {
+
+  // specialize numeric_limits for Angle class
+  template<>
+  class numeric_limits<Angle> : public numeric_limits<double> {
+  };
+}
 
 // More Arctangle stuff... NOTE: remember the Angle = operator
 // DOESN'T set wrap_point, so only use these to e.g. pass directly
