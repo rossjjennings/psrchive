@@ -170,6 +170,12 @@ Angle Pulsar::Receiver::get_calibrator_offset () const
   return get<Linear>()->get_calibrator_offset ();
 }
 
+void Pulsar::Receiver::set_feed_corrected (bool val)
+{
+  // cerr << "Pulsar::Receiver::set_feed_corrected " << val << endl;
+  feed_corrected = val;
+}
+
 static string match_indent = "\n\t";
 
 bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const

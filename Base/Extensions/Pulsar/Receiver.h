@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.22 $
-   $Date: 2007/10/02 04:50:09 $
+   $Revision: 1.23 $
+   $Date: 2007/11/21 18:53:56 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -155,7 +155,7 @@ namespace Pulsar {
     //! Get the flag set when the offset of the feed has been corrected
     bool get_feed_corrected () const { return feed_corrected; }
     //! Set the flag set when the offset of the feed has been corrected
-    void set_feed_corrected (bool val) { feed_corrected = val; }
+    void set_feed_corrected (bool);
 
     //! Get if platform to sky transformation has been corrected
     bool get_platform_corrected () const { return platform_corrected; }
