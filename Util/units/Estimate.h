@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.37 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.38 $
+   $Date: 2007/11/21 19:47:55 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -187,6 +187,20 @@ class PromoteTraits< Estimate<T,U>, Estimate<V,W> >
   public:
     typedef Estimate< typename PromoteTraits<T,V>::promote_type, 
                       typename PromoteTraits<U,W>::promote_type > promote_type;
+};
+
+template <class T, class U, class V>
+class PromoteTraits< Estimate<T,U>, V >
+{
+  public:
+    typedef Estimate<typename PromoteTraits<T,V>::promote_type,U> promote_type;
+};
+
+template <class T, class U, class V>
+class PromoteTraits< V, Estimate<T,U> >
+{
+  public:
+    typedef Estimate<typename PromoteTraits<T,V>::promote_type,U> promote_type;
 };
 
 #endif
