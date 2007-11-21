@@ -208,7 +208,8 @@ void Pulsar::Archive::add_extension (Extension* ext)
   else
   {
     if (verbose == 3)
-      cerr << "Pulsar::Archive::add_extension appending" << endl;
+      cerr << "Pulsar::Archive::add_extension appending "
+	   << ext->get_extension_name() << endl;
     extension.push_back(ext);
   }
 }
