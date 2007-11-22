@@ -19,6 +19,24 @@ Pulsar::PlotAttributes::~PlotAttributes ()
 {
 }
 
+//! Set the character height
+void Pulsar::PlotAttributes::set_character_height (float h)
+{
+  character_height = h; set_applied = "none";
+}
+
+//! Set the character font
+void Pulsar::PlotAttributes::set_character_font (int font)
+{
+  character_font = font; set_applied = "none";
+}
+
+//! Set the line width
+void Pulsar::PlotAttributes::set_line_width (int width)
+{
+  line_width = width; set_applied = "none";
+}
+
 void Pulsar::PlotAttributes::publication_quality ()
 {
   set_character_height (1.5);
@@ -43,3 +61,5 @@ void Pulsar::PlotAttributes::apply_set (const std::string& name)
     throw Error (InvalidParam, "Pulsar::PlotAttributes::apply_set",
 		 "unrecognized set name '" + name + "'");
 }
+
+

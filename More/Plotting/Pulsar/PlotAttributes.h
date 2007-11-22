@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotAttributes.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/10/08 00:43:22 $
-   $Author: nopeer $ */
+   $Revision: 1.7 $
+   $Date: 2007/11/22 11:56:32 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_PlotAttributes_h
 #define __Pulsar_PlotAttributes_h
@@ -36,15 +36,15 @@ namespace Pulsar {
     };
 
     //! Set the character height
-    virtual void set_character_height (float h) { character_height = h; set_applied = "none"; }
+    virtual void set_character_height (float h);
     float get_character_height () const { return character_height; }
 
     //! Set the character font
-    virtual void set_character_font (int font) { character_font = font; set_applied = "none"; }
+    virtual void set_character_font (int font);
     int get_character_font () const { return character_font; }
 
     //! Set the line width
-    virtual void set_line_width (int width) { line_width = width; set_applied = "none"; }
+    virtual void set_line_width (int width);
     int get_line_width () const { return line_width; }
 
     //! Apply the named customization option set
@@ -58,11 +58,15 @@ namespace Pulsar {
     //! Remove all plot labels
     virtual void no_labels ();
 
+    //! Set the plot surface size, if necessary
+    void initialize_surface ();
+
   protected:
 
     float character_height;
     int character_font;
     int line_width;
+
     std::string set_applied;
 
   };
