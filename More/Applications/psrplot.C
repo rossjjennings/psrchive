@@ -41,6 +41,8 @@ void usage ()
     " -D device        plot device \n"
     " -N x,y           plot panels \n"
     " -O               overlay plots \n"
+    " -r ratio         aspect ratio (height/width) \n"
+    " -w width         plot surface width (in centimetres) \n"
     "\n"
     " -p plot          plot type \n"
     " -c cfg[,cfg2...] plot options \n"
@@ -79,6 +81,9 @@ void specific_options (string optarg, vector<Plot*>& plots);
 // load the style file into one of the plots
 void specific_style (string optarg, vector<Plot*>& plots);
 
+// set the size of the plotting surface
+void set_paper_size (float width_cm, float aspect_ratio);
+
 int main (int argc, char** argv) try {
 
   // name of file containing list of Archive filenames
@@ -105,22 +110,24 @@ int main (int argc, char** argv) try {
   // verbosity
   bool verbose = false;
 
+  // width of plot surface in cm
+  float surface_width = 0.0;
+
+  // aspect ratio (height/width)
+  float aspect_ratio = 0.0;
+
   int n1 = 1;
   int n2 = 1;
 
-  static char* args = "A:c:C:D:hj:J:K:l:M:N:Op:Pqs:vVx";
+  static char* args = "A:c:C:D:hj:J:K:l:M:N:Op:Pqr:s:vVw:x";
 
   char c = 0;
   while ((c = getopt (argc, argv, args)) != -1) 
 
     switch (c)  {
 
-    case 'p':
-      plots.push_back( factory.construct(optarg) );
-      break;
-
-    case 'P':
-      help_plot_types ();
+    case 'A': 
+      help_frame_options (optarg);
       return 0;
 
     case 'c':
@@ -134,22 +141,10 @@ int main (int argc, char** argv) try {
       help_plot_options (optarg);
       return 0;
 
-    case 's':
-      if (optarg[0] == ':')
-	specific_style (optarg, plots);
-      else
-	loadlines (optarg, options);
-      break;
-
-    case 'K':
-      // for backward compatibility with pav ...
     case 'D':
+    case 'K': // for backward compatibility with old pav ...
       plot_device = optarg;
       break;
-
-    case 'A': 
-      help_frame_options (optarg);
-      return 0;
 
     case 'h':
       usage();
@@ -176,13 +171,36 @@ int main (int argc, char** argv) try {
 	cerr << "psrplot: error parsing -N " << optarg << endl;
 	return -1;
       }
+      break;
 
     case 'O':
       loop.set_overlay( true );
       break;
 
+    case 'p':
+      plots.push_back( factory.construct(optarg) );
+      break;
+
+    case 'P':
+      help_plot_types ();
+      return 0;
+
     case 'q':
       Archive::set_verbosity (0);
+      break;
+
+    case 'r':
+      if (sscanf( optarg, "%f", &aspect_ratio ) != 1) {
+	cerr << "psrplot: error parsing -r " << optarg << endl;
+	return -1;
+      }
+      break;
+
+    case 's':
+      if (optarg[0] == ':')
+	specific_style (optarg, plots);
+      else
+	loadlines (optarg, options);
       break;
 
     case 'v':
@@ -193,6 +211,13 @@ int main (int argc, char** argv) try {
       Archive::set_verbosity (3);
       Plot::verbose = true;
       verbose = true;
+      break;
+
+    case 'w':
+      if (sscanf( optarg, "%f", &surface_width ) != 1) {
+	cerr << "psrplot: error parsing -w " << optarg << endl;
+	return -1;
+      }
       break;
 
     case 'x':
@@ -230,11 +255,16 @@ int main (int argc, char** argv) try {
     return -1;
   } 
 
+  // open the plot device
   if (cpgopen(plot_device.c_str()) < 0) {
     cout << "psrplot: Could not open plot device" << endl;
     return -1;
   }
 
+  // set the size of the plot
+  set_paper_size (surface_width, aspect_ratio);
+
+  // prompt before plotting the next page
   cpgask(1);
 
   if (n1 > 1 || n2 > 1)
@@ -371,4 +401,26 @@ void specific_style (string optarg, vector<Plot*>& plots)
 
   // set them for the specified plot
   set_options (plots[index], options);
+}
+
+void set_paper_size (float width_cm, float aspect_ratio)
+{
+  if (width_cm == 0 && aspect_ratio == 0)
+    return;
+
+  float use_aspect_ratio = aspect_ratio;
+
+  if (aspect_ratio == 0)
+  {
+    // determine the current aspect ratio
+
+    int units = 2; // mm
+    float x1, x2, y1, y2;
+    cpgqvsz (units, &x1, &x2, &y1, &y2);
+    use_aspect_ratio = y2/x2;
+  }
+
+  float cm_per_inch = 2.54;
+
+  cpgpap( width_cm/cm_per_inch, use_aspect_ratio );
 }
