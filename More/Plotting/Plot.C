@@ -27,7 +27,7 @@ void Pulsar::Plot::configure (const std::string& option)
   }
 }
 
-/* By default, most plot will need the profile baseline to be removed */
+/* By default, most plots will need the profile baseline to be removed */
 void Pulsar::Plot::preprocess (Archive* archive)
 {
   archive->remove_baseline();
