@@ -200,6 +200,9 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     model[ichan] -> set_feed_transformation (to_receptor);
     model[ichan] -> set_platform_transformation (to_feed);
 
+    if (normalize_by_invariant)
+      model[ichan] -> set_constant_pulsar_gain ();
+
     if (measure_cal_Q)
       model[ichan] -> fix_orientation ();
 
