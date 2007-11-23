@@ -155,14 +155,14 @@ Pulsar::CorrectionsCalibrator::get_feed_transformation (const Pointing* point,
   double feed_rotation = 0.0;
 
   if (point) {
-    if (verbose > 2)
+    if (verbose > 1)
       cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation\n"
         "   using Pointing::feed_angle="
            << point->get_feed_angle().getDegrees() << " deg" << endl;
     feed_rotation = point->get_feed_angle().getRadians();
   }
   else if (rcvr) {
-    if (verbose > 2)
+    if (verbose > 1)
       cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation\n"
         "   using Receiver::tracking_angle="
            << rcvr->get_tracking_angle().getDegrees() << " deg" << endl;
