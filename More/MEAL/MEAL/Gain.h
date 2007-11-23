@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Gain.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.8 $
+   $Date: 2007/11/23 20:12:09 $
    $Author: straten $ */
 
 #ifndef __MEAL_Gain_H
@@ -25,6 +25,12 @@ namespace MEAL {
 
     //! Default constructor
     Gain ();
+
+    //! Set the gain
+    void set_gain (const Estimate<double>&);
+
+    //! Get the gain
+    Estimate<double> get_gain () const;
 
     // ///////////////////////////////////////////////////////////////////
     //

@@ -16,6 +16,18 @@ MEAL::Gain::Gain ()
   param->set_param (1.0);
 }
 
+//! Set the gain
+void MEAL::Gain::set_gain (const Estimate<double>& gain)
+{
+  set_Estimate (0, gain);
+}
+
+//! Get the gain
+Estimate<double> MEAL::Gain::get_gain () const
+{
+  return get_Estimate (0);
+}
+
 //! Return the name of the class
 string MEAL::Gain::get_name () const
 {
