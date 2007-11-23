@@ -120,9 +120,9 @@ long double Pulsar::SimplePredictor::frequency (const MJD& t) const
   long double power_of_t = 1.0;
   long double result = 0;
 
-  for (unsigned i=0; i<coefs.size(); i++) {
-    result += coefs[i] * power_of_t;
-    power_of_t *= (i+2) * seconds;
+  for (unsigned i=1; i<coefs.size(); i++) {
+    result += coefs[i] * i * power_of_t;
+    power_of_t *= seconds;
   }
 
   return result;
