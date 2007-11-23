@@ -9,6 +9,7 @@
 #include "Pulsar/Feed.h"
 
 #include "MEAL/Polynomial.h"
+#include "MEAL/Gain.h"
 #include "MEAL/Steps.h"
 
 #include <iostream>
@@ -41,6 +42,8 @@ Calibration::StandardModel::StandardModel (bool britton)
   built = false;
 
   time_variations_engaged = true;
+  constant_pulsar_gain = false;
+
   time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
 }
 
@@ -53,6 +56,12 @@ void
 Calibration::StandardModel::set_platform_transformation (MEAL::Complex2* x)
 {
   platform_transformation = x;
+}
+
+//! Set true when the pulsar Stokes parameters have been normalized
+void Calibration::StandardModel::set_constant_pulsar_gain (bool value)
+{
+  constant_pulsar_gain = value;
 }
 
 //! Get the measurement equation solver
@@ -110,6 +119,9 @@ void Calibration::StandardModel::build ()
 
   if (physical)
     *instrument *= physical;
+
+  if (constant_pulsar_gain)
+    instrument->set_infit (0, false);
 
   if (feed_transformation)
     *instrument *= feed_transformation;
@@ -171,6 +183,17 @@ void Calibration::StandardModel::add_polncal_backend ()
     build ();
 
   pcal_path = new MEAL::ProductRule<MEAL::Complex2>;
+
+  if (constant_pulsar_gain)
+  {
+    pcal_gain = new MEAL::Gain;
+    pcal_gain_chain = new MEAL::ChainRule<MEAL::Complex2>;
+    pcal_gain_chain->set_model( pcal_gain );
+    if (gain)
+      pcal_gain_chain->set_constraint( 0, gain );
+    *pcal_path *= pcal_gain_chain;
+  }
+
   *pcal_path *= instrument;
 
   equation->add_transformation ( pcal_path );
@@ -204,7 +227,11 @@ void Calibration::StandardModel::update ()
 
     if (gain)
       update_parameter( gain, backend->get_gain().get_value() );
-      
+    else if (pcal_gain) {
+      pcal_gain->set_gain( backend->get_gain() );
+      backend->set_gain( 1.0 );
+    }
+
     if (diff_gain)
       update_parameter( diff_gain, backend->get_diff_gain().get_value() );
     
@@ -354,11 +381,21 @@ using namespace MEAL;
 
 void Calibration::StandardModel::set_gain (Univariate<Scalar>* function)
 {
-  if (!physical)
-    throw Error (InvalidState, "Calibration::StandardModel::set_gain",
-		 "cannot set gain variation in polar model");
+  if (constant_pulsar_gain) {
 
-  physical -> set_gain( function );
+    if (pcal_gain)
+      pcal_gain_chain->set_constraint (0, function);
+
+  }
+  else
+  {    
+    if (!physical)
+      throw Error (InvalidState, "Calibration::StandardModel::set_gain",
+		   "cannot set gain variation in polar model");
+
+    physical -> set_gain( function );
+  }
+
   convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
   gain = function;
 }
@@ -504,7 +541,12 @@ void Calibration::StandardModel::engage_time_variations ()
 #ifdef _DEBUG
     cerr << "engage gain" << endl;
 #endif
-    physical->set_gain( gain );
+
+    if (!constant_pulsar_gain)
+      physical->set_gain( gain );
+    else if (pcal_gain_chain)
+      pcal_gain_chain->set_constraint (0, gain);
+
   }
 
   if (diff_gain) {
@@ -548,8 +590,18 @@ void Calibration::StandardModel::disengage_time_variations (const MJD& epoch)
 #ifdef _DEBUG
     cerr << "disengage gain" << endl;
 #endif
-    physical->set_gain( zero );
-    physical->set_gain( gain->estimate() );
+
+    if (!constant_pulsar_gain)
+    {
+      physical->set_gain( zero );
+      physical->set_gain( gain->estimate() );
+    }
+    else if (pcal_gain_chain)
+    {
+      pcal_gain_chain->set_constraint( 0, zero );
+      pcal_gain->set_gain( gain->estimate() );
+    }
+
   }
 
   if (diff_gain) {

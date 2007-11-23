@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.14 $
-   $Date: 2007/11/11 01:00:55 $
+   $Revision: 1.15 $
+   $Date: 2007/11/23 20:09:00 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -46,6 +46,9 @@ namespace Calibration {
 
     //! Set the transformation from the platform to the feed basis
     void set_platform_transformation (MEAL::Complex2* xform);
+
+    //! Set true when the pulsar Stokes parameters have been normalized
+    void set_constant_pulsar_gain (bool = true);
 
     //! Set gain to the univariate function of time
     void set_gain (MEAL::Univariate<MEAL::Scalar>*);
@@ -138,6 +141,8 @@ namespace Calibration {
 
     //! The signal path experienced by the calibrator
     Reference::To< MEAL::ProductRule<MEAL::Complex2> > pcal_path;
+    Reference::To< MEAL::ChainRule<MEAL::Complex2> > pcal_gain_chain;
+    Reference::To< MEAL::Gain > pcal_gain;
 
     //! The signal path experienced by the pulsar
     Reference::To< MEAL::ProductRule<MEAL::Complex2> > pulsar_path;
@@ -175,6 +180,7 @@ namespace Calibration {
     void add_step (MEAL::Scalar* function, double step);
 
     bool time_variations_engaged;
+    bool constant_pulsar_gain;
 
     // ////////////////////////////////////////////////////////////////////
     //
