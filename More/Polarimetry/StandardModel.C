@@ -604,6 +604,9 @@ void Calibration::StandardModel::disengage_time_variations (const MJD& epoch)
 
   }
 
+  if (pcal_gain)
+    physical->set_gain( pcal_gain->get_gain() );
+
   if (diff_gain) {
 #ifdef _DEBUG
     cerr << "disengage diff_gain" << endl;
