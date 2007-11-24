@@ -681,6 +681,8 @@ void Calibration::StandardModel::get_covariance( vector<double>& covar,
   vector< unsigned > gain_imap;
   if (gain)
     MEAL::get_imap( get_equation(), gain, gain_imap );
+  else if (pcal_gain)
+    MEAL::get_imap( get_equation(), pcal_gain, gain_imap );
 
   vector< unsigned > diff_gain_imap;
   if (diff_gain)
@@ -703,6 +705,8 @@ void Calibration::StandardModel::get_covariance( vector<double>& covar,
 
   if (gain)
     compute_covariance( imap[0], Ctotal, gain_imap, gain );
+  else if (pcal_gain)
+    imap[0] = gain_imap[0];
 
   if (diff_gain)
     compute_covariance( imap[1], Ctotal, diff_gain_imap, diff_gain );
