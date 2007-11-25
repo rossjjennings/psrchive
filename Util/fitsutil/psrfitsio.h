@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/11/16 05:47:20 $
+   $Revision: 1.10 $
+   $Date: 2007/11/25 23:57:28 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
@@ -124,14 +124,18 @@ void psrfits_read_key (fitsfile* fptr, const char* name, T* data,
   // status
   int status = 0;
   psrfits_read_key_work (fptr, name, data, &status);
-  if (status) {
-    if (verbose) {
+  if (status)
+  {
+    if (verbose)
+    {
       FITSError error (status, "psrfits_read_key", name);
       std::cerr << error.get_message() << std::endl;
-      std::cerr << "psrfits_read_key: using default="<< dfault <<std::endl;
+      std::cerr << "psrfits_read_key: using default=" << dfault << std::endl;
     }
     *data = dfault;
   }
+  else if (verbose)
+    std::cerr << "psrfits_read_key: " << name << "=" << *data << std::endl;
 }
 
 
@@ -288,14 +292,19 @@ void psrfits_read_col( fitsfile *fptr, const char *name, T *data,
   // status
   int status = 0;
   psrfits_read_col_work (fptr, name, data, row, null, &status);
-  if (status) {
-    if (verbose) {
+  if (status)
+  {
+    if (verbose)
+    {
       FITSError error (status, "psrfits_read_col", name);
       std::cerr << error.get_message() << std::endl;
       std::cerr << "psrfits_read_col: using default=" << dfault << std::endl;
     }
     *data = dfault;
   }
+  else if (verbose)
+    std::cerr << "psrfits_read_col: " << name << "=" << *data << std::endl;
+
 }
 
 
