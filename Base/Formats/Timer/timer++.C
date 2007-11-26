@@ -165,6 +165,8 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
   if (hdr->rotm == -100000)
     hdr->rotm = 0.0;
 
+  strtok (hdr->telid, " ");
+
   return 0;
 }
 
