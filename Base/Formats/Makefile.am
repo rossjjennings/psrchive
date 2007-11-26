@@ -12,6 +12,11 @@ SUBDIRS += PSRFITS
 libFormats_la_LIBADD += PSRFITS/libpsrfits.la
 endif
 
+if HAVE_PUMA
+SUBDIRS += PuMa
+libFormats_la_LIBADD += PuMa/libpuma.la
+endif
+
 SUBDIRS += .
 
 check_PROGRAMS = test_Parameters_factory test_Predictor_factory
