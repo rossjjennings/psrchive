@@ -637,7 +637,7 @@ string get_date( Reference::To< Archive > archive )
 
 string get_site( Reference::To< Archive > archive )
 {
-  string result = archive->get_telescope_code();
+  string result = archive->get_telescope();
 
   return result;
 }

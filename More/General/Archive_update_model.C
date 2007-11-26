@@ -183,7 +183,7 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
 
   generator->set_time_span( time, time );
 
-  generator->set_site( get_telescope_code() );
+  generator->set_site( get_telescope() );
 
   Reference::To<Predictor> predictor = generator->generate();
 

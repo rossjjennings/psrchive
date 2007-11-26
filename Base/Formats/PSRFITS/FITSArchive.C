@@ -37,7 +37,6 @@
 #include "fitsio_tempo.h"
 
 #include "psrfitsio.h"
-#include "Telescope.h"
 #include "strutil.h"
 #include "ephio.h"
 
@@ -266,10 +265,10 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (verbose == 3)
     cerr << "Got telescope: " << obs_ext->telescope << endl;
   
-  set_telescope_code ( obs_ext->telescope );
+  set_telescope ( obs_ext->telescope );
 
   Telescope* telescope = getadd<Telescope>();
-  telescope->set_coordinates (get_telescope_code());
+  telescope->set_coordinates (get_telescope());
   
   // RA
     
@@ -805,20 +804,9 @@ try {
 		     "fits_moveabs_hdu");
 
 
-  // do not return comments in fits_read_key
-  char* comment = 0;
+  psrfits_update_key (fptr, "TELESCOP", get_telescope());
 
-  // Write the source name
-
-  char* telescope;
-  telescope = const_cast<char*>( telescope_code.c_str() );
-
-  fits_update_key (fptr, TSTRING, "TELESCOP", telescope, comment, &status);
-
-  string source = get_source();
-  
-  fits_update_key (fptr, TSTRING, "SRC_NAME",
-		   const_cast<char*>(source.c_str()), comment, &status);
+  psrfits_update_key (fptr, "SRC_NAME", get_source());
     
   AnglePair radec = get_coordinates().getRaDec();
   string RA = radec.angle1.getHMS();
@@ -871,8 +859,7 @@ try {
   else
     obs_mode = "UNKNOWN";
   
-  fits_update_key (fptr, TSTRING, "OBS_MODE", 
-		   const_cast<char*>(obs_mode.c_str()), comment, &status);
+  psrfits_update_key (fptr, "OBS_MODE", obs_mode);
 
   {
     const ObsExtension* ext = get<ObsExtension>();
@@ -959,6 +946,9 @@ try {
   long day = reference_epoch.intday();
   long sec = reference_epoch.get_secs();
   double frac = reference_epoch.get_fracsec();
+
+  // do not return comments in fits_read_key
+  char* comment = 0;
 
   fits_update_key (fptr, TLONG, "STT_IMJD", &day, comment, &status);
   fits_update_key (fptr, TLONG, "STT_SMJD", &sec, comment, &status);

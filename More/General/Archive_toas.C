@@ -41,7 +41,7 @@ void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
 
   const Integration* std = standard->get_Integration (0);
 
-  std::string nsite = get_telescope_code();
+  std::string nsite = get_telescope();
 
   for (unsigned isub=0; isub<get_nsubint(); isub++) {
     

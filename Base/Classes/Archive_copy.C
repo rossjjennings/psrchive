@@ -72,7 +72,7 @@ void Pulsar::Archive::copy (const Archive& archive,
   set_nchan( archive.get_nchan() );
   set_npol( archive.get_npol() );
 
-  set_telescope_code( archive.get_telescope_code() );
+  set_telescope( archive.get_telescope() );
 
   set_state( archive.get_state() );
   set_scale( archive.get_scale() );

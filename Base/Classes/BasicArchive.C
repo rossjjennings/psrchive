@@ -137,16 +137,16 @@ void Pulsar::BasicArchive::set_nbin (unsigned numbins)
   nbin = numbins;
 }
 
-//! Get the tempo code of the telescope used
-std::string Pulsar::BasicArchive::get_telescope_code () const
+//! Get the name of the telescope
+std::string Pulsar::BasicArchive::get_telescope () const
 {
-  return telescope_code;
+  return telescope;
 }
 
-//! Set the tempo code of the telescope used
-void Pulsar::BasicArchive::set_telescope_code (const std::string& telcode)
+//! Set the name of the telescope
+void Pulsar::BasicArchive::set_telescope (const std::string& tel)
 {
-  telescope_code = telcode;
+  telescope = tel;
 }
 
 //! Return the type of observation (psr, cal, etc.)

@@ -153,17 +153,17 @@ void Pulsar::PuMaArchive::set_nsubint (unsigned nsubint)
   hdr.redn.NTimeInts = nsubint;
 }
 
-//! Get the tempo code of the telescope used
-char Pulsar::PuMaArchive::get_telescope_code () const
+//! Get the telescope name
+char Pulsar::PuMaArchive::get_telescope () const
 {
   return 'i';
 }
 
-//! Set the tempo code of the telescope used
-void Pulsar::PuMaArchive::set_telescope_code (char telescope_code)
+//! Set the telescope name
+void Pulsar::PuMaArchive::set_telescope (char telescope)
 {
-  if (telescope_code != 'i')
-    cerr << "Pulsar::PuMaArchive::set_telescope_code unimplemented" << endl;
+  if (telescope != 'i')
+    cerr << "Pulsar::PuMaArchive::set_telescope unimplemented" << endl;
 }
 
 

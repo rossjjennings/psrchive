@@ -1752,7 +1752,7 @@ double getDopplerFactor(const Archive * archive) {
 	}
 
 	// Get the site index
-	//char site_code = copy->get_telescope_code();
+	//char site_code = copy->get_telescope();
 
 	/*int index = getSiteCodeIndex(site_code);*/
 

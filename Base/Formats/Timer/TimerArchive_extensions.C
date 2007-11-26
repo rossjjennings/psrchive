@@ -21,7 +21,7 @@ void Pulsar::TimerArchive::unpack_extensions ()
   unpack (receiver);
 
   Telescope* telescope = getadd<Telescope>();
-  telescope->set_coordinates (get_telescope_code());
+  telescope->set_coordinates (get_telescope());
 
   TapeInfo* tape = getadd<TapeInfo>();
   unpack (tape);

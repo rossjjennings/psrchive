@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.14 $
-   $Date: 2007/06/21 17:32:05 $
+   $Revision: 1.15 $
+   $Date: 2007/11/26 02:50:18 $
    $Author: straten $ */
 
 #ifndef __EPN_Archive_h
@@ -57,10 +57,10 @@ namespace Pulsar {
     //! Return a pointer to a new extraction constructed instance equal to this
     EPNArchive* extract (const std::vector<unsigned>& subints) const;
 
-    //! Get the tempo code of the telescope used
-    std::string get_telescope_code () const;
-    //! Set the tempo code of the telescope used
-    void set_telescope_code (const std::string&);
+    //! Get the telescope name
+    std::string get_telescope () const;
+    //! Set the telescope name
+    void set_telescope (const std::string&);
 
     //! Get the state of the profiles
     Signal::State get_state () const;

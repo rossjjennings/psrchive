@@ -325,7 +325,7 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try
       toa.set_arrival   (integration->get_epoch() + phase.val * period);
       toa.set_error     (sqrt(phase.var) * period * 1e6);
 
-      toa.set_telescope (archive->get_telescope_code());
+      toa.set_telescope (archive->get_telescope());
       
       string aux = basename (archive->get_filename());
       toa.set_auxilliary_text (aux);

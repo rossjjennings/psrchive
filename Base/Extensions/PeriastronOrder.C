@@ -73,7 +73,7 @@ void Pulsar::PeriastronOrder::organise (Archive* arch, unsigned newsub)
     phases.push_back(get_binphs_peri((arch->get_Integration(i)->get_epoch()).in_days(),
 				       *eph, 
 				       arch->get_Integration(i)->get_centre_frequency(),
-				       arch->get_telescope_code()[0]));
+				       arch->get_telescope()[0]));
     if (phases[i]!=phases[i]) {
       throw Error(FailedCall, "PeriastronOrder::organise",
 		  "get_binphs_peri returned nan");

@@ -185,15 +185,15 @@ Pulsar::TimerArchive::load_Integration (const char* filename, unsigned isubint)
 }
 
 
-std::string Pulsar::TimerArchive::get_telescope_code () const
+std::string Pulsar::TimerArchive::get_telescope () const
 {
   return hdr.telid;
 }
 
-void Pulsar::TimerArchive::set_telescope_code (const std::string& code)
+void Pulsar::TimerArchive::set_telescope (const std::string& code)
 {
   if (code.length() > TELID_STRLEN-1)
-    throw Error (InvalidParam, "Pulsar::TimerArchive::set_telescope_code",
+    throw Error (InvalidParam, "Pulsar::TimerArchive::set_telescope",
 		 "code string='%s' length > TELID_STRLEN=%d",
 		 code.c_str(), TELID_STRLEN);
 
@@ -614,7 +614,7 @@ catch (Error& error) {
 void Pulsar::TimerArchive::correct () try {
 
   Telescope* telescope = getadd<Telescope>();
-  telescope->set_coordinates (get_telescope_code());
+  telescope->set_coordinates (get_telescope());
 
   MJD mjd = start_time();
 

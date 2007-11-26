@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PuMa/Pulsar/PuMaArchive.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/11/16 14:33:06 $
+   $Revision: 1.2 $
+   $Date: 2007/11/26 02:50:18 $
    $Author: straten $ */
 
 #ifndef __PuMaArchive_h
@@ -72,10 +72,10 @@ namespace Pulsar {
     //! Get the number of sub-integrations stored in the file
     unsigned get_nsubint () const;
 
-    //! Get the tempo code of the telescope used
-    char get_telescope_code () const;
-    //! Set the tempo code of the telescope used
-    void set_telescope_code (char telescope_code);
+    //! Get the telescope name
+    char get_telescope () const;
+    //! Set the telescope name
+    void set_telescope (char telescope);
 
     //! Get the state of the profiles
     Signal::State get_state () const;

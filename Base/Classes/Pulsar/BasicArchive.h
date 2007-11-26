@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.37 $
-   $Date: 2007/06/21 17:32:05 $
+   $Revision: 1.38 $
+   $Date: 2007/11/26 02:50:18 $
    $Author: straten $ */
 
 #ifndef __BasicArchive_h
@@ -54,10 +54,10 @@ namespace Pulsar {
     // implement the pure virtual methods of the Archive base class
     //
 
-    //! Get the tempo code of the telescope used
-    virtual std::string get_telescope_code () const;
-    //! Set the tempo code of the telescope used
-    virtual void set_telescope_code (const std::string& telescope_code);
+    //! Get the name of the telescope
+    virtual std::string get_telescope () const;
+    //! Set the name of the telescope
+    virtual void set_telescope (const std::string&);
 
     //! Get the state of the profiles
     virtual Signal::State get_state () const;
@@ -158,8 +158,8 @@ namespace Pulsar {
     /*! This attribute may be set only through Archive::resize */
     virtual void set_nsubint (unsigned nsubint);
 
-    //! The tempo code of the telescope used
-    std::string telescope_code;
+    //! The name of the telescope
+    std::string telescope;
 
     //! The feed configuration of the receiver
     Signal::Basis basis;

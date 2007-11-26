@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/Telescope.h"
-#include "Telescope.h"
+#include "tempo++.h"
 #include "coord.h"
 
 //! Default constructor
@@ -51,7 +51,7 @@ Pulsar::Telescope::~Telescope ()
 //! Set the coordinates of the telescope based on known tempo codes
 void Pulsar::Telescope::set_coordinates (const std::string& code)
 {
-  char isite = ::Telescope::code (code);
+  char isite = Tempo::code (code);
 
   if (isite == 0)
     throw Error (InvalidParam, "Pulsar::Telescope::set_coordinates",

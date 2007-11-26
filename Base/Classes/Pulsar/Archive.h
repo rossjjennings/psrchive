@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.170 $
-   $Date: 2007/11/18 11:56:24 $
+   $Revision: 1.171 $
+   $Date: 2007/11/26 02:50:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.170 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.171 $"
 
 #include "IntegrationManager.h"
 #include "TextInterface.h"
@@ -197,10 +197,10 @@ namespace Pulsar
      */
     //@{
 
-    //! Get the tempo code of the telescope used
-    virtual std::string get_telescope_code () const = 0;
-    //! Set the tempo code of the telescope used
-    virtual void set_telescope_code (const std::string& code) = 0;
+    //! Get the name of the telescope used
+    virtual std::string get_telescope () const = 0;
+    //! Set the name of the telescope used
+    virtual void set_telescope (const std::string& code) = 0;
 
     //! Get the state of the profile data
     virtual Signal::State get_state () const = 0;

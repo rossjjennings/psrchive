@@ -272,7 +272,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.80 2007/11/19 17:25:46 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.81 2007/11/26 02:50:18 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -691,7 +691,7 @@ int main (int argc, char *argv[]) try {
       }
 
       if( site != string() )
-	arch->set_telescope_code( site );
+	arch->set_telescope( site );
 
       if( name != string() )
 	arch->set_source( name );
