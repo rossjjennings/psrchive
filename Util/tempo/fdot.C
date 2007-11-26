@@ -62,11 +62,16 @@ int main (int argc, char** argv) try
   Tempo::Predict predict;
 
   predict.set_parameters (ephemeris);
+  predict.set_ncoef (15);
+  predict.set_nspan (120);
 
   polyco model = predict.get_polyco (epoch, epoch);
 
-  cout << "fdot: " << model.chirp(epoch)
-       << "  acceleration: " << model.accel(epoch) << endl;
+  cerr << "acceleration\tperiod\t\tDM" << endl;
+
+  cout.precision(10);
+
+  cout << model.accel(epoch) << "\t" << 1/model.frequency(epoch) << "\t" << ephemeris.get_dm() << endl;
 
   return 0;
 }
@@ -79,6 +84,6 @@ void usage ()
 {
   cout <<
     "fdot - print the first derivative of the pulse frequency \n"
-    "USAGE: fdot [-n pulsar | -e ephemeris] -t epoch \n"
+    "USAGE: fdot -p ephemeris -t epoch \n"
        << endl;
 }
