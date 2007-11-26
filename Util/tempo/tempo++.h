@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.21 $
-   $Date: 2007/11/19 17:21:49 $
+   $Revision: 1.22 $
+   $Date: 2007/11/26 02:49:34 $
    $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
@@ -21,7 +21,22 @@
 #include <vector>
 
 namespace Tempo {
-  
+
+  const char Greenbank   = '1';
+  const char Narrabri    = '2';
+  const char Arecibo     = '3';
+  const char Hobart      = '4';
+  const char Urumqi      = '5';
+  const char Tidbinbilla = '6';
+  const char Parkes      = '7';
+  const char Westerbork  = 'i';
+
+  //! Convert a telescope name to a code
+  char code (const std::string& telescope_name);
+
+  //! Convert a telecope code to a name
+  const char* name (char code);
+
   // get the tempo version
   float  get_version ();
 

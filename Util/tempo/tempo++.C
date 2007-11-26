@@ -329,3 +329,62 @@ void Tempo::tempo (const string& arguments, const string& input)
   throw Error (FailedCall, "Tempo::tempo", "system (\"" + runtempo + "\")"
 	       " failed: " + errstr);
 }
+
+//! Convert a telescope name to a code
+char Tempo::code (const string& code)
+{
+  const char* name = code.c_str();
+
+  if (strlen(name) == 1)
+    return name[0];
+
+  if (strcasecmp (name, "pks") == 0 || strcasecmp (name, "parkes") == 0)
+    return Parkes;
+
+  if (strcasecmp (name, "atca") == 0 || strcasecmp (name, "narrabri") == 0)
+    return Narrabri;
+
+  if (strcasecmp (name, "tid") == 0 || strcasecmp (name, "tidbinbilla") == 0)
+    return Tidbinbilla;
+
+  if (strcasecmp (name, "Arecibo") == 0)
+    return Arecibo;
+
+  if (strcasecmp (name, "Hobart") == 0 || strcasecmp (name, "DSS43") == 0)
+    return Hobart;
+
+  if (strcasecmp (name, "GBT") || strcasecmp (name, "Greenbank") == 0)
+    return Greenbank;
+
+  if (strcasecmp (name, "WSRT") || strcasecmp (name, "Westerbork") == 0)
+    return Westerbork;
+  
+  return 0;
+}
+
+//! Convert a telecope code to a name
+const char* Tempo::name (char code)
+{
+  switch (code) {
+  case Parkes:
+    return "Parkes";
+
+  case Narrabri:
+    return "Narrabri";
+
+  case Tidbinbilla:
+    return "Tidbinbilla";
+
+  case Arecibo:
+    return "Arecibo";
+
+  case Hobart:
+    return "Hobart";
+
+  case Westerbork:
+    return "Westerbork";
+
+  default:
+    return "";
+  }
+}

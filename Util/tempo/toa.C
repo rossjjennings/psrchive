@@ -4,9 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "toa.h"
 #include "polyco.h"
-#include "Telescope.h"
+#include "tempo++.h"
 
 #include "strutil.h"
 #include "Error.h"
@@ -74,7 +75,7 @@ Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
 
 void Tempo::toa::set_telescope (const std::string& telcode)
 {
-  telescope = Telescope::code( telcode );
+  telescope = Tempo::code( telcode );
 
   if (verbose)
     cerr << "Tempo::toa::set_telescope name=" << telcode

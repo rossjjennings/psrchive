@@ -10,7 +10,6 @@
 #include "psrephem.h"
 #include "polyco.h"
 
-#include "Telescope.h"
 #include "Error.h"
 #include "strutil.h"
 
@@ -62,7 +61,7 @@ void Tempo::Predict::set_frequency_span (long double low, long double high)
 //! Set the site at which the signal is observed
 void Tempo::Predict::set_site (const std::string& site)
 {
-  set_asite( Telescope::code(site) );
+  set_asite( code(site) );
 }
 
 void Tempo::Predict::set_asite (char code)
