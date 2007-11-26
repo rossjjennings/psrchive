@@ -37,7 +37,6 @@ include_HEADERS = \
         RegularExpression.h \
         sky_coord.h \
         strutil.h \
-        Telescope.h \
         templates.h \
 	TemporaryFile.h \
 	ThreadContext.h \
@@ -96,7 +95,6 @@ libgenutil_la_SOURCES = \
         stringprintf.C \
         stringtok.C \
         strutil.C \
-        Telescope.C \
 	TemporaryFile.C \
 	ThreadContext.C \
 	time_string.C \
