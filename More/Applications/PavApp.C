@@ -365,6 +365,7 @@ void PavApp::PavSpecificOptions( void )
   if( plot_error_box )
   {
     SetPlotOptions<ProfilePlot>( "ebox=1" );
+    SetPlotOptions<StokesCylindrical>( "flux:ebox=1" );
   }
 
   // if we are plotting position angles between -90 and 180, set  config for PosAnglePlot
@@ -551,7 +552,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.36 2007/11/27 03:35:56 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.37 2007/11/27 03:47:23 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
