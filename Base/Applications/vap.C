@@ -450,6 +450,20 @@ string get_fac( Reference::To<Archive> archive )
   return result;
 }
 
+string get_fa_req( Reference::To<Archive> archive )
+{
+  string result = "UNDEF";
+  Reference::To<Receiver> recv = archive->get<Receiver>();
+
+  if( recv )
+  {
+    Angle a = recv->get_tracking_angle();
+    result = tostring<Angle>( a );
+  }
+
+  return result;
+}
+
 string get_basis( Reference::To<Archive> archive )
 {
   string result = "";
@@ -472,6 +486,33 @@ string get_fd_hand( Reference::To<Archive> archive )
     result = "UNDEF";
   else
     result = tostring( recv->get_hand() );
+
+  return result;
+}
+
+string get_fd_mode( Reference::To<Archive> archive )
+{
+  string result = "UNDEF";
+
+  Reference::To<Receiver> recv = archive->get<Receiver>();
+
+  if( recv )
+  {
+    Receiver::Tracking mode;
+    mode = recv->get_tracking_mode();
+    switch( mode )
+    {
+      case Receiver::Feed:
+	result = "FA";
+	break;
+      case Receiver::Celestial:
+	result = "CPA";
+	break;
+      case Receiver::Galactic:
+	result = "GPA";
+	break;
+    };
+  }
 
   return result;
 }
@@ -1605,9 +1646,9 @@ void PrintExtdHlp( void )
 
   cout << "BACKEND PARAMETERS" << endl;
   cout << "backend                         Name of the backend instrument" << endl;
+  cout << "beconfig                        Backend Config file" << endl;
   cout << "be_dcc                          Downconversion conjugation corrected" << endl;
   cout << "be_phase                        Phase convention of backend" << endl;
-  cout << "beconfig                        Backend Config file" << endl;
   cout << "tcycle                          Correlator cycle time" << endl;
   cout << "" << endl;
 
@@ -1618,6 +1659,7 @@ void PrintExtdHlp( void )
 
   cout << "OBSERVATION PARAMETERS" << endl;
   cout << "bw                              Bandwidth (MHz)" << endl;
+  cout << "dm                              Dispersion measure" << endl;
   cout << "dmc                             Dispersion corrected (boolean)" << endl;
   cout << "length                          The full duration of the observation (s)" << endl;
   cout << "name                            Name of the source" << endl;
@@ -1628,7 +1670,6 @@ void PrintExtdHlp( void )
   cout << "obs_mode                        Observation Mode (PSR, CAL, SEARCH)" << endl;
   cout << "polc                            Polarization calibrated (boolean)" << endl;
   cout << "rm                              Rotation measure (rad/m^2)" << endl;
-  cout << "dm                              Dispersion measure" << endl;
   cout << "rmc                             Faraday Rotation corrected (boolean)" << endl;
   cout << "scale                           Units of profile amplitudes" << endl;
   cout << "state                           State of profile amplitudes" << endl;
@@ -1701,22 +1742,24 @@ void PrintExtdHlp( void )
   cout << endl;
 
   cout << "FEED & RECEIVER PARAMETERS" << endl;
-  cout << "rcvr                            Name of receiver" << endl;
   cout << "basis                           Basis of receptors" << endl;
   cout << "fac                             Feed angle corrected" << endl;
+  cout << "fa_req                          Feed angle requested" << endl;
   cout << "fd_hand                         Hand of receptor basis" << endl;
+  cout << "fd_mode                         Feed track mode (FA,CPA,GPA)" << endl;
   cout << "fd_sang                         Feed symmetry angle (rcvr:ra)" << endl;
   cout << "fd_xyph                         Reference source phase (rcvr:rph)" << endl;
   cout << "nrcpt                           Number of receptors" << endl;
+  cout << "rcvr                            Name of receiver" << endl;
   cout << "ta                              Tracking angle of feed" << endl;
   cout << "xoffset                         Offset of feed X-axis wrt platform zero" << endl;
   cout << endl;
 
   cout << "SUBINT PARAMETERS" << endl;
-  cout << "nch_file                        Number of channels/sub-bands in this file" << endl;
-  cout << "nch_strt                        Start channel/sub-band number (0 to NCHAN-1)" << endl;
   cout << "nbin_subint                     Nr of bins (PSR/CAL mode; else 1)" << endl;
   cout << "nbits                           Nr of bits/datum (SEARCH mode 'X' data, else 1)" << endl;
+  cout << "nch_file                        Number of channels/sub-bands in this file" << endl;
+  cout << "nch_strt                        Start channel/sub-band number (0 to NCHAN-1)" << endl;
   cout << "npol_subint                     Nr of polarisations in table" << endl;
   cout << "nsblk                           Samples/row (SEARCH mode, else 1)" << endl;
   cout << "subint_type                     Time axis (TIME, BINPHSPERI, BINLNGASC, etc)" << endl;
@@ -1732,10 +1775,10 @@ void PrintExtdHlp( void )
   cout << "bmin                            [deg] beam minor axis" << endl;
   cout << "bpa                             [deg] beam position angle" << endl;
   cout << "date                            File creation date" << endl;
+  cout << "file                            The file number (FB data only)" << endl;
   cout << "hdrver                          Header Version" << endl;
   cout << "site                            Telescope tempo code" << endl;
   cout << "telescop                        Telescope name" << endl;
-  cout << "file                            The file number (FB data only)" << endl;
   cout << "tlabel                          Tape label (FB data only)" << endl;
   cout << endl;
 
@@ -1927,6 +1970,8 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "cal_phs" ) return get_cal_phs( archive );
     else if( command == "file" ) return get_file( archive );
     else if( command == "tlabel" ) return get_tlabel ( archive );
+    else if( command == "fd_mode" ) return get_fd_mode ( archive );
+    else if( command == "fa_req" ) return get_fa_req ( archive );
 
     else return "UNDEF";
   }
@@ -2144,7 +2189,7 @@ int main( int argc, char *argv[] )
     {
       for_each( filenames.begin(), filenames.end(), ProcessArchive );
       if( neat_table )
-	ts.flush();
+        ts.flush();
     }
   }
 
