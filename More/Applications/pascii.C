@@ -8,6 +8,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/PolnProfile.h"
+#include "Pulsar/Interpreter.h"
+#include "strutil.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -31,6 +33,8 @@ void usage ()
     "  -P         Pscrunch first\n"
     "  -C         Centre first\n"
     "  -B b       Bscrunch by this factor first\n"
+    "  -j job     Other preprocessing jobs \n"
+    "  -J jobs    Multiple preprocessing jobs in file, 'jobs' \n"
     "  -x         Convert to Stokes and also print fraction polarisation\n"
     "  -y         Convert to Stokes and also print fraction linear\n"
     "  -z         Convert to Stokes and also print fraction circular\n"
@@ -68,8 +72,11 @@ int main (int argc, char** argv){ try {
   bool show_pa = false;
   bool remove_baseline = false;
 
+  // Preprocessing jobs
+  vector<string> jobs;
+
   char c;
-  while ((c = getopt(argc, argv, "b:B:c:CFi:p:Pr:RhpqTvVxyzZ")) != -1) 
+  while ((c = getopt(argc, argv, "b:B:c:CFi:j:J:p:Pr:RhpqTvVxyzZ")) != -1) 
 
     switch (c)  {
 
@@ -96,6 +103,14 @@ int main (int argc, char** argv){ try {
 
     case 'i':
       csub = atoi (optarg);
+      break;
+
+    case 'j':
+      separate (optarg, jobs, ",");
+      break;
+      
+    case 'J':
+      loadlines (optarg, jobs);
       break;
 
     case 'p':
@@ -147,6 +162,14 @@ int main (int argc, char** argv){ try {
   }
 
   Pulsar::Archive* archive = Pulsar::Archive::load( argv[optind] );
+
+  if (jobs.size()) {
+    cerr << "pascii: preprocessing" << endl;
+    Pulsar::Interpreter* preprocessor = standard_shell();
+    preprocessor->allow_infinite_frequency = true;
+    preprocessor->set(archive);
+    preprocessor->script(jobs);
+  }
 
   if( do_centre )
     archive->centre();
