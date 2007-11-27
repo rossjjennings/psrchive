@@ -20,7 +20,7 @@ using namespace Pulsar;
 
 //Default constructor
 DigitiserCounts::DigitiserCounts ()
-    : Extension( "DigitiserCounts" ), nlev(0), npthist(0), ndigr(0)
+    : Extension( "DigitiserCounts" ), nlev(0), npthist(0), ndigr(0), dyn_levt(0)
 {}
 
 // Copy constructor

@@ -48,7 +48,8 @@ void Pulsar::FITSArchive::load_DigitiserCounts (fitsfile* fptr)
   float f_data;
 
   psrfits_read_key( fptr, "DYN_LEVT", &s_data );
-  ext->set_dyn_levt( fromstring<float>( s_data ) );
+  if( s_data != "*" )
+    ext->set_dyn_levt( fromstring<float>( s_data ) );
 
   psrfits_read_key( fptr, "DIG_MODE", &s_data );
   ext->set_dig_mode( s_data );
