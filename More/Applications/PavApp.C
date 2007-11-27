@@ -18,6 +18,7 @@
 #include <Pulsar/DynamicSNSpectrum.h>
 #include <Pulsar/ProfilePlot.h>
 #include <Pulsar/PosAngPlot.h>
+#include <Pulsar/PeakConsecutive.h>
 #include <limits>
 
 
@@ -550,7 +551,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.35 2007/11/20 00:57:57 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.36 2007/11/27 03:35:56 nopeer Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
@@ -880,34 +881,35 @@ int PavApp::run( int argc, char *argv[] )
 
       if( centre_profile )
       {
-	preprocessor.set( plots[i].archive );
-	preprocessor.parse( "centre" );
-// 	Reference::To<Archive> copy = plots[i].archive->clone();
-//         //copy->remove_baseline();
-// 
-// 	int nbin = copy->get_nbin();
-// 
-// 	int p1, p2;
-// 	copy->find_peak_edges( p1, p2 );
-// 
-// 	float first = float(p1) / float(nbin);
-// 	float second = float(p2) / float(nbin);
-// 	float centre = first + (second - first) / 2.0;
-// 
-// 	if( centre > 0.5 )
-// 	{
-// 	  float rot = (centre - 0.5);
-// 	  cerr << "rotating by " << rot << endl;
-// 	  plots[i].archive->rotate_phase( rot );
-// 	}
-// 	else
-// 	  plots[i].archive->rotate_phase( .5 - centre );
-// 
-// 	cerr << "peak edges were " << first << ", " << second << endl;
-// 	cerr << "centre is " << centre << endl;
+	Functor< std::pair<int,int> (const Profile*) > old_strat = Profile::peak_edges_strategy;
+	Functor< std::pair<int,int> (const Profile*) > consecutive_functor; 
 
-        //plots[i].archive->rotate_phase( 1.0 );
+	if (!consecutive_functor)
+	  consecutive_functor.set( new PeakConsecutive, &RiseFall::get_rise_fall );
 
+	Profile::peak_edges_strategy = consecutive_functor;
+	
+	Reference::To<Archive> copy = plots[i].archive->clone();
+	copy->dedisperse();
+
+	int nbin = copy->get_nbin();
+
+	int p1, p2;
+	copy->find_peak_edges( p1, p2 );
+
+	float first = float(p1) / float(nbin);
+	float second = float(p2) / float(nbin);
+	float centre = first + (second - first) / 2.0;
+
+	if( centre > 0.5 )
+	{
+	  float rot = (centre - 0.5);
+	  plots[i].archive->rotate_phase( rot );
+	}
+	else
+	  plots[i].archive->rotate_phase( .5 - centre );
+	
+	Profile::peak_edges_strategy = old_strat;
       }
 
 
