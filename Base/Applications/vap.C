@@ -1325,6 +1325,19 @@ string get_dig_mode( Reference::To<Archive> archive )
   return result;
 }
 
+string get_dyn_levt( Reference::To<Archive> archive )
+{
+  string result = "UNDEF";
+  Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
+  
+  if( ext )
+  {
+    result = tostring<float>( ext->get_dyn_levt() );
+  }
+  
+  return result;
+}
+
 string get_nlev_digcnts( Reference::To<Archive> archive )
 {
   string result = "TODO";
@@ -1679,6 +1692,7 @@ void PrintExtdHlp( void )
 
   cout << "DIGITISER COUNTS PARAMETERS" << endl;
   cout << "dig_mode                        Digitiser mode" << endl;
+  cout << "dyn_levt                        Timescale for dynamic leveling" << endl;
   cout << "levmode_digcnts                 Digitiser level-setting mode (AUTO, FIX)" << endl;
   cout << "nlev_digcnts                    Number of digitiser levels" << endl;
   cout << "npthist                         Number of points in histogram (I)" << endl;
@@ -1972,6 +1986,7 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "tlabel" ) return get_tlabel ( archive );
     else if( command == "fd_mode" ) return get_fd_mode ( archive );
     else if( command == "fa_req" ) return get_fa_req ( archive );
+    else if( command == "dyn_levt" ) return get_dyn_levt ( archive );
 
     else return "UNDEF";
   }
