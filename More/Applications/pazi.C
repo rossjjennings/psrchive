@@ -100,14 +100,25 @@ int main(int argc, char* argv[]) try
 	}
 
 	int gotc = 0;
-	while ((gotc = getopt(argc, argv, "h")) != -1) {
+	while ((gotc = getopt(argc, argv, "hvV")) != -1) {
 		switch (gotc) {
 			case 'h':
 				usage();
 				return EXIT_SUCCESS;
+			case 'V':
+				Pulsar::Archive::set_verbosity(3);
+				break;
+			case 'v':
+				Pulsar::Archive::set_verbosity(2);
+				break;
 		}
 	}
 
+	if (optind >= argc)
+	{
+		cerr << "pazi: please specify filename" << endl;
+		return -1;
+	}
 	float mouseX = 0;
 	float mouseY = 0;
 	float mouseX2;
@@ -121,7 +132,7 @@ int main(int argc, char* argv[]) try
 	bool zoomed = false;
 	bool fscrunched = true;
 	string plot_type = "time";
-	string filename = argv[1];
+	string filename = argv[optind];
 	string extension = filename.substr(filename.length() - 2, 2);
 
 	if ((extension != "rf") && (extension != "cf")) {
@@ -138,7 +149,7 @@ int main(int argc, char* argv[]) try
 	write_filename += extension;
 
 	cerr << "pazi: loading data" << endl;
-	Reference::To<Pulsar::Archive> base_archive = Archive::load(argv[1]);
+	Reference::To<Pulsar::Archive> base_archive = Archive::load(filename);
 
 	if (base_archive->get_npol() == 4)
 	  base_archive->convert_state( Signal::Stokes );
