@@ -1253,6 +1253,27 @@ string get_MJD_feed( Reference::To<Archive> archive )
 // DIGITISER STATISTICS FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+string get_dig_atten( Reference::To<Archive> archive )
+{
+  ostringstream result;
+  Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
+  
+  if( !ext )
+    result << "UNDEF";
+  else
+  {
+    vector<float>::iterator it;
+    for( it = ext->rows[0].atten.begin(); it != ext->rows[0].atten.end(); it ++ )
+    {
+      if( it != ext->rows[0].atten.begin() )
+	result << ",";
+      result << (*it);
+    }
+  }
+  
+  return result.str();
+}
+
 string get_ndigstat( Reference::To<Archive> archive )
 {
   string result = "TODO";
@@ -1699,6 +1720,7 @@ void PrintExtdHlp( void )
   cout << endl;
 
   cout << "DIGITISER STATISTICS PARAMETERS" << endl;
+  cout << "dig_atten                       Digitiser attenuator settings" << endl;
   cout << "levmode_digstat                 Digitiser level-setting mode (AUTO, FIX)" << endl;
   cout << "ncycsub                         Number of correlator cycles per subint" << endl;
   cout << "ndigstat                        Number of digitised channels (I)" << endl;
@@ -1987,6 +2009,7 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "fd_mode" ) return get_fd_mode ( archive );
     else if( command == "fa_req" ) return get_fa_req ( archive );
     else if( command == "dyn_levt" ) return get_dyn_levt ( archive );
+    else if( command == "dig_atten" ) return get_dig_atten ( archive );
 
     else return "UNDEF";
   }
