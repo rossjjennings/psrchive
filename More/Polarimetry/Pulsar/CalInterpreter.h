@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalInterpreter.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/05/24 22:16:48 $
+   $Revision: 1.3 $
+   $Date: 2007/11/28 05:58:45 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CalInterpreter_h
@@ -16,6 +16,7 @@
 
 #include "Pulsar/InterpreterExtension.h"
 #include "Pulsar/Calibrator.h"
+#include "MEAL/Complex2.h"
 
 namespace Pulsar {
 
@@ -51,6 +52,9 @@ namespace Pulsar {
 
     //! Calibrator to be applied
     Reference::To<PolnCalibrator> calibrator;
+
+    //! The transformation to be applied
+    Reference::To<MEAL::Complex2> transformation;
 
   };
 

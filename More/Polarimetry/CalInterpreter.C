@@ -59,6 +59,7 @@ string Pulsar::CalInterpreter::load (const string& args)
 {
   string filename = setup<string>(args);
   string dbase_error;
+  string cal_error;
 
   try {
     // try to load the file as a database
@@ -78,9 +79,24 @@ string Pulsar::CalInterpreter::load (const string& args)
     return response (Good);
   }
   catch (Error& error) {
-    return response( Fail, "could not load 1) database or 2) calibrator:\n"
+    cal_error = error.get_message();
+  }
+
+  try {
+    Reference::To<MEAL::Function> function = MEAL::Function::load( filename );
+    transformation = dynamic_cast<MEAL::Complex2*>( function.get() );
+    if (!transformation) {
+      throw Error ( InvalidState, "Pulsar::CalInterpreter::load",
+		    "Function does not return a complex 2x2 matrix" );
+    }
+    return response (Good);
+  }
+  catch (Error& error) {
+    return response( Fail,
+		     "could not load 1) database 2) calibrator 3) tranform:\n"
 		     "1) " + dbase_error + "\n"
-		     "2) " + error.get_message() );
+		     "2) " + cal_error + "\n"
+		     "3) " + error.get_message() );
   }
 
 }
@@ -89,15 +105,23 @@ string Pulsar::CalInterpreter::cal (const string& arg) try {
 
   Reference::To<PolnCalibrator> use_cal;
 
-  if (!calibrator && !database)
-    return response( Fail, "no database or calibrator loaded");
+  if (!calibrator && !database && !transformation)
+    return response( Fail, "no database, calibrator or transformation loaded");
 
-  if (calibrator)
-    use_cal = calibrator;
+  if (transformation)
+  {
+    Jones<double> xform = transformation->evaluate();
+    get()->transform( xform );
+  }
   else
-    use_cal = database -> generatePolnCalibrator( get(), caltype );
-
-  use_cal->calibrate( get() );
+  {
+    if (calibrator)
+      use_cal = calibrator;
+    else
+      use_cal = database -> generatePolnCalibrator( get(), caltype );
+    
+    use_cal->calibrate( get() );
+  }
 
   return response (Good);
 
