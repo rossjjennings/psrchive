@@ -6,7 +6,6 @@
  ***************************************************************************/
 
 #include "table_stream.h"
-#include <assert.h>
 
 table_stream &operator<<( table_stream &rhs, const std::string &lhs )
 {
@@ -161,7 +160,8 @@ void table_stream::determine_justifications( void )
   if (!data.size())
     return;
 
-  assert (data[0].size() == justifications.size());
+  if (data[0].size() != justifications.size())
+    return;
 
   for( unsigned col = 0; col < data[0].size(); col ++ )
   {
