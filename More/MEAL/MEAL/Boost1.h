@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Boost1.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.3 $
+   $Date: 2007/11/28 05:58:33 $
    $Author: straten $ */
 
 #ifndef __MEAL_Boost1_H
@@ -28,6 +28,12 @@ namespace MEAL {
 
     //! Construct with a fixed axis
     Boost1 (const Vector<3,double>& axis);
+
+    //! Copy constructor
+    Boost1 (const Boost1&);
+
+    //! Clone operator
+    Boost1* clone () const;
 
     //! Set the axis along which the boost occurs
     void set_axis (const Vector<3,double>& axis);
@@ -50,6 +56,12 @@ namespace MEAL {
     //! Return the name of the class
     std::string get_name () const;
 
+    //! Parse the values of model parameters and fit flags from a string
+    void parse (const std::string& line);
+
+    //! Print the values of model parameters and fit flags to a string
+    void print (std::string& text) const;
+
   protected:
 
     //! The axis along which the boost occurs
@@ -58,6 +70,7 @@ namespace MEAL {
     //! Calculate the Jones matrix and its gradient
     void calculate (Jones<double>& result, std::vector<Jones<double> >*);
 
+    void init ();
   };
 
 }

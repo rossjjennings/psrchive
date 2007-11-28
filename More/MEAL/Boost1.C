@@ -7,14 +7,32 @@
 #include "MEAL/Boost1.h"
 #include "MEAL/OneParameter.h"
 #include "Pauli.h"
+#include "stringtok.h"
 
 using namespace std;
 
-MEAL::Boost1::Boost1 (const Vector<3,double>& _axis) 
+void MEAL::Boost1::init ()
 {
   OneParameter* param = new OneParameter (this);
   param->set_param_name ("boost");
+}
+
+MEAL::Boost1::Boost1 (const Vector<3,double>& _axis) 
+{
+  init ();
   set_axis (_axis);
+}
+
+MEAL::Boost1::Boost1 (const Boost1& copy) 
+{
+  init ();
+  set_axis( copy.get_axis() );
+  set_beta( copy.get_beta() );
+}
+
+MEAL::Boost1*  MEAL::Boost1::clone () const
+{
+  return new Boost1(*this);
 }
 
 //! Return the name of the class
@@ -72,4 +90,37 @@ void MEAL::Boost1::calculate (Jones<double>& result,
     cerr << "   " << (*grad)[0] << endl;
   }
   
+}
+
+
+//! Parses the values of model parameters and fit flags from a string
+void MEAL::Boost1::parse (const string& line)
+{
+  string temp = line;
+
+  // the key should be the name of the parameter to be set
+  string key = stringtok (temp, " \t");
+
+  if (verbose)
+    cerr << "MEAL::Boost1::parse key '" << key << "'" << endl;
+
+  if (key == "axis") {
+
+    if (verbose)
+      cerr << "MEAL::Boost1::parse value " << temp << endl;
+
+    Vector<3,double> v = fromstring< Vector<3,double> >( temp );
+    set_axis (v);
+
+  }
+  else
+    Function::parse (line);
+}
+
+//! Prints the values of model parameters and fit flags to a string
+void MEAL::Boost1::print (string& text) const
+{
+  text = get_name ();
+  text += "\n axis " + tostring(axis);
+  print_parameters (text, "\n ");
 }
