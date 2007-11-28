@@ -185,7 +185,7 @@ check_PROGRAMS =							 \
 	test_BasisRule test_Scalar test_Complex2Product			 \
 	test_Polar test_Rotation					 \
 	test_Invariant test_CyclicParameter test_Univariate		 \
-	test_StokesError test_StokesCovariance
+	test_StokesError test_StokesCovariance test_Function_load
 
 TESTS = $(check_PROGRAMS)
 
@@ -204,6 +204,7 @@ test_Univariate_SOURCES		= test_Univariate.C
 test_Invariant_SOURCES		= test_Invariant.C
 test_StokesError_SOURCES	= test_StokesError.C 
 test_StokesCovariance_SOURCES	= test_StokesCovariance.C 
+test_Function_load_SOURCES	= test_Function_load.C
 
 ##############################################################################
 #
