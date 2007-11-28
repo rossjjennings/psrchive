@@ -1,27 +1,28 @@
-dnl @synopsis BNV_HAVE_QT [--with-Qt-dir=DIR] [--with-Qt-lib=LIB]
+dnl @synopsis BNV_HAVE_QT [--with-Qt-dir=DIR] [--with-Qt-lib-dir=DIR] [--with-Qt-lib=LIB]
 dnl @synopsis BNV_HAVE_QT [--with-Qt-include-dir=DIR] [--with-Qt-bin-dir=DIR] [--with-Qt-lib-dir=DIR] [--with-Qt-lib=LIB]
-dnl !
-dnl Search for Trolltech's Qt GUI framework.
 dnl
-dnl Searches common directories for Qt include files, libraries and Qt binary
-dnl utilities. The macro supports several different versions of the Qt
-dnl framework being installed on the same machine.
-dnl Without options, the macro is designed to look for the latest library,
-dnl i.e., the highest definition of QT_VERSION in qglobal.h.
-dnl By use of one or more options a different library may be selected. There
-dnl are two different sets of options.
-dnl Both sets contain the option --with-Qt-lib=LIB which can be used to
-dnl force the use of a particular version of the library file when more than
-dnl one are available. LIB must be in the form as it would appear behind the
-dnl "-l" option to the compiler. Examples for LIB would be "qt-mt" for the
-dnl multi-threaded version and "qt" for the regular version.
-dnl In addition to this, the first set consists of an option --with-Qt-dir=DIR
-dnl which can be used when the installation conforms to Trolltech's standard
-dnl installation, which means that header files are in DIR/include, binary
-dnl utilities are in DIR/bin and the library is in DIR/lib.
-dnl The second set of options can be used to indicate individual locations
-dnl for the header files, the binary utilities and the library file, in
-dnl addition to the specific version of the library file.
+dnl @summary Search for Trolltech's Qt GUI framework.
+dnl
+dnl Searches common directories for Qt include files, libraries and Qt
+dnl binary utilities. The macro supports several different versions of
+dnl the Qt framework being installed on the same machine. Without
+dnl options, the macro is designed to look for the latest library,
+dnl i.e., the highest definition of QT_VERSION in qglobal.h. By use of
+dnl one or more options a different library may be selected. There are
+dnl two different sets of options. Both sets contain the option
+dnl --with-Qt-lib=LIB which can be used to force the use of a
+dnl particular version of the library file when more than one are
+dnl available. LIB must be in the form as it would appear behind the
+dnl "-l" option to the compiler. Examples for LIB would be "qt-mt" for
+dnl the multi-threaded version and "qt" for the regular version. In
+dnl addition to this, the first set consists of an option
+dnl --with-Qt-dir=DIR which can be used when the installation conforms
+dnl to Trolltech's standard installation, which means that header files
+dnl are in DIR/include, binary utilities are in DIR/bin and the library
+dnl is in DIR/lib. The second set of options can be used to indicate
+dnl individual locations for the header files, the binary utilities and
+dnl the library file, in addition to the specific version of the
+dnl library file.
 dnl
 dnl The following shell variable is set to either "yes" or "no":
 dnl
@@ -36,9 +37,10 @@ dnl   QT_UIC
 dnl   QT_DIR
 dnl
 dnl which respectively contain an "-I" flag pointing to the Qt include
-dnl directory, link flags necessary to link with Qt and X, the name of the
-dnl meta object compiler and the user interface compiler both with full path,
-dnl and finaly the variable QTDIR as Trolltech likes to see it defined (if
+dnl directory (and "-DQT_THREAD_SUPPORT" when LIB is "qt-mt"), link
+dnl flags necessary to link with Qt and X, the name of the meta object
+dnl compiler and the user interface compiler both with full path, and
+dnl finaly the variable QTDIR as Trolltech likes to see it defined (if
 dnl possible).
 dnl
 dnl Example lines for Makefile.in:
@@ -47,18 +49,19 @@ dnl   CXXFLAGS = @QT_CXXFLAGS@
 dnl   MOC      = @QT_MOC@
 dnl
 dnl After the variables have been set, a trial compile and link is
-dnl performed to check the correct functioning of the meta object compiler.
-dnl This test may fail when the different detected elements stem from
-dnl different releases of the Qt framework. In that case, an error message
-dnl is emitted and configure stops.
+dnl performed to check the correct functioning of the meta object
+dnl compiler. This test may fail when the different detected elements
+dnl stem from different releases of the Qt framework. In that case, an
+dnl error message is emitted and configure stops.
 dnl
 dnl No common variables such as $LIBS or $CFLAGS are polluted.
 dnl
 dnl Options:
 dnl
 dnl --with-Qt-dir=DIR: DIR is equal to $QTDIR if you have followed the
-dnl installation instructions of Trolltech. Header files are in DIR/include,
-dnl binary utilities are in DIR/bin and the library is in DIR/lib.
+dnl installation instructions of Trolltech. Header files are in
+dnl DIR/include, binary utilities are in DIR/bin and the library is in
+dnl DIR/lib.
 dnl
 dnl --with-Qt-include-dir=DIR: Qt header files are in DIR.
 dnl
@@ -68,20 +71,43 @@ dnl --with-Qt-lib-dir=DIR: The Qt library is in DIR.
 dnl
 dnl --with-Qt-lib=LIB: Use -lLIB to link with the Qt library.
 dnl
-dnl If some option "=no" or, equivalently, a --without-Qt-* version is given
-dnl in stead of a --with-Qt-*, "have_qt" is set to "no" and the other
-dnl variables are set to the empty string.
+dnl If some option "=no" or, equivalently, a --without-Qt-* version is
+dnl given in stead of a --with-Qt-*, "have_qt" is set to "no" and the
+dnl other variables are set to the empty string.
 dnl
-dnl Calls BNV_PATH_QT_DIRECT as a subroutine.
-dnl
-dnl @version $Id: bnv_have_qt.m4,v 1.5 2005/02/07 15:40:32 straten Exp $
-dnl @author Bastiaan N. Veelo <Bastiaan.N.Veelo@immtek.ntnu.no>
-dnl
+dnl @category InstalledPackages
+dnl @author Bastiaan Veelo <Bastiaan@Veelo.net>
+dnl @version 2006-03-12
+dnl @license AllPermissive
+
+dnl Copyright (C) 2001, 2002, 2003, 2005, 2006 Bastiaan Veelo
+
+dnl THANKS! This code includes bug fixes and contributions made by:
+dnl Tim McClarren,
+dnl Dennis R. Weilert,
+dnl Qingning Huo,
+dnl Brian Mingus,
+dnl Jens Hannemann,
+dnl Pavel Roskin,
+dnl Scott J. Bertin.
+
+dnl ChangeLog
+dnl 2006-03-12  * Hide output of ls and fix an m4 quoting problem (due to Scott J. Bertin).
+dnl 2006-02-13  * Check compiler return value instead of parsing the error stream,
+dnl               which detected warnings as false negatives (due to Jens Hannemann).
+dnl 2006-02-02  * Spelling of "Success".
+dnl             * Fixed unsave test for $bnv_qt_lib without quotes.
+dnl             * Put dnl in front of all comments.
+dnl             * Changed -l$bnv_qt_lib_dir into -L$bnv_qt_lib_dir (all due to Pavel Roskin).
+dnl 2006-01-19  * Support for 64bit architectures.
+dnl             * Updated documentation.
+dnl 2006-01-18: * Fix "cat: bnv_qt_test.c: No such file or directory" (due to Jens Hannemann).
+dnl             * Hide output of failing ls.
+dnl 2006-01-11: * Check in /Developer on Mac OS X; Check in $QTDIR (due to Brian Mingus).
+
+dnl Calls BNV_PATH_QT_DIRECT (contained in this file) as a subroutine.
 AC_DEFUN([BNV_HAVE_QT],
 [
-  dnl THANKS! This code includes bug fixes by:
-  dnl Tim McClarren.
-
   AC_REQUIRE([AC_PROG_CXX])
   AC_REQUIRE([AC_PATH_X])
   AC_REQUIRE([AC_PATH_XTRA])
@@ -89,10 +115,11 @@ AC_DEFUN([BNV_HAVE_QT],
   AC_MSG_CHECKING(for Qt)
 
   AC_ARG_WITH([Qt-dir],
-    [  --with-Qt-dir=DIR       DIR is equal to \$QTDIR if you have followed the
+    [  --with-Qt-dir=DIR       DIR is equal to $QTDIR if you have followed the
                           installation instructions of Trolltech. Header
                           files are in DIR/include, binary utilities are
-                          in DIR/bin and the library is in DIR/lib])
+                          in DIR/bin. The library is in DIR/lib, unless
+			  --with-Qt-lib-dir is also set.])
   AC_ARG_WITH([Qt-include-dir],
     [  --with-Qt-include-dir=DIR
                           Qt header files are in DIR])
@@ -132,26 +159,13 @@ AC_DEFUN([BNV_HAVE_QT],
     if test x"$with_Qt_lib" != x; then
       bnv_qt_lib="$with_Qt_lib"
     fi
-
-    # Check whether QTDIR is defined
-    if test x"$QTDIR" != x; then
-      have_qt=yes
-      bnv_qt_dir="$QTDIR"
-      bnv_qt_include_dir="$QTDIR/include"
-      bnv_qt_bin_dir="$QTDIR/bin"
-      bnv_qt_lib_dir="$QTDIR/lib"
-    fi
-
-    # Check whether the user has over-ridden the default
+    # Check whether we were supplied with an answer already
     if test x"$with_Qt_dir" != x; then
       have_qt=yes
       bnv_qt_dir="$with_Qt_dir"
       bnv_qt_include_dir="$with_Qt_dir/include"
       bnv_qt_bin_dir="$with_Qt_dir/bin"
       bnv_qt_lib_dir="$with_Qt_dir/lib"
-    fi
-
-    if test x"$have_qt" = xyes; then
       # Only search for the lib if the user did not define one already
       if test x"$bnv_qt_lib" = x; then
         bnv_qt_lib="`ls $bnv_qt_lib_dir/libqt* | sed -n 1p |
@@ -191,6 +205,9 @@ AC_DEFUN([BNV_HAVE_QT],
   fi   # $have_qt reflects the system status
   if test x"$have_qt" = xyes; then
     QT_CXXFLAGS="-I$bnv_qt_include_dir"
+    if test x"$bnv_qt_lib" = xqt-mt; then
+        QT_CXXFLAGS="$QT_CXXFLAGS -DQT_THREAD_SUPPORT"
+    fi
     QT_DIR="$bnv_qt_dir"
     QT_LIBS="$bnv_qt_LIBS"
     # If bnv_qt_dir is defined, utilities are expected to be in the
@@ -273,37 +290,33 @@ int main( int argc, char **argv )
 EOF
 
       bnv_cv_qt_test_result="failure"
-      bnv_try_1="$QT_MOC bnv_qt_test.h -o moc_bnv_qt_test.$ac_ext >/dev/null 2>bnv_qt_test_1.out"
+      bnv_try_1="$QT_MOC bnv_qt_test.h -o moc_bnv_qt_test.$ac_ext >/dev/null 2>/dev/null"
       AC_TRY_EVAL(bnv_try_1)
-      bnv_err_1=`grep -v '^ *+' bnv_qt_test_1.out | grep -v "^bnv_qt_test.h\$"`
-      if test x"$bnv_err_1" != x; then
+      if test x"$ac_status" != x0; then
         echo "$bnv_err_1" >&AC_FD_CC
         echo "configure: could not run $QT_MOC on:" >&AC_FD_CC
         cat bnv_qt_test.h >&AC_FD_CC
       else
-        bnv_try_2="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o moc_bnv_qt_test.o moc_bnv_qt_test.$ac_ext >/dev/null 2>bnv_qt_test_2.out"
+        bnv_try_2="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o moc_bnv_qt_test.o moc_bnv_qt_test.$ac_ext >/dev/null 2>/dev/null"
         AC_TRY_EVAL(bnv_try_2)
-        bnv_err_2=`grep -v '^ *+' bnv_qt_test_2.out | grep -v "^bnv_qt_test.{$ac_ext}\$"`
-        if test x"$bnv_err_2" != x; then
+        if test x"$ac_status" != x0; then
           echo "$bnv_err_2" >&AC_FD_CC
           echo "configure: could not compile:" >&AC_FD_CC
-          cat bnv_qt_test.$ac_ext >&AC_FD_CC
+          cat moc_bnv_qt_test.$ac_ext >&AC_FD_CC
         else
-          bnv_try_3="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o bnv_qt_main.o bnv_qt_main.$ac_ext >/dev/null 2>bnv_qt_test_3.out"
+          bnv_try_3="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o bnv_qt_main.o bnv_qt_main.$ac_ext >/dev/null 2>/dev/null"
           AC_TRY_EVAL(bnv_try_3)
-          bnv_err_3=`grep -v '^ *+' bnv_qt_test_3.out | grep -v "^bnv_qt_main.{$ac_ext}\$"`
-          if test x"$bnv_err_3" != x; then
+          if test x"$ac_status" != x0; then
             echo "$bnv_err_3" >&AC_FD_CC
             echo "configure: could not compile:" >&AC_FD_CC
             cat bnv_qt_main.$ac_ext >&AC_FD_CC
           else
-            bnv_try_4="$CXX $QT_LIBS $LIBS -o bnv_qt_main bnv_qt_main.o moc_bnv_qt_test.o >/dev/null 2>bnv_qt_test_4.out"
+            bnv_try_4="$CXX $QT_LIBS $LIBS -o bnv_qt_main bnv_qt_main.o moc_bnv_qt_test.o >/dev/null 2>/dev/null"
             AC_TRY_EVAL(bnv_try_4)
-            bnv_err_4=`grep -v '^ *+' bnv_qt_test_4.out`
-            if test x"$bnv_err_4" != x; then
+            if test x"$ac_status" != x0; then
               echo "$bnv_err_4" >&AC_FD_CC
             else
-              bnv_cv_qt_test_result="succes"
+              bnv_cv_qt_test_result="success"
             fi
           fi
         fi
@@ -311,14 +324,13 @@ EOF
     ])dnl AC_CACHE_VAL bnv_cv_qt_test_result
     AC_MSG_RESULT([$bnv_cv_qt_test_result]);
     if test x"$bnv_cv_qt_test_result" = "xfailure"; then
-      echo "	Failed to compile Qt test program."
-      echo "	Perhaps Qt was compiled with a different compiler version."
-      have_qt="no"
+      AC_MSG_ERROR([Failed to find matching components of a complete
+                  Qt installation. Try using more options,
+                  see ./configure --help.])
     fi
 
     rm -f bnv_qt_test.h moc_bnv_qt_test.$ac_ext moc_bnv_qt_test.o \
-          bnv_qt_main.$ac_ext bnv_qt_main.o bnv_qt_main \
-          bnv_qt_test_1.out bnv_qt_test_2.out bnv_qt_test_3.out bnv_qt_test_4.out
+          bnv_qt_main.$ac_ext bnv_qt_main.o bnv_qt_main
   fi
 
   # added by Willem van Straten
@@ -328,7 +340,6 @@ EOF
 
 dnl Internal subroutine of BNV_HAVE_QT
 dnl Set bnv_qt_dir bnv_qt_include_dir bnv_qt_bin_dir bnv_qt_lib_dir bnv_qt_lib
-dnl Copyright 2001 Bastiaan N. Veelo <Bastiaan.N.Veelo@immtek.ntnu.no>
 AC_DEFUN([BNV_PATH_QT_DIRECT],
 [
   ## Binary utilities ##
@@ -342,11 +353,14 @@ AC_DEFUN([BNV_PATH_QT_DIRECT],
     # The following header file is expected to define QT_VERSION.
     qt_direct_test_header=qglobal.h
     # Look for the header file in a standard set of common directories.
-    bnv_include_path_list="$PSRHOME/packages/$LOGIN_ARCH/qt/include /usr/include
+    bnv_include_path_list="
+      /usr/include
+      `ls -dr ${QTDIR}/include 2>/dev/null`
       `ls -dr /usr/include/qt* 2>/dev/null`
       `ls -dr /usr/lib/qt*/include 2>/dev/null`
       `ls -dr /usr/local/qt*/include 2>/dev/null`
       `ls -dr /opt/qt*/include 2>/dev/null`
+      `ls -dr /Developer/qt*/include 2>/dev/null`
     "
     for bnv_dir in $bnv_include_path_list; do
       if test -r "$bnv_dir/$qt_direct_test_header"; then
@@ -365,12 +379,23 @@ AC_DEFUN([BNV_PATH_QT_DIRECT],
   fi dnl Found header files.
 
   # Are these headers located in a traditional Trolltech installation?
-  if test -x $bnv_qt_include_dir/../bin/moc &&
-     ls $bnv_qt_include_dir/../lib/libqt* > /dev/null; then
-    # Then the rest is is a piece of cake
-    bnv_qt_dir="`echo $bnv_qt_include_dir | sed ss/includess`"
+  # That would be $bnv_qt_include_dir stripped from its last element:
+  bnv_possible_qt_dir=`dirname $bnv_qt_include_dir`
+  if (test -x $bnv_possible_qt_dir/bin/moc) &&
+     ((ls $bnv_possible_qt_dir/lib/libqt* > /dev/null 2>/dev/null) ||
+      (ls $bnv_possible_qt_dir/lib64/libqt* > /dev/null 2>/dev/null)); then
+    # Then the rest is a piece of cake
+    bnv_qt_dir=$bnv_possible_qt_dir
     bnv_qt_bin_dir="$bnv_qt_dir/bin"
-    bnv_qt_lib_dir="$bnv_qt_dir/lib"
+    if test x"$with_Qt_lib_dir" != x; then
+      bnv_qt_lib_dir="$with_Qt_lib_dir"
+    else
+      if (test -d $bnv_qt_dir/lib64); then
+	bnv_qt_lib_dir="$bnv_qt_dir/lib64"
+      else
+	bnv_qt_lib_dir="$bnv_qt_dir/lib"
+      fi
+    fi
     # Only look for lib if the user did not supply it already
     if test x"$bnv_qt_lib" = xNO; then
       bnv_qt_lib="`ls $bnv_qt_lib_dir/libqt* | sed -n 1p |
@@ -413,7 +438,7 @@ AC_DEFUN([BNV_PATH_QT_DIRECT],
       AC_TRY_LINK([#include <$qt_direct_test_header>],
         $qt_direct_test_main,
       [
-        # Succes.
+        # Success.
         # We can link with no special library directory.
         bnv_qt_lib_dir=
       ], [
@@ -424,7 +449,7 @@ AC_DEFUN([BNV_PATH_QT_DIRECT],
         AC_TRY_LINK([#include <$qt_direct_test_header>],
           $qt_direct_test_main,
         [
-          # Succes.
+          # Success.
           # We can link with no special library directory.
           bnv_qt_lib_dir=
         ], [
@@ -435,7 +460,7 @@ AC_DEFUN([BNV_PATH_QT_DIRECT],
           AC_TRY_LINK([#include <$qt_direct_test_header>],
             $qt_direct_test_main,
           [
-            # Succes.
+            # Success.
             # We can link with no special library directory.
             bnv_qt_lib_dir=
           ], [
@@ -445,18 +470,23 @@ AC_DEFUN([BNV_PATH_QT_DIRECT],
             bnv_dir_list="
               `echo $bnv_qt_includes | sed ss/includess`
               /lib
+	      /usr/lib64
               /usr/lib
+	      /usr/local/lib64
               /usr/local/lib
+	      /opt/lib64
               /opt/lib
+              `ls -dr /usr/lib64/qt* 2>/dev/null`
+              `ls -dr /usr/lib64/qt*/lib64 2>/dev/null`
               `ls -dr /usr/lib/qt* 2>/dev/null`
               `ls -dr /usr/local/qt* 2>/dev/null`
               `ls -dr /opt/qt* 2>/dev/null`
             "
             for bnv_dir in $bnv_dir_list; do
-              if ls $bnv_dir/libqt*; then
+              if ls $bnv_dir/libqt* >/dev/null 2>/dev/null; then
                 # Gamble that it's the first one...
                 bnv_qt_lib="`ls $bnv_dir/libqt* | sed -n 1p |
-                            sed s@$bnv_dir/lib@@ | sed s/[.].*//` 2>/dev/null"
+                            sed s@$bnv_dir/lib@@ | sed s/[[.]].*//`"
                 bnv_qt_lib_dir="$bnv_dir"
                 break
               fi
@@ -466,7 +496,7 @@ AC_DEFUN([BNV_PATH_QT_DIRECT],
             AC_TRY_LINK([#include <$qt_direct_test_header>],
               $qt_direct_test_main,
             [
-              # Succes.
+              # Success.
               # We can link with no special library directory.
               bnv_qt_lib_dir=
             ], [
@@ -476,7 +506,7 @@ AC_DEFUN([BNV_PATH_QT_DIRECT],
         ])
       ])
       if test x"$bnv_qt_lib_dir" != x; then
-        bnv_qt_LIBS="-l$bnv_qt_lib_dir $LIBS"
+        bnv_qt_LIBS="-L$bnv_qt_lib_dir $LIBS"
       else
         bnv_qt_LIBS="$LIBS"
       fi
@@ -484,5 +514,4 @@ AC_DEFUN([BNV_PATH_QT_DIRECT],
       CXXFLAGS="$bnv_save_CXXFLAGS"
     fi dnl $with_Qt_lib_dir was not given
   fi dnl Done setting up for non-traditional Trolltech installation
-
 ])
