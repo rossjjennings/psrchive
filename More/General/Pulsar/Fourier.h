@@ -7,12 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Fourier.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/10/02 05:41:11 $
+   $Revision: 1.5 $
+   $Date: 2007/11/28 05:18:05 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Fourier_h
 #define __Pulsar_Fourier_h
+
+#include "FTransformAgent.h"
 
 namespace Pulsar {
 
@@ -20,10 +22,10 @@ namespace Pulsar {
   class PolnProfile;
 
   //! Return the forward Fourier transform of the input Profile
-  Profile* fourier_transform (const Profile* input);
+  Profile* fourier_transform (const Profile*, FTransform::Plan* = 0);
 
   //! Return the forward Fourier transform of the input PolnProfile
-  PolnProfile* fourier_transform (const PolnProfile* input);
+  PolnProfile* fourier_transform (const PolnProfile*, FTransform::Plan* = 0);
 
   //! Square-law detect the input Profile
   void detect (Profile* input);

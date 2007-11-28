@@ -4,30 +4,36 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
 
 #include "Pulsar/Fourier.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
-#include "FTransform.h"
 
-Pulsar::PolnProfile* Pulsar::fourier_transform (const PolnProfile* input) try
+using namespace std;
+
+Pulsar::PolnProfile* Pulsar::fourier_transform (const PolnProfile* input,
+						FTransform::Plan* plan) try
 {
   return new PolnProfile( input->get_basis(), input->get_state(),
-			  fourier_transform(input->get_Profile(0)),
-			  fourier_transform(input->get_Profile(1)),
-			  fourier_transform(input->get_Profile(2)),
-			  fourier_transform(input->get_Profile(3)) );
+			  fourier_transform(input->get_Profile(0),plan),
+			  fourier_transform(input->get_Profile(1),plan),
+			  fourier_transform(input->get_Profile(2),plan),
+			  fourier_transform(input->get_Profile(3),plan) );
 }
 catch (Error& error) {
   throw error += "Pulsar::fourier_transform (PolnProfile)";
 }
 
-Pulsar::Profile* Pulsar::fourier_transform (const Profile* input) try
+Pulsar::Profile* Pulsar::fourier_transform (const Profile* input,
+					    FTransform::Plan* plan) try
 {
   Reference::To<Profile> fourier = new Profile (input->get_nbin() + 2);
 
-  FTransform::frc1d (input->get_nbin(), fourier->get_amps(), input->get_amps());
+  if (plan)
+    plan->frc1d  (input->get_nbin(), fourier->get_amps(), input->get_amps());
+  else
+    FTransform::frc1d (input->get_nbin(),
+		       fourier->get_amps(), input->get_amps());
 
   fourier->scale( 1.0 / sqrt(double(input->get_nbin())) );
 
