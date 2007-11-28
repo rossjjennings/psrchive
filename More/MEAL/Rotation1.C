@@ -126,12 +126,10 @@ void MEAL::Rotation1::parse (const string& line)
 
   if (key == "axis") {
 
-    string value = stringtok (temp, " \t");
-
     if (verbose)
-      cerr << "MEAL::Rotation1::parse value " << value << endl;
+      cerr << "MEAL::Rotation1::parse value " << temp << endl;
 
-    Vector<3,double> v = fromstring< Vector<3,double> >( value );
+    Vector<3,double> v = fromstring< Vector<3,double> >( temp );
     set_axis (v);
 
   }
