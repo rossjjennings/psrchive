@@ -16,16 +16,16 @@ using namespace std;
 void usage ()
 {
   cerr << 
-    "pascii - pulsar archive ascii print\n"
+    "psrtxt - pulsar archive ascii print\n"
     "\n"
-    "pascii [options] filename\n"
+    "psrtxt [options] filename\n"
     "options:\n"
     "  -b ibin    select a single phase bin, from 0 to nbin-1\n"
     "  -c ichan   select a single frequency channel, from 0 to nchan-1\n"
     "  -i isub    select a single integration, from 0 to nsubint-1\n"
     "  -p phase   select a single phase, from 0.0 to 1.0 (overrides -b)\n"
     "\n"
-    "Each row output by pascii contains:\n"
+    "Each row output by psrtxt contains:\n"
     "\n"
     "isub ichan ibin S0 [S1 ... SN]\n" 
     "\n"
@@ -81,7 +81,7 @@ int main (int argc, char** argv) try {
 
 
   if (optind >= argc) {
-    cerr << "pascii: specify filename" << endl;
+    cerr << "psrtxt: specify filename" << endl;
     return -1;
   }
 
@@ -96,17 +96,17 @@ int main (int argc, char** argv) try {
     cbin = int (phase * (nbin-1));
 
   if (cbin > 0 && unsigned(cbin) >= nbin) {
-    cerr << "pascii: -b " << cbin << " >= nbin=" << nbin << endl;
+    cerr << "psrtxt: -b " << cbin << " >= nbin=" << nbin << endl;
     return -1;
   }
 
   if (cchan > 0 && unsigned(cchan) >= nchan) {
-    cerr << "pascii: -c " << cchan << " >= nchan=" << nchan << endl;
+    cerr << "psrtxt: -c " << cchan << " >= nchan=" << nchan << endl;
     return -1;
   }
 
   if (csub > 0 && unsigned(csub) >= nsub) {
-    cerr << "pascii: -i " << csub << " >= nsub=" << nsub << endl;
+    cerr << "psrtxt: -i " << csub << " >= nsub=" << nsub << endl;
     return -1;
   }
 
