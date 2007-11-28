@@ -74,6 +74,12 @@ void MEAL::Function::copy (const Function* model)
   set_evaluation_changed();
 }
 
+//! Clone
+MEAL::Function* MEAL::Function::clone () const
+{
+  throw Error (InvalidState, "MEAL::Function::clone", "not implemented" );
+}
+
 void MEAL::Function::copy_parameter_policy (const Function* function)
 {
   parameter_policy = function->parameter_policy;

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Function.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/10/30 02:30:59 $
+   $Revision: 1.11 $
+   $Date: 2007/11/28 05:18:08 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -80,6 +80,9 @@ namespace MEAL {
     //! Virtual destructor
     virtual ~Function ();
 
+    //! Clone
+    virtual Function* clone () const;
+
     //! Does the work for operator =
     virtual void copy (const Function* model);
 
@@ -88,9 +91,6 @@ namespace MEAL {
 
     //! Prints the values of model parameters and fit flags to a string
     virtual void print (std::string& text) const;
-
-    //! Prints the values of model parameters and fit flags to a string
-    virtual void print_parameters (std::string& text, const std::string& sep) const;
 
     //! Return the name of the class
     virtual std::string get_name () const = 0;
@@ -162,6 +162,10 @@ namespace MEAL {
     //! Provide access to the parameter_policy attribute
     const ParameterPolicy* get_parameter_policy () const
     { return parameter_policy; }
+
+    //! Prints the values of model parameters and fit flags to a string
+    virtual void print_parameters (std::string& text,
+				   const std::string& separator) const;
 
    protected:
 
