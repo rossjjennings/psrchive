@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Agent.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.7 $
+   $Date: 2007/11/28 05:18:24 $
    $Author: straten $ */
 
 #ifndef __MEAL_Agent_H
@@ -54,32 +54,30 @@ namespace MEAL {
     Function-derived classes for use with the Function::load factory. */
 
   template<class Type>
-    class Advocate : public Agent {
+  class Advocate : public Agent
+  {
     
-    public:
+  public:
 
     //! Constructor ensures that template entry is instantiated
-    Advocate () { entry.get(); instance = new Type; }
+    Advocate () { instance = new Type; }
+    
+    //! Constructor ensures that template entry is instantiated
+    template<typename Arg>
+    Advocate (const Arg& arg) { instance = new Type (arg); }
 
     //! Return the name of the derived class
     std::string get_name () { return instance->get_name(); }
 
     //! Return a new instance of the Function derived class
-    Function* new_Function () { return new Type; }
+    Function* new_Function () { return instance->clone(); }
 
     private:
 
-    //! Use an instance of the class to call get_name method
+    //! Use an instance of the class to create clones
     Type* instance;
 
-    //! Enter template constructor adds Advocate<Type> to Agent::registry
-    static Registry::List<Agent>::Enter<Advocate> entry;
-    
   };
-
-  /*! Static instance of entry attribute. */
-  template<class Type>
-    Registry::List<Agent>::Enter< Advocate<Type> > Advocate<Type>::entry;
 
 }
 

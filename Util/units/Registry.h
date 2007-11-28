@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Registry.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.5 $
+   $Date: 2007/11/28 05:18:24 $
    $Author: straten $ */
 
 #ifndef __Registry_h
@@ -67,27 +67,15 @@ namespace Registry {
     friend class Entry<Parent>;
 
   public:
-    //! Used to enter a Child class into the Registry::List<Parent>
-    template<class Child>
-    class Enter : public Entry<Parent>
-    {
-    public:
-      //! Constructor registers only the first instance
-      Enter ()  { 
-        if (instances == 0)
-          register_child (new Child);
-        instances ++;
-      }
 
-    protected:
-      //! Create a new instance of Child
-      Parent* create () const { return new Child; }
-      
-    private:
-      //! The number of Enter<Child> instances
-      static unsigned instances;
-    };
+    //! Counts the number of instances of Child entries
+    template<class Child> class Instances;
+
+    //! Enter a Child with default constructor into Registry::List<Parent>
+    template<class Child> class Enter;
   
+    //! Enter Child with unary constructor into Registry::List<Parent>
+    template<class Child, class Argument> class Unary;
 
     //! Return the size of the list
     unsigned size () const { return entries.size(); }
@@ -113,13 +101,64 @@ namespace Registry {
     std::vector< Entry<Parent>* > entries;
   };
 
+  template<class Parent>
+  template<class Child>
+  class List<Parent>::Instances
+  {
+  public:
+    static unsigned get_instances () { return instances; }
+    static void add_instance () { instances++; }
+  private:
+    static unsigned instances;
+  };
+
+  //! Enter a Child with default constructor into Registry::List<Parent>
+  template<class Parent>
+  template<class Child>
+  class List<Parent>::Enter : public Entry<Parent>
+  {
+  public:
+    //! Constructor registers only the first instance
+    Enter () 
+    { 
+      if (Instances<Child>::get_instances() == 0)
+	register_child (new Child);
+      Instances<Child>::add_instance();
+    }
+
+  protected:
+    //! Create a new instance of Child
+    Parent* create () const { return new Child; }
+  };
+  
+  //! Enter Child with unary constructor into Registry::List<Parent>
+  template<class Parent>
+  template<class Child, class Argument>
+  class List<Parent>::Unary : public Entry<Parent>
+  {
+  public:
+
+    //! Constructor registers only the first instance
+    Unary (const Argument& arg)
+    { 
+      argument = arg;
+      if (Instances<Child>::get_instances() == 0)
+	register_child( new Child(arg) );
+      Instances<Child>::add_instance();
+    }
+  protected:
+    //! Create a new instance of Child
+    Parent* create () const { return new Child(argument); }
+    //! Argument to unary constructor
+    Argument argument;
+  };
 
 
 }
 
 template<class Parent> 
 template<class Child>
-unsigned Registry::List<Parent>::Enter<Child>::instances = 0;
+unsigned Registry::List<Parent>::Instances<Child>::instances = 0;
 
 template<class Parent>
 bool Registry::List<Parent>::verbose = false;
