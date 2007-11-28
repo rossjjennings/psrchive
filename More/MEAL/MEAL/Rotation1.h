@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Rotation1.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/11/28 05:18:20 $
+   $Revision: 1.5 $
+   $Date: 2007/11/28 05:58:41 $
    $Author: straten $ */
 
 #ifndef __MEAL_Rotation1_H
@@ -68,7 +68,7 @@ namespace MEAL {
     void parse (const std::string& line);
 
     //! Print the values of model parameters and fit flags to a string
-    virtual void print (std::string& text) const;
+    void print (std::string& text) const;
 
   protected:
 
