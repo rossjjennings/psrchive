@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.16 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.17 $
+   $Date: 2007/11/28 05:18:32 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -205,6 +205,36 @@ std::ostream& operator<< (std::ostream& ostr, const Vector<N,T>& v)
   for (unsigned i=1; i<N; i++)
     ostr << "," << v[i];
   return ostr << ")";
+}
+
+template<unsigned N, typename T>
+std::istream& operator >> (std::istream& is, Vector<N,T>& v)
+{
+  char c;
+  is >> c;
+
+  if (c != '(') {
+    is.setstate(std::istream::failbit);
+    return is;
+  }
+
+  is >> v[0];
+
+  for (unsigned i=1; i<N; i++)
+  {
+    is >> c >> v[i];
+    if (c != ',') {
+      is.setstate(std::istream::failbit);
+      return is;
+    }
+  }
+
+  is >> c;
+
+  if (c != ')')
+    is.setstate(std::istream::failbit);
+
+  return is;
 }
 
 #endif  /* not __Vector_H defined */
