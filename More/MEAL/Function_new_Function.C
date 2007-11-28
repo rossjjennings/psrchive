@@ -7,17 +7,29 @@
 #include "MEAL/Agent.h"
 #include "MEAL/Function.h"
 
-Registry::List<MEAL::Agent> MEAL::Agent::registry;
+using namespace MEAL;
+
+Registry::List<Agent> Agent::registry;
 
 #include "MEAL/Polynomial.h"
-static MEAL::Advocate<MEAL::Polynomial> polynomial;
+static Registry::List<Agent>::Enter< Advocate<Polynomial> >
+polynomial;
 
 #include "MEAL/Gaussian.h"
-static MEAL::Advocate<MEAL::Gaussian> gaussian;
+static Registry::List<Agent>::Enter< Advocate<Gaussian> >
+gaussian;
 
 #include "MEAL/SumRule.h"
-typedef MEAL::SumRule<MEAL::Scalar> ScalarSum;
-static MEAL::Advocate<ScalarSum> scalar_sum;
+static Registry::List<Agent>::Enter< Advocate< SumRule<Scalar> > >
+scalar_sum;
+
+#include "MEAL/Rotation1.h"
+static Registry::List<Agent>::Unary< Advocate<Rotation1>, Vector<3,double> >
+rotation1( Vector<3,double>::basis(0) );
+
+#include "MEAL/Boost1.h"
+static Registry::List<Agent>::Unary< Advocate<Boost1>, Vector<3,double> >
+boost1( Vector<3,double>::basis(0) );
 
 using namespace std;
 
