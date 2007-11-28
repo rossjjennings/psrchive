@@ -77,12 +77,15 @@ int main (int argc, char** argv) try
 
   while( isub < nsub )
   {
+    cerr << "psrsplit: extracting";
     vector<unsigned> subints;
     for (unsigned jsub=0; jsub < nsubint && isub < nsub; jsub++)
     {
+      cerr << " " << isub;
       subints.push_back( isub );
       isub ++;
     }
+    cerr << endl;
 
     Reference::To<Pulsar::Archive> sub_archive = archive->extract(subints);
 
