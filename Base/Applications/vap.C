@@ -2044,7 +2044,7 @@ void ProcessArchiveImplementation( OS& os, string filename )
     }
     else
     {
-      cerr << e.get_message() << endl;
+      cerr << "\n\t" << e.get_message() << endl;
     }
   }
   catch ( ... )
