@@ -834,6 +834,9 @@ int polyco::i_nearest (const MJD &t) const
   float min_dist = FLT_MAX;
   int imin = -1;
 
+  if (verbose)
+    cerr << "polyco::i_nearest epoch=" << t.printdays(10) << endl;
+
   for (unsigned ipolly=0; ipolly<pollys.size(); ipolly ++)  {
 
     float dist = fabs ( (pollys[ipolly].ref_time - t).in_minutes() );
@@ -858,6 +861,7 @@ int polyco::i_nearest (const MJD &t) const
   if (imin < 0) {
     if (verbose)
       cerr << "polyco::i_nearest - no polynomial found" << endl;
+    why_not = "no polynomial for epoch=" + t.printdays( 15 );
     return -1;
   }
 
@@ -888,17 +892,20 @@ int polyco::i_nearest (const Phase& p) const
   float min_dist = FLT_MAX;
   int imin = -1;
 
+  if (verbose)
+    cerr << "polyco::i_nearest phase=" << p << endl;
+
   for (unsigned ipolly=0; ipolly<pollys.size(); ipolly ++)  {
 
     float dist = fabs ( (pollys[ipolly].ref_phase - p).in_turns() );
 
     if (verbose)  {
-      cerr << "polyco::i_nearest distance=" << dist << " turns";
+      cerr << "polyco::i_nearest ref_phase=" << pollys[ipolly].ref_phase
+	   << " distance=" << dist << " turns";
       if (min_dist != FLT_MAX)
         cerr << " (min=" << min_dist << ")";
       cerr << endl;
     }
-
 
     if (dist < min_dist) {
       imin = ipolly;
@@ -910,6 +917,7 @@ int polyco::i_nearest (const Phase& p) const
   if (imin < 0) {
     if (verbose)
       cerr << "polyco::i_nearest - no polynomial found" << endl;
+    why_not = "no polynomial for phase=" + p.strprint( 15 );
     return -1;
   }
 
