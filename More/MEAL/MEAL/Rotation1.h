@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Rotation1.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/11/08 11:11:29 $
+   $Revision: 1.4 $
+   $Date: 2007/11/28 05:18:20 $
    $Author: straten $ */
 
 #ifndef __MEAL_Rotation1_H
@@ -30,6 +30,12 @@ namespace MEAL {
 
     //! Construct for the specified axis
     Rotation1 (const Vector<3,double>& axis);
+
+    //! Copy constructor
+    Rotation1 (const Rotation1&);
+
+    //! Clone operator
+    Rotation1* clone () const;
 
     //! Set the axis about which the rotation occurs
     void set_axis (const Vector<3,double>& axis);
@@ -58,6 +64,12 @@ namespace MEAL {
     //! Return the name of the class
     std::string get_name () const;
 
+    //! Parse the values of model parameters and fit flags from a string
+    void parse (const std::string& line);
+
+    //! Print the values of model parameters and fit flags to a string
+    virtual void print (std::string& text) const;
+
   protected:
 
     //! Calculate the Jones matrix and its gradient
@@ -66,6 +78,7 @@ namespace MEAL {
     //! The axis along which the rotation occurs
     Vector<3,double> axis;
 
+    void init ();
   };
 
 }

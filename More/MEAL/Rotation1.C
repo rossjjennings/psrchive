@@ -7,14 +7,32 @@
 #include "MEAL/Rotation1.h"
 #include "MEAL/OneParameter.h"
 #include "Pauli.h"
+#include "stringtok.h"
 
 using namespace std;
 
-MEAL::Rotation1::Rotation1 (const Vector<3,double>& _axis) 
+void MEAL::Rotation1::init ()
 {
   OneParameter* param = new OneParameter (this);
   param->set_param_name ("rotation");
+}
+
+MEAL::Rotation1::Rotation1 (const Vector<3,double>& _axis) 
+{
+  init ();
   set_axis( _axis );
+}
+
+MEAL::Rotation1::Rotation1 (const Rotation1& copy) 
+{
+  init ();
+  set_axis( copy.get_axis() );
+  set_phi( copy.get_phi() );
+}
+
+MEAL::Rotation1*  MEAL::Rotation1::clone () const
+{
+  return new Rotation1(*this);
 }
 
 //! Return the name of the class
@@ -93,4 +111,38 @@ void MEAL::Rotation1::calculate (Jones<double>& result,
   if (verbose)
     cerr << "MEAL::Rotation1::calculate gradient" << endl
 	 << "   " << (*grad)[0] << endl;
+}
+
+//! Parses the values of model parameters and fit flags from a string
+void MEAL::Rotation1::parse (const string& line)
+{
+  string temp = line;
+
+  // the key should be the name of the parameter to be set
+  string key = stringtok (temp, " \t");
+
+  if (verbose)
+    cerr << "MEAL::Rotation1::parse key '" << key << "'" << endl;
+
+  if (key == "axis") {
+
+    string value = stringtok (temp, " \t");
+
+    if (verbose)
+      cerr << "MEAL::Rotation1::parse value " << value << endl;
+
+    Vector<3,double> v = fromstring< Vector<3,double> >( value );
+    set_axis (v);
+
+  }
+  else
+    Function::parse (line);
+}
+
+//! Prints the values of model parameters and fit flags to a string
+void MEAL::Rotation1::print (string& text) const
+{
+  text = get_name ();
+  text += "\n axis " + tostring(axis);
+  print_parameters (text, "\n ");
 }
