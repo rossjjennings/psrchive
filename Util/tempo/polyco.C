@@ -477,6 +477,10 @@ int operator != (const polynomial & p1, const polynomial & p2){
   return(1);
 }
 
+bool time_order (const polynomial & p1, const polynomial & p2)
+{
+  return p1.get_reftime() < p2.get_reftime();
+}
 
 /******************************************/
 
@@ -680,10 +684,13 @@ int polyco::load (string* instr)
   pollys.clear();
 
   polynomial tst;
-  while(instr->length() && tst.load(instr)==0){
+  while (instr->length() && tst.load(instr)==0)
+  {
     pollys.push_back(tst);      
     npollys++;
   }
+
+  std::sort( pollys.begin(), pollys.end(), time_order );
 
   if (verbose)
     cerr << "polyco::load (string*) return npollys=" << npollys << endl;
@@ -754,7 +761,8 @@ void polyco::append (const polyco& poly)
     cerr << "polyco::append have=" << pollys.size() << " get="
 	 << poly.pollys.size() << " polynomials" << endl;
 
-  for (unsigned iget=0; iget<poly.pollys.size(); ++iget) {
+  for (unsigned iget=0; iget<poly.pollys.size(); ++iget)
+  {
     bool is_new = true;
     for (unsigned ihave=0; ihave<pollys.size(); ihave++)
       if (pollys[ihave] == poly.pollys[iget])
@@ -764,6 +772,8 @@ void polyco::append (const polyco& poly)
     else if (verbose)
       cerr << "polyco::append already have iget=" << iget << endl;
   }
+
+  std::sort( pollys.begin(), pollys.end(), time_order );
 }
 
 void polyco::prettyprint() const 
