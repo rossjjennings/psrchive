@@ -111,7 +111,7 @@ void PavApp::PrintUsage( void )
   cout << " -M meta   Read a meta-file containing the files to use" << endl;
   cout << endl;
   cout << "Selection options:" << endl;
-  cout << " -z x1,x2  Zoom to this pulse phase range" << endl;
+  cout << " -z x1,x2  Zoom to this pulse phase range (in turns)" << endl;
   cout << " -k f1,f2  Zoom to this frequency range" << endl;
   cout << " -y s1,s2  Zoom to this subint range" << endl;
   cout << " -N x,y    Divide the window into x by y panels" << endl;
@@ -552,7 +552,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.37 2007/11/27 03:47:23 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.38 2007/11/29 19:42:57 straten Exp $" << endl << endl;
       return 0;
       break;
     case 'M':
