@@ -131,6 +131,8 @@ private:
   bool plot_error_box;
   
   bool freq_under_name;
+  
+  float user_character_height;
 
   bool label_degrees;
   bool centre_profile;

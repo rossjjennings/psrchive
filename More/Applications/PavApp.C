@@ -69,6 +69,8 @@ PavApp::PavApp()
   plot_error_box = false;
 
   freq_under_name = false;
+  
+  user_character_height = -1;
 
   cbppo = false;
   cbpao = false;
@@ -392,6 +394,18 @@ void PavApp::PavSpecificOptions( void )
   {
     SetPlotOptions<StokesCylindrical>( "pa:y:range=(0,1.5)" );
   }
+  
+  if( user_character_height != -1 )
+  {
+    int old_precision = tostring_precision;
+    bool old_places = tostring_places;
+    tostring_precision = 3;
+    tostring_places = true;
+    cerr << "setting character height to " << ( string("ch=") + tostring<float>(user_character_height) ) << endl;
+    SetPlotOptions<Plot>( string("ch=") + tostring<float>(user_character_height) );
+    tostring_places = old_places;
+    tostring_precision = old_precision;
+  }
 }
 
 
@@ -533,6 +547,7 @@ int PavApp::run( int argc, char *argv[] )
   const int EBOX             = 1010;
   const int PAEXT            = 1011;
   const int STACKLEFT        = 1012;
+  const int CH               = 1013;
 
   static struct option long_options[] =
     {
@@ -548,6 +563,7 @@ int PavApp::run( int argc, char *argv[] )
       { "ebox",               0, 0, EBOX },
       { "pa_ext",             0, 0, PAEXT },
       { "sl",                 0, 0, STACKLEFT },
+      { "ch",                 1, 0, CH },
       { 0,0,0,0 }
     };
 
@@ -573,7 +589,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.39 2007/12/02 23:15:52 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.40 2007/12/02 23:54:21 nopeer Exp $" << endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
@@ -764,6 +780,9 @@ int PavApp::run( int argc, char *argv[] )
     case STACKLEFT:
       freq_under_name = true;
       break;
+    case CH:
+      user_character_height = fromstring<float>( optarg );
+      break;
     case 'x':
       clip_value = "=(0,";
       clip_value += string( optarg );
@@ -816,15 +835,13 @@ int PavApp::run( int argc, char *argv[] )
     return -1;
   }
 
-  // Adjust the labels etc to the way we want to see them in pav.
-
-  PavSpecificOptions();
-
   // set options for all the plots
 
   SetCmdLineOptions( options );
 
+  // Adjust the labels etc to the way we want to see them in pav.
 
+  PavSpecificOptions();
 
   // TODO ??
 
