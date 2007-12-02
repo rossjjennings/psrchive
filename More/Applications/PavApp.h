@@ -129,6 +129,8 @@ private:
   bool pa_ext;
   
   bool plot_error_box;
+  
+  bool freq_under_name;
 
   bool label_degrees;
   bool centre_profile;

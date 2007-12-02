@@ -68,6 +68,8 @@ PavApp::PavApp()
 
   plot_error_box = false;
 
+  freq_under_name = false;
+
   cbppo = false;
   cbpao = false;
   cblpo = false;
@@ -134,6 +136,7 @@ void PavApp::PrintUsage( void )
   cout << " -Y        Plot colour map of sub-integrations against pulse phase" << endl;
   cout << endl;
   cout << "Other plotting options:" << endl;
+  cout << " --sl           Stack labels(name,freq) on the left side of the plot" << endl;
   cout << " --publn        Publication quality plot (B&W)  L dashed, V dots" << endl;
   cout << " --publnc       Publication quality plot (keep in colour if device supports it)" << endl;
   cout << " --cmap index   Select a colour map for PGIMAG style plots" << endl;
@@ -275,8 +278,13 @@ void PavApp::PavSpecificOptions( void )
   {
     tostring_precision = 1;
     SetPlotOptions<Plot>( "ch=1.2" );
-    SetPlotOptions<FramedPlot>( "below:l=$name" );
-    SetPlotOptions<FramedPlot>( "below:r=$freq MHz" );
+    if( freq_under_name )
+      SetPlotOptions<FramedPlot>( "below:l=$name.$freq MHz" );
+    else
+    {
+      SetPlotOptions<FramedPlot>( "below:l=$name" );
+      SetPlotOptions<FramedPlot>( "below:r=$freq MHz" );
+    }
   }
   else
   {
@@ -312,8 +320,14 @@ void PavApp::PavSpecificOptions( void )
   else
   {
     SetPlotOptions<StokesCylindrical>( "pa:above:c=" );
-    SetPlotOptions<StokesCylindrical>( "flux:below:l=$name" );
-    SetPlotOptions<StokesCylindrical>( "flux:below:r=$freq MHz" );
+    if( freq_under_name )
+      SetPlotOptions<StokesCylindrical>( "flux:below:l=$name.$freq Mhz" );
+    else
+    {
+
+      SetPlotOptions<StokesCylindrical>( "flux:below:l=$name" );
+      SetPlotOptions<StokesCylindrical>( "flux:below:r=$freq MHz" );
+    }
   }
 
   // PhasVsTime plot config
@@ -352,8 +366,13 @@ void PavApp::PavSpecificOptions( void )
   if( publn )
   {
     SetPlotOptions<StokesSpherical>( "ell:above:c=" );
-    SetPlotOptions<StokesSpherical>( "flux:below:l=$name" );
-    SetPlotOptions<StokesSpherical>( "flux:below:r=$freq Mhz" );
+    if( freq_under_name )
+      SetPlotOptions<StokesSpherical>( "flux:below:l=$name.$freq Mhz" );
+    else
+    {
+      SetPlotOptions<StokesSpherical>( "flux:below:l=$name" );
+      SetPlotOptions<StokesSpherical>( "flux:below:r=$freq Mhz" );
+    }
   }
   else
   {
@@ -513,6 +532,7 @@ int PavApp::run( int argc, char *argv[] )
   const int LAB_DEG          = 1009;
   const int EBOX             = 1010;
   const int PAEXT            = 1011;
+  const int STACKLEFT        = 1012;
 
   static struct option long_options[] =
     {
@@ -527,6 +547,7 @@ int PavApp::run( int argc, char *argv[] )
       { "ld",                 0, 0, LAB_DEG },
       { "ebox",               0, 0, EBOX },
       { "pa_ext",             0, 0, PAEXT },
+      { "sl",                 0, 0, STACKLEFT },
       { 0,0,0,0 }
     };
 
@@ -547,14 +568,13 @@ int PavApp::run( int argc, char *argv[] )
       return 0;
     case 'h':
       PrintUsage();
-      break;
+      return 0;
     case 'b':
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.38 2007/11/29 19:42:57 straten Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.39 2007/12/02 23:15:52 nopeer Exp $" << endl << endl;
       return 0;
-      break;
     case 'M':
       metafile = optarg;
       break;
@@ -604,7 +624,6 @@ int PavApp::run( int argc, char *argv[] )
     case 'p':
       jobs.push_back( "pscrunch" );
       break;
-
     case 'S':
       clip_command = "flux:y:range";
       clear_labels = false;
@@ -742,29 +761,15 @@ int PavApp::run( int argc, char *argv[] )
     case PAEXT:
       pa_ext = true;
       break;
+    case STACKLEFT:
+      freq_under_name = true;
+      break;
     case 'x':
       clip_value = "=(0,";
       clip_value += string( optarg );
       clip_value += ")";
       break;
     };
-  }
-
-  // If we can't open the pgplot device
-  //   output an error and exit
-
-  if (cpgopen(plot_device.c_str()) < 0)
-  {
-    cout << "pav: Could not open plot device" << endl;
-    return -1;
-  }
-
-  // Determine if the device supports colour or not
-  // TODO: in future, might check that it has enough colours, not just that it has colour
-
-  if( !force_bw )
-  {
-    have_colour = CheckColour();
   }
 
   // Create a list of FilePlots with the archives and a vector of plots for each
@@ -784,6 +789,22 @@ int PavApp::run( int argc, char *argv[] )
     return -1;
   }
 
+  // If we can't open the pgplot device
+  //   output an error and exit
+
+  if (cpgopen(plot_device.c_str()) < 0)
+  {
+    cout << "pav: Could not open plot device" << endl;
+    return -1;
+  }
+
+  // Determine if the device supports colour or not
+  // TODO: in future, might check that it has enough colours, not just that it has colour
+
+  if( !force_bw )
+  {
+    have_colour = CheckColour();
+  }
 
   CreatePlotsList( filenames, plot_ids );
 
@@ -867,7 +888,6 @@ int PavApp::run( int argc, char *argv[] )
   cmap.set_name ( colour_map );
   cmap.apply();
 
-
   Interpreter preprocessor;
 
   for (unsigned i = 0; i < plots.size(); i++)
@@ -882,35 +902,35 @@ int PavApp::run( int argc, char *argv[] )
 
       if( centre_profile )
       {
-	Functor< std::pair<int,int> (const Profile*) > old_strat = Profile::peak_edges_strategy;
-	Functor< std::pair<int,int> (const Profile*) > consecutive_functor; 
+        Functor< std::pair<int,int> (const Profile*) > old_strat = Profile::peak_edges_strategy;
+        Functor< std::pair<int,int> (const Profile*) > consecutive_functor;
 
-	if (!consecutive_functor)
-	  consecutive_functor.set( new PeakConsecutive, &RiseFall::get_rise_fall );
+        if (!consecutive_functor)
+          consecutive_functor.set( new PeakConsecutive, &RiseFall::get_rise_fall );
 
-	Profile::peak_edges_strategy = consecutive_functor;
-	
-	Reference::To<Archive> copy = plots[i].archive->clone();
-	copy->dedisperse();
+        Profile::peak_edges_strategy = consecutive_functor;
 
-	int nbin = copy->get_nbin();
+        Reference::To<Archive> copy = plots[i].archive->clone();
+        copy->dedisperse();
 
-	int p1, p2;
-	copy->find_peak_edges( p1, p2 );
+        int nbin = copy->get_nbin();
 
-	float first = float(p1) / float(nbin);
-	float second = float(p2) / float(nbin);
-	float centre = first + (second - first) / 2.0;
+        int p1, p2;
+        copy->find_peak_edges( p1, p2 );
 
-	if( centre > 0.5 )
-	{
-	  float rot = (centre - 0.5);
-	  plots[i].archive->rotate_phase( rot );
-	}
-	else
-	  plots[i].archive->rotate_phase( .5 - centre );
-	
-	Profile::peak_edges_strategy = old_strat;
+        float first = float(p1) / float(nbin);
+        float second = float(p2) / float(nbin);
+        float centre = first + (second - first) / 2.0;
+
+        if( centre > 0.5 )
+        {
+          float rot = (centre - 0.5);
+          plots[i].archive->rotate_phase( rot );
+        }
+        else
+          plots[i].archive->rotate_phase( .5 - centre );
+
+        Profile::peak_edges_strategy = old_strat;
       }
 
 
