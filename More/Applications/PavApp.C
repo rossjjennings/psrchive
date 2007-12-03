@@ -69,13 +69,16 @@ PavApp::PavApp()
   plot_error_box = false;
 
   freq_under_name = false;
-  
+
   user_character_height = -1;
 
   cbppo = false;
   cbpao = false;
   cblpo = false;
   cblao = false;
+
+  pa_min = 0;
+  pa_max = 1;
 
   pa_ext = false;
 
@@ -118,6 +121,7 @@ void PavApp::PrintUsage( void )
   cout << " -z x1,x2  Zoom to this pulse phase range (in turns)" << endl;
   cout << " -k f1,f2  Zoom to this frequency range" << endl;
   cout << " -y s1,s2  Zoom to this subint range" << endl;
+  cout << " -l a1,a2  Zoom to this position angle range (Degrees)" << endl;
   cout << " -N x,y    Divide the window into x by y panels" << endl;
   cout << " -H chan   Select which frequency channel to display" << endl;
   cout << " -P pol    Select which polarization to display" << endl;
@@ -141,6 +145,7 @@ void PavApp::PrintUsage( void )
   cout << " --sl           Stack labels(name,freq) on the left side of the plot" << endl;
   cout << " --publn        Publication quality plot (B&W)  L dashed, V dots" << endl;
   cout << " --publnc       Publication quality plot (keep in colour if device supports it)" << endl;
+  cout << " --ch           Set the character height" << endl;
   cout << " --cmap index   Select a colour map for PGIMAG style plots" << endl;
   cout << "                The available indices are: (maybe 4-6 not needed)" << endl;
   cout << "                  0 -> Greyscale" << endl;
@@ -172,6 +177,22 @@ void PavApp::PrintUsage( void )
   cout << endl << endl;
 }
 
+
+
+/**
+ * PADegreesToTurns
+ *
+ *   DOES     - Converts a value in degrees to the turns value needed for angle plots (0 = -60, 1 = 90)
+ *   RECEIVES - The angle in degrees
+ *   RETURNS  - The angle in turns
+ *   THROWS   - Nothing
+ *   TODO     - Nothing
+ **/
+
+float PavApp::PADegreesToTurns( const int deg )
+{
+  return (deg / 180.0) + 0.5;
+}
 
 
 
@@ -394,7 +415,17 @@ void PavApp::PavSpecificOptions( void )
   {
     SetPlotOptions<StokesCylindrical>( "pa:y:range=(0,1.5)" );
   }
-  
+
+  // if we have a range of position angles
+  if( pa_min != 0 && pa_max != 1 )
+  {
+    SetPlotOptions<StokesCylindrical>( string("pa:y:range=(") +
+                                       tostring<float>(pa_min) +
+                                       string(",") +
+                                       tostring<float>(pa_max) +
+                                       string(")" ) );
+  }
+
   if( user_character_height != -1 )
   {
     int old_precision = tostring_precision;
@@ -572,7 +603,7 @@ int PavApp::run( int argc, char *argv[] )
   string clip_command = "y:range";
   string clip_value = "=(0,1)";
 
-  char valid_args[] = "Az:hb:M:KDCdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g:";
+  char valid_args[] = "Az:hb:M:KDCdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g:l:";
 
   int c = '\0';
   while( (c = getopt_long( argc, argv, valid_args, long_options, &option_index )) != -1 )
@@ -589,7 +620,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.40 2007/12/02 23:54:21 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.41 2007/12/03 00:40:21 nopeer Exp $" << endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
@@ -699,6 +730,14 @@ int PavApp::run( int argc, char *argv[] )
         string_split( optarg, s1, s2, "," );
         min_freq = fromstring<double>( s1 );
         max_freq = fromstring<double>( s2 );
+      }
+      break;
+    case 'l':
+      {
+        string s1, s2;
+        string_split( optarg, s1, s2, "," );
+        pa_min = PADegreesToTurns( fromstring<int>( s1 ) );
+        pa_max = PADegreesToTurns( fromstring<int>( s2 ) );
       }
       break;
     case 'z':
@@ -853,9 +892,6 @@ int PavApp::run( int argc, char *argv[] )
     SetPlotOptions<PhasePlot>( "x:unit=deg" );
     SetPlotOptions<MultiPhase>( "x:unit=deg" );
   }
-
-
-
 
   // If we received a -N option, divide the pgplot window into n1,n2 panels.
 
