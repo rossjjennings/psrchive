@@ -123,7 +123,7 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
   
   CorrectionsCalibrator correct;
   if (correct.needs_correction(data)) {
-    // if (verbose > 2)
+    if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::set_standard correcting instrument" 
 	   << endl;
     correct.calibrate( clone );
@@ -151,7 +151,6 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan)
 
   const Integration* integration = get_calibrator()->get_Integration (0);
   unsigned model_nchan = integration->get_nchan();
-
   if (model_nchan != 1 && model_nchan != nchan)
     throw Error (InvalidState, "Pulsar::PulsarCalibrator::build",
 		 "template nchan=%d != required nchan=%d", model_nchan, nchan);
@@ -179,7 +178,8 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan)
 
   }
 
-  for (unsigned ichan=0; ichan<nchan; ichan++) {
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+  {
 
     if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::build ichan=" << ichan << endl;
@@ -260,6 +260,7 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
+  unsigned nbin = data->get_nbin();
 
   if (one_channel)
     build (nchan);
@@ -281,7 +282,17 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try
     unsigned clean_mean = nchan/20;
     big_difference = 0;
 
-    for (unsigned ichan=0; ichan<nchan; ichan++) {
+    for (unsigned ichan=0; ichan<nchan; ichan++) try
+    {
+      unsigned mchan = ichan;
+      if (one_channel)
+	mchan = 0;
+
+      if (!model[mchan])
+	continue;
+
+      model[mchan]->set_plan
+	( FTransform::Agent::current->get_plan (nbin, FTransform::frc) );
 
       queue.submit( this, &Pulsar::PulsarCalibrator::solve,
 		    integration, ichan );
@@ -298,6 +309,11 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try
 	big_difference = 0;
       }
 
+    }
+    catch (Error& error)
+    {
+      cerr << "Pulsar::PulsarCalibrator::add_observation ichan=" << ichan
+	   << error << endl;
     }
 
     queue.wait ();

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.31 $
-   $Date: 2007/10/30 12:03:54 $
+   $Revision: 1.32 $
+   $Date: 2007/12/03 05:41:22 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -19,6 +19,7 @@
 #include "Matrix.h"
 #include "Estimate.h"
 #include "Stokes.h"
+#include "FTransformAgent.h"
 #include "toa.h"
 
 // forward declarations
@@ -96,6 +97,9 @@ namespace Pulsar {
     //! Fit the specified observation to the standard
     void fit (const PolnProfile* observation);
 
+    //! Set the fourier transform plan
+    void set_plan (FTransform::Plan*);
+
     //! Get the last significant harmonic of the last fit observation
     unsigned get_nharmonic_obs () const { return n_harmonic_obs; }
 
@@ -161,6 +165,9 @@ namespace Pulsar {
 
     //! The fourier transform of the standard
     Reference::To<const PolnProfile> standard_fourier;
+
+    //! The fourier transform plan (useful in multi-threaded applications)
+    FTransform::Plan* plan;
 
     //! The mask used to calculate the noise power
     PhaseWeight noise_mask;

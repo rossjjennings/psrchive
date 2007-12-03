@@ -86,6 +86,13 @@ void Pulsar::PolnProfileFit::init ()
   emulate_scalar = false;
   separate_fits = false;
   fit_debug = false;
+
+  plan = 0;
+}
+
+void Pulsar::PolnProfileFit::set_plan (FTransform::Plan* p)
+{
+  plan = p;
 }
 
 void Pulsar::PolnProfileFit::set_maximum_harmonic (unsigned max)
@@ -111,7 +118,7 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   if (!standard)
     return;
 
-  Reference::To<PolnProfile> fourier = fourier_transform (standard);
+  Reference::To<PolnProfile> fourier = fourier_transform (standard, plan);
   fourier->convert_state (Signal::Stokes);
   // Drop the Nyquist bin
   fourier->resize( standard->get_nbin() );
@@ -272,7 +279,7 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 		 "observation n_harmonic=%d < n_harmonic=%d",
 		 obs_harmonic, n_harmonic);
 
-  Reference::To<PolnProfile> fourier = fourier_transform (observation);
+  Reference::To<PolnProfile> fourier = fourier_transform (observation, plan);
 
   fourier->convert_state (Signal::Stokes);
   // Drop the Nyquist bin
