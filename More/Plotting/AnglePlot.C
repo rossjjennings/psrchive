@@ -76,6 +76,18 @@ void Pulsar::AnglePlot::prepare (const Archive* data)
   {
     min = -90;
     max = 90;
+    
+    float range_total = range.second - range.first;
+    if( range_total > 1.5 )
+    {
+      get_frame()->get_y_axis()->set_tick( 90.0 );
+      get_frame()->get_y_axis()->set_nsub( 3 );
+    }
+    if( range_total > 2 )
+    {
+      get_frame()->get_y_axis()->set_tick( 120.0 );
+      get_frame()->get_y_axis()->set_nsub( 3 );
+    }
   }
 
   get_frame()->get_y_scale()->set_minmax ( min, max );
