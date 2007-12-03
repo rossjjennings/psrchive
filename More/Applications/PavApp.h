@@ -86,7 +86,6 @@ private:
     }
   }
   
-  
   void PrintUsage( void );
 
   void SetStokesPlotToQU( void );
@@ -96,6 +95,7 @@ private:
   void CreatePlotsList( vector< string > filenames, vector< string > plot_ids );
   void SetCmdLineOptions( vector< string > options );
   bool CheckColour( void );
+  float PADegreesToTurns( const int deg );
 
   bool have_colour;
   int ipol;
@@ -133,6 +133,8 @@ private:
   bool freq_under_name;
   
   float user_character_height;
+  
+  float pa_min, pa_max;
 
   bool label_degrees;
   bool centre_profile;
