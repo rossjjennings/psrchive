@@ -49,15 +49,22 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
     receiver->get_tracking_mode() != Receiver::Celestial;
 
   // ... or the angle tracked by the receiver is not zero
-  if (pointing) {
+  if (pointing) 
+  {
     if (verbose > 2)
-      cerr << "Pulsar::CorrectionsCalibrator::needs_correction\n"
-	"   Pointing::position_angle=" 
+      cerr << "Pulsar::CorrectionsCalibrator::needs_correction"
+	"\n  Pointing::position_angle=" 
            << pointing->get_position_angle().getDegrees() << " deg" << endl;
     should_correct_vertical |= pointing->get_position_angle() != 0.0;
   }
   else
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::CorrectionsCalibrator::needs_correction"
+	"\n  Receiver::tracking_angle=" 
+           << receiver->get_tracking_angle () << " deg" << endl;
     should_correct_vertical |= receiver->get_tracking_angle () != 0.0;
+  }
 
   // a fixed antenna, such as a dipole array (or Arecibo?)
   should_correct_projection = 
@@ -67,6 +74,13 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
   must_correct_platform =
     !receiver->get_platform_corrected() && !archive->type_is_cal() &&
     (should_correct_vertical || should_correct_projection);
+
+  if (verbose > 2)
+    cerr << "  Receiver::platform_corrected=" 
+	 << receiver->get_platform_corrected() 
+	 << "\n  should_correct_vertical=" << should_correct_vertical
+	 << "\n  should_correct_projection=" << should_correct_projection
+	 << "\n  -> must_correct_platform=" << must_correct_platform << endl;
 
   // determine if it is necesary to correct for known receptor projections
   
