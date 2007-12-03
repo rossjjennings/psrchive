@@ -78,7 +78,6 @@ void Pulsar::AnglePlot::prepare (const Archive* data)
     max = 90;
   }
 
-  cerr << "setting minmax to (" << min << "," << max << ")" << endl;
   get_frame()->get_y_scale()->set_minmax ( min, max );
 }
 
@@ -94,13 +93,9 @@ void Pulsar::AnglePlot::draw (const Archive *data)
 
   pair<float,float> y_range = get_frame()->get_y_scale()->get_range_norm();
 
-  cerr << "y range actual is (" << y_range.first << "," << y_range.second << ")" << endl;
-  
   int y_range_start = int(floor(y_range.first));
   int y_range_end = int(ceil(y_range.second));
   
-  cerr << "y range ints are (" << y_range_start << "," << y_range_end << ")" << endl;
-
   for( int range = range_start; range < range_end; range ++ )
   {
     //     float yoff = 0;

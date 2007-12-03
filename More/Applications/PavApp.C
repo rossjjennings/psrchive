@@ -429,11 +429,6 @@ void PavApp::PavSpecificOptions( void )
                                        string(",") +
                                        tostring<float>(pa_max) +
                                        string(")" ) );
-    cerr << "pa command is " << ( string("pa:y:range=(") +
-	tostring<float>(pa_min) +
-	string(",") +
-	tostring<float>(pa_max) +
-	string(")" ) ) << endl;
   }
 
   if( user_character_height != -1 )
@@ -626,7 +621,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.42 2007/12/03 05:33:07 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.43 2007/12/03 05:41:36 nopeer Exp $" << endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
@@ -746,7 +741,6 @@ int PavApp::run( int argc, char *argv[] )
 	int d2 = fromstring<int>(s2);
         pa_min = PADegreesToTurns( d1 + 0.0001 );
         pa_max = PADegreesToTurns( d2 - 0.0001 );
-	cerr << "pa range (" << pa_min << "," << pa_max << ")" << endl;
       }
       break;
     case 'z':
