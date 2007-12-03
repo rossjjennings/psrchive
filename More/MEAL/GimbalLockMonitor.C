@@ -50,11 +50,11 @@ void MEAL::GimbalLockMonitor::set_pitch_limits (double lower, double upper)
 bool MEAL::GimbalLockMonitor::lock_detected ()
 {
   double pitch_rad = pitch->get_param(0);
-  double yaw_rad = yaw->get_param(0);
+  // double yaw_rad = yaw->get_param(0);
 
-  if( !gimbal_lock_detected &&
-      ( pitch_rad < lower_pitch_limit || pitch_rad > upper_pitch_limit ||
-	yaw_rad < lower_yaw_limit || yaw_rad > upper_yaw_limit ) ) {
+  if (!gimbal_lock_detected &&
+      ( pitch_rad < lower_pitch_limit || pitch_rad > upper_pitch_limit ))
+  {
 
     gimbal_lock_detected = true;
 
