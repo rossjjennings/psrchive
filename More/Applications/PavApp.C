@@ -191,7 +191,7 @@ void PavApp::PrintUsage( void )
 
 float PavApp::PADegreesToTurns( const int deg )
 {
-  return (deg / 180.0) + 0.5;
+  return ((float)deg / 180.0) + 0.5;
 }
 
 
@@ -227,7 +227,7 @@ void PavApp::SetPhaseZoom( double min_phase, double max_phase  )
  * SetFreqZoom
  *
  *  DOES     - creates a command string that sets the y zoom in normalised coords based
- *             on a target frequency range in Mhz.
+ *             on a target frequency range in MHz.
  *  RECEIVES - Nothing
  *  RETURNS  - Nothing
  *  THROWS   - Nothing
@@ -344,7 +344,7 @@ void PavApp::PavSpecificOptions( void )
   {
     SetPlotOptions<StokesCylindrical>( "pa:above:c=" );
     if( freq_under_name )
-      SetPlotOptions<StokesCylindrical>( "flux:below:l=$name.$freq Mhz" );
+      SetPlotOptions<StokesCylindrical>( "flux:below:l=$name.$freq MHz" );
     else
     {
 
@@ -360,7 +360,7 @@ void PavApp::PavSpecificOptions( void )
   if( publn )
   {
     SetPlotOptions<PhaseVsTime>( "above:l=$name" );
-    SetPlotOptions<PhaseVsTime>( "above:r=$freq Mhz" );
+    SetPlotOptions<PhaseVsTime>( "above:r=$freq MHz" );
   }
 
   // PhaseVsFrequency plot config
@@ -370,7 +370,7 @@ void PavApp::PavSpecificOptions( void )
   if( publn )
   {
     SetPlotOptions<PhaseVsFrequency>( "above:l=$name" );
-    SetPlotOptions<PhaseVsFrequency>( "above:r=$freq Mhz" );
+    SetPlotOptions<PhaseVsFrequency>( "above:r=$freq MHz" );
   }
 
   // DynamicSNSpectrum plot config
@@ -380,7 +380,7 @@ void PavApp::PavSpecificOptions( void )
   if( publn )
   {
     SetPlotOptions<DynamicSNSpectrum>( "above:l=$name" );
-    SetPlotOptions<DynamicSNSpectrum>( "above:r=$freq Mhz" );
+    SetPlotOptions<DynamicSNSpectrum>( "above:r=$freq MHz" );
   }
 
   // StokesSpherical plot config
@@ -390,11 +390,11 @@ void PavApp::PavSpecificOptions( void )
   {
     SetPlotOptions<StokesSpherical>( "ell:above:c=" );
     if( freq_under_name )
-      SetPlotOptions<StokesSpherical>( "flux:below:l=$name.$freq Mhz" );
+      SetPlotOptions<StokesSpherical>( "flux:below:l=$name.$freq MHz" );
     else
     {
       SetPlotOptions<StokesSpherical>( "flux:below:l=$name" );
-      SetPlotOptions<StokesSpherical>( "flux:below:r=$freq Mhz" );
+      SetPlotOptions<StokesSpherical>( "flux:below:r=$freq MHz" );
     }
   }
   else
@@ -416,27 +416,33 @@ void PavApp::PavSpecificOptions( void )
     SetPlotOptions<StokesCylindrical>( "pa:y:range=(0,1.5)" );
   }
 
+  int old_precision = tostring_precision;
+  bool old_places = tostring_places;
+  tostring_precision = 3;
+  tostring_places = true;
+  
   // if we have a range of position angles
-  if( pa_min != 0 && pa_max != 1 )
+  if( pa_min != 0.0 || pa_max != 1.0 )
   {
     SetPlotOptions<StokesCylindrical>( string("pa:y:range=(") +
                                        tostring<float>(pa_min) +
                                        string(",") +
                                        tostring<float>(pa_max) +
                                        string(")" ) );
+    cerr << "pa command is " << ( string("pa:y:range=(") +
+	tostring<float>(pa_min) +
+	string(",") +
+	tostring<float>(pa_max) +
+	string(")" ) ) << endl;
   }
 
   if( user_character_height != -1 )
   {
-    int old_precision = tostring_precision;
-    bool old_places = tostring_places;
-    tostring_precision = 3;
-    tostring_places = true;
-    cerr << "setting character height to " << ( string("ch=") + tostring<float>(user_character_height) ) << endl;
     SetPlotOptions<Plot>( string("ch=") + tostring<float>(user_character_height) );
-    tostring_places = old_places;
-    tostring_precision = old_precision;
   }
+  
+  tostring_places = old_places;
+  tostring_precision = old_precision;
 }
 
 
@@ -620,7 +626,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.41 2007/12/03 00:40:21 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.42 2007/12/03 05:33:07 nopeer Exp $" << endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
@@ -736,8 +742,11 @@ int PavApp::run( int argc, char *argv[] )
       {
         string s1, s2;
         string_split( optarg, s1, s2, "," );
-        pa_min = PADegreesToTurns( fromstring<int>( s1 ) );
-        pa_max = PADegreesToTurns( fromstring<int>( s2 ) );
+	int d1 = fromstring<int>(s1);
+	int d2 = fromstring<int>(s2);
+        pa_min = PADegreesToTurns( d1 + 0.0001 );
+        pa_max = PADegreesToTurns( d2 - 0.0001 );
+	cerr << "pa range (" << pa_min << "," << pa_max << ")" << endl;
       }
       break;
     case 'z':
