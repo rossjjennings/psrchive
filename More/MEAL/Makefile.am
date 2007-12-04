@@ -180,14 +180,14 @@ bin_PROGRAMS = lmfit
 
 lmfit_SOURCES = lmfit.C
 
-check_PROGRAMS =							 \
+TESTS = \
 	test_copy test_Axis test_Projection test_Composite test_get_imap \
-	test_BasisRule test_Scalar test_Complex2Product			 \
-	test_Polar test_Rotation					 \
-	test_Invariant test_CyclicParameter test_Univariate		 \
-	test_StokesError test_StokesCovariance test_Function_load
+	test_BasisRule test_Scalar test_Complex2Product                  \
+	test_Polar test_Rotation                                         \
+	test_Invariant test_CyclicParameter test_Univariate              \
+	test_StokesError test_StokesCovariance
 
-TESTS = $(check_PROGRAMS)
+check_PROGRAMS = $(TESTS) test_Function_load 
 
 test_copy_SOURCES		= test_copy.C
 test_Axis_SOURCES		= test_Axis.C
