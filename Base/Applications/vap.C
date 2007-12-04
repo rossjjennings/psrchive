@@ -8,6 +8,7 @@
 #include <Pulsar/Archive.h>
 #include <Pulsar/Profile.h>
 
+#include <Pulsar/Telescope.h>
 #include <Pulsar/FITSHdrExtension.h>
 #include <Pulsar/ObsExtension.h>
 #include <Pulsar/ITRFExtension.h>
@@ -51,6 +52,7 @@
 #include <utc.h>
 #include <FITSUTC.h>
 
+#include "tempo++.h"
 
 /**
  * For the sake of cleanliness, readability and common sense, I decided to concede that the text interfaces
@@ -681,6 +683,12 @@ string get_site( Reference::To< Archive > archive )
   string result = archive->get_telescope();
 
   return result;
+}
+
+string get_asite( Reference::To< Archive > archive )
+{
+  cerr << Tempo::code(archive->get_telescope()) << endl;
+  return "A";
 }
 
 string get_file( Reference::To<Archive > archive )
@@ -1813,7 +1821,8 @@ void PrintExtdHlp( void )
   cout << "date                            File creation date" << endl;
   cout << "file                            The file number (FB data only)" << endl;
   cout << "hdrver                          Header Version" << endl;
-  cout << "site                            Telescope tempo code" << endl;
+  cout << "site                            Telescope name from header" << endl;
+  cout << "asite                           Telescope tempo code" << endl;
   cout << "telescop                        Telescope name" << endl;
   cout << "tlabel                          Tape label (FB data only)" << endl;
   cout << endl;
@@ -1949,6 +1958,7 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "ant_z" ) return get_ant_z( archive );
     else if( command == "telescop" ) return get_telescop( archive );
     else if( command == "site" ) return get_site( archive );
+    else if( command == "asite" ) return get_asite( archive );
     else if( command == "backend" ) return get_backend( archive );
     else if( command == "be_dcc" ) return get_be_dcc( archive );
     else if( command == "be_phase" ) return get_be_phase( archive );
