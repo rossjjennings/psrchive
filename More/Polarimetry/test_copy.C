@@ -22,6 +22,8 @@
 #include "MEAL/Polar.h"
 #include "MEAL/Polynomial.h"
 
+#include <inttypes.h>
+
 using namespace std;
 
 template <class Type> void test_copy (Type* copy, Type* instance, 
