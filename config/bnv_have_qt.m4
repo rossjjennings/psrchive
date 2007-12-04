@@ -324,9 +324,9 @@ EOF
     ])dnl AC_CACHE_VAL bnv_cv_qt_test_result
     AC_MSG_RESULT([$bnv_cv_qt_test_result]);
     if test x"$bnv_cv_qt_test_result" = "xfailure"; then
-      AC_MSG_ERROR([Failed to find matching components of a complete
-                  Qt installation. Try using more options,
-                  see ./configure --help.])
+      echo "  Failed to compile Qt test program."
+      echo "  Perhaps Qt was compiled with a different compiler version."
+      have_qt="no"
     fi
 
     rm -f bnv_qt_test.h moc_bnv_qt_test.$ac_ext moc_bnv_qt_test.o \
