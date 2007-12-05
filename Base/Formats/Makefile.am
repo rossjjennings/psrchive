@@ -34,7 +34,7 @@ INCLUDES = -I$(top_builddir)/local_include \
 	-I$(top_srcdir)/Base/Formats/EPN \
 	-I$(top_srcdir)/Base/Formats/ASCII \
 	-I$(top_srcdir)/Base/Formats/PSRFITS \
-	@CFITSIO_CFLAGS@ @TEMPO2_CFLAGS@
+	@CFITSIO_CFLAGS@ @PUMA_CFLAGS@ @TEMPO2_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.local
 

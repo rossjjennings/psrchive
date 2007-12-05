@@ -14,5 +14,5 @@ INCLUDES = @PUMA_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.include
 
-LDADD = @PUMA_LIBS@
+libpuma_la_LIBADD = @PUMA_LIBS@
 

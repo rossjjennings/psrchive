@@ -43,6 +43,16 @@ Archive::Advocate<FITSArchive>::entry;
 
 #endif
 
+#ifdef HAVE_PUMA
+
+#include "Pulsar/PuMaArchive.h"
+
+template
+Registry::List<Archive::Agent>::Enter<PuMaArchive::Agent>
+Archive::Advocate<PuMaArchive>::entry;
+
+#endif
+
 #include "Pulsar/ASCIIArchive.h"
 
 template
