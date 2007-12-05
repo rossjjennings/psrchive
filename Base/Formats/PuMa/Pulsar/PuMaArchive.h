@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PuMa/Pulsar/PuMaArchive.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/11/26 02:50:18 $
+   $Revision: 1.3 $
+   $Date: 2007/12/05 04:13:45 $
    $Author: straten $ */
 
 #ifndef __PuMaArchive_h
 #define __PuMaArchive_h
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Agent.h"
 
 // PuMa header definition
 #include <pumadata.h>
@@ -43,10 +44,10 @@ namespace Pulsar {
     PuMaArchive (const Archive& archive);
 
     //! Base extraction constructor
-    PuMaArchive (const Archive& archive, const vector<unsigned>& subint);
+    PuMaArchive (const Archive& archive, const std::vector<unsigned>& subint);
 
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const vector<unsigned>& subints);
+    void copy (const Archive& archive, const std::vector<unsigned>& subints);
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -58,7 +59,7 @@ namespace Pulsar {
     Archive* clone () const;
 
     //! Return a new extraction-constructed PuMaArchive instance
-    Archive* extract (const vector<unsigned>& subints) const;
+    Archive* extract (const std::vector<unsigned>& subints) const;
 
     //! Get the number of pulsar phase bins used
     unsigned get_nbin () const;
@@ -73,9 +74,9 @@ namespace Pulsar {
     unsigned get_nsubint () const;
 
     //! Get the telescope name
-    char get_telescope () const;
+    std::string get_telescope () const;
     //! Set the telescope name
-    void set_telescope (char telescope);
+    void set_telescope (const std::string& telescope);
 
     //! Get the state of the profiles
     Signal::State get_state () const;
@@ -93,19 +94,19 @@ namespace Pulsar {
     void set_type (Signal::Source type);
 
     //! Get the source name
-    string get_source () const;
+    std::string get_source () const;
     //! Set the source name
-    void set_source (const string& source);
+    void set_source (const std::string& source);
 
     //! Get the backend
-    string get_backend () const;
+    std::string get_backend () const;
     //! Set the backend
-    void set_backend (const string& bak);
+    void set_backend (const std::string& bak);
 
     //! Get the receiver
-    string get_receiver () const;
+    std::string get_receiver () const;
     //! Set the receiver
-    void set_receiver (const string& rec);
+    void set_receiver (const std::string& rec);
 
     //! Get the coordinates of the source
     sky_coord get_coordinates () const;
@@ -198,10 +199,10 @@ namespace Pulsar {
       bool advocate (const char* filename);
       
       //! Return the name of the PuMaArchive plugin
-      string get_name () { return "PuMa"; }
+      std::string get_name () { return "PuMa"; }
       
       //! Return description of this plugin
-      string get_description ();
+      std::string get_description ();
       
     };
 

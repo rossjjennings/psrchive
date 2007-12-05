@@ -1,9 +1,12 @@
 #include "Pulsar/PuMaArchive.h"
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Pulsar.h"
 
 #include <libpuma.h>
 #include <bigendian.h>
+
+using namespace std;
 
 /* Plans:
 
@@ -153,17 +156,16 @@ void Pulsar::PuMaArchive::set_nsubint (unsigned nsubint)
   hdr.redn.NTimeInts = nsubint;
 }
 
-//! Get the telescope name
-char Pulsar::PuMaArchive::get_telescope () const
+//! Get the telescope name
+std::string Pulsar::PuMaArchive::get_telescope () const
 {
-  return 'i';
+  return "wsrt";
 }
 
-//! Set the telescope name
-void Pulsar::PuMaArchive::set_telescope (char telescope)
+//! Set the telescope name
+void Pulsar::PuMaArchive::set_telescope (const string&)
 {
-  if (telescope != 'i')
-    cerr << "Pulsar::PuMaArchive::set_telescope unimplemented" << endl;
+  warning << "Pulsar::PuMaArchive::set_telescope unimplemented" << endl;
 }
 
 
@@ -365,7 +367,7 @@ Pulsar::PuMaArchive::new_Integration (Integration* subint)
   Integration* integration;
 
   if (subint)
-    integration = new BasicIntegration (*subint);
+    integration = new BasicIntegration (subint);
   else
     integration = new BasicIntegration;
 
