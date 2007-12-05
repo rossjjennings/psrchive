@@ -135,9 +135,12 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
     // //////////////////////////////////////////////////////////////////////
     
     if (archive->get_type() == Signal::Pulsar) {
-      
-      // ensure that the polyco includes the new integration time
-      archive->expert()->update_model (epoch);
+
+      if (archive->has_ephemeris())
+      {
+        // ensure that the polyco includes the new integration time
+        archive->expert()->update_model (epoch);
+      }
       
       if (archive->has_model()) {
 
