@@ -20,6 +20,7 @@ nobase_include_HEADERS = \
         Pulsar/FluxCalibrator.h \
         Pulsar/HybridCalibrator.h \
         Pulsar/Instrument.h \
+	Pulsar/InstrumentInfo.h \
         Pulsar/IonosphereCalibrator.h \
         Pulsar/IRIonosphere.h \
         Pulsar/MeanCoherency.h \
@@ -51,6 +52,7 @@ nobase_include_HEADERS = \
         Pulsar/SingleAxis.h \
         Pulsar/SingleAxisPolynomial.h \
         Pulsar/SingleAxisSolver.h \
+	Pulsar/SourceInfo.h \
         Pulsar/StandardModel.h \
         Pulsar/SystemCalibrator.h \
         Pulsar/TemplateUncertainty.h \
