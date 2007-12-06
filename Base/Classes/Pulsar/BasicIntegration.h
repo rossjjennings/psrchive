@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicIntegration.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/08/14 05:21:06 $
-   $Author: straten $ */
+   $Revision: 1.12 $
+   $Date: 2007/12/06 20:03:35 $
+   $Author: demorest $ */
 
 #ifndef __BasicIntegration_h
 #define __BasicIntegration_h
@@ -18,6 +18,7 @@
   
 namespace Pulsar {
 
+  //! BasicIntegration class
   class BasicIntegration : public Integration {
 
   public:
