@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.15 $
-   $Date: 2007/11/23 20:09:00 $
+   $Revision: 1.16 $
+   $Date: 2007/12/06 19:23:29 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -58,6 +58,15 @@ namespace Calibration {
 
     //! Set differential phase to the univariate function of time
     void set_diff_phase (MEAL::Univariate<MEAL::Scalar>*);
+
+    //! Set gain to the univariate function of time
+    const MEAL::Scalar* get_gain () const;
+
+    //! Set differential gain to the univariate function of time
+    const MEAL::Scalar* get_diff_gain () const;
+
+    //! Set differential phase to the univariate function of time
+    const MEAL::Scalar* get_diff_phase () const;
 
     //! Add a step if any of the above functions require it
     void add_calibrator_epoch (const MJD&);

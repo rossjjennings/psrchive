@@ -394,6 +394,7 @@ void Calibration::StandardModel::set_gain (Univariate<Scalar>* function)
 		   "cannot set gain variation in polar model");
 
     physical -> set_gain( function );
+
   }
 
   convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
@@ -439,6 +440,25 @@ void Calibration::StandardModel::set_reference_epoch (const MJD& epoch)
   if (diff_phase)
     offset_steps( diff_phase, offset );
 }
+
+//! Set gain to the univariate function of time
+const MEAL::Scalar* Calibration::StandardModel::get_gain () const
+{
+  return gain;
+}
+
+//! Set differential gain to the univariate function of time
+const MEAL::Scalar* Calibration::StandardModel::get_diff_gain () const
+{
+  return diff_gain;
+}
+
+//! Set differential phase to the univariate function of time
+const MEAL::Scalar* Calibration::StandardModel::get_diff_phase () const
+{
+  return diff_phase;
+}
+
 
 void Calibration::StandardModel::offset_steps (Scalar* function, double offset)
 {
