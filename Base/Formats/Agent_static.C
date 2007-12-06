@@ -59,3 +59,9 @@ template
 Registry::List<Archive::Agent>::Enter<ASCIIArchive::Agent>
 Archive::Advocate<ASCIIArchive>::entry;
 
+#include "Pulsar/BPPArchive.h"
+
+template
+Registry::List<Archive::Agent>::Enter<BPPArchive::Agent>
+Archive::Advocate<BPPArchive>::entry;
+
