@@ -1154,18 +1154,28 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 
 void Pulsar::ReceptionCalibrator::initialize ()
 {
+  /*
+    Time variations are disengaged at the end of the call to solve.
+    However, it is desireable to plot the time variation parameters
+    after the solution is obtained.  The get_Info method calls this
+    function before the model parameters are plotted; therefore, this
+    method re-engages the time variations.
+  */
+  for (unsigned ichan=0; ichan<model.size(); ichan++)
+    model[ichan]->engage_time_variations ();
+
   if (is_initialized)
     return;
 
   PA_min *= 180.0/M_PI;
   PA_max *= 180.0/M_PI;
 
-  cerr << "Pulsar::ReceptionCalibrator::solve information:\n"
+  cerr << "Pulsar::ReceptionCalibrator::initialize information:\n"
     "  Parallactic angle ranges from " << PA_min <<
     " to " << PA_max << " degrees" << endl;
 
   if (previous_cal) {
-    cerr << "Pulsar::ReceptionCalibrator::solve using previous CAL solution"
+    cerr << "Pulsar::ReceptionCalibrator::initialize using previous solution"
 	 << endl;
     for (unsigned ichan=0; ichan<model.size(); ichan++)
       calibrator_estimate.source[ichan]
@@ -1181,23 +1191,23 @@ void Pulsar::ReceptionCalibrator::initialize ()
     pulsar[istate].update_source ();
 
   MJD epoch = 0.5 * (end_epoch + start_epoch);
-  cerr << "Pulsar::ReceptionCalibrator::solve epoch=" << epoch << endl;
+  cerr << "Pulsar::ReceptionCalibrator::initialize epoch=" << epoch << endl;
 
   for (unsigned ichan=0; ichan<model.size(); ichan++) {
 
     if (get_ndata(ichan) == 0) {
       if (verbose)
-	cerr << "Pulsar::ReceptionCalibrator::solve warning ichan=" << ichan 
-	     << " has no data" << endl;
+	cerr << "Pulsar::ReceptionCalibrator::initialize warning"
+	  " ichan=" << ichan << " has no data" << endl;
       model[ichan]->valid = false;
       continue;
     }
 
     // sanity check
     double I = calibrator_estimate.source[ichan]->get_stokes()[0].get_value();
-    if (fabs(I-1.0) > 1e-5)
-      cerr << "Pulsar::ReceptionCalibrator::solve warning ichan=" << ichan
-           << " reference flux=" << I << " != 1" << endl;
+    if (fabs(I-1.0) > 1e-5 && verbose)
+      cerr << "Pulsar::ReceptionCalibrator::initialize warning"
+	" ichan=" << ichan << " reference flux=" << I << " != 1" << endl;
 
     model[ichan]->set_reference_epoch ( epoch );
 
