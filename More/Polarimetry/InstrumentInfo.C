@@ -6,6 +6,8 @@
  ***************************************************************************/
 #include "Pulsar/InstrumentInfo.h"
 
+#include <assert.h>
+
 using namespace std;
 
 //! Constructor
