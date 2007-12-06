@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/InstrumentInfo.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/12/06 05:49:23 $
+   $Revision: 1.2 $
+   $Date: 2007/12/06 19:58:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_InstrumentInfo_H
@@ -50,13 +50,6 @@ namespace Pulsar {
     //! Set to the first valid Instrument instance found in PolnCalibrator
     const Calibration::Instrument* instrument;
 
-    //! time variation functions
-    std::vector< std::pair< std::string, const MEAL::Scalar* > > variation;
-
-    //! total number of time variation parameters
-    unsigned variation_nparam;
-
-    void set_variation (const std::string& name, const MEAL::Scalar*);
   };
 
 }
