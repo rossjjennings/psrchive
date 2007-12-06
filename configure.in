@@ -229,6 +229,7 @@ AC_CONFIG_FILES([
 		Base/Formats/PSRFITS/Makefile
 		Base/Formats/PuMa/Makefile
                 Base/Formats/ASCII/Makefile
+                Base/Formats/BPP/Makefile
 		Base/Applications/Makefile
 		More/Makefile
 		More/General/Makefile
