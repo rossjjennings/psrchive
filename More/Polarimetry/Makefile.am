@@ -38,6 +38,7 @@ nobase_include_HEADERS = \
         Pulsar/PolnProfileFit.h \
         Pulsar/PolnProfileStats.h \
         Pulsar/PolnCalibrator.h \
+	Pulsar/PolynomialInfo.h \
         Pulsar/PulsarCalibrator.h \
         Pulsar/ReceptionCalibrator.h \
         Pulsar/ReceptionCalibratorPlotter.h \
@@ -102,6 +103,7 @@ libPolarimetry_la_SOURCES = \
         PolnProfile.C \
         PolnProfileFit.C \
         PolnProfileStats.C \
+	PolynomialInfo.C \
         PulsarCalibrator.C \
         Receiver_get_transformation.C \
         Receiver_load.C \

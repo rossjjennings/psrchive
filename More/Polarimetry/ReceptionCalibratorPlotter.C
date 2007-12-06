@@ -9,7 +9,10 @@
 #include "Pulsar/Archive.h"
 
 #include "Pulsar/ReceptionModelAxisPlotter.h"
+#include "Pulsar/PolynomialInfo.h"
 #include "Pulsar/StepsInfo.h"
+
+#include "MEAL/Polynomial.h"
 #include "MEAL/Steps.h"
 
 #include <cpgplot.h>
@@ -149,9 +152,9 @@ void Pulsar::ReceptionCalibratorPlotter::plot_time_variations ()
 void Pulsar::ReceptionCalibratorPlotter::plot_time_variation
 (VariationInfo::Which which, const MEAL::Scalar* scalar)
 {
-  const MEAL::Steps* steps = dynamic_cast<const MEAL::Steps*> (scalar);
+  cpgpage();
 
-  if (steps)
+  if ( dynamic_cast<const MEAL::Steps*> (scalar) )
   {
     if (verbose)
       cerr << "Pulsar::ReceptionCalibratorPlotter::plot_time_variations"
@@ -165,7 +168,22 @@ void Pulsar::ReceptionCalibratorPlotter::plot_time_variation
     return;
   }
 
-  cerr << "unrecognized function" << endl;
+  if( dynamic_cast<const MEAL::Polynomial*> (scalar) )
+  {
+    if (verbose)
+      cerr << "Pulsar::ReceptionCalibratorPlotter::plot_time_variations"
+	   << " polynomial" << endl;
+
+    plot( new PolynomialInfo(calibrator, which),
+	  calibrator->get_nchan(),
+	  calibrator->get_Archive()->get_centre_frequency(),
+	  calibrator->get_Archive()->get_bandwidth() );
+
+    return;
+  }
+
+  cerr << "Pulsar::ReceptionCalibratorPlotter::plot_time_variations"
+       << " unrecognized" << endl;
 }
 
 //! Return the calibrator to be plotted
