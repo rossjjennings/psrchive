@@ -20,7 +20,7 @@ Pulsar::VariationInfo::VariationInfo (const ReceptionCalibrator* cal, Which w)
   which = w;
 }
 
-const MEAL::Scalar* Pulsar::VariationInfo::get_Scalar (unsigned ichan)
+const MEAL::Scalar* Pulsar::VariationInfo::get_Scalar (unsigned ichan) const
 try
 {
   const Calibration::StandardModel* model = calibrator->get_model( ichan );

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/VariationInfo.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/12/06 18:19:34 $
+   $Revision: 1.2 $
+   $Date: 2007/12/06 19:23:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_VariationInfo_H
@@ -19,7 +19,7 @@
 
 namespace Pulsar {
 
-  //! Communicates Step parameters to plotting routines
+  //! Communicates time variation parameters to plotting routines
   class VariationInfo : public Calibrator::Info {
 
   public:
@@ -41,7 +41,7 @@ namespace Pulsar {
     std::string get_name (unsigned iclass) const;
     
     //! Return the Scalar variation function for the specified channel
-    const MEAL::Scalar* get_Scalar (unsigned ichan);
+    const MEAL::Scalar* get_Scalar (unsigned ichan) const;
 
   protected:
 
