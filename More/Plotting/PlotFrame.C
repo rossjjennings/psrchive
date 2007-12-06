@@ -50,6 +50,11 @@ void Pulsar::PlotFrame::focus (const Archive* data)
   std::pair<float,float> xvp = get_x_scale(true)->get_viewport ();
   std::pair<float,float> yvp = get_y_scale(true)->get_viewport ();
 
+  if (Plot::verbose)
+    cerr << "Pulsar::PlotFrame::focus cpgsvp (" 
+	 << xvp.first << ", " << xvp.second << ", " 
+	 << yvp.first << ", " << yvp.second << ")" << endl;
+
   cpgsvp (xvp.first, xvp.second, yvp.first, yvp.second);
 
   float x_min, x_max;
@@ -59,8 +64,9 @@ void Pulsar::PlotFrame::focus (const Archive* data)
   get_y_scale(true)->get_range (y_min, y_max);
 
   if (Plot::verbose)
-    cerr << "Pulsar::PlotFrame::focus xmin=" << x_min << " xmax=" << x_max
-	 << " ymin=" << y_min << " ymax=" << y_max << endl;
+    cerr << "Pulsar::PlotFrame::focus cpgswin ("
+	 << x_min << ", " << x_max << ", "
+	 << y_min << ", " << y_max << ")" << endl;
 
   cpgswin (x_min, x_max, y_min, y_max);
 
@@ -81,26 +87,31 @@ void Pulsar::PlotFrame::draw_axes (const Archive* data)
   get_y_scale(true)->get_range_external (y_min, y_max);
 
   if (Plot::verbose)
-    cerr << "Pulsar::PlotFrame::draw_axes xmin=" << x_min << " xmax=" << x_max
-	 << " ymin=" << y_min << " ymax=" << y_max << endl;
+    cerr << "Pulsar::PlotFrame::draw_axes cpgswin ("
+	 << x_min << ", " << x_max << ", "
+	 << y_min << ", " << y_max << ")" << endl;
 
   cpgswin (x_min, x_max, y_min, y_max);
-
-  if (Plot::verbose)
-    cerr << "Pulsar::PlotFrame::draw_axes"
-      " xopt='" << get_x_axis(true)->get_opt() << "'"
-      " yopt='" << get_y_axis(true)->get_opt() << "'" << endl;
 
   PlotAxis* xAxis = get_x_axis(true);
   PlotAxis* yAxis = get_y_axis(true);
 
   if( draw_box )
+  {
+    if (Plot::verbose)
+      cerr << "Pulsar::PlotFrame::draw_axes cpgbox (" 
+	   << xAxis->get_opt().c_str() << ", " 
+	   << xAxis->get_tick() << ", " << xAxis->get_nsub() << ", "
+	   << yAxis->get_opt().c_str() << ", "
+	   << yAxis->get_tick() << ", " << yAxis->get_nsub() << ")" << endl;
+
     cpgbox( xAxis->get_opt().c_str(),
 	    xAxis->get_tick(),
 	    xAxis->get_nsub(),
 	    yAxis->get_opt().c_str(),
 	    yAxis->get_tick(),
 	    yAxis->get_nsub() );
+  }
 }
 
 void Pulsar::PlotFrame::label_axes (const string& default_x,

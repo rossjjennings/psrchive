@@ -90,6 +90,11 @@ void Pulsar::FluxPlot::draw (const Archive* data)
   get_scale()->get_ordinates (data, plotter.ordinates);
 
   pair<float,float> range = get_frame()->get_x_scale()->get_range_norm();
+
+  if (verbose)
+    cerr << "Pulsar::FluxPlot::draw ProfileVectorPlotter::draw ("
+	 << range.first << ", " << range.second << ")" << endl;
+
   plotter.draw ( range.first, range.second );
 
   cpgsci (1);

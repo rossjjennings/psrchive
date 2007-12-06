@@ -61,6 +61,10 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
     // bottom of stack; just plot the archive
     if (!overlay)
       cpgpage ();
+
+    if (Plot::verbose)
+      cerr << "Pulsar::PlotLoop::plot plotting" << endl;
+
     the_plot->plot (archive);
     return;
   }
@@ -72,7 +76,12 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
 
   for (unsigned i=0; i<index->size(); i++) try
   {
-    the_plot->configure( index->get_index(i) );
+    string index_command = index->get_index(i);
+
+    if (Plot::verbose)
+      cerr << "Pulsar::PlotLoop::plot " << index_command << endl;
+
+    the_plot->configure( index_command );
     plot (indeces);
   }
   catch (Error& error)
