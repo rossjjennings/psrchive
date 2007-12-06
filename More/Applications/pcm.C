@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.75 $
-   $Date: 2007/11/14 23:55:05 $
+   $Revision: 1.76 $
+   $Date: 2007/12/06 19:23:12 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -318,6 +318,11 @@ int main (int argc, char *argv[])
 Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
 Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
 Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
+
+bool get_time_variation ()
+{
+  return gain_variation || diff_gain_variation || diff_phase_variation;
+}
 
 void set_time_variation (char code, MEAL::Univariate<MEAL::Scalar>* function)
 {
@@ -931,7 +936,8 @@ int actual_main (int argc, char *argv[]) try {
 
 #if HAVE_PGPLOT
 
-  if (display) {
+  if (display)
+  {
 
     cpgbeg (0, "result.ps/CPS", 0, 0);
     cpgsvp (0.1,.9, 0.1,.9);
@@ -945,6 +951,17 @@ int actual_main (int argc, char *argv[]) try {
     plotter.plotcal();
 
     cpgend ();
+
+    if (get_time_variation())
+    {
+      cpgbeg (0, "variations.ps/PS", 0, 0);
+      cpgsvp (0.1,.9, 0.1,.9);
+
+      cerr << "pcm: plotting time variation functions" << endl;
+      plotter.plot_time_variations ();
+
+      cpgend ();
+    }
 
     cpgbeg (0, "source.ps/CPS", 0, 0);
     cpgsvp (0.1,.9, 0.1,.9);

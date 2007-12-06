@@ -9,6 +9,8 @@
 #include "Pulsar/Archive.h"
 
 #include "Pulsar/ReceptionModelAxisPlotter.h"
+#include "Pulsar/StepsInfo.h"
+#include "MEAL/Steps.h"
 
 #include <cpgplot.h>
 
@@ -122,6 +124,48 @@ void Pulsar::ReceptionCalibratorPlotter::plotcal ()
 	calibrator->get_Archive()->get_centre_frequency(),
 	calibrator->get_Archive()->get_bandwidth() );
 
+}
+
+void Pulsar::ReceptionCalibratorPlotter::plot_time_variations ()
+{
+  if (!calibrator)
+    throw Error (InvalidState,
+		 "Pulsar::ReceptionCalibratorPlotter::plot_time_variations",
+                 "ReceptionCalibrator not set");
+
+  if (calibrator->gain_variation)
+    plot_time_variation (VariationInfo::Gain,
+			 calibrator->gain_variation);
+
+  if (calibrator->diff_gain_variation)
+    plot_time_variation (VariationInfo::Boost,
+			 calibrator->diff_gain_variation);
+
+  if (calibrator->diff_phase_variation)
+    plot_time_variation (VariationInfo::Rotation,
+			 calibrator->diff_phase_variation);
+}
+
+void Pulsar::ReceptionCalibratorPlotter::plot_time_variation
+(VariationInfo::Which which, const MEAL::Scalar* scalar)
+{
+  const MEAL::Steps* steps = dynamic_cast<const MEAL::Steps*> (scalar);
+
+  if (steps)
+  {
+    if (verbose)
+      cerr << "Pulsar::ReceptionCalibratorPlotter::plot_time_variations"
+	   << " steps" << endl;
+
+    plot( new StepsInfo(calibrator, which),
+	  calibrator->get_nchan(),
+	  calibrator->get_Archive()->get_centre_frequency(),
+	  calibrator->get_Archive()->get_bandwidth() );
+
+    return;
+  }
+
+  cerr << "unrecognized function" << endl;
 }
 
 //! Return the calibrator to be plotted
