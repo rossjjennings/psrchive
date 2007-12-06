@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Instrument.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/11/07 18:46:37 $
+   $Revision: 1.8 $
+   $Date: 2007/12/06 05:49:31 $
    $Author: straten $ */
 
 #ifndef __CalibrationInstrument_H
@@ -101,6 +101,15 @@ namespace Calibration {
     
     //! Set the differential phase variation
     void set_diff_phase (MEAL::Scalar*);
+
+    //! Get the instrumental gain variation
+    const MEAL::Scalar* get_gain_variation () const;
+
+    //! Get the differential gain variation
+    const MEAL::Scalar* get_diff_gain_variation () const;
+    
+    //! Get the differential phase variation
+    const MEAL::Scalar* get_diff_phase_variation () const;
 
     // ///////////////////////////////////////////////////////////////////
     //

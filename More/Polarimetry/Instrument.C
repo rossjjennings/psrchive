@@ -225,3 +225,22 @@ void Calibration::Instrument::set_diff_phase (MEAL::Scalar* function)
   diff_phase_variation = function;
   backend_chain->set_constraint (2, function);
 }
+
+//! Set the instrumental gain variation
+const MEAL::Scalar* Calibration::Instrument::get_gain_variation () const
+{
+  return gain_variation.ptr();
+}
+
+//! Set the differential gain variation
+const MEAL::Scalar* Calibration::Instrument::get_diff_gain_variation () const
+{
+  return diff_gain_variation.ptr();
+}
+   
+//! Set the differential phase variation
+const MEAL::Scalar* Calibration::Instrument::get_diff_phase_variation () const
+{
+  return diff_phase_variation.ptr();
+}
+ 
