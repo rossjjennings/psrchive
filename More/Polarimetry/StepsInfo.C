@@ -75,7 +75,8 @@ string Pulsar::StepsInfo::get_name (unsigned iclass) const
   if (iclass == 0)
     return VariationInfo::get_name (iclass) + "(mean)";
 
-  return VariationInfo::get_name (iclass) + "(" + tostring(steps[iclass])+ ")";
+  return VariationInfo::get_name (iclass) 
+    + "(" + tostring( steps[iclass], 4 )+ ")";
 }
 
 //! Return the number of parameters in the specified class
@@ -89,15 +90,16 @@ Estimate<float>
 Pulsar::StepsInfo::get_param (unsigned ichan, unsigned iclass,
 			      unsigned iparam) const
 {
-  if (iclass == 0)
-  {
-    if (which == Rotation)
-      return mean_radian[ichan].get_Estimate();
-    else
-      return mean[ichan].get_Estimate();
-  }
+  Estimate<float> the_mean;
+  if (which == Rotation)
+    the_mean = mean_radian[ichan].get_Estimate();
+  else
+    the_mean = mean[ichan].get_Estimate();
 
-  return get_step (ichan, iclass - 1);
+  if (iclass == 0)
+    return the_mean;
+  else
+    return get_step (ichan, iclass - 1) - the_mean;
 }
 
 Estimate<float>
