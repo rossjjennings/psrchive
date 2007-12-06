@@ -14,6 +14,9 @@ using namespace std;
 Pulsar::InstrumentInfo::InstrumentInfo (const PolnCalibrator* calibrator) :
   SingleAxisCalibrator::Info (calibrator)
 {
+  if (Calibrator::verbose)
+    cerr << "Pulsar::InstrumentInfo::InstrumentInfo" << endl;
+
   fixed_orientation = false;
   variation_nparam = 0;
 
@@ -35,9 +38,8 @@ Pulsar::InstrumentInfo::InstrumentInfo (const PolnCalibrator* calibrator) :
   if (!instrument)
     return;
 
-  // parameter 4 is the orientation of receptor 0
-  if (xform->get_Estimate(4).var == 0)  {
-    cerr << "Pulsar::InstrumentInfo orientation of receptor 0 set to zero" 
+  if (instrument->get_orientation(0).var == 0)  {
+    cerr << "Pulsar::InstrumentInfo orientation[0] set to zero" 
          << endl;
     fixed_orientation = true;
   }
@@ -45,6 +47,11 @@ Pulsar::InstrumentInfo::InstrumentInfo (const PolnCalibrator* calibrator) :
   set_variation( "\\fiG\\fr(\\fit\\fr)", instrument->get_gain_variation() );
   set_variation( "\\gb(\\fit\\fr)", instrument->get_diff_gain_variation() );
   set_variation( "\\gf(\\fit\\fr)", instrument->get_diff_phase_variation() );
+
+  if (Calibrator::verbose)
+    cerr << "Pulsar::InstrumentInfo::InstrumentInfo"
+	 << " nfunction=" << variation.size()
+	 << " nparam=" << variation_nparam << endl;
 }
 
 void Pulsar::InstrumentInfo::set_variation (const std::string& name,
@@ -61,14 +68,15 @@ void Pulsar::InstrumentInfo::set_variation (const std::string& name,
 //! Return the number of parameter classes
 unsigned Pulsar::InstrumentInfo::get_nclass () const
 {
-  // by default, two extra classes: ellipticities and orientations
-  unsigned nclass = 2;
+  // two extra classes: ellipticities and orientations
+  // plus a separate class for each time variation parameter
+  unsigned nclass = SingleAxisCalibrator::Info::get_nclass()
+    + 2 + variation_nparam;
 
-  // plot each of the time variation model parameters in separate panels
-  for (unsigned i=0; i<variation.size(); i++)
-    nclass += variation[i].second->get_nparam();
+  if (Calibrator::verbose)
+    cerr << "Pulsar::InstrumentInfo::get_nclass " << nclass << endl;
 
-  return SingleAxisCalibrator::Info::get_nclass() + nclass;
+  return nclass;
 }
     
 //! Return the name of the specified class
@@ -136,32 +144,37 @@ Estimate<float>
 Pulsar::InstrumentInfo::get_param (unsigned ichan, unsigned iclass,
 				   unsigned iparam) const
 {
-  
+  if( ! calibrator->get_transformation_valid (ichan) )
+    return 0;
+ 
   if (iclass < SingleAxisCalibrator::Info::get_nclass())
     return SingleAxisCalibrator::Info::get_param (ichan, iclass, iparam);
   
   iclass -= SingleAxisCalibrator::Info::get_nclass();
 
+  const Calibration::Instrument* data
+    = dynamic_cast<const Calibration::Instrument*> 
+    ( calibrator->get_transformation (ichan) );
+
+  if (!data)
+    throw Error (InvalidState, "Pulsar::InstrumentInfo::get_param",
+		 "transformation[%d] is not an Instrument", ichan);
+
   if (iclass < 2)
   {
-    // unscramble the orientation and ellipticity
-    iparam += SingleAxisCalibrator::Info::get_nclass();
+    Estimate<double> angle;
+    if (iclass == 1)
+      angle = data->get_orientation(iparam);
+    else
+      angle = data->get_ellipticity(iparam);
   
-    return 180.0 / M_PI * 
-      PolnCalibrator::Info::get_param (ichan, iparam, iclass);
+    return 180.0 / M_PI * angle;
   }
 
   iclass -= 2;
 
   if( ! variation.size() )
     return 0;
-
-  if( ! calibrator->get_transformation_valid (ichan) )
-    return 0;
-
-  const Calibration::Instrument* data
-    = dynamic_cast<const Calibration::Instrument*> 
-    ( calibrator->get_transformation (ichan) );
 
   vector<const MEAL::Scalar*> functions;
 
