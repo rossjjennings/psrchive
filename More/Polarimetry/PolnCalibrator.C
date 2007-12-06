@@ -752,7 +752,7 @@ unsigned Pulsar::PolnCalibrator::Info::get_nclass () const
 }
 
 /*! The name of each parameter is unknown */
-const char* Pulsar::PolnCalibrator::Info::get_name (unsigned iclass) const
+string Pulsar::PolnCalibrator::Info::get_name (unsigned iclass) const
 {
   return "unknown";
 }

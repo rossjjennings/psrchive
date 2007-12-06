@@ -202,7 +202,7 @@ try {
       cerr << "cpgmtxt (" << info->get_name(iplot) << ")" << endl;
 #endif
 
-      cpgmtxt("L",3.5,.5,.5, info->get_name(iplot));
+      cpgmtxt("L",3.5,.5,.5, info->get_name(iplot).c_str());
       
       if (ipanel % npanel == 0)
 	cpgmtxt("B",3.0,.5,.5, "Frequency (MHz)");

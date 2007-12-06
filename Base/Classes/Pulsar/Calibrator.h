@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Calibrator.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/10/03 06:14:13 $
+   $Revision: 1.5 $
+   $Date: 2007/12/06 05:49:36 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -123,7 +123,7 @@ namespace Pulsar {
       virtual unsigned get_nclass () const = 0;
 
       //! Return the name of the specified class
-      virtual const char* get_name (unsigned iclass) const = 0;
+      virtual std::string get_name (unsigned iclass) const = 0;
 
       //! Return the number of parameters in the specified class
       virtual unsigned get_nparam (unsigned iclass) const = 0;

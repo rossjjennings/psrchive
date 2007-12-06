@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.44 $
-   $Date: 2007/05/11 22:59:47 $
+   $Revision: 1.45 $
+   $Date: 2007/12/06 05:49:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -124,7 +124,7 @@ namespace Pulsar {
       unsigned get_nclass () const;
 
       //! Return the name of the specified class
-      const char* get_name (unsigned iclass) const;
+      std::string get_name (unsigned iclass) const;
       
       //! Return the number of parameters in the specified class
       unsigned get_nparam (unsigned iclass) const;

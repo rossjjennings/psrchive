@@ -167,16 +167,15 @@ unsigned Pulsar::ReceptionCalibrator::CalInfo::get_nclass () const
 }
 
 //! Return the name of the specified class
-const char*
-Pulsar::ReceptionCalibrator::CalInfo::get_name (unsigned iclass) const
+string Pulsar::ReceptionCalibrator::CalInfo::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:
     return "Noise Diode";
   case 1:
-    return "System + Hydra A";
+    return "System + Standard Candle";
   case 2:
-    return "Hydra A (Q,U,V)";
+    return "Standard Candle (Q,U,V)";
   default:
     return "";
   }

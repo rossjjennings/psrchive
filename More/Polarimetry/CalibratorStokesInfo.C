@@ -24,7 +24,7 @@ unsigned Pulsar::CalibratorStokesInfo::get_nclass () const
 }
 
 //! Return the name of the specified class
-const char* Pulsar::CalibratorStokesInfo::get_name (unsigned iclass) const
+std::string Pulsar::CalibratorStokesInfo::get_name (unsigned iclass) const
 {
   static char label [64] = "\\fiC\\fr\\dk\\u (\%\\fiC\\fr\\d0\\u)";
   static char* replace = strchr (label, 'k');

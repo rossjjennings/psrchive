@@ -431,7 +431,7 @@ unsigned Pulsar::FluxCalibrator::get_nreceptor () const
 }
 
 //! Return the name of the specified class
-const char* Pulsar::FluxCalibrator::Info::get_name (unsigned iclass) const
+std::string Pulsar::FluxCalibrator::Info::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:

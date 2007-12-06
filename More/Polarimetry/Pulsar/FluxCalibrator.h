@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.30 $
-   $Date: 2007/05/01 06:44:49 $
+   $Revision: 1.31 $
+   $Date: 2007/12/06 05:49:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -138,7 +138,7 @@ namespace Pulsar {
     unsigned get_nclass () const { return 2; }
     
     //! Return the name of the specified class
-    const char* get_name (unsigned iclass) const;
+    std::string get_name (unsigned iclass) const;
     
     //! Return the number of parameters in the specified class
     unsigned get_nparam (unsigned iclass) const;

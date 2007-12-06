@@ -68,8 +68,7 @@ unsigned Pulsar::SingleAxisCalibrator::Info::get_nclass () const
 }
 
 //! Return the name of the specified class
-const char* 
-Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass) const
+string Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:

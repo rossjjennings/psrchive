@@ -64,7 +64,7 @@ unsigned Pulsar::PolarCalibrator::Info::get_nclass () const
 }
 
 //! Return the name of the specified class
-const char* Pulsar::PolarCalibrator::Info::get_name (unsigned iclass) const
+string Pulsar::PolarCalibrator::Info::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:
