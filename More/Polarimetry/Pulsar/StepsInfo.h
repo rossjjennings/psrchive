@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StepsInfo.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/12/06 18:34:45 $
+   $Revision: 1.2 $
+   $Date: 2007/12/06 19:23:34 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StepsInfo_H
@@ -42,6 +42,9 @@ namespace Pulsar {
 
     //! Return the Steps function for the specified channel
     const MEAL::Steps* get_Steps (unsigned ichan) const;
+
+    //! Get the kth step of the ith channel
+    Estimate<float> get_step (unsigned ichan, unsigned kstep) const;
 
   protected:
 

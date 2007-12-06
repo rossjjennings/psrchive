@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/StepsInfo.h"
+#include "templates.h"
 
 #include <assert.h>
 
@@ -21,11 +22,35 @@ Pulsar::StepsInfo::StepsInfo (const ReceptionCalibrator* cal, Which w)
   
   for (unsigned ichan = 0; ichan < nchan; ichan++)
     add_steps( get_Steps( ichan ) );
+
+  cerr << "Pulsar::StepsInfo nstep=" << steps.size() << endl;
+
+  if (which == Rotation)
+    mean_radian.resize( nchan );
+  else
+    mean.resize( nchan );
+
+  for (unsigned ichan = 0; ichan < nchan; ichan++)
+    for (unsigned istep = 0; istep < steps.size(); istep++)
+      if (which == Rotation)
+	mean_radian[ichan] += get_step( ichan, istep );
+      else
+	mean[ichan] += get_step( ichan, istep );
+
 }
 
 const MEAL::Steps* Pulsar::StepsInfo::get_Steps (unsigned ichan) const
 {
   return dynamic_cast<const MEAL::Steps*>( get_Scalar(ichan) );
+}
+
+template<typename T>
+void add (vector<T>& data, T value)
+{
+  if (!found (value, data)) {
+    data.push_back( value );
+    std::sort (data.begin(), data.end());
+  }
 }
 
 void Pulsar::StepsInfo::add_steps (const MEAL::Steps* function)
@@ -34,8 +59,7 @@ void Pulsar::StepsInfo::add_steps (const MEAL::Steps* function)
     return;
 
   for (unsigned istep=0; istep < function->get_nstep(); istep++)
-  {
-  }
+    add (steps, function->get_step(istep));
 }
 
 //! Return the number of parameter classes
@@ -73,11 +97,23 @@ Pulsar::StepsInfo::get_param (unsigned ichan, unsigned iclass,
       return mean[ichan].get_Estimate();
   }
 
-  const MEAL::Steps* function = get_Steps (ichan);
+  return get_step (ichan, iclass - 1);
+}
 
+Estimate<float>
+Pulsar::StepsInfo::get_step (unsigned ichan, unsigned kstep) const
+{
+  assert (kstep < steps.size());
+
+  const MEAL::Steps* function = get_Steps (ichan);
   if (!function)
     return 0;
  
-  // loops and find the matching step
+  for (unsigned istep=0; istep < function->get_nstep(); istep++)
+  {
+    if (function->get_step(istep) == steps[kstep])
+      return function->get_Estimate(istep);
+  }
+
   return 0;
 }
