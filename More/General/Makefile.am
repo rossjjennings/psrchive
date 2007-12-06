@@ -42,7 +42,6 @@ nobase_include_HEADERS = \
         Pulsar/GaussianBaseline.h \
 	Pulsar/Integrate.h \
 	Pulsar/InstallInterpreter.h \
-        Pulsar/InstrumentInfo.h \
         Pulsar/IntegrationWeight.h \
         Pulsar/Interpreter.h \
 	Pulsar/InterpreterExtension.h \
@@ -72,7 +71,6 @@ nobase_include_HEADERS = \
 	Pulsar/SmoothSinc.h \
 	Pulsar/SNRatioInterpreter.h \
         Pulsar/SNRWeight.h \
-        Pulsar/SourceInfo.h \
         Pulsar/SquareWave.h \
 	Pulsar/StandardCandles.h \
         Pulsar/StandardSNR.h \
