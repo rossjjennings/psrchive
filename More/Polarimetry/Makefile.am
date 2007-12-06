@@ -54,9 +54,11 @@ nobase_include_HEADERS = \
         Pulsar/SingleAxisSolver.h \
 	Pulsar/SourceInfo.h \
         Pulsar/StandardModel.h \
+	Pulsar/StepsInfo.h \
         Pulsar/SystemCalibrator.h \
         Pulsar/TemplateUncertainty.h \
-        Pulsar/TotalCovariance.h
+        Pulsar/TotalCovariance.h \
+	Pulsar/VariationInfo.h
 
 libPolarimetry_la_SOURCES = \
         CalibratorStokesInfo.C \
@@ -118,9 +120,11 @@ libPolarimetry_la_SOURCES = \
         SingleAxisSolver.C \
         SourceInfo.C \
         StandardModel.C \
+	StepsInfo.C \
         SystemCalibrator.C \
         TemplateUncertainty.C \
-        TotalCovariance.C
+        TotalCovariance.C \
+	VariationInfo.C
 
 SUBDIRS = iri2001
 
