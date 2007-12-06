@@ -1,0 +1,83 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2007 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+#include "Pulsar/StepsInfo.h"
+
+#include <assert.h>
+
+using namespace std;
+
+//! Constructor
+Pulsar::StepsInfo::StepsInfo (const ReceptionCalibrator* cal, Which w)
+  : VariationInfo (cal, w)
+{
+  if (Calibrator::verbose)
+    cerr << "Pulsar::StepsInfo::StepsInfo" << endl;
+
+  unsigned nchan = calibrator->get_nchan ();
+  
+  for (unsigned ichan = 0; ichan < nchan; ichan++)
+    add_steps( get_Steps( ichan ) );
+}
+
+const MEAL::Steps* Pulsar::StepsInfo::get_Steps (unsigned ichan) const
+{
+  return dynamic_cast<const MEAL::Steps*>( get_Scalar(ichan) );
+}
+
+void Pulsar::StepsInfo::add_steps (const MEAL::Steps* function)
+{
+  if (!function)
+    return;
+
+  for (unsigned istep=0; istep < function->get_nstep(); istep++)
+  {
+  }
+}
+
+//! Return the number of parameter classes
+unsigned Pulsar::StepsInfo::get_nclass () const
+{
+  // a separate panel for each step, plus one for the mean
+  return steps.size() + 1;
+}
+    
+//! Return the name of the specified class
+string Pulsar::StepsInfo::get_name (unsigned iclass) const
+{
+  if (iclass == 0)
+    return VariationInfo::get_name (iclass) + "(mean)";
+
+  return VariationInfo::get_name (iclass) + "(" + tostring(steps[iclass])+ ")";
+}
+
+//! Return the number of parameters in the specified class
+unsigned Pulsar::StepsInfo::get_nparam (unsigned iclass) const
+{
+  return 1;
+}
+
+//! Return the estimate of the specified parameter
+Estimate<float> 
+Pulsar::StepsInfo::get_param (unsigned ichan, unsigned iclass,
+			      unsigned iparam) const
+{
+  if (iclass == 0)
+  {
+    if (which == Rotation)
+      return mean_radian[ichan].get_Estimate();
+    else
+      return mean[ichan].get_Estimate();
+  }
+
+  const MEAL::Steps* function = get_Steps (ichan);
+
+  if (!function)
+    return 0;
+ 
+  // loops and find the matching step
+  return 0;
+}
