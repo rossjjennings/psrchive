@@ -370,6 +370,13 @@ MJD Pulsar::ReceptionCalibrator::get_epoch () const
   return 0.5 * (start_epoch + end_epoch);
 }
 
+//! Return the StandardModel for the specified channel
+const Calibration::StandardModel*
+Pulsar::ReceptionCalibrator::get_model (unsigned ichan) const
+{
+  return model[ichan];
+}
+
 
 //! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)

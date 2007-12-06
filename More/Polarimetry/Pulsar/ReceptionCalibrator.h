@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.79 $
-   $Date: 2007/12/06 05:49:36 $
+   $Revision: 1.80 $
+   $Date: 2007/12/06 19:23:24 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -100,6 +100,9 @@ namespace Pulsar {
 
     //! Return the Calibrator information
     Info* get_Info () const;
+
+    //! Return the StandardModel for the specified channel
+    const Calibration::StandardModel* get_model (unsigned ichan) const;
 
     //! Return the CalibratorStokes Extension
     CalibratorStokes* get_CalibratorStokes () const;
