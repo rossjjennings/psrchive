@@ -9,7 +9,6 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 #include "templates.h"
-#include "Pulsar/PhaseScale.h"
 
 #include <cpgplot.h>
 
@@ -36,7 +35,7 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
 
   style = "image";
   line_colour = -1;
-
+  
   y_res = -1;
   y_scale = -1;
 }
@@ -61,8 +60,8 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
 
   float x_min = 0.0;
   float x_max = 1.0;
-  get_scale()->get_range( x_min, x_max );
-  
+  get_frame()->get_x_scale()->PlotScale::get_minmax (x_min, x_max);
+
   float y_min = 0.0;
   float y_max = 1.0;
   get_frame()->get_y_scale()->PlotScale::get_minmax (y_min, y_max);
@@ -97,8 +96,8 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   float x_res = (x_max-x_min)/nbin;
   if( y_res == -1 )
     y_res = (y_max-y_min)/nrow;
-
-
+  
+  
 
   if (style == "image")
   {
@@ -160,25 +159,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       }
     }
 
-    float first_x, last_x, x_step;
-    Pulsar::PhaseScale::Units units = get_scale()->get_units();
-    if( units == Pulsar::PhaseScale::Turns )
-    {
-      first_x = floor(x_min) - 1;
-      last_x = ceil(x_max) + 1;
-      x_step = 1;
-    }
-    else if( units == Pulsar::PhaseScale::Degrees )
-    {
-      first_x = int(x_min / 360) * 360;
-      last_x = int(x_max / 360) * 360;
-      x_step = 360;
-    }
-    else
-      throw Error( InvalidState, "Pulsar::PhaseVsPlot::draw",
-		   "unhandled PhaseScale::Units" );
-
-    for( int xoff = first_x; xoff < last_x; xoff += x_step )
+    for( int xoff = int(x_min)-1; xoff < int( x_max )+1; xoff ++ )
     {
       for( unsigned b = 0; b < nbin; b ++ )
         xaxis_adjusted[b] = xaxis[b] + xoff;
@@ -188,13 +169,13 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
         if (!all_zeroes[irow])
           cpgline (nbin, &xaxis_adjusted[0], &plotarray[irow*nbin]);
 
-        // fill in the gap between iterations
-        float pxs[2], pys[2];
-        pxs[0] = xaxis_adjusted[nbin-1];
-        pxs[1] = pxs[0] + ( 1.0 / float(nbin) );
-        pys[0] = plotarray[irow*nbin + nbin - 1];
-        pys[1] = plotarray[irow*nbin];
-        cpgline( 2, pxs, pys );
+	// fill in the gap between iterations
+	float pxs[2], pys[2];
+	pxs[0] = xaxis_adjusted[nbin-1];
+	pxs[1] = pxs[0] + ( 1.0 / float(nbin) );
+	pys[0] = plotarray[irow*nbin + nbin - 1];
+	pys[1] = plotarray[irow*nbin];
+	cpgline( 2, pxs, pys );
       }
     }
 
