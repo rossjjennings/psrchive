@@ -57,6 +57,9 @@ namespace Pulsar {
     //! Correct the RFs array from the file.
     void fix_orig_rfs();
 
+    //! Convert raw header data to big endian
+    void hdr_to_big_endian ();
+
     //! Load the BPP header information from filename
     virtual void load_header (const char* filename);
 

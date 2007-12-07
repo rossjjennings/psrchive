@@ -8,6 +8,8 @@
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Profile.h"
 
+#include "machine_endian.h"
+
 using namespace std;
 
 void Pulsar::BPPArchive::init ()
@@ -115,8 +117,7 @@ Pulsar::BPPArchive::extract (const vector<unsigned>& subints) const
  * Quirks:
  *   - The data in rf_array is not quite accurate, and needs to be corrected
  *     via the function fix_orig_rfs.
- *   - The endianess of the file agrees with PCs, we need to implement
- *     byte-swapping if this is to be portable to Suns/etc.
+ *   - The endianess of the file agrees with PCs (little-endian).
  *   - Later files have 3 groups of 8 channels, where the middle group
  *     overlaps the frequency range of the outer 2.  In the end, we probably
  *     want to ignore this middle group (TODO)...
@@ -153,6 +154,41 @@ void Pulsar::BPPArchive::fix_orig_rfs ()
   orig_rfs_corrected=1;
 }
 
+void Pulsar::BPPArchive::hdr_to_big_endian () 
+{
+#if (MACHINE_LITTE_ENDIAN==0) // Compile-time endian check
+  if (verbose>2)
+    cerr << "Pulsar::BPPArchive::hdr_to_big_endian" << endl;
+  ChangeEndian(hdr.telescope);
+  ChangeEndian(hdr.apparent_period);
+  ChangeEndian(hdr.dispersion_measure);
+  ChangeEndian(hdr.scan_number);
+  ChangeEndian(hdr.crate_id);
+  ChangeEndian(hdr.year);
+  ChangeEndian(hdr.day);
+  ChangeEndian(hdr.seconds);
+  ChangeEndian(hdr.second_fraction);
+  ChangeEndian(hdr.RF_of_chan_0);
+  ChangeEndian(hdr.bandwidth);
+  ChangeEndian(hdr.integration_time);
+  ChangeEndian(hdr.bins);
+  ChangeEndian(hdr.bds);
+  ChangeEndian(hdr.chsbd);
+  ChangeEndian(hdr.polns);
+  ChangeEndian(hdr.IF0_gain);
+  ChangeEndian(hdr.IF1_gain);
+  ChangeEndian(hdr.IF2_gain);
+  ChangeEndian(hdr.IF3_gain);
+  ChangeEndian(hdr.RF_of_IFcenter_0);
+  ChangeEndian(hdr.RF_of_IFcenter_1);
+  ChangeEndian(hdr.RF_of_IFcenter_2);
+  ChangeEndian(hdr.RF_of_IFcenter_3);
+  ChangeEndian(hdr.SRAM_base_freq);
+  ChangeEndian(hdr.SRAM_freq_incr);
+  ChangeEndian(hdr.bytes);
+#endif
+}
+
 void Pulsar::BPPArchive::load_header (const char* filename)
 {
   // load all BasicArchive and BPPArchive attributes from filename
@@ -171,7 +207,10 @@ void Pulsar::BPPArchive::load_header (const char* filename)
     throw Error (FailedCall, "Pulsar::BPPArchive::load_header", "fread");
   }
 
-  // TODO : check if we need to byte-swap ?
+#if (MACHINE_LITTLE_ENDIAN==0) 
+  // Byte-swap header if needed
+  hdr_to_big_endian();
+#endif
   
   // Read in RFs array now to make life easier
   int i;
@@ -194,6 +233,11 @@ void Pulsar::BPPArchive::load_header (const char* filename)
   }
   fclose(f);
 
+#if (MACHINE_LITTLE_ENDIAN==0)
+  // Byte-swap RFs array if needed
+  array_changeEndian(hdr.chsbd*hdr.bds, orig_rfs, sizeof(double));
+#endif
+
   // Check for expected version number
   if (strncmp(hdr.version,"1.0",3)==0) { rv=1; }
   else if (strncmp(hdr.version,"2.0",3)==0) { rv=1; }
@@ -205,7 +249,6 @@ void Pulsar::BPPArchive::load_header (const char* filename)
 
 
   // Convert raw header values to things PSRCHIVE wants
-
   set_npol(hdr.polns);
   if (npol==1) { set_state(Signal::Intensity); }
   else if (npol==2) { set_state(Signal::PPQQ); }
@@ -359,6 +402,10 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
     if (rv!=num_means)
       throw Error (FailedSys, "Pulsar::BPPArchive::load_Integration", 
           "fread(means) rv=%d", rv);
+#if (MACHINE_LITTLE_ENDIAN==0)
+    // Byte-swap means array if needed
+    array_changeEndian(num_means, means, sizeof(float));
+#endif
     for (int j=0; j<hdr.polns; j++) {
       for (int k=0; k<hdr.chsbd; k++) {
         cur_chan = i*hdr.chsbd + k;
@@ -366,6 +413,10 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
         if (rv!=hdr.bins)
           throw Error (FailedSys, "Pulsar::BPPArchive::load_Integration",
               "fread(data) rv=%d", rv);
+#if (MACHINE_LITTLE_ENDIAN==0)
+        // Byte-swap data
+        array_changeEndian(hdr.bins, data, sizeof(float));
+#endif
         prof = integration->get_Profile(j,cur_chan);
         prof->set_amps(data);
         prof->offset(means[j*hdr.chsbd+k]);
