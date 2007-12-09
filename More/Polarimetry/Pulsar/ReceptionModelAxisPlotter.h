@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModelAxisPlotter.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/11/11 01:01:01 $
+   $Revision: 1.9 $
+   $Date: 2007/12/09 07:03:33 $
    $Author: straten $ */
 
 #ifndef __Calibration_ReceptionModelAxisPlotter_H
@@ -73,8 +73,8 @@ void Calibration::ReceptionModelAxisPlotter<Type>::plot_model ()
   model->set_transformation_index (ipath);
   model->set_input_index (isource);
 
-  for (unsigned ipt=0; ipt<npt; ipt++) {
-
+  for (unsigned ipt=0; ipt<npt; ipt++) try
+  {
     Type index = min + step * ipt;
 
     axis->set_value (index);
@@ -87,6 +87,13 @@ void Calibration::ReceptionModelAxisPlotter<Type>::plot_model ()
     else
       cpgdraw (pa, stokes[ipol]);
     
+  }
+  catch (Error& error)
+  {
+#ifdef _DEBUG
+    std::cerr << "Calibration::ReceptionModelAxisPlotter<Type>::plot_model "
+                 "ipt=" << ipt << " " << error.get_message() << std::endl;
+#endif
   }
 }
 
