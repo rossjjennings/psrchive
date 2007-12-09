@@ -15,6 +15,8 @@
 #include <cpgplot.h>
 #include <stdio.h>
 
+using namespace std;
+
 Calibration::ReceptionModelPlotter::ReceptionModelPlotter ()
 {
   ipol = isource = ipath = 0;
@@ -83,7 +85,8 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   }
   
   unsigned ndat = model->get_ndata ();
-  for (unsigned idat=0; idat < ndat; idat++) {
+  for (unsigned idat=0; idat < ndat; idat++) try
+  {
     
     // get the specified CoherencyMeasurementSet
     const Calibration::CoherencyMeasurementSet& data = model->get_data (idat);
@@ -117,11 +120,15 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
     }
     
   }
-  
+  catch (Error& error)
+  {
+    cerr << "Calibration::ReceptionModelPlotter::plot_observations idat="
+         << idat << error << endl;
+  }
+
   if (stokes[0].size() == 0) {
-    std::cerr << "Calibration::ReceptionModelPlotter::plot_observations "
-            "ipath=" << ipath << " isource=" << isource << " no data" 
-              << std::endl;
+    cerr << "Calibration::ReceptionModelPlotter::plot_observations "
+            "ipath=" << ipath << " isource=" << isource << " no data" << endl;
     return;
   }
 
