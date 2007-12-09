@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CoherencyMeasurementSet.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.6 $
+   $Date: 2007/12/09 19:06:05 $
    $Author: straten $ */
 
 #ifndef __Calibration_CoherencyMeasurementSet_H
@@ -16,7 +16,6 @@
 
 #include "Pulsar/CoherencyMeasurement.h"
 #include "MEAL/Argument.h"
-#include "Reference.h"
 
 namespace Calibration {
 
@@ -43,6 +42,12 @@ namespace Calibration {
     //! Apply the independent variables
     void set_coordinates () const;
 
+    //! Set the identifier
+    void set_identifier (const std::string&);
+
+    //! Get the identifier
+    const std::string get_identifier () const;
+
   protected:
 
     //! Index of the transformation through which the measurements are made
@@ -50,6 +55,9 @@ namespace Calibration {
 
     //! The coordinates of the measurement
     std::vector< Reference::To<MEAL::Argument::Value> > coordinates;
+
+    //! The identifier
+    std::string identifier;
 
   };
 

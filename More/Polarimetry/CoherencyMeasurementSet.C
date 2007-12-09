@@ -6,6 +6,8 @@
  ***************************************************************************/
 #include "Pulsar/CoherencyMeasurementSet.h"
 
+using namespace std;
+
 Calibration::CoherencyMeasurementSet::CoherencyMeasurementSet (unsigned index)
 {
   transformation_index = index;
@@ -41,3 +43,14 @@ void Calibration::CoherencyMeasurementSet::set_coordinates () const
     coordinates[ic]->apply();
 }
 
+//! Set the identifier
+void Calibration::CoherencyMeasurementSet::set_identifier (const string& id)
+{
+  identifier = id;
+}
+
+//! Get the identifier
+const string Calibration::CoherencyMeasurementSet::get_identifier () const
+{
+  return identifier;
+}

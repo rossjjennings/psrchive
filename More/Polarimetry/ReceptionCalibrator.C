@@ -555,6 +555,8 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
     }
 
+    string identifier = data->get_filename() + " " + tostring(isub);
+
     for (unsigned ichan=0; ichan<nchan; ichan++) try {
 
       if (integration->get_weight (ichan) == 0) {
@@ -569,6 +571,8 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
       unsigned xform_index = model[ichan]->get_pulsar_path();
       Calibration::CoherencyMeasurementSet measurements (xform_index);
+
+      measurements.set_identifier( identifier );
 
       measurements.add_coordinate( arg );
       measurements.add_coordinate( platform_arg );
@@ -799,6 +803,8 @@ try {
     if (epoch > end_epoch)
       end_epoch = epoch;
 
+    string identifier = cal->get_filename() + " " + tostring(isub);
+
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
       if (integration->get_weight (ichan) == 0) {
@@ -828,6 +834,9 @@ try {
 	MEAL::Argument::Value* arg = model[ichan]->time.new_Value(epoch);
 
 	Calibration::CoherencyMeasurementSet measurements;
+
+	measurements.set_identifier( identifier );
+
 	measurements.add_coordinate( arg );
 
         // convert to CoherencyMeasurement format
