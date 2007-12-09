@@ -317,6 +317,17 @@ bool Pulsar::ArchiveMatch::get_check_bandwidth () const
   return check_bandwidth;
 }
 
+bool name_match (std::string a, std::string b)
+{
+  if (a[0] == 'J' || a[0] == 'B')
+    a.erase(0,1);
+  if (b[0] == 'J' || b[0] == 'B')
+    b.erase(0,1);
+
+  // cerr << "name_match a=" << a << " b=" << b << endl;
+  return a == b;
+}
+
 /*!  This method checks each of the archive attributes for which the
   check flag is set.  If a pair of checked attributes does not match,
   the result of this function is set to false and an appropriate
@@ -347,7 +358,8 @@ bool Pulsar::ArchiveMatch::match (const Archive* a, const Archive* b)
   }
 
   // Name of observed source
-  if (check_source && a->get_source() != b->get_source()) {
+  if (check_source && !name_match( a->get_source(), b->get_source() ))
+  {
     reason += separator
       + "source name mismatch: " + a->get_source() + " != " + b->get_source();
     result = false;
