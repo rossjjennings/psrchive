@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.76 $
-   $Date: 2007/12/06 19:23:12 $
+   $Revision: 1.77 $
+   $Date: 2007/12/09 06:58:02 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -801,9 +801,13 @@ int actual_main (int argc, char *argv[]) try {
 	return -1;
       
     }
-    
-    if (phase_std) {
 
+    /*
+      test for phase shift only if phase_std is not from current archive.
+      this test will fail if binfile is a symbollic link.
+    */
+    if (phase_std && archive->get_filename() != binfile)
+    {
       Reference::To<Pulsar::Archive> total = archive->total();
       Estimate<double> shift = total->get_Profile(0,0,0)->shift (*phase_std);
 
