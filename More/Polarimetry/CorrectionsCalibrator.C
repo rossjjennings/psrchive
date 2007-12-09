@@ -271,7 +271,8 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
   xform *= jones;
 
   if (must_correct_platform && should_correct_projection)
-    throw Error (InvalidState, "Pulsar::CorrectionsCalibrator::calibrate",
+    throw Error (InvalidState,
+		 "Pulsar::CorrectionsCalibrator::get_transformation",
 		 "Projection of fixed receptors not yet implemented");
 
   if (must_correct_platform && should_correct_vertical) {
@@ -287,6 +288,10 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
     Angle pa = para.get_parallactic_angle();
  
+    if (verbose > 2)
+      cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
+	" vertical angle=" << pa << endl;
+    
     // check that the para_ang is equal
 
     if (pointing && !equal_pi( pointing->get_parallactic_angle(), pa ))  {
