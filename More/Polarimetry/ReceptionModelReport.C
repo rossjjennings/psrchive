@@ -64,9 +64,19 @@ bool Calibration::ReceptionModelReport::report (ReceptionModel* model)
 	  cerr << "model=" << ms << "\ndata=" << datum << endl;
 #endif
 
-	for (unsigned ipol=0; ipol<4; ipol++) {
+	double max_divergence = 36.0;
+
+	for (unsigned ipol=0; ipol<4; ipol++)
+	{
 	  double diff = datum[ipol].get_value() - ms[ipol];
-	  chisq[ipol] += diff * diff / datum[ipol].get_variance();
+	  double divergence = diff * diff / datum[ipol].get_variance();
+
+	  if (divergence > max_divergence)
+	    cerr << "Calibration::ReceptionModelReport::report"
+	      " divergence=" << sqrt(divergence) << " sigma in \n\t"
+		 << data.get_identifier() << endl;
+
+	  chisq[ipol] += divergence;
 	}
 
 	count ++;
