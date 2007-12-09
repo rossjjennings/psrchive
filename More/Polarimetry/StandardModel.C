@@ -491,8 +491,8 @@ void Calibration::StandardModel::add_observation_epoch (const MJD& epoch)
   if (max_epoch == zero || epoch > max_epoch) 
     max_epoch = epoch;
 
-  MJD one_minute (0.0, 60.0, 0.0);
-  time.set_value (min_epoch - one_minute);
+  MJD half_minute (0.0, 30.0, 0.0);
+  time.set_value (min_epoch - half_minute);
 
   double min_step = convert.get_value();
 
@@ -543,9 +543,9 @@ void Calibration::StandardModel::add_calibrator_epoch (const MJD& epoch)
        << epoch << endl;
 #endif
 
-  MJD one_minute (0.0, 60.0, 0.0);
+  MJD half_minute (0.0, 30.0, 0.0);
 
-  time.set_value( epoch-one_minute );
+  time.set_value( epoch-half_minute );
 
   if (gain)
     add_step( gain, convert.get_value() );
@@ -784,11 +784,25 @@ void Calibration::StandardModel::get_covariance( vector<double>& covar,
     for (unsigned j=i; j<nparam; j++) {
       assert( count < ncovar );
       covar[count] = Ctotal[imap[i]][imap[j]];
+
+      if (i > 0 && i == j && physical)
+      {
+	// ensure that variances are sensible
+	if (covar[count] > 1.0)
+	  throw Error( InvalidState, 
+		       "Calibration::StandardModel::get_covariance",
+		       "invalid %s variance=%lf",
+		       physical->get_param_name(i).c_str(), covar[count] );
+      }
+
       count ++;
+
     }
+
   }
 
   if (count != ncovar)
     throw Error( InvalidState, "Calibration::StandardModel::get_covariance",
 		 "count=%u != ncovar=%u", count, ncovar );
+  
 }
