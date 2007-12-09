@@ -857,7 +857,12 @@ try {
 	  measurements.set_transformation_index
 	    ( model[ichan]->get_polncal_path() );
 
-	  if (!epoch_added[ichan]) {
+	  if (!epoch_added[ichan])
+          {
+#ifdef _DEBUG
+            cerr << "isub=" << isub 
+                 << " add epoch[" << ichan << "]=" << epoch << endl;
+#endif
 	    model[ichan]->add_calibrator_epoch (epoch);
 	    epoch_added[ichan] = true;
 	  }

@@ -466,8 +466,19 @@ void Calibration::StandardModel::offset_steps (Scalar* function, double offset)
   if (!steps)
     return;
 
+#ifdef _DEBUG
+  cerr << "Calibration::StandardModel::offset_steps offset=" << offset << " ";
+#endif
   for (unsigned i=0; i < steps->get_nstep(); i++)
+  {
     steps->set_step( i, steps->get_step(i) + offset );
+#ifdef _DEBUG
+    cerr << i << "=" << steps->get_step(i) << " ";
+#endif
+  }
+#ifdef _DEBUG
+  cerr << endl;
+#endif
 }
 
 void Calibration::StandardModel::add_observation_epoch (const MJD& epoch)
@@ -502,10 +513,22 @@ void Calibration::StandardModel::set_min_step (Scalar* function, double step)
     return;
 
   if (!steps->get_nstep())
+  {
+#ifdef _DEBUG
+    cerr << "Calibration::StandardModel::set_min_step add step[0]="
+         << step << endl;
+#endif
     steps->add_step( step );
-  
+  }
+ 
   else if (step < steps->get_step(0))
+  {
+#ifdef _DEBUG
+    cerr << "Calibration::StandardModel::set_min_step set step[0]="
+         << step << endl;
+#endif
     steps->set_step( 0, step );
+  }
 }
 
 void Calibration::StandardModel::add_calibrator_epoch (const MJD& epoch)
@@ -538,7 +561,12 @@ void Calibration::StandardModel::add_step (Scalar* function, double step)
 {
   Steps* steps = dynamic_cast<Steps*> (function);
   if (steps)
+  {
+#ifdef _DEBUG
+    cerr << "Calibration::StandardModel::add_step step=" << step << endl;
+#endif
     steps->add_step (step);
+  }
 }
 
 
