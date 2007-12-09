@@ -193,7 +193,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.75 2007/11/03 20:05:17 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.76 2007/12/09 07:03:03 straten Exp $" << endl;
       return 0;
 
     case 'n':
@@ -329,7 +329,8 @@ int main (int argc, char *argv[]) try {
 
       }
       catch (Error& error) {
-	cerr << "pat: Error MTM " << arch->get_filename() << endl;
+	cerr << "pat: Error MTM " << arch->get_filename() << "\n\t"
+             << error.get_message() << endl;
       }
       else {
 
