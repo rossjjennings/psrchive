@@ -72,8 +72,11 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow )
 
   psrfits_read_col (fptr, "DEDISP", &(hrow->dedisp), row,
 		    0, 0, Pulsar::Archive::verbose > 2);
-
+  
   empty = "NONE";
+  
+  psrfits_read_col (fptr, "DDS_MTHD", &(hrow->dds_mthd), row,
+		    empty, empty, Pulsar::Archive::verbose > 2 );
 
   psrfits_read_col (fptr, "SC_MTHD", &(hrow->sc_mthd), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);

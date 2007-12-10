@@ -66,6 +66,7 @@ namespace Pulsar {
       int fa_corr;
       int rm_corr;
       int dedisp;
+      std::string dds_mthd;
       std::string sc_mthd;
       std::string cal_mthd;
       std::string cal_file;

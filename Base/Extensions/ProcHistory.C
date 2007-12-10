@@ -154,7 +154,8 @@ void Pulsar::ProcHistory::row::init ()
   cal_file = "NONE";
   rfi_mthd = "NONE";
   ifr_mthd = "NONE";
-  
+  dds_mthd = "UNSET";
+
   nsub     = 0;
   npol     = 0;
   nbin     = 0;
