@@ -3,11 +3,10 @@ bin_SCRIPTS = psrhelp
 
 EXTRA_DIST = psrhelp
 
-bin_PROGRAMS = pam pascii pat paz psradd psrsh psrwt fluxcal pac pcm pdv
+bin_PROGRAMS = pam pat paz psradd psrsh psrwt fluxcal pac pcm pdv
 
 pam_SOURCES = pam.C
 
-pascii_SOURCES = pascii.C
 pat_SOURCES = pat.C
 pat_LDADD = $(LDADD) @PTHREAD_LIBS@
 
