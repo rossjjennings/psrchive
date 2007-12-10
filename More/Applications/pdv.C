@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.9 $
-   $Date: 2007/12/10 00:55:57 $
+   $Revision: 1.10 $
+   $Date: 2007/12/10 04:16:48 $
    $Author: nopeer $ */
 
 
@@ -484,9 +484,6 @@ void DisplayHistory( vector<string> filenames, vector<string> params )
   }
   else
   {
-    cerr << filenames[0] << endl;
-    cerr << params[0] << endl;
-    
     vector<string>::iterator fit;
     for( fit = filenames.begin(); fit != filenames.end(); fit ++ )
     {
@@ -527,19 +524,51 @@ void DisplayHistory( vector<string> filenames, vector<string> params )
                 ts << (*rit).date_pro;
               else if( (*pit) == "proc_cmd" )
                 ts << (*rit).proc_cmd;
-// 	      else if( (*pit) == "scale" )
-// 		ts << (*rit).scale;
-// 	      else if( (*pit) == "pol_type" )
-// 		ts << (*rit).pol_type;
-// 	      else if( (*pit) == "npol" )
-// 		ts << (*rit).npol;
-// 	      else if( (*pit) == "nbin" )
-// 		ts << (*rit).nbin;
+	      else if( (*pit) == "scale" )
+		ts << tostring<Signal::Scale>( (*rit).scale );
+	      else if( (*pit) == "pol_type" )
+		ts << (*rit).pol_type;
+	      else if( (*pit) == "npol" )
+		ts << tostring<int>( (*rit).npol );
+	      else if( (*pit) == "nbin" )
+		ts << tostring<int>( (*rit).nbin );
+	      else if( (*pit) == "nsub" )
+		ts << tostring<int>( (*rit).nsub );
+	      else if( (*pit) == "nbin_prd" )
+		ts << tostring<int>( (*rit).nbin_prd );
+	      else if( (*pit) == "tbin" )
+		ts << tostring<double>( (*rit).tbin );
+	      else if( (*pit) == "ctr_freq" )
+		ts << tostring<double>( (*rit).ctr_freq );
+	      else if( (*pit) == "nchan" )
+		ts << tostring<int>( (*rit).nchan );
+	      else if( (*pit) == "chan_bw" )
+		ts << tostring<double>( (*rit).chanbw );
+	      else if( (*pit) == "par_corr" )
+		ts << tostring<int>( (*rit).par_corr );
+	      else if( (*pit) == "fa_corr" )
+		ts << tostring<int>( (*rit).fa_corr );
+	      else if( (*pit) == "rm_corr" )
+		ts << tostring<int>( (*rit).rm_corr );
+	      else if( (*pit) == "dedisp" )
+		ts << tostring<int>( (*rit).dedisp );
+	      else if( (*pit) == "dds_mthd" )
+		ts << (*rit).dds_mthd;
+	      else if( (*pit) == "sc_mthd" )
+		ts << (*rit).sc_mthd;
+	      else if( (*pit) == "cal_mthd" )
+		ts << (*rit).cal_mthd;
+	      else if( (*pit) == "cal_file" )
+		ts << (*rit).cal_file;
+	      else if( (*pit) == "rfi_mthd" )
+		ts << (*rit).rfi_mthd;
+	      else if( (*pit) == "ifr_mthd" )
+		ts << (*rit).ifr_mthd;
               else
                 ts << "INVALID";
             }
+	    ts << endl;
           }
-          ts << endl;
         }
       }
       ts.flush();
