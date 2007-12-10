@@ -227,10 +227,11 @@ void Calibration::StandardModel::update ()
 
     if (gain)
       update_parameter( gain, backend->get_gain().get_value() );
-    else if (pcal_gain) {
+    else if (pcal_gain)
       pcal_gain->set_gain( backend->get_gain() );
+
+    if (pcal_gain)
       backend->set_gain( 1.0 );
-    }
 
     if (diff_gain)
       update_parameter( diff_gain, backend->get_diff_gain().get_value() );
@@ -595,6 +596,9 @@ void Calibration::StandardModel::engage_time_variations ()
     else if (pcal_gain_chain)
       pcal_gain_chain->set_constraint (0, gain);
 
+    if (pcal_gain)
+      physical->set_gain( 1.0 );
+
   }
 
   if (diff_gain) {
@@ -788,7 +792,7 @@ void Calibration::StandardModel::get_covariance( vector<double>& covar,
       if (i > 0 && i == j && physical)
       {
 	// ensure that variances are sensible
-	if (covar[count] > 1.0)
+	if (covar[count] > 0.5)
 	  throw Error( InvalidState, 
 		       "Calibration::StandardModel::get_covariance",
 		       "invalid %s variance=%lf",
