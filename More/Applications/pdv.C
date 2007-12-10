@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.8 $
-   $Date: 2007/11/14 00:29:40 $
+   $Revision: 1.9 $
+   $Date: 2007/12/10 00:55:57 $
    $Author: nopeer $ */
 
 
@@ -17,6 +17,10 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/Interpreter.h"
 #include "Pulsar/PolnProfile.h"
+#include <Pulsar/ProcHistory.h>
+#include <table_stream.h>
+#include <algorithm>
+#include <functional>
 
 #include "strutil.h"
 #include "dirutil.h"
@@ -45,6 +49,8 @@
 #define BASELINE_KEY         'R'
 #define TEXT_KEY             't'
 #define TEXT_HEADERS_KEY     'A'
+#define PER_SUBINT_KEY       'S'
+#define HISTORY_KEY          'H'
 
 
 using namespace std;
@@ -53,6 +59,8 @@ using namespace Pulsar;
 
 bool cmd_text = false;
 bool cmd_flux = false;
+bool cmd_subints = false;
+bool cmd_history = false;
 bool per_channel_headers = false;
 bool cal_parameters = false;
 bool keep_baseline = false;
@@ -80,7 +88,7 @@ void Usage( void )
   cout <<
   "A program for extracting archive data in text form \n"
   "Usage: \n"
-  "     pdv [-f dc] [-t] [-c] filenames \n"
+  "     pdv [-f dc] [-H params] [-t] [-c] filenames \n"
   "Where: \n"
   "   -" << IBIN_KEY <<           " ibin     select a single phase bin, from 0 to nbin-1 \n"
   "   -" << ICHAN_KEY <<          " ichan    select a single frequency channel, from 0 to nchan-1 \n"
@@ -101,6 +109,8 @@ void Usage( void )
   "   -" << BASELINE_KEY <<       "          Do not remove baseline \n"
   "   -" << TEXT_KEY <<           "          Print out profiles as ASCII text \n"
   "   -" << TEXT_HEADERS_KEY <<   "          Print out profiles as ASCII text (with per channel headers) \n"
+  // "   -" << PER_SUBINT_KEY <<     "          Print out per subint data \n"
+  "   -" << HISTORY_KEY <<        "          Print out the history table for the archive \n"
   << endl;
 }
 
@@ -164,14 +174,14 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
         Integration* intg = archive->get_Integration(s);
         for (unsigned c = fchan; c <= lchan; c++)
         {
-	  vector< Estimate<double> > PAs;
-	  if( show_pa )
-	  {
-	    Reference::To<Pulsar::PolnProfile> profile;
-	    profile = intg->new_PolnProfile(c);
-	    profile->get_orientation (PAs, 3.0);
-	  }
-	  
+          vector< Estimate<double> > PAs;
+          if( show_pa )
+          {
+            Reference::To<Pulsar::PolnProfile> profile;
+            profile = intg->new_PolnProfile(c);
+            profile->get_orientation (PAs, 3.0);
+          }
+
           if( per_channel_headers )
           {
             IntegrationHeader( intg );
@@ -187,21 +197,22 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
               Profile *p = intg->get_Profile( ipol, c );
               cout << " " << p->get_amps()[b];
             }
-	    if( show_pol_frac || show_lin_frac || show_circ_frac || show_pa ){
-	      float stokesI = intg->get_Profile(0,c)->get_amps()[b];
-	      float stokesQ = intg->get_Profile(1,c)->get_amps()[b];
-	      float stokesU = intg->get_Profile(2,c)->get_amps()[b];
-	      float stokesV = intg->get_Profile(3,c)->get_amps()[b];
+            if( show_pol_frac || show_lin_frac || show_circ_frac || show_pa )
+            {
+              float stokesI = intg->get_Profile(0,c)->get_amps()[b];
+              float stokesQ = intg->get_Profile(1,c)->get_amps()[b];
+              float stokesU = intg->get_Profile(2,c)->get_amps()[b];
+              float stokesV = intg->get_Profile(3,c)->get_amps()[b];
 
-	      float frac_lin  = sqrt(stokesQ*stokesQ + stokesU*stokesU)/stokesI;
-	      float frac_circ = fabs(stokesV)/stokesI;
-	      float frac_pol  = sqrt(stokesQ*stokesQ + stokesU*stokesU + stokesV*stokesV)/stokesI;
+              float frac_lin  = sqrt(stokesQ*stokesQ + stokesU*stokesU)/stokesI;
+              float frac_circ = fabs(stokesV)/stokesI;
+              float frac_pol  = sqrt(stokesQ*stokesQ + stokesU*stokesU + stokesV*stokesV)/stokesI;
 
-	      if( show_pol_frac )  cout << " " << frac_pol;
-	      if( show_lin_frac )  cout << " " << frac_lin;
-	      if( show_circ_frac ) cout << " " << frac_circ;
-	      if( show_pa )        cout << " " << PAs[b].get_value();
-	    }
+              if( show_pol_frac )  cout << " " << frac_pol;
+              if( show_lin_frac )  cout << " " << frac_lin;
+              if( show_circ_frac ) cout << " " << frac_circ;
+              if( show_pa )        cout << " " << PAs[b].get_value();
+            }
             cout << endl;
           }
         }
@@ -409,8 +420,8 @@ void Flux( Reference::To< Archive > archive )
   if (archive->get_npol() == 4)
     archive->convert_state (Signal::Stokes);
 
-//   if( !keep_baseline )
-//     archive->remove_baseline ();
+  //   if( !keep_baseline )
+  //     archive->remove_baseline ();
 
   cout << "File\t\t\tSub\tChan\tPol\tFlux\tUnit\t10\% Width\t50\% Width"
   << endl;
@@ -457,6 +468,87 @@ void Flux( Reference::To< Archive > archive )
 
 
 
+void DisplaySubints( vector<string> filenames )
+{
+  cerr << "per subint data" << endl;
+}
+
+
+
+
+void DisplayHistory( vector<string> filenames, vector<string> params )
+{
+  if( params.size() == 0 || filenames.size() == 0 )
+  {
+    cerr << "Usage: pav -H param1,param2 filenames (params are date_pro,proc_cmd etc)" << endl;
+  }
+  else
+  {
+    cerr << filenames[0] << endl;
+    cerr << params[0] << endl;
+    
+    vector<string>::iterator fit;
+    for( fit = filenames.begin(); fit != filenames.end(); fit ++ )
+    {
+      table_stream ts(&cout);
+
+      ts << "Filename";
+      vector<string>::iterator pit;
+      for( pit = params.begin(); pit != params.end(); pit ++ )
+      {
+        ts << (*pit);
+      }
+      ts << endl;
+
+      Reference::To<Archive> archive = Archive::load( (*fit) );
+      if( !archive )
+      {
+        ts << (*fit) << "Failed To Load" << endl;
+      }
+      else
+      {
+        Reference::To<ProcHistory> history = archive->get<ProcHistory>();
+
+        if( !history )
+        {
+          ts << (*fit) << "No History Table" << endl;
+        }
+        else
+        {
+          vector<ProcHistory::row>::iterator rit;
+          for( rit = history->rows.begin(); rit != history->rows.end(); rit ++ )
+          {
+            ts << (*fit);
+
+            vector<string>::iterator pit;
+            for( pit = params.begin(); pit != params.end(); pit ++ )
+            {
+              if( (*pit) == "date_pro" )
+                ts << (*rit).date_pro;
+              else if( (*pit) == "proc_cmd" )
+                ts << (*rit).proc_cmd;
+// 	      else if( (*pit) == "scale" )
+// 		ts << (*rit).scale;
+// 	      else if( (*pit) == "pol_type" )
+// 		ts << (*rit).pol_type;
+// 	      else if( (*pit) == "npol" )
+// 		ts << (*rit).npol;
+// 	      else if( (*pit) == "nbin" )
+// 		ts << (*rit).nbin;
+              else
+                ts << "INVALID";
+            }
+          }
+          ts << endl;
+        }
+      }
+      ts.flush();
+    }
+  }
+}
+
+
+
 
 
 
@@ -480,12 +572,15 @@ void ProcessArchive( string filename )
 {
   Reference::To< Archive > archive = Archive::load( filename );
 
+  if( !archive )
+    return;
+
+  if( !keep_baseline )
+    archive->remove_baseline();
+
   Interpreter preprocessor;
   preprocessor.set( archive );
   preprocessor.script( jobs );
-  
-  if( !keep_baseline )
-    archive->remove_baseline();
 
   if( archive->get_state() != Signal::Stokes && (show_pol_frac || show_lin_frac || show_circ_frac || show_pa ) )
     archive->convert_state(Signal::Stokes);
@@ -525,6 +620,10 @@ int main( int argc, char *argv[] ) try
   args += PULSE_WIDTHS_KEY; args += ':';
   args += TEXT_KEY;
   args += TEXT_HEADERS_KEY;
+  args += PER_SUBINT_KEY; args += ":";
+  args += HISTORY_KEY; args += ":";
+
+  vector<string> history_params;
 
   int i;
   while( ( i = getopt( argc, argv, args.c_str() ) ) != -1 )
@@ -596,17 +695,31 @@ int main( int argc, char *argv[] ) try
     case STOKES_POSANG_KEY:
       show_pa = true;
       break;
+    case PER_SUBINT_KEY:
+      cmd_subints = true;
+      break;
+    case HISTORY_KEY:
+      cmd_history = true;
+      separate (optarg, history_params, " ,");
+      break;
     default:
       cerr << "Unknown option " << char(i) << endl;
       break;
     };
   }
 
+  vector< string > filenames = GetFilenames( argc, argv );
+
   if( cal_parameters || cmd_text || cmd_flux )
   {
-    vector< string > filenames = GetFilenames( argc, argv );
+
     for_each( filenames.begin(), filenames.end(), ProcessArchive );
   }
+
+  if( cmd_subints )
+    DisplaySubints( filenames );
+  if( cmd_history )
+    DisplayHistory( filenames, history_params );
 
   return 0;
 }
