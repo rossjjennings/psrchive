@@ -220,6 +220,18 @@ void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow)
     throw FITSError (status, "FITSArchive::unload_hist_row", 
                      "fits_write_col DEDISP");
   
+  // Write DDS_MTHD
+  
+  colnum = 0;
+  fits_get_colnum( fptr, CASEINSEN, "DDS_MTHD", &colnum, &status );
+  
+  tempstr = const_cast<char*>( hrow->dds_mthd.c_str() );
+  fits_write_col( fptr, TSTRING, colnum, row, 1, 1, &tempstr, &status );
+  
+  if( status != 0 )
+    throw FITSError ( status, "FITSArchive::unload_hist_row",
+		      "fits_write_col DDS_MTHD" );
+  
   // Write SC_MTHD
 
   colnum = 0;
