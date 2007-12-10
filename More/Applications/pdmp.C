@@ -747,7 +747,9 @@ int main (int argc, char** argv)
 	Reference::To<Pulsar::Archive> archive;
 	Reference::To<Pulsar::Archive> joined_archive;
 
+
 	if (join && filenames.size() > 1) {
+
 		finished = false;
 		archive = Pulsar::Archive::load (filenames[0]);
 		joined_archive = archive->clone();
@@ -759,9 +761,9 @@ int main (int argc, char** argv)
 			archive = Pulsar::Archive::load (filenames[ifile]);
 			joined_archive->append(archive);
 		}
-		
+
 		cout << endl;
-		
+
 		reorder(joined_archive);
 		// total->unload(newname); // THIS IS BROKEN!!!
 	} else {
@@ -785,8 +787,9 @@ int main (int argc, char** argv)
 			if (join) {
 				archive = joined_archive->clone();
 				finished = true;
-			} else
+			} else {
 				archive = archives[iarch];
+			}
 
 			dopplerFactor = getDopplerFactor(archive);
 
@@ -878,18 +881,8 @@ vector<Reference::To<Pulsar::Archive> > get_archives(string filename) {
 	vector<Reference::To<Pulsar::Archive> > archives;
 	Reference::To<Pulsar::Archive> arch( Pulsar::Archive::load(filename) );
 
-	//if( !breakup_archive ){
-		archives.push_back( arch );
-		return archives;
-	//}
-
-	/*for( unsigned isub=0; isub<arch->get_nsubint(); isub++){
-		vector<unsigned> subints(1,isub);
-		archives.push_back( arch->extract(subints) );
-		archives.back()->set_filename( arch->get_filename() + " subint " + MAKE_STRING(isub) );
-	}
-
-	return archives;*/
+	archives.push_back( arch );
+	return archives;
 }
 
 
@@ -902,11 +895,8 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 	double periodOffset_us, double periodStep_us, double periodHalfRange_us, ProfilePlot* total_plot, TextInterface::Parser* flui) {
 
 	vector<float> SNRs;
-
 	Reference::To<Profile> profile;
-
 	float snr = 0;
-
 	Reference::To<Archive> copy = archive->clone();
 
 	unsigned nbin = copy->get_nbin();
@@ -981,15 +971,15 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 	// Begin the search for optimum DM and Period
 	// Foreach DM
 
-	Reference::To<Archive> periodLoopCopy;
+	cout << endl << endl << "DM bins: " << dmBins << endl;
+	cout << "Period bins: " << periodBins << endl;
+	cout << "Total bins: " << dmBins * periodBins << endl << endl;
 
 	for (int dmBin = 0; dmBin < dmBins ; dmBin++) {
 
 		Reference::To<Archive> dmLoopCopy = copy->clone();
-
 		dmLoopCopy->set_dispersion_measure(currDM);
 		dmLoopCopy->dedisperse();
-
 		dmLoopCopy->fscrunch();
 
 		// Foreach Period (include one extra period bin at the end to scale with
@@ -1006,7 +996,7 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 			printf("%3d%%", displayPercentage*SHOW_EVERY_PERCENT_COMPLETE);
 
 			// Create a new (unscrunched) copy so the values can be testedget
-			periodLoopCopy = dmLoopCopy->clone();
+			Reference::To<Archive> periodLoopCopy = dmLoopCopy->clone();
 
 			// set the trial period and dm value and update
 			double newFoldingPeriod = currP/(double)MICROSEC;
@@ -1033,17 +1023,11 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 				}
 
 				bestSNR = snr;
-
 				bestPeriod_bc_us = currP / dopplerFactor;
-
 				bestDM = currDM;
-
 				bestFreq = 1/(bestPeriod_bc_us/(double)MICROSEC);
-
 				freqError = fabs((periodStep_us/(double)MICROSEC)/pow((bestPeriod_bc_us/(double)MICROSEC), 2));
-
 				periodLoopCopy->remove_baseline();
-
 				bestProfile = periodLoopCopy->get_Profile(FIRST_SUBINT, FIRST_POL, FIRST_CHAN);
 
 				// get the width of the pulse
@@ -1058,17 +1042,13 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 
 			// put this intensity into array
 			SNRs.push_back((float)snr);
-
 			currP += periodStep_us;
 		}
 
-
 		// Reset the initial period value
 		currP = minP;
-
 		currDM += dmStep;
 	}
-
 
 	// get the error
 	periodError_ms = computePeriodError(archive);
@@ -1150,88 +1130,53 @@ void scrunchPartially(Archive * scrunchedCopy) {
 
 double getNaturalDMStep(const Archive * archive, double halfRange)  {
 
-	unsigned nchan = archive->get_nchan();
+    unsigned nchan = archive->get_nchan();
 
-	if (halfRange < 0) {
-		// give step arg value of 0 so that it gets the natural half range
-		halfRange = getNaturalDMHalfRange(archive, 0);
-	}
+    if (halfRange < 0) {
+        // give step arg value of 0 so that it gets the natural half range
+        halfRange = getNaturalDMHalfRange(archive, 0);
+    }
 
-	return halfRange / (double)(2*nchan + 1);
-
+    return halfRange / (double)(2*nchan + 1);
 }
 
 
 double getNaturalDMHalfRange(const Archive * archive, double step)  {
 
-	double halfRange;
-
-	unsigned nchan = archive->get_nchan();
-
-	if (step > 0)
-		halfRange = step * (2 * nchan + 1);
-	else {
-
+	unsigned nbin = archive->get_nbin();
   	double centre_period = archive->get_Integration(FIRST_SUBINT)->get_folding_period() * MILLISEC;
+	double DMStep;
+	double tbin = centre_period / (double)nbin;
+	double fcentre = archive->get_centre_frequency();
+	double bw = archive->get_bandwidth();
+	unsigned nchan = archive->get_nchan();
+	double bwband = fabs(bw/(double)nchan);
 
-		unsigned nbin = archive->get_nbin();
-
-		double bw = archive->get_bandwidth();
-
-		double bwband = fabs(bw/(double)nchan);
-
-		double tbin = centre_period / (double)nbin;
-
-		double fcentre = archive->get_centre_frequency();
-
-		halfRange = tbin / (DMCONST * ( pow(fcentre - 0.5*bwband, -2) - pow(fcentre + 0.5*bwband, -2)) );
-	}
-	return halfRange;
+	return tbin / DMCONST / (pow(1.0/(fcentre - 0.5*bwband), 2.0) - (pow(1.0/(fcentre + 0.5*bwband), 2.0)));
 }
 
 
 double getNaturalPeriodStep(const Archive * archive, double halfRange)  {
 
-	unsigned nsub = archive->get_nsubint();
+	int nbin = archive->get_nbin();
+	double tspan = (archive->end_time() - archive->start_time()).in_seconds() * MICROSEC;
+  	double centre_period = archive->get_Integration(FIRST_SUBINT)->get_folding_period() * MICROSEC;
+	double tsub = (archive->get_Integration(0))->get_duration() * MICROSEC;
+	double tbin = centre_period / (double)nbin; // already in microseconds
+    unsigned nsub = archive->get_nsubint();
 
-	if (halfRange < 0)
-		// give step arg value of 0 so that it gets the natural half range
-		halfRange = getNaturalperiodHalfRange(archive, 0);
-
-	return halfRange / (double)(2*nsub + 1);
-
+	return centre_period * tbin / tspan;
 }
 
 
 double getNaturalperiodHalfRange(const Archive * archive, double step)  {
 
-	double halfRange;
+	int nbin = archive->get_nbin();
+  	double centre_period = archive->get_Integration(FIRST_SUBINT)->get_folding_period() * MICROSEC;
+	double tsub = (archive->get_Integration(0))->get_duration() * MICROSEC;
+	double tbin = centre_period / (double)nbin; // already in microseconds
 
-	if (step > 0) {
-
-		double nsub = archive->get_nsubint();
-
-		halfRange = step * (2 * nsub + 1);
-
-	} else {
-
-		double centre_period = getPeriod(archive) * MICROSEC;
-
-		int nbin = archive->get_nbin();
-
-		double tsub = (archive->get_Integration(0))->get_duration() * MICROSEC;
-
-		double tbin = centre_period / (double)nbin; // already in microseconds
-
-		halfRange = tbin * centre_period/tsub; // in microsecs
-
-	}
-
-
-	if (verbose)
-		printf("Natural Half-Range = %3.10g\n", halfRange);
-
-	return halfRange;
+	return centre_period * tbin / tsub;
 }
 
 
@@ -1300,7 +1245,6 @@ float getRMS (const Archive * archive) {
 
 			// find the min mean
 			smin = -1;
-
 			Reference::To<Profile> profile = copy->get_Profile(is, FIRST_POL, ic);
 
 			vector<double> amps;
@@ -1337,9 +1281,7 @@ float getRMS (const Archive * archive) {
 float getSNR (const Archive * archive, float rms) {
 
 	Reference::To<Archive> copy = archive->clone();
-
 	Reference::To<Profile> profile = copy->get_Profile(FIRST_SUBINT, FIRST_POL, FIRST_CHAN);
-
 	FortranSNR snr_obj;
 
 	snr_obj.set_rms( rms );
@@ -1462,19 +1404,17 @@ double computePeriodError(const Archive * archive) {
 
 	double pulseWidth_ms = 0;
 	double error = 0;
-
+	double tspan = (archive->end_time() - archive->start_time()).in_seconds();
 	double bcPeriod_s = getPeriod(archive) / dopplerFactor;
 	double refP_ms = bcPeriod_s * MILLISEC;
-	double nsub = archive->get_nsubint();
 	double tsub = archive->get_Integration(0)->get_duration();
+	unsigned nsub = tspan / tsub;
 	double integrationLength = tsub * (nsub - 1);
 	unsigned nbin = archive->get_nbin();
 	double tbin_ms = (refP_ms) / nbin;
 
 	Reference::To<Archive> copy = archive->clone();
-
 	pulseWidth_ms = bestPulseWidth * tbin_ms;
-
 	error = pulseWidth_ms / bestSNR;
 
 	if (error < (bcPeriod_s / nbin ) * 0.5 * MILLISEC) {
@@ -1506,15 +1446,10 @@ double computeDMError(const Archive * archive) {
 	unsigned nchan = archive->get_nchan();
 
 	Reference::To<Archive> copy = archive->clone();
-
 	double channelBW = copy->get_bandwidth() / copy->get_nchan();
-
 	double refP_ms = bcPeriod_s * MILLISEC;
-
 	double tbin_ms = (refP_ms) / nbin;
-
 	pulseWidth_ms = bestPulseWidth * tbin_ms;
-
 	error = pulseWidth_ms / bestSNR;
 
 	if (error < (bcPeriod_s / nbin ) * 0.5 * MILLISEC) {
@@ -1600,7 +1535,6 @@ double getPeriod(const Archive * archive) {
 
 	if (verbose) {
 		MJD start = subint->get_start_time();
-
 		MJD end = subint->get_end_time();
 
 		printf("pdmp: getPeriod: start_time = %3.10g, end_time = %3.10g\n",
@@ -1803,9 +1737,7 @@ double getDopplerFactor(const Archive * archive) {
 	double erad = sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
 
 	double siteLatitude = asin(z/erad);
-
 	double siteLongitude = atan2(-y, x);
-
 	double sphericalRadius = erad/(2.99792458e8*AUS);
 
 	if (verbose) {
@@ -2029,7 +1961,7 @@ void printHeader(const Archive * archive,
 	int nBin = copy->get_nbin();
 	int nChan = copy->get_nchan();
 	int nSub = copy->get_nsubint();
-	double tspan = copy->integration_length();
+	double tspan = (copy->end_time() - copy->start_time()).in_seconds();
 	double tsub = (copy->get_Integration(0))->get_duration();
 	double tbin = (refP_us/1000) / nBin;
 
@@ -2131,9 +2063,7 @@ void printResults(const Archive * archive) {
 	Reference::To<Pulsar::Integration> subint = copy->get_Integration((int)(copy->get_nsubint()/(double)2));
 
 	MJD start = subint->get_start_time();
-
 	double bcPeriod_s = getPeriod(archive) / dopplerFactor;
-
 	double refDM = getDM(archive);
 	double refP_us = bcPeriod_s * MICROSEC;
 
@@ -2239,7 +2169,7 @@ void printResults(const Archive * archive) {
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Width (ms):");
 	bestValues_y -= lineHeight;
-	cpgtext(bestValues_x, bestValues_y, "Best SNR:");
+	cpgtext(bestValues_x, bestValues_y, "Best S/N:");
 
 	bestValues_x += colWidth * 0.8;
 	bestValues_y = 1;
@@ -2346,8 +2276,6 @@ void writeResultFiles(Archive * archive) {
 
 void plotProfile(const Profile * profile, ProfilePlot* plot, TextInterface::Parser* flui) {
 
-// ---------------
-
 	cpgsch(0.7);
 	cpgslw(1);
 
@@ -2377,6 +2305,7 @@ void plotPhaseFreq(const Archive * archive, Plot* phase_plot, TextInterface::Par
 
 	fui->set_value("x:view", "(0.55, 0.95)");
 	fui->set_value("y:view", "(0.33, 0.56)");
+	fui->set_value("x:range", "(0, 1.2)");
 	fui->set_value("ch", "0.8");
 	fui->set_value("above:c", "");
 	fui->set_value("below:c", "");
@@ -2385,7 +2314,6 @@ void plotPhaseFreq(const Archive * archive, Plot* phase_plot, TextInterface::Par
 	fui->set_value("above:l", "Phase vs Frequency");
 	fui->set_value("x:opt", "BCNTSI");
 	fui->set_value("y:opt", "BNTIC");
-	fui->set_value("x:range", "(0, 1.2)");
 
 	phase_plot->plot(phase_freq_copy);
 
@@ -2397,7 +2325,12 @@ void plotPhaseFreq(const Archive * archive, Plot* phase_plot, TextInterface::Par
 
 void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* tui) {
 
+	string y_scale = get_scale(archive);
 	Reference::To<Archive> phase_time_copy = archive->clone();
+
+    string yscale = "Elapsed Time (";
+    yscale = yscale + y_scale;
+    yscale = yscale + ")";
 
 	phase_time_copy->fscrunch();
 	phase_time_copy->pscrunch();
@@ -2405,6 +2338,7 @@ void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* t
 
 	tui->set_value("x:view", "(0.05, 0.45)");
 	tui->set_value("y:view", "(0.33, 0.56)");
+	tui->set_value("x:range", "(0, 1.2)");
 	tui->set_value("ch", "0.8");
 	tui->set_value("above:c", "");
 	tui->set_value("below:c", "");
@@ -2413,7 +2347,7 @@ void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* t
 	tui->set_value("above:l", "Phase vs Time");
 	tui->set_value("x:opt", "BCNTSI");
 	tui->set_value("y:opt", "BNTIC");
-	tui->set_value("x:range", "(0, 1.2)");
+	tui->set_value("y:lab", yscale);
 
 	plot->plot(phase_time_copy);
 
@@ -2431,27 +2365,16 @@ void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* t
 void drawBestFitPhaseFreq(const Archive * archive) {
 
 	Reference::To<Archive> copy = archive->clone();
-
 	Reference::To<Profile> profile;
-
 	unsigned nchan = archive->get_nchan();
-
 	double dm = getDM(copy);
-
 	double bw = archive->get_bandwidth();
-
 	double bwband = fabs(bw/(double)nchan);
-
 	double fspan = fabs((nchan) * bwband);
-
 	double centre_freq = archive->get_centre_frequency();
-
 	double deltaDM = bestDM - dm;
-
 	vector<float> xpoints;
-
 	vector<float> ypoints;
-
 	double refPhase = 0.5;
 
 	// Note that DMCONST is in milliseconds
@@ -2467,7 +2390,12 @@ void drawBestFitPhaseFreq(const Archive * archive) {
 		deltaPhase = 0;
 		gradient = 0;
 	} else {
-		gradient = deltaPhase / (nchan - 1);
+
+		if (bw > 0) {
+			gradient = -(deltaPhase / (nchan - 1));
+		} else {
+			gradient = deltaPhase / (nchan - 1);
+		}
 	}
 
 	// get the deltaPhase for the entire length of the freq channels
@@ -2513,33 +2441,40 @@ void drawBestFitPhaseTime(const Archive * archive) {
 	else if (scale == "minutes")
 		divisor = 60;
 
-	double intLength = archive->integration_length();
-
 	Reference::To<Archive> copy = archive->clone();
 	Reference::To<Profile> profile;
 
+	double intLength = (archive->end_time() - archive->start_time()).in_seconds();
 	double bcPeriod_s = getPeriod(archive) / dopplerFactor;
-
 	double p = bcPeriod_s*MICROSEC;
+	double deltaP;
 
-	double deltaP = bestPeriod_bc_us - p;
+	if (join) {
+		deltaP = bestPeriod_bc_us - p * MICROSEC;
+	} else {
+		deltaP = bestPeriod_bc_us - p;
+	}
 
-	unsigned nsub = archive->get_nsubint();
-
+	double tspan = (archive->end_time() - archive->start_time()).in_seconds();
 	double tsub = archive->get_Integration(0)->get_duration();
+	unsigned nsub;
+
+	if (join) {
+		nsub = tspan / tsub;
+	} else {
+		nsub = archive->get_nsubint();
+	}
 
 	vector<float> xpoints;
-
 	vector<float> ypoints;
-
 	double refPhase = 0.5;
 
 	// This equation is derived from the property
 	// deltaP / P = deltaT / T
 	// Note that this deltaPhase refers to the midpoint of the
 	// first subint to the midpoint of the second subint
-	double deltaPhase = ((nsub-1) * tsub * (deltaP / MICROSEC)) / pow((bestPeriod_bc_us/MICROSEC), 2);
 
+	double deltaPhase = ((nsub-1) * tsub * (deltaP / MICROSEC)) / pow((bestPeriod_bc_us/MICROSEC), 2);
 	double gradient;
 
 	if (nsub == 1) {
@@ -2547,12 +2482,18 @@ void drawBestFitPhaseTime(const Archive * archive) {
 		gradient = 0;
 
 	} else {
-		gradient = deltaPhase / (nsub - 1);
+
+		if (join) {
+			gradient = (bestPeriod_bc_us - bcPeriod_s * MICROSEC) / MILLISEC;
+		} else {
+			gradient = deltaPhase / (nsub - 1);
+		}
 	}
 
 	// get the deltaPhase for the entire length of the subints
 	// This draws a nice line from top to bottom, instead of midway
 	// through the first and last subints
+
 	deltaPhase = gradient * nsub;
 
 	if (verbose)
@@ -2593,7 +2534,6 @@ void drawBestValuesCrossHair( const Archive * archive,
 	double bcPeriod_us = (getPeriod(archive) / dopplerFactor) * MICROSEC;
 
 	vector<float> xpoints;
-
 	vector<float> ypoints;
 
 	double minDM = getDM(archive) + dmOffset -	dmHalfRange;
@@ -2691,7 +2631,6 @@ void minmaxval (int n, const float *thearray, float *min, float *max)
 string get_scale(const Archive * archive)
 {
     double range = (archive->end_time() - archive->start_time()).in_days();
-
     const float mjd_hours = 1.0 / 24.0;
     const float mjd_minutes = mjd_hours / 60.0;
 
