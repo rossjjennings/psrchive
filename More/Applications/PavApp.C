@@ -601,8 +601,7 @@ int PavApp::run( int argc, char *argv[] )
 
   string top_label = "above:c";
 
-  string clip_command = "y:range";
-  string clip_value = "=(0,1)";
+  float clip_value;
 
   char valid_args[] = "Az:hb:M:KDCdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g:l:";
 
@@ -621,7 +620,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.43 2007/12/03 05:41:36 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.44 2007/12/10 23:06:48 nopeer Exp $" << endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
@@ -673,7 +672,6 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "pscrunch" );
       break;
     case 'S':
-      clip_command = "flux:y:range";
       clear_labels = false;
     case 'A':
     case 'X':
@@ -739,8 +737,8 @@ int PavApp::run( int argc, char *argv[] )
         string_split( optarg, s1, s2, "," );
 	int d1 = fromstring<int>(s1);
 	int d2 = fromstring<int>(s2);
-        pa_min = PADegreesToTurns( d1 + 0.0001 );
-        pa_max = PADegreesToTurns( d2 - 0.0001 );
+        pa_min = PADegreesToTurns( int(floor(d1 + 0.0001)) );
+        pa_max = PADegreesToTurns( int(ceil(d2 - 0.0001)) );
       }
       break;
     case 'z':
@@ -826,9 +824,7 @@ int PavApp::run( int argc, char *argv[] )
       user_character_height = fromstring<float>( optarg );
       break;
     case 'x':
-      clip_value = "=(0,";
-      clip_value += string( optarg );
-      clip_value += ")";
+      clip_value = fromstring<float>( optarg );
       break;
     };
   }
@@ -885,9 +881,10 @@ int PavApp::run( int argc, char *argv[] )
 
   PavSpecificOptions();
 
-  // TODO ??
+  // Set the clip value for flux plots -x on the command line
 
-  SetPlotOptions<FramedPlot>( clip_command + clip_value );
+  SetPlotOptions<FluxPlot>( string("pavcrop=") + tostring<float>(clip_value) );
+  SetPlotOptions<StokesCylindrical>( string("flux:pavcrop=") + tostring<float>(clip_value) );
 
   if( label_degrees )
   {

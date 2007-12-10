@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.26 $
-   $Date: 2007/10/31 05:59:47 $
-   $Author: straten $ */
+   $Revision: 1.27 $
+   $Date: 2007/12/10 23:06:48 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_FluxPlot_h
 #define __Pulsar_FluxPlot_h
@@ -114,6 +114,12 @@ namespace Pulsar {
 
     //! Set the selected profiles
     void set_selection (PhaseWeight*);
+    
+    //! Set the pavcrop level
+    void set_pavcrop( float new_crop ) { pavcrop = new_crop; }
+    
+    //! Get the pavcrop level
+    float get_pavcrop() const { return pavcrop; }
 
   protected:
 
@@ -128,6 +134,8 @@ namespace Pulsar {
     bool peak_centre_origin;
     float baseline_zoom;
     unsigned original_nchan;
+    
+    float pavcrop;
 
     Reference::To<InfoLabel> info_label;
     Reference::To<PhaseWeight> selection;

@@ -31,6 +31,8 @@ Pulsar::FluxPlot::FluxPlot ()
 
   original_nchan = 0;
 
+  pavcrop = 0.0;
+
   get_frame()->get_y_scale()->set_buf_norm(0.05);
 }
 
@@ -72,12 +74,30 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
     max = std::max( max, mean.get_value() + baseline_zoom*rms.get_value() );
 
     frame->get_y_scale()->set_minmax (min, max);
-
   }
   else {
     if (verbose)
       cerr << "Pulsar::FluxPlot::prepare using all bins" << endl;
     plotter.minmax (get_frame());
+
+    // Added by DS, for pav we want the peak to represent the percentage of max above 0
+    // and if the graph has a negative component, and the magnitude of the negative component
+    // is more than the cropped positive component, then crop the nevative aswell.
+
+    if( pavcrop != 0.0 )
+    {
+      float min, max;
+      get_frame()->get_y_scale()->get_minmax( min, max );
+
+      max *= pavcrop;
+      if( min < 0 && max + min < 0 )
+        min = -max;
+
+      pair<float,float> coords;
+      coords.first = min;
+      coords.second = max;
+      frame->get_y_scale()->set_world( coords );
+    }
   }
 }
 

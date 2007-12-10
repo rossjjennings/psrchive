@@ -45,4 +45,8 @@ Pulsar::FluxPlot::Interface::Interface (FluxPlot* instance)
   add( &FluxPlot::get_plot_histogram,
        &FluxPlot::set_plot_histogram,
        "hist", "Plot histogram style" );
+  
+  add( &FluxPlot::get_pavcrop,
+	&FluxPlot::set_pavcrop,
+	"pavcrop", "Crop the graph pav style" );
 }
