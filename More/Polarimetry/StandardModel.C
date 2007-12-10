@@ -586,7 +586,8 @@ void Calibration::StandardModel::engage_time_variations ()
   cerr << "before engage nparam = " << physical->get_nparam() << endl;
 #endif
 
-  if (gain) {
+  if (gain) 
+  {
 #ifdef _DEBUG
     cerr << "engage gain" << endl;
 #endif
@@ -596,19 +597,21 @@ void Calibration::StandardModel::engage_time_variations ()
     else if (pcal_gain_chain)
       pcal_gain_chain->set_constraint (0, gain);
 
-    if (pcal_gain)
-      physical->set_gain( 1.0 );
-
   }
 
-  if (diff_gain) {
+  if (pcal_gain)
+    physical->set_gain( 1.0 );
+
+  if (diff_gain)
+  {
 #ifdef _DEBUG
     cerr << "engage diff_gain" << endl;
 #endif
     physical->set_diff_gain( diff_gain );
   }
 
-  if (diff_phase) {
+  if (diff_phase)
+  {
 #ifdef _DEBUG
     cerr << "engage diff_phase" << endl;
 #endif
