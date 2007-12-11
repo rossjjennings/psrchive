@@ -426,18 +426,6 @@ string get_nrcvr( Reference::To<Archive> archive )
   return result;
 }
 
-string get_ta( Reference::To<Archive> archive )
-{
-  string result = "";
-  Reference::To<Receiver> recv = archive->get<Receiver>();
-
-  if( !recv )
-    result = "UNDEF";
-  else
-    result = tostring( recv->get_tracking_angle() );
-
-  return result;
-}
 
 string get_fac( Reference::To<Archive> archive )
 {
@@ -1795,7 +1783,6 @@ void PrintExtdHlp( void )
   cout << "fd_xyph                         Reference source phase (rcvr:rph)" << endl;
   cout << "nrcpt                           Number of receptors" << endl;
   cout << "rcvr                            Name of receiver" << endl;
-  cout << "ta                              Tracking angle of feed" << endl;
   cout << "xoffset                         Offset of feed X-axis wrt platform zero" << endl;
   cout << endl;
 
@@ -1941,7 +1928,6 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "tsub" ) return get_tsub( archive );
     else if( command == "observer" ) return get_observer( archive );
     else if( command == "projid" ) return get_projid( archive );
-    else if( command == "ta" ) return get_ta( archive );
     else if( command == "fac" ) return get_fac( archive );
     else if( command == "rcvr" ) return get_rcvr( archive );
     else if( command == "nrcvr" ) return get_nrcvr( archive );
