@@ -601,7 +601,7 @@ int PavApp::run( int argc, char *argv[] )
 
   string top_label = "above:c";
 
-  float clip_value;
+  float clip_value = 0.0;
 
   char valid_args[] = "Az:hb:M:KDCdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g:l:";
 
@@ -620,7 +620,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.44 2007/12/10 23:06:48 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.45 2007/12/11 02:25:17 nopeer Exp $" << endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
@@ -883,9 +883,13 @@ int PavApp::run( int argc, char *argv[] )
 
   // Set the clip value for flux plots -x on the command line
 
-  SetPlotOptions<FluxPlot>( string("pavcrop=") + tostring<float>(clip_value) );
-  SetPlotOptions<StokesCylindrical>( string("flux:pavcrop=") + tostring<float>(clip_value) );
-
+  if( clip_value != 0.0 )
+  {
+    SetPlotOptions<FluxPlot>( string("pavcrop=") + tostring<float>(clip_value) );
+    SetPlotOptions<StokesCylindrical>( string("flux:pavcrop=") + tostring<float>(clip_value) );
+    SetPlotOptions<PhaseVsFrequency>( string("z:range=(0,") + tostring<float>(clip_value) + string(")") );
+  }
+  
   if( label_degrees )
   {
     //SetPlotOptions<StokesCylindrical>( "x:unit=deg" );
