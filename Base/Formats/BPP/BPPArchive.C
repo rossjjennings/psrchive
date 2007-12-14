@@ -9,6 +9,7 @@
 #include "Pulsar/Profile.h"
 
 #include "machine_endian.h"
+#include "ierf.h"
 
 using namespace std;
 
@@ -333,7 +334,42 @@ int Pulsar::BPPArchive::get_mjd_from_hdr()
   return(mjd_1990_01_01 + sum);
 }
 
-// TODO Implement this
+// Computes "linearized" input power as a function of
+// (non-linear) 2-bit quantized output power.  Also
+// returns "gain" (derivative of non-linear power relation)
+// at this point.  Returns 0 on success, or +/-1 if quant_power
+// is out of range.  
+//
+// This process does not fix dedispersion "dips" around pulse
+// but simply rescales things so the data is proportional 
+// to flux.
+int Pulsar::BPPArchive::linearize_power(float quant_power, 
+    float *input_power, float *gain)
+{
+  // Bounds checking
+  if (quant_power<=1.0) { return(-1); }
+  if (quant_power>=8.5) { return(1); } // True upper limit would be 9.0
+
+  // Formula is
+  //   ip = 0.5*(ierf((9.0-qp)/8.0))^-2
+  // Based on 2-bit quant with output levels -3,-1,+1,+3.
+  // Computes input power in units of threshold_voltage^2.
+  float res = ierf((9.0-quant_power)/8.0);
+  res *= res;
+  res = 0.5/res;
+  if (input_power!=NULL) { *input_power = res; }
+
+  // From above formula, compute d(ip)/d(qp).
+  // deriv = (sqrt(2*pi)/8) * ip^(3/2) * exp(1/(2*ip))
+  float gres = sqrt(res);
+  gres *= res; // ip^3/2
+  gres *= exp(1.0/(2.0*res));
+  gres *= sqrt(2.0*M_PI)/8.0;
+  if (gain!=NULL) { *gain = gres; }
+
+  return(0);
+}
+
 Pulsar::Integration*
 Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
 {
@@ -391,6 +427,7 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
   int cur_chan;
   float *data = new float[hdr.bins];
   float *means = new float[num_means];
+  float *gains = new float[num_means];
   int rv = fseek(f, size_hdr, SEEK_SET); // Already read this
   if (rv) 
     throw Error (FailedSys, "Pulsar::BPPArchive::load_Integration", "fseek");
@@ -406,6 +443,38 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
     // Byte-swap means array if needed
     array_changeEndian(num_means, means, sizeof(float));
 #endif
+
+    // Correct 2-bit mean powers, get 2-bit "gain" factors
+    // Blank any channels with funky values.
+    int nblank=0;
+    float meantmp;
+    for (int k=0; k<hdr.chsbd; k++) {
+      cur_chan = i*hdr.chsbd + k;
+      for (int j=0; j<hdr.polns; j++) {
+        if (j<2) {
+          // Power terms
+          gains[j*hdr.chsbd+k]=1.0; // Default value
+          rv = linearize_power(means[j*hdr.chsbd+k], &meantmp,
+              &gains[j*hdr.chsbd+k]);
+          if (rv!=0) { integration->set_weight(cur_chan,0.0); nblank++; } 
+          else { means[j*hdr.chsbd+k] = meantmp; }
+        } else if (j<4) { 
+          // TODO Cross terms
+          // XXX geom mean, this is probably not quite right, but ok for now:
+          gains[j*hdr.chsbd+k]=sqrt(gains[0*hdr.chsbd+k]*gains[1*hdr.chsbd+k]);
+          means[j*hdr.chsbd+k] *= gains[j*hdr.chsbd+k];
+        } else {
+          // Shouldn't get here!
+          throw Error (InvalidState, "Pulsar::BPPArchive::load_Integration",
+              "ipol>4 (%d)", j);
+        }
+      }
+    }
+
+    if (nblank&&(verbose>2)) 
+      cerr << "Pulsar::BPPArchive blanked " << nblank << " channels" << endl;
+
+    // Loop over profile data
     for (int j=0; j<hdr.polns; j++) {
       for (int k=0; k<hdr.chsbd; k++) {
         cur_chan = i*hdr.chsbd + k;
@@ -419,6 +488,7 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
 #endif
         prof = integration->get_Profile(j,cur_chan);
         prof->set_amps(data);
+        prof->scale(gains[j*hdr.chsbd+k]);
         prof->offset(means[j*hdr.chsbd+k]);
       }
     }
@@ -428,6 +498,7 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
   // Unalloc temp space
   delete [] data;
   delete [] means;
+  delete [] gains;
 
   return integration;
 }

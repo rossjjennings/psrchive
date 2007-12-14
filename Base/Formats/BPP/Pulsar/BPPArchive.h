@@ -66,6 +66,9 @@ namespace Pulsar {
     //! Get integer MJD out of the BPP header.
     int get_mjd_from_hdr();
 
+    //! Linearize 2-bit power scale.
+    int linearize_power(float quant_power, float *input_power, float *gain);
+
     //! Load the specified Integration from filename, returning new instance
     virtual Integration*
     load_Integration (const char* filename, unsigned subint);
