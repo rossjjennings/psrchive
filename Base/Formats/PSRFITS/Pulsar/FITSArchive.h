@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.50 $
-   $Date: 2007/12/17 05:44:23 $
+   $Revision: 1.51 $
+   $Date: 2007/12/17 05:52:23 $
    $Author: nopeer $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -135,6 +135,8 @@ namespace Pulsar {
      //! Unload CalibratorStokes to the CAL_POLN HDU
     static void unload (fitsfile* fptr, const CalibratorStokes* ext);
     
+    //! Get the offs_sub value (only present in fits files)
+    double get_offs_sub( unsigned int isub ) const;
   protected:
     
     friend class Archive::Advocate<FITSArchive>;
@@ -228,8 +230,7 @@ namespace Pulsar {
     //! The polyco parsed from the PSRFITS file
     Reference::To<Predictor> hdr_model;
     
-    //! Get the offs_sub value (only present in fits files)
-    double get_offs_sub( unsigned int isub ) const;
+
     
     // The version of the psrfits file, can be used to make decisions about
     // how we treat older files
