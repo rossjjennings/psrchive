@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.13 $
-   $Date: 2007/12/17 05:40:36 $
+   $Revision: 1.14 $
+   $Date: 2007/12/17 23:00:31 $
    $Author: nopeer $ */
 
 
@@ -95,6 +95,7 @@ void Usage( void )
   "A program for extracting archive data in text form \n"
   "Usage: \n"
   "     pdv [-f dc] [-H params] [-t] [-c] filenames \n"
+  "     pdv help [arg] \n"
   "Where: \n"
   "   -" << IBIN_KEY <<           " ibin     select a single phase bin, from 0 to nbin-1 \n"
   "   -" << ICHAN_KEY <<          " ichan    select a single frequency channel, from 0 to nchan-1 \n"
@@ -115,9 +116,75 @@ void Usage( void )
   "   -" << BASELINE_KEY <<       "          Do not remove baseline \n"
   "   -" << TEXT_KEY <<           "          Print out profiles as ASCII text \n"
   "   -" << TEXT_HEADERS_KEY <<   "          Print out profiles as ASCII text (with per channel headers) \n"
-  "   -" << PER_SUBINT_KEY <<     " params   Print out per subint data \n"
-  "   -" << HISTORY_KEY <<        " params   Print out the history table for the archive \n"
+  "   -" << PER_SUBINT_KEY <<     " params   Print out per subint data (no params for argument list) \n"
+  "   -" << HISTORY_KEY <<        " params   Print out the history table for the archive (no params for argument list) \n"
+  " \n"
+  "   For more detailed list of options use \"pdv help arg\", ie \"pdv help S\" \n"
+  "   for a full list of parameters that can be used with -S \n"
   << endl;
+}
+
+
+
+void DisplaySubintsUsage( void )
+{
+  cout <<
+      "Usage: \n"
+      "    pdv -S parameters \n"
+      "Where: \n"
+      "    Parameters are of the form param1,param2 or \"param1 param2\" \n"
+      "    Parameter names are case insensitive \n"
+      "Available Parameters: \n"
+      "    INDEXVAL           Optionally used if INT_TYPE != TIME \n"
+      "    TSUBINT            Length of subintegration \n"
+      "    OFFS_SUB           Offset from Start of subint centre \n"
+      "    LST_SUB            LST at subint centre \n"
+      "    RA_SUB             RA (J2000) at subint centre \n"
+      "    DEC_SUB            Dec (J2000) at subint centre \n"
+      "    GLON_SUB           [deg] Gal longitude at subint centre \n"
+      "    GLAT_SUB           [deg] Gal latitude at subint centre \n"
+      "    FD_ANG             [deg] Feed angle at subint centre \n"
+      "    POS_ANG            [deg] Position angle of feed at subint centre \n"
+      "    PAR_ANG            [deg] Parallactic angle at subint centre \n"
+      "    TEL_AZ             [deg] Telescope azimuth at subint centre \n"
+      "    TEL_ZEN            [deg] Telescope zenith angle at subint centre \n"
+      << endl;
+}
+
+
+
+void DisplayHistoryUsage( void )
+{
+  cout <<
+      "Usage: \n"
+      "    pdv -H parameters \n"
+      "Where: \n"
+      "    Parameters are of the form param1,param2 or \"param1 param2\" \n"
+      "    Parameter names are case insensitive \n"
+      "Available Parameters: \n"
+      "    DATE_PRO           Processing date and time (UTC) \n"
+      "    PROC_CMD           Processing program and command \n"
+      "    SCALE              Units (FluxDen/RefFlux/Jansky) \n"
+      "    POL_TYPE           Polarisation identifier \n"
+      "    NSUB               Number of Sub-Integrations \n"
+      "    NPOL               Number of polarisations \n"
+      "    NBIN               Nr of bins per product (0 for SEARCH mode) \n"
+      "    NBIN_PRD           Nr of bins per period \n"
+      "    TBIN               Time per bin or sample \n"
+      "    CTR_FREQ           Band centre frequency \n"
+      "    NCHAN              Number of frequency channels \n"
+      "    CHAN_BW            Channel bandwidth \n"
+      "    PAR_CORR           Parallactic angle correction applied \n"
+      "    FA_CORR            Feed angle correction applied \n"
+      "    RM_CORR            RM correction applied \n"
+      "    DEDISP             Data dedispersed \n"
+      "    DDS_MTHD           Dedispersion method \n"
+      "    SC_MTHD            Scattered power correction method \n"
+      "    CAL_MTHD           Calibration method \n"
+      "    CAL_FILE           Name of gain calibration file \n"
+      "    RFI_MTHD           RFI excision method \n"
+      "    IFR_MTHD           Ionospheric Faraday rotation correction method \n"
+      << endl;
 }
 
 
@@ -488,15 +555,15 @@ bool CheckPointing( Reference::To<Pointing> pointing, table_stream &ts )
 void DisplaySubints( vector<string> filenames, vector<string> parameters )
 {
   // If we don't have filenames or parameters, output a usage message
-  
-  if( parameters.size() == 0 || filenames.size() == 0 )
+
+  if( filenames.size() == 0 )
   {
-    cerr << "Usage: pav -S param1,param2 filenames (params are par_ang,fd_ang,ra_sub etc)" << endl;
+    cerr << "No filenames given, or no parameters given." << endl;
     return;
   }
 
   // convert all the parameters to uppercase
-  
+
   for( int i = 0; i < parameters.size(); i ++ )
   {
     parameters[i] = uppercase( parameters[i] );
@@ -627,10 +694,12 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
 
 void DisplayHistory( vector<string> filenames, vector<string> params )
 {
-  if( params.size() == 0 || filenames.size() == 0 )
+  if( filenames.size() == 0 )
   {
-    cerr << "Usage: pav -H param1,param2 filenames (params are date_pro,proc_cmd etc)" << endl;
+    cerr << "No filenames given, or no parameters given" << endl;
+    return;
   }
+
   else
   {
     vector<string>::iterator fit;
@@ -876,16 +945,38 @@ int main( int argc, char *argv[] ) try
       break;
     case PER_SUBINT_KEY:
       cmd_subints = true;
-      separate( optarg, subint_params, " ," );
+      if( optarg != NULL )
+        separate( optarg, subint_params, " ," );
       break;
     case HISTORY_KEY:
       cmd_history = true;
-      separate (optarg, history_params, " ,");
+      if( optarg != NULL )
+        separate (optarg, history_params, " ,");
       break;
     default:
       cerr << "Unknown option " << char(i) << endl;
       break;
     };
+  }
+
+  // see if we have a command
+  if( optind < argc )
+  {
+    if( string( argv[optind] ) == string("help") )
+    {
+      if( optind == argc-1 )
+      {
+        Usage();
+      }
+      else
+      {
+        string help_cmd = argv[optind+1];
+	if( help_cmd == "S" )
+	  DisplaySubintsUsage();
+	else if( help_cmd == "H" )
+	  DisplayHistoryUsage();
+      }
+    }
   }
 
   vector< string > filenames = GetFilenames( argc, argv );
