@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.11 $
-   $Date: 2007/12/17 05:02:53 $
+   $Revision: 1.12 $
+   $Date: 2007/12/17 05:34:29 $
    $Author: nopeer $ */
 
 
@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <functional>
 #include <Pulsar/FITSArchive.h>
+#include <strutil.h>
 
 #include "strutil.h"
 #include "dirutil.h"
@@ -114,8 +115,8 @@ void Usage( void )
   "   -" << BASELINE_KEY <<       "          Do not remove baseline \n"
   "   -" << TEXT_KEY <<           "          Print out profiles as ASCII text \n"
   "   -" << TEXT_HEADERS_KEY <<   "          Print out profiles as ASCII text (with per channel headers) \n"
-  // "   -" << PER_SUBINT_KEY <<     "          Print out per subint data \n"
-  "   -" << HISTORY_KEY <<        "          Print out the history table for the archive \n"
+  "   -" << PER_SUBINT_KEY <<     " params   Print out per subint data \n"
+  "   -" << HISTORY_KEY <<        " params   Print out the history table for the archive \n"
   << endl;
 }
 
@@ -486,6 +487,11 @@ bool CheckPointing( Reference::To<Pointing> pointing, table_stream &ts )
 
 void DisplaySubints( vector<string> filenames, vector<string> parameters )
 {
+  for( int i = 0; i < parameters.size(); i ++ )
+  {
+    parameters[i] = uppercase( parameters[i] );
+  }
+  
   vector<string>::iterator fit;
   for( fit = filenames.begin(); fit != filenames.end(); fit ++ )
   {
