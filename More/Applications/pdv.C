@@ -7,20 +7,25 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.10 $
-   $Date: 2007/12/10 04:16:48 $
+   $Revision: 1.11 $
+   $Date: 2007/12/17 05:02:53 $
    $Author: nopeer $ */
 
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include <Pulsar/IntegrationOrder.h>
 #include "Pulsar/Profile.h"
 #include "Pulsar/Interpreter.h"
 #include "Pulsar/PolnProfile.h"
 #include <Pulsar/ProcHistory.h>
+#include <Pulsar/DigitiserStatistics.h>
+#include <Pulsar/Integration.h>
+#include <Pulsar/Pointing.h>
 #include <table_stream.h>
 #include <algorithm>
 #include <functional>
+#include <Pulsar/FITSArchive.h>
 
 #include "strutil.h"
 #include "dirutil.h"
@@ -468,9 +473,137 @@ void Flux( Reference::To< Archive > archive )
 
 
 
-void DisplaySubints( vector<string> filenames )
+bool CheckPointing( Reference::To<Pointing> pointing, table_stream &ts )
 {
-  cerr << "per subint data" << endl;
+  if( pointing )
+    return true;
+  
+  ts << "INVALID";
+  return false;
+}
+
+
+
+void DisplaySubints( vector<string> filenames, vector<string> parameters )
+{
+  vector<string>::iterator fit;
+  for( fit = filenames.begin(); fit != filenames.end(); fit ++ )
+  {
+    // Load the archive
+    Reference::To<Archive> data = Archive::load( (*fit) );
+    if( !data )
+    {
+      cerr << "Failed to load archive " << (*fit) << endl;
+      break;
+    }
+
+    cout << (*fit) << endl;
+
+    table_stream ts( &cout );
+
+    vector<string>::iterator pit;
+    for( pit = parameters.begin(); pit != parameters.end(); pit ++ )
+    {
+      ts << (*pit);
+    }
+    ts << endl;
+
+    // Get references to any extensions we may be interested in
+    Reference::To<DigitiserStatistics> stats = data->get<DigitiserStatistics>();
+    Reference::To<Pointing> pointing = data->get<Pointing>();
+
+    int nsub = data->get_nsubint();
+
+    for( int i = 0; i < nsub; i ++ )
+    {
+      try
+      {
+        Reference::To<Integration> integ = data->get_Integration( i );
+        Reference::To<Pointing> pointing;
+        Reference::To<IntegrationOrder> integ_order = data->get<IntegrationOrder>();
+
+        if( integ )
+          pointing = integ->get<Pointing>();
+
+        vector<string>::iterator pit;
+        for( pit = parameters.begin(); pit != parameters.end(); pit ++ )
+        {
+          // parameters from the SUBINT table
+          if( (*pit) == "INDEXVAL" )
+          {
+            if( !integ_order )
+              ts << "INVALID";
+            else
+              ts << tostring<double>( integ_order->get_Index(i) );
+          }
+	  else if( (*pit) == "TSUBINT" )
+	  {
+	    if( !integ )
+	      ts << "INVALID";
+	    else
+	      ts << tostring<double>( integ->get_duration() );
+	  }
+	  else if( (*pit) == "OFFS_SUB" )
+	  {
+	    Reference::To<FITSArchive> data_fits = dynamic_cast<FITSArchive*>( data.get() );
+	    if( ! data_fits )
+	      ts << "INVALID";
+	    else
+	      ts << tostring<double>( data_fits->get_offs_sub( i ) );
+	  }
+          else if( (*pit) == "LST_SUB" && CheckPointing( pointing, ts ) )
+              ts << tostring<double>( pointing->get_local_sidereal_time () );
+	  else if( (*pit) == "RA_SUB" && CheckPointing( pointing, ts ))
+              ts << tostring<double>( pointing->get_right_ascension().getDegrees() );
+	  else if( (*pit) == "DEC_SUB" && CheckPointing( pointing, ts ))
+              ts << tostring<double>( pointing->get_declination().getDegrees() );
+	  else if( (*pit) == "GLON_SUB" && CheckPointing( pointing, ts ))
+	      ts << tostring<double>( pointing->get_galactic_longitude().getDegrees() );
+	  else if( (*pit) == "GLAT_SUB" && CheckPointing( pointing, ts ))
+	      ts << tostring<double>( pointing->get_galactic_latitude().getDegrees() );
+	  else if( (*pit) == "FD_ANG" && CheckPointing( pointing, ts ))
+	      ts << tostring<double>( pointing->get_feed_angle().getDegrees() );
+	  else if( (*pit) == "POS_ANG" && CheckPointing( pointing, ts ))
+	      ts << tostring<double>( pointing->get_position_angle().getDegrees() );
+	  else if( (*pit) == "PAR_ANG" && CheckPointing( pointing, ts ))
+	      ts << tostring<double>( pointing->get_parallactic_angle().getDegrees() );
+	  else if( (*pit) == "TEL_AZ" && CheckPointing( pointing, ts ) )
+	    ts << tostring<double>( pointing->get_telescope_azimuth().getDegrees() );
+	  else if( (*pit) == "TEL_ZEN" && CheckPointing( pointing, ts ) )
+	    ts << tostring<double>( pointing->get_telescope_zenith().getDegrees() );
+
+
+          // parameters from the DIG_CNTS table
+          else if( (*pit) == "ATTEN" )
+          {
+            string atten_string;
+
+            if( stats )
+            {
+              int num_atten = stats->rows[i].atten.size();
+              if( num_atten > 0 )
+              {
+                for( int a = 0; a < num_atten-1; a ++ )
+                  atten_string += tostring<float>( stats->rows[i].atten[a] ) + string(",");
+                atten_string += tostring<float>( stats->rows[i].atten[num_atten-1] );
+              }
+            }
+            else
+              atten_string = "INVALID";
+            ts << atten_string;
+          }
+        }
+        ts << endl;
+      }
+      catch( Error e )
+      {
+        cerr << e << endl;
+	break;
+      }
+    }
+
+    ts.flush();
+  }
 }
 
 
@@ -524,50 +657,50 @@ void DisplayHistory( vector<string> filenames, vector<string> params )
                 ts << (*rit).date_pro;
               else if( (*pit) == "proc_cmd" )
                 ts << (*rit).proc_cmd;
-	      else if( (*pit) == "scale" )
-		ts << tostring<Signal::Scale>( (*rit).scale );
-	      else if( (*pit) == "pol_type" )
-		ts << (*rit).pol_type;
-	      else if( (*pit) == "npol" )
-		ts << tostring<int>( (*rit).npol );
-	      else if( (*pit) == "nbin" )
-		ts << tostring<int>( (*rit).nbin );
-	      else if( (*pit) == "nsub" )
-		ts << tostring<int>( (*rit).nsub );
-	      else if( (*pit) == "nbin_prd" )
-		ts << tostring<int>( (*rit).nbin_prd );
-	      else if( (*pit) == "tbin" )
-		ts << tostring<double>( (*rit).tbin );
-	      else if( (*pit) == "ctr_freq" )
-		ts << tostring<double>( (*rit).ctr_freq );
-	      else if( (*pit) == "nchan" )
-		ts << tostring<int>( (*rit).nchan );
-	      else if( (*pit) == "chan_bw" )
-		ts << tostring<double>( (*rit).chanbw );
-	      else if( (*pit) == "par_corr" )
-		ts << tostring<int>( (*rit).par_corr );
-	      else if( (*pit) == "fa_corr" )
-		ts << tostring<int>( (*rit).fa_corr );
-	      else if( (*pit) == "rm_corr" )
-		ts << tostring<int>( (*rit).rm_corr );
-	      else if( (*pit) == "dedisp" )
-		ts << tostring<int>( (*rit).dedisp );
-	      else if( (*pit) == "dds_mthd" )
-		ts << (*rit).dds_mthd;
-	      else if( (*pit) == "sc_mthd" )
-		ts << (*rit).sc_mthd;
-	      else if( (*pit) == "cal_mthd" )
-		ts << (*rit).cal_mthd;
-	      else if( (*pit) == "cal_file" )
-		ts << (*rit).cal_file;
-	      else if( (*pit) == "rfi_mthd" )
-		ts << (*rit).rfi_mthd;
-	      else if( (*pit) == "ifr_mthd" )
-		ts << (*rit).ifr_mthd;
+              else if( (*pit) == "scale" )
+                ts << tostring<Signal::Scale>( (*rit).scale );
+              else if( (*pit) == "pol_type" )
+                ts << (*rit).pol_type;
+              else if( (*pit) == "npol" )
+                ts << tostring<int>( (*rit).npol );
+              else if( (*pit) == "nbin" )
+                ts << tostring<int>( (*rit).nbin );
+              else if( (*pit) == "nsub" )
+                ts << tostring<int>( (*rit).nsub );
+              else if( (*pit) == "nbin_prd" )
+                ts << tostring<int>( (*rit).nbin_prd );
+              else if( (*pit) == "tbin" )
+                ts << tostring<double>( (*rit).tbin );
+              else if( (*pit) == "ctr_freq" )
+                ts << tostring<double>( (*rit).ctr_freq );
+              else if( (*pit) == "nchan" )
+                ts << tostring<int>( (*rit).nchan );
+              else if( (*pit) == "chan_bw" )
+                ts << tostring<double>( (*rit).chanbw );
+              else if( (*pit) == "par_corr" )
+                ts << tostring<int>( (*rit).par_corr );
+              else if( (*pit) == "fa_corr" )
+                ts << tostring<int>( (*rit).fa_corr );
+              else if( (*pit) == "rm_corr" )
+                ts << tostring<int>( (*rit).rm_corr );
+              else if( (*pit) == "dedisp" )
+                ts << tostring<int>( (*rit).dedisp );
+              else if( (*pit) == "dds_mthd" )
+                ts << (*rit).dds_mthd;
+              else if( (*pit) == "sc_mthd" )
+                ts << (*rit).sc_mthd;
+              else if( (*pit) == "cal_mthd" )
+                ts << (*rit).cal_mthd;
+              else if( (*pit) == "cal_file" )
+                ts << (*rit).cal_file;
+              else if( (*pit) == "rfi_mthd" )
+                ts << (*rit).rfi_mthd;
+              else if( (*pit) == "ifr_mthd" )
+                ts << (*rit).ifr_mthd;
               else
                 ts << "INVALID";
             }
-	    ts << endl;
+            ts << endl;
           }
         }
       }
@@ -653,6 +786,7 @@ int main( int argc, char *argv[] ) try
   args += HISTORY_KEY; args += ":";
 
   vector<string> history_params;
+  vector<string> subint_params;
 
   int i;
   while( ( i = getopt( argc, argv, args.c_str() ) ) != -1 )
@@ -726,6 +860,7 @@ int main( int argc, char *argv[] ) try
       break;
     case PER_SUBINT_KEY:
       cmd_subints = true;
+      separate( optarg, subint_params, " ," );
       break;
     case HISTORY_KEY:
       cmd_history = true;
@@ -746,7 +881,7 @@ int main( int argc, char *argv[] ) try
   }
 
   if( cmd_subints )
-    DisplaySubints( filenames );
+    DisplaySubints( filenames, subint_params );
   if( cmd_history )
     DisplayHistory( filenames, history_params );
 
