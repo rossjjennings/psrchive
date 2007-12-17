@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.49 $
-   $Date: 2007/11/21 07:12:55 $
-   $Author: straten $ */
+   $Revision: 1.50 $
+   $Date: 2007/12/17 05:44:23 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_FITSArchive_h
 #define __Pulsar_FITSArchive_h
@@ -227,6 +227,9 @@ namespace Pulsar {
 
     //! The polyco parsed from the PSRFITS file
     Reference::To<Predictor> hdr_model;
+    
+    //! Get the offs_sub value (only present in fits files)
+    double get_offs_sub( unsigned int isub ) const;
     
     // The version of the psrfits file, can be used to make decisions about
     // how we treat older files

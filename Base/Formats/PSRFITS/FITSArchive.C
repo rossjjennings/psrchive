@@ -1086,6 +1086,18 @@ int Pulsar::FITSArchive::truthval (bool condition) const
     return 0;
 }
 
+// !retreive the offs_sub
+
+double Pulsar::FITSArchive::get_offs_sub( unsigned int isub ) const
+{
+  Reference::To<const Integration> integ = get_Integration( isub );
+  
+  if( !integ )
+    return -1;
+  
+  return (integ->get_epoch() - reference_epoch).in_seconds();
+}
+
 // EOF
 // ///
     
