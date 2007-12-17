@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.12 $
-   $Date: 2007/12/17 05:34:29 $
+   $Revision: 1.13 $
+   $Date: 2007/12/17 05:40:36 $
    $Author: nopeer $ */
 
 
@@ -478,7 +478,7 @@ bool CheckPointing( Reference::To<Pointing> pointing, table_stream &ts )
 {
   if( pointing )
     return true;
-  
+
   ts << "INVALID";
   return false;
 }
@@ -487,11 +487,21 @@ bool CheckPointing( Reference::To<Pointing> pointing, table_stream &ts )
 
 void DisplaySubints( vector<string> filenames, vector<string> parameters )
 {
+  // If we don't have filenames or parameters, output a usage message
+  
+  if( parameters.size() == 0 || filenames.size() == 0 )
+  {
+    cerr << "Usage: pav -S param1,param2 filenames (params are par_ang,fd_ang,ra_sub etc)" << endl;
+    return;
+  }
+
+  // convert all the parameters to uppercase
+  
   for( int i = 0; i < parameters.size(); i ++ )
   {
     parameters[i] = uppercase( parameters[i] );
   }
-  
+
   vector<string>::iterator fit;
   for( fit = filenames.begin(); fit != filenames.end(); fit ++ )
   {
@@ -542,41 +552,41 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
             else
               ts << tostring<double>( integ_order->get_Index(i) );
           }
-	  else if( (*pit) == "TSUBINT" )
-	  {
-	    if( !integ )
-	      ts << "INVALID";
-	    else
-	      ts << tostring<double>( integ->get_duration() );
-	  }
-	  else if( (*pit) == "OFFS_SUB" )
-	  {
-	    Reference::To<FITSArchive> data_fits = dynamic_cast<FITSArchive*>( data.get() );
-	    if( ! data_fits )
-	      ts << "INVALID";
-	    else
-	      ts << tostring<double>( data_fits->get_offs_sub( i ) );
-	  }
+          else if( (*pit) == "TSUBINT" )
+          {
+            if( !integ )
+              ts << "INVALID";
+            else
+              ts << tostring<double>( integ->get_duration() );
+          }
+          else if( (*pit) == "OFFS_SUB" )
+          {
+            Reference::To<FITSArchive> data_fits = dynamic_cast<FITSArchive*>( data.get() );
+            if( ! data_fits )
+              ts << "INVALID";
+            else
+              ts << tostring<double>( data_fits->get_offs_sub( i ) );
+          }
           else if( (*pit) == "LST_SUB" && CheckPointing( pointing, ts ) )
-              ts << tostring<double>( pointing->get_local_sidereal_time () );
-	  else if( (*pit) == "RA_SUB" && CheckPointing( pointing, ts ))
-              ts << tostring<double>( pointing->get_right_ascension().getDegrees() );
-	  else if( (*pit) == "DEC_SUB" && CheckPointing( pointing, ts ))
-              ts << tostring<double>( pointing->get_declination().getDegrees() );
-	  else if( (*pit) == "GLON_SUB" && CheckPointing( pointing, ts ))
-	      ts << tostring<double>( pointing->get_galactic_longitude().getDegrees() );
-	  else if( (*pit) == "GLAT_SUB" && CheckPointing( pointing, ts ))
-	      ts << tostring<double>( pointing->get_galactic_latitude().getDegrees() );
-	  else if( (*pit) == "FD_ANG" && CheckPointing( pointing, ts ))
-	      ts << tostring<double>( pointing->get_feed_angle().getDegrees() );
-	  else if( (*pit) == "POS_ANG" && CheckPointing( pointing, ts ))
-	      ts << tostring<double>( pointing->get_position_angle().getDegrees() );
-	  else if( (*pit) == "PAR_ANG" && CheckPointing( pointing, ts ))
-	      ts << tostring<double>( pointing->get_parallactic_angle().getDegrees() );
-	  else if( (*pit) == "TEL_AZ" && CheckPointing( pointing, ts ) )
-	    ts << tostring<double>( pointing->get_telescope_azimuth().getDegrees() );
-	  else if( (*pit) == "TEL_ZEN" && CheckPointing( pointing, ts ) )
-	    ts << tostring<double>( pointing->get_telescope_zenith().getDegrees() );
+            ts << tostring<double>( pointing->get_local_sidereal_time () );
+          else if( (*pit) == "RA_SUB" && CheckPointing( pointing, ts ))
+            ts << tostring<double>( pointing->get_right_ascension().getDegrees() );
+          else if( (*pit) == "DEC_SUB" && CheckPointing( pointing, ts ))
+            ts << tostring<double>( pointing->get_declination().getDegrees() );
+          else if( (*pit) == "GLON_SUB" && CheckPointing( pointing, ts ))
+            ts << tostring<double>( pointing->get_galactic_longitude().getDegrees() );
+          else if( (*pit) == "GLAT_SUB" && CheckPointing( pointing, ts ))
+            ts << tostring<double>( pointing->get_galactic_latitude().getDegrees() );
+          else if( (*pit) == "FD_ANG" && CheckPointing( pointing, ts ))
+            ts << tostring<double>( pointing->get_feed_angle().getDegrees() );
+          else if( (*pit) == "POS_ANG" && CheckPointing( pointing, ts ))
+            ts << tostring<double>( pointing->get_position_angle().getDegrees() );
+          else if( (*pit) == "PAR_ANG" && CheckPointing( pointing, ts ))
+            ts << tostring<double>( pointing->get_parallactic_angle().getDegrees() );
+          else if( (*pit) == "TEL_AZ" && CheckPointing( pointing, ts ) )
+            ts << tostring<double>( pointing->get_telescope_azimuth().getDegrees() );
+          else if( (*pit) == "TEL_ZEN" && CheckPointing( pointing, ts ) )
+            ts << tostring<double>( pointing->get_telescope_zenith().getDegrees() );
 
 
           // parameters from the DIG_CNTS table
@@ -604,7 +614,7 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
       catch( Error e )
       {
         cerr << e << endl;
-	break;
+        break;
       }
     }
 
