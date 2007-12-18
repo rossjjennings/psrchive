@@ -308,7 +308,13 @@ void Pulsar::BPPArchive::load_header (const char* filename)
   // gaps between them...
   set_bandwidth((double)nchan*fabs(hdr.bandwidth)/1e6);
 
-  set_dispersion_measure(hdr.dispersion_measure);
+  // Don't put in DM for cal data
+  if (get_type()==Signal::Pulsar) { 
+    set_dispersion_measure(hdr.dispersion_measure);
+  } else {
+    set_dispersion_measure(0.0);
+  }
+
   set_dedispersed(false);
   set_faraday_corrected(false);
   set_poln_calibrated(false);
@@ -444,6 +450,10 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
     array_changeEndian(num_means, means, sizeof(float));
 #endif
 
+    // Gains default to 1.0
+    for (int k=0; k<num_means; k++) { gains[k]=1.0; }
+
+#if 1 
     // Correct 2-bit mean powers, get 2-bit "gain" factors
     // Blank any channels with funky values.
     int nblank=0;
@@ -453,7 +463,6 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
       for (int j=0; j<hdr.polns; j++) {
         if (j<2) {
           // Power terms
-          gains[j*hdr.chsbd+k]=1.0; // Default value
           rv = linearize_power(means[j*hdr.chsbd+k], &meantmp,
               &gains[j*hdr.chsbd+k]);
           if (rv!=0) { integration->set_weight(cur_chan,0.0); nblank++; } 
@@ -473,6 +482,7 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
 
     if (nblank&&(verbose>2)) 
       cerr << "Pulsar::BPPArchive blanked " << nblank << " channels" << endl;
+#endif
 
     // Loop over profile data
     for (int j=0; j<hdr.polns; j++) {
