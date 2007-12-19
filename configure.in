@@ -124,6 +124,14 @@ if test -d $PSRHOME/packages/$LOGIN_ARCH; then
 fi
 
 #
+# Set up to use any packages already installed in the target directory
+#
+if test -d $PSRCHIVE_INSTALL; then
+  CPPFLAGS="-I$PSRCHIVE_INSTALL/include $CPPFLAGS"
+  LDFLAGS="-L$PSRCHIVE_INSTALL/lib $LDFLAGS"
+fi
+
+#
 # Checks for header files.
 #
 AC_HEADER_SYS_WAIT
