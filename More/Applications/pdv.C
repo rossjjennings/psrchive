@@ -7,10 +7,18 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.14 $
-   $Date: 2007/12/17 23:00:31 $
-   $Author: nopeer $ */
+   $Revision: 1.15 $
+   $Date: 2007/12/19 01:13:32 $
+   $Author: straten $ */
 
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#ifdef HAVE_CFITSIO
+#include "Pulsar/FITSArchive.h"
+#endif
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -22,10 +30,10 @@
 #include <Pulsar/DigitiserStatistics.h>
 #include <Pulsar/Integration.h>
 #include <Pulsar/Pointing.h>
+
 #include <table_stream.h>
 #include <algorithm>
 #include <functional>
-#include <Pulsar/FITSArchive.h>
 #include <strutil.h>
 
 #include "strutil.h"
@@ -137,7 +145,9 @@ void DisplaySubintsUsage( void )
       "Available Parameters: \n"
       "    INDEXVAL           Optionally used if INT_TYPE != TIME \n"
       "    TSUBINT            Length of subintegration \n"
+#ifdef HAVE_CFITSIO
       "    OFFS_SUB           Offset from Start of subint centre \n"
+#endif
       "    LST_SUB            LST at subint centre \n"
       "    RA_SUB             RA (J2000) at subint centre \n"
       "    DEC_SUB            Dec (J2000) at subint centre \n"
@@ -626,6 +636,9 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
             else
               ts << tostring<double>( integ->get_duration() );
           }
+
+#ifdef HAVE_CFITSIO
+
           else if( (*pit) == "OFFS_SUB" )
           {
             Reference::To<FITSArchive> data_fits = dynamic_cast<FITSArchive*>( data.get() );
@@ -634,6 +647,9 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
             else
               ts << tostring<double>( data_fits->get_offs_sub( i ) );
           }
+
+#endif
+
           else if( (*pit) == "LST_SUB" && CheckPointing( pointing, ts ) )
             ts << tostring<double>( pointing->get_local_sidereal_time () );
           else if( (*pit) == "RA_SUB" && CheckPointing( pointing, ts ))
