@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/csh
 
 # @configure_input@
 
@@ -8,20 +8,21 @@ echo -n " @LDFLAGS@ @FFT_LIBS@ @CFITSIO_LIBS@ @PUMA_LIBS@ @TEMPO2_LIBS@ "
 
 echo -n " @PTHREAD_CFLAGS@ @PTHREAD_LIBS@ "
 
-for arg in $* ; do
+foreach arg ( $* )
 
-case $arg in
+  switch ( $arg )
 
-pgplot)
-  echo -n " @PGPLOT_LIBS@ "
-;;
+  case pgplot:
+    echo -n " @PGPLOT_LIBS@ "
+  breaksw
 
-qt)
-  echo -n " @QT_LIBS@ "
-;;
+  case qt:
+    echo -n " @QT_LIBS@ "
+  breaksw
 
-esac
+  endsw
 
-done
+end
 
 echo -n " @FLIBS@ "
+
