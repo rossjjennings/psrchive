@@ -31,7 +31,7 @@ Pulsar::FluxPlot::FluxPlot ()
 
   original_nchan = 0;
 
-  pavcrop = 0.0;
+  crop = 0.0;
 
   get_frame()->get_y_scale()->set_buf_norm(0.05);
 }
@@ -80,16 +80,19 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
       cerr << "Pulsar::FluxPlot::prepare using all bins" << endl;
     plotter.minmax (get_frame());
 
-    // Added by DS, for pav we want the peak to represent the percentage of max above 0
-    // and if the graph has a negative component, and the magnitude of the negative component
-    // is more than the cropped positive component, then crop the nevative aswell.
+    /* Added by DS, for pav we want the peak to represent the
+     percentage of max above 0 and if the graph has a negative
+     component, and the magnitude of the negative component is more
+     than the cropped positive component, then crop the nevative
+     as well.
+    */
 
-    if( pavcrop != 0.0 )
+    if( crop != 0.0 )
     {
       float min, max;
       get_frame()->get_y_scale()->get_minmax( min, max );
 
-      max *= pavcrop;
+      max *= crop;
       if( min < 0 && max + min < 0 )
         min = -max;
 
@@ -245,7 +248,7 @@ std::string Pulsar::FluxPlot::get_ylabel (const Archive* data)
   if (data->get_scale() == Signal::Jansky)
     return "Flux Density (mJy)";
   else
-    return "Relative Flux Units";
+    return "Flux";
 }
 
 float Pulsar::FluxPlot::get_phase_error (const Archive* data)
