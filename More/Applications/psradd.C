@@ -166,7 +166,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.58 2007/11/06 23:02:06 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.59 2007/12/19 01:46:37 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -774,7 +774,8 @@ int main (int argc, char **argv) try {
 	total->defaraday();
 
       // re-compute the phase predictor to the new centre frequency
-      total->update_model ();
+      if (total->has_model() && total->has_ephemeris())
+        total->update_model ();
 
     }
 
