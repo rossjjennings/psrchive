@@ -42,7 +42,7 @@ Pulsar::Append::Append ()
 bool Pulsar::Append::stop (Archive* into, const Archive* from)
 {
   if (into == from)
-    throw Error (InvalidParam, "Pulsar::Append::append",
+    throw Error (InvalidParam, "Pulsar::Append::stop",
 		 "cannot append archive to self");
 
   if (from->get_nsubint() == 0)
@@ -59,15 +59,15 @@ bool Pulsar::Append::stop (Archive* into, const Archive* from)
 void Pulsar::Append::check (Archive* into, const Archive* from)
 {
   if (Archive::verbose == 3)
-    cerr << "Pulsar::Append::append compare" << endl;
+    cerr << "Pulsar::Append::check compare" << endl;
 
   string reason;
 
   if (must_match && !match.match (into, from))
-    throw Error (InvalidState, "Append::append", match.get_reason ());
+    throw Error (InvalidState, "Pulsar::Append::check", match.get_reason ());
 
   else if (!into->standard_match (from, reason))
-    throw Error (InvalidState, "Append::append", reason);
+    throw Error (InvalidState, "Pulsar::Append::check", reason);
 }
 
 /*! 
@@ -176,3 +176,4 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
   if (Archive::verbose == 3)
     cerr << "Pulsar::Append::append exit" << endl;
 }
+

@@ -22,6 +22,7 @@ bool decreasing_frequency (const Reference::To<Pulsar::Profile>& a,
 }
 
 void Pulsar::Integration::insert (Integration* from)
+try
 {
   unsigned npol  = get_npol();
   unsigned nchan = get_nchan();
@@ -55,3 +56,8 @@ void Pulsar::Integration::insert (Integration* from)
   set_nchan (new_nchan);
 
 }
+catch (Error& error)
+{
+  throw error += "Pulsar::Integration::insert";
+}
+

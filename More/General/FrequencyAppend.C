@@ -73,6 +73,7 @@ void Pulsar::FrequencyAppend::combine (Archive* into, Archive* from)
 }
 
 void Pulsar::FrequencyAppend::combine (Integration* into, Integration* from)
+try 
 {
   double weight_ratio = 1.0;
 
@@ -107,3 +108,8 @@ void Pulsar::FrequencyAppend::combine (Integration* into, Integration* from)
   }
 
 }
+catch (Error& error)
+{
+  throw error += "Pulsar::FrequencyAppend::combine";
+}
+
