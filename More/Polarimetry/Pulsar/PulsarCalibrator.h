@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.25 $
-   $Date: 2007/10/30 02:31:55 $
+   $Revision: 1.26 $
+   $Date: 2007/12/20 11:50:13 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -96,6 +96,12 @@ namespace Pulsar {
 
     //! The calibration model as a function of frequency
     std::vector< Reference::To<PolnProfileFit> > model;
+
+    //! The reduced chi-squared as a function of frequency
+    std::vector<float> reduced_chisq;
+
+    //! The phase shift estimate as a function of frequency
+    std::vector< Estimate<double> > phase_shift;
 
     typedef MEAL::Mean< MEAL::Complex2 > MeanXform;
 
