@@ -266,13 +266,13 @@ void Pulsar::BasicArchive::set_poln_calibrated (bool done)
 }
 
 
-//! Return true when the data has been corrected for ISM Faraday rotation
+//! Return true when the data have been corrected for ISM Faraday rotation
 bool Pulsar::BasicArchive::get_faraday_corrected () const
 {
   return faraday_corrected;
 }
     
-//! Set true when the data has been corrected for ISM Faraday rotation
+//! Set true when the data have been corrected for ISM Faraday rotation
 void Pulsar::BasicArchive::set_faraday_corrected (bool done)
 {
   faraday_corrected = done;

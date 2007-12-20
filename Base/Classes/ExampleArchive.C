@@ -143,7 +143,7 @@ void Pulsar::ExampleArchive::load_header (const char* filename)
   // Dispersion measure, pc/cm^3.
   set_dispersion_measure(71.025);
 
-  // Flags telling whether the data has had any of these operations
+  // Flags telling whether the data have had any of these operations
   // done to it already.  "dedispersed" refers to the inter-channel
   // dispersion delay, not in-channel coherent dedisp.
   set_dedispersed(false); 

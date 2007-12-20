@@ -383,7 +383,7 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
 {
   if (!has_calibrator())
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::add_calibrator",
-		 "No Archive containing pulsar data has yet been added");
+		 "No Archive containing pulsar data have yet been added");
 
   if (data->get_type() == Signal::Calibrator) {
     set_previous (data);

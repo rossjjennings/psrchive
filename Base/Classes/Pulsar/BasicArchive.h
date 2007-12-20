@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.38 $
-   $Date: 2007/11/26 02:50:18 $
+   $Revision: 1.39 $
+   $Date: 2007/12/20 11:50:08 $
    $Author: straten $ */
 
 #ifndef __BasicArchive_h
@@ -125,7 +125,7 @@ namespace Pulsar {
     //! Set the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
     virtual void set_rotation_measure (double rm);
 
-    //! data has been corrected for ISM faraday rotation
+    //! data have been corrected for ISM faraday rotation
     virtual bool get_faraday_corrected () const;
     //! Set the status of the ISM RM flag
     virtual void set_faraday_corrected (bool done = true);
@@ -207,10 +207,10 @@ namespace Pulsar {
     //! The rotation measure (in \f${\rm rad\, m}^{-2}\f$)
     double rotation_measure;
 
-    //! data has been dedispersed
+    //! data have been dedispersed
     bool dedispersed;
 
-    //! data has been corrected for ISM faraday rotation
+    //! data have been corrected for ISM faraday rotation
     bool faraday_corrected;
 
     //! Data has been poln calibrated

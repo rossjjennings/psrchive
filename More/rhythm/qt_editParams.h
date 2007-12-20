@@ -50,7 +50,7 @@ class qt_editParams : public QWidget
  signals:
   // emitted when the user selects 'File/Close'
   void closed ();
-  // emitted when new data has been loaded/set
+  // emitted when new data have been loaded/set
   void newParams ( const psrephem& );
 
  public slots:
