@@ -180,14 +180,18 @@ string Pulsar::ASCIIArchive::Agent::get_description ()
 
 
 bool Pulsar::ASCIIArchive::Agent::advocate (const char* filename)
-  try {
+try {
     
-    ASCIIArchive archive;
-    archive.load_header (filename);
-    return true;
-
-  }
-  catch (Error& e) {
-    return false;
-  }
-
+  ASCIIArchive archive;
+  archive.load_header (filename);
+  return true;
+  
+}
+catch (Error& e) 
+{
+  return false;
+}
+catch (std::exception& e)
+{
+  return false;
+}
