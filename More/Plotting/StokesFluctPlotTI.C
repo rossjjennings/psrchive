@@ -20,10 +20,6 @@ Pulsar::StokesFluctPlot::Interface::Interface (StokesFluctPlot* instance)
        &StokesFluctPlot::set_plot_values,
        "val", "Values to be plotted (IQUVLpS)" );
 
-  add( &StokesFluctPlot::get_signal_to_noise,
-       &StokesFluctPlot::set_signal_to_noise,
-       "sn", "S/N on ordinate axis" );
-
   add( &StokesFluctPlot::get_plot_colours,
        &StokesFluctPlot::set_plot_colours,
        "sci", "PGPLOT colour index for each value" );
