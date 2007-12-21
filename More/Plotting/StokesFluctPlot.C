@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/StokesFluctPlot.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Polarization.h"
@@ -11,11 +12,16 @@
 
 #include "Pulsar/ExponentialBaseline.h"
 #include "Pulsar/PhaseWeight.h"
+#include "Pulsar/LastSignificant.h"
+
+#include <cpgplot.h>
 
 using namespace std;
 
 Pulsar::StokesFluctPlot::StokesFluctPlot ()
 {
+  plot_last_harmonic = false;
+
   plot_values  = "Ip";
   plot_colours = "123";
   plot_lines   = "111";
@@ -51,10 +57,25 @@ void Pulsar::StokesFluctPlot::prepare (const Archive* data)
 {
   FluctPlot::prepare (data);
 
+  // enforce that the minimum always start at zero (s/n = 1)
   float min, max;
   get_frame()->get_y_scale()->get_minmax (min, max);
-  get_frame()->get_y_scale()->set_minmax (0.0, max);    
+  get_frame()->get_y_scale()->set_minmax (0.0, max);
 }
+
+/*! The ProfileVectorPlotter class draws the profile */
+void Pulsar::StokesFluctPlot::draw (const Archive* data)
+{
+  FluctPlot::draw (data);
+  if (plot_last_harmonic)
+  {
+    float min, max;
+    get_frame()->get_y_scale()->get_minmax (min, max);
+    cpgmove (last_harmonic, min);
+    cpgdraw (last_harmonic, max*.5);
+  }
+}
+
 
 //! Return the label for the y-axis
 std::string Pulsar::StokesFluctPlot::get_ylabel (const Archive* data)
@@ -129,14 +150,15 @@ void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
   if (verbose)
     cerr << "Pulsar::StokesFluctPlot::get_profiles filling vector" << endl;
 
+  Pulsar::LastSignificant last_significant;
+
   for (unsigned ipol=0; ipol < plotter.profiles.size(); ipol++) {
 
     Reference::To<Profile> prof;
 
     // special case for invariant interval: form before FFT
     if (plot_values[ipol] == 'S') {
-      prof = new Profile;
-      profile->invint (prof);
+      prof = new_Fluct (profile, plot_values[ipol]);
       prof = fourier_transform (prof);
       detect (prof);
     }
@@ -150,7 +172,17 @@ void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
 
     ExponentialBaseline baseline;
     Reference::To<PhaseWeight> weight = baseline.baseline( prof );
-    float log_noise = log(weight->get_mean().get_value()) / log(10.0);
+
+    // the standard deviation of an exponential distribution equals its mean
+    double rms = weight->get_mean().get_value();
+
+    if (plot_last_harmonic)
+    {
+      last_significant.find (prof, rms);
+      cerr << ipol << ": last harmonic = " << last_significant.get() << endl;
+    }
+ 
+    float log_noise = log(rms) / log(10.0);
 
     prof->logarithm();
 
@@ -160,5 +192,12 @@ void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
     plotter.plot_sci[ipol] = plot_colours[ipol] - '0';
     plotter.plot_sls[ipol] = plot_lines[ipol] - '0';
   }
+
+  last_harmonic = last_significant.get();
+
+  if (verbose)
+    cerr << "Pulsar::StokesFluctPlot::get_profiles last harmonic ibin="
+	 << last_harmonic << endl;
+
 }
 

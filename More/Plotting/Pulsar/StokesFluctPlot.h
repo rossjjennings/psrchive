@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesFluctPlot.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/10/30 02:31:19 $
+   $Revision: 1.7 $
+   $Date: 2007/12/21 04:38:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesFluctPlot_h
@@ -40,6 +40,9 @@ namespace Pulsar {
     //! Perform any preprocessing steps
     void prepare (const Archive* data);
 
+    //! Draw the profiles in the currently open window
+    void draw (const Archive*);
+
     //! Get the default label for the y axis
     std::string get_ylabel (const Archive*);
 
@@ -58,11 +61,18 @@ namespace Pulsar {
     void set_plot_lines (const std::string& plot) { plot_lines = plot; }
     std::string get_plot_lines () const { return plot_lines; }
  
+    //! Plot the last significant harmonic
+    void set_plot_last_harmonic (bool p) { plot_last_harmonic = p; }
+    bool get_plot_last_harmonic () const { return plot_last_harmonic; }
+
   protected:
  
     std::string plot_values;
     std::string plot_colours;
     std::string plot_lines;
+
+    bool plot_last_harmonic;
+    unsigned last_harmonic;
 
   };
 
