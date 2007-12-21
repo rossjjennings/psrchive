@@ -130,6 +130,29 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
     correct.calibrate( clone );
   }
 
+  if (choose_maximum_harmonic) {
+
+    const Integration* integration = get_calibrator()->get_Integration (0);
+
+    Reference::To<Integration> clone = integration->clone();
+    clone->expert()->fscrunch ();
+
+    PolnProfileFit temp;
+
+    if (verbose > 2)
+      PolnProfileFit::verbose = true;
+
+    temp.choose_maximum_harmonic = true;
+    temp.set_standard ( clone->new_PolnProfile (0) );
+
+    chosen_maximum_harmonic = temp.get_nharmonic();
+
+    if (verbose)
+      cerr << "Pulsar::PulsarCalibrator::build max harmonic="
+           << chosen_maximum_harmonic << "/" << clone->get_nbin()/2 << endl;
+
+  }
+
   if (clone->get_nchan () > 1)
     build (clone->get_nchan());
 
@@ -160,30 +183,8 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan)
 
   model.resize (model_nchan);
 
-  if (choose_maximum_harmonic) {
-    
-    Reference::To<Integration> clone = integration->clone();
-    clone->expert()->fscrunch ();
-
-    PolnProfileFit temp;
-
-    if (verbose > 2)
-      PolnProfileFit::verbose = true;
-
-    temp.choose_maximum_harmonic = true;
-    temp.set_standard ( clone->new_PolnProfile (0) );
-
-    chosen_maximum_harmonic = temp.get_nharmonic();
-    
-    if (verbose)
-      cerr << "Pulsar::PulsarCalibrator::build max harmonic="
-	   << chosen_maximum_harmonic << "/" << clone->get_nbin()/2 << endl;
-
-  }
-
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
-
     if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::build ichan=" << ichan << endl;
 
