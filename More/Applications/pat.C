@@ -193,7 +193,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.76 2007/12/09 07:03:03 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.77 2007/12/21 04:38:24 straten Exp $" << endl;
       return 0;
 
     case 'n':
@@ -228,11 +228,13 @@ int main (int argc, char *argv[]) try {
 
     case 'v':
       Archive::set_verbosity(2);
+      PulsarCalibrator::verbose = 2;
       verbose = true;
       break;
 
     case 'V':
       Archive::set_verbosity(3);
+      PulsarCalibrator::verbose = 3;
       verbose = true;
       break;
 
