@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PolnProfileFit.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
@@ -14,6 +15,7 @@
 #include "Pulsar/ReceptionModel.h"
 #include "Pulsar/CoherencyMeasurementSet.h"
 #include "Pulsar/TotalCovariance.h"
+#include "Pulsar/LastSignificant.h"
 
 #include "MEAL/Polynomial.h"
 #include "MEAL/Phase.h"
@@ -33,7 +35,29 @@
 using namespace std;
 
 unsigned get_last_significant (const Pulsar::PolnProfile* psd,
-			       const Stokes<double>& var);
+			       const Stokes<double>& var)
+{
+  unsigned n_harmonic = psd->get_nbin();
+  unsigned npol = 4;
+
+  vector<float> S (n_harmonic, 0);
+  double S_variance = 0;
+
+  for (unsigned ipol=1; ipol<npol; ipol++)  {
+    const float* amps = psd->get_amps(ipol);
+    for (unsigned ibin=1; ibin<n_harmonic; ibin++)
+      S[ibin] += amps[ibin];
+    S_variance += var[ipol];
+  }
+
+  Pulsar::LastSignificant ls;
+  // find for the total intensity
+  ls.find (psd->get_Profile(0), var[0] * 2.0);
+  // find for the polarized intensity
+  ls.find (S, S_variance * 2.0);
+
+  return ls.get();
+}
 
 bool Pulsar::PolnProfileFit::verbose = false;
 
@@ -300,7 +324,8 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   if (total)
     total->set_covariance (get_covariance( fourier ));
-  else {
+  else 
+  {
     Stokes<double> var = get_variance( fourier );
     uncertainty->set_variance (var);
 
