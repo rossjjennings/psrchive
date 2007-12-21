@@ -1,64 +1,91 @@
-#include "Pulsar/PolnProfile.h"
+/***************************************************************************
+ *
+ *   Copyright (C) 2006 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
-unsigned get_last_significant (const Pulsar::PolnProfile* psd,
-			       const Stokes<double>& var)
-{
-  unsigned n_harmonic = psd->get_nbin();
+#include "Pulsar/LastSignificant.h"
+#include "Pulsar/Profile.h"
+
 using namespace std;
 
-  unsigned max_harmonic = 0;
-  unsigned ipol, npol = 4;
+// #define _DEBUG 1
 
-  vector<float> S (n_harmonic, 0);
-  double S_variance = 0;
+//! Default constructor
+Pulsar::LastSignificant::LastSignificant ()
+{
+  cutoff_sigma = 3.0;
+  consecutive = 3;
+  last_significant = 0;
+}
 
-  for (ipol=1; ipol<npol; ipol++)  {
-    const float* amps = psd->get_amps(ipol);
-    for (unsigned ibin=1; ibin<n_harmonic; ibin++)
-      S[ibin] += amps[ibin];
-    S_variance += var[ipol];
+//! Set the cut-off threshold as a multiple of the rms
+void Pulsar::LastSignificant::set_threshold (float sigma)
+{
+  cutoff_sigma = sigma;
+}
+
+void Pulsar::LastSignificant::set_consecutive (unsigned bins)
+{
+  consecutive = bins;
+}
+
+//! Get the last signficant bin
+unsigned Pulsar::LastSignificant::get () const
+{
+  return last_significant;
+}
+
+//! Reset the last significant phase bin
+void Pulsar::LastSignificant::reset ()
+{
+  last_significant = 0;
+}
+
+//! Find the last signficant bin
+void Pulsar::LastSignificant::find (const Profile* psd, double rms)
+{
+  find( psd->get_nbin(), psd->get_amps(), rms );
+}
+
+//! Find the last significant bin
+void Pulsar::LastSignificant::find (const std::vector<float>& psd, double rms)
+{
+  find( psd.size(), &(psd[0]), rms);
+}
+
+//! Find the last significant bin
+void
+Pulsar::LastSignificant::find (unsigned nbin, const float* psd, double rms)
+{
+  double threshold = rms * cutoff_sigma;
+  unsigned count = 0;
+
+#ifdef _DEBUG
+  cerr << "RMS=" << rms << " THRESHOLD=" << threshold  << endl;
+#endif
+
+  for (unsigned ibin=1; ibin<nbin; ibin++)
+  {
+
+    if (psd[ibin] > threshold)
+      count ++;
+    else
+      count = 0;
+
+#ifdef _DEBUG
+    cerr << count << " " << ibin << " " << psd[ibin]  <<endl;
+#endif
+
+    if (count >= consecutive && ibin > last_significant)
+      last_significant = ibin;
+
   }
-
-  double cutoff_sigma = 3.0;
-
-  for (ipol=0; ipol<2; ipol++) {
-
-    const float* amps = psd->get_amps(ipol);
-    if (ipol)
-      amps = &(S[0]);
-
-    double threshold = var[ipol] * cutoff_sigma * cutoff_sigma;
-    if (ipol)
-      threshold = S_variance * cutoff_sigma * cutoff_sigma;
-
-    unsigned count = 0;
-
+  
 #ifdef _DEBUG
-    cerr << "THRESHOLD=" << threshold  << endl;
+  cerr << "last_significant = " << last_significant << endl;
 #endif
-
-    for (unsigned ibin=1; ibin<n_harmonic; ibin++) {
-
-      if (amps[ibin] > threshold)
-	count ++;
-      else
-	count = 0;
-
-#ifdef _DEBUG
-      cerr << count << " " << ibin << " " << amps[ibin]  <<endl;
-#endif
-
-      if (count > 2 && ibin > max_harmonic)
-	max_harmonic = ibin;
-
-    }
-    
-#ifdef _DEBUG
-    cerr << "max_harmonic = " << max_harmonic << endl;
-#endif
-
-  }
-
-  return max_harmonic;
+  
 }
 

@@ -47,6 +47,7 @@ nobase_include_HEADERS = \
 	Pulsar/InterpreterExtension.h \
         Pulsar/InterpreterVariables.h \
         Pulsar/IterativeBaseline.h \
+	Pulsar/LastSignificant.h \
 	Pulsar/MaskSmooth.h \
         Pulsar/NoiseStatistics.h \
         Pulsar/OnPulseEstimator.h \
