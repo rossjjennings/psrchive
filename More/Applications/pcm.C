@@ -1,4 +1,5 @@
 //-*-C++-*-
+
 /***************************************************************************
  *
  *   Copyright (C) 2003-2007 by Willem van Straten
@@ -7,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.77 $
-   $Date: 2007/12/09 06:58:02 $
+   $Revision: 1.78 $
+   $Date: 2007/12/24 20:00:49 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -120,6 +121,8 @@ void auto_select (Pulsar::ReceptionCalibrator& model,
     // cerr << "pcm: adding phase bin " << bins[ibin] << endl;
     model.add_state (bins[ibin]);
   }
+
+  model.set_standard_data( archive );
 
 #if HAVE_PGPLOT
   cpgbeg (0, "chosen.ps/CPS", 0, 0);
@@ -631,7 +634,7 @@ int actual_main (int argc, char *argv[]) try {
   else
     cerr << "pcm: not normalizing Stokes parameters" << endl;
 
-  model.normalize_by_invariant = normalize_by_invariant;
+  model.set_normalize_by_invariant( normalize_by_invariant );
 
   if (independent_gains)
     cerr << "pcm: each observation has a unique gain" << endl;
@@ -961,9 +964,13 @@ int actual_main (int argc, char *argv[]) try {
       cpgbeg (0, "variations.ps/PS", 0, 0);
       cpgsvp (0.1,.9, 0.1,.9);
 
+      unsigned panels = plotter.npanel;
+      plotter.npanel = 4;
+
       cerr << "pcm: plotting time variation functions" << endl;
       plotter.plot_time_variations ();
 
+      plotter.npanel = panels;
       cpgend ();
     }
 
