@@ -54,6 +54,7 @@ nobase_include_HEADERS = \
         Pulsar/SingleAxisPolynomial.h \
         Pulsar/SingleAxisSolver.h \
 	Pulsar/SourceInfo.h \
+	Pulsar/StandardData.h \
         Pulsar/StandardModel.h \
 	Pulsar/StepsInfo.h \
         Pulsar/SystemCalibrator.h \
@@ -121,6 +122,7 @@ libPolarimetry_la_SOURCES = \
         SingleAxisPolynomial.C \
         SingleAxisSolver.C \
         SourceInfo.C \
+	StandardData.C \
         StandardModel.C \
 	StepsInfo.C \
         SystemCalibrator.C \
