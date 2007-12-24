@@ -84,6 +84,9 @@ void specific_style (string optarg, vector<Plot*>& plots);
 // set the size of the plotting surface
 void set_paper_size (float width_cm, float aspect_ratio);
 
+// verbosity
+static bool verbose = false;
+
 int main (int argc, char** argv) try {
 
   // name of file containing list of Archive filenames
@@ -106,9 +109,6 @@ int main (int argc, char** argv) try {
 
   // Allow plot classes to preprocess data before plotting
   bool preprocess = true;
-
-  // verbosity
-  bool verbose = false;
 
   // width of plot surface in cm
   float surface_width = 0.0;
@@ -296,6 +296,9 @@ int main (int argc, char** argv) try {
 
     for (unsigned iplot=0; iplot < plots.size(); iplot++) {
 
+      if (verbose)
+	cerr << "psrplot: iplot=" << iplot << endl;
+
       if (plots.size() > 1)
 	toplot = archive->clone();
 
@@ -407,6 +410,10 @@ void set_paper_size (float width_cm, float aspect_ratio)
 {
   if (width_cm == 0 && aspect_ratio == 0)
     return;
+
+  if (verbose)
+    cerr << "psrplot: set_paper_size width=" << width_cm 
+	 << " aspect=" << aspect_ratio << endl;
 
   float use_aspect_ratio = aspect_ratio;
 
