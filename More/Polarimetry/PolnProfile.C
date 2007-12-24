@@ -494,11 +494,11 @@ void Pulsar::PolnProfile::convert_basis (Signal::Basis to) {
   upon completion, npol == 1 and state == Signal::Invariant.
 
   \pre The profile baselines must have been removed (unchecked).
+  \post The bias due to noise is removed
 */
-void Pulsar::PolnProfile::invint (Profile* invint) const
+void Pulsar::PolnProfile::invint (Profile* invint, bool second) const
 {
   unsigned nbin = get_nbin();
-
   invint->resize (nbin);
 
   if (state == Signal::Stokes)
@@ -509,12 +509,27 @@ void Pulsar::PolnProfile::invint (Profile* invint) const
     for (unsigned ibin = 0; ibin < nbin; ibin++)
       invint->get_amps()[ibin] = 4.0 * abs( det(get_coherence(ibin)) );
 
-  // remove the baseline
-  *(invint) -= invint->mean( invint->find_min_phase() );
-  // return to a second-order moment
-  invint->square_root();
+  /*
+    derive the baseline from the total intensity profile because its
+    statistics are better modelled
+  */
+  Reference::To<Pulsar::PhaseWeight> baseline = profile[0]->baseline();
 
-  invint->set_state (Signal::Inv);
+  /*
+    remove the bias due to noise from the invariant profile
+  */
+  baseline->set_Profile( invint );
+  invint->offset( -baseline->get_mean().get_value() );
+
+  // return to a second-order moment
+  if (second)
+  {
+    invint->square_root();
+    invint->set_state (Signal::Inv);
+  }
+  else
+    invint->set_state (Signal::DetRho);
+
   invint->set_centre_frequency ( get_Profile(0)->get_centre_frequency() );
   invint->set_weight ( get_Profile(0)->get_weight() );
 }

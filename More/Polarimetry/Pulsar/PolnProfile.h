@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfile.h,v $
-   $Revision: 1.38 $
-   $Date: 2007/11/06 03:17:29 $
+   $Revision: 1.39 $
+   $Date: 2007/12/24 20:02:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -114,13 +114,13 @@ namespace Pulsar {
     void transform (const Matrix<4,4,double>& response);
 
     //! Convert to the specified state
-    void convert_state (Signal::State output_state);
+    void convert_state (Signal::State state);
 
     //! Convert the Stokes parameters to the specified basis
-    void convert_basis (Signal::Basis to = Signal::Circular);
+    void convert_basis (Signal::Basis basis);
 
     //! Return the invariant interval
-    void invint (Profile* invint) const;
+    void invint (Profile* invint, bool second = true) const;
 
     //! Return the linear polarization profile
     void get_linear (Profile* linear) const;
