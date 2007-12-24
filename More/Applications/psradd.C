@@ -166,7 +166,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.59 2007/12/19 01:46:37 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.60 2007/12/24 20:01:49 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -417,7 +417,7 @@ int main (int argc, char **argv) try {
   FILE* log_file = 0;
   string log_filename;
 
-  Pulsar::Interpreter preprocessor;
+  Pulsar::Interpreter* preprocessor = standard_shell();
 
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
@@ -462,8 +462,8 @@ int main (int argc, char **argv) try {
       if (jobs.size()) {
 	if (verbose)
 	  cerr << "psradd: preprocessing " << filenames[ifile] << endl;
-	preprocessor.set(archive);
-	preprocessor.script(jobs);
+	preprocessor->set(archive);
+	preprocessor->script(jobs);
       }
 
       if (nbin)
