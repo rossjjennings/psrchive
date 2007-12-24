@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileInterpreter.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/10/12 02:45:31 $
+   $Revision: 1.3 $
+   $Date: 2007/12/24 20:02:08 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileInterpreter_h
@@ -29,6 +29,9 @@ namespace Pulsar {
 
     //! Destructor
     ~ProfileInterpreter ();
+
+    //! Remove the profile baseline
+    std::string baseline (const std::string& args);
 
     //! Form the cummulative profile
     std::string cumulative (const std::string& args);

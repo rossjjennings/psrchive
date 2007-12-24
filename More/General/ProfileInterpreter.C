@@ -29,6 +29,11 @@ string help_smooth (const string& method)
 Pulsar::ProfileInterpreter::ProfileInterpreter ()
 {
   add_command 
+    ( &ProfileInterpreter::baseline,
+      "baseline", "remove the profile baseline",
+      "usage: baseline \n" );
+
+  add_command 
     ( &ProfileInterpreter::mean,
       "mean", "form the mean smoothed profile",
       help_smooth ("mean") );
@@ -63,6 +68,14 @@ Pulsar::ProfileInterpreter::~ProfileInterpreter ()
 {
 }
 
+string Pulsar::ProfileInterpreter::baseline (const string& args) try
+{
+  get()->remove_baseline();
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
 
 string Pulsar::ProfileInterpreter::cumulative (const string& args) try
 {
