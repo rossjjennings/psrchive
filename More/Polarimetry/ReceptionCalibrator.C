@@ -25,6 +25,7 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationExpert.h"
+#include "Pulsar/PolnProfile.h"
 
 #include "MEAL/PhysicalCoherency.h"
 #include "MEAL/Complex2Constant.h"
@@ -96,6 +97,32 @@ void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& n)
   calibrator_filenames = n;
 }
 
+void Pulsar::ReceptionCalibrator::set_standard_data (const Archive* data)
+{
+  Reference::To<Archive> clone = data->clone ();
+
+  clone->fscrunch();
+  clone->tscrunch();
+
+  Reference::To<PolnProfile> p = clone->get_Integration(0)->new_PolnProfile(0);
+
+  standard_data = new Calibration::StandardData;
+  standard_data->select_profile( p );
+  standard_data->set_normalize (normalize_by_invariant);
+}
+
+void Pulsar::ReceptionCalibrator::set_normalize_by_invariant (bool set)
+{
+  normalize_by_invariant = true;
+  if (standard_data)
+    standard_data->set_normalize (normalize_by_invariant);
+}
+
+/*!
+  This method is called on the first call to add_observation.
+  It initializes various arrays and internal book-keeping attributes.
+*/
+
 void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 {
   if (!data)
@@ -134,6 +161,9 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
       "  Pulse phase will vary as a function of frequency channel" << endl;
 
   set_calibrator( data->clone() );
+
+  if (!standard_data)
+    set_standard_data (data);
 
   Signal::Basis basis = get_calibrator()->get_basis ();
   Pauli::basis.set_basis(basis);
@@ -525,11 +555,6 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
     }
 
-    // the noise power in the baseline is used to estimate the
-    // variance in each Stokes parameter
-    vector< vector< double > > baseline_variance;
-    integration->baseline_stats (0, &baseline_variance);
-
     // the platform transformation "abscissa"
     Jones<double> feed = corrections.get_feed_transformation (data, isub);
 
@@ -566,6 +591,8 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 	continue;
       }
 
+      standard_data->set_profile( integration->new_PolnProfile (ichan) );
+
       // the epoch abscissa
       MEAL::Argument::Value* arg = model[ichan]->time.new_Value(epoch);
 
@@ -581,15 +608,8 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
       measurements.set_coordinates();
 
-      for (unsigned istate=0; istate < pulsar.size(); istate++) {
-
-	Stokes<float> variance;
-	for (unsigned ipol=0; ipol < variance.size(); ipol++)
-	  variance[ipol] = baseline_variance[ipol][ichan];
-
-	add_data (measurements, pulsar[istate], ichan, integration, variance);
-
-      }
+      for (unsigned istate=0; istate < pulsar.size(); istate++)
+	add_data (measurements, pulsar[istate], ichan);
 
       model[ichan]->get_equation()->add_data (measurements);
       model[ichan]->add_observation_epoch (epoch);
@@ -612,38 +632,21 @@ void
 Pulsar::ReceptionCalibrator::add_data
 ( vector<Calibration::CoherencyMeasurement>& bins,
   SourceEstimate& estimate,
-  unsigned ichan,
-  const Integration* data,
-  Stokes<float>& variance
-  )
+  unsigned ichan )
 {
   add_data_call ++;
 
-  unsigned nchan = data->get_nchan ();
-
   // sanity check
-  if (estimate.source.size () != nchan)
+  if (ichan >= estimate.source.size ())
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::add_data",
-		 "SourceEstimate.nchan=%d != Integration.nchan=%d",
-		 estimate.source.size(), nchan);
+		 "ichan=%d >= SourceEstimate.nchan=%d",
+		 ichan, estimate.source.size());
 
   unsigned ibin = estimate.phase_bin;
 
-  Stokes<float> value = data->get_Stokes ( ichan, ibin );
-
-  Stokes< Estimate<double> > stokes;
-
-  for (unsigned ipol=0; ipol<stokes.size(); ipol++) {
-
-    stokes[ipol].val = value[ipol];
-    stokes[ipol].var = variance[ipol];
-
-  }
-
   try {
 
-    if (normalize_by_invariant) 
-      normalizer.normalize (stokes);
+    Stokes< Estimate<double> > stokes = standard_data->get_stokes( ibin );
 
     // NOTE: the measured states are not corrected
     Calibration::CoherencyMeasurement state (estimate.input_index);

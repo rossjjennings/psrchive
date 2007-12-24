@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.80 $
-   $Date: 2007/12/06 19:23:24 $
+   $Revision: 1.81 $
+   $Date: 2007/12/24 20:01:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -22,7 +22,8 @@
 #include "Pulsar/MeanCoherency.h"
 #include "Pulsar/CoherencyMeasurementSet.h"
 
-#include "MEAL/NormalizeStokes.h"
+#include "Pulsar/StandardData.h"
+
 #include "MEAL/Coherency.h"
 #include "MEAL/VectorRule.h"
 
@@ -116,9 +117,6 @@ namespace Pulsar {
     //! Enforce that Stokes I > |p|, where p=(Q,U,V)
     bool physical_coherency;
 
-    //! Normalize the Stokes parameters by the invariant interval
-    bool normalize_by_invariant;
-
     //! Allow the gain to vary independently from observation to observation
     bool independent_gains;
 
@@ -146,6 +144,9 @@ namespace Pulsar {
     //! Set the calibrator observations to be loaded during initial_observation
     void set_calibrators (const std::vector<std::string>& filenames);
     
+    //! Set the observation that defines the baseline and on-pulse phase bins
+    void set_standard_data (const Archive* data);
+
     //! Add the observation to the set of constraints
     void add_observation (const Archive* data);
     
@@ -160,6 +161,9 @@ namespace Pulsar {
 
     //! Set the number of channels that may be simultaneously solved
     void set_nthread (unsigned nthread);
+
+    //! Normalize each Stokes vector by the mean on-pulse invariant 
+    void set_normalize_by_invariant (bool set = true);
 
     //! Solve equation for each frequency
     void solve (int only_ichan = -1);
@@ -177,6 +181,9 @@ namespace Pulsar {
 
     //! The calibration model as a function of frequency
     std::vector< Reference::To<Calibration::StandardModel> > model;
+
+    //! Standard data interface
+    Reference::To<Calibration::StandardData> standard_data;
 
     //! Time variation of absolute gain
     Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
@@ -218,9 +225,6 @@ namespace Pulsar {
     //! The epochs of all loaded calibrators
     std::vector<MJD> calibrator_epochs;
 
-    //! Routine for normalizing the Stokes parameters
-    MEAL::NormalizeStokes normalizer;
-
     //! Epoch of the first observation
     MJD start_epoch;
 
@@ -238,6 +242,9 @@ namespace Pulsar {
 
     //! The number of channels that may be simultaneously solved
     unsigned nthread;
+
+    //! Normalize the Stokes parameters by the invariant interval
+    bool normalize_by_invariant;
 
     //! Set the initial guesses and update the reference epoch
     void initialize ();
@@ -265,10 +272,7 @@ namespace Pulsar {
       \param variance the variance to be assigned to the measurement. 
     */
     void add_data (std::vector<Calibration::CoherencyMeasurement>& bins,
-		   SourceEstimate& estimate,
-		   unsigned ichan,
-		   const Integration* data,
-		   Stokes<float>& variance);
+		   SourceEstimate& estimate, unsigned ichan);
 
     //! Communicates flux and reference calibrator parameters
     class CalInfo : public Calibrator::Info {
