@@ -7,16 +7,17 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.19 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.20 $
+   $Date: 2007/12/24 11:51:56 $
    $Author: straten $ */
 
 #ifndef __Stokes_H
 #define __Stokes_H
 
 #include "Vector.h"
-#include "random.h"
+#include "Estimate.h"
 #include "Error.h"
+#include "random.h"
 
 template <typename T>
 class Stokes : public Vector<4,T>
@@ -93,6 +94,24 @@ template <class T, class U>
 void random_vector (Stokes<T>& val, U scale)
 {
   random_value (val, scale);
+}
+
+template<typename T>
+Estimate<T> invariant ( const Stokes< Estimate<T> >& stokes )
+{
+  Estimate<T> result = stokes.invariant();
+
+  // the value is underestimated due to noise
+  double bias = stokes[0].get_variance();
+  for (unsigned i=1; i<4; i++)
+    bias -= stokes[i].get_variance();
+
+  result.val -= bias;
+
+  // the variance is underestimated by Estimate<T>::operator * (x,x)
+  result.var *= 2;
+
+  return result;
 }
 
 #endif
