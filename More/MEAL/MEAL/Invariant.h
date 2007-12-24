@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Invariant.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.5 $
+   $Date: 2007/12/24 20:01:58 $
    $Author: straten $ */
 
 #ifndef __MEAL_Invariant_h
@@ -23,7 +23,7 @@ namespace MEAL {
   class Scalar;
 
   //! Computes the invariant interval
-  /*! This class properly handles the propagation of errors */
+  /*! Properly handles error propagation and bias correction. */
 
   class Invariant : public Reference::Able {
 
