@@ -10,8 +10,11 @@
 void MEAL::NormalizeStokes::init ()
 {
   invariant = new Invariant;
+  other = new ScalarParameter;
 
-  ScalarMath invint = sqrt( invariant->get_correct_result() );
+  Reference::To<Scalar> temp = other.get();
+
+  ScalarMath invint = sqrt( invariant->get_correct_result() + temp );
 
   output = invariant->get_input() / invint;
 }
@@ -35,6 +38,12 @@ MEAL::NormalizeStokes&
 MEAL::NormalizeStokes::operator = (const NormalizeStokes&)
 {
   return *this;
+}
+
+//! Set the other term in the denominator
+void MEAL::NormalizeStokes::set_other (const Estimate<double>& value)
+{
+  other->set_value( value );
 }
 
 void

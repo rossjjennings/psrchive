@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/NormalizeStokes.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.7 $
+   $Date: 2007/12/24 20:01:36 $
    $Author: straten $ */
 
 #ifndef __MEAL_NormalizeStokes_h
 #define __MEAL_NormalizeStokes_h
 
 #include "MEAL/Invariant.h"
+#include "MEAL/ScalarParameter.h"
 
 namespace MEAL {
 
@@ -36,6 +37,9 @@ namespace MEAL {
     //! Destructor
     ~NormalizeStokes ();
 
+    //! Set the other term in the denominator
+    void set_other (const Estimate<double>& other);
+
     //! Assignment operator
     NormalizeStokes& operator = (const NormalizeStokes&);
 
@@ -49,6 +53,9 @@ namespace MEAL {
 
     //! Calculates the invariant interval and its bias
     Reference::To<Invariant> invariant;
+
+    //! The other term in the denominator
+    Reference::To<ScalarParameter> other;
 
     //! The output Stokes parameters
     Stokes<ScalarMath> output;
