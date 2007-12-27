@@ -67,7 +67,8 @@ namespace Pulsar {
     int get_mjd_from_hdr();
 
     //! Linearize 2-bit power scale.
-    int linearize_power(float quant_power, float *input_power, float *gain);
+    int linearize_power(float quant_power, float *input_power, float *gain,
+        float *xgain);
 
     //! Load the specified Integration from filename, returning new instance
     virtual Integration*

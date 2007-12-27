@@ -350,7 +350,7 @@ int Pulsar::BPPArchive::get_mjd_from_hdr()
 // but simply rescales things so the data is proportional 
 // to flux.
 int Pulsar::BPPArchive::linearize_power(float quant_power, 
-    float *input_power, float *gain)
+    float *input_power, float *gain, float *xgain)
 {
   // Bounds checking
   if (quant_power<=1.0) { return(-1); }
@@ -366,12 +366,21 @@ int Pulsar::BPPArchive::linearize_power(float quant_power,
   if (input_power!=NULL) { *input_power = res; }
 
   // From above formula, compute d(ip)/d(qp).
-  // deriv = (sqrt(2*pi)/8) * ip^(3/2) * exp(1/(2*ip))
+  // deriv = (sqrt(2*pi)/8) * ip^(3/2) * exp(0.5/ip))
   float gres = sqrt(res);
   gres *= res; // ip^3/2
   gres *= exp(1.0/(2.0*res));
   gres *= sqrt(2.0*M_PI)/8.0;
   if (gain!=NULL) { *gain = gres; }
+
+  // Cross-term gain factor for this pol.
+  //   g_x = (ip)/E(ip)
+  //   E(ip) = sqrt(2/pi) * sqrt(ip) * (1+2*exp(-0.5/ip))
+  // Full cross-term gain is g_x*g_y
+  float gxres = sqrt(2.0/M_PI * res);
+  gxres *= 1.0 + 2.0*exp(-0.5/res);
+  gxres = res/gxres;
+  if (xgain!=NULL) { *xgain = gxres; }
 
   return(0);
 }
@@ -457,20 +466,20 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
     // Correct 2-bit mean powers, get 2-bit "gain" factors
     // Blank any channels with funky values.
     int nblank=0;
-    float meantmp;
+    float meantmp, gxtmp[2];
     for (int k=0; k<hdr.chsbd; k++) {
       cur_chan = i*hdr.chsbd + k;
       for (int j=0; j<hdr.polns; j++) {
         if (j<2) {
           // Power terms
+          gxtmp[j]=1.0;
           rv = linearize_power(means[j*hdr.chsbd+k], &meantmp,
-              &gains[j*hdr.chsbd+k]);
+              &gains[j*hdr.chsbd+k], &gxtmp[j]);
           if (rv!=0) { integration->set_weight(cur_chan,0.0); nblank++; } 
           else { means[j*hdr.chsbd+k] = meantmp; }
         } else if (j<4) { 
-          // TODO Cross terms
-          // XXX geom mean, this is probably not quite right, but ok for now:
-          gains[j*hdr.chsbd+k]=sqrt(gains[0*hdr.chsbd+k]*gains[1*hdr.chsbd+k]);
+          // Cross terms
+          gains[j*hdr.chsbd+k] = gxtmp[0]*gxtmp[1];
           means[j*hdr.chsbd+k] *= gains[j*hdr.chsbd+k];
         } else {
           // Shouldn't get here!
