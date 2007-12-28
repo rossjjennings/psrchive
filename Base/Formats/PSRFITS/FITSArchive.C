@@ -54,6 +54,7 @@ void Pulsar::FITSArchive::init ()
 
   scale_cross_products = false;
   correct_P236_reference_epoch = false;
+  preserve_reference_epoch = false;
 }
 
 //
@@ -154,6 +155,7 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
   
   chanbw = farchive->chanbw;
   scale_cross_products = farchive->scale_cross_products;
+  preserve_reference_epoch = farchive->preserve_reference_epoch;
 }
 
 //! Returns a pointer to a new copy-constructed FITSArchive instance
@@ -555,6 +557,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (verbose == 3)
     cerr << "Got start time: " << hdr_ext->start_time.printall() << endl;
 
+  reference_epoch = hdr_ext->start_time;
+  preserve_reference_epoch = true;
+
   // Read the start LST (in seconds)
 
   if (verbose == 3)
@@ -921,28 +926,40 @@ try {
       unload (fptr, ext);
   }
   
-  MJD hdr_epoch;
-
-  if (hdr_ext)
-    hdr_epoch = hdr_ext->start_time;
-
-  // take the epoch of the first Integration with a duration
-  for (unsigned jsubint = 0; jsubint < get_nsubint(); jsubint++)
-    if (get_Integration(jsubint)->get_duration() != 0.0)
+  if (preserve_reference_epoch)
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::unload_file preserving reference epoch="
+	   << reference_epoch.printdays (13) << endl;
+  }
+  else
+  {
+    if (hdr_ext)
     {
-      hdr_epoch = get_Integration(jsubint)->get_epoch();
+      reference_epoch = hdr_ext->start_time;
       if (verbose > 2)
-        cerr << "FITSArchive::unload_file reference epoch subint=" << jsubint
-             << " eopch=" << hdr_epoch.printdays (13);
-      break;
+	cerr << "FITSArchive::unload_file FITSHdr reference epoch="
+	     << reference_epoch.printdays (13) << endl;
+    }
+    else
+    {
+      // take the epoch of the first Integration with a duration
+      for (unsigned jsubint = 0; jsubint < get_nsubint(); jsubint++)
+	if (get_Integration(jsubint)->get_duration() != 0.0)
+	{
+	  reference_epoch = get_Integration(jsubint)->get_epoch();
+	  if (verbose > 2)
+	    cerr << "FITSArchive::unload_file subint=" << jsubint
+		 << " reference epoch=" << reference_epoch.printdays (13)
+		 << endl;
+	  break;
+	}
     }
 
-  if (hdr_epoch == MJD::zero && verbose > 1)
-    cerr << "FITSArchive::unload_file WARNING reference epoch == 0" << endl;
-
-  // for use in unload_Integration.C
-  reference_epoch = hdr_epoch;
-
+    if (reference_epoch == MJD::zero && verbose > 1)
+      cerr << "FITSArchive::unload_file WARNING reference epoch == 0" << endl;
+  }
+    
   long day = reference_epoch.intday();
   long sec = reference_epoch.get_secs();
   double frac = reference_epoch.get_fracsec();
