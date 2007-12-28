@@ -17,8 +17,6 @@ void Pulsar::FITSArchive::load_DigitiserCounts (fitsfile* fptr)
 {
   int status = 0;
 
-  float nullfloat = 0.0;
-
   if (verbose > 2)
     cerr << "FITSArchive::load_DigitiserCounts entered" << endl;
 
@@ -45,7 +43,6 @@ void Pulsar::FITSArchive::load_DigitiserCounts (fitsfile* fptr)
     throw( Error( BadAllocation, "Pulsar::FITSArchive::load_DigitiserCounts", "failed to allocate DigitiserCounts" ) );
 
   string s_data;
-  float f_data;
 
   psrfits_read_key( fptr, "DYN_LEVT", &s_data );
   if( s_data != "*" )
@@ -80,18 +77,11 @@ void Pulsar::FITSArchive::load_DigitiserCounts (fitsfile* fptr)
 
   ext->rows.resize( num_rows );
 
-  int data_length = ext->get_npthist() * ext->get_ndigr();
-
   for( int i = 0; i < num_rows; i ++ )
   {
     psrfits_read_col( fptr, "DAT_OFFS", &(ext->rows[i].data_offs), i+1, 0.0f );
     psrfits_read_col( fptr, "DAT_SCL", &(ext->rows[i].data_scl), i+1, 0.0f );
 
-    int ndigr = ext->get_ndigr();
-    int npthist = ext->get_npthist();
-    int row_length = ndigr * npthist;
-
-//     vector<int> new_row( row_length );
     ext->rows[i].data.resize( ext->get_ndigr() * ext->get_npthist() );
 
     psrfits_read_col( fptr, "DATA", ext->rows[i].data, i+1, 0 );
