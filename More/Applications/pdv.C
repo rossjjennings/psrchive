@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.15 $
-   $Date: 2007/12/19 01:13:32 $
-   $Author: straten $ */
+   $Revision: 1.16 $
+   $Date: 2008/01/01 21:52:22 $
+   $Author: nopeer $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -44,27 +44,27 @@
 #include <vector>
 
 
-#define HELP_KEY             'h'
-#define IBIN_KEY             'b'
-#define ICHAN_KEY            'n'
-#define ISUB_KEY             'i'
-#define PHASE_KEY            'r'
-#define FSCRUNCH_KEY         'F'
-#define TSCRUNCH_KEY         'T'
-#define PSCRUNCH_KEY         'P'
-#define CENTRE_KEY           'C'
-#define BSCRUNCH_KEY         'B'
-#define STOKES_FRACPOL_KEY   'x'
-#define STOKES_FRACLIN_KEY   'y'
-#define STOKES_FRACCIR_KEY   'z'
-#define STOKES_POSANG_KEY    'Z'
-#define CALIBRATOR_KEY       'c'
-#define PULSE_WIDTHS_KEY     'f'
-#define BASELINE_KEY         'R'
-#define TEXT_KEY             't'
-#define TEXT_HEADERS_KEY     'A'
-#define PER_SUBINT_KEY       'S'
-#define HISTORY_KEY          'H'
+const char HELP_KEY             = 'h';
+const char IBIN_KEY             = 'b';
+const char ICHAN_KEY            = 'n';
+const char ISUB_KEY             = 'i';
+const char PHASE_KEY            = 'r';
+const char FSCRUNCH_KEY         = 'F';
+const char TSCRUNCH_KEY         = 'T';
+const char PSCRUNCH_KEY         = 'P';
+const char CENTRE_KEY           = 'C';
+const char BSCRUNCH_KEY         = 'B';
+const char STOKES_FRACPOL_KEY   = 'x';
+const char STOKES_FRACLIN_KEY   = 'y';
+const char STOKES_FRACCIR_KEY   = 'z';
+const char STOKES_POSANG_KEY    = 'Z';
+const char CALIBRATOR_KEY       = 'c';
+const char PULSE_WIDTHS_KEY     = 'f';
+const char BASELINE_KEY         = 'R';
+const char TEXT_KEY             = 't';
+const char TEXT_HEADERS_KEY     = 'A';
+const char PER_SUBINT_KEY       = 'S';
+const char HISTORY_KEY          = 'H';
 
 
 using namespace std;
