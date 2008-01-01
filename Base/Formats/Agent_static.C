@@ -35,8 +35,13 @@ Archive::Advocate<EPNArchive>::entry;
 
 #ifdef HAVE_CFITSIO
 
-#include "Pulsar/FITSArchive.h"
+#include "Pulsar/ASPArchive.h"
 
+template
+Registry::List<Archive::Agent>::Enter<ASPArchive::Agent>
+Archive::Advocate<ASPArchive>::entry;
+
+#include "Pulsar/FITSArchive.h"
 template
 Registry::List<Archive::Agent>::Enter<FITSArchive::Agent>
 Archive::Advocate<FITSArchive>::entry;

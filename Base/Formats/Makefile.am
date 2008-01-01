@@ -9,8 +9,8 @@ libFormats_la_LIBADD = Timer/libtimer.la EPN/libepn.la ASCII/libascii.la \
 		       BPP/libbpp.la
 
 if HAVE_CFITSIO
-SUBDIRS += PSRFITS 
-libFormats_la_LIBADD += PSRFITS/libpsrfits.la
+SUBDIRS += PSRFITS ASP
+libFormats_la_LIBADD += PSRFITS/libpsrfits.la ASP/libasp.la
 endif
 
 if HAVE_PUMA
@@ -36,6 +36,7 @@ INCLUDES = -I$(top_builddir)/local_include \
 	-I$(top_srcdir)/Base/Formats/ASCII \
 	-I$(top_srcdir)/Base/Formats/BPP \
 	-I$(top_srcdir)/Base/Formats/PSRFITS \
+	-I$(top_srcdir)/Base/Formats/ASP \
 	@CFITSIO_CFLAGS@ @PUMA_CFLAGS@ @TEMPO2_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.local
