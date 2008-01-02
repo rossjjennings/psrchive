@@ -723,6 +723,32 @@ catch (Error& error) {
 // /////////////////////////////////////////////////////////////////////
 //! An unload function to write FITSArchive data to a FITS file on disk.
 
+  // To create a new file we need a FITS file template to provide the format
+
+string Pulsar::FITSArchive::get_template_name ()
+{
+  static char* template_defn = getenv ("PSRFITSDEFN");
+
+  if (template_defn) {
+
+    if (verbose > 2)
+      cerr << "FITSArchive::get_template_name using\n"
+	"  PSRFITSDEFN=" << template_defn << endl;
+
+    return template_defn;
+
+  }
+
+  // load the definition from the configured installation directory
+  string template_name = Pulsar::Config::get_runtime() + "/psrheader.fits";
+
+  if (verbose > 2)
+    cerr << "FITSArchive::get_template_name using\n"
+      "  installed=" << template_name << endl;
+
+  return template_name;
+}
+
 void Pulsar::FITSArchive::unload_file (const char* filename) const
 {
 
@@ -742,29 +768,7 @@ try {
 
   // To create a new file we need a FITS file template to provide the format
 
-  static char* template_defn = getenv ("PSRFITSDEFN");
-
-  string template_name;
-
-  if (template_defn) {
-
-    if (verbose > 2)
-      cerr << "FITSArchive::unload_file using template at:\n"
-	"  PSRFITSDEFN=" << template_defn << endl;
-
-    template_name = template_defn;
-
-  }
-  else {
-
-    // load the definition from the configured installation directory
-    template_name = Pulsar::Config::get_runtime() + "/psrheader.fits";
-
-    if (verbose > 2)
-      cerr << "FITSArchive::unload_file using installed template:\n"
-	"  " << template_name << endl;
-
-  }
+  string template_name = get_template_name();
   
   if (verbose == 3)
     cerr << "FITSArchive::unload_file creating file " 

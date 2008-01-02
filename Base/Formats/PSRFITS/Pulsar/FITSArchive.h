@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.52 $
-   $Date: 2007/12/28 20:13:36 $
+   $Revision: 1.53 $
+   $Date: 2008/01/02 20:27:03 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -92,7 +92,10 @@ namespace Pulsar {
 
     //! Add a new row to the history, reflecting the current state
     void update_history ();
-    
+
+    //! Return the name of the PSRFITS definition template file
+    static std::string get_template_name ();
+
     //! Unload FITSHdrExtension to the current HDU of the specified FITS file
     static void unload (fitsfile* fptr, const FITSHdrExtension* ext);
 
