@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Error.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/06/06 05:31:10 $
+   $Revision: 1.9 $
+   $Date: 2008/01/02 22:38:05 $
    $Author: straten $ */
 
 #ifndef __Error_h
@@ -32,12 +32,10 @@ enum ErrorCode {
   InvalidState,
   //! index out of range, or range mismatch
   InvalidRange,
-  //! invalid state of Profile for requested operation
-  InvalidPolnMeasure,
-  //! invalid state of Integration for requested operation
-  InvalidPolnState,
   //! file not found
   FileNotFound,
+  //! end of file
+  EndOfFile,
   //! failure of a function called from another lib
   FailedCall,
   //! failure of a system call that sets errno

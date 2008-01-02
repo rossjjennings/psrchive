@@ -144,9 +144,8 @@ const char* Error::err2str (ErrorCode code)
     CASESTR(InvalidParam);
     CASESTR(InvalidState);
     CASESTR(InvalidRange);
-    CASESTR(InvalidPolnMeasure);
-    CASESTR(InvalidPolnState);
     CASESTR(FileNotFound);
+    CASESTR(EndOfFile);
     CASESTR(FailedCall);
     CASESTR(FailedSys);
   default: return "invalid";
