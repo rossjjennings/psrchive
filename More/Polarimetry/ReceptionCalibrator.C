@@ -670,7 +670,7 @@ Pulsar::ReceptionCalibrator::add_data
 
   }
   catch (Error& error) {
-    if (error.get_code() != InvalidPolnState)
+    if (verbose > 2)
       cerr << "Pulsar::ReceptionCalibrator::add_data ichan=" << ichan 
 	   << " ibin=" << ibin << " error\n\t" << error.get_message() << endl;
     add_data_fail ++;

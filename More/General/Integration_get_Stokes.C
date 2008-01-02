@@ -39,7 +39,7 @@ Stokes<float> Pulsar::Integration::get_Stokes (unsigned ichan,
     return S;
   
   if (get_state() != Signal::Coherence)
-    throw Error (InvalidPolnState, "Integration::get_Stokes",
+    throw Error (InvalidState, "Integration::get_Stokes",
 		 "Invalid state=" + State2string(get_state()));
   
   float PP   = S[0];
@@ -89,7 +89,7 @@ void Pulsar::Integration::get_Stokes (vector< Stokes<float> >& S,
   unsigned ndim_other = 0;
 
   if (!(get_state()==Signal::Stokes || get_state()==Signal::Coherence))
-    throw Error (InvalidPolnState, "Integration::get_Stokes");
+    throw Error (InvalidState, "Integration::get_Stokes");
 
   if (abscissa == Signal::Frequency) {
     ndim = get_nchan();

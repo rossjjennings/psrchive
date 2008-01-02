@@ -4,11 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
+
+using namespace std;
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -17,9 +19,8 @@ using namespace std;
 /*!
 
 */
-void Pulsar::Integration::convert_state (Signal::State state)
-{ try {
-
+void Pulsar::Integration::convert_state (Signal::State state) try
+{
   if (verbose)
     cerr << "Pulsar::Integration::convert_state current=" 
          << Signal::state_string (get_state()) << " request="
@@ -39,20 +40,19 @@ void Pulsar::Integration::convert_state (Signal::State state)
     invint ();
     return;
   }
-  else if (state == Signal::Intensity) {
+
+  if (state == Signal::Intensity) {
     pscrunch();
     return;
   }
 
+  throw Error (InvalidParam, "Pulsar::Integration::convert_state",
+	       "cannot convert from %s to %s", 
+	       Signal::state_string (get_state()),
+	       Signal::state_string (state));
 }
 catch (Error& error) {
   throw error += "Pulsar::Integration::convert_state";
-}
-  
- throw Error (InvalidPolnState, "Pulsar::Integration::convert_state",
-	      "cannot convert from %s to %s", 
-	      Signal::state_string (get_state()),
-	      Signal::state_string (state));
 }
 
 
