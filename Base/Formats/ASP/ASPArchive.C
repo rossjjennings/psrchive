@@ -138,13 +138,12 @@ void Pulsar::ASPArchive::load_header (const char* filename)
         "Unrecognized HDRVER=%s in file %s", version.c_str(), filename);
   }
 
-  // Only Ver1.0.1 is supported currently.
-  // load_header handles all versions, but load_integration only 
-  // supports V101 for now.
-  if (asp_file_version!=ASP_FITS_V101) {
+  // Ver1.1 not supported now.  Not very much data in this version
+  // exists.
+  if (asp_file_version==ASP_FITS_V11) {
     fits_close_file(f, &int_tmp);
     throw Error (InvalidState, "Pulsar::ASPArchive::load_header",
-        "Only ASP Ver1.0.1 currently supported (version=%s)", version.c_str());
+        "ASP Ver1.1 not currently supported");
   }
 
   // Some tmp variables
@@ -152,6 +151,11 @@ void Pulsar::ASPArchive::load_header (const char* filename)
   string stmp;
 
   // Determine number of subints
+  // TODO: make this more robust?  In all versions, data is stored 
+  // in ASPOUTn binary table extensions.  In V101, timestamp info is 
+  // stored in DUMPREFn ascii table extensions.  Maybe we could store
+  // a list of which of these exist here, and then refer to it in 
+  // load_Integration.
   fits_get_num_hdus(f, &int_tmp, &status);
   int_tmp -= 3; // info HDUs
   if (asp_file_version==ASP_FITS_V101) { int_tmp /= 2; }
@@ -163,7 +167,11 @@ void Pulsar::ASPArchive::load_header (const char* filename)
   set_scale(Signal::FluxDensity);
   set_faraday_corrected(false);
   set_poln_calibrated(false);
-  set_dedispersed(true);  //XXX potentially not true
+
+  // This is mostly true... but will probably change a bit for the
+  // multi-polyco updates.
+  if (asp_file_version==ASP_FITS_V101) { set_dedispersed(true); } 
+  else { set_dedispersed(false); }
 
   // Info from main header
   fits_movabs_hdu(f, 1, NULL, &status);
@@ -186,14 +194,13 @@ void Pulsar::ASPArchive::load_header (const char* filename)
     stmp = ctmp;
     if (stmp.compare("CAL")==0) {
       set_type(Signal::PolnCal);
-      // TODO : check for flux cal srcs
+      // TODO : check for flux cal srcs?
     } else {
       set_type(Signal::Pulsar);
     }
   }
 
   // Approx center frequency, MHz.  
-  // XXX does this key exist in all versions?
   fits_read_key(f, TFLOAT, "FSKYCENT", &flt_tmp, NULL, &status);
   if (!status) set_centre_frequency(flt_tmp);
 
@@ -247,8 +254,13 @@ Pulsar::Integration*
 Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
 {
 
-  // Basic check to see if header has been loaded correctly
-  if (asp_file_version!=ASP_FITS_V101) 
+  // Basic check to see if header has been loaded correctly, 
+  // and we support this version.
+  int version_ok=0;
+  if (asp_file_version==ASP_FITS_V101) { version_ok=1; }
+  else if (asp_file_version==ASP_FITS_V10) { version_ok=1; }
+  else { version_ok=0; }
+  if (!version_ok) 
     throw Error (InvalidState, "Pulsar::ASPArchive::load_Integration",
         "Invalid asp_file_version (%d) or header not loaded", asp_file_version);
 
@@ -301,8 +313,7 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
 
   // Move to specified subint 
   if (asp_file_version==ASP_FITS_V101) { 
-    sprintf(ctmp, "DUMPREF%d", subint);
-    fits_movnam_hdu(f, ASCII_TBL, ctmp, 0, &status);
+    fits_movabs_hdu(f, 4+subint*2, NULL, &status);
   } else {
     fits_movabs_hdu(f, subint+4, NULL, &status);
   }
@@ -316,11 +327,21 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
   double midsecs;
   double *midphase = new double[nchan];
   double *midper = new double[nchan];
-  fits_read_key(f, TDOUBLE, "MIDSECS", &midsecs, NULL, &status);
-  fits_get_colnum(f, CASEINSEN, "REFPHASE", &col, &status);
-  fits_read_col(f, TDOUBLE, col, 1, 1, nchan, NULL, midphase, NULL, &status);
-  fits_get_colnum(f, CASEINSEN, "REFPERIOD", &col, &status);
-  fits_read_col(f, TDOUBLE, col, 1, 1, nchan, NULL, midper, NULL, &status);
+  if (asp_file_version==ASP_FITS_V101) { 
+    fits_read_key(f, TDOUBLE, "MIDSECS", &midsecs, NULL, &status);
+    fits_get_colnum(f, CASEINSEN, "REFPHASE", &col, &status);
+    fits_read_col(f, TDOUBLE, col, 1, 1, nchan, NULL, midphase, NULL, &status);
+    fits_get_colnum(f, CASEINSEN, "REFPERIOD", &col, &status);
+    fits_read_col(f, TDOUBLE, col, 1, 1, nchan, NULL, midper, NULL, &status);
+  } else if (asp_file_version==ASP_FITS_V10) { 
+    fits_read_key(f, TDOUBLE, "DUMPMIDSECS", &midsecs, NULL, &status);
+    fits_read_key(f, TDOUBLE, "DUMPREFPER", &midper[0], NULL, &status);
+    fits_read_key(f, TDOUBLE, "DUMPREFPHASE", &midphase[0], NULL, &status);
+    for (int i=1; i<nchan; i++) {
+      midphase[i] = midphase[0];
+      midper[i] = midper[0];
+    }
+  }
 
   // Use avg folding period
   double pfold=0.0;
@@ -330,8 +351,7 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
 
   // Move to data HDU
   if (asp_file_version==ASP_FITS_V101) {
-    sprintf(ctmp, "ASPOUT%d", subint);
-    fits_movnam_hdu(f, BINARY_TBL, ctmp, 0, &status);
+    fits_movrel_hdu(f, 1, NULL, &status);
   }
 
   // Read time offset
@@ -409,9 +429,7 @@ void Pulsar::ASPArchive::unload_file (const char* filename) const
   // unload all BasicArchive and ASPArchive attributes as well as
   // BasicIntegration attributes and data to filename.
 
-  // This does not need to be filled in if you never need to save files
-  // in this data format.  Assuming this is the case, it's best to throw 
-  // an error here:
+  // We don't want to save files in ASP format.
   throw Error (InvalidState, "Pulsar::ASPArchive::unload_file",
       "unload not implemented for ASPArchive");
 
@@ -440,4 +458,5 @@ bool Pulsar::ASPArchive::Agent::advocate (const char* filename)
 
   return false;
 }
+
 
