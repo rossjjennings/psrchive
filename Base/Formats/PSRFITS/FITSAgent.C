@@ -5,12 +5,57 @@
  *
  ***************************************************************************/
 #include "Pulsar/FITSArchive.h"
+#include "psrfitsio.h"
+
+#include <unistd.h>
 
 using namespace std;
 
+static string get_version ()
+{
+  /*
+    Create a temporary PSRFITS file using the template and HDRVER from it
+  */
+
+  string version = "unknown";
+
+  char temporary_name[64] = "/tmp/psrfits.tmp.XXXXXX";
+
+  if (mktemp (temporary_name) == NULL)
+    return version;
+
+  string name = Pulsar::FITSArchive::get_template_name();
+  
+  int status = 0;
+  fitsfile* fptr = 0;
+
+  fits_create_template (&fptr, temporary_name, name.c_str(), &status);
+  if (status) {
+    char error[FLEN_ERRMSG];
+    fits_get_errstatus (status, error);
+    cerr << "FITSArchive::Agent::get_description fits_open_file: " 
+	 << error << endl;
+    return version;
+  }
+
+  psrfits_read_key (fptr, "HDRVER", &version, version, 
+		    Pulsar::Archive::verbose == 3);
+
+  fits_close_file (fptr, &status);
+  remove (temporary_name);
+
+  return version;
+}
+
+
 string Pulsar::FITSArchive::Agent::get_description ()
 {
-  return "PSRFITS version 1.4";
+  static string version;
+
+  if (version.empty())
+    version = get_version ();
+
+  return "PSRFITS version " + version;
 }
 
 // /////////////////////////////////////////////////////////////////////
@@ -37,11 +82,34 @@ bool Pulsar::FITSArchive::Agent::advocate (const char* filename)
     return false;
   }
 
-  else {
+  if (Archive::verbose == 3)
+    cerr << "FITSAgent::advocate test reading MJD" << endl;
 
-    fits_close_file(test_fptr, &status);
-    return true;
+  bool result = true;
 
+  try {
+
+    // try to read the MJD from the header
+    long day;
+    long sec;
+    double frac;
+    
+    psrfits_read_key (test_fptr, "STT_IMJD", &day);
+    psrfits_read_key (test_fptr, "STT_SMJD", &sec);
+    psrfits_read_key (test_fptr, "STT_OFFS", &frac);
+    
   }
+  catch (Error& error)
+  {
+    if (Archive::verbose == 3)
+      cerr << "FITSAgent::advocate failed to read MJD "
+	   << error.get_message() << endl;
+    
+    result = false;
+  }
+  
+  fits_close_file(test_fptr, &status);
+  
+  return result;
+  
 }
-
