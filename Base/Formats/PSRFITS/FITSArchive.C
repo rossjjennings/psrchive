@@ -156,6 +156,7 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
   chanbw = farchive->chanbw;
   scale_cross_products = farchive->scale_cross_products;
   preserve_reference_epoch = farchive->preserve_reference_epoch;
+  reference_epoch = farchive->reference_epoch;
 }
 
 //! Returns a pointer to a new copy-constructed FITSArchive instance
