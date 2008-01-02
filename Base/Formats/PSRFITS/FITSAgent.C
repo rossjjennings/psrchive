@@ -21,15 +21,17 @@ static string get_version ()
 
   char temporary_name[64] = "/tmp/psrfits.tmp.XXXXXX";
 
-  if (mktemp (temporary_name) == NULL)
+  if (mkstemp (temporary_name) < 0)
     return version;
+
+  string clobber = "!" + string(temporary_name);
 
   string name = Pulsar::FITSArchive::get_template_name();
   
   int status = 0;
   fitsfile* fptr = 0;
 
-  fits_create_template (&fptr, temporary_name, name.c_str(), &status);
+  fits_create_template (&fptr, clobber.c_str(), name.c_str(), &status);
   if (status) {
     char error[FLEN_ERRMSG];
     fits_get_errstatus (status, error);
