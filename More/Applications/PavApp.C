@@ -19,11 +19,43 @@
 #include <Pulsar/ProfilePlot.h>
 #include <Pulsar/PosAngPlot.h>
 #include <Pulsar/PeakConsecutive.h>
+#include <Pulsar/PlotFactory.h>
 #include <limits>
 
 
 
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::ostringstream;
+using Pulsar::PhasePlot;
+using Pulsar::MultiPlot;
+using Pulsar::StokesCylindrical;
+using Pulsar::BandpassChannelWeightPlot;
+using Pulsar::StokesSpherical;
+using Pulsar::PhaseVsTime;
+using Pulsar::PhaseVsFrequency;
+using Pulsar::DynamicSNSpectrum;
+using Pulsar::ProfilePlot;
+using Pulsar::PosAngPlot;
+using Pulsar::PeakConsecutive;
+using Pulsar::MultiPhase;
+using Pulsar::FramedPlot;
+using Pulsar::PlotFactory;
+using Pulsar::FluxPlot;
+using Pulsar::Interpreter;
+using Pulsar::RiseFall;
+using Pulsar::Profile;
 
+
+
+Pulsar::Option<string> PavApp::default_plot_device
+(
+  "PlotDevice::name", "/xs",
+  "The name of the pgplot device to use for output",
+  "The name of the plot device to got to pgopen if none is given by the user\n"
+  "on the command line."
+);
 
 
 
@@ -420,7 +452,7 @@ void PavApp::PavSpecificOptions( void )
   bool old_places = tostring_places;
   tostring_precision = 3;
   tostring_places = true;
-  
+
   // if we have a range of position angles
   if( pa_min != 0.0 || pa_max != 1.0 )
   {
@@ -435,7 +467,7 @@ void PavApp::PavSpecificOptions( void )
   {
     SetPlotOptions<Plot>( string("ch=") + tostring<float>(user_character_height) );
   }
-  
+
   tostring_places = old_places;
   tostring_precision = old_precision;
 }
@@ -549,7 +581,7 @@ int PavApp::run( int argc, char *argv[] )
   char* metafile = NULL;
 
   // PGPLOT device name
-  string plot_device = "/xs";
+  string plot_device = default_plot_device;
 
   // Options to be set
   vector<string> options;
@@ -604,12 +636,17 @@ int PavApp::run( int argc, char *argv[] )
   float clip_value = 0.0;
 
   char valid_args[] = "Az:hb:M:KDCdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g:l:";
+  opterr = 0;
 
   int c = '\0';
   while( (c = getopt_long( argc, argv, valid_args, long_options, &option_index )) != -1 )
   {
     switch( c )
     {
+    case '?':
+      if( optopt == 'g' )
+        plot_device = "?";
+      break;
     case 'a':
       Pulsar::Archive::agent_report ();
       return 0;
@@ -620,7 +657,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.46 2007/12/19 21:18:21 straten Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.47 2008/01/03 00:29:42 nopeer Exp $" << endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
@@ -735,8 +772,8 @@ int PavApp::run( int argc, char *argv[] )
       {
         string s1, s2;
         string_split( optarg, s1, s2, "," );
-	int d1 = fromstring<int>(s1);
-	int d2 = fromstring<int>(s2);
+        int d1 = fromstring<int>(s1);
+        int d2 = fromstring<int>(s2);
         pa_min = PADegreesToTurns( int(floor(d1 + 0.0001)) );
         pa_max = PADegreesToTurns( int(ceil(d2 - 0.0001)) );
       }
@@ -849,7 +886,7 @@ int PavApp::run( int argc, char *argv[] )
   // If we can't open the pgplot device
   //   output an error and exit
 
-  if (cpgopen(plot_device.c_str()) < 0)
+  if ( cpgopen( plot_device.c_str() ) < 0 )
   {
     cout << "pav: Could not open plot device" << endl;
     return -1;
@@ -889,7 +926,7 @@ int PavApp::run( int argc, char *argv[] )
     SetPlotOptions<StokesCylindrical>( string("flux:crop=") + tostring<float>(clip_value) );
     SetPlotOptions<PhaseVsFrequency>( string("z:range=(0,") + tostring<float>(clip_value) + string(")") );
   }
-  
+
   if( label_degrees )
   {
     //SetPlotOptions<StokesCylindrical>( "x:unit=deg" );
