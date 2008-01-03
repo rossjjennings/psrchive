@@ -15,6 +15,7 @@ Pulsar::Backend::Backend (const std::string& ext_name)
   hand = Signal::Right;
   argument = Signal::Conventional;
   downconversion_corrected = false;
+  delay = 0.0;
 }
 
 //! Copy constructor

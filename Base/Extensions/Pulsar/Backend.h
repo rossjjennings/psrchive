@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Backend.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/10/02 04:50:09 $
-   $Author: straten $ */
+   $Revision: 1.11 $
+   $Date: 2008/01/03 00:36:30 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_Backend_h
 #define __Pulsar_Backend_h
@@ -70,6 +70,12 @@ namespace Pulsar {
 
     //! True if backend has compensated for lower sideband downconversion
     void set_downconversion_corrected (bool corrected = true);
+    
+    //! Get the delay
+    double get_delay() const { return delay; }
+    
+    //! Set the delay
+    void set_delay( const double set_delay ) { delay = set_delay; }
 
   protected:
 
@@ -84,6 +90,9 @@ namespace Pulsar {
 
     //! True if backend has compensated for lower sideband downconversion
     bool downconversion_corrected;
+    
+    //! proportional delay from digitiser input
+    double delay;
 
   };
  
