@@ -47,8 +47,12 @@
 
 #include <unistd.h>
 
-using namespace Pulsar;
-using namespace std;
+using std::string;
+using std::vector;
+using Pulsar::Archive;
+using Pulsar::Option;
+using Pulsar::Plot;
+using Reference::To;
 
 
 
@@ -59,6 +63,8 @@ public:
 
   int run( int argc, char *argv[] );
 private:
+  
+  static Option<string> default_plot_device;
 
   struct FilePlots
   {
