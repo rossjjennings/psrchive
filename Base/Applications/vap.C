@@ -400,7 +400,7 @@ string get_projid( Reference::To<Archive> archive )
 
 string get_rcvr( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
 
   Reference::To<Receiver> ext = archive->get<Receiver>();
 
@@ -414,7 +414,7 @@ string get_rcvr( Reference::To<Archive> archive )
 
 string get_nrcvr( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
 
   Reference::To<Receiver> ext = archive->get<Receiver>();
 
@@ -752,7 +752,7 @@ string get_be_dcc( Reference::To< Archive > archive )
 
 string get_be_phase( Reference::To< Archive > archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<Backend> ext;
   ext = archive->get<Backend>();
   if( !ext )
@@ -770,7 +770,7 @@ string get_be_phase( Reference::To< Archive > archive )
 
 string get_beconfig( Reference::To< Archive > archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<WidebandCorrelator> ext = archive->get<WidebandCorrelator>();
 
   if( !ext )
@@ -781,9 +781,41 @@ string get_beconfig( Reference::To< Archive > archive )
   return result;
 }
 
+
+
+string get_be_delay( Reference::To< Archive > archive )
+{
+  string result;
+  Reference::To<Backend> ext = archive->get<WidebandCorrelator>();
+
+  set_precision( 14 );
+  if( !ext )
+    result = "UNDEF";
+  else
+    result = tostring<double>( ext->get_delay() );
+  restore_precision();
+
+  return result;
+}
+
+
+
+string get_period( Reference::To<Archive> archive )
+{
+  string result = "UNDEF";
+  
+  // TODO check this
+  set_precision( 14 );
+  result = tostring<double>( archive->get_Integration(0)->get_folding_period() );
+  restore_precision();
+  
+  return result;
+}
+
+
 string get_tcycle( Reference::To< Archive > archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<WidebandCorrelator> ext = archive->get<WidebandCorrelator>();
 
   if( !ext )
@@ -873,7 +905,7 @@ string get_stt_lst( Reference::To<Archive> archive )
 
 string get_coord_md( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
@@ -886,7 +918,7 @@ string get_coord_md( Reference::To<Archive> archive )
 
 string get_equinox( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
@@ -899,7 +931,7 @@ string get_equinox( Reference::To<Archive> archive )
 
 string get_trk_mode( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
@@ -912,7 +944,7 @@ string get_trk_mode( Reference::To<Archive> archive )
 
 string get_bpa( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
@@ -925,7 +957,7 @@ string get_bpa( Reference::To<Archive> archive )
 
 string get_bmaj( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   set_precision(3);
@@ -940,7 +972,7 @@ string get_bmaj( Reference::To<Archive> archive )
 
 string get_bmin( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   set_precision( 3 );
@@ -955,7 +987,7 @@ string get_bmin( Reference::To<Archive> archive )
 
 string get_stt_imjd( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
@@ -968,7 +1000,7 @@ string get_stt_imjd( Reference::To<Archive> archive )
 
 string get_stt_smjd( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
@@ -981,7 +1013,7 @@ string get_stt_smjd( Reference::To<Archive> archive )
 
 string get_stt_offs( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   set_precision( 9 );
@@ -1008,7 +1040,7 @@ string get_dec( Reference::To<Archive> archive )
 
 string get_stt_crd1( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
@@ -1021,7 +1053,7 @@ string get_stt_crd1( Reference::To<Archive> archive )
 
 string get_stt_crd2( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
@@ -1034,7 +1066,7 @@ string get_stt_crd2( Reference::To<Archive> archive )
 
 string get_stp_crd1( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
@@ -1047,7 +1079,7 @@ string get_stp_crd1( Reference::To<Archive> archive )
 
 string get_stp_crd2( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
@@ -1081,7 +1113,7 @@ string get_nchan_fluxcal( Reference::To<Archive> archive )
 
 string get_nrcvr_fluxcal( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FluxCalibratorExtension> ext = archive->get<FluxCalibratorExtension>();
 
   if( !ext )
@@ -1173,7 +1205,7 @@ string get_nsub( Reference::To< Archive > archive )
 
 string get_npol_bp( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<Passband> ext = archive->get<Passband>();
 
   if( !ext )
@@ -1186,7 +1218,7 @@ string get_npol_bp( Reference::To<Archive> archive )
 
 string get_nch_bp( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<Passband> ext = archive->get<Passband>();
 
   if( !ext )
@@ -1206,7 +1238,7 @@ string get_nch_bp( Reference::To<Archive> archive )
 
 string get_npar_feed( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<PolnCalibratorExtension> ext = archive->get<PolnCalibratorExtension>();
 
   if( !ext )
@@ -1219,7 +1251,7 @@ string get_npar_feed( Reference::To<Archive> archive )
 
 string get_nchan_feed( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<PolnCalibratorExtension> ext = archive->get<PolnCalibratorExtension>();
 
   if( !ext )
@@ -1232,7 +1264,7 @@ string get_nchan_feed( Reference::To<Archive> archive )
 
 string get_MJD_feed( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<PolnCalibratorExtension> ext = archive->get<PolnCalibratorExtension>();
 
   if( !ext )
@@ -1272,7 +1304,7 @@ string get_dig_atten( Reference::To<Archive> archive )
 
 string get_ndigstat( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
 
   if( !ext )
@@ -1285,7 +1317,7 @@ string get_ndigstat( Reference::To<Archive> archive )
 
 string get_npar_digstat( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
 
   if( !ext )
@@ -1298,7 +1330,7 @@ string get_npar_digstat( Reference::To<Archive> archive )
 
 string get_ncycsub( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
 
   if( !ext )
@@ -1311,7 +1343,7 @@ string get_ncycsub( Reference::To<Archive> archive )
 
 string get_levmode_digstat( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
 
   if( !ext )
@@ -1331,7 +1363,7 @@ string get_levmode_digstat( Reference::To<Archive> archive )
 
 string get_dig_mode( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
 
   if( !ext )
@@ -1357,7 +1389,7 @@ string get_dyn_levt( Reference::To<Archive> archive )
 
 string get_nlev_digcnts( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
 
   if( !ext )
@@ -1370,7 +1402,7 @@ string get_nlev_digcnts( Reference::To<Archive> archive )
 
 string get_npthist( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
 
   if( !ext )
@@ -1383,7 +1415,7 @@ string get_npthist( Reference::To<Archive> archive )
 
 string get_levmode_digcnts( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
 
   if( !ext )
@@ -1401,7 +1433,7 @@ string get_levmode_digcnts( Reference::To<Archive> archive )
 
 string get_subint_type( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
@@ -1414,7 +1446,7 @@ string get_subint_type( Reference::To<Archive> archive )
 
 string get_subint_unit( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
@@ -1427,7 +1459,7 @@ string get_subint_unit( Reference::To<Archive> archive )
 
 string get_tsamp( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
@@ -1440,7 +1472,7 @@ string get_tsamp( Reference::To<Archive> archive )
 
 string get_nbin_subint( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
@@ -1453,7 +1485,7 @@ string get_nbin_subint( Reference::To<Archive> archive )
 
 string get_nbits( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
@@ -1466,7 +1498,7 @@ string get_nbits( Reference::To<Archive> archive )
 
 string get_nch_file( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
@@ -1479,7 +1511,7 @@ string get_nch_file( Reference::To<Archive> archive )
 
 string get_nch_strt( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
@@ -1492,7 +1524,7 @@ string get_nch_strt( Reference::To<Archive> archive )
 
 string get_npol_subint( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
@@ -1505,7 +1537,7 @@ string get_npol_subint( Reference::To<Archive> archive )
 
 string get_nsblk( Reference::To<Archive> archive )
 {
-  string result = "TODO";
+  string result;
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
@@ -1678,7 +1710,9 @@ void PrintExtdHlp( void )
   cout << "backend                         Name of the backend instrument" << endl;
   cout << "beconfig                        Backend Config file" << endl;
   cout << "be_dcc                          Downconversion conjugation corrected" << endl;
-  cout << "be_phase                        Phase convention of backend" << endl;
+  cout << "be_delay                        Proportional delay from digitiser input" << endl;
+  cout << "be_phase                        Phase convention of backend" << endl;  
+  cout << "period                          Folding period" << endl;
   cout << "tcycle                          Correlator cycle time" << endl;
   cout << "" << endl;
 
@@ -2006,6 +2040,8 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "fa_req" ) return get_fa_req ( archive );
     else if( command == "dyn_levt" ) return get_dyn_levt ( archive );
     else if( command == "dig_atten" ) return get_dig_atten ( archive );
+    else if( command == "be_delay" ) return get_be_delay( archive );
+    else if( command == "period" ) return get_period( archive );
 
     else return "UNDEF";
   }
