@@ -67,6 +67,13 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
     cerr << "FITSArchive::load_WidebandCorrelator reading NRCVR" << endl;
   
   psrfits_read_key (fptr, "NRCVR", &(ext->nrcvr), 0, verbose == 3);
+  
+  if( verbose == 3   )
+    cerr << "FITSArchive::load_WidebandCorrelator reading BE_DELAY" << endl;
+  
+  double dtmp = 0.0;
+  psrfits_read_key( fptr, "BE_DELAY", &dtmp, 0.0, verbose == 3 );
+  ext->set_delay( dtmp );
 
   add_extension (ext);
 

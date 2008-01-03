@@ -899,7 +899,8 @@ try {
 	cerr << "FITSArchive::unload " << backend->get_extension_name()
 	     << " BACKEND=" << backend->get_name() 
 	     << " BE_DCC=" << backend->get_downconversion_corrected()
-	     << " BE_PHASE=" << backend->get_argument() << endl;
+	     << " BE_PHASE=" << backend->get_argument() 
+	     << " BE_DELAY=" << backend->get_delay() << endl;
       
       psrfits_update_key (fptr, "BACKEND",  backend->get_name());
       
@@ -908,6 +909,9 @@ try {
  
       int be_phase = backend->get_argument();
       psrfits_update_key (fptr, "BE_PHASE", be_phase);
+      
+      double be_delay = backend->get_delay();
+      psrfits_update_key (fptr, "BE_DELAY", be_delay );
 
     }
     
