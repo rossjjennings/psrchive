@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.53 $
-   $Date: 2008/01/02 20:27:03 $
-   $Author: straten $ */
+   $Revision: 1.54 $
+   $Date: 2008/01/06 23:30:55 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_FITSArchive_h
 #define __Pulsar_FITSArchive_h
@@ -254,7 +254,6 @@ namespace Pulsar {
 
     mutable bool preserve_reference_epoch;
 
-    int truthval (bool) const;
     void init ();
 
   };

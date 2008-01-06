@@ -1101,17 +1101,6 @@ catch (Error& error) {
 
 
 
-// !A quick little helper function for internal use.
-// /////////////////////////////////////////////////
-
-int Pulsar::FITSArchive::truthval (bool condition) const
-{
-  if (condition)
-    return 1;
-  else
-    return 0;
-}
-
 // !retreive the offs_sub
 
 double Pulsar::FITSArchive::get_offs_sub( unsigned int isub ) const
