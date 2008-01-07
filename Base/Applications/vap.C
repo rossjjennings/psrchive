@@ -280,9 +280,12 @@ string get_intmjd( Reference::To< Archive > archive )
 {
   string intmjd = "*";
 
-  Reference::To<FITSHdrExtension> hdr = archive->get<FITSHdrExtension>();
-  if( hdr )
-    intmjd = tostring<int>( hdr->start_time.intday() );
+  try 
+  {
+    MJD t = archive->start_time();
+    intmjd = tostring<int>( t.intday() );
+  }
+  catch( Error e ) {}
 
   return intmjd;
 }
@@ -293,9 +296,14 @@ string get_fracmjd( Reference::To< Archive > archive )
   string fracmjd;
 
   set_precision( 14 );
-  Reference::To<FITSHdrExtension> hdr_ext = archive->get<FITSHdrExtension>();
-  if( hdr_ext )
-    fracmjd = tostring( hdr_ext->start_time.fracday() );
+
+  try
+  {
+    MJD t = archive->start_time();
+    fracmjd = tostring( t.fracday() );
+  }
+  catch( Error e ) {}
+
   restore_precision();
 
   return fracmjd;
@@ -303,10 +311,20 @@ string get_fracmjd( Reference::To< Archive > archive )
 
 string get_mjd( Reference::To< Archive > archive )
 {
-  set_precision( 14 );
-  string result = tostring( archive->start_time(), 15 );
+  string mjd;
+
+  set_precision( 19 );
+
+  try
+  {
+    MJD t = archive->start_time();
+    mjd = tostring( t, 15 );
+  } 
+  catch( Error e ) {}
+
   restore_precision();
-  return result;
+
+  return mjd;
 }
 
 string get_parang( Reference::To< Archive > archive )
@@ -492,15 +510,15 @@ string get_fd_mode( Reference::To<Archive> archive )
     mode = recv->get_tracking_mode();
     switch( mode )
     {
-      case Receiver::Feed:
-	result = "FA";
-	break;
-      case Receiver::Celestial:
-	result = "CPA";
-	break;
-      case Receiver::Galactic:
-	result = "GPA";
-	break;
+    case Receiver::Feed:
+      result = "FA";
+      break;
+    case Receiver::Celestial:
+      result = "CPA";
+      break;
+    case Receiver::Galactic:
+      result = "GPA";
+      break;
     };
   }
 
@@ -645,7 +663,15 @@ string get_telescop( Reference::To< Archive > archive )
   Reference::To<ObsExtension> ext = archive->get<ObsExtension>();
 
   if( !ext )
-    result = "UNDEF";
+  {
+    Reference::To<Telescope> text = archive->get<Telescope>();
+    if( text )
+    {
+      result = text->get_name();
+    }
+    else 
+      result = "UNDEF";
+  }
   else
     result = ext->get_telescope();
 
@@ -802,13 +828,11 @@ string get_be_delay( Reference::To< Archive > archive )
 
 string get_period( Reference::To<Archive> archive )
 {
-  string result = "UNDEF";
-  
   // TODO check this
   set_precision( 14 );
-  result = tostring<double>( archive->get_Integration(0)->get_folding_period() );
+  string result = tostring<double>( archive->get_Integration(0)->get_folding_period() );
   restore_precision();
-  
+
   return result;
 }
 
@@ -1119,7 +1143,7 @@ string get_nrcvr_fluxcal( Reference::To<Archive> archive )
   if( !ext )
     result = "UNDEF";
   else
-    result = tostring( ext->get_nreceptor() );
+    result = tostring<double>( ext->get_nreceptor() );
 
   return result;
 }
@@ -1285,7 +1309,7 @@ string get_dig_atten( Reference::To<Archive> archive )
 {
   ostringstream result;
   Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
-  
+
   if( !ext )
     result << "UNDEF";
   else
@@ -1294,11 +1318,11 @@ string get_dig_atten( Reference::To<Archive> archive )
     for( it = ext->rows[0].atten.begin(); it != ext->rows[0].atten.end(); it ++ )
     {
       if( it != ext->rows[0].atten.begin() )
-	result << ",";
+        result << ",";
       result << (*it);
     }
   }
-  
+
   return result.str();
 }
 
@@ -1378,12 +1402,12 @@ string get_dyn_levt( Reference::To<Archive> archive )
 {
   string result = "UNDEF";
   Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
-  
+
   if( ext )
   {
     result = tostring<float>( ext->get_dyn_levt() );
   }
-  
+
   return result;
 }
 
@@ -1711,7 +1735,7 @@ void PrintExtdHlp( void )
   cout << "beconfig                        Backend Config file" << endl;
   cout << "be_dcc                          Downconversion conjugation corrected" << endl;
   cout << "be_delay                        Proportional delay from digitiser input" << endl;
-  cout << "be_phase                        Phase convention of backend" << endl;  
+  cout << "be_phase                        Phase convention of backend" << endl;
   cout << "period                          Folding period" << endl;
   cout << "tcycle                          Correlator cycle time" << endl;
   cout << "" << endl;
@@ -1854,6 +1878,11 @@ void PrintExtdHlp( void )
   cout << "cal_mode                        Cal mode (OFF, SYNC, EXT1, EXT2)" << endl;
   cout << "cal_phs                         Cal phase (wrt start time) (E)" << endl;
   cout << endl;
+  
+  cout << "Values given as UNDEF are not valid for the current file eg nch_fluxcal" << endl;
+  cout << "will return UNDEF for all files that do not contain a FluxCalibratorExtension." << endl;
+  cout << "Values given as * are defined, but not present in the particular file. Values" << endl;
+  cout << "marked as INVALID are for unrecognised parameters, usually you have mispelled them" << endl;
 
 }
 
@@ -2042,8 +2071,11 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "dig_atten" ) return get_dig_atten ( archive );
     else if( command == "be_delay" ) return get_be_delay( archive );
     else if( command == "period" ) return get_period( archive );
+    else if( command == "epoch_fluxcal" ) return get_epoch_fluxcal( archive );
+    else if( command == "nchan_fluxcal" ) return get_nchan_fluxcal( archive );
+    else if( command == "nrcvr_fluxcal" ) return get_nrcvr_fluxcal( archive );
 
-    else return "UNDEF";
+    else return "INVALID";
   }
   catch( Error e )
   {
