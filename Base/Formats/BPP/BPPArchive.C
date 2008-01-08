@@ -208,55 +208,31 @@ void Pulsar::BPPArchive::load_header (const char* filename)
     throw Error (FailedCall, "Pulsar::BPPArchive::load_header", "fread");
   }
 
-#if (MACHINE_LITTLE_ENDIAN==0) 
-  // Byte-swap header if needed
-  hdr_to_big_endian();
-#endif
-  
-  // Read in RFs array now to make life easier
-  int i;
-  orig_rfs = new double[hdr.chsbd*hdr.bds];
-  int means_array_size = sizeof(float)*hdr.chsbd*hdr.polns;
-  int data_array_size = sizeof(float)*hdr.bins*hdr.chsbd*hdr.polns;
-  for (i=0; i<hdr.bds; i++) {
-    rv = fread(&orig_rfs[i*hdr.chsbd], sizeof(double), hdr.chsbd, f);
-    if (rv!=hdr.chsbd) { 
-      fclose(f);
-      throw Error (FailedCall, "Pulsar::BPPArchive::load_header", 
-          "fread(orig_rfs)");
-    }
-    rv = fseek(f, means_array_size + data_array_size, SEEK_CUR);
-    if (rv) { 
-      fclose(f);
-      throw Error (FailedCall, "Pulsar::BPPArchive::load_header", 
-          "fseek(orig_rfs)");
-    }
-  }
-  fclose(f);
-
-#if (MACHINE_LITTLE_ENDIAN==0)
-  // Byte-swap RFs array if needed
-  array_changeEndian(hdr.chsbd*hdr.bds, orig_rfs, sizeof(double));
-#endif
-
   // Check for expected version number
   if (strncmp(hdr.version,"1.0",3)==0) { rv=1; }
   else if (strncmp(hdr.version,"2.0",3)==0) { rv=1; }
   else { rv=0; }
-
-  if (!rv)
+  if (!rv) {
+    fclose(f);
     throw Error (InvalidState, "Pulsar::BPPArchive::load_header",
         "version not recognized");
+  }
 
+#if (MACHINE_LITTLE_ENDIAN==0) 
+  // Byte-swap header if needed
+  hdr_to_big_endian();
+#endif
 
   // Convert raw header values to things PSRCHIVE wants
   set_npol(hdr.polns);
   if (npol==1) { set_state(Signal::Intensity); }
   else if (npol==2) { set_state(Signal::PPQQ); }
   else if (npol==4) { set_state(Signal::Coherence); }
-  else
+  else {
+    fclose(f);
     throw Error (InvalidState, "Pulsar::BPPArchive::load_header",
         "invalid npol (%d)", npol);
+  }
 
   set_nsubint(1); // Only 1 subint per bpp file ever
   set_nbin(hdr.bins);
@@ -281,6 +257,41 @@ void Pulsar::BPPArchive::load_header (const char* filename)
   } else {
     set_type(Signal::Pulsar);
   }
+
+  // Read in RFs array now 
+  if ((hdr.chsbd<0) || (hdr.chsbd>64)) {
+    fclose(f);
+    throw Error (InvalidState, "Pulsar::BPPArchive::load_header",
+        "invalid chsbd=%d", hdr.chsbd);
+  }
+  if ((hdr.bds<0) || (hdr.bds>64)) {
+    fclose(f);
+    throw Error (InvalidState, "Pulsar::BPPArchive::load_header",
+        "invalid bds=%d", hdr.bds);
+  }
+  int i;
+  orig_rfs = new double[hdr.chsbd*hdr.bds];
+  int means_array_size = sizeof(float)*hdr.chsbd*hdr.polns;
+  int data_array_size = sizeof(float)*hdr.bins*hdr.chsbd*hdr.polns;
+  for (i=0; i<hdr.bds; i++) {
+    rv = fread(&orig_rfs[i*hdr.chsbd], sizeof(double), hdr.chsbd, f);
+    if (rv!=hdr.chsbd) { 
+      fclose(f);
+      throw Error (FailedCall, "Pulsar::BPPArchive::load_header", 
+          "fread(orig_rfs)");
+    }
+    rv = fseek(f, means_array_size + data_array_size, SEEK_CUR);
+    if (rv) { 
+      fclose(f);
+      throw Error (FailedCall, "Pulsar::BPPArchive::load_header", 
+          "fseek(orig_rfs)");
+    }
+  }
+  fclose(f);
+#if (MACHINE_LITTLE_ENDIAN==0)
+  // Byte-swap RFs array if needed
+  array_changeEndian(hdr.chsbd*hdr.bds, orig_rfs, sizeof(double));
+#endif
 
   // Find total (non-overlapping) BW
   // BPP file convention: bw is always positive, rf<0 for reversed sideband.
@@ -547,6 +558,8 @@ bool Pulsar::BPPArchive::Agent::advocate (const char* filename)
     return true;
   }
   catch (Error &e) { 
+    if (verbose > 2) 
+        cerr << "BPP load failed due to: " << e << endl;
     return false;
   }
   return false;

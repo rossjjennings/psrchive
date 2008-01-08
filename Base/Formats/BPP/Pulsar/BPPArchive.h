@@ -111,7 +111,7 @@ namespace Pulsar {
     bool advocate (const char* filename);
     
     //! Return the name of the BPPArchive plugin
-    std::string get_name () { return "BPPArchive"; }
+    std::string get_name () { return "BPP"; }
     
     //! Return description of this plugin
     std::string get_description ();
