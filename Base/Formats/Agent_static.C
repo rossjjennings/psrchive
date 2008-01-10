@@ -58,15 +58,21 @@ Archive::Advocate<PuMaArchive>::entry;
 
 #endif
 
-#include "Pulsar/ASCIIArchive.h"
+#include "Pulsar/WAPPArchive.h"
 
 template
-Registry::List<Archive::Agent>::Enter<ASCIIArchive::Agent>
-Archive::Advocate<ASCIIArchive>::entry;
+Registry::List<Archive::Agent>::Enter<WAPPArchive::Agent>
+Archive::Advocate<WAPPArchive>::entry;
 
 #include "Pulsar/BPPArchive.h"
 
 template
 Registry::List<Archive::Agent>::Enter<BPPArchive::Agent>
 Archive::Advocate<BPPArchive>::entry;
+
+#include "Pulsar/ASCIIArchive.h"
+
+template
+Registry::List<Archive::Agent>::Enter<ASCIIArchive::Agent>
+Archive::Advocate<ASCIIArchive>::entry;
 
