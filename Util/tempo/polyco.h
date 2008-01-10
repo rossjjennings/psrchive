@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.47 $
-   $Date: 2007/08/14 22:15:58 $
-   $Author: straten $ */
+   $Revision: 1.48 $
+   $Date: 2008/01/10 20:57:24 $
+   $Author: demorest $ */
 
 #ifndef __POLY_H
 #define __POLY_H
@@ -24,6 +24,7 @@
 #include <mpi.h>
 #endif
 
+//! Describes a single Tempo polyco set
 class polynomial {
   
   friend class polyco;
@@ -163,13 +164,14 @@ public:
 #ifdef HAVE_MPI
   friend int mpiPack_size (const polynomial&, MPI_Comm comm, int* size);
   friend int mpiPack (const polynomial&, void* outbuf, int outcount,
-		      int* position, MPI_Comm comm);
+                      int* position, MPI_Comm comm);
   friend int mpiUnpack (void* inbuf, int insize, int* position, 
-			polynomial*, MPI_Comm comm);
+                        polynomial*, MPI_Comm comm);
 #endif
 
 };
 
+//! Expert interface to polynomial attributes
 class polynomial::Expert {
 
 public:
@@ -194,7 +196,7 @@ public:
   polynomial* instance;
 };
 
-
+//! Implements Predictor class for Tempo
 class polyco : public Pulsar::Predictor {
 
 public:
@@ -325,9 +327,9 @@ public:
 #ifdef HAVE_MPI
   friend int mpiPack_size (const polyco&, MPI_Comm comm, int* size);
   friend int mpiPack   (const polyco&, void* outbuf, int outcount,
-			int* position, MPI_Comm comm);
+                        int* position, MPI_Comm comm);
   friend int mpiUnpack (void* inbuf, int insize, int* position, 
-			polyco*, MPI_Comm comm);
+                        polyco*, MPI_Comm comm);
 #endif
 
 protected:
