@@ -10,6 +10,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/PhaseWeight.h"
+#include "Pulsar/ProcHistory.h"
 
 #include "Pulsar/SmoothMean.h"
 
@@ -27,7 +28,7 @@ Pulsar::FluxPlot::FluxPlot ()
   peak_centre_origin = true;
 
   baseline_zoom = 0;
-  plot_ebox = false;
+  plot_ebox = 0;
 
   original_nchan = 0;
 
@@ -260,6 +261,12 @@ float Pulsar::FluxPlot::get_phase_error (const Archive* data)
   if (original_nchan)
     chan_bw = data->get_bandwidth() / original_nchan;
 
+  const ProcHistory* history = data->get<ProcHistory>();
+  if (history && history->rows.size())
+    chan_bw = history->rows[0].chanbw;
+
+  chan_bw = fabs(chan_bw);
+
   double period    = data->get_Integration(0)->get_folding_period();
 
   cerr << "Frequency = " << freq << endl;
@@ -309,15 +316,48 @@ void Pulsar::FluxPlot::plot_error_box (const Archive* data)
 
   float x_min = 0;
   float x_max = 0;
+  get_frame()->get_x_scale()->get_range (x_min, x_max);
 
-  get_scale()->PlotScale::get_range (x_min, x_max);
+  float y_min = 0;
+  float y_max = 0;
+  get_frame()->get_y_scale()->get_range (y_min, y_max);
 
-  float xscale = get_scale()->get_scale (data);
+  PlotLabel* label = get_frame()->get_label_below();
 
-  float x1 = x_min + (x_max - x_min) * 0.05;
-  float x2 = x1 + x_error * xscale;
-  float y1 = 10 * y_error;
-  float y2 = y1 + 4.0 * y_error;
+  // left side of error box defined by label margin
+  float x1 = x_min + label->get_margin (PlotLabel::World);
+  float x2 = x1 + x_error * get_scale()->get_scale (data);
+
+  float y1 = 0;
+  float y2 = 0;
+
+  switch (plot_ebox)
+    {
+    case 1:
+      // bottom of error box is ten sigma away from baseline
+      y1 = 10 * y_error;
+      y2 = y1 + 4.0 * y_error;
+      break;
+
+    case 2:
+      // middle of error box is half way between baseline and top of plot
+      y1 = 0.5 * y_max - 2.0 * y_error;
+      y2 = 0.5 * y_max + 2.0 * y_error;
+      break;
+
+    case 3:
+      // top edge of error box one character height below last row in top left
+      unsigned nrows = label->get_nrows( label->get_left() );
+      y2 = y_max + label->get_displacement( nrows, PlotLabel::World );
+      y1 = y2 - 4.0 * y_error;
+      break;
+
+    default:
+      throw Error (InvalidState, "Pulsar::FluxPlot::plot_error_box",
+		   "unknown error box code = %d", plot_ebox);
+    }
+
+  cerr << "x1=" << x1 << " x2=" << x2 << " y1=" << y1 << " y2=" << y2 << endl;
 
   cpgmove (x1,y1);
   cpgdraw (x2,y1);

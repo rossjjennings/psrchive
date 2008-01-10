@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.28 $
-   $Date: 2007/12/19 21:16:59 $
+   $Revision: 1.29 $
+   $Date: 2008/01/10 23:21:34 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -90,8 +90,8 @@ namespace Pulsar {
     bool get_info_label () const;
 
     //! Plot an error box on the baseline
-    void set_plot_error_box (bool flag = true) { plot_ebox = flag; }
-    bool get_plot_error_box () const { return plot_ebox; }
+    void set_plot_error_box (int code) { plot_ebox = code; }
+    int get_plot_error_box () const { return plot_ebox; }
 
     //! Plot an error box on the baseline
     void set_plot_histogram (bool f = true) { plotter.plot_histogram = f; }
@@ -129,7 +129,7 @@ namespace Pulsar {
     PlotIndex ichan;
     PlotIndex ipol;
 
-    bool plot_ebox;
+    int plot_ebox;
     float peak_zoom;
     bool peak_centre_origin;
     float baseline_zoom;
