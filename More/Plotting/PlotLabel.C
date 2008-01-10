@@ -43,36 +43,69 @@ Pulsar::PlotLabel::plot ( const Archive* data, const string& label, float side)
   vector<string> labels;
   separate (label, labels, ".");
   
-  for (unsigned i=0; i < labels.size(); i++) {
-
+  for (unsigned i=0; i < labels.size(); i++)
+  {
     labels[i] = substitute( labels[i], get_interface(data) );
     labels[i] = evaluate( labels[i] );
     row (labels[i], i, labels.size(), side);
-
   }
+}
 
+unsigned Pulsar::PlotLabel::get_nrows (const string& label) const
+{
+  vector<string> labels;
+  separate (label, labels, ".");
+  return labels.size();
+}
+
+//! Get the margin in the specified units
+float Pulsar::PlotLabel::get_margin (Units units) const
+{
+  float xl, yl;
+  // the margin is defined by the width of a dash
+  cpglen (units, "-", &xl, &yl);
+  return 1.5 * xl;
+}
+
+//! Get the displacement of label[irow] in the specified units
+float Pulsar::PlotLabel::get_displacement (int row, Units units) const
+{
+  float xl, yl;
+  // the row displacement is defined by the height of a zero
+  cpgqcs (units, &xl, &yl);
+
+  return yl * get_displacement(row);
+}
+
+//! Get the displacement of row character heights from the viewport edge
+float Pulsar::PlotLabel::get_displacement (int row) const
+{
+  if (spacing > 0)
+    return offset + row * spacing;
+  else
+    return (row+1) * spacing - offset;
 }
 
 void Pulsar::PlotLabel::row (const string& label,
 			     unsigned irow, unsigned nrow, float side)
 {
-  // get the length of a dash in normalized device coordinates
-  float xl, yl;
-  cpglen (5, "-", &xl, &yl);
+  /*
+    COORD: the location of the character string along the specified
+    edge of the viewport, as a fraction of the length of the edge.
+  */
+
+  float coord = 0.5;
 
   if (side < 0.5)
-    side += xl;
+    coord = side + get_margin (Viewport);
   else if (side > 0.5)
-    side -= xl;
-  
-  float start = 0;
+    coord = side - get_margin (Viewport);
 
+  // rows always go from top to bottom
   if (spacing > 0)
-    start = offset + (nrow-irow-1) * spacing;
-  else
-    start = (irow+1) * spacing - offset;
+    irow = nrow - irow -1;
 
-  cpgmtxt ("T", start, side, side, label.c_str());
+  cpgmtxt ("T", get_displacement(irow), coord, side, label.c_str());
 }
 
 
