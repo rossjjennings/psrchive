@@ -10,6 +10,7 @@
 
 #include <fitsio.h>
 #include "FITSError.h"
+#include "FTransform.h"
 
 using namespace std;
 
@@ -168,10 +169,8 @@ void Pulsar::ASPArchive::load_header (const char* filename)
   set_faraday_corrected(false);
   set_poln_calibrated(false);
 
-  // This is mostly true... but will probably change a bit for the
-  // multi-polyco updates.
-  if (asp_file_version==ASP_FITS_V101) { set_dedispersed(true); } 
-  else { set_dedispersed(false); }
+  // TODO: This may change for multi-polyco support
+  set_dedispersed(false);
 
   // Info from main header
   fits_movabs_hdu(f, 1, NULL, &status);
@@ -344,10 +343,16 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
   }
 
   // Use avg folding period
+  // TODO: This will change for multi-polyco support
   double pfold=0.0;
   for (int i=0; i<nchan; i++) pfold += midper[i];
   pfold /= (double)nchan;
   if (!status) integration->set_folding_period(pfold);
+
+  // Use a middle channel as ref phase, adjust epoch
+  // TODO: This will change for multi-polyco support
+  double refphase = midphase[nchan/2];
+  midsecs -= refphase * midper[nchan/2];
 
   // Move to data HDU
   if (asp_file_version==ASP_FITS_V101) {
@@ -398,12 +403,11 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
           &status);
       // Normalize by counts
       for (int ibin=0; ibin<nbin; ibin++) data[ibin] /= (float)count[ibin];
+      // Rotate to align phase0 w/ epoch.
+      // TODO: This will change for multi-polyco support
+      FTransform::shift(nbin, data, (double)nbin*(midphase[ichan]-refphase));
       // Put data in integration structure:
       integration->get_Profile(ipol,ichan)->set_amps(data);
-      // Rotate to align phase0 w/ epoch.
-      // Need to resolve library dependencies (libpsrmore) to get this 
-      // step to work.  Or find another way to do it..
-      //integration->get_Profile(ipol,ichan)->rotate_phase(midphase[ichan]);
     }
   }
 
