@@ -65,7 +65,7 @@ Calibration::StandardData::get_stokes (unsigned ibin)
     normalize->set_other (total_other);
     normalize->normalize (result);
 
-    result *= sqrt( stats->get_on_pulse_nbin() );
+    result *= sqrt( stats->get_stats()->get_on_pulse_nbin() );
   }
 
   return result;
