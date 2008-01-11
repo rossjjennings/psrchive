@@ -91,6 +91,18 @@ unsigned Pulsar::ProfileStats::get_baseline_nbin () const
   return (unsigned) baseline.get_weight_sum();
 }
 
+//! Return true if the specified phase bin is in the on pulse window
+bool Pulsar::ProfileStats::get_on_pulse (unsigned ibin) const
+{
+  return on_pulse[ibin];
+}
+
+//! Return true if the specified phase bin is in the baseline window
+bool Pulsar::ProfileStats::get_baseline (unsigned ibin) const
+{
+  return baseline[ibin];
+}
+
 Estimate<double> Pulsar::ProfileStats::get_baseline_variance () const
 {
   if (baseline_variance.get_value() == 0)

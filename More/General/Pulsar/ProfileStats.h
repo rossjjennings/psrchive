@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/01/11 02:37:09 $
+   $Revision: 1.2 $
+   $Date: 2008/01/11 03:43:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileStats_h
@@ -17,7 +17,6 @@
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Algorithm.h"
 #include "Estimate.h"
-#include "Stokes.h"
 
 namespace Pulsar {
 
@@ -25,7 +24,7 @@ namespace Pulsar {
   class BaselineEstimator;
   class OnPulseEstimator;
 
-  //! Computes polarimetric pulse profile statistics
+  //! Computes pulse profile statistics
   class ProfileStats : public Algorithm {
     
   public:
@@ -51,8 +50,14 @@ namespace Pulsar {
     //! Get the number of phase bins in the on pulse window
     unsigned get_on_pulse_nbin () const;
 
+    //! Return true if the specified phase bin is in the on pulse window
+    bool get_on_pulse (unsigned ibin) const;
+
     //! Get the number of phase bins in the baseline window
     unsigned get_baseline_nbin () const;
+
+    //! Return true if the specified phase bin is in the baseline window
+    bool get_baseline (unsigned ibin) const;
 
     //! Returns the total flux of the on-pulse phase bins
     Estimate<double> get_total () const;
