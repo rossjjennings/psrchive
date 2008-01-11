@@ -346,11 +346,13 @@ void Pulsar::FluxPlot::plot_error_box (const Archive* data)
       break;
 
     case 3:
-      // top edge of error box one character height below last row in top left
-      unsigned nrows = label->get_nrows( label->get_left() );
-      y2 = y_max + label->get_displacement( nrows, PlotLabel::World );
-      y1 = y2 - 4.0 * y_error;
-      break;
+      {
+        // top edge of error box is one row below last row in top left
+        unsigned nrows = label->get_nrows( label->get_left() );
+        y2 = y_max + label->get_displacement( nrows, PlotLabel::World );
+        y1 = y2 - 4.0 * y_error;
+        break;
+      }
 
     default:
       throw Error (InvalidState, "Pulsar::FluxPlot::plot_error_box",
