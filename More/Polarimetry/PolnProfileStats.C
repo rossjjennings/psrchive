@@ -15,10 +15,8 @@ using namespace std;
 //! Default constructor
 Pulsar::PolnProfileStats::PolnProfileStats (const PolnProfile* _profile)
 {
-  set_on_pulse_estimator (new OnPulseThreshold);
-  set_baseline_estimator (new GaussianBaseline);
-
   estimators_selected = false;
+  stats = new ProfileStats;
   set_profile (_profile);
 }
 
@@ -31,47 +29,28 @@ Pulsar::PolnProfileStats::~PolnProfileStats()
 void Pulsar::PolnProfileStats::set_profile (const PolnProfile* _profile)
 {
   profile = _profile;
-  if (profile)
-    build ();
+  build ();
 }
 
 //! Set the PolnProfile from which baseline and on_pulse mask will be selected
 /*! It is assumed that all subsequent PolnProfile instances passed to
   set_profile will have the same phase as set_profile */
-void Pulsar::PolnProfileStats::select_profile (const PolnProfile* set_profile)
+void Pulsar::PolnProfileStats::select_profile (const PolnProfile* _profile)
 {
+  profile = _profile;
   estimators_selected = false;
 
-  if (set_profile)
-    profile = set_profile;
-
   build ();
-
-  if (set_profile)
+  if (_profile)
     estimators_selected = true;
 }
 
-//! The algorithm used to find the on-pulse phase bins
-void Pulsar::PolnProfileStats::set_on_pulse_estimator (OnPulseEstimator* est)
-{
-  on_pulse_estimator = est;
-  if (profile)
-    build ();
-}
-
-//! The algorithm used to find the off-pulse phase bins
-void Pulsar::PolnProfileStats::set_baseline_estimator (BaselineEstimator* est)
-{
-  baseline_estimator = est;
-  if (profile)
-    build ();
-}
 
 //! Returns the total flux of the on-pulse phase bins
 Estimate<double> Pulsar::PolnProfileStats::get_total_intensity () const
 {
-  setup (profile->get_Profile(0));
-  return get_total_on_pulse ();
+  stats->set_profile( profile->get_Profile(0) );
+  return stats->get_total ();
 }
 
 
@@ -81,9 +60,9 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_polarized () const
   Profile polarized;
   profile->get_polarized (&polarized);
 
-  setup (&polarized);
+  stats->set_profile (&polarized);
 
-  return get_total_on_pulse ();
+  return stats->get_total ();
 }
 
 //! Returns the total linearly polarized flux of the on-pulse phase bins
@@ -92,16 +71,16 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_linear () const
   Profile linear;
   profile->get_linear (&linear);
 
-  setup (&linear);
+  stats->set_profile (&linear);
 
-  return get_total_on_pulse ();
+  return stats->get_total ();
 }
 
 //! Returns the total circularly polarized flux of the on-pulse phase bins
 Estimate<double> Pulsar::PolnProfileStats::get_total_circular () const
 {
-  setup (profile->get_Profile(3));
-  return get_total_on_pulse ();
+  stats->set_profile (profile->get_Profile(3));
+  return stats->get_total ();
 }
 
 //! Returns the total absolute value of circularly polarized flux
@@ -110,9 +89,9 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_abs_circular () const
   Profile circular;
   profile->get_circular (&circular);
 
-  setup (&circular);
+  stats->set_profile (&circular);
 
-  return get_total_on_pulse ();
+  return stats->get_total ();
 }
 
 //! Get the Stokes parameters of the specified phase bin
@@ -133,33 +112,10 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_determinant () const
   Estimate<double> total_det;
 
   for (unsigned ibin=0; ibin < profile->get_nbin(); ibin++)
-    if (on_pulse[ibin])
+    if (stats->get_on_pulse(ibin))
       total_det += invariant( get_stokes(ibin) );
 
   return total_det;
-}
-
-Estimate<double> Pulsar::PolnProfileStats::get_total_on_pulse () const
-{
-  double variance = baseline.get_variance().get_value ();
-  double navg = on_pulse.get_weight_sum();
-
-  if (Profile::verbose)
-    cerr << "Pulsar::PolnProfileStats::get_total_on_pulse navg=" << navg
-	 << " var=" << variance << endl;
-
-  return Estimate<double> (on_pulse.get_weighted_sum(), 
-			   variance * navg);
-}
-
-unsigned Pulsar::PolnProfileStats::get_on_pulse_nbin () const
-{
-  return (unsigned) on_pulse.get_weight_sum();
-}
-
-unsigned Pulsar::PolnProfileStats::get_baseline_nbin () const
-{
-  return (unsigned) baseline.get_weight_sum();
 }
 
 Estimate<double>
@@ -167,8 +123,8 @@ Pulsar::PolnProfileStats::get_baseline_variance (unsigned ipol) const
 {
   if (baseline_variance[ipol].get_value() == 0)
   {
-    baseline.set_Profile( profile->get_Profile(ipol) );
-    baseline_variance[ipol] = baseline.get_variance();
+    stats->set_profile( profile->get_Profile(ipol) );
+    baseline_variance[ipol] = stats->get_baseline_variance();
   }
   return baseline_variance[ipol];
 }
@@ -182,27 +138,10 @@ void Pulsar::PolnProfileStats::build () try
 
   baseline_variance = Stokes< Estimate<double> > ();
 
-  if (estimators_selected)
-    return;
-
-  on_pulse_estimator->set_Profile (profile->get_Profile(0));
-  on_pulse_estimator->get_weight (&on_pulse);
-    
-  baseline_estimator->set_Profile (profile->get_Profile(0));
-  baseline_estimator->get_weight (&baseline);
-
-  if (Profile::verbose)
-    cerr << "Pulsar::PolnProfileStats::build nbin=" << profile->get_nbin()
-	 << " on-pulse=" << on_pulse.get_weight_sum()
-	 << " baseline=" << baseline.get_weight_sum() << endl;
+  if (!estimators_selected && profile)
+    stats->select_profile( profile->get_Profile(0) );
 }
 catch (Error& error)
 {
   throw error += "Pulsar::PolnProfileStats::build";
-}
-
-void Pulsar::PolnProfileStats::setup (const Profile* prof) const
-{
-  on_pulse.set_Profile (prof);
-  baseline.set_Profile (prof);
 }
