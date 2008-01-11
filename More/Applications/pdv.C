@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.16 $
-   $Date: 2008/01/01 21:52:22 $
-   $Author: nopeer $ */
+   $Revision: 1.17 $
+   $Date: 2008/01/11 03:43:23 $
+   $Author: straten $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -22,10 +22,12 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
-#include <Pulsar/IntegrationOrder.h>
+#include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Interpreter.h"
 #include "Pulsar/PolnProfile.h"
+#include "Pulsar/ProfileStats.h"
+
 #include <Pulsar/ProcHistory.h>
 #include <Pulsar/DigitiserStatistics.h>
 #include <Pulsar/Integration.h>
@@ -60,6 +62,7 @@ const char STOKES_FRACCIR_KEY   = 'z';
 const char STOKES_POSANG_KEY    = 'Z';
 const char CALIBRATOR_KEY       = 'c';
 const char PULSE_WIDTHS_KEY     = 'f';
+const char PULSE_FLUX_KEY       = 'I';
 const char BASELINE_KEY         = 'R';
 const char TEXT_KEY             = 't';
 const char TEXT_HEADERS_KEY     = 'A';
@@ -73,6 +76,7 @@ using namespace Pulsar;
 
 bool cmd_text = false;
 bool cmd_flux = false;
+bool cmd_flux2 = false;
 bool cmd_subints = false;
 bool cmd_history = false;
 bool per_channel_headers = false;
@@ -102,7 +106,7 @@ void Usage( void )
   cout <<
   "A program for extracting archive data in text form \n"
   "Usage: \n"
-  "     pdv [-f dc] [-H params] [-t] [-c] filenames \n"
+  "     pdv [options] filenames \n"
   "     pdv help [arg] \n"
   "Where: \n"
   "   -" << IBIN_KEY <<           " ibin     select a single phase bin, from 0 to nbin-1 \n"
@@ -121,6 +125,7 @@ void Usage( void )
   "   -" << CALIBRATOR_KEY <<     "          Print out calibrator (square wave) parameters \n"
   "   -" << PULSE_WIDTHS_KEY <<   " dcyc     Show pulse widths and mean flux density (mJy) \n"
   "                                          with baseline width dcyc \n"
+  "   -" << PULSE_FLUX_KEY <<     "          print the mean flux density \n"
   "   -" << BASELINE_KEY <<       "          Do not remove baseline \n"
   "   -" << TEXT_KEY <<           "          Print out profiles as ASCII text \n"
   "   -" << TEXT_HEADERS_KEY <<   "          Print out profiles as ASCII text (with per channel headers) \n"
@@ -218,10 +223,9 @@ void IntegrationHeader( Reference::To< Pulsar::Integration > intg )
 
 void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 {
-  unsigned nsub = archive->get_nsubint();
-  unsigned npol = archive->get_npol();
-  unsigned nchn = archive->get_nchan();
-  unsigned nbin = archive->get_nbin();
+  int nsub = archive->get_nsubint();
+  int npol = archive->get_npol();
+  int nchn = archive->get_nchan();
 
   int fchan = 0, lchan = nchn - 1;
   if( ichan != -1 && ichan <= lchan && ichan >= fchan)
@@ -252,10 +256,10 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
     {
       Header( archive );
 
-      for (unsigned s = fsub; s <= lsub; s++)
+      for (int s = fsub; s <= lsub; s++)
       {
         Integration* intg = archive->get_Integration(s);
-        for (unsigned c = fchan; c <= lchan; c++)
+        for (int c = fchan; c <= lchan; c++)
         {
           vector< Estimate<double> > PAs;
           if( show_pa )
@@ -272,10 +276,10 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
             cout << " ChBW: " << intg->get_bandwidth() / nchn;
             cout << endl;
           }
-          for (unsigned b = fbin; b <= lbin; b++)
+          for (int b = fbin; b <= lbin; b++)
           {
             cout << s << " " << c << " " << b;
-            for(unsigned ipol=0; ipol<npol; ipol++)
+            for(int ipol=0; ipol<npol; ipol++)
             {
               Profile *p = intg->get_Profile( ipol, c );
               cout << " " << p->get_amps()[b];
@@ -309,7 +313,6 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 }
 
 
-
 float flux (const Profile* profile, float dc, float min_phs)
 {
   if( min_phs < 0.0 )
@@ -331,7 +334,13 @@ float flux (const Profile* profile, float dc, float min_phs)
   return flux;
 }
 
+Estimate<float> flux2 (const Profile* profile)
+{
+  Pulsar::ProfileStats stats;
 
+  stats.set_profile( profile );
+  return stats.get_total() / stats.get_on_pulse_nbin();
+}
 
 float width (const Profile* profile, float& error, float pc, float dc)
 {
@@ -457,7 +466,7 @@ void CalParameters( Reference::To< Archive > archive )
   vector< vector< Estimate<double> > > hi;
   vector< vector< Estimate<double> > > lo;
 
-  for (unsigned s = fsub; s <= lsub; s++)
+  for (int s = fsub; s <= lsub; s++)
   {
     Integration* intg = archive->get_Integration (s);
 
@@ -473,7 +482,7 @@ void CalParameters( Reference::To< Archive > archive )
       cout << " lo_pol" << ipol;
     cout << endl;
 
-    for (unsigned c = fchan; c <= lchan; c++)
+    for (int c = fchan; c <= lchan; c++)
     {
       cout << s << " "
       << c << " " << intg->get_centre_frequency( c ) << " "
@@ -525,9 +534,9 @@ void Flux( Reference::To< Archive > archive )
 
   float junk;
 
-  for (unsigned s = fsub; s <= lsub; s++)
+  for (int s = fsub; s <= lsub; s++)
   {
-    for (unsigned c = fchan; c <= lchan; c++)
+    for (int c = fchan; c <= lchan; c++)
     {
       for (unsigned k = 0; k < archive->get_npol(); k++)
       {
@@ -549,6 +558,43 @@ void Flux( Reference::To< Archive > archive )
   }
 }
 
+
+void Flux2( Reference::To< Archive > archive )
+{
+  archive->convert_state (Signal::Intensity);
+
+  int fchan = 0, lchan = archive->get_nchan() - 1;
+  if( ichan <= lchan && ichan >= fchan)
+  {
+    fchan = ichan;
+    lchan = ichan;
+  }
+
+  int fsub = 0, lsub = archive->get_nsubint() - 1;
+  if( isub <= lsub && isub >= fsub )
+  {
+    fsub = isub;
+    lsub = isub;
+  }
+
+  for (int s = fsub; s <= lsub; s++)
+  {
+    for (int c = fchan; c <= lchan; c++)
+    {
+      cout << archive->get_filename() << "\t";
+      cout << s << "\t" << c << "\t";
+      cout.setf(ios::showpoint);
+
+      Estimate<float> flux = flux2( archive->get_Profile(s,0,c) );
+      cout << flux.get_value() << " " << flux.get_error();
+      
+      if (archive->get_scale() == Signal::Jansky)
+	cout << "\t" << "mJy";
+      
+      cout << endl;
+    }
+  }
+}
 
 
 bool CheckPointing( Reference::To<Pointing> pointing, table_stream &ts )
@@ -574,7 +620,7 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
 
   // convert all the parameters to uppercase
 
-  for( int i = 0; i < parameters.size(); i ++ )
+  for( unsigned i = 0; i < parameters.size(); i ++ )
   {
     parameters[i] = uppercase( parameters[i] );
   }
@@ -856,6 +902,8 @@ void ProcessArchive( string filename )
       OutputDataAsText( archive );
     if( cmd_flux )
       Flux( archive );
+    if( cmd_flux2 )
+      Flux2( archive );
   }
 }
 
@@ -881,6 +929,7 @@ int main( int argc, char *argv[] ) try
   args += CALIBRATOR_KEY;
   args += BASELINE_KEY;
   args += PULSE_WIDTHS_KEY; args += ':';
+  args += PULSE_FLUX_KEY;
   args += TEXT_KEY;
   args += TEXT_HEADERS_KEY;
   args += PER_SUBINT_KEY; args += ":";
@@ -915,6 +964,9 @@ int main( int argc, char *argv[] ) try
         exit(-1);
       }
       cmd_flux = true;
+      break;
+    case PULSE_FLUX_KEY:
+      cmd_flux2 = true;
       break;
     case HELP_KEY:
       Usage();
@@ -997,7 +1049,7 @@ int main( int argc, char *argv[] ) try
 
   vector< string > filenames = GetFilenames( argc, argv );
 
-  if( cal_parameters || cmd_text || cmd_flux )
+  if( cal_parameters || cmd_text || cmd_flux || cmd_flux2 )
   {
 
     for_each( filenames.begin(), filenames.end(), ProcessArchive );
