@@ -83,7 +83,7 @@ vector< string > current_row;
 bool new_new_vap = false;
 string meta_filename = "";
 
-bool neat_table = true;
+bool neat_table = false;
 table_stream ts(&cout);
 
 bool full_paths = false;
@@ -471,6 +471,20 @@ string get_fa_req( Reference::To<Archive> archive )
 
   return result;
 }
+
+string get_fda( Reference::To<Archive> archive )
+{
+  const Pulsar::Pointing* ext = 0;
+
+  if( archive->get_nsubint() )
+    ext = archive->get_Integration(0)->get<Pulsar::Pointing>();
+
+  if( ext )
+    return tostring( ext->get_feed_angle().getDegrees() );
+  else
+    return "UNDEF";
+}
+
 
 string get_basis( Reference::To<Archive> archive )
 {
@@ -1717,7 +1731,7 @@ void PrintBasicHlp( void )
   "\n"
   "-s  show the extensions present in an archive\n"
   "\n"
-  "-q  quickly show parameters as files are loaded (no table formatting)\n"
+  "-f  format the output into a table with aligned columns \n"
   << endl;
 }
 
@@ -1728,165 +1742,168 @@ void PrintBasicHlp( void )
 
 void PrintExtdHlp( void )
 {
-  cout << "" << endl;
+  cout << 
+    "\n"
+    "BACKEND PARAMETERS \n"
+    "backend                         Name of the backend instrument \n"
+    "beconfig                        Backend Config file \n"
+    "be_dcc                          Downconversion conjugation corrected \n"
+    "be_delay                        Proportional delay from digitiser input \n"
+    "be_phase                        Phase convention of backend \n"
+    "period                          Folding period \n"
+    "be_phase                        Phase convention of backend \n"
+    "tcycle                          Correlator cycle time \n"
+    " \n"
 
-  cout << "BACKEND PARAMETERS" << endl;
-  cout << "backend                         Name of the backend instrument" << endl;
-  cout << "beconfig                        Backend Config file" << endl;
-  cout << "be_dcc                          Downconversion conjugation corrected" << endl;
-  cout << "be_delay                        Proportional delay from digitiser input" << endl;
-  cout << "be_phase                        Phase convention of backend" << endl;
-  cout << "period                          Folding period" << endl;
-  cout << "tcycle                          Correlator cycle time" << endl;
-  cout << "" << endl;
+    "BANDPASS PARAMETERS \n"
+    "nch_bp                          Number of channels in original bandpass \n"
+    "npol_bp                         Number of polarizations in bandpass \n"
+    " \n"
 
-  cout << "BANDPASS PARAMETERS" << endl;
-  cout << "nch_bp                          Number of channels in original bandpass" << endl;
-  cout << "npol_bp                         Number of polarizations in bandpass" << endl;
-  cout << "" << endl;
+    "OBSERVATION PARAMETERS \n"
+    "bw                              Bandwidth (MHz) \n"
+    "dm                              Dispersion measure \n"
+    "dmc                             Dispersion corrected (boolean) \n"
+    "length                          The full duration of the observation (s) \n"
+    "name                            Name of the source \n"
+    "nbin_obs                        Number of pulse phase bins \n"
+    "nchan_obs                       Number of frequency channels \n"
+    "npol_obs                        Number of polarizations \n"
+    "nsub_obs                        Number of Sub-Integrations \n"
+    "obs_mode                        Observation Mode (PSR, CAL, SEARCH) \n"
+    "polc                            Polarization calibrated (boolean) \n"
+    "rm                              Rotation measure (rad/m^2) \n"
+    "rmc                             Faraday Rotation corrected (boolean) \n"
+    "scale                           Units of profile amplitudes \n"
+    "state                           State of profile amplitudes \n"
+    "tsub                            The duration of the first subint (s) \n"
+    "type                            Observation type (Pulsar, PolnCal, etc.) \n"
+    " \n"
 
-  cout << "OBSERVATION PARAMETERS" << endl;
-  cout << "bw                              Bandwidth (MHz)" << endl;
-  cout << "dm                              Dispersion measure" << endl;
-  cout << "dmc                             Dispersion corrected (boolean)" << endl;
-  cout << "length                          The full duration of the observation (s)" << endl;
-  cout << "name                            Name of the source" << endl;
-  cout << "nbin_obs                        Number of pulse phase bins" << endl;
-  cout << "nchan_obs                       Number of frequency channels" << endl;
-  cout << "npol_obs                        Number of polarizations" << endl;
-  cout << "nsub_obs                        Number of Sub-Integrations" << endl;
-  cout << "obs_mode                        Observation Mode (PSR, CAL, SEARCH)" << endl;
-  cout << "polc                            Polarization calibrated (boolean)" << endl;
-  cout << "rm                              Rotation measure (rad/m^2)" << endl;
-  cout << "rmc                             Faraday Rotation corrected (boolean)" << endl;
-  cout << "scale                           Units of profile amplitudes" << endl;
-  cout << "state                           State of profile amplitudes" << endl;
-  cout << "tsub                            The duration of the first subint (s)" << endl;
-  cout << "type                            Observation type (Pulsar, PolnCal, etc.)" << endl;
-  cout << endl;
+    "DIGITISER COUNTS PARAMETERS \n"
+    "dig_mode                        Digitiser mode \n"
+    "dyn_levt                        Timescale for dynamic leveling \n"
+    "levmode_digcnts                 Digitiser level-setting mode (AUTO, FIX) \n"
+    "nlev_digcnts                    Number of digitiser levels \n"
+    "npthist                         Number of points in histogram (I) \n"
+    " \n"
 
-  cout << "DIGITISER COUNTS PARAMETERS" << endl;
-  cout << "dig_mode                        Digitiser mode" << endl;
-  cout << "dyn_levt                        Timescale for dynamic leveling" << endl;
-  cout << "levmode_digcnts                 Digitiser level-setting mode (AUTO, FIX)" << endl;
-  cout << "nlev_digcnts                    Number of digitiser levels" << endl;
-  cout << "npthist                         Number of points in histogram (I)" << endl;
-  cout << endl;
+    "DIGITISER STATISTICS PARAMETERS \n"
+    "dig_atten                       Digitiser attenuator settings \n"
+    "levmode_digstat                 Digitiser level-setting mode (AUTO, FIX) \n"
+    "ncycsub                         Number of correlator cycles per subint \n"
+    "ndigstat                        Number of digitised channels (I) \n"
+    "npar_digstat                    Number of digitiser parameters \n"
+    " \n"
 
-  cout << "DIGITISER STATISTICS PARAMETERS" << endl;
-  cout << "dig_atten                       Digitiser attenuator settings" << endl;
-  cout << "levmode_digstat                 Digitiser level-setting mode (AUTO, FIX)" << endl;
-  cout << "ncycsub                         Number of correlator cycles per subint" << endl;
-  cout << "ndigstat                        Number of digitised channels (I)" << endl;
-  cout << "npar_digstat                    Number of digitiser parameters" << endl;
-  cout << "" << endl;
+    "FEED COUPLING PARAMETERS \n"
+    "MJD_feed                        [MJD] Epoch of calibration obs \n"
+    "nchan_feed                      Nr of channels in Feed coupling data \n"
+    "npar_feed                       Number of coupling parameters \n"
+    " \n"
 
-  cout << "FEED COUPLING PARAMETERS" << endl;
-  cout << "MJD_feed                        [MJD] Epoch of calibration obs" << endl;
-  cout << "nchan_feed                      Nr of channels in Feed coupling data" << endl;
-  cout << "npar_feed                       Number of coupling parameters" << endl;
-  cout << endl;
+    "FLUXCAL \n"
+    "epoch_fluxcal                   [MJD] Epoch of calibration obs \n"
+    "nchan_fluxcal                   Nr of frequency channels (I) \n"
+    "nrcvr_fluxcal                   Number of receiver channels (I) \n"
+    " \n"
 
-  cout << "FLUXCAL" << endl;
-  cout << "epoch_fluxcal                   [MJD] Epoch of calibration obs" << endl;
-  cout << "nchan_fluxcal                   Nr of frequency channels (I)" << endl;
-  cout << "nrcvr_fluxcal                   Number of receiver channels (I)" << endl;
-  cout << endl;
+    "HISTORY \n"
+    "chbw                            Channel bandwidth \n"
+    "freq                            Centre frequency (MHz) \n"
+    "nchan                           Number of frequency channels \n"
+    "nbin                            Number of pulse phase bins \n"
+    "nbin_prd                        Nr of bins per period \n"
+    "npol                            Number of polarizations \n"
+    "nsub                            Number of sub-integrations \n"
+    "tbin                            Time per bin or sample \n"
+    " \n"
 
-  cout << "HISTORY" << endl;
-  cout << "chbw                            Channel bandwidth" << endl;
-  cout << "freq                            Centre frequency (MHz)" << endl;
-  cout << "nchan                           Number of frequency channels" << endl;
-  cout << "nbin                            Number of pulse phase bins" << endl;
-  cout << "nbin_prd                        Nr of bins per period" << endl;
-  cout << "npol                            Number of polarizations" << endl;
-  cout << "nsub                            Number of sub-integrations" << endl;
-  cout << "tbin                            Time per bin or sample" << endl;
-  cout << endl;
+    "OBSERVER PARAMETERS \n"
+    "observer                        Observer name(s) \n"
+    "projid                          Project name \n"
+    " \n"
 
-  cout << "OBSERVER PARAMETERS" << endl;
-  cout << "observer                        Observer name(s)" << endl;
-  cout << "projid                          Project name" << endl;
-  cout << endl;
+    "COORDINATES & TIMES \n"
+    "coord_md                        The coordinate mode (J2000, GAL, ECLIP, etc ). \n"
+    "dec                             Declination (-dd:mm:ss.sss) \n"
+    "equinox                         Equinox of coords (2000.0) \n"
+    "fracmjd                         MJD faction of day \n"
+    "intmjd                          MJD day \n"
+    "mjd                             MJD \n"
+    "parang                          Parallactic angle at archive mid point \n"
+    "ra                              Right ascension (hh:mm:ss.ssss) \n"
+    "stp_crd1                        Stop coord 1 (hh:mm:ss.sss or ddd.ddd) \n"
+    "stp_crd2                        Stop coord 2 (-dd:mm:ss.sss or -dd.ddd) \n"
+    "stt_crd1                        Start coord 1 (hh:mm:ss.sss or ddd.ddd) \n"
+    "stt_crd2                        Start coord 2 (-dd:mm:ss.sss or -dd.ddd) \n"
+    "stt_date                        Start UT date (YYYY-MM-DD) \n"
+    "stt_imjd                        Start MJD (UTC days) (J - long integer) \n"
+    "stt_lst                         Start LST (hh:mm:ss) \n"
+    "stt_offs                        [s] Start time offset (D) \n"
+    "stt_smjd                        [s] Start time (sec past UTC 00h) (J) \n"
+    "stt_time                        Start UT (hh:mm:ss) \n"
+    "trk_mode                        Track mode ( TRACK, SCANGC, SCANLAT ) \n"
+    " \n"
 
-  cout << "COORDINATES & TIMES" << endl;
-  cout << "coord_md                        The coordinate mode (J2000, GAL, ECLIP, etc )." << endl;
-  cout << "dec                             Declination (-dd:mm:ss.sss)" << endl;
-  cout << "equinox                         Equinox of coords (2000.0)" << endl;
-  cout << "fracmjd                         MJD faction of day" << endl;
-  cout << "intmjd                          MJD day" << endl;
-  cout << "mjd                             MJD" << endl;
-  cout << "parang                          Parallactic angle at archive mid point" << endl;
-  cout << "ra                              Right ascension (hh:mm:ss.ssss)" << endl;
-  cout << "stp_crd1                        Stop coord 1 (hh:mm:ss.sss or ddd.ddd)" << endl;
-  cout << "stp_crd2                        Stop coord 2 (-dd:mm:ss.sss or -dd.ddd)" << endl;
-  cout << "stt_crd1                        Start coord 1 (hh:mm:ss.sss or ddd.ddd)" << endl;
-  cout << "stt_crd2                        Start coord 2 (-dd:mm:ss.sss or -dd.ddd)" << endl;
-  cout << "stt_date                        Start UT date (YYYY-MM-DD)" << endl;
-  cout << "stt_imjd                        Start MJD (UTC days) (J - long integer)" << endl;
-  cout << "stt_lst                         Start LST (hh:mm:ss)" << endl;
-  cout << "stt_offs                        [s] Start time offset (D)" << endl;
-  cout << "stt_smjd                        [s] Start time (sec past UTC 00h) (J)" << endl;
-  cout << "stt_time                        Start UT (hh:mm:ss)" << endl;
-  cout << "trk_mode                        Track mode ( TRACK, SCANGC, SCANLAT )" << endl;
-  cout << endl;
+    "FEED & RECEIVER PARAMETERS \n"
+    "basis                           Basis of receptors \n"
+    "fac                             Feed angle corrected \n"
+    "fa_req                          Feed angle requested \n"
+    "fda                             Feed angle recorded in first subint \n"
+    "fd_hand                         Hand of receptor basis \n"
+    "fd_mode                         Feed track mode (FA,CPA,GPA) \n"
+    "fd_sang                         Feed symmetry angle (rcvr:ra) \n"
+    "fd_xyph                         Reference source phase (rcvr:rph) \n"
+    "nrcpt                           Number of receptors \n"
+    "rcvr                            Name of receiver \n"
+    "xoffset                         Offset of feed X-axis wrt platform zero \n"
+    " \n"
 
-  cout << "FEED & RECEIVER PARAMETERS" << endl;
-  cout << "basis                           Basis of receptors" << endl;
-  cout << "fac                             Feed angle corrected" << endl;
-  cout << "fa_req                          Feed angle requested" << endl;
-  cout << "fd_hand                         Hand of receptor basis" << endl;
-  cout << "fd_mode                         Feed track mode (FA,CPA,GPA)" << endl;
-  cout << "fd_sang                         Feed symmetry angle (rcvr:ra)" << endl;
-  cout << "fd_xyph                         Reference source phase (rcvr:rph)" << endl;
-  cout << "nrcpt                           Number of receptors" << endl;
-  cout << "rcvr                            Name of receiver" << endl;
-  cout << "xoffset                         Offset of feed X-axis wrt platform zero" << endl;
-  cout << endl;
+    "SUBINT PARAMETERS \n"
+    "nbin_subint                     Nr of bins (PSR/CAL mode; else 1) \n"
+    "nbits                           Nr of bits/datum (SEARCH mode 'X' data, else 1) \n"
+    "nch_file                        Number of channels/sub-bands in this file \n"
+    "nch_strt                        Start channel/sub-band number (0 to NCHAN-1) \n"
+    "npol_subint                     Nr of polarisations in table \n"
+    "nsblk                           Samples/row (SEARCH mode, else 1) \n"
+    "subint_type                     Time axis (TIME, BINPHSPERI, BINLNGASC, etc) \n"
+    "subint_unit                     Unit of time axis (SEC, PHS (0-1), DEG) \n"
+    "tsamp                           [s] Sample interval for SEARCH-mode data \n"
+    " \n"
 
-  cout << "SUBINT PARAMETERS" << endl;
-  cout << "nbin_subint                     Nr of bins (PSR/CAL mode; else 1)" << endl;
-  cout << "nbits                           Nr of bits/datum (SEARCH mode 'X' data, else 1)" << endl;
-  cout << "nch_file                        Number of channels/sub-bands in this file" << endl;
-  cout << "nch_strt                        Start channel/sub-band number (0 to NCHAN-1)" << endl;
-  cout << "npol_subint                     Nr of polarisations in table" << endl;
-  cout << "nsblk                           Samples/row (SEARCH mode, else 1)" << endl;
-  cout << "subint_type                     Time axis (TIME, BINPHSPERI, BINLNGASC, etc)" << endl;
-  cout << "subint_unit                     Unit of time axis (SEC, PHS (0-1), DEG)" << endl;
-  cout << "tsamp                           [s] Sample interval for SEARCH-mode data" << endl;
-  cout << endl;
+    "FILE & TELESCOPE PARAMETERS \n"
+    "ant_x                           ITRF X coordinate. \n"
+    "ant_y                           ITRF Y coordinate. \n"
+    "ant_z                           ITRF Z coordinate. \n"
+    "bmaj                            [deg] beam major axis \n"
+    "bmin                            [deg] beam minor axis \n"
+    "bpa                             [deg] beam position angle \n"
+    "date                            File creation date \n"
+    "file                            The file number (FB data only) \n"
+    "hdrver                          Header Version \n"
+    "site                            Telescope name from header \n"
+    "asite                           Telescope tempo code \n"
+    "telescop                        Telescope name \n"
+    "tlabel                          Tape label (FB data only) \n"
+    " \n"
 
-  cout << "FILE & TELESCOPE PARAMETERS" << endl;
-  cout << "ant_x                           ITRF X coordinate." << endl;
-  cout << "ant_y                           ITRF Y coordinate." << endl;
-  cout << "ant_z                           ITRF Z coordinate." << endl;
-  cout << "bmaj                            [deg] beam major axis" << endl;
-  cout << "bmin                            [deg] beam minor axis" << endl;
-  cout << "bpa                             [deg] beam position angle" << endl;
-  cout << "date                            File creation date" << endl;
-  cout << "file                            The file number (FB data only)" << endl;
-  cout << "hdrver                          Header Version" << endl;
-  cout << "site                            Telescope name from header" << endl;
-  cout << "asite                           Telescope tempo code" << endl;
-  cout << "telescop                        Telescope name" << endl;
-  cout << "tlabel                          Tape label (FB data only)" << endl;
-  cout << endl;
+    "CALIBRATION PARAMETERS \n"
+    "cal_dcyc                        Cal duty cycle (E) \n"
+    "cal_freq                        [Hz] Cal modulation frequency (E) \n"
+    "cal_mode                        Cal mode (OFF, SYNC, EXT1, EXT2) \n"
+    "cal_phs                         Cal phase (wrt start time) (E) \n"
+    " \n"
 
-  cout << "CALIBRATION PARAMETERS" << endl;
-  cout << "cal_dcyc                        Cal duty cycle (E)" << endl;
-  cout << "cal_freq                        [Hz] Cal modulation frequency (E)" << endl;
-  cout << "cal_mode                        Cal mode (OFF, SYNC, EXT1, EXT2)" << endl;
-  cout << "cal_phs                         Cal phase (wrt start time) (E)" << endl;
-  cout << endl;
-  
-  cout << "Values given as UNDEF are not valid for the current file eg nch_fluxcal" << endl;
-  cout << "will return UNDEF for all files that do not contain a FluxCalibratorExtension." << endl;
-  cout << "Values given as * are defined, but not present in the particular file. Values" << endl;
-  cout << "marked as INVALID are for unrecognised parameters, usually you have mispelled them" << endl;
-
+    "Values listed as: \n"
+    " - UNDEF   are not valid for the current file \n"
+    " - *       are defined, but not present in the particular file \n"
+    " - INVALID are unrecognised \n"
+    "\n"
+    "For example, nch_fluxcal will return UNDEF for all files that \n"
+    "do not contain a FluxCalibratorExtension. \n"
+       << endl;
 }
-
-
 
 
 /**
@@ -1896,7 +1913,7 @@ void PrintExtdHlp( void )
 void ProcArgs( int argc, char *argv[] )
 {
   int gotc;
-  while ((gotc = getopt (argc, argv, "nc:sEphHvVtTXM:Rq")) != -1)
+  while ((gotc = getopt (argc, argv, "fnc:sEphHvVtTXM:Rq")) != -1)
     switch (gotc)
     {
 
@@ -1945,8 +1962,11 @@ void ProcArgs( int argc, char *argv[] )
       full_paths = true;
       break;
 
+    case 'f':
+      neat_table = true;
+      break;
+
     case 'q':
-      neat_table = false;
       break;
 
     default:
@@ -2066,7 +2086,9 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "file" ) return get_file( archive );
     else if( command == "tlabel" ) return get_tlabel ( archive );
     else if( command == "fd_mode" ) return get_fd_mode ( archive );
-    else if( command == "fa_req" ) return get_fa_req ( archive );
+    else if( command == "fa_req" || command == "ta" )
+      return get_fa_req ( archive );
+    else if( command == "fda" ) return get_fda ( archive );
     else if( command == "dyn_levt" ) return get_dyn_levt ( archive );
     else if( command == "dig_atten" ) return get_dig_atten ( archive );
     else if( command == "be_delay" ) return get_be_delay( archive );
