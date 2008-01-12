@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FaradayRotation.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/09/01 02:12:49 $
+   $Revision: 1.9 $
+   $Date: 2008/01/12 23:42:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FaradayRotation_h
@@ -50,6 +50,9 @@ namespace Pulsar {
 
     //! Set the Faraday rotation correction attributes in the Archive
     void execute (Archive*);
+
+    //! Ignore correction history if parent Archive corrected flag is false
+    bool ignore_history (const Integration* data);
 
     //! Set the rotation measure
     void set_rotation_measure (double rotation_measure)

@@ -6,8 +6,8 @@
  ***************************************************************************/
 #include "Pulsar/FaradayRotation.h"
 
+#include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
 
 // #define _DEBUG 1
@@ -26,6 +26,13 @@ Pulsar::FaradayRotation::FaradayRotation ()
 double Pulsar::FaradayRotation::correction_measure (const Integration* data)
 {
   return data->get_rotation_measure ();
+}
+
+bool Pulsar::FaradayRotation::ignore_history (const Integration* data)
+{
+  Integration::Expert* expert = const_cast<Integration*>(data)->expert();
+  return !( expert->has_parent() && 
+	    expert->get_parent()->get_faraday_corrected() );
 }
 
 //! Execute the correction for an entire Pulsar::Archive
