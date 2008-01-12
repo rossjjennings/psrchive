@@ -39,7 +39,6 @@ void Pulsar::PolnProfileStats::select_profile (const PolnProfile* _profile)
 {
   profile = _profile;
   estimators_selected = false;
-
   build ();
   if (_profile)
     estimators_selected = true;
@@ -132,11 +131,14 @@ Pulsar::PolnProfileStats::get_baseline_variance (unsigned ipol) const
 
 void Pulsar::PolnProfileStats::build () try
 {
+  baseline_variance = Stokes< Estimate<double> > ();
+
+  if (!profile)
+    return;
+
   if (profile->get_state() != Signal::Stokes)
     throw Error (InvalidParam, "Pulsar::PolnProfileStats::build",
 		 "input PolnProfile is not in the Stokes state");
-
-  baseline_variance = Stokes< Estimate<double> > ();
 
   if (!estimators_selected && profile)
     stats->select_profile( profile->get_Profile(0) );
