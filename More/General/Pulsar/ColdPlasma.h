@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ColdPlasma.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/09/22 09:38:00 $
+   $Revision: 1.9 $
+   $Date: 2008/01/12 23:42:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ColdPlasma_h
@@ -53,6 +53,9 @@ namespace Pulsar {
 
     //! Derived classes must define how to apply the correction
     virtual void apply (Integration*, unsigned channel) = 0;
+
+    //! Derived classes may dictate that the History should be ignored
+    virtual bool ignore_history (const Integration*) { return false; }
 
     //! Execute the correction for an entire Pulsar::Archive
     virtual void execute (Archive*);
@@ -196,10 +199,13 @@ void Pulsar::ColdPlasma<C,History>::update (const Integration* data) try
 {
   backup_measure = get_measure();
 
-  const History* corrected = data->template get<History>();
- 
-  if ( corrected ) {
+  const History* corrected = 0;
 
+  if ( !ignore_history(data) )
+    corrected = data->template get<History>();
+ 
+  if (corrected)
+  {
     double corrected_measure = corrected->get_measure();
     double lambda = corrected->get_reference_wavelength();
 
