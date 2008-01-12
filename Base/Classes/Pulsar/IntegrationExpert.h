@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExpert.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/08/10 00:16:33 $
+   $Revision: 1.12 $
+   $Date: 2008/01/12 23:42:11 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationExpert_h
 #define __Pulsar_IntegrationExpert_h
 
 #include "Pulsar/Integration.h"
+#include "Pulsar/Archive.h"
 
 namespace Pulsar {
 
@@ -110,6 +111,14 @@ namespace Pulsar {
     //! Use with care
     std::vector< std::vector< Reference::To<Profile> > >& profiles ()
     { return instance->profiles; }
+
+    //! Return true if the Integration has a parent Archive
+    bool has_parent ()
+    { return instance->archive; }
+
+    //! Provide access to the parent Archive
+    const Archive* get_parent ()
+    { return instance->archive; }
 
   private:
 
