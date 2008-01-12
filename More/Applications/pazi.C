@@ -468,7 +468,7 @@ int main(int argc, char* argv[]) try
 
 						} else {
 							time_get_limits(lower_channel, upper_channel, mouseY, mouseY2, int_length, num_subints, scale);
-							Pulsar::Integration* integ;
+
 
 							for (int i = lower_channel; i <= upper_channel; i++) {
 								subints_to_zap.push_back(i);
@@ -504,7 +504,6 @@ int freq_get_channel(float mouseY, double bandwidth, int num_chans, double centr
 
 int time_get_channel(float mouseY, double int_length, int num_subints, string scale)
 {
-	double channel;
 	if (scale == "days")
 		return (int)((mouseY * 60 * 60 * 24) / int_length * num_subints);
 	else if (scale == "hours")
@@ -776,17 +775,22 @@ void print_command (vector<int>& freq_chans, vector<int>& subints,
 
 void set_dedispersion(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &dedispersed)
 {
-	if (!dedispersed) {
-		dedispersed = true;
-		*arch = *old_arch;
-		arch->dedisperse();
-	} else {
-		dedispersed = false;
-		*arch = *old_arch;
-		arch->set_dispersion_measure(0);
-		arch->dedisperse();
-	}
-	arch->remove_baseline();
+  if (!dedispersed)
+  {
+    dedispersed = true;
+    *arch = *old_arch;
+    arch->dedisperse();
+  }
+  else
+  {
+    dedispersed = false;
+    *arch = *old_arch;
+    arch->set_dispersion_measure(0);
+    arch->dedisperse();
+    arch->set_dispersion_measure(old_arch->get_dispersion_measure());
+    arch->set_dedispersed (false);
+  }
+  arch->remove_baseline();
 }
 
 void set_centre(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &centered, string type, bool dedispersed)
@@ -820,7 +824,6 @@ string get_scale(Pulsar::Archive* arch)
 
 	const float mjd_hours = 1.0 / 24.0;
 	const float mjd_minutes = mjd_hours / 60.0;
-	const float mjd_seconds = mjd_minutes / 60.0;
 
 	if (range > 1.0)
 		return "days";
