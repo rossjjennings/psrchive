@@ -23,17 +23,17 @@ Pulsar::PhaseWeight* Pulsar::Integration::baseline () const
   return total->get_Profile(0,0)->baseline ();
 }
 
-static Pulsar::PhaseWeightShift shift;
-static Pulsar::Dispersion dispersion;
+static Pulsar::PhaseWeightShift* shift = 0;
+static Pulsar::Dispersion* dispersion = 0;
 
-static int static_init ()
+static void init ()
 {
-  Functor<double()> get_shift ( &dispersion, &Pulsar::Dispersion::get_shift );
-  shift.get_shift = get_shift;
-  return 0;
-}
+  shift = new Pulsar::PhaseWeightShift;
+  dispersion = new Pulsar::Dispersion;
 
-static int initalize = static_init ();
+  Functor<double()> get_shift ( dispersion, &Pulsar::Dispersion::get_shift );
+  shift->get_shift = get_shift;
+}
 
 /*!
   If baseline is not specified, this method calls
@@ -53,11 +53,14 @@ void Pulsar::Integration::remove_baseline (const PhaseWeight* baseline) try
   if (!baseline)
     baseline = my_baseline = this->baseline();
 
+  if (!shift)
+    init ();
+
   // set the input to the PhaseWeight shifter
-  shift.set_weight( baseline );
+  shift->set_weight( baseline );
 
   // set up the dispersion computation attributes
-  dispersion.set( this );
+  dispersion->set( this );
 
   // the output of the PhaseWeight shifter
   PhaseWeight shifted_baseline;
@@ -68,10 +71,10 @@ void Pulsar::Integration::remove_baseline (const PhaseWeight* baseline) try
       cerr << "Pulsar::Integration::remove_baseline ichan=" << ichan << endl;
 
     // compute the dispersion shift for this channel (input to shifter)
-    dispersion.set_Profile( profiles[0][ichan] );
+    dispersion->set_Profile( profiles[0][ichan] );
 
     // get the shifted PhaseWeight mask
-    shift.get_weight( &shifted_baseline );
+    shift->get_weight( &shifted_baseline );
 
     for (unsigned ipol=0; ipol<get_npol(); ipol++) {
 
@@ -103,11 +106,14 @@ try {
   if (verbose)
     cerr << "Pulsar::Integration::baseline_stats" << endl;
 
+  if (!shift)
+    init ();
+
   // set the input to the PhaseWeight shifter
-  shift.set_weight( this->baseline() );
+  shift->set_weight( this->baseline() );
 
   // set up the dispersion computation attributes
-  dispersion.set( this );
+  dispersion->set( this );
 
   // the output of the PhaseWeight shifter
   PhaseWeight shifted_baseline;
@@ -124,18 +130,16 @@ try {
   double* meanvar_ptr = 0;
   double* variance_ptr = 0;
 
-  for (unsigned ipol=0; ipol<npol; ++ipol) {
-
+  for (unsigned ipol=0; ipol<npol; ++ipol)
+  {
     if (mean)
       (*mean)[ipol].resize (nchan);
     if (variance)
-      (*variance)[ipol].resize (nchan);
-    
+      (*variance)[ipol].resize (nchan); 
   }
 
-
-  for (unsigned ichan=0; ichan<nchan; ++ichan) {
-
+  for (unsigned ichan=0; ichan<nchan; ++ichan)
+  {
     if (get_weight(ichan) == 0) {
 
       if (verbose)
@@ -154,25 +158,25 @@ try {
     }
     
     // compute the dispersion shift for this channel (input to shifter)
-    dispersion.set_Profile( profiles[0][ichan] );
+    dispersion->set_Profile( profiles[0][ichan] );
 
     // get the shifted PhaseWeight mask
-    shift.get_weight( &shifted_baseline );
+    shift->get_weight( &shifted_baseline );
 
-    for (unsigned ipol=0; ipol<npol; ipol++) {
-
-      if (mean) {
+    for (unsigned ipol=0; ipol<npol; ipol++)
+    {
+      if (mean)
+      {
 	meanval_ptr = &((*mean)[ipol][ichan].val);
 	meanvar_ptr = &((*mean)[ipol][ichan].var);
       }
+
       if (variance)
 	variance_ptr = &((*variance)[ipol][ichan]);
 
       shifted_baseline.stats( get_Profile(ipol,ichan),
-			      meanval_ptr, variance_ptr, meanvar_ptr );
-      
+			      meanval_ptr, variance_ptr, meanvar_ptr );      
     }
-
   }
 
   if (verbose)
