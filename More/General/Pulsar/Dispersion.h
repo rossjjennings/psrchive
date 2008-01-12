@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Dispersion.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/09/01 02:40:19 $
+   $Revision: 1.5 $
+   $Date: 2008/01/12 23:42:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Dispersion_h
@@ -47,6 +47,9 @@ namespace Pulsar {
 
     //! Set the dedispersion attributes in the Archive
     void execute (Archive*);
+
+    //! Ignore correction history if parent Archive corrected flag is false
+    bool ignore_history (const Integration* data);
 
     //! Set the dispersion measure
     void set_dispersion_measure (double dispersion_measure)

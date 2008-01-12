@@ -4,11 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 using namespace std;
+
 #include "Pulsar/Dispersion.h"
 
+#include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
 Pulsar::Dispersion::Dispersion ()
@@ -20,6 +22,12 @@ Pulsar::Dispersion::Dispersion ()
 double Pulsar::Dispersion::correction_measure (const Integration* data)
 {
   return data->get_dispersion_measure ();
+}
+
+bool Pulsar::Dispersion::ignore_history (const Integration* data)
+{
+  Integration::Expert* expert = const_cast<Integration*>(data)->expert();
+  return !( expert->has_parent() && expert->get_parent()->get_dedispersed() );
 }
 
 //! Execute the correction for an entire Pulsar::Archive
@@ -41,7 +49,7 @@ catch (Error& error) {
   throw error += "Pulsar::Dispersion::apply";
 }
 
-//! Execute the correction for an entire Pulsar::Archive
+//! Set attributes in preparation for execute
 void Pulsar::Dispersion::set (const Integration* data)
 {
   ColdPlasma<DispersionDelay,Dedisperse>::set (data);
