@@ -52,7 +52,7 @@ void usage ()
     " -J jobs          multiple preprocessing jobs in 'jobs' file \n"
     " -x               disable default preprocessing \n"
     "\n"
-    " -l name:range    loop over the range of the specified dimension \n"
+    " -l name=<range>  loop over the range of the named parameter \n"
     "\n"
     " -h               This help page \n"
     " -M metafile      Specify list of archive filenames in metafile \n"
