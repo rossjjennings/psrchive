@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/01/11 03:43:31 $
+   $Revision: 1.3 $
+   $Date: 2008/01/13 23:13:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileStats_h
@@ -60,7 +60,7 @@ namespace Pulsar {
     bool get_baseline (unsigned ibin) const;
 
     //! Returns the total flux of the on-pulse phase bins
-    Estimate<double> get_total () const;
+    Estimate<double> get_total (bool subtract_baseline = true) const;
 
     //! Returns the variance of the baseline
     Estimate<double> get_baseline_variance () const;

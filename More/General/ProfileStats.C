@@ -72,9 +72,13 @@ void Pulsar::ProfileStats::set_baseline_estimator (BaselineEstimator* est)
 }
 
 //! Returns the total flux of the on-pulse phase bins
-Estimate<double> Pulsar::ProfileStats::get_total () const
+Estimate<double> Pulsar::ProfileStats::get_total (bool subtract_baseline) const
 {
-  double offmean = baseline.get_mean().get_value();
+  double offmean = 0.0;
+  
+  if (subtract_baseline)
+    offmean = baseline.get_mean().get_value();
+
   double variance = baseline.get_variance().get_value ();
   double navg = on_pulse.get_weight_sum();
   double total = on_pulse.get_weighted_sum();
