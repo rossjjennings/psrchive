@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.18 $
-   $Date: 2008/01/13 06:08:28 $
+   $Revision: 1.19 $
+   $Date: 2008/01/13 23:13:48 $
    $Author: straten $ */
 
 
@@ -910,7 +910,7 @@ void ProcessArchive( string filename )
 
 int main( int argc, char *argv[] ) try
 {
-  string args;
+  string args = "V";
   args += HELP_KEY;
   args += CALIBRATOR_KEY;
   args += IBIN_KEY; args += ':';
@@ -943,6 +943,9 @@ int main( int argc, char *argv[] ) try
   {
     switch( i )
     {
+    case 'V':
+      Pulsar::Archive::set_verbosity (3);
+      break;
 
     case CALIBRATOR_KEY:
       cal_parameters = true;
