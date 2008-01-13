@@ -15,8 +15,12 @@ using namespace std;
 //! Default constructor
 Pulsar::ProfileStats::ProfileStats (const Profile* _profile)
 {
-  set_on_pulse_estimator (new OnPulseThreshold);
-  set_baseline_estimator (new GaussianBaseline);
+  OnPulseThreshold* on_est = new OnPulseThreshold;
+  set_on_pulse_estimator (on_est);
+
+  GaussianBaseline* off_est = new GaussianBaseline;
+  set_baseline_estimator (off_est);
+  on_est->set_baseline_estimator (off_est);
 
   estimators_selected = false;
   set_profile (_profile);
@@ -70,15 +74,17 @@ void Pulsar::ProfileStats::set_baseline_estimator (BaselineEstimator* est)
 //! Returns the total flux of the on-pulse phase bins
 Estimate<double> Pulsar::ProfileStats::get_total () const
 {
+  double offmean = baseline.get_mean().get_value();
   double variance = baseline.get_variance().get_value ();
   double navg = on_pulse.get_weight_sum();
+  double total = on_pulse.get_weighted_sum();
 
   if (Profile::verbose)
-    cerr << "Pulsar::ProfileStats::get_total_on_pulse navg=" << navg
-	 << " var=" << variance << endl;
+    cerr << "Pulsar::ProfileStats::get_total"
+         << "\nt on nbin=" << navg << " tot=" << total 
+	 << "\nt off mean=" << offmean << " var=" << variance << endl;
 
-  return Estimate<double> (on_pulse.get_weighted_sum(), 
-			   variance * navg);
+  return Estimate<double> (total - offmean * navg, variance * navg);
 }
 
 unsigned Pulsar::ProfileStats::get_on_pulse_nbin () const
@@ -117,6 +123,8 @@ void Pulsar::ProfileStats::build () try
 
   if (estimators_selected)
   {
+    if (Profile::verbose)
+      cerr << "Pulsar::ProfileStats::build estimators set" << endl;
     on_pulse.set_Profile (profile);
     baseline.set_Profile (profile);
     return;
