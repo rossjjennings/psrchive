@@ -61,7 +61,7 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_polarized () const
 
   stats->set_profile (&polarized);
 
-  return stats->get_total ();
+  return stats->get_total (false);
 }
 
 //! Returns the total linearly polarized flux of the on-pulse phase bins
@@ -72,7 +72,7 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_linear () const
 
   stats->set_profile (&linear);
 
-  return stats->get_total ();
+  return stats->get_total (false);
 }
 
 //! Returns the total circularly polarized flux of the on-pulse phase bins
@@ -90,7 +90,7 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_abs_circular () const
 
   stats->set_profile (&circular);
 
-  return stats->get_total ();
+  return stats->get_total (false);
 }
 
 //! Get the Stokes parameters of the specified phase bin
