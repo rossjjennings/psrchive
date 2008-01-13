@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.17 $
-   $Date: 2008/01/11 03:43:23 $
+   $Revision: 1.18 $
+   $Date: 2008/01/13 06:08:28 $
    $Author: straten $ */
 
 
@@ -339,7 +339,7 @@ Estimate<float> flux2 (const Profile* profile)
   Pulsar::ProfileStats stats;
 
   stats.set_profile( profile );
-  return stats.get_total() / stats.get_on_pulse_nbin();
+  return stats.get_total() / profile->get_nbin();
 }
 
 float width (const Profile* profile, float& error, float pc, float dc)
