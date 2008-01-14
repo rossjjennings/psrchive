@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.25 $
-   $Date: 2007/10/15 01:24:34 $
-   $Author: nopeer $ */
+   $Revision: 1.26 $
+   $Date: 2008/01/14 04:55:49 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
 #define __Pulsar_PlotFrame_h
@@ -67,11 +67,6 @@ namespace Pulsar {
     //! Remove all labels
     void no_labels ();
 
-    //! Get the above-frame label
-    PlotLabel* get_label_above () { return above; }
-    //! Set the above-frame label
-    void set_label_above (PlotLabel*);
-
     //! Get the below-frame label
     PlotLabel* get_label_below () { return below; }
     //! Set the below-frame label
@@ -84,7 +79,7 @@ namespace Pulsar {
     //! Draw the axes of the frame
     virtual void draw_axes (const Archive*);
 
-    //! Label the axes os the frame
+    //! Label the axes of the frame
     virtual void label_axes (const std::string& default_x,
 			     const std::string& default_y);
 
@@ -96,6 +91,7 @@ namespace Pulsar {
     virtual void focus (const Archive*);
 
     void hide_axes( void ) { draw_box = false; }
+
   protected:
 
     Reference::To<PlotScale> x_scale;
@@ -104,7 +100,6 @@ namespace Pulsar {
     Reference::To<PlotAxis> x_axis;
     Reference::To<PlotAxis> y_axis;
 
-    Reference::To<PlotLabel> above;
     Reference::To<PlotLabel> below;
 
     bool  transpose;

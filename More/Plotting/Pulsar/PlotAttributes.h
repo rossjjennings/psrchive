@@ -7,13 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotAttributes.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/11/22 11:56:32 $
+   $Revision: 1.8 $
+   $Date: 2008/01/14 04:55:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotAttributes_h
 #define __Pulsar_PlotAttributes_h
 
+#include "Pulsar/PlotLabel.h"
 #include "TextInterface.h"
 
 namespace Pulsar {
@@ -47,6 +48,11 @@ namespace Pulsar {
     virtual void set_line_width (int width);
     int get_line_width () const { return line_width; }
 
+    //! Get the above-frame label
+    PlotLabel* get_label_above () { return above; }
+    //! Set the above-frame label
+    void set_label_above (PlotLabel*);
+
     //! Apply the named customization option set
     virtual void apply_set (const std::string& name);
     //! Get the applied set
@@ -62,6 +68,8 @@ namespace Pulsar {
     void initialize_surface ();
 
   protected:
+
+    Reference::To<PlotLabel> above;
 
     float character_height;
     int character_font;

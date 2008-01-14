@@ -26,4 +26,7 @@ Pulsar::PlotAttributes::Interface::Interface (PlotAttributes* instance)
   add( &PlotAttributes::get_applied,
        &PlotAttributes::apply_set,
        "set", "Apply an option set ('pub' or 'blank')" );
+
+  import ( "above", PlotLabel::Interface(), &PlotAttributes::get_label_above );
+
 }

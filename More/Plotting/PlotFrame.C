@@ -24,10 +24,8 @@ Pulsar::PlotFrame::PlotFrame ()
   character_font = 1;
   line_width = 1;
 
-  above = new PlotLabel;
   below = new PlotLabel;
 
-  get_label_above()->set_centre("$file");
   get_label_below()->set_left("$name.$freq MHz");
   get_label_below()->set_spacing( -get_label_below()->get_spacing() );
 
@@ -201,11 +199,6 @@ Pulsar::PlotAxis* Pulsar::PlotFrame::get_y_axis(bool allow_transpose)
     return x_axis;
   else
     return y_axis;
-}
-
-void Pulsar::PlotFrame::set_label_above (PlotLabel* label)
-{
-  above = label;
 }
 
 void Pulsar::PlotFrame::set_label_below (PlotLabel* label)

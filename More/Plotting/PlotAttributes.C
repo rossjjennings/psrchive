@@ -13,6 +13,9 @@ Pulsar::PlotAttributes::PlotAttributes ()
   character_font = 1;
   line_width = 1;
   set_applied = "none";
+
+  above = new PlotLabel;
+  above->set_centre("$file");
 }
 
 Pulsar::PlotAttributes::~PlotAttributes ()
@@ -36,6 +39,12 @@ void Pulsar::PlotAttributes::set_line_width (int width)
 {
   line_width = width; set_applied = "none";
 }
+
+void Pulsar::PlotAttributes::set_label_above (PlotLabel* label)
+{
+  above = label;
+}
+
 
 void Pulsar::PlotAttributes::publication_quality ()
 {

@@ -22,7 +22,6 @@ Pulsar::PlotFrame::Interface::Interface (PlotFrame* instance)
 
   import ( PlotAttributes::Interface() );
 
-  import ( "above", PlotLabel::Interface(), &PlotFrame::get_label_above );
   import ( "below", PlotLabel::Interface(), &PlotFrame::get_label_below );
 
 }
