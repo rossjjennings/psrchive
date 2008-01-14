@@ -657,7 +657,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.47 2008/01/03 00:29:42 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.48 2008/01/14 04:40:11 nopeer Exp $" << endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
@@ -925,6 +925,7 @@ int PavApp::run( int argc, char *argv[] )
     SetPlotOptions<FluxPlot>( string("crop=") + tostring<float>(clip_value) );
     SetPlotOptions<StokesCylindrical>( string("flux:crop=") + tostring<float>(clip_value) );
     SetPlotOptions<PhaseVsFrequency>( string("z:range=(0,") + tostring<float>(clip_value) + string(")") );
+    SetPlotOptions<PhaseVsTime>( string("z:range=(0,") + tostring<float>(clip_value) + string(")") );
   }
 
   if( label_degrees )
