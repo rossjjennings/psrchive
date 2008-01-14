@@ -22,6 +22,11 @@ TextInterface::Parser* Pulsar::MultiPlot::get_frame_interface ()
   return new MultiFrame::Interface (&frames);
 }
 
+Pulsar::PlotAttributes* Pulsar::MultiPlot::get_attributes ()
+{
+  return &frames;
+}
+
 void Pulsar::MultiPlot::plot (const Archive* data)
 {
   prepare (data);
@@ -62,6 +67,11 @@ void Pulsar::MultiPlot::plot (const Archive* data)
       throw *to_throw;
 
   }
+
+  // plot above the window
+  cpgsls (1);
+  cpgsci (1);
+  frames.get_label_above()->plot(data);
 }
 
 void Pulsar::MultiPlot::set_viewport (PlotFrame* frame, 
@@ -89,6 +99,8 @@ void Pulsar::MultiPlot::set_viewport (PlotFrame* frame,
 void Pulsar::MultiPlot::manage (const std::string& name, FramedPlot* plot)
 {
   frames.manage (name, plot->get_frame());
+
+  plot->get_frame()->get_label_above()->set_all( PlotLabel::unset );
 
   if (frames.has_shared_x_scale())
     plot->get_frame()->set_x_scale( frames.get_shared_x_scale() );
