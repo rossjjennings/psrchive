@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FramedPlot.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/10/02 05:08:15 $
+   $Revision: 1.3 $
+   $Date: 2008/01/14 04:55:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FramedPlot_h
@@ -29,6 +29,9 @@ namespace Pulsar {
 
     //! Get the text interface to the frame attributes
     virtual TextInterface::Parser* get_frame_interface ();
+
+    //! Get the plot attributes
+    PlotAttributes* get_attributes ();
 
     //! Get the frame
     virtual PlotFrame* get_frame ();

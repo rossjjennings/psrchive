@@ -18,6 +18,11 @@ TextInterface::Parser* Pulsar::FramedPlot::get_frame_interface ()
   return new PlotFrame::Interface (get_frame());
 }
 
+Pulsar::PlotAttributes* Pulsar::FramedPlot::get_attributes ()
+{
+  return frame;
+}
+
 //! Get the frame
 Pulsar::PlotFrame* Pulsar::FramedPlot::get_frame ()
 {
