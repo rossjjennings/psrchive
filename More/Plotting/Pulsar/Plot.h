@@ -7,13 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Plot.h,v $
-   $Revision: 1.16 $
-   $Date: 2007/10/21 23:21:53 $
+   $Revision: 1.17 $
+   $Date: 2008/01/14 04:55:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Plot_h
 #define __Pulsar_Plot_h
 
+#include "Pulsar/PlotAttributes.h"
 #include "TextInterface.h"
 
 namespace Pulsar {
@@ -33,6 +34,9 @@ namespace Pulsar {
 
     //! Plot in the current viewport
     virtual void plot (const Archive*) = 0;
+
+    //! Provide access to the plot attributes
+    virtual PlotAttributes* get_attributes () = 0;
 
     //! Get the text interface to the configuration attributes
     virtual TextInterface::Parser* get_interface () = 0;
