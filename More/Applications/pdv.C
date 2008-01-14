@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.19 $
-   $Date: 2008/01/13 23:13:48 $
-   $Author: straten $ */
+   $Revision: 1.20 $
+   $Date: 2008/01/14 04:50:24 $
+   $Author: nopeer $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -107,8 +107,7 @@ void Usage( void )
   "A program for extracting archive data in text form \n"
   "Usage: \n"
   "     pdv [options] filenames \n"
-  "     pdv help [arg] \n"
-  "Where: \n"
+  "     pdv help [arg] \n"  "Where: \n"
   "   -" << IBIN_KEY <<           " ibin     select a single phase bin, from 0 to nbin-1 \n"
   "   -" << ICHAN_KEY <<          " ichan    select a single frequency channel, from 0 to nchan-1 \n"
   "   -" << ISUB_KEY <<           " isub     select a single integration, from 0 to nsubint-1 \n"
@@ -132,7 +131,7 @@ void Usage( void )
   "   -" << PER_SUBINT_KEY <<     " params   Print out per subint data (no params for argument list) \n"
   "   -" << HISTORY_KEY <<        " params   Print out the history table for the archive (no params for argument list) \n"
   " \n"
-  "   For more detailed list of options use \"pdv help arg\", ie \"pdv help S\" \n"
+  "   For more detailed list of options use \"pdv -h param\", ie \"pdv -h S\" \n"
   "   for a full list of parameters that can be used with -S \n"
   << endl;
 }
@@ -142,28 +141,29 @@ void Usage( void )
 void DisplaySubintsUsage( void )
 {
   cout <<
-      "Usage: \n"
-      "    pdv -S parameters \n"
-      "Where: \n"
-      "    Parameters are of the form param1,param2 or \"param1 param2\" \n"
-      "    Parameter names are case insensitive \n"
-      "Available Parameters: \n"
-      "    INDEXVAL           Optionally used if INT_TYPE != TIME \n"
-      "    TSUBINT            Length of subintegration \n"
+  "Usage: \n"
+  "    pdv -S parameters \n"
+  "Where: \n"
+  "    Parameters are of the form param1,param2 or \"param1 param2\" \n"
+  "    Parameter names are case insensitive \n"
+  "Available Parameters: \n"
+  "    INDEXVAL           Optionally used if INT_TYPE != TIME \n"
+  "    TSUBINT            Length of subintegration \n"
 #ifdef HAVE_CFITSIO
-      "    OFFS_SUB           Offset from Start of subint centre \n"
+  "    OFFS_SUB           Offset from Start of subint centre \n"
 #endif
-      "    LST_SUB            LST at subint centre \n"
-      "    RA_SUB             RA (J2000) at subint centre \n"
-      "    DEC_SUB            Dec (J2000) at subint centre \n"
-      "    GLON_SUB           [deg] Gal longitude at subint centre \n"
-      "    GLAT_SUB           [deg] Gal latitude at subint centre \n"
-      "    FD_ANG             [deg] Feed angle at subint centre \n"
-      "    POS_ANG            [deg] Position angle of feed at subint centre \n"
-      "    PAR_ANG            [deg] Parallactic angle at subint centre \n"
-      "    TEL_AZ             [deg] Telescope azimuth at subint centre \n"
-      "    TEL_ZEN            [deg] Telescope zenith angle at subint centre \n"
-      << endl;
+  "    LST_SUB            LST at subint centre \n"
+  "    RA_SUB             RA (J2000) at subint centre \n"
+  "    DEC_SUB            Dec (J2000) at subint centre \n"
+  "    GLON_SUB           [deg] Gal longitude at subint centre \n"
+  "    GLAT_SUB           [deg] Gal latitude at subint centre \n"
+  "    FD_ANG             [deg] Feed angle at subint centre \n"
+  "    POS_ANG            [deg] Position angle of feed at subint centre \n"
+  "    PAR_ANG            [deg] Parallactic angle at subint centre \n"
+  "    TEL_AZ             [deg] Telescope azimuth at subint centre \n"
+  "    TEL_ZEN            [deg] Telescope zenith angle at subint centre \n"
+  "    SNR                Signal to noise ration for each subint\n"
+  << endl;
 }
 
 
@@ -171,35 +171,35 @@ void DisplaySubintsUsage( void )
 void DisplayHistoryUsage( void )
 {
   cout <<
-      "Usage: \n"
-      "    pdv -H parameters \n"
-      "Where: \n"
-      "    Parameters are of the form param1,param2 or \"param1 param2\" \n"
-      "    Parameter names are case insensitive \n"
-      "Available Parameters: \n"
-      "    DATE_PRO           Processing date and time (UTC) \n"
-      "    PROC_CMD           Processing program and command \n"
-      "    SCALE              Units (FluxDen/RefFlux/Jansky) \n"
-      "    POL_TYPE           Polarisation identifier \n"
-      "    NSUB               Number of Sub-Integrations \n"
-      "    NPOL               Number of polarisations \n"
-      "    NBIN               Nr of bins per product (0 for SEARCH mode) \n"
-      "    NBIN_PRD           Nr of bins per period \n"
-      "    TBIN               Time per bin or sample \n"
-      "    CTR_FREQ           Band centre frequency \n"
-      "    NCHAN              Number of frequency channels \n"
-      "    CHAN_BW            Channel bandwidth \n"
-      "    PAR_CORR           Parallactic angle correction applied \n"
-      "    FA_CORR            Feed angle correction applied \n"
-      "    RM_CORR            RM correction applied \n"
-      "    DEDISP             Data dedispersed \n"
-      "    DDS_MTHD           Dedispersion method \n"
-      "    SC_MTHD            Scattered power correction method \n"
-      "    CAL_MTHD           Calibration method \n"
-      "    CAL_FILE           Name of gain calibration file \n"
-      "    RFI_MTHD           RFI excision method \n"
-      "    IFR_MTHD           Ionospheric Faraday rotation correction method \n"
-      << endl;
+  "Usage: \n"
+  "    pdv -H parameters \n"
+  "Where: \n"
+  "    Parameters are of the form param1,param2 or \"param1 param2\" \n"
+  "    Parameter names are case insensitive \n"
+  "Available Parameters: \n"
+  "    DATE_PRO           Processing date and time (UTC) \n"
+  "    PROC_CMD           Processing program and command \n"
+  "    SCALE              Units (FluxDen/RefFlux/Jansky) \n"
+  "    POL_TYPE           Polarisation identifier \n"
+  "    NSUB               Number of Sub-Integrations \n"
+  "    NPOL               Number of polarisations \n"
+  "    NBIN               Nr of bins per product (0 for SEARCH mode) \n"
+  "    NBIN_PRD           Nr of bins per period \n"
+  "    TBIN               Time per bin or sample \n"
+  "    CTR_FREQ           Band centre frequency \n"
+  "    NCHAN              Number of frequency channels \n"
+  "    CHAN_BW            Channel bandwidth \n"
+  "    PAR_CORR           Parallactic angle correction applied \n"
+  "    FA_CORR            Feed angle correction applied \n"
+  "    RM_CORR            RM correction applied \n"
+  "    DEDISP             Data dedispersed \n"
+  "    DDS_MTHD           Dedispersion method \n"
+  "    SC_MTHD            Scattered power correction method \n"
+  "    CAL_MTHD           Calibration method \n"
+  "    CAL_FILE           Name of gain calibration file \n"
+  "    RFI_MTHD           RFI excision method \n"
+  "    IFR_MTHD           Ionospheric Faraday rotation correction method \n"
+  << endl;
 }
 
 
@@ -587,10 +587,10 @@ void Flux2( Reference::To< Archive > archive )
 
       Estimate<float> flux = flux2( archive->get_Profile(s,0,c) );
       cout << flux.get_value() << " " << flux.get_error();
-      
+
       if (archive->get_scale() == Signal::Jansky)
-	cout << "\t" << "mJy";
-      
+        cout << "\t" << "mJy";
+
       cout << endl;
     }
   }
@@ -716,6 +716,10 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
             ts << tostring<double>( pointing->get_telescope_azimuth().getDegrees() );
           else if( (*pit) == "TEL_ZEN" && CheckPointing( pointing, ts ) )
             ts << tostring<double>( pointing->get_telescope_zenith().getDegrees() );
+          else if( (*pit) == "SNR" )
+          {
+            ts << tostring<double>( integ->total()->get_Profile(0,0)->snr() );
+          }
 
 
           // parameters from the DIG_CNTS table
@@ -911,7 +915,7 @@ void ProcessArchive( string filename )
 int main( int argc, char *argv[] ) try
 {
   string args = "V";
-  args += HELP_KEY;
+  args += HELP_KEY; args += ':';
   args += CALIBRATOR_KEY;
   args += IBIN_KEY; args += ':';
   args += ICHAN_KEY; args += ':';
@@ -943,10 +947,15 @@ int main( int argc, char *argv[] ) try
   {
     switch( i )
     {
+    case '?':
+      if( optopt == 'h' )
+      {
+        Usage();
+      }
+      break;
     case 'V':
       Pulsar::Archive::set_verbosity (3);
       break;
-
     case CALIBRATOR_KEY:
       cal_parameters = true;
       break;
@@ -972,7 +981,10 @@ int main( int argc, char *argv[] ) try
       cmd_flux2 = true;
       break;
     case HELP_KEY:
-      Usage();
+      if( string(optarg) == string("S") )
+        DisplaySubintsUsage();
+      else if( string(optarg) == string("H") )
+        DisplayHistoryUsage();
       break;
     case ICHAN_KEY:
       ichan = fromstring<int>( string(optarg) );
@@ -1028,26 +1040,6 @@ int main( int argc, char *argv[] ) try
       cerr << "Unknown option " << char(i) << endl;
       break;
     };
-  }
-
-  // see if we have a command
-  if( optind < argc )
-  {
-    if( string( argv[optind] ) == string("help") )
-    {
-      if( optind == argc-1 )
-      {
-        Usage();
-      }
-      else
-      {
-        string help_cmd = argv[optind+1];
-	if( help_cmd == "S" )
-	  DisplaySubintsUsage();
-	else if( help_cmd == "H" )
-	  DisplayHistoryUsage();
-      }
-    }
   }
 
   vector< string > filenames = GetFilenames( argc, argv );
