@@ -82,7 +82,14 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
       cerr << "Pulsar::PlotLoop::plot " << index_command << endl;
 
     the_plot->configure( index_command );
+
+    PlotLabel* label = the_plot->get_attributes()->get_label_above();
+    string current = label->get_centre();
+    label->set_centre( current + " " + index_command );
+
     plot (indeces);
+
+    label->set_centre( current );
   }
   catch (Error& error)
   {
