@@ -2150,7 +2150,7 @@ void ProcessArchiveImplementation( OS& os, string filename )
   for( it = commands.begin(); it != commands.end(); it ++ )
   {
     if (!neat_table)
-      os << "\t";
+      os << "   ";
 
     string val = FetchValue( archive, lowercase((*it)) );
     if ( val == "" ) val = "*";
@@ -2266,7 +2266,7 @@ void Header( OS& os )
   for( it = commands.begin(); it != commands.end(); it ++ )
   {
     if (!neat_table)
-      os << "\t";
+      os << "   ";
     os << (*it);
   }
 
