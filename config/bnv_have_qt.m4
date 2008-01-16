@@ -290,28 +290,28 @@ int main( int argc, char **argv )
 EOF
 
       bnv_cv_qt_test_result="failure"
-      bnv_try_1="$QT_MOC bnv_qt_test.h -o moc_bnv_qt_test.$ac_ext >/dev/null 2>/dev/null"
+      bnv_try_1="$QT_MOC bnv_qt_test.h -o moc_bnv_qt_test.$ac_ext >.bnv_have_qt.stdout 2>.bnv_have_qt.stderr"
       AC_TRY_EVAL(bnv_try_1)
       if test x"$ac_status" != x0; then
         echo "$bnv_err_1" >&AC_FD_CC
         echo "configure: could not run $QT_MOC on:" >&AC_FD_CC
         cat bnv_qt_test.h >&AC_FD_CC
       else
-        bnv_try_2="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o moc_bnv_qt_test.o moc_bnv_qt_test.$ac_ext >/dev/null 2>/dev/null"
+        bnv_try_2="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o moc_bnv_qt_test.o moc_bnv_qt_test.$ac_ext >.bnv_have_qt.stdout 2>.bnv_have_qt.stderr"
         AC_TRY_EVAL(bnv_try_2)
         if test x"$ac_status" != x0; then
           echo "$bnv_err_2" >&AC_FD_CC
           echo "configure: could not compile:" >&AC_FD_CC
           cat moc_bnv_qt_test.$ac_ext >&AC_FD_CC
         else
-          bnv_try_3="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o bnv_qt_main.o bnv_qt_main.$ac_ext >/dev/null 2>/dev/null"
+          bnv_try_3="$CXX $QT_CXXFLAGS -c $CXXFLAGS -o bnv_qt_main.o bnv_qt_main.$ac_ext >.bnv_have_qt.stdout 2>.bnv_have_qt.stderr"
           AC_TRY_EVAL(bnv_try_3)
           if test x"$ac_status" != x0; then
             echo "$bnv_err_3" >&AC_FD_CC
             echo "configure: could not compile:" >&AC_FD_CC
             cat bnv_qt_main.$ac_ext >&AC_FD_CC
           else
-            bnv_try_4="$CXX $QT_LIBS $LIBS -o bnv_qt_main bnv_qt_main.o moc_bnv_qt_test.o >/dev/null 2>/dev/null"
+            bnv_try_4="$CXX $QT_LIBS $LIBS -o bnv_qt_main bnv_qt_main.o moc_bnv_qt_test.o >.bnv_have_qt.stdout 2>.bnv_have_qt.stderr"
             AC_TRY_EVAL(bnv_try_4)
             if test x"$ac_status" != x0; then
               echo "$bnv_err_4" >&AC_FD_CC
