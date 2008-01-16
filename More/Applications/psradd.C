@@ -34,7 +34,7 @@
 
 using namespace std;
 
-static const char* args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:p:PqRr:sS:tTUvVwZ:";
+static const char* args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:o:p:PqRr:sS:tTUvVwZ:";
 
 void reorder(Reference::To<Pulsar::Archive> arch);
 
@@ -49,7 +49,7 @@ void usage () {
     " -V          Very verbose mode (debugging) \n"
     "\n"
     " -E f.eph    Load and install new ephemeris from f.eph \n"
-    " -f fname    Output result to 'fname' \n"
+    " -o fname    Output result to 'fname' \n"
     " -F          Force append despite mismatch of header parameters \n"
     " -j j1[,jN]  preprocessing job[s] \n"
     " -J jobs     multiple preprocessing jobs in 'jobs' file \n"
@@ -166,7 +166,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.60 2007/12/24 20:01:49 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.61 2008/01/16 20:19:26 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -212,12 +212,14 @@ int main (int argc, char **argv) try {
       command += optarg;
       break;
 
+    case 'o':
+      command += " -o ";
     case 'f':
       newname = optarg;
-      
-      command += " -f ";
       command += optarg;
       
+      if (c == 'f')
+	command += " -f ";
       break;
 
     case 'F':
