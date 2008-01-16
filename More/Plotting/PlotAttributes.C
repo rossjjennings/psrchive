@@ -45,9 +45,10 @@ void Pulsar::PlotAttributes::set_label_above (PlotLabel* label)
   above = label;
 }
 
-
 void Pulsar::PlotAttributes::publication_quality ()
 {
+  get_label_above()->set_all( PlotLabel::unset );
+
   set_character_height (1.5);
   set_character_font (2);
   set_line_width (3);

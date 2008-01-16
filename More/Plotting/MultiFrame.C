@@ -57,16 +57,10 @@ void Pulsar::MultiFrame::set_line_width (int width)
 
 template<typename Iterator, typename GeneratorMemberFunction>
 void foreach (Iterator begin, Iterator end,
-	       GeneratorMemberFunction func)
+	      GeneratorMemberFunction func)
 {
   for (Iterator i = begin; i != end; i++)
     (i->second->*func)();
-}
-
-void Pulsar::MultiFrame::publication_quality ()
-{
-  foreach( frames.begin(), frames.end(), 
-	   &PlotFrame::publication_quality );
 }
 
 void Pulsar::MultiFrame::no_labels ()

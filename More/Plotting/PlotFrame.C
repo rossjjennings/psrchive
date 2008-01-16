@@ -206,13 +206,6 @@ void Pulsar::PlotFrame::set_label_below (PlotLabel* label)
   below = label;
 }
 
-void Pulsar::PlotFrame::publication_quality ()
-{
-  PlotAttributes::publication_quality ();
-
-  get_label_above()->set_all(PlotLabel::unset);
-}
-
 void Pulsar::PlotFrame::no_labels ()
 {
   PlotAttributes::no_labels ();
