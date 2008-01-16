@@ -11,7 +11,7 @@
 #
 # This macro tries to link a test program, using 
 #
-#    -I$TEMPO2/include -L$TEMPO2/lib -ltempo2pred
+#    -I$TEMPO2/include -L$TEMPO2/lib -ltempo2pred -ltempo2 -lsofa
 #
 # Notice that the environment variable TEMPO2 is required.
 #
@@ -28,17 +28,22 @@ AC_DEFUN([SWIN_LIB_TEMPO2],
   ac_save_CFLAGS="$CFLAGS"
   ac_save_LIBS="$LIBS"
 
-  LIBS="$ac_save_LIBS $TEMPO2_LIBS"
-  CFLAGS="$ac_save_CFLAGS $TEMPO2_CFLAGS"
+  AC_LANG_PUSH(C++)
 
-  AC_TRY_LINK([#include "tempo2pred.h"],
-              [T2Predictor p; T2Predictor_Read (&p, 0);],
+  LIBS="$ac_save_LIBS $TEMPO2_LIBS"
+  CXXFLAGS="$ac_save_CXXFLAGS $TEMPO2_CFLAGS"
+
+  AC_TRY_LINK([#include "tempo2pred.h"
+               #include "tempo2.h"],
+              [T2Predictor p; T2Predictor_Read (&p, 0); destroyOne(0); ],
                have_tempo2=yes, have_tempo2=no)
 
   AC_MSG_RESULT($have_tempo2)
 
   LIBS="$ac_save_LIBS"
-  CFLAGS="$ac_save_CFLAGS"
+  CXXFLAGS="$ac_save_CXXFLAGS"
+
+  AC_LANG_POP(C++)
 
   if test x"$have_tempo2" = xyes; then
     AC_DEFINE([HAVE_TEMPO2], [1], [Define to 1 if you have the TEMPO2 library])
