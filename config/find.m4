@@ -10,7 +10,7 @@ AC_DEFUN([SWIN_PROG_FIND],
 
   AC_MSG_CHECKING([that find is not SIGPROC find])
 
-  sigproc_find=`find | $FGREP SIGPROC`
+  sigproc_find=`find 2>/dev/null | $FGREP SIGPROC`
   if test x"$sigproc_find" = x; then
     AC_MSG_RESULT(ok)
   else
