@@ -796,6 +796,7 @@ try {
 
     criterion.minutes_apart = long_time_scale;
     criterion.check_coordinates = false;
+    criterion.check_instrument = false;
     criterion.policy = NoPolicy;
 
   }
@@ -829,7 +830,13 @@ try {
       calType == Calibrator::Hamaker) {
 
     criterion.minutes_apart = long_time_scale;
+
+    // these solutions are global
     criterion.check_coordinates = false;
+
+    // in principle, these solutions are indepenent of backend
+    criterion.check_instrument = false;
+
     criterion.policy = NoPolicy;
 
   }
