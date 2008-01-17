@@ -1,9 +1,12 @@
 
+noinst_PROGRAMS = example
+example_SOURCES = example.C
+
 bin_SCRIPTS = psrhelp
 
 EXTRA_DIST = psrhelp
 
-bin_PROGRAMS = pam pat paz psradd psrsh psrwt fluxcal pac pcm pdv
+bin_PROGRAMS = pam pat paz psradd psrsh psrwt fluxcal pac pcm pdv psrsp
 
 pam_SOURCES = pam.C
 
@@ -16,6 +19,8 @@ psradd_SOURCES = psradd.C
 
 psrsh_SOURCES = psrsh.C
 psrsh_LDADD = $(LDADD) @READLINE_LIBS@
+
+psrsp_SOURCES = psrsp.C
 
 psrwt_SOURCES = psrwt.C
 
