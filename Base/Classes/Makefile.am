@@ -7,6 +7,7 @@ nobase_include_HEADERS = \
         Pulsar/ArchiveExpert.h \
         Pulsar/Archive.h \
         Pulsar/ArchiveTI.h \
+	Pulsar/Application.h \
         Pulsar/BasicArchive.h \
         Pulsar/BasicIntegration.h \
 	Pulsar/Calibrator.h \
@@ -42,6 +43,7 @@ libClasses_la_SOURCES = \
         ArchiveTI.C \
         Archive_unload.C \
         Archive_verbose.C \
+	Application.C \
         BasicArchive.C \
         BasicIntegration.C \
 	Calibrator.C \
