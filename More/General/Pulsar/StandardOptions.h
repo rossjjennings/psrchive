@@ -6,13 +6,13 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/CommonFeature.h,v $
+/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardOptions.h,v $
    $Revision: 1.1 $
-   $Date: 2008/01/17 21:50:25 $
+   $Date: 2008/01/17 21:55:00 $
    $Author: straten $ */
 
-#ifndef __Pulsar_CommonFeature_h
-#define __Pulsar_CommonFeature_h
+#ifndef __Pulsar_StandardOptions_h
+#define __Pulsar_StandardOptions_h
 
 #include "Pulsar/Application.h"
 
@@ -20,13 +20,13 @@ namespace Pulsar {
 
   class Interpreter;
 
-  //! Features that employ the standard interpreter
-  class CommonFeature : public Application::Feature
+  //! Optionss that employ the standard interpreter
+  class StandardOptions : public Application::Options
   {
   public:
 
     //! Default constructor
-    CommonFeature ();
+    StandardOptions ();
 
     //! Extra usage information implemented by derived classes
     virtual std::string get_usage ();
@@ -42,7 +42,12 @@ namespace Pulsar {
 
   private:
 
-    bool tscrunch, fscrunch, pscrunch;
+    // Preprocessing jobs
+    std::vector<std::string> jobs;
+
+    // standard interpreter
+    Reference::To<Interpreter> interpreter;
+
 
   };
 

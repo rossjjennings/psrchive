@@ -7,10 +7,10 @@
 
 using namespace std;
 
-#include "Pulsar/CommonFeature.h"
+#include "Pulsar/CommonOptions.h"
 #include "Pulsar/Interpreter.h"
 
-Pulsar::CommonFeature::CommonFeature ()
+Pulsar::CommonOptions::CommonOptions ()
 {
   tscrunch = false;
   fscrunch = false;
@@ -18,7 +18,7 @@ Pulsar::CommonFeature::CommonFeature ()
 }
 
 //! Extra usage information implemented by derived classes
-std::string Pulsar::CommonFeature::get_usage ()
+std::string Pulsar::CommonOptions::get_usage ()
 {
   return 
     " -T               integrate all sub-integrations \n"
@@ -27,13 +27,13 @@ std::string Pulsar::CommonFeature::get_usage ()
 }
 
 //! Extra option flags implemented by derived classes
-std::string Pulsar::CommonFeature::get_options ()
+std::string Pulsar::CommonOptions::get_options ()
 {
   return "FTp";
 }
 
 //! Parse a non-standard command
-bool Pulsar::CommonFeature::parse (char code, const std::string& arg)
+bool Pulsar::CommonOptions::parse (char code, const std::string& arg)
 {
   switch (code)
   {
@@ -57,7 +57,7 @@ bool Pulsar::CommonFeature::parse (char code, const std::string& arg)
 }
 
 //! Preprocessing tasks implemented by partially derived classes
-void Pulsar::CommonFeature::process (Archive* archive)
+void Pulsar::CommonOptions::process (Archive* archive)
 {
   if (tscrunch)
   {

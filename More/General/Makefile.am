@@ -24,7 +24,7 @@ nobase_include_HEADERS = \
         Pulsar/ChannelZapModulation.h \
         Pulsar/ColdPlasma.h \
 	Pulsar/Combination.h \
-	Pulsar/CommonFeature.h \
+	Pulsar/CommonOptions.h \
 	Pulsar/ConvertIsolated.h \
 	Pulsar/Differentiate.h \
         Pulsar/DispersionDelay.h \
@@ -75,7 +75,7 @@ nobase_include_HEADERS = \
 	Pulsar/SNRatioInterpreter.h \
         Pulsar/SNRWeight.h \
         Pulsar/SquareWave.h \
-	Pulsar/StandardFeature.h \
+	Pulsar/StandardOptions.h \
 	Pulsar/StandardCandles.h \
         Pulsar/StandardSNR.h \
 	Pulsar/Subtract.h \
@@ -128,7 +128,7 @@ libGeneral_la_SOURCES = \
         BaselineWindow.C \
         ChannelZapMedian.C \
         ChannelZapModulation.C \
-	CommonFeature.C \
+	CommonOptions.C \
 	ConvertIsolated.C \
 	Differentiate.C \
         Dispersion.C \
@@ -196,7 +196,7 @@ libGeneral_la_SOURCES = \
         SNRWeight.C \
         SquareWave.C \
 	standard_shell.C \
-	StandardFeature.C \
+	StandardOptions.C \
         StandardCandles.C \
         StandardSNR.C \
 	Subtract.C \
