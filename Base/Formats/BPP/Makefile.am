@@ -1,9 +1,9 @@
 
 noinst_LTLIBRARIES = libbpp.la
 
-include_HEADERS = Pulsar/BPPArchive.h
+nobase_include_HEADERS = Pulsar/BPPArchive.h
 
-libbpp_la_SOURCES = BPPArchive.C
+libbpp_la_SOURCES = BPPArchive.C bpp_header.h
 
 #############################################################################
 #
