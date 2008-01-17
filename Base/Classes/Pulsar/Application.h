@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/01/17 21:11:58 $
+   $Revision: 1.3 $
+   $Date: 2008/01/17 21:36:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Application_h
@@ -85,8 +85,9 @@ namespace Pulsar {
     // name of file containing list of Archive filenames
     char* metafile;
 
-    // verbosity flag
+    // verbosity flags
     bool verbose;
+    bool very_verbose;
 
   };
 

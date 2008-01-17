@@ -20,9 +20,12 @@ Pulsar::Application::Application (const string& n, const string& d)
 {
   name = n;
   description = d;
-  metafile   = NULL;
-  verbose    = false;
-  has_manual = false;
+
+  metafile     = NULL;
+  has_manual   = false;
+
+  verbose      = false;
+  very_verbose = false;
 }
 
 //! Add a feature to the application
@@ -121,6 +124,7 @@ void Pulsar::Application::parse (int argc, char** argv)
     case 'V':
       Pulsar::Archive::set_verbosity (3);
       verbose = true;
+      very_verbose = true;
       break;
 
     default:
@@ -171,7 +175,11 @@ int Pulsar::Application::main (int argc, char** argv) try
     archive = Pulsar::Archive::load (filenames[ifile]);
 
     for (unsigned i=0; i<features.size(); i++)
+    {
+      if (very_verbose)
+	cerr << "Pulsar::Application::main feature "<< i <<" process" << endl;
       features[i]->process (archive);
+    }
 
     process (archive);
   }
