@@ -38,6 +38,10 @@ void Pulsar::Integration::toas (vector<Tempo::toa>& toas,
 
   for (unsigned ichan=0; ichan < get_nchan(); ++ichan) {
 
+    if (std_subint.get_nchan() > 1) {
+	  standard = std_subint.get_Profile (0, ichan);
+	}
+
     const Profile* profile = get_Profile (0, ichan);
 
     if (discard_bad && profile->get_weight() == 0)
