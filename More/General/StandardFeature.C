@@ -50,17 +50,19 @@ bool Pulsar::StandardFeature::parse (char code, const std::string& arg)
   return true;
 }
 
+#define _DEBUG 1
+
 //! Preprocessing tasks implemented by partially derived classes
 void Pulsar::StandardFeature::process (Archive* archive)
 {
-  if (jobs.size())
+  if (jobs.size() == 0)
     return;
 
   if (!interpreter)
     interpreter = standard_shell();
 
   if (application->get_verbose())
-    cerr << application->get_name() << ": preprocessing "
+    cerr << application->get_name() << ": interpreter processing "
 	 << archive->get_filename() << endl;
 
   interpreter->set (archive);
