@@ -61,6 +61,7 @@ nobase_include_HEADERS = \
 	Pulsar/PhaseWeightShift.h \
 	Pulsar/PhaseWeightSmooth.h \
         Pulsar/PhaseWeight.h \
+	Pulsar/PlotOptions.h \
 	Pulsar/ProfileInterpreter.h \
 	Pulsar/ProfileStats.h \
         Pulsar/ProfileWeightFunction.h \
