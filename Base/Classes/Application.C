@@ -29,9 +29,10 @@ Pulsar::Application::Application (const string& name,
 //! Provide usage information
 void Pulsar::Application::usage ()
 {
-  cout << application_name + " - " + application_description + "\n"
+  cout << 
+    "\n" + application_name + " - " + application_description + "\n"
     "\n"
-    "usage: " + application_name + " [options] filenames \n"
+    "usage: " + application_name + " [options] filename[s] \n"
     "\n"
     "where options are:\n"
     "\n"
@@ -40,14 +41,13 @@ void Pulsar::Application::usage ()
     " -v               verbose mode \n"
     " -V               very verbose mode \n"
     "\n"
-    " -j commands      execute pulsar shell preprocessing commands \n"
-    " -J script        execute pulsar shell preprocessing script \n"
     " -M metafile      metafile contains list of archive filenames \n"
     "\n"
-    + get_usage () << endl << endl;
+       << get_usage () 
+       << endl;
 
   if (!has_manual)
-    return;
+    exit (0);
 
   cout << 
     "See "PSRCHIVE_HTTP"/manuals/" + application_name + " for more details \n" 
