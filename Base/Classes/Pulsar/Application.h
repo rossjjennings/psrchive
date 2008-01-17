@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/01/17 11:31:10 $
+   $Revision: 1.2 $
+   $Date: 2008/01/17 21:11:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Application_h
@@ -26,13 +26,31 @@ namespace Pulsar {
   {
   public:
 
-    //! Construct with the application name
+    //! Construct with the application name and a short description
     Application (const std::string& name, const std::string& description);
 
     //! Execute the main loop
     virtual int main (int argc, char** argv);
 
+    //! Application features
+    class Feature;
+
+    //! Add a feature to the application
+    void add (Feature*);
+
+    //! Get the application name
+    std::string get_name () const;
+
+    //! Get the application description
+    std::string get_description () const;
+
+    //! Get the verbosity flag
+    bool get_verbose () const;
+
   protected:
+
+    //! Available features
+    std::vector< Reference::To<Feature> > features;
 
     //! Provide usage information
     virtual void usage ();
@@ -49,9 +67,6 @@ namespace Pulsar {
     //! Parse an additional command, return true if understood
     virtual bool parse (char code, const std::string& arg);
 
-    //! Preprocessing tasks implemented by partially derived classes
-    virtual void preprocess (Archive*);
-
     //! Data analysis tasks implemented by most derived classes
     virtual void process (Archive*) = 0;
 
@@ -59,10 +74,10 @@ namespace Pulsar {
     bool has_manual;
 
     // name of the application
-    std::string application_name;
+    std::string name;
 
     // short description of the application
-    std::string application_description;
+    std::string description;
 
     // list of file names on which to operate
     std::vector <std::string> filenames;
@@ -72,6 +87,34 @@ namespace Pulsar {
 
     // verbosity flag
     bool verbose;
+
+  };
+
+  class Application::Feature : public Reference::Able
+  {
+    public:
+
+    //! Additional usage information
+    virtual std::string get_usage () = 0;
+
+    //! Additional getopt options
+    virtual std::string get_options () = 0;
+
+    //! Parse an additional command, return true if understood
+    virtual bool parse (char code, const std::string& arg) = 0;
+
+    //! Additional setup tasks
+    virtual void setup ();
+
+    //! Additional processing tasks
+    virtual void process (Archive*);
+
+  protected:
+
+    friend class Application;
+
+    //! The application to which this feature belongs
+    Reference::To<Application,false> application;
 
   };
 

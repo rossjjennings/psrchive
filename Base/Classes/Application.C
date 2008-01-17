@@ -16,23 +16,47 @@ using namespace std;
 
 #include <unistd.h>
 
-Pulsar::Application::Application (const string& name,
-				  const string& description)
+Pulsar::Application::Application (const string& n, const string& d)
 {
-  application_name = name;
-  application_description = description;
+  name = n;
+  description = d;
   metafile   = NULL;
   verbose    = false;
   has_manual = false;
+}
+
+//! Add a feature to the application
+void Pulsar::Application::add (Feature* f)
+{
+  f->application = this;
+  features.push_back( f );
+}
+
+//! Get the application name
+std::string Pulsar::Application::get_name () const
+{
+  return name;
+}
+
+//! Get the application description
+std::string Pulsar::Application::get_description () const
+{
+  return description;
+}
+
+//! Get the verbosity flag
+bool Pulsar::Application::get_verbose () const
+{
+  return verbose;
 }
 
 //! Provide usage information
 void Pulsar::Application::usage ()
 {
   cout << 
-    "\n" + application_name + " - " + application_description + "\n"
+    "\n" + name + " - " + description + "\n"
     "\n"
-    "usage: " + application_name + " [options] filename[s] \n"
+    "usage: " + name + " [options] filename[s] \n"
     "\n"
     "where options are:\n"
     "\n"
@@ -42,24 +66,35 @@ void Pulsar::Application::usage ()
     " -V               very verbose mode \n"
     "\n"
     " -M metafile      metafile contains list of archive filenames \n"
-    "\n"
-       << get_usage () 
        << endl;
+
+  for (unsigned i=0; i<features.size(); i++)
+    if (features[i]->get_usage().length())
+      cout << features[i]->get_usage() << endl;
+
+  if (get_usage().length())
+    cout << get_usage () << endl;
 
   if (!has_manual)
     exit (0);
 
   cout << 
-    "See "PSRCHIVE_HTTP"/manuals/" + application_name + " for more details \n" 
+    "See "PSRCHIVE_HTTP"/manuals/" + name + " for more details \n" 
        << endl;
 
   exit (0);
 }
 
+
 //! Parse the command line options
 void Pulsar::Application::parse (int argc, char** argv)
 {
-  string args = "hM:qvV" + get_options ();
+  string args = "hM:qvV";
+
+  for (unsigned i=0; i<features.size(); i++)
+    args += features[i]->get_options();
+
+  args += get_options ();
 
   char code;
   while ((code = getopt(argc, argv, args.c_str())) != -1) 
@@ -89,12 +124,27 @@ void Pulsar::Application::parse (int argc, char** argv)
       break;
 
     default:
-      if (! parse (code, optarg) )
-	throw Error (InvalidParam, application_name,
+      {
+	bool parsed = false;
+	
+	for (unsigned i=0; i<features.size(); i++)
+	  if (features[i]->parse (code, optarg))
+	    {
+	      parsed = true;
+	      break;
+	    }
+	
+	if (!parsed)
+	  parsed = parse (code, optarg);
+	
+	if (parsed)
+	  break;
+	
+	throw Error (InvalidParam, name,
 		     "option -%c not understood", code);
-      break;
-
-    } 
+      } 
+      
+    }
 
   if (metafile)
     stringfload (&filenames, metafile);
@@ -103,7 +153,7 @@ void Pulsar::Application::parse (int argc, char** argv)
       dirglob (&filenames, argv[ai]);
 
   if (filenames.empty())
-    throw Error (InvalidParam, application_name,
+    throw Error (InvalidParam, name,
 		 "please specify filename[s]");
 }
 
@@ -112,16 +162,21 @@ int Pulsar::Application::main (int argc, char** argv) try
 {
   parse (argc, argv);
 
+  for (unsigned i=0; i<features.size(); i++)
+    features[i]->setup ();
+
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
   {
     Reference::To<Pulsar::Archive> archive;
     archive = Pulsar::Archive::load (filenames[ifile]);
 
-    preprocess (archive);
+    for (unsigned i=0; i<features.size(); i++)
+      features[i]->process (archive);
+
     process (archive);
   }
   catch (Error& error) {
-    cerr << application_name << ": error while processing "
+    cerr << name << ": error while processing "
 	 << filenames[ifile] << ":\n" << error.get_message() << endl;
   }
 
@@ -129,7 +184,7 @@ int Pulsar::Application::main (int argc, char** argv) try
 }
 catch (Error& error)
 {
-  cerr << application_name << ": " << error.get_message() << endl;
+  cerr << name << ": " << error.get_message() << endl;
   return -1;
 }
 
@@ -151,8 +206,13 @@ bool Pulsar::Application::parse (char code, const string& arg)
   return false;
 }
 
-//! Preprocessing tasks implemented by partially derived classes
-void Pulsar::Application::preprocess (Archive*)
+
+void Pulsar::Application::Feature::process (Archive*)
+{
+}
+
+
+void Pulsar::Application::Feature::setup ()
 {
 }
 

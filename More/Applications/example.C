@@ -7,19 +7,14 @@
 
 using namespace std;
 
-#include "Pulsar/StandardApplication.h"
+#include "Pulsar/Application.h"
+#include "Pulsar/StandardFeature.h"
 #include "Pulsar/Archive.h"
 
 //
-//! An example of a standard application
+//! An example of an application
 //
-
-/*! 
-  A standard application provides preprocessing functionality using
-  the standard pulsar shell interpreter 
-*/
-
-class example : public Pulsar::StandardApplication
+class example : public Pulsar::Application
 {
 public:
 
@@ -35,11 +30,19 @@ public:
   The constructor must set the name of the application and a short
   description of its purpose.  These are shown when the user types
   "example -h"
+
+  This constructor also makes use of the StandardFeature class,
+  an add-on that provides standard preprocessing with the pulsar
+  command language interpreter.
+
+  Other add-ons include the CommonFeature class and the
+  PlottingFeature class.
 */
 
 example::example ()
-  : StandardApplication ("example", "example psrchive program")
+  : Application ("example", "example psrchive program")
 {
+  add( new Pulsar::StandardFeature );
 }
 
 /*!

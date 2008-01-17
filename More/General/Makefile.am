@@ -74,7 +74,7 @@ nobase_include_HEADERS = \
 	Pulsar/SNRatioInterpreter.h \
         Pulsar/SNRWeight.h \
         Pulsar/SquareWave.h \
-	Pulsar/StandardApplication.h \
+	Pulsar/StandardFeature.h \
 	Pulsar/StandardCandles.h \
         Pulsar/StandardSNR.h \
 	Pulsar/Subtract.h \
@@ -194,7 +194,7 @@ libGeneral_la_SOURCES = \
         SNRWeight.C \
         SquareWave.C \
 	standard_shell.C \
-	StandardApplication.C \
+	StandardFeature.C \
         StandardCandles.C \
         StandardSNR.C \
 	Subtract.C \

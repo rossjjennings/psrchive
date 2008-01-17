@@ -6,13 +6,13 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/StandardApplication.h,v $
+/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/StandardFeature.h,v $
    $Revision: 1.1 $
-   $Date: 2008/01/17 11:31:10 $
+   $Date: 2008/01/17 21:11:59 $
    $Author: straten $ */
 
-#ifndef __Pulsar_StandardApplication_h
-#define __Pulsar_StandardApplication_h
+#ifndef __Pulsar_StandardFeature_h
+#define __Pulsar_StandardFeature_h
 
 #include "Pulsar/Application.h"
 
@@ -20,16 +20,13 @@ namespace Pulsar {
 
   class Interpreter;
 
-  //! Applications that employ the standard interpreter
-  class StandardApplication : public Application
+  //! Features that employ the standard interpreter
+  class StandardFeature : public Application::Feature
   {
   public:
 
-    //! Construct with the application name
-    StandardApplication (const std::string& name,
-			 const std::string& description);
-
-  protected:
+    //! Default constructor
+    StandardFeature ();
 
     //! Extra usage information implemented by derived classes
     virtual std::string get_usage ();
@@ -41,7 +38,7 @@ namespace Pulsar {
     virtual bool parse (char code, const std::string& arg);
 
     //! Preprocessing tasks implemented by partially derived classes
-    virtual void preprocess (Archive*);
+    virtual void process (Archive*);
 
   private:
 
