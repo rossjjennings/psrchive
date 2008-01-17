@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/01/17 21:36:49 $
+   $Revision: 1.4 $
+   $Date: 2008/01/17 22:05:05 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Application_h
@@ -21,7 +21,7 @@ namespace Pulsar {
 
   class Archive;
 
-  //! Applications with the basic command line options
+  //! Application with basic command line options
   class Application : public Reference::Able
   {
   public:
@@ -32,11 +32,11 @@ namespace Pulsar {
     //! Execute the main loop
     virtual int main (int argc, char** argv);
 
-    //! Application features
-    class Feature;
+    //! Application options
+    class Options;
 
-    //! Add a feature to the application
-    void add (Feature*);
+    //! Add options to the application
+    void add (Options*);
 
     //! Get the application name
     std::string get_name () const;
@@ -49,8 +49,8 @@ namespace Pulsar {
 
   protected:
 
-    //! Available features
-    std::vector< Reference::To<Feature> > features;
+    //! Available options
+    std::vector< Reference::To<Options> > options;
 
     //! Provide usage information
     virtual void usage ();
@@ -91,7 +91,7 @@ namespace Pulsar {
 
   };
 
-  class Application::Feature : public Reference::Able
+  class Application::Options : public Reference::Able
   {
     public:
 
@@ -114,7 +114,7 @@ namespace Pulsar {
 
     friend class Application;
 
-    //! The application to which this feature belongs
+    //! The application to which these options belong
     Reference::To<Application,false> application;
 
   };

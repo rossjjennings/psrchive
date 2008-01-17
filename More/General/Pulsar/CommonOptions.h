@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/CommonOptions.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/01/17 21:55:00 $
+   $Revision: 1.2 $
+   $Date: 2008/01/17 22:05:05 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CommonOptions_h
@@ -28,10 +28,10 @@ namespace Pulsar {
     //! Default constructor
     CommonOptions ();
 
-    //! Extra usage information implemented by derived classes
+    //! Additional usage information implemented by derived classes
     virtual std::string get_usage ();
 
-    //! Extra getopt options
+    //! Additional getopt options
     virtual std::string get_options ();
 
     //! Parse a non-standard command

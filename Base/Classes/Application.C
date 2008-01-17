@@ -28,11 +28,11 @@ Pulsar::Application::Application (const string& n, const string& d)
   very_verbose = false;
 }
 
-//! Add a feature to the application
-void Pulsar::Application::add (Feature* f)
+//! Add options to the application
+void Pulsar::Application::add (Options* f)
 {
   f->application = this;
-  features.push_back( f );
+  options.push_back( f );
 }
 
 //! Get the application name
@@ -71,9 +71,9 @@ void Pulsar::Application::usage ()
     " -M metafile      metafile contains list of archive filenames \n"
        << endl;
 
-  for (unsigned i=0; i<features.size(); i++)
-    if (features[i]->get_usage().length())
-      cout << features[i]->get_usage() << endl;
+  for (unsigned i=0; i<options.size(); i++)
+    if (options[i]->get_usage().length())
+      cout << options[i]->get_usage() << endl;
 
   if (get_usage().length())
     cout << get_usage () << endl;
@@ -94,8 +94,8 @@ void Pulsar::Application::parse (int argc, char** argv)
 {
   string args = "hM:qvV";
 
-  for (unsigned i=0; i<features.size(); i++)
-    args += features[i]->get_options();
+  for (unsigned i=0; i<options.size(); i++)
+    args += options[i]->get_options();
 
   args += get_options ();
 
@@ -131,8 +131,8 @@ void Pulsar::Application::parse (int argc, char** argv)
       {
 	bool parsed = false;
 	
-	for (unsigned i=0; i<features.size(); i++)
-	  if (features[i]->parse (code, optarg))
+	for (unsigned i=0; i<options.size(); i++)
+	  if (options[i]->parse (code, optarg))
 	    {
 	      parsed = true;
 	      break;
@@ -166,19 +166,19 @@ int Pulsar::Application::main (int argc, char** argv) try
 {
   parse (argc, argv);
 
-  for (unsigned i=0; i<features.size(); i++)
-    features[i]->setup ();
+  for (unsigned i=0; i<options.size(); i++)
+    options[i]->setup ();
 
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
   {
     Reference::To<Pulsar::Archive> archive;
     archive = Pulsar::Archive::load (filenames[ifile]);
 
-    for (unsigned i=0; i<features.size(); i++)
+    for (unsigned i=0; i<options.size(); i++)
     {
       if (very_verbose)
 	cerr << "Pulsar::Application::main feature "<< i <<" process" << endl;
-      features[i]->process (archive);
+      options[i]->process (archive);
     }
 
     process (archive);
@@ -215,12 +215,12 @@ bool Pulsar::Application::parse (char code, const string& arg)
 }
 
 
-void Pulsar::Application::Feature::process (Archive*)
+void Pulsar::Application::Options::process (Archive*)
 {
 }
 
 
-void Pulsar::Application::Feature::setup ()
+void Pulsar::Application::Options::setup ()
 {
 }
 

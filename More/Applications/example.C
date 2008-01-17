@@ -8,7 +8,7 @@
 using namespace std;
 
 #include "Pulsar/Application.h"
-#include "Pulsar/StandardFeature.h"
+#include "Pulsar/StandardOptions.h"
 #include "Pulsar/Archive.h"
 
 //
@@ -31,18 +31,18 @@ public:
   description of its purpose.  These are shown when the user types
   "example -h"
 
-  This constructor also makes use of the StandardFeature class,
+  This constructor also makes use of the StandardOptions class,
   an add-on that provides standard preprocessing with the pulsar
   command language interpreter.
 
-  Other add-ons include the CommonFeature class and the
-  PlottingFeature class.
+  Other option sets include the CommonOptions class and the
+  PlottingOptions class.
 */
 
 example::example ()
   : Application ("example", "example psrchive program")
 {
-  add( new Pulsar::StandardFeature );
+  add( new Pulsar::StandardOptions );
 }
 
 /*!
