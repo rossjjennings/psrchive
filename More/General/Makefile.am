@@ -206,13 +206,23 @@ libGeneral_la_SOURCES = \
         Weight.C \
 	ZapInterpreter.C
 
+##############################################################################
+#
+# PGPLOT-specific code
+#
+if HAVE_PGPLOT
+
+libGeneral_la_SOURCES += PlotOptions.C
+
+endif
+
 #############################################################################
 #
 # Dependencies should never be changed
 #
 
 INCLUDES = -I$(top_srcdir)/More/Polarimetry -I$(top_srcdir)/More/MEAL \
-	@TEMPO2_CFLAGS@
+	@PGPLOT_CFLAGS@ @TEMPO2_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.include
 
