@@ -7,6 +7,7 @@
 
 #include "Pulsar/Application.h"
 #include "Pulsar/StandardOptions.h"
+#include "Pulsar/PlotOptions.h"
 #include "Pulsar/Archive.h"
 
 using namespace std;
@@ -21,6 +22,7 @@ public:
 psrsp::psrsp () : Application ("psrsp", "pulsar spectral power")
 {
   add( new Pulsar::StandardOptions );
+  add( new Pulsar::PlotOptions );
 }
 
 void psrsp::process (Pulsar::Archive*)

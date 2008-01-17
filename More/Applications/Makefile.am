@@ -6,7 +6,7 @@ bin_SCRIPTS = psrhelp
 
 EXTRA_DIST = psrhelp
 
-bin_PROGRAMS = pam pat paz psradd psrsh psrwt fluxcal pac pcm pdv psrsp
+bin_PROGRAMS = pam pat paz psradd psrsh psrwt fluxcal pac pcm pdv
 
 pam_SOURCES = pam.C
 
@@ -19,8 +19,6 @@ psradd_SOURCES = psradd.C
 
 psrsh_SOURCES = psrsh.C
 psrsh_LDADD = $(LDADD) @READLINE_LIBS@
-
-psrsp_SOURCES = psrsp.C
 
 psrwt_SOURCES = psrwt.C
 
@@ -41,7 +39,7 @@ pdv_SOURCES = pdv.C
 #
 if HAVE_PGPLOT
 
-bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi pav
+bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi pav psrsp
 
 pdmp_SOURCES = pdmp.C
 pdmp_LDADD = $(LDADD) @PGPLOT_LIBS@
@@ -66,6 +64,9 @@ pazi_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 pav_SOURCES = pav.C PavApp.C PavApp.h
 pav_LDADD = $(LDADD) @PGPLOT_LIBS@
+
+psrsp_SOURCES = psrsp.C
+psrsp_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 endif
 
