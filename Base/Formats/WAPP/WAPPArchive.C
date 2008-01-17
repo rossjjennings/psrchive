@@ -9,7 +9,10 @@
 #include "Pulsar/Profile.h"
 #include "FTransform.h"
 
-#include "wapp_header.h"
+#include "wapp_headers.h"
+#include "wapp_convert.h"
+#include "vanvleck.h"
+#include "ierf.h"
 
 using namespace std;
 
@@ -34,6 +37,7 @@ Pulsar::WAPPArchive::~WAPPArchive()
 {
   // destroy any WAPPArchive-specific resources
   if (rawhdr!=NULL) { delete [] rawhdr; }
+  if (hdr!=NULL) { delete hdr; }
 }
 
 Pulsar::WAPPArchive::WAPPArchive (const Archive& arch)
@@ -148,8 +152,13 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
 
   // Check for known version
   int version_ok=0;
+  if (wapp_hdr_version==2) { version_ok=1; }
+  if (wapp_hdr_version==3) { version_ok=1; }
+  if (wapp_hdr_version==4) { version_ok=1; }
+  if (wapp_hdr_version==5) { version_ok=1; }
+  if (wapp_hdr_version==6) { version_ok=1; }
+  if (wapp_hdr_version==8) { version_ok=1; }
   if (wapp_hdr_version==9) { version_ok=1; }
-  else { version_ok=0; }
   if (!version_ok) {
     fclose(f);
     throw Error (InvalidState, "Pulsar::WAPPArchive::load_header",
@@ -177,7 +186,10 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
     throw Error (FailedSys, "Pulsar::WAPPArchive::load_header",
         "fread(rawhdr)");
   }
-  hdr = (struct WAPP_HEADER *)rawhdr;
+
+  // Conver header to standard version
+  hdr = new WAPP_HEADER;
+  wapp_hdr_convert(hdr, rawhdr);
 
   // Find out how big the file is
   rv = fseek(f, 0, SEEK_END);
@@ -204,46 +216,50 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
   // where appropriate.
 
   // Number of polarizations, channels, and subintegrations in file.
-  if ((hdr->nifs==1)||(hdr->nifs==2)||(hdr->nifs==4)) {
-    set_npol(hdr->nifs); 
+  int nifs = hdr->nifs;
+  int num_lags = hdr->num_lags;
+  int nbins = hdr->nbins;
+  if ((nifs==1)||(nifs==2)||(nifs==4)) {
+    set_npol(nifs); 
   } else {
     throw Error (InvalidState, "Pulsar::WAPPArchive::load_header",
-        "Invalid nifs=%d", hdr->nifs);
+        "Invalid nifs=%d", nifs);
   }
-  set_nchan(hdr->num_lags);
+  set_nchan(num_lags);
 
   // How many dumps, ACFs versus spectra
   size_t dump_size_bytes=0;
-  if (hdr->lagformat==WAPP_FLOATLAGS) { 
-    dump_size_bytes = 4 * hdr->num_lags * hdr->nbins * hdr->nifs;
+  int lagformat = hdr->lagformat;
+  if (lagformat==WAPP_FLOATLAGS) { 
+    dump_size_bytes = 4 * num_lags * nbins * nifs;
     raw_data_is_lags = 1;
-  } else if (hdr->lagformat==WAPP_FLOATSPEC) {
-    dump_size_bytes = 4 * hdr->num_lags * hdr->nbins * hdr->nifs;
+  } else if (lagformat==WAPP_FLOATSPEC) {
+    dump_size_bytes = 4 * num_lags * nbins * nifs;
     raw_data_is_lags = 0;
   } else {
     throw Error (InvalidState, "Pulsar::WAPPArchive::load_header",
-        "Unexpected lagformat=%d", hdr->lagformat);
+        "Unexpected lagformat=%d", lagformat);
   }
   set_nsubint((wapp_file_size-wapp_hdr_size-wapp_ascii_hdr_size)
       / dump_size_bytes);
 
   // Number of bins per pulse period in folded profiles.
-  set_nbin(hdr->nbins);
+  set_nbin(nbins);
 
   // Polarization state
-  if (hdr->nifs==1) {
+  if (nifs==1) {
     if (hdr->sum) {
       set_state(Signal::Intensity);
     } else {
       set_state(Signal::PP_State); // but no one would do this, right?
     }
-  } else if (hdr->nifs==2) {
+  } else if (nifs==2) {
     set_state(Signal::PPQQ);
-  } else if (hdr->nifs==4) {
+  } else if (nifs==4) {
     set_state(Signal::Coherence);
   } else {
     throw Error (InvalidState, "Pulsar::WAPPArchive::load_header",
-        "Invalid nifs=%d", hdr->nifs);
+        "Invalid nifs=%d", nifs);
   }
 
   // Data scale
@@ -258,7 +274,8 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
   // Observation type (PSR or CAL)
   // Look for 25 Hz constant folding period to determine if 
   // this is a cal scan.
-  if ((fabs(hdr->psr_f0[0]-25.0) < 1e-5) && (hdr->num_coeffs[0]==0)) {
+  if ((fabs(hdr->psr_f0[0]-25.0) < 1e-5) 
+      && (hdr->num_coeffs[0]==0)) {
     set_type(Signal::PolnCal); 
   } else {
     set_type(Signal::Pulsar);
@@ -444,7 +461,37 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
     throw Error (FailedSys, "Pulsar::WAPPArchive::load_Integration",
         "fread(subint %d)", subint);
 
-  // TODO : vanvleck correction
+  // Vanvleck correction
+  // Based on what is done in sigproc and presto (but see note below).
+  float *dptr;
+#if 1 
+  double power;
+  for (int ibin=0; ibin<nbin; ibin++) {
+    for (int ipol=0; ipol<npol; ipol++) {
+      dptr = &data[ibin*nchan*npol + ipol*nchan];
+      // The total power correction here is only valid for
+      // 3-level sampling.  Also, I don't know where the 0.18...
+      // comes from, but it just acts as a overall gain so doesn't
+      // really matter.  We'll use the psrchive ierf rather than
+      // doubling code.
+      if (hdr->level==1) { // 3-level case
+        //power = inv_cerf(dptr[0]); /* old vanvleck.c version */
+        power = ierf(1.0-dptr[0]);
+        power = 0.1872721836 / (power * power);
+        vanvleck3lev(dptr,nchan);
+      } else if (hdr->level==2) { // 9-level case
+        power = dptr[0];  /* XXX not quite right */
+        vanvleck9lev(dptr,nchan);
+      } else
+        throw Error (InvalidState, "Pulsar::WAPPArchive::load_Integration",
+            "Unrecognized hdr->level=%d", hdr->level);
+      for (int ichan=0; ichan<nchan; ichan++) {
+        dptr[ichan] *= power;
+      }
+    }
+  }
+#endif
+
   // TODO : window?
 
   // FFT to get spectra from ACFs.  No real-to-real interface yet
@@ -452,7 +499,6 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
   if (raw_data_is_lags) {
     float *mirror_data = new float[2*nchan];
     float *spec_data = new float[2*nchan+2];
-    float *dptr;
     for (int ipol=0; ipol<npol; ipol++) {
       for (int ibin=0; ibin<nbin; ibin++) {
         dptr = &data[ibin*nchan*npol + ipol*nchan];

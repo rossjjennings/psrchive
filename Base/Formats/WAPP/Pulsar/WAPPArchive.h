@@ -13,7 +13,7 @@
 #include "Pulsar/Agent.h"
 
 #include "polyco.h"
-#include "wapp_header.h"
+#include "wapp_headers.h"
 
 namespace Pulsar {
 
@@ -92,7 +92,7 @@ namespace Pulsar {
     char *rawhdr;
 
     //! Points to header 
-    struct WAPP_HEADER *hdr;
+    WAPP_HEADER *hdr;
 
     //! Raw data is ACFs (so needs to be FFTd);
     int raw_data_is_lags;

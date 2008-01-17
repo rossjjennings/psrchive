@@ -1,9 +1,3 @@
-/* wapp_header.h
- * Most recent (Jan 2008) WAPP header.  Changed all int/long types 
- * to int32_t to improve portability.  PBD 9 Jan 2008.
- */
-#ifndef _WAPP_HEADER_H
-#define _WAPP_HEADER_H
 /*
  *****************************************************************************
  *
@@ -33,20 +27,20 @@
 
 
 
-#define WAPP_HEADER_VERSION 9
+//#define HEADER_VERSION 9
 
 /* lagformat for wapp_header */
 
-#define WAPP_INTLAGS   0   /* 16 bit integers - searching only      */
-#define WAPP_LONGLAGS  1   /* 32 bit integers - searching only      */
-#define WAPP_FLOATLAGS 2   /* 32 bit float ACF/CCFs folding only    */
-#define WAPP_FLOATSPEC 3   /* 32 bit float fftd ACFs folding only   */
-#define WAPP_BYTELAGS  4   /* 8 bit integers ACF/CCF searching only */
-#define WAPP_NIBBLAGS  5   /* 4 bit integers ACF/CCF searching only */
-#define WAPP_FOLD32    8   /* bit mask with FLOATLAGS and FLOATSPEC */
+//#define INTLAGS   0   /* 16 bit integers - searching only      */
+//#define LONGLAGS  1   /* 32 bit integers - searching only      */
+//#define FLOATLAGS 2   /* 32 bit float ACF/CCFs folding only    */
+//#define FLOATSPEC 3   /* 32 bit float fftd ACFs folding only   */
+//#define BYTELAGS  4   /* 8 bit integers ACF/CCF searching only */
+//#define NIBBLAGS  5   /* 4 bit integers ACF/CCF searching only */
+//#define FOLD32    8   /* bit mask with FLOATLAGS and FLOATSPEC */
                       /* if on 32 bit folding is turned on     */
 
-struct WAPP_HEADER {
+struct WAPP_HEADER_v9 {
 
   int32_t header_version; /* some integer that increments with each revision  */
   int32_t header_size;    /* size (in bytes) of this header (nom =1024)       */
@@ -76,8 +70,8 @@ struct WAPP_HEADER {
   double wapp_time;    /* actual sample time (us) i.e. requested+dead time */
   double bandwidth;    /* total bandwidth (MHz) for this observation       */
 
-  int32_t num_lags;     /* user-requested number of lags per dump per spect */
-  int32_t scan_number;  /* built by WAPP from year+daynumber+3-digit-number */
+  int32_t num_lags;       /* user-requested number of lags per dump per spect */
+  int32_t scan_number;    /* built by WAPP from year+daynumber+3-digit-number */
 
   char src_name[24];   /* user-supplied source name (usually pulsar name)  */
   char obs_date[24];   /* built by WAPP from yyyymmdd                      */
@@ -88,27 +82,27 @@ struct WAPP_HEADER {
   char backendmode[24];/* backend mode description                         */
   char caltype[8];     /* calibrator type                                  */
 
-  int32_t nifs;        /* user-requested: number of IFs to be recorded     */
-  int32_t level;       /* user-requested: 1 means 3-level; 2 mean 9-level  */
-  int32_t sum;         /* user-requested: 1 means that data is sum of IFs  */
-  int32_t freqinversion; /* 1 band is inverted, else band is not inverted    */
-  int64_t timeoff;     /* number of reads between obs start and snap block */
-  int32_t lagformat;   /* 0=16 bit uint lags , 1=32 bit uint lags          */
+  int32_t nifs;            /* user-requested: number of IFs to be recorded     */
+  int32_t level;           /* user-requested: 1 means 3-level; 2 mean 9-level  */
+  int32_t sum;             /* user-requested: 1 means that data is sum of IFs  */
+  int32_t freqinversion;   /* 1 band is inverted, else band is not inverted    */
+  int64_t timeoff;   /* number of reads between obs start and snap block */
+  int32_t lagformat;       /* 0=16 bit uint lags , 1=32 bit uint lags          */
                        /* 2=32 bit float lags, 3=32 bit float spectra      */
-  int32_t lagtrunc;    /* if we truncate data (0 no trunc)                 */
+  int32_t lagtrunc;        /* if we truncate data (0 no trunc)                 */
                        /* for 16 bit lagmux modes, selects which 16 bits   */
                        /* of the 32 are included as data                   */
                        /* 0 is bits 15-0 1,16-1 2,17-2...7,22-7            */
-  int32_t firstchannel;  /* 0 when correlator channel a is first, 1 if b     */
-  int32_t nbins;       /* number of time bins for pulsar folding mode      */
+  int32_t firstchannel;    /* 0 when correlator channel a is first, 1 if b     */
+  int32_t nbins;           /* number of time bins for pulsar folding mode      */
                        /* doubles as maxrecs for snap mode                 */
-  int32_t isfolding;   /* is folding selected                              */
-  int32_t isalfa;      /* is ALFA selected                                 */
-  int32_t isdual;      /* are WAPPs in dual board mode                     */
-  int32_t fold_bits;   /* 0 if 16 bits (old default) 1 if 32 bit folding   */
-  int32_t iflo_flip[2];  /* is signal flipped in each board                  */
-  int32_t attena;      /* first board parallel port value                  */
-  int32_t attenb;      /* second board parallel port value                 */
+  int32_t isfolding;       /* is folding selected                              */
+  int32_t isalfa;          /* is ALFA selected                                 */
+  int32_t isdual;          /* are WAPPs in dual board mode                     */
+  int32_t fold_bits;       /* 0 if 16 bits (old default) 1 if 32 bit folding   */
+  int32_t iflo_flip[2];    /* is signal flipped in each board                  */
+  int32_t attena;          /* first board parallel port value                  */
+  int32_t attenb;          /* second board parallel port value                 */
   double dumptime;     /* folded integrations for this period of time      */
   double power_analog[2];   /* power measured by analog detector           */
 /*
@@ -130,7 +124,7 @@ struct WAPP_HEADER {
   double psr_f0[16];    /* pulse frequency at reference epoch (Hz)         */
   double poly_tmid[16]; /* mid point of polyco in (MJD) modified Julian date */
   double coeff[192];    /* polynomial coefs made by TEMPO, 16 sets of 12   */
-  int32_t num_coeffs[16]; /* number of coefficients                          */
+  int32_t num_coeffs[16];   /* number of coefficients                          */
   char hostname[24];    /* ascii hostname of machine that took this data   */
 
 /* ALFA info */
@@ -187,4 +181,3 @@ struct WAPP_HEADER {
   unsigned char blank430;   /* 430 blanking on                             */
   unsigned char fill[6];    /* fill                                        */
 };
-#endif

@@ -3,7 +3,7 @@ noinst_LTLIBRARIES = libwapp.la
 
 nobase_include_HEADERS = Pulsar/WAPPArchive.h
 
-libwapp_la_SOURCES = WAPPArchive.C wapp_header.h
+libwapp_la_SOURCES = WAPPArchive.C vanvleck.C
 
 #############################################################################
 #
