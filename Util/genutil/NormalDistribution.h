@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/NormalDistribution.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/10/26 12:02:53 $
-   $Author: straten $ */
+   $Revision: 1.3 $
+   $Date: 2008/01/18 21:43:46 $
+   $Author: demorest $ */
 
 #ifndef __NormalDistribution_h
 #define __NormalDistribution_h
@@ -33,7 +33,11 @@ class NormalDistribution : public Probability {
   //! Get the second moment of the distribution averaged from 0 to x
   double cumulative_moment2 (double x);
 
+  //! Get the raw first moment of the distribution averaged from 0 to x.
+  double cumulative_mean_raw(double x);
 
+  //! Get the raw third moment of the distribution averaged from 0 to x.
+  double cumulative_moment3_raw(double x);
 };
 
 #endif
