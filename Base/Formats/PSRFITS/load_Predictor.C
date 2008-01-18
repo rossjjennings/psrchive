@@ -9,24 +9,26 @@
 #include <config.h>
 #endif
 
+using namespace std;
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Pulsar.h"
 #include "Pulsar/Predictor.h"
 
-using namespace std;
-
 // load a tempo polyco, defined in load_polyco.C
-Pulsar::Predictor* load_polyco (fitsfile* fptr, double* phase, bool verbose);
+Pulsar::Predictor* load_polyco (fitsfile*, double* phase,
+				bool constant_period, bool verbose);
 
 // load a tempo2 predictor, defined in load_T2Predictor.C
-Pulsar::Predictor* load_T2Predictor (fitsfile* fptr, bool verbose);
+Pulsar::Predictor* load_T2Predictor (fitsfile*, bool verbose);
 
 void Pulsar::FITSArchive::load_Predictor (fitsfile* fptr)
 {
   if (verbose > 2)
     cerr << "Pulsar::FITSArchive::load_Predictor try POLYCO" << endl;
 
-  model = load_polyco (fptr, &predicted_phase, verbose > 2);
+  model = load_polyco (fptr, &predicted_phase, 
+		       get_type() != Signal::Pulsar, verbose > 2);
 
   if (model)
     return;

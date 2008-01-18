@@ -5,17 +5,16 @@
  *
  ***************************************************************************/
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+using namespace std;
 
 #include "fitsio_tempo.h"
 #include "FITSError.h"
 
-using namespace std;
+#include <float.h>
 
 Pulsar::Predictor*
-load_polyco (fitsfile* fptr, double* pred_phs, bool verbose)
+load_polyco (fitsfile* fptr, double* pred_phs,
+	     bool constant_period, bool verbose)
 {
   if (verbose)
     cerr << "load_polyco entered" << endl;
@@ -66,6 +65,27 @@ load_polyco (fitsfile* fptr, double* pred_phs, bool verbose)
 		   NULL, pred_phs, &anynul, &status);
 
   }
+
+  if (constant_period)
+  {
+    /*
+      If a polyco is used to represent a CAL observation with constant
+      period, and that calibrator is added to another, then it is
+      possible for the epoch of the integrated result to fall outside
+      of the span of the polyco that it written to file.  The
+      following code corrects this condition by setting the span to a
+      very large number.
+    */
+    for (unsigned ipoly=0; ipoly < model->pollys.size(); ipoly++)
+    {
+      polynomial::Expert expert( &(model->pollys[ipoly]) );
+
+      // multiply by 0.99 in case FLT_MAX means anything special anywhere
+      expert.set_nspan( FLT_MAX * 0.99 );
+    }
+  }
+  
+
 
   return model.release();
 }
