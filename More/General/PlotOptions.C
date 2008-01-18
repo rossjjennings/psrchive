@@ -73,4 +73,7 @@ void Pulsar::PlotOptions::setup ()
 
   if (x_npanel > 1 || y_npanel > 1)
     cpgsubp(x_npanel, y_npanel);
+
+  // set the viewport with room for titles
+  cpgsvp (0.15,0.9, 0.15,0.9);
 }
