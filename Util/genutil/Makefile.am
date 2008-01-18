@@ -44,6 +44,7 @@ include_HEADERS = \
         Types.h \
         typeutil.h \
         utc.h \
+	VanVleck.h \
 	VirtualMemory.h \
 	table_stream.h
 
@@ -101,6 +102,7 @@ libgenutil_la_SOURCES = \
 	time_string.C \
         Types.C \
         utc.c \
+	VanVleck.C \
 	VirtualMemory.C \
 	table_stream.C
 
