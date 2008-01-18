@@ -362,7 +362,7 @@ void Pulsar::WAPPArchive::load_polycos()
     poly.set_binph(0.0);  
     double *coefs = poly.get_coefs();
     for (int icoef=0; icoef<ncoef; icoef++) {
-      coefs[icoef] = hdr->coeff[pmap[ipoly]*12 + icoef];
+      coefs[icoef] = hdr->coeff[pmap[ipoly]*ncoef + icoef];
     }
   }
   
@@ -403,15 +403,18 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
 
   // epoch now refers to the time of the first sample.  We need to
   // use the included polycos to get reference epochs for each
-  // subint.  
+  // subint.  WAPPs always set the phase of the first sample
+  // to 0.0, so we need to subtract this off when computing the
+  // midphase here.
   Phase midphase=0.0;
   double midfreq=0.0;
+  MJD startepoch = epoch;
   epoch += ((double)subint + 0.5) * hdr->dumptime; // Middle of subint
   if (get_type()==Signal::Pulsar) {
     if (hdr_polyco.pollys.size()==0)
       throw Error (InvalidState, "Pulsar::WAPPArchive::load_Integration",
           "No polyco sets found -- can't compute timestamps!");
-    midphase = hdr_polyco.phase(epoch);
+    midphase = hdr_polyco.phase(epoch) - hdr_polyco.phase(startepoch);
     midfreq = hdr_polyco.frequency(epoch);
     epoch -= midphase.fracturns() / midfreq;
   } else {
