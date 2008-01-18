@@ -7,12 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/StraightLine.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/01/18 01:39:04 $
+   $Revision: 1.2 $
+   $Date: 2008/01/18 04:11:58 $
    $Author: straten $ */
 
 #ifndef __StraightLine_h
 #define __StraightLine_h
+
+#include "Estimate.h"
 
 //! Linear least squares fit to a straight line
 /*!
@@ -38,7 +40,8 @@ public:
     S_xy += x*y * w;
   }
 
-  Estimate<T,U> get_slope () const
+  //! Return the intercept, a
+  Estimate<T,U> get_intercept () const
   {
     T delta = S * S_xx - S_x * S_x;
     T slope = (S_xx * S_y - S_x * S_xy) / delta;
@@ -46,7 +49,8 @@ public:
     return Estimate<T,U> (slope, var);
   }
 
-  Estimate<T,U> get_intercept () const
+  //! Return the slope, b
+  Estimate<T,U> get_slope () const
   {
     T delta = S * S_xx - S_x * S_x;
     T intercept = (S * S_xy - S_x * S_y) / delta;
