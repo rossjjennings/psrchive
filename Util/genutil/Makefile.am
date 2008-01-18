@@ -117,7 +117,7 @@ getHorizon_SOURCES = getHorizon.C
 TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98 \
 	test_endian test_environ test_sum test_NormalDistribution \
 	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord \
-	test_exponential
+	test_exponential test_StraightLine
 
 #	test_BatchQueue
 
@@ -139,6 +139,7 @@ test_MJD_ostream_SOURCES	= test_MJD_ostream.C
 test_sky_coord_SOURCES		= test_sky_coord.C
 test_expand_SOURCES		= test_expand.C
 test_NormalDistribution_SOURCES = test_NormalDistribution.C
+test_StraightLine_SOURCES	= test_StraightLine.C
 
 # test_BatchQueue_SOURCES		= test_BatchQueue.C
 
