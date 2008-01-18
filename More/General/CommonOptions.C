@@ -8,7 +8,7 @@
 using namespace std;
 
 #include "Pulsar/CommonOptions.h"
-#include "Pulsar/Interpreter.h"
+#include "Pulsar/Archive.h"
 
 Pulsar::CommonOptions::CommonOptions ()
 {
