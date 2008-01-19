@@ -25,7 +25,7 @@ AC_DEFUN([SWIN_LIB_TEMPO2],
   TEMPO2_CFLAGS="-I$TEMPO2/include"
   TEMPO2_LIBS="-L$TEMPO2/lib -ltempo2pred -ltempo2 -lsofa"
 
-  ac_save_CFLAGS="$CFLAGS"
+  ac_save_CXXFLAGS="$CXXFLAGS"
   ac_save_LIBS="$LIBS"
 
   AC_LANG_PUSH(C++)
