@@ -99,7 +99,8 @@ nobase_include_HEADERS = \
         MEAL/UnivariatePolicy.h \
         MEAL/VectorRule.h \
         MEAL/VelocityModel.h \
-        MEAL/VonMises.h
+        MEAL/VonMises.h \
+	MEAL/PhaseGradients.h
 
 libMEAL_la_SOURCES = \
         Argument.C \
@@ -174,7 +175,8 @@ libMEAL_la_SOURCES = \
         UnaryScalar.C \
         UnivariatePolicy.C \
         VelocityModel.C \
-        VonMises.C
+        VonMises.C \
+	PhaseGradients.C
 
 bin_PROGRAMS = lmfit
 

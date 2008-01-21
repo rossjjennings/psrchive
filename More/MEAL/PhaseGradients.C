@@ -9,6 +9,7 @@ using namespace std;
 
 #include "MEAL/PhaseGradients.h"
 #include "MEAL/OneParameter.h"
+#include <cassert>
 
 void MEAL::PhaseGradients::init ()
 {
