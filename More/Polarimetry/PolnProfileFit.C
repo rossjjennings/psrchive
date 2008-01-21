@@ -17,10 +17,7 @@
 #include "Pulsar/TotalCovariance.h"
 #include "Pulsar/LastSignificant.h"
 
-#include "MEAL/Polynomial.h"
-#include "MEAL/Phase.h"
-
-#include "MEAL/ChainRule.h"
+#include "MEAL/PhaseGradients.h"
 #include "MEAL/Complex2Math.h"
 #include "MEAL/Complex2Constant.h"
 
@@ -86,21 +83,12 @@ Pulsar::PolnProfileFit::~PolnProfileFit ()
 {
 }
 
+
 void Pulsar::PolnProfileFit::init ()
 {
-  // create the linear phase relationship transformation
-  phase = new MEAL::Polynomial (2);
-  phase -> set_param (0, 0.0);
-  phase -> set_infit (0, false);
-
-  phase -> set_argument (0, &phase_axis);
-
-  MEAL::ChainRule<MEAL::Complex2>* chain = 0;
-  chain = new MEAL::ChainRule<MEAL::Complex2>;
-  chain -> set_model (new MEAL::Phase);
-  chain -> set_constraint (0, phase);
-
-  phase_xform = chain;
+  phases = new MEAL::PhaseGradients;
+  phases -> set_argument (0, &phase_axis);
+  phases -> add_slope ();
 
   uncertainty = new Calibration::TemplateUncertainty;
 
@@ -217,8 +205,9 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 
     // each complex phase bin is phase related
     Reference::To<MEAL::Complex2> input = jones;
+    Reference::To<MEAL::Complex2> ph = phases.get();
 
-    model->add_input( input * phase_xform );
+    model->add_input( input * ph );
 
   }
 
@@ -278,6 +267,12 @@ void Pulsar::PolnProfileFit::set_fit_debug (bool flag)
     model->set_fit_debug(flag);
 }
 
+void Pulsar::PolnProfileFit::set_phase_lock (bool locked)
+{
+  for (unsigned i=0; i<phases->get_nslope(); i++)
+    phases->set_infit( i, !locked );
+}
+
 //! Fit the specified observation to the standard
 void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 {
@@ -292,6 +287,9 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   if (!observation)
     throw Error (InvalidState, "Pulsar::PolnProfileFit::fit",
 		 "no observation supplied as argument");
+
+  if (phases->get_nslope() == 0)
+    phases->add_slope();
 
   // ensure that the PolnProfile class is cleaned up
   Reference::To<const PolnProfile> obs = observation;
@@ -397,14 +395,14 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   if (separate_fits) {
 
     // first fit only for the transformation
-    phase->set_infit (1, false);
+    set_phase_lock (true);
     for (unsigned i=0; i<transformation->get_nparam(); i++)
       transformation->set_infit (i, true);
 
     model->solve ();
 
     // then fit only for the phase
-    phase->set_infit (1, true);
+    set_phase_lock (false);
     for (unsigned i=0; i<transformation->get_nparam(); i++)
       transformation->set_infit (i, false);
 
@@ -417,9 +415,11 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   /* if template and observation have different numbers of bins, there
      is an extra offset equal to the offset between the centres of bin
      0 of each profile */
-  if (nbin_std != nbin_obs) {
+  if (nbin_std != nbin_obs)
+  {
     double mismatch_shift = 0.5/nbin_std - 0.5/nbin_obs;
-    phase->set_param (1, phase->get_param(1) - mismatch_shift);
+    for (unsigned i=0; i<phases->get_nslope(); i++)
+      phases->set_param (i, phases->get_param(i) - mismatch_shift);
   }
 
   if (verbose)
@@ -446,13 +446,21 @@ const Calibration::ReceptionModel* Pulsar::PolnProfileFit::get_model () const
 //! Get the phase offset between the observation and the standard
 Estimate<double> Pulsar::PolnProfileFit::get_phase () const
 {
-  return phase -> get_Estimate (1);
+  if (phases->get_nslope() == 0)
+    throw Error (InvalidState, "Pulsar::PolnProfileFit::get_phase",
+		 "no phases have been added to the model");
+
+  return phases -> get_Estimate (0);
 }
 
 //! Get the phase offset between the observation and the standard
 void Pulsar::PolnProfileFit::set_phase (const Estimate<double>& value)
 {
-  phase -> set_Estimate (1, value);
+  if (phases->get_nslope() == 0)
+    throw Error (InvalidState, "Pulsar::PolnProfileFit::get_phase",
+		 "no phases have been added to the model");
+
+  phases->set_Estimate (0, value);
 }
 
 /*!

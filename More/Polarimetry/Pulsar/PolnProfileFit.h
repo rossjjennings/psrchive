@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.33 $
-   $Date: 2007/12/21 04:38:47 $
+   $Revision: 1.34 $
+   $Date: 2008/01/21 20:40:37 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -25,7 +25,7 @@
 // forward declarations
 namespace MEAL {
   class Complex2;
-  class Polynomial;
+  class PhaseGradients;
 }
 
 namespace Calibration {
@@ -116,6 +116,9 @@ namespace Pulsar {
     //! Set the phase offset between the observation and the standard
     void set_phase (const Estimate<double>& phase);
 
+    //! Lock pulse phase; i.e., do not allow pulse phase to vary in fit
+    void set_phase_lock (bool locked);
+
     //! Get the arrival time estimate
     Tempo::toa get_toa (const PolnProfile* observation,
 			const MJD& mjd, double period,
@@ -137,6 +140,7 @@ namespace Pulsar {
 
     //! Get the measured variances of the template Stokes parameters
     Stokes<double> get_standard_variance () const { return standard_variance; }
+
     //! Return the phase shift based on the cross correlation function
     float ccf_max_phase (const Profile* std, const Profile* obs) const;
 
@@ -181,11 +185,7 @@ namespace Pulsar {
     //! Least-squares normalization includes variable template contribution
     Reference::To<Calibration::TemplateUncertainty> uncertainty;
 
-    //! The polynomial that describes linear phase in the Fourier domain
-    Reference::To<MEAL::Polynomial> phase;
-
-    //! The phase transformation in the Fourier domain
-    Reference::To<MEAL::Complex2> phase_xform;
+    Reference::To<MEAL::PhaseGradients> phases;
 
     //! The phase axis
     MEAL::Axis<double> phase_axis;
