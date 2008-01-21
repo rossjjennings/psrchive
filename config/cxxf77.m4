@@ -30,21 +30,5 @@ AC_DEFUN([SWIN_TEST_CXXF77],
 
   LIBS="$ac_save_LIBS"
 
-  if test x"$can_cxxf77" = xno; then
-
-AC_MSG_ERROR([
-
-The flags required to link the Fortran runtime libraries:
-
-FLIBS=$FLIBS
-
-cause the linker to choose the wrong standard C++ libraries.
-
-Please see http://psrchive.sourceforge.net/third/cxx#f77
-
-])
-
-  fi
-
 ])
 
