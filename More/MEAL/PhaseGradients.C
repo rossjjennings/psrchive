@@ -11,18 +11,11 @@ using namespace std;
 #include "MEAL/OneParameter.h"
 #include <cassert>
 
-void MEAL::PhaseGradients::init ()
-{
-  for (unsigned i=0; i<get_nparam(); i++)
-    parameters.set_param_name (i, "phi_" + tostring(i));
-
-  islope = 0;
-}
 
 MEAL::PhaseGradients::PhaseGradients (unsigned ncoef)
-  : parameters (this, ncoef)
+  : parameters (this)
 {
-  init ();
+  resize (ncoef);
 }
 
 //! Copy constructor
@@ -40,7 +33,10 @@ MEAL::PhaseGradients::operator = (const PhaseGradients& copy)
     return *this;
 
   parameters = copy.parameters;
-  islope = copy.islope;
+  offsets = copy.offsets;
+  igradient = copy.igradient;
+
+  set_evaluation_changed();
 
   return *this;
 }
@@ -52,26 +48,70 @@ MEAL::PhaseGradients* MEAL::PhaseGradients::clone () const
 }
 
 //! Set the current phase gradient
-void MEAL::PhaseGradients::set_islope (unsigned i)
+void MEAL::PhaseGradients::set_igradient (unsigned i)
 {
-  if (i == islope)
+  if (i == igradient)
     return;
 
-  assert (i < parameters.get_nparam());
-  islope = i;
+  if (i >= get_ngradient())
+    throw Error (InvalidParam, "MEAL::PhaseGradients::set_igradient",
+		 "invalid index=%d >= ngradient=%d", i, get_ngradient());
+
+  igradient = i;
   set_evaluation_changed ();
 }
 
-//! Add another slope to the set
-void MEAL::PhaseGradients::add_slope ()
+//! Get the current phase gradient index
+unsigned MEAL::PhaseGradients::get_igradient () const
 {
-  parameters.resize( parameters.get_nparam() + 1 );
-  init ();
-  islope = parameters.get_nparam() - 1;
+  return igradient;
 }
 
-//! Get the number of slopes
-unsigned MEAL::PhaseGradients::get_nslope () const
+//! Set the current phase gradient index
+void MEAL::PhaseGradients::set_offset (unsigned igradient, double offset)
+{
+#if 0
+  cerr << "MEAL::PhaseGradients::set_offset"
+    " i=" << igradient << " offset=" << offset << endl;
+#endif
+  offsets[igradient] = offset;
+}
+
+//! Get the current phase gradient index
+double MEAL::PhaseGradients::get_offset (unsigned igradient) const
+{
+  return offsets[igradient];
+}
+
+//! Set the number of gradients
+void MEAL::PhaseGradients::resize (unsigned ngradient)
+{
+  unsigned current = get_ngradient();
+
+  if (current == ngradient)
+    return;
+
+  parameters.resize( ngradient );
+  offsets.resize (ngradient);
+
+  for (unsigned i=current; i<ngradient; i++)
+  {
+    parameters.set_param_name (i, "phi_" + tostring(i));
+    offsets[i] = 0.0;
+  }
+
+  if (ngradient)
+    set_igradient (ngradient-1);
+}
+
+//! Add another gradient to the set
+void MEAL::PhaseGradients::add_gradient ()
+{
+  resize ( get_ngradient() + 1 );
+}
+
+//! Get the number of gradients
+unsigned MEAL::PhaseGradients::get_ngradient () const
 {
   return parameters.get_nparam();
 }
@@ -88,7 +128,7 @@ void MEAL::PhaseGradients::calculate (Jones<double>& result,
 {
   double x = get_abscissa();
 
-  double phase = get_param(islope) * x;
+  double phase = ( get_param(igradient) + get_offset(igradient) ) * x;
 
   if (verbose)
     cerr << "MEAL::PhaseGradients::calculate phase=" << phase << endl;
@@ -103,11 +143,11 @@ void MEAL::PhaseGradients::calculate (Jones<double>& result,
     grad->resize (get_nparam());
     for (unsigned i=0; i<grad->size(); i++)
       (*grad)[i] = 0.0;
-    (*grad)[islope] = x * complex<double>(-sin_phase, cos_phase);
+    (*grad)[igradient] = x * complex<double>(-sin_phase, cos_phase);
     
     if (verbose)
       cerr << "MEAL::PhaseGradients::calculate gradient" << endl
-	   << "   " << (*grad)[islope] << endl;
+	   << "   " << (*grad)[igradient] << endl;
   }
   
 }

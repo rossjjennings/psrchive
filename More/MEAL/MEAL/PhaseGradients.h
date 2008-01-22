@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/PhaseGradients.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/01/21 20:19:49 $
+   $Revision: 1.2 $
+   $Date: 2008/01/22 05:36:41 $
    $Author: straten $ */
 
 #ifndef __MEAL_PhaseGradients_H
@@ -26,7 +26,7 @@ namespace MEAL {
   public:
 
     //! Default constructor
-    PhaseGradients (unsigned nslopes = 0);
+    PhaseGradients (unsigned ngradient = 0);
 
     //! Copy constructor
     PhaseGradients (const PhaseGradients&);
@@ -37,14 +37,26 @@ namespace MEAL {
     //! Clone operator
     PhaseGradients* clone () const;
 
-    //! Set the current phase gradient
-    void set_islope (unsigned islope);
+    //! Get the number of gradients
+    unsigned get_ngradient () const;
 
-    //! Add another slope to the set
-    void add_slope ();
+    //! Set the current phase gradient index
+    void set_igradient (unsigned igradient);
 
-    //! Get the number of slopes
-    unsigned get_nslope () const;
+    //! Get the current phase gradient index
+    unsigned get_igradient () const;
+
+    //! Set the current phase gradient index
+    void set_offset (unsigned igradient, double offset);
+
+    //! Get the current phase gradient index
+    double get_offset (unsigned igradient) const;
+
+    //! Add another gradient to the set
+    void add_gradient ();
+
+    //! Set the number of gradients
+    void resize (unsigned ngradient);
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -63,11 +75,12 @@ namespace MEAL {
     //! Parameter policy
     Parameters parameters;
 
-    //! The current phase gradient
-    unsigned islope;
+    //! The phase offsets
+    std::vector<double> offsets;
 
-    //! Initialization
-    void init ();
+    //! The current phase gradient
+    unsigned igradient;
+
   };
 
 }
