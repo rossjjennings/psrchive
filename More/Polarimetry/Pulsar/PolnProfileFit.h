@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.34 $
-   $Date: 2008/01/21 20:40:37 $
+   $Revision: 1.35 $
+   $Date: 2008/01/22 05:36:45 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -96,6 +96,12 @@ namespace Pulsar {
 
     //! Fit the specified observation to the standard
     void fit (const PolnProfile* observation);
+
+    //! Add the specified observation to be fitted to the standard
+    void add_observation (const PolnProfile* observation);
+
+    //! Fit all observations to the standard
+    void solve ();
 
     //! Set the fourier transform plan
     void set_plan (FTransform::Plan*);
@@ -189,6 +195,9 @@ namespace Pulsar {
 
     //! The phase axis
     MEAL::Axis<double> phase_axis;
+
+    //! The gradient index axis
+    MEAL::Axis<unsigned> index_axis;
 
     //! The variance of the standard
     Stokes<float> standard_variance;

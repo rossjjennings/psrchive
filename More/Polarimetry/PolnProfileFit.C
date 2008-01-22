@@ -87,8 +87,16 @@ Pulsar::PolnProfileFit::~PolnProfileFit ()
 void Pulsar::PolnProfileFit::init ()
 {
   phases = new MEAL::PhaseGradients;
+
+  // start with one gradient
+  // (optimization that saves remapping after adding to model)
+  phases -> add_gradient ();
+
+  // connect to the phase axis via the Univariate<> interface
   phases -> set_argument (0, &phase_axis);
-  phases -> add_slope ();
+
+  // connect to the index axis via the standard Callback interface
+  index_axis.signal.connect (phases, &MEAL::PhaseGradients::set_igradient);
 
   uncertainty = new Calibration::TemplateUncertainty;
 
@@ -269,27 +277,43 @@ void Pulsar::PolnProfileFit::set_fit_debug (bool flag)
 
 void Pulsar::PolnProfileFit::set_phase_lock (bool locked)
 {
-  for (unsigned i=0; i<phases->get_nslope(); i++)
+  for (unsigned i=0; i<phases->get_ngradient(); i++)
     phases->set_infit( i, !locked );
 }
 
 //! Fit the specified observation to the standard
 void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 {
+  if (!model)
+    throw Error (InvalidState, "Pulsar::PolnProfileFit::fit", "no model");
+
+  // delete any previously set data
+  model->delete_data ();
+
+  // (re)set the number of phases to one
+  phases->resize (1);
+
+  add_observation (observation);
+
+  solve ();
+}
+ catch (Error& error)
+   { throw error += "Pulsar::PolnProfile::fit"; }
+
+void Pulsar::PolnProfileFit::add_observation (const PolnProfile* observation)
+try
+{
   if (!standard)
-    throw Error (InvalidState, "Pulsar::PolnProfileFit::fit",
+    throw Error (InvalidState, "Pulsar::PolnProfileFit::add_observation",
 		 "no standard specified.  call set_standard");
 
   if (!transformation)
-    throw Error (InvalidState, "Pulsar::PolnProfileFit::fit",
+    throw Error (InvalidState, "Pulsar::PolnProfileFit::add_observation",
 		 "no transformation specified.  call set_transformation");
 
   if (!observation)
-    throw Error (InvalidState, "Pulsar::PolnProfileFit::fit",
+    throw Error (InvalidState, "Pulsar::PolnProfileFit::add_observation",
 		 "no observation supplied as argument");
-
-  if (phases->get_nslope() == 0)
-    phases->add_slope();
 
   // ensure that the PolnProfile class is cleaned up
   Reference::To<const PolnProfile> obs = observation;
@@ -297,23 +321,38 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   unsigned obs_harmonic = observation->get_nbin() / 2;
 
   if (obs_harmonic < n_harmonic)
-    throw Error (InvalidState, "Pulsar::PolnProfileFit::fit",
+    throw Error (InvalidState, "Pulsar::PolnProfileFit::add_observation",
 		 "observation n_harmonic=%d < n_harmonic=%d",
 		 obs_harmonic, n_harmonic);
 
   Reference::To<PolnProfile> fourier = fourier_transform (observation, plan);
 
   fourier->convert_state (Signal::Stokes);
-  // Drop the Nyquist bin
-  fourier->resize( observation->get_nbin() );
 
-  unsigned nbin_std = standard->get_nbin();
-  unsigned nbin_obs = observation->get_nbin();
+  // drop the Nyquist bin
+  fourier->resize( observation->get_nbin() );
 
   float phase_guess = ccf_max_phase (standard_fourier->get_Profile(0),
 				     fourier->get_Profile(0));
 
-  set_phase (phase_guess);
+  // if the model already contains observed data, add another phase gradient
+  if (model->get_ndata())
+    phases->add_gradient();
+
+  unsigned index = phases->get_igradient();
+
+  phases->set_param (index, phase_guess);
+
+  unsigned nbin_std = standard->get_nbin();
+  unsigned nbin_obs = observation->get_nbin();
+
+  /* 
+     if the standard (template) and observed profiles have different
+     numbers of bins, account for the offset between the centres of
+     bin 0 of each profile 
+  */
+  if (nbin_std != nbin_obs)
+    phases->set_offset (index, 0.5/nbin_std - 0.5/nbin_obs);
 
   uncertainty->set_template_variance (standard_variance);
 
@@ -332,11 +371,11 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
     n_harmonic_obs = get_last_significant (psd, var);
     
     if (verbose)
-      cerr << "Pulsar::PolnProfileFit::fit last harmonic = "
+      cerr << "Pulsar::PolnProfileFit::add_observation last harmonic = "
 	   << n_harmonic_obs << endl;
   }
 
-  model->delete_data ();
+
 
   unsigned npol = 4;
   if (emulate_scalar)
@@ -361,7 +400,7 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
     observation_det += re.invariant() + im.invariant();
 
 #ifdef _DEBUG
-    cerr << "Pulsar::PolnProfileFit::fit ibin=" << ibin 
+    cerr << "Pulsar::PolnProfileFit::add_observation ibin=" << ibin 
 	 << "\n  " << stokes << endl;
 #endif
 
@@ -372,6 +411,8 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
     Calibration::CoherencyMeasurementSet measurements;
     measurements.add_coordinate ( phase_axis.new_Value(phase_shift) );
+    measurements.add_coordinate ( index_axis.new_Value(index) );
+
     measurements.push_back ( measurement );
  
     model->add_data( measurements );
@@ -388,6 +429,15 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   // of the Complex2 function passed in set_transformation
   transformation->set_param (0, sqrt(Gain));
 
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::PolnProfile::add_observation";
+}
+
+
+void Pulsar::PolnProfileFit::solve () try
+{
   RealTimer clock;
 
   clock.start();
@@ -412,23 +462,13 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   clock.stop();
 
-  /* if template and observation have different numbers of bins, there
-     is an extra offset equal to the offset between the centres of bin
-     0 of each profile */
-  if (nbin_std != nbin_obs)
-  {
-    double mismatch_shift = 0.5/nbin_std - 0.5/nbin_obs;
-    for (unsigned i=0; i<phases->get_nslope(); i++)
-      phases->set_param (i, phases->get_param(i) - mismatch_shift);
-  }
-
   if (verbose)
-    cerr << "Pulsar::PolnProfileFit::fit solved in " << clock << "."
+    cerr << "Pulsar::PolnProfileFit::solve solved in " << clock << "."
       " chisq=" << model->get_fit_chisq() / model->get_fit_nfree() << endl;
 
 }
 catch (Error& error) {
-  throw error += "Pulsar::PolnProfileFit::fit";
+  throw error += "Pulsar::PolnProfileFit::solve";
 }
 
 //! Get the measurement equation used to model the fit
@@ -446,7 +486,7 @@ const Calibration::ReceptionModel* Pulsar::PolnProfileFit::get_model () const
 //! Get the phase offset between the observation and the standard
 Estimate<double> Pulsar::PolnProfileFit::get_phase () const
 {
-  if (phases->get_nslope() == 0)
+  if (phases->get_ngradient() == 0)
     throw Error (InvalidState, "Pulsar::PolnProfileFit::get_phase",
 		 "no phases have been added to the model");
 
@@ -456,7 +496,7 @@ Estimate<double> Pulsar::PolnProfileFit::get_phase () const
 //! Get the phase offset between the observation and the standard
 void Pulsar::PolnProfileFit::set_phase (const Estimate<double>& value)
 {
-  if (phases->get_nslope() == 0)
+  if (phases->get_ngradient() == 0)
     throw Error (InvalidState, "Pulsar::PolnProfileFit::get_phase",
 		 "no phases have been added to the model");
 
