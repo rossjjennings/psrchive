@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.26 $
-   $Date: 2007/12/20 11:50:13 $
+   $Revision: 1.27 $
+   $Date: 2008/01/23 03:27:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -67,9 +67,15 @@ namespace Pulsar {
 
     //! Add the observation to the set of constraints
     void add_observation (const Archive* data);
-    
+
+    //! Solve the measurement equation in each channel
+    void solve ();
+
     //! Set the flag to return the mean solution or the last fit
     void set_return_mean_solution (bool return_mean = true);
+
+    //! Set the flag to solve for each observation (instead of global fit)
+    void set_solve_each (bool flag = true);
 
     //! Set the solution to the mean
     void update_solution ();
@@ -100,6 +106,8 @@ namespace Pulsar {
     //! The reduced chi-squared as a function of frequency
     std::vector<float> reduced_chisq;
 
+    std::vector< Reference::To<MEAL::Complex2> > solved_transformation;
+
     //! The phase shift estimate as a function of frequency
     std::vector< Estimate<double> > phase_shift;
 
@@ -129,11 +137,20 @@ namespace Pulsar {
     //! When true, set the gain to unity after the best fit has been found
     bool normalize_gain;
 
+    //! Solve the measurement equation on each call to add_observation
+    bool solve_each;
+
     //! Epoch of the solution
     MJD epoch;
 
     //! Solve the measurement equation for the given channel
-    void solve (const Integration* data, unsigned ichan);
+    void solve1 (const Integration* data, unsigned ichan);
+
+    //! Add data to the measurement equation for the given channel
+    void add_observation (const Integration* data, unsigned ichan);
+
+    //! Set things up for the model in the given channel
+    unsigned setup (const Integration* data, unsigned ichan);
 
   private:
 
