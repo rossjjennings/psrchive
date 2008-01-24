@@ -22,10 +22,6 @@ if HAVE_IPP
 libpsrfft_la_SOURCES += IPP_Transform.C
 endif
 
-if HAVE_FFTW
-libpsrfft_la_SOURCES += FFTW_Transform.C
-endif
-
 if HAVE_FFTW3
 libpsrfft_la_SOURCES += FFTW3_Transform.C
 endif

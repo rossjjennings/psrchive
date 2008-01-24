@@ -6,49 +6,6 @@ AC_DEFUN([SWIN_LIB_FFTW],
 
   SWIN_PACKAGE_OPTIONS([fftw])
 
-  AC_MSG_CHECKING([for single-precision FFTW-2 library])
-
-  if test "$have_fftw" != "user disabled"; then
-
-    SWIN_PACKAGE_FIND([fftw],[fftw.h])
-    SWIN_PACKAGE_TRY_COMPILE([fftw],[#include <fftw.h>],
-                             [#ifndef FFTW_ENABLE_FLOAT
-                              #error must have single-precision library
-                              #endif])
-
-    if test $have_fftw = yes; then
-      SWIN_PACKAGE_FIND([fftw],[libfftw.*])
-      SWIN_PACKAGE_TRY_LINK([fftw],[#include <fftw.h>],
-                            [fftw_create_plan(64,FFTW_FORWARD,FFTW_ESTIMATE);],
-                            [-lfftw])
-    fi
-
-  fi
-
-  AC_MSG_RESULT([$have_fftw])
-
-  if test $have_fftw = yes; then
-
-    AC_MSG_CHECKING([for FFTW-2 real-to-complex library])
-
-    # SWIN_PACKAGE_FIND([fftw],[fftw.h])
-    SWIN_PACKAGE_TRY_LINK([fftw],[#include <fftw.h>],
-                          [rfftw_create_plan(64,FFTW_FORWARD,FFTW_ESTIMATE);],
-                          [-lrfftw -lfftw])
-
-    AC_MSG_RESULT($have_fftw)
-
-  fi
-
-  if test $have_fftw = yes; then
-
-    AC_DEFINE(HAVE_FFTW,1,[Define if the FFTW library is installed])
-
-    FFTW_CFLAGS="$fftw_CFLAGS"
-    FFTW_LIBS="$fftw_LIBS"
-
-  fi
-
   AC_MSG_CHECKING([for single-precision FFTW-3 library])
 
   if test "$have_fftw" != "user disabled"; then
@@ -77,7 +34,6 @@ AC_DEFUN([SWIN_LIB_FFTW],
   AC_SUBST(FFTW_CFLAGS)
   LIBS="$ac_save_LIBS"
 
-  AM_CONDITIONAL(HAVE_FFTW,[test "$have_fftw" = yes])
   AM_CONDITIONAL(HAVE_FFTW3,[test "$have_fftw3" = yes])
 
 ])
