@@ -8,6 +8,10 @@
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Profile.h"
 
+#include "Pulsar/Telescope.h"
+#include "Pulsar/Receiver.h"
+#include "Pulsar/Backend.h"
+
 #include <fitsio.h>
 #include "FITSError.h"
 #include "FTransform.h"
@@ -247,6 +251,9 @@ void Pulsar::ASPArchive::load_header (const char* filename)
     throw FITSError (status, "Pulsar::ASPArchive::load_header",
         "Error reading header values (file=%s)", filename);
 
+  // Create extensions
+  load_extensions();
+
 }
 
 Pulsar::Integration*
@@ -426,6 +433,68 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
         "FITS Error");
 
   return integration;
+}
+
+void Pulsar::ASPArchive::load_extensions()
+{
+
+  // Telescope extension
+  // TODO : move this stuff to a generic telescope-picker routine
+  Telescope *t = getadd<Telescope>();
+  t->set_coordinates(get_telescope());
+  if (get_telescope()=="1") {
+    t->set_name("GBT");
+    t->set_mount(Telescope::Horizon);
+    t->set_primary(Telescope::Parabolic);
+    if (get_centre_frequency()<1200.0) { 
+      t->set_focus(Telescope::PrimeFocus);
+    } else {
+      t->set_focus(Telescope::Gregorian);
+    }
+  } else if (get_telescope()=="3") {
+    t->set_name("Arecibo");
+    t->set_mount(Telescope::Fixed);
+    t->set_primary(Telescope::Spherical);
+    t->set_focus(Telescope::Gregorian);
+  } else if (get_telescope()=="a") {
+    t->set_name("GB 140ft");
+    t->set_mount(Telescope::Equatorial);
+    t->set_primary(Telescope::Parabolic);
+    t->set_focus(Telescope::PrimeFocus);
+  } else if (get_telescope()=="b") {
+    t->set_name("GB 85-3");
+    t->set_mount(Telescope::Horizon);
+    t->set_primary(Telescope::Parabolic);
+    t->set_focus(Telescope::PrimeFocus);
+  } else if (get_telescope()=="f") {
+    t->set_name("Nancay");
+    t->set_mount(Telescope::Fixed);
+    t->set_primary(Telescope::Parabolic);
+    t->set_focus(Telescope::Gregorian);
+  }
+
+  // Backend extension
+  Backend *b = getadd<Backend>();
+  if ((get_telescope()=="1") || (get_telescope()=="a") 
+      || (get_telescope()=="b")) {
+    b->set_name("GASP"); 
+    b->set_hand(Signal::Left); 
+    b->set_delay(32.0*8.0/(128.0e6)/2.0); // 8x overlap PFB
+  } else if (get_telescope()=="3") {
+    b->set_name("ASP");
+    b->set_delay(32.0*24.0/(128.0e6)/2.0); // 24x overlap PFB
+  } else if (get_telescope()=="f") {
+    b->set_name("LBP");
+    b->set_delay(32.0*24.0/(128.0e6)/2.0); // 24x overlap PFB
+  } else {
+    b->set_name("xASP");
+  }
+  b->set_argument(Signal::Conventional); // XXX check this
+  b->set_downconversion_corrected(false);
+
+  // Receiver ext
+  //Receiver *r = getadd<Receiver>();
+
 }
 
 void Pulsar::ASPArchive::unload_file (const char* filename) const

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASP/Pulsar/ASPArchive.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/01/01 18:08:38 $
+   $Revision: 1.2 $
+   $Date: 2008/01/25 22:34:13 $
    $Author: demorest $ */
 
 #ifndef __ASPArchive_h
@@ -64,6 +64,9 @@ namespace Pulsar {
     //! Load the specified Integration from filename, returning new instance
     virtual Integration*
     load_Integration (const char* filename, unsigned subint);
+
+    //! Fill in info for select Archive extensions
+    void load_extensions();
 
     //! Unload the ASPArchive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;
