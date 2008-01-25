@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.24 $
-   $Date: 2006/10/18 04:28:44 $
-   $Author: straten $ */
+   $Revision: 1.25 $
+   $Date: 2008/01/25 22:33:31 $
+   $Author: demorest $ */
 
 #ifndef __Types_h
 #define __Types_h
@@ -17,6 +17,7 @@
 #include "Conventions.h"
 #include <string>
 
+//! Defines various signal types
 namespace Signal {
 
   //! Dimensions of the data (so far)
@@ -134,7 +135,7 @@ namespace Signal {
 
   //! Tells you if your state is consistent with your npol and ndim
   bool valid_state (State state, unsigned ndim, unsigned npol,
-		    std::string& reason);
+                    std::string& reason);
   
 }
 
