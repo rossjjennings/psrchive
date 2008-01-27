@@ -48,6 +48,7 @@ nobase_include_HEADERS = \
         Pulsar/ReceiverTI.h \
         Pulsar/TapeInfo.h \
         Pulsar/Telescope.h \
+        Pulsar/Telescopes.h \
         Pulsar/TimeSortedOrder.h \
         Pulsar/TwoBitStats.h \
         Pulsar/WidebandCorrelator.h \
@@ -104,6 +105,7 @@ libExtensions_la_SOURCES = \
         Receiver_Native.C \
         TapeInfo.C \
         Telescope.C \
+        Telescopes.C \
         TimeSortedOrder.C \
         TwoBitStats.C \
         WidebandCorrelator.C \
