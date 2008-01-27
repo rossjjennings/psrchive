@@ -30,6 +30,9 @@ void Pulsar::Telescopes::set_telescope_info(Telescope *t, Archive *a)
     case 'f':
       Telescopes::Nancay(t);
       break;
+    case 'g':
+      Telescopes::Effelsberg(t);
+      break;
     default: // Unknown code, throw error
       throw Error (InvalidParam, "Pulsar::Telescopes::set_telescope_info",
           "Unrecognized telescope code (%s)", a->get_telescope().c_str());
@@ -85,5 +88,14 @@ void Pulsar::Telescopes::Nancay(Telescope *t)
   t->set_primary(Telescope::Parabolic);
   t->set_focus(Telescope::Gregorian); 
   t->set_coordinates("f");
+}
+
+void Pulsar::Telescopes::Effelsberg(Telescope *t)
+{
+  t->set_name("Effelsberg");
+  t->set_mount(Telescope::Horizon);
+  t->set_primary(Telescope::Parabolic);
+  t->set_focus(Telescope::Gregorian); // XXX also varies by receiver
+  t->set_coordinates("g");
 }
 

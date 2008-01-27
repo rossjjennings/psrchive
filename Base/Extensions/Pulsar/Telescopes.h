@@ -35,6 +35,9 @@ namespace Pulsar {
     //! Initialize the Telescope Extension with Nancay info
     void Nancay (Telescope* t);
 
+    //! Initialize the Telescope Extension with Effelsberg info
+    void Effelsberg (Telescope* t);
+
     //! Initialize the Telescope Extension with Parkes info
     void Parkes (Telescope* t);
 
