@@ -9,6 +9,7 @@
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/Telescope.h"
+#include "Pulsar/Telescopes.h"
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Backend.h"
 
@@ -439,39 +440,8 @@ void Pulsar::ASPArchive::load_extensions()
 {
 
   // Telescope extension
-  // TODO : move this stuff to a generic telescope-picker routine
   Telescope *t = getadd<Telescope>();
-  t->set_coordinates(get_telescope());
-  if (get_telescope()=="1") {
-    t->set_name("GBT");
-    t->set_mount(Telescope::Horizon);
-    t->set_primary(Telescope::Parabolic);
-    if (get_centre_frequency()<1200.0) { 
-      t->set_focus(Telescope::PrimeFocus);
-    } else {
-      t->set_focus(Telescope::Gregorian);
-    }
-  } else if (get_telescope()=="3") {
-    t->set_name("Arecibo");
-    t->set_mount(Telescope::Fixed);
-    t->set_primary(Telescope::Spherical);
-    t->set_focus(Telescope::Gregorian);
-  } else if (get_telescope()=="a") {
-    t->set_name("GB 140ft");
-    t->set_mount(Telescope::Equatorial);
-    t->set_primary(Telescope::Parabolic);
-    t->set_focus(Telescope::PrimeFocus);
-  } else if (get_telescope()=="b") {
-    t->set_name("GB 85-3");
-    t->set_mount(Telescope::Horizon);
-    t->set_primary(Telescope::Parabolic);
-    t->set_focus(Telescope::PrimeFocus);
-  } else if (get_telescope()=="f") {
-    t->set_name("Nancay");
-    t->set_mount(Telescope::Fixed);
-    t->set_primary(Telescope::Parabolic);
-    t->set_focus(Telescope::Gregorian);
-  }
+  Telescopes::set_telescope_info(t, this);
 
   // Backend extension
   Backend *b = getadd<Backend>();
