@@ -11,6 +11,10 @@
 #include "machine_endian.h"
 #include "ierf.h"
 
+#include "Pulsar/Telescope.h"
+#include "Pulsar/Telescopes.h"
+#include "Pulsar/Backend.h"
+
 using namespace std;
 
 void Pulsar::BPPArchive::init ()
@@ -330,7 +334,8 @@ void Pulsar::BPPArchive::load_header (const char* filename)
   set_faraday_corrected(false);
   set_poln_calibrated(false);
 
-  // Why are there no time values loaded in here?
+  // Fill extensions
+  load_extensions();
 
 }
 
@@ -531,6 +536,32 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
   delete [] gains;
 
   return integration;
+}
+
+void Pulsar::BPPArchive::load_extensions() {
+
+    // Telescope extension
+    Telescope *t = getadd<Telescope>();
+    Telescopes::set_telescope_info(t, this);
+
+    // Backend extension
+    Backend *b = getadd<Backend>();
+    if ((get_telescope()=="1") || (get_telescope()=="a") 
+        || (get_telescope()=="b")) {
+      b->set_name("GBPP");
+    } else if (get_telescope()=="3") {
+      b->set_name("ABPP");
+    } else if (get_telescope()=="f") {
+      b->set_name("NBPP");
+    } else if (get_telescope()=="g") {
+      b->set_name("EBPP");
+    } else {
+      b->set_name("BPP");
+    }
+    // TODO : latency info goes here
+
+    // TODO Receiver extension
+    //Receiver *r = getadd<Receiver>();
 }
 
 void Pulsar::BPPArchive::unload_file (const char* filename) const

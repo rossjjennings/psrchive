@@ -74,6 +74,9 @@ namespace Pulsar {
     virtual Integration*
     load_Integration (const char* filename, unsigned subint);
 
+    //! Fill in Archive extension info
+    void load_extensions();
+
     //! Unload the BPPArchive (header and Integration data) to filename.
     //! Not implemented.
     virtual void unload_file (const char* filename) const;
