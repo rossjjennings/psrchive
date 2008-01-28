@@ -4,10 +4,11 @@
 
 
 #include "Pulsar/DigitiserStatsPlot.h"
+#include <pairutil.h>
 
 
 
-using namespace Pulsar;
+using Pulsar::DigitiserStatsPlot;
 
 
 
@@ -21,13 +22,9 @@ DigitiserStatsPlot::Interface::Interface( DigitiserStatsPlot *s_instance )
          &DigitiserStatsPlot::set_subint,
          "subint", "Sub integration" );
 
-  add( &DigitiserStatsPlot::get_fsub,
-         &DigitiserStatsPlot::set_fsub,
-         "fsub", "First Subintegration" );
-
-  add( &DigitiserStatsPlot::get_lsub,
-         &DigitiserStatsPlot::set_lsub,
-         "lsub", "Last Subintegration" );
+  add( &DigitiserStatsPlot::get_srange,
+	&DigitiserStatsPlot::set_srange,
+	"srange", "Range of sub integrations to plot" );
 }
 
 

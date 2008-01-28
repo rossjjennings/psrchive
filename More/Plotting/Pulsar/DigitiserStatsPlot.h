@@ -16,7 +16,8 @@
 
 
 
-using namespace std;
+using std::pair;
+using std::vector;
 
 
 
@@ -47,18 +48,15 @@ namespace Pulsar
     void set_subint( int s_subint ) { subint = s_subint; }
     int get_subint() const { return subint; }
 
-    void set_fsub( int s_fsub ) { fsub = s_fsub; }
-    int get_fsub() const { return fsub; }
-
-    void set_lsub( int s_lsub ) { lsub = s_lsub; }
-    int get_lsub() const { return lsub; }
+    pair<int,int> get_srange() const { return srange; }
+    void set_srange( const pair<int,int> &s_srange ) { srange = s_srange; }
   private:
     float y_min, y_max;
     vector< vector< vector< float > > > profiles;
     bool valid_archive;
 
     int subint;
-    int fsub, lsub;
+    pair<int,int> srange;
 
     int ncycsub;
     int ndigr;

@@ -19,8 +19,13 @@
 
 
 
-using namespace std;
-using namespace Pulsar;
+using std::pair;
+using std::string;
+using std::cerr;
+using std::cout;
+using std::endl;
+using Pulsar::DigitiserStatsPlot;
+
 
 
 
@@ -38,8 +43,8 @@ using namespace Pulsar;
 DigitiserStatsPlot::DigitiserStatsPlot()
 {
   subint = -1;
-  fsub = -1;
-  lsub = -1;
+  srange.first = -1;
+  srange.second = -1;
   valid_archive = false;
 }
 
@@ -48,7 +53,7 @@ DigitiserStatsPlot::DigitiserStatsPlot()
 /**
  * AdjustSubRange
  *
- *  DOES     - Looks at subint,fsub and lsub to determine the correct subint range.
+ *  DOES     - Looks at subint,srange.first and srange.second to determine the correct subint range.
  *  RECEIVES - Nothing
  *  RETURNS  - Nothing
  *  THROWS   - Nothing
@@ -57,30 +62,30 @@ DigitiserStatsPlot::DigitiserStatsPlot()
 
 void DigitiserStatsPlot::AdjustSubRange( void )
 {
-  // Make sure fsub,lsub have the subint range we want to display
-  if( fsub == -1 && lsub == -1 )
+  // Make sure srange.first,srange.second have the subint range we want to display
+  if( srange.first == -1 && srange.second == -1 )
   {
     if( subint == -1 )
     {
-      fsub = 0;
-      lsub = nsub -1;
+      srange.first = 0;
+      srange.second = nsub -1;
     }
     else
     {
-      fsub = subint;
-      lsub = subint;
+      srange.first = subint;
+      srange.second = subint;
     }
   }
 
-  if( fsub < 0 )
+  if( srange.first < 0 )
     throw Error( InvalidParam,
                  "DigitiserStatsPlot::AdjustSubRange",
-                 (string("bad fsub value: ") + tostring<int>(fsub)).c_str() );
+                 (string("bad srange.first value: ") + tostring<int>(srange.first)).c_str() );
 
-  if( lsub >= nsub )
+  if( srange.second >= nsub )
     throw Error( InvalidParam,
                  "DigitiserStatsPlot::AdjustSubRange",
-                 (string("bad lsub value: ") + tostring<int>(lsub)).c_str() );
+                 (string("bad srange.second value: ") + tostring<int>(srange.second)).c_str() );
 }
 
 
@@ -164,7 +169,7 @@ void DigitiserStatsPlot::prepare( const Archive *const_arch )
         profiles[g][p].resize( ncycsub * nsub );
         for( int c = 0; c < ncycsub; c ++ )
         {
-          for( int s = fsub; s <= lsub; s ++ )
+          for( int s = srange.first; s <= srange.second; s ++ )
           {
             float next_val = ext->rows[s].data[c*ndigr*npar + g*npar + p];
             if( next_val < y_min )
@@ -264,7 +269,7 @@ void DigitiserStatsPlot::draw( const Archive *const_arch )
     for( int c = 0; c < ndigr; c ++ )
     {
       cpgsvp( nx, nx + xw, ty_min, ty_max );
-      float y_range = lsub - fsub + 1;
+      float y_range = srange.second - srange.first + 1;
       cpgswin( 0, duration, w_y1, w_y2 );
       if( nx == tx_min )
         cpgbox("bcnt", 0.0, 0, "bcnt", 20.0, 0);
