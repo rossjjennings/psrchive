@@ -18,7 +18,7 @@
 
 
 
-
+using std::pair;
 
 
 namespace Pulsar
@@ -31,11 +31,9 @@ namespace Pulsar
   public:
     DynamicSNSpectrum();
 
-    void set_fsub( int s_fsub ) { fsub = s_fsub; }
-    void set_lsub( int s_lsub ) { lsub = s_lsub; }
-
-    int get_fsub( void ) const { return fsub; }
-    int get_lsub( void ) const { return lsub; }
+    pair<int,int> get_srange() const { return srange; }
+    void set_srange( const pair<int,int> &s_srange ) { srange = s_srange; }
+    void set_srange( int fsub, int lsub ) { set_srange( pair<int,int>( fsub, lsub ) ); }
 
     void prepare( const Pulsar::Archive *data );
     virtual void preprocess( Pulsar::Archive *data ) {}
@@ -62,8 +60,7 @@ namespace Pulsar
     int isubint;
     int pol;
 
-    int fsub;
-    int lsub;
+    pair<int,int> srange;
   };
 
 

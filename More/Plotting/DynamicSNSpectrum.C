@@ -10,7 +10,7 @@
 
 
 
-using namespace Pulsar;
+using Pulsar::DynamicSNSpectrum;
 
 
 
@@ -29,8 +29,8 @@ DynamicSNSpectrum::DynamicSNSpectrum()
   isubint = -1;
   pol = -1;
 
-  fsub = -1;
-  lsub = -1;
+  srange.first = -1;
+  srange.second = -1;
 
   get_frame()->set_y_scale( new FrequencyScale );
 }
@@ -84,12 +84,12 @@ void DynamicSNSpectrum::draw( const Archive *data )
 
   if( isubint > -1 )
   {
-    fsub = lsub = isubint;
+    srange.first = srange.second = isubint;
   }
-  else if( fsub == -1 )
+  else if( srange.first == -1 )
   {
-    fsub = 0;
-    lsub = data->get_nsubint() - 1;
+    srange.first = 0;
+    srange.second = data->get_nsubint() - 1;
   }
 
   float centre_freq = data->get_centre_frequency();
@@ -122,7 +122,7 @@ void DynamicSNSpectrum::draw( const Archive *data )
   if( pol < 0 )
     pol = 0;
 
-  int num_subs = lsub - fsub + 1;
+  int num_subs = srange.second - srange.first + 1;
 
   float plot_array[ num_subs * data->get_nchan() ];
 
@@ -133,7 +133,7 @@ void DynamicSNSpectrum::draw( const Archive *data )
 
   for( int next_chan = fchan; next_chan <= lchan; next_chan ++ )
   {
-    for( int next_sub = fsub; next_sub <= lsub; next_sub ++ )
+    for( int next_sub = srange.first; next_sub <= srange.second; next_sub ++ )
     {
       Reference::To<const Profile> next_profile = data->get_Profile ( next_sub, pol, next_chan);
 
@@ -150,11 +150,11 @@ void DynamicSNSpectrum::draw( const Archive *data )
 
   float dy = freq_range / total_num_chans;
 
-  cpgswin( fsub, lsub+1, fchan, lchan+1 );
+  cpgswin( srange.first, srange.second+1, fchan, lchan+1 );
 
-  get_frame()->get_x_scale()->set_minmax( fsub, lsub + 1 );
+  get_frame()->get_x_scale()->set_minmax( srange.first, srange.second + 1 );
 
-  float transform[6] = { fsub -.5, 1, 0.0, fchan, 0.0, 1 };
+  float transform[6] = { srange.first -.5, 1, 0.0, fchan, 0.0, 1 };
 
   cpgimag( plot_array, num_subs, num_chans_displayed, 1, num_subs, 1, num_chans_displayed , min_snr, max_snr, transform );
 
