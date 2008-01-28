@@ -826,7 +826,11 @@ string get_beconfig( Reference::To< Archive > archive )
 string get_be_delay( Reference::To< Archive > archive )
 {
   string result;
-  Reference::To<Backend> ext = archive->get<WidebandCorrelator>();
+  Reference::To<Backend> ext = archive->get<Backend>();
+  if( !ext )
+  {
+    ext = archive->get<WidebandCorrelator>();
+  }
 
   set_precision( 14 );
   if( !ext )
