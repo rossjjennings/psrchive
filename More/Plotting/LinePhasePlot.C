@@ -16,166 +16,155 @@
 
 
 
-using namespace std;
-using namespace Pulsar;
+using std::pair;
+using std::cerr;
+using std::cout;
+using std::endl;
+using Pulsar::Archive;
+using Pulsar::Profile;
+using Pulsar::LinePhasePlot;
 
 
+
+
+/**
+ * @brief Constructor
+ *        Assume the subint, or range of subints are unset until we know how many there are
+ *        Assume channel and polarization are zero, leave it up to the user to scrunch the
+ *        data in frequency and polarization.
+ **/
 
 LinePhasePlot::LinePhasePlot()
 {
-    style = "line";
-    set_line_colour( 7 );
+  ichan = 0;                          // assume channel of 0
+  ipol = 0;                           // assume polarization of 0
+  srange = pair<int,int>( -1, -1 );   // leave subint range unset, use 0 to nbin-1 later.
+  y_buffer_norm = 0.07;               // For this plot we use 7% buffer on y axis.
+  line_colour = 7;                    // default line colour (yellow)
 }
 
 
+
+/**
+ * @brief Destructor
+ *        Virtual destructor calls parent destructor.
+ **/
 
 LinePhasePlot::~LinePhasePlot()
-{}
-
-
-
-/**
- * get_nrow
- *
- * DOES     - Return the number of rows, in this case the number of subints we wish to show
- * RECEIVES - The Archive to be displayed
- * RETURNS  - The number of rows
- * THROWS   - Nothing
- * TODO     - Nothing
- **/
-
-unsigned LinePhasePlot::get_nrow (const Archive* arch)
 {
-    return data.size();
+  this->~PhasePlot();
 }
 
 
 
 
 /**
- * get_Profile
- *
- * DOES     - Retreives a profile to be displayed
- * RECEIVES - The Archive and the row to retreive
- * RETURNS  - A Profile
- * THROWS   - Nothing
- * TODO     - Nothing
+ * @brief   Figures out some measurements before plotting
+ *          We want to setup the y scale with world coordinates to fit all
+ *          the subints on the plot. We also want to setup the external world coordinates
+ *          that the y axis will be labelled with. Being a PhasePlot, x axis takes care
+ *          of itself.
+ * @param   data The archive to prepare, hopefully the one that will be draw(n)
  **/
 
-const Profile* LinePhasePlot::get_Profile (const Archive* arch, unsigned row)
+void LinePhasePlot::prepare (const Archive *data )
 {
-  return data[row].ptr();
-}
+  // if we didn't have a subint range set, use the full range
 
-
-
-/**
- * prepare
- *
- * DOES     - Extract data from the archive and store it in data
- * RECEIVES - The Archive to extract from
- * RETURNS  - Nothing
- * THROWS   - Nothing
- * TODO     - Could make the spacing between integrations configurable
- **/
-
-void LinePhasePlot::prepare (const Archive* arch )
-{
-  try
+  if( srange.first == -1 )
   {
-    int nsub = arch->get_nsubint();
-    int nbin = arch->get_nbin();
-
-    int fsub = 0;
-    int lsub = nsub - 1;
-    
-    float max_amp = FLT_MIN;
-    float min_amp = FLT_MAX;
-
-    data.clear();
-    
-    vector< vector< float > > all_data;
-    
-    all_data.resize( nsub );
-    
-    // create a massive data table with all the profiles we are looking at
-    // while at it, determine the min and max amplitude from the whole table
-    for( int s = fsub; s <= lsub; s ++ )
-    {
-      const float *src_amps = arch->get_Integration(s)->get_Profile( ipol, ichan )->get_amps();
-      
-      all_data[s-fsub].resize( nbin );
-      for( int d = 0; d < nbin; d ++ )
-      {
-        all_data[s-fsub][d] = src_amps[d];
-	if( src_amps[d] > max_amp )
-	  max_amp = src_amps[d];
-	if( src_amps[d] < min_amp )
-	  min_amp = src_amps[d];
-      }
-    }
-    
-    float data_range = max_amp - min_amp;
-    
-    // scale all the data so that 1/3 of the data range will = 1
-    // ie there is (1) between each profile and this represents 1/3 of the max range
-    // put the resulting profiles into the data vector
-    
-    float dscale = 1 / data_range;
-    for( int s = fsub; s <= lsub; s ++ )
-    {
-      for( int d = 0; d < nbin; d ++ )
-      {
-	all_data[s-fsub][d] *= dscale;
-	all_data[s-fsub][d] += s;
-      }
-      Reference::To< Profile > new_profile = new Profile();
-      new_profile->set_amps( all_data[s-fsub] );
-      data.push_back( new_profile );
-    }
-
-    // set the range we want to look
-    
-    float target_min = fsub + (min_amp * dscale);
-    float target_max = lsub + (max_amp * dscale);
-    float target_range = target_max - target_min;
-    
-    // get the range specified by the user
-    
-    float set_min, set_max;
-    get_frame()->get_y_scale()->get_range( set_min, set_max );
-    
-    // scale out target range according to the users set range
-    
-    float new_min = target_min + set_min * target_range;
-    float new_max = target_max - (1-set_max) * target_range + (lsub);
-    get_frame()->get_y_scale()->set_minmax( target_min, target_max );
-    
-    y_scale = -1;
-    y_res = 0;
-    
-    // Don't draw an alternate axis, and label the y axis and set tick marks to 1 (ie we don't have 1/2 a subint)
-    
-    get_frame()->get_y_axis()->set_alternate( false );
-    get_frame()->get_y_axis()->set_tick( 1.0 );
-    get_frame()->get_y_axis()->set_label( "Sub Integration" );
+    srange.first = 0;
+    srange.second = data->get_nsubint() - 1;
   }
-  catch( Error e )
+
+  // determine the minimum and maximum amplitudes from
+  // all the integrations we are looking at
+
+  float min_amp = FLT_MAX;
+  float max_amp = -FLT_MAX;
+  for( int s = srange.first; s <= srange.second; s ++ )
   {
-    cerr << "preparing LinePhasePlot failed with exception " << e << endl;
+    Reference::To<const Profile> next_profile = data->get_Integration(s)->get_Profile( ipol, ichan );
+    float profile_min = next_profile->min();
+    float profile_max = next_profile->max();
+
+    if( profile_min < min_amp ) min_amp = profile_min;
+    if( profile_max > max_amp ) max_amp = profile_max;
+  }
+  amp_range = max_amp - min_amp;
+
+  // set our y range to be from the min to the max times the number of subints
+
+  get_frame()->get_y_scale()->set_minmax( min_amp + srange.first * amp_range,
+                                          max_amp + srange.second * amp_range );
+
+  // give the y axis its buffer
+
+  get_frame()->get_y_scale()->set_buf_norm( y_buffer_norm );
+
+  // set the external range, we have to account for the buffer space
+  // TODO see if we want to change the way world_external works to account
+  //      for the buffer space automatically
+
+  pair<float,float> ext_range( srange.first + (min_amp / amp_range),
+                               srange.second + (max_amp / amp_range) );
+  float width = ext_range.second - ext_range.first;
+  ext_range.first -= y_buffer_norm * width;
+  ext_range.second += y_buffer_norm * width;
+  get_frame()->get_y_scale()->set_world_external( ext_range );
+
+  // Setup the y axis to draw integral tick marks, have no markings on opposite axis
+  // and be labelled "Sub Integration".
+
+  get_frame()->get_y_axis()->set_alternate( false );
+  get_frame()->get_y_axis()->set_tick( 1.0 );
+  get_frame()->get_y_axis()->set_label( "Sub Integration" );
+}
+
+
+
+/**
+ * @brief   Draws a stack of profiles, one for each subint
+ * @param   data The archive to draw, hopefully the archive that was prepare(d) :)
+ **/
+
+void LinePhasePlot::draw( const Archive *data )
+{
+  int nbin = data->get_nbin();
+
+  // premake the array of x coords
+
+  vector<float> xs( nbin );
+  for( int i = 0; i < nbin; i ++ )
+    xs[i] = i / float(nbin);
+
+  // Set the line colour to use
+
+  cpgsci( line_colour );
+
+  // for each integration
+  //   get the profile given the polarization and channel
+  //   increase the amplitudes by the offset
+  //   draw the profile as a line
+
+  for( int s = srange.first; s <= srange.second; s ++ )
+  {
+    vector<float> profile_data = data->get_Integration(s)->get_Profile( ipol, ichan )->get_weighted_amps();
+
+    // TODO see if you want to use transform here instead of the loop, measure for efficiency
+    float amp_offset = s * amp_range;
+    for( int i = 0; i < nbin; i ++ )
+      profile_data[i] += amp_offset;
+
+    cpgline( nbin, &xs[0], &profile_data[0] );
   }
 }
 
 
 
 /**
- * get_interface
- *
- * DOES     - Returns a text interface to this object
- * RECEIVES - Nothing
- * RETURNS  - text interface
- * THROWS   - Nothing
- * TODO     - Nothing
+ * @brief   Returns a text ineterface that can be used with this object
+ * @return  a LinePhasePlot::Interface class pointing at this
  **/
 
 TextInterface::Parser *LinePhasePlot::get_interface()

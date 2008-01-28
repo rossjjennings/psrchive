@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/LinePhasePlot.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/10/02 05:08:15 $
-   $Author: straten $ */
+   $Revision: 1.4 $
+   $Date: 2008/01/28 23:37:33 $
+   $Author: nopeer $ */
 
 
 
@@ -18,47 +18,94 @@
 
 
 
-#include "Pulsar/PhaseVsPlot.h"
+#include <Pulsar/Archive.h>
+#include <Pulsar/Profile.h>
+#include "Pulsar/PhasePlot.h"
 
 
 
-using namespace std;
+using std::pair;
+using std::vector;
+using Pulsar::Archive;
+using Pulsar::Profile;
+using Pulsar::PhasePlot;
 
 
 
 namespace Pulsar
 {
-  class LinePhasePlot : public Pulsar::PhaseVsPlot
+
+  //! Draw a set of profiles for subints stacked ontop of eachother
+  class LinePhasePlot : public PhasePlot
   {
   public:
     LinePhasePlot();
-    ~LinePhasePlot();
+    virtual ~LinePhasePlot();
 
-    unsigned get_nrow (const Archive* arch);
+    //! prepare the archive for rendering
+    void prepare (const Archive *data );
 
-    const Profile* get_Profile (const Archive* arch, unsigned row);
+    //! draw the archive
+    void draw( const Archive *data );
 
-    void prepare (const Archive* data);
-
+    //! Text interface for LinePhasePlot
   class Interface : public TextInterface::To<LinePhasePlot>
     {
     public:
-      Interface( LinePhasePlot *target = NULL );
+      Interface( LinePhasePlot *s_instance = NULL );
     };
 
+    //! Get a LinePhasePlot::Interface for this object
     TextInterface::Parser *get_interface();
 
-    int get_isub( void ) const { return isub; }
-    void set_isub( int s_isub ) { isub = s_isub; }
+    //! Get the first index of the subint range
+    int get_isub( void ) const { return srange.first; }
 
+    //! Set the subint range to (x,x)
+    void set_isub( int s_isub ) { srange.first = srange.second = s_isub; }
+
+    //! Get the range of subints to plot
+    pair<int,int> get_srange() const { return srange; }
+
+    //! Set the range of subints to plot
+    void set_srange( const pair<int,int> &s_srange ) { srange = s_srange; }
+
+    //! Get the polarization to plot
     int get_ipol( void ) const { return ipol; }
+
+    //! Set the polarization to plot
     void set_ipol( int s_ipol ) { ipol = s_ipol; }
 
+    //! Get the frequency channel to plot
+    int get_ichan() const { return ichan; }
+
+    //! Set the frequency channel to plot
+    void set_ichan( const int &s_ichan ) { ichan = s_ichan; }
+
+    //! Get the line colour
+    int get_line_colour() const { return line_colour; }
+
+    //! Set the line colour
+    void set_line_colour( const int &s_line_colour ) { line_colour = s_line_colour; }
+
   private:
-    vector< Reference::To<Profile> > data;
+    // polarization to plot
     int ipol;
+
+    // channel to plot
     int ichan;
-    int isub;
+
+    // range of subints to plot
+    pair<int,int> srange;
+
+    // The maximum different maxamp - minamp of all relevant subints
+    float amp_range;
+
+    // how much space(%) to add above and below the plot
+    float y_buffer_norm;
+
+    // The line colour
+    int line_colour;
   };
 }
 
