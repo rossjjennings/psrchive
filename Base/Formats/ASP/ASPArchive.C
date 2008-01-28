@@ -12,6 +12,8 @@
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Receiver.h"
+#include "Pulsar/GBT.h"
+#include "Pulsar/Arecibo.h"
 #include "Pulsar/Backend.h"
 #include "Pulsar/ObsExtension.h"
 
@@ -480,13 +482,32 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
   ObsExtension *o = getadd<ObsExtension>();
   fits_movabs_hdu(f, 1, NULL, status);
   fits_read_key(f, TSTRING, "OBSERVER", ctmp, NULL, status);
-  if (*status==0) { o->observer = ctmp; }
+  if (*status==0) o->observer = ctmp; 
   fits_read_key(f, TSTRING, "PROJID", ctmp, NULL, status);
-  if (*status==0) { o->project_ID = ctmp; }
+  if (*status==0) o->project_ID = ctmp; 
   o->telescope = t->get_name();
 
   // Receiver ext
-  //Receiver *r = getadd<Receiver>();
+  Receiver *r = getadd<Receiver>();
+  if ((get_telescope()=="1")) {
+    GBT::guess(r, this); // Uses center freq to determine rcvr
+  } else if (get_telescope()=="3") {
+    Arecibo::guess(r, this); // Uses center freq
+  } 
+  // If still no recvr found, use info from FITS
+  if (r->get_name()=="unknown") {
+    fits_read_key(f, TSTRING, "FRONTEND", ctmp, NULL, status);
+    if (*status==0) r->set_name(ctmp);
+  }
+  // Override default receiver pol basis with info from file
+  // TODO: check whether what's in the files tends to be right..
+  // Also find out if we can note the use of a hybrid separately.
+  fits_read_key(f, TSTRING, "FD_POLN", ctmp, NULL, status);
+  if (*status==0) {
+    if ((ctmp[0]=='L') || (ctmp[0]=='l')) r->set_basis(Signal::Linear);
+    if ((ctmp[0]=='C') || (ctmp[0]=='c')) r->set_basis(Signal::Circular);
+  }
+
 
 }
 
