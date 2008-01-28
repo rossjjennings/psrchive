@@ -8,6 +8,13 @@
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Profile.h"
 #include "FTransform.h"
+#include "sky_coord.h"
+
+#include "Pulsar/Telescope.h"
+#include "Pulsar/Telescopes.h"
+#include "Pulsar/Backend.h"
+#include "Pulsar/ObsExtension.h"
+#include "Pulsar/Receiver.h"
 
 #include "wapp_headers.h"
 #include "wapp_convert.h"
@@ -157,6 +164,7 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
   if (wapp_hdr_version==4) { version_ok=1; }
   if (wapp_hdr_version==5) { version_ok=1; }
   if (wapp_hdr_version==6) { version_ok=1; }
+  if (wapp_hdr_version==7) { version_ok=1; }
   if (wapp_hdr_version==8) { version_ok=1; }
   if (wapp_hdr_version==9) { version_ok=1; }
   if (!version_ok) {
@@ -268,6 +276,16 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
   // Source name
   set_source(hdr->src_name);
 
+  // Coordinates
+  sky_coord s;
+  s.ra().setHMS((int)trunc(hdr->src_ra/10000.0), 
+      ((int)floor(fabs(hdr->src_ra)/100.0)) % 100,
+      fmod(fabs(hdr->src_ra),100.0));
+  s.dec().setDMS((int)trunc(hdr->src_dec/10000.0), 
+      ((int)floor(fabs(hdr->src_dec)/100.0)) % 100,
+      fmod(fabs(hdr->src_dec),100.0));
+  set_coordinates(s);
+
   // TEMPO telescope site code
   set_telescope("3"); // WAPPs only exist at Arecibo...
 
@@ -284,15 +302,14 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
   // Total bandwidth, MHz. Negative value denotes reversed band.
   // Apparently the freqinversion and iflo_flip flags are cumuulative,
   // so we multiply at each step if needed.
+  // TODO : check isdual?
   int bw_sign = 1;
   if (verbose>2)
     cerr << "WAPP IF/LO Flips: " << hdr->freqinversion 
       << " " << hdr->iflo_flip[0] 
       << " " << hdr->iflo_flip[1] << endl;
   if (hdr->freqinversion==1) { bw_sign*=-1; }
-  if (hdr->iflo_flip[0]&&hdr->iflo_flip[1]) { bw_sign*=-1; }
-  if (hdr->iflo_flip[0]!=hdr->iflo_flip[1]) 
-    cerr << "Warning: WAPP polns have inconsistent iflo_flip." << endl;
+  if (hdr->iflo_flip[0]) { bw_sign*=-1; }
   set_bandwidth((double)bw_sign * hdr->bandwidth);
 
   // Center frequency, MHz.
@@ -310,6 +327,9 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
 
   // Load in polycos
   if (get_type()==Signal::Pulsar) { load_polycos(); }
+
+  // Fill extensions
+  load_extensions();
 
 }
 
@@ -539,6 +559,29 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
   delete [] data;
 
   return integration;
+}
+
+void Pulsar::WAPPArchive::load_extensions()
+{
+
+  // Telescope extension
+  Telescope *t = getadd<Telescope>();
+  Telescopes::set_telescope_info(t, this);
+
+  // Backend extension
+  Backend *b = getadd<Backend>();
+  b->set_name("WAPP");
+
+  // ObsExtension
+  ObsExtension *o = getadd<ObsExtension>();
+  o->observer = hdr->observers;
+  o->project_ID = hdr->project_id;
+  o->telescope = t->get_name();
+
+  // Receiver
+  Receiver *r = getadd<Receiver>();
+  r->set_name(hdr->frontend);
+
 }
 
 void Pulsar::WAPPArchive::unload_file (const char* filename) const

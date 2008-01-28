@@ -65,6 +65,9 @@ namespace Pulsar {
     virtual Integration*
     load_Integration (const char* filename, unsigned subint);
 
+    //! Fill various Archive extensions
+    void load_extensions();
+
     //! Unload the ExampleArchive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;
 
