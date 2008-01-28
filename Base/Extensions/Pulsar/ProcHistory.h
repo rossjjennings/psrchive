@@ -47,6 +47,12 @@ namespace Pulsar {
       // Default constructor
       row () { init(); }
       
+      int get_nbin() const { return nbin; }
+      int get_npol() const { return npol; }
+      int get_nsub() const { return nsub; }
+      int get_nchan() const { return nchan; }
+      int get_nbin_prd() const { return nbin_prd; }
+      
       // Row label
       int index;
       
@@ -92,6 +98,7 @@ namespace Pulsar {
     std::string the_rfi_mthd;
     std::string the_ifr_mthd;
 
+    ProcHistory::row& get_first ();
     ProcHistory::row& get_last ();
 
     void   set_command_str (std::string str);
