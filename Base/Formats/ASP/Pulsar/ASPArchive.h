@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASP/Pulsar/ASPArchive.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/01/25 22:34:13 $
+   $Revision: 1.3 $
+   $Date: 2008/01/28 19:06:01 $
    $Author: demorest $ */
 
 #ifndef __ASPArchive_h
@@ -16,6 +16,7 @@
 
 #include "Pulsar/BasicArchive.h"
 #include "Pulsar/Agent.h"
+#include <fitsio.h>
 
 // File version codes
 #define ASP_FITS_V10  1
@@ -66,7 +67,7 @@ namespace Pulsar {
     load_Integration (const char* filename, unsigned subint);
 
     //! Fill in info for select Archive extensions
-    void load_extensions();
+    void load_extensions(fitsfile *f, int *status);
 
     //! Unload the ASPArchive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;

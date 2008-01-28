@@ -7,11 +7,13 @@
 #include "Pulsar/ASPArchive.h"
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Profile.h"
+#include "sky_coord.h"
 
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Backend.h"
+#include "Pulsar/ObsExtension.h"
 
 #include <fitsio.h>
 #include "FITSError.h"
@@ -188,6 +190,17 @@ void Pulsar::ASPArchive::load_header (const char* filename)
   fits_read_key(f, TSTRING, "SRC_NAME", ctmp, NULL, &status);
   if (!status) set_source(ctmp);
 
+  // Source coordinates
+  double ra, dec;
+  sky_coord s;
+  fits_read_key(f, TDOUBLE, "RA", &ra, NULL, &status);
+  fits_read_key(f, TDOUBLE, "DEC", &dec, NULL, &status);
+  if (!status) {
+    s.ra().setDegrees(ra*15.0);
+    s.dec().setDegrees(dec);
+    set_coordinates(s);
+  }
+
   // TEMPO telescope site code
   fits_read_key(f, TSTRING, "OBSVTY", ctmp, NULL, &status);
   if (!status) set_telescope(ctmp);
@@ -243,6 +256,9 @@ void Pulsar::ASPArchive::load_header (const char* filename)
       set_dispersion_measure(0.0);
   }
 
+  // Create extensions
+  load_extensions(f, &status);
+
   // Done for now
   int_tmp=0;
   fits_close_file(f, &int_tmp);
@@ -251,9 +267,6 @@ void Pulsar::ASPArchive::load_header (const char* filename)
   if (status) 
     throw FITSError (status, "Pulsar::ASPArchive::load_header",
         "Error reading header values (file=%s)", filename);
-
-  // Create extensions
-  load_extensions();
 
 }
 
@@ -436,7 +449,7 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
   return integration;
 }
 
-void Pulsar::ASPArchive::load_extensions()
+void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
 {
 
   // Telescope extension
@@ -461,6 +474,16 @@ void Pulsar::ASPArchive::load_extensions()
   }
   b->set_argument(Signal::Conventional); // XXX check this
   b->set_downconversion_corrected(false);
+
+  // ObsExtension
+  char ctmp[64];
+  ObsExtension *o = getadd<ObsExtension>();
+  fits_movabs_hdu(f, 1, NULL, status);
+  fits_read_key(f, TSTRING, "OBSERVER", ctmp, NULL, status);
+  if (*status==0) { o->observer = ctmp; }
+  fits_read_key(f, TSTRING, "PROJID", ctmp, NULL, status);
+  if (*status==0) { o->project_ID = ctmp; }
+  o->telescope = t->get_name();
 
   // Receiver ext
   //Receiver *r = getadd<Receiver>();
