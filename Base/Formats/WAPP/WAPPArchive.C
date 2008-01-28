@@ -15,6 +15,7 @@
 #include "Pulsar/Backend.h"
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/Receiver.h"
+#include "Pulsar/Arecibo.h"
 
 #include "wapp_headers.h"
 #include "wapp_convert.h"
@@ -580,7 +581,15 @@ void Pulsar::WAPPArchive::load_extensions()
 
   // Receiver
   Receiver *r = getadd<Receiver>();
-  r->set_name(hdr->frontend);
+  // Use codes to init recvr
+  string rcode = hdr->frontend;
+  if (rcode=="lbw") Arecibo::L_wide(r);
+  else if (rcode=="sbw") Arecibo::S_wide(r);
+  else if (rcode=="430") Arecibo::Greg_430(r);
+  else if (rcode=="327") Arecibo::Greg_327(r);
+  else if (rcode=="cb") Arecibo::C_band(r);
+  else r->set_name(rcode);
+  // TODO : figure out hybrid field in hdr
 
 }
 
