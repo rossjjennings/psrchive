@@ -18,10 +18,10 @@ namespace Pulsar {
   namespace GBT {
 
     //! Initialize the Receiver Extension with 350Mhz PF
-    void Rcvr350(Receiver *r);
+    void Rcvr_350(Receiver *r);
 
     //! Initialize the Receiver Extension with 800Mhz PF
-    void Rcvr800(Receiver *r);
+    void Rcvr_800(Receiver *r);
 
     //! Initialize the Receiver Extension with L-band
     void Rcvr1_2(Receiver *r);
