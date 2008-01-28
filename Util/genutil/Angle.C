@@ -46,7 +46,7 @@ char * Angle::getHMS(char *str, int places) const
   getHMS (hours, minutes, seconds);
 
   sprintf(str, "%02d:%02d:%0*.*f", hours, minutes, 
-	  3+places, places, seconds);
+          3+places, places, seconds);
 
   return str;
 }
@@ -89,7 +89,7 @@ void Angle::getHMS (int& hours, int& minutes, double& seconds) const
 
 void Angle::setDMS (int degrees, int minutes, double seconds)
 {
-  radians = M_PI * ( degrees/180.0 + minutes/720.0 + seconds/43200.0 );
+  radians = (M_PI/180.0) * ( degrees + minutes/60.0 + seconds/3600.0 );
 }
 
 void Angle::getDMS (int& degrees, int& minutes, double& seconds) const
@@ -108,10 +108,10 @@ char * Angle::getDMS(char *str,int places) const
 
   if (radians < 0.0)
     sprintf(str, "-%02d:%02d:%0*.*f", degrees, minutes, 
-	  3+places, places, seconds);
+          3+places, places, seconds);
   else 
     sprintf(str, "+%02d:%02d:%0*.*f", degrees, minutes, 
-	    3+places, places, seconds);
+            3+places, places, seconds);
 
   return str;
 }
@@ -182,7 +182,7 @@ const Angle operator + (const Angle &a1, const Angle &a2) {
   //  return Angle(atan2(imag,real));
   Angle a;
   a.setWrapPoint((a1.wrap_point > a2.wrap_point ? 
-		 a1.wrap_point: a2.wrap_point));
+                 a1.wrap_point: a2.wrap_point));
   a.setradians(a1.radians+a2.radians);
   return a;
 }
@@ -344,7 +344,7 @@ AnglePair::AnglePair (const std::string& astr)
 { 
   if (str2coord (&angle1.radians, &angle2.radians, astr.c_str()) < 0)
     throw Error (InvalidParam, "AnglePair::AnglePair",
-		 "str2coord(" + astr + ") failure");
+                 "str2coord(" + astr + ") failure");
   angle1.setWrapPoint (2*M_PI);
 }
 
@@ -399,7 +399,7 @@ AnglePair::getDegrees(double *d1, double *d2) const
 std::string AnglePair::getDegrees() const
 {
   sprintf (angle_str, "(%8.4f,%8.4f)",
-	   angle1.getDegrees(), angle2.getDegrees());
+           angle1.getDegrees(), angle2.getDegrees());
   return std::string (angle_str);
 }
 
@@ -420,7 +420,7 @@ AnglePair:: getRadians(double *r1, double *r2) const
 std::string AnglePair::getRadians() const
 {
   sprintf(angle_str,
-	  "(%8.4f,%8.4f)", angle1.getradians(),angle2.getradians());
+          "(%8.4f,%8.4f)", angle1.getradians(),angle2.getradians());
   return std::string (angle_str);
 }
 
@@ -473,7 +473,7 @@ AnglePair::operator= (const AnglePair & a)
 std::ostream& operator<< (std::ostream & os, const AnglePair & pair)
 {
   return os << "(" << pair.angle1 
-	    << "," << pair.angle2 << ")";
+            << "," << pair.angle2 << ")";
 }
 
 int operator == (const AnglePair &a1, const AnglePair &a2){
