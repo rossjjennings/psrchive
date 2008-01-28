@@ -11,9 +11,14 @@
 #include "machine_endian.h"
 #include "ierf.h"
 
+#include "bpp_latent.h"
+
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Backend.h"
+#include "Pulsar/Receiver.h"
+#include "Pulsar/GBT.h"
+#include "Pulsar/Arecibo.h"
 
 using namespace std;
 
@@ -558,10 +563,26 @@ void Pulsar::BPPArchive::load_extensions() {
     } else {
       b->set_name("BPP");
     }
-    // TODO : latency info goes here
+    // Fill in latency for this bandwidth mode
+    // Applies closest match from the table.
+    double fdiff1, fdiff0=fabs(hdr.bandwidth/1e6 - bpp_chbw[0]);
+    int idx=0;
+    for (int i=1; i<BPP_NLATENT; i++) { 
+      fdiff1 = fabs(hdr.bandwidth/1e6 - bpp_chbw[i]); 
+      if (fdiff1<fdiff0) { 
+        fdiff0=fdiff1;
+        idx=i;
+      }
+    }
+    b->set_delay(bpp_latent[idx]);
 
-    // TODO Receiver extension
-    //Receiver *r = getadd<Receiver>();
+    // Receiver extension
+    // Note: Arecibo recvr selection will definitely need some
+    // tweaking in order to even semi-accurately deal with old
+    // data.  No recvr info (other than center freq) is in the file.
+    Receiver *r = getadd<Receiver>();
+    if (get_telescope()=="1") GBT::guess(r,this);
+    else if (get_telescope()=="3") Arecibo::guess(r,this);
 }
 
 void Pulsar::BPPArchive::unload_file (const char* filename) const
