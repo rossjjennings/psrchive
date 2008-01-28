@@ -2,6 +2,7 @@
 noinst_LTLIBRARIES = libExtensions.la
 
 nobase_include_HEADERS = \
+        Pulsar/Arecibo.h \
         Pulsar/Backend.h \
         Pulsar/BackendTI.h \
         Pulsar/BinaryPhaseOrder.h \
@@ -25,6 +26,7 @@ nobase_include_HEADERS = \
 	Pulsar/FITSSUBHdrExtensionTI.h \
         Pulsar/FluxCalibratorExtension.h \
         Pulsar/FluxCalibratorExtensionTI.h \
+        Pulsar/GBT.h \
         Pulsar/IntegrationOrder.h \
         Pulsar/ITRFExtension.h \
 	Pulsar/ITRFExtensionTI.h \
@@ -56,6 +58,7 @@ nobase_include_HEADERS = \
 	Pulsar/ExtensionRegister.h
 
 libExtensions_la_SOURCES = \
+        Arecibo.C \
         Backend.C \
         BackendTI.C \
         BinaryPhaseOrder.C \
@@ -83,6 +86,7 @@ libExtensions_la_SOURCES = \
         FluxCalibratorExtension_build.C \
         FluxCalibratorExtension.C \
         FluxCalibratorExtensionTI.C \
+        GBT.C \
         IntegrationOrder.C \
         ITRFExtension.C \
         ITRFExtensionTI.C \
