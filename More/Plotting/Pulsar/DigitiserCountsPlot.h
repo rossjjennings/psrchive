@@ -17,7 +17,9 @@
 #include <vector>
 
 
-using namespace std;
+
+using std::pair;
+using std::vector;
 
 
 
@@ -44,11 +46,9 @@ namespace Pulsar
     std::string get_xlabel( const Archive *data );
     std::string get_ylabel( const Archive *data );
 
-    int get_fsub( void ) const { return fsub; }
-    void set_fsub( int s_fsub ) { fsub = s_fsub; }
-
-    int get_lsub( void ) const { return lsub; }
-    void set_lsub( int s_lsub ) { lsub = s_lsub; }
+    pair<int,int> get_srange() const { return srange; }
+    void set_srange( const pair<int,int> &s_srange ) { srange = s_srange; }
+    void set_srange( int fsub, int lsub ) { set_srange( pair<int,int>( fsub, lsub) ); }
 
     int get_subint( void ) const { return subint; }
     void set_subint( int s_subint ) { subint = s_subint; }
@@ -61,8 +61,9 @@ namespace Pulsar
     float y_jump;
     int first_nz;
     int last_nz;
-    int subint, fsub, lsub;
-    
+    int subint;
+    pair<int,int> srange;
+
     bool valid_data;
   };
 }

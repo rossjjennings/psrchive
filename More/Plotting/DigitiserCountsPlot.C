@@ -32,9 +32,9 @@ using namespace std;
 
 DigitiserCountsPlot::DigitiserCountsPlot()
 {
-  fsub = -1;
-  lsub = -1;
   subint = -1;
+  srange.first = -1;
+  srange.second = -1;
   valid_data = false;
 }
 
@@ -128,18 +128,18 @@ void DigitiserCountsPlot::prepare( const Archive *data )
   int npthist = ext->get_npthist();
   int ndigr = ext->get_ndigr();
 
-  // Make sure fsub,lsub have the subint range we want to display
-  if( fsub == -1 && lsub == -1 )
+  // Make sure srange.first,srange.second have the subint range we want to display
+  if( srange.first == -1 && srange.second == -1 )
   {
     if( subint == -1 )
     {
-      fsub = 0;
-      lsub = num_rows -1;
+      srange.first = 0;
+      srange.second = num_rows -1;
     }
     else
     {
-      fsub = subint;
-      lsub = subint;
+      srange.first = subint;
+      srange.second = subint;
     }
   }
 
@@ -159,7 +159,7 @@ void DigitiserCountsPlot::prepare( const Archive *data )
   // 10 as effectively zero.
   first_nz = npthist;
   last_nz = 0;
-  for( int s = fsub; s <= lsub; s ++ )
+  for( int s = srange.first; s <= srange.second; s ++ )
   {
     for( int c = 0; c < ndigr; c ++ )
     {
@@ -198,7 +198,7 @@ void DigitiserCountsPlot::prepare( const Archive *data )
   // Find the min and max counts for all subints and channels
   min_count = FLT_MAX;
   max_count = FLT_MIN;
-  for( int s = fsub ; s <= lsub; s ++ )
+  for( int s = srange.first ; s <= srange.second; s ++ )
   {
     //cyclic_minmax( ext->rows[s].data, first_nz, last_nz, min_count, max_count );
     cyclic_minmax( adjusted_data[s], first_nz, last_nz, min_count, max_count );
@@ -215,7 +215,7 @@ void DigitiserCountsPlot::prepare( const Archive *data )
   // set the ranges for the axes, we hide the axes becase we need to draw a box for
   // each digitiser channel later.
   // TODO find out why we need to hard code the buffer here
-  get_frame()->get_y_scale()->set_minmax( min_count , max_count + y_jump * (lsub - fsub) );
+  get_frame()->get_y_scale()->set_minmax( min_count , max_count + y_jump * (srange.second - srange.first) );
   get_frame()->get_y_scale()->set_buf_norm( 0.05 );
   get_frame()->get_x_scale()->set_minmax( 0, ext->get_ndigr() );
   get_frame()->hide_axes();
@@ -259,7 +259,7 @@ void DigitiserCountsPlot::draw( const Archive *data )
   //     draw a binned histogram of x and y
   //   restore the old color
   float xstep = 1.0 / nz_range;
-  for( int s = fsub; s <= lsub; s ++ )
+  for( int s = srange.first; s <= srange.second; s ++ )
   {
     int old_col;
     cpgqci( &old_col );
@@ -272,8 +272,8 @@ void DigitiserCountsPlot::draw( const Archive *data )
       for( int j = 0; j < nz_range; j ++ )
       {
         xs[j] = j * xstep + c;
-        // ys[j] = ext->rows[s].data[(first_nz+j) + c * npthist ] + y_jump * (s-fsub);
-        ys[j] = adjusted_data[s][(first_nz+j) + c * npthist] + y_jump * (s-fsub);
+        // ys[j] = ext->rows[s].data[(first_nz+j) + c * npthist ] + y_jump * (s-srange.first);
+        ys[j] = adjusted_data[s][(first_nz+j) + c * npthist] + y_jump * (s-srange.first);
       }
       cpgsci( next_col++ );
       cpgbin( nz_range, xs, ys, 1 );
