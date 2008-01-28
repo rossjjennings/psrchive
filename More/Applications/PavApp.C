@@ -657,7 +657,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.48 2008/01/14 04:40:11 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.49 2008/01/28 23:42:38 nopeer Exp $" << endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
@@ -736,12 +736,8 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'y':
       {
-        string s1,s2;
-        string_split( optarg, s1, s2, "," );
-        fsub = fromstring<unsigned int>( s1 );
-        lsub = fromstring<unsigned int>( s2 );
-        options.push_back( string("fsub=" ) + s1 );
-        options.push_back( string("lsub=" ) + s2 );
+	string range_string = string("(") + string(optarg) + string(")");
+	options.push_back( string( "srange=" ) + range_string );
       }
       break;
     case 'H':
