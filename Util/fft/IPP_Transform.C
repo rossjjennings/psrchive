@@ -4,23 +4,27 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 
-#if HAVE_IPP
+/*
+
+See threads related documentation at:
+http://support.intel.com/support/performancetools/libraries/ipp/sb/cs-010662.htm
+
+*/
 
 #include "IPP_Transform.h"
 #include "Error.h"
 
-using namespace std;
+#include <ippcore.h>
 
+using namespace std;
 
 FTransform::IPP::Plan::~Plan()
 {
   if( pBuffer )
     delete [] pBuffer;
-  if( Spec ){
+  if( Spec )
+  {
     if( call & real )
       ippsFFTFree_R_32f( (IppsFFTSpec_R_32f*)Spec );
     else
@@ -36,6 +40,8 @@ FTransform::IPP::Plan::Plan (size_t n_fft, type t)
   cerr << "FTransform::IPP::Plan nfft=" << n_fft
        << " call='" << fft_call << "'" << endl;
 #endif
+
+  ippSetNumThreads (1);
 
   int order = 0;
   int pSize = 0;
@@ -99,4 +105,3 @@ void FTransform::IPP::Plan::bcr1d (size_t nfft, float* dest, const float* src)
 			 (const IppsFFTSpec_R_32f*)Spec, pBuffer );
 }
 
-#endif
