@@ -60,7 +60,9 @@ FTransform::MKL_DFTI::Plan::Plan (size_t n_fft, type t)
 		 "fail DftiCreateDescriptor\n\t%s",
 		 DftiErrorMessage(status));
 
+#ifdef _DEBUG
   cerr << "FTransform::MKL_DFTI::Plan::Plan plan=" << plan << endl;
+#endif
 
   /*
 
