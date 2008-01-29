@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.21 $
-   $Date: 2008/01/29 02:34:20 $
+   $Revision: 1.22 $
+   $Date: 2008/01/29 02:40:06 $
    $Author: nopeer $ */
 
 
@@ -896,7 +896,7 @@ void PrintSNR( vector<string> filenames )
 {
   table_stream ts( &cout );
 
-  ts << "FILE" << "S/N" << "S/N(unweighted)" << endl;
+  ts << "FILE" << "S/N" << endl;
 
   vector<string>::iterator it;
   for( it = filenames.begin(); it != filenames.end(); it ++ )
@@ -911,7 +911,6 @@ void PrintSNR( vector<string> filenames )
 
       ts << filename;
       ts << tostring<double>(snr);
-      ts << "TODO";
       ts << endl;
     }
     catch( Error e )
