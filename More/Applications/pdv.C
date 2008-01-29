@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.20 $
-   $Date: 2008/01/14 04:50:24 $
+   $Revision: 1.21 $
+   $Date: 2008/01/29 02:34:20 $
    $Author: nopeer $ */
 
 
@@ -18,6 +18,7 @@
 
 #ifdef HAVE_CFITSIO
 #include "Pulsar/FITSArchive.h"
+using Pulsar::FITSArchive;
 #endif
 
 #include "Pulsar/Archive.h"
@@ -68,10 +69,28 @@ const char TEXT_KEY             = 't';
 const char TEXT_HEADERS_KEY     = 'A';
 const char PER_SUBINT_KEY       = 'S';
 const char HISTORY_KEY          = 'H';
+const char SNR_KEY              = 'N';
 
 
-using namespace std;
-using namespace Pulsar;
+
+
+using std::cerr;
+using std::cout;
+using std::endl;
+using std::string;
+using std::vector;
+using std::ios;
+using std::ostream;
+using Pulsar::Archive;
+using Pulsar::Profile;
+using Pulsar::Integration;
+using Pulsar::DigitiserStatistics;
+using Pulsar::Pointing;
+using Pulsar::Interpreter;
+using Pulsar::ProcHistory;
+using Pulsar::IntegrationOrder;
+
+
 
 
 bool cmd_text = false;
@@ -79,6 +98,7 @@ bool cmd_flux = false;
 bool cmd_flux2 = false;
 bool cmd_subints = false;
 bool cmd_history = false;
+bool cmd_snr = false;
 bool per_channel_headers = false;
 bool cal_parameters = false;
 bool keep_baseline = false;
@@ -130,6 +150,7 @@ void Usage( void )
   "   -" << TEXT_HEADERS_KEY <<   "          Print out profiles as ASCII text (with per channel headers) \n"
   "   -" << PER_SUBINT_KEY <<     " params   Print out per subint data (no params for argument list) \n"
   "   -" << HISTORY_KEY <<        " params   Print out the history table for the archive (no params for argument list) \n"
+  "   -" << SNR_KEY <<            "          Print the S/N \n"
   " \n"
   "   For more detailed list of options use \"pdv -h param\", ie \"pdv -h S\" \n"
   "   for a full list of parameters that can be used with -S \n"
@@ -863,6 +884,49 @@ void DisplayHistory( vector<string> filenames, vector<string> params )
 
 
 
+/**
+ * @brief Display a snr for each file
+ * @param filenames vector of filenames to use
+ *
+ *        Use a table stream to neatly order output, iterate through the filenames
+ *        take the total and use the current snr algorithm on the resulting profile.
+ **/
+
+void PrintSNR( vector<string> filenames )
+{
+  table_stream ts( &cout );
+
+  ts << "FILE" << "S/N" << "S/N(unweighted)" << endl;
+
+  vector<string>::iterator it;
+  for( it = filenames.begin(); it != filenames.end(); it ++ )
+  {
+    try
+    {
+      Reference::To<Archive> archive = Archive::load( (*it) );
+
+      string filename = archive->get_filename();
+
+      double snr = archive->total()->get_Profile(0,0,0)->snr();
+
+      ts << filename;
+      ts << tostring<double>(snr);
+      ts << "TODO";
+      ts << endl;
+    }
+    catch( Error e )
+    {
+      cerr << "Failed to extract snr from archive " << (*it) << endl;
+      cerr << e << endl;
+    }
+  }
+  ts.flush();
+}
+
+
+
+
+
 
 
 
@@ -882,7 +946,11 @@ vector< string > GetFilenames ( int argc, char *argv[] )
 
 
 void ProcessArchive( string filename )
+try
 {
+
+
+
   Reference::To< Archive > archive = Archive::load( filename );
 
   if( !archive )
@@ -909,6 +977,10 @@ void ProcessArchive( string filename )
     if( cmd_flux2 )
       Flux2( archive );
   }
+}
+catch( Error e )
+{
+  cerr << e << endl;
 }
 
 
@@ -938,6 +1010,7 @@ int main( int argc, char *argv[] ) try
   args += TEXT_HEADERS_KEY;
   args += PER_SUBINT_KEY; args += ":";
   args += HISTORY_KEY; args += ":";
+  args += SNR_KEY;
 
   vector<string> history_params;
   vector<string> subint_params;
@@ -1036,6 +1109,9 @@ int main( int argc, char *argv[] ) try
       if( optarg != NULL )
         separate (optarg, history_params, " ,");
       break;
+    case SNR_KEY:
+      cmd_snr = true;
+      break;
     default:
       cerr << "Unknown option " << char(i) << endl;
       break;
@@ -1043,6 +1119,9 @@ int main( int argc, char *argv[] ) try
   }
 
   vector< string > filenames = GetFilenames( argc, argv );
+
+  if( cmd_snr )
+    PrintSNR( filenames );
 
   if( cal_parameters || cmd_text || cmd_flux || cmd_flux2 )
   {
