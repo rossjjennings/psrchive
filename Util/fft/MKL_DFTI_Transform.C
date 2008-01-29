@@ -5,10 +5,21 @@
  *
  ***************************************************************************/
 
+using namespace std;
+
+/*
+
+See threads related documentation at:
+http://www.intel.com/support/performancetools/libraries/mkl/sb/cs-017177.htm
+
+*/
+
 #include "MKL_DFTI_Transform.h"
 #include "Error.h"
 
-using namespace std;
+#include <assert.h>
+
+//#define _DEBUG 1
 
 /* ***********************************************************************
 
@@ -19,47 +30,74 @@ using namespace std;
 FTransform::MKL_DFTI::Plan::Plan (size_t n_fft, type t)
 {
 #ifdef _DEBUG
-  cerr << "FTransform::MKL_DFTI::Plan nfft=" << n
-       << " call='" << fft_call << "'" << endl;
+  cerr << "FTransform::MKL_DFTI::Plan nfft=" << n_fft
+       << " type='" << t << "'" << endl;
 #endif
 
-  int status;
+  long status;
 
   long n = n_fft;
 
+  plan = 0;
+
   if (t & real)
+  {
+#ifdef _DEBUG
+    cerr << "FTransform::MKL_DFTI::Plan DFTI_REAL" << endl;
+#endif
     status = DftiCreateDescriptor( &plan, DFTI_SINGLE, DFTI_REAL, 1, n );
+  }
   else
+  {
+#ifdef _DEBUG
+    cerr << "FTransform::MKL_DFTI::Plan DFTI_COMPLEX" << endl;
+#endif
     status = DftiCreateDescriptor( &plan, DFTI_SINGLE, DFTI_COMPLEX, 1, n );
+  }
 
   if (! DftiErrorClass(status, DFTI_NO_ERROR))
     throw Error (InvalidState, "FTransform::MKL_DFTI::Plan ctor",
-		 "fail DftiCreateDescriptor");
+		 "fail DftiCreateDescriptor\n\t%s",
+		 DftiErrorMessage(status));
 
-#if 0
+  cerr << "FTransform::MKL_DFTI::Plan::Plan plan=" << plan << endl;
 
-  // this code is in the double precision version in
-  // interfaces/fftw3xc/wrappers
-  if (t & real) {
-    status = DftiSetValue
-      ( plan, DFTI_CONJUGATE_EVEN_STORAGE, DFTI_COMPLEX_COMPLEX );
+  /*
 
-    if (! DftiErrorClass(status, DFTI_NO_ERROR))
-      throw Error (InvalidState, "FTransform::MKL_DFTI::Plan ctor",
-		   "fail DftiSetValue DFTI_CONJUGATE_EVEN_STORAGE");
-  }
+    http://www.intel.com/software/products/mkl/docs/webhelp/fft/fft_NumberOfThreads.html
 
-#endif
+    You create threads in the application yourself after initializing
+    the only DFT descriptor. This implies that threading is employed
+    for parallel DFT computation only, and the descriptor is released
+    upon return from the parallel region. In this case, each thread
+    uses the same descriptor.
+
+    You must use the DftiSetValue() function to set the
+    DFTI_NUMBER_OF_USER_THREADS to the actual number of DFT
+    computation threads, because multiple threads will be using the
+    same descriptor. If this setting is not done, your program will
+    work incorrectly or fail, since the descriptor contains individual
+    data for each thread.
+
+   */
+
+  status = DftiSetValue( plan, DFTI_NUMBER_OF_USER_THREADS, nthread );
+  if (! DftiErrorClass(status, DFTI_NO_ERROR))
+    throw Error (InvalidState, "FTransform::MKL_DFTI::Plan ctor",
+                 "fail DftiSetValue DFTI_NUMBER_OF_USER_THREADS %d\n\t%s",
+                 nthread, DftiErrorMessage(status));
 
   status = DftiSetValue( plan, DFTI_PLACEMENT, DFTI_NOT_INPLACE );
   if (! DftiErrorClass(status, DFTI_NO_ERROR))
     throw Error (InvalidState, "FTransform::MKL_DFTI::Plan ctor",
-		 "fail DftiSetValue DFTI_PLACEMENT");
+		 "fail DftiSetValue DFTI_PLACEMENT\n\t%s",
+		 DftiErrorMessage(status));
 
   status = DftiCommitDescriptor( plan );
   if (! DftiErrorClass(status, DFTI_NO_ERROR))
     throw Error (InvalidState, "FTransform::MKL_DFTI::Plan ctor",
-		 "fail DftiCommitDescriptor");
+		 "fail DftiCommitDescriptor\n\t%s",
+		 DftiErrorMessage(status));
 
   this->nfft = n_fft;
   this->call = t;
@@ -68,32 +106,78 @@ FTransform::MKL_DFTI::Plan::Plan (size_t n_fft, type t)
 
 FTransform::MKL_DFTI::Plan::~Plan()
 {
+#ifdef _DEBUG
+  cerr << "FTransform::MKL_DFTI::Plan::~Plan plan=" << plan << endl;
+#endif
+
   if (plan)
     DftiFreeDescriptor(&plan);
 }
 
+#define CHECK_ALIGN(x) assert ( ( ((uintptr_t)x) & 15 ) == 0 )
+
 void FTransform::MKL_DFTI::Plan::frc1d (size_t nfft, float* dest, 
 					const float* src)
 {
-  DftiComputeForward( plan, (void*) src, dest );
+  CHECK_ALIGN(src);
+  CHECK_ALIGN(dest);
+
+#ifdef _DEBUG
+  cerr << "FTransform::MKL_DFTI::Plan::frc1d plan=" << plan << endl;
+#endif
+  long status = DftiComputeForward( plan, (void*) src, dest );
+  if (! DftiErrorClass(status, DFTI_NO_ERROR))
+    throw Error (InvalidState, "FTransform::MKL_DFTI::Plan::frc1d",
+		 "fail DftiComputeForward\n\t%s",
+		 DftiErrorMessage(status));
 }
 
 void FTransform::MKL_DFTI::Plan::fcc1d (size_t nfft, float* dest,
 					const float* src)
 {
-  DftiComputeForward( plan, (void*) src, dest );
+  CHECK_ALIGN(src);
+  CHECK_ALIGN(dest);
+
+#ifdef _DEBUG
+  cerr << "FTransform::MKL_DFTI::Plan::fcc1d" << endl;
+#endif
+  long status = DftiComputeForward( plan, (void*) src, dest );
+  if (! DftiErrorClass(status, DFTI_NO_ERROR))
+    throw Error (InvalidState, "FTransform::MKL_DFTI::Plan::frc1d",
+		 "fail DftiComputeForward\n\t%s",
+		 DftiErrorMessage(status));
 }
 
 void FTransform::MKL_DFTI::Plan::bcc1d (size_t nfft, float* dest,
 					const float* src)
 {
-  DftiComputeBackward( plan, (void*) src, dest );
+  CHECK_ALIGN(src);
+  CHECK_ALIGN(dest);
+
+#ifdef _DEBUG
+  cerr << "FTransform::MKL_DFTI::Plan::bcc1d" << endl;
+#endif
+  long status = DftiComputeBackward( plan, (void*) src, dest );
+  if (! DftiErrorClass(status, DFTI_NO_ERROR))
+    throw Error (InvalidState, "FTransform::MKL_DFTI::Plan::frc1d",
+		 "fail DftiComputeBackward\n\t%s",
+		 DftiErrorMessage(status));
 }
 
 void FTransform::MKL_DFTI::Plan::bcr1d (size_t nfft, float* dest,
 					const float* src)
 {
-  DftiComputeBackward( plan, (void*) src, dest );
+  CHECK_ALIGN(src);
+  CHECK_ALIGN(dest);
+
+#ifdef _DEBUG
+  cerr << "FTransform::MKL_DFTI::Plan::bcr1d" << endl;
+#endif
+  long status = DftiComputeBackward( plan, (void*) src, dest );
+  if (! DftiErrorClass(status, DFTI_NO_ERROR))
+    throw Error (InvalidState, "FTransform::MKL_DFTI::Plan::frc1d",
+		 "fail DftiComputeBackward\n\t%s",
+		 DftiErrorMessage(status));
 }
 
 /* ***********************************************************************
