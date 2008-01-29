@@ -43,6 +43,9 @@ namespace FTransform {
   //! Whether to use SIMD or not
   extern bool simd;
 
+  //! Number of threads that will use the plan
+  extern unsigned nthread;
+
   //! Returns the name of the currently selected library
   std::string get_library ();
   
