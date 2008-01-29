@@ -25,8 +25,8 @@ using namespace std;
 //! A function to write an integration to a row in a FITS file on disk.
 
 void Pulsar::FITSArchive::unload_Integration (int row, 
-					      const Integration* integ, 
-					      fitsfile* thefptr) const
+                                            const Integration* integ, 
+                                            fitsfile* thefptr) const
 {
   int status = 0;
  
@@ -36,8 +36,8 @@ void Pulsar::FITSArchive::unload_Integration (int row,
     has_alt_order = true;
     if (verbose == 3)
       cerr << "FITSArchive::unload_integration using " 
-	   << get<Pulsar::IntegrationOrder>()->get_extension_name()
-	   << endl;
+         << get<Pulsar::IntegrationOrder>()->get_extension_name()
+         << endl;
   }
 
   // Set the subint number
@@ -47,13 +47,13 @@ void Pulsar::FITSArchive::unload_Integration (int row,
   
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_get_colnum ISUBINT");
+                   "fits_get_colnum ISUBINT");
   
   fits_write_col (thefptr, TINT, colnum, row, 1, 1, &row, &status);
 
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_write_col ISUBINT");
+                   "fits_write_col ISUBINT");
   
   // Write out the index values, if applicable
   if (has_alt_order) {
@@ -62,7 +62,7 @@ void Pulsar::FITSArchive::unload_Integration (int row,
 
     if (status != 0)
       throw FITSError (status, "FITSArchive:unload_integration",
-		       "fits_get_colnum INDEXVAL");
+                       "fits_get_colnum INDEXVAL");
     
     double value = get<Pulsar::IntegrationOrder>()->get_Index(row-1);
     fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &value, &status);
@@ -75,14 +75,14 @@ void Pulsar::FITSArchive::unload_Integration (int row,
   
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_get_colnum TSUBINT");
+                   "fits_get_colnum TSUBINT");
   
   double duration = integ->get_duration();  
   fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &duration, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_write_col TSUBINT");
+                   "fits_write_col TSUBINT");
   
   if (verbose== 3)
     cerr << "FITSArchive::unload_integration row=" << row
@@ -95,7 +95,7 @@ void Pulsar::FITSArchive::unload_Integration (int row,
   
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_get_colnum OFFS_SUB");
+                   "fits_get_colnum OFFS_SUB");
 
   if (verbose == 3)
     cerr << "FITSArchive::unload_integration row=" << row
@@ -107,7 +107,7 @@ void Pulsar::FITSArchive::unload_Integration (int row,
   
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_write_col OFFS_SUB");
+                   "fits_write_col OFFS_SUB");
   
   if (verbose == 3)
     cerr << "FITSArchive::unload_integration row=" << row 
@@ -119,6 +119,13 @@ void Pulsar::FITSArchive::unload_Integration (int row,
   if (theExt)
     unload(thefptr,theExt,row);
   
+  // Write folding period if predictor model does not exist
+  if (has_model()==false) {
+    double per = integ->get_folding_period();
+    fits_get_colnum(thefptr, CASEINSEN, "PERIOD", &colnum, &status);
+    fits_write_col(thefptr, TDOUBLE, colnum, row, 1, 1, &per, &status);
+  }
+
   // Write the channel centre frequencies
 
   colnum = 0;
@@ -126,7 +133,7 @@ void Pulsar::FITSArchive::unload_Integration (int row,
   
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_get_colnum DAT_FREQ");
+                   "fits_get_colnum DAT_FREQ");
   
   //fits_modify_vector_len (thefptr, colnum, nchan, &status);
 
@@ -136,11 +143,11 @@ void Pulsar::FITSArchive::unload_Integration (int row,
     temp_array[j] = integ->get_centre_frequency(j);
 
   fits_write_col (thefptr, TFLOAT, colnum, row, 1, nchan, 
-		  &(temp_array[0]), &status);
+                &(temp_array[0]), &status);
 
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_write_col DAT_FREQ");
+                   "fits_write_col DAT_FREQ");
 
   // Write the profile weights
 
@@ -149,7 +156,7 @@ void Pulsar::FITSArchive::unload_Integration (int row,
   
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_get_colnum DAT_WTS");
+                   "fits_get_colnum DAT_WTS");
 
   //fits_modify_vector_len (thefptr, colnum, nchan, &status);
 
@@ -157,11 +164,11 @@ void Pulsar::FITSArchive::unload_Integration (int row,
     temp_array[j] = integ->get_weight(j);
 
   fits_write_col (thefptr, TFLOAT, colnum, row, 1, nchan, 
-		  &(temp_array[0]), &status);
+                &(temp_array[0]), &status);
 
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_write_col DAT_WTS");
+                   "fits_write_col DAT_WTS");
   
   // Start writing profiles
   
@@ -221,115 +228,115 @@ void Pulsar::FITSArchive::unload_Integration (int row,
       p = integ->get_Profile(a,b);
       vector<float> temparray1 (nbin);
       for(unsigned j = 0; j < get_nbin(); j++)
-	temparray1[j] = p->get_amps()[j];
+        temparray1[j] = p->get_amps()[j];
       
       if (verbose == 3) {
-	cerr << "FITSArchive::unload_integration got profile" << endl;
-	cerr << "nchan = " << b << endl;
-	cerr << "npol  = " << a << endl;
+        cerr << "FITSArchive::unload_integration got profile" << endl;
+        cerr << "nchan = " << b << endl;
+        cerr << "npol  = " << a << endl;
       }
 
       minmax(temparray1, min, max);
 
       if (save_signed)
-	offset = 0.5 * (max + min);
+        offset = 0.5 * (max + min);
       else
-	offset = min;
+        offset = min;
 
       if (verbose == 3)
-	cerr << "FITSArchive::unload_integration offset = "
-	     << offset
-	     << endl;
+        cerr << "FITSArchive::unload_integration offset = "
+             << offset
+             << endl;
       
       scalefac = 1.0;
       
       // Test for dynamic range
       if (fabs(min - max) < (100.0 * FLT_MIN)) {
-	if (verbose == 3) {
-	  cerr << "FITSArchive::unload_integration WARNING no range in profile"
-	       << endl;
-	}
+        if (verbose == 3) {
+          cerr << "FITSArchive::unload_integration WARNING no range in profile"
+               << endl;
+        }
       }
       else
-	// Find the scale factor
-	scalefac = (max - min) / max_short;
+        // Find the scale factor
+        scalefac = (max - min) / max_short;
       
       if (verbose == 3)
-	cerr << "FITSArchive::unload_integration scalefac = "
-	     << scalefac
-	     << endl;
+        cerr << "FITSArchive::unload_integration scalefac = "
+             << scalefac
+             << endl;
       
       // Apply the scale factor
       
       for (unsigned i = 0; i < nbin; i++) {
-	temparray2[i] = int16 ((temparray1[i]-offset) / scalefac);
+        temparray2[i] = int16 ((temparray1[i]-offset) / scalefac);
       }
 
       // Write the offset to file
 
       if (verbose == 3)
-	cerr << "FITSArchive::unload_integration writing offset" << endl;
+        cerr << "FITSArchive::unload_integration writing offset" << endl;
 
       colnum = 0;
       fits_get_colnum (thefptr, CASEINSEN, "DAT_OFFS", &colnum, &status);
 
       if (status != 0)
-	throw FITSError (status, "FITSArchive:unload_integration",
-			 "fits_get_colnum DAT_OFFS");
+        throw FITSError (status, "FITSArchive:unload_integration",
+                         "fits_get_colnum DAT_OFFS");
 
       fits_write_col (thefptr, TFLOAT, colnum, row, counter1, 1, 
-		      &offset, &status);
+                      &offset, &status);
       
       if (status != 0)
-	throw FITSError (status, "FITSArchive:unload_integration",
-			 "fits_write_col DAT_OFFS");
+        throw FITSError (status, "FITSArchive:unload_integration",
+                         "fits_write_col DAT_OFFS");
 
       // Write the scale factor to file
 
       if (verbose == 3)
-	cerr << "FITSArchive::unload_integration writing scale fac" << endl;
+        cerr << "FITSArchive::unload_integration writing scale fac" << endl;
 
       colnum = 0;
       fits_get_colnum (thefptr, CASEINSEN, "DAT_SCL", &colnum, &status);
 
       if (status != 0)
-	throw FITSError (status, "FITSArchive:unload_integration",
-			 "fits_get_colnum DAT_SCL");
+        throw FITSError (status, "FITSArchive:unload_integration",
+                         "fits_get_colnum DAT_SCL");
 
       fits_write_col (thefptr, TFLOAT, colnum, row, counter1, 1, 
-		      &scalefac, &status);
+                      &scalefac, &status);
       
       if (status != 0)
-	throw FITSError (status, "FITSArchive:unload_integration",
-			 "fits_write_col DAT_SCL");
+        throw FITSError (status, "FITSArchive:unload_integration",
+                         "fits_write_col DAT_SCL");
       
       counter1 ++;
 
       // Write the data
 
       if (verbose == 3)
-	cerr << "FITSArchive:unload_integration writing data" << endl;
+        cerr << "FITSArchive:unload_integration writing data" << endl;
 
       colnum = 0;
       fits_get_colnum (thefptr, CASEINSEN, "DATA", &colnum, &status);
 
       if (status != 0)
-	throw FITSError (status, "FITSArchive:unload_integration",
-			 "fits_get_colnum DATA");
+        throw FITSError (status, "FITSArchive:unload_integration",
+                         "fits_get_colnum DATA");
 
       fits_write_col (thefptr, TSHORT, colnum, row, counter2, nbin, 
-		      &(temparray2[0]), &status);
+                      &(temparray2[0]), &status);
 
       if (status != 0)
-	throw FITSError (status, "FITSArchive:unload_integration",
-			 "fits_write_col DATA");
+        throw FITSError (status, "FITSArchive:unload_integration",
+                         "fits_write_col DATA");
 
       counter2 = counter2 + nbin;
-	
+        
       if (verbose == 3)
-	cerr << "FITSArchive:unload_integration looping" << endl;
+        cerr << "FITSArchive:unload_integration looping" << endl;
       
-    }	  
+    }     
   }
   
   

@@ -22,12 +22,23 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   fits_movnam_hdu (ffptr, BINARY_TBL, "SUBINT", 0, &status);
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
-		     "fits_movnam_hdu SUBINT");
+                     "fits_movnam_hdu SUBINT");
 
   char* valid = "VALID";
   fits_update_key (ffptr, TSTRING, "EPOCHS", valid, comment, &status);
 
   clean_Pointing_columns (ffptr);
+
+  // If archive has a folding model, remove PERIOD column
+  if (has_model()) {
+    if (verbose > 2) 
+      cerr << "Pulsar::FITSArchive::unload_integrations found model, "
+        << "removing PERIOD column" << endl;
+    int perstatus=0;
+    int percolnum=0;
+    fits_get_colnum(ffptr, CASEINSEN, "PERIOD", &percolnum, &perstatus);
+    fits_delete_col(ffptr, percolnum, &perstatus);
+  }
 
   psrfits_clean_rows (ffptr);
 
@@ -43,14 +54,14 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     fits_get_num_rows (ffptr, &newrownum, &status);
     if (verbose == 3) {
       cerr << "FITSArchive::unload_integrations DATA row count = "
-	   << newrownum
-	   << endl;
+           << newrownum
+           << endl;
     }
   }
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
-		     "error clearing old subints");
+                     "error clearing old subints");
 
   // Update the header information
   
@@ -66,22 +77,22 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   if (has_alt_order) {
     fits_update_key (ffptr, TSTRING, "INT_TYPE", 
-		     const_cast<char*>(order_name.c_str()),
-		     comment, &status);
+                     const_cast<char*>(order_name.c_str()),
+                     comment, &status);
     
     fits_update_key (ffptr, TSTRING, "INT_UNIT", 
-		     const_cast<char*>(order_unit.c_str()),
-		     comment, &status);
+                     const_cast<char*>(order_unit.c_str()),
+                     comment, &status);
   }
   else {
     char* useful = new char[64];
     sprintf(useful, "%s", "TIME");
     fits_update_key (ffptr, TSTRING, "INT_TYPE", useful,
-		     comment, &status);
+                     comment, &status);
     
     sprintf(useful, "%s", "SEC");
     fits_update_key (ffptr, TSTRING, "INT_UNIT", useful,
-		     comment, &status);
+                     comment, &status);
     delete[] useful;
   }
   
@@ -94,56 +105,56 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
-		     "error resizing DAT_FREQ");
+                     "error resizing DAT_FREQ");
 
   if (verbose == 3)
     cerr << "FITSArchive::unload_integrations DAT_FREQ resized to "
-	 << nchan
-	 << endl;
+         << nchan
+         << endl;
 
   fits_get_colnum (ffptr, CASEINSEN, "DAT_WTS", &colnum, &status);
   fits_modify_vector_len (ffptr, colnum, nchan, &status);
 
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
-		     "error resizing DAT_WTS");
+                     "error resizing DAT_WTS");
 
   if (verbose == 3)
     cerr << "FITSArchive::unload_integrations DAT_WTS resized to "
-	 << nchan
-	 << endl;
+         << nchan
+         << endl;
 
   fits_get_colnum (ffptr, CASEINSEN, "DAT_OFFS", &colnum, &status);
   fits_modify_vector_len (ffptr, colnum, nchan*npol, &status);
 
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
-		     "error resizing DAT_OFFS");
+                     "error resizing DAT_OFFS");
 
   if (verbose == 3)
     cerr << "FITSArchive::unload_integrations DAT_OFFS resized to "
-	 << nchan*npol
-	 << endl;
+         << nchan*npol
+         << endl;
 
   fits_get_colnum (ffptr, CASEINSEN, "DAT_SCL", &colnum, &status);
   fits_modify_vector_len (ffptr, colnum, nchan*npol, &status);
 
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_integrations", 
-		     "error resizing DAT_SCL");
+                     "error resizing DAT_SCL");
 
   if (verbose == 3)
     cerr << "FITSArchive::unload_integrations DAT_SCL resized to "
-	 << nchan*npol
-	 << endl;
+         << nchan*npol
+         << endl;
 
   fits_get_colnum (ffptr, CASEINSEN, "DATA", &colnum, &status);
   fits_modify_vector_len (ffptr, colnum, nchan*npol*nbin, &status);
 
   if (verbose == 3)
     cerr << "FITSArchive::unload_integrations DATA resized to "
-	 << nchan*npol*nbin
-	 << endl;
+         << nchan*npol*nbin
+         << endl;
   
   // Iterate over all rows, calling the unload_integration function to
   // fill in the next spot in the file.
