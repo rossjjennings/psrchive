@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/LinePhasePlot.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/01/28 23:37:33 $
+   $Revision: 1.5 $
+   $Date: 2008/01/29 00:14:33 $
    $Author: nopeer $ */
 
 
@@ -40,7 +40,6 @@ namespace Pulsar
   {
   public:
     LinePhasePlot();
-    virtual ~LinePhasePlot();
 
     //! prepare the archive for rendering
     void prepare (const Archive *data );

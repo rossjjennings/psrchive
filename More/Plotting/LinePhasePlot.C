@@ -45,18 +45,6 @@ LinePhasePlot::LinePhasePlot()
 
 
 
-/**
- * @brief Destructor
- *        Virtual destructor calls parent destructor.
- **/
-
-LinePhasePlot::~LinePhasePlot()
-{
-  this->~PhasePlot();
-}
-
-
-
 
 /**
  * @brief   Figures out some measurements before plotting
