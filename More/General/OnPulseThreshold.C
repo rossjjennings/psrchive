@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/OnPulseThreshold.h"
-#include "Pulsar/BaselineWindow.h"
+#include "Pulsar/BaselineEstimator.h"
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 
@@ -23,8 +23,6 @@ Pulsar::OnPulseThreshold::OnPulseThreshold ()
 
   bin_start = bin_end = 0;
   range_specified = false;
-
-  baseline_estimator = new BaselineWindow;
 }
 
 //! Set the duty cycle

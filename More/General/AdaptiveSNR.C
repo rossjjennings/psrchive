@@ -25,36 +25,31 @@ Pulsar::AdaptiveSNR::~AdaptiveSNR ()
 
 
 //! Set the threshold below which samples are included in the baseline
-void Pulsar::AdaptiveSNR::set_baseline (BaselineEstimator* function)
+void Pulsar::AdaptiveSNR::set_baseline_estimator (BaselineEstimator* function)
 {
-  baseline = function;
+  baseline_estimator = function;
 }
 
 
 //! Return the signal to noise ratio
 float Pulsar::AdaptiveSNR::get_snr (const Profile* profile)
 {
-  if (!baseline)
-    throw Error (InvalidState, "Pulsar::AdaptiveSNR::get_snr",
-		 "no BaselineEstimator provided (use set_baseline)");
+  Reference::To<PhaseWeight> baseline;
 
-  baseline->set_Profile( profile );
+  if (baseline_estimator)
+    baseline = baseline_estimator->baseline (profile);
+  else
+    baseline = profile->baseline();
 
-  PhaseWeight weight;
-
-  baseline->get_weight (&weight);
-
-  weight.set_Profile (profile);
-
-  Estimate<double> mean = weight.get_mean();
-  Estimate<double> variance = weight.get_variance();
+  Estimate<double> mean = baseline->get_mean();
+  Estimate<double> variance = baseline->get_variance();
 
   double rms = sqrt (variance.val);
   unsigned nbin = profile->get_nbin();
   double energy = profile->sum() - mean.val * nbin;
 
-  double total = weight.get_weight_sum();
-  double max   = weight.get_weight_max();
+  double total = baseline->get_weight_sum();
+  double max   = baseline->get_weight_max();
 
   double on_pulse = nbin * max - total;
   double snr = energy / sqrt(variance.val*on_pulse);
