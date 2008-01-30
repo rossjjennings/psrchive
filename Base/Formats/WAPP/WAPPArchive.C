@@ -386,6 +386,9 @@ void Pulsar::WAPPArchive::load_polycos()
       coefs[icoef] = hdr->coeff[pmap[ipoly]*ncoef + icoef];
     }
   }
+
+  // Link into Archive
+  model = &hdr_polyco;
   
 }
 
@@ -451,7 +454,7 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
   for (int ichan=0; ichan<nchan; ichan++) {
     integration->set_centre_frequency(ichan, 
         get_centre_frequency() - 0.5*get_bandwidth() 
-        + ichan*get_bandwidth()/(double)nchan);
+        + ichan*get_bandwidth()/((double)nchan+1));
   }
 
   // If the "no_amps" flag is set, the actual data is not called for, 
