@@ -111,6 +111,7 @@ AC_DEFUN([SWIN_PACKAGE_TRY_COMPILE],
     if test $have_[$1] = yes; then
       if test x"$cf_dir" != x.; then
         [$1]_CFLAGS="-I$cf_dir"
+        swin_[$1]_include_dir="$cf_dir"
       fi
       break
     fi
@@ -125,7 +126,15 @@ AC_DEFUN([SWIN_PACKAGE_TRY_LINK],
 [
   AC_PROVIDE([SWIN_PACKAGE_TRY_LINK])
 
-  cf_lib_path_list="$with_[$1]_lib_dir $swin_[$1]_found [$5] ."
+  swin_search_path="$swin_[$1]_found"
+  if test x"$swin_[$1]_include_dir" != x; then
+    swin_base=`dirname $swin_[$1]_include_dir`
+    if test -d $swin_base/lib; then
+      swin_search_path="$swin_base/lib $swin_search_path"
+    fi
+  fi
+
+  cf_lib_path_list="$with_[$1]_lib_dir $swin_search_path [$5] ."
 
   ac_save_CFLAGS="$CFLAGS"
   CFLAGS="$[$1]_CFLAGS $ac_save_CFLAGS"
