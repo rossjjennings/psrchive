@@ -31,6 +31,7 @@ const Pulsar::Backend& Pulsar::Backend::operator= (const Backend& backend)
   hand = backend.hand;
   argument = backend.argument;
   downconversion_corrected = backend.downconversion_corrected;
+  delay = backend.delay;
   return *this;
 }
 
