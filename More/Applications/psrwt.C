@@ -94,7 +94,7 @@ int main (int argc, char** argv)
   Pulsar::AdaptiveSNR adaptive_snr;
 
   Pulsar::GaussianBaseline mask;
-  adaptive_snr.set_baseline (&mask);
+  adaptive_snr.set_baseline_estimator (&mask);
 
   Reference::To<Pulsar::Archive> standard;
 
