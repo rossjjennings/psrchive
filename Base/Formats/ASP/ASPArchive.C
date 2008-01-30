@@ -485,7 +485,8 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
   if (*status==0) o->observer = ctmp; 
   fits_read_key(f, TSTRING, "PROJID", ctmp, NULL, status);
   if (*status==0) o->project_ID = ctmp; 
-  o->telescope = t->get_name();
+  //o->telescope = t->get_name(); // Telescope name
+  o->telescope = get_telescope(); // Tempo code
 
   // Receiver ext
   Receiver *r = getadd<Receiver>();
