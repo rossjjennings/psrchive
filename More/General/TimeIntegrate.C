@@ -116,7 +116,8 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
 
     result->set_duration (duration);
     
-    MJD epoch;
+    double avg_period=0.0;
+    MJD epoch, alt_epoch;
     
     for (unsigned iadd=start; iadd < stop; iadd++) {
       
@@ -125,6 +126,10 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
       double cur_weight = (weight_midtime) ? weight(cur) : 1.0;
 
       epoch += cur_weight/total_weight * cur->get_epoch();
+
+      avg_period += cur_weight/total_weight * cur->get_folding_period();
+
+      if (iadd==(stop-start)/2) { alt_epoch = cur->get_epoch(); }
       
     }
     
@@ -135,6 +140,7 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
     // //////////////////////////////////////////////////////////////////////
     
     if (archive->get_type() == Signal::Pulsar) {
+
 
       if (archive->has_ephemeris())
       {
@@ -166,9 +172,22 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
 	       << model->phase(epoch) << endl;
 	
 	result->set_folding_period (period);
-	
-      }
       
+      } else {
+
+        // If no model exists, we can't recompute an aribtrary epoch. 
+        // Instead, we will pick the epoch of one of the two middle
+        // subints (detemined above as alt_epoch).
+
+        if (Archive::verbose > 2)
+          cerr << "TimeIntegrate::transform used alt_epoch, diff="
+               << alt_epoch-epoch << endl;
+	
+
+        epoch = alt_epoch;
+        result->set_folding_period (avg_period);
+
+      }
     }
     
     result->set_epoch (epoch);
