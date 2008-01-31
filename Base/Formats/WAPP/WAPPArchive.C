@@ -34,6 +34,10 @@ void Pulsar::WAPPArchive::init ()
   wapp_ascii_hdr_size=0;
   wapp_file_size=0;
   raw_data_is_lags=0;
+#if WAPP_USE_FFTW_DCT
+  fplan=NULL;
+  fftbuf=NULL;
+#endif
 }
 
 Pulsar::WAPPArchive::WAPPArchive()
@@ -46,6 +50,10 @@ Pulsar::WAPPArchive::~WAPPArchive()
   // destroy any WAPPArchive-specific resources
   if (rawhdr!=NULL) { delete [] rawhdr; }
   if (hdr!=NULL) { delete hdr; }
+#if WAPP_USE_FFTW_DCT
+  if (fplan!=NULL) { fftwf_destroy_plan(fplan); }
+  if (fftbuf!=NULL) { fftwf_free(fftbuf); }
+#endif
 }
 
 Pulsar::WAPPArchive::WAPPArchive (const Archive& arch)
@@ -451,11 +459,20 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
 
   // Set RFs for each channel, MHz.
   // TODO: make sure we're not off by a half-channel..
+  // This depends on which FFT type is in use
+#if WAPP_USE_FFTW_DCT
   for (int ichan=0; ichan<nchan; ichan++) {
     integration->set_centre_frequency(ichan, 
         get_centre_frequency() - 0.5*get_bandwidth() 
-        + ichan*get_bandwidth()/((double)nchan+1));
+        + ((double)ichan+0.5)*get_bandwidth()/((double)nchan));
   }
+#else
+  for (int ichan=0; ichan<nchan; ichan++) {
+    integration->set_centre_frequency(ichan, 
+        get_centre_frequency() - 0.5*get_bandwidth() 
+        + ichan*get_bandwidth()/((double)nchan));
+  }
+#endif
 
   // If the "no_amps" flag is set, the actual data is not called for, 
   // so we can exit early.  (Trying to actually load the data 
@@ -521,9 +538,40 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
 
   // TODO : window?
 
-  // FFT to get spectra from ACFs.  No real-to-real interface yet
-  // so for now we'll do a r2c on a mirrored copy of the data.
+  // FFT to get spectra from ACFs.
   if (raw_data_is_lags) {
+
+#if WAPP_USE_FFTW_DCT
+    // Use FFTW calls directly until we get the DCT added to 
+    // FTransform interface
+    if (verbose>2) 
+      cerr << "Pulsar::WAPPArchive::load_Integration using FFTW DCT-III"
+        << endl;
+
+    // Create plan if it hasn't been done yet
+    if (fftbuf==NULL) fftbuf = (float *)fftwf_malloc(sizeof(float)*nchan);
+    if (fplan==NULL) {
+      fplan = fftwf_plan_r2r_1d(nchan, fftbuf, fftbuf, FFTW_REDFT01, 
+          FFTW_MEASURE);
+      if (fplan==NULL) 
+        throw Error (FailedSys, "Pulsar::WAPPArchive::load_Integration",
+            "Error computing FFTW plan.");
+    }
+
+    // Loop over data
+    for (int ipol=0; ipol<npol; ipol++) {
+      for (int ibin=0; ibin<nbin; ibin++) {
+        dptr = &data[ibin*nchan*npol + ipol*nchan];
+        memcpy(fftbuf, dptr, sizeof(float)*nchan);
+        fftwf_execute(fplan);
+        memcpy(dptr, fftbuf, sizeof(float)*nchan);
+      }
+    }
+#else
+    // No FFTW, so use a (less efficient) mirrored r2c transform
+    if (verbose>2) 
+      cerr << "Pulsar::WAPPArchive::load_Integration using R2C FFT"
+        << endl;
     float *mirror_data = new float[2*nchan];
     float *spec_data = new float[2*nchan+2];
     for (int ipol=0; ipol<npol; ipol++) {
@@ -545,6 +593,8 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
     }
     delete [] mirror_data;
     delete [] spec_data;
+#endif
+
   }
 
   // Reorganize array, load into integration

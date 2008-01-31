@@ -15,6 +15,21 @@
 #include "polyco.h"
 #include "wapp_headers.h"
 
+// Default to DCT if FFTW is present
+#define WAPP_USE_FFTW_DCT 1
+
+#if WAPP_USE_FFTW_DCT
+#  ifdef HAVE_CONFIG_H
+#    include <config.h>
+#  endif
+#  if HAVE_FFTW3
+#    include <fftw3.h>
+#  else
+#    warn "WAPP_USE_FFTW_DCT requires FFTW3, falling back to general R2C"
+#    define WAPP_USE_FFTW_DCT 0 
+#  endif
+#endif
+
 namespace Pulsar {
 
   //! Loads and unloads WAPP Pulsar archives
@@ -99,6 +114,12 @@ namespace Pulsar {
 
     //! Raw data is ACFs (so needs to be FFTd);
     int raw_data_is_lags;
+
+    //! FFTW DCT plan
+#if WAPP_USE_FFTW_DCT
+    fftwf_plan fplan;
+    float *fftbuf;
+#endif
 
   };
  
