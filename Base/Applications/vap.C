@@ -1735,7 +1735,8 @@ void PrintBasicHlp( void )
   "\n"
   "-s  show the extensions present in an archive\n"
   "\n"
-  "-f  format the output into a table with aligned columns \n"
+  "-f  format the output into a table with aligned columns and headers\n"
+  "    (overrides -n)\n"
   << endl;
 }
 
@@ -1977,6 +1978,10 @@ void ProcArgs( int argc, char *argv[] )
       cerr << "Unknown command line option" << endl;
       return;
     };
+
+  // -f overrides -n
+  if (neat_table) hide_headers = false;
+
 }
 
 
@@ -2300,10 +2305,12 @@ int main( int argc, char *argv[] )
     ExpandMetafile( meta_filename, filenames );
   }
 
-  if( neat_table )
-    Header( ts );
-  else
-    Header( cout );
+  if (!hide_headers) {
+    if( neat_table )
+      Header( ts );
+    else
+      Header( cout );
+  }
 
   if( filenames.size() )
   {
