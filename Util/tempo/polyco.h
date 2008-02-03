@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.48 $
-   $Date: 2008/01/10 20:57:24 $
-   $Author: demorest $ */
+   $Revision: 1.49 $
+   $Date: 2008/02/03 04:35:56 $
+   $Author: straten $ */
 
 #ifndef __POLY_H
 #define __POLY_H
@@ -147,15 +147,15 @@ public:
 
   static double flexibility;
 
-  MJD start_time () const
-  { return ref_time - nspan_mins * (1.0+flexibility) * 60.0/2.0; };
-  MJD end_time () const 
-  { return ref_time + nspan_mins * (1.0+flexibility) * 60.0/2.0; };
+  MJD start_time( double f = flexibility ) const
+  { return ref_time - nspan_mins * (1.0+f) * 60.0/2.0; };
+  MJD end_time( double f = flexibility ) const 
+  { return ref_time + nspan_mins * (1.0+f) * 60.0/2.0; };
 
-  Phase start_phase () const
-  { return phase (start_time()); };
-  Phase end_phase () const
-  { return phase (end_time()); };
+  Phase start_phase( double f = flexibility ) const
+  { return phase (start_time(f)); };
+  Phase end_phase( double f = flexibility ) const
+  { return phase (end_time(f)); };
   
   friend int operator == (const polynomial &, const polynomial &);
   friend int operator != (const polynomial &, const polynomial &);

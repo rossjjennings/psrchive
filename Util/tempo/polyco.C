@@ -827,10 +827,10 @@ void polyco::set_last_work (int i)
 {
   polynomial* poly = &(pollys[i]);
   last_epoch = poly->ref_time;
-  last_span_epoch = 0.5 * (poly->end_time()-poly->start_time()).in_minutes();
+  last_span_epoch = 0.5 * (poly->end_time(0.0)-poly->start_time(0.0)).in_minutes();
 
   last_phase = poly->ref_phase;
-  last_span_phase = 0.5 * (poly->end_phase()-poly->start_phase()).in_turns();
+  last_span_phase = 0.5 * (poly->end_phase(0.0)-poly->start_phase(0.0)).in_turns();
 
   last_index = i;
 }
@@ -839,7 +839,11 @@ int polyco::i_nearest (const MJD &t) const
 {
   if (last_index >= 0
       && fabs((pollys[last_index].ref_time-t).in_minutes()) < last_span_epoch)
+  {
+    if (verbose)
+      cerr << "polyco::i_nearest using last_index=" << last_index << endl;
     return last_index;
+  }
 
   float min_dist = FLT_MAX;
   int imin = -1;
@@ -897,7 +901,11 @@ int polyco::i_nearest (const Phase& p) const
 {
   if (last_index >= 0
       && fabs((pollys[last_index].ref_phase-p).in_turns()) < last_span_phase)
+  {
+    if (verbose)
+      cerr << "polyco::i_nearest using last_index=" << last_index << endl;
     return last_index;
+  }
 
   float min_dist = FLT_MAX;
   int imin = -1;
