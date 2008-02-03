@@ -34,6 +34,9 @@ void Pulsar::Archive::apply_model (Integration* subint, const Predictor* old)
     // get the MJD of the rising edge of bin zero
     MJD epoch = subint -> get_epoch();
 
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::apply_model compute new phase" << endl;
+
     // get the phase of the rising edge of bin zero
     Phase phase = model->phase (epoch);
     
@@ -46,8 +49,12 @@ void Pulsar::Archive::apply_model (Integration* subint, const Predictor* old)
     if (verbose == 3) {
 
       Phase old_phase;
-      if (old) 
+      if (old)
+      {
+        if (verbose > 2)
+          cerr << "Pulsar::Archive::apply_model compute old phase" << endl;
 	old_phase = old->phase(epoch);
+      }
 
       cerr << "Pulsar::Archive::apply_model"
 	   << "\n  old MJD " << epoch;

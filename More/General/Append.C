@@ -164,14 +164,21 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
   if (Archive::verbose == 3)
     cerr << "Pulsar::Append::append phasing new integrations" << endl;
 
-  /* Correct the new subints:
+  /*
+    Correct the new subints:
 
     At this point, 'into' includes pointers to the data in 'clone'.
-    By correcting the data in 'clone', 'into' is also corrected.  */
+    By correcting the data in 'clone', 'into' is also corrected.
 
+  */
   for (unsigned isub=0; isub < clone->get_nsubint(); isub++)
+  {
+    if (Archive::verbose > 2)
+      cerr << "Pulsar::Append::append phasing new isub=" << isub << endl;
+
     into->expert()->apply_model (clone->get_Integration(isub),
 				 from->get_model());
+  }
 
   if (Archive::verbose == 3)
     cerr << "Pulsar::Append::append exit" << endl;

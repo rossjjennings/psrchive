@@ -34,9 +34,10 @@ void Pulsar::Profile::rotate_phase (double phase)
     throw Error (InvalidParam, "Pulsar::Profile::rotate_phase",
 		 "non-finite phase = %lf\n", phase);
 
-  if (verbose)
+#ifdef _DEBUG
     cerr << "Pulsar::Profile::rotate phase=" << phase 
 	 << " nbin=" << get_nbin() << endl;
+#endif
 
   if (phase == 0.0)
     return;
@@ -48,19 +49,21 @@ void Pulsar::Profile::rotate_phase (double phase)
   unsigned nbin = get_nbin();
   float* amps = get_amps();
 
-  if (!rotate_in_phase_domain) {
+  if (!rotate_in_phase_domain)
+  {
     FTransform::shift (nbin, amps, phase*double(nbin));
   }
-  else {
-
+  else
+  {
     // after using floor as above, phase is always greater than zero
     unsigned binshift = unsigned (phase * double(nbin) + 0.5);
 
+#ifdef _DEBUG
     if (verbose)
       cerr << "Pulsar::Profile::rotate " << binshift << " bins" << endl;
+#endif
 
     ::shift (nbin, binshift, amps);
-
   }
 
 }

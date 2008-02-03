@@ -51,7 +51,8 @@ void Pulsar::Archive::update_model()
   \param nsubint the number of Integrations to correct
   \param clear if true, clear the current model
 */
-void Pulsar::Archive::update_model (unsigned nsubint, bool clear) try {
+void Pulsar::Archive::update_model (unsigned nsubint, bool clear) try
+{
 
   if (verbose > 2)
     cerr << "Pulsar::Archive::update_model nsubint=" << nsubint << endl;
@@ -68,16 +69,21 @@ void Pulsar::Archive::update_model (unsigned nsubint, bool clear) try {
          << nsubint << " Integrations" << endl;
 
   // correct the old Integrations with the old model
-  for (unsigned isub = 0; isub < nsubint; isub++){
-    if (!get_Integration(isub)->zero_phase_aligned)  {
+  for (unsigned isub = 0; isub < nsubint; isub++)
+  {
+    if (!get_Integration(isub)->zero_phase_aligned)
+    {
       if (verbose > 2)
         cerr << "Pulsar::Archive::update_model phasing isub=" << isub << endl;
       apply_model (get_Integration(isub), oldmodel.ptr());
     }
+    else if (verbose > 2)
+      cerr << "Pulsar::Archive::update_model isub=" << isub << " phased" << endl;
   }
 
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::Archive::update_model";
 }
 
@@ -103,18 +109,26 @@ void Pulsar::Archive::create_updated_model (bool clear_model)
     throw Error (InvalidState, "Pulsar::Archive::create_updated_model",
 		 "not a pulsar observation");
 
+  if (verbose > 2)
+    cerr << "Pulsar::Archive::create_updated_model clear_model=" 
+         << clear_model << endl;
+
   if (clear_model)
     for (unsigned isub = 0; isub < get_nsubint(); isub++)
       get_Integration(isub)->zero_phase_aligned = false;
 
-  for (unsigned isub = 0; isub < get_nsubint(); isub++) {
-
+  for (unsigned isub = 0; isub < get_nsubint(); isub++)
+  {
     MJD time = get_Integration(isub)->get_epoch();
+
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::create_updated_model isub=" << isub
+           << " epoch=" << time << endl;
+
     update_model (time, clear_model);
 
     // clear the model only on the first time around the loop
     clear_model = false;
-
   }
 }
 
@@ -193,6 +207,5 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     model->insert (predictor);
 
 }
-
 
 
