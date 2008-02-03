@@ -33,14 +33,16 @@ void Pulsar::Archive::init_Integration (Integration* subint, bool check_phase)
 
   subint->archive = this;
 
-  if ( get_dedispersed() ) {
+  if ( get_dedispersed() )
+  {
     Dedisperse* corrected = new Dedisperse;
     corrected->set_reference_frequency( get_centre_frequency() );
     corrected->set_dispersion_measure( get_dispersion_measure() );
     subint->add_extension( corrected );
   }
 
-  if ( get_faraday_corrected() ) {
+  if ( get_faraday_corrected() )
+  {
     DeFaraday* corrected = new DeFaraday;
     corrected->set_reference_frequency( get_centre_frequency() );
     corrected->set_rotation_measure( get_rotation_measure() );
@@ -49,19 +51,23 @@ void Pulsar::Archive::init_Integration (Integration* subint, bool check_phase)
 
   subint->zero_phase_aligned = false;
 
-  if (check_phase && model) {
+  if (check_phase && model)
+  {
     MJD epoch = subint->get_epoch();
-    if (verbose > 2)
-      cerr << "Pulsar::Archive::init_Integration epoch = " << epoch << endl;
     Phase phase = model->phase( epoch );
 
-    double frac = std::min( fabs(phase.fracturns()),
-			    fabs(1.0-phase.fracturns()) );
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::init_Integration epoch="
+           << epoch.printdays(20) << " fturn=" << phase.fracturns() << endl;
+
+    double frac = phase.fracturns();
+    frac = fabs( frac - round(frac) );
+
+    subint->zero_phase_aligned = frac < 1e-8;
 
     if (verbose > 2)
-      cerr << "Pulsar::Archive::init_Integration phase = " << frac << endl;
-
-    subint->zero_phase_aligned = frac < 1e-8;;
+      cerr << "Pulsar::Archive::init_Integration frac=" << frac
+           << " aligned=" << subint->zero_phase_aligned << endl;
   }
 
 }
