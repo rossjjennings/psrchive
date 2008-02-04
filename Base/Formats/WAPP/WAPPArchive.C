@@ -17,6 +17,7 @@
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Arecibo.h"
 
+#include "machine_endian.h"
 #include "wapp_headers.h"
 #include "wapp_convert.h"
 #include "vanvleck.h"
@@ -151,7 +152,6 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
   wapp_ascii_hdr_size++; // Include null byte in this count
 
   // Next two ints are header version and size
-  // TODO : fix byte-swap if needed
   int rv;
   rv = fread(&wapp_hdr_version, sizeof(uint32_t), 1, f);
   if (rv!=1) {
@@ -165,6 +165,12 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
     throw Error (FailedSys, "Pulsar::WAPPArchive::load_header",
         "fread(hdr_size)");
   }
+
+  // Fix byte-swap if needed
+#if (MACHINE_LITTLE_ENDIAN==0)
+  ChangeEndian(wapp_hdr_version);
+  ChangeEndian(wapp_hdr_size);
+#endif
 
   // Check for known version
   int version_ok=0;
@@ -205,6 +211,7 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
   }
 
   // Conver header to standard version
+  // This also handles byte-swap if needed
   hdr = new WAPP_HEADER;
   wapp_hdr_convert(hdr, rawhdr);
 
@@ -227,7 +234,11 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
         "Only fold-mode WAPP file are supported (read obs_type=%s)",
         hdr->obs_type);
 
-  // TODO : byteswap!  WAPP files are little-endian.
+  // Check that we're not in dual board mode
+  if (hdr->isdual) 
+    throw Error (InvalidState, "Pulsar::WAPPArchive::load_header",
+        "Dual-board WAPP data not supported (isdual=%d)",
+        hdr->isdual);
 
   // Convert header info to psrchive format.  Check values 
   // where appropriate.
@@ -311,7 +322,6 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
   // Total bandwidth, MHz. Negative value denotes reversed band.
   // Apparently the freqinversion and iflo_flip flags are cumuulative,
   // so we multiply at each step if needed.
-  // TODO : check isdual?
   int bw_sign = 1;
   if (verbose>2)
     cerr << "WAPP IF/LO Flips: " << hdr->freqinversion 
@@ -458,7 +468,6 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
   integration->set_folding_period(1.0/midfreq);
 
   // Set RFs for each channel, MHz.
-  // TODO: make sure we're not off by a half-channel..
   // This depends on which FFT type is in use
 #if WAPP_USE_FFTW_DCT
   for (unsigned ichan=0; ichan<nchan; ichan++) {
@@ -504,6 +513,11 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
   if (rv!=dump_size_floats) 
     throw Error (FailedSys, "Pulsar::WAPPArchive::load_Integration",
         "fread(subint %d)", subint);
+
+  // Byte-swap if needed
+#if (MACHINE_LITTLE_ENDIAN==0)
+  array_changeEndian(dump_size_floats, data, sizeof(float));
+#endif
 
   // Vanvleck correction
   // Based on what is done in sigproc and presto (but see note below).
@@ -559,8 +573,8 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
     }
 
     // Loop over data
-    for (int ipol=0; ipol<npol; ipol++) {
-      for (int ibin=0; ibin<nbin; ibin++) {
+    for (unsigned ipol=0; ipol<npol; ipol++) {
+      for (unsigned ibin=0; ibin<nbin; ibin++) {
         dptr = &data[ibin*nchan*npol + ipol*nchan];
         memcpy(fftbuf, dptr, sizeof(float)*nchan);
         fftwf_execute(fplan);

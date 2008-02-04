@@ -2,6 +2,7 @@
 #define _WAPP_CONVERT_H
 
 #include <string.h>
+#include "machine_endian.h"
 #include "wapp_headers.h"
 
 template<class DEST_HEADER, class ORIG_HEADER>
@@ -14,7 +15,19 @@ template<class DEST_HEADER, class ORIG_HEADER>
 void wapp_hdr_convert_v6(DEST_HEADER *dest, char *rawsrc); 
 
 template<class DEST_HEADER, class ORIG_HEADER>
+void wapp_hdr_convert_v7(DEST_HEADER *dest, char *rawsrc); 
+
+template<class DEST_HEADER, class ORIG_HEADER>
 void wapp_hdr_convert_v8(DEST_HEADER *dest, char *rawsrc); 
+
+template<class DEST_HEADER, class ORIG_HEADER>
+void wapp_hdr_convert_v9(DEST_HEADER *dest, char *rawsrc); 
+
+template<class DEST_HEADER, class ORIG_HEADER>
+void wapp_hdr_convert_iflo_lt9(DEST_HEADER *dest, char *rawsrc);
+
+template<class DEST_HEADER, class ORIG_HEADER>
+void wapp_hdr_convert_iflo_v9(DEST_HEADER *dest, char *rawsrc);
 
 int wapp_hdr_convert(WAPP_HEADER *dest, char *rawsrc);
 
@@ -39,33 +52,52 @@ int wapp_hdr_convert(WAPP_HEADER *dest, char *rawsrc) {
     rv = wapp_hdr_convert_common<WAPP_HEADER, WAPP_HEADER_v6>(dest,rawsrc);
     wapp_hdr_convert_v5<WAPP_HEADER, WAPP_HEADER_v6>(dest,rawsrc);
     wapp_hdr_convert_v6<WAPP_HEADER, WAPP_HEADER_v6>(dest,rawsrc);
+    wapp_hdr_convert_iflo_lt9<WAPP_HEADER, WAPP_HEADER_v6>(dest,rawsrc);
     return(rv);
   } else if (ver==7) {
     rv = wapp_hdr_convert_common<WAPP_HEADER, WAPP_HEADER_v7>(dest,rawsrc);
     wapp_hdr_convert_v5<WAPP_HEADER, WAPP_HEADER_v7>(dest,rawsrc);
     wapp_hdr_convert_v6<WAPP_HEADER, WAPP_HEADER_v7>(dest,rawsrc);
+    wapp_hdr_convert_iflo_lt9<WAPP_HEADER, WAPP_HEADER_v7>(dest,rawsrc);
+    wapp_hdr_convert_v7<WAPP_HEADER, WAPP_HEADER_v7>(dest,rawsrc);
     return(rv);
   } else if (ver==8) {
     rv = wapp_hdr_convert_common<WAPP_HEADER, WAPP_HEADER_v8>(dest,rawsrc);
     wapp_hdr_convert_v5<WAPP_HEADER, WAPP_HEADER_v8>(dest,rawsrc);
     wapp_hdr_convert_v6<WAPP_HEADER, WAPP_HEADER_v8>(dest,rawsrc);
+    wapp_hdr_convert_iflo_lt9<WAPP_HEADER, WAPP_HEADER_v8>(dest,rawsrc);
+    wapp_hdr_convert_v7<WAPP_HEADER, WAPP_HEADER_v8>(dest,rawsrc);
     wapp_hdr_convert_v8<WAPP_HEADER, WAPP_HEADER_v8>(dest,rawsrc);
     return(rv);
   } else if (ver==9) {
-    //rv = wapp_hdr_convert_common<WAPP_HEADER, WAPP_HEADER_v9>(dest,rawsrc);
-    //wapp_hdr_convert_v5<WAPP_HEADER, WAPP_HEADER_v9>(dest,rawsrc);
-    //wapp_hdr_convert_v6<WAPP_HEADER, WAPP_HEADER_v9>(dest,rawsrc);
-    //wapp_hdr_convert_v8<WAPP_HEADER, WAPP_HEADER_v9>(dest,rawsrc);
-    //return(rv);
-    memcpy(dest,rawsrc,sizeof(WAPP_HEADER_v9));
-    return(0);
+    rv = wapp_hdr_convert_common<WAPP_HEADER, WAPP_HEADER_v9>(dest,rawsrc);
+    wapp_hdr_convert_v5<WAPP_HEADER, WAPP_HEADER_v9>(dest,rawsrc);
+    wapp_hdr_convert_v6<WAPP_HEADER, WAPP_HEADER_v9>(dest,rawsrc);
+    wapp_hdr_convert_iflo_v9<WAPP_HEADER, WAPP_HEADER_v9>(dest,rawsrc);
+    wapp_hdr_convert_v7<WAPP_HEADER, WAPP_HEADER_v9>(dest,rawsrc);
+    wapp_hdr_convert_v8<WAPP_HEADER, WAPP_HEADER_v9>(dest,rawsrc);
+    wapp_hdr_convert_v9<WAPP_HEADER, WAPP_HEADER_v9>(dest,rawsrc);
+    return(rv);
+    //memcpy(dest,rawsrc,sizeof(WAPP_HEADER_v9));
+    //return(0);
   } else { 
     return(-1); 
   }
 }
 
-#define WAPP_SET_PARAM(p) dest->p = src->p
-#define WAPP_CPY_PARAM(p) memcpy(dest->p, src->p, sizeof(src->p))
+#if MACHINE_LITTLE_ENDIAN
+#  define WAPP_SET_PARAM(p) dest->p = src->p
+#  define WAPP_CPY_PARAM(p) memcpy(dest->p, src->p, sizeof(src->p))
+#else 
+#  define WAPP_SET_PARAM(p) do {\
+  if (sizeof(src->p)>1) ChangeEndian(src->p); \
+  dest->p = src->p; } while (0)
+# define WAPP_CPY_PARAM(p) do {\
+  if (sizeof(src->p[0])>1) \
+    array_changeEndian(sizeof(src->p)/sizeof(src->p[0]), src->p, \
+        sizeof(src->p[0])); \
+  memcpy(dest->p, src->p, sizeof(src->p)); } while(0)
+#endif
 
 // Convert common attributes
 template<class DEST_HEADER, class ORIG_HEADER>
@@ -142,15 +174,44 @@ void wapp_hdr_convert_v6(DEST_HEADER *dest, char *rawsrc)
   // Version 6 additions
   WAPP_SET_PARAM(fold_bits);
 
-  // Only good for output=v9, input<v9
-  dest->iflo_flip[0] = src->iflo_flip;
-  dest->iflo_flip[1] = src->iflo_flip;
-
-  // TODO : all the ifo stuff (don't care right now)
+  // Some of the IFLO stuff
+  WAPP_SET_PARAM(syn1);
+  WAPP_CPY_PARAM(synfrq);
+  WAPP_SET_PARAM(ifnum);
+  WAPP_SET_PARAM(phbsig);
+  WAPP_SET_PARAM(hybrid);
+  WAPP_SET_PARAM(phblo);
 
 }
 
-// TODO : find what happens in v7
+// Convert iflo_flip from versions less than 9 to v9+
+template<class DEST_HEADER, class ORIG_HEADER>
+void wapp_hdr_convert_iflo_lt9(DEST_HEADER *dest, char *rawsrc)
+{
+  ORIG_HEADER *src = (ORIG_HEADER *)rawsrc;
+#if (MACHINE_LITTLE_ENDIAN==0)
+  ChangeEndian(src->iflo_flip);
+#endif
+  dest->iflo_flip[0] = src->iflo_flip;
+  dest->iflo_flip[1] = src->iflo_flip;
+}
+
+// Convert iflo_flip for versions v9+
+template<class DEST_HEADER, class ORIG_HEADER>
+void wapp_hdr_convert_iflo_v9(DEST_HEADER *dest, char *rawsrc)
+{
+  ORIG_HEADER *src = (ORIG_HEADER *)rawsrc;
+  WAPP_CPY_PARAM(iflo_flip);
+}
+
+// Version 7
+template<class DEST_HEADER, class ORIG_HEADER>
+void wapp_hdr_convert_v7(DEST_HEADER *dest, char *rawsrc)
+{
+  ORIG_HEADER *src = (ORIG_HEADER *)rawsrc;
+  WAPP_SET_PARAM(isfolding);
+  WAPP_SET_PARAM(isalfa);
+}
 
 // Version 8
 template<class DEST_HEADER, class ORIG_HEADER>
@@ -159,12 +220,21 @@ void wapp_hdr_convert_v8(DEST_HEADER *dest, char *rawsrc)
   ORIG_HEADER *src = (ORIG_HEADER *)rawsrc;
 
   // Version 8 additions
-  WAPP_SET_PARAM(isfolding);
-  WAPP_SET_PARAM(isalfa);
   WAPP_CPY_PARAM(frontend);
 
-  // TODO : all the alfa stuff
+  // TODO : all the alfa stuff?
 
+}
+
+// Version 9
+template<class DEST_HEADER, class ORIG_HEADER>
+void wapp_hdr_convert_v9(DEST_HEADER *dest, char *rawsrc)
+{
+  ORIG_HEADER *src = (ORIG_HEADER *)rawsrc;
+
+  // Version 9 additions
+  WAPP_SET_PARAM(isdual);
+  
 }
 
 #endif
