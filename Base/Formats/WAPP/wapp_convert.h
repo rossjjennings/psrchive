@@ -149,7 +149,7 @@ int wapp_hdr_convert_common (DEST_HEADER *dest, char *rawsrc)
   WAPP_CPY_PARAM(rphase);
   WAPP_CPY_PARAM(psr_f0);
   WAPP_CPY_PARAM(poly_tmid);
-  WAPP_CPY_PARAM(coeff); //TODO: check format of this array
+  WAPP_CPY_PARAM(coeff);
   WAPP_CPY_PARAM(num_coeffs);
 
   return(orig_version);
