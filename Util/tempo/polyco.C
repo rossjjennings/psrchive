@@ -795,26 +795,14 @@ const polynomial* polyco::nearest (const MJD &t) const
   return &pollys[ipolly];
 }
 
-static string why_not;
-
 const polynomial& polyco::best (const MJD &t) const
 {
-  int ipolly = i_nearest (t);
-
-  if (ipolly < 0)
-    throw Error (InvalidParam, "polyco::best", why_not);
-
-  return pollys[ipolly];
+  return pollys[ i_nearest (t, true) ];
 }
 
 const polynomial& polyco::best (const Phase& p) const
 {
-  int ipolly = i_nearest (p);
-
-  if (ipolly < 0)
-    throw Error (InvalidParam, "polyco::best", why_not);
-
-  return pollys[ipolly];
+  return pollys[ i_nearest (p, true) ];
 }
 
 void polyco::set_last (int i) const
@@ -835,7 +823,7 @@ void polyco::set_last_work (int i)
   last_index = i;
 }
 
-int polyco::i_nearest (const MJD &t) const
+int polyco::i_nearest (const MJD &t, bool throw_exception) const
 {
   if (last_index >= 0
       && fabs((pollys[last_index].ref_time-t).in_minutes()) < last_span_epoch)
@@ -872,10 +860,15 @@ int polyco::i_nearest (const MJD &t) const
     cerr << "polyco::i_nearest imin=" << imin << endl;
 
   // check if any polynomial matched
-  if (imin < 0) {
+  if (imin < 0)
+  {
     if (verbose)
       cerr << "polyco::i_nearest - no polynomial found" << endl;
-    why_not = "no polynomial for epoch=" + t.printdays( 15 );
+
+    if (throw_exception)
+      throw Error (InvalidParam, "polyco::i_nearest",
+                   "no polynomial for epoch=" + t.printdays( 15 ));
+
     return -1;
   }
 
@@ -885,19 +878,21 @@ int polyco::i_nearest (const MJD &t) const
     return imin;
   }
 
-  why_not =
-    "no polynomial for MJD " + t.printdays(15) + "\n\t"
-    "closest range: " + pollys[imin].start_time().printdays(15) +
-    " - " + pollys[imin].end_time().printdays(15);
+  if (throw_exception)
+    throw Error (InvalidParam, "polyco::i_nearest",
+                 "no polynomial for MJD " + t.printdays(15) + "\n\t"
+                 "closest range: " + pollys[imin].start_time().printdays(15)
+                 + " - " + pollys[imin].end_time().printdays(15));
 
   // the time is out of range of the nearest polynomial
   if (verbose)
-    cerr << "polyco::i_nearest " << why_not << endl;
+    cerr << "polyco::i_nearest closest polynomial does not span epoch=" 
+         << t.printdays(15) << endl;
 
   return -1;
 }
 
-int polyco::i_nearest (const Phase& p) const
+int polyco::i_nearest (const Phase& p, bool throw_exception) const
 {
   if (last_index >= 0
       && fabs((pollys[last_index].ref_phase-p).in_turns()) < last_span_phase)
@@ -932,10 +927,13 @@ int polyco::i_nearest (const Phase& p) const
   }
 
   // check if any polynomial matched
-  if (imin < 0) {
+  if (imin < 0)
+  {
     if (verbose)
       cerr << "polyco::i_nearest - no polynomial found" << endl;
-    why_not = "no polynomial for phase=" + p.strprint( 15 );
+    if (throw_exception)
+      throw Error (InvalidParam, "polyco::i_nearest",
+                   "no polynomial for phase=" + p.strprint( 15 ));
     return -1;
   }
 
@@ -946,14 +944,16 @@ int polyco::i_nearest (const Phase& p) const
     return imin;
   }
 
-  why_not = 
-    "no polynomial for Phase " + p.strprint(15) + "\n\t"
-    "closest range: " + pollys[imin].start_phase().strprint(15) +
-    " - " + pollys[imin].end_phase().strprint(15);
+  if (throw_exception)
+    throw Error (InvalidParam, "polyco::i_nearest",
+                 "no polynomial for Phase " + p.strprint(15) + "\n\t"
+                 "closest range: " + pollys[imin].start_phase().strprint(15)
+                 + " - " + pollys[imin].end_phase().strprint(15));
 
   // the time is out of range of the nearest polynomial
   if (verbose)
-    cerr << "polyco::i_nearest " << why_not << endl;
+    cerr << "polyco::i_nearest closest polynomial does not span phase=" 
+         << p.strprint(15) << endl;
 
   return -1;
 }

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.50 $
-   $Date: 2008/02/04 02:27:58 $
+   $Revision: 1.51 $
+   $Date: 2008/02/04 11:30:55 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -290,8 +290,8 @@ public:
   const polynomial& best (const MJD &t) const;
   const polynomial& best (const Phase &p) const;
 
-  virtual int i_nearest (const MJD &t) const;
-  virtual int i_nearest (const Phase &p) const;
+  int i_nearest (const MJD &t, bool throw_exception = false) const;
+  int i_nearest (const Phase &p, bool throw_exception = false) const;
 
   double doppler_shift (const MJD& t) const
   { return best(t).get_doppler_shift(); };
