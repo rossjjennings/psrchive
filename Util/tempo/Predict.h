@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Predict.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/11/17 21:01:32 $
+   $Revision: 1.9 $
+   $Date: 2008/02/04 02:27:47 $
    $Author: straten $ */
 
 #ifndef __Tempo_Predict_h
@@ -28,6 +28,9 @@ namespace Tempo {
 
     //! The minimum value of nspan allowed
     static unsigned minimum_nspan;
+
+    //! The maximum rms allowed, in turns
+    static double maximum_rms;
 
     //! Default constructor
     Predict (const psrephem* parameters = 0);

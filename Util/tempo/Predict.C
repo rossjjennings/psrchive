@@ -9,9 +9,11 @@
 #include "tempo++.h"
 #include "psrephem.h"
 #include "polyco.h"
+#include "ephio.h"
 
 #include "Error.h"
 #include "strutil.h"
+#include "Warning.h"
 
 #include <unistd.h>
 #include <ctype.h>
@@ -19,11 +21,14 @@
 using namespace std;
 
 unsigned Tempo::Predict::minimum_nspan = 0;
+double Tempo::Predict::maximum_rms = 0;
+
+static Warning warn;
 
 Tempo::Predict::Predict (const psrephem* parameters)
 {
-  nspan  = 960;
-  ncoef = 12;
+  nspan  = 120;
+  ncoef = 15;
   maxha  = 12;
   asite  = '7';
   frequency = 1400.0;
@@ -123,6 +128,12 @@ void Tempo::Predict::set_parameters (const psrephem& _parameters)
 
   parameters = _parameters;
 
+  if (parameters.parmStatus[EPH_TZNSPAN]==1)
+    nspan = parameters.value_integer[EPH_TZNSPAN];
+
+  if (parameters.parmStatus[EPH_TZNCOEF]==1)
+    ncoef = parameters.value_integer[EPH_TZNCOEF];
+
   psrname = parameters.psrname();
 
   if (psrname.empty())
@@ -162,7 +173,6 @@ void Tempo::Predict::write_tzin () const
   if (psrname.empty())
     throw Error (InvalidState, "Tempo::Predict::write_tzin",
 		 "psrname is empty");
-
 
   string tzin = get_directory() + "/tz.in";
 
@@ -327,7 +337,30 @@ polyco Tempo::Predict::generate_work () const
 	     << " -> " << to_tempo_m2.in_days() << endl;
     }
 
-    else {  // polyco OK
+    else
+    {  // polyco OK
+
+      if (maximum_rms)
+      {
+        for (unsigned i=0; i < cached->pollys.size(); i++)
+        {
+          double log_rms = cached->pollys[i].get_log_rms_resid();
+          double rms_turns = pow (10.0, log_rms);
+
+          if (Tempo::verbose)
+            cerr << "Tempo::Predict::generate rms[" << i << "]=" 
+                 << rms_turns << " turns" << endl;
+
+          if (rms_turns > maximum_rms)
+          {
+            double rms_us = rms_turns * parameters.p() * 1e6;
+            warn << "Tempo::Predict::generate WARNING rms=" 
+                 << rms_us << " microseconds" << endl;
+            warn << "Tempo::Predict::generate "
+                    "http://psrchive.sourceforge.net/warnings/tempo" << endl;
+          }
+        }
+      }
 
       if (Tempo::verbose) {
 	fprintf (stderr, 
