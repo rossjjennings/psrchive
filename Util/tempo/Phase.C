@@ -4,13 +4,17 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+using namespace std;
+
+#include "Phase.h"
+#include "Error.h"
+
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
 #include <float.h>
 #include <math.h>
-
-#include "Phase.h"
 
 double Phase::rounding_threshold = 1e-9;
 
@@ -55,20 +59,28 @@ double Phase::fracturns() const {
   return fturns;
 }
 
-std::string Phase::strprint(int precision) const
+string Phase::strprint(int precision) const
 {
   if (precision>DBL_DIG) {
-    std::cerr << "Phase::strprint warning: precision of " << precision 
-	 << " exceeds that of a double" << std::endl;
-    std::cerr << "- truncating to a precision of " << DBL_DIG << std::endl;
+    cerr << "Phase::strprint warning: precision of " << precision 
+	 << " exceeds that of a double" << endl;
+    cerr << "- truncating to a precision of " << DBL_DIG << endl;
   }
 
-  char ftn[30];
-  // I64 is defined in environ.h.
-  sprintf(ftn, I64, turns);
+  const unsigned size = precision + 64;
+  char ftn[size];
 
-  std::string s = ftn;
-  sprintf(ftn, "%.*lf", precision, fturns);
+  // I64 is defined in environ.h.
+  int retval = snprintf (ftn, size, I64, turns);
+  if (retval >= int(size))
+    throw Error (InvalidState, "Phase::strprint",
+                 "turns="I64" overflows text buffer length=%u", turns, size);
+
+  string s = ftn;
+  retval = snprintf (ftn, size, "%.*lf", precision, fturns);
+  if (retval >= int(size))
+    throw Error (InvalidState, "Phase::strprint",
+                 "fturns=%lf overflows text buffer length=%u", fturns, size);
 
   if (fturns>=0)
     s += &(ftn[1]);
