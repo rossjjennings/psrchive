@@ -110,3 +110,23 @@ minimum_nspan_config_wrapper
  "This parameter, if set, puts a lower limit on the value of 'nspan' used."
 );
 
+
+/* ***********************************************************************
+
+   Tempo::Predict::maximum_rms configuration
+
+   *********************************************************************** */
+
+Pulsar::Option<double>
+maximum_rms_config_wrapper
+(
+ &Tempo::Predict::maximum_rms,
+ "Tempo::maximum_rms", 1e-6,
+
+ "Maximum value of fit rms residual [turns]",
+
+ "When generating a polyco with 'tempo -z', the rms between the best-fit \n"
+ "polynomial and the model is reported.  If the maximum_rms is not zero, \n"
+ "a warning will be issued if the rms reported by tempo exceeds this value."
+);
+
