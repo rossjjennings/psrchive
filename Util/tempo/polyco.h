@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.49 $
-   $Date: 2008/02/03 04:35:56 $
+   $Revision: 1.50 $
+   $Date: 2008/02/04 02:27:58 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -131,19 +131,20 @@ public:
   //! Returns the apparent acceleration toward observer (m s^-2)
   double accel (const MJD &t) const { return chirp(t)/frequency(t)*2.9979e8; }
 
-  bool   is_tempov11       () const {return tempov11; }
-  char   get_telescope     () const {return telescope; }
-  double get_freq          () const {return freq; }
-  MJD    get_reftime       () const {return ref_time; }
-  Phase  get_refphase      () const {return ref_phase; }
-  double get_reffrequency  () const {return ref_freq; }
-  double get_nspan         () const {return nspan_mins; }
-  float  get_dm            () const {return dm; }
-  int    get_ncoeff        () const {return (int) coefs.size(); }
-  double get_doppler_shift () const {return doppler_shift / 1e4; }
-  std::string get_psrname  () const {return psrname; }
-  bool   get_binary        () const {return binary; } 
-  double get_binph         () const {return binph; }
+  bool   is_tempov11       () const { return tempov11; }
+  char   get_telescope     () const { return telescope; }
+  double get_freq          () const { return freq; }
+  MJD    get_reftime       () const { return ref_time; }
+  Phase  get_refphase      () const { return ref_phase; }
+  double get_reffrequency  () const { return ref_freq; }
+  double get_nspan         () const { return nspan_mins; }
+  float  get_dm            () const { return dm; }
+  int    get_ncoeff        () const { return (int) coefs.size(); }
+  double get_doppler_shift () const { return doppler_shift / 1e4; }
+  std::string get_psrname  () const { return psrname; }
+  bool   get_binary        () const { return binary; } 
+  double get_binph         () const { return binph; }
+  double get_log_rms_resid () const { return log_rms_resid; }
 
   static double flexibility;
 
