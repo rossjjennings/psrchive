@@ -461,13 +461,13 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
   // TODO: make sure we're not off by a half-channel..
   // This depends on which FFT type is in use
 #if WAPP_USE_FFTW_DCT
-  for (int ichan=0; ichan<nchan; ichan++) {
+  for (unsigned ichan=0; ichan<nchan; ichan++) {
     integration->set_centre_frequency(ichan, 
         get_centre_frequency() - 0.5*get_bandwidth() 
         + ((double)ichan+0.5)*get_bandwidth()/((double)nchan));
   }
 #else
-  for (int ichan=0; ichan<nchan; ichan++) {
+  for (unsigned ichan=0; ichan<nchan; ichan++) {
     integration->set_centre_frequency(ichan, 
         get_centre_frequency() - 0.5*get_bandwidth() 
         + ichan*get_bandwidth()/((double)nchan));
@@ -510,8 +510,8 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
   float *dptr;
 #if 1 
   double power;
-  for (int ibin=0; ibin<nbin; ibin++) {
-    for (int ipol=0; ipol<npol; ipol++) {
+  for (unsigned ibin=0; ibin<nbin; ibin++) {
+    for (unsigned ipol=0; ipol<npol; ipol++) {
       dptr = &data[ibin*nchan*npol + ipol*nchan];
       // The total power correction here is only valid for
       // 3-level sampling.  Also, I don't know where the 0.18...
@@ -529,7 +529,7 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
       } else
         throw Error (InvalidState, "Pulsar::WAPPArchive::load_Integration",
             "Unrecognized hdr->level=%d", hdr->level);
-      for (int ichan=0; ichan<nchan; ichan++) {
+      for (unsigned ichan=0; ichan<nchan; ichan++) {
         dptr[ichan] *= power;
       }
     }
@@ -574,11 +574,11 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
         << endl;
     float *mirror_data = new float[2*nchan];
     float *spec_data = new float[2*nchan+2];
-    for (int ipol=0; ipol<npol; ipol++) {
-      for (int ibin=0; ibin<nbin; ibin++) {
+    for (unsigned ipol=0; ipol<npol; ipol++) {
+      for (unsigned ibin=0; ibin<nbin; ibin++) {
         dptr = &data[ibin*nchan*npol + ipol*nchan];
         mirror_data[0] = dptr[0];
-        for (int ichan=1; ichan<nchan; ichan++) {
+        for (unsigned ichan=1; ichan<nchan; ichan++) {
           mirror_data[ichan] = dptr[ichan];
           mirror_data[2*nchan-ichan] = dptr[ichan];
         }
@@ -586,7 +586,7 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
         FTransform::frc1d(2*nchan, spec_data, mirror_data);
         // Copy result back to data array.  Since input was symmetric
         // we only need to keep the real part.
-        for (int ichan=0; ichan<nchan; ichan++) {
+        for (unsigned ichan=0; ichan<nchan; ichan++) {
           dptr[ichan] = spec_data[2*ichan];
         }
       }
@@ -599,9 +599,9 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
 
   // Reorganize array, load into integration
   float *prof = new float[nbin];
-  for (int ipol=0; ipol<npol; ipol++) {
-    for (int ichan=0; ichan<nchan; ichan++) {
-      for (int ibin=0; ibin<nbin; ibin++) {
+  for (unsigned ipol=0; ipol<npol; ipol++) {
+    for (unsigned ichan=0; ichan<nchan; ichan++) {
+      for (unsigned ibin=0; ibin<nbin; ibin++) {
         prof[ibin] = data[ibin*nchan*npol + ipol*nchan + ichan];
       }
       integration->get_Profile(ipol,ichan)->set_amps(prof);
