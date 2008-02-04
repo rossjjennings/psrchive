@@ -48,7 +48,7 @@ void usage ()
     "  -w            Write a new database summary file \n"
     "\n"
     "Calibrator options: \n"
-    "  -A filename   Use the calibrator specified by filename \n"
+    "  -A filename   Use the calibrator in filename, as output by pcm/pacv \n"
     "  -P            Calibrate polarisations only \n"
     "  -r filename   Use the specified receiver parameters file \n"
     "  -S            Use the complete Reception model \n"
@@ -161,7 +161,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.84 2008/01/16 22:02:51 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.85 2008/02/04 23:34:18 straten Exp $" << endl;
       return 0;
 
     case 'A':
