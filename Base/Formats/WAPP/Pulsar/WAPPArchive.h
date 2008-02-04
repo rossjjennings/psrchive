@@ -25,7 +25,8 @@
 #  if HAVE_FFTW3
 #    include <fftw3.h>
 #  else
-#    warn "WAPP_USE_FFTW_DCT requires FFTW3, falling back to general R2C"
+#    warning "WAPP_USE_FFTW_DCT requires FFTW3, falling back to general R2C"
+#    undef WAPP_USE_FFTW_DCT
 #    define WAPP_USE_FFTW_DCT 0 
 #  endif
 #endif
