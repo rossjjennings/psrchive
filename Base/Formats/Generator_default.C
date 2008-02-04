@@ -121,7 +121,7 @@ Pulsar::Option<double>
 maximum_rms_config_wrapper
 (
  &Tempo::Predict::maximum_rms,
- "Tempo::maximum_rms", 1e-6,
+ "Tempo::maximum_rms", 1e-5,    // default is 10 microturns
 
  "Maximum value of fit rms residual [turns]",
 
