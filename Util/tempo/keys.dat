@@ -83,7 +83,7 @@ DM7 1 1
 DM8 1 1
 DM9 1 1
 
-RM 1 1      # Rotation Measure (rad m^-2)
+RM 1 1        # Rotation Measure (rad m^-2)
 
 START 4 0     # Epoch of start of fit (MJD)
 FINISH 4 0    # Epoch of end of fit (MJD)
@@ -94,6 +94,9 @@ EPHEM 0 0     # Solar system ephemeris
 TZRMJD 4 0    # Reference TOA (MJD)
 TZRFRQ 1 0    # Frequency of reference TOA (MHz)
 TZRSITE 0 0   # One-letter observatory code of reference TOA
+
+TZNSPAN 5 0   # Integer number of minutes spanned by each polynomial
+TZNCOEF 5 0   # Number of coefficients in each polynomial
 
 #TAU 1 1      # LOG10 of the temporal broadening of pulses at 1 GHz (log10(s))
 
