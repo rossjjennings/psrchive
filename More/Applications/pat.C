@@ -47,6 +47,7 @@ void usage ()
     "  -v               Verbose mode \n"
     "  -V               Very verbose mode \n"
     "  -i               Show revision information \n"
+    "  -M metafile      List of archive filenames in metafile \n"
     "\n"
     "Preprocessing options:\n"
     "  -F               Frequency scrunch before fitting \n"
@@ -102,6 +103,8 @@ int main (int argc, char *argv[]) try {
   bool fscrunch = false;
   bool tscrunch = false;
 
+  char *metafile = NULL;
+
   Pulsar::SmoothSinc* sinc = 0;
 
   string std,gaussFile;
@@ -119,7 +122,7 @@ int main (int argc, char *argv[]) try {
 
   float chisq_max = 2.0;
 
-  while ((gotc = getopt(argc, argv, "a:A:cDf:Fg:hin:pPqS:s:tTvVx:")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:A:cDf:Fg:hiM:n:pPqS:s:tTvVx:")) != -1) {
     switch (gotc) {
 
     case 'a':
@@ -193,8 +196,12 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.77 2007/12/21 04:38:24 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.78 2008/02/04 19:00:43 demorest Exp $" << endl;
       return 0;
+
+    case 'M':
+      metafile = optarg;
+      break;
 
     case 'n':
       maximum_harmonic = atoi(optarg);
@@ -251,8 +258,11 @@ int main (int argc, char *argv[]) try {
     }
   }
 
-  for (int ai=optind; ai<argc; ai++)
-    dirglob (&archives, argv[ai]);
+  if (metafile)
+    stringfload (&archives, metafile);
+  else
+    for (int ai=optind; ai<argc; ai++)
+      dirglob (&archives, argv[ai]);
   
   if (archives.empty()) {
     cerr << "No archives were specified" << endl;
