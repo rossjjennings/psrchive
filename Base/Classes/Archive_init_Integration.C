@@ -31,7 +31,7 @@ void Pulsar::Archive::init_Integration (Integration* subint, bool check_phase)
   if (verbose > 2)
     cerr << "Pulsar::Archive::init_Integration check_phase=" << check_phase << endl;
 
-  subint->archive = this;
+  subint->parent = this;
 
   if ( get_dedispersed() )
   {

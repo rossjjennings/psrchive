@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExpert.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/01/12 23:42:11 $
+   $Revision: 1.13 $
+   $Date: 2008/02/05 05:25:30 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationExpert_h
@@ -114,11 +114,11 @@ namespace Pulsar {
 
     //! Return true if the Integration has a parent Archive
     bool has_parent ()
-    { return instance->archive; }
+    { return instance->parent; }
 
     //! Provide access to the parent Archive
     const Archive* get_parent ()
-    { return instance->archive; }
+    { return instance->parent; }
 
   private:
 
