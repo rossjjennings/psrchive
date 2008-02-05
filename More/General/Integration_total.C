@@ -21,7 +21,7 @@ using namespace std;
 */
 Pulsar::Integration* Pulsar::Integration::total () const
 {
-  if (Pulsar::Integration::verbose)
+  if (verbose)
     cerr << "Pulsar::Integration::total entered" << endl;
 
   if (get_npol()<1 || get_nchan()<1)
@@ -31,8 +31,18 @@ Pulsar::Integration* Pulsar::Integration::total () const
   try {
 
     Reference::To<Integration> copy = clone ();
+    copy->orphan ();
+
     copy->pscrunch ();
+
+    if (verbose)
+      cerr << "Pulsar::Integration::total dedisperse" << endl;
+
     copy->dedisperse();
+
+    if (verbose)
+      cerr << "Pulsar::Integration::total fscrunch" << endl;
+
     copy->fscrunch ();
     return copy.release();
 
