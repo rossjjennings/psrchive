@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSSUBHdrExtension.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/10/02 04:50:09 $
-   $Author: straten $ */
+   $Revision: 1.3 $
+   $Date: 2008/02/05 16:01:18 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_FITSSUBHdrExtension_h
 #define __Pulsar_FITSSUBHdrExtension_h
@@ -21,19 +21,21 @@
 
 namespace Pulsar
 {
+
+  //! Stores PSRFITS SUBINT header parameters
   class FITSSUBHdrExtension : public Archive::Extension
   {
   public:
-    //Default constructor
+    //! Default constructor
     FITSSUBHdrExtension ();
 
-    // Copy constructor
+    //! Copy constructor
     FITSSUBHdrExtension (const Pulsar::FITSSUBHdrExtension& extension);
 
-    // Operator =
+    //! Operator =
     const FITSSUBHdrExtension& operator= (const FITSSUBHdrExtension& extension);
 
-    // Destructor
+    //! Destructor
     ~FITSSUBHdrExtension ();
 
     //! Clone method
