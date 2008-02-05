@@ -18,7 +18,7 @@ libpsrfits_la_SOURCES = CalibratorExtensionIO.h FITSArchive.C \
 	unload_PolnCalibratorExtension.C load_PolnCalibratorExtension.C \
 	unload_FluxCalibratorExtension.C load_FluxCalibratorExtension.C \
 	unload_CalibratorStokes.C load_CalibratorStokes.C \
-	load_FITSSUBHdrExtension.C \
+	unload_FITSSUBHdrExtension.C load_FITSSUBHdrExtension.C \
 	unload_Passband.C load_Passband.C \
 	unload_Pointing.C load_Pointing.C clean_Pointing_columns.C \
 	unload_Integration.C load_Integration.C \

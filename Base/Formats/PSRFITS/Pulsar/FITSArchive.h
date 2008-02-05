@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.54 $
-   $Date: 2008/01/06 23:30:55 $
+   $Revision: 1.55 $
+   $Date: 2008/02/05 04:00:24 $
    $Author: nopeer $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -137,6 +137,9 @@ namespace Pulsar {
 
      //! Unload CalibratorStokes to the CAL_POLN HDU
     static void unload (fitsfile* fptr, const CalibratorStokes* ext);
+    
+    //! Unload FITSSUBHdrExtension
+    static void unload (fitsfile *fptr, const FITSSUBHdrExtension *sub_hdr );
     
     //! Get the offs_sub value (only present in fits files)
     double get_offs_sub( unsigned int isub ) const;

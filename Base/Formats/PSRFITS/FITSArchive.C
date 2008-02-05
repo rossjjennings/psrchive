@@ -14,6 +14,7 @@
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/FITSHdrExtension.h"
+#include "Pulsar/FITSSUBHdrExtension.h"
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/ITRFExtension.h"
 #include "Pulsar/CalInfoExtension.h"
@@ -1071,6 +1072,25 @@ try {
     unload (fptr, pce);
   else
     delete_hdu (fptr, "FEEDPAR");
+
+  // Unload extra subint parameters.
+
+  FITSSUBHdrExtension *sub_hdr = const_cast<FITSSUBHdrExtension*>( get<FITSSUBHdrExtension>() );
+  if( sub_hdr )
+  {
+    // older version files may have SUBINT headers but not all the parameters set
+
+    if( sub_hdr->get_npol() == -1 && get_npol() != -1 )
+      sub_hdr->set_npol( get_npol() );
+
+    if( sub_hdr->get_nsblk() == -1 && hdr_ext->get_obs_mode() == "SEARCH" )
+      sub_hdr->set_nsblk( 1 );
+
+    if( sub_hdr->get_nbin() == -1 && get_nbin() != -1 )
+      sub_hdr->set_nbin( get_nbin() );
+
+    unload( fptr, sub_hdr );
+  }
 
   // Now write the actual integrations to file
 

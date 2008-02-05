@@ -15,8 +15,12 @@
 
 
 
-using namespace Pulsar;
-using namespace std;
+using std::cerr;
+using std::endl;
+using std::cout;
+using std::string;
+using Pulsar::FITSSUBHdrExtension;
+using Pulsar::FITSArchive;
 
 
 
@@ -62,22 +66,23 @@ void FITSArchive::load_FITSSUBHdrExtension ( fitsfile *fptr )
   psrfits_read_key( fptr, "TSAMP", &d_data, 0.0, verbose == 3 );
   si_hdr->set_tsamp( d_data );
 
-  psrfits_read_key( fptr, "NBIN", &i_data, 0, verbose == 3 );
+  psrfits_read_key( fptr, "NBIN", &i_data, -1, verbose == 3 );
   si_hdr->set_nbin( i_data );
 
-  psrfits_read_key( fptr, "NBITS", &i_data, 0, verbose == 3 );
+  psrfits_read_key( fptr, "NBITS", &i_data, -1, verbose == 3 );
   si_hdr->set_nbits( i_data );
 
-  psrfits_read_key( fptr, "NCH_FILE", &i_data, 0, verbose == 3 );
+  psrfits_read_key( fptr, "NCH_FILE", &i_data, -1, verbose == 3 );
   si_hdr->set_nch_file( i_data );
 
-  psrfits_read_key( fptr, "NCH_STRT", &i_data, 0, verbose == 3 );
+  psrfits_read_key( fptr, "NCH_STRT", &i_data, -1, verbose == 3 );
   si_hdr->set_nch_strt( i_data );
 
-  psrfits_read_key( fptr, "NPOL", &i_data, 0, verbose == 3 );
+  psrfits_read_key( fptr, "NPOL", &i_data, -1, verbose == 3 );
   si_hdr->set_npol( i_data );
+  cout << "read npol of " << i_data << endl;
 
-  psrfits_read_key( fptr, "NSBLK", &i_data, 0, verbose == 3 );
+  psrfits_read_key( fptr, "NSBLK", &i_data, -1, verbose == 3 );
   si_hdr->set_nsblk( i_data );
 
   add_extension( si_hdr );
