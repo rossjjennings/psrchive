@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FaradayRotation.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/01/12 23:42:27 $
+   $Revision: 1.10 $
+   $Date: 2008/02/05 05:25:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FaradayRotation_h
@@ -40,7 +40,10 @@ namespace Pulsar {
     FaradayRotation ();
 
     //! Return the rotation measure
-    double correction_measure (const Integration*);
+    double get_correction_measure (const Integration*);
+
+    //! Ignore correction history if parent Archive corrected flag is false
+    bool get_corrected (const Integration* data);
 
     //! Return the identity matrix
     Jones<double> get_identity () { return 1; }
@@ -50,9 +53,6 @@ namespace Pulsar {
 
     //! Set the Faraday rotation correction attributes in the Archive
     void execute (Archive*);
-
-    //! Ignore correction history if parent Archive corrected flag is false
-    bool ignore_history (const Integration* data);
 
     //! Set the rotation measure
     void set_rotation_measure (double rotation_measure)

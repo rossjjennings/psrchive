@@ -1,21 +1,19 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+using namespace std;
+
 #include "Pulsar/FaradayRotation.h"
 
-#include "Pulsar/IntegrationExpert.h"
+#include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/PolnProfile.h"
 
-// #define _DEBUG 1
-
-#ifdef _DEBUG
 #include <iostream>
-using namespace std;
-#endif
 
 Pulsar::FaradayRotation::FaradayRotation ()
 {
@@ -23,16 +21,19 @@ Pulsar::FaradayRotation::FaradayRotation ()
   val = "RM";
 }
 
-double Pulsar::FaradayRotation::correction_measure (const Integration* data)
+double 
+Pulsar::FaradayRotation::get_correction_measure (const Integration* data)
 {
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::FaradayRotation::get_correction_measure RM="
+         << data->get_dispersion_measure () << endl;
+
   return data->get_rotation_measure ();
 }
 
-bool Pulsar::FaradayRotation::ignore_history (const Integration* data)
+bool Pulsar::FaradayRotation::get_corrected (const Integration* data)
 {
-  Integration::Expert* expert = const_cast<Integration*>(data)->expert();
-  return !( expert->has_parent() && 
-	    expert->get_parent()->get_faraday_corrected() );
+  return data->get_faraday_corrected();
 }
 
 //! Execute the correction for an entire Pulsar::Archive
