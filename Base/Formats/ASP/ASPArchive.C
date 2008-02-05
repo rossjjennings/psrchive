@@ -232,13 +232,21 @@ void Pulsar::ASPArchive::load_header (const char* filename)
   fits_read_col(f, TINT, col, 1, 1, 1, NULL, &int_tmp, NULL, &status);
   if (!status) set_nchan(int_tmp);
 
-  // get sign of BW
+  // get sign of BW, compute archive center freq
   int bw_sign=1;
   fits_get_colnum(f, CASEINSEN, "CFRQ0", &col, &status);
   fits_read_col(f, TFLOAT, col, 1, 1, 1, NULL, &flt_tmp, NULL, &status);
   fits_get_colnum(f, CASEINSEN, "CFRQ1", &col, &status);
   fits_read_col(f, TFLOAT, col, 1, 1, 1, NULL, &flt_tmp2, NULL, &status);
   if (flt_tmp2<flt_tmp) { bw_sign=-1; }
+  flt_tmp2=0.0;
+  for (unsigned i=0; i<nchan; i++) {
+    sprintf(ctmp, "CFRQ%d", i);
+    fits_get_colnum(f, CASEINSEN, ctmp, &col, &status);
+    fits_read_col(f, TFLOAT, col, 1, 1, 1, NULL, &flt_tmp, NULL, &status);
+    flt_tmp2 += flt_tmp;
+  }
+  set_centre_frequency(flt_tmp2/(double)nchan);
 
   // Bandwidth
   fits_get_colnum(f, CASEINSEN, "BW0", &col, &status);
