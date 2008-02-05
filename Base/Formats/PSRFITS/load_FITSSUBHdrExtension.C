@@ -80,7 +80,8 @@ void FITSArchive::load_FITSSUBHdrExtension ( fitsfile *fptr )
 
   psrfits_read_key( fptr, "NPOL", &i_data, -1, verbose == 3 );
   si_hdr->set_npol( i_data );
-  cout << "read npol of " << i_data << endl;
+  if (verbose > 2)
+    cerr << "read npol of " << i_data << endl;
 
   psrfits_read_key( fptr, "NSBLK", &i_data, -1, verbose == 3 );
   si_hdr->set_nsblk( i_data );
