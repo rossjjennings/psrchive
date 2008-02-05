@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -9,7 +9,7 @@ using namespace std;
 
 #include "Pulsar/Dispersion.h"
 
-#include "Pulsar/IntegrationExpert.h"
+#include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
@@ -19,15 +19,21 @@ Pulsar::Dispersion::Dispersion ()
   val = "DM";
 }
 
-double Pulsar::Dispersion::correction_measure (const Integration* data)
+double Pulsar::Dispersion::get_correction_measure (const Integration* data)
 {
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::Dispersion::get_correction_measure DM="
+         << data->get_dispersion_measure () << endl;
+
   return data->get_dispersion_measure ();
 }
 
-bool Pulsar::Dispersion::ignore_history (const Integration* data)
+bool Pulsar::Dispersion::get_corrected (const Integration* data)
 {
-  Integration::Expert* expert = const_cast<Integration*>(data)->expert();
-  return !( expert->has_parent() && expert->get_parent()->get_dedispersed() );
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::Dispersion::get_corrected dedispersed=" 
+	 << data->get_dedispersed() << endl;
+  return data->get_dedispersed();
 }
 
 //! Execute the correction for an entire Pulsar::Archive
@@ -71,3 +77,4 @@ double Pulsar::Dispersion::get_shift () const
 
   return shift / folding_period;
 }
+

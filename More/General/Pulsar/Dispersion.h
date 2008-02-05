@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Dispersion.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/01/12 23:42:23 $
+   $Revision: 1.6 $
+   $Date: 2008/02/05 05:25:43 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Dispersion_h
@@ -34,7 +34,10 @@ namespace Pulsar {
     Dispersion ();
 
     //! Return the dispersion measure
-    double correction_measure (const Integration*);
+    double get_correction_measure (const Integration*);
+
+    //! Return true if the Integration has been dedispersed
+    bool get_corrected (const Integration* data);
 
     //! Return zero delay
     double get_identity () { return 0; }
@@ -47,9 +50,6 @@ namespace Pulsar {
 
     //! Set the dedispersion attributes in the Archive
     void execute (Archive*);
-
-    //! Ignore correction history if parent Archive corrected flag is false
-    bool ignore_history (const Integration* data);
 
     //! Set the dispersion measure
     void set_dispersion_measure (double dispersion_measure)
