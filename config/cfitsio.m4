@@ -17,7 +17,7 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
     SWIN_PACKAGE_FIND([cfitsio],[libcfitsio.*])
     SWIN_PACKAGE_TRY_LINK([cfitsio],[#include <fitsio.h>],
                           [fits_movnam_hdu(0,0,0,0,0);],
-                          [-lcfitsio $SOCKET_LIBS])
+                          [-lcfitsio -lm $SOCKET_LIBS])
 
   fi
 
