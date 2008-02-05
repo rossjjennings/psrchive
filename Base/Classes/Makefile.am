@@ -21,6 +21,7 @@ nobase_include_HEADERS = \
         Pulsar/Integration.h \
         Pulsar/IntegrationManagerExpert.h \
         Pulsar/IntegrationManager.h \
+	Pulsar/IntegrationMeta.h \
         Pulsar/IntegrationTI.h \
         Pulsar/Profile.h \
 	Pulsar/ProfileAmps.h \
@@ -53,6 +54,7 @@ libClasses_la_SOURCES = \
 	FITSAlias.C \
         Integration.C \
         IntegrationManager.C \
+	IntegrationMeta.C \
         Integration_combine.C \
 	Integration_insert.C \
         Integration_mixable.C \
