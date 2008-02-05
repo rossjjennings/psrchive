@@ -21,7 +21,17 @@ using namespace Pulsar;
 //Default constructor
 FITSSUBHdrExtension::FITSSUBHdrExtension ()
     : Extension( "FITSSUBHdrExtension" )
-{}
+{
+  int_type = "";
+  int_unit = "";
+  tsamp = -1;
+  nbin = -1;
+  nbits = -1;
+  nch_file = -1;
+  nch_strt = -1;
+  npol = -1;
+  nsblk = -1;
+}
 
 // Copy constructor
 FITSSUBHdrExtension::FITSSUBHdrExtension (const Pulsar::FITSSUBHdrExtension& extension)
