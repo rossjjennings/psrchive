@@ -150,6 +150,10 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   fits_get_colnum (ffptr, CASEINSEN, "DATA", &colnum, &status);
   fits_modify_vector_len (ffptr, colnum, nchan*npol*nbin, &status);
+  char keyname[16], tdim[32];
+  sprintf(keyname, "TDIM%d", colnum);
+  sprintf(tdim, "(%d,%d,%d,1)", nbin, nchan, npol);
+  fits_update_key (ffptr, TSTRING, keyname, &tdim, NULL, &status);
 
   if (verbose == 3)
     cerr << "FITSArchive::unload_integrations DATA resized to "
