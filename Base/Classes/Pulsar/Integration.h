@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.93 $
-   $Date: 2007/11/20 04:55:13 $
+   $Revision: 1.94 $
+   $Date: 2008/02/05 05:25:34 $
    $Author: straten $ */
 
 /*
@@ -148,10 +148,13 @@ namespace Pulsar {
      */
     //@{
 
-    //! Return pointer to a new copy of self
+    //! Return a new copy of self
     virtual Integration* clone () const = 0;
 
-    //! Return the pointer to a new fscrunched and pscrunched copy of self
+    //! Disconnect from parent archive (useful after cloning a working copy)
+    void orphan ();
+
+    //! Return an orphaned pscrunched dedispersed fscrunched clone of self
     Integration* total () const;
     
     //@}
@@ -470,7 +473,12 @@ namespace Pulsar {
     std::vector< std::vector< Reference::To<Profile> > > profiles;
 
     //! The Archive that manages this integration
-    Reference::To<const Archive, false> archive;
+    Reference::To<const Archive, false> parent;
+
+    class Meta;
+
+    //! The orphaned Integration's attributes
+    Reference::To<Meta> orphaned;
 
     //! Dedispersion worker function
     void dedisperse (unsigned ichan, unsigned kchan,

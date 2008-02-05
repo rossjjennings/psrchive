@@ -7,6 +7,7 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationExpert.h"
+#include "Pulsar/IntegrationMeta.h"
 #include "Pulsar/Profile.h"
 
 #include "Error.h"
@@ -39,7 +40,7 @@ string Pulsar::Integration::Extension::get_extension_name () const
 const Pulsar::Archive* 
 Pulsar::Integration::Extension::get_parent (const Integration* subint) const
 {
-  return subint->archive; 
+  return subint->parent;
 }
 
 /*! Derived classes need only define this method, as the non-const version
@@ -187,9 +188,15 @@ void Pulsar::Integration::copy (const Integration* subint, bool management)
   set_folding_period ( subint->get_folding_period() );
 
   if (management)
-    archive = subint->archive;
+    parent = subint->parent;
 
   zero_phase_aligned = false;
+}
+
+void Pulsar::Integration::orphan ()
+{
+  orphaned = new Meta(parent);
+  parent = 0;
 }
 
 Pulsar::Profile*
@@ -316,7 +323,9 @@ void Pulsar::Integration::set_weight (unsigned ichan, float weight)
 //! Get the centre frequency (in MHz)
 double Pulsar::Integration::get_centre_frequency() const
 try {
-  return archive->get_centre_frequency ();
+  if (orphaned)
+    return orphaned->get_centre_frequency ();
+  return parent->get_centre_frequency ();
 }
 catch (Error& error) {
   throw error += "Pulsar::Integration::get_centre_frequency";
@@ -325,7 +334,9 @@ catch (Error& error) {
 //! Get the bandwidth (in MHz)
 double Pulsar::Integration::get_bandwidth() const
 try {
-  return archive->get_bandwidth ();
+  if (orphaned)
+    return orphaned->get_bandwidth ();
+  return parent->get_bandwidth ();
 }
 catch (Error& error) {
   throw error += "Pulsar::Integration::get_bandwidth";
@@ -334,7 +345,9 @@ catch (Error& error) {
 //! Get the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
 double Pulsar::Integration::get_dispersion_measure () const
 try {
-  return archive->get_dispersion_measure ();
+  if (orphaned)
+    return orphaned->get_dispersion_measure ();
+  return parent->get_dispersion_measure ();
 }
 catch (Error& error) {
   throw error += "Pulsar::Integration::get_dispersion_measure";
@@ -343,7 +356,9 @@ catch (Error& error) {
 //! Inter-channel dispersion delay has been removed
 bool Pulsar::Integration::get_dedispersed () const
 try {
-  return archive->get_dedispersed ();
+  if (orphaned)
+    return orphaned->get_dedispersed ();
+  return parent->get_dedispersed ();
 }
 catch (Error& error) {
   throw error += "Pulsar::Integration::get_dedispersed";
@@ -352,7 +367,9 @@ catch (Error& error) {
 //! Get the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
 double Pulsar::Integration::get_rotation_measure () const
 try {
-  return archive->get_rotation_measure ();
+  if (orphaned)
+    return orphaned->get_rotation_measure ();
+  return parent->get_rotation_measure ();
 }
 catch (Error& error) {
   throw error += "Pulsar::Integration::get_rotation_measure";
@@ -361,7 +378,9 @@ catch (Error& error) {
 //! Data has been corrected for ISM faraday rotation
 bool Pulsar::Integration::get_faraday_corrected () const
 try {
-  return archive->get_faraday_corrected ();
+  if (orphaned)
+    return orphaned->get_faraday_corrected ();
+  return parent->get_faraday_corrected ();
 }
 catch (Error& error) {
   throw error += "Pulsar::Integration::get_faraday_corrected";
@@ -370,7 +389,9 @@ catch (Error& error) {
 //! Get the feed configuration of the receiver
 Signal::Basis Pulsar::Integration::get_basis () const
 try {
-  return archive->get_basis ();
+  if (orphaned)
+    return orphaned->get_basis ();
+  return parent->get_basis ();
 }
 catch (Error& error) {
   throw error += "Pulsar::Integration::get_basis";
@@ -379,7 +400,9 @@ catch (Error& error) {
 //! Get the polarimetric state of the profiles
 Signal::State Pulsar::Integration::get_state () const
 try {
-  return archive->get_state ();
+  if (orphaned)
+    return orphaned->get_state ();
+  return parent->get_state ();
 }
 catch (Error& error) {
   throw error += "Pulsar::Integration::get_state";
@@ -454,6 +477,8 @@ void Pulsar::Integration::pscrunch()
 
   resize (1);
 
+  if (orphaned)
+    orphaned->set_state( Signal::Intensity );
 } 
 
 MJD Pulsar::Integration::get_start_time () const
