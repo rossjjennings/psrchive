@@ -20,7 +20,7 @@ void Pulsar::Arecibo::Greg_327 (Receiver* r)
 {
   r->set_name ("327");
   r->set_basis(Signal::Linear);
-  r->set_nrcvr(1); 
+  r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
 
@@ -28,7 +28,7 @@ void Pulsar::Arecibo::Greg_430 (Receiver* r)
 {
   r->set_name ("430");
   r->set_basis(Signal::Circular);
-  r->set_nrcvr(1); 
+  r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
 
@@ -36,7 +36,7 @@ void Pulsar::Arecibo::CH_430 (Receiver* r)
 {
   r->set_name ("CH-430");
   r->set_basis(Signal::Circular);
-  r->set_nrcvr(1); 
+  r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
 
@@ -44,7 +44,7 @@ void Pulsar::Arecibo::L_narrow (Receiver* r)
 {
   r->set_name ("L-narrow");
   r->set_basis(Signal::Circular);
-  r->set_nrcvr(1); 
+  r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
 
@@ -52,7 +52,7 @@ void Pulsar::Arecibo::L_wide (Receiver* r)
 {
   r->set_name ("L-wide");
   r->set_basis(Signal::Linear);
-  r->set_nrcvr(1); 
+  r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
 
@@ -60,7 +60,7 @@ void Pulsar::Arecibo::L_wide_old (Receiver* r)
 {
   r->set_name ("L-wide-OLD");
   r->set_basis(Signal::Linear);
-  r->set_nrcvr(1); 
+  r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
 
@@ -68,7 +68,7 @@ void Pulsar::Arecibo::S_wide (Receiver* r)
 {
   r->set_name ("S-wide");
   r->set_basis(Signal::Linear);
-  r->set_nrcvr(1); 
+  r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
 
@@ -76,7 +76,7 @@ void Pulsar::Arecibo::S_narrow (Receiver* r)
 {
   r->set_name ("S-narrow");
   r->set_basis(Signal::Circular);
-  r->set_nrcvr(1); 
+  r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
 
@@ -84,7 +84,7 @@ void Pulsar::Arecibo::C_band (Receiver* r)
 {
   r->set_name ("C-band");
   r->set_basis(Signal::Circular);
-  r->set_nrcvr(1); 
+  r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
 }
 
