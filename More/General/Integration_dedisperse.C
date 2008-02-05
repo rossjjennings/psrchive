@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationMeta.h"
 #include "Pulsar/Dispersion.h"
 
 using namespace std;
@@ -15,10 +15,15 @@ static Pulsar::Dispersion xform;
 /*! 
   Calls Dispersion::transform
 */
-void Pulsar::Integration::dedisperse () try {
+void Pulsar::Integration::dedisperse () try
+{
+  if (verbose)
+    cerr << "Pulsar::Integration::dedisperse" << endl;
 
   xform.transform (this);
 
+  if (orphaned)
+    orphaned->set_dedispersed( true );
 }
 catch (Error& error) {
   throw error += "Pulsar::Integration::dedisperse";
