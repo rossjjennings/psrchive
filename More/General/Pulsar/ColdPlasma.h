@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ColdPlasma.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/01/12 23:42:31 $
+   $Revision: 1.10 $
+   $Date: 2008/02/05 05:25:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ColdPlasma_h
@@ -46,16 +46,16 @@ namespace Pulsar {
     ColdPlasma () { name = "ColdPlasma"; }
 
     //! Derived classes must return the measure to be passed to the Corrector
-    virtual double correction_measure (const Integration*) = 0;
+    virtual double get_correction_measure (const Integration*) = 0;
+
+    //! Return true if the data have been corrected
+    virtual bool get_corrected (const Integration*) = 0;
 
     //! Derived classes must define the identity
     virtual typename Corrector::Return get_identity () = 0;
 
     //! Derived classes must define how to apply the correction
     virtual void apply (Integration*, unsigned channel) = 0;
-
-    //! Derived classes may dictate that the History should be ignored
-    virtual bool ignore_history (const Integration*) { return false; }
 
     //! Execute the correction for an entire Pulsar::Archive
     virtual void execute (Archive*);
@@ -133,7 +133,7 @@ template<class C, class H>
 void Pulsar::ColdPlasma<C,H>::setup (const Integration* data)
 {
   set_reference_frequency( data->get_centre_frequency() );
-  set_measure( correction_measure(data) );
+  set_measure( get_correction_measure(data) );
 
   if (Integration::verbose)
     std::cerr << "Pulsar::" + name + "::setup lambda=" 
@@ -201,7 +201,7 @@ void Pulsar::ColdPlasma<C,History>::update (const Integration* data) try
 
   const History* corrected = 0;
 
-  if ( !ignore_history(data) )
+  if ( get_corrected(data) )
     corrected = data->template get<History>();
  
   if (corrected)
