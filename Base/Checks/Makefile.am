@@ -15,8 +15,6 @@ libChecks_la_SOURCES = Check_registry.C \
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
 
 include $(top_srcdir)/config/Makefile.include
 

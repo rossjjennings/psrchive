@@ -18,8 +18,6 @@ nodist_rhythm_SOURCES = $(CLEANFILES)
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
 
 INCLUDES = -I$(top_builddir)/local_include @QTDRIV_CFLAGS@
 

@@ -12,8 +12,6 @@ libTiming_la_SOURCES = \
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
 
 include $(top_srcdir)/config/Makefile.include
 

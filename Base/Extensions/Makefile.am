@@ -118,8 +118,6 @@ libExtensions_la_SOURCES = \
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
 
 INCLUDES = -I$(top_srcdir)/More/Polarimetry
 

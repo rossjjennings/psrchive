@@ -25,7 +25,7 @@ libpsrmore_la_LIBADD += RFIMitigation/libRFIMitigation.la
 
 SUBDIRS += Polarimetry
 libpsrmore_la_LIBADD += Polarimetry/libPolarimetry.la
-endif #
+endif
 
 if HAVE_PGPLOT
 SUBDIRS += Plotting

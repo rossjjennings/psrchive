@@ -7,8 +7,6 @@ libbpp_la_SOURCES = BPPArchive.C bpp_header.h bpp_latent.h
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
 
 include $(top_srcdir)/config/Makefile.include
 

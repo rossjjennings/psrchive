@@ -7,12 +7,10 @@ libasp_la_SOURCES = ASPArchive.C
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = @CFITSIO_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @CFITSIO_CFLAGS@
 
 libasp_la_LIBADD = @CFITSIO_LIBS@
 

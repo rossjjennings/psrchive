@@ -15,8 +15,6 @@ libwapp_la_SOURCES = WAPPArchive.C vanvleck.C vanvleck.h wapp_headers.h wapp_con
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
 
 include $(top_srcdir)/config/Makefile.include
 

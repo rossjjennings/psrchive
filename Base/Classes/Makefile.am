@@ -68,8 +68,6 @@ libClasses_la_SOURCES = \
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
 
 INCLUDES = -I$(top_srcdir)/Base/Extensions
 

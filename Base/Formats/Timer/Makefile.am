@@ -27,8 +27,6 @@ baseband_header_size_SOURCES = baseband_header_size.C
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
 
 include $(top_srcdir)/config/Makefile.include
 

@@ -12,8 +12,6 @@ psrchive_wrap.cxx: psrchive.i ../Pulsar/Archive.h
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
 
 INCLUDES = @PSRCHIVE_CFLAGS@ @SWIG_PYTHON_CPPFLAGS@
 

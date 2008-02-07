@@ -7,8 +7,6 @@ libRFIMitigation_la_SOURCES = LawnMower.C
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
 
 include $(top_srcdir)/config/Makefile.include
 
