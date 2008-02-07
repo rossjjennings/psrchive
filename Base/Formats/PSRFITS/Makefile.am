@@ -11,7 +11,7 @@ libpsrfits_la_SOURCES = CalibratorExtensionIO.h FITSArchive.C \
 	unload_WidebandCorrelator.C load_WidebandCorrelator.C \
 	unload_CalInfoExtension.C load_CalInfoExtension.C \
 	unload_ITRFExtension.C load_ITRFExtension.C \
-	unload_ProcHistory.C load_ProcHistory.C no_ProcHistory.C \
+	unload_ProcHistory.C load_ProcHistory.C \
 	unload_DigitiserStatistics.C load_DigitiserStatistics.C \
 	unload_DigitiserCounts.C load_DigitiserCounts.C \
 	unload_CalibratorExtension.C load_CalibratorExtension.C \
@@ -24,7 +24,8 @@ libpsrfits_la_SOURCES = CalibratorExtensionIO.h FITSArchive.C \
 	unload_Integration.C load_Integration.C \
 	unload_Predictor.C load_Predictor.C \
 	unload_polyco.C load_polyco.C \
-	delete_hdu.C update_history.C unload_integrations.C \
+	delete_hdu.C update_history.C \
+	unload_integrations.C load_integration_state.C \
 	CalibratorExtensionIO.C FITSAgent.C \
 	P236_reference_epoch_correction.C \
 	fitsio_psrephem.C fitsio_polyco.C fitsio_tempo.h
