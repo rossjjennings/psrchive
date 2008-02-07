@@ -44,10 +44,10 @@ void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
   std::string nsite = get_telescope();
 
   for (unsigned isub=0; isub<get_nsubint(); isub++) {
-    
+ 
     vector<Tempo::toa> toaset;
     get_Integration(isub)->toas (toaset, *std, nsite, arguments, fmt);
-    
+
     if (fmt == Tempo::toa::Parkes || fmt == Tempo::toa::Psrclock) {
       // some extra information to place in each toa
       char extra[20];
@@ -58,6 +58,12 @@ void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
 	toas.push_back (toaset[itoa]);
       }
     }
+	else if (fmt == Tempo::toa::Tempo2) {
+	  for (unsigned itoa = 0; itoa < toaset.size(); itoa++) {
+	    toaset[itoa].set_subint(isub);
+		toas.push_back (toaset[itoa]);
+	  }
+	}
     else {
       for (unsigned itoa=0; itoa < toaset.size(); itoa++) {
         toas.push_back (toaset[itoa]);
