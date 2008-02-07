@@ -56,20 +56,11 @@ void Pulsar::FITSArchive::unload ( fitsfile *fptr, const FITSSUBHdrExtension *su
   d_data = sub_hdr->get_tsamp();
   if( d_data != 0.0 ) psrfits_update_key( fptr, "TSAMP", d_data );
 
-  i_data = sub_hdr->get_nbin();
-  if( i_data != -1 ) psrfits_update_key( fptr, "NBIN", i_data );
-
   i_data = sub_hdr->get_nbits();
   if( i_data != -1 ) psrfits_update_key( fptr, "NBITS", i_data );
 
-  i_data = sub_hdr->get_nch_file();
-  if( i_data != -1 ) psrfits_update_key( fptr, "NCH_FILE", i_data );
-
   i_data = sub_hdr->get_nch_strt();
   if( i_data != -1 ) psrfits_update_key( fptr, "NCH_STRT", i_data );
-
-  i_data = sub_hdr->get_npol();
-  if( i_data != -1 ) psrfits_update_key( fptr, "NPOL", i_data );
 
   i_data = sub_hdr->get_nsblk();
   if( i_data != -1 ) psrfits_update_key( fptr, "NSBLK", i_data );

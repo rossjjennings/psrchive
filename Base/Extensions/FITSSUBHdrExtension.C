@@ -25,11 +25,8 @@ FITSSUBHdrExtension::FITSSUBHdrExtension ()
   int_type = "";
   int_unit = "";
   tsamp = -1;
-  nbin = -1;
   nbits = -1;
-  nch_file = -1;
   nch_strt = -1;
-  npol = -1;
   nsblk = -1;
 }
 
@@ -46,11 +43,8 @@ const FITSSUBHdrExtension& FITSSUBHdrExtension::operator= (const FITSSUBHdrExten
   int_type = extension.int_type;
   int_unit = extension.int_unit;
   tsamp = extension.tsamp;
-  nbin = extension.nbin;
   nbits = extension.nbits;
-  nch_file = extension.nch_file;
   nch_strt = extension.nch_strt;
-  npol = extension.npol;
   nsblk = extension.nsblk;
 
   return *this;

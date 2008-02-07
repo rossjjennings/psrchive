@@ -1512,18 +1512,6 @@ string get_tsamp( Reference::To<Archive> archive )
   return result;
 }
 
-string get_nbin_subint( Reference::To<Archive> archive )
-{
-  string result;
-  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
-
-  if( !ext )
-    result = "UNDEF";
-  else
-    result = tostring( ext->get_nbin() );
-
-  return result;
-}
 
 string get_nbits( Reference::To<Archive> archive )
 {
@@ -1538,18 +1526,6 @@ string get_nbits( Reference::To<Archive> archive )
   return result;
 }
 
-string get_nch_file( Reference::To<Archive> archive )
-{
-  string result;
-  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
-
-  if( !ext )
-    result = "UNDEF";
-  else
-    result = tostring( ext->get_nch_file() );
-
-  return result;
-}
 
 string get_nch_strt( Reference::To<Archive> archive )
 {
@@ -1564,18 +1540,6 @@ string get_nch_strt( Reference::To<Archive> archive )
   return result;
 }
 
-string get_npol_subint( Reference::To<Archive> archive )
-{
-  string result;
-  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
-
-  if( !ext )
-    result = "UNDEF";
-  else
-    result = tostring( ext->get_npol() );
-
-  return result;
-}
 
 string get_nsblk( Reference::To<Archive> archive )
 {
@@ -1866,11 +1830,8 @@ void PrintExtdHlp( void )
     " \n"
 
     "SUBINT PARAMETERS \n"
-    "nbin_subint                     Nr of bins (PSR/CAL mode; else 1) \n"
     "nbits                           Nr of bits/datum (SEARCH mode 'X' data, else 1) \n"
-    "nch_file                        Number of channels/sub-bands in this file \n"
     "nch_strt                        Start channel/sub-band number (0 to NCHAN-1) \n"
-    "npol_subint                     Nr of polarisations in table \n"
     "nsblk                           Samples/row (SEARCH mode, else 1) \n"
     "subint_type                     Time axis (TIME, BINPHSPERI, BINLNGASC, etc) \n"
     "subint_unit                     Unit of time axis (SEC, PHS (0-1), DEG) \n"
@@ -2081,11 +2042,8 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "subint_type" ) return get_subint_type( archive );
     else if( command == "subint_unit" ) return get_subint_unit( archive );
     else if( command == "tsamp" ) return get_tsamp( archive );
-    else if( command == "nbin_subint" ) return get_nbin_subint( archive );
     else if( command == "nbits" ) return get_nbits( archive );
-    else if( command == "nch_file" ) return get_nch_file( archive );
     else if( command == "nch_strt" ) return get_nch_strt( archive );
-    else if( command == "npol_subint" ) return get_npol_subint( archive );
     else if( command == "nsblk" ) return get_nsblk( archive );
     else if( command == "date" ) return get_date( archive );
     else if( command == "cal_mode" ) return get_cal_mode( archive );
