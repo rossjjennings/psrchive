@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow)
+void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow) try
 {
   if (!hrow)
     return;
@@ -20,332 +20,39 @@ void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow)
   if (Pulsar::Archive::verbose == 3)
     cerr << "unload Pulsar::ProcHistory::row row=" << row << endl;
 
-  int status = 0;
-  int colnum = 0;
-  
-  char*  tempstr = 0;
-  int    tempint = 0;
-  double tempdouble = 0;
+  psrfits_write_col (fptr, "DATE_PRO", hrow->date_pro, row);
+  psrfits_write_col (fptr, "PROC_CMD", hrow->proc_cmd, row);
+  psrfits_write_col (fptr, "POL_TYPE", hrow->pol_type, row);
+  psrfits_write_col (fptr, "NSUB",     hrow->nsub,     row);
+  psrfits_write_col (fptr, "NPOL",     hrow->npol,     row);
+  psrfits_write_col (fptr, "NBIN",     hrow->nbin,     row);
+  psrfits_write_col (fptr, "NBIN_PRD", hrow->nbin_prd, row);
+  psrfits_write_col (fptr, "TBIN",     hrow->tbin,     row);
+  psrfits_write_col (fptr, "CTR_FREQ", hrow->ctr_freq, row);
+  psrfits_write_col (fptr, "NCHAN",    hrow->nchan,    row);
+  psrfits_write_col (fptr, "CHAN_BW",  hrow->chan_bw,  row);
+  psrfits_write_col (fptr, "PAR_CORR", hrow->par_corr, row);
+  psrfits_write_col (fptr, "FA_CORR",  hrow->fa_corr,  row);
+  psrfits_write_col (fptr, "RM_CORR",  hrow->rm_corr,  row);
+  psrfits_write_col (fptr, "DEDISP",   hrow->dedisp,   row);
+  psrfits_write_col (fptr, "DDS_MTHD", hrow->dds_mthd, row);
+  psrfits_write_col (fptr, "SC_MTHD",  hrow->sc_mthd,  row);
+  psrfits_write_col (fptr, "CAL_MTHD", hrow->cal_mthd, row);
+  psrfits_write_col (fptr, "CAL_FILE", hrow->cal_file, row);
+  psrfits_write_col (fptr, "RFI_MTHD", hrow->rfi_mthd, row);
+  psrfits_write_col (fptr, "IFR_MTHD", hrow->ifr_mthd, row);
+  psrfits_write_col (fptr, "SCALE",    hrow->scale,    row);
 
-  // AWH 17/2/2003 :
-  
-  // fits_read/write_col TSTRING data arguments must be of type char**
-  // while fits_update_key TSTRING data args must be of type char*
-  // very confusing, you have to be careful.
-  
-  // Write DATE_PRO
-  
-  fits_get_colnum (fptr, CASEINSEN, "DATE_PRO", &colnum, &status);
-  
-  // Write the value from the specified row
-  
-  tempstr = const_cast<char*>( hrow->date_pro.c_str() );
-  fits_write_col (fptr, TSTRING, colnum, row, 1, 1, &tempstr, &status);
-  
-  if (status != 0) {
-    cerr << "WARNING: FITSArchive::unload_hist_row DATE_PRO not found" << endl;
-    status = 0;
-    //throw FITSError (status, "FITSArchive::unload_hist_row", 
-    //       "fits_write_col DATE_PRO");
-  }
-  
-  // Write PROC_CMD
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "PROC_CMD", &colnum, &status);
-  
-  tempstr = const_cast<char*>( hrow->proc_cmd.c_str() );
-  fits_write_col (fptr, TSTRING, colnum, row, 1, 1, &tempstr, &status);
-  
-  if (status != 0) {
-    cerr << "WARNING: FITSArchive::unload_hist_row PROC_CMD not found" << endl;
-    status = 0;
-    //throw FITSError (status, "FITSArchive::unload_hist_row", 
-    //       "fits_write_col PROC_CMD");
-  }
-  
-  // Write POL_TYPE
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "POL_TYPE", &colnum, &status);
-  
-  tempstr = const_cast<char*>( hrow->pol_type.c_str() );
-  fits_write_col (fptr, TSTRING, colnum, row, 1, 1, &tempstr, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col POL_TYPE");
-  
-  // Write NSUB
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "NSUB", &colnum, &status);
-  
-  tempint = hrow->nsub;
-  fits_write_col (fptr, TINT, colnum, row, 1, 1, &tempint, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-		     "fits_write_col NSUB");
-  
-  // Write NPOL
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "NPOL", &colnum, &status);
-  
-  tempint = hrow->npol;
-  fits_write_col (fptr, TINT, colnum, row, 1, 1, &tempint, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col NPOL");
-  
-  // Write NBIN
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "NBIN", &colnum, &status);
-  
-  tempint = hrow->nbin;
-  fits_write_col (fptr, TINT, colnum, row, 1, 1, &tempint, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col NBIN");
-  
-  // Write NBIN_PRD
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "NBIN_PRD", &colnum, &status);
-  
-  tempint = hrow->nbin_prd;
-  fits_write_col (fptr, TINT, colnum, row, 1, 1, &tempint, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col NBIN_PRD");
-  
-  // Write TBIN
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "TBIN", &colnum, &status);
-  
-  tempdouble = hrow->tbin;
-  fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col TBIN");
-  
-  // Write CTR_FREQ
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "CTR_FREQ", &colnum, &status);
-  
-  tempdouble = hrow->ctr_freq;
-  fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col CTR_FREQ");
-
-  // Write NCHAN
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "NCHAN", &colnum, &status);
-  
-  tempint = hrow->nchan;
-  fits_write_col (fptr, TINT, colnum, row, 1, 1, &tempint, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col NCHAN");
-  
-  // Write CHAN_BW
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "CHAN_BW", &colnum, &status);
-  
-  tempdouble = hrow->chanbw;
-  fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col CHAN_BW");
-  
-  // Write PAR_CORR
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "PAR_CORR", &colnum, &status);
-  
-  tempint = hrow->par_corr;
-  fits_write_col (fptr, TINT, colnum, row, 1, 1, &tempint, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col PAR_CORR");
-
-  // Write FA_CORR
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "FA_CORR", &colnum, &status);
-
-  tempint = hrow->fa_corr;
-  fits_write_col (fptr, TINT, colnum, row, 1, 1, &tempint, &status);
-  
-  if (status)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col FA_CORR");
-
-  // Write RM_CORR
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "RM_CORR", &colnum, &status);
-  
-  tempint = hrow->rm_corr;
-  fits_write_col (fptr, TINT, colnum, row, 1, 1, &tempint, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col RM_CORR");
-
-  // Write DEDISP
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DEDISP", &colnum, &status);
-  
-  tempint = hrow->dedisp;
-  fits_write_col (fptr, TINT, colnum, row, 1, 1, &tempint, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col DEDISP");
-  
-  // Write DDS_MTHD
-  
-  colnum = 0;
-  fits_get_colnum( fptr, CASEINSEN, "DDS_MTHD", &colnum, &status );
-  
-  tempstr = const_cast<char*>( hrow->dds_mthd.c_str() );
-  fits_write_col( fptr, TSTRING, colnum, row, 1, 1, &tempstr, &status );
-  
-  if( status != 0 )
-    throw FITSError ( status, "FITSArchive::unload_hist_row",
-		      "fits_write_col DDS_MTHD" );
-  
-  // Write SC_MTHD
-
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "SC_MTHD", &colnum, &status);
-  
-  // Write the value from the specified row
-  
-  tempstr = const_cast<char*>( hrow->sc_mthd.c_str() );
-  fits_write_col (fptr, TSTRING, colnum, row, 1, 1, &tempstr, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col SC_MTHD");
-  
-  // Write CAL_MTHD
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "CAL_MTHD", &colnum, &status);
-  
-  // Write the value from the specified row
-  
-  tempstr = const_cast<char*>( hrow->cal_mthd.c_str() );
-  fits_write_col (fptr, TSTRING, colnum, row, 1, 1, &tempstr, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col CAL_MTHD");
-
-  // Write CAL_FILE
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "CAL_FILE", &colnum, &status);
-  
-  // Write the value from the specified row
-  
-  tempstr = const_cast<char*>( hrow->cal_file.c_str() );
-  fits_write_col (fptr, TSTRING, colnum, row, 1, 1, &tempstr, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_hist_row", 
-                     "fits_write_col CAL_FILE");
-  
-  // Write RFI_MTHD
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "RFI_MTHD", &colnum, &status);
-  
-  // Write the value from the specified row
-  
-  tempstr = const_cast<char*>( hrow->rfi_mthd.c_str() );
-  fits_write_col (fptr, TSTRING, colnum, row, 1, 1, &tempstr, &status);
-  
-  if (status != 0) {
-    cerr << "WARNING: FITSArchive::unload_hist_row RFI_MTHD not found" << endl;
-    status = 0;
-    //throw FITSError (status, "FITSArchive::unload_hist_row", 
-    //       "fits_write_col RFI_MTHD");
-  }
-
-  // Write IFR_MTHD
-  
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "IFR_MTHD", &colnum, &status);
-  
-  // Write the value from the specified row
-  
-  tempstr = const_cast<char*>( hrow->ifr_mthd.c_str() );
-  fits_write_col (fptr, TSTRING, colnum, row, 1, 1, &tempstr, &status);
-  
-  if (status != 0) {
-    cerr << "WARNING: FITSArchive::unload_hist_row IFR_MTHD not found" << endl;
-    status = 0;
-    //throw FITSError (status, "FITSArchive::unload_hist_row", 
-    //       "fits_write_col IFR_MTHD");
-  }
-
-
-  // Write SCALE
-
-  switch (hrow->scale) {
-    
-  case Signal::FluxDensity:
-    strcpy (tempstr, "FluxDen");
-    break;
-  case Signal::ReferenceFluxDensity:
-    strcpy (tempstr, "RefFlux");
-    break;
-  case Signal::Jansky:
-    strcpy (tempstr, "Jansky");
-    break;
-  default:
-    if (Pulsar::Archive::verbose)
-      cerr << "unload ProcHistory::row WARNING unrecognized SCALE" << endl;
-  }
-
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "SCALE", &colnum, &status);
-  
-  // Read the value from the specified row
-  
-  fits_write_col (fptr, TSTRING, colnum, row, 1, 1, &tempstr, &status);
-
-  if (status != 0) {
-    if (Pulsar::Archive::verbose)
-      cerr << "unload ProcHistory::row WARNING SCALE not found"<<endl;
-    status = 0;
-  }
-
-  if (Pulsar::Archive::verbose == 3)
+  if (Pulsar::Archive::verbose > 2)
     cerr << "FITSArchive::unload_hist_row exiting" << endl;
 }
-
+catch (Error& error)
+{
+  throw error += "unload Pulsar::ProcHistory::row";
+}
 
 void Pulsar::FITSArchive::unload (fitsfile* fptr, const ProcHistory* history)
+try
 {
   unsigned numrows = history->rows.size();
 
@@ -376,3 +83,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const ProcHistory* history)
   if (verbose == 3)
     cerr << "FITSArchive::unload ProcHistory exiting" << endl;
 }
+catch (Error& error)
+{
+  error += "Pulsar::FITSArchive::unload ProcHistory";
+}
+
