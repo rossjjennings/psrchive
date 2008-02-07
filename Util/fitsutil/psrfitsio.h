@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/11/25 23:57:28 $
+   $Revision: 1.11 $
+   $Date: 2008/02/07 10:40:03 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
@@ -29,25 +29,29 @@ void psrfits_clean_rows (fitsfile*);
 template<typename T> struct FITS_traits { };
   
 //! Template specialization for double
-template<> struct FITS_traits<double> {
+template<> struct FITS_traits<double>
+{
   static inline int datatype() { return TDOUBLE; }
   static inline double null () { return 0; }
 };
 
 //! Template specialization for float
-template<> struct FITS_traits<float> {
+template<> struct FITS_traits<float>
+{
   static inline int datatype() { return TFLOAT; }
   static inline float null () { return fits_nullfloat; }
 };
 
 //! Template specialization for float
-template<> struct FITS_traits<short> {
+template<> struct FITS_traits<short>
+{
   static inline int datatype() { return TSHORT; }
   static inline short null () { return -1; }
 };
 
 //! Template specialization for int
-template<> struct FITS_traits<int> {
+template<> struct FITS_traits<int>
+{
   static inline int datatype() { return TINT; }
   static inline int null () { return -1; }
 };
@@ -59,10 +63,19 @@ template<> struct FITS_traits<long> {
 };
 
 //! Template specialization for long
-template<> struct FITS_traits<std::string> {
+template<> struct FITS_traits<std::string>
+{
   static inline int datatype() { return TSTRING; }
   static inline std::string null () { return ""; }
 };
+
+template<typename T>
+void* FITS_void_ptr (const T& ptr)
+{
+  return const_cast<T*> (&ptr);
+}
+
+void* FITS_void_ptr (const std::string&);
 
 //! Calls fits_update_key; throws a FITSError exception if status != 0
 template<typename T>
@@ -140,8 +153,8 @@ void psrfits_read_key (fitsfile* fptr, const char* name, T* data,
 
 
 template<typename T>
-void psrfits_write_col (fitsfile* fptr, const char* name, std::vector<T>& data,
-		       int row = 1)
+void psrfits_write_col (fitsfile* fptr, const char* name,
+			const std::vector<T>& data, int row = 1)
 {
   //
   // Get the number of the named column
@@ -156,14 +169,15 @@ void psrfits_write_col (fitsfile* fptr, const char* name, std::vector<T>& data,
   fits_write_col (fptr, FITS_traits<T>::datatype(),
 		  colnum, row,
 		  1, data.size(),
-		  &(data[0]), &status);
+		  const_cast<T*>(&(data[0])), &status);
 
   if (status)
     throw FITSError (status, "psrfits_write_col(vector<T>)", name);
 }
 
 template<typename T>
-void psrfits_write_col( fitsfile *fptr, const char *name, T &data, int row=1 )
+void psrfits_write_col( fitsfile *fptr, const char *name,
+			const T& data, int row=1 )
 {
   int colnum = 0;
   int status = 0;
@@ -173,7 +187,7 @@ void psrfits_write_col( fitsfile *fptr, const char *name, T &data, int row=1 )
   fits_write_col (fptr, FITS_traits<T>::datatype(),
 		  colnum, row,
 		  1, 1,
-		  &data, &status);
+		  FITS_void_ptr(data), &status);
 
   if (status)
     throw FITSError (status, "psrfits_write_col(T)", name);

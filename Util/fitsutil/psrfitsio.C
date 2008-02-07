@@ -94,3 +94,11 @@ void psrfits_read_col_work( fitsfile *fptr, const char *name,
     *data = temp.get();
 }
 
+void* FITS_void_ptr (const string& txt)
+{
+  // not thread-safe
+  static char* ptr;
+  ptr = const_cast<char*> (txt.c_str());
+  return &ptr;
+}
+
