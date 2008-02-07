@@ -163,7 +163,7 @@ void Pulsar::ProcHistory::row::init ()
   tbin     = 0.0;
   ctr_freq = 0.0;
   nchan    = 0;
-  chanbw   = 0.0;
+  chan_bw  = 0.0;
   par_corr = 0;
   fa_corr  = 0;
   rm_corr  = 0;

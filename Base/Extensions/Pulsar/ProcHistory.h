@@ -67,7 +67,7 @@ namespace Pulsar {
       double tbin;
       double ctr_freq;
       int nchan;
-      double chanbw;
+      double chan_bw;
       int par_corr;
       int fa_corr;
       int rm_corr;
@@ -78,7 +78,7 @@ namespace Pulsar {
       std::string cal_file;
       std::string rfi_mthd;
       std::string ifr_mthd;
-      Signal::Scale scale;
+      std::string scale;
 
       //Destructor
       ~row ();
@@ -116,7 +116,7 @@ namespace Pulsar {
     
     int get_last_nbin_prd( void ) const { return rows.back().nbin_prd; }
     double get_last_tbin( void ) const { return rows.back().tbin; }
-    double get_last_chan_bw( void ) const { return rows.back().chanbw; }
+    double get_last_chan_bw( void ) const { return rows.back().chan_bw; }
 
     void   add_blank_row ();
     

@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.22 $
-   $Date: 2008/01/29 02:40:06 $
-   $Author: nopeer $ */
+   $Revision: 1.23 $
+   $Date: 2008/02/07 10:39:18 $
+   $Author: straten $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -830,7 +830,7 @@ void DisplayHistory( vector<string> filenames, vector<string> params )
               else if( (*pit) == "proc_cmd" )
                 ts << (*rit).proc_cmd;
               else if( (*pit) == "scale" )
-                ts << tostring<Signal::Scale>( (*rit).scale );
+                ts << (*rit).scale;
               else if( (*pit) == "pol_type" )
                 ts << (*rit).pol_type;
               else if( (*pit) == "npol" )
@@ -848,7 +848,7 @@ void DisplayHistory( vector<string> filenames, vector<string> params )
               else if( (*pit) == "nchan" )
                 ts << tostring<int>( (*rit).nchan );
               else if( (*pit) == "chan_bw" )
-                ts << tostring<double>( (*rit).chanbw );
+                ts << tostring<double>( (*rit).chan_bw );
               else if( (*pit) == "par_corr" )
                 ts << tostring<int>( (*rit).par_corr );
               else if( (*pit) == "fa_corr" )

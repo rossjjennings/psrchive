@@ -263,7 +263,7 @@ float Pulsar::FluxPlot::get_phase_error (const Archive* data)
 
   const ProcHistory* history = data->get<ProcHistory>();
   if (history && history->rows.size())
-    chan_bw = history->rows[0].chanbw;
+    chan_bw = history->rows[0].chan_bw;
 
   chan_bw = fabs(chan_bw);
 
