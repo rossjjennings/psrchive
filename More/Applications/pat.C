@@ -19,6 +19,8 @@
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/Backend.h"
 #include "Pulsar/Receiver.h"
+#include <Pulsar/Pointing.h>
+#include <Pulsar/WidebandCorrelator.h>
 
 #include "Phase.h"
 #include "toa.h"
@@ -34,10 +36,40 @@
 #include <unistd.h>
 
 using namespace std;
+using namespace Pulsar;
+
+vector<string> commands;
 
 void loadGaussian(string file,  
 		  Reference::To<Pulsar::Archive> &stdarch,  
 		  Reference::To<Pulsar::Archive> arch);
+
+string FetchValue( Reference::To< Archive > archive, string command );
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// PRECISION FOR tostring
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+unsigned int old_precision;
+bool old_places;
+
+void set_precision( unsigned int num_digits, unsigned int places = true )
+{
+  old_precision = tostring_precision;
+  old_places = tostring_places;
+
+  tostring_precision = num_digits;
+  tostring_places = places;
+}
+
+
+void restore_precision( void )
+{
+  tostring_precision = old_precision;
+  tostring_places = old_places;
+}
 
 void usage ()
 {
@@ -76,16 +108,16 @@ void usage ()
     "                   SIS = Sinc interpolation of cross-corration function\n"
     "\n"
     "Output options:\n"
-    "  -f \"fmt <flags>\"  Select output format [default: parkes]\n"
+    "  -f \"fmt <flags>\" Select output format [default: parkes]\n"
     "                   Available formats: parkes tempo2, itoa, princeton \n"
     "                   For tempo2, <flags> include i = display instrument \n"
     "                                               r = display receiver   \n"
+	"  -C \"<options>\"   Select vap-like options to be displayed on output\n"
     "\n"
     "See "PSRCHIVE_HTTP"/manuals/pat for more details\n"
        << endl;
 }
 
-using namespace Pulsar;
 
 int main (int argc, char *argv[]) try {
   
@@ -122,7 +154,7 @@ int main (int argc, char *argv[]) try {
 
   float chisq_max = 2.0;
 
-  while ((gotc = getopt(argc, argv, "a:A:cDf:Fg:hiM:n:pPqS:s:tTvVx:")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:A:cDf:C:Fg:hiM:n:pPqS:s:tTvVx:")) != -1) {
     switch (gotc) {
 
     case 'a':
@@ -168,6 +200,10 @@ int main (int argc, char *argv[]) try {
       choose_maximum_harmonic = true;
       break;
 
+	case 'C':
+		separate(optarg, commands, " ,");
+		break;
+
     case 'D':
       sinc = new Pulsar::SmoothSinc;
       sinc -> set_bins (8);
@@ -196,7 +232,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.78 2008/02/04 19:00:43 demorest Exp $" << endl;
+      cout << "$Id: pat.C,v 1.79 2008/02/07 01:12:38 jonathan_khoo Exp $" << endl;
       return 0;
 
     case 'M':
@@ -281,7 +317,7 @@ int main (int argc, char *argv[]) try {
     stdarch = Archive::load(std);
 
     if (!full_freq)
-      stdarch->fscrunch();
+		stdarch->fscrunch();
 
     stdarch->tscrunch();
     
@@ -334,10 +370,19 @@ int main (int argc, char *argv[]) try {
       if (tscrunch)
 	arch->tscrunch();
 
-      if (full_poln) try {
+	if (full_freq) {
+	  if (stdarch->get_nchan() < arch->get_nchan()) {
+		  arch->fscrunch(arch->get_nchan() / stdarch->get_nchan());
+	  } else if (stdarch->get_nchan() > arch->get_nchan()) {
+		  stdarch->fscrunch(stdarch->get_nchan() / arch->get_nchan());
+	  } 
+	}
 
+      if (full_poln) try {
 	arch->convert_state (Signal::Stokes);
 	full_poln->add_observation( arch );
+
+
 
       }
       catch (Error& error) {
@@ -345,8 +390,8 @@ int main (int argc, char *argv[]) try {
              << error.get_message() << endl;
       }
       else {
-
 	arch->convert_state (Signal::Intensity);
+
 	/* If multiple standard profiles given must now choose and load 
            the one closest in frequency */
 	if (std_multiple) {	  
@@ -397,8 +442,25 @@ int main (int argc, char *argv[]) try {
 	    if (outFormatFlags.find("r")!=string::npos) {
 	      Receiver* receiver = arch->get<Receiver>();
 	      if (receiver)
-		args += string(" -i ") + receiver->get_name();
+		args += string(" -r ") + receiver->get_name();
 	    }
+
+		if (outFormatFlags.find("c")!=string::npos) {
+		  char temp[10];
+		  sprintf(temp, "%d", arch->get_nchan());
+		  args += string(" -c ") + temp;
+		}
+
+		if (outFormatFlags.find("s")!=string::npos) {
+		  char temp[10];
+		  sprintf(temp, "%d", arch->get_nsubint());
+		  args += string(" -s ") + temp;
+		}
+
+		for (int i = 0; i < commands.size(); i++) {
+			string value = FetchValue(arch, commands[i]);
+			args += " -" + commands[i] + " " + value;
+		}
 
 	    if (outFormatFlags.find("o")!=string::npos) /* Include observer info. */
 	      {
@@ -410,12 +472,15 @@ int main (int argc, char *argv[]) try {
 		else {
 		  args += " -o " + ext->observer;
 		}
+
 	      }
 	    arch->toas(toas, stdarch, args, Tempo::toa::Tempo2); 
 	  }
       }
-      for (unsigned i = 0; i < toas.size(); i++)
-	toas[i].unload(stdout);
+
+      for (unsigned i = 0; i < toas.size(); i++) {
+		toas[i].unload(stdout);
+	  }
     }
     catch (Error& error) {
       fflush(stdout); 
@@ -499,5 +564,200 @@ void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<
   prof->set_amps(amps);
   firstTime=false;
 }
+
+string get_name( Reference::To< Archive > archive )
+{
+	return archive->get_source();
+}
+
+string get_nbin( Reference::To< Archive > archive )
+{
+	return tostring( archive->get_nbin() );
+}
+
+string get_nchan( Reference::To< Archive > archive )
+{
+	return tostring( archive->get_nchan() );
+}
+
+string get_npol( Reference::To< Archive > archive )
+{
+	return tostring( archive->get_npol() );
+}
+
+string get_nsub( Reference::To< Archive > archive )
+{
+	return tostring( archive->get_nsubint() );
+}
+
+string get_length( Reference::To< Archive > archive )
+{
+  tostring_precision = 6;
+  return tostring( archive->integration_length() );
+}
+
+string get_bw( Reference::To< Archive > archive )
+{
+  	set_precision(3);
+  	string result = tostring(archive->get_bandwidth());
+  	restore_precision();
+  	return result;
+}
+
+string get_parang( Reference::To< Archive > archive )
+{
+  	stringstream result;
+  	int nsubs = archive->get_nsubint();
+
+  	if (nsubs != 0) {
+		Reference::To< Integration > integration = archive->get_Integration( nsubs / 2 );
+
+    	if (integration) {
+      		Reference::To< Pointing > ext = integration->get<Pointing>();
+
+      		if (ext) {
+        		result << ext->get_parallactic_angle().getDegrees();
+      		}
+    	}
+  	}
+
+  	return result.str();
+}
+
+string get_tsub( Reference::To< Archive > archive )
+{
+  	string result;
+  	int nsubs = archive->get_nsubint();
+
+  	if( nsubs != 0 ) {
+    	Reference::To< Integration > first_int = archive->get_first_Integration();
+
+    		if( first_int ) {
+      			set_precision( 6 );
+      			result = tostring( first_int->get_duration() );
+      			restore_precision();
+    		}
+  	}
+
+  	return result;
+}
+
+string get_observer( Reference::To<Archive> archive )
+{
+  	string result;
+  	Reference::To< ObsExtension > ext = archive->get<ObsExtension>();
+
+  	if( !ext ) {
+    	result = "UNDEF";
+
+  	} else {
+    	result = ext->get_observer();
+  	}
+
+  	return result;
+}
+
+string get_projid( Reference::To<Archive> archive )
+{
+  	string result = "";
+  	Reference::To<ObsExtension> ext = archive->get<ObsExtension>();
+
+  	if( !ext ) {
+    	result = "UNDEF";
+
+  	} else {
+    	result = ext->get_project_ID();
+  	}
+
+  	return result;
+}
+
+string get_rcvr( Reference::To<Archive> archive )
+{
+  	string result;
+  	Reference::To<Receiver> ext = archive->get<Receiver>();
+
+  	if( ext ) {
+    	result = ext->get_name();
+  	}
+
+  	return result;
+}
+
+string get_backend( Reference::To< Archive > archive )
+{
+  	string result = "";
+  	Reference::To<Backend> ext;
+  	ext = archive->get<Backend>();
+
+  	if( !ext ) {
+    	ext = archive->get<WidebandCorrelator>();
+  	}
+
+  	if( !ext ) {
+    	result = "UNDEF";
+	} else {
+    	result = ext->get_name();
+	}
+
+  	return result;
+}
+
+string get_period( Reference::To<Archive> archive )
+{
+  	// TODO check this
+	set_precision( 14 );
+	string result = tostring<double>( archive->get_Integration(0)->get_folding_period() );
+	restore_precision();
+
+	return result;
+}
+
+string get_be_delay( Reference::To< Archive > archive )
+{
+	string result;
+	Reference::To<Backend> ext = archive->get<WidebandCorrelator>();
+	set_precision( 14 );
+
+	if( !ext ) {
+		result = "UNDEF";
+
+	} else {
+		result = tostring<double>( ext->get_delay() );
+	}
+
+	restore_precision();
+	return result;
+}
+
+string FetchValue (Reference::To<Archive> archive, string command)
+{
+	try {
+
+		if (command == "name") return get_name( archive );
+		else if(command == "nbin") return get_nbin( archive );
+		else if(command == "nchan") return get_nchan( archive );
+		else if(command == "npol") return get_npol( archive );
+		else if(command == "nsub") return get_nsub( archive );
+		else if(command == "length") return get_length( archive );
+		else if(command == "bw") return get_bw( archive );
+		else if(command == "parang") return get_parang( archive );
+		else if(command == "tsub") return get_tsub( archive );
+		else if(command == "observer") return get_observer( archive );
+		else if(command == "projid") return get_projid( archive );
+		else if(command == "rcvr") return get_rcvr( archive );
+		else if(command == "backend") return get_backend( archive );
+		else if(command == "period") return get_period( archive );
+		else if(command == "be_delay") return get_be_delay( archive );
+		else if(command == "subint") return "";
+		else if(command == "chan") return "";
+
+		else return "INVALID";
+
+	} catch (Error e) {
+		return "*error*";
+	}
+}
+
 
 
