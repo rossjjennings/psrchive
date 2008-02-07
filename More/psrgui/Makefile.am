@@ -24,5 +24,5 @@ LDADD = libpsrgui.la \
 
 include $(top_srcdir)/config/Makefile.Qt
 
-AM_CPPFLAGS += @PGPLOT_CFLAGS@ @QT_CXXFLAGS@
+AM_CPPFLAGS = @PGPLOT_CFLAGS@ @QT_CXXFLAGS@
 
