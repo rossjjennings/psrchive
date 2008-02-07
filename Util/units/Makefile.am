@@ -143,12 +143,10 @@ generate_PromoteTraits_LDADD	=
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = @PGPLOT_CFLAGS@
 
 LDADD = libunits.la
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @PGPLOT_CFLAGS@
 

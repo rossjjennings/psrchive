@@ -7,10 +7,8 @@ libpgutil_la_SOURCES = ColourMap.C quickimage.C Plot3D.C
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = @PGPLOT_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @PGPLOT_CFLAGS@
 

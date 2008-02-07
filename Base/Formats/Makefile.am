@@ -27,20 +27,19 @@ test_Predictor_factory_SOURCES = test_Predictor_factory.C
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
 
-INCLUDES = -I$(top_builddir)/local_include \
+INCLUDES = \
 	-I$(top_srcdir)/Base/Formats/Timer \
 	-I$(top_srcdir)/Base/Formats/EPN \
 	-I$(top_srcdir)/Base/Formats/ASCII \
 	-I$(top_srcdir)/Base/Formats/BPP \
 	-I$(top_srcdir)/Base/Formats/WAPP \
 	-I$(top_srcdir)/Base/Formats/PSRFITS \
-	-I$(top_srcdir)/Base/Formats/ASP \
-	@CFITSIO_CFLAGS@ @PUMA_CFLAGS@ @TEMPO2_CFLAGS@
+	-I$(top_srcdir)/Base/Formats/ASP
 
 include $(top_srcdir)/config/Makefile.local
+
+AM_CPPFLAGS = @CFITSIO_CFLAGS@ @PUMA_CFLAGS@ @TEMPO2_CFLAGS@
 
 LDADD = libFormats.la $(top_builddir)/Base/Classes/libClasses.la $(top_builddir)/Util/libpsrutil.la
 

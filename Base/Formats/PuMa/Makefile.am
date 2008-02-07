@@ -7,12 +7,10 @@ libpuma_la_SOURCES = PuMaArchive.C
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = @PUMA_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @PUMA_CFLAGS@
 
 libpuma_la_LIBADD = @PUMA_LIBS@
 

@@ -84,10 +84,8 @@ endif
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = @PGPLOT_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @PGPLOT_CFLAGS@
 

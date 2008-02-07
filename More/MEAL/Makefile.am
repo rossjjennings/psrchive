@@ -229,11 +229,10 @@ doc: MEAL.pdf
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = @PGPLOT_CFLAGS@
 
 LDADD = libMEAL.la $(top_builddir)/Util/units/libunits.la @PGPLOT_LIBS@
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @PGPLOT_CFLAGS@
+

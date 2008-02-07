@@ -56,10 +56,6 @@ keys2c_LDADD =
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = @CFITSIO_CFLAGS@
 
 LDADD = libtempo.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \
@@ -67,6 +63,8 @@ LDADD = libtempo.la \
 	$(top_builddir)/Util/third/libthird.la @FLIBS@
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @CFITSIO_CFLAGS@
 
 #
 # builddir != srcdir fix: g77 version 3 looks for header files

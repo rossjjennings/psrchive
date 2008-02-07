@@ -219,11 +219,10 @@ endif
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
 
-INCLUDES = -I$(top_srcdir)/More/Polarimetry -I$(top_srcdir)/More/MEAL \
-	@PGPLOT_CFLAGS@ @TEMPO2_CFLAGS@
+INCLUDES = -I$(top_srcdir)/More/Polarimetry -I$(top_srcdir)/More/MEAL
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @PGPLOT_CFLAGS@ @TEMPO2_CFLAGS@
 

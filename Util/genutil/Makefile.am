@@ -147,14 +147,12 @@ test_StraightLine_SOURCES	= test_StraightLine.C
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = @PGPLOT_CFLAGS@
 
 LDADD = libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
 	$(top_builddir)/Util/third/libthird.la
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @PGPLOT_CFLAGS@
 

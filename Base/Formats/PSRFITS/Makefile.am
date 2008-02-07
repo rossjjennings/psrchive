@@ -43,12 +43,10 @@ test_polyco_fitsio_SOURCES = test_polyco_fitsio.C
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = @CFITSIO_CFLAGS@ @MPI_CFLAGS@ @TEMPO2_CFLAGS@
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @CFITSIO_CFLAGS@ @MPI_CFLAGS@ @TEMPO2_CFLAGS@
 
 LDADD = libpsrfits.la $(top_builddir)/Util/libpsrutil.la @CFITSIO_LIBS@
 

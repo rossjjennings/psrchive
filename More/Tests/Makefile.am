@@ -470,18 +470,6 @@ export:
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = -I$(top_builddir)/third/include				  \
-	-I$(top_builddir)/Util/include					  \
-	-I$(top_builddir)/astro/include					  \
-        -I$(top_srcdir)/psrchive/Calibration				  \
-        -I$(top_srcdir)/psrchive/Plotter				  \
-	-I$(top_srcdir)/psrchive/Extension -I$(top_srcdir)/psrchive/timer \
-	-I$(top_srcdir)/psrchive/epn -I$(top_srcdir)/psrchive/psrfits	  \
-	-I$(top_srcdir)/psrchive/ascii					  \
-	@PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @MPI_CFLAGS@
 
 LDADD = libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
         $(top_builddir)/Util/libpsrutil.la \
@@ -490,3 +478,6 @@ LDADD = libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
 libpsrchive_la_LIBADD += @FFT_LIBS@ @CFITSIO_LIBS@ @FLIBS@
 
 include $(top_srcdir)/config/Makefile.local
+
+# AM_CPPFLAGS += @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @MPI_CFLAGS@
+

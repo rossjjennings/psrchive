@@ -11,10 +11,6 @@ test_T2Generator_SOURCES = test_T2Generator.C
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = @TEMPO2_CFLAGS@
 
 LDADD = libtempo_2.la \
 	$(top_builddir)/Util/tempo/libtempo.la \
@@ -25,3 +21,6 @@ LDADD = libtempo_2.la \
 libtempo_2_la_LIBADD = @TEMPO2_LIBS@
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @TEMPO2_CFLAGS@
+

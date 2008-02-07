@@ -72,14 +72,12 @@ endif
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@
 
 LDADD = $(top_builddir)/More/libpsrmore.la \
 	$(top_builddir)/Base/libpsrbase.la \
         $(top_builddir)/Util/libpsrutil.la
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@
 

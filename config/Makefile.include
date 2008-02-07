@@ -15,10 +15,7 @@ $(LOCAL_INCLUDE) : $(local_includedir)/% : %
 
 CLEANFILES = $(LOCAL_INCLUDE) $(MOC_SOURCES) $(BUILT_SOURCES)
 
-# DS changed to put local_include earlier in the command line and prevent
-# installed psrchive headers being read before those in local_include
-#AM_CPPFLAGS = -I$(local_includedir)
-DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir) -I$(local_includedir)
+AM_CPPFLAGS = -I$(local_includedir)
 
 ###########################################################################
 #

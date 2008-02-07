@@ -19,14 +19,12 @@ include $(top_srcdir)/config/Makefile.Qt
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = @QT_CXXFLAGS@
 
 LDADD = libqtutil.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la @QT_LIBS@ 
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @QT_CXXFLAGS@
 

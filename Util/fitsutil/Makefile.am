@@ -7,12 +7,10 @@ libfitsutil_la_SOURCES = FITSError.C fitsutil.C psrfitsio.C
 
 #############################################################################
 #
-# Dependencies should never be changed
-#
-
-INCLUDES = @CFITSIO_CFLAGS@
 
 libfitsutil_la_LIBADD = @CFITSIO_LIBS@
 
 include $(top_srcdir)/config/Makefile.include
+
+AM_CPPFLAGS += @CFITSIO_CFLAGS@
 
