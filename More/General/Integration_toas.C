@@ -34,7 +34,8 @@ void Pulsar::Integration::toas (vector<Tempo::toa>& toas,
   Tempo::toa toa;
 
   // auxilliary information
-  char extra[20];
+  //char extra[20];
+  char extra[50];
 
   for (unsigned ichan=0; ichan < get_nchan(); ++ichan) {
 
@@ -54,6 +55,8 @@ void Pulsar::Integration::toas (vector<Tempo::toa>& toas,
       
       if (get_dedispersed())
 	toa.set_frequency (get_centre_frequency());
+
+	  toa.set_channel(ichan);
       
     }
     catch (Error& error)  {
@@ -66,7 +69,7 @@ void Pulsar::Integration::toas (vector<Tempo::toa>& toas,
       sprintf(extra, "%d", ichan);
       toa.set_auxilliary_text(extra);
     }
-    
+
     toas.push_back (toa);
 
   }
