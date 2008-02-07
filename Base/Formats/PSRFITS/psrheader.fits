@@ -7,58 +7,61 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '2.17            '   / Header version 
+HDRVER  = '3.0             '   / Header version 
+FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
 TELESCOP= '                '   / Telescope name
-ANT_X   = *                    / [m] Antenna ITRF X-coordinate (D)
-ANT_Y   = *                    / [m] Antenna ITRF Y-coordinate (D)
-ANT_Z   = *                    / [m] Antenna ITRF Z-coordinate (D)
+ANT_X   =                    * / [m] Antenna ITRF X-coordinate (D)
+ANT_Y   =                    * / [m] Antenna ITRF Y-coordinate (D)
+ANT_Z   =                    * / [m] Antenna ITRF Z-coordinate (D)
 FRONTEND= '                '   / Rx and feed ID
+NRCVR   =                    * / Number of receiver polarisation channels
 FD_POLN = '                '   / LIN or CIRC
-FD_HAND = *                    / +/- 1. +1 is LIN:A=X,B=Y, CIRC:A=L,B=R (I)
-FD_SANG = *                    / [deg] FA of E vect for equal sig in A&B (E)
-FD_XYPH = *                    / [deg] Phase of A^* B for injected cal (E)
+FD_HAND =                    * / +/- 1. +1 is LIN:A=X,B=Y, CIRC:A=L,B=R (I)
+FD_SANG =                    * / [deg] FA of E vect for equal sig in A&B (E)
+FD_XYPH =                    * / [deg] Phase of A^* B for injected cal (E)
 BACKEND = '                '   / Backend ID
 BECONFIG= '                '   / Backend configuration file name
-BE_PHASE= *                    / 0/+1/-1 BE cross-phase:0 unknown,+/-1 std/rev
-BE_DCC  = *                    / 0/1 BE downconversion conjugation corrected
-BE_DELAY= *                    / [s] Backend propn delay from digitiser input 
-TCYCLE  = *                    / [s] On-line cycle time (D)
-NRCVR   = *                    / Number of receiver channels (I)
+BE_PHASE=                    * / 0/+1/-1 BE cross-phase:0 unknown,+/-1 std/rev
+BE_DCC  =                    * / 0/1 BE downconversion conjugation corrected
+BE_DELAY=                    * / [s] Backend propn delay from digitiser input 
+TCYCLE  =                    * / [s] On-line cycle time (D)
 OBS_MODE= '                '   / (PSR, CAL, SEARCH)
 DATE-OBS= '                '   / Date of observation (YYYY-MM-DDThh:mm:ss UTC)
-OBSFREQ = *                    / [MHz] Centre frequency for observation
+OBSFREQ =                    * / [MHz] Centre frequency for observation
+OBSBW   =                    * / [MHz] Bandwidth for observation
+NCHAN   =                    * / Number of frequency channels (original)
 SRC_NAME= '                '   / Source or scan ID 
 COORD_MD= '                '   / Coordinate mode (J2000, GAL, ECLIP, etc.)
 EQUINOX = '                '   / Equinox of coords (e.g. 2000.0) 
 RA      = '                '   / Right ascension (hh:mm:ss.ssss)
 DEC     = '                '   / Declination (-dd:mm:ss.sss)
-BMAJ    = *                    / [deg] Beam major axis length
-BMIN    = *                    / [deg] Beam minor axis length
-BPA     = *                    / [deg] Beam position angle
+BMAJ    =                    * / [deg] Beam major axis length
+BMIN    =                    * / [deg] Beam minor axis length
+BPA     =                    * / [deg] Beam position angle
 STT_CRD1= '                '   / Start coord 1 (hh:mm:ss.sss or ddd.ddd)
 STT_CRD2= '                '   / Start coord 2 (-dd:mm:ss.sss or -dd.ddd) 
 TRK_MODE= '                '   / Track mode (TRACK, SCANGC, SCANLAT)
 STP_CRD1= '                '   / Stop coord 1 (hh:mm:ss.sss or ddd.ddd)
 STP_CRD2= '                '   / Stop coord 2 (-dd:mm:ss.sss or -dd.ddd) 
-SCANLEN = *                    / [s] Requested scan length (E)
+SCANLEN =                    * / [s] Requested scan length (E)
 FD_MODE = '                '   / Feed track mode - FA, CPA, SPA, TPA
-FA_REQ  = *                    / [deg] Feed/Posn angle requested (E)
+FA_REQ  =                    * / [deg] Feed/Posn angle requested (E)
 CAL_MODE= '                '   / Cal mode (OFF, SYNC, EXT1, EXT2)
-CAL_FREQ= *                    / [Hz] Cal modulation frequency (E)
-CAL_DCYC= *                    / Cal duty cycle (E)
-CAL_PHS = *                    / Cal phase (wrt start time) (E)
-STT_IMJD= *                    / Start MJD (UTC days) (J - long integer)
-STT_SMJD= *                    / [s] Start time (sec past UTC 00h) (J)
-STT_OFFS= *                    / [s] Start time offset (D)   
-STT_LST = *                    / [s] Start LST (D)
+CAL_FREQ=                    * / [Hz] Cal modulation frequency (E)
+CAL_DCYC=                    * / Cal duty cycle (E)
+CAL_PHS =                    * / Cal phase (wrt start time) (E)
+STT_IMJD=                    * / Start MJD (UTC days) (J - long integer)
+STT_SMJD=                    * / [s] Start time (sec past UTC 00h) (J)
+STT_OFFS=                    * / [s] Start time offset (D)   
+STT_LST =                    * / [s] Start LST (D)
 END
 #
 ###############################################################################
 #
-# Processing History Binary Table Extension
+# History Binary Table Extension
 #
 ###############################################################################
 #
@@ -92,12 +95,12 @@ TFORM#  = 1I                  / Integer
 TTYPE#  = TBIN                / Time per bin or sample
 TUNIT#  = s                   / units of field
 TFORM#  = 1D                  / Double
-TTYPE#  = CTR_FREQ            / Band centre frequency
+TTYPE#  = CTR_FREQ            / Band centre frequency (weighted)
 TUNIT#  = MHz                 / units of field
 TFORM#  = 1D                  / Double
 TTYPE#  = NCHAN               / Number of frequency channels
 TFORM#  = 1I                  / Integer
-TTYPE#  = CHAN_BW             / Channel bandwidth
+TTYPE#  = CHAN_BW             / Channel bandwidth (nominal)
 TFORM#  = 1D                  / Double
 TUNIT#  = MHz                 / units of field
 TTYPE#  = PAR_CORR            / Parallactic angle correction applied
@@ -137,8 +140,8 @@ PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    3 / number of fields per row
 #
-NCH_ORIG= *                    / Number of channels in original bandpass
-BP_NPOL = *                    / Number of polarizations in bandpass
+NCH_ORIG=                    * / Number of channels in original bandpass
+BP_NPOL =                    * / Number of polarizations in bandpass
 EXTNAME = BANDPASS             / name of this binary table extension
 #
 TTYPE#  = DAT_OFFS             / Data offset for each bandpass
@@ -149,6 +152,38 @@ TTYPE#  = DATA                 / Bandpass for autocorrelations
 TDIM#   = (*,*)                / Data table dimensions = (NCH_ORIG,BP_NPOL)
 TUNIT#  = Jy                   / Bandpass amplitude units
 TFORM#  = I                    / NCH_ORIG*BP_NPOL integers
+END
+#
+###############################################################################
+#
+# Digitiser Counts Binary Table Extension
+#
+###############################################################################
+#
+XTENSION= BINTABLE             / ***** Digitiser counts *****
+BITPIX  =                    8 / N/A
+NAXIS   =                    2 / 2-dimensional binary table
+NAXIS1  =                    * / Width of table in bytes
+NAXIS2  =                    * / Number of rows in table
+PCOUNT  =                    0 / Size of special data area
+GCOUNT  =                    1 / One data group (required keyword)
+TFIELDS =                    3 / Number of fields per row
+#
+DIG_MODE= '                '   / Digitiser mode
+DYN_LEVT=                    * / Timescale for dynamic leveling
+NDIGR   =                    * / Number of digitised channels (I)
+NLEV    =                    * / Number of digitiser levels
+NPTHIST =                    * / Number of points in histogram (I)
+DIGLEV  = '                '   / Digitiser level-setting mode (AUTO, FIX)
+EXTNAME = DIG_CNTS             / Name of this binary table extension
+#
+TTYPE#  = DAT_OFFS             / Data offset for each histogram
+TFORM#  = E                    / NDIGR floats
+TTYPE#  = DAT_SCL              / Data scale factor for each histogram
+TFORM#  = E                    / NDIGR floats
+TTYPE#  = DATA                 / Digitiser count data
+TDIM#   = (*,*)                / Data table dimensions (NPTHIST,NDIGR)         
+TFORM#  = I                    / NPTHIST*NDIGR integers
 END
 #
 ###############################################################################
@@ -690,18 +725,19 @@ TFIELDS =                   19 / Number of fields per row
 # 
 INT_TYPE= '                  ' / Time axis (TIME, BINPHSPERI, BINLNGASC, etc)
 INT_UNIT= '                  ' / Unit of time axis (SEC, PHS (0-1), DEG) 
-TSAMP   =                    * / [s] Sample interval for SEARCH-mode data 
+SCALE   = '                  ' / Intensity units (FluxDen/RefFlux/Jansky)
+NPOL    =                    * / Nr of polarisations
+POL_TYPE= '                  ' / Polarisation identifier (e.g., XXYYCRCI, XX+YY)
+TBIN    =                    * / [s] Time per bin or sample 
 NBIN    =                    * / Nr of bins (PSR/CAL mode; else 1)
 NBITS   =                    * / Nr of bits/datum (SEARCH mode 'X' data, else 1)
+NSUBOFFS=                    * / Subint offset (Contiguous SEARCH-mode files)
 NCH_FILE=                    * / Number of channels/sub-bands in this file
 NCH_STRT=                    * / Start channel/sub-band number (0 to NCHAN-1)
-NPOL    =                    * / Nr of polarisations in table
 NSBLK   =                    * / Samples/row (SEARCH mode, else 1) 
 #
 EXTNAME = SUBINT               / name of this binary table extension
 #
-TTYPE#  = ISUBINT              / Subint number
-TFORM#  = 1J                   / Long integer
 TTYPE#  = INDEXVAL             / Optionally used if INT_TYPE != TIME
 TFORM#  = 1D                   / Double
 TTYPE#  = TSUBINT              / Length of subintegration
@@ -740,12 +776,9 @@ TUNIT#  = deg                  / Units of field
 TTYPE#  = TEL_ZEN              / [deg] Telescope zenith angle at subint centre
 TFORM#  = 1E                   / Float
 TUNIT#  = deg                  / Units of field
-TTYPE#  = PERIOD               / [s] Folding period at subint centre
-TFORM#  = 1D                   / Double 
-TUNIT#  = s                    / Units of field
 TTYPE#  = DAT_FREQ             / [MHz] Centre frequency for each channel
 TFORM#  = E                    / NCH_FILE floats
-TUNIT#  = MHz                  / Units of field
+TUNIT#  = deg                  / Units of field
 TTYPE#  = DAT_WTS              / Weights for each channel
 TFORM#  = E                    / NCH_FILE floats
 TTYPE#  = DAT_OFFS             / Data offset for each channel
@@ -774,9 +807,9 @@ GCOUNT  =                    1 / One data group (required keyword)
 TFIELDS =                    1 / Number of fields per row
 #
 DIG_MODE= '                '   / Digitiser mode
-NDIGR   = *                    / Number of digitised channels (I)
-NPAR    = *                    / Number of digitiser parameters
-NCYCSUB = *                    / Number of correlator cycles per subint
+NDIGR   =                    * / Number of digitised channels (I)
+NPAR    =                    * / Number of digitiser parameters
+NCYCSUB =                    * / Number of correlator cycles per subint
 DIGLEV  = '                '   / Digitiser level-setting mode (AUTO, FIX)
 EXTNAME = DIG_STAT             / Name of this binary table extension
 #
@@ -786,35 +819,4 @@ TUNIT#  = db                   / Units of field
 TTYPE#  = DATA                 / Digitiser statistics
 TDIM#   = (*,*,*)              / Data table dimensions (NPAR,NDIGR,NCYCSUB)
 TFORM#  = E                    / NPAR*NDIGR*NCYCSUB floats
-END
-###############################################################################
-#
-# Digitiser Counts Binary Table Extension
-#
-###############################################################################
-#
-XTENSION= BINTABLE             / ***** Digitiser counts *****
-BITPIX  =                    8 / N/A
-NAXIS   =                    2 / 2-dimensional binary table
-NAXIS1  =                    * / Width of table in bytes
-NAXIS2  =                    * / Number of rows in table
-PCOUNT  =                    0 / Size of special data area
-GCOUNT  =                    1 / One data group (required keyword)
-TFIELDS =                    3 / Number of fields per row
-#
-DIG_MODE= '                '   / Digitiser mode
-DYN_LEVT= *                    / Timescale for dynamic leveling
-NDIGR   = *                    / Number of digitised channels (I)
-NLEV    = *                    / Number of digitiser levels
-NPTHIST = *                    / Number of points in histogram (I)
-DIGLEV  = '                '   / Digitiser level-setting mode (AUTO, FIX)
-EXTNAME = DIG_CNTS             / Name of this binary table extension
-#
-TTYPE#  = DAT_OFFS             / Data offset for each histogram
-TFORM#  = E                    / NDIGR floats
-TTYPE#  = DAT_SCL              / Data scale factor for each histogram
-TFORM#  = E                    / NDIGR floats
-TTYPE#  = DATA                 / Digitiser count data
-TDIM#   = (*,*)                / Data table dimensions (NPTHIST,NDIGR)         
-TFORM#  = I                    / NPTHIST*NDIGR integers
 END
