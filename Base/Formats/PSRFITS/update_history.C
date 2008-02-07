@@ -1,9 +1,12 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+using namespace std;
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/ProcHistory.h"
@@ -11,14 +14,47 @@
 
 #include "strutil.h"
 
-using namespace std;
+string fits_scale_string (Signal::Scale scale, bool verbose)
+{
+  switch (scale)
+  {
+  case Signal::FluxDensity:
+    return "FluxDen";
+  case Signal::ReferenceFluxDensity:
+    return "RefFlux";
+  case Signal::Jansky:
+    return "Jansky";
+  default:
+    if (verbose)
+      cerr << "PSRFITS WARNING output SCALE unknown" << endl;
+    return "UNKNOWN";
+  }
+}
+
+string fits_state_string (Signal::State state, bool verbose)
+{
+  switch (state)
+  {
+  case Signal::PPQQ:
+    return "AABB";
+  case Signal::Stokes:
+    return "STOKE";
+  case Signal::Coherence:
+    return "AABBCRCI";
+  case Signal::Intensity:
+    return "INTEN";
+  case Signal::Invariant:
+    return "INVAR";
+  default:
+    if (verbose)
+      cerr << "PSRFITS WARNING output POL_TYPE unknown" << endl;
+    return "UNKNOWN";
+  }
+}
 
 void Pulsar::FITSArchive::update_history()
 {
-  ProcHistory* history = get<ProcHistory>();
-
-  if (!history)
-    add_extension (history = new ProcHistory);
+  ProcHistory* history = getadd<ProcHistory>();
 
   // Construct the new final row
   history->add_blank_row();
@@ -26,59 +62,50 @@ void Pulsar::FITSArchive::update_history()
   time_t timeval = time(0);
   string timestr = ctime (&timeval);
 
-  history->get_last().date_pro = remove_all(timestr,'\n');
-  
-  history->get_last().proc_cmd = history->get_command_str();
-  
-  history->get_last().scale = get_scale();
+  ProcHistory::row& last = history->get_last();
 
-  if (get_state() == Signal::PPQQ)
-    history->get_last().pol_type = "XXYY";
-  else if (get_state() == Signal::Stokes)
-    history->get_last().pol_type = "STOKE";
-  else if (get_state() == Signal::Coherence)
-    history->get_last().pol_type = "XXYYCRCI";
-  else if (get_state() == Signal::Intensity)
-    history->get_last().pol_type = "INTEN";
-  else if (get_state() == Signal::Invariant)
-    history->get_last().pol_type = "INVAR";
-  else
-    history->get_last().pol_type = "UNKNOWN";
+  last.date_pro = remove_all(timestr,'\n');
+  
+  last.proc_cmd = history->get_command_str();
 
-  history->get_last().nsub = get_nsubint();
-  history->get_last().npol = get_npol();
-  history->get_last().nbin = get_nbin();
-  history->get_last().nbin_prd = get_nbin();
+  last.scale = state_scale = fits_scale_string(get_scale(), verbose > 1);
+
+  last.pol_type = state_pol_type = fits_state_string(get_state(), verbose > 1);
+
+  last.nsub = get_nsubint();
+  last.npol = get_npol();
+  last.nbin = get_nbin();
+  last.nbin_prd = get_nbin();
 
   if ( get_nsubint() )
-    history->get_last().tbin = get_Integration(0)->get_folding_period() / get_nbin();
+    last.tbin = get_Integration(0)->get_folding_period() / get_nbin();
   else
-    history->get_last().tbin = 0.0;
+    last.tbin = 0.0;
 
-  history->get_last().ctr_freq = get_centre_frequency();
-  history->get_last().nchan = get_nchan();
-  history->get_last().chan_bw = get_bandwidth() / float(get_nchan());
-  history->get_last().rm_corr = get_faraday_corrected();
-  history->get_last().dedisp = get_dedispersed();
+  last.ctr_freq = get_centre_frequency();
+  last.nchan = get_nchan();
+  last.chan_bw = get_bandwidth() / float(get_nchan());
+  last.rm_corr = get_faraday_corrected();
+  last.dedisp = get_dedispersed();
 
   Receiver* receiver = get<Receiver>();
   if (!receiver) {
-    history->get_last().par_corr = false;
-    history->get_last().fa_corr = false;
+    last.par_corr = false;
+    last.fa_corr = false;
   }
   else {
-    history->get_last().par_corr = receiver->get_platform_corrected();
-    history->get_last().fa_corr = receiver->get_feed_corrected();
+    last.par_corr = receiver->get_platform_corrected();
+    last.fa_corr = receiver->get_feed_corrected();
   }
 
   if (get_poln_calibrated()) {
     if (history->get_cal_mthd() == "NONE")
       history->set_cal_mthd("Other");
-    history->get_last().cal_mthd = history->get_cal_mthd();
+    last.cal_mthd = history->get_cal_mthd();
   }
   else
-    history->get_last().cal_mthd = "NONE";
+    last.cal_mthd = "NONE";
 
-  history->get_last().cal_file = history->get_cal_file();
-  history->get_last().rfi_mthd = history->get_rfi_mthd();;
+  last.cal_file = history->get_cal_file();
+  last.rfi_mthd = history->get_rfi_mthd();;
 }
