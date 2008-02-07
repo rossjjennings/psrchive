@@ -30,7 +30,8 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   clean_Pointing_columns (ffptr);
 
   // If archive has a folding model, remove PERIOD column
-  if (has_model()) {
+  if (has_model())
+  {
     if (verbose > 2) 
       cerr << "Pulsar::FITSArchive::unload_integrations found model, "
         << "removing PERIOD column" << endl;
@@ -44,15 +45,15 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   // Insert nsubint rows
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::unload_integrations nsubint=" << nsubint << endl;
 
   fits_insert_rows (ffptr, 0, nsubint, &status);
 
-  if (verbose == 3) {
+  if (verbose > 2) {
     long newrownum = 0;
     fits_get_num_rows (ffptr, &newrownum, &status);
-    if (verbose == 3) {
+    if (verbose > 2) {
       cerr << "FITSArchive::unload_integrations DATA row count = "
            << newrownum
            << endl;
@@ -60,42 +61,34 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   }
   
   if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_integrations", 
+    throw FITSError (status, "FITS:Archive::unload_integrations", 
                      "error clearing old subints");
 
   // Update the header information
   
-  bool   has_alt_order = false;
-  string order_name    = "unknown";
-  string order_unit    = "unknown";
+  string order_name = "TIME";
+  string order_unit = "SEC";
 
-  if (get<Pulsar::IntegrationOrder>()) {
-    has_alt_order = true;
+  if (get<Pulsar::IntegrationOrder>())
+  {
     order_name = get<Pulsar::IntegrationOrder>()->get_extension_name();
     order_unit = get<Pulsar::IntegrationOrder>()->get_Unit();
   }
 
-  if (has_alt_order) {
-    fits_update_key (ffptr, TSTRING, "INT_TYPE", 
-                     const_cast<char*>(order_name.c_str()),
-                     comment, &status);
-    
-    fits_update_key (ffptr, TSTRING, "INT_UNIT", 
-                     const_cast<char*>(order_unit.c_str()),
-                     comment, &status);
-  }
-  else {
-    char* useful = new char[64];
-    sprintf(useful, "%s", "TIME");
-    fits_update_key (ffptr, TSTRING, "INT_TYPE", useful,
-                     comment, &status);
-    
-    sprintf(useful, "%s", "SEC");
-    fits_update_key (ffptr, TSTRING, "INT_UNIT", useful,
-                     comment, &status);
-    delete[] useful;
-  }
-  
+  psrfits_update_key (ffptr, "INT_TYPE", order_name);
+  psrfits_update_key (ffptr, "INT_UNIT", order_unit);
+
+  /*
+    WvS - 07 Feb 2008
+    state_scale and state_pol_type are set in update_history method
+  */
+  psrfits_update_key (ffptr, "SCALE", state_scale);
+  psrfits_update_key (ffptr, "NPOL", (int) get_npol());
+  psrfits_update_key (ffptr, "POL_TYPE", state_pol_type);
+
+  psrfits_update_key (ffptr, "NBIN", (int) get_nbin());
+  psrfits_update_key (ffptr, "NCH_FILE", (int) get_nchan());
+
   // Set the sizes of the columns which may have changed
   
   int colnum = 0;
@@ -107,7 +100,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     throw FITSError (status, "FITSArchive::unload_integrations", 
                      "error resizing DAT_FREQ");
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::unload_integrations DAT_FREQ resized to "
          << nchan
          << endl;
@@ -119,7 +112,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     throw FITSError (status, "FITSArchive::unload_integrations", 
                      "error resizing DAT_WTS");
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::unload_integrations DAT_WTS resized to "
          << nchan
          << endl;
@@ -131,7 +124,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     throw FITSError (status, "FITSArchive::unload_integrations", 
                      "error resizing DAT_OFFS");
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::unload_integrations DAT_OFFS resized to "
          << nchan*npol
          << endl;
@@ -143,7 +136,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     throw FITSError (status, "FITSArchive::unload_integrations", 
                      "error resizing DAT_SCL");
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::unload_integrations DAT_SCL resized to "
          << nchan*npol
          << endl;
@@ -155,7 +148,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   sprintf(tdim, "(%d,%d,%d,1)", nbin, nchan, npol);
   fits_update_key (ffptr, TSTRING, keyname, &tdim, NULL, &status);
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::unload_integrations DATA resized to "
          << nchan*npol*nbin
          << endl;
@@ -166,7 +159,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   for(unsigned i = 0; i < nsubint; i++)
     unload_Integration (i+1, get_Integration(i), ffptr);
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::unload_integrations exit" << endl;
 
 }
