@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.55 $
-   $Date: 2008/02/05 04:00:24 $
-   $Author: nopeer $ */
+   $Revision: 1.56 $
+   $Date: 2008/02/07 10:39:28 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
 #define __Pulsar_FITSArchive_h
@@ -214,6 +214,15 @@ namespace Pulsar {
     void load_WidebandCorrelator (fitsfile*);
     void load_FITSSUBHdrExtension ( fitsfile * );
 
+    void load_integration_state ( fitsfile * );
+    void load_state ( fitsfile * );
+
+    void interpret_scale ( );
+    void interpret_pol_type ( );
+
+    std::string state_scale;
+    std::string state_pol_type;
+
     //! Delete the HDU with the specified name
     void delete_hdu (fitsfile* fptr, char* hdu_name) const;
 
@@ -236,11 +245,8 @@ namespace Pulsar {
     //! The polyco parsed from the PSRFITS file
     Reference::To<Predictor> hdr_model;
     
-
-    
-    // The version of the psrfits file, can be used to make decisions about
-    // how we treat older files
-    float hdrver;
+    //! The PSRFITS version
+    float psrfits_version;
 
   private:
 
