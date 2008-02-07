@@ -59,7 +59,7 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow )
 
   psrfits_read_col (fptr, "NCHAN", &(hrow->nchan), row);
 
-  psrfits_read_col (fptr, "CHAN_BW", &(hrow->chanbw), row);
+  psrfits_read_col (fptr, "CHAN_BW", &(hrow->chan_bw), row);
 
   psrfits_read_col (fptr, "PAR_CORR", &(hrow->par_corr), row,
 		    0, 0, Pulsar::Archive::verbose > 2);
@@ -93,29 +93,10 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow )
   psrfits_read_col (fptr, "IFR_MTHD", &(hrow->ifr_mthd), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);
 
-  std::string temp;
-  psrfits_read_col (fptr, "SCALE", &temp, row,
+  psrfits_read_col (fptr, "SCALE", &(hrow->scale), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);
 
-  if (temp == empty) {
-    if (Pulsar::Archive::verbose > 1)
-      cerr << "load ProcHistory::row error reading SCALE" <<endl;
-    hrow->scale = Signal::FluxDensity;    
-  }
-  else {
-
-    if (Pulsar::Archive::verbose > 2)
-      cerr << "load ProcHistory::row SCALE = " << temp << endl;
-
-    if (temp == "FluxDen")
-      hrow->scale = Signal::FluxDensity;
-    else if (temp == "RefFlux")
-      hrow->scale = Signal::ReferenceFluxDensity;
-    else if (temp == "Jansky")
-      hrow->scale = Signal::Jansky;
-    else if (Pulsar::Archive::verbose > 2)
-      cerr << "load ProcHistory::row WARNING unrecognized SCALE" << endl;
-  }
+  // scale string interpretation is now done in load_integrations
 
   if (Pulsar::Archive::verbose > 2)
     cerr << "load ProcHistory::row exiting" << endl;
@@ -158,30 +139,46 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   
   history->rows.resize(numrows);   
   
-  for (int i = 0; i < numrows; i++) {
+  if (!numrows)
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_ProcHistory no rows" << endl;
+    return;
+  }
+
+  for (int i = 0; i < numrows; i++)
+  {
     history->rows[i] = ProcHistory::row();
     history->rows[i].index = i+1;
 
     ::load( fptr, &(history->rows[i]) );
   }
 
-  if( history->rows.size() == 0 )
+  ProcHistory::row& last = history->get_last();
+
+  /*
+    WvS - 07 Feb 2008
+    Beginning with PSRFITS version 3, the centre frequency and
+    bandwidth are stored in the primary header as OBSFREQ and OBSBW.
+    These values are over-ridden by the history, if available.
+  */
+  set_centre_frequency (last.ctr_freq);
+  set_bandwidth (last.nchan * last.chan_bw);
+
+  /*
+    WvS - 07 Feb 2008
+    Beginning with PSRFITS version 3, the number of polarizations,
+    frequency channels, and phase bins are stored in the SUBINT HDU.
+    However, prior to version 3, these attributes may not be reliable.
+    They are set here with the understanding that they may be reset
+    during load_integrations.
+  */
+  set_npol  (last.npol);
+  set_nchan (last.nchan);
+  set_nbin  (last.nbin);
+
+  if (last.cal_mthd == "NONE")
   {
-  	cerr << "No rows present" << endl;
-	return;
-  }
-
-  set_nbin (history->get_last().nbin);
-  set_npol (history->get_last().npol);
-
-  if( (history->get_last()).ctr_freq != 0 )
-  	set_centre_frequency (history->get_last().ctr_freq);
-  set_nchan (history->get_last().nchan);
-
-  chanbw = history->get_last().chanbw;
-  set_bandwidth(get_nchan()*chanbw);
-
-  if (history->get_last().cal_mthd == "NONE") {
     if (verbose > 2)
       cerr << "FITSArchive::load_header not calibrated" << endl;
     set_poln_calibrated (false);
@@ -190,60 +187,25 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     if (verbose > 2)
       cerr << "FITSArchive::load_header calibrated" << endl;
     set_poln_calibrated (true);
-    history->set_cal_mthd(history->get_last().cal_mthd);
+    history->set_cal_mthd(last.cal_mthd);
   }
 
-  history->set_sc_mthd (history->get_last().sc_mthd);
-  history->set_cal_file(history->get_last().cal_file);
-  history->set_rfi_mthd(history->get_last().rfi_mthd);
-  history->set_ifr_mthd(history->get_last().ifr_mthd);
-
-  set_scale ( history->get_last().scale );
-  string polstr = history->get_last().pol_type;
-
-  if(polstr == "XXYY") {
-    set_state ( Signal::PPQQ );
-    if (verbose > 2)
-      cerr << "FITSArchive:load_header setting Signal::PPQQ" << endl;
-  }
-  else if(polstr == "STOKE") {
-    set_state ( Signal::Stokes );
-    if (verbose > 2)
-      cerr << "FITSArchive:load_header setting Signal::Stokes" << endl;
-  }
-  else if(polstr == "XXYYCRCI") {
-    set_state ( Signal::Coherence );
-    if (verbose > 2)
-      cerr << "FITSArchive:load_header setting Signal::Coherence" << endl;
-  }
-  else if(polstr == "INTEN") {
-    set_state ( Signal::Intensity );
-    if (verbose > 2)
-      cerr << "FITSArchive:load_header setting Signal::Intensity" << endl;
-  }
-  else if(polstr == "INVAR")
-    set_state ( Signal::Invariant );
-  else {
-    if (verbose > 2) {
-      cerr << "FITSArchive:load_header WARNING unknown POL_TYPE = "
-           << polstr <<endl;
-      cerr << "FITSArchive:load_header setting Signal::Intensity"
-           << endl;
-    }
-    set_state ( Signal::Intensity );
-  }
+  history->set_sc_mthd (last.sc_mthd);
+  history->set_cal_file(last.cal_file);
+  history->set_rfi_mthd(last.rfi_mthd);
+  history->set_ifr_mthd(last.ifr_mthd);
 
   //
-  // WvS 23-06-2004
+  // WvS 23 Jun 2004
   //
   // Note that ionospheric rotation measure has been removed from the
   // Pulsar::Archive definition.  When implemented, it will be treated
   // as an Extension.
   
-  if (history->get_last().rm_corr == 1)
+  if (last.rm_corr == 1)
     set_faraday_corrected (true);
 
-  else if (history->get_last().rm_corr == 0)
+  else if (last.rm_corr == 0)
     set_faraday_corrected (false);
 
   else {
@@ -254,10 +216,10 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     set_faraday_corrected (false);
   }
 
-  if (history->get_last().par_corr == 1)
+  if (last.par_corr == 1)
     receiver->set_platform_corrected (true);
 
-  else if (history->get_last().par_corr == 0)
+  else if (last.par_corr == 0)
     receiver->set_platform_corrected (false);
 
   else {
@@ -269,10 +231,10 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   }
 
 
-  if (history->get_last().fa_corr == 1)
+  if (last.fa_corr == 1)
     receiver->set_feed_corrected (true);
 
-  else if (history->get_last().fa_corr == 0)
+  else if (last.fa_corr == 0)
     receiver->set_feed_corrected (false);
 
   else {
@@ -284,9 +246,9 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   }
 
 
-  if(history->get_last().dedisp == 1)
+  if(last.dedisp == 1)
     set_dedispersed (true);
-  else if(history->get_last().dedisp == 0)
+  else if(last.dedisp == 0)
     set_dedispersed (false);
   else {
     if (verbose > 2) {
@@ -300,9 +262,7 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
 
   if (verbose > 2)
     cerr << "FITSArchive::load_ProcHistory exiting" << endl;
-    
-    
-    
+
 }
 
 
