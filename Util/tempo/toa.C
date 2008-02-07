@@ -46,6 +46,8 @@ Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
   if (this == &in_toa)
    return *this;
 
+
+  channel = in_toa.channel;
   frequency = in_toa.frequency;
   arrival = in_toa.arrival;
   error = in_toa.error; 
@@ -69,6 +71,9 @@ Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
   state = in_toa.state;
 
   resid = in_toa.resid;
+
+  subint = in_toa.subint;
+  channel = in_toa.channel;
 
   return *this;
 }
@@ -265,12 +270,34 @@ int Tempo::toa::Princeton_unload (FILE* outstream) const
 
 int Tempo::toa::Tempo2_unload (char* outstring) const
 {
+
   // output the basic line
   string fname,flags; 
-  
+
   fname = auxinfo.substr(0,auxinfo.find(" "));
-  if (auxinfo.find(" ")!=string::npos) flags = auxinfo.substr(auxinfo.find(" "));
-  sprintf (outstring,"%s %8.3f %s %6.2f %c %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,flags.c_str());
+  if (auxinfo.find(" ")!=string::npos) 
+	  flags = auxinfo.substr(auxinfo.find(" "));
+
+  int sub = -1;
+  int chan = -1;
+
+  sub = flags.find("-subint");
+  if (sub != -1)
+	  flags.erase(sub, 8);
+
+  chan = flags.find("-chan");
+  if (chan != -1)
+	  flags.erase(chan, 6);
+
+  if (sub == -1 && chan == -1) {
+	  sprintf (outstring,"%s %8.3f %s %6.2f %c %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,flags.c_str());
+  } else if (sub != -1 && chan == -1) {
+	  sprintf (outstring,"%s %8.3f %s %6.2f %c -subint %d %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,subint,flags.c_str());
+  } else if (sub == -1 && chan != -1) {
+	  sprintf (outstring,"%s %8.3f %s %6.2f %c -chan %d %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,channel,flags.c_str());
+  } else if (sub != -1 && chan != -1) {
+	  sprintf (outstring,"%s %8.3f %s %6.2f %c -subint %d -chan %d %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,subint,channel,flags.c_str());
+  }
 
   return 0;
 }
@@ -680,6 +707,9 @@ char   Tempo::toa::datestr [25];
 
 void Tempo::toa::init()
 {
+  subint = 0;
+  channel = 0;
+
   format = Unspecified;
   // auxdata = NULL;
   resid.valid = false;

@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.25 $
-   $Date: 2007/06/21 17:32:05 $
-   $Author: straten $ */
+   $Revision: 1.26 $
+   $Date: 2008/02/07 00:51:43 $
+   $Author: jonathan_khoo $ */
 
 #ifndef __TOA_H
 #define __TOA_H
@@ -73,6 +73,9 @@ namespace Tempo {
     MJD    arrival;        // TOA
     float  error;          // TOA uncertainty
     char   telescope;      // Observatory (one-character code)
+
+	unsigned channel;
+	unsigned subint;
     
     // Parkes Format specific
 
@@ -142,6 +145,9 @@ namespace Tempo {
     void set_telescope (const std::string& telcode);
     void set_auxilliary_text (const std::string& text) { auxinfo = text; };
 
+	void set_channel	(unsigned chan) {channel = chan; };
+	void set_subint		(unsigned subint) {subint = subint; };
+
     Format get_format    () const { return format; };
     float  get_StoN      () const { return ston; };
     float  get_pa        () const { return pa; };
@@ -188,7 +194,9 @@ namespace Tempo {
     int    Comment_unload    (FILE* outstream) const;
     int    Comment_unload    (char* outstring) const;
 
-    int    Tempo2_unload     (FILE* outstream) const;
+	// -----------
+
+	int    Tempo2_unload     (FILE* outstream) const;
     int    Tempo2_unload     (char* outstring) const;
 
     int    Tempo_unload      (FILE* outstream) const;
