@@ -5,6 +5,10 @@
  *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "TemporaryFile.h"
 #include "Error.h"
 
@@ -13,6 +17,14 @@
 #include <unistd.h>
 
 using namespace std;
+
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
+
+//! The current temporary file instances
+static std::set<TemporaryFile*> instances;
 
 //! Set true when the signal handler has been installed
 bool TemporaryFile::signal_handler_installed = false;
@@ -42,16 +54,21 @@ void remove_instance (TemporaryFile* file)
 //! The signal handler ensures that all temporary files are removed
 void TemporaryFile::signal_handler (int sig)
 {
-  cerr << strsignal(sig) << " signal received." << endl;
+  cerr << "TemporaryFile::signal_handler received " << strsignal(sig) << endl;
+
+#ifdef HAVE_PTHREAD
+  pthread_mutex_lock (&mutex);
+#endif
 
   for_each (instances.begin(), instances.end(), remove_instance);
+
+#ifdef HAVE_PTHREAD
+  pthread_mutex_unlock (&mutex);
+#endif
 
   if (abort)
     exit (-1);
 }
-
-//! The current temporary file instances
-std::set<TemporaryFile*> TemporaryFile::instances;
 
 //! Construct with regular expression
 TemporaryFile::TemporaryFile (const string& basename)
@@ -64,19 +81,36 @@ TemporaryFile::TemporaryFile (const string& basename)
     throw Error (FailedSys, "TemporaryFile",
 		 "failed mkstemp(" + filename + ")");
 
+  removed = false;
+
+#ifdef HAVE_PTHREAD
+  pthread_mutex_lock (&mutex);
+#endif
+
   if (!signal_handler_installed)
     install_signal_handler ();
 
-  removed = false;
-
   instances.insert (this);
+
+#ifdef HAVE_PTHREAD
+  pthread_mutex_unlock (&mutex);
+#endif
 }
 
 //! Destructor
 TemporaryFile::~TemporaryFile ()
 {
   remove ();
+
+#ifdef HAVE_PTHREAD
+  pthread_mutex_lock (&mutex);
+#endif
+
   instances.erase (this);
+
+#ifdef HAVE_PTHREAD
+  pthread_mutex_unlock (&mutex);
+#endif
 }
 
 void TemporaryFile::close ()

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/TemporaryFile.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/12/14 23:08:05 $
+   $Revision: 1.3 $
+   $Date: 2008/02/08 12:56:53 $
    $Author: straten $ */
 
 #ifndef __TemporaryFile_h
@@ -65,9 +65,6 @@ class TemporaryFile {
 
   //! The signal handler ensures that all temporary files are removed
   static void signal_handler (int);
-
-  //! The current temporary file instances
-  static std::set<TemporaryFile*> instances;
 
 };
 
