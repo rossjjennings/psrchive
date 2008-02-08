@@ -31,11 +31,16 @@ public:
   Reference::To<Pulsar::Archive> input;
   unsigned loops;
 
-  void run ()
+  void run (unsigned ithread)
   {
-    cerr << "test_threads: Test::run" << endl;
+    char filename[64];
+    sprintf (filename, "/tmp/%d.tmp", ithread);
+    cerr << "test_threads: Test::run " << filename << endl;
     for (unsigned i=0; i<loops; i++)
+    {
       Reference::To<Pulsar::Archive> copy = input->clone();
+      copy->unload(filename);
+    }
   }
 };
 
@@ -92,7 +97,7 @@ int main (int argc, char **argv) try
   BatchQueue queue (nthread);
 
   for (unsigned i=0; i<nthread; i++)
-    queue.submit( &test, &Test::run );
+    queue.submit( &test, &Test::run, i );
 
   queue.wait ();
 
