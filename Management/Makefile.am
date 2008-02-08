@@ -22,7 +22,7 @@ install-exec-hook: fix_prefix
 FIX_PREFIX := ${prefix}/bin/psrchive_ldflags ${prefix}/bin/psrchive_cflags
 
 fix_prefix: install-binSCRIPTS
-	perl -p -i -e "s|PREFIX|${prefix}|" ${FIX_PREFIX}
+	perl -p -i -e "s|PREFIX|${prefix}|; s|INCLUDEDIR|${includedir}|" ${FIX_PREFIX}
 
 #############################################################################
 #

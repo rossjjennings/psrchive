@@ -2,5 +2,5 @@
 
 # @configure_input@
 
-echo -IPREFIX/include @PTHREAD_CFLAGS@
+echo -IINCLUDEDIR @PTHREAD_CFLAGS@
 
