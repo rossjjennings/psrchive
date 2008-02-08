@@ -65,7 +65,7 @@ void Pulsar::ArchiveTI::setup( void )
        "rm", "Rotation measure (rad/m^2)" );
 
   add( &Archive::get_dedispersed,
-       &Archive::set_dedispersed,    \
+       &Archive::set_dedispersed,
        "dmc", "Dispersion corrected (boolean)");
 
   add( &Archive::get_faraday_corrected,
