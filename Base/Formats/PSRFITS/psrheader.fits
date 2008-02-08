@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '3.0             '   / Header version 
+HDRVER  = '3.2             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -32,7 +32,7 @@ OBS_MODE= '                '   / (PSR, CAL, SEARCH)
 DATE-OBS= '                '   / Date of observation (YYYY-MM-DDThh:mm:ss UTC)
 OBSFREQ =                    * / [MHz] Centre frequency for observation
 OBSBW   =                    * / [MHz] Bandwidth for observation
-NCHAN   =                    * / Number of frequency channels (original)
+OBSNCHAN=                    * / Number of frequency channels (original)
 SRC_NAME= '                '   / Source or scan ID 
 COORD_MD= '                '   / Coordinate mode (J2000, GAL, ECLIP, etc.)
 EQUINOX = '                '   / Equinox of coords (e.g. 2000.0) 
@@ -618,7 +618,7 @@ EXTNAME = FLUX_CAL             / name of this binary table extension
 CAL_MTHD=                      / Flux cal method
 SCALFILE=                      / Cal file(s) used to derive flux-cal data
 NCHAN   =                    * / Nr of frequency channels (I)
-NRCVR   =                    * / Number of receiver channels (I)
+NRCVR   =                    * / Number of polarisation channels (I)
 EPOCH   =                      / [MJD] Epoch of calibration obs
 #
 TTYPE#  = DAT_FREQ             / Centre frequency for each channel
@@ -721,19 +721,22 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / Number of rows in table (NSUBINT)
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                   19 / Number of fields per row
+TFIELDS =                   18 / Number of fields per row
 # 
 INT_TYPE= '                  ' / Time axis (TIME, BINPHSPERI, BINLNGASC, etc)
 INT_UNIT= '                  ' / Unit of time axis (SEC, PHS (0-1), DEG) 
 SCALE   = '                  ' / Intensity units (FluxDen/RefFlux/Jansky)
 NPOL    =                    * / Nr of polarisations
-POL_TYPE= '                  ' / Polarisation identifier (e.g., XXYYCRCI, XX+YY)
+POL_TYPE= '                  ' / Polarisation identifier (e.g., AABBCRCI, AA+BB)
 TBIN    =                    * / [s] Time per bin or sample 
 NBIN    =                    * / Nr of bins (PSR/CAL mode; else 1)
+NBIN_PRD=                    * / Nr of bins/pulse period (for gated data)
+PHS_OFFS=                    * / Phase offset of bin 0 for gated data
 NBITS   =                    * / Nr of bits/datum (SEARCH mode 'X' data, else 1)
 NSUBOFFS=                    * / Subint offset (Contiguous SEARCH-mode files)
-NCH_FILE=                    * / Number of channels/sub-bands in this file
-NCH_STRT=                    * / Start channel/sub-band number (0 to NCHAN-1)
+NCHAN   =                    * / Number of channels/sub-bands in this file
+CHAN_BW =                    * / [MHz] Channel/sub-band width
+NCHNOFFS=                    * / Channel/sub-band offset for split files
 NSBLK   =                    * / Samples/row (SEARCH mode, else 1) 
 #
 EXTNAME = SUBINT               / name of this binary table extension
@@ -777,17 +780,17 @@ TTYPE#  = TEL_ZEN              / [deg] Telescope zenith angle at subint centre
 TFORM#  = 1E                   / Float
 TUNIT#  = deg                  / Units of field
 TTYPE#  = DAT_FREQ             / [MHz] Centre frequency for each channel
-TFORM#  = E                    / NCH_FILE floats
+TFORM#  = E                    / NCHAN floats
 TUNIT#  = deg                  / Units of field
 TTYPE#  = DAT_WTS              / Weights for each channel
-TFORM#  = E                    / NCH_FILE floats
+TFORM#  = E                    / NCHAN floats
 TTYPE#  = DAT_OFFS             / Data offset for each channel
-TFORM#  = E                    / NCH_FILE*NPOL floats
+TFORM#  = E                    / NCHAN*NPOL floats
 TTYPE#  = DAT_SCL              / Data scale factor for each channel
-TFORM#  = E                    / NCH_FILE*NPOL floats
+TFORM#  = E                    / NCHAN*NPOL floats
 TTYPE#  = DATA                 / Subint data table
-TDIM#   = (*,*,*,*)            / Dimensions (NBITS or NBIN,NCH_FILE,NPOL,NSBLK)
-TFORM#  = I                    / NBIN*NCH_FILE*NPOL*NSBLK int, byte(B) or bit(X)
+TDIM#   = (*,*,*,*)            / Dimensions (NBITS or NBIN,NCHAN,NPOL,NSBLK)
+TFORM#  = I                    / NBIN*NCHAN*NPOL*NSBLK int, byte(B) or bit(X)
 TUNIT#  = Jy                   / Units of subint data
 END
 #

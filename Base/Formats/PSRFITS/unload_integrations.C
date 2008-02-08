@@ -69,10 +69,11 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   string order_name = "TIME";
   string order_unit = "SEC";
 
-  if (get<Pulsar::IntegrationOrder>())
+  const IntegrationOrder* order = get<IntegrationOrder>();
+  if (order)
   {
-    order_name = get<Pulsar::IntegrationOrder>()->get_extension_name();
-    order_unit = get<Pulsar::IntegrationOrder>()->get_Unit();
+    order_name = order->get_extension_name();
+    order_unit = order->get_Unit();
   }
 
   psrfits_update_key (ffptr, "INT_TYPE", order_name);
@@ -80,14 +81,16 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   /*
     WvS - 07 Feb 2008
-    state_scale and state_pol_type are set in update_history method
+    state_scale and state_pol_type strings are set in update_history method
   */
   psrfits_update_key (ffptr, "SCALE", state_scale);
-  psrfits_update_key (ffptr, "NPOL", (int) get_npol());
   psrfits_update_key (ffptr, "POL_TYPE", state_pol_type);
 
+  psrfits_update_key (ffptr, "NPOL", (int) get_npol());
+  psrfits_update_key (ffptr, "NCHAN", (int) get_nchan());
   psrfits_update_key (ffptr, "NBIN", (int) get_nbin());
-  psrfits_update_key (ffptr, "NCH_FILE", (int) get_nchan());
+
+  psrfits_update_key (ffptr, "CHAN_BW", get_bandwidth() / get_nchan());
 
   // Set the sizes of the columns which may have changed
   

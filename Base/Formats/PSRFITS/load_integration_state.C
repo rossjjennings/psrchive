@@ -217,8 +217,9 @@ void Pulsar::FITSArchive::interpret_pol_type ()
 
   if (pol_type_undefined)
   {
-    cerr << "FITSArchive:load_header WARNING guessing state from NPOL="
-	 << get_npol() << endl;
+    if (verbose)
+      cerr << "FITSArchive:load_header WARNING guessing state from NPOL="
+	   << get_npol() << endl;
 
     if (npol == 4)
       set_state ( Signal::Stokes );
@@ -253,7 +254,21 @@ void Pulsar::FITSArchive::load_state (fitsfile* fptr)
   set_nbin( nbin );
 
   int nchan = 0;
-  psrfits_read_key (fptr, "NCH_FILE", &nchan);
+
+  int undefined = -1;
+  psrfits_read_key (fptr, "NCHAN", &nchan, undefined, verbose > 2);
+  
+  // support old format
+  if (nchan == undefined)
+    psrfits_read_key (fptr, "NCH_FILE", &nchan);
+
   set_nchan( nchan );
+
+  double chan_bw = 0.0;
+  double zero = 0.0;
+  psrfits_read_key (fptr, "CHAN_BW", &chan_bw, zero, verbose > 2);
+
+  if (chan_bw != zero)
+    set_bandwidth (chan_bw * nchan);
 }
 
