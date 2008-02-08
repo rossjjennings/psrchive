@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MJD.h"
 #include "Error.h"
 
@@ -52,11 +53,15 @@ int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
 // no static kludgeyness, no memory leaks
 string MJD::printdays (unsigned prec) const
 {
-  char* temp = new char [prec + 80];
-  sprintf (temp, "%d", days);
+  const unsigned size = prec + 80;
+
+  char temp [size];
+  snprintf (temp, size, "%d", days);
   string output = temp;
-  if (prec > 0)  {
-    sprintf (temp, "%*.*lf", prec+3, prec, fracday());
+
+  if (prec > 0)
+  {
+    snprintf (temp, size, "%*.*lf", prec+3, prec, fracday());
     char* period = strchr (temp, '.');
     if (!period)  {
       output += ".";
@@ -65,76 +70,41 @@ string MJD::printdays (unsigned prec) const
     else
       output += period;
   }
-  delete [] temp;
   return output;
 }
 
-const char * MJD::printdays() const {
-  static vector<string> ringbuffer(RINGBUFFER_SIZE);
-  static vector<string>::iterator rb_ptr = ringbuffer.begin();
- 
-  rb_ptr++;
-  if( rb_ptr==ringbuffer.end() )
-    rb_ptr = ringbuffer.begin();
- 
+string MJD::printdays() const
+{
   char dummy[10];
-  sprintf(dummy, "%d",days);
-  *rb_ptr = dummy;
-
-  return rb_ptr->c_str();
+  snprintf (dummy, 10, "%d", days);
+  return dummy;
 }
 
-const char * MJD::printhhmmss() const {
-  static vector<string> ringbuffer(RINGBUFFER_SIZE);
-  static vector<string>::iterator rb_ptr = ringbuffer.begin();
-
-  rb_ptr++;
-  if( rb_ptr==ringbuffer.end() )
-    rb_ptr = ringbuffer.begin();
-
+string MJD::printhhmmss() const
+{
   char dummy[10];
   int hh, mm, ss;
 
   ss2hhmmss (&hh, &mm, &ss, secs);
-
-  sprintf(dummy,"%2.2d%2.2d%2.2d",hh,mm,ss);
-
-  *rb_ptr = dummy;
-
-  return rb_ptr->c_str();
+  snprintf (dummy, 10, "%2.2d%2.2d%2.2d", hh,mm,ss);
+  return dummy;
 }
 
-const char * MJD::printfs() const {
-  static vector<string> ringbuffer(RINGBUFFER_SIZE);
-  static vector<string>::iterator rb_ptr = ringbuffer.begin();
-
-  rb_ptr++;
-  if( rb_ptr==ringbuffer.end() )
-    rb_ptr = ringbuffer.begin();
-
+string MJD::printfs() const
+{
   char dummy[20];
-  char temp[20];
-  sprintf(temp,"%.15lf",fracsec);
-  strcpy(dummy,&temp[1]);   // Chomp off leading 0
-  
-  *rb_ptr = dummy;
-
-  return rb_ptr->c_str();
+  snprintf (dummy, 20, "%.15lf", fracsec);
+  return dummy + 1;
 }
 
-const char* MJD::printall() const {
-  static vector<string> ringbuffer(RINGBUFFER_SIZE);
-  static vector<string>::iterator rb_ptr = ringbuffer.begin();
-
-  rb_ptr++;
-  if( rb_ptr==ringbuffer.end() )
-    rb_ptr = ringbuffer.begin();
-
+string MJD::printall() const
+{
   char dummy[40];
-  sprintf(dummy,"%s:%s%s",printdays(),printhhmmss(),printfs());
-  *rb_ptr = dummy;
-
-  return rb_ptr->c_str();
+  snprintf (dummy, 40, "%s:%s%s",
+	    printdays().c_str(),
+	    printhhmmss().c_str(),
+	    printfs().c_str());
+  return dummy;
 }
 
 char* MJD::datestr (char* dstr, int len, const char* format) const
@@ -150,32 +120,31 @@ char* MJD::datestr (char* dstr, int len, const char* format) const
   return dstr;
 }
 
-const char * MJD::strtempo() const{
-  static vector<string> ringbuffer(RINGBUFFER_SIZE);
-  static vector<string>::iterator rb_ptr = ringbuffer.begin();
+string MJD::strtempo() const
+{
+  char temp[20];
+  snprintf (temp, 20, "%14.11lf", fracday());
 
-  rb_ptr++;
-  if( rb_ptr==ringbuffer.end() )
-    rb_ptr = ringbuffer.begin();
+  char* period = strchr (temp, '.');
 
   char dummy[40];
-  char temp[20];
-  sprintf(temp,"%14.11lf",fracday());
-  char* period = strchr (temp, '.');
-  sprintf(&dummy[0],"%5d.%s",days,period+1);
+  snprintf (dummy, 40, "%5d.%s", days,period+1);
 
-  *rb_ptr = dummy;
-
-  return rb_ptr->c_str();
+  return dummy;
 }
 
-double MJD::in_seconds() const {
+double MJD::in_seconds() const 
+{
   return((double)days*86400.0+(double)secs+fracsec);
 }
-double MJD::in_days() const {
+
+double MJD::in_days() const
+{
   return((double)days + ((double)secs+fracsec)/86400.0);
 }
-double MJD::in_minutes() const {
+
+double MJD::in_minutes() const
+{
   return((double) days*1440.0 + ((double)secs+fracsec)/60.0);
 }
 
@@ -326,14 +295,16 @@ int operator != (const MJD &m1, const MJD &m2) {
   return !(m1 == m2);
 }
 
-int MJD::print (FILE *stream){
-  fprintf(stream, "%s", printall());
-  return(0);
+int MJD::print (FILE *stream)
+{
+  fprintf(stream, printall().c_str());
+  return 0;
 }
 
-int MJD::println (FILE *stream) {
-  fprintf(stream, "%s\n", printall());
-  return(0);
+int MJD::println (FILE *stream)
+{
+  fprintf(stream, "%s\n", printall().c_str());
+  return 0;
 }
 
 MJD::MJD (double dd, double ss, double fs)

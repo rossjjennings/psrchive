@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.29 $
-   $Date: 2007/05/29 11:53:30 $
+   $Revision: 1.30 $
+   $Date: 2008/02/08 12:32:30 $
    $Author: straten $ */
 
 #ifndef __GENUTIL_MJD_H
@@ -136,11 +136,11 @@ class MJD {
 
   int print (FILE *stream);
   int println (FILE *stream);
-  const char* printall()    const;
-  const char * printdays()   const;
-  const char * printhhmmss() const;
-  const char * printfs()     const;
-  const char * strtempo() const; 
+  std::string printall()    const;
+  std::string printdays()   const;
+  std::string printhhmmss() const;
+  std::string printfs()     const;
+  std::string strtempo() const; 
 
   // returns a string formatted by strftime
   // e.g. format = "%Y-%m-%d %H:%M:%S"
