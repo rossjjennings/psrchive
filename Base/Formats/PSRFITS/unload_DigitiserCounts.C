@@ -49,7 +49,6 @@ void unload_counts_table ( fitsfile *fptr, const DigitiserCounts *const_ext )
 
 void unload_counts_keys( fitsfile *fptr, const DigitiserCounts *ext )
 {
-  int status = 0;
   int ndigr = ext->get_ndigr();
   string diglev = ext->get_diglev();
   string dig_mode = ext->get_dig_mode();
@@ -57,16 +56,15 @@ void unload_counts_keys( fitsfile *fptr, const DigitiserCounts *ext )
   int nlev = ext->get_nlev();
   float dyn_levt = ext->get_dyn_levt();
 
-  if (Archive::verbose > 2) {
-  cerr << "saving dyn_levt" << dyn_levt << endl;
-  cerr << "saving ndigr " << ndigr << endl;
-  cerr << "saving diglev " << diglev << endl;
-  cerr << "saving dig_mode " << dig_mode << endl;
-  cerr << "saving npthist " << npthist << endl;
-  cerr << "saving nlev " << nlev << endl;
+  if (Archive::verbose > 2)
+  {
+    cerr << "saving dyn_levt" << dyn_levt << endl;
+    cerr << "saving ndigr " << ndigr << endl;
+    cerr << "saving diglev " << diglev << endl;
+    cerr << "saving dig_mode " << dig_mode << endl;
+    cerr << "saving npthist " << npthist << endl;
+    cerr << "saving nlev " << nlev << endl;
   }
-
-  char *nullstring = NULL;
 
   psrfits_update_key( fptr, "DYN_LEVT", dyn_levt );
   psrfits_update_key( fptr, "NDIGR", ndigr );
