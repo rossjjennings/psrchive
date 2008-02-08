@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Haydon Knight
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -15,58 +15,50 @@
 
 using namespace std;
 
-// for some strange reason, isnan is getting undefed somehow
-#if defined(__APPLE__) && defined (__POWERPC__)
-#define isnan(x) __isnanf(x)
-#endif
-
 /******************************************************************************/
 /* these two functions are used by load and unload functions. */
 /* so need to declare them here                               */ 
-
-//  Writes out compressed data
-
-static unsigned short int * packed_buf = NULL;
-static unsigned packed_buf_sz = 0;
 
 /*****************************************************************************/
 // reads in compressed data
 int fcompread (unsigned nvals, float * vals, FILE * fptr, bool big_endian)
 {
-  if (packed_buf_sz < nvals)  {
-    if (packed_buf) delete [] packed_buf; packed_buf = NULL;
-    packed_buf = new unsigned short int [nvals]; assert (packed_buf != NULL);
-    packed_buf_sz = nvals;
-  }
+  unsigned short int packed_buf [nvals];
 
   float offset,scale;
-  if (fread(&scale,sizeof(float),1,fptr) < 1)  {
+  if (fread(&scale,sizeof(float),1,fptr) < 1)
+  {
     perror ("fcompread: fail fread scale");
     return -1;
   }
-  if (fread(&offset,sizeof(float),1,fptr) < 1)  {
+  if (fread(&offset,sizeof(float),1,fptr) < 1)
+  {
     perror ("fcompread: fail fread offset");
     return -1;
   }
-  if (fread(packed_buf,sizeof(unsigned short int),nvals,fptr) < nvals)  {
+  if (fread(packed_buf,sizeof(unsigned short int),nvals,fptr) < nvals)
+  {
     perror ("fcompread: fail fread nvals");
     fprintf(stderr, "could not read %d bins from archive\n", nvals);
     return -1;
   }
-  if (big_endian) {
+  if (big_endian)
+  {
     FromBigEndian (scale);
     FromBigEndian (offset);
     N_FromBigEndian (nvals, packed_buf);
   }
-  else {
+  else
+  {
     FromLittleEndian   (scale);
     FromLittleEndian   (offset);
     N_FromLittleEndian (nvals, packed_buf);
   }
 
-  if(scale==0 ||isnan(scale) ){
-    fprintf(stderr, "fcompread error - scale==0, indicating imminent divsion by zero\n");
-    return(-1);
+  if (scale==0 || !finite(scale))
+  {
+    cerr << "fcompread: invalid scale=" << scale << endl;
+    return -1;
   }
 
   for (unsigned k=0;k<nvals;k++)
@@ -80,18 +72,14 @@ int fcompread (unsigned nvals, float * vals, FILE * fptr, bool big_endian)
   return 0;
 }
 
-int fcompwrite(unsigned nvals,const float * vals, FILE * fptr)
+int fcompwrite (unsigned nvals,const float * vals, FILE * fptr)
 {
   if (!vals) {
     cerr << "fcompwrite: invalid vals" << endl;
     return -1;
   }
 
-  if (packed_buf_sz < nvals)  {
-    if (packed_buf) delete [] packed_buf; packed_buf = NULL;
-    packed_buf = new unsigned short int [nvals]; assert (packed_buf != NULL);
-    packed_buf_sz = nvals;
-  }
+  unsigned short int packed_buf [nvals];
 
   assert (sizeof (unsigned short int) == 2);
 
@@ -131,7 +119,8 @@ int fcompwrite(unsigned nvals,const float * vals, FILE * fptr)
   fwrite (&offset, sizeof(offset), 1,fptr);
   fwrite (packed_buf,  nvals*sizeof(unsigned short int), 1,fptr);
 
-  if (ferror(fptr))  {
+  if (ferror(fptr))
+  {
     perror ("fcompwrite:");
     return -1;
   }
