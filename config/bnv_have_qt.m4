@@ -135,7 +135,7 @@ AC_DEFUN([BNV_HAVE_QT],
      test x"$with_Qt_lib_dir" = x"no" ||
      test x"$with_Qt_lib" = x"no"; then
     # user disabled Qt. Leave cache alone.
-    have_qt="User disabled Qt."
+    have_qt=no
   else
     # "yes" is a bogus option
     if test x"$with_Qt_dir" = xyes; then
