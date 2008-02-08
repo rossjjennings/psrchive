@@ -1,7 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 1998 by Russell Edwards
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 1998-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -273,21 +272,24 @@ int polynomial::unload (string* outstr) const
   char numstr[100];  // max length of string set by princeton at 86...
   int bytes = 0;
 
-  if (tempov11)  {
+  if (tempov11)
+  {
 #ifdef _DEBUG
-      cerr << "polynomial::unload tempo11" << endl;
+    cerr << "polynomial::unload tempo11" << endl;
 #endif
-
-    bytes += sprintf(numstr, "%-10.10s %9.9s%12.12s%22s%19f%7.3lf%7.3lf\n",
-          psrname.c_str(), date.c_str(), utc.c_str(), ref_time.strtempo(),
-          dm, doppler_shift, log_rms_resid);
+    bytes += sprintf (numstr, "%-10.10s %9.9s%12.12s%22s%19f%7.3lf%7.3lf\n",
+		      psrname.c_str(), date.c_str(), utc.c_str(),
+		      ref_time.strtempo().c_str(),
+		      dm, doppler_shift, log_rms_resid);
   }
-  else  {
+  else
+  {
 #ifdef _DEBUG
-      cerr << "polynomial::unload not tempo11" << endl;
+    cerr << "polynomial::unload not tempo11" << endl;
 #endif
     bytes += sprintf(numstr, "%-10.9s%9.9s%12.12s%22s%19f\n",
-          psrname.c_str(), date.c_str(), utc.c_str(), ref_time.strtempo(),dm); 
+		     psrname.c_str(), date.c_str(), utc.c_str(),
+		     ref_time.strtempo().c_str(), dm); 
   }
 
   *outstr += numstr;
