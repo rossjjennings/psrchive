@@ -50,9 +50,15 @@ int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
   return 0;
 }
 
-// no static kludgeyness, no memory leaks
+// #define _DEBUG 1
+
 string MJD::printdays (unsigned prec) const
 {
+#ifdef _DEBUG
+  cerr << "MJD::printdays prec=" << prec << " days=" << days 
+       << " secs=" << secs << " fracsec=" << fracsec << endl;
+#endif
+
   const unsigned size = prec + 80;
 
   char temp [size];
@@ -614,10 +620,15 @@ ostream& operator << (ostream& ostr, const MJD& mjd)
   if (!precision)
     precision = MJD::ostream_precision;
 
+  double ddays = mjd.in_days();
+
   if (precision < std::numeric_limits<double>::digits10)
-    return ostr << mjd.in_days();
-  else {
-    int digits = int(log(mjd.in_days())/log(10.0)) + 1;
+    return ostr << ddays;
+  else
+  {
+    int digits = 1;
+    if (ddays != 0)
+      digits = int(log(fabs(ddays))/log(10.0)) + 1;
     return ostr << mjd.printdays(precision-digits);
   }
 }
@@ -631,26 +642,10 @@ istream& operator >> (istream& istr, MJD& mjd)
   return istr;
 }
 
-bool equal (const MJD &m1, const MJD &m2) {
+bool equal (const MJD &m1, const MJD &m2)
+{
   return m1.days == m2.days &&
     m1.secs == m2.secs &&
     (fabs (m1.fracsec-m2.fracsec))/2.0 < MJD::precision;
 }
 
-#if 0
-bool equal (const MJD &m1, const MJD &m2) {
-  if (m1.days != m2.days) {
-    cerr << "equal: "<< iter <<" days: " << m1.days <<"!="<< m2.days << endl;
-    return false;
-  }
-  if (m1.secs != m2.secs) {
-    cerr << "equal: "<< iter <<" secs: " << m1.secs <<"!="<< m2.secs << endl;
-    return false;
-  }
-  if (fabs (m1.fracsec-m2.fracsec)  >= MJD::precision) {
-    cerr << "equal: "<< iter <<" fsecs diff: " << m1.fracsec-m2.fracsec << endl;
-    return false;
-  }
-  return true;
-}
-#endif
