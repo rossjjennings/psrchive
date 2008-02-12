@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/02/07 10:40:03 $
-   $Author: straten $ */
+   $Revision: 1.12 $
+   $Date: 2008/02/12 04:41:12 $
+   $Author: nopeer $ */
 
 #ifndef __psrfitsio_h
 #define __psrfitsio_h
@@ -21,6 +21,8 @@
 
 #include <string>
 #include <vector>
+
+
 
 //! Remove any existing rows from the current binary table
 void psrfits_clean_rows (fitsfile*);
@@ -321,10 +323,8 @@ void psrfits_read_col( fitsfile *fptr, const char *name, T *data,
 
 }
 
-
-
-
-
+//! Move to the HDU given, throw an exception if we fail
+void psrfits_move_hdu( fitsfile *fptr, char *hdu_name, int table_type = BINARY_TBL, int version = 0 );
 
 
 #endif

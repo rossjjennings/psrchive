@@ -9,45 +9,104 @@
 
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/DigitiserCounts.h"
-#include "psrfitsio.h"
-
-
-
-using namespace std;
-using namespace Pulsar;
+#include <psrfitsio.h>
+#include <templates.h>
 
 
 
 
-void unload_counts_table ( fitsfile *fptr, const DigitiserCounts *const_ext )
+using Pulsar::DigitiserCounts;
+using Pulsar::FITSArchive;
+using Pulsar::Archive;
+using std::cout;
+using std::endl;
+using std::cerr;
+
+
+
+
+/**
+ * CompressCounts     This function takes a vector of long values and compresses the data into an integer
+ *                    determining the scale and offset to be used to reconstruct the original data.
+ *
+ * @param data        The vector of actual counts that we are compressing
+ * @param target_data The vector to place the compressed data in
+ * @param scale       Where to store the scale that was used for compression
+ * @param offset      Where to store the offset that was used for compression.
+ */
+
+void CompressCounts( const vector<long> &data, vector<int> &target_data, float &scale, float &offset )
 {
-  DigitiserCounts *ext = const_cast<DigitiserCounts*>(const_ext);
+  // get the range of vlues
+  long min, max;
+  cyclic_minmax( data, 0, data.size()-1, min, max );
 
-  for( int i = 0; i < ext->rows.size(); i ++ )
+  // determine the scale and offset
+  float range = max - min;
+  scale = range / 65534.0f;
+  offset = min - ( -32768.0f * scale );
+
+  // adjust the target data
+  target_data.resize( data.size() );
+  for( int d = 0; d < data.size(); d ++ )
   {
-
-    if( !ext )
-    {
-      if (Archive::verbose > 2)
-      cerr << "Failed to fetch digitiser counts ext" << endl;
-      return;
-    }
-
-    try
-    {
-      psrfits_write_col (fptr, "DAT_SCL", ext->rows[i].data_scl, i+1 );
-      psrfits_write_col (fptr, "DAT_OFFS", ext->rows[i].data_offs, i+1 );
-
-      psrfits_write_col (fptr, "DATA", ext->rows[i].data, i+1 );
-    }
-    catch( Error e )
-    {
-      if (Archive::verbose > 2) cerr << e << endl;
-    }
+    target_data[d] = floor( ( float(data[d]) - offset ) / scale + 0.5f);
   }
 }
 
-void unload_counts_keys( fitsfile *fptr, const DigitiserCounts *ext )
+
+
+
+/**
+ * UnloadCountsTable  This function unloads the counts data into the fits file given
+ *
+ * @param fptr        The fits file to unload into
+ * @param const_ext   The DigitiserCounts extension to extract the data from
+ */
+
+void UnloadCountsTable ( fitsfile *fptr, const DigitiserCounts *ext )
+{
+  int num_counts = ext->get_npthist() * ext->get_ndigr();
+
+  int status;
+  fits_insert_rows (fptr, 0, ext->subints.size(), &status);
+
+  if( status != 0 )
+    throw FITSError(status, "UnloadCountsTable", "Failed to insert rows" );
+
+  // for each subint
+  //   determine the min and max counts
+  //   determine the range (max - min)
+  //   determine the scale (65534 / range)
+  //   determine the offset (min - ( -32768 * scale ) )
+
+  int num_subints = ext->subints.size();
+  for( int s = 0; s < num_subints; s ++ )
+  {
+    vector<int> int_data;
+    float scale;
+    float offset;
+
+    CompressCounts( ext->subints[s].data, int_data, scale, offset );
+
+    psrfits_write_col( fptr, "DAT_SCL", scale, s+1 );
+    psrfits_write_col( fptr, "DAT_OFFS", offset, s+1 );
+    psrfits_write_col( fptr, "DATA", int_data, s+1 );
+  }
+}
+
+
+
+
+
+/**
+ * UnloadCountsKeys   Unload the DIG_CNTS header parameters to the fits file given
+ *
+ * @param fptr        The fits file to unload into
+ * @param const_ext   The DigitiserCounts extension to extract the data from
+ */
+
+void UnloadCountsKeys( fitsfile *fptr, const DigitiserCounts *ext )
 {
   int ndigr = ext->get_ndigr();
   string diglev = ext->get_diglev();
@@ -74,27 +133,24 @@ void unload_counts_keys( fitsfile *fptr, const DigitiserCounts *ext )
   psrfits_update_key( fptr, "NLEV", nlev );
 
   if (Archive::verbose > 2)
-  cerr << "digitiser counts keys unloaded" << endl;
+    cerr << "digitiser counts keys unloaded" << endl;
 }
 
 
-void
-Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserCounts* ext )
+
+
+/**
+ * FITSArchive::unload   Unload the DigitierCounts extension to the fits file given
+ *
+ * @param fptr           The fits file to unload to
+ * @param const_ext      The DigitiserCounts extension to unload
+ **/
+
+void Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserCounts* const_ext )
 {
-  int status = 0;
+  psrfits_move_hdu( fptr, "DIG_CNTS" );
 
-  if (verbose == 3)
-    cerr << "FITSArchive::unload(DigitiserCounts) entered" << endl;
+  UnloadCountsKeys( fptr, const_ext );
 
-  fits_movnam_hdu (fptr, BINARY_TBL, "DIG_CNTS", 0, &status);
-
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload(DigitiserCounts)",
-                     "fits_movnam_hdu DIG_CNTS");
-
-  unload_counts_keys( fptr, ext );
-
-  fits_insert_rows (fptr, 0, ext->rows.size(), &status);
-
-  unload_counts_table( fptr, ext );
+  UnloadCountsTable( fptr, const_ext );
 }

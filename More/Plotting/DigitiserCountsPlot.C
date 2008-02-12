@@ -15,8 +15,12 @@
 
 
 
-using namespace Pulsar;
-using namespace std;
+using Pulsar::DigitiserCounts;
+using Pulsar::DigitiserCountsPlot;
+using std::string;
+using std::cerr;
+using std::cout;
+using std::endl;
 
 
 
@@ -43,7 +47,7 @@ DigitiserCountsPlot::DigitiserCountsPlot()
 /**
  * get_interface
  *
- *  DOES     - Creates a text interfaces to this object
+ *  DOES     - Creates a tcounts interfaces to this object
  *  RECEIVES - Nothing
  *  RETURNS  - a DigitiserCountsPlot::Interface pointer
  *  THROWS   - Nothing
@@ -60,9 +64,9 @@ TextInterface::Parser *DigitiserCountsPlot::get_interface()
 /**
  * CheckCounts
  *
- *  DOES     - Do a few basic checks to see if that Archive given has a valid DigitiserCounts extension.
+ *  DOES     - Do a few basic checks to see if that Archive given has a valid DigitiserCounts countsension.
  *             if we can't find a problem with it, set valid_data to true.
- *  RECEIVES - The extension to examine
+ *  RECEIVES - The countsension to examine
  *  RETURNS  - Nothing
  *  THROWS   - Nothing
  *  TODO     - Nothing
@@ -72,23 +76,23 @@ void DigitiserCountsPlot::CheckCounts( const Archive *const_data )
 {
   Archive *data = const_cast<Archive*>( const_data );
 
-  Reference::To<DigitiserCounts> ext = data->get<DigitiserCounts>();
+  Reference::To<DigitiserCounts> counts = data->get<DigitiserCounts>();
 
-  if( !ext )
+  if( !counts )
   {
     if( verbose > 1 )
-      cerr << "Attempted to plot DigitiserCounts on an archive without a DigitiserCounts extension" << endl;
+      cerr << "Attempted to plot DigitiserCounts on an archive without a DigitiserCounts countsension" << endl;
     return;
   }
 
-  int npthist = ext->get_npthist();
-  int ndigr = ext->get_ndigr();
-  int nlev = ext->get_nlev();
+  int npthist = counts->get_npthist();
+  int ndigr = counts->get_ndigr();
+  int nlev = counts->get_nlev();
 
   if( npthist == 0 || nlev == 0 || ndigr == 0 )
   {
     if( verbose > 1 )
-      cerr << "Attempted to plot DigitiserCounts on an archive with parameter (npthist,ndigr,nlev)" << endl;
+      cerr << "Attempted to plot DigitiserCounts on an archive without parameter (npthist,ndigr,nlev)" << endl;
     return;
   }
   
@@ -107,26 +111,26 @@ void DigitiserCountsPlot::CheckCounts( const Archive *const_data )
  *  TODO     - Nothing
  **/
 
-void DigitiserCountsPlot::prepare( const Archive *data )
+void DigitiserCountsPlot::prepare( const Archive *const_data )
 {
-  CheckCounts( data );
+  CheckCounts( const_data );
 
   if( !valid_data )
     return;
 
-  Reference::To<Archive> ncdata = const_cast<Archive*>(data);
-  if( !ncdata )
+  Reference::To<Archive> data = const_cast<Archive*>(const_data);
+  if( !data )
     return;
 
-  Reference::To<DigitiserCounts> ext = ncdata->get<DigitiserCounts>();
+  Reference::To<DigitiserCounts> counts = data->get<DigitiserCounts>();
 
-  if( !ext )
+  if( !counts )
     return;
 
 
-  int num_rows = ext->rows.size();
-  int npthist = ext->get_npthist();
-  int ndigr = ext->get_ndigr();
+  int num_rows = counts->subints.size();
+  int npthist = counts->get_npthist();
+  int ndigr = counts->get_ndigr();
 
   // Make sure srange.first,srange.second have the subint range we want to display
   if( srange.first == -1 && srange.second == -1 )
@@ -144,15 +148,15 @@ void DigitiserCountsPlot::prepare( const Archive *data )
   }
 
   // Should optimize this, at present just create a separate array for data thats scaled properly
-  adjusted_data.resize( num_rows );
-  for( int s = 0; s < num_rows; s ++ )
-  {
-    adjusted_data[s].resize( ndigr * npthist );
-    for( int d = 0; d < ndigr * npthist; d ++ )
-    {
-      adjusted_data[s][d] = float(ext->rows[s].data[d]) * ext->rows[s].data_scl + ext->rows[s].data_offs;
-    }
-  }
+//   adjusted_data.resize( num_rows );
+//   for( int s = 0; s < num_rows; s ++ )
+//   {
+//     adjusted_data[s].resize( ndigr * npthist );
+//     for( int d = 0; d < ndigr * npthist; d ++ )
+//     {
+//       adjusted_data[s][d] = float(counts->rows[s].data[d]) * counts->rows[s].data_scl + counts->rows[s].data_offs;
+//     }
+//   }
 
   // Determine the first and last indices with non zero data in all channels/subints
   // Some files have data values close to zero but negligible, treat anything under
@@ -163,12 +167,10 @@ void DigitiserCountsPlot::prepare( const Archive *data )
   {
     for( int c = 0; c < ndigr; c ++ )
     {
-      bool scanning_first = true;
       for( int v = 0; v < npthist; v ++ )
       {
-        //float next_value = ext->rows[s].data[c*npthist + v];
-        float next_value = adjusted_data[s][c*npthist + v];
-        if( next_value > 10 )
+        float ncounts_value = counts->subints[s].data[c*npthist + v];
+        if( ncounts_value > 10 )
         {
           if( v < first_nz )
             first_nz = v;
@@ -177,9 +179,8 @@ void DigitiserCountsPlot::prepare( const Archive *data )
       }
       for( int v = npthist - 1; v >= 0; v -- )
       {
-        // float next_value = ext->rows[s].data[c*npthist + v];
-        float next_value = adjusted_data[s][c*npthist + v];
-        if( next_value > 10 )
+        float ncounts_value = counts->subints[s].data[c*npthist + v];
+        if( ncounts_value > 10 )
         {
           if( v > last_nz )
             last_nz = v;
@@ -200,8 +201,8 @@ void DigitiserCountsPlot::prepare( const Archive *data )
   max_count = FLT_MIN;
   for( int s = srange.first ; s <= srange.second; s ++ )
   {
-    //cyclic_minmax( ext->rows[s].data, first_nz, last_nz, min_count, max_count );
-    cyclic_minmax( adjusted_data[s], first_nz, last_nz, min_count, max_count );
+    //cyclic_minmax( counts->rows[s].data, first_nz, last_nz, min_count, max_count );
+    cyclic_minmax( counts->subints[s].data, first_nz, last_nz, min_count, max_count );
   }
 
   // y_range is how far up the y axis each subint goes
@@ -217,7 +218,7 @@ void DigitiserCountsPlot::prepare( const Archive *data )
   // TODO find out why we need to hard code the buffer here
   get_frame()->get_y_scale()->set_minmax( min_count , max_count + y_jump * (srange.second - srange.first) );
   get_frame()->get_y_scale()->set_buf_norm( 0.05 );
-  get_frame()->get_x_scale()->set_minmax( 0, ext->get_ndigr() );
+  get_frame()->get_x_scale()->set_minmax( 0, counts->get_ndigr() );
   get_frame()->hide_axes();
 }
 
@@ -233,19 +234,19 @@ void DigitiserCountsPlot::prepare( const Archive *data )
  *  TODO     - Nothing
  **/
 
-void DigitiserCountsPlot::draw( const Archive *data )
+void DigitiserCountsPlot::draw( const Archive *const_data )
 {
-  Reference::To<Archive> clone = data->clone();
+  Reference::To<Archive> data = const_cast<Archive*>( const_data );
 
   if( !valid_data )
     return;
 
-  Reference::To<DigitiserCounts> ext = clone->get<DigitiserCounts>();
-  if( !ext )
+  Reference::To<DigitiserCounts> counts = data->get<DigitiserCounts>();
+  if( !counts )
     return;
 
-  int ndigr = ext->get_ndigr();
-  int npthist = ext->get_npthist();
+  int ndigr = counts->get_ndigr();
+  int npthist = counts->get_npthist();
 
   // the range of non zero indices
   int nz_range = (last_nz - first_nz) + 1;
@@ -254,8 +255,8 @@ void DigitiserCountsPlot::draw( const Archive *data )
   //   save the old color
   //   for each digitiser channel
   //     for each index in the non zero range
-  //       calculate the next x coord
-  //       calculate the next y coord
+  //       calculate the ncounts x coord
+  //       calculate the ncounts y coord
   //     draw a binned histogram of x and y
   //   restore the old color
   float xstep = 1.0 / nz_range;
@@ -263,7 +264,7 @@ void DigitiserCountsPlot::draw( const Archive *data )
   {
     int old_col;
     cpgqci( &old_col );
-    int next_col = old_col;
+    int ncounts_col = old_col;
 
     for( int c = 0; c < ndigr; c ++ )
     {
@@ -272,10 +273,9 @@ void DigitiserCountsPlot::draw( const Archive *data )
       for( int j = 0; j < nz_range; j ++ )
       {
         xs[j] = j * xstep + c;
-        // ys[j] = ext->rows[s].data[(first_nz+j) + c * npthist ] + y_jump * (s-srange.first);
-        ys[j] = adjusted_data[s][(first_nz+j) + c * npthist] + y_jump * (s-srange.first);
+        ys[j] = counts->subints[s].data[(first_nz+j) + c * npthist] + y_jump * (s-srange.first);
       }
-      cpgsci( next_col++ );
+      cpgsci( ncounts_col++ );
       cpgbin( nz_range, xs, ys, 1 );
     }
     cpgsci( old_col );

@@ -6,7 +6,12 @@
  ***************************************************************************/
 #include "psrfitsio.h"
 
-using namespace std;
+
+
+using std::string;
+using std::auto_ptr;
+
+
 
 void psrfits_clean_rows (fitsfile* ffptr)
 {
@@ -101,4 +106,32 @@ void* FITS_void_ptr (const string& txt)
   ptr = const_cast<char*> (txt.c_str());
   return &ptr;
 }
+
+
+/**
+ * psrfits_move_hdu           Simple wrapper function for fits_movnam_hdu, assumes defaults for table type and version.
+ *
+ * @param fptr                The file to find the hdu in
+ * @param hdu_name            The name of the hdu we want
+ * @param table_type          The type of table, ours are always BINARY_TBL
+ * @param version             Some version number ???, we always use 0
+ **/
+
+void psrfits_move_hdu( fitsfile *fptr, char *hdu_name, int table_type, int version )
+{
+  int status = 0;
+  fits_movnam_hdu (fptr, table_type, hdu_name, version, &status);
+
+  if( status == BAD_HDU_NUM )
+  {
+    string msg = "Bad HDU number '";
+    msg += hdu_name;
+    msg += "'";
+    throw FITSError( status, "psrfits_move_hdu", msg.c_str() );
+  }
+
+  if( status != 0 )
+    throw FITSError( status, "psrfits_move_hdu", "Failed to move to HDU" );
+}
+
 

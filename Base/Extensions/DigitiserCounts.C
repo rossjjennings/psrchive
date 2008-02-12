@@ -11,7 +11,7 @@
 
 
 
-using namespace Pulsar;
+using Pulsar::DigitiserCounts;
 
 
 
@@ -38,7 +38,7 @@ const DigitiserCounts& DigitiserCounts::operator= (const DigitiserCounts& extens
   npthist = extension.npthist;
   diglev = extension.diglev;
   ndigr = extension.ndigr;
-  rows = extension.rows;
+  subints = extension.subints;
 
   return *this;
 }
@@ -56,16 +56,5 @@ TextInterface::Parser* DigitiserCounts::get_interface()
 
 
 
-/////////////////////// row
-
-DigitiserCounts::row::row()
-{
-}
-
-
-
-DigitiserCounts::row::~row()
-{
-}
 
 

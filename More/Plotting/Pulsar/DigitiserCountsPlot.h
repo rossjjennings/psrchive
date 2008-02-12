@@ -54,7 +54,7 @@ namespace Pulsar
     void set_subint( int s_subint ) { subint = s_subint; }
 
   private:
-    vector< vector< float > > adjusted_data;
+    //vector< vector< float > > adjusted_data;
 
     float min_count;
     float max_count;

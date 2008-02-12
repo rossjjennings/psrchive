@@ -1,21 +1,30 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by David Smith
+ *   Copyright (C) 2007 by David Smith
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/DigitiserCounts.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/11/08 03:37:18 $
+   $Revision: 1.7 $
+   $Date: 2008/02/12 04:41:12 $
    $Author: nopeer $ */
+
+
 
 #ifndef __Pulsar_DigitiserCounts_h
 #define __Pulsar_DigitiserCounts_h
 
+
+
 #include "Pulsar/Archive.h"
 #include <TextInterface.h>
+
+
+
+using std::string;
+using std::vector;
 
 
 
@@ -48,39 +57,36 @@ namespace Pulsar
       Interface( DigitiserCounts *s_instance );
     };
 
-    //! class to represent a row
-    class row
+    //! Class representing an array of digitiser counts for a subint
+    class SubintCounts
     {
-    public:
-      row();
-      ~row();
-
-      float data_offs;
-      float data_scl;
-
-      std::vector<int> data;
+      public:
+	SubintCounts() {};
+	~SubintCounts() {};
+	
+	vector<long> data;
     };
-    std::vector<row> rows;
+    vector<SubintCounts> subints;
 
-    void set_dig_mode( std::string s_dig_mode ) { dig_mode = s_dig_mode; }
+    void set_dig_mode( string s_dig_mode ) { dig_mode = s_dig_mode; }
     void set_nlev( int s_nlev ) { nlev = s_nlev; }
     void set_npthist( int s_npthist ) { npthist = s_npthist; }
-    void set_diglev( std::string s_diglev ) { diglev = s_diglev; }
+    void set_diglev( string s_diglev ) { diglev = s_diglev; }
     void set_ndigr(int s_ndigr ) { ndigr = s_ndigr; }
     void set_dyn_levt( float s_dyn_levt ) { dyn_levt = s_dyn_levt; }
 
-    std::string get_dig_mode( void ) const { return dig_mode; }
+    string get_dig_mode( void ) const { return dig_mode; }
     int get_nlev( void ) const { return nlev; }
     int get_npthist( void ) const { return npthist; }
-    std::string get_diglev( void ) const { return diglev; }
+    string get_diglev( void ) const { return diglev; }
     int get_ndigr( void ) const { return ndigr; }
     float get_dyn_levt( void ) const { return dyn_levt; }
   private:
-    std::string dig_mode;
+    string dig_mode;
     int nlev;
     int npthist;
     int ndigr;
-    std::string diglev;
+    string diglev;
     float dyn_levt;
   };
 }
