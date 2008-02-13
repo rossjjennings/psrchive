@@ -138,20 +138,29 @@ void LoadCounts( fitsfile *fptr, Reference::To<DigitiserCounts> counts )
 
 void FITSArchive::load_DigitiserCounts (fitsfile* fptr)
 {
-  psrfits_move_hdu( fptr, "DIG_CNTS" );
+  try
+  {
+    psrfits_move_hdu( fptr, "DIG_CNTS" );
 
-  Reference::To< DigitiserCounts > ext = new DigitiserCounts();
+    Reference::To< DigitiserCounts > ext = new DigitiserCounts();
 
-  if( !ext )
-    throw Error( BadAllocation,
-                 "Pulsar::FITSArchive::load_DigitiserCounts",
-                 "failed to allocate DigitiserCounts" );
+    if( !ext )
+      throw Error( BadAllocation,
+                   "Pulsar::FITSArchive::load_DigitiserCounts",
+                   "failed to allocate DigitiserCounts" );
 
-  LoadKeys( fptr, ext );
+    LoadKeys( fptr, ext );
 
-  LoadCounts( fptr, ext );
+    LoadCounts( fptr, ext );
 
-  add_extension( ext );
+    add_extension( ext );
+  }
+  catch( Error e )
+  {
+    // If any problem occured, we simply fail to load the extension.
+    if( Archive::verbose > 2 )
+      cerr << "FITSArchive::load_DigitiserCounts failed with error" << e << endl;
+  }
 }
 
 
