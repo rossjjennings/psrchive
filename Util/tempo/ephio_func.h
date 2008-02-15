@@ -8,18 +8,25 @@
    ADVICE!:  Do not include this file directly.  Instead, #include "ephio.h"
 
    $Source: /cvsroot/psrchive/psrchive/Util/tempo/ephio_func.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/09/22 20:42:18 $
+   $Revision: 1.6 $
+   $Date: 2008/02/15 02:03:58 $
    $Author: straten $ 
 */
 
 #ifndef __EPHIO_FUNC_H
 #define __EPHIO_FUNC_H
 
+#define EPH_TYPE_STRING 0
+#define EPH_TYPE_REAL 1
+#define EPH_TYPE_HMS 2
+#define EPH_TYPE_DMS 3
+#define EPH_TYPE_MJD 4
+#define EPH_TYPE_INT 5
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-  
+
   extern int eph_rd (char* filename, int* parmStatus,
 		     char strs[EPH_NUM_KEYS][EPH_STR_LEN],
 		     double* value, int* integer, double* error);
