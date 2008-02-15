@@ -59,10 +59,12 @@ int rd_eph_wrap (int uselun, char *fname, int lun,
 		 int value_integer[EPH_NUM_KEYS],
 		 double error_double[EPH_NUM_KEYS])
 {
-  /* Array passed to Fortran routines instead of two-D C array */
-  char v_str[EPH_NUM_KEYS*EPH_STR_LEN];
   int retval, i,j;
 
+  /* Array passed to Fortran routines instead of two-D C array */
+  char* v_str = malloc (EPH_NUM_KEYS*EPH_STR_LEN);
+
+  /* fortran space-padded strings */
   memset (v_str, ' ', EPH_NUM_KEYS*EPH_STR_LEN);
 
   if (uselun)
@@ -85,6 +87,8 @@ int rd_eph_wrap (int uselun, char *fname, int lun,
 
     value_str[i][j] = '\0';
   }
+
+  free (v_str);
 
   return retval;
 }
@@ -164,9 +168,10 @@ int wr_eph_wrap (int uselun, char *fname, int lun,
 		 int value_integer[EPH_NUM_KEYS],
 		 double error_double[EPH_NUM_KEYS])
 {
-  /* Array passed to Fortran routines instead of two-D C array */
-  char v_str[EPH_NUM_KEYS*EPH_STR_LEN];
   int i,j, retval;
+
+  /* Array passed to Fortran routines instead of two-D C array */
+  char* v_str = malloc (EPH_NUM_KEYS*EPH_STR_LEN);
 
   /* fortran space-padded strings */
   memset (v_str, ' ', EPH_NUM_KEYS*EPH_STR_LEN);
@@ -188,6 +193,8 @@ int wr_eph_wrap (int uselun, char *fname, int lun,
     retval = F77_wr_eph (fname, parmStatus, v_str, value_double,
 			 value_integer, error_double,
 			 strlen(fname), EPH_STR_LEN);
+
+  free (v_str);
 
   return retval;
 }
