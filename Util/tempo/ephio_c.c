@@ -185,13 +185,9 @@ int wr_eph_wrap (int uselun, char *fname, int lun,
     retval = F77_wr_eph_lun (&lun, parmStatus, v_str, value_double,
 			     value_integer, error_double, EPH_STR_LEN);
   else
-  {
-    fprintf (stderr, "call wr_eph %s\n", fname);
-
     retval = F77_wr_eph (fname, parmStatus, v_str, value_double,
 			 value_integer, error_double,
 			 strlen(fname), EPH_STR_LEN);
-  }
 
   return retval;
 }
