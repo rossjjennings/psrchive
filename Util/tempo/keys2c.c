@@ -73,6 +73,9 @@ main(int argc, char** argv)
   fprintf (fouth,
 	   "#ifndef EPHIO_H\n#define EPHIO_H\n\n"
 	   "#define EPH_NUM_KEYS %d\n", nelem);
+
+  maxlen += 2;
+
   fprintf (fouth, 
 	   "#define EPH_STR_LEN 32\n"
 	   "#define EPH_MAX_KEY_LEN %d\n\n", maxlen);
@@ -84,7 +87,7 @@ main(int argc, char** argv)
     fprintf(fouth, "#define EPH_%s %d\n", key[i], i);
   
   fprintf (fouth,
-	  "\n\nextern char parmNames[EPH_NUM_KEYS][16];\n"
+	  "\n\nextern char parmNames[EPH_NUM_KEYS][EPH_MAX_KEY_LEN];\n"
 	   "extern int parmTypes[EPH_NUM_KEYS];\n"
 	   "extern int parmError[EPH_NUM_KEYS];\n\n"
 	   "\n\n#endif\n");
@@ -95,7 +98,7 @@ main(int argc, char** argv)
 
   fprintf(foutc, "#include \"ephio.h\"\n\n");
 
-  fprintf(foutc, "char parmNames[EPH_NUM_KEYS][16] = {\n");
+  fprintf(foutc, "char parmNames[EPH_NUM_KEYS][EPH_MAX_KEY_LEN] = {\n");
   for (i=0; i < nelem-1; i++)
     fprintf(foutc, "                      \"%s\",\n", key[i]);
   fprintf(foutc, "                      \"%s\"};\n\n", key[i]);
