@@ -22,11 +22,13 @@ const Phase Phase::zero;
 
 void Phase::settle ()
 {
-  if (turns>0 && fturns < -rounding_threshold) {
+  if (turns>0 && fturns < -rounding_threshold)
+  {
     fturns += 1.0;
     turns--;
   }
-  if (turns<0 && fturns > rounding_threshold) {
+  if (turns<0 && fturns > rounding_threshold)
+  {
     fturns -= 1.0;
     turns++;
   }
@@ -41,27 +43,36 @@ Phase::Phase (double tns)
 
 Phase::Phase (int64 tns, double ftns) 
 {
+  set (tns, ftns);
+}
+
+void Phase::set (int64 tns, double ftns)
+{
   int64 iturns = (int64) ftns;
   turns = tns + iturns;
   fturns = ftns - double (iturns);
   settle ();
 }
 
-double Phase::in_turns() const {
+double Phase::in_turns() const
+{
   return double(turns)+fturns;
 }
 
-int64 Phase::intturns() const {
+int64 Phase::intturns() const
+{
   return turns;
 }
 
-double Phase::fracturns() const {
+double Phase::fracturns() const
+{
   return fturns;
 }
 
-string Phase::strprint(int precision) const
+string Phase::strprint (int precision) const
 {
-  if (precision>DBL_DIG) {
+  if (precision>DBL_DIG)
+  {
     cerr << "Phase::strprint warning: precision of " << precision 
 	 << " exceeds that of a double" << endl;
     cerr << "- truncating to a precision of " << DBL_DIG << endl;
@@ -82,40 +93,45 @@ string Phase::strprint(int precision) const
     throw Error (InvalidState, "Phase::strprint",
                  "fturns=%lf overflows text buffer length=%u", fturns, size);
 
-  if (fturns>=0)
-    s += &(ftn[1]);
+  if (!finite(fturns))
+  {
+    s += ".NaN";
+  }
   else
-    s += &(ftn[2]);
+  {
+    sprintf(ftn, "%.*lf", precision, fturns);
+
+    if (fturns>=0)
+      s += &(ftn[1]);
+    else
+      s += &(ftn[2]);
+  }
 
   return s;
 }
 
-Phase& Phase::operator = (double turns)
+const Phase& Phase::operator = (const Phase &copy)
 {
-  *this = Phase(turns);
+  turns = copy.turns;
+  fturns = copy.fturns;
+
   return *this;
 }
 
-Phase& Phase::operator = (const Phase &in_Phase)
+Phase operator + (const Phase &p1, const Phase &p2)
 {
-  if (this != &in_Phase) {
-    turns = in_Phase.turns;
-    fturns = in_Phase.fturns;
-  }
-  return *this;
-}
-
-Phase operator + (const Phase &p1, const Phase &p2) {
   return Phase(p1.turns + p2.turns,
 	       p1.fturns + p2.fturns); 
 }
 
-Phase operator - (const Phase &p1, const Phase &p2) {
+Phase operator - (const Phase &p1, const Phase &p2)
+{
   return Phase(p1.turns - p2.turns,
 	       p1.fturns - p2.fturns); 
 }
 
-Phase operator - (const Phase &p) {
+Phase operator - (const Phase &p)
+{
   return Phase( -p.turns, -p.fturns );
 }
 
@@ -143,29 +159,34 @@ MJD operator * (const Phase &p1, double period)
   return MJD (b_days+s_days, int(b_seconds+s_seconds), b_fracsec+s_fracsec);
 }
 
-MJD operator / (const Phase &p1, double frequency) {
+MJD operator / (const Phase &p1, double frequency)
+{
   return p1 * (1.0/frequency);
 }
 
-Phase& Phase::operator ++ () {
+const Phase& Phase::operator ++ ()
+{
   turns ++;
   settle();
   return *this;
 }
 
-Phase& Phase::operator -- () {
+const Phase& Phase::operator -- ()
+{
   turns --;
   settle();
   return *this;
 }
 
-Phase& Phase::operator += (int iturns) {
+const Phase& Phase::operator += (int iturns)
+{
   turns += iturns;
   settle();
   return *this;
 }
 
-Phase& Phase::operator -= (int iturns) {
+const Phase& Phase::operator -= (int iturns)
+{
   turns -= iturns;
   settle();
   return *this;
@@ -174,65 +195,86 @@ Phase& Phase::operator -= (int iturns) {
 
 // turns is converted to a Phase first, in order that large 'turns' does not
 // destroy the precision of 'p1.fturns' -- WvS
-Phase operator + (const Phase &p1, double turns) {
+Phase operator + (const Phase &p1, double turns)
+{
   return p1 + Phase(turns);
 }
 
-Phase operator - (const Phase &p1, double turns) {
+Phase operator - (const Phase &p1, double turns)
+{
   return p1 - Phase(turns);
 }
 
-Phase& Phase::operator += (double in_turns) {
-  return *this = *this + Phase (in_turns);
+const Phase& Phase::operator += (double tns)
+{
+  int64 add_turns = (int64) tns;
+  double add_fturns = tns - double (add_turns);
+
+  set (turns + add_turns, fturns + add_fturns);
+  return *this;
 }
 
-Phase& Phase::operator -= (double in_turns) {
-  return *this = *this - Phase (in_turns);
+const Phase& Phase::operator -= (double tns)
+{
+  int64 sub_turns = (int64) tns;
+  double sub_fturns = tns - double (sub_turns);
+
+  set (turns - sub_turns, fturns - sub_fturns);
+  return *this;
 }
 
-Phase& Phase::operator += (const Phase &p) {
-  return *this = *this + p;
+const Phase& Phase::operator += (const Phase &add)
+{
+  set (turns + add.turns, fturns + add.fturns);
+  return *this;
 }
 
-Phase& Phase::operator -= (const Phase &p) {
-  return *this = *this - p;
+const Phase& Phase::operator -= (const Phase &sub)
+{
+  set (turns - sub.turns, fturns - sub.fturns);
+  return *this;
 }
 
 static const double precision_limit = 2.0 * pow (10.0,-DBL_DIG);
 
-int operator > (const Phase &p1, const Phase &p2)
+bool operator > (const Phase &p1, const Phase &p2)
 {
   if (p1.turns != p2.turns)
     return p1.turns > p2.turns;
 
   // double precision_limit = 2*pow(10,-DBL_DIG);
   if (fabs (p1.fturns-p2.fturns) < precision_limit)
-    return 0;
+    return false;
   else 
     return p1.fturns > p2.fturns;
 }
 
-int operator == (const Phase &p1, const Phase &p2) {
+bool operator == (const Phase &p1, const Phase &p2)
+{
   if (p1.turns == p2.turns &&
       fabs (p1.fturns-p2.fturns) < precision_limit) 
-    return 1;
+    return true;
   else
-    return 0;  
+    return false;  
 }
 
-int operator >= (const Phase &p1, const Phase &p2) {
+bool operator >= (const Phase &p1, const Phase &p2)
+{
   return p1>p2 || p1==p2;
 }
 
-int operator < (const Phase &p1, const Phase &p2) {
+bool operator < (const Phase &p1, const Phase &p2)
+{
   return !(p1 >= p2);
 }
 
-int operator <= (const Phase &p1, const Phase &p2) {
+bool operator <= (const Phase &p1, const Phase &p2)
+{
   return p1<p2 || p1==p2;
 }
 
-int operator != (const Phase &p1, const Phase &p2) {
+bool operator != (const Phase &p1, const Phase &p2)
+{
   return !(p1 == p2);
 }
 

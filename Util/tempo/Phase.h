@@ -32,12 +32,12 @@ class Phase {
 
   static const Phase zero;
 
-  ~Phase(){}
-  Phase (int64 tns, double ftns);
+  //! Default constructor
   Phase (double turns=0);
 
-  Phase& operator= (const Phase &in_Phase);
-  Phase& operator= (double turns);
+  Phase (int64 tns, double ftns);
+
+  const Phase& operator= (const Phase&);
 
   friend Phase operator + (const Phase &, double); 
   friend Phase operator - (const Phase &, double); 
@@ -49,26 +49,28 @@ class Phase {
   friend MJD operator * (const Phase &, double period);
   friend MJD operator / (const Phase &, double frequency);
 
-  Phase& operator += (const Phase &);
-  Phase& operator -= (const Phase &);
-  Phase& operator += (double);
-  Phase& operator -= (double);
-  Phase& operator += (int);
-  Phase& operator -= (int);
+  const Phase& operator += (const Phase &);
+  const Phase& operator -= (const Phase &);
+  const Phase& operator += (double);
+  const Phase& operator -= (double);
+  const Phase& operator += (int);
+  const Phase& operator -= (int);
   // increment/decrement by one turn
-  Phase& operator ++ ();
-  Phase& operator -- ();
+  const Phase& operator ++ ();
+  const Phase& operator -- ();
 
-  friend int operator > (const Phase &, const Phase &) ;
-  friend int operator < (const Phase &, const Phase &) ;
-  friend int operator >= (const Phase &, const Phase &);
-  friend int operator <= (const Phase &, const Phase &);
-  friend int operator == (const Phase &, const Phase &);
-  friend int operator != (const Phase &, const Phase &);
+  friend bool operator > (const Phase &, const Phase &) ;
+  friend bool operator < (const Phase &, const Phase &) ;
+  friend bool operator >= (const Phase &, const Phase &);
+  friend bool operator <= (const Phase &, const Phase &);
+  friend bool operator == (const Phase &, const Phase &);
+  friend bool operator != (const Phase &, const Phase &);
 
   Phase Ceil  ();
   Phase Floor ();
   Phase Rint  ();
+
+  void set (int64 tns, double ftns);
 
   double in_turns() const;
   int64  intturns() const;
