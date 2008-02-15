@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.51 $
-   $Date: 2008/02/04 11:30:55 $
+   $Revision: 1.52 $
+   $Date: 2008/02/15 02:04:09 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -93,16 +93,16 @@ public:
 
   static double precision;
 
-  //! null constructor
-  polynomial() { init(); }
+  //! default constructor
+  polynomial ();
 
   //! copy constructor
-  polynomial (const polynomial& poly) { operator = (poly); }
+  polynomial (const polynomial& poly);
 
   //! destructor
-  ~polynomial() {}
+  ~polynomial ();
 
-  polynomial& operator = (const polynomial& poly);
+  const polynomial& operator = (const polynomial& poly);
 
   int load (std::string* instr);
   int unload (std::string *outstr) const;
@@ -158,8 +158,8 @@ public:
   Phase end_phase( double f = flexibility ) const
   { return phase (end_time(f)); };
   
-  friend int operator == (const polynomial &, const polynomial &);
-  friend int operator != (const polynomial &, const polynomial &);
+  friend bool operator == (const polynomial &, const polynomial &);
+  friend bool operator != (const polynomial &, const polynomial &);
 
   // MPI functions
 #ifdef HAVE_MPI
@@ -207,10 +207,10 @@ public:
   std::vector<polynomial> pollys;
 
   //! Default constructor
-  polyco () { init(); }
+  polyco ();
 
   //! Copy constructor
-  polyco (const polyco& poly) { init(); operator = (poly); }
+  polyco (const polyco& poly);
 
   //! Destructor
   ~polyco ();
@@ -322,8 +322,8 @@ public:
   Phase start_phase () const { return pollys.front().start_phase(); };
   Phase end_phase ()   const { return pollys.back().end_phase(); };
 
-  friend int operator == (const polyco &, const polyco &);
-  friend int operator != (const polyco &, const polyco &);
+  friend bool operator == (const polyco &, const polyco &);
+  friend bool operator != (const polyco &, const polyco &);
 
 #ifdef HAVE_MPI
   friend int mpiPack_size (const polyco&, MPI_Comm comm, int* size);
@@ -333,21 +333,19 @@ public:
                         polyco*, MPI_Comm comm);
 #endif
 
-protected:
+private:
 
   // these attributes enable optimized i_nearest
-  int last_index;
+  mutable int last_index;
 
-  MJD last_epoch;
-  double last_span_epoch;
+  mutable MJD last_epoch;
+  mutable double last_span_epoch;
 
-  Phase last_phase;
-  double last_span_phase;
+  mutable Phase last_phase;
+  mutable double last_span_phase;
 
   void init();
   void set_last (int i) const;
-  void set_last_work (int i);
-
 };
 
 inline std::ostream& operator<< (std::ostream& ostr, const polyco& p)

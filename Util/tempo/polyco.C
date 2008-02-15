@@ -48,31 +48,47 @@ void polynomial::init()
   tempov11 = 0;
 }
 
-polynomial & polynomial::operator = (const polynomial & in_poly)
+polynomial::polynomial ()
 {
-  if(this == &in_poly) 
-    return(*this);
+  init ();
+}
 
-  psrname = in_poly.psrname;
-  date = in_poly.date;
-  utc = in_poly.utc;
-  ref_time = in_poly.ref_time;
-  dm = in_poly.dm;
-  doppler_shift = in_poly.doppler_shift;
-  log_rms_resid = in_poly.log_rms_resid;
-  ref_phase = in_poly.ref_phase;
-  ref_freq = in_poly.ref_freq;
-  telescope = in_poly.telescope;
-  nspan_mins = in_poly.nspan_mins;
-  freq = in_poly.freq;
-  binph = in_poly.binph;
-  binfreq = in_poly.binfreq;
-  coefs = in_poly.coefs; 
-  binary = in_poly.binary;
-  tempov11 = in_poly.tempov11;
+polynomial::polynomial (const polynomial & copy)
+{
+  init ();
+  operator = (copy);
+}
 
-  return(*this);
+const polynomial & polynomial::operator = (const polynomial & copy)
+{
+  if (this == &copy) 
+    return *this;
+
+  psrname = copy.psrname;
+  date = copy.date;
+  utc = copy.utc;
+  ref_time = copy.ref_time;
+  dm = copy.dm;
+  doppler_shift = copy.doppler_shift;
+  log_rms_resid = copy.log_rms_resid;
+  ref_phase = copy.ref_phase;
+  ref_freq = copy.ref_freq;
+  telescope = copy.telescope;
+  nspan_mins = copy.nspan_mins;
+  freq = copy.freq;
+  binph = copy.binph;
+  binfreq = copy.binfreq;
+  coefs = copy.coefs; 
+  binary = copy.binary;
+  tempov11 = copy.tempov11;
+
+  return *this;
 }  
+
+polynomial::~polynomial ()
+{
+}
+
 
 /* ************************************************************************
    polynomial::load
@@ -459,24 +475,24 @@ void polynomial::prettyprint() const {
     cout << "\tCoeff  " << i+1 << "\t\t" << coefs[i] << endl;
 }
 
-int operator == (const polynomial & p1, const polynomial & p2){
-  if(p1.dm != p2.dm ||
-     p1.doppler_shift != p2.doppler_shift ||
-     p1.log_rms_resid != p2.log_rms_resid ||
-     p1.ref_freq != p2.ref_freq ||
-     p1.telescope != p2.telescope ||
-     p1.nspan_mins != p2.nspan_mins ||
-     p1.freq != p2.freq ||
-     p1.binph != p2.binph ||
-     p1.binfreq != p2.binfreq ||
-     p1.binary != p2.binary ||
-     p1.tempov11 != p2.tempov11) return(0);
-  return(1);
+bool operator == (const polynomial & p1, const polynomial & p2)
+{
+  return ! (p1 != p2);
 }
 
-int operator != (const polynomial & p1, const polynomial & p2){
-  if(p1==p2) return(0);
-  return(1);
+bool operator != (const polynomial & p1, const polynomial & p2)
+{
+  return (p1.dm != p2.dm ||
+	    p1.doppler_shift != p2.doppler_shift ||
+	    p1.log_rms_resid != p2.log_rms_resid ||
+	    p1.ref_freq != p2.ref_freq ||
+	    p1.telescope != p2.telescope ||
+	    p1.nspan_mins != p2.nspan_mins ||
+	    p1.freq != p2.freq ||
+	    p1.binph != p2.binph ||
+	    p1.binfreq != p2.binfreq ||
+	    p1.binary != p2.binary ||
+	    p1.tempov11 != p2.tempov11);
 }
 
 bool time_order (const polynomial & p1, const polynomial & p2)
@@ -492,12 +508,34 @@ void polyco::init ()
   last_span_epoch = last_span_phase = 0;
 }
 
-polyco & polyco::operator = (const polyco & in_poly)
+//! Default constructor
+polyco::polyco ()
 {
-  if (this == &in_poly)
+  init();
+}
+
+//! Copy constructor
+polyco::polyco (const polyco& copy)
+{
+  init();
+  operator = (copy);
+}
+
+
+polyco & polyco::operator = (const polyco & copy)
+{
+  if (this == &copy)
     return *this;
 
-  pollys = in_poly.pollys;
+  pollys = copy.pollys;
+
+  last_index = copy.last_index;
+
+  last_epoch = copy.last_epoch;
+  last_span_epoch = copy.last_span_epoch;
+
+  last_phase = copy.last_phase;
+  last_span_phase = copy.last_span_phase;
 
   return *this;
 }
@@ -809,18 +847,15 @@ const polynomial& polyco::best (const Phase& p) const
 
 void polyco::set_last (int i) const
 {
-  const_cast<polyco*>(this)->set_last_work(i);
-}
+  const polynomial* poly = &(pollys[i]);
 
-
-void polyco::set_last_work (int i)
-{
-  polynomial* poly = &(pollys[i]);
   last_epoch = poly->ref_time;
-  last_span_epoch = 0.5 * (poly->end_time(0.0)-poly->start_time(0.0)).in_minutes();
+  last_span_epoch
+    = 0.5 * (poly->end_time(0.0)-poly->start_time(0.0)).in_minutes();
 
   last_phase = poly->ref_phase;
-  last_span_phase = 0.5 * (poly->end_phase(0.0)-poly->start_phase(0.0)).in_turns();
+  last_span_phase
+    = 0.5 * (poly->end_phase(0.0)-poly->start_phase(0.0)).in_turns();
 
   last_index = i;
 }
@@ -960,21 +995,25 @@ int polyco::i_nearest (const Phase& p, bool throw_exception) const
   return -1;
 }
 
-bool polyco::is_tempov11() const {
-  for(unsigned i=0; i<pollys.size(); ++i)
-    if(!pollys[i].is_tempov11()) return(pollys[i].is_tempov11());
-  return(pollys[0].is_tempov11());
+bool polyco::is_tempov11() const
+{
+  for (unsigned i=0; i<pollys.size(); ++i)
+    if (!pollys[i].is_tempov11())
+      return pollys[i].is_tempov11();
+  return pollys[0].is_tempov11();
 }
 
-int operator == (const polyco & p1, const polyco & p2){
-  if(p1.pollys.size()!=p2.pollys.size()) return(0);
-  for(unsigned i=0; i<p1.pollys.size(); ++i)
-    if(p1.pollys[i]!=p2.pollys[i]) return(0);
-  return(1);
+bool operator == (const polyco & p1, const polyco & p2)
+{
+  if (p1.pollys.size() != p2.pollys.size())
+    return false;
+  for (unsigned i=0; i<p1.pollys.size(); ++i)
+    if (p1.pollys[i] != p2.pollys[i])
+      return false;
+  return true;
 }
 
-int operator != (const polyco & p1, const polyco & p2){
-  if(p1==p2) return(0);
-  return(1);
+bool operator != (const polyco & p1, const polyco & p2)
+{
+  return ! (p1 == p2);
 }
-
