@@ -49,8 +49,6 @@ vector<string> psrephem::extensions ()
 
 bool Pulsar::Parameters::verbose = 0;
 
-static char ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
-
 void psrephem::init()
 {
   nontempo11.erase();
@@ -169,13 +167,18 @@ int psrephem::load (const char* filename)
   if (verbose)
     cerr << "psrephem::load eph_rd (" << filename << ")" << endl;
 
+  char ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
+
   eph_rd (const_cast<char*>(filename), parmStatus, ephemstr, value_double, 
 	  value_integer, error_double);
 
   int all_zero = 1;
-  for (int i=0;i<EPH_NUM_KEYS;i++)  {
-    if (parmStatus[i]) {
-      value_str[i] = ephemstr [i];
+  for (int i=0;i<EPH_NUM_KEYS;i++)
+  {
+    if (parmStatus[i])
+    {
+      if (parmTypes[i] == EPH_TYPE_STRING)
+	value_str[i] = ephemstr [i];
       all_zero = 0;
     }
   }
@@ -218,9 +221,18 @@ int psrephem::unload (const char* filename) const
   if (verbose)
     cerr << "psrephem::unload copying strings" << endl;
 
-  for (int ieph=0; ieph<EPH_NUM_KEYS; ieph++) {
-    assert (value_str[ieph].length() < EPH_STR_LEN -1);
-    strcpy (ephemstr[ieph], value_str[ieph].c_str());
+  char ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
+
+  for (int ieph=0; ieph<EPH_NUM_KEYS; ieph++)
+  {
+    if (parmStatus[ieph] && parmTypes[ieph] == EPH_TYPE_STRING)
+    {
+      assert (value_str[ieph].length() < EPH_STR_LEN -1);
+      strncpy (ephemstr[ieph], value_str[ieph].c_str(), EPH_STR_LEN);
+      assert (ephemstr[ieph][EPH_STR_LEN-1] == '\0');
+    }
+    else
+      ephemstr[ieph][0] = '\0';
   }
 
   if (verbose)
@@ -876,11 +888,20 @@ int psrephem::unload (string* outstr) const
 
   char ephstr [EPH_STR_LEN];
   unsigned bytes_out = 0;
-  for (int ieph=0; ieph < EPH_NUM_KEYS; ieph++) {
+
+  for (int ieph=0; ieph < EPH_NUM_KEYS; ieph++)
+  {
     if (!parmStatus[ieph])
       continue;
 
-    strcpy (ephstr, value_str[ieph].c_str());
+    if (parmTypes[ieph] == EPH_TYPE_STRING)
+    {
+      assert (value_str[ieph].length() < EPH_STR_LEN - 1);
+      strncpy (ephstr, value_str[ieph].c_str(), EPH_STR_LEN);
+      assert (ephstr[EPH_STR_LEN-1] == '\0');
+    }
+    else
+      ephstr[0] = '\0';
 
     eph_wr_str (buffer, buflen, ieph, parmStatus[ieph], 
 		ephstr, value_double[ieph], value_integer[ieph],

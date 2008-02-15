@@ -4,7 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* This file defines C wrappers to the fortran rd_eph and wr_eph. */
+
+/* This file defines C wrappers to the fortran rd_eph and wr_eph functions */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -51,29 +52,6 @@ extern int F77_wr_eph_str (char* string, int* ephind, char* str_val,
 
 extern int F77_length (char *buffer, int buflen);
 
-/* Array passed to Fortran routines instead of two-D C array */
-
-static char v_str[EPH_NUM_KEYS*EPH_STR_LEN];
-
-/* parse information in v_str into a two-D C array.
-   Converts the strings to '\0' terminated */
-
-void eph_unpack (int  parmStatus[EPH_NUM_KEYS], 
-		 char value_str [EPH_NUM_KEYS][EPH_STR_LEN])
-{  
-  int i,j;
-
-  for (i=0; i < EPH_NUM_KEYS; i++)
-    {
-      if (parmStatus[i])
-	{
-	  j = F77_length(v_str+i*EPH_STR_LEN, EPH_STR_LEN);
-	  memcpy(value_str[i], v_str+i*EPH_STR_LEN, j);
-	  value_str[i][j] = '\0';
-	}
-    }
-}
-
 int rd_eph_wrap (int uselun, char *fname, int lun,
 		 int parmStatus[EPH_NUM_KEYS], 
 		 char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
@@ -81,7 +59,11 @@ int rd_eph_wrap (int uselun, char *fname, int lun,
 		 int value_integer[EPH_NUM_KEYS],
 		 double error_double[EPH_NUM_KEYS])
 {
-  int retval;
+  /* Array passed to Fortran routines instead of two-D C array */
+  char v_str[EPH_NUM_KEYS*EPH_STR_LEN];
+  int retval, i,j;
+
+  memset (v_str, ' ', EPH_NUM_KEYS*EPH_STR_LEN);
 
   if (uselun)
     retval = F77_rd_eph_lun (&lun, parmStatus, v_str, value_double,
@@ -91,7 +73,19 @@ int rd_eph_wrap (int uselun, char *fname, int lun,
 			 value_integer, error_double, 
 			 strlen(fname), EPH_STR_LEN);
 
-  eph_unpack (parmStatus, value_str);
+  for (i=0; i < EPH_NUM_KEYS; i++)
+  {
+    if (parmStatus[i] && parmTypes[i] == EPH_TYPE_STRING)
+    {
+      j = F77_length(v_str+i*EPH_STR_LEN, EPH_STR_LEN);
+      memcpy(value_str[i], v_str+i*EPH_STR_LEN, j);
+    }
+    else
+      j = 0;
+
+    value_str[i][j] = '\0';
+  }
+
   return retval;
 }
 
@@ -170,27 +164,34 @@ int wr_eph_wrap (int uselun, char *fname, int lun,
 		 int value_integer[EPH_NUM_KEYS],
 		 double error_double[EPH_NUM_KEYS])
 {
+  /* Array passed to Fortran routines instead of two-D C array */
+  char v_str[EPH_NUM_KEYS*EPH_STR_LEN];
   int i,j, retval;
+
+  /* fortran space-padded strings */
+  memset (v_str, ' ', EPH_NUM_KEYS*EPH_STR_LEN);
 
   /* fix up the 2-d array. */
   for (i=0; i < EPH_NUM_KEYS; i++)
+  {
+    if ( parmStatus[i] && parmTypes[i]==EPH_TYPE_STRING )
     {
-      if ((parmTypes[i]==0)&&(parmStatus[i]))
-	{
-	  j = strlen(value_str[i]);
-	  memcpy(v_str+i*EPH_STR_LEN, value_str[i], j);
-	  for ( ; j < EPH_STR_LEN; j++)
-	    *(v_str+i*EPH_STR_LEN+j)= ' ';	/* fortran space-padded string */
-	}
+      j = strlen(value_str[i]);
+      memcpy(v_str+i*EPH_STR_LEN, value_str[i], j);
     }
+  }
 
   if (uselun)
     retval = F77_wr_eph_lun (&lun, parmStatus, v_str, value_double,
 			     value_integer, error_double, EPH_STR_LEN);
   else
+  {
+    fprintf (stderr, "call wr_eph %s\n", fname);
+
     retval = F77_wr_eph (fname, parmStatus, v_str, value_double,
 			 value_integer, error_double,
 			 strlen(fname), EPH_STR_LEN);
+  }
 
   return retval;
 }
@@ -201,8 +202,8 @@ int eph_wr (char *fname, int parmStatus[EPH_NUM_KEYS],
 	    int value_integer[EPH_NUM_KEYS],
 	    double error_double[EPH_NUM_KEYS])
 {
-  return wr_eph_wrap(0, fname, 0, parmStatus, value_str,
-		     value_double, value_integer, error_double);
+  return wr_eph_wrap (0, fname, 0, parmStatus, value_str,
+		      value_double, value_integer, error_double);
 }
 
 int eph_wr_lun (int lun,
@@ -212,6 +213,6 @@ int eph_wr_lun (int lun,
 		int value_integer[EPH_NUM_KEYS],
 		double error_double[EPH_NUM_KEYS])
 {
-  return wr_eph_wrap(1, NULL, lun, parmStatus, value_str,
-		     value_double, value_integer, error_double);
+  return wr_eph_wrap (1, NULL, lun, parmStatus, value_str,
+		      value_double, value_integer, error_double);
 }
