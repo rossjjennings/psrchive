@@ -41,8 +41,6 @@ test_QuaternionFT_SOURCES	= test_QuaternionFT.C
 #############################################################################
 #
 
-INCLUDES = @FFT_CFLAGS@
-
 LDADD = libpsrfft.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
@@ -52,5 +50,5 @@ libpsrfft_la_LIBADD = @FFT_LIBS@
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @FFT_LIBS@ 
+AM_CPPFLAGS += @FFT_CFLAGS@ 
 
