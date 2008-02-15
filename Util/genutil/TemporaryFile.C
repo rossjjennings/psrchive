@@ -37,11 +37,20 @@ void TemporaryFile::install_signal_handler ()
   struct sigaction sa;
 
   sa.sa_handler = TemporaryFile::signal_handler;
+
+  // allow interrupted system calls to continue
   sa.sa_flags = SA_RESTART;
+
+  // block all signals during execution of the signal handler
+  sigfillset (&(sa.sa_mask));
 
   // "man 7 signal" to see which signals are being handled
   for (unsigned i=1; i<16; i++)
-    sigaction (i, &sa, NULL);
+  {
+    // cannot catch SIGKILL
+    if (i != SIGKILL)
+      sigaction (i, &sa, NULL);
+  }
 
   signal_handler_installed = true;
 }
