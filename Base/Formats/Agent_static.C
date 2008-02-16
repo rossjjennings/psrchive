@@ -64,6 +64,12 @@ template
 Registry::List<Archive::Agent>::Enter<WAPPArchive::Agent>
 Archive::Advocate<WAPPArchive>::entry;
 
+#include "Pulsar/PRESTOArchive.h"
+
+template
+Registry::List<Archive::Agent>::Enter<PRESTOArchive::Agent>
+Archive::Advocate<PRESTOArchive>::entry;
+
 #include "Pulsar/BPPArchive.h"
 
 template

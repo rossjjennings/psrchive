@@ -4,10 +4,10 @@ noinst_LTLIBRARIES = libFormats.la
 libFormats_la_SOURCES = Agent_static.C \
 	Predictor_children.C Parameters_children.C Generator_default.C
 
-SUBDIRS = Timer EPN ASCII BPP WAPP
+SUBDIRS = Timer EPN ASCII BPP WAPP PRESTO
 
 libFormats_la_LIBADD = Timer/libtimer.la EPN/libepn.la ASCII/libascii.la \
-       BPP/libbpp.la WAPP/libwapp.la
+       BPP/libbpp.la WAPP/libwapp.la PRESTO/libpresto.la
 
 if HAVE_CFITSIO
 SUBDIRS += PSRFITS ASP
@@ -35,6 +35,7 @@ INCLUDES = -I$(top_builddir)/local_include \
 	-I$(top_srcdir)/Base/Formats/ASCII \
 	-I$(top_srcdir)/Base/Formats/BPP \
 	-I$(top_srcdir)/Base/Formats/WAPP \
+	-I$(top_srcdir)/Base/Formats/PRESTO \
 	-I$(top_srcdir)/Base/Formats/PSRFITS \
 	-I$(top_srcdir)/Base/Formats/ASP
 
