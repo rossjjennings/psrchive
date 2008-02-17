@@ -111,8 +111,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status);
   fits_modify_vector_len (fptr, colnum, dimension, &status);
-  fits_write_col (fptr, TFLOAT, colnum, 1, 1, dimension,
-		  data, &status);
+  psrfits_update_tdim (fptr, colnum, nch_orig, npol);
+  fits_write_col (fptr, TFLOAT, colnum, 1, 1, dimension, data, &status);
 
   delete [] data;
   delete [] data_scales;

@@ -105,8 +105,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   if (verbose > 2)
     cerr << "FITSArchive::unload_integrations DAT_FREQ resized to "
-         << nchan
-         << endl;
+         << nchan << endl;
 
   fits_get_colnum (ffptr, CASEINSEN, "DAT_WTS", &colnum, &status);
   fits_modify_vector_len (ffptr, colnum, nchan, &status);
@@ -117,8 +116,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   if (verbose > 2)
     cerr << "FITSArchive::unload_integrations DAT_WTS resized to "
-         << nchan
-         << endl;
+         << nchan << endl;
 
   fits_get_colnum (ffptr, CASEINSEN, "DAT_OFFS", &colnum, &status);
   fits_modify_vector_len (ffptr, colnum, nchan*npol, &status);
@@ -129,8 +127,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   if (verbose > 2)
     cerr << "FITSArchive::unload_integrations DAT_OFFS resized to "
-         << nchan*npol
-         << endl;
+         << nchan*npol << endl;
 
   fits_get_colnum (ffptr, CASEINSEN, "DAT_SCL", &colnum, &status);
   fits_modify_vector_len (ffptr, colnum, nchan*npol, &status);
@@ -141,20 +138,15 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   if (verbose > 2)
     cerr << "FITSArchive::unload_integrations DAT_SCL resized to "
-         << nchan*npol
-         << endl;
+         << nchan*npol << endl;
 
   fits_get_colnum (ffptr, CASEINSEN, "DATA", &colnum, &status);
   fits_modify_vector_len (ffptr, colnum, nchan*npol*nbin, &status);
-  char keyname[16], tdim[32];
-  sprintf(keyname, "TDIM%d", colnum);
-  sprintf(tdim, "(%d,%d,%d,1)", nbin, nchan, npol);
-  fits_update_key (ffptr, TSTRING, keyname, &tdim, NULL, &status);
+  psrfits_update_tdim (ffptr, colnum, nbin, nchan, npol, 1);
 
   if (verbose > 2)
     cerr << "FITSArchive::unload_integrations DATA resized to "
-         << nchan*npol*nbin
-         << endl;
+         << nchan*npol*nbin << endl;
   
   // Iterate over all rows, calling the unload_integration function to
   // fill in the next spot in the file.
