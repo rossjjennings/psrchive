@@ -1,10 +1,12 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "CalibratorExtensionIO.h"
+#include "psrfitsio.h"
 
 using namespace std;
 
@@ -59,8 +61,10 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
   
 }
 
-void Pulsar::unload_Estimates (fitsfile* fptr, vector<Estimate<double> >& data,
-			     char* column_name)
+void Pulsar::unload_Estimates (fitsfile* fptr,
+			       const vector<Estimate<double> >& data,
+			       char* column_name,
+			       const vector<unsigned>* dimensions)
 {
   long dimension = data.size();
   
@@ -76,6 +80,10 @@ void Pulsar::unload_Estimates (fitsfile* fptr, vector<Estimate<double> >& data,
   int colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, column_name, &colnum, &status);
   fits_modify_vector_len (fptr, colnum, dimension, &status);
+
+  if (dimensions)
+    psrfits_update_tdim (fptr, colnum, *dimensions);
+
   fits_write_col (fptr, TFLOAT, colnum, 1, 1, dimension,
 		  temp.get(), &status);
 
@@ -95,6 +103,10 @@ void Pulsar::unload_Estimates (fitsfile* fptr, vector<Estimate<double> >& data,
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, column_name, &colnum, &status);
   fits_modify_vector_len (fptr, colnum, dimension, &status);
+
+  if (dimensions)
+    psrfits_update_tdim (fptr, colnum, *dimensions);
+
   fits_write_col (fptr, TFLOAT, colnum, 1, 1, dimension,
 		  temp.get(), &status);
 
