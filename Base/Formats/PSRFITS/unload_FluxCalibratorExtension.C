@@ -57,15 +57,21 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
     unsigned ichan = 0;
     unsigned ireceptor = 0;
 
+    vector<unsigned> dimensions (2);
+    dimensions[0] = nchan;
+    dimensions[1] = nreceptor;
+
     for (ichan=0; ichan < nchan; ichan++)
       for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
 	temp[ichan + nchan*ireceptor] = fce->get_S_sys (ichan, ireceptor);
-    unload_Estimates (fptr, temp, "S_SYS");
+
+    unload_Estimates (fptr, temp, "S_SYS", &dimensions);
 
     for (ichan=0; ichan < nchan; ichan++)
       for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
 	temp[ichan + nchan*ireceptor] = fce->get_S_cal (ichan, ireceptor);
-    unload_Estimates(fptr, temp, "S_CAL");
+
+    unload_Estimates(fptr, temp, "S_CAL", &dimensions);
 
   }
   catch (Error& error) {
