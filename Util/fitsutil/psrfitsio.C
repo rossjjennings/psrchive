@@ -1,16 +1,79 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+using namespace std;
+
 #include "psrfitsio.h"
 
+#include <stdarg.h>
 
 
-using std::string;
-using std::auto_ptr;
+static void update_tdim (fitsfile* ffptr, int column, unsigned ndim, ...)
+{
+  vector<unsigned> dims (ndim);
 
+  va_list args;
+  va_start(args, ndim);
+
+  for (unsigned i=0; i < ndim; i++)
+    dims[i] = va_arg ( args, unsigned );
+
+  va_end(args);
+
+  psrfits_update_tdim (ffptr, column, dims);
+}
+
+
+void psrfits_update_tdim (fitsfile* ffptr, int column, unsigned dim)
+{
+  update_tdim (ffptr, column, 1, dim);
+}
+
+void psrfits_update_tdim (fitsfile* ffptr, int column,
+			  unsigned dim1, unsigned dim2)
+{
+  update_tdim (ffptr, column, 2, dim1, dim2);
+}
+
+void psrfits_update_tdim (fitsfile* ffptr, int column,
+			  unsigned dim1, unsigned dim2, unsigned dim3)
+{
+  update_tdim (ffptr, column, 3, dim1, dim2, dim3);
+}
+
+void psrfits_update_tdim (fitsfile* ffptr, int column,
+			  unsigned dim1, unsigned dim2,
+			  unsigned dim3, unsigned dim4)
+{
+  update_tdim (ffptr, column, 4, dim1, dim2, dim3, dim4);
+}
+
+void psrfits_update_tdim (fitsfile* ffptr, int column,
+			  const vector<unsigned>& dims)
+{
+  string result = "(";
+
+  for (unsigned i=0; i < dims.size(); i++)
+  {
+    result += tostring(dims[i]);
+    if (i < dims.size()-1)
+      result += ",";
+  }
+
+  result += ")";
+
+  char keyword [FLEN_KEYWORD+1];
+  int status = 0;
+  fits_make_keyn ("TDIM", column, keyword, &status);
+  if (status)
+    throw FITSError (status, "psrfits_update_tdim", "fits_make_keyn");
+
+  psrfits_update_key (ffptr, keyword, result);
+}
 
 
 void psrfits_clean_rows (fitsfile* ffptr)

@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/02/12 04:41:12 $
-   $Author: nopeer $ */
+   $Revision: 1.13 $
+   $Date: 2008/02/17 11:25:56 $
+   $Author: straten $ */
 
 #ifndef __psrfitsio_h
 #define __psrfitsio_h
@@ -21,8 +21,6 @@
 
 #include <string>
 #include <vector>
-
-
 
 //! Remove any existing rows from the current binary table
 void psrfits_clean_rows (fitsfile*);
@@ -324,7 +322,27 @@ void psrfits_read_col( fitsfile *fptr, const char *name, T *data,
 }
 
 //! Move to the HDU given, throw an exception if we fail
-void psrfits_move_hdu( fitsfile *fptr, char *hdu_name, int table_type = BINARY_TBL, int version = 0 );
+void psrfits_move_hdu( fitsfile *fptr, char *hdu_name,
+		       int table_type = BINARY_TBL, int version = 0 );
 
+//! Write/update a TDIM descriptor for the specified column
+void psrfits_update_tdim (fitsfile* ffptr, int column, unsigned dim);
+
+//! Write/update a TDIM descriptor for the specified column
+void psrfits_update_tdim (fitsfile* ffptr, int column,
+			  unsigned dim1, unsigned dim2);
+
+//! Write/update a TDIM descriptor for the specified column
+void psrfits_update_tdim (fitsfile* ffptr, int column,
+			  unsigned dim1, unsigned dim2, unsigned dim3);
+
+//! Write/update a TDIM descriptor for the specified column
+void psrfits_update_tdim (fitsfile* ffptr, int column,
+			  unsigned dim1, unsigned dim2,
+			  unsigned dim3, unsigned dim4);
+
+//! Write/update a TDIM descriptor for the specified column
+void psrfits_update_tdim (fitsfile* ffptr, int column,
+			  const std::vector<unsigned>& dims);
 
 #endif
