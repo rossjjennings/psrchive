@@ -72,7 +72,7 @@ namespace Pulsar {
     prepfoldinfo pfd;
 
     //! Raw header size
-    size_t header_size;
+    int header_size;
 
     //! Initialize all values to null
     void init ();
@@ -82,6 +82,18 @@ namespace Pulsar {
 
     //! Read, a presto position struct from current file position
     void read_position(position *out, FILE *f);
+
+    //! Test that header params fall in acceptable ranges
+    int test_param_range(std::string &whynot);
+
+    //! Does file endian need to be changed?
+    int endian_swap;
+
+    //! Change endianness of header struct
+    void change_header_endian();
+
+    //! Change endianness of foldstats struct
+    void change_foldstats_endian(foldstats *f);
 
   };
  

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2008 by Paul Demorest
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,6 +8,7 @@
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Profile.h"
 
+#include "machine_endian.h"
 #include "prepfold.h"
 
 using namespace std;
@@ -16,6 +17,7 @@ void Pulsar::PRESTOArchive::init ()
 {
   // initialize the PRESTOArchive attributes
   header_size=0;
+  endian_swap=0;
 }
 
 Pulsar::PRESTOArchive::PRESTOArchive()
@@ -135,6 +137,77 @@ void Pulsar::PRESTOArchive::read_position(position *out, FILE *f)
   }
 }
 
+void Pulsar::PRESTOArchive::change_header_endian()
+{
+  ChangeEndian(pfd.numdms);
+  ChangeEndian(pfd.numperiods);
+  ChangeEndian(pfd.numpdots);
+  ChangeEndian(pfd.nsub);
+  ChangeEndian(pfd.npart);
+  ChangeEndian(pfd.proflen);
+  ChangeEndian(pfd.numchan);
+  ChangeEndian(pfd.pstep);
+  ChangeEndian(pfd.dmstep);
+  ChangeEndian(pfd.ndmfact);
+  ChangeEndian(pfd.npfact);
+  ChangeEndian(pfd.npfact);
+
+  ChangeEndian(pfd.dt);
+  ChangeEndian(pfd.startT);
+  ChangeEndian(pfd.endT);
+  ChangeEndian(pfd.tepoch);
+  ChangeEndian(pfd.bepoch);
+  ChangeEndian(pfd.avgvoverc);
+  ChangeEndian(pfd.lofreq);
+  ChangeEndian(pfd.chan_wid);
+  ChangeEndian(pfd.bestdm);
+
+  ChangeEndian(pfd.topo.pow);
+  ChangeEndian(pfd.topo.p1);
+  ChangeEndian(pfd.topo.p2);
+  ChangeEndian(pfd.topo.p3);
+
+  ChangeEndian(pfd.bary.pow);
+  ChangeEndian(pfd.bary.p1);
+  ChangeEndian(pfd.bary.p2);
+  ChangeEndian(pfd.bary.p3);
+
+  ChangeEndian(pfd.fold.pow);
+  ChangeEndian(pfd.fold.p1);
+  ChangeEndian(pfd.fold.p2);
+  ChangeEndian(pfd.fold.p3);
+}
+
+void Pulsar::PRESTOArchive::change_foldstats_endian(foldstats *f)
+{
+  ChangeEndian(f->numdata);
+  ChangeEndian(f->data_avg);
+  ChangeEndian(f->data_var);
+  ChangeEndian(f->numprof);
+  ChangeEndian(f->prof_avg);
+  ChangeEndian(f->prof_var);
+  ChangeEndian(f->redchi);
+}
+
+#define param_test(test) \
+  if (test) { whynot = #test; return(1); }
+
+int Pulsar::PRESTOArchive::test_param_range(std::string &whynot)
+{
+  param_test(pfd.numdms<0);
+  param_test(pfd.numperiods<0);
+  param_test(pfd.numpdots<0);
+  param_test(pfd.nsub<0);
+  param_test(pfd.npart<0);
+  param_test(pfd.proflen<0);
+  param_test(pfd.numchan<0);
+
+  param_test(pfd.tepoch<39000.0);
+  param_test(pfd.tepoch>65000.0); // Y2036 noncompliant
+
+  return(0);
+}
+
 void Pulsar::PRESTOArchive::load_header (const char* filename)
 {
   // load all BasicArchive and PRESTOArchive attributes from filename
@@ -192,7 +265,20 @@ void Pulsar::PRESTOArchive::load_header (const char* filename)
         "ftell");
   }
 
-  // TODO: deal with byte swap if needed.
+  // Check that various parameters are in correct range.  If not,
+  // try changing endianness.  If that fails, it's probably not 
+  // a pfd file.
+  string s1, s2;
+  if (test_param_range(s1)) {
+    change_header_endian();
+    if (test_param_range(s2)) {
+      fclose(f);
+      throw Error (InvalidParam, "Pulsar::PRESTOArchive::load_header",
+          "Param out of range: " + s1 + ", " + s2);
+    } else {
+      endian_swap = 1;
+    }
+  }
   
   // Account for items not yet read from header
   header_size += sizeof(double)*7 // orbital params
@@ -214,6 +300,11 @@ void Pulsar::PRESTOArchive::load_header (const char* filename)
     fclose(f);
     throw Error (FailedSys, "Pulsar::PRESTOArchive::load_header",
         "fread");
+  }
+  if (endian_swap) {
+    for (int i=0; i<pfd.nsub*pfd.npart; i++) {
+      change_foldstats_endian(&pfd.stats[i]);
+    }
   }
   
   // Done w/ file
@@ -275,7 +366,7 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
   // Subint epoch needs to correspond to bin 0 of the folded profile.
   // Count samples to get offset to current subint.
   double nsamp=0.0;
-  for (int isub=0; isub<subint; isub++) {
+  for (unsigned isub=0; isub<subint; isub++) {
     nsamp += pfd.stats[isub*pfd.nsub].numdata;
   }
   MJD epoch(pfd.tepoch);
@@ -293,7 +384,7 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
   int chan_per_subband = pfd.numchan/pfd.nsub;
   double f0 = pfd.lofreq - 0.5*pfd.chan_wid 
     + 0.5*(double)chan_per_subband*pfd.chan_wid;
-  for (int ichan=0; ichan<nchan; ichan++) {
+  for (unsigned ichan=0; ichan<nchan; ichan++) {
     integration->set_centre_frequency(ichan, 
         f0 + (double)ichan * chan_per_subband * pfd.chan_wid);
   }
@@ -320,7 +411,7 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
 
   // Load the actual data for each pol, channel from the file.
   double *data = new double[nbin]; // Temporary storage space
-  for (int ichan=0; ichan<nchan; ichan++) {
+  for (unsigned ichan=0; ichan<nchan; ichan++) {
     // Load data for ichan 
     rv = fread(data, sizeof(double), pfd.proflen, f);
     if (rv!=pfd.proflen) {
@@ -328,6 +419,8 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
       throw Error (FailedSys, "Pulsar::PRESTOArchive::load_Integration",
           "fread");
     }
+    // Swap if needed
+    if (endian_swap) { array_changeEndian(pfd.proflen, data, sizeof(double)); }
     // Put data in integration structure:
     integration->get_Profile(0,ichan)->set_amps(data);
   }
