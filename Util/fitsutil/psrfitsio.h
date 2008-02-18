@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.13 $
-   $Date: 2008/02/17 11:25:56 $
+   $Revision: 1.14 $
+   $Date: 2008/02/18 08:50:23 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
@@ -151,10 +151,30 @@ void psrfits_read_key (fitsfile* fptr, const char* name, T* data,
     std::cerr << "psrfits_read_key: " << name << "=" << *data << std::endl;
 }
 
+//! Write/update a 1-D TDIM descriptor for the specified column
+void psrfits_update_tdim (fitsfile* ffptr, int column, unsigned dim);
+
+//! Write/update a 2-D TDIM descriptor for the specified column
+void psrfits_update_tdim (fitsfile* ffptr, int column,
+			  unsigned dim1, unsigned dim2);
+
+//! Write/update a 3-D TDIM descriptor for the specified column
+void psrfits_update_tdim (fitsfile* ffptr, int column,
+			  unsigned dim1, unsigned dim2, unsigned dim3);
+
+//! Write/update a 4-D TDIM descriptor for the specified column
+void psrfits_update_tdim (fitsfile* ffptr, int column,
+			  unsigned dim1, unsigned dim2,
+			  unsigned dim3, unsigned dim4);
+
+//! Write/update a N-D TDIM descriptor for the specified column
+void psrfits_update_tdim (fitsfile* ffptr, int column,
+			  const std::vector<unsigned>& dims);
 
 template<typename T>
 void psrfits_write_col (fitsfile* fptr, const char* name,
-			const std::vector<T>& data, int row = 1)
+			const std::vector<T>& data,
+			int row = 1, const std::vector<unsigned>* dims = 0)
 {
   //
   // Get the number of the named column
@@ -166,6 +186,9 @@ void psrfits_write_col (fitsfile* fptr, const char* name,
 
   fits_modify_vector_len (fptr, colnum, data.size(), &status);
 
+  if (dims)
+    psrfits_update_tdim (fptr, colnum, *dims);
+
   fits_write_col (fptr, FITS_traits<T>::datatype(),
 		  colnum, row,
 		  1, data.size(),
@@ -173,6 +196,14 @@ void psrfits_write_col (fitsfile* fptr, const char* name,
 
   if (status)
     throw FITSError (status, "psrfits_write_col(vector<T>)", name);
+}
+
+template<typename T>
+void psrfits_write_col (fitsfile* fptr, const char* name,
+			const std::vector<T>& data,
+			const std::vector<unsigned>& dims)
+{
+  psrfits_write_col (fptr, name, data, 1, &dims);
 }
 
 template<typename T>
@@ -325,24 +356,6 @@ void psrfits_read_col( fitsfile *fptr, const char *name, T *data,
 void psrfits_move_hdu( fitsfile *fptr, char *hdu_name,
 		       int table_type = BINARY_TBL, int version = 0 );
 
-//! Write/update a TDIM descriptor for the specified column
-void psrfits_update_tdim (fitsfile* ffptr, int column, unsigned dim);
 
-//! Write/update a TDIM descriptor for the specified column
-void psrfits_update_tdim (fitsfile* ffptr, int column,
-			  unsigned dim1, unsigned dim2);
-
-//! Write/update a TDIM descriptor for the specified column
-void psrfits_update_tdim (fitsfile* ffptr, int column,
-			  unsigned dim1, unsigned dim2, unsigned dim3);
-
-//! Write/update a TDIM descriptor for the specified column
-void psrfits_update_tdim (fitsfile* ffptr, int column,
-			  unsigned dim1, unsigned dim2,
-			  unsigned dim3, unsigned dim4);
-
-//! Write/update a TDIM descriptor for the specified column
-void psrfits_update_tdim (fitsfile* ffptr, int column,
-			  const std::vector<unsigned>& dims);
 
 #endif
