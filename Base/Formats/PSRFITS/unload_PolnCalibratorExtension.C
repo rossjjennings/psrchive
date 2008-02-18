@@ -100,7 +100,11 @@ try {
 
   assert (count == dimension);
 
-  psrfits_write_col (fptr, "DATA", data);
+  vector<unsigned> dimensions (2);
+  dimensions[0] = nchan;
+  dimensions[1] = ncpar;
+
+  psrfits_write_col (fptr, "DATA", data, dimensions);
 
   if (ncovar)
     unload_covariances (fptr, pce, ncovar, data);
@@ -135,7 +139,11 @@ void unload_variances (fitsfile* fptr,
 
   assert (count == data.size());
 
-  psrfits_write_col (fptr, "DATAERR", data);
+  vector<unsigned> dimensions (2);
+  dimensions[0] = nchan;
+  dimensions[1] = ncpar;
+
+  psrfits_write_col (fptr, "DATAERR", data, dimensions);
 }
 
 void unload_covariances (fitsfile* fptr,
@@ -177,6 +185,10 @@ void unload_covariances (fitsfile* fptr,
   }
 
   assert (count == data.size());
+
+  vector<unsigned> dimensions (2);
+  dimensions[0] = nchan;
+  dimensions[1] = ncovar;
 
   psrfits_write_col (fptr, "COVAR", data);
 }
