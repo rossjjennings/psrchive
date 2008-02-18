@@ -1,52 +1,30 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/DigitiserStatistics.h"
 #include "psrfitsio.h"
 
-
-
 using namespace std;
 using namespace Pulsar;
 
-
-
-void unload (fitsfile* fptr, const Pulsar::DigitiserStatistics::row* const_drow)
+void unload (fitsfile* fptr, const Pulsar::DigitiserStatistics::row& drow,
+	     vector<unsigned> dimensions)
 {
-  DigitiserStatistics::row *drow = const_cast<DigitiserStatistics::row*>( const_drow );
   
-  int row = drow->index;
+  int row = drow.index;
 
   if (row <= 0)
     throw Error (InvalidParam, "unload (Pulsar::DigitiserStatistics::row*)",
 		 "digistat_row invalid row number=%d", row);
 
-  int status = 0;
-  
-  // Write the data itself
-  if (status)
-    throw FITSError (status, "unload (Pulsar::DigitiserStatistics::row*)",
-		     "fit_update_key(s)");
-  
-  
-  psrfits_write_col( fptr, "ATTEN", drow->atten, row );
-  
-  int colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status); 
-  fits_modify_vector_len (fptr, colnum, drow->data.size(), 
-			  &status);
-  fits_write_col (fptr, TFLOAT, colnum, row, 1, 
-		  drow->data.size(), 
-		  (float*)&(drow->data[0]), &status);
+  psrfits_write_col( fptr, "ATTEN", drow.atten, row );
+  psrfits_write_col( fptr, "DATA", drow.data, row, &dimensions );
 
-  if (status)
-    throw FITSError (status, "unload (Pulsar::DigitiserStatistics::row*)",
-		     "fit_write_col DATA");
-  
 }
 
 void 
@@ -89,10 +67,7 @@ Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserStatistics* dstats)
   tempstr = const_cast<char*>(dstats->get_diglev().c_str());
   fits_update_key (fptr, TSTRING, "DIGLEV", tempstr, comment, &status);
 
-  
-  
-  
-  
+
   psrfits_clean_rows (fptr);
 
   // Insert some new rows
@@ -102,11 +77,16 @@ Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserStatistics* dstats)
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload_digistat",
                      "fits_insert_rows DIG_STAT");
-  
+
+  vector<unsigned> dimensions (3);
+  dimensions[0] = dstats->get_npar();
+  dimensions[1] = dstats->get_ndigr();
+  dimensions[2] = dstats->get_ncycsub();
+
   try {
     
     for (unsigned i = 0; i < (dstats->rows).size(); i++)
-      ::unload( fptr, &(dstats->rows[i]) );
+      ::unload( fptr, dstats->rows[i], dimensions );
 
   }
   catch (Error& error) {

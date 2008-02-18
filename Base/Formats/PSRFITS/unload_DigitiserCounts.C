@@ -48,7 +48,7 @@ void CompressCounts( const vector<long> &data, vector<int> &target_data, float &
 
   // adjust the target data
   target_data.resize( data.size() );
-  for( int d = 0; d < data.size(); d ++ )
+  for( unsigned d = 0; d < data.size(); d ++ )
   {
     target_data[d] = floor( ( float(data[d]) - offset ) / scale + 0.5f);
   }
@@ -66,8 +66,6 @@ void CompressCounts( const vector<long> &data, vector<int> &target_data, float &
 
 void UnloadCountsTable ( fitsfile *fptr, const DigitiserCounts *ext )
 {
-  int num_counts = ext->get_npthist() * ext->get_ndigr();
-
   int status;
   fits_insert_rows (fptr, 0, ext->subints.size(), &status);
 
@@ -80,6 +78,10 @@ void UnloadCountsTable ( fitsfile *fptr, const DigitiserCounts *ext )
   //   determine the scale (65534 / range)
   //   determine the offset (min - ( -32768 * scale ) )
 
+  vector<unsigned> dimensions (2);
+  dimensions[0] = ext->get_npthist();
+  dimensions[1] = ext->get_ndigr();
+
   int num_subints = ext->subints.size();
   for( int s = 0; s < num_subints; s ++ )
   {
@@ -91,7 +93,7 @@ void UnloadCountsTable ( fitsfile *fptr, const DigitiserCounts *ext )
 
     psrfits_write_col( fptr, "DAT_SCL", scale, s+1 );
     psrfits_write_col( fptr, "DAT_OFFS", offset, s+1 );
-    psrfits_write_col( fptr, "DATA", int_data, s+1 );
+    psrfits_write_col( fptr, "DATA", int_data, s+1, &dimensions );
   }
 }
 
