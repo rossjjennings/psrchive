@@ -22,24 +22,26 @@ void VanVleck::set_nlevel(int n)
   if (n<2) 
     throw Error (InvalidParam, "VanVleck::set_nlevel",
         "Invalid nlevel=%d", n);
-  if (n%2) { // Odd N
-    // Here we assume center level is always 0.0
-    thresh.resize((n-1)/2);
-    levels.resize((n-1)/2);
-  } else { // Even N
-    // Here we assume center thresh is always 0.0
-    thresh.resize(n/2 - 1);
-    levels.resize(n/2);
-  }
+  levels.resize(n);
+  thresh.resize(n-1);
   nlevel = n;
 }
 
 void VanVleck::set_uniform_threshold() 
 {
   float t;
-  if (nlevel%2) { t=0.5; } 
-  else { t=1.0; }
-  for (int i=0; i<thresh.size(); i++) { thresh[i]=t; t+=1.0; }
+  int idx;
+  if (nlevel%2) {
+    // Odd nlevel
+    idx = nlevel/2;
+    thresh[idx] = 0.5;
+  } else {
+    // Even nlevel
+    idx = nlevel/2-1;
+    thresh[idx] = 0.0;
+  }
+  for (int i=idx-1; i>=0; i--) { thresh[i] = thresh[i+1]-1.0; }
+  for (int i=idx+1; i<thresh.size(); i++) { thresh[i] = thresh[i-1]+1.0; }
 }
 
 void VanVleck::set_threshold(float *thr) 
@@ -48,21 +50,34 @@ void VanVleck::set_threshold(float *thr)
 
 void VanVleck::set_uniform_levels()
 {
-  float l;
-  if (nlevel%2) { l=1.0; }
-  else { l=0.5; }
-  for (int i=0; i<levels.size(); i++) { levels[i]=l; l+=1.0; }
+  int idx;
+  if (nlevel%2) { 
+    // Odd
+    idx = nlevel/2;
+    levels[idx] = 0.0;
+  } else { 
+    // Even
+    idx = nlevel/2;
+    levels[idx] = 0.5;
+  }
+  for (int i=idx-1; i>0; i--) { levels[i] = levels[i+1]-1.0; }
+  for (int i=idx+1; i<nlevel; i++) { levels[i] = levels[i-1]+1.0; }
 }
 
 void VanVleck::set_canonical_levels()
 {
   if (nlevel==2) { 
-    levels[0] = 1.0; // Probably not used much for pulsar data..
+    levels[0] = -1.0;
+    levels[1] = +1.0; // Probably not used much for pulsar data..
   } else if (nlevel==3) {
-    levels[0] = 1.0; // Only 1 non-zero level in this case
+    levels[0] = -1.0; 
+    levels[1] = 0.0; 
+    levels[2] = 1.0; 
   } else if (nlevel==4) {
-    levels[0] = 1.0; 
-    levels[1] = 3.0; // Classic 2-bit output levels
+    levels[0] = -3.0; // Classic 2-bit output levels 
+    levels[1] = -1.0;
+    levels[2] = 1.0; 
+    levels[3] = 3.0;
   } else {
     set_uniform_levels(); // All others get uniform levels
   }
@@ -75,7 +90,7 @@ void VanVleck::set_levels(float *lev)
 /* Theory for total power correction functions:
  */
 
-double VanVleck::out_pow(double in_pow)
+double VanVleck::out_pow(double in_pow, double in_dc)
 {
   double sum=0.0;
   NormalDistribution n;
@@ -83,37 +98,36 @@ double VanVleck::out_pow(double in_pow)
 
   // Check for in_pow=0
   if (in_pow==0.0) { 
-      if (nlevel%2) return(0.0); 
-      else return(levels[0]*levels[0]); 
+    if (in_dc==0.0) { 
+      if (nlevel%2) return(levels[nlevel/2]*levels[nlevel/2]);
+      else return(0.5*(levels[nlevel/2]*levels[nlevel/2] 
+            + levels[nlevel/2-1]*levels[nlevel/2-1]));
+    } else {
+      int ilev=0;
+      for (ilev=0; ilev<thresh.size(); ilev++) {
+        if (in_dc<thresh[ilev]) break;
+      }
+      return(levels[ilev]*levels[ilev]);
+    }
   }
 
   // Pre-calculate cumulatve dist values at thresholds.
   std::vector<double> cdist(thresh.size());
   for (int i=0; i<thresh.size(); i++) { 
-      cdist[i] = n.cumulative_distribution(thresh[i]/in_pow_1_2);
+      cdist[i] = n.cumulative_distribution((thresh[i]-in_dc)/in_pow_1_2);
   }
 
-  if (nlevel%2) { // Odd nlevel
-    for (int i=0; i<levels.size()-1; i++) {
-      sum += levels[i] * levels[i] * (cdist[i+1] - cdist[i]);
-    }
-    sum += levels[levels.size()-1] * levels[levels.size()-1] *
-      (1.0 - cdist[levels.size()-1]);
-    sum *= 2.0;
-  } else {        // Even nlevel
-    sum += levels[0]*levels[0]*(cdist[0] - 0.5);
-    for (int i=1; i<levels.size()-1; i++) {
-      sum += levels[i] * levels[i] * (cdist[i] - cdist[i-1]);
-    }
-    sum += levels[levels.size()-1] * levels[levels.size()-1] * 
-      (1.0 - cdist[levels.size()-2]);
-    sum *= 2.0;
+  // Sum over levels
+  sum += levels[0] * levels[0] * cdist[0];
+  for (int i=1; i<nlevel-1; i++) {
+    sum += levels[i] * levels[i] * (cdist[i] - cdist[i-1]);
   }
+  sum += levels[nlevel-1] * levels[nlevel-1] * (1.0 - cdist[nlevel-2]);
 
   return(sum);
 }
 
-double VanVleck::d_out_pow(double in_pow)
+double VanVleck::d_out_pow(double in_pow, double in_dc)
 {
   double sum=0.0;
   NormalDistribution n;
@@ -126,26 +140,16 @@ double VanVleck::d_out_pow(double in_pow)
   // Pre-calculate density values at thresholds.
   std::vector<double> dens(thresh.size());
   for (int i=0; i<thresh.size(); i++) {
-    dens[i] = n.density(thresh[i]/in_pow_1_2) * 
-      (-0.5 * thresh[i]/in_pow_3_2);
+    dens[i] = n.density((thresh[i]-in_dc)/in_pow_1_2) * 
+      (-0.5 * (thresh[i]-in_dc)/in_pow_3_2);
   }
 
-  if (nlevel%2) { // Odd
-    for (int i=0; i<levels.size(); i++) {
-      sum += levels[i] * levels[i] * (dens[i+1] - dens[i]);
-    }
-    sum += levels[levels.size()-1] * levels[levels.size()-1] *
-      (-dens[levels.size()-1]);
-    sum *= 2.0;
-  } else {        // Even
-    sum += levels[0]*levels[0]*dens[0];
-    for (int i=1; i<levels.size()-1; i++) {
+  // Sum over levels
+  sum += levels[0]*levels[0] * dens[0];
+  for (int i=1; i<nlevel-1; i++) {
       sum += levels[i] * levels[i] * (dens[i] - dens[i-1]);
-    }
-    sum += levels[levels.size()-1] * levels[levels.size()-1] * 
-      (-dens[levels.size()-2]);
-    sum *= 2.0;
   }
+  sum += levels[nlevel-1] * levels[nlevel-1] * (-dens[nlevel-2]);
 
   return(sum);
 }

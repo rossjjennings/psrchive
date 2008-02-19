@@ -51,11 +51,11 @@ class VanVleck {
   //! Set arbitrary output levels
   void set_levels(float *lev);
 
-  //! Return output (quantized) power given input power
-  double out_pow(double in_pow);
+  //! Return output (quantized) power given input power, dc
+  double out_pow(double in_pow, double in_dc=0.0);
 
   //! Return derivative d(out_pow)/d(in_pow)
-  double d_out_pow(double in_pow);
+  double d_out_pow(double in_pow, double in_dc=0.0);
 
   //! Return input (analog) power given output (quantized) power
   double in_pow(double out_pow);
