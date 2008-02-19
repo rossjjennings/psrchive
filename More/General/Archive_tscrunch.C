@@ -48,8 +48,8 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   \param  end one more than the index of the last Integration
 */
 double Pulsar::Archive::weighted_frequency (unsigned ichan,
-					    unsigned start, unsigned end) 
-  const
+					    unsigned start,
+					    unsigned end) const
 {
   unsigned nsubint = get_nsubint();
 
@@ -77,40 +77,51 @@ double Pulsar::Archive::weighted_frequency (unsigned ichan,
   double fstart = 0.0;
   double fend = 0.0;
 
-  try {
-    for (unsigned isubint=start; isubint < end; isubint++) {
+  for (unsigned isubint=start; isubint < end; isubint++) try {
       
-      const Profile* prof = get_Profile (isubint, ipol, ichan);
+    const Profile* prof = get_Profile (isubint, ipol, ichan);
+    
+    double freq   = prof->get_centre_frequency();
+    double weight = prof->get_weight();
+    
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::weighted_frequency [" << isubint << "]"
+	" freq=" << freq << " wt=" << weight << endl;
       
-      double freq   = prof->get_centre_frequency();
-      double weight = prof->get_weight();
-      
-      //if (verbose > 2)
-      //cerr << "Pulsar::Archive::weighted_frequency [" << isubint << "]"
-      //  " freq=" << freq << " wt=" << weight << endl;
-      
-      freqsum += freq * weight;
-      weightsum += weight;
-      
-      if (isubint == start)
-	fstart = freq;
-      if (isubint == end-1)
-	fend = freq;
-    }
+    freqsum += freq * weight;
+    weightsum += weight;
+    
+    if (isubint == start)
+      fstart = freq;
+    if (isubint == end-1)
+      fend = freq;
   }
-  catch (Error& err) {
+  catch (Error& err)
+  {
     throw err += "Pulsar::Archive::weighted_frequency";
   }
   
   double result = 0.0;
   
   if (weightsum != 0.0)
+  {
     result = freqsum / weightsum;
+    if (verbose)
+      cerr << "Pulsar::Archive::weighted_frequency mean=" << result << endl;
+  }
   else
+  {
     result = 0.5 * ( fstart + fend );
-  
+    if (verbose)
+      cerr << "Pulsar::Archive::weighted_frequency mid=" << result << endl;
+  }
+
   // Nearest kHz
   result = 1e-3 * double( int(result*1e3) );
+
+  if (verbose)
+    cerr << "Pulsar::Archive::weighted_frequency kHz=" << result*1e3 << endl;
+
   return result;
 }
 
