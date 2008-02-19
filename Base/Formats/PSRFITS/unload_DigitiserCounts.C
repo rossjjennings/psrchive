@@ -66,7 +66,7 @@ void CompressCounts( const vector<long> &data, vector<int> &target_data, float &
 
 void UnloadCountsTable ( fitsfile *fptr, const DigitiserCounts *ext )
 {
-  int status;
+  int status = 0;
   fits_insert_rows (fptr, 0, ext->subints.size(), &status);
 
   if( status != 0 )
