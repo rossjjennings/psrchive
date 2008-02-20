@@ -329,7 +329,7 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
   int col=0;
   char ctmp[16];
   fits_movnam_hdu(f, ASCII_TBL, "BECONFIG", 0, &status);
-  for (int i=0; i<nchan; i++) {
+  for (unsigned i=0; i<nchan; i++) {
     sprintf(ctmp, "CFRQ%d", i);
     fits_get_colnum(f, CASEINSEN, ctmp, &col, &status);
     fits_read_col(f, TFLOAT, col, 1, 1, 1, NULL, &flt_tmp, NULL, &status);
@@ -367,7 +367,7 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
     fits_read_key(f, TDOUBLE, "DUMPMIDSECS", &midsecs, NULL, &status);
     fits_read_key(f, TDOUBLE, "DUMPREFPER", &midper[0], NULL, &status);
     fits_read_key(f, TDOUBLE, "DUMPREFPHASE", &midphase[0], NULL, &status);
-    for (int i=1; i<nchan; i++) {
+    for (unsigned i=1; i<nchan; i++) {
       midphase[i] = midphase[0];
       midper[i] = midper[0];
     }
@@ -376,7 +376,7 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
   // Use avg folding period
   // TODO: This will change for multi-polyco support
   double pfold=0.0;
-  for (int i=0; i<nchan; i++) pfold += midper[i];
+  for (unsigned i=0; i<nchan; i++) pfold += midper[i];
   pfold /= (double)nchan;
   if (!status) integration->set_folding_period(pfold);
 
@@ -425,15 +425,15 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
   // Still relies on column numbers... probably ok, though.
   float *data = new float[nbin]; // Temporary storage space
   int *count = new int[nbin];
-  for (int ichan=0; ichan<nchan; ichan++) {
+  for (unsigned ichan=0; ichan<nchan; ichan++) {
     // Load counts for this chan
     fits_read_col(f, TINT, 5*ichan+5, 1, 1, nbin, NULL, count, NULL, &status);
-    for (int ipol=0; ipol<npol; ipol++) {
+    for (unsigned ipol=0; ipol<npol; ipol++) {
       // Load data for ipol, ichan 
       fits_read_col(f, TFLOAT, 5*ichan+ipol+1, 1, 1, nbin, NULL, data, NULL, 
           &status);
       // Normalize by counts
-      for (int ibin=0; ibin<nbin; ibin++) data[ibin] /= (float)count[ibin];
+      for (unsigned ibin=0; ibin<nbin; ibin++) data[ibin] /= (float)count[ibin];
       // Rotate to align phase0 w/ epoch.
       // TODO: This will change for multi-polyco support
       FTransform::shift(nbin, data, (double)nbin*(midphase[ichan]-refphase));

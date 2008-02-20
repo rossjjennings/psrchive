@@ -42,9 +42,9 @@ void ExtractCounts( const vector<int> &src_data, vector<long> &data, const float
 {
   data.resize( src_data.size() );
 
-  for( int d = 0; d < src_data.size(); d ++ )
+  for( unsigned d = 0; d < src_data.size(); d ++ )
   {
-    data[d] = floor( float(src_data[d]) * scale + offset + 0.5f );
+    data[d] = (long int) floor( float(src_data[d]) * scale + offset + 0.5f );
   }
 }
 
