@@ -220,7 +220,10 @@ endif
 #############################################################################
 #
 
-INCLUDES = -I$(top_srcdir)/More/Polarimetry -I$(top_srcdir)/More/MEAL
+INCLUDES = \
+	-I$(top_srcdir)/More/Polarimetry \
+	-I$(top_srcdir)/More/MEAL \
+	-I$(top_srcdir)/More/RFIMitigation
 
 include $(top_srcdir)/config/Makefile.include
 
