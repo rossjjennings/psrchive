@@ -73,9 +73,19 @@ void Pulsar::LawnMower::set_threshold (float sigma)
   mower->set_threshold( sigma );
 }
 
+float Pulsar::LawnMower::get_threshold () const
+{
+  return mower->get_threshold();
+}
+
 void Pulsar::LawnMower::set_median_smoothing (float turns)
 {
   median_smoothing_turns = turns;
+}
+
+float Pulsar::LawnMower::get_median_smoothing () const
+{
+  return median_smoothing_turns;
 }
 
 void Pulsar::LawnMower::set_broadband (bool flag)
@@ -255,4 +265,25 @@ void Pulsar::LawnMower::transform (Integration* subint)
     subint->set_weight (ichan, 0.0);
   }
   
+}
+
+
+//! Get the text interface to the configuration attributes
+TextInterface::Parser* Pulsar::LawnMower::get_interface ()
+{
+  return new Interface (this);
+}
+
+Pulsar::LawnMower::Interface::Interface (LawnMower* instance)
+{
+  if (instance)
+    set_instance (instance);
+
+  add( &LawnMower::get_median_smoothing,
+       &LawnMower::set_median_smoothing,
+       "window", "Median smoothing window in turns" );
+
+  add( &LawnMower::get_threshold,
+       &LawnMower::set_threshold,
+       "cutoff", "Cutoff threshold" );
 }

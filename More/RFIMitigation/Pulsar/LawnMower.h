@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/RFIMitigation/Pulsar/LawnMower.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/11/02 04:25:35 $
+   $Revision: 1.4 $
+   $Date: 2008/02/20 10:22:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_LawnMower_h
@@ -16,6 +16,8 @@
 
 #include "Pulsar/Transformation.h"
 #include "Pulsar/Integration.h"
+
+#include "TextInterface.h"
 #include "Functor.h"
 
 namespace Pulsar {
@@ -36,6 +38,15 @@ namespace Pulsar {
     //! Destructor
     ~LawnMower ();
 
+    //! Get the text interface to the configuration attributes
+    TextInterface::Parser* get_interface ();
+
+    // Text interface to the LawnMower class
+    class Interface : public TextInterface::To<LawnMower> {
+    public:
+      Interface (LawnMower* = 0);
+    };
+
     //! Set the Profile from which baseline PhaseWeight will be computed
     void transform (Integration*);
 
@@ -45,9 +56,11 @@ namespace Pulsar {
 
     //! Set the threshold above which samples are mown
     virtual void set_threshold (float sigma);
+    float get_threshold () const;
 
     //! Set the size of the window used during median smoothing
     virtual void set_median_smoothing (float turns);
+    float get_median_smoothing () const;
 
     //! If set, search for spikes in fscrunched (DM=0) total
     virtual void set_broadband (bool);
