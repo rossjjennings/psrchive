@@ -106,20 +106,20 @@ double Pulsar::Archive::weighted_frequency (unsigned ichan,
   if (weightsum != 0.0)
   {
     result = freqsum / weightsum;
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::Archive::weighted_frequency mean=" << result << endl;
   }
   else
   {
     result = 0.5 * ( fstart + fend );
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::Archive::weighted_frequency mid=" << result << endl;
   }
 
   // Nearest kHz
   result = 1e-3 * double( int(result*1e3) );
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::Archive::weighted_frequency kHz=" << result*1e3 << endl;
 
   return result;
