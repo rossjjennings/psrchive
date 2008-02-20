@@ -13,7 +13,7 @@ using namespace std;
 using namespace Pulsar;
 
 void unload (fitsfile* fptr, const Pulsar::DigitiserStatistics::row& drow,
-	     vector<unsigned> dimensions)
+	     const vector<unsigned>& dimensions)
 {
   
   int row = drow.index;
@@ -22,8 +22,8 @@ void unload (fitsfile* fptr, const Pulsar::DigitiserStatistics::row& drow,
     throw Error (InvalidParam, "unload (Pulsar::DigitiserStatistics::row*)",
 		 "digistat_row invalid row number=%d", row);
 
-  psrfits_write_col( fptr, "ATTEN", drow.atten, row );
-  psrfits_write_col( fptr, "DATA", drow.data, row, &dimensions );
+  psrfits_write_col( fptr, "ATTEN", row, drow.atten, vector<unsigned>() );
+  psrfits_write_col( fptr, "DATA", row, drow.data, dimensions );
 
 }
 

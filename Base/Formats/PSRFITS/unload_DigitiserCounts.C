@@ -50,7 +50,7 @@ void CompressCounts( const vector<long> &data, vector<int> &target_data, float &
   target_data.resize( data.size() );
   for( unsigned d = 0; d < data.size(); d ++ )
   {
-    target_data[d] = floor( ( float(data[d]) - offset ) / scale + 0.5f);
+    target_data[d] = (int) floor( ( float(data[d]) - offset ) / scale + 0.5f);
   }
 }
 
@@ -91,9 +91,9 @@ void UnloadCountsTable ( fitsfile *fptr, const DigitiserCounts *ext )
 
     CompressCounts( ext->subints[s].data, int_data, scale, offset );
 
-    psrfits_write_col( fptr, "DAT_SCL", scale, s+1 );
-    psrfits_write_col( fptr, "DAT_OFFS", offset, s+1 );
-    psrfits_write_col( fptr, "DATA", int_data, s+1, &dimensions );
+    psrfits_write_col( fptr, "DAT_SCL", s+1, scale );
+    psrfits_write_col( fptr, "DAT_OFFS", s+1, offset );
+    psrfits_write_col( fptr, "DATA", s+1, int_data, dimensions );
   }
 }
 

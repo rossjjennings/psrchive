@@ -36,11 +36,11 @@ void Pulsar::FITSArchive::unload_Integration (int row,
       cerr << "FITSArchive::unload_integration order=" 
            << order->get_extension_name() << endl;
 
-    psrfits_write_col (thefptr, "INDEXVAL", order->get_Index(row-1), row);
+    psrfits_write_col (thefptr, "INDEXVAL", row, order->get_Index(row-1));
   }
 
   // Set the duration of the integration
-  psrfits_write_col (thefptr, "TSUBINT", integ->get_duration(), row);
+  psrfits_write_col (thefptr, "TSUBINT", row, integ->get_duration());
   
   // Set the start time of the integration
 
@@ -50,7 +50,7 @@ void Pulsar::FITSArchive::unload_Integration (int row,
 
   double time = (integ->get_epoch () - reference_epoch).in_seconds();
 
-  psrfits_write_col (thefptr, "OFFS_SUB", time, row);
+  psrfits_write_col (thefptr, "OFFS_SUB", row, time);
 
   if (verbose > 2)
     cerr << "FITSArchive::unload_integration row=" << row 
@@ -62,57 +62,26 @@ void Pulsar::FITSArchive::unload_Integration (int row,
   if (theExt)
     unload(thefptr,theExt,row);
 
-  int colnum = 0;
-  int status = 0;
-
   // Write folding period if predictor model does not exist
   if (!has_model())
-    psrfits_write_col(thefptr, "PERIOD", integ->get_folding_period(), row);
+    psrfits_write_col(thefptr, "PERIOD", row, integ->get_folding_period());
 
   // Write the channel centre frequencies
 
-  colnum = 0;
-  fits_get_colnum (thefptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive:unload_integration",
-                   "fits_get_colnum DAT_FREQ");
-  
-  //fits_modify_vector_len (thefptr, colnum, nchan, &status);
+  vector<float> temp (nchan);
 
-  vector < float >  temp_array(nchan);
+  for (unsigned j = 0; j < nchan; j++)
+    temp[j] = integ->get_centre_frequency(j);
 
-  for(unsigned j = 0; j < nchan; j++)
-    temp_array[j] = integ->get_centre_frequency(j);
-
-  fits_write_col (thefptr, TFLOAT, colnum, row, 1, nchan, 
-                &(temp_array[0]), &status);
-
-  if (status != 0)
-    throw FITSError (status, "FITSArchive:unload_integration",
-                   "fits_write_col DAT_FREQ");
+  psrfits_write_col (thefptr, "DAT_FREQ", row, temp, vector<unsigned> ());
 
   // Write the profile weights
 
-  colnum = 0;
-  fits_get_colnum (thefptr, CASEINSEN, "DAT_WTS", &colnum, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive:unload_integration",
-                   "fits_get_colnum DAT_WTS");
+  for (unsigned j = 0; j < nchan; j++)
+    temp[j] = integ->get_weight(j);
 
-  //fits_modify_vector_len (thefptr, colnum, nchan, &status);
+  psrfits_write_col (thefptr, "DAT_WTS", row, temp, vector<unsigned> ());
 
-  for(unsigned j = 0; j < nchan; j++)
-    temp_array[j] = integ->get_weight(j);
-
-  fits_write_col (thefptr, TFLOAT, colnum, row, 1, nchan, 
-                &(temp_array[0]), &status);
-
-  if (status != 0)
-    throw FITSError (status, "FITSArchive:unload_integration",
-                   "fits_write_col DAT_WTS");
-  
   // Start writing profiles
   
   if (verbose > 2)
@@ -220,7 +189,8 @@ void Pulsar::FITSArchive::unload_Integration (int row,
       if (verbose > 2)
         cerr << "FITSArchive::unload_integration writing offset" << endl;
 
-      colnum = 0;
+      int status = 0; 
+      int colnum = 0;
       fits_get_colnum (thefptr, CASEINSEN, "DAT_OFFS", &colnum, &status);
 
       if (status != 0)

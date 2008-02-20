@@ -20,28 +20,28 @@ void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow) try
   if (Pulsar::Archive::verbose == 3)
     cerr << "unload Pulsar::ProcHistory::row row=" << row << endl;
 
-  psrfits_write_col (fptr, "DATE_PRO", hrow->date_pro, row);
-  psrfits_write_col (fptr, "PROC_CMD", hrow->proc_cmd, row);
-  psrfits_write_col (fptr, "POL_TYPE", hrow->pol_type, row);
-  psrfits_write_col (fptr, "NSUB",     hrow->nsub,     row);
-  psrfits_write_col (fptr, "NPOL",     hrow->npol,     row);
-  psrfits_write_col (fptr, "NBIN",     hrow->nbin,     row);
-  psrfits_write_col (fptr, "NBIN_PRD", hrow->nbin_prd, row);
-  psrfits_write_col (fptr, "TBIN",     hrow->tbin,     row);
-  psrfits_write_col (fptr, "CTR_FREQ", hrow->ctr_freq, row);
-  psrfits_write_col (fptr, "NCHAN",    hrow->nchan,    row);
-  psrfits_write_col (fptr, "CHAN_BW",  hrow->chan_bw,  row);
-  psrfits_write_col (fptr, "PAR_CORR", hrow->par_corr, row);
-  psrfits_write_col (fptr, "FA_CORR",  hrow->fa_corr,  row);
-  psrfits_write_col (fptr, "RM_CORR",  hrow->rm_corr,  row);
-  psrfits_write_col (fptr, "DEDISP",   hrow->dedisp,   row);
-  psrfits_write_col (fptr, "DDS_MTHD", hrow->dds_mthd, row);
-  psrfits_write_col (fptr, "SC_MTHD",  hrow->sc_mthd,  row);
-  psrfits_write_col (fptr, "CAL_MTHD", hrow->cal_mthd, row);
-  psrfits_write_col (fptr, "CAL_FILE", hrow->cal_file, row);
-  psrfits_write_col (fptr, "RFI_MTHD", hrow->rfi_mthd, row);
-  psrfits_write_col (fptr, "IFR_MTHD", hrow->ifr_mthd, row);
-  psrfits_write_col (fptr, "SCALE",    hrow->scale,    row);
+  psrfits_write_col (fptr, "DATE_PRO", row, hrow->date_pro);
+  psrfits_write_col (fptr, "PROC_CMD", row, hrow->proc_cmd);
+  psrfits_write_col (fptr, "POL_TYPE", row, hrow->pol_type);
+  psrfits_write_col (fptr, "NSUB",     row, hrow->nsub);
+  psrfits_write_col (fptr, "NPOL",     row, hrow->npol);
+  psrfits_write_col (fptr, "NBIN",     row, hrow->nbin);
+  psrfits_write_col (fptr, "NBIN_PRD", row, hrow->nbin_prd);
+  psrfits_write_col (fptr, "TBIN",     row, hrow->tbin);
+  psrfits_write_col (fptr, "CTR_FREQ", row, hrow->ctr_freq);
+  psrfits_write_col (fptr, "NCHAN",    row, hrow->nchan);
+  psrfits_write_col (fptr, "CHAN_BW",  row, hrow->chan_bw);
+  psrfits_write_col (fptr, "PAR_CORR", row, hrow->par_corr);
+  psrfits_write_col (fptr, "FA_CORR",  row, hrow->fa_corr);
+  psrfits_write_col (fptr, "RM_CORR",  row, hrow->rm_corr);
+  psrfits_write_col (fptr, "DEDISP",   row, hrow->dedisp);
+  psrfits_write_col (fptr, "DDS_MTHD", row, hrow->dds_mthd);
+  psrfits_write_col (fptr, "SC_MTHD",  row, hrow->sc_mthd);
+  psrfits_write_col (fptr, "CAL_MTHD", row, hrow->cal_mthd);
+  psrfits_write_col (fptr, "CAL_FILE", row, hrow->cal_file);
+  psrfits_write_col (fptr, "RFI_MTHD", row, hrow->rfi_mthd);
+  psrfits_write_col (fptr, "IFR_MTHD", row, hrow->ifr_mthd);
+  psrfits_write_col (fptr, "SCALE",    row, hrow->scale);
 
   if (Pulsar::Archive::verbose > 2)
     cerr << "FITSArchive::unload_hist_row exiting" << endl;

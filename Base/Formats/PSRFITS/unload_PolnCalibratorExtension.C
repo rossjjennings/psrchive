@@ -104,7 +104,7 @@ try {
   dimensions[0] = nchan;
   dimensions[1] = ncpar;
 
-  psrfits_write_col (fptr, "DATA", data, dimensions);
+  psrfits_write_col (fptr, "DATA", 1, data, dimensions);
 
   if (ncovar)
     unload_covariances (fptr, pce, ncovar, data);
@@ -143,7 +143,7 @@ void unload_variances (fitsfile* fptr,
   dimensions[0] = nchan;
   dimensions[1] = ncpar;
 
-  psrfits_write_col (fptr, "DATAERR", data, dimensions);
+  psrfits_write_col (fptr, "DATAERR", 1, data, dimensions);
 }
 
 void unload_covariances (fitsfile* fptr,
@@ -190,5 +190,6 @@ void unload_covariances (fitsfile* fptr,
   dimensions[0] = nchan;
   dimensions[1] = ncovar;
 
-  psrfits_write_col (fptr, "COVAR", data);
+  psrfits_write_col (fptr, "COVAR", 1, data, dimensions);
 }
+

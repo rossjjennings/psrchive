@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.14 $
-   $Date: 2008/02/18 08:50:23 $
+   $Revision: 1.15 $
+   $Date: 2008/02/20 12:24:41 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
@@ -172,9 +172,9 @@ void psrfits_update_tdim (fitsfile* ffptr, int column,
 			  const std::vector<unsigned>& dims);
 
 template<typename T>
-void psrfits_write_col (fitsfile* fptr, const char* name,
+void psrfits_write_col (fitsfile* fptr, const char* name, int row,
 			const std::vector<T>& data,
-			int row = 1, const std::vector<unsigned>* dims = 0)
+			const std::vector<unsigned>& dims)
 {
   //
   // Get the number of the named column
@@ -186,8 +186,8 @@ void psrfits_write_col (fitsfile* fptr, const char* name,
 
   fits_modify_vector_len (fptr, colnum, data.size(), &status);
 
-  if (dims)
-    psrfits_update_tdim (fptr, colnum, *dims);
+  if (dims.size() > 1)
+    psrfits_update_tdim (fptr, colnum, dims);
 
   fits_write_col (fptr, FITS_traits<T>::datatype(),
 		  colnum, row,
@@ -199,16 +199,8 @@ void psrfits_write_col (fitsfile* fptr, const char* name,
 }
 
 template<typename T>
-void psrfits_write_col (fitsfile* fptr, const char* name,
-			const std::vector<T>& data,
-			const std::vector<unsigned>& dims)
-{
-  psrfits_write_col (fptr, name, data, 1, &dims);
-}
-
-template<typename T>
-void psrfits_write_col( fitsfile *fptr, const char *name,
-			const T& data, int row=1 )
+void psrfits_write_col( fitsfile *fptr, const char *name, int row,
+			const T& data )
 {
   int colnum = 0;
   int status = 0;
