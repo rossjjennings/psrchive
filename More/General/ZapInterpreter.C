@@ -7,7 +7,9 @@
 
 #include "Pulsar/ZapInterpreter.h"
 #include "Pulsar/Integration.h"
+
 #include "Pulsar/ChannelZapMedian.h"
+#include "Pulsar/LawnMower.h"
 
 #include "TextInterface.h"
 #include "pairutil.h"
@@ -34,7 +36,13 @@ Pulsar::ZapInterpreter::ZapInterpreter ()
     ( &ZapInterpreter::median, 
       "median", "median smooth the passband and zap spikes",
       "usage: median <TI> \n"
-      "  type 'median help' for text interface help \n" );
+      "  type 'zap median help' for text interface help" );
+
+  add_command 
+    ( &ZapInterpreter::mow, 
+      "mow", "median smooth the profile and clean spikes",
+      "usage: mow <TI> \n"
+      "  type 'zap mow help' for text interface help" );
 
   add_command
     ( &ZapInterpreter::chan,
@@ -62,7 +70,6 @@ Pulsar::ZapInterpreter::~ZapInterpreter ()
 {
 }
 
-
 string Pulsar::ZapInterpreter::median (const string& args) try
 { 
   vector<string> arguments = setup (args);
@@ -88,6 +95,41 @@ string Pulsar::ZapInterpreter::median (const string& args) try
   return retval;
 }
 catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::ZapInterpreter::mow (const string& args) try
+{ 
+  vector<string> arguments = setup (args);
+
+  if (!lawn_mower)
+    lawn_mower = new LawnMower;
+
+  if (!arguments.size())
+  {
+    Reference::To<Archive> data = get();
+    for (unsigned isub = 0; isub < data->get_nsubint(); isub++)
+    {
+      cerr << "mowing subint " << isub << endl;
+      lawn_mower->transform( data->get_Integration( isub ) );
+    }
+    return response (Good);
+  }
+
+  //! Zap median interface
+  Reference::To<TextInterface::Parser> interface = lawn_mower->get_interface();
+
+  string retval;
+  for (unsigned icmd=0; icmd < arguments.size(); icmd++) {
+    if (icmd)
+      retval += " ";
+    retval += interface->process (arguments[icmd]);
+  }
+
+  return retval;
+}
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 

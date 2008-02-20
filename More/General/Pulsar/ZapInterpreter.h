@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ZapInterpreter.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/06/12 05:53:22 $
+   $Revision: 1.5 $
+   $Date: 2008/02/20 10:22:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ZapInterpreter_h
@@ -19,7 +19,8 @@
 namespace Pulsar {
 
   class ChannelZapMedian;
-  
+  class LawnMower;
+
   class ZapInterpreter : public Interpreter::Extension {
 
   public:
@@ -32,6 +33,9 @@ namespace Pulsar {
 
     //! zap data using the median smoothed filter
     std::string median (const std::string& args);
+
+    //! clean data using the lawn mowing algorithm
+    std::string mow (const std::string& args);
 
     //! zap the specified channels
     std::string chan (const std::string& args);
@@ -52,6 +56,9 @@ namespace Pulsar {
 
     //! Zap median algorithm
     Reference::To<ChannelZapMedian> zap_median;
+
+    //! Lawn mowing algorithm
+    Reference::To<LawnMower> lawn_mower;
 
   };
 
