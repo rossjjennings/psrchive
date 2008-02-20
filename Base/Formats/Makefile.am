@@ -41,7 +41,7 @@ INCLUDES = -I$(top_builddir)/local_include \
 
 include $(top_srcdir)/config/Makefile.local
 
-AM_CPPFLAGS = @CFITSIO_CFLAGS@ @PUMA_CFLAGS@ @TEMPO2_CFLAGS@
+AM_CPPFLAGS = @CFITSIO_CFLAGS@ @PUMA_CFLAGS@ @TEMPO2_CFLAGS@ @FFT_CFLAGS@
 
 LDADD = libFormats.la $(top_builddir)/Base/Classes/libClasses.la $(top_builddir)/Util/libpsrutil.la
 

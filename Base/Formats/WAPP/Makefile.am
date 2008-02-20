@@ -18,3 +18,6 @@ libwapp_la_SOURCES = WAPPArchive.C vanvleck.C vanvleck.h wapp_headers.h wapp_con
 
 include $(top_srcdir)/config/Makefile.include
 
+AM_CPPFLAGS += @FFT_CFLAGS@ 
+
+
