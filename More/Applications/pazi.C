@@ -13,6 +13,7 @@
 #include "Pulsar/PlotFactory.h"
 #include "Pulsar/Plot.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/ProcHistory.h"
 
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/LawnMower.h"
@@ -374,9 +375,12 @@ int main(int argc, char* argv[]) try
 				}
 				break;
 
-			case 's': // save current archive changes
+			case 's': {// save current archive changes
+				Pulsar::ProcHistory* fitsext = base_archive->get<Pulsar::ProcHistory>();
+				fitsext->set_command_str("pazi");
 				base_archive->unload(write_filename);
 				break;
+			}
 
 			case 't': // time plot
 				mouseY = 0;
