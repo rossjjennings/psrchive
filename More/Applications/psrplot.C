@@ -15,6 +15,7 @@
 #include "TextInterface.h"
 #include "strutil.h"
 #include "dirutil.h"
+#include "pgutil.h"
 
 #include <cpgplot.h>
 
@@ -81,9 +82,6 @@ void specific_options (string optarg, vector<Plot*>& plots);
 // load the style file into one of the plots
 void specific_style (string optarg, vector<Plot*>& plots);
 
-// set the size of the plotting surface
-void set_paper_size (float width_cm, float aspect_ratio);
-
 // verbosity
 static bool verbose = false;
 
@@ -116,10 +114,13 @@ int main (int argc, char** argv) try {
   // aspect ratio (height/width)
   float aspect_ratio = 0.0;
 
+  // plot dimensions in pixels
+  unsigned width_pixels = 0, height_pixels = 0;
+
   int n1 = 1;
   int n2 = 1;
 
-  static char* args = "A:c:C:D:hj:J:K:l:M:N:Op:Pqr:s:vVw:x";
+  static char* args = "A:c:C:D:g:hj:J:K:l:M:N:Op:Pqr:s:vVw:x";
 
   char c = 0;
   while ((c = getopt (argc, argv, args)) != -1) 
@@ -144,6 +145,14 @@ int main (int argc, char** argv) try {
     case 'D':
     case 'K': // for backward compatibility with old pav ...
       plot_device = optarg;
+      break;
+
+    case 'g':
+      if (sscanf (optarg, "%ux%u", &width_pixels, &height_pixels) != 2)
+      {
+	cerr << "psrplot: could not parse dimensions from " << optarg << endl;
+	return -1;
+      }
       break;
 
     case 'h':
@@ -262,7 +271,11 @@ int main (int argc, char** argv) try {
   }
 
   // set the size of the plot
-  set_paper_size (surface_width, aspect_ratio);
+  if (surface_width || aspect_ratio)
+    pgplot::set_paper_size (surface_width, aspect_ratio);
+
+  if (width_pixels && height_pixels)
+    pgplot::set_dimensions (width_pixels, height_pixels);
 
   // prompt before plotting the next page
   cpgask(1);
@@ -274,12 +287,13 @@ int main (int argc, char** argv) try {
 
   preprocessor->allow_infinite_frequency = true;
 
-  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
-
+  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try
+  {
     Reference::To<Archive> archive;
     archive = Archive::load( filenames[ifile] );
 
-    if (jobs.size()) {
+    if (jobs.size())
+    {
       if (verbose)
 	cerr << "psrplot: preprocessing " << filenames[ifile] << endl;
       preprocessor->set(archive);
@@ -294,8 +308,8 @@ int main (int argc, char** argv) try {
 
     Reference::To<Archive> toplot = archive;
 
-    for (unsigned iplot=0; iplot < plots.size(); iplot++) {
-
+    for (unsigned iplot=0; iplot < plots.size(); iplot++)
+    {
       if (verbose)
 	cerr << "psrplot: iplot=" << iplot << endl;
 
@@ -312,7 +326,8 @@ int main (int argc, char** argv) try {
     }
 
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << "Error while handling '" << filenames[ifile] << "'" << endl;
     if (verbose)
       cerr << error << endl;
@@ -325,7 +340,8 @@ int main (int argc, char** argv) try {
   return 0;
 
 }
-catch (Error& error) {
+catch (Error& error)
+{
   cerr << "psrplot: " << error << endl;
   return -1;
 }
@@ -354,11 +370,14 @@ void help_frame_options (const char* name)
 
 void set_options (Pulsar::Plot* plot, const vector<string>& options)
 {
-  for (unsigned j = 0; j < options.size(); j++) {
-    try {
+  for (unsigned j = 0; j < options.size(); j++)
+  {
+    try
+    {
       plot->configure (options[j]);
     }
-    catch (Error& error) {
+    catch (Error& error)
+    {
       cerr << "psrplot: Invalid option '" << options[j] << "' " 
 	   << error.get_message() << endl;
       exit (-1);
@@ -370,7 +389,8 @@ void set_options (Pulsar::Plot* plot, const vector<string>& options)
 unsigned get_index (string& optarg, vector<Plot*>& plots)
 {
   unsigned index = fromstring<unsigned> ( stringtok (optarg, ":") );
-  if (index >= plots.size()) {
+  if (index >= plots.size())
+  {
     cerr << "psrplot: invalid plot index = " << index
 	 << " nplot=" << plots.size() << endl;
     exit(-1);
@@ -406,28 +426,3 @@ void specific_style (string optarg, vector<Plot*>& plots)
   set_options (plots[index], options);
 }
 
-void set_paper_size (float width_cm, float aspect_ratio)
-{
-  if (width_cm == 0 && aspect_ratio == 0)
-    return;
-
-  if (verbose)
-    cerr << "psrplot: set_paper_size width=" << width_cm 
-	 << " aspect=" << aspect_ratio << endl;
-
-  float use_aspect_ratio = aspect_ratio;
-
-  if (aspect_ratio == 0)
-  {
-    // determine the current aspect ratio
-
-    int units = 2; // mm
-    float x1, x2, y1, y2;
-    cpgqvsz (units, &x1, &x2, &y1, &y2);
-    use_aspect_ratio = y2/x2;
-  }
-
-  float cm_per_inch = 2.54;
-
-  cpgpap( width_cm/cm_per_inch, use_aspect_ratio );
-}
