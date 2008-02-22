@@ -321,6 +321,19 @@ bool Signal::valid_state(Signal::State state,unsigned ndim,unsigned npol, string
   return true;
 }
 
+Signal::State Signal::pscrunch (State state)
+{
+  switch (state)
+    {
+    case Stokes:
+    case Coherence:
+    case PPQQ:
+      return Intensity;
+    default:
+      return state;
+    }
+}
+
 // //////////////////////////////////////////////////////////////////////////
 //
 // Signal::State

@@ -4,10 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+
+using namespace std;
 
 /*!
   Simply calls Integration::pscrunch for each Integration
@@ -21,6 +22,7 @@ void Pulsar::Archive::pscrunch()
     get_Integration(isub) -> pscrunch ();
 
   set_npol( 1 );
-  set_state( Signal::Intensity );
+
+  set_state( Signal::pscrunch (get_state()) );
 }
 

@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.25 $
-   $Date: 2008/01/25 22:33:31 $
-   $Author: demorest $ */
+   $Revision: 1.26 $
+   $Date: 2008/02/22 11:20:45 $
+   $Author: straten $ */
 
 #ifndef __Types_h
 #define __Types_h
@@ -136,7 +136,10 @@ namespace Signal {
   //! Tells you if your state is consistent with your npol and ndim
   bool valid_state (State state, unsigned ndim, unsigned npol,
                     std::string& reason);
-  
+
+  //! Returns the state resulting from a pscrunch operation
+  State pscrunch (State state);
+
 }
 
 std::ostream& operator << (std::ostream& ostr, Signal::Source source);

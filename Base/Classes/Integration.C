@@ -461,24 +461,25 @@ void Pulsar::Integration::bscrunch (unsigned nscrunch)
  */    
 void Pulsar::Integration::pscrunch()
 {
+  Signal::State state = get_state();
+
   if (verbose)
-    cerr << "Integration::pscrunch " << Signal::state_string(get_state())
+    cerr << "Integration::pscrunch " << Signal::state_string(state)
 	 << endl;
 
-  if (get_state() == Signal::Coherence || get_state() == Signal::PPQQ) {
-
+  if (state == Signal::Coherence || state == Signal::PPQQ)
+  {
     if (get_npol() < 2)
       throw Error (InvalidState, "Integration::pscrunch", "npol < 2");
 
     for (unsigned ichan=0; ichan < get_nchan(); ichan++)
       profiles[0][ichan] -> sum (profiles[1][ichan]);
-
   }
 
   resize (1);
 
   if (orphaned)
-    orphaned->set_state( Signal::Intensity );
+    orphaned->set_state( Signal::pscrunch(state) );
 } 
 
 MJD Pulsar::Integration::get_start_time () const
