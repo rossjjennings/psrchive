@@ -325,7 +325,7 @@ void Pulsar::FluxPlot::plot_error_box (const Archive* data)
   PlotLabel* label = get_frame()->get_label_below();
 
   // left side of error box defined by label margin
-  float x1 = x_min + label->get_margin (PlotLabel::World);
+  float x1 = x_min + label->get_margin (pgplot::World);
   float x2 = x1 + x_error * get_scale()->get_scale (data);
 
   float y1 = 0;
@@ -349,7 +349,7 @@ void Pulsar::FluxPlot::plot_error_box (const Archive* data)
       {
         // top edge of error box is one row below last row in top left
         unsigned nrows = label->get_nrows( label->get_left() );
-        y2 = y_max + label->get_displacement( nrows, PlotLabel::World );
+        y2 = y_max + label->get_displacement( nrows, pgplot::World );
         y1 = y2 - 4.0 * y_error;
         break;
       }

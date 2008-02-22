@@ -59,7 +59,7 @@ unsigned Pulsar::PlotLabel::get_nrows (const string& label) const
 }
 
 //! Get the margin in the specified units
-float Pulsar::PlotLabel::get_margin (Units units) const
+float Pulsar::PlotLabel::get_margin (pgplot::Units units) const
 {
   float xl, yl;
   // the margin is defined by the width of a dash
@@ -68,7 +68,7 @@ float Pulsar::PlotLabel::get_margin (Units units) const
 }
 
 //! Get the displacement of label[irow] in the specified units
-float Pulsar::PlotLabel::get_displacement (int row, Units units) const
+float Pulsar::PlotLabel::get_displacement (int row, pgplot::Units units) const
 {
   float xl, yl;
   // the row displacement is defined by the height of a zero
@@ -97,9 +97,9 @@ void Pulsar::PlotLabel::row (const string& label,
   float coord = 0.5;
 
   if (side < 0.5)
-    coord = side + get_margin (Viewport);
+    coord = side + get_margin (pgplot::Viewport);
   else if (side > 0.5)
-    coord = side - get_margin (Viewport);
+    coord = side - get_margin (pgplot::Viewport);
 
   // rows always go from top to bottom
   if (spacing > 0)

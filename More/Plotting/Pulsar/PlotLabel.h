@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotLabel.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/01/10 23:21:37 $
+   $Revision: 1.12 $
+   $Date: 2008/02/22 14:07:09 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotLabel_h
 #define __Pulsar_PlotLabel_h
 
 #include "TextInterface.h"
+#include "pgutil.h"
 
 namespace Pulsar {
 
@@ -28,30 +29,6 @@ namespace Pulsar {
 
     //! Default label string signifies not set by user
     static std::string unset;
-
-    /* UNITS: 0 => answer in normalized device coordinates
-              1 => answer in inches
-	      2 => answer in mm
-	      3 => answer in absolute device coordinates (dots)
-	      4 => answer in world coordinates
-	      5 => answer as a fraction of the current viewport size
-    */
-    //! Coordinate frame of reference
-    enum Units
-    {
-      //! normalized device coordinates
-      Device = 0,
-      //! imperial
-      Inches = 1,
-      //! metric
-      Millimetres = 2,
-      //! pixels
-      Pixels = 3,
-      //! world coordinates
-      World = 4,
-      //! fraction of the current viewport size
-      Viewport = 5,
-     };
 
     //! Default constructor
     PlotLabel ();
@@ -95,10 +72,10 @@ namespace Pulsar {
     virtual void plot (const Archive*);
 
     //! Get the margin in the specified metric
-    float get_margin (Units) const;
+    float get_margin (pgplot::Units) const;
 
     //! Get the displacement of label[irow] in the specified metric
-    float get_displacement (int row, Units) const;
+    float get_displacement (int row, pgplot::Units) const;
 
     //! Get the displacement of label[irow] in units of the character height
     float get_displacement (int row) const;
