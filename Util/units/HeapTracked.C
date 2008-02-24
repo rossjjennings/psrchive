@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -12,20 +12,26 @@
 #include "HeapTracked.h"
 #include "Error.h"
 
-#ifdef HAVE_PTHREAD
-#include <pthread.h>
-#endif
-
-// #define _DEBUG 1
-
 using namespace std;
 
-// static ensures read-only access via get_heap_queue_size
-static vector<const void*> heap_addresses;
-
 #ifdef HAVE_PTHREAD
+
+#include <pthread.h>
+
 static pthread_mutex_t heap_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+#define LOCK_HEAP    pthread_mutex_lock (&heap_mutex);
+#define UNLOCK_HEAP  pthread_mutex_unlock (&heap_mutex);
+
+#else
+
+#define LOCK_HEAP
+#define UNLOCK_HEAP
+
 #endif
+
+// list of addresses that have been dynamically allocated on the heap
+static vector<const void*> heap_addresses;
 
 size_t Reference::HeapTracked::get_heap_queue_size ()
 {
@@ -36,8 +42,8 @@ bool Reference::verbose = false;
 
 void* Reference::HeapTracked::operator new (size_t size, void* ptr)
 {
-  if (ptr) {
-
+  if (ptr)
+  {
 #ifdef _DEBUG
     cerr << "Reference::HeapTracked::operator placement new size=" << size 
 	 << " ptr=" << ptr << endl;
@@ -45,10 +51,8 @@ void* Reference::HeapTracked::operator new (size_t size, void* ptr)
 
     return ptr;
   }
-  
-#ifdef HAVE_PTHREAD
-  pthread_mutex_lock (&heap_mutex);
-#endif
+
+  LOCK_HEAP
 
   ptr = ::operator new (size);
 
@@ -59,17 +63,7 @@ void* Reference::HeapTracked::operator new (size_t size, void* ptr)
 
   heap_addresses.push_back (ptr);
 
-#if 0
-  static unsigned max_size = 0;
-  if (heap_addresses.size() > max_size) {
-    max_size = heap_addresses.size();
-    cerr << "max. size=" << heap_addresses.size() << endl;
-  }
-#endif
-
-#ifdef HAVE_PTHREAD
-  pthread_mutex_unlock (&heap_mutex);
-#endif
+  UNLOCK_HEAP
 
   return ptr;
 }
@@ -85,15 +79,10 @@ void Reference::HeapTracked::operator delete (void* ptr)
 
 bool Reference::HeapTracked::__is_on_heap () const
 {
-  return const_cast<HeapTracked*>(this)->__is_on_heap ();
-}
-
-bool Reference::HeapTracked::__is_on_heap ()
-{
   const char is_on_heap = 0x01;
 
-  if (__heap_state) {
-
+  if (__heap_state)
+  {
 #ifdef _DEBUG
     cerr << "Reference::HeapTracked::__is_on_heap __heap_state="
          << (int)__heap_state << endl;
@@ -119,26 +108,12 @@ bool Reference::HeapTracked::__is_on_heap ()
   
   vector<const void*>::iterator it;
 
-#ifdef HAVE_PTHREAD
-  pthread_mutex_lock (&heap_mutex);
-#endif
+  LOCK_HEAP
 
-  for (it = heap_addresses.begin(); it != heap_addresses.end(); it++) {
+  it = std::find( heap_addresses.begin(), heap_addresses.end(), raw_address );
 
-#ifdef _DEBUG
-    unsigned long itl = (unsigned long) *it;
-    unsigned long ral = (unsigned long) raw_address;
-
-    cerr << "Reference::HeapTracked::is_on_heap heap address=" << *it
-	 << " diff=" << (ral - itl) << endl;
-#endif
-
-    if (*it == raw_address)
-      break;
-  }
-
-  if ( it != heap_addresses.end() ) {
-
+  if ( it != heap_addresses.end() )
+  {
     heap_addresses.erase (it);
     __heap_state = is_on_heap;
 
@@ -147,9 +122,7 @@ bool Reference::HeapTracked::__is_on_heap ()
          << (int)__heap_state << endl;
 #endif
 
-#ifdef HAVE_PTHREAD
-  pthread_mutex_unlock (&heap_mutex);
-#endif
+    UNLOCK_HEAP
 
     return true;
   }
@@ -161,9 +134,8 @@ bool Reference::HeapTracked::__is_on_heap ()
          << (int)__heap_state << endl;
 #endif
 
-#ifdef HAVE_PTHREAD
-  pthread_mutex_unlock (&heap_mutex);
-#endif
+  UNLOCK_HEAP
 
   return false;
 }
+

@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/HeapTracked.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/02/24 22:05:30 $
+   $Revision: 1.11 $
+   $Date: 2008/02/24 23:06:13 $
    $Author: straten $ */
 
 #ifndef __ReferenceHeapTracked_h
@@ -18,7 +18,7 @@
 
 namespace Reference {
 
-  //! Method verbosity flag
+  //! Verbosity flag
   extern bool verbose;
 
   //! Determines if the instance was dynamically allocated on the heap.
@@ -43,12 +43,12 @@ namespace Reference {
     Therefore, in order to improve the efficiency of the __is_on_heap
     search, it is advised to call the __is_on_heap method as soon as
     possible after construction of the object.  This is done by the
-    Reference::Able::__add_reference method, which is called by the
+    Reference::Able::__reference method, which is called by the
     Reference::To template class when its assigment operator is
     called. 
   */
-  class HeapTracked {
-
+  class HeapTracked
+  {
   public:
 
     //! Default constructor
@@ -74,8 +74,6 @@ namespace Reference {
 
     //! Return true if this instance is found in heap addresses
     bool __is_on_heap () const;
-    //! Return true if this instance is found in heap addresses
-    bool __is_on_heap ();
 
     //! Return the number of heap addresses awaiting processing
     static size_t get_heap_queue_size ();
@@ -84,7 +82,7 @@ namespace Reference {
 
     friend class Able;
 
-    //! State of this instance allocated on the heap
+    //! State of this instance
     mutable char __heap_state;
 
   };
@@ -92,3 +90,4 @@ namespace Reference {
 }
 
 #endif
+
