@@ -92,7 +92,8 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
 
   // timer supplement - added 23 July 04
 
-  struct supp* supplement = reinterpret_cast<struct supp*>( &(hdr.bandb) );
+  void* temp = &(hdr.bandb);
+  struct supp* supplement = reinterpret_cast<struct supp*>( temp );
 
   if (supplement->version > 0
       && hdr.bandb.nlag > 0
@@ -215,7 +216,8 @@ void Pulsar::TimerArchive::pack (const Receiver* receiver)
   set_corrected (FEED_CORRECTED, receiver->get_feed_corrected());
   set_corrected (PARA_CORRECTED,  receiver->get_platform_corrected());
 
-  struct supp* supplement = reinterpret_cast<struct supp*>( &(hdr.bandb) );
+  void* temp = &(hdr.bandb);
+  struct supp* supplement = reinterpret_cast<struct supp*>( temp );
 
   if ( receiver->get_basis() == Signal::Circular )  {
     supplement->X_offset = 0;
