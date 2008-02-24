@@ -1,11 +1,9 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-
-// #define _DEBUG 1
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -14,39 +12,19 @@
 #include "ReferenceAble.h"
 #include "Error.h"
 
-#include <iostream>
-using namespace std;
-
-#ifdef HAVE_PTHREAD
-#include <pthread.h>
-#endif
-
 #include <assert.h>
 
-#ifdef _DEBUG
-
-#include "ThreadStream.h"
-
-static ThreadStream* mtcerr = 0;
-
-static ostream& get_mtcerr ()
-{
-  if (!mtcerr)
-    mtcerr = new ThreadStream;
-  return (*mtcerr)();
-}
-
-#define cerr get_mtcerr()
-
-#endif
-
-// static ensures read-only access via get_instance_count
-static size_t instance_count = 0;
-
-
 #ifdef HAVE_PTHREAD
 
-// returns a mutex that may be used recursively
+#include <pthread.h>
+
+/*
+  Returns a new mutex that may be used recursively
+
+  The mutex must be recursive because it is locked by both the
+  Reference::Able::Handle::copy and Reference::Able::__reference methods,
+  and the former calls the latter.
+*/
 static pthread_mutex_t* recursive_mutex ()
 {
   pthread_mutexattr_t attr;
@@ -59,7 +37,14 @@ static pthread_mutex_t* recursive_mutex ()
   return mutex;
 }
 
-// protect mutable attributes in multi-threaded applications
+/*
+  Interface to the recursive mutex use to protect mutable attributes
+
+  The order in which constructor functions are called at runtime cannot be
+  guaranteed, but built-in types like pointers are initialized by the
+  compiler.  The static pthread_mutex_t pointer is will be zero only on the
+  first call to this method.
+*/
 static pthread_mutex_t* get_mutex ()
 {
   static pthread_mutex_t* mutex = 0;
@@ -68,7 +53,18 @@ static pthread_mutex_t* get_mutex ()
   return mutex;
 }
 
+#define LOCK_REFERENCE    pthread_mutex_lock (get_mutex());
+#define UNLOCK_REFERENCE  pthread_mutex_unlock (get_mutex());
+
+#else
+
+#define LOCK_REFERENCE
+#define UNLOCK_REFERENCE
+
 #endif
+
+// count of Reference::Able instances
+static size_t instance_count = 0;
 
 size_t Reference::Able::get_instance_count ()
 {
@@ -115,7 +111,6 @@ Reference::Able::~Able ()
 #ifdef _DEBUG
   cerr << "Reference::Able::~Able instances=" << instance_count << endl;
 #endif
-
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -129,14 +124,16 @@ Reference::Able::__reference (bool active) const
        << " active=" << active << endl;
 #endif
 
-#ifdef HAVE_PTHREAD
-  pthread_mutex_lock (get_mutex());
-#endif
-
-  __is_on_heap();
+  LOCK_REFERENCE
 
   if (!__reference_handle)
   {
+    /*
+      optimization: calling __is_on_heap when first referenced reduces the
+      size of the pending heap address list.
+    */
+    __is_on_heap();
+
     __reference_handle = new Handle;
     __reference_handle->pointer = const_cast<Able*>(this);
 
@@ -151,9 +148,7 @@ Reference::Able::__reference (bool active) const
   if (active)
     __reference_count ++;
 
-#ifdef HAVE_PTHREAD
-  pthread_mutex_unlock (get_mutex());
-#endif
+  UNLOCK_REFERENCE
 
 #ifdef _DEBUG
   cerr << "Reference::Able::__reference this=" << this 
@@ -205,12 +200,10 @@ void Reference::Able::__dereference (bool auto_delete) const
 
 void Reference::Able::Handle::decrement (bool active, bool auto_delete)
 {
-#ifdef HAVE_PTHREAD
-  pthread_mutex_lock (get_mutex());
-#endif
+  LOCK_REFERENCE
 
-  if (pointer) {
-
+  if (pointer)
+  {
     if (count == 1)
       // this instance is about to be deleted, ensure that Able knows it
       pointer->__reference_handle = 0;
@@ -218,7 +211,6 @@ void Reference::Able::Handle::decrement (bool active, bool auto_delete)
     if (active)
       // decrease the active reference count
       pointer->__dereference (auto_delete);
-
   }
 
   // decrease the total reference count
@@ -229,11 +221,9 @@ void Reference::Able::Handle::decrement (bool active, bool auto_delete)
 #endif
 
   // delete the handle
-  if (count == 0) {
-
-#ifdef HAVE_PTHREAD
-    pthread_mutex_unlock (get_mutex());
-#endif
+  if (count == 0)
+  {
+    UNLOCK_REFERENCE
 
 #ifdef _DEBUG
     cerr << "Reference::Able::Handle::decrement delete this=" << this << endl;
@@ -243,28 +233,23 @@ void Reference::Able::Handle::decrement (bool active, bool auto_delete)
     return;
   }
 
-#ifdef HAVE_PTHREAD
-  pthread_mutex_unlock (get_mutex());
-#endif
+  LOCK_REFERENCE
 }
 
 
 void
 Reference::Able::Handle::copy (Handle* &to, Handle* const &from, bool active)
 {
-#ifdef HAVE_PTHREAD
-  pthread_mutex_lock (get_mutex());
-#endif
+  LOCK_REFERENCE
 
 #ifdef _DEBUG
   cerr << "Reference::Able::Handle::copy from=" << from << endl;
 #endif
 
-  if (!from) {
+  if (!from)
+  {
     to = 0;
-#ifdef HAVE_PTHREAD
-    pthread_mutex_unlock (get_mutex());
-#endif
+    UNLOCK_REFERENCE
     return;
   }
 
@@ -279,9 +264,7 @@ Reference::Able::Handle::copy (Handle* &to, Handle* const &from, bool active)
   cerr << "Reference::Able::Handle::copy count=" << to->count << endl;
 #endif
 
-#ifdef HAVE_PTHREAD
-  pthread_mutex_unlock (get_mutex());
-#endif
+  UNLOCK_REFERENCE
 }
 
 //! Default constructor
@@ -309,3 +292,4 @@ Reference::Able::Handle& Reference::Able::Handle::operator = (const Handle&)
 Reference::Able::Handle::~Handle()
 {
 }
+
