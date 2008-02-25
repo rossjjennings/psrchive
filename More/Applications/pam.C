@@ -272,7 +272,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.81 2007/11/26 02:50:18 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.82 2008/02/25 03:29:15 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -996,17 +996,12 @@ int main (int argc, char *argv[]) try {
 	  arch->unload();
 	  cout << arch->get_filename() << " updated on disk" << endl;
 	}
-	else {
-	  string the_old = arch->get_filename();
-	  int index = the_old.find_last_of(".",the_old.length());
-	  string primary = the_old.substr(0, index);
-
-	  string the_new;
+	else
+        {
+	  string the_new = replace_extension (arch->get_filename(), ext);
 	  if (!ulpath.empty())
-	    the_new = ulpath + primary + "." + ext;
-	  else
-	    the_new = primary + "." + ext;
-	  
+	    the_new = ulpath + the_new;
+
 	  arch->unload(the_new);
 	  cout << "New file " << the_new << " written to disk" << endl;
 	}

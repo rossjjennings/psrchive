@@ -20,6 +20,7 @@
 
 #include "Error.h"
 #include "dirutil.h"
+#include "strutil.h"
 
 #include <unistd.h>
 
@@ -156,7 +157,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.41 2007/11/01 04:05:42 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.42 2008/02/25 03:29:15 straten Exp $" << endl;
       return 0;
 
     case 'm':
@@ -730,14 +731,9 @@ int main (int argc, char *argv[]) {
       continue;
     }
 
-    string the_old = arch->get_filename();
-    int index = the_old.find_last_of(".",the_old.length());
-    string primary = the_old.substr(0, index);
-    string the_new;
+    string the_new = replace_extension (arch->get_filename(), ext);
     if (!ulpath.empty())
-      the_new = ulpath + primary + "." + ext;
-    else
-      the_new = primary + "." + ext;
+      the_new = ulpath + the_new;
 
     cout << "Unloading " << the_new << " ..." << endl;
     arch->unload(the_new);

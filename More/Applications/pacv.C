@@ -483,10 +483,8 @@ int main (int argc, char** argv)
       cerr << "pacv: Creating " << archive_class << " Archive" << endl;
       
       output = calibrator->new_solution (archive_class);
-      
-      int index = filenames[ifile].find_first_of(".", 0);
-      string newname = filenames[ifile].substr(0, index) + ".pacv";
-      
+
+      string newname = replace_extension (filenames[ifile], "pacv");
       cerr << "pacv: Unloading " << newname << endl;
       output -> unload (newname);
 

@@ -116,19 +116,11 @@ int main(int argc, char *argv[])
       cerr << "# of bins: " << output -> get_nbin() << endl;
     }
 
-    string newname = input->get_filename();
-
-    size_t index = newname.find_last_of(".",newname.length());
-
-    if (index == string::npos)
-      index = newname.length();
-
-    newname = newname.substr(0, index);
-
+    string ext = unload_psr_ext;
     if (input->type_is_cal())
-      newname += unload_cal_ext;
-    else
-      newname += unload_psr_ext;
+      ext = unload_cal_ext;
+
+    string newname = replace_extension( input->get_filename(), ext );
 
     if (!quiet)
       cerr << "Unloading " << newname << endl;

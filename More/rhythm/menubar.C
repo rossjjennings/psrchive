@@ -360,14 +360,10 @@ void Rhythm::save_all ()
   
   save_toas ( toaName.c_str() );
   
-  int index = toaName.find_first_of(".", 0);
-
-  string parName = toaName.substr(0, index);
-  parName += ".par";
+  string parName = replace_extension (toaName, ".par");
   
-  if (fitpopup) {
+  if (fitpopup)
     fitpopup->save(parName);
-  }
 
   QString str = "TOAs and Ephemeris saved";
   

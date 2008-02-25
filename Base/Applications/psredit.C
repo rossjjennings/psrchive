@@ -188,11 +188,7 @@ int main (int argc, char** argv) try {
 	cout << archive->get_filename() << " updated on disk" << endl;
       }
       else {
-	string name = archive->get_filename();
-	size_t index = name.find_last_of(".");
-	if (index == string::npos)
-	  index = name.length();    
-	name = name.substr(0, index) + "." + save_ext;
+	string name = replace_extension( archive->get_filename(), save_ext );
 	archive->unload(name);
 	cout << archive->get_filename() << " written to disk" << endl;
       }
