@@ -161,7 +161,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.85 2008/02/04 23:34:18 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.86 2008/02/25 03:16:14 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -594,24 +594,7 @@ int main (int argc, char *argv[]) {
 	   << "\t" << error.get_message() << endl;
     }
 
-    // find first of "." turns "./cal/poo.cfb" into ".unload_ext" WvS
-    //
-    // int index = filenames[i].find_first_of(".", 0);
-
-    unsigned index = filenames[i].find_last_of(".",filenames[i].length());
-
-    if (index == string::npos)
-      index = filenames[i].length();
-
-    // starting the output filename with the cwd causes a mess when 
-    // full path names to input files are used.  WvS
-    //  
-    // string newname = opath;
-    
-    string newname = filenames[i].substr(0, index);
-    
-    newname += ".";
-    newname += unload_ext;
+    string newname = replace_extension( filenames[i], unload_ext );
 
     if (!successful_fluxcal)
       newname += "P";
