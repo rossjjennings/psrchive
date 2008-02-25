@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.23 $
-   $Date: 2007/11/21 18:53:56 $
+   $Revision: 1.24 $
+   $Date: 2008/02/25 05:35:20 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -64,9 +64,6 @@ namespace Pulsar {
       Galactic
     };
     
-    //! Get the feed track mode
-    std::string get_fd_mode () const;
-
     //! Get the tracking mode of the receiver platform
     Tracking get_tracking_mode () const { return tracking_mode; }
     //! Set the tracking mode of the receiver platform
@@ -78,7 +75,7 @@ namespace Pulsar {
     void set_tracking_angle (const Angle& angle) { tracking_angle = angle; }
 
     //! Get the name of the receiver
-    const std::string get_name () const { return name; }
+    std::string get_name () const { return name; }
     //! Set the name of the receiver
     void set_name (const std::string& _name) { name = _name; }
     

@@ -232,29 +232,6 @@ Stokes<double> Pulsar::Receiver::get_reference_source () const
   return standard (cal);
 }
 
-
-
-std::string Pulsar::Receiver::get_fd_mode() const
-{
-	std::string mode;
-
-	switch( tracking_mode )
-	{
-		case Feed:
-			mode = "FEED";
-			break;
-		case Celestial:
-			mode = "CPA";
-			break;
-		case Galactic:
-			mode = "GPA";
-			break;
-	};
-	
-	return mode;
-}
-
-
 TextInterface::Parser* Pulsar::Receiver::get_interface()
 {
 	return new ReceiverTI( this );
