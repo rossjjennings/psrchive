@@ -26,8 +26,6 @@ static string get_default (string which)
 
 Pulsar::CalSource::CalSource () 
 {
-  Configuration* config = Config::get_configuration();
-
   Option<string,false> cfgon
     ( &on_filename,
       "fluxcal::on", get_default("on"),
