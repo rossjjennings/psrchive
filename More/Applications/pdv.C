@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.23 $
-   $Date: 2008/02/07 10:39:18 $
-   $Author: straten $ */
+   $Revision: 1.24 $
+   $Date: 2008/02/26 23:53:48 $
+   $Author: nopeer $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -629,21 +629,21 @@ bool CheckPointing( Reference::To<Pointing> pointing, table_stream &ts )
 
 
 
+/**
+ * DisplaySubints    Display a subint table header parameters.
+ *
+ * @param filenames  The files to read the data from
+ * @param parameters The columns to display for each subint table. (assumed to be all uppercase).
+ **/
+
 void DisplaySubints( vector<string> filenames, vector<string> parameters )
 {
   // If we don't have filenames or parameters, output a usage message
 
-  if( filenames.size() == 0 )
+  if( filenames.size() == 0 || parameters.size() == 0 )
   {
     cerr << "No filenames given, or no parameters given." << endl;
     return;
-  }
-
-  // convert all the parameters to uppercase
-
-  for( unsigned i = 0; i < parameters.size(); i ++ )
-  {
-    parameters[i] = uppercase( parameters[i] );
   }
 
   vector<string>::iterator fit;
@@ -779,9 +779,16 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
 
 
 
+/**
+ * DisplayHistory     Display entries in the archives history tables.
+ *
+ * @param filenames   The archives to display.
+ * @param params      The columns from the subint table to display. (assumed to be all lowercase)
+ **/
+
 void DisplayHistory( vector<string> filenames, vector<string> params )
 {
-  if( filenames.size() == 0 )
+  if( filenames.size() == 0 || params.size() == 0 )
   {
     cerr << "No filenames given, or no parameters given" << endl;
     return;
@@ -825,49 +832,49 @@ void DisplayHistory( vector<string> filenames, vector<string> params )
             vector<string>::iterator pit;
             for( pit = params.begin(); pit != params.end(); pit ++ )
             {
-              if( (*pit) == "date_pro" )
+              if( (*pit) == "DATE_PRO" )
                 ts << (*rit).date_pro;
-              else if( (*pit) == "proc_cmd" )
+              else if( (*pit) == "PROC_CMD" )
                 ts << (*rit).proc_cmd;
-              else if( (*pit) == "scale" )
+              else if( (*pit) == "SCALE" )
                 ts << (*rit).scale;
-              else if( (*pit) == "pol_type" )
+              else if( (*pit) == "POL_TYPE" )
                 ts << (*rit).pol_type;
-              else if( (*pit) == "npol" )
+              else if( (*pit) == "NPOL" )
                 ts << tostring<int>( (*rit).npol );
-              else if( (*pit) == "nbin" )
+              else if( (*pit) == "NBIN" )
                 ts << tostring<int>( (*rit).nbin );
-              else if( (*pit) == "nsub" )
+              else if( (*pit) == "NSUB" )
                 ts << tostring<int>( (*rit).nsub );
-              else if( (*pit) == "nbin_prd" )
+              else if( (*pit) == "NBIN_PRD" )
                 ts << tostring<int>( (*rit).nbin_prd );
-              else if( (*pit) == "tbin" )
+              else if( (*pit) == "TBIN" )
                 ts << tostring<double>( (*rit).tbin );
-              else if( (*pit) == "ctr_freq" )
+              else if( (*pit) == "CTR_FREQ" )
                 ts << tostring<double>( (*rit).ctr_freq );
-              else if( (*pit) == "nchan" )
+              else if( (*pit) == "NCHAN" )
                 ts << tostring<int>( (*rit).nchan );
-              else if( (*pit) == "chan_bw" )
+              else if( (*pit) == "CHAN_BW" )
                 ts << tostring<double>( (*rit).chan_bw );
-              else if( (*pit) == "par_corr" )
+              else if( (*pit) == "PAR_CORR" )
                 ts << tostring<int>( (*rit).par_corr );
-              else if( (*pit) == "fa_corr" )
+              else if( (*pit) == "FA_CORR" )
                 ts << tostring<int>( (*rit).fa_corr );
-              else if( (*pit) == "rm_corr" )
+              else if( (*pit) == "RM_CORR" )
                 ts << tostring<int>( (*rit).rm_corr );
-              else if( (*pit) == "dedisp" )
+              else if( (*pit) == "DEDISP" )
                 ts << tostring<int>( (*rit).dedisp );
-              else if( (*pit) == "dds_mthd" )
+              else if( (*pit) == "DDS_MTHD" )
                 ts << (*rit).dds_mthd;
-              else if( (*pit) == "sc_mthd" )
+              else if( (*pit) == "SC_MTHD" )
                 ts << (*rit).sc_mthd;
-              else if( (*pit) == "cal_mthd" )
+              else if( (*pit) == "CAL_MTHD" )
                 ts << (*rit).cal_mthd;
-              else if( (*pit) == "cal_file" )
+              else if( (*pit) == "CAL_FILE" )
                 ts << (*rit).cal_file;
-              else if( (*pit) == "rfi_mthd" )
+              else if( (*pit) == "RFI_MTHD" )
                 ts << (*rit).rfi_mthd;
-              else if( (*pit) == "ifr_mthd" )
+              else if( (*pit) == "IFR_MTHD" )
                 ts << (*rit).ifr_mthd;
               else
                 ts << "INVALID";
@@ -947,9 +954,6 @@ vector< string > GetFilenames ( int argc, char *argv[] )
 void ProcessArchive( string filename )
 try
 {
-
-
-
   Reference::To< Archive > archive = Archive::load( filename );
 
   if( !archive )
@@ -1124,9 +1128,11 @@ int main( int argc, char *argv[] ) try
 
   if( cal_parameters || cmd_text || cmd_flux || cmd_flux2 )
   {
-
     for_each( filenames.begin(), filenames.end(), ProcessArchive );
   }
+
+  transform( subint_params.begin(), subint_params.end(), subint_params.begin(), &uppercase );
+  transform( history_params.begin(), history_params.end(), history_params.begin(), &uppercase );
 
   if( cmd_subints )
     DisplaySubints( filenames, subint_params );
