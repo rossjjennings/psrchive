@@ -233,7 +233,7 @@ void Reference::Able::Handle::decrement (bool active, bool auto_delete)
     return;
   }
 
-  LOCK_REFERENCE
+  UNLOCK_REFERENCE
 }
 
 
