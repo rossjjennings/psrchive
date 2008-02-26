@@ -13,7 +13,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-using namespace std;
+using std::vector;
+using std::string;
 
 //! Makes the string lowercase
 string lowercase(string s)
@@ -23,12 +24,30 @@ string lowercase(string s)
   return s;
 }
 
+//! Makes a vector of strings all lowercase
+void lowercase( vector<string> &str )
+{
+  int length = str.size();
+  for( unsigned int i = 0; i < length; i ++ )
+    str[i] = lowercase( str[i] );
+}
+
+
+
 //! Makes the string uppercase
 string uppercase(string s)
 {
   for( unsigned i=0; i<s.size(); i++)
     s[i] = toupper(s[i]);
   return s;
+}
+
+//! Make a vector of strings all uppercase
+void uppercase( vector<string> &str )
+{
+  int length = str.size();
+  for( unsigned int i = 0; i < length; i ++ )
+    str[i] = uppercase( str[i] );
 }
 
 string basename (const string& filename)
