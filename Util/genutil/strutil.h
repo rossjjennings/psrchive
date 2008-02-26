@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/strutil.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/02/26 23:34:53 $
+   $Revision: 1.8 $
+   $Date: 2008/02/26 23:43:09 $
    $Author: nopeer $ */
 
 #ifndef __STRING_UTILS_H
@@ -28,10 +28,9 @@
 
 //! Makes the string lowercase
 std::string lowercase (std::string s);
-void lowercase( std::vector< std::string > &str );
+
 //! Makes the string uppercase
 std::string uppercase (std::string s);
-void uppercase( std::vector< std::string > &str );
 
 // returns the filename without its path
 std::string basename (const std::string& filename);
