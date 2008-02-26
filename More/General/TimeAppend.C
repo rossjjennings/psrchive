@@ -9,10 +9,15 @@
 #include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Config.h"
+#include <Pulsar/DigitiserCounts.h>
 
 #include "Error.h"
 
-using namespace std;
+using Pulsar::Option;
+using Pulsar::TimeAppend;
+using std::cerr;
+using std::endl;
+
 
 Pulsar::Option<bool> dflt_chronological
 (
@@ -104,4 +109,10 @@ void Pulsar::TimeAppend::combine (Archive* into, Archive* from)
 	 << endl;
  
   into->expert()->manage (from);
+  
+  // Append the Digitiser counts
+  DigitiserCounts *into_counts = into->get<DigitiserCounts>();
+  DigitiserCounts *from_counts = from->get<DigitiserCounts>();
+  if( into_counts != NULL && from_counts != NULL )
+    into_counts->Append( *from_counts );
 }

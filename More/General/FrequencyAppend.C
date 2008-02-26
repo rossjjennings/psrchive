@@ -13,10 +13,14 @@
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
+#include <Pulsar/DigitiserCounts.h>
 
 #include "Error.h"
 
-using namespace std;
+using Pulsar::FrequencyAppend;
+using Pulsar::DigitiserCounts;
+using std::cerr;
+using std::endl;
 
 Pulsar::FrequencyAppend::FrequencyAppend ()
 {
@@ -64,6 +68,12 @@ void Pulsar::FrequencyAppend::combine (Archive* into, Archive* from)
 
   into->set_bandwidth( total_bandwidth );
   into->set_centre_frequency( weighted_centre_frequency );
+
+  // Sum the digitiser counts
+  DigitiserCounts *into_counts = into->get<DigitiserCounts>();
+  DigitiserCounts *from_counts = from->get<DigitiserCounts>();
+  if( into_counts != NULL && from_counts != NULL )
+    into_counts->Accumulate( *from_counts );
 
   if (Archive::verbose > 2)
     cerr << "Pulsar::FrequencyAppend::combine result"

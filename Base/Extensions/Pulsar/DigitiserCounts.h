@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/DigitiserCounts.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/02/12 04:41:12 $
+   $Revision: 1.8 $
+   $Date: 2008/02/26 00:35:14 $
    $Author: nopeer $ */
 
 
@@ -44,6 +44,12 @@ namespace Pulsar
 
     // Destructor
     ~DigitiserCounts ();
+
+    //! Append the counts from another DigitiserCounts to this one
+    void Append( const DigitiserCounts &src );
+
+    //! Accumulate the counts from another DigitiserCounts onto this one
+    void Accumulate( const DigitiserCounts &src );
 
     //! Clone method
     DigitiserCounts* clone () const { return new DigitiserCounts( *this ); }

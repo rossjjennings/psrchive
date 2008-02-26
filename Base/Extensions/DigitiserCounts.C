@@ -12,6 +12,9 @@
 
 
 using Pulsar::DigitiserCounts;
+using std::cerr;
+using std::cout;
+using std::endl;
 
 
 
@@ -54,6 +57,44 @@ TextInterface::Parser* DigitiserCounts::get_interface()
 }
 
 
+
+/**
+ * Append               Append the counts for the subints from the source to our subints vector
+ *
+ * @param src           The DigitiserCounts extension to append to this one.
+ * @throws InvalidState If the number of subints in the source does not match ours
+ **/
+
+void DigitiserCounts::Append( const DigitiserCounts &src )
+{
+  if( subints.size() != 0 && src.subints.size() != 0 )
+    if( subints[0].data.size() != src.subints[0].data.size() )
+      throw Error( InvalidState, "DigitiserCounts::Append", "Can\'t append DigitiserCounts with differing nbin" );
+
+  for( int s = 0; s < src.subints.size(); s ++ )
+    subints.push_back( src.subints[s] );
+}
+
+
+/**
+ * Accumulate           Add the count values together with those from the source given.
+ *
+ * @param src           The DigitiserCounts extension to add to this one.
+ * @throws InvalidState If the number of subints or counts int the source differs from ours
+ **/
+
+void DigitiserCounts::Accumulate( const DigitiserCounts &src )
+{
+  if( subints.size() != src.subints.size() )
+    throw Error( InvalidState, "DigitiserCounts::Accumulate", "source number of subints differs" );
+
+  if( subints[0].data.size() != src.subints[0].data.size() )
+    throw Error( InvalidState, "DigitiserCounts::Accumulate", "source number of counts differs" );
+
+  for( int s = 0; s < subints.size(); s ++ )
+    for( int d = 0; d < subints[s].data.size(); d ++ )
+      subints[s].data[d] += src.subints[s].data[d];
+}
 
 
 
