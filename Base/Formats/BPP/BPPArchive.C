@@ -596,7 +596,7 @@ void Pulsar::BPPArchive::unload_file (const char* filename) const
 
 string Pulsar::BPPArchive::Agent::get_description () 
 {
-  return "BPP Archive Version 0.1";
+  return "BPP folded data version 2.0";
 }
 
 bool Pulsar::BPPArchive::Agent::advocate (const char* filename)

@@ -449,7 +449,7 @@ void Pulsar::PRESTOArchive::unload_file (const char* filename) const
 
 string Pulsar::PRESTOArchive::Agent::get_description () 
 {
-  return "PRESTO Prepfold (.pfd) Archive";
+  return "PRESTO Prepfold (.pfd) output files";
 }
 
 bool Pulsar::PRESTOArchive::Agent::advocate (const char* filename)

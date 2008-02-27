@@ -533,7 +533,7 @@ void Pulsar::ASPArchive::unload_file (const char* filename) const
 
 string Pulsar::ASPArchive::Agent::get_description () 
 {
-  return "ASP Archive Version 1.0";
+  return "ASP FITS versions 1.0, 1.0.1";
 }
 
 bool Pulsar::ASPArchive::Agent::advocate (const char* filename)

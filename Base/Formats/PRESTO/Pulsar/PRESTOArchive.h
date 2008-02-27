@@ -109,7 +109,7 @@ namespace Pulsar {
     bool advocate (const char* filename);
     
     //! Return the name of the PRESTOArchive plugin
-    std::string get_name () { return "PRESTOArchive"; }
+    std::string get_name () { return "PRESTO"; }
     
     //! Return description of this plugin
     std::string get_description ();

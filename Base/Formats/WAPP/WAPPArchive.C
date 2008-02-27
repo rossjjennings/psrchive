@@ -676,7 +676,7 @@ void Pulsar::WAPPArchive::unload_file (const char* filename) const
 
 string Pulsar::WAPPArchive::Agent::get_description () 
 {
-  return "WAPP Archive Version 1.0";
+  return "WAPP fold-mode data versions 2-9";
 }
 
 bool Pulsar::WAPPArchive::Agent::advocate (const char* filename)
