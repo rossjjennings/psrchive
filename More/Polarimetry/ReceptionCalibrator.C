@@ -1098,11 +1098,6 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
   if (!is_initialized)
     check_ready ("Pulsar::ReceptionCalibrator::solve");
 
-  if (calibrator_estimate.source.size() == 0)
-    throw Error (InvalidState, "Pulsar::ReceptionCalibrator::solve",
-		 "Without a ReferenceCalibrator observation,\n\t"
-		 "there remains a degeneracy along the Stokes V axis");
-
   initialize ();
 
   unsigned nchan = model.size();
@@ -1191,6 +1186,11 @@ void Pulsar::ReceptionCalibrator::initialize ()
   if (is_initialized)
     return;
 
+  if (calibrator_estimate.source.size() == 0)
+    throw Error (InvalidState, "Pulsar::ReceptionCalibrator::solve",
+		 "Without a ReferenceCalibrator observation,\n\t"
+		 "there remains a degeneracy along the Stokes V axis");
+
   PA_min *= 180.0/M_PI;
   PA_max *= 180.0/M_PI;
 
@@ -1226,6 +1226,8 @@ void Pulsar::ReceptionCalibrator::initialize ()
       model[ichan]->valid = false;
       continue;
     }
+
+    assert (ichan < calibrator_estimate.source.size());
 
     // sanity check
     double I = calibrator_estimate.source[ichan]->get_stokes()[0].get_value();
