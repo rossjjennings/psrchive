@@ -367,6 +367,7 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
     fits_read_key(f, TDOUBLE, "DUMPMIDSECS", &midsecs, NULL, &status);
     fits_read_key(f, TDOUBLE, "DUMPREFPER", &midper[0], NULL, &status);
     fits_read_key(f, TDOUBLE, "DUMPREFPHASE", &midphase[0], NULL, &status);
+    midphase[0] = fmod(midphase[0],1.0);
     for (unsigned i=1; i<nchan; i++) {
       midphase[i] = midphase[0];
       midper[i] = midper[0];
