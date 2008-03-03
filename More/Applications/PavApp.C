@@ -42,7 +42,6 @@ using Pulsar::ProfilePlot;
 using Pulsar::PosAngPlot;
 using Pulsar::PeakConsecutive;
 using Pulsar::MultiPhase;
-using Pulsar::FramedPlot;
 using Pulsar::PlotFactory;
 using Pulsar::FluxPlot;
 using Pulsar::Interpreter;
@@ -336,17 +335,17 @@ void PavApp::PavSpecificOptions( void )
     tostring_precision = 1;
     SetPlotOptions<Plot>( "ch=1.2" );
     if( freq_under_name )
-      SetPlotOptions<FramedPlot>( "below:l=$name.$freq MHz" );
+      SetPlotOptions<Plot>( "below:l=$name.$freq MHz" );
     else
     {
-      SetPlotOptions<FramedPlot>( "below:l=$name" );
-      SetPlotOptions<FramedPlot>( "below:r=$freq MHz" );
+      SetPlotOptions<Plot>( "below:l=$name" );
+      SetPlotOptions<Plot>( "below:r=$freq MHz" );
     }
   }
   else
   {
-    SetPlotOptions<FramedPlot>( "above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
-    SetPlotOptions<FramedPlot>( "below:l=" );
+    SetPlotOptions<Plot>( "above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
+    SetPlotOptions<Plot>( "below:l=" );
   }
 
   // bandpass channel weights plot config.
@@ -633,8 +632,6 @@ int PavApp::run( int argc, char *argv[] )
       { 0,0,0,0 }
     };
 
-  string top_label = "above:c";
-
   float clip_value = 0.0;
 
   char valid_args[] = "Az:hb:M:KDCdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g:l:";
@@ -659,7 +656,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.50 2008/03/03 03:16:49 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.51 2008/03/03 04:21:33 nopeer Exp $" << endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
@@ -725,12 +722,10 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'B':
       plot_ids.push_back( tostring<char>(c) );
-      top_label = "band:above:c";
       clear_labels = false;
       break;
     case 'm':
       plot_ids.push_back( tostring<char>(c) );
-      top_label = "ell:above:c";
       break;
     case 'P':
       ipol = fromstring<int>( optarg );
