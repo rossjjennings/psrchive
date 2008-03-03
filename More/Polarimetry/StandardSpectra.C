@@ -23,15 +23,24 @@ void
 Calibration::StandardSpectra::select_profile (const Pulsar::PolnProfile* pp)
 {
   stats->select_profile (pp);
+  total_determinant = stats->get_total_determinant ();
 }
-
-
 
 //! Set the profile from which estimates will be derived
 void Calibration::StandardSpectra::set_profile (const Pulsar::PolnProfile* p)
 {
   stats->set_profile (p);
   total_determinant = stats->get_total_determinant ();
+}
+
+unsigned Calibration::StandardSpectra::get_last_harmonic () const
+{
+  return stats->get_last_harmonic ();
+}
+
+const Pulsar::PolnProfile* Calibration::StandardSpectra::get_fourier () const
+{
+  return stats->get_fourier ();
 }
 
 //! Normalize estimates by the average determinant

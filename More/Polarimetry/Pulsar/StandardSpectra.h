@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardSpectra.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/03/03 04:15:01 $
+   $Revision: 1.2 $
+   $Date: 2008/03/03 07:22:13 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardSpectra_H
@@ -39,6 +39,12 @@ namespace Calibration {
     //! Set the profile from which estimates will be derived
     void set_profile (const Pulsar::PolnProfile*);
 
+    //! Get the fourier transform of the last set profile
+    const Pulsar::PolnProfile* get_fourier () const;
+
+    //! Return the index of the last harmonic
+    unsigned get_last_harmonic () const;
+
     //! Normalize estimates by the average determinant
     void set_normalize (bool);
 
@@ -52,6 +58,7 @@ namespace Calibration {
 
     Stokes< std::complex<double> > profile_variance;
     Estimate<double> total_determinant;
+    unsigned last_harmonic;
 
   };
   
