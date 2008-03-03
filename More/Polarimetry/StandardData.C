@@ -28,7 +28,6 @@ void Calibration::StandardData::select_profile (const Pulsar::PolnProfile* p)
 void Calibration::StandardData::set_profile (const Pulsar::PolnProfile* p)
 {
   stats->set_profile (p);
-  profile = p;
 
   for (unsigned i=0; i<4; i++)
     profile_variance[i] = stats->get_baseline_variance(i).get_value();
@@ -55,16 +54,7 @@ Calibration::StandardData::get_stokes (unsigned ibin)
 
   if (normalize)
   {
-    Estimate<double> invint = invariant (result);
-
-    // the total determinant, less the determinant of this phase bin
-    Estimate<double> total_other = total_determinant;
-    total_other.val -= invint.val;
-    total_other.var -= invint.var;
-    
-    normalize->set_other (total_other);
-    normalize->normalize (result);
-
+    normalize->normalize (result, total_determinant);
     result *= sqrt( stats->get_stats()->get_on_pulse_nbin() );
   }
 

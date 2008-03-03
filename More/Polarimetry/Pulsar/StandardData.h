@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardData.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/12/24 12:11:41 $
+   $Revision: 1.2 $
+   $Date: 2008/03/03 07:22:09 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardData_H
@@ -74,7 +74,6 @@ namespace Calibration {
 
     Reference::To< Pulsar::PolnProfileStats > stats;
     Reference::To< MEAL::NormalizeStokes > normalize;
-    Reference::To< const Pulsar::PolnProfile > profile;
 
     Stokes<double> profile_variance;
     Estimate<double> total_determinant;
