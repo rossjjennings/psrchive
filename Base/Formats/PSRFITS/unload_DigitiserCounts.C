@@ -18,7 +18,6 @@
 using Pulsar::DigitiserCounts;
 using Pulsar::FITSArchive;
 using Pulsar::Archive;
-using std::cout;
 using std::endl;
 using std::cerr;
 
@@ -26,8 +25,9 @@ using std::cerr;
 
 
 /**
- * CompressCounts     This function takes a vector of long values and compresses the data into an integer
- *                    determining the scale and offset to be used to reconstruct the original data.
+ * CompressCounts     This function takes a vector of long values and compresses the data into a
+ *                    vector of integers determining the scale and offset to be used to reconstruct
+ *                    the original data.
  *
  * @param data        The vector of actual counts that we are compressing
  * @param target_data The vector to place the compressed data in
