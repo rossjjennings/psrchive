@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/01/13 23:13:54 $
+   $Revision: 1.4 $
+   $Date: 2008/03/03 07:21:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileStats_h
@@ -18,15 +18,15 @@
 #include "Pulsar/Algorithm.h"
 #include "Estimate.h"
 
-namespace Pulsar {
-
+namespace Pulsar
+{
   class Profile;
   class BaselineEstimator;
   class OnPulseEstimator;
 
   //! Computes pulse profile statistics
-  class ProfileStats : public Algorithm {
-    
+  class ProfileStats : public Algorithm
+  {   
   public:
 
     //! Default constructor
@@ -46,6 +46,9 @@ namespace Pulsar {
 
     //! The algorithm used to find the off-pulse phase bins
     void set_baseline_estimator (BaselineEstimator*);
+
+    //! Set the on-pulse and baseline regions
+    void set_regions (const PhaseWeight& pulse, const PhaseWeight& baseline);
 
     //! Get the number of phase bins in the on pulse window
     unsigned get_on_pulse_nbin () const;
@@ -76,8 +79,8 @@ namespace Pulsar {
     //! The algorithm used to find the off-pulse phase bins
     Reference::To<BaselineEstimator> baseline_estimator;
 
-    //! When, true the on_pulse and baseline estimators have been selected
-    bool estimators_selected;
+    //! When, true the on_pulse and baseline regions have been set
+    bool regions_set;
 
     //! The on-pulse phase bin mask
     mutable PhaseWeight on_pulse;

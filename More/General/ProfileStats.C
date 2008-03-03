@@ -4,10 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/ProfileStats.h"
 #include "Pulsar/Profile.h"
 
-#include "Pulsar/OnPulseThreshold.h"
+#include "Pulsar/PeakConsecutive.h"
 #include "Pulsar/GaussianBaseline.h"
 
 using namespace std;
@@ -15,14 +16,14 @@ using namespace std;
 //! Default constructor
 Pulsar::ProfileStats::ProfileStats (const Profile* _profile)
 {
-  OnPulseThreshold* on_est = new OnPulseThreshold;
+  PeakConsecutive* on_est = new PeakConsecutive;
   set_on_pulse_estimator (on_est);
 
   GaussianBaseline* off_est = new GaussianBaseline;
   set_baseline_estimator (off_est);
   on_est->set_baseline_estimator (off_est);
 
-  estimators_selected = false;
+  regions_set = false;
   set_profile (_profile);
 }
 
@@ -44,7 +45,7 @@ void Pulsar::ProfileStats::set_profile (const Profile* _profile)
   set_profile will have the same phase as set_profile */
 void Pulsar::ProfileStats::select_profile (const Profile* set_profile)
 {
-  estimators_selected = false;
+  regions_set = false;
 
   if (set_profile)
     profile = set_profile;
@@ -52,7 +53,7 @@ void Pulsar::ProfileStats::select_profile (const Profile* set_profile)
   build ();
 
   if (set_profile)
-    estimators_selected = true;
+    regions_set = true;
 }
 
 //! The algorithm used to find the on-pulse phase bins
@@ -71,6 +72,18 @@ void Pulsar::ProfileStats::set_baseline_estimator (BaselineEstimator* est)
     build ();
 }
 
+//! Set the on-pulse and baseline regions
+void Pulsar::ProfileStats::set_regions (const PhaseWeight& on,
+					const PhaseWeight& off)
+{
+  on_pulse = on;
+  baseline = off;
+
+  regions_set = true;
+  if (profile)
+    build ();
+}
+
 //! Returns the total flux of the on-pulse phase bins
 Estimate<double> Pulsar::ProfileStats::get_total (bool subtract_baseline) const
 {
@@ -80,8 +93,14 @@ Estimate<double> Pulsar::ProfileStats::get_total (bool subtract_baseline) const
     offmean = baseline.get_mean().get_value();
 
   double variance = baseline.get_variance().get_value ();
+
   double navg = on_pulse.get_weight_sum();
   double total = on_pulse.get_weighted_sum();
+
+#if 0
+  navg = profile->get_nbin();
+  total = profile->sum();
+#endif
 
   if (Profile::verbose)
     cerr << "Pulsar::ProfileStats::get_total"
@@ -120,15 +139,14 @@ Estimate<double> Pulsar::ProfileStats::get_baseline_variance () const
   return baseline_variance;
 }
 
-
 void Pulsar::ProfileStats::build () try
 {
   baseline_variance = 0.0;
 
-  if (estimators_selected)
+  if (regions_set)
   {
     if (Profile::verbose)
-      cerr << "Pulsar::ProfileStats::build estimators set" << endl;
+      cerr << "Pulsar::ProfileStats::build regions set" << endl;
     on_pulse.set_Profile (profile);
     baseline.set_Profile (profile);
     return;
