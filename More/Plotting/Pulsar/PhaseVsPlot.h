@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.16 $
-   $Date: 2007/10/03 06:45:14 $
+   $Revision: 1.17 $
+   $Date: 2008/03/03 03:15:58 $
    $Author: nopeer $ */
 
 #ifndef __Pulsar_PhaseVsPlot_h
@@ -63,6 +63,11 @@ namespace Pulsar {
     //! Get the line colour
     int get_line_colour( void ) { return line_colour; }
     
+    //! Set the crop value
+    void set_crop( float s_crop_value ) { crop_value = s_crop_value; }
+    //! Get the crop value
+    float get_crop() const { return crop_value; }
+    
   protected:
 
     PlotScale z_scale;
@@ -80,6 +85,9 @@ namespace Pulsar {
     
     //! The scale factor for the data
     float y_scale;
+    
+    //! The percentage of max to crop at
+    float crop_value;
 
   };
 

@@ -38,6 +38,8 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
   
   y_res = -1;
   y_scale = -1;
+  
+  crop_value = 1.0f;
 }
 
 TextInterface::Parser* Pulsar::PhaseVsPlot::get_interface ()
@@ -58,12 +60,10 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
 {
   colour_map.apply ();
 
-  float x_min = 0.0;
-  float x_max = 1.0;
+  float x_min, x_max;
   get_frame()->get_x_scale()->PlotScale::get_minmax (x_min, x_max);
 
-  float y_min = 0.0;
-  float y_max = 1.0;
+  float y_min, y_max;
   get_frame()->get_y_scale()->PlotScale::get_minmax (y_min, y_max);
 
   // Fill the image data
@@ -97,11 +97,21 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   if( y_res == -1 )
     y_res = (y_max-y_min)/nrow;
   
-  
+
+  /* Added by DS, we crop the data range with crop_value being a
+     percentage of max. However, if min is negative and greater in 
+     magnitude then the new max, then we set min to be -max in order
+     to get a zoom that is summetric around zero. */
+
+  if( crop_value != 1.0f )
+  {
+    max *= crop_value;
+    if( min < 0 && max + min < 0 )
+      min = -max;
+  }
 
   if (style == "image")
   {
-
     get_z_scale()->set_minmax (min, max);
     get_z_scale()->get_range (min, max);
 
