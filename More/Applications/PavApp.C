@@ -20,6 +20,7 @@
 #include <Pulsar/PosAngPlot.h>
 #include <Pulsar/PeakConsecutive.h>
 #include <Pulsar/PlotFactory.h>
+#include <Pulsar/PhaseVsPlot.h>
 #include <limits>
 
 
@@ -32,6 +33,7 @@ using Pulsar::PhasePlot;
 using Pulsar::MultiPlot;
 using Pulsar::StokesCylindrical;
 using Pulsar::BandpassChannelWeightPlot;
+using Pulsar::PhaseVsPlot;
 using Pulsar::StokesSpherical;
 using Pulsar::PhaseVsTime;
 using Pulsar::PhaseVsFrequency;
@@ -657,7 +659,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.49 2008/01/28 23:42:38 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.50 2008/03/03 03:16:49 nopeer Exp $" << endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
@@ -920,8 +922,7 @@ int PavApp::run( int argc, char *argv[] )
   {
     SetPlotOptions<FluxPlot>( string("crop=") + tostring<float>(clip_value) );
     SetPlotOptions<StokesCylindrical>( string("flux:crop=") + tostring<float>(clip_value) );
-    SetPlotOptions<PhaseVsFrequency>( string("z:range=(0,") + tostring<float>(clip_value) + string(")") );
-    SetPlotOptions<PhaseVsTime>( string("z:range=(0,") + tostring<float>(clip_value) + string(")") );
+    SetPlotOptions<PhaseVsPlot>( string("crop=") + tostring<float>(clip_value) );
   }
 
   if( label_degrees )
