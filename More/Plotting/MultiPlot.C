@@ -30,6 +30,8 @@ Pulsar::PlotAttributes* Pulsar::MultiPlot::get_attributes ()
 void Pulsar::MultiPlot::plot (const Archive* data)
 {
   prepare (data);
+  
+  frames.get_label_above()->plot(data);
 
   std::map< std::string, Reference::To<FramedPlot> >::iterator ptr;
   for (ptr = plots.begin(); ptr != plots.end(); ptr++)
@@ -71,7 +73,6 @@ void Pulsar::MultiPlot::plot (const Archive* data)
   // plot above the window
   cpgsls (1);
   cpgsci (1);
-  frames.get_label_above()->plot(data);
 }
 
 void Pulsar::MultiPlot::set_viewport (PlotFrame* frame, 
