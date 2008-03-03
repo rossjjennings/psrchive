@@ -48,6 +48,7 @@ nobase_include_HEADERS = \
 	Pulsar/InterpreterExtension.h \
         Pulsar/InterpreterVariables.h \
         Pulsar/IterativeBaseline.h \
+	Pulsar/LastHarmonic.h \
 	Pulsar/LastSignificant.h \
 	Pulsar/MaskSmooth.h \
         Pulsar/NoiseStatistics.h \
@@ -161,6 +162,7 @@ libGeneral_la_SOURCES = \
 	Interpreter.C \
 	InterpreterVariables.C \
         IterativeBaseline.C \
+	LastHarmonic.C \
         LastSignificant.C \
 	MaskSmooth.C \
         NoiseStatistics.C \
