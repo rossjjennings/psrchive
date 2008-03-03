@@ -11,11 +11,9 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/ProcHistory.h"
-
 #include "Pulsar/SmoothMean.h"
-
+#include "Pulsar/InfoLabel.h"
 #include "Physical.h"
-
 #include <cpgplot.h>
 
 using namespace std;
@@ -368,7 +366,7 @@ void Pulsar::FluxPlot::plot_error_box (const Archive* data)
   cpgdraw (x1,y1);
 }
 
-#include "Pulsar/InfoLabel.h"
+
 
 void Pulsar::FluxPlot::set_info_label (bool flag)
 {
