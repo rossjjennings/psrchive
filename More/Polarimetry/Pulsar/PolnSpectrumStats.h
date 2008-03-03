@@ -7,14 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnSpectrumStats.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/03/03 07:22:05 $
+   $Revision: 1.3 $
+   $Date: 2008/03/03 21:02:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnSpectrumStats_h
 #define __Pulsar_PolnSpectrumStats_h
 
 #include "Pulsar/Algorithm.h"
+#include "Pulsar/PhaseWeight.h"
+
 #include "FTransformAgent.h"
 #include "Stokes.h"
 
@@ -39,6 +41,12 @@ namespace Pulsar {
 
     //! Set the PolnProfile that defines the last harmonic and baseline
     void select_profile (const PolnProfile*);
+
+    //! Set the on-pulse and baseline regions
+    void set_regions (const PhaseWeight& pulse, const PhaseWeight& baseline);
+
+    //! Set the on-pulse and baseline regions
+    void get_regions (PhaseWeight& pulse, PhaseWeight& base) const;
 
     //! Return the last harmonic chosen in the on-pulse signal
     unsigned get_last_harmonic () const { return last_harmonic; }
@@ -77,6 +85,9 @@ namespace Pulsar {
 
     //! When, true the on_pulse and baseline estimators have been selected
     bool regions_set;
+
+    PhaseWeight on_pulse;
+    PhaseWeight baseline;
 
     unsigned last_harmonic;
 

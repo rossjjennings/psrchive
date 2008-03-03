@@ -24,6 +24,7 @@ Pulsar::PolnSpectrumStats::PolnSpectrumStats (const PolnProfile* _profile)
 
   regions_set = false;
   last_harmonic = 0;
+  plan = 0;
 
   if (profile)
     select_profile (_profile);
@@ -49,8 +50,28 @@ void Pulsar::PolnSpectrumStats::select_profile (const PolnProfile* _profile)
   profile = _profile;
   regions_set = false;
   build ();
-  if (_profile)
-    regions_set = true;
+}
+
+//! Set the on-pulse and baseline regions
+void Pulsar::PolnSpectrumStats::set_regions (const PhaseWeight& on,
+					     const PhaseWeight& off)
+{
+  real->set_regions (on, off);
+  imag->set_regions (on, off);
+
+  on_pulse = on;
+  baseline = off;
+
+  regions_set = true;
+  build ();
+}
+
+//! Set the on-pulse and baseline regions
+void Pulsar::PolnSpectrumStats::get_regions (PhaseWeight& on, 
+					     PhaseWeight& off) const
+{
+  on = on_pulse;
+  off = baseline;
 }
 
 //! Get the fourier transform of the last set profile
@@ -149,18 +170,32 @@ void Pulsar::PolnSpectrumStats::build () try
     LastHarmonic last;
     last.set_Profile( psd->get_Profile(0) );
 
+    last.get_weight (&on_pulse);
+    last.get_baseline_estimator()->get_weight (&baseline);
+
     last_harmonic = last.get_last_harmonic();
 
-    PhaseWeight on;
-    last.get_weight (&on);
+#ifdef _DEBUG
+    cerr << "Pulsar::PolnSpectrumStats::build last harmonic=" 
+	 << last_harmonic << " nbin on=" << on_pulse.get_weight_sum() << endl;
+#endif
 
-    PhaseWeight off;
-    last.get_baseline_estimator()->get_weight (&off);
-
-    real->get_stats()->set_regions (on, off);
-    imag->get_stats()->set_regions (on, off);
+    real->set_regions (on_pulse, baseline);
+    imag->set_regions (on_pulse, baseline);
 
     regions_set = true;
+  }
+
+  if (on_pulse.get_nbin () > re->get_nbin())
+  {
+    PhaseWeight on_temp = on_pulse;
+    PhaseWeight off_temp = baseline;
+
+    on_temp.resize( re->get_nbin() );
+    off_temp.resize( re->get_nbin() );
+
+    real->set_regions (on_temp, off_temp);
+    imag->set_regions (on_temp, off_temp);
   }
 
   real->set_profile (re);
