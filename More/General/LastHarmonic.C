@@ -23,6 +23,9 @@ Pulsar::LastHarmonic::LastHarmonic ()
   built = false;
 
   baseline_estimator = new ExponentialBaseline;
+
+  set_threshold (3.0);
+  set_consecutive (3);
 }
 
 void Pulsar::LastHarmonic::set_Profile (const Profile* p)
@@ -33,6 +36,9 @@ void Pulsar::LastHarmonic::set_Profile (const Profile* p)
 
 void Pulsar::LastHarmonic::set_threshold (float threshold)
 {
+  // add one to threshold because mean = rms in exponential distribution
+  threshold += 1.0;
+
   if (threshold != significant.get_threshold())
   {
     built = false;
@@ -106,7 +112,12 @@ void Pulsar::LastHarmonic::build ()
   Estimate<double> var = baseline->get_variance ();
   Estimate<double> rms = sqrt(var);
 
-  significant.find (profile, var.get_value());
+#ifdef _DEBUG
+  cerr << "Pulsar::LastHarmonic::build mean=" << mean
+       << " rms=" << rms << endl;
+#endif
+
+  significant.find (profile, rms.get_value());
 
   // skip the DC term
   bin_rise = 1;
