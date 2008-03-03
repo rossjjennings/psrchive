@@ -26,9 +26,20 @@ void Pulsar::LastSignificant::set_threshold (float sigma)
   cutoff_sigma = sigma;
 }
 
+float Pulsar::LastSignificant::get_threshold () const
+{
+  return cutoff_sigma;
+}
+
 void Pulsar::LastSignificant::set_consecutive (unsigned bins)
 {
   consecutive = bins;
+}
+
+//! Get the number of consecutive bins
+unsigned Pulsar::LastSignificant::get_consecutive () const
+{
+  return consecutive;
 }
 
 //! Get the last signficant bin

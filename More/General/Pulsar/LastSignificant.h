@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/LastSignificant.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/12/21 04:38:29 $
+   $Revision: 1.2 $
+   $Date: 2008/03/03 07:21:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_LastSignificant_h
@@ -35,8 +35,14 @@ namespace Pulsar {
     //! Set the cut-off threshold as a multiple of the rms
     void set_threshold (float sigma);
 
+    //! Get the cut-off threshold
+    float get_threshold () const;
+
     //! Set the number of consecutive bins that must remain above threshold
     void set_consecutive (unsigned consecutive);
+
+    //! Get the number of consecutive bins
+    unsigned get_consecutive () const;
 
     //! Find the last significant bin
     void find (const Profile*, double rms);
