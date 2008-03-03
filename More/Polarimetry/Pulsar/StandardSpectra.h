@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardSpectra.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/03/03 07:22:13 $
+   $Revision: 1.3 $
+   $Date: 2008/03/03 21:03:12 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardSpectra_H
@@ -50,6 +50,9 @@ namespace Calibration {
 
     //! Get the Stokes parameters of the specified phase bin
     Stokes< std::complex< Estimate<double> > > get_stokes (unsigned ibin);
+
+    //! Get the statistical interface to the data
+    Pulsar::PolnSpectrumStats* get_stats ();
 
  protected:
 

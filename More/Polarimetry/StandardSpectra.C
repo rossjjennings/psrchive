@@ -33,6 +33,11 @@ void Calibration::StandardSpectra::set_profile (const Pulsar::PolnProfile* p)
   total_determinant = stats->get_total_determinant ();
 }
 
+Pulsar::PolnSpectrumStats* Calibration::StandardSpectra::get_stats ()
+{
+  return stats;
+}
+
 unsigned Calibration::StandardSpectra::get_last_harmonic () const
 {
   return stats->get_last_harmonic ();
