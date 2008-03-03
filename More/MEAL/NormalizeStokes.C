@@ -73,3 +73,15 @@ void MEAL::NormalizeStokes::normalize (Stokes<Estimate<double> >& stokes)
   stokes = normalized;
 }
 
+void MEAL::NormalizeStokes::normalize (Stokes< Estimate<double> >& stokes,
+				       Estimate<double> total_determinant)
+{
+  Estimate<double> invint = ::invariant (stokes);
+
+  // subtract the determinant of the input from the total
+  total_determinant.val -= invint.val;
+  total_determinant.var -= invint.var;
+    
+  set_other (total_determinant);
+  normalize (stokes);
+}
