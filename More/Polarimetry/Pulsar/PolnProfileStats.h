@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileStats.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/01/11 03:43:35 $
+   $Revision: 1.7 $
+   $Date: 2008/03/03 07:22:01 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileStats_h
@@ -40,6 +40,7 @@ namespace Pulsar {
 
     //! Get the ProfileStats estimator
     ProfileStats* get_stats () { return stats; }
+    const ProfileStats* get_stats () const { return stats; }
 
     //! Get the Stokes parameters for the specified phase bin
     Stokes< Estimate<double> > get_stokes (unsigned ibin) const;
@@ -73,8 +74,8 @@ namespace Pulsar {
     //! Computes the statistics of a single pulse profile
     Reference::To<ProfileStats> stats;
 
-    //! When, true the on_pulse and baseline estimators have been selected
-    bool estimators_selected;
+    //! True when the on_pulse and baseline regions have been set
+    bool regions_set;
 
     //! The variance of the total intensity baseline
     mutable Stokes< Estimate<double> > baseline_variance;

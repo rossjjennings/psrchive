@@ -15,7 +15,7 @@ using namespace std;
 //! Default constructor
 Pulsar::PolnProfileStats::PolnProfileStats (const PolnProfile* _profile)
 {
-  estimators_selected = false;
+  regions_set = false;
   stats = new ProfileStats;
   set_profile (_profile);
 }
@@ -38,10 +38,8 @@ void Pulsar::PolnProfileStats::set_profile (const PolnProfile* _profile)
 void Pulsar::PolnProfileStats::select_profile (const PolnProfile* _profile)
 {
   profile = _profile;
-  estimators_selected = false;
+  regions_set = false;
   build ();
-  if (_profile)
-    estimators_selected = true;
 }
 
 
@@ -140,8 +138,12 @@ void Pulsar::PolnProfileStats::build () try
     throw Error (InvalidParam, "Pulsar::PolnProfileStats::build",
 		 "input PolnProfile is not in the Stokes state");
 
-  if (!estimators_selected && profile)
+  if (!regions_set)
+  {
     stats->select_profile( profile->get_Profile(0) );
+    regions_set = true;
+  }
+
 }
 catch (Error& error)
 {
