@@ -19,7 +19,6 @@ using Pulsar::DigitiserCounts;
 using Pulsar::DigitiserCountsPlot;
 using std::string;
 using std::cerr;
-using std::cout;
 using std::endl;
 
 
@@ -303,7 +302,8 @@ void DigitiserCountsPlot::draw( const Archive *const_data )
       cpgbox("bcnt", 0.0, 0, "bcnt", 0.0, 0);
     else
       cpgbox("bcnt", 0.0, 0, "bct", 0.0, 0 );
-    string dig_label = string("Dig ") + tostring<int>(c);
+    char pol = char( int('A') + c );
+    string dig_label = string("Pol ") + tostring(pol);
     cpgmtxt( "T", -1, 0.01, 0, dig_label.c_str() );
     nx += xw;
   }
