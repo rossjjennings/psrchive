@@ -23,6 +23,7 @@ Pulsar::PolnSpectrumStats::PolnSpectrumStats (const PolnProfile* _profile)
   imag = new Pulsar::PolnProfileStats;
 
   regions_set = false;
+  last_harmonic = 0;
 
   if (profile)
     select_profile (_profile);
@@ -50,6 +51,12 @@ void Pulsar::PolnSpectrumStats::select_profile (const PolnProfile* _profile)
   build ();
   if (_profile)
     regions_set = true;
+}
+
+//! Get the fourier transform of the last set profile
+const Pulsar::PolnProfile* Pulsar::PolnSpectrumStats::get_fourier () const
+{
+  return fourier;
 }
 
 //! Get the Stokes parameters for the specified harmonic
@@ -108,7 +115,7 @@ void Pulsar::PolnSpectrumStats::build () try
   if (!profile)
     return;
 
-  Reference::To<PolnProfile> fourier = fourier_transform (profile, plan);
+  fourier = fourier_transform (profile, plan);
 
   // convert to Stokes parameters and drop the Nyquist bin
   fourier->convert_state (Signal::Stokes);
@@ -141,6 +148,8 @@ void Pulsar::PolnSpectrumStats::build () try
   {
     LastHarmonic last;
     last.set_Profile( psd->get_Profile(0) );
+
+    last_harmonic = last.get_last_harmonic();
 
     PhaseWeight on;
     last.get_weight (&on);

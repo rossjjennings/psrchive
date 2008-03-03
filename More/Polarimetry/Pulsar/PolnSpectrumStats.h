@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnSpectrumStats.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/03/03 03:49:00 $
+   $Revision: 1.2 $
+   $Date: 2008/03/03 07:22:05 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnSpectrumStats_h
@@ -40,6 +40,12 @@ namespace Pulsar {
     //! Set the PolnProfile that defines the last harmonic and baseline
     void select_profile (const PolnProfile*);
 
+    //! Return the last harmonic chosen in the on-pulse signal
+    unsigned get_last_harmonic () const { return last_harmonic; }
+
+    //! Get the fourier transform of the last set profile
+    const PolnProfile* get_fourier () const;
+
     //! Get the Stokes parameters for the specified harmonic
     Stokes< std::complex< Estimate<double> > > get_stokes (unsigned) const;
 
@@ -60,6 +66,9 @@ namespace Pulsar {
     //! The PolnProfile from which statistics will be derived
     Reference::To<const PolnProfile> profile;
 
+    //! The Fourier transform of the profile
+    Reference::To<PolnProfile> fourier;
+
     //! Computes the statistics of the real component
     Reference::To<PolnProfileStats> real;
 
@@ -68,6 +77,8 @@ namespace Pulsar {
 
     //! When, true the on_pulse and baseline estimators have been selected
     bool regions_set;
+
+    unsigned last_harmonic;
 
     //! Computes the phase bin masks
     void build ();
