@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/InterpreterVariables.h"
 #include "Functor.h"
 
@@ -12,6 +12,15 @@ using namespace std;
 #include "Pulsar/NoiseStatistics.h"
 #include "Pulsar/SquareWave.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Receiver.h"
+#include <string>
+
+
+
+using std::string;
+using Pulsar::Receiver;
+
+
 
 Pulsar::Interpreter::Variables::Variables ()
 {
@@ -26,6 +35,9 @@ Pulsar::Interpreter::Variables::Variables ()
 
   add( Functor<double(const Archive*)> (this, &Variables::get_2bit_dist),
        "2bitd", "Estimate the 2-bit distortion" );
+  
+  add( Functor<string(const Archive*)> (this, &Variables::get_rcvr),
+       "rcvr", "Receiver Name " );
 }
 
 //! Get the signal-to-noise ratio
@@ -67,4 +79,20 @@ Pulsar::Interpreter::Variables::get_2bit_dist (const Archive* archive) const
   for (unsigned idig=0; idig < ndig; idig++)
     distortion += tbs->get_distortion(idig);
   return distortion;
+}
+
+
+//! Get the name of the receiver
+string Pulsar::Interpreter::Variables::get_rcvr( const Archive *archive ) const
+{
+  string result;
+
+  Reference::To<const Receiver> ext = archive->get<const Receiver>();
+
+  if( ext )
+  {
+    result = ext->get_name();
+  }
+
+  return result;
 }

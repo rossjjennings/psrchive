@@ -7,15 +7,21 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/InterpreterVariables.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:53 $
-   $Author: straten $ */
+   $Revision: 1.5 $
+   $Date: 2008/03/03 04:46:52 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_InterpreterVariables_h
 #define __Pulsar_InterpreterVariables_h
 
 #include "Pulsar/Interpreter.h"
 #include "Pulsar/ArchiveTI.h"
+#include <string>
+
+
+using std::string;
+
+
 
 namespace Pulsar {
 
@@ -38,6 +44,9 @@ namespace Pulsar {
 
     //! Get the predicted level of 2-bit distortion
     double get_2bit_dist (const Archive* archive) const;
+    
+    //! Get the name of the receiver
+    string get_rcvr( const Archive * ) const;
 
   };
 
