@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.20 $
-   $Date: 2007/12/24 11:51:56 $
+   $Revision: 1.21 $
+   $Date: 2008/03/03 21:03:16 $
    $Author: straten $ */
 
 #ifndef __Stokes_H
@@ -24,18 +24,27 @@ class Stokes : public Vector<4,T>
 {
  public:
   
-  Stokes (T a=0.0, T b=0.0, T c=0.0, T d=0.0) : Vector<4,T> (a,b,c,d) {}
+  //! Default constructor
+  Stokes (T a=0.0, T b=0.0, T c=0.0, T d=0.0)
+    : Vector<4,T> (a,b,c,d) {}
 
   //! Construct from a 4-vector
   template<typename U>
-  Stokes (const Vector<4,U>& v) : Vector<4,T> (v[0], v[1], v[2], v[3]) {}
+  Stokes (const Vector<4,U>& v)
+    : Vector<4,T> (v[0], v[1], v[2], v[3]) {}
 
   //! Construct from a scalar and 3-vector
   template<typename U>
-  Stokes (T s, const Vector<3,U>& v) : Vector<4,T> (s, v[0], v[1], v[2]) {}
+  Stokes (T s, const Vector<3,U>& v)
+    : Vector<4,T> (s, v[0], v[1], v[2]) {}
 
   template<typename U>
-  Stokes (const Stokes<U>& s) : Vector<4,T> (s[0], s[1], s[2], s[3]) {}
+  Stokes (const Stokes<U>& s)
+    : Vector<4,T> (s[0], s[1], s[2], s[3]) {}
+
+  template<typename U, typename Unary>
+  Stokes (const Stokes<U>& s, Unary f) 
+    : Vector<4,T>( f(s[0]), f(s[1]), f(s[2]), f(s[3]) ) {}
 
   //! Access to scalar component
   T get_scalar () const { return this->x[0]; }
