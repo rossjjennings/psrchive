@@ -7,15 +7,13 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/FluxCalibratorExtensionTI.C,v $
-   $Revision: 1.3 $
-   $Date: 2008/03/04 00:42:21 $
+   $Revision: 1.4 $
+   $Date: 2008/03/04 00:44:53 $
    $Author: nopeer $ */
 
 
 
-
-
-#include "Pulsar/FluxCalibratorExtensionTI.h"
+#include "Pulsar/FluxCalibratorExtension.h"
 
 
 
