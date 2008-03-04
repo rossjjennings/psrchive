@@ -6,8 +6,8 @@
  ***************************************************************************/
 #include "Pulsar/ArchiveTI.h"
 
-#include "Pulsar/ReceiverTI.h"
-#include "Pulsar/BackendTI.h"
+#include "Pulsar/Receiver.h"
+#include "Pulsar/Backend.h"
 #include "Pulsar/IntegrationTI.h"
 
 #include "Pulsar/FITSAlias.h"
@@ -87,10 +87,10 @@ void Pulsar::ArchiveTI::setup( void )
   add( &Archive::integration_length,
        "length", "The full duration of the observation (s)" );
   
-  import( "rcvr", Pulsar::ReceiverTI(),
+  import( "rcvr", Pulsar::Receiver::Interface(),
           (Receiver*(Archive::*)()) &Archive::get<Receiver> );
 
-  import( "be", Pulsar::BackendTI(),
+  import( "be", Pulsar::Backend::Interface(),
           (Backend*(Archive::*)()) &Archive::get<Backend> );
 
   import( "int", IntegrationTI(),
