@@ -4,22 +4,22 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/PointingTI.h"
 
-Pulsar::PointingTI::PointingTI ()
+
+
+#include "Pulsar/Pointing.h"
+
+
+
+using Pulsar::Pointing;
+
+
+
+Pointing::Interface::Interface ( Pointing *s_instance )
 {
-  SetupMethods();
-}
+  if( s_instance )
+    set_instance( s_instance );
 
-Pulsar::PointingTI::PointingTI( Pointing *c )
-{
-  SetupMethods();
-  set_instance( c );
-}
-
-
-void Pulsar::PointingTI::SetupMethods( void )
-{
   add( &Pointing::get_local_sidereal_time,
          &Pointing::set_local_sidereal_time,
          "lst", "Local sidereal time (seconds)" );
@@ -54,11 +54,5 @@ void Pulsar::PointingTI::SetupMethods( void )
 }
 
 
-TextInterface::Parser *Pulsar::PointingTI::clone()
-{
-  if( instance )
-    return new PointingTI( instance );
-  else
-    return new PointingTI();
-}
+
 

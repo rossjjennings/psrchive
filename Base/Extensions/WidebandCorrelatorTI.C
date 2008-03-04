@@ -1,39 +1,30 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 
 
-
-#include "Pulsar/WidebandCorrelatorTI.h"
-
+#include "Pulsar/WidebandCorrelator.h"
 
 
-namespace Pulsar
+
+using Pulsar::WidebandCorrelator;
+
+
+
+WidebandCorrelator::Interface::Interface( WidebandCorrelator *s_instance )
 {
+  if( s_instance )
+    set_instance( s_instance );
 
-  WidebandCorrelatorTI::WidebandCorrelatorTI()
-  {
-    SetupMethods();
-  }
-
-  WidebandCorrelatorTI::WidebandCorrelatorTI( WidebandCorrelator *c )
-  {
-    SetupMethods();
-    set_instance(c);
-  }
-
-  void WidebandCorrelatorTI::SetupMethods( void )
-  {
-    add( &WidebandCorrelator::get_config, "beconfig", "Backend Config file" );
-    add( &WidebandCorrelator::get_nrcvr, "nrcvr", "Number of receiver channels" );
-    add( &WidebandCorrelator::get_tcycle, "tcycle", "Get the correlator cycle time" );
-  }
-
-  TextInterface::Parser *Pulsar::WidebandCorrelatorTI::clone()
-  {
-    if( instance )
-      return new WidebandCorrelatorTI( instance );
-    else
-      return new WidebandCorrelatorTI();
-  }
+  add( &WidebandCorrelator::get_config, "beconfig", "Backend Config file" );
+  add( &WidebandCorrelator::get_nrcvr, "nrcvr", "Number of receiver channels" );
+  add( &WidebandCorrelator::get_tcycle, "tcycle", "Get the correlator cycle time" );
 }
+
+
 
 

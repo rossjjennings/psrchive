@@ -5,7 +5,6 @@
  *
  ***************************************************************************/
 #include "Pulsar/WidebandCorrelator.h"
-#include "Pulsar/WidebandCorrelatorTI.h"
 
 //! Default constructor
 Pulsar::WidebandCorrelator::WidebandCorrelator ()
@@ -45,5 +44,5 @@ Pulsar::WidebandCorrelator::~WidebandCorrelator ()
 //! Return a text interfaces that can be used to access this instance
 TextInterface::Parser* Pulsar::WidebandCorrelator::get_interface()
 {
-	return new WidebandCorrelatorTI( this );
+  return new Interface( this );
 }

@@ -4,33 +4,26 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/PolnCalibratorExtensionTI.h"
 
-Pulsar::PolnCalibratorExtensionTI::PolnCalibratorExtensionTI ()
+
+
+#include "Pulsar/PolnCalibratorExtension.h"
+
+
+
+using Pulsar::PolnCalibratorExtension;
+
+
+
+PolnCalibratorExtension::Interface::Interface( PolnCalibratorExtension *s_instance )
 {
-  SetupMethods();
-}
+  if( s_instance )
+    set_instance( s_instance );
 
-
-Pulsar::PolnCalibratorExtensionTI::PolnCalibratorExtensionTI( PolnCalibratorExtension *c )
-{
-  SetupMethods();
-  set_instance( c );
-}
-
-
-void Pulsar::PolnCalibratorExtensionTI::SetupMethods( void )
-{
   add( &PolnCalibratorExtension::get_epoch, "epoch", "[MJD] Epoch of calibration obs" );
   add( &PolnCalibratorExtension::get_ncpar, "npar", "Number of coupling parameters" );
   add( &PolnCalibratorExtension::get_nchan, "nchan", "Nr of channels in Feed coupling data" );
 }
 
-TextInterface::Parser *Pulsar::PolnCalibratorExtensionTI::clone()
-{
-  if( instance )
-    return new PolnCalibratorExtensionTI( instance );
-  else
-    return new PolnCalibratorExtensionTI();
-}
+
 

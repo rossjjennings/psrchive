@@ -29,12 +29,9 @@ nobase_include_HEADERS = \
         Pulsar/Passband.h \
         Pulsar/PeriastronOrder.h \
         Pulsar/Pointing.h \
-        Pulsar/PointingTI.h \
         Pulsar/PolnCalibratorExtension.h \
-        Pulsar/PolnCalibratorExtensionTI.h \
         Pulsar/PowerEstimator.h \
         Pulsar/ProcHistory.h \
-        Pulsar/ProcHistoryTI.h \
         Pulsar/Receiver_Field.h \
         Pulsar/Receiver.h \
         Pulsar/Receiver_Linear.h \
@@ -45,7 +42,6 @@ nobase_include_HEADERS = \
         Pulsar/TimeSortedOrder.h \
         Pulsar/TwoBitStats.h \
         Pulsar/WidebandCorrelator.h \
-        Pulsar/WidebandCorrelatorTI.h \
 	Pulsar/ExtensionRegister.h
 
 libExtensions_la_SOURCES = \

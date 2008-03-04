@@ -7,7 +7,6 @@
  ***************************************************************************/
 
 #include "Pulsar/ProcHistory.h"
-#include "Pulsar/ProcHistoryTI.h"
 
 using namespace std;
 
@@ -174,7 +173,7 @@ void Pulsar::ProcHistory::row::init ()
 
 TextInterface::Parser* Pulsar::ProcHistory::get_interface() 
 {
-  return new ProcHistoryTI( this );
+  return new Interface( this );
 }
 
 

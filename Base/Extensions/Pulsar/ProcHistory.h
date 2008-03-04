@@ -36,6 +36,13 @@ namespace Pulsar {
     
     //! Get the text interface
     TextInterface::Parser* get_interface();
+    
+    //! Text interface to a ProcHistory instance
+    class Interface : public TextInterface::To<ProcHistory>
+    {
+      public:
+	Interface( ProcHistory *s_instance = NULL );
+    };
 
     ///////////////////////////////////////////////////////////////
     // The information container

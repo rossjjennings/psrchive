@@ -4,11 +4,17 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+
+
 #include "Pulsar/PolnCalibratorExtension.h"
-#include "Pulsar/PolnCalibratorExtensionTI.h"
+#include <assert.h>
+
+
+
 using namespace std;
 
-#include <assert.h>
+
 
 //! Default constructor
 Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
@@ -363,7 +369,7 @@ void PolnCalibratorExtension::Transformation::set_covariance
 //! Get the text interface 
 TextInterface::Parser* PolnCalibratorExtension::get_interface()
 {
-  return new PolnCalibratorExtensionTI( this );
+  return new Interface( this );
 }
 
 

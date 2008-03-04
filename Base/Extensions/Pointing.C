@@ -4,16 +4,21 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/Pointing.h"
-#include "Pulsar/PointingTI.h"
 
+
+
+#include "Pulsar/Pointing.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Telescope.h"
 #include "Horizon.h"
-
 #include "strutil.h"
 
+
+
 using namespace std;
+
+
+
 
 Pulsar::Pointing::Pointing () : Extension ("Pointing")
 {
@@ -271,6 +276,6 @@ void Pulsar::Pointing::integrate (const Integration* subint)
 //! Return a text interfaces that can be used to access this instance
 TextInterface::Parser* Pulsar::Pointing::get_interface()
 {
-	return new PointingTI( this );
+  return new Interface( this );
 }
 
