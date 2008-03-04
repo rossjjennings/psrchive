@@ -5,7 +5,6 @@
  *
  ***************************************************************************/
 #include "Pulsar/FITSHdrExtension.h"
-#include "Pulsar/FITSHdrExtensionTI.h"
 #include "strutil.h"
 
 using namespace std;
@@ -58,7 +57,7 @@ Pulsar::FITSHdrExtension::~FITSHdrExtension ()
 
 TextInterface::Parser* Pulsar::FITSHdrExtension::get_interface()
 {
-  return new FITSHdrExtensionTI( this );
+  return new Interface( this );
 }
 
 void Pulsar::FITSHdrExtension::set_coord_mode (const string mode)

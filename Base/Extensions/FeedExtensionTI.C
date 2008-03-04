@@ -4,31 +4,25 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+
+
 #include "Pulsar/FeedExtensionTI.h"
 
-Pulsar::FeedExtensionTI::FeedExtensionTI ()
+
+
+using Pulsar::FeedExtension;
+
+
+
+FeedExtension::Interface::Interface ( FeedExtension *s_instance )
 {
-  SetupMethods();
+  if( s_instance )
+    set_instance( s_instance );
+
+  // Currently there are not gettable/settable parameters for a FeedExtension
 }
 
 
-Pulsar::FeedExtensionTI::FeedExtensionTI( FeedExtension *c )
-{
-  SetupMethods();
-  set_instance( c );
-}
 
-
-void Pulsar::FeedExtensionTI::SetupMethods( void )
-{
-}
-
-
-TextInterface::Parser *Pulsar::FeedExtensionTI::clone()
-{
-  if( instance )
-    return new FeedExtensionTI( instance );
-  else
-    return new FeedExtensionTI();
-}
 

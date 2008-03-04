@@ -4,8 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+
+
 #include "Pulsar/FeedExtension.h"
-#include "Pulsar/FeedExtensionTI.h"
+
 
 
 //! Default constructor
@@ -39,6 +42,6 @@ Pulsar::FeedExtension::~FeedExtension ()
 
 TextInterface::Parser* Pulsar::FeedExtension::get_interface()
 {
-  return new FeedExtensionTI( this );
+  return new Interface( this );
 }
 

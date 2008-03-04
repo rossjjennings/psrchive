@@ -1,35 +1,25 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by David Smith
+ *   Copyright (C) 2008 by David Smith
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
- 
- 
- 
 
 
 
+#include "Pulsar/FITSSUBHdrExtension.h"
 
 
 
-#include "Pulsar/FITSSUBHdrExtensionTI.h"
+using Pulsar::FITSSUBHdrExtension;
 
-Pulsar::FITSSUBHdrExtensionTI::FITSSUBHdrExtensionTI ()
+
+
+FITSSUBHdrExtension::Interface::Interface ( FITSSUBHdrExtension *s_instance )
 {
-  setup();
-}
+  if( s_instance )
+    set_instance( s_instance );
 
-
-Pulsar::FITSSUBHdrExtensionTI::FITSSUBHdrExtensionTI( FITSSUBHdrExtension *c )
-{
-  setup();
-  set_instance( c );
-}
-
-
-void Pulsar::FITSSUBHdrExtensionTI::setup( void )
-{
   add( &FITSSUBHdrExtension::get_int_type, "int_type", "Time axis (TIME, BINPHSPERI, BINLNGASC, etc)" );
   add( &FITSSUBHdrExtension::get_int_unit, "int_unit", "Unit of time axis (SEC, PHS (0-1), DEG)" );
   add( &FITSSUBHdrExtension::get_tsamp, "tsamp", "[s] Sample interval for SEARCH-mode data" );
@@ -41,11 +31,5 @@ void Pulsar::FITSSUBHdrExtensionTI::setup( void )
   add( &FITSSUBHdrExtension::get_nsblk, "nsblk", "Samples/row (SEARCH mode, else 1)" );
 }
 
-TextInterface::Parser *Pulsar::FITSSUBHdrExtensionTI::clone()
-{
-  if( instance )
-    return new FITSSUBHdrExtensionTI( instance );
-  else
-    return new FITSSUBHdrExtensionTI();
-}
+
 

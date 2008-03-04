@@ -5,7 +5,6 @@
  *
  ***************************************************************************/
 #include "Pulsar/Receiver.h"
-#include "Pulsar/ReceiverTI.h"
 
 #include "Pulsar/Receiver_Native.h"
 #include "Pulsar/Receiver_Field.h"
@@ -234,5 +233,5 @@ Stokes<double> Pulsar::Receiver::get_reference_source () const
 
 TextInterface::Parser* Pulsar::Receiver::get_interface()
 {
-	return new ReceiverTI( this );
+	return new Receiver::Interface( this );
 }

@@ -7,13 +7,10 @@
 
 
 #include "Pulsar/FITSSUBHdrExtension.h"
-#include "Pulsar/FITSSUBHdrExtensionTI.h"
 
 
 
-using namespace Pulsar;
-
-
+using Pulsar::FITSSUBHdrExtension;
 
 
 
@@ -57,7 +54,7 @@ FITSSUBHdrExtension::~FITSSUBHdrExtension ()
 
 TextInterface::Parser* FITSSUBHdrExtension::get_interface()
 {
-  return new FITSSUBHdrExtensionTI( this );
+  return new Interface( this );
 }
 
 

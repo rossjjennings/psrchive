@@ -4,23 +4,22 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/BackendTI.h"
 
-Pulsar::BackendTI::BackendTI ()
+
+
+#include "Pulsar/Backend.h"
+
+
+
+using Pulsar::Backend;
+
+
+
+Backend::Interface::Interface ( Backend *s_instance )
 {
-  SetupMethods();
-}
+  if( s_instance )
+    set_instance( s_instance );
 
-
-Pulsar::BackendTI::BackendTI( Backend *c )
-{
-  SetupMethods();
-  set_instance( c );
-}
-
-
-void Pulsar::BackendTI::SetupMethods( void )
-{
   add( &Backend::get_name,
          &Backend::set_name,
          "name", "Name of the backend instrument" );
@@ -34,11 +33,6 @@ void Pulsar::BackendTI::SetupMethods( void )
          "dcc", "Downconversion conjugation corrected" );
 }
 
-TextInterface::Parser *Pulsar::BackendTI::clone()
-{
-  if( instance )
-    return new BackendTI( instance );
-  else
-    return new BackendTI();
-}
+
+
 

@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSSUBHdrExtension.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/02/07 10:39:12 $
-   $Author: straten $ */
+   $Revision: 1.5 $
+   $Date: 2008/03/04 00:14:32 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_FITSSUBHdrExtension_h
 #define __Pulsar_FITSSUBHdrExtension_h
@@ -43,6 +43,13 @@ namespace Pulsar
 
     //! Get the text interface
     TextInterface::Parser* get_interface();
+
+    //! Text interface to a FITSSUBHdrExtension
+    class Interface : public TextInterface::To<FITSSUBHdrExtension>
+    {
+      public:
+	Interface( FITSSUBHdrExtension *s_instance = NULL );
+    };
 
     std::string get_int_type( void ) const { return int_type; }
     std::string get_int_unit( void ) const { return int_unit; }

@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.15 $
-   $Date: 2007/10/02 04:50:09 $
-   $Author: straten $ */
+   $Revision: 1.16 $
+   $Date: 2008/03/04 00:14:32 $
+   $Author: nopeer $ */
 
 #ifndef __FITSHdrExtension_h
 #define __FITSHdrExtension_h
@@ -18,9 +18,6 @@
 
 namespace Pulsar
 {
-
-  // Forward declaration of the text interface for this class.
-
   //! Stores PSRFITS header extensions
   class FITSHdrExtension : public Pulsar::Archive::Extension
   {
@@ -44,6 +41,13 @@ namespace Pulsar
 
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
+
+    //! The text interface to a FITSHdrExtension object
+    class Interface : public TextInterface::To<FITSHdrExtension>
+    {
+      public:
+	Interface( FITSHdrExtension *s_instance = NULL );
+    };
 
     //! Return two strings based on coordmode attribute
     void get_coord_string (const sky_coord& coordinates,

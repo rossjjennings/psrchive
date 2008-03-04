@@ -39,7 +39,7 @@ const Pulsar::Backend& Pulsar::Backend::operator= (const Backend& backend)
 
 TextInterface::Parser* Pulsar::Backend::get_interface()
 {
-  return new BackendTI( this );
+  return new Pulsar::Backend::Interface( this );
 }
 
 //! Return the name of the Backend
