@@ -4,7 +4,6 @@ noinst_LTLIBRARIES = libExtensions.la
 nobase_include_HEADERS = \
         Pulsar/Arecibo.h \
         Pulsar/Backend.h \
-        Pulsar/BackendTI.h \
         Pulsar/BinaryPhaseOrder.h \
         Pulsar/BinLngAscOrder.h \
         Pulsar/BinLngPeriOrder.h \
@@ -19,11 +18,8 @@ nobase_include_HEADERS = \
         Pulsar/dspReduction.h \
         Pulsar/ExampleExtension.h \
         Pulsar/FeedExtension.h \
-        Pulsar/FeedExtensionTI.h \
         Pulsar/FITSHdrExtension.h \
-	Pulsar/FITSHdrExtensionTI.h \
 	Pulsar/FITSSUBHdrExtension.h \
-	Pulsar/FITSSUBHdrExtensionTI.h \
         Pulsar/FluxCalibratorExtension.h \
         Pulsar/FluxCalibratorExtensionTI.h \
         Pulsar/GBT.h \
@@ -47,7 +43,6 @@ nobase_include_HEADERS = \
         Pulsar/Receiver.h \
         Pulsar/Receiver_Linear.h \
         Pulsar/Receiver_Native.h \
-        Pulsar/ReceiverTI.h \
         Pulsar/TapeInfo.h \
         Pulsar/Telescope.h \
         Pulsar/Telescopes.h \
