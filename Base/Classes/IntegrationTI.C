@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/IntegrationTI.h"
-#include "Pulsar/PointingTI.h"
+#include "Pulsar/Pointing.h"
 
 Pulsar::IntegrationTI::IntegrationTI ()
 {
@@ -36,7 +36,7 @@ Pulsar::IntegrationTI::IntegrationTI ()
 		       &Integration::set_centre_frequency,
 		       &Integration::get_nchan ));
 
-  import( "point", Pulsar::PointingTI(),
+  import( "point", Pulsar::Pointing::Interface(),
 	  (Pointing*(Integration::*)()) &Integration::get<Pointing> );
 
 
