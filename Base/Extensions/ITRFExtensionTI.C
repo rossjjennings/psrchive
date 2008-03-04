@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 
 
@@ -5,34 +11,19 @@
 
 
 
-namespace Pulsar
+using Pulsar::ITRFExtension;
+
+
+
+ITRFExtension::Interface::Interface ( ITRFExtension *s_instance )
 {
+  if( s_instance )
+    set_instance( s_instance );
 
-  ITRFExtensionTI::ITRFExtensionTI()
-  {
-    SetupMethods();
-  }
-
-  ITRFExtensionTI::ITRFExtensionTI( ITRFExtension *c )
-  {
-    SetupMethods();
-    set_instance( c );
-  }
-
-  void ITRFExtensionTI::SetupMethods( void )
-  {
-    add( &ITRFExtension::get_ant_x, "ant_x", "ITRF X coordinate." );
-    add( &ITRFExtension::get_ant_y, "ant_y", "ITRF Y coordinate." );
-    add( &ITRFExtension::get_ant_z, "ant_z", "ITRF Z coordinate." );
-  }
-  
-  TextInterface::Parser *Pulsar::ITRFExtensionTI::clone()
-  {
-    if( instance )
-      return new ITRFExtensionTI( instance );
-    else
-      return new ITRFExtensionTI();
-  }
+  add( &ITRFExtension::get_ant_x, "ant_x", "ITRF X coordinate." );
+  add( &ITRFExtension::get_ant_y, "ant_y", "ITRF Y coordinate." );
+  add( &ITRFExtension::get_ant_z, "ant_z", "ITRF Z coordinate." );
 }
+
 
 

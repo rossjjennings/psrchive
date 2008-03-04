@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/FluxCalibratorExtension.h"
-#include "Pulsar/FluxCalibratorExtensionTI.h"
+
 
 //! Default constructor
 Pulsar::FluxCalibratorExtension::FluxCalibratorExtension ()
@@ -124,7 +124,7 @@ double FluxCalibratorExtension::get_epoch( void ) const
 
 TextInterface::Parser* FluxCalibratorExtension::get_interface()
 {
-  return new FluxCalibratorExtensionTI( this );
+  return new Interface( this );
 }
 
 

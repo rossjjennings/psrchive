@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/Passband.h"
-#include "Pulsar/PassbandTI.h"
+
 
 using namespace std;
 
@@ -141,7 +141,7 @@ void Pulsar::Passband::range_check (unsigned ipol, unsigned iband,
 
 TextInterface::Parser* Pulsar::Passband::get_interface( void )
 {
-	return new PassbandTI( this );
+  return new Interface( this );
 }
 
 

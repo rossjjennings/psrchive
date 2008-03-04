@@ -21,16 +21,12 @@ nobase_include_HEADERS = \
         Pulsar/FITSHdrExtension.h \
 	Pulsar/FITSSUBHdrExtension.h \
         Pulsar/FluxCalibratorExtension.h \
-        Pulsar/FluxCalibratorExtensionTI.h \
         Pulsar/GBT.h \
         Pulsar/IntegrationOrder.h \
         Pulsar/ITRFExtension.h \
-	Pulsar/ITRFExtensionTI.h \
         Pulsar/ObsExtension.h \
-	Pulsar/ObsExtensionTI.h \
         Pulsar/Parkes.h \
         Pulsar/Passband.h \
-        Pulsar/PassbandTI.h \
         Pulsar/PeriastronOrder.h \
         Pulsar/Pointing.h \
         Pulsar/PointingTI.h \

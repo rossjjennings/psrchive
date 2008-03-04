@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ITRFExtension.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/10/02 04:50:09 $
-   $Author: straten $ */
+   $Revision: 1.8 $
+   $Date: 2008/03/04 00:42:21 $
+   $Author: nopeer $ */
 
 #ifndef __ITRFExtension_h
 #define __ITRFExtension_h
@@ -43,6 +43,13 @@ namespace Pulsar {
     
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
+    
+    //! Text interface to a ITRFExtension
+    class Interface : public TextInterface::To<ITRFExtension>
+    {
+      public:
+	Interface( ITRFExtension *s_instance = NULL );
+    };
     
     // get methods
     double get_ant_x() const { return ant_x; }

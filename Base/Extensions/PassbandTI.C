@@ -1,4 +1,3 @@
-//-*-C++-*-
 /***************************************************************************
  *
  *   Copyright (C) 2007 by David Smith
@@ -6,48 +5,25 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Attic/PassbandTI.C,v $
-   $Revision: 1.2 $
-   $Date: 2007/10/02 04:50:09 $
-   $Author: straten $ */
+
+
+#include "Pulsar/Passband.h"
 
 
 
-
-
-#include "Pulsar/PassbandTI.h"
-
-
-
-using namespace Pulsar;
+using Pulsar::Passband;
 
 
 
-PassbandTI::PassbandTI()
+Passband::Interface::Interface ( Passband *s_instance )
 {
-  setup();
-}
+  if( s_instance )
+    set_instance( s_instance );
 
-
-PassbandTI::PassbandTI( Passband *c )
-{
-  setup();
-  set_instance( c );
-}
-
-
-void PassbandTI::setup( void )
-{
   add( &Passband::get_nchan, "nchan", "Number of channels in original bandpass" );
   add( &Passband::get_npol, "npol", "Number of polarizations in bandpass" );
 }
 
 
-TextInterface::Parser *PassbandTI::clone()
-{
-  if( instance )
-    return new PassbandTI( instance );
-  else
-    return new PassbandTI();
-}
+
 

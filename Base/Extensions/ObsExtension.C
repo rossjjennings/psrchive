@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/ObsExtension.h"
-#include "Pulsar/ObsExtensionTI.h"
+
 
 //! Default constructor
 Pulsar::ObsExtension::ObsExtension ()
@@ -47,6 +47,6 @@ Pulsar::ObsExtension::~ObsExtension ()
 //! Ge text interface
 TextInterface::Parser* Pulsar::ObsExtension::get_interface()
 {
-  return new ObsExtensionTI( this );
+  return new Interface( this );
 
 }

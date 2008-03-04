@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FluxCalibratorExtension.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/10/02 04:50:09 $
-   $Author: straten $ */
+   $Revision: 1.10 $
+   $Date: 2008/03/04 00:42:21 $
+   $Author: nopeer $ */
 
 #ifndef __FluxCalibratorExtension_h
 #define __FluxCalibratorExtension_h
@@ -48,6 +48,13 @@ namespace Pulsar
 
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
+
+    //! Text interface to a FluxCalibratorExtension
+    class Interface : public TextInterface::To<FluxCalibratorExtension>
+    {
+      public:
+	Interface( FluxCalibratorExtension *s_instance = NULL );
+    };
 
     //! Construct from a FluxCalibrator instance
     FluxCalibratorExtension (const FluxCalibrator*);
