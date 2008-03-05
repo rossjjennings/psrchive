@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.24 $
-   $Date: 2008/02/26 23:53:48 $
+   $Revision: 1.25 $
+   $Date: 2008/03/05 03:35:36 $
    $Author: nopeer $ */
 
 
@@ -54,7 +54,7 @@ const char ISUB_KEY             = 'i';
 const char PHASE_KEY            = 'r';
 const char FSCRUNCH_KEY         = 'F';
 const char TSCRUNCH_KEY         = 'T';
-const char PSCRUNCH_KEY         = 'P';
+const char PSCRUNCH_KEY         = 'p';
 const char CENTRE_KEY           = 'C';
 const char BSCRUNCH_KEY         = 'B';
 const char STOKES_FRACPOL_KEY   = 'x';
@@ -183,7 +183,7 @@ void DisplaySubintsUsage( void )
   "    PAR_ANG            [deg] Parallactic angle at subint centre \n"
   "    TEL_AZ             [deg] Telescope azimuth at subint centre \n"
   "    TEL_ZEN            [deg] Telescope zenith angle at subint centre \n"
-  "    SNR                Signal to noise ration for each subint\n"
+  "    S/N                Signal to noise ration for each subint\n"
   << endl;
 }
 
@@ -737,7 +737,7 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
             ts << tostring<double>( pointing->get_telescope_azimuth().getDegrees() );
           else if( (*pit) == "TEL_ZEN" && CheckPointing( pointing, ts ) )
             ts << tostring<double>( pointing->get_telescope_zenith().getDegrees() );
-          else if( (*pit) == "SNR" )
+          else if( (*pit) == "S/N" )
           {
             ts << tostring<double>( integ->total()->get_Profile(0,0)->snr() );
           }
