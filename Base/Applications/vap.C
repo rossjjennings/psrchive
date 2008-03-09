@@ -63,8 +63,37 @@
  * David Smith nopeer@gmail.com
  **/
 
-using namespace std;
-using namespace Pulsar;
+
+
+using std::vector;
+using std::string;
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::ifstream;
+using std::ios;
+using std::ostringstream;
+using Pulsar::Archive;
+using Pulsar::Integration;
+using Pulsar::Passband;
+using Pulsar::Backend;
+using Pulsar::Receiver;
+using Pulsar::Pointing;
+using Pulsar::WidebandCorrelator;
+using Pulsar::ObsExtension;
+using Pulsar::CalInfoExtension;
+using Pulsar::FITSHdrExtension;
+using Pulsar::FITSSUBHdrExtension;
+using Pulsar::PolnCalibratorExtension;
+using Pulsar::FluxCalibratorExtension;
+using Pulsar::ITRFExtension;
+using Pulsar::TapeInfo;
+using Pulsar::Telescope;
+using Pulsar::DigitiserCounts;
+using Pulsar::DigitiserStatistics;
+using Pulsar::ProcHistory;
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -256,22 +285,55 @@ string get_polc( Reference::To< Archive > archive )
 
 string get_freq( Reference::To< Archive > archive )
 {
-  ostringstream result;
+  string result;
 
-  double cf = archive->get_centre_frequency();
-  result << setiosflags( ios::fixed ) << setprecision(3) << cf;
+  set_precision( 3, true );
 
-  return result.str();
-}
-
-string get_bw( Reference::To< Archive > archive )
-{
-  set_precision( 3 );
-
-  string result = tostring( archive->get_bandwidth() );
+  result = tostring( archive->get_centre_frequency() );
 
   restore_precision();
 
+  return result;
+}
+
+
+
+string get_freq_obs( Reference::To< Archive > archive )
+{
+  double freq_obs = 0.0;
+
+  Reference::To<const FITSHdrExtension> hdr = archive->get<const FITSHdrExtension>();
+  Reference::To<const ProcHistory> history = archive->get<const ProcHistory>();
+
+  if( hdr )
+  {
+    freq_obs = hdr->get_obsfreq();
+  }
+
+  if( history && freq_obs == 0.0 )
+  {
+    if( history->rows.size() > 0 )
+    {
+      freq_obs =  history->rows[0].ctr_freq;
+    }
+  }
+
+  set_precision( 3, true );
+  string result = tostring( freq_obs );
+  restore_precision();
+
+  return result;
+}
+
+
+string get_bw( Reference::To< Archive > archive )
+{
+  set_precision( 3, true );
+
+  string result = tostring( archive->get_bandwidth() );
+  
+  restore_precision();
+  
   return result;
 }
 
@@ -329,7 +391,7 @@ string get_mjd( Reference::To< Archive > archive )
 
 string get_parang( Reference::To< Archive > archive )
 {
-  stringstream result;
+  ostringstream result;
 
   int nsubs = archive->get_nsubint();
 
@@ -430,7 +492,7 @@ string get_rcvr( Reference::To<Archive> archive )
   return result;
 }
 
-string get_nrcvr( Reference::To<Archive> archive )
+string get_nrcpt( Reference::To<Archive> archive )
 {
   string result;
 
@@ -627,8 +689,8 @@ string get_ant_x( Reference::To< Archive > archive )
   string result = "";
   Reference::To<ITRFExtension> ext = archive->get<ITRFExtension>();
 
-  set_precision( 6 );
-
+  set_precision( 3, true );
+  
   if( !ext )
     result = "UNDEF";
   else
@@ -644,7 +706,7 @@ string get_ant_y( Reference::To< Archive > archive )
   string result = "";
   Reference::To<ITRFExtension> ext = archive->get<ITRFExtension>();
 
-  set_precision( 3, false );
+  set_precision( 3, true );
 
   if( !ext )
     result = "UNDEF";
@@ -660,13 +722,17 @@ string get_ant_z( Reference::To< Archive > archive )
 {
   string result = "";
   Reference::To<ITRFExtension> ext = archive->get<ITRFExtension>();
+  
+  set_precision( 3, true );
 
   if( !ext )
     result = "UNDEF";
   else
     result = tostring( ext->ant_z );
+  
+  restore_precision();
 
-  if( tostring_places == true ) return "f";
+// // //   if( tostring_places == true ) return "f";
 
   return result;
 }
@@ -706,17 +772,13 @@ string get_date( Reference::To< Archive > archive )
   return result;
 }
 
-string get_site( Reference::To< Archive > archive )
-{
-  string result = archive->get_telescope();
-
-  return result;
-}
 
 string get_asite( Reference::To< Archive > archive )
 {
-  cerr << Tempo::code(archive->get_telescope()) << endl;
-  return "A";
+  ostringstream s;
+  s << Tempo::code(archive->get_telescope());
+
+  return s.str();
 }
 
 string get_file( Reference::To<Archive > archive )
@@ -1002,7 +1064,7 @@ string get_bmaj( Reference::To<Archive> archive )
   string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
-  set_precision(3);
+  set_precision(5,true);
   if( !ext )
     result = "UNDEF";
   else
@@ -1017,7 +1079,7 @@ string get_bmin( Reference::To<Archive> archive )
   string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
-  set_precision( 3 );
+  set_precision(5,true);
   if( !ext )
     result = "UNDEF";
   else
@@ -1589,7 +1651,6 @@ string get_cal_freq( Reference::To<Archive> archive )
     restore_precision();
   }
 
-
   return result;
 }
 
@@ -1720,7 +1781,6 @@ void PrintExtdHlp( void )
     "be_delay                        Proportional delay from digitiser input \n"
     "be_phase                        Phase convention of backend \n"
     "period                          Folding period \n"
-    "be_phase                        Phase convention of backend \n"
     "tcycle                          Correlator cycle time \n"
     " \n"
 
@@ -1730,15 +1790,16 @@ void PrintExtdHlp( void )
     " \n"
 
     "OBSERVATION PARAMETERS \n"
-    "bw                              Bandwidth (MHz) \n"
+    "bw                              Observation Bandwidth (MHz) \n"
     "dm                              Dispersion measure \n"
     "dmc                             Dispersion corrected (boolean) \n"
+    "freq_obs                        Observed frequency\n"
     "length                          The full duration of the observation (s) \n"
     "name                            Name of the source \n"
-    "nbin_obs                        Number of pulse phase bins \n"
-    "nchan_obs                       Number of frequency channels \n"
-    "npol_obs                        Number of polarizations \n"
-    "nsub_obs                        Number of Sub-Integrations \n"
+    "nbin_obs                        Observed number of pulse phase bins \n"
+    "nchan_obs                       Observed number of frequency channels \n"
+    "npol_obs                        Observed number of polarizations \n"
+    "nsub_obs                        Observed number of Sub-Integrations \n"
     "obs_mode                        Observation Mode (PSR, CAL, SEARCH) \n"
     "polc                            Polarization calibrated (boolean) \n"
     "rm                              Rotation measure (rad/m^2) \n"
@@ -1848,7 +1909,6 @@ void PrintExtdHlp( void )
     "date                            File creation date \n"
     "file                            The file number (FB data only) \n"
     "hdrver                          Header Version \n"
-    "site                            Telescope name from header \n"
     "asite                           Telescope tempo code \n"
     "telescop                        Telescope name \n"
     "tlabel                          Tape label (FB data only) \n"
@@ -1973,6 +2033,7 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "rmc" ) return get_rmc( archive );
     else if( command == "polc" ) return get_polc( archive );
     else if( command == "freq" ) return get_freq( archive );
+    else if( command == "freq_obs" ) return get_freq_obs( archive );
     else if( command == "bw" ) return get_bw( archive );
     else if( command == "intmjd" ) return get_intmjd( archive );
     else if( command == "fracmjd" ) return get_fracmjd( archive );
@@ -1983,7 +2044,7 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "projid" ) return get_projid( archive );
     else if( command == "fac" ) return get_fac( archive );
     else if( command == "rcvr" ) return get_rcvr( archive );
-    else if( command == "nrcvr" ) return get_nrcvr( archive );
+    else if( command == "nrcpt" ) return get_nrcpt( archive );
     else if( command == "basis" ) return get_basis( archive );
     else if( command == "fd_hand" ) return get_fd_hand( archive );
     else if( command == "fd_xyph" ) return get_fd_xyph( archive );
@@ -1996,7 +2057,6 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "ant_y" ) return get_ant_y( archive );
     else if( command == "ant_z" ) return get_ant_z( archive );
     else if( command == "telescop" ) return get_telescop( archive );
-    else if( command == "site" ) return get_site( archive );
     else if( command == "asite" ) return get_asite( archive );
     else if( command == "backend" ) return get_backend( archive );
     else if( command == "be_dcc" ) return get_be_dcc( archive );
