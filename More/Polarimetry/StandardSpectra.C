@@ -8,6 +8,8 @@
 #include "Pulsar/StandardSpectra.h"
 #include "Pulsar/PolnProfileStats.h"
 
+using namespace std;
+
 //! Default constructor
 /*! If specified, baseline and on-pulse regions are defined by select */
 Calibration::StandardSpectra::StandardSpectra (const Pulsar::PolnProfile* pp)
@@ -30,6 +32,12 @@ Calibration::StandardSpectra::select_profile (const Pulsar::PolnProfile* pp)
 void Calibration::StandardSpectra::set_profile (const Pulsar::PolnProfile* p)
 {
   stats->set_profile (p);
+
+#ifdef _DEBUG
+  cerr << "Calibration::StandardSpectra::set_profile onpulse nbin=" 
+       << stats->get_real()->get_stats()->get_on_pulse_nbin() << endl;
+#endif
+
   total_determinant = stats->get_total_determinant ();
 }
 
@@ -64,6 +72,12 @@ Calibration::StandardSpectra::get_stokes (unsigned ibin)
   Stokes< Estimate<double> > re = stats->get_real()->get_stokes (ibin);
   Stokes< Estimate<double> > im = stats->get_imag()->get_stokes (ibin);
 
+#ifdef _DEBUG
+  cerr << "ibin=" << ibin << endl;
+  cerr << "re=" << re << endl;
+  cerr << "im=" << im << endl;
+#endif
+
   if (normalize)
   {
     normalize->normalize (re, total_determinant);
@@ -83,3 +97,4 @@ Calibration::StandardSpectra::get_stokes (unsigned ibin)
 
   return result;
 }
+
