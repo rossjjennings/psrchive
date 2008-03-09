@@ -309,6 +309,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
     psrfits_read_key (fptr, "OBSFREQ", &centre_frequency, dfault, verbose > 2);
     set_centre_frequency( centre_frequency );
+    hdr_ext->set_obsfreq( centre_frequency );
   }
 
   // Read the bandwidth of the observation
