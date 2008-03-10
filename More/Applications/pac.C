@@ -161,7 +161,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.86 2008/02/25 03:16:14 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.87 2008/03/10 22:51:24 nopeer Exp $" << endl;
       return 0;
 
     case 'A':
@@ -632,8 +632,8 @@ int main (int argc, char *argv[]) {
 	  break;
 	  
 	}
-	
-	fitsext->set_cal_file(pcal_file);
+
+	fitsext->set_cal_file( pcal_file.substr( pcal_file.rfind( "/" ) + 1 ) );
       }
       
       if (command.length() > 80) {
