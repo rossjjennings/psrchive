@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSSUBHdrExtension.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/03/04 00:14:32 $
+   $Revision: 1.6 $
+   $Date: 2008/03/10 23:12:43 $
    $Author: nopeer $ */
 
 #ifndef __Pulsar_FITSSUBHdrExtension_h
@@ -44,7 +44,7 @@ namespace Pulsar
     //! Get the text interface
     TextInterface::Parser* get_interface();
 
-    //! Text interface to a FITSSUBHdrExtension
+    // Text interface to a FITSSUBHdrExtension
     class Interface : public TextInterface::To<FITSSUBHdrExtension>
     {
       public:

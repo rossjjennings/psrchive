@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Pointing.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/03/04 01:54:19 $
+   $Revision: 1.9 $
+   $Date: 2008/03/10 23:12:43 $
    $Author: nopeer $ */
 
 #ifndef __Pulsar_Pointing_h
@@ -44,7 +44,7 @@ namespace Pulsar {
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
     
-    //! Text interface to a Pointing instance
+    // Text interface to a Pointing instance
     class Interface : public TextInterface::To<Pointing>
     {
       public:

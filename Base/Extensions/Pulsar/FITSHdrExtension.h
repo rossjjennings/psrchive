@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.16 $
-   $Date: 2008/03/04 00:14:32 $
+   $Revision: 1.17 $
+   $Date: 2008/03/10 23:12:43 $
    $Author: nopeer $ */
 
 #ifndef __FITSHdrExtension_h
@@ -42,7 +42,7 @@ namespace Pulsar
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
 
-    //! The text interface to a FITSHdrExtension object
+    // The text interface to a FITSHdrExtension object
     class Interface : public TextInterface::To<FITSHdrExtension>
     {
       public:

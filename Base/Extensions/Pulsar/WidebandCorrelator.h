@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/WidebandCorrelator.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/03/04 01:54:20 $
+   $Revision: 1.11 $
+   $Date: 2008/03/10 23:12:43 $
    $Author: nopeer $ */
 
 #ifndef __Pulsar_WideBandCorrelator_h
@@ -37,7 +37,7 @@ namespace Pulsar {
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
 
-    //! Text interface to a WidebandCorrelator instance
+    // Text interface to a WidebandCorrelator instance
     class Interface : public TextInterface::To<WidebandCorrelator>
     {
       public:

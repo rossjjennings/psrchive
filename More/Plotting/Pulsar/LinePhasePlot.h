@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/LinePhasePlot.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/01/29 00:14:33 $
+   $Revision: 1.6 $
+   $Date: 2008/03/10 23:12:43 $
    $Author: nopeer $ */
 
 
@@ -47,7 +47,7 @@ namespace Pulsar
     //! draw the archive
     void draw( const Archive *data );
 
-    //! Text interface for LinePhasePlot
+    // Text interface for LinePhasePlot
   class Interface : public TextInterface::To<LinePhasePlot>
     {
     public:

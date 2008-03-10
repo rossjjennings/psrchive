@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ObsExtension.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/03/04 00:42:21 $
+   $Revision: 1.10 $
+   $Date: 2008/03/10 23:12:43 $
    $Author: nopeer $ */
 
 #ifndef __ObsExtension_h
@@ -45,7 +45,7 @@ namespace Pulsar {
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
 
-    //! Text interface to a ObsExtension object
+    // Text interface to a ObsExtension object
     class Interface : public TextInterface::To<ObsExtension>
     {
       public:

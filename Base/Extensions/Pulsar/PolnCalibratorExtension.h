@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.25 $
-   $Date: 2008/03/04 01:54:20 $
+   $Revision: 1.26 $
+   $Date: 2008/03/10 23:12:43 $
    $Author: nopeer $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -46,7 +46,7 @@ namespace Pulsar {
     //! get the text ineterface 
     TextInterface::Parser* get_interface();
 
-    //! Text interface to a PolnCalibratorExtension instance
+    // Text interface to a PolnCalibratorExtension instance
     class Interface : public TextInterface::To<PolnCalibratorExtension>
     {
       public:

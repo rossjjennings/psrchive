@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.25 $
-   $Date: 2008/03/04 00:14:32 $
+   $Revision: 1.26 $
+   $Date: 2008/03/10 23:12:43 $
    $Author: nopeer $ */
 
 #ifndef __ReceiverExtension_h
@@ -51,7 +51,7 @@ namespace Pulsar {
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
 
-    //! Text interface to a receiver object
+    // Text interface to a receiver object
     class Interface : public TextInterface::To<Receiver>
     {
       public:

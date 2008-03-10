@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Backend.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/03/04 00:14:32 $
+   $Revision: 1.13 $
+   $Date: 2008/03/10 23:12:43 $
    $Author: nopeer $ */
 
 #ifndef __Pulsar_Backend_h
@@ -38,7 +38,7 @@ namespace Pulsar {
     Backend* clone () const
     { return new Backend( *this ); }
 
-    //! Text interface to a Backend extension
+    // Text interface to a Backend extension
     class Interface : public TextInterface::To<Backend>
     {
       public:
