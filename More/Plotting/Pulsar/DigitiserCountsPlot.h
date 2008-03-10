@@ -25,6 +25,7 @@ using std::vector;
 
 namespace Pulsar
 {
+  //! Plots a histogram of the DigitiserCounts
   class DigitiserCountsPlot : public SimplePlot
   {
   public:
@@ -37,7 +38,7 @@ namespace Pulsar
     public:
       Interface( DigitiserCountsPlot *s_instance = NULL );
     };
-    
+
     void CheckCounts( const Archive *data );
 
     void prepare( const Archive *data );
@@ -54,8 +55,6 @@ namespace Pulsar
     void set_subint( int s_subint ) { subint = s_subint; }
 
   private:
-    //vector< vector< float > > adjusted_data;
-
     float min_count;
     float max_count;
     float y_jump;
