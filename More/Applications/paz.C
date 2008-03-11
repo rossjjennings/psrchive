@@ -157,7 +157,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.42 2008/02/25 03:29:15 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.43 2008/03/11 05:46:09 nopeer Exp $" << endl;
       return 0;
 
     case 'm':
@@ -178,8 +178,13 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'l':
+      command += " l ";
+      command += optarg;
       subints_to_mow.push_back( atoi(optarg) );
+      mower = new Pulsar::LawnMower;
+      break;
     case 'L':
+      command += " -L ";
       mower = new Pulsar::LawnMower;
       break;
 
