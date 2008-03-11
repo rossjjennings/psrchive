@@ -45,8 +45,53 @@
 #include <libgen.h>
 #include <time.h>
 #include <getopt.h>
+#include <Pulsar/Archive.h>
+#include <Pulsar/ArchiveExpert.h>
+#include <vector>
 
-using namespace std;
+
+
+using std::vector;
+using std::string;
+using std::cout;
+using std::cerr;
+using std::endl;
+using std::pair;
+using std::bad_alloc;
+using std::exception;
+using Pulsar::Archive;
+
+
+
+/**
+ * @brief Create a string listing the names of the registered Archive classes
+ * @return a coma separated list of archive class names
+ *
+ * The list of registered classes will vary depending on what is compiled into
+ * psrchive. So instead of having a static list, we query the registry to find
+ * out what classes were actually compiled.
+ **/
+
+string GetArchiveTypes( void )
+{
+  vector< pair<string,string> > agents;
+  string agents_string;
+
+  Archive::Expert::get_agent_list( agents );
+
+  if( agents.size() > 0 )
+  {
+    for( int i = 0; i < agents.size() -1; i ++ )
+    {
+      agents_string += agents[i].first;
+      agents_string += string(",");
+    }
+    agents_string += agents[ agents.size() - 1 ].first;
+  }
+
+  return agents_string;
+}
+
 
 void usage()
 {
@@ -58,7 +103,8 @@ void usage()
     "  -i               Show revision information \n"
     "  -m               Modify the original files on disk \n"
     "  -M metafile      List of archive filenames in metafile \n"
-    "  -a archive       Write new files using this archive class \n"
+    "  -a archive       The archive class to create valid types are \n"
+    "                   (" << GetArchiveTypes() << ") \n"
     "  -e extension     Write new files with this extension \n"
     "  -u path          Write files to this location \n"
     "  -T               Time scrunch to one subint \n"
@@ -272,7 +318,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.82 2008/02/25 03:29:15 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.83 2008/03/11 05:24:17 nopeer Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;

@@ -7,15 +7,18 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Agent.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/05/18 21:23:54 $
-   $Author: straten $ */
+   $Revision: 1.4 $
+   $Date: 2008/03/11 05:24:17 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_Agent_h
 #define __Pulsar_Agent_h
 
 #include "Pulsar/Archive.h"
 #include "Registry.h"
+
+#include <vector>
+
 
 namespace Pulsar {
 
@@ -51,6 +54,9 @@ namespace Pulsar {
 
     // Print the list of agents to the FILE I/O stream
     static std::string get_list ();
+    
+    // Get a list of name,description pairs from the registry
+    static void get_list( std::vector<std::pair<std::string,std::string> > &details );
 
   protected:
 

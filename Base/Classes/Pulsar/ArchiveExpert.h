@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveExpert.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/07/12 05:58:25 $
-   $Author: straten $ */
+   $Revision: 1.7 $
+   $Date: 2008/03/11 05:24:17 $
+   $Author: nopeer $ */
 
 #ifndef __Pulsar_ArchiveExpert_h
 #define __Pulsar_ArchiveExpert_h
@@ -17,6 +17,7 @@
 #include "Pulsar/IntegrationManagerExpert.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Predictor.h"
+#include "Pulsar/Agent.h"
 
 namespace Pulsar {
 
@@ -79,6 +80,10 @@ namespace Pulsar {
     //! Return true if all Integration::zero_phase_aligned flags are set
     bool zero_phase_aligned () const
     { return instance->zero_phase_aligned(); }
+    
+    //! Get agent list
+    static void get_agent_list( std::vector< std::pair< std::string,std::string > > &details )
+    { return Archive::Agent::get_list( details ); }
 
   private:
 

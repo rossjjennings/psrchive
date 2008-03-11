@@ -67,6 +67,21 @@ string Pulsar::Archive::Agent::get_list ()
   return out;
 }
 
+// Added by DS
+// A get_list function shouldn't be returning a string ready for output.
+// How its used/output should be up to the caller
+
+void Pulsar::Archive::Agent::get_list( vector<pair<string,string> > &details )
+{
+  details.resize( registry.size() );
+
+  for( unsigned agent = 0; agent < registry.size(); agent ++ )
+  {
+    details[agent].first = registry[agent]->get_name();
+    details[agent].second = registry[agent]->get_description();
+  }
+}
+
 // reports on the status of the plugins
 void Pulsar::Archive::Agent::verify_revisions ()
 {
