@@ -1646,7 +1646,7 @@ string get_cal_freq( Reference::To<Archive> archive )
 
   if( ext )
   {
-    set_precision( 3 );
+    set_precision( 6 );
     result = tostring( ext->cal_frequency );
     restore_precision();
   }
