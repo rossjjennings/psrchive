@@ -17,6 +17,7 @@
 #include "Types.h"
 #include "Error.h"
 #include "typeutil.h"
+#include "strutil.h"
 
 using namespace std;
 
@@ -92,7 +93,7 @@ Pulsar::Archive* Pulsar::Archive::new_Archive (const string& class_name)
                  "no Agents loaded");
 
   for (unsigned agent=0; agent<Agent::registry.size(); agent++)
-    if (Agent::registry[agent]->get_name() == class_name)
+    if (lowercase(Agent::registry[agent]->get_name()) == lowercase(class_name))
       return Agent::registry[agent]->new_Archive();
 
   throw Error (InvalidParam, "Pulsar::Archive::new_Archive",
