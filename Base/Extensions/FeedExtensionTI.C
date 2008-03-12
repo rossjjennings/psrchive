@@ -5,15 +5,9 @@
  *
  ***************************************************************************/
 
-
-
-#include "Pulsar/FeedExtensionTI.h"
-
-
+#include "Pulsar/FeedExtension.h"
 
 using Pulsar::FeedExtension;
-
-
 
 FeedExtension::Interface::Interface ( FeedExtension *s_instance )
 {
@@ -22,7 +16,4 @@ FeedExtension::Interface::Interface ( FeedExtension *s_instance )
 
   // Currently there are not gettable/settable parameters for a FeedExtension
 }
-
-
-
 

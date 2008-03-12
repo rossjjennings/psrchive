@@ -16,12 +16,6 @@
 #include <Pulsar/Receiver.h>
 #include <Pulsar/ArchiveTI.h>
 #include <Pulsar/WidebandCorrelator.h>
-#include <Pulsar/FITSHdrExtensionTI.h>
-#include <Pulsar/ObsExtensionTI.h>
-#include <Pulsar/ITRFExtensionTI.h>
-#include <Pulsar/BackendTI.h>
-#include <Pulsar/ReceiverTI.h>
-#include <Pulsar/WidebandCorrelatorTI.h>
 #include <Pulsar/FluxCalibratorExtension.h>
 #include <Pulsar/ProcHistory.h>
 #include <Pulsar/Parameters.h>

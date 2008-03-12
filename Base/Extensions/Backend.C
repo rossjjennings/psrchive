@@ -5,7 +5,6 @@
  *
  ***************************************************************************/
 #include "Pulsar/Backend.h"
-#include "Pulsar/BackendTI.h"
 
 //! Default constructor
 Pulsar::Backend::Backend (const std::string& ext_name)
