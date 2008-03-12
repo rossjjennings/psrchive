@@ -353,10 +353,10 @@ char Tempo::code (const string& code)
   if (strcasecmp (name, "Hobart") == 0 || strcasecmp (name, "DSS43") == 0)
     return Hobart;
 
-  if (strcasecmp (name, "GBT") || strcasecmp (name, "Greenbank") == 0)
+  if (strcasecmp (name, "GBT") == 0 || strcasecmp (name, "Greenbank") == 0)
     return Greenbank;
 
-  if (strcasecmp (name, "WSRT") || strcasecmp (name, "Westerbork") == 0)
+  if (strcasecmp (name, "WSRT") == 0 || strcasecmp (name, "Westerbork") == 0)
     return Westerbork;
   
   return 0;
