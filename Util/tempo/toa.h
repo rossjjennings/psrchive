@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.26 $
-   $Date: 2008/02/07 00:51:43 $
-   $Author: jonathan_khoo $ */
+   $Revision: 1.27 $
+   $Date: 2008/03/12 17:54:46 $
+   $Author: demorest $ */
 
 #ifndef __TOA_H
 #define __TOA_H
@@ -36,6 +36,7 @@ namespace Tempo {
   //
   // //////////////////////////////////////////////////////////////////////////
 
+	//! Describes a pulse Time of Arrival (TOA)
   class toa
   {
     
@@ -43,6 +44,7 @@ namespace Tempo {
     
     static const float UNSET;
     
+		//! TOA output format
     enum Format { 
       Unspecified,
       Comment, 

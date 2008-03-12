@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.22 $
-   $Date: 2007/11/26 02:49:34 $
-   $Author: straten $ */
+   $Revision: 1.23 $
+   $Date: 2008/03/12 17:54:46 $
+   $Author: demorest $ */
 
 #ifndef __TEMPO_PP_H
 #define __TEMPO_PP_H
@@ -20,6 +20,7 @@
 
 #include <vector>
 
+//! Interface to Tempo
 namespace Tempo {
 
   const char Greenbank   = '1';
