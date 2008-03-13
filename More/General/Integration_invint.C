@@ -16,14 +16,18 @@ void Pulsar::Integration::invint ()
 {
   Reference::To<PolnProfile> profile;
 
-  for (unsigned ichan=0; ichan<get_nchan(); ++ichan) {
-
+  for (unsigned ichan=0; ichan<get_nchan(); ++ichan) try
+  {
     profile = new_PolnProfile (ichan);
 
     profile -> invint ( profile->get_Profile(0) );
-
-  } // for each channel
+  }
+  catch (Error& error)
+  {
+    error << " chan=" << ichan;
+    throw error += "Pulsar::Integration::invint";
+  }
 
   resize (1);
-
 }
+
