@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfile.h,v $
-   $Revision: 1.39 $
-   $Date: 2007/12/24 20:02:19 $
+   $Revision: 1.40 $
+   $Date: 2008/03/13 19:18:12 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -70,6 +70,9 @@ namespace Pulsar {
 
     //! Set the amplitudes of the specified polarization
     void set_amps (unsigned ipol, float* amps);
+
+    //! Set the baseline used by some methods
+    void set_baseline (PhaseWeight*);
 
     //! Add that to this
     void sum (const PolnProfile* that);
@@ -150,6 +153,9 @@ namespace Pulsar {
 
     //! References to the polarimetric profiles
     Reference::To<Profile> profile[4];
+
+    //! The baseline used by some methods
+    Reference::To<PhaseWeight> baseline;
 
     //! Efficiently forms the inplace sum and difference of two profiles
     void sum_difference (Profile* sum, Profile* difference);

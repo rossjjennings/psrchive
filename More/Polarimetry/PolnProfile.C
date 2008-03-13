@@ -267,6 +267,12 @@ void Pulsar::PolnProfile::set_coherence (unsigned ibin,
 
 }
 
+//! Set the baseline used by some methods
+void Pulsar::PolnProfile::set_baseline (PhaseWeight* mask)
+{
+  baseline = mask;
+}
+
 void Pulsar::PolnProfile::scale (double scale)
 {
   for (unsigned ipol=0; ipol < 4; ipol++)
@@ -513,13 +519,18 @@ void Pulsar::PolnProfile::invint (Profile* invint, bool second) const
     derive the baseline from the total intensity profile because its
     statistics are better modelled
   */
-  Reference::To<Pulsar::PhaseWeight> baseline = profile[0]->baseline();
+  Reference::To<Pulsar::PhaseWeight> use_baseline;
+
+  if (baseline)
+    use_baseline = baseline;
+  else
+    use_baseline = profile[0]->baseline();
 
   /*
     remove the bias due to noise from the invariant profile
   */
-  baseline->set_Profile( invint );
-  invint->offset( -baseline->get_mean().get_value() );
+  use_baseline->set_Profile( invint );
+  invint->offset( -use_baseline->get_mean().get_value() );
 
   // return to a second-order moment
   if (second)
