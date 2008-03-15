@@ -65,6 +65,7 @@ nobase_include_HEADERS = \
         Pulsar/PhaseWeight.h \
 	Pulsar/PlotOptions.h \
 	Pulsar/ProfileInterpreter.h \
+	Pulsar/ProfilePCA.h \
 	Pulsar/ProfileStats.h \
         Pulsar/ProfileWeightFunction.h \
 	Pulsar/RiseFall.h \
@@ -221,6 +222,16 @@ libGeneral_la_SOURCES += PlotOptions.C
 
 endif
 
+##############################################################################
+#
+# GSL-dependent code
+#
+if HAVE_GSL
+
+libGeneral_la_SOURCES += ProfilePCA.C
+
+endif
+
 #############################################################################
 #
 
@@ -231,5 +242,5 @@ INCLUDES = \
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @PGPLOT_CFLAGS@ @TEMPO2_CFLAGS@
+AM_CPPFLAGS += @PGPLOT_CFLAGS@ @TEMPO2_CFLAGS@ @GSL_CFLAGS@
 
