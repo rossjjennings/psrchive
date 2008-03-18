@@ -11,6 +11,9 @@
 
 #include <gsl/gsl_eigen.h>
 
+#include <fitsio.h>
+#include "FITSError.h"
+
 #include "Warning.h"
 #include "FTransform.h"
 
@@ -25,6 +28,7 @@ Pulsar::ProfilePCA::ProfilePCA ()
   nharm_pca=0;
   cov=NULL;
   mean=NULL;
+  nprof=0;
   wt_sum=0.0;
   wt2_sum=0.0;
   pc_values.resize(0);
@@ -115,6 +119,7 @@ void Pulsar::ProfilePCA::add_Profile(const Profile *p)
   delete [] fprof;
 
   // Increment weight sums
+  nprof++;
   wt_sum += wt;
   wt2_sum += wt*wt;
 }
@@ -242,8 +247,74 @@ Pulsar::ProfilePCA::decompose(const Profile *p, unsigned n_pc)
 
 void Pulsar::ProfilePCA::unload(const std::string& filename)
 {
-  throw Error (InvalidState, "Pulsar::ProfilePCA::unload"
-      "Unload not implemented yet.");
+  // FITS status
+  int status=0;
+
+  // Create FITS file (overwrite if existing).
+  fitsfile *f;
+  char fname[256];
+  sprintf(fname, "!%s", filename.c_str());
+  if (fits_create_file(&f, fname, &status)) 
+    throw FITSError (status, "Pulsar::ProfilePCA::unload",
+        "fits_create_file(%s)", filename.c_str());
+
+  // Primary HDU:
+  // Basic keywords, cov matrix in image format
+  fits_movabs_hdu(f, 1, NULL, &status);
+  long naxes[2];
+  naxes[0]=naxes[1]=2*nharm_cov;
+  if (fits_create_img(f, DOUBLE_IMG, 2, naxes, &status))
+    throw FITSError (status, "Pulsar::ProfilePCA::unload",
+        "fits_create_img");
+  fits_write_key(f, TUINT, "NHARMCOV", &nharm_cov, NULL, &status);
+  fits_write_key(f, TUINT, "NHARMPCA", &nharm_pca, NULL, &status);
+  fits_write_key(f, TUINT, "NPROF", &nprof, NULL, &status);
+  fits_write_key(f, TDOUBLE, "WT_SUM", &wt_sum, NULL, &status);
+  fits_write_key(f, TDOUBLE, "WT2_SUM", &wt2_sum, NULL, &status);
+  // TODO : more info like source name, freq, etc..
+  if (status) 
+    throw FITSError (status, "Pulsar::ProfilePCA::unload",
+        "fits_write_key");
+
+  // COV matrix
+  naxes[0]=naxes[1]=1;
+  if (fits_write_pix(f, TDOUBLE, naxes, 4*nharm_cov*nharm_cov, 
+        cov, &status))
+    throw FITSError (status, "Pulsar::ProfilePCA::unload",
+        "fits_write_pix");
+
+  // Bintable extension with mean profile, and PCs (if computed)
+  char *ttype[] = {"PC_VALUE", "PC_VECTOR"};
+  char *tform[] = {"D", "1D"};
+  if (fits_create_tbl(f, BINARY_TBL, 0, 2, ttype, tform, NULL, "PCA", 
+        &status))
+    throw FITSError (status, "Pulsar::ProfilePCA::unload",
+        "fits_create_tbl");
+  if (fits_modify_vector_len(f, 2, 2*nharm_pca, &status)) 
+    throw FITSError (status, "Pulsar::ProfilePCA::unload",
+        "fits_modify_vector_len");
+  if (fits_write_comment(f, "First row contains unnormalized mean profile.", 
+      &status))
+    throw FITSError (status, "Pulsar::ProfilePCA::unload",
+        "fits_write_comment");
+  double dtmp=0.0;
+  fits_write_col(f, TDOUBLE, 1, 1, 1, 1, &dtmp, &status);
+  fits_write_col(f, TDOUBLE, 2, 1, 1, 2*nharm_pca, &mean[2], &status);
+  if (pc_values.size()>0) {
+    for (unsigned i=0; i<pc_values.size(); i++) {
+      dtmp = pc_values[i];
+      fits_write_col(f, TDOUBLE, 1, i+2, 1, 1, &dtmp, &status);
+      fits_write_col(f, TDOUBLE, 2, i+2, 1, 2*nharm_pca, 
+          &pc_vectors[2*nharm_pca*i], &status);
+    }
+  }
+  if (status) 
+    throw FITSError (status, "Pulsar::ProfilePCA::unload",
+        "fits_write_col");
+
+  if (fits_close_file(f, &status)) 
+    throw FITSError (status, "Pulsar::ProfilePCA::unload",
+        "fits_close_file");
 }
 
 Pulsar::ProfilePCA* Pulsar::ProfilePCA::load(const std::string& filename)

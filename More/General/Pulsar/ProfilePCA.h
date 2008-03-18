@@ -80,6 +80,9 @@ namespace Pulsar
     //! Current mean profile
     double *mean;
 
+    //! Total number of profiles added
+    unsigned nprof;
+
     //! Sum of weights
     double wt_sum;
 
