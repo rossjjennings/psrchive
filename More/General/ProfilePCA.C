@@ -170,6 +170,7 @@ void Pulsar::ProfilePCA::compute()
   for (unsigned i=0; i<2*nharm_pca; i++) {
     pc_values[i] = gsl_vector_get(eval, i);
   }
+  if (pc_vectors!=NULL) delete [] pc_vectors;
   pc_vectors = new double[4*nharm_pca*nharm_pca];
   for (unsigned i=0; i<2*nharm_pca; i++) {
     for (unsigned j=0; j<2*nharm_pca; j++) {
@@ -290,7 +291,7 @@ void Pulsar::ProfilePCA::unload(const std::string& filename)
         &status))
     throw FITSError (status, "Pulsar::ProfilePCA::unload",
         "fits_create_tbl");
-  if (fits_modify_vector_len(f, 2, 2*nharm_pca, &status)) 
+  if (fits_modify_vector_len(f, 2, 2*nharm_cov, &status)) 
     throw FITSError (status, "Pulsar::ProfilePCA::unload",
         "fits_modify_vector_len");
   if (fits_write_comment(f, "First row contains unnormalized mean profile.", 
@@ -299,7 +300,7 @@ void Pulsar::ProfilePCA::unload(const std::string& filename)
         "fits_write_comment");
   double dtmp=0.0;
   fits_write_col(f, TDOUBLE, 1, 1, 1, 1, &dtmp, &status);
-  fits_write_col(f, TDOUBLE, 2, 1, 1, 2*nharm_pca, &mean[2], &status);
+  fits_write_col(f, TDOUBLE, 2, 1, 1, 2*nharm_cov, &mean[2], &status);
   if (pc_values.size()>0) {
     for (unsigned i=0; i<pc_values.size(); i++) {
       dtmp = pc_values[i];
@@ -319,6 +320,76 @@ void Pulsar::ProfilePCA::unload(const std::string& filename)
 
 Pulsar::ProfilePCA* Pulsar::ProfilePCA::load(const std::string& filename)
 {
-  throw Error (InvalidState, "Pulsar::ProfilePCA::load"
-      "Load not implemented yet.");
+  // Open file
+  int status=0;
+  fitsfile *f;
+  if (fits_open_file(&f, filename.c_str(), READONLY, &status))
+    throw FITSError (status, "Pulsar::ProfilePCA::load",
+        "fits_open_file(%s)", filename.c_str());
+
+  // Init new pca object
+  Reference::To<ProfilePCA> pca = new ProfilePCA;
+
+  // Main HDU params
+  unsigned uitmp;
+  fits_movabs_hdu(f, 1, NULL, &status);
+  fits_read_key(f, TUINT, "NHARMCOV", &uitmp, NULL, &status);
+  pca->set_nharm_cov(uitmp);  // allocs mem, etc.
+  fits_read_key(f, TUINT, "NHARMPCA", &pca->nharm_pca, NULL, &status);
+  fits_read_key(f, TUINT, "NPROF", &pca->nprof, NULL, &status);
+  fits_read_key(f, TDOUBLE, "WT_SUM", &pca->wt_sum, NULL, &status);
+  fits_read_key(f, TDOUBLE, "WT2_SUM", &pca->wt2_sum, NULL, &status);
+  // TODO : more info like source name, freq, etc..
+  if (status) 
+    throw FITSError (status, "Pulsar::ProfilePCA::load",
+        "fits_read_key");
+
+  // COV matrix
+  long fpixel[2] = {1,1};
+  if (fits_read_pix(f, TDOUBLE, fpixel, 4*pca->nharm_cov*pca->nharm_cov,
+        NULL, pca->cov, NULL, &status))
+    throw FITSError (status, "Pulsar::ProfilePCA::load",
+        "fits_read_pix(cov)");
+
+  // move to PCA table
+  if (fits_movnam_hdu(f, BINARY_TBL, "PCA", 0, &status)) 
+    throw FITSError (status, "Pulsar::ProfilePCA::load",
+        "fits_movnam_hdu(pca)");
+
+  // Read mean vector
+  int vec_col=0, val_col=0;
+  fits_get_colnum(f, CASEINSEN, "PC_VECTOR", &vec_col, &status);
+  fits_read_col(f, TDOUBLE, vec_col, 1, 1, 2*pca->nharm_cov, 
+      NULL, &pca->mean[2], NULL, &status);
+  if (status) 
+    throw FITSError (status, "Pulsar::ProfilePCA::load",
+        "fits_read_col(mean)");
+
+  // Read components
+  long num_pc=0;
+  double dbltmp;
+  fits_get_num_rows(f, &num_pc, &status);
+  num_pc--;
+  if (num_pc>0) {
+    pca->pc_values.resize(num_pc);
+    pca->pc_vectors = new double[4*pca->nharm_pca*pca->nharm_pca];
+    fits_get_colnum(f, CASEINSEN, "PC_VALUE", &val_col, &status);
+    for (int i=0; i<num_pc; i++) {
+      fits_read_col(f, TDOUBLE, val_col, i+2, 1, 1, NULL, &dbltmp, NULL, 
+          &status);
+      pca->pc_values[i] = dbltmp;
+      fits_read_col(f, TDOUBLE, vec_col, i+2, 1, 2*pca->nharm_pca, 
+          NULL, &pca->pc_vectors[2*pca->nharm_pca*i], NULL, &status);
+    }
+    if (status) 
+      throw FITSError (status, "Pulsar::ProfilePCA::load",
+          "fits_read_col(pca)");
+  }
+
+  // All done
+  if (fits_close_file(f, &status)) 
+    throw FITSError (status, "Pulsar::ProfilePCA::load",
+        "fits_close_file");
+
+  return pca.release();
 }
