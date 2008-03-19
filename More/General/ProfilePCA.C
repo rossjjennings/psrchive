@@ -144,8 +144,7 @@ void Pulsar::ProfilePCA::compute()
   double *pca = new double[4*nharm_pca*nharm_pca];
   for (unsigned i=0; i<2*nharm_pca; i++) {
     for (unsigned j=i; j<2*nharm_pca; j++) {
-      pca[2*i*nharm_pca + j] = cov[2*i*nharm_cov + j]/wt_sum
-        - mean[i+2]*mean[j+2]/(wt_sum*wt_sum);
+      pca[2*i*nharm_pca + j] = get_cov_value(i,j);
     }
   }
 
@@ -184,6 +183,16 @@ void Pulsar::ProfilePCA::compute()
   gsl_vector_free(eval);
 }
 
+double Pulsar::ProfilePCA::get_cov_value(unsigned i, unsigned j)
+{
+  if ((i>2*nharm_cov) || (j>2*nharm_cov))
+    throw Error (InvalidParam, "Pulsar::ProfilePCA::get_cov_value",
+        "requested out of range component (%d,%d)", i, j);
+  if (j<i) { unsigned tmp=j; j=i; i=tmp; }
+  return cov[2*i*nharm_cov + j]/wt_sum 
+    - mean[i+2]*mean[j+2]/(wt_sum*wt_sum);
+}
+
 double Pulsar::ProfilePCA::get_pc_value(unsigned i)
 {
   if (i>2*nharm_pca)
@@ -197,21 +206,31 @@ double Pulsar::ProfilePCA::get_pc_value(unsigned i)
 }
 
 Pulsar::Profile*
-Pulsar::ProfilePCA::get_pc_vector(unsigned i, unsigned nbin) 
+Pulsar::ProfilePCA::get_pc_vector(int i, unsigned nbin) 
 {
-  if (i>2*nharm_pca)
+  if ((i>=0) && ((unsigned)i>2*nharm_pca))
     throw Error (InvalidParam, "Pulsar::ProfilePCA::get_pc_vector",
         "requested out of range component (%d)", i);
+
+  Profile *prof = new Profile(nbin);
+  float *fprof = new float[nbin+2];
+  for (unsigned ii=0; ii<nbin+2; ii++) fprof[ii]=0.0;
+
+  // Component -1 is mean prof
+  if (i<0) {
+    for (unsigned ii=0; ii<2*nharm_pca; ii++) 
+      fprof[ii+2] = mean[ii+2]/wt_sum;
+    FTransform::bcr1d(nbin, prof->get_amps(), fprof);
+    delete [] fprof;
+    return(prof);
+  }
 
   if (pc_values.size()==0) 
     compute();
 
-  float *fprof = new float[nbin+2];
-  for (int ii=0; ii<nbin+2; ii++) fprof[ii]=0.0;
   for (unsigned ii=0; ii<2*nharm_pca; ii++) {
     fprof[ii+2] = pc_vectors[2*i*nharm_pca + ii];
   }
-  Profile *prof = new Profile(nbin);
   FTransform::bcr1d(nbin, prof->get_amps(), fprof);
   // TODO : set other Profile attributes?
   delete [] fprof;

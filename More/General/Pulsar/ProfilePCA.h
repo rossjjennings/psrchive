@@ -51,11 +51,14 @@ namespace Pulsar
     //! Compute principal components.
     void compute();
 
+    //! Return i,j cov matrix entry
+    double get_cov_value(unsigned i, unsigned j);
+
     //! Return i-th largest PC value (eigenvalue).
     double get_pc_value(unsigned i);
 
     //! Return i-th largest PC vector (eigenvector) as Profile.
-    Profile* get_pc_vector(unsigned i, unsigned nbin);
+    Profile* get_pc_vector(int i, unsigned nbin);
 
     //! Decompose given Profile using first n_pc PCs
     std::vector<double> decompose(const Profile *p, unsigned n_pc);
