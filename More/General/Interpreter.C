@@ -150,12 +150,25 @@ void Pulsar::Interpreter::init()
       "  unsigned chans    number of desired frequency channels \n"
       "                    if not specified, fscrunch all (chans=1)\n" );
   
+  add_command
+      ( &Interpreter::fscrunch_by,
+	 "fscrunch_by", "integrate archive in frequency by factor channels",
+	 "usage: fscrunch_by [factor] \n"
+	 "  unsigned factor    The number of channels to sum together in each group \n" );
+  
   add_command 
     ( &Interpreter::tscrunch, 'T',
       "tscrunch", "integrate archive in time",
       "usage: tscrunch [subints] \n"
       "  unsigned subints  number of desired sub-integrations \n"
       "                    if not specified, tscrunch all (subints=1)\n" );
+  
+  add_command
+      ( &Interpreter::tscrunch_by,
+	 "tscrunch_by", "integrate archive in time by factor",
+	 "usage: tscrunch_by [factor] \n"
+	 "  unsigned factor  number of consecutive sub-integrations \n"
+	 "                 to sum together, tscrunch all (factor=1)\n" );
 
   add_command 
     ( &Interpreter::pscrunch, 'p',
@@ -715,6 +728,28 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
+
+// //////////////////////////////////////////////////////////////////////
+//
+// fscrunch_by <string> <int>
+//
+string Pulsar::Interpreter::fscrunch_by (const string& args)
+try
+{
+  unsigned scrunch_by = setup<unsigned> (args, 0 );
+  
+  if(scrunch_by)
+    get() -> fscrunch( scrunch_by );
+  else
+    get() -> fscrunch();
+  
+  return response(Good);
+}
+catch( Error &error )
+{
+  return response( Fail, error.get_message() );
+}
+
 // //////////////////////////////////////////////////////////////////////
 //
 // tscrunch <string> <int>
@@ -732,6 +767,28 @@ try {
 }
 catch (Error& error) {
   return response (Fail, error.get_message());
+}
+
+
+// //////////////////////////////////////////////////////////////////////
+//
+// tscrunch_by <string> <int>
+//
+string Pulsar::Interpreter::tscrunch_by ( const string &args )
+try 
+{
+  unsigned scrunch_by = setup<unsigned> (args, 0 );
+  
+  if( scrunch_by == 0 )
+    get()->tscrunch( scrunch_by );
+  else
+    get()->tscrunch();
+  
+  return response( Good );
+}
+catch( Error &error )
+{
+  return response( Fail, error.get_message() );
 }
 
 // //////////////////////////////////////////////////////////////////////

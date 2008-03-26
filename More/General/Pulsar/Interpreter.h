@@ -127,9 +127,15 @@ namespace Pulsar {
 
     //! frequency scrunch an archive in the stack
     std::string fscrunch (const std::string& args);
+    
+    //! frequency scrunch an archive in the stack by the factor
+    std::string fscrunch_by (const std::string& args);
 
     //! time scrunch an archive in the stack
     std::string tscrunch (const std::string& args);
+    
+    //! time scrunch an archive by the factor given
+    std::string tscrunch_by (const std::string& args);
     
     //! poln scrunch an archive in the stack
     std::string pscrunch (const std::string& args);
