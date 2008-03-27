@@ -42,7 +42,6 @@
 
 #include <string.h>
 #include <unistd.h>
-#include <libgen.h>
 #include <time.h>
 #include <getopt.h>
 #include <Pulsar/Archive.h>
@@ -318,7 +317,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.83 2008/03/11 05:24:17 nopeer Exp $" << endl;
+	cout << "$Id: pam.C,v 1.84 2008/03/27 06:03:49 nopeer Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -336,8 +335,9 @@ int main (int argc, char *argv[]) try {
 	archive_class = optarg;
 	break;
       case 'e':
-	save = true;
 	ext = optarg;
+	if( !ext.empty() )
+	  save = true;
 	break;
       case 'E':
 
@@ -463,8 +463,12 @@ int main (int argc, char *argv[]) try {
 	break;
       case 'u':
 	ulpath = optarg;
-	if (ulpath.substr(ulpath.length()-1,1) != "/")
-	  ulpath += "/";
+	if( !ulpath.empty() )
+	{
+	  save = true;
+	  if (ulpath.substr(ulpath.length()-1,1) != "/")
+	    ulpath += "/";
+	}
 	break;
       case 'w':
 	reset_weights = true;
@@ -657,7 +661,7 @@ int main (int argc, char *argv[]) try {
     Reference::To<Pulsar::Archive> arch;
 
     if (!save) {
-      cout << "Changes will not be saved. Use -m or -e to write results to disk"
+      cout << "Changes will not be saved. Use -m, -u or -e to write results to disk"
 	   << endl;
     }
 
@@ -1038,19 +1042,16 @@ int main (int argc, char *argv[]) try {
 	  
 	}
 	
-	if (ext.empty()) {
-	  arch->unload();
-	  cout << arch->get_filename() << " updated on disk" << endl;
-	}
-	else
-        {
-	  string the_new = replace_extension (arch->get_filename(), ext);
-	  if (!ulpath.empty())
-	    the_new = ulpath + the_new;
-
-	  arch->unload(the_new);
-	  cout << "New file " << the_new << " written to disk" << endl;
-	}
+	string out_filename = arch->get_filename();
+	
+	if( !ext.empty() )
+	  out_filename = replace_extension( out_filename, ext );
+	
+	if( !ulpath.empty() )
+	  out_filename = ulpath + basename(out_filename);
+	
+	arch->unload( out_filename );
+	cout << out_filename << " written to disk" << endl;
       }
     }  
     catch (Error& error) {
