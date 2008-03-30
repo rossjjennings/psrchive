@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.25 $
-   $Date: 2008/03/05 03:35:36 $
+   $Revision: 1.26 $
+   $Date: 2008/03/30 22:56:46 $
    $Author: nopeer $ */
 
 
@@ -293,8 +293,8 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
           if( per_channel_headers )
           {
             IntegrationHeader( intg );
-            cout << " ChFreq: " << tostring<double>( intg->get_centre_frequency( c ) );
-            cout << " ChBW: " << intg->get_bandwidth() / nchn;
+            cout << " Freq: " << tostring<double>( intg->get_centre_frequency( c ) );
+            cout << " BW: " << intg->get_bandwidth() / nchn;
             cout << endl;
           }
           for (int b = fbin; b <= lbin; b++)
