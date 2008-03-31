@@ -61,7 +61,7 @@ void Pulsar::FITSArchive::load_integration_state (fitsfile* fptr)
     else if (tempstr == "BINLNGASC")
       add_extension(new BinLngAscOrder());
     else
-      throw Error(InvalidParam, "FITSArchive::load_header",
+      throw Error(InvalidParam, "FITSArchive::load_integration_state",
 		  "unknown INT_TYPE=" + tempstr);
     
     get<Pulsar::IntegrationOrder>()->resize(get_nsubint());
@@ -172,14 +172,14 @@ void Pulsar::FITSArchive::interpret_pol_type ()
       {
 	set_state ( Signal::PPQQ );
 	if (verbose > 2)
-	  cerr << "FITSArchive:load_header setting Signal::PPQQ" << endl;
+	  cerr << "FITSArchive::interpret_pol_type setting Signal::PPQQ" << endl;
       }
 
     else if( state_pol_type == "STOKE" )
       {
 	set_state ( Signal::Stokes );
 	if (verbose > 2)
-	  cerr << "FITSArchive:load_header setting Signal::Stokes" << endl;
+	  cerr << "FITSArchive::interpret_pol_type setting Signal::Stokes" << endl;
       }
 
     else if( state_pol_type == "XXYYCRCI" ||
@@ -188,27 +188,28 @@ void Pulsar::FITSArchive::interpret_pol_type ()
       {
 	set_state ( Signal::Coherence );
 	if (verbose > 2)
-	  cerr << "FITSArchive:load_header setting Signal::Coherence" << endl;
+	  cerr << "FITSArchive::interpret_pol_type setting Signal::Coherence" << endl;
       }
 
-    else if( state_pol_type == "INTEN" )
+    else if( state_pol_type == "INTEN" ||
+	   state_pol_type == "AA+BB" )
       {
 	set_state ( Signal::Intensity );
 	if (verbose > 2)
-	  cerr << "FITSArchive:load_header setting Signal::Intensity" << endl;
+	  cerr << "FITSArchive::interpret_pol_type setting Signal::Intensity" << endl;
       }
 
     else if( state_pol_type == "INVAR" )
       {
 	set_state ( Signal::Invariant );
  	if (verbose > 2)
-	  cerr << "FITSArchive:load_header setting Signal::Invariant" << endl;
+	  cerr << "FITSArchive::interpret_pol_type setting Signal::Invariant" << endl;
       }
 
     else
       {
 	if (verbose > 1)
-	  cerr << "FITSArchive:load_header WARNING unknown POL_TYPE='"
+	  cerr << "FITSArchive::interpret_pol_type WARNING unknown POL_TYPE='"
 	       << state_pol_type << "'" << endl;
 	pol_type_undefined = true;
       }
@@ -217,8 +218,8 @@ void Pulsar::FITSArchive::interpret_pol_type ()
 
   if (pol_type_undefined)
   {
-    if (verbose)
-      cerr << "FITSArchive:load_header WARNING guessing state from NPOL="
+    if (verbose > 1)
+      cerr << "FITSArchive::interpret_pol_type WARNING guessing state from NPOL="
 	   << get_npol() << endl;
 
     if (npol == 4)
@@ -228,8 +229,8 @@ void Pulsar::FITSArchive::interpret_pol_type ()
     else if (npol == 1)
       set_state ( Signal::Intensity );
     else
-      throw Error (InvalidState, "Pulsar::FITSArchive::no_ProcHistory",
-		   "unhandled npol=%d", npol);
+      throw Error (InvalidState, "Pulsar::FITSArchive::interpret_pol_type",
+		   "Bad archive, no POL_TYPE and npol=%d", npol);
   }
 }
 
