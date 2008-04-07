@@ -6,13 +6,13 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/ReceptionCalibratorPlotter.h,v $
-   $Revision: 1.21 $
-   $Date: 2007/12/06 19:23:12 $
+/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibratorPlotter.h,v $
+   $Revision: 1.2 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
-#ifndef __ReceptionCalibratorPlotter_H
-#define __ReceptionCalibratorPlotter_H
+#ifndef __SystemCalibratorPlotter_H
+#define __SystemCalibratorPlotter_H
 
 #include "Pulsar/CalibratorPlotter.h"
 #include "Pulsar/VariationInfo.h"
@@ -24,16 +24,16 @@ class EstimatePlotter;
 
 namespace Pulsar {
 
-  class ReceptionCalibrator;
+  class SystemCalibrator;
 
-  //! Pulsar::ReceptionCalibrator plotter
-  class ReceptionCalibratorPlotter : public CalibratorPlotter {
+  //! Pulsar::SystemCalibrator plotter
+  class SystemCalibratorPlotter : public CalibratorPlotter {
     
   public:
 
-    ReceptionCalibratorPlotter (ReceptionCalibrator* calibrator);
+    SystemCalibratorPlotter (SystemCalibrator* calibrator);
 
-    ~ReceptionCalibratorPlotter ();
+    ~SystemCalibratorPlotter ();
 
     //! Plot the calibrator as a function of frequency
     void plotcal ();
@@ -54,7 +54,7 @@ namespace Pulsar {
     void plot_time_variations ();
 
     //! Return the calibrator to be plotted
-    const ReceptionCalibrator* get_calibrator () const;
+    const SystemCalibrator* get_calibrator () const;
 
   protected:
 
@@ -65,7 +65,7 @@ namespace Pulsar {
     void plot_time_variation (VariationInfo::Which, const MEAL::Scalar*);
 
     //! Reference stored on init
-    Reference::To<ReceptionCalibrator> calibrator;
+    Reference::To<SystemCalibrator> calibrator;
 
     //! Plotting methods will plot the residual
     bool plot_residual;

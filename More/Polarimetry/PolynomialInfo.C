@@ -12,7 +12,7 @@
 using namespace std;
 
 //! Constructor
-Pulsar::PolynomialInfo::PolynomialInfo (const ReceptionCalibrator* c, Which w)
+Pulsar::PolynomialInfo::PolynomialInfo (const SystemCalibrator* c, Which w)
   : VariationInfo (c, w)
 {
   if (Calibrator::verbose)

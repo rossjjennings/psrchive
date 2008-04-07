@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.11 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
@@ -115,7 +115,7 @@ namespace MEAL {
     float lamda_decrease_factor;
 
     //! Singular Matrix threshold
-    /*! Passed to Numerical::GaussJordan, this attribute is used to
+    /*! Passed to MEAL::GaussJordan, this attribute is used to
       decide when the curvature matrix is close to singular. */
     float singular_threshold;
 
@@ -240,7 +240,10 @@ namespace MEAL {
 		 // output
 		 std::vector<std::vector<double> >& alpha,
 		 std::vector<double>& beta);
-  
+
+  template<class Mt>
+  std::string get_name (const Mt& model, unsigned iparam);
+
 }
 
 template <class Grad>
@@ -282,57 +285,95 @@ float MEAL::LevenbergMarquardt<Grad>::init
 }
 
 template<class T>
-void verify_orthogonal (const std::vector<std::vector<double > >& alpha, const T& model)
+void verify_orthogonal (const std::vector<std::vector<double > >& alpha,
+			const T& model)
 {
   unsigned nrow = alpha.size();
 
   if (!nrow)
     return;
 
-  std::vector<double> row_mod (nrow, 0.0);
+  unsigned nparam = model.get_nparam ();
 
-  // calculate the size of each row vector
-  for (unsigned irow=0; irow<nrow; irow++) {
-    for (unsigned jcol=0; jcol<nrow; jcol++) 
-      row_mod[irow] += alpha[irow][jcol] * alpha[irow][jcol];
-    row_mod[irow] = sqrt(row_mod[irow]);
-  }
+  unsigned nfree = 0;
+  for (unsigned iparam=0; iparam < nparam; iparam++)
+    if (model.get_infit(iparam))
+      nfree ++;
+
+  std::cerr << "verify_orthogonal nrow=" << nrow << " nfree=" << nfree
+	    << " nparam=" << model.get_nparam() << std::endl;
+
+  /*
+    Convert row numbers to parameter names
+  */
+  std::vector<std::string> names (nfree);
 
   unsigned kparam = 0;
-
-  for (unsigned krow=0; krow<nrow; krow++) {
-
+  for (unsigned krow=0; krow<nfree; krow++)
+  {
     while (!model.get_infit(kparam))
       kparam ++;
 
-    unsigned iparam = 0;
+    names[krow] = model.get_param_name(kparam);
+    kparam ++;
+  }
 
-    for (unsigned irow=krow+1; irow<nrow; irow++) {
+  std::vector<double> row_mod (nfree, 0.0);
 
-      while (!model.get_infit(iparam))
-	iparam ++;
+  /*
+    calculate the norm of each row vector
+  */
 
-      if (row_mod[krow] == 0 || row_mod[irow] == 0)
-        continue;
-      
+  for (unsigned irow=0; irow<nfree; irow++)
+  {
+    for (unsigned jcol=0; jcol<nfree; jcol++) 
+      row_mod[irow] += alpha[irow][jcol] * alpha[irow][jcol];
+    row_mod[irow] = sqrt(row_mod[irow]);
+
+    if (row_mod[irow] == 0)
+      std::cerr << irow << "=" << names[irow] << " gradient = 0" << std::endl;
+  }
+
+  for (unsigned krow=0; krow<nfree; krow++)
+  {
+    if (row_mod[krow] == 0)
+      continue;
+
+    for (unsigned irow=krow+1; irow<nfree; irow++)
+    {
+      if (row_mod[irow] == 0)
+	continue;
+
       double covar = 0.0;
-      for (unsigned jcol=0; jcol<nrow; jcol++)
+      for (unsigned jcol=0; jcol<nfree; jcol++)
         covar += alpha[krow][jcol] * alpha[irow][jcol];
       covar /= row_mod[krow] * row_mod[irow];
 
-      if (!finite(covar)) {
+      if (covar > 0.9)
+	std::cerr << "covar(" << names[krow] << "," << names[irow] << ")="
+		  << covar << std::endl;
+
+      if (!finite(covar))
+      {
         std::cerr << "NaN or Inf in covariance matrix" << std::endl;
         return;
       }
-
-      if ( fabs( 1.0-fabs(covar) ) < 1e-3 )
-        std::cerr << model.get_param_name(kparam) << " (row " << krow << ") and "
-	     << model.get_param_name(iparam) << " (row " << irow << ")"
-	     " covar=" << covar << std::endl;
     }
-
   }
+}
 
+template<typename Mt>
+std::string MEAL::get_name (const Mt& model, unsigned iparam)
+{
+  unsigned ifree = 0;
+  for (unsigned i=0; i < model.get_nparam(); i++)
+    if (model.get_infit(i))
+    {
+      if (ifree == iparam)
+	return model.get_param_name(i);
+      ifree ++;
+    }
+  return "unknown";
 }
 
 // /////////////////////////////////////////////////////////////////////////
@@ -368,8 +409,8 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 
   unsigned iinfit = 0;
   for (unsigned ifit=0; ifit<model.get_nparam(); ifit++)
-    if (model.get_infit(ifit)) {
-
+    if (model.get_infit(ifit))
+    {
       unsigned jinfit = 0;
       for (unsigned jfit=0; jfit<model.get_nparam(); jfit++)
 	if (model.get_infit(jfit)) {
@@ -380,7 +421,6 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
       alpha[iinfit][iinfit] *= (1.0 + lamda);
       delta[iinfit][0]=best_beta[ifit];
       iinfit ++;
-
     }
 
 
@@ -396,18 +436,20 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
   //! curvature matrix
   std::vector<std::vector<double> > temp_copy (alpha);
 
-  try {
+  try
+  {
     // invert Equation 15.5.14
     MEAL::GaussJordan (alpha, delta, iinfit, singular_threshold);
   }
-  catch (Error& error)  {
-    std::cerr << "Numerical::GaussJordan failed" << std::endl;
+  catch (Error& error)
+  {
     verify_orthogonal (temp_copy, model);
     throw error += "MEAL::LevenbergMarquardt<Grad>::solve_delta";
   }
 
   if (verbose > 2)
-    std::cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta exit" << std::endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta exit" 
+	      << std::endl;
 }
 
 // /////////////////////////////////////////////////////////////////////////
@@ -434,9 +476,9 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 template <class Grad>
 template <class Xt, class Yt, class Et, class Mt>
 float MEAL::LevenbergMarquardt<Grad>::iter
-(const std::vector< Xt >& x,
- const std::vector< Estimate<Yt,Et> >& y,
- Mt& model)
+( const std::vector< Xt >& x,
+  const std::vector< Estimate<Yt,Et> >& y,
+  Mt& model )
 {
   if (verbose > 2)
     std::cerr << "MEAL::LevenbergMarquardt<Grad>::iter" << std::endl;
@@ -447,7 +489,8 @@ float MEAL::LevenbergMarquardt<Grad>::iter
   // parameters.  Update the model.
 
   if (verbose > 2)
-    std::cerr << "MEAL::LevenbergMarquardt<Grad>::iter update model" << std::endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::iter update model"
+	      << std::endl;
 
   unsigned iinfit = 0;
   for (unsigned ifit=0; ifit<model.get_nparam(); ifit++) {
@@ -515,10 +558,10 @@ float MEAL::LevenbergMarquardt<Grad>::iter
 */
 template <class Grad>
 template <class Mt>
-void 
-MEAL::LevenbergMarquardt<Grad>::result (Mt& model,
-					std::vector<std::vector<double> >& covar,
-					std::vector<std::vector<double> >& curve)
+void MEAL::LevenbergMarquardt<Grad>::result
+( Mt& model,
+  std::vector<std::vector<double> >& covar,
+  std::vector<std::vector<double> >& curve )
 {
   if (verbose > 2)
     std::cerr << "MEAL::LevenbergMarquardt<Grad>::result" << std::endl;
@@ -617,15 +660,17 @@ float MEAL::LevenbergMarquardt<Grad>::calculate_chisq
 }
 
 template <class Mt, class Xt, class Yt, class Et, class Grad>
-float MEAL::lmcoff (// input
-			   Mt& model,
-			   const Xt& abscissa,
-			   const Estimate<Yt,Et>& data,
-			   // storage
-			   std::vector<Grad>& gradient,
-			   // output
-			   std::vector<std::vector<double> >& alpha,
-			   std::vector<double>& beta)
+float MEAL::lmcoff (
+		    // input
+		    Mt& model,
+		    const Xt& abscissa,
+		    const Estimate<Yt,Et>& data,
+		    // storage
+		    std::vector<Grad>& gradient,
+		    // output
+		    std::vector<std::vector<double> >& alpha,
+		    std::vector<double>& beta
+		    )
 {
   if (LevenbergMarquardt<Grad>::verbose > 2)
     std::cerr << "MEAL::lmcoff data val=" << data.val
@@ -642,14 +687,16 @@ float MEAL::lmcoff (// input
 
 
 template <class Mt, class Yt, class Wt, class Grad>
-float MEAL::lmcoff1 (// input
-			  Mt& model,
-			  const Yt& delta_y,
-			  const Wt& weight,
-			  const std::vector<Grad>& gradient,
-			  // output
-			  std::vector<std::vector<double> >& alpha,
-			  std::vector<double>& beta)
+float MEAL::lmcoff1 (
+		     // input
+		     Mt& model,
+		     const Yt& delta_y,
+		     const Wt& weight,
+		     const std::vector<Grad>& gradient,
+		     // output
+		     std::vector<std::vector<double> >& alpha,
+		     std::vector<double>& beta
+		     )
 {
   //! The traits of the gradient element
   ElementTraits<Grad> traits;

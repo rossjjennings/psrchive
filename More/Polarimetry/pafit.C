@@ -43,6 +43,24 @@ void usage ()
        << endl;
 }
 
+class ParallacticAbscissa : public Calibration::ReceptionModelPlotter::Abscissa
+{
+public:
+
+  ParallacticAbscissa (Calibration::Parallactic* para) { parallactic = para; }
+
+  void push_back ()
+  { degrees.push_back ( parallactic->get_param(0) * 180.0/M_PI ); }
+
+  void get_values (std::vector<double>& values) const { values = degrees; }
+
+  std::string get_label () const { return "Parallactic Angle (degrees)"; }
+
+protected:
+  Reference::To< Calibration::Parallactic > parallactic;
+  std::vector<double> degrees;
+};
+
 
 int main (int argc, char** argv)
 {
@@ -249,7 +267,7 @@ int main (int argc, char** argv)
 
   plotter.set_model( &model );
   plotter.set_model_solved( true );
-  plotter.set_parallactic( &parallactic );
+  plotter.set_abscissa( new ParallacticAbscissa(&parallactic) );
 
   plotter.set_axis( &pa_axis );
   plotter.set_min ( pa_min );

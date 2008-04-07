@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Tracer.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.6 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __MEAL_Tracer_H
@@ -16,38 +16,33 @@
 
 #include "MEAL/Function.h"
 
-namespace MEAL {
-
-  //! This class provides verbose output of changes to a single parameter
-  class Tracer : public Reference::Able {
+namespace MEAL
+{
+  //! Traces changes in a single Function instance
+  class Tracer : public Reference::Able
+  {
 
   public:
 
     //! Default constructor
-    Tracer (Function* model = 0, unsigned param = 0);
+    Tracer ();
 
     //! Destructor
     ~Tracer ();
 
-    //! Add the Function parameters to the running mean
-    virtual void watch (Function* model, unsigned param);
+    //! Trace changes in the specified function
+    virtual void watch (Function*);
 
   protected:
 
-    //! The model to watch
+    //! The function to watch
     Reference::To<Function> model;
 
-    //! The parameter to watch
-    unsigned parameter;
-
-    //! The current value of the watched parameter
-    double current_value;
-
     //! Method called when a Function attribute has changed
-    void attribute_changed (Function::Attribute attribute);
+    virtual void attribute_changed (Function::Attribute attribute);
 
-    //! Method called to report parameter value
-    void report ();
+    //! Method called to report state
+    virtual void report () = 0;
 
   };
 

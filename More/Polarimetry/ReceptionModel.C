@@ -40,16 +40,26 @@ Calibration::ReceptionModel::ReceptionModel ()
 
   // used during solve
   fit_debug = false;
+  fit_report = false;
+  is_solved = false;
 }
 
 Calibration::ReceptionModel::~ReceptionModel ()
 {
+#ifdef _DEBUG
+  cerr << "Calibration::ReceptionModel::~ReceptionModel" << endl;
+#endif
 }
 
 //! Return the name of the class
 string Calibration::ReceptionModel::get_name () const
 {
   return "ReceptionModel";
+}
+
+bool Calibration::ReceptionModel::get_fit_solved () const
+{
+  return is_solved;
 }
 
 //! The number of iterations in last call to solve method
@@ -68,6 +78,24 @@ float Calibration::ReceptionModel::get_fit_chisq () const
 unsigned Calibration::ReceptionModel::get_fit_nfree () const
 {
   return nfree;
+}
+
+void Calibration::ReceptionModel::copy_fit (const ReceptionModel* other)
+{
+  if (get_nparam() != other->get_nparam())
+    throw Error (InvalidParam, "Calibration::ReceptionModel::copy_fit",
+		 "this.nparam=%d != copy.nparam=%d",
+		 get_nparam(), other->get_nparam());
+
+  for (unsigned iparm=0; iparm < get_nparam(); iparm++)
+  {
+    if (get_infit(iparm) != other->get_infit(iparm))
+      throw Error (InvalidParam, "Calibration::ReceptionModel::copy_fit",
+		   "this.infit[%d]=%d != copy.infit[%d]=%d",
+		   iparm, get_infit(iparm), iparm, other->get_infit(iparm));
+
+    set_param (iparm, other->get_param(iparm));
+  }
 }
 
 //! Additional input, \f$\rho_i,k\f$, where \f$i\f$=transformation_index

@@ -31,13 +31,20 @@ float lmcoff (// input
 	      vector<vector<double> >& alpha,
 	      vector<double>& beta)
 {
-  if (MEAL::LevenbergMarquardt< Jones<double> >::verbose > 2 ||
-      Calibration::ReceptionModel::verbose)
-    cerr << "Calibration::ReceptionModel::lmcoff" << endl;
+  if (Calibration::ReceptionModel::verbose)
+    cerr << "Calibration::ReceptionModel::lmcoff input index=" 
+	 << obs.get_input_index() << endl;
 
   model.set_input_index (obs.get_input_index());
 
-  Jones<double> delta_y = obs.get_coherency() - model.evaluate (&gradient);
+  Jones<double> result = model.evaluate (&gradient);
+
+  if (Calibration::ReceptionModel::verbose)
+    cerr << "Calibration::ReceptionModel::lmcoff"
+      "\n  data=" << obs.get_coherency() <<
+      "\n  model=" << result << endl;
+
+  Jones<double> delta_y = obs.get_coherency() - result;
 
   /* Note that Calibration::CoherencyMeasurement implements the interface
      of the WeightingScheme template class used by LevenbergMacquardt */
@@ -80,16 +87,23 @@ void Calibration::ReceptionModel::solve ()
   if (verbose)
     cerr << "Calibration::ReceptionModel::solve count free parameters" << endl;
 
+  if (fit_report)
+    cerr << endl << get_nparam()
+         << " model parameters [index:free name=value]" << endl << endl;
+
   unsigned free_params = 0;
   unsigned iparm=0;  
-  for (iparm=0; iparm < get_nparam(); iparm++) {
-    if (verbose) cerr << iparm  
-		      << " " << get_param_name(iparm)
-		      << " " << get_param(iparm) 
-		      << " " << get_infit(iparm) << endl;
+  for (iparm=0; iparm < get_nparam(); iparm++)
+  {
+    if (verbose || fit_report)
+      cerr << iparm << ":" << get_infit(iparm) << " "
+           << get_param_name(iparm) << "=" << get_param(iparm) << endl;
     if (get_infit(iparm))
       free_params ++;
   }
+
+  if (fit_report)
+    cerr << endl << free_params << " free parameters" << endl << endl;
 
   vector<bool> has_source (get_num_input(), false);
 
@@ -97,12 +111,12 @@ void Calibration::ReceptionModel::solve ()
     cerr << "Calibration::ReceptionModel::solve count constraints" << endl;
 
   unsigned fixed_params = 0;
-  for (unsigned idat=0; idat < data.size(); idat++) {
-       
+  for (unsigned idat=0; idat < data.size(); idat++)
+  {
     // ensure that each source_index is valid and flag the input states
     // that have at least one measurement to constrain them
-    for (unsigned isource=0; isource < data[idat].size(); isource++) {
-      
+    for (unsigned isource=0; isource < data[idat].size(); isource++)
+    {
       unsigned source_index = data[idat][isource].get_input_index();
 
       if (source_index >= get_num_input())
@@ -114,18 +128,16 @@ void Calibration::ReceptionModel::solve ()
 
       // count the number of constraints provided by each CoherencyMeasurement
       fixed_params += data[idat][isource].get_nconstraint ();
-
     }
   }
   
-  if (fixed_params <= free_params) {
-
+  if (fixed_params <= free_params)
+  {
     for (iparm=0; iparm < get_nparam(); iparm++)
       set_Estimate (iparm, 0.0);
 
     throw Error (InvalidState, "Calibration::ReceptionModel::solve",
 		 "ndata=%d <= nfree=%d", fixed_params, free_params);
-
   }
 
   if (verbose)
@@ -348,5 +360,7 @@ void Calibration::ReceptionModel::solve ()
     if ( !acceptance_condition[i](this) )
       throw Error (InvalidState, "Calibration::ReceptionModel::solve",
 		   "model not accepted by condition #%u", i);
+
+  is_solved = true;
 }
 

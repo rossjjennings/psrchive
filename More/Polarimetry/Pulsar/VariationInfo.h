@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/VariationInfo.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/12/06 19:23:38 $
+   $Revision: 1.3 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_VariationInfo_H
 #define __Pulsar_VariationInfo_H
 
-#include "Pulsar/ReceptionCalibrator.h"
+#include "Pulsar/SystemCalibrator.h"
 #include "MEAL/Scalar.h"
 
 namespace Pulsar {
@@ -24,7 +24,7 @@ namespace Pulsar {
 
   public:
 
-    //! Things that vary in a ReceptionCalibrator
+    //! Things that vary in a SystemCalibrator
     enum Which {
       //! Absolute gain
       Gain,
@@ -35,7 +35,7 @@ namespace Pulsar {
     };
 
     //! Construct with which function to plot
-    VariationInfo (const ReceptionCalibrator* calibrator, Which which);
+    VariationInfo (const SystemCalibrator* calibrator, Which which);
     
     //! Return the name of the specified class
     std::string get_name (unsigned iclass) const;
@@ -45,8 +45,8 @@ namespace Pulsar {
 
   protected:
 
-    //! The ReceptionCalibrator containing the step functions
-    Reference::To<const ReceptionCalibrator> calibrator;
+    //! The SystemCalibrator containing the step functions
+    Reference::To<const SystemCalibrator> calibrator;
 
     //! Which function to plot
     Which which;

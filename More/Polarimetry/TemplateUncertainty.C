@@ -10,26 +10,57 @@
 #include <iostream>
 using namespace std;
 
+complex<double> reim (double s)
+{
+  return complex<double> (s,s);
+}
+
+Stokes< complex<double> > duplicate (const Stokes<double>& s)
+{
+  return Stokes< complex<double> > (s, reim);
+}
+
 //! Default constructor
 Calibration::TemplateUncertainty::TemplateUncertainty ()
 {
   built = false;
 }
 
+Calibration::TemplateUncertainty*
+Calibration::TemplateUncertainty::clone () const
+{
+  return new TemplateUncertainty (*this);
+}
 
 //! Set the uncertainty of the observation
-void
-Calibration::TemplateUncertainty::set_variance (const Stokes<double>& v)
+void Calibration::TemplateUncertainty::set_variance
+( const Stokes<double>& var )
 {
-  observation_variance = v;
+  observation_variance = duplicate (var);
   built = false;
 }
 
 //! Set the uncertainty of the template
 void Calibration::TemplateUncertainty::set_template_variance
-(const Stokes<double>& v)
+( const Stokes<double>& var )
 {
-  template_variance = v;
+  template_variance = duplicate (var);
+  built = false;
+}
+
+//! Set the uncertainty of the observation
+void Calibration::TemplateUncertainty::set_variance
+( const Stokes< complex<double> >& var )
+{
+  observation_variance = var;
+  built = false;
+}
+
+//! Set the uncertainty of the template
+void Calibration::TemplateUncertainty::set_template_variance
+(const Stokes< complex<double> >& var)
+{
+  template_variance = var;
   built = false;
 }
 
@@ -76,21 +107,31 @@ void Calibration::TemplateUncertainty::changed (MEAL::Function::Attribute a)
 void Calibration::TemplateUncertainty::build ()
 {
   MEAL::StokesError compute;
-
-  compute.set_variance( template_variance );
   compute.set_transformation( transformation->evaluate() );
 
-  Stokes<double> var = compute.get_variance();
+  Stokes<double> re = real( template_variance );
+  Stokes<double> im = imag( template_variance );
 
-  for (unsigned ipol=0; ipol < 4; ipol++)
-    inv_variance[ipol] = 1.0 / (observation_variance[ipol] + var[ipol]);
-
-#if 0
-  std::cerr << "Calibration::TemplateUncertainty::build"
-	    << "\n  tran_var=" << var
-	    << "\n  obs_var=" << observation_variance
-	    << "\n  inv_var=" << inv_variance << std::endl;
+#ifdef _DEBUG
+  cerr << "var=" << template_variance << endl;
+  cerr << "re=" << re << endl;
+  cerr << "im=" << im << endl;
 #endif
+
+  compute.set_variance (re);
+  re = compute.get_variance();
+
+  compute.set_variance (im);
+  im = compute.get_variance();
+
+  Stokes< complex<double> > variance;
+  for (unsigned i=0; i<4; i++)
+    variance[i] = complex<double>( re[i], im[i] );
+
+  variance += observation_variance;
+
+  ObservationUncertainty::set_variance (variance);
 
   built = true;
 }
+

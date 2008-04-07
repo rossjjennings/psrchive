@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardSpectra.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/03/03 21:03:12 $
+   $Revision: 1.4 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardSpectra_H
@@ -59,7 +59,6 @@ namespace Calibration {
     Reference::To< Pulsar::PolnSpectrumStats > stats;
     Reference::To< MEAL::NormalizeStokes > normalize;
 
-    Stokes< std::complex<double> > profile_variance;
     Estimate<double> total_determinant;
     unsigned last_harmonic;
 

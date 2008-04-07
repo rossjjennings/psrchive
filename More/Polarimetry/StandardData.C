@@ -8,6 +8,8 @@
 #include "Pulsar/StandardData.h"
 #include "Pulsar/PolnProfile.h"
 
+using namespace std;
+
 //! Default constructor
 /*! If specified, baseline and on-pulse regions are defined by select */
 Calibration::StandardData::StandardData (const Pulsar::PolnProfile* select)
@@ -22,6 +24,7 @@ Calibration::StandardData::StandardData (const Pulsar::PolnProfile* select)
 void Calibration::StandardData::select_profile (const Pulsar::PolnProfile* p)
 {
   stats->select_profile (p);
+  total_determinant = stats->get_total_determinant ();
 }
 
 //! Set the profile from which estimates will be derived
@@ -29,8 +32,10 @@ void Calibration::StandardData::set_profile (const Pulsar::PolnProfile* p)
 {
   stats->set_profile (p);
 
-  for (unsigned i=0; i<4; i++)
-    profile_variance[i] = stats->get_baseline_variance(i).get_value();
+#ifdef _DEBUG
+  cerr << "Calibration::StandardData::set_profile onpulse nbin=" 
+       << stats->get_stats()->get_on_pulse_nbin() << endl;
+#endif
 
   total_determinant = stats->get_total_determinant ();
 }
@@ -44,8 +49,6 @@ void Calibration::StandardData::set_normalize (bool norm)
     normalize = 0;
 }
 
-
-
 //! Get the Stokes parameters of the specified phase bin
 Stokes< Estimate<double> >
 Calibration::StandardData::get_stokes (unsigned ibin)
@@ -58,5 +61,11 @@ Calibration::StandardData::get_stokes (unsigned ibin)
     result *= sqrt( stats->get_stats()->get_on_pulse_nbin() );
   }
 
+#ifdef _DEBUG
+  cerr << "Calibration::StandardData::get_stokes ibin=" << ibin << endl
+       << "result=" << result << endl;
+#endif
+
   return result;
 }
+

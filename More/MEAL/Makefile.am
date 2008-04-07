@@ -26,6 +26,7 @@ nobase_include_HEADERS = \
         MEAL/CyclicParameter.h \
 	MEAL/Depolarizer.h \
         MEAL/EvaluationPolicy.h \
+	MEAL/EvaluationTracer.h \
         MEAL/Factory.h \
         MEAL/ForwardChanged.h \
         MEAL/ForwardResult.h \
@@ -48,9 +49,11 @@ nobase_include_HEADERS = \
 	MEAL/Null.h \
         MEAL/OneParameter.h \
         MEAL/ParameterPolicy.h \
+	MEAL/ParameterTracer.h \
         MEAL/Parameters.h \
         MEAL/parse.h \
         MEAL/Phase.h \
+	MEAL/PhaseGradients.h \
         MEAL/PhysicalCoherency.h \
         MEAL/Polar.h \
         MEAL/Polynomial.h \
@@ -99,8 +102,7 @@ nobase_include_HEADERS = \
         MEAL/UnivariatePolicy.h \
         MEAL/VectorRule.h \
         MEAL/VelocityModel.h \
-        MEAL/VonMises.h \
-	MEAL/PhaseGradients.h
+        MEAL/VonMises.h
 
 libMEAL_la_SOURCES = \
         Argument.C \
@@ -134,8 +136,10 @@ libMEAL_la_SOURCES = \
 	Null.C \
         OneParameter.C \
         ParameterPolicy.C \
+	ParameterTracer.C \
         Parameters.C \
         Phase.C \
+	PhaseGradients.C \
         PhysicalCoherency.C \
         Polar.C \
         Polynomial.C \
@@ -175,8 +179,7 @@ libMEAL_la_SOURCES = \
         UnaryScalar.C \
         UnivariatePolicy.C \
         VelocityModel.C \
-        VonMises.C \
-	PhaseGradients.C
+        VonMises.C
 
 bin_PROGRAMS = lmfit
 

@@ -84,6 +84,14 @@ void Pulsar::ProfileStats::set_regions (const PhaseWeight& on,
     build ();
 }
 
+//! Set the on-pulse and baseline regions
+void Pulsar::ProfileStats::get_regions (PhaseWeight& on, 
+					PhaseWeight& off) const
+{
+  on = on_pulse;
+  off = baseline;
+}
+
 //! Returns the total flux of the on-pulse phase bins
 Estimate<double> Pulsar::ProfileStats::get_total (bool subtract_baseline) const
 {

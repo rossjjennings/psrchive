@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/TemplateUncertainty.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.12 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __Calibration_TemplateUncertainty_H
@@ -20,18 +20,28 @@
 namespace Calibration {
 
   //! Combines the uncertainty of the template and the observation
-  class TemplateUncertainty : public ObservationUncertainty {
+  class TemplateUncertainty : public ObservationUncertainty
+  {
 
   public:
 
     //! Default constructor
     TemplateUncertainty ();
 
+    //! Clone operator
+    TemplateUncertainty* clone () const;
+
     //! Set the uncertainty of the observation
     void set_variance (const Stokes<double>& var);
 
     //! Set the uncertainty of the template
     void set_template_variance (const Stokes<double>& var);
+
+    //! Set the uncertainty of the observation
+    void set_variance (const Stokes< std::complex<double> >& var);
+
+    //! Set the uncertainty of the template
+    void set_template_variance (const Stokes< std::complex<double> >& var);
 
     //! Set the transformation from template to observation
     void set_transformation (const MEAL::Complex2* transformation);
@@ -45,10 +55,10 @@ namespace Calibration {
   protected:
 
     //! The variance of the observed Stokes parameters
-    Stokes<double> observation_variance;
+    Stokes< std::complex<double> > observation_variance;
 
     //! The variance of the template Stokes parameters
-    Stokes<double> template_variance;
+    Stokes< std::complex<double> > template_variance;
 
     //! The transformation from template to observation
     Reference::To<MEAL::Complex2> transformation;

@@ -12,7 +12,6 @@
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Pointing.h"
 
-#include "Pulsar/Parallactic.h"
 #include "Pauli.h"
 
 using namespace std;
@@ -35,7 +34,7 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
     throw Error (InvalidState, "Pulsar::CorrectionsCalibrator",
 		 "no Receiver extension available");
 
-  telescope = const_cast<Telescope*>( archive->get<Telescope>() );
+  telescope = archive->get<Telescope>();
 
   if (!telescope)
     throw Error (InvalidState, "Pulsar::CorrectionsCalibrator",
@@ -109,13 +108,15 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
 
 void Pulsar::CorrectionsCalibrator::calibrate (Archive* archive)
 {
-  if (!archive->get_nsubint()) {
+  if (!archive->get_nsubint())
+  {
     if (verbose > 2)
       cerr << "Pulsar::CorrectionsCalibrator no data to correct" << endl;
     return;
   }
 
-  if (!needs_correction (archive)) {
+  if (!needs_correction (archive))
+  {
     if (verbose > 2)
       cerr << "Pulsar::CorrectionsCalibrator no corrections required" << endl;
     return;
@@ -166,31 +167,79 @@ Pulsar::CorrectionsCalibrator::get_feed_transformation (const Pointing* point,
   if (verbose > 2)
     cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation" << endl;
 
-  double feed_rotation = 0.0;
+  Angle feed_rotation = 0.0;
 
-  if (point) {
+  if (point)
+  {
     if (verbose > 1)
       cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation\n"
         "   using Pointing::feed_angle="
            << point->get_feed_angle().getDegrees() << " deg" << endl;
-    feed_rotation = point->get_feed_angle().getRadians();
+    feed_rotation = point->get_feed_angle();
   }
-  else if (rcvr) {
+  else if (rcvr)
+  {
     if (verbose > 1)
       cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation\n"
         "   using Receiver::tracking_angle="
            << rcvr->get_tracking_angle().getDegrees() << " deg" << endl;
-    feed_rotation = rcvr->get_tracking_angle().getRadians();
+    feed_rotation = rcvr->get_tracking_angle();
   }
+
+  if (must_correct_platform && should_correct_projection)
+    throw Error (InvalidState,
+		 "Pulsar::CorrectionsCalibrator::get_feed_transformation",
+		 "Projection of fixed receptors not yet implemented");
+
+  if (must_correct_platform && should_correct_vertical)
+  {
+    Angle pa = para.get_parallactic_angle();
+ 
+    if (verbose > 2)
+      cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation"
+	" vertical angle=" << pa << endl;
+    
+    // check that the para_ang is equal
+
+    if (point && !equal_pi( point->get_parallactic_angle(), pa ))
+    {
+      if (Archive::verbose)
+        cerr <<
+	  "Pulsar::CorrectionsCalibrator::get_feed_transformation WARNING\n"
+	  "  Pointing parallactic angle="
+	     << point->get_parallactic_angle().getDegrees() << "deg "
+	     << " != " << pa.getDegrees() << "deg calculated for MJD="
+	     << para.get_epoch() << endl;
+  
+      if (pointing_over_computed)
+      {
+        if (Archive::verbose)
+          cerr << "  Using Pointing parallactic angle." << endl;
+	pa = point->get_parallactic_angle();
+      }
+      else if (Archive::verbose)
+        cerr << "  Using calculated parallactic angle." << endl;
+
+    }
+
+    if (verbose > 2)
+      cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation"
+	" adding vertical transformation\n  " << para.evaluate() << endl;
+    
+    feed_rotation += pa;
+  }
+
+  if (verbose > 2)
+    cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation rotation="
+	 << feed_rotation.getDegrees() << " degs" << endl;
 
   if (feed_rotation == 0.0)
     return Jones<double> (1.0);
 
   // rotate the basis about the Stokes V axis
   MEAL::Rotation1 rotation ( Pauli::basis.get_basis_vector(2) );
-  rotation.set_phi ( feed_rotation );
+  rotation.set_phi ( feed_rotation.getRadians() );
   return rotation.evaluate();
-
 }
 
 //! Return the transformation matrix for the given epoch
@@ -207,6 +256,18 @@ Pulsar::CorrectionsCalibrator::get_feed_transformation (const Archive* arch,
 		 "no Receiver extension available");
 
   Pauli::basis.set_basis( receiver->get_basis() );
+
+  needs_correction( arch, pointing );
+
+  if (must_correct_platform && should_correct_vertical)
+  {
+    para.set_observatory_coordinates(telescope->get_latitude().getDegrees(),
+				     telescope->get_longitude().getDegrees());
+
+    para.set_source_coordinates( arch->get_coordinates() );
+
+    para.set_epoch( integration->get_epoch() );
+  }
 
   return get_feed_transformation (pointing, receiver);
 }
@@ -232,8 +293,8 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
   if (pointing && !equal_pi (pointing->get_position_angle(),
 			     pointing->get_feed_angle() 
-                             + pointing->get_parallactic_angle()) )  {
-
+                             + pointing->get_parallactic_angle()) )
+  {
     // verify self-consistency of attributes
 
     if (Archive::verbose > 1)
@@ -244,10 +305,10 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 	   << endl;
     
     pointing = 0;
-
   }
 
-  if (!needs_correction( archive, pointing )) {
+  if (!needs_correction( archive, pointing ))
+  {
     if (verbose > 2)
       cerr << "Pulsar::CorrectionsCalibrator no corrections required" << endl;
     return xform;
@@ -255,7 +316,8 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
   Pauli::basis.set_basis( receiver->get_basis() );
 
-  if (must_correct_feed)  {
+  if (must_correct_feed) 
+  {
     Jones<double> jones = receiver->get_transformation();
     if (verbose > 2)
       cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
@@ -270,63 +332,5 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
   xform *= jones;
 
-  if (must_correct_platform && should_correct_projection)
-    throw Error (InvalidState,
-		 "Pulsar::CorrectionsCalibrator::get_transformation",
-		 "Projection of fixed receptors not yet implemented");
-
-  if (must_correct_platform && should_correct_vertical) {
-
-    Calibration::Parallactic para;
-
-    para.set_observatory_coordinates (telescope->get_latitude().getDegrees(),
-				      telescope->get_longitude().getDegrees());
-
-    para.set_source_coordinates( archive->get_coordinates() );
-
-    para.set_epoch( integration->get_epoch() );
-
-    Angle pa = para.get_parallactic_angle();
- 
-    if (verbose > 2)
-      cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
-	" vertical angle=" << pa << endl;
-    
-    // check that the para_ang is equal
-
-    if (pointing && !equal_pi( pointing->get_parallactic_angle(), pa ))  {
-
-      if (Archive::verbose > 1)
-        cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
-	  "  Pointing parallactic angle="
-	     << pointing->get_parallactic_angle().getDegrees() << "deg "
-	     << " != " << pa.getDegrees() << "deg calculated for MJD="
-	     << integration->get_epoch() << endl;
-  
-      if (pointing_over_computed)  {
-        if (Archive::verbose)
-          cerr << "  Using Pointing parallactic angle." << endl;
-        para.set_parallactic_angle 
-             (pointing->get_parallactic_angle().getRadians());
-      }
-      else if (Archive::verbose)
-        cerr << "  Using calculated parallactic angle." << endl;
-
-    }
-
-    if (verbose > 2)
-      cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
-	" adding vertical transformation\n  " << para.evaluate() << endl;
-    
-    xform *= para.evaluate();
-     
-  }
-
-  if (verbose > 2)
-    cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
-      " result\n  " << xform << endl;
-
   return xform;
-
 }
-

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModelAxisPlotter.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/12/09 07:03:33 $
+   $Revision: 1.10 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __Calibration_ReceptionModelAxisPlotter_H
@@ -22,7 +22,7 @@
 
 namespace Calibration {
 
-  //! Plots model Stokes parameters as a function of parallactic angle
+  //! Plots model Stokes parameters as a function of time
   template<class Type>
   class ReceptionModelAxisPlotter : public ReceptionModelPlotter
   {
@@ -31,7 +31,7 @@ namespace Calibration {
 
     ReceptionModelAxisPlotter () { axis = 0; npt = 100; }
 
-    //! Set the Axis<Type> to which Parallactic model is connected
+    //! Set the Axis<Type> to which the epoch is connected
     void set_axis (MEAL::Axis<Type>* _axis) { axis = _axis; }
 
     //! Set the number of points in the plot
@@ -48,7 +48,7 @@ namespace Calibration {
 
   protected:
 
-    //! The Axis<Type> to which Parallactic model is connected
+    //! The Axis<Type> to which the epoch is connected
     MEAL::Axis<Type>* axis;
 
     //! The number of points in the plot
@@ -64,6 +64,17 @@ namespace Calibration {
 
 }
 
+template<typename T>
+float cast_to_float (T t)
+{
+  return (float) t;
+}
+
+float cast_to_float (const MJD& t)
+{
+  return t.in_days();
+}
+
 /*! The Parallactic model must be connected to the specified Axis<Type> */
 template<class Type>
 void Calibration::ReceptionModelAxisPlotter<Type>::plot_model ()
@@ -76,16 +87,16 @@ void Calibration::ReceptionModelAxisPlotter<Type>::plot_model ()
   for (unsigned ipt=0; ipt<npt; ipt++) try
   {
     Type index = min + step * ipt;
+    float val = cast_to_float (index);
 
     axis->set_value (index);
 
-    float pa = parallactic->get_param(0) * 180.0/M_PI;
     Stokes<double> stokes = coherency( model->evaluate () );
 
     if (ipt == 0)
-      cpgmove (pa, stokes[ipol]);
+      cpgmove (val, stokes[ipol]);
     else
-      cpgdraw (pa, stokes[ipol]);
+      cpgdraw (val, stokes[ipol]);
     
   }
   catch (Error& error)

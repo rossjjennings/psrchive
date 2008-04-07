@@ -11,7 +11,7 @@
 using namespace std;
 
 //! Constructor
-Pulsar::VariationInfo::VariationInfo (const ReceptionCalibrator* cal, Which w)
+Pulsar::VariationInfo::VariationInfo (const SystemCalibrator* cal, Which w)
 {
   if (Calibrator::verbose)
     cerr << "Pulsar::VariationInfo::VariationInfo" << endl;

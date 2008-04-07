@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/StandardModel.h"
 #include "Pulsar/SingleAxis.h"
 #include "Pulsar/Feed.h"
@@ -11,32 +12,33 @@
 #include "MEAL/Polynomial.h"
 #include "MEAL/Gain.h"
 #include "MEAL/Steps.h"
+#include "MEAL/Complex2Value.h"
 
 #include <iostream>
 #include <assert.h>
 
 using namespace std;
 
+// #define _DEBUG 1
+
+bool Calibration::StandardModel::verbose = false;
+
 /*! 
-  \param britton if true, use the Britton (2000) decomposition of the receiver
+  \param phenomenological if true, use the Britton (2000) decomposition 
+         of the receiver
 */
-Calibration::StandardModel::StandardModel (bool britton)
+Calibration::StandardModel::StandardModel (bool _phenomenological)
 {
   // ////////////////////////////////////////////////////////////////////
   //
   // initialize the model of the instrument
   //
 
-  if (britton) {
-    if (MEAL::Function::verbose)
-      cerr << "Calibration::StandardModel Britton" << endl;
-    physical = new Calibration::Instrument;
-  }
-  else {
-    if (MEAL::Function::verbose)
-      cerr << "Calibration::StandardModel Hamaker" << endl;
-    polar = new MEAL::Polar;
-  }
+  phenomenological = _phenomenological;
+
+  Pulsar_path = 0;
+  ReferenceCalibrator_path = 0;
+  FluxCalibrator_path = 0;
 
   valid = true;
   built = false;
@@ -52,25 +54,68 @@ void Calibration::StandardModel::set_feed_transformation (MEAL::Complex2* x)
   feed_transformation = x;
 }
 
-void
-Calibration::StandardModel::set_platform_transformation (MEAL::Complex2* x)
-{
-  platform_transformation = x;
-}
-
 //! Set true when the pulsar Stokes parameters have been normalized
 void Calibration::StandardModel::set_constant_pulsar_gain (bool value)
 {
   constant_pulsar_gain = value;
+
+  if (!constant_pulsar_gain)
+    return;
+
+  if (!built)
+    return;
+
+  if (!physical)
+    return;
+
+  MEAL::Scalar* function 
+    = const_cast<MEAL::Scalar*>( physical->get_gain_variation() );
+
+  if (function)
+  {
+    if (verbose)
+      cerr << "Calibration::StandardModel::set_constant_pulsar_gain"
+	" disabling gain variation" << endl;
+      
+    if (pcal_gain)
+    {
+      if (verbose)
+	cerr << "Calibration::StandardModel::set_constant_pulsar_gain"
+	  " transfer to pcal gain" << endl;
+      pcal_gain_chain->set_constraint (0, function);
+    }
+
+    function = 0;
+    physical->set_gain (function);
+  }
+
+  physical->set_gain (1.0);
+  physical->set_infit (0, false);
 }
 
 //! Get the measurement equation solver
 Calibration::ReceptionModel* Calibration::StandardModel::get_equation ()
 {
+  if (verbose)
+    cerr << "Calibration::StandardModel::get_equation" << endl;
+
   if (!built)
     build ();
 
   return equation;
+}
+
+void Calibration::StandardModel::set_equation (Calibration::ReceptionModel* e)
+{
+  if (equation)
+    throw Error (InvalidState, "Calibration::StandardModel::set_equation",
+		 "equation already set; cannot be reset after construction");
+
+#ifdef _DEBUG
+  cerr << "Calibration::StandardModel::set_equation " << e << endl;
+#endif
+
+  equation = e;
 }
 
 //! Get the signal path experienced by the pulsar
@@ -92,6 +137,9 @@ Calibration::StandardModel::get_transformation () const
 const MEAL::Complex2*
 Calibration::StandardModel::get_pulsar_transformation () const
 {
+  if (!built)
+    const_build ();
+
   return pulsar_path;
 }
 
@@ -112,6 +160,19 @@ void Calibration::StandardModel::build ()
   if (built)
     return;
 
+  if (phenomenological)
+  {
+    if (verbose)
+      cerr << "Calibration::StandardModel using Britton (2000)" << endl;
+    physical = new Calibration::Instrument;
+  }
+  else
+  {
+    if (verbose)
+      cerr << "Calibration::StandardModel using Hamaker (2000)" << endl;
+    polar = new MEAL::Polar;
+  }
+
   instrument = new MEAL::ProductRule<MEAL::Complex2>;
 
   if (polar)
@@ -120,16 +181,15 @@ void Calibration::StandardModel::build ()
   if (physical)
     *instrument *= physical;
 
-  if (constant_pulsar_gain)
-    instrument->set_infit (0, false);
-
   if (feed_transformation)
     *instrument *= feed_transformation;
 
-  equation = new Calibration::ReceptionModel;
+  if (constant_pulsar_gain)
+    instrument->set_infit (0, false);
 
-  ReferenceCalibrator_path = 0;
-  FluxCalibrator_path = 0;
+  // the known transformation from the source to the receptors
+  MEAL::Complex2Value* known = new MEAL::Complex2Value;
+  source_to_feed.signal.connect (known, &MEAL::Complex2Value::set_value);
 
   // ////////////////////////////////////////////////////////////////////
   //
@@ -137,17 +197,24 @@ void Calibration::StandardModel::build ()
   //
 
   pulsar_path = new MEAL::ProductRule<MEAL::Complex2>;
+
   *pulsar_path *= instrument;
+  *pulsar_path *= known;
 
-  if (platform_transformation)
-    *pulsar_path *= platform_transformation;
-
-  *pulsar_path *= &parallactic;
+  if (!equation)
+  {
+    if (verbose)
+      cerr << "Calibration::StandardModel::build new ReceptionModel" << endl;
+    equation = new Calibration::ReceptionModel;
+  }
 
   equation->add_transformation ( pulsar_path );
+
   Pulsar_path = equation->get_transformation_index ();
 
-  time.signal.connect (&parallactic, &Calibration::Parallactic::set_epoch);
+  if (verbose)
+    cerr << "Calibration::StandardModel::build pulsar path="
+	 << Pulsar_path << endl;
 
   built = true;
 }
@@ -202,16 +269,19 @@ void Calibration::StandardModel::add_polncal_backend ()
 
 void Calibration::StandardModel::fix_orientation ()
 {
+  if (!built)
+    build ();
+
   if (physical)
-    // set the orientation of the first receptor
-    physical->set_infit (4, false);
+    // fix the orientation of the first receptor
+    physical->get_feed()->get_orientation_transformation(0)->set_infit (0, 0);
 
   if (polar)
-    // set the orientation of the last rotation
+    // fix the orientation of the last rotation
     polar->set_infit (6, false);
 }
 
-void Calibration::StandardModel::update ()
+void Calibration::StandardModel::update () try
 {
   if (polar)
     polar_estimate.update (polar);
@@ -241,6 +311,10 @@ void Calibration::StandardModel::update ()
 
   }
 }
+catch (Error& error)
+{
+  throw error += "Calibration::StandardModel::update";
+}
 
 void Calibration::StandardModel::update_parameter (MEAL::Scalar* function,
 						   double value)
@@ -262,8 +336,8 @@ void Calibration::StandardModel::check_constraints ()
 
   return;
 
-  if (!fluxcal_backend) {
-
+  if (!fluxcal_backend)
+  {
     /*
       Flux calibrator observations are used to constrain the boost
       component of the degeneracy along the Stokes V axis.  If there
@@ -279,7 +353,6 @@ void Calibration::StandardModel::check_constraints ()
     */
     if (physical)
       physical->equal_ellipticities();
-
   }
 }
 
@@ -305,7 +378,7 @@ Calibration::StandardModel::copy_transformation (const MEAL::Complex2* xform)
     if (polar_solution)
       copy_param( polar, polar_solution );
     else
-      throw Error (InvalidState, "StandardModel::set_transformation",
+      throw Error (InvalidState, "StandardModel::copy_transformation",
 		   "solution is not of the required type");
   }
 
@@ -314,7 +387,7 @@ Calibration::StandardModel::copy_transformation (const MEAL::Complex2* xform)
     if (instrument)
       copy_param( physical, instrument );
     else
-      throw Error (InvalidState, "StandardModel::set_transformation",
+      throw Error (InvalidState, "StandardModel::copy_transformation",
 		   "solution is not of the required type");
   }
 }
@@ -382,11 +455,17 @@ using namespace MEAL;
 
 void Calibration::StandardModel::set_gain (Univariate<Scalar>* function)
 {
-  if (constant_pulsar_gain) {
+  if (!built)
+    build ();
 
+  if (constant_pulsar_gain)
+  {
     if (pcal_gain)
+    {
+      if (verbose)
+	cerr << "Calibration::StandardModel::set_gain set pcal gain" << endl;
       pcal_gain_chain->set_constraint (0, function);
-
+    }
   }
   else
   {    
@@ -394,8 +473,9 @@ void Calibration::StandardModel::set_gain (Univariate<Scalar>* function)
       throw Error (InvalidState, "Calibration::StandardModel::set_gain",
 		   "cannot set gain variation in polar model");
 
-    physical -> set_gain( function );
-
+    if (verbose)
+      cerr << "Calibration::StandardModel::set_gain set physical gain" << endl;
+    physical->set_gain( function );
   }
 
   convert.signal.connect( function, &Univariate<Scalar>::set_abscissa );
@@ -404,6 +484,9 @@ void Calibration::StandardModel::set_gain (Univariate<Scalar>* function)
 
 void Calibration::StandardModel::set_diff_gain (Univariate<Scalar>* function)
 {
+  if (!built)
+    build ();
+
   if (!physical)
     throw Error (InvalidState, "Calibration::StandardModel::set_diff_gain",
 		 "cannot set gain variation in polar model");
@@ -415,6 +498,9 @@ void Calibration::StandardModel::set_diff_gain (Univariate<Scalar>* function)
 
 void Calibration::StandardModel::set_diff_phase (Univariate<Scalar>* function)
 {
+  if (!built)
+    build ();
+
   if (!physical)
     throw Error (InvalidState, "Calibration::StandardModel::set_diff_phase",
 		 "cannot set diff_phase variation in polar model");
@@ -426,6 +512,10 @@ void Calibration::StandardModel::set_diff_phase (Univariate<Scalar>* function)
 
 void Calibration::StandardModel::set_reference_epoch (const MJD& epoch)
 {
+#ifdef _DEBUG
+  cerr << "Calibration::StandardModel::set_reference_epoch " << epoch << endl;
+#endif
+
   MJD current_epoch = convert.get_reference_epoch();
   convert.set_reference_epoch( epoch );
 
@@ -572,7 +662,7 @@ void Calibration::StandardModel::add_step (Scalar* function, double step)
 
 
 
-void Calibration::StandardModel::engage_time_variations ()
+void Calibration::StandardModel::engage_time_variations () try
 {
   if (time_variations_engaged)
     return;
@@ -589,7 +679,7 @@ void Calibration::StandardModel::engage_time_variations ()
   if (gain) 
   {
 #ifdef _DEBUG
-    cerr << "engage gain" << endl;
+    cerr << "engage constant_pulsar_gain=" << constant_pulsar_gain << endl;
 #endif
 
     if (!constant_pulsar_gain)
@@ -600,7 +690,12 @@ void Calibration::StandardModel::engage_time_variations ()
   }
 
   if (pcal_gain)
+  {
+#ifdef _DEBUG
+    cerr << "engage fix physical gain = 1" << endl;
+#endif
     physical->set_gain( 1.0 );
+  }
 
   if (diff_gain)
   {
@@ -622,8 +717,13 @@ void Calibration::StandardModel::engage_time_variations ()
   cerr << "after engage nparam = " << physical->get_nparam() << endl;
 #endif
 }
+catch (Error& error)
+{
+  throw error += "Calibration::StandardModel::engage_time_variations";
+}
 
-void Calibration::StandardModel::disengage_time_variations (const MJD& epoch)
+void Calibration::StandardModel::disengage_time_variations (const MJD& epoch) 
+try
 {
   if (!time_variations_engaged)
     return;
@@ -683,13 +783,19 @@ void Calibration::StandardModel::disengage_time_variations (const MJD& epoch)
 #endif
 
 }
+catch (Error& error)
+{
+  throw error += "Calibration::StandardModel::disengage_time_variations";
+}
 
-void Calibration::StandardModel::solve () try {
+void Calibration::StandardModel::solve () try
+{
+  engage_time_variations ();
 
   get_equation()->solve();
-
 }
-catch (Error& error) {
+catch (Error& error)
+{
   cerr << "Calibration::StandardModel::solve failure \n\t"
        << error.get_message() << endl;
   valid = false;
@@ -784,7 +890,8 @@ void Calibration::StandardModel::get_covariance( vector<double>& covar,
   covar.resize (ncovar);
   unsigned count = 0;
 
-  for (unsigned i=0; i<nparam; i++) {
+  for (unsigned i=0; i<nparam; i++)
+  {
 #ifdef _DEBUG
     cerr << i << ":" << imap[i] << " " << xform->get_param_name(i) << endl;
 #endif

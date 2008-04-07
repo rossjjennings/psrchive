@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SourceInfo.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/12/06 05:49:23 $
+   $Revision: 1.2 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SourceInfo_H
@@ -18,7 +18,7 @@
 
 namespace Pulsar {
 
-  class ReceptionCalibrator;
+  class SourceEstimate;
 
   //! Communicates Calibrator Stokes parameters
   class SourceInfo : public Calibrator::Info {
@@ -26,7 +26,7 @@ namespace Pulsar {
   public:
 
     //! Constructor
-    SourceInfo (const ReceptionCalibrator* calibrator, unsigned source_index);
+    SourceInfo (const SourceEstimate* source);
     
     //! Return the number of parameter classes
     unsigned get_nclass () const;
@@ -41,16 +41,22 @@ namespace Pulsar {
     Estimate<float> get_param (unsigned ichan, unsigned iclass,
 			       unsigned iparam) const;
 
+    //! Plot all Stokes parameters in one panel
+    void set_together (bool);
+
+    //! Set the label printed on the y-axis
+    void set_label (const std::string&);
+
   protected:
+    
+    //! The SourceEstimate to be plotted
+    Reference::To<const SourceEstimate> source;
 
-    //! The ReceptionCalibrator containing the source model
-    Reference::To<const ReceptionCalibrator> calibrator;
-
-    //! The index of the source model to be plotted
-    unsigned source_index;
-
-    //! Plot all of the Stokes parameters in one panel
+    //! Plot all Stokes parameters in one panel
     bool together;
+
+    //! The label printed on the y-axis
+    std::string label;
 
   };
 

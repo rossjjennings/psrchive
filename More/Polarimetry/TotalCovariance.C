@@ -61,17 +61,18 @@ Jones<double> Calibration::TotalCovariance::get_weighted_conjugate
 void Calibration::TotalCovariance::build ()
 {
   MEAL::StokesCovariance compute;
-
-  compute.set_variance (template_variance);
   compute.set_transformation (optimizer * Mueller(transformation->evaluate()));
 
+  compute.set_variance( real(template_variance) );
   Matrix<4,4,double> covar = compute.get_covariance();
 
-  if (observation_covariance_set) {
+  if (observation_covariance_set)
+  {
     covar += observation_covariance;
   }
-  else {
-    compute.set_variance (observation_variance);
+  else
+  {
+    compute.set_variance( real(observation_variance) );
     compute.set_transformation (optimizer);
     covar += compute.get_covariance();
   }

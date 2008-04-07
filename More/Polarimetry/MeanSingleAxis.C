@@ -31,7 +31,13 @@ void Calibration::MeanSingleAxis::update (SingleAxis* single_axis) const
       "\n  diff_gain=" << mean_diff_gain.get_Estimate() <<
       "\n  diff_phase=" << mean_diff_phase.get_Estimate() << endl;
 
-  single_axis->set_gain       (mean_gain.get_Estimate());
+  // avoid setting the gain to zero if nothing has been added to the mean
+  Estimate<double> gain = mean_gain.get_Estimate();
+  if (gain.get_value() == 0)
+    single_axis->set_gain (1.0);
+  else
+    single_axis->set_gain (mean_gain.get_Estimate());
+
   single_axis->set_diff_gain  (mean_diff_gain.get_Estimate());
   single_axis->set_diff_phase (0.5 * mean_diff_phase.get_Estimate());
 }

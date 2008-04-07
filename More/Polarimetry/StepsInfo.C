@@ -12,7 +12,7 @@
 using namespace std;
 
 //! Constructor
-Pulsar::StepsInfo::StepsInfo (const ReceptionCalibrator* cal, Which w)
+Pulsar::StepsInfo::StepsInfo (const SystemCalibrator* cal, Which w)
   : VariationInfo (cal, w)
 {
   if (Calibrator::verbose)

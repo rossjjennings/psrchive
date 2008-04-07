@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileStats.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/03/03 07:22:01 $
+   $Revision: 1.8 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileStats_h
@@ -38,7 +38,13 @@ namespace Pulsar {
     //! Set the PolnProfile that defines the baseline and on-pulse regions
     void select_profile (const PolnProfile*);
 
-    //! Get the ProfileStats estimator
+    //! Set the on-pulse and baseline regions
+    void set_regions (const PhaseWeight& pulse, const PhaseWeight& baseline);
+
+    //! Set the on-pulse and baseline regions
+    void get_regions (PhaseWeight& pulse, PhaseWeight& base) const;
+
+     //! Get the ProfileStats estimator
     ProfileStats* get_stats () { return stats; }
     const ProfileStats* get_stats () const { return stats; }
 

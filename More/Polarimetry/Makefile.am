@@ -34,14 +34,14 @@ nobase_include_HEADERS = \
         Pulsar/Parallactic.h \
         Pulsar/PolarCalibrator.h \
         Pulsar/Polarization.h \
+        Pulsar/PolnCalibrator.h \
         Pulsar/PolnProfile.h \
         Pulsar/PolnProfileFit.h \
         Pulsar/PolnProfileStats.h \
-        Pulsar/PolnCalibrator.h \
+	Pulsar/PolnSpectrumStats.h \
 	Pulsar/PolynomialInfo.h \
         Pulsar/PulsarCalibrator.h \
         Pulsar/ReceptionCalibrator.h \
-        Pulsar/ReceptionCalibratorPlotter.h \
         Pulsar/ReceptionModelAxisPlotter.h \
         Pulsar/ReceptionModel.h \
         Pulsar/ReceptionModelPlotter.h \
@@ -56,8 +56,10 @@ nobase_include_HEADERS = \
 	Pulsar/SourceInfo.h \
 	Pulsar/StandardData.h \
         Pulsar/StandardModel.h \
+	Pulsar/StandardSpectra.h \
 	Pulsar/StepsInfo.h \
         Pulsar/SystemCalibrator.h \
+	Pulsar/SystemCalibratorPlotter.h \
         Pulsar/TemplateUncertainty.h \
         Pulsar/TotalCovariance.h \
 	Pulsar/VariationInfo.h
@@ -104,13 +106,12 @@ libPolarimetry_la_SOURCES = \
         PolnProfile.C \
         PolnProfileFit.C \
         PolnProfileStats.C \
+	PolnSpectrumStats.C \
 	PolynomialInfo.C \
         PulsarCalibrator.C \
         Receiver_get_transformation.C \
         Receiver_load.C \
         ReceptionCalibrator.C \
-        ReceptionCalibrator_get_Info.C \
-        ReceptionCalibrator_get_solution.C \
         ReceptionModel.C \
         ReceptionModel_solve.C \
 	ReceptionModelReport.C \
@@ -124,6 +125,7 @@ libPolarimetry_la_SOURCES = \
         SourceInfo.C \
 	StandardData.C \
         StandardModel.C \
+	StandardSpectra.C \
 	StepsInfo.C \
         SystemCalibrator.C \
         TemplateUncertainty.C \
@@ -146,7 +148,7 @@ if HAVE_PGPLOT
 
 libPolarimetry_la_SOURCES += \
 	CalibratorPlotter.C \
-	ReceptionCalibratorPlotter.C \
+	SystemCalibratorPlotter.C \
 	ReceptionModelPlotter.C
 
 bin_PROGRAMS += pafit

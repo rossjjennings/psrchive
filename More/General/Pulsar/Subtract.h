@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Subtract.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/10/12 02:45:48 $
+   $Revision: 1.2 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Subtract_h
@@ -18,8 +18,6 @@
 #include "Pulsar/Profile.h"
 
 namespace Pulsar {
-
-  class Profile;
 
   //! Profile smoothing algorithms
   class Subtract : public Combination<Profile> {

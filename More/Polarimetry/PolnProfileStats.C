@@ -40,8 +40,25 @@ void Pulsar::PolnProfileStats::select_profile (const PolnProfile* _profile)
   profile = _profile;
   regions_set = false;
   build ();
+  if (profile)
+    regions_set = true;
 }
 
+//! Set the on-pulse and baseline regions
+void Pulsar::PolnProfileStats::set_regions (const PhaseWeight& on,
+					    const PhaseWeight& off)
+{
+  stats->set_regions (on, off);
+  regions_set = true;
+  build ();
+}
+
+//! Set the on-pulse and baseline regions
+void Pulsar::PolnProfileStats::get_regions (PhaseWeight& on, 
+					    PhaseWeight& off) const
+{
+  stats->get_regions (on, off);
+}
 
 //! Returns the total flux of the on-pulse phase bins
 Estimate<double> Pulsar::PolnProfileStats::get_total_intensity () const
@@ -120,6 +137,10 @@ Pulsar::PolnProfileStats::get_baseline_variance (unsigned ipol) const
 {
   if (baseline_variance[ipol].get_value() == 0)
   {
+#ifdef _DEBUG
+    cerr << "Pulsar::PolnProfileStats::get_baseline_variance ipol=" 
+         << ipol << endl;
+#endif
     stats->set_profile( profile->get_Profile(ipol) );
     baseline_variance[ipol] = stats->get_baseline_variance();
   }
@@ -139,13 +160,10 @@ void Pulsar::PolnProfileStats::build () try
 		 "input PolnProfile is not in the Stokes state");
 
   if (!regions_set)
-  {
     stats->select_profile( profile->get_Profile(0) );
-    regions_set = true;
-  }
-
 }
 catch (Error& error)
 {
   throw error += "Pulsar::PolnProfileStats::build";
 }
+

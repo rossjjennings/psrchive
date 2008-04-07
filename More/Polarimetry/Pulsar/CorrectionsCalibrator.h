@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/CorrectionsCalibrator.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.9 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CorrectionsCalibrator_H
 #define __Pulsar_CorrectionsCalibrator_H
 
 #include "Pulsar/Calibrator.h"
+#include "Pulsar/Parallactic.h"
 #include "MJD.h"
 
 namespace Pulsar {
@@ -79,11 +80,14 @@ namespace Pulsar {
     //@{
 
     //! The Telescope Extension of the Archive to be corrected
-    Reference::To<Telescope, false> telescope;
+    Reference::To<const Telescope, false> telescope;
 
     //! The Receiver Extension of the Archive to be corrected
     Reference::To<Receiver, false> receiver;
 
+    //! The parallactic (vertical) angle rotation
+    Calibration::Parallactic para;
+    
     //! Flag set when the receiver vertical angle should be corrected
     bool should_correct_vertical;
     //! Flag set when the receiver projection should be corrected

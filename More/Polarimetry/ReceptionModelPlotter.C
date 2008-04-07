@@ -1,13 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/ReceptionModelPlotter.h"
 #include "Pulsar/CoherencyMeasurementSet.h"
 #include "Pulsar/ReceptionModel.h"
-#include "Pulsar/Parallactic.h"
 
 #include "EstimatePlotter.h"
 #include "Pauli.h"
@@ -34,9 +34,9 @@ void Calibration::ReceptionModelPlotter::set_model (ReceptionModel* _model)
 }
 
 
-void Calibration::ReceptionModelPlotter::set_parallactic (Parallactic* para)
+void Calibration::ReceptionModelPlotter::set_abscissa (Abscissa* abs)
 {
-  parallactic = para;
+  abscissa = abs;
 }
 
 
@@ -77,9 +77,9 @@ void Calibration::ReceptionModelPlotter::set_output (const char* filename)
 void Calibration::ReceptionModelPlotter::plot_observations ()
 {
   std::vector< Estimate<float> > stokes[4];
-  std::vector< float > para;
 
-  if (model_solved && plot_residual) {
+  if (model_solved && plot_residual)
+  {
     model->set_transformation_index (ipath);
     model->set_input_index (isource);
   }
@@ -87,7 +87,6 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   unsigned ndat = model->get_ndata ();
   for (unsigned idat=0; idat < ndat; idat++) try
   {
-    
     // get the specified CoherencyMeasurementSet
     const Calibration::CoherencyMeasurementSet& data = model->get_data (idat);
     
@@ -99,8 +98,8 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
     
     unsigned mstate = data.size();
     
-    for (unsigned jstate=0; jstate<mstate; jstate++) {
-      
+    for (unsigned jstate=0; jstate<mstate; jstate++)
+    {
       if (data[jstate].get_input_index() != isource)
 	continue;
       
@@ -114,11 +113,8 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
       for (unsigned ipol=0; ipol<4; ipol++)
 	stokes[ipol].push_back (datum[ipol]);
 	
-      // get the parallactic angle for this observation
-      para.push_back ( parallactic->get_param(0) * 180.0/M_PI );
-      
+      abscissa->push_back (); 
     }
-    
   }
   catch (Error& error)
   {
@@ -126,22 +122,26 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
          << idat << error << endl;
   }
 
-  if (stokes[0].size() == 0) {
+  if (stokes[0].size() == 0)
+  {
     cerr << "Calibration::ReceptionModelPlotter::plot_observations "
             "ipath=" << ipath << " isource=" << isource << " no data" << endl;
     return;
   }
 
-  if ( !output_filename.empty() ) {
-
+  vector<double> values;
+  abscissa->get_values (values);
+  
+  if ( !output_filename.empty() )
+  {
     FILE* fptr = fopen (output_filename.c_str(), "w");
     if (!fptr)
       throw Error (FailedSys,
 		   "Calibration::ReceptionModelPlotter::plot_observations",
 		   "fopen (%s)", output_filename.c_str());
 
-    for (unsigned ipt=0; ipt < para.size(); ipt++) {
-      fprintf (fptr, "%f ", para[ipt]);
+    for (unsigned ipt=0; ipt < values.size(); ipt++) {
+      fprintf (fptr, "%f ", values[ipt]);
 
       for (unsigned ipol=0; ipol<4; ipol++)
 	fprintf (fptr, "%f %f ", stokes[ipol][ipt].val, stokes[ipol][ipt].var);
@@ -151,7 +151,6 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
     }
 
     fclose (fptr);
-
   }
 
   // the plotting class
@@ -172,7 +171,7 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
 
   cpgsvp (x1, x2, y1, y1+(y2-y1)*Ispace);
   
-  plotter.add_plot (para, stokes[0]);
+  plotter.add_plot (values, stokes[0]);
   plotter.set_border (xborder, Iyborder);
 
   set_ipol (0);
@@ -187,7 +186,7 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   cpgsvp (x1, x2, y1+(y2-y1)*(Ispace+space), y2);
   
   for (unsigned ipol=1; ipol<4; ipol++)
-    plotter.add_plot (para, stokes[ipol]);
+    plotter.add_plot (values, stokes[ipol]);
   
   plotter.separate_viewports();
   
@@ -205,7 +204,7 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   cpgsls (1);
   cpgsvp (x1, x2, y1, y2);
   cpgbox ("bcnst",0,0,"",0,0);
-  cpgmtxt("B",3.0,.5,.5,"Parallactic Angle (degrees)");
+  cpgmtxt("B",3.0,.5,.5, abscissa->get_label().c_str());
 
   cpgsci (1);
   cpgsls (1);

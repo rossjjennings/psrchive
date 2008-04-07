@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/03/03 07:21:49 $
+   $Revision: 1.5 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileStats_h
@@ -50,6 +50,9 @@ namespace Pulsar
     //! Set the on-pulse and baseline regions
     void set_regions (const PhaseWeight& pulse, const PhaseWeight& baseline);
 
+    //! Set the on-pulse and baseline regions
+    void get_regions (PhaseWeight& pulse, PhaseWeight& base) const;
+
     //! Get the number of phase bins in the on pulse window
     unsigned get_on_pulse_nbin () const;
 
@@ -79,7 +82,7 @@ namespace Pulsar
     //! The algorithm used to find the off-pulse phase bins
     Reference::To<BaselineEstimator> baseline_estimator;
 
-    //! When, true the on_pulse and baseline regions have been set
+    //! True when the on_pulse and baseline regions have been set
     bool regions_set;
 
     //! The on-pulse phase bin mask

@@ -217,8 +217,8 @@ int main (int argc, char** argv)
 	fit.set_standard (std_profile);
         fit.fit (profile);
   
-	unsigned nfree = fit.get_model()->get_fit_nfree ();
-	float chisq = fit.get_model()->get_fit_chisq ();
+	unsigned nfree = fit.get_equation()->get_fit_nfree ();
+	float chisq = fit.get_equation()->get_fit_chisq ();
 
 	float reduced_chisq = chisq / nfree;
 

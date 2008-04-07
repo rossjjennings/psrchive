@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ObservationUncertainty.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.4 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __Calibration_ObservationUncertainty_H
@@ -19,7 +19,8 @@
 namespace Calibration {
 
   //! Combines the uncertainty of the template and the observation
-  class ObservationUncertainty : public CoherencyMeasurement::Uncertainty {
+  class ObservationUncertainty : public CoherencyMeasurement::Uncertainty
+  {
 
   public:
 
@@ -27,10 +28,13 @@ namespace Calibration {
     ObservationUncertainty () { }
 
     //! Construct with the uncertainty of the observation
-    ObservationUncertainty (const Stokes<double>& var);
+    ObservationUncertainty (const Stokes<double>& variance);
 
     //! Set the uncertainty of the observation
-    virtual void set_variance (const Stokes<double>& var);
+    virtual void set_variance (const Stokes<double>&);
+
+    //! Set the uncertainty of the observation
+    virtual void set_variance (const Stokes< std::complex<double> >&);
 
     //! Given a coherency matrix, return the weighted norm
     virtual double get_weighted_norm (const Jones<double>&) const;
@@ -41,7 +45,7 @@ namespace Calibration {
   protected:
 
     //! The inverse of the observation variance
-    Stokes<double> inv_variance;
+    Stokes< std::complex<double> > inv_variance;
 
   };
 

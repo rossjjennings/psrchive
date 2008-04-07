@@ -5,21 +5,25 @@
  *
  ***************************************************************************/
 #include "Pulsar/SourceInfo.h"
-#include "Pulsar/ReceptionCalibrator.h"
+#include "Pulsar/SystemCalibrator.h"
 
 //! Constructor
-Pulsar::SourceInfo::SourceInfo (const ReceptionCalibrator* c, unsigned i)
+Pulsar::SourceInfo::SourceInfo (const SourceEstimate* estimate)
 {
-  calibrator = c;
-  source_index = i;
-
-  if (source_index >= calibrator->pulsar.size())
-    throw Error (InvalidRange, "Pulsar::SourceInfo",
-		 "index=%d >= pulsar size=%d", i, calibrator->pulsar.size());
-
+  source = estimate;
   together = false;
 }
-    
+
+void Pulsar::SourceInfo::set_together (bool flag)
+{
+  together = flag;
+}
+
+void Pulsar::SourceInfo::set_label (const std::string& lab)
+{
+  label = lab;
+}
+
 //! Return the number of parameter classes
 unsigned Pulsar::SourceInfo::get_nclass () const
 {
@@ -32,13 +36,16 @@ unsigned Pulsar::SourceInfo::get_nclass () const
 //! Return the name of the specified class
 std::string Pulsar::SourceInfo::get_name (unsigned iclass) const
 {
-  static char label [64] = "\\fiS'\\b\\d\\frk";
-  static char* replace = strchr (label, 'k');
+  if (!label.empty())
+    return label;
+
+  static char default_label [64] = "\\fiS'\\b\\d\\frk";
+  static char* replace = strchr (default_label, 'k');
 
   if (!together)
     *replace = '0' + iclass;
 
-  return label;
+  return default_label;
 }
 
 
@@ -56,7 +63,13 @@ Estimate<float>
 Pulsar::SourceInfo::get_param (unsigned ichan, unsigned iclass,
 			       unsigned iparam) const
 {
-  if (!calibrator->pulsar[source_index].valid[ichan])
+  if (!source)
+    return 0.0;
+
+  if (!source->valid.size() || !source->source.size())
+    return 0.0;
+
+  if (!source->valid[ichan])
     return 0.0;
 
   unsigned index = 0;
@@ -66,5 +79,5 @@ Pulsar::SourceInfo::get_param (unsigned ichan, unsigned iclass,
   else
     index = iclass;
 
-  return calibrator->pulsar[source_index].source[ichan]->get_Estimate(index);
+  return source->source[ichan]->get_Estimate(index);
 }

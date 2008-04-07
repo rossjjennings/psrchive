@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolynomialInfo.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/12/06 19:52:54 $
+   $Revision: 1.2 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolynomialInfo_H
@@ -25,7 +25,7 @@ namespace Pulsar {
   public:
 
     //! Construct with code of which function to plot
-    PolynomialInfo (const ReceptionCalibrator* calibrator, Which which);
+    PolynomialInfo (const SystemCalibrator* calibrator, Which which);
     
     //! Return the number of parameter classes
     unsigned get_nclass () const;

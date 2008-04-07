@@ -50,6 +50,8 @@ void Pulsar::PolnSpectrumStats::select_profile (const PolnProfile* _profile)
   profile = _profile;
   regions_set = false;
   build ();
+  if (profile)
+    regions_set = true;
 }
 
 //! Set the on-pulse and baseline regions
@@ -156,7 +158,7 @@ void Pulsar::PolnSpectrumStats::build () try
   {
     float* C_ptr = fourier->get_Profile(ipol)->get_amps();
     float* re_ptr = re->get_Profile(ipol)->get_amps();
-    float* im_ptr = re->get_Profile(ipol)->get_amps();
+    float* im_ptr = im->get_Profile(ipol)->get_amps();
 
     for (unsigned ibin=0; ibin < nbin; ibin++)
     {
@@ -182,8 +184,6 @@ void Pulsar::PolnSpectrumStats::build () try
 
     real->set_regions (on_pulse, baseline);
     imag->set_regions (on_pulse, baseline);
-
-    regions_set = true;
   }
 
   if (on_pulse.get_nbin () > re->get_nbin())
@@ -206,3 +206,4 @@ catch (Error& error)
 {
   throw error += "Pulsar::PolnSpectrumStats::build";
 }
+

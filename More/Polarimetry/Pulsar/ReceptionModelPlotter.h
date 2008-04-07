@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModelPlotter.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.5 $
+   $Date: 2008/04/07 00:38:18 $
    $Author: straten $ */
 
 #ifndef __Calibration_ReceptionModelPlotter_H
@@ -21,7 +21,6 @@ class EstimatePlotter;
 namespace Calibration {
 
   class ReceptionModel;
-  class Parallactic;
 
   class ReceptionModelPlotter : public Reference::Able
   {
@@ -37,8 +36,11 @@ namespace Calibration {
     //! Set the model to yield the Stokes parameters
     void set_model (ReceptionModel* model);
 
-    //! Set the parallactic angle model to yield the plot abscissa
-    void set_parallactic (Parallactic* para);
+    //! Defines the abscissa
+    class Abscissa;
+
+    //! Set the epoch angle model to yield the plot abscissa
+    void set_abscissa (Abscissa* para);
 
     //! Set the index of the Stokes parameter to be plotted
     void set_ipol (unsigned ipol);
@@ -73,7 +75,7 @@ namespace Calibration {
     Reference::To<ReceptionModel> model;
 
     //! The independent variable in each plot
-    Reference::To<Parallactic> parallactic;
+    Reference::To<Abscissa> abscissa;
 
     //! The index of the Stokes parameter to be plotted
     unsigned ipol;
@@ -93,6 +95,15 @@ namespace Calibration {
     //! Flag set true when the data-model residual should be plotted
     bool plot_residual;
 
+  };
+
+
+  class ReceptionModelPlotter::Abscissa : public Reference::Able
+  {
+  public:
+    virtual void push_back () = 0;
+    virtual void get_values (std::vector<double>& values) const = 0;
+    virtual std::string get_label () const = 0;
   };
 
 }
