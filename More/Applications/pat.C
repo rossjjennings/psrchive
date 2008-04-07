@@ -232,7 +232,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.79 2008/02/07 01:12:38 jonathan_khoo Exp $" << endl;
+      cout << "$Id: pat.C,v 1.80 2008/04/07 07:14:27 straten Exp $" << endl;
       return 0;
 
     case 'M':
@@ -249,6 +249,7 @@ int main (int argc, char *argv[]) try {
 
     case 'p':
       full_poln = new Pulsar::PulsarCalibrator;
+      full_poln->set_solve_each ();
       break;
 
    case 'q':
@@ -378,18 +379,17 @@ int main (int argc, char *argv[]) try {
 	  } 
 	}
 
-      if (full_poln) try {
+      if (full_poln) try
+      {
 	arch->convert_state (Signal::Stokes);
 	full_poln->add_observation( arch );
-
-
-
       }
-      catch (Error& error) {
-	cerr << "pat: Error MTM " << arch->get_filename() << "\n\t"
-             << error.get_message() << endl;
+      catch (Error& error)
+      {
+	cerr << "pat: Error MTM " << arch->get_filename() << error << endl;
       }
-      else {
+      else
+      {
 	arch->convert_state (Signal::Intensity);
 
 	/* If multiple standard profiles given must now choose and load 
