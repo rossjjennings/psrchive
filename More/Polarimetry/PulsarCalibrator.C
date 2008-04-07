@@ -219,10 +219,10 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
   create_model();
 
   if (verbose)
-    cerr << "Pulsar::PulsarCalibrator::set_standard"
-      " set StandardModel equations" << endl;
+    cerr << "Pulsar::PulsarCalibrator::set_standard " << model.size()
+	 << " StandardModel equations" << endl;
 
-  for (unsigned ichan=0; ichan<nchan; ichan++)
+  for (unsigned ichan=0; ichan<model_nchan; ichan++)
   {
     // share the measurement equations between PolnProfileFit and StandardModel
     if (mtm[ichan])
@@ -281,10 +281,18 @@ void Pulsar::PulsarCalibrator::add_pulsar
 ( Calibration::CoherencyMeasurementSet& measurements,
   const Integration* integration, unsigned ichan )
 {
+  if (verbose > 2)
+    cerr << "Pulsar::PulsarCalibrator::add_pulsar start" << endl;
+
+  setup (integration, ichan);
+
+  if (!transformation[ichan])
+    return;
+
   if (solve_each)
   {
-    if (verbose > 2)
-      cerr << "Pulsar::PulsarCalibrator::add_pulsar solving each" << endl;
+    if (verbose > 2) cerr << "Pulsar::PulsarCalibrator::add_pulsar"
+      " solving ichan=" << ichan << endl;
 
     bool one_channel = get_calibrator()->get_nchan() == 1;
     unsigned mchan = ichan;
@@ -302,21 +310,12 @@ void Pulsar::PulsarCalibrator::add_pulsar
   else
   {
     if (verbose > 2)
-      cerr << "Pulsar::PulsarCalibrator::add_pulsar set up" << endl;
-
-    setup (integration, ichan);
-
-    if (!transformation[ichan])
-      return;
-
-    if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::add_pulsar adding to path index="
 	   << measurements.get_transformation_index() << endl;
 
     mtm[ichan]->set_measurement_set( measurements );
     mtm[ichan]->add_observation( integration->new_PolnProfile (ichan) );
   }
-
 }
 
 //! Add the observation to the set of constraints
@@ -461,9 +460,15 @@ Pulsar::PulsarCalibrator::setup (const Integration* data, unsigned ichan)
   return mchan;
 }
 
-void 
-Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
+void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
 {
+  if (verbose)
+    cerr << "Pulsar::PulsarCalibrator::solve1 ichan=" << ichan << endl;
+
+  MEAL::Function* backup = 0;
+  if (transformation[ichan])
+    backup = transformation[ichan]->clone();
+
   for (unsigned tries=0 ; tries < 2; tries ++) try
   {
     unsigned mchan = setup (data, ichan);
@@ -472,11 +477,21 @@ Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
       return;
 
     if (solution[ichan])
+    {
       solution[ichan]->update( transformation[ichan] );
-
+      //cerr << "update gain=" << transformation[ichan]->get_param(0) << endl;
+    }
     else if (ichan>0 && tries==0 && solution[ichan-1]
              && reduced_chisq[ichan-1] < 1.2)
+    {
       solution[ichan-1]->update( transformation[ichan] );
+      //cerr << "copy gain=" << transformation[ichan]->get_param(0) << endl;
+    }
+    else if (backup)
+    {
+      transformation[ichan]->copy (backup);
+      //cerr << "backup gain=" << transformation[ichan]->get_param(0) << endl;
+    }
 
     if (verbose)
       cerr << "Pulsar::PulsarCalibrator::solve1 chan=" << mchan << endl;
@@ -509,9 +524,11 @@ Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
     solution[ichan] = 0;
 
   }
-  catch (Error& error) {
-    cerr << "Pulsar::PulsarCalibrator::solve1 ichan=" << ichan 
-         << " error" << error << endl;
+  catch (Error& error)
+  {
+    if (verbose)
+      cerr << "Pulsar::PulsarCalibrator::solve1 ichan=" << ichan 
+	   << " error" << error << endl;
 #if 0
     if (verbose > 2)
       cerr << error << endl;
@@ -532,14 +549,14 @@ Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
 
 #endif
 
-  if (solution[ichan]) {
-
+  if (solution[ichan])
+  {
     float chisq = solution[ichan]->chisq(transformation[ichan]);
 
-    if (chisq > 5.0) {
-
-      if (verbose > 2) {
-
+    if (chisq > 5.0)
+    {
+      if (verbose > 2)
+      {
 	cerr << "  BIG DIFFERENCE=" << chisq << endl;
 	cerr << "    OLD\t\t\t\tNEW" << endl;
 
@@ -550,28 +567,26 @@ Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
 	for (unsigned ip=1; ip < nparam; ip++)
 	  cerr << "  " << ip << " " << test.get_Estimate(ip)
 	       << "\t\t" << transformation[ichan]->get_Estimate(ip) << endl;
-
       }
 
       solution[ichan] = 0;
       big_difference ++;
-
     }
-
   }
 
   if (!solution[ichan])
     solution[ichan] = new Calibration::MeanInstrument;
 
   solution[ichan]->integrate( transformation[ichan] );
-  
 }
 
 void Pulsar::PulsarCalibrator::update_solution ()
 {
   unsigned nchan = solution.size ();
-  for (unsigned ichan=0; ichan < nchan; ichan++) {
-    if (solution[ichan]) {
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+  {
+    if (solution[ichan])
+    {
       if (!transformation[ichan])
 	transformation[ichan] = new_transformation (ichan);
       solution[ichan]->update( transformation[ichan] );
@@ -589,4 +604,3 @@ void Pulsar::PulsarCalibrator::set_solve_each (bool flag)
 {
   solve_each = flag;
 }
-
