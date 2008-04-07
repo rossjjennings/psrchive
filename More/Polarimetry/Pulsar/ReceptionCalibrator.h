@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.81 $
-   $Date: 2007/12/24 20:01:15 $
+   $Revision: 1.82 $
+   $Date: 2008/04/07 00:38:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -17,14 +17,8 @@
 #include "Pulsar/SystemCalibrator.h"
 #include "Pulsar/ReflectStokes.h"
 
-// Parameterizations of the instrument and source
-#include "Pulsar/StandardModel.h"
-#include "Pulsar/MeanCoherency.h"
-#include "Pulsar/CoherencyMeasurementSet.h"
-
 #include "Pulsar/StandardData.h"
 
-#include "MEAL/Coherency.h"
 #include "MEAL/VectorRule.h"
 
 namespace Pulsar {
@@ -33,37 +27,6 @@ namespace Pulsar {
   class Integration;
   class ReferenceCalibrator;
   class FluxCalibrator;
-
-  class SourceEstimate {
-
-  public:
-
-    //! Construct with the specified bin from Archive
-    SourceEstimate (unsigned ibin = 0) { phase_bin = ibin; }
-
-    //! Update each source with the mean
-    void update_source();
-
-    //! Model of Stokes parameters as a function of frequency
-    std::vector< Reference::To<MEAL::Coherency> > source;
-
-    //! Best guess of Stokes parameters
-    std::vector< Calibration::MeanCoherency > source_guess;
-
-    //! Validity flags for each Coherency
-    std::vector< bool > valid;
-
-    //! Phase bin from which pulsar polarization is derived
-    unsigned phase_bin;
-
-    //! The index of the source in the model
-    unsigned input_index;
-
-    unsigned get_input_index() const { return input_index; }
-
-  };
-
-
   
   //! Models the variation of Stokes parameters with parallactic angle
   /*! The ReceptionCalibrator implements a technique of single dish
@@ -83,30 +46,6 @@ namespace Pulsar {
 
     //! Descructor
     ~ReceptionCalibrator ();
-
-    //! Set the time variation of absolute gain
-    void set_gain_variation( MEAL::Univariate<MEAL::Scalar>* );
-
-    //! Set the time variation of differential gain
-    void set_diff_gain_variation( MEAL::Univariate<MEAL::Scalar>* );
-
-    //! Set the time variation of differential phase
-    void set_diff_phase_variation( MEAL::Univariate<MEAL::Scalar>* );
-
-    //! Return the reference epoch of the calibration experiment
-    MJD get_epoch () const;
-
-    //! Return Calibrator::Hamaker or Calibrator::Britton
-    Type get_type () const;
-
-    //! Return the Calibrator information
-    Info* get_Info () const;
-
-    //! Return the StandardModel for the specified channel
-    const Calibration::StandardModel* get_model (unsigned ichan) const;
-
-    //! Return the CalibratorStokes Extension
-    CalibratorStokes* get_CalibratorStokes () const;
 
     //! Allow the CAL Stokes V to vary (applies only if FluxCal observed)
     bool measure_cal_V;
@@ -132,14 +71,8 @@ namespace Pulsar {
     //! Get the number of pulsar phase bin input polarization states
     unsigned get_nstate_pulsar () const;
     
-    //! Get the total number of input polarization states (pulsar and cal)
-    unsigned get_nstate () const;
-    
-    //! Get the number of frequency channels
-    unsigned get_nchan () const;
-
-    //! Get the number of data in the given frequency channels
-    unsigned get_ndata (unsigned ichan) const;
+    //! Retern a new plot information interface for the specified state
+    Calibrator::Info* new_info_pulsar (unsigned istate) const;
 
     //! Set the calibrator observations to be loaded during initial_observation
     void set_calibrators (const std::vector<std::string>& filenames);
@@ -147,9 +80,6 @@ namespace Pulsar {
     //! Set the observation that defines the baseline and on-pulse phase bins
     void set_standard_data (const Archive* data);
 
-    //! Add the observation to the set of constraints
-    void add_observation (const Archive* data);
-    
     //! Add the calibrator observation to the set of constraints
     void add_calibrator (const Archive* data);
     
@@ -159,50 +89,20 @@ namespace Pulsar {
     //! Set the first guess to a previous solution
     void set_previous (const Archive* data);
 
-    //! Set the number of channels that may be simultaneously solved
-    void set_nthread (unsigned nthread);
-
     //! Normalize each Stokes vector by the mean on-pulse invariant 
     void set_normalize_by_invariant (bool set = true);
 
     //! Solve equation for each frequency
-    void solve (int only_ichan = -1);
-    
-    //! Get the status of the model
-    bool get_solved () const;
-    
-    //! Pre-calibrate the polarization of the given archive
-    virtual void precalibrate (Archive* archive);
+    void solve ();
     
   protected:
     
-    //! Initialize the PolnCalibration::transformation attribute
-    virtual void calculate_transformation ();
-
-    //! The calibration model as a function of frequency
-    std::vector< Reference::To<Calibration::StandardModel> > model;
-
     //! Standard data interface
     Reference::To<Calibration::StandardData> standard_data;
-
-    //! Time variation of absolute gain
-    Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
-
-    //! Time variation of differential gain
-    Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
-
-    //! Time variation of differential phase
-    Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
 
     //! A previous solution, if availabe
     Reference::To<const PolnCalibrator> previous;
     Reference::To<const CalibratorStokes> previous_cal;
-
-    //! The model specified on construction
-    Calibrator::Type model_type;
-
-    //! The platform transformation "axis"
-    MEAL::Axis< Jones<double> > platform_axis;
 
     //! The unique transformation for each observation
     MEAL::VectorRule<MEAL::Complex2>* unique;
@@ -210,9 +110,6 @@ namespace Pulsar {
     //! The unique transformation "axis"
     MEAL::Axis< unsigned > unique_axis;
 
-    //! Uncalibrated estimate of calibrator polarization
-    SourceEstimate calibrator_estimate;
-    
     //! Uncalibrated estimate of calibrator polarization
     SourceEstimate flux_calibrator_estimate;
 
@@ -224,12 +121,6 @@ namespace Pulsar {
 
     //! The epochs of all loaded calibrators
     std::vector<MJD> calibrator_epochs;
-
-    //! Epoch of the first observation
-    MJD start_epoch;
-
-    //! Epoch of the last observation
-    MJD end_epoch;
 
     //! Minimum and maximum values of parallactic angle (informational)
     float PA_min, PA_max;
@@ -258,9 +149,6 @@ namespace Pulsar {
     //! Load the set of calibrators set by set_calibrators
     void load_calibrators ();
 
-    //! Add the estimate to pulsar attribute
-    void init_estimate (SourceEstimate& estimate);
-
     void valid_mask (const SourceEstimate& src);
 
     //! Add Integration data to the CoherencyMeasurement vector
@@ -274,49 +162,28 @@ namespace Pulsar {
     void add_data (std::vector<Calibration::CoherencyMeasurement>& bins,
 		   SourceEstimate& estimate, unsigned ichan);
 
-    //! Communicates flux and reference calibrator parameters
-    class CalInfo : public Calibrator::Info {
-      
-    public:
-      
-      CalInfo (ReceptionCalibrator* cal);
-      
-      //! Return the number of parameter classes
-      unsigned get_nclass () const;
-      
-      //! Return the name of the specified class
-      std::string get_name (unsigned iclass) const;
+    //! Create the calibrator estimate
+    void create_calibrator_estimate (Signal::Source);
 
-      //! Return the number of parameters in the specified class
-      unsigned get_nparam (unsigned iclass) const;
-      
-      //! Return the estimate of the specified parameter
-      Estimate<float> get_param (unsigned ichan, unsigned iclass,
-				 unsigned iparam) const;
+    void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
+				 const SourceObservation&);
 
-      //! Return the number of channels in the calibrator estimate
-      unsigned get_nchan () const;
+    void integrate_calibrator_data (const Jones< Estimate<double> >&,
+				    const SourceObservation&);
 
-      //! Return the number of channels in the flux calibrator estimate
-      unsigned get_fcal_nchan () const;
+    //! Ensure that the pulsar observation can be added to the data set
+    void match (const Archive*);
 
-    protected:
+    void add_pulsar (Calibration::CoherencyMeasurementSet&,
+		     const Integration*, unsigned ichan);
 
-      //! The ReceptionCalibrator
-      Reference::To<const ReceptionCalibrator> calibrator;
+    //! Prepare the measurement equations for fitting
+    void solve_prepare ();
 
-    };
+    //! Prepare to export the solution
+    void export_prepare () const;
 
-    friend class CalInfo;
-
-  private:
-    //! Flag set after the solve method has been called
-    bool is_fit;
-
-    //! Flag set after the initialize method has been called
-    bool is_initialized;
-
-  };
+   };
 
 }
 

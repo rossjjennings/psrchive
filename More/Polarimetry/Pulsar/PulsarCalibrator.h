@@ -7,16 +7,17 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.27 $
-   $Date: 2008/01/23 03:27:51 $
+   $Revision: 1.28 $
+   $Date: 2008/04/07 00:38:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
 #define __Pulsar_PulsarCalibrator_H
 
-#include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/SystemCalibrator.h"
+#include "Pulsar/PhaseWeight.h"
+
 #include "MEAL/Mean.h"
-#include "BatchQueue.h"
 
 #include <stdio.h>
 
@@ -31,7 +32,7 @@ namespace Pulsar {
   /*! The PulsarCalibrator implements a technique of polarimetric
     calibration using a well-determined source.  This class requires a
     polarimetric standard and another observation of the same source.  */
-  class PulsarCalibrator : public PolnCalibrator {
+  class PulsarCalibrator : public SystemCalibrator {
     
   public:
     
@@ -40,15 +41,6 @@ namespace Pulsar {
 
     //! Destructor
     ~PulsarCalibrator ();
-
-    //! Return the reference epoch of the calibration experiment
-    MJD get_epoch () const;
-
-    //! Return Calibrator::Hamaker or Calibrator::Britton
-    Type get_type () const;
-
-    //! Return the Calibrator information
-    Info* get_Info () const;
 
     //! Set the maximum number of harmonics to include in fit
     void set_maximum_harmonic (unsigned max);
@@ -59,20 +51,11 @@ namespace Pulsar {
     //! Get the number of harmonics in use
     unsigned get_nharmonic () const;
 
-    //! Ignore fluctuations in pulsar flux
-    void set_normalize_gain (bool flag = true);
+    //! Normalize each Stokes vector by the mean on-pulse invariant
+    void set_normalize_by_invariant (bool flag = true);
 
     //! Set the standard to which pulsar profiles will be fit
     void set_standard (const Archive* data);
-
-    //! Add the observation to the set of constraints
-    void add_observation (const Archive* data);
-
-    //! Solve the measurement equation in each channel
-    void solve ();
-
-    //! Set the flag to return the mean solution or the last fit
-    void set_return_mean_solution (bool return_mean = true);
 
     //! Set the flag to solve for each observation (instead of global fit)
     void set_solve_each (bool flag = true);
@@ -83,30 +66,22 @@ namespace Pulsar {
     //! File to which arrival time estimates should be written
     void set_tim_file (FILE* fptr) { tim_file = fptr; }
 
-    //! The model used to fit the specified channel
-    const PolnProfileFit* get_model (unsigned ichan) const;
-
-    //! Set the number of channels that may be simultaneously solved
-    void set_nthread (unsigned nthread);
+    //! The matrix template matching engine used to fit the specified channel
+    const PolnProfileFit* get_mtm (unsigned ichan) const;
 
     //! Set true to detect gimbal lock when rotations are not quaternion
     bool monitor_gimbal_lock;
 
   protected:
     
-    //! Initialize the PolnCalibration::transformation attribute
-    virtual void calculate_transformation ();
-
     //! Return a pointer to a newly constructed/initialized transformation
     MEAL::Complex2* new_transformation (unsigned ichan);
 
     //! The calibration model as a function of frequency
-    std::vector< Reference::To<PolnProfileFit> > model;
+    std::vector< Reference::To<PolnProfileFit> > mtm;
 
     //! The reduced chi-squared as a function of frequency
     std::vector<float> reduced_chisq;
-
-    std::vector< Reference::To<MEAL::Complex2> > solved_transformation;
 
     //! The phase shift estimate as a function of frequency
     std::vector< Estimate<double> > phase_shift;
@@ -115,12 +90,6 @@ namespace Pulsar {
 
     //! The array of transformation Model instances
     std::vector< Reference::To<MeanXform> > solution;
-
-    //! The known instrumental corrections
-    Jones<double> corrections;
-
-    //! The model specified on construction
-    Calibrator::Type model_type;
 
     //! The maximum number of harmonics to include in the fit
     unsigned maximum_harmonic;
@@ -131,26 +100,37 @@ namespace Pulsar {
     //! The maximum harmonic chosen
     unsigned chosen_maximum_harmonic;
 
-    //! When true, calculate_transformation will return the mean solution
-    bool mean_solution;
-
-    //! When true, set the gain to unity after the best fit has been found
-    bool normalize_gain;
+    //! Normalize the Stokes parameters by the invariant interval
+    bool normalize_by_invariant;
 
     //! Solve the measurement equation on each call to add_observation
     bool solve_each;
 
-    //! Epoch of the solution
-    MJD epoch;
+    //! The on-pulse region
+    PhaseWeight on_pulse;
+
+    //! The baseline region
+    PhaseWeight baseline;
+
 
     //! Solve the measurement equation for the given channel
     void solve1 (const Integration* data, unsigned ichan);
 
-    //! Add data to the measurement equation for the given channel
-    void add_observation (const Integration* data, unsigned ichan);
-
     //! Set things up for the model in the given channel
     unsigned setup (const Integration* data, unsigned ichan);
+
+    //! Prepare to export the solution in current state; e.g. for plotting
+    virtual void export_prepare () const;
+
+    //! Ensure that the pulsar observation can be added to the data set
+    virtual void match (const Archive*);
+
+    //! Add data from the specified sub-integration
+    virtual void add_pulsar (const Archive* data, unsigned isub);
+
+    //! Add data from the specified channel
+    virtual void add_pulsar (Calibration::CoherencyMeasurementSet&,
+			     const Integration*, unsigned ichan);
 
   private:
 
@@ -162,9 +142,6 @@ namespace Pulsar {
 
     //! Archive instance that is currently in use
     const Archive* archive;
-
-    //! Controls the number of channels that may be simultaneously solved
-    BatchQueue queue;
 
     //! Build the arrays
     void build (unsigned nchan);

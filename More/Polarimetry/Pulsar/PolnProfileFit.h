@@ -7,14 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.35 $
-   $Date: 2008/01/22 05:36:45 $
+   $Revision: 1.36 $
+   $Date: 2008/04/07 00:38:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
 #define __Pulsar_PolnProfileFit_h
 
+#include "Pulsar/CoherencyMeasurementSet.h"
 #include "Pulsar/PhaseWeight.h"
+
 #include "MEAL/Axis.h"
 #include "Matrix.h"
 #include "Estimate.h"
@@ -23,18 +25,21 @@
 #include "toa.h"
 
 // forward declarations
-namespace MEAL {
+namespace MEAL
+{
   class Complex2;
   class PhaseGradients;
 }
 
-namespace Calibration {
+namespace Calibration
+{
   class ReceptionModel;
   class TemplateUncertainty;
+  class StandardSpectra;
 }
 
-namespace Pulsar {
-
+namespace Pulsar
+{
   class PolnProfile;
   class Profile;
 
@@ -45,7 +50,8 @@ namespace Pulsar {
     two profiles, which may be used to calibrate the instrumental
     response and/or calculate arrival time estimates. */
 
-  class PolnProfileFit : public Reference::Able {
+  class PolnProfileFit : public Reference::Able
+  {
     
   public:
 
@@ -70,11 +76,23 @@ namespace Pulsar {
     //! Get the maximum number of harmonics to include in fit
     unsigned get_maximum_harmonic () const { return maximum_harmonic; }
 
+    //! Get the number of harmonics to be included in fit
+    unsigned get_nharmonic () const { return n_harmonic; }
+
+    //! Set the on-pulse and baseline regions
+    void set_regions (const PhaseWeight& pulse, const PhaseWeight& baseline);
+
     //! Set the standard to which observations will be fit
     void set_standard (const PolnProfile* standard);
 
     //! Get the standard to which observations will be fit
     const PolnProfile* get_standard () const;
+
+    //! Add the specified observation to be fitted to the standard
+    void add_observation (const PolnProfile* observation);
+
+    //! Set the template from which measurment sets will be constructed
+    void set_measurement_set (const Calibration::CoherencyMeasurementSet&);
 
     //! Set the transformation between the standard and observation
     void set_transformation (MEAL::Complex2* xform);
@@ -82,23 +100,14 @@ namespace Pulsar {
     //! Get the transformation between the standard and the observation
     MEAL::Complex2* get_transformation () const;
 
-    //! Set the error propagation policy
-    void set_uncertainty (Calibration::TemplateUncertainty*);
-
-    //! Get the error propagation policy
-    Calibration::TemplateUncertainty* get_uncertainty ();
-
-    //! Set the separate fits mode
-    void set_separate_fits (bool flag = true);
-
     //! Set the debug mode in the ReceptionModel
     void set_fit_debug (bool flag = true);
 
+    //! Normalize each Stokes vector by the mean on-pulse invariant
+    void set_normalize_by_invariant (bool set = true);
+
     //! Fit the specified observation to the standard
     void fit (const PolnProfile* observation);
-
-    //! Add the specified observation to be fitted to the standard
-    void add_observation (const PolnProfile* observation);
 
     //! Fit all observations to the standard
     void solve ();
@@ -106,15 +115,9 @@ namespace Pulsar {
     //! Set the fourier transform plan
     void set_plan (FTransform::Plan*);
 
-    //! Get the last significant harmonic of the last fit observation
-    unsigned get_nharmonic_obs () const { return n_harmonic_obs; }
-
-    //! Get the number of harmonics to be included
-    unsigned get_nharmonic () const { return n_harmonic; }
-
     //! Get the measurement equation used to model the fit
-    Calibration::ReceptionModel* get_model ();
-    const Calibration::ReceptionModel* get_model () const;
+    Calibration::ReceptionModel* get_equation ();
+    const Calibration::ReceptionModel* get_equation () const;
 
     //! Get the phase offset between the standard and the observation
     Estimate<double> get_phase () const;
@@ -130,23 +133,6 @@ namespace Pulsar {
 			const MJD& mjd, double period,
 			const std::string& nsite);
 
-    //! Return the PSD of the Fourier Transform of the PolnProfile
-    PolnProfile* fourier_psd (const PolnProfile* fourier) const;
-    
-    //! Return the variance of the fluctuation power
-    double get_variance (const Profile* fourier) const;
-
-    //! Return the covariance of two power spectral densities
-    std::complex<double> get_covariance (const Profile*, const Profile*) const;
-
-    //! Return the variance in each of the four Stokes parameters
-    Stokes<float> get_variance (const PolnProfile* fourier) const;
-
-    Matrix<4,4,double> get_covariance (const PolnProfile* fourier) const;
-
-    //! Get the measured variances of the template Stokes parameters
-    Stokes<double> get_standard_variance () const { return standard_variance; }
-
     //! Return the phase shift based on the cross correlation function
     float ccf_max_phase (const Profile* std, const Profile* obs) const;
 
@@ -155,6 +141,12 @@ namespace Pulsar {
 
     //! Set true when only the total intensity should be used
     bool emulate_scalar;
+
+    //! Manage the equation transformation
+    bool manage_equation_transformation;
+
+    //! Get the statistical interface to the data
+    Calibration::StandardSpectra* get_spectra ();
 
   protected:
 
@@ -167,30 +159,25 @@ namespace Pulsar {
     //! The number of harmonics in the fit
     unsigned n_harmonic;
 
-    //! The last significant harmonic of the last fit observation
-    unsigned n_harmonic_obs;
-
     //! The standard to which observations will be fit
     Reference::To<const PolnProfile> standard;
 
-    //! The fourier transform of the standard
+    //! The Fourier transform of the standard
     Reference::To<const PolnProfile> standard_fourier;
-
-    //! The fourier transform plan (useful in multi-threaded applications)
-    FTransform::Plan* plan;
-
-    //! The mask used to calculate the noise power
-    PhaseWeight noise_mask;
 
     //! The transformation between the standard and observation
     Reference::To<MEAL::Complex2> transformation;
 
+    //! Normalization by total invariant interval with error propagation
+    Reference::To<Calibration::StandardSpectra> standard_data;
+
     //! The measurement equation used to model the fit
-    Reference::To<Calibration::ReceptionModel> model;
+    Reference::To<Calibration::ReceptionModel> equation;
 
     //! Least-squares normalization includes variable template contribution
-    Reference::To<Calibration::TemplateUncertainty> uncertainty;
+    std::vector< Reference::To<Calibration::TemplateUncertainty> > uncertainty;
 
+    //! The phase gradient model for each observation added
     Reference::To<MEAL::PhaseGradients> phases;
 
     //! The phase axis
@@ -199,17 +186,11 @@ namespace Pulsar {
     //! The gradient index axis
     MEAL::Axis<unsigned> index_axis;
 
-    //! The variance of the standard
-    Stokes<float> standard_variance;
-
-    //! The total determinant of the standard
-    double standard_det;
+    //! The template from which measurement sets are constructed
+    Calibration::CoherencyMeasurementSet measurement_set;
 
     //! The reduced chi-squared after fitting
     double reduced_chisq;
-
-    //! When set, perform separate fits for transformation and phase shift
-    bool separate_fits;
 
     //! The fit debug flag
     bool fit_debug;
@@ -217,11 +198,12 @@ namespace Pulsar {
     //! Construtor helper
     void init ();
 
-    //! Set noise mask based on power spectral density of standard
-    void set_noise_mask ();
+    Stokes< std::complex<double> > standard_variance;
 
-    //! Choose the maximum_harmonic for the given standard
-    void choose_max_harmonic (const PolnProfile* standard_psd);
+  private:
+
+    //! True when the regions have been set
+    bool regions_set;
 
   };
 

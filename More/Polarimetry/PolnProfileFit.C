@@ -6,16 +6,13 @@
  ***************************************************************************/
 
 #include "Pulsar/PolnProfileFit.h"
+#include "Pulsar/StandardSpectra.h"
+
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/Fourier.h"
-
-#include "Pulsar/ExponentialBaseline.h"
 
 #include "Pulsar/ReceptionModel.h"
-#include "Pulsar/CoherencyMeasurementSet.h"
 #include "Pulsar/TotalCovariance.h"
-#include "Pulsar/LastSignificant.h"
 
 #include "MEAL/PhaseGradients.h"
 #include "MEAL/Complex2Math.h"
@@ -30,31 +27,6 @@
 #include <memory>
 
 using namespace std;
-
-unsigned get_last_significant (const Pulsar::PolnProfile* psd,
-			       const Stokes<double>& var)
-{
-  unsigned n_harmonic = psd->get_nbin();
-  unsigned npol = 4;
-
-  vector<float> S (n_harmonic, 0);
-  double S_variance = 0;
-
-  for (unsigned ipol=1; ipol<npol; ipol++)  {
-    const float* amps = psd->get_amps(ipol);
-    for (unsigned ibin=1; ibin<n_harmonic; ibin++)
-      S[ibin] += amps[ibin];
-    S_variance += var[ipol];
-  }
-
-  Pulsar::LastSignificant ls;
-  // find for the total intensity
-  ls.find (psd->get_Profile(0), var[0] * 2.0);
-  // find for the polarized intensity
-  ls.find (S, S_variance * 2.0);
-
-  return ls.get();
-}
 
 bool Pulsar::PolnProfileFit::verbose = false;
 
@@ -83,14 +55,16 @@ Pulsar::PolnProfileFit::~PolnProfileFit ()
 {
 }
 
+void Pulsar::PolnProfileFit::set_normalize_by_invariant (bool set)
+{
+  standard_data->set_normalize (set);
+}
 
 void Pulsar::PolnProfileFit::init ()
 {
-  phases = new MEAL::PhaseGradients;
+  standard_data = new Calibration::StandardSpectra;
 
-  // start with one gradient
-  // (optimization that saves remapping after adding to model)
-  phases -> add_gradient ();
+  phases = new MEAL::PhaseGradients;
 
   // connect to the phase axis via the Univariate<> interface
   phases -> set_argument (0, &phase_axis);
@@ -98,21 +72,18 @@ void Pulsar::PolnProfileFit::init ()
   // connect to the index axis via the standard Callback interface
   index_axis.signal.connect (phases, &MEAL::PhaseGradients::set_igradient);
 
-  uncertainty = new Calibration::TemplateUncertainty;
-
   maximum_harmonic = n_harmonic = 0;
 
+  regions_set = false;
   choose_maximum_harmonic = false;
-  emulate_scalar = false;
-  separate_fits = false;
+  manage_equation_transformation = true;
   fit_debug = false;
-
-  plan = 0;
 }
 
 void Pulsar::PolnProfileFit::set_plan (FTransform::Plan* p)
 {
-  plan = p;
+  throw Error (InvalidState, "Pulsar::PolnProfileFit::set_plan",
+	       "not implemented");
 }
 
 void Pulsar::PolnProfileFit::set_maximum_harmonic (unsigned max)
@@ -126,6 +97,28 @@ const Pulsar::PolnProfile* Pulsar::PolnProfileFit::get_standard () const
   return standard; 
 }
 
+//! separate the values and the variances
+void valvar( const Stokes< complex< Estimate<double> > >& data,
+	     Stokes< complex<double> >& val,
+	     Stokes< complex<double> >& var )
+{
+  for (unsigned ipol=0; ipol < 4; ipol++)
+  {
+    val[ipol] = complex<double>( data[ipol].real().get_value(),
+				 data[ipol].imag().get_value() );
+
+    var[ipol] = complex<double>( data[ipol].real().get_variance(),
+				 data[ipol].imag().get_variance() );
+  }
+}
+
+void Pulsar::PolnProfileFit::set_regions (const PhaseWeight& on,
+					  const PhaseWeight& off)
+{
+  get_spectra()->get_stats()->set_regions ( on, off );
+  regions_set = true;
+}
+
 //! Set the standard to which observations will be fit
 void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 {
@@ -133,78 +126,72 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 
   // until greater resize functionality is added to ReceptionModel,
   // best to just delete it and start fresh
-  model = 0;
+  equation = 0;
   
   if (!standard)
     return;
 
-  Reference::To<PolnProfile> fourier = fourier_transform (standard, plan);
-  fourier->convert_state (Signal::Stokes);
-  // Drop the Nyquist bin
-  fourier->resize( standard->get_nbin() );
+  if (regions_set)
+    standard_data->set_profile (standard);
+  else
+    standard_data->select_profile (standard);
 
-  standard_fourier = fourier;
-  if (verbose)
-    cerr << "Pulsar::PolnProfileFit::set_standard nbin = " 
-         << fourier->get_nbin() << endl;
-
-  set_noise_mask ();
+  standard_fourier = standard_data->get_fourier();
 
   // number of complex phase bins in Fourier domain
   unsigned std_harmonic = standard->get_nbin() / 2;
 
-  if (choose_maximum_harmonic) {
+  if (choose_maximum_harmonic)
+  {
+    n_harmonic = standard_data->get_last_harmonic ();
     if (verbose)
       cerr << "Pulsar::PolnProfileFit::set_standard chose "
 	   << n_harmonic << " harmonics" << endl;
   }
-  else if (maximum_harmonic && maximum_harmonic < std_harmonic) {
+  else if (maximum_harmonic && maximum_harmonic < std_harmonic)
+  {
+    n_harmonic = maximum_harmonic;
     if (verbose)
       cerr << "Pulsar::PolnProfileFit::set_standard using " << maximum_harmonic
 	   << " out of " << std_harmonic << " harmonics" << endl;
-    n_harmonic = maximum_harmonic;
   }
-  else {
+  else
+  {
+    n_harmonic = std_harmonic;
     if (verbose)
       cerr << "Pulsar::PolnProfileFit::set_standard using all "
 	   << std_harmonic << " harmonics" << endl;
-    n_harmonic = std_harmonic;
   }
 
+  equation = new Calibration::ReceptionModel;
+  equation->set_fit_debug( fit_debug );
 
-  model = new Calibration::ReceptionModel;
-  model->set_fit_debug( fit_debug );
+  if (manage_equation_transformation)
+  {
+    // initialize the model transformation
+    equation->add_transformation ();
+    if (transformation)
+      equation->set_transformation (transformation);
+  }
 
-  // initialize the model transformation
-  model->add_transformation ();
-  if (transformation)
-    model->set_transformation (transformation);
-
-  unsigned npol = 4;
-  if (emulate_scalar)
-    npol = 1;
-
-  standard_det = 0;
+  uncertainty.resize (n_harmonic - 1);
 
   // initialize the model input states
-  for (unsigned ibin=1; ibin<n_harmonic; ibin++) {
 
-    Stokes< complex<double> > stokes;
-    Stokes<double> re;
-    Stokes<double> im;
+  for (unsigned ibin=1; ibin<n_harmonic; ibin++)
+  {
+    Stokes< complex<double> > standard_value;
+    Stokes< complex<double> > standard_variance;
 
-    for (unsigned ipol=0; ipol<npol; ipol++) {
-      const float* amps = standard_fourier->get_amps(ipol) + ibin*2;
-      stokes[ipol] = complex<double>(amps[0], amps[1]);
-      re[ipol] = amps[0];
-      im[ipol] = amps[1];
-    }
-
-    standard_det += re.invariant() + im.invariant();
+    valvar( standard_data->get_stokes(ibin),
+	    standard_value, standard_variance );
 
     // each complex phase bin of the standard is treated as a known constant
     MEAL::Complex2Constant* jones;
-    jones = new MEAL::Complex2Constant( convert(stokes) );
+    jones = new MEAL::Complex2Constant( convert(standard_value) );
+
+    uncertainty[ibin-1] = new Calibration::TemplateUncertainty;
+    uncertainty[ibin-1] -> set_template_variance (standard_variance);
 
 #ifdef _DEBUG
     cerr << "Pulsar::PolnProfileFit::set_standard ibin=" << ibin 
@@ -215,31 +202,21 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
     Reference::To<MEAL::Complex2> input = jones;
     Reference::To<MEAL::Complex2> ph = phases.get();
 
-    model->add_input( input * ph );
-
+    equation->add_input( input * ph );
   }
-
-  if (verbose)
-    cerr << "Pulsar::PolnProfileFit::set_standard det=" << standard_det <<endl;
-
 }
 
-//! Choose the maximum_harmonic for the given standard
-void Pulsar::PolnProfileFit::choose_max_harmonic (const PolnProfile* psd)
-{
-  n_harmonic = get_last_significant (psd, standard_variance);
-}
 
 //! Set the transformation between the standard and observation
 void Pulsar::PolnProfileFit::set_transformation (MEAL::Complex2* xform)
 {
   transformation = xform;
 
-  if (uncertainty)
-    uncertainty->set_transformation (xform);
+  for (unsigned i=0; i<uncertainty.size(); i++)
+    uncertainty[i]->set_transformation (xform);
 
-  if (model)
-    model->set_transformation (xform);
+  if (equation && manage_equation_transformation)
+    equation->set_transformation (xform);
 }
 
 MEAL::Complex2* Pulsar::PolnProfileFit::get_transformation () const
@@ -247,32 +224,11 @@ MEAL::Complex2* Pulsar::PolnProfileFit::get_transformation () const
   return transformation;
 }
 
-//! Set the error propagation policy
-void Pulsar::PolnProfileFit::set_uncertainty
-(Calibration::TemplateUncertainty* policy)
-{
-  uncertainty = policy;
-
-  if (uncertainty && transformation)
-    uncertainty->set_transformation (transformation);
-}
-
-//! Get the error propagation policy
-Calibration::TemplateUncertainty* Pulsar::PolnProfileFit::get_uncertainty ()
-{
-  return uncertainty;
-}
-
-void Pulsar::PolnProfileFit::set_separate_fits (bool flag)
-{
-  separate_fits = flag;
-}
-
 void Pulsar::PolnProfileFit::set_fit_debug (bool flag)
 {
   fit_debug = flag;
-  if (model)
-    model->set_fit_debug(flag);
+  if (equation)
+    equation->set_fit_debug(flag);
 }
 
 void Pulsar::PolnProfileFit::set_phase_lock (bool locked)
@@ -284,11 +240,11 @@ void Pulsar::PolnProfileFit::set_phase_lock (bool locked)
 //! Fit the specified observation to the standard
 void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 {
-  if (!model)
-    throw Error (InvalidState, "Pulsar::PolnProfileFit::fit", "no model");
+  if (!equation)
+    throw Error (InvalidState, "Pulsar::PolnProfileFit::fit", "no equation");
 
   // delete any previously set data
-  model->delete_data ();
+  equation->delete_data ();
 
   // (re)set the number of phases to one
   phases->resize (1);
@@ -297,10 +253,21 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   solve ();
 }
- catch (Error& error)
-   { throw error += "Pulsar::PolnProfile::fit"; }
+catch (Error& error)
+{
+  throw error += "Pulsar::PolnProfile::fit";
+}
 
-void Pulsar::PolnProfileFit::add_observation (const PolnProfile* observation)
+void Pulsar::PolnProfileFit::set_measurement_set
+( const Calibration::CoherencyMeasurementSet& the_template)
+{
+  measurement_set = the_template;
+  if (verbose)
+    cerr << "Pulsar::PolnProfileFit::set_measurement_set path index="
+         << measurement_set.get_transformation_index() << endl;
+}
+
+void Pulsar::PolnProfileFit::add_observation( const PolnProfile* observation )
 try
 {
   if (!standard)
@@ -325,19 +292,16 @@ try
 		 "observation n_harmonic=%d < n_harmonic=%d",
 		 obs_harmonic, n_harmonic);
 
-  Reference::To<PolnProfile> fourier = fourier_transform (observation, plan);
+  standard_data->set_profile( observation );
 
-  fourier->convert_state (Signal::Stokes);
-
-  // drop the Nyquist bin
-  fourier->resize( observation->get_nbin() );
+  Reference::To<const PolnProfile> fourier = standard_data->get_fourier();
 
   float phase_guess = ccf_max_phase (standard_fourier->get_Profile(0),
 				     fourier->get_Profile(0));
 
-  // if the model already contains observed data, add another phase gradient
-  if (model->get_ndata())
-    phases->add_gradient();
+  if (verbose)
+    cerr << "Pulsar::PolnProfileFit::add_observation add gradient" << endl;
+  phases->add_gradient();
 
   unsigned index = phases->get_igradient();
 
@@ -354,85 +318,36 @@ try
   if (nbin_std != nbin_obs)
     phases->set_offset (index, 0.5/nbin_std - 0.5/nbin_obs);
 
-  uncertainty->set_template_variance (standard_variance);
-
-  Calibration::TotalCovariance* total;
-  total = dynamic_cast<Calibration::TotalCovariance*> (uncertainty.get());
-
-  if (total)
-    total->set_covariance (get_covariance( fourier ));
-  else 
-  {
-    Stokes<double> var = get_variance( fourier );
-    uncertainty->set_variance (var);
-
-    // calculate the power spectral density of the input
-    Reference::To<PolnProfile> psd = fourier_psd (fourier);
-    n_harmonic_obs = get_last_significant (psd, var);
-    
-    if (verbose)
-      cerr << "Pulsar::PolnProfileFit::add_observation last harmonic = "
-	   << n_harmonic_obs << endl;
-  }
-
-
-
-  unsigned npol = 4;
-  if (emulate_scalar)
-    npol = 1;
-
-  double observation_det = 0;
-
   // initialize the measurement sets
-  for (unsigned ibin=1; ibin<n_harmonic; ibin++) {
+  for (unsigned ibin=1; ibin<n_harmonic; ibin++)
+  {
 
-    Stokes< complex<double> > stokes;
-    Stokes<double> re;
-    Stokes<double> im;
+    Stokes< complex<double> > val;
+    Stokes< complex<double> > var;
+    valvar( standard_data->get_stokes(ibin), val, var );
 
-    for (unsigned ipol=0; ipol<npol; ipol++) {
-      const float* amps = fourier->get_amps(ipol) + ibin*2;
-      re[ipol] = amps[0];
-      im[ipol] = amps[1];
-      stokes[ipol] = complex<double>(amps[0], amps[1]);
-    }
-
-    observation_det += re.invariant() + im.invariant();
-
-#ifdef _DEBUG
-    cerr << "Pulsar::PolnProfileFit::add_observation ibin=" << ibin 
-	 << "\n  " << stokes << endl;
-#endif
+    Calibration::TemplateUncertainty* error = uncertainty[ibin-1]->clone();
+    error -> set_variance (var);
 
     Calibration::CoherencyMeasurement measurement (ibin-1);
-    measurement.set_stokes (stokes, uncertainty);
+    measurement.set_stokes (val, error);
 
     double phase_shift = -2.0 * M_PI * double(ibin);
 
-    Calibration::CoherencyMeasurementSet measurements;
+    Calibration::CoherencyMeasurementSet measurements (measurement_set);
+
     measurements.add_coordinate ( phase_axis.new_Value(phase_shift) );
     measurements.add_coordinate ( index_axis.new_Value(index) );
 
     measurements.push_back ( measurement );
  
-    model->add_data( measurements );
-
+    equation->add_data( measurements );
   }
-
-  double Gain = 1.0;
-
-  // with optimized template matching, the determinant could be anything
-  if (observation_det > 0)
-    Gain = sqrt(observation_det / standard_det);
-
-  // WARNING: this next line assumes that gain is the first free parameter
-  // of the Complex2 function passed in set_transformation
-  transformation->set_param (0, sqrt(Gain));
 
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::PolnProfile::add_observation";
+  throw error += "Pulsar::PolnProfileFit::add_observation";
 }
 
 
@@ -442,45 +357,38 @@ void Pulsar::PolnProfileFit::solve () try
 
   clock.start();
 
-  if (separate_fits) {
-
-    // first fit only for the transformation
-    set_phase_lock (true);
-    for (unsigned i=0; i<transformation->get_nparam(); i++)
-      transformation->set_infit (i, true);
-
-    model->solve ();
-
-    // then fit only for the phase
-    set_phase_lock (false);
-    for (unsigned i=0; i<transformation->get_nparam(); i++)
-      transformation->set_infit (i, false);
-
-  }
-
-  model->solve ();
+  equation->solve ();
 
   clock.stop();
 
   if (verbose)
     cerr << "Pulsar::PolnProfileFit::solve solved in " << clock << "."
-      " chisq=" << model->get_fit_chisq() / model->get_fit_nfree() << endl;
-
+      " chisq=" << equation->get_fit_chisq() / equation->get_fit_nfree()
+	 << endl;
 }
 catch (Error& error) {
   throw error += "Pulsar::PolnProfileFit::solve";
 }
 
 //! Get the measurement equation used to model the fit
-Calibration::ReceptionModel* Pulsar::PolnProfileFit::get_model ()
+Calibration::ReceptionModel* 
+Pulsar::PolnProfileFit::get_equation ()
 {
-  return model;
+  return equation;
 }
 
 //! Get the measurement equation used to model the fit
-const Calibration::ReceptionModel* Pulsar::PolnProfileFit::get_model () const
+const Calibration::ReceptionModel* 
+Pulsar::PolnProfileFit::get_equation () const
 {
-  return model;
+  return equation;
+}
+
+//! Get the statistical interface to the data
+Calibration::StandardSpectra*
+Pulsar::PolnProfileFit::get_spectra ()
+{
+  return standard_data;
 }
 
 //! Get the phase offset between the observation and the standard
@@ -488,7 +396,7 @@ Estimate<double> Pulsar::PolnProfileFit::get_phase () const
 {
   if (phases->get_ngradient() == 0)
     throw Error (InvalidState, "Pulsar::PolnProfileFit::get_phase",
-		 "no phases have been added to the model");
+		 "no phases have been added to the equation");
 
   return phases -> get_Estimate (0);
 }
@@ -498,7 +406,7 @@ void Pulsar::PolnProfileFit::set_phase (const Estimate<double>& value)
 {
   if (phases->get_ngradient() == 0)
     throw Error (InvalidState, "Pulsar::PolnProfileFit::get_phase",
-		 "no phases have been added to the model");
+		 "no phases have been added to the equation");
 
   phases->set_Estimate (0, value);
 }
@@ -533,169 +441,6 @@ catch (Error& error) {
   throw error += "Pulsar::PolnProfileFit::get_toa";
 }
 
-Pulsar::PolnProfile* 
-Pulsar::PolnProfileFit::fourier_psd (const PolnProfile* fourier) const try
-{
-  Reference::To<PolnProfile> psd = fourier->clone();
-  detect (psd);
-  return psd.release();
-}
-catch (Error& error) {
-  throw error += "Pulsar::PolnProfileFit::fourier_psd";
-}
-
-void Pulsar::PolnProfileFit::set_noise_mask () try
-{
-  // calculate the power spectral density of the input
-  Reference::To<PolnProfile> input_psd;
-  input_psd = fourier_psd (standard_fourier);
-
-  // initialize the mask
-  PhaseWeight mask;
-  ExponentialBaseline finder;
-
-  unsigned npol = 4;
-
-  for (unsigned ipol=0; ipol < npol; ipol++) {
-
-    finder.set_Profile( input_psd->get_Profile(ipol) );
-    finder.get_weight( &mask );
-
-    if (verbose)
-      cerr << "Pulsar::PolnProfileFit::set_noise_mask ipol=" << ipol
-	   << " mask count=" << mask.get_weight_sum() << endl;
-
-    if (ipol == 0)
-      noise_mask = mask;
-    else
-      noise_mask *= mask;
-
-  }
-
-  standard_variance = get_variance (standard_fourier);
-  uncertainty->set_template_variance (standard_variance);
-
-  // while we have the PSD ...
-  if (choose_maximum_harmonic)
-    choose_max_harmonic (input_psd);
-
-}
-catch (Error& error) {
-  throw error += "Pulsar::PolnProfileFit::set_noise_mask";
-}
-
-Stokes<float> 
-Pulsar::PolnProfileFit::get_variance (const PolnProfile* input) const try
-{
-  Stokes<float> variance;
-
-  unsigned npol = 4;
-
-  for (unsigned ipol=0; ipol<npol; ipol++) {
-
-    // The variance of the spectrum (with zero mean) is the mean of the PSD
-    variance[ipol] = get_variance ( input->get_Profile(ipol) );
-
-    if (verbose)
-      cerr << "Pulsar::PolnProfileFit::get_variance ipol=" << ipol 
-	   << " sigma=" << sqrt(variance[ipol]) << endl;
-  }
-
-  return variance;
-}
-catch (Error& error) {
-  throw error += "Pulsar::PolnProfileFit::get_variance";
-}
-
-double Pulsar::PolnProfileFit::get_variance (const Profile* input) const try
-{
-  unsigned nbin = input->get_nbin()/2;
-  unsigned mbin = std::min(nbin, noise_mask.get_nbin());
-
-  if (verbose)
-    cerr << "Pulsar::PolnProfileFit::get_variance noise mask uses "
-	 << noise_mask.get_weight_sum() << " out of " << noise_mask.get_nbin()
-	 << " harmonics" << endl;
-
-  const float* amps = input->get_amps();
-
-  unsigned count = 0;
-  double total = 0;
-
-  for (unsigned ibin = 0; ibin < nbin; ibin++)
-    if (ibin > mbin || noise_mask[ibin]) {
-      float re = amps[ibin*2];
-      float im = amps[ibin*2+1];
-      total += re*re + im*im;
-      count += 2;
-    }
-
-
-  // The variance of the spectrum (with zero mean) is the mean of the PSD
-  return total / count;
-
-}
-catch (Error& error) {
-  throw error += "Pulsar::PolnProfileFit::get_variance";
-}
-
-Matrix<4,4,double> 
-Pulsar::PolnProfileFit::get_covariance (const PolnProfile* input) const try
-{
-  Matrix<4,4,double> covariance;
-
-  unsigned npol = 4;
-
-  for (unsigned ipol=0; ipol<npol; ipol++)
-    for (unsigned jpol=ipol; jpol < npol; jpol++)
-      covariance[ipol][jpol] = covariance[jpol][ipol] =
-	get_covariance( input->get_Profile(ipol),
-			input->get_Profile(jpol) ).real() / 2.0;
-
-  //                                                      ^^^^^
-  // divide by two because re and im are treated as unique measurements
-
-  if (verbose)
-    cerr << "Pulsar::PolnProfileFit::get_covariance\n" << covariance << endl;
-
-  return covariance;
-}
-catch (Error& error) {
-  throw error += "Pulsar::PolnProfileFit::get_covariance";
-}
-
-complex<double> Pulsar::PolnProfileFit::get_covariance (const Profile* p1,
-							const Profile* p2)
-  const try
-{
-  unsigned nbin = p1->get_nbin()/2;
-  unsigned mbin = std::min(nbin, noise_mask.get_nbin());
-
-  if (verbose)
-    cerr << "Pulsar::PolnProfileFit::get_variance noise mask uses "
-	 << noise_mask.get_weight_sum() << " out of " << noise_mask.get_nbin()
-	 << " harmonics" << endl;
-
-  const complex<float>* amps1 = (complex<float>*) p1->get_amps();
-  const complex<float>* amps2 = (complex<float>*) p2->get_amps();
-
-  unsigned count = 0;
-  complex<double> total = 0;
-
-  for (unsigned ibin = 0; ibin < nbin; ibin++)
-    if (ibin > mbin || noise_mask[ibin]) {
-      total += amps1[ibin] * conj(amps2[ibin]);
-      count ++;
-    }
-
-
-  // The variance of the spectrum (with zero mean) is the mean of the PSD
-  return total / complex<double>(count);
-}
-catch (Error& error) {
-  throw error += "Pulsar::PolnProfileFit::get_covariance";
-}
-
 float Pulsar::PolnProfileFit::ccf_max_phase (const Profile* std,
 					     const Profile* obs) const try
 {
@@ -709,8 +454,8 @@ float Pulsar::PolnProfileFit::ccf_max_phase (const Profile* std,
 
   // don't care about DC term
   cpsd[0] = cpsd[1] = 0.0;
-  for (ibin=2; ibin < nbin; ibin+=2) {
-
+  for (ibin=2; ibin < nbin; ibin+=2)
+  {
     complex<float> c_std (std->get_amps()[ibin], std->get_amps()[ibin+1]);
     complex<float> c_obs (obs->get_amps()[ibin], obs->get_amps()[ibin+1]);
 
@@ -718,7 +463,6 @@ float Pulsar::PolnProfileFit::ccf_max_phase (const Profile* std,
 
     cpsd[ibin]   = c_psd.real();
     cpsd[ibin+1] = c_psd.imag();
-
   }
 
   // calculate the (complex) cross correlation function
@@ -731,9 +475,11 @@ float Pulsar::PolnProfileFit::ccf_max_phase (const Profile* std,
   // find the maximum modulus
   float max = 0;
   float imax = 0;
-  for (ibin=0; ibin < nbin; ibin++) {
+  for (ibin=0; ibin < nbin; ibin++)
+  {
     float mod = ccf[2*ibin]*ccf[2*ibin] + ccf[2*ibin+1]*ccf[2*ibin+1];
-    if (mod > max) {
+    if (mod > max)
+    {
       max = mod;
       imax = ibin;
     }

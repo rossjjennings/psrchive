@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.16 $
-   $Date: 2007/12/06 19:23:29 $
+   $Revision: 1.17 $
+   $Date: 2008/04/07 00:38:07 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -20,32 +20,27 @@
 #include "Pulsar/MeanPolar.h"
 #include "Pulsar/MeanSingleAxis.h"
 #include "Pulsar/Instrument.h"
-#include "Pulsar/Parallactic.h"
 #include "Pulsar/ConvertMJD.h"
 
 #include "MEAL/Polynomial.h"
 #include "MEAL/Polar.h"
 #include "MEAL/Axis.h"
 
-namespace Pulsar {
-  class ReceptionCalibrator;
-}
-
-namespace Calibration {
-
+namespace Calibration
+{
   //! Stores the various elements related to the calibration model
-  class StandardModel : public Reference::Able {
-
+  class StandardModel : public Reference::Able
+  {
   public:
-    
+
+    //! Verbosity flag
+    static bool verbose;
+
     //! Default constructor
-    StandardModel (bool britton = true);
+    StandardModel (bool phenomenological = true);
 
     //! Set the transformation from the feed to the receptor basis
     void set_feed_transformation (MEAL::Complex2* xform);
-
-    //! Set the transformation from the platform to the feed basis
-    void set_platform_transformation (MEAL::Complex2* xform);
 
     //! Set true when the pulsar Stokes parameters have been normalized
     void set_constant_pulsar_gain (bool = true);
@@ -110,6 +105,9 @@ namespace Calibration {
     //! Get the measurement equation solver
     Calibration::ReceptionModel* get_equation ();
 
+    //! Set the measurement equation solver
+    void set_equation (Calibration::ReceptionModel*);
+
     //! Copy the parameters for the signal path experienced by the pulsar
     void copy_transformation (const MEAL::Complex2*);
 
@@ -125,11 +123,11 @@ namespace Calibration {
     //! Get the covariance vector at the specified epoch
     void get_covariance( std::vector<double>& covar, const MJD& epoch );
 
-    //! The parallactic angle rotation
-    Calibration::Parallactic parallactic;
-
     //! The time axis
     MEAL::Axis<MJD> time;
+
+    //! The known transformations from the sky to the receptors
+    MEAL::Axis< Jones<double> > source_to_feed;
 
     //! validity flag
     bool valid;
@@ -172,6 +170,7 @@ namespace Calibration {
     Reference::To< MEAL::Scalar > diff_phase;
 
     void integrate_parameter (MEAL::Scalar* function, double value);
+
     void update_parameter (MEAL::Scalar* function, double value);
 
     void compute_covariance( unsigned index, 
@@ -219,12 +218,12 @@ namespace Calibration {
     //! The feed transformation
     Reference::To<MEAL::Complex2> feed_transformation;
 
-    //! The platform transformation
-    Reference::To<MEAL::Complex2> platform_transformation;
-
     MJD min_epoch, max_epoch;
 
   private:
+
+    //! Use the phenomenological parameterization of the receiver
+    bool phenomenological;
 
     //! built flag
     bool built;
