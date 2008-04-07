@@ -58,7 +58,7 @@ Calibration::StandardData::get_stokes (unsigned ibin)
   if (normalize)
   {
     normalize->normalize (result, total_determinant);
-    result *= sqrt( stats->get_stats()->get_on_pulse_nbin() );
+    result *= sqrt( (double) stats->get_stats()->get_on_pulse_nbin() );
   }
 
 #ifdef _DEBUG

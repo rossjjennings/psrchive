@@ -85,8 +85,8 @@ Calibration::StandardSpectra::get_stokes (unsigned ibin)
 
     unsigned nbin = stats->get_real()->get_stats()->get_on_pulse_nbin();
 
-    re *= sqrt( nbin );
-    im *= sqrt( nbin );
+    re *= sqrt( (double) nbin );
+    im *= sqrt( (double) nbin );
   }
 
   std::complex< Estimate<double> > zero;
