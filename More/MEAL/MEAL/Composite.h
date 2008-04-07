@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Composite.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/11/09 04:48:09 $
+   $Revision: 1.10 $
+   $Date: 2008/04/07 00:38:12 $
    $Author: straten $ */
 
 #ifndef __Composite_H
@@ -77,27 +77,27 @@ namespace MEAL {
 
     //! Convenience interface to map (Projection*)
     template <class Type>
-    void map (Project<Type>& model, bool signal_changes = true)
+    void map (Project<Type>& model)
     {
       if (Function::very_verbose)
 	std::cerr << class_name() + "map (Project<Type>)" << std::endl;
-      map (model.get_map(), signal_changes);
+      map (model.get_map());
     }
 
     //! Convenience interface to unmap (Projection*)
     template <class Type>
-    void unmap (Project<Type>& model, bool signal_changes = true)
+    void unmap (Project<Type>& model)
     {
       if (Function::very_verbose)
 	std::cerr << class_name() + "unmap (Project<Type>)" << std::endl;
-      unmap (model.get_map(), signal_changes);
+      unmap (model.get_map());
     }
 
     //! Map the Projection into the composite mappting
-    void map (Projection* model, bool signal_changes = true);
+    void map (Projection* model);
 
     //! Remove the Projection from the composite mapping
-    void unmap (Projection* model, bool signal_changes = true);
+    void unmap (Projection* model);
 
     //! Get the mapping for the given Function
     void get_imap (const Function* model,
@@ -131,6 +131,12 @@ namespace MEAL {
     //! Optimization: keep track of the base index of the current model
     mutable unsigned current_index;
 
+    //! Flag set when remap is needed
+    mutable bool remap_needed;
+
+    //! Flag set to temporarily disable callbacks
+    mutable bool disable_callbacks;
+
     //! Method called when a Function attribute has changed
     void attribute_changed (Function::Attribute attribute);
 
@@ -141,7 +147,13 @@ namespace MEAL {
     void remove_component (Function*);
 
     //! Remap the parameter indeces
-    void remap (bool signal_changes = true);
+    void remap ();
+
+    //! Set flag to remap
+    void remap_later ();
+
+    //! Send callbacks when changes are made
+    void callbacks ();
 
     //! Recount the number of parameters
     void recount () const;

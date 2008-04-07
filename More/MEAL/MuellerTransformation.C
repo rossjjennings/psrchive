@@ -32,11 +32,12 @@ void MEAL::MuellerTransformation::set_transformation (Real4* xform)
   if (!xform)
     return;
 
-  if (transformation) {
+  if (transformation)
+  {
     if (verbose)
       cerr << "MEAL::MuellerTransformation::set_transformation"
 	" unmap old transformation" << endl;
-    composite.unmap (transformation, false);
+    composite.unmap (transformation);
   }
 
   transformation = xform;
@@ -60,10 +61,11 @@ void MEAL::MuellerTransformation::set_input (Complex2* xform)
   if (!xform)
     return;
 
-  if (input) {
+  if (input)
+  {
     if (verbose)
       cerr << "MEAL::MuellerTransformation::set_input unmap old input" << endl;
-    composite.unmap (input, false);
+    composite.unmap (input);
   }
 
   input = xform;

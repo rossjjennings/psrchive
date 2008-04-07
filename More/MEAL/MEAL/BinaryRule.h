@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/BinaryRule.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.8 $
+   $Date: 2008/04/07 00:38:12 $
    $Author: straten $ */
 
 #ifndef __MEAL_BinaryRule_H
@@ -79,7 +79,7 @@ template<class T>
 void MEAL::BinaryRule<T>::set_arg1 (T* model)
 {
   if (arg1)
-    composite.unmap (arg1, false);
+    composite.unmap (arg1);
 
   arg1 = model;
 
@@ -96,7 +96,7 @@ template<class T>
 void MEAL::BinaryRule<T>::set_arg2 (T* model)
 {
   if (arg2)
-    composite.unmap (arg2, false);
+    composite.unmap (arg2);
 
   arg2 = model;
 

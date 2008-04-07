@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/BasisRule.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/02/06 22:45:10 $
+   $Revision: 1.3 $
+   $Date: 2008/04/07 00:38:12 $
    $Author: straten $ */
 
 #ifndef __MEAL_BasisRule_H
@@ -112,11 +112,12 @@ MEAL::BasisRule<N,T>::operator = (const BasisRule& rule)
 template<unsigned N, class T>
 void MEAL::BasisRule<N,T>::set_model (T* _model)
 {
-  if (model) {
+  if (model)
+  {
     if (T::verbose)
       std::cerr << "MEAL::BasisRule::set_model"
 	" unmap old model" << std::endl;
-    composite.unmap (model, false);
+    composite.unmap (model);
   }
 
   model = _model;
@@ -132,11 +133,10 @@ void MEAL::BasisRule<N,T>::set_model (T* _model)
 
   Vector<N,double> params;
 
-  for (unsigned i=0; i<N; i++) {
-
+  for (unsigned i=0; i<N; i++)
+  {
     model->set_infit (i, false);
     params[i] = model->get_param(i);
-
   }
 
   params = inv(transformation) * params;

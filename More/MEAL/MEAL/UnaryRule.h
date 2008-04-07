@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/UnaryRule.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.8 $
+   $Date: 2008/04/07 00:38:12 $
    $Author: straten $ */
 
 #ifndef __MEAL_UnaryRule_H
@@ -70,7 +70,7 @@ template<class T>
 void MEAL::UnaryRule<T>::set_model (T* _model)
 {
   if (model)
-    composite.unmap (model, false);
+    composite.unmap (model);
 
   model = _model;
 

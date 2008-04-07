@@ -24,12 +24,13 @@ void Calibration::MeasurementEquation::set_input (Complex2* _input)
   if (!_input)
     return;
 
-  if (inputs[current_input]) {
+  if (inputs[current_input])
+  {
     if (very_verbose)
       cerr << "Calibration::MeasurementEquation::set_input"
 	" unmap old input" << endl;
 
-    composite.unmap (inputs[current_input], false);
+    composite.unmap (inputs[current_input]);
   }
 
   inputs[current_input] = _input;
@@ -97,12 +98,19 @@ Calibration::MeasurementEquation::set_transformation (Complex2* _xform)
   if (!_xform)
     return;
 
-  if (xforms[current_xform]) {
+  if (current_xform >= xforms.size())
+    throw Error (InvalidState,
+		 "Calibration::MeasurementEquation::set_transformation",
+		 "transformation index error: current=%d >= size=%d",
+		 current_xform, xforms.size());
+
+  if (xforms[current_xform])
+  {
     if (very_verbose)
       cerr << "Calibration::MeasurementEquation::set_transformation"
 	" unmap old transformation" << endl;
 
-    composite.unmap (xforms[current_xform], false);
+    composite.unmap (xforms[current_xform]);
   }
 
   xforms[current_xform] = _xform;
@@ -113,7 +121,6 @@ Calibration::MeasurementEquation::set_transformation (Complex2* _xform)
       " map new transformation" << endl;
 
   composite.map (xforms[current_xform]);
-  // xforms[current_xform]->name = "MeasurementEquation::xform";
 }
 
 

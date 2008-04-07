@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ChainRule.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/11/07 18:39:34 $
+   $Revision: 1.9 $
+   $Date: 2008/04/07 00:38:12 $
    $Author: straten $ */
 
 #ifndef __MEAL_ChainRule_H
@@ -137,8 +137,6 @@ void MEAL::ChainRule<T>::set_constraint (unsigned iparam, Scalar* scalar)
     std::cerr << "MEAL::ChainRule::set_constraint iparam=" << iparam
 	      << std::endl;
 
-  bool signal = !scalar;
-
   // only one scalar may control a parameter
   for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++) {
 
@@ -148,7 +146,7 @@ void MEAL::ChainRule<T>::set_constraint (unsigned iparam, Scalar* scalar)
 	std::cerr << "MEAL::ChainRule::set_constraint"
 	  " remove param=" << iparam << std::endl;
 
-      composite.unmap (constraints[ifunc].scalar, signal);
+      composite.unmap (constraints[ifunc].scalar);
 
       if (model)
 	model->set_infit (iparam, constraints[ifunc].previously_infit);
@@ -186,11 +184,12 @@ void MEAL::ChainRule<T>::set_model (T* _model)
   if (!_model)
     return;
 
-  if (model) {
+  if (model)
+  {
     if (T::verbose)
       std::cerr << "MEAL::ChainRule::set_model"
 	" unmap old model" << std::endl;
-    composite.unmap (model, false);
+    composite.unmap (model);
   }
 
   model = _model;
@@ -201,7 +200,8 @@ void MEAL::ChainRule<T>::set_model (T* _model)
 
   composite.map (model);
 
-  for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++) {
+  for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++)
+  {
     unsigned iparam = constraints[ifunc].parameter;
     constraints[ifunc].previously_infit = model->get_infit (iparam);
     model->set_infit (iparam, false);

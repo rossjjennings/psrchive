@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/Composite.h"
 #include "MEAL/Constant.h"
 #include "MEAL/ArgumentPolicyAdapter.h"
@@ -22,11 +23,16 @@ MEAL::Composite::Composite (Function* context)
   nparameters = 0;
   current_model = 0;
   current_index = 0;
+  remap_needed = false;
+  disable_callbacks = false;
 }
 
 //! Return the number of parameters
 unsigned MEAL::Composite::get_nparam () const
 {
+  if (remap_needed)
+    const_cast<Composite*>(this)->remap ();
+
   return nparameters;
 }
 
@@ -106,11 +112,13 @@ string MEAL::Composite::class_name() const
 //! Get the number of Functions
 unsigned MEAL::Composite::get_nmodel () const
 {
+  if (remap_needed)
+    const_cast<Composite*>(this)->remap ();
   return models.size ();
 }
 
 
-void MEAL::Composite::map (Projection* modelmap, bool signal_changes)
+void MEAL::Composite::map (Projection* modelmap)
 {
 #ifdef _DEBUG
   cerr << class_name() + "map (Projection* = " << modelmap << ")" << endl;
@@ -121,8 +129,8 @@ void MEAL::Composite::map (Projection* modelmap, bool signal_changes)
 
   bool already_mapped = false;
   
-  if (modelmap->meta) {
-
+  if (modelmap->meta)
+  {
     if (modelmap->meta != this)
       throw Error (InvalidState, class_name() + "map",
                    "Projection already mapped into another Composite");
@@ -132,12 +140,11 @@ void MEAL::Composite::map (Projection* modelmap, bool signal_changes)
       already_mapped = true;
     else
       throw Error (InvalidState, class_name() + "map",
-		   "Projection partially mapped into this");
-      
+		   "Projection partially mapped into this");   
   }
   
-  try {
-
+  try
+  {
     Function* model = modelmap->get_Function();
     modelmap->imap.resize(0);
     add_component (model, modelmap->imap);
@@ -147,7 +154,8 @@ void MEAL::Composite::map (Projection* modelmap, bool signal_changes)
 		   "map size=%d != nparam=%d",
 		   modelmap->imap.size(), model->get_nparam());
 
-    if (Function::very_verbose) {
+    if (Function::very_verbose)
+    {
       cerr << class_name() + "map Function maps into" << endl;
       for (unsigned i=0; i<modelmap->imap.size(); i++)
 	cerr << "   " << i << ":" << modelmap->imap[i] << endl;
@@ -155,24 +163,15 @@ void MEAL::Composite::map (Projection* modelmap, bool signal_changes)
 
     model->changed.connect (this, &Composite::attribute_changed);
 
-    if (!already_mapped) {
+    if (!already_mapped)
+    {
       if (Function::very_verbose)
 	cerr << class_name() + "map new Projection" << endl;
       maps.push_back (modelmap);
       modelmap->meta = this;
     }
 
-    if (signal_changes) {
-      if (Function::very_verbose) 
-	cerr << class_name() + "map send changed ParameterCount" << endl;
-
-      get_context()->changed.send (Function::ParameterCount);
-    }
-
-    if (Function::very_verbose) 
-      cerr << class_name() + "map set_evaluation_changed" << endl;
-
-    get_context()->set_evaluation_changed ();
+    callbacks ();
 
   }
   catch (Error& error) {
@@ -261,7 +260,7 @@ void MEAL::Composite::add_component (Function* model, vector<unsigned>& imap)
 
 }
 
-void MEAL::Composite::unmap (Projection* modelmap, bool signal_changes)
+void MEAL::Composite::unmap (Projection* modelmap)
 {
   if (!(modelmap->meta))
     throw Error (InvalidParam, class_name() + "unmap",
@@ -290,8 +289,8 @@ void MEAL::Composite::unmap (Projection* modelmap, bool signal_changes)
   // flag the mapping as unmanaged
   modelmap->meta = 0;
 
-  // remap the remaining mappings
-  remap (signal_changes);
+  // remap later
+  remap_later ();
 }
 
 
@@ -354,7 +353,7 @@ void MEAL::Composite::recount () const
 }
 
 //! Recount the number of parameters
-void MEAL::Composite::remap (bool signal_changes)
+void MEAL::Composite::remap ()
 { 
   if (Function::very_verbose)
     cerr << class_name() << "remap remove indirect Function instances" << endl;
@@ -364,11 +363,15 @@ void MEAL::Composite::remap (bool signal_changes)
   if (Function::very_verbose)
     cerr << class_name() << "remap remap Projection instances" << endl;
 
-  try {
+  disable_callbacks = true;
+
+  try
+  {
     for (unsigned imap=0; imap < maps.size(); imap++)
-      map (maps[imap], false);
+      map (maps[imap]);
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     throw error += class_name() + "remap";
   }
 
@@ -378,18 +381,36 @@ void MEAL::Composite::remap (bool signal_changes)
   recount ();
 
   if (Function::very_verbose)
-    cerr << class_name() << "remap send changed ParameterCount nparam=" 
-	 << nparameters << endl;
-  
-  get_context()->changed.send (Function::ParameterCount);
-  
-  if (Function::very_verbose)
-    cerr << class_name() << "remap set_evaluation_changed" << endl;
-  
-  get_context()->set_evaluation_changed ();
+    cerr << class_name() << "remap nparam=" << nparameters << endl;
 
-  if (Function::very_verbose)
-    cerr << class_name() << "remap exit" << endl;
+  disable_callbacks = false;
+  remap_needed = false;
+}
+
+void MEAL::Composite::remap_later ()
+{
+  if (remap_needed)
+    return;
+
+  remap_needed = true;
+
+  callbacks ();
+}
+
+void MEAL::Composite::callbacks ()
+{
+  if (disable_callbacks)
+    return;
+
+  if (Function::very_verbose) 
+    cerr << class_name() + "callbacks send changed ParameterCount" << endl;
+
+  get_context()->changed.send (Function::ParameterCount);
+
+  if (Function::very_verbose) 
+    cerr << class_name() + "callbacks set_evaluation_changed" << endl;
+
+  get_context()->set_evaluation_changed ();
 }
 
 void MEAL::Composite::attribute_changed (Function::Attribute attribute) 
@@ -397,19 +418,20 @@ void MEAL::Composite::attribute_changed (Function::Attribute attribute)
   if (Function::very_verbose)
     cerr << class_name() << "attribute_changed" << endl;
 
-  if (attribute == Function::ParameterCount) {
+  if (attribute == Function::ParameterCount)
+  {
     if (Function::very_verbose)
       cerr << class_name() << "attribute_changed remap" << endl;
-    remap ();
+    remap_later ();
   }
 
-  if (attribute == Function::Evaluation) {
+  if (attribute == Function::Evaluation)
+  {
     if (Function::very_verbose)
       cerr << class_name() << "attribute_changed set_evaluation_changed"
 	   << endl;
     get_context()->set_evaluation_changed ();
-  } 
-
+  }
 }
 
 //! Get the const Function that corresponds to the given index
@@ -422,6 +444,9 @@ MEAL::Composite::get_Function (unsigned& index) const
 //! Get the Function that corresponds to the given index
 MEAL::Function* MEAL::Composite::get_Function (unsigned& index)
 {
+  if (remap_needed)
+    remap ();
+
   unsigned imodel = current_model;
   
   if (index < current_index) {
@@ -505,10 +530,14 @@ void MEAL::Composite::get_imap (const Function* model,
   if (constant)
     return;
 
+  if (remap_needed)
+    const_cast<Composite*>(this)->remap ();
+
   const Composite* meta = 0;
   meta = dynamic_cast<const Composite*>(model->get_parameter_policy());
 
-  if (meta) {
+  if (meta)
+  {
     unsigned nmodel = meta->get_nmodel();
     for (unsigned imodel=0; imodel<nmodel; imodel++)
       get_imap (meta->models[imodel], imap);
@@ -518,7 +547,8 @@ void MEAL::Composite::get_imap (const Function* model,
   unsigned iparam = 0;
   unsigned imodel = 0;
 
-  for (imodel = 0; imodel < models.size(); imodel++)  {  
+  for (imodel = 0; imodel < models.size(); imodel++)
+  {  
     reference_check (imodel, "get_imap");
     if (models[imodel].ptr() == model)
       break;
@@ -533,7 +563,8 @@ void MEAL::Composite::get_imap (const Function* model,
   unsigned nparam = model->get_nparam();
 
   // add the mapped indeces (works for both cases: new model or old model)
-  for (unsigned jparam=0; jparam < nparam; jparam++) {
+  for (unsigned jparam=0; jparam < nparam; jparam++)
+  {
     *imap = iparam + jparam;
     imap ++;
   }

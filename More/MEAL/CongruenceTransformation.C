@@ -29,11 +29,12 @@ void MEAL::CongruenceTransformation::set_transformation (Complex2* xform)
   if (!xform)
     return;
 
-  if (transformation) {
+  if (transformation)
+  {
     if (verbose)
       cerr << "MEAL::CongruenceTransformation::set_transformation"
 	" unmap old transformation" << endl;
-    composite.unmap (transformation, false);
+    composite.unmap (transformation);
   }
 
   transformation = xform;
@@ -58,11 +59,12 @@ void MEAL::CongruenceTransformation::set_input (Complex2* xform)
   if (!xform)
     return;
 
-  if (input) {
+  if (input)
+  {
     if (verbose)
       cerr << "MEAL::CongruenceTransformation::set_input"
 	" unmap old input" << endl;
-    composite.unmap (input, false);
+    composite.unmap (input);
   }
 
   input = xform;
@@ -98,11 +100,10 @@ MEAL::CongruenceTransformation::calculate (Jones<double>& result,
   std::vector<Jones<double> > input_grad;
   std::vector<Jones<double> > *input_grad_ptr = 0;
 
-  if (grad) {
-
+  if (grad)
+  {
     xform_grad_ptr = &xform_grad;
     input_grad_ptr = &input_grad;
-
   }
 
   // compute xform and partial derivatives with respect to xform parameters
@@ -146,7 +147,8 @@ MEAL::CongruenceTransformation::calculate (Jones<double>& result,
   // map the input parameter gradient elements
   ProjectGradient (input, input_grad, *grad);
 
-  if (verbose) {
+  if (verbose)
+  {
     cerr << "MEAL::CongruenceTransformation::evaluate gradient" << endl;
     for (unsigned i=0; i<grad->size(); i++)
       cerr << "   " << i << ":" << get_infit(i) << " " << get_param_name(i)

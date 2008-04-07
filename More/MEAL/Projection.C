@@ -24,8 +24,15 @@ MEAL::Projection::~Projection ()
 unsigned MEAL::Projection::get_imap (unsigned index) const
 {
   if (!model)
-    throw Error (InvalidRange, "MEAL::Projection::get_imap",
+    throw Error (InvalidState, "MEAL::Projection::get_imap",
 		 "no Function");
+
+  if (!meta)
+    throw Error (InvalidState, "MEAL::Projection::get_imap",
+		 "no Composit");
+
+  if (meta->remap_needed)
+    meta->remap ();
 
   if (model->get_nparam() != imap.size())
     throw Error (InvalidRange, "MEAL::Projection::get_imap",
