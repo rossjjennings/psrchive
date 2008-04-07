@@ -82,8 +82,7 @@ void Pulsar::PolnProfileFit::init ()
 
 void Pulsar::PolnProfileFit::set_plan (FTransform::Plan* p)
 {
-  throw Error (InvalidState, "Pulsar::PolnProfileFit::set_plan",
-	       "not implemented");
+  get_spectra()->get_stats()->set_plan (p);
 }
 
 void Pulsar::PolnProfileFit::set_maximum_harmonic (unsigned max)
@@ -246,8 +245,8 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   // delete any previously set data
   equation->delete_data ();
 
-  // (re)set the number of phases to one
-  phases->resize (1);
+  // (re)set the number of phases to zero
+  phases->resize (0);
 
   add_observation (observation);
 
@@ -255,7 +254,7 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::PolnProfile::fit";
+  throw error += "Pulsar::PolnProfileFit::fit";
 }
 
 void Pulsar::PolnProfileFit::set_measurement_set
@@ -356,6 +355,9 @@ void Pulsar::PolnProfileFit::solve () try
   RealTimer clock;
 
   clock.start();
+
+  if (verbose)
+    equation->set_fit_report ();
 
   equation->solve ();
 

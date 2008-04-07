@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnSpectrumStats.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/03/03 21:02:51 $
+   $Revision: 1.4 $
+   $Date: 2008/04/07 07:14:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnSpectrumStats_h
@@ -68,6 +68,9 @@ namespace Pulsar {
 
     //! Returns the variance of the baseline for the specified polarization
     std::complex< Estimate<double> > get_baseline_variance (unsigned) const;
+
+    //! Set the fourier transform plan
+    void set_plan (FTransform::Plan*);
 
   protected:
 

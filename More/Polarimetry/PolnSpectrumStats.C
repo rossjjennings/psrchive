@@ -207,3 +207,7 @@ catch (Error& error)
   throw error += "Pulsar::PolnSpectrumStats::build";
 }
 
+void Pulsar::PolnSpectrumStats::set_plan (FTransform::Plan* p)
+{
+  plan = p;
+}
