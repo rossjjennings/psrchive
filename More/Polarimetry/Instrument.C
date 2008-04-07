@@ -13,6 +13,8 @@
 
 using namespace std;
 
+static unsigned instances = 0;
+
 void Calibration::Instrument::init ()
 {
   backend = new Calibration::SingleAxis;
@@ -21,12 +23,14 @@ void Calibration::Instrument::init ()
 
   add_model( backend_chain );
 
-
   feed = new Calibration::Feed;
   feed_chain = new MEAL::ChainRule<MEAL::Complex2>;
   feed_chain->set_model( feed );
 
   add_model( feed_chain );
+
+  instances ++;
+  //cerr << "Calibration::Instrument::init instances=" << instances << endl;
 }
 
 Calibration::Instrument::Instrument ()
@@ -51,10 +55,16 @@ Calibration::Instrument::operator = (const Instrument& s)
   return *this;
 }
 
+Calibration::Instrument* Calibration::Instrument::clone () const
+{
+  return new Instrument (*this);
+}
+
 Calibration::Instrument::~Instrument ()
 {
+  instances --;
   if (verbose)
-    cerr << "Calibration::Instrument destructor" << endl;
+    cerr << "Calibration::Instrument::dtor instances=" << instances << endl;
 }
 
 //! Return the name of the class

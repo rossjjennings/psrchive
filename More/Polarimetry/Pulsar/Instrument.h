@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Instrument.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/12/06 05:49:31 $
+   $Revision: 1.9 $
+   $Date: 2008/04/07 07:14:50 $
    $Author: straten $ */
 
 #ifndef __CalibrationInstrument_H
@@ -42,6 +42,9 @@ namespace Calibration {
 
     //! Assignment Operator
     const Instrument& operator = (const Instrument& s);
+
+    //! Clone operator
+    Instrument* clone () const;
 
     //! Destructor
     ~Instrument ();
