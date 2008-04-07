@@ -140,13 +140,17 @@ void Calibration::ReceptionModel::solve ()
 		 "ndata=%d <= nfree=%d", fixed_params, free_params);
   }
 
+  if (fit_report)
+    cerr << endl << fixed_params << " indepdendent data" << endl << endl;
+
   if (verbose)
     cerr << "Calibration::ReceptionModel::solve check constraints" << endl;
 
   // check that all inputs with unknown parameters have a CoherencyMeasurement
-  for (unsigned ipath=0; ipath < get_num_transformation(); ipath++) {
-    for (unsigned isource=0; isource < get_num_input(); isource++) {
-      
+  for (unsigned ipath=0; ipath < get_num_transformation(); ipath++)
+  {
+    for (unsigned isource=0; isource < get_num_input(); isource++)
+    {
       bool need_source = false;
 
       set_input_index (isource);
@@ -156,15 +160,14 @@ void Calibration::ReceptionModel::solve ()
 	if( state->get_infit(iparam) )
 	  need_source = true;
       
-      if (need_source && !has_source[isource]) {
-
+      if (need_source && !has_source[isource])
+      {
 	for (iparm=0; iparm < get_nparam(); iparm++)
 	  set_Estimate (iparm, 0.0);
 
 	throw Error (InvalidRange, "Calibration::ReceptionModel::solve",
 		     "input source %d with free parameter(s) not observed",
 		     isource);
-
       }
     }
   }

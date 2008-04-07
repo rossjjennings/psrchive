@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/04/07 00:38:18 $
+   $Revision: 1.12 $
+   $Date: 2008/04/07 07:14:32 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
@@ -443,7 +443,7 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
   }
   catch (Error& error)
   {
-    verify_orthogonal (temp_copy, model);
+    // verify_orthogonal (temp_copy, model);
     throw error += "MEAL::LevenbergMarquardt<Grad>::solve_delta";
   }
 
