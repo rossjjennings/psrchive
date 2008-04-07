@@ -211,8 +211,12 @@ void
 Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
 {
   const Integration* integration = data->get_Integration (isub);
-
   unsigned nchan = integration->get_nchan ();
+
+  if (model.size() > 1 && nchan != model.size())
+    throw Error (InvalidState, "Pulsar::SystemCalibrator::add_pulsar",
+		 "input data nchan=%d != model nchan=%d", nchan, model.size());
+
   MJD epoch = integration->get_epoch ();
   add_epoch (epoch);
 
@@ -237,16 +241,20 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
       continue;
     }
     
+    unsigned mchan = ichan;
+    if (model.size() == 1)
+      mchan = 0;
+
     using MEAL::Argument;
     
     // epoch abscissa
-    Argument::Value* time = model[ichan]->time.new_Value( epoch );
+    Argument::Value* time = model[mchan]->time.new_Value( epoch );
     
     // known transformation
-    Argument::Value* xform = model[ichan]->source_to_feed.new_Value( feed );
+    Argument::Value* xform = model[mchan]->source_to_feed.new_Value( feed );
     
     // pulsar signal path
-    unsigned path = model[ichan]->get_pulsar_path();
+    unsigned path = model[mchan]->get_pulsar_path();
     
     // measurement set
     Calibration::CoherencyMeasurementSet measurements (path);
@@ -273,7 +281,7 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
       get_data_fail ++;
     }
     
-    model[ichan]->add_observation_epoch (epoch);
+    model[mchan]->add_observation_epoch (epoch);
     
   }
   catch (Error& error)
