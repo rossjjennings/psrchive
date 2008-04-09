@@ -16,8 +16,10 @@ http://www.intel.com/support/performancetools/libraries/mkl/sb/cs-017177.htm
 
 #include "MKL_DFTI_Transform.h"
 #include "Error.h"
+#include "malloc16.h"
 
 #include <assert.h>
+#include <string.h>
 
 //#define _DEBUG 1
 
@@ -118,10 +120,19 @@ FTransform::MKL_DFTI::Plan::~Plan()
 
 #define CHECK_ALIGN(x) assert ( ( ((uintptr_t)x) & 15 ) == 0 )
 
+#define MAKE_ALIGN(x,n) \
+  float* temp = 0; \
+  if ( ( ((uintptr_t)x) & 15 ) != 0 ) \
+  { temp = (float*) malloc16 (n * sizeof(float)); \
+    memcpy (temp, x, n * sizeof(float)); \
+    x = temp; }
+
+#define FREE_ALIGN if (temp) free (temp);
+
 void FTransform::MKL_DFTI::Plan::frc1d (size_t nfft, float* dest, 
 					const float* src)
 {
-  CHECK_ALIGN(src);
+  MAKE_ALIGN(src,nfft);
   CHECK_ALIGN(dest);
 
 #ifdef _DEBUG
@@ -132,12 +143,14 @@ void FTransform::MKL_DFTI::Plan::frc1d (size_t nfft, float* dest,
     throw Error (InvalidState, "FTransform::MKL_DFTI::Plan::frc1d",
 		 "fail DftiComputeForward\n\t%s",
 		 DftiErrorMessage(status));
+
+  FREE_ALIGN;
 }
 
 void FTransform::MKL_DFTI::Plan::fcc1d (size_t nfft, float* dest,
 					const float* src)
 {
-  CHECK_ALIGN(src);
+  MAKE_ALIGN(src,nfft);
   CHECK_ALIGN(dest);
 
 #ifdef _DEBUG
@@ -148,12 +161,14 @@ void FTransform::MKL_DFTI::Plan::fcc1d (size_t nfft, float* dest,
     throw Error (InvalidState, "FTransform::MKL_DFTI::Plan::frc1d",
 		 "fail DftiComputeForward\n\t%s",
 		 DftiErrorMessage(status));
+
+  FREE_ALIGN;
 }
 
 void FTransform::MKL_DFTI::Plan::bcc1d (size_t nfft, float* dest,
 					const float* src)
 {
-  CHECK_ALIGN(src);
+  MAKE_ALIGN(src,nfft*2);
   CHECK_ALIGN(dest);
 
 #ifdef _DEBUG
@@ -164,12 +179,14 @@ void FTransform::MKL_DFTI::Plan::bcc1d (size_t nfft, float* dest,
     throw Error (InvalidState, "FTransform::MKL_DFTI::Plan::frc1d",
 		 "fail DftiComputeBackward\n\t%s",
 		 DftiErrorMessage(status));
+
+  FREE_ALIGN;
 }
 
 void FTransform::MKL_DFTI::Plan::bcr1d (size_t nfft, float* dest,
 					const float* src)
 {
-  CHECK_ALIGN(src);
+  MAKE_ALIGN(src,nfft*2);
   CHECK_ALIGN(dest);
 
 #ifdef _DEBUG
@@ -180,6 +197,8 @@ void FTransform::MKL_DFTI::Plan::bcr1d (size_t nfft, float* dest,
     throw Error (InvalidState, "FTransform::MKL_DFTI::Plan::frc1d",
 		 "fail DftiComputeBackward\n\t%s",
 		 DftiErrorMessage(status));
+
+  FREE_ALIGN;
 }
 
 /* ***********************************************************************
