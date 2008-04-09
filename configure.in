@@ -135,7 +135,7 @@ fi
 # Checks for header files.
 #
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([sys/statvfs.h sys/vfs.h sys/mount.h])
+AC_CHECK_HEADERS([malloc.h sys/statvfs.h sys/vfs.h sys/mount.h])
 
 #
 # Checks for essential libraries
