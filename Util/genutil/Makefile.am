@@ -25,6 +25,7 @@ include_HEADERS = \
         JenetAnderson98A5.h \
         JenetAnderson98.h \
         machine_endian.h \
+	malloc16.h \
         MJD.h \
 	FITSUTC.h \
 	NormalDistribution.h \
@@ -81,6 +82,7 @@ libgenutil_la_SOURCES = \
         ierf.c \
         JenetAnderson98A5.C \
         JenetAnderson98.C \
+	malloc16.c \
         MJD.C \
 	FITSUTC.C \
 	NormalDistribution.C \
