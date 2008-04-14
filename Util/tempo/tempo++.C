@@ -358,7 +358,10 @@ char Tempo::code (const string& code)
 
   if (strcasecmp (name, "WSRT") == 0 || strcasecmp (name, "Westerbork") == 0)
     return Westerbork;
-  
+
+  if (strcasecmp (name, "GMRT") == 0 || strcasecmp (name, "GMRT") == 0)        // Added for GMRT by Jayanta
+    return GMRT; 
+ 
   return 0;
 }
 
@@ -383,6 +386,10 @@ const char* Tempo::name (char code)
 
   case Westerbork:
     return "Westerbork";
+
+ case GMRT:			// Added for GMRT by Jayanta
+    return "GMRT";
+
 
   default:
     return "";

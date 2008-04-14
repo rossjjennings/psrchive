@@ -94,6 +94,12 @@ int telescope_coords (char telescope, float* latitude,
     elev = 86.0000;
     break;
 
+  case 'r':   // Added GMRT by Jayanta
+    latd = 19.0534;
+    longd = -74.0323;
+    elev = 407.0000;
+    break;
+
   default:
     fprintf (stderr, "telescope_coords: unknown telescope code %d\n",
 	     telescope);

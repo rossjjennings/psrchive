@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.23 $
-   $Date: 2008/03/12 17:54:46 $
-   $Author: demorest $ */
+   $Revision: 1.24 $
+   $Date: 2008/04/14 23:32:30 $
+   $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
 #define __TEMPO_PP_H
@@ -31,6 +31,7 @@ namespace Tempo {
   const char Tidbinbilla = '6';
   const char Parkes      = '7';
   const char Westerbork  = 'i';
+  const char GMRT  	 = 'r';  // Added for GMRT by Jayanta
 
   //! Convert a telescope name to a code
   char code (const std::string& telescope_name);
