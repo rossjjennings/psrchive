@@ -11,6 +11,7 @@ using namespace std;
 #include "Pulsar/Interpreter.h"
 
 #include "strutil.h"
+#include "separate.h"
 
 Pulsar::StandardOptions::StandardOptions ()
 {
