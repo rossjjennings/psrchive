@@ -49,8 +49,13 @@ string TextInterface::Parser::help (bool default_value)
   unsigned max_namelen = name_label.length();
   unsigned max_descriptionlen = description_label.length();
 
+#ifdef _DEBUG
+  cerr << "TextInterface::Parser::help nvalue=" << get_nvalue() << endl;
+#endif
+
   // find the maximum string length of the name and description
-  for (i=0; i<get_nvalue(); i++) {
+  for (i=0; i<get_nvalue(); i++)
+  {
     if (get_name(i).length() > max_namelen)
       max_namelen = get_name(i).length();
     if (get_description(i).length() > max_descriptionlen)
@@ -114,6 +119,7 @@ void TextInterface::Parser::clean ()
 TextInterface::Parser::Parser ()
 {
   alphabetical = false;
+  import_filter = false;
 }
 
 //! Get the value of the value
@@ -169,8 +175,10 @@ TextInterface::Parser::find (const string& name, bool throw_exception) const
   if (aliases)
     key = aliases->substitute (key);
 
-  for (unsigned i=0; i<values.size(); i++) {
-    if (values[i]->matches (key)) {
+  for (unsigned i=0; i<values.size(); i++)
+  {
+    if (values[i]->matches (key))
+    {
 #ifdef _DEBUG
       cerr << "TextInterface::Parser::find value[" << i << "]=" 
 		<< values[i]->get_name() << " matches" << endl;
@@ -187,8 +195,78 @@ TextInterface::Parser::find (const string& name, bool throw_exception) const
   return 0;
 }
 
+//! Import a nested interface
+void TextInterface::Parser::nested_import (const std::string& prefix,
+					   Parser* other)
+{
+  if (!other)
+    return;
+
+  for (unsigned i=0; i < other->values.size(); i++)
+    if (!import_filter || !find(other->values[i]->get_name(),false))
+    {
+      other->setup( other->values[i] );
+      add_value( new NestedValue(prefix, other->values[i]) );
+    }
+}
+
+//! Clear all nested interfaces
+void TextInterface::Parser::nested_clean ()
+{
+  for (unsigned i=0; i < values.size(); )
+  {
+    NestedValue* nested = dynamic_kast<NestedValue>( values[i] );
+    if (nested)
+      values.erase( values.begin() + i );
+    else
+      i++;
+  }
+}
 
 
+
+bool TextInterface::NestedValue::matches (const std::string& name,
+					  const std::string& prefix,
+					  const Value* value)
+{
+#ifdef _DEBUG
+  cerr << "TextInterface::NestedValue::matches prefix=" << prefix 
+       << " name=" << name;
+#endif
+
+  std::string::size_type length = prefix.length();
+
+  if ( name[length] != ':' )
+  {
+#ifdef _DEBUG
+    cerr << " false" << endl;
+#endif
+    return false;
+  }
+
+  if ( strncmp (name.c_str(), prefix.c_str(), length) != 0 )
+  {
+#ifdef _DEBUG
+    cerr << " false" << endl;
+#endif
+    return false;
+  }
+
+  std::string remainder = name.substr (length+1);
+
+#ifdef _DEBUG
+  cerr << " maybe" << endl;
+  cerr << "TextInterface::NestedValue::matches nested name="
+       << value->get_name() << " remain=" << remainder << endl;
+#endif
+
+  bool result = value->matches (remainder);
+
+#ifdef _DEBUG
+  cerr << "TextInterface::NestedValue::matches result=" << result << endl;
+#endif
+  return result;
+}
 
 
 /*! Parses text into key, range, and remainder
@@ -197,25 +275,53 @@ TextInterface::Parser::find (const string& name, bool throw_exception) const
 bool TextInterface::match (const string& name, const string& text,
 			   string* range, string* remainder)
 {
+#ifdef _DEBUG
+  cerr << "TextInterface::match name=" << name << " text=" << text;
+#endif
+
   string::size_type length = name.length();
 
   if ( length && strncmp (text.c_str(), name.c_str(), length) != 0 )
+  {
+#ifdef _DEBUG
+    cerr << " false" << endl;
+#endif
     return false;
+  }
 
   string::size_type end = text.find (':', length);
-  if (end == string::npos) {
+  if (end == string::npos)
+  {
     if (remainder)
+    {
+#ifdef _DEBUG
+      cerr << " false" << endl; 
+#endif
       return false;
+    }
     else
       end = text.length();
   }
 
+#ifdef _DEBUG
+  cerr << " maybe" << endl;
+#endif
+
   // the range is everything between the end of the variable name and the colon
   *range = text.substr (length, end-length);
 
+#ifdef _DEBUG
+  cerr << "TextInterface::match range=" << *range << endl;
+#endif
+
   // the remainder is everything following the colon
   if (remainder)
+  {
     *remainder = text.substr (end+1);
+#ifdef _DEBUG
+    cerr << "TextInterface::match remainder=" << *remainder << endl;
+#endif
+  }
 
   // a map may have no name
   if (!length)
@@ -234,6 +340,10 @@ bool TextInterface::match (const string& name, const string& text,
   // .. or must be enclosed in square brackets
   if ((*range)[0] == '[' && (*range)[length-1] == ']')
     return true;
+
+#ifdef _DEBUG
+  cerr << "FALSE" << endl;
+#endif
 
   return false;
 }
