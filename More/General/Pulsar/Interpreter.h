@@ -19,7 +19,6 @@
 namespace Pulsar {
   
   class Archive;
-  class ArchiveTI;
 
   //! Pulsar data processing command language interpreter
   /*!
@@ -208,7 +207,7 @@ namespace Pulsar {
     std::map< std::string, Reference::To<Archive> > theMap;
 
     //! the Archive text interface
-    Reference::To<ArchiveTI> interface;
+    Reference::To<Archive::Interface> interface;
 
     //! initialize the interface attribute
     void initialize_interface (bool need_archive = true);

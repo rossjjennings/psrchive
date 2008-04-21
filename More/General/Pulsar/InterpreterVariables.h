@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/InterpreterVariables.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/03/03 04:46:52 $
-   $Author: nopeer $ */
+   $Revision: 1.6 $
+   $Date: 2008/04/21 06:25:13 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_InterpreterVariables_h
 #define __Pulsar_InterpreterVariables_h
 
 #include "Pulsar/Interpreter.h"
-#include "Pulsar/ArchiveTI.h"
+#include "Pulsar/ArchiveInterface.h"
 #include <string>
 
 
@@ -26,7 +26,7 @@ using std::string;
 namespace Pulsar {
 
   //! The Archive Text Interface used by the Interpreter
-  class Interpreter::Variables : public ArchiveTI {
+  class Interpreter::Variables : public Archive::Interface {
 
   public:
 
