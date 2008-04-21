@@ -24,8 +24,8 @@
 namespace TextInterface {
 
   //! Text interface to a value of undefined type
-  class Value : public Reference::Able {
-
+  class Value : public Reference::Able
+  {
   public:
     
     //! Get the name of the value
@@ -45,7 +45,54 @@ namespace TextInterface {
 
     //! Return true if the name argument matches the value name
     virtual bool matches (const std::string& name) const
-    { return name == get_name(); }
+    {
+#ifdef _DEBUG
+      std::cerr << "TextInterface::Value::matches" << std::endl;
+#endif
+      return name == get_name();
+    }
+  };
+
+  //! Proxy enables value interfaces to be imported with a name
+  class NestedValue : public Value
+  {
+  public:
+    
+    //! Construct from a name and pointer to Value
+    NestedValue (const std::string& pre, Value* val)
+      { prefix = pre; value = val; }
+
+    //! Get the name of the attribute
+    std::string get_name () const
+      { return prefix + ":" + value->get_name(); }
+
+    //! Get the description of the value
+    std::string get_description () const
+      { return value->get_description(); }
+
+    //! Get the value of the value
+    std::string get_value () const 
+      { return value->get_value (); }
+
+    //! Set the value of the value
+    void set_value (const std::string& txt)
+      { value->set_value (txt); }
+
+    //! Return true if the name argument matches
+    bool matches (const std::string& name) const
+      { return matches (name, prefix, value); }
+
+    static bool matches (const std::string& name,
+			 const std::string& prefix,
+			 const Value* value);
+
+  protected:
+
+    //! The parent value interface
+    Reference::To< Value > value;
+
+    //! The name of the value
+    std::string prefix;
 
   };
 
@@ -268,6 +315,9 @@ namespace TextInterface {
     void set_description (const std::string& description)
       { attribute->set_description (description); }
 
+    bool matches (const std::string& name) const
+      { return attribute->matches (name); }
+
   protected:
 
     //! The parent attribute interface
@@ -315,7 +365,8 @@ namespace TextInterface {
       { attribute->set_description (description); }
 
     //! Return true if the name argument matches
-    bool matches (const std::string& name) const;
+    bool matches (const std::string& name) const
+      { return NestedValue::matches (name, prefix, attribute); }
 
   protected:
 
@@ -340,8 +391,8 @@ namespace TextInterface {
   public:
     
     //! Construct from a pointer to element attribute interface
-    VectorOfProxy (const std::string& pre, const Attribute<E>* a, Get g, Size s)
-      { prefix = pre; attribute = a->clone(); get = g; size = s; }
+    VectorOfProxy (const std::string& p, const Attribute<E>* a, Get g, Size s)
+      { prefix = p; attribute = a->clone(); get = g; size = s; }
 
     //! Copy constructor
     VectorOfProxy (const VectorOfProxy& copy)
@@ -388,7 +439,7 @@ namespace TextInterface {
     std::string prefix;
 
     //! Range parsed from name during matches
-    std::string range;
+    mutable std::string range;
 
   };
 
@@ -448,7 +499,7 @@ namespace TextInterface {
     std::string prefix;
 
     //! Range parsed from name during matches
-    std::string range;
+    mutable std::string range;
 
     //! Worker function parses keys for get_value and set_value
     void get_indeces (std::vector<K>& keys,
@@ -561,7 +612,7 @@ namespace TextInterface {
     Size size;
 
     //! Range parsed from name during matches
-    std::string range;
+    mutable std::string range;
 
   };
 
@@ -795,6 +846,12 @@ namespace TextInterface {
     //! Set aliases for value names
     void set_aliases (const Alias* alias) { aliases = alias; }
 
+    //! Import a nested interface
+    void nested_import (const std::string& prefix, Parser*);
+
+    //! Clear all nested interfaces
+    void nested_clean ();
+
   protected:
 
     //! The indentation that precedes the output of a call to process
@@ -802,6 +859,9 @@ namespace TextInterface {
 
     //! Maintain alphabetical order of parameter names
     bool alphabetical;
+
+    //! Filters duplicate value names during import
+    bool import_filter;
 
     //! The aliases for the value names
     Reference::To<const Alias> aliases;
@@ -831,16 +891,17 @@ namespace TextInterface {
 
     template<class Type> class VGenerator : public VAllocator<C,Type> { };
 
-    //! Default constructor
-    To () { import_filter = false; }
-
     //! Set the instance
     virtual void set_instance (C* c) 
       { instance = c; }
 
     //! Set the instance of the Attribute<C>
     void setup (const Value* value)
-      { dynamic_cast<const Attribute<C>*>(value)->instance = instance.ptr(); }
+    {
+      const Attribute<C>* attribute = dynamic_cast<const Attribute<C>*>(value);
+      if (attribute) 
+	attribute->instance = instance.ptr();
+    }
 
     //! Import the attribute interfaces from a parent text interface
     template<class P> 
@@ -913,9 +974,6 @@ namespace TextInterface {
       { return dynamic_cast< const Attribute<C>* >( values[i].get() ); }
 
   protected:
-
-    //! When set, import filters out duplicate attribute names
-    bool import_filter;
 
     //! Factory generates a new AttributeGet instance
     template<class P, typename T> 
@@ -1029,8 +1087,12 @@ template<class C,class M,class Get,class Size>
  bool TextInterface::VectorOfProxy<C,M,Get,Size>::matches
   (const std::string& name) const
 {
+#ifdef _DEBUG
+  std::cerr << "TextInterface::VectorOfProxy::matches" << std::endl;
+#endif
+
   std::string remainder;
-  if (!match (prefix, name, const_cast<std::string*>(&range), &remainder))
+  if (!match (prefix, name, &range, &remainder))
     return false;
 
   return attribute->matches (remainder);
@@ -1081,6 +1143,7 @@ TextInterface::MapOfProxy<M,K,E,G>::get_indeces (std::vector<K>& indeces,
 #ifdef _DEBUG
   std::cerr << "MapOfProxy::get_indeces " << par << std::endl;
 #endif
+
   std::string::size_type length = par.length();
 
   std::string range = par;
@@ -1105,34 +1168,28 @@ template<class M, class K, class E, class G>
  bool TextInterface::MapOfProxy<M,K,E,G>::matches
   (const std::string& name) const
 {
+#ifdef _DEBUG
+  std::cerr << "TextInterface::MapOfProxy::matches" << std::endl;
+#endif
+
   std::string remainder;
-  if (!match (prefix, name, const_cast<std::string*>(&range), &remainder))
+  if (!match (prefix, name, &range, &remainder))
     return false;
 
   return attribute->matches (remainder);
 }
 
-#include <string.h>
-
-template<class C,class M,class Get>
-bool TextInterface::HasAProxy<C,M,Get>::matches (const std::string& name) const
-{
-  std::string::size_type length = prefix.length();
-
-  if ( strncmp (name.c_str(), prefix.c_str(), length) != 0 )
-    return false;
-
-  if ( name[length] != ':' )
-    return false;
-
-  return attribute->matches (name.substr(length+1));
-}
+//#include <string.h>
 
 template<class C,class Get,class Size>
  bool TextInterface::ElementGet<C,Get,Size>::matches
   (const std::string& var) const
 {
-  if (!match (name, var, const_cast<std::string*>(&range)))
+#ifdef _DEBUG
+  std::cerr << "TextInterface::ElementGet::matches" << std::endl;
+#endif
+
+  if (!match (name, var, &range))
     return false;
 
   return true;
@@ -1141,6 +1198,11 @@ template<class C,class Get,class Size>
 template<class C, class G, class S> 
 std::string TextInterface::ElementGet<C,G,S>::get_value (const C* ptr) const
 {
+#ifdef _DEBUG
+  std::cerr << "TextInterface::ElementGet::get_value name=" << name 
+	    << " range=" << range << std::endl;
+#endif
+
   std::vector<unsigned> ind;
   parse_indeces (ind, range, (ptr->*(size))());
   std::ostringstream ost;
