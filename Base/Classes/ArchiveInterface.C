@@ -5,12 +5,13 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/ArchiveTI.h"
+#include "Pulsar/ArchiveInterface.h"
+#include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/IntegrationTI.h"
 
 #include "Pulsar/FITSAlias.h"
 
-Pulsar::ArchiveTI::ArchiveTI( Archive *c )
+Pulsar::Archive::Interface::Interface( Archive *c )
 {
   add( &Archive::get_filename, "file",    "Name of the file" );
 
@@ -85,7 +86,7 @@ Pulsar::ArchiveTI::ArchiveTI( Archive *c )
 }
 
 //! Set the instance
-void Pulsar::ArchiveTI::set_instance (Pulsar::Archive* c) 
+void Pulsar::Archive::Interface::set_instance (Pulsar::Archive* c) 
 {
   TextInterface::To<Archive>::set_instance (c);
 
@@ -98,11 +99,11 @@ void Pulsar::ArchiveTI::set_instance (Pulsar::Archive* c)
   }
 }
 
-TextInterface::Parser *Pulsar::ArchiveTI::clone()
+TextInterface::Parser *Pulsar::Archive::Interface::clone()
 {
   if( instance )
-    return new ArchiveTI( instance );
+    return new Interface( instance );
   else
-    return new ArchiveTI();
+    return new Interface();
 }
 

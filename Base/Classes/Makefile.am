@@ -4,9 +4,10 @@ noinst_LTLIBRARIES = libClasses.la
 nobase_include_HEADERS = \
 	Pulsar/psrchive.h \
 	Pulsar/Agent.h \
-        Pulsar/ArchiveExpert.h \
         Pulsar/Archive.h \
-        Pulsar/ArchiveTI.h \
+        Pulsar/ArchiveExpert.h \
+	Pulsar/ArchiveExtension.h \
+        Pulsar/ArchiveInterface.h \
 	Pulsar/Application.h \
         Pulsar/BasicArchive.h \
         Pulsar/BasicIntegration.h \
@@ -34,6 +35,7 @@ libClasses_la_SOURCES = \
         Agent.C \
         Agent_plugin.C \
         Archive.C \
+        ArchiveInterface.C \
 	Archive_correct.C \
         Archive_copy.C \
         Archive_init_Integration.C \
@@ -41,7 +43,6 @@ libClasses_la_SOURCES = \
         Archive_load.C \
         Archive_resize.C \
 	Archive_verify.C \
-        ArchiveTI.C \
         Archive_unload.C \
         Archive_verbose.C \
 	Application.C \
