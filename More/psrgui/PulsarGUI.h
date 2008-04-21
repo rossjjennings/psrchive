@@ -16,7 +16,7 @@
 #include "Pulsar/Plot.h"
 #include "Pulsar/PlotFactory.h"
 #include "Pulsar/Archive.h"
-#include "Pulsar/ArchiveTI.h"
+#include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/Interpreter.h"
 
 #include "plotItem.h"
@@ -57,7 +57,7 @@ namespace Pulsar {
       protected:
 
 	Reference::To<Pulsar::Archive> arch;
-        Reference::To<Pulsar::ArchiveTI> preti;
+        Reference::To<Pulsar::Archive::Interface> preti;
         Reference::To<Pulsar::Interpreter> ppengine;
 
         QLineEdit* ppLe;

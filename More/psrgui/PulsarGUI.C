@@ -120,7 +120,7 @@ void Pulsar::PulsarGUI::readFile(QString& filename)
     arch = Pulsar::Archive::load(filename);
     if (autoBase->isChecked())
       arch->remove_baseline();
-    preti = new Pulsar::ArchiveTI(arch);
+    preti = new Pulsar::Archive::Interface(arch);
     ppengine->set(arch);
     preProcess();
   }
