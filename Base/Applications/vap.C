@@ -14,7 +14,6 @@
 #include <Pulsar/ITRFExtension.h>
 #include <Pulsar/Backend.h>
 #include <Pulsar/Receiver.h>
-#include <Pulsar/ArchiveTI.h>
 #include <Pulsar/WidebandCorrelator.h>
 #include <Pulsar/FluxCalibratorExtension.h>
 #include <Pulsar/ProcHistory.h>
