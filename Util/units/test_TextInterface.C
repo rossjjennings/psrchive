@@ -11,8 +11,8 @@
 #include <iostream>
 using namespace std;
 
-class extension : public Reference::Able {
-
+class extension : public Reference::Able
+{
 public:
 
   extension () 
@@ -39,20 +39,19 @@ public:
 
 protected:
   std::string text;
-
 };
 
-class extensionTUI : public TextInterface::To<extension> {
-
+class extensionTUI : public TextInterface::To<extension>
+{
 public:
-  extensionTUI () {
+  extensionTUI ()
+  {
     add (&extension::get_text, &extension::set_text, "text");
   }
-
 };
 
-class tester : public Reference::Able {
-
+class tester : public Reference::Able
+{
 public:
   tester () { value = 0; }
   void set_value (double _value) { value = _value; }
@@ -74,10 +73,11 @@ protected:
 };
 
 
-class testerTUI : public TextInterface::To<tester> {
-
+class testerTUI : public TextInterface::To<tester>
+{
 public:
-  testerTUI () {
+  testerTUI ()
+  {
     add (&tester::get_value, "value", "description");
     add (&tester::get_value, "same",  "description");
 
@@ -86,9 +86,7 @@ public:
 			 &tester::get_element,
 			 &tester::set_element,
 			 &tester::get_nelement) );
-    
   }
-
 };
 
 class testerETUI : public testerTUI {
@@ -133,34 +131,46 @@ public:
 };
 
 
-int main () try {
-
+int main () try
+{
   tester Test;
 
+  //
+  // test the Allocator generator
+  //
   TextInterface::Allocator<tester,double> allocate;
 
   TextInterface::Attribute<tester>* interface;
   interface = allocate ("value", &tester::get_value, &tester::set_value);
 
+  //
+  // test the Attribute interface
+  //
   interface->set_value (&Test, "3.456");
 
   cerr << "tester::get_value=" << Test.get_value() << endl;
 
-  if (Test.get_value() != 3.456) {
+  if (Test.get_value() != 3.456)
+  {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
 
+  //
+  // test the read-only Attribute interface
+  //
   TextInterface::Attribute<tester>* read_only;
   read_only = allocate ("value", &tester::get_value);
 
   cerr << "AttributeGet::get_value=" << read_only->get_value(&Test) << endl;
 
-  if (read_only->get_value(&Test) != "3.456") {
+  if (read_only->get_value(&Test) != "3.456")
+  {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
 
+  // should not be able to set a read-only value
   try {
     read_only->set_value (&Test, "0.789");
 
@@ -179,19 +189,22 @@ int main () try {
   cerr << "TextInterface::To<>::get_value="
        << getset.get_value("value") << endl;
 
-  if (getset.get_value("value") != "3.456") {
+  if (getset.get_value("value") != "3.456")
+  {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
 
-  if (getset.get_value("value%2") != "3.5") {
+  if (getset.get_value("value%2") != "3.5")
+  {
     cerr <<
       "test_TextInterface ERROR precision:\n"
       "value;2 = " << getset.get_value("value%2") << endl;
     return -1;
   }
 
-  if (getset.get_value("value") != "3.456") {
+  if (getset.get_value("value") != "3.456")
+  {
     cerr <<
       "test_TextInterface ERROR after precision:\n"
       "value = " << getset.get_value("value") << endl;
@@ -200,22 +213,27 @@ int main () try {
 
   // test ElementGetSet all elements in the vector
   getset.set_value("element", "5.67");
-  for (unsigned i=0; i<Test.get_nelement(); i++) {
+  for (unsigned i=0; i<Test.get_nelement(); i++)
+  {
     cerr << "Test.get_element(" << i << ")=" << Test.get_element(i) << endl;
-    if (Test.get_element(i) != 5.67) {
+    if (Test.get_element(i) != 5.67)
+    {
       cerr << "test_TextInterface ERROR!" << endl;
       return -1;
     }
   }
 
   getset.set_value("element[3]", "4.32");
-  for (unsigned i=0; i<Test.get_nelement(); i++) {
+  for (unsigned i=0; i<Test.get_nelement(); i++)
+  {
     cerr << "Test.get_element(" << i << ")=" << Test.get_element(i) << endl;
-    if (i == 3 && Test.get_element(i) != 4.32) {
+    if (i == 3 && Test.get_element(i) != 4.32)
+    {
       cerr << "test_TextInterface ERROR!" << endl;
       return -1;
     }
-    if (i != 3 && Test.get_element(i) != 5.67) {
+    if (i != 3 && Test.get_element(i) != 5.67)
+    {
       cerr << "test_TextInterface ERROR!" << endl;
       return -1;
     }
@@ -322,7 +340,8 @@ int main () try {
 
   cerr << "tester_array[2].get_extension()->get_text=" << gotstring << endl;
 
-  if (gotstring != teststring) {
+  if (gotstring != teststring) 
+  {
     cerr << "test_TextInterface ERROR! &(tester_array[2])=" 
 	 << &(Array.array[2]) << endl;
     return -1;
@@ -352,6 +371,21 @@ int main () try {
   getset.import ( "map", string(), extensionTUI(), &tester::get_map );
 
   cerr << getset.help(true) << endl;
+
+  //
+  // test nested_import
+  //
+
+  cerr << "testing nested import of another text interface" << endl;
+
+  getset.nested_import ( "child", &child_tui );
+
+  if ( getset.get_value ("child:value") != "0" )
+  {
+    cerr << "test_TextInterface ERROR! nested child:value="  
+	 << getset.get_value ("child:value") << endl;
+    return -1;
+  }
 
   cerr << "test_TextInterface SUCCESS!" << endl;
   return 0;
