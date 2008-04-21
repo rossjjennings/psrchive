@@ -178,7 +178,7 @@ Pulsar::ExampleArchive::load_Integration (const char* filename, unsigned subint)
   integration->set_folding_period(1.55e-3); // Pulsar period, s.
 
   // Set RFs for each channel, MHz.
-  for (int ichan=0; ichan<nchan; ichan++) {
+  for (unsigned ichan=0; ichan<nchan; ichan++) {
     integration->set_centre_frequency(ichan, 1442.0-(double)ichan*4.0);
   }
 
@@ -189,8 +189,8 @@ Pulsar::ExampleArchive::load_Integration (const char* filename, unsigned subint)
 
   // Load the actual data for each pol, channel from the file.
   float *data = new float[nbin]; // Temporary storage space
-  for (int ipol=0; ipol<npol; ipol++) {
-    for (int ichan=0; ichan<nchan; ichan++) {
+  for (unsigned ipol=0; ipol<npol; ipol++) {
+    for (unsigned ichan=0; ichan<nchan; ichan++) {
       // Load data for ipol, ichan into data array here.
       // Put data in integration structure:
       integration->get_Profile(ipol,ichan)->set_amps(data);
