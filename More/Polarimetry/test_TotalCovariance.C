@@ -46,10 +46,6 @@ int main ()
 
   MEAL::RandomPolar random;
 
-  unsigned tests = 0;
-  unsigned errors = 0;
-  bool verbose = false;
-
   Vector< 4, complex<double> > input1;
   Vector< 4, complex<double> > input2;
   Vector< 4, double > variance;
@@ -80,7 +76,7 @@ int main ()
     for (unsigned i=0; i<4; i++)
       variance[i] *= variance[i];
 
-    total_covar.set_template_variance (variance);
+    total_covar.set_template_variance ( Stokes<double>(variance) );
 
     // compute the covariance matrix
     MEAL::StokesCovariance compute;
