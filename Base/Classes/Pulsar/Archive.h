@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.171 $
-   $Date: 2007/11/26 02:50:18 $
+   $Revision: 1.172 $
+   $Date: 2008/04/21 01:58:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.171 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.172 $"
 
 #include "IntegrationManager.h"
 #include "TextInterface.h"
@@ -494,6 +494,9 @@ namespace Pulsar
 
       //! Return the name of the Extension
       std::string get_extension_name () const;
+
+      //! Return an abbreviated name that can be typed relatively quickly
+      virtual std::string get_short_name () const;
 
     protected:
 

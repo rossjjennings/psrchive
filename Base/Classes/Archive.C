@@ -137,6 +137,11 @@ string Pulsar::Archive::Extension::get_extension_name () const
   return extension_name;
 }
 
+string Pulsar::Archive::Extension::get_short_name () const
+{
+  return extension_name;
+}
+
 /*! Derived classes need only define this method, as the non-const version
   implemented by the Archive base class simply calls this method. */
 const Pulsar::Archive::Extension*
