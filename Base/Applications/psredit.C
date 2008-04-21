@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/ArchiveTI.h"
+
 #include "Pulsar/Profile.h"
 #include "Pulsar/Check.h"
 
@@ -36,12 +36,21 @@ void usage ()
     "\n"
     "    will print the centre frequency and set the source name.\n"
     "    Note that parameter names are case insensitive.\n"
-    "    For the list of parameter names, type \"psredit -H\"\n"
+    "\n"
+    "    For the complete list of all available parameters in an archive, \n"
+    "    run \"psredit <filename>\" without any command line options. \n"
        << endl;
 }
 
-const char* vector_help =
-"These may be further specified using range notation.  For example:\n"
+const char* long_help = 
+"\n"
+"PLEASE NOTE: the list of available parameters is now generated dynamically.\n"
+"\n"
+"To list all available parameters, simply load an archive file without \n"
+"specifying any command line options. \n"
+"\n"
+"Parameter names followed by a '*' represent vectors; these may be further \n"
+"specified using range notation.  For example:\n"
 "\n"
 "  psredit -c int[0,8-15]:mjd\n"
 "\n"
@@ -51,8 +60,8 @@ const char* vector_help =
 
 using namespace Pulsar;
 
-int main (int argc, char** argv) try {  
-
+int main (int argc, char** argv) try
+{  
   // print in degrees
   Angle::default_type = Angle::Degrees;
 
@@ -66,11 +75,6 @@ int main (int argc, char** argv) try {
   bool verbose = false;
 
   vector <string> commands;
-
-  Pulsar::ArchiveTI tui;
-
-  // so that a space precedes each parameter processed
-  tui.set_indentation (" ");
 
   // print the name of each file processed
   bool output_filename = true;
@@ -98,27 +102,9 @@ int main (int argc, char** argv) try {
       usage ();
       return 0;
 
-    case 'H': {
-
-      cout << 
-	  "-------------------------------------------------\n"
-	  "Attribute Name   Description\n"
-	  "-------------------------------------------------"
-	     << endl;
-  
-      for (unsigned i=0; i<tui.get_nvalue(); i++)
-	cout << pad(16,tui.get_name(i)) 
-             << " " << tui.get_description(i) << endl;
-  
-      cout << "\nAttributes with a * following the name represent vectors.\n";
-      if (!verbose)
-        cout << "Type \"psredit -vH\" for more details.\n" << endl;
-      else
-        cout << vector_help << endl;
-  
+    case 'H':
+      cerr << long_help << endl;
       return 0;
-
-    }
 
     case 'm':
       save = true;
@@ -162,39 +148,49 @@ int main (int argc, char** argv) try {
   for (int ai=optind; ai<argc; ai++)
     dirglob (&filenames, argv[ai]);
 
-  for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try {
-
+  for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try
+  {
     Reference::To<Pulsar::Archive> archive;
     archive = Pulsar::Archive::load(filenames[ifile]);
+
+    Reference::To<TextInterface::Parser> interface = archive->get_interface();
+
+    if (commands.size() == 0)
+    {
+      cout << interface->help (true) << endl;;
+      continue;
+    }
+
+    // so that a space precedes each parameter processed
+    interface->set_indentation (" ");
 
     if (output_filename)
       cout << archive->get_filename();
 
-    tui.set_instance (archive);
-
-    for (unsigned j = 0; j < commands.size(); j++)  {
+    for (unsigned j = 0; j < commands.size(); j++)
+    {
       if (verbose)
         cerr << "psredit: processing command '" << commands[j] << "'" << endl;
 
-      cout << tui.process (commands[j]);
+      cout << interface->process (commands[j]);
     }
 
     cout << endl;
 
-    if (edit && save) {
-
-      if (save_ext.empty()) {
+    if (edit && save)
+    {
+      if (save_ext.empty())
+      {
 	archive->unload();
 	cout << archive->get_filename() << " updated on disk" << endl;
       }
-      else {
+      else
+      {
 	string name = replace_extension( archive->get_filename(), save_ext );
 	archive->unload(name);
 	cout << archive->get_filename() << " written to disk" << endl;
       }
-
     }
-
   } // for each archive
 
   catch (Error& error) {
@@ -202,7 +198,6 @@ int main (int argc, char** argv) try {
   }
 
   return 0;
-
 }
 catch (Error& error) {
   cerr << "psredit: " << error << endl;
