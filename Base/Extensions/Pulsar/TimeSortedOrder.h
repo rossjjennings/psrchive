@@ -9,7 +9,7 @@
 #ifndef __TimeSortedOrder_h
 #define __TimeSortedOrder_h
                                                                                 
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
                                                                             

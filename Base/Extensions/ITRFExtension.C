@@ -4,8 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/ITRFExtension.h"
 
+#include "Pulsar/ITRFExtension.h"
+#include "TextInterface.h"
 
 //! Default constructor
 Pulsar::ITRFExtension::ITRFExtension ()
@@ -41,6 +42,21 @@ Pulsar::ITRFExtension::~ITRFExtension ()
 {
 }
 
+// Text interface to a ITRFExtension
+class Pulsar::ITRFExtension::Interface
+  : public TextInterface::To<ITRFExtension>
+{
+public:
+  Interface( ITRFExtension *s_instance = NULL )
+  {
+    if( s_instance )
+      set_instance( s_instance );
+
+    add( &ITRFExtension::get_ant_x, "ant_x", "ITRF X coordinate." );
+    add( &ITRFExtension::get_ant_y, "ant_y", "ITRF Y coordinate." );
+    add( &ITRFExtension::get_ant_z, "ant_z", "ITRF Z coordinate." );
+  }
+};
 
 //! Return a text interfaces that can be used to access this instance
 TextInterface::Parser* Pulsar::ITRFExtension::get_interface()

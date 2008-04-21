@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Telescope.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/06/21 17:32:05 $
+   $Revision: 1.8 $
+   $Date: 2008/04/21 06:20:00 $
    $Author: straten $ */
 
 #ifndef __Telescope_Extension_h
 #define __Telescope_Extension_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
 
 namespace Pulsar {
   

@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ITRFExtension.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/03/10 23:12:43 $
-   $Author: nopeer $ */
+   $Revision: 1.10 $
+   $Date: 2008/04/21 06:20:00 $
+   $Author: straten $ */
 
 #ifndef __ITRFExtension_h
 #define __ITRFExtension_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
 
 namespace Pulsar {
   
@@ -43,13 +43,7 @@ namespace Pulsar {
     
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
-    
-    // Text interface to a ITRFExtension
-    class Interface : public TextInterface::To<ITRFExtension>
-    {
-      public:
-	Interface( ITRFExtension *s_instance = NULL );
-    };
+    class Interface;
     
     // get methods
     double get_ant_x() const { return ant_x; }

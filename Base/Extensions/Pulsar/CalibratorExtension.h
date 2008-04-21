@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorExtension.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.11 $
+   $Date: 2008/04/21 06:20:00 $
    $Author: straten $ */
 
 #ifndef __CalibratorExtension_h
 #define __CalibratorExtension_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/Calibrator.h"
 
 namespace Pulsar {
@@ -22,8 +22,8 @@ namespace Pulsar {
   //! Stores Calibrator parameters in an Archive
   /*! This Archive::Extension class implements the storage of Calibrator
     data, enabling a calibrator to be constructed from file. */
-  class CalibratorExtension : public Pulsar::Archive::Extension {
-    
+  class CalibratorExtension : public Archive::Extension
+  {   
   public:
     
     //! Default constructor
@@ -69,6 +69,9 @@ namespace Pulsar {
     void set_centre_frequency (unsigned ichan, double centre_frequency);
     //! Get the centre frequency of the specified channel
     double get_centre_frequency (unsigned ichan) const;
+
+    //! Return a short name
+    std::string get_short_name () const { return "cal"; }
 
     protected:
 

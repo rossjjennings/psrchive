@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorStokes.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.6 $
+   $Date: 2008/04/21 06:20:00 $
    $Author: straten $ */
 
 #ifndef __CalibratorStokes_h
 #define __CalibratorStokes_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
 #include "Stokes.h"
 #include "Estimate.h"
 

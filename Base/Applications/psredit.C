@@ -5,15 +5,17 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/Profile.h"
 #include "Pulsar/Check.h"
+#include "Pulsar/Profile.h"
 
+#include "TextInterface.h"
 #include "dirutil.h"
 #include "strutil.h"
 
 #include <unistd.h>
 
 using namespace std;
+using Pulsar::Archive;
 
 void usage ()
 {
@@ -44,7 +46,7 @@ void usage ()
 
 const char* long_help = 
 "\n"
-"PLEASE NOTE: the list of available parameters is now generated dynamically.\n"
+"PLEASE NOTE: the list of available parameters is generated dynamically.\n"
 "\n"
 "To list all available parameters, simply load an archive file without \n"
 "specifying any command line options. \n"
@@ -66,11 +68,11 @@ int main (int argc, char** argv) try
   Angle::default_type = Angle::Degrees;
 
   // suppress warnings by default
-  Pulsar::Archive::set_verbosity (0);
+  Archive::set_verbosity (0);
 
   // disable sanity checks that try to load Integration data
-  Pulsar::Archive::Check::disable ("Dedispersed");
-  Pulsar::Archive::Check::disable ("DeFaradayed");
+  Archive::Check::disable ("Dedispersed");
+  Archive::Check::disable ("DeFaradayed");
 
   bool verbose = false;
 
@@ -116,13 +118,13 @@ int main (int argc, char** argv) try
 
     case 'v':
       verbose = true;
-      Pulsar::Archive::set_verbosity(2);
+      Archive::set_verbosity(2);
       break;
 
     case 'V':
       verbose = true;
       Error::verbose = true;
-      Pulsar::Archive::set_verbosity(3);
+      Archive::set_verbosity(3);
       break;
 
     default:
@@ -150,8 +152,8 @@ int main (int argc, char** argv) try
 
   for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try
   {
-    Reference::To<Pulsar::Archive> archive;
-    archive = Pulsar::Archive::load(filenames[ifile]);
+    Reference::To<Archive> archive;
+    archive = Archive::load(filenames[ifile]);
 
     Reference::To<TextInterface::Parser> interface = archive->get_interface();
 

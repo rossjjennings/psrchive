@@ -7,7 +7,7 @@
 
 
 #include "Pulsar/DigitiserCounts.h"
-
+#include "TextInterface.h"
 
 
 
@@ -51,6 +51,28 @@ DigitiserCounts::~DigitiserCounts ()
 {}
 
 
+class DigitiserCounts::Interface : public TextInterface::To<DigitiserCounts>
+{
+public:
+  Interface( DigitiserCounts *s_instance )
+  {
+    if( s_instance )
+      set_instance( s_instance );
+
+    add( &DigitiserCounts::get_dig_mode,
+	 "dig_mode", "Digitiser mode" );
+
+    add( &DigitiserCounts::get_nlev,
+	 "nlev", "Number of digitiser levels" );
+    
+    add( &DigitiserCounts::get_npthist, 
+	 "npthist", "Number of points in histogram (I)" );
+    
+    add( &DigitiserCounts::get_diglev, 
+	 "diglev", "Digitiser level-setting mode (AUTO, FIX)" );
+  }
+};
+
 TextInterface::Parser* DigitiserCounts::get_interface()
 {
   return new Interface( this );
@@ -71,7 +93,7 @@ void DigitiserCounts::Append( const DigitiserCounts &src )
     if( subints[0].data.size() != src.subints[0].data.size() )
       throw Error( InvalidState, "DigitiserCounts::Append", "Can\'t append DigitiserCounts with differing nbin" );
 
-  for( int s = 0; s < src.subints.size(); s ++ )
+  for( unsigned s = 0; s < src.subints.size(); s ++ )
     subints.push_back( src.subints[s] );
 }
 
@@ -91,8 +113,8 @@ void DigitiserCounts::Accumulate( const DigitiserCounts &src )
   if( subints[0].data.size() != src.subints[0].data.size() )
     throw Error( InvalidState, "DigitiserCounts::Accumulate", "source number of counts differs" );
 
-  for( int s = 0; s < subints.size(); s ++ )
-    for( int d = 0; d < subints[s].data.size(); d ++ )
+  for( unsigned s = 0; s < subints.size(); s ++ )
+    for( unsigned d = 0; d < subints[s].data.size(); d ++ )
       subints[s].data[d] += src.subints[s].data[d];
 }
 

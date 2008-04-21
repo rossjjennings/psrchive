@@ -4,7 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Backend.h"
+#include "TextInterface.h"
 
 //! Default constructor
 Pulsar::Backend::Backend (const std::string& ext_name)
@@ -34,8 +36,30 @@ const Pulsar::Backend& Pulsar::Backend::operator= (const Backend& backend)
   return *this;
 }
 
-//! Return a text interfaces that can be used to access this instance
+// Text interface to a Backend extension
+class Pulsar::Backend::Interface : public TextInterface::To<Pulsar::Backend>
+{
+public:
+  Interface( Backend *s_instance = NULL )
+  {
+    if( s_instance )
+      set_instance( s_instance );
 
+    add( &Backend::get_name,
+	 &Backend::set_name,
+	 "name", "Name of the backend instrument" );
+    
+    add( &Backend::get_argument,
+	 &Backend::set_argument,
+	 "phase", "Phase convention of backend" );
+    
+    add( &Backend::get_downconversion_corrected,
+	 &Backend::set_downconversion_corrected,
+	 "dcc", "Downconversion conjugation corrected" );
+  }
+};
+
+//! Return a text interfaces that can be used to access this instance
 TextInterface::Parser* Pulsar::Backend::get_interface()
 {
   return new Pulsar::Backend::Interface( this );

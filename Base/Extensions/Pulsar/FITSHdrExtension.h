@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.17 $
-   $Date: 2008/03/10 23:12:43 $
-   $Author: nopeer $ */
+   $Revision: 1.18 $
+   $Date: 2008/04/21 06:20:00 $
+   $Author: straten $ */
 
 #ifndef __FITSHdrExtension_h
 #define __FITSHdrExtension_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
+#include "TextInterface.h"
 
 namespace Pulsar
 {

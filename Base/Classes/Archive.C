@@ -4,11 +4,14 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#include "Pulsar/ArchiveExpert.h"
+#include "Pulsar/ArchiveExtension.h"
+#include "Pulsar/ArchiveInterface.h"
+
 #include "Pulsar/Agent.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
-#include "Pulsar/ArchiveExpert.h"
-#include "Pulsar/ArchiveTI.h"
 #include "Pulsar/Receiver.h"
 
 #include "Pulsar/Predictor.h"
@@ -44,7 +47,10 @@ const Pulsar::Archive::Expert* Pulsar::Archive::expert () const
 //! Return a text interface that can be used to access this instance
 TextInterface::Parser* Pulsar::Archive::get_interface ()
 {
-  return new ArchiveTI( this );
+  if (!text_interface)
+    text_interface = new Interface (this);
+
+  return text_interface;
 }
 
 Pulsar::Archive::Archive ()
@@ -319,12 +325,6 @@ void Pulsar::Archive::uniform_weight (float new_weight)
 {
   for (unsigned isub=0; isub < get_nsubint(); isub++)
     get_Integration(isub) -> uniform_weight (new_weight);
-}
-
-//! A dsp::Transformation into an Archive must be able to call this
-bool Pulsar::Archive::state_is_valid(string& reason) const
-{
-  return Signal::valid_state(get_state(),1,get_npol(),reason);
 }
 
 bool Pulsar::Archive::zero_phase_aligned () const

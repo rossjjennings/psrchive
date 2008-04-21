@@ -4,8 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/Passband.h"
 
+#include "Pulsar/Passband.h"
+#include "TextInterface.h"
 
 using namespace std;
 
@@ -135,6 +136,25 @@ void Pulsar::Passband::range_check (unsigned ipol, unsigned iband,
 
 }
 
+
+// Text interface to a Passband object
+class Pulsar::Passband::Interface : public TextInterface::To<Passband>
+{
+public:
+  Interface( Passband *s_instance = NULL )
+  {
+    if( s_instance )
+      set_instance( s_instance );
+
+    add( &Passband::get_nchan,
+	 "nchan", "Number of channels in bandpass" );
+
+    add( &Passband::get_npol,
+	 "npol", "Number of polarizations in bandpass" );
+  }
+
+  std::string get_short_name () const { return "band"; }
+};
 
 
 //! Return a text interfaces that can be used to access this instance

@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Passband.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/03/10 23:12:43 $
-   $Author: nopeer $ */
+   $Revision: 1.11 $
+   $Date: 2008/04/21 06:20:00 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Passband_h
 #define __Pulsar_Passband_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
 
 namespace Pulsar {
 
@@ -41,13 +41,7 @@ namespace Pulsar {
     
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
-
-    // Text interface to a Passband object
-    class Interface : public TextInterface::To<Passband>
-    {
-      public:
-	Interface( Passband *s_instance = NULL );
-    };
+    class Interface;
 
     //! Get the number of frequency channels in each passband
     unsigned get_nchan () const;

@@ -9,7 +9,7 @@
 #include <string.h>
 
 #include "Pulsar/DigitiserStatistics.h"
-
+#include "TextInterface.h"
 
 // //////////////////////////////////////////////////
 // DigitiserStatistics methods
@@ -86,9 +86,31 @@ void Pulsar::DigitiserStatistics::row::init ()
 }
 
 
+class Pulsar::DigitiserStatistics::Interface
+  : public TextInterface::To<DigitiserStatistics>
+{
+public:
+  Interface( DigitiserStatistics *s_instance = NULL )
+  {
+    if( s_instance )
+      set_instance( s_instance );
+
+    add( &DigitiserStatistics::get_ndigr,
+	 "ndigr", "Number of digitised channels (I)" );
+
+    add( &DigitiserStatistics::get_npar,
+	 "npar", "Number of digitiser parameters" );
+    
+    add( &DigitiserStatistics::get_ncycsub,
+	 "ncycsub", "Number of correlator cycles per subint" );
+
+    add( &DigitiserStatistics::get_diglev,
+	 "diglev", "Digitiser level-setting mode (AUTO, FIX)" );
+  }
+};
 
 //! Return a text interfaces that can be used to access this instance
 TextInterface::Parser* Pulsar::DigitiserStatistics::get_interface()
 {
-	return new Interface( this );
+  return new Interface( this );
 }

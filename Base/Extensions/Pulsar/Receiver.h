@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.27 $
-   $Date: 2008/04/21 01:58:35 $
+   $Revision: 1.28 $
+   $Date: 2008/04/21 06:20:00 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
 #define __ReceiverExtension_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
 #include "Jones.h"
 #include "Stokes.h"
 #include "Angle.h"
@@ -54,13 +54,7 @@ namespace Pulsar {
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
 
-    // Text interface to a receiver object
-    class Interface : public TextInterface::To<Receiver>
-    {
-      public:
-	Interface( Receiver *s_instance = NULL );
-	virtual std::string get_interface_name() { return "ReceiverTI"; }
-    };
+    class Interface;
 
     //! Parses the value of a Receiver attribute from a string
     void parse (std::string text);

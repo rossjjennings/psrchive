@@ -47,7 +47,6 @@ nobase_include_HEADERS = \
 libExtensions_la_SOURCES = \
         Arecibo.C \
         Backend.C \
-        BackendTI.C \
         BinaryPhaseOrder.C \
         BinLngAscOrder.C \
         BinLngPeriOrder.C \
@@ -59,13 +58,11 @@ libExtensions_la_SOURCES = \
         Dedisperse.C \
         DeFaraday.C \
         DigitiserStatistics.C \
-	DigitiserStatisticsTI.C \
 	DigitiserCounts.C \
-	DigitiserCountsTI.C \
         dspReduction.C \
         ExampleExtension.C \
         FeedExtension.C \
-        FeedExtensionTI.C \
+        FeedExtension.C \
         FITSHdrExtension.C \
 	FITSHdrExtensionTI.C \
 	FITSSUBHdrExtension.C \
@@ -76,12 +73,12 @@ libExtensions_la_SOURCES = \
         GBT.C \
         IntegrationOrder.C \
         ITRFExtension.C \
-        ITRFExtensionTI.C \
+        ITRFExtension.C \
         ObsExtension.C \
 	ObsExtensionTI.C \
         Parkes.C \
         Passband.C \
-        PassbandTI.C \
+        Passband.C \
         PeriastronOrder.C \
         Pointing.C \
         PointingTI.C \
@@ -90,7 +87,6 @@ libExtensions_la_SOURCES = \
         ProcHistory.C \
         ProcHistoryTI.C \
         Receiver.C \
-        ReceiverTI.C \
         Receiver_Field.C \
         Receiver_Linear.C \
         Receiver_Native.C \

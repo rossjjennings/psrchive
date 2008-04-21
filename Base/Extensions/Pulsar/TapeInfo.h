@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/TapeInfo.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.3 $
+   $Date: 2008/04/21 06:20:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_TapeInfo_h
 #define __Pulsar_TapeInfo_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
 
 namespace Pulsar {
 

@@ -11,11 +11,12 @@
 #ifndef __ProcHistory_h
 #define __ProcHistory_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
+#include "TextInterface.h"
 
 namespace Pulsar {
   
-  class ProcHistory : public Pulsar::Archive::Extension {
+  class ProcHistory : public Archive::Extension {
     
   public:
     

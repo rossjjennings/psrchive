@@ -7,21 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/DigitiserCounts.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/02/26 00:35:14 $
-   $Author: nopeer $ */
+   $Revision: 1.9 $
+   $Date: 2008/04/21 06:20:00 $
+   $Author: straten $ */
 
 
 
 #ifndef __Pulsar_DigitiserCounts_h
 #define __Pulsar_DigitiserCounts_h
 
-
-
-#include "Pulsar/Archive.h"
-#include <TextInterface.h>
-
-
+#include "Pulsar/ArchiveExtension.h"
 
 using std::string;
 using std::vector;
@@ -56,12 +51,7 @@ namespace Pulsar
 
     //! Get the text interface
     TextInterface::Parser* get_interface();
-
-  class Interface : public TextInterface::To<DigitiserCounts>
-    {
-    public:
-      Interface( DigitiserCounts *s_instance );
-    };
+    class Interface;
 
     //! Class representing an array of digitiser counts for a subint
     class SubintCounts

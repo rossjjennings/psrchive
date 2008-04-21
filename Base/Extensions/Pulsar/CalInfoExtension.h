@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalInfoExtension.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.7 $
+   $Date: 2008/04/21 06:20:00 $
    $Author: straten $ */
 
 #ifndef __CalInfoExtension_h
 #define __CalInfoExtension_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
 
 namespace Pulsar {
   

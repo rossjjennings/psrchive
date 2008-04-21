@@ -7,17 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.172 $
-   $Date: 2008/04/21 01:58:26 $
+   $Revision: 1.173 $
+   $Date: 2008/04/21 06:20:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.172 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.173 $"
 
 #include "IntegrationManager.h"
-#include "TextInterface.h"
 
 #include "sky_coord.h"
 #include "toa.h"
@@ -28,6 +27,12 @@
 #include <iostream>
 
 template<typename T> class Jones;
+
+// forward declaration of text interface
+namespace TextInterface
+{
+  class Parser;
+};
 
 namespace Pulsar
 {
@@ -451,8 +456,8 @@ namespace Pulsar
     //! Returns geometric mean of baseline RMS for each Integration
     float rms_baseline (float dc = 0.4);
 
-    //! A dsp::Transformation into an Archive must be able to call this
-    bool state_is_valid (std::string& reason) const;
+    //! Textual interface to Archive attributes
+    class Interface;
 
     //! Return a text interface that can be used to access this instance
     virtual TextInterface::Parser* get_interface ();
@@ -472,38 +477,7 @@ namespace Pulsar
     //@{
 
     //! Adds features or data to Archive instances
-    /* Archive-derived classes may provide access to additional informaton
-       through Extension-derived objects. */
-    class Extension : public Reference::Able
-    {
-
-    public:
-
-      //! Construct with a name
-      Extension (const char* name);
-
-      //! Destructor
-      virtual ~Extension ();
-
-      //! Return a new copy-constructed instance identical to this instance
-      virtual Extension* clone () const = 0;
-
-      //! Return a text interface that can be used to access this instance
-      virtual TextInterface::Parser* get_interface ()
-      { return 0; }
-
-      //! Return the name of the Extension
-      std::string get_extension_name () const;
-
-      //! Return an abbreviated name that can be typed relatively quickly
-      virtual std::string get_short_name () const;
-
-    protected:
-
-      //! Extension name - useful when debugging
-      std::string extension_name;
-
-    };
+    class Extension;
 
     //! Return the number of extensions available
     virtual unsigned get_nextension () const;
@@ -665,6 +639,9 @@ namespace Pulsar
     //! Expert interface
     Reference::To<Expert> expert_interface;
 
+    //! Text interface
+    Reference::To<TextInterface::Parser> text_interface;
+
   private:
 
     //! The Extensions added to this Archive instance
@@ -698,66 +675,6 @@ namespace Pulsar
     template<class Plugin> class Advocate;
 
   };
-
-  /*! e.g. MyExtension* ext = archive->get<MyExtension>(); */
-  template<class ExtensionType>
-  const ExtensionType* Archive::get () const
-    {
-      const ExtensionType* extension = 0;
-
-      for (unsigned iext=0; iext<get_nextension(); iext++)
-      {
-
-        const Extension* ext = get_extension (iext);
-
-        if (verbose == 3)
-          std::cerr << "Pulsar::Archive::get<Ext> name="
-          << ext->get_extension_name() << std::endl;
-
-        extension = dynamic_cast<const ExtensionType*>( ext );
-
-        if (extension)
-          return extension;
-      }
-
-      if (verbose==3)
-        std::cerr << "Pulsar::Archive::get<Ext> failed to find extension of type "
-        << typeid(extension).name() << std::endl;
-
-      return extension;
-    }
-
-  template<class ExtensionType>
-  ExtensionType* Archive::get ()
-  {
-    const Archive* thiz = this;
-    return const_cast<ExtensionType*>( thiz->get<ExtensionType>() );
-  }
-
-  /*! If the specified ExtensionType does not exist, an atempt is made to
-      add it using add_extension.  If this fails, NULL is returned. */
-  template<class ExtensionType>
-  ExtensionType* Archive::getadd ()
-  {
-    const Archive* thiz = this;
-    ExtensionType* retv = 0;
-    retv = const_cast<ExtensionType*>( thiz->get<ExtensionType>() );
-
-    if (retv)
-      return retv;
-
-    try
-    {
-      Reference::To<ExtensionType> add_ext = new ExtensionType;
-      add_extension (add_ext);
-      return add_ext;
-    }
-    catch (Error& error)
-    {
-      return retv;
-    }
-
-  }
 
 }
 

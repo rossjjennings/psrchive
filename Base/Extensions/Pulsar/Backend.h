@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Backend.h,v $
-   $Revision: 1.14 $
-   $Date: 2008/04/21 01:58:35 $
+   $Revision: 1.15 $
+   $Date: 2008/04/21 06:20:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Backend_h
 #define __Pulsar_Backend_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
 #include "Conventions.h"
 
 namespace Pulsar {
@@ -41,12 +41,7 @@ namespace Pulsar {
     //! Return an abbreviated name that can be typed relatively quickly
     std::string get_short_name () const { return "be"; }
 
-    // Text interface to a Backend extension
-    class Interface : public TextInterface::To<Backend>
-    {
-      public:
-	Interface( Backend *s_instance = NULL );
-    };
+    class Interface;
 
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();

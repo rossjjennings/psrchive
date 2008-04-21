@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/WidebandCorrelator.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/03/10 23:12:43 $
-   $Author: nopeer $ */
+   $Revision: 1.12 $
+   $Date: 2008/04/21 06:20:00 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_WideBandCorrelator_h
 #define __Pulsar_WideBandCorrelator_h
 
 #include "Pulsar/Backend.h"
+#include "TextInterface.h"
 
 namespace Pulsar {
   

@@ -7,14 +7,14 @@
  ***************************************************************************/
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/IntegrationOrder.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.12 $
+   $Date: 2008/04/21 06:20:00 $
    $Author: straten $ */
                                                                                 
 #ifndef __IntegrationOrder_h
 #define __IntegrationOrder_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveExtension.h"
 
 namespace Pulsar {
   
@@ -24,7 +24,7 @@ namespace Pulsar {
     inherited by developers who wish to define a new way to index the
     Integrations in their Archive */
   
-  class IntegrationOrder : public Pulsar::Archive::Extension {
+  class IntegrationOrder : public Archive::Extension {
                                                                                 
   public:
     
@@ -74,6 +74,9 @@ namespace Pulsar {
     /*! Scrunch together this many consecutive Integrations in an Archive 
       with this IntegrationOrder */
     virtual void combine (Archive*, unsigned) = 0;
+
+    //! Return a short name
+    std::string get_short_name () const { return "order"; }
 
   protected:
 
