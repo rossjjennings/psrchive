@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotLabel.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/02/22 14:07:09 $
+   $Revision: 1.13 $
+   $Date: 2008/04/21 06:27:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotLabel_h
@@ -97,12 +97,6 @@ namespace Pulsar {
     //! Plot a single row of the label
     void row (const std::string&, unsigned irow, unsigned nrow, float side);
 
-    //! Get the text interface to the archive class
-    ArchiveTI* get_interface (const Archive*);
-
-  private:
-
-    Reference::To<ArchiveTI> archive_interface;
   };
 
 }

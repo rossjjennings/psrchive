@@ -45,8 +45,11 @@ Pulsar::PlotLabel::plot ( const Archive* data, const string& label, float side)
   
   for (unsigned i=0; i < labels.size(); i++)
   {
-    labels[i] = substitute( labels[i], get_interface(data) );
+    labels[i] = substitute( labels[i], 
+			    const_cast<Archive*>(data)->get_interface() );
+
     labels[i] = evaluate( labels[i] );
+
     row (labels[i], i, labels.size(), side);
   }
 }
@@ -108,12 +111,3 @@ void Pulsar::PlotLabel::row (const string& label,
   cpgmtxt ("T", get_displacement(irow), coord, side, label.c_str());
 }
 
-
-//! Get the text interface to the archive class
-Pulsar::ArchiveTI* Pulsar::PlotLabel::get_interface (const Archive* data)
-{
-  if (!archive_interface)
-    archive_interface = new Interpreter::Variables;
-  archive_interface->set_instance( const_cast<Archive*>(data) );
-  return archive_interface;
-}
