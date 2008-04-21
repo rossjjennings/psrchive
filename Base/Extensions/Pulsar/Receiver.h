@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.26 $
-   $Date: 2008/03/10 23:12:43 $
-   $Author: nopeer $ */
+   $Revision: 1.27 $
+   $Date: 2008/04/21 01:58:35 $
+   $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
 #define __ReceiverExtension_h
@@ -47,6 +47,9 @@ namespace Pulsar {
 
     //! Clone method
     Receiver* clone () const { return new Receiver(*this); }
+
+    //! Return an abbreviated name that can be typed relatively quickly
+    std::string get_short_name () const { return "rcvr"; }
 
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();

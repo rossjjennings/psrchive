@@ -21,16 +21,16 @@ Backend::Interface::Interface ( Backend *s_instance )
     set_instance( s_instance );
 
   add( &Backend::get_name,
-         &Backend::set_name,
-         "name", "Name of the backend instrument" );
+       &Backend::set_name,
+       "name", "Name of the backend instrument" );
 
   add( &Backend::get_argument,
-         &Backend::set_argument,
-         "phase", "Phase convention of backend" );
+       &Backend::set_argument,
+       "phase", "Phase convention of backend" );
 
   add( &Backend::get_downconversion_corrected,
-         &Backend::set_downconversion_corrected,
-         "dcc", "Downconversion conjugation corrected" );
+       &Backend::set_downconversion_corrected,
+       "dcc", "Downconversion conjugation corrected" );
 }
 
 
