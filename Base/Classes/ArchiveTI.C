@@ -1,29 +1,16 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/ArchiveTI.h"
 
-#include "Pulsar/Receiver.h"
-#include "Pulsar/Backend.h"
+#include "Pulsar/ArchiveTI.h"
 #include "Pulsar/IntegrationTI.h"
 
 #include "Pulsar/FITSAlias.h"
 
-Pulsar::ArchiveTI::ArchiveTI ()
-{
-  setup();
-}
-
 Pulsar::ArchiveTI::ArchiveTI( Archive *c )
-{
-  setup();
-  set_instance( c );
-}
-
-void Pulsar::ArchiveTI::setup( void )
 {
   add( &Archive::get_filename, "file",    "Name of the file" );
 
@@ -87,20 +74,29 @@ void Pulsar::ArchiveTI::setup( void )
   add( &Archive::integration_length,
        "length", "The full duration of the observation (s)" );
   
-  import( "rcvr", Pulsar::Receiver::Interface(),
-          (Receiver*(Archive::*)()) &Archive::get<Receiver> );
-
-  import( "be", Pulsar::Backend::Interface(),
-          (Backend*(Archive::*)()) &Archive::get<Backend> );
-
   import( "int", IntegrationTI(),
           (Integration*(Archive::*)(unsigned)) &Archive::get_Integration,
           &Archive::get_nsubint );
 
   set_aliases( new FITSAlias );
 
+  if (c)
+    set_instance (c);
 }
 
+//! Set the instance
+void Pulsar::ArchiveTI::set_instance (Pulsar::Archive* c) 
+{
+  TextInterface::To<Archive>::set_instance (c);
+
+  nested_clean();
+
+  for (unsigned iext=0; iext < instance->get_nextension(); iext++)
+  {
+    Archive::Extension* extension = instance->get_extension(iext);
+    nested_import (extension->get_short_name(), extension->get_interface());
+  }
+}
 
 TextInterface::Parser *Pulsar::ArchiveTI::clone()
 {

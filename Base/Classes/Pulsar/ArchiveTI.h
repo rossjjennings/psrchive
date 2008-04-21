@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Attic/ArchiveTI.h,v $
-   $Revision: 1.12 $
-   $Date: 2007/10/02 05:19:26 $
+   $Revision: 1.13 $
+   $Date: 2008/04/21 01:58:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveTI_h
@@ -26,16 +26,13 @@ namespace Pulsar
 
   public:
 
-    //! Constructor
-    ArchiveTI ();
+    //! Default constructor that takes an optional instance
+    ArchiveTI ( Archive* = 0 );
 
-    //! Constructor that takes an instance
-    ArchiveTI ( Archive *c );
+    //! Set the instance to which this interface interfaces
+    void set_instance (Archive*) ;
 
-    //! setup the get/set methods
-    void setup( void );
-    
-    //! clone this ti
+    //! clone this text interface
     TextInterface::Parser *clone();
     
     //! Get the interface name
