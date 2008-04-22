@@ -4,10 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "rhythm.h"
 #include "qt_fileParams.h"
 #include "qt_editParams.h"
 #include "tempo++.h"
+#include "strutil.h"
 
 #include <qapplication.h>
 #include <qpopupmenu.h> 
