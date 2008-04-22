@@ -16,11 +16,12 @@
 #include "Pulsar/Plot.h"
 #include "Pulsar/PlotFactory.h"
 #include "Pulsar/Archive.h"
-#include "Pulsar/TextInterface.h"
 #include "Pulsar/Interpreter.h"
 
 #include "plotItem.h"
 #include "interfacePanel.h"
+
+#include "TextInterface.h"
 #include "Error.h"
 
 #include "cpgplot.h"
