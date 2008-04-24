@@ -152,8 +152,6 @@ public:
     add( &Passband::get_npol,
 	 "npol", "Number of polarizations in bandpass" );
   }
-
-  std::string get_short_name () const { return "band"; }
 };
 
 

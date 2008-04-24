@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Passband.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/04/21 06:20:00 $
+   $Revision: 1.12 $
+   $Date: 2008/04/24 02:35:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Passband_h
@@ -42,6 +42,8 @@ namespace Pulsar {
     //! Return a text interfaces that can be used to access this instance
     TextInterface::Parser* get_interface();
     class Interface;
+
+    std::string get_short_name () const { return "band"; }
 
     //! Get the number of frequency channels in each passband
     unsigned get_nchan () const;
