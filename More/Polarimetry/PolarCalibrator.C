@@ -68,9 +68,9 @@ string Pulsar::PolarCalibrator::Info::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:
-    return "Gain (C\\d0\\u)";
+    return "G (c\\d0\\u)";
   case 1:
-    return "Boost, sinh\\(2128)\\.m\\b\\u \\(0832)";
+    return "sinh\\(2128)\\.m\\b\\u \\(0832)";
   case 2:
     return "\\gf\\dk\\u (rad.)";
   default:
