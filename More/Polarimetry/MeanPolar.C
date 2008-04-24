@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/MeanPolar.h"
 #include "MEAL/Polar.h"
 
@@ -14,9 +15,15 @@ void Calibration::MeanPolar::update (MEAL::Complex2* model) const
     throw Error (InvalidParam, "Calibration::MeanPolar::update",
 		 "Complex2 model is not a Polar");
 
-  polar->set_gain (mean_gain.get_Estimate());
+  // avoid setting the gain to zero if nothing has been added to the mean
+  Estimate<double> gain = mean_gain.get_Estimate();
+  if (gain.get_value() == 0)
+    polar->set_gain (1.0);
+  else
+    polar->set_gain (gain);
 
-  for (unsigned i=0; i<3; i++) {
+  for (unsigned i=0; i<3; i++)
+  {
     polar->set_boostGibbs (i, mean_boostGibbs[i].get_Estimate());
     polar->set_rotationEuler (i, 0.5 * mean_rotationEuler[i].get_Estimate());
   }
@@ -31,7 +38,8 @@ void Calibration::MeanPolar::integrate (const MEAL::Complex2* model)
 
   mean_gain += polar->get_gain ();
 
-  for (unsigned i=0; i<3; i++) {
+  for (unsigned i=0; i<3; i++)
+  {
     mean_boostGibbs[i] += polar->get_boostGibbs (i);
     mean_rotationEuler[i] += 2.0 * polar->get_rotationEuler (i);
   }
