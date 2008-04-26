@@ -61,6 +61,7 @@ void usage ()
     " -D dev       specify PGPLOT device\n"
     " -d           use the Degree of Polarization Calibrator\n"
     " -f           treat all archives as members of a fluxcal observation\n"
+    " -j           print Jones matrix elements of calibrator solution \n"
     " -p           use the polar model\n"
     " -P           produce publication-quality plots\n"
     " -S pcm.out   combine each calibrator with the pcm solution\n"
@@ -104,6 +105,7 @@ int main (int argc, char** argv)
   bool plot_calibrator_solution = false;
   bool plot_calibrator_stokes = false;
   bool plot_specified = false;
+  bool print_jones = false;
 
   //
   float cross_scale_factor = 1.0;
@@ -120,10 +122,10 @@ int main (int argc, char** argv)
   bool verbose = false;
   char c;
 
-  while ((c = getopt(argc, argv, "2:a:c:CD:dfhM:n:Pr:S:pqvV")) != -1)  {
-
-    switch (c)  {
-
+  while ((c = getopt(argc, argv, "2:a:c:CD:dfhjM:n:Pr:S:pqvV")) != -1)
+  {
+    switch (c)
+    {
     case '2':
       if (optarg[0] == 'm')
 	cross_scale_factor = 2.0;
@@ -143,8 +145,8 @@ int main (int argc, char** argv)
       archive_class = optarg;
       break;
 
-    case 'c': {
-
+    case 'c':
+    {
       unsigned ichan1 = 0;
       unsigned ichan2 = 0;
 
@@ -179,14 +181,19 @@ int main (int argc, char** argv)
       fluxcal = new Pulsar::FluxCalibrator;
       break;
 
+    case 'j':
+      print_jones = true;
+      break;
+
     case 'M':
       metafile = optarg;
       break;
 
-    case 'n': {
-
+    case 'n':
+    {
       unsigned when = 0;
-      switch (optarg[2]) {
+      switch (optarg[2])
+      {
       case 'c':
 	when = 1; break;
       case 'u':
@@ -196,7 +203,8 @@ int main (int argc, char** argv)
       }
 
       unsigned what = 0;
-      switch (optarg[1]) {
+      switch (optarg[1])
+      {
       case 's':
 	what = Stokes; break;
       case 'p':
@@ -205,7 +213,8 @@ int main (int argc, char** argv)
 	cerr << "invalid plot 'what' code=" << optarg[1] << endl; return -1;
       }
 
-      switch (optarg[0]) {
+      switch (optarg[0])
+      {
       case 'c':
 	CAL[what][when] = true; break;
       case 's':
@@ -226,7 +235,8 @@ int main (int argc, char** argv)
       single_axis = false;
       break;
 
-    case 'S': {
+    case 'S':
+    {
       Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(optarg);
       hybrid = new Pulsar::HybridCalibrator (data);
       break;
@@ -295,7 +305,8 @@ int main (int argc, char** argv)
   
   Pulsar::CalibratorPlotter plotter;
 
-  if (publication) {
+  if (publication)
+  {
     plotter.npanel = 5;
     plotter.between_panels = 0.08;
     cpgsvp (.25,.75,.15,.95);
@@ -305,20 +316,20 @@ int main (int argc, char** argv)
 
   Pulsar::CalibratorSpectrum archplot;
 
-  for (unsigned ifile=0; ifile<filenames.size(); ifile++) try {
-
+  for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
+  {
     if (verbose)
       cerr << "pacv: Loading " << filenames[ifile] << endl;
 
     input = Pulsar::Archive::load( filenames[ifile] );
 
-    if (input->get_type() == Signal::Calibrator) {
-
+    if (input->get_type() == Signal::Calibrator)
+    {
       cerr << "pacv: " << filenames[ifile] << " is a processed Calibrator"
            << endl;
 
-      if (input->get<Pulsar::FluxCalibratorExtension>()) {
-
+      if (input->get<Pulsar::FluxCalibratorExtension>())
+      {
         cerr << "pacv: constructing FluxCalibrator from Extension" << endl;
         fluxcal = new Pulsar::FluxCalibrator (input);
 
@@ -340,8 +351,8 @@ int main (int argc, char** argv)
       cerr << "pacv: Archive Calibrator with nchan=" 
 	   << calibrator->get_nchan() << endl;
 
-      if (!plot_calibrator_stokes) {
-
+      if (!plot_calibrator_stokes)
+      {
 	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
 	  calibrator->set_transformation_invalid (zapchan[ichan]);
 	
@@ -352,13 +363,12 @@ int main (int argc, char** argv)
 	plotter.plot (calibrator);
 
         calibrator_stokes = 0;
-
       }
       else
         calibrator_stokes = input->get<Pulsar::CalibratorStokes>();
 
-      if (calibrator_stokes) {
-
+      if (calibrator_stokes)
+      {
 	cerr << "pacv: Plotting CalibratorStokes" << endl;
 
 	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
@@ -369,35 +379,47 @@ int main (int argc, char** argv)
 		      calibrator->get_nchan(),
 		      calibrator->get_Archive()->get_centre_frequency(),
 		      calibrator->get_Archive()->get_bandwidth() );
-	
+      }
+
+      if (print_jones)
+      {
+	cerr << "pacv: Printing Jones matrix elements" << endl;
+	for (unsigned ichan=0; ichan<calibrator->get_nchan(); ichan++)
+	{
+	  Jones<double> xform;
+	  if (calibrator->get_transformation_valid (ichan))
+	    xform = calibrator->get_transformation(ichan)->evaluate();
+	  
+	  cout << ichan << " " << xform << endl;
+	}
       }
 
       continue;
-
     }
 
-    for (unsigned ichan=0; ichan<zapchan.size(); ichan++) {
+    for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
+    {
       if (verbose)
 	cerr << "pacv: Zapping channel " << zapchan[ichan] << endl;
 
       for (unsigned isub=0; isub<input->get_nsubint(); isub++)
 	input->get_Integration(isub)->set_weight (zapchan[ichan], 0.0);
-
     }
 
-    if (cross_scale_factor != 1.0) {
-
+    if (cross_scale_factor != 1.0)
+    {
       cerr << "Scaling cross products by " << cross_scale_factor << endl;
 
       for (unsigned isub=0; isub < input->get_nsubint(); isub++)
-	for (unsigned ichan=0; ichan < input->get_nchan(); ichan++) {
+	for (unsigned ichan=0; ichan < input->get_nchan(); ichan++)
+	{
 	  input->get_Profile (isub, 2, ichan) -> scale (cross_scale_factor);
 	  input->get_Profile (isub, 3, ichan) -> scale (cross_scale_factor);
 	}
-
     }
 
-    if (fluxcal) {
+    if (fluxcal)
+    {
       if (verbose)
 	cerr << "pacv: Adding Archive to FluxCalibrator" << endl;
       
@@ -409,15 +431,17 @@ int main (int argc, char** argv)
 
     string cal = "uncalibrated";
 
-    for (unsigned ical=0; ical < 2; ical++) {
-
-      if (CAL[Stokes][ical]) {
+    for (unsigned ical=0; ical < 2; ical++)
+    {
+      if (CAL[Stokes][ical])
+      {
 	cerr << "pacv: Plotting " << cal << " CAL Stokes parameters" << endl;
 	cpgpage ();
 	archplot.plot (input);
       }
       
-      if (CAL[Ip][ical]) {
+      if (CAL[Ip][ical])
+      {
 	cerr << "pacv: Plotting " << cal << " CAL total and polarized flux"
 	     << endl;
 	cpgpage ();
@@ -426,7 +450,8 @@ int main (int argc, char** argv)
 	archplot.set_plot_Ip (false);
       }
       
-      if (SYS[Stokes][ical]) {
+      if (SYS[Stokes][ical])
+      {
 	cerr << "pacv: Plotting " << cal << " SYS Stokes parameters"
 	     << endl;
 	cpgpage ();
@@ -435,7 +460,8 @@ int main (int argc, char** argv)
 	archplot.set_plot_low (false);    
       }
       
-      if (SYS[Ip][ical]) {
+      if (SYS[Ip][ical])
+      {
 	cerr << "pacv: Plotting " << cal << " SYS total and polarized flux"
 	     << endl;
 	cpgpage ();
@@ -452,7 +478,8 @@ int main (int argc, char** argv)
       if (verbose)
 	cerr << "pacv: Constructing PolnCalibrator" << endl;
       
-      if (hybrid) {
+      if (hybrid)
+      {
 	hybrid -> set_reference_observation 
 	  ( new Pulsar::SingleAxisCalibrator (input) );
 	calibrator = hybrid;
@@ -469,12 +496,11 @@ int main (int argc, char** argv)
       
       calibrator -> calibrate (input);
 
-      if (plot_calibrator_solution) {
-
+      if (plot_calibrator_solution)
+      {
 	cerr << "pacv: Plotting calibrator solution parameters" << endl;
 	cpgpage ();
 	plotter.plot (calibrator);
-      
       }
 
       if (dop_calibrator)
@@ -487,10 +513,7 @@ int main (int argc, char** argv)
       string newname = replace_extension (filenames[ifile], "pacv");
       cerr << "pacv: Unloading " << newname << endl;
       output -> unload (newname);
-
     }
-
-      
   }
   catch (Error& error) {
     cerr << "pacv: Error during " << filenames[ifile] << error << endl;
@@ -500,7 +523,8 @@ int main (int argc, char** argv)
     cerr << "pacv: An unknown exception was thrown" << endl;
   }
   
-  if (fluxcal) try {
+  if (fluxcal) try
+  {
     cerr << "pacv: Plotting FluxCalibrator" << endl;
     plotter.plot (fluxcal);
 
