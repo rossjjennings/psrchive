@@ -813,6 +813,9 @@ namespace TextInterface {
     //! Get the named value
     std::string get_value (const std::string& name) const;
 
+    //! Get the named value and update name for display purposes
+    std::string get_name_value (std::string& name) const;
+
     //! Set the named value
     void set_value (const std::string& name, const std::string& value);
 

@@ -24,7 +24,11 @@ string TextInterface::Parser::process (const string& command)
 
   // if no equals sign is present, assume that command is get key
   if (set == string::npos)
-    return indentation + command + "=" + get_value (command);
+  {
+    string name = command;
+    string value = get_name_value (name);
+    return indentation + name + "=" + value;
+  }
 
   // string before the equals sign
   string before = command.substr (0,set);
@@ -125,16 +129,27 @@ TextInterface::Parser::Parser ()
 //! Get the value of the value
 string TextInterface::Parser::get_value (const string& name) const
 {
+  string temp = name;
+  return get_name_value (temp);
+}
+
+//! Get the value of the value
+string TextInterface::Parser::get_name_value (string& name) const
+{
   // an optional precision may be specified
   std::string::size_type dot = name.find('%');
 
   if (dot == std::string::npos)
     return find(name)->get_value();
 
-  ModifyRestore<unsigned> temp ( tostring_precision,
-				 fromstring<unsigned> (name.substr(dot+1)) );
+  // strip off the precision
+  string precision = name.substr(dot+1);
+  name = name.substr(0,dot);
 
-  return find(name.substr(0,dot))->get_value();
+  ModifyRestore<unsigned> temp ( tostring_precision,
+				 fromstring<unsigned> (precision) );
+
+  return find(name)->get_value();
 }
 
 //! Set the value of the value
