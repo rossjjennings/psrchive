@@ -45,20 +45,33 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
 
     vector<double> covariance;
 
-    unsigned nchan = get_nchan();
-    for (unsigned ichan=0; ichan < nchan; ichan++) {
+    bool first = true;
 
-      if ( calibrator->get_transformation_valid(ichan) ) {
+    unsigned nchan = get_nchan();
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      if ( calibrator->get_transformation_valid(ichan) )
+      {
         copy( get_transformation(ichan), 
 	      calibrator->get_transformation(ichan) );
 	set_valid (ichan, true);
+
+	if (Archive::verbose && first)
+	{
+	  const MEAL::Function* f = calibrator->get_transformation(ichan);
+	  for (unsigned i=0; i<f->get_nparam(); i++)
+	    cerr << i << " " << f->get_param_name(i) << endl;
+	}
+	first = false;
       }
-      else {
+      else
+      {
         set_valid (ichan, false);
 	continue;
       }
 
-      if ( has_covariance ) {
+      if ( has_covariance )
+      {
 	calibrator->get_covariance( ichan, covariance );
 	get_transformation(ichan)->set_covariance( covariance );
       }
