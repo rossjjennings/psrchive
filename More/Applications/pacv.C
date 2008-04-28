@@ -290,10 +290,13 @@ int main (int argc, char** argv)
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  cpgbeg (0, device.c_str(), 0, 0);
-  cpgask(1);
-  cpgsvp (.1,.9, .1,.9);
-  
+  if (!print_jones)
+  {
+    cpgbeg (0, device.c_str(), 0, 0);
+    cpgask(1);
+    cpgsvp (.1,.9, .1,.9);
+  }
+
   // the input calibrator archive
   Reference::To<Pulsar::Archive> input;
   // the output calibrator archive
@@ -351,6 +354,20 @@ int main (int argc, char** argv)
       cerr << "pacv: Archive Calibrator with nchan=" 
 	   << calibrator->get_nchan() << endl;
 
+      if (print_jones)
+      {
+	cerr << "pacv: Printing Jones matrix elements" << endl;
+	for (unsigned ichan=0; ichan<calibrator->get_nchan(); ichan++)
+	{
+	  Jones<double> xform;
+	  if (calibrator->get_transformation_valid (ichan))
+	    xform = calibrator->get_transformation(ichan)->evaluate();
+	  
+	  cout << ichan << " " << xform << endl;
+	}
+	continue;
+      }
+
       if (!plot_calibrator_stokes)
       {
 	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
@@ -379,19 +396,6 @@ int main (int argc, char** argv)
 		      calibrator->get_nchan(),
 		      calibrator->get_Archive()->get_centre_frequency(),
 		      calibrator->get_Archive()->get_bandwidth() );
-      }
-
-      if (print_jones)
-      {
-	cerr << "pacv: Printing Jones matrix elements" << endl;
-	for (unsigned ichan=0; ichan<calibrator->get_nchan(); ichan++)
-	{
-	  Jones<double> xform;
-	  if (calibrator->get_transformation_valid (ichan))
-	    xform = calibrator->get_transformation(ichan)->evaluate();
-	  
-	  cout << ichan << " " << xform << endl;
-	}
       }
 
       continue;
