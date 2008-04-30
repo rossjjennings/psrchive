@@ -213,7 +213,7 @@ void Pulsar::Interpreter::init()
       "weight", "weight each profile using the specified scheme",
       "usage: weight <time|snr> \n"
       "  time              weight each sub-integration by its duration \n"
-      "  snr               weight each profile by its S/N \n");
+      "  snr               weight each profile by its S/N squared\n");
 
   add_command 
     ( &Interpreter::scale, 's',
