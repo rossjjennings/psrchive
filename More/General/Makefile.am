@@ -66,6 +66,7 @@ nobase_include_HEADERS = \
 	Pulsar/PlotOptions.h \
 	Pulsar/ProfileInterpreter.h \
 	Pulsar/ProfilePCA.h \
+	Pulsar/ProfileShiftFit.h \
 	Pulsar/ProfileStats.h \
         Pulsar/ProfileWeightFunction.h \
 	Pulsar/RiseFall.h \
@@ -177,6 +178,7 @@ libGeneral_la_SOURCES = \
 	PhaseWeightShift.C \
         PhaseWeight.C \
 	ProfileInterpreter.C \
+	ProfileShiftFit.C \
 	ProfileStats.C \
 	Profile_baseline.C \
         Profile_convolve.C \
