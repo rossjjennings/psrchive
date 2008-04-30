@@ -88,9 +88,9 @@ void MEAL::Rotation::calculate (Jones<double>& result,
       dphi_dvecti = vect[i] / phi;
 
     Vector<3, double> dvect = dsinc_phi * dphi_dvecti * vect;
+    dvect[i] += sinc_phi;
 
     Quaternion<double, Unitary> drotation_dvecti (dcos_phi_dvecti, dvect);
-    drotation_dvecti[i+1] += sinc_phi;
     
     // set the partial derivative wrt this parameter
     (*grad)[i] = convert (drotation_dvecti);
