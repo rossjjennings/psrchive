@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Polar.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.9 $
+   $Date: 2008/04/30 15:32:33 $
    $Author: straten $ */
 
 #ifndef __MEAL_Polar_H
@@ -27,7 +27,8 @@ namespace MEAL {
 
   //! Represents the polar decomposition of a transformation
   /*! The transformation is parameterized by the gain, G, the boost vector,
-    \f${\bf b}=\sinh\beta\hat{m}\f$, and three rotations, \f$\phi_i\f$. */
+    \f${\bf b}=\sinh\beta\hat{m}\f$, and the rotation vector,
+    \f${\bf r}=\phi_i\hat{n}\f$. */
   class Polar : public ProductRule<Complex2> {
 
   public:
@@ -47,24 +48,20 @@ namespace MEAL {
     //! Get the instrumental gain, \f$ G \f$, in calibrator voltage units
     Estimate<double> get_gain () const;
 
-    //! Get the specified component of the Boost Gibbs vector
-    Estimate<double> get_boostGibbs (unsigned i) const;
+    //! Get the specified component of the boost vector
+    Estimate<double> get_boost (unsigned i) const;
     
-    //! Get the specified basis rotation in radians
-    Estimate<double> get_rotationEuler (unsigned i) const;
+    //! Get the specified component of the rotation vector
+    Estimate<double> get_rotation (unsigned i) const;
 
     //! Set the instrumental gain, \f$ G \f$, in calibrator voltage units
     void set_gain (const Estimate<double>& gain);
 
-    //! Set the specified component of the Boost Gibbs vector
-    void set_boostGibbs (unsigned i, const Estimate<double>& b_i);
+    //! Set the specified component of the boost vector
+    void set_boost (unsigned i, const Estimate<double>& b_i);
     
-    //! Set the specified basis rotation angle in radians
-    void set_rotationEuler (unsigned i, const Estimate<double>& phi_i);
- 
-    //! Given the source and sky states, solve for most of the parameters
-    void solve (Quaternion<Estimate<double>, Hermitian>& source,
-		Quaternion<Estimate<double>, Hermitian>& sky);
+    //! Set the specified component of the rotation vector
+    void set_rotation (unsigned i, const Estimate<double>& phi_i);
 
     //! Polar decompose the Jones matrix
     void solve (Jones< Estimate<double> >& jones);

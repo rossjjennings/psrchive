@@ -24,8 +24,8 @@ void Calibration::MeanPolar::update (MEAL::Complex2* model) const
 
   for (unsigned i=0; i<3; i++)
   {
-    polar->set_boostGibbs (i, mean_boostGibbs[i].get_Estimate());
-    polar->set_rotationEuler (i, 0.5 * mean_rotationEuler[i].get_Estimate());
+    polar->set_boost (i, mean_boost[i].get_Estimate());
+    polar->set_rotation (i, 0.5 * mean_rotation[i].get_Estimate());
   }
 }
 
@@ -40,8 +40,8 @@ void Calibration::MeanPolar::integrate (const MEAL::Complex2* model)
 
   for (unsigned i=0; i<3; i++)
   {
-    mean_boostGibbs[i] += polar->get_boostGibbs (i);
-    mean_rotationEuler[i] += 2.0 * polar->get_rotationEuler (i);
+    mean_boost[i] += polar->get_boost (i);
+    mean_rotation[i] += 2.0 * polar->get_rotation (i);
   }
 }
 

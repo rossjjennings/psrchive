@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/MeanPolar.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.6 $
+   $Date: 2008/04/30 15:32:33 $
    $Author: straten $ */
 
 #ifndef __Calibration_MeanPolar_H
@@ -36,10 +36,10 @@ namespace Calibration {
     MeanEstimate<double> mean_gain;
 
     //! Best estimate of receiver boost
-    MeanEstimate<double> mean_boostGibbs[3];
+    MeanEstimate<double> mean_boost[3];
 
     //! Best estimate of receiver rotations
-    MeanRadian<double> mean_rotationEuler[3];
+    MeanRadian<double> mean_rotation[3];
 
   };
 

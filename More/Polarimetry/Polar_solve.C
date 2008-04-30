@@ -55,8 +55,8 @@ void MEAL::Polar::solve (Jones< Estimate<double> >& j)
   set_gain( determinant.real().get_Estimate() );
 
   for (unsigned i=0; i<3; i++) {
-    set_boostGibbs( i, boost[i+1].get_Estimate() );
-    set_rotationEuler( i, rotation[i+1].get_Estimate() );
+    set_boost( i, boost[i+1].get_Estimate() );
+    set_rotation( i, rotation[i+1].get_Estimate() );
   } 
 }
 

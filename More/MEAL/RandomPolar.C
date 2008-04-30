@@ -28,7 +28,7 @@ void MEAL::RandomPolar::get (Polar* polar)
   polar->set_gain( random<double>(min_gain, max_gain) );
 
   for (unsigned i=0; i < 3; i++) {
-    polar->set_boostGibbs( i, random<double>(max_abs_boost) );
-    polar->set_rotationEuler( i, random<double>(max_abs_rotation) );
+    polar->set_boost( i, random<double>(max_abs_boost) );
+    polar->set_rotation( i, random<double>(max_abs_rotation) );
   }
 }
