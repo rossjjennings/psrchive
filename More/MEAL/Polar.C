@@ -130,3 +130,35 @@ void MEAL::Polar::set_rotation (unsigned i, const Estimate<double>& phi_i)
   rotation->set_Estimate (i, phi_i);
 }
 
+//! Provide access to the gain transformation
+const MEAL::Gain* MEAL::Polar::get_gain_transformation () const
+{
+  return gain;
+}
+
+MEAL::Gain* MEAL::Polar::get_gain_transformation ()
+{
+  return gain;
+}
+
+//! Provide access to the boost transformation
+const MEAL::Boost* MEAL::Polar::get_boost_transformation () const
+{
+  return boost;
+}
+
+MEAL::Boost* MEAL::Polar::get_boost_transformation ()
+{
+  return boost;
+}
+
+//! Provide access to the rotation transformation
+const MEAL::Rotation* MEAL::Polar::get_rotation_transformation () const
+{
+  return rotation;
+}
+
+MEAL::Rotation* MEAL::Polar::get_rotation_transformation ()
+{
+  return rotation;
+}

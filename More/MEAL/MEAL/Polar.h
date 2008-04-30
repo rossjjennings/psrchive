@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Polar.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/04/30 15:32:33 $
+   $Revision: 1.10 $
+   $Date: 2008/04/30 17:12:37 $
    $Author: straten $ */
 
 #ifndef __MEAL_Polar_H
@@ -74,6 +74,18 @@ namespace MEAL {
 
     //! Return the name of the class
     std::string get_name () const;
+
+    //! Provide access to the gain transformation
+    const Gain* get_gain_transformation () const;
+    Gain* get_gain_transformation ();
+
+    //! Provide access to the boost transformation
+    const Boost* get_boost_transformation () const;
+    Boost* get_boost_transformation ();
+
+    //! Provide access to the rotation transformation
+    const Rotation* get_rotation_transformation () const;
+    Rotation* get_rotation_transformation ();
 
   protected:
 
