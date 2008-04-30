@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/InterpreterVariables.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/04/21 06:25:13 $
+   $Revision: 1.7 $
+   $Date: 2008/04/30 13:26:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_InterpreterVariables_h
@@ -16,22 +16,19 @@
 
 #include "Pulsar/Interpreter.h"
 #include "Pulsar/ArchiveInterface.h"
+
 #include <string>
-
-
-using std::string;
-
-
 
 namespace Pulsar {
 
   //! The Archive Text Interface used by the Interpreter
-  class Interpreter::Variables : public Archive::Interface {
+  class Interpreter::Variables : public TextInterface::To<Archive>
+  {
 
   public:
 
     //! Default constructor
-    Variables ();
+    Variables (Archive* = 0);
 
     //! Get the signal-to-noise ratio
     double get_snr (const Archive*) const;
@@ -43,11 +40,8 @@ namespace Pulsar {
     unsigned get_cal_ntrans (const Archive*) const;
 
     //! Get the predicted level of 2-bit distortion
-    double get_2bit_dist (const Archive* archive) const;
+    double get_2bit_dist (const Archive*) const;
     
-    //! Get the name of the receiver
-    string get_rcvr( const Archive * ) const;
-
   };
 
 }
