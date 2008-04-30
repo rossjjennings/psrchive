@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Rotation.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.10 $
+   $Date: 2008/04/30 15:32:38 $
    $Author: straten $ */
 
 #ifndef __MEAL_Rotation_H
@@ -21,10 +21,14 @@ namespace MEAL {
 
   class OneParameter;
 
-  //! Represents a rotation (unitary, birefringent) transformation
+  //! Represents a rotation (unitary transformation) about a free axis
   /*! This class represents a rotation through angle, \f$\phi\f$,
-    about a free axis, \f$\hat n\f$.  The three free parameters are
-    the imaginary components of the rotation quaternion. */
+    about a unit vector, \f$\hat n\f$.  The three free parameters are
+    the components of the rotation vector, \f${\bf r}=\phi\hat n\f$,
+    which are related to the quaternion representation by
+
+    \f$ Q = [\cos|{\bf r}|, i\, {\rm sinc}|{\bf r}| {\bf r}]\f$
+  */
   class Rotation : public Complex2 {
 
   public:
