@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Rotation1.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/11/28 05:58:41 $
+   $Revision: 1.6 $
+   $Date: 2008/04/30 15:32:42 $
    $Author: straten $ */
 
 #ifndef __MEAL_Rotation1_H
@@ -21,7 +21,7 @@ namespace MEAL {
 
   class OneParameter;
 
-  //! Represents a rotation (unitary, birefringent) transformation
+  //! Represents a rotation (unitary transformation) about a fixed axis
   /*! This class represents a rotation through angle, \f$\phi\f$,
     about a fixed axis, \f$\hat n\f$. */
   class Rotation1 : public Complex2 {
