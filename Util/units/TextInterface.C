@@ -107,10 +107,10 @@ void TextInterface::Parser::add_value (Value* value)
 void TextInterface::Parser::remove (const std::string& name)
 {
   delete find (name);
-  clean ();
+  clean_invalid ();
 }
 
-void TextInterface::Parser::clean () 
+void TextInterface::Parser::clean_invalid () 
 {
   unsigned i=0; 
   while ( i < values.size() )
@@ -210,9 +210,22 @@ TextInterface::Parser::find (const string& name, bool throw_exception) const
   return 0;
 }
 
+//! Insert the interface into self
+void TextInterface::Parser::insert (Parser* other)
+{
+  if (!other)
+    return;
+
+  for (unsigned i=0; i < other->values.size(); i++)
+    if (!import_filter || !find(other->values[i]->get_name(),false))
+    {
+      other->setup( other->values[i] );
+      add_value( other->values[i] );
+    }
+}
+
 //! Import a nested interface
-void TextInterface::Parser::nested_import (const std::string& prefix,
-					   Parser* other)
+void TextInterface::Parser::insert (const std::string& prefix, Parser* other)
 {
   if (!other)
     return;
@@ -226,7 +239,7 @@ void TextInterface::Parser::nested_import (const std::string& prefix,
 }
 
 //! Clear all nested interfaces
-void TextInterface::Parser::nested_clean ()
+void TextInterface::Parser::clean ()
 {
   for (unsigned i=0; i < values.size(); )
   {

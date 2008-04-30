@@ -378,7 +378,7 @@ int main () try
 
   cerr << "testing nested import of another text interface" << endl;
 
-  getset.nested_import ( "child", &child_tui );
+  getset.insert ( "child", &child_tui );
 
   if ( getset.get_value ("child:value") != "0" )
   {

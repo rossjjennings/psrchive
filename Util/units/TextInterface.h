@@ -849,11 +849,14 @@ namespace TextInterface {
     //! Set aliases for value names
     void set_aliases (const Alias* alias) { aliases = alias; }
 
+    //! Insert Parser into self
+    void insert (Parser*);
+
     //! Import a nested interface
-    void nested_import (const std::string& prefix, Parser*);
+    void insert (const std::string& prefix, Parser*);
 
     //! Clear all nested interfaces
-    void nested_clean ();
+    void clean ();
 
   protected:
 
@@ -876,7 +879,7 @@ namespace TextInterface {
     void remove (const std::string& name);
 
     //! Clean up invalid references in values vector
-    void clean ();
+    void clean_invalid ();
 
     //! The vector of values
     std::vector< Reference::To<Value> > values;
