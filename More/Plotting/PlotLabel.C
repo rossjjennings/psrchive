@@ -27,28 +27,39 @@ Pulsar::PlotLabel::~PlotLabel ()
 {
 }
 
-void Pulsar::PlotLabel::plot ( const Archive* data)
+void Pulsar::PlotLabel::plot (const Archive* data)
 {
   plot (data, get_left(),   0.0);
   plot (data, get_centre(), 0.5);
   plot (data, get_right(),  1.0);
 }
 
-void 
-Pulsar::PlotLabel::plot ( const Archive* data, const string& label, float side)
+void Pulsar::PlotLabel::plot (const Archive* archive, 
+                              const string& label, float side)
 {
   if (label == PlotLabel::unset)
     return;
   
   vector<string> labels;
   separate (label, labels, ".");
-  
+
+  TextInterface::Parser* parser=const_cast<Archive*>(archive)->get_interface();
+  parser->insert( new Interpreter::Variables );
+
   for (unsigned i=0; i < labels.size(); i++)
   {
-    labels[i] = substitute( labels[i], 
-			    const_cast<Archive*>(data)->get_interface() );
+    if (Archive::verbose > 2)
+      cerr << "Pulsar::PlotLabel::plot label[" <<i<< "]=" << labels[i] << endl;
+
+    labels[i] = substitute( labels[i], parser );
+
+    if (Archive::verbose > 2)
+      cerr << "Pulsar::PlotLabel::plot subst label=" << labels[i] << endl;
 
     labels[i] = evaluate( labels[i] );
+
+    if (Archive::verbose > 2)
+      cerr << "Pulsar::PlotLabel::plot eval label=" << labels[i] << endl;
 
     row (labels[i], i, labels.size(), side);
   }

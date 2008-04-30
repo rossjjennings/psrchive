@@ -580,24 +580,24 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
-void Pulsar::Interpreter::initialize_interface (bool need_archive)
+TextInterface::Parser* Pulsar::Interpreter::get_interface ()
 {
-  if (!interface)
-    interface = new Variables;
+  TextInterface::Parser* interface = get()->get_interface();
 
   interface->set_indentation (" ");
 
-  if (need_archive)
-    interface->set_instance (get());
+  interface->insert( new Variables );
+
+  return interface;
 }
 
-string Pulsar::Interpreter::edit (const string& args)
-try { 
+string Pulsar::Interpreter::edit (const string& args) try
+{ 
 
   // replace variable names with values
-  if (args == "help") {
-    initialize_interface (false);
-    return interface->help (true);
+  if (args == "help")
+  {
+    return get_interface()->help (true);
   }
 
   vector<string> arguments = setup (args);
@@ -605,13 +605,11 @@ try {
   if (!arguments.size())
     return response (Fail, "please specify at least one editor command");
 
-  initialize_interface();
-
   string retval;
   for (unsigned icmd=0; icmd < arguments.size(); icmd++) {
     if (icmd)
       retval += " ";
-    retval += interface->process (arguments[icmd]);
+    retval += get_interface()->process (arguments[icmd]);
   }
 
   return retval;
@@ -620,18 +618,13 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
-string Pulsar::Interpreter::test (const string& args)
-try { 
-
+string Pulsar::Interpreter::test (const string& args) try
+{ 
   // replace variable names with values
-  if (args == "help") {
-    initialize_interface (false);
-    return interface->help (true);
-  }
+  if (args == "help")
+    return get_interface()->help (true);
 
-  initialize_interface();
-
-  string test = substitute (args, interface.get());
+  string test = substitute (args, get_interface());
 
   string result = "result";
   string expression = result + " = (" + test + ")";

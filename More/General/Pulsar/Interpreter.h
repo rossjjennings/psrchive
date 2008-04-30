@@ -206,11 +206,8 @@ namespace Pulsar {
     //! the Archive map
     std::map< std::string, Reference::To<Archive> > theMap;
 
-    //! the Archive text interface
-    Reference::To<Archive::Interface> interface;
-
-    //! initialize the interface attribute
-    void initialize_interface (bool need_archive = true);
+    //! get the interface to the current archive
+    TextInterface::Parser* get_interface ();
 
     //! operate on data "in place", otherwise make a copy
     bool inplace;
