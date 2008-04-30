@@ -87,6 +87,78 @@ void test_matrix (const Jones<T>& j1, const Jones<T>& j2,
 
 int main () 
 {
+  complex<double> i (0, 1);
+
+  Jones<double> sigma_1 (1, 0,
+                         0, -1);
+
+  Jones<double> sigma_2 (0, 1,
+                         1, 0);
+
+  Jones<double> sigma_3 (0, -i,
+                         i, 0);
+
+  //
+  // test Unitary transformations
+  //
+  Quaternion<double,Unitary> R_1 (0, 1, 0, 0);
+  Jones<double> JR_1 = convert (R_1);
+  cerr << "R_1=" << JR_1 << endl;
+  if (JR_1 != i * sigma_1)
+  {
+    cerr << "R_1 does not equal expected value\n" << i*sigma_1 << endl;
+    return -1;
+  }
+
+  Quaternion<double,Unitary> R_2 (0, 0, 1, 0);
+  Jones<double> JR_2 = convert (R_2);
+  cerr << "R_2=" << JR_2 << endl;
+  if (JR_2 != i * sigma_2)
+  {
+    cerr << "R_2 does not equal expected value\n" << i*sigma_2 << endl;
+    return -1;
+  }
+
+  Quaternion<double,Unitary> R_3 (0, 0, 0, 1);
+  Jones<double> JR_3 = convert (R_3);
+  cerr << "R_3=" << JR_3 << endl;
+  if (JR_3 != i * sigma_3)
+  {
+    cerr << "R_3 does not equal expected value\n" << i*sigma_3 << endl;
+    return -1;
+  }
+
+  //
+  // test Hermitian transformations
+  //
+  Quaternion<double,Hermitian> B_1 (0, 1, 0, 0);
+  Jones<double> JB_1 = convert (B_1);
+  cerr << "B_1=" << JB_1 << endl;
+  if (JB_1 != sigma_1)
+  {
+    cerr << "B_1 does not equal expected value\n" << sigma_1 << endl;
+    return -1;
+  }
+
+  Quaternion<double,Hermitian> B_2 (0, 0, 1, 0);
+  Jones<double> JB_2 = convert (B_2);
+  cerr << "B_2=" << JB_2 << endl;
+  if (JB_2 != sigma_2)
+  {
+    cerr << "B_2 does not equal expected value\n" << sigma_2 << endl;
+    return -1;
+  }
+
+  Quaternion<double,Hermitian> B_3 (0, 0, 0, 1);
+  Jones<double> JB_3 = convert (B_3);
+  cerr << "B_3=" << JB_3 << endl;
+  if (JB_3 != sigma_3)
+  {
+    cerr << "B_3 does not equal expected value\n" << sigma_3 << endl;
+    return -1;
+  }
+
+
 #if (RAND_MAX > 9000000)
   unsigned loops = RAND_MAX/1000;
 #else
