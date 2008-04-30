@@ -90,12 +90,12 @@ void Pulsar::Archive::Interface::set_instance (Pulsar::Archive* c)
 {
   TextInterface::To<Archive>::set_instance (c);
 
-  nested_clean();
+  clean();
 
   for (unsigned iext=0; iext < instance->get_nextension(); iext++)
   {
     Archive::Extension* extension = instance->get_extension(iext);
-    nested_import (extension->get_short_name(), extension->get_interface());
+    insert (extension->get_short_name(), extension->get_interface());
   }
 }
 
