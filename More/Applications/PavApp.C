@@ -656,7 +656,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.52 2008/03/03 04:48:28 nopeer Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.53 2008/04/30 13:26:33 straten Exp $" << endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
@@ -672,6 +672,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "dedisperse" );
       break;
     case 'V':
+      Pulsar::Plot::verbose = true;
       Pulsar::Archive::set_verbosity (3);
       break;
     case 'v':
