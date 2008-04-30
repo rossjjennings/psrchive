@@ -476,6 +476,7 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
     b->set_delay(32.0*8.0/(128.0e6)/2.0); // 8x overlap PFB
   } else if (get_telescope()=="3") {
     b->set_name("ASP");
+    b->set_hand(Signal::Left); 
     b->set_delay(32.0*24.0/(128.0e6)/2.0); // 24x overlap PFB
   } else if (get_telescope()=="f") {
     b->set_name("LBP");
