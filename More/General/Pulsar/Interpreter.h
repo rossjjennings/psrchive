@@ -64,6 +64,9 @@ namespace Pulsar {
     //! destructor
     ~Interpreter ();
 
+    //! Evaluate a boolean expression
+    bool evaluate (const std::string& expression);
+
     //! set the current Archive
     void set (Archive* data);
 
@@ -247,7 +250,10 @@ namespace Pulsar {
   private:
     
     void init ();
-    
+
+    //! the last expression evaluated by evaluate method
+    std::string evaluate_expression;
+
   };
   
 }

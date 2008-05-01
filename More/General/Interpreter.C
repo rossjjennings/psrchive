@@ -618,24 +618,21 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
-string Pulsar::Interpreter::test (const string& args) try
-{ 
-  // replace variable names with values
-  if (args == "help")
-    return get_interface()->help (true);
-
-  string test = substitute (args, get_interface());
-
+bool Pulsar::Interpreter::evaluate (const std::string& expression)
+{
   string result = "result";
-  string expression = result + " = (" + test + ")";
+
+  evaluate_expression = substitute (expression, get_interface());
+
+  string evaluate = result + " = (" + evaluate_expression + ")";
 
   // Call parser function from Parsifal Software
-  int errorFlag = evaluateExpression (const_cast<char*>(expression.c_str()));
+  int errorFlag = evaluateExpression (const_cast<char*>(evaluate.c_str()));
 
   if (errorFlag)
-    throw Error (InvalidParam, "Pulsar::Interpreter::test",
+    throw Error (InvalidParam, "evaluateBoolean",
 		 "%s in expression\n\n  %s\n  %s",
-		 errorRecord.message, test.c_str(), 
+		 errorRecord.message, evaluate_expression.c_str(), 
 		 pad (errorRecord.column-10, "^", false).c_str());
 
   double value = -1;
@@ -644,16 +641,30 @@ string Pulsar::Interpreter::test (const string& args) try
       value = variable[i].value;
 
   if (value == 1)
-    return response (Good);
+    return true;
 
   if (value != 0)
-    return response (Fail, "non-boolean result="+tostring(value));
+    throw Error (InvalidParam, "evaluateBoolean",
+		 "non-boolean result=" + tostring(value));
 
-  // value == 0
-  return response (Fail, "assertion '"+args+"' failed");
-
+  return false;
 }
-catch (Error& error) {
+
+string Pulsar::Interpreter::test (const string& args) try
+{ 
+  // replace variable names with values
+  if (args == "help")
+    return get_interface()->help (true);
+
+  if (evaluate (args))
+    return response (Good);
+  else
+    return response (Fail,
+		     "assertion '"+args+"'\n"
+		     "        = '"+evaluate_expression+"' failed");
+}
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
