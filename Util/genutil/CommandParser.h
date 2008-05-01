@@ -51,6 +51,12 @@ class CommandParser : public Reference::Able {
   //! parse a command and its arguments
   std::string parse2 (const std::string& command, const std::string& args);
 
+  //! conditional execution of command: '(condition) command'
+  std::string conditional (const std::string& command);
+
+  //! evaluate a boolean expression
+  virtual bool evaluate (const std::string& expression);
+
   //! string returned on an empty command
   virtual std::string empty ();
 

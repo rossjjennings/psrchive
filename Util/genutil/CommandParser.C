@@ -109,6 +109,9 @@ string CommandParser::parse2 (const string& command, const string& arguments)
   if (command == "help" || command == "?")
     return help (arguments);
 
+  if (command == "if")
+    return conditional (arguments);
+
   if (debug)
     cerr << "CommandParser::parse command not help" << endl;
 
@@ -169,8 +172,8 @@ string CommandParser::parse2 (const string& command, const string& arguments)
 
   for (ikey=0; ikey < length; ikey++)
     for (icmd=0; icmd < commands.size(); icmd++)
-      if (command[ikey] == commands[icmd]->shortcut) {
-
+      if (command[ikey] == commands[icmd]->shortcut)
+      {
 	current_command = commands[icmd]->command;
 
 	// only the last command gets the arguments
@@ -179,10 +182,60 @@ string CommandParser::parse2 (const string& command, const string& arguments)
 
 	if (!reply.empty())
 	  total_reply += reply + "\n";
-
       }
 
   return total_reply;
+}
+
+bool CommandParser::evaluate (const string& expression)
+{
+  throw Error (InvalidState, "CommandParser::evaluate",
+	       "expression evaluation not implemented");
+}
+
+string CommandParser::conditional (const string& command)
+{
+  string::size_type open_bracket = command.find ("(");
+  if (open_bracket == string::npos)
+    return "if: opening bracket '(' not found \n";
+
+  string::size_type close_bracket = command.rfind (")");
+  if (close_bracket == string::npos)
+    return "if: closing bracket ')' not found \n";
+
+  if (close_bracket < open_bracket)
+    return "if: syntax error \n";
+
+  if (close_bracket - open_bracket < 2)
+    return "if: no text between brackets \n";
+
+  open_bracket ++;
+
+  string condition = command.substr (open_bracket, close_bracket-open_bracket);
+
+  if (debug)
+    cerr << "condition ='" << condition << "'" << endl;
+
+  bool pass = false;
+
+  try
+  {
+    pass = evaluate(condition);
+  }
+  catch (Error& error)
+  {
+    return "if: " + error.get_message() + "\n";
+  }
+
+  if (!pass)
+    return "";
+
+  string remainder = command.substr (close_bracket+1);
+
+  if (debug)
+    cerr << "remainder='" << remainder << "'" << endl;
+
+  return parse (remainder);
 }
 
 string CommandParser::help (const string& command)
