@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/BandpassPlotter.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/11/28 18:32:51 $
+   $Revision: 1.4 $
+   $Date: 2008/05/05 07:54:48 $
    $Author: straten $*/
 
 #ifndef __fft_BandpassPlotter_h
@@ -26,7 +26,11 @@ namespace fft {
     public:
     
     //! Default constructor
-    BandpassPlotter () { user_max = 0.0; ignore_fraction = 0.0; }
+    BandpassPlotter ()
+    { user_max = 0.0; ignore_fraction = 0.0; logarithmic = false; }
+
+    //! Destructor
+    virtual ~BandpassPlotter() { }
 
     //! Plot the data using the given information
     virtual void plot (Data* data, Info* info) const;
@@ -43,9 +47,21 @@ namespace fft {
 
     //! Ignore band edges
     float ignore_fraction;
-    
+
+    //! Use logarithmic axis
+    bool logarithmic;
+
   };
 
+}
+
+void log (std::vector<float>& data)
+{
+  for (unsigned i=0; i<data.size(); i++)
+    if (data[i] > 0)
+      data[i] = log10 (data[i]);
+    else
+      data[i] = 0.0;
 }
 
 template<class Data, class Info>
@@ -56,9 +72,12 @@ void fft::BandpassPlotter<Data,Info>::plot (Data* data, Info* info) const
 
   float min = 0;
   float max = 0;
-  for (ipol=0; ipol<npol; ipol++) {
+  for (ipol=0; ipol<npol; ipol++)
+  {
     std::vector<float> pband = data->get_passband (ipol);
     this->preprocess (pband);
+    if (logarithmic)
+      log (pband);
     minmax (pband, min, max, ipol);
   }
   
@@ -73,13 +92,24 @@ void fft::BandpassPlotter<Data,Info>::plot (Data* data, Info* info) const
   
   cpgsci(1);
   cpgswin(fmin, fmax, min, max);
-  cpgbox("BCNST", 0.0, 0, "BCNST", 0.0, 0);
-  cpglab("Frequency (MHz)", "Linear Scale", "Original Bandpass");
-  
-  for (unsigned ipol=0; ipol<npol; ipol++) {
+  if (logarithmic)
+  {
+    cpgbox("BCNST", 0.0, 0, "BCNSTL2", 0.0, 0);
+    cpglab("Frequency (MHz)", "Logarithmic Scale", "Original Bandpass");
+  }
+  else
+  {
+    cpgbox("BCNST", 0.0, 0, "BCNST", 0.0, 0);
+    cpglab("Frequency (MHz)", "Linear Scale", "Original Bandpass");
+  }
+
+  for (unsigned ipol=0; ipol<npol; ipol++)
+  {
     std::vector<float> pband = data->get_passband (ipol);
     this->preprocess (pband);
-    
+    if (logarithmic)
+      log (pband);
+
     nchan = pband.size();
     double fstep = bw/(nchan-1);
     
