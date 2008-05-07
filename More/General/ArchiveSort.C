@@ -66,7 +66,7 @@ try {
   string filename, name, freq, mjd;
   input >> filename >> name >> freq >> mjd;
 
-  if (filename != "FILE" && filename != "file")
+  if (filename != "FILE" && filename != "filename")
     throw Error (InvalidState, "Pulsar::ArchiveSort::load",
 		 "input is not the output of vap?");
 
