@@ -13,9 +13,12 @@ using namespace std;
 MEAL::Boost::Boost ()
 {
   Parameters* params = new Parameters (this, 3);
-  params->set_param_name (0, "b_1");
-  params->set_param_name (1, "b_2");
-  params->set_param_name (2, "b_3");
+  for (unsigned i=0; i<3; i++)
+  {
+    string index = tostring (i + 1);
+    params->set_name (0, "b_" + index);
+    params->set_description (0, "\\sinh\\beta \\hat{m}_" + index);
+  }
 }
 
 //! Return the name of the class

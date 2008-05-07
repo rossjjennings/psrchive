@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Parameters.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/11/07 18:38:49 $
+   $Revision: 1.10 $
+   $Date: 2008/05/07 01:21:11 $
    $Author: straten $ */
 
 #ifndef __Parameters_H
@@ -52,17 +52,31 @@ namespace MEAL {
     }
 
     //! Return the name of the specified parameter
-    std::string get_param_name (unsigned index) const
+    std::string get_name (unsigned index) const
     {
-      range_check (index, "MEAL::Parameters::get_param_name");
+      range_check (index, "MEAL::Parameters::get_name");
       return names[index];
     }
 
     //! Return the name of the specified parameter
-    void set_param_name (unsigned index, const std::string& name)
+    void set_name (unsigned index, const std::string& name)
     {
-      range_check (index, "MEAL::Parameters::set_param_name");
+      range_check (index, "MEAL::Parameters::set_name");
       names[index] = name;
+    }
+
+    //! Return the description of the specified parameter
+    std::string get_description (unsigned index) const
+    {
+      range_check (index, "MEAL::Parameters::get_description");
+      return descriptions[index];
+    }
+
+    //! Return the description of the specified parameter
+    void set_description (unsigned index, const std::string& description)
+    {
+      range_check (index, "MEAL::Parameters::set_description");
+      descriptions[index] = description;
     }
 
     //! Return the value of the specified parameter
@@ -129,6 +143,9 @@ namespace MEAL {
 
     //! The name of each parameter
     std::vector<std::string> names;
+
+    //! The description of each parameter
+    std::vector<std::string> descriptions;
 
   };
 

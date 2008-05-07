@@ -13,9 +13,12 @@ using namespace std;
 MEAL::Rotation::Rotation ()
 {
   Parameters* params = new Parameters (this, 3);
-  params->set_param_name (0, "r_1");
-  params->set_param_name (1, "r_2");
-  params->set_param_name (2, "r_3");
+  for (unsigned i=0; i<3; i++)
+  {
+    string index = tostring (i + 1);
+    params->set_name (0, "r_" + index);
+    params->set_description (0, "\\phi \\hat{n}_" + index);
+  }
 }
 
 //! Return the name of the class

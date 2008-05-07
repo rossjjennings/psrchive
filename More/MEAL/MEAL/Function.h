@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Function.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/11/28 05:18:08 $
+   $Revision: 1.12 $
+   $Date: 2008/05/07 01:21:11 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -95,13 +95,20 @@ namespace MEAL {
     //! Return the name of the class
     virtual std::string get_name () const = 0;
 
+    //! Return the description of the class
+    virtual std::string get_description () const { return ""; }
+
     //! Return the number of parameters
     unsigned get_nparam () const
     { return parameter_policy->get_nparam (); }
 
     //! Return the name of the specified parameter
     std::string get_param_name (unsigned index) const
-    { return parameter_policy->get_param_name (index); }
+    { return parameter_policy->get_name (index); }
+
+    //! Return the description of the specified parameter
+    std::string get_param_description (unsigned index) const
+    { return parameter_policy->get_description (index); }
 
     //! Return the value of the specified parameter
     double get_param (unsigned index) const

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/NoParameters.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.7 $
+   $Date: 2008/05/07 01:21:11 $
    $Author: straten $ */
 
 #ifndef __MEAL_NoParameters_H
@@ -39,7 +39,10 @@ namespace MEAL {
     unsigned get_nparam () const { return 0; }
 
     //! Return the name of the specified parameter
-    std::string get_param_name (unsigned index) const { return ""; }
+    std::string get_name (unsigned index) const { return ""; }
+
+    //! Return the name of the specified parameter
+    std::string get_description (unsigned index) const { return ""; }
 
     //! Return the value of the specified parameter
     double get_param (unsigned index) const { return 0.0; }

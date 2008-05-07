@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Composite.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/04/07 00:38:12 $
+   $Revision: 1.11 $
+   $Date: 2008/05/07 01:21:11 $
    $Author: straten $ */
 
 #ifndef __Composite_H
@@ -46,7 +46,10 @@ namespace MEAL {
     unsigned get_nparam () const;
 
     //! Return the name of the specified parameter
-    std::string get_param_name (unsigned index) const;
+    std::string get_name (unsigned index) const;
+
+    //! Return the name of the specified parameter
+    std::string get_description (unsigned index) const;
 
     //! Return the value of the specified parameter
     double get_param (unsigned index) const;

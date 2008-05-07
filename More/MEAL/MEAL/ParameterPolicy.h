@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ParameterPolicy.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/05/11 22:59:34 $
+   $Revision: 1.7 $
+   $Date: 2008/05/07 01:21:11 $
    $Author: straten $ */
 
 #ifndef __MEAL_ParameterPolicy_H
@@ -38,7 +38,10 @@ namespace MEAL {
     virtual unsigned get_nparam () const = 0;
 
     //! Return the name of the specified parameter
-    virtual std::string get_param_name (unsigned index) const = 0;
+    virtual std::string get_name (unsigned index) const = 0;
+
+    //! Return the name of the specified parameter
+    virtual std::string get_description (unsigned index) const = 0;
 
     //! Return the value of the specified parameter
     virtual double get_param (unsigned index) const = 0;

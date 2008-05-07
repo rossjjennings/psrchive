@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/OneParameter.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/10/30 02:30:51 $
+   $Revision: 1.9 $
+   $Date: 2008/05/07 01:21:11 $
    $Author: straten $ */
 
 #ifndef __OneParameter_H
@@ -38,15 +38,27 @@ namespace MEAL {
     OneParameter* clone (Function* context) const;
 
     //! Return the name of the parameter
-    std::string get_param_name () const
+    std::string get_name () const
     {
       return name;
     }
 
-    //! Return the name of the parameter
-    void set_param_name (const std::string& _name)
+    //! Set the name of the parameter
+    void set_name (const std::string& _name)
     {
       name = _name;
+    }
+
+    //! Return the description of the parameter
+    std::string get_description () const
+    {
+      return description;
+    }
+
+    //! Set the description of the parameter
+    void set_description (const std::string& _description)
+    {
+      description = _description;
     }
 
     //! Return the value of the parameter
@@ -95,17 +107,31 @@ namespace MEAL {
     }
 
     //! Return the name of the specified parameter
-    std::string get_param_name (unsigned index) const
+    std::string get_name (unsigned index) const
     {
-      range_check (index, "MEAL::OneParameter::get_param_name");
+      range_check (index, "MEAL::OneParameter::get_name");
       return name;
     }
 
-    //! Return the name of the specified parameter
-    void set_param_name (unsigned index, const std::string& _name)
+    //! Set the name of the specified parameter
+    void set_name (unsigned index, const std::string& _name)
     {
-      range_check (index, "MEAL::OneParameter::set_param_name");
+      range_check (index, "MEAL::OneParameter::set_name");
       name = _name;
+    }
+
+    //! Return the description of the specified parameter
+    std::string get_description (unsigned index) const
+    {
+      range_check (index, "MEAL::OneParameter::get_description");
+      return description;
+    }
+
+    //! Set the description of the specified parameter
+    void set_description (unsigned index, const std::string& _description)
+    {
+      range_check (index, "MEAL::OneParameter::set_description");
+      description = _description;
     }
 
     //! Return the value of the specified parameter
@@ -169,6 +195,9 @@ namespace MEAL {
 
     //! The name of the parameter
     std::string name;
+
+    //! The description of the parameter
+    std::string description;
 
   };
 

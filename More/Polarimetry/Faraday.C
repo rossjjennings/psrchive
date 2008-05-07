@@ -15,7 +15,8 @@ Calibration::Faraday::Faraday () :
   rotation (Pauli::basis.get_basis_vector(2))
 {
   MEAL::OneParameter* parm = new MEAL::OneParameter (this);
-  parm->set_param_name (0, "RM");
+  parm->set_name (0, "RM");
+  parm->set_description (0, "rotation measure (rad/m^2)");
 
   reference_wavelength = 0.0;
   wavelength = 0.0;

@@ -37,10 +37,17 @@ unsigned MEAL::Composite::get_nparam () const
 }
 
 //! Return the name of the specified parameter
-string MEAL::Composite::get_param_name (unsigned index) const
+string MEAL::Composite::get_name (unsigned index) const
 {
   const Function* function = get_Function (index);
   return function->get_param_name (index);
+}
+
+//! Return the description of the specified parameter
+string MEAL::Composite::get_description (unsigned index) const
+{
+  const Function* function = get_Function (index);
+  return function->get_param_description (index);
 }
 
 //! Return the value of the specified parameter
