@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Gain.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/11/23 20:12:09 $
+   $Revision: 1.9 $
+   $Date: 2008/05/07 02:33:38 $
    $Author: straten $ */
 
 #ifndef __MEAL_Gain_H
@@ -31,6 +31,12 @@ namespace MEAL {
 
     //! Get the gain
     Estimate<double> get_gain () const;
+
+    //! Set the name of the parameter
+    void set_param_name (const std::string& name);
+
+    //! Set the description of the parameter
+    void set_param_description (const std::string& name);
 
     // ///////////////////////////////////////////////////////////////////
     //

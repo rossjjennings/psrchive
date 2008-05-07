@@ -35,6 +35,20 @@ MEAL::Boost1*  MEAL::Boost1::clone () const
   return new Boost1(*this);
 }
 
+void MEAL::Boost1::set_param_name (const string& name) 
+{
+  OneParameter* current = dynamic_kast<OneParameter>(parameter_policy);
+  if (current)
+    current->set_name (name);
+}
+
+void MEAL::Boost1::set_param_description (const string& name) 
+{
+  OneParameter* current = dynamic_kast<OneParameter>(parameter_policy);
+  if (current)
+    current->set_description (name);
+}
+
 //! Return the name of the class
 string MEAL::Boost1::get_name () const
 {

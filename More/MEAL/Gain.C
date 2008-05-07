@@ -28,6 +28,20 @@ Estimate<double> MEAL::Gain::get_gain () const
   return get_Estimate (0);
 }
 
+void MEAL::Gain::set_param_name (const string& name) 
+{
+  OneParameter* current = dynamic_kast<OneParameter>(parameter_policy);
+  if (current)
+    current->set_name (name);
+}
+
+void MEAL::Gain::set_param_description (const string& name) 
+{
+  OneParameter* current = dynamic_kast<OneParameter>(parameter_policy);
+  if (current)
+    current->set_description (name);
+}
+
 //! Return the name of the class
 string MEAL::Gain::get_name () const
 {
@@ -45,7 +59,8 @@ void MEAL::Gain::calculate (Jones<double>& result,
 
   result = gain;
 
-  if (grad) {
+  if (grad)
+  {
     (*grad)[0] = 1.0;
     
     if (verbose)

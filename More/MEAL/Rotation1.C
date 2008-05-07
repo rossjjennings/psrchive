@@ -48,6 +48,13 @@ void MEAL::Rotation1::set_param_name (const string& name)
     current->set_name (name);
 }
 
+void MEAL::Rotation1::set_param_description (const string& name) 
+{
+  OneParameter* current = dynamic_kast<OneParameter>(parameter_policy);
+  if (current)
+    current->set_description (name);
+}
+
 void MEAL::Rotation1::set_axis (const Vector<3,double>& _axis)
 {
   if (normsq(_axis) == 0.0)

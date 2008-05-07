@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Boost1.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/11/28 05:58:33 $
+   $Revision: 1.4 $
+   $Date: 2008/05/07 02:33:38 $
    $Author: straten $ */
 
 #ifndef __MEAL_Boost1_H
@@ -46,6 +46,12 @@ namespace MEAL {
 
     //! Get the boost parameter, beta
     Estimate<double> get_beta () const;
+
+    //! Set the name of the parameter
+    void set_param_name (const std::string& name);
+
+    //! Set the description of the parameter
+    void set_param_description (const std::string& name);
 
     // ///////////////////////////////////////////////////////////////////
     //
