@@ -17,7 +17,7 @@ MEAL::Rotation::Rotation ()
   {
     string index = tostring (i + 1);
     params->set_name (0, "r_" + index);
-    params->set_description (0, "\\phi \\hat{n}_" + index);
+    params->set_description (0, "rotation axis_"+index+" times angle (radians)");
   }
 }
 

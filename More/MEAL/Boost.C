@@ -17,7 +17,7 @@ MEAL::Boost::Boost ()
   {
     string index = tostring (i + 1);
     params->set_name (0, "b_" + index);
-    params->set_description (0, "\\sinh\\beta \\hat{m}_" + index);
+    params->set_description (0, "boost axis_" + index + " times sinh(boost)");
   }
 }
 
