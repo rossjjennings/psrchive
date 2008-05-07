@@ -10,7 +10,7 @@
 MEAL::Phase::Phase ()
 {
   OneParameter* param = new OneParameter (this);
-  param->set_param_name ("phase");
+  param->set_name ("phase");
 }
 
 //! Return the name of the class

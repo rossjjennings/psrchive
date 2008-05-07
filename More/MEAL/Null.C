@@ -13,7 +13,7 @@ using namespace std;
 void MEAL::Null::init ()
 {
   for (unsigned i=0; i<get_nparam(); i++)
-    parameters.set_param_name (i, "c_" + tostring(i));
+    parameters.set_name (i, "c_" + tostring(i));
 }
 
 MEAL::Null::Null (unsigned ncoef)

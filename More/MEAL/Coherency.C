@@ -15,10 +15,10 @@ MEAL::Coherency::Coherency ()
 {
   Parameters* parameters = new Parameters (this, 4);
 
-  parameters->set_param_name (0, "StokesI");
-  parameters->set_param_name (1, "StokesQ");
-  parameters->set_param_name (2, "StokesU");
-  parameters->set_param_name (3, "StokesV");
+  parameters->set_name (0, "StokesI");
+  parameters->set_name (1, "StokesQ");
+  parameters->set_name (2, "StokesU");
+  parameters->set_name (3, "StokesV");
 }
 
 //! Return the name of the class

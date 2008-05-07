@@ -96,7 +96,7 @@ void MEAL::PhaseGradients::resize (unsigned ngradient)
 
   for (unsigned i=current; i<ngradient; i++)
   {
-    parameters.set_param_name (i, "phi_" + tostring(i));
+    parameters.set_name (i, "phi_" + tostring(i));
     offsets[i] = 0.0;
   }
 

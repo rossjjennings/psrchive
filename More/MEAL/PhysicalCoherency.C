@@ -15,10 +15,10 @@ MEAL::PhysicalCoherency::PhysicalCoherency ()
 {
   Parameters* parameters = new Parameters (this, 4);
 
-  parameters->set_param_name (0, "log_Inv");
-  parameters->set_param_name (1, "StokesQ");
-  parameters->set_param_name (2, "StokesU");
-  parameters->set_param_name (3, "StokesV");
+  parameters->set_name (0, "log_Inv");
+  parameters->set_name (1, "StokesQ");
+  parameters->set_name (2, "StokesU");
+  parameters->set_name (3, "StokesV");
 }
 
 //! Return the name of the class

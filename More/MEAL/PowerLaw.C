@@ -11,9 +11,9 @@ using namespace std;
 MEAL::PowerLaw::PowerLaw ()
   : parameters (this, 3)
 {
-  parameters.set_param_name (0, "scale");
-  parameters.set_param_name (1, "offset");
-  parameters.set_param_name (2, "power");
+  parameters.set_name (0, "scale");
+  parameters.set_name (1, "offset");
+  parameters.set_name (2, "power");
 }
 
 //! Return the name of the class

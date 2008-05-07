@@ -13,9 +13,9 @@ MEAL::Gaussian::Gaussian ()
 {
   period = 0.0;
 
-  parameters.set_param_name (0, "centre");
-  parameters.set_param_name (1, "width");
-  parameters.set_param_name (2, "height");
+  parameters.set_name (0, "centre");
+  parameters.set_name (1, "width");
+  parameters.set_name (2, "height");
 }
 
 //! Return the name of the class

@@ -14,7 +14,7 @@ using namespace std;
 void MEAL::Boost1::init ()
 {
   OneParameter* param = new OneParameter (this);
-  param->set_param_name ("boost");
+  param->set_name ("boost");
 }
 
 MEAL::Boost1::Boost1 (const Vector<3,double>& _axis) 

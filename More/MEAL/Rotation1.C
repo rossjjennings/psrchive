@@ -14,7 +14,7 @@ using namespace std;
 void MEAL::Rotation1::init ()
 {
   OneParameter* param = new OneParameter (this);
-  param->set_param_name ("rotation");
+  param->set_name ("rotation");
 }
 
 MEAL::Rotation1::Rotation1 (const Vector<3,double>& _axis) 
@@ -45,7 +45,7 @@ void MEAL::Rotation1::set_param_name (const string& name)
 {
   OneParameter* current = dynamic_kast<OneParameter>(parameter_policy);
   if (current)
-    current->set_param_name (name);
+    current->set_name (name);
 }
 
 void MEAL::Rotation1::set_axis (const Vector<3,double>& _axis)

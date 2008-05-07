@@ -13,15 +13,15 @@ using namespace std;
 MEAL::Depolarizer::Depolarizer ()
 {
   Parameters* params = new Parameters (this, 9);
-  params->set_param_name (0, "p_1");
-  params->set_param_name (1, "p_2");
-  params->set_param_name (2, "p_3");
-  params->set_param_name (0, "m_11");
-  params->set_param_name (1, "m_12");
-  params->set_param_name (2, "m_13");
-  params->set_param_name (0, "m_22");
-  params->set_param_name (1, "m_23");
-  params->set_param_name (2, "m_33");
+  params->set_name (0, "p_1");
+  params->set_name (1, "p_2");
+  params->set_name (2, "p_3");
+  params->set_name (0, "m_11");
+  params->set_name (1, "m_12");
+  params->set_name (2, "m_13");
+  params->set_name (0, "m_22");
+  params->set_name (1, "m_23");
+  params->set_name (2, "m_33");
 }
 
 //! Return the name of the class

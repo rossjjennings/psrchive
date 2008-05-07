@@ -12,14 +12,14 @@ using namespace std;
 
 MEAL::VelocityModel::VelocityModel()  : parameters(this,8) {
   
-    parameters.set_param_name (0,"scaling");
-    parameters.set_param_name (1,"vpar");
-    parameters.set_param_name (2,"vperp");
-    parameters.set_param_name (3,"inc");
-    parameters.set_param_name (4,"omega");
-    parameters.set_param_name (5,"ecc");
-    parameters.set_param_name (6,"pb");
-    parameters.set_param_name (7,"a");
+    parameters.set_name (0,"scaling");
+    parameters.set_name (1,"vpar");
+    parameters.set_name (2,"vperp");
+    parameters.set_name (3,"inc");
+    parameters.set_name (4,"omega");
+    parameters.set_name (5,"ecc");
+    parameters.set_name (6,"pb");
+    parameters.set_name (7,"a");
 
     parameters.set_infit (0,true);
     parameters.set_infit (1,true);

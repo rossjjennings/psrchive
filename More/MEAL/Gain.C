@@ -12,7 +12,7 @@ using namespace std;
 MEAL::Gain::Gain ()
 {
   OneParameter* param = new OneParameter (this);
-  param->set_param_name ("gain");
+  param->set_name ("gain");
   param->set_param (1.0);
 }
 
