@@ -31,15 +31,15 @@ bool Calibration::ReceptionModelReport::report (ReceptionModel* model)
   Stokes<double> total_chisq = 0;
   unsigned total_count = 0;
 
-  for (unsigned input = 0; input < model->get_num_input(); input++) {
-
+  for (unsigned input = 0; input < model->get_num_input(); input++)
+  {
     model->set_input_index (input);
 
     Stokes<double> chisq = 0;
     unsigned count = 0;
 
-    for (unsigned idat=0; idat < ndat; idat++) {
-    
+    for (unsigned idat=0; idat < ndat; idat++)
+    {
       // get the specified CoherencyMeasurementSet
       const Calibration::CoherencyMeasurementSet& data 
 	= model->get_data (idat);
@@ -50,8 +50,8 @@ bool Calibration::ReceptionModelReport::report (ReceptionModel* model)
     
       unsigned mstate = data.size();
     
-      for (unsigned jstate=0; jstate<mstate; jstate++) {
-      
+      for (unsigned jstate=0; jstate<mstate; jstate++)
+      {
 	if (data[jstate].get_input_index() != input)
 	  continue;
       
@@ -64,7 +64,8 @@ bool Calibration::ReceptionModelReport::report (ReceptionModel* model)
 	  cerr << "model=" << ms << "\ndata=" << datum << endl;
 #endif
 
-	double max_divergence = 36.0;
+        // report above 10 sigma
+	double max_divergence = 100.0;
 
 	for (unsigned ipol=0; ipol<4; ipol++)
 	{
@@ -72,9 +73,8 @@ bool Calibration::ReceptionModelReport::report (ReceptionModel* model)
 	  double divergence = diff * diff / datum[ipol].get_variance();
 
 	  if (divergence > max_divergence)
-	    cerr << "Calibration::ReceptionModelReport::report"
-	      " divergence=" << sqrt(divergence) << " sigma in \n\t"
-		 << data.get_identifier() << endl;
+	    os << "divergence=" << sqrt(divergence) << " "
+	       << data.get_identifier() << endl;
 
 	  chisq[ipol] += divergence;
 	}
