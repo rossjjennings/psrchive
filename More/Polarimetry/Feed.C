@@ -56,7 +56,10 @@ void Calibration::Feed::init ()
 #endif
 
     ellipticity[ir]->set_param_name( "el" + rname );
+    ellipticity[ir]->set_param_description ("ellipticity of receptor "+rname);
+
     orientation[ir]->set_param_name( "or" + rname );
+    orientation[ir]->set_param_description ("orientation of receptor "+rname);
 
     receptor->add_model (ellipticity[ir]);
     receptor->add_model (orientation[ir]);

@@ -21,15 +21,17 @@ using namespace std;
 
 void Calibration::SingleAxis::init ()
 {
-  // name = "SingleAxis";
-
-  // Note, these objects will be destroyed during Reference::To destructor
   gain     = new MEAL::Gain;
-  // gain->name = "SingleAxis::Gain";
+  gain->set_param_name ("G");
+  gain->set_param_description ("scalar gain");
+
   boost    = new MEAL::Boost1    (Vector<3, double>::basis(0));
-  // boost->set_param_name ("SingleAxis::boost");
+  boost->set_param_name ("gamma");
+  boost->set_param_description ("differential gain (hyperbolic radians)");
+
   rotation = new MEAL::Rotation1 (Vector<3, double>::basis(0));
-  // rotation->name = "SingleAxis::Rotation";
+  rotation->set_param_name ("phi");
+  rotation->set_param_description ("differential phase (radians)");
 
   add_model (gain);
   add_model (boost);
