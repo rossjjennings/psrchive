@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.15 $
-   $Date: 2008/02/20 12:24:41 $
+   $Revision: 1.16 $
+   $Date: 2008/05/07 01:21:19 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
@@ -79,27 +79,30 @@ void* FITS_void_ptr (const std::string&);
 
 //! Calls fits_update_key; throws a FITSError exception if status != 0
 template<typename T>
-void psrfits_update_key (fitsfile* fptr, const char* name, T data)
+void psrfits_update_key (fitsfile* fptr, const char* name, T data,
+			 const char* comment = 0)
 {
-  // no comment
-  char* comment = 0;
   // status
   int status = 0;
   
   fits_update_key (fptr, FITS_traits<T>::datatype(),
 		   const_cast<char*>(name), &data,
-		   comment, &status);
+		   const_cast<char*>(comment), &status);
   
   if (status)
     throw FITSError (status, "psrfits_update_key", name);
 }
 
-//! Specialization for string
+//! Specialization for C string
 void psrfits_update_key (fitsfile* fptr, const char* name,
-			 const std::string& data);
+			 const char* data,
+			 const char* comment = 0);
 
-//! Specialization for C string constants
-void psrfits_update_key (fitsfile* fptr, const char* name, const char* data);
+//! Specialization for C++ string
+void psrfits_update_key (fitsfile* fptr, const char* name,
+			 const std::string& data,
+			 const char* comment = 0);
+
 
 //! Worker function does not handle status
 template<typename T>

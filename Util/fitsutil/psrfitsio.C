@@ -95,22 +95,24 @@ void psrfits_clean_rows (fitsfile* ffptr)
     throw FITSError (status, "psrfits_clean_rows", "fits_delete_rows");
 }
 
-void psrfits_update_key (fitsfile* fptr, const char* name, const char* data)
+void psrfits_update_key (fitsfile* fptr, const char* name,
+			 const std::string& data,
+			 const char* comment)
 {
-  psrfits_update_key (fptr, name, string(data));
+  psrfits_update_key (fptr, name, data.c_str(), comment);
 }
 
-//! Specialization for string
-void psrfits_update_key (fitsfile* fptr, const char* name, const string& txt)
+void psrfits_update_key (fitsfile* fptr, const char* name, const char* text,
+			 const char* comment)
 {
-  // no comment
-  char* comment = 0;
   // status
   int status = 0;
   
-  fits_update_key (fptr, TSTRING, const_cast<char*>(name), 
-		   const_cast<char*>(txt.c_str()),
-		   comment, &status);
+  fits_update_key (fptr, TSTRING,
+		   const_cast<char*>(name), 
+		   const_cast<char*>(text),
+		   const_cast<char*>(comment),
+		   &status);
   
   if (status)
     throw FITSError (status, "psrfits_update_key", name);
