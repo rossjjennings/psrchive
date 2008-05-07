@@ -55,11 +55,13 @@ void Calibration::Feed::init ()
     orientation[ir] = new MEAL::Rotation1 (Vector<3, double>::basis(2));
 #endif
 
+    string describe = " of receptor " + rname + " (radians)";
+
     ellipticity[ir]->set_param_name( "el" + rname );
-    ellipticity[ir]->set_param_description ("ellipticity of receptor "+rname);
+    ellipticity[ir]->set_param_description ("ellipticity" + describe);
 
     orientation[ir]->set_param_name( "or" + rname );
-    orientation[ir]->set_param_description ("orientation of receptor "+rname);
+    orientation[ir]->set_param_description ("orientation" + describe);
 
     receptor->add_model (ellipticity[ir]);
     receptor->add_model (orientation[ir]);
