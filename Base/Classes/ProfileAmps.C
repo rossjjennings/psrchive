@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/ProfileAmps.h"
+#include "malloc16.h"
 
 /*! 
   Do not allocate memory for the amps
@@ -34,7 +35,7 @@ Pulsar::ProfileAmps::ProfileAmps (const ProfileAmps& copy)
 
 Pulsar::ProfileAmps::~ProfileAmps () 
 {
-  if (amps != NULL) delete [] amps;
+  if (amps != NULL) free16(amps);
 }
 
 /*
@@ -50,16 +51,19 @@ void Pulsar::ProfileAmps::resize (unsigned _nbin)
   if (amps_size >= nbin && nbin != 0)
     return;
 
-  if (amps) delete [] amps; amps = NULL;
+  if (amps) free16(amps); amps = NULL;
   amps_size = 0;
 
   if (nbin == 0)
     return;
 
-  if (!no_amps) {
-    amps = new float [nbin];
+  if (!no_amps)
+  {
+    amps = (float*) malloc16 (sizeof(float) * nbin);
+
     if (!amps)
       throw Error (BadAllocation, "Pulsar::ProfileAmps::resize");
+
     amps_size = nbin;
   }
 }
