@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.26 $
-   $Date: 2008/03/10 23:12:43 $
-   $Author: nopeer $ */
+   $Revision: 1.27 $
+   $Date: 2008/05/07 01:21:07 $
+   $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
 #define __PolnCalibratorExtension_h
@@ -128,6 +128,16 @@ namespace Pulsar {
     //! Set the number of model parameters
     void set_nparam (unsigned);
 
+    //! Get the name of the specified model parameter
+    std::string get_param_name (unsigned) const;
+    //! Set the name of the specified model parameter
+    void set_param_name (unsigned, const std::string&);
+
+    //! Get the description of the specified model parameter
+    std::string get_param_description (unsigned) const;
+    //! Set the description of the specified model parameter
+    void set_param_description (unsigned, const std::string&);
+
     //! Get the value of the specified model parameter
     double get_param (unsigned) const;
     //! Set the value of the specified model parameter
@@ -161,6 +171,8 @@ namespace Pulsar {
   protected:
 
     std::vector< Estimate<double> > params;
+    std::vector< std::string > names;
+    std::vector< std::string > descriptions;
 
     std::vector<double> covariance;
 

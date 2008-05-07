@@ -13,6 +13,29 @@
 
 using namespace std;
 
+void copy_name (MEAL::Complex2* to,
+		const Pulsar::PolnCalibratorExtension::Transformation* from)
+{
+  for (unsigned i=0; i<to->get_nparam(); i++)
+  {
+    string param_name = from->get_param_name(i);
+    if (param_name != "" && param_name != to->get_param_name(i))
+      throw Error (InvalidState, "copy_name",
+		   "iparam=%d name=%s != model=%s",
+		   i, param_name.c_str(), to->get_param_name(i).c_str());
+  }
+}
+
+void copy_name (Pulsar::PolnCalibratorExtension::Transformation* to,
+		const MEAL::Complex2* from)
+{
+  for (unsigned i=0; i<to->get_nparam(); i++)
+  {
+    to->set_param_name(i, from->get_param_name(i));
+    to->set_param_description(i, from->get_param_description(i));
+  }
+}
+
 template<class T, class F>
 void copy (T* to, const F* from)
 {
@@ -23,6 +46,8 @@ void copy (T* to, const F* from)
 
   for (unsigned i=0; i<to->get_nparam(); i++)
     to->set_Estimate(i, from->get_Estimate(i));
+
+  copy_name (to, from);
 }
 
 //! Construct from a PolnCalibrator instance
@@ -88,6 +113,7 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
 //! Return a new MEAL::Complex2 instance, based on type attribute
 MEAL::Complex2*
 Pulsar::new_transformation (const PolnCalibratorExtension* ext, unsigned ichan)
+try
 {
   if( !ext->get_valid(ichan) )
     return 0;
@@ -97,6 +123,10 @@ Pulsar::new_transformation (const PolnCalibratorExtension* ext, unsigned ichan)
   copy( xform, ext->get_transformation(ichan) );
 
   return xform;
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::new_transformation";
 }
 
 MEAL::Complex2* Pulsar::new_transformation( Calibrator::Type type )

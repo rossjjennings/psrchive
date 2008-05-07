@@ -217,6 +217,37 @@ PolnCalibratorExtension::Transformation::get_nparam() const
   return params.size();
 }
 
+//! Get the name of the specified model parameter
+string
+PolnCalibratorExtension::Transformation::get_param_name (unsigned i) const
+{
+  return names[i];
+}
+
+//! Set the name of the specified model parameter
+void
+PolnCalibratorExtension::Transformation::set_param_name (unsigned i,
+							 const string& n)
+{
+  names[i] = n;
+}
+
+//! Get the description of the specified model parameter
+string
+PolnCalibratorExtension::Transformation::get_param_description (unsigned i)
+  const
+{
+  return descriptions[i];
+}
+
+//! Set the description of the specified model parameter
+void
+PolnCalibratorExtension::Transformation::set_param_description 
+(unsigned i, const string& n)
+{
+  descriptions[i] = n;
+}
+
 void PolnCalibratorExtension::Transformation::set_nparam (unsigned s)
 {
   params.resize(s);

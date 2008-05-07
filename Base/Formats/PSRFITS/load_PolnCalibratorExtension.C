@@ -8,6 +8,7 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "CalibratorExtensionIO.h"
 #include "psrfitsio.h"
+#include "strutil.h"
 
 #include <stdlib.h>
 #include <assert.h>
@@ -20,19 +21,17 @@ void load_variances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
 void load_covariances (fitsfile* fptr, Pulsar::PolnCalibratorExtension* pce,
 		       int ncovar, vector<float>& data);
 
-void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
-try {
-
-  int status = 0;
- 
+void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
+{
   if (verbose == 3)
     cerr << "FITSArchive::load_PolnCalibratorExtension entered" << endl;
   
   // Move to the FEEDPAR HDU
-  
+  int status = 0;
   fits_movnam_hdu (fptr, BINARY_TBL, "FEEDPAR", 0, &status);
   
-  if (status == BAD_HDU_NUM) {
+  if (status == BAD_HDU_NUM)
+  {
     if (verbose == 3)
       cerr << "Pulsar::FITSArchive::load_PolnCalibratorExtension"
 	" no FEEDPAR HDU" << endl;
@@ -45,27 +44,25 @@ try {
 
   Reference::To<PolnCalibratorExtension> pce = new PolnCalibratorExtension;
 
-  char* comment = 0;
-
   // Get CAL_MTHD
   
-  char* cal_mthd = new char[80];
-  fits_read_key (fptr, TSTRING, "CAL_MTHD", cal_mthd, comment, &status);
+  string cal_mthd;
+  string unknown = "unknown";
+  psrfits_read_key (fptr, "CAL_MTHD", &cal_mthd, unknown, verbose == 3);
 
   if (verbose > 2)
     cerr << "FITSArchive::load_PolnCalibratorExtension "
             "CAL_MTHD='" << cal_mthd << "'" << endl;
 
-  if (cal_mthd[0] == '\0')  {
+  if (cal_mthd == unknown)
+  {
     if (verbose == 3)
       cerr << "Pulsar::FITSArchive::load_PolnCalibratorExtension"
         " empty CAL_MTHD" << endl;
-    delete[] cal_mthd;
     return;
   }
 
-  pce->set_type( Calibrator::str2Type (cal_mthd) );
-  delete[] cal_mthd;
+  pce->set_type( Calibrator::str2Type (cal_mthd.c_str()) );
 
   if (verbose == 3)
     cerr << "FITSArchive::load_PolnCalibratorExtension Calibrator type=" 
@@ -77,18 +74,6 @@ try {
   if (ncpar < 0)
     ncpar = 0;
   pce->set_ncpar( ncpar );
-//   
-//   // Get NCHAN
-//   int nchan = 0;
-//   psrfits_read_key( fptr, "NCHAN", &nchan, 0, verbose == 3 );
-//   if( nchan < 0 )
-//     nchan = 0;
-//   pce->set_nchan( nchan );
-//   
-//   // Get EPOCH
-//   double epoch;
-//   psrfits_read_key( fptr, "EPOCH", &epoch, 0.0, verbose == 3 );
-//   pce->set_epoch( epoch );
 
   int ncovar = 0;
   psrfits_read_key (fptr, "NCOVAR", &ncovar, 0, verbose == 3);
@@ -96,11 +81,19 @@ try {
   // Get NCH_FDPR (old versions of PSRFITS header)
   int nch_fdpr = 0;
   psrfits_read_key (fptr, "NCH_FDPR", &nch_fdpr, 0, verbose == 3);
-  
-  if (status == 0 && nch_fdpr >= 0)
+
+  if (nch_fdpr > 0)
     pce->set_nchan(nch_fdpr);
 
-  status = 0;
+  vector<string> param_names (ncpar);
+
+  for (int iparam=0; iparam < ncpar; iparam++)
+  {
+    string key = stringprintf ("PAR_%04d", iparam);
+    string empty = "";
+    psrfits_read_key (fptr, key.c_str(), &(param_names[iparam]),
+		      empty, verbose == 3);
+  }
 
   Pulsar::load (fptr, pce);
 
@@ -132,9 +125,13 @@ try {
   
   int count = 0;
   for (ichan = 0; ichan < pce->get_nchan(); ichan++)
-    if (pce->get_valid(ichan)) {
+    if (pce->get_valid(ichan))
+    {
       bool valid = true;
-      for (int j = 0; j < ncpar; j++) {
+      for (int j = 0; j < ncpar; j++)
+      {
+	pce->get_transformation(ichan)->set_param_name (j, param_names[j]);
+
 	if (!finite(data[count]))
 	  valid = false;
 	else

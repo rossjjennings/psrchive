@@ -1,13 +1,15 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "CalibratorExtensionIO.h"
 #include "psrfitsio.h"
+#include "strutil.h"
 
 #include <assert.h>
 
@@ -70,6 +72,22 @@ try {
 
   // Write NCOVAR
   psrfits_update_key (fptr, "NCOVAR", ncovar);
+
+  const PolnCalibratorExtension::Transformation* valid = 0;
+  for (int ichan=0; ichan < nchan; ichan++)
+    if (pce->get_valid(ichan))
+      valid = pce->get_transformation(ichan);
+
+  if (valid)
+  {
+    assert (valid->get_nparam() == unsigned(ncpar));
+    for (unsigned iparam=0; iparam < valid->get_nparam(); iparam++)
+    {
+      string key = stringprintf ("PAR_%04d", iparam);
+      psrfits_update_key (fptr, key.c_str(), valid->get_param_name(iparam),
+			  valid->get_param_description(iparam).c_str());
+    }
+  }
 
   Pulsar::unload (fptr, pce);
 
