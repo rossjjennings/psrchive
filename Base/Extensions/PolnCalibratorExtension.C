@@ -251,6 +251,8 @@ PolnCalibratorExtension::Transformation::set_param_description
 void PolnCalibratorExtension::Transformation::set_nparam (unsigned s)
 {
   params.resize(s);
+  names.resize(s);
+  descriptions.resize(s);
 }
 
 double 
