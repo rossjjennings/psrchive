@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.26 $
-   $Date: 2008/03/30 22:56:46 $
+   $Revision: 1.27 $
+   $Date: 2008/05/08 23:37:04 $
    $Author: nopeer $ */
 
 
@@ -1024,9 +1024,11 @@ int main( int argc, char *argv[] ) try
     switch( i )
     {
     case '?':
-      if( optopt == 'h' )
       {
-        Usage();
+        if( optopt == 'h' )
+        {
+          Usage();
+        }
       }
       break;
     case 'V':
@@ -1119,6 +1121,30 @@ int main( int argc, char *argv[] ) try
       cerr << "Unknown option " << char(i) << endl;
       break;
     };
+  }
+  
+  if( optind < argc )
+  {
+    string first_arg = argv[optind];
+    if( first_arg == "help" )
+    {
+      if( optind == argc - 1 )
+        Usage();
+      else
+      {
+        char help_param = argv[optind+1][0];
+        switch( help_param )
+        {
+          case 'H':
+            DisplayHistoryUsage();
+            break;
+          case 'S':
+            DisplaySubintsUsage();
+            break;
+        };
+        exit(0);
+      }
+    }
   }
 
   vector< string > filenames = GetFilenames( argc, argv );
