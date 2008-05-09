@@ -10,9 +10,20 @@
 #include "Functor.h"
 #include "ierf.h"
 
- 
+#include <assert.h>
+
 /*! From JA98, Table 1 */
 const double JenetAnderson98::optimal_threshold = 0.9674;
+
+double JenetAnderson98::get_optimal_spacing (unsigned bits)
+{
+  assert (bits > 1 && bits < 9);
+
+  double spacing [9] = { 0, 0,  // 0 and 1 bit not handled
+                         0.9674, 0.5605, 0.3188, 0.1789,
+                         0.09925, 0.05445, 0.02957 };
+  return spacing[bits];
+}
 
 JenetAnderson98::JenetAnderson98 ()
 {
