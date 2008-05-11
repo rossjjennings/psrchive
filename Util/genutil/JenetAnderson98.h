@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/05/09 05:03:00 $
+   $Revision: 1.12 $
+   $Date: 2008/05/11 08:15:08 $
    $Author: straten $ */
 
 #ifndef __Jenet_Anderson_98
@@ -42,8 +42,6 @@ class JenetAnderson98 : public Reference::Able {
 
  public:
 
-  static const double optimal_threshold;
-
   //! Table 3 - Optimum Input Threshold Spacing for a Uniform Digitizer
   static double get_optimal_spacing (unsigned bits);
 
@@ -66,7 +64,7 @@ class JenetAnderson98 : public Reference::Able {
   double get_A () const { return A; }
 
   //! Set the sampling threshold
-  void set_threshold (double t = optimal_threshold);
+  void set_threshold ( double t = get_optimal_spacing(2) );
   //! Get the sampling threshold
   double get_threshold () const { return threshold; }
 
