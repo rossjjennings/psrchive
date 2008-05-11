@@ -20,7 +20,7 @@ Pulsar::TwoBitStats::TwoBitStats ()
   nsample = 0;
   ndig = 0;
 
-  threshold = JenetAnderson98::optimal_threshold;
+  threshold = JenetAnderson98::get_optimal_spacing(2);
   cutoff_sigma = 0.0;
 }
 
