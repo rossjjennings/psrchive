@@ -4,6 +4,7 @@ noinst_LTLIBRARIES = libExtensions.la
 nobase_include_HEADERS = \
         Pulsar/Arecibo.h \
         Pulsar/Backend.h \
+	Pulsar/BackendInterface.h \
         Pulsar/BinaryPhaseOrder.h \
         Pulsar/BinLngAscOrder.h \
         Pulsar/BinLngPeriOrder.h \

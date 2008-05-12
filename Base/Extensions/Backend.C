@@ -5,12 +5,11 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/Backend.h"
-#include "TextInterface.h"
+#include "Pulsar/BackendInterface.h"
 
 //! Default constructor
 Pulsar::Backend::Backend (const std::string& ext_name)
-    : Extension (ext_name.c_str())
+  : Extension (ext_name.c_str())
 {
   name = "unknown";
   hand = Signal::Right;
@@ -37,27 +36,23 @@ const Pulsar::Backend& Pulsar::Backend::operator= (const Backend& backend)
 }
 
 // Text interface to a Backend extension
-class Pulsar::Backend::Interface : public TextInterface::To<Pulsar::Backend>
+Pulsar::Backend::Interface::Interface (Backend *s_instance)
 {
-public:
-  Interface( Backend *s_instance = NULL )
-  {
-    if( s_instance )
-      set_instance( s_instance );
+  if( s_instance )
+    set_instance( s_instance );
 
-    add( &Backend::get_name,
-	 &Backend::set_name,
-	 "name", "Name of the backend instrument" );
+  add( &Backend::get_name,
+       &Backend::set_name,
+       "name", "Name of the backend instrument" );
     
-    add( &Backend::get_argument,
-	 &Backend::set_argument,
-	 "phase", "Phase convention of backend" );
-    
-    add( &Backend::get_downconversion_corrected,
-	 &Backend::set_downconversion_corrected,
-	 "dcc", "Downconversion conjugation corrected" );
-  }
-};
+  add( &Backend::get_argument,
+       &Backend::set_argument,
+       "phase", "Phase convention of backend" );
+  
+  add( &Backend::get_downconversion_corrected,
+       &Backend::set_downconversion_corrected,
+       "dcc", "Downconversion conjugation corrected" );
+}
 
 //! Return a text interfaces that can be used to access this instance
 TextInterface::Parser* Pulsar::Backend::get_interface()
