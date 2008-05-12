@@ -5,26 +5,24 @@
  *
  ***************************************************************************/
 
-
-
 #include "Pulsar/WidebandCorrelator.h"
-
-
+#include "Pulsar/BackendInterface.h"
 
 using Pulsar::WidebandCorrelator;
-
-
 
 WidebandCorrelator::Interface::Interface( WidebandCorrelator *s_instance )
 {
   if( s_instance )
     set_instance( s_instance );
 
-  add( &WidebandCorrelator::get_config, "beconfig", "Backend Config file" );
-  add( &WidebandCorrelator::get_nrcvr, "nrcvr", "Number of receiver channels" );
-  add( &WidebandCorrelator::get_tcycle, "tcycle", "Get the correlator cycle time" );
+  import ( Backend::Interface() );
+
+  add( &WidebandCorrelator::get_config,
+       "beconfig", "Backend Config file" );
+
+  add( &WidebandCorrelator::get_nrcvr,
+       "nrcvr", "Number of receiver channels" );
+
+  add( &WidebandCorrelator::get_tcycle,
+       "tcycle", "Get the correlator cycle time" );
 }
-
-
-
-
