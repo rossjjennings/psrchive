@@ -41,6 +41,9 @@ namespace Pulsar
     TextInterface::Parser* get_interface();
     class Interface;
 
+    //! Return an abbreviated name that can be typed relatively quickly
+    std::string get_short_name () const { return "dig"; }
+
     //! set ndigr
     void set_ndigr( int s_ndigr ) { ndigr = s_ndigr; }
 

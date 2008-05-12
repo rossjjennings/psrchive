@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSSUBHdrExtension.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/04/21 06:20:00 $
+   $Revision: 1.8 $
+   $Date: 2008/05/12 20:46:06 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSSUBHdrExtension_h
@@ -50,6 +50,9 @@ namespace Pulsar
       public:
 	Interface( FITSSUBHdrExtension *s_instance = NULL );
     };
+
+    //! Return an abbreviated name that can be typed relatively quickly
+    std::string get_short_name () const { return "sub"; }
 
     std::string get_int_type( void ) const { return int_type; }
     std::string get_int_unit( void ) const { return int_unit; }

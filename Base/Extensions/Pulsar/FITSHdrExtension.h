@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.18 $
-   $Date: 2008/04/21 06:20:00 $
+   $Revision: 1.19 $
+   $Date: 2008/05/12 20:46:06 $
    $Author: straten $ */
 
 #ifndef __FITSHdrExtension_h
@@ -49,6 +49,9 @@ namespace Pulsar
       public:
 	Interface( FITSHdrExtension *s_instance = NULL );
     };
+
+    //! Return an abbreviated name that can be typed relatively quickly
+    std::string get_short_name () const { return "ext"; }
 
     //! Return two strings based on coordmode attribute
     void get_coord_string (const sky_coord& coordinates,

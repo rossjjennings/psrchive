@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ITRFExtension.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/04/21 06:20:00 $
+   $Revision: 1.11 $
+   $Date: 2008/05/12 20:46:06 $
    $Author: straten $ */
 
 #ifndef __ITRFExtension_h
@@ -45,6 +45,9 @@ namespace Pulsar {
     TextInterface::Parser* get_interface();
     class Interface;
     
+    //! Return an abbreviated name that can be typed relatively quickly
+    std::string get_short_name () const { return "itrf"; }
+
     // get methods
     double get_ant_x() const { return ant_x; }
     double get_ant_y() const { return ant_y; }

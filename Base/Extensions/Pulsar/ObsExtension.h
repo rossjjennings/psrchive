@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ObsExtension.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/04/21 06:20:00 $
+   $Revision: 1.12 $
+   $Date: 2008/05/12 20:46:06 $
    $Author: straten $ */
 
 #ifndef __ObsExtension_h
@@ -52,6 +52,9 @@ namespace Pulsar {
       public:
 	Interface( ObsExtension *s_instance = NULL );
     };
+
+    //! Return an abbreviated name that can be typed relatively quickly
+    std::string get_short_name () const { return "obs"; }
 
     // get methods
     std::string get_observer() const { return observer; }

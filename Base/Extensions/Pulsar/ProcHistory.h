@@ -45,6 +45,9 @@ namespace Pulsar {
 	Interface( ProcHistory *s_instance = NULL );
     };
 
+    //! Return an abbreviated name that can be typed relatively quickly
+    std::string get_short_name () const { return "hist"; }
+
     ///////////////////////////////////////////////////////////////
     // The information container
     
