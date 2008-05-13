@@ -1,3 +1,9 @@
+
+aclocaldir = $(datadir)/aclocal
+
+dist_aclocal_DATA = \
+	debug.m4 compiler.m4 x11.m4 pgplot.m4 getopt_long.m4 mpi.m4
+
 #############################################################################
 #
 # This Makefile smooths over various bugs and bumps and other features
