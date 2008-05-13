@@ -63,22 +63,18 @@ libExtensions_la_SOURCES = \
         dspReduction.C \
         ExampleExtension.C \
         FeedExtension.C \
-        FeedExtension.C \
         FITSHdrExtension.C \
 	FITSHdrExtensionTI.C \
 	FITSSUBHdrExtension.C \
 	FITSSUBHdrExtensionTI.C \
-        FluxCalibratorExtension_build.C \
         FluxCalibratorExtension.C \
         FluxCalibratorExtensionTI.C \
         GBT.C \
         IntegrationOrder.C \
         ITRFExtension.C \
-        ITRFExtension.C \
         ObsExtension.C \
 	ObsExtensionTI.C \
         Parkes.C \
-        Passband.C \
         Passband.C \
         PeriastronOrder.C \
         Pointing.C \
