@@ -115,6 +115,8 @@ include_HEADERS += JenetAnderson98Plot.h
 libgenutil_la_SOURCES += JenetAnderson98Plot.C
 endif
 
+libgenutil_la_LIBADD = @READLINE_LIBS@
+
 bin_PROGRAMS = getMJD getHorizon
 
 getMJD_SOURCES = getMJD.C
