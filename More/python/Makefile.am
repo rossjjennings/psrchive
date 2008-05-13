@@ -7,8 +7,8 @@ _psrchive_la_LDFLAGS = -module -avoid-version -no-undefined
 
 _psrchive_la_LIBADD = @PSRCHIVE_LIBS@
 
-psrchive_wrap.cxx: psrchive.i ../Pulsar/Archive.h
-	$(SWIG) -Wall -python -I.. psrchive.i
+psrchive_wrap.cxx: psrchive.i ../../local_include/Pulsar/Archive.h
+	$(SWIG) -Wall -python -I../../local_include psrchive.i
 
 #############################################################################
 #
