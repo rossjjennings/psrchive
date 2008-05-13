@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.94 $
-   $Date: 2008/02/05 05:25:34 $
-   $Author: straten $ */
+   $Revision: 1.95 $
+   $Date: 2008/05/13 21:49:05 $
+   $Author: demorest $ */
 
 /*
   
@@ -103,19 +103,12 @@ namespace Pulsar {
     void baseline_stats (std::vector< std::vector< Estimate<double> > >* mean,
 			 std::vector< std::vector<double> >* variance = 0) const;
 
-    //! Return the statistics of every profile baseline
-    void baseline_stats (std::vector< std::vector< Estimate<double> > >& mean,
-			 std::vector< std::vector< Estimate<double> > >& variance) const;
-
     //! Remove the baseline from all profiles
     void remove_baseline (const PhaseWeight* baseline = 0);
 
     //! Returns the mean hi/lo and variance of the mean hi/lo of every profile
     void cal_levels (std::vector< std::vector< Estimate<double> > >& hi,
                      std::vector< std::vector< Estimate<double> > >& lo) const;
-
-    void find_psr_levels (std::vector<std::vector<double> >& mean_high,
-			  std::vector<std::vector<double> >& mean_low) const;
 
     //! Computes the weighted centre frequency of an interval of sub-chans.
     double weighted_frequency (unsigned ch_start=0, unsigned ch_end=0) const;
