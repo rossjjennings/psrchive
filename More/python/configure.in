@@ -4,7 +4,7 @@
 AC_PREREQ(2.57)
 AC_INIT([PSRCHIVE_PYTHON],[3.1],[psrchive@astro.swin.edu.au])
 AC_CONFIG_SRCDIR([psrchive.i])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 
 # Checks for programs.
 AC_PROG_CXX
