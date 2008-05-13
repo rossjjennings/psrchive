@@ -258,6 +258,7 @@ AC_CONFIG_FILES([
 		Management/Makefile
 		Management/psrchive_ldflags
 		Management/psrchive_cflags
+		Management/psrchive_aclocal
 		Management/psrchive_install.h
 		Makefile])
 
