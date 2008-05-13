@@ -82,6 +82,7 @@ libPolarimetry_la_SOURCES = \
         Feed_load.C \
         FluxCalibrator.C \
         FluxCalibratorData.C \
+	FluxCalibratorExt.C \
         HybridCalibrator.C \
         Instrument.C \
         InstrumentInfo.C \
