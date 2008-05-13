@@ -29,7 +29,6 @@ void VanVleck::set_nlevel(int n)
 
 void VanVleck::set_uniform_threshold() 
 {
-  float t;
   int idx;
   if (nlevel%2) {
     // Odd nlevel
@@ -41,7 +40,7 @@ void VanVleck::set_uniform_threshold()
     thresh[idx] = 0.0;
   }
   for (int i=idx-1; i>=0; i--) { thresh[i] = thresh[i+1]-1.0; }
-  for (int i=idx+1; i<thresh.size(); i++) { thresh[i] = thresh[i-1]+1.0; }
+  for (unsigned i=idx+1; i<thresh.size(); i++) { thresh[i] = thresh[i-1]+1.0; }
 }
 
 void VanVleck::set_threshold(float *thr) 
@@ -103,7 +102,7 @@ double VanVleck::out_pow(double in_pow, double in_dc)
       else return(0.5*(levels[nlevel/2]*levels[nlevel/2] 
             + levels[nlevel/2-1]*levels[nlevel/2-1]));
     } else {
-      int ilev=0;
+      unsigned ilev=0;
       for (ilev=0; ilev<thresh.size(); ilev++) {
         if (in_dc<thresh[ilev]) break;
       }
@@ -113,7 +112,7 @@ double VanVleck::out_pow(double in_pow, double in_dc)
 
   // Pre-calculate cumulatve dist values at thresholds.
   std::vector<double> cdist(thresh.size());
-  for (int i=0; i<thresh.size(); i++) { 
+  for (unsigned i=0; i<thresh.size(); i++) { 
       cdist[i] = n.cumulative_distribution((thresh[i]-in_dc)/in_pow_1_2);
   }
 
@@ -139,7 +138,7 @@ double VanVleck::d_out_pow(double in_pow, double in_dc)
 
   // Pre-calculate density values at thresholds.
   std::vector<double> dens(thresh.size());
-  for (int i=0; i<thresh.size(); i++) {
+  for (unsigned i=0; i<thresh.size(); i++) {
     dens[i] = n.density((thresh[i]-in_dc)/in_pow_1_2) * 
       (-0.5 * (thresh[i]-in_dc)/in_pow_3_2);
   }

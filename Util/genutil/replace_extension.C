@@ -14,7 +14,7 @@ string replace_extension (const string& filename, const string& ext)
   if (!(ext.length() && filename.length()))
     return filename;
 
-  unsigned index = filename.find_last_of( ".", filename.length() );
+  string::size_type index = filename.find_last_of( ".", filename.length() );
   if (index == string::npos)
     index = filename.length();
 
@@ -27,3 +27,4 @@ string replace_extension (const string& filename, const string& ext)
 
   return retval;
 }
+

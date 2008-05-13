@@ -80,7 +80,7 @@ int main (int argc, char** argv)
   else {
     cout <<
       "\\begin{tabular}{l";
-    for (int ie=0; ie<ephs.size(); ie++)
+    for (unsigned ie=0; ie<ephs.size(); ie++)
       cout << "r";
     cout << "}\n";
 
