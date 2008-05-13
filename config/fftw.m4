@@ -20,6 +20,8 @@ AC_DEFUN([SWIN_LIB_FFTW],
                             [-lfftw3f])
     fi
 
+  else
+    have_fftw3=no
   fi
 
   AC_MSG_RESULT([$have_fftw3])
