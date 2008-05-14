@@ -88,7 +88,7 @@ AC_DEFUN([SWIN_PACKAGE_FIND],
   swin_[$1]_found=""
 
   if test x"$PACKAGES" != x; then
-    for cf_file in `find $PACKAGES -name "[$2]"`; do
+    for cf_file in `find $PACKAGES -name "[$2]" 2> /dev/null`; do
       cf_path=`dirname $cf_file`
       swin_[$1]_found="$swin_[$1]_found $cf_path"
     done
