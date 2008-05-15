@@ -44,5 +44,9 @@ SUBDIRS += psrgui
 endif
 endif
 
+if HAVE_PYTHON
+SUBDIRS += python
+endif
+
 include $(top_srcdir)/config/Makefile.local
 
