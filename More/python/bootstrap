@@ -1,9 +1,0 @@
-#! /bin/sh
-
-set -x
-aclocal -I .
-libtoolize --force --copy
-aclocal -I .
-automake --add-missing --copy -Woverride
-autoconf
-
