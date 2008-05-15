@@ -16,7 +16,7 @@ if test -d /sw; then
 elif test -d /usr/local; then
   DEFAULT_INSTALL=/usr/local
 else
-  DEFAULT_INSTALL=/
+  DEFAULT_INSTALL=$HOME
 fi
 
 AC_ARG_VAR([PSRHOME],[Standard pulsar home directory])
@@ -172,11 +172,28 @@ SWIN_LIB_MPI
 SWIN_LIB_READLINE
 SWIN_LIB_GSL
 
+#
+# Generate python module if --enable-shared is used
+#
+if test x"$enable_shared" == xyes; then
+  AM_PATH_PYTHON(,, [:])
+  AC_PROG_SWIG
+  SWIG_ENABLE_CXX
+  SWIG_PYTHON
+else
+  PYTHON=":"
+fi
+
+AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
+
 ACX_PTHREAD
 LIBS="$PTHREAD_LIBS $LIBS"
 CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"
 
+#
+# Compile plotting and GUI code if --enable-lean is not used
+#
 if test x"$enable_lean" == xyes; then
 
 AM_CONDITIONAL(HAVE_PGPLOT, [test 1 = 0])
@@ -255,6 +272,7 @@ AC_CONFIG_FILES([
 		More/Applications/Makefile
 		More/rhythm/Makefile
 		More/psrgui/Makefile
+		More/python/Makefile
 		Management/Makefile
 		Management/psrchive_ldflags
 		Management/psrchive_cflags
