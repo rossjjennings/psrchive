@@ -15,5 +15,5 @@ psrchive_wrap.cxx: psrchive.i ../../local_include/Pulsar/Archive.h
 #############################################################################
 #
 
-INCLUDES = @SWIG_PYTHON_CPPFLAGS@
+INCLUDES = @SWIG_PYTHON_CPPFLAGS@ -I$(top_builddir)/local_include
 
