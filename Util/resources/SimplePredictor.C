@@ -178,21 +178,23 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
     else if (key == "DEC:")
       coordinates.dec().setDMS (val.c_str());
 
-    else if (key == "PERIOD:") {
+    else if (key == "PERIOD:")
+    {
       long double period = fromstring<long double>(val);
       if (coefs.size() == 0)
 	coefs.resize(1);
       coefs[0] = 1/period;
     }
 
-    else if (key == "ACC:") {
+    else if (key == "ACC:")
+    {
       if (coefs.size() == 0)
         throw Error (InvalidState, "Pulsar::SimplePredictor::load",
                      "PERIOD not specified before ACC");
       long double acc = fromstring<long double>(val);
       if (coefs.size() < 2)
 	coefs.resize(2);
-      coefs[1] = 0.5 * coefs[0] * acc / Pulsar::speed_of_light;
+      coefs[1] = -0.5 * coefs[0] * acc / Pulsar::speed_of_light;
     }
 
     else
