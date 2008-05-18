@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/BandpassPlotter.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/05/05 07:54:48 $
+   $Revision: 1.5 $
+   $Date: 2008/05/18 21:19:38 $
    $Author: straten $*/
 
 #ifndef __fft_BandpassPlotter_h
@@ -27,7 +27,11 @@ namespace fft {
     
     //! Default constructor
     BandpassPlotter ()
-    { user_max = 0.0; ignore_fraction = 0.0; logarithmic = false; }
+    { 
+      user_max = user_min = 0; ignore_fraction = 0.0; 
+      logarithmic = false; xlabel_ichan = false;
+      title = "Original Bandpass";
+    }
 
     //! Destructor
     virtual ~BandpassPlotter() { }
@@ -43,13 +47,22 @@ namespace fft {
     virtual void preprocess (std::vector<float>& bandpass) const { }
 
     //! Maximum value in plots
-    float user_max;
+    void set_minmax (float min, float max)
+    { user_min = min; user_max = max; }
 
     //! Ignore band edges
     float ignore_fraction;
 
     //! Use logarithmic axis
     bool logarithmic;
+
+    //! Label x-axis with channel number
+    bool xlabel_ichan;
+
+    std::string title;
+
+    protected:
+      float user_min, user_max;
 
   };
 
@@ -68,7 +81,6 @@ template<class Data, class Info>
 void fft::BandpassPlotter<Data,Info>::plot (Data* data, Info* info) const
 {
   unsigned ipol, npol = data->get_npol ();
-  unsigned nchan = data->get_nchan ();
 
   float min = 0;
   float max = 0;
@@ -81,27 +93,33 @@ void fft::BandpassPlotter<Data,Info>::plot (Data* data, Info* info) const
     minmax (pband, min, max, ipol);
   }
   
-  if (user_max)
+  if (user_min != user_max)
+  {
+    min = user_min;
     max = user_max;
+  }
 
   double freq = info->get_centre_frequency();
   double bw = info->get_bandwidth();
-  
+
   double fmin = freq - bw/2;
   double fmax = freq + bw/2;
-  
+
+  std::string xlabel = "Frequency (MHz)";
+
+  if (xlabel_ichan)
+  {
+    fmin = 0;
+    fmax = 1;
+    xlabel = "Frequency channel";
+  }
+
   cpgsci(1);
   cpgswin(fmin, fmax, min, max);
-  if (logarithmic)
-  {
-    cpgbox("BCNST", 0.0, 0, "BCNSTL2", 0.0, 0);
-    cpglab("Frequency (MHz)", "Logarithmic Scale", "Original Bandpass");
-  }
-  else
-  {
-    cpgbox("BCNST", 0.0, 0, "BCNST", 0.0, 0);
-    cpglab("Frequency (MHz)", "Linear Scale", "Original Bandpass");
-  }
+
+  unsigned nchan = 0;
+
+  // std::cerr << "npol=" << npol << std::endl;
 
   for (unsigned ipol=0; ipol<npol; ipol++)
   {
@@ -111,19 +129,46 @@ void fft::BandpassPlotter<Data,Info>::plot (Data* data, Info* info) const
       log (pband);
 
     nchan = pband.size();
+
+    // std::cerr << "ipol=" << ipol << " nchan=" << nchan << std::endl;
+
     double fstep = bw/(nchan-1);
-    
+    if (xlabel_ichan)
+      fstep = 1.0/nchan;
+ 
     cpgsci(ipol+2);
-    for (unsigned ichan=0; ichan<nchan; ichan++) {
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+    {
       float x = fmin + ichan*fstep;
       float y = pband[ichan];
+
+      // std::cerr << "ichan=" << ichan << " x=" << x << " y=" << y << std::endl;
+
       if (ichan == 0)
 	cpgmove (x, y);
       else
 	cpgdraw (x, y);
     }
   }
-  
+
+  if (xlabel_ichan)
+  {
+    fmax = nchan;
+    cpgswin(fmin, fmax, min, max);
+  }
+
+  cpgsci (1);
+
+  if (logarithmic)
+  {
+    cpgbox("BCNST", 0.0, 0, "BCNSTL2", 0.0, 0);
+    cpglab(xlabel.c_str(), "Logarithmic Scale", title.c_str());
+  }
+  else
+  {
+    cpgbox("BCNST", 0.0, 0, "BCNST", 0.0, 0);
+    cpglab(xlabel.c_str(), "Linear Scale", title.c_str());
+  }
 }
 
 
@@ -157,13 +202,12 @@ void fft::BandpassPlotter<Data,Info>::plot (std::vector< std::vector<T> >& data,
     jchan += nchan;
   }
 
-  std::cerr << "min=" << min << " max=" << max << std::endl;
+  //std::cerr << "min=" << min << " max=" << max << std::endl;
   float diff = max - min;
   min -= .1 * diff;
   max += .1 * diff;
-  std::cerr << "min=" << min << " max=" << max << std::endl;
+  //std::cerr << "min=" << min << " max=" << max << std::endl;
 
-  
   if (user_max)
     max = user_max;
 
