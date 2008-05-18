@@ -11,8 +11,10 @@ _psrchive_la_LIBADD = $(top_builddir)/More/libpsrmore.la \
                       $(top_builddir)/Base/libpsrbase.la \
                       $(top_builddir)/Util/libpsrutil.la 
 
-psrchive_wrap.cxx: psrchive.i ../../local_include/Pulsar/Archive.h
-	$(SWIG) -Wall -python -I../../local_include psrchive.i
+psrchive_wrap.cxx: $(srcdir)/psrchive.i
+	$(SWIG) -Wall -python -I$(top_builddir)/local_include $(srcdir)/psrchive.i
+
+CLEANFILES = psrchive.py psrchive.pyc psrchive_wrap.cxx
 
 #############################################################################
 #
