@@ -71,7 +71,6 @@ void test_matrix (const Type1& t1_1, const Type1& t1_2, const Type2& t2_null,
     throw std::string ("test_matrix "
 		 "Error casting from Type1 to Type2");
 
-
   if (verbose) std::cerr << "Type1 == Type2" << std::endl;
   if (t1_1 != t2_1)
     throw std::string ("test_matrix "
@@ -80,7 +79,8 @@ void test_matrix (const Type1& t1_1, const Type1& t1_2, const Type2& t2_null,
   //
   // test operator + and - (implicitly tests operator+= and -=)
   //
-  if (verbose) std::cerr << "\n*************** Testing operator + and -" << std::endl;
+  if (verbose)
+    std::cerr << "\n*************** Testing operator + and -" << std::endl;
 
   t2_2 = t1_2;
 
@@ -94,7 +94,8 @@ void test_matrix (const Type1& t1_1, const Type1& t1_2, const Type2& t2_null,
 
   if (verbose) std::cerr << "Type1 == Type2" << std::endl;
 
-  if (norm(t1_1 - t2_1)/norm(t2_1) > tolerance) {
+  if (norm(t1_1 - t2_1)/norm(t2_1) > tolerance)
+  {
     std::cerr << "t1_1 = " << t1_1 << " != "
 	 << "t2_1 = " << t2_1 << std::endl;
 
@@ -107,7 +108,9 @@ void test_matrix (const Type1& t1_1, const Type1& t1_2, const Type2& t2_null,
   // test operator * and / Element (implicitly tests operator*= and /=)
   //
   if (verbose)
-    std::cerr << "\n*************** Testing operator * and / Element" << std::endl;
+    std::cerr << "\n*************** Testing operator * and / Element" 
+              << std::endl;
+
   Element dfactor;
   random_value (dfactor, scale);
 
@@ -120,7 +123,8 @@ void test_matrix (const Type1& t1_1, const Type1& t1_2, const Type2& t2_null,
   t2_1 = t2_2 / dfactor;
 
   if (verbose) std::cerr << "Type1 == Type2" << std::endl;
-  if (norm(t2_1 - t1_1)/norm(t2_1) > tolerance) {
+  if (norm(t2_1 - t1_1)/norm(t2_1) > tolerance)
+  {
     std::cerr << "Error Type2=" << t2_1 
 	 << " * / Element=" << dfactor
 	 << " != Type1=" << t1_1 << std::endl;
@@ -154,8 +158,12 @@ void test_matrix (const Type1& t1_1, const Type1& t1_2, const Type2& t2_null,
   t2_2 = conj (t1_1) * conj (t1_2);
 
   if (verbose) std::cerr << "Type2 == Type2" << std::endl;
-  if (t2_2 != t2_1)
+  if (norm(t2_1 - t2_2)/norm(t2_1) > tolerance)
+  {
+    std::cerr << "1=" << t2_1 << "\n2=" << t2_2 << std::endl;
     throw std::string ("test_matrix Error Conjugate");
+  }
+
   //
   // test Hermitian
   //
@@ -220,7 +228,8 @@ void test_matrix (const Type1& t1_1, const Type1& t1_2, const Type2& t2_null,
   if (verbose) std::cerr << "trace (Type2)" << std::endl;
   Element variance2 (trace (t2_1));
 
-  if ( variance1 != variance2 ) {
+  if ( norm(variance1 - variance2) > tolerance )
+  {
     std::cerr << "Q=" << t2_2 << std::endl;
     std::cerr << "herm(Q)=" << herm(t2_2) << std::endl;
     std::cerr << "Q*herm(Q)=" << t2_1 << std::endl;
