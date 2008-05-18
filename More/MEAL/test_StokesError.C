@@ -36,6 +36,8 @@ protected:
 
 int main ()
 {
+  // MEAL::Function::very_verbose = true;
+
   MEAL::StokesError test;
 
   // test the identity
@@ -57,14 +59,23 @@ int main ()
   cerr << "simple identity test passed" << endl;
 
   MEAL::Rotation rotation;
+
+  cerr << "set rotation angle" << endl;
+
   rotation.set_param (0, M_PI/4);
 
+  cerr << "set transformation" << endl;
+
   test.set_transformation (rotation.evaluate());
+
+  cerr << "get variance" << endl;
+
   output = test.get_variance ();
 
   Stokes<double> expect (1,2,.6,.5);
 
-  if (expect != output) {
+  if (expect != output)
+  {
     cerr << "FAIL! simple rotation\n"
       "expect = " << expect << "\n"
       "output= " << output << endl;
@@ -171,7 +182,7 @@ Test::Test ()
   cerr << "Failed " << errors << " out of " << tests << " times ("
        << failure_rate << "%)" << endl;
 
-  if (failure_rate > 10)
+  if (failure_rate > 15)
     exit (-1);
 }
 
