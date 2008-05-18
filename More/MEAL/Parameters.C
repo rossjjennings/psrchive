@@ -10,13 +10,23 @@
 using namespace std;
 
 MEAL::Parameters::Parameters (Function* context, unsigned nparam)
-  : ParameterPolicy(context), params(nparam), fit(nparam, true), names(nparam)
+  : 
+  ParameterPolicy (context),
+  params (nparam),
+  fit (nparam, true),
+  names (nparam),
+  descriptions (nparam)
 {
 }
 
 
 MEAL::Parameters::Parameters (const Parameters& p)
-  : ParameterPolicy(0), params(p.params), fit(p.fit), names(p.names)
+  :
+  ParameterPolicy (0), 
+  params (p.params),
+  fit (p.fit),
+  names (p.names),
+  descriptions (p.descriptions)
 {
 }
 
@@ -43,6 +53,7 @@ MEAL::Parameters::operator = (const Parameters& np)
   params = np.params;
   fit = np.fit;
   names = np.names;
+  descriptions = np.descriptions;
 
   get_context()->set_evaluation_changed ();
 
@@ -84,6 +95,8 @@ void MEAL::Parameters::resize (unsigned nparam)
   params.resize (nparam);
   fit.resize (nparam);
   names.resize (nparam);
+  descriptions.resize (nparam);
+
   for (; current < nparam; current++)
     fit[current] = true;
   
