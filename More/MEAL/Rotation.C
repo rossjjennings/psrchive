@@ -13,11 +13,25 @@ using namespace std;
 MEAL::Rotation::Rotation ()
 {
   Parameters* params = new Parameters (this, 3);
+
   for (unsigned i=0; i<3; i++)
   {
     string index = tostring (i + 1);
-    params->set_name (0, "r_" + index);
-    params->set_description (0, "rotation axis_"+index+" times angle (radians)");
+
+    string name = "r_" + index;
+
+    if (very_verbose)
+      cerr << "MEAL::Rotation::Rotation name[" << i << "]=" << name << endl;
+
+    params->set_name (i, name);
+
+    string description = "rotation axis_" + index + " times angle (radians)";
+
+    if (very_verbose)
+      cerr << "MEAL::Rotation::Rotation description[" << i << "]=" 
+           << description << endl;
+
+    params->set_description (i, description);
   }
 }
 
