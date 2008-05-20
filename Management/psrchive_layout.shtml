@@ -21,6 +21,8 @@
 
 <div id="header-right">
 
+<!--#if expr="'$project_freefind' != '0'" -->
+
 <TABLE CELLPADDING=5>
 <TR valign=top>
 <TD>Search <!--#echo encoding="none" var="project_fancy" -->:</TD>
@@ -44,6 +46,8 @@ FreeFind</A></font></FORM>
 </TD>
 </TR>
 </TABLE>
+
+<!--#endif -->
 
 </div>
 
