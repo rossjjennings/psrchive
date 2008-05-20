@@ -59,7 +59,7 @@ int main (int argc, char** argv) try
   if (verbose)
     cerr << "assume cal=" << assume_cal << endl;
 
-  cout << "\nhand\tcalU\tslope\ttrend\toff" << endl;
+  cout << "\nhand\tcalU\tslope\ttrend\toffset" << endl;
 
   // start with right-handed receiver
   Signal::Hand hand = Signal::Right;

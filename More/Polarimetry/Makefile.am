@@ -165,7 +165,8 @@ endif
 #
 
 TESTS = test_copy test_Feed test_SingleAxis test_TotalCovariance \
-	test_Parallactic test_ReceptionModel test_Instrument
+	test_Parallactic test_ReceptionModel test_Instrument \
+	test_hand_xyph
 
 check_PROGRAMS = $(TESTS) test_IRIonosphere
 
@@ -175,6 +176,7 @@ test_ReceptionModel_SOURCES	= test_ReceptionModel.C
 test_SingleAxis_SOURCES		= test_SingleAxis.C
 test_TotalCovariance_SOURCES	= test_TotalCovariance.C
 test_Instrument_SOURCES		= test_Instrument.C
+test_hand_xyph_SOURCES		= test_hand_xyph.C
 
 test_copy_SOURCES		= test_copy.C
 test_IRIonosphere_SOURCES	= test_IRIonosphere.C
@@ -184,7 +186,9 @@ test_IRIonosphere_SOURCES	= test_IRIonosphere.C
 
 INCLUDES = -I$(top_srcdir)/More/Plotting
 
-LDADD = libPolarimetry.la $(top_builddir)/More/MEAL/libMEAL.la \
+LDADD = libPolarimetry.la \
+	$(top_builddir)/More/MEAL/libMEAL.la \
+	$(top_builddir)/Base/libpsrbase.la \
 	$(top_builddir)/Util/libpsrutil.la
 
 include $(top_srcdir)/config/Makefile.include
