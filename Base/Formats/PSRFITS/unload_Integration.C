@@ -11,7 +11,9 @@
 
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Pointing.h"
+
 #include "Pulsar/FITSHdrExtension.h"
+#include "Pulsar/CalInfoExtension.h"
 
 #include "FITSError.h"
 #include "psrfitsio.h"
@@ -62,9 +64,12 @@ void Pulsar::FITSArchive::unload_Integration (int row,
   if (theExt)
     unload(thefptr,theExt,row);
 
+  const CalInfoExtension* calinfo = get<CalInfoExtension>();
+  bool calfreq_set = calinfo && calinfo->cal_frequency > 0.0;
+
   // Write folding period if predictor model does not exist
-  if (!has_model())
-    psrfits_write_col(thefptr, "PERIOD", row, integ->get_folding_period());
+  if (!has_model() && !calfreq_set)
+    psrfits_write_col (thefptr, "PERIOD", row, integ->get_folding_period());
 
   // Write the channel centre frequencies
 
@@ -87,32 +92,8 @@ void Pulsar::FITSArchive::unload_Integration (int row,
   if (verbose > 2)
     cerr << "FITSArchive::unload_integration writing profiles" << endl;
 
-  // Resize the FITS column arrays
+  // FITS column arrays are resized before calling this function
 
-  // 20/02/2003 This is unnecessary. I do it before I call the function.
-  // This section is only included to help avoid confusion (including
-  // my own!)
-
-  /*
-    
-    colnum = 0;
-    fits_get_colnum (thefptr, CASEINSEN, "DAT_OFFS", &colnum, &status);
-    fits_modify_vector_len (thefptr, colnum, (nchan*npol), &status);
-    
-    colnum = 0;
-    fits_get_colnum (thefptr, CASEINSEN, "DAT_WTS", &colnum, &status);
-    fits_modify_vector_len (thefptr, colnum, (nchan*npol), &status);
-    
-    colnum = 0;
-    fits_get_colnum (thefptr, CASEINSEN, "DAT_SCL", &colnum, &status);
-    fits_modify_vector_len (thefptr, colnum, (nchan*npol), &status);
-    
-    colnum = 0;
-    fits_get_colnum (thefptr, CASEINSEN, "DATA", &colnum, &status);
-    fits_modify_vector_len (thefptr, colnum, (nchan*npol*nbin), &status);
-
-  */
-  
   int counter1 = 1;
   int counter2 = 1;
 
@@ -134,9 +115,10 @@ void Pulsar::FITSArchive::unload_Integration (int row,
   else
     max_short = pow(2.0,16.0)-1.0;
 
-  for(unsigned a = 0; a < npol; a++) {
-    for(unsigned b = 0; b < nchan; b++) {
-      
+  for (unsigned a = 0; a < npol; a++)
+  {
+    for (unsigned b = 0; b < nchan; b++)
+    {
       p = integ->get_Profile(a,b);
       vector<float> temparray1 (nbin);
       for(unsigned j = 0; j < get_nbin(); j++)
@@ -180,9 +162,8 @@ void Pulsar::FITSArchive::unload_Integration (int row,
       
       // Apply the scale factor
       
-      for (unsigned i = 0; i < nbin; i++) {
+      for (unsigned i = 0; i < nbin; i++)
         temparray2[i] = int16 ((temparray1[i]-offset) / scalefac);
-      }
 
       // Write the offset to file
 
