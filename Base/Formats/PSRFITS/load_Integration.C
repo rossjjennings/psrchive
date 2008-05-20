@@ -168,8 +168,8 @@ try {
 
      ********************************************************************** */
 
-  if (hdr_model) {
-
+  if (hdr_model)
+  {
     // Set the folding period, using the polyco from the file header
     // This was taken out of the condition clause below because period
     // wasn't set when TSUB was 0
@@ -228,9 +228,7 @@ try {
 	  "\n     subint epoch=" << epoch << 
 	  "\n     subint phase=" << hdr_model->phase(epoch) << endl;
       }
-
     }
-
   }
   else
   {
@@ -274,9 +272,11 @@ try {
                        "folding period unknown: no model, CAL_FREQ or PERIOD");
   }
 
+  status = 0;
+
   // Load other useful info
 
-  load_Pointing(fptr,row,integ);
+  load_Pointing (fptr,row,integ);
 
   // Set up the data vector, only Pulsar::Archive base class is friend
 
@@ -296,7 +296,11 @@ try {
   
   fits_read_col (fptr, TFLOAT, colnum, row, counter, get_nchan(),
 		 &nullfloat, &(chan_freqs[0]), &initflag, &status);
-  
+
+  if (status != 0)
+    throw FITSError (status, "FITSArchive::load_Integration",
+                     "fits_read_col DAT_FREQ");
+
   // Set the profile channel centre frequencies
   
   if (verbose > 2)
@@ -310,20 +314,20 @@ try {
   
   double chanbw = get_bandwidth() / get_nchan();
   
-  if ( all_ones ) {
+  if ( all_ones )
+  {
     if (verbose > 2)
       cerr << "FITSArchive::load_Integration all frequencies unity - reseting"
 	   << endl;
-    for (unsigned j = 0; j < get_nchan(); j++) {
+    for (unsigned j = 0; j < get_nchan(); j++)
       integ->set_centre_frequency (j, get_centre_frequency()
 				   -0.5*(get_bandwidth()+chanbw)+j*chanbw);
-    }
   }
   else
-    for (unsigned j = 0; j < get_nchan(); j++) {
-      //integ->set_frequency(j, chan_freqs[j]);
+  {
+    for (unsigned j = 0; j < get_nchan(); j++)
       integ->set_centre_frequency(j, chan_freqs[j]);
-    }
+  }
   
   // Load the profile weights
 
@@ -337,12 +341,16 @@ try {
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "DAT_WTS", &colnum, &status);
   
-  for(unsigned b = 0; b < get_nchan(); b++) {
+  for (unsigned b = 0; b < get_nchan(); b++) {
     fits_read_col (fptr, TFLOAT, colnum, row, counter, 1, &nullfloat, 
 		   &weights[b], &initflag, &status);
     counter ++;
   }
-  
+
+  if (status != 0)
+    throw FITSError (status, "FITSArchive::load_Integration",
+                     "fits_read_col DAT_WTS");
+
   // Set the profile weights
   
   if (verbose > 2)
