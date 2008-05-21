@@ -2,7 +2,8 @@
 aclocaldir = $(datadir)/aclocal
 
 dist_aclocal_DATA = \
-	debug.m4 compiler.m4 x11.m4 pgplot.m4 getopt_long.m4 mpi.m4
+	debug.m4 compiler.m4 x11.m4 pgplot.m4 getopt_long.m4 mpi.m4 \
+	Makefile.root Makefile.local Makefile.include install-intermediate
 
 #############################################################################
 #
