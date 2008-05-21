@@ -16,6 +16,7 @@
 #include "Pulsar/Arecibo.h"
 #include "Pulsar/Backend.h"
 #include "Pulsar/ObsExtension.h"
+#include "Pulsar/CalInfoExtension.h"
 
 #include <fitsio.h>
 #include "FITSError.h"
@@ -519,6 +520,22 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
     if ((ctmp[0]=='C') || (ctmp[0]=='c')) r->set_basis(Signal::Circular);
   }
 
+  // CalInfo Extension
+  CalInfoExtension *c = getadd<CalInfoExtension>();
+  if (get_type()==Signal::PolnCal
+      || get_type()==Signal::FluxCalOn
+      || get_type()==Signal::FluxCalOff) {
+    c->cal_mode = "EXT1";  // Is this meaningful??
+    c->cal_frequency = 25.0;
+    c->cal_dutycycle = 0.5;
+    c->cal_phase = 0.0; // We generally don't know this
+  } else {
+    // Fill this in even in non-cal mode to make PSRFITS happy.
+    c->cal_mode = "OFF";
+    c->cal_frequency = 0.0;
+    c->cal_dutycycle = 0.0;
+    c->cal_phase = 0.0;
+  }
 
 }
 
