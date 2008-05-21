@@ -7,6 +7,7 @@ echo "Installing html/* as $SFUSER"
 
 echo "Creating gzipped tarball ..."
 cd html
+chmod -R g+w *
 tar cf doc.tar *
 gzip -f doc.tar
 
