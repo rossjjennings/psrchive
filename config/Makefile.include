@@ -11,7 +11,7 @@ LOCAL_INCLUDE = $(addprefix $(local_includedir)/, $(HEADERS))
 all-local: $(LOCAL_INCLUDE)
 
 $(LOCAL_INCLUDE) : $(local_includedir)/% : %
-	@$(top_srcdir)/config/install-intermediate $< $@
+	@sh $(top_srcdir)/config/install-intermediate $< $@
 
 CLEANFILES = $(LOCAL_INCLUDE) $(MOC_SOURCES) $(BUILT_SOURCES)
 
