@@ -161,7 +161,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.87 2008/03/10 22:51:24 nopeer Exp $" << endl;
+      cout << "$Id: pac.C,v 1.88 2008/05/22 20:01:13 demorest Exp $" << endl;
       return 0;
 
     case 'A':
@@ -533,7 +533,7 @@ int main (int argc, char *argv[]) {
       cout << "pac: PolnCalibrator constructed from:\n\t" << pcal_file << endl;
       pcal_engine->calibrate (arch);
 
-      if (arch->get_npol() == 4) {
+      if (arch->get_npol() == 4 && deparallactify) {
 	if (verbose)
 	  cerr << "pac: Correcting platform, if necessary" << endl;
 
