@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Pointing.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/03/10 23:12:43 $
-   $Author: nopeer $ */
+   $Revision: 1.10 $
+   $Date: 2008/05/22 19:59:41 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_Pointing_h
 #define __Pulsar_Pointing_h
@@ -59,6 +59,10 @@ namespace Pulsar {
 
     //! Update information based on the provided Integration
     void update (const Integration* subint);
+
+    //! Update information based on the provided Integration and Archive
+    void update (const Integration* subint, const Archive *archive);
+
 
     //! Set the LST (in seconds) at subint centre
     void set_local_sidereal_time (double seconds);

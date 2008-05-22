@@ -190,11 +190,6 @@ Angle Pulsar::Pointing::get_telescope_zenith () const
 }
 
 
-
-
-/*! Based on the epoch of the Integration, uses slalib to re-calculate
-  the following Pointing attributes: local_sidereal_time, parallactic_angle, 
-  telescope_azimuth, and telescope_zenith. */
 void Pulsar::Pointing::update (const Integration* subint)
 {
   const Archive* archive = get_parent (subint);
@@ -202,6 +197,16 @@ void Pulsar::Pointing::update (const Integration* subint)
   if (!archive)
     throw Error (InvalidState, "Pulsar::Pointing::update",
 	         "Integration has no parent Archive");
+  update(subint, archive);
+}
+
+
+/*! Based on the epoch of the Integration, uses slalib to re-calculate
+  the following Pointing attributes: local_sidereal_time, parallactic_angle, 
+  telescope_azimuth, and telescope_zenith. */
+void Pulsar::Pointing::update (const Integration* subint, 
+    const Archive *archive)
+{
 
   const Telescope* telescope = archive->get<Telescope>();
 
