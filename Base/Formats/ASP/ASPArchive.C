@@ -17,6 +17,7 @@
 #include "Pulsar/Backend.h"
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/CalInfoExtension.h"
+#include "Pulsar/Pointing.h"
 
 #include <fitsio.h>
 #include "FITSError.h"
@@ -409,6 +410,23 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
   integration->set_epoch(epoch);
 
   integration->uniform_weight(1.0);
+
+#if 1 
+  // Create pointing extension
+  Reference::To<Pointing> pnt = new Pointing;
+  pnt->set_right_ascension(get_coordinates().ra());
+  pnt->set_declination(get_coordinates().dec());
+  pnt->set_local_sidereal_time(0.0);
+  pnt->set_galactic_longitude(0.0);
+  pnt->set_galactic_latitude(0.0);
+  pnt->set_feed_angle(0.0);
+  pnt->set_position_angle(0.0);
+  pnt->set_parallactic_angle(0.0);
+  pnt->set_telescope_azimuth(0.0);
+  pnt->set_telescope_zenith(0.0);
+  pnt->update(integration,this);
+  integration->add_extension(pnt);
+#endif
 
   // If the "no_amps" flag is set, the actual data is not called for, 
   // so we can exit early.  (Trying to actually load the data 
