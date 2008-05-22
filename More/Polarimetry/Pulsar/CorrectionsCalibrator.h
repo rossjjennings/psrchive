@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/CorrectionsCalibrator.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/04/07 00:38:18 $
+   $Revision: 1.10 $
+   $Date: 2008/05/22 00:42:01 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CorrectionsCalibrator_H
@@ -71,7 +71,7 @@ namespace Pulsar {
   protected:
 
     //! Return the transformation from platform to feed
-    Jones<double> get_feed_transformation (const Pointing*, const Receiver*);
+    Jones<double> get_feed_rotation (const Pointing*, const Receiver*);
 
     /** @name Correction Information
      *  These attributes are set during the call to needs_correction and
