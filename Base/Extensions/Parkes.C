@@ -39,21 +39,19 @@ void Pulsar::Parkes::COAX10_50 (Receiver* receiver)
 //! Initialize the Receiver Extension with Parkes best guess
 void Pulsar::Parkes::guess (Receiver* receiver, Archive* archive)
 {
-  if ( Tempo::code(archive->get_telescope()) != Tempo::Parkes )
-    throw Error (InvalidParam, "Pulsar::Parkes::guess",
-		 "telescope=" + archive->get_telescope() + " != Parkes");
-
-  if ( receiver->get_basis() == Signal::Linear ) {
-
+  if ( receiver->get_basis() == Signal::Linear )
+  {
     if ( archive->get_centre_frequency() > 1230.0 && 
-	 archive->get_centre_frequency() < 1530.0 ) {
+	 archive->get_centre_frequency() < 1530.0 )
+    {
       if (Archive::verbose >= 1)
 	cerr << "Pulsar::Parkes::guess Multibeam" << endl;
       Parkes::Multibeam (receiver);
     }
 	
     else if ( archive->get_centre_frequency() > 1200.0 &&
-	      archive->get_centre_frequency() < 1800.0 ) {
+	      archive->get_centre_frequency() < 1800.0 )
+    {
       if (Archive::verbose >= 1)
 	cerr << "Pulsar::Parkes::guess H-OH" << endl;
       Parkes::H_OH (receiver);
@@ -66,20 +64,15 @@ void Pulsar::Parkes::guess (Receiver* receiver, Archive* archive)
       Parkes::COAX10_50 (receiver);
     }
 
-    else {
-      
+    else
+    {
       if (Archive::verbose > 0)
         cerr << "Pulsar::Parkes::guess nothing for " 
-             << archive->get_centre_frequency() << " MHz" << endl;
-      
+             << archive->get_centre_frequency() << " MHz" << endl; 
     }
-
   }
-  
-  else {
-    
+  else
+  {
     cerr << "Pulsar::Parkes::guess nothing for circular feeds" << endl;
-    
   }
-
 }
