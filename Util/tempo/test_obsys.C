@@ -21,6 +21,13 @@ int main () try
 	 << " itoa=" << obs->get_itoa_code() << endl;
   }
 
+  const Tempo::Observatory* obs = Tempo::observatory ("pks");
+
+  double lat, lon, el;
+  obs->get_latlonel (lat, lon, el);
+
+  cout << "lat=" << lat << " lon=" << lon << endl;
+
   return 0;
 }
 catch (Error& error)
