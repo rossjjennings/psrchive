@@ -491,11 +491,9 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
   if ((get_telescope()=="1") || (get_telescope()=="a") 
       || (get_telescope()=="b")) {
     b->set_name("GASP"); 
-    b->set_hand(Signal::Left); 
     b->set_delay(32.0*8.0/(128.0e6)/2.0); // 8x overlap PFB
   } else if (get_telescope()=="3") {
     b->set_name("ASP");
-    b->set_hand(Signal::Left); 
     b->set_delay(32.0*24.0/(128.0e6)/2.0); // 24x overlap PFB
   } else if (get_telescope()=="f") {
     b->set_name("LBP");
@@ -505,6 +503,9 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
   }
   b->set_argument(Signal::Conventional); // XXX check this
   b->set_downconversion_corrected(false);
+
+  // Replace tempo code with telescope name
+  set_telescope(t->get_name());
 
   // ObsExtension
   char ctmp[64];
@@ -586,6 +587,8 @@ bool Pulsar::ASPArchive::Agent::advocate (const char* filename)
     return true;
   }
   catch (Error &e) {
+    if (verbose>2)
+      cerr << "ASP load failed due to: " << e << endl;
     return false;
   }
 
