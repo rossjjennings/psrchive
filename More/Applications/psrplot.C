@@ -40,6 +40,7 @@ void usage ()
     " -A plot          Help: list common options for 'plot'\n"
     "\n"
     " -D device        plot device \n"
+    " -g WxH           plot dimensions in pixels, width times height"
     " -N x,y           plot panels \n"
     " -O               overlay plots \n"
     " -r ratio         aspect ratio (height/width) \n"
