@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.25 $
-   $Date: 2008/05/23 06:37:26 $
+   $Revision: 1.26 $
+   $Date: 2008/05/23 12:37:58 $
    $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
@@ -24,21 +24,11 @@
 //! Interface to Tempo
 namespace Tempo
 {
-  const char Greenbank   = '1';
-  const char Narrabri    = '2';
-  const char Arecibo     = '3';
-  const char Hobart      = '4';
-  const char Urumqi      = '5';
-  const char Tidbinbilla = '6';
-  const char Parkes      = '7';
-  const char Westerbork  = 'i';
-  const char GMRT        = 'r';  // Added for GMRT by Jayanta
+  //! Return the Observatory data given the telescope name
+  const Observatory* observatory (const std::string& telescope_name);
 
   //! Convert a telescope name to a single-character tempo code
   char code (const std::string& telescope_name);
-
-  //! Convert a telecope code to a name
-  const char* name (char code);
 
   // get the tempo version
   float  get_version ();

@@ -331,67 +331,14 @@ void Tempo::tempo (const string& arguments, const string& input)
 }
 
 //! Convert a telescope name to a code
-char Tempo::code (const string& code)
+char Tempo::code (const string& name)
 {
-  const char* name = code.c_str();
+  const Observatory* obs = observatory (name);
 
-  if (strlen(name) == 1)
-    return name[0];
+  if (!obs)
+    throw Error (InvalidParam, "Tempo::code",
+		 "no observatory named " + name);
 
-  if (strcasecmp (name, "pks") == 0 || strcasecmp (name, "parkes") == 0)
-    return Parkes;
-
-  if (strcasecmp (name, "atca") == 0 || strcasecmp (name, "narrabri") == 0)
-    return Narrabri;
-
-  if (strcasecmp (name, "tid") == 0 || strcasecmp (name, "tidbinbilla") == 0)
-    return Tidbinbilla;
-
-  if (strcasecmp (name, "Arecibo") == 0)
-    return Arecibo;
-
-  if (strcasecmp (name, "Hobart") == 0 || strcasecmp (name, "DSS43") == 0)
-    return Hobart;
-
-  if (strcasecmp (name, "GBT") == 0 || strcasecmp (name, "Greenbank") == 0)
-    return Greenbank;
-
-  if (strcasecmp (name, "WSRT") == 0 || strcasecmp (name, "Westerbork") == 0)
-    return Westerbork;
-
-  if (strcasecmp (name, "GMRT") == 0 || strcasecmp (name, "GMRT") == 0)        // Added for GMRT by Jayanta
-    return GMRT; 
- 
-  return 0;
+  return obs->get_code();
 }
 
-//! Convert a telecope code to a name
-const char* Tempo::name (char code)
-{
-  switch (code) {
-  case Parkes:
-    return "Parkes";
-
-  case Narrabri:
-    return "Narrabri";
-
-  case Tidbinbilla:
-    return "Tidbinbilla";
-
-  case Arecibo:
-    return "Arecibo";
-
-  case Hobart:
-    return "Hobart";
-
-  case Westerbork:
-    return "Westerbork";
-
- case GMRT:			// Added for GMRT by Jayanta
-    return "GMRT";
-
-
-  default:
-    return "";
-  }
-}
