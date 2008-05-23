@@ -15,6 +15,8 @@
 #include <malloc.h>
 #endif
 
+#include <stdlib.h>
+
 /* return an newly allocated array with base pointer % 16 == 0 */
 void* malloc16 (size_t n)
 {
