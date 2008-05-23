@@ -171,18 +171,16 @@ Pulsar::CorrectionsCalibrator::get_feed_rotation (const Pointing* point,
 
   if (point)
   {
-    if (verbose > 1)
-      cerr << "Pulsar::CorrectionsCalibrator::get_feed_rotation\n"
-        "   using Pointing::feed_angle="
-           << point->get_feed_angle().getDegrees() << " deg" << endl;
+    feed_summary += " using Pointing::feed_angle="
+      + tostring( point->get_feed_angle().getDegrees() ) + " deg\n";
+
     feed_rotation = point->get_feed_angle();
   }
   else if (rcvr)
   {
-    if (verbose > 1)
-      cerr << "Pulsar::CorrectionsCalibrator::get_feed_rotation\n"
-        "   using Receiver::tracking_angle="
-           << rcvr->get_tracking_angle().getDegrees() << " deg" << endl;
+    feed_summary += " using Receiver::tracking_angle="
+      + tostring( rcvr->get_tracking_angle().getDegrees() ) + " deg\n";
+
     feed_rotation = rcvr->get_tracking_angle();
   }
 
@@ -195,11 +193,8 @@ Pulsar::CorrectionsCalibrator::get_feed_rotation (const Pointing* point,
   {
     Angle pa = para.get_parallactic_angle();
  
-    if (verbose > 2)
-      cerr << "Pulsar::CorrectionsCalibrator::get_feed_rotation"
-	" vertical angle=" << pa << endl;
-    
     // check that the para_ang is equal
+    std::string origin = "";
 
     if (point && !equal_pi( point->get_parallactic_angle(), pa ))
     {
@@ -213,15 +208,16 @@ Pulsar::CorrectionsCalibrator::get_feed_rotation (const Pointing* point,
   
       if (pointing_over_computed)
       {
-        if (Archive::verbose)
-          cerr << "  Using Pointing parallactic angle." << endl;
+	origin = "Pointing::";
 	pa = point->get_parallactic_angle();
       }
-      else if (Archive::verbose)
-        cerr << "  Using calculated parallactic angle." << endl;
-
+      else
+	origin = "computed ";
     }
 
+    feed_summary += " using " + origin + "parallactic angle=" 
+      + tostring( pa.getDegrees() ) + " deg\n";
+    
     if (verbose > 2)
       cerr << "Pulsar::CorrectionsCalibrator::get_feed_rotation"
 	" adding vertical transformation\n  " << para.evaluate() << endl;
@@ -230,7 +226,8 @@ Pulsar::CorrectionsCalibrator::get_feed_rotation (const Pointing* point,
   }
 
   if (verbose > 2)
-    cerr << "Pulsar::CorrectionsCalibrator::get_feed_rotation total="
+    cerr << "Pulsar::CorrectionsCalibrator::get_feed_rotation"
+	 << feed_summary + " total="
 	 << feed_rotation.getDegrees() << " deg" << endl;
 
   if (feed_rotation == 0.0)
@@ -240,6 +237,11 @@ Pulsar::CorrectionsCalibrator::get_feed_rotation (const Pointing* point,
   MEAL::Rotation1 rotation ( Pauli::basis.get_basis_vector(2) );
   rotation.set_phi ( feed_rotation.getRadians() );
   return rotation.evaluate();
+}
+
+std::string Pulsar::CorrectionsCalibrator::get_feed_summary () const
+{
+  return feed_summary;
 }
 
 //! Return the transformation matrix for the given epoch
@@ -261,6 +263,8 @@ Pulsar::CorrectionsCalibrator::get_feed_transformation (const Archive* arch,
   Pauli::basis.set_basis( receiver->get_basis() );
 
   needs_correction( arch, pointing );
+
+  feed_summary = "";
 
   if (must_correct_platform && should_correct_vertical)
   {

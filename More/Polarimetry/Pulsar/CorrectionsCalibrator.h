@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/CorrectionsCalibrator.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/05/22 00:42:01 $
+   $Revision: 1.11 $
+   $Date: 2008/05/23 03:43:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CorrectionsCalibrator_H
@@ -18,14 +18,15 @@
 #include "Pulsar/Parallactic.h"
 #include "MJD.h"
 
-namespace Pulsar {
-
+namespace Pulsar
+{
   class Telescope;
   class Receiver;
   class Pointing;
 
   //! Corrects known instrumental effects
-  class CorrectionsCalibrator : public Calibrator {
+  class CorrectionsCalibrator : public Calibrator
+  {
 
   public:
 
@@ -49,6 +50,9 @@ namespace Pulsar {
 
     //! Return the transformation from platform to feed
     Jones<double> get_feed_transformation (const Archive*, unsigned isub);
+
+    //! Return a summary of parameters relevant to get_feed_transformation
+    std::string get_feed_summary () const;
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -99,6 +103,9 @@ namespace Pulsar {
     bool should_correct_receptors;
     //! Flag set when the above correction has not been performed
     bool must_correct_feed;
+
+    //! Summary of relevant parameters
+    std::string feed_summary;
 
     //@}
 
