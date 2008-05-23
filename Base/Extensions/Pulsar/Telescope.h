@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Telescope.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/04/21 06:20:00 $
-   $Author: straten $ */
+   $Revision: 1.9 $
+   $Date: 2008/05/23 19:15:04 $
+   $Author: demorest $ */
 
 #ifndef __Telescope_Extension_h
 #define __Telescope_Extension_h
@@ -97,6 +97,8 @@ namespace Pulsar {
 
     //! Set the coordinates of the telescope based on known tempo codes
     void set_coordinates (const std::string& code);
+    //! Set the coordinates using the telescope name
+    void set_coordinates () { set_coordinates(name); }
 
     //! Get the type of primary reflector mount
     Mount get_mount() const { return mount; }
