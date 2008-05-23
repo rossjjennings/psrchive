@@ -7,10 +7,12 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Telescope.h"
+#include "tempo++.h"
 #include "coord.h"
 
 void Pulsar::Telescopes::set_telescope_info(Telescope *t, Archive *a)
 {
+  Tempo::obsys(); // Loads obsys.dat info
   switch (a->get_telescope().at(0)) {
     case '1':
       Telescopes::GBT(t);
@@ -38,6 +40,7 @@ void Pulsar::Telescopes::set_telescope_info(Telescope *t, Archive *a)
           "Unrecognized telescope code (%s)", a->get_telescope().c_str());
       break;
   }
+  t->set_coordinates();
 }
 
 // Info for each telescope below.  Maybe the coordinate setting
@@ -51,7 +54,6 @@ void Pulsar::Telescopes::GBT(Telescope *t)
   t->set_mount(Telescope::Horizon);
   t->set_primary(Telescope::Parabolic);
   t->set_focus(Telescope::Gregorian); // XXX only true for L-band and up
-  t->set_coordinates("1");
 }
 
 void Pulsar::Telescopes::Arecibo(Telescope *t)
@@ -60,7 +62,6 @@ void Pulsar::Telescopes::Arecibo(Telescope *t)
   t->set_mount(Telescope::Fixed);
   t->set_primary(Telescope::Spherical);
   t->set_focus(Telescope::Gregorian); // What about CH receivers?
-  t->set_coordinates("3");
 }
 
 void Pulsar::Telescopes::GB140(Telescope *t)
@@ -69,7 +70,6 @@ void Pulsar::Telescopes::GB140(Telescope *t)
   t->set_mount(Telescope::Equatorial);
   t->set_primary(Telescope::Parabolic);
   t->set_focus(Telescope::PrimeFocus); 
-  t->set_coordinates("a");
 }
 
 void Pulsar::Telescopes::GB85_3(Telescope *t)
@@ -78,7 +78,6 @@ void Pulsar::Telescopes::GB85_3(Telescope *t)
   t->set_mount(Telescope::Equatorial);
   t->set_primary(Telescope::Parabolic);
   t->set_focus(Telescope::PrimeFocus); 
-  t->set_coordinates("b");
 }
 
 void Pulsar::Telescopes::Nancay(Telescope *t)
@@ -87,7 +86,6 @@ void Pulsar::Telescopes::Nancay(Telescope *t)
   t->set_mount(Telescope::Fixed);
   t->set_primary(Telescope::Parabolic);
   t->set_focus(Telescope::Gregorian); 
-  t->set_coordinates("f");
 }
 
 void Pulsar::Telescopes::Effelsberg(Telescope *t)
@@ -96,6 +94,5 @@ void Pulsar::Telescopes::Effelsberg(Telescope *t)
   t->set_mount(Telescope::Horizon);
   t->set_primary(Telescope::Parabolic);
   t->set_focus(Telescope::Gregorian); // XXX also varies by receiver
-  t->set_coordinates("g");
 }
 
