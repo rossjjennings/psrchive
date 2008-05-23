@@ -32,6 +32,10 @@ TextInterface::Parser* Pulsar::CalibratorSpectrum::get_interface ()
   return new Interface (this);
 }
 
+/*
+  Because it assumes that the errors of its two arguments are uncorrelated,
+  the variance is underestimated by Estimate<double>::operator*(x,y)
+*/
 Estimate<double> sqr (const Estimate<double>& x)
 {
   Estimate<double> result = x*x;
