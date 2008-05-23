@@ -68,7 +68,12 @@ void Tempo::ObservatoryITRF::get_latlonel (double& lat,
 					   double& lon,
 					   double& el) const
 {
-  double radius = x*x + y*y + z*z;
+#ifdef _DEBUG
+  cerr << "Tempo::ObservatoryITRF::get_latlonel"
+          " x=" << x << " y=" << y << " z=" << z << endl;
+#endif
+
+  double radius = sqrt(x*x + y*y + z*z);
   lat = asin (z/radius);
   lon = atan2 (-y, x);
 
@@ -115,7 +120,8 @@ Tempo::observatory (const string& telescope_name)
     if (antennae[i]->get_itoa_code() == itoa)
       return antennae[i];
 
-  return 0;
+  throw Error (InvalidParam, "Tempo::observatory",
+               "no antennae named '" + telescope_name + "'");
 }
 
 class aliases
@@ -147,18 +153,20 @@ static int default_aliases ();
 
 string itoa_code (const string& telescope_name)
 {
+  if (!init)
+    default_aliases ();
+
   for (unsigned i=0; i<itoa_aliases.size(); i++)
     if (itoa_aliases[i].match( telescope_name ))
       return itoa_aliases[i].itoa_code;
+
+  cerr << "itoa_code no alias found for " << telescope_name << endl;
 
   return string();
 }
 
 void add_alias (const string& itoa_code, const string& alias)
 {
-  if (!init)
-    default_aliases ();
-
   for (unsigned i=0; i<itoa_aliases.size(); i++)
     if (itoa_aliases[i].itoa_code == itoa_code)
     {
