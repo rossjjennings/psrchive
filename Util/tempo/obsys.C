@@ -49,7 +49,7 @@ double from_ddmmss (double ddmmss)
 {
   int dd = int (ddmmss * 1e-4);
 
-  ddmmss -= dd * 1000;
+  ddmmss -= dd * 10000;
 
   int mm = int (ddmmss * 1e-2);
 
@@ -109,3 +109,4 @@ void Tempo::obsys ()
 
   obsys_parsed = true;
 }
+
