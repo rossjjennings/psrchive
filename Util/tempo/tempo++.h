@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.24 $
-   $Date: 2008/04/14 23:32:30 $
+   $Revision: 1.25 $
+   $Date: 2008/05/23 06:37:26 $
    $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
@@ -17,12 +17,13 @@
 #include "polyco.h"
 #include "psrephem.h"
 #include "toa.h"
+#include "Observatory.h"
 
 #include <vector>
 
 //! Interface to Tempo
-namespace Tempo {
-
+namespace Tempo
+{
   const char Greenbank   = '1';
   const char Narrabri    = '2';
   const char Arecibo     = '3';
@@ -31,9 +32,9 @@ namespace Tempo {
   const char Tidbinbilla = '6';
   const char Parkes      = '7';
   const char Westerbork  = 'i';
-  const char GMRT  	 = 'r';  // Added for GMRT by Jayanta
+  const char GMRT        = 'r';  // Added for GMRT by Jayanta
 
-  //! Convert a telescope name to a code
+  //! Convert a telescope name to a single-character tempo code
   char code (const std::string& telescope_name);
 
   //! Convert a telecope code to a name
@@ -87,6 +88,12 @@ namespace Tempo {
 
   // file to which tempo ephemeris files are written
   extern std::string ephem_filename;
+
+  // observatories parsed from obsys.dat
+  extern std::vector< Reference::To<Observatory> > antennae;
+
+  // parse obsys.dat
+  void obsys ();
 
   //! Run tempo using the given arguments and input
   /*! tempo is run with a working directory given by

@@ -7,7 +7,7 @@
  ***************************************************************************/
 
 #include "tempo++.h"
-#include "inverse_phase.h"
+#include <fstream>
 
 /*
 
@@ -39,4 +39,59 @@ The observatory code is a 2-character code used in ITOA format.
 
 */
 
+using namespace std;
 
+vector< Reference::To<Tempo::Observatory> > Tempo::antennae;
+
+static bool obsys_parsed = false;
+
+void Tempo::obsys ()
+{
+  if (obsys_parsed)
+    return;
+
+  string filename = get_configuration ("OBSYS");
+
+  ifstream input (filename.c_str());
+  if (!input)
+    throw Error (FailedSys, "Tempo::obsys",
+		 "ifstream (" + filename + ")");
+
+  string line;
+
+  while (!input.eof())
+  {
+    getline (input, line);
+
+    if (!line.length())
+      continue;
+
+    double coordinate[3];
+    unsigned offset[3] = { 0, 15, 30 };
+
+    for (unsigned i=0; i<3; i++)
+      if (sscanf (line.c_str()+offset[i], "%lf", coordinate+i) != 1)
+	throw Error (InvalidParam, "Tempo::obsys",
+		     "failed to parse coordinate[%d] from '%s'",
+		     i, line.c_str());
+
+    Reference::To<Observatory> observatory;
+
+    if (line[47] == '1')
+      observatory = new ObservatoryITRF (coordinate[0],
+					 coordinate[1],
+					 coordinate[2]);
+    else
+      observatory = new ObservatoryWGS84 (coordinate[0],
+					  coordinate[1],
+					  coordinate[2]);
+
+    observatory->set_name( line.substr (50, 11) );
+    observatory->set_code( line[70] );
+    observatory->set_itoa_code( line.substr (73, 2) );
+
+    antennae.push_back( observatory );
+  }
+
+  obsys_parsed = true;
+}
