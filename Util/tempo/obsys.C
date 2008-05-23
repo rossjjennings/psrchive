@@ -86,7 +86,7 @@ void Tempo::obsys ()
 					  coordinate[1],
 					  coordinate[2]);
 
-    observatory->set_name( line.substr (50, 11) );
+    observatory->set_name( line.substr (50, 19) );
     observatory->set_code( line[70] );
     observatory->set_itoa_code( line.substr (73, 2) );
 
