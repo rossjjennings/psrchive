@@ -224,6 +224,8 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   CorrectionsCalibrator corrections;
   Jones<double> feed = corrections.get_feed_transformation (data, isub);
 
+  cerr << corrections.get_feed_summary () << endl;
+
   // an identifier for this set of data
   string identifier = data->get_filename() + " " + tostring(isub);
 
