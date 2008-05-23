@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Observatory.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/05/23 06:37:26 $
+   $Revision: 1.2 $
+   $Date: 2008/05/23 12:37:48 $
    $Author: straten $ */
 
 #ifndef __Tempo_Observatory_h
@@ -40,11 +40,11 @@ namespace Tempo
     void set_name (const std::string&);
 
     //! Get the geocentric XYZ coordinates in metres
-    virtual void get_xyz (double& x, double& y, double& z) = 0;
+    virtual void get_xyz (double& x, double& y, double& z) const = 0;
 
     //! Get the latitude and longitude in radians
     /*! elevation is not implemented */
-    virtual void get_latlonel (double& lat, double& lon, double& el) = 0;
+    virtual void get_latlonel (double& lat, double& lon, double& el) const = 0;
 
   protected:
 
@@ -62,10 +62,10 @@ namespace Tempo
     ObservatoryITRF (double x, double y, double z);
 
     //! Get the geocentric XYZ coordinates in metres
-    virtual void get_xyz (double& x, double& y, double& z);
+    virtual void get_xyz (double& x, double& y, double& z) const;
 
     //! Get the latitude and longitude in radians
-    virtual void get_latlonel (double& lat, double& lon, double& el);
+    virtual void get_latlonel (double& lat, double& lon, double& el) const;
 
   protected:
     double x, y, z;
@@ -79,10 +79,10 @@ namespace Tempo
     ObservatoryWGS84 (double lat, double lon, double el);
 
     //! Get the geocentric XYZ coordinates in metres
-    virtual void get_xyz (double& x, double& y, double& z);
+    virtual void get_xyz (double& x, double& y, double& z) const;
 
     //! Get the latitude and longitude in radians
-    virtual void get_latlonel (double& lat, double& lon, double& el);
+    virtual void get_latlonel (double& lat, double& lon, double& el) const;
 
   protected:
     double lat, lon, el;
