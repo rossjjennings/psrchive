@@ -80,7 +80,7 @@ string GetArchiveTypes( void )
 
   if( agents.size() > 0 )
   {
-    for( int i = 0; i < agents.size() -1; i ++ )
+    for( unsigned i = 0; i < agents.size() -1; i ++ )
     {
       agents_string += agents[i].first;
       agents_string += string(",");
@@ -317,7 +317,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.84 2008/03/27 06:03:49 nopeer Exp $" << endl;
+	cout << "$Id: pam.C,v 1.85 2008/05/23 03:43:39 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
