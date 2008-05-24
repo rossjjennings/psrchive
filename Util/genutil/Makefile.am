@@ -9,7 +9,6 @@ include_HEADERS = \
         Cartesian.h \
         CommandParser.h \
         compressed_io.h \
-        coord.h \
         coord_parse.h \
         dirutil.h \
         environ.h \
@@ -61,7 +60,6 @@ libgenutil_la_SOURCES = \
         companion_mass.c \
         completion.C \
         compressed_io.C \
-        coord.c \
         coord_parse.c \
 	copy.C \
         dirglob.C \
@@ -117,17 +115,15 @@ endif
 
 libgenutil_la_LIBADD = @READLINE_LIBS@
 
-bin_PROGRAMS = getMJD getHorizon
+bin_PROGRAMS = getMJD
 
 getMJD_SOURCES = getMJD.C
-getHorizon_SOURCES = getHorizon.C
 
 TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98 \
 	test_endian test_environ test_sum test_NormalDistribution \
 	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord \
-	test_exponential test_StraightLine test_ThreadStream
-
-#	test_BatchQueue
+	test_exponential test_StraightLine test_ThreadStream \
+	test_threads
 
 check_PROGRAMS = $(TESTS) test_CommandParser test_Angle test_expand
 
@@ -149,6 +145,7 @@ test_expand_SOURCES		= test_expand.C
 test_NormalDistribution_SOURCES = test_NormalDistribution.C
 test_StraightLine_SOURCES	= test_StraightLine.C
 test_ThreadStream_SOURCES	= test_ThreadStream.C
+test_threads_SOURCES		= test_threads.C
 
 # test_BatchQueue_SOURCES		= test_BatchQueue.C
 

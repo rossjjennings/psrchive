@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/coord.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.12 $
+   $Date: 2008/05/24 14:13:51 $
    $Author: straten $ */
 
 #ifndef __COORD_H
@@ -58,21 +58,6 @@ extern "C" {
   
 
   int coord2name (char* pulsar, double ra, double dec);
-
-/* ********************************************************************
-   telescope_coords -
-	returns latitude and longitude (in degrees) and height
-	(in metres) for telescope given by its tempo code
-   ******************************************************************** */
-int telescope_coords (char telescope, float* latitude, 
-		      float* longitude, float* elevation);
-
-/* ********************************************************************
-   telescope_xyz -
-        returns ITRF X, Y, X  coordinates (in metres) about the
-        geocentre for a telescope given by its tempo code
-   ******************************************************************** */
-int telescope_xyz (char telescope, double* x, double* y, double* z);
 
 #ifdef __cplusplus
 	   }
