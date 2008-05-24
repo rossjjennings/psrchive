@@ -6,12 +6,13 @@
  ***************************************************************************/
 
 #include "tempo++.h"
+#include "tempo_impl.h"
 
 using namespace std;
 
 int main () try
 {
-  Tempo::obsys ();
+  Tempo::load_obsys ();
 
   for (unsigned i=0; i<Tempo::antennae.size(); i++)
   {
@@ -23,8 +24,8 @@ int main () try
 
   const Tempo::Observatory* obs = Tempo::observatory ("pks");
 
-  double lat, lon, el;
-  obs->get_latlonel (lat, lon, el);
+  double lat, lon, rad;
+  obs->get_sph (lat, lon, rad);
 
   cout << "lat=" << lat << " lon=" << lon << endl;
 
