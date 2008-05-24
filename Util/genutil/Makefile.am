@@ -9,6 +9,7 @@ include_HEADERS = \
         Cartesian.h \
         CommandParser.h \
         compressed_io.h \
+	coord.h \
         coord_parse.h \
         dirutil.h \
         environ.h \
