@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "psrephem_orbital.h"
+#include "tempo++.h"
 #include "coord.h"
 #include "orbital.h"
 
@@ -119,13 +120,15 @@ double get_bcmjd(double mjd, const psrephem& eph, double freq, char site)
   double g = (357.53 + 0.9856003*(mjd - 51544.5))*M_PI/180.;
   double tdb = tdt + (0.001658*sin(g) + 0.000014*sin(2.0*g))/86400.;
 
+  string site1 = "a";
+  site1[0] = site;
+  const Tempo::Observatory* obs = Tempo::observatory (site1);
+
   // Observatory coordinates
   double xx, yy, zz;
+  obs->get_xyz (xx,yy,zz);
+
   const double AU_M = 1.495979E11;
-  if(telescope_xyz(site, &xx, &yy, &zz) < 0){
-    cerr << "Invalid observatory code:" << site << endl;
-    return(-1.0);
-  }
   double re = sqrt(xx*xx + yy*yy)/AU_M;
   double alng = atan2(-yy, xx);      // West longitude
   double ph = slaGmst(mjd) - alng;
