@@ -51,7 +51,6 @@ Pulsar::Telescope::~Telescope ()
 //! Set the coordinates of the telescope based on known tempo codes
 void Pulsar::Telescope::set_coordinates (const std::string& code)
 {
-  Tempo::obsys();  // Load in obsys.dat
   char isite = Tempo::code (code);
 
   if (isite == 0)

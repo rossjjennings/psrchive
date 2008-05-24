@@ -12,8 +12,8 @@
 
 void Pulsar::Telescopes::set_telescope_info(Telescope *t, Archive *a)
 {
-  Tempo::obsys(); // Loads obsys.dat info
-  switch (a->get_telescope().at(0)) {
+  switch (a->get_telescope().at(0))
+  {
     case '1':
       Telescopes::GBT(t);
       // Hack to pick correct focus type for GBT
