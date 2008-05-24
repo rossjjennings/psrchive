@@ -27,9 +27,9 @@ libpsrfft_la_SOURCES += FFTW3_Transform.C
 endif
 
 TESTS = test_frexp test_enum test_normalization test_interpolate \
-	test_real_complex test_QuaternionFT
+	test_real_complex
 
-check_PROGRAMS = $(TESTS)
+check_PROGRAMS = $(TESTS) test_QuaternionFT
 
 test_enum_SOURCES		= test_enum.C
 test_normalization_SOURCES	= test_normalization.C
