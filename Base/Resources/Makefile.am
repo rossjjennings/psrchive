@@ -19,5 +19,6 @@ include $(top_srcdir)/config/Makefile.local
 
 AM_CPPFLAGS = -I$(top_builddir)/local_include @TEMPO2_CFLAGS@
 
-LDADD = libResources.la $(top_builddir)/Util/libpsrutil.la
+LDADD = libResources.la $(top_builddir)/Base/Classes/libClasses.la \
+	$(top_builddir)/Util/libpsrutil.la
 
