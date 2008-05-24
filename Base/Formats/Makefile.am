@@ -1,8 +1,7 @@
 
 noinst_LTLIBRARIES = libFormats.la
 
-libFormats_la_SOURCES = Agent_static.C \
-	Predictor_children.C Parameters_children.C Generator_default.C
+libFormats_la_SOURCES = Agent_static.C
 
 SUBDIRS = Timer EPN ASCII BPP WAPP PRESTO
 
@@ -21,11 +20,6 @@ endif
 
 SUBDIRS += .
 
-check_PROGRAMS = test_Parameters_factory test_Predictor_factory
-
-test_Parameters_factory_SOURCES = test_Parameters_factory.C
-test_Predictor_factory_SOURCES = test_Predictor_factory.C
-
 #############################################################################
 #
 
@@ -41,7 +35,5 @@ INCLUDES = -I$(top_builddir)/local_include \
 
 include $(top_srcdir)/config/Makefile.local
 
-AM_CPPFLAGS = @CFITSIO_CFLAGS@ @PUMA_CFLAGS@ @TEMPO2_CFLAGS@ @FFT_CFLAGS@
-
-LDADD = libFormats.la $(top_builddir)/Base/Classes/libClasses.la $(top_builddir)/Util/libpsrutil.la
+AM_CPPFLAGS = @CFITSIO_CFLAGS@ @PUMA_CFLAGS@ @FFT_CFLAGS@
 
