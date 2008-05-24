@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.26 $
-   $Date: 2008/05/23 12:37:58 $
+   $Revision: 1.27 $
+   $Date: 2008/05/24 09:06:39 $
    $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
@@ -78,12 +78,6 @@ namespace Tempo
 
   // file to which tempo ephemeris files are written
   extern std::string ephem_filename;
-
-  // observatories parsed from obsys.dat
-  extern std::vector< Reference::To<Observatory> > antennae;
-
-  // parse obsys.dat
-  void obsys ();
 
   //! Run tempo using the given arguments and input
   /*! tempo is run with a working directory given by

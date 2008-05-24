@@ -8,6 +8,7 @@
 
 #include "Observatory.h"
 #include "tempo++.h"
+#include "tempo_impl.h"
 
 #include <math.h>
 
@@ -105,11 +106,18 @@ void Tempo::ObservatoryWGS84::get_latlonel (double& _lat,
   _lat = lat; _lon = lon; _el = el;
 };
 
-static string itoa_code (const string& telescope_name);
 
 const Tempo::Observatory*
 Tempo::observatory (const string& telescope_name)
 {
+  load_obsys ();
+
+  // if the name is a single character, then it is likely a tempo site number
+  if (telescope_name.length() == 1)
+    for (unsigned i=0; i < antennae.size(); i++)
+      if (antennae[i]->get_code() == telescope_name[0])
+	return antennae[i];
+
   for (unsigned i=0; i < antennae.size(); i++)
     if (strcasestr( antennae[i]->get_name().c_str(), telescope_name.c_str() ))
       return antennae[i];
@@ -123,102 +131,4 @@ Tempo::observatory (const string& telescope_name)
   throw Error (InvalidParam, "Tempo::observatory",
                "no antennae named '" + telescope_name + "'");
 }
-
-class aliases
-{
-public:
-  aliases (const string& code, const string& alias)
-  {
-    itoa_code = code;
-    aka.push_back (alias);
-  }
-
-  bool match (const string& name)
-  {
-    for (unsigned i=0; i<aka.size(); i++)
-      if (strcasecmp (aka[i].c_str(), name.c_str()) == 0)
-	return true;
-    return false;
-  }
-
-  string itoa_code;
-  vector<string> aka;
-};
-
-static int init = 0;
-
-static vector<aliases> itoa_aliases;
-
-static int default_aliases ();
-
-string itoa_code (const string& telescope_name)
-{
-  if (!init)
-    default_aliases ();
-
-  for (unsigned i=0; i<itoa_aliases.size(); i++)
-    if (itoa_aliases[i].match( telescope_name ))
-      return itoa_aliases[i].itoa_code;
-
-  cerr << "itoa_code no alias found for " << telescope_name << endl;
-
-  return string();
-}
-
-void add_alias (const string& itoa_code, const string& alias)
-{
-  for (unsigned i=0; i<itoa_aliases.size(); i++)
-    if (itoa_aliases[i].itoa_code == itoa_code)
-    {
-      itoa_aliases[i].aka.push_back (alias);
-      return;
-    }
-
-  itoa_aliases.push_back ( aliases( itoa_code, alias ) );
-}
-
-int default_aliases ()
-{
-  add_alias ("GB", "gbt");
-  add_alias ("GB", "green bank");
-  add_alias ("GB", "greenbank");
-
-  add_alias ("NA", "atca");
-  add_alias ("NA", "narrabri");
-
-  add_alias ("AO", "arecibo");
-
-  add_alias ("HO", "hobart");
-
-  add_alias ("NS", "urumqi");
-
-  add_alias ("TD", "tid");
-  add_alias ("TD", "tidbinbilla");
-  add_alias ("TD", "DSS43");
-  add_alias ("TD", "DSS 43");
-
-  add_alias ("PK", "pks");
-  add_alias ("PK", "parkes");
-
-  add_alias ("JB", "jodrell");
-  add_alias ("JB", "jodrell bank");
-
-  add_alias ("VL", "vla");
-
-  add_alias ("BO", "northern cross");
-
-  add_alias ("MO", "most");
-
-  add_alias ("NC", "nancay");
-
-  add_alias ("EF", "effelsberg");
-
-  add_alias ("WT", "wsrt");
-  add_alias ("WT", "westerbork");
-
-  add_alias ("GM", "gmrt");
-
-  return 1;
-}
-
 

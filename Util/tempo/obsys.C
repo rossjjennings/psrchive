@@ -7,7 +7,10 @@
  ***************************************************************************/
 
 #include "tempo++.h"
+#include "tempo_impl.h"
+
 #include <fstream>
+#include <math.h>
 
 /*
 
@@ -43,7 +46,7 @@ using namespace std;
 
 vector< Reference::To<Tempo::Observatory> > Tempo::antennae;
 
-static bool obsys_parsed = false;
+static bool obsys_loaded = false;
 
 double from_ddmmss (double ddmmss)
 {
@@ -59,9 +62,9 @@ double from_ddmmss (double ddmmss)
   return degrees * M_PI / 180.0;
 }
 
-void Tempo::obsys ()
+void Tempo::load_obsys ()
 {
-  if (obsys_parsed)
+  if (obsys_loaded)
     return;
 
   string filename = get_configuration ("OBSYS");
@@ -107,6 +110,6 @@ void Tempo::obsys ()
     antennae.push_back( observatory );
   }
 
-  obsys_parsed = true;
+  obsys_loaded = true;
 }
 
