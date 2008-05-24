@@ -250,6 +250,7 @@ AC_CONFIG_FILES([
 		Base/Classes/Makefile
 		Base/Extensions/Makefile
 		Base/Checks/Makefile
+		Base/Resources/Makefile
 		Base/Formats/Makefile
 		Base/Formats/EPN/Makefile
 		Base/Formats/Timer/Makefile
