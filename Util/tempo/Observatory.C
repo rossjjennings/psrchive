@@ -65,30 +65,27 @@ void Tempo::ObservatoryITRF::get_xyz (double& _x, double& _y, double& _z) const
 }
 
 //! Get the latitude and longitude in radians
-void Tempo::ObservatoryITRF::get_latlonel (double& lat,
-					   double& lon,
-					   double& el) const
+void Tempo::ObservatoryITRF::get_sph (double& lat,
+				      double& lon,
+				      double& rad) const
 {
 #ifdef _DEBUG
-  cerr << "Tempo::ObservatoryITRF::get_latlonel"
+  cerr << "Tempo::ObservatoryITRF::get_sph"
           " x=" << x << " y=" << y << " z=" << z << endl;
 #endif
 
-  double radius = sqrt(x*x + y*y + z*z);
-  lat = asin (z/radius);
+  rad = sqrt(x*x + y*y + z*z);
+  lat = asin (z/rad);
   lon = atan2 (-y, x);
-
-  // no time
-  el = 0.0;
 }
 
 
 //! Default constructor
 Tempo::ObservatoryWGS84::ObservatoryWGS84 (double _lat,
 					   double _lon,
-					   double _el)
+					   double _rad)
 {
-  lat = _lat; lon = _lon; el = _el;
+  lat = _lat; lon = _lon; rad = _rad;
 };
 
 //! Get the geocentric XYZ coordinates in metres
@@ -99,11 +96,11 @@ void Tempo::ObservatoryWGS84::get_xyz (double& x, double& y, double& z) const
 }
 
 //! Get the latitude and longitude in radians
-void Tempo::ObservatoryWGS84::get_latlonel (double& _lat,
-					    double& _lon,
-					    double& _el) const
+void Tempo::ObservatoryWGS84::get_sph (double& _lat,
+				       double& _lon,
+				       double& _rad) const
 {
-  _lat = lat; _lon = lon; _el = el;
+  _lat = lat; _lon = lon; _rad = rad;
 };
 
 
