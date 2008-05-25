@@ -76,7 +76,7 @@ void Tempo::ObservatoryITRF::get_sph (double& lat,
 
   rad = sqrt(x*x + y*y + z*z);
   lat = asin (z/rad);
-  lon = atan2 (-y, x);
+  lon = atan2 (y, x);
 }
 
 
