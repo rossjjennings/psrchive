@@ -79,8 +79,8 @@ int main (int argc, char* argv[])
   cerr << "Inputs:" << endl;
   cerr << "MJD: " << mjd.printdays(4) << endl;
   cerr << "Coordinates: " << coord.getHMSDMS() << endl;
-  cerr << "Latitude: " << lat << " degrees" << endl;
-  cerr << "Longitude: " << lon << " degrees" << endl;
+  cerr << "Latitude: " << latitude.getDegrees() << " degrees" << endl;
+  cerr << "Longitude: " << longitude.getDegrees() << " degrees" << endl;
 
   Horizon horizon;
 
