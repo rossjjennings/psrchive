@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/04/07 07:14:32 $
+   $Revision: 1.13 $
+   $Date: 2008/05/26 06:50:27 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
@@ -349,7 +349,7 @@ void verify_orthogonal (const std::vector<std::vector<double > >& alpha,
         covar += alpha[krow][jcol] * alpha[irow][jcol];
       covar /= row_mod[krow] * row_mod[irow];
 
-      if (covar > 0.9)
+      if (covar > 0.99999)
 	std::cerr << "covar(" << names[krow] << "," << names[irow] << ")="
 		  << covar << std::endl;
 
@@ -443,7 +443,7 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
   }
   catch (Error& error)
   {
-    // verify_orthogonal (temp_copy, model);
+    verify_orthogonal (temp_copy, model);
     throw error += "MEAL::LevenbergMarquardt<Grad>::solve_delta";
   }
 
