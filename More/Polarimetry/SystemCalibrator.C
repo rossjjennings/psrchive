@@ -493,6 +493,9 @@ void Pulsar::SystemCalibrator::init_estimate (SourceEstimate& estimate)
 #endif
       estimate.source[ichan] = new MEAL::Coherency;
 
+    string prefix = "psr_" + tostring(estimate.phase_bin) + "_";
+    estimate.source[ichan]->set_param_name_prefix( prefix );
+
     unsigned nsource = model[ichan]->get_equation()->get_num_input();
 
     if (first_channel)
