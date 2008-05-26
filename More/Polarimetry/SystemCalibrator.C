@@ -537,6 +537,8 @@ void Pulsar::SystemCalibrator::create_calibrator_estimate ( Signal::Source )
     {   
       calibrator_estimate.source[ichan]->set_stokes( cal_state );
       calibrator_estimate.source[ichan]->set_infit( 0, false );
+
+      calibrator_estimate.source[ichan]->set_param_name_prefix( "cal_" );
     }
 }
 
