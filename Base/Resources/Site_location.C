@@ -26,7 +26,7 @@ Pulsar::Site::location (const string& antenna) try
   }
   catch (Error& error)
   {
-    if (Predictor::verbose > 2)
+    if (Predictor::verbose)
       cerr << error.get_message() << endl;
   }
 #endif
