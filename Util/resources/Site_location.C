@@ -12,22 +12,28 @@
 #include "tempo++.h"
 
 #ifdef HAVE_TEMPO2
-//#include "T2Observatory.h"
+#include "T2Observatory.h"
 #endif
 
 using namespace std;
 
 const Pulsar::Site* 
-Pulsar::Site::location (const string& antenna)
+Pulsar::Site::location (const string& antenna) try
 {
 #ifdef HAVE_TEMPO2
-  //try {
-  //  return Tempo2::observatory (antenna);
-  //}
-  //catch (Error)
-  //{
-  //}
+  try {
+    return Tempo2::observatory (antenna);
+  }
+  catch (Error& error)
+  {
+    if (Predictor::verbose > 2)
+      cerr << error.get_message() << endl;
+  }
 #endif
 
   return Tempo::observatory (antenna);
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::Site::location";
 }

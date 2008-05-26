@@ -1,9 +1,10 @@
 
 noinst_LTLIBRARIES = libtempo_2.la
 
-include_HEADERS = T2Generator.h T2Predictor.h T2Parameters.h
+include_HEADERS = T2Generator.h T2Predictor.h T2Parameters.h T2Observatory.h
 
-libtempo_2_la_SOURCES = T2Predictor.C T2Generator.C T2Parameters.C
+libtempo_2_la_SOURCES = \
+	T2Predictor.C T2Generator.C T2Parameters.C T2Observatory.C
 
 check_PROGRAMS = test_T2Generator
 
