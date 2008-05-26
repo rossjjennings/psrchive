@@ -80,25 +80,45 @@ void Tempo::ObservatoryITRF::get_sph (double& lat,
 }
 
 
-//! Default constructor
-Tempo::ObservatoryWGS84::ObservatoryWGS84 (double _lat,
-					   double _lon,
-					   double _rad)
+/*!
+  \param alat geodetic latitude in radians
+  \param alon geodetic longitude in radians
+  \param elev geodetic elevation in metres
+*/
+Tempo::ObservatoryIAU1976::ObservatoryIAU1976 (double alat,
+					       double alon,
+					       double elev)
 {
-  lat = _lat; lon = _lon; rad = _rad;
+  /*
+    Code taken from tempo/src/setup.f
+
+    IAU 1976 flattening f, equatorial radius a
+  */
+
+  double aa_f = 1.0/298.257;
+  double aa_a = 6378140.0;
+
+  double aa_c = 1.0/sqrt(1.0+(-2.0+aa_f)*aa_f*sin(alat)*sin(alat));
+  double aa_arcf = (aa_a*aa_c+elev)*cos(alat);
+  double aa_arsf = (aa_a*(1.0-aa_f)*(1.0-aa_f)*aa_c+elev)*sin(alat);
+
+  lat = atan2 (aa_arsf,aa_arcf);
+  lon = alon;
+  rad = sqrt(aa_arcf*aa_arcf+aa_arsf*aa_arsf);
 };
 
 //! Get the geocentric XYZ coordinates in metres
-void Tempo::ObservatoryWGS84::get_xyz (double& x, double& y, double& z) const
+void Tempo::ObservatoryIAU1976::get_xyz (double& x, double& y, double& z) const
 {
-  throw Error (InvalidState, "Tempo::ObservatoryWGS84::get_xyz",
-	       "not implemented");
+  x = rad * cos(lon) * cos(lat);
+  y = rad * cos(lon) * sin(lat);
+  z = rad * sin(lon);
 }
 
 //! Get the latitude and longitude in radians
-void Tempo::ObservatoryWGS84::get_sph (double& _lat,
-				       double& _lon,
-				       double& _rad) const
+void Tempo::ObservatoryIAU1976::get_sph (double& _lat,
+					 double& _lon,
+					 double& _rad) const
 {
   _lat = lat; _lon = lon; _rad = rad;
 };

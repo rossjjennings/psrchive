@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Observatory.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/05/24 14:13:56 $
+   $Revision: 1.4 $
+   $Date: 2008/05/26 20:35:57 $
    $Author: straten $ */
 
 #ifndef __Tempo_Observatory_h
@@ -64,12 +64,12 @@ namespace Tempo
     double x, y, z;
   };
 
-  class ObservatoryWGS84 : public Observatory
+  class ObservatoryIAU1976 : public Observatory
   {
   public:
 
     //! Default constructor
-    ObservatoryWGS84 (double lat, double lon, double el);
+    ObservatoryIAU1976 (double alat, double alon, double elev);
 
     //! Get the geocentric XYZ coordinates in metres
     virtual void get_xyz (double& x, double& y, double& z) const;

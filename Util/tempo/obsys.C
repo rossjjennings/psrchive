@@ -99,9 +99,9 @@ void Tempo::load_obsys ()
 					 coordinate[1],
 					 coordinate[2]);
     else
-      observatory = new ObservatoryWGS84 (from_ddmmss(coordinate[0]),
-					  from_ddmmss(coordinate[1]),
-					  coordinate[2]);
+      observatory = new ObservatoryIAU1976 (from_ddmmss(coordinate[0]),
+					    from_ddmmss(coordinate[1]),
+					    coordinate[2]);
 
     observatory->set_name( line.substr (50, 19) );
     observatory->set_code( line[70] );
