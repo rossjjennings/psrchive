@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ITRFExtension.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/05/12 20:46:06 $
+   $Revision: 1.12 $
+   $Date: 2008/05/26 20:51:52 $
    $Author: straten $ */
 
 #ifndef __ITRFExtension_h
@@ -52,6 +52,9 @@ namespace Pulsar {
     double get_ant_x() const { return ant_x; }
     double get_ant_y() const { return ant_y; }
     double get_ant_z() const { return ant_z; }
+
+    //! Get geocentric latitude and longitude in radians, and radius in metres
+    void get_sph (double& lat, double& lon, double& rad);
 
     ////////////////////////////////////////////////////////////////
 

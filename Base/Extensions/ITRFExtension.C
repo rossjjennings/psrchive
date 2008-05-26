@@ -37,6 +37,14 @@ Pulsar::ITRFExtension::operator= (const ITRFExtension& extension)
   return *this;
 }
 
+void
+Pulsar::ITRFExtension::get_sph (double& lat, double& lon, double& rad)
+{
+  rad = sqrt( ant_x*ant_x + ant_y*ant_y + ant_z*ant_z );
+  lat = asin (ant_z/rad);
+  lon = atan2 (ant_y, ant_x);
+}
+
 //! Destructor
 Pulsar::ITRFExtension::~ITRFExtension ()
 {
@@ -61,5 +69,5 @@ public:
 //! Return a text interfaces that can be used to access this instance
 TextInterface::Parser* Pulsar::ITRFExtension::get_interface()
 {
-	return new Interface( this );
+  return new Interface( this );
 }
