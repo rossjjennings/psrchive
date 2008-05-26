@@ -24,7 +24,7 @@ using std::pair;
 namespace Pulsar
 {
 
-  //! - Another Signal to Noise ratio plot.
+  //! Another Signal to Noise ratio plot.
 
   class DynamicSNSpectrum : public Pulsar::SimplePlot
   {
