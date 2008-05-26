@@ -28,9 +28,6 @@
 #include "slalib.h"
 #include "TextInterface.h"
 
-#include <Pulsar/FortranSNR.h>
-#include <Pulsar/ITRFExtension.h>
-
 #include "Pulsar/Archive.h"
 #include "Pulsar/counter_drift.h"
 #include "Pulsar/Integration.h"
@@ -40,6 +37,9 @@
 #include "Pulsar/ProfilePlot.h"
 #include "Pulsar/StandardSNR.h"
 #include "Pulsar/TimeSortedOrder.h"
+#include "Pulsar/FortranSNR.h"
+#include "Pulsar/ITRFExtension.h"
+#include "Pulsar/Site.h"
 
 #include <sys/stat.h>
 
@@ -234,16 +234,6 @@ void slaGeoc ( double p, double h, double *r, double *z );
 // Gets the doppler factor, used by multiplying with Topocentric
 // period to obtain the Barycentric period
 double getDopplerFactor(const Archive * archive);
-
-// Initialise the site code to index mapping
-void initSiteCode2Index();
-
-// Gets the site code index that refers to the site code.
-// e.g. '7' will return 6. 'a' will return 9.
-// If the site code doesn't exist, an error message will be
-// printed out and then defaulted to Parkes.
-
-int getSiteCodeIndex(char site_code);
 
 // Calculates the sidereal time
 double lmst2(double mjd,double olong,double *tsid,double *tsid_der);
@@ -725,13 +715,10 @@ int main (int argc, char** argv)
 	if (verbose)
 		Pulsar::Archive::verbose = 3;
 
-	// Initialised the site code to index hash table
-	initSiteCode2Index();
-
 	if (cpgopen(plot_device.c_str()) < 0) {
 		cout << "Error: Could not open plot device" << endl;
 		return -1;
-    }
+	}
 
 	for (int i = beginFilenamesIndex; i < argc; i++)
 		dirglob (&filenames, argv[i]);
@@ -1145,7 +1132,7 @@ double getNaturalDMHalfRange(const Archive * archive, double step)  {
 
 	unsigned nbin = archive->get_nbin();
   	double centre_period = archive->get_Integration(FIRST_SUBINT)->get_folding_period() * MILLISEC;
-	double DMStep;
+
 	double tbin = centre_period / (double)nbin;
 	double fcentre = archive->get_centre_frequency();
 	double bw = archive->get_bandwidth();
@@ -1161,9 +1148,8 @@ double getNaturalPeriodStep(const Archive * archive, double halfRange)  {
 	int nbin = archive->get_nbin();
 	double tspan = (archive->end_time() - archive->start_time()).in_seconds() * MICROSEC;
   	double centre_period = archive->get_Integration(FIRST_SUBINT)->get_folding_period() * MICROSEC;
-	double tsub = (archive->get_Integration(0))->get_duration() * MICROSEC;
+
 	double tbin = centre_period / (double)nbin; // already in microseconds
-    unsigned nsub = archive->get_nsubint();
 
 	return centre_period * tbin / tspan;
 }
@@ -1230,7 +1216,7 @@ float getRMS (const Archive * archive) {
 
 	double s;
 	double smin = 1e30;
-	int itmin;
+	int itmin = 0;
 	double minMean;
 
 	unsigned nbin = copy->get_nbin();
@@ -1549,87 +1535,10 @@ double getDM(const Archive * archive) {
 	return archive->get_dispersion_measure();
 }
 
-void initSiteCode2Index() {
-	siteCode2Index.insert(entry('1', 0));
-	siteCode2Index.insert(entry('2', 1));
-	siteCode2Index.insert(entry('3', 2));
-	siteCode2Index.insert(entry('4', 3));
-	siteCode2Index.insert(entry('5', 4));
-	siteCode2Index.insert(entry('6', 5));
-	siteCode2Index.insert(entry('7', 6));
-	siteCode2Index.insert(entry('8', 7));
-	siteCode2Index.insert(entry('9', 8));
-	siteCode2Index.insert(entry('a', 9));
-	siteCode2Index.insert(entry('b', 10));
-	siteCode2Index.insert(entry('c', 11));
-	siteCode2Index.insert(entry('d', 12));
-	siteCode2Index.insert(entry('e', 13));
-	siteCode2Index.insert(entry('f', 14));
-	siteCode2Index.insert(entry('g', 15));
-	siteCode2Index.insert(entry('h', 16));
-	siteCode2Index.insert(entry('i', 17));
-}
 
-/*int getSiteCodeIndex(char site_code) {
 
-	map<char,int>::iterator iter;
-
-	iter = siteCode2Index.find(site_code);
-
-	if (iter != siteCode2Index.end())
-		return iter->second;
-
-	cerr << "pdmp: Error: No known site code '" << site_code <<
-		"'. Defaulting to Parkes site code" <<endl;
-
-	return DEFAULT_SITE_CODE_INDEX;
-}*/
-
-double getDopplerFactor(const Archive * archive) {
-
-	// This hardcoded bit might not be such a good idea.
-	// Counting on the fact that these values don't change
-
-	string CTEL [] = { "GBT XYZ"          , "NARRABRI CS08",
-	                   "ARECIBO XYZ (JPL)", "Hobart, Tasmania",
-	                   "Nanshan,Urumqi"   , "DSS 43 XYZ",
-										 "PARKES XYZ (JER)" , "JODRELL BANK XYZ",
-										 "GB 300FT"         , "GB 140FT",
-										 "GB 85-3"          , "VLA XYZ",
-										 "NORTHERN CROSS"   , "MOST",
-										 "Nancay"           , "Effelsberg",
-										 "JODRELL BANK"     , "Fallbrook"};
-
-	double X []    = { 882589.65          , -4752329.7000,
-	                   2390490.0          , -424818.0,
-										 -228310.702        , -4460892.6,
-										 -4554231.5         , 3822252.643,
-										 382546.30          , 382615.409,
-										 382545.90          , -1601192,
-										 443118.48          , -352219.00,
-										 4324165.81         , 4033949.5,
-										 531412             , 332235};
-
-	double Y []    = { -4924872.32        , 2790505.9340,
-	                   -5564764.0         , -1472621.0,
-										 4631922.905        , 2682358.9,
-										 2816759.1          , -153995.683,
-										 795056.36          , 795009.613,
-										 795036.87          , -5041981.4,
-										 -113848.48         , -1492525.00,
-										 165927.11          , 486989.4,
-										 21824              , 1171501};
-
-	double Z []    = { 3943729.348        , -3200483.7470,
-	                   1994727.0          , 50.0,
-										 4367064.059        , -3674756.0,
-										 -3454036.3         , 5086051.443,
-										 893.7              , 880.87,
-										 835.8              , 3554871.4,
-										 25                 , 500.0,
-										 4670132.83         , 4900430.8,
-										 78                 , 0};
-
+double getDopplerFactor(const Archive * archive)
+{
 	// Astronomical units
 	double AUS     = 499.004786;
 	double TWOPI   = 2*M_PI;
@@ -1698,17 +1607,27 @@ double getDopplerFactor(const Archive * archive) {
 	double y = Y[index];
 	double z = Z[index];*/
 
-	double x = X[7];
-	double y = Y[7];
-	double z = Z[7];
+	double x = 0;
+	double y = 0;
+	double z = 0;
 
 	try {
 		Reference::To<ITRFExtension> ext = copy->get<ITRFExtension>();
 		x = ext->ant_x;
 		y = ext->ant_y;
 		z = ext->ant_z;
-	} catch (Error &error) {
-		cerr << "Selecting Parkes as default telescope site\n";
+	} catch (Error &error)
+        {
+	  using Pulsar::Site;
+	  const Site* site = Site::location (copy->get_telescope());
+	  if (site)
+	    site->get_xyz (x, y, z);
+	  else
+	    {
+	      cerr << "pdmp: cannot determine coordinates of antenna" << endl
+		   << "      defaulting to geocenter" << endl;
+	      x = y = z = 0.0;
+	    }
 	}
 
 	// Convert to DCS
@@ -1934,13 +1853,13 @@ void printHeader(const Archive * archive,
 	if (join) {
 		temp_str = copy->get_source() + ": ";
 		if (filenames.size() > 5) {
-			for (int i = 0; i < 6; i++) {
+			for (unsigned i = 0; i < 6; i++) {
 				temp_str = temp_str + " " + filenames[i];
 			}
 			temp_str = temp_str + " ...";
 
 		} else {
-			for (int i = 0; i < filenames.size(); i++) {
+			for (unsigned i = 0; i < filenames.size(); i++) {
 				temp_str = temp_str + " " + filenames[i];
 			}
 		}
