@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Coherency.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.8 $
+   $Date: 2008/05/26 05:48:15 $
    $Author: straten $ */
 
 #ifndef __MEAL_Coherency_H
@@ -38,6 +38,9 @@ namespace MEAL {
 
     //! Get the Stokes parameters and their estimated errors
     virtual Stokes< Estimate<double> > get_stokes () const;
+
+    //! Set the prefix to each parameter name
+    void set_param_name_prefix (const std::string& prefix);
 
     // ///////////////////////////////////////////////////////////////////
     //

@@ -27,7 +27,6 @@ string MEAL::Coherency::get_name () const
   return "Coherency";
 }
 
-
 //! Calculate the Jones matrix and its gradient
 void MEAL::Coherency::calculate (Jones<double>& result,
 				 std::vector<Jones<double> >* grad)
@@ -39,22 +38,24 @@ void MEAL::Coherency::calculate (Jones<double>& result,
 
   result = convert(stokes);
 
-  if (grad) {
-
+  if (grad)
+  {
     grad->resize (4);
 
-    for (unsigned i=0; i<4; i++) {
+    for (unsigned i=0; i<4; i++)
+    {
       Stokes<double> param;
       param[i] = 1.0;
       (*grad)[i] = convert (param);
     }
-
   }
 
-  if (verbose) {
+  if (verbose)
+  {
     cerr << "MEAL::Coherency::get_stokes result\n"
       "   " << result << endl;
-    if (grad) {
+    if (grad)
+    {
       cerr << "MEAL::Coherency::get_stokes gradient" << endl;
       for (unsigned i=0; i<grad->size(); i++)
 	cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
@@ -88,3 +89,16 @@ Stokes< Estimate<double> > MEAL::Coherency::get_stokes () const
 
   return stokes;
 }
+
+void MEAL::Coherency::set_param_name_prefix (const string& prefix)
+{
+  Parameters* current = dynamic_kast<Parameters>(parameter_policy);
+  if (!current)
+    return;
+
+  const char* iquv = "IQUV";
+
+  for (unsigned i=0; i<4; i++)
+    current->set_name (i, prefix + iquv[i]);
+}
+
