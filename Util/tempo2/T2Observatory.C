@@ -14,6 +14,22 @@
 
 using namespace std;
 
+Tempo2::Observatory::Observatory ()
+{
+  code = 0;
+  x = y = z = 0;
+}
+
+char Tempo2::Observatory::get_code () const
+{
+  return code;
+}
+
+void Tempo2::Observatory::set_code (char c)
+{
+  code = c;
+}
+
 std::string Tempo2::Observatory::get_old_code () const
 {
   return old_code;
@@ -61,10 +77,71 @@ void Tempo2::Observatory::get_sph (double& lat,
 
 static vector< Reference::To<Tempo2::Observatory> > antennae;
 
-static bool observatories_loaded = false;
+static void load_observatories ();
 
-static void load_observatories ()
+const Tempo2::Observatory*
+Tempo2::observatory (const string& telescope_name)
 {
+  load_observatories ();
+
+  // if the name is a single character, then it is likely a tempo site number
+  if (telescope_name.length() == 1)
+    for (unsigned i=0; i < antennae.size(); i++)
+      if (antennae[i]->get_code() == telescope_name[0])
+	return antennae[i];
+
+  for (unsigned i=0; i < antennae.size(); i++)
+    if (strcasestr( antennae[i]->get_name().c_str(), telescope_name.c_str() ))
+      return antennae[i];
+
+  for (unsigned i=0; i < antennae.size(); i++)
+    if (antennae[i]->get_old_code() == telescope_name)
+      return antennae[i];
+
+  throw Error (InvalidParam, "Tempo2::observatory",
+               "no antennae named '" + telescope_name + "'");
+}
+
+static void load_aliases ()
+{
+  char* tempo2_dir = getenv ("TEMPO2");
+  if (!tempo2_dir)
+    throw Error (FailedSys, "Tempo2::load_aliases",
+		 "TEMPO2 environment variable not defined");
+
+  string filename = tempo2_dir + string("/observatory/aliases");
+
+  ifstream input (filename.c_str());
+  if (!input)
+    throw Error (FailedSys, "Tempo2::load_aliases",
+		 "ifstream (" + filename + ")");
+
+  string line;
+
+  while (!input.eof())
+  {
+    getline (input, line);
+    line = stringtok (line, "#\n", false);  // get rid of comments
+
+    if (!line.length())
+      continue;
+
+    char name[32], code;
+
+    if (sscanf (line.c_str(), "%s %c", name, &code) != 2)
+      throw Error (InvalidParam, "Tempo::load_aliases",
+		   "failed to parse '%s'", line.c_str());
+
+    for (unsigned i=0; i < antennae.size(); i++)
+      if (antennae[i]->get_old_code() == name)
+	antennae[i]->set_code (code);
+  }
+}
+
+void load_observatories ()
+{
+  static bool observatories_loaded = false;
+
   if (observatories_loaded)
     return;
 
@@ -106,23 +183,7 @@ static void load_observatories ()
     antennae.push_back( observatory );
   }
 
+  load_aliases ();
+
   observatories_loaded = true;
 }
-
-const Tempo2::Observatory*
-Tempo2::observatory (const string& telescope_name)
-{
-  load_observatories ();
-
-  for (unsigned i=0; i < antennae.size(); i++)
-    if (strcasestr( antennae[i]->get_name().c_str(), telescope_name.c_str() ))
-      return antennae[i];
-
-  for (unsigned i=0; i < antennae.size(); i++)
-    if (antennae[i]->get_old_code() == telescope_name)
-      return antennae[i];
-
-  throw Error (InvalidParam, "Tempo2::observatory",
-               "no antennae named '" + telescope_name + "'");
-}
-
