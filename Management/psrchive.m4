@@ -16,8 +16,6 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
     have_psrchive="User disabled PSRCHIVE."
   else
 
-    AC_MSG_CHECKING([for PSRCHIVE installation])
-
     # "yes" is not a specification
     if test x"$with_psrchive_dir" = xyes; then
       with_psrchive_dir=
@@ -32,6 +30,8 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
     fi
 
     have_psrchive="not found"
+
+    AC_MSG_CHECKING([PSRCHIVE installation])
 
     if test -x "$psrchive_cflags" -a -x "$psrchive_ldflags" ; then
 
