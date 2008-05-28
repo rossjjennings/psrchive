@@ -11,7 +11,7 @@
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/IonosphereCalibrator.h"
-#include "Pulsar/CorrectionsCalibrator.h"
+#include "Pulsar/FrontendCorrection.h"
 
 using namespace std;
 

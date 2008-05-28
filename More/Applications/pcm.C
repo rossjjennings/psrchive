@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.79 $
-   $Date: 2008/04/07 00:38:07 $
+   $Revision: 1.80 $
+   $Date: 2008/05/28 08:32:34 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -19,7 +19,7 @@
 #include "Pulsar/psrchive.h"
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/PulsarCalibrator.h"
-#include "Pulsar/CorrectionsCalibrator.h"
+#include "Pulsar/FrontendCorrection.h"
 #include "Pulsar/Database.h"
 #include "MEAL/Steps.h"
 
@@ -804,7 +804,7 @@ int actual_main (int argc, char *argv[]) try
       if (verbose)
 	cerr << "pcm: correct and add to total" << endl;
       
-      Pulsar::CorrectionsCalibrator correct;
+      Pulsar::FrontendCorrection correct;
       correct.calibrate(archive);
 
       if (!total)
@@ -904,6 +904,7 @@ int actual_main (int argc, char *argv[]) try
     return -1;
   }
 
+  cerr << "pcm: creating solution" << endl;
   Reference::To<Archive> solution = model->new_solution (archive_class);
 
   cerr << "pcm: unloading solution to pcm.fits" << endl;
@@ -983,8 +984,9 @@ int actual_main (int argc, char *argv[]) try
       
       model->precalibrate( archive );
 
-      if (archive->get_type() == Signal::Pulsar) {
-	Pulsar::CorrectionsCalibrator correct;
+      if (archive->get_type() == Signal::Pulsar)
+      {
+	Pulsar::FrontendCorrection correct;
 	correct.calibrate(archive);
       }
 

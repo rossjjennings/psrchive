@@ -4,7 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/ReferenceCalibrator.h"
+#include "Pulsar/BackendCorrection.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationExpert.h"
@@ -52,12 +54,15 @@ void Pulsar::ReferenceCalibrator::set_calibrator (const Archive* archive)
 
   Archive* clone = 0;
 
-  if (fullStokes && state != Signal::Coherence) {
+  if (fullStokes && state != Signal::Coherence)
+  {
     clone = archive->clone();
     clone -> convert_state (Signal::Coherence);
   }
 
-  if (must_correct_backend(archive)) {
+  BackendCorrection correct_backend;
+  if (correct_backend.required(archive))
+  {
     if (!clone)
       clone = archive->clone();
     correct_backend (clone);
@@ -81,14 +86,14 @@ Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
   set_calibrator (archive);
   requested_nchan = get_calibrator()->get_nchan();
 
-  if (receiver) {
+  if (receiver)
+  {
     Pauli::basis.set_basis( receiver->get_basis() );    
     Stokes<double> cal = receiver->get_reference_source ();
     if (verbose > 2)
       cerr << "Pulsar::ReferenceCalibrator reference source " << cal << endl;
     set_reference_source (cal);
   }
-
 }
 
 //! Set the Stokes parameters of the reference source

@@ -6,7 +6,9 @@
  ***************************************************************************/
 
 #include "Pulsar/SystemCalibrator.h"
-#include "Pulsar/CorrectionsCalibrator.h"
+
+#include "Pulsar/BackendCorrection.h"
+#include "Pulsar/FrontendCorrection.h"
 #include "Pulsar/PolarCalibrator.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
@@ -180,7 +182,8 @@ void Pulsar::SystemCalibrator::add_pulsar (const Archive* data) try
 
   Reference::To<Archive> clone;
 
-  if( must_correct_backend (data) )
+  BackendCorrection correct_backend;
+  if( correct_backend.required (data) )
   {
     if (verbose)
       cerr << "Pulsar::SystemCalibrator::add_pulsar correct backend" << endl;
@@ -220,11 +223,12 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   MJD epoch = integration->get_epoch ();
   add_epoch (epoch);
 
-  // use the CorrectionsCalibrator class to calculate the feed transformation
-  CorrectionsCalibrator corrections;
-  Jones<double> feed = corrections.get_feed_transformation (data, isub);
+  // use the FrontendCorrection class to calculate the feed transformation
+  ProjectionCorrection correction;
+  correction.set_archive (data);
+  Jones<double> projection = correction (isub);
 
-  cerr << corrections.get_feed_summary () << endl;
+  cerr << correction.get_summary () << endl;
 
   // an identifier for this set of data
   string identifier = data->get_filename() + " " + tostring(isub);
@@ -252,8 +256,8 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     // epoch abscissa
     Argument::Value* time = model[mchan]->time.new_Value( epoch );
     
-    // known transformation
-    Argument::Value* xform = model[mchan]->source_to_feed.new_Value( feed );
+    // projection transformation
+    Argument::Value* xform = model[mchan]->projection.new_Value( projection );
     
     // pulsar signal path
     unsigned path = model[mchan]->get_pulsar_path();
@@ -637,28 +641,29 @@ void Pulsar::SystemCalibrator::create_model ()
 {
   receiver = get_calibrator()->get<Receiver>();
 
-  MEAL::Complex2* feed = 0;
+  MEAL::Complex2* basis = 0;
   if (receiver)
   {
     /*
       If the calibrator is a calibrated standard, as is the case with
-      the template used in matrix template matching, then its feed
+      the template used in matrix template matching, then its basis
       will have already been corrected.  The receiver should probably
       be taken from the first uncalibrated archive to be fit, or
       combined with the platform transformation.
     */
-    if (receiver->get_feed_corrected())
+    if (receiver->get_basis_corrected())
     {
       Receiver* clone = receiver->clone();
-      clone->set_feed_corrected (false);
+      clone->set_basis_corrected (false);
       receiver = clone;
     }
 
-    feed = new MEAL::Complex2Constant (receiver->get_transformation());
+    BasisCorrection basis_correction;
+    basis = new MEAL::Complex2Constant (basis_correction(receiver));
 
     if (verbose)
       cerr << "Pulsar::SystemCalibrator::create_model receiver=\n  " 
-	   << feed->evaluate() << endl;
+	   << basis->evaluate() << endl;
   }
 
   unsigned nchan = get_calibrator()->get_nchan();
@@ -684,8 +689,8 @@ void Pulsar::SystemCalibrator::create_model ()
     if (diff_phase_variation)
       model[ichan]->set_diff_phase( diff_phase_variation->clone() );
 
-    if (feed)
-      model[ichan]->set_feed_transformation (feed);
+    if (basis)
+      model[ichan]->set_basis (basis);
   }
 
   if (verbose)
@@ -929,6 +934,7 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
 
   bool parallactic_corrected = false;
 
+  BackendCorrection correct_backend;
   correct_backend (data);
 
   for (unsigned isub=0; isub<nsub; isub++)
@@ -1025,8 +1031,8 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
     return;
   }
 
-  receiver->set_platform_corrected (parallactic_corrected);
-  receiver->set_feed_corrected (true);
+  receiver->set_projection_corrected (parallactic_corrected);
+  receiver->set_basis_corrected (true);
 }
 
 

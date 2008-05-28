@@ -11,7 +11,7 @@
 #include "Pulsar/PolnSpectrumStats.h"
 #include "Pulsar/PolnProfileStats.h"
 
-#include "Pulsar/CorrectionsCalibrator.h"
+#include "Pulsar/FrontendCorrection.h"
 
 #include "Pulsar/ArchiveMatch.h"
 #include "Pulsar/Archive.h"
@@ -116,8 +116,8 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 
   set_calibrator( clone = data->clone() );
   
-  CorrectionsCalibrator correct;
-  if (correct.needs_correction(data))
+  FrontendCorrection correct;
+  if (correct.required(data))
   {
     if (verbose)
       cerr << "Pulsar::PulsarCalibrator::set_standard correcting instrument" 

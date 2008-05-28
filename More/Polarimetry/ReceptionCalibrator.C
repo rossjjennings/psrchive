@@ -14,7 +14,7 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 
-#include "Pulsar/CorrectionsCalibrator.h"
+#include "Pulsar/FrontendCorrection.h"
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/PolarCalibrator.h"
 
@@ -121,12 +121,10 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 		 data->get_filename().c_str(),
 		 Signal::state_string(data->get_state()));
 
-  // use the CorrectionsCalibrator class to determine applicability
-  CorrectionsCalibrator corrections;
+  // use the FrontendCorrection class to determine applicability
+  FrontendCorrection corrections;
 
-  if (! (corrections.needs_correction (data) &&
-	 corrections.should_correct_vertical &&
-	 corrections.must_correct_platform) )
+  if (! corrections.required (data))
     throw Error (InvalidParam,
 		 "Pulsar::ReceptionCalibrator::initial_observation",
 		 "Pulsar::Archive='" + data->get_filename() + "'\n"

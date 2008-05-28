@@ -217,32 +217,32 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   }
 
   if (last.par_corr == 1)
-    receiver->set_platform_corrected (true);
+    receiver->set_projection_corrected (true);
 
   else if (last.par_corr == 0)
-    receiver->set_platform_corrected (false);
+    receiver->set_projection_corrected (false);
 
   else {
     if (verbose > 2)
       cerr << "FITSArchive::load_header unexpected PAR_CORR flag"
            << endl;
 
-    receiver->set_platform_corrected (false);
+    receiver->set_projection_corrected (false);
   }
 
 
   if (last.fa_corr == 1)
-    receiver->set_feed_corrected (true);
+    receiver->set_basis_corrected (true);
 
   else if (last.fa_corr == 0)
-    receiver->set_feed_corrected (false);
+    receiver->set_basis_corrected (false);
 
   else {
     if (verbose > 2) {
       cerr << "FITSArchive::load_header unexpected FA_CORR flag"
            << endl;
     }
-    receiver->set_feed_corrected (false);
+    receiver->set_basis_corrected (false);
   }
 
 

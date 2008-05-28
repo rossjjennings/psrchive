@@ -4,11 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 
 #include "Pulsar/Receiver.h"
-#include "Pulsar/Backend.h"
+#include "Pulsar/BasisCorrection.h"
+#include "Pulsar/BackendCorrection.h"
 #include "Pulsar/FeedExtension.h"
 
 #include "Pulsar/Archive.h"
@@ -461,15 +463,17 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
   Jones<double> rcvr_xform = 1.0;
 
   // if known, add the receiver transformation
-  if (receiver) {
-    rcvr_xform = receiver->get_transformation();
+  if (receiver)
+  {
+    BasisCorrection basis_correction;
+    rcvr_xform = basis_correction (receiver);
     if (verbose > 2)
       cerr << "Pulsar::PolnCalibrator::build known receiver:\n"
            << rcvr_xform << endl;
   }
 
-  for (ichan=0; ichan < nchan; ichan++) {
-
+  for (ichan=0; ichan < nchan; ichan++)
+  {
     if (det(response[ichan]) == zero)
       continue;
 
@@ -481,7 +485,6 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
     // invert: the response must undo the effect of the instrument
     response[ichan] = inv (response[ichan]);
-
   }
 
   if (verbose > 2)
@@ -510,141 +513,19 @@ catch (Error& error) {
   throw error += "Pulsar::PolnCalibrator::calibrate";
 }
 
-bool must_correct_lsb (const Pulsar::Backend* be, const Pulsar::Archive* ar)
-{
-  return !be->get_downconversion_corrected() && ar->get_bandwidth() < 0;
-}
-
-bool Pulsar::PolnCalibrator::must_correct_backend (const Archive* arch) const
-{
-  const Backend* backend = arch->get<Backend>();
-
-  if (!backend) 
-    return false;
-
-  Signal::Hand hand = backend->get_hand();
-  Signal::Argument argument = backend->get_argument();
-  bool correct_lsb = must_correct_lsb (backend, arch);
-
-  return argument == Signal::Conjugate || hand == Signal::Left || correct_lsb;
-}
-
-void Pulsar::PolnCalibrator::correct_backend (Archive* arch) const try {
-
-  Backend* backend = arch->get<Backend>();
-
-  if (!backend) 
-    return;
-
-  Signal::State state = arch->get_state();
-  Signal::Basis basis = arch->get_basis();
-  Signal::Hand hand = backend->get_hand();
-  Signal::Argument argument = backend->get_argument();
-
-  bool correct_lsb = must_correct_lsb (backend, arch);
-
-  if (verbose > 2)
-    cerr << "Pulsar::PolnCalibrator::correct_backend basis=" << basis
-	 << " hand=" << hand << " phase=" << argument
-	 << " lsb=" << correct_lsb << endl;
-
-  /* complex conjugation due to lower sideband downconversion and
-     backend convention have the same effect; the following lines
-     effect an exclusive or operation. */
-  if (correct_lsb) {
-    if (verbose)
-      cerr << "Pulsar::PolnCalibrator::correct_backend down conversion" 
-	   << endl;
-    if (argument == Signal::Conjugate)
-      argument = Signal::Conventional;
-    else
-      argument = Signal::Conjugate;
-  }
-
-  unsigned npol = arch->get_npol();
-
-  if (npol < 2)
-    return;
-
-  bool swap01 = false;
-  bool flip[4] = { false, false, false, false };
-
-  if (npol == 4) {
-    if (argument == Signal::Conjugate) {
-      if (verbose)
-	cerr << "Pulsar::PolnCalibrator::correct_backend phase convention"
-	     << endl;
-      if (state == Signal::Stokes && basis == Signal::Circular)
-	flip[2] = !flip[2];   // Flip Stokes U
-      else
-	flip[3] = !flip[3];   // Flip Stokes V or Im[AB]
-    }
-
-    if (hand == Signal::Left) {
-      if (verbose)
-	cerr << "Pulsar::PolnCalibrator::correct_backend hand" << endl;
-      if (state == Signal::Stokes && basis == Signal::Circular)
-	flip[2] = !flip[2];   // Flip Stokes U and ...
-      else if (state == Signal::Stokes && basis == Signal::Linear)
-	flip[1] = !flip[1];   // Flip Stokes Q and ...
-      flip[3] = !flip[3];     // Flip Stokes V or Im[AB]
-    }
-  }
-
-  // If state == Coherence or PPQQ ...
-  if (hand == Signal::Left && state != Signal::Stokes)
-    swap01 = true;
-
-  bool flip_something = false;
-  for (unsigned ipol=0; ipol < npol; ipol++)
-    if (flip[ipol]) {
-      if (verbose > 2)
-	cerr << "Pulsar::PolnCalibrator::correct_backend flip ipol=" << ipol
-	     << endl;
-      flip_something = true;
-    }
-
-  if (swap01 && verbose > 2)
-    cerr << "Pulsar::PolnCalibrator::correct_backend swap 0 and 1" << endl;
-
-  if (flip_something || swap01) {
-    for (unsigned isub=0; isub < arch->get_nsubint(); isub++) {
-      Integration* integration = arch->get_Integration(isub);
-      for (unsigned ichan=0; ichan < arch->get_nchan(); ichan++) {
-	
-	for (unsigned ipol=0; ipol < npol; ipol++)
-	  if (flip[ipol])
-	    integration->get_Profile(ipol, ichan)->scale(-1);
-	
-	if (swap01)
-	  integration->expert()->swap_profiles(0, ichan, 1, ichan);
-	
-      }
-    }
-  }
-
-  backend->set_argument (Signal::Conventional);
-  backend->set_hand (Signal::Right);
-
-  if (correct_lsb)
-    backend->set_downconversion_corrected ();
-}
-catch (Error& error) {
-  throw error += "Pulsar::PolnCalibrator::correct_backend";
-}
-
 /*! Upon completion, the flux of the archive will be normalized with
   respect to the flux of the calibrator, such that a FluxCalibrator
   simply scales the archive by the calibrator flux. */
-void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
-
+void Pulsar::PolnCalibrator::calibrate (Archive* arch) try
+{
   if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::calibrate" << endl;
 
   calibration_setup (arch);
 
-  if (arch->get_npol() == 4) {
-
+  if (arch->get_npol() == 4)
+  {
+    BackendCorrection correct_backend;
     correct_backend (arch);
 
     if (verbose > 2)
@@ -660,7 +541,7 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
 	throw Error (InvalidState, "Pulsar::PolnCalibrator::calibrate",
 		     "Archive has no Receiver Extension");
       
-      rcvr->set_feed_corrected (true);
+      rcvr->set_basis_corrected (true);
       
     }
 

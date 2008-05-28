@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.28 $
-   $Date: 2008/04/21 06:20:00 $
+   $Revision: 1.29 $
+   $Date: 2008/05/28 08:32:34 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -154,15 +154,15 @@ namespace Pulsar {
 
     //@}
 
-    //! Get the flag set when the offset of the feed has been corrected
-    bool get_feed_corrected () const { return feed_corrected; }
-    //! Set the flag set when the offset of the feed has been corrected
-    void set_feed_corrected (bool);
+    //! Return true when receptor basis has been corrected
+    bool get_basis_corrected () const { return basis_corrected; }
+    //! Set true when receptor basis has been corrected
+    void set_basis_corrected (bool);
 
-    //! Get if platform to sky transformation has been corrected
-    bool get_platform_corrected () const { return platform_corrected; }
-    //! Set when platform to sky transformation has been corrected
-    void set_platform_corrected (bool val) { platform_corrected = val; }
+    //! Return true when receptor projection onto sky has been corrected
+    bool get_projection_corrected () const { return projection_corrected; }
+    //! Set true when receptor projection onto sky has been corrected
+    void set_projection_corrected (bool val) { projection_corrected = val; }
 
     //! Get the attenuator, Poln A
     float get_atten_a () const { return atten_a; }
@@ -179,9 +179,6 @@ namespace Pulsar {
 
     //! Return a string that describes the tracking mode
     std::string get_tracking_mode_string() const;
-
-    //! Return the feed correction matrix
-    Jones<double> get_transformation () const;
 
     //! Return the Stokes parameters of the reference source
     Stokes<double> get_reference_source () const;
@@ -236,13 +233,13 @@ namespace Pulsar {
     /*! This flag should be set when the offset of the feed X and Y
       axes and any rotation of the feed (tracking_angle) with respect to
       the platform zero have been corrected. */
-    bool feed_corrected;
+    bool basis_corrected;
 
     //! Flag set when platform to sky transformation has been corrected
     /*! For a horizon mounted antenna, this flag should be set when
       the rotation of the platform zero, known as the vertical angle or
       parallactic angle, has been corrected. */
-    bool platform_corrected;
+    bool projection_corrected;
 
     //! Attenuator, Poln A
     /*! The software currently does nothing with this value */
@@ -251,9 +248,6 @@ namespace Pulsar {
     //! Attenuator, Poln B
     /*! The software currently does nothing with this value */
     float atten_b;
-
-    //! Get the tranformation arising from the handedness
-    Jones<double> get_hand_transformation () const;
 
   };
 

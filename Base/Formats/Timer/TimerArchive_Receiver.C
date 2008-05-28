@@ -121,8 +121,8 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
 
   }
 
-  receiver->set_feed_corrected (hdr.corrected & FEED_CORRECTED);
-  receiver->set_platform_corrected (hdr.corrected & PARA_CORRECTED);
+  receiver->set_basis_corrected (hdr.corrected & FEED_CORRECTED);
+  receiver->set_projection_corrected (hdr.corrected & PARA_CORRECTED);
 
   if ( receiver->get_basis() == Signal::Circular )  {
     if ( supplement->X_offset != 0 )
@@ -213,8 +213,8 @@ void Pulsar::TimerArchive::pack (const Receiver* receiver)
 
   hdr.banda.feed_offset = receiver->get_tracking_angle().getDegrees (); 
 
-  set_corrected (FEED_CORRECTED, receiver->get_feed_corrected());
-  set_corrected (PARA_CORRECTED,  receiver->get_platform_corrected());
+  set_corrected (FEED_CORRECTED, receiver->get_basis_corrected());
+  set_corrected (PARA_CORRECTED,  receiver->get_projection_corrected());
 
   void* temp = &(hdr.bandb);
   struct supp* supplement = reinterpret_cast<struct supp*>( temp );

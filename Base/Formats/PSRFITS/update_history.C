@@ -94,8 +94,8 @@ void Pulsar::FITSArchive::update_history()
     last.fa_corr = false;
   }
   else {
-    last.par_corr = receiver->get_platform_corrected();
-    last.fa_corr = receiver->get_feed_corrected();
+    last.par_corr = receiver->get_projection_corrected();
+    last.fa_corr = receiver->get_basis_corrected();
   }
 
   if (get_poln_calibrated()) {

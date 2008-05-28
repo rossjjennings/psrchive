@@ -508,7 +508,7 @@ string get_fac( Reference::To<Archive> archive )
   if( !recv )
     result = "UNDEF";
   else
-    result = tostring( recv->get_feed_corrected() );
+    result = tostring( recv->get_basis_corrected() );
 
   return result;
 }

@@ -14,7 +14,7 @@
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/IonosphereCalibrator.h"
-#include "Pulsar/CorrectionsCalibrator.h"
+#include "Pulsar/FrontendCorrection.h"
 #include "Pulsar/ReflectStokes.h"
 
 #include "Pulsar/ProcHistory.h"
@@ -161,7 +161,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.88 2008/05/22 20:01:13 demorest Exp $" << endl;
+      cout << "$Id: pac.C,v 1.89 2008/05/28 08:32:34 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -270,7 +270,7 @@ int main (int argc, char *argv[]) {
     }
 
     case 'O':
-      Pulsar::CorrectionsCalibrator::pointing_over_computed = true;
+      Pulsar::ProjectionCorrection::pointing_over_computed = true;
       command += " -O";
       break;
 
@@ -533,15 +533,17 @@ int main (int argc, char *argv[]) {
       cout << "pac: PolnCalibrator constructed from:\n\t" << pcal_file << endl;
       pcal_engine->calibrate (arch);
 
-      if (arch->get_npol() == 4 && deparallactify) {
+      if (arch->get_npol() == 4 && deparallactify)
+      {
 	if (verbose)
 	  cerr << "pac: Correcting platform, if necessary" << endl;
 
-	Pulsar::CorrectionsCalibrator correct;
+	Pulsar::FrontendCorrection correct;
 	correct.calibrate(arch);
       }
 
-      if (ionosphere) {
+      if (ionosphere)
+      {
 	cerr << "pac: Correcting ionospheric Faraday rotation" << endl;
 	ionosphere->calibrate (arch);
       }

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.45 $
-   $Date: 2007/12/06 05:49:36 $
+   $Revision: 1.46 $
+   $Date: 2008/05/28 08:32:34 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -61,12 +61,6 @@ namespace Pulsar {
 
     //! Return the Receiver
     const Receiver* get_Receiver () const;
-
-    //! Return true if the backend transformation needs to be corrected
-    bool must_correct_backend (const Archive* arch) const;
-
-    //! Correct the backend transformation
-    void correct_backend (Archive* arch) const;
 
     // ///////////////////////////////////////////////////////////////////
     //

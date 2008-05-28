@@ -91,7 +91,8 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
   bool  drift_detected = false;
   float drift_threshold = 0.0;
 
-  if (initial_baseline) try {
+  if (initial_baseline) try
+  {
 
 #ifndef _DEBUG
     if (Profile::verbose)
@@ -101,13 +102,19 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
     initial_baseline->set_Profile (profile);
     initial_baseline->get_weight (weight);
 
-    if (include) {
+    if (include)
+    {
 #ifndef _DEBUG
       if (Profile::verbose)
 #endif
 	cerr << "Pulsar::IterativeBaseline::calculate mask include" << endl;
       (*weight) *= *include;
     }
+
+    if (weight->get_variance() == 0.0)
+      throw Error (InvalidState, "Pulsar::IterativeBaseline::get_weight",
+                   "no variance in %u selected phase bins", 
+                   weight->get_weight_sum());
 
     Estimate<double> initial_mean = weight->get_mean();
     Estimate<double> initial_rms  = sqrt( weight->get_variance() );
@@ -120,9 +127,9 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
     drift_threshold = initial_mean.get_value() + initial_rms.get_value();
 
     initial_bounds = true;
-
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     throw error += "Pulsar::IterativeBaseline::get_weight";
   }
 
@@ -133,8 +140,8 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
 
   float lower, upper;
 
-  for (iter=0; iter < max_iterations; iter++) {
-
+  for (iter=0; iter < max_iterations; iter++)
+  {
     get_bounds (weight, lower, upper);
 
     initial_bounds = false;
@@ -146,11 +153,12 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
     unsigned added = 0;
     unsigned subtracted = 0;
 
-    for (unsigned ibin=0; ibin<nbin; ibin++) {
-
-      if ( amps[ibin] > lower && amps[ibin] < upper )  {
-	
-	if ((*weight)[ibin] == 0.0 && (!include || (*include)[ibin])) {
+    for (unsigned ibin=0; ibin<nbin; ibin++)
+    {
+      if ( amps[ibin] > lower && amps[ibin] < upper )
+      {
+	if ((*weight)[ibin] == 0.0 && (!include || (*include)[ibin]))
+        {
 	  added ++;
 #ifdef _DEBUG
 	  cerr << "+ ibin=" << ibin << " v=" << amps[ibin] << endl;
@@ -158,11 +166,11 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
 	}
 	
 	(*weight)[ibin] = 1.0;
-	
       }
-      else {
-	
-	if ((*weight)[ibin] == 1.0 && (!include || (*include)[ibin])) {
+      else
+      {
+	if ((*weight)[ibin] == 1.0 && (!include || (*include)[ibin]))
+        {
 	  subtracted ++;
 #ifdef _DEBUG
 	  cerr << "- ibin=" << ibin << " v=" << amps[ibin] << endl;
@@ -170,16 +178,15 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
 	}
 	
 	(*weight)[ibin] = 0.0;
-	
       }
-      
     }
 
 #ifdef _DEBUG
     cerr << "added=" << added << " subtracted=" << subtracted << endl;
 #endif
 
-    if (!added && !subtracted) {
+    if (!added && !subtracted)
+    {
 #ifdef _DEBUG
       cerr << "no change" << endl;
 #endif
@@ -189,8 +196,8 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
     if (drift_detected)
       break;
 
-    if (drift_threshold != 0.0 && weight->get_mean() > drift_threshold) {
-
+    if (drift_threshold != 0.0 && weight->get_mean() > drift_threshold)
+    {
 #ifdef _DEBUG
       cerr << "drift detected" << endl;
 #endif
@@ -240,10 +247,9 @@ void Pulsar::IterativeBaseline::postprocess
   convert.set_like_fraction( 1.0 );
   convert.get_weight( weight );
 
-
-
 #ifdef _DEBUG
   cerr << "after postprocessing, mean=" << weight->get_mean() << endl;
 #endif
 
 }
+

@@ -7,6 +7,8 @@
 #include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/ReferenceCalibrator.h"
 #include "Pulsar/CalibratorStokes.h"
+
+#include "Pulsar/BasisCorrection.h"
 #include "Pulsar/Receiver.h"
 
 #include "Pulsar/SingleAxisSolver.h"
@@ -166,7 +168,8 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     // get the Receiver correction, if any
     if (precalibrator->has_Receiver()) {
       const Receiver* receiver = precalibrator->get_Receiver();
-      response *= receiver->get_transformation ();
+      BasisCorrection basis_correction;
+      response *= basis_correction (receiver);
     }
 
     // pass the reference Stokes parameters through the instrument

@@ -2,13 +2,14 @@
 noinst_LTLIBRARIES = libPolarimetry.la
 
 nobase_include_HEADERS = \
+	Pulsar/BackendCorrection.h \
+	Pulsar/BasisCorrection.h \
         Pulsar/CalibratorPlotter.h \
         Pulsar/CalibratorStokesInfo.h \
 	Pulsar/CalInterpreter.h \
         Pulsar/CoherencyMeasurement.h \
         Pulsar/CoherencyMeasurementSet.h \
         Pulsar/ConvertMJD.h \
-        Pulsar/CorrectionsCalibrator.h \
         Pulsar/Database.h \
         Pulsar/DeltaPA.h \
         Pulsar/DeltaRM.h \
@@ -18,6 +19,7 @@ nobase_include_HEADERS = \
         Pulsar/Feed.h \
         Pulsar/FluxCalibratorData.h \
         Pulsar/FluxCalibrator.h \
+	Pulsar/FrontendCorrection.h \
         Pulsar/HybridCalibrator.h \
         Pulsar/Instrument.h \
 	Pulsar/InstrumentInfo.h \
@@ -40,6 +42,7 @@ nobase_include_HEADERS = \
         Pulsar/PolnProfileStats.h \
 	Pulsar/PolnSpectrumStats.h \
 	Pulsar/PolynomialInfo.h \
+	Pulsar/ProjectionCorrection.h \
         Pulsar/PulsarCalibrator.h \
         Pulsar/ReceptionCalibrator.h \
         Pulsar/ReceptionModelAxisPlotter.h \
@@ -65,13 +68,14 @@ nobase_include_HEADERS = \
 	Pulsar/VariationInfo.h
 
 libPolarimetry_la_SOURCES = \
+	BackendCorrection.C \
+	BasisCorrection.C \
         CalibratorStokesInfo.C \
 	CalInterpreter.C \
         choose.C \
         CoherencyMeasurement.C \
         CoherencyMeasurementSet.C \
         ConvertMJD.C \
-        CorrectionsCalibrator.C \
         Database.C \
         DeltaPA.C \
         DeltaRM.C \
@@ -83,6 +87,7 @@ libPolarimetry_la_SOURCES = \
         FluxCalibrator.C \
         FluxCalibratorData.C \
 	FluxCalibratorExt.C \
+	FrontendCorrection.C \
         HybridCalibrator.C \
         Instrument.C \
         InstrumentInfo.C \
@@ -109,8 +114,8 @@ libPolarimetry_la_SOURCES = \
         PolnProfileStats.C \
 	PolnSpectrumStats.C \
 	PolynomialInfo.C \
+	ProjectionCorrection.C \
         PulsarCalibrator.C \
-        Receiver_get_transformation.C \
         Receiver_load.C \
         ReceptionCalibrator.C \
         ReceptionModel.C \

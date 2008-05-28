@@ -49,9 +49,9 @@ Calibration::StandardModel::StandardModel (bool _phenomenological)
   time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
 }
 
-void Calibration::StandardModel::set_feed_transformation (MEAL::Complex2* x)
+void Calibration::StandardModel::set_basis (MEAL::Complex2* x)
 {
-  feed_transformation = x;
+  basis = x;
 }
 
 //! Set true when the pulsar Stokes parameters have been normalized
@@ -181,15 +181,16 @@ void Calibration::StandardModel::build ()
   if (physical)
     *instrument *= physical;
 
-  if (feed_transformation)
-    *instrument *= feed_transformation;
+  if (basis)
+    *instrument *= basis;
 
   if (constant_pulsar_gain)
     instrument->set_infit (0, false);
 
   // the known transformation from the source to the receptors
-  MEAL::Complex2Value* known = new MEAL::Complex2Value;
-  source_to_feed.signal.connect (known, &MEAL::Complex2Value::set_value);
+  MEAL::Complex2Value* sky_to_receptors = new MEAL::Complex2Value;
+  projection.signal.connect (sky_to_receptors,
+			     &MEAL::Complex2Value::set_value);
 
   // ////////////////////////////////////////////////////////////////////
   //
@@ -199,7 +200,7 @@ void Calibration::StandardModel::build ()
   pulsar_path = new MEAL::ProductRule<MEAL::Complex2>;
 
   *pulsar_path *= instrument;
-  *pulsar_path *= known;
+  *pulsar_path *= sky_to_receptors;
 
   if (!equation)
   {
@@ -237,8 +238,8 @@ void Calibration::StandardModel::add_fluxcal_backend ()
   *path *= fluxcal_backend;
   *path *= physical->get_feed();
 
-  if (feed_transformation)
-    *path *= feed_transformation;
+  if (basis)
+    *path *= basis;
 
   equation->add_transformation ( path );
   FluxCalibrator_path = equation->get_transformation_index ();
@@ -411,20 +412,19 @@ void
 Calibration::StandardModel::integrate_calibrator (const MEAL::Complex2* xform,
 						  bool flux_calibrator)
 {
-  if (polar) {
-
+  if (polar)
+  {
     const MEAL::Polar* polar_solution;
 
     polar_solution = dynamic_cast<const MEAL::Polar*>( xform );
 
     if (polar_solution)
       polar_estimate.integrate( polar_solution );
-
   }
 
 
-  if (physical) {
-
+  if (physical)
+  {
     const Calibration::SingleAxis* sa;
 
     sa = dynamic_cast<const Calibration::SingleAxis*>( xform );

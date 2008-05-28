@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.17 $
-   $Date: 2008/04/07 00:38:07 $
+   $Revision: 1.18 $
+   $Date: 2008/05/28 08:32:34 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -39,8 +39,8 @@ namespace Calibration
     //! Default constructor
     StandardModel (bool phenomenological = true);
 
-    //! Set the transformation from the feed to the receptor basis
-    void set_feed_transformation (MEAL::Complex2* xform);
+    //! Set the transformation to the receptor basis
+    void set_basis (MEAL::Complex2* xform);
 
     //! Set true when the pulsar Stokes parameters have been normalized
     void set_constant_pulsar_gain (bool = true);
@@ -127,7 +127,7 @@ namespace Calibration
     MEAL::Axis<MJD> time;
 
     //! The known transformations from the sky to the receptors
-    MEAL::Axis< Jones<double> > source_to_feed;
+    MEAL::Axis< Jones<double> > projection;
 
     //! validity flag
     bool valid;
@@ -165,6 +165,10 @@ namespace Calibration
     //! The best estimate of the polar model
     Calibration::MeanPolar polar_estimate;
 
+    //! The basis transformation
+    Reference::To<MEAL::Complex2> basis;
+
+    //! The backend variation transformations
     Reference::To< MEAL::Scalar > gain;
     Reference::To< MEAL::Scalar > diff_gain;
     Reference::To< MEAL::Scalar > diff_phase;
@@ -214,9 +218,6 @@ namespace Calibration
 
     //! The signal path of the Pulsar phase bin sources
     unsigned Pulsar_path;
-
-    //! The feed transformation
-    Reference::To<MEAL::Complex2> feed_transformation;
 
     MJD min_epoch, max_epoch;
 

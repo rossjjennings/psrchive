@@ -23,32 +23,35 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
       with_psrchive_dir=
     fi
 
-    if test x"$with_psrchive_dir" = x; then
-      psrchive_cflags=`which psrchive_cflags`
-      psrchive_ldflags=`which psrchive_ldflags`
-    else
+    if test x"$with_psrchive_dir" != x; then
       psrchive_cflags=$with_psrchive_dir/bin/psrchive_cflags
       psrchive_ldflags=$with_psrchive_dir/bin/psrchive_ldflags
+    else
+      AC_PATH_PROG(psrchive_cflags, psrchive_cflags, no)
+      AC_PATH_PROG(psrchive_ldflags, psrchive_ldflags, no)
     fi
 
     have_psrchive="not found"
 
     if test -x "$psrchive_cflags" -a -x "$psrchive_ldflags" ; then
 
+      PSRCHIVE_CFLAGS=`$psrchive_cflags`
+      PSRCHIVE_LIBS=`$psrchive_cflags`
+
       ac_save_CPPFLAGS="$CPPFLAGS"
       ac_save_LIBS="$LIBS"
 
-      CPPFLAGS="`$psrchive_cflags` $CPPFLAGS"
-      LIBS="`$psrchive_ldflags` $LIBS"
+      CPPFLAGS="$PSRCHIVE_CFLAGS $CPPFLAGS"
+      LIBS="$PSRCHIVE_LIBS $LIBS"
 
       AC_LANG_PUSH(C++)
       AC_TRY_LINK([#include "Pulsar/Archive.h"], [Pulsar::Archive::load("");],
                   have_psrchive=yes, have_psrchive=no)
       AC_LANG_POP(C++)
 
-      if test $have_psrchive = yes; then
-        PSRCHIVE_CFLAGS="`$psrchive_cflags`"
-        PSRCHIVE_LIBS="`$psrchive_ldflags`"
+      if test $have_psrchive = no; then
+        PSRCHIVE_CFLAGS=
+        PSRCHIVE_LIBS=
       fi
 
       LIBS="$ac_save_LIBS"

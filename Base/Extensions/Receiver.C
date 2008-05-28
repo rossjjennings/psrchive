@@ -40,8 +40,8 @@ Pulsar::Receiver::Receiver () : Extension ("Receiver")
 
   state = new Native;
 
-  feed_corrected = false;
-  platform_corrected = false;
+  basis_corrected = false;
+  projection_corrected = false;
 
   atten_a = 0.0;
   atten_b = 0.0;
@@ -66,8 +66,8 @@ Pulsar::Receiver::operator= (const Receiver& ext)
   state = new Native;
   state->copy(ext.state);
 
-  feed_corrected = ext.feed_corrected;
-  platform_corrected = ext.platform_corrected;
+  basis_corrected = ext.basis_corrected;
+  projection_corrected = ext.projection_corrected;
 
   atten_a = ext.atten_a;
   atten_b = ext.atten_b;
@@ -170,10 +170,10 @@ Angle Pulsar::Receiver::get_calibrator_offset () const
   return get<Linear>()->get_calibrator_offset ();
 }
 
-void Pulsar::Receiver::set_feed_corrected (bool val)
+void Pulsar::Receiver::set_basis_corrected (bool val)
 {
-  // cerr << "Pulsar::Receiver::set_feed_corrected " << val << endl;
-  feed_corrected = val;
+  // cerr << "Pulsar::Receiver::set_basis_corrected " << val << endl;
+  basis_corrected = val;
 }
 
 static string match_indent = "\n\t";
@@ -197,20 +197,7 @@ bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
   return result;
 }
 
-//! Return the handedness correction matrix
-Jones<double> Pulsar::Receiver::get_hand_transformation () const
-{
-  if ( feed_corrected || get_hand() == Signal::Right )
-    return 1.0;
 
-  if (Archive::verbose > 1)
-    cerr << "Pulsar::Receiver::get_hand_transformation left-handed" << endl;
-
-  /* Switch the two receptors.  Note that det(J)=1. */
-  complex<double> i (0,1);
-  return Jones<double> (0, i,
-                        i, 0);
-}
 
 Stokes<double> Pulsar::Receiver::get_reference_source () const
 {
@@ -281,12 +268,12 @@ public:
 	 &Receiver::set_tracking_angle,
 	 "ta", "Tracking angle of feed" );
     
-    add( &Receiver::get_feed_corrected,
-	 &Receiver::set_feed_corrected,
+    add( &Receiver::get_basis_corrected,
+	 &Receiver::set_basis_corrected,
 	 "fac", "Feed angle corrected" );
     
-    add( &Receiver::get_platform_corrected,
-	 &Receiver::set_platform_corrected,
+    add( &Receiver::get_projection_corrected,
+	 &Receiver::set_projection_corrected,
 	 "vac", "Vertical (parallactic) angle corrected" );
   }
   
