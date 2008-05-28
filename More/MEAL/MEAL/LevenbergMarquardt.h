@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.13 $
-   $Date: 2008/05/26 06:50:27 $
+   $Revision: 1.14 $
+   $Date: 2008/05/28 08:30:18 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
@@ -300,13 +300,11 @@ void verify_orthogonal (const std::vector<std::vector<double > >& alpha,
     if (model.get_infit(iparam))
       nfree ++;
 
-  std::cerr << "verify_orthogonal nrow=" << nrow << " nfree=" << nfree
-	    << " nparam=" << model.get_nparam() << std::endl;
-
   /*
     Convert row numbers to parameter names
   */
   std::vector<std::string> names (nfree);
+  std::vector<unsigned> indeces (nfree);
 
   unsigned kparam = 0;
   for (unsigned krow=0; krow<nfree; krow++)
@@ -315,6 +313,8 @@ void verify_orthogonal (const std::vector<std::vector<double > >& alpha,
       kparam ++;
 
     names[krow] = model.get_param_name(kparam);
+    indeces[krow] = kparam;
+
     kparam ++;
   }
 
@@ -344,18 +344,25 @@ void verify_orthogonal (const std::vector<std::vector<double > >& alpha,
       if (row_mod[irow] == 0)
 	continue;
 
-      double covar = 0.0;
+      double degen = 0.0;
       for (unsigned jcol=0; jcol<nfree; jcol++)
-        covar += alpha[krow][jcol] * alpha[irow][jcol];
-      covar /= row_mod[krow] * row_mod[irow];
+        degen += alpha[krow][jcol] * alpha[irow][jcol];
+      degen /= row_mod[krow] * row_mod[irow];
 
-      if (covar > 0.99999)
-	std::cerr << "covar(" << names[krow] << "," << names[irow] << ")="
-		  << covar << std::endl;
-
-      if (!finite(covar))
+      if (degen > 0.99999)
       {
-        std::cerr << "NaN or Inf in covariance matrix" << std::endl;
+        double ival = model.get_param(indeces[irow]);
+	double kval = model.get_param(indeces[krow]);
+
+	std::cerr << "degen(" << names[krow] << "," << names[irow] << ") = "
+		  << degen << std::endl 
+		  << "\t" << names[krow] << " = " << kval << std::endl
+		  << "\t" << names[irow] << " = " << ival << std::endl;
+      }
+
+      if (!finite(degen))
+      {
+        std::cerr << "NaN or Inf in curvature matrix" << std::endl;
         return;
       }
     }
