@@ -4,7 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/SingleAxis.h"
+
 #include "MEAL/Gain.h"
 #include "MEAL/Boost1.h"
 #include "MEAL/Rotation1.h"
@@ -21,20 +23,19 @@ using namespace std;
 
 void Calibration::SingleAxis::init ()
 {
-  gain     = new MEAL::Gain;
+  gain = new MEAL::Gain;
   gain->set_param_name ("G");
   gain->set_param_description ("scalar gain");
+  add_model (gain);
 
-  boost    = new MEAL::Boost1    (Vector<3, double>::basis(0));
+  boost = new MEAL::Boost1    (Vector<3, double>::basis(0));
   boost->set_param_name ("gamma");
   boost->set_param_description ("differential gain (hyperbolic radians)");
+  add_model (boost);
 
   rotation = new MEAL::Rotation1 (Vector<3, double>::basis(0));
   rotation->set_param_name ("phi");
   rotation->set_param_description ("differential phase (radians)");
-
-  add_model (gain);
-  add_model (boost);
   add_model (rotation);
 }
 
