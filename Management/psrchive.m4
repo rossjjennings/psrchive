@@ -36,7 +36,7 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
     if test -x "$psrchive_cflags" -a -x "$psrchive_ldflags" ; then
 
       PSRCHIVE_CFLAGS=`$psrchive_cflags`
-      PSRCHIVE_LIBS=`$psrchive_cflags`
+      PSRCHIVE_LIBS=`$psrchive_ldflags`
 
       ac_save_CPPFLAGS="$CPPFLAGS"
       ac_save_LIBS="$LIBS"
