@@ -1,6 +1,4 @@
 
-PACKAGE = PSRCHIVE
-
 SUBDIRS	= config Util Base More Management
 
 include $(top_srcdir)/config/Makefile.root
