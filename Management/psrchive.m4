@@ -22,21 +22,19 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
     fi
 
     if test x"$with_psrchive_dir" != x; then
-      psrchive_cflags=$with_psrchive_dir/bin/psrchive_cflags
-      psrchive_ldflags=$with_psrchive_dir/bin/psrchive_ldflags
+      psrchive_config=$with_psrchive_dir/bin/psrchive
     else
-      AC_PATH_PROG(psrchive_cflags, psrchive_cflags, no)
-      AC_PATH_PROG(psrchive_ldflags, psrchive_ldflags, no)
+      AC_PATH_PROG(psrchive_config, psrchive, no)
     fi
 
     have_psrchive="not found"
 
     AC_MSG_CHECKING([PSRCHIVE installation])
 
-    if test -x "$psrchive_cflags" -a -x "$psrchive_ldflags" ; then
+    if test -x $psrchive_config; then
 
-      PSRCHIVE_CFLAGS=`$psrchive_cflags`
-      PSRCHIVE_LIBS=`$psrchive_ldflags`
+      PSRCHIVE_CFLAGS=`$psrchive_config --cflags`
+      PSRCHIVE_LIBS=`$psrchive_config --libs`
 
       ac_save_CPPFLAGS="$CPPFLAGS"
       ac_save_LIBS="$LIBS"

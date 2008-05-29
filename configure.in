@@ -275,10 +275,7 @@ AC_CONFIG_FILES([
 		More/psrgui/Makefile
 		More/python/Makefile
 		Management/Makefile
-		Management/psrchive_ldflags
-		Management/psrchive_cflags
-		Management/psrchive_aclocal
-		Management/psrchive_ssi
+		Management/psrchive
 		Management/psrchive_install.h
 		Makefile])
 
