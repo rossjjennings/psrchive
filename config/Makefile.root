@@ -7,7 +7,7 @@ libs:
 libs-am:
 	@echo
 	@echo
-	@echo "${PACKAGE} libraries have been installed in ${prefix}/lib"
+	@echo "${PACKAGE_STRING} libraries have been installed in ${prefix}/lib"
 	@echo
 	@echo
 
@@ -16,22 +16,24 @@ include: install-data
 all-am:
 	@echo
 	@echo
-	@echo "${PACKAGE} successfully compiled.  Remember to \"make install\""
+	@echo "${PACKAGE_STRING} successfully compiled.  Remember to \"make install\""
 	@echo
 	@echo
 
 install-am:
 	@echo
 	@echo
-	@echo "${PACKAGE} has been installed in ${prefix}"
+	@echo "${PACKAGE_STRING} has been installed in ${prefix}"
 	@echo
 	@echo
 
 where:
 	@echo
-	@echo "${PACKAGE} will be installed in ${prefix}"
+	@echo "${PACKAGE_STRING} will be installed in ${prefix}"
 	@echo
 
+
+# ###############################################
 #
 # Persist after an autoconf macro file is removed
 #
