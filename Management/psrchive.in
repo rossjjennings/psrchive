@@ -43,7 +43,7 @@ while test $# -gt 0; do
         ;;
 
     --version)
-        echo 
+        echo @PACKAGE_STRING@
         exit 0
         ;;
 
