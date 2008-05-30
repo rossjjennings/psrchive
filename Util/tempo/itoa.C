@@ -18,6 +18,13 @@ static int default_aliases ()
   add_alias ("GB", "green bank");
   add_alias ("GB", "greenbank");
 
+  add_alias ("G1", "gb43m");
+  add_alias ("G1", "gb 140ft");
+
+  add_alias ("G8", "gb85-3");
+  add_alias ("G8", "gb853");
+  add_alias ("G8", "gb 85-3");
+
   add_alias ("NA", "atca");
   add_alias ("NA", "narrabri");
 
@@ -69,7 +76,7 @@ public:
   {
     for (unsigned i=0; i<aka.size(); i++)
       if (strcasecmp (aka[i].c_str(), name.c_str()) == 0)
-	return true;
+        return true;
     return false;
   }
 
