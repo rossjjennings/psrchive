@@ -94,25 +94,38 @@ void Angle::setDMS (int degrees, int minutes, double seconds)
 
 double from_ttmmss (double ttmmss)
 {
+  // cerr << "ttmmss=" << ttmmss << endl;
+
   int tt = int (ttmmss * 1e-4);
   ttmmss -= tt * 10000;
+  // cerr << "tt=" << tt << endl;
 
   int mm = int (ttmmss * 1e-2);
   ttmmss -= mm * 100;
+  // cerr << "mm=" << mm << endl;
 
   double turns = tt + double(mm)/60.0 + ttmmss/3600.0;
+  // cerr << "turns=" << turns << endl;
+
   return turns;
 }
 
 double to_ttmmss (double turns)
 {
+  // cerr << "turns=" << turns << endl;
+
   int tt = int (turns);
   turns -= tt;
+  // cerr << "tt=" << tt << endl;
 
-  int mm = int (turns * 60.0);
+  turns *= 60.0;
+  int mm = int (turns);
   turns -= mm;
+  // cerr << "mm=" << mm << endl;
 
   double ttmmss = double(tt)*1e4 + double(mm)*1e2 + turns*60;
+  // cerr << "ttmmss=" << ttmmss << endl;
+
   return ttmmss;
 }
 
