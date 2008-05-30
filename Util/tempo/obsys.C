@@ -48,20 +48,6 @@ vector< Reference::To<Tempo::Observatory> > Tempo::antennae;
 
 static bool obsys_loaded = false;
 
-double from_ddmmss (double ddmmss)
-{
-  int dd = int (ddmmss * 1e-4);
-
-  ddmmss -= dd * 10000;
-
-  int mm = int (ddmmss * 1e-2);
-
-  ddmmss -= mm * 100;
-
-  double degrees = dd + double(mm)/60.0 + ddmmss/3600.0;
-  return degrees * M_PI / 180.0;
-}
-
 void Tempo::load_obsys ()
 {
   if (obsys_loaded)
@@ -98,10 +84,14 @@ void Tempo::load_obsys ()
       observatory = new ObservatoryITRF (coordinate[0],
 					 coordinate[1],
 					 coordinate[2]);
-    else
-      observatory = new ObservatoryIAU1976 (from_ddmmss(coordinate[0]),
-					    from_ddmmss(coordinate[1]),
+    else {
+      Angle alat, alon;
+      alat.setDegMS (coordinate[0]);
+      alon.setDegMS (coordinate[1]);
+      observatory = new ObservatoryIAU1976 (alat.getRadians(),
+					    alon.getRadians(),
 					    coordinate[2]);
+    }
 
     observatory->set_name( line.substr (50, 19) );
     observatory->set_code( line[70] );
