@@ -52,7 +52,7 @@ while test $# -gt 0; do
         ;;
 
     --cflags)
-        echo -I@PSRCHIVE_INSTALL@/include @PTHREAD_CFLAGS@
+        echo -I@includedir@ @PTHREAD_CFLAGS@
         ;;
 
     --libs)
