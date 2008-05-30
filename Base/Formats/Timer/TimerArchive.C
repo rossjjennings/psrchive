@@ -285,8 +285,8 @@ void Pulsar::TimerArchive::set_source (const string& source)
 sky_coord Pulsar::TimerArchive::get_coordinates () const
 {
   sky_coord coordinates;
-  coordinates.ra().setradians( hdr.ra );
-  coordinates.dec().setradians( hdr.dec );
+  coordinates.ra().setRadians( hdr.ra );
+  coordinates.dec().setRadians( hdr.dec );
 
   if (verbose == 3)
     cerr << "Pulsar::TimerArchive::get_coordinates " << coordinates << endl;
@@ -297,8 +297,8 @@ sky_coord Pulsar::TimerArchive::get_coordinates () const
 //! Set the coordinates of the source
 void Pulsar::TimerArchive::set_coordinates (const sky_coord& coordinates)
 {
-  hdr.dec = coordinates.dec().getradians();
-  hdr.ra  = coordinates.ra().getradians();
+  hdr.dec = coordinates.dec().getRadians();
+  hdr.ra  = coordinates.ra().getRadians();
 
   AnglePair galactic = coordinates.getGalactic();
   hdr.l = galactic.angle1.getDegrees();

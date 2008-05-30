@@ -234,8 +234,8 @@ class psrAngle : public psrParameter
  
   void is_RA () { 
                 value.setWrapPoint(2*M_PI);
-   		if (value.getradians() < 0) {
-		   value.setradians(value.getradians()+2*M_PI);
+   		if (value.getRadians() < 0) {
+		   value.setRadians(value.getRadians()+2*M_PI);
 		};
   };	
  protected:

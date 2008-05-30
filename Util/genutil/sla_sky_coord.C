@@ -15,13 +15,13 @@ sky_coord::setGalactic(AnglePair &gal)
   double l, b;
   double ra, dec;
 
-  l = gal.angle1.getradians();
-  b = gal.angle2.getradians();
+  l = gal.angle1.getRadians();
+  b = gal.angle2.getRadians();
 
   slaGaleq (l, b, &ra, &dec);
 
-  angle1.setradians(ra);
-  angle2.setradians(dec);
+  angle1.setRadians(ra);
+  angle2.setRadians(dec);
   return *this;
 }
 
@@ -32,13 +32,13 @@ sky_coord::getGalactic() const
   double ra, dec;
   AnglePair gal;
 
-  ra = angle1.getradians();
-  dec= angle2.getradians();
+  ra = angle1.getRadians();
+  dec= angle2.getRadians();
 
   slaEqgal (ra, dec, &l, &b);
 
-  gal.angle1.setradians(l);
-  gal.angle2.setradians(b);
+  gal.angle1.setRadians(l);
+  gal.angle2.setRadians(b);
   return gal;
 }
 

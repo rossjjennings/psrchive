@@ -22,8 +22,8 @@ void qt_Angle::setAngle (const Angle& angle)
   
   if (hms) {
     valset.setWrapPoint(2*M_PI);
-    if (angle.getradians() < 0){
-	valset.setradians(angle.getradians() + 2*M_PI);
+    if (angle.getRadians() < 0){
+	valset.setRadians(angle.getRadians() + 2*M_PI);
     }
     value.setText (valset.getHMS(val_precision).c_str());
   }
@@ -56,8 +56,8 @@ void qt_Angle::displayHMS ()
   hms = true;
   valset.setWrapPoint (2*M_PI);
 
-  if (valset.getradians() < 0)
-	valset.setradians(valset.getradians() + 2*M_PI);
+  if (valset.getRadians() < 0)
+	valset.setRadians(valset.getRadians() + 2*M_PI);
 
   setAngle (valset);
 }

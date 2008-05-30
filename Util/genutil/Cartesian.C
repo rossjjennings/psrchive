@@ -99,24 +99,24 @@ void Cartesian::rotate (double& x1, double& x2, double radians)
 
 void Cartesian::x_rot (const Angle& phi)
 {
-  rotate (y, z, phi.getradians());
+  rotate (y, z, phi.getRadians());
 }
 
 void Cartesian::y_rot (const Angle& phi)
 {
-  rotate (z, x, phi.getradians());
+  rotate (z, x, phi.getRadians());
 }
 
 void Cartesian::z_rot (const Angle& phi)
 {
-  rotate (x, y, phi.getradians());
+  rotate (x, y, phi.getRadians());
 }
 
 // rotates the point about an arbitrary vector
 void Cartesian::rot (const Cartesian& v, const Angle& phi)
 {
-  double s = sin(phi.getradians());
-  double c = cos(phi.getradians());
+  double s = sin(phi.getRadians());
+  double c = cos(phi.getRadians());
   double u = 1.0 - c;
 
   double R[3][3] =

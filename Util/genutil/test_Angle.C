@@ -25,12 +25,12 @@ Angle oldAngularSeparation(const AnglePair& a1, const AnglePair& a2)
   Angle a;
   double a1_1, a1_2, a2_1, a2_2;
 
-  a1_1=a1.angle1.getradians();
-  a1_2=a1.angle2.getradians();
-  a2_1=a2.angle1.getradians();
-  a2_2=a2.angle2.getradians();
+  a1_1=a1.angle1.getRadians();
+  a1_2=a1.angle2.getRadians();
+  a2_1=a2.angle1.getRadians();
+  a2_2=a2.angle2.getRadians();
 
-  a.setradians(slaDsep(a1_1, a1_2, a2_1, a2_2));
+  a.setRadians(slaDsep(a1_1, a1_2, a2_1, a2_2));
 
   return a;
 }
@@ -50,8 +50,8 @@ int main ()
 
   coordinates.setHMSDMS (coordstr);
   AnglePair galactic = coordinates.getGalactic();
-  double l = galactic.angle1.getradians();
-  double b = coordinates.angle2.getradians();
+  double l = galactic.angle1.getRadians();
+  double b = coordinates.angle2.getRadians();
 
   printf ("COORDSTR: %s\n", coordstr);
   printf ("(RA DEC) (%s)  l:%g   b:%g\n", coordinates.getHMSDMS().c_str(),
@@ -89,7 +89,7 @@ int main ()
 	  sepnew = coord1.angularSeparation (coord2);
 	  sepold = oldAngularSeparation (coord1,coord2);
 
-	  if (fabs( sepnew.getradians() - sepold.getradians() ) > tolerance ) {
+	  if (fabs( sepnew.getRadians() - sepold.getradians() ) > tolerance ) {
 	    //if (sepnew != sepold) {
 	    cerr << "Different Answers::"
 		 << "  a1:" << coord1 
