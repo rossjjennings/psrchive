@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.26 $
-   $Date: 2007/11/21 05:01:27 $
+   $Revision: 1.27 $
+   $Date: 2008/05/30 12:19:04 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -68,6 +68,7 @@ class Angle
   char*   getDMS (char* str, int places=3) const;
   std::string  getDMS (int places = 3) const;
 
+
   // ms is given in milliseconds of an hour
   void  setRadMS(long int ms)
     { radians = double(ms) * M_PI / MilliSecin12Hours; };
@@ -86,19 +87,20 @@ class Angle
   double getTurns() const
     { return radians / (2.0*M_PI); };
 
-  void setradians(double rad)
-    { radians = rad; wrap();};
-
-  double getradians() const
-    { return radians; };
-
-  // Argh some capitalization consistency would be nice.... redwards.
   void setRadians(double rad)
-    { setradians(rad); };
+    { radians = rad; wrap(); };
+
   double getRadians() const
     { return radians; };
   
+  void setDegMS (double deg_mmss);
+  double getDegMS () const;
 
+  void setHourMS (double hour_mmss);
+  double getHourMS () const;
+
+  void setTurnMS (double turn_mmss);
+  double getTurnMS () const;
 
   Angle & operator= (const Angle & a);
   Angle & operator= (const double &val);

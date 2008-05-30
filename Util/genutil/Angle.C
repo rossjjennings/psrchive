@@ -19,7 +19,7 @@ using namespace std;
 bool Angle::verbose = false;
 Angle::Type Angle::default_type = Angle::Radians;
 
-Angle::Angle (const double & rad) { init(); setradians(rad); }
+Angle::Angle (const double & rad) { init(); setRadians(rad); }
 
 void Angle::wrap()
 {
@@ -92,6 +92,60 @@ void Angle::setDMS (int degrees, int minutes, double seconds)
   radians = (M_PI/180.0) * ( degrees + minutes/60.0 + seconds/3600.0 );
 }
 
+double from_ttmmss (double ttmmss)
+{
+  int tt = int (ttmmss * 1e-4);
+  ttmmss -= tt * 10000;
+
+  int mm = int (ttmmss * 1e-2);
+  ttmmss -= mm * 100;
+
+  double turns = tt + double(mm)/60.0 + ttmmss/3600.0;
+  return turns;
+}
+
+double to_ttmmss (double turns)
+{
+  int tt = int (turns);
+  turns -= tt;
+
+  int mm = int (turns * 60.0);
+  turns -= mm;
+
+  double ttmmss = double(tt)*1e4 + double(mm)*1e2 + turns*60;
+  return ttmmss;
+}
+
+void Angle::setDegMS (double deg_mmss)
+{
+  setRadians( from_ttmmss(deg_mmss) * M_PI/180.0 );
+}
+
+double Angle::getDegMS () const
+{
+  return to_ttmmss(radians * 180.0/M_PI);
+}
+
+void Angle::setHourMS (double hour_mmss)
+{
+  setRadians( from_ttmmss(hour_mmss) * M_PI/12.0 );
+}
+
+double Angle::getHourMS () const
+{
+  return to_ttmmss(radians * 12.0/M_PI);
+}
+
+void Angle::setTurnMS (double turn_mmss)
+{
+  setRadians( from_ttmmss(turn_mmss) * (2.0*M_PI) );
+}
+
+double Angle::getTurnMS () const
+{
+  return to_ttmmss(radians / (2.0*M_PI));
+}
+
 void Angle::getDMS (int& degrees, int& minutes, double& seconds) const
 {
   degrees = (int)floor(fabs(radians) * 180.0/M_PI); 
@@ -131,7 +185,7 @@ Angle& Angle::operator= (const Angle & a)
 }
 
 Angle& Angle::operator= (const double &rad){
-  setradians(rad);
+  setRadians(rad);
   return *this;
 }
 
@@ -175,15 +229,15 @@ const Angle operator + (const Angle &a1, const Angle &a2) {
 
   // what is this for ?? I think I mistakenly thought it was
   // necessary to add in cartesian space.. only need this for means
-  //  double real = cos(a1.getradians())*cos(a2.getradians()) - 
-  //   sin(a1.getradians())*sin(a2.getradians());
-  //  double imag = cos(a1.getradians())*sin(a2.getradians()) +
-  ///   sin(a1.getradians())*cos(a2.getradians());
+  //  double real = cos(a1.getRadians())*cos(a2.getRadians()) - 
+  //   sin(a1.getRadians())*sin(a2.getRadians());
+  //  double imag = cos(a1.getRadians())*sin(a2.getRadians()) +
+  ///   sin(a1.getRadians())*cos(a2.getRadians());
   //  return Angle(atan2(imag,real));
   Angle a;
   a.setWrapPoint((a1.wrap_point > a2.wrap_point ? 
                  a1.wrap_point: a2.wrap_point));
-  a.setradians(a1.radians+a2.radians);
+  a.setRadians(a1.radians+a2.radians);
   return a;
 }
 
@@ -191,7 +245,7 @@ const Angle operator + (const Angle &a1, const Angle &a2) {
 const Angle operator - (const Angle& a)
 {
   Angle ret(a);
-  ret.setradians(-a.radians);
+  ret.setRadians(-a.radians);
   return ret;
 }
 
@@ -202,19 +256,19 @@ const Angle operator - (const Angle &a1, const Angle &a2) {
 
 const Angle operator + (const Angle &a1, double d) {
   Angle a(a1);
-  a.setradians(a.radians+d);
+  a.setRadians(a.radians+d);
   return a;
 }
 
 const Angle operator - (const Angle &a1, double d) {
   Angle a(a1);
-  a.setradians(a.radians-d);
+  a.setRadians(a.radians-d);
   return a;
 }
 
 const Angle operator * (const Angle &a1, double d) {
   Angle a(a1);
-  a.setradians(a.radians*d);
+  a.setRadians(a.radians*d);
   return a;
 }
 
@@ -222,43 +276,43 @@ const Angle operator * (const Angle &a1, double d) {
 // limited to <pi radians as angle is
 // it returns the product of the angles.radians
 double operator * (const Angle &a1, const Angle &a2) {
-  return a1.getradians()*a2.getradians();
+  return a1.getRadians()*a2.getRadians();
 }
 
 const Angle operator / (const Angle &a1, double d) {
   Angle a(a1);
-  a.setradians(a.radians/d);
+  a.setRadians(a.radians/d);
   return a;
   
 }
 
 int operator > (const Angle &a1, const Angle &a2) {
   double precision_limit = 2*pow(10.0,-DBL_DIG);
-  if(fabs(a1.getradians()-a2.getradians())<precision_limit) return(0);
-  else return (a1.getradians()>a2.getradians());
+  if(fabs(a1.getRadians()-a2.getRadians())<precision_limit) return(0);
+  else return (a1.getRadians()>a2.getRadians());
 }
 
 int operator >= (const Angle &a1, const Angle &a2) {
   double precision_limit = 2*pow(10.0,-DBL_DIG);
-  if(fabs(a1.getradians()-a2.getradians())<precision_limit) return(1);
-  else return (a1.getradians()>a2.getradians());
+  if(fabs(a1.getRadians()-a2.getRadians())<precision_limit) return(1);
+  else return (a1.getRadians()>a2.getRadians());
 }
 
 int operator < (const Angle &a1, const Angle &a2) {
   double precision_limit = 2*pow(10.0,-DBL_DIG);
-  if(fabs(a1.getradians()-a2.getradians())<precision_limit) return(0);
-  else return (a1.getradians()<a2.getradians());
+  if(fabs(a1.getRadians()-a2.getRadians())<precision_limit) return(0);
+  else return (a1.getRadians()<a2.getRadians());
 }
 
 int operator <= (const Angle &a1, const Angle &a2) {
   double precision_limit = 2*pow(10.0,-DBL_DIG);
-  if(fabs(a1.getradians()-a2.getradians())<precision_limit) return(1);
-  else return (a1.getradians()<a2.getradians());
+  if(fabs(a1.getRadians()-a2.getRadians())<precision_limit) return(1);
+  else return (a1.getRadians()<a2.getRadians());
 }
 
 int operator == (const Angle &a1, const Angle &a2){
   double precision_limit = 2*pow(10.0,-DBL_DIG);
-  if ((fabs(a1.getradians()-a2.getradians())<precision_limit)) 
+  if ((fabs(a1.getRadians()-a2.getRadians())<precision_limit)) 
       return (1);
   else
       return (0);  
@@ -266,7 +320,7 @@ int operator == (const Angle &a1, const Angle &a2){
 
 int operator != (const Angle &a1, const Angle &a2){
   double precision_limit = 2*pow(10.0,-DBL_DIG);
-  if ((fabs(a1.getradians()-a2.getradians())>precision_limit)) 
+  if ((fabs(a1.getRadians()-a2.getRadians())>precision_limit)) 
       return (1);
   else
       return (0);  
@@ -279,7 +333,7 @@ std::ostream& operator << (std::ostream& os, const Angle& angle)
   switch (Angle::default_type) {
   case Angle::Radians:
     // the previous default operation
-    return os << angle.getradians();
+    return os << angle.getRadians();
   case Angle::Degrees:
     return os << angle.getDegrees() << "deg";
   case Angle::Turns:
@@ -406,21 +460,21 @@ std::string AnglePair::getDegrees() const
 void 
 AnglePair:: setRadians(double r1, double r2)
 {
-  angle1.setradians(r1);
-  angle2.setradians(r2);
+  angle1.setRadians(r1);
+  angle2.setRadians(r2);
 }
 
 void 
 AnglePair:: getRadians(double *r1, double *r2) const
 {
-  *r1 = angle1.getradians();
-  *r2 = angle2.getradians();
+  *r1 = angle1.getRadians();
+  *r2 = angle2.getRadians();
 }
 
 std::string AnglePair::getRadians() const
 {
   sprintf(angle_str,
-          "(%8.4f,%8.4f)", angle1.getradians(),angle2.getradians());
+          "(%8.4f,%8.4f)", angle1.getRadians(),angle2.getRadians());
   return std::string (angle_str);
 }
 
