@@ -84,10 +84,15 @@ void Tempo::load_obsys ()
       observatory = new ObservatoryITRF (coordinate[0],
 					 coordinate[1],
 					 coordinate[2]);
-    else {
+    else
+    {
       Angle alat, alon;
       alat.setDegMS (coordinate[0]);
       alon.setDegMS (coordinate[1]);
+
+      // cerr << "ddmmss=" << coordinate[0] << " " << coordinate[1] << endl;
+      // cerr << "again=" << alat.getDegMS() << " " << alon.getDegMS() << endl;
+
       observatory = new ObservatoryIAU1976 (alat.getRadians(),
 					    alon.getRadians(),
 					    coordinate[2]);
