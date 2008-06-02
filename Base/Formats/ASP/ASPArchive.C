@@ -520,9 +520,9 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
 
   // Receiver ext
   Receiver *r = getadd<Receiver>();
-  if ((get_telescope()=="1")) {
+  if (get_telescope()=="1" || get_telescope()=="GBT") {
     GBT::guess(r, this); // Uses center freq to determine rcvr
-  } else if (get_telescope()=="3") {
+  } else if (get_telescope()=="3" || get_telescope()=="Arecibo") {
     Arecibo::guess(r, this); // Uses center freq
   } 
   // If still no recvr found, use info from FITS
