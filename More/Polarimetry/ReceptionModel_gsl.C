@@ -31,10 +31,10 @@ static void model_set (Calibration::ReceptionModel* model, const gsl_vector* x)
       assert (ifit < x->size);
       model->set_param( iparam, gsl_vector_get (x, ifit) );
       ifit ++;
-    }
 
-    if (model_verbose)
-      cerr << "set." << iparam << "=" << model->get_param(iparam) << endl;
+      if (model_verbose)
+	cerr << "set." << iparam << "=" << model->get_param(iparam) << endl;
+    }
   }
 
   assert( ifit == model->get_nparam_infit() );
@@ -65,14 +65,10 @@ static int model_fdf (const gsl_vector* x, void* data,
 
   Calibration::ReceptionModel* model = (Calibration::ReceptionModel*) data;
 
-  model_verbose = false;
   model_set (model, x);
 
   // number of CoherencyMeasurementSets
   unsigned nset = model->get_ndata ();
-
-  //! The traits of the gradient element
-  ElementTraits< Jones<double> > traits;
 
   vector< Jones<double> > gradient;
   vector< Jones<double> >* grad_ptr = 0;
@@ -80,6 +76,8 @@ static int model_fdf (const gsl_vector* x, void* data,
     grad_ptr = &gradient;
 
   unsigned idat = 0;
+
+  vector<double> components;
 
   for (unsigned iset=0; iset < nset; iset++)
   {
@@ -97,9 +95,7 @@ static int model_fdf (const gsl_vector* x, void* data,
 
       Jones<double> result = model->evaluate (grad_ptr);
 
-      Jones<double> delta = mset[istate].get_coherency() - result;
-
-      Jones<double> w_delta = mset[istate].get_weighted_conjugate (delta);
+      unsigned idat_start = idat;
 
       /*
 
@@ -109,12 +105,17 @@ static int model_fdf (const gsl_vector* x, void* data,
       */
       if (f)
       {
-	assert (idat < f->size);
-	gsl_vector_set( f, idat, mset[istate].get_weighted_norm (delta) );
-      }
+	Jones<double> delta = result - mset[istate].get_coherency();
 
-      // may need to normalize by
-      // float norm = mset[istate].get_nconstraint ();
+	mset[istate].get_weighted_components (delta, components);
+
+	for (unsigned i=0; i<components.size(); i++)
+	{
+	  assert (idat < f->size);
+	  gsl_vector_set( f, idat, components[i] );
+	  idat ++;
+	}
+      }
 
       if (J)
       {
@@ -126,7 +127,6 @@ static int model_fdf (const gsl_vector* x, void* data,
         {
 	  if (model->get_infit(iparam))
 	  {
-	    assert (idat < J->size1);
 	    assert (ifit < J->size2);
 
 	    /* 
@@ -134,8 +134,17 @@ static int model_fdf (const gsl_vector* x, void* data,
 	    Eq.(6) of van Straten (2004)
 	    
 	    */
-	    gsl_matrix_set( J, idat, ifit,
-			    traits.to_real (w_delta * gradient[iparam]) );
+
+	    mset[istate].get_weighted_components (gradient[iparam],components);
+
+	    idat = idat_start;
+
+	    for (unsigned i=0; i<components.size(); i++)
+	    {
+	      assert (idat < J->size1);
+	      gsl_matrix_set( J, idat, ifit, components[i] );
+	      idat ++;
+	    }
 
 	    ifit ++;
 	  }
@@ -143,12 +152,13 @@ static int model_fdf (const gsl_vector* x, void* data,
 
 	assert( ifit == model->get_nparam_infit() );
       }
-
-      idat++;
     }
   }
 
   assert( idat == model->get_ndat_constraint() );
+
+  if (f)
+    cerr << "|f(x)|=" << gsl_blas_dnrm2 (f) << endl;
 
   return GSL_SUCCESS;
 }
@@ -229,15 +239,11 @@ void Calibration::ReceptionModel::gsl_solve ()
   function.fdf = &model_fdf;
   function.n = get_ndat_constraint ();
   function.p = get_nparam_infit ();
+  function.params = this;
 
   if (verbose)
     cerr << "Calibration::ReceptionModel::gsl_solve"
       " nfit=" << function.p << " ndat=" << function.n << endl;
-
-  function.params = this;
-
-  if (verbose)
-    cerr << "Calibration::ReceptionModel::gsl_solve set initial guess" << endl;
 
   gsl_vector* initial_guess = gsl_vector_alloc (function.p);
   model_get (this, initial_guess);
@@ -253,25 +259,26 @@ void Calibration::ReceptionModel::gsl_solve ()
   gsl_multifit_fdfsolver_set (solver, &function, initial_guess);
 
   int status = 0;
+  iterations = 0;
 
   if (verbose)
     cerr << "Calibration::ReceptionModel::gsl_solve enter loop" << endl;
 
-  for (iterations = 0; iterations < maximum_iterations; iterations++)
+  do 
   {
+    iterations ++;
+
     status = gsl_multifit_fdfsolver_iterate (solver);
 
-    if (status == GSL_SUCCESS)
+    cerr << iterations << " status: " << gsl_strerror (status) << endl;
+
+    if (status)
       break;
 
-    status = gsl_multifit_test_delta (solver->dx, solver->x,
-				      1e-4, 1e-4);
-
-    if (status == GSL_SUCCESS)
-      break;
+    status = gsl_multifit_test_delta (solver->dx, solver->x, 1e-4, 1e-4);
   }
+  while ( (status == GSL_CONTINUE) && (iterations < maximum_iterations) );
 
-  model_verbose = true;
   // unpack the final solution
   model_set (this, solver->x);
 
