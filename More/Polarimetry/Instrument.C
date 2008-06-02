@@ -13,8 +13,6 @@
 
 using namespace std;
 
-static unsigned instances = 0;
-
 void Calibration::Instrument::init ()
 {
   backend = new Calibration::SingleAxis;
@@ -28,9 +26,6 @@ void Calibration::Instrument::init ()
   feed_chain->set_model( feed );
 
   add_model( feed_chain );
-
-  instances ++;
-  //cerr << "Calibration::Instrument::init instances=" << instances << endl;
 }
 
 Calibration::Instrument::Instrument ()
@@ -62,9 +57,8 @@ Calibration::Instrument* Calibration::Instrument::clone () const
 
 Calibration::Instrument::~Instrument ()
 {
-  instances --;
   if (verbose)
-    cerr << "Calibration::Instrument::dtor instances=" << instances << endl;
+    cerr << "Calibration::Instrument::dtor" << endl;
 }
 
 //! Return the name of the class
