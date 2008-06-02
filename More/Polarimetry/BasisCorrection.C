@@ -39,7 +39,7 @@ Pulsar::BasisCorrection::get_basis (const Receiver* rcvr) const
   if (!rcvr)
     return 1.0;
 
-  if (rcvr->get_basis() == Signal::Linear)
+  if (rcvr->get_basis_corrected() || rcvr->get_basis() == Signal::Linear)
     return 1.0;
 
   if (Archive::verbose > 1)
@@ -61,7 +61,7 @@ Pulsar::BasisCorrection::get_symmetry (const Receiver* rcvr) const
   if (!rcvr)
     return 1.0;
 
-  if (rcvr->get_orientation().getRadians() == 0)
+  if (rcvr->get_basis_corrected() || rcvr->get_orientation().getRadians() == 0)
     return 1.0;
 
   if (Archive::verbose > 1)
