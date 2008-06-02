@@ -18,6 +18,8 @@
 using namespace std;
 using Calibration::CoherencyMeasurementSet;
 
+static bool model_verbose = false;
+
 static void model_set (Calibration::ReceptionModel* model, const gsl_vector* x)
 {
   unsigned ifit=0;
@@ -26,9 +28,13 @@ static void model_set (Calibration::ReceptionModel* model, const gsl_vector* x)
   {
     if (model->get_infit(iparam))
     {
+      assert (ifit < x->size);
       model->set_param( iparam, gsl_vector_get (x, ifit) );
       ifit ++;
     }
+
+    if (model_verbose)
+      cerr << "set." << iparam << "=" << model->get_param(iparam) << endl;
   }
 
   assert( ifit == model->get_nparam_infit() );
@@ -42,6 +48,7 @@ static void model_get (const Calibration::ReceptionModel* model, gsl_vector* x)
   {
     if (model->get_infit(iparam))
     {
+      assert (ifit < x->size);
       gsl_vector_set( x, ifit, model->get_param (iparam) );
       ifit ++;
     }
@@ -58,6 +65,7 @@ static int model_fdf (const gsl_vector* x, void* data,
 
   Calibration::ReceptionModel* model = (Calibration::ReceptionModel*) data;
 
+  model_verbose = false;
   model_set (model, x);
 
   // number of CoherencyMeasurementSets
@@ -81,7 +89,7 @@ static int model_fdf (const gsl_vector* x, void* data,
     mset.set_coordinates();
 
     // set the signal path through which these measurements were observed
-    model->set_transformation_index (mset.get_transformation_index());
+    model->set_transformation_index( mset.get_transformation_index() );
 
     for (unsigned istate=0; istate<mset.size(); istate++)
     {
@@ -89,9 +97,9 @@ static int model_fdf (const gsl_vector* x, void* data,
 
       Jones<double> result = model->evaluate (grad_ptr);
 
-      Jones<double> delta_y = mset[istate].get_coherency() - result;
+      Jones<double> delta = mset[istate].get_coherency() - result;
 
-      Jones<double> w_delta_y = mset[istate].get_weighted_conjugate (delta_y);
+      Jones<double> w_delta = mset[istate].get_weighted_conjugate (delta);
 
       /*
 
@@ -100,26 +108,34 @@ static int model_fdf (const gsl_vector* x, void* data,
 
       */
       if (f)
-	gsl_vector_set( f, idat, mset[istate].get_weighted_norm (delta_y) );
+      {
+	assert (idat < f->size);
+	gsl_vector_set( f, idat, mset[istate].get_weighted_norm (delta) );
+      }
 
       // may need to normalize by
-      float norm = mset[istate].get_nconstraint ();
-
-      unsigned ifit=0;
+      // float norm = mset[istate].get_nconstraint ();
 
       if (J)
       {
+	assert (gradient.size() == model->get_nparam());
+
+	unsigned ifit=0;
+
 	for (unsigned iparam=0; iparam < model->get_nparam(); iparam++)
         {
 	  if (model->get_infit(iparam))
 	  {
+	    assert (idat < J->size1);
+	    assert (ifit < J->size2);
+
 	    /* 
 
 	    Eq.(6) of van Straten (2004)
 	    
 	    */
 	    gsl_matrix_set( J, idat, ifit,
-			    traits.to_real (w_delta_y * gradient[iparam]) );
+			    traits.to_real (w_delta * gradient[iparam]) );
 
 	    ifit ++;
 	  }
@@ -155,17 +171,69 @@ static int model_df (const gsl_vector* x, void* data, gsl_matrix* J)
   return model_fdf (x, data, 0, J);
 }
 
+void unpack_covariance (Calibration::ReceptionModel* model,
+			vector< vector<double> >& covariance,
+			gsl_matrix* covar)
+{
+  unsigned nparam = model->get_nparam();
+
+  covariance.resize (nparam);
+  for (unsigned iparam=0; iparam < nparam; iparam++)
+    covariance[iparam].resize (nparam);
+
+  unsigned idat = 0;
+
+  for (unsigned iparam=0; iparam < nparam; iparam++)
+  {
+    unsigned jdat = idat;
+
+    for (unsigned jparam=iparam; jparam < nparam; jparam++)
+    {
+      double val = 0;
+
+      if (model->get_infit(iparam) && model->get_infit(jparam))
+      {
+	val = gsl_matrix_get( covar, idat, jdat );
+	jdat ++;
+      }
+
+      covariance[iparam][jparam] = covariance[jparam][iparam] = val;
+    }
+
+    // cerr << endl;
+
+    if (model->get_infit(iparam))
+    {
+      assert( jdat == covar->size2 );
+      idat ++;
+    }
+  }
+
+  assert( idat == covar->size1 );
+
+#ifdef _DEBUG
+  for (unsigned iparam=0; iparam < nparam; iparam++)
+  {
+    for (unsigned jparam=0; jparam < nparam; jparam++)
+      cerr << covariance[iparam][jparam] << " ";
+    cerr << endl;
+  }
+#endif
+}
+
 void Calibration::ReceptionModel::gsl_solve ()
 {
-  if (verbose)
-    cerr << "Calibration::ReceptionModel::gsl_solve" << endl;
-
   gsl_multifit_function_fdf function;
   function.f = &model_f;
   function.df = &model_df;
   function.fdf = &model_fdf;
   function.n = get_ndat_constraint ();
   function.p = get_nparam_infit ();
+
+  if (verbose)
+    cerr << "Calibration::ReceptionModel::gsl_solve"
+      " nfit=" << function.p << " ndat=" << function.n << endl;
+
   function.params = this;
 
   if (verbose)
@@ -184,27 +252,38 @@ void Calibration::ReceptionModel::gsl_solve ()
 
   gsl_multifit_fdfsolver_set (solver, &function, initial_guess);
 
-  unsigned iter = 0;
   int status = 0;
 
   if (verbose)
     cerr << "Calibration::ReceptionModel::gsl_solve enter loop" << endl;
 
-  do
+  for (iterations = 0; iterations < maximum_iterations; iterations++)
   {
-    iter++;
-
     status = gsl_multifit_fdfsolver_iterate (solver);
 
-    if (status)
+    if (status == GSL_SUCCESS)
       break;
 
     status = gsl_multifit_test_delta (solver->dx, solver->x,
 				      1e-4, 1e-4);
+
+    if (status == GSL_SUCCESS)
+      break;
   }
-  while (status == GSL_CONTINUE && iter < 500);
+
+  model_verbose = true;
+  // unpack the final solution
+  model_set (this, solver->x);
+
+  best_chisq = gsl_blas_dnrm2 (solver->f);
 
   gsl_matrix *covar = gsl_matrix_alloc (function.p, function.p);
   gsl_multifit_covar (solver->J, 0.0, covar);
+
+  unpack_covariance (this, covariance, covar);
+
+  gsl_multifit_fdfsolver_free (solver);
+  gsl_matrix_free (covar);
+  gsl_vector_free (initial_guess);
 }
 
