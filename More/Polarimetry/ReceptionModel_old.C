@@ -113,8 +113,6 @@ void Calibration::ReceptionModel::old_solve ()
     cerr << "Calibration::ReceptionModel::old_solve chisq="
 	 << best_chisq << endl;
 
-  nfree = ndat_total - nparam_infit;
-
   float last_lamda = 0.0;
 
   unsigned stick_to_steepest_decent = 0;
@@ -212,74 +210,28 @@ void Calibration::ReceptionModel::old_solve ()
       }
     }
   }
- 
-  unsigned iparam = 0;
-
-  if (iterations >= maximum_iterations)
-  {
-    if (fit_debug)
-      cerr << "maximum iterations exceeded" << endl;
-    for (iparam=0; iparam < get_nparam(); iparam++)
-      set_Estimate (iparam, 0.0);
-    throw Error (InvalidState, "Calibration::ReceptionModel::old_solve",
-		 "exceeded maximum number of iterations=%d",
-		 maximum_iterations);
-  }
-
-  float reduced_chisq = best_chisq / nfree;
-
-  if (report_chisq)
-    cerr << "  reduced chisq " << reduced_chisq << endl;
-
-  if (!finite(reduced_chisq) ||
-      maximum_reduced && reduced_chisq > maximum_reduced)
-  {
-    for (iparam=0; iparam < get_nparam(); iparam++)
-      set_Estimate (iparam, 0.0);
-    throw Error (InvalidState, "Calibration::ReceptionModel::old_solve",
-		 "bad reduced chisq=%f (nfree=%d)", reduced_chisq, nfree);
-  }
-
-  if (verbose)
-    cerr << "Calibration::ReceptionModel::old_solve converged in " 
-	 << iterations << " iterations. chi_sq=" 
-	 << best_chisq << "/(" << ndat_total << "-" << nparam_infit
-	 << "=" << nfree << ")=" << reduced_chisq << endl;
   
-  try {
+  try
+  {
     fit.result (*this, covariance);
   }
-  catch (Error& error) {
-    for (iparam=0; iparam < get_nparam(); iparam++)
+  catch (Error& error)
+  {
+    for (unsigned iparam=0; iparam < get_nparam(); iparam++)
       set_Estimate (iparam, 0.0);
     throw error += "Calibration::ReceptionModel::old_solve";
   }
 
-  // For data with normally-distributed errors, the variance of
-  // each model parameter is given by eqn. 15.6.4 NR
-
   if (covariance.size() != get_nparam())
   {
-    for (iparam=0; iparam < get_nparam(); iparam++)
+    for (unsigned iparam=0; iparam < get_nparam(); iparam++)
       set_Estimate (iparam, 0.0);
+
     throw Error (InvalidState, "Calibration::ReceptionModel::old_solve",
 		 "MEAL::LevenbergMarquardt<Jones<double>>::result returns"
 		 "\n\tcovariance matrix dimension=%d != nparam=%d",
 		 covariance.size(), get_nparam());
   }
-
-  for (iparam=0; iparam < get_nparam(); iparam++)
-  {
-    if (verbose)
-      cerr << "Calibration::ReceptionModel::old_solve"
-	" variance[" << iparam << "]=" << covariance[iparam][iparam] << endl;
-    set_variance (iparam, covariance[iparam][iparam]);
-  }
-
-  for (unsigned i=0; i < acceptance_condition.size(); i++)
-    if ( !acceptance_condition[i](this) )
-      throw Error (InvalidState, "Calibration::ReceptionModel::old_solve",
-		   "model not accepted by condition #%u", i);
 
 }
 
