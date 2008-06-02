@@ -229,9 +229,11 @@ endif
 # GSL-dependent code
 #
 if HAVE_GSL
+if HAVE_CFITSIO
 
 libGeneral_la_SOURCES += ProfilePCA.C
 
+endif
 endif
 
 #############################################################################
@@ -244,5 +246,5 @@ INCLUDES = \
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @PGPLOT_CFLAGS@ @TEMPO2_CFLAGS@ @GSL_CFLAGS@
+AM_CPPFLAGS += @PGPLOT_CFLAGS@ @TEMPO2_CFLAGS@ @CFITSIO_CFLAGS@ @GSL_CFLAGS@
 
