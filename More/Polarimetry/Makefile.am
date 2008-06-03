@@ -49,6 +49,9 @@ nobase_include_HEADERS = \
         Pulsar/ReceptionModel.h \
         Pulsar/ReceptionModelPlotter.h \
 	Pulsar/ReceptionModelReport.h \
+	Pulsar/ReceptionModelSolver.h \
+	Pulsar/ReceptionModelSolveGSL.h \
+	Pulsar/ReceptionModelSolveMEAL.h \
         Pulsar/ReferenceCalibrator.h \
         Pulsar/ReflectStokes.h \
         Pulsar/Simulation.h \
@@ -119,8 +122,9 @@ libPolarimetry_la_SOURCES = \
         Receiver_load.C \
         ReceptionCalibrator.C \
         ReceptionModel.C \
-        ReceptionModel_solve.C \
 	ReceptionModelReport.C \
+	ReceptionModelSolver.C \
+	ReceptionModelSolveMEAL.C \
         ReferenceCalibrator.C \
         ReflectStokes.C \
         Simulation.C \
@@ -138,9 +142,13 @@ libPolarimetry_la_SOURCES = \
         TotalCovariance.C \
 	VariationInfo.C
 
+if HAVE_GSL
+libPolarimetry_la_SOURCES += ReceptionModelSolveGSL.C
+endif
+
 SUBDIRS = iri2001
 
-libPolarimetry_la_LIBADD = iri2001/libiri.la
+libPolarimetry_la_LIBADD = iri2001/libiri.la @GSL_LIBS@
 
 bin_PROGRAMS = rmrot
 
@@ -166,7 +174,7 @@ endif
 
 # ######################################################################
 #
-# programs
+# test programs
 #
 
 TESTS = test_copy test_Feed test_SingleAxis test_TotalCovariance \
