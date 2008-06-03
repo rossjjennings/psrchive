@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.81 $
-   $Date: 2008/06/03 05:00:04 $
+   $Revision: 1.82 $
+   $Date: 2008/06/03 07:46:08 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -66,6 +66,7 @@ void usage ()
     "  -V level   set verbosity level [0->4] \n"
     "  -A archive set the output archive class name \n"
     "  -m model   model: Britton [default] or Hamaker \n"
+    "  -l solver  solver: MEAL [default] of GSL \n"
     "\n"
     "  -C meta    filename with list of calibrator files \n"
     "  -d dbase   filename of Calibration Database \n"
@@ -837,7 +838,6 @@ int actual_main (int argc, char *argv[]) try
       Pulsar::FrontendCorrection correct;
       correct.calibrate(archive);
 
-#if 0
       if (!total)
 	total = archive;
       else
@@ -845,14 +845,12 @@ int actual_main (int argc, char *argv[]) try
 	total->append (archive);
 	total->tscrunch ();
       }
-#endif
-
     }
     
     archive = 0;
-    
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << "pcm: error while handling " << filenames[i] << endl;
     cerr << error << endl;
     archive = 0;
