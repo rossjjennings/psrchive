@@ -7,6 +7,7 @@
 
 #include "Pulsar/ReceptionModel.h"
 #include "Pulsar/CoherencyMeasurementSet.h"
+#include "Pulsar/ReceptionModelSolveMEAL.h"
 
 #include <assert.h>
 
@@ -16,32 +17,7 @@ using namespace std;
 
 Calibration::ReceptionModel::ReceptionModel ()
 {
-  // name = "ReceptionModel";
-
-  // should be ok
-  maximum_iterations = 50;
-
-  // Relative \Delta\chi^2 considered significant
-  convergence_threshold = 1e-2;
-
-  // By default, do not cull solutions
-  maximum_reduced = 0.0;
-
-  // By default, not simulated
-  exact_solution = false;
-
-  // Switch between ReceptionModel:: and MeasurementEquation::calculate
-  top_calculate = false;
-
-  // set during solve
-  iterations = 0;
-  best_chisq = 0.0;
-  nfree = 0;
-
-  // used during solve
-  fit_debug = false;
-  fit_report = false;
-  is_solved = false;
+  set_solver( new SolveMEAL );
 }
 
 Calibration::ReceptionModel::~ReceptionModel ()
@@ -57,27 +33,32 @@ string Calibration::ReceptionModel::get_name () const
   return "ReceptionModel";
 }
 
-bool Calibration::ReceptionModel::get_fit_solved () const
+//! Set the algorithm used to solve the measurement equation
+void Calibration::ReceptionModel::set_solver (Solver* s)
 {
-  return is_solved;
+  solver = s;
+  if (solver)
+    solver->set_equation (this);
 }
 
-//! The number of iterations in last call to solve method
-unsigned Calibration::ReceptionModel::get_fit_iterations () const
+//! Get the algorithm used to solve the measurement equation
+Calibration::ReceptionModel::Solver*
+Calibration::ReceptionModel::get_solver ()
 {
-  return iterations;
+  return solver;
 }
 
-//! The chi-squared in last call to solve method
-float Calibration::ReceptionModel::get_fit_chisq () const
+//! Get the algorithm used to solve the measurement equation
+const Calibration::ReceptionModel::Solver*
+Calibration::ReceptionModel::get_solver () const
 {
-  return best_chisq;
+  return solver;
 }
 
-//! The number of free parameters in last call to solve method
-unsigned Calibration::ReceptionModel::get_fit_nfree () const
+//! Solve the measurement equation using the current algorithm
+void Calibration::ReceptionModel::solve ()
 {
-  return nfree;
+  solver->solve();
 }
 
 void Calibration::ReceptionModel::copy_fit (const ReceptionModel* other)
@@ -95,70 +76,6 @@ void Calibration::ReceptionModel::copy_fit (const ReceptionModel* other)
 		   iparm, get_infit(iparm), iparm, other->get_infit(iparm));
 
     set_param (iparm, other->get_param(iparm));
-  }
-}
-
-//! Additional input, \f$\rho_i,k\f$, where \f$i\f$=transformation_index
-void Calibration::ReceptionModel::add_to_output (unsigned index,
-                                                 MEAL::Complex2* rho)
-{
-  if (index >= xforms.size())
-    throw Error (InvalidRange, 
-		 "Calibration::ReceptionModel::add_to_output",
-		 "index=%d >= npath=%d", index, xforms.size());
-
-  if (!top_calculate) {
-    for (unsigned ipath=0; ipath < xforms.size(); ipath++) {
-      output.push_back( MEAL::SumRule<MEAL::Complex2>() );
-      output.back() += this;
-    }
-    top_calculate = true;
-  }
-
-  assert (xforms.size() == output.size());
-
-  if (!rho)
-    return;
-
-  output[index] += rho;
-
-  if (index == current_xform)
-    set_evaluation_changed();
-}
-
-//! Add a transformation, \f$J_M\f$, where \f$M\f$ = get_num_transformation
-void Calibration::ReceptionModel::add_transformation (MEAL::Complex2* state)
-{
-  if (top_calculate) {
-    assert (xforms.size() == output.size());
-    output.push_back( MEAL::SumRule<MEAL::Complex2>() );
-    output.back() += this;
-  }
-
-  MeasurementEquation::add_transformation (state);
-}
-
-//! Returns \f$ \rho^\prime \f$ and its gradient
-void Calibration::ReceptionModel::calculate (Jones<double>& result, 
-					     vector<Jones<double> >* grad)
-{
-  if (top_calculate) {
-
-    if (verbose)
-      cerr << "Calibration::ReceptionModel::calculate top current_xform="
-	   << current_xform << endl;
-    
-    top_calculate = false;
-    result = output[current_xform].evaluate (grad);
-    top_calculate = true;
-
-  }
-  else {
-
-    if (verbose) cerr << "Calibration::ReceptionModel::calculate"
-		   " call MeasurementEquation::calculate" << endl;
-    MeasurementEquation::calculate (result, grad);
-
   }
 }
 
@@ -224,38 +141,3 @@ void Calibration::ReceptionModel::range_check (unsigned idata,
 		 idata, data.size());
 }
 
-//! Set the maximum number of iterations in fit algorithm
-void Calibration::ReceptionModel::set_fit_maximum_iterations (unsigned max)
-{
-  maximum_iterations = max;
-}
-
-//! Add a convergence conditions
-void Calibration::ReceptionModel::add_convergence_condition
-( Functor< bool(ReceptionModel*) > condition )
-{
-  convergence_condition.push_back( condition );
-}
-
-//! Add a report
-void Calibration::ReceptionModel::add_acceptance_condition
-( Functor< bool(ReceptionModel*) > condition )
-{
-  acceptance_condition.push_back( condition );
-}
-
-//! Set the convergence threshold
-void Calibration::ReceptionModel::set_fit_convergence_threshold (float ct,
-								 bool exact)
-{
-  convergence_threshold = ct;
-  exact_solution = exact;
-}
-
-//! Get the covariance matrix of the last fit
-void 
-Calibration::ReceptionModel::get_fit_covariance (vector<vector<double> >& c)
-  const
-{
-  c = covariance;
-}

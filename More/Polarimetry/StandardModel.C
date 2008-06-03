@@ -9,6 +9,8 @@
 #include "Pulsar/SingleAxis.h"
 #include "Pulsar/Feed.h"
 
+#include "Pulsar/ReceptionModelSolver.h"
+
 #include "MEAL/Polynomial.h"
 #include "MEAL/Gain.h"
 #include "MEAL/Steps.h"
@@ -52,6 +54,13 @@ Calibration::StandardModel::StandardModel (bool _phenomenological)
 void Calibration::StandardModel::set_basis (MEAL::Complex2* x)
 {
   basis = x;
+}
+
+void Calibration::StandardModel::set_solver (ReceptionModel::Solver* s)
+{
+  solver = s;
+  if (equation)
+    equation->set_solver (s);
 }
 
 //! Set true when the pulsar Stokes parameters have been normalized
@@ -216,6 +225,9 @@ void Calibration::StandardModel::build ()
   if (verbose)
     cerr << "Calibration::StandardModel::build pulsar path="
 	 << Pulsar_path << endl;
+
+  if (solver)
+    equation->set_solver( solver );
 
   built = true;
 }
@@ -835,7 +847,7 @@ void Calibration::StandardModel::get_covariance( vector<double>& covar,
   vector< vector<double> > Ctotal;
   vector< unsigned > imap;
 
-  get_equation()->get_fit_covariance (Ctotal);
+  get_equation()->get_solver()->get_covariance (Ctotal);
 
   if (Ctotal.size() != get_equation()->get_nparam())
     throw Error( InvalidState, "Calibration::StandardModel::get_covariance",

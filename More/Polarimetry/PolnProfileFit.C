@@ -11,7 +11,7 @@
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
 
-#include "Pulsar/ReceptionModel.h"
+#include "Pulsar/ReceptionModelSolver.h"
 #include "Pulsar/TotalCovariance.h"
 
 #include "MEAL/PhaseGradients.h"
@@ -163,7 +163,8 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   }
 
   equation = new Calibration::ReceptionModel;
-  equation->set_fit_debug( fit_debug );
+
+  // equation->set_fit_debug( fit_debug );
 
   if (manage_equation_transformation)
   {
@@ -226,8 +227,9 @@ MEAL::Complex2* Pulsar::PolnProfileFit::get_transformation () const
 void Pulsar::PolnProfileFit::set_fit_debug (bool flag)
 {
   fit_debug = flag;
+
   if (equation)
-    equation->set_fit_debug(flag);
+    equation->get_solver()->set_debug (flag);
 }
 
 void Pulsar::PolnProfileFit::set_phase_lock (bool locked)
@@ -357,16 +359,19 @@ void Pulsar::PolnProfileFit::solve () try
   clock.start();
 
   if (verbose)
-    equation->set_fit_report ();
+    equation->get_solver()->set_report ();
 
   equation->solve ();
 
   clock.stop();
 
   if (verbose)
+  {
+    float chisq = equation->get_solver()->get_chisq();
+    float nfree = equation->get_solver()->get_nfree();
     cerr << "Pulsar::PolnProfileFit::solve solved in " << clock << "."
-      " chisq=" << equation->get_fit_chisq() / equation->get_fit_nfree()
-	 << endl;
+      " chisq=" << chisq/nfree << endl;
+  }
 }
 catch (Error& error) {
   throw error += "Pulsar::PolnProfileFit::solve";

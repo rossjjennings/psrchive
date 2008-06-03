@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.18 $
-   $Date: 2008/05/28 08:32:34 $
+   $Revision: 1.19 $
+   $Date: 2008/06/03 04:57:34 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -16,6 +16,7 @@
 
 // Reception Model and its management
 #include "Pulsar/ReceptionModel.h"
+#include "Pulsar/ReceptionModelSolver.h"
 
 #include "Pulsar/MeanPolar.h"
 #include "Pulsar/MeanSingleAxis.h"
@@ -105,8 +106,11 @@ namespace Calibration
     //! Get the measurement equation solver
     Calibration::ReceptionModel* get_equation ();
 
-    //! Set the measurement equation solver
+    //! Set the measurement equation
     void set_equation (Calibration::ReceptionModel*);
+
+    //! Set the algorithm used to solve the measurement equation
+    void set_solver (Calibration::ReceptionModel::Solver*);
 
     //! Copy the parameters for the signal path experienced by the pulsar
     void copy_transformation (const MEAL::Complex2*);
@@ -142,6 +146,9 @@ namespace Calibration
 
     //! ReceptionModel
     Reference::To< Calibration::ReceptionModel > equation;
+
+    //! The algorithm used to solve the measurement equation
+    Reference::To< Calibration::ReceptionModel::Solver > solver;
 
     //! Used to convert MJD to double
     Calibration::ConvertMJD convert;

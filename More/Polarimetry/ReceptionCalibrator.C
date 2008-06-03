@@ -5,11 +5,9 @@
  *
  ***************************************************************************/
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "Pulsar/ReceptionCalibrator.h"
+#include "Pulsar/ReceptionModelReport.h"
+#include "Pulsar/ReceptionModelSolver.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -17,6 +15,7 @@
 #include "Pulsar/FrontendCorrection.h"
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/PolarCalibrator.h"
+#include "Pulsar/SourceInfo.h"
 
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Receiver.h"
@@ -587,8 +586,6 @@ void Pulsar::SourceEstimate::update_source ()
   }
 }
 
-#include "Pulsar/ReceptionModelReport.h"
-
 void Pulsar::ReceptionCalibrator::solve_prepare ()
 {
   SystemCalibrator::solve_prepare ();
@@ -597,14 +594,12 @@ void Pulsar::ReceptionCalibrator::solve_prepare ()
     if (model[ichan]->valid)
     {
       string report_name = "pcm_report_" + tostring(ichan) + ".txt";
-      model[ichan]->get_equation()->add_acceptance_condition
+      model[ichan]->get_equation()->get_solver()->add_acceptance_condition
 	( Functor< bool(Calibration::ReceptionModel*) >
 	  ( new Calibration::ReceptionModelReport (report_name),
 	    &Calibration::ReceptionModelReport::report ) );
     }
 }
-
-#include "Pulsar/SourceInfo.h"
 
 Pulsar::Calibrator::Info* 
 Pulsar::ReceptionCalibrator::new_info_pulsar (unsigned istate) const

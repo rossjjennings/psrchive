@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/SystemCalibrator.h"
+#include "Pulsar/ReceptionModelSolver.h"
 
 #include "Pulsar/BackendCorrection.h"
 #include "Pulsar/FrontendCorrection.h"
@@ -59,6 +60,12 @@ void Pulsar::SystemCalibrator::set_calibrator (Archive* archive)
 
   extension = archive->get<PolnCalibratorExtension>();
   calibrator_stokes = archive->get<CalibratorStokes>();
+}
+
+void 
+Pulsar::SystemCalibrator::set_solver (Calibration::ReceptionModel::Solver* s)
+{
+  solver = s;
 }
 
 //! Copy constructor
@@ -691,6 +698,9 @@ void Pulsar::SystemCalibrator::create_model ()
 
     if (basis)
       model[ichan]->set_basis (basis);
+
+    if (solver)
+      model[ichan]->set_solver( solver->clone() );
   }
 
   if (verbose)
@@ -753,7 +763,7 @@ void Pulsar::SystemCalibrator::solve_prepare ()
       model[ichan]->update ();
     
     if (verbose > 2)
-      model[ichan]->get_equation()->set_fit_debug();
+      model[ichan]->get_equation()->get_solver()->set_debug();
 
   }
 
@@ -763,7 +773,7 @@ void Pulsar::SystemCalibrator::solve_prepare ()
 
 void Pulsar::SystemCalibrator::solve ()
 {
-  ReceptionModel::report_chisq = true;
+  ReceptionModel::Solver::report_chisq = true;
 
   solve_prepare ();
 
@@ -783,7 +793,7 @@ void Pulsar::SystemCalibrator::solve ()
 
     // first valid channel, print a report
     if (valid == 1)
-      model[ichan]->get_equation()->set_fit_report ();
+      model[ichan]->get_equation()->get_solver()->set_report ();
 
     queue.submit( model[ichan].get(), &StandardModel::solve );
 
@@ -799,8 +809,8 @@ void Pulsar::SystemCalibrator::solve ()
 
     ReceptionModel* equation = model[ichan]->get_equation();
 
-    float chisq = equation->get_fit_chisq ();
-    unsigned free = equation->get_fit_nfree ();
+    float chisq = equation->get_solver()->get_chisq ();
+    unsigned free = equation->get_solver()->get_nfree ();
     float reduced_chisq = chisq/free;
 
     if (reduced_chisq > try_again_chisq)
@@ -856,11 +866,11 @@ void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
 
       ReceptionModel* equation = model[jchan]->get_equation();
 
-      if (!equation->get_fit_solved())
+      if (!equation->get_solver()->get_solved())
 	continue;
 
-      float chisq = equation->get_fit_chisq ();
-      unsigned free = equation->get_fit_nfree ();
+      float chisq = equation->get_solver()->get_chisq ();
+      unsigned free = equation->get_solver()->get_nfree ();
       float reduced_chisq = chisq/free;
 
       if (reduced_chisq > try_again_chisq)

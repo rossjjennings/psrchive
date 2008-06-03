@@ -7,14 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/04/07 00:38:07 $
+   $Revision: 1.8 $
+   $Date: 2008/06/03 04:57:34 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
 #define __Pulsar_SystemCalibrator_H
 
 #include "Pulsar/PolnCalibrator.h"
+
+#include "Pulsar/ReceptionModelSolver.h"
 #include "Pulsar/StandardModel.h"
 
 #include "Pulsar/CoherencyMeasurementSet.h"
@@ -153,6 +155,9 @@ namespace Pulsar {
     //! Set the number of channels that may be simultaneously solved
     virtual void set_nthread (unsigned nthread);
 
+    //! Set the algorithm used to solve the measurement equation
+    virtual void set_solver (Calibration::ReceptionModel::Solver*);
+
     //! Solve equation for each frequency
     virtual void solve ();
     
@@ -183,6 +188,9 @@ namespace Pulsar {
 
     //! The standard calibration model as a function of frequency
     std::vector< Reference::To<Calibration::StandardModel> > model;
+
+    //! The algorithm used to solve the measurement equation
+    Reference::To<Calibration::ReceptionModel::Solver> solver;
 
     //! The CalibratorStokesExtension of the Archive passed during construction
     mutable Reference::To<CalibratorStokes> calibrator_stokes;

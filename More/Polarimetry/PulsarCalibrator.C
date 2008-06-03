@@ -22,7 +22,7 @@
 #include "Pulsar/Feed.h"
 #include "Pulsar/MeanInstrument.h"
 
-#include "Pulsar/ReceptionModel.h"
+#include "Pulsar/ReceptionModelSolver.h"
 #include "Pulsar/Fourier.h"
 
 #include "MEAL/Complex2Math.h"
@@ -408,7 +408,7 @@ MEAL::Complex2* Pulsar::PulsarCalibrator::new_transformation (unsigned ichan)
 
   if (monitor_gimbal_lock)
     for (unsigned i=0; i<2; i++)
-      mtm[ichan]->get_equation()->add_convergence_condition
+      mtm[ichan]->get_equation()->get_solver()->add_convergence_condition
 	( gimbal_lock(instrument, i) );
 
   return instrument;
@@ -498,8 +498,8 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
 
     mtm[mchan]->fit( data->new_PolnProfile (ichan) );
 
-    unsigned nfree = mtm[mchan]->get_equation()->get_fit_nfree ();
-    float chisq = mtm[mchan]->get_equation()->get_fit_chisq ();
+    unsigned nfree = mtm[mchan]->get_equation()->get_solver()->get_nfree ();
+    float chisq = mtm[mchan]->get_equation()->get_solver()->get_chisq ();
 
     reduced_chisq[ichan] = chisq / nfree;
 
