@@ -157,8 +157,10 @@ static int model_fdf (const gsl_vector* x, void* data,
 
   assert( idat == model->get_ndat_constraint() );
 
+  //#ifdef _DEBUG
   if (f)
     cerr << "|f(x)|=" << gsl_blas_dnrm2 (f) << endl;
+  //#endif
 
   return GSL_SUCCESS;
 }
@@ -270,19 +272,26 @@ void Calibration::ReceptionModel::gsl_solve ()
 
     status = gsl_multifit_fdfsolver_iterate (solver);
 
-    cerr << iterations << " status: " << gsl_strerror (status) << endl;
-
     if (status)
       break;
 
-    status = gsl_multifit_test_delta (solver->dx, solver->x, 1e-4, 1e-4);
+#ifdef _DEBUG
+    cerr << " |dx|=" << gsl_blas_dnrm2 (solver->dx) 
+	 << " |x|=" << gsl_blas_dnrm2 (solver->x) << endl;
+#endif
+
+    status = gsl_multifit_test_delta (solver->dx, solver->x, 0, 5e-2);
   }
   while ( (status == GSL_CONTINUE) && (iterations < maximum_iterations) );
+
+#ifdef _DEBUG
+  cerr << iterations << " status: " << gsl_strerror (status) << endl;
+#endif
 
   // unpack the final solution
   model_set (this, solver->x);
 
-  best_chisq = gsl_blas_dnrm2 (solver->f);
+  best_chisq = pow( gsl_blas_dnrm2 (solver->f), 2.0 );
 
   gsl_matrix *covar = gsl_matrix_alloc (function.p, function.p);
   gsl_multifit_covar (solver->J, 0.0, covar);
