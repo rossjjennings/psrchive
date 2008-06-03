@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.80 $
-   $Date: 2008/05/28 08:32:34 $
+   $Revision: 1.81 $
+   $Date: 2008/06/03 05:00:04 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -21,6 +21,12 @@
 #include "Pulsar/PulsarCalibrator.h"
 #include "Pulsar/FrontendCorrection.h"
 #include "Pulsar/Database.h"
+
+#include "Pulsar/ReceptionModelSolveMEAL.h"
+#if HAVE_GSL
+#include "Pulsar/ReceptionModelSolveGSL.h"
+#endif
+
 #include "MEAL/Steps.h"
 
 #include "Pulsar/Interpreter.h"
@@ -380,6 +386,19 @@ void set_time_variation (char code, MEAL::Univariate<MEAL::Scalar>* function)
 	       "unrecognized PAR code = %c", code);
 }
 
+Calibration::ReceptionModel::Solver* new_solver (const string& name)
+{
+  if (name == "MEAL")
+    return new Calibration::SolveMEAL;
+
+#if HAVE_GSL
+  if (name == "GSL")
+    return new Calibration::SolveGSL;
+#endif
+
+  throw Error (InvalidParam, "pcm", "no solver named " + name);
+}
+
 int actual_main (int argc, char *argv[]) try
 {
   // Number of threads used to solve equations
@@ -400,6 +419,9 @@ int actual_main (int argc, char *argv[]) try
   // name of file from which phase bins will be chosen
   char* binfile = NULL;
 
+  // name of least squares minimization algorithm
+  char* least_squares = NULL;
+
   // number of hours over which CALs will be found from Database
   float hours = 12.0;
 
@@ -410,7 +432,7 @@ int actual_main (int argc, char *argv[]) try
   bool publication_plots = false;
 
   int gotc = 0;
-  const char* args = "1:A:a:b:c:C:d:DgHhIj:J:L:M:m:N:n:o:Pp:qrsS:t:T:u:vV:";
+  const char* args = "1:A:a:b:c:C:d:DgHhIj:J:L:l:M:m:N:n:o:Pp:qrsS:t:T:u:vV:";
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
     switch (gotc)
@@ -468,6 +490,10 @@ int actual_main (int argc, char *argv[]) try
 
     case 'L':
       hours = atof (optarg);
+      break;
+
+    case 'l':
+      least_squares = optarg;
       break;
 
     case 'm':
@@ -740,6 +766,10 @@ int actual_main (int argc, char *argv[]) try
 
       if (diff_phase_variation)
 	model->set_diff_phase( diff_phase_variation );
+
+      if (least_squares)
+	model->set_solver( new_solver(least_squares) );
+
     }
     catch (Error& error)
     {
@@ -807,6 +837,7 @@ int actual_main (int argc, char *argv[]) try
       Pulsar::FrontendCorrection correct;
       correct.calibrate(archive);
 
+#if 0
       if (!total)
 	total = archive;
       else
@@ -814,6 +845,7 @@ int actual_main (int argc, char *argv[]) try
 	total->append (archive);
 	total->tscrunch ();
       }
+#endif
 
     }
     
