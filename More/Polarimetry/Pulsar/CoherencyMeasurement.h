@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CoherencyMeasurement.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/06/13 05:28:14 $
+   $Revision: 1.10 $
+   $Date: 2008/06/03 04:57:10 $
    $Author: straten $ */
 
 #ifndef __Calibration_CoherencyMeasurement_H
@@ -68,6 +68,9 @@ namespace Calibration {
     //! Given a coherency matrix, return the weighted conjugate matrix
     Jones<double> get_weighted_conjugate (const Jones<double>& matrix) const;
 
+    void get_weighted_components (const Jones<double>&,
+				  std::vector<double>& components) const;
+
   protected:
 
     //! Index of the input to which the measurement corresponds
@@ -92,11 +95,19 @@ namespace Calibration {
   public:
 
     //! Given a coherency matrix, return the weighted norm
-    virtual double get_weighted_norm (const Jones<double>&) const = 0;
+    virtual 
+    double
+    get_weighted_norm (const Jones<double>&) const = 0;
     
     //! Given a coherency matrix, return the weighted conjugate matrix
-    virtual Jones<double> get_weighted_conjugate (const Jones<double>&)const=0;
-    
+    virtual 
+    Jones<double>
+    get_weighted_conjugate (const Jones<double>&)const = 0;
+
+    virtual 
+    Stokes< std::complex<double> > 
+    get_weighted_components (const Jones<double>&) const = 0;
+
   };
 }
 

@@ -41,6 +41,20 @@ Jones<double> Calibration::ObservationUncertainty::get_weighted_conjugate
   return convert (stokes);
 }
 
+Stokes< complex<double> >
+Calibration::ObservationUncertainty::get_weighted_components
+( const Jones<double>& matrix ) const
+{
+  Stokes< complex<double> > stokes = complex_coherency( matrix );
+
+  for (unsigned ipol=0; ipol<4; ipol++)
+    stokes[ipol] =
+      complex<double>( sqrt(inv_variance[ipol].real()) * stokes[ipol].real(),
+		       sqrt(inv_variance[ipol].imag()) * stokes[ipol].imag() );
+
+  return stokes;
+}
+
 //! Set the uncertainty of the observation
 void Calibration::ObservationUncertainty::set_variance
 ( const Stokes< complex<double> >& variance )

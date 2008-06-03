@@ -98,6 +98,16 @@ Jones<double> Calibration::TemplateUncertainty::get_weighted_conjugate
   return ObservationUncertainty::get_weighted_conjugate (matrix);
 }
 
+Stokes< complex<double> >
+Calibration::TemplateUncertainty::get_weighted_components
+( const Jones<double>& matrix ) const
+{
+  if (!built)
+    const_cast<TemplateUncertainty*>(this)->build();
+
+  return ObservationUncertainty::get_weighted_components (matrix);
+}
+
 void Calibration::TemplateUncertainty::changed (MEAL::Function::Attribute a)
 {
   if (a == MEAL::Function::Evaluation)

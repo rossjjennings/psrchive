@@ -114,3 +114,25 @@ Jones<double> Calibration::CoherencyMeasurement::get_weighted_conjugate
   return uncertainty->get_weighted_conjugate (matrix);
 }
 
+void Calibration::CoherencyMeasurement::get_weighted_components
+(const Jones<double>& matrix, std::vector<double>& components) const
+{
+  Stokes< complex<double> > wc = uncertainty->get_weighted_components (matrix);
+
+  components.resize (nconstraint);
+  unsigned index = 0;
+
+  for (unsigned i=0; i<4; i++)
+  {
+    components[index] = wc[i].real();
+    index ++;
+
+    if (nconstraint == 8)
+    {
+      components[index] = wc[i].imag();
+      index ++;
+    }
+  }
+
+  assert (index == nconstraint);
+}
