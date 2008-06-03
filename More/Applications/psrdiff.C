@@ -8,7 +8,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
-#include "Pulsar/ReceptionModel.h"
+#include "Pulsar/ReceptionModelSolver.h"
 #include "Pulsar/PolnProfileFit.h"
 #include "Pulsar/PolnProfile.h"
 #include "MEAL/Polar.h"
@@ -217,8 +217,8 @@ int main (int argc, char** argv)
 	fit.set_standard (std_profile);
         fit.fit (profile);
   
-	unsigned nfree = fit.get_equation()->get_fit_nfree ();
-	float chisq = fit.get_equation()->get_fit_chisq ();
+	unsigned nfree = fit.get_equation()->get_solver()->get_nfree ();
+	float chisq = fit.get_equation()->get_solver()->get_chisq ();
 
 	float reduced_chisq = chisq / nfree;
 
