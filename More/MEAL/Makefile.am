@@ -39,6 +39,7 @@ nobase_include_HEADERS = \
         MEAL/GroupRule.h \
         MEAL/Invariant.h \
         MEAL/InverseRule.h \
+	MEAL/LeastSquares.h \
         MEAL/LevenbergMarquardt.h \
         MEAL/Mean.h \
 	MEAL/MuellerTransformation.h \
@@ -129,8 +130,8 @@ libMEAL_la_SOURCES = \
         Gain.C \
         Gaussian.C \
 	GimbalLockMonitor.C \
-        PowerLaw.C \
         Invariant.C \
+	LeastSquares.C \
 	MuellerTransformation.C \
         NormalizeStokes.C \
 	Null.C \
@@ -144,6 +145,7 @@ libMEAL_la_SOURCES = \
         Polar.C \
         Polynomial.C \
         PositionAngles.C \
+        PowerLaw.C \
         Projection.C \
 	RandomPolar.C \
 	Real4.C \
