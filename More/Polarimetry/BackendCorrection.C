@@ -59,7 +59,7 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
   */
   if (correct_lsb)
   {
-    if (Archive::verbose)
+    if (Archive::verbose > 2)
       cerr << "Pulsar::BackendCorrection::operator down conversion" << endl;
     if (argument == Signal::Conjugate)
       argument = Signal::Conventional;
@@ -79,7 +79,7 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
   {
     if (argument == Signal::Conjugate)
     {
-      if (Archive::verbose)
+      if (Archive::verbose > 2)
 	cerr << "Pulsar::BackendCorrection::operator phase convention" << endl;
       if (state == Signal::Stokes && basis == Signal::Circular)
 	flip[2] = !flip[2];   // Flip Stokes U
@@ -89,7 +89,7 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
 
     if (hand == Signal::Left) 
     {
-      if (Archive::verbose)
+      if (Archive::verbose > 2)
 	cerr << "Pulsar::BackendCorrection::operator hand" << endl;
       if (state == Signal::Stokes && basis == Signal::Circular)
 	flip[2] = !flip[2];   // Flip Stokes U and ...
