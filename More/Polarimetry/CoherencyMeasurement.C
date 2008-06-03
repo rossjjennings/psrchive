@@ -1,12 +1,15 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/CoherencyMeasurement.h"
 #include "Pulsar/ObservationUncertainty.h"
 #include "Pauli.h"
+
+#include <assert.h>
 
 using namespace std;
 
