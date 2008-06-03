@@ -206,5 +206,5 @@ LDADD = libPolarimetry.la \
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @PGPLOT_CFLAGS@
+AM_CPPFLAGS += @PGPLOT_CFLAGS@ @GSL_CFLAGS@
 
