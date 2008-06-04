@@ -8,9 +8,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.82 $
-   $Date: 2008/06/03 07:46:08 $
-   $Author: straten $ */
+   $Revision: 1.83 $
+   $Date: 2008/06/04 16:37:15 $
+   $Author: demorest $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -778,20 +778,11 @@ int actual_main (int argc, char *argv[]) try
       return -1;
     }
 
-    if (alignment_threshold && !phase_std)
-    { 
-      cerr << "pcm: creating phase reference" << endl;
-
-      // store an fscrunched and tscrunched clone for phase reference
-      Reference::To<Archive> temp = archive->total();
-      phase_std = temp->get_Profile (0,0,0);	
-    }
-
     /*
       test for phase shift only if phase_std is not from current archive.
       this test will fail if binfile is a symbollic link.
     */
-    if (phase_std && archive->get_filename() != binfile) try
+    if (phase_std && (binfile==NULL || archive->get_filename() != binfile)) try
     {
       if (verbose)
 	cerr << "pcm: creating checking phase" << endl;
@@ -822,6 +813,16 @@ int actual_main (int argc, char *argv[]) try
       cerr << "pcm: ERROR while testing phase shift\n" << error << endl;
       return -1;
     }
+
+    if (alignment_threshold && !phase_std)
+    { 
+      cerr << "pcm: creating phase reference" << endl;
+
+      // store an fscrunched and tscrunched clone for phase reference
+      Reference::To<Archive> temp = archive->total();
+      phase_std = temp->get_Profile (0,0,0);	
+    }
+
 
     model->add_observation( archive );
 
