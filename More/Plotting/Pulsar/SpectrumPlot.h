@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/SpectrumPlot.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/10/16 02:50:11 $
+   $Revision: 1.9 $
+   $Date: 2008/06/04 04:41:22 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SpectrumPlot_h
@@ -42,6 +42,9 @@ namespace Pulsar {
     //! Set the phase bin to plot
     void set_bin (const PlotIndex& _ibin) { ibin = _ibin; }
     PlotIndex get_bin () const { return ibin; }
+
+    //! Disable baseline removal
+    void preprocess (Archive*);
 
   protected:
 

@@ -21,7 +21,8 @@ void Pulsar::SpectrumPlot::get_spectra (const Archive* data)
   spectra.resize(1);
   spectra[0].resize(nchan);
 
-  for (unsigned ichan=0; ichan<nchan; ichan++) {
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+  {
     Reference::To<const Profile> profile;
     profile = get_Profile (data, isubint, ipol, ichan);
     if (profile -> get_weight() == 0.0)
@@ -31,4 +32,9 @@ void Pulsar::SpectrumPlot::get_spectra (const Archive* data)
     else
       spectra[0][ichan] = profile->get_amps()[ibin.get_value()];
   }
+}
+
+//! Disable baseline removal
+void Pulsar::SpectrumPlot::preprocess (Archive* archive)
+{
 }
