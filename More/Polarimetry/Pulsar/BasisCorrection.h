@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/BasisCorrection.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/05/28 08:32:34 $
+   $Revision: 1.3 $
+   $Date: 2008/06/05 05:27:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BasisCorrection_H
@@ -44,7 +44,13 @@ namespace Pulsar
 
     //! Return the transformation due to receiver symmetry axis
     Jones<double> get_symmetry (const Receiver*) const;
-    
+
+    //! Return a summary of parameters that produce non-identity terms
+    std::string get_summary () const;
+
+  protected:
+    mutable std::string summary;
+
   };
 }
 

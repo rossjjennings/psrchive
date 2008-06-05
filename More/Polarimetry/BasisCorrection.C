@@ -23,8 +23,7 @@ Pulsar::BasisCorrection::get_hand (const Receiver* rcvr) const
   if (rcvr->get_basis_corrected() || rcvr->get_hand() == Signal::Right)
     return 1.0;
 
-  if (Archive::verbose > 1)
-    cerr << "Pulsar::BasisCorrection::get_hand left-handed" << endl;
+  summary += " left-handed basis\n";
 
   // return the exchange matrix for which det(J)=1
   complex<double> i (0,1);
@@ -42,8 +41,7 @@ Pulsar::BasisCorrection::get_basis (const Receiver* rcvr) const
   if (rcvr->get_basis_corrected() || rcvr->get_basis() == Signal::Linear)
     return 1.0;
 
-  if (Archive::verbose > 1)
-    cerr << "Pulsar::BasisCorrection::get_basis circular" << endl;
+  summary += " circular basis\n";
 
   const double r = 1.0/sqrt(2.0);
   complex<double> p (r,-r);
@@ -64,9 +62,9 @@ Pulsar::BasisCorrection::get_symmetry (const Receiver* rcvr) const
   if (rcvr->get_basis_corrected() || rcvr->get_orientation().getRadians() == 0)
     return 1.0;
 
-  if (Archive::verbose > 1)
-    cerr << "Pulsar::BasisCorrection::get_symmetry orientation="
-         << rcvr->get_orientation().getDegrees() << " deg" << endl;
+  Angle::default_type = Angle::Degrees;
+
+  summary += " orientation=" + tostring(rcvr->get_orientation()) + "\n";
 
   // rotate the basis about the Stokes V axis
   MEAL::Rotation1 rotation ( Pauli::basis.get_basis_vector(2) );
@@ -85,6 +83,7 @@ Jones<double> Pulsar::BasisCorrection::operator () (const Archive* a) const
 
 Jones<double> Pulsar::BasisCorrection::operator () (const Receiver* rcvr) const
 {
+  summary = "";
   return get_hand (rcvr) * get_basis (rcvr) * get_symmetry (rcvr);
 }
 
@@ -110,4 +109,9 @@ bool Pulsar::BasisCorrection::required (const Archive* archive) const
       "\n  -> required=" << required << endl;
 
   return required;
+}
+
+std::string Pulsar::BasisCorrection::get_summary () const
+{
+  return summary;
 }
