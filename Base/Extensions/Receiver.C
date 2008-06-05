@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Receiver.h"
 
 #include "Pulsar/Receiver_Native.h"
@@ -180,20 +181,37 @@ static string match_indent = "\n\t";
 
 bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
 {
-  if (!receiver) {
+  if (!receiver)
+  {
     reason += match_indent + "no Receiver";
     return false;
   }
 
   bool result = true;
 
-  if (get_basis() != receiver->get_basis()) {
+  if (get_basis() != receiver->get_basis())
+  {
     result = false;
     reason += match_indent + "basis mismatch: "
-      + Signal::Basis2string(get_basis()) + " != " 
-      + Signal::Basis2string(receiver->get_basis());
+      + tostring( get_basis() ) + " != " 
+      + tostring( receiver->get_basis() );
   }
 
+  if (get_hand() != receiver->get_hand())
+  {
+    result = false;
+    reason += match_indent + "hand mismatch: "
+      + tostring( get_hand() ) + " != " 
+      + tostring( receiver->get_hand() );
+  }
+
+  if (get_orientation() != receiver->get_orientation())
+  {
+    result = false;
+    reason += match_indent + "orientation mismatch: "
+      + tostring( get_orientation() ) + " != " 
+      + tostring( receiver->get_orientation() );
+  }
   return result;
 }
 
