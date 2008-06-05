@@ -8,9 +8,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.83 $
-   $Date: 2008/06/04 16:37:15 $
-   $Author: demorest $ */
+   $Revision: 1.84 $
+   $Date: 2008/06/05 20:34:33 $
+   $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -744,7 +744,7 @@ int actual_main (int argc, char *argv[]) try
       archive->convert_state (Signal::Stokes);
       archive->remove_baseline ();
       archive->dedisperse ();
-      archive->centre ();
+      archive->centre (0.0);
     }
 
     if (!model) try
@@ -847,7 +847,6 @@ int actual_main (int argc, char *argv[]) try
 	total->tscrunch ();
       }
     }
-    
     archive = 0;
   }
   catch (Error& error)
@@ -1151,7 +1150,7 @@ SystemCalibrator* time_variation_based (const char* binfile, unsigned nbin) try
       autobin->convert_state (Signal::Stokes);
       autobin->remove_baseline ();
       autobin->dedisperse ();
-      autobin->centre ();
+      autobin->centre (0.0);
 
       auto_select (*model, autobin, maxbins);
 
