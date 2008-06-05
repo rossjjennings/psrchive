@@ -15,7 +15,7 @@ using namespace std;
   Uses the polyco model, as well as the centre frequency and mid-time of
   each Integration to determine the predicted pulse phase.
  */
-void Pulsar::Archive::centre ()
+void Pulsar::Archive::centre (double phase_offset)
 {
   // this function doesn't work for things without polycos
   if (get_type () != Signal::Pulsar)
@@ -25,7 +25,7 @@ void Pulsar::Archive::centre ()
     throw Error (InvalidState, "Pulsar::Archive::centre",
                  "Pulsar observation with no polyco");
 
-  Phase half_turn (0.5);
+  Phase half_turn (phase_offset);
 
   for (unsigned isub=0; isub < get_nsubint(); isub++)  {
 

@@ -1,26 +1,27 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Aidan Hotan
+ *   Copyright (C) 2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+using namespace std;
+
 /*! Rotate pulsar Integrations so that the bin of largest amplitude
     is centred */
-void Pulsar::Archive::centre_max_bin ()
+void Pulsar::Archive::centre_max_bin (double phase_offset)
 {
   Reference::To<Pulsar::Archive> arch = total();
-  double p = arch->get_Integration(0)->get_folding_period();
+  double period = arch->get_Integration(0)->get_folding_period();
 
-  int bnum = arch->get_Profile(0,0,0)->find_max_bin();
-  bnum -= get_nbin()/2;
+  int max_bin = arch->get_Profile(0,0,0)->find_max_bin();
 
-  float frac = float(bnum)/float(get_nbin());
-  double extra_time = frac * p;
+  double shift_phase = double(max_bin) / double(get_nbin()) - phase_offset;
+  double shift_time = shift_phase * period;
 
-  rotate(extra_time); 
+  rotate (shift_time); 
 }

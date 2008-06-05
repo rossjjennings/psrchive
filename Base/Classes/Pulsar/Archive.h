@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.173 $
-   $Date: 2008/04/21 06:20:00 $
+   $Revision: 1.174 $
+   $Date: 2008/06/05 20:34:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.173 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.174 $"
 
 #include "IntegrationManager.h"
 
@@ -361,10 +361,10 @@ namespace Pulsar
     void append (const Archive* archive);
 
     //! Phase rotate pulsar Integrations so that pulse phase zero is centred
-    void centre ();
+    void centre (double phase_offset = 0.5);
 
     //! Phase rotate pulsar Integrations so centre the maximum amplitude
-    void centre_max_bin ();
+    void centre_max_bin (double phase_offset = 0.5);
 
     //! Convert data to the specified state
     void convert_state (Signal::State state);
