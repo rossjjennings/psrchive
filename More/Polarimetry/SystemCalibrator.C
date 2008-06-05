@@ -9,11 +9,12 @@
 #include "Pulsar/ReceptionModelSolver.h"
 
 #include "Pulsar/BackendCorrection.h"
-#include "Pulsar/FrontendCorrection.h"
-#include "Pulsar/PolarCalibrator.h"
+#include "Pulsar/BasisCorrection.h"
+#include "Pulsar/ProjectionCorrection.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
+#include "Pulsar/PolarCalibrator.h"
 #include "Pulsar/InstrumentInfo.h"
 
 #include "Pulsar/Archive.h"
@@ -230,7 +231,7 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   MJD epoch = integration->get_epoch ();
   add_epoch (epoch);
 
-  // use the FrontendCorrection class to calculate the feed transformation
+  // use the ProjectionCorrection class to calculate the feed transformation
   ProjectionCorrection correction;
   correction.set_archive (data);
   Jones<double> projection = correction (isub);
@@ -378,9 +379,9 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
   string reason;
   if (!get_calibrator()->calibrator_match (cal, reason))
     throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_calibrator",
-		 "mismatch between calibrators\n\t" 
+		 "mismatch between \n\t" 
 		 + get_calibrator()->get_filename() +
-                 " and\n\t" + cal->get_filename() + reason);
+                 " and \n\t" + cal->get_filename() + reason);
 
   unsigned nchan = get_calibrator()->get_nchan ();
   unsigned nsub = cal->get_nsubint();
@@ -666,7 +667,10 @@ void Pulsar::SystemCalibrator::create_model ()
     }
 
     BasisCorrection basis_correction;
-    basis = new MEAL::Complex2Constant (basis_correction(receiver));
+    basis = new MEAL::Complex2Constant( basis_correction(receiver) );
+
+    cerr << "Pulsar::SystemCalibrator::create_model basis corrections:\n"
+	 << basis_correction.get_summary () << endl;
 
     if (verbose)
       cerr << "Pulsar::SystemCalibrator::create_model receiver=\n  " 
