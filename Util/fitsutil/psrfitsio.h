@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.16 $
-   $Date: 2008/05/07 01:21:19 $
+   $Revision: 1.17 $
+   $Date: 2008/06/06 02:37:41 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
@@ -21,9 +21,6 @@
 
 #include <string>
 #include <vector>
-
-//! Remove any existing rows from the current binary table
-void psrfits_clean_rows (fitsfile*);
 
 //! Empty template class requires specialization 
 template<typename T> struct FITS_traits { };
@@ -347,10 +344,20 @@ void psrfits_read_col( fitsfile *fptr, const char *name, T *data,
 
 }
 
-//! Move to the HDU given, throw an exception if we fail
-void psrfits_move_hdu( fitsfile *fptr, char *hdu_name,
-		       int table_type = BINARY_TBL, int version = 0 );
+//! Move to the named HDU, remove any existing rows, and insert a new one
+void psrfits_init_hdu (fitsfile *fptr, const char *name);
 
+//! Move to the named HDU
+void psrfits_move_hdu (fitsfile *fptr, const char *name,
+		       int table_type = BINARY_TBL, int version = 0);
 
+//! Remove any existing rows from the current binary table
+void psrfits_clean_rows (fitsfile*);
+
+//! Insert a single new row at the start of the current binary table
+void psrfits_insert_row (fitsfile* fptr);
+
+//! Delete the named column from the current binary table
+void psrfits_delete_col (fitsfile* fptr, const char* name);
 
 #endif

@@ -5,12 +5,11 @@
  *
  ***************************************************************************/
 
-using namespace std;
-
 #include "psrfitsio.h"
 
 #include <stdarg.h>
 
+using namespace std;
 
 static void update_tdim (fitsfile* ffptr, int column, unsigned ndim, ...)
 {
@@ -52,6 +51,20 @@ void psrfits_update_tdim (fitsfile* ffptr, int column,
   update_tdim (ffptr, column, 4, dim1, dim2, dim3, dim4);
 }
 
+/*
+
+  Wvs - 6 June 2008
+
+  IMPORTANT NOTE:
+
+  fits_write_tdim does not look for any existing TDIMn entry and
+  update its value.  Rather, it leaves the uninitialized value and
+  adds a new one.  This function works around this problem by creating
+  an appropriate key/value pair and calling fits_update_key.
+
+  Many thanks to Paul Demorest for this insight.
+
+*/
 void psrfits_update_tdim (fitsfile* ffptr, int column,
 			  const vector<unsigned>& dims)
 {
@@ -75,25 +88,6 @@ void psrfits_update_tdim (fitsfile* ffptr, int column,
   psrfits_update_key (ffptr, keyword, result);
 }
 
-
-void psrfits_clean_rows (fitsfile* ffptr)
-{
-  long rows = 0;
-  int status = 0;
-
-  fits_get_num_rows (ffptr, &rows, &status);
-
-  if (status)
-    throw FITSError (status, "psrfits_clean_rows", "fits_get_num_rows");
-
-  if (!rows)
-    return;
-
-  fits_delete_rows (ffptr, 1, rows, &status);
-
-  if (status)
-    throw FITSError (status, "psrfits_clean_rows", "fits_delete_rows");
-}
 
 void psrfits_update_key (fitsfile* fptr, const char* name,
 			 const std::string& data,
@@ -173,6 +167,13 @@ void* FITS_void_ptr (const string& txt)
 }
 
 
+void psrfits_init_hdu( fitsfile *fptr, const char *name  )
+{
+  psrfits_move_hdu (fptr, name);
+  psrfits_clean_rows (fptr);
+  psrfits_insert_row (fptr);
+}
+
 /**
  * psrfits_move_hdu           Simple wrapper function for fits_movnam_hdu, assumes defaults for table type and version.
  *
@@ -182,10 +183,12 @@ void* FITS_void_ptr (const string& txt)
  * @param version             Some version number ???, we always use 0
  **/
 
-void psrfits_move_hdu( fitsfile *fptr, char *hdu_name, int table_type, int version )
+void psrfits_move_hdu( fitsfile *fptr, const char *hdu_name,
+		       int table_type, int version )
 {
   int status = 0;
-  fits_movnam_hdu (fptr, table_type, hdu_name, version, &status);
+  fits_movnam_hdu (fptr, table_type, const_cast<char*>(hdu_name), 
+		   version, &status);
 
   if( status == BAD_HDU_NUM )
   {
@@ -199,4 +202,44 @@ void psrfits_move_hdu( fitsfile *fptr, char *hdu_name, int table_type, int versi
     throw FITSError( status, "psrfits_move_hdu", "Failed to move to HDU" );
 }
 
+void psrfits_clean_rows (fitsfile* ffptr)
+{
+  long rows = 0;
+  int status = 0;
 
+  fits_get_num_rows (ffptr, &rows, &status);
+
+  if (status)
+    throw FITSError (status, "psrfits_clean_rows", "fits_get_num_rows");
+
+  if (!rows)
+    return;
+
+  fits_delete_rows (ffptr, 1, rows, &status);
+
+  if (status)
+    throw FITSError (status, "psrfits_clean_rows", "fits_delete_rows");
+}
+
+void psrfits_insert_row (fitsfile* fptr)
+{
+  int status = 0;
+
+  fits_insert_rows (fptr, 0, 1, &status);
+
+  if (status != 0)
+    throw FITSError (status, "psrfits_insert_row", "fits_insert_rows");
+}
+
+void psrfits_delete_col (fitsfile* fptr, const char* name)
+{
+  int status = 0;
+  int colnum = 0;
+
+  fits_get_colnum (fptr, CASEINSEN, const_cast<char*>(name), &colnum, &status);
+
+  fits_delete_col (fptr, colnum, &status);
+
+  if (status != 0)
+    throw FITSError (status, "psrfits_delete_col", "fits_delete_col %s", name);
+}
