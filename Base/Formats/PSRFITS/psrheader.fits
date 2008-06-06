@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '3.4             '   / Header version 
+HDRVER  = '3.5             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -103,9 +103,11 @@ TFORM#  = 1I                  / Integer
 TTYPE#  = CHAN_BW             / Channel bandwidth (nominal)
 TFORM#  = 1D                  / Double
 TUNIT#  = MHz                 / units of field
-TTYPE#  = PAR_CORR            / Parallactic angle correction applied
+TTYPE#  = PR_CORR             / Projection of receptors onto sky corrected
 TFORM#  = 1I                  / Integer flag 
-TTYPE#  = FA_CORR             / Feed angle correction applied
+TTYPE#  = FD_CORR             / Feed basis correction applied
+TFORM#  = 1I                  / Integer flag 
+TTYPE#  = BE_CORR             / Backend correction applied
 TFORM#  = 1I                  / Integer flag 
 TTYPE#  = RM_CORR             / RM correction applied
 TFORM#  = 1I                  / Integer flag 
@@ -633,8 +635,10 @@ NCHAN   =                    * / Nr of channels in flux cal file
 TTYPE#  = DAT_WTS              / Weights for each channel
 TFORM#  = E                    / NCHAN floats
 TTYPE#  = DATA                 / Stokes (Q,U,V) of calibrator rel. to Cal I
+TDIM#   = (*,*)                / Dimensions (3,NCHAN)
 TFORM#  = E                    / 3*NCHAN floats
 TTYPE#  = DATAERR              / Estimated error of Stokes (Q,U,V)
+TDIM#   = (*,*)                / Dimensions (3,NCHAN)
 TFORM#  = E                    / 3*NCHAN floats
 END
 #
@@ -666,14 +670,14 @@ TUNIT#  = MHz                  / Units of field
 TTYPE#  = DAT_WTS              / Weights for each channel
 TFORM#  = E                    / NCHAN floats
 TTYPE#  = DATA                 / Cross-coupling data
-TDIM#   = (*,*)                / Dimensions (NCHAN,NCPAR)
-TFORM#  = E                    / NCHAN*NCPAR floats
+TDIM#   = (*,*)                / Dimensions (NCPAR,NCHAN)
+TFORM#  = E                    / NCPAR*NCHAN floats
 TTYPE#  = DATAERR              / Estimated error of cross-coupling data
-TDIM#   = (*,*)                / Dimensions (NCHAN,NCPAR)
-TFORM#  = E                    / NCHAN*NCPAR floats
+TDIM#   = (*,*)                / Dimensions (NCPAR,NCHAN)
+TFORM#  = E                    / NCPAR*NCHAN floats
 TTYPE#  = COVAR                / Formal covariances of coupling data
-TDIM#   = (*,*)                / Dimensions (NCHAN,NCOVAR)
-TFORM#  = E                    / NCHAN*NCOVAR floats
+TDIM#   = (*,*)                / Dimensions (NCOVAR,NCHAN)
+TFORM#  = E                    / NCOVAR*NCHAN floats
 END
 #
 ###############################################################################
