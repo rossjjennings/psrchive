@@ -31,3 +31,19 @@ MEAL::LeastSquares::LeastSquares ()
   report = false;
   solved = false;
 }
+
+void MEAL::LeastSquares::set_convergence_chisq (float chisq)
+{
+  convergence_chisq = chisq;
+}
+
+void MEAL::LeastSquares::set_convergence_delta (float delta)
+{
+  convergence_delta = delta;
+}
+
+void MEAL::LeastSquares::set_maximum_reduced_chisq (float max)
+{
+  maximum_reduced = max;
+}
+
