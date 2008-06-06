@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "psrfitsio.h"
@@ -11,130 +12,94 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#ifdef sun
-#include <ieeefp.h>
-#endif
-
 using namespace std;
 
 void Pulsar::FITSArchive::unload (fitsfile* fptr, 
 				  const CalibratorStokes* stokes)
 {
-  int status = 0;
-
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::unload CalibratorStokes entered" << endl;
   
-  // Move to the CAL_POLN Binary Table
-  
-  fits_movnam_hdu (fptr, BINARY_TBL, "CAL_POLN", 0, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload CalibratorStokes", 
-		     "fits_movnam_hdu CAL_POLN");
-  
+  // Move to the CAL_POLN Binary Table and delete any existing rows
+  psrfits_move_hdu (fptr, "CAL_POLN");
   psrfits_clean_rows (fptr);
 
   // Insert a new row
-
+  int status = 0;
   fits_insert_rows (fptr, 0, 1, &status);
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload CalibratorStokes", 
 		     "fits_insert_rows CAL_POLN");
 
-  int nch_poln = stokes->get_nchan();
+  int nchan = stokes->get_nchan();
 
-  if (verbose == 3) cerr << "FITSArchive::unload CalibratorStokes nchan=" 
-		    << nch_poln << endl;
+  if (verbose > 2) cerr << "FITSArchive::unload CalibratorStokes nchan=" 
+		    << nchan << endl;
 
-  char* comment = 0;
+  // Write NCHAN  
+  psrfits_update_key (fptr, "NCHAN", nchan);
 
-  // Write NCH_POLN  
-  fits_update_key (fptr, TINT, "NCH_POLN", &nch_poln, comment, &status);
+  vector<float> data ( nchan );
+  for (int i = 0; i < nchan; i++)
+    data[i] = stokes->get_valid(i);
 
-  long dimension = nch_poln * 3;  
-  auto_ptr<float> data ( new float[dimension] );
-
-  // Write the channel frequencies
-    
-  for (int i = 0; i < nch_poln; i++)
-    data.get()[i] = 0;
-  
+  vector<unsigned> dimensions;
 
   // Write the weights
-  
-  for (int i = 0; i < nch_poln; i++)
-    data.get()[i] = stokes->get_valid(i);
-  
-  int colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DAT_WTS", &colnum, &status);
-  fits_modify_vector_len (fptr, colnum, nch_poln, &status);
-  fits_write_col (fptr, TFLOAT, colnum, 1, 1, nch_poln, 
-		  data.get(), &status);
+  psrfits_write_col (fptr, "DAT_WTS", 1, data, dimensions);
 
-  if (status)
-    throw FITSError (status, "FITSArchive::unload CalibratorStokes", 
-		     "fits_write_col DAT_WTS");
-
-  if (verbose == 3) cerr << "FITSArchive::unload CalibratorStokes"
+  if (verbose > 2) cerr << "FITSArchive::unload CalibratorStokes"
 		 " weights written" << endl;
   
   // Write the model parameters
-    
-  int count = 0;
-  #ifdef sun
-    for (count = 0; count < dimension; count++)
-      data.get()[count] = FP_QNAN;
-  #else
-    for (count = 0; count < dimension; count++)
-      data.get()[count] = strtod("NAN(n-charsequence)", (char**) NULL);
-  #endif
+
+  unsigned npol_QUV = 3;
+  data.resize( nchan * npol_QUV );
+
+  unsigned count = 0;
+  for (count = 0; count < data.size(); count++)
+    data[count] = 0;
 
   count = 0;
-  for (int i = 0; i < nch_poln; i++)
+  for (int i = 0; i < nchan; i++)
+  {
     if (stokes->get_valid(i))
-      for (int ipol = 1; ipol < 4; ipol++) {
-	data.get()[count] = stokes->get_stokes(i)[ipol].val;
+      for (int ipol = 1; ipol < 4; ipol++)
+      {
+	data[count] = stokes->get_stokes(i)[ipol].val;
 	count++;
       }
     else
-      count += 3;
+      count += npol_QUV;
+  }
 
-  assert (count == dimension);
+  assert (count == data.size());
 
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status);
-  fits_modify_vector_len (fptr, colnum, dimension, &status);
-  fits_write_col (fptr, TFLOAT, colnum, 1, 1, dimension,
-		  data.get(), &status);
+  dimensions.resize (2);
+  dimensions[0] = npol_QUV;
+  dimensions[1] = nchan;
 
-  if (status)
-    throw FITSError (status, "FITSArchive::unload CalibratorStokes", 
-		     "fits_write_col DATA");
+  psrfits_write_col (fptr, "DATA", 1, data, dimensions);
 
   // Write the variance of the model parameters
     
   count = 0;
-  for (int i = 0; i < nch_poln; i++)
+  for (int i = 0; i < nchan; i++)
+  {
     if (stokes->get_valid(i))
-      for (int ipol = 1; ipol < 4; ipol++) {
-	data.get()[count] = sqrt( stokes->get_stokes(i)[ipol].var );
+      for (int ipol = 1; ipol < 4; ipol++)
+      {
+	data[count] = sqrt( stokes->get_stokes(i)[ipol].var );
 	count++;
       }
     else
-      count += 3;
+      count += npol_QUV;
+  }
 
-  assert (count == dimension);
+  assert (count == data.size());
 
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DATAERR", &colnum, &status);
-  fits_modify_vector_len (fptr, colnum, dimension, &status);
-  fits_write_col (fptr, TFLOAT, colnum, 1, 1, dimension,
-		  data.get(), &status);
+  psrfits_write_col (fptr, "DATAERR", 1, data, dimensions);
 
-  if (status)
-    throw FITSError (status, "FITSArchive::unload CalibratorStokes", 
-		     "fits_write_col DATAERR");
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::unload CalibratorStokes exiting" << endl; 
 }
