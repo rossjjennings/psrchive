@@ -89,7 +89,7 @@ int main ()
 	  sepnew = coord1.angularSeparation (coord2);
 	  sepold = oldAngularSeparation (coord1,coord2);
 
-	  if (fabs( sepnew.getRadians() - sepold.getradians() ) > tolerance ) {
+	  if (fabs( sepnew.getRadians() - sepold.getRadians() ) > tolerance ) {
 	    //if (sepnew != sepold) {
 	    cerr << "Different Answers::"
 		 << "  a1:" << coord1 
