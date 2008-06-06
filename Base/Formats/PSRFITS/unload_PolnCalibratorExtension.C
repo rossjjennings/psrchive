@@ -27,19 +27,9 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   if (verbose == 3)
     cerr << "FITSArchive::unload PolnCalibratorExtension entered" << endl;
   
-  // Move to the FEEDPAR Binary Table
+  // Initialize the FEEDPAR Binary Table
   
-  psrfits_move_hdu (fptr, "FEEDPAR");  
-  psrfits_clean_rows (fptr);
-
-  // Initialise a new row
-  
-  int status = 0;
-
-  fits_insert_rows (fptr, 0, 1, &status);
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload PolnCalibratorExtension", 
-		     "fits_insert_rows FEEDPAR");
+  psrfits_init_hdu (fptr, "FEEDPAR");  
 
   int nchan = pce->get_nchan();
   int ncpar = pce->get_nparam();
@@ -160,6 +150,7 @@ void unload_variances (fitsfile* fptr,
   dimensions[0] = ncpar;
   dimensions[1] = nchan;
 
+  psrfits_delete_col (fptr, "COVAR");
   psrfits_write_col (fptr, "DATAERR", 1, data, dimensions);
 }
 
@@ -216,6 +207,7 @@ void unload_covariances (fitsfile* fptr,
   dimensions[0] = ncovar;
   dimensions[1] = nchan;
 
+  psrfits_delete_col (fptr, "DATAERR");
   psrfits_write_col (fptr, "COVAR", 1, data, dimensions);
 }
 
