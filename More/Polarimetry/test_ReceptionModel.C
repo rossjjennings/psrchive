@@ -4,7 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/ReceptionModel.h"
+
+#include "Pulsar/ReceptionModelSolver.h"
 #include "Pulsar/Parallactic.h"
 #include "MEAL/Axis.h"
 
@@ -509,7 +510,7 @@ int runtest (Calibration::Parallactic& parallactic)
   // solve the model!
   //
 
-  model.set_fit_convergence_threshold (variance*variance, true);
+  model.get_solver()->set_convergence_chisq (variance*variance);
 
   try {
     if (verbose)
