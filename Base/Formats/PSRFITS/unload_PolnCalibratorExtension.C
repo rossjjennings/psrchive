@@ -22,26 +22,20 @@ void unload_covariances (fitsfile*, const Pulsar::PolnCalibratorExtension*,
 			 int ncovar, vector<float>& data);
 
 void Pulsar::FITSArchive::unload (fitsfile* fptr, 
-				  const PolnCalibratorExtension* pce)
-try {
-
-  int status = 0;
-
+				  const PolnCalibratorExtension* pce) try
+{
   if (verbose == 3)
     cerr << "FITSArchive::unload PolnCalibratorExtension entered" << endl;
   
   // Move to the FEEDPAR Binary Table
   
-  fits_movnam_hdu (fptr, BINARY_TBL, "FEEDPAR", 0, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload PolnCalibratorExtension", 
-		     "fits_movnam_hdu FEEDPAR");
-  
+  psrfits_move_hdu (fptr, "FEEDPAR");  
   psrfits_clean_rows (fptr);
 
   // Initialise a new row
   
+  int status = 0;
+
   fits_insert_rows (fptr, 0, 1, &status);
   if (status != 0)
     throw FITSError (status, "FITSArchive::unload PolnCalibratorExtension", 
@@ -92,22 +86,25 @@ try {
   Pulsar::unload (fptr, pce);
 
   long dimension = nchan * ncpar;  
-  vector<float> data ( dimension );
+  vector<float> data( dimension, 0.0 );
 
   int count = 0;
   for (count = 0; count < dimension; count++)
     data[count] = fits_nullfloat;
 
   count = 0;
-  for (int ichan = 0; ichan < nchan; ichan++) {
-
-    if (pce->get_valid(ichan)) {
-      for (int j = 0; j < ncpar; j++) {
+  for (int ichan = 0; ichan < nchan; ichan++)
+  {
+    if (pce->get_valid(ichan))
+    {
+      for (int j = 0; j < ncpar; j++)
+      {
 	data[count] = pce->get_transformation(ichan)->get_param(j);
 	count++;
       }
     }
-    else  {
+    else
+    {
       if (verbose == 3)
         cerr << "FITSArchive::unload PolnCalibratorExtension ichan="
              << ichan << " flagged invalid" << endl;
@@ -119,8 +116,8 @@ try {
   assert (count == dimension);
 
   vector<unsigned> dimensions (2);
-  dimensions[0] = nchan;
-  dimensions[1] = ncpar;
+  dimensions[0] = ncpar;
+  dimensions[1] = nchan;
 
   psrfits_write_col (fptr, "DATA", 1, data, dimensions);
 
@@ -133,9 +130,10 @@ try {
     cerr << "FITSArchive::unload PolnCalibratorExtension exiting" << endl; 
 
 }
- catch (Error& error) {
-   throw error += "FITSArchive::unload PolnCalibratorExtension";
- }
+catch (Error& error)
+{
+  throw error += "FITSArchive::unload PolnCalibratorExtension";
+}
 
 void unload_variances (fitsfile* fptr,
 		       const Pulsar::PolnCalibratorExtension* pce,
@@ -148,7 +146,8 @@ void unload_variances (fitsfile* fptr,
   unsigned count = 0;
   for (unsigned i = 0; i < nchan; i++)
     if (pce->get_valid(i))
-      for (int j = 0; j < ncpar; j++) {
+      for (int j = 0; j < ncpar; j++)
+      {
 	data[count] = sqrt(pce->get_transformation(i)->get_variance(j));
 	count++;
       }
@@ -158,8 +157,8 @@ void unload_variances (fitsfile* fptr,
   assert (count == data.size());
 
   vector<unsigned> dimensions (2);
-  dimensions[0] = nchan;
-  dimensions[1] = ncpar;
+  dimensions[0] = ncpar;
+  dimensions[1] = nchan;
 
   psrfits_write_col (fptr, "DATAERR", 1, data, dimensions);
 }
@@ -179,34 +178,43 @@ void unload_covariances (fitsfile* fptr,
   vector<double> covar;
   unsigned count = 0;
 
-  for (unsigned ichan = 0; ichan < nchan; ichan++) {
+  for (unsigned ichan = 0; ichan < nchan; ichan++)
+  {
+    bool zero = false;
 
-    if (!pce->get_valid(ichan)) {
-      count += ncovar;
-      continue;
-    }
+    if (!pce->get_valid(ichan))
+      zero = true;
 
-    pce->get_transformation(ichan)->get_covariance (covar);
+    if (!zero)
+      pce->get_transformation(ichan)->get_covariance (covar);
 
-    if (covar.size() == 0) {
-      count += ncovar;
+    if (covar.size() == 0)
+      zero = true;
+
+    if (zero)
+    {
+      for (int j = 0; j < ncovar; j++)
+      {
+	data[count] = 0.0;
+	count++;
+      }
       continue;
     }
 
     assert (covar.size() == unsigned(ncovar));
 
-    for (int j = 0; j < ncovar; j++) {
+    for (int j = 0; j < ncovar; j++)
+    {
       data[count] = covar[j];
       count++;
     }
-
   }
 
   assert (count == data.size());
 
   vector<unsigned> dimensions (2);
-  dimensions[0] = nchan;
-  dimensions[1] = ncovar;
+  dimensions[0] = ncovar;
+  dimensions[1] = nchan;
 
   psrfits_write_col (fptr, "COVAR", 1, data, dimensions);
 }
