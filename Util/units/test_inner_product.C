@@ -31,7 +31,13 @@ int main ()
     if (diff > 1e-12) {
       cerr << "inner1=" << inner1 << endl
 	   << "inner2=" << inner2 << endl
-	   << "diff=" << diff << endl;
+	   << "diff=" << diff << endl
+	   << "S1=" << S1 << endl
+	   << "S2=" << S2 << endl
+	   << "conj(S2)=" << conj(S2) << endl
+	   << "J1=" << J1 << endl
+	   << "J2=" << J2 << endl
+	   << "herm(J2)=" << herm(J2) << endl;
       return -1;
     }
 
