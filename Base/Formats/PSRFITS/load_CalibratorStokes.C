@@ -1,19 +1,18 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/CalibratorStokes.h"
+
+#include "psrfitsio.h"
 #include "FITSError.h"
 
 #include <stdlib.h>
 #include <assert.h>
-
-#ifdef sun
-#include <ieeefp.h>
-#endif
 
 using namespace std;
 
@@ -21,15 +20,16 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
 {
   int status = 0;
  
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::load_CalibratorStokes entered" << endl;
   
   // Move to the CAL_POLN HDU
   
   fits_movnam_hdu (fptr, BINARY_TBL, "CAL_POLN", 0, &status);
   
-  if (status == BAD_HDU_NUM) {
-    if (verbose == 3) cerr << "Pulsar::FITSArchive::load_CalibratorStokes"
+  if (status == BAD_HDU_NUM)
+  {
+    if (verbose > 2) cerr << "Pulsar::FITSArchive::load_CalibratorStokes"
 		   " no CAL_POLN HDU" << endl;
     return;
   }
@@ -40,126 +40,102 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
 
   Reference::To<CalibratorStokes> stokes = new CalibratorStokes;
 
-  char* comment = 0;
-
-  // Get NCH_POLN
-  int nch_poln = 0;
-  fits_read_key (fptr, TINT, "NCH_POLN", &nch_poln, comment, &status);
+  // Get NCHAN
+  int nchan = 0;
+  psrfits_read_key (fptr, "NCHAN", &nchan, 0, verbose > 2);
   
-  if (status == 0)
-    stokes->set_nchan(nch_poln);
+  if (!nchan)
+    // Try the old NCH_POLN
+    psrfits_read_key (fptr, "NCH_POLN", &nchan, 0, verbose > 2);
 
-  long dimension = nch_poln * 3;  
-  
-  if (dimension == 0) {
-    if (verbose == 3)
+  if (!nchan)
+  {
+    if (verbose > 2)
       cerr << "FITSArchive::load_CalibratorStokes CAL_POLN HDU"
 	   << " contains no data. CalibratorStokes not loaded" << endl;
     return;
   }
+
+  stokes->set_nchan( nchan );
   
-  auto_ptr<float> data ( new float[dimension] );
+  vector<float> data( nchan );
 
-  #ifdef sun
-    float nullfloat = FP_QNAN;
-  #else
-    float nullfloat = strtod("NAN(n-charsequence)", (char**) NULL);
-  #endif
+  // Read the data weights
+  psrfits_read_col (fptr, "DAT_WTS", data);
 
-  // Read the data scale weights
-  
-  int colnum = 0;
-  int initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DAT_WTS", &colnum, &status);
-  
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, nch_poln, &nullfloat, 
-		 data.get(), &initflag, &status);
-
-  if (status)
-    throw FITSError (status, "FITSArchive::load CalibratorStokes", 
-		     "fits_read_col DAT_WTS");
-
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::load_CalibratorStokes weights read" << endl;
   
-  for (int ichan=0; ichan < nch_poln; ichan++) {
-    float weight = data.get()[ichan];
+  for (int ichan=0; ichan < nchan; ichan++)
+  {
+    float weight = data[ichan];
     stokes->set_valid (ichan, finite(weight) && weight != 0);
   }
 
   // Read the data itself
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status);
 
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &nullfloat, 
-		 data.get(), &initflag, &status);
+  unsigned npol_QUV = 3;
+  data.resize( nchan * npol_QUV );
 
-  if (status)
-    throw FITSError (status, "FITSArchive::load CalibratorStokes", 
-		     "fits_read_col DATA");
+  // Read the data
+  psrfits_read_col (fptr, "DATA", data);
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::load_CalibratorStokes data read" << endl;
   
-  int count = 0;
-  for (int ichan = 0; ichan < nch_poln; ichan++) {
-
-    if (!stokes->get_valid(ichan)) {
-      count += 3;
+  unsigned count = 0;
+  for (int ichan = 0; ichan < nchan; ichan++)
+  {
+    if (!stokes->get_valid(ichan))
+    {
+      count += npol_QUV;
       continue;
     }
 
     Stokes< Estimate<float> > s;
 
-    for (unsigned ipol = 1; ipol < 4; ipol++) {
-      s[ipol] = data.get()[count];
+    for (unsigned ipol = 1; ipol < 4; ipol++)
+    {
+      s[ipol] = data[count];
       count++;
     }
 
     stokes->set_stokes (ichan, s);
-
   }
 
-  assert (count == dimension);
+  assert (count == data.size());
 
-  fits_get_colnum (fptr, CASEINSEN, "DATAERR", &colnum, &status);
+  // Read the data error estimates
+  psrfits_read_col (fptr, "DATAERR", data);
 
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &nullfloat, 
-		 data.get(), &initflag, &status);
-
-  if (status)
-    throw FITSError (status, "FITSArchive::load CalibratorStokes", 
-		     "fits_read_col DATAERR");
-
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::load_CalibratorStokes data error read" << endl;
   
   count = 0;
-  for (int ichan = 0; ichan < nch_poln; ichan++) {
-
-    if (!stokes->get_valid(ichan)) {
-      count += 3;
+  for (int ichan = 0; ichan < nchan; ichan++)
+  {
+    if (!stokes->get_valid(ichan))
+    {
+      count += npol_QUV;
       continue;
     }
 
     Stokes< Estimate<float> > s = stokes->get_stokes (ichan);
 
-    for (unsigned ipol = 1; ipol < 4; ipol++) {
-      float err = data.get()[count];
+    for (unsigned ipol = 1; ipol < 4; ipol++)
+    {
+      float err = data[count];
       s[ipol].var = err * err;
       count++;
     }
 
     stokes->set_stokes (ichan, s);
-
   }
 
-  assert (count == dimension);
+  assert (count == data.size());
 
   add_extension (stokes);
   
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::load_CalibratorStokes exiting" << endl;
 }
