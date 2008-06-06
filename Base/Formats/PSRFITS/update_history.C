@@ -10,7 +10,9 @@ using namespace std;
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/ProcHistory.h"
+
 #include "Pulsar/Receiver.h"
+#include "Pulsar/Backend.h"
 
 #include "strutil.h"
 
@@ -89,16 +91,25 @@ void Pulsar::FITSArchive::update_history()
   last.dedisp = get_dedispersed();
 
   Receiver* receiver = get<Receiver>();
-  if (!receiver) {
-    last.par_corr = false;
-    last.fa_corr = false;
+  if (!receiver)
+  {
+    last.pr_corr = false;
+    last.fd_corr = false;
   }
-  else {
-    last.par_corr = receiver->get_projection_corrected();
-    last.fa_corr = receiver->get_basis_corrected();
+  else
+  {
+    last.pr_corr = receiver->get_projection_corrected();
+    last.fd_corr = receiver->get_basis_corrected();
   }
 
-  if (get_poln_calibrated()) {
+  Backend* backend = get<Backend>();
+  if (!backend)
+    last.be_corr = false;
+  else
+    last.be_corr = backend->get_corrected();
+
+  if (get_poln_calibrated())
+  {
     if (history->get_cal_mthd() == "NONE")
       history->set_cal_mthd("Other");
     last.cal_mthd = history->get_cal_mthd();

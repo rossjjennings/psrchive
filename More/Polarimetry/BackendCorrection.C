@@ -23,7 +23,7 @@ bool Pulsar::BackendCorrection::required (const Archive* arch) const
 {
   const Backend* backend = arch->get<Backend>();
 
-  if (!backend) 
+  if (!backend || backend->get_corrected())
     return false;
 
   Signal::Hand hand = backend->get_hand();
@@ -37,7 +37,7 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
 {
   Backend* backend = arch->get<Backend>();
 
-  if (!backend) 
+  if (!backend || backend->get_corrected())
     return;
 
   Signal::State state = arch->get_state();
@@ -132,11 +132,7 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
     }
   }
 
-  backend->set_argument (Signal::Conventional);
-  backend->set_hand (Signal::Right);
-
-  if (correct_lsb)
-    backend->set_downconversion_corrected ();
+  backend->set_corrected ();
 }
 catch (Error& error)
 {

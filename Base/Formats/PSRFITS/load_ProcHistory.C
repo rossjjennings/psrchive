@@ -4,15 +4,19 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/ProcHistory.h"
+
 #include "Pulsar/Receiver.h"
+#include "Pulsar/Backend.h"
+#include "Pulsar/Pulsar.h"
 
 #include "psrfitsio.h"
 
 using namespace std;
 
-void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow )
+void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow, float hdr_version )
 {
   int row = hrow->index;
   
@@ -21,11 +25,11 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow )
 
   string empty = "";
 
-  //
-  // in the following, if a value cannot be read from file:
-  // A) if no default is given, an exception will be thrown; or
-  // B) if a default is given, the value will be set to it
-  //
+  /*
+    in the following, if a value cannot be read from file:
+    A) if no default is given, an exception will be thrown; or
+    B) if a default is given, the value will be set to it
+  */
 
   psrfits_read_col (fptr, "DATE_PRO", &(hrow->date_pro), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);
@@ -61,11 +65,50 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow )
 
   psrfits_read_col (fptr, "CHAN_BW", &(hrow->chan_bw), row);
 
-  psrfits_read_col (fptr, "PAR_CORR", &(hrow->par_corr), row,
-		    0, 0, Pulsar::Archive::verbose > 2);
+  if (hdr_version < 3.5)
+  {
+    //
+    // read pre-version 3.5 calibration correction parameters
+    //
 
-  psrfits_read_col (fptr, "FA_CORR", &(hrow->fa_corr), row,
-		    0, 0, Pulsar::Archive::verbose > 2);
+    int par_corr = 0;
+    psrfits_read_col (fptr, "PAR_CORR", &par_corr, row,
+		      0, 0, Pulsar::Archive::verbose > 2);
+
+    int fa_corr = 0;
+    psrfits_read_col (fptr, "FA_CORR", &fa_corr, row,
+		      0, 0, Pulsar::Archive::verbose > 2);
+
+
+    // this assumes that both the projection and the basis
+    // corrections would have been applied
+
+    hrow->pr_corr = hrow->fd_corr = par_corr && fa_corr;
+
+    // a bit-wise XOR should effect a logical XOR if values are 0 or 1
+
+    if ( par_corr ^ fa_corr )
+      Pulsar::warning << "load Pulsar::ProcHistory::row WARNING PAR_CORR="
+                      << par_corr << " and FA_CORR=" << fa_corr << endl;
+  }
+  else
+  {
+    //
+    // read version 3.5 calibration correction parameters
+    //
+
+    // projection corrected
+    psrfits_read_col (fptr, "PR_CORR", &(hrow->pr_corr), row,
+		      0, 0, Pulsar::Archive::verbose > 2);
+
+    // basis (feed) corrected
+    psrfits_read_col (fptr, "FD_CORR", &(hrow->fd_corr), row,
+		      0, 0, Pulsar::Archive::verbose > 2);
+
+    // backend corrected
+    psrfits_read_col (fptr, "BE_CORR", &(hrow->be_corr), row,
+		      0, 0, Pulsar::Archive::verbose > 2);
+  }
 
   psrfits_read_col (fptr, "RM_CORR", &(hrow->rm_corr), row,
 		    0, 0, Pulsar::Archive::verbose > 2);
@@ -117,6 +160,12 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     throw Error (InvalidState, "FITSArchive::load_ProcHistory", 
 		 "no Receiver Extension: first call load_Receiver");
 
+  // some processing flags are stored in the Backend extension
+  Reference::To<Backend> backend = get<Backend>();
+  if (!backend)
+    throw Error (InvalidState, "FITSArchive::load_ProcHistory", 
+		 "no Backend Extension: first call load_Backend");
+
   // Move to the HISTORY HDU
 
   int status = 0;
@@ -151,7 +200,7 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     history->rows[i] = ProcHistory::row();
     history->rows[i].index = i+1;
 
-    ::load( fptr, &(history->rows[i]) );
+    ::load( fptr, &(history->rows[i]), psrfits_version );
   }
 
   ProcHistory::row& last = history->get_last();
@@ -162,8 +211,10 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     bandwidth are stored in the primary header as OBSFREQ and OBSBW.
     These values are over-ridden by the history, if available.
   */
+
   set_centre_frequency (last.ctr_freq);
   set_bandwidth (last.nchan * last.chan_bw);
+
 
   /*
     WvS - 07 Feb 2008
@@ -173,6 +224,7 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
     They are set here with the understanding that they may be reset
     during load_integrations.
   */
+
   set_npol  (last.npol);
   set_nchan (last.nchan);
   set_nbin  (last.nbin);
@@ -180,12 +232,13 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   if (last.cal_mthd == "NONE")
   {
     if (verbose > 2)
-      cerr << "FITSArchive::load_header not calibrated" << endl;
+      cerr << "FITSArchive::load_ProcHistory not calibrated" << endl;
     set_poln_calibrated (false);
   }
-  else {
+  else
+  {
     if (verbose > 2)
-      cerr << "FITSArchive::load_header calibrated" << endl;
+      cerr << "FITSArchive::load_ProcHistory calibrated" << endl;
     set_poln_calibrated (true);
     history->set_cal_mthd(last.cal_mthd);
   }
@@ -195,66 +248,84 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   history->set_rfi_mthd(last.rfi_mthd);
   history->set_ifr_mthd(last.ifr_mthd);
 
-  //
-  // WvS 23 Jun 2004
-  //
-  // Note that ionospheric rotation measure has been removed from the
-  // Pulsar::Archive definition.  When implemented, it will be treated
-  // as an Extension.
-  
+  /*
+    WvS - 23 Jun 2004
+    Note that ionospheric rotation measure has been removed from the
+    Pulsar::Archive definition.  When implemented, it will be treated
+    as an Extension.
+  */
+
   if (last.rm_corr == 1)
     set_faraday_corrected (true);
 
   else if (last.rm_corr == 0)
     set_faraday_corrected (false);
 
-  else {
-    if (verbose > 2) {
-      cerr << "FITSArchive:load_header unexpected value in RM_CORR flag"
-           << endl;
-    }
+  else
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive:load_ProcHistory"
+	      " unexpected RM_CORR=" << last.rm_corr << endl;
+
     set_faraday_corrected (false);
   }
 
-  if (last.par_corr == 1)
+  if (last.pr_corr == 1)
     receiver->set_projection_corrected (true);
 
-  else if (last.par_corr == 0)
+  else if (last.pr_corr == 0)
     receiver->set_projection_corrected (false);
 
-  else {
+  else
+  {
     if (verbose > 2)
-      cerr << "FITSArchive::load_header unexpected PAR_CORR flag"
-           << endl;
+      cerr << "FITSArchive::load_ProcHistory"
+              " unexpected PR_CORR=" << last.pr_corr << endl;
 
     receiver->set_projection_corrected (false);
   }
 
 
-  if (last.fa_corr == 1)
+  if (last.fd_corr == 1)
     receiver->set_basis_corrected (true);
 
-  else if (last.fa_corr == 0)
+  else if (last.fd_corr == 0)
     receiver->set_basis_corrected (false);
 
-  else {
-    if (verbose > 2) {
-      cerr << "FITSArchive::load_header unexpected FA_CORR flag"
-           << endl;
-    }
+  else
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_ProcHistory"
+              " unexpected FD_CORR=" << last.fd_corr << endl;
+
     receiver->set_basis_corrected (false);
   }
 
+  if (last.be_corr == 1)
+    receiver->set_basis_corrected (true);
+
+  else if (last.be_corr == 0)
+    receiver->set_basis_corrected (false);
+
+  else
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_ProcHistory"
+              " unexpected BE_CORR=" << last.be_corr << endl;
+
+    backend->set_corrected (false);
+  }
 
   if(last.dedisp == 1)
     set_dedispersed (true);
   else if(last.dedisp == 0)
     set_dedispersed (false);
-  else {
-    if (verbose > 2) {
-      cerr << "FITSArchive::load unexpected DEDISP flag"
-           << endl;
-    }
+  else
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_ProcHistory"
+              " unexpected DEDISP=" << last.dedisp << endl;
+
     set_dedispersed (false);
   }
 

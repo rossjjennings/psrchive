@@ -79,8 +79,9 @@ namespace Pulsar {
       double ctr_freq;
       int nchan;
       double chan_bw;
-      int par_corr;
-      int fa_corr;
+      int pr_corr;
+      int fd_corr;
+      int be_corr;
       int rm_corr;
       int dedisp;
       std::string dds_mthd;

@@ -163,8 +163,9 @@ void Pulsar::ProcHistory::row::init ()
   ctr_freq = 0.0;
   nchan    = 0;
   chan_bw  = 0.0;
-  par_corr = 0;
-  fa_corr  = 0;
+  pr_corr  = 0;
+  fd_corr  = 0;
+  be_corr  = 0;
   rm_corr  = 0;
   dedisp   = 0;
   scale    = Signal::FluxDensity;

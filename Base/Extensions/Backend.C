@@ -13,8 +13,11 @@ Pulsar::Backend::Backend (const std::string& ext_name)
 {
   name = "unknown";
   hand = Signal::Right;
+
   argument = Signal::Conventional;
   downconversion_corrected = false;
+  corrected = false;
+
   delay = 0.0;
 }
 
@@ -29,8 +32,11 @@ const Pulsar::Backend& Pulsar::Backend::operator= (const Backend& backend)
 {
   name = backend.name;
   hand = backend.hand;
+
   argument = backend.argument;
   downconversion_corrected = backend.downconversion_corrected;
+  corrected = backend.corrected;
+
   delay = backend.delay;
   return *this;
 }
@@ -106,4 +112,16 @@ bool Pulsar::Backend::get_downconversion_corrected () const
 void Pulsar::Backend::set_downconversion_corrected (bool c)
 {
   downconversion_corrected = c;
+}
+
+//! Return true if backend has compensated for lower sideband downconversion
+bool Pulsar::Backend::get_corrected () const
+{
+  return corrected;
+}
+
+//! Set true if backend has compensated for lower sideband downconversion
+void Pulsar::Backend::set_corrected (bool c)
+{
+  corrected = c;
 }

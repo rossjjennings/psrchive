@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.27 $
-   $Date: 2008/05/08 23:37:04 $
-   $Author: nopeer $ */
+   $Revision: 1.28 $
+   $Date: 2008/06/06 04:46:42 $
+   $Author: straten $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -210,8 +210,8 @@ void DisplayHistoryUsage( void )
   "    CTR_FREQ           Band centre frequency \n"
   "    NCHAN              Number of frequency channels \n"
   "    CHAN_BW            Channel bandwidth \n"
-  "    PAR_CORR           Parallactic angle correction applied \n"
-  "    FA_CORR            Feed angle correction applied \n"
+  "    PR_CORR            Projection correction applied \n"
+  "    FD_CORR            Feed basis correction applied \n"
   "    RM_CORR            RM correction applied \n"
   "    DEDISP             Data dedispersed \n"
   "    DDS_MTHD           Dedispersion method \n"
@@ -856,10 +856,10 @@ void DisplayHistory( vector<string> filenames, vector<string> params )
                 ts << tostring<int>( (*rit).nchan );
               else if( (*pit) == "CHAN_BW" )
                 ts << tostring<double>( (*rit).chan_bw );
-              else if( (*pit) == "PAR_CORR" )
-                ts << tostring<int>( (*rit).par_corr );
-              else if( (*pit) == "FA_CORR" )
-                ts << tostring<int>( (*rit).fa_corr );
+              else if( (*pit) == "PR_CORR" )
+                ts << tostring<int>( (*rit).pr_corr );
+              else if( (*pit) == "FD_CORR" )
+                ts << tostring<int>( (*rit).fd_corr );
               else if( (*pit) == "RM_CORR" )
                 ts << tostring<int>( (*rit).rm_corr );
               else if( (*pit) == "DEDISP" )

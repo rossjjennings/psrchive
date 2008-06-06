@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Backend.h,v $
-   $Revision: 1.15 $
-   $Date: 2008/04/21 06:20:00 $
+   $Revision: 1.16 $
+   $Date: 2008/06/06 04:46:42 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Backend_h
@@ -75,7 +75,13 @@ namespace Pulsar {
 
     //! True if backend has compensated for lower sideband downconversion
     void set_downconversion_corrected (bool corrected = true);
-    
+
+    //! True if backend corrections were applied during calibration
+    bool get_corrected () const;
+
+    //! True if backend corrections were applied during calibration
+    void set_corrected (bool corrected = true);
+
     //! Get the delay
     double get_delay() const { return delay; }
     
@@ -95,6 +101,9 @@ namespace Pulsar {
 
     //! True if backend has compensated for lower sideband downconversion
     bool downconversion_corrected;
+
+    //! True if backend corrections were applied during calibration
+    bool corrected;
     
     //! proportional delay from digitiser input
     double delay;
