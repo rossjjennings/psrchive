@@ -58,6 +58,11 @@ Pulsar::Backend::Interface::Interface (Backend *s_instance)
   add( &Backend::get_downconversion_corrected,
        &Backend::set_downconversion_corrected,
        "dcc", "Downconversion conjugation corrected" );
+
+  add( &Backend::get_corrected,
+       &Backend::set_corrected,
+       "phc", "Phase convention corrected" );
+
 }
 
 //! Return a text interfaces that can be used to access this instance
