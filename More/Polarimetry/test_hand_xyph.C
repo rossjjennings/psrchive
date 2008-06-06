@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 
+#include "Pulsar/BasisCorrection.h"
 #include "Pulsar/Receiver.h"
 #include "Pulsar/SingleAxis.h"
 #include "Pulsar/SingleAxisSolver.h"
@@ -67,10 +68,12 @@ int main (int argc, char** argv) try
   // Start with a right-handed receiver
   Signal::Hand hand = Signal::Right;
 
+  Pulsar::BasisCorrection correction;
+
   for (unsigned i=0; i<2; i++)
   {
     receiver.set_hand (hand);
-    Jones<double> actual_rcvr = receiver.get_transformation ();
+    Jones<double> actual_rcvr = correction( &receiver );
 
     // start with a noise diode with Stokes U = 1
     Angle xyph = 0;
