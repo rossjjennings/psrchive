@@ -302,10 +302,10 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   }
 
   if (last.be_corr == 1)
-    receiver->set_basis_corrected (true);
+    backend->set_corrected (true);
 
   else if (last.be_corr == 0)
-    receiver->set_basis_corrected (false);
+    backend->set_corrected (false);
 
   else
   {
