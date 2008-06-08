@@ -470,11 +470,13 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
 
   if (check_coordinates) {
 
+    diff = have.position.angularSeparation(entry.position).getDegrees();
+
     if (match_verbose)
       cerr << "  Seeking position=" << entry.position.getHMSDMS() 
-	   << " have position=" << have.position.getHMSDMS();
-
-    diff = have.position.angularSeparation(entry.position).getDegrees();
+           << " have position=" << have.position.getHMSDMS()
+           << "\n    difference=" << diff << " degrees "
+           << "(max=" << deg_apart << ")";
 
     if (diff < deg_apart) {
       if (match_verbose)
