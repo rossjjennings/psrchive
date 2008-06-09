@@ -8,6 +8,8 @@
 
 
 #include "Pulsar/PolnCalibratorExtension.h"
+
+#include <string.h>
 #include <assert.h>
 
 

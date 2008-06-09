@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/ArchiveMatch.h"
@@ -25,6 +26,7 @@
 #include "strutil.h"
 
 #include <unistd.h>
+#include <string.h>
 
 using namespace std;
 
@@ -161,7 +163,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.89 2008/05/28 08:32:34 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.90 2008/06/09 21:40:00 straten Exp $" << endl;
       return 0;
 
     case 'A':

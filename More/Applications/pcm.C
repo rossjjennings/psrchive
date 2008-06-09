@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.84 $
-   $Date: 2008/06/05 20:34:33 $
+   $Revision: 1.85 $
+   $Date: 2008/06/09 21:40:00 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -50,6 +50,7 @@
 #include <algorithm>
 #include <unistd.h>
 #include <errno.h>
+#include <string.h>
 
 using namespace std;
 using namespace Pulsar;

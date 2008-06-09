@@ -37,6 +37,8 @@
 #include "strutil.h"
 #include "ephio.h"
 
+#include <string.h>
+
 using namespace std;
 
 //! null constructor

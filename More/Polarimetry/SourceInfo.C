@@ -4,8 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/SourceInfo.h"
 #include "Pulsar/SystemCalibrator.h"
+
+#include <string.h>
 
 //! Constructor
 Pulsar::SourceInfo::SourceInfo (const SourceEstimate* estimate)

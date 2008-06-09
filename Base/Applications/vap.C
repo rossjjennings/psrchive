@@ -34,14 +34,14 @@
 #include <tostring.h>
 #include <Angle.h>
 #include <table_stream.h>
-#include <fstream>
 
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <ctime>
 
 #include <unistd.h>
 
-#include <sstream>
-
-#include <ctime>
 #include <utc.h>
 #include <FITSUTC.h>
 
@@ -65,7 +65,9 @@ using std::cerr;
 using std::endl;
 using std::ifstream;
 using std::ios;
+using std::for_each;
 using std::ostringstream;
+
 using Pulsar::Archive;
 using Pulsar::Integration;
 using Pulsar::Passband;
