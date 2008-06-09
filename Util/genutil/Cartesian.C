@@ -132,7 +132,12 @@ void Cartesian::rot (const Cartesian& v, const Angle& phi)
 
 Angle Cartesian::angularSeparation (const Cartesian& c1, const Cartesian& c2)
 {
-  return Angle (acos( (c1 * c2) / (c1.mod() * c2.mod()) ));
+  double tmp = c1 * c2 / (c1.mod() * c2.mod());
+  // Numerical errors may sometimes make this slightly out of
+  // -1 to +1 range, causing acos to return nan.
+  if (tmp>=1.0) return Angle(0.0);
+  else if (tmp<=-1.0) return Angle(M_PI);
+  else return Angle (acos(tmp));
 }
 
 std::ostream& operator << (std::ostream& ostr, const Cartesian& coord) {
