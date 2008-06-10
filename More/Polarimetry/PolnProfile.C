@@ -696,12 +696,11 @@ void Pulsar::PolnProfile::get_orientation (vector< Estimate<double> >& posang,
 {
   Profile linear;
   get_linear (&linear);
-  float min_phase = linear.find_min_phase();
 
-  double var_q = get_variance (1, min_phase);
-  double var_u = get_variance (2, min_phase);
-
-  float sigma = sqrt (0.5*(var_q + var_u));
+  double var_q = get_Profile(1)->baseline()->get_variance().get_value();
+  double var_u = get_Profile(2)->baseline()->get_variance().get_value();
+  double sigma = get_Profile(0)->baseline()->get_variance().get_value();
+  sigma = sqrt(sigma);
 
   const float *q = get_Profile(1)->get_amps(); 
   const float *u = get_Profile(2)->get_amps(); 
