@@ -305,12 +305,16 @@ float Pulsar::FluxPlot::get_phase_error (const Archive* data)
 
 float Pulsar::FluxPlot::get_flux_error (const Profile* profile)
 {
-  float min_phase = profile->find_min_phase();
+
+	double var = profile->baseline()->get_variance().get_value();
+	float y_error = sqrt((double)var);
+
+  /*float min_phase = profile->find_min_phase();
   double var;
   profile->stats (min_phase, 0, &var);
 
   // sigma error box
-  float y_error = sqrt(var);
+  float y_error = sqrt(var);*/
   if( verbose )
     cerr << "Flux error = " << y_error << endl;
 
