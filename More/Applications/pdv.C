@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.28 $
-   $Date: 2008/06/06 04:46:42 $
-   $Author: straten $ */
+   $Revision: 1.29 $
+   $Date: 2008/06/10 06:41:31 $
+   $Author: jonathan_khoo $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -232,7 +232,8 @@ void Header( Reference::To< Pulsar::Archive > archive )
   << " Nsub: " << archive->get_nsubint()
   << " Nch: " << archive->get_nchan()
   << " Npol: " << archive->get_npol()
-  << " Nbin: " << archive->get_nbin() << endl;
+  << " Nbin: " << archive->get_nbin()
+  << " RMS: " << sqrt(archive->get_Profile(0,0,0)->baseline()->get_variance().get_value()) << endl;
 }
 
 void IntegrationHeader( Reference::To< Pulsar::Integration > intg )
@@ -319,7 +320,10 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
               if( show_pol_frac )  cout << " " << frac_pol;
               if( show_lin_frac )  cout << " " << frac_lin;
               if( show_circ_frac ) cout << " " << frac_circ;
-              if( show_pa )        cout << " " << PAs[b].get_value();
+			  if (show_pa) {
+				  cout << " " << PAs[b].get_value();
+				  cout << " " << sqrt(PAs[b].get_variance());
+			  }
             }
             cout << endl;
           }
@@ -536,7 +540,7 @@ void Flux( Reference::To< Archive > archive )
   //   if( !keep_baseline )
   //     archive->remove_baseline ();
 
-  cout << "File\t\t\tSub\tChan\tPol\tFlux\tUnit\t10\% Width\t50\% Width"
+  cout << "File\t\t\tSub\tChan\tPol\tMJD\tCentre Freq\tFlux\tUnit\t10\% Width\t50\% Width\tMJD"
   << endl;
 
   int fchan = 0, lchan = archive->get_nchan() - 1;
@@ -564,6 +568,9 @@ void Flux( Reference::To< Archive > archive )
         cout << archive->get_filename() << "\t";
         cout << s << "\t" << c << "\t" << k << "\t";
         cout.setf(ios::showpoint);
+		cout << archive->start_time() << "\t";
+		cout << archive->get_centre_frequency() << "\t";
+        cout.setf(ios::showpoint);
         cout << flux(archive->get_Profile(s,k,c),dc, -1);
         if (archive->get_scale() == Signal::Jansky)
           cout << "\t" << "mJy";
@@ -572,8 +579,9 @@ void Flux( Reference::To< Archive > archive )
         cout << "\t" << width(archive->get_Profile(s,k,c),junk, 10,dc);
         if (width(archive->get_Profile(s,k,c),junk, 10,dc) == 0)
           cout << "\t";
-        cout << "\t" << width(archive->get_Profile(s,k,c),junk, 50,dc)
-        << endl;
+        cout << "\t" << width(archive->get_Profile(s,k,c),junk, 50,dc);
+
+        cout << endl;
       }
     }
   }
@@ -1007,7 +1015,8 @@ int main( int argc, char *argv[] ) try
   args += STOKES_POSANG_KEY;
   args += CALIBRATOR_KEY;
   args += BASELINE_KEY;
-  args += PULSE_WIDTHS_KEY; args += ':';
+  //args += PULSE_WIDTHS_KEY; args += ':';
+  args += PULSE_WIDTHS_KEY;
   args += PULSE_FLUX_KEY;
   args += TEXT_KEY;
   args += TEXT_HEADERS_KEY;
@@ -1048,11 +1057,7 @@ int main( int argc, char *argv[] ) try
       per_channel_headers = true;
       break;
     case PULSE_WIDTHS_KEY:
-      if (sscanf(optarg, "%f", &dc) != 1)
-      {
-        cerr << "Invalid duty cycle" << endl;
-        exit(-1);
-      }
+  	  dc = Pulsar::Profile::default_duty_cycle;
       cmd_flux = true;
       break;
     case PULSE_FLUX_KEY:
