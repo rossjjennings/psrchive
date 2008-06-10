@@ -697,10 +697,16 @@ void Pulsar::PolnProfile::get_orientation (vector< Estimate<double> >& posang,
   Profile linear;
   get_linear (&linear);
 
-  double var_q = get_Profile(1)->baseline()->get_variance().get_value();
-  double var_u = get_Profile(2)->baseline()->get_variance().get_value();
-  double sigma = get_Profile(0)->baseline()->get_variance().get_value();
+  // Determine baseline weights from I profile.
+  Reference::To<PhaseWeight> base = get_Profile(0)->baseline();
+  double sigma = base->get_variance().get_value();
   sigma = sqrt(sigma);
+
+  // Apply I baseline to determine Q, U variance.
+  base->set_Profile(get_Profile(1));
+  double var_q = base->get_variance().get_value();
+  base->set_Profile(get_Profile(2));
+  double var_u = base->get_variance().get_value();
 
   const float *q = get_Profile(1)->get_amps(); 
   const float *u = get_Profile(2)->get_amps(); 
