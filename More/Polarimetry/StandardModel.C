@@ -54,6 +54,10 @@ Calibration::StandardModel::StandardModel (bool _phenomenological)
 void Calibration::StandardModel::set_basis (MEAL::Complex2* x)
 {
   basis = x;
+
+  // if the instrument has already been constructed, add the basis to it
+  if (instrument && basis)
+    *instrument *= basis;
 }
 
 void Calibration::StandardModel::set_solver (ReceptionModel::Solver* s)
