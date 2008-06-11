@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.27 $
-   $Date: 2008/05/07 01:21:07 $
+   $Revision: 1.28 $
+   $Date: 2008/06/11 23:56:22 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -59,9 +59,6 @@ namespace Pulsar {
     //! get the ncpar
     int get_ncpar( void ) const { return ncpar; }
     
-    //! set the epoch
-    //void set_epoch( 
-
     //! Construct from a PolnCalibrator instance
     PolnCalibratorExtension (const PolnCalibrator*);
 
@@ -81,6 +78,11 @@ namespace Pulsar {
     bool get_has_covariance () const;
     //! Set if the covariances of the transformation parameters
     void set_has_covariance (bool);
+
+    //! Get if the covariances of the transformation parameters
+    bool get_has_solver () const;
+    //! Set if the covariances of the transformation parameters
+    void set_has_solver (bool);
 
     //! Return true if the transformation for the specified channel is valid
     bool get_valid (unsigned ichan) const;
@@ -104,20 +106,22 @@ namespace Pulsar {
     //! The covariances of the transformation parameters are available
     bool has_covariance;
 
+    //! The solver statistics are available
+    bool has_solver;
+
     //! Construct the response array according to the current attributes
     void construct ();
 
   private:
     
     int ncpar;
-
     void init ();
 
   };
  
   //! Intermediate storage of MEAL::Complex parameters 
-  class PolnCalibratorExtension::Transformation {
-
+  class PolnCalibratorExtension::Transformation
+  {
   public:
 
     //! Default constructor
@@ -168,6 +172,16 @@ namespace Pulsar {
     //! Set the model validity flag
     void set_valid (bool);
 
+    //! Get the best fit value of chi squared
+    double get_chisq () const;
+    //! Set the best fit value of chi squared
+    void set_chisq (double);
+
+    //! Get the number of free parameters
+    unsigned get_nfree() const;
+    //! Set the number of free parameters
+    void set_nfree (unsigned);
+
   protected:
 
     std::vector< Estimate<double> > params;
@@ -175,6 +189,8 @@ namespace Pulsar {
     std::vector< std::string > descriptions;
 
     std::vector<double> covariance;
+    double chisq;
+    unsigned nfree;
 
     bool valid;
 

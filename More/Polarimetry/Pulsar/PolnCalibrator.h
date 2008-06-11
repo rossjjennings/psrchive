@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.46 $
-   $Date: 2008/05/28 08:32:34 $
+   $Revision: 1.47 $
+   $Date: 2008/06/11 23:56:22 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
 #define __Pulsar_PolnCalibrator_H
 
 #include "Pulsar/Calibrator.h"
+#include "MEAL/LeastSquares.h"
 #include "MEAL/Complex2.h"
 #include "Jones.h"
 
@@ -26,10 +27,11 @@ namespace Pulsar {
   class Receiver;
 
   //! Polarimetric calibrators
-  /*! The calibrated archive will have its flux normalized by the calibrator
-    flux, such that the FluxCalibrator class need only multiply the archive
-    by the calibrator flux.  Polarimetric calibration does not require a
-    flux calibrator in order to work.  */
+  /*! The calibrated archive will have its flux normalized by the
+    calibrator flux, such that the FluxCalibrator class need only
+    multiply the archive by the absolute calibrator flux.
+    Polarimetric calibration does not require a flux calibrator in
+    order to work.  */
   class PolnCalibrator : public Calibrator {
 
   public:
@@ -85,6 +87,12 @@ namespace Pulsar {
     //! Return the covariance matrix vector for the specified channel
     void get_covariance (unsigned ichan, std::vector<double>&) const;
 
+    //! Return true if least squares minimization solvers are available
+    virtual bool has_solver () const;
+
+    //! Return the transformation for the specified channel
+    virtual const MEAL::LeastSquares* get_solver (unsigned ichan) const;
+
     // ///////////////////////////////////////////////////////////////////
     //
     // Pulsar::Calibrator implementation
@@ -103,50 +111,11 @@ namespace Pulsar {
     //! Return a new PolnCalibratorExtension
     CalibratorExtension* new_Extension () const;
 
+    //! Return plotting information
+    Calibrator::Info* get_Info () const;
+
     //! Communicates PolnCalibrator parameters to plotting routines
-    class Info : public Calibrator::Info {
-
-    public:
-
-      //! Factory returns a suitable instance
-      static PolnCalibrator::Info* create (const PolnCalibrator* calibrator);
-
-      //! Constructor
-      Info (const PolnCalibrator* calibrator);
-      
-      //! Return the number of parameter classes
-      unsigned get_nclass () const;
-
-      //! Return the name of the specified class
-      std::string get_name (unsigned iclass) const;
-      
-      //! Return the number of parameters in the specified class
-      unsigned get_nparam (unsigned iclass) const;
-      
-      //! Return the estimate of the specified parameter
-      Estimate<float> get_param (unsigned ichan, unsigned iclass,
-				 unsigned iparam) const;
-      
-      //! Return the colour index
-      int get_colour_index (unsigned iclass, unsigned iparam) const;
-
-      //! Return the graph marker
-      int get_graph_marker (unsigned iclass, unsigned iparam) const;
-
-    protected:
-
-      //! The PolnCalibrator to be plotted
-      Reference::To<const PolnCalibrator> calibrator;
-
-      //! The number of parameters in the PolnCalibrator transformation
-      unsigned nparam;
-
-    };
-
-    //! Return the Calibrator::Info information
-    /*! By default, derived classes need not necessarily define Info */
-    Info* get_Info () const;
-
+    class Info;
 
   protected:
 
@@ -185,6 +154,9 @@ namespace Pulsar {
     //! Build the response array
     void build (unsigned nchan = 0);
     
+    //! Temporary storage space of solver statistics
+    mutable std::vector< Reference::To<MEAL::LeastSquares> > tmp_solver;
+
   };
 
   //! Create a new transformation instance described by the extension
@@ -195,6 +167,45 @@ namespace Pulsar {
   MEAL::Complex2* new_transformation( Calibrator::Type type );
 
 
+  class PolnCalibrator::Info : public Calibrator::Info
+  {
+
+  public:
+
+    //! Factory returns a suitable instance
+    static PolnCalibrator::Info* create (const PolnCalibrator* calibrator);
+    
+    //! Constructor
+    Info (const PolnCalibrator* calibrator);
+    
+    //! Return the number of parameter classes
+    unsigned get_nclass () const;
+    
+    //! Return the name of the specified class
+    std::string get_name (unsigned iclass) const;
+    
+    //! Return the number of parameters in the specified class
+    unsigned get_nparam (unsigned iclass) const;
+    
+    //! Return the estimate of the specified parameter
+    Estimate<float> get_param (unsigned ichan, unsigned iclass,
+			       unsigned iparam) const;
+    
+    //! Return the colour index
+    int get_colour_index (unsigned iclass, unsigned iparam) const;
+    
+    //! Return the graph marker
+    int get_graph_marker (unsigned iclass, unsigned iparam) const;
+    
+  protected:
+    
+    //! The PolnCalibrator to be plotted
+    Reference::To<const PolnCalibrator> calibrator;
+
+    //! The number of parameters in the PolnCalibrator transformation
+    unsigned nparam;
+    
+  };
 
 }
 

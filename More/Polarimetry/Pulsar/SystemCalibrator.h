@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/06/03 04:57:34 $
+   $Revision: 1.9 $
+   $Date: 2008/06/11 23:56:22 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -154,6 +154,12 @@ namespace Pulsar {
     
     //! Set the number of channels that may be simultaneously solved
     virtual void set_nthread (unsigned nthread);
+
+    //! Return true if least squares minimization solvers are available
+    virtual bool has_solver () const;
+
+    //! Return the transformation for the specified channel
+    virtual const MEAL::LeastSquares* get_solver (unsigned ichan) const;
 
     //! Set the algorithm used to solve the measurement equation
     virtual void set_solver (Calibration::ReceptionModel::Solver*);

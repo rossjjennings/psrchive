@@ -63,6 +63,19 @@ void Pulsar::SystemCalibrator::set_calibrator (Archive* archive)
   calibrator_stokes = archive->get<CalibratorStokes>();
 }
 
+//! Return true if least squares minimization solvers are available
+bool Pulsar::SystemCalibrator::has_solver () const
+{
+  return true;
+}
+
+//! Return the transformation for the specified channel
+const MEAL::LeastSquares* 
+Pulsar::SystemCalibrator::get_solver (unsigned ichan) const
+{
+  return model[ichan]->get_equation()->get_solver();
+}
+
 void 
 Pulsar::SystemCalibrator::set_solver (Calibration::ReceptionModel::Solver* s)
 {

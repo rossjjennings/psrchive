@@ -5,18 +5,12 @@
  *
  ***************************************************************************/
 
-
-
 #include "Pulsar/PolnCalibratorExtension.h"
 
 #include <string.h>
 #include <assert.h>
 
-
-
 using namespace std;
-
-
 
 //! Default constructor
 Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
@@ -30,6 +24,7 @@ void Pulsar::PolnCalibratorExtension::init ()
   type = Calibrator::SingleAxis;
   nparam = 3;
   has_covariance = false;
+  has_solver = false;
 }
 
 //! Copy constructor
@@ -55,6 +50,7 @@ Pulsar::PolnCalibratorExtension::operator=
   epoch = copy.get_epoch();
   nparam = copy.get_nparam();
   has_covariance = copy.get_has_covariance();
+  has_solver = copy.get_has_solver();
 
   unsigned nchan = copy.get_nchan();
   set_nchan (nchan);
@@ -140,6 +136,18 @@ void Pulsar::PolnCalibratorExtension::set_has_covariance (bool has)
   has_covariance = has;
 }
 
+//! Get if the covariances of the transformation parameters
+bool Pulsar::PolnCalibratorExtension::get_has_solver () const
+{
+  return has_solver;
+}
+
+//! Set if the covariances of the transformation parameters
+void Pulsar::PolnCalibratorExtension::set_has_solver (bool has)
+{
+  has_solver = has;
+}
+
 //! Get the transformation for the specified frequency channel
 Pulsar::PolnCalibratorExtension::Transformation* 
 Pulsar::PolnCalibratorExtension::get_transformation (unsigned ichan)
@@ -211,6 +219,8 @@ using namespace Pulsar;
 PolnCalibratorExtension::Transformation::Transformation ()
 {
   valid = true;
+  chisq = 0.0;
+  nfree = 0;
 }
 
 unsigned
@@ -302,6 +312,26 @@ bool PolnCalibratorExtension::Transformation::get_valid () const
 void PolnCalibratorExtension::Transformation::set_valid (bool flag)
 {
   valid = flag;
+}
+
+double PolnCalibratorExtension::Transformation::get_chisq () const
+{
+  return chisq;
+}
+
+void PolnCalibratorExtension::Transformation::set_chisq (double c)
+{
+  chisq = c;
+}
+
+unsigned PolnCalibratorExtension::Transformation::get_nfree() const
+{
+  return nfree;
+}
+
+void PolnCalibratorExtension::Transformation::set_nfree (unsigned n)
+{
+  nfree = n;
 }
 
 //! Get the covariance matrix of the model paramters

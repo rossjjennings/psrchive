@@ -196,6 +196,40 @@ void Pulsar::PolnCalibrator::get_covariance (unsigned ichan,
   c = covariance[ichan];
 }
 
+//! Return true if least squares minimization solvers are available
+bool Pulsar::PolnCalibrator::has_solver () const
+{
+  return poln_extension && poln_extension->get_has_solver();
+}
+
+class TmpSolver : public MEAL::LeastSquares
+{
+public:
+  TmpSolver (float _chisq, unsigned _nfree)
+  {
+    best_chisq = _chisq; nfree = _nfree;
+  }
+  string get_name () const { return "TmpSolver"; }
+};
+
+//! Return the transformation for the specified channel
+const MEAL::LeastSquares*
+Pulsar::PolnCalibrator::get_solver (unsigned ichan) const
+{
+  if (!has_solver())
+    throw Error (InvalidState, "Pulsar::PolnCalibrator::get_solver",
+		 "no solver available");
+
+  tmp_solver.resize( get_nchan() );
+
+  const PolnCalibratorExtension::Transformation* xform 
+    = poln_extension->get_transformation (ichan);
+
+  tmp_solver[ichan] = new TmpSolver (xform->get_chisq(), xform->get_nfree());
+  return tmp_solver[ichan];
+}
+
+
 void Pulsar::PolnCalibrator::setup_transformation () const
 {
   if (receiver)
@@ -221,21 +255,22 @@ void Pulsar::PolnCalibrator::calculate_transformation ()
   if (poln_extension->get_has_covariance())
     covariance.resize(nchan);
 
-  for (unsigned i=0; i < nchan; i++) {
+  for (unsigned i=0; i < nchan; i++)
+  {
     transformation[i] = new_transformation (poln_extension, i);
     if (poln_extension->get_has_covariance())
       poln_extension->get_transformation(i)->get_covariance(covariance[i]);
   }
-
 }
 
-void Pulsar::PolnCalibrator::build (unsigned nchan) try {
-
+void Pulsar::PolnCalibrator::build (unsigned nchan) try
+{
   if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::build transformation size="
 	 << transformation.size() << " nchan=" << nchan << endl;
 
-  if (!built || transformation.size() == 0) {
+  if (!built || transformation.size() == 0)
+  {
     if (verbose > 2) cerr << "Pulsar::PolnCalibrator::build"
                          " call calculate_transformation" << endl;
     setup_transformation();
@@ -255,60 +290,55 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
   unsigned ichan=0;
 
-  for (ichan=0; ichan < response.size(); ichan++)  {
-
-    if (transformation[ichan])  {
-
+  for (ichan=0; ichan < response.size(); ichan++)
+  {
+    if (transformation[ichan])
+    {
       // sanity check of model parameters
       unsigned nparam = transformation[ichan]->get_nparam();
       for (unsigned iparam=0; iparam < nparam; iparam++)
-        if ( !finite(transformation[ichan]->get_param(iparam)) ) {
-
+        if ( !finite(transformation[ichan]->get_param(iparam)) )
+	{
 	  if (verbose > 2)
 	    cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan
 		 << " " << transformation[ichan]->get_param_name(iparam)
 		 << " not finite" << endl;
 
 	  bad[ichan] = true;
-
         }
 
       double normdet = norm(det( transformation[ichan]->evaluate() ));
 
-      if ( normdet < 1e-9 || !finite(normdet) ) {
-
+      if ( normdet < 1e-9 || !finite(normdet) )
+      {
 	if (verbose > 2)
 	  cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<
 	    " faulty response" << endl;
 
 	bad[ichan] = true;
-
       }
-      else {
-
+      else
+      {
         response[ichan] = transformation[ichan]->evaluate();
 
         if (verbose > 2)
           cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<
             " response=\n" << response[ichan] << endl;
-
       }
-
     }
-    else {
-
+    else
+    {
       if (verbose > 2) cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan 
                         << " no transformation" << endl;
 
       bad[ichan] = true;
-
     }
 
-    if (bad[ichan]) {
+    if (bad[ichan])
+    {
       response[ichan] = 0.0;
       bad_count ++;
     }
-
   }
 
   /* If there are bad channels and the solution must be interpolated to
@@ -317,8 +347,8 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
   bool need_patching = bad_count && nchan > response.size();
 
-  if (median_smoothing)  {
-
+  if (median_smoothing)
+  {
     unsigned window = unsigned (float(response.size()) * median_smoothing);
     
     if (verbose > 2)
@@ -331,16 +361,15 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
     throw Error (InvalidState, "Pulsar::PolnCalibrator::build",
 		 "median smoothing of Jones matrices not yet implemented");
-
   }
-  else if (interpolating || need_patching) {
-
+  else if (interpolating || need_patching)
+  {
     if (!interpolating)
       cerr << "Pulsar::PolnCalibrator::build patch up"
 	" before interpolation in Fourier domain" << endl;
 
-    for (ichan = 0; ichan < response.size(); ichan++) {
-
+    for (ichan = 0; ichan < response.size(); ichan++)
+    {
       if (!bad[ichan])
 	continue;
 
@@ -377,13 +406,11 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
       // to describe any instrumental bandwidth depolarization.
 
       response[ichan] = float(0.5) * (left + right);
-      
     }
-
   }
 
-  if (nchan < response.size()) {
-
+  if (nchan < response.size())
+  {
     // TO-DO: It is probably more accurate to first form Mueller
     // matrices and average these as a function of frequency, in order
     // to describe any instrumental bandwidth depolarization.
@@ -398,13 +425,12 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
     for (ichan=0; ichan<nchan; ichan++)
       response[ichan] /= factor;
-
   }
 
   complex<float> zero (0.0);
 
-  if (nchan > response.size()) {
-
+  if (nchan > response.size())
+  {
     if (verbose > 2)
       cerr << "Pulsar::PolnCalibrator::build interpolating from nchan="
 	   << response.size() << " to " << nchan << endl;
@@ -415,7 +441,8 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
     vector< Jones<float> > backup = response;
 
-    for (ichan=0; ichan<response.size(); ichan++) {
+    for (ichan=0; ichan<response.size(); ichan++)
+    {
       if (det(response[ichan]) == zero)
 	continue;
       polar (determinant, hermitian, unitary, response[ichan]);
@@ -428,32 +455,33 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
     
     unsigned factor = nchan / response.size();
 
-    for (ichan=0; ichan<nchan; ichan++) {
-
+    for (ichan=0; ichan<nchan; ichan++)
+    {
       unsigned orig_ichan = ichan / factor;
-      if (orig_ichan >= response.size() || bad[orig_ichan]) {
+      if (orig_ichan >= response.size() || bad[orig_ichan])
+      {
 	out_response[ichan] = 0;
 	continue;
       }
 
       polar (determinant, hermitian, unitary, out_response[ichan]);
       unitary = sqrt(unitary);
-      if (unitary[0] < 0.05)  {
+      if (unitary[0] < 0.05)
+      {
         unsigned iback = (ichan * response.size()) / nchan;
         polar (determinant, hermitian, unitary, backup[iback]);
       }
       out_response[ichan] = determinant * (hermitian * unitary);
-
     }
 
     response = out_response;
-
   }
 
   Jones<double> feed_xform = 1.0;
 
   // if known, add the feed transformation
-  if (feed) {
+  if (feed)
+  {
     feed_xform = feed->get_transformation();
     if (verbose > 2)
       cerr << "Pulsar::PolnCalibrator::build known feed:\n"
@@ -534,20 +562,18 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try
     arch->transform (response);
     arch->set_poln_calibrated (true);
 
-    if (receiver) {
-      
+    if (receiver)
+    {
       Receiver* rcvr = arch->get<Receiver>();
       if (!rcvr)
 	throw Error (InvalidState, "Pulsar::PolnCalibrator::calibrate",
 		     "Archive has no Receiver Extension");
       
       rcvr->set_basis_corrected (true);
-      
     }
-
   }
-  else if (arch->get_npol() == 1) {
-
+  else if (arch->get_npol() == 1)
+  {
     if (Archive::verbose)
       cerr << "Pulsar::PolnCalibrator::calibrate WARNING"
 	" calibrating only absolute gain" << endl;
@@ -555,28 +581,27 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try
     unsigned nsub = arch->get_nsubint ();
     unsigned nchan = arch->get_nchan ();
 
-    for (unsigned isub=0; isub < nsub; isub++) {
+    for (unsigned isub=0; isub < nsub; isub++)
+    {
       Integration* subint = arch->get_Integration (isub);
-      for (unsigned ichan=0; ichan < nchan; ichan++) {
-
+      for (unsigned ichan=0; ichan < nchan; ichan++)
+      {
 	double gain = abs(det( response[ichan] ));
 	Profile* profile = subint->get_Profile (0, ichan);
 
 	profile -> scale (gain);
 	profile -> set_weight ( profile->get_weight() / gain );
-
       }
     }
-
   }
   else
     throw Error (InvalidParam, "Pulsar::PolnCalibrator::calibrate",
 		 "Archive::npol == %d not yet implemented", arch->get_npol());
 
   arch->set_scale (Signal::ReferenceFluxDensity);
-
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::PolnCalibrator::calibrate";
 }
 
@@ -615,7 +640,8 @@ Pulsar::PolnCalibrator::Info::Info (const PolnCalibrator* cal)
   // find the first valid transformation
   const MEAL::Complex2* xform = 0;
   for (unsigned ichan = 0; ichan < nchan; ichan++)
-    if ( cal->get_transformation_valid (ichan) ) {
+    if ( cal->get_transformation_valid (ichan) )
+    {
       xform = cal->get_transformation (ichan);
       break;
     }
@@ -649,7 +675,8 @@ Estimate<float> Pulsar::PolnCalibrator::Info::get_param (unsigned ichan,
 							 unsigned iclass,
 							 unsigned iparam) const
 {
-  if (! calibrator->get_transformation_valid(ichan) ) {
+  if (! calibrator->get_transformation_valid(ichan) )
+  {
     if (verbose > 2) cerr << "Pulsar::PolnCalibrator::Info::get_param"
 		   " invalid ichan=" << ichan << endl;
     return 0;
@@ -689,7 +716,7 @@ int Pulsar::PolnCalibrator::Info::get_graph_marker (unsigned iclass,
 }
 
 
-Pulsar::PolnCalibrator::Info* Pulsar::PolnCalibrator::get_Info () const
+Pulsar::Calibrator::Info* Pulsar::PolnCalibrator::get_Info () const
 {
   return PolnCalibrator::Info::create (this);
 }

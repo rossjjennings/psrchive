@@ -60,13 +60,15 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
                  "null PolnCalibrator*");
 
   init ();
+
   try {
 
     if (Archive::verbose == 3)
       cerr << "Pulsar::PolnCalibratorExtension(PolnCalibrator*)" << endl;
 
     CalibratorExtension::build (calibrator);
-    has_covariance = calibrator->has_covariance();
+    has_covariance = calibrator->has_covariance ();
+    has_solver = calibrator->has_solver ();
 
     vector<double> covariance;
 
@@ -101,8 +103,13 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
 	get_transformation(ichan)->set_covariance( covariance );
       }
 
+      if ( has_solver )
+      {
+	const MEAL::LeastSquares* solver = calibrator->get_solver( ichan );
+	get_transformation(ichan)->set_chisq( solver->get_chisq() );
+	get_transformation(ichan)->set_nfree( solver->get_nfree() );
+      }
     }
-
   }
   catch (Error& error) {
     throw error += "Pulsar::PolnCalibratorExtension (PolnCalibrator*)";
@@ -131,7 +138,8 @@ catch (Error& error)
 
 MEAL::Complex2* Pulsar::new_transformation( Calibrator::Type type )
 {
-  switch (type) {
+  switch (type)
+  {
   case Calibrator::SingleAxis:
     return new Calibration::SingleAxis;
   case Calibrator::Polar:
