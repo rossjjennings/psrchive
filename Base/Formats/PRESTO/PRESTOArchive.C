@@ -384,7 +384,7 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
 
   // Subint epoch needs to correspond to bin 0 of the folded profile.
   // Count samples to get offset to current subint.
-  // TODO: Check w/ scott about pfd "bin0" phase convention
+  // Prepfold puts first sample in bin 0.
   double nsamp=0.0;
   for (unsigned isub=0; isub<subint; isub++) {
     nsamp += pfd.stats[isub*pfd.nsub].numdata;
@@ -399,11 +399,12 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
   else  
     warn << "PRESTOArchive warning: Start time has second fraction " 
       << fs*1e3 << "ms.  Not rounding to nearest second." << endl;
+  MJD epoch0 = epoch;  // XXX Do this before or after int sec correction?
   epoch += nsamp * pfd.dt;
   Phase midphase;
   double midfreq;
   if (has_model()) {                    // Correct to zero phase point
-    midphase = model->phase(epoch); 
+    midphase = model->phase(epoch) - model->phase(epoch0); 
     midfreq = model->frequency(epoch);
     epoch -= midphase.fracturns() / midfreq;
   }
