@@ -8,6 +8,9 @@
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Profile.h"
 
+#include "Physical.h"
+#include "FTransform.h"
+
 #include "machine_endian.h"
 #include "prepfold.h"
 
@@ -363,12 +366,15 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
   // load_header.
   resize_Integration(integration);
 
+  // TODO: read polyco file if it hasn't been read already
+
   // Subint epoch needs to correspond to bin 0 of the folded profile.
   // Count samples to get offset to current subint.
   double nsamp=0.0;
   for (unsigned isub=0; isub<subint; isub++) {
     nsamp += pfd.stats[isub*pfd.nsub].numdata;
   }
+  nsamp += pfd.stats[subint*pfd.nsub].numdata/2; // Get to mid-subint
   MJD epoch(pfd.tepoch);
   epoch += nsamp * pfd.dt;
   integration->set_epoch(epoch);
@@ -376,17 +382,23 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
   // Integration time, s.
   integration->set_duration(pfd.dt*pfd.stats[subint*pfd.nsub].numdata);
 
-  // XXX fix this, need to include freq derivs, also figure out
-  // what happens in polyco case..
+  // TODO fix this, should be based on polycos.
   integration->set_folding_period(1.0/pfd.fold.p1); // Pulsar period, s.
 
   // Set RFs for each channel, MHz.
+  // Also calculate how much we need to correct each profile
+  // to get it dedispersed to the middle of the subband
   int chan_per_subband = pfd.numchan/pfd.nsub;
   double f0 = pfd.lofreq - 0.5*pfd.chan_wid 
     + 0.5*(double)chan_per_subband*pfd.chan_wid;
+  double *dm_phase_shift = new double[pfd.nsub];
   for (unsigned ichan=0; ichan<nchan; ichan++) {
-    integration->set_centre_frequency(ichan, 
-        f0 + (double)ichan * chan_per_subband * pfd.chan_wid);
+    double f_mid = f0 + (double)ichan * chan_per_subband * pfd.chan_wid;
+    double f_high_chan = f_mid + (double)(chan_per_subband-1)*pfd.chan_wid/2.0;
+    integration->set_centre_frequency(ichan, f_mid);
+    dm_phase_shift[ichan] = 
+      Pulsar::dispersion_delay(get_dispersion_measure(),f_mid,f_high_chan) / 
+      integration->get_folding_period();
   }
 
   // If the "no_amps" flag is set, the actual data is not called for, 
@@ -423,6 +435,9 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
     if (endian_swap) { array_changeEndian(pfd.proflen, data, sizeof(double)); }
     // Put data in integration structure:
     integration->get_Profile(0,ichan)->set_amps(data);
+    // Shift to dedisperse to center freq of channel
+    FTransform::shift(nbin, integration->get_Profile(0,ichan)->get_amps(),
+        (double)nbin*dm_phase_shift[ichan]);
   }
 
   // Close file
@@ -430,6 +445,7 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
 
   // Unallocate temp space
   delete [] data;
+  delete [] dm_phase_shift;
 
   return integration;
 }
