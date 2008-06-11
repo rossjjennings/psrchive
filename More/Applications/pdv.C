@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.30 $
-   $Date: 2008/06/10 23:52:29 $
+   $Revision: 1.31 $
+   $Date: 2008/06/11 01:51:43 $
    $Author: jonathan_khoo $ */
 
 
@@ -72,8 +72,6 @@ const char HISTORY_KEY          = 'H';
 const char SNR_KEY              = 'N';
 
 
-
-
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -118,8 +116,7 @@ vector<string> jobs;
 // default duty cycle
 float dc = 0.15;
 
-
-
+double GetBaselineRMS( Reference::To< Pulsar::Archive > archive );
 
 void Usage( void )
 {
@@ -142,7 +139,7 @@ void Usage( void )
   "   -" << STOKES_FRACCIR_KEY << "          Convert to Stokes and also print fraction circular \n"
   "   -" << STOKES_POSANG_KEY <<  "          Convert to Stokes and also print position angle \n"
   "   -" << CALIBRATOR_KEY <<     "          Print out calibrator (square wave) parameters \n"
-  "   -" << PULSE_WIDTHS_KEY <<   " dcyc     Show pulse widths and mean flux density (mJy) \n"
+  "   -" << PULSE_WIDTHS_KEY <<   "[dcyc]    Show pulse widths and mean flux density (mJy) \n"
   "                                          with baseline width dcyc \n"
   "   -" << PULSE_FLUX_KEY <<     "          print the mean flux density \n"
   "   -" << BASELINE_KEY <<       "          Do not remove baseline \n"
@@ -232,7 +229,16 @@ void Header( Reference::To< Pulsar::Archive > archive )
   << " Nsub: " << archive->get_nsubint()
   << " Nch: " << archive->get_nchan()
   << " Npol: " << archive->get_npol()
-  << " Nbin: " << archive->get_nbin() << endl;
+  << " Nbin: " << archive->get_nbin()
+  << " RMS: " << GetBaselineRMS(archive) << endl;
+
+}
+
+double GetBaselineRMS( Reference::To< Pulsar::Archive > archive )
+{
+  double var = archive->get_Profile(0,0,0)->baseline()->get_variance().get_value();
+  double rms = sqrt(var);
+  return rms;
 }
 
 void IntegrationHeader( Reference::To< Pulsar::Integration > intg )
@@ -319,7 +325,10 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
               if( show_pol_frac )  cout << " " << frac_pol;
               if( show_lin_frac )  cout << " " << frac_lin;
               if( show_circ_frac ) cout << " " << frac_circ;
-              if( show_pa )        cout << " " << PAs[b].get_value();
+              if( show_pa ) {
+				  cout << " " << PAs[b].get_value();
+				  cout << " " << sqrt(PAs[b].get_variance());
+			  }
             }
             cout << endl;
           }
@@ -536,7 +545,7 @@ void Flux( Reference::To< Archive > archive )
   //   if( !keep_baseline )
   //     archive->remove_baseline ();
 
-  cout << "File\t\t\tSub\tChan\tPol\tFlux\tUnit\t10\% Width\t50\% Width"
+  cout << "File\t\t\tSub\tChan\tPol\tMJD\t\tFreq\tFlux\tUnit\t10\% Width\t50\% Width"
   << endl;
 
   int fchan = 0, lchan = archive->get_nchan() - 1;
@@ -554,6 +563,7 @@ void Flux( Reference::To< Archive > archive )
   }
 
   float junk;
+  cout.setf(ios::fixed,ios::floatfield);
 
   for (int s = fsub; s <= lsub; s++)
   {
@@ -563,16 +573,18 @@ void Flux( Reference::To< Archive > archive )
       {
         cout << archive->get_filename() << "\t";
         cout << s << "\t" << c << "\t" << k << "\t";
-        cout.setf(ios::showpoint);
+		cout.precision(3);
+		cout << archive->start_time() << "\t";
+		cout.precision(1);
+		cout << archive->get_centre_frequency() << "\t";
+		cout.precision(5);
         cout << flux(archive->get_Profile(s,k,c),dc, -1);
         if (archive->get_scale() == Signal::Jansky)
           cout << "\t" << "mJy";
         else
           cout << "\t" << "Arb";
         cout << "\t" << width(archive->get_Profile(s,k,c),junk, 10,dc);
-        if (width(archive->get_Profile(s,k,c),junk, 10,dc) == 0)
-          cout << "\t";
-        cout << "\t" << width(archive->get_Profile(s,k,c),junk, 50,dc)
+        cout << "\t\t" << width(archive->get_Profile(s,k,c),junk, 50,dc)
         << endl;
       }
     }
@@ -1007,7 +1019,7 @@ int main( int argc, char *argv[] ) try
   args += STOKES_POSANG_KEY;
   args += CALIBRATOR_KEY;
   args += BASELINE_KEY;
-  args += PULSE_WIDTHS_KEY; args += ':';
+  args += PULSE_WIDTHS_KEY; args += "::";
   args += PULSE_FLUX_KEY;
   args += TEXT_KEY;
   args += TEXT_HEADERS_KEY;
@@ -1048,11 +1060,12 @@ int main( int argc, char *argv[] ) try
       per_channel_headers = true;
       break;
     case PULSE_WIDTHS_KEY:
-      if (sscanf(optarg, "%f", &dc) != 1)
-      {
-        cerr << "Invalid duty cycle" << endl;
-        exit(-1);
-      }
+	  if (optarg == NULL) {
+	    dc = Pulsar::Profile::default_duty_cycle;
+	  } else {
+		dc = atof(optarg);
+		jobs.push_back("config Profile::baseline=minimum");
+	  }
       cmd_flux = true;
       break;
     case PULSE_FLUX_KEY:
