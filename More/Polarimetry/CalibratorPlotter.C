@@ -219,6 +219,9 @@ try {
 
   }
 
+  if (!title.empty())
+    cpgmtxt("T",.5,.5,.5, title.c_str());
+	
   // restore the viewport
   cpgsvp (xmin, xmax, ymin, ymax);
 

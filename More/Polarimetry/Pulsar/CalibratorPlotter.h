@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalibratorPlotter.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/06/22 01:41:12 $
+   $Revision: 1.12 $
+   $Date: 2008/06/11 23:56:18 $
    $Author: straten $ */
 
 #ifndef __CalibratorPlotter_H
@@ -19,7 +19,8 @@
 namespace Pulsar {
 
   //! Plots Calibrator parameters
-  class CalibratorPlotter : public Reference::Able {
+  class CalibratorPlotter : public Reference::Able
+  {
     
   public:
     //! Verbosity flag
@@ -46,6 +47,9 @@ namespace Pulsar {
 
     //! Use colour in plots
     bool use_colour;
+
+    //! Title to print over top panel
+    std::string title;
 
   };
 
