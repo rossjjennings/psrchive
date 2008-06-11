@@ -95,6 +95,9 @@ namespace Pulsar {
     //! Change endianness of foldstats struct
     void change_foldstats_endian(foldstats *f);
 
+    //! Did a polyco load fail?
+    bool polyco_load_failed;
+
   };
  
 

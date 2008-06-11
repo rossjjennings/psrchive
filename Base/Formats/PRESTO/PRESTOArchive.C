@@ -10,17 +10,22 @@
 
 #include "Physical.h"
 #include "FTransform.h"
+#include "polyco.h"
+#include "Warning.h"
 
 #include "machine_endian.h"
 #include "prepfold.h"
 
 using namespace std;
 
+static Warning warn;
+
 void Pulsar::PRESTOArchive::init ()
 {
   // initialize the PRESTOArchive attributes
   header_size=0;
   endian_swap=0;
+  polyco_load_failed=false;
 }
 
 Pulsar::PRESTOArchive::PRESTOArchive()
@@ -366,24 +371,52 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
   // load_header.
   resize_Integration(integration);
 
-  // TODO: read polyco file if it hasn't been read already
+  // Read polyco file if it hasn't been read already
+  if (!has_model() && !polyco_load_failed) try {
+    model = new polyco(string(filename) + ".polycos");
+  }
+  catch (Error &e) {
+    cerr << "PRESTOArchive::load_Integration WARNING:  Polyco load failed. " 
+      << "These results will NOT be accurate for timing!"  << e << endl;
+    polyco_load_failed = true;
+    model = NULL;
+  }
 
   // Subint epoch needs to correspond to bin 0 of the folded profile.
   // Count samples to get offset to current subint.
+  // TODO: Check w/ scott about pfd "bin0" phase convention
   double nsamp=0.0;
   for (unsigned isub=0; isub<subint; isub++) {
     nsamp += pfd.stats[isub*pfd.nsub].numdata;
   }
   nsamp += pfd.stats[subint*pfd.nsub].numdata/2; // Get to mid-subint
   MJD epoch(pfd.tepoch);
+  double fs = epoch.get_fracsec();      // Round to nearest integer second
+  if (fabs(fs) < 1e-3)                  // if we're within 1 ms.
+    epoch -= fs;  
+  else if (fabs(1.0-fs) < 1e-3) 
+    epoch += 1.0 - fs;
+  else  
+    warn << "PRESTOArchive warning: Start time has second fraction " 
+      << fs*1e3 << "ms.  Not rounding to nearest second." << endl;
   epoch += nsamp * pfd.dt;
+  Phase midphase;
+  double midfreq;
+  if (has_model()) {                    // Correct to zero phase point
+    midphase = model->phase(epoch); 
+    midfreq = model->frequency(epoch);
+    epoch -= midphase.fracturns() / midfreq;
+  }
   integration->set_epoch(epoch);
 
   // Integration time, s.
   integration->set_duration(pfd.dt*pfd.stats[subint*pfd.nsub].numdata);
 
-  // TODO fix this, should be based on polycos.
-  integration->set_folding_period(1.0/pfd.fold.p1); // Pulsar period, s.
+  // Nominal (midpoint) pulse period for this subint, s.
+  if (has_model()) 
+    integration->set_folding_period(1.0/midfreq);
+  else 
+    integration->set_folding_period(1.0/pfd.fold.p1);
 
   // Set RFs for each channel, MHz.
   // Also calculate how much we need to correct each profile
