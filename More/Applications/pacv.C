@@ -19,8 +19,10 @@
 
 #include "Pulsar/CalibratorPlotter.h"
 #include "Pulsar/CalibratorStokes.h"
-#include "Pulsar/CalibratorStokesInfo.h"
 #include "Pulsar/CalibratorSpectrum.h"
+
+#include "Pulsar/CalibratorStokesInfo.h"
+#include "Pulsar/SolverInfo.h"
 
 #include "Pulsar/Profile.h"
 #include "Pulsar/Integration.h"
@@ -102,10 +104,15 @@ int main (int argc, char** argv)
   // produce publication quality plots
   bool publication = false;
 
-  bool plot_calibrator_solution = false;
+  bool plot_derived_calibrator = false;
+
+  bool plot_calibrator_solution = true;
   bool plot_calibrator_stokes = false;
+  bool plot_calibrator_solver = false;
+
   bool plot_specified = false;
   bool print_jones = false;
+  bool print_title = true;
 
   //
   float cross_scale_factor = 1.0;
@@ -122,7 +129,7 @@ int main (int argc, char** argv)
   bool verbose = false;
   char c;
 
-  while ((c = getopt(argc, argv, "2:a:c:CD:dfhjM:n:Pr:S:pqvV")) != -1)
+  while ((c = getopt(argc, argv, "2:a:c:CD:dfhjM:mn:Ppr:S:stqvV")) != -1)
   {
     switch (c)
     {
@@ -131,7 +138,8 @@ int main (int argc, char** argv)
 	cross_scale_factor = 2.0;
       else if (optarg[0] == 'd')
 	cross_scale_factor = 0.5;
-      else {
+      else
+      {
 	cerr << " -2 " << optarg << " not recognized" << endl;
 	return -1;
       }
@@ -157,7 +165,8 @@ int main (int argc, char** argv)
       else if (sscanf (optarg, "%u", &ichan1) == 1)
 	zapchan.push_back(ichan1);
 
-      else {
+      else
+      {
 	cerr << "pacv: Error parsing " << optarg << " as zap range" << endl;
 	return -1;
       }
@@ -167,6 +176,7 @@ int main (int argc, char** argv)
       
     case 'C':
       plot_calibrator_stokes = true;
+      plot_calibrator_solution = false;
       break;
 
     case 'D':
@@ -187,6 +197,10 @@ int main (int argc, char** argv)
 
     case 'M':
       metafile = optarg;
+      break;
+
+    case 'm':
+      plot_calibrator_solution = true;
       break;
 
     case 'n':
@@ -229,18 +243,12 @@ int main (int argc, char** argv)
 
     case 'P':
       publication = true;
+      print_title = false;
       break;
 
     case 'p':
       single_axis = false;
       break;
-
-    case 'S':
-    {
-      Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(optarg);
-      hybrid = new Pulsar::HybridCalibrator (data);
-      break;
-    }
 
     case 'r':
       feed = new Calibration::Feed;
@@ -255,6 +263,22 @@ int main (int argc, char** argv)
 	"\n  ellipticity 1 = "
 	   << feed->get_ellipticity(1).get_value() * 180/M_PI << " deg"
 	   << endl;
+      break;
+
+    case 'S':
+    {
+      Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(optarg);
+      hybrid = new Pulsar::HybridCalibrator (data);
+      break;
+    }
+
+    case 's':
+      plot_calibrator_solver = true;
+      plot_calibrator_solution = false;
+      break;
+
+    case 't':
+      print_title = true;
       break;
 
     case 'V':
@@ -276,7 +300,7 @@ int main (int argc, char** argv)
   }
 
   if (!plot_specified)
-    plot_calibrator_solution = true;
+    plot_derived_calibrator = true;
 
   if (!metafile && optind >= argc) {
     cerr << "pacv requires a list of archive filenames as parameters.\n";
@@ -326,6 +350,9 @@ int main (int argc, char** argv)
 
     input = Pulsar::Archive::load( filenames[ifile] );
 
+    if (print_title)
+      plotter.title = filenames[ifile];
+
     if (input->get_type() == Signal::Calibrator)
     {
       cerr << "pacv: " << filenames[ifile] << " is a processed Calibrator"
@@ -368,7 +395,7 @@ int main (int argc, char** argv)
 	continue;
       }
 
-      if (!plot_calibrator_stokes)
+      if (plot_calibrator_solution)
       {
 	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
 	  calibrator->set_transformation_invalid (zapchan[ichan]);
@@ -378,14 +405,12 @@ int main (int argc, char** argv)
 	
 	cpgpage ();
 	plotter.plot (calibrator);
-
-        calibrator_stokes = 0;
       }
-      else
+
+      if (plot_calibrator_stokes)
+      {
         calibrator_stokes = input->get<Pulsar::CalibratorStokes>();
 
-      if (calibrator_stokes)
-      {
 	cerr << "pacv: Plotting CalibratorStokes" << endl;
 
 	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
@@ -393,6 +418,16 @@ int main (int argc, char** argv)
 
 	cpgpage ();
 	plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
+		      calibrator->get_nchan(),
+		      calibrator->get_Archive()->get_centre_frequency(),
+		      calibrator->get_Archive()->get_bandwidth() );
+      }
+
+      if (plot_calibrator_solver)
+      {
+	cerr << "pacv: Plotting SystemCalibrator solver" << endl;
+	cpgpage ();
+	plotter.plot( new Pulsar::SolverInfo (calibrator),
 		      calibrator->get_nchan(),
 		      calibrator->get_Archive()->get_centre_frequency(),
 		      calibrator->get_Archive()->get_bandwidth() );
@@ -500,7 +535,7 @@ int main (int argc, char** argv)
       
       calibrator -> calibrate (input);
 
-      if (plot_calibrator_solution)
+      if (plot_derived_calibrator)
       {
 	cerr << "pacv: Plotting calibrator solution parameters" << endl;
 	cpgpage ();
