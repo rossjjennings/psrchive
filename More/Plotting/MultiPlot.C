@@ -31,8 +31,6 @@ void Pulsar::MultiPlot::plot (const Archive* data)
 {
   prepare (data);
   
-  frames.get_label_above()->plot(data);
-
   std::map< std::string, Reference::To<FramedPlot> >::iterator ptr;
   for (ptr = plots.begin(); ptr != plots.end(); ptr++)
   {
@@ -70,9 +68,13 @@ void Pulsar::MultiPlot::plot (const Archive* data)
 
   }
 
-  // plot above the window
-  cpgsls (1);
-  cpgsci (1);
+  if (verbose)
+    cerr << "Pulsar::MultiPlot::plot focus" << endl;
+  get_frame()->focus (data);
+
+  if (verbose)
+    cerr << "Pulsar::MultiPlot::plot decorate frame" << endl;
+  get_frame()->decorate (data);
 }
 
 void Pulsar::MultiPlot::set_viewport (PlotFrame* frame, 
