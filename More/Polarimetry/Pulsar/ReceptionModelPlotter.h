@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModelPlotter.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/04/07 00:38:18 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2008/06/11 12:17:13 $
+   $Author: demorest $ */
 
 #ifndef __Calibration_ReceptionModelPlotter_H
 #define __Calibration_ReceptionModelPlotter_H
@@ -22,6 +22,7 @@ namespace Calibration {
 
   class ReceptionModel;
 
+  //! Plots a ReceptionModel
   class ReceptionModelPlotter : public Reference::Able
   {
 
