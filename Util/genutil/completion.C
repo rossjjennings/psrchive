@@ -16,6 +16,8 @@
 #include <readline/history.h>
 #endif
 
+#include <stdlib.h>
+
 using namespace std;
 
 string CommandParser::readline ()

@@ -8,6 +8,9 @@
 #include "Pulsar/Receiver.h"
 #include "FITSError.h"
 
+#include <memory>
+#include <string.h>
+
 using namespace std;
 
 void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)

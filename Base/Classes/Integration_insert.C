@@ -7,6 +7,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+#include <algorithm>
+
 using namespace std;
 
 bool increasing_frequency (const Reference::To<Pulsar::Profile>& a, 

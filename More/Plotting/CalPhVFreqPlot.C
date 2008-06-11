@@ -7,6 +7,7 @@
 #include <Pulsar/Integration.h>
 #include <cpgplot.h>
 
+#include <string.h>
 
 using namespace std;
 using namespace Pulsar;

@@ -1,6 +1,8 @@
 #include "MEAL/RandomPolar.h"
 #include "MEAL/Polar.h"
 
+#include <stdlib.h>
+
 template <class T, class U>
 T random (U min, U max)
 {

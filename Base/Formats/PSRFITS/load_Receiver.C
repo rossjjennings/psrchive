@@ -8,6 +8,8 @@
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Pulsar.h"
 
+#include <string.h>
+
 #include "psrfitsio.h"
 
 using namespace std;

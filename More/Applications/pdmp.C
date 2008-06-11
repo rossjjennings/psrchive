@@ -14,6 +14,8 @@
 #include <iostream>
 #include <fstream>
 #include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
 #include <cpgplot.h>
 #include <time.h>
 #include <sstream>

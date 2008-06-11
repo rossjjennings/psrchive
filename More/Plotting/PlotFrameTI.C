@@ -14,11 +14,15 @@ Pulsar::PlotFrame::Interface::Interface (PlotFrame* instance)
   if (instance)
     set_instance (instance);
 
-  import ( "x", PlotScale::Interface(), &PlotFrame::get_x_scale );
-  import ( "y", PlotScale::Interface(), &PlotFrame::get_y_scale );
+  import ( "x", PlotScale::Interface(), 
+      (PlotScale* (PlotFrame::*)(void))&PlotFrame::get_x_scale );
+  import ( "y", PlotScale::Interface(), 
+      (PlotScale* (PlotFrame::*)(void))&PlotFrame::get_y_scale );
 
-  import ( "x", PlotAxis::Interface(), &PlotFrame::get_x_axis );
-  import ( "y", PlotAxis::Interface(), &PlotFrame::get_y_axis );
+  import ( "x", PlotAxis::Interface(), 
+      (PlotAxis* (PlotFrame::*)(void))&PlotFrame::get_x_axis );
+  import ( "y", PlotAxis::Interface(),
+      (PlotAxis* (PlotFrame::*)(void))&PlotFrame::get_y_axis );
 
   import ( PlotAttributes::Interface() );
 

@@ -10,6 +10,8 @@
 #include "Error.h"
 #include "ScintPowerEstimator.h"
 
+#include <string.h>
+
 #include "compressed_io.h"
 #include "timer++.h"
 

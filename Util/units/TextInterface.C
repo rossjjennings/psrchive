@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <algorithm>
+
 using namespace std;
 
 bool TextInterface::label_elements = false;

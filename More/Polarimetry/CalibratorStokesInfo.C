@@ -7,6 +7,8 @@
 #include "Pulsar/CalibratorStokesInfo.h"
 #include "Pulsar/CalibratorStokes.h"
 
+#include <string.h>
+
 //! Constructor
 Pulsar::CalibratorStokesInfo::CalibratorStokesInfo (const CalibratorStokes* cs)
 {

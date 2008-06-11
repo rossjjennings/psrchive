@@ -10,6 +10,8 @@
 
 #include <float.h>
 
+#include <algorithm>
+
 using namespace std;
 
 void Pulsar::PhaseWeight::init ()

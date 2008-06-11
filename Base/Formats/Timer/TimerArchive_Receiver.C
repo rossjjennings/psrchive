@@ -8,6 +8,8 @@
 #include "Pulsar/TimerArchive.h"
 #include "Pulsar/Parkes.h"
 
+#include <string.h>
+
 #include "timer_supp.h"
 
 using namespace std;

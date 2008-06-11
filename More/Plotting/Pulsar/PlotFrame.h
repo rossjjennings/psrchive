@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.28 $
-   $Date: 2008/06/11 04:51:03 $
-   $Author: straten $ */
+   $Revision: 1.29 $
+   $Date: 2008/06/11 15:53:26 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_PlotFrame_h
 #define __Pulsar_PlotFrame_h
@@ -46,20 +46,24 @@ namespace Pulsar {
     void set_viewport (float x0, float x1, float y0, float y1);
 
     //! Get the x-scale
-    PlotScale* get_x_scale (bool allow_transpose = false);
+    PlotScale* get_x_scale (bool allow_transpose);
+    PlotScale* get_x_scale () { return get_x_scale(false); }
     //! Set the x-scale
     void set_x_scale (PlotScale* scale);
 
     //! Get the x-axis
-    PlotAxis* get_x_axis (bool allow_transpose = false);
+    PlotAxis* get_x_axis (bool allow_transpose);
+    PlotAxis* get_x_axis () { return get_x_axis(false); }
 
     //! Get the x-scale
-    PlotScale* get_y_scale (bool allow_transpose = false);
+    PlotScale* get_y_scale (bool allow_transpose);
+    PlotScale* get_y_scale () { return get_y_scale(false); }
     //! Set the y-scale
     void set_y_scale (PlotScale* scale);
 
-    //! Get the x-axis
-    PlotAxis* get_y_axis (bool allow_transpose = false);
+    //! Get the y-axis
+    PlotAxis* get_y_axis (bool allow_transpose);
+    PlotAxis* get_y_axis () { return get_y_axis(false); }
 
     //! Remove all labels
     void no_labels ();

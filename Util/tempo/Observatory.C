@@ -11,6 +11,7 @@
 #include "tempo_impl.h"
 
 #include <math.h>
+#include <string.h>
 
 using namespace std;
 

@@ -23,6 +23,7 @@
 #include "strutil.h"
 
 #include <unistd.h>
+#include <string.h>
 
 #include "BoxMuller.h"
 
@@ -157,7 +158,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.43 2008/03/11 05:46:09 nopeer Exp $" << endl;
+      cout << "$Id: paz.C,v 1.44 2008/06/11 15:53:26 demorest Exp $" << endl;
       return 0;
 
     case 'm':

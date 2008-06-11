@@ -7,7 +7,7 @@
 
 #include "Pulsar/TimeSortedOrder.h"
 
-//#include <algorithm>
+#include <algorithm>
 //#include <utility>
 
 using namespace std;

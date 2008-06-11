@@ -9,6 +9,8 @@
 
 #include <stdarg.h>
 
+#include <memory>
+
 using namespace std;
 
 static void update_tdim (fitsfile* ffptr, int column, unsigned ndim, ...)

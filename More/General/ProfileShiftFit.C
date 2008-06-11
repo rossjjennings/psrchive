@@ -16,6 +16,7 @@
 #include "FTransform.h"
 #include "Brent.h"
 #include <complex>
+#include <string.h>
 
 using namespace std;
 

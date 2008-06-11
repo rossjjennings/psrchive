@@ -20,6 +20,8 @@
 #include "mini++.h"
 #include "Horizon.h"
 
+#include <string.h>
+
 using namespace std;
 
 /*****************************************************************************/

@@ -8,6 +8,8 @@
 #include <config.h>
 #endif
 
+#include <stdlib.h>
+
 #include "FTransformAgent.h"
 
 #ifdef HAVE_MKL_DFTI

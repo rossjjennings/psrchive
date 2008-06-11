@@ -12,6 +12,8 @@
 #include "HeapTracked.h"
 #include "Error.h"
 
+#include <algorithm>
+
 using namespace std;
 
 #ifdef HAVE_PTHREAD

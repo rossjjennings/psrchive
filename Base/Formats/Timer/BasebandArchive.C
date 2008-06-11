@@ -8,6 +8,8 @@
 #include "Pulsar/BasebandArchive.h"
 #include "Error.h"
 
+#include <string.h>
+
 #include "machine_endian.h"
 #include "compressed_io.h"
 #include "timer++.h"

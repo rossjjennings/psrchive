@@ -6,6 +6,7 @@
  ***************************************************************************/
 #include <iostream>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "Pulsar/Faraday.h"
 

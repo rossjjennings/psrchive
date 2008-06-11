@@ -7,6 +7,8 @@
 #include "Pulsar/Receiver.h"
 #include "MEAL/Factory.h"
 
+#include <string.h>
+
 using namespace std;
 
 Pulsar::Receiver* Pulsar::Receiver::load (const string& filename) try {

@@ -22,6 +22,8 @@
 #include <sys/wait.h>
 #include <errno.h>
 
+#include <algorithm>
+
 using namespace std;
 
 bool Pulsar::Predictor::verbose = false;

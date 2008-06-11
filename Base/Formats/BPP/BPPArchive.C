@@ -8,6 +8,8 @@
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Profile.h"
 
+#include <string.h>
+
 #include "machine_endian.h"
 #include "ierf.h"
 

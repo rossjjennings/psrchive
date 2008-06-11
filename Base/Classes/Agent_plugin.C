@@ -8,6 +8,8 @@
 #include "Pulsar/Agent.h"
 #include "Plugin.h"
 
+#include <stdlib.h>
+
 using namespace std;
 
 // the plugins loader

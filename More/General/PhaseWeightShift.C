@@ -9,6 +9,10 @@
 #include "Pulsar/PhaseWeight.h"
 #include "templates.h"
 
+#include <string.h>
+
+#include <algorithm>
+
 using namespace std;
 
 static double no_shift ()

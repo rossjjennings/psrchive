@@ -10,6 +10,8 @@
 #include "Pulsar/TapeInfo.h"
 #include "Pulsar/Backend.h"
 
+#include <string.h>
+
 using namespace std;
 
 void Pulsar::TimerArchive::unpack_extensions ()

@@ -16,6 +16,7 @@
 #include "strutil.h"
 
 #include <unistd.h>
+#include <string.h>
 
 using namespace std;
 

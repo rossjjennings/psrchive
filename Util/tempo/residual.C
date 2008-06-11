@@ -7,6 +7,7 @@
 #include <string>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 
 #include "resio.h"
 #include "residual.h"

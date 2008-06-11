@@ -8,6 +8,8 @@
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Profile.h"
 
+#include <string.h>
+
 #include "epnio.h"
 
 using namespace std;

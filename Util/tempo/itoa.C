@@ -8,6 +8,8 @@
 
 #include "tempo_impl.h"
 
+#include <string.h>
+
 using namespace std;
 
 static void add_alias (const string& itoa_code, const string& alias);

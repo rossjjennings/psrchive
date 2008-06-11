@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <unistd.h>
+#include <string.h>
 
 #include "Reference.h"
 #include "Pulsar/Archive.h"

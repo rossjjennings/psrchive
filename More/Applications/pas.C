@@ -28,6 +28,7 @@
 #include <fstream>
 #include <unistd.h>
 #include <math.h>
+#include <string.h>
 
 using namespace std;
 
@@ -100,7 +101,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.26 2007/04/03 06:43:13 ahotan Exp $" << endl;
+      cout << "$Id: pas.C,v 1.27 2008/06/11 15:53:26 demorest Exp $" << endl;
       return 0;
 
     case 'r':

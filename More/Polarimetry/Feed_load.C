@@ -8,6 +8,7 @@
 #include "MEAL/parse.h"
 #include "Angle.h"
 #include <stdio.h>
+#include <string.h>
 
 using namespace std;
 
