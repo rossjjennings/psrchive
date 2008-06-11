@@ -9,6 +9,10 @@
 
 Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
 {
+  // put the filename in the upper left
+  get_frame()->get_label_above()->set_left ("$file");
+  get_frame()->get_label_above()->set_centre ("");
+
   ///////////////////////////////////////////////////////////////////////
 
   manage ("freq", &freq);
@@ -22,8 +26,6 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   // remove the alternative labeling
   freq.get_frame()->get_y_axis()->add_opt ('C');
   freq.get_frame()->get_y_axis()->set_alternate (false);
-  // remove the above frame labels
-  freq.get_frame()->get_label_above()->set_all ("");
 
   ///////////////////////////////////////////////////////////////////////
 
@@ -45,10 +47,6 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   flux.get_frame()->get_y_axis()->rem_opt('N');
   // remove the y label
   flux.get_frame()->get_y_axis()->set_label("");
-  // remove the above frame labels
-  flux.get_frame()->get_label_above()->set_all ("");
-  // put the filename in the upper left
-  flux.get_frame()->get_label_above()->set_left ("$file");
 
   ///////////////////////////////////////////////////////////////////////
 
@@ -71,8 +69,6 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   psd.get_frame()->get_y_axis()->set_label("Power");
   // remove the below frame labels
   psd.get_frame()->get_label_below()->set_all ("");
-  // remove the above frame labels
-  psd.get_frame()->get_label_above()->set_all ("");
 
   // transpose the frame
   psd.get_frame()->set_transpose ();
