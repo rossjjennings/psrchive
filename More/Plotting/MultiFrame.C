@@ -4,12 +4,40 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/MultiFrame.h"
+#include "Pulsar/Plot.h"
+
+#include <cpgplot.h>
+
+using namespace std;
 
 void Pulsar::MultiFrame::manage (const std::string& name, PlotFrame* frame)
 {
   frames[name] = frame;
 }
+
+void Pulsar::MultiFrame::focus (const Archive* data)
+{
+  std::pair<float,float> xvp = get_x_edge()->get_viewport ();
+  std::pair<float,float> yvp = get_y_edge()->get_viewport ();
+  
+  if (Plot::verbose)
+    cerr << "Pulsar::MultiFrame::focus cpgsvp ("
+         << xvp.first << ", " << xvp.second << ", "
+         << yvp.first << ", " << yvp.second << ")" << endl;
+
+  cpgsvp (xvp.first, xvp.second, yvp.first, yvp.second);
+}
+
+void Pulsar::MultiFrame::decorate (const Archive* data)
+{
+  cpgsls (1);
+  cpgsci (1);
+
+  get_label_above()->plot(data);
+}
+
 
 Pulsar::PlotFrame* Pulsar::MultiFrame::get_frame (const std::string& name)
 {

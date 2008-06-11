@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiFrame.h,v $
-   $Revision: 1.16 $
-   $Date: 2008/01/16 04:33:42 $
+   $Revision: 1.17 $
+   $Date: 2008/06/11 04:50:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiFrame_h
@@ -63,6 +63,12 @@ namespace Pulsar {
  
     //! Set no_labels in all sub-plots
     void no_labels ();
+
+    //! Focus the frame
+    virtual void focus (const Archive*);
+
+    //! Decorate the frame
+    virtual void decorate (const Archive*);
 
   protected:
 
