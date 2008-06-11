@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.27 $
-   $Date: 2008/01/16 04:33:42 $
+   $Revision: 1.28 $
+   $Date: 2008/06/11 04:51:03 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -84,7 +84,6 @@ namespace Pulsar {
     virtual void decorate (const Archive*);
 
     //! Focus the frame
-    /*! By default a frame exists in the current viewport */
     virtual void focus (const Archive*);
 
     void hide_axes( void ) { draw_box = false; }
