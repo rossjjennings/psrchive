@@ -25,3 +25,6 @@ LDADD = $(top_builddir)/More/libpsrmore.la \
 
 include $(top_srcdir)/config/Makefile.include
 
+libs include:
+	@echo > /dev/null
+
