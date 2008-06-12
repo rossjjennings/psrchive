@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/06/11 23:56:22 $
+   $Revision: 1.10 $
+   $Date: 2008/06/12 03:15:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -163,6 +163,9 @@ namespace Pulsar {
 
     //! Set the algorithm used to solve the measurement equation
     virtual void set_solver (Calibration::ReceptionModel::Solver*);
+
+    //! Set the reduced chisq above which the solution will be retried
+    virtual void set_retry_reduced_chisq (float);
 
     //! Solve equation for each frequency
     virtual void solve ();
