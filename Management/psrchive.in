@@ -73,11 +73,11 @@ while test $# -gt 0; do
         ;;
 
     --aclocal)
-        echo @datarootdir@/aclocal
+        echo @datadir@/aclocal
         ;;
 
     --html)
-        echo @datarootdir@/html
+        echo @datadir@/html
         ;;
 
     *)
