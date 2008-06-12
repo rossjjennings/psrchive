@@ -127,6 +127,8 @@ void Calibration::ReceptionModel::Solver::solve () try
 
   check_solution ();
   set_variances ();
+
+  solved = true;
 }
 catch (Error& error)
 {
@@ -154,7 +156,7 @@ void Calibration::ReceptionModel::Solver::check_solution ()
     cerr << "  reduced chisq " << reduced_chisq << endl;
 
   if (!finite(reduced_chisq) ||
-      maximum_reduced && reduced_chisq > maximum_reduced)
+      (maximum_reduced && reduced_chisq > maximum_reduced))
     throw Error (InvalidState,
 		 "Calibration::ReceptionModel::Solver::check_solution",
 		 "bad reduced chisq=%f (nfree=%d)", reduced_chisq, nfree);
