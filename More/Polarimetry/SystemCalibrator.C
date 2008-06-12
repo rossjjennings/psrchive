@@ -871,28 +871,39 @@ void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
   // look for the nearest neighbour with a solution
   for (int off=1; off < int(nchan); off++)
   {
-    for (int dir=-1; dir!=1; dir=1)
+    for (int dir=-1; dir <= 1; dir+=2)
     {
       int jchan = int(ichan) + dir * off;
 
       if (jchan < 0 || jchan >= int(nchan))
 	continue;
 
+      cerr << "testing " << jchan << " ... ";
+
       if (!model[jchan]->valid)
+      {
+        cerr << "not valid" << endl;
 	continue;
+      }
 
       ReceptionModel* equation = model[jchan]->get_equation();
 
       if (!equation->get_solver()->get_solved())
+      {
+        cerr << "not solved" << endl;
 	continue;
+      }
 
       float chisq = equation->get_solver()->get_chisq ();
       unsigned free = equation->get_solver()->get_nfree ();
       float reduced_chisq = chisq/free;
 
       if (reduced_chisq > try_again_chisq)
+      {
+        cerr << "not good; reduced chisq=" << reduced_chisq << endl;
 	continue;
-      
+      }
+
       cerr << "copying solution from jchan=" << jchan 
 	   << " chisq/nfree=" << reduced_chisq << endl;
 
@@ -1083,4 +1094,10 @@ Pulsar::SystemCalibrator::new_solution (const string& class_name) const try
 catch (Error& error) {
   throw error += "Pulsar::SystemCalibrator::new_solution";
 }
+
+void Pulsar::SystemCalibrator::set_retry_reduced_chisq (float reduced_chisq)
+{
+  try_again_chisq = reduced_chisq;
+}
+
 
