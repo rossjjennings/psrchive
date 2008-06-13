@@ -404,8 +404,7 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 
   Signal::Source source = cal->get_type();
 
-  if (calibrator_estimate.source.size() == 0)
-    create_calibrator_estimate( source );
+  prepare_calibrator_estimate( source );
 
   vector<vector<Estimate<double> > > cal_hi;
   vector<vector<Estimate<double> > > cal_lo;
@@ -538,8 +537,13 @@ void Pulsar::SystemCalibrator::init_estimate (SourceEstimate& estimate)
 
 }
 
+void Pulsar::SystemCalibrator::prepare_calibrator_estimate ( Signal::Source s )
+{
+  if (calibrator_estimate.source.size() == 0)
+    create_calibrator_estimate();
+}
 
-void Pulsar::SystemCalibrator::create_calibrator_estimate ( Signal::Source )
+void Pulsar::SystemCalibrator::create_calibrator_estimate ()
 {
   if (verbose)
     cerr << "Pulsar::SystemCalibrator::create_calibrator_estimate" << endl;
@@ -610,6 +614,9 @@ void Pulsar::SystemCalibrator::integrate_calibrator_data
  )
 {
   Stokes< Estimate<double> > result = transform( data.observation, correct );
+
+  assert( data.ichan < calibrator_estimate.source_guess.size() );
+
   calibrator_estimate.source_guess[data.ichan].integrate (result);
 }
 

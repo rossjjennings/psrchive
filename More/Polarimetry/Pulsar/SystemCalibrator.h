@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/06/12 03:15:41 $
+   $Revision: 1.11 $
+   $Date: 2008/06/13 17:24:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -216,8 +216,11 @@ namespace Pulsar {
     //! Initialize a SourceEstimate instance
     virtual void init_estimate (SourceEstimate&);
 
+    //! Prepare any calibrator estimates
+    virtual void prepare_calibrator_estimate (Signal::Source);
+
     //! Create the calibrator estimate
-    virtual void create_calibrator_estimate (Signal::Source);
+    virtual void create_calibrator_estimate ();
 
     virtual void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
 					 const SourceObservation&);

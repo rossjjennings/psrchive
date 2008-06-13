@@ -351,30 +351,33 @@ Pulsar::ReceptionCalibrator::add_data
 }
 
 
-void
-Pulsar::ReceptionCalibrator::create_calibrator_estimate (Signal::Source source)
+void Pulsar::ReceptionCalibrator::prepare_calibrator_estimate
+(Signal::Source source)
 {
-  SystemCalibrator::create_calibrator_estimate (source);
-
   Signal::Basis basis = get_calibrator()->get_basis ();
 
-  for (unsigned ichan=0; ichan<get_nchan(); ichan++)
-  {   
-    for (unsigned istokes=0; istokes<4; istokes++)
-      calibrator_estimate.source[ichan]->set_infit (istokes, false);
+  if (calibrator_estimate.source.size() == 0)
+  {
+    create_calibrator_estimate();
 
-    if (basis == Signal::Linear)
-    {
-      // degree of polarization (Stokes U) may vary
-      calibrator_estimate.source[ichan]->set_infit (2, true);
-      if (measure_cal_Q)
-	// Stokes Q of the calibrator may vary!
+    for (unsigned ichan=0; ichan<get_nchan(); ichan++)
+    {   
+      for (unsigned istokes=0; istokes<4; istokes++)
+	calibrator_estimate.source[ichan]->set_infit (istokes, false);
+
+      if (basis == Signal::Linear)
+      {
+	// degree of polarization (Stokes U) may vary
+	calibrator_estimate.source[ichan]->set_infit (2, true);
+	if (measure_cal_Q)
+	  // Stokes Q of the calibrator may vary!
+	  calibrator_estimate.source[ichan]->set_infit (1, true);
+      }
+      else
+      {
+	// degree of polarization (Stokes Q) may vary
 	calibrator_estimate.source[ichan]->set_infit (1, true);
-    }
-    else
-    {
-      // degree of polarization (Stokes Q) may vary
-      calibrator_estimate.source[ichan]->set_infit (1, true);
+      }
     }
   }
 
@@ -457,6 +460,7 @@ void Pulsar::ReceptionCalibrator::integrate_calibrator_data
   if (data.source == Signal::FluxCalOn)
   {
     Stokes< Estimate<double> > result = transform( data.baseline, use );
+    assert( data.ichan < flux_calibrator_estimate.source_guess.size() );
     flux_calibrator_estimate.source_guess[data.ichan].integrate (result);
   }
 
