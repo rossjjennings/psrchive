@@ -16,13 +16,13 @@ using namespace std;
 void Calibration::Instrument::init ()
 {
   backend = new Calibration::SingleAxis;
-  backend_chain = new MEAL::ChainRule<MEAL::Complex2>;
+  backend_chain = new MEAL::ChainParameters<MEAL::Complex2>;
   backend_chain->set_model( backend );
 
   add_model( backend_chain );
 
   feed = new Calibration::Feed;
-  feed_chain = new MEAL::ChainRule<MEAL::Complex2>;
+  feed_chain = new MEAL::ChainParameters<MEAL::Complex2>;
   feed_chain->set_model( feed );
 
   add_model( feed_chain );

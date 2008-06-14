@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Instrument.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/04/07 07:14:50 $
+   $Revision: 1.10 $
+   $Date: 2008/06/14 12:59:27 $
    $Author: straten $ */
 
 #ifndef __CalibrationInstrument_H
 #define __CalibrationInstrument_H
 
 #include "MEAL/ProductRule.h"
-#include "MEAL/ChainRule.h"
+#include "MEAL/ChainParameters.h"
 #include "MEAL/Complex2.h"
 #include "MEAL/ScalarParameter.h"
 
@@ -131,8 +131,8 @@ namespace Calibration {
     //! Feed model: \f$\theta_0-1\f$ and \f$\chi_0-1\f$
     Reference::To<Feed> feed;
 
-    //! ChainRule used to model Backend parameter variations
-    Reference::To< MEAL::ChainRule<MEAL::Complex2> > backend_chain;
+    //! ChainParameters used to model Backend parameter variations
+    Reference::To< MEAL::ChainParameters<MEAL::Complex2> > backend_chain;
 
     //! Scalar function used to model gain variation
     Reference::To<MEAL::Scalar> gain_variation;
@@ -143,8 +143,8 @@ namespace Calibration {
     //! Scalar function used to model differential phase variation
     Reference::To<MEAL::Scalar> diff_phase_variation;
 
-    //! ChainRule used to bind Feed parameters
-    Reference::To< MEAL::ChainRule<MEAL::Complex2> > feed_chain;
+    //! ChainParameters used to bind Feed parameters
+    Reference::To< MEAL::ChainParameters<MEAL::Complex2> > feed_chain;
 
     //! ScalarParameter used to bind ellipticities
     Reference::To<MEAL::ScalarParameter> ellipticities;

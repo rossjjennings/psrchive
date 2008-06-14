@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisPolynomial.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.5 $
+   $Date: 2008/06/14 12:59:27 $
    $Author: straten $ */
 
 #ifndef __SingleAxisPolynomial_H
 #define __SingleAxisPolynomial_H
 
-#include "MEAL/ChainRule.h"
+#include "MEAL/ChainParameters.h"
 #include "MEAL/Complex2.h"
 #include "MEAL/Polynomial.h"
 
@@ -23,14 +23,14 @@ namespace Calibration {
   class SingleAxis;
 
   //! A SingleAxis parameterized by Polynomial ordinates
-  /*! This class provides an example use of the ChainRule class.  The
+  /*! This class provides an example use of the ChainParameters class.  The
     SingleAxis Complex2 is used so that the gain, differential
     gain, and differential phase vary separately as polynomial
     functions of an independent variable.  This class is used in
     test_ReceptionModel as a verification of the underlying
-    assumptions of the ChainRule. */
+    assumptions of the ChainParameters. */
 
-  class SingleAxisPolynomial : public MEAL::ChainRule<MEAL::Complex2>
+  class SingleAxisPolynomial : public MEAL::ChainParameters<MEAL::Complex2>
   {
 
   public:
