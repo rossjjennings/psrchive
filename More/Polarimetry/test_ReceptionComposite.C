@@ -21,7 +21,9 @@ public:
 
 int main ()
 {
-  MEAL::Function::verbose = MEAL::Function::very_verbose = true;
+  MEAL::Function::cache_results = true;
+  MEAL::Function::verbose = true;
+  MEAL::Function::very_verbose = true;
 
   TestComposite model;
 
@@ -57,31 +59,6 @@ int main ()
 
   cerr << "setting component parameter" << endl;
   rotation->set_param (1, 3.4);
-
-  if (model.get_changed())
-  {
-    cerr << "composite changed by modification of unused component" << endl;
-    return -1;
-  }
-
-  model.set_transformation_index (1);
-
-  if (!model.get_changed())
-  {
-    cerr << "composite not changed by component switch" << endl;
-    return -1;
-  }
-
-  model.evaluate ();
-
-  if (model.get_changed())
-  {
-    cerr << "composite changed after second evaluation" << endl;
-    return -1;
-  }
-
-  cerr << "setting component parameter" << endl;
-  rotation->set_param (1, 5.6);
 
   if (!model.get_changed())
   {
