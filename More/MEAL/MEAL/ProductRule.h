@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ProductRule.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.7 $
+   $Date: 2008/06/15 17:09:09 $
    $Author: straten $ */
 
 #ifndef __MEAL_ProductRule_H
@@ -52,7 +52,8 @@ namespace MEAL {
     const Result get_identity() const { return 1.0; }
 
     //! Multiply the total by the element
-    void operate (Result& total, const Result& element) { total *= element; }
+    void operate (Result& total, const Result& element)
+    { total = total * element; }
 
     //! Neighbouring terms stay in each other's partial derivatives
     const Result partial (const Result& element) const { return element; }
