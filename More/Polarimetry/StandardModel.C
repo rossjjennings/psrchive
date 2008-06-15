@@ -177,7 +177,10 @@ void Calibration::StandardModel::const_build () const
 void Calibration::StandardModel::add_transformation (MEAL::Complex2* xform)
 {
   if (!impurity)
+  {
     equation->add_transformation (xform);
+    return;
+  }
 
   Reference::To< MEAL::ProductRule<MEAL::Real4> > combination;
   combination = new MEAL::ProductRule<MEAL::Real4>;
