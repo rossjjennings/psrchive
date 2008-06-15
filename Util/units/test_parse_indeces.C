@@ -4,7 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "TextInterface.h"
+
+#include <stdlib.h>
 
 using namespace std;
 using namespace TextInterface;

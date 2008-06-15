@@ -10,6 +10,7 @@
 #include "Error.h"
 
 #include <iostream>
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
