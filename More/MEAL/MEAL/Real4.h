@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Real4.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.3 $
+   $Date: 2008/06/15 17:09:13 $
    $Author: straten $ */
 
 #ifndef __MEAL_Real4_H
@@ -40,7 +40,7 @@ namespace MEAL {
     //! Assignment operator
     Real4& operator = (const Real4&);
 
-    //! Return the Jones matrix and its gradient
+    //! Return the Mueller matrix and its gradient
     Result evaluate (std::vector<Result>* grad=0) const
     { return evaluation_policy->evaluate (grad); }
 
@@ -51,7 +51,7 @@ namespace MEAL {
     //! The policy for managing function evaluation
     Reference::To< EvaluationPolicy< Matrix<4,4,double> > > evaluation_policy;
 
-    //! Calculate the Jones matrix and its gradient
+    //! Calculate the Mueller matrix and its gradient
     virtual void calculate (Matrix<4,4,double>& result,
 			    std::vector<Matrix<4,4,double> >*) = 0;
 
