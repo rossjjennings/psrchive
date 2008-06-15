@@ -26,6 +26,7 @@ public:
 
 int main (int argc, char** argv)
 {
+  MEAL::Function::cache_results = true;
   MEAL::Function::verbose = true;
 
   Test< MEAL::ProductRule<MEAL::Complex2> > meta;

@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/Composite.h"
 #include "MEAL/Rotation1.h"
 #include "MEAL/Boost1.h"
@@ -146,6 +147,7 @@ void CompositeTest::nested ()
 
 int main (int argc, char** argv) try
 {
+  Function::cache_results = true;
   Function::very_verbose = true;
   Function::verbose = true;
 
@@ -154,7 +156,13 @@ int main (int argc, char** argv) try
   test.nested ();
   test.shared ();
 
-  cerr << "Successful completion" << endl;
+  cerr << 
+    "\n"
+    "\n"
+    "Successful completion"
+    "\n"
+    "\n" << endl;
+
   return 0;
 }
 catch (Error& error) {
