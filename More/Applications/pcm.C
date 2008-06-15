@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.86 $
-   $Date: 2008/06/15 16:12:34 $
+   $Revision: 1.87 $
+   $Date: 2008/06/15 17:27:04 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -27,6 +27,7 @@
 #include "Pulsar/ReceptionModelSolveGSL.h"
 #endif
 
+#include "MEAL/Depolarizer.h"
 #include "MEAL/Steps.h"
 
 #include "Pulsar/Interpreter.h"
@@ -355,6 +356,7 @@ int main (int argc, char *argv[])
   return ret;
 }
 
+Reference::To< MEAL::Real4 > impurity;
 Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;
 Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_gain_variation;
 Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
@@ -482,6 +484,10 @@ int actual_main (int argc, char *argv[]) try
       
     case 'H':
       choose_maximum_harmonic = true;
+      break;
+
+    case 'I':
+      impurity = new MEAL::Depolarizer;
       break;
 
     case 'j':
@@ -762,6 +768,9 @@ int actual_main (int argc, char *argv[]) try
 
       model->set_nthread (nthread);
 
+      if (impurity)
+	model->set_impurity( impurity );
+
       if (gain_variation)
 	model->set_gain( gain_variation );
 
@@ -852,6 +861,7 @@ int actual_main (int argc, char *argv[]) try
 	total->append (archive);
 	total->tscrunch ();
       }
+
     }
     archive = 0;
   }
