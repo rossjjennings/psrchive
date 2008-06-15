@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/EvaluationPolicy.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.5 $
+   $Date: 2008/06/15 16:12:34 $
    $Author: straten $ */
 
 #ifndef __MEAL_EvaluationPolicy_H
@@ -33,6 +33,23 @@ namespace MEAL {
 
   };
 
+  //! Return the default evaluation policy
+  template<typename T>
+  static EvaluationPolicy<typename T::Result>* default_evaluation_policy (T*);
+
+}
+
+#include "MEAL/Cached.h"
+#include "MEAL/NotCached.h"
+
+template<typename T>
+MEAL::EvaluationPolicy<typename T::Result>*
+MEAL::default_evaluation_policy (T* thiz)
+{
+  if (Function::cache_results)
+    return new Cached<T> (thiz);
+  else
+    return new NotCached<T> (thiz);
 }
 
 #endif

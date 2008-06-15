@@ -4,14 +4,17 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/MeasurementEquation.h"
+#include "MEAL/CongruenceTransformation.h"
+#include "MEAL/MuellerTransformation.h"
 
 using namespace std;
 
-Calibration::MeasurementEquation::MeasurementEquation ()
+Calibration::MeasurementEquation::MeasurementEquation () 
+  : composite (this), inputs (&composite), xforms (&composite)
 {
-  current_input = 0;
-  current_xform = 0;
+  // set_verbose(true);
 }
 
 Calibration::MeasurementEquation::~MeasurementEquation ()
@@ -19,48 +22,23 @@ Calibration::MeasurementEquation::~MeasurementEquation ()
 }
 
 /*! This method unmaps the old input before mapping the new */
-void Calibration::MeasurementEquation::set_input (Complex2* _input)
+void Calibration::MeasurementEquation::set_input (Complex2* input)
 {
-  if (!_input)
-    return;
-
-  if (inputs[current_input])
-  {
-    if (very_verbose)
-      cerr << "Calibration::MeasurementEquation::set_input"
-	" unmap old input" << endl;
-
-    composite.unmap (inputs[current_input]);
-  }
-
-  inputs[current_input] = _input;
-  input = inputs[current_input];
-
-  if (very_verbose)
-    cerr << "Calibration::MeasurementEquation::set_input"
-      " map new input" << endl;
-
-  composite.map (inputs[current_input]);
-  // inputs[current_input]->name = "MeasurementEquation::input";
+  inputs.assign (input);
 }
 
 /*!
   \post current_input will be set to the newly added input
 */
-void Calibration::MeasurementEquation::add_input (Complex2* _input)
+void Calibration::MeasurementEquation::add_input (Complex2* input)
 {
-  if (very_verbose) cerr << "Calibration::MeasurementEquation::add_input"
-		      " input=" << _input << endl;
-
-  current_input = inputs.size();
-  inputs.resize (current_input + 1);
-
-  if (_input)
-    set_input (_input);
-
-  set_input_index (current_input);
+  inputs.push_back (input);
 }
 
+MEAL::Complex2* Calibration::MeasurementEquation::get_input ()
+{
+  return inputs.get_current ();
+}
 
 unsigned Calibration::MeasurementEquation::get_num_input () const
 {
@@ -69,79 +47,68 @@ unsigned Calibration::MeasurementEquation::get_num_input () const
 
 unsigned Calibration::MeasurementEquation::get_input_index () const
 {
-  return current_input;
+  return inputs.get_index();
 }
 
 void Calibration::MeasurementEquation::set_input_index (unsigned index)
 {
-  if (index >= inputs.size())
-    throw Error (InvalidRange,
-		 "Calibration::MeasurementEquation::set_input_index",
-		 "index=%d >= ninput=%d", index, inputs.size());
-
-  if (verbose) cerr << "Calibration::MeasurementEquation::set_input_index "
-		    << index << endl;
-
-  if (current_input != index)
-    set_evaluation_changed ();
-
-  current_input = index;
-  input = inputs[current_input];
-
+  inputs.set_index( index );
 }
 
+MEAL::Transformation<MEAL::Complex2>*
+Calibration::MeasurementEquation::new_transformation (Complex2* xform)
+{
+  MEAL::CongruenceTransformation* cong = new MEAL::CongruenceTransformation;
+  cong->set_composite (&composite);
+  cong->set_transformation (xform);
+  return cong;
+}
 
 /*! This method unmaps the old transformation before mapping the new */
 void 
-Calibration::MeasurementEquation::set_transformation (Complex2* _xform)
+Calibration::MeasurementEquation::set_transformation (Complex2* xform)
 {
-  if (!_xform)
-    return;
-
-  if (current_xform >= xforms.size())
-    throw Error (InvalidState,
-		 "Calibration::MeasurementEquation::set_transformation",
-		 "transformation index error: current=%d >= size=%d",
-		 current_xform, xforms.size());
-
-  if (xforms[current_xform])
-  {
-    if (very_verbose)
-      cerr << "Calibration::MeasurementEquation::set_transformation"
-	" unmap old transformation" << endl;
-
-    composite.unmap (xforms[current_xform]);
-  }
-
-  xforms[current_xform] = _xform;
-  transformation = xforms[current_xform];
-
-  if (very_verbose)
-    cerr << "Calibration::MeasurementEquation::set_transformation"
-      " map new transformation" << endl;
-
-  composite.map (xforms[current_xform]);
+  xforms.assign( new_transformation(xform) );
 }
-
 
 /*!
   \post current_xform will be set to the newly added transformation
 */
-void Calibration::MeasurementEquation::add_transformation (Complex2* _xform)
+void Calibration::MeasurementEquation::add_transformation (Complex2* xform)
 {
-  if (very_verbose) 
-    cerr << "Calibration::MeasurementEquation::add_transformation"
-      " xform=" << _xform << endl;
-
-  current_xform = xforms.size();
-  xforms.resize (current_xform + 1);
-
-  if (_xform)
-    set_transformation (_xform);
-
-  set_transformation_index (current_xform);
+  xforms.push_back( new_transformation (xform) );
 }
- 
+
+MEAL::Transformation<MEAL::Complex2>*
+Calibration::MeasurementEquation::new_transformation (MEAL::Real4* xform)
+{
+  MEAL::MuellerTransformation* cong = new MEAL::MuellerTransformation;
+  cong->set_composite (&composite);
+  cong->set_transformation (xform);
+  return cong;
+}
+
+/*! This method unmaps the old transformation before mapping the new */
+void 
+Calibration::MeasurementEquation::set_transformation (MEAL::Real4* xform)
+{
+  xforms.assign( new_transformation(xform) );
+}
+
+/*!
+  \post current_xform will be set to the newly added transformation
+*/
+void Calibration::MeasurementEquation::add_transformation (MEAL::Real4* xform)
+{
+  xforms.push_back( new_transformation (xform) );
+}
+
+MEAL::Transformation<MEAL::Complex2>*
+Calibration::MeasurementEquation::get_transformation ()
+{
+  return xforms.get_current ();
+}
+
 unsigned Calibration::MeasurementEquation::get_num_transformation () const
 {
   return xforms.size();
@@ -149,24 +116,26 @@ unsigned Calibration::MeasurementEquation::get_num_transformation () const
 
 unsigned Calibration::MeasurementEquation::get_transformation_index () const
 {
-  return current_xform;
+  return xforms.get_index();
 }
 
 void
 Calibration::MeasurementEquation::set_transformation_index (unsigned index)
 {
-  if (index >= xforms.size())
-    throw Error (InvalidRange, 
-		 "Calibration::MeasurementEquation::set_transformation_index",
-		 "index=%d >= npath=%d", index, xforms.size());
+  xforms.set_index( index );
+}
 
+//! Returns \f$ \rho^\prime_j \f$ and its gradient
+void 
+Calibration::MeasurementEquation::calculate (Jones<double>& result,
+					     std::vector<Jones<double> >* grad)
+{
   if (verbose)
-    cerr << "Calibration::MeasurementEquation::set_transformation_index "
-	 << index << endl;
+    cerr << "Calibration::MeasurementEquation::calculate nparam="
+	 << get_nparam() << " policy=" << parameter_policy.ptr()
+	 << " composite=" << &composite << endl;
 
-  if (current_xform != index)
-    set_evaluation_changed ();
+  xforms.get_current()->set_input( inputs.get_projection() );
 
-  current_xform = index;
-  transformation = xforms[current_xform];
+  result = xforms.get_current()->evaluate (grad);
 }

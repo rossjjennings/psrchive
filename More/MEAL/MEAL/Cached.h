@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Cached.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.6 $
+   $Date: 2008/06/15 16:12:34 $
    $Author: straten $ */
 
 #ifndef __Cached_H
@@ -24,8 +24,8 @@ namespace MEAL {
     gradient only if the context has been altered. */
 
   template<class T>
-  class Cached : public CalculatePolicy<T>  {
-
+  class Cached : public CalculatePolicy<T>
+  {
   public:
 
     typedef typename T::Result Result;
@@ -35,14 +35,15 @@ namespace MEAL {
     { gradient_is_cached = false; }
 
     //! Implement the evaluate method of the Function
-    Result evaluate (std::vector<Result>* gradient = 0) const
+    Result evaluate (std::vector<Result>* gradient = 0) const try
     {
-      if (Function::very_verbose)
+      if (this->get_context()->get_verbose())
 	std::cerr << class_name() + "evaluate" << std::endl;
 
       update (gradient != 0);
   
-      if (gradient) {
+      if (gradient)
+      {
 	gradient->resize (cached_gradient.size());
 	for (unsigned i=0; i<cached_gradient.size(); i++)
 	  (*gradient)[i] = cached_gradient[i];
@@ -50,6 +51,10 @@ namespace MEAL {
 
       return cached_result;
     }
+    catch (Error& error)
+      {
+	throw error += class_name() + "evaluate";
+      }
 
     //! Return the name of the class for debugging
     std::string class_name() const
@@ -66,15 +71,17 @@ namespace MEAL {
     void update (bool need_gradient)
     {
       if (! (this->get_context()->get_evaluation_changed()
-	     || (need_gradient && !gradient_is_cached))) {
-	if (Function::very_verbose) 
+	     || (need_gradient && !gradient_is_cached)))
+      {
+	if (this->get_context()->get_verbose()) 
 	  std::cerr << class_name() + "update no change" << std::endl;
 	return;
       }
 
       std::vector<Result>* grad_ptr = 0;
 
-      if (need_gradient) {
+      if (need_gradient)
+      {
 	cached_gradient.resize (this->get_context()->get_nparam());
 	grad_ptr = &cached_gradient;
 	gradient_is_cached = true;

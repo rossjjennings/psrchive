@@ -180,18 +180,23 @@ endif
 #
 
 TESTS = test_copy test_Feed test_SingleAxis test_TotalCovariance \
-	test_Parallactic test_ReceptionModel test_Instrument \
-	test_hand_xyph
+	test_Parallactic test_ReceptionComposite test_ReceptionEvaluate \
+	test_ReceptionModel test_Instrument \
+	test_hand_xyph 
 
 check_PROGRAMS = $(TESTS) test_IRIonosphere
 
+test_ReceptionComposite_SOURCES	= test_ReceptionComposite.C
+test_ReceptionEvaluate_SOURCES	= test_ReceptionEvaluate.C
+
 test_Feed_SOURCES		= test_Feed.C
 test_Parallactic_SOURCES	= test_Parallactic.C
-test_ReceptionModel_SOURCES	= test_ReceptionModel.C
 test_SingleAxis_SOURCES		= test_SingleAxis.C
 test_TotalCovariance_SOURCES	= test_TotalCovariance.C
 test_Instrument_SOURCES		= test_Instrument.C
 test_hand_xyph_SOURCES		= test_hand_xyph.C
+
+test_ReceptionModel_SOURCES	= test_ReceptionModel.C
 
 test_copy_SOURCES		= test_copy.C
 test_IRIonosphere_SOURCES	= test_IRIonosphere.C

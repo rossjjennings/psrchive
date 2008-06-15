@@ -29,14 +29,14 @@ unsigned MEAL::Projection::get_imap (unsigned index) const
 
   if (!meta)
     throw Error (InvalidState, "MEAL::Projection::get_imap",
-		 "no Composit");
+		 "no Composite");
 
   if (meta->remap_needed)
     meta->remap ();
 
   if (model->get_nparam() != imap.size())
     throw Error (InvalidRange, "MEAL::Projection::get_imap",
-                 "MEAL::nparam=%d >= nmap=%d",
+                 "%s.nparam=%d >= nmap=%d", model->get_name().c_str(),
 		 model->get_nparam(), imap.size());
 
   if (index >= imap.size())

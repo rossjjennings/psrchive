@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.85 $
-   $Date: 2008/06/09 21:40:00 $
+   $Revision: 1.86 $
+   $Date: 2008/06/15 16:12:34 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -334,6 +334,8 @@ bool normalize_by_invariant = false;
 bool independent_gains = false;
 
 bool physical_coherency = false;
+
+float try_again_chisq = 0.0;
 
 int actual_main (int argc, char *argv[]);
 
@@ -771,6 +773,9 @@ int actual_main (int argc, char *argv[]) try
 
       if (least_squares)
 	model->set_solver( new_solver(least_squares) );
+
+      if (try_again_chisq)
+        model->set_retry_reduced_chisq( try_again_chisq );
 
     }
     catch (Error& error)

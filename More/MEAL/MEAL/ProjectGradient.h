@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ProjectGradient.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.7 $
+   $Date: 2008/06/15 16:12:34 $
    $Author: straten $ */
 
 #ifndef __ProjectProductGradient_H
@@ -25,18 +25,22 @@ namespace MEAL {
   {
     unsigned nparam = model->get_nparam();
     
-    for (unsigned iparam = 0; iparam < nparam; iparam++) {
-
+    for (unsigned iparam = 0; iparam < nparam; iparam++)
+    {
       unsigned imap = model.get_map()->get_imap (iparam);
 
       if (Function::verbose)
 	std::cerr << "ProjectGradient iparam=" << iparam << " imap=" << imap
 	     << " igrad=" << igrad << std::endl;
 
+      if (imap >= output.size())
+	throw Error (InvalidRange, "MEAL::ProjectGradient",
+		     "iparam=%u -> imap=%u >= composite.nparam=%u",
+		     iparam, imap, output.size());
+
       output[imap] += input[igrad];
       
       igrad ++;
-
     }
   }
 
@@ -63,25 +67,21 @@ namespace MEAL {
     
     unsigned igrad = 0;
     
-    for (unsigned imodel=0; imodel<nmodel; imodel++) {
-
+    for (unsigned imodel=0; imodel<nmodel; imodel++)
+    {
       if (Function::verbose)
 	std::cerr << "ProjectGradient imodel=" << imodel 
 	     << " igrad=" << igrad << std::endl;
 
       ProjectGradient (model[imodel], igrad, input, output);
-
     }
 
     // sanity check, ensure that all elements have been set
     if (igrad != input.size())
-      throw Error (InvalidState, "MEAL::ProjectProductGradient",
+      throw Error (InvalidState, "MEAL::ProjectGradient",
 		   "on completion igrad=%d != ngrad=%d",
 		   igrad, input.size());
   }
-  
-
-
 }
 
 #endif

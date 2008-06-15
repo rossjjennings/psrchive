@@ -97,6 +97,7 @@ nobase_include_HEADERS = \
 	MEAL/StokesError.h \
         MEAL/SumRule.h \
         MEAL/Tracer.h \
+	MEAL/Transformation.h \
         MEAL/UnaryRule.h \
         MEAL/UnaryScalar.h \
         MEAL/Univariate.h \

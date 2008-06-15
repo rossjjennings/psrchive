@@ -1,23 +1,15 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/MuellerTransformation.h"
 #include "MEAL/ProjectGradient.h"
 #include "Pauli.h"
 
 using namespace std;
-
-MEAL::MuellerTransformation::MuellerTransformation ()
-  : composite (this)
-{
-}
-
-MEAL::MuellerTransformation::~MuellerTransformation ()
-{
-}
 
 //! Return the name of the class
 string MEAL::MuellerTransformation::get_name () const
@@ -27,7 +19,7 @@ string MEAL::MuellerTransformation::get_name () const
 
 //! Set the transformation, \f$ M \f$
 /*! This method unmaps the old transformation before mapping xform */
-void MEAL::MuellerTransformation::set_transformation (Real4* xform)
+void MEAL::MuellerTransformation::set_transformation (Real4* xform) try
 {
   if (!xform)
     return;
@@ -35,18 +27,23 @@ void MEAL::MuellerTransformation::set_transformation (Real4* xform)
   if (transformation)
   {
     if (verbose)
-      cerr << "MEAL::MuellerTransformation::set_transformation"
-	" unmap old transformation" << endl;
-    composite.unmap (transformation);
+      cerr << "MEAL::MuellerTransformation::set_transformation unmap old"
+	   << endl;
+
+    composite->unmap (transformation);
   }
 
   transformation = xform;
 
   if (verbose)
-    cerr << "MEAL::MuellerTransformation::set_transformation"
-      " map new transformation" << endl;
+    cerr << "MEAL::MuellerTransformation::set_transformation map new"
+	 << endl;
 
-  composite.map (transformation);
+  composite->map (transformation);
+}
+catch (Error& error)
+{
+  throw error += "MEAL::MuellerTransformation::set_transformation";
 }
 
 //! Get the transformation, \f$ J \f$
@@ -55,33 +52,6 @@ MEAL::Real4* MEAL::MuellerTransformation::get_transformation ()
   return transformation;
 }
 
-/*! This method unmaps the old input before mapping xform */
-void MEAL::MuellerTransformation::set_input (Complex2* xform)
-{
-  if (!xform)
-    return;
-
-  if (input)
-  {
-    if (verbose)
-      cerr << "MEAL::MuellerTransformation::set_input unmap old input" << endl;
-    composite.unmap (input);
-  }
-
-  input = xform;
-
-  if (verbose)
-    cerr << "MEAL::MuellerTransformation::set_input"
-      " map new input" << endl;
-
-  composite.map (input);
-}
-
-//! Get the input, \f$ \rho \f$
-MEAL::Complex2* MEAL::MuellerTransformation::get_input ()
-{
-  return input;
-}
 
 //! Returns \f$ \rho^\prime_j \f$ and its gradient
 void MEAL::MuellerTransformation::calculate (Jones<double>& result,

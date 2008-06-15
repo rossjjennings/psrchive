@@ -99,7 +99,8 @@ void MEAL::Composite::set_argument (unsigned dimension, Argument* axis)
   if (Function::verbose)
     cerr << "MEAL::Composite::set_argument nmodel=" << models.size() << endl;
 
-  for (unsigned imodel=0; imodel < models.size(); imodel++)  {
+  for (unsigned imodel=0; imodel < models.size(); imodel++)
+  {
     reference_check (imodel, "set_axis");
     models[imodel] -> set_argument (dimension, axis);
   }
@@ -153,21 +154,29 @@ void MEAL::Composite::map (Projection* modelmap)
   try
   {
     Function* model = modelmap->get_Function();
+
     modelmap->imap.resize(0);
     add_component (model, modelmap->imap);
 
-    if (modelmap->imap.size() != model->get_nparam())
-      throw Error (InvalidState, class_name() + "map",
-		   "map size=%d != nparam=%d",
-		   modelmap->imap.size(), model->get_nparam());
-
-    if (Function::very_verbose)
+    if (!component_shares_this)
     {
-      cerr << class_name() + "map Function maps into" << endl;
-      for (unsigned i=0; i<modelmap->imap.size(); i++)
-	cerr << "   " << i << ":" << modelmap->imap[i] << endl;
+      if (modelmap->imap.size() != model->get_nparam())
+	throw Error (InvalidState, class_name() + "map",
+		     "map size=%d != nparam=%d",
+		     modelmap->imap.size(), model->get_nparam());
+      
+      if (Function::very_verbose)
+      {
+	cerr << class_name() + "map Function maps into" << endl;
+	for (unsigned i=0; i<modelmap->imap.size(); i++)
+	  cerr << "   " << i << ":" << modelmap->imap[i] << endl;
+      }
     }
 
+    if (Function::very_verbose)
+      cerr << class_name() + "map connect to changed callback model="
+	   << model << endl;
+      
     model->changed.connect (this, &Composite::attribute_changed);
 
     if (!already_mapped)
@@ -198,10 +207,13 @@ void MEAL::Composite::add_component (Function* model, vector<unsigned>& imap)
   if (Function::very_verbose)
     cerr << class_name() + "add_component [" <<model->get_name()<< "]" << endl;
 
+  component_shares_this = false;
+
   const Constant* constant = 0;
   constant = dynamic_cast<const Constant*>(model->get_parameter_policy());
 
-  if (constant) {
+  if (constant)
+  {
     if (Function::very_verbose)
       cerr << class_name() + "add_component Constant" << endl;
     return;
@@ -210,11 +222,17 @@ void MEAL::Composite::add_component (Function* model, vector<unsigned>& imap)
   const Composite* meta = 0;
   meta = dynamic_cast<const Composite*>(model->get_parameter_policy());
 
-  if (meta) {
-
+  if (meta)
+  {
     if (meta == this)
-      throw Error (InvalidState, class_name() + "add_component",
-		   "cannot map Composite into self");
+    {
+      if (Function::very_verbose)
+	cerr << class_name() + "add_component [" << model->get_name() << "]" 
+	  " this is shared" << endl;
+
+      component_shares_this = true;
+      return;
+    }
 
     if (Function::very_verbose)
       cerr << class_name() + "add_component Composite" << endl;
@@ -225,25 +243,23 @@ void MEAL::Composite::add_component (Function* model, vector<unsigned>& imap)
 
     if (imap.size() != meta->get_nparam())
       meta->recount();
-
   }
-  else {
-    
+  else
+  {   
     if (Function::very_verbose)
       cerr << class_name() + "add_component nmodel=" << models.size() << endl;
 
     unsigned iparam = 0;
     unsigned imodel = 0;
 
-    for(; imodel < models.size(); imodel++)  {
-      
+    for(; imodel < models.size(); imodel++)
+    {
       reference_check (imodel, "add_component");
       
       if (models[imodel].ptr() == model)
         break;
       
       iparam += models[imodel]->get_nparam();
-
     }
 
     unsigned nparam = model->get_nparam();
@@ -262,9 +278,7 @@ void MEAL::Composite::add_component (Function* model, vector<unsigned>& imap)
     // add the new model
     nparameters += model->get_nparam();
     models.push_back (model);
-
   }
-
 }
 
 void MEAL::Composite::unmap (Projection* modelmap)
@@ -279,7 +293,8 @@ void MEAL::Composite::unmap (Projection* modelmap)
   
   // erase the mapping
   unsigned imap = find_Projection (modelmap);
-  if (imap == maps.size()) {
+  if (imap == maps.size())
+  {
     //if (Function::very_verbose)
       cerr << class_name() + "unmap Projection not found" << endl;
     return;
@@ -310,7 +325,8 @@ void MEAL::Composite::remove_component (Function* model)
   const Constant* constant = 0;
   constant = dynamic_cast<const Constant*>(model->get_parameter_policy());
 
-  if (constant) {
+  if (constant)
+  {
     if (Function::very_verbose)
       cerr << class_name() + "remove_component no need to remove Constant"
 	   << endl;
@@ -320,18 +336,17 @@ void MEAL::Composite::remove_component (Function* model)
   const Composite* meta = 0;
   meta = dynamic_cast<const Composite*>(model->get_parameter_policy());
 
-  if (meta) {
-
+  if (meta)
+  {
     if (Function::very_verbose)
       cerr << class_name() + "remove_component remove Composite" << endl;
 
     unsigned nmodel = meta->get_nmodel();
     for (unsigned imodel=0; imodel<nmodel; imodel++)
       remove_component (meta->models[imodel]);
-
   }
-  else {
-    
+  else
+  {   
     unsigned imodel = find_Function(model);
 
     if (Function::very_verbose)
@@ -345,15 +360,14 @@ void MEAL::Composite::remove_component (Function* model)
 
     nparameters -= model->get_nparam();
     models.erase (models.begin()+imodel);
-  
   }
-
 }
 
 void MEAL::Composite::recount () const
 {
   nparameters = 0;
-  for (unsigned imodel=0; imodel < models.size(); imodel++)  {
+  for (unsigned imodel=0; imodel < models.size(); imodel++)
+  {
     reference_check (imodel, "recount");
     nparameters += models[imodel]->get_nparam();
   }
@@ -396,6 +410,9 @@ void MEAL::Composite::remap ()
 
 void MEAL::Composite::remap_later ()
 {
+  if (Function::very_verbose)
+    cerr << class_name() << "remap_later" << endl;
+
   if (remap_needed)
     return;
 
@@ -437,6 +454,7 @@ void MEAL::Composite::attribute_changed (Function::Attribute attribute)
     if (Function::very_verbose)
       cerr << class_name() << "attribute_changed set_evaluation_changed"
 	   << endl;
+
     get_context()->set_evaluation_changed ();
   }
 }
@@ -456,20 +474,22 @@ MEAL::Function* MEAL::Composite::get_Function (unsigned& index)
 
   unsigned imodel = current_model;
   
-  if (index < current_index) {
+  if (index < current_index)
+  {
     current_index = 0;
     imodel = 0;
   }
   else
     index -= current_index;
   
-  while (imodel < models.size())  {
-    
+  while (imodel < models.size())
+  {    
     reference_check (imodel, "get_Function");
 
     unsigned nparam = models[imodel]->get_nparam();
     
-    if (index < nparam) {
+    if (index < nparam)
+    {
       current_model = imodel;
       return models[imodel];
     }
@@ -499,7 +519,8 @@ unsigned MEAL::Composite::find_Function (Function* model) const
   if (Function::very_verbose) cerr << class_name() + "find_Function nmodel="
 			 << models.size() << endl;
 
-  for (unsigned imodel=0; imodel < models.size(); imodel++)  {
+  for (unsigned imodel=0; imodel < models.size(); imodel++)
+  {
     reference_check (imodel, "find_Function");
     if (models[imodel] && models[imodel].get() == model)
       return imodel;
@@ -511,9 +532,10 @@ unsigned MEAL::Composite::find_Function (Function* model) const
 unsigned MEAL::Composite::find_Projection (Projection* modelmap) const
 {
   if (Function::very_verbose) cerr << class_name() + "find_Projection nmap="
-			 << maps.size() << endl;
+				   << maps.size() << endl;
 
-  for (unsigned imap=0; imap < maps.size(); imap++) {
+  for (unsigned imap=0; imap < maps.size(); imap++)
+  {
     if (maps[imap] && maps[imap].get() == modelmap)
       return imap;
   }

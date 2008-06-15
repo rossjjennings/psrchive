@@ -13,38 +13,68 @@ using namespace std;
 using namespace MEAL;
 
 // Tests the mapping function of the Composite class
-class CompositeTest: public Function {
+class CompositeTest: public Function
+{
 
 public:
-  CompositeTest () : composite (this) { }
-  void runtest ();
-  void evaluate () { set_evaluation_changed (false); }
-  bool get_changed () { return get_evaluation_changed(); }
+  CompositeTest (Composite* c = 0);
+
+  void runtest (CompositeTest& c1, CompositeTest& c2);
+
+  void nested ();
+  void shared ();
+
+  void evaluate ();
+  bool get_changed ();
   string get_name () const { return "CompositeTest"; }
-  Composite composite;
+  Composite* composite;
+
+protected:
+  Reference::To<Rotation1> rotation;
+  Reference::To<Boost1> boost;
+
 };
 
-
-void CompositeTest::runtest ()
+CompositeTest::CompositeTest (Composite* c)
 {
-  Rotation1 rotation (Vector<3,double>::basis(0));
-  Boost1 boost (Vector<3,double>::basis(2));
+  if (c)
+    composite = c;
+  else
+    composite = new Composite (this);
 
-  CompositeTest m1;
-  CompositeTest m2;
+  rotation = new Rotation1 (Vector<3,double>::basis(0));
+  boost = new Boost1 (Vector<3,double>::basis(2));
+}
 
-  Project<Rotation1> m1r (&rotation);
-  Project<Rotation1> m2r (&rotation);
+void CompositeTest::evaluate ()
+{
+  cerr << "CompositeTest::evaluate" << endl;
+
+  set_evaluation_changed (false);
+  rotation->evaluate ();
+  boost->evaluate ();
+}
+
+bool CompositeTest::get_changed ()
+{
+  cerr << "CompositeTest::get_changed ptr=" << this << endl;
+  return get_evaluation_changed();
+}
+
+void CompositeTest::runtest (CompositeTest& m1, CompositeTest& m2)
+{
+  rotation->set_phi (0.0);
+
+  Project<Rotation1> m1r (rotation);
+  Project<Rotation1> m2r (rotation);
 
   Project<CompositeTest> m1m (&m2);
 
-  Project<Boost1> m2b (&boost);
+  Project<Boost1> m2b (boost);
 
   cerr << "********************* m1 map rotation" << endl;
-  m1.composite.map (m1r);
-
-  cerr << "********************* m1 map m2" << endl;
-  m1.composite.map (m1m);
+  m1.composite->map (m1r);
+  m1.rotation = rotation;
 
   if (!m1.get_changed())
     throw Error (InvalidState, "test_Composite", 
@@ -56,31 +86,73 @@ void CompositeTest::runtest ()
     throw Error (InvalidState, "test_Composite", 
 		 "Composite changed after evaluate");
 
+  if (rotation->get_evaluation_changed())
+    throw Error (InvalidState, "test_Composite", 
+		 "Component changed after evaluate");
+
   cerr << "********************* m2 map boost" << endl;
-  m2.composite.map (m2b);
+  m2.composite->map (m2b);
+  m2.boost = boost;
+
   cerr << "********************* m2 map rotation" << endl;
-  m2.composite.map (m2r);
-    
+  m2.composite->map (m2r);
+  m2.rotation = rotation;
+
   if (!m1.get_changed())
     throw Error (InvalidState, "test_Composite", 
 		 "Parent Composite not changed after child Composite mapping");
 
-  cerr << "m2 maps into m1:" << endl;
+  m1.evaluate();
 
-  for (unsigned iparm=0; iparm<m2.get_nparam(); iparm++)
-    cerr << " " << iparm << " " << m1m.get_imap(iparm) << endl;
-    
-  if (m1m.get_imap(0) != 1 || m1m.get_imap(1) != 0)
-    throw Error (InvalidState, "test_Composite", "mapping failure");
+  if (m1.get_changed())
+    throw Error (InvalidState, "test_Composite", 
+		 "Composite changed after second evaluation");
 
+  if (rotation->get_evaluation_changed())
+    throw Error (InvalidState, "test_Composite", 
+		 "Component changed after second evaluation");
+
+  cerr << "********************* setting component parameter" << endl;
+
+  rotation->set_phi (4.5);
+
+  if (!m1.get_changed())
+    throw Error (InvalidState, "test_Composite", 
+		 "Composite not changed after component parameter changed");
+
+}
+
+void CompositeTest::shared ()
+{
+  CompositeTest m1;
+
+  cerr << "********************* m1 share m2" << endl;
+  CompositeTest m2 (m1.composite);
+
+  runtest (m1, m2);
+}
+
+void CompositeTest::nested ()
+{
+  CompositeTest m1;
+  CompositeTest m2;
+
+  cerr << "********************* m1 nest m2" << endl;
+  Project<CompositeTest> m1m (&m2);
+  m1.composite->map (m1m);
+
+  runtest (m1, m2);
 }
 
 int main (int argc, char** argv) try
 {
+  Function::very_verbose = true;
   Function::verbose = true;
+
   CompositeTest test;
 
-  test.runtest ();
+  test.nested ();
+  test.shared ();
 
   cerr << "Successful completion" << endl;
   return 0;

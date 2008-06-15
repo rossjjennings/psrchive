@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Composite.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/05/07 01:21:11 $
+   $Revision: 1.12 $
+   $Date: 2008/06/15 16:12:34 $
    $Author: straten $ */
 
 #ifndef __Composite_H
@@ -106,6 +106,9 @@ namespace MEAL {
     void get_imap (const Function* model,
 		   std::vector<unsigned>::iterator& imap) const;
 
+    //! Method called when a Function attribute has changed
+    void attribute_changed (Function::Attribute attribute);
+
   protected:
 
     //! Provide access to Projection base class
@@ -140,8 +143,8 @@ namespace MEAL {
     //! Flag set to temporarily disable callbacks
     mutable bool disable_callbacks;
 
-    //! Method called when a Function attribute has changed
-    void attribute_changed (Function::Attribute attribute);
+    //! Flag set when this is shared by Function passed to add_component
+    mutable bool component_shares_this;
 
     //! Recursive function does the work for map
     void add_component (Function*, std::vector<unsigned>& imap);

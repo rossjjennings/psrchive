@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/GroupRule.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.8 $
+   $Date: 2008/06/15 16:12:34 $
    $Author: straten $ */
 
 #ifndef __GroupRule_H
@@ -24,7 +24,7 @@ namespace MEAL {
   /*! Because the binary operation is associative, this class is
     implemented as a series of elements; that is, an arbitrary number
     of models can be added.  By inheriting this class and defining the
-    get_identity(),operate(), and partial() pure virtual methods,
+    get_identity(), operate(), and partial() pure virtual methods,
     derived classes may define the closed, associative binary
     operation, such as the product or sum. */
 
@@ -155,7 +155,7 @@ void MEAL::GroupRule<T>::parse (const std::string& line)
   std::string temp = line;
   std::string key = stringtok (temp, " \t");
 
-  if (T::verbose)
+  if (this->get_verbose())
     std::cerr << class_name() << "::parse key '" << key << "'" << std::endl;
 
   Function* model = Function::new_Function (key);
@@ -172,11 +172,11 @@ void MEAL::GroupRule<T>::parse (const std::string& line)
 template<class T>
 void MEAL::GroupRule<T>::add_model (T* x)
 {
-  if (T::very_verbose)
-    std::cerr << class_name() + "add_model" << std::endl;
-
   model.push_back (Project<T>(x));
   composite.map (model.back());
+
+  if (this->get_verbose())
+    std::cerr << class_name() + "add_model size=" << model.size() << std::endl;
 }
 
 template<class T>
@@ -194,7 +194,7 @@ void MEAL::GroupRule<T>::calculate (Result& retval,
 {
   unsigned nmodel = model.size();
 
-  if (T::very_verbose)
+  if (this->get_verbose())
     std::cerr << class_name() + "calculate nmodel=" << nmodel << std::endl;
 
   // the result of each component
@@ -208,14 +208,13 @@ void MEAL::GroupRule<T>::calculate (Result& retval,
   
   unsigned total_nparam = 0;
 
-  if (grad) {
-
+  if (grad)
+  {
     for (unsigned imodel=0; imodel < nmodel; imodel++)
       total_nparam += model[imodel]->get_nparam();
 
     comp_gradient_ptr = &comp_gradient;
     gradient.resize (total_nparam);
-
   }
 
   // initialize the result and gradient attributes
@@ -223,9 +222,9 @@ void MEAL::GroupRule<T>::calculate (Result& retval,
 
   unsigned igradient = 0;
 
-  for (unsigned imodel=0; imodel < nmodel; imodel++) {
-
-    if (T::very_verbose) 
+  for (unsigned imodel=0; imodel < nmodel; imodel++)
+  {
+    if (this->get_verbose()) 
       std::cerr << class_name() + "calculate evaluate " 
 	        << model[imodel]->get_name() << std::endl;
 
@@ -236,8 +235,8 @@ void MEAL::GroupRule<T>::calculate (Result& retval,
 
       operate( result, comp_result );
       
-      if (grad) {
-
+      if (grad)
+      {
 	unsigned jgrad;
 	unsigned ngrad = comp_gradient_ptr->size();
 
@@ -249,17 +248,16 @@ void MEAL::GroupRule<T>::calculate (Result& retval,
 	
 	for (jgrad=igradient+ngrad; jgrad<gradient.size(); jgrad++)
 	  operate( gradient[jgrad], partial(comp_result) );
-	
       }
-
     }
-    catch (Error& error) {
+    catch (Error& error)
+    {
       error += class_name() + "calculate";
       throw error << " model=" << model[imodel]->get_name();
     }
 
-    if (grad) {
-
+    if (grad)
+    {
       if (model[imodel]->get_nparam() != comp_gradient.size())
 	throw Error (InvalidState, (class_name() + "calculate").c_str(),
 		     "model[%d]=%s.get_nparam=%d != gradient.size=%d",
@@ -267,15 +265,13 @@ void MEAL::GroupRule<T>::calculate (Result& retval,
 		     model[imodel]->get_nparam(), comp_gradient.size());
       
       igradient += comp_gradient.size();
-
     }
-
   }
 
   retval = result;
 
-  if (grad)  {
-
+  if (grad)
+  {
     /* re-map the components of the gradient into the Composite space,
        summing duplicates implements both the sum and product rules. */
 
@@ -289,12 +285,13 @@ void MEAL::GroupRule<T>::calculate (Result& retval,
 
     // this verion of ProjectGradient initializes the gradient vector to zero
     ProjectGradient (model, gradient, *grad);
-
   }
 
-  if (T::very_verbose) {
+  if (this->get_verbose())
+  {
     std::cerr << class_name() + "calculate result\n   " << retval << std::endl;
-    if (grad) {
+    if (grad)
+    {
       std::cerr << class_name() + "calculate gradient" << std::endl;
       for (unsigned i=0; i<grad->size(); i++)
 	std::cerr << "   " << i << ":" << this->get_infit(i) 

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/VectorRule.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.6 $
+   $Date: 2008/06/15 16:12:34 $
    $Author: straten $ */
 
 #ifndef __MEAL_VectorRule_H
@@ -30,10 +30,10 @@ namespace MEAL {
     typedef typename T::Result Result;
 
     //! Default constructor
-    VectorRule () : composite(this) { model_index = 0; }
+    VectorRule (Composite* policy = 0);
 
     //! Copy constructor
-    VectorRule (const VectorRule& v) : composite(this) { operator = (v); }
+    VectorRule (const VectorRule& v);
 
     //! Assignment operator
     VectorRule& operator = (const VectorRule& copy);
@@ -44,13 +44,22 @@ namespace MEAL {
     //! Add an element to the array
     void push_back (T* model);
 
+    //! Assign the current element of the array
+    void assign (T* model);
+
+    //! Get the current element of the array
+    T* get_current ();
+
+    //! Get the projection of the current element of the array
+    Project<T>& get_projection ();
+
     //! Get the size of the array
     unsigned size () const { return model.size(); }
 
-    //! Set the index of the array
+    //! Set the current element of the array
     void set_index (unsigned index);
 
-    //! Get the index of the array
+    //! Get the current element of the array
     unsigned get_index () const { return model_index; }
 
     //! Return the name of the class
@@ -71,12 +80,30 @@ namespace MEAL {
     unsigned model_index;
 
     //! Composite parameter policy
-    Composite composite;
+    Reference::To<Composite> composite;
 
   };
   
 }
 
+template<class T>
+MEAL::VectorRule<T>::VectorRule (Composite* policy)
+{
+  if (policy)
+    composite = policy;
+  else
+    composite = new Composite (this);
+
+  model_index = 0;
+}
+
+//! Copy constructor
+template<class T>
+MEAL::VectorRule<T>::VectorRule (const VectorRule& v)
+{
+  composite = new Composite (this);
+  operator = (v);
+}
 
 template<class T>
 MEAL::VectorRule<T>&
@@ -100,8 +127,54 @@ void MEAL::VectorRule<T>::push_back (T* x)
   if (T::very_verbose)
     std::cerr << get_name() + "push_back" << std::endl;
 
+  model_index = model.size();
   model.push_back (Project<T>(x));
-  composite.map (model.back());
+  composite->map (model.back());
+}
+
+template<class T>
+void MEAL::VectorRule<T>::assign (T* x)
+{
+  if (T::very_verbose)
+    std::cerr << get_name() + "assign" << std::endl;
+
+  if (model[model_index])
+  {
+    if (T::very_verbose)
+      std::cerr << get_name() + "assign unmap old" << std::endl;
+
+    composite->unmap (model[model_index]);
+  }
+
+  model[model_index] = x;
+
+  if (!x)
+    return;
+
+  if (T::very_verbose)
+    std::cerr << get_name() + "assign map new" << std::endl;
+
+  composite->map (model[model_index]);
+}
+
+template<class T>
+T* MEAL::VectorRule<T>::get_current ()
+{
+  if (model_index >= model.size())
+   throw Error (InvalidRange, "MEAL::"+get_name()+"::get_current",
+		 "index=%d >= nmodel=%d", model_index, model.size());
+
+  return model[model_index];
+}
+
+template<class T>
+MEAL::Project<T>& MEAL::VectorRule<T>::get_projection ()
+{
+  if (model_index >= model.size())
+   throw Error (InvalidRange, "MEAL::"+get_name()+"::get_current",
+		 "index=%d >= nmodel=%d", model_index, model.size());
+
+  return model[model_index];
 }
 
 template<class T>
@@ -115,7 +188,7 @@ void MEAL::VectorRule<T>::set_index (unsigned index)
 		 "index=%d >= nmodel=%d", index, model.size());
 
   model_index = index;
-  this->set_evaluation_changed();
+  composite->attribute_changed( Function::Evaluation );
 }
 
 template<class T>
@@ -149,8 +222,8 @@ void MEAL::VectorRule<T>::calculate (Result& result,
     throw error << " model=" << model[model_index]->get_name();
   }
   
-  if (grad) {
-
+  if (grad)
+  {
     if (model[model_index]->get_nparam() != comp_gradient.size())
       throw Error (InvalidState, (get_name() + "calculate").c_str(),
 		   "model[%d]=%s.get_nparam=%d != gradient.size=%d",
@@ -169,13 +242,13 @@ void MEAL::VectorRule<T>::calculate (Result& result,
 
     // this verion of ProjectGradient initializes the gradient vector to zero
     ProjectGradient (model[model_index], comp_gradient, *grad);
-
   }
 
-  if (T::very_verbose) {
-
+  if (T::very_verbose)
+  {
     std::cerr << get_name() + "calculate result\n   " << result << std::endl;
-    if (grad) {
+    if (grad)
+    {
       std::cerr << get_name() + "calculate gradient" << std::endl;
       for (unsigned i=0; i<grad->size(); i++)
 	std::cerr << "   " << i << ":" << this->get_infit(i) 

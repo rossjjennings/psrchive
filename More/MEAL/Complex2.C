@@ -4,8 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/Complex2.h"
-#include "MEAL/Cached.h"
 
 #include <complex>
 
@@ -14,12 +14,12 @@ const char* MEAL::Complex2::Name = "Complex2";
 
 MEAL::Complex2::Complex2 ()
 {
-  evaluation_policy = new Cached<Complex2> (this);
+  evaluation_policy = default_evaluation_policy (this);
 }
 
 MEAL::Complex2::Complex2 (const Complex2& copy) : Function (copy)
 {
-  evaluation_policy = new Cached<Complex2> (this);
+  evaluation_policy = default_evaluation_policy (this);
 }
 
 MEAL::Complex2& MEAL::Complex2::operator = (const Complex2& copy)

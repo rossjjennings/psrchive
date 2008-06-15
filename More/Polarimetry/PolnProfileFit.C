@@ -169,9 +169,7 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   if (manage_equation_transformation)
   {
     // initialize the model transformation
-    equation->add_transformation ();
-    if (transformation)
-      equation->set_transformation (transformation);
+    equation->set_transformation (transformation);
   }
 
   uncertainty.resize (n_harmonic - 1);

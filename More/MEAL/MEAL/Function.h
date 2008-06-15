@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Function.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/05/07 01:21:11 $
+   $Revision: 1.13 $
+   $Date: 2008/06/15 16:12:34 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -61,6 +61,9 @@ namespace MEAL {
 
     //! When set, some Functions will throw an Error if input variance <= 0
     static bool check_variance;
+
+    //! When set, use the Cached evaluation policy and callbacks
+    static bool cache_results;
 
     //! Construct a new model instance from a file
     static Function* load (const std::string& filename);
@@ -144,6 +147,12 @@ namespace MEAL {
     //! Set the Estimate of the specified parameter
     void set_Estimate (unsigned index, const Estimate<double>& param);
 
+    //! Set the verbosity of this instance
+    void set_verbose (bool);
+
+    //! Get the verbosity of this instance
+    bool get_verbose () const;
+
     //! Function attributes that require the attention of Composite models
     enum Attribute {
       //! Number of Function parameters, as returned by get_nparam
@@ -156,12 +165,7 @@ namespace MEAL {
     Callback<Attribute> changed;
 
     //! Set true if the Function evaluation has changed
-    void set_evaluation_changed (bool _changed = true) 
-    {
-      if (!evaluation_changed && _changed)
-        changed.send (Evaluation);
-      evaluation_changed = _changed;
-    }
+    void set_evaluation_changed (bool _changed = true);
 
     //! Return true if the Function evaluation has changed
     bool get_evaluation_changed () const { return evaluation_changed; }
@@ -196,10 +200,19 @@ namespace MEAL {
     //! Set the parameter policy
     void set_parameter_policy (ParameterPolicy* policy);
 
+    //! Set the parameter policy context
+    bool set_parameter_policy_context;
+
+    //! The verbosity of this instance
+    bool this_verbose;
+
   private:
 
     //! Flag set when the model evaluation has changed
     bool evaluation_changed;
+
+    //! Initialize attributes
+    void init ();
 
   };
 

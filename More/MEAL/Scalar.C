@@ -1,12 +1,11 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/Scalar.h"
-#include "MEAL/Cached.h"
-#include "MEAL/NotCached.h"
 
 using namespace std;
 
@@ -17,14 +16,14 @@ MEAL::Scalar::Scalar ()
 {
   if (verbose)
     cerr << "MEAL::Scalar ctor" << endl;
-  evaluation_policy = new Cached<Scalar> (this);
+  evaluation_policy = default_evaluation_policy (this);
 }
 
 MEAL::Scalar::Scalar (const Scalar& copy) : Function (copy)
 {
   if (verbose)
     cerr << "MEAL::Scalar copy ctor" << endl;
-  evaluation_policy = new Cached<Scalar> (this);
+  evaluation_policy = default_evaluation_policy (this);
 }
 
 MEAL::Scalar& MEAL::Scalar::operator = (const Scalar& copy)
