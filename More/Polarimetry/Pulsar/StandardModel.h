@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.20 $
-   $Date: 2008/06/14 12:59:27 $
+   $Revision: 1.21 $
+   $Date: 2008/06/15 17:09:17 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -26,6 +26,7 @@
 #include "MEAL/Polynomial.h"
 #include "MEAL/Polar.h"
 #include "MEAL/Axis.h"
+#include "MEAL/Real4.h"
 
 namespace Calibration
 {
@@ -40,8 +41,11 @@ namespace Calibration
     //! Default constructor
     StandardModel (bool phenomenological = true);
 
+    //! Include an impurity transformation
+    void set_impurity (MEAL::Real4*);
+
     //! Set the transformation to the receptor basis
-    void set_basis (MEAL::Complex2* xform);
+    void set_basis (MEAL::Complex2*);
 
     //! Set true when the pulsar Stokes parameters have been normalized
     void set_constant_pulsar_gain (bool = true);
@@ -164,6 +168,9 @@ namespace Calibration
     //! The instrumental model and any additional transformations
     Reference::To< MEAL::ProductRule<MEAL::Complex2> > instrument;
 
+    //! The Mueller transformation
+    Reference::To< MEAL::Real4 > impurity;
+
     // ////////////////////////////////////////////////////////////////////
     //
     //! Polar decomposition of instrumental response (Hamaker)
@@ -227,6 +234,9 @@ namespace Calibration
     unsigned Pulsar_path;
 
     MJD min_epoch, max_epoch;
+
+    //! Add a transformation to the ReceptionModel
+    void add_transformation (MEAL::Complex2*);
 
   private:
 

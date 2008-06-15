@@ -15,6 +15,7 @@
 #include "MEAL/Gain.h"
 #include "MEAL/Steps.h"
 #include "MEAL/Complex2Value.h"
+#include "MEAL/JonesMueller.h"
 
 #include <iostream>
 #include <assert.h>
@@ -49,6 +50,11 @@ Calibration::StandardModel::StandardModel (bool _phenomenological)
   constant_pulsar_gain = false;
 
   time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
+}
+
+void Calibration::StandardModel::set_impurity (MEAL::Real4* x)
+{
+  impurity = x;
 }
 
 void Calibration::StandardModel::set_basis (MEAL::Complex2* x)
@@ -168,6 +174,20 @@ void Calibration::StandardModel::const_build () const
   const_cast<StandardModel*>(this)->build();
 }
 
+void Calibration::StandardModel::add_transformation (MEAL::Complex2* xform)
+{
+  if (!impurity)
+    equation->add_transformation (xform);
+
+  Reference::To< MEAL::ProductRule<MEAL::Real4> > combination;
+  combination = new MEAL::ProductRule<MEAL::Real4>;
+
+  combination->add_model( impurity );
+  combination->add_model( new MEAL::JonesMueller (xform) );
+
+  equation->add_transformation( combination );
+}
+
 void Calibration::StandardModel::build ()
 {
   if (built)
@@ -222,7 +242,7 @@ void Calibration::StandardModel::build ()
     equation = new Calibration::ReceptionModel;
   }
 
-  equation->add_transformation ( pulsar_path );
+  add_transformation ( pulsar_path );
 
   Pulsar_path = equation->get_transformation_index ();
 
@@ -257,7 +277,7 @@ void Calibration::StandardModel::add_fluxcal_backend ()
   if (basis)
     *path *= basis;
 
-  equation->add_transformation ( path );
+  add_transformation ( path );
   FluxCalibrator_path = equation->get_transformation_index ();
 }
 
@@ -280,7 +300,8 @@ void Calibration::StandardModel::add_polncal_backend ()
 
   *pcal_path *= instrument;
 
-  equation->add_transformation ( pcal_path );
+  add_transformation ( pcal_path );
+
   ReferenceCalibrator_path = equation->get_transformation_index ();
 }
 
