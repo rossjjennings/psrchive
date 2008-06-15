@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/06/13 17:24:07 $
+   $Revision: 1.12 $
+   $Date: 2008/06/15 17:23:03 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -128,6 +128,9 @@ namespace Pulsar {
     //! Set the calibrator
     virtual void set_calibrator (Archive*);
 
+    //! Set the impurity transformation
+    virtual void set_impurity( MEAL::Real4* );
+
     //! Set the time variation of absolute gain
     virtual void set_gain( MEAL::Univariate<MEAL::Scalar>* );
 
@@ -203,6 +206,9 @@ namespace Pulsar {
 
     //! The CalibratorStokesExtension of the Archive passed during construction
     mutable Reference::To<CalibratorStokes> calibrator_stokes;
+
+    //! Impurity transformation
+    Reference::To< MEAL::Real4 > impurity;
 
     //! Time variation of absolute gain
     Reference::To< MEAL::Univariate<MEAL::Scalar> > gain_variation;

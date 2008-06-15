@@ -162,6 +162,11 @@ unsigned Pulsar::SystemCalibrator::get_ndata (unsigned ichan) const
 
 using namespace MEAL;
 
+void Pulsar::SystemCalibrator::set_impurity( MEAL::Real4* f )
+{
+  impurity = f;
+}
+
 void Pulsar::SystemCalibrator::set_gain( Univariate<Scalar>* f )
 {
   gain_variation = f;
@@ -710,6 +715,9 @@ void Pulsar::SystemCalibrator::create_model ()
 
     if (verbose > 2)
       cerr << "Pulsar::SystemCalibrator::create_model set variations" << endl;
+
+    if (impurity)
+      model[ichan]->set_impurity( impurity->clone() );
 
     if (gain_variation)
       model[ichan]->set_gain( gain_variation->clone() );
