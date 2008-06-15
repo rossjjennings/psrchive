@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.21 $
-   $Date: 2007/05/22 08:05:59 $
+   $Revision: 1.22 $
+   $Date: 2008/06/15 17:04:49 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -26,6 +26,10 @@ public:
 
   //! Null constructor
   Matrix () { for (unsigned i=0; i<Rows; i++) this->x[i] = 0; }
+
+  //! Scalar constructor
+  Matrix (T s) 
+  { for (unsigned i=0; i<Rows; i++) { this->x[i] = 0; this->x[i][i] = s; } }
 
   //! Construct from another Vector of Vector<U> instance
   template<typename U> Matrix (const Vector< Rows, Vector<Columns,U> >& s)
