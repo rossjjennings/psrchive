@@ -8,9 +8,20 @@
 #include "MEAL/JonesMueller.h"
 #include "Pauli.h"
 
-MEAL::JonesMueller::JonesMueller () : composite (this)
+MEAL::JonesMueller::JonesMueller (Complex2* xform) : composite (this)
 {
+  if (xform)
+    set_transformation (xform);
 }
+
+std::string MEAL::JonesMueller::get_name () const
+{
+  std::string name = "JonesMueller";
+  if (transformation)
+    name += "[" + transformation->get_name() + "]";
+  return name;
+}
+
 
 /*! Complex2his method unmaps the old transformation before mapping xform */
 void MEAL::JonesMueller::set_transformation (Complex2* _transformation) try

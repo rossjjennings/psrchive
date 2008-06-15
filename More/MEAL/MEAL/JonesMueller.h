@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/JonesMueller.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/06/15 16:31:36 $
+   $Revision: 1.2 $
+   $Date: 2008/06/15 17:09:05 $
    $Author: straten $ */
 
 #ifndef __MEAL_JonesMueller_H
@@ -28,7 +28,7 @@ namespace MEAL {
   public:
 
     //! Default constructor
-    JonesMueller ();
+    JonesMueller (Complex2* = 0);
 
     //! Destructor
     ~JonesMueller () { }
@@ -38,6 +38,8 @@ namespace MEAL {
 
     //! Get the transformation, \f$ J \f$
     virtual Complex2* get_transformation () { return transformation; }
+
+    std::string get_name () const;
 
   protected:
 
