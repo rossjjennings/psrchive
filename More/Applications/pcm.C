@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.87 $
-   $Date: 2008/06/15 17:27:04 $
+   $Revision: 1.88 $
+   $Date: 2008/06/15 18:34:16 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -899,7 +899,7 @@ int actual_main (int argc, char *argv[]) try
 
     cpgend();
 
-    if (total)
+    if (total) try
     {
       cerr << "pcm: plotting uncalibrated total PSR" << endl;
 
@@ -915,6 +915,10 @@ int actual_main (int argc, char *argv[]) try
       plot.plot (total);
       
       cpgend();
+    }
+    catch (Error& error)
+    {
+      cerr << "pcm: error while producing plots ignored" << endl;
     }
 
     if (model->get_nstate_pulsar())
