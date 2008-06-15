@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Real4.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/06/15 17:09:13 $
+   $Revision: 1.4 $
+   $Date: 2008/06/15 17:22:59 $
    $Author: straten $ */
 
 #ifndef __MEAL_Real4_H
@@ -39,6 +39,9 @@ namespace MEAL {
 
     //! Assignment operator
     Real4& operator = (const Real4&);
+
+    //! Clone
+    virtual Real4* clone () const;
 
     //! Return the Mueller matrix and its gradient
     Result evaluate (std::vector<Result>* grad=0) const

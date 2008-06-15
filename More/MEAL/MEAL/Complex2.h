@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Complex2.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.7 $
+   $Date: 2008/06/15 17:22:59 $
    $Author: straten $ */
 
 #ifndef __MEAL_Complex2_H
@@ -42,6 +42,9 @@ namespace MEAL {
 
     //! Assignment operator
     Complex2& operator = (const Complex2&);
+
+    //! Clone
+    virtual Complex2* clone () const;
 
     //! Return the Jones matrix and its gradient
     Result evaluate (std::vector<Result>* grad=0) const

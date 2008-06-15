@@ -30,6 +30,12 @@ string MEAL::Depolarizer::get_name () const
   return "Depolarizer";
 }
 
+//! Clone operator
+MEAL::Depolarizer* MEAL::Depolarizer::clone () const
+{
+  return new Depolarizer( *this );
+}
+
 //! Calculate the Jones matrix and its gradient
 void MEAL::Depolarizer::calculate (Matrix<4,4,double>& result,
 				   vector< Matrix<4,4,double> >* grad)

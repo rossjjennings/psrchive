@@ -26,3 +26,8 @@ MEAL::Real4& MEAL::Real4::operator = (const Real4& copy)
   return *this;
 }
 
+//! Clone
+MEAL::Real4* MEAL::Real4::clone () const
+{
+  throw Error (InvalidState, "MEAL::Real4::clone", "not implemented" );
+}

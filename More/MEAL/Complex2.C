@@ -28,6 +28,12 @@ MEAL::Complex2& MEAL::Complex2::operator = (const Complex2& copy)
   return *this;
 }
 
+//! Clone
+MEAL::Complex2* MEAL::Complex2::clone () const
+{
+  throw Error (InvalidState, "MEAL::Complex2::clone", "not implemented" );
+}
+
 void MEAL::Complex2::calculate (Complex2* other, Jones<double>& result,
                                 std::vector< Jones<double> >* grad)
 {

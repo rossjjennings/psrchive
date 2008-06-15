@@ -7,24 +7,26 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Depolarizer.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.4 $
+   $Date: 2008/06/15 17:22:59 $
    $Author: straten $ */
 
 #ifndef __MEAL_Depolarizer_H
 #define __MEAL_Depolarizer_H
 
 #include "MEAL/Real4.h"
-#include "Vector.h"
 
-namespace MEAL {
+namespace MEAL
+{
 
   //! Represents a pure depolarizer transformation
-  class Depolarizer : public Real4 {
-
+  class Depolarizer : public Real4
+  {
   public:
 
     Depolarizer ();
+
+    Depolarizer* clone () const;
 
     // ///////////////////////////////////////////////////////////////////
     //
