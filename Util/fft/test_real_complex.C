@@ -4,10 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "test_libraries.h"
 #include "BoxMuller.h"
 
 #include <iostream>
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 

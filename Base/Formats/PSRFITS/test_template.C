@@ -4,11 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "FITSError.h"
 #include "dirutil.h"
 
 #include <fitsio.h>
-
+#include <string.h>
 #include <iostream>
 #include <string>
 

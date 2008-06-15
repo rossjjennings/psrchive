@@ -8,7 +8,9 @@
 #include "test_libraries.h"
 #include "interpolate.h"
 #include "BoxMuller.h"
+
 #include <iostream>
+#include <stdlib.h>
 
 using namespace std;
 
