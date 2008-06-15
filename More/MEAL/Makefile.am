@@ -39,6 +39,7 @@ nobase_include_HEADERS = \
         MEAL/GroupRule.h \
         MEAL/Invariant.h \
         MEAL/InverseRule.h \
+	MEAL/JonesMueller.h \
 	MEAL/LeastSquares.h \
         MEAL/LevenbergMarquardt.h \
         MEAL/Mean.h \
@@ -132,6 +133,7 @@ libMEAL_la_SOURCES = \
         Gaussian.C \
 	GimbalLockMonitor.C \
         Invariant.C \
+	JonesMueller.C \
 	LeastSquares.C \
 	MuellerTransformation.C \
         NormalizeStokes.C \
