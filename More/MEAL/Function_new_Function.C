@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/Agent.h"
 #include "MEAL/Function.h"
 
@@ -30,6 +31,10 @@ rotation1( Vector<3,double>::basis(0) );
 #include "MEAL/Boost1.h"
 static Registry::List<Agent>::Unary< Advocate<Boost1>, Vector<3,double> >
 boost1( Vector<3,double>::basis(0) );
+
+#include "MEAL/Depolarizer.h"
+static Registry::List<Agent>::Enter< Advocate<Depolarizer> >
+depolarizer;
 
 using namespace std;
 
