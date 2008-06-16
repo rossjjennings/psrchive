@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/Function.h"
 #include "stringtok.h"
 
@@ -23,27 +24,31 @@ void MEAL::Function::parse (const string& line)
     cerr << "MEAL::Function::parse key '" << key << "'" << endl;
 
   unsigned iparam=0;
-  for (iparam=0; iparam < get_nparam(); iparam++) {
-
+  for (iparam=0; iparam < get_nparam(); iparam++)
+  {
     if (verbose)
       cerr << "MEAL::Function::parse param[" << iparam << "]='"
 	   << get_param_name(iparam) << "'" << endl;
 
-    if ( key == get_param_name(iparam) ) {
-
+    if ( key == get_param_name(iparam) )
+    {
       if (verbose)
 	cerr << "MEAL::Function::parse match" << endl;
 
       break;
-
     }
-
   }
 
   if (iparam == get_nparam())
+  {
+    string names;
+    for (iparam=0; iparam < get_nparam(); iparam++)
+      names += get_param_name(iparam) + " ";
+
     throw Error (InvalidParam, "MEAL::Function::parse",
-		 "key='%s' does not match name of any %d parameters",
-		 key.c_str(), get_nparam());
+		 "key='%s' does not match any name of %d parameters:\n\t%s",
+		 key.c_str(), get_nparam(), names.c_str());
+  }
 
   string value = stringtok (temp, " \t");
 
@@ -62,12 +67,14 @@ void MEAL::Function::parse (const string& line)
   if (!value.length())
     return;
 
-  if (value=="true" || value=="1") {
+  if (value=="true" || value=="1")
+  {
     if (verbose)
       cerr << "MEAL::Function::parse fit " << key << endl;
     set_infit (iparam, true);
   }
-  else if (value=="false" || value=="0") {
+  else if (value=="false" || value=="0")
+  {
     if (verbose)
       cerr << "MEAL::Function::parse do not fit " << key << endl;
     set_infit (iparam, false);
@@ -89,6 +96,4 @@ void MEAL::Function::parse (const string& line)
 		 "sigma='" + value + "' could not be parsed as a double");
 
   set_variance (iparam, param_value*param_value);
-
 }
-
