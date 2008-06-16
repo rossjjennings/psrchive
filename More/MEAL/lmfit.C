@@ -103,13 +103,7 @@ int main (int argc, char** argv) try {
   if (verbose)
     cerr << "lmfit: loading model from '" << model_filename << "'" << endl;
 
-  MEAL::Function* model = MEAL::Function::load (model_filename);
-
-  MEAL::Scalar* scalar = dynamic_cast<MEAL::Scalar*>(model);
-  if (!scalar) {
-    cerr << "lmfit: loaded model is not Scalar" << endl;
-    return -1;
-  }
+  MEAL::Scalar* scalar = MEAL::Function::load<MEAL::Scalar> (model_filename);
 
   string model_text;
 

@@ -83,12 +83,7 @@ string Pulsar::CalInterpreter::load (const string& args)
   }
 
   try {
-    Reference::To<MEAL::Function> function = MEAL::Function::load( filename );
-    transformation = dynamic_cast<MEAL::Complex2*>( function.get() );
-    if (!transformation) {
-      throw Error ( InvalidState, "Pulsar::CalInterpreter::load",
-		    "Function does not return a complex 2x2 matrix" );
-    }
+    transformation = MEAL::Function::load<MEAL::Complex2>( filename );
     return response (Good);
   }
   catch (Error& error) {

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Function.h,v $
-   $Revision: 1.13 $
-   $Date: 2008/06/15 16:12:34 $
+   $Revision: 1.14 $
+   $Date: 2008/06/16 23:04:52 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -65,10 +65,14 @@ namespace MEAL {
     //! When set, use the Cached evaluation policy and callbacks
     static bool cache_results;
 
-    //! Construct a new model instance from a file
-    static Function* load (const std::string& filename);
+    //! Construct a new Model instance from a file
+    template<class Model>
+    static Model* load (const std::string& filename);
 
-    //! Construct a new model instance from a string
+    //! Construct a new Function instance from a file
+    static Function* load_Function (const std::string& filename);
+
+    //! Construct a new Function instance from a string
     static Function* new_Function (const std::string& text);
 
     //! Default constructor
@@ -216,6 +220,19 @@ namespace MEAL {
 
   };
 
+}
+
+template<class Model>
+Model* MEAL::Function::load (const std::string& filename)
+{
+  Function* function = load_Function (filename);
+
+  Model* model = dynamic_cast<Model*> (function);
+  if (!model)
+    throw Error (InvalidState, "MEAL::Function::load",
+		 "function is not a %s", Model::Name);
+
+  return model;
 }
 
 #endif
