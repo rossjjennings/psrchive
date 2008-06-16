@@ -13,6 +13,7 @@
 #include "FTransform.h"
 #include "Estimate.h"
 #include "toa.h"
+#include "BoxMuller.h"
 
 namespace Pulsar
 {
@@ -43,6 +44,12 @@ namespace Pulsar
   {   
   public:
 
+    //! Method to use for calculating shift error
+    enum Error_Method {
+      Traditional_Chi2,     // Chi-squared 2nd derivatives
+      MCMC_Variance         // Shift variance from MCMC
+    };
+
     //! Default constructor
     ProfileShiftFit ();
 
@@ -57,6 +64,9 @@ namespace Pulsar
 
     //! Get the number of harmonics currently in use.
     unsigned get_nharm();
+
+    //! Set the error method
+    void set_error_method(Error_Method e) { err_meth = e; }
 
     //! Set the standard or template profile to use
     void set_standard(Profile* p);
@@ -78,6 +88,10 @@ namespace Pulsar
 
     //! Get the resulting Mean Squared Error (per fit DOF)
     double get_mse();
+
+    //! Current MCMC accept stats
+    int mcmc_trials;
+    int mcmc_accept;
 
   protected:
 
@@ -129,8 +143,14 @@ namespace Pulsar
     //! Same as above, but with scale>0 prior
     double log_shift_pdf_pos(double phi);
 
+    //! Error method to use
+    Error_Method err_meth;
+
     //! Calculate "traditional" parameter uncertainties
     void error_traditional();
+
+    //! Calculate shift uncertainty as posterior PDF variance using MCMC
+    void error_mcmc_pdf_var();
 
     //! Current shift result
     double shift;
@@ -152,6 +172,23 @@ namespace Pulsar
 
     //! Current fit Chi^2 (not reduced)
     double chi2;
+
+  private:
+
+    //! Normal random number generator
+    BoxMuller nrand;
+
+    //! Current MCMC state
+    double mcmc_state;
+
+    //! Current MCMC probability value
+    double mcmc_log_pdf;
+
+    //! Init MCMC state
+    void mcmc_init();
+
+    //! Return next sample from MCMC sequence
+    double mcmc_sample();
 
   };
 

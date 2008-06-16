@@ -15,7 +15,9 @@
 #include "Warning.h"
 #include "FTransform.h"
 #include "Brent.h"
+#include "BoxMuller.h"
 #include <complex>
+#include <stdlib.h>
 #include <string.h>
 
 using namespace std;
@@ -37,6 +39,8 @@ void Pulsar::ProfileShiftFit::init ()
   nbins_prof=0;
   nbins_std=0;
   nbins_ccf=0;
+
+  err_meth = Traditional_Chi2;
 
   shift=0.0;
   eshift=0.0;
@@ -241,7 +245,14 @@ void Pulsar::ProfileShiftFit::compute()
   mse = (prof_pow - scale*max_ccf)/(double)dof;
 
   // Estimate param errors
-  error_traditional();
+  switch (err_meth) {
+    case MCMC_Variance:
+      error_mcmc_pdf_var();
+      break;
+    case Traditional_Chi2:
+    default:
+      error_traditional();
+  }
 }
 
 double Pulsar::ProfileShiftFit::log_shift_pdf(double phi)
@@ -263,6 +274,80 @@ void Pulsar::ProfileShiftFit::error_traditional()
   // "Traditional" uncertainty calc based on Chi^2 2nd derivs
   eshift = sqrt(mse / (-1.0 * scale * d2ccf(shift)));
   escale = sqrt(mse / std_pow);
+}
+
+void Pulsar::ProfileShiftFit::error_mcmc_pdf_var() 
+{
+  // First calculate usual errors
+  error_traditional();
+
+  // Init MCMC
+  mcmc_init();
+
+  // Run for some number of samples, calc variance relative to
+  // best-fit position.  We'll try w/ no "burn-in" since we're
+  // starting from a known high probability state.
+  int mcmc_it = 1000;
+  double sum=0.0; 
+  double rsum=0.0, isum=0.0;
+  for (int i=0; i<mcmc_it; i++) {
+    // "Standard" variance
+    double x = mcmc_sample() - shift;
+    x -= trunc(x);
+    x = fabs(x);
+    if (x>0.5) x = 1.0 - x;
+    sum += x*x;
+    // Circular variance
+    //double z = 2.0*M_PI*mcmc_sample();
+    //rsum += cos(z);
+    //isum += sin(z);
+  }
+  sum /= (double)mcmc_it;
+  eshift = sqrt(sum);
+  //rsum /= (double)mcmc_it;
+  //isum /= (double)mcmc_it;
+  //eshift = sqrt(1.0 - rsum*rsum - isum*isum)/(2.0*M_PI);
+}
+
+void Pulsar::ProfileShiftFit::mcmc_init()
+{
+  /* Init MCMC using current shift value */
+  mcmc_state = shift;
+  mcmc_log_pdf = log_shift_pdf_pos(shift);
+  mcmc_trials=0;
+  mcmc_accept=0;
+}
+
+double Pulsar::ProfileShiftFit::mcmc_sample()
+{
+  /* Computes a trial sample by stepping away from current state
+   * using a normally distributed step size.  Sample is then either
+   * accepted or rejected using the usual MCMC rules.  Updated
+   * state is returned and stored in mcmc_state.
+   * 
+   * Could try independent rather than random walk sampling?
+   */
+  double trial_state = mcmc_state + nrand() * eshift * 2.0;
+  if (fabs(trial_state)>1.0) trial_state = fmod(trial_state,1.0);
+  if (trial_state<1.0) trial_state += 1.0;
+  double trial_log_pdf = log_shift_pdf_pos(trial_state);
+  double log_pdf_ratio = trial_log_pdf - mcmc_log_pdf;
+  mcmc_trials++;
+  if (log_pdf_ratio>=0.0) { 
+    /* Accept the new sample */
+    mcmc_state = trial_state;
+    mcmc_log_pdf = trial_log_pdf;
+    mcmc_accept++;
+  } else {
+    /* Accept with probability pdf_ratio */
+    double rv = ((double)rand()) / RAND_MAX;
+    if (log(rv) < log_pdf_ratio) {
+      mcmc_state = trial_state;
+      mcmc_log_pdf = trial_log_pdf;
+      mcmc_accept++;
+    }
+  }
+  return(mcmc_state);
 }
 
 Tempo::toa Pulsar::ProfileShiftFit::toa(Integration *i)
