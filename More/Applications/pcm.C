@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.88 $
-   $Date: 2008/06/15 18:34:16 $
+   $Revision: 1.89 $
+   $Date: 2008/06/16 23:04:59 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -438,7 +438,7 @@ int actual_main (int argc, char *argv[]) try
   bool publication_plots = false;
 
   int gotc = 0;
-  const char* args = "1:A:a:b:c:C:d:DgHhIj:J:L:l:M:m:N:n:o:Pp:qrsS:t:T:u:vV:";
+  const char* args = "1:A:a:b:c:C:d:DgHhI:j:J:L:l:M:m:N:n:o:Pp:qrsS:t:T:u:vV:";
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
     switch (gotc)
@@ -487,7 +487,7 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'I':
-      impurity = new MEAL::Depolarizer;
+      impurity = MEAL::Function::load<MEAL::Real4> (optarg);
       break;
 
     case 'j':
