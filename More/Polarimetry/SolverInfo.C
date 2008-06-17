@@ -14,6 +14,11 @@ Pulsar::SolverInfo::SolverInfo (const PolnCalibrator* cs)
   poln_calibrator = cs;
 }
     
+std::string Pulsar::SolverInfo::get_title () const
+{
+  return "Goodness of Fit (Reduced \\gx\\u2\\d)";
+}
+
 //! Return the number of parameter classes
 unsigned Pulsar::SolverInfo::get_nclass () const
 {

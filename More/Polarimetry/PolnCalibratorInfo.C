@@ -29,7 +29,7 @@ Pulsar::PolnCalibrator::Info::create (const Pulsar::PolnCalibrator* calibrator)
   case Calibrator::Britton:
     return new InstrumentInfo (calibrator);
 
-  default:
-    return new PolnCalibrator::Info (calibrator);
+    //default:
+    //return new PolnCalibrator::Info (calibrator);
   }
 }

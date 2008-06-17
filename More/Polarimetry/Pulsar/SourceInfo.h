@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SourceInfo.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/04/07 00:38:18 $
+   $Revision: 1.3 $
+   $Date: 2008/06/17 07:59:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SourceInfo_H
@@ -21,13 +21,17 @@ namespace Pulsar {
   class SourceEstimate;
 
   //! Communicates Calibrator Stokes parameters
-  class SourceInfo : public Calibrator::Info {
+  class SourceInfo : public Calibrator::Info
+  {
 
   public:
 
     //! Constructor
     SourceInfo (const SourceEstimate* source);
     
+    //! Return the title
+    std::string get_title () const;
+
     //! Return the number of parameter classes
     unsigned get_nclass () const;
     
@@ -47,6 +51,9 @@ namespace Pulsar {
     //! Set the label printed on the y-axis
     void set_label (const std::string&);
 
+    //! Set the title
+    void set_title (const std::string&);
+
   protected:
     
     //! The SourceEstimate to be plotted
@@ -57,6 +64,9 @@ namespace Pulsar {
 
     //! The label printed on the y-axis
     std::string label;
+
+    //! The title
+    std::string title;
 
   };
 

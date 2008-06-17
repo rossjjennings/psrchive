@@ -29,7 +29,8 @@ Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
 {
   Reference::To<Calibration::SingleAxis> model = new Calibration::SingleAxis;
 
-  if ( !source_set || source.size() != 4 ) {
+  if ( !source_set || source.size() != 4 )
+  {
     if (verbose > 2)
       cerr << "Pulsar::SingleAxisCalibrator::solve" << endl;
     model->solve (source);
@@ -59,6 +60,11 @@ Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
 Pulsar::SingleAxisCalibrator::Info::Info (const PolnCalibrator* cal) 
   : PolnCalibrator::Info (cal)
 {
+}
+
+string Pulsar::SingleAxisCalibrator::Info::get_title () const
+{
+  return "Backend Differential Gain/Phase and Reference Gain";
 }
 
 //! Return the number of parameter classes

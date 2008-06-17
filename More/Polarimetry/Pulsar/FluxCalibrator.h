@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.31 $
-   $Date: 2007/12/06 05:49:36 $
+   $Revision: 1.32 $
+   $Date: 2008/06/17 07:59:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -128,12 +128,16 @@ namespace Pulsar {
   };
 
   //! FluxCalibrator parameter communication
-  class FluxCalibrator::Info : public Calibrator::Info {
-      
+  class FluxCalibrator::Info : public Calibrator::Info
+  {
   public:
+
     //! Constructor
     Info (const FluxCalibrator* cal) { instance = cal; }
     
+    //! Return the title
+    std::string get_title () const;
+
     //! Return the number of parameter classes
     unsigned get_nclass () const { return 2; }
     

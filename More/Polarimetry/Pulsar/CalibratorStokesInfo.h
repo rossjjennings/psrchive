@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalibratorStokesInfo.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/12/06 05:49:36 $
+   $Revision: 1.8 $
+   $Date: 2008/06/17 08:02:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CalibratorStokesInfo_H
@@ -28,6 +28,9 @@ namespace Pulsar {
     //! Constructor
     CalibratorStokesInfo (const CalibratorStokes* calibrator);
     
+    //! Return the title
+    std::string get_title () const;
+
     //! Return the number of parameter classes
     unsigned get_nclass () const;
     

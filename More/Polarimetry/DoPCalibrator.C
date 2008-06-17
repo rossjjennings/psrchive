@@ -86,6 +86,11 @@ Pulsar::DoPCalibrator::Info::Info (const DoPCalibrator* cal)
   dopcal = cal;
 }
 
+string Pulsar::DoPCalibrator::Info::get_title () const
+{
+  return "Degree of Polarization Fudge Factors";
+}
+
 //! Return the number of parameter classes
 unsigned Pulsar::DoPCalibrator::Info::get_nclass () const
 {

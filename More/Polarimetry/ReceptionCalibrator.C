@@ -612,6 +612,11 @@ void Pulsar::ReceptionCalibrator::solve_prepare ()
 Pulsar::Calibrator::Info* 
 Pulsar::ReceptionCalibrator::new_info_pulsar (unsigned istate) const
 {
-  return new SourceInfo (&(pulsar[istate]));
+  SourceInfo* info = new SourceInfo( &(pulsar[istate]) );
+
+  info->set_title( "Stokes Parameters of Phase Bin " 
+		   + tostring(pulsar[istate].phase_bin) );
+
+  return info;
 }
 

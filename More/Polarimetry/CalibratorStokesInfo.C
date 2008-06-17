@@ -15,7 +15,12 @@ Pulsar::CalibratorStokesInfo::CalibratorStokesInfo (const CalibratorStokes* cs)
   calibrator_stokes = cs;
   together = false;
 }
-    
+
+std::string Pulsar::CalibratorStokesInfo::get_title () const
+{
+  return "Reference Source Stokes Parameters";
+} 
+
 //! Return the number of parameter classes
 unsigned Pulsar::CalibratorStokesInfo::get_nclass () const
 {

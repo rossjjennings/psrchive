@@ -430,6 +430,11 @@ unsigned Pulsar::FluxCalibrator::get_nreceptor () const
     return 0;
 }
 
+string Pulsar::FluxCalibrator::Info::get_title () const
+{
+  return "System Temperature and Reference Flux Density";
+}
+
 //! Return the name of the specified class
 std::string Pulsar::FluxCalibrator::Info::get_name (unsigned iclass) const
 {

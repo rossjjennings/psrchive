@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisCalibrator.h,v $
-   $Revision: 1.22 $
-   $Date: 2007/12/06 05:49:36 $
+   $Revision: 1.23 $
+   $Date: 2008/06/17 07:59:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SingleAxisCalibrator_H
@@ -42,6 +42,9 @@ namespace Pulsar {
       //! Constructor
       Info (const PolnCalibrator* calibrator);
       
+      //! Return the title
+      std::string get_title () const;
+
       //! Return the number of parameter classes
       unsigned get_nclass () const;
 

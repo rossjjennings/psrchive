@@ -82,6 +82,11 @@ void Pulsar::StepsInfo::add_steps (const MEAL::Steps* function)
     add (steps, function->get_step(istep));
 }
 
+string Pulsar::StepsInfo::get_title () const
+{
+  return "Steps";
+}
+
 //! Return the number of parameter classes
 unsigned Pulsar::StepsInfo::get_nclass () const
 {

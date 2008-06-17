@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SolverInfo.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/06/11 23:56:22 $
+   $Revision: 1.3 $
+   $Date: 2008/06/17 08:05:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SolverInfo_H
@@ -29,6 +29,9 @@ namespace Pulsar {
     //! Constructor
     SolverInfo (const PolnCalibrator* calibrator);
     
+    //! Return the title
+    std::string get_title () const;
+
     //! Return the number of parameter classes
     unsigned get_nclass () const;
     

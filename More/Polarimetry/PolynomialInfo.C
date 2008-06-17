@@ -39,6 +39,11 @@ Pulsar::PolynomialInfo::get_Polynomial (unsigned ichan) const
   return dynamic_cast<const MEAL::Polynomial*>( get_Scalar(ichan) );
 }
 
+string Pulsar::PolynomialInfo::get_title () const
+{
+  return "Polynomial Coefficients";
+}
+
 //! Return the number of parameter classes
 unsigned Pulsar::PolynomialInfo::get_nclass () const
 {

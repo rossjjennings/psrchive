@@ -15,6 +15,7 @@ Pulsar::SourceInfo::SourceInfo (const SourceEstimate* estimate)
 {
   source = estimate;
   together = false;
+  title = "Stokes Parameters";
 }
 
 void Pulsar::SourceInfo::set_together (bool flag)
@@ -25,6 +26,16 @@ void Pulsar::SourceInfo::set_together (bool flag)
 void Pulsar::SourceInfo::set_label (const std::string& lab)
 {
   label = lab;
+}
+
+void Pulsar::SourceInfo::set_title (const std::string& t)
+{
+  title = t;
+}
+
+std::string Pulsar::SourceInfo::get_title () const
+{
+  return title;
 }
 
 //! Return the number of parameter classes

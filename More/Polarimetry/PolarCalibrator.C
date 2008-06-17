@@ -127,6 +127,11 @@ Pulsar::PolarCalibrator::Info::Info (const PolnCalibrator* cal)
 {
 }
 
+string Pulsar::PolarCalibrator::Info::get_title () const
+{
+  return "Polar Decomposition of Jones Matrix";
+}
+
 //! Return the number of parameter classes
 unsigned Pulsar::PolarCalibrator::Info::get_nclass () const
 {
