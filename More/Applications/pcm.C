@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.89 $
-   $Date: 2008/06/16 23:04:59 $
+   $Revision: 1.90 $
+   $Date: 2008/06/17 01:59:03 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -69,6 +69,7 @@ void usage ()
     "  -A archive set the output archive class name \n"
     "  -m model   model: Britton [default] or Hamaker \n"
     "  -l solver  solver: MEAL [default] of GSL \n"
+    "  -I impure  load impurity transformation from file \n"
     "\n"
     "  -C meta    filename with list of calibrator files \n"
     "  -d dbase   filename of Calibration Database \n"
@@ -854,6 +855,7 @@ int actual_main (int argc, char *argv[]) try
       Pulsar::FrontendCorrection correct;
       correct.calibrate(archive);
 
+#if 0
       if (!total)
 	total = archive;
       else
@@ -861,6 +863,7 @@ int actual_main (int argc, char *argv[]) try
 	total->append (archive);
 	total->tscrunch ();
       }
+#endif
 
     }
     archive = 0;
