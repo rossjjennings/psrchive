@@ -968,7 +968,7 @@ try {
 	 << endl;
 
   // Write the ephemeris to the FITS file
-  psrephem* write_eph = 0;
+  Reference::To<psrephem> write_eph;
 
   if (ephemeris)
   {
