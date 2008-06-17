@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.90 $
-   $Date: 2008/06/17 01:59:03 $
+   $Revision: 1.91 $
+   $Date: 2008/06/17 14:19:42 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -21,6 +21,7 @@
 #include "Pulsar/PulsarCalibrator.h"
 #include "Pulsar/FrontendCorrection.h"
 #include "Pulsar/Database.h"
+#include "Pulsar/StandardPrepare.h"
 
 #include "Pulsar/ReceptionModelSolveMEAL.h"
 #if HAVE_GSL
@@ -89,10 +90,13 @@ void usage ()
     "               r = differential phase \n"
     "               a = all of the above \n"
     "\n"
+    "  -B choose  set the phase bin selection policy: int, pol, orth, inv \n"
+    "             separate multiple policies with commas \n"
+    "  -c archive choose best input states from input archive \n"
+    "\n"
     "  -b bin     add phase bin to constraints \n"
     "  -n nbin    set the number of phase bins to choose as input states \n"
     "  -p pA,pB   set the phase window from which to choose input states \n"
-    "  -c archive choose best input states from input archive \n"
     "\n"
     "  -a align   set the threshold for testing input data phase alignment \n"
     "  -g         unique absolute gain for each pulsar observation [DEVEL]\n"
@@ -121,24 +125,30 @@ SystemCalibrator* time_variation_based (const char* binname, unsigned nbin);
 // Construct a calibrator model for mode B
 SystemCalibrator* matrix_template_matching_based (const char* stdname);
 
-// defined in More/Polarimetry/choose.C
-void choose (vector<unsigned>& bins, Pulsar::Archive* archive);
+Reference::To<Calibration::StandardPrepare> prepare;
 
 void auto_select (Pulsar::ReceptionCalibrator& model,
 		  Pulsar::Archive* archive,
 		  unsigned maxbins)
 {
   cerr << "pcm: choosing up to " << maxbins << " pulse phase bins" << endl;
-  vector<unsigned> bins (maxbins);
+  vector<unsigned> bins;
 
-  choose (bins, archive);
+  prepare->set_input_states (maxbins);
+  prepare->choose (archive);
+  prepare->get_bins (bins);
 
   sort (bins.begin(), bins.end());
 
-  for (unsigned ibin=0; ibin < bins.size(); ibin++) {
+  for (unsigned ibin=0; ibin < bins.size(); ibin++)
+  {
     // cerr << "pcm: adding phase bin " << bins[ibin] << endl;
     model.add_state (bins[ibin]);
   }
+
+  archive->fscrunch ();
+  archive->tscrunch ();
+  prepare->prepare (archive);
 
   model.set_standard_data( archive );
 
@@ -153,7 +163,8 @@ void auto_select (Pulsar::ReceptionCalibrator& model,
 
   cpgswin (0,1,0,1);
   cpgsls (2);
-  for (unsigned ibin=0; ibin < bins.size(); ibin++) {
+  for (unsigned ibin=0; ibin < bins.size(); ibin++)
+  {
     float phase = float(bins[ibin])/float(archive->get_nbin());
     cpgmove (phase, 0);
     cpgdraw (phase, 1);
@@ -439,7 +450,10 @@ int actual_main (int argc, char *argv[]) try
   bool publication_plots = false;
 
   int gotc = 0;
-  const char* args = "1:A:a:b:c:C:d:DgHhI:j:J:L:l:M:m:N:n:o:Pp:qrsS:t:T:u:vV:";
+
+  const char* args
+    = "1:A:a:B:b:c:C:d:DgHhI:j:J:L:l:M:m:N:n:o:Pp:qrsS:t:T:u:vV:";
+
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
     switch (gotc)
@@ -456,7 +470,12 @@ int actual_main (int argc, char *argv[]) try
       alignment_threshold = atof (optarg);
       break;
 
-    case 'b': {
+    case 'B':
+      prepare = Calibration::StandardPrepare::factory (optarg);
+      break;
+
+    case 'b':
+    {
       unsigned bin = atoi (optarg);
       cerr << "pcm: adding phase bin " << bin << endl;
       phase_bins.push_back (bin);
@@ -572,7 +591,6 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 't':
-
       nthread = atoi (optarg);
       if (nthread == 0)  {
         cerr << "pcm: invalid number of threads = " << nthread << endl;
@@ -716,6 +734,14 @@ int actual_main (int argc, char *argv[]) try
 
   }
 
+  if (!prepare)
+  {
+    Calibration::MultipleRanking* mult = new Calibration::MultipleRanking;
+    mult->add( new Calibration::MaximumPolarization );
+    mult->add( new Calibration::MaximumIntensity );
+    prepare = mult;
+  }
+
   Reference::To<Pulsar::Interpreter> preprocessor = standard_shell();
 
   Reference::To<Pulsar::SystemCalibrator> model;
@@ -751,10 +777,7 @@ int actual_main (int argc, char *argv[]) try
 	cerr << "pcm: dedispersing and removing baseline from pulsar data"
 	     << endl;
       
-      archive->convert_state (Signal::Stokes);
-      archive->remove_baseline ();
-      archive->dedisperse ();
-      archive->centre (0.0);
+      prepare->prepare (archive);
     }
 
     if (!model) try
@@ -855,7 +878,6 @@ int actual_main (int argc, char *argv[]) try
       Pulsar::FrontendCorrection correct;
       correct.calibrate(archive);
 
-#if 0
       if (!total)
 	total = archive;
       else
@@ -863,8 +885,6 @@ int actual_main (int argc, char *argv[]) try
 	total->append (archive);
 	total->tscrunch ();
       }
-#endif
-
     }
     archive = 0;
   }
@@ -1006,7 +1026,7 @@ int actual_main (int argc, char *argv[]) try
 
       cpgend ();
       
-      plotter.set_plot_residual (!normalize_by_invariant);
+      plotter.set_plot_residual (true);
       
       cerr << "pcm: plotting pulsar constraints with model" << endl;
       plot_constraints (plotter, model->get_nchan(),
@@ -1168,13 +1188,6 @@ SystemCalibrator* time_variation_based (const char* binfile, unsigned nbin) try
       autobin = Pulsar::Archive::load (binfile);
       reflections.transform (autobin);
 
-      autobin->fscrunch ();
-      autobin->tscrunch ();
-      autobin->convert_state (Signal::Stokes);
-      autobin->remove_baseline ();
-      autobin->dedisperse ();
-      autobin->centre (0.0);
-
       auto_select (*model, autobin, maxbins);
 
       if (alignment_threshold)
@@ -1182,9 +1195,8 @@ SystemCalibrator* time_variation_based (const char* binfile, unsigned nbin) try
     }
     catch (Error& error)
     {
-      throw Error (InvalidState, "pcm:mode A",
-		   "could not load constraint archive %s:\n\t%s",
-		   binfile, error.warning().c_str());
+      error << "\ncould not load constraint archive '" << binfile << "'";
+      throw error;
     }
     else
       range_select (*model, phmin, phmax, nbin, maxbins);
