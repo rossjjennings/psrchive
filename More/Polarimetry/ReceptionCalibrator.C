@@ -156,17 +156,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     }
   }
 
-
   create_model ();
-
-  for (unsigned ichan=0; ichan<model.size(); ichan++)
-  {
-    if (normalize_by_invariant)
-      model[ichan] -> set_constant_pulsar_gain ();
-
-    if (measure_cal_Q)
-      model[ichan] -> fix_orientation ();
-  }
 
   if (calibrator_estimate.source.size() == 0 && calibrator_filenames.size())
     load_calibrators ();
@@ -176,6 +166,20 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     init_estimate ( pulsar[istate] );
 
   add_epoch( data->start_time () );
+}
+
+void Pulsar::ReceptionCalibrator::init_model (unsigned ichan)
+{
+  if (verbose > 2)
+    cerr << "Pulsar::ReceptionCalibrator::init_model ichan=" << ichan << endl;
+
+  SystemCalibrator::init_model (ichan);
+
+  if (normalize_by_invariant)
+    model[ichan] -> set_constant_pulsar_gain ();
+
+  if (measure_cal_Q)
+    model[ichan] -> fix_orientation ();
 }
 
 void Pulsar::ReceptionCalibrator::load_calibrators ()
