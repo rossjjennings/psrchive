@@ -719,7 +719,7 @@ void Pulsar::SystemCalibrator::create_model ()
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
-    //if (verbose > 2)
+    if (verbose > 2)
       cerr << "Pulsar::SystemCalibrator::create_model ichan=" << ichan << endl;
 
     bool britton = model_type == Calibrator::Britton;
@@ -742,7 +742,8 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
 
   if (impurity)
   {
-    cerr << ichan << " setting impurity" << endl;
+    if (verbose > 2)
+      cerr << "Pulsar::SystemCalibrator::init_model impurity" << endl;
     model[ichan]->set_impurity( impurity->clone() );
   }
 
