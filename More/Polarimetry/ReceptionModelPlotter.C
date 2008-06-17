@@ -191,14 +191,13 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   
   plotter.separate_viewports();
   
-  for (unsigned iplot=0; iplot<3; iplot++) {
-
+  for (unsigned iplot=0; iplot<3; iplot++)
+  {
     set_ipol (iplot + 1);
     plot_stokes (plotter, iplot);
 
     if (model_solved && !plot_residual)
       plot_model ();
-
   }
 
   cpgsci (1);
@@ -206,6 +205,12 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   cpgsvp (x1, x2, y1, y2);
   cpgbox ("bcnst",0,0,"",0,0);
   cpgmtxt("B",3.0,.5,.5, abscissa->get_label().c_str());
+
+  string title = "Stokes Parameters (State= " + tostring(isource) + ")";
+  if (plot_residual)
+    title = "Residual " + title;
+
+  cpgmtxt("T",.5,.5,.5, title.c_str());
 
   cpgsci (1);
   cpgsls (1);
