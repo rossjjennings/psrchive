@@ -160,7 +160,18 @@ void Pulsar::PolnProfileStats::build () try
 		 "input PolnProfile is not in the Stokes state");
 
   if (!regions_set)
+  {
     stats->select_profile( profile->get_Profile(0) );
+
+    // cerr << "1:on pulse=" << stats->get_on_pulse_nbin() << endl;
+
+    Profile invint;
+    profile->invint (&invint);
+
+    stats->deselect_onpulse (&invint, 0);
+
+    // cerr << "2:on pulse=" << stats->get_on_pulse_nbin() << endl;
+  }
 }
 catch (Error& error)
 {
