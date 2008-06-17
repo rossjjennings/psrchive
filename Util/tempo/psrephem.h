@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.44 $
-   $Date: 2007/08/14 22:15:58 $
+   $Revision: 1.45 $
+   $Date: 2008/06/17 06:18:55 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -68,7 +68,7 @@ class psrephem : public Pulsar::Parameters
   bool   tempo11;
   std::string nontempo11;
 
-  psrephem() { init (); };
+  psrephem();
   ~psrephem();
 
   psrephem (const psrephem &);

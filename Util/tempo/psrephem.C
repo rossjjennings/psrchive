@@ -26,15 +26,17 @@
 #include <iostream>
 using namespace std;
 
+psrephem::psrephem()
+{
+  init ();
+  zero ();
+}
 
-/* convertunits declaration removed from header file; needs config.h to be
-   defined on every architecture */
+psrephem::~psrephem()
+{
+  destroy();
+}
 
-#define convertunits F77_FUNC (convertunits,CONVERTUNITS)
-extern "C" int convertunits (double* value, double* error,
-			     int* status, int* convert);
-
-psrephem::~psrephem(){ destroy(); }
 
 // defines the recognized filename extensions used for pulsar ephemeris files
 vector<string> psrephem::extensions ()
@@ -614,13 +616,21 @@ void f2cstr (char* str, unsigned length)
 {
   unsigned i = length-1;
  
-  while (str[i] == ' ') {
+  while (str[i] == ' ')
+  {
     str[i] = '\0';
     if (i == 0)
       break;
     i--;
   }
 }
+
+/* convertunits declaration removed from header file; needs config.h to be
+   defined on every architecture */
+
+#define convertunits F77_FUNC (convertunits,CONVERTUNITS)
+extern "C" int convertunits (double* value, double* error,
+			     int* status, int* convert);
 
 int psrephem::load (string* instr)
 {
