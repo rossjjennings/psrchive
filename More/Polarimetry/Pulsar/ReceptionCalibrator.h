@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.83 $
-   $Date: 2008/06/13 17:24:07 $
+   $Revision: 1.84 $
+   $Date: 2008/06/17 01:35:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -139,6 +139,9 @@ namespace Pulsar {
 
     //! Set the initial guesses and update the reference epoch
     void initialize ();
+
+    //! Initialize the StandardModel of the specified channel
+    void init_model (unsigned ichan);
 
     //! Check that the model is ready to receive additional constraints
     void check_ready (const char* method, bool init = true);

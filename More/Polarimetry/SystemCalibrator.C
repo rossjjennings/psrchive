@@ -73,6 +73,7 @@ bool Pulsar::SystemCalibrator::has_solver () const
 const MEAL::LeastSquares* 
 Pulsar::SystemCalibrator::get_solver (unsigned ichan) const
 {
+  check_ichan ("get_solver", ichan);
   return model[ichan]->get_equation()->get_solver();
 }
 
@@ -132,6 +133,7 @@ unsigned Pulsar::SystemCalibrator::get_nstate () const
   if (model.size() == 0)
     return 0;
 
+  check_ichan ("get_nstate", 0);
   return model[0]->get_equation()->get_num_input ();
 }
 
@@ -156,7 +158,7 @@ unsigned Pulsar::SystemCalibrator::get_nchan () const
 
 unsigned Pulsar::SystemCalibrator::get_ndata (unsigned ichan) const
 {
-  assert (ichan < model.size());
+  check_ichan ("get_ndata", ichan);
   return model[ichan]->get_equation()->get_ndata ();
 }
 
@@ -206,6 +208,9 @@ void Pulsar::SystemCalibrator::add_pulsar (const Archive* data) try
 
   match (data);
 
+  if (model.size() == 0)
+    create_model ();
+
   Reference::To<Archive> clone;
 
   BackendCorrection correct_backend;
@@ -242,7 +247,7 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   const Integration* integration = data->get_Integration (isub);
   unsigned nchan = integration->get_nchan ();
 
-  if (model.size() > 1 && nchan != model.size())
+  if (model.size() != 1 && nchan != model.size())
     throw Error (InvalidState, "Pulsar::SystemCalibrator::add_pulsar",
 		 "input data nchan=%d != model nchan=%d", nchan, model.size());
 
@@ -416,6 +421,9 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 
   epoch_added = vector<bool> (nchan, false);
 
+  // ensure that model array is large enough
+  check_ichan ("add_calibrator", nchan - 1);
+
   for (unsigned isub=0; isub<nsub; isub++)
   {
     const Integration* integration = cal->get_Integration (isub);
@@ -510,6 +518,8 @@ void Pulsar::SystemCalibrator::init_estimate (SourceEstimate& estimate)
 
   bool first_channel = true;
 
+  check_ichan ("init_estimate", nchan - 1);
+
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
     if (!model[ichan]->valid)
@@ -585,6 +595,8 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
   if (verbose > 2)
     cerr << "Pulsar::SystemCalibrator::submit_calibrator_data ichan="
 	 << data.ichan << endl;
+
+  check_ichan ("subit_calibrator_data", data.ichan);
 
   // it may be necessary to remove this signal path if
   // the add_data step fails and no other calibrator succeeds
@@ -707,42 +719,51 @@ void Pulsar::SystemCalibrator::create_model ()
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
-    if (verbose > 2)
+    //if (verbose > 2)
       cerr << "Pulsar::SystemCalibrator::create_model ichan=" << ichan << endl;
 
     bool britton = model_type == Calibrator::Britton;
     model[ichan] = new Calibration::StandardModel (britton);
 
-    if (verbose > 2)
-      cerr << "Pulsar::SystemCalibrator::create_model set variations" << endl;
-
-    if (impurity)
-      model[ichan]->set_impurity( impurity->clone() );
-
-    if (gain_variation)
-      model[ichan]->set_gain( gain_variation->clone() );
-
-    if (diff_gain_variation)
-      model[ichan]->set_diff_gain( diff_gain_variation->clone() );
-
-    if (diff_phase_variation)
-      model[ichan]->set_diff_phase( diff_phase_variation->clone() );
-
     if (basis)
       model[ichan]->set_basis (basis);
-
-    if (solver)
-      model[ichan]->set_solver( solver->clone() );
+  
+    init_model( ichan );
   }
 
   if (verbose)
     cerr << "Pulsar::SystemCalibrator::create_model exit" << endl;
 }
 
+void Pulsar::SystemCalibrator::init_model (unsigned ichan)
+{
+  if (verbose > 2)
+    cerr << "Pulsar::SystemCalibrator::init_model ichan=" << ichan << endl;
+
+  if (impurity)
+  {
+    cerr << ichan << " setting impurity" << endl;
+    model[ichan]->set_impurity( impurity->clone() );
+  }
+
+  if (gain_variation)
+    model[ichan]->set_gain( gain_variation->clone() );
+
+  if (diff_gain_variation)
+    model[ichan]->set_diff_gain( diff_gain_variation->clone() );
+  
+  if (diff_phase_variation)
+    model[ichan]->set_diff_phase( diff_phase_variation->clone() );
+  
+  if (solver)
+    model[ichan]->set_solver( solver->clone() );
+}
+
 //! Return the StandardModel for the specified channel
 const Calibration::StandardModel*
 Pulsar::SystemCalibrator::get_model (unsigned ichan) const
 {
+  check_ichan ("get_model", ichan);
   return model[ichan];
 }
 
@@ -1115,4 +1136,11 @@ void Pulsar::SystemCalibrator::set_retry_reduced_chisq (float reduced_chisq)
   try_again_chisq = reduced_chisq;
 }
 
+void Pulsar::SystemCalibrator::check_ichan (const char* name, unsigned ichan)
+const
+{
+  if (ichan >= model.size())
+    throw Error (InvalidRange, "Pulsar::SystemCalibrator::" + string(name),
+		 "ichan=%u >= nchan=%u", ichan, model.size());
+}
 

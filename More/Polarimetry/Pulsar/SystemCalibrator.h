@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/06/15 17:23:03 $
+   $Revision: 1.13 $
+   $Date: 2008/06/17 01:35:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -219,6 +219,9 @@ namespace Pulsar {
     //! Time variation of differential phase
     Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
 
+    //! Initialize the StandardModel of the specified channel
+    virtual void init_model (unsigned ichan);
+
     //! Initialize a SourceEstimate instance
     virtual void init_estimate (SourceEstimate&);
 
@@ -276,6 +279,9 @@ namespace Pulsar {
 
     //! Solve the specified channel after copying a good solution from another
     void resolve (unsigned ichan);
+
+    //! ensure that ichan < model.size()
+    void check_ichan (const char* name, unsigned ichan) const;
 
   private:
 

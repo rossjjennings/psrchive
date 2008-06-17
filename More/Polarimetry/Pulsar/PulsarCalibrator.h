@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.28 $
-   $Date: 2008/04/07 00:38:07 $
+   $Revision: 1.29 $
+   $Date: 2008/06/17 01:35:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -112,6 +112,8 @@ namespace Pulsar {
     //! The baseline region
     PhaseWeight baseline;
 
+    //! Initialize the StandardModel of the specified channel
+    void init_model (unsigned ichan);
 
     //! Solve the measurement equation for the given channel
     void solve1 (const Integration* data, unsigned ichan);
