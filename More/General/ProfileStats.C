@@ -56,6 +56,13 @@ void Pulsar::ProfileStats::select_profile (const Profile* set_profile)
     regions_set = true;
 }
 
+void Pulsar::ProfileStats::deselect_onpulse (const Profile* prof, float thresh)
+{
+  for (unsigned i=0; i<prof->get_nbin(); i++)
+    if (prof->get_amps()[i] < thresh)
+      on_pulse[i] = 0;
+}
+
 //! The algorithm used to find the on-pulse phase bins
 void Pulsar::ProfileStats::set_on_pulse_estimator (OnPulseEstimator* est)
 {

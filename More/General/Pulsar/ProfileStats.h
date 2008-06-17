@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/04/07 00:38:18 $
+   $Revision: 1.6 $
+   $Date: 2008/06/17 14:41:43 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileStats_h
@@ -40,6 +40,9 @@ namespace Pulsar
 
     //! Set the Profile that defines the baseline and on-pulse regions
     void select_profile (const Profile*);
+
+    //! Deselect onpulse phase bins in profile that fall below threshold
+    void deselect_onpulse (const Profile* profile, float threshold);
 
     //! The algorithm used to find the on-pulse phase bins
     void set_on_pulse_estimator (OnPulseEstimator*);
