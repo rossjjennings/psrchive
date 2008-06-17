@@ -219,8 +219,14 @@ try {
 
   }
 
+  string plot_title;
+
   if (!title.empty())
-    cpgmtxt("T",.5,.5,.5, title.c_str());
+    plot_title = title;
+  else
+    plot_title = info->get_title ();
+
+  cpgmtxt("T",.5,.5,.5, title.c_str());
 	
   // restore the viewport
   cpgsvp (xmin, xmax, ymin, ymax);
