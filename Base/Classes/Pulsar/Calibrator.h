@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Calibrator.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/12/06 05:49:36 $
+   $Revision: 1.6 $
+   $Date: 2008/06/17 07:55:24 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -118,6 +118,9 @@ namespace Pulsar {
 
       //! Destructor
       virtual ~Info () {}
+
+      //! Return the title to print above the plot
+      virtual std::string get_title() const = 0;
 
       //! Return the number of parameter classes
       virtual unsigned get_nclass () const = 0;
