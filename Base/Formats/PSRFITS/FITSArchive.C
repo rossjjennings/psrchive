@@ -958,7 +958,8 @@ try {
   const ProcHistory* history = get<ProcHistory>();
   
   if (!history)
-    throw Error (InvalidState,"Pulsar::FITSArchive::unload","no ProcHistory");
+    throw Error (InvalidState, "Pulsar::FITSArchive::unload",
+		 "no ProcHistory");
 
   unload (fptr, history);
   
@@ -967,23 +968,34 @@ try {
 	 << endl;
 
   // Write the ephemeris to the FITS file
-  
-  if (ephemeris) {
+  psrephem* write_eph = 0;
 
-    psrephem* eph = dynamic_cast<psrephem*>( ephemeris.get() );
+  if (ephemeris)
+  {
+    write_eph = dynamic_cast<psrephem*>( ephemeris.get() );
 
-    if (eph) {
-      eph->set_dm(dispersion_measure);
-      eph->set_double (EPH_RM, rotation_measure);
-      ::unload (fptr, eph);
-    }
-    else
-      warning << "FITSArchive::unload_file"
-	" non-tempo parameters not yet supported" << endl;
+    if (!write_eph)
+      throw Error (InvalidState, "Pulsar::FITSArchive::unload",
+		   "pulsar parameter set is not a tempo ephemeris");
+  }
+
+  if (!write_eph && (dispersion_measure != 0.0 || rotation_measure != 0.0))
+  {
+    warning << "FITSArchive::unload_file creating psrephem to store DM/RM"
+	    << endl;
+    
+    write_eph = new psrephem;
+  }
+
+  if (write_eph)
+  {
+    write_eph->set_double (EPH_DM, dispersion_measure);
+    write_eph->set_double (EPH_RM, rotation_measure);
+
+    ::unload (fptr, write_eph);
 
     if (verbose > 2)
       cerr << "FITSArchive::unload_file ephemeris written" << endl;
-
   }
   else
     delete_hdu (fptr, "PSREPHEM");
@@ -994,14 +1006,17 @@ try {
 
   try
   {
-  const DigitiserStatistics* digistats = get<DigitiserStatistics>();
-  if (digistats)
-    unload (fptr, digistats);
-  else
-    delete_hdu (fptr, "DIG_STAT");
-  } catch( Error e ) {
+    const DigitiserStatistics* digistats = get<DigitiserStatistics>();
+    if (digistats)
+      unload (fptr, digistats);
+    else
+      delete_hdu (fptr, "DIG_STAT");
+  }
+  catch( Error& e )
+  {
     cerr << e << endl;
   }
+
   const DigitiserCounts *dig_counts = get<DigitiserCounts>();
   if( dig_counts )
     unload( fptr, dig_counts );
