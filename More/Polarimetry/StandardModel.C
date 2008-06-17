@@ -413,7 +413,8 @@ void copy_param (MEAL::Function* to, const MEAL::Function* from)
 void 
 Calibration::StandardModel::copy_transformation (const MEAL::Complex2* xform)
 {
-  if (polar) {
+  if (polar)
+  {
     const MEAL::Polar* polar_solution;
     polar_solution = dynamic_cast<const MEAL::Polar*>( xform );
     if (polar_solution)
@@ -423,7 +424,8 @@ Calibration::StandardModel::copy_transformation (const MEAL::Complex2* xform)
 		   "solution is not of the required type");
   }
 
-  if (physical) {
+  if (physical)
+  {
     const Instrument* instrument = dynamic_cast<const Instrument*>( xform );
     if (instrument)
       copy_param( physical, instrument );
@@ -474,7 +476,8 @@ Calibration::StandardModel::integrate_calibrator (const MEAL::Complex2* xform,
 
     if (flux_calibrator)
       fluxcal_backend_estimate.integrate( sa );
-    else {
+    else
+    {
       physical_estimate.integrate( sa );
 
       if (gain)
@@ -833,6 +836,14 @@ void Calibration::StandardModel::solve () try
   engage_time_variations ();
 
   get_equation()->solve();
+
+  if (impurity)
+    for (unsigned i=0; i<impurity->get_nparam(); i++)
+    {
+      cerr << i << ":" << impurity->get_Estimate(i) << " ";
+      if (i%3 == 2)
+	cerr << endl;
+    }
 }
 catch (Error& error)
 {
