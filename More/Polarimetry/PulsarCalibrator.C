@@ -213,33 +213,28 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
   }
 
   if (verbose)
-    cerr << "Pulsar::PulsarCalibrator::set_standard create model" << endl;
-
-  // create the StandardModel array of the SystemCalibrator base class
-  create_model();
-
-  if (verbose)
-    cerr << "Pulsar::PulsarCalibrator::set_standard " << model.size()
-	 << " StandardModel equations" << endl;
-
-  for (unsigned ichan=0; ichan<model_nchan; ichan++)
-  {
-    // share the measurement equations between PolnProfileFit and StandardModel
-    if (mtm[ichan])
-      model[ichan]->set_equation( mtm[ichan]->get_equation() );
-    else
-      model[ichan]->valid = false;
-
-    if (normalize_by_invariant)
-      model[ichan]->set_constant_pulsar_gain ();
-  }
-
-  if (verbose)
     cerr << "Pulsar::PulsarCalibrator::set_standard exit" << endl;
 }
 catch (Error& error)
 {
   throw error += "Pulsar::PulsarCalibrator::build";
+}
+
+void Pulsar::PulsarCalibrator::init_model (unsigned ichan)
+{
+  if (verbose > 2)
+    cerr << "Pulsar::PulsarCalibrator::init_model" << endl;
+
+  // share the measurement equations between PolnProfileFit and StandardModel
+  if (mtm[ichan])
+    model[ichan]->set_equation( mtm[ichan]->get_equation() );
+  else
+    model[ichan]->valid = false;
+
+  if (normalize_by_invariant)
+    model[ichan]->set_constant_pulsar_gain ();
+
+  SystemCalibrator::init_model (ichan);
 }
 
 //! Ensure that the pulsar observation can be added to the data set
