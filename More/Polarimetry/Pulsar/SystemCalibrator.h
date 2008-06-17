@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.13 $
-   $Date: 2008/06/17 01:35:59 $
+   $Revision: 1.14 $
+   $Date: 2008/06/17 15:04:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -34,7 +34,7 @@ namespace Pulsar {
   public:
 
     //! Construct with the specified bin from Archive
-    SourceEstimate (unsigned ibin = 0) { phase_bin = ibin; }
+    SourceEstimate (unsigned ibin = 0);
 
     //! Update each source with the mean
     void update_source();
@@ -53,6 +53,12 @@ namespace Pulsar {
 
     //! The index of the source in the model
     unsigned input_index;
+
+    //! Count attempts to add data for this state
+    unsigned add_data_attempts;
+
+    //! Count failures to add data for this state
+    unsigned add_data_failures;
 
     unsigned get_input_index() const { return input_index; }
 

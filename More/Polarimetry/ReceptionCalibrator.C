@@ -58,8 +58,6 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type)
   unique = 0;
 
   PA_min = PA_max = 0.0;
-  add_data_fail = 0;
-  add_data_call = 0;
   nthread = 1;
 }
 
@@ -311,7 +309,7 @@ Pulsar::ReceptionCalibrator::add_data
   SourceEstimate& estimate,
   unsigned ichan )
 {
-  add_data_call ++;
+  estimate.add_data_attempts ++;
 
   // sanity check
   if (ichan >= estimate.source.size ())
@@ -323,7 +321,7 @@ Pulsar::ReceptionCalibrator::add_data
 
   try {
 
-     Stokes< Estimate<double> > stokes = standard_data->get_stokes( ibin );
+    Stokes< Estimate<double> > stokes = standard_data->get_stokes( ibin );
 
     // NOTE: the measured states are not corrected
     Calibration::CoherencyMeasurement state (estimate.input_index);
@@ -346,11 +344,12 @@ Pulsar::ReceptionCalibrator::add_data
     estimate.source_guess[ichan].integrate( stokes );
 
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     if (verbose > 2)
       cerr << "Pulsar::ReceptionCalibrator::add_data ichan=" << ichan 
 	   << " ibin=" << ibin << " error\n\t" << error.get_message() << endl;
-    add_data_fail ++;
+    estimate.add_data_failures ++;
   }
 }
 
@@ -571,10 +570,29 @@ void Pulsar::ReceptionCalibrator::valid_mask (const Pulsar::SourceEstimate& src)
     model[ichan]->valid &= src.valid[ichan];
 }
 
+//! Construct with the specified bin from Archive
+Pulsar::SourceEstimate::SourceEstimate (unsigned ibin)
+{
+  phase_bin = ibin;
+  input_index = 0;
+  add_data_attempts = 0;
+  add_data_failures = 0;
+}
 
 /*! Update the best guess of each unknown input state */
 void Pulsar::SourceEstimate::update_source ()
 {
+  if (add_data_attempts && add_data_failures)
+  {
+    cerr << "Failed to add data " << add_data_failures << " out of "
+	 << add_data_attempts << " times";
+
+    if (input_index)
+      cerr << " for phase bin " << phase_bin;
+
+    cerr << endl;
+  }
+
   valid.resize( source.size() );
 
   unsigned ichan=0;
