@@ -915,11 +915,15 @@ void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
       if (jchan < 0 || jchan >= int(nchan))
 	continue;
 
+#ifdef _DEBUG
       cerr << "testing " << jchan << " ... ";
+#endif
 
       if (!model[jchan]->valid)
       {
+#ifdef _DEBUG
         cerr << "not valid" << endl;
+#endif
 	continue;
       }
 
@@ -927,7 +931,9 @@ void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
 
       if (!equation->get_solver()->get_solved())
       {
+#ifdef _DEBUG
         cerr << "not solved" << endl;
+#endif
 	continue;
       }
 
@@ -937,7 +943,9 @@ void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
 
       if (reduced_chisq > try_again_chisq)
       {
+#ifdef _DEBUG
         cerr << "not good; reduced chisq=" << reduced_chisq << endl;
+#endif
 	continue;
       }
 
