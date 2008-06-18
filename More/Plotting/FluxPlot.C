@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FluxPlot.h"
 #include "Pulsar/PlotFrame.h"
 #include "Pulsar/Archive.h"
@@ -179,7 +180,7 @@ void Pulsar::FluxPlot::plot_selection ()
 
 }
 
-void Pulsar::FluxPlot::set_selection (PhaseWeight* w)
+void Pulsar::FluxPlot::set_selection (const PhaseWeight* w)
 {
   selection = w; 
 }

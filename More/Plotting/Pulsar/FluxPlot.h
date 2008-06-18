@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.29 $
-   $Date: 2008/01/10 23:21:34 $
+   $Revision: 1.30 $
+   $Date: 2008/06/18 12:56:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -113,7 +113,7 @@ namespace Pulsar {
     const ProfileVectorPlotter* get_plotter () const { return &plotter; }
 
     //! Set the selected profiles
-    void set_selection (PhaseWeight*);
+    void set_selection (const PhaseWeight*);
     
     //! Set the crop fraction
     void set_crop( float new_crop ) { crop = new_crop; }
@@ -138,7 +138,7 @@ namespace Pulsar {
     float crop;
 
     Reference::To<InfoLabel> info_label;
-    Reference::To<PhaseWeight> selection;
+    Reference::To<const PhaseWeight> selection;
 
     void plot_selection ();
 
