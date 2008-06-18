@@ -23,6 +23,9 @@ Calibration::StandardData::StandardData (const Pulsar::PolnProfile* select)
 //! Select the baseline and on-pulse regions from profile
 void Calibration::StandardData::select_profile (const Pulsar::PolnProfile* p)
 {
+  if (normalize)
+    stats -> set_avoid_zero_determinant ();
+
   stats->select_profile (p);
   total_determinant = stats->get_total_determinant ();
 }
@@ -69,3 +72,8 @@ Calibration::StandardData::get_stokes (unsigned ibin)
   return result;
 }
 
+//! Get the algorithm used to compute the profile statistics
+Pulsar::PolnProfileStats* Calibration::StandardData::get_poln_stats ()
+{
+  return stats;
+}
