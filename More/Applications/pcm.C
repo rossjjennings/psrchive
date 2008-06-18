@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.91 $
-   $Date: 2008/06/17 14:19:42 $
+   $Revision: 1.92 $
+   $Date: 2008/06/18 12:56:40 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -92,7 +92,7 @@ void usage ()
     "\n"
     "  -B choose  set the phase bin selection policy: int, pol, orth, inv \n"
     "             separate multiple policies with commas \n"
-    "  -c archive choose best input states from input archive \n"
+    "  -c archive choose best input states from archive \n"
     "\n"
     "  -b bin     add phase bin to constraints \n"
     "  -n nbin    set the number of phase bins to choose as input states \n"
@@ -153,7 +153,9 @@ void auto_select (Pulsar::ReceptionCalibrator& model,
   model.set_standard_data( archive );
 
 #if HAVE_PGPLOT
+
   cpgbeg (0, "chosen.ps/CPS", 0, 0);
+
   cpgslw(2);
   cpgsvp (.1,.9, .1,.9);
 
@@ -163,6 +165,7 @@ void auto_select (Pulsar::ReceptionCalibrator& model,
 
   cpgswin (0,1,0,1);
   cpgsls (2);
+
   for (unsigned ibin=0; ibin < bins.size(); ibin++)
   {
     float phase = float(bins[ibin])/float(archive->get_nbin());
@@ -171,6 +174,18 @@ void auto_select (Pulsar::ReceptionCalibrator& model,
   }
 
   cpgend();
+
+  cpgbeg (0, "onpulse.ps/CPS", 0, 0);
+
+  cpgslw(2);
+  cpgsvp (.1,.9, .1,.9);
+
+  cerr << "pcm: plotting on-pulse phase bins" << endl;
+  plot.get_flux()->set_selection( model.get_on_pulse() );
+  plot.plot (archive);
+
+  cpgend();
+
 #endif
 }
 
