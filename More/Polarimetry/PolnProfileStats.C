@@ -125,9 +125,19 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_determinant () const
 {
   Estimate<double> total_det;
 
+  unsigned count = 0;
+
   for (unsigned ibin=0; ibin < profile->get_nbin(); ibin++)
     if (stats->get_on_pulse(ibin))
+    {
       total_det += invariant( get_stokes(ibin) );
+      count ++;
+    }
+
+  if (total_det.val < 0)
+    throw Error (InvalidState, 
+                 "Pulsar::PolnProfileStats::get_total_determinant",
+                 "total det=%lf over %u phase bins\n", total_det.val, count);
 
   return total_det;
 }
@@ -163,14 +173,10 @@ void Pulsar::PolnProfileStats::build () try
   {
     stats->select_profile( profile->get_Profile(0) );
 
-    // cerr << "1:on pulse=" << stats->get_on_pulse_nbin() << endl;
-
     Profile invint;
     profile->invint (&invint);
 
     stats->deselect_onpulse (&invint, 0);
-
-    // cerr << "2:on pulse=" << stats->get_on_pulse_nbin() << endl;
   }
 }
 catch (Error& error)
