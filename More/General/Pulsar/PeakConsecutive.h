@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PeakConsecutive.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/11/02 04:25:15 $
+   $Revision: 1.3 $
+   $Date: 2008/06/18 12:56:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PeakConsecutive_h
@@ -63,8 +63,14 @@ namespace Pulsar {
 
   protected:
 
+    //! Set the weights between rise and fall, or each rise/fall pair
+    void calculate (PhaseWeight* weight);
+
     //! Compute the rise and fall of the pulse
     void build ();
+
+    //! Merge all on pulse regions into one
+    bool merge_regions;
 
     //! Flag set when the rise and fall are computed
     bool built;
@@ -86,6 +92,9 @@ namespace Pulsar {
 
     int bin_rise;
     int bin_fall;
+
+    std::vector<unsigned> on_transitions;
+    std::vector<unsigned> off_transitions;
 
     //! The BaselineEstimator used to find the off-pulse phase bins
     Reference::To<BaselineEstimator> baseline_estimator;

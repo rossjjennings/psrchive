@@ -23,14 +23,15 @@ void nbinify (int& istart, int& iend, int nbin);
 //! Default constructor
 Pulsar::PeakConsecutive::PeakConsecutive ()
 {
-  threshold = 2.0;  // 3 sigma
-  consecutive = 4;  // pretty unlikely by chance
+  threshold = 3.0;  // 3 sigma
+  consecutive = 3;  // pretty unlikely by chance
 
   bin_start = bin_end = 0;
   range_specified = false;
 
   bin_rise = bin_fall = 0;
 
+  merge_regions = false;
   built = false;
 }
 
@@ -213,15 +214,16 @@ void Pulsar::PeakConsecutive::build ()
   int start = 0;
   int stop = nbin;
 
-  if (range_specified) {
+  if (range_specified)
+  {
     start = bin_start;
     stop  = bin_end;
     nbinify (start, stop, nbin);
   }
 
-  vector<unsigned> on_transitions;
-  vector<unsigned> off_transitions;
-
+  on_transitions.resize (0);
+  off_transitions.resize (0);
+  
   regions (nbin, amps, start, stop, consecutive, cutoff,
 	   on_transitions, off_transitions);
 
@@ -231,8 +233,8 @@ void Pulsar::PeakConsecutive::build ()
   unsigned offset = on_transitions.size() - 1;
   unsigned number = on_transitions.size();
 
-  for (unsigned i=0; i < number; i++) {
-
+  for (unsigned i=0; i < number; i++)
+  {
     unsigned last = (i+offset) % number;
 
     unsigned on = on_transitions[i];
@@ -247,14 +249,13 @@ void Pulsar::PeakConsecutive::build ()
 	 << " off=" << off << " width=" << width << endl;
 #endif
 
-    if (width < min_width) {
+    if (width < min_width)
+    {
       min_width = width;
       bin_rise = on;
       bin_fall = off;
     }
-
   }
-
 }
 
 
@@ -269,4 +270,35 @@ void Pulsar::PeakConsecutive::get_indeces (int& rise, int& fall) const
 
   rise = bin_rise;
   fall = bin_fall;
+}
+
+//! Retrieve the PhaseWeight
+void Pulsar::PeakConsecutive::calculate (PhaseWeight* weight) 
+{
+  if (merge_regions)
+  {
+    RiseFall::calculate (weight);
+    return;
+  }
+
+  assert( weight != 0 );
+
+  build ();
+
+  unsigned nbin = profile->get_nbin();
+  weight->resize( nbin );
+  weight->set_all( 0.0 );
+
+  for (unsigned i=0; i < on_transitions.size(); i++)
+  {
+    int bin_rise = on_transitions[i];
+    int bin_fall = off_transitions[i];
+
+    // cerr << "rise=" << bin_rise << " fall=" << bin_fall << endl;
+
+    nbinify (bin_rise, bin_fall, nbin);
+
+    for (int ibin=bin_rise; ibin<bin_fall; ibin++)
+      (*weight)[ibin % nbin] = 1.0;
+  }
 }
