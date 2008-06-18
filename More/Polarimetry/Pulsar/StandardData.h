@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardData.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/04/07 00:38:18 $
+   $Revision: 1.4 $
+   $Date: 2008/06/18 12:57:13 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardData_H
@@ -53,7 +53,7 @@ namespace Calibration {
   class StandardData : public Reference::Able {
 
   public:
-    
+
     //! Default constructor
     /*! If specified, baseline and on-pulse regions are defined by select */
     StandardData (const Pulsar::PolnProfile* select = 0);
@@ -70,6 +70,9 @@ namespace Calibration {
     //! Get the Stokes parameters of the specified phase bin
     Stokes< Estimate<double> > get_stokes (unsigned ibin);
 
+    //! Get the algorithm used to compute the profile statistics
+    Pulsar::PolnProfileStats* get_poln_stats ();
+
  protected:
 
     Reference::To< Pulsar::PolnProfileStats > stats;
@@ -78,7 +81,7 @@ namespace Calibration {
     Estimate<double> total_determinant;
 
   };
-  
+
 }
 
 #endif
