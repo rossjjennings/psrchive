@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.84 $
-   $Date: 2008/06/17 01:35:59 $
+   $Revision: 1.85 $
+   $Date: 2008/06/18 12:56:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -79,6 +79,12 @@ namespace Pulsar {
     
     //! Set the observation that defines the baseline and on-pulse phase bins
     void set_standard_data (const Archive* data);
+
+    //! Get the baseline mask
+    const PhaseWeight* get_baseline () const;
+
+    //! Get the on-pulse mask
+    const PhaseWeight* get_on_pulse () const;
 
     //! Add the calibrator observation to the set of constraints
     void add_calibrator (const Archive* data);

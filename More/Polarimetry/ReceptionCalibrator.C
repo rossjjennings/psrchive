@@ -75,8 +75,19 @@ void Pulsar::ReceptionCalibrator::set_standard_data (const Archive* data)
   Reference::To<PolnProfile> p = clone->get_Integration(0)->new_PolnProfile(0);
 
   standard_data = new Calibration::StandardData;
-  standard_data->select_profile( p );
   standard_data->set_normalize (normalize_by_invariant);
+  standard_data->select_profile( p );
+}
+
+const Pulsar::PhaseWeight* Pulsar::ReceptionCalibrator::get_baseline () const
+{
+  return standard_data->get_poln_stats()->get_stats()->get_baseline();
+}
+
+//! Get the on-pulse mask
+const Pulsar::PhaseWeight* Pulsar::ReceptionCalibrator::get_on_pulse () const
+{
+  return standard_data->get_poln_stats()->get_stats()->get_on_pulse();
 }
 
 void Pulsar::ReceptionCalibrator::set_normalize_by_invariant (bool set)
