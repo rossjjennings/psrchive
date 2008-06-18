@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileStats.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/04/07 00:38:18 $
+   $Revision: 1.9 $
+   $Date: 2008/06/18 12:57:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileStats_h
@@ -31,6 +31,9 @@ namespace Pulsar {
 
     //! Destructor
     ~PolnProfileStats();
+
+    //! Avoid on-pulse phase bins with det(rho) close to zero
+    void set_avoid_zero_determinant (bool flag=true);
 
     //! Set the PolnProfile from which statistics will be derived
     void set_profile (const PolnProfile*);
@@ -82,6 +85,9 @@ namespace Pulsar {
 
     //! True when the on_pulse and baseline regions have been set
     bool regions_set;
+
+    //! True when zero determinant phase bins should be avoided
+    bool avoid_zero_determinant;
 
     //! The variance of the total intensity baseline
     mutable Stokes< Estimate<double> > baseline_variance;

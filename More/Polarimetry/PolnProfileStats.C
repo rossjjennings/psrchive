@@ -25,6 +25,11 @@ Pulsar::PolnProfileStats::~PolnProfileStats()
 {
 }
 
+void Pulsar::PolnProfileStats::set_avoid_zero_determinant (bool flag)
+{
+  avoid_zero_determinant = true;
+}
+
 //! Set the PolnProfile from which statistics will be derived
 void Pulsar::PolnProfileStats::set_profile (const PolnProfile* _profile)
 {
@@ -125,19 +130,15 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_determinant () const
 {
   Estimate<double> total_det;
 
-  unsigned count = 0;
-
   for (unsigned ibin=0; ibin < profile->get_nbin(); ibin++)
     if (stats->get_on_pulse(ibin))
-    {
       total_det += invariant( get_stokes(ibin) );
-      count ++;
-    }
 
   if (total_det.val < 0)
     throw Error (InvalidState, 
                  "Pulsar::PolnProfileStats::get_total_determinant",
-                 "total det=%lf over %u phase bins\n", total_det.val, count);
+                 "total det=%lf over %u phase bins\n",
+		 total_det.val, stats->get_on_pulse_nbin());
 
   return total_det;
 }
@@ -173,10 +174,19 @@ void Pulsar::PolnProfileStats::build () try
   {
     stats->select_profile( profile->get_Profile(0) );
 
-    Profile invint;
-    profile->invint (&invint);
+    if (avoid_zero_determinant)
+    {
+      Profile invint;
+      profile->invint (&invint);
 
-    stats->deselect_onpulse (&invint, 0);
+      // roughly speaking ...
+      double invint_variance = get_baseline_variance(0).val * 4;
+      double threshold = 3.0 * sqrt (invint_variance);
+
+      cerr << "before avoid " << stats->get_on_pulse_nbin() << endl;
+      stats->deselect_onpulse (&invint, threshold);
+      cerr << "after avoid " << stats->get_on_pulse_nbin() << endl;
+    }
   }
 }
 catch (Error& error)
