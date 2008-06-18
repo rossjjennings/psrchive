@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.92 $
-   $Date: 2008/06/18 12:56:40 $
+   $Revision: 1.93 $
+   $Date: 2008/06/18 23:37:12 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -322,29 +322,26 @@ bool display = true;
 // verbosity flags
 bool verbose = false;
 
-//! The maximum number of bins to use
+// The maximum number of bins to use
 unsigned maxbins = 16;
 
-//! Flag raised when the above value is set using -n
+// Flag raised when the above value is set using -n
 bool maxbins_set = false;
 
-//! The pulse phase window to use
+// The pulse phase window to use
 float phmin = 0, phmax = 0;
 
-//! The phase bins to add to the model
+// The phase bins to add to the model
 vector<unsigned> phase_bins;
 
-//! Flag raised when software may choose the maximum harmonic
+// Flag raised when software may choose the maximum harmonic
 bool choose_maximum_harmonic = false;
 
-//! Mode B: Solve the measurement equation for each observation
+// Mode B: Solve the measurement equation for each observation
 bool solve_each = false;
 
 // significance of phase shift required to fail test
 float alignment_threshold = 4.0; // sigma
-
-//! The Stokes parameters to be inverted
-Pulsar::ReflectStokes reflections;
 
 // total instensity profile of first archive, used to check for phase jumps
 Reference::To<Pulsar::Profile> phase_std;
@@ -432,6 +429,37 @@ Calibration::ReceptionModel::Solver* new_solver (const string& name)
   throw Error (InvalidParam, "pcm", "no solver named " + name);
 }
 
+// The command language interpreter
+Reference::To<Pulsar::Interpreter> preprocessor = standard_shell();
+
+// preprocessing jobs
+vector<string> jobs;
+
+// The Stokes parameters to be inverted
+Pulsar::ReflectStokes reflections;
+
+Pulsar::Archive* load (const std::string& filename)
+{
+  if (verbose)
+    cerr << "pcm: loading " << filename << endl;
+	
+  Reference::To<Pulsar::Archive> archive = Pulsar::Archive::load (filename);
+
+  cout << "pcm: loaded archive: " << filename << endl;
+
+  reflections.transform (archive);
+
+  if (jobs.size())
+  {
+    if (verbose)
+      cerr << "pcm: preprocessing " << archive->get_filename() << endl;
+    preprocessor->set(archive);
+    preprocessor->script(jobs);
+  }
+
+  return archive.release();
+}
+
 int actual_main (int argc, char *argv[]) try
 {
   // Number of threads used to solve equations
@@ -457,9 +485,6 @@ int actual_main (int argc, char *argv[]) try
 
   // number of hours over which CALs will be found from Database
   float hours = 12.0;
-
-  // preprocessing jobs
-  vector<string> jobs;
 
   bool must_have_cals = true;
   bool publication_plots = false;
@@ -661,7 +686,8 @@ int actual_main (int argc, char *argv[]) try
     }
   }
 
-  if (!stdfile && phmin == phmax && !binfile) {
+  if (!stdfile && phmin == phmax && !binfile)
+  {
     cerr << "pcm: In mode A, at least one of the following options"
       " must be specified:\n"
       " -p min,max  Choose constraints from the specified pulse phase range \n"
@@ -693,10 +719,10 @@ int actual_main (int argc, char *argv[]) try
 
   if (dbfile)
   {
-    archive = Pulsar::Archive::load(filenames.back());
+    archive = Pulsar::Archive::load( filenames.back() );
     MJD end = archive->end_time();
 
-    archive = Pulsar::Archive::load(filenames.front());
+    archive = Pulsar::Archive::load( filenames.front() );
     MJD start = archive->start_time();
 
     MJD mid = 0.5 * (end + start);
@@ -757,8 +783,6 @@ int actual_main (int argc, char *argv[]) try
     prepare = mult;
   }
 
-  Reference::To<Pulsar::Interpreter> preprocessor = standard_shell();
-
   Reference::To<Pulsar::SystemCalibrator> model;
 
   Reference::To<Pulsar::Archive> total;
@@ -767,24 +791,7 @@ int actual_main (int argc, char *argv[]) try
   
   for (unsigned i = 0; i < filenames.size(); i++) try
   {
-    if (!archive)
-    {
-      if (verbose)
-	cerr << "pcm: loading " << filenames[i] << endl;
-	
-      archive = Pulsar::Archive::load(filenames[i]);
-      reflections.transform (archive);
-
-      cout << "pcm: loaded archive: " << filenames[i] << endl;
-    }
-
-    if (jobs.size())
-    {
-      if (verbose)
-        cerr << "pcm: preprocessing " << archive->get_filename() << endl;
-      preprocessor->set(archive);
-      preprocessor->script(jobs);
-    }
+    archive = load (filenames[i]);
 
     if (archive->get_type() == Signal::Pulsar)
     {
@@ -1200,8 +1207,7 @@ SystemCalibrator* time_variation_based (const char* binfile, unsigned nbin) try
 
     if (binfile) try 
     {
-      autobin = Pulsar::Archive::load (binfile);
-      reflections.transform (autobin);
+      autobin = load (binfile);
 
       auto_select (*model, autobin, maxbins);
 
