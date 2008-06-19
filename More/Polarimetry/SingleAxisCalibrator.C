@@ -64,7 +64,7 @@ Pulsar::SingleAxisCalibrator::Info::Info (const PolnCalibrator* cal)
 
 string Pulsar::SingleAxisCalibrator::Info::get_title () const
 {
-  return "Backend Differential Gain/Phase and Reference Gain";
+  return "Polar Decomposition of Complex Gains";
 }
 
 //! Return the number of parameter classes
