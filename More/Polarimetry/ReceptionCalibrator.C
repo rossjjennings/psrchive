@@ -321,6 +321,7 @@ Pulsar::ReceptionCalibrator::add_data
   unsigned ichan )
 {
   estimate.add_data_attempts ++;
+  get_data_call ++;
 
   // sanity check
   if (ichan >= estimate.source.size ())
@@ -361,6 +362,7 @@ Pulsar::ReceptionCalibrator::add_data
       cerr << "Pulsar::ReceptionCalibrator::add_data ichan=" << ichan 
 	   << " ibin=" << ibin << " error\n\t" << error.get_message() << endl;
     estimate.add_data_failures ++;
+    get_data_fail ++;
   }
 }
 
