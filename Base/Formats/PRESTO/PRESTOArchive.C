@@ -221,9 +221,9 @@ int Pulsar::PRESTOArchive::is_spigot()
   // Try to guess whether or not we're observing with the Spigot.
   if (get_telescope()!="GBT") return 0;
   if (pfd.dt!=8.192e-05) return 0;
-  if (pfd.chan_wid==800.0/1024 || pfd.chan_wid==800.0/2048)
+  if (pfd.chan_wid==800.0/1024. || pfd.chan_wid==800.0/2048.)
     return -1;
-  if (pfd.chan_wid==50/1024 || pfd.chan_wid==50/2048)
+  if (pfd.chan_wid==50.0/1024. || pfd.chan_wid==50.0/2048.)
     return 1;
   return 0;
 }
