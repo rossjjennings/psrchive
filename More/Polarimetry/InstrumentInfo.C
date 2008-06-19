@@ -42,6 +42,11 @@ Pulsar::InstrumentInfo::InstrumentInfo (const PolnCalibrator* calibrator) :
   }
 }
 
+string Pulsar::InstrumentInfo::get_title () const
+{
+  return "Phenomenological Parameterization of Instrument";
+}
+
 //! Return the number of parameter classes
 unsigned Pulsar::InstrumentInfo::get_nclass () const
 {
