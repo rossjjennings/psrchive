@@ -68,7 +68,13 @@ void MEAL::NormalizeStokes::normalize (Stokes<Estimate<double> >& stokes)
   Stokes< Estimate<double> > normalized;
 
   for (unsigned ipol=0; ipol<stokes.size(); ipol++)
+  {
     normalized[ipol] = output[ipol].get_Estimate();
+    if (normalized[ipol].get_variance() < 0.0)
+      throw Error (InvalidParam, "MEAL::NormalizeStokes::normalize",
+                   "ipol=%d variance=%lf",
+		   ipol, normalized[ipol].get_variance());
+  }
 
   stokes = normalized;
 }
