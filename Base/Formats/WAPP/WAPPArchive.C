@@ -306,8 +306,8 @@ void Pulsar::WAPPArchive::load_header (const char* filename)
       fmod(fabs(hdr->src_dec),100.0));
   set_coordinates(s);
 
-  // TEMPO telescope site code
-  set_telescope("3"); // WAPPs only exist at Arecibo...
+  // Telescope name
+  set_telescope("Arecibo"); // WAPPs only exist at Arecibo...
 
   // Observation type (PSR or CAL)
   // Look for 25 Hz constant folding period to determine if 
@@ -387,7 +387,7 @@ void Pulsar::WAPPArchive::load_polycos()
     polynomial::Expert poly(&hdr_polyco.pollys[ipoly]);
     int ncoef = hdr->num_coeffs[pmap[ipoly]];
     poly.set_tempov11(true); 
-    poly.set_telescope(get_telescope().at(0));
+    poly.set_telescope('3');
     poly.set_freq(get_centre_frequency());
     poly.set_reftime(hdr->poly_tmid[pmap[ipoly]]);
     poly.set_refphase(hdr->rphase[pmap[ipoly]]);
@@ -634,7 +634,7 @@ void Pulsar::WAPPArchive::load_extensions()
 
   // Telescope extension
   Telescope *t = getadd<Telescope>();
-  Telescopes::set_telescope_info(t, this);
+  Telescopes::Arecibo(t);
 
   // Backend extension
   Backend *b = getadd<Backend>();
@@ -644,8 +644,7 @@ void Pulsar::WAPPArchive::load_extensions()
   ObsExtension *o = getadd<ObsExtension>();
   o->observer = hdr->observers;
   o->project_ID = hdr->project_id;
-  //o->telescope = t->get_name(); // Name
-  o->telescope = get_telescope(); // Code
+  o->telescope = get_telescope();
 
   // Receiver
   Receiver *r = getadd<Receiver>();

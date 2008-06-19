@@ -585,6 +585,9 @@ void Pulsar::BPPArchive::load_extensions() {
     Receiver *r = getadd<Receiver>();
     if (get_telescope()=="1") GBT::guess(r,this);
     else if (get_telescope()=="3") Arecibo::guess(r,this);
+
+    // Convert tempo code to telescope name
+    set_telescope(t->get_name());
 }
 
 void Pulsar::BPPArchive::unload_file (const char* filename) const
