@@ -86,6 +86,9 @@ namespace Pulsar {
     //! Test that header params fall in acceptable ranges
     int test_param_range(std::string &whynot);
 
+    //! Try to determine if this is a spigot observation
+    int is_spigot();
+
     //! Does file endian need to be changed?
     int endian_swap;
 

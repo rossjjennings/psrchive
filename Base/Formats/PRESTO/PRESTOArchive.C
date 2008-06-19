@@ -216,6 +216,18 @@ int Pulsar::PRESTOArchive::test_param_range(std::string &whynot)
   return(0);
 }
 
+int Pulsar::PRESTOArchive::is_spigot()
+{
+  // Try to guess whether or not we're observing with the Spigot.
+  if (get_telescope()!="GBT") return 0;
+  if (pfd.dt!=8.192e-05) return 0;
+  if (pfd.chan_wid==800.0/1024 || pfd.chan_wid==800.0/2048)
+    return -1;
+  if (pfd.chan_wid==50/1024 || pfd.chan_wid==50/2048)
+    return 1;
+  return 0;
+}
+
 void Pulsar::PRESTOArchive::load_header (const char* filename)
 {
   // load all BasicArchive and PRESTOArchive attributes from filename
@@ -420,11 +432,20 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
     integration->set_folding_period(1.0/pfd.fold.p1);
 
   // Set RFs for each channel, MHz.
-  // Also calculate how much we need to correct each profile
+  //
+  // NOTE: Shift all spigot data down by half a channel, to
+  // compensate for an error in converting ACFs to spectra.
+  // This should also apply to WAPP data processed by presto
+  // but the situation is more complex there since each WAPP can
+  // have different sideband, etc.  
+  // 
+  // We also calculate how much we need to correct each profile
   // to get it dedispersed to the middle of the subband
   int chan_per_subband = pfd.numchan/pfd.nsub;
   double f0 = pfd.lofreq - 0.5*pfd.chan_wid 
     + 0.5*(double)chan_per_subband*pfd.chan_wid;
+  if (is_spigot()!=0) 
+    f0 += 0.5*(double)is_spigot()*pfd.chan_wid;
   double *dm_phase_shift = new double[pfd.nsub];
   for (unsigned ichan=0; ichan<nchan; ichan++) {
     double f_mid = f0 + (double)ichan * chan_per_subband * pfd.chan_wid;
