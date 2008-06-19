@@ -18,7 +18,7 @@ int main (int argc, char** argv) try
     return -1;
   }
 
-  MEAL::Function* function = MEAL::Function::load( argv[1] );
+  MEAL::Function* function = MEAL::Function::load_Function( argv[1] );
 
   string text;
   function->print( text );
@@ -32,3 +32,4 @@ catch (Error & error)
   cerr << "test_Function_load: error" << error << endl;
   return -1;
 }
+
