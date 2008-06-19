@@ -156,6 +156,7 @@ Estimate<double> Pulsar::ProfileStats::get_baseline_variance () const
 {
   if (baseline_variance.get_value() == 0)
     baseline_variance = baseline.get_variance();
+
   return baseline_variance;
 }
 
@@ -191,9 +192,23 @@ void Pulsar::ProfileStats::build () try
   baseline_estimator->get_weight (&baseline);
 
   if (Profile::verbose)
+  {
     cerr << "Pulsar::ProfileStats::build nbin=" << profile->get_nbin()
 	 << " on-pulse=" << on_pulse.get_weight_sum()
 	 << " baseline=" << baseline.get_weight_sum() << endl;
+
+    cerr << "onpulse ";
+    for (unsigned ibin=0; ibin<profile->get_nbin(); ibin++)
+      if (on_pulse[ibin])
+        cerr << ibin << " ";
+    cerr << endl;
+
+    cerr << "baseline ";
+    for (unsigned ibin=0; ibin<profile->get_nbin(); ibin++)
+      if (baseline[ibin])
+        cerr << ibin << " ";
+    cerr << endl;
+  }
 }
 catch (Error& error)
 {
