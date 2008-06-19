@@ -745,7 +745,7 @@ string get_telescop( Reference::To< Archive > archive )
       result = text->get_name();
     }
     else 
-      result = "UNDEF";
+      result = archive->get_telescope();
   }
   else
     result = ext->get_telescope();
