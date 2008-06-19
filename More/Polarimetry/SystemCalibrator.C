@@ -303,8 +303,6 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     
     try
     {
-      get_data_call ++;
-
       if (verbose > 2)
 	cerr << "Pulsar::SystemCalibrator::add_pulsar call add_pulsar ichan="
 	     << ichan << endl;
@@ -315,7 +313,6 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     {
       if (verbose > 2 || error.get_code() != InvalidParam)
         cerr << "Pulsar::SystemCalibrator::add_pulsar error" << error << endl;
-      get_data_fail ++;
     }
     
     model[mchan]->add_observation_epoch (epoch);

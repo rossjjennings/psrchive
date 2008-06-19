@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.14 $
-   $Date: 2008/06/17 15:04:36 $
+   $Revision: 1.15 $
+   $Date: 2008/06/19 02:40:13 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -289,10 +289,10 @@ namespace Pulsar {
     //! ensure that ichan < model.size()
     void check_ichan (const char* name, unsigned ichan) const;
 
-  private:
-
     unsigned get_data_fail;
     unsigned get_data_call;
+
+  private:
 
     std::vector<bool> epoch_added;
 
