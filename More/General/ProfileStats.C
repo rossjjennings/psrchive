@@ -141,6 +141,11 @@ bool Pulsar::ProfileStats::get_on_pulse (unsigned ibin) const
   return on_pulse[ibin];
 }
 
+void Pulsar::ProfileStats::set_on_pulse (unsigned ibin, bool val)
+{
+  on_pulse[ibin] = val;
+}
+
 //! Return true if the specified phase bin is in the baseline window
 bool Pulsar::ProfileStats::get_baseline (unsigned ibin) const
 {

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/06/18 12:56:53 $
+   $Revision: 1.8 $
+   $Date: 2008/06/19 06:52:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileStats_h
@@ -61,6 +61,9 @@ namespace Pulsar
 
     //! Return true if the specified phase bin is in the on pulse window
     bool get_on_pulse (unsigned ibin) const;
+
+    //! Set if the specified phase bin is in the on pulse window
+    void set_on_pulse (unsigned ibin, bool);
 
     //! Get the number of phase bins in the baseline window
     unsigned get_baseline_nbin () const;
