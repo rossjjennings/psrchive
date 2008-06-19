@@ -128,19 +128,12 @@ Pulsar::PolnProfileStats::get_stokes (unsigned ibin) const
 //! Returns the total determinant of the on-pulse phase bins
 Estimate<double> Pulsar::PolnProfileStats::get_total_determinant () const
 {
-  Estimate<double> total_det;
+  Profile invint;
+  profile->invint (&invint, false);
 
-  for (unsigned ibin=0; ibin < profile->get_nbin(); ibin++)
-    if (stats->get_on_pulse(ibin))
-      total_det += invariant( get_stokes(ibin) );
+  stats->set_profile (&invint);
 
-  if (total_det.val < 0)
-    throw Error (InvalidState, 
-                 "Pulsar::PolnProfileStats::get_total_determinant",
-                 "total det=%lf over %u phase bins\n",
-		 total_det.val, stats->get_on_pulse_nbin());
-
-  return total_det;
+  return stats->get_total (false);
 }
 
 Estimate<double>
