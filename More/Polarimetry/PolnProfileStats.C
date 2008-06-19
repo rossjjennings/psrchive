@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PolnProfileStats.h"
 #include "Pulsar/PolnProfile.h"
 
@@ -11,6 +12,8 @@
 #include "Pulsar/GaussianBaseline.h"
 
 using namespace std;
+
+// #define _DEBUG
 
 //! Default constructor
 Pulsar::PolnProfileStats::PolnProfileStats (const PolnProfile* _profile)
@@ -128,12 +131,26 @@ Pulsar::PolnProfileStats::get_stokes (unsigned ibin) const
 //! Returns the total determinant of the on-pulse phase bins
 Estimate<double> Pulsar::PolnProfileStats::get_total_determinant () const
 {
+  Estimate<double> total_det;
+
+  for (unsigned ibin=0; ibin < profile->get_nbin(); ibin++)
+    if (stats->get_on_pulse(ibin))
+      total_det += invariant( get_stokes(ibin) );
+
+#if 0
+  cerr << "1: " << total_det << endl;
+
   Profile invint;
   profile->invint (&invint, false);
 
   stats->set_profile (&invint);
 
-  return stats->get_total (false);
+  total_det = stats->get_total (false);
+
+  cerr << "2: " << total_det << endl;
+#endif
+
+  return total_det;
 }
 
 Estimate<double>
@@ -141,12 +158,12 @@ Pulsar::PolnProfileStats::get_baseline_variance (unsigned ipol) const
 {
   if (baseline_variance[ipol].get_value() == 0)
   {
-#ifdef _DEBUG
-    cerr << "Pulsar::PolnProfileStats::get_baseline_variance ipol=" 
-         << ipol << endl;
-#endif
     stats->set_profile( profile->get_Profile(ipol) );
     baseline_variance[ipol] = stats->get_baseline_variance();
+#ifdef _DEBUG
+    cerr << "Pulsar::PolnProfileStats::get_baseline_variance ipol="
+         << ipol << " var=" << baseline_variance[ipol] << endl;
+#endif
   }
   return baseline_variance[ipol];
 }
