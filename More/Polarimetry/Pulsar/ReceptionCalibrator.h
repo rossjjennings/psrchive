@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.85 $
-   $Date: 2008/06/18 12:56:53 $
+   $Revision: 1.86 $
+   $Date: 2008/06/19 06:52:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -192,6 +192,8 @@ namespace Pulsar {
     //! Prepare to export the solution
     void export_prepare () const;
 
+    //! Ensure that selected phase bins are represented in on-pulse mask
+    void ensure_consistent_on_pulse ();
    };
 
 }

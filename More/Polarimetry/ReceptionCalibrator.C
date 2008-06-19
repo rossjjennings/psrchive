@@ -77,6 +77,19 @@ void Pulsar::ReceptionCalibrator::set_standard_data (const Archive* data)
   standard_data = new Calibration::StandardData;
   standard_data->set_normalize (normalize_by_invariant);
   standard_data->select_profile( p );
+
+  ensure_consistent_on_pulse ();
+}
+
+void Pulsar::ReceptionCalibrator::ensure_consistent_on_pulse ()
+{
+  if (!standard_data)
+    return;
+
+  ProfileStats* stats = standard_data->get_poln_stats()->get_stats();
+
+  for (unsigned istate=0; istate < pulsar.size(); istate++)
+    stats->set_on_pulse (pulsar[istate].phase_bin, true);
 }
 
 const Pulsar::PhaseWeight* Pulsar::ReceptionCalibrator::get_baseline () const
@@ -246,7 +259,8 @@ void Pulsar::ReceptionCalibrator::add_state (unsigned phase_bin)
 	 << phase_bin << endl;
 
   for (unsigned istate=0; istate<pulsar.size(); istate++)
-    if (pulsar[istate].phase_bin == phase_bin) {
+    if (pulsar[istate].phase_bin == phase_bin)
+    {
       cerr << "Pulsar::ReceptionCalibrator::add_state phase bin=" << phase_bin
 	   << " already in use" << endl;
       return;
