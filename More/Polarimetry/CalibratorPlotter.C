@@ -220,14 +220,18 @@ try {
   }
 
   string plot_title;
+  float offset = 0.5;
 
-  if (!title.empty())
-    plot_title = title;
-  else
-    plot_title = info->get_title ();
+  plot_title = info->get_title ();
 
   if (!plot_title.empty())
-    cpgmtxt("T",.5,.5,.5, plot_title.c_str());
+  {
+    cpgmtxt( "T", offset, .5,.5, plot_title.c_str());
+    offset += 1.0;
+  }
+
+  if (!title.empty())
+    cpgmtxt( "T", offset, .5,.5, title.c_str());
 	
   // restore the viewport
   cpgsvp (xmin, xmax, ymin, ymax);
