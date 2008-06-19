@@ -39,24 +39,21 @@ depolarizer;
 using namespace std;
 
 //! Construct a new model instance from a string
-MEAL::Function* MEAL::Function::new_Function (const std::string& text)
+MEAL::Function* MEAL::Function::factory (const std::string& text)
 {
-  for (unsigned agent=0; agent<Agent::registry.size(); agent++) {
-
-    if (Agent::registry[agent]->get_name () == text) {
-
+  for (unsigned agent=0; agent<Agent::registry.size(); agent++)
+  {
+    if (Agent::registry[agent]->get_name () == text)
+    {
       if (verbose)
-        cerr << "MEAL::Function::new_Function using " 
+        cerr << "MEAL::Function::factory using " 
 	     << Agent::registry[agent]->get_name() << endl;
 
-      return Agent::registry[agent]->new_Function();
-      
+      return Agent::registry[agent]->new_Function(); 
     }
-
   }
 
-  throw Error (InvalidParam, "MEAL::Function::new_Function",
+  throw Error (InvalidParam, "MEAL::Function::factory",
 	       "no match for '%s' in %d agents", text.c_str(),
 	       Agent::registry.size());
-
 }

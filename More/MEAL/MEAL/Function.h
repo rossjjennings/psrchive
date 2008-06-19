@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Function.h,v $
-   $Revision: 1.14 $
-   $Date: 2008/06/16 23:04:52 $
+   $Revision: 1.15 $
+   $Date: 2008/06/19 10:22:10 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -73,7 +73,7 @@ namespace MEAL {
     static Function* load_Function (const std::string& filename);
 
     //! Construct a new Function instance from a string
-    static Function* new_Function (const std::string& text);
+    static Function* factory (const std::string& text);
 
     //! Default constructor
     Function ();

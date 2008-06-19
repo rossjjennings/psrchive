@@ -11,7 +11,7 @@
 MEAL::Function*
 MEAL::Function::load_Function (const std::string& filename) try
 {
-  Functor< Function*(std::string) > constructor( &new_Function );
+  Functor< Function*(std::string) > constructor (&factory);
 
   return Factory::load (filename, constructor, verbose);
 }

@@ -124,8 +124,8 @@ libMEAL_la_SOURCES = \
 	Depolarizer.C \
         ForwardChanged.C \
         Function.C \
+        Function_factory.C \
         Function_load.C \
-        Function_new_Function.C \
         Function_parse.C \
         Function_print.C \
 	FunctionPolicy.C \

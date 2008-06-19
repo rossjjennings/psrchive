@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/GroupRule.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/06/15 16:12:34 $
+   $Revision: 1.9 $
+   $Date: 2008/06/19 10:22:10 $
    $Author: straten $ */
 
 #ifndef __GroupRule_H
@@ -158,7 +158,7 @@ void MEAL::GroupRule<T>::parse (const std::string& line)
   if (this->get_verbose())
     std::cerr << class_name() << "::parse key '" << key << "'" << std::endl;
 
-  Function* model = Function::new_Function (key);
+  Function* model = Function::factory (key);
 
   T* mtype = dynamic_cast<T*>(model);
   if (!mtype)
