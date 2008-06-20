@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -22,11 +22,11 @@
 
 using namespace std;
 
-Pulsar::SystemCalibratorPlotter::SystemCalibratorPlotter
-(SystemCalibrator* cal)
+Pulsar::SystemCalibratorPlotter::SystemCalibratorPlotter (SystemCalibrator* c)
 {
-  calibrator = cal;
+  calibrator = c;
   plot_residual = false;
+  output_state = false;
 }
 
 Pulsar::SystemCalibratorPlotter::~SystemCalibratorPlotter ()
@@ -113,13 +113,12 @@ void Pulsar::SystemCalibratorPlotter::plot_constraints (unsigned ichan,
   plotter.set_max ( calibrator->end_epoch );
   plotter.set_npt ( 100 );
 
-  if (!calibrator->get_solved()) {
-
+  if (output_state && !calibrator->get_solved())
+  {
     char buffer[256];
     sprintf (buffer, "pcm_state%d_chan%d.dat", istate, ichan);
 
     plotter.set_output (buffer);
-
   }
 
   plotter.plot_observations ();

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibratorPlotter.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/04/07 00:38:18 $
+   $Revision: 1.3 $
+   $Date: 2008/06/20 13:10:40 $
    $Author: straten $ */
 
 #ifndef __SystemCalibratorPlotter_H
@@ -22,12 +22,13 @@
 
 class EstimatePlotter;
 
-namespace Pulsar {
-
+namespace Pulsar
+{
   class SystemCalibrator;
 
   //! Pulsar::SystemCalibrator plotter
-  class SystemCalibratorPlotter : public CalibratorPlotter {
+  class SystemCalibratorPlotter : public CalibratorPlotter
+  {
     
   public:
 
@@ -70,6 +71,8 @@ namespace Pulsar {
     //! Plotting methods will plot the residual
     bool plot_residual;
 
+    //! Plotting methods will output data in text files, pcm_state*.dat
+    bool output_state;
   };
 
 }
