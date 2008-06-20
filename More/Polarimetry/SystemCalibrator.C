@@ -254,7 +254,7 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   MJD epoch = integration->get_epoch ();
   add_epoch (epoch);
 
-  // use the ProjectionCorrection class to calculate the feed transformation
+  // use the ProjectionCorrection class to calculate the transformation
   ProjectionCorrection correction;
   correction.set_archive (data);
   Jones<double> projection = correction (isub);
@@ -462,8 +462,8 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
       data.observation = coherency( convert (calibtor) );
       data.baseline = coherency( convert (baseline) );
 
-      try {
-
+      try
+      {
 	Calibration::CoherencyMeasurementSet measurements;
 
 	measurements.set_identifier( identifier );
@@ -477,9 +477,9 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
         measurements.push_back( state );
 
 	submit_calibrator_data (measurements, data);
-
       }
-      catch (Error& error) {
+      catch (Error& error)
+      {
         cerr << "Pulsar::SystemCalibrator::add_calibrator ichan="
              << ichan << " error\n" << error << endl;
 	continue;
@@ -546,7 +546,6 @@ void Pulsar::SystemCalibrator::init_estimate (SourceEstimate& estimate)
 
     first_channel = false;
   }
-
 }
 
 void Pulsar::SystemCalibrator::prepare_calibrator_estimate ( Signal::Source s )
@@ -815,7 +814,6 @@ void Pulsar::SystemCalibrator::solve_prepare ()
     
     if (verbose > 2)
       model[ichan]->get_equation()->get_solver()->set_debug();
-
   }
 
   is_prepared = true;
@@ -847,7 +845,6 @@ void Pulsar::SystemCalibrator::solve ()
       model[ichan]->get_equation()->get_solver()->set_report ();
 
     queue.submit( model[ichan].get(), &StandardModel::solve );
-
   }
 
   queue.wait ();
@@ -1024,9 +1021,18 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
   {
     Integration* integration = data->get_Integration (isub);
 
+    // use the ProjectionCorrection class to calculate the transformation
+    ProjectionCorrection correction;
+    correction.set_archive (data);
+    Jones<double> projection = correction (isub);
+
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
-      if (!model[ichan]->valid)
+      unsigned mchan = ichan;
+      if (model.size() == 1)
+	mchan = 0;
+
+      if (!model[mchan]->valid)
       {
 	if (verbose > 2)
 	  cerr << "Pulsar::SystemCalibrator::precalibrate ichan=" << ichan 
@@ -1039,46 +1045,52 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
       }
 
       MEAL::Complex2* signal_path = 0;
-      ReceptionModel* equation = model[ichan]->get_equation();
+      ReceptionModel* equation = model[mchan]->get_equation();
 
-      switch ( data->get_type() )  {
+      switch ( data->get_type() )
+      {
+
       case Signal::Pulsar:
 	// cerr << "Pulsar::ReceptionCalibrator::precalibrate Pulsar" << endl;
-        equation->set_transformation_index (model[ichan]->get_pulsar_path());
+	model[mchan]->projection.set_value (projection);
+        equation->set_transformation_index (model[mchan]->get_pulsar_path());
         signal_path = equation->get_transformation ();
 	parallactic_corrected = true;
 	break;
+
       case Signal::PolnCal:
 	// cerr << "Pulsar::ReceptionCalibrator::precalibrate PolnCal" << endl;
-        equation->set_transformation_index (model[ichan]->get_polncal_path());
+        equation->set_transformation_index (model[mchan]->get_polncal_path());
         signal_path = equation->get_transformation ();
 	break;
+
       case Signal::FluxCalOn:
 	// cerr << "Pulsar::ReceptionCalibrator::precalibrate FluxCal" << endl;
-        equation->set_transformation_index (model[ichan]->get_fluxcal_path());
+        equation->set_transformation_index (model[mchan]->get_fluxcal_path());
         signal_path = equation->get_transformation ();
         break;
+
       default:
 	throw Error (InvalidParam, "Pulsar::SystemCalibrator::precalibrate",
 		     "unknown Archive type for " + data->get_filename() );
+
       }
 
       response[ichan] = Jones<float>::identity();
 
-      if (!signal_path) {
+      if (!signal_path)
+      {
         integration->set_weight (ichan, 0.0);
         continue;
       }
 
-      try {
-	model[ichan]->time.set_value( integration->get_epoch() );
-#ifdef _DEBUG
-	cerr << "para=" << model[ichan]->parallactic.get_parallactic_angle()
-	     << endl;
-#endif
+      try
+      {
+	model[mchan]->time.set_value( integration->get_epoch() );
 	response[ichan] = signal_path->evaluate();
       }
-      catch (Error& error) {
+      catch (Error& error)
+      {
 	if (verbose > 2)
 	  cerr << "Pulsar::SystemCalibrator::precalibrate ichan=" << ichan
 	       << endl << error.get_message() << endl;
@@ -1087,7 +1099,8 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
 	continue;
       }
 
-      if ( norm(det( response[ichan] )) < 1e-9 ) {
+      if ( norm(det( response[ichan] )) < 1e-9 )
+      {
         if (verbose > 2)
           cerr << "Pulsar::SystemCalibrator::precalibrate ichan=" << ichan
                << " faulty response" << endl;
