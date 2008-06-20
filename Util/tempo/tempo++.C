@@ -114,7 +114,8 @@ string Tempo::get_directory ()
 {
   char* unknown = "unknown";
 
-  if (!directory.length()) {
+  if (!directory.length())
+  {
     char* userid = getenv ("USER");
     if (!userid)
       userid = unknown;
@@ -122,8 +123,8 @@ string Tempo::get_directory ()
     directory = string ("/tmp/tempo/") + userid;
   }
 
-  if (makedir (directory.c_str()) < 0)  {
-
+  if (makedir (directory.c_str()) < 0)
+  {
     if (verbose)
       cerr << "Tempo::get_directory failure creating '" << directory 
 	   << "'" << endl;
@@ -140,8 +141,9 @@ string Tempo::get_directory ()
     if (makedir (directory.c_str()) < 0)
       throw Error (InvalidState, "Tempo::get_directory",
 		   "cannot create a temporary working directory");
-
   }
+  else
+    chmod ("/tmp/tempo/", 0777);
 
   return directory;
 }
