@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/CalibratorPlotter.h"
 #include "Pulsar/Calibrator.h"
 #include "Pulsar/Archive.h"
@@ -23,6 +24,7 @@ Pulsar::CalibratorPlotter::CalibratorPlotter ()
   npanel = 3;
   between_panels = 0.1;
   use_colour = true;
+  print_titles = true;
 }
 
 Pulsar::CalibratorPlotter::~CalibratorPlotter ()
@@ -30,8 +32,8 @@ Pulsar::CalibratorPlotter::~CalibratorPlotter ()
 }
 
 //! PGPLOT the calibrator model parameters as a function of frequency
-void Pulsar::CalibratorPlotter::plot (const Calibrator* calibrator) try {
-
+void Pulsar::CalibratorPlotter::plot (const Calibrator* calibrator) try
+{
   if (!calibrator)
     return;
 
@@ -41,16 +43,17 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calibrator) try {
   plot( calibrator->get_Info (), calibrator->get_nchan (),
 	calibrator->get_Archive()->get_centre_frequency(),
 	calibrator->get_Archive()->get_bandwidth() );
-
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::CalibratorPlotter::plot(Calibrator*)";
 }
 
 
 void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
 				      unsigned nchan, double cfreq, double bw)
-try {
+try
+{
 
   if (!info) {
     cerr << "Pulsar::CalibratorPlotter::plot no Calibrator::Info" << endl;
@@ -59,7 +62,8 @@ try {
 
   Reference::To<const Calibrator::Info> manage = info;
 
-  if (nchan == 0) {
+  if (nchan == 0)
+  {
     cerr << "Pulsar::CalibratorPlotter::plot no points to plot" << endl;
     return;
   }
@@ -109,15 +113,15 @@ try {
 
   unsigned ipanel = 0;
 
-  for (unsigned iplot=0; iplot < info->get_nclass(); iplot++) {
-
+  for (unsigned iplot=0; iplot < info->get_nclass(); iplot++)
+  {
 #ifdef _DEBUG
     cerr << "Pulsar::CalibratorPlotter::plot " 
 	 << iplot << "/" << info->get_nclass() << endl;
 #endif
 
-    if (ipanel % npanel == 0) {
-
+    if (ipanel % npanel == 0)
+    {
       xaxis = "bcnst";
 
       if (ipanel)
@@ -129,7 +133,6 @@ try {
 
       if (to_plot < npanel)
 	ybottom += 0.5 * (ybetween + yheight) * float(npanel - to_plot);
-
     }
     else
       xaxis = "bcst";
@@ -146,8 +149,8 @@ try {
 
     unsigned iparam = 0;
 
-    for (iparam=0; iparam<nparam; iparam++) {
-
+    for (iparam=0; iparam<nparam; iparam++)
+    {
 #ifndef _DEBUG
       if (verbose)
 #endif
@@ -158,7 +161,6 @@ try {
 	data[ichan] = info->get_param (ichan, iplot, iparam);
 
       plotter.add_plot (data);
-
     }
 
 #ifndef _DEBUG
@@ -171,19 +173,18 @@ try {
 
     unsigned plotted = 0;
 
-    for (iparam=0; iparam<nparam; iparam++) {
-
+    for (iparam=0; iparam<nparam; iparam++)
+    {
       if (use_colour)
 	cpgsci ( info->get_colour_index(iplot, iparam) );
       else
 	plotter.set_graph_marker ( info->get_graph_marker(iplot, iparam) );
 
       plotted += plotter.plot (iparam);
-
     }
 
-    if (plotted > 0) {
-
+    if (plotted > 0)
+    {
 #ifndef _DEBUG
       if (verbose)
 #endif
@@ -209,7 +210,6 @@ try {
 
       ipanel ++;
       ybottom += ybetween + yheight;
-
     }
 
 #ifdef _DEBUG
@@ -219,20 +219,22 @@ try {
 
   }
 
-  string plot_title;
-  float offset = 0.5;
-
-  plot_title = info->get_title ();
-
-  if (!plot_title.empty())
+  if (print_titles)
   {
-    cpgmtxt( "T", offset, .5,.5, plot_title.c_str());
-    offset += 1.0;
+    float offset = 0.5;
+
+    string plot_title = info->get_title ();
+
+    if (!plot_title.empty())
+    {
+      cpgmtxt( "T", offset, .5,.5, plot_title.c_str());
+      offset += 1.0;
+    }
+
+    if (!title.empty())
+      cpgmtxt( "T", offset, .5,.5, title.c_str());
   }
 
-  if (!title.empty())
-    cpgmtxt( "T", offset, .5,.5, title.c_str());
-	
   // restore the viewport
   cpgsvp (xmin, xmax, ymin, ymax);
 
@@ -242,6 +244,7 @@ try {
     cerr << "Pulsar::CalibratorPlotter::plot return" << endl;
 
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::CalibratorPlotter::plot(Calibrator::Info*)";
 }
