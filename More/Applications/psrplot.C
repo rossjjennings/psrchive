@@ -86,7 +86,10 @@ void specific_style (string optarg, vector<Plot*>& plots);
 // verbosity
 static bool verbose = false;
 
-int main (int argc, char** argv) try {
+int main (int argc, char** argv) try
+{
+  // print angles in degrees
+  Angle::default_type = Angle::Degrees;
 
   // name of file containing list of Archive filenames
   char* metafile = NULL;
