@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.94 $
-   $Date: 2008/06/20 05:16:11 $
+   $Revision: 1.95 $
+   $Date: 2008/06/20 13:12:47 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -304,7 +304,6 @@ void plot_constraints (Pulsar::SystemCalibratorPlotter& plotter,
 
   if (nstate == 1)
     cpgend ();
-
 }
 
 #endif // HAVE_PGPLOT
@@ -316,7 +315,7 @@ Pulsar::Calibrator::Type model_type = Pulsar::Calibrator::Britton;
 string archive_class = "PSRFITS";
 
 // plot the solution before calibrating with it
-bool display = true;
+bool display = false;
 
 // verbosity flags
 bool verbose = false;
@@ -534,7 +533,7 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'D':
-      display = false;
+      display = true;
       break;
 
     case 'g':
@@ -1005,7 +1004,6 @@ int actual_main (int argc, char *argv[]) try
 
   if (display)
   {
-
     cpgbeg (0, "result.ps/CPS", 0, 0);
     cpgsvp (0.1,.9, 0.1,.9);
 
