@@ -74,6 +74,9 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
 
   index->set_container( const_cast<Archive*>(archive.get())->get_interface() );
 
+  PlotLabel* label = the_plot->get_attributes()->get_label_above();
+  string current = label->get_centre();
+
   for (unsigned i=0; i<index->size(); i++) try
   {
     string index_command = index->get_index(i);
@@ -83,8 +86,6 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
 
     the_plot->configure( index_command );
 
-    PlotLabel* label = the_plot->get_attributes()->get_label_above();
-    string current = label->get_centre();
     label->set_centre( current + " " + index_command );
 
     plot (indeces);
@@ -97,6 +98,8 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
          << " of "
          << "\n\t" << archive->get_filename()
          << "\n\t" << error.get_message() << endl;
+
+    label->set_centre( current );
   }
 
   indeces.push( index );
