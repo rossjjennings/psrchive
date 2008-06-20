@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.93 $
-   $Date: 2008/06/18 23:37:12 $
+   $Revision: 1.94 $
+   $Date: 2008/06/20 05:16:11 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -19,7 +19,6 @@
 #include "Pulsar/psrchive.h"
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/PulsarCalibrator.h"
-#include "Pulsar/FrontendCorrection.h"
 #include "Pulsar/Database.h"
 #include "Pulsar/StandardPrepare.h"
 
@@ -895,10 +894,7 @@ int actual_main (int argc, char *argv[]) try
       model->precalibrate (archive);
       
       if (verbose)
-	cerr << "pcm: correct and add to total" << endl;
-      
-      Pulsar::FrontendCorrection correct;
-      correct.calibrate(archive);
+	cerr << "pcm: add to total" << endl;
 
       if (!total)
 	total = archive;
@@ -1078,12 +1074,6 @@ int actual_main (int argc, char *argv[]) try
       cout << "pcm: loaded archive: " << filenames[i] << endl;
       
       model->precalibrate( archive );
-
-      if (archive->get_type() == Signal::Pulsar)
-      {
-	Pulsar::FrontendCorrection correct;
-	correct.calibrate(archive);
-      }
 
       string newname = replace_extension (filenames[i], ".calib");
 
