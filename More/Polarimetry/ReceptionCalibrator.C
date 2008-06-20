@@ -55,9 +55,10 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type)
   check_pointing = false;
   physical_coherency = false;
 
+  output_report = false;
+
   unique = 0;
 
-  PA_min = PA_max = 0.0;
   nthread = 1;
 }
 
@@ -545,13 +546,6 @@ void Pulsar::ReceptionCalibrator::initialize ()
   if (get_prepared())
     return;
 
-  PA_min *= 180.0/M_PI;
-  PA_max *= 180.0/M_PI;
-
-  cerr << "Pulsar::ReceptionCalibrator::initialize information:\n"
-    "  Parallactic angle ranges from " << PA_min <<
-    " to " << PA_max << " degrees" << endl;
-
   if (previous_cal)
   {
     cerr << "Pulsar::ReceptionCalibrator::initialize using previous solution"
@@ -644,7 +638,7 @@ void Pulsar::ReceptionCalibrator::solve_prepare ()
   SystemCalibrator::solve_prepare ();
 
   for (unsigned ichan=0; ichan < model.size(); ichan++)
-    if (model[ichan]->valid)
+    if (output_report && model[ichan]->valid)
     {
       string report_name = "pcm_report_" + tostring(ichan) + ".txt";
       model[ichan]->get_equation()->get_solver()->add_acceptance_condition

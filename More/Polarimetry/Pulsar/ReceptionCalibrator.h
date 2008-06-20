@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.86 $
-   $Date: 2008/06/19 06:52:32 $
+   $Revision: 1.87 $
+   $Date: 2008/06/20 13:10:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -21,7 +21,8 @@
 
 #include "MEAL/VectorRule.h"
 
-namespace Pulsar {
+namespace Pulsar
+{
 
   class Archive;
   class Integration;
@@ -34,8 +35,9 @@ namespace Pulsar {
     constraints, which are provided in through the add_observation,
     add_ReferenceCalibrator, and add_FluxCalibrator methods.
   */
-  class ReceptionCalibrator : public SystemCalibrator {
-    
+  class ReceptionCalibrator : public SystemCalibrator
+  {
+   
   public:
     
     friend class ReceptionCalibratorPlotter;
@@ -128,9 +130,6 @@ namespace Pulsar {
     //! The epochs of all loaded calibrators
     std::vector<MJD> calibrator_epochs;
 
-    //! Minimum and maximum values of parallactic angle (informational)
-    float PA_min, PA_max;
-
     // counts the number of times that add_data failed
     unsigned add_data_fail;
 
@@ -142,6 +141,9 @@ namespace Pulsar {
 
     //! Normalize the Stokes parameters by the invariant interval
     bool normalize_by_invariant;
+
+    //! Produce reports of reduced chisq for each state in each channel
+    bool output_report;
 
     //! Set the initial guesses and update the reference epoch
     void initialize ();
