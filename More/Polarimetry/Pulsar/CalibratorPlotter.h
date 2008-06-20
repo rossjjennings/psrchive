@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalibratorPlotter.h,v $
-   $Revision: 1.13 $
-   $Date: 2008/06/20 09:32:36 $
+   $Revision: 1.14 $
+   $Date: 2008/06/20 12:47:46 $
    $Author: straten $ */
 
 #ifndef __CalibratorPlotter_H
@@ -39,6 +39,9 @@ namespace Pulsar {
     //! Plot the Pulsar::Calibrator
     virtual void plot (const Calibrator::Info* info, unsigned nchan,
 		       double centre_frequency, double bandwidth);
+
+    //! Plot the titles over the plot frames
+    void plot_labels (const Calibrator::Info* info);
 
     //! Number of panels (vertical)
     unsigned npanel;

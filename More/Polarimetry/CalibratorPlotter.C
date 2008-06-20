@@ -125,7 +125,11 @@ try
       xaxis = "bcnst";
 
       if (ipanel)
+      {
+	if (print_titles)
+	  plot_labels (info);
 	cpgpage ();
+      }
 
       ybottom = ymin;
 
@@ -220,20 +224,7 @@ try
   }
 
   if (print_titles)
-  {
-    float offset = 0.5;
-
-    string plot_title = info->get_title ();
-
-    if (!plot_title.empty())
-    {
-      cpgmtxt( "T", offset, .5,.5, plot_title.c_str());
-      offset += 1.0;
-    }
-
-    if (!title.empty())
-      cpgmtxt( "T", offset, .5,.5, title.c_str());
-  }
+    plot_labels (info);
 
   // restore the viewport
   cpgsvp (xmin, xmax, ymin, ymax);
@@ -247,4 +238,20 @@ try
 catch (Error& error)
 {
   throw error += "Pulsar::CalibratorPlotter::plot(Calibrator::Info*)";
+}
+
+void Pulsar::CalibratorPlotter::plot_labels (const Calibrator::Info* info)
+{
+  float offset = 0.5;
+  
+  string plot_title = info->get_title ();
+  
+  if (!plot_title.empty())
+  {
+    cpgmtxt( "T", offset, .5,.5, plot_title.c_str());
+    offset += 1.0;
+  }
+
+  if (!title.empty())
+    cpgmtxt( "T", offset, .5,.5, title.c_str());
 }
