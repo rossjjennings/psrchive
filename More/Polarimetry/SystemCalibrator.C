@@ -22,6 +22,7 @@
 #include "Pulsar/Receiver.h"
 
 #include "MEAL/Complex2Constant.h"
+#include "MEAL/CongruenceTransformation.h"
 
 #include "BatchQueue.h"
 #include "Pauli.h"
@@ -1044,7 +1045,7 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
 	continue;
       }
 
-      MEAL::Complex2* signal_path = 0;
+      MEAL::Transformation<Complex2>* signal_path = 0;
       ReceptionModel* equation = model[mchan]->get_equation();
 
       switch ( data->get_type() )
@@ -1078,7 +1079,11 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
 
       response[ichan] = Jones<float>::identity();
 
-      if (!signal_path)
+      MEAL::CongruenceTransformation* congruence = 0;
+      if (signal_path)
+        congruence = dynamic_cast<MEAL::CongruenceTransformation*>(signal_path);
+
+      if (!congruence)
       {
         integration->set_weight (ichan, 0.0);
         continue;
@@ -1087,7 +1092,7 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
       try
       {
 	model[mchan]->time.set_value( integration->get_epoch() );
-	response[ichan] = signal_path->evaluate();
+	response[ichan] = congruence->get_transformation()->evaluate();
       }
       catch (Error& error)
       {
