@@ -18,6 +18,7 @@ using namespace std;
 //! Default constructor
 Pulsar::PolnProfileStats::PolnProfileStats (const PolnProfile* _profile)
 {
+  avoid_zero_determinant = false;
   regions_set = false;
   stats = new ProfileStats;
   set_profile (_profile);
@@ -30,7 +31,7 @@ Pulsar::PolnProfileStats::~PolnProfileStats()
 
 void Pulsar::PolnProfileStats::set_avoid_zero_determinant (bool flag)
 {
-  avoid_zero_determinant = true;
+  avoid_zero_determinant = flag;
 }
 
 //! Set the PolnProfile from which statistics will be derived
@@ -193,9 +194,13 @@ void Pulsar::PolnProfileStats::build () try
       double invint_variance = get_baseline_variance(0).val * 4;
       double threshold = 3.0 * sqrt (invint_variance);
 
+#ifdef _DEBUG
       cerr << "before avoid " << stats->get_on_pulse_nbin() << endl;
+#endif
       stats->deselect_onpulse (&invint, threshold);
+#ifdef _DEBUG
       cerr << "after avoid " << stats->get_on_pulse_nbin() << endl;
+#endif
     }
   }
 }
