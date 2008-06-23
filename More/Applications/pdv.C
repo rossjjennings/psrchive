@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.31 $
-   $Date: 2008/06/11 01:51:43 $
+   $Revision: 1.32 $
+   $Date: 2008/06/23 00:15:59 $
    $Author: jonathan_khoo $ */
 
 
@@ -971,11 +971,27 @@ try
   if( !archive )
     return;
 
+  Interpreter preprocessor;
+  preprocessor.set( archive );
+
+  if (jobs.size())
+  {
+	vector<string> config_jobs;
+    for( int i = 0; i < jobs.size(); i++)
+    {
+	  if (jobs[i].substr(0, 6) == "config")
+	  {
+		config_jobs.push_back( jobs[i] );
+		jobs.erase( jobs.begin() + i );
+		i--;
+	  }
+      preprocessor.script( config_jobs );
+	}
+  }
+
   if( !keep_baseline )
     archive->remove_baseline();
 
-  Interpreter preprocessor;
-  preprocessor.set( archive );
   preprocessor.script( jobs );
 
   if( archive->get_state() != Signal::Stokes && (show_pol_frac || show_lin_frac || show_circ_frac || show_pa ) )
@@ -1063,7 +1079,8 @@ int main( int argc, char *argv[] ) try
 	  if (optarg == NULL) {
 	    dc = Pulsar::Profile::default_duty_cycle;
 	  } else {
-		dc = atof(optarg);
+        dc = fromstring<float>( string(optarg) );
+		Pulsar::Profile::default_duty_cycle = dc;
 		jobs.push_back("config Profile::baseline=minimum");
 	  }
       cmd_flux = true;
