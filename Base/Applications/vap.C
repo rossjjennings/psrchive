@@ -325,10 +325,14 @@ string get_bw( Reference::To< Archive > archive )
 {
   set_precision( 3, true );
 
-  string result = tostring( archive->get_bandwidth() );
-  
+  double bandwidth = archive->get_bandwidth();
+
+  if (bandwidth < 0)
+	  bandwidth *= -1.0;
+
+  string result = tostring( bandwidth );
   restore_precision();
-  
+
   return result;
 }
 
