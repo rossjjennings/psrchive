@@ -44,7 +44,8 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
   is_prepared = false;
   is_solved = false;
 
-  try_again_chisq = 0.0;
+  retry_chisq = 0.0;
+  invalid_chisq = 0.0;
 
   get_data_fail = 0;
   get_data_call = 0;
@@ -820,6 +821,20 @@ void Pulsar::SystemCalibrator::solve_prepare ()
   is_prepared = true;
 }
 
+float Pulsar::SystemCalibrator::get_reduced_chisq (unsigned ichan) const
+{
+  check_ichan ("get_reduced_chisq", ichan);
+
+  if (!model[ichan]->valid)
+    return 0.0;
+
+  const ReceptionModel* equation = model[ichan]->get_equation();
+
+  float chisq = equation->get_solver()->get_chisq ();
+  unsigned free = equation->get_solver()->get_nfree ();
+
+  return chisq/free;
+}
 
 void Pulsar::SystemCalibrator::solve ()
 {
@@ -850,7 +865,7 @@ void Pulsar::SystemCalibrator::solve ()
 
   queue.wait ();
 
-  if (try_again_chisq > 0.0)
+  if (retry_chisq > 0.0)
   { 
     // attempt to fix up any channels that didn't converge well
     for (unsigned ichan=0; ichan<nchan; ichan++)
@@ -858,13 +873,9 @@ void Pulsar::SystemCalibrator::solve ()
       if (!model[ichan]->valid)
 	continue;
 
-      ReceptionModel* equation = model[ichan]->get_equation();
+      float reduced_chisq = get_reduced_chisq (ichan);
 
-      float chisq = equation->get_solver()->get_chisq ();
-      unsigned free = equation->get_solver()->get_nfree ();
-      float reduced_chisq = chisq/free;
-
-      if (reduced_chisq > try_again_chisq)
+      if (reduced_chisq > retry_chisq)
       {
 	cerr << "try for better fit in ichan=" << ichan 
 	     << " chisq/nfree=" << reduced_chisq << endl;
@@ -874,6 +885,25 @@ void Pulsar::SystemCalibrator::solve ()
     }
 
     queue.wait ();
+  }
+
+  if (invalid_chisq > 0.0)
+  {
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+    {
+      if (!model[ichan]->valid)
+	continue;
+
+      float reduced_chisq = get_reduced_chisq (ichan);
+
+      if (reduced_chisq > invalid_chisq)
+      {
+	cerr << "invalid fit in ichan=" << ichan 
+	     << " chisq/nfree=" << reduced_chisq << endl;
+
+	model[ichan]->valid = false;
+      }
+    }
   }
 
   covariance.resize (nchan);
@@ -939,7 +969,7 @@ void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
       unsigned free = equation->get_solver()->get_nfree ();
       float reduced_chisq = chisq/free;
 
-      if (reduced_chisq > try_again_chisq)
+      if (reduced_chisq > retry_chisq)
       {
 #ifdef _DEBUG
         cerr << "not good; reduced chisq=" << reduced_chisq << endl;
@@ -1160,7 +1190,12 @@ catch (Error& error) {
 
 void Pulsar::SystemCalibrator::set_retry_reduced_chisq (float reduced_chisq)
 {
-  try_again_chisq = reduced_chisq;
+  retry_chisq = reduced_chisq;
+}
+
+void Pulsar::SystemCalibrator::set_invalid_reduced_chisq (float reduced_chisq)
+{
+  invalid_chisq = reduced_chisq;
 }
 
 void Pulsar::SystemCalibrator::check_ichan (const char* name, unsigned ichan)

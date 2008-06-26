@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.15 $
-   $Date: 2008/06/19 02:40:13 $
+   $Revision: 1.16 $
+   $Date: 2008/06/26 01:49:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -27,8 +27,8 @@
 #include "BatchQueue.h"
 #include "Types.h"
 
-namespace Pulsar {
-
+namespace Pulsar
+{
   class SourceEstimate : public Reference::Able
   {
   public:
@@ -176,12 +176,18 @@ namespace Pulsar {
     //! Set the reduced chisq above which the solution will be retried
     virtual void set_retry_reduced_chisq (float);
 
+    //! Set the reduced chisq above which a solution will be flagged invalid
+    virtual void set_invalid_reduced_chisq (float);
+
     //! Solve equation for each frequency
     virtual void solve ();
     
     //! Get the status of the model
     virtual bool get_solved () const;
-    
+
+    //! Get the reduced chisq of the best fit in the specified channel
+    float get_reduced_chisq (unsigned ichan) const;
+
     //! Pre-calibrate the polarization of the given archive
     virtual void precalibrate (Archive* archive);
 
@@ -269,7 +275,10 @@ namespace Pulsar {
     bool set_initial_guess;
 
     //! The maximum reduced chisq before another fit will be attempted
-    float try_again_chisq;
+    float retry_chisq;
+
+    //! The maximum reduced chisq before a fit will be flagged invalid
+    float invalid_chisq;
 
     //! Prepare the measurement equations for fitting
     virtual void solve_prepare ();
