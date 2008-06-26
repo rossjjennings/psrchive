@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.95 $
-   $Date: 2008/06/20 13:12:47 $
+   $Revision: 1.96 $
+   $Date: 2008/06/26 01:48:26 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -358,7 +358,8 @@ bool independent_gains = false;
 
 bool physical_coherency = false;
 
-float try_again_chisq = 0.0;
+float retry_chisq = 0.0;
+float invalid_chisq = 0.0;
 
 int actual_main (int argc, char *argv[]);
 
@@ -490,7 +491,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args
-    = "1:A:a:B:b:c:C:d:DgHhI:j:J:L:l:M:m:N:n:o:Pp:qrsS:t:T:u:vV:";
+    = "1:A:a:B:b:c:C:d:DgHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rsS:t:T:u:vV:X:";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -619,6 +620,10 @@ int actual_main (int argc, char *argv[]) try
       physical_coherency = true;
       break;
 
+    case 'R':
+      retry_chisq = atof (optarg);
+      break;
+
     case 's':
       normalize_by_invariant = true;
       break;
@@ -655,6 +660,9 @@ int actual_main (int argc, char *argv[]) try
       measure_cal_V = false;
       break;
 
+    case 'X':
+      invalid_chisq = atof (optarg);
+      break;
 
     case 'h':
       usage ();
@@ -827,8 +835,11 @@ int actual_main (int argc, char *argv[]) try
       if (least_squares)
 	model->set_solver( new_solver(least_squares) );
 
-      if (try_again_chisq)
-        model->set_retry_reduced_chisq( try_again_chisq );
+      if (retry_chisq)
+        model->set_retry_reduced_chisq( retry_chisq );
+
+      if (invalid_chisq)
+        model->set_invalid_reduced_chisq( invalid_chisq );
 
     }
     catch (Error& error)
