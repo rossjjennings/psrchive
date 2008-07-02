@@ -1,55 +1,27 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Horizon.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.6 $
+   $Date: 2008/07/02 11:23:08 $
    $Author: straten $ */
 
 #ifndef __Horizon_H
 #define __Horizon_H
 
-#include "MJD.h"
-#include "sky_coord.h"
+#include "Directional.h"
 
-//! Calculates horizon pointing parameters using SLALIB
-
-class Horizon  {
-  
+//! Horizon mounted antenna with first rotation in horizontal plane
+/*! Also known as altazimuth, az-el, Dobsonian, or even x-y mount */
+class Horizon : public Directional
+{  
 public:
   
-  //! Default constructor
-  Horizon ();
-  
-  //! Set the coordinates of the source
-  void set_source_coordinates (const sky_coord& coords);
-  
-  //! Set the latitude of the observatory in radians
-  void set_observatory_latitude (double latitude);
-  double get_observatory_latitude () const;
-
-  //! Set the longitude of the observator in radians
-  void set_observatory_longitude (double longitude);
-  double get_observatory_longitude () const;
-
-  //! Set the epoch in Modified Julian Days
-  void set_epoch (const MJD& epoch);
-  MJD get_epoch () const;
-
-  //! Get the LST in radians
-  double get_local_sidereal_time () const;
-
-  //! Get the hour_angle in radians
-  double get_hour_angle () const;
-
-  //! Get the parallactic angle in radians
-  double get_parallactic_angle () const;
-
   //! Get the azimuth angle in radians
   double get_azimuth () const;
 
@@ -61,47 +33,14 @@ public:
 
 protected:
 
-  //! The declination of the source in radians
-  double declination;
-
-  //! The right ascension of the source in radians
-  double right_ascension;
-
-  //! The latitude of the observatory in radians
-  double latitude;
-
-  //! The latitude of the observatory in radians
-  double longitude;
-
-  //! The epoch
-  MJD epoch;
-
-  //! Flag set when return values have been computed
-  bool built;
-
-  //! Recomputes, when necessary, the following values
-  void build () const {
-    if (!built)
-      const_cast<Horizon*>(this)->do_build();
-  }
-
-  //! Recomputes the following values
-  void do_build ();
-
-  //! The LST in radians
-  double lst;
-
-  //! The hour angle in radians
-  double hour_angle;
-
-  //! The parallactic angle in radians
-  double parallactic_angle;
+  //! Get the receptor basis in the reference frame of the observatory
+  Matrix<3,3,double> get_basis (const Vector<3,double>& from_source) const;
 
   //! The telescope azimuth in radians
-  double azimuth;
+  mutable double azimuth;
 
   //! The telescope elevation in radians
-  double elevation;
+  mutable double elevation;
 
 };
 
