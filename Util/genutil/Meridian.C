@@ -24,22 +24,20 @@ double Meridian::get_y () const
 //! Get the receptor basis in the reference frame of the observatory
 Matrix<3,3,double> Meridian::get_basis (const Vector<3,double>& from) const
 {
-  Vector<3,double> toward = -from;
-
   /*
     angle in meridianal plane, positive toward North
   */
-  x = - atan2 (toward[0], toward[2]);
+  x = - atan2 (from[0], from[2]);
 
   /*
     radius projected into meridianal plane
   */
-  double r = sqrt (toward[2]*toward[2] + toward[0]*toward[0]);
+  double r = sqrt (from[2]*from[2] + from[0]*from[0]);
 
   /*
     angle out of meridianal plane, positive toward East
   */
-  y = atan (toward[1] / r);
+  y = - atan (from[1] / r);
 
   /*
     receptor basis in the frame of the observatory
