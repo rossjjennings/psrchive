@@ -72,6 +72,9 @@ int main ()
 	      check (horizon.get_vertical(), parallactic_angle,
 		     "parallactic_angle");
 	    }
+	    else
+	      meridian.get_vertical ();
+
 	  }
 	  catch (Error& error)
 	    {
