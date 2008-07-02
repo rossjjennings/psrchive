@@ -11,6 +11,7 @@ include_HEADERS = \
         compressed_io.h \
 	coord.h \
         coord_parse.h \
+	Directional.h \
         dirutil.h \
         environ.h \
 	evaluate.h \
@@ -26,7 +27,9 @@ include_HEADERS = \
         JenetAnderson98.h \
         machine_endian.h \
 	malloc16.h \
+	Meridian.h \
         MJD.h \
+	Mount.h \
 	FITSUTC.h \
 	NormalDistribution.h \
         orbital.h \
@@ -63,6 +66,7 @@ libgenutil_la_SOURCES = \
         compressed_io.C \
         coord_parse.c \
 	copy.C \
+	Directional.C \
         dirglob.C \
 	dirglobtree.C \
         dirutil.c \
@@ -82,7 +86,9 @@ libgenutil_la_SOURCES = \
         JenetAnderson98A5.C \
         JenetAnderson98.C \
 	malloc16.c \
+	Meridian.C \
         MJD.C \
+	Mount.C \
 	FITSUTC.C \
 	NormalDistribution.C \
         Physical.C \
@@ -120,10 +126,11 @@ bin_PROGRAMS = getMJD
 
 getMJD_SOURCES = getMJD.C
 
-TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98 \
-	test_endian test_environ test_sum test_NormalDistribution \
-	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord \
-	test_exponential test_StraightLine test_ThreadStream
+TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98	\
+	test_endian test_environ test_sum test_NormalDistribution	\
+	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord	\
+	test_exponential test_StraightLine test_ThreadStream		\
+	test_Horizon
 
 check_PROGRAMS = $(TESTS) test_CommandParser test_Angle test_expand
 
@@ -145,6 +152,7 @@ test_expand_SOURCES		= test_expand.C
 test_NormalDistribution_SOURCES = test_NormalDistribution.C
 test_StraightLine_SOURCES	= test_StraightLine.C
 test_ThreadStream_SOURCES	= test_ThreadStream.C
+test_Horizon_SOURCES		= test_Horizon.C
 
 #############################################################################
 #
