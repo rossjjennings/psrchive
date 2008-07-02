@@ -35,8 +35,13 @@ void Directional::build () const
 
   double alignment = basis[2] * from_source;
   if ( fabs( alignment - 1.0 ) > 1e-12 )
-    throw Error (InvalidState, "Directional::build",
+  {
+    Error error (InvalidState, "Directional::build",
 		 "basis does not point at source");
+    error << "\n\tbasis[2]=" << basis[2]
+	  << "\n\tfrom_source=" << from_source;
+    throw error;
+  }
 
   /*
     vector to north in reference frame of receptors
