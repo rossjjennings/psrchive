@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.22 $
-   $Date: 2008/06/15 17:04:49 $
+   $Revision: 1.23 $
+   $Date: 2008/07/02 11:27:30 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -300,6 +300,27 @@ void partition (const Matrix<M+1,M+1,T>& covariance,
   variance  = ul[0][0];
   cov_vector = ur[0];
 }
+
+//! Return a 3-dimensional rotation about an arbitrary axis
+template<typename T>
+Matrix<3,3,T> rotation (const Vector<3,T>& v, double radians)
+{
+  double s = sin(radians);
+  double c = cos(radians);
+  double u = 1.0 - c;
+
+  Matrix<3,3,T> result;
+
+  result[0] = Vector<3,T>
+    ( v[0]*v[0]*u + c    ,   v[1]*v[0]*u - v[2]*s,  v[2]*v[0]*u + v[1]*s );
+  result[1] = Vector<3,T>
+    ( v[0]*v[1]*u + v[2]*s,  v[1]*v[1]*u + c    ,   v[2]*v[1]*u - v[0]*s );
+  result[2] = Vector<3,T>
+    ( v[0]*v[2]*u - v[1]*s,  v[1]*v[2]*u + v[0]*s,  v[2]*v[2]*u + c );
+
+  return result;
+}
+
 
 //! Useful for printing the components
 template<unsigned R, unsigned C, typename T>
