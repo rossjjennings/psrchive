@@ -32,7 +32,7 @@ double Horizon::get_zenith () const
 Matrix<3,3,double> Horizon::get_basis (const Vector<3,double>& from) const
 {
   /*
-    vector toward source in horizontal plane.
+    angle toward source in horizontal plane.
     'from' points 180 degrees away from the source.
     this form also ensures that 0 < az < 360 degrees.
   */
