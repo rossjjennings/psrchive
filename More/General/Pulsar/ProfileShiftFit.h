@@ -89,6 +89,9 @@ namespace Pulsar
     //! Get the resulting Mean Squared Error (per fit DOF)
     double get_mse();
 
+    //! Get the resulting SNR
+    double get_snr();
+
     //! Current MCMC accept stats
     int mcmc_trials;
     int mcmc_accept;
@@ -172,6 +175,9 @@ namespace Pulsar
 
     //! Current fit Chi^2 (not reduced)
     double chi2;
+
+    //! Current profile SNR
+    double snr;
 
   private:
 

@@ -243,6 +243,8 @@ void Pulsar::ProfileShiftFit::compute()
   int dof = 2*nharm - 2;
   chi2 = (prof_pow - scale*max_ccf)/sigma2;
   mse = (prof_pow - scale*max_ccf)/(double)dof;
+  snr = (scale*scale*std_pow - sigma2) / mse;
+  snr = (snr<0.0) ? 0.0 : sqrt(snr);
 
   // Estimate param errors
   switch (err_meth) {
@@ -377,4 +379,9 @@ Estimate<double> Pulsar::ProfileShiftFit::get_scale()
 double Pulsar::ProfileShiftFit::get_mse()
 {
   return(mse);
+}
+
+double Pulsar::ProfileShiftFit::get_snr()
+{
+  return(snr);
 }
