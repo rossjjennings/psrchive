@@ -246,11 +246,13 @@ int Tempo::toa::Princeton_load (const char* instring)
 
 int Tempo::toa::Princeton_unload (char* outstring) const
 {
-  // output the basic line
-  outstring[0] = telescope;
+  // Blank line w/ spaces
+  memset(outstring, ' ', 78);
+  outstring[78] = '\0';
 
-  sprintf (outstring+15, "%8.7g %13.13s %4.2f %8.2f",
- 	   frequency, arrival.printdays(13).c_str(), error, dmc);
+  sprintf (outstring, "%c %13.13s %8.3f %19.19s  %7.3f               %9.5f",
+      telescope, auxinfo.c_str(), frequency, 
+      arrival.printdays(19).c_str(), error, dmc);
   return 0;
 }
 
