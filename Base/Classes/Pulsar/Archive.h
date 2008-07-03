@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.174 $
-   $Date: 2008/06/05 20:34:26 $
-   $Author: straten $ */
+   $Revision: 1.175 $
+   $Date: 2008/07/03 15:12:13 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.174 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.175 $"
 
 #include "IntegrationManager.h"
 
@@ -381,7 +381,8 @@ namespace Pulsar
     //! Fit Profiles to the standard and return toas
     void toas (std::vector<Tempo::toa>& toas, const Archive* std,
                std::string arguments = "",
-               Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
+               Tempo::toa::Format fmt = Tempo::toa::Parkes,
+               bool discard_bad = false) const;
 
     //! Perform the transformation on each polarimetric profile
     void transform (const Jones<float>& transformation);

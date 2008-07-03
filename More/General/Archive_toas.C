@@ -18,7 +18,8 @@ using namespace std;
 void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
 			    const Archive* standard,
 			    string arguments,
-			    Tempo::toa::Format fmt) const
+			    Tempo::toa::Format fmt,
+                            bool discard_bad) const
 {
   if (get<IntegrationOrder>()) {
     throw Error (InvalidState, "Pulsar::Archive::toas",
@@ -46,7 +47,8 @@ void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
   for (unsigned isub=0; isub<get_nsubint(); isub++) {
  
     vector<Tempo::toa> toaset;
-    get_Integration(isub)->toas (toaset, *std, nsite, arguments, fmt);
+    get_Integration(isub)->toas (toaset, *std, nsite, arguments, fmt, 
+        discard_bad);
 
     if (fmt == Tempo::toa::Parkes || fmt == Tempo::toa::Psrclock) {
       // some extra information to place in each toa
