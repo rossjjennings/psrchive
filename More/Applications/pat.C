@@ -84,6 +84,7 @@ void usage ()
     "Preprocessing options:\n"
     "  -F               Frequency scrunch before fitting \n"
     "  -T               Time scrunch before fitting \n"
+    "  -d               Discard profiles with zero weight\n"
     "\n"
     "Fitting options:\n"
     "  -a stdfiles      Automatically select standard from specified group\n"
@@ -134,6 +135,7 @@ int main (int argc, char *argv[]) try {
 
   bool fscrunch = false;
   bool tscrunch = false;
+  bool skip_bad = false;
 
   char *metafile = NULL;
 
@@ -154,7 +156,7 @@ int main (int argc, char *argv[]) try {
 
   float chisq_max = 2.0;
 
-  while ((gotc = getopt(argc, argv, "a:A:cDf:C:Fg:hiM:n:pPqS:s:tTvVx:")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:A:cDdf:C:Fg:hiM:n:pPqS:s:tTvVx:")) != -1) {
     switch (gotc) {
 
     case 'a':
@@ -209,6 +211,10 @@ int main (int argc, char *argv[]) try {
       sinc -> set_bins (8);
       break;
 
+    case 'd':
+      skip_bad = true;
+      break;
+
     case 'F':
       fscrunch = true;
       break;
@@ -232,7 +238,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.80 2008/04/07 07:14:27 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.81 2008/07/03 15:12:44 demorest Exp $" << endl;
       return 0;
 
     case 'M':
@@ -419,14 +425,14 @@ int main (int argc, char *argv[]) try {
 	}
 	if (strcasecmp(outFormat.c_str(),"parkes")==0)
 	  {
-	    arch->toas(toas, stdarch, "", Tempo::toa::Parkes); 
+	    arch->toas(toas, stdarch, "", Tempo::toa::Parkes, skip_bad); 
 	  }
 	else if (strcasecmp(outFormat.c_str(),"princeton")==0)
-	  arch->toas(toas, stdarch, "", Tempo::toa::Princeton); 
+	  arch->toas(toas, stdarch, "", Tempo::toa::Princeton, skip_bad); 
 	else if (strcasecmp(outFormat.c_str(),"itoa")==0)
-	  arch->toas(toas, stdarch, "", Tempo::toa::ITOA); 
+	  arch->toas(toas, stdarch, "", Tempo::toa::ITOA, skip_bad); 
 	else if (strcasecmp(outFormat.c_str(),"psrclock")==0)
-	  arch->toas(toas, stdarch, "", Tempo::toa::Psrclock); 
+	  arch->toas(toas, stdarch, "", Tempo::toa::Psrclock, skip_bad); 
 	else if (strcasecmp(outFormat.c_str(),"tempo2")==0)
 	  {
 	    string args;
@@ -474,7 +480,7 @@ int main (int argc, char *argv[]) try {
 		}
 
 	      }
-	    arch->toas(toas, stdarch, args, Tempo::toa::Tempo2); 
+	    arch->toas(toas, stdarch, args, Tempo::toa::Tempo2, skip_bad); 
 	  }
       }
 
