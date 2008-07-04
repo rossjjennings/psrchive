@@ -128,7 +128,7 @@ int main (int argc, char** argv) try
 
 	for (double va = -M_PI/2; va <= M_PI/2; va += M_PI/30)
 	{
-	  para.set_parallactic_angle (va);
+	  para.set_phi (va);
 	  
 	  Jones<double> R = para.evaluate ();
 
