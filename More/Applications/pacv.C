@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #define PGPLOT 1
 
 #include "Pulsar/FluxCalibrator.h"
@@ -112,7 +113,7 @@ int main (int argc, char** argv)
 
   bool plot_specified = false;
   bool print_jones = false;
-  bool print_title = true;
+  bool print_titles = true;
 
   //
   float cross_scale_factor = 1.0;
@@ -243,7 +244,7 @@ int main (int argc, char** argv)
 
     case 'P':
       publication = true;
-      print_title = false;
+      print_titles = false;
       break;
 
     case 'p':
@@ -278,7 +279,7 @@ int main (int argc, char** argv)
       break;
 
     case 't':
-      print_title = true;
+      print_titles = true;
       break;
 
     case 'V':
@@ -350,8 +351,8 @@ int main (int argc, char** argv)
 
     input = Pulsar::Archive::load( filenames[ifile] );
 
-    if (print_title)
-      plotter.title = filenames[ifile];
+    plotter.print_titles = print_titles;
+    plotter.title = filenames[ifile];
 
     if (input->get_type() == Signal::Calibrator)
     {
