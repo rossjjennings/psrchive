@@ -11,7 +11,7 @@
 #include "tempo++.h"
 #include "coord.h"
 
-void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
+void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a) try
 {
   switch ( Tempo::code( a->get_telescope() ) )
   {
@@ -58,6 +58,10 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
   }
 
   t->set_coordinates();
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::Telescopes::set_telescope_info";
 }
 
 // Info for each telescope below.  Maybe the coordinate setting

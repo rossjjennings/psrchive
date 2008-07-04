@@ -48,7 +48,7 @@ vector< Reference::To<Tempo::Observatory> > Tempo::antennae;
 
 static bool obsys_loaded = false;
 
-void Tempo::load_obsys ()
+void Tempo::load_obsys () try
 {
   if (obsys_loaded)
     return;
@@ -107,4 +107,7 @@ void Tempo::load_obsys ()
 
   obsys_loaded = true;
 }
-
+catch (Error& error)
+{
+  throw error += "Tempo::load_obsys";
+}

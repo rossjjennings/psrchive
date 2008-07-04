@@ -273,7 +273,7 @@ int psrephem::old_unload (const char* filename) const
   return 0;
 }
 
-string psrephem::par_lookup (const char* name, int use_cwd)
+string psrephem::par_lookup (const char* name, int use_cwd) try
 {
   string psr_name;
 
@@ -284,10 +284,12 @@ string psrephem::par_lookup (const char* name, int use_cwd)
 
   if (use_cwd) {
     vector <string> exts = extensions ();
-    for (unsigned iext=0; iext < exts.size(); iext++) {
+    for (unsigned iext=0; iext < exts.size(); iext++)
+    {
       /* Look for jname.ext in current directory */
       string filename = psr_name + exts[iext];
-      if (file_exists(filename.c_str())) {
+      if (file_exists(filename.c_str()))
+      {
 	if (verbose)
 	  cerr << "psrephem::Using " << filename << " from cwd" << endl;
 	return filename;
@@ -297,26 +299,25 @@ string psrephem::par_lookup (const char* name, int use_cwd)
 
   string tempo_pardir = Tempo::get_configuration("PARDIR");
 
-  if (tempo_pardir.length()) {
-
+  if (tempo_pardir.length())
+  {
     vector <string> exts = extensions ();
-    for (unsigned iext=0; iext < exts.size(); iext++) {
-
+    for (unsigned iext=0; iext < exts.size(); iext++)
+    {
       string filename = tempo_pardir + psr_name + exts[iext];
 
       if (verbose)
 	cerr << "psrephem::par_lookup in TEMPO PARDIR '" 
 	     << filename << "'" << endl;
 
-      if (file_exists(filename.c_str())) {
+      if (file_exists(filename.c_str()))
+      {
 	if (verbose)
 	  cerr << "psrephem:: Using " << filename 
 	       << " from PARDIR:" << tempo_pardir << endl;
 	return filename;
       }
-
     }
-
   }
   
   /* Create name.eph in local directory */ 
@@ -355,7 +356,8 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   if (chdir (cwd) != 0)
     throw Error (FailedSys, "psrephem", "failed chdir(%s)", cwd);
 
-  if (retval != 0) {
+  if (retval != 0)
+  {
     cerr << "psrephem:: Error executing system (" + command + ")" << endl;
     return "";
   }
@@ -369,7 +371,8 @@ string psrephem::par_lookup (const char* name, int use_cwd)
 
   string filename = filenames[0];
 
-  if (file_exists(filename.c_str())) {
+  if (file_exists(filename.c_str()))
+  {
     if (verbose)
       cerr << "psrephem:: Using '" + filename + "'" << endl;
     return filename;
@@ -380,6 +383,10 @@ string psrephem::par_lookup (const char* name, int use_cwd)
 	     filename.c_str(),catalogue.c_str());
 
   return "";
+}
+catch (Error& error)
+{
+  throw error += "psrephem::par_lookup";
 }
 
 string psrephem::psrname() const
