@@ -28,6 +28,8 @@
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/IntegrationOrder.h"
+
+#include "Pulsar/Telescopes.h"
 #include "Pulsar/Telescope.h"
 
 #include "Pulsar/Predictor.h"
@@ -270,8 +272,8 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   set_telescope ( obs_ext->telescope );
 
   Telescope* telescope = getadd<Telescope>();
-  telescope->set_coordinates (get_telescope());
-  
+  Telescopes::set_telescope_info (telescope, this);
+
   // RA
     
   psrfits_read_key( fptr, "RA", &tempstr, dfault, verbose > 2 );
