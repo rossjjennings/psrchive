@@ -4,42 +4,59 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Telescope.h"
 #include "tempo++.h"
 #include "coord.h"
 
-void Pulsar::Telescopes::set_telescope_info(Telescope *t, Archive *a)
+void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
 {
-  switch (a->get_telescope().at(0))
+  switch ( Tempo::code( a->get_telescope() ) )
   {
-    case '1':
-      Telescopes::GBT(t);
-      // Hack to pick correct focus type for GBT
-      if (a->get_centre_frequency()<1200.0)
-        t->set_focus(Telescope::PrimeFocus);
-      break;
-    case '3':
-      Telescopes::Arecibo(t);
-      break;
-    case 'a':
-      Telescopes::GB140(t);
-      break;
-    case 'b':
-      Telescopes::GB85_3(t);
-      break;
-    case 'f':
-      Telescopes::Nancay(t);
-      break;
-    case 'g':
-      Telescopes::Effelsberg(t);
-      break;
-    default: // Unknown code, throw error
-      throw Error (InvalidParam, "Pulsar::Telescopes::set_telescope_info",
-          "Unrecognized telescope code (%s)", a->get_telescope().c_str());
-      break;
+
+  case '1':
+    Telescopes::GBT(t);
+    // Hack to pick correct focus type for GBT
+    if (a->get_centre_frequency()<1200.0)
+      t->set_focus(Telescope::PrimeFocus);
+    break;
+
+  case '3':
+    Telescopes::Arecibo(t);
+    break;
+
+  case '4':
+    Telescopes::MtPleasant26(t);
+    break;
+
+  case '7':
+    Telescopes::Parkes(t);
+    break;
+
+  case 'a':
+    Telescopes::GB140(t);
+    break;
+
+  case 'b':
+    Telescopes::GB85_3(t);
+    break;
+
+  case 'f':
+    Telescopes::Nancay(t);
+    break;
+
+  case 'g':
+    Telescopes::Effelsberg(t);
+    break;
+    
+  default: // Unknown code, throw error
+    throw Error (InvalidParam, "Pulsar::Telescopes::set_telescope_info",
+		 "Unrecognized telescope code (%s)",
+		 a->get_telescope().c_str());
   }
+
   t->set_coordinates();
 }
 
@@ -94,5 +111,21 @@ void Pulsar::Telescopes::Effelsberg(Telescope *t)
   t->set_mount(Telescope::Horizon);
   t->set_primary(Telescope::Parabolic);
   t->set_focus(Telescope::Gregorian); // XXX also varies by receiver
+}
+
+void Pulsar::Telescopes::MtPleasant26(Telescope *t)
+{
+  t->set_name ("Hobart");
+  t->set_mount (Telescope::Meridian);
+  t->set_primary (Telescope::Parabolic);
+  t->set_focus (Telescope::PrimeFocus);
+}
+
+void Pulsar::Telescopes::Parkes(Telescope *t)
+{
+  t->set_name ("Parkes");
+  t->set_mount (Telescope::Horizon);
+  t->set_primary (Telescope::Parabolic);
+  t->set_focus (Telescope::PrimeFocus);
 }
 
