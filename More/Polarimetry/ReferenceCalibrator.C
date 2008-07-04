@@ -164,13 +164,14 @@ try {
   unsigned ipol, npol = integration->get_npol();
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
-    if (integration->get_weight (ichan) == 0)  {
+    if (integration->get_weight (ichan) == 0)
+    {
       for (ipol=0; ipol<npol; ipol++)
 	cal_hi[ipol][ichan] = cal_lo[ipol][ichan] = 0.0;
     }
 
-  if (smooth_bandpass)  {
-
+  if (smooth_bandpass)
+  {
     unsigned window = unsigned (integration->get_nchan() * median_smoothing);
 
     if (verbose > 2)
@@ -181,11 +182,11 @@ try {
     if (window < 3)
       window = 3;
 
-    for (ipol=0; ipol < npol; ipol++) {
+    for (ipol=0; ipol < npol; ipol++)
+    {
       fft::median_smooth (cal_lo[ipol], window);
       fft::median_smooth (cal_hi[ipol], window);
     }
-
   }
 
   if (integration->get_nchan() == request_nchan)
@@ -195,8 +196,8 @@ try {
   vector<vector<Estimate<double> > > hi (npol);
   vector<vector<Estimate<double> > > lo (npol);
  
-  for (ipol=0; ipol < npol; ipol++) {
-
+  for (ipol=0; ipol < npol; ipol++)
+  {
     lo[ipol].resize (request_nchan);
     hi[ipol].resize (request_nchan);
 
@@ -206,14 +207,13 @@ try {
 
     fft::interpolate (lo[ipol], cal_lo[ipol]);
     fft::interpolate (hi[ipol], cal_hi[ipol]);
-
   }
 
   cal_lo = lo;
   cal_hi = hi;
-
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::ReferenceCalibrator::get_levels";
 }
 
@@ -243,23 +243,28 @@ void Pulsar::ReferenceCalibrator::get_levels
   vector<vector<MeanEstimate<double> > > total_hi;
   vector<vector<MeanEstimate<double> > > total_lo;
 
-  for (unsigned isub=0; isub<nsub; isub++) {
-
+  for (unsigned isub=0; isub<nsub; isub++)
+  {
     const Integration* integration = archive->get_Integration(isub);
 
     get_levels (integration, nchan, cal_hi, cal_lo);
 
-    if (nsub > 1) {
-      if (isub == 0) {
+    if (nsub > 1)
+    {
+      if (isub == 0)
+      {
 	total_hi.resize (cal_hi.size());
 	total_lo.resize (cal_lo.size());
-	for (unsigned ipol=0; ipol<npol; ipol++) {
+	for (unsigned ipol=0; ipol<npol; ipol++)
+	{
 	  total_hi[ipol].resize (nchan);
 	  total_lo[ipol].resize (nchan);
 	}
       }
-      for (unsigned ipol=0; ipol<npol; ipol++) {
-	for (unsigned ichan=0; ichan<nchan; ichan++) {
+      for (unsigned ipol=0; ipol<npol; ipol++)
+      {
+	for (unsigned ichan=0; ichan<nchan; ichan++)
+	{
 	  total_hi[ipol][ichan] += cal_hi[ipol][ichan];
 	  total_lo[ipol][ichan] += cal_lo[ipol][ichan];
 	}
@@ -268,9 +273,12 @@ void Pulsar::ReferenceCalibrator::get_levels
 
   }
 
-  if (nsub > 1) {
-    for (unsigned ipol=0; ipol<npol; ipol++) {
-      for (unsigned ichan=0; ichan<nchan; ichan++) {
+  if (nsub > 1)
+  {
+    for (unsigned ipol=0; ipol<npol; ipol++)
+    {
+      for (unsigned ichan=0; ichan<nchan; ichan++)
+      {
 	cal_hi[ipol][ichan] = total_hi[ipol][ichan].get_Estimate();
 	cal_lo[ipol][ichan] = total_lo[ipol][ichan].get_Estimate();
       }
@@ -310,13 +318,14 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
   vector<Estimate<double> > source (npol);
   vector<Estimate<double> > sky (npol);
 
-  for (unsigned ichan=0; ichan<nchan; ++ichan) try {
-
+  for (unsigned ichan=0; ichan<nchan; ++ichan) try
+  {
     if (verbose > 2)
       cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
 	" ichan=" << ichan << endl;
 
-    for (unsigned ipol=0; ipol<npol; ++ipol) {
+    for (unsigned ipol=0; ipol<npol; ++ipol)
+    {
       source[ipol] = cal_hi[ipol][ichan] - cal_lo[ipol][ichan];
       sky[ipol] = cal_lo[ipol][ichan];
     }
@@ -326,15 +335,16 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
 
     bool bad = false;
 
-    if (cal_AA.val <= 0 || cal_BB.val <= 0) {
+    if (cal_AA.val <= 0 || cal_BB.val <= 0)
+    {
       if (verbose > 2)
 	cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
 	  " ichan=" << ichan << " bad levels" << endl;
       bad = true;
     }
 
-    if (det_threshold > 0 && npol == 4) {
-
+    if (det_threshold > 0 && npol == 4)
+    {
       // this class correctly handles the propagation of error and bias
       static MEAL::Invariant invariant;
 
@@ -356,7 +366,8 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
 
       double cutoff = det_threshold * (bias - inv.get_error());
 
-      if (inv.get_value() < cutoff)  {
+      if (inv.get_value() < cutoff)
+      {
 	if (verbose)
 	  cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
 	    " ichan=" << ichan << "\n  invariant=" << inv.get_value()
@@ -366,10 +377,10 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
 	       << " bias=" << bias << ")" << endl;
 	bad = true;
       }
-
     }
 
-    if (bad) {
+    if (bad)
+    {
       baseline[ichan] = 0;
       transformation[ichan] = 0;
       // derived classes may need to initialize bad values

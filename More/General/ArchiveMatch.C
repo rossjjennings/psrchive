@@ -340,7 +340,8 @@ bool Pulsar::ArchiveMatch::match (const Archive* a, const Archive* b)
   reason = "";
 
   // State of the signal
-  if (check_state && a->get_state() != b->get_state()) {
+  if (check_state && a->get_state() != b->get_state())
+  {
     reason += separator
       + stringprintf ("signal state mismatch: %s != %s",
 		      Signal::state_string(a->get_state()),
@@ -349,7 +350,8 @@ bool Pulsar::ArchiveMatch::match (const Archive* a, const Archive* b)
   }
   
   // Type of observation
-  if (check_type && a->get_type() != b->get_type()) {
+  if (check_type && a->get_type() != b->get_type())
+  {
     reason += separator
       + stringprintf ("observation type mismatch: %s != %s",
 		      Signal::source_string(a->get_type()),
@@ -366,7 +368,8 @@ bool Pulsar::ArchiveMatch::match (const Archive* a, const Archive* b)
   }
 
   // Data has been flux calibrated
-  if (check_scale && a->get_scale() != b->get_scale()) {
+  if (check_scale && a->get_scale() != b->get_scale())
+  {
     reason += separator + "scale mismatch: "
       + tostring(a->get_scale()) + " != " + tostring(b->get_scale());
     result = false;
@@ -374,21 +377,24 @@ bool Pulsar::ArchiveMatch::match (const Archive* a, const Archive* b)
 
   // Data has been corrected for ISM faraday rotation
   if (check_faraday_corrected &&
-      a->get_faraday_corrected() != b->get_faraday_corrected()) {
+      a->get_faraday_corrected() != b->get_faraday_corrected())
+  {
     reason += separator
       + stringprintf ("faraday rotation correction mismatch");
     result = false;
   }
   
   // Inter-channel dispersion delay has been removed
-  if (check_dedispersed && a->get_dedispersed() != b->get_dedispersed()) {
+  if (check_dedispersed && a->get_dedispersed() != b->get_dedispersed())
+  {
     reason += separator
       + stringprintf ("dedispersion mismatch");
     result = false;
   }
 
   // number of phase bins
-  if (check_nbin && a->get_nbin() != b->get_nbin()) {
+  if (check_nbin && a->get_nbin() != b->get_nbin())
+  {
     reason += separator
       + stringprintf ("number of bins mismatch: %d != %d",
 		      a->get_nbin(), b->get_nbin());
@@ -396,7 +402,8 @@ bool Pulsar::ArchiveMatch::match (const Archive* a, const Archive* b)
   }
 
   // number of frequency channels
-  if (check_nchan && a->get_nchan() != b->get_nchan()) {
+  if (check_nchan && a->get_nchan() != b->get_nchan())
+  {
     reason += separator
       + stringprintf ("numbers of channels mismatch: %d != %d",
 		      a->get_nchan(), b->get_nchan());
@@ -404,56 +411,58 @@ bool Pulsar::ArchiveMatch::match (const Archive* a, const Archive* b)
   }
 
   // number of polarizations
-  if (check_npol && a->get_npol() != b->get_npol()) {
+  if (check_npol && a->get_npol() != b->get_npol())
+  {
     reason += separator
       + stringprintf ("numbers of channels mismatch: %d != %d",
 		      a->get_npol(), b->get_npol());
     result = false;
   }
 
-  if (check_receiver) {
-
+  if (check_receiver)
+  {
     const Receiver* a_receiver = a->get<Receiver>();
     const Receiver* b_receiver = b->get<Receiver>();
 
-    if ( a_receiver && !b_receiver ) {
+    if ( a_receiver && !b_receiver )
+    {
       reason += separator + "receiver mismatch: have and haven't extension";
       result = false;
     }
-    else if ( !a_receiver && b_receiver ) {
+    else if ( !a_receiver && b_receiver )
+    {
       reason += separator + "receiver mismatch: haven't and have extension";
       result = false;
     }
     else if (a_receiver && ! a_receiver->match (b_receiver, reason))
       result = false;
-
   }
 
-  if (check_centre_frequency) {
-
+  if (check_centre_frequency)
+  {
     double cf1 = a->get_centre_frequency();
     double cf2 = b->get_centre_frequency();
     double dfreq = fabs (cf2 - cf1);
 
-    if (dfreq > max_frequency_difference) {
+    if (dfreq > max_frequency_difference)
+    {
       reason += separator
 	+ stringprintf ("centre frequency mismatch: %lf and %lf", cf1, cf2);
       result = false;
     }
-
   }
 
-  if (check_bandwidth) {
-
+  if (check_bandwidth)
+  {
     double bw1 = a->get_bandwidth();
     double bw2 = b->get_bandwidth();
     
-    if ( ( bw1 != bw2 ) && !(opposite_sideband && (bw1 == -bw2)) ) {
+    if ( ( bw1 != bw2 ) && !(opposite_sideband && (bw1 == -bw2)) )
+    {
       reason += separator
 	+ stringprintf ("bandwidth mismatch: %lf and %lf", bw1, bw2);
       result = false;
     }
-    
   }
 
   return result;
