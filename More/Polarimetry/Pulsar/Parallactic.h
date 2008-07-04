@@ -7,17 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Parallactic.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.6 $
+   $Date: 2008/07/04 12:18:56 $
    $Author: straten $ */
 
 #ifndef __Calibration_Parallactic_H
 #define __Calibration_Parallactic_H
 
 #include "MEAL/Rotation1.h"
-#include "MJD.h"
-
-class sky_coord;
+#include "Directional.h"
 
 namespace Calibration {
 
@@ -55,18 +53,22 @@ namespace Calibration {
     rotation about the Stokes V axis by -VA.
   */
 
-  class Parallactic : public MEAL::Rotation1 {
+  class Parallactic : public MEAL::Rotation1
+  {
 
   public:
 
     //! Default constructor
     Parallactic ();
 
-    //! Set the coordinates of the source
-    void set_source_coordinates (const sky_coord& coords);
+    //! Set the directional antenna
+    void set_directional (Directional*);
 
-    //! Set the latitude and longitude of the observatory in degrees
-    void set_observatory_coordinates (double latitude, double longitude);
+    //! Get the directional antenna
+    Directional* get_directional ();
+
+    //! Get the directional antenna
+    const Directional* get_directional () const;
 
     //! Set the MJD
     void set_epoch (const MJD& epoch);
@@ -75,41 +77,14 @@ namespace Calibration {
     MJD get_epoch () const;
 
     //! Set the hour angle in radians
-    void set_hour_angle (double hour_angle);
+    void set_hour_angle (double radians);
 
-    //! Get the hour_angle in radians
+    //! Get the hour angle in radians
     double get_hour_angle () const;
-
-    //! Set the parallactic angle in radians
-    void set_parallactic_angle (double pa);
-
-    //! Get the parallactic angle in radians
-    double get_parallactic_angle () const;
 
   protected:
 
-    //! The declination of the source in radians
-    double declination;
-
-    //! The right ascension of the source in radians
-    double right_ascension;
-
-    //! The latitude of the observatory in degrees
-    double latitude;
-
-    //! The latitude of the observatory in degrees
-    double longitude;
-
-  private:
-
-    //! The last epoch for which the result was calculated
-    MJD current_epoch;
-
-    //! The last hour angle for which the result was calculated
-    double current_hour_angle;
-
-    //! Resets the result whenever set_*_coordinates is called
-    void reset ();
+    Reference::To<Directional> directional;
 
   };
 
