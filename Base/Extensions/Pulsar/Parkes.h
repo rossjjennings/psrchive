@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Parkes.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.5 $
+   $Date: 2008/07/04 23:40:36 $
    $Author: straten $ */
 
 #ifndef __Parkes_h
@@ -25,10 +25,10 @@ namespace Pulsar {
     //! Initialize the Receiver Extension with Parkes Multibeam attributes
     void Multibeam (Receiver* receiver);
 
-    //! Initialize the Receiver Extension with Parkes H_OH attributes
+    //! Initialize the Receiver Extension with Parkes H-OH attributes
     void H_OH (Receiver* receiver);
 
-    //! Initialize the Receiver Extension with Parkes H_OH attributes
+    //! Initialize the Receiver Extension with Parkes 10/50 attributes
     void COAX10_50 (Receiver* receiver);
 
     //! Initialize the Receiver Extension with Parkes best guess
