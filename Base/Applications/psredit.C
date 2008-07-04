@@ -64,7 +64,7 @@ using namespace Pulsar;
 
 int main (int argc, char** argv) try
 {  
-  // print in degrees
+  // print/parse in degrees
   Angle::default_type = Angle::Degrees;
 
   // suppress warnings by default
@@ -138,7 +138,7 @@ int main (int argc, char** argv) try
       edit = true;
 
   if (edit && !save) {
-    cout << "psredit: changes will not be saved."
+    cerr << "psredit: changes will not be saved."
       " Use -m or -e to write results to disk" << endl;
   }
 
@@ -195,13 +195,18 @@ int main (int argc, char** argv) try
     }
   } // for each archive
 
-  catch (Error& error) {
-    cout << " " << error.get_message() << endl;
+  catch (Error& error)
+  {
+    if (verbose)
+      cerr << "psredit: error on " << filenames[ifile] << error << endl;
+    else
+      cerr << " " << error.get_message() << endl;
   }
 
   return 0;
 }
-catch (Error& error) {
+catch (Error& error)
+{
   cerr << "psredit: " << error << endl;
   return -1;
 }
