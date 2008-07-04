@@ -7,20 +7,22 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Mount.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/07/02 11:23:23 $
+   $Revision: 1.2 $
+   $Date: 2008/07/04 12:19:14 $
    $Author: straten $ */
 
 #ifndef __Mount_H
 #define __Mount_H
 
+#include "Reference.h"
 #include "MJD.h"
 #include "sky_coord.h"
 #include "Matrix.h"
 
 //! Calculates horizon pointing parameters using SLALIB
 
-class Mount  {
+class Mount : public Reference::Able
+{
   
 public:
   
@@ -45,11 +47,12 @@ public:
   void set_epoch (const MJD& epoch);
   MJD get_epoch () const;
 
+  //! Set the hour_angle in radians
+  void set_hour_angle (double rad);
+  double get_hour_angle () const;
+
   //! Get the LST in radians
   double get_local_sidereal_time () const;
-
-  //! Get the hour_angle in radians
-  double get_hour_angle () const;
 
   //! Get the vertical angle (rotation about the line of sight)
   virtual double get_vertical () const = 0;

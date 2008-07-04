@@ -6,9 +6,13 @@
  ***************************************************************************/
 
 #include "Mount.h"
-#include "sky_coord.h"
 
-#include <slalib.h>
+// #define _DEBUG
+
+#ifdef _DEBUG
+#include <iostream>
+using namespace std;
+#endif
 
 static float unset = -333.0;
 
@@ -17,6 +21,7 @@ Mount::Mount ()
   declination = right_ascension = 0;
   longitude = latitude = 0;
   lst = unset;
+  hour_angle = unset;
 }
 
 Mount::~Mount ()
@@ -34,6 +39,7 @@ void Mount::set_source_coordinates (const sky_coord& pos)
 void Mount::set_observatory_latitude (double lat)
 {
   latitude = lat;
+
   lst = unset;
 }
 
@@ -42,9 +48,10 @@ double Mount::get_observatory_latitude () const
   return latitude;
 }
 
-void Mount::set_observatory_longitude (double longi)
+void Mount::set_observatory_longitude (double lon)
 {
-  longitude = longi;
+  longitude = lon;
+
   lst = unset;
 }
 
@@ -59,7 +66,9 @@ void Mount::set_epoch (const MJD& _epoch)
     return;
 
   epoch = _epoch;
+
   lst = unset;
+  hour_angle = unset;
 }
 
 MJD Mount::get_epoch () const
@@ -67,11 +76,12 @@ MJD Mount::get_epoch () const
   return epoch;
 }
 
-//! Get the LST in radians
-double Mount::get_local_sidereal_time () const
+//! Set the hour_angle in radians
+void Mount::set_hour_angle (double rad)
 {
-  build ();
-  return lst;
+  hour_angle = rad;
+
+  lst = unset;
 }
 
 //! Get the hour_angle in radians
@@ -81,16 +91,44 @@ double Mount::get_hour_angle () const
   return hour_angle;
 }
 
+//! Get the LST in radians
+double Mount::get_local_sidereal_time () const
+{
+  build ();
+  return lst;
+}
+
 void Mount::build () const
 {
   if (get_built())
     return;
 
-  // MJD::LST receives longitude in degrees and returns LST in hours
-  lst = epoch.LST (longitude * 180/M_PI) * M_PI/12.0;
+  if (hour_angle == unset)
+  {
+#ifdef _DEBUG
+    cerr << "Mount::build epoch=" << epoch << endl;
+#endif
 
-  // compute hour angle in radians
-  hour_angle = lst - right_ascension;
+    // MJD::LST receives longitude in degrees and returns LST in hours
+    lst = epoch.LST (longitude * 180/M_PI) * M_PI/12.0;
+
+    // compute hour angle in radians
+    hour_angle = lst - right_ascension;
+  }
+  else
+  {
+#ifdef _DEBUG
+    cerr << "Mount::build hour_angle=" << hour_angle << endl;
+#endif
+    lst = hour_angle + right_ascension;
+  }
+
+#ifdef _DEBUG
+  cerr << "Mount::build LST=" << lst << " latitude=" << latitude
+       << endl
+       << "Mount::build RA=" << right_ascension << " Dec=" << declination
+       << endl;
+#endif
 
   // Basis pointing to source in celestial reference frame
   source_basis =
