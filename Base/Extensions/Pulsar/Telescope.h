@@ -7,19 +7,21 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Telescope.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/05/23 19:15:04 $
-   $Author: demorest $ */
+   $Revision: 1.10 $
+   $Date: 2008/07/04 06:17:24 $
+   $Author: straten $ */
 
 #ifndef __Telescope_Extension_h
 #define __Telescope_Extension_h
 
 #include "Pulsar/ArchiveExtension.h"
 
-namespace Pulsar {
+namespace Pulsar
+{
   
   //! Contains information about the telescope used for the observation
-  class Telescope : public Pulsar::Archive::Extension {
+  class Telescope : public Pulsar::Archive::Extension
+  {
 
   public:
     
@@ -44,11 +46,14 @@ namespace Pulsar {
     //
 
     //! Types of primary reflector mounts
-    enum Mount {
+    enum Mount
+    {
       //! Equatorial (right ascension, declination)
       Equatorial,
       //! Horizon (altidue, azimuth)
       Horizon,
+      //! Meridian (aka X-Y, meridianal longitude and latitude)
+      Meridian,
       //! Fixed (LOFAR, Arecibo)
       Fixed,
       //! Mobile (satellite)
@@ -56,7 +61,8 @@ namespace Pulsar {
     };
 
     //! Types of primary reflector
-    enum Reflector {
+    enum Reflector
+    {
       //! Parabolic
       Parabolic,
       //! Spherical
@@ -64,7 +70,8 @@ namespace Pulsar {
     };
 
     //! Types of focus
-    enum Focus {
+    enum Focus 
+    {
       /*! Prime Focus: primary reflector; receiver at primary focus */
       PrimeFocus,
       /*! Cassegrain: primary and secondary reflectors; receiver at
