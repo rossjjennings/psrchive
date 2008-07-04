@@ -72,8 +72,19 @@ int main ()
 	      check (horizon.get_vertical(), parallactic_angle,
 		     "parallactic_angle");
 	    }
-	    else
-	      meridian.get_vertical ();
+
+	    double vertical = directional->get_vertical ();
+
+	    double hour_angle = directional->get_hour_angle();
+
+	    // "forget" the current hour angle
+	    directional->set_hour_angle (M_PI*2);
+	    directional->get_vertical ();
+
+	    // test that set_hour_angle works
+	    directional->set_hour_angle (hour_angle);
+
+	    check (vertical, directional->get_vertical(), "vertical");
 
 	  }
 	  catch (Error& error)
