@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -21,7 +21,7 @@
 #include "Pulsar/SingleAxisPolynomial.h"
 #include "MEAL/Complex2Constant.h"
 
-#include "sky_coord.h"
+#include "Horizon.h"
 #include "Pauli.h"
 
 #include <iostream>
@@ -40,10 +40,10 @@ float max_poln = 0.8;
 // tolerance to error
 float error_tolerance = 2.0;
 
-// minimum parallactic angle
+// minimum hour angle
 float ha_min = -5;
 
-// maximum parallactic angle
+// maximum hour angle
 float ha_max = 5;
 
 // number of backend polynomial coefficients
@@ -441,7 +441,6 @@ int runtest (Calibration::Parallactic& parallactic)
 
     // make the backend vary as a function of hour angle
     backend->set_argument (0, &hour_angle);
-
   }
 
   // ///////////////////////////////////////////////////////////////////////
@@ -450,11 +449,13 @@ int runtest (Calibration::Parallactic& parallactic)
   //
   MEAL::Complex2* system;
 
-  if (hamaker) {
+  if (hamaker)
+  {
     cerr << "Using Algebraic Decomposition (Hamaker)" << endl;
     system = new MEAL::Polar;
   }
-  else {
+  else
+  {
     cerr << "Using Phenomenological Decomposition (Britton)" << endl;
     system = new Calibration::Instrument;
   }
@@ -464,8 +465,8 @@ int runtest (Calibration::Parallactic& parallactic)
   unsigned cal_path = 0;
   unsigned src_path = 0;
 
-  if (ncal) {
-
+  if (ncal)
+  {
     // ///////////////////////////////////////////////////////////////////////
     //
     // add the calibrator signal path to the model
@@ -476,7 +477,6 @@ int runtest (Calibration::Parallactic& parallactic)
     model.add_transformation (path);
 
     path = new MEAL::ProductRule<MEAL::Complex2> (*path);
-
   }
 
   // ///////////////////////////////////////////////////////////////////////
@@ -490,6 +490,7 @@ int runtest (Calibration::Parallactic& parallactic)
 
   model.add_transformation (path);
 
+  cerr << "ReceptionModel::nparam=" << model.get_nparam() << endl;
 
   // ///////////////////////////////////////////////////////////////////////
   //
@@ -512,12 +513,14 @@ int runtest (Calibration::Parallactic& parallactic)
 
   model.get_solver()->set_convergence_chisq (variance*variance);
 
-  try {
+  try
+  {
     if (verbose)
       cerr << "runtest call MeasurementEquation::solve" << endl;
     model.solve ();
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << error << endl;
     return -1;
   }
@@ -531,7 +534,8 @@ int runtest (Calibration::Parallactic& parallactic)
   if (compare (system->evaluate(), receiver, max_norm) < 0)
     return -1;
 
-  if (vverbose) {
+  if (vverbose)
+  {
     for (unsigned istate=0; istate<nstates; istate++)
       cerr << "source["<<istate<<"] = " << source[istate]
 	   << "\ninitial guess[" << istate << "] = " 
@@ -549,8 +553,8 @@ int runtest (Calibration::Parallactic& parallactic)
   if (verbose)
     cerr << "runtest verify model states" << endl;
 
-  for (unsigned istate=0; istate<nstates; istate++) {
-
+  for (unsigned istate=0; istate<nstates; istate++)
+  {
     Stokes<double> state = coherency( source_model[istate]->evaluate() );
     
     if (vverbose)
@@ -562,24 +566,24 @@ int runtest (Calibration::Parallactic& parallactic)
     float max_norm = limit * norm (source[istate]);
     float diff = sqrt(norm (state - source[istate]));
     
-    if (diff > max_norm) {
-      
+    if (diff > max_norm)
+    {
       cerr << "\n\nmodel source[" << istate << "]=" << state << " != "
 	   << "\ninput source[" << istate << "]=" << source[istate] 
 	   << " norm=" << diff << " > max_norm=" << max_norm <<  endl;
 
-      if (verbose) {
-
+      if (verbose)
+      {
 	model.set_input_index (istate);
   
-	for (unsigned iobs=0; iobs<nobs; iobs++) {
-	  
+	for (unsigned iobs=0; iobs<nobs; iobs++)
+	{
 	  Calibration::CoherencyMeasurementSet& meas = source_obs[iobs];
 	  
-	  for (unsigned imeas=0; imeas<meas.size(); imeas++) {
-	    
-	    if (meas[imeas].get_input_index() == istate) {
-	      
+	  for (unsigned imeas=0; imeas<meas.size(); imeas++)
+	  {
+	    if (meas[imeas].get_input_index() == istate)
+	    {
 	      meas.set_coordinates ();
 	      
 	      vector< Jones<double> > grad;
@@ -590,7 +594,6 @@ int runtest (Calibration::Parallactic& parallactic)
 	      cerr << "obsout["<<iobs<<"]=" << observed_source
 		   << "\n obsin["<<iobs<<"]=" 
 		   << meas[imeas].get_stokes() << endl;
-	      
 	    }
 	  } // for each measurement
 	} // for each observation
@@ -620,7 +623,6 @@ int runtest (Calibration::Parallactic& parallactic)
 
 int main (int argc, char** argv)
 {
-
   int c = 0;
   const char* args = "b:c:d:Df:hi:Oo:p:s:t:vVx";
   while ((c = getopt(argc, argv, args)) != -1)
@@ -683,15 +685,18 @@ int main (int argc, char** argv)
     }
 
   // the known parallactic angle rotation of the feeds
-  Calibration::Parallactic parallactic;
+  Horizon horizon;
 
   // Parkes-like
-  parallactic.set_observatory_coordinates (-33, 0);
+  horizon.set_observatory_latitude (-33 * M_PI/180.0);
+  horizon.set_observatory_longitude (0);
 
   // 0437-like
   sky_coord position ("00:00-47:15");
-  parallactic.set_source_coordinates (position);
+  horizon.set_source_coordinates (position);
 
+  Calibration::Parallactic parallactic;
+  parallactic.set_directional( &horizon );
 
   cerr << "Generating " << nloop << " random source and receiver combinations"
     " (difficulty=" << difficulty << ")" << endl;
@@ -707,8 +712,8 @@ int main (int argc, char** argv)
   cerr << "Hour angle ranges from " 
        << ha_min << " to " << ha_max << " hours" << endl;
 
-  ha_min /= 24.0;
-  ha_max /= 24.0;
+  ha_min *= M_PI/12.0;
+  ha_max *= M_PI/12.0;
     
   unsigned errors = 0;
   unsigned reported_errors = 0;
@@ -717,8 +722,8 @@ int main (int argc, char** argv)
 
   try {
 
-    for (unsigned i=0; i<nloop; i++) {
-      
+    for (unsigned i=0; i<nloop; i++)
+    {
       if (vverbose)
 	cerr << "runtest " << i << endl;
 
@@ -727,8 +732,8 @@ int main (int argc, char** argv)
 
       int finished = (i*100)/nloop;
 
-      if ((finished != reported_finished) || (errors != reported_errors)) {
-
+      if ((finished != reported_finished) || (errors != reported_errors))
+      {
 	cerr << "Finished: " << finished << "% -- errors: " << errors << 
 	  " (" << float((errors*1000)/(i+1))/10.0 << "%)" << endl;
 
@@ -739,7 +744,8 @@ int main (int argc, char** argv)
       hamaker = !hamaker;
     }
 
-    if (errors) {
+    if (errors)
+    {
       float percent = ((errors*1000)/nloop)/10.0;
 
       cerr << "Failed " << errors << " out of " << nloop << " times" 
@@ -750,10 +756,13 @@ int main (int argc, char** argv)
     }
 
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << "Error " << error << endl;
     return -1;
   }
+
+  cerr << "All tests passed" << endl << endl;
 
   return 0;
 }
