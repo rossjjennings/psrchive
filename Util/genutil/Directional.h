@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Directional.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/07/02 11:23:03 $
+   $Revision: 1.2 $
+   $Date: 2008/07/04 12:19:11 $
    $Author: straten $ */
 
 #ifndef __Directional_H
@@ -21,6 +21,9 @@ class Directional : public Mount
 {  
 public:
   
+  //! Default constructor
+  Directional ();
+
   //! Get the vertical angle in radians (rotation about the line of sight)
   double get_vertical () const;
 

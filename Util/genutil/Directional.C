@@ -7,6 +7,18 @@
 
 #include "Directional.h"
 
+// #define _DEBUG
+
+#ifdef _DEBUG
+#include <iostream>
+using namespace std;
+#endif
+
+Directional::Directional ()
+{
+  vertical = 0;
+}
+
 double Directional::get_vertical () const
 {
   build ();
@@ -49,4 +61,8 @@ void Directional::build () const
   Vector<3,double> north = basis * observatory_basis * source_basis[0];
 
   vertical = - atan2 (north[1], north[0]);
+
+#ifdef _DEBUG
+  cerr << "Directional::build vertical=" << vertical << endl;
+#endif
 }
