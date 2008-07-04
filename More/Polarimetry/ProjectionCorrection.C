@@ -14,6 +14,9 @@
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Pointing.h"
 
+#include "Horizon.h"
+#include "Meridian.h"
+
 #include "Pauli.h"
 
 using namespace std;
@@ -46,18 +49,29 @@ void Pulsar::ProjectionCorrection::set_archive (const Archive* _archive)
     throw Error (InvalidState, "Pulsar::ProjectionCorrection::set_archive",
 		 "no Telescope extension available");
 
+  Directional* directional = 0;
+
   if (telescope->get_mount() == Telescope::Horizon)
+    directional = new Horizon;
+  if (telescope->get_mount() == Telescope::Meridian)
+    directional = new Meridian;
+
+  if (directional)
   {
-    double lat = telescope->get_latitude().getDegrees();
-    double lon = telescope->get_longitude().getDegrees();
+    double lat = telescope->get_latitude().getRadians();
+    double lon = telescope->get_longitude().getRadians();
 
     if (Archive::verbose > 2)
       cerr << "Pulsar::ProjectionCorrection::set_archive horizon mount \n"
-	" antenna latitude=" << lat << "deg longitude=" << lon << "deg \n"
+	" antenna latitude=" << lat*180/M_PI << "deg"
+	" longitude=" << lon*180/M_PI << "deg \n"
 	" source coordinates=" << archive->get_coordinates() << endl;
-  
-    para.set_observatory_coordinates( lat, lon );
-    para.set_source_coordinates( archive->get_coordinates() );
+
+    directional->set_observatory_latitude (lat);
+    directional->set_observatory_longitude (lon);
+    directional->set_source_coordinates ( archive->get_coordinates() );
+
+    para.set_directional (directional);
   }
 }
 
@@ -185,7 +199,7 @@ Jones<double> Pulsar::ProjectionCorrection::get_rotation () const
   if (must_correct_platform && should_correct_vertical)
   {
     para.set_epoch( integration->get_epoch() );
-    Angle pa = para.get_parallactic_angle();
+    Angle pa = para.get_directional()->get_parallactic_angle();
  
     // check that the para_ang is equal
     std::string origin = "";
