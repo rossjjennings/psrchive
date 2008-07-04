@@ -54,6 +54,10 @@ void MEAL::OneParameter::set_param (double value)
   param.val = value;
 
   if (get_context())
+  {
+    if (Function::very_verbose)
+      cerr << "MEAL::OneParameter::set_param set_evaluation_changed" << endl;
     get_context()->set_evaluation_changed ();
+  }
 }
 
