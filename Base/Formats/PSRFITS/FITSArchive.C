@@ -272,7 +272,17 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   set_telescope ( obs_ext->telescope );
 
   Telescope* telescope = getadd<Telescope>();
-  Telescopes::set_telescope_info (telescope, this);
+
+  try
+  {
+    Telescopes::set_telescope_info (telescope, this);
+  }
+  catch (Error& error)
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_header WARNING"
+	" could not set telescope info for " << obs_ext->telescope << endl;
+  }
 
   // RA
     
