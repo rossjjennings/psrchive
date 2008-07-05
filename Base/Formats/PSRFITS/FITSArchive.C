@@ -439,8 +439,8 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     coord.setHMSDMS (hms.c_str(),tempstr.c_str());
 
   }     
-  else if (hdr_ext->coordmode == "GAL") {
-
+  else if (hdr_ext->coordmode == "GAL")
+  {
     double dfault = 0.0;
     double co_ord1, co_ord2;
 
@@ -449,12 +449,10 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     AnglePair temp;
     temp.setDegrees(co_ord1,co_ord2);
     coord.setGalactic(temp);
-
   }
-  else
-    if (verbose)
-      cerr << "FITSArchive::load_header WARNING COORD_MD="
-	   << hdr_ext->coordmode << " not implemented" << endl;
+  else if (verbose > 2)
+    cerr << "FITSArchive::load_header WARNING COORD_MD="
+	 << hdr_ext->coordmode << " not implemented" << endl;
   
   set_coordinates (coord);
   
@@ -480,8 +478,8 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   dfault = "pre version 2.8";
   psrfits_read_key (fptr, "DATE-OBS", &tempstr, dfault, verbose > 2);
 
-  if ((tempstr == dfault) || (tempstr.empty())) {
-
+  if ((tempstr == dfault) || (tempstr.empty()))
+  {
     //
     // Before version 2.8, the UTC date and time were stored separately
     //
@@ -509,10 +507,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
       tempstr = tempstr.substr (0, decimal);
 
     hdr_ext->stt_time = tempstr;
-
   }
-  else {
-
+  else
+  {
     //
     // Since version 2.8, the UTC date and time are stored as one string
     //
@@ -530,12 +527,11 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
       cerr << "FITSArchive::load_header DATE-0BS parsed into\n"
 	" date='" << hdr_ext->stt_date << "'\n"
 	" time='" << hdr_ext->stt_time << "'\n";
-
   }
   
-      // Read the bpa
+  // Read the bpa
    
-  if(verbose > 2 )
+  if (verbose > 2)
     cerr << "FITSArchive::load_header reading BPA" << endl;
     
   dfault = "0.0";
@@ -547,7 +543,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     
     // Read the bmaj
     
-  if(verbose > 2 )
+  if (verbose > 2)
     cerr << "FITSArchive::load_header reading BMAJ" << endl;
     
   dfault = "0.0";
@@ -605,8 +601,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   // ////////////////////////////////////////////////////////////////
   
   if (verbose > 2)
-    cerr << "FITSArchive::load_header finished with primary HDU" 
-	 << endl;
+    cerr << "FITSArchive::load_header finished with primary HDU" << endl;
   
   // Load the processing history
   load_ProcHistory (fptr);
@@ -635,8 +630,8 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   // Load the ephemeris from the FITS file
   fits_movnam_hdu (fptr, BINARY_TBL, "PSREPHEM", 0, &status);
 
-  if (status == 0 && get_type() == Signal::Pulsar) {
-
+  if (status == 0 && get_type() == Signal::Pulsar)
+  {
     psrephem* eph = new psrephem;
 
     ::load (fptr, eph);
@@ -647,17 +642,15 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
     if (verbose > 2)
       cerr << "FITSArchive::load_header ephemeris loaded" << endl;
-
   }
-  else {
-
+  else
+  {
     ephemeris = 0;
     set_dispersion_measure (0);
     set_rotation_measure (0);
 
     if (verbose > 2)
       cerr << "FITSArchive::load_header no ephemeris" << endl;
-
   }
 
   load_Predictor (fptr);
@@ -701,14 +694,13 @@ string Pulsar::FITSArchive::get_template_name ()
 {
   static char* template_defn = getenv ("PSRFITSDEFN");
 
-  if (template_defn) {
-
+  if (template_defn)
+  {
     if (verbose > 2)
       cerr << "FITSArchive::get_template_name using\n"
 	"  PSRFITSDEFN=" << template_defn << endl;
 
     return template_defn;
-
   }
 
   // load the definition from the configured installation directory
@@ -721,13 +713,10 @@ string Pulsar::FITSArchive::get_template_name ()
   return template_name;
 }
 
-void Pulsar::FITSArchive::unload_file (const char* filename) const
+void Pulsar::FITSArchive::unload_file (const char* filename) const try
 {
-
   if (!filename)
-    throw Error (InvalidParam, "FITSArchive::unload_file", 
-                 "filename unspecified");
-try {
+    throw Error (InvalidParam, string(), "filename unspecified");
 
   if (verbose > 2)
     cerr << "FITSArchive::unload_file (" << filename << ")" << endl
@@ -797,18 +786,16 @@ try {
   string coord1, coord2;
   const FITSHdrExtension* hdr_ext = get<FITSHdrExtension>();
 
-  if (hdr_ext) {
-    
+  if (hdr_ext)
+  {
     if (verbose > 2)
       cerr << "Pulsar::FITSArchive::unload_file FITSHdrExtension" << endl;
     
     unload (fptr, hdr_ext);
     hdr_ext->get_coord_string( get_coordinates(), coord1, coord2 );
-
-  }
-  
-  else {
-
+  }  
+  else
+  {
     // If no FITSHdrExtension is present, assume J2000 Equatorial
 
     coord1 = RA;
@@ -850,23 +837,20 @@ try {
   }
 
   {
-
     const WidebandCorrelator* ext = get<WidebandCorrelator>();
-    if (ext) {
-
+    if (ext)
+    {
       if (verbose > 2)
 	cerr << "FITSArchive::unload WidebandCorrelator extension" << endl;
       unload (fptr, ext);
-
     }
-
   }
 
   {
     const Backend* backend = get<Backend>();
 
-    if (backend) {
-      
+    if (backend)
+    {
       if (verbose > 2)
 	cerr << "FITSArchive::unload " << backend->get_extension_name()
 	     << " BACKEND=" << backend->get_name() 
@@ -884,9 +868,7 @@ try {
       
       double be_delay = backend->get_delay();
       psrfits_update_key (fptr, "BE_DELAY", be_delay );
-
     }
-    
   }
 
   {
@@ -1061,13 +1043,13 @@ try {
 
   // Unload extra subint parameters.
 
-  FITSSUBHdrExtension *sub_hdr = const_cast<FITSSUBHdrExtension*>( get<FITSSUBHdrExtension>() );
+  const FITSSUBHdrExtension *sub_hdr = get<FITSSUBHdrExtension>();
   if( sub_hdr )
   {
-    // older version files may have SUBINT headers but not all the parameters set
+    // older version files may have SUBINT headers but not all parameters set
 
     if( sub_hdr->get_nsblk() == -1 && hdr_ext->get_obs_mode() == "SEARCH" )
-      sub_hdr->set_nsblk( 1 );
+      const_cast<FITSSUBHdrExtension*>(sub_hdr)->set_nsblk( 1 );
 
     unload( fptr, sub_hdr );
   }
@@ -1089,11 +1071,11 @@ try {
     cerr << "FITSArchive::unload_file fits_close_file " << "(" << filename 
 	 << ")" << " complete" << endl;
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "FITSArchive::unload_file";
 }
 
-}
 
 // End of unload_file function
 // //////////////////////////////////////////
