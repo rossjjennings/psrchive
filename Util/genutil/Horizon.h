@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Horizon.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/07/02 11:23:08 $
+   $Revision: 1.7 $
+   $Date: 2008/07/07 00:27:02 $
    $Author: straten $ */
 
 #ifndef __Horizon_H
@@ -30,6 +30,9 @@ public:
 
   //! Get the zenith angle in radians
   double get_zenith () const;
+
+  //! Get the name of the mount
+  std::string get_name () const;
 
 protected:
 

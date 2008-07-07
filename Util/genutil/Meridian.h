@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Meridian.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/07/02 11:23:18 $
+   $Revision: 1.2 $
+   $Date: 2008/07/07 00:27:02 $
    $Author: straten $ */
 
 #ifndef __Meridian_H
@@ -28,6 +28,9 @@ public:
 
   //! Get the y angle in radians
   double get_y () const;
+
+  //! Get the name of the mount
+  std::string get_name () const;
 
 protected:
 

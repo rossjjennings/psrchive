@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Mount.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/07/04 12:19:14 $
+   $Revision: 1.3 $
+   $Date: 2008/07/07 00:27:02 $
    $Author: straten $ */
 
 #ifndef __Mount_H
@@ -53,6 +53,9 @@ public:
 
   //! Get the LST in radians
   double get_local_sidereal_time () const;
+
+  //! Get the name of the mount
+  virtual std::string get_name () const = 0;
 
   //! Get the vertical angle (rotation about the line of sight)
   virtual double get_vertical () const = 0;

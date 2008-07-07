@@ -21,6 +21,12 @@ double Meridian::get_y () const
   return y;
 }
 
+//! Get the name of the mount
+std::string Meridian::get_name () const
+{
+  return "Meridian";
+}
+
 //! Get the receptor basis in the reference frame of the observatory
 Matrix<3,3,double> Meridian::get_basis (const Vector<3,double>& from) const
 {

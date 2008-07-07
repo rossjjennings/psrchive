@@ -28,6 +28,12 @@ double Horizon::get_zenith () const
   return 0.5 * M_PI - elevation;
 }
 
+//! Get the name of the mount
+std::string Horizon::get_name () const
+{
+  return "Horizon";
+}
+
 //! Get the receptor basis in the reference frame of the observatory
 Matrix<3,3,double> Horizon::get_basis (const Vector<3,double>& from) const
 {
