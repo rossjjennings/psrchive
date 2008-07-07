@@ -1,17 +1,20 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003 by Aidan Hotan
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FITSHdrExtension.h"
+#include "Pulsar/Pulsar.h"
+
 #include "strutil.h"
 
 using namespace std;
 
 //! Default constructor
 Pulsar::FITSHdrExtension::FITSHdrExtension ()
-    : Extension ("FITSHdrExtension")
+  : Extension ("FITSHdrExtension")
 {
   start_time.Construct("00000.00000");
   hdrver = "UNSET";
@@ -27,7 +30,7 @@ Pulsar::FITSHdrExtension::FITSHdrExtension ()
 
 //! Copy constructor
 Pulsar::FITSHdrExtension::FITSHdrExtension (const FITSHdrExtension& extension)
-    : Extension ("FITSHdrExtension")
+  : Extension ("FITSHdrExtension")
 {
   operator=(extension);
 }
@@ -98,7 +101,7 @@ void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
 {
   AnglePair newcoord;
 
-  if (coordmode == "J2000")
+  if (coordmode == "J2000" || coordmode == "UNSET")
   {
 
     newcoord = coordinates.getRaDec();
@@ -122,8 +125,8 @@ void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
 
   }
 
-  cerr << "FITSHdrExtension::get_coord_string WARNING COORD_MD = "
-  << coordmode << " not implemented" << endl;
+  warning << "FITSHdrExtension::get_coord_string WARNING COORD_MD="
+	  << coordmode << " not implemented" << endl;
 
 }
 

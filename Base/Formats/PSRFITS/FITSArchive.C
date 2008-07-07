@@ -281,7 +281,8 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   {
     if (verbose > 2)
       cerr << "FITSArchive::load_header WARNING"
-	" could not set telescope info for " << obs_ext->telescope << endl;
+	" could not set telescope info for " << obs_ext->telescope << "\n\t"
+	   << error.get_message() << endl;
   }
 
   // RA
@@ -383,14 +384,16 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   dfault = "pre version 2.8";
   psrfits_read_key (fptr, "EQUINOX", &tempstr, dfault, verbose > 2);
 
-  if ((tempstr == dfault) || (tempstr.empty())) {
+  if ((tempstr == dfault) || (tempstr.empty()))
+  {
     //
     // The file was created before the EQUINOX attribute was added,
     // or was mistakenly created with a null equinox.
     //
     hdr_ext->equinox = "2000.0";
   }
-  else {
+  else
+  {
     hdr_ext->equinox = tempstr;
 
     if (verbose > 2)
@@ -423,10 +426,20 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (hdr_ext->coordmode == "Gal")
     hdr_ext->coordmode = "GAL";
 
+  //
+  // ... also, if unset assume J2000
+  //
+  if (hdr_ext->coordmode == "UNSET")
+  {
+    warning << "FITSArchive::load_header WARNING"
+      " assuming J2000 coordinates" << endl;
+    hdr_ext->coordmode = "J2000";
+  }
+
   sky_coord coord;
   
-  if (hdr_ext->coordmode == "J2000") {
-
+  if (hdr_ext->coordmode == "J2000")
+  {
     dfault = "";
 
     psrfits_read_key (fptr, "STT_CRD1", &tempstr, dfault, verbose > 2);
@@ -437,7 +450,6 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     if( tempstr == "" )
       psrfits_read_key ( fptr, "DEC", &tempstr, dfault, verbose > 2 );
     coord.setHMSDMS (hms.c_str(),tempstr.c_str());
-
   }     
   else if (hdr_ext->coordmode == "GAL")
   {
