@@ -157,13 +157,10 @@ bool Pulsar::ProjectionCorrection::required (unsigned isub) const try
   // return true if feed or platform needs correction
   return must_correct_platform;
 }
- catch (Error& error)
-   {
-     throw error += "Pulsar::ProjectionCorrection::required";
-   }
-
-
-
+catch (Error& error)
+{
+  throw error += "Pulsar::ProjectionCorrection::required";
+}
 
 /*!
   \pre both set_archive and required methods must be called before
@@ -199,38 +196,60 @@ Jones<double> Pulsar::ProjectionCorrection::get_rotation () const
   if (must_correct_platform && should_correct_vertical)
   {
     para.set_epoch( integration->get_epoch() );
-    Angle pa = para.get_directional()->get_parallactic_angle();
  
-    // check that the para_ang is equal
-    std::string origin = "";
+    Directional* directional = para.get_directional();
 
-    if (pointing && !equal_pi( pointing->get_parallactic_angle(), pa ))
+    Angle para_pa = directional->get_parallactic_angle();
+    std::string origin = directional->get_name();
+
+    // check that the para_ang is equal
+
+    Angle pointing_pa = pointing->get_parallactic_angle();
+
+    if (pointing && !equal_pi( pointing_pa, para_pa ))
     {
       if (Archive::verbose)
+      {
         cerr <<
 	  "Pulsar::ProjectionCorrection::get_rotation WARNING\n"
 	  "  Pointing parallactic angle="
-	     << pointing->get_parallactic_angle().getDegrees() << "deg "
-	     << " != " << pa.getDegrees() << "deg calculated for MJD="
-	     << para.get_epoch() << endl;
-  
+	     << pointing_pa.getDegrees() << " deg != \n"
+	  "  " << origin << " parallactic angle="
+	     << para_pa.getDegrees() << " deg";
+      }
+
+      if (Archive::verbose > 2)
+      {
+	MJD mjd = para.get_epoch();
+	double lat = directional->get_observatory_latitude () * 180/M_PI;
+	double lon = directional->get_observatory_longitude () * 180/M_PI;
+
+	cerr << endl <<
+	  "  lat=" << lat << " deg, lon=" << lon << " deg, MJD=" << mjd;
+      }
+      
       if (pointing_over_computed)
       {
 	origin = "Pointing::";
-	pa = pointing->get_parallactic_angle();
+	para_pa = pointing->get_parallactic_angle();
+
       }
       else
-	origin = "computed ";
+      {
+	if (Archive::verbose)
+	  cerr << endl << "  correcting Pointing" << endl;
+	const_kast(pointing)->set_parallactic_angle (para_pa);
+      }
     }
 
-    summary += " using " + origin + "parallactic angle=" 
-      + tostring( pa.getDegrees() ) + " deg\n";
+    summary += " using " + origin + "::parallactic angle=" 
+      + tostring( para_pa.getDegrees() ) + " deg\n";
     
     if (Archive::verbose > 2)
       cerr << "Pulsar::ProjectionCorrection::get_rotation"
 	" adding vertical transformation\n  " << para.evaluate() << endl;
     
-    feed_rotation += pa;
+    feed_rotation += para_pa;
   }
 
   if (Archive::verbose > 2)
