@@ -204,41 +204,44 @@ Jones<double> Pulsar::ProjectionCorrection::get_rotation () const
 
     // check that the para_ang is equal
 
-    Angle pointing_pa = pointing->get_parallactic_angle();
+    if (pointing) {
 
-    if (pointing && !equal_pi( pointing_pa, para_pa ))
-    {
-      if (Archive::verbose)
-      {
-        cerr <<
-	  "Pulsar::ProjectionCorrection::get_rotation WARNING\n"
-	  "  Pointing parallactic angle="
-	     << pointing_pa.getDegrees() << " deg != \n"
-	  "  " << origin << " parallactic angle="
-	     << para_pa.getDegrees() << " deg";
-      }
+      Angle pointing_pa = pointing->get_parallactic_angle();
 
-      if (Archive::verbose > 2)
+      if (!equal_pi( pointing_pa, para_pa ))
       {
-	MJD mjd = para.get_epoch();
-	double lat = directional->get_observatory_latitude () * 180/M_PI;
-	double lon = directional->get_observatory_longitude () * 180/M_PI;
+        if (Archive::verbose)
+        {
+          cerr <<
+            "Pulsar::ProjectionCorrection::get_rotation WARNING\n"
+            "  Pointing parallactic angle="
+               << pointing_pa.getDegrees() << " deg != \n"
+            "  " << origin << " parallactic angle="
+               << para_pa.getDegrees() << " deg";
+        }
 
-	cerr << endl <<
-	  "  lat=" << lat << " deg, lon=" << lon << " deg, MJD=" << mjd;
-      }
-      
-      if (pointing_over_computed)
-      {
-	origin = "Pointing::";
-	para_pa = pointing->get_parallactic_angle();
+        if (Archive::verbose > 2)
+        {
+          MJD mjd = para.get_epoch();
+          double lat = directional->get_observatory_latitude () * 180/M_PI;
+          double lon = directional->get_observatory_longitude () * 180/M_PI;
 
-      }
-      else
-      {
-	if (Archive::verbose)
-	  cerr << endl << "  correcting Pointing" << endl;
-	const_kast(pointing)->set_parallactic_angle (para_pa);
+          cerr << endl <<
+            "  lat=" << lat << " deg, lon=" << lon << " deg, MJD=" << mjd;
+        }
+        
+        if (pointing_over_computed)
+        {
+          origin = "Pointing::";
+          para_pa = pointing->get_parallactic_angle();
+
+        }
+        else
+        {
+          if (Archive::verbose)
+            cerr << endl << "  correcting Pointing" << endl;
+          const_kast(pointing)->set_parallactic_angle (para_pa);
+        }
       }
     }
 
