@@ -248,7 +248,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.82 2008/07/07 22:46:58 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.83 2008/07/07 23:05:43 straten Exp $" << endl;
       return 0;
 
     case 'M':
@@ -448,35 +448,32 @@ int main (int argc, char *argv[]) try {
 	    string args;
 	    args = archives[i];
 
-	    if (outFormatFlags.find("i")!=string::npos) {
+	    if (outFormatFlags.find("i")!=string::npos)
+	    {
 	      Backend* backend;
 	      backend = arch->get<Backend>();
 	      if (backend)
-		args += string(" -i ") + backend->get_name();
+		args += " -i " + backend->get_name();
 	    }
 
-	    if (outFormatFlags.find("r")!=string::npos) {
+	    if (outFormatFlags.find("r")!=string::npos)
+	    {
 	      Receiver* receiver = arch->get<Receiver>();
 	      if (receiver)
-		args += string(" -r ") + receiver->get_name();
+		args += " -r " + receiver->get_name();
 	    }
 
-		if (outFormatFlags.find("c")!=string::npos) {
-		  char temp[10];
-		  sprintf(temp, "%d", arch->get_nchan());
-		  args += string(" -c ") + temp;
-		}
+	    if (outFormatFlags.find("c")!=string::npos)
+	      args += " -c " + tostring(arch->get_nchan());
 
-		if (outFormatFlags.find("s")!=string::npos) {
-		  char temp[10];
-		  sprintf(temp, "%d", arch->get_nsubint());
-		  args += string(" -s ") + temp;
-		}
+	    if (outFormatFlags.find("s")!=string::npos)
+	      args += " -s " + tostring(arch->get_nsubint());
 
-		for (int i = 0; i < commands.size(); i++) {
-			string value = FetchValue(arch, commands[i]);
-			args += " -" + commands[i] + " " + value;
-		}
+	    for (unsigned i = 0; i < commands.size(); i++)
+	    {
+	      string value = FetchValue(arch, commands[i]);
+	      args += " -" + commands[i] + " " + value;
+	    }
 
 	    if (outFormatFlags.find("o")!=string::npos) /* Include observer info. */
 	      {
