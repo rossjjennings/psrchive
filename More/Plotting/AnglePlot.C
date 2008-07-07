@@ -26,9 +26,6 @@ Pulsar::AnglePlot::AnglePlot()
 
   isubint = 0;
   ichan = 0;
-
-  get_frame()->get_y_axis()->set_tick( 60.0 );
-  get_frame()->get_y_axis()->set_nsub( 3 );
 }
 
 TextInterface::Parser* Pulsar::AnglePlot::get_interface ()
