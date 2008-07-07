@@ -39,7 +39,12 @@ class TwoBitProbability : public JenetAnderson98::Probability {
 public:
   
   TwoBitProbability (const Pulsar::Archive* archive)
-  { tbs = archive->get<Pulsar::TwoBitStats>(); }
+  {
+    tbs = archive->get<Pulsar::TwoBitStats>();
+    if (!tbs)
+      throw Error (InvalidParam, "TwoBitProbability",
+		   "Archive does not contain two bit statistics extension");
+  }
 
   //! Get the number of samples in each histogram
   unsigned get_nsample() const
@@ -68,9 +73,13 @@ protected:
 };
 
 /*!  */
-void Pulsar::TwoBitPlot::prepare (const Archive* data)
+void Pulsar::TwoBitPlot::prepare (const Archive* data) try
 {
   plot.set_interface( new TwoBitProbability(data) );
   get_frame()->get_x_scale()->set_minmax (plot.get_xmin(), plot.get_xmax());
   get_frame()->get_y_scale()->set_minmax (plot.get_ymin(), plot.get_ymax());
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::TwoBitPlot::prepare";
+   }
