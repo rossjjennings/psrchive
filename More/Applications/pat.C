@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -152,28 +153,37 @@ int main (int argc, char *argv[]) try {
   Reference::To<Archive> stdarch;
   Reference::To<Profile> prof;
 
-  int gotc = 0;
-
   float chisq_max = 2.0;
 
-  while ((gotc = getopt(argc, argv, "a:A:cDdf:C:Fg:hiM:n:pPqS:s:tTvVx:")) != -1) {
-    switch (gotc) {
+  const char* args = "a:A:cDdf:C:Fg:hiM:n:pPqS:s:tTvVx:";
+  int gotc = 0;
+
+  while ((gotc = getopt(argc, argv, args)) != -1)
+  {
+    switch (gotc)
+    {
 
     case 'a':
       std_given     = true;
       std_multiple  = true;
       std = optarg;
-      if (strchr(optarg,'*')) /* have something like "*.std" */
-	dirglob (&stdprofiles, optarg);
-      else /* Break up inputs (e.g. have "10cm.std 20cm.std") */
+
+      /* Break up inputs (e.g. have "10cm.std 20cm.std 50*.std") */
+      {
+	char *str;
+	str = strtok(optarg," ");
+	do 
 	{
-	  char *str;
-	  str = strtok(optarg," ");
-	  do 
-	    {
-	      stdprofiles.push_back(str);
-	    } while ((str = strtok(NULL," "))!=NULL);
+	  dirglob (&stdprofiles, str);
 	}
+	while ((str = strtok(NULL," "))!=NULL);
+      }
+
+      if (stdprofiles.size() == 0)
+      {
+	cerr << "pat -a \"" << optarg << "\" failed: no such file" << endl;
+	return -1;
+      }
       break;
 
     case 'A':
@@ -238,7 +248,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.81 2008/07/03 15:12:44 demorest Exp $" << endl;
+      cout << "$Id: pat.C,v 1.82 2008/07/07 22:46:58 straten Exp $" << endl;
       return 0;
 
     case 'M':
