@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/EllAngPlot.h"
 #include "Pulsar/Polarization.h"
 #include "Pulsar/PolnProfile.h"
@@ -11,6 +12,8 @@
 Pulsar::EllAngPlot::EllAngPlot ()
 {
   set_span (90.0);
+  get_frame()->get_y_axis()->set_tick( 30.0 );
+  get_frame()->get_y_axis()->set_nsub( 2 );
 }
 
 void Pulsar::EllAngPlot::get_angles (const Archive* data)
