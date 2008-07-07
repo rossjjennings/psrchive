@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceTo.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/02/24 22:05:30 $
+   $Revision: 1.10 $
+   $Date: 2008/07/07 00:27:06 $
    $Author: straten $ */
 
 #ifndef __ReferenceTo_h
@@ -339,6 +339,12 @@ template<typename C, typename P, bool A>
 C* dynamic_kast (Reference::To<P,A>& p)
 {
   return dynamic_cast<C*> (p.ptr());
+}
+
+template<typename P, bool A>
+P* const_kast (Reference::To<const P,A>& p)
+{
+  return const_cast<P*> (p.ptr());
 }
 
 #endif // #ifndef __ReferenceTo_h
