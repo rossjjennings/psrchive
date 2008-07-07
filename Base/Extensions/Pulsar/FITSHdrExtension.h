@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003 by Aidan Hotan
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.19 $
-   $Date: 2008/05/12 20:46:06 $
+   $Revision: 1.20 $
+   $Date: 2008/07/07 00:26:45 $
    $Author: straten $ */
 
 #ifndef __FITSHdrExtension_h
