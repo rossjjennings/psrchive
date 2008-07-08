@@ -1052,23 +1052,24 @@ TextInterface::VectorOfProxy<V,E,G,S>::get_value (const V* ptr) const
 {
   std::vector<unsigned> ind;
   parse_indeces (ind, range, (ptr->*size)());
-  std::ostringstream ost;
+  std::string result;
 
-  for (unsigned i=0; i<ind.size(); i++) {
+  for (unsigned i=0; i<ind.size(); i++)
+  {
     if (i)
-      ost << ",";  // place a comma between elements
+      result += ",";  // place a comma between elements
     if (label_elements && ind.size() > 1)
-      ost << ind[i] << ")";  // label the elements
+      result += tostring(ind[i]) + ")";  // label the elements
 
     E* element = (const_cast<V*>(ptr)->*get)(ind[i]);
 #ifdef _DEBUG
     std::cerr << "VectorOfProxy[" << prefix << "]::get_value (" 
 	      << ptr << ") element=" << element << std::endl;
 #endif
-    ost << attribute->get_value (element);
+    result += attribute->get_value (element);
   }
 
-  return ost.str();
+  return result;
 }
 
 template<class V, class E, class G, class S>
@@ -1112,22 +1113,24 @@ TextInterface::MapOfProxy<M,K,E,G>::get_value (const M* ptr) const
 {
   std::vector<K> ind;
   get_indeces (ind, range);
-  std::ostringstream ost;
+  std::string result;
 
-  for (unsigned i=0; i<ind.size(); i++) {
+  for (unsigned i=0; i<ind.size(); i++)
+  {
     // place a comma between elements
     if (i)
-      ost << ",";
+      result += ",";
+
     // label the elements
     if (label_elements && ind.size() > 1)
-      ost << ind[i] << ")";
+      result += tostring(ind[i]) + ")";
 
     E* element = (const_cast<M*>(ptr)->*get) (ind[i]);
     if (element)
-      ost << attribute->get_value (element);
+      result += attribute->get_value (element);
   }
 
-  return ost.str();
+  return result;
 }
 
 template<class M, class K, class E, class G>
@@ -1211,18 +1214,19 @@ std::string TextInterface::ElementGet<C,G,S>::get_value (const C* ptr) const
 
   std::vector<unsigned> ind;
   parse_indeces (ind, range, (ptr->*(size))());
-  std::ostringstream ost;
+  std::string result;
 
-  for (unsigned i=0; i<ind.size(); i++) {
+  for (unsigned i=0; i<ind.size(); i++)
+  {
     if (i)
-      ost << ",";  // place a comma between elements
+      result += ",";  // place a comma between elements
     if (label_elements && ind.size() > 1)
-      ost << ind[i] << ")";  // label the elements
+      result += tostring(ind[i]) + ")";  // label the elements
 
-    ost << (ptr->*get)(ind[i]);
+    result += tostring( (ptr->*get)(ind[i]) );
   }
 
-  return ost.str();
+  return result;
 }
 
 template<class C, class T, class G, class S, class Z>
