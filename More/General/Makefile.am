@@ -90,6 +90,7 @@ nobase_include_HEADERS = \
         Pulsar/Transformation.h \
         Pulsar/Transposer.h \
         Pulsar/Weight.h \
+	Pulsar/WeightedFrequency.h \
         Pulsar/ZapInterpreter.h
 
 libGeneral_la_SOURCES = \
@@ -128,6 +129,7 @@ libGeneral_la_SOURCES = \
         Archive_transform.C \
         Archive_tscrunch.C \
         Archive_update_model.C \
+	Archive_weighted_frequency.C \
 	BaselineEstimator.C \
 	BaselineInterpreter.C \
         BaselineWindow.C \
@@ -212,6 +214,7 @@ libGeneral_la_SOURCES = \
 	TimeIntegrate.C \
         Transposer.C \
         Weight.C \
+	WeightedFrequency.C \
 	ZapInterpreter.C
 
 ##############################################################################
