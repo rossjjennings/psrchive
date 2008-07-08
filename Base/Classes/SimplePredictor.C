@@ -186,6 +186,17 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
       coefs[0] = 1/period;
     }
 
+    else if (key == "PDOT:")
+    {
+      if (coefs.size() == 0)
+        throw Error (InvalidState, "Pulsar::SimplePredictor::load",
+                     "PERIOD not specified before PDOT");
+      long double pdot = fromstring<long double>(val);
+      if (coefs.size() < 2)
+	coefs.resize(2);
+      coefs[1] = -0.5 * pdot / (coefs[0] * coefs[0]);
+    }
+
     else if (key == "ACC:")
     {
       if (coefs.size() == 0)
