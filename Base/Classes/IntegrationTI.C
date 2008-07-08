@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/IntegrationTI.h"
 #include "Pulsar/Pointing.h"
 
@@ -25,19 +26,23 @@ Pulsar::IntegrationTI::IntegrationTI ()
        &Integration::set_folding_period, 
        "period", "Period at which data were folded (seconds)" );
 
-  VGenerator<double> generator;
-  add_value(generator( "freq", "Centre frequency of each channel (MHz)",
-		       /* WvS - not sure why the compiler doesn't know the
-			  type of the pointer to the get_centre_frequency
-			  method, but this cast is necessary for now.
-		       */
-		       (double(Integration::*)(unsigned)const)
-		       &Integration::get_centre_frequency,
-		       &Integration::set_centre_frequency,
-		       &Integration::get_nchan ));
+  // note that explicit casts are required for overloaded methods
+
+  VGenerator<double> dgenerator;
+  add_value(dgenerator( "freq", "Centre frequency of each channel (MHz)",
+			( double (Integration::*) (unsigned) const )
+			&Integration::get_centre_frequency,
+			&Integration::set_centre_frequency,
+			&Integration::get_nchan ));
+
+  VGenerator<float> fgenerator;
+  add_value(fgenerator( "wt", "Weight assigned to each channel",
+			&Integration::get_weight,
+			&Integration::set_weight,
+			&Integration::get_nchan ));
 
   import( "point", Pulsar::Pointing::Interface(),
-	  (Pointing*(Integration::*)()) &Integration::get<Pointing> );
+	  ( Pointing* (Integration::*) () ) &Integration::get<Pointing> );
 
 
 }
