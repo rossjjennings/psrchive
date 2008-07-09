@@ -6,7 +6,7 @@ bin_SCRIPTS = psrhelp
 
 EXTRA_DIST = psrhelp
 
-bin_PROGRAMS = pam pat paz psradd psrsh psrwt fluxcal pac pcm pdv
+bin_PROGRAMS = pam pat paz psradd psrsh psrwt fluxcal pac pcm pdv sesdiv
 
 pam_SOURCES = pam.C
 
@@ -32,6 +32,7 @@ pcm_LDADD = $(LDADD) @PGPLOT_LIBS@ @PTHREAD_LIBS@
 
 pdv_SOURCES = pdv.C
 
+sesdiv_SOURCES = sesdiv.C
 
 # ######################################################################
 #
