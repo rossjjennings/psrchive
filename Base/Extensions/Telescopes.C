@@ -80,7 +80,7 @@ void Pulsar::Telescopes::GBT(Telescope *t)
 void Pulsar::Telescopes::Arecibo(Telescope *t)
 {
   t->set_name("Arecibo");
-  t->set_mount(Telescope::Fixed);
+  t->set_mount(Telescope::Horizon);
   t->set_primary(Telescope::Spherical);
   t->set_focus(Telescope::Gregorian); // What about CH receivers?
 }
@@ -104,7 +104,7 @@ void Pulsar::Telescopes::GB85_3(Telescope *t)
 void Pulsar::Telescopes::Nancay(Telescope *t)
 {
   t->set_name("Nancay");
-  t->set_mount(Telescope::Fixed);
+  t->set_mount(Telescope::Horizon);
   t->set_primary(Telescope::Parabolic);
   t->set_focus(Telescope::Gregorian); 
 }
