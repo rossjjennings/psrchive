@@ -293,13 +293,13 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
 	  flags.erase(chan, 6);
 
   if (sub == -1 && chan == -1) {
-	  sprintf (outstring,"%s %8.3f %s %6.2f %c %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,flags.c_str());
+	  sprintf (outstring,"%s %8.3f %s %7.3f %c %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,flags.c_str());
   } else if (sub != -1 && chan == -1) {
-	  sprintf (outstring,"%s %8.3f %s %6.2f %c -subint %d %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,subint,flags.c_str());
+	  sprintf (outstring,"%s %8.3f %s %7.3f %c -subint %d %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,subint,flags.c_str());
   } else if (sub == -1 && chan != -1) {
-	  sprintf (outstring,"%s %8.3f %s %6.2f %c -chan %d %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,channel,flags.c_str());
+	  sprintf (outstring,"%s %8.3f %s %7.3f %c -chan %d %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,channel,flags.c_str());
   } else if (sub != -1 && chan != -1) {
-	  sprintf (outstring,"%s %8.3f %s %6.2f %c -subint %d -chan %d %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,subint,channel,flags.c_str());
+	  sprintf (outstring,"%s %8.3f %s %7.3f %c -subint %d -chan %d %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,subint,channel,flags.c_str());
   }
 
   return 0;
