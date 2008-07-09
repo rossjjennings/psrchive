@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -31,7 +31,7 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:BbCcDd:e:fFGhiIJM:m:n:Oop:PqRr:sSt:Tu:vVwZ";
+const char* args = "A:BbCcDd:e:fFGhiIJM:m:n:O:op:PqRr:sSt:Tu:vVwZ";
 
 void usage ()
 {
@@ -77,19 +77,19 @@ void usage ()
     "Expert options: \n"
     "  -f            Override flux calibration flag\n"
     "  -G            Normalize profile weights by absolute gain \n"
-    "  -O            Pointing parallactic angle overrides computed \n"
     "\n"
     "Input/Output options: \n"
-    "  -M meta       Specify file of files\n"
-    "  -e extension  Use this extension when unloading results \n"
+    "  -M meta       File from which input filenames are read \n"
+    "  -O path       Path to which output files are written \n"
+    "  -e ext        Extension added to output filenames (default .calib) \n"
     "  -n [q|u|v]    Flip the sign of Stokes Q, U, or V \n"
     "\n"
     "See "PSRCHIVE_HTTP"/manuals/pac for more details\n"
        << endl;
 }
 
-int main (int argc, char *argv[]) {
-    
+int main (int argc, char *argv[])
+{    
   bool verbose = false;
   bool new_database = true;
   bool do_fluxcal = true;
@@ -117,7 +117,11 @@ int main (int argc, char *argv[]) {
   Pulsar::Database::Criterion criterion;
 
   string cals_are_here = "./";
+
+  // directory to which calibrated output files are written
+  string unload_path;
   string unload_ext = "calib";
+
   string model_file;
   vector<string> exts;
 
@@ -163,7 +167,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.90 2008/06/09 21:40:00 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.91 2008/07/09 10:53:28 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -272,8 +276,9 @@ int main (int argc, char *argv[]) {
     }
 
     case 'O':
-      Pulsar::ProjectionCorrection::pointing_over_computed = true;
-      command += " -O";
+      unload_path = optarg;
+      command += " -O ";
+      command += optarg;
       break;
 
     case 'o':
@@ -405,8 +410,10 @@ int main (int argc, char *argv[]) {
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  if (filenames.empty()) {
-    if (!write_database_file) {
+  if (filenames.empty())
+  {
+    if (!write_database_file)
+    {
       cout << "pac: No Archives were specified. Exiting" << endl;
       exit(-1);
     }
@@ -421,23 +428,23 @@ int main (int argc, char *argv[]) {
   // the database from which calibrators will be selected
   Pulsar::Database* dbase = 0;
   
-  if ( !model_file.empty() ) try {
-
+  if ( !model_file.empty() ) try
+  {
     cerr << "pac: Loading calibrator from " << model_file << endl;
 
     model_arch = Pulsar::Archive::load(model_file);
     model_calibrator = new Pulsar::PolnCalibrator(model_arch);
     pcal_type = model_calibrator->get_type();
-
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << "pac: Could not load calibrator from " << model_file << endl;
     cerr << error << endl;
     return -1;
   }
 
-  else if (new_database) try {
-    
+  else if (new_database) try
+  {   
     // Generate the CAL file database
     
     exts.push_back("cf");
@@ -465,22 +472,21 @@ int main (int argc, char *argv[]) {
 	   << output_filename << endl;
       
       dbase -> unload (output_filename);
-      
     }
-    
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << "pac: Error generating CAL database" << error << endl;
     return -1;
   }
 
-  else try {
-    
+  else try
+  {   
     cout << "pac: Reading from database summary file" << endl;
     dbase = new Pulsar::Database (cals_are_here);
-
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << "pac: Error loading CAL database" << error << endl;
     return -1;
   }
@@ -490,8 +496,8 @@ int main (int argc, char *argv[]) {
 
   // Start calibrating archives
   
-  for (unsigned i = 0; i < filenames.size(); i++) try {
-
+  for (unsigned i = 0; i < filenames.size(); i++) try
+  {
     cout << endl;
 
     if (verbose)
@@ -509,25 +515,23 @@ int main (int argc, char *argv[]) {
     if (do_polncal && arch->get_poln_calibrated() )
       cout << "pac: " << filenames[i] << " already poln calibrated" << endl;
 
-    else if (do_polncal && !arch->get_poln_calibrated()) {
-      
+    else if (do_polncal && !arch->get_poln_calibrated())
+    {
       Reference::To<Pulsar::PolnCalibrator> pcal_engine;
 
-      if (model_calibrator) {
-
+      if (model_calibrator)
+      {
 	if (verbose)
 	  cout << "pac: Applying specified calibrator" << endl;
 
 	pcal_engine = model_calibrator;
-
       }
-      else {
-
+      else
+      {
 	if (verbose)
 	  cout << "pac: Finding PolnCalibrator" << endl;
 
 	pcal_engine = dbase->generatePolnCalibrator(arch, pcal_type);
-	
       }
       
       pcal_file = pcal_engine->get_filenames();
@@ -569,8 +573,8 @@ int main (int argc, char *argv[]) {
     else if (!dbase)
       cout << "pac: Not performing flux calibration (no database)." << endl;
 
-    else if (do_fluxcal) try {
-
+    else if (do_fluxcal) try
+    {
       if (verbose)
 	cout << "pac: Generating flux calibrator" << endl;
       
@@ -591,9 +595,9 @@ int main (int argc, char *argv[]) {
       
       cout << "pac: Mean Tsys = " << fcal_engine->meanTsys() 
 	   << " mJy" << endl;
-      
     }
-    catch (Error& error) {
+    catch (Error& error)
+    {
       cerr << "pac: Could not flux calibrate " << arch->get_filename() << endl
 	   << "\t" << error.get_message() << endl;
     }
@@ -602,6 +606,9 @@ int main (int argc, char *argv[]) {
 
     if (!successful_fluxcal)
       newname += "P";
+
+    if (!unload_path.empty())
+      newname = unload_path + "/" + basename (newname);
 
     if (verbose)
       cerr << "pac: Calibrated Archive name '" << newname << "'" << endl;
@@ -612,10 +619,10 @@ int main (int argc, char *argv[]) {
     
     Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
     
-    if (fitsext) {
-      
-      if (successful_polncal) {
-	
+    if (fitsext)
+    {
+      if (successful_polncal)
+      {
 	switch (pcal_type) {
 	  
 	case Pulsar::Calibrator::SingleAxis:
@@ -637,14 +644,17 @@ int main (int argc, char *argv[]) {
 	  
 	}
 
-	fitsext->set_cal_file( pcal_file.substr( pcal_file.rfind( "/" ) + 1 ) );
+	fitsext->set_cal_file( basename(pcal_file) );
       }
       
-      if (command.length() > 80) {
-	cout << "pac: WARNING: ProcHistory command string truncated to 80 chars" << endl;
+      if (command.length() > 80)
+      {
+	cerr << "pac: ProcHistory command string truncated to 80 chars"
+	     << endl;
 	fitsext->set_command_str(command.substr(0, 80));
       }
-      else {
+      else
+      {
 	fitsext->set_command_str(command);
       }
     }
@@ -657,7 +667,8 @@ int main (int argc, char *argv[]) {
     cout << "pac: Calibrated archive " << newname << " unloaded" << endl;
     
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << "pac: Error while handling " << filenames[i] << ":" << endl; 
     cerr << error << endl;
   }
