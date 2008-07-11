@@ -15,6 +15,7 @@
 #include <fstream>
 #include <algorithm>
 #include <unistd.h>
+#include <string.h>
 
 using namespace std;
 
