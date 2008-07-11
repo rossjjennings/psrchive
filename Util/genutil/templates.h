@@ -240,4 +240,16 @@ bool remove (const T& x, C& c)
   return false;
 }
 
+//! Return the number nearest to and larger than big and divisible by small
+template<typename Big, typename Small>
+inline Big multiple_greater (Big big, Small small)
+{
+  Big divides = big / small;
+  if (big % small)
+    divides ++;
+
+  return divides * small;
+}
+
 #endif
+
