@@ -150,7 +150,7 @@ void FTransform::MKL_DFTI::Plan::frc1d (size_t nfft, float* dest,
 void FTransform::MKL_DFTI::Plan::fcc1d (size_t nfft, float* dest,
 					const float* src)
 {
-  MAKE_ALIGN(src,nfft);
+  MAKE_ALIGN(src,nfft*2);
   CHECK_ALIGN(dest);
 
 #ifdef _DEBUG
