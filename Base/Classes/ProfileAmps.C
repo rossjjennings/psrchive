@@ -1,12 +1,49 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/ProfileAmps.h"
+#include "Pulsar/Config.h"
+
+#include "VirtualMemory.h"
 #include "malloc16.h"
+
+using namespace std;
+
+static Pulsar::Option<string> profile_swap_filename
+(
+ "Profile::swap", "",
+
+ "Virtual memory swap space filename",
+
+ "The Profile class can use an alternative virtual memory manager so that \n"
+ "the kernel swap space is not consumed when processing large files. \n"
+ "\n"
+ "This configuration parameter should be set the full path of a filename \n"
+ "to be used for page swapping; e.g. \"/tmp/psrchive.swap\" \n"
+ "\n"
+ "The filename will have a unique extension added so that multiple \n"
+ "processes will not conflict."
+);
+
+static VirtualMemory* profile_swap_init ()
+{
+  string filename = profile_swap_filename;
+
+  if (filename == "")
+    return 0;
+
+  VirtualMemory* swap = new VirtualMemory (profile_swap_filename);
+
+  cerr << "psrchive virtual memory swap file=" << swap->get_filename() << endl;
+
+  return swap;
+}
+
+static VirtualMemory* profile_swap = profile_swap_init();
 
 /*! 
   Do not allocate memory for the amps
@@ -15,6 +52,10 @@ bool Pulsar::ProfileAmps::no_amps = false;
 
 Pulsar::ProfileAmps::ProfileAmps (unsigned _nbin)
 {
+#ifdef _DEBUG
+  cerr << "Pulsar::ProfileAmps ctor nbin=" << nbin << endl;
+#endif
+
   nbin = 0;
   amps = NULL;
   amps_size = 0;
@@ -24,18 +65,35 @@ Pulsar::ProfileAmps::ProfileAmps (unsigned _nbin)
 
 Pulsar::ProfileAmps::ProfileAmps (const ProfileAmps& copy)
 {
+#ifdef _DEBUG
+  cerr << "Pulsar::ProfileAmps copy ctor nbin=" << copy.nbin << endl;
+#endif
+
   nbin = 0;
   amps = NULL;
   amps_size = 0;
-  if (copy.nbin) {
+  if (copy.nbin) 
+  {
     resize( copy.nbin );
     set_amps( copy.amps );
   }
 }
 
+static void amps_free (float* amps)
+{
+  if (profile_swap)
+    profile_swap->destroy (amps);
+  else
+    free16 (amps);
+}
+
 Pulsar::ProfileAmps::~ProfileAmps () 
 {
-  if (amps != NULL) free16(amps);
+#ifdef _DEBUG
+  cerr << "Pulsar::ProfileAmps dtor amps=" << amps << endl;
+#endif
+
+  if (amps != NULL) amps_free (amps); amps = 0;
 }
 
 /*
@@ -51,7 +109,7 @@ void Pulsar::ProfileAmps::resize (unsigned _nbin)
   if (amps_size >= nbin && nbin != 0)
     return;
 
-  if (amps) free16(amps); amps = NULL;
+  if (amps) amps_free(amps); amps = NULL;
   amps_size = 0;
 
   if (nbin == 0)
@@ -59,7 +117,14 @@ void Pulsar::ProfileAmps::resize (unsigned _nbin)
 
   if (!no_amps)
   {
-    amps = (float*) malloc16 (sizeof(float) * nbin);
+#ifdef _DEBUG
+    cerr << "Pulsar::ProfileAmps::resize nbin=" << nbin << endl;
+#endif
+
+    if (profile_swap)
+      amps = profile_swap->create<float> (nbin);
+    else
+      amps = (float*) malloc16 (sizeof(float) * nbin);
 
     if (!amps)
       throw Error (BadAllocation, "Pulsar::ProfileAmps::resize");
