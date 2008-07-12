@@ -1,24 +1,27 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/VirtualMemory.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/12/14 22:50:50 $
+   $Revision: 1.2 $
+   $Date: 2008/07/12 07:14:10 $
    $Author: straten $ */
 
 #ifndef __VirtualMemory_h
 #define __VirtualMemory_h
 
 #include "TemporaryFile.h"
+#include "ThreadContext.h"
+
+#include <map>
 
 //! Virtual memory manager
-class VirtualMemory : public TemporaryFile {
-
+class VirtualMemory : public TemporaryFile
+{
  public:
 
   //! Construct a virutal memory resource with the given filename
@@ -27,16 +30,52 @@ class VirtualMemory : public TemporaryFile {
   //! Destructor
   ~VirtualMemory ();
 
-  //! Map the specified number of bytes into memory
-  void* mmap (size_t length);
+  //! Create a new array
+  template<typename T>
+  T* create (unsigned elements)
+  { return static_cast<T*>( mmap (elements * sizeof(T)) ); }
+
+  //! Destroy an existing array
+  void destroy (void* pointer)
+  { munmap (pointer); }
 
  private:
 
-  //! The page size used for swapping
-  size_t page_size;
+  //! Map the specified number of bytes into memory
+  void* mmap (size_t length);
 
-  //! The total number of bytes mapped
-  size_t length;
+  //! Free the memory to which the pointer points
+  void munmap (void*);
+
+  typedef std::map<char*, size_t> Map;
+  typedef Map::iterator Block;
+
+  //! Add allocated memory
+  void add_allocated (char* ptr, size_t size);
+
+  //! Find allocated memory
+  Block find_allocated (char* ptr);
+
+  //! Add available memory
+  Block add_available (char* ptr, size_t size);
+
+  //! Find available memory
+  Block find_available (size_t size);
+
+  //! List of available blocks: base addresses and lengths
+  Map available;
+
+  //! List of allocated blocks: base addresses and lengths
+  Map allocated;
+
+  //! Protection in multi-threaded applications
+  ThreadContext* context;
+
+  //! Extend the swap space
+  Block extend ();
+
+  //! The total number of bytes mapped into the temporary file
+  size_t swap_space;
 
   //! Cleanup all resources
   void destroy ();
