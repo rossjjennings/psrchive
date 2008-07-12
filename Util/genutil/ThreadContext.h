@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/ThreadContext.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/09/11 00:43:46 $
+   $Revision: 1.2 $
+   $Date: 2008/07/12 07:14:06 $
    $Author: straten $ */
 
 #ifndef __ThreadContext_h
@@ -49,6 +49,12 @@ protected:
 
 };
 
+//! Locks the mutex on construction and unlocks on deletion
+/*!
+  This class implements the "resource acquisition is initialization"
+  paradigm (see http://www.research.att.com/~bs/glossary.html) of
+  exception safe mutex locking and unlocking.
+*/
 class ThreadContext::Lock {
 
 public:
