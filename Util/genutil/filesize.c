@@ -19,8 +19,9 @@
 uint64 filesize (const char* filename)
 {
   struct stat statistics;
-  if (stat (filename, &statistics) < 0) {
-    fprintf (stderr, "filesize error stat (%s)", filename);
+  if (stat (filename, &statistics) < 0)
+  {
+    fprintf (stderr, "filesize error stat (%s): ", filename);
     perror ("");
     return 0;
   }
