@@ -14,6 +14,7 @@
 
 #include <unistd.h>
 #include <sys/mman.h>
+#include <assert.h>
 
 using namespace std;
 
