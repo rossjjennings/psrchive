@@ -58,35 +58,8 @@
 
 
 
-using std::vector;
-using std::string;
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::ifstream;
-using std::ios;
-using std::for_each;
-using std::ostringstream;
-
-using Pulsar::Archive;
-using Pulsar::Integration;
-using Pulsar::Passband;
-using Pulsar::Backend;
-using Pulsar::Receiver;
-using Pulsar::Pointing;
-using Pulsar::WidebandCorrelator;
-using Pulsar::ObsExtension;
-using Pulsar::CalInfoExtension;
-using Pulsar::FITSHdrExtension;
-using Pulsar::FITSSUBHdrExtension;
-using Pulsar::PolnCalibratorExtension;
-using Pulsar::FluxCalibratorExtension;
-using Pulsar::ITRFExtension;
-using Pulsar::TapeInfo;
-using Pulsar::Telescope;
-using Pulsar::DigitiserCounts;
-using Pulsar::DigitiserStatistics;
-using Pulsar::ProcHistory;
+using namespace std;
+using namespace Pulsar;
 
 
 
@@ -378,8 +351,18 @@ string get_mjd( Reference::To< Archive > archive )
 
   try
   {
-    MJD t = archive->start_time();
-    mjd = tostring( t, 15 );
+    MJD epoch;
+
+    if (archive->get_type() == Signal::Calibrator)
+    {
+      CalibratorExtension* extension = archive->get<CalibratorExtension>();
+      if (extension)
+	epoch = extension->get_epoch();
+    }
+    else
+      epoch = archive->start_time();
+
+    mjd = tostring( epoch, 15 );
   } 
   catch( Error e ) {}
 
@@ -1232,10 +1215,14 @@ string get_epoch_fluxcal( Reference::To<Archive> archive )
   string result = "";
   Reference::To<FluxCalibratorExtension> ext = archive->get<FluxCalibratorExtension>();
 
+  set_precision( 6, true );
+
   if( !ext )
     result = "UNDEF";
   else
     result = tostring( ext->get_epoch() );
+
+  restore_precision ();
 
   return result;
 }
@@ -1370,10 +1357,14 @@ string get_MJD_feed( Reference::To<Archive> archive )
   string result;
   Reference::To<PolnCalibratorExtension> ext = archive->get<PolnCalibratorExtension>();
 
+  set_precision( 6, true );
+
   if( !ext )
     result = "UNDEF";
   else
     result = tostring( ext->get_epoch() );
+
+  restore_precision ();
 
   return result;
 }
