@@ -1,4 +1,26 @@
+
+/***************************************************************************
+ *
+ *   Copyright (C) 2007 Aidan Hotan
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+
+/* $Source: /cvsroot/psrchive/psrchive/More/psrgui/PulsarGUI.C,v $
+   $Revision: 1.8 $
+   $Date: 2008/07/13 10:32:03 $
+   $Author: straten $ */
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "PulsarGUI.h"
+#include "Pulsar/UsingXSERVE.h"
+
+#ifdef HAVE_QTDRIV
+#include "Pulsar/UsingQTDRIV.h"
+#endif
 
 using namespace std;
 
@@ -34,12 +56,15 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename)
   connect(confProcAction, SIGNAL(activated()), this, SLOT(confProc()));
 
   // Look after the global placement of Widgets
-  QGroupBox* layout = new QGroupBox(4, Qt::Vertical, "Control Panel", this);
+  QGroupBox* layout = new QGroupBox(4, Qt::Horizontal, "Control Panel", this);
   setCentralWidget(layout);
+
+  // Look after the global placement of Widgets
+  QGroupBox* panel = new QGroupBox(4, Qt::Vertical, "Control Panel", layout);
 
   // Nest a section for the pre-processor options
   QGroupBox* prebox = new QGroupBox(1, Qt::Horizontal, "Pre-processor Options",
-                                    layout);
+                                    panel);
 
   // Construct a LineEdit for the pre-processor
   ppLe = new QLineEdit(prebox);
@@ -57,7 +82,7 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename)
 
   // Construct a radio button group to hold the plot options
   psrButtons = new QButtonGroup(1, Qt::Horizontal, 
-				"Pulsar Plot Methods", layout);
+				"Pulsar Plot Methods", panel);
   psrButtons->setRadioButtonExclusive(true);
 
   // Define some useful main menus
@@ -94,29 +119,32 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename)
   psrButtons->adjustSize();
   
   // Allow the user to open a pgplot window and draw the active plot
-  QPushButton* launcher = new QPushButton("Draw Plot", layout);
+  QPushButton* launcher = new QPushButton("Draw Plot", panel);
   QObject::connect(launcher, SIGNAL(clicked()), this, SLOT(plotGraph()));
  
+#if 0//HAVE_QTDRIV
+  window = new Pulsar::UsingQTDRIV (layout, "qtdriv");
+  layout->adjustSize();
+#else
+  window = new Pulsar::UsingXSERVE ("323/xs");
+#endif
+
   // Load a file if a name was given on the command line
-  if (filename.isEmpty()) {
-    arch = 0;
-  }
-  else {
+  if (!filename.isEmpty())
     readFile(filename);
-  }
 }
 
 void Pulsar::PulsarGUI::fileOpen()
 {
   QString filename = QFileDialog::getOpenFileName("./", "*.*", this);
-  if (!filename.isEmpty()) {
+  if (!filename.isEmpty())
     readFile(filename);
-  }
 }
 
 void Pulsar::PulsarGUI::readFile(QString& filename)
 {
-  try {
+  try
+  {
     arch = Pulsar::Archive::load(filename);
     if (autoBase->isChecked())
       arch->remove_baseline();
@@ -207,24 +235,29 @@ void Pulsar::PulsarGUI::undoChanges()
     arch->remove_baseline();
 }
 
-void Pulsar::PulsarGUI::plotGraph()
+void Pulsar::PulsarGUI::plotGraph() try
 {
-  try {
-    plotItem* pi = 0;
-    pi = dynamic_cast<plotItem*> (psrButtons->selected());
+  if (!arch)
+    throw Error (InvalidState, "Pulsar::PulsarGUI::plotGraph",
+		 "no Archive loaded");
+
+  plotItem* pi = dynamic_cast<plotItem*> (psrButtons->selected());
     
-    if (pi) {
-      cpgopen("323/xs");
-      cpgsvp(0.1,0.9,0.1,0.9);
-      pi->getPlot()->plot(arch);
-      cpgclos();
-    }
+  if (pi)
+    window->set_plot( pi->getPlot() );
+
+    window->set_data( arch );
+
+  window->plot_data ();
+}
+catch (Error& error)
+  {
+    report (error);
   }
-  catch (Error& error) {
-    QErrorMessage* em = new QErrorMessage(this);
-    QString useful = "Failed to construct plot: ";
-    useful += (error.get_message()).c_str();
-    em->message(useful);
-    cpgclos();
-  }
+
+void Pulsar::PulsarGUI::report (Error& error)
+{
+  QErrorMessage* em = new QErrorMessage(this);
+  QString useful = error.get_message().c_str();
+  em->message(useful);
 }

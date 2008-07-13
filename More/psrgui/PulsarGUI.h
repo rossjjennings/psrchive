@@ -30,6 +30,8 @@
 
 namespace Pulsar {
   
+  class PlotWindow;
+
   class PulsarGUI : public QMainWindow
     {
       Q_OBJECT
@@ -60,6 +62,7 @@ namespace Pulsar {
 	Reference::To<Pulsar::Archive> arch;
         Reference::To<TextInterface::Parser> preti;
         Reference::To<Pulsar::Interpreter> ppengine;
+	Reference::To<Pulsar::PlotWindow> window;
 
         QLineEdit* ppLe;
         QCheckBox* autoBase;
@@ -72,6 +75,8 @@ namespace Pulsar {
 	QToolBar* psrTools;
 
 	QApplication* myApp;
+
+	void report (Error&);
 
       private:
   
