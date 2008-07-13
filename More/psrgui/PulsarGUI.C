@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/psrgui/PulsarGUI.C,v $
-   $Revision: 1.10 $
-   $Date: 2008/07/13 11:25:21 $
+   $Revision: 1.11 $
+   $Date: 2008/07/13 12:12:43 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -24,7 +24,7 @@
 
 using namespace std;
 
-Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename) 
+Pulsar::PulsarGUI::PulsarGUI(QApplication* qa)
   : QMainWindow(0, 0, WDestructiveClose)
 {
   myApp = qa;
@@ -111,16 +111,23 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename)
   // Store the pointers in case they come in handy
   vector<plotItem*> pointers;
   
-  for (unsigned i = 0; i < factory.get_nplot(); i++) {
-    
-    pointers.push_back(new plotItem(psrButtons, factory.construct(factory.get_name(i)),
-				    factory.get_description(i), factory.get_description(i)));
+  for (unsigned i = 0; i < factory.get_nplot(); i++)
+  {
+    plotItem* item = new plotItem (psrButtons,
+				   factory.construct(factory.get_name(i)),
+				   factory.get_description(i),
+				   factory.get_description(i));
+
+    QObject::connect(item, SIGNAL(clicked()), this, SLOT(plotGraph()));
+
+    pointers.push_back(item);
   }
+
   psrButtons->adjustSize();
   
   // Allow the user to open a pgplot window and draw the active plot
-  QPushButton* launcher = new QPushButton("Draw Plot", panel);
-  QObject::connect(launcher, SIGNAL(clicked()), this, SLOT(plotGraph()));
+  //QPushButton* launcher = new QPushButton("Draw Plot", panel);
+  //QObject::connect(launcher, SIGNAL(clicked()), this, SLOT(plotGraph()));
  
 #ifdef HAVE_QTDRIV
   Pulsar::UsingQTDRIV* qtdriv = new Pulsar::UsingQTDRIV (layout, "qtdriv");
@@ -132,9 +139,6 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename)
   window = new Pulsar::UsingXSERVE ("323/xs");
 #endif
 
-  // Load a file if a name was given on the command line
-  if (!filename.isEmpty())
-    readFile(filename);
 }
 
 void Pulsar::PulsarGUI::fileOpen()
@@ -144,23 +148,18 @@ void Pulsar::PulsarGUI::fileOpen()
     readFile(filename);
 }
 
-void Pulsar::PulsarGUI::readFile(QString& filename)
+void Pulsar::PulsarGUI::readFile(QString& filename) try
 {
-  try
-  {
-    arch = Pulsar::Archive::load(filename);
-    if (autoBase->isChecked())
-      arch->remove_baseline();
-    preti = arch->get_interface();
-    ppengine->set(arch);
-    preProcess();
-  }
-  catch (Error& error) {
-    QErrorMessage* em = new QErrorMessage(this);
-    QString useful = "Failed to load Archive: ";
-    useful += (error.get_message()).c_str();
-    em->message(useful);
-  }
+  arch = Pulsar::Archive::load(filename);
+  if (autoBase->isChecked())
+    arch->remove_baseline();
+  preti = arch->get_interface();
+  ppengine->set(arch);
+  preProcess();
+}
+catch (Error& error)
+{
+  report (error);
 }
 
 void Pulsar::PulsarGUI::fileQuit()
@@ -192,43 +191,42 @@ void Pulsar::PulsarGUI::confGraph()
 
   pi = dynamic_cast<plotItem*> (psrButtons->selected());
 
-  if (pi) {
+  if (pi)
     ui = pi->getPlot()->get_interface();
-  }
 
-  if (ui) {
-    interfacePanel* panl = new interfacePanel(this, ui);
-    panl->show();
-  }
+  if (!ui)
+    return;
+
+  interfacePanel* panl = new interfacePanel(this, ui);
+  panl->show();
 }
 
 
 void Pulsar::PulsarGUI::confProc()
 {
-  if (preti) {
-    interfacePanel* panl = new interfacePanel(this, preti);
-    panl->show();
-  }
+  if (!preti)
+    return;
+
+  interfacePanel* panl = new interfacePanel(this, preti);
+  panl->show();
 }
 
 void Pulsar::PulsarGUI::preProcess()
 {
   QString jobs = ppLe->text();
-  if (jobs.isEmpty())
-    return;
 
-  vector<string> joblist;
-
-  try {
+  if (!jobs.isEmpty()) try
+  {
+    vector<string> joblist;
     separate(jobs.ascii(), joblist, ",");
     ppengine->script(joblist);
   }
-  catch(Error& error) {
-    QErrorMessage* em = new QErrorMessage(this);
-    QString useful = "Failed to process: ";
-    useful += (error.get_message()).c_str();
-    em->message(useful);
+  catch(Error& error)
+  {
+    report (error);
   }
+
+  plotGraph ();
 }
 
 void Pulsar::PulsarGUI::undoChanges()
@@ -236,6 +234,7 @@ void Pulsar::PulsarGUI::undoChanges()
   arch->refresh();
   if (autoBase->isChecked())
     arch->remove_baseline();
+  plotGraph ();
 }
 
 void Pulsar::PulsarGUI::plotGraph() try

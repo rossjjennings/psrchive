@@ -39,7 +39,7 @@ namespace Pulsar {
       public:
 
         // Basic constructor
-        PulsarGUI(QApplication* qa, QString& filename);
+      PulsarGUI (QApplication* qa);
 
 	void readFile(QString& filename);
       
