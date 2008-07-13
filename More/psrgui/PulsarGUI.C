@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/psrgui/PulsarGUI.C,v $
-   $Revision: 1.8 $
-   $Date: 2008/07/13 10:32:03 $
+   $Revision: 1.9 $
+   $Date: 2008/07/13 10:48:55 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -122,7 +122,7 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename)
   QPushButton* launcher = new QPushButton("Draw Plot", panel);
   QObject::connect(launcher, SIGNAL(clicked()), this, SLOT(plotGraph()));
  
-#if 0//HAVE_QTDRIV
+#ifdef HAVE_QTDRIV
   window = new Pulsar::UsingQTDRIV (layout, "qtdriv");
   layout->adjustSize();
 #else
