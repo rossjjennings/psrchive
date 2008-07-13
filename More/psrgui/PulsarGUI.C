@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/psrgui/PulsarGUI.C,v $
-   $Revision: 1.9 $
-   $Date: 2008/07/13 10:48:55 $
+   $Revision: 1.10 $
+   $Date: 2008/07/13 11:25:21 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -56,7 +56,7 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename)
   connect(confProcAction, SIGNAL(activated()), this, SLOT(confProc()));
 
   // Look after the global placement of Widgets
-  QGroupBox* layout = new QGroupBox(4, Qt::Horizontal, "Control Panel", this);
+  QHBox* layout = new QHBox(this, "layout");
   setCentralWidget(layout);
 
   // Look after the global placement of Widgets
@@ -123,7 +123,10 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename)
   QObject::connect(launcher, SIGNAL(clicked()), this, SLOT(plotGraph()));
  
 #ifdef HAVE_QTDRIV
-  window = new Pulsar::UsingQTDRIV (layout, "qtdriv");
+  Pulsar::UsingQTDRIV* qtdriv = new Pulsar::UsingQTDRIV (layout, "qtdriv");
+  window = qtdriv;
+  layout->setStretchFactor (panel, 1);
+  layout->setStretchFactor (qtdriv, 4);
   layout->adjustSize();
 #else
   window = new Pulsar::UsingXSERVE ("323/xs");
