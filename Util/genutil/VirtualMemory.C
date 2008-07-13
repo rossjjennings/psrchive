@@ -14,7 +14,6 @@
 
 #include <unistd.h>
 #include <sys/mman.h>
-#include <assert.h>
 
 using namespace std;
 
@@ -24,6 +23,8 @@ using namespace std;
 VirtualMemory::VirtualMemory (const string& filename)
   : TemporaryFile (filename)
 {
+  // cerr << "VirtualMemory ctor filename=" << get_filename() << endl;
+
   swap_space = 0;
 
 #ifdef HAVE_PTHREAD
@@ -36,24 +37,26 @@ VirtualMemory::VirtualMemory (const string& filename)
 //! Destructor
 VirtualMemory::~VirtualMemory ()
 {
-  destroy ();
-}
-
-void VirtualMemory::destroy ()
-{
-
 }
 
 //! Map the specified number of bytes into memory
 void* VirtualMemory::mmap (size_t size) try
 {
+  // cerr << "VirtualMemory::mmap size=" << size << endl;
+
   ThreadContext::Lock lock (context);
 
   /*
     get a block with at least size bytes
   */
   Block block = find_available (size);
-  assert (block->second >= size);
+  if (block->second < size)
+  {
+    Error error (InvalidState, "");
+    error << "block size=" << block->second << " < required size=" << size;
+    throw error;
+  }
+
   char* ptr = block->first;
 
   /*
@@ -116,7 +119,7 @@ VirtualMemory::Block VirtualMemory::find_available (size_t size)
     if (block->second >= size)
       return block;
   
-  return extend ();
+  return extend (size);
 }
 
 //! Add available memory
@@ -160,14 +163,18 @@ VirtualMemory::Block VirtualMemory::add_available (char* ptr, size_t size)
   return available.find (ptr);
 }
 
-VirtualMemory::Block VirtualMemory::extend ()
+VirtualMemory::Block VirtualMemory::extend (size_t size)
 {
   size_t current = swap_space;
 
-  if (swap_space == 0)
-    swap_space = (size_t) sysconf (_SC_PAGESIZE);
-  else
-    swap_space *= 2;
+  do
+  {
+    if (swap_space == 0)
+      swap_space = getpagesize();
+    else
+      swap_space *= 2;
+  }
+  while (swap_space < size);
 
   /*
     Stretch the file size to swap_space

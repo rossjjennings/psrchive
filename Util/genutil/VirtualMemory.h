@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/VirtualMemory.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/07/12 07:14:10 $
+   $Revision: 1.3 $
+   $Date: 2008/07/13 08:09:02 $
    $Author: straten $ */
 
 #ifndef __VirtualMemory_h
@@ -72,7 +72,7 @@ class VirtualMemory : public TemporaryFile
   ThreadContext* context;
 
   //! Extend the swap space
-  Block extend ();
+  Block extend (size_t size);
 
   //! The total number of bytes mapped into the temporary file
   size_t swap_space;
