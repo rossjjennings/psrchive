@@ -25,6 +25,9 @@ VirtualMemory::VirtualMemory (const string& filename)
 {
   // cerr << "VirtualMemory ctor filename=" << get_filename() << endl;
 
+  // so the swap file will automatically be deleted when the program exists
+  unlink ();
+
   swap_space = 0;
 
 #ifdef HAVE_PTHREAD
