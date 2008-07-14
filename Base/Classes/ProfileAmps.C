@@ -38,12 +38,12 @@ static VirtualMemory* profile_swap_init ()
 
   VirtualMemory* swap = new VirtualMemory (profile_swap_filename);
 
-  cerr << "psrchive virtual memory swap file=" << swap->get_filename() << endl;
+  cerr << "psrchive: virtual memory swap file=" << filename << endl;
 
   return swap;
 }
 
-static VirtualMemory* profile_swap = profile_swap_init();
+static Reference::To<VirtualMemory> profile_swap = profile_swap_init();
 
 /*! 
   Do not allocate memory for the amps
