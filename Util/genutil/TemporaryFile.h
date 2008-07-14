@@ -7,18 +7,21 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/TemporaryFile.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/02/08 12:56:53 $
+   $Revision: 1.4 $
+   $Date: 2008/07/14 00:01:38 $
    $Author: straten $ */
 
 #ifndef __TemporaryFile_h
 #define __TemporaryFile_h
 
+#include "Reference.h"
+
 #include <string>
 #include <set>
 
 //! Opens a temporary file with a unique name and deletes it when finished
-class TemporaryFile {
+class TemporaryFile : public Reference::Able
+{
 
  public:
 
@@ -34,7 +37,10 @@ class TemporaryFile {
   //! Close the temporary file
   void close ();
 
-  //! Remove the temporary file
+  //! Unlink the temporary file
+  void unlink ();
+
+  //! Remove the temporary file (close and unlink)
   void remove ();
 
   //! Get the file descriptor of the temporary file
@@ -44,7 +50,7 @@ class TemporaryFile {
   std::string get_filename () const { return filename; }
 
   //! Set to true if the temporary file need not be removed
-  void set_removed (bool flag = true) { removed = flag; }
+  void set_removed (bool flag = true) { unlinked = flag; }
 
  private:
 
@@ -54,8 +60,8 @@ class TemporaryFile {
   //! The file descriptor of the temporary file
   int fd;
 
-  //! Set true when the temporary file has been removed
-  bool removed;
+  //! Set true when the temporary file has been unlinked
+  bool unlinked;
 
   //! Install the signal handler
   static void install_signal_handler ();

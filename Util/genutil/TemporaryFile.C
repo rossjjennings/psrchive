@@ -26,8 +26,24 @@ using namespace std;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
-//! The current temporary file instances
-static std::set<TemporaryFile*> instances;
+/*
+  The order in which static variable constructors are called is
+  indeterminate.  However, pointers can be initialized to zero by the
+  compiler.  This function hides a static pointer, intializing it on
+  the first call.
+*/
+
+typedef std::set<TemporaryFile*> Instances;
+
+static Instances* get_instances()
+{
+  static Instances* instances = 0;
+  
+  if (!instances)
+    instances = new Instances;
+
+  return instances;
+}
 
 //! Set true when the signal handler has been installed
 bool TemporaryFile::signal_handler_installed = false;
@@ -66,17 +82,12 @@ void remove_instance (TemporaryFile* file)
 //! The signal handler ensures that all temporary files are removed
 void TemporaryFile::signal_handler (int sig)
 {
+
+#ifdef _DEBUG
   cerr << "TemporaryFile::signal_handler received " << strsignal(sig) << endl;
-
-#ifdef HAVE_PTHREAD
-  pthread_mutex_lock (&mutex);
 #endif
 
-  for_each (instances.begin(), instances.end(), remove_instance);
-
-#ifdef HAVE_PTHREAD
-  pthread_mutex_unlock (&mutex);
-#endif
+  for_each (get_instances()->begin(), get_instances()->end(), remove_instance);
 
   if (abort)
     exit (-1);
@@ -93,7 +104,7 @@ TemporaryFile::TemporaryFile (const string& basename)
     throw Error (FailedSys, "TemporaryFile",
 		 "failed mkstemp(" + filename + ")");
 
-  removed = false;
+  unlinked = false;
 
 #ifdef HAVE_PTHREAD
   pthread_mutex_lock (&mutex);
@@ -102,7 +113,7 @@ TemporaryFile::TemporaryFile (const string& basename)
   if (!signal_handler_installed)
     install_signal_handler ();
 
-  instances.insert (this);
+  get_instances()->insert (this);
 
 #ifdef HAVE_PTHREAD
   pthread_mutex_unlock (&mutex);
@@ -118,7 +129,7 @@ TemporaryFile::~TemporaryFile ()
   pthread_mutex_lock (&mutex);
 #endif
 
-  instances.erase (this);
+  get_instances()->erase (this);
 
 #ifdef HAVE_PTHREAD
   pthread_mutex_unlock (&mutex);
@@ -140,15 +151,19 @@ void TemporaryFile::close ()
 void TemporaryFile::remove ()
 {
   close ();
+  unlink ();
+}
 
-  if (removed)
+void TemporaryFile::unlink ()
+{
+  if (unlinked)
     return;
 
-  if (unlink (filename.c_str()) < 0)
+  if (::unlink (filename.c_str()) < 0)
     throw Error (FailedSys, "TemporaryFile",
 		 "failed unlink(" + filename + ")");
 
-  removed = true;
+  unlinked = true;
 }
 
 
