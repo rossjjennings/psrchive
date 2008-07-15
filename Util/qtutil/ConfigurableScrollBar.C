@@ -26,19 +26,19 @@ ConfigurableScrollBar::ConfigurableScrollBar (QWidget *parent,
   new QLabel ("Name:", hbox);
   parameter_name = new QLineEdit (hbox);
 
-  connect (parameter_name, SIGNAL(returnPressed()),
+  connect (parameter_name, SIGNAL(lostFocus()),
 	   this, SLOT(parameter_name_CB()));
 
   new QLabel ("Min:", hbox);
   minimum_value = new QLineEdit (hbox);
 
-  connect (minimum_value, SIGNAL(returnPressed()),
+  connect (minimum_value, SIGNAL(lostFocus()),
 	   this, SLOT(minimum_value_CB()));
 
   new QLabel ("Max:", hbox);
   maximum_value = new QLineEdit (hbox);
 
-  connect (maximum_value, SIGNAL(returnPressed()),
+  connect (maximum_value, SIGNAL(lostFocus()),
 	   this, SLOT(maximum_value_CB()));
 
   new QLabel ("Type:", hbox);
@@ -62,6 +62,7 @@ ConfigurableScrollBar::ConfigurableScrollBar (QWidget *parent,
   minimum_value->setText( range_policy->get_output_min().c_str() );
   maximum_value->setText( range_policy->get_output_max().c_str() );
 
+  setFocusPolicy (QWidget::StrongFocus);
 }
 
 
