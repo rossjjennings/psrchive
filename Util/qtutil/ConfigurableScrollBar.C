@@ -26,20 +26,36 @@ ConfigurableScrollBar::ConfigurableScrollBar (QWidget *parent,
   new QLabel ("Name:", hbox);
   parameter_name = new QLineEdit (hbox);
 
+  default_palette = parameter_name->palette();
+  highlight_palette = default_palette;
+  highlight_palette.setColor( QColorGroup::Base, Qt::yellow );
+
   connect (parameter_name, SIGNAL(lostFocus()),
 	   this, SLOT(parameter_name_CB()));
+  connect (parameter_name, SIGNAL(returnPressed()),
+	   this, SLOT(parameter_name_CB()));
+  connect (parameter_name, SIGNAL( textChanged(const QString&) ),
+	   this, SLOT( text_changed_CB(const QString&) ));
 
   new QLabel ("Min:", hbox);
   minimum_value = new QLineEdit (hbox);
 
   connect (minimum_value, SIGNAL(lostFocus()),
 	   this, SLOT(minimum_value_CB()));
+  connect (minimum_value, SIGNAL(returnPressed()),
+	   this, SLOT(parameter_name_CB()));
+  connect (minimum_value, SIGNAL( textChanged(const QString&) ),
+	   this, SLOT( text_changed_CB(const QString&) ));
 
   new QLabel ("Max:", hbox);
   maximum_value = new QLineEdit (hbox);
 
   connect (maximum_value, SIGNAL(lostFocus()),
 	   this, SLOT(maximum_value_CB()));
+  connect (maximum_value, SIGNAL(returnPressed()),
+	   this, SLOT(parameter_name_CB()));
+  connect (maximum_value, SIGNAL( textChanged(const QString&) ),
+	   this, SLOT( text_changed_CB(const QString&) ));
 
   new QLabel ("Type:", hbox);
   conversion_type = new QComboBox (hbox);
@@ -65,14 +81,29 @@ ConfigurableScrollBar::ConfigurableScrollBar (QWidget *parent,
   setFocusPolicy (QWidget::StrongFocus);
 }
 
+void ConfigurableScrollBar::text_changed_CB (const QString& text)
+{
+  if (parameter_name->isModified())
+    parameter_name->setPalette (highlight_palette);
+
+  if (minimum_value->isModified())
+    minimum_value->setPalette (highlight_palette);
+
+  if (maximum_value->isModified())
+    maximum_value->setPalette (highlight_palette);
+}
 
 void ConfigurableScrollBar::parameter_name_CB ()
 {
+  parameter_name->clearModified ();
+  parameter_name->setPalette (default_palette);
   current_parameter_name = parameter_name->text().ascii();
 }
 
 void ConfigurableScrollBar::minimum_value_CB ()
 {
+  minimum_value->setPalette (default_palette);
+
   range_policy->set_output_min( minimum_value->text().ascii() );
   minimum_value->setText( range_policy->get_output_min().c_str() );
 
@@ -81,6 +112,8 @@ void ConfigurableScrollBar::minimum_value_CB ()
 
 void ConfigurableScrollBar::maximum_value_CB ()
 {
+  maximum_value->setPalette (default_palette);
+
   range_policy->set_output_max( maximum_value->text().ascii() );
   maximum_value->setText( range_policy->get_output_max().c_str() );
 
@@ -116,6 +149,7 @@ void ConfigurableScrollBar::set_range_policy (RangePolicy* policy)
 
 void ConfigurableScrollBar::scroll_bar_CB (int value)
 {
-  output (current_parameter_name + "=" + range_policy->get_output (value));
+  if (current_parameter_name != "")
+    output (current_parameter_name + "=" + range_policy->get_output (value));
 }
 

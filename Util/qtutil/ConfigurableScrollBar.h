@@ -34,6 +34,7 @@ class ConfigurableScrollBar : public QVBox
   void parameter_name_CB ();
   void minimum_value_CB ();
   void maximum_value_CB ();
+  void text_changed_CB (const QString&);
   void conversion_type_CB (const QString&);
   void scroll_bar_CB (int value);
 
@@ -44,6 +45,9 @@ class ConfigurableScrollBar : public QVBox
   QLineEdit* maximum_value;
   QComboBox* conversion_type;
   QScrollBar* scroll_bar;
+
+  QPalette default_palette;
+  QPalette highlight_palette;
 
   std::string current_parameter_name;
 
