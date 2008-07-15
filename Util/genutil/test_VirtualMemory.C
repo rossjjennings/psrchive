@@ -21,7 +21,10 @@ int main ()
   unsigned array_size = 50;
 
   {
-    VirtualMemory manager (filename);
+    // disable unlinking the swap file so that it can be tested
+    bool unlink_swapfile = false;
+
+    VirtualMemory manager (filename, unlink_swapfile);
 
     // the filename is used as the base for a random filename
     filename = manager.get_filename();

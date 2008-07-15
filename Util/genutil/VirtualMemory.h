@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/VirtualMemory.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/07/13 08:09:02 $
+   $Revision: 1.4 $
+   $Date: 2008/07/15 19:35:40 $
    $Author: straten $ */
 
 #ifndef __VirtualMemory_h
@@ -25,7 +25,7 @@ class VirtualMemory : public TemporaryFile
  public:
 
   //! Construct a virutal memory resource with the given filename
-  VirtualMemory (const std::string& filename);
+  VirtualMemory (const std::string& filename, bool unlink = true);
 
   //! Destructor
   ~VirtualMemory ();

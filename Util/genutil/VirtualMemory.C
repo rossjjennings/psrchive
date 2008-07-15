@@ -20,13 +20,14 @@ using namespace std;
 #include <algorithm>
 
 //! Construct with regular expression
-VirtualMemory::VirtualMemory (const string& filename)
+VirtualMemory::VirtualMemory (const string& filename, bool unlink_swapfile)
   : TemporaryFile (filename)
 {
   // cerr << "VirtualMemory ctor filename=" << get_filename() << endl;
 
   // so the swap file will automatically be deleted when the program exists
-  unlink ();
+  if (unlink_swapfile)
+    unlink ();
 
   swap_space = 0;
 
