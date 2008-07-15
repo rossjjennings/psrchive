@@ -91,12 +91,16 @@ void ConfigurableScrollBar::text_changed_CB (const QString& text)
 
   if (maximum_value->isModified())
     maximum_value->setPalette (highlight_palette);
+
+  scroll_bar->setEnabled (false);
 }
 
 void ConfigurableScrollBar::parameter_name_CB ()
 {
   parameter_name->clearModified ();
   parameter_name->setPalette (default_palette);
+  scroll_bar->setEnabled (true);
+
   current_parameter_name = parameter_name->text().ascii();
 }
 
@@ -108,6 +112,7 @@ void ConfigurableScrollBar::minimum_value_CB ()
   minimum_value->setText( range_policy->get_output_min().c_str() );
 
   scroll_bar->setMinValue( range_policy->get_input_min() );
+  scroll_bar->setEnabled (true);
 }
 
 void ConfigurableScrollBar::maximum_value_CB ()
@@ -118,6 +123,7 @@ void ConfigurableScrollBar::maximum_value_CB ()
   maximum_value->setText( range_policy->get_output_max().c_str() );
 
   scroll_bar->setMaxValue( range_policy->get_input_max() );
+  scroll_bar->setEnabled (true);
 }
 
 void ConfigurableScrollBar::conversion_type_CB (const QString& selected)
