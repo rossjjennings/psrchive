@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/psrgui/Pulsar/PlotWindow.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/07/13 10:20:44 $
+   $Revision: 1.2 $
+   $Date: 2008/07/16 02:27:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotWindow_h
@@ -33,6 +33,15 @@ namespace Pulsar {
 
     //! Set the data to be plotted
     virtual void set_data (Archive*);
+
+    //! Get the plot
+    Plot* get_plot ();
+
+    //! Get the data
+    Archive* get_data ();
+
+    //! Ready to plot data
+    bool ready () const;
 
     //! Plot the data
     virtual void plot_data ();
