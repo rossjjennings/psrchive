@@ -2,18 +2,20 @@
 noinst_LTLIBRARIES = libpsrgui.la
 
 nobase_include_HEADERS = PulsarGUI.h plotItem.h interfacePanel.h \
-	Pulsar/PlotWindow.h Pulsar/UsingXSERVE.h Pulsar/UsingQTDRIV.h
+	Pulsar/PlotWindow.h Pulsar/UsingXSERVE.h Pulsar/UsingQTDRIV.h \
+	Pulsar/InterfaceDialog.h
 
 libpsrgui_la_SOURCES = PulsarGUI.C plotItem.C interfacePanel.C \
-	PlotWindow.C UsingXSERVE.C
+	PlotWindow.C UsingXSERVE.C InterfaceDialog.C
 
 if HAVE_QTDRIV
 libpsrgui_la_SOURCES += UsingQTDRIV.C
 endif
 
-CLEANFILES = moc_PulsarGUI.C moc_plotItem.C moc_interfacePanel.C
+MOC_SOURCES = moc_PulsarGUI.C moc_plotItem.C moc_interfacePanel.C \
+	moc_InterfaceDialog.C
 
-nodist_libpsrgui_la_SOURCES = $(CLEANFILES)
+nodist_libpsrgui_la_SOURCES = $(MOC_SOURCES)
 
 bin_PROGRAMS = psrgui
 
