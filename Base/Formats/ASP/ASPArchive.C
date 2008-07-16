@@ -120,8 +120,9 @@ void Pulsar::ASPArchive::load_header (const char* filename)
 
   // Try to open fits file
   fitsfile *f;
-  int status=0; 
+  int status=0, zstatus=0; 
   int int_tmp=0;
+  long int_tmp2=0;
   if (fits_open_file(&f, filename, READONLY, &status)) 
     throw FITSError (status, "Pulsar::ASPArchive::load_header",
         "fits_open_file(%s)", filename);
@@ -172,6 +173,20 @@ void Pulsar::ASPArchive::load_header (const char* filename)
   int_tmp -= 3; // info HDUs
   if (asp_file_version==ASP_FITS_V101) { int_tmp /= 2; }
   if (!status) set_nsubint(int_tmp);
+
+  // Check if last subint is empty
+  if (asp_file_version==ASP_FITS_V101) { 
+    fits_movabs_hdu(f, 4+(int_tmp-1)*2+1, NULL, &status);
+  } else {
+    fits_movabs_hdu(f, (int_tmp-1)+4, NULL, &status);
+  }
+  if (status) {
+    fits_close_file(f, &zstatus);
+    throw FITSError (status, "Pulsar::ASPArchive::load_header", 
+        "Couldn't move to last subint (%d)", int_tmp);
+  }
+  fits_get_num_rows(f, &int_tmp2, &status);
+  if (int_tmp2==0) set_nsubint(int_tmp-1);
 
   // Pol info always the same for ASP
   set_npol(4);
