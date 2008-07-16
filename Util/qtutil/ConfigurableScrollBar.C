@@ -23,6 +23,12 @@ ConfigurableScrollBar::ConfigurableScrollBar (QWidget *parent,
 {
   QHBox* hbox = new QHBox (this);
 
+  /* **************************************************************
+   *
+   *  parameter name text entry
+   *
+   * ************************************************************** */
+     
   new QLabel ("Name:", hbox);
   parameter_name = new QLineEdit (hbox);
 
@@ -37,15 +43,27 @@ ConfigurableScrollBar::ConfigurableScrollBar (QWidget *parent,
   connect (parameter_name, SIGNAL( textChanged(const QString&) ),
 	   this, SLOT( text_changed_CB(const QString&) ));
 
+  /* **************************************************************
+   *
+   *  minimum value text entry
+   *
+   * ************************************************************** */
+     
   new QLabel ("Min:", hbox);
   minimum_value = new QLineEdit (hbox);
 
   connect (minimum_value, SIGNAL(lostFocus()),
 	   this, SLOT(minimum_value_CB()));
   connect (minimum_value, SIGNAL(returnPressed()),
-	   this, SLOT(parameter_name_CB()));
+	   this, SLOT(mimimum_value_CB()));
   connect (minimum_value, SIGNAL( textChanged(const QString&) ),
 	   this, SLOT( text_changed_CB(const QString&) ));
+
+  /* **************************************************************
+   *
+   *  maximum value text entry
+   *
+   * ************************************************************** */
 
   new QLabel ("Max:", hbox);
   maximum_value = new QLineEdit (hbox);
@@ -53,9 +71,15 @@ ConfigurableScrollBar::ConfigurableScrollBar (QWidget *parent,
   connect (maximum_value, SIGNAL(lostFocus()),
 	   this, SLOT(maximum_value_CB()));
   connect (maximum_value, SIGNAL(returnPressed()),
-	   this, SLOT(parameter_name_CB()));
+	   this, SLOT(maximum_value_CB()));
   connect (maximum_value, SIGNAL( textChanged(const QString&) ),
 	   this, SLOT( text_changed_CB(const QString&) ));
+
+  /* **************************************************************
+   *
+   *  parameter type drop down
+   *
+   * ************************************************************** */
 
   new QLabel ("Type:", hbox);
   conversion_type = new QComboBox (hbox);
@@ -65,6 +89,12 @@ ConfigurableScrollBar::ConfigurableScrollBar (QWidget *parent,
 
   connect (conversion_type, SIGNAL( highlighted(const QString&) ),
 	   this, SLOT( conversion_type_CB(const QString&) ));
+
+  /* **************************************************************
+   *
+   *  scroll bar
+   *
+   * ************************************************************** */
 
   scroll_bar = new QScrollBar (this);
   scroll_bar->setOrientation (Qt::Horizontal);
