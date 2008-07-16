@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/psrgui/PulsarGUI.C,v $
-   $Revision: 1.11 $
-   $Date: 2008/07/13 12:12:43 $
+   $Revision: 1.12 $
+   $Date: 2008/07/16 02:27:57 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -16,6 +16,8 @@
 #endif
 
 #include "PulsarGUI.h"
+
+#include "Pulsar/InterfaceDialog.h"
 #include "Pulsar/UsingXSERVE.h"
 
 #ifdef HAVE_QTDRIV
@@ -30,30 +32,29 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa)
   myApp = qa;
 
   // First, define all user Actions
-  QAction* fileOpenAction = new QAction("Open File", "&Open", CTRL+Key_O, 
-					this, "Open");
+  QAction* fileOpenAction = new QAction("&Open File", CTRL+Key_O, this);
 
   connect(fileOpenAction, SIGNAL(activated()), this, SLOT(fileOpen()));
 
-  QAction* fileQuitAction = new QAction("Quit", "&Quit", CTRL+Key_Q, 
-					this, "Quit");
+  QAction* fileQuitAction = new QAction("&Quit", CTRL+Key_Q, this);
 
   connect(fileQuitAction, SIGNAL(activated()), this, SLOT(fileQuit()));
 
-  QAction* confFrameAction = new QAction("Frame", "&Frame", CTRL+Key_F, 
-					this, "Frame");
+  QAction* confFrameAction = new QAction("&Frame", CTRL+Key_F, this);
 
   connect(confFrameAction, SIGNAL(activated()), this, SLOT(confFrame()));
 
-  QAction* confGraphAction = new QAction("Plot", "&Plot", CTRL+Key_P, 
-					this, "Plot");
+  QAction* confGraphAction = new QAction("&Plot", CTRL+Key_P, this);
 
   connect(confGraphAction, SIGNAL(activated()), this, SLOT(confGraph()));
 
-  QAction* confProcAction = new QAction("Data", "&Data", CTRL+Key_D,
-                                        this, "Data");
+  QAction* confProcAction = new QAction("&Data", CTRL+Key_D, this);
 
   connect(confProcAction, SIGNAL(activated()), this, SLOT(confProc()));
+
+  QAction* confDialogAction = new QAction("&Interactive", CTRL+Key_I, this);
+
+  connect(confDialogAction, SIGNAL(activated()), this, SLOT(confDialog()));
 
   // Look after the global placement of Widgets
   QHBox* layout = new QHBox(this, "layout");
@@ -93,17 +94,18 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa)
   menuBar()->insertItem("&Configure", confMenu);
 
   // Define a useful shortcuts toolbar
-  psrTools = new QToolBar("Pulsar Tools", this);
-  QWhatsThis::whatsThisButton(psrTools);
+  //psrTools = new QToolBar("Pulsar Tools", this);
+  // QWhatsThis::whatsThisButton(psrTools);
 
   // Connect the Actions to the toolbar and menus
-  fileOpenAction->addTo(psrTools);
+  //fileOpenAction->addTo(psrTools);
   fileOpenAction->addTo(fileMenu);
   fileQuitAction->addTo(fileMenu);
 
   confFrameAction->addTo(confMenu);
   confGraphAction->addTo(confMenu);
   confProcAction->addTo(confMenu);
+  confDialogAction->addTo(confMenu);
   
   // Construct available plot styles
   static PlotFactory factory;
@@ -208,6 +210,16 @@ void Pulsar::PulsarGUI::confProc()
     return;
 
   interfacePanel* panl = new interfacePanel(this, preti);
+  panl->show();
+}
+
+void Pulsar::PulsarGUI::confDialog()
+{
+  if (!window)
+    return;
+
+  InterfaceDialog* panl = new InterfaceDialog (this);
+  panl->set_window (window);
   panl->show();
 }
 

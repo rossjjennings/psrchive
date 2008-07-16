@@ -1,6 +1,5 @@
 #include "qapplication.h"
 #include "qmainwindow.h"
-#include "qwhatsthis.h"
 #include "qradiobutton.h"
 #include "qbuttongroup.h"
 #include "qerrormessage.h"
@@ -51,6 +50,7 @@ namespace Pulsar {
 	void confFrame();
 	void confGraph();
         void confProc();
+	void confDialog();
 
 	void plotGraph();
 
