@@ -9,6 +9,8 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Plot.h"
 
+using namespace std;
+
 Pulsar::PlotWindow::PlotWindow ()
 {
 }
@@ -58,3 +60,4 @@ catch (Error& error)
 {
   cerr << "Pulsar::PlotWindow::plot_data error=" << error << endl;
 }
+
