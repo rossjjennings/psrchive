@@ -1,3 +1,15 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="SHORTCUT ICON"
+ href="http://psrchive.sourceforge.net/img/square50.png">
+<style type="text/css">
+@import url("http://psrchive.sourceforge.net/css/psrchive.css");
+</style>
+</head>
+
+<!--#set var="name" value="Willem van Straten" -->
+<!--#set var="year" value="2006-2008" -->
+
+<body>
 
 <div id="super-header">
 <div id="header">
@@ -42,4 +54,7 @@ FreeFind</A></font></FORM>
 </div>
 </div>
 
+<!-- start the table for the rest of the page -->
 
+<TABLE CELLPADDING=10>
+<TR valign=top>
