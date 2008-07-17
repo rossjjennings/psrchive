@@ -14,7 +14,7 @@ aclocaldir = $(datadir)/aclocal
 dist_aclocal_DATA = psrchive.m4
 
 htmldir = $(datadir)/html
-dist_html_DATA = psrchive_layout.shtml
+dist_html_DATA = psrchive_layout.shtml psrchive_top.shtml psrchive_side.shtml
 
 #############################################################################
 #
