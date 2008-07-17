@@ -130,16 +130,19 @@ void Pulsar::Application::parse (int argc, char** argv)
     default:
       {
 	bool parsed = false;
+        std::string arg = "";
+
+        if (optarg!=NULL) arg = optarg;
 	
 	for (unsigned i=0; i<options.size(); i++)
-	  if (options[i]->parse (code, optarg))
+	  if (options[i]->parse (code, arg))
 	    {
 	      parsed = true;
 	      break;
 	    }
 	
 	if (!parsed)
-	  parsed = parse (code, optarg);
+	  parsed = parse (code, arg);
 	
 	if (parsed)
 	  break;
@@ -209,7 +212,7 @@ string Pulsar::Application::get_options ()
 }
 
 //! Parse a non-standard command
-bool Pulsar::Application::parse (char code, const string& arg)
+bool Pulsar::Application::parse (char code, const std::string& arg)
 {
   return false;
 }
