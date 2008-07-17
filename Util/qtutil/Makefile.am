@@ -27,7 +27,9 @@ include $(top_srcdir)/config/Makefile.Qt
 
 LDADD = libqtutil.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \
-	$(top_builddir)/Util/units/libunits.la @QT_LIBS@ 
+	$(top_builddir)/Util/units/libunits.la 
+
+libqtutil_la_LIBADD = @QT_LIBS@ 
 
 include $(top_srcdir)/config/Makefile.include
 
