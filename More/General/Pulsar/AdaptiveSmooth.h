@@ -76,6 +76,10 @@ namespace Pulsar {
     //! Compute using best sinc lowpass (ie, harmonic cutoff)
     void compute_lpf_sinc(const float *pspec, double sigma2, int nh);
 
+    //! Compute using a generic filter func
+    void compute_lpf(const float *pspec, double sigma2, int nh,
+        float (*filter_func)(float,float));
+
   };
 
 }

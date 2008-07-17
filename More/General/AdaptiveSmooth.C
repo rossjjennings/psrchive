@@ -10,6 +10,7 @@
 #include "FTransform.h"
 
 #include <complex>
+#include <math.h>
 
 using namespace std;
 
@@ -29,7 +30,7 @@ Pulsar::AdaptiveSmooth::~AdaptiveSmooth ()
 float Pulsar::AdaptiveSmooth::get_turns () const
 {
   double sum=0.0;
-  for (unsigned i=0; i<max_harm; i++) { sum += filter[i]; }
+  for (unsigned i=0; i<filter.size(); i++) { sum += filter[i]; }
   return 1.0/sum;
 }
 
@@ -54,7 +55,7 @@ void Pulsar::AdaptiveSmooth::transform(Profile *p)
   FTransform::frc1d(p->get_nbin(), fprof, p->get_amps());
 
   // If no current filter or hold is off, compute optimal filter
-  if (max_harm==0 || filter.size()==0 || !hold) 
+  if (filter.size()==0 || !hold) 
     compute(fprof, p->get_nbin());
 
   // Apply filter to profile
@@ -123,8 +124,8 @@ void Pulsar::AdaptiveSmooth::compute_wiener(const float *pspec,
 }
 
 void Pulsar::AdaptiveSmooth::compute_lpf_sinc(const float *pspec,
-    double sigma2, int nh) {
-
+    double sigma2, int nh) 
+{
   // Just brute-force this minimization:
   // Criterion is minimum expected MS diff between real and noisy signal,
   // same as in Wiener filter.  But here our denoising filter is 
@@ -161,4 +162,40 @@ void Pulsar::AdaptiveSmooth::compute_lpf_sinc(const float *pspec,
 
   // fill in etc
   max_harm = ih_min;
+}
+
+void Pulsar::AdaptiveSmooth::compute_lpf(const float *pspec,
+    double sigma2, int nh, float (*filter_func)(float,float))
+{
+  // Same minimization as above, but uses a generic filter
+  // shape that takes a freq and cutoff freq as 
+  // arguments.
+  double mse, mse_min=0.0;
+  int ih_min=0;
+
+  for (unsigned ih=1; ih<nh*(1.0-noise_band); ih++) {
+
+    // Compute MSE using ih as cutoff freq.
+    mse=0.0;
+    for (unsigned i=1; i<nh; i++) {
+      double g = filter_func((float)i, (float)ih);
+      mse += ((1.0-g)*(1.0-g)*(pspec[i]-sigma2) + g*g*sigma2);
+    }
+
+    // Keep this one if mse is minimum
+    if (ih==1) {
+      ih_min = 1;
+      mse_min = mse;
+    } else {
+      if (mse<mse_min) {
+        ih_min = ih;
+        mse_min = mse;
+      }
+    }
+  }
+
+  // Fill in filter coeffs
+  for (unsigned ih=0; ih<nh; ih++) 
+    filter[ih] = filter_func((float)ih, (float)ih_min);
+
 }
