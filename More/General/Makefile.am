@@ -12,6 +12,7 @@ nobase_include_HEADERS = \
 	Pulsar/shift_methods.h \
 	Pulsar/Accumulate.h \
         Pulsar/AdaptiveSNR.h \
+        Pulsar/AdaptiveSmooth.h \
         Pulsar/Algorithm.h \
         Pulsar/ArchiveMatch.h \
         Pulsar/ArchiveSort.h \
@@ -100,6 +101,7 @@ libGeneral_la_SOURCES = \
 	morphological_difference.C \
 	Accumulate.C \
         AdaptiveSNR.C \
+        AdaptiveSmooth.C \
 	Append.C \
 	ArchiveTemplates.C \
         Archive_append.C \
