@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/01/17 22:05:05 $
-   $Author: straten $ */
+   $Revision: 1.5 $
+   $Date: 2008/07/17 21:09:40 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_Application_h
 #define __Pulsar_Application_h
@@ -91,6 +91,7 @@ namespace Pulsar {
 
   };
 
+  //! Describes application command line options.
   class Application::Options : public Reference::Able
   {
     public:
