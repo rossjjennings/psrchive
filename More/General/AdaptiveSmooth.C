@@ -110,6 +110,9 @@ void Pulsar::AdaptiveSmooth::compute(const float *fprof, int nbin)
     throw Error(InvalidState, "Pulsar::AdaptiveSmooth::compute",
         "Invalid filter method selected");
 
+  // Free up mem
+  delete [] pspec;
+
 }
 
 void Pulsar::AdaptiveSmooth::compute_wiener(const float *pspec,
@@ -131,24 +134,19 @@ void Pulsar::AdaptiveSmooth::compute_lpf_sinc(const float *pspec,
   // same as in Wiener filter.  But here our denoising filter is 
   // constrained to be a "brick wall" (sinc in time domain). We ignore
   // DC in making this.
-  double mse, mse_min;
-  int ih_min;
+  double mse, mse_min=0.0;
+  int ih_min=0;
 
   // Get total signal power
   double ptot=0.0;
   for (unsigned i=1; i<nh; i++) 
     ptot += pspec[i];
 
-  // Init with values for first harm
-  ih_min = 1;
-  ptot -= pspec[1];
-  mse_min = sigma2 + ptot - (double)(nh-2)*sigma2;
-
   // Loop over harmonics, look for min
-  for (unsigned i=2; i<nh; i++) {
+  for (unsigned i=1; i<nh; i++) {
     ptot -= pspec[i];
     mse = (double)i*sigma2 + ptot - (double)(nh-1-i)*sigma2;
-    if (mse < mse_min) { 
+    if ((i==1) || (mse<mse_min)) { 
       mse_min = mse;
       ih_min = i;
     }
@@ -183,15 +181,11 @@ void Pulsar::AdaptiveSmooth::compute_lpf(const float *pspec,
     }
 
     // Keep this one if mse is minimum
-    if (ih==1) {
-      ih_min = 1;
+    if ((ih==1) || (mse<mse_min)) {
+      ih_min = ih;
       mse_min = mse;
-    } else {
-      if (mse<mse_min) {
-        ih_min = ih;
-        mse_min = mse;
-      }
     }
+
   }
 
   // Fill in filter coeffs
