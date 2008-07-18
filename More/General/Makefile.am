@@ -90,6 +90,7 @@ nobase_include_HEADERS = \
 	Pulsar/TimeIntegrate.h \
         Pulsar/Transformation.h \
         Pulsar/Transposer.h \
+        Pulsar/WaveletTransform.h \
         Pulsar/Weight.h \
 	Pulsar/WeightedFrequency.h \
         Pulsar/ZapInterpreter.h
@@ -234,6 +235,9 @@ endif
 # GSL-dependent code
 #
 if HAVE_GSL
+
+libGeneral_la_SOURCES += WaveletTransform.C
+
 if HAVE_CFITSIO
 
 libGeneral_la_SOURCES += ProfilePCA.C
