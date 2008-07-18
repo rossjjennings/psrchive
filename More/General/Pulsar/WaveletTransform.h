@@ -41,7 +41,7 @@ namespace Pulsar {
        *  All types can have _centered appended to their name to 
        *  get centered versions.
        */
-      void set_type(gsl_wavelet_type *t) { type=t; };
+      void set_type(const gsl_wavelet_type *t) { type=t; };
 
       //! Set wavelet order
       /*! Implemented values (as of GSL 1.11) are:
@@ -82,6 +82,12 @@ namespace Pulsar {
 
       //! Get const pointer to data array
       const double* get_data() const;
+
+      //! Get number of pts currently in use
+      const int get_npts() const { return npts; };
+
+      //! Get log2 of number of pts currently in use
+      const int get_log2_npts() const { return log2_npts; };
 
     protected:
 
