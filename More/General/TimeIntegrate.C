@@ -49,10 +49,11 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
   range_policy->initialize (this, archive);
   unsigned output_nsub = range_policy->get_nrange();
 
-  if (archive_nsub <= 1 || output_nsub >= archive_nsub) {
-    if (Archive::verbose > 1) 
+  if (archive_nsub <= 1 || output_nsub >= archive_nsub)
+  {
+    if (Archive::verbose > 2) 
       cerr << "Pulsar::TimeIntegrate::transform nothing to do" << endl;
-   return;
+    return;
   }
 
   if ( Archive::verbose > 1 &&

@@ -52,10 +52,11 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
 
   unsigned output_nchan = range_policy->get_nrange();
 
-  if (subint_nchan <= 1 || output_nchan >= subint_nchan) {
+  if (subint_nchan <= 1 || output_nchan >= subint_nchan)
+  {
     if (Integration::verbose) 
       cerr << "Pulsar::FrequencyIntegrate::transform nothing to do" << endl;
-   return;
+    return;
   }
 
   double dm = integration->get_dispersion_measure();
