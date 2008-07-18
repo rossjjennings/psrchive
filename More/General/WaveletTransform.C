@@ -98,11 +98,18 @@ void Pulsar::WaveletTransform::invert() {
     throw Error (InvalidState, "Pulsar::WaveletTransform::invert",
         "invert() called before transform initialized/allocated");
 
+  if (state!=Wavelet)
+    throw Error (InvalidState, "Pulsar::WaveletTransform::invert",
+        "Current state is not Wavelet");
+
   // Call GSL in-place transformation
   int rv = gsl_wavelet_transform_inverse(wave, data, 1, npts, work);
   if (rv!=GSL_SUCCESS)
     throw Error (FailedSys, "Pulsar::WaveletTransform::invert",
         "GSL error: %s", gsl_strerror(rv));
+
+  // Set state
+  state = Time;
 }
 
 double Pulsar::WaveletTransform::get_data(int level, int k) {
