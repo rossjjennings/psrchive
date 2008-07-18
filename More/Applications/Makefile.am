@@ -34,6 +34,20 @@ pdv_SOURCES = pdv.C
 
 sesdiv_SOURCES = sesdiv.C
 
+
+# ######################################################################
+#
+# GSL specific code
+#
+if HAVE_GSL
+
+bin_PROGRAMS += psrsmooth
+
+psrsmooth_SOURCES = psrsmooth.C
+psrsmooth_LDADD = $(LDADD) @GSL_LIBS@
+
+endif
+
 # ######################################################################
 #
 # PGPLOT specific code
@@ -80,5 +94,5 @@ LDADD = $(top_builddir)/More/libpsrmore.la \
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@
+AM_CPPFLAGS += @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @GSL_CFLAGS@
 
