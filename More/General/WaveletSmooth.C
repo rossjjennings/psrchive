@@ -9,6 +9,8 @@
 #include "Pulsar/WaveletTransform.h"
 #include "Pulsar/Profile.h"
 
+#include <algorithm>
+
 using namespace std;
 
 Pulsar::WaveletSmooth::WaveletSmooth ()
