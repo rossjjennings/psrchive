@@ -77,6 +77,12 @@ namespace Pulsar {
       //! Get data element
       double get_data(int n);
 
+      //! Get pointer to data array
+      double* get_data();
+
+      //! Get const pointer to data array
+      const double* get_data() const;
+
     protected:
 
       //! Wavelet type

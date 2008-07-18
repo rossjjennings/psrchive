@@ -107,6 +107,10 @@ void Pulsar::WaveletTransform::invert() {
 
 double Pulsar::WaveletTransform::get_data(int level, int k) {
 
+  if (data==NULL) 
+    throw Error (InvalidState, "Pulsar::WaveletTransform::get_data",
+        "data array not allocated");
+
   if (state!=Wavelet)
     throw Error (InvalidState, "Pulsar:WaveletTransform::get_data",
         "data is not in Wavelet state");
@@ -123,8 +127,25 @@ double Pulsar::WaveletTransform::get_data(int level, int k) {
 }
 
 double Pulsar::WaveletTransform::get_data(int n) {
+  if (data==NULL) 
+    throw Error (InvalidState, "Pulsar::WaveletTransform::get_data",
+        "data array not allocated");
   if ((n<0) || (n>=npts)) 
     throw Error (InvalidRange, "Pulsar:WaveletTransform::get_data",
         "index %d out of range (npts=%d)", n, npts);
   return data[n];
+}
+
+double* Pulsar::WaveletTransform::get_data() {
+  if (data==NULL) 
+    throw Error (InvalidState, "Pulsar::WaveletTransform::get_data",
+        "data array not allocated");
+  return data;
+}
+
+const double* Pulsar::WaveletTransform::get_data() const {
+  if (data==NULL) 
+    throw Error (InvalidState, "Pulsar::WaveletTransform::get_data",
+        "data array not allocated");
+  return data;
 }
