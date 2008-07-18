@@ -103,6 +103,15 @@ namespace Pulsar {
       //! GSL workspace
       gsl_wavelet_workspace *work;
 
+    private:
+
+      //! Free internal memory
+      void free_mem();
+
+      //! Allocate internal memory, set up wavelet coeffs
+      void init_mem();
+
+
   };
 
 }

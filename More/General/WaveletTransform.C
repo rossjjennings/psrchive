@@ -29,9 +29,22 @@ Pulsar::WaveletTransform::WaveletTransform ()
 
 Pulsar::WaveletTransform::~WaveletTransform ()
 {
+  free_mem();
+}
+
+void Pulsar::WaveletTransform::free_mem() {
   if (data!=NULL) delete [] data;
   if (work!=NULL) gsl_wavelet_workspace_free(work);
   if (wave!=NULL) gsl_wavelet_free(wave);
+}
+
+void Pulsar::WaveletTransform::init_mem() {
+    data = new double[npts];
+    work = gsl_wavelet_workspace_alloc(npts);
+    wave = gsl_wavelet_alloc(type, order);
+    if ((work==NULL) || (wave==NULL)) 
+      throw Error (FailedSys, "Pulsar::WaveletTransform::init_mem",
+          "Error allocating working space");
 }
 
 void Pulsar::WaveletTransform::transform(const std::vector<float>& in) {
@@ -55,13 +68,9 @@ void Pulsar::WaveletTransform::transform(unsigned n, const float *in) {
 
   // If npts has changed, need to reallocate workspace, data buf
   if (npts!=n) {
-    if (data!=NULL) delete [] data;
-    if (work!=NULL) gsl_wavelet_workspace_free(work);
-    if (wave!=NULL) gsl_wavelet_free(wave);
-    data = new double[n];
-    work = gsl_wavelet_workspace_alloc(n);
-    wave = gsl_wavelet_alloc(type, order);
     npts = n;
+    free_mem();
+    init_mem();
   }
 
   // Copy input data
@@ -79,8 +88,21 @@ void Pulsar::WaveletTransform::transform(unsigned n, const float *in) {
 }
 
 void Pulsar::WaveletTransform::invert() {
-  throw Error (InvalidState, "Pulsar::WaveletTransform::invert",
-      "invert() not implemented yet");
+
+  /* TODO: If anyone wants to inverse transform something that is not a result
+   * of a forward transform, we need to provide a method to set up wavelet
+   * coeffs, memory, etc without having to call transform().
+   */
+
+  if ((npts==0) || (data==NULL) || (wave==NULL) || (work==NULL)) 
+    throw Error (InvalidState, "Pulsar::WaveletTransform::invert",
+        "invert() called before transform initialized/allocated");
+
+  // Call GSL in-place transformation
+  int rv = gsl_wavelet_transform_inverse(wave, data, 1, npts, work);
+  if (rv!=GSL_SUCCESS)
+    throw Error (FailedSys, "Pulsar::WaveletTransform::invert",
+        "GSL error: %s", gsl_strerror(rv));
 }
 
 double Pulsar::WaveletTransform::get_data(int level, int k) {
