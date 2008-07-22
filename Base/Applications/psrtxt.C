@@ -20,10 +20,13 @@ void usage ()
     "\n"
     "psrtxt [options] filename\n"
     "options:\n"
-    "  -b ibin    select a single phase bin, from 0 to nbin-1\n"
-    "  -c ichan   select a single frequency channel, from 0 to nchan-1\n"
-    "  -i isub    select a single integration, from 0 to nsubint-1\n"
-    "  -p phase   select a single phase, from 0.0 to 1.0 (overrides -b)\n"
+    "  -b ibin    select a single phase bin, from 0 to nbin-1 \n"
+    "  -c ichan   select a single frequency channel, from 0 to nchan-1 \n"
+    "  -i isub    select a single integration, from 0 to nsubint-1 \n"
+    "  -s ipol    select a single polarization, from 0 to npol-1 \n"
+    "\n"
+    "  -p phase   select a single phase, from 0.0 to 1.0 (overrides -b) \n"
+    "  -m         search for minimum and maximum value in data \n"
     "\n"
     "Each row output by psrtxt contains:\n"
     "\n"
@@ -33,17 +36,46 @@ void usage ()
        << endl;
 }
 
-int main (int argc, char** argv) try {
+class where
+{
+public:
 
+  where () { set = false; value = 0.0; subint = chan = pol = bin = 0; }
+
+  bool set;
+  float value;
+
+  unsigned subint;
+  unsigned chan;
+  unsigned pol;
+  unsigned bin;
+};
+
+#define SET_WHERE(x)    \
+  { x.value = value;    \
+    x.set = true;       \
+    x.subint = isub;    \
+    x.chan = ichan;     \
+    x.pol = ipol;       \
+    x.bin = ibin; }
+
+#define GET_WHERE(x) \
+  "subint=" << x.subint << " chan=" << x.chan << \
+  " pol=" << x.pol << " bin=" << x.bin << " value=" << x.value
+
+int main (int argc, char** argv) try
+{
+  bool minmax = false;
   bool phase_chosen = false;
   float phase = 0.0;
 
   int cbin  = -1;
   int cchan = -1;
   int csub  = -1;
+  int cpol  = -1;
 
   char c;
-  while ((c = getopt(argc, argv, "b:c:i:p:hqvV")) != -1) 
+  while ((c = getopt(argc, argv, "b:c:i:mp:s:hqvV")) != -1) 
 
     switch (c)  {
 
@@ -72,15 +104,24 @@ int main (int argc, char** argv) try {
       csub = atoi (optarg);
       break;
 
+    case 'm':
+      minmax = true;
+      break;
+
     case 'p':
       phase_chosen = true;
       phase = atof (optarg);
       break;
 
+    case 's':
+      cpol = atoi (optarg);
+      break;
+
     } 
 
 
-  if (optind >= argc) {
+  if (optind >= argc)
+  {
     cerr << "psrtxt: specify filename" << endl;
     return -1;
   }
@@ -95,60 +136,89 @@ int main (int argc, char** argv) try {
   if (phase_chosen)
     cbin = int (phase * (nbin-1));
 
-  if (cbin > 0 && unsigned(cbin) >= nbin) {
+  if (cbin > 0 && unsigned(cbin) >= nbin)
+  {
     cerr << "psrtxt: -b " << cbin << " >= nbin=" << nbin << endl;
     return -1;
   }
 
-  if (cchan > 0 && unsigned(cchan) >= nchan) {
+  if (cchan > 0 && unsigned(cchan) >= nchan)
+  {
     cerr << "psrtxt: -c " << cchan << " >= nchan=" << nchan << endl;
     return -1;
   }
 
-  if (csub > 0 && unsigned(csub) >= nsub) {
+  if (csub > 0 && unsigned(csub) >= nsub)
+  {
     cerr << "psrtxt: -i " << csub << " >= nsub=" << nsub << endl;
     return -1;
   }
 
-  for (unsigned isub=0; isub < nsub; isub++) {
+  where min, max;
 
-    if (csub > 0)
+  for (unsigned isub=0; isub < nsub; isub++)
+  {
+    if (csub >= 0)
       isub = csub;
 
     Pulsar::Integration* integration = archive->get_Integration(isub);
 
-    for (unsigned ichan=0; ichan < nchan; ichan++) {
-
-      if (cchan > 0)
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      if (cchan >= 0)
 	ichan = cchan;
       
-      for (unsigned ibin=0; ibin < nbin; ibin++) {
-
-	if (cbin > 0)
+      for (unsigned ibin=0; ibin < nbin; ibin++)
+      {
+	if (cbin >= 0)
 	  ibin = cbin;
 
-	cout << isub << " " << ichan << " " << ibin;
+	if (!minmax)
+	  cout << isub << " " << ichan << " " << ibin;
+
 	for (unsigned ipol=0; ipol < npol; ipol++)
-	  cout<<" "<< integration->get_Profile(ipol,ichan)->get_amps()[ibin];
-	cout << endl;
+	{
+	  if (cpol >= 0)
+	    ipol = cpol;
 
-	if (cbin > 0)
+	  float value = integration->get_Profile(ipol,ichan)->get_amps()[ibin];
+
+	  if (minmax)
+	  {
+	    if (value > max.value || !max.set)
+	      SET_WHERE (max);
+	    if (value < min.value || !min.set)
+	      SET_WHERE (min);
+	  }
+	  else
+	    cout << " " << value;
+
+	  if (cpol >= 0)
+	    break;
+	}
+
+	if (!minmax)
+	  cout << endl;
+	
+	if (cbin >= 0)
 	  break;
-
       }
 
-      if (cchan > 0)
+      if (cchan >= 0)
 	break;
-
     }
 
-    if (csub > 0)
+    if (csub >= 0)
       break;
+  }
 
+  if (minmax)
+  {
+    cout << "MIN: " << GET_WHERE(min) << endl
+	 << "MAX: " << GET_WHERE(max) << endl;
   }
 
   return 0;
-
 }
 catch (Error& er)
 {
