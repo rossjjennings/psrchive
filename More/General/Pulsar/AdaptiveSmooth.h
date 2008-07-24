@@ -43,7 +43,7 @@ namespace Pulsar {
     void transform(Profile *);
 
     //! Different types of filter
-    enum Method { Wiener, Sinc };
+    enum Method { Wiener, Sinc_MSE, Sinc_IC };
 
     //! Set filter method
     void set_method(Method m);
@@ -74,7 +74,10 @@ namespace Pulsar {
     void compute_wiener(const float *pspec, double sigma2, int nh);
 
     //! Compute using best sinc lowpass (ie, harmonic cutoff)
-    void compute_lpf_sinc(const float *pspec, double sigma2, int nh);
+    void compute_sinc_mse(const float *pspec, double sigma2, int nh);
+
+    //! Compute using best sinc lowpass using information criteria
+    void compute_sinc_ic(const float *pspec, double sigma2, int nh);
 
     //! Compute using a generic filter func
     void compute_lpf(const float *pspec, double sigma2, int nh,

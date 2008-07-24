@@ -19,7 +19,7 @@ Pulsar::AdaptiveSmooth::AdaptiveSmooth ()
   max_harm=0;
   hold=false;
   noise_band=0.3;
-  method = Sinc;
+  method = Sinc_IC;
 }
 
 Pulsar::AdaptiveSmooth::~AdaptiveSmooth ()
@@ -104,8 +104,10 @@ void Pulsar::AdaptiveSmooth::compute(const float *fprof, int nbin)
   // Use a specific implementation
   if (method==Wiener)
     compute_wiener(pspec, sigma2, nh);
-  else if (method==Sinc)
-    compute_lpf_sinc(pspec, sigma2, nh);
+  else if (method==Sinc_IC)
+    compute_sinc_ic(pspec, sigma2, nh);
+  else if (method==Sinc_MSE)
+    compute_sinc_mse(pspec, sigma2, nh);
   else 
     throw Error(InvalidState, "Pulsar::AdaptiveSmooth::compute",
         "Invalid filter method selected");
@@ -126,7 +128,7 @@ void Pulsar::AdaptiveSmooth::compute_wiener(const float *pspec,
   }
 }
 
-void Pulsar::AdaptiveSmooth::compute_lpf_sinc(const float *pspec,
+void Pulsar::AdaptiveSmooth::compute_sinc_mse(const float *pspec,
     double sigma2, int nh) 
 {
   // Just brute-force this minimization:
@@ -151,6 +153,9 @@ void Pulsar::AdaptiveSmooth::compute_lpf_sinc(const float *pspec,
       ih_min = i;
     }
   }
+
+  // Keep always at least 2 harmonics.
+  if (ih_min<2) { ih_min=2; }
 
   // Fill in filter coeffs
   for (unsigned i=0; i<=ih_min; i++) 
@@ -192,4 +197,43 @@ void Pulsar::AdaptiveSmooth::compute_lpf(const float *pspec,
   for (unsigned ih=0; ih<nh; ih++) 
     filter[ih] = filter_func((float)ih, (float)ih_min);
 
+}
+
+void Pulsar::AdaptiveSmooth::compute_sinc_ic(const float *pspec,
+    double sigma2, int nh) {
+
+  // Compute optimal number of harmonics using various 
+  // information criteria.  These seem to be a little
+  // more conservative than the pure MSE criterion above.
+
+  double rss=0.0;
+  for (int i=1; i<nh; i++) { rss += pspec[i]; }
+
+  double ic, ic_min;
+  double ih_min;
+  for (int i=1; i<nh; i++) {
+    rss -= pspec[i];
+    double n = (double)(nh-1-i);
+    double k = (double)i;
+    ic = n*log(rss/n) + k*log(n);          // This is BIC
+    //ic = n*(log(2.0*M_PI*rss/n) + 1) + 2k; // This is AIC
+    //ic = log(rss/n) + (n+k)/(n-k-2);       // This is AICc
+    //ic = log(rss/(n-k)) + (n+k)/(n-k-2);   // This is AICu
+    if (ic<ic_min || i==1) {
+      ic_min = ic;
+      ih_min = i;
+    }
+  }
+
+  // Keep always at least 2 harmonics.
+  if (ih_min<2) { ih_min=2; }
+
+  // Fill in filter coeffs
+  for (unsigned i=0; i<=ih_min; i++) 
+    filter[i] = 1.0;
+  for (unsigned i=ih_min+1; i<nh; i++) 
+    filter[i] = 0.0;
+
+  // fill in etc
+  max_harm = ih_min;
 }
