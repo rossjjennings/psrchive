@@ -29,7 +29,7 @@ public:
   psrsmooth ();
 
   //! Return extra cmd line args
-  std::string get_options() { return "We:"; }
+  std::string get_options() { return "Wne:"; }
 
   //! Parse extra command line opts
   bool parse(char code, const std::string& arg);
@@ -46,6 +46,9 @@ public:
   //! Extension to append
   std::string ext;
 
+  //! Normalize outputs?
+  bool normalize;
+
 };
 
 
@@ -54,11 +57,13 @@ psrsmooth::psrsmooth ()
 {
   method = "sinc";
   ext = "sm";
+  normalize = false;
 }
 
 std::string psrsmooth::get_usage() {
   return 
     " -W               Use Wavelet smoothing (default Sinc)\n"
+    " -n               Normalize smoothed profile\n"
     " -e ext           Append extention to output (default .sm)\n";
 }
 
@@ -68,6 +73,9 @@ bool psrsmooth::parse(char code, const std::string& arg) {
     return true;
   } else if (code=='e') {
     ext = arg;
+    return true;
+  } else if (code=='n') {
+    normalize = true;
     return true;
   } else 
     return false;
@@ -105,13 +113,27 @@ void psrsmooth::process (Pulsar::Archive* archive)
       // Smooth pol 0
       (*smooth)(subint->get_Profile(0,ichan));
 
+      // Calc norm factor from pol0
+      // Normalize so sum of squares is 1.0 (not counting DC).
+      double norm=1.0;
+      if (normalize) {
+        Profile *p = subint->get_Profile(0,ichan);
+        double dc = p->sum() / (double)(p->get_nbin());
+        p->offset(-1.0 * dc);
+        norm = 1.0 / sqrt(p->sumsq());
+        p->offset(dc);
+        p->scale(norm);
+      }
+
       // if we're using Fourier-domain, apply same filter to all 
       // other pols
       if (asmooth) asmooth->set_hold(true);
 
       // Loop over other pols
-      for (unsigned ipol=1; ipol<subint->get_npol(); ipol++) 
+      for (unsigned ipol=1; ipol<subint->get_npol(); ipol++) {
         (*smooth)(subint->get_Profile(ipol,ichan));
+        if (normalize) subint->get_Profile(ipol,ichan)->scale(norm);
+      }
 
       // Reset hold if needed
       if (asmooth) asmooth->set_hold(false);
