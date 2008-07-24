@@ -539,6 +539,9 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
     GBT::guess(r, this); // Uses center freq to determine rcvr
   } else if (get_telescope()=="3" || get_telescope()=="Arecibo") {
     Arecibo::guess(r, this); // Uses center freq
+    // Arecibo recvrs need hand=-1, at least for ASP.  So far
+    // I've only checked this for L-wide and S-wide (July 2008).
+    r->set_hand(Signal::Left);
   } 
   // If still no recvr found, use info from FITS
   if (r->get_name()=="unknown") {
