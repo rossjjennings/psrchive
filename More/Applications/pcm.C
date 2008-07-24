@@ -8,9 +8,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.96 $
-   $Date: 2008/06/26 01:48:26 $
-   $Author: straten $ */
+   $Revision: 1.97 $
+   $Date: 2008/07/24 18:01:30 $
+   $Author: demorest $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -491,7 +491,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args
-    = "1:A:a:B:b:c:C:d:DgHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rsS:t:T:u:vV:X:";
+    = "1A:a:B:b:c:C:d:DgHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rsS:t:T:u:vV:X:";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
