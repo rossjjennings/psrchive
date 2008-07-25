@@ -15,8 +15,8 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
 {
   long dimension = data.size();
   
-  auto_ptr<float> temp ( new float[dimension] );
-  
+  vector<float> temp (dimension, 0.0);
+
   int status = 0;
   int colnum = 0;
   int initflag = 0;
@@ -25,7 +25,7 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
   fits_get_colnum (fptr, CASEINSEN, column_name, &colnum, &status);
   
   fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &fits_nullfloat,
-		 temp.get(), &initflag, &status);
+		 &(temp[0]), &initflag, &status);
   
   if (status)
     throw FITSError (status, "Pulsar::load_Estimates",
@@ -34,7 +34,7 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
   int idim = 0;
   
   for (idim=0; idim < dimension; idim++)
-    data[idim].val = temp.get()[idim];
+    data[idim].val = temp[idim];
   
   // name of column containing data errors
   string cname = column_name;
@@ -48,14 +48,14 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
   fits_get_colnum (fptr, CASEINSEN, column_name, &colnum, &status);
   
   fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &fits_nullfloat, 
-		 temp.get(), &initflag, &status);
+		 &(temp[0]), &initflag, &status);
   
   if (status)
     throw FITSError (status, "Pulsar::load_Estimates",
 		     "fits_read_col " + cname);
   
   for (idim=0; idim < dimension; idim++) {
-    float err = temp.get()[idim];
+    float err = temp[idim];
     data[idim].var = err*err;
   }
   
@@ -68,13 +68,13 @@ void Pulsar::unload_Estimates (fitsfile* fptr,
 {
   long dimension = data.size();
   
-  auto_ptr<float> temp ( new float[dimension] );
+  vector<float> temp (dimension, 0.0);
   
   int idim;
 
   // Write the data values
   for (idim = 0; idim < dimension; idim++)
-    temp.get()[idim] = data[idim].val;
+    temp[idim] = data[idim].val;
 
   int status = 0;
   int colnum = 0;
@@ -85,7 +85,7 @@ void Pulsar::unload_Estimates (fitsfile* fptr,
     psrfits_update_tdim (fptr, colnum, *dimensions);
 
   fits_write_col (fptr, TFLOAT, colnum, 1, 1, dimension,
-		  temp.get(), &status);
+		  &(temp[0]), &status);
 
   if (status)
     throw FITSError (status, "Pulsar::unload_Estimates", 
@@ -98,7 +98,7 @@ void Pulsar::unload_Estimates (fitsfile* fptr,
   
   // Write the data errors
   for (idim = 0; idim < dimension; idim++)
-    temp.get()[idim] = sqrt(data[idim].var);
+    temp[idim] = sqrt(data[idim].var);
 
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, column_name, &colnum, &status);
@@ -108,7 +108,7 @@ void Pulsar::unload_Estimates (fitsfile* fptr,
     psrfits_update_tdim (fptr, colnum, *dimensions);
 
   fits_write_col (fptr, TFLOAT, colnum, 1, 1, dimension,
-		  temp.get(), &status);
+		  &(temp[0]), &status);
 
   if (status)
     throw FITSError (status, "Pulsar::unload_Estimates", 
