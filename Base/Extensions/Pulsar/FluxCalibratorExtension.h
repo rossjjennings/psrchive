@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FluxCalibratorExtension.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/03/10 23:12:43 $
-   $Author: nopeer $ */
+   $Revision: 1.12 $
+   $Date: 2008/07/25 22:32:48 $
+   $Author: straten $ */
 
 #ifndef __FluxCalibratorExtension_h
 #define __FluxCalibratorExtension_h
@@ -71,12 +71,6 @@ namespace Pulsar
     //! Get the number of receptors
     unsigned get_nreceptor () const;
 
-    //! Set Epoch
-    void set_epoch( double s_epoch );
-
-    //! Get Epoch
-    double get_epoch ( void ) const;
-
     //! Set the system equivalent flux density of the specified channel
     void set_S_sys (unsigned chan, unsigned receptor, const Estimate<double>&);
     //! Get the system equivalent flux density of the specified channel
@@ -97,7 +91,6 @@ namespace Pulsar
     /*! in mJy */
     std::vector< std::vector< Estimate<double> > > S_cal;
 
-    double epoch;
   };
 
 

@@ -1,18 +1,17 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004, 2006 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/FluxCalibratorExtension.h"
 
+#include "Pulsar/FluxCalibratorExtension.h"
 
 //! Default constructor
 Pulsar::FluxCalibratorExtension::FluxCalibratorExtension ()
   : CalibratorExtension ("FluxCalibratorExtension")
 {
   type = Calibrator::Flux;
-  epoch = 0.0;
 }
 
 //! Copy constructor
@@ -108,19 +107,6 @@ FluxCalibratorExtension::get_S_cal (unsigned ichan, unsigned ireceptor) const
   range_check (ichan, "Pulsar::FluxCalibratorExtension::get_S_cal");
   return S_cal[ichan][ireceptor];
 }
-
-
-void FluxCalibratorExtension::set_epoch( double s_epoch )
-{
-	epoch = s_epoch;
-}
-
-
-double FluxCalibratorExtension::get_epoch( void ) const
-{
-	return epoch;
-}
-
 
 TextInterface::Parser* FluxCalibratorExtension::get_interface()
 {
