@@ -1,22 +1,27 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2002-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 
+#include "Pulsar/Parameters.h"
+#include "Pulsar/Predictor.h"
+
 using namespace std;
 
 /*!
-  If any current dimension is greater than that requested, the Profiles
-  will be deleted and the dimension resized.  If any current dimension is
-  smaller than that requested, the dimension will be resized and new Profiles
-  will be constructed.  If any of the supplied paramaters is equal to zero,
-  the dimension is left unchanged.
-  */
+  If any current dimension is greater than that requested, the extra
+  Profiles will be deleted and the dimension resized.  If any current
+  dimension is smaller than that requested, the dimension will be
+  resized and new Profiles will be constructed.  If one or more of the
+  npol, nchan, or nbin arguments is set to zero, the dimension is left
+  unchanged.
+*/
 
 void Pulsar::Archive::resize (unsigned nsubint, unsigned npol,
 			      unsigned nchan, unsigned nbin)
@@ -42,13 +47,21 @@ void Pulsar::Archive::resize (unsigned nsubint, unsigned npol,
 
   if (verbose == 3)
     cerr << "Pulsar::Archive::resize subints" << endl;
+
   IntegrationManager::resize (nsubint);
 
-  if (get<Pulsar::IntegrationOrder>()) {
-    get<Pulsar::IntegrationOrder>()->resize(nsubint);
+  // convenience for calibrators
+  if (get_type() != Signal::Pulsar)
+  {
+    ephemeris = 0;
+    model = 0;
   }
 
-  for (unsigned isub=0; isub<nsubint; isub++) {
+  if (get<Pulsar::IntegrationOrder>())
+    get<Pulsar::IntegrationOrder>()->resize(nsubint);
+
+  for (unsigned isub=0; isub<nsubint; isub++)
+  {
     // initialize only the new Integrations (preserve internal book-keeping)
     if (isub >= cur_nsub)
       init_Integration( get_Integration(isub) );
