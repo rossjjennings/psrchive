@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.36 $
-   $Date: 2008/04/07 00:38:07 $
+   $Revision: 1.37 $
+   $Date: 2008/07/25 23:30:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -69,6 +69,9 @@ namespace Pulsar
 
     //! Destructor
     ~PolnProfileFit ();
+
+    //! Clone
+    PolnProfileFit* clone () const;
 
     //! Set the maximum number of harmonics to include in fit
     void set_maximum_harmonic (unsigned max);

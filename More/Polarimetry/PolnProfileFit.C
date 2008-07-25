@@ -43,16 +43,41 @@ Pulsar::PolnProfileFit::PolnProfileFit (const PolnProfileFit& fit)
   operator = (fit);
 }
 
-//! Assignment operator
+/*! This operator is under development and is not fit for use */
 Pulsar::PolnProfileFit&
 Pulsar::PolnProfileFit::operator = (const PolnProfileFit& fit)
 {
+  cerr << "Pulsar::PolnProfileFit::operator = WARNING not implemented" << endl;
+
+  choose_maximum_harmonic = fit.choose_maximum_harmonic;
+  emulate_scalar = fit.emulate_scalar;
+
+  manage_equation_transformation = fit.manage_equation_transformation;
+
+  maximum_harmonic = fit.maximum_harmonic;
+  n_harmonic = fit.n_harmonic;
+
+  standard = fit.standard;
+  standard_fourier = fit.standard_fourier;
+
+  standard_data = fit.standard_data;
+
+  reduced_chisq = fit.reduced_chisq;
+  fit_debug = fit.fit_debug;
+  standard_variance = fit.standard_variance;
+  regions_set = fit.regions_set;
+
   return *this;
 }
 
 //! Destructor
 Pulsar::PolnProfileFit::~PolnProfileFit ()
 {
+}
+
+Pulsar::PolnProfileFit* Pulsar::PolnProfileFit::clone () const
+{
+  return new PolnProfileFit (*this);
 }
 
 void Pulsar::PolnProfileFit::set_normalize_by_invariant (bool set)
@@ -300,6 +325,7 @@ try
 
   if (verbose)
     cerr << "Pulsar::PolnProfileFit::add_observation add gradient" << endl;
+
   phases->add_gradient();
 
   unsigned index = phases->get_igradient();
