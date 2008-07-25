@@ -178,9 +178,8 @@ Pulsar::ExampleArchive::load_Integration (const char* filename, unsigned subint)
   integration->set_folding_period(1.55e-3); // Pulsar period, s.
 
   // Set RFs for each channel, MHz.
-  for (unsigned ichan=0; ichan<nchan; ichan++) {
+  for (unsigned ichan=0; ichan<nchan; ichan++)
     integration->set_centre_frequency(ichan, 1442.0-(double)ichan*4.0);
-  }
 
   // If the "no_amps" flag is set, the actual data is not called for, 
   // so we can exit early.  (Trying to actually load the data 

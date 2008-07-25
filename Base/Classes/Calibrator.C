@@ -114,18 +114,17 @@ MJD Pulsar::Calibrator::get_epoch () const
   return 0.5 * (calibrator->start_time() + calibrator->end_time());
 }
 
-Pulsar::Archive*
-Pulsar::Calibrator::new_solution (const string& archive_class) const
+Pulsar::Archive* Pulsar::Calibrator::new_solution (const string& arclass) const
 {
-  if (verbose > 2) cerr << "Pulsar::PolnCalibrator::new_solution"
-		     " create PolnCalibratorExtension" << endl;
+  if (verbose > 2) cerr << "Pulsar::Calibrator::new_solution"
+		     " create CalibratorExtension" << endl;
 
   Reference::To<CalibratorExtension> ext = new_Extension ();
 
-  if (verbose > 2) cerr << "Pulsar::PolnCalibrator::new_solution"
-		     " create " << archive_class << endl;
+  if (verbose > 2) 
+    cerr << "Pulsar::Calibrator::new_solution create " << arclass << endl;
   
-  Reference::To<Archive> output = Pulsar::Archive::new_Archive (archive_class);
+  Reference::To<Archive> output = Pulsar::Archive::new_Archive (arclass);
   output -> copy (*calibrator);
 
   output -> set_type (Signal::Calibrator);

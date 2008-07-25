@@ -17,7 +17,7 @@ static Pulsar::Option<string> profile_swap_filename
 (
  "Profile::swap", "",
 
- "Virtual memory swap space filename",
+ "Virtual memory swap space filename base",
 
  "The Profile class can use an alternative virtual memory manager so that \n"
  "the kernel swap space is not consumed when processing large files. \n"
