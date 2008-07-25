@@ -16,7 +16,8 @@ MEAL::OneParameter::OneParameter (Function* context)
 
 
 MEAL::OneParameter::OneParameter (const OneParameter& p)
-  : ParameterPolicy (0), param(p.param), fit(p.fit), name(p.name)
+  : ParameterPolicy (0), param(p.param), fit(p.fit),
+    name(p.name), description(p.description)
 {
 }
 
@@ -37,6 +38,7 @@ MEAL::OneParameter::operator = (const OneParameter& np)
   param = np.param;
   fit = np.fit;
   name = np.name;
+  description = np.description;
 
   if (get_context())
     get_context()->set_evaluation_changed ();
