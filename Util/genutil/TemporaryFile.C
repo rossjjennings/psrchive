@@ -82,9 +82,10 @@ void remove_instance (TemporaryFile* file)
 //! The signal handler ensures that all temporary files are removed
 void TemporaryFile::signal_handler (int sig)
 {
-
 #ifdef _DEBUG
   cerr << "TemporaryFile::signal_handler received " << strsignal(sig) << endl;
+#else
+  cerr << strsignal(sig) << endl;
 #endif
 
   for_each (get_instances()->begin(), get_instances()->end(), remove_instance);

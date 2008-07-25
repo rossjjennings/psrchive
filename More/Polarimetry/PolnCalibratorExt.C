@@ -63,8 +63,8 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
 
   try {
 
-    if (Archive::verbose == 3)
-      cerr << "Pulsar::PolnCalibratorExtension(PolnCalibrator*)" << endl;
+    if (Calibrator::verbose > 2)
+      cerr << "Pulsar::PolnCalibratorExtension (PolnCalibrator*)" << endl;
 
     CalibratorExtension::build (calibrator);
     has_covariance = calibrator->has_covariance ();
@@ -75,24 +75,34 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
     bool first = true;
 
     unsigned nchan = get_nchan();
+
+    if (Calibrator::verbose > 2)
+      cerr << "Pulsar::PolnCalibratorExtension nchan=" << nchan << endl;
+
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
       if ( calibrator->get_transformation_valid(ichan) )
       {
         copy( get_transformation(ichan), 
 	      calibrator->get_transformation(ichan) );
+
 	set_valid (ichan, true);
 
-	if (Archive::verbose && first)
+	if (Calibrator::verbose > 2 && first)
 	{
 	  const MEAL::Function* f = calibrator->get_transformation(ichan);
 	  for (unsigned i=0; i<f->get_nparam(); i++)
-	    cerr << i << " " << f->get_param_name(i) << endl;
+	    cerr << "Pulsar::PolnCalibratorExtension name[" << i << "]=" 
+		 << f->get_param_name(i) << endl;
 	}
 	first = false;
       }
       else
       {
+	if (Calibrator::verbose > 2)
+	  cerr << "Pulsar::PolnCalibratorExtension ichan=" << ichan 
+	       << " flagged invalid" << endl;
+
         set_valid (ichan, false);
 	continue;
       }

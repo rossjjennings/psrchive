@@ -537,8 +537,9 @@ void Pulsar::PolnCalibrator::calibration_setup (Archive* arch) try
   if (response.size() != arch->get_nchan())
     build( arch->get_nchan() );
 }
-catch (Error& error) {
-  throw error += "Pulsar::PolnCalibrator::calibrate";
+catch (Error& error)
+{
+  throw error += "Pulsar::PolnCalibrator::calibration_setup";
 }
 
 /*! Upon completion, the flux of the archive will be normalized with
@@ -621,6 +622,9 @@ Pulsar::Calibrator::Type Pulsar::PolnCalibrator::get_type () const
 Pulsar::CalibratorExtension*
 Pulsar::PolnCalibrator::new_Extension () const
 {
+  if (verbose > 2)
+    cerr << "Pulsar::PolnCalibrator::new_Extension" << endl;
+
   return new PolnCalibratorExtension (this);
 }
 
