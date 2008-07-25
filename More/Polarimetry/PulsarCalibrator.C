@@ -33,6 +33,8 @@
 #include "toa.h"
 #include "strutil.h"
 
+#include <assert.h>
+
 using namespace std;
 using namespace Calibration;
 
