@@ -100,10 +100,19 @@ void Pulsar::PolnCalibratorExtension::set_nchan (unsigned _nchan)
 //! Set the weight of the specified channel
 void Pulsar::PolnCalibratorExtension::set_weight (unsigned ichan, float weight)
 {
-  CalibratorExtension::set_weight (ichan, weight);
-  if (weight == 0)
-    set_valid (ichan, false);
+  set_valid (ichan, weight != 0.0);
 }
+
+//! Set the weight of the specified channel
+float Pulsar::PolnCalibratorExtension::get_weight (unsigned ichan) const
+{
+  if (get_valid (ichan))
+    return 1.0;
+  else
+    return 0.0;
+}
+
+//! Get the weight of the specified channel
 
 bool Pulsar::PolnCalibratorExtension::get_valid (unsigned ichan) const
 {
@@ -117,6 +126,8 @@ void Pulsar::PolnCalibratorExtension::set_valid (unsigned ichan, bool valid)
 
   if (!valid)
     weight[ichan] = 0;
+  else
+    weight[ichan] = 1.0;
 
   response[ichan].set_valid (valid);
 }
@@ -172,7 +183,10 @@ void Pulsar::PolnCalibratorExtension::construct ()
          << Calibrator::Type2str (get_type()) << endl;
 
   for (unsigned ichan=0; ichan<response.size(); ichan++)
+  {
     response[ichan].set_nparam (nparam);
+    weight[ichan] = 1.0;
+  }
 }
 
 

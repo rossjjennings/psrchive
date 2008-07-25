@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.28 $
-   $Date: 2008/06/11 23:56:22 $
+   $Revision: 1.29 $
+   $Date: 2008/07/25 23:29:32 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -70,6 +70,8 @@ namespace Pulsar {
 
     //! Set the weight of the specified channel
     void set_weight (unsigned ichan, float weight);
+    //! Get the weight of the specified channel
+    float get_weight (unsigned ichan) const;
 
     //! Get the number of parameters describing each transformation
     unsigned get_nparam () const;
