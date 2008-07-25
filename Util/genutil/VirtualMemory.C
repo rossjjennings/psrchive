@@ -14,6 +14,7 @@
 
 #include <unistd.h>
 #include <sys/mman.h>
+#include <errno.h>
 
 using namespace std;
 
@@ -189,7 +190,8 @@ VirtualMemory::Block VirtualMemory::extend (size_t size)
   {
     close ();
     Error error (InvalidState, "VirtualMemory::extend");
-    error << "could not lseek swap file to " << swap_space-1;
+    error << "could not lseek swap file to " << swap_space-1
+	  << " - " << strerror (errno);
     throw error;
   }
     
@@ -201,7 +203,8 @@ VirtualMemory::Block VirtualMemory::extend (size_t size)
   {
     close ();
     Error error (InvalidState, "VirtualMemory::extend");
-    error << "could not write end of swap file at " << swap_space;
+    error << "could not write end of swap file at " << swap_space 
+	  << " - " << strerror (errno);
     throw error;
   }
 
@@ -217,13 +220,15 @@ VirtualMemory::Block VirtualMemory::extend (size_t size)
     close ();
     Error error (InvalidState, "VirtualMemory::extend");
     error << "could not mmap swap file from " << current
-	  << " to " << swap_space;
+	  << " to " << swap_space
+	  << " - " << strerror (errno);
     throw error;
   }
 
-  try {
-    return add_available( static_cast<char*>(ptr), swap_space-current );
-  }
+  try
+    {
+      return add_available( static_cast<char*>(ptr), swap_space-current );
+    }
   catch (Error& error)
     {
       throw error += "VirtualMemory::extend";
