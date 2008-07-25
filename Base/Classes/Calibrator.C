@@ -127,8 +127,9 @@ Pulsar::Calibrator::new_solution (const string& archive_class) const
   
   Reference::To<Archive> output = Pulsar::Archive::new_Archive (archive_class);
   output -> copy (*calibrator);
-  output -> resize (0);
+
   output -> set_type (Signal::Calibrator);
+  output -> resize (0);
   output -> add_extension (ext);
 
   return output.release();
