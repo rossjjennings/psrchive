@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.29 $
-   $Date: 2008/06/17 01:35:59 $
+   $Revision: 1.30 $
+   $Date: 2008/07/25 23:30:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -42,6 +42,9 @@ namespace Pulsar {
     //! Destructor
     ~PulsarCalibrator ();
 
+    //! Get the number of frequency channels
+    unsigned get_nchan () const;
+
     //! Set the maximum number of harmonics to include in fit
     void set_maximum_harmonic (unsigned max);
 
@@ -57,8 +60,11 @@ namespace Pulsar {
     //! Set the standard to which pulsar profiles will be fit
     void set_standard (const Archive* data);
 
-    //! Set the flag to solve for each observation (instead of global fit)
-    void set_solve_each (bool flag = true);
+    //! Solve each sub-integration (instead of global fit)
+    void set_solve_each (bool = true);
+
+    //! Unload the solution from each sub-integration
+    void set_unload_each (Unloader*);
 
     //! Set the solution to the mean
     void update_solution ();
@@ -74,11 +80,15 @@ namespace Pulsar {
 
   protected:
     
+    //! Used to unload the solution derived from each sub-integration
+    Reference::To<Unloader> unload_each;
+    bool solve_each;
+
     //! Return a pointer to a newly constructed/initialized transformation
     MEAL::Complex2* new_transformation (unsigned ichan);
 
     //! The calibration model as a function of frequency
-    std::vector< Reference::To<PolnProfileFit> > mtm;
+    Reference::Vector<PolnProfileFit> mtm;
 
     //! The reduced chi-squared as a function of frequency
     std::vector<float> reduced_chisq;
@@ -89,7 +99,7 @@ namespace Pulsar {
     typedef MEAL::Mean< MEAL::Complex2 > MeanXform;
 
     //! The array of transformation Model instances
-    std::vector< Reference::To<MeanXform> > solution;
+    Reference::Vector<MeanXform> solution;
 
     //! The maximum number of harmonics to include in the fit
     unsigned maximum_harmonic;
@@ -102,9 +112,6 @@ namespace Pulsar {
 
     //! Normalize the Stokes parameters by the invariant interval
     bool normalize_by_invariant;
-
-    //! Solve the measurement equation on each call to add_observation
-    bool solve_each;
 
     //! The on-pulse region
     PhaseWeight on_pulse;
@@ -119,7 +126,7 @@ namespace Pulsar {
     void solve1 (const Integration* data, unsigned ichan);
 
     //! Set things up for the model in the given channel
-    unsigned setup (const Integration* data, unsigned ichan);
+    void setup (const Integration* data, unsigned ichan);
 
     //! Prepare to export the solution in current state; e.g. for plotting
     virtual void export_prepare () const;
