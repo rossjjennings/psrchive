@@ -1,5 +1,3 @@
-//-*-C++-*-
-
 /***************************************************************************
  *
  *   Copyright (C) 2003-2008 by Willem van Straten
@@ -8,17 +6,20 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.97 $
-   $Date: 2008/07/24 18:01:30 $
-   $Author: demorest $ */
+   $Revision: 1.98 $
+   $Date: 2008/07/25 23:29:50 $
+   $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
 #include "Pulsar/psrchive.h"
+
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/PulsarCalibrator.h"
+#include "Pulsar/SystemCalibratorUnloader.h"
+
 #include "Pulsar/Database.h"
 #include "Pulsar/StandardPrepare.h"
 
@@ -311,8 +312,8 @@ void plot_constraints (Pulsar::SystemCalibratorPlotter& plotter,
 // name of the default parameterization
 Pulsar::Calibrator::Type model_type = Pulsar::Calibrator::Britton;
 
-// class name of the calibrator solution archives to be produced
-string archive_class = "PSRFITS";
+// unloads the solution(s)
+Pulsar::SystemCalibrator::Unloader unloader;
 
 // plot the solution before calibrating with it
 bool display = false;
@@ -461,6 +462,9 @@ Pulsar::Archive* load (const std::string& filename)
 
 int actual_main (int argc, char *argv[]) try
 {
+  unloader.set_program ( "pcm" );
+  unloader.set_filename( "pcm.fits" );
+
   // Number of threads used to solve equations
   unsigned nthread = 0;
 
@@ -502,7 +506,7 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'A':
-      archive_class = optarg;
+      unloader.set_archive_class( optarg );
       break;
 
     case 'a':
@@ -673,10 +677,10 @@ int actual_main (int argc, char *argv[]) try
       int level = atoi (optarg);
       verbose = true;
 
-      if (level > 3)
+      if (level > 4)
         Calibration::ReceptionModel::very_verbose = true;
 
-      if (level > 2) 
+      if (level > 3) 
         Calibration::ReceptionModel::verbose = true;
 
       Calibration::StandardModel::verbose = true;
@@ -802,8 +806,7 @@ int actual_main (int argc, char *argv[]) try
     if (archive->get_type() == Signal::Pulsar)
     {
       if (verbose)
-	cerr << "pcm: dedispersing and removing baseline from pulsar data"
-	     << endl;
+	cerr << "pcm: preparing pulsar data" << endl;
       
       prepare->prepare (archive);
     }
@@ -893,7 +896,6 @@ int actual_main (int argc, char *argv[]) try
       phase_std = temp->get_Profile (0,0,0);	
     }
 
-
     model->add_observation( archive );
 
     if (archive->get_type() == Signal::Pulsar)
@@ -903,6 +905,13 @@ int actual_main (int argc, char *argv[]) try
       
       model->precalibrate (archive);
       
+      if (solve_each)
+      {
+	string newname = replace_extension (filenames[i], ".calib");
+	archive->unload (newname);    
+	cerr << "pcm: unloaded " << newname << endl;
+      }
+
       if (verbose)
 	cerr << "pcm: add to total" << endl;
 
@@ -923,11 +932,22 @@ int actual_main (int argc, char *argv[]) try
     archive = 0;
   }
 
+  if (solve_each)
+  {
+    if (total)
+    {
+      cerr << "pcm: writing total calibrated pulsar archive" << endl;
+      total->unload ("total.ar");
+    }
+    return 0;
+  }
+
   if (total)
   {
     cerr << "pcm: writing total uncalibrated pulsar archive" << endl;
     total->unload ("first.ar");
   }
+
 
 #if HAVE_PGPLOT
 
@@ -1005,11 +1025,7 @@ int actual_main (int argc, char *argv[]) try
     return -1;
   }
 
-  cerr << "pcm: creating solution" << endl;
-  Reference::To<Archive> solution = model->new_solution (archive_class);
-
-  cerr << "pcm: unloading solution to pcm.fits" << endl;
-  solution->unload( "pcm.fits" );
+  unloader.unload (model);
 
 #if HAVE_PGPLOT
 
@@ -1070,49 +1086,48 @@ int actual_main (int argc, char *argv[]) try
   
   cerr << "pcm: calibrating archives (PSR and CAL)" << endl;
 
-  for (unsigned i = 0; i < filenames.size(); i++) {
+  for (unsigned i = 0; i < filenames.size(); i++) try
+  {
+    if (verbose)
+      cerr << "pcm: loading " << filenames[i] << endl;
+
+    archive = Pulsar::Archive::load(filenames[i]);
+    reflections.transform (archive);
+
+    cout << "pcm: loaded archive: " << filenames[i] << endl;
     
-    try {
+    model->precalibrate( archive );
 
+    string newname = replace_extension (filenames[i], ".calib");
+    
+    if (verbose)
+      cerr << "pcm: calibrated Archive name '" << newname << "'" << endl;
+
+    archive->unload (newname);
+    
+    cout << "New file " << newname << " unloaded" << endl;
+    
+    if (archive->get_type() == Signal::Pulsar)
+    {
       if (verbose)
-	cerr << "pcm: loading " << filenames[i] << endl;
-
-      archive = Pulsar::Archive::load(filenames[i]);
-      reflections.transform (archive);
-
-      cout << "pcm: loaded archive: " << filenames[i] << endl;
+	cerr << "pcm: correct and add to calibrated total" << endl;
       
-      model->precalibrate( archive );
-
-      string newname = replace_extension (filenames[i], ".calib");
-
-      if (verbose)
-        cerr << "pcm: calibrated Archive name '" << newname << "'" << endl;
-
-      archive->unload (newname);
-      
-      cout << "New file " << newname << " unloaded" << endl;
-
-      if (archive->get_type() == Signal::Pulsar)  {
-
-        if (verbose)
-          cerr << "pcm: correct and add to calibrated total" << endl;
-
-        if (!total)
-          total = archive;
-        else {
-          total->append (archive);
-          total->tscrunch ();
-        }
+      if (!total)
+	total = archive;
+      else
+      {
+	total->append (archive);
+	total->tscrunch ();
       }
-
     }
-    catch (Error& error) {
-      cerr << error << endl;
-    }
+    
+  }
+  catch (Error& error) {
+    cerr << error << endl;
   }
 
-  if (total)  {
+  if (total)
+  {
     cerr << "pcm: writing total integrated pulsar archive" << endl;
     total->unload ("total.ar");
   }
@@ -1242,7 +1257,15 @@ SystemCalibrator* matrix_template_matching_based (const char* stdname)
     model->set_maximum_harmonic (maxbins);
 
   model->set_choose_maximum_harmonic (choose_maximum_harmonic);
-  model->set_solve_each (solve_each);
+
+  if (solve_each)
+  {
+    SystemCalibrator::Unloader* mtm = new SystemCalibrator::Unloader(unloader);
+    mtm->set_extension ("mtm");
+
+    model->set_solve_each (true);
+    model->set_unload_each (mtm);
+  }
 
   if (normalize_by_invariant)
     cerr << "pcm: normalizing Stokes parameters by invariant" << endl;
