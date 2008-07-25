@@ -64,7 +64,7 @@ void Calibration::ReceptionModel::Solver::count_constraint ()
       if (source_index >= equation->get_num_input())
 	throw Error (InvalidRange,
 		     "Calibration::ReceptionModel::Solver::count_constraint",
-		     "isource=%d >= nsource=%d",
+		     "isource=%u >= nsource=%u",
 		     source_index, equation->get_num_input());
       
       state_observed[source_index] = true;
@@ -77,7 +77,7 @@ void Calibration::ReceptionModel::Solver::count_constraint ()
   if (ndat_constraint <= nparam_infit)
     throw Error (InvalidState,
 		 "Calibration::ReceptionModel::Solver::count_constraint",
-		 "ndata=%d <= nfree=%d", ndat_constraint, nparam_infit);
+		 "ndata=%u <= nfree=%u", ndat_constraint, nparam_infit);
 
   if (report)
     cerr << endl << ndat_constraint << " indepdendent data" << endl << endl;
@@ -105,7 +105,7 @@ void Calibration::ReceptionModel::Solver::check_constraints ()
       if (need_source && !state_observed[isource])
 	throw Error (InvalidRange,
 		     "Calibration::ReceptionModel::Solver::check_constraints",
-		     "input source %d with free parameter(s) not observed",
+		     "input source %u with free parameter(s) not observed",
 		     isource);
 
     }
@@ -146,7 +146,7 @@ void Calibration::ReceptionModel::Solver::check_solution ()
 
     throw Error (InvalidState, 
 		 "Calibration::ReceptionModel::Solver::check_solution",
-		 "exceeded maximum number of iterations=%d",
+		 "exceeded maximum number of iterations=%u",
 		 maximum_iterations);
   }
 
@@ -159,7 +159,7 @@ void Calibration::ReceptionModel::Solver::check_solution ()
       (maximum_reduced && reduced_chisq > maximum_reduced))
     throw Error (InvalidState,
 		 "Calibration::ReceptionModel::Solver::check_solution",
-		 "bad reduced chisq=%f (nfree=%d)", reduced_chisq, nfree);
+		 "bad reduced chisq=%f (nfree=%u)", reduced_chisq, nfree);
 
   if (verbose)
     cerr << "Calibration::ReceptionModel::Solver::check_solution " 
