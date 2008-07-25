@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.32 $
-   $Date: 2008/06/23 00:15:59 $
+   $Revision: 1.33 $
+   $Date: 2008/07/25 04:48:07 $
    $Author: jonathan_khoo $ */
 
 
@@ -33,6 +33,7 @@ using Pulsar::FITSArchive;
 #include <Pulsar/DigitiserStatistics.h>
 #include <Pulsar/Integration.h>
 #include <Pulsar/Pointing.h>
+#include <Pulsar/WidebandCorrelator.h>
 
 #include <table_stream.h>
 #include <algorithm>
@@ -70,6 +71,7 @@ const char TEXT_HEADERS_KEY     = 'A';
 const char PER_SUBINT_KEY       = 'S';
 const char HISTORY_KEY          = 'H';
 const char SNR_KEY              = 'N';
+const char MINMAX_KEY           = 'm';
 
 
 using std::cerr;
@@ -87,6 +89,7 @@ using Pulsar::Pointing;
 using Pulsar::Interpreter;
 using Pulsar::ProcHistory;
 using Pulsar::IntegrationOrder;
+using Pulsar::WidebandCorrelator;
 
 
 
@@ -105,6 +108,7 @@ bool show_pol_frac = false;
 bool show_lin_frac = false;
 bool show_circ_frac = false;
 bool show_pa = false;
+bool show_min_max = false;
 
 int ichan = -1;
 int ibin = -1;
@@ -116,7 +120,19 @@ vector<string> jobs;
 // default duty cycle
 float dc = 0.15;
 
+struct min_max_data {
+	float max;
+	float min;
+	unsigned int max_pol;
+	unsigned int min_pol;
+	unsigned int max_chan;
+	unsigned int min_chan;
+	unsigned int max_bin;
+	unsigned int min_bin;
+};
+
 double GetBaselineRMS( Reference::To< Pulsar::Archive > archive );
+void subint_min_max( const Reference::To< Integration > integ, struct min_max_data *mm );
 
 void Usage( void )
 {
@@ -148,6 +164,7 @@ void Usage( void )
   "   -" << PER_SUBINT_KEY <<     " params   Print out per subint data (no params for argument list) \n"
   "   -" << HISTORY_KEY <<        " params   Print out the history table for the archive (no params for argument list) \n"
   "   -" << SNR_KEY <<            "          Print the S/N \n"
+  "   -" << MINMAX_KEY <<         "          Print out the min and max bin value for each subint \n"
   " \n"
   "   For more detailed list of options use \"pdv -h param\", ie \"pdv -h S\" \n"
   "   for a full list of parameters that can be used with -S \n"
@@ -221,6 +238,17 @@ void DisplayHistoryUsage( void )
 }
 
 
+void MinMaxHeader( Reference::To< Pulsar::Archive > archive )
+{
+  cout << "@" << archive->get_filename()
+  << " " << archive->start_time()
+  << " " << archive->get_centre_frequency()
+  << " " << archive->get<WidebandCorrelator>()->get_config()
+  << " nchan: " << archive->get_nchan()
+  << " npol: " << archive->get_npol()
+  << " nsub: " << archive->get_nsubint() << endl
+  << "sub     pol chan  bin      max      pol chan  bin      min" << endl;
+}
 
 void Header( Reference::To< Pulsar::Archive > archive )
 {
@@ -231,7 +259,6 @@ void Header( Reference::To< Pulsar::Archive > archive )
   << " Npol: " << archive->get_npol()
   << " Nbin: " << archive->get_nbin()
   << " RMS: " << GetBaselineRMS(archive) << endl;
-
 }
 
 double GetBaselineRMS( Reference::To< Pulsar::Archive > archive )
@@ -281,57 +308,74 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
   {
     if( nsub > 0 )
     {
-      Header( archive );
+	  if( show_min_max )
+		MinMaxHeader( archive );
+	  else
+        Header( archive );
 
       for (int s = fsub; s <= lsub; s++)
       {
         Integration* intg = archive->get_Integration(s);
-        for (int c = fchan; c <= lchan; c++)
-        {
-          vector< Estimate<double> > PAs;
-          if( show_pa )
-          {
-            Reference::To<Pulsar::PolnProfile> profile;
-            profile = intg->new_PolnProfile(c);
-            profile->get_orientation (PAs, 3.0);
-          }
 
-          if( per_channel_headers )
-          {
-            IntegrationHeader( intg );
-            cout << " Freq: " << tostring<double>( intg->get_centre_frequency( c ) );
-            cout << " BW: " << intg->get_bandwidth() / nchn;
-            cout << endl;
-          }
-          for (int b = fbin; b <= lbin; b++)
-          {
-            cout << s << " " << c << " " << b;
-            for(int ipol=0; ipol<npol; ipol++)
-            {
-              Profile *p = intg->get_Profile( ipol, c );
-              cout << " " << p->get_amps()[b];
-            }
-            if( show_pol_frac || show_lin_frac || show_circ_frac || show_pa )
-            {
-              float stokesI = intg->get_Profile(0,c)->get_amps()[b];
-              float stokesQ = intg->get_Profile(1,c)->get_amps()[b];
-              float stokesU = intg->get_Profile(2,c)->get_amps()[b];
-              float stokesV = intg->get_Profile(3,c)->get_amps()[b];
+		if( show_min_max )
+		{
+		  struct min_max_data mmData;
+		  subint_min_max(intg, &mmData);
 
-              float frac_lin  = sqrt(stokesQ*stokesQ + stokesU*stokesU)/stokesI;
-              float frac_circ = fabs(stokesV)/stokesI;
-              float frac_pol  = sqrt(stokesQ*stokesQ + stokesU*stokesU + stokesV*stokesV)/stokesI;
+		  printf("%3d     %3d %4d %4d %8.2f      %3d %4d %4d %8.2f\n", s, mmData.max_pol, mmData.max_chan, mmData.max_bin, mmData.max, mmData.min_pol, mmData.min_chan, mmData.min_bin, mmData.min);
 
-              if( show_pol_frac )  cout << " " << frac_pol;
-              if( show_lin_frac )  cout << " " << frac_lin;
-              if( show_circ_frac ) cout << " " << frac_circ;
-              if( show_pa ) {
+		  //cout << s << "\t" << mmData.max_pol << "\t" << mmData.max_chan << "\t" << mmData.max_bin << "\t" << mmData.max << "\t\t" << mmData.min_pol << "\t" << mmData.min_chan << "\t" << mmData.min_bin << "\t" << mmData.min << endl;
+		}
+		else
+		{
+          for (int c = fchan; c <= lchan; c++)
+          {
+            vector< Estimate<double> > PAs;
+			if( show_pa )
+			{
+			  Reference::To<Pulsar::PolnProfile> profile;
+			  profile = intg->new_PolnProfile(c);
+			  profile->get_orientation (PAs, 3.0);
+			}
+
+            if( per_channel_headers )
+			{
+			  IntegrationHeader( intg );
+			  cout << " Freq: " << tostring<double>( intg->get_centre_frequency( c ) );
+			  cout << " BW: " << intg->get_bandwidth() / nchn;
+			  cout << endl;
+			}
+
+		    for (int b = fbin; b <= lbin; b++)
+			{
+			  cout << s << " " << c << " " << b;
+			  for(int ipol=0; ipol<npol; ipol++)
+			  {
+			    Profile *p = intg->get_Profile( ipol, c );
+				cout << " " << p->get_amps()[b];
+			  }
+			  if( show_pol_frac || show_lin_frac || show_circ_frac || show_pa )
+			  {
+				float stokesI = intg->get_Profile(0,c)->get_amps()[b];
+				float stokesQ = intg->get_Profile(1,c)->get_amps()[b];
+				float stokesU = intg->get_Profile(2,c)->get_amps()[b];
+				float stokesV = intg->get_Profile(3,c)->get_amps()[b];
+
+				float frac_lin  = sqrt(stokesQ*stokesQ + stokesU*stokesU)/stokesI;
+				float frac_circ = fabs(stokesV)/stokesI;
+				float frac_pol  = sqrt(stokesQ*stokesQ + stokesU*stokesU + stokesV*stokesV)/stokesI;
+
+				if( show_pol_frac )  cout << " " << frac_pol;
+				if( show_lin_frac )  cout << " " << frac_lin;
+				if( show_circ_frac ) cout << " " << frac_circ;
+				if( show_pa ) {
 				  cout << " " << PAs[b].get_value();
 				  cout << " " << sqrt(PAs[b].get_variance());
+				}
 			  }
-            }
-            cout << endl;
-          }
+			  cout << endl;
+			}
+		  }
         }
       }
     }
@@ -977,7 +1021,7 @@ try
   if (jobs.size())
   {
 	vector<string> config_jobs;
-    for( int i = 0; i < jobs.size(); i++)
+    for( unsigned int i = 0; i < jobs.size(); i++)
     {
 	  if (jobs[i].substr(0, 6) == "config")
 	  {
@@ -997,11 +1041,12 @@ try
   if( archive->get_state() != Signal::Stokes && (show_pol_frac || show_lin_frac || show_circ_frac || show_pa ) )
     archive->convert_state(Signal::Stokes);
 
+
   if( archive )
   {
     if( cal_parameters )
       CalParameters( archive );
-    if( cmd_text )
+    if( cmd_text || show_min_max )
       OutputDataAsText( archive );
     if( cmd_flux )
       Flux( archive );
@@ -1014,6 +1059,40 @@ catch( Error e )
   cerr << e << endl;
 }
 
+void subint_min_max( const Reference::To< Integration > integ, struct min_max_data *mm )
+{
+    unsigned int npol = integ->get_npol();
+    unsigned int nchan = integ->get_nchan();
+
+    mm->max = integ->get_Profile(0, 0)->get_amps()[0];
+    mm->min = integ->get_Profile(0, 0)->get_amps()[0];
+
+    for (unsigned int ipol = 0; ipol < npol; ++ipol) {
+        for (unsigned int ichan = 0; ichan < nchan; ++ichan) {
+
+            unsigned maxBin = integ->get_Profile(ipol, ichan)->find_max_bin();
+            unsigned minBin = integ->get_Profile(ipol, ichan)->find_min_bin();
+
+            float *bins = integ->get_Profile(ipol, ichan)->get_amps();
+			float prof_max = bins[maxBin];
+			float prof_min = bins[minBin];
+
+            if (prof_max > mm->max) {
+                mm->max = prof_max;
+                mm->max_pol = ipol;
+                mm->max_chan = ichan;
+                mm->max_bin = maxBin;
+            }
+
+			if (prof_min < mm->min) {
+				mm->min = prof_min;
+				mm->min_pol = ipol;
+				mm->min_chan = ichan;
+				mm->min_bin = maxBin;
+			}
+        }
+    }
+}
 
 int main( int argc, char *argv[] ) try
 {
@@ -1042,6 +1121,7 @@ int main( int argc, char *argv[] ) try
   args += PER_SUBINT_KEY; args += ":";
   args += HISTORY_KEY; args += ":";
   args += SNR_KEY;
+  args += MINMAX_KEY;
 
   vector<string> history_params;
   vector<string> subint_params;
@@ -1147,6 +1227,9 @@ int main( int argc, char *argv[] ) try
     case SNR_KEY:
       cmd_snr = true;
       break;
+	case MINMAX_KEY:
+	  show_min_max = true;
+	  break;
     default:
       cerr << "Unknown option " << char(i) << endl;
       break;
@@ -1182,7 +1265,7 @@ int main( int argc, char *argv[] ) try
   if( cmd_snr )
     PrintSNR( filenames );
 
-  if( cal_parameters || cmd_text || cmd_flux || cmd_flux2 )
+  if( cal_parameters || cmd_text || cmd_flux || cmd_flux2 || show_min_max )
   {
     for_each( filenames.begin(), filenames.end(), ProcessArchive );
   }
@@ -1202,6 +1285,7 @@ catch (Error& error)
   cerr << error << endl;
   return -1;
 }
+
 
 
 
