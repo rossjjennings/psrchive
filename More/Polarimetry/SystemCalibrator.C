@@ -155,7 +155,18 @@ Pulsar::SystemCalibrator::new_info_pulsar (unsigned istate) const
 
 unsigned Pulsar::SystemCalibrator::get_nchan () const
 {
-  return model.size();
+  unsigned nchan = 0;
+
+  if (has_calibrator())
+    get_calibrator()->get_nchan ();
+
+  if (model.size())
+    nchan = model.size ();
+
+  if (verbose > 2)
+    cerr << "Pulsar::SystemCalibrator::get_nchan " << nchan << endl;
+
+  return nchan;
 }
 
 unsigned Pulsar::SystemCalibrator::get_ndata (unsigned ichan) const
@@ -405,7 +416,7 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 		 + get_calibrator()->get_filename() +
                  " and \n\t" + cal->get_filename() + reason);
 
-  unsigned nchan = get_calibrator()->get_nchan ();
+  unsigned nchan = get_nchan ();
   unsigned nsub = cal->get_nsubint();
   unsigned npol = cal->get_npol();
   
@@ -505,7 +516,7 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 
 void Pulsar::SystemCalibrator::init_estimate (SourceEstimate& estimate)
 {
-  unsigned nchan = get_calibrator()->get_nchan ();
+  unsigned nchan = get_nchan ();
   unsigned nbin = get_calibrator()->get_nbin ();
 
   if (estimate.phase_bin >= nbin)
@@ -572,7 +583,7 @@ void Pulsar::SystemCalibrator::create_calibrator_estimate ()
   if (basis == Signal::Circular)
     cal_state = Stokes<double> (1,.5,0,0);
 
-  unsigned nchan = get_nchan();
+  unsigned nchan = get_nchan ();
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
     if (calibrator_estimate.source[ichan])
@@ -645,7 +656,7 @@ Pulsar::SystemCalibrator::get_CalibratorStokes () const
   if (verbose > 2) cerr << "Pulsar::SystemCalibrator::get_CalibratorStokes"
 		 " create CalibratorStokes Extension" << endl;
 
-  unsigned nchan = get_nchan();
+  unsigned nchan = get_nchan ();
 
   if (nchan != calibrator_estimate.source.size())
     throw Error (InvalidState,
@@ -712,7 +723,7 @@ void Pulsar::SystemCalibrator::create_model ()
 	   << basis->evaluate() << endl;
   }
 
-  unsigned nchan = get_calibrator()->get_nchan();
+  unsigned nchan = get_nchan ();
   model.resize (nchan);
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
@@ -842,8 +853,7 @@ void Pulsar::SystemCalibrator::solve ()
 
   solve_prepare ();
 
-  unsigned nchan = model.size();
-
+  unsigned nchan = get_nchan ();
   unsigned valid = 0;
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
@@ -931,7 +941,7 @@ void Pulsar::SystemCalibrator::solve ()
 
 void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
 {
-  unsigned nchan = model.size();
+  unsigned nchan = get_nchan ();
 
   // look for the nearest neighbour with a solution
   for (int off=1; off < int(nchan); off++)
@@ -1007,13 +1017,15 @@ bool Pulsar::SystemCalibrator::get_solved () const
 /*! Retrieves the transformation from the standard model in each channel */
 void Pulsar::SystemCalibrator::calculate_transformation ()
 {
-  unsigned nchan = model.size();
+  unsigned nchan = get_nchan ();
 
   transformation.resize( nchan );
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
     transformation[ichan] = 0;
+
+    assert (ichan < model.size());
 
     if (model[ichan]->valid)
       transformation[ichan] = model[ichan]->get_transformation();   
@@ -1037,7 +1049,7 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
   unsigned nchan = data->get_nchan ();
 
   // sanity check
-  if (nchan != model.size())
+  if (nchan != model.size() && model.size() != 1)
     throw Error (InvalidState, "Pulsar::SystemCalibrator::precalibrate",
                  "model size=%u != data nchan=%u", model.size(), nchan);
 
@@ -1174,7 +1186,13 @@ Pulsar::SystemCalibrator::new_solution (const string& class_name) const try
     " create CalibratorStokes Extension" << endl;
 
   Reference::To<Archive> output = Calibrator::new_solution (class_name);
-  
+
+  // get rid of the pulsar attributes
+  output->set_rotation_measure (0.0);
+  output->set_dispersion_measure (0.0);
+  output->set_ephemeris (0);
+  output->set_model (0);
+
   if (calibrator_estimate.source.size())
   {
     Reference::To<CalibratorStokes> stokes = get_CalibratorStokes();
@@ -1182,9 +1200,9 @@ Pulsar::SystemCalibrator::new_solution (const string& class_name) const try
   }
 
   return output.release();
-
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::SystemCalibrator::new_solution";
 }
 
