@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.47 $
-   $Date: 2008/06/11 23:56:22 $
+   $Revision: 1.48 $
+   $Date: 2008/07/25 23:35:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -17,6 +17,8 @@
 #include "Pulsar/Calibrator.h"
 #include "MEAL/LeastSquares.h"
 #include "MEAL/Complex2.h"
+
+#include "ReferenceVector.h"
 #include "Jones.h"
 
 namespace Pulsar {
@@ -120,7 +122,7 @@ namespace Pulsar {
   protected:
 
     //! The array of transformation Model instances
-    std::vector< Reference::To< MEAL::Complex2 > > transformation;
+    Reference::Vector<MEAL::Complex2> transformation;
 
     //! The array of covariance matrix vectors
     std::vector< std::vector<double> > covariance;
@@ -155,7 +157,7 @@ namespace Pulsar {
     void build (unsigned nchan = 0);
     
     //! Temporary storage space of solver statistics
-    mutable std::vector< Reference::To<MEAL::LeastSquares> > tmp_solver;
+    mutable Reference::Vector<MEAL::LeastSquares> tmp_solver;
 
   };
 
