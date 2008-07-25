@@ -180,7 +180,7 @@ VirtualMemory::Block VirtualMemory::extend (size_t size)
     else
       swap_space *= 2;
   }
-  while (swap_space < size);
+  while (swap_space-current < size);
 
   /*
     Stretch the file size to swap_space
