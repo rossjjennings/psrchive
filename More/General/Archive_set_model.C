@@ -1,17 +1,24 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Predictor.h"
 
+using namespace std;
+
 void Pulsar::Archive::set_model (const Predictor* new_model, bool apply)
 {
+  if (!new_model)
+  {
+    model = 0;
+    return;
+  }
+
   if (!good_model (new_model))
     throw Error (InvalidParam, "Pulsar::Archive::set_model",
                  "supplied model does not span Integrations");
