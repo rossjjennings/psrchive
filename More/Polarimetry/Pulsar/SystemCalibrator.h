@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.16 $
-   $Date: 2008/06/26 01:49:23 $
+   $Revision: 1.17 $
+   $Date: 2008/07/25 23:30:02 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -40,7 +40,7 @@ namespace Pulsar
     void update_source();
 
     //! Model of Stokes parameters as a function of frequency
-    std::vector< Reference::To<MEAL::Coherency> > source;
+    Reference::Vector<MEAL::Coherency> source;
 
     //! Best guess of Stokes parameters
     std::vector< Calibration::MeanCoherency > source_guess;
@@ -200,6 +200,9 @@ namespace Pulsar
     //! Return the StandardModel for the specified channel
     virtual const Calibration::StandardModel* get_model (unsigned ichan) const;
 
+    //! Solution unloading policy
+    class Unloader;
+
   protected:
 
     friend class SystemCalibratorPlotter;
@@ -211,7 +214,7 @@ namespace Pulsar
     void create_model ();
 
     //! The standard calibration model as a function of frequency
-    std::vector< Reference::To<Calibration::StandardModel> > model;
+    Reference::Vector<Calibration::StandardModel> model;
 
     //! The algorithm used to solve the measurement equation
     Reference::To<Calibration::ReceptionModel::Solver> solver;

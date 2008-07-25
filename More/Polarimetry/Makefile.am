@@ -68,6 +68,7 @@ nobase_include_HEADERS = \
 	Pulsar/StepsInfo.h \
         Pulsar/SystemCalibrator.h \
 	Pulsar/SystemCalibratorPlotter.h \
+	Pulsar/SystemCalibratorUnloader.h \
         Pulsar/TemplateUncertainty.h \
         Pulsar/TotalCovariance.h \
 	Pulsar/VariationInfo.h
@@ -142,6 +143,7 @@ libPolarimetry_la_SOURCES = \
 	StandardSpectra.C \
 	StepsInfo.C \
         SystemCalibrator.C \
+	SystemCalibratorUnloader.C \
         TemplateUncertainty.C \
         TotalCovariance.C \
 	VariationInfo.C
