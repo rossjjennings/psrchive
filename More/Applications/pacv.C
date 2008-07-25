@@ -555,12 +555,9 @@ int main (int argc, char** argv)
       output -> unload (newname);
     }
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << "pacv: Error during " << filenames[ifile] << error << endl;
-    return -1;
-  }
-  catch (...)  {
-    cerr << "pacv: An unknown exception was thrown" << endl;
   }
   
   if (fluxcal) try
