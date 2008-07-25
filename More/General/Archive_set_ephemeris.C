@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -20,9 +20,13 @@ void Pulsar::Archive::set_ephemeris (const Parameters* new_ephemeris,
   if (verbose == 3)
     cerr << "Pulsar::Archive::set_ephemeris" << endl;
 
-  ephemeris = new_ephemeris->clone();
+  if (!new_ephemeris)
+    ephemeris = 0;
+  else
+    ephemeris = new_ephemeris->clone();
 
-  if (update)  {
+  if (ephemeris && update)
+  {
     if (verbose == 3)
       cerr << "Pulsar::Archive::set_ephemeris update predictor" << endl;
     update_model ();
