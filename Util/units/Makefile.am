@@ -27,6 +27,7 @@ include_HEADERS = \
         ReferenceAble.h \
         Reference.h \
         ReferenceTo.h \
+	ReferenceVector.h \
         Registry.h \
         separate.h \
         Stokes.h \
