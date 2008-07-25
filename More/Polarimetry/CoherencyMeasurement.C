@@ -16,7 +16,6 @@ using namespace std;
 Calibration::CoherencyMeasurement::CoherencyMeasurement (unsigned index)
 {
   nconstraint = 0;
-  uncertainty = 0;
   input_index = index;
 }
 
@@ -107,6 +106,11 @@ Jones<double> Calibration::CoherencyMeasurement::get_coherency () const
 double Calibration::CoherencyMeasurement::get_weighted_norm
 (const Jones<double>& matrix) const
 {
+  if (!uncertainty)
+    throw Error (InvalidState,
+		 "Calibration::CoherencyMeasurement::get_weighted_norm",
+		 "Uncertainty policy not set");
+
   return uncertainty->get_weighted_norm (matrix);
 }
 
@@ -114,12 +118,22 @@ double Calibration::CoherencyMeasurement::get_weighted_norm
 Jones<double> Calibration::CoherencyMeasurement::get_weighted_conjugate
 (const Jones<double>& matrix) const
 {
+  if (!uncertainty)
+    throw Error (InvalidState,
+		 "Calibration::CoherencyMeasurement::get_weighted_conjugate",
+		 "Uncertainty policy not set");
+
   return uncertainty->get_weighted_conjugate (matrix);
 }
 
 void Calibration::CoherencyMeasurement::get_weighted_components
 (const Jones<double>& matrix, std::vector<double>& components) const
 {
+  if (!uncertainty)
+    throw Error (InvalidState,
+		 "Calibration::CoherencyMeasurement::get_weighted_component",
+		 "Uncertainty policy not set");
+
   Stokes< complex<double> > wc = uncertainty->get_weighted_components (matrix);
 
   components.resize (nconstraint);
@@ -137,5 +151,8 @@ void Calibration::CoherencyMeasurement::get_weighted_components
     }
   }
 
-  assert (index == nconstraint);
+  if (index != nconstraint)
+    throw Error (InvalidState,
+		 "Calibration::CoherencyMeasurement::get_weighted_component",
+		 "index=%u != nconstraint=%u", index, nconstraint);
 }
