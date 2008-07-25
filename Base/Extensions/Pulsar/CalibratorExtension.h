@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorExtension.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/04/21 06:20:00 $
+   $Revision: 1.12 $
+   $Date: 2008/07/25 23:29:26 $
    $Author: straten $ */
 
 #ifndef __CalibratorExtension_h
@@ -48,27 +48,27 @@ namespace Pulsar {
     //! Set the type of the calibrator
     virtual void set_type (Calibrator::Type type);
     //! Get the type of the calibrator
-    Calibrator::Type get_type () const;
+    virtual Calibrator::Type get_type () const;
 
     //! Set the reference epoch of the calibration experiment
     virtual void set_epoch (const MJD& epoch);
     //! Get the reference epoch of the calibration experiment
-    MJD get_epoch () const;
+    virtual MJD get_epoch () const;
 
     //! Set the number of frequency channels
     virtual void set_nchan (unsigned nchan);
     //! Get the number of frequency channels
-    unsigned get_nchan () const;
+    virtual unsigned get_nchan () const;
 
     //! Set the weight of the specified channel
     virtual void set_weight (unsigned ichan, float weight);
     //! Get the weight of the specified channel
-    float get_weight (unsigned ichan) const;
+    virtual float get_weight (unsigned ichan) const;
 
     //! Set the centre frequency of the specified channel
-    void set_centre_frequency (unsigned ichan, double centre_frequency);
+    virtual void set_centre_frequency (unsigned ichan, double frequency);
     //! Get the centre frequency of the specified channel
-    double get_centre_frequency (unsigned ichan) const;
+    virtual double get_centre_frequency (unsigned ichan) const;
 
     //! Return a short name
     std::string get_short_name () const { return "cal"; }
