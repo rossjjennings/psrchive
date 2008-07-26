@@ -352,7 +352,17 @@ try
     unload_each->unload (this);
 
     if (verbose > 2)
-      cerr << "Pulsar::PulsarCalibrator::add_pulsar solution unloaded" << endl;
+      cerr << "Pulsar::PulsarCalibrator::add_pulsar store solution" << endl;
+
+    // clear the map for each new archive
+    if (isub == 0)
+      store_each.clear();
+
+    Reference::Vector<MEAL::Complex2>& store = store_each[isub];
+    store.resize( transformation.size() );
+    for (unsigned i=0; i < store.size(); i++)
+      if (transformation[i])
+	store[i] = transformation[i]->clone();
   }
 
   if (!tim_file)
@@ -401,6 +411,17 @@ try
 catch (Error& error)
 {
   throw error += "Pulsar::PulsarCalibrator::add_pulsar";
+}
+
+//! Return the transformation to be used for precalibration
+MEAL::Complex2*
+Pulsar::PulsarCalibrator::get_transformation (const Archive* data,
+					      unsigned isub, unsigned ichan)
+{
+  if (store_each.size() == 0)
+    return SystemCalibrator::get_transformation (data, isub, ichan);
+
+  return store_each[isub][ichan];
 }
 
 class interface : public MEAL::GimbalLockMonitor

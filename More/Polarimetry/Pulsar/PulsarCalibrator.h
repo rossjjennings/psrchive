@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.30 $
-   $Date: 2008/07/25 23:30:52 $
+   $Revision: 1.31 $
+   $Date: 2008/07/26 23:10:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -69,6 +69,10 @@ namespace Pulsar {
     //! Set the solution to the mean
     void update_solution ();
 
+    //! Return the transformation to be used for precalibration
+    MEAL::Complex2* get_transformation (const Archive* data,
+					unsigned isub, unsigned ichan);
+
     //! File to which arrival time estimates should be written
     void set_tim_file (FILE* fptr) { tim_file = fptr; }
 
@@ -80,9 +84,15 @@ namespace Pulsar {
 
   protected:
     
-    //! Used to unload the solution derived from each sub-integration
-    Reference::To<Unloader> unload_each;
+    //! Solve the measurement equation for each sub-integration
     bool solve_each;
+
+    //! Store the solution derived from each sub-integration
+    typedef std::map< unsigned, Reference::Vector<MEAL::Complex2> > Storage;
+    Storage store_each;
+
+    //! Unload the solution derived from each sub-integration
+    Reference::To<Unloader> unload_each;
 
     //! Return a pointer to a newly constructed/initialized transformation
     MEAL::Complex2* new_transformation (unsigned ichan);
