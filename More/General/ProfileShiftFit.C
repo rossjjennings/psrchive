@@ -235,7 +235,7 @@ void Pulsar::ProfileShiftFit::compute()
     count++;
     sigma2 += norm(cprof[ih]);
   }
-  sigma2 /= (double)count;
+  sigma2 /= 2.0*(double)count;
 
   // Put params/etc in correct place
   shift = phi;
