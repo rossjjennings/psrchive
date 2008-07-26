@@ -272,7 +272,8 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   correction.set_archive (data);
   Jones<double> projection = correction (isub);
 
-  cerr << correction.get_summary () << endl;
+  if (verbose)
+    cerr << correction.get_summary () << endl;
 
   // an identifier for this set of data
   string identifier = data->get_filename() + " " + tostring(isub);
@@ -727,8 +728,9 @@ void Pulsar::SystemCalibrator::create_model ()
     BasisCorrection basis_correction;
     basis = new MEAL::Complex2Constant( basis_correction(receiver) );
 
-    cerr << "Pulsar::SystemCalibrator::create_model basis corrections:\n"
-	 << basis_correction.get_summary () << endl;
+    if (verbose)
+      cerr << "Pulsar::SystemCalibrator::create_model basis corrections:\n"
+           << basis_correction.get_summary () << endl;
 
     if (verbose)
       cerr << "Pulsar::SystemCalibrator::create_model receiver=\n  " 
