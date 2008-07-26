@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.17 $
-   $Date: 2008/07/25 23:30:02 $
+   $Revision: 1.18 $
+   $Date: 2008/07/26 06:42:47 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -190,6 +190,10 @@ namespace Pulsar
 
     //! Pre-calibrate the polarization of the given archive
     virtual void precalibrate (Archive* archive);
+
+    //! Return the transformation to be used for precalibration
+    virtual MEAL::Complex2* get_transformation (const Archive* data,
+						unsigned isub, unsigned ichan);
 
     //! Return a Calibrator::new_solution with a CalibratorStokesExtension
     virtual Archive* new_solution (const std::string& archive_class) const;

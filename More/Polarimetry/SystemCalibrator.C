@@ -158,7 +158,7 @@ unsigned Pulsar::SystemCalibrator::get_nchan () const
   unsigned nchan = 0;
 
   if (has_calibrator())
-    get_calibrator()->get_nchan ();
+    nchan = get_calibrator()->get_nchan ();
 
   if (model.size())
     nchan = model.size ();
@@ -361,31 +361,39 @@ void Pulsar::SystemCalibrator::match (const Archive* data)
 void Pulsar::SystemCalibrator::add_calibrator (const Archive* data)
 {
   if (!has_calibrator())
-    throw Error (InvalidState, "Pulsar::SystemCalibrator::add_calibrator",
+    throw Error (InvalidState, 
+		 "Pulsar::SystemCalibrator::add_calibrator (Archive*)",
 		 "No Archive containing pulsar data has yet been added");
 
-  Reference::To<ReferenceCalibrator> polncal;
-
-  if (model_type == Calibrator::Hamaker)
+  try
   {
-    if (verbose > 2)
-      cerr << "Pulsar::SystemCalibrator::add_calibrator"
-	" new PolarCalibrator" << endl;
+    Reference::To<ReferenceCalibrator> polncal;
+
+    if (model_type == Calibrator::Hamaker)
+    {
+      if (verbose > 2)
+	cerr << "Pulsar::SystemCalibrator::add_calibrator"
+	  " new PolarCalibrator" << endl;
     
-    polncal = new PolarCalibrator (data);
+      polncal = new PolarCalibrator (data);
+    }
+    else
+    {
+      if (verbose > 2)
+	cerr << "Pulsar::SystemCalibrator::add_calibrator"
+	  " new SingleAxisCalibrator" << endl;
+      
+      polncal = new SingleAxisCalibrator (data);
+    }
+
+    polncal->set_nchan( get_calibrator()->get_nchan() );
+
+    add_calibrator (polncal);
   }
-  else
+  catch (Error& error)
   {
-    if (verbose > 2)
-      cerr << "Pulsar::SystemCalibrator::add_calibrator"
-	" new SingleAxisCalibrator" << endl;
-    
-    polncal = new SingleAxisCalibrator (data);
+    throw error += "Pulsar::SystemCalibrator::add_calibrator (Archive*)";
   }
-
-  polncal->set_nchan( get_calibrator()->get_nchan() );
-
-  add_calibrator (polncal);
 }
 
 //! Add the ReferenceCalibrator observation to the set of constraints
@@ -395,18 +403,22 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
   if (verbose > 2)
     cerr << "Pulsar::SystemCalibrator::add_calibrator" << endl;
 
+  unsigned nchan = get_nchan ();
+
+  if (!nchan)
+    throw Error (InvalidState, "Pulsar::SystemCalibrator::add_calibrator",
+		 "nchan == 0");
+
   const Archive* cal = p->get_Archive();
 
   if (cal->get_state() != Signal::Coherence)
-    throw Error (InvalidParam, 
-		 "Pulsar::SystemCalibrator::add_calibrator",
+    throw Error (InvalidParam, "Pulsar::SystemCalibrator::add_calibrator",
 		 "Archive='" + cal->get_filename() + "' "
 		 "invalid state=" + State2string(cal->get_state()));
 
   if ( cal->get_type() != Signal::FluxCalOn && 
        cal->get_type() != Signal::PolnCal )
-    throw Error (InvalidParam,
-                 "Pulsar::SystemCalibrator::add_calibrator",
+    throw Error (InvalidParam, "Pulsar::SystemCalibrator::add_calibrator",
                  "invalid source=" + Source2string(cal->get_type()));
 
   string reason;
@@ -416,7 +428,6 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 		 + get_calibrator()->get_filename() +
                  " and \n\t" + cal->get_filename() + reason);
 
-  unsigned nchan = get_nchan ();
   unsigned nsub = cal->get_nsubint();
   unsigned npol = cal->get_npol();
   
@@ -509,10 +520,11 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
     }
   }
 }
- catch (Error& error) 
- {
-   throw error += "Pulsar::SystemCalibrator::add_calibrator";
- }
+catch (Error& error) 
+{
+  throw error +=
+    "Pulsar::SystemCalibrator::add_calibrator (ReferenceCalibrator*)";
+}
 
 void Pulsar::SystemCalibrator::init_estimate (SourceEstimate& estimate)
 {
@@ -1055,7 +1067,7 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
 
   vector< Jones<float> > response (nchan);
 
-  bool parallactic_corrected = false;
+  bool projection_corrected = false;
 
   BackendCorrection correct_backend;
   correct_backend (data);
@@ -1071,11 +1083,9 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
 
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
-      unsigned mchan = ichan;
-      if (model.size() == 1)
-	mchan = 0;
+      assert (ichan < model.size());
 
-      if (!model[mchan]->valid)
+      if (!model[ichan]->valid)
       {
 	if (verbose > 2)
 	  cerr << "Pulsar::SystemCalibrator::precalibrate ichan=" << ichan 
@@ -1087,62 +1097,26 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
 	continue;
       }
 
-      MEAL::Transformation<Complex2>* signal_path = 0;
-      ReceptionModel* equation = model[mchan]->get_equation();
+      /*
+	remove the projection from the signal path;
+	it will be included later, if necessary.
+      */
 
-      switch ( data->get_type() )
-      {
-
-      case Signal::Pulsar:
-	// cerr << "Pulsar::ReceptionCalibrator::precalibrate Pulsar" << endl;
-	model[mchan]->projection.set_value (projection);
-        equation->set_transformation_index (model[mchan]->get_pulsar_path());
-        signal_path = equation->get_transformation ();
-	parallactic_corrected = true;
-	break;
-
-      case Signal::PolnCal:
-	// cerr << "Pulsar::ReceptionCalibrator::precalibrate PolnCal" << endl;
-        equation->set_transformation_index (model[mchan]->get_polncal_path());
-        signal_path = equation->get_transformation ();
-	break;
-
-      case Signal::FluxCalOn:
-	// cerr << "Pulsar::ReceptionCalibrator::precalibrate FluxCal" << endl;
-        equation->set_transformation_index (model[mchan]->get_fluxcal_path());
-        signal_path = equation->get_transformation ();
-        break;
-
-      default:
-	throw Error (InvalidParam, "Pulsar::SystemCalibrator::precalibrate",
-		     "unknown Archive type for " + data->get_filename() );
-
-      }
-
-      response[ichan] = Jones<float>::identity();
-
-      MEAL::CongruenceTransformation* congruence = 0;
-      if (signal_path)
-        congruence = dynamic_cast<MEAL::CongruenceTransformation*>(signal_path);
-
-      if (!congruence)
-      {
-        integration->set_weight (ichan, 0.0);
-        continue;
-      }
+      model[ichan]->projection.set_value( Jones<double>::identity() );
 
       try
       {
-	model[mchan]->time.set_value( integration->get_epoch() );
-	response[ichan] = congruence->get_transformation()->evaluate();
+	response[ichan] = get_transformation(data, isub, ichan)->evaluate();
       }
       catch (Error& error)
       {
 	if (verbose > 2)
 	  cerr << "Pulsar::SystemCalibrator::precalibrate ichan=" << ichan
 	       << endl << error.get_message() << endl;
+
         integration->set_weight (ichan, 0.0);
         response[ichan] = Jones<float>::identity();
+
 	continue;
       }
 
@@ -1151,12 +1125,17 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
         if (verbose > 2)
           cerr << "Pulsar::SystemCalibrator::precalibrate ichan=" << ichan
                << " faulty response" << endl;
+
         integration->set_weight (ichan, 0.0);
         response[ichan] = Jones<float>::identity();
+
 	continue;
       }
-      else
-	response[ichan] = inv( response[ichan] );
+
+      if ( data->get_type() == Signal::Pulsar )
+	response[ichan] *= projection;
+
+      response[ichan] = inv( response[ichan] );
     }
 
     integration->expert()->transform (response);
@@ -1174,10 +1153,61 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
     return;
   }
 
-  receiver->set_projection_corrected (parallactic_corrected);
+  receiver->set_projection_corrected (projection_corrected);
   receiver->set_basis_corrected (true);
 }
 
+
+
+MEAL::Complex2* 
+Pulsar::SystemCalibrator::get_transformation (const Archive* data,
+					      unsigned isubint, unsigned ichan)
+{
+  const Integration* integration = data->get_Integration (isubint);
+  ReceptionModel* equation = model[ichan]->get_equation();
+
+  MEAL::Transformation<Complex2>* signal_path = 0;
+
+  switch ( data->get_type() )
+  {
+  case Signal::Pulsar:
+    if (verbose > 2)
+      cerr << "Pulsar::SystemCalibrator::get_transformation Pulsar" << endl;
+    equation->set_transformation_index (model[ichan]->get_pulsar_path());
+    signal_path = equation->get_transformation ();
+    break;
+
+  case Signal::PolnCal:
+    if (verbose > 2)
+      cerr << "Pulsar::SystemCalibrator::get_transformation PolnCal" << endl;
+    equation->set_transformation_index (model[ichan]->get_polncal_path());
+    signal_path = equation->get_transformation ();
+    break;
+
+  case Signal::FluxCalOn:
+    if (verbose > 2)
+      cerr << "Pulsar::SystemCalibrator::get_transformation FluxCal" << endl;
+    equation->set_transformation_index (model[ichan]->get_fluxcal_path());
+    signal_path = equation->get_transformation ();
+    break;
+
+  default:
+    throw Error (InvalidParam, "Pulsar::SystemCalibrator::get_transformation",
+		 "unknown Archive type for " + data->get_filename() );
+    
+  }
+
+  MEAL::CongruenceTransformation* congruence = 0;
+  if (signal_path)
+    congruence = dynamic_cast<MEAL::CongruenceTransformation*>(signal_path);
+
+  if (!congruence)
+    throw Error (InvalidState, "Pulsar::SystemCalibrator::get_transformation",
+		 "measurement equation is not a congruence transformation");
+
+  model[ichan]->time.set_value( integration->get_epoch() );
+  return congruence->get_transformation();
+}
 
 Pulsar::Archive*
 Pulsar::SystemCalibrator::new_solution (const string& class_name) const try
