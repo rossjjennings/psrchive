@@ -45,7 +45,7 @@ void Pulsar::WaveletSmooth::transform(Pulsar::Profile *prof) {
 
   // Threshold wavelet coeffs
   ncoeff = prof->get_nbin();
-  cutoff = sqrt(2.0 * log((double)ncoeff));
+  cutoff = 1.3*sqrt(2.0 * log((double)ncoeff));
   for (unsigned i=1; i<prof->get_nbin(); i++) {
     if (thresh==Hard) wt.get_data()[i] = thresh_hard(wt.get_data(i));
     else if (thresh==Soft) wt.get_data()[i] = thresh_soft(wt.get_data(i));
@@ -69,8 +69,8 @@ double Pulsar::WaveletSmooth::thresh_hard(double in) {
 
 double Pulsar::WaveletSmooth::thresh_soft(double in) {
   if (fabs(in) > cutoff*sigma) {
-    if (in>0.0) return in - sigma;
-    else return in + sigma;
+    if (in>0.0) return in - cutoff*sigma;
+    else return in + cutoff*sigma;
   } else 
     return 0.0;
 }
