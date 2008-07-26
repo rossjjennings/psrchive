@@ -29,7 +29,7 @@ public:
   psrsmooth ();
 
   //! Return extra cmd line args
-  std::string get_options() { return "Wne:"; }
+  std::string get_options() { return "Wne:H"; }
 
   //! Parse extra command line opts
   bool parse(char code, const std::string& arg);
@@ -49,6 +49,9 @@ public:
   //! Normalize outputs?
   bool normalize;
 
+  //! Harmonics output
+  bool print_harm;
+
 };
 
 
@@ -58,13 +61,15 @@ psrsmooth::psrsmooth ()
   method = "sinc";
   ext = "sm";
   normalize = false;
+  print_harm = false;
 }
 
 std::string psrsmooth::get_usage() {
   return 
     " -W               Use Wavelet smoothing (default Sinc)\n"
     " -n               Normalize smoothed profile\n"
-    " -e ext           Append extention to output (default .sm)\n";
+    " -e ext           Append extention to output (default .sm)\n"
+    " -H               Only print the smoothed number of harmonics\n";
 }
 
 bool psrsmooth::parse(char code, const std::string& arg) {
@@ -76,6 +81,9 @@ bool psrsmooth::parse(char code, const std::string& arg) {
     return true;
   } else if (code=='n') {
     normalize = true;
+    return true;
+  } else if (code=='H') {
+    print_harm = true;
     return true;
   } else 
     return false;
@@ -93,6 +101,9 @@ void psrsmooth::process (Pulsar::Archive* archive)
   // Set up transformation
   Reference::To< Transformation<Profile> > smooth;
   Reference::To<AdaptiveSmooth> asmooth = NULL;
+
+  // Print harmonics needs Sinc method
+  if (print_harm) method = "sinc";
 
   if (method=="sinc")
     smooth = new AdaptiveSmooth;
@@ -125,6 +136,10 @@ void psrsmooth::process (Pulsar::Archive* archive)
         p->scale(norm);
       }
 
+      if (print_harm) 
+        cout << archive->get_filename() << " " << isub << " " 
+          << ichan << " " << asmooth->get_max_harm() << endl;
+
       // if we're using Fourier-domain, apply same filter to all 
       // other pols
       if (asmooth) asmooth->set_hold(true);
@@ -141,7 +156,8 @@ void psrsmooth::process (Pulsar::Archive* archive)
   }
 
   // Unload archive with .sm extension
-  archive->unload(archive->get_filename() + "." + ext);
+  if (!print_harm)
+    archive->unload(archive->get_filename() + "." + ext);
 
 }
 
