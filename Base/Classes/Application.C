@@ -172,6 +172,8 @@ int Pulsar::Application::main (int argc, char** argv) try
   for (unsigned i=0; i<options.size(); i++)
     options[i]->setup ();
 
+  setup ();
+
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
   {
     Reference::To<Pulsar::Archive> archive;
@@ -190,6 +192,8 @@ int Pulsar::Application::main (int argc, char** argv) try
     cerr << name << ": error while processing "
 	 << filenames[ifile] << ":\n" << error.get_message() << endl;
   }
+
+  finalize ();
 
   return 0;
 }
@@ -217,11 +221,19 @@ bool Pulsar::Application::parse (char code, const std::string& arg)
   return false;
 }
 
+//! Extra setup
+void Pulsar::Application::setup ()
+{
+}
 
 void Pulsar::Application::Options::process (Archive*)
 {
 }
 
+//! Final steps
+void Pulsar::Application::finalize ()
+{
+}
 
 void Pulsar::Application::Options::setup ()
 {

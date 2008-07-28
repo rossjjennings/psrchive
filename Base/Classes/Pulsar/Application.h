@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/07/17 21:09:40 $
+   $Revision: 1.6 $
+   $Date: 2008/07/28 13:04:16 $
    $Author: demorest $ */
 
 #ifndef __Pulsar_Application_h
@@ -67,8 +67,14 @@ namespace Pulsar {
     //! Parse an additional command, return true if understood
     virtual bool parse (char code, const std::string& arg);
 
+    //! Any extra setup before running main loop
+    virtual void setup ();
+
     //! Data analysis tasks implemented by most derived classes
     virtual void process (Archive*) = 0;
+
+    //! Any final work after main loop finishes
+    virtual void finalize ();
 
     //! Set to true if this application has an online manual
     bool has_manual;
