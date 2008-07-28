@@ -120,7 +120,12 @@ include_HEADERS += JenetAnderson98Plot.h
 libgenutil_la_SOURCES += JenetAnderson98Plot.C
 endif
 
-libgenutil_la_LIBADD = @READLINE_LIBS@
+if HAVE_GSL
+include_HEADERS += PolynomialFit.h
+libgenutil_la_SOURCES += PolynomialFit.C
+endif
+
+libgenutil_la_LIBADD = @READLINE_LIBS@ @GSL_LIBS@
 
 bin_PROGRAMS = getMJD
 
@@ -164,5 +169,5 @@ LDADD = libgenutil.la \
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @PGPLOT_CFLAGS@
+AM_CPPFLAGS += @PGPLOT_CFLAGS@ @GSL_CFLAGS@
 
