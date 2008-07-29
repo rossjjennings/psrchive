@@ -99,6 +99,8 @@ main (int argc, char *argv[])
 
   string killfile;
 
+  char *metafile = NULL;
+
   bool zero_channels = false;
   vector < int >chans_to_zap;
   vector < double >freqs_to_zap;
@@ -145,7 +147,7 @@ main (int argc, char *argv[])
   Pulsar::ChannelZapMedian * median_zapper = 0;
   Pulsar::ChannelZapModulation * modulation_zapper = 0;
 
-  const char *args = "8bC:B:dDe:E:f:hIik:l:Lmno:p:P:rR:s:S:u:vVw:W:x:X:z:Z:";
+  const char *args = "8bC:B:dDe:E:f:hIik:l:LmM:no:p:P:rR:s:S:u:vVw:W:x:X:z:Z:";
 
   string command = "paz";
 
@@ -163,12 +165,16 @@ main (int argc, char *argv[])
       Pulsar::Archive::set_verbosity (3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.45 2008/07/29 14:04:16 demorest Exp $" << endl;
+      cout << "$Id: paz.C,v 1.46 2008/07/29 14:24:03 demorest Exp $" << endl;
       return 0;
 
     case 'm':
       write = true;
       command += " -m";
+      break;
+
+    case 'M':
+      metafile = optarg;
       break;
 
     case 'I':
@@ -479,8 +485,11 @@ main (int argc, char *argv[])
     return -1;
   }
 
-  for (int ai = optind; ai < argc; ai++)
-    dirglob (&archives, argv[ai]);
+  if (metafile) 
+    stringfload (&archives, metafile);
+  else 
+    for (int ai = optind; ai < argc; ai++)
+      dirglob (&archives, argv[ai]);
 
   if (archives.empty ()) {
     cerr << "No archives were specified" << endl;
