@@ -150,12 +150,6 @@ void Pulsar::Interpreter::init()
       "  unsigned chans    number of desired frequency channels \n"
       "                    if not specified, fscrunch all (chans=1)\n" );
   
-  add_command
-      ( &Interpreter::fscrunch_by,
-	 "fscrunch_by", "integrate archive in frequency by factor channels",
-	 "usage: fscrunch_by [factor] \n"
-	 "  unsigned factor    The number of channels to sum together in each group \n" );
-  
   add_command 
     ( &Interpreter::tscrunch, 'T',
       "tscrunch", "integrate archive in time",
@@ -163,13 +157,6 @@ void Pulsar::Interpreter::init()
       "  unsigned subints  number of desired sub-integrations \n"
       "                    if not specified, tscrunch all (subints=1)\n" );
   
-  add_command
-      ( &Interpreter::tscrunch_by,
-	 "tscrunch_by", "integrate archive in time by factor",
-	 "usage: tscrunch_by [factor] \n"
-	 "  unsigned factor  number of consecutive sub-integrations \n"
-	 "                 to sum together, tscrunch all (factor=1)\n" );
-
   add_command 
     ( &Interpreter::pscrunch, 'p',
       "pscrunch", "integrate archive to produce total intensity",
@@ -390,8 +377,8 @@ Pulsar::Archive* Pulsar::Interpreter::getmap (const string& name, bool ex)
   return entry->second;
 }
 
-string Pulsar::Interpreter::load (const string& args)
-try {
+string Pulsar::Interpreter::load (const string& args) try
+{
   vector<string> arguments = setup (args);
   
   if (!arguments.size() || arguments.size() > 2)
@@ -408,8 +395,8 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
-string Pulsar::Interpreter::unload (const string& args)
-try {
+string Pulsar::Interpreter::unload (const string& args) try
+{
   vector<string> arguments = setup (args);
   
   if (arguments.size() > 2)
@@ -442,8 +429,8 @@ catch (Error& error) {
 }
 
 //! push a clone of the current stack top onto the stack
-string Pulsar::Interpreter::push (const string& args)
-try {
+string Pulsar::Interpreter::push (const string& args) try
+{
   vector<string> arguments = setup (args);
 
   if (arguments.size() > 1)
@@ -471,8 +458,8 @@ string Pulsar::Interpreter::pop (const string& args)
   return response (Good);
 }
 
-string Pulsar::Interpreter::set (const string& args)
-try {
+string Pulsar::Interpreter::set (const string& args) try
+{
   vector<string> arguments = setup (args);
 
   if (arguments.size() != 1)
@@ -486,8 +473,8 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
-string Pulsar::Interpreter::get (const string& args)
-try {
+string Pulsar::Interpreter::get (const string& args) try
+{
   vector<string> arguments = setup (args);
 
   if (arguments.size() != 1)
@@ -521,8 +508,8 @@ string Pulsar::Interpreter::remove (const string& args)
 }
 
 
-string Pulsar::Interpreter::clone (const string& args)
-try { 
+string Pulsar::Interpreter::clone (const string& args) try
+{ 
   vector<string> arguments = setup (args);
 
   if (!arguments.size() > 1)
@@ -539,8 +526,8 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
-string Pulsar::Interpreter::extract (const string& args)
-try {
+string Pulsar::Interpreter::extract (const string& args) try
+{
   vector<string> arguments = setup (args);
 
   if (!arguments.size())
@@ -669,8 +656,8 @@ catch (Error& error)
 }
 
 
-string Pulsar::Interpreter::config (const string& args)
-try { 
+string Pulsar::Interpreter::config (const string& args) try
+{ 
 
   // replace variable names with values
   if (args == "help")
@@ -696,8 +683,8 @@ catch (Error& error) {
 }
 
 
-string Pulsar::Interpreter::append (const string& args)
-try { 
+string Pulsar::Interpreter::append (const string& args) try
+{ 
   vector<string> arguments = setup (args);
 
   if (!arguments.size() != 1)
@@ -716,56 +703,57 @@ catch (Error& error) {
 //
 // fscrunch <string> <int>
 //
-string Pulsar::Interpreter::fscrunch (const string& args)
-try {
-  unsigned scrunch_to = setup<unsigned> (args, 0);
+string Pulsar::Interpreter::fscrunch (const string& args) try
+{
+  bool scrunch_by = false;
+  string temp = args;
+
+  if (args[0] == 'x')
+  {
+    scrunch_by = true;
+    temp.erase (0,1);
+  }
+
+  unsigned scrunch = setup<unsigned> (temp, 0);
   
-  if (scrunch_to)
-    get() -> fscrunch_to_nchan (scrunch_to);
-  else
+  if (!scrunch)
     get() -> fscrunch();
+  else if (scrunch_by)
+    get() -> fscrunch (scrunch);
+  else
+    get() -> fscrunch_to_nchan (scrunch);
   
   return response (Good);
-
 }
 catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
 
-// //////////////////////////////////////////////////////////////////////
-//
-// fscrunch_by <string> <int>
-//
-string Pulsar::Interpreter::fscrunch_by (const string& args)
-try
-{
-  unsigned scrunch_by = setup<unsigned> (args, 0 );
-  
-  if(scrunch_by)
-    get() -> fscrunch( scrunch_by );
-  else
-    get() -> fscrunch();
-  
-  return response(Good);
-}
-catch( Error &error )
-{
-  return response( Fail, error.get_message() );
-}
 
 // //////////////////////////////////////////////////////////////////////
 //
 // tscrunch <string> <int>
 //
-string Pulsar::Interpreter::tscrunch (const string& args)
-try {
-  unsigned scrunch_to = setup<unsigned> (args, 0);
+string Pulsar::Interpreter::tscrunch (const string& args) try
+{
+  bool scrunch_by = false;
+  string temp = args;
+
+  if (args[0] == 'x')
+  {
+    scrunch_by = true;
+    temp.erase (0,1);
+  }
+
+  unsigned scrunch = setup<unsigned> (temp, 0);
   
-  if (scrunch_to)
-    get() -> tscrunch_to_nsub (scrunch_to);
-  else
+  if (!scrunch)
     get() -> tscrunch();
+  else if (scrunch_by)
+    get() -> tscrunch (scrunch);
+  else
+    get() -> tscrunch_to_nsub (scrunch);
   
   return response (Good);
 }
@@ -776,31 +764,10 @@ catch (Error& error) {
 
 // //////////////////////////////////////////////////////////////////////
 //
-// tscrunch_by <string> <int>
-//
-string Pulsar::Interpreter::tscrunch_by ( const string &args )
-try 
-{
-  unsigned scrunch_by = setup<unsigned> (args, 0 );
-  
-  if( scrunch_by == 0 )
-    get()->tscrunch( scrunch_by );
-  else
-    get()->tscrunch();
-  
-  return response( Good );
-}
-catch( Error &error )
-{
-  return response( Fail, error.get_message() );
-}
-
-// //////////////////////////////////////////////////////////////////////
-//
 // pscrunch
 //
-string Pulsar::Interpreter::pscrunch (const string& args)
-try {
+string Pulsar::Interpreter::pscrunch (const string& args) try
+{
   if (args.length())
     return response (Fail, "accepts no arguments");
 
@@ -812,13 +779,13 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
-string Pulsar::Interpreter::bscrunch (const string& args)
-try {
-
+string Pulsar::Interpreter::bscrunch (const string& args) try 
+{
   bool scrunch_by = false;
   string temp = args;
 
-  if (args[0] == 'x') {
+  if (args[0] == 'x')
+  {
     scrunch_by = true;
     temp.erase (0,1);
   }
@@ -835,13 +802,14 @@ try {
 
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
 
-string Pulsar::Interpreter::fold (const string& args)
-try {
+string Pulsar::Interpreter::fold (const string& args) try
+{
   unsigned factor = setup<unsigned> (args);
   
   if (!factor)
@@ -858,8 +826,8 @@ catch (Error& error) {
 //
 // invint
 //
-string Pulsar::Interpreter::invint (const string& args)
-try {
+string Pulsar::Interpreter::invint (const string& args) try
+{
   if (args.length())
     return response (Fail, "accepts no arguments");
 
@@ -871,8 +839,8 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
-string Pulsar::Interpreter::centre (const string& args)
-try {
+string Pulsar::Interpreter::centre (const string& args) try
+{
   vector<string> arguments = setup (args);
 
   if (arguments.size() == 1 && arguments[0] == "max")
@@ -893,8 +861,8 @@ catch (Error& error) {
 // dedisp <string>
 //
 
-string Pulsar::Interpreter::dedisperse (const string& args)
-try {
+string Pulsar::Interpreter::dedisperse (const string& args) try
+{
 
   if (!args.length()) {
     get()->dedisperse();
@@ -925,8 +893,8 @@ catch (Error& error) {
 
 // //////////////////////////////////////////////////////////////////////
 //
-string Pulsar::Interpreter::defaraday (const string& args)
-try {
+string Pulsar::Interpreter::defaraday (const string& args) try
+{
 
   if (!args.length()) {
     get()->defaraday();
@@ -957,8 +925,8 @@ catch (Error& error) {
 
 // //////////////////////////////////////////////////////////////////////
 //
-string Pulsar::Interpreter::scattered_power_correct (const string& args)
-try {
+string Pulsar::Interpreter::scattered_power_correct (const string& args) try
+{
   if (args.length())
     return response (Fail, "accepts no arguments");
 
@@ -977,8 +945,8 @@ catch (Error& error) {
 
 // //////////////////////////////////////////////////////////////////////
 //
-string Pulsar::Interpreter::weight (const string& args)
-try { 
+string Pulsar::Interpreter::weight (const string& args) try
+{ 
   vector<string> arguments = setup (args);
 
   if (!arguments.size())
@@ -1004,8 +972,8 @@ catch (Error& error) {
 
 // //////////////////////////////////////////////////////////////////////
 //
-string Pulsar::Interpreter::scale (const string& args)
-try {
+string Pulsar::Interpreter::scale (const string& args) try
+{
   float factor = setup<float> (args);
   
   Archive* archive = get();
@@ -1027,8 +995,8 @@ catch (Error& error) {
 
 // //////////////////////////////////////////////////////////////////////
 //
-string Pulsar::Interpreter::offset (const string& args)
-try {
+string Pulsar::Interpreter::offset (const string& args) try
+{
   float summand = setup<float> (args);
   
   Archive* archive = get();
@@ -1050,8 +1018,8 @@ catch (Error& error) {
 
 // //////////////////////////////////////////////////////////////////////
 //
-string Pulsar::Interpreter::rotate (const string& args)
-try {
+string Pulsar::Interpreter::rotate (const string& args) try
+{
   get()->rotate_phase( setup<double>(args) );
   return response (Good);
 }
@@ -1061,8 +1029,8 @@ catch (Error& error) {
 
 // //////////////////////////////////////////////////////////////////////
 //
-string Pulsar::Interpreter::fix (const string& args)
-try {
+string Pulsar::Interpreter::fix (const string& args) try
+{
 
   string what = setup<string>(args);
 
@@ -1100,8 +1068,8 @@ string Pulsar::Interpreter::toggle_clobber (const string& args)
 //
 // screendump <string>
 //
-string Pulsar::Interpreter::screen_dump (const string& args)
-try {
+string Pulsar::Interpreter::screen_dump (const string& args) try
+{
   if (args.length())
     set( getmap (args) );
 
