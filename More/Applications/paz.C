@@ -165,7 +165,7 @@ main (int argc, char *argv[])
       Pulsar::Archive::set_verbosity (3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.46 2008/07/29 14:24:03 demorest Exp $" << endl;
+      cout << "$Id: paz.C,v 1.47 2008/07/31 01:39:17 demorest Exp $" << endl;
       return 0;
 
     case 'm':
@@ -690,10 +690,11 @@ main (int argc, char *argv[])
 
     if (zap_ston) {
       double theston = 0.0;
-      arch->pscrunch ();
+      Reference::To<Pulsar::Archive> cloned = arch->clone();
+      cloned->pscrunch ();
       for (unsigned isub = 0; isub < arch->get_nsubint (); isub++) {
 	for (unsigned ichan = 0; ichan < arch->get_nchan (); ichan++) {
-	  theston = arch->get_Profile (isub, 0, ichan)->snr ();
+	  theston = cloned->get_Profile (isub, 0, ichan)->snr ();
 	  if (theston < ston_cutoff) {
 	    arch->get_Integration (isub)->set_weight (ichan, 0.0);
 	  }
