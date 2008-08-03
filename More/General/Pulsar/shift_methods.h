@@ -33,6 +33,9 @@ namespace Pulsar {
   /*! Phase shift by sinc interpolation of CCF */
   Estimate<double> SincInterpShift (const Profile& std, const Profile& ephase);
 
+  /*! Fourier domain chi^2 fit with MCMC error estimate */
+  Estimate<double> FourierDomainFit (const Profile& std, const Profile& ephase);
+
   //! Fundamental period of spike sequence in profile, zap in SincInterpShift
   extern unsigned SIS_zap_period;
 

@@ -8,7 +8,8 @@ libTiming_la_SOURCES = \
 	ParIntShift.C \
 	PhaseGradShift.C \
 	SincInterpShift.C \
-	ZeroPadShift.C
+	ZeroPadShift.C \
+	FourierDomainFit.C
 
 #############################################################################
 #
