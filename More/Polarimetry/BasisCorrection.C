@@ -81,10 +81,15 @@ Jones<double> Pulsar::BasisCorrection::operator () (const Archive* a) const
   return operator () (a->get<Receiver>());
 }
 
+/*!
+  The basis transformation is not included in the basis correction.
+  Rather, all transformations to the right of the basis tranformation are
+  expressed in that basis.
+ */
 Jones<double> Pulsar::BasisCorrection::operator () (const Receiver* rcvr) const
 {
   summary = "";
-  return get_hand (rcvr) * get_basis (rcvr) * get_symmetry (rcvr);
+  return get_hand (rcvr) * get_symmetry (rcvr);
 }
 
 bool Pulsar::BasisCorrection::required (const Archive* archive) const
