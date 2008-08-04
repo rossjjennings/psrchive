@@ -11,14 +11,11 @@
 #include "MEAL/Rotation1.h"
 #include "MEAL/CyclicParameter.h"
 
-#include "Pauli.h"
 #include "ModifyRestore.h"
 
 #include <assert.h>
 
 using namespace std;
-
-#define FEED_BOTH 0
 
 void Calibration::Feed::init ()
 {
@@ -43,17 +40,10 @@ void Calibration::Feed::init ()
     selection = new MEAL::Complex2Constant (select_jones);
     receptor->add_model (selection);
 
-#if FEED_BOTH
-    // construct the elipticity matrix
-    ellipticity[ir] = new MEAL::Rotation1 (Pauli::basis.get_basis_vector(1));
-    // construct the orientation matrix
-    orientation[ir] = new MEAL::Rotation1 (Pauli::basis.get_basis_vector(2));
-#else
     // construct the elipticity matrix
     ellipticity[ir] = new MEAL::Rotation1 (Vector<3, double>::basis(1));
     // construct the orientation matrix
     orientation[ir] = new MEAL::Rotation1 (Vector<3, double>::basis(2));
-#endif
 
     string describe = " of receptor " + rname + " (radians)";
 
@@ -80,14 +70,6 @@ void Calibration::Feed::init ()
 Calibration::Feed::Feed ()
 {
   init ();
-
-#if FEED_BOTH
-  for (unsigned i=0; i<2; i++)  {
-    set_orientation (i, Pauli::basis.get_orientation());
-    set_ellipticity (i, Pauli::basis.get_ellipticity());
-  }
-#endif
-
 }
 
 Calibration::Feed::Feed (const Feed& feed)
