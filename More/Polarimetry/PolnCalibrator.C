@@ -234,7 +234,6 @@ void Pulsar::PolnCalibrator::setup_transformation () const
 {
   if (receiver)
     Pauli::basis.set_basis( receiver->get_basis() );
-
   const_cast<PolnCalibrator*>(this)->calculate_transformation();
 }
 
@@ -660,6 +659,12 @@ Pulsar::PolnCalibrator::Info::Info (const PolnCalibrator* cal)
 unsigned Pulsar::PolnCalibrator::Info::get_nclass () const
 {
   return nparam;
+}
+
+/*! The name of each parameter is unknown */
+string Pulsar::PolnCalibrator::Info::get_title () const
+{
+  return "Unknown Calibrator Parameters";
 }
 
 /*! The name of each parameter is unknown */
