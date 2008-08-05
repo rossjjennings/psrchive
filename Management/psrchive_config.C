@@ -11,8 +11,6 @@
 */
 
 #include "Pulsar/psrchive.h"
-
-#include "Pulsar/Interpreter.h"
 #include "Pulsar/Config.h"
 
 using namespace std;
@@ -41,10 +39,7 @@ string find_and_replace (string text, string replace, string with)
 
 int main (int argc, char** argv)
 {
-  /*
-    The following call ensures that all configuration symbols are linked.
-  */
-  standard_shell();
+  Pulsar::Config::ensure_linkage ();
 
   Pulsar::Config::Interface* interface = Pulsar::Config::get_interface();
 
