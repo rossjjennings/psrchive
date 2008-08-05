@@ -165,7 +165,7 @@ main (int argc, char *argv[])
       Pulsar::Archive::set_verbosity (3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.47 2008/07/31 01:39:17 demorest Exp $" << endl;
+      cout << "$Id: paz.C,v 1.48 2008/08/05 13:30:43 straten Exp $" << endl;
       return 0;
 
     case 'm':
@@ -607,35 +607,41 @@ main (int argc, char *argv[])
       arch->set_filename (useful);
     }
 
-    if (median_zapper) {
+    if (median_zapper)
+    {
       cout << "Using median smoothed difference zapper" << endl;
-      median_zapper->ChannelWeight::weight (arch);
+      (*median_zapper) (arch);
     }
 
-    if (modulation_zapper) {
+    if (modulation_zapper)
+    {
       cout << "Using modulation index zapper" << endl;
-      modulation_zapper->ChannelWeight::weight (arch);
+      (*modulation_zapper) (arch);
     }
 
-    if (simple) {
+    if (simple)
+    {
       cout << "Using simple mean offset zapper" << endl;
       zapper->zap_chans (arch);
       cout << "Zapping complete" << endl;
     }
 
-    if (zero_subints && !zero_intersection) {
+    if (zero_subints && !zero_intersection)
+    {
       vector < float >mask (nchan, 0.0);
       zapper->zap_very_specific (arch, mask, subs_to_zap);
     }
 
-    if (bin_zap && bins_to_zap.size ()) {
+    if (bin_zap && bins_to_zap.size ())
+    {
       for (unsigned i = 0; i + 5 <= bins_to_zap.size (); i += 5)
 	binzap (arch, arch->get_Integration (bins_to_zap[i]), bins_to_zap[i],
 		bins_to_zap[i + 1], bins_to_zap[i + 2], bins_to_zap[i + 3],
 		bins_to_zap[i + 4]);
     }
 
-    if (zero_channels) {
+    if (zero_channels)
+    {
       if (!killfile.empty ()) {
 	vector < int >some_chans;
 	char *useful = new char[4096];

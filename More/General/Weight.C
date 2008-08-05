@@ -4,11 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Weight.h"
 #include "Pulsar/Archive.h"
 
-void Pulsar::Weight::weight (Archive* archive)
+void Pulsar::Weight::operator () (Archive* archive)
 {
   for (unsigned isub = 0; isub < archive->get_nsubint(); isub++)
     weight (archive->get_Integration (isub));

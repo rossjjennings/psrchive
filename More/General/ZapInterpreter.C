@@ -77,8 +77,9 @@ string Pulsar::ZapInterpreter::median (const string& args) try
   if (!zap_median)
     zap_median = new ChannelZapMedian;
 
-  if (!arguments.size()) {
-    zap_median->ChannelWeight::weight( get() );
+  if (!arguments.size())
+  {
+    (*zap_median)( get() );
     return response (Good);
   }
 

@@ -962,7 +962,7 @@ string Pulsar::Interpreter::weight (const string& args) try
   else
     return response (Fail, "unrecognized weighting scheme '" + args + "'");
 
-  weight->weight( get() );
+  (*weight)( get() );
 
   return response (Good);
 }

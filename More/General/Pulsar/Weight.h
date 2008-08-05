@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Weight.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.3 $
+   $Date: 2008/08/05 13:30:43 $
    $Author: straten $ */
 
 #ifndef _Pulsar_Weight_H
@@ -27,7 +27,7 @@ namespace Pulsar {
   public:
 
     //! Set the weights of all Profiles in the Archive
-    virtual void weight (Archive*);
+    virtual void operator () (Archive*);
 
   protected:
 
