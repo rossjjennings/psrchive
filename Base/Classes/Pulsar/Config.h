@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Config.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/10/03 12:30:38 $
+   $Revision: 1.11 $
+   $Date: 2008/08/05 13:51:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Config_h
@@ -38,6 +38,11 @@ namespace Pulsar {
 
     //! Return the text interface to the configuration parameters
     static Interface* get_interface ();
+
+    //! Ensure that configuration options are linked
+    /*! This method is defined in More/Config_ensure_linage.C so that
+      every configuration option to be defined can be included. */
+    static void ensure_linkage ();
 
   protected:
 
