@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/IntegrationWeight.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.3 $
+   $Date: 2008/08/05 13:30:58 $
    $Author: straten $ */
 
 #ifndef _Pulsar_IntegrationWeight_H
@@ -19,7 +19,30 @@
 namespace Pulsar {
   
   //! Algorithms that set the weights of sub-integrations
-  class IntegrationWeight : public Weight {
+  class IntegrationWeight : public Weight
+  {
+
+  public:
+
+    //! Default constructor
+    IntegrationWeight ();
+
+    //! Set integration weights
+    void weight (Integration*);
+
+    //! Set weight equal to value or scale weight by value
+    /*! 
+      When true: the weight is set equal to the duration (weight = duration)
+      When false: the weight is scaled by the duration (weight *= duration)
+    */
+    void set_weight_absolute (bool f) { weight_absolute = f; }
+    bool get_weight_absolute () const { return weight_absolute; }
+
+    virtual double get_weight (const Integration*, unsigned ichan) = 0;
+
+  protected:
+
+    bool weight_absolute;
 
   };
   
