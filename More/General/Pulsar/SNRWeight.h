@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SNRWeight.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.3 $
+   $Date: 2008/08/05 13:30:53 $
    $Author: straten $ */
 
 #ifndef _Pulsar_SNRWeight_H
@@ -30,10 +30,10 @@ namespace Pulsar {
     void set_threshold (float f) { threshold = f; }
     float get_threshold () const { return threshold; }
 
-  protected:
+    //! Get the weight of the specified channel
+    double get_weight (const Integration* integration, unsigned ichan);
 
-    //! Set integration weights
-    void weight (Integration* integration);
+  protected:
 
     float threshold;
 

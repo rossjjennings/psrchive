@@ -1,10 +1,9 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
 
 #include "Pulsar/SNRWeight.h"
 #include "Pulsar/Integration.h"
@@ -16,23 +15,14 @@ Pulsar::SNRWeight::SNRWeight ()
   threshold = 0.0;
 }
 
-//! Set integration weights
-void Pulsar::SNRWeight::weight (Integration* integration)
+//! Get the weight of the specified channel
+double Pulsar::SNRWeight::get_weight (const Integration* integration,
+				      unsigned ichan)
 {
-  unsigned nchan = integration->get_nchan();
+  double snr = integration->get_Profile(0,ichan)->snr ();
 
-  for (unsigned ichan=0; ichan < nchan; ichan++) {
+  if (threshold && snr < threshold)
+    snr = 0;
 
-    // always ignore zapped channels
-    if (integration->get_weight (ichan) == 0)
-      continue;
-
-    float snr = integration->get_Profile(0,ichan)->snr ();
-
-    if (threshold && snr < threshold)
-      snr = 0;
-
-    integration->set_weight (ichan, snr*snr);
-
-  }
+  return snr * snr;
 }
