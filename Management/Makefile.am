@@ -2,7 +2,7 @@
 bin_PROGRAMS = psrchive_info psrchive_config
 
 psrchive_info_SOURCES   = psrchive_info.C
-psrchive_config_SOURCES = psrchive_config.C
+psrchive_config_SOURCES = psrchive_config.C Config_ensure_linkage.C
 
 bin_SCRIPTS = psrchive
 
