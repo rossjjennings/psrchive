@@ -19,15 +19,20 @@ using namespace std;
 
 // #define _DEBUG 1
 
+static Pulsar::BaselineEstimator* default_initial_baseline ()
+{
+  Pulsar::BaselineWindow* window = new Pulsar::BaselineWindow;
+
+  window->set_smooth( new Pulsar::SmoothMedian );
+  window->set_median_cut( 4.0 );
+  window->get_smooth()->set_turns( Pulsar::Profile::default_duty_cycle );
+
+  return window;
+}
+
 Pulsar::IterativeBaseline::IterativeBaseline ()
 {
-  BaselineWindow* window = new BaselineWindow;
-
-  window->set_smooth( new SmoothMedian );
-  window->set_median_cut( 4.0 );
-  window->get_smooth()->set_turns( Profile::default_duty_cycle );
-
-  set_initial_baseline( window );
+  set_initial_baseline( default_initial_baseline() );
 
   set_median_cut( 4.0 );
 
@@ -112,9 +117,16 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
     }
 
     if (weight->get_variance() == 0.0)
-      throw Error (InvalidState, "Pulsar::IterativeBaseline::get_weight",
-                   "no variance in %u selected phase bins", 
-                   weight->get_weight_sum());
+    {
+#ifndef _DEBUG
+      if (Profile::verbose)
+#endif
+	cerr << "Pulsar::IterativeBaseline::get_weight no variance in "
+	     << weight->get_weight_sum() << " selected phase bins" << endl;
+
+      // assume that the profile is a noiseless template and return
+      return;
+    }
 
     Estimate<double> initial_mean = weight->get_mean();
     Estimate<double> initial_rms  = sqrt( weight->get_variance() );
@@ -147,8 +159,20 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
     initial_bounds = false;
 
     if (lower == upper)
-      throw Error (InvalidState, "Pulsar::IterativeBaseline::get_weight",
-		   "lower bound equals upper bound = %f", upper);
+    {
+#ifndef _DEBUG
+      if (Profile::verbose)
+#endif
+	cerr << "Pulsar::IterativeBaseline::get_weight"
+	  " lower bound equals upper bound = " << upper << endl;
+
+      // return to the initial baseline estimate
+      if (!initial_baseline)
+	initial_baseline = default_initial_baseline ();
+
+      initial_baseline->get_weight (weight);
+      return;
+    }
 
     unsigned added = 0;
     unsigned subtracted = 0;
@@ -209,8 +233,21 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
   }
 
   if (iter >= max_iterations)
-    throw Error (InvalidState, "Pulsar::IterativeBaseline::get_weight",
-		 "did not converge in %d iterations", max_iterations);
+  {
+#ifndef _DEBUG
+    if (Profile::verbose)
+#endif
+      cerr << "Pulsar::IterativeBaseline::get_weight did not converge in "
+	   << max_iterations << " iterations" << endl;
+
+    // return to the initial baseline estimate
+    if (!initial_baseline)
+      initial_baseline = default_initial_baseline ();
+    
+    initial_baseline->get_weight (weight);
+
+    return;
+  }
 
   postprocess (weight, profile);
 
