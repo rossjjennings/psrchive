@@ -8,11 +8,11 @@
 #include "Pulsar/BaselineInterpreter.h"
 #include "Pulsar/BaselineWindow.h"
 #include "Pulsar/GaussianBaseline.h"
-#include "Pulsar/Profile.h"
 
 using namespace std;
 
-Pulsar::BaselineInterpreter::BaselineInterpreter ()
+Pulsar::BaselineInterpreter::BaselineInterpreter (Policy& _policy)
+  : policy (_policy)
 {
   add_command 
     ( &BaselineInterpreter::normal,
@@ -23,7 +23,6 @@ Pulsar::BaselineInterpreter::BaselineInterpreter ()
     ( &BaselineInterpreter::minimum,
       "minimum", "install BaselineWindow algorithm (default)",
       "usage: minimum \n" );
-
 }
 
 string Pulsar::BaselineInterpreter::normal (const string& args) try
@@ -31,7 +30,7 @@ string Pulsar::BaselineInterpreter::normal (const string& args) try
   if (!normal_functor)
     normal_functor.set( new GaussianBaseline, &BaselineEstimator::baseline );
 
-  Profile::baseline_strategy = normal_functor;
+  policy = normal_functor;
   return "";
 }
 catch (Error& error) {
@@ -43,7 +42,7 @@ string Pulsar::BaselineInterpreter::minimum (const string& args) try
   if (!minimum_functor)
     minimum_functor.set( new BaselineWindow, &BaselineEstimator::baseline );
 
-  Profile::baseline_strategy = minimum_functor;
+  policy = minimum_functor;
   return "";
 }
 catch (Error& error) {
@@ -52,15 +51,12 @@ catch (Error& error) {
     
 string Pulsar::BaselineInterpreter::empty ()
 { 
-  if (Profile::baseline_strategy == normal_functor)
+  if (policy == normal_functor)
     return "normal";
 
-  if (Profile::baseline_strategy == minimum_functor)
+  if (policy == minimum_functor)
     return "minimum";
 
   return "unknown";
 }
-
-
-
 

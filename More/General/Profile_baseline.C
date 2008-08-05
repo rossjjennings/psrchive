@@ -25,7 +25,7 @@ Functor< PhaseWeight* (const Profile*) > Profile::baseline_strategy;
 */
 static Pulsar::Option<CommandParser> cfg
 (
- new Pulsar::BaselineInterpreter,
+ new Pulsar::BaselineInterpreter (Profile::baseline_strategy),
  "Profile::baseline", "minimum",
 
  "Baseline estimation algorithm",

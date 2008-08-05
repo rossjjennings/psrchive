@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineInterpreter.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/10/02 05:18:49 $
+   $Revision: 1.3 $
+   $Date: 2008/08/05 13:30:48 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BaselineInterpreter_h
@@ -22,12 +22,16 @@ namespace Pulsar {
   class PhaseWeight;
   class Profile;
 
+  //! Interprets configuration strings into a weighting policy
+
   class BaselineInterpreter : public CommandParser {
 
   public:
 
-    //! Default constructor
-    BaselineInterpreter ();
+    typedef Functor< PhaseWeight* (const Profile*) > Policy;
+
+    //! Construct with reference to the policy to be modified
+    BaselineInterpreter (Policy&);
 
     //! Install the interative Gaussian baseline algorithm
     std::string normal (const std::string& args);
@@ -35,13 +39,19 @@ namespace Pulsar {
     //! Install the default baseline algorithm (minimum window)
     std::string minimum (const std::string& args);
 
-    //! No empty arguments
+    //! Return the configuration string of the current baseline policy
     std::string empty ();
 
   protected:
 
-    Functor< PhaseWeight* (const Profile*) > normal_functor;
-    Functor< PhaseWeight* (const Profile*) > minimum_functor;
+    //! The normal baseline policy (GaussianBaseline)
+    Policy normal_functor;
+
+    //! The minimum mean baseline policy (BaselineWindow)
+    Policy minimum_functor;
+
+    //! The policy to be modified
+    Policy& policy;
 
   };
 
