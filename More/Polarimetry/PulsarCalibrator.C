@@ -311,6 +311,13 @@ void Pulsar::PulsarCalibrator::add_pulsar
 
   assert (ichan < mtm.size());
 
+  //
+  // the measurement set passed down by SystemCalibrator contains information
+  // that must be incorporated into the equation maintained by PolnProfileFit
+  //
+
+  mtm[ichan]->set_measurement_set( measurements );
+
   if (solve_each)
   {
     if (verbose > 2) cerr << "Pulsar::PulsarCalibrator::add_pulsar"
@@ -330,7 +337,6 @@ void Pulsar::PulsarCalibrator::add_pulsar
       cerr << "Pulsar::PulsarCalibrator::add_pulsar adding to path index="
 	   << measurements.get_transformation_index() << endl;
 
-    mtm[ichan]->set_measurement_set( measurements );
     mtm[ichan]->add_observation( integration->new_PolnProfile (ichan) );
   }
 }
