@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FrequencyAppend.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/07/14 22:05:12 $
+   $Revision: 1.3 $
+   $Date: 2008/08/05 13:31:02 $
    $Author: straten $ */
 
 #ifndef _Pulsar_FrequencyAppend_H
 #define _Pulsar_FrequencyAppend_H
 
 #include "Pulsar/Append.h"
+#include "Functor.h"
 
 namespace Pulsar {
 
@@ -27,6 +28,9 @@ namespace Pulsar {
 
     //! Default constructor
     FrequencyAppend ();
+
+    //! The policy used to weight each profile during combine
+    static Functor< void (Integration*) > weight_strategy;
 
   protected:
 

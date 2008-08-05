@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/FrequencyAppend.h"
+#include "Pulsar/WeightInterpreter.h"
 #include "Pulsar/Dispersion.h"
 #include "Pulsar/FaradayRotation.h"
 
@@ -17,10 +18,27 @@
 
 #include "Error.h"
 
-using Pulsar::FrequencyAppend;
-using Pulsar::DigitiserCounts;
-using std::cerr;
-using std::endl;
+using namespace Pulsar;
+using namespace std;
+
+
+/*! 
+  This use of the Functor template implements the Strategy design
+  pattern (ghjv94 p.315) for calculating the profile baseline mask.
+*/
+Functor< void (Integration*) > FrequencyAppend::weight_strategy;
+
+static Pulsar::Option<CommandParser> cfg
+(
+ new Pulsar::WeightInterpreter (FrequencyAppend::weight_strategy),
+ "FrequencyAppend::weight", "radiometer",
+
+ "Weighting policy",
+
+ "The name of the algorithm used to weight each profile.\n"
+ "Possible values: radiometer, time, snr, none"
+);
+
 
 Pulsar::FrequencyAppend::FrequencyAppend ()
 {
@@ -85,38 +103,26 @@ void Pulsar::FrequencyAppend::combine (Archive* into, Archive* from)
 void Pulsar::FrequencyAppend::combine (Integration* into, Integration* from)
 try 
 {
-  double weight_ratio = 1.0;
-
-  if (into->get_duration() != 0.0)
-    weight_ratio = from->get_duration() / into->get_duration();
-
-  unsigned npol = from->get_npol();
-  unsigned nchan = from->get_nchan();
-
-  for (unsigned ipol = 0; ipol < npol; ipol++)
-    for (unsigned ichan = 0; ichan < nchan; ichan++)
-      from->set_weight( ichan, from->get_weight(ichan) * weight_ratio );
+  if (weight_strategy)
+    weight_strategy ( from );
 
   into->expert()->insert(from);
 
-  if (into->get_dedispersed()) {
-
+  if (into->get_dedispersed())
+  {
     Dispersion xform;
     xform.set_reference_frequency( into->get_centre_frequency() );
     xform.set_dispersion_measure( into->get_dispersion_measure() );
     xform.execute1 (from);
-
   }
 
-  if (into->get_faraday_corrected()) {
-
+  if (into->get_faraday_corrected())
+  {
     FaradayRotation xform;
     xform.set_reference_frequency( into->get_centre_frequency() );
     xform.set_rotation_measure( into->get_rotation_measure() );
     xform.execute1 (from);
-
   }
-
 }
 catch (Error& error)
 {
