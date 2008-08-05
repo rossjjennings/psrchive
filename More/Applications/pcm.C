@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.98 $
-   $Date: 2008/07/25 23:29:50 $
+   $Revision: 1.99 $
+   $Date: 2008/08/05 02:09:55 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -918,11 +918,11 @@ int actual_main (int argc, char *argv[]) try
       if (!total)
 	total = archive;
       else
-      {
 	total->append (archive);
-	total->tscrunch ();
-      }
+
+      total->tscrunch ();
     }
+
     archive = 0;
   }
   catch (Error& error)
@@ -1115,14 +1115,14 @@ int actual_main (int argc, char *argv[]) try
       if (!total)
 	total = archive;
       else
-      {
 	total->append (archive);
-	total->tscrunch ();
-      }
+
+      total->tscrunch ();
     }
     
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << error << endl;
   }
 
