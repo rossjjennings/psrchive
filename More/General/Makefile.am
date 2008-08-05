@@ -70,6 +70,7 @@ nobase_include_HEADERS = \
 	Pulsar/ProfileShiftFit.h \
 	Pulsar/ProfileStats.h \
         Pulsar/ProfileWeightFunction.h \
+	Pulsar/RadiometerWeight.h \
 	Pulsar/RiseFall.h \
         Pulsar/RFIMitigation.h \
         Pulsar/ScatteredPowerCorrection.h \
@@ -94,6 +95,7 @@ nobase_include_HEADERS = \
         Pulsar/WaveletTransform.h \
         Pulsar/Weight.h \
 	Pulsar/WeightedFrequency.h \
+	Pulsar/WeightInterpreter.h \
         Pulsar/ZapInterpreter.h
 
 libGeneral_la_SOURCES = \
@@ -169,6 +171,7 @@ libGeneral_la_SOURCES = \
         Integration_total.C \
         Integration_transform.C \
         Integration_weighted_frequency.C \
+	IntegrationWeight.C \
 	Interpreter.C \
 	InterpreterVariables.C \
         IterativeBaseline.C \
@@ -199,6 +202,7 @@ libGeneral_la_SOURCES = \
         Profile_stats.C \
         Profile_toa.C \
         ProfileWeightFunction.C \
+	RadiometerWeight.C \
 	RiseFall.C \
         RFIMitigation.C \
         ScatteredPowerCorrection.C \
@@ -219,6 +223,7 @@ libGeneral_la_SOURCES = \
         Transposer.C \
         Weight.C \
 	WeightedFrequency.C \
+	WeightInterpreter.C \
 	ZapInterpreter.C
 
 ##############################################################################
