@@ -15,8 +15,6 @@ void Pulsar::Config::ensure_linkage ()
   // the standard shell uses a lot of different options
   Reference::To<Interpreter> temp = standard_shell();
 
-  if (FrequencyAppend::weight_strategy)
-    // do nothing
-    ;
+  FrequencyAppend append;
 }
 
