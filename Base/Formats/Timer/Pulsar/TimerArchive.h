@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.24 $
-   $Date: 2007/11/26 02:50:18 $
+   $Revision: 1.25 $
+   $Date: 2008/08/06 00:40:26 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -21,6 +21,7 @@
 namespace Pulsar {
 
   class TapeInfo;
+  class CalInfoExtension;
 
   //! Reads and writes the timer archive file format
   class TimerArchive : public Archive {
@@ -268,6 +269,9 @@ namespace Pulsar {
 
     //! Pack the TapeInfo extension
     void pack (const TapeInfo* tape);
+
+    //! Unpack the CalInfoExtension
+    void unpack (CalInfoExtension* cal);
 
   };
 

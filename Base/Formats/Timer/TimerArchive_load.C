@@ -10,6 +10,7 @@
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Pointing.h"
 #include "Pulsar/Backend.h"
+#include "Pulsar/CalInfoExtension.h"
 
 #include "Pulsar/Predictor.h"
 #include "Pulsar/Parameters.h"
@@ -74,6 +75,9 @@ void Pulsar::TimerArchive::load (FILE* fptr)
   if (verbose > 2 && get_nsubint())
     cerr << "TimerArchive::load epoch[0]=" 
          << get_Integration(0)->get_epoch().printdays(15) << endl;
+
+  if (hdr.obstype != PULSAR)
+    unpack( getadd<CalInfoExtension>() );
 
   valid = true;
 
@@ -508,8 +512,10 @@ void Pulsar::TimerArchive::psr_load (FILE* fptr)
 
     ephemeris = factory<Pulsar::Parameters> (fptr, hdr.nbytesephem);
 
-    if (verbose == 3) {
-      if (ephemeris) {
+    if (verbose == 3)
+    {
+      if (ephemeris)
+      {
 	cerr << "TimerArchive::psr_load read parameters:" << endl;
 	ephemeris->unload (stderr);
 	cerr << "TimerArchive::psr_load end of parameters" << endl;

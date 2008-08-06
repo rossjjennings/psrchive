@@ -1,14 +1,18 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/TimerArchive.h"
+#include "Pulsar/Integration.h"
+
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Receiver.h"
 #include "Pulsar/TapeInfo.h"
 #include "Pulsar/Backend.h"
+#include "Pulsar/CalInfoExtension.h"
 
 #include <string.h>
 
@@ -33,7 +37,8 @@ void Pulsar::TimerArchive::unpack_extensions ()
 
   Backend* backend = get<Backend>();
 
-  if (!backend) {
+  if (!backend)
+  {
     Backend* ben = getadd<Backend>();
     ben->set_name (hdr.machine_id);
     backend = ben;
@@ -94,4 +99,15 @@ void Pulsar::TimerArchive::pack (const TapeInfo* tape)
 {
   strncpy (hdr.tape_label, tape->get_tape_label().c_str(), TLABEL_STRLEN);
   hdr.file_number = tape->get_file_number();
+}
+
+void Pulsar::TimerArchive::unpack (CalInfoExtension* cal)
+{
+  cal->cal_mode = "N/A";
+  cal->cal_frequency = -1.0;
+  cal->cal_dutycycle = 0.5;
+  cal->cal_phase = -1.0;
+
+  if (get_nsubint())
+    cal->cal_frequency = 1.0 / get_Integration(0)->get_folding_period();
 }
