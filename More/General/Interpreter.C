@@ -105,12 +105,19 @@ void Pulsar::Interpreter::init()
       "  string name       name of archive to be cloned \n" );
 
   add_command
+    ( &Interpreter::convert,
+      "convert", "convert to another archive class",
+      "usage: convert <class> [name] \n"
+      "  string class      name of the class to which to convert \n"
+      "  string name       name of archive to be converted \n" );
+
+  add_command
     ( &Interpreter::extract,
       "extract", "duplicate part of an archive",
       "usage: extract [name] <subints> \n"
       "  string name       name of archive from which to extract \n"
       "  unsigned subints  range[s] of subints to be extracted \n" );
-  
+
   add_command
     ( &Interpreter::append,
       "append", "append data from one archive to another",
@@ -512,7 +519,7 @@ string Pulsar::Interpreter::clone (const string& args) try
 { 
   vector<string> arguments = setup (args);
 
-  if (!arguments.size() > 1)
+  if (arguments.size() > 1)
     return response (Fail, "please specify only one name");
 
   if (arguments.size() == 1)
@@ -525,6 +532,34 @@ string Pulsar::Interpreter::clone (const string& args) try
 catch (Error& error) {
   return response (Fail, error.get_message());
 }
+
+// convert the archive to a new type
+string Pulsar::Interpreter::convert (const string& args) try
+{ 
+  vector<string> arguments = setup (args);
+
+  if (!arguments.size())
+    return response (Fail, "please specify the target archive class name");
+
+  Reference::To<Archive> input;
+
+  if (arguments.size() > 1)
+    input = getmap(arguments[1]);
+  else
+    input = get();
+
+  Reference::To<Archive> output = Archive::new_Archive (arguments[0]);
+  output-> copy (*input);
+
+  set( output );
+
+  return response (Good);
+}
+catch (Error& error)
+{
+  return response (Fail, error.get_message());
+}
+
 
 string Pulsar::Interpreter::extract (const string& args) try
 {
@@ -687,7 +722,7 @@ string Pulsar::Interpreter::append (const string& args) try
 { 
   vector<string> arguments = setup (args);
 
-  if (!arguments.size() != 1)
+  if (arguments.size() != 1)
     return response (Fail, "please specify one name");
 
   get()->append( getmap(arguments[0]) );

@@ -112,6 +112,9 @@ namespace Pulsar {
     //! clone the current archive
     std::string clone (const std::string& args);
 
+    //! convert the current archive or a named archive to a different class
+    std::string convert (const std::string& args);
+
     //! extract part of the current archive
     std::string extract (const std::string& args);
 
