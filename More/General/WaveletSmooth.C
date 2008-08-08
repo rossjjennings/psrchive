@@ -16,7 +16,7 @@ using namespace std;
 Pulsar::WaveletSmooth::WaveletSmooth ()
 {
   // These seem like good defaults
-  thresh = Soft;
+  thresh = Hard;
   set_wavelet(gsl_wavelet_daubechies, 8);
 }
 
