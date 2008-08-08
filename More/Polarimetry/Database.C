@@ -24,6 +24,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+#include "Pulsar/ChannelSubsetMatch.h"
+
 #include "ModifyRestore.h"
 #include "Error.h"
 
@@ -303,6 +305,7 @@ Pulsar::Database::Criterion::Criterion ()
   check_obs_type    = true;
   check_time        = true;
   check_coordinates = true;
+  check_frequency_array = false;
 }
 
 void Pulsar::Database::Criterion::no_data ()
@@ -314,6 +317,7 @@ void Pulsar::Database::Criterion::no_data ()
   check_bandwidth   = false;
   check_time        = false;
   check_coordinates = false;
+  check_frequency_array = false;
 }
 
 //! returns true if this matches observation parameters
@@ -488,6 +492,23 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
       return false;
     }
 
+  }
+
+  if (check_frequency_array) {
+    // For now this assumes we can accurately recreate the original
+    // freq arrays from nchan, bw, and freq.
+
+    ChannelSubsetMatch chan_match;
+    bool result = chan_match.match(have, entry);
+    if (match_verbose) {
+      cerr << "  Seeking channel subset match";
+      if (result==true)
+        cerr << "... match found!" << endl;
+      else 
+        cerr << "... no match (" << chan_match.get_reason() << ")" << endl;
+    }
+    if (result==false)
+      return false;
   }
 
   if (match_verbose)
@@ -976,6 +997,43 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
     cout << "Constructing PolnCalibrator from file " << entry.filename << endl;
   Reference::To<Pulsar::Archive> polcalarch;
   polcalarch = Pulsar::Archive::load(get_filename(entry));
+
+  // Truncate cal archive here if needed.
+  // How to determine when this is appropriate?  compare BW?
+  if (polcalarch->get_bandwidth() != arch->get_bandwidth()) {
+
+    // NOTE: this will currently only work when loading in 
+    // raw cal observations.  could/should be updated to deal
+    // with polcal solutions as well.
+
+    ChannelSubsetMatch chan_match;
+
+    if (verbose)
+      cerr << "Pulsar::Database::generatePolnCalibrator " 
+        << "BW mismatch, trying channel truncation... " << endl;
+
+    unsigned nremoved=0;
+
+    // Loop over polcal channels
+    for (unsigned ichan_pcal=0; ichan_pcal<polcalarch->get_nchan(); 
+        ichan_pcal++) {
+
+      // Try to match them to archive channels
+      int ichan_arch = chan_match.sub_channel(polcalarch, arch, ichan_pcal);
+
+      // If no match, delete it
+      if (ichan_arch==-1) {
+        polcalarch->remove_chan(ichan_pcal,ichan_pcal);
+        ichan_pcal--;
+        nremoved++;
+      }
+    }
+
+    if (verbose) 
+      cerr << "Pulsar::Database::generatePolnCalibrator removed " 
+        << nremoved << " channels." << endl;
+
+  }
 
   if (feed) {
     FeedExtension* feed_ext = polcalarch->getadd<FeedExtension>();
