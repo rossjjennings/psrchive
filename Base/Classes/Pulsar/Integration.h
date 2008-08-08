@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.95 $
-   $Date: 2008/05/13 21:49:05 $
+   $Revision: 1.96 $
+   $Date: 2008/08/08 15:24:55 $
    $Author: demorest $ */
 
 /*
@@ -405,6 +405,12 @@ namespace Pulsar {
 
     //! Inserts Profiles from Integration into this
     virtual void insert (Integration*);
+
+    //! Remove a channel from this Integration
+    virtual void remove (unsigned ichan);
+
+    //! Remove an inclusive channel range from this Integration
+    virtual void remove (unsigned ichan_first, unsigned ichan_last);
 
     //@}
 

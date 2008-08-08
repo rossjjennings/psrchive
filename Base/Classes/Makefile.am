@@ -42,6 +42,7 @@ libClasses_la_SOURCES = \
 	Archive_load_Integration.C \
         Archive_load.C \
         Archive_resize.C \
+        Archive_remove_chan.C \
 	Archive_verify.C \
         Archive_unload.C \
         Archive_verbose.C \
@@ -58,6 +59,7 @@ libClasses_la_SOURCES = \
 	IntegrationMeta.C \
         Integration_combine.C \
 	Integration_insert.C \
+	Integration_remove.C \
         Integration_mixable.C \
         Integration_resize.C \
         IntegrationTI.C \

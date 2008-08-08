@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.175 $
-   $Date: 2008/07/03 15:12:13 $
+   $Revision: 1.176 $
+   $Date: 2008/08/08 15:24:55 $
    $Author: demorest $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.175 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.176 $"
 
 #include "IntegrationManager.h"
 
@@ -359,6 +359,9 @@ namespace Pulsar
 
     //! Append the Integrations from the specifed archive
     void append (const Archive* archive);
+
+    //! Delete the specified inclusive channel range from the Archive
+    void remove_chan(unsigned first, unsigned last);
 
     //! Phase rotate pulsar Integrations so that pulse phase zero is centred
     void centre (double phase_offset = 0.5);
