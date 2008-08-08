@@ -39,7 +39,7 @@ bool PolynomialFit::check_range(double x_in)
   double xmin = *min_element(x.begin(),x.end());
   double xmax = *max_element(x.begin(),x.end());
   double xmid = 0.5 * (xmax + xmin);
-  double span = 1.1 * (xmax - xmin);
+  double span = 1.2 * (xmax - xmin);
   if (x_in > xmid-0.5*span && x_in < xmid+0.5*span)
     return true;
   else
@@ -101,12 +101,36 @@ double PolynomialFit::evaluate_integ(double x0, double x1)
     throw Error (InvalidState, "PolynomialFit::evaluate_integ",
         "evaluate_integ() called before compute()");
 
-  if (!check_range(x0) || !check_range(x1))
-    throw Error (InvalidParam, "PolynomicalFit::evaluate_integ",
-        "input x outside of fit range");
+  return evaluate_moment(x0, x1, 0);
+}
 
-  throw Error (InvalidState, "PolynomialFit::evaluate_integ",
-      "evaluate_integ() not implemented yet");
+double PolynomialFit::evaluate_moment(double x0, double x1, int n)
+{
+  if (!calcd)
+    throw Error (InvalidState, "PolynomialFit::evaluate_moment",
+        "evaluate_moment() called before compute()");
+
+  if (n>1) 
+    throw Error (InvalidParam, "PolynomialFit::evaulate_moment",
+        "only 0th and 1st moments implemented now");
+
+  x0 -= x_avg;
+  x1 -= x_avg;
+  double xx0=pow(x0,n+1), xx1=pow(x1,n+1);
+  double result = 0.0;
+  for (unsigned i=0; i<=ndeg; i++) {
+    // This may get numerically bad for very high order polynomials.
+    result += coeffs[i].get_value() * (xx1 - xx0) / (double)(i+n+1);
+    xx0 *= x0;
+    xx1 *= x1;
+  }
+
+  if (n==0)
+    return result;
+
+  result += x_avg * evaluate_integ(x0+x_avg, x1+x_avg);
+
+  return result;
 
 }
 

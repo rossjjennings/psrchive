@@ -48,6 +48,9 @@ public:
   //! Integrate the fit solution between x0 and x1
   double evaluate_integ(double x0, double x1);
 
+  //! Integrate x^n * y(x) over the specified range
+  double evaluate_moment(double x0, double x1, int n);
+
   //! Get the reduced chi2 of the fit
   double get_rchi2();
 
