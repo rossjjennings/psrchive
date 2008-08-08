@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.31 $
-   $Date: 2008/07/26 23:10:44 $
-   $Author: straten $ */
+   $Revision: 1.32 $
+   $Date: 2008/08/08 19:36:22 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
 #define __Pulsar_PulsarCalibrator_H
@@ -18,6 +18,8 @@
 #include "Pulsar/PhaseWeight.h"
 
 #include "MEAL/Mean.h"
+
+#include "toa.h"
 
 #include <stdio.h>
 
@@ -75,6 +77,9 @@ namespace Pulsar {
 
     //! File to which arrival time estimates should be written
     void set_tim_file (FILE* fptr) { tim_file = fptr; }
+
+    //! Output TOA format
+    void set_toa_format (Tempo::toa::Format fmt) { toa_format = fmt; }
 
     //! The matrix template matching engine used to fit the specified channel
     const PolnProfileFit* get_mtm (unsigned ichan) const;
@@ -158,6 +163,9 @@ namespace Pulsar {
 
     //! File to which arrival time estimates should be written
     FILE* tim_file;
+
+    //! TOA format to use
+    Tempo::toa::Format toa_format;
 
     //! Archive instance that is currently in use
     const Archive* archive;

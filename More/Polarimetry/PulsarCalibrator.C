@@ -53,6 +53,7 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)
 
   tim_file = 0;
   archive = 0;
+  toa_format = Tempo::toa::Parkes;
 }
 
 //! Constructor
@@ -271,7 +272,7 @@ void Pulsar::PulsarCalibrator::match (const Archive* data)
 
   bool one_channel = get_calibrator()->get_nchan() == 1;
 
-  if (one_channel && !solve_each) 
+  if (one_channel)
   {
     match.set_check_nchan (false);
     match.set_check_centre_frequency (false);
@@ -386,7 +387,7 @@ try
     if (!transformation[ichan])
       continue;
 
-    Tempo::toa toa (Tempo::toa::Parkes);
+    Tempo::toa toa (toa_format);
 
     double freq = integration->get_centre_frequency (ichan);
     toa.set_frequency (freq);
@@ -396,6 +397,10 @@ try
     assert (ichan < phase_shift.size());
 
     Estimate<double> phase = phase_shift[ichan];
+
+    // Skip messed up toas
+    if (phase.var<=0.0) 
+      continue;
 
     toa.set_arrival   (integration->get_epoch() + phase.val * period);
     toa.set_error     (sqrt(phase.var) * period * 1e6);

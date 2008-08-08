@@ -202,6 +202,9 @@ int main (int argc, char *argv[]) try {
       
       else if (strcasecmp (optarg, "SIS") == 0)
 	Profile::shift_strategy.set(&SincInterpShift);
+
+      else if (strcasecmp (optarg, "FDM") == 0)
+	Profile::shift_strategy.set(&FourierDomainFit);
       
       else
 	cerr << "pat: unrecognized shift method '" << optarg << "'" << endl;
@@ -248,7 +251,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.83 2008/07/07 23:05:43 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.84 2008/08/08 19:36:41 demorest Exp $" << endl;
       return 0;
 
     case 'M':
@@ -351,6 +354,17 @@ int main (int argc, char *argv[]) try {
       full_poln->set_choose_maximum_harmonic (choose_maximum_harmonic);
 
       full_poln->set_tim_file (stdout);
+
+      if (strcasecmp(outFormat.c_str(),"parkes")==0) 
+        full_poln->set_toa_format(Tempo::toa::Parkes);
+      else if (strcasecmp(outFormat.c_str(),"princeton")==0)
+        full_poln->set_toa_format(Tempo::toa::Princeton);
+      else if (strcasecmp(outFormat.c_str(),"itoa")==0)
+        full_poln->set_toa_format(Tempo::toa::ITOA);
+      else if (strcasecmp(outFormat.c_str(),"psrclock")==0)
+        full_poln->set_toa_format(Tempo::toa::Psrclock);
+      else if (strcasecmp(outFormat.c_str(),"tempo2")==0)
+        full_poln->set_toa_format(Tempo::toa::Tempo2);
 
       stdarch->convert_state (Signal::Stokes);
       full_poln->set_standard( stdarch );
