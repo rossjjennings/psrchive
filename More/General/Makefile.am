@@ -20,6 +20,7 @@ nobase_include_HEADERS = \
         Pulsar/BaselineEstimator.h \
 	Pulsar/BaselineInterpreter.h \
         Pulsar/BaselineWindow.h \
+        Pulsar/ChannelSubsetMatch.h \
         Pulsar/ChannelWeight.h \
         Pulsar/ChannelZapMedian.h \
         Pulsar/ChannelZapModulation.h \
@@ -139,6 +140,7 @@ libGeneral_la_SOURCES = \
 	BaselineEstimator.C \
 	BaselineInterpreter.C \
         BaselineWindow.C \
+        ChannelSubsetMatch.C \
         ChannelZapMedian.C \
         ChannelZapModulation.C \
 	CommonOptions.C \
