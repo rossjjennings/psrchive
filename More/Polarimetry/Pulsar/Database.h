@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.16 $
-   $Date: 2007/10/02 05:19:33 $
-   $Author: straten $ */
+   $Revision: 1.17 $
+   $Date: 2008/08/08 19:20:13 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_Database_h
 #define __Pulsar_Database_h
@@ -161,6 +161,7 @@ namespace Pulsar {
       
     };
     
+    //! Describes Database matching criteria
     class Criterion  {
       
     public:
@@ -183,6 +184,7 @@ namespace Pulsar {
       bool check_obs_type;
       bool check_time;
       bool check_coordinates;
+      bool check_frequency_array;
 
       //! Default constructor
       Criterion ();
