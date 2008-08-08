@@ -31,7 +31,7 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:BbCcDd:e:fFGhiIJM:m:n:O:op:PqRr:sSt:Tu:vVwZ";
+const char* args = "A:aBbCcDd:e:fFGhiIJM:m:n:O:op:PqRr:sSt:Tu:vVwZ";
 
 void usage ()
 {
@@ -73,6 +73,7 @@ void usage ()
     "  -F            Do not try to match frequencies\n"
     "  -b            Do not try to match bandwidths\n"
     "  -o            Allow opposite sidebands\n"
+    "  -a            Per-channel matching\n"
     "\n"
     "Expert options: \n"
     "  -f            Override flux calibration flag\n"
@@ -167,7 +168,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.91 2008/07/09 10:53:28 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.92 2008/08/08 19:20:35 demorest Exp $" << endl;
       return 0;
 
     case 'A':
@@ -394,6 +395,11 @@ int main (int argc, char *argv[])
       criterion.check_instrument = false;
       command += " -Z";
       break;
+    case 'a':
+      criterion.check_frequency = false;
+      criterion.check_bandwidth = false;
+      criterion.check_frequency_array = true;
+      break;
 
     default:
       return -1;
@@ -431,6 +437,9 @@ int main (int argc, char *argv[])
   if ( !model_file.empty() ) try
   {
     cerr << "pac: Loading calibrator from " << model_file << endl;
+
+    if (criterion.check_frequency_array)
+      cerr << "pac: Warning: -a and -A options are incompatible" << endl;
 
     model_arch = Pulsar::Archive::load(model_file);
     model_calibrator = new Pulsar::PolnCalibrator(model_arch);
