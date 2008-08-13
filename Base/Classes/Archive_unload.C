@@ -40,10 +40,19 @@ void Pulsar::Archive::unload (const char* filename) const
 
   TemporaryFile temp (unload_to_filename);
 
-  try {
-    unload_file (temp.get_filename().c_str());
+  try
+  {
+    if (!can_unload())
+    {
+      Reference::To<Archive> output = Archive::new_Archive (unload_class);
+      output-> copy (*this);
+      output-> unload_file (temp.get_filename().c_str());
+    }
+    else
+      unload_file (temp.get_filename().c_str());
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     throw error += "Pulsar::Archive::unload";
   }
 
