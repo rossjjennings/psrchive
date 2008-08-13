@@ -7,16 +7,17 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.176 $
-   $Date: 2008/08/08 15:24:55 $
-   $Author: demorest $ */
+   $Revision: 1.177 $
+   $Date: 2008/08/13 11:57:31 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.176 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.177 $"
 
-#include "IntegrationManager.h"
+#include "Pulsar/IntegrationManager.h"
+#include "Pulsar/Config.h"
 
 #include "sky_coord.h"
 #include "toa.h"
@@ -568,12 +569,18 @@ namespace Pulsar
      */
     //@{
 
+    //! Name of class to which data are converted if unload_file unimplemented
+    static Option<std::string> unload_class;
+
     //! Load the header information from filename
     virtual void load_header (const char* filename) = 0;
 
     //! Load the specified Integration from filename, returning new instance
     virtual Integration*
     load_Integration (const char* filename, unsigned subint) = 0;
+
+    //! Return true if unload_file is implemented
+    virtual bool can_unload () const = 0;
 
     //! Unload the Archive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const = 0;
