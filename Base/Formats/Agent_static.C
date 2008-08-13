@@ -12,6 +12,7 @@
 #endif
 
 using namespace Pulsar;
+using namespace std;
 
 Registry::List<Archive::Agent> Archive::Agent::registry;
 
@@ -82,3 +83,20 @@ template
 Registry::List<Archive::Agent>::Enter<ASCIIArchive::Agent>
 Archive::Advocate<ASCIIArchive>::entry;
 
+
+
+Pulsar::Option<string> Pulsar::Archive::unload_class
+(
+ "Archive::unload_class",
+
+#ifdef HAVE_CFITSIO
+ "PSRFITS",
+#else
+ "Timer",
+#endif
+
+ "File format used if unload is not implemented",
+
+ "If the file format used to load the data does not implement an unload \n"
+ "method, then the data will be converted to the name file format."
+);
