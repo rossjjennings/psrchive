@@ -84,6 +84,9 @@ namespace Pulsar {
     //! Fill various Archive extensions
     void load_extensions();
 
+    //! The unload_file method is not implemented
+    bool can_unload () const { return false; }
+
     //! Unload the ExampleArchive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;
 

@@ -57,6 +57,9 @@ namespace Pulsar {
     virtual Integration*
     load_Integration (const char* filename, unsigned subint);
 
+    //! The unload_file method is not implemented
+    bool can_unload () const { return false; }
+
     //! Unload the PRESTOArchive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;
 

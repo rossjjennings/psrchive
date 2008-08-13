@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.15 $
-   $Date: 2007/11/26 02:50:18 $
+   $Revision: 1.16 $
+   $Date: 2008/08/13 11:57:45 $
    $Author: straten $ */
 
 #ifndef __EPN_Archive_h
@@ -166,6 +166,9 @@ namespace Pulsar {
 
     //! Load the specified Integration from filename, returning new instance
     Integration* load_Integration (const char* filename, unsigned subint);
+
+    //! The unload_file method is not implemented
+    bool can_unload () const { return false; }
 
     //! Unload the Archive (header and Integration data) to filename
     void unload_file (const char* filename) const;

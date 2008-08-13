@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASP/Pulsar/ASPArchive.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/01/28 19:06:01 $
-   $Author: demorest $ */
+   $Revision: 1.4 $
+   $Date: 2008/08/13 11:57:45 $
+   $Author: straten $ */
 
 #ifndef __ASPArchive_h
 #define __ASPArchive_h
@@ -68,6 +68,9 @@ namespace Pulsar {
 
     //! Fill in info for select Archive extensions
     void load_extensions(fitsfile *f, int *status);
+
+    //! The unload_file method is not implemented
+    bool can_unload () const { return false; }
 
     //! Unload the ASPArchive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;

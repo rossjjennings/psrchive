@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.25 $
-   $Date: 2008/08/06 00:40:26 $
+   $Revision: 1.26 $
+   $Date: 2008/08/13 11:57:45 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -178,6 +178,9 @@ namespace Pulsar {
     //! Load the specified Integration from filename, returning new instance
     virtual Integration*
     load_Integration (const char* filename, unsigned subint);
+
+    //! The unload_file method is implemented
+    bool can_unload () const { return true; }
 
     //! Unload the Archive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;

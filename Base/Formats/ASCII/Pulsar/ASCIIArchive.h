@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASCII/Pulsar/ASCIIArchive.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/17 14:59:21 $
+   $Revision: 1.7 $
+   $Date: 2008/08/13 11:57:45 $
    $Author: straten $ */
 
 #ifndef __ASCIIArchive_h
@@ -59,6 +59,9 @@ namespace Pulsar {
     //! Load the specified Integration from filename, returning new instance
     virtual Integration*
     load_Integration (const char* filename, unsigned subint);
+
+    //! The unload_file method is not implemented
+    bool can_unload () const { return false; }
 
     //! Unload the ASCIIArchive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;

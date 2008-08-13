@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PuMa/Pulsar/PuMaArchive.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/12/05 04:13:45 $
+   $Revision: 1.4 $
+   $Date: 2008/08/13 11:57:45 $
    $Author: straten $ */
 
 #ifndef __PuMaArchive_h
@@ -175,6 +175,9 @@ namespace Pulsar {
     //! Load the specified Integration from filename, returning new instance
     Integration*
     load_Integration (const char* filename, unsigned subint);
+
+    //! The unload_file method is implemented
+    bool can_unload () const { return true; }
 
     //! Unload the PuMaArchive (header and Integration data) to filename
     void unload_file (const char* filename) const;

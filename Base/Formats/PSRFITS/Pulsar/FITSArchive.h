@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.56 $
-   $Date: 2008/02/07 10:39:28 $
+   $Revision: 1.57 $
+   $Date: 2008/08/13 11:57:45 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -173,6 +173,9 @@ namespace Pulsar {
     virtual Integration*
     load_Integration (const char* filename, unsigned subint);
     
+    //! The unload_file method is implemented
+    bool can_unload () const { return true; }
+
     //! Unload the FITSArchive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;
 

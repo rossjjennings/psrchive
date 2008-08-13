@@ -77,8 +77,10 @@ namespace Pulsar {
     //! Fill in Archive extension info
     void load_extensions();
 
+    //! The unload_file method is not implemented
+    bool can_unload () const { return false; }
+
     //! Unload the BPPArchive (header and Integration data) to filename.
-    //! Not implemented.
     virtual void unload_file (const char* filename) const;
 
     // Advocates the use of the BPPArchive plugin
