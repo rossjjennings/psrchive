@@ -1,12 +1,14 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2007 by Willem van Straten
+ *   Copyright (C) 2003-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/IntegrationOrder.h"
+#include "Pulsar/CalInfoExtension.h"
+
 #include "FITSError.h"
 #include "psrfitsio.h"
 
@@ -29,16 +31,32 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   clean_Pointing_columns (ffptr);
 
-  // If archive has a folding model, remove PERIOD column
-  if (has_model())
+  const CalInfoExtension* calinfo = get<CalInfoExtension>();
+  bool calfreq_set = calinfo && calinfo->cal_frequency > 0.0;
+
+  int perstatus=0;
+  int percolnum=0;
+  fits_get_colnum(ffptr, CASEINSEN, "PERIOD", &percolnum, &perstatus);
+
+  // Write folding period if predictor model does not exist
+  if (has_model() || calfreq_set)
   {
     if (verbose > 2) 
-      cerr << "Pulsar::FITSArchive::unload_integrations found model, "
-        << "removing PERIOD column" << endl;
-    int perstatus=0;
-    int percolnum=0;
-    fits_get_colnum(ffptr, CASEINSEN, "PERIOD", &percolnum, &perstatus);
-    fits_delete_col(ffptr, percolnum, &perstatus);
+      cerr << "Pulsar::FITSArchive::unload_integrations delete PERIOD column"
+	   << endl;
+
+    fits_delete_col (ffptr, percolnum, &perstatus);
+  }
+  else if (perstatus)
+  {
+    if (verbose > 2) 
+      cerr << "Pulsar::FITSArchive::unload_integrations insert PERIOD column"
+	   << endl;
+
+    fits_get_colnum(ffptr, CASEINSEN, "OFFS_SUB", &percolnum, &perstatus);
+    fits_insert_col (ffptr, percolnum+1, "PERIOD", "1D", &perstatus);
+    psrfits_update_key (ffptr, "TUNIT", percolnum+1, "s",
+			"Spin period in seconds");
   }
 
   psrfits_clean_rows (ffptr);
@@ -50,10 +68,12 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   fits_insert_rows (ffptr, 0, nsubint, &status);
 
-  if (verbose > 2) {
+  if (verbose > 2)
+  {
     long newrownum = 0;
     fits_get_num_rows (ffptr, &newrownum, &status);
-    if (verbose > 2) {
+    if (verbose > 2)
+    {
       cerr << "FITSArchive::unload_integrations DATA row count = "
            << newrownum
            << endl;
