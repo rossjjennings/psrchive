@@ -51,6 +51,13 @@ namespace Pulsar {
 
     //! Return a new extraction-constructed BPPArchive instance
     BPPArchive* extract (const std::vector<unsigned>& subints) const;
+
+    //! Different linearization methods  
+    /*! Mean = use only mean power levels,
+     *  Bins = use measured power at each pulse phase, 
+     *  None = do nothing.
+     */
+    enum Linearization { Mean, Bins, None };
     
   protected:
 
@@ -65,6 +72,9 @@ namespace Pulsar {
 
     //! Get integer MJD out of the BPP header.
     int get_mjd_from_hdr();
+
+    //! Selected linearization method
+    Linearization lin_method;
 
     //! Linearize 2-bit power scale.
     int linearize_power(float quant_power, float *input_power, float *gain,

@@ -31,7 +31,7 @@ void Pulsar::BPPArchive::init ()
   // go in here.
   orig_rfs = NULL;
   orig_rfs_corrected = 0;
-
+  lin_method = Mean;
   ThresholdMatch::set_BPP (this);
 }
 
@@ -264,6 +264,7 @@ void Pulsar::BPPArchive::load_header (const char* filename)
 
   if (src[0]=='c' || src[0]=='C') {
     set_type(Signal::PolnCal);
+    lin_method = Bins; // Use per-bin linearization for cal data
   } else if (src[0]=='d' || src[0]=='D') {
     if (src[src.length()-1]=='n' || src[src.length()-1]=='N') { 
       set_type(Signal::FluxCalOff); 
@@ -488,36 +489,39 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
     // Gains default to 1.0
     for (int k=0; k<num_means; k++) { gains[k]=1.0; }
 
-#if 1 
     // Correct 2-bit mean powers, get 2-bit "gain" factors
     // Blank any channels with funky values.
-    int nblank=0;
-    float meantmp, gxtmp[2];
-    for (int k=0; k<hdr.chsbd; k++) {
-      cur_chan = i*hdr.chsbd + k;
-      for (int j=0; j<hdr.polns; j++) {
-        if (j<2) {
-          // Power terms
-          gxtmp[j]=1.0;
-          rv = linearize_power(means[j*hdr.chsbd+k], &meantmp,
-              &gains[j*hdr.chsbd+k], &gxtmp[j]);
-          if (rv!=0) { integration->set_weight(cur_chan,0.0); nblank++; } 
-          else { means[j*hdr.chsbd+k] = meantmp; }
-        } else if (j<4) { 
-          // Cross terms
-          gains[j*hdr.chsbd+k] = gxtmp[0]*gxtmp[1];
-          means[j*hdr.chsbd+k] *= gains[j*hdr.chsbd+k];
-        } else {
-          // Shouldn't get here!
-          throw Error (InvalidState, "Pulsar::BPPArchive::load_Integration",
-              "ipol>4 (%d)", j);
+    if (lin_method==Mean) {
+
+      int nblank=0;
+      float meantmp, gxtmp[2];
+
+      for (int k=0; k<hdr.chsbd; k++) {
+        cur_chan = i*hdr.chsbd + k;
+        for (int j=0; j<hdr.polns; j++) {
+          if (j<2) {
+            // Power terms
+            gxtmp[j]=1.0;
+            rv = linearize_power(means[j*hdr.chsbd+k], &meantmp,
+                &gains[j*hdr.chsbd+k], &gxtmp[j]);
+            if (rv!=0) { integration->set_weight(cur_chan,0.0); nblank++; } 
+            else { means[j*hdr.chsbd+k] = meantmp; }
+          } else if (j<4) { 
+            // Cross terms
+            gains[j*hdr.chsbd+k] = gxtmp[0]*gxtmp[1];
+            means[j*hdr.chsbd+k] *= gains[j*hdr.chsbd+k];
+          } else {
+            // Shouldn't get here!
+            throw Error (InvalidState, "Pulsar::BPPArchive::load_Integration",
+                "ipol>4 (%d)", j);
+          }
         }
       }
-    }
 
-    if (nblank&&(verbose>2)) 
-      cerr << "Pulsar::BPPArchive blanked " << nblank << " channels" << endl;
-#endif
+      if (nblank&&(verbose>2)) 
+        cerr << "Pulsar::BPPArchive blanked " << nblank << " channels" << endl;
+
+    }
 
     // Loop over profile data
     for (int j=0; j<hdr.polns; j++) {
@@ -533,12 +537,69 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
 #endif
         prof = integration->get_Profile(j,cur_chan);
         prof->set_amps(data);
-        prof->scale(gains[j*hdr.chsbd+k]);
+        // Only need to do scaling if we already linearized
+        if (lin_method==Mean) 
+          prof->scale(gains[j*hdr.chsbd+k]);
         prof->offset(means[j*hdr.chsbd+k]);
       }
     }
   }
   fclose(f);
+
+  // Per-bin linearization, if requested
+  if (lin_method==Bins) {
+
+    int nblank=0;
+
+    for (unsigned ichan=0; ichan<get_nchan(); ichan++) {
+
+      bool blanked=false;
+      float tmp,gxtmp[2];
+
+      for (unsigned ipol=0; ipol<get_npol(); ipol++) {
+
+        prof = integration->get_Profile(ipol,ichan);
+
+        for (unsigned ibin=0; ibin<get_nbin(); ibin++) {
+
+          if (ipol<2) {
+            // AA, BB polns
+            gxtmp[ipol]=1.0;
+            rv = linearize_power(prof->get_amps()[ibin],&tmp,
+                NULL,&gxtmp[ipol]); 
+            if (rv!=0) { 
+              // Linearize failed, blank this channel
+              integration->set_weight(ichan,0.0); 
+              nblank++; 
+              blanked=true;
+              break;
+            } 
+            prof->get_amps()[ibin] = tmp;
+          } else {
+            // Cross-terms
+            prof->get_amps()[ibin] *= gxtmp[0]*gxtmp[1];
+          }
+
+        }
+
+        if (blanked) break;
+
+      }
+
+      // Don't put half-corrected data through, just zero it
+      if (blanked) {
+        for (unsigned ipol=0; ipol<get_npol(); ipol++) {
+          prof = integration->get_Profile(ipol,ichan);
+          prof->scale(0.0);
+        }
+      }
+
+    }
+
+    if (nblank && (verbose>2)) 
+      cerr << "Pulsar::BPPArchive blanked " << nblank << " channels" << endl;
+
+  }
 
   // Unalloc temp space
   delete [] data;
