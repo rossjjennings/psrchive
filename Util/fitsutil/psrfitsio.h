@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.17 $
-   $Date: 2008/06/06 02:37:41 $
+   $Revision: 1.18 $
+   $Date: 2008/08/14 12:57:19 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
@@ -100,6 +100,12 @@ void psrfits_update_key (fitsfile* fptr, const char* name,
 			 const std::string& data,
 			 const char* comment = 0);
 
+//! Convenience interface to fits_make_keyn + fits_update_key
+void psrfits_update_key (fitsfile* fptr,
+			 const char* name,
+			 int column,
+			 const std::string& data,
+			 const char* comment = 0);
 
 //! Worker function does not handle status
 template<typename T>

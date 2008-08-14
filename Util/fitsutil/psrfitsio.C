@@ -81,15 +81,23 @@ void psrfits_update_tdim (fitsfile* ffptr, int column,
 
   result += ")";
 
-  char keyword [FLEN_KEYWORD+1];
-  int status = 0;
-  fits_make_keyn ("TDIM", column, keyword, &status);
-  if (status)
-    throw FITSError (status, "psrfits_update_tdim", "fits_make_keyn");
-
-  psrfits_update_key (ffptr, keyword, result);
+  psrfits_update_key (ffptr, "TDIM", column, result);
 }
 
+void psrfits_update_key (fitsfile* fptr,
+			 const char* name,
+			 int column,
+			 const std::string& data,
+			 const char* comment)
+{
+  char keyword [FLEN_KEYWORD+1];
+  int status = 0;
+  fits_make_keyn (const_cast<char*>(name), column, keyword, &status);
+  if (status)
+    throw FITSError (status, "psrfits_update_key", "fits_make_keyn");
+
+  psrfits_update_key (fptr, keyword, data, comment);
+}
 
 void psrfits_update_key (fitsfile* fptr, const char* name,
 			 const std::string& data,
