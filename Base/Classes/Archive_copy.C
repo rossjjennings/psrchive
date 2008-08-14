@@ -42,20 +42,22 @@ void Pulsar::Archive::copy (const Archive& archive,
     return;
   
   // copy only the selected subints
-  resize (nsub, archive.get_npol(),
-	  archive.get_nchan(), archive.get_nbin());
+  resize (nsub, archive.get_npol(), archive.get_nchan(), archive.get_nbin());
   
-  for (unsigned isub=0; isub<nsub; isub++) {
+  for (unsigned isub=0; isub<nsub; isub++)
+  {
     const Integration* subint = archive.get_Integration( selected[isub] );
     get_Integration(isub) -> copy (subint, false);
   }
   
-  if (archive.ephemeris) {
+  if (archive.ephemeris)
+  {
     if (verbose > 2)
       cerr << "Pulsar::Archive::copy ephemeris" << endl;
     ephemeris = archive.ephemeris->clone();
   } 
-  else {
+  else
+  {
     if (verbose > 2)
       cerr << "Pulsar::Archive::copy no ephemeris" << endl;
     ephemeris = 0;
@@ -104,8 +106,8 @@ void Pulsar::Archive::copy (const Archive& archive,
 
   extension.resize (0);
 
-  for (unsigned iext=0; iext < archive.get_nextension(); iext++) {
-
+  for (unsigned iext=0; iext < archive.get_nextension(); iext++)
+  {
     if (verbose == 3)
       cerr << "Pulsar::Archive::copy clone " 
 	   << archive.get_extension(iext)->get_extension_name() << endl;
@@ -113,6 +115,11 @@ void Pulsar::Archive::copy (const Archive& archive,
     Reference::To<Extension> ext = archive.get_extension(iext)->clone();
     add_extension (ext);
   }
+
+  mixable_strategy = archive.mixable_strategy;
+  standard_match_strategy = archive.standard_match_strategy;
+  processing_match_strategy = archive.processing_match_strategy;
+  calibrator_match_strategy = archive.calibrator_match_strategy;
 
   if (selected.empty())
     return;
