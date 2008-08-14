@@ -53,8 +53,15 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
       cerr << "Pulsar::FITSArchive::unload_integrations insert PERIOD column"
 	   << endl;
 
+    perstatus = 0;
+
     fits_get_colnum(ffptr, CASEINSEN, "OFFS_SUB", &percolnum, &perstatus);
     fits_insert_col (ffptr, percolnum+1, "PERIOD", "1D", &perstatus);
+
+    if (perstatus)
+      throw FITSError (perstatus, "Pulsar::FITSArchive::unload_integrations",
+                       "fits_insert_col PERIOD");
+
     psrfits_update_key (ffptr, "TUNIT", percolnum+1, "s",
 			"Spin period in seconds");
   }
