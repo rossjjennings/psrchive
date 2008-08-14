@@ -6,21 +6,20 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/ArchiveMatch.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/10/02 05:19:32 $
+/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveMatch.h,v $
+   $Revision: 1.1 $
+   $Date: 2008/08/14 13:17:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveMatch_h
 #define __Pulsar_ArchiveMatch_h
 
+#include "Pulsar/Archive.h"
 #include "Pulsar/Config.h"
 
 namespace Pulsar {
 
-  class Archive;
-
-  //! Flexible criterion used to determine if two archives match
+  //! Criterion used to determine if two archives match
   class ArchiveMatch {
 
   public:
@@ -28,8 +27,14 @@ namespace Pulsar {
     //! Default constructor
     ArchiveMatch ();
 
+    //! Empty destructor
+    virtual ~ArchiveMatch () {}
+
     //! Check that the selected attributes match
     bool match (const Archive* a, const Archive* b);
+
+    //! Functor interface
+    Archive::MatchResult operator () (const Archive* a1, const Archive* a2);
 
     //! Get the mismatch messages from the last call to the match method
     std::string get_reason () const { return reason; }
@@ -98,6 +103,9 @@ namespace Pulsar {
     void set_check_bandwidth (bool flag = true);
     bool get_check_bandwidth () const;
 
+    //! Return true if the bandwidths match
+    virtual bool get_bandwidth_match (const Archive* a, const Archive* b) const;
+
     //! The maximum amount by which the centre frequency may differ, in MHz
     static Option<double> max_frequency_difference;
 
@@ -107,10 +115,19 @@ namespace Pulsar {
     //! String used to separate mismatch messages
     static std::string separator;
 
+    //! Return a matching strategy based on the specified method
+    template <typename T>
+    static Archive::MatchFunctor functor (T method)
+    {
+      ArchiveMatch* match = new ArchiveMatch;
+      (match->*method) ();
+      return Archive::MatchFunctor (match);
+    }
+
   protected:
 
     //! The mismatch messages from the last call to the match method
-    std::string reason;
+    mutable std::string reason;
 
     bool check_state;
     bool check_type;

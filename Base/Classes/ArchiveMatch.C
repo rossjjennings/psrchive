@@ -452,19 +452,32 @@ bool Pulsar::ArchiveMatch::match (const Archive* a, const Archive* b)
     }
   }
 
-  if (check_bandwidth)
-  {
-    double bw1 = a->get_bandwidth();
-    double bw2 = b->get_bandwidth();
-    
-    if ( ( bw1 != bw2 ) && !(opposite_sideband && (bw1 == -bw2)) )
-    {
-      reason += separator
-	+ stringprintf ("bandwidth mismatch: %lf and %lf", bw1, bw2);
-      result = false;
-    }
-  }
+  if (check_bandwidth && !get_bandwidth_match(a,b))
+    result = false;
 
+  return result;
+}
+
+bool Pulsar::ArchiveMatch::get_bandwidth_match (const Archive* a, const Archive* b) const
+{
+  double bw1 = a->get_bandwidth();
+  double bw2 = b->get_bandwidth();
+
+  if ( ( bw1 != bw2 ) && !(opposite_sideband && (bw1 == -bw2)) )
+  {
+    reason += separator
+      + stringprintf ("bandwidth mismatch: %lf and %lf", bw1, bw2);
+    return false;
+  }
+  return true;
+}
+
+Pulsar::Archive::MatchResult
+Pulsar::ArchiveMatch::operator () (const Archive* a1, const Archive* a2)
+{
+  Archive::MatchResult result;
+  result.first = match (a1, a2);
+  result.second = reason;
   return result;
 }
 

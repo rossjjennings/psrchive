@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Append.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/07/14 22:05:12 $
+   $Revision: 1.4 $
+   $Date: 2008/08/14 13:17:10 $
    $Author: straten $ */
 
 #ifndef _Pulsar_Append_H
 #define _Pulsar_Append_H
 
-#include "ArchiveMatch.h"
+#include "Pulsar/ArchiveMatch.h"
 #include "Reference.h"
 
 namespace Pulsar {

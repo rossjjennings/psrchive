@@ -14,7 +14,6 @@ nobase_include_HEADERS = \
         Pulsar/AdaptiveSNR.h \
         Pulsar/AdaptiveSmooth.h \
         Pulsar/Algorithm.h \
-        Pulsar/ArchiveMatch.h \
         Pulsar/ArchiveSort.h \
 	Pulsar/ArchiveTemplates.h \
         Pulsar/BaselineEstimator.h \
@@ -122,8 +121,6 @@ libGeneral_la_SOURCES = \
         Archive_fscrunch.C \
 	Archive_good_model.C \
         Archive_invint.C \
-        Archive_match.C \
-        ArchiveMatch.C \
         Archive_pscrunch.C \
         Archive_remove_baseline.C \
         Archive_rms_baseline.C \

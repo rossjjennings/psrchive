@@ -8,6 +8,7 @@ nobase_include_HEADERS = \
         Pulsar/ArchiveExpert.h \
 	Pulsar/ArchiveExtension.h \
         Pulsar/ArchiveInterface.h \
+	Pulsar/ArchiveMatch.h \
 	Pulsar/Application.h \
         Pulsar/BasicArchive.h \
         Pulsar/BasicIntegration.h \
@@ -29,6 +30,7 @@ nobase_include_HEADERS = \
 	Pulsar/ProfileAmpsExpert.h \
         Pulsar/Pulsar.h \
 	Pulsar/SimplePredictor.h \
+	Pulsar/ThresholdMatch.h \
 	Pulsar/Verification.h
 
 libClasses_la_SOURCES = \
@@ -36,11 +38,13 @@ libClasses_la_SOURCES = \
         Agent_plugin.C \
         Archive.C \
         ArchiveInterface.C \
+	ArchiveMatch.C \
 	Archive_correct.C \
         Archive_copy.C \
         Archive_init_Integration.C \
 	Archive_load_Integration.C \
         Archive_load.C \
+	Archive_match.C \
         Archive_resize.C \
         Archive_remove_chan.C \
 	Archive_verify.C \
@@ -67,7 +71,8 @@ libClasses_la_SOURCES = \
         Profile.C \
 	ProfileAmps.C \
 	Pulsar.C \
-	SimplePredictor.C
+	SimplePredictor.C \
+	ThresholdMatch.C
 
 #############################################################################
 #
