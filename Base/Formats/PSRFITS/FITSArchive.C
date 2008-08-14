@@ -31,6 +31,7 @@
 
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Telescope.h"
+#include "Pulsar/ThresholdMatch.h"
 
 #include "Pulsar/Predictor.h"
 #include "fitsio_tempo.h"
@@ -306,6 +307,14 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   // WidebandCorrelator parameters
 
   load_WidebandCorrelator (fptr);
+
+  Backend* backend = get<Backend>();
+  if (backend && strstr (backend->get_name().c_str(), "BPP"))
+  {
+    if (verbose > 3)
+      cerr << "FITSArchive::load_header using BPP matching policy" << endl;
+    ThresholdMatch::set_BPP (this);
+  }
 
   // Figure out what kind of observation it was
 

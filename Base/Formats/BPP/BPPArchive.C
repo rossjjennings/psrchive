@@ -21,6 +21,7 @@
 #include "Pulsar/Receiver.h"
 #include "Pulsar/GBT.h"
 #include "Pulsar/Arecibo.h"
+#include "Pulsar/ThresholdMatch.h"
 
 using namespace std;
 
@@ -30,6 +31,8 @@ void Pulsar::BPPArchive::init ()
   // go in here.
   orig_rfs = NULL;
   orig_rfs_corrected = 0;
+
+  ThresholdMatch::set_BPP (this);
 }
 
 Pulsar::BPPArchive::BPPArchive()
