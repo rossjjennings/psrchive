@@ -524,21 +524,23 @@ catch (Error& error) {
 }
 
 
-void Pulsar::PolnCalibrator::calibration_setup (Archive* arch) try
+void Pulsar::PolnCalibrator::calibration_setup (Archive* arch)
 {
   string reason;
   if (!get_calibrator()->calibrator_match (arch, reason))
-    throw Error (InvalidParam, "Pulsar::PolnCalibrator::add_observation",
+    throw Error (InvalidParam, "Pulsar::PolnCalibrator::calibration_setup",
 		 "mismatch between calibrator\n\t" 
 		 + get_calibrator()->get_filename() +
                  " and\n\t" + arch->get_filename() + reason);
 
-  if (response.size() != arch->get_nchan())
+  if (response.size() != arch->get_nchan()) try
+  {
     build( arch->get_nchan() );
-}
-catch (Error& error)
-{
-  throw error += "Pulsar::PolnCalibrator::calibration_setup";
+  }
+  catch (Error& error)
+  {
+    throw error += "Pulsar::PolnCalibrator::calibration_setup";
+  }
 }
 
 /*! Upon completion, the flux of the archive will be normalized with
