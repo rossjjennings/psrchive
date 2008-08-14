@@ -401,34 +401,42 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
     }
   }
 
-  if (check_frequency) {
-
+  if (check_frequency)
+  {
     if (match_verbose)
       cerr << "  Seeking frequency=" << entry.frequency
 	   << " have frequency=" << have.frequency;
 
-    if (entry.frequency==have.frequency) {
+    double diff = entry.frequency - have.frequency;
+    if (diff)
+      diff /= entry.frequency + have.frequency;
+
+    if ( diff < 1e-12 )
+    {
       if (match_verbose)
 	cerr << " ... match found" << endl; 
     }
-    else {
+    else
+    {
       if (match_verbose)
 	cerr << "... no match" << endl;
       return false;
     }
   }
 
-  if (check_bandwidth) {
-
+  if (check_bandwidth)
+  {
     if (match_verbose)
       cerr << "  Seeking bandwidth=" << entry.bandwidth
            << " have bandwidth=" << have.bandwidth;
 
-    if (entry.bandwidth==have.bandwidth) {
+    if (entry.bandwidth==have.bandwidth)
+    {
       if (match_verbose)
         cerr << " ... match found" << endl;
     }
-    else {
+    else
+    {
       if (match_verbose)
         cerr << "... no match" << endl;
       return false;
@@ -437,8 +445,8 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
 
   double diff;
 
-  if (check_time) {
-
+  if (check_time)
+  {
     diff = (have.time - entry.time).in_minutes();
 
     switch (policy) {
@@ -1000,7 +1008,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
 
   // Truncate cal archive here if needed.
   // How to determine when this is appropriate?  compare BW?
-  if (polcalarch->get_bandwidth() != arch->get_bandwidth()) {
+  if (polcalarch->get_bandwidth() != arch->get_bandwidth() && polcalarch->get_nsubint()) {
 
     // NOTE: this will currently only work when loading in 
     // raw cal observations.  could/should be updated to deal
