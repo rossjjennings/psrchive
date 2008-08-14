@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.177 $
-   $Date: 2008/08/13 11:57:31 $
+   $Revision: 1.178 $
+   $Date: 2008/08/14 13:17:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.177 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.178 $"
 
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Config.h"
@@ -22,6 +22,7 @@
 #include "sky_coord.h"
 #include "toa.h"
 
+#include "Functor.h"
 #include "Estimate.h"
 #include "Types.h"
 
@@ -537,7 +538,7 @@ namespace Pulsar
 
     // //////////////////////////////////////////////////////////////////
     //
-    // Control flags
+    // Expert interface
     //
     // //////////////////////////////////////////////////////////////////
 
@@ -547,6 +548,23 @@ namespace Pulsar
     //! Provide access to the expert interface
     Expert* expert ();
     const Expert* expert () const;
+
+    // //////////////////////////////////////////////////////////////////
+    //
+    // Matching policies
+    //
+    // //////////////////////////////////////////////////////////////////
+
+    //! Matching strategies return boolean plus reason if false
+    typedef std::pair<bool,std::string> MatchResult;
+
+    //! Matching strategies are implemented as functors to avoid virtual methods
+    typedef Functor<MatchResult (const Archive*, const Archive*)> MatchFunctor;
+
+    mutable MatchFunctor standard_match_strategy;
+    mutable MatchFunctor calibrator_match_strategy;
+    mutable MatchFunctor processing_match_strategy;
+    mutable MatchFunctor mixable_strategy;
 
   protected:
 
