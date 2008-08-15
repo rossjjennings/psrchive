@@ -19,8 +19,11 @@
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Backend.h"
 #include "Pulsar/Receiver.h"
+
 #include "Pulsar/GBT.h"
 #include "Pulsar/Arecibo.h"
+#include "Pulsar/Effelsberg.h"
+
 #include "Pulsar/ThresholdMatch.h"
 
 using namespace std;
@@ -646,9 +649,11 @@ void Pulsar::BPPArchive::load_extensions() {
     // Note: Arecibo recvr selection will definitely need some
     // tweaking in order to even semi-accurately deal with old
     // data.  No recvr info (other than center freq) is in the file.
+
     Receiver *r = getadd<Receiver>();
     if (get_telescope()=="1") GBT::guess(r,this);
     else if (get_telescope()=="3") Arecibo::guess(r,this);
+    else if (get_telescope()=="g") Effelsberg::guess(r,this);
 
     // Convert tempo code to telescope name
     set_telescope(t->get_name());
