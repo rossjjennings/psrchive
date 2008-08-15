@@ -89,7 +89,7 @@ void usage ()
        << endl;
 }
 
-int main (int argc, char *argv[])
+int main (int argc, char *argv[]) try
 {    
   bool verbose = false;
   bool new_database = true;
@@ -168,7 +168,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.92 2008/08/08 19:20:35 demorest Exp $" << endl;
+      cout << "$Id: pac.C,v 1.93 2008/08/15 03:23:43 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -684,7 +684,13 @@ int main (int argc, char *argv[])
 
   cout << "\npac: Finished all files" << endl;
   return 0;
+
 }
+ catch (Error& error)
+ {
+   cerr << "pac: error" << error << endl;
+   return -1;
+ }
 
 
 
