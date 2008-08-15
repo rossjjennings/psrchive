@@ -17,6 +17,7 @@ nobase_include_HEADERS = \
         Pulsar/DigitiserStatistics.h \
 	Pulsar/DigitiserCounts.h \
         Pulsar/dspReduction.h \
+	Pulsar/Effelsberg.h \
         Pulsar/ExampleExtension.h \
         Pulsar/FeedExtension.h \
         Pulsar/FITSHdrExtension.h \
@@ -61,6 +62,7 @@ libExtensions_la_SOURCES = \
         DigitiserStatistics.C \
 	DigitiserCounts.C \
         dspReduction.C \
+	Effelsberg.C \
         ExampleExtension.C \
         FeedExtension.C \
         FITSHdrExtension.C \
