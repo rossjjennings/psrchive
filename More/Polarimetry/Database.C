@@ -407,7 +407,7 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
       cerr << "  Seeking frequency=" << entry.frequency
 	   << " have frequency=" << have.frequency;
 
-    double diff = entry.frequency - have.frequency;
+    double diff = fabs(entry.frequency - have.frequency);
     if (diff)
       diff /= entry.frequency + have.frequency;
 
