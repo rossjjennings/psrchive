@@ -17,6 +17,7 @@
 #include "Pulsar/IonosphereCalibrator.h"
 #include "Pulsar/FrontendCorrection.h"
 #include "Pulsar/ReflectStokes.h"
+#include "Pulsar/Interpreter.h"
 
 #include "Pulsar/ProcHistory.h"
 #include "Pulsar/Feed.h"
@@ -31,59 +32,57 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbCcDd:e:fFGhiIJM:m:n:O:op:PqRr:sSt:Tu:vVwZ";
+const char* args = "A:aBbCcDd:e:fFGhiIJ:j:M:m:n:O:op:Pqr:sSt:Tu:vVwZ";
 
 void usage ()
 {
   cout << "A program for calibrating Pulsar::Archives\n"
     "Usage: pac [options] filenames\n"
-    "  -q            Quiet mode\n"
-    "  -v            Verbose mode\n"
-    "  -V            Very verbose mode\n"
-    "  -i            Show revision information\n"
+    "  -q             Quiet mode\n"
+    "  -v             Verbose mode\n"
+    "  -V             Very verbose mode\n"
+    "  -i             Show revision information\n"
     "\n"
     "Database options: \n"
-    "  -d database   Read calibration database summary \n"   
-    "  -p path       Search for CAL files in the specified path \n"
-    "  -u ext        Add to file extensions recognized in search \n"
-    "                (defaults: .cf .pcal .fcal .pfit) \n"
-    "  -w            Write a new database summary file \n"
+    "  -d database    Read calibration database summary \n"   
+    "  -p path        Search for CAL files in the specified path \n"
+    "  -u ext         Add to file extensions recognized in search \n"
+    "                 (defaults: .cf .pcal .fcal .pfit) \n"
+    "  -w             Write a new database summary file \n"
     "\n"
     "Calibrator options: \n"
-    "  -A filename   Use the calibrator in filename, as output by pcm/pacv \n"
-    "  -P            Calibrate polarisations only \n"
-    "  -r filename   Use the specified receiver parameters file \n"
-    "  -S            Use the complete Reception model \n"
-    "  -s            Use the Polar Model \n"
-    "  -I            Correct ionospheric Faraday rotation using IRI\n"
+    "  -A filename    Use the calibrator in filename, as output by pcm/pacv \n"
+    "  -P             Calibrate polarisations only \n"
+    "  -r filename    Use the specified receiver parameters file \n"
+    "  -S             Use the complete Reception model \n"
+    "  -s             Use the Polar Model \n"
+    "  -I             Correct ionospheric Faraday rotation using IRI\n"
     "\n"
     "Rough Alignment options [not recommended]: \n"
-    "  -B            Fix the off-pulse baseline statistics \n"
-    "  -D            Fix the reference degree of polarization \n"
-    "\n"
-    "Off-pulse polarimetry options: \n"
-    "  -R            Remove baseline \n"
-    "  -J            Disable deparallactification \n"
+    "  -B             Fix the off-pulse baseline statistics \n"
+    "  -D             Fix the reference degree of polarization \n"
     "\n"
     "Matching options: \n"
-    "  -m [b|a]      Use only calibrator before|after observation\n"
-    "  -T            Take closest time (no maximum interval)\n"
-    "  -c            Take closest sky coordinates (no maximum distance)\n"
-    "  -Z            Do not try to match instruments\n"
-    "  -F            Do not try to match frequencies\n"
-    "  -b            Do not try to match bandwidths\n"
-    "  -o            Allow opposite sidebands\n"
-    "  -a            Per-channel matching\n"
+    "  -m [b|a]       Use only calibrator before|after observation\n"
+    "  -T             Take closest time (no maximum interval)\n"
+    "  -c             Take closest sky coordinates (no maximum distance)\n"
+    "  -Z             Do not try to match instruments\n"
+    "  -F             Do not try to match frequencies\n"
+    "  -b             Do not try to match bandwidths\n"
+    "  -o             Allow opposite sidebands\n"
+    "  -a             Per-channel matching\n"
     "\n"
     "Expert options: \n"
-    "  -f            Override flux calibration flag\n"
-    "  -G            Normalize profile weights by absolute gain \n"
+    "  -f             Override flux calibration flag\n"
+    "  -G             Normalize profile weights by absolute gain \n"
     "\n"
     "Input/Output options: \n"
-    "  -M meta       File from which input filenames are read \n"
-    "  -O path       Path to which output files are written \n"
-    "  -e ext        Extension added to output filenames (default .calib) \n"
-    "  -n [q|u|v]    Flip the sign of Stokes Q, U, or V \n"
+    "  -e ext         Extension added to output filenames (default .calib) \n"
+    "  -j job1[,jobN] Preprocessing job[s] \n"
+    "  -J jobs        Multiple preprocessing jobs in 'jobs' file \n"
+    "  -M meta        File from which input filenames are read \n"
+    "  -n [q|u|v]     Flip the sign of Stokes Q, U, or V \n"
+    "  -O path        Path to which output files are written \n"
     "\n"
     "See "PSRCHIVE_HTTP"/manuals/pac for more details\n"
        << endl;
@@ -96,8 +95,8 @@ int main (int argc, char *argv[]) try
   bool do_fluxcal = true;
   bool do_polncal = true;
 
-  bool remove_baseline = false;
-  bool deparallactify = true;
+  // Preprocessing jobs
+  vector<string> jobs;
 
   bool write_database_file = false;
   bool check_flags = true;
@@ -168,7 +167,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.93 2008/08/15 03:23:43 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.94 2008/08/18 02:33:36 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -179,11 +178,10 @@ int main (int argc, char *argv[]) try
       optarg_str = optarg;
       index = optarg_str.rfind("/", optarg_str.length()-2);
 
-      if (index == string::npos) {
-      	command += optarg_str;
-      }
-      
-      else {
+      if (index == string::npos)
+      	command += optarg_str;      
+      else
+      {
         // Larger than last index but doesn't matter. String class will 
 	// just take the rest of the string safely
         command += optarg_str.substr(index+1, optarg_str.length()); 
@@ -245,8 +243,12 @@ int main (int argc, char *argv[]) try
       ionosphere = new Pulsar::IonosphereCalibrator;
       break;
 
+    case 'j':
+      separate (optarg, jobs, ",");
+      break;
+      
     case 'J':
-      deparallactify = false;
+      loadlines (optarg, jobs);
       break;
 
     case 'M':
@@ -341,10 +343,6 @@ int main (int argc, char *argv[]) try
 	// just take the rest of the string safely
         command += optarg_str.substr(index+1, optarg_str.length()); 
       }
-      break;
-
-    case 'R':
-      remove_baseline = true;
       break;
 
     case 's':
@@ -505,6 +503,8 @@ int main (int argc, char *argv[]) try
 
   // Start calibrating archives
   
+  Pulsar::Interpreter* preprocessor = standard_shell();
+
   for (unsigned i = 0; i < filenames.size(); i++) try
   {
     cout << endl;
@@ -514,11 +514,16 @@ int main (int argc, char *argv[]) try
     
     Reference::To<Pulsar::Archive> arch = Pulsar::Archive::load(filenames[i]);
 
-    if (remove_baseline)
-      arch->remove_baseline ();
-
     cout << "pac: Loaded archive " << filenames[i] << endl;
-    
+
+    if (jobs.size())
+    {
+      if (verbose)
+	cerr << "pac: preprocessing " << filenames[i] << endl;
+      preprocessor->set (arch);
+      preprocessor->script (jobs);
+    }
+
     bool successful_polncal = false;
 
     if (do_polncal && arch->get_poln_calibrated() )
@@ -548,13 +553,13 @@ int main (int argc, char *argv[]) try
       cout << "pac: PolnCalibrator constructed from:\n\t" << pcal_file << endl;
       pcal_engine->calibrate (arch);
 
-      if (arch->get_npol() == 4 && deparallactify)
+      if (arch->get_npol() == 4)
       {
 	if (verbose)
 	  cerr << "pac: Correcting platform, if necessary" << endl;
 
 	Pulsar::FrontendCorrection correct;
-	correct.calibrate(arch);
+	correct.calibrate (arch);
       }
 
       if (ionosphere)
