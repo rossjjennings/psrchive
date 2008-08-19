@@ -1029,7 +1029,7 @@ namespace TextInterface {
       }
 
     //! The instance of the class with which this interfaces
-    Reference::To<C> instance;
+    Reference::To<C,false> instance;
 
   };
 
