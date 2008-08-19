@@ -18,6 +18,7 @@ CommandParser::CommandParser()
   quit = false;
   verbose = false;
   fault = false;
+  abort = true;
 }
 
 CommandParser::~CommandParser()
@@ -42,9 +43,10 @@ void CommandParser::script (const string& filename)
 void CommandParser::script (const vector<string>& cmds)
 {
   fault = false;
-  for (unsigned i=0; i<cmds.size(); i++) {
+  for (unsigned i=0; i<cmds.size(); i++)
+  {
     string response = parse( cmds[i] );
-    if (fault)
+    if (fault && abort)
       throw Error (InvalidState, "CommandParser::script", response);
     cerr << response;
   }
@@ -87,7 +89,8 @@ string CommandParser::parse2 (const string& command, const string& arguments)
   //
   // quit, exit, verbose, help
   //
-  if (command == "quit" || command == "exit") {
+  if (command == "quit" || command == "exit")
+  {
     quit = true;
     return "\n";
   }
@@ -95,12 +98,30 @@ string CommandParser::parse2 (const string& command, const string& arguments)
   if (debug)
     cerr << "CommandParser::parse command not quit" << endl;
 
-  if (command == "verbose") {
+  if (command == "verbose")
+  {
     verbose = !verbose;
     if (verbose)
       return "verbosity enabled\n";
     else
       return "";
+  }
+
+  // add new lines to output only if this CommandParser is not nested
+  string newline;
+  if (nested.empty())
+    newline = "\n";
+
+  if (command == "abort")
+  {
+    if (arguments == "false" || arguments == "0")
+      abort = false;
+    else if (arguments == "true" || arguments == "1")
+      abort = true;
+    else
+      return "fail: abort " + arguments + " not understood" + newline;
+
+    return "";
   }
 
   if (debug)
@@ -118,22 +139,29 @@ string CommandParser::parse2 (const string& command, const string& arguments)
   bool shortcut = command.length() == 1;
   unsigned icmd = 0;
 
-  // add new lines to output only if this CommandParser is not nested
-  string newline;
-  if (nested.empty())
-    newline = "\n";
-
   for (icmd=0; icmd < commands.size(); icmd++)
 
     if ( (shortcut && command[0] == commands[icmd]->shortcut)
-	 || command == commands[icmd]->command) {
-
+	 || command == commands[icmd]->command)
+    {
       current_command = commands[icmd]->command;
 
       if (debug)
 	cerr << "CommandParser::parse execute " << command << endl;
 
-      string reply = commands[icmd]->execute (arguments);
+      string reply;
+
+      try
+      {
+	reply = commands[icmd]->execute (arguments);
+      }
+      catch (Error& error)
+      {
+	if (abort)
+	  throw error += "CommandParser::parse";
+	else
+	  reply = error.get_message();
+      }
 
       if (debug)
 	cerr << "CommandParser::parse execute reply '" << reply << "'" << endl;
@@ -161,7 +189,8 @@ string CommandParser::parse2 (const string& command, const string& arguments)
       break;
   }
 
-  if (ikey != length)  {
+  if (ikey != length)
+  {
     fault = true;
     return "invalid command: " + command + newline;
   }

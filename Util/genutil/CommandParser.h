@@ -66,6 +66,9 @@ class CommandParser : public Reference::Able {
   //! verbose operation enabled by "verbose"
   bool verbose;
 
+  //! abort on exception flag set by "abort" command
+  bool abort;
+
   //! Pure virtual base class of interface to parser methods
   class Method;
 
