@@ -33,6 +33,14 @@
 
 using namespace std;
 
+// #define _DEBUG 1
+
+#ifdef _DEBUG
+#define VERBOSE true
+#else
+#define VERBOSE Archive::verbose > 2
+#endif
+
 void Pulsar::Interpreter::init()
 {
   clobber = true;  // names in map can be reassigned
@@ -313,7 +321,7 @@ string Pulsar::Interpreter::response (Status s, const string& text)
   status = s;
 
   if (status == Fail)
-   fault = true;
+    fault = true;
 
   if (!reply)
     return text;
@@ -339,23 +347,32 @@ string Pulsar::Interpreter::response (Status s, const string& text)
 
 void Pulsar::Interpreter::set (Archive* data)
 {
-  if (theStack.empty() || !inplace)
+  if (theStack.empty() || !inplace) 
+  {
+    if (VERBOSE)
+      cerr << "Pulsar::Interpreter::set push " << data << endl;
     theStack.push (data);
+  }
   else
+  {
+    if (VERBOSE)
+      cerr << "Pulsar::Interpreter::set top " << data << endl;
     theStack.top() = data;
+  }
 
-  if (Archive::verbose > 2)
+  if (VERBOSE)
     cerr << "Pulsar::Interpreter::set stack size=" << theStack.size() << endl;
 }
 
 Pulsar::Archive* Pulsar::Interpreter::get ()
 {
-  if (Archive::verbose > 2)
+  if (VERBOSE)
     cerr << "Pulsar::Interpreter::get stack size=" << theStack.size() << endl;
 
   if (theStack.empty() || !theStack.top())
     throw Error (InvalidState, "Pulsar::Interpreter::get",
 		 "no archive in stack");
+
   return theStack.top();
 }
 
