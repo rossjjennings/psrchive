@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/NoiseStatistics.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.4 $
+   $Date: 2008/08/20 02:30:57 $
    $Author: straten $ */
 
 #ifndef __Pulsar_NoiseStatistics_h
@@ -20,7 +20,31 @@ namespace Pulsar {
 
   class Profile;
 
-  //! Calculates the signal-to-noise ratio in the Fourier domain
+  //! Computes the noise to Fourier noise ratio
+  /*!  
+
+    By Parseval's Theorem, the energy in the noise of the off-pulse
+    baseline in the phase domain should be equal to the energy in the
+    noise of the post-Nyquist harmonics in the frequency domain.
+
+    However, if the profile baseline is corrupted by some periodic
+    structure, then the r.m.s. computed in the phase domain will be
+    larger than that in the frequency domain, where the periodic
+    corruption is likely isolated in some low harmonic.
+
+    Likewise, if the profile is unresolved, then the r.m.s. computed
+    in the frequency domain will be larger than that in the phase
+    domain because there are no post-Nyquist harmonics.
+
+    The noise to Fourier noise ratio is a way to detect either of
+    these problems.  If it is much greater than unity, then there is
+    likely some low frequency structure in the profile baseline.  If
+    it is much less than unity, then it is likely that the profile
+    contains unresolved structure.  In either case, there is likely
+    a good reason to discard the data.
+
+  */
+
   class NoiseStatistics : public Reference::Able {
 
   public:
