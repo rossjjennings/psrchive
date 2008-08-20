@@ -12,7 +12,6 @@
 
 #include "Pulsar/Fourier.h"
 #include "Pulsar/LastHarmonic.h"
-#include "Pulsar/ExponentialBaseline.h"
 
 using namespace std;
 

@@ -99,7 +99,8 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
   combine (into, clone);
   
   // if observation is not a pulsar, no further checks required
-  if (into->get_type() != Signal::Pulsar) {
+  if (into->get_type() != Signal::Pulsar)
+  {
     if (Archive::verbose == 3)
       cerr << "Pulsar::Append::append no pulsar; no predictor to correct"
 	   << endl;
@@ -107,7 +108,8 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
   }
   
   // if neither archive has a polyco, no correction needed
-  if (!into->has_model() && !from->has_model()) {
+  if (!into->has_model() && !from->has_model())
+  {
     if (Archive::verbose == 3)    
       cerr << "Pulsar::Append::append no predictor to correct" << endl;
     return;
@@ -127,7 +129,8 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
     predictors.
   */
 
-  if (Archive::verbose == 3) {
+  if (Archive::verbose == 3)
+  {
     if (!aligned)
       cerr << "Pulsar::Append::append "
 	"zero phase aligned flags not set" << endl;
@@ -139,8 +142,8 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
 	"archives have different phase models" << endl;
   }
 
-  if (aligned && equal_ephemerides && equal_models) {
-
+  if (aligned && equal_ephemerides && equal_models)
+  {
     if (Archive::verbose == 3)
       cerr << "Pulsar::Append::append "
 	"zero phase aligned and equal ephemerides" << endl;

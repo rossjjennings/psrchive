@@ -1,17 +1,21 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Aidan Hotan
+ *   Copyright (C) 2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Profile.h"
 #include "Pulsar/shift_methods.h"
+
 using namespace std;
 
-/*! This use of the Functor template implements the Strategy design
- pattern (ghjv94 p.315) for calculating the shift between an
- observation and a standard.  By default, the shift is calculated
- using the PhaseGradShift concrete strategy. */
+/*!
+  This use of the Functor template implements the Strategy design
+  pattern (ghjv94 p.315) for calculating the shift between an
+  observation and a standard.  By default, the shift is calculated
+  using the PhaseGradShift concrete strategy.
+*/
 Functor< Estimate<double>(Pulsar::Profile,Pulsar::Profile) > 
 Pulsar::Profile::shift_strategy (&PhaseGradShift);
 

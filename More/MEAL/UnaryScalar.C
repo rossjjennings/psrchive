@@ -9,7 +9,7 @@
 using namespace std;
 
 void MEAL::UnaryScalar::calculate (double& result,
-					  std::vector<double>* grad)
+				   std::vector<double>* grad)
 {
   if (!model)
     throw Error (InvalidState, "MEAL::UnaryScalar::calculate",

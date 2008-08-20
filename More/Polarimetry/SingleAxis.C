@@ -136,8 +136,8 @@ Vector<3, double> Calibration::SingleAxis::get_axis () const
 
 void Calibration::SingleAxis::set_cyclic (bool flag)
 {
-  if (flag) {
-
+  if (flag)
+  {
     // set up the cyclic boundary for orientation
     MEAL::CyclicParameter* cyclic = 0;
     cyclic = new MEAL::CyclicParameter (rotation);
@@ -145,18 +145,14 @@ void Calibration::SingleAxis::set_cyclic (bool flag)
 
     cyclic->set_period (M_PI);
     cyclic->set_upper_bound (M_PI/2);
-    cyclic->set_lower_bound (-M_PI/2);
-    
-    
+    cyclic->set_lower_bound (-M_PI/2); 
   }
-  else {
-
+  else
+  {
     MEAL::OneParameter* noncyclic = 0;
     noncyclic = new MEAL::OneParameter (rotation);
     rotation->set_parameter_policy (noncyclic);
-
   }
-
 }
 
 
@@ -170,18 +166,20 @@ void Calibration::SingleAxis::solve (const vector<Estimate<double> >& cal)
 
   unsigned npol = cal.size();
 
-  for (unsigned ipol=0; ipol<npol; ++ipol) {
-
+  for (unsigned ipol=0; ipol<npol; ++ipol)
+  {
     bool invalid = false;
 
-    if (ipol < 2 && cal[ipol].val <= 0)  {
+    if (ipol < 2 && cal[ipol].val <= 0)
+    {
       if (verbose)
 	cerr << "Calibration::SingleAxis::solve invalid flux[" << ipol << "]="
 	     << cal[ipol].val << endl;
       invalid = true;
     }
 
-    if (cal[ipol].var <= 0) {
+    if (cal[ipol].var <= 0)
+    {
       if (verbose)
 	cerr << "Calibration::SingleAxis::solve invalid var[" << ipol << "]="
 	     << cal[ipol].var << endl;
@@ -189,7 +187,8 @@ void Calibration::SingleAxis::solve (const vector<Estimate<double> >& cal)
 	invalid = true;
     }
 
-    if (invalid) {
+    if (invalid)
+    {
       set_gain (0);
       set_diff_gain (0);
       set_diff_phase (0);
@@ -197,7 +196,8 @@ void Calibration::SingleAxis::solve (const vector<Estimate<double> >& cal)
     }
   }
 
-  if (npol == 1) {
+  if (npol == 1)
+  {
     set_gain ( sqrt(cal[0]) );
     set_diff_gain (0);
     set_diff_phase (0);
@@ -227,7 +227,8 @@ void Calibration::SingleAxis::solve (const vector<Estimate<double> >& cal)
     cerr << "Calibration::SingleAxis::solve gamma=" << get_diff_gain()
 	 << " gain=" << get_gain() << endl;
 
-  if (npol == 2) {
+  if (npol == 2)
+  {
     set_diff_phase (0);
     return;
   }
@@ -239,7 +240,8 @@ void Calibration::SingleAxis::solve (const vector<Estimate<double> >& cal)
   Estimate<double> cal_ReAB = cal[2];
   Estimate<double> cal_ImAB = cal[3];
 
-  if (cal_ImAB == 0 && cal_ReAB == 0)  {
+  if (cal_ImAB == 0 && cal_ReAB == 0)
+  {
     if (verbose)
       cerr << "Calibration::SingleAxis::solve invalid phase" << endl;
     set_diff_phase (0);

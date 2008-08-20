@@ -166,7 +166,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.61 2008/01/16 20:19:26 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.62 2008/08/20 02:30:49 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -428,10 +428,12 @@ int main (int argc, char **argv) try {
     
     archive = Pulsar::Archive::load (filenames[ifile]);
 
-    if (vverbose && archive->has_model()) {
+    if (vverbose)
       cerr << "psradd: after load, instance count = " 
 	   << Reference::Able::get_instance_count() << endl;
 
+    if (vverbose && archive->has_model())
+    {
       for (unsigned isub=0; isub < archive->get_nsubint(); isub++) {
 	MJD epoch = archive->get_Integration(isub)->get_epoch();
 	cerr << isub << ": phase=" 
@@ -482,33 +484,35 @@ int main (int argc, char **argv) try {
       continue;
     }
 
-    if (reset_total_next_load) {
-
+    if (reset_total_next_load)
+    {
       if (verbose) cerr << "psradd: Setting total" << endl;
       total = archive;
-
+      
       if (vverbose)
 	cerr << "psradd: after reset total, instance count = " 
 	     << Reference::Able::get_instance_count() << endl;
 
       correct_total = true;
-
     }
 
-    if (correct_total) {
-
-      if (auto_add) {
+    if (correct_total)
+    {
+      if (auto_add)
+      {
 	newname = total->get_filename() + "." + integrated_extension;
         if (!integrated_path.empty())
           newname = integrated_path + "/" + basename (newname);
       }
 
-      if (log_results) {
-
+      if (log_results)
+      {
 	string log_name = total->get_source() + ".log";
 
-	if (log_name != log_filename)  {
-	  if (log_file) {
+	if (log_name != log_filename)
+        {
+	  if (log_file)
+          {
 	    cerr << "psradd: Closing log file " << log_filename << endl;
 	    fclose (log_file);
 	  }
@@ -525,17 +529,18 @@ int main (int argc, char **argv) try {
       if (verbose)
 	cerr << "psradd: New filename: '" << newname << "'" << endl;
 
-      if (ephemeris) try {
-
+      if (ephemeris) try
+      {
         if (verbose)
           cerr << "psradd: Installing new ephemeris" << endl;
 
 	total->set_ephemeris (ephemeris);
-
       }
-      catch (Error& error) {
+      catch (Error& error)
+      {
 	cerr << "psradd: Error installing ephemeris in "
              << total->get_filename() << endl;
+
         if (verbose)
           cerr << error << endl;
         else
@@ -552,15 +557,16 @@ int main (int argc, char **argv) try {
 
     }
 
-    if (reset_total_next_load)  {
+    if (reset_total_next_load)
+    {
       reset_total_next_load = false;
       continue;
     }
 
     bool reset_total_current = false;
     
-    if (interval != 0.0) {
-      
+    if (interval != 0.0)
+    {   
       // ///////////////////////////////////////////////////////////////
       //
       // auto_add -G: check the gap between the end of total
@@ -579,13 +585,14 @@ int main (int argc, char **argv) try {
       }
     }
 
-    if( cal_phase_diff ) {
-
+    if( cal_phase_diff )
+    {
       // ///////////////////////////////////////////////////////////////
       //
       // auto_add -C: check that the calibrator observations are aligned
 
-      if (!archive->type_is_cal()) {
+      if (!archive->type_is_cal())
+      {
 	cerr << "psradd: Auto add - not a CAL" << endl;
 	continue;
       }
@@ -610,7 +617,8 @@ int main (int argc, char **argv) try {
 
     }
 
-    if (!reset_total_current) {
+    if (!reset_total_current)
+    {
 
       try {
 
@@ -665,11 +673,10 @@ int main (int argc, char **argv) try {
 
       if (log_file)
 	fprintf (log_file, " %s", archive->get_filename().c_str());
-
     }
 
-    if (integrate != 0.0)  {
-
+    if (integrate != 0.0)
+    {
       // ///////////////////////////////////////////////////////////////
       //
       // auto_add -I: check that amount of data integrated in total
@@ -735,16 +742,20 @@ int main (int argc, char **argv) try {
 	cerr << "psradd: after tscrunch, instance count = " 
 	     << Reference::Able::get_instance_count() << endl;
 
-      if (!testing){
+      if (!testing)
+      {
 	reorder( total );
 	total->unload (newname);
       }      
 
-      if (reset_total_current) {
+      if (reset_total_current)
+      {
 	if (verbose)
 	  cerr << "psradd: Auto add - reset total to current" << endl;
+
 	total = archive;
 	correct_total = true;
+
 	if (vverbose)
 	  cerr << "psradd: after reset total, instance count = " 
 	       << Reference::Able::get_instance_count() << endl;

@@ -131,7 +131,8 @@ static double gammln(double xx)
 }
 
 // returns ln(n!)
-double ln_fact (unsigned n) {
+double ln_fact (unsigned n)
+{
   return gammln (n+1.0);
 }
 
@@ -149,14 +150,13 @@ void JenetAnderson98::get_prob_Phi (unsigned L, vector<float>& prob_Phi)
 
   double mean_Phi = get_mean_Phi ();
 
-  for (unsigned nlo=0; nlo<L; nlo++) {
-
+  for (unsigned nlo=0; nlo<L; nlo++)
+  {
     double Phi = double(nlo) / double(L);
 
     prob_Phi[nlo]  = exp( lnLfact - ln_fact(nlo) - ln_fact(L-nlo) +
 			  L * ( log(pow (mean_Phi, Phi)) +
 				log(pow (1.0-mean_Phi, 1.0-Phi)) ) );
-
   }
 }
 
