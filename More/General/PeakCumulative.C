@@ -122,7 +122,8 @@ void Pulsar::PeakCumulative::build ()
   int start = 0;
   int stop = nbin;
 
-  if (range_specified) {
+  if (range_specified)
+  {
     start = bin_start;
     stop  = bin_end;
     nbinify (start, stop, nbin);
@@ -136,8 +137,8 @@ void Pulsar::PeakCumulative::build ()
 	 << " total power=" << tot_amp << " threshold=" << threshold << endl;
 
   // set the thresholds for the search
-  double rise_threshold = mean.get_value() + double(threshold) * tot_amp;
-  double fall_threshold = mean.get_value() + double(1.0-threshold) * tot_amp;
+  double rise_threshold = double(threshold) * tot_amp;
+  double fall_threshold = double(1.0-threshold) * tot_amp;
 
   // start on first bin, then on nbin/2
   unsigned istart = 0;
@@ -151,13 +152,14 @@ void Pulsar::PeakCumulative::build ()
   if (!choose)
     ntries = 1;
 
-  for (unsigned itry=0; itry<ntries; itry++) {
-
+  for (unsigned itry=0; itry<ntries; itry++)
+  {
     // space to hold the cumulative sum
     Profile cumulative (*profile);
 
     Accumulate accumulate;
     accumulate.set_offset (istart);
+    accumulate.set_baseline (mean.get_value());
     accumulate.transform (&cumulative);
 
     float* cumu = cumulative.get_amps();

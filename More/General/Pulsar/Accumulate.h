@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Accumulate.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/09/24 08:52:25 $
+   $Revision: 1.2 $
+   $Date: 2008/08/22 04:50:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Accumulate_h
@@ -37,6 +37,12 @@ namespace Pulsar {
     //! Get the offset
     unsigned get_offset () const;
 
+    //! Set the baseline
+    void set_baseline (double);
+
+    //! Get the baseline
+    double get_baseline () const;
+
     //! Form the cummulative profile
     void transform (Profile* profile);
 
@@ -44,6 +50,9 @@ namespace Pulsar {
 
     //! The offset
     unsigned offset;
+
+    //! The baseline
+    double baseline;
 
   };
 

@@ -13,6 +13,7 @@ using namespace std;
 Pulsar::Accumulate::Accumulate ()
 {
   offset = 0;
+  baseline = 0;
 }
 
 Pulsar::Accumulate::~Accumulate ()
@@ -30,6 +31,16 @@ unsigned Pulsar::Accumulate::get_offset () const
   return offset;
 }
 
+void Pulsar::Accumulate::set_baseline (double b)
+{
+  baseline = b;
+}
+
+double Pulsar::Accumulate::get_baseline () const
+{
+  return baseline;
+}
+
 void Pulsar::Accumulate::transform (Profile* profile)
 {
   unsigned nbin = profile->get_nbin();
@@ -37,10 +48,10 @@ void Pulsar::Accumulate::transform (Profile* profile)
 
   vector<double> cummulative (nbin);
 
-  cummulative[0] = amps[offset];
+  cummulative[0] = amps[offset] - baseline;
 
   for (unsigned i=1; i<nbin; i++)
-    cummulative[i] = cummulative[i-1] + amps[(i+offset)%nbin];
+    cummulative[i] = cummulative[i-1] + amps[(i+offset)%nbin] - baseline;
 
   profile->set_amps (cummulative);
 }
