@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveMatch.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/08/14 13:17:10 $
-   $Author: straten $ */
+   $Revision: 1.2 $
+   $Date: 2008/08/22 17:30:57 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_ArchiveMatch_h
 #define __Pulsar_ArchiveMatch_h
@@ -120,7 +120,7 @@ namespace Pulsar {
     static Archive::MatchFunctor functor (T method)
     {
       ArchiveMatch* match = new ArchiveMatch;
-      (match->*method) ();
+      (match->*method) (true);
       return Archive::MatchFunctor (match);
     }
 
