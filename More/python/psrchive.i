@@ -1,7 +1,9 @@
 %module psrchive
 %{
+#include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/ProfileAmps.h"
 #include "Pulsar/Profile.h"
 %}
 
@@ -60,7 +62,9 @@ using namespace std;
 %ignore Pulsar::Profile::default_duty_cycle;
 
 // Parse the header file to generate wrappers
+%include "Pulsar/IntegrationManager.h"
 %include "Pulsar/Archive.h"
 %include "Pulsar/Integration.h"
+%include "Pulsar/ProfileAmps.h"
 %include "Pulsar/Profile.h"
 
