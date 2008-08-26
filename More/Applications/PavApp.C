@@ -354,7 +354,7 @@ void PavApp::PavSpecificOptions( void )
   {
     SetPlotOptions<BandpassChannelWeightPlot>( "band:below:l=" );
     SetPlotOptions<BandpassChannelWeightPlot>( "band:below:r=" );
-    SetPlotOptions<BandpassChannelWeightPlot>( "above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length Rcvr: $rcvr" );
+    SetPlotOptions<BandpassChannelWeightPlot>( "above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length Rcvr: $rcvr:name" );
   }
   else
   {
@@ -656,7 +656,7 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.53 2008/04/30 13:26:33 straten Exp $" << endl << endl;
+      cout << "pav VERSION $Id: PavApp.C,v 1.54 2008/08/26 15:05:02 demorest Exp $" << endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
