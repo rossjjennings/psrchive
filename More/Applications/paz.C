@@ -51,6 +51,7 @@ usage ()
     "  -z \"a b c ...\"   Zero weight these particular channels\n"
     "  -Z \"a b\"         Zero weight chans between a & b inclusive\n"
     "  -f \"a b c ...\"   Zero weight channels with these frequencies (MHz)\n"
+    "  -F \"a b\"         Zero weight this frequency range, inclusive (MHz)\n"
     "  -x \"a b c ...\"   Delete all sub-integrations except these\n"
     "  -X \"a b\"         Delete all sub-ints except a to b inclusive\n"
     "  -E percent       Zero weight this much of each band edge\n"
@@ -83,6 +84,11 @@ void zap_periodic_spikes (Pulsar::Profile * profile, int period, int phase);
 void binzap (Pulsar::Archive * arch, Pulsar::Integration * integ, int subint,
 	     int lower_bin, int upper_bin, int lower_range, int upper_range);
 
+struct FreqRange {
+  double lo;
+  double hi;
+};
+
 int
 main (int argc, char *argv[])
 {
@@ -104,6 +110,7 @@ main (int argc, char *argv[])
   bool zero_channels = false;
   vector < int >chans_to_zap;
   vector < double >freqs_to_zap;
+  vector < FreqRange >freq_ranges_to_zap;
 
   bool zero_subints = false;
   vector < unsigned >subs_to_zap;
@@ -147,7 +154,7 @@ main (int argc, char *argv[])
   Pulsar::ChannelZapMedian * median_zapper = 0;
   Pulsar::ChannelZapModulation * modulation_zapper = 0;
 
-  const char *args = "8bC:B:dDe:E:f:hIik:l:LmM:no:p:P:rR:s:S:u:vVw:W:x:X:z:Z:";
+  const char *args = "8bC:B:dDe:E:f:F:hIik:l:LmM:no:p:P:rR:s:S:u:vVw:W:x:X:z:Z:";
 
   string command = "paz";
 
@@ -165,7 +172,7 @@ main (int argc, char *argv[])
       Pulsar::Archive::set_verbosity (3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.48 2008/08/05 13:30:43 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.49 2008/08/26 15:11:14 demorest Exp $" << endl;
       return 0;
 
     case 'm':
@@ -281,6 +288,25 @@ main (int argc, char *argv[])
 	  chans_to_zap.push_back (i);
       }
       command += " -Z ";
+      command += optarg;
+      break;
+
+    case 'F':
+      {
+        FreqRange range;
+        zero_channels= true;
+        if (sscanf (optarg, "%lf %lf", &range.lo, &range.hi) !=2) {
+          cerr << "Invalid parameter to option -F" << endl;
+          return(-1);
+        }
+        if (range.lo > range.hi) { 
+          double tmp = range.lo;
+          range.lo = range.hi;
+          range.hi = tmp;
+        }
+        freq_ranges_to_zap.push_back(range);
+      }
+      command += " -F ";
       command += optarg;
       break;
 
@@ -663,15 +689,36 @@ main (int argc, char *argv[])
 	}
 	delete[]useful;
       }
+
       vector < float >mask (nchan, 1.0);
       for (unsigned i = 0; i < chans_to_zap.size (); i++) {
 	mask[chans_to_zap[i]] = 0.0;
       }
+
       for (unsigned i = 0; i < freqs_to_zap.size (); i++) {
         for (unsigned ic=0; ic<nchan; ic++) {
           double chan_freq=arch->get_Integration(0)->get_centre_frequency(ic);
           if ( freqs_to_zap[i] > chan_freq - chan_bw/2.0 
               && freqs_to_zap[i] < chan_freq + chan_bw/2.0 )
+            mask[ic] = 0.0;
+        }
+      }
+
+      for (unsigned i=0; i< freq_ranges_to_zap.size(); i++) {
+        for (unsigned ic=0; ic<nchan; ic++) {
+          FreqRange chan;
+          chan.lo=arch->get_Integration(0)->get_centre_frequency(ic) 
+            - chan_bw/2.0;
+          chan.hi=arch->get_Integration(0)->get_centre_frequency(ic) 
+            + chan_bw/2.0;
+          if (chan.lo > freq_ranges_to_zap[i].lo 
+              && chan.lo < freq_ranges_to_zap[i].hi)
+            mask[ic] = 0.0;
+          else if (chan.hi > freq_ranges_to_zap[i].lo 
+              && chan.hi < freq_ranges_to_zap[i].hi)
+            mask[ic] = 0.0;
+          else if (freq_ranges_to_zap[i].lo > chan.lo 
+              && freq_ranges_to_zap[i].lo < chan.hi)
             mask[ic] = 0.0;
         }
       }
