@@ -40,7 +40,7 @@ void usage ()
     " -A plot          Help: list common options for 'plot'\n"
     "\n"
     " -D device        plot device \n"
-    " -g WxH           plot dimensions in pixels, width times height"
+    " -g WxH           plot dimensions in pixels, width times height \n"
     " -N x,y           plot panels \n"
     " -O               overlay plots \n"
     " -r ratio         aspect ratio (height/width) \n"
@@ -127,6 +127,7 @@ int main (int argc, char** argv) try
   static char* args = "A:c:C:D:g:hj:J:K:l:M:N:Op:Pqr:s:vVw:x";
 
   char c = 0;
+
   while ((c = getopt (argc, argv, args)) != -1) 
 
     switch (c)  {
@@ -152,7 +153,7 @@ int main (int argc, char** argv) try
       break;
 
     case 'g':
-      if (sscanf (optarg, "%ux%u", &width_pixels, &height_pixels) != 2)
+      if (sscanf (optarg, "%u%c%u", &width_pixels, &c, &height_pixels) != 3)
       {
 	cerr << "psrplot: could not parse dimensions from " << optarg << endl;
 	return -1;
@@ -180,7 +181,8 @@ int main (int argc, char** argv) try
       break;
 
     case 'N':
-      if (sscanf( optarg, "%d,%d", &n1, &n2 ) != 2) {
+      if (sscanf( optarg, "%d%c%d", &n1, &c, &n2 ) != 3)
+      {
 	cerr << "psrplot: error parsing -N " << optarg << endl;
 	return -1;
       }
