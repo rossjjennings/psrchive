@@ -1,5 +1,7 @@
 %module psrchive
 %{
+#define SWIG_FILE_WITH_INIT
+#include "numpy/noprefix.h"
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -22,6 +24,10 @@ using namespace std;
         SWIG_exception(SWIG_RuntimeError,"Unknown exception");
     }
 }
+
+%init %{
+  import_array();
+%}
 
 // help memory management
 %newobject Pulsar::Archive::new_Archive (const string&);
@@ -75,3 +81,61 @@ using namespace std;
 %include "Pulsar/ProfileAmps.h"
 %include "Pulsar/Profile.h"
 
+%extend Pulsar::Profile
+{
+    PyObject *get_numpy()
+    {
+        PyArrayObject *arr;
+        float *ptr;
+        npy_intp n;
+        
+        n = self->get_nbin();
+        ptr = self->get_amps();
+        arr = (PyArrayObject *)                                         \
+            PyArray_SimpleNewFromData(1, &n, PyArray_FLOAT, (char *)ptr);
+        if (arr == NULL) return NULL;
+        arr->flags |= OWN_DATA;
+        PyArray_INCREF(arr);
+        return (PyObject *)arr;
+    }
+}
+
+%extend Pulsar::Archive
+{
+    PyObject *get_data()
+    {
+        PyArrayObject *arr;
+        npy_intp ndims[4];  // nsubint, npol, nchan, nbin
+        int ii, jj, kk;
+        
+        ndims[0] = self->get_nsubint();
+        ndims[1] = self->get_npol();
+        ndims[2] = self->get_nchan();
+        ndims[3] = self->get_nbin();
+        arr = (PyArrayObject *)PyArray_SimpleNew(4, ndims, PyArray_FLOAT);
+        for (ii = 0 ; ii < ndims[0] ; ii++)
+            for (jj = 0 ; jj < ndims[1] ; jj++)
+                for (kk = 0 ; kk < ndims[2] ; kk++)
+                    memcpy(arr->data + sizeof(float) * 
+                           (ndims[3] * (kk + ndims[2] * (jj + ndims[1] * ii))), 
+                           self->get_Profile(ii, jj, kk)->get_amps(),
+                           ndims[3]*sizeof(float));
+        return (PyObject *)arr;
+    }
+
+    PyObject *get_weights()
+    {
+        PyArrayObject *arr;
+        npy_intp ndims[2];  // nsubint, nchan
+        int ii, jj;
+        
+        ndims[0] = self->get_nsubint();
+        ndims[1] = self->get_nchan();
+        arr = (PyArrayObject *)PyArray_SimpleNew(2, ndims, PyArray_FLOAT);
+        for (ii = 0 ; ii < ndims[0] ; ii++)
+            for (jj = 0 ; jj < ndims[1] ; jj++)
+                ((float *)arr->data)[ii*ndims[1]+jj] = \
+                    self->get_Integration(ii)->get_weight(jj);
+        return (PyObject *)arr;
+    }
+}
