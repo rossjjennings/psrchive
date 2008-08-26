@@ -172,7 +172,7 @@ main (int argc, char *argv[])
       Pulsar::Archive::set_verbosity (3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.49 2008/08/26 15:11:14 demorest Exp $" << endl;
+      cout << "$Id: paz.C,v 1.50 2008/08/26 20:54:25 straten Exp $" << endl;
       return 0;
 
     case 'm':
@@ -729,19 +729,21 @@ main (int argc, char *argv[])
 	zapper->zap_specific (arch, mask);
     }
 
-    if (edge_zap) {
+    if (edge_zap)
+    {
       float fraction = percent / 100.0;
       int buffer = int (float (nchan) * fraction);
 
       vector < float >mask (nchan, 0.0);
 
-      for (int i = (0 + buffer); i <= (nchan - buffer); i++) {
+      for (int i = buffer; i < (nchan - buffer); i++)
 	mask[i] = 1.0;
-      }
+
       zapper->zap_specific (arch, mask);
     }
 
-    if (zap_ston) {
+    if (zap_ston)
+    {
       double theston = 0.0;
       Reference::To<Pulsar::Archive> cloned = arch->clone();
       cloned->pscrunch ();
