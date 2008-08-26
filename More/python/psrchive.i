@@ -48,10 +48,17 @@ using namespace std;
 %ignore Pulsar::Archive::operator=(const Archive&);
 %ignore Pulsar::Integration::operator=(const Integration&);
 %ignore Pulsar::Profile::operator=(const Profile&);
+%ignore Pulsar::IntegrationManager::operator=(const IntegrationManager&);
 
 // does not distinguish between const and non-const overloaded methods
 %ignore Pulsar::Archive::get_Profile(unsigned,unsigned,unsigned) const;
+%ignore Pulsar::Archive::expert() const;
 %ignore Pulsar::Integration::get_Profile(unsigned,unsigned) const;
+%ignore Pulsar::Integration::new_PolnProfile(unsigned) const;
+%ignore Pulsar::IntegrationManager::get_Integration(unsigned) const;
+%ignore Pulsar::IntegrationManager::get_last_Integration() const;
+%ignore Pulsar::IntegrationManager::get_first_Integration() const;
+%ignore Pulsar::ProfileAmps::get_amps() const;
 
 // Ignore Stokes class for now
 %ignore Pulsar::Integration::get_Stokes(unsigned,unsigned) const;
