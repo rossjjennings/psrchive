@@ -46,14 +46,11 @@ bool verbose = false;
 
 void cpg_next ();
 
-void
-do_refine(Reference::To<Pulsar::Archive> data,bool log_results);
+void do_refine(Reference::To<Pulsar::Archive> data,bool log_results);
 
-Reference::To<Pulsar::Archive>
-get_data(string archive_filename);
+Reference::To<Pulsar::Archive> get_data (string archive_filename);
 
-double
-do_maxmthd(double minrm,double maxrm,unsigned rmsteps,
+double do_maxmthd(double minrm,double maxrm,unsigned rmsteps,
 		Reference::To<Pulsar::Archive> data);
 
 // prints various numbers out to file
@@ -73,7 +70,6 @@ void usage ()
 		"  -t                Use the default bounds and resolution \n"
 		"  -u max            Set the upper bound on the default maximum RM \n"
 		"  -U rm/dm          Set upper bound on default maximum RM = DM * rm/dm \n"
-		"  -p                Use experimental linearly polarized flux estimate \n"
 		"\n"
 		"Fit options: \n"
 		"  -r                Refine the RM using two halves of band \n"
@@ -86,19 +82,7 @@ void usage ()
 		"\n"
 		"Plotting options: \n"
 		"  -D                Display results \n"
-		"  -a \"a1 a2 a3...\"  Add 180 of phase to PA of these chans\n"
-		"  -A \"a1 a2\"        Add 180 of phase to chans in range [a1,a2)\n"
-		"  -a \"n1:a1 n2:a2 n3:a3...\"  Add 180 of phase to PA of these chans for these plot numbers\n"
-		"  -A \"n1:a1 n1:a2\"  Add 180 of phase to chans in range for these plot numbers [a1,a2)\n"
-		"  -b [phase]        Single phase bin mode \n"
-		"  -w [x1,x2]        Average over phase window \n"
-		"  -W [x1,x2]        Window avg with offset rotn \n"
-		"  -P                Average over on-pulse region \n"
-		"  -T                Set profile weight cut-off\n"  
-		"  -C                Attempt to correct for wraps\n"
 		"  -K dev            Specify pgplot device\n"
-		"  -S nsigma         Set number of sigma error bars are to be [1.0]\n"
-		"  Options b, B and P are mutually exclusive.\n"
 		"\n"
 		"Standard options:\n"
 		"  -h                This help page \n"
@@ -122,14 +106,9 @@ Estimate<double> best_search_rm;
 
 int main (int argc, char** argv)
 {
-	bool singlebin = false;
-	bool window = false;
-	bool window_offset = false;
-	bool onpulse = false;
 	bool refine  = false;
-	bool correct = false;
-
 	bool maxmthd = false;
+
 	float minrm = 0.0;
 	float maxrm = 0.0;
 	unsigned rmsteps = 50;
@@ -139,10 +118,6 @@ int main (int argc, char** argv)
 
 	bool bscrunchme = false;
 	int bscr = 1;
-
-	float iphs = 0.0;
-	float x1 = 0.0;
-	float x2 = 0.0;
 
 	float threshold = 0.01;
 
@@ -156,71 +131,14 @@ int main (int argc, char** argv)
 	unsigned ny = 1;
 	float nsigma = 1.0;
 	vector<unsigned> zap_chans;
-	vector<unsigned> add_chans;
-	vector<vector<unsigned> > plot_add_chans;
-	bool experimental = false;
 
 	vector<string> archives;
 
-	const char* args = "a:A:b:B:CDeF:hJK:Lm:pPrR:S:T:tu:U:vVw:W:z:";
+	const char* args = "B:DeF:hJK:Lm:pPrR:S:T:tu:U:vVw:W:z:";
 	int gotc = 0;
 
 	while ((gotc = getopt(argc, argv, args)) != -1) {
 		switch (gotc) {
-
-			case 'a': {
-					  vector<string> words = stringdecimate(optarg," \t");
-					  for( unsigned i=0; i<words.size(); i++){
-						  unsigned colon_pos = words[i].find(":",0);
-						  if( colon_pos == string::npos ){
-							  add_chans.push_back( fromstring<unsigned>(words[i]) );
-							  continue;
-						  }
-						  unsigned plot_number = fromstring<unsigned>( words[i].substr(0,colon_pos) );
-						  unsigned add_chan = fromstring<unsigned>( string(&words[i][colon_pos+1],&words[i][words.size()]) );
-						  if( plot_add_chans.size() < plot_number+1 )
-							  plot_add_chans.resize( plot_number+1 );
-						  plot_add_chans[plot_number].push_back( add_chan );
-					  }
-					  break;
-				  }
-
-			case 'A': {
-					  vector<string> words = stringdecimate(optarg," \t");
-					  unsigned colon_pos = words[0].find(":",0);
-
-					  if( colon_pos == string::npos ){
-						  unsigned begin_chan = fromstring<unsigned>(words[0]);
-						  unsigned end_chan = fromstring<unsigned>(words[1]);
-						  for( unsigned i=begin_chan; i<end_chan; i++)
-							  add_chans.push_back( i );
-						  break;
-					  }
-
-					  unsigned plot_number = fromstring<unsigned>( words[0].substr(0,colon_pos) );
-					  if( plot_add_chans.size() < plot_number+1 )
-						  plot_add_chans.resize( plot_number+1 );
-
-					  unsigned begin_chan = fromstring<unsigned>( string(&words[0][colon_pos+1],&words[0][words[0].size()]) );
-					  unsigned end_chan = fromstring<unsigned>( string(&words[1][colon_pos+1],&words[1][words[1].size()]) );
-
-					  for( unsigned i=begin_chan; i<end_chan; i++)
-						  plot_add_chans[plot_number].push_back( i );
-
-					  break;
-				  }
-
-			case 'b':
-				  singlebin = true;
-				  if (sscanf(optarg, "%f", &iphs) != 1) {
-					  cerr << "That is not a valid phase bin!" << endl;
-					  return -1;
-				  }
-				  if (iphs > 1.0 || iphs < 0.0) {
-					  cerr << "That is not a valid phase bin!" << endl;
-					  return -1;
-				  }
-				  break;
 
 			case 'B':
 				  bscrunchme = true;
@@ -228,10 +146,6 @@ int main (int argc, char** argv)
 					  cerr << "That is not a valid scrunch factor!" << endl;
 					  return -1;
 				  }
-				  break;
-
-			case 'C':
-				  correct = true;
 				  break;
 
 			case 'D':
@@ -271,13 +185,6 @@ int main (int argc, char** argv)
 				  }
 				  break;
 
-			case 'p':
-				  experimental = true; 
-				  break;
-
-			case 'P':
-				  onpulse = true;
-				  break;
 			case 'r':
 				  refine = true;
 				  break;
@@ -304,7 +211,6 @@ int main (int argc, char** argv)
 			case 'J':
 
 				  refine = true;          // <delta PA> two halves of band
-				  experimental = true;    // new linear poln
 				  auto_maxrm = 2000.0;
 				  auto_minrm = 100.0;
 				  auto_maxrm_dm = 6.0;    // max RM = 6.0 * DM
@@ -332,22 +238,6 @@ int main (int argc, char** argv)
 			case 'V':
 				  verbose = true;
 				  Pulsar::Archive::set_verbosity(3);
-				  break;
-
-			case 'w':
-				  window = true;
-				  if (sscanf(optarg, "%f,%f", &x1, &x2) != 2) {
-					  cerr << "That is not a valid phase window!" << endl;
-					  return -1;
-				  }
-				  break;
-
-			case 'W':
-				  window_offset = true;
-				  if (sscanf(optarg, "%f,%f", &x1, &x2) != 2) {
-					  cerr << "That is not a valid phase window!" << endl;
-					  return -1;
-				  }
 				  break;
 
 			case 'z': 
