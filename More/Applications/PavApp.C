@@ -118,6 +118,7 @@ PavApp::PavApp()
   label_degrees = false;
 
   ronsub = 0;
+  remove_baseline = true;
 }
 
 
@@ -145,6 +146,7 @@ void PavApp::PrintUsage( void )
   cout << " -T        Tscrunch all Integrations" << endl;
   cout << " -p        Add all polarisations together" << endl;
   cout << " -x  max   Zoom into the data between 0 and max (normalized coords)" << endl;
+  cout << " -c        Do not remove baseline" << endl;
   cout << endl;
   cout << "Configuration options:" << endl;
   cout << " -g dev    Manually specify a plot device" << endl;
@@ -345,6 +347,7 @@ void PavApp::PavSpecificOptions( void )
   else
   {
     SetPlotOptions<Plot>( "above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
+    //SetPlotOptions<Plot>( "above:c=$name $file. Freq: $freq MHz BW: $bw Length: $int*:duration S/N: $snr" );
     SetPlotOptions<Plot>( "below:l=" );
   }
 
@@ -634,7 +637,7 @@ int PavApp::run( int argc, char *argv[] )
 
   float clip_value = 0.0;
 
-  char valid_args[] = "Az:hb:M:KDCdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g:l:";
+  char valid_args[] = "Az:hb:M:KDcCdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g:l:";
   opterr = 0;
 
   int c = '\0';
@@ -656,13 +659,18 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "bscrunch x" + string(optarg) );
       break;
     case 'i':
-      cout << "pav VERSION $Id: PavApp.C,v 1.54 2008/08/26 15:05:02 demorest Exp $" << endl << endl;
+      cout << 
+        "pav VERSION $Id: PavApp.C,v 1.55 2008/08/27 00:09:34 jonathan_khoo Exp $" << 
+        endl << endl;
       return 0;
     case 'M':
       metafile = optarg;
       break;
     case 'g':
       plot_device = optarg;
+      break;
+    case 'c':
+      remove_baseline = false;
       break;
     case 'C':
       //jobs.push_back( "centre" );
@@ -1059,7 +1067,9 @@ int PavApp::run( int argc, char *argv[] )
       for (unsigned p=0; p < plots[i].plots.size(); p++)
       {
         cpgpage ();
-        plots[i].plots[p]->preprocess( plots[i].archive );
+        if( remove_baseline )
+          plots[i].plots[p]->preprocess( plots[i].archive );
+
         plots[i].plots[p]->plot ( plots[i].archive );
       }
     }
