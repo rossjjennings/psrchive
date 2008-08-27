@@ -110,25 +110,36 @@ int Pulsar::model_profile (int npts, int narrays,
 
     int ntries = 0;
     int low = 0, high = 0;
-    while(low == 0 || high == 0){ 
+
+    while (low == 0 || high == 0)
+    {
+      ntries++;
+      if (ntries > 100)
+      {
+	cerr << "model_profile: max retries (100) exceeded" << endl;
+        return(-1);
+      }
+
       deriv_chisq = 0;
       for(i=0; i<narrays; ++i)
 	for(int iter=1; iter<nsum; ++iter)
 	  deriv_chisq+=iter*xcorr_amps[i][iter]*sin(-xcorr_phases[i][iter]+iter*tau);
-      ntries++;
-      if(deriv_chisq<0){
+
+      if (deriv_chisq<0)
+      {
         low_tau = tau;
         low_deriv_chisq = deriv_chisq;
         tau += dtau;
         low = 1;
-      } else {
+      }
+      else
+      {
         high_tau = tau;
         high_deriv_chisq = deriv_chisq;
         tau -= dtau;
         high = 1;
       }
-      if(ntries>10)
-        return(-1);
+
     }
     tau = zbrent (low_tau, high_tau, low_deriv_chisq, high_deriv_chisq, 
 		  edtau, narrays, xcorr_amps, xcorr_phases, nsum);
@@ -163,7 +174,8 @@ int Pulsar::model_profile (int npts, int narrays,
     }
   }
 
-  if (s1<=0 || s2==0 || s3<=0) {
+  if (s1<=0 || s2==0 || s3<=0)
+  {
     cerr << "model_profile: aborting before floating point exception" << endl;
     if (s1<=0)
       cerr << "  Numerator to Equation A9 = " << s1 << endl;
@@ -187,7 +199,8 @@ int Pulsar::model_profile (int npts, int narrays,
     }
   }
 
-  if (*chisq <= 0) {
+  if (*chisq <= 0)
+  {
     cerr << "model_profile: chisq <= 0" << endl;
     return -1;
   }
