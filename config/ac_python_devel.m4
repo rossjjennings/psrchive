@@ -4,6 +4,8 @@ dnl Checks for Python and tries to get the include path to 'Python.h'.
 dnl It provides the $(PYTHON_CPPFLAGS) and $(PYTHON_LDFLAGS) output
 dnl variable.
 dnl
+dnl Added check for Numpy - 2008/08/27 PBD
+dnl
 dnl @category InstalledPackages
 dnl @author Sebastian Huber <sebastian-huber@web.de>
 dnl @author Alan W. Irwin <irwin@beluga.phys.uvic.ca>
@@ -32,7 +34,17 @@ AC_DEFUN([AC_PYTHON_DEVEL],[
 	if test -z "$python_path" ; then
 		AC_MSG_ERROR([cannot find Python include path])
 	fi
-	AC_SUBST([PYTHON_CPPFLAGS],[-I$python_path])
+
+	# Check for numpy
+	AC_MSG_CHECKING([for Numpy include path])
+	numpy_include=`$PYTHON -c "import numpy; print numpy.get_include()"`
+	AC_MSG_RESULT([$numpy_include])
+	if test -z "$numpy_include" ; then
+		AC_MSG_ERROR([cannot find Numpy include path])
+	fi
+	
+	# Output full include path
+	AC_SUBST([PYTHON_CPPFLAGS],["-I$python_path -I$numpy_include"])
 
 	# Check for Python library path
 	AC_MSG_CHECKING([for Python library path])
