@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.34 $
-   $Date: 2008/08/27 01:08:52 $
+   $Revision: 1.35 $
+   $Date: 2008/08/27 01:14:31 $
    $Author: straten $ */
 
 
@@ -418,14 +418,6 @@ Estimate<float> flux2 (const Profile* profile)
   return stats.get_total() / profile->get_nbin();
 }
 
-Estimate<float> flux3 (const Profile* profile)
-{
-  Pulsar::FourierSNR stats;
-
-  stats.set_profile( profile );
-  return sqrt(stats.get_total());
-}
-
 // defined in width.C
 float width (const Profile* profile, float& error, float pc, float dc);
 
@@ -578,8 +570,7 @@ void Flux2( Reference::To< Archive > archive )
       if (archive->get_scale() == Signal::Jansky)
 	cout << "\t" << "mJy";
 
-      Estimate<float> fourier = flux3( archive->get_Profile(s,0,c) );
-      cout << " " << fourier.get_value() << " " << fourier.get_error() << endl;
+      cout << endl;
     }
   }
 }
