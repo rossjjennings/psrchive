@@ -6,7 +6,7 @@ bin_SCRIPTS = psrhelp
 
 EXTRA_DIST = psrhelp
 
-bin_PROGRAMS = pam pat paz psradd psrsh psrwt fluxcal pac pcm pdv sesdiv
+bin_PROGRAMS = pam pat paz psradd psrsh psrwt fluxcal pac pcm pdv rmfit sesdiv
 
 pam_SOURCES = pam.C
 
@@ -30,7 +30,11 @@ pac_SOURCES = pac.C
 pcm_SOURCES = pcm.C
 pcm_LDADD = $(LDADD) @PGPLOT_LIBS@ @PTHREAD_LIBS@
 
-pdv_SOURCES = pdv.C
+pdv_SOURCES = pdv.C width.C
+
+# Note that rmfit uses PGPLOT only if it is available
+rmfit_SOURCES = rmfit.C width.C
+rmfit_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 sesdiv_SOURCES = sesdiv.C
 
