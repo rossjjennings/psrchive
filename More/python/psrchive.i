@@ -83,7 +83,23 @@ using namespace std;
 
 %extend Pulsar::Profile
 {
-    PyObject *get_numpy()
+    // Allow indexing
+    float __getitem__(int i)
+    {
+        return self->get_amps()[i];
+    }
+    void __setitem__(int i, float val)
+    {
+        self->get_amps()[i] = val;
+    }
+    int __len__()
+    {
+        return self->get_nbin();
+    }
+
+    // Return a numpy array view of the data.
+    // This points to the actual Profile data, not a separate copy.
+    PyObject *get_amps()
     {
         PyArrayObject *arr;
         float *ptr;
@@ -102,6 +118,24 @@ using namespace std;
 
 %extend Pulsar::Archive
 {
+
+    // Allow indexing of Archive objects
+    Pulsar::Integration *__getitem__(int i)
+    {
+        return self->get_Integration(i);
+    }
+    int __len__()
+    {
+        return self->get_nsubint();
+    }
+
+    // String representation of the Archive
+    std::string __str__()
+    {
+        return "PSRCHIVE Archive object: " + self->get_filename();
+    }
+
+    // Return a copy of all the data as a numpy array
     PyObject *get_data()
     {
         PyArrayObject *arr;
@@ -123,6 +157,7 @@ using namespace std;
         return (PyObject *)arr;
     }
 
+    // Return a copy of all the weights as a numpy array
     PyObject *get_weights()
     {
         PyArrayObject *arr;
