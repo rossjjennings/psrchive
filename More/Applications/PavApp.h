@@ -144,6 +144,7 @@ private:
 
   bool label_degrees;
   bool centre_profile;
+  bool remove_baseline;
 
   unsigned int ronsub;
 };
