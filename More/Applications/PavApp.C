@@ -332,15 +332,7 @@ void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
   string duration = tostring( archive->get_Integration(0)->get_duration());
   string snr = tostring( archive->get_Profile(0, 0, 0)->snr() );
 
-  uint dotPos = duration.find('.');
-  if (dotPos != std::string::npos)
-    duration = duration.substr(0, dotPos);
-
-  dotPos = snr.find('.');
-  if (dotPos != std::string::npos)
-    snr = snr.substr(0, dotPos);
-
-  SetPlotOptions<Plot>( "above:c=$name $file. Freq: $freq MHz BW: $bw Length: "
+  SetPlotOptions<Plot>( "above:c=$name $file\n Freq: $freq MHz BW: $bw Length: "
           + duration + " S/N: " + snr );
 }
 
@@ -373,8 +365,7 @@ void PavApp::PavSpecificOptions( void )
   }
   else
   {
-    SetPlotOptions<Plot>( "above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
-    //SetPlotOptions<Plot>( "above:c=$name $file. Freq: $freq MHz BW: $bw Length: $int*:duration S/N: $snr" );
+    SetPlotOptions<Plot>( "above:c=$name $file\n Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
     SetPlotOptions<Plot>( "below:l=" );
   }
 
@@ -384,7 +375,7 @@ void PavApp::PavSpecificOptions( void )
   {
     SetPlotOptions<BandpassChannelWeightPlot>( "band:below:l=" );
     SetPlotOptions<BandpassChannelWeightPlot>( "band:below:r=" );
-    SetPlotOptions<BandpassChannelWeightPlot>( "above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length Rcvr: $rcvr:name" );
+    SetPlotOptions<BandpassChannelWeightPlot>( "above:c=$name $file\n Freq: $freq MHz BW: $bw Length: $length Rcvr: $rcvr:name" );
   }
   else
   {
@@ -401,7 +392,7 @@ void PavApp::PavSpecificOptions( void )
   SetPlotOptions<StokesCylindrical>( "pa:mark=dot+tick" );
   if( !publn )
   {
-    SetPlotOptions<StokesCylindrical>( "pa:above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
+    SetPlotOptions<StokesCylindrical>( "pa:above:c=$name $file\n Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
   }
   else
   {
@@ -462,7 +453,7 @@ void PavApp::PavSpecificOptions( void )
   }
   else
   {
-    SetPlotOptions<StokesSpherical>( "ell:above:c=$name $file. Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
+    SetPlotOptions<StokesSpherical>( "ell:above:c=$name $file\n Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
   }
 
   // if we want to plot error bars
@@ -687,7 +678,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.56 2008/08/28 01:06:47 jonathan_khoo Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.57 2008/08/28 06:24:16 jonathan_khoo Exp $" << 
         endl << endl;
       return 0;
     case 'M':
