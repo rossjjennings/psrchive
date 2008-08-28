@@ -98,6 +98,7 @@ private:
   void SetPhaseZoom( double min_phase, double max_phase );
   void SetFreqZoom( double min_freq, double max_freq );
   void PavSpecificOptions( void );
+  void PavSpecificLabels( Pulsar::Archive* archive );
   void CreatePlotsList( vector< string > filenames, vector< string > plot_ids );
   void SetCmdLineOptions( vector< string > options );
   bool CheckColour( void );
