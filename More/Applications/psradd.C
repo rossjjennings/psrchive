@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2002-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/psrchive.h"
 
 #include "Pulsar/TimeAppend.h"
@@ -166,7 +167,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.62 2008/08/20 02:30:49 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.63 2008/08/28 07:45:27 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -397,10 +398,12 @@ int main (int argc, char **argv) try {
   if (metafile)
     stringfload (&filenames, metafile);
   else
+  {
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  sort(filenames.begin(),filenames.end());
+    sort (filenames.begin(), filenames.end());
+  }
 
   if (!filenames.size()) {
     cerr << "psradd requires a list of archive filenames as parameters.\n";
