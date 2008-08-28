@@ -4,9 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PlotLabel.h"
 #include "Pulsar/InterpreterVariables.h"
 
+#include "escape.h"
 #include "substitute.h"
 #include "evaluate.h"
 
@@ -39,9 +41,10 @@ void Pulsar::PlotLabel::plot (const Archive* archive,
 {
   if (label == PlotLabel::unset)
     return;
-  
+
+  string elabel = escape (label);
   vector<string> labels;
-  separate (label, labels, "\n");
+  separate (elabel, labels, "\n");
 
   TextInterface::Parser* parser=const_cast<Archive*>(archive)->get_interface();
   parser->insert( new Interpreter::Variables );
@@ -67,8 +70,9 @@ void Pulsar::PlotLabel::plot (const Archive* archive,
 
 unsigned Pulsar::PlotLabel::get_nrows (const string& label) const
 {
+  string elabel = escape (label);
   vector<string> labels;
-  separate (label, labels, "\n");
+  separate (elabel, labels, "\n");
   return labels.size();
 }
 
