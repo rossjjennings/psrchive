@@ -26,7 +26,7 @@ Pulsar::PlotFrame::PlotFrame ()
 
   below = new PlotLabel;
 
-  get_label_below()->set_left("$name.$freq MHz");
+  get_label_below()->set_left("$name\n$freq MHz");
   get_label_below()->set_spacing( -get_label_below()->get_spacing() );
 
   transpose = false;

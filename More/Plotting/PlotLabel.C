@@ -41,7 +41,7 @@ void Pulsar::PlotLabel::plot (const Archive* archive,
     return;
   
   vector<string> labels;
-  separate (label, labels, ".");
+  separate (label, labels, "\n");
 
   TextInterface::Parser* parser=const_cast<Archive*>(archive)->get_interface();
   parser->insert( new Interpreter::Variables );
@@ -68,7 +68,7 @@ void Pulsar::PlotLabel::plot (const Archive* archive,
 unsigned Pulsar::PlotLabel::get_nrows (const string& label) const
 {
   vector<string> labels;
-  separate (label, labels, ".");
+  separate (label, labels, "\n");
   return labels.size();
 }
 
