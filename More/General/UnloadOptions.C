@@ -58,13 +58,15 @@ bool Pulsar::UnloadOptions::parse (char code, const std::string& arg)
 
 void Pulsar::UnloadOptions::setup ()
 {
+  cerr << "Pulsar::UnloadOptions::setup" << endl;
+
   if (overwrite && (!extension.empty() || !directory.empty()))
     throw Error (InvalidState, "Pulsar::UnloadOptions::setup",
 		 "cannot use -m option with -e and/or -O option");
 
-  if (!overwrite && (!extension.empty() || !directory.empty()))
+  if (!overwrite && extension.empty() && directory.empty())
     throw Error (InvalidState, "Pulsar::UnloadOptions::setup",
-		 "please specify either the -m option or -e and/or -O option");
+		 "please specify either the -m option or the -e or -O option");
 }
 
 //! Unload the archive
@@ -77,7 +79,9 @@ void Pulsar::UnloadOptions::finish (Archive* archive)
 	 << archive->get_filename() << endl;
 #endif
 
+    cout << "Unloading " << archive->get_filename () << " ..." << endl;
     archive->unload ();
+    cout << archive->get_filename () << " updated on disk" << endl;
     return;
   }
 
@@ -93,5 +97,7 @@ void Pulsar::UnloadOptions::finish (Archive* archive)
   cerr << "Pulsar::UnloadOptions::finish writing " << newname << endl;
 #endif
 
+  cout << "Unloading " << newname << " ..." << endl;
   archive->unload (newname);
+  cout << "New file " << newname << " written to disk" << endl;
 }
