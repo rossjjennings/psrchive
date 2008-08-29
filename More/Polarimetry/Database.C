@@ -327,19 +327,21 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
   if (match_verbose)
     cerr << "Pulsar::Database::Criterion::match" << endl;
  
-  if (check_obs_type) {
-
+  if (check_obs_type)
+  {
     if (match_verbose)
       cerr << "  Seeking obsType="
 	   << Signal::source_string(entry.obsType) 
 	   << " have obsType="
 	   << Signal::source_string(have.obsType);
     
-    if (entry.obsType == have.obsType) {
+    if (entry.obsType == have.obsType)
+    {
       if (match_verbose)
-	cerr << "... match found" << endl; 
+	cerr << "... matches" << endl; 
     }
-    else {
+    else
+    {
       if (match_verbose)
 	cerr << "... no match" << endl;
       return false;
@@ -355,46 +357,48 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
 
       if (entry.calType == have.calType) {
 	if (match_verbose)
-	  cerr << "... match found" << endl; 
+	  cerr << "... matches" << endl; 
       }
       else {
 	if (match_verbose)
 	  cerr << "... no match" << endl;
 	return false;
       }
-
     }
-
   }
 
-  if (check_receiver) {
-
+  if (check_receiver)
+  {
     if (match_verbose)
       cerr << "  Seeking receiver=" << entry.receiver
            << " have receiver=" << have.receiver;
 
-    if (entry.receiver==have.receiver) {
+    if (entry.receiver==have.receiver)
+    {
       if (match_verbose)
-        cerr << " ... match found" << endl;
+        cerr << " ... matches" << endl;
     }
-    else {
+    else
+    {
       if (match_verbose)
         cerr << "... no match" << endl;
       return false;
     }
   }
 
-  if (check_instrument) {
-
+  if (check_instrument)
+  {
     if (match_verbose)
       cerr << "  Seeking instrument=" << entry.instrument
            << " have instrument=" << have.instrument;
 
-    if (entry.instrument==have.instrument) {
+    if (entry.instrument==have.instrument)
+    {
       if (match_verbose)
-        cerr << " ... match found" << endl;
+        cerr << " ... matches" << endl;
     }
-    else {
+    else
+    {
       if (match_verbose)
         cerr << "... no match" << endl;
       return false;
@@ -414,7 +418,7 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
     if ( diff < 1e-12 )
     {
       if (match_verbose)
-	cerr << " ... match found" << endl; 
+	cerr << " ... matches" << endl; 
     }
     else
     {
@@ -433,7 +437,7 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
     if (entry.bandwidth==have.bandwidth)
     {
       if (match_verbose)
-        cerr << " ... match found" << endl;
+        cerr << " ... matches" << endl;
     }
     else
     {
@@ -449,7 +453,8 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
   {
     diff = (have.time - entry.time).in_minutes();
 
-    switch (policy) {
+    switch (policy)
+    {
     case NoPolicy:
     default:
       diff = fabs( diff );
@@ -462,26 +467,29 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
       break;
     }
 
-    if (match_verbose) {
+    if (match_verbose)
+    {
       cerr << "  Seeking time=" << entry.time
 	   << " have time=" << have.time
 	   << "\n    difference=" << diff << " minutes "
 	"(max=" << minutes_apart << ")";
     }
 
-    if (diff < minutes_apart && diff >= 0) {
+    if (diff < minutes_apart && diff >= 0)
+    {
       if (match_verbose)
-	cerr << " ... match found" << endl;
+	cerr << " ... matches" << endl;
     }
-    else {
+    else
+    {
       if (match_verbose)
 	cerr << " do not match" << endl;
       return false;
     }
   }
 
-  if (check_coordinates) {
-
+  if (check_coordinates)
+  {
     diff = have.position.angularSeparation(entry.position).getDegrees();
 
     if (match_verbose)
@@ -490,11 +498,13 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
            << "\n    difference=" << diff << " degrees "
            << "(max=" << deg_apart << ")";
 
-    if (diff < deg_apart) {
+    if (diff < deg_apart)
+    {
       if (match_verbose)
-	cerr << " ... match found" << endl;
+	cerr << " ... matches" << endl;
     }
-    else {
+    else
+    {
       if (match_verbose)
 	cerr << "... no match" << endl;
       return false;
@@ -502,16 +512,18 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
 
   }
 
-  if (check_frequency_array) {
+  if (check_frequency_array)
+  {
     // For now this assumes we can accurately recreate the original
     // freq arrays from nchan, bw, and freq.
 
     ChannelSubsetMatch chan_match;
     bool result = chan_match.match(have, entry);
-    if (match_verbose) {
+    if (match_verbose)
+    {
       cerr << "  Seeking channel subset match";
       if (result==true)
-        cerr << "... match found!" << endl;
+        cerr << "... matches!" << endl;
       else 
         cerr << "... no match (" << chan_match.get_reason() << ")" << endl;
     }
@@ -1008,8 +1020,14 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
 
   // Truncate cal archive here if needed.
   // How to determine when this is appropriate?  compare BW?
-  if (polcalarch->get_bandwidth() != arch->get_bandwidth() && polcalarch->get_nsubint()) {
 
+  // WvS - 29 Sept 2008
+  // added constraint: calibrator nchan must be greater than data nchan
+
+  if ( polcalarch->get_bandwidth() != arch->get_bandwidth()
+       && polcalarch->get_nchan() > arch->get_nchan()
+       && polcalarch->get_nsubint() )
+  {
     // NOTE: this will currently only work when loading in 
     // raw cal observations.  could/should be updated to deal
     // with polcal solutions as well.
@@ -1043,12 +1061,14 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
 
   }
 
-  if (feed) {
+  if (feed)
+  {
     FeedExtension* feed_ext = polcalarch->getadd<FeedExtension>();
     feed_ext -> set_transformation ( feed->evaluate() );
   }
 
-  if (verbose > 2) {
+  if (verbose > 2)
+  {
     if (entry.obsType == Signal::Calibrator)
       cerr << "CAL OF TYPE " <<  Calibrator::Type2str (entry.calType) << endl;
     else
@@ -1062,8 +1082,8 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
   // otherwise, construct a solution
   Reference::To<Pulsar::ReferenceCalibrator> ref_cal;
 
-  switch (m) {
-    
+  switch (m)
+  {   
   case Pulsar::Calibrator::Hybrid:
   case Pulsar::Calibrator::SingleAxis:
     ref_cal = new Pulsar::SingleAxisCalibrator (polcalarch);
