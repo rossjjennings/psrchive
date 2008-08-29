@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.35 $
-   $Date: 2008/08/27 01:14:31 $
+   $Revision: 1.36 $
+   $Date: 2008/08/29 06:29:15 $
    $Author: straten $ */
 
 
@@ -54,6 +54,8 @@ const char HELP_KEY             = 'h';
 const char IBIN_KEY             = 'b';
 const char ICHAN_KEY            = 'n';
 const char ISUB_KEY             = 'i';
+const char JOB_KEY              = 'j';
+const char JOBS_KEY             = 'J';
 const char PHASE_KEY            = 'r';
 const char FSCRUNCH_KEY         = 'F';
 const char TSCRUNCH_KEY         = 'T';
@@ -152,6 +154,8 @@ void Usage( void )
   "   -" << PSCRUNCH_KEY <<       "          Pscrunch first \n"
   "   -" << CENTRE_KEY <<         "          Centre first \n"
   "   -" << BSCRUNCH_KEY <<       " factor   Bscrunch by this factor first \n"
+  "   -" << JOB_KEY <<            " job      Do anything first \n"
+  "   -" << JOBS_KEY <<           " script   Do many things first \n"
   "   -" << STOKES_FRACPOL_KEY << "          Convert to Stokes and also print fraction polarisation \n"
   "   -" << STOKES_FRACLIN_KEY << "          Convert to Stokes and also print fraction linear \n"
   "   -" << STOKES_FRACCIR_KEY << "          Convert to Stokes and also print fraction circular \n"
@@ -922,17 +926,17 @@ try
 
   if (jobs.size())
   {
-	vector<string> config_jobs;
+    vector<string> config_jobs;
     for( unsigned int i = 0; i < jobs.size(); i++)
     {
-	  if (jobs[i].substr(0, 6) == "config")
-	  {
-		config_jobs.push_back( jobs[i] );
-		jobs.erase( jobs.begin() + i );
-		i--;
-	  }
+      if (jobs[i].substr(0, 6) == "config")
+      {
+	config_jobs.push_back( jobs[i] );
+	jobs.erase( jobs.begin() + i );
+	i--;
+      }
       preprocessor.script( config_jobs );
-	}
+    }
   }
 
   if( !keep_baseline )
@@ -1005,6 +1009,8 @@ int main( int argc, char *argv[] ) try
   args += IBIN_KEY; args += ':';
   args += ICHAN_KEY; args += ':';
   args += ISUB_KEY; args += ':';
+  args += JOB_KEY; args += ':';
+  args += JOBS_KEY; args += ':';
   args += PHASE_KEY; args += ':';
   args += FSCRUNCH_KEY;
   args += TSCRUNCH_KEY;
@@ -1101,6 +1107,12 @@ int main( int argc, char *argv[] ) try
       break;
     case BSCRUNCH_KEY:
       jobs.push_back( "bscrunch x" + string(optarg) );
+      break;
+    case JOB_KEY:
+      separate (optarg, jobs, ",");
+      break;
+    case JOBS_KEY:
+      loadlines (optarg, jobs);
       break;
     case CENTRE_KEY:
       jobs.push_back( "centre" );
