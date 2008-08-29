@@ -46,7 +46,7 @@ template <typename T>
 static Pulsar::Archive::MatchFunctor bpp_functor (T method)
 {
   Pulsar::ThresholdMatch* match = new Pulsar::ThresholdMatch;
-  match->set_maximum_relative_bandwidth (1e-3);
+  match->set_maximum_relative_bandwidth (5e-3);
   (match->*method) (true);
   return Pulsar::Archive::MatchFunctor (match);
 }
