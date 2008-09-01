@@ -79,24 +79,54 @@ void usage () {
 }
 
 // returns the phase of the mid-point of the on cal hi
-float mid_hi (Pulsar::Archive* archive);
+static float mid_hi (Pulsar::Archive* archive);
 
-int main (int argc, char **argv) try {
+// set the total to the specified archive
+static void set_total (Pulsar::Archive* archive);
 
+// the accumulated total
+static Reference::To<Pulsar::Archive> total;
+
+// name of the output file
+static string unload_name;
+
+// verbose output
+static bool verbose = false;
+
+// very verbose output
+static bool vverbose = false;
+
+// log the results
+static bool log_results = false;
+
+// tscrunch+unload when certain limiting conditions are met
+static bool auto_add = false; 
+
+// after loading the next archive, reset the total
+static bool reset_total_next_load = true;
+
+// extension added to auto-added output files
+static string integrated_extension ("it");
+
+// directory to which auto-added output files are written
+static string integrated_path;
+
+// the file stream to which log messages are written
+static FILE* log_file = 0;
+
+// the name of the currently open log file
+static string log_filename;
+
+// the ephemeris to be installed
+static Reference::To<Pulsar::Parameters> ephemeris;
+
+int main (int argc, char **argv) try
+{
   // append in the time direction
   bool time_direction = true;
 
   // do not make changes to file system when true
   bool testing = false;
-
-  // verbose output
-  bool verbose = false;
-
-  // very verbose output
-  bool vverbose = false;
-
-  // log the results
-  bool log_results = false;
 
   // if specified, bscrunch each archive to nbin
   int nbin = 0;
@@ -113,9 +143,6 @@ int main (int argc, char **argv) try {
   // phase align each archive before appending to total
   bool phase_align = false;
 
-  // tscrunch+unload when certain limiting conditions are met
-  bool auto_add = false; 
-
   // auto_add features:
   // maximum amount of data (in seconds) to integrate into one archive
   float integrate = 0.0;
@@ -129,15 +156,6 @@ int main (int argc, char **argv) try {
 
   // name of file containing list of Archive filenames
   char* metafile = NULL;
-
-  // extension added to auto-added output files
-  string integrated_extension ("it");
-
-  // directory to which auto-added output files are written
-  string integrated_path;
-
-  // name of the output file
-  string newname;
 
   // name of the new ephemeris file
   string parname;
@@ -167,7 +185,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.63 2008/08/28 07:45:27 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.64 2008/09/01 02:24:02 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -216,7 +234,7 @@ int main (int argc, char **argv) try {
     case 'o':
       command += " -o ";
     case 'f':
-      newname = optarg;
+      unload_name = optarg;
       command += optarg;
       
       if (c == 'f')
@@ -346,7 +364,7 @@ int main (int argc, char **argv) try {
     } 
   }
 
-  if (!auto_add && !newname.length()) {
+  if (!auto_add && !unload_name.length()) {
     cerr << "psradd requires a new filename on the command line (use -f) \n";
     return -1;
   }
@@ -361,13 +379,11 @@ int main (int argc, char **argv) try {
     return -1;
   }
 
-  if (auto_add && newname.length())
+  if (auto_add && unload_name.length())
     cerr << "psradd ignores -f when AUTO ADD features are used\n";
 
-  if (integrated_path.length() && newname.length())
+  if (integrated_path.length() && unload_name.length())
     cerr << "psradd ignores -O when -f is used \n";
-
-  Reference::To<Pulsar::Parameters> ephemeris;
 
   if (!parname.empty()) {
 
@@ -413,15 +429,6 @@ int main (int argc, char **argv) try {
   // the individual archive
   Reference::To<Pulsar::Archive> archive;
 
-  // the accumulated total
-  Reference::To<Pulsar::Archive> total;
-
-  bool reset_total_next_load = true;
-  bool correct_total = false;
-
-  FILE* log_file = 0;
-  string log_filename;
-
   Pulsar::Interpreter* preprocessor = standard_shell();
 
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
@@ -464,9 +471,10 @@ int main (int argc, char **argv) try {
 	&& fabs(archive->get_centre_frequency()-centre_frequency) > 0.0001 )
       continue;
 
-    try {
-
-      if (jobs.size()) {
+    try
+    {
+      if (jobs.size())
+      {
 	if (verbose)
 	  cerr << "psradd: preprocessing " << filenames[ifile] << endl;
 	preprocessor->set(archive);
@@ -476,9 +484,8 @@ int main (int argc, char **argv) try {
       if (nbin)
 	archive->bscrunch_to_nbin (nbin);
 
-      if( nchan )
+      if (nchan)
 	archive->fscrunch_to_nchan (nchan);
-
     }
     catch (Error& error) {
       cerr << "psradd: preprocessing error\n"
@@ -490,78 +497,12 @@ int main (int argc, char **argv) try {
     if (reset_total_next_load)
     {
       if (verbose) cerr << "psradd: Setting total" << endl;
-      total = archive;
+      set_total (archive);
       
       if (vverbose)
 	cerr << "psradd: after reset total, instance count = " 
 	     << Reference::Able::get_instance_count() << endl;
 
-      correct_total = true;
-    }
-
-    if (correct_total)
-    {
-      if (auto_add)
-      {
-	newname = total->get_filename() + "." + integrated_extension;
-        if (!integrated_path.empty())
-          newname = integrated_path + "/" + basename (newname);
-      }
-
-      if (log_results)
-      {
-	string log_name = total->get_source() + ".log";
-
-	if (log_name != log_filename)
-        {
-	  if (log_file)
-          {
-	    cerr << "psradd: Closing log file " << log_filename << endl;
-	    fclose (log_file);
-	  }
-	  cerr << "psradd: Opening log file " << log_name << endl;
-	  log_file = fopen (log_name.c_str(), "a");
-	  if (!log_file)
-	    throw Error (FailedSys, "psradd", "fopen (" + log_name + ")");
-	}
-
-	fprintf (log_file, "\npsradd %s: %s", newname.c_str(),
-		 total->get_filename().c_str());
-      }
-
-      if (verbose)
-	cerr << "psradd: New filename: '" << newname << "'" << endl;
-
-      if (ephemeris) try
-      {
-        if (verbose)
-          cerr << "psradd: Installing new ephemeris" << endl;
-
-	total->set_ephemeris (ephemeris);
-      }
-      catch (Error& error)
-      {
-	cerr << "psradd: Error installing ephemeris in "
-             << total->get_filename() << endl;
-
-        if (verbose)
-          cerr << error << endl;
-        else
-	  cerr << "  " << error.get_message() << endl;
-
-	if (!auto_add)
-	  return -1;
-
-	reset_total_next_load = true;
-	continue;
-      }
-
-      correct_total = false;
-
-    }
-
-    if (reset_total_next_load)
-    {
       reset_total_next_load = false;
       continue;
     }
@@ -580,7 +521,8 @@ int main (int argc, char **argv) try {
       if (verbose)
 	cerr << "psradd: Auto add - gap = " << gap << " seconds" << endl;
       
-      if (gap > interval) {
+      if (gap > interval)
+      {
 	if (verbose)
 	  cerr << "psradd: gap=" << gap << " greater than interval=" 
 	       << interval << endl;
@@ -611,7 +553,8 @@ int main (int argc, char **argv) try {
       if (verbose)
 	cerr << "psradd: Auto add - CAL phase diff = " << diff << endl;
 
-      if ( diff > cal_phase_diff ) {
+      if ( diff > cal_phase_diff )
+      {
 	if (verbose)
 	  cerr << "psradd: diff=" << diff << " greater than max diff=" 
 	       << cal_phase_diff << endl;
@@ -695,8 +638,8 @@ int main (int argc, char **argv) try {
 	reset_total_next_load = true;
     }
 
-    if (max_ston != 0.0)  {
-
+    if (max_ston != 0.0)
+    {
       // ///////////////////////////////////////////////////////////////
       //
       // auto_add -S: check that S/N of the integrated data is less
@@ -712,8 +655,8 @@ int main (int argc, char **argv) try {
 	reset_total_next_load = true;
     }
     
-    if (tscrunch_total) {
-
+    if (tscrunch_total)
+    {
       if (verbose) cerr << "psradd: tscrunch total" << endl;
 
       // tscrunch the archive
@@ -722,7 +665,6 @@ int main (int argc, char **argv) try {
       if (vverbose)
 	cerr << "psradd: after tscrunch, instance count = " 
 	     << Reference::Able::get_instance_count() << endl;
-
     }
 
     /////////////////////////////////////////////////////////////////
@@ -733,8 +675,8 @@ int main (int argc, char **argv) try {
     if (fitsext)
       fitsext->set_command_str(command);
 
-    if (reset_total_next_load || reset_total_current) {
-
+    if (reset_total_next_load || reset_total_current)
+    {
       if (verbose)
 	cerr << "psradd: Auto add - tscrunch and unload " 
 	     << total->integration_length() << " s archive" << endl;
@@ -748,7 +690,7 @@ int main (int argc, char **argv) try {
       if (!testing)
       {
 	reorder( total );
-	total->unload (newname);
+	total->unload (unload_name);
       }      
 
       if (reset_total_current)
@@ -756,8 +698,7 @@ int main (int argc, char **argv) try {
 	if (verbose)
 	  cerr << "psradd: Auto add - reset total to current" << endl;
 
-	total = archive;
-	correct_total = true;
+	set_total( archive );
 
 	if (vverbose)
 	  cerr << "psradd: after reset total, instance count = " 
@@ -765,22 +706,24 @@ int main (int argc, char **argv) try {
       }
     }
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << "psradd: Error handling [" << filenames[ifile] << "]\n" 
 	 << error << endl;
   }
 
-  if (!reset_total_next_load) try {
-
-    if (auto_add)  {      
+  if (!reset_total_next_load) try
+  {
+    if (auto_add)
+    {      
       if (verbose) cerr << "psradd: Auto add - tscrunching last " 
 			<< total->integration_length()
 			<< " seconds of data." << endl;
       total->tscrunch();
     }
 
-    if (!time_direction) {
-
+    if (!time_direction)
+    {
       // dedisperse to the new centre frequency
       if (total->get_dedispersed())
 	total->dedisperse();
@@ -792,31 +735,33 @@ int main (int argc, char **argv) try {
       // re-compute the phase predictor to the new centre frequency
       if (total->has_model() && total->has_ephemeris())
         total->update_model ();
-
     }
 
-    if (verbose)
-      cerr << "psradd: Unloading archive: '" << newname << "'" << endl;
+    if (!testing)
+    {
+      if (verbose)
+	cerr << "psradd: Unloading archive: '" << unload_name << "'" << endl;
     
-    if (!testing){
       reorder( total );
-      total->unload (newname);
+      total->unload (unload_name);
     }
-
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << "psradd: Error unloading total\n" << error << endl;
     return -1;
   }
 
-  if (log_file) {
+  if (log_file)
+  {
     fprintf (log_file, "\n");
     fclose (log_file);
   }
 
   return 0;
 }
-catch (Error& error) {
+catch (Error& error)
+{
   cerr << "psradd: Unhandled error" << error << endl;
   return -1;
 }
@@ -840,4 +785,69 @@ reorder(Reference::To<Pulsar::Archive> arch)
 {
   Reference::To<Pulsar::TimeSortedOrder> tso = new Pulsar::TimeSortedOrder;
   tso->organise(arch,0);
+}
+
+void set_total (Pulsar::Archive* archive)
+{
+  total = archive;
+
+  if (auto_add)
+  {
+    unload_name = total->get_filename() + "." + integrated_extension;
+    if (!integrated_path.empty())
+      unload_name = integrated_path + "/" + basename (unload_name);
+  }
+
+  if (log_results)
+  {
+    string log_name = total->get_source() + ".log";
+
+    if (log_name != log_filename)
+    {
+      if (log_file)
+      {
+	cerr << "psradd: Closing log file " << log_filename << endl;
+	fclose (log_file);
+      }
+      
+      cerr << "psradd: Opening log file " << log_name << endl;
+      
+      log_file = fopen (log_name.c_str(), "a");
+      log_filename = log_name;
+
+      if (!log_file)
+	throw Error (FailedSys, "psradd", "fopen (" + log_name + ")");
+    }
+
+    fprintf (log_file, "\npsradd %s: %s", unload_name.c_str(),
+	     total->get_filename().c_str());
+  }
+
+  if (verbose)
+    cerr << "psradd: New filename: '" << unload_name << "'" << endl;
+
+  if (ephemeris) try
+  {
+    if (verbose)
+      cerr << "psradd: Installing new ephemeris" << endl;
+    
+    total->set_ephemeris (ephemeris);
+  }
+  catch (Error& error)
+  {
+    cerr << "psradd: Error installing ephemeris in "
+	 << total->get_filename() << endl;
+    
+    if (verbose)
+      cerr << error << endl;
+    else
+      cerr << "  " << error.get_message() << endl;
+    
+    if (!auto_add)
+      exit (-1);
+    
+    reset_total_next_load = true;
+
+    throw error;
+  }
 }
