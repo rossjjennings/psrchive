@@ -187,11 +187,22 @@ int Pulsar::Application::main (int argc, char** argv) try
     }
 
     process (archive);
+
+    for (unsigned i=0; i<options.size(); i++)
+    {
+      if (very_verbose)
+	cerr << "Pulsar::Application::main feature "<< i <<" finish" << endl;
+      options[i]->finish (archive);
+    }
+
   }
   catch (Error& error) {
     cerr << name << ": error while processing "
 	 << filenames[ifile] << ":\n" << error.get_message() << endl;
   }
+
+  for (unsigned i=0; i<options.size(); i++)
+    options[i]->finalize ();
 
   finalize ();
 
@@ -221,22 +232,33 @@ bool Pulsar::Application::parse (char code, const std::string& arg)
   return false;
 }
 
-//! Extra setup
+//! Extra setup, run once before main loop
 void Pulsar::Application::setup ()
 {
 }
 
+//! Extra optional processing tasks, run once per Archive (before main process)
 void Pulsar::Application::Options::process (Archive*)
 {
 }
 
-//! Final steps
+//! Final steps, run once at end of program
 void Pulsar::Application::finalize ()
 {
 }
 
+//! Optional final steps, run once at end
+void Pulsar::Application::Options::finalize ()
+{
+}
+
+//! Optional setup steps, run once at start
 void Pulsar::Application::Options::setup ()
 {
 }
 
+//! Optional finishing tasks, run once per Archive (after main process)
+void Pulsar::Application::Options::finish (Archive*)
+{
+}
 

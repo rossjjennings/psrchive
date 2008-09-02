@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/07/28 13:04:16 $
+   $Revision: 1.7 $
+   $Date: 2008/09/02 19:51:43 $
    $Author: demorest $ */
 
 #ifndef __Pulsar_Application_h
@@ -111,11 +111,17 @@ namespace Pulsar {
     //! Parse an additional command, return true if understood
     virtual bool parse (char code, const std::string& arg) = 0;
 
-    //! Additional setup tasks
+    //! Additional one-time setup tasks
     virtual void setup ();
 
-    //! Additional processing tasks
+    //! Additional per-Archive processing tasks
     virtual void process (Archive*);
+
+    //! Additional per-Archive finishing tasks (e.g., unload)
+    virtual void finish (Archive*);
+
+    //! Additional one-time final tasks
+    virtual void finalize();
 
   protected:
 
