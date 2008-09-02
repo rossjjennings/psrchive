@@ -14,7 +14,6 @@
 #include "Pulsar/DeltaRM.h"
 #include "Pulsar/PolnProfileStats.h"
 #include "Pulsar/FaradayRotation.h"
-#include "Pulsar/StokesCylindrical.h"
 
 #include "MEAL/LevenbergMarquardt.h"
 #include "MEAL/Gaussian.h"
@@ -27,6 +26,7 @@
 #include "templates.h"
 
 #if HAVE_PGPLOT
+#include "Pulsar/StokesCylindrical.h"
 #include <cpgplot.h>
 #endif
 
