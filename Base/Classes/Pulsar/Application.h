@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/09/02 19:51:43 $
-   $Author: demorest $ */
+   $Revision: 1.8 $
+   $Date: 2008/09/03 01:19:37 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Application_h
 #define __Pulsar_Application_h
 
-#include "Reference.h"
+#include "Functor.h"
 #include <string>
 
 namespace Pulsar {
@@ -27,7 +27,8 @@ namespace Pulsar {
   public:
 
     //! Construct with the application name and a short description
-    Application (const std::string& name, const std::string& description);
+    Application (const std::string& name,
+		 const std::string& description);
 
     //! Execute the main loop
     virtual int main (int argc, char** argv);
@@ -76,7 +77,11 @@ namespace Pulsar {
     //! Any final work after main loop finishes
     virtual void finalize ();
 
-    //! Set to true if this application has an online manual
+    //! getopt options filter 
+    /*! can be used to address backward compatibility issues */
+    Functor<char(char)> filter;
+    
+    //! set to true if this application has an online manual
     bool has_manual;
 
     // name of the application
@@ -84,6 +89,9 @@ namespace Pulsar {
 
     // short description of the application
     std::string description;
+
+    // revision information
+    std::string version;
 
     // list of file names on which to operate
     std::vector <std::string> filenames;

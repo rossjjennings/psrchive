@@ -62,7 +62,12 @@ void Pulsar::Application::usage ()
     "usage: " + name + " [options] filename[s] \n"
     "\n"
     "where options are:\n"
-    "\n"
+       << endl;
+
+  if (!version.empty())
+    cout << " -i               revision information \n";
+
+  cout <<
     " -h               help page \n"
     " -q               quiet mode \n"
     " -v               verbose mode \n"
@@ -84,8 +89,6 @@ void Pulsar::Application::usage ()
   cout << 
     "See "PSRCHIVE_HTTP"/manuals/" + name + " for more details \n" 
        << endl;
-
-  exit (0);
 }
 
 
@@ -94,6 +97,9 @@ void Pulsar::Application::parse (int argc, char** argv)
 {
   string args = "hM:qvV";
 
+  if (!version.empty())
+    args += "i";
+
   for (unsigned i=0; i<options.size(); i++)
     args += options[i]->get_options();
 
@@ -101,12 +107,19 @@ void Pulsar::Application::parse (int argc, char** argv)
 
   char code;
   while ((code = getopt(argc, argv, args.c_str())) != -1) 
+  {    
+    if (filter)
+      code = filter (code);
 
     switch (code)  {
 
+    case 'i':
+      cout << version << endl;
+      exit (0);
+
     case 'h':
       usage ();
-      break;
+      exit (0);
 
     case 'M':
       metafile = optarg;
@@ -150,8 +163,8 @@ void Pulsar::Application::parse (int argc, char** argv)
 	throw Error (InvalidParam, name,
 		     "option -%c not understood", code);
       } 
-      
     }
+  }
 
   if (metafile)
     stringfload (&filenames, metafile);
