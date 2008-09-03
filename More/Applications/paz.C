@@ -62,11 +62,20 @@ int main (int argc, char** argv)
   return program.main (argc, argv);
 }
 
+char backward_compatibility (char c)
+{
+  // paz used to accept -u to specify the output directory, now it is -O
+  if (c == 'u')
+    return 'O';
 
+  return c;
+}
 
 paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
 {
   has_manual = true;
+  version = "$Id: paz.C,v 1.52 2008/09/03 01:19:41 straten Exp $";
+  filter = backward_compatibility;
 
   add( new Pulsar::StandardOptions );
   add( new Pulsar::UnloadOptions );
