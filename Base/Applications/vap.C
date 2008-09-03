@@ -265,29 +265,39 @@ string get_freq( Reference::To< Archive > archive )
 }
 
 
-
-string get_freq_obs( Reference::To< Archive > archive )
+string get_profile_centre_frequency( Reference::To< Archive > archive )
 {
-  double freq_obs = 0.0;
+  double freq = archive->get_Profile(0, 0, 0)->get_centre_frequency();
+  return tostring(freq);
+}
 
-  Reference::To<const FITSHdrExtension> hdr = archive->get<const FITSHdrExtension>();
-  Reference::To<const ProcHistory> history = archive->get<const ProcHistory>();
 
-  if( hdr )
-  {
-    freq_obs = hdr->get_obsfreq();
-  }
-
-  if( history && freq_obs == 0.0 )
-  {
-    if( history->rows.size() > 0 )
-    {
-      freq_obs =  history->rows[0].ctr_freq;
-    }
-  }
-
+string get_freq_pa( Reference::To< Archive > archive )
+{
+  string result = "UNDEF";
   set_precision( 3, true );
-  string result = tostring( freq_obs );
+
+  if (archive->get_faraday_corrected())
+    result = get_freq(archive);
+  else if (archive->get_nchan() == 1)
+    result = get_profile_centre_frequency(archive);
+
+  restore_precision();
+
+  return result;
+}
+
+
+string get_freq_phs( Reference::To< Archive > archive )
+{
+  string result = "UNDEF";
+  set_precision( 3, true );
+
+  if (archive->get_dedispersed())
+    result = get_freq(archive);
+  else if (archive->get_nchan() == 1)
+    result = get_profile_centre_frequency(archive);
+
   restore_precision();
 
   return result;
@@ -1780,7 +1790,9 @@ void PrintExtdHlp( void )
     "bw                              Observation Bandwidth (MHz) \n"
     "dm                              Dispersion measure \n"
     "dmc                             Dispersion corrected (boolean) \n"
-    "freq_obs                        Observed frequency\n"
+    "freq_phs                        Pulse phase frequency \n"
+    "freq_pa                         Position angle frequency \n"
+    //"freq_obs                        Observed frequency\n"
     "length                          The full duration of the observation (s) \n"
     "name                            Name of the source \n"
     "nbin_obs                        Observed number of pulse phase bins \n"
@@ -2020,7 +2032,8 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "rmc" ) return get_rmc( archive );
     else if( command == "polc" ) return get_polc( archive );
     else if( command == "freq" ) return get_freq( archive );
-    else if( command == "freq_obs" ) return get_freq_obs( archive );
+    else if( command == "freq_pa" ) return get_freq_pa( archive );
+    else if( command == "freq_phs" ) return get_freq_phs( archive );
     else if( command == "bw" ) return get_bw( archive );
     else if( command == "intmjd" ) return get_intmjd( archive );
     else if( command == "fracmjd" ) return get_fracmjd( archive );
