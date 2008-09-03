@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.36 $
-   $Date: 2008/08/29 06:29:15 $
+   $Revision: 1.37 $
+   $Date: 2008/09/03 04:57:52 $
    $Author: straten $ */
 
 
@@ -490,7 +490,8 @@ void CalParameters( Reference::To< Archive > archive )
 
 void Flux( Reference::To< Archive > archive )
 {
-  archive->centre();
+  if (archive->has_model())
+    archive->centre();
 
   if (archive->get_npol() == 4)
     archive->convert_state (Signal::Stokes);
