@@ -319,8 +319,9 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq )
 /**
  * PavSpecificLabels
  *
- *  DOES     - Calculates the integration duration and SNR after the jobs have 
- *             been executed.
+ *  DOES     - Calculates integration duration, SNR and after the jobs have 
+ *             been executed. Displays the appropriate frequency depending on
+ *             whether the archive has been dedispersed.
  *  RECEIVES - Archive
  *  RETURNS  - Nothing
  *  THROWS   - Nothing
@@ -332,8 +333,15 @@ void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
   string duration = tostring( archive->get_Integration(0)->get_duration());
   string snr = tostring( archive->get_Profile(0, 0, 0)->snr() );
 
-  SetPlotOptions<Plot>( "above:c=$name $file\n Freq: $freq MHz BW: $bw Length: "
-          + duration + " S/N: " + snr );
+  string frequency;
+
+  if (archive->get_dedispersed())
+    frequency = tostring(archive->get_centre_frequency());
+  else
+    frequency = tostring(archive->get_Profile(0, 0, 0)->get_centre_frequency());
+
+  SetPlotOptions<Plot>( "above:c=$name $file\n Freq: " + frequency +
+          " MHz BW: $bw Length: " + duration + " S/N: " + snr );
 }
 
 /**
@@ -678,7 +686,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.57 2008/08/28 06:24:16 jonathan_khoo Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.58 2008/09/03 05:22:32 jonathan_khoo Exp $" << 
         endl << endl;
       return 0;
     case 'M':
