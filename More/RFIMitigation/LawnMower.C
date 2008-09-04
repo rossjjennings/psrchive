@@ -8,6 +8,7 @@
 #include "Pulsar/LawnMower.h"
 #include "Pulsar/OnPulseThreshold.h"
 #include "Pulsar/GaussianBaseline.h"
+#include "Pulsar/BaselineWindow.h"
 #include "Pulsar/SmoothMedian.h"
 
 #include "Pulsar/FrequencyIntegrate.h"
@@ -36,6 +37,13 @@ Pulsar::LawnMower::LawnMower ()
      searched, and the result is not normally distributed. */
   baseline->set_threshold( 3.0 );
 
+  BaselineWindow* window = new BaselineWindow;
+  window->set_smooth( new SmoothMedian );
+  window->set_median_cut( 4.0 );
+  window->get_smooth()->set_turns( Profile::default_duty_cycle );
+
+  baseline->set_initial_baseline( window );
+
   /* Also, a relatively large number of samples in the median smoothed
      difference profile will be equal to zero.  It is important to 
      remove these points from the computation of the variance. */
@@ -45,7 +53,7 @@ Pulsar::LawnMower::LawnMower ()
 
   mower -> set_baseline_estimator( baseline );
   mower -> set_threshold( 4.0 );
-  mower -> set_allow_negative (true);
+  mower -> set_allow_negative( true );
 
   // risk smoothing out 2% duty cycle profiles
   median_smoothing_turns = 0.02;
@@ -109,8 +117,8 @@ bool Pulsar::LawnMower::build_mask (Profile* profile)
   include->resize (nbin);
   include->set_all (1.0);
 
-  if (median_smoothing_turns) {
-
+  if (median_smoothing_turns)
+  {
 #ifndef _DEBUG
     if (Profile::verbose)
 #endif
@@ -136,7 +144,6 @@ bool Pulsar::LawnMower::build_mask (Profile* profile)
 	(*include)[ibin] = 0;
     
     mower->set_Profile( difference );
-
   }
 
   else
@@ -177,8 +184,8 @@ void Pulsar::LawnMower::transform (Integration* subint)
   Reference::To<Integration> total = subint->clone();
   total->expert()->pscrunch();
 
-  if (broadband) {
-
+  if (broadband)
+  {
     FrequencyIntegrate integrate;
     integrate.set_dedisperse( false );
 
@@ -186,15 +193,14 @@ void Pulsar::LawnMower::transform (Integration* subint)
 
     if (!build_mask( total->get_Profile(0,0) ))
       return;
-
   }
 
   GaussianBaseline baseline;
   SmoothMedian median;
   median.set_turns( median_smoothing_turns );
 
-  for (unsigned ichan=0; ichan < subint->get_nchan(); ichan++) try {
-
+  for (unsigned ichan=0; ichan < subint->get_nchan(); ichan++) try
+  {
 #ifdef _DEBUG
     cerr << "ichan=" << ichan << "/" << subint->get_nchan() << endl;
 #endif
@@ -208,8 +214,8 @@ void Pulsar::LawnMower::transform (Integration* subint)
     Reference::To<PhaseWeight> base = 
       baseline( subint->get_Profile (0,ichan) );
 
-    for (unsigned ipol=0; ipol < subint->get_npol(); ipol++) {
-
+    for (unsigned ipol=0; ipol < subint->get_npol(); ipol++)
+    {
       Reference::To<Profile> profile = subint->get_Profile (ipol, ichan);
 
       base->set_Profile( profile );
@@ -217,7 +223,6 @@ void Pulsar::LawnMower::transform (Integration* subint)
 
       Reference::To<Profile> smoothed = new Profile( *profile );
       median( smoothed );
-
 
 #ifdef _DEBUG
       cerr << ipol << " " << ichan << " rms=" << rms << endl;
@@ -229,16 +234,16 @@ void Pulsar::LawnMower::transform (Integration* subint)
       unsigned nbin = subint->get_nbin ();
 
       // 2.5 sigma should get most valid baseline samples
-      for (unsigned i=0; i<nbin; i++) {
-
-	if ( (*mowed)[i] ) {
-
+      for (unsigned i=0; i<nbin; i++)
+      {
+	if ( (*mowed)[i] )
+	{
 	  unsigned count = 0;
 	  unsigned ibin = 0;
 	  float diff = 0;
 
-	  do {
-
+	  do
+	  {
 	    ibin = lrand48() % nbin;
 	    count ++;
 
@@ -247,19 +252,16 @@ void Pulsar::LawnMower::transform (Integration* subint)
 			   "no baseline points available for replacement");
 
 	    diff = amps[ibin] - smamps[ibin];
-
 	  }
 	  while ( (*mowed)[ibin] || fabs(diff) > rms * 2.5 );
 
 	  amps[i] = smamps[i] + diff;
-
 	}
-
       }
     }
-
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     if (Integration::verbose)
       cerr << "Pulsar::LawnMower::transform failed on ichan=" << ichan
 	   << " " << error.get_message() << endl;
