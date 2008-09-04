@@ -60,8 +60,13 @@ using namespace std;
 // does not distinguish between const and non-const overloaded methods
 %ignore Pulsar::Archive::get_Profile(unsigned,unsigned,unsigned) const;
 %ignore Pulsar::Archive::expert() const;
+%ignore Pulsar::Archive::get_type() const;
+%ignore Pulsar::Archive::get_state() const;
+%ignore Pulsar::Archive::get_scale() const;
+%ignore Pulsar::Archive::get_basis() const;
 %ignore Pulsar::Integration::get_Profile(unsigned,unsigned) const;
 %ignore Pulsar::Integration::new_PolnProfile(unsigned) const;
+%ignore Pulsar::Integration::get_epoch() const;
 %ignore Pulsar::IntegrationManager::get_Integration(unsigned) const;
 %ignore Pulsar::IntegrationManager::get_last_Integration() const;
 %ignore Pulsar::IntegrationManager::get_first_Integration() const;
