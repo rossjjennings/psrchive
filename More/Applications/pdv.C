@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.37 $
-   $Date: 2008/09/03 04:57:52 $
-   $Author: straten $ */
+   $Revision: 1.38 $
+   $Date: 2008/09/04 12:41:20 $
+   $Author: demorest $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -72,6 +72,7 @@ const char PULSE_FLUX_KEY       = 'I';
 const char BASELINE_KEY         = 'R';
 const char TEXT_KEY             = 't';
 const char TEXT_HEADERS_KEY     = 'A';
+const char HDR_MARKER_KEY       = 'K';
 const char PER_SUBINT_KEY       = 'S';
 const char HISTORY_KEY          = 'H';
 const char SNR_KEY              = 'N';
@@ -113,6 +114,8 @@ bool show_lin_frac = false;
 bool show_circ_frac = false;
 bool show_pa = false;
 bool show_min_max = false;
+
+string header_marker = "";
 
 int ichan = -1;
 int ibin = -1;
@@ -167,6 +170,7 @@ void Usage( void )
   "   -" << BASELINE_KEY <<       "          Do not remove baseline \n"
   "   -" << TEXT_KEY <<           "          Print out profiles as ASCII text \n"
   "   -" << TEXT_HEADERS_KEY <<   "          Print out profiles as ASCII text (with per channel headers) \n"
+  "   -" << HDR_MARKER_KEY <<     "          Start header lines with #\n"
   "   -" << PER_SUBINT_KEY <<     " params   Print out per subint data (no params for argument list) \n"
   "   -" << HISTORY_KEY <<        " params   Print out the history table for the archive (no params for argument list) \n"
   "   -" << SNR_KEY <<            "          Print the S/N \n"
@@ -258,6 +262,7 @@ void MinMaxHeader( Reference::To< Pulsar::Archive > archive )
 
 void Header( Reference::To< Pulsar::Archive > archive )
 {
+  cout << header_marker;
   cout << "File: " << archive->get_filename()
   << " Src: " << archive->get_source()
   << " Nsub: " << archive->get_nsubint()
@@ -276,6 +281,7 @@ double GetBaselineRMS( Reference::To< Pulsar::Archive > archive )
 
 void IntegrationHeader( Reference::To< Pulsar::Integration > intg )
 {
+  cout << header_marker;
   cout << "MJD(mid): " << intg->get_epoch().printdays(12);
   tostring_precision = 3;
   cout << " Tsub: " << tostring<double>( intg->get_duration() );
@@ -457,6 +463,7 @@ void CalParameters( Reference::To< Archive > archive )
     IntegrationHeader( intg );
     cout << endl;
 
+    cout << header_marker;
     cout << "isub ichan freq hi_err";
     for (unsigned ipol = 0; ipol < archive->get_npol(); ipol++)
       cout << " hi_pol" << ipol;
@@ -496,6 +503,7 @@ void Flux( Reference::To< Archive > archive )
   if (archive->get_npol() == 4)
     archive->convert_state (Signal::Stokes);
 
+  cout << header_marker;
   cout << "File\t\t\tSub\tChan\tPol\tMJD\t\tFreq\tFlux\tUnit\t10\% Width\t50\% Width"
   << endl;
 
@@ -866,7 +874,7 @@ void PrintSNR( vector<string> filenames )
 {
   table_stream ts( &cout );
 
-  ts << "FILE" << "S/N" << endl;
+  ts << header_marker << "FILE" << "S/N" << endl;
 
   vector<string>::iterator it;
   for( it = filenames.begin(); it != filenames.end(); it ++ )
@@ -1032,6 +1040,7 @@ int main( int argc, char *argv[] ) try
   args += HISTORY_KEY; args += ":";
   args += SNR_KEY;
   args += MINMAX_KEY;
+  args += HDR_MARKER_KEY;
 
   vector<string> history_params;
   vector<string> subint_params;
@@ -1146,6 +1155,9 @@ int main( int argc, char *argv[] ) try
 	case MINMAX_KEY:
 	  show_min_max = true;
 	  break;
+    case HDR_MARKER_KEY:
+      header_marker = "# ";
+      break;
     default:
       cerr << "Unknown option " << char(i) << endl;
       break;
