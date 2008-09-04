@@ -23,8 +23,10 @@ static Pulsar::BaselineEstimator* default_initial_baseline ()
 {
   Pulsar::BaselineWindow* window = new Pulsar::BaselineWindow;
 
-  window->set_smooth( new Pulsar::SmoothMedian );
-  window->set_median_cut( 4.0 );
+  // All of these median-based steps blow the wall time from 2 to 9 hours
+  // window->set_smooth( new Pulsar::SmoothMedian );
+  // window->set_median_cut( 4.0 );
+
   window->get_smooth()->set_turns( Pulsar::Profile::default_duty_cycle );
 
   return window;
