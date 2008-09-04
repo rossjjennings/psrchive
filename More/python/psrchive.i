@@ -2,6 +2,7 @@
 %{
 #define SWIG_FILE_WITH_INIT
 #include "numpy/noprefix.h"
+
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -116,6 +117,13 @@ using namespace std;
     }
 }
 
+%extend Pulsar::Integration
+{
+    // Return MJD as double
+    // TODO: probably can do this better with typemap?
+    double get_epoch() { return self->get_epoch().in_days(); }
+}
+
 %extend Pulsar::Archive
 {
 
@@ -134,6 +142,12 @@ using namespace std;
     {
         return "PSRCHIVE Archive object: " + self->get_filename();
     }
+
+    // String representation of various enums
+    std::string get_type() { return Source2string(self->get_type()); }
+    std::string get_state() { return State2string(self->get_state()); }
+    std::string get_basis() { return Basis2string(self->get_basis()); }
+    std::string get_scale() { return Scale2string(self->get_scale()); }
 
     // Return a copy of all the data as a numpy array
     PyObject *get_data()
