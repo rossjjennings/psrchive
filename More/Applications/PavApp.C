@@ -336,9 +336,9 @@ void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
   string frequency;
 
   if (archive->get_dedispersed())
-    frequency = tostring(archive->get_centre_frequency());
-  else
     frequency = tostring(archive->get_Profile(0, 0, 0)->get_centre_frequency());
+  else
+    frequency = tostring(archive->get_centre_frequency());
 
   SetPlotOptions<Plot>( "above:c=$name $file\n Freq: " + frequency +
           " MHz BW: $bw Length: " + duration + " S/N: " + snr );
@@ -686,7 +686,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.58 2008/09/03 05:22:32 jonathan_khoo Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.59 2008/09/04 02:21:07 jonathan_khoo Exp $" << 
         endl << endl;
       return 0;
     case 'M':
