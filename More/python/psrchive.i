@@ -31,16 +31,16 @@ using namespace std;
 %}
 
 // help memory management
-%newobject Pulsar::Archive::new_Archive (const string&);
-%newobject Pulsar::Archive::load (const string&);
-%newobject Pulsar::Archive::clone () const;
-%newobject Pulsar::Archive::extract (const vector<unsigned>& subints) const;
-%newobject Pulsar::Archive::total () const;
+%newobject Pulsar::Archive::new_Archive;
+%newobject Pulsar::Archive::load;
+%newobject Pulsar::Archive::clone;
+%newobject Pulsar::Archive::extract;
+%newobject Pulsar::Archive::total;
 
-%newobject Pulsar::Integration::clone () const;
-%newobject Pulsar::Integration::total () const;
+%newobject Pulsar::Integration::clone;
+%newobject Pulsar::Integration::total;
 
-%newobject Pulsar::Profile::clone () const;
+%newobject Pulsar::Profile::clone;
 
 // does not handle nested classes
 %ignore Pulsar::Archive::get_extension(unsigned);
