@@ -3,6 +3,7 @@
 #define SWIG_FILE_WITH_INIT
 #include "numpy/noprefix.h"
 
+#include "Reference.h"
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -41,6 +42,24 @@ using namespace std;
 %newobject Pulsar::Integration::total;
 
 %newobject Pulsar::Profile::clone;
+
+// Track any pointers handed off to python with a global list
+// of Reference::To objects.  Prevents the C++ routines from
+// prematurely destroying objects by effectively making python
+// variables act like Reference::To pointers.
+%feature("ref")   Reference::Able "pointer_tracker_add($this);"
+%feature("unref") Reference::Able "pointer_tracker_remove($this);"
+%header %{
+std::vector< Reference::To<Reference::Able> > _pointer_tracker;
+void pointer_tracker_add(Reference::Able *ptr) {
+    _pointer_tracker.push_back(ptr);
+}
+void pointer_tracker_remove(Reference::Able *ptr) {
+    std::vector< Reference::To<Reference::Able> >::iterator it;
+    for (it=_pointer_tracker.begin(); it<_pointer_tracker.end(); it++) 
+        if ((*it).ptr() == ptr) _pointer_tracker.erase(it);
+}
+%}
 
 // does not handle nested classes
 %ignore Pulsar::Archive::get_extension(unsigned);
@@ -81,6 +100,8 @@ using namespace std;
 %ignore Pulsar::Profile::default_duty_cycle;
 
 // Parse the header file to generate wrappers
+%include "ReferenceAble.h"
+%include "Pulsar/Container.h"
 %include "Pulsar/IntegrationManager.h"
 %include "Pulsar/Archive.h"
 %include "Pulsar/Integration.h"
