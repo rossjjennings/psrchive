@@ -12,9 +12,21 @@
 #include <iostream>
 using namespace std;
 
+Pulsar::Option<float> default_median_cut
+(
+ "Baseline::median_cut", 0.0,
+
+ "Remove outliers from baseline using median",
+
+ "Large outliers can skew the estimate of the off-pulse baseline mean and \n"
+ "standard deviation.  This parameter can be used to omit any phase bins \n"
+ "that are more than median_cut times the median difference from the \n"
+ "median from the median. [not a typo]"
+);
+
 Pulsar::BaselineEstimator::BaselineEstimator ()
 {
-  median_cut = 0.0;
+  median_cut = default_median_cut;
 }
 
 void Pulsar::BaselineEstimator::set_median_cut (float cut)
@@ -29,8 +41,8 @@ Pulsar::BaselineEstimator::baseline (const Profile* profile)
   set_Profile( profile );
   get_weight( weight );
 
-  if (median_cut) {
-
+  if (median_cut)
+  {
     float median = weight->get_median();
     float median_diff = weight->get_median_difference();
 
@@ -38,12 +50,14 @@ Pulsar::BaselineEstimator::baseline (const Profile* profile)
     const float* amps = profile->get_amps();
 
     for (unsigned ibin=0; ibin<nbin; ibin++)
-      if ( (*weight)[ibin] ) {
+    {
+      if ( (*weight)[ibin] )
+      {
 	float diff = fabs( amps[ibin] - median );
 	if ( diff > median_cut * median_diff )
 	  (*weight)[ibin] = 0;
       }
-
+    }
   }
 
   return weight.release();
