@@ -1,21 +1,20 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/BaselineWindow.h"
+
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/SmoothMean.h"
+#include "Pulsar/SmoothMedian.h"
+
+#include "Pulsar/Config.h"
 #include "Pulsar/Profile.h"
 
-// #define _DEBUG 1
-
-#ifdef _DEBUG
-#include <iostream>
 using namespace std;
-#endif
 
 // defined in Profile.C
 void nbinify (int& istart, int& iend, int nbin);
@@ -45,11 +44,35 @@ void Pulsar::BaselineWindow::set_smooth (Smooth* function)
   smooth = function;
 }
 
+static Pulsar::Option<std::string> default_smooth
+(
+ "BaselineWindow::smooth", "mean",
+
+ "Baseline window smoothing function",
+
+ "The BaselineWindow algorithm defines the off-pulse baseline by the\n"
+ "the minimum phase of a smoothed version of the profile.  The smoothing \n"
+ "function can be either 'mean' or 'median'."
+);
+
 //! Get the smoothing function
 Pulsar::Smooth* Pulsar::BaselineWindow::get_smooth ()
 {
   if (!smooth)
-    smooth = new SmoothMean;
+  {
+    string smooth_name = default_smooth;
+
+    if (smooth_name == "median")
+      smooth = new Pulsar::SmoothMedian;
+
+    else if (smooth_name == "mean")
+      smooth = new Pulsar::SmoothMean;
+
+    else
+      throw Error (InvalidState, 
+		   "Pulsar::BaslineWindow::get_smooth",
+		   "no smoothing function named '" + smooth_name + "'");
+  }
 
   return smooth;
 }
