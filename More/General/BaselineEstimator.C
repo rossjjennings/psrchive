@@ -26,7 +26,12 @@ Pulsar::Option<float> default_median_cut
 
 Pulsar::BaselineEstimator::BaselineEstimator ()
 {
-  median_cut = default_median_cut;
+  /*
+   * cannot set to default in constructor, as Option<float> default_median_cut
+   * may not yet have been constructed.
+   */
+  
+  median_cut = -1;
 }
 
 void Pulsar::BaselineEstimator::set_median_cut (float cut)
@@ -40,6 +45,9 @@ Pulsar::BaselineEstimator::baseline (const Profile* profile)
   Reference::To<PhaseWeight> weight = new PhaseWeight;
   set_Profile( profile );
   get_weight( weight );
+
+  if (median_cut == -1)
+    median_cut = default_median_cut;
 
   if (median_cut)
   {
