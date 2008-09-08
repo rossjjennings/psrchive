@@ -7,6 +7,7 @@
 
 #include "Pulsar/ThresholdMatch.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/Config.h"
 
 #include "strutil.h"  // for stringprintf
 
@@ -41,12 +42,23 @@ bool Pulsar::ThresholdMatch::get_bandwidth_match (const Archive* a,
   return true;
 }
 
+
+Pulsar::Option<float> bpp_maximum_relative_bandwidth
+(
+ "BPP::maximum_relative_bandwidth", 5e-3,
+
+ "Maximum tolerable difference in relative bandwidth",
+
+ "The Berkeley Pulsar Processing instruments can have varying bandwidths. \n"
+ "I don't know why (WvS - 2008 Sept 8)"
+);
+
 //! Return a matching strategy based on the specified method
 template <typename T>
 static Pulsar::Archive::MatchFunctor bpp_functor (T method)
 {
   Pulsar::ThresholdMatch* match = new Pulsar::ThresholdMatch;
-  match->set_maximum_relative_bandwidth (5e-3);
+  match->set_maximum_relative_bandwidth (bpp_maximum_relative_bandwidth);
   (match->*method) (true);
   return Pulsar::Archive::MatchFunctor (match);
 }
