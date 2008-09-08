@@ -151,6 +151,34 @@ void pointer_tracker_remove(Reference::Able *ptr) {
     // Return MJD as double
     // TODO: probably can do this better with typemap?
     double get_epoch() { return self->get_epoch().in_days(); }
+
+    // Return baseline_stats as numpy arrays
+    PyObject *baseline_stats() {
+
+        // Call C++ routine
+        std::vector< std::vector< Estimate<double> > > mean;
+        std::vector< std::vector<double> > var;
+        self->baseline_stats(&mean, &var);
+        npy_intp size[2];
+        size[0] = mean.size();
+        size[1] = mean[0].size();
+
+        // Pack values into new numpy arrays
+        PyArrayObject *npy_mean, *npy_var;
+        npy_mean = (PyArrayObject *)PyArray_SimpleNew(2, size, PyArray_DOUBLE);
+        npy_var  = (PyArrayObject *)PyArray_SimpleNew(2, size, PyArray_DOUBLE);
+        for (int ii=0; ii<size[0]; ii++) 
+            for (int jj=0; jj<size[1]; jj++) {
+                ((double *)npy_mean->data)[ii*size[1]+jj] = mean[ii][jj].get_value();
+                ((double *)npy_var->data)[ii*size[1]+jj] = var[ii][jj];
+            }
+
+        // Pack arrays into tuple for output
+        PyTupleObject *result = (PyTupleObject *)PyTuple_New(2);
+        PyTuple_SetItem((PyObject *)result, 0, (PyObject *)npy_mean);
+        PyTuple_SetItem((PyObject *)result, 1, (PyObject *)npy_var);
+        return (PyObject *)result;
+    }
 }
 
 %extend Pulsar::Archive
@@ -177,6 +205,9 @@ void pointer_tracker_remove(Reference::Able *ptr) {
     std::string get_state() { return State2string(self->get_state()); }
     std::string get_basis() { return Basis2string(self->get_basis()); }
     std::string get_scale() { return Scale2string(self->get_scale()); }
+    void convert_state(std::string s) { 
+        self->convert_state(Signal::string2State(s)); 
+    }
 
     // Return a copy of all the data as a numpy array
     PyObject *get_data()
