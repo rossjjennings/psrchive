@@ -159,7 +159,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
         std::vector< std::vector< Estimate<double> > > mean;
         std::vector< std::vector<double> > var;
         self->baseline_stats(&mean, &var);
-        npy_intp size[2];
+        npy_intp size[2]; // Chan and pol
         size[0] = mean.size();
         size[1] = mean[0].size();
 
@@ -179,6 +179,47 @@ void pointer_tracker_remove(Reference::Able *ptr) {
         PyTuple_SetItem((PyObject *)result, 1, (PyObject *)npy_var);
         return (PyObject *)result;
     }
+
+    // Return cal levels as numpy arrays
+    PyObject *cal_levels() {
+
+        // Call C++ routine for values
+        std::vector< std::vector< Estimate<double> > > hi, lo;
+        self->cal_levels(hi, lo);
+        npy_intp dims[2]; // Chan and pol
+        dims[0] = hi.size();
+        dims[1] = hi[0].size();
+
+        // Create, fill numpy arrays
+        PyArrayObject *hi_arr, *lo_arr, *sig_hi_arr, *sig_lo_arr;
+        hi_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims, PyArray_DOUBLE);
+        lo_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims, PyArray_DOUBLE);
+        sig_hi_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims, 
+            PyArray_DOUBLE);
+        sig_lo_arr = (PyArrayObject *)PyArray_SimpleNew(2, dims, 
+            PyArray_DOUBLE);
+        for (int ii=0; ii<dims[0]; ii++) {
+            for (int jj=0; jj<dims[1]; jj++) {
+                ((double *)hi_arr->data)[ii*dims[1]+jj] = 
+                    hi[ii][jj].get_value();
+                ((double *)lo_arr->data)[ii*dims[1]+jj] = 
+                    lo[ii][jj].get_value();
+                ((double *)sig_hi_arr->data)[ii*dims[1]+jj] = 
+                    sqrt(hi[ii][jj].get_variance());
+                ((double *)sig_lo_arr->data)[ii*dims[1]+jj] = 
+                    sqrt(lo[ii][jj].get_variance());
+            }
+        }
+
+        // Pack arrays into tuple
+        PyTupleObject *result = (PyTupleObject *)PyTuple_New(4);
+        PyTuple_SetItem((PyObject *)result, 0, (PyObject *)hi_arr);
+        PyTuple_SetItem((PyObject *)result, 1, (PyObject *)lo_arr);
+        PyTuple_SetItem((PyObject *)result, 2, (PyObject *)sig_hi_arr);
+        PyTuple_SetItem((PyObject *)result, 3, (PyObject *)sig_lo_arr);
+        return (PyObject *)result;
+    }
+
 }
 
 %extend Pulsar::Archive
