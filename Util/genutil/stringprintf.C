@@ -4,12 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include <stdio.h>
 #include <string>
 #include <stdarg.h>
 
 std::string
-stringprintf(char *fmt ...)
+stringprintf (const char *fmt ...)
 {
   static char buf[1024];
   va_list args;
