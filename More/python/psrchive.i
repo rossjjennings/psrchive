@@ -31,16 +31,15 @@ using namespace std;
   import_array();
 %}
 
-// help memory management
+// Declare functions that return a newly created object
+// (Helps memory management)
 %newobject Pulsar::Archive::new_Archive;
 %newobject Pulsar::Archive::load;
 %newobject Pulsar::Archive::clone;
 %newobject Pulsar::Archive::extract;
 %newobject Pulsar::Archive::total;
-
 %newobject Pulsar::Integration::clone;
 %newobject Pulsar::Integration::total;
-
 %newobject Pulsar::Profile::clone;
 
 // Track any pointers handed off to python with a global list
@@ -57,26 +56,28 @@ void pointer_tracker_add(Reference::Able *ptr) {
 void pointer_tracker_remove(Reference::Able *ptr) {
     std::vector< Reference::To<Reference::Able> >::iterator it;
     for (it=_pointer_tracker.begin(); it<_pointer_tracker.end(); it++) 
-        if ((*it).ptr() == ptr) _pointer_tracker.erase(it);
+        if ((*it).ptr() == ptr) {
+            _pointer_tracker.erase(it);
+            break;
+        }
 }
 %}
 
-// does not handle nested classes
+// SWIG can't handle nested classes, so ignore them
 %ignore Pulsar::Archive::get_extension(unsigned);
 %ignore Pulsar::Archive::get_extension(unsigned) const;
 %ignore Pulsar::Archive::add_extension(Extension*);
-
 %ignore Pulsar::Integration::get_extension(unsigned);
 %ignore Pulsar::Integration::get_extension(unsigned) const;
 %ignore Pulsar::Integration::add_extension(Extension*);
 
-// does not use the assignment operator
+// Also does not use the assignment operator
 %ignore Pulsar::Archive::operator=(const Archive&);
 %ignore Pulsar::Integration::operator=(const Integration&);
 %ignore Pulsar::Profile::operator=(const Profile&);
 %ignore Pulsar::IntegrationManager::operator=(const IntegrationManager&);
 
-// does not distinguish between const and non-const overloaded methods
+// Also does not distinguish between const and non-const overloaded methods
 %ignore Pulsar::Archive::get_Profile(unsigned,unsigned,unsigned) const;
 %ignore Pulsar::Archive::expert() const;
 %ignore Pulsar::Archive::get_type() const;
@@ -91,15 +92,15 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %ignore Pulsar::IntegrationManager::get_first_Integration() const;
 %ignore Pulsar::ProfileAmps::get_amps() const;
 
-// Ignore Stokes class for now
+// Stokes class not wrapped yet, so ignore it
 %ignore Pulsar::Integration::get_Stokes(unsigned,unsigned) const;
 
-// Also ignore Option
+// Same for Option
 %ignore Pulsar::Profile::rotate_in_phase_domain;
 %ignore Pulsar::Profile::transition_duty_cycle;
 %ignore Pulsar::Profile::default_duty_cycle;
 
-// Parse the header file to generate wrappers
+// Header files included here will be wrapped
 %include "ReferenceAble.h"
 %include "Pulsar/Container.h"
 %include "Pulsar/IntegrationManager.h"
@@ -107,6 +108,8 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/Integration.h"
 %include "Pulsar/ProfileAmps.h"
 %include "Pulsar/Profile.h"
+
+// Python-specific extensions to the classes:
 
 %extend Pulsar::Profile
 {
