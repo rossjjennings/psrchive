@@ -47,10 +47,11 @@ Pulsar::Option<float> bpp_maximum_relative_bandwidth
 (
  "BPP::maximum_relative_bandwidth", 5e-3,
 
- "Maximum tolerable difference in relative bandwidth",
+ "Tolerable bandwidth difference",
 
  "The Berkeley Pulsar Processing instruments can have varying bandwidths. \n"
- "I don't know why (WvS - 2008 Sept 8)"
+ "Set this parameter to the maximum value of the relative difference \n"
+ "that will be tolerated when determining if two archives match each other. \n"
 );
 
 //! Return a matching strategy based on the specified method
