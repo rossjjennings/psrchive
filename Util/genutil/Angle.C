@@ -28,7 +28,8 @@ void Angle::wrap()
 
   // first cut the radian down to size
 
-  while (fabs(radians) > 4.0*M_PI)  {
+  while (fabs(radians) > 4.0*M_PI)
+  {
     double irad = floor(0.5*radians/M_PI);
     irad *= 2.0*M_PI;
     radians -= irad;
@@ -40,21 +41,16 @@ void Angle::wrap()
 
 char * Angle::getHMS(char *str, int places) const
 {
-  int hours, minutes;
-  double seconds;
-
-  getHMS (hours, minutes, seconds);
-
-  sprintf(str, "%02d:%02d:%0*.*f", hours, minutes, 
-          3+places, places, seconds);
-
+  ra2str (str, ANGLE_STRLEN, radians, places);
   return str;
 }
 
-static char angle_str [100];
+static char angle_str [ANGLE_STRLEN];
+
 std::string Angle::getHMS (int places) const
 {
-  ra2str (angle_str, 100, radians, places);
+  // cerr << "std::string Angle::getHMS" << endl;
+  ra2str (angle_str, ANGLE_STRLEN, radians, places);
   return angle_str;
 }
 
@@ -166,26 +162,15 @@ void Angle::getDMS (int& degrees, int& minutes, double& seconds) const
   seconds = fabs(radians) * 648000.0/M_PI - ((degrees*60.0)+minutes)*60.0;
 }
 
-char * Angle::getDMS(char *str,int places) const
+char * Angle::getDMS (char *str,int places) const
 {
-  int degrees, minutes;
-  double seconds;
-
-  getDMS (degrees, minutes, seconds);
-
-  if (radians < 0.0)
-    sprintf(str, "-%02d:%02d:%0*.*f", degrees, minutes, 
-          3+places, places, seconds);
-  else 
-    sprintf(str, "+%02d:%02d:%0*.*f", degrees, minutes, 
-            3+places, places, seconds);
-
+  dec2str2 (str, ANGLE_STRLEN, radians, places);
   return str;
 }
 
-std::string Angle::getDMS(int places) const
+std::string Angle::getDMS (int places) const
 {
-  dec2str2 (angle_str, 100, radians, places);
+  dec2str2 (angle_str, ANGLE_STRLEN, radians, places);
   return angle_str;
 }
 
@@ -197,7 +182,8 @@ Angle& Angle::operator= (const Angle & a)
   return *this;
 }
 
-Angle& Angle::operator= (const double &rad){
+Angle& Angle::operator= (const double &rad)
+{
   setRadians(rad);
   return *this;
 }
@@ -238,15 +224,8 @@ Angle& Angle::operator/= (const double & d)
   return(*this);
 }
 
-const Angle operator + (const Angle &a1, const Angle &a2) {
-
-  // what is this for ?? I think I mistakenly thought it was
-  // necessary to add in cartesian space.. only need this for means
-  //  double real = cos(a1.getRadians())*cos(a2.getRadians()) - 
-  //   sin(a1.getRadians())*sin(a2.getRadians());
-  //  double imag = cos(a1.getRadians())*sin(a2.getRadians()) +
-  ///   sin(a1.getRadians())*cos(a2.getRadians());
-  //  return Angle(atan2(imag,real));
+const Angle operator + (const Angle &a1, const Angle &a2)
+{
   Angle a;
   a.setWrapPoint((a1.wrap_point > a2.wrap_point ? 
                  a1.wrap_point: a2.wrap_point));
@@ -262,24 +241,28 @@ const Angle operator - (const Angle& a)
   return ret;
 }
 
-const Angle operator - (const Angle &a1, const Angle &a2) {
+const Angle operator - (const Angle &a1, const Angle &a2)
+{
   Angle a3 = a2*-1.0;
   return (a1+a3);
 }
 
-const Angle operator + (const Angle &a1, double d) {
+const Angle operator + (const Angle &a1, double d)
+{
   Angle a(a1);
   a.setRadians(a.radians+d);
   return a;
 }
 
-const Angle operator - (const Angle &a1, double d) {
+const Angle operator - (const Angle &a1, double d)
+{
   Angle a(a1);
   a.setRadians(a.radians-d);
   return a;
 }
 
-const Angle operator * (const Angle &a1, double d) {
+const Angle operator * (const Angle &a1, double d)
+{
   Angle a(a1);
   a.setRadians(a.radians*d);
   return a;
@@ -288,42 +271,48 @@ const Angle operator * (const Angle &a1, double d) {
 // NOTE : this returns double, not angle, since angle^2 is not
 // limited to <pi radians as angle is
 // it returns the product of the angles.radians
-double operator * (const Angle &a1, const Angle &a2) {
+double operator * (const Angle &a1, const Angle &a2)
+{
   return a1.getRadians()*a2.getRadians();
 }
 
-const Angle operator / (const Angle &a1, double d) {
+const Angle operator / (const Angle &a1, double d)
+{
   Angle a(a1);
   a.setRadians(a.radians/d);
   return a;
-  
 }
 
-int operator > (const Angle &a1, const Angle &a2) {
+int operator > (const Angle &a1, const Angle &a2)
+{
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   if(fabs(a1.getRadians()-a2.getRadians())<precision_limit) return(0);
   else return (a1.getRadians()>a2.getRadians());
 }
 
-int operator >= (const Angle &a1, const Angle &a2) {
+int operator >= (const Angle &a1, const Angle &a2)
+{
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   if(fabs(a1.getRadians()-a2.getRadians())<precision_limit) return(1);
   else return (a1.getRadians()>a2.getRadians());
 }
 
-int operator < (const Angle &a1, const Angle &a2) {
+int operator < (const Angle &a1, const Angle &a2)
+{
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   if(fabs(a1.getRadians()-a2.getRadians())<precision_limit) return(0);
   else return (a1.getRadians()<a2.getRadians());
 }
 
-int operator <= (const Angle &a1, const Angle &a2) {
+int operator <= (const Angle &a1, const Angle &a2)
+{
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   if(fabs(a1.getRadians()-a2.getRadians())<precision_limit) return(1);
   else return (a1.getRadians()<a2.getRadians());
 }
 
-int operator == (const Angle &a1, const Angle &a2){
+int operator == (const Angle &a1, const Angle &a2)
+{
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   if ((fabs(a1.getRadians()-a2.getRadians())<precision_limit)) 
       return (1);
@@ -331,7 +320,8 @@ int operator == (const Angle &a1, const Angle &a2){
       return (0);  
 }
 
-int operator != (const Angle &a1, const Angle &a2){
+int operator != (const Angle &a1, const Angle &a2)
+{
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   if ((fabs(a1.getRadians()-a2.getRadians())>precision_limit)) 
       return (1);
@@ -343,7 +333,8 @@ int operator != (const Angle &a1, const Angle &a2){
 
 std::ostream& operator << (std::ostream& os, const Angle& angle)
 {
-  switch (Angle::default_type) {
+  switch (Angle::default_type)
+  {
   case Angle::Radians:
     // the previous default operation
     return os << angle.getRadians();
@@ -518,13 +509,15 @@ Angle AnglePair::angularSeparation(const AnglePair& other) const
   return Cartesian::angularSeparation (u1, u2);
 }
 
-AnglePair & AnglePair::operator*= (const double mult){
+AnglePair & AnglePair::operator*= (const double mult)
+{
   angle1 *= mult;
   angle2 *= mult;
   return *this;
 }
 
-AnglePair operator* (const AnglePair & pair, const double mult){
+AnglePair operator* (const AnglePair & pair, const double mult)
+{
   return AnglePair(pair.angle1*mult, pair.angle2*mult);
 }
 
@@ -543,7 +536,8 @@ std::ostream& operator<< (std::ostream & os, const AnglePair & pair)
             << "," << pair.angle2 << ")";
 }
 
-int operator == (const AnglePair &a1, const AnglePair &a2){
+int operator == (const AnglePair &a1, const AnglePair &a2)
+{
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   double ra1, ra2, dec1, dec2;
   a1.getRadians(&ra1, &dec1);
@@ -554,7 +548,8 @@ int operator == (const AnglePair &a1, const AnglePair &a2){
       return (0);  
 }
 
-int operator != (const AnglePair &a1, const AnglePair &a2){
+int operator != (const AnglePair &a1, const AnglePair &a2)
+{
   double precision_limit = 2*pow(10.0,-DBL_DIG);
   double ra1, ra2, dec1, dec2;
   a1.getRadians(&ra1, &dec1);

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.27 $
-   $Date: 2008/05/30 12:19:04 $
+   $Revision: 1.28 $
+   $Date: 2008/09/09 04:52:14 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -23,6 +23,8 @@
 #include <math.h>
 
 static const double MilliSecin12Hours = 4.32e7;
+
+#define ANGLE_STRLEN 128
 
 class Angle
 {
@@ -58,16 +60,25 @@ class Angle
   void getHMS (int& hours, int& minutes, double& seconds) const;
 
   int     setHMS (const char *);
+
+  //! Get the value in HH:MM:SS[.sss]
+  /*! \param str must point to an arrays of at least ANGLE_STR characters */
   char*   getHMS (char* str, int places=3) const;
+
+  //! Get the value in HH:MM:SS[.sss]
   std::string  getHMS (int places = 3) const;
 
   void setDMS (int degrees, int minutes, double seconds);
   void getDMS (int& degrees, int& minutes, double& seconds) const;
 
   int     setDMS (const char *);
-  char*   getDMS (char* str, int places=3) const;
-  std::string  getDMS (int places = 3) const;
 
+  //! Get the value in DD:MM:SS[.sss]
+  /*! \param str must point to an arrays of at least ANGLE_STR characters */
+  char*   getDMS (char* str, int places=3) const;
+
+  //! Get the value in DD:MM:SS[.sss]
+  std::string  getDMS (int places = 3) const;
 
   // ms is given in milliseconds of an hour
   void  setRadMS(long int ms)
