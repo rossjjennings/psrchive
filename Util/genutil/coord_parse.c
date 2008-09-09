@@ -234,7 +234,7 @@ int unit2str (char* unit_string, unsigned unit_strlen,
     unit_string ++;
   }
 
-  rounding = 0.5 / pow (10,field_precision[nfields-1]);
+  rounding = 0.1 / pow (10,field_precision[nfields-1]);
   for (ifield=0; ifield<nfields; ifield++)
   {
     assert (field_scale[ifield] > 0.0);
