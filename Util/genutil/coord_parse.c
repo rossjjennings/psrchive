@@ -1,14 +1,16 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
+#include <assert.h>
 
 // #define _DEBUG 1
 
@@ -48,7 +50,8 @@ int str2coord (double *ra, double *dec, const char* coordstring)
     decstr = strchr (coordstr, ' ');
   if (decstr == NULL)
     decstr = strchr (coordstr, '\t');
-  if (decstr == NULL) {
+  if (decstr == NULL)
+  {
     fprintf (stderr, "str2coord: No +,-,<space>, or <tab> in '%s'\n",coordstr);
     free (coordstr);
     return -1;
@@ -113,34 +116,36 @@ int str2unit (double* unit, unsigned nfields,
 	  && *curstr != '-' && *curstr != '+' )
     curstr++;
 
-  if (*curstr == '-') {
+  if (*curstr == '-')
+  {
     sign = -1.0;
     curstr ++;
   }
-  else if (*curstr == '+') {
+  else if (*curstr == '+')
+  {
     sign = 1;
     curstr ++;
   }
 
-  for (ifield=0; curstr<endstr && ifield<nfields; ifield++) {
-
+  for (ifield=0; curstr<endstr && ifield<nfields; ifield++)
+  {
     /* skip leading non-numeric characters */
     while ( curstr<endstr && !isdigit(*curstr) )
       curstr++;
 
-    if (field_width[ifield]) {
+    if (field_width[ifield])
+    {
       strncpy (field_string_copy, curstr, field_width[ifield]);
       field_string_copy [field_width[ifield]] = '\0';
       curstr += field_width[ifield];
     }
-    else {
+    else
+    {
       strcpy (field_string_copy, curstr);
       /* skip to end of numeric characters */
       while ( curstr<endstr && (isdigit(*curstr) || *curstr=='.') )
 	curstr++;
     }
-
-    /* fprintf (stderr, "str2unit: field[%d]=%s\n", ifield, field_string_copy); */
 
     if (sscanf (field_string_copy, "%lf", &field_value) != 1)
       break;
@@ -203,73 +208,60 @@ int coord2str (char* coordstring, unsigned coordstrlen, double ra, double dec,
 /*! returns the number of fields successfully parsed into unit_string. */
 int unit2str (char* unit_string, unsigned unit_strlen,
 	      char sign, unsigned nfields,
-	      const int* field_width, const int* field_precision,
+	      const unsigned* field_width, const unsigned* field_precision,
 	      const double* field_scale, char separator, double unit)
 {
   char* end_string = unit_string + unit_strlen;
 
+  double rounding = 0;
   double field_value = 0;
 
-  unsigned ifield;
+  unsigned ifield = 0;
   int printed = 0;
 
   if (unit_strlen < 1)
     return 0;
 
-  if (unit < 0) {
+  if (unit < 0)
+  {
     unit *= -1.0;
     *unit_string = '-';
     unit_string ++;
   }
-  else if (sign) {
+  else if (sign)
+  {
     *unit_string = '+';
     unit_string ++;
   }
 
+  rounding = 0.5 / pow (10,field_precision[nfields-1]);
+  for (ifield=0; ifield<nfields; ifield++)
+  {
+    assert (field_scale[ifield] > 0.0);
+    rounding /= field_scale[ifield];
+  }
+  unit += rounding;
 
-  for (ifield=0; unit_string<end_string && ifield<nfields; ifield++) {
-
-    if (separator && ifield > 0) {
+  for (ifield=0; unit_string<end_string && ifield<nfields; ifield++)
+  {
+    if (separator && ifield > 0)
+    {
       *unit_string = separator;
       unit_string ++;
     }
 
     unit *= field_scale[ifield];
 
-    if (field_precision[ifield]) {
+    if (field_precision[ifield])
+    {
       field_value = unit;
       printed = snprintf (unit_string, end_string-unit_string, "%0*.*f",
 			  field_width[ifield]+field_precision[ifield]+1,
 			  field_precision[ifield], field_value);
     }
-    else {
-
-#ifdef _DEBUG
-      fprintf (stderr, "no precision. unit=%lf\n", unit);
-#endif
-
-      /* tricks to avoid rounding ugliness in string */
-      if (ifield+1 == nfields) {
-	unit = lround (unit);
-#ifdef _DEBUG
-	fprintf (stderr, "last field. unit=%lf\n", unit);
-#endif
-      }
-      else if (field_precision[ifield+1]) {
-	field_value = pow (10.0,-(field_precision[ifield+1]+3));
-	unit += field_value/field_scale[ifield+1];
-#ifdef _DEBUG
-	fprintf (stderr, "rounding trick field_value=%lf unit=%lf\n",
-		 field_value, unit);
-#endif
-      }
-
+    else
+    {
       field_value = floor (unit);
-
-#ifdef _DEBUG
-      fprintf (stderr, "field_value=%lf\n", field_value);
-#endif
-
       printed = snprintf (unit_string, end_string-unit_string, "%.*d",
 			  field_width[ifield], (int) field_value);
     }
@@ -292,8 +284,8 @@ int unit2str (char* unit_string, unsigned unit_strlen,
 int xms2str (char* xms_str, unsigned xms_strlen, char sign,
              double radians, double scale, unsigned places) 
 {
-  int field_width[3] = {2, 2, 2};
-  int field_precision[3] = {0, 0, 0};
+  unsigned field_width[3] = {2, 2, 2};
+  unsigned field_precision[3] = {0, 0, 0};
   double field_scale[3] = {0.0, 60.0, 60.0};
 
   field_precision[2] = places;
