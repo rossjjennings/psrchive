@@ -37,10 +37,28 @@ Angle oldAngularSeparation(const AnglePair& a1, const AnglePair& a2)
 
 int main ()
 {
-  cerr << "If this process appears to hang, then fix Angle::wrap" << endl;
+  cerr << "\nIf this process hangs, then fix Angle::wrap" << endl;
   Angle big (FLT_MAX*0.5);
-  cerr << "big=" << big << endl;
-  cerr << "Angle::wrap test passed" << endl;
+  cerr << "Angle::wrap test passed\n" << endl;
+
+  char test_string[64];
+  Angle test_angle;
+
+  for (unsigned hour=0; hour<24; hour++)
+    for (unsigned minute=0; minute<60; minute++)
+    {
+      test_angle.setHMS (hour, minute, 0.0);
+      sprintf (test_string, "%02d:%02d:00", hour, minute);
+
+      if (test_angle.getHMS (0) != test_string)
+      {
+	cerr << "Angle::getHMS="
+	     << test_angle.getHMS(0) << " != " << test_string << endl;
+	return -1;
+      }
+    }
+
+  cerr << "Angle::getHMS passes rounding precision test \n" << endl;
 
   sky_coord coordinates;
 
@@ -67,7 +85,7 @@ int main ()
   Angle sepnew;
   Angle sepold;
 
-  cerr << "Testing the angular separation routine.  This may take a while..." 
+  cerr << "Testing the angular separation routine ..." 
        << endl;
 
   unsigned error_count = 0;
