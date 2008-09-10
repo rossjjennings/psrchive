@@ -127,9 +127,10 @@ endif
 
 libgenutil_la_LIBADD = @READLINE_LIBS@ @GSL_LIBS@
 
-bin_PROGRAMS = getMJD
+bin_PROGRAMS = getMJD dop
 
 getMJD_SOURCES = getMJD.C
+dop_SOURCES = dop.C
 
 TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98	\
 	test_endian test_environ test_sum test_NormalDistribution	\
