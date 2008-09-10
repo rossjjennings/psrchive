@@ -7,13 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.28 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.29 $
+   $Date: 2008/09/10 21:01:22 $
    $Author: straten $ */
 
 #ifndef __Jones_H
 #define __Jones_H
 
+#include "Matrix.h"
 #include "Traits.h"
 #include "complex_promote.h"
 
@@ -39,6 +40,10 @@ public:
   //! Construct from another Jones<U> matrix
   template<typename U> Jones (const Jones<U>& s)
     { operator=(s); }
+
+  //! Construct from a Matrix
+  template<typename U> Jones (const Matrix< 2, 2, std::complex<U> >& M)
+    : j00(M[0][0]), j01(M[0][1]), j10(M[1][0]),j11(M[1][1]) {  }
 
   //! Set this instance equal to another Jones<T> instance
   Jones& operator = (const Jones& s)
@@ -145,6 +150,15 @@ public:
 
   //! Dimension of data
   unsigned size () const { return 4; }
+
+  //! Degree of polarization
+  T p () const
+  { 
+    T tr = trace(*this).real();
+    T d = det(*this).real();
+    return sqrt( 1 - 4*d/(tr*tr) );
+  }
+
 };
 
 //! Binary addition
