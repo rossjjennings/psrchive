@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.17 $
-   $Date: 2007/11/28 05:18:32 $
+   $Revision: 1.18 $
+   $Date: 2008/09/10 21:01:28 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -28,8 +28,17 @@ public:
   Vector () 
   { for (unsigned i=0; i<N; i++) x[i] = 0; }
 
+  Vector (T x0)
+  { x[0] = x0; }
+
+  Vector (T x0, T x1)
+  { x[0] = x0; x[1] = x1; }
+
   Vector (T x0, T x1, T x2)
   { x[0] = x0; x[1] = x1; x[2] = x2; }
+
+  Vector (T x0, T x1, T x2, T x3)
+  { x[0] = x0; x[1] = x1; x[2] = x2; x[3] = x3; }
 
   //! Construct from another Vector<U> instance
   template<typename U> Vector (const Vector<N, U>& s)
@@ -118,12 +127,6 @@ public:
   //! Return the basis vector
   static const Vector basis (unsigned i)
     { Vector v;  v[i] = 1.0; return v; }
-
-protected:
-
-  //! Used by the Stokes class
-  Vector (T x0, T x1, T x2, T x3)
-  { x[0] = x0; x[1] = x1; x[2] = x2; x[3] = x3; }
 
 };
 
