@@ -1396,7 +1396,7 @@ double computePeriodError(const Archive * archive) {
 	double bcPeriod_s = getPeriod(archive) / dopplerFactor;
 	double refP_ms = bcPeriod_s * MILLISEC;
 	double tsub = archive->get_Integration(0)->get_duration();
-	unsigned nsub = tspan / tsub;
+	unsigned nsub = (uint)(tspan / tsub);
 	double integrationLength = tsub * (nsub - 1);
 	unsigned nbin = archive->get_nbin();
 	double tbin_ms = (refP_ms) / nbin;
@@ -1906,14 +1906,11 @@ void printHeader(const Archive * archive,
 	////////////////////////////////////////
 	/// Print the reference period and dm
 
-	sprintf(temp, "Ref BC period (ms) = %3.9f%sRef TC period (ms) = %3.9f%sRef DM = %3.3f%sRAJ = %02d:%02d:%05.2f%sDecJ = %02d:%02d:%04.1f",
-		(refP_us/1000) / dopplerFactor, space.c_str(),
+	sprintf(temp, "BC P(ms)= %3.9f TC P(ms)= %3.9f DM= %3.3f RAJ= %02d:%02d:%05.2f DecJ= %02d:%02d:%04.1f",
+		(refP_us/1000) / dopplerFactor,
 		getPeriod(copy) * MILLISEC,
-		space.c_str(),
 		refDM,
-		space.c_str(),
 		hours, ra_minutes, ra_seconds,
-		space.c_str(),
 		degrees, dec_minutes, dec_seconds);
 
 	cpgtext(linex, liney, temp);
@@ -1923,20 +1920,20 @@ void printHeader(const Archive * archive,
 	/// Print the MJD and frequency
 
 	// Newline
-	sprintf(temp, "Ref BC MJD = %.6f" ,
+	sprintf(temp, "BC MJD = %.6f " ,
 	start.intday() + start.fracday());
 	temp_str = temp;
 
-	sprintf(temp, "Centre freq. (MHz) = %3.3f",copy->get_centre_frequency());
-	temp_str += space + temp;
+	sprintf(temp, "Centre freq(MHz) = %3.3f ", copy->get_centre_frequency());
+	temp_str += temp;
 
-	sprintf(temp, "Bandwidth (MHz) = %3.9g",
+	sprintf(temp, "Bandwidth(MHz) = %3.9g ",
 	copy->get_bandwidth());
-	temp_str += space + temp;
+	temp_str += temp;
 
-	sprintf(temp, "Gal.l = %.3f Gal.b = %.3f",
+	sprintf(temp, "l = %.3f b = %.3f",
 	gal_long, gal_lat);
-	temp_str += space + temp;
+	temp_str += temp;
 
 	cpgtext(linex, liney, temp_str.c_str());
 
@@ -1945,12 +1942,12 @@ void printHeader(const Archive * archive,
 
 	liney -= lineHeight;
 
-	sprintf(temp , "NBin = %d%sNChan = %d%sNSub = %d%s", nBin, space.c_str(), nChan,
-	space.c_str(),	nSub, space.c_str());
+	sprintf(temp, "NBin = %d NChan = %d NSub = %d ", nBin, nChan, nSub);
 	temp_str = temp;
 
-	sprintf(temp , "TBin(ms) = %.3f%sTSub(s) = %.3f%sTSpan(s) = %.3f%s",  tbin ,
-	space.c_str(),	tsub, space.c_str(), tspan, space.c_str());
+    sprintf(temp , "TBin(ms) = %.3f TSub(s) = %.3f TSpan(s) = %.3f", tbin,
+        tsub, tspan);
+
 	temp_str += temp;
 
 	// Print the line
@@ -1962,13 +1959,13 @@ void printHeader(const Archive * archive,
 	/// Print the Period and DM offset, step and half-range
 
 	// Newline
-	sprintf(temp, "P (us): offset = %3.6f, step = %3.6f, half-range = %3.6f",
+	sprintf(temp, "P(us): offset = %3.5f, step = %3.5f, range = %3.5f ",
 	 	periodOffset_us, periodStep_us, periodHalfRange_us);
 
 	temp_str = temp;
 
-	sprintf(temp, "%s%sDM: offset = %3.3f, step = %3.3f, half-range = %3.3f",
-		space.c_str(), space.c_str(), dmOffset, dmStep, dmHalfRange);
+	sprintf(temp, "DM: offset = %3.3f, step = %3.3f, range = %3.3f",
+		dmOffset, dmStep, dmHalfRange);
 
 	temp_str += temp;
 	cpgtext(linex, liney, temp_str.c_str());
@@ -2018,15 +2015,15 @@ void printResults(const Archive * archive) {
 	bestValues_x += colWidth*1.7;
 	bestValues_y = 1;
 
-	sprintf(temp, "%3.10f", bestPeriod_bc_us / MILLISEC);
+	sprintf(temp, "%3.9f", bestPeriod_bc_us / MILLISEC);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 	bestValues_y -= lineHeight;
-	sprintf(temp, "%3.10f", (bestPeriod_bc_us-refP_us) / MILLISEC);
+	sprintf(temp, "%3.9f", (bestPeriod_bc_us-refP_us) / MILLISEC);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 	bestValues_y -= lineHeight;
-	sprintf(temp, "%3.10f", periodError_ms);
+	sprintf(temp, "%3.9f", periodError_ms);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 	// New column
@@ -2042,15 +2039,15 @@ void printResults(const Archive * archive) {
 	bestValues_x += colWidth * 1.7;
 	bestValues_y = 1;
 
-	sprintf(temp, "%3.10f", dopplerFactor * bestPeriod_bc_us / MILLISEC);
+	sprintf(temp, "%3.9f", dopplerFactor * bestPeriod_bc_us / MILLISEC);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 	bestValues_y -= lineHeight;
-	sprintf(temp, "%3.10f", (dopplerFactor * bestPeriod_bc_us / MILLISEC) - getPeriod(copy) * MILLISEC);
+	sprintf(temp, "%3.9f", (dopplerFactor * bestPeriod_bc_us / MILLISEC) - getPeriod(copy) * MILLISEC);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 	bestValues_y -= lineHeight;
-	sprintf(temp, "%3.10f", periodError_ms);
+	sprintf(temp, "%3.9f", periodError_ms);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 
@@ -2060,7 +2057,7 @@ void printResults(const Archive * archive) {
 	cpgtext(bestValues_x, bestValues_y, "DM:");
 
 	bestValues_y -= lineHeight;
-	cpgtext(bestValues_x, bestValues_y, "Correction:");
+	cpgtext(bestValues_x, bestValues_y, "Corrn:");
 
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Error:");
@@ -2086,7 +2083,7 @@ void printResults(const Archive * archive) {
 
 	cpgtext(bestValues_x, bestValues_y, "BC freq (Hz):");
 	bestValues_y -= lineHeight;
-	cpgtext(bestValues_x, bestValues_y, "Freq error (Hz):");
+	cpgtext(bestValues_x, bestValues_y, "Freq err. (Hz):");
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Width (ms):");
 	bestValues_y -= lineHeight;
@@ -2095,11 +2092,11 @@ void printResults(const Archive * archive) {
 	bestValues_x += colWidth * 0.8;
 	bestValues_y = 1;
 
-	sprintf(temp, "%-3.10f", bestFreq);
+	sprintf(temp, "%-3.9f", bestFreq);
 	cpgtext(bestValues_x, bestValues_y, temp);
 
 	bestValues_y -= lineHeight;
-	sprintf(temp, "%-3.10f", freqError);
+	sprintf(temp, "%-3.9f", freqError);
 	cpgtext(bestValues_x, bestValues_y, temp);
 
 	bestValues_y -= lineHeight;
@@ -2116,9 +2113,9 @@ void printResults(const Archive * archive) {
 
 		printf("\n\nBest S/N = %.2f\n", bestSNR);
 
-		printf("Ref BC MJD = %.6f\n", start.intday() + start.fracday());
+		printf("BC MJD = %.6f\n", start.intday() + start.fracday());
 
-		printf("Ref BC Period (ms) = %3.10g  Ref TC Period (ms) =  %3.10g  Ref DM = %3.3g\n",
+		printf("BC Period (ms) = %3.10g  TC Period (ms) =  %3.10g  DM = %3.3g\n",
 						bcPeriod_s * MILLISEC,	getPeriod(copy) * MILLISEC, getDM(copy));
 
 		printf("Best BC Period (ms) = %3.10g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n",
@@ -2381,7 +2378,7 @@ void drawBestFitPhaseTime(const Archive * archive) {
 	unsigned nsub;
 
 	if (join) {
-		nsub = tspan / tsub;
+		nsub = (uint)(tspan / tsub);
 	} else {
 		nsub = archive->get_nsubint();
 	}
