@@ -4,14 +4,47 @@
 
 #include <iostream>
 #include <vector>
+#include <stdlib.h>
 
 using namespace std;
+
+static BoxMuller normal;
+
+static double lambda0 = 0.0;
+static double lambda1 = 0.0;
+
+typedef Vector< 2, complex<float> > Efield;
+
+Efield white ()
+{
+  return Efield
+    ( complex<float> ( lambda0*normal(), lambda0*normal() ),
+      complex<float> ( lambda1*normal(), lambda1*normal() ) );
+}
+
+class Correlated
+{
+public:
+  void exponential (double tau);
+  Efield operator () ();
+  vector< complex<float> > impulse_response;
+  vector< Efield > input;
+  unsigned current;
+};
 
 int main (int argc, char** argv)
 {
   double P = 0.0;
-  double l0 = sqrt( 0.5 * (1+P) );
-  double l1 = sqrt( 0.5 * (1-P) );
+  double tau = 0.0;
+
+  if (argc > 1)
+    P = atof (argv[1]);
+
+  if (argc > 2)
+    tau = 1.0 / atof (argv[2]);
+
+  lambda0 = sqrt( 0.5 * (1+P) );
+  lambda1 = sqrt( 0.5 * (1-P) );
 
   unsigned long nsamples = 1 << 20;
 
@@ -22,15 +55,21 @@ int main (int argc, char** argv)
   vector< Jones<double> > sum (nresult, 0.0);
   vector< bool > tally (nresult, false);
 
-  BoxMuller normal;
+  Correlated correlated;
+  if (tau)
+    correlated.exponential (tau);
 
   for (unsigned i=0; i<nsamples; i++)
   {
-    // realization of random electric field
-    Vector<2,complex<float> > e (complex<float> ( l0*normal(), l0*normal() ),
-				 complex<float> ( l1*normal(), l1*normal() ));
+    // random electric field vector (Goodman 1963)
+    Efield e;
 
-    // corresponding intantaneous coherency matrix
+    if (tau)
+      e = correlated ();
+    else
+      e = white ();
+
+    // intantaneous coherency matrix
     Jones<double> J( outer( e, conj(e) ) );
 
     // make averages of 
@@ -62,4 +101,42 @@ int main (int argc, char** argv)
 	 << " " << total[ires]/count[ires] << endl;
     power *= 2;
   }
+}
+
+
+void Correlated::exponential (double tau)
+{
+  double limit = 1e-6;
+  unsigned npt = unsigned( log(limit) / -tau );
+
+  cerr << "Correlated::exponential tau=" << tau << " npt=" << npt << endl;
+
+  impulse_response.resize( npt );
+  input.resize( npt );
+
+  for (unsigned ipt=0; ipt < npt; ipt++)
+  {
+    input[ipt] = white ();
+    impulse_response [ipt] = 1/tau * exp (-tau * ipt);
+  }
+
+  current = 0;
+}
+
+Efield Correlated::operator () ()
+{
+  Vector< 2, complex<double> > total;
+  unsigned npt = input.size();
+
+  for (unsigned ipt=0; ipt<npt; ipt++)
+    {
+      // cerr << ipt << " " << endl;
+      total += impulse_response [ipt] * input[ (ipt+current) % npt ];
+    }
+
+  input[current] = white();
+  current ++;
+  current %= npt;
+
+  return total;
 }
