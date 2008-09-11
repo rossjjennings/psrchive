@@ -2003,10 +2003,10 @@ void printResults(const Archive * archive) {
 	const float HORIZONTAL = 0;
 
 	// Firstly print out the first column of labels
-	cpgtext(bestValues_x, bestValues_y, "BC period (ms):");
+	cpgtext(bestValues_x, bestValues_y, "BC prd (ms):");
 
 	bestValues_y -= lineHeight;
-	cpgtext(bestValues_x, bestValues_y, "Correction (ms):");
+	cpgtext(bestValues_x, bestValues_y, "Corrn (ms):");
 
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Error (ms):");
@@ -2030,9 +2030,9 @@ void printResults(const Archive * archive) {
 	bestValues_x += colWidth * 0.1;
 	bestValues_y = 1;
 
-	cpgtext(bestValues_x, bestValues_y, "TC period (ms):");
+	cpgtext(bestValues_x, bestValues_y, "TC prd (ms):");
 	bestValues_y -= lineHeight;
-	cpgtext(bestValues_x, bestValues_y, "Correction (ms):");
+	cpgtext(bestValues_x, bestValues_y, "Corrn (ms):");
 	bestValues_y -= lineHeight;
 	cpgtext(bestValues_x, bestValues_y, "Error (ms):");
 
