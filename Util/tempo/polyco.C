@@ -83,6 +83,7 @@ const polynomial & polynomial::operator = (const polynomial & copy)
   coefs = copy.coefs; 
   binary = copy.binary;
   tempov11 = copy.tempov11;
+  keep = copy.keep;
 
   return *this;
 }  
