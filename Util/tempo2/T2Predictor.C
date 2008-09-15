@@ -88,6 +88,12 @@ void Tempo2::Predictor::insert (const Pulsar::Predictor* from)
   T2Predictor_Insert (&predictor, &t2p->predictor);
 }
 
+void Tempo2::Predictor::keep (const std::vector<MJD>& epochs)
+{
+  if (verbose)
+    cerr << "Tempo2::Predictor::keep not implemented" << endl;
+}
+
 string Tempo2::Predictor::get_psrname () const
 {
   if (predictor.modelset.cheby.nsegments < 1)
@@ -135,7 +141,6 @@ bool Tempo2::Predictor::matches (const Pulsar::Predictor* other) const
     get_freq_start () == t2p->get_freq_start() &&
     get_freq_end () == t2p->get_freq_end() &&
     get_dispersion_constant () == t2p->get_dispersion_constant();
-
 }
 
 //! Set the observing frequency at which predictions will be made
@@ -329,8 +334,8 @@ MJD Tempo2::Predictor::iphase (const Phase& phase, const MJD* guess) const
     cerr << "Tempo2::Predictor::iphase observing_frequency=" 
 	 << observing_frequency << endl;
 
-  for (icheby=0; icheby<chebys.size(); icheby ++)  {
-
+  for (icheby=0; icheby<chebys.size(); icheby ++)
+  {
     if (verbose)
       cerr << "Tempo2::Predictor::iphase icheby=" << icheby << endl;
 
@@ -338,7 +343,9 @@ MJD Tempo2::Predictor::iphase (const Phase& phase, const MJD* guess) const
 			      observing_frequency );
 
     float dist = fabs ( (chebys[icheby].get_refphase() - phase).in_turns() );
-    if (icheby == 0 || dist < min_dist) {
+
+    if (icheby == 0 || dist < min_dist)
+    {
       imin = icheby;
       min_dist = dist;
     }

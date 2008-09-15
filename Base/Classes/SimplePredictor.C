@@ -60,6 +60,12 @@ void Pulsar::SimplePredictor::insert (const Pulsar::Predictor* from)
 	       "Pulsar::SimplePredictor::insert not implemented"); 
 }
 
+void Pulsar::SimplePredictor::keep (const std::vector<MJD>& epochs)
+{
+  if (verbose)
+    cerr << "Pulsar::SimplePredictor::keep not implemented" << endl;
+}
+
 //! Add the information from the supplied predictor to self
 bool Pulsar::SimplePredictor::matches (const Predictor* other) const
 {

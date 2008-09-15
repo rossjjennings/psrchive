@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Attic/SimplePredictor.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/11/14 03:08:06 $
+   $Revision: 1.3 $
+   $Date: 2008/09/15 06:26:52 $
    $Author: straten $ */
 
 #ifndef __SimplePredictor_h
@@ -47,6 +47,9 @@ namespace Pulsar {
 
     //! Add the information from the supplied predictor to self
     void insert (const Pulsar::Predictor*);
+
+    //! Keep only the components required to span the given epochs
+    void keep (const std::vector<MJD>& epochs);
 
     //! Return true if reference attributes are equal
     bool matches (const Pulsar::Predictor*) const;

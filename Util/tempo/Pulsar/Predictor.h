@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Predictor.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/08/17 06:09:47 $
+   $Revision: 1.6 $
+   $Date: 2008/09/15 06:26:52 $
    $Author: straten $ */
 
 #ifndef __PulsarPredictor_h
@@ -49,6 +49,9 @@ namespace Pulsar {
     //! Add the information from the supplied predictor to self
     /*! This method should check to avoid inconsistency and duplication */
     virtual void insert (const Predictor*) = 0;
+
+    //! Keep only the components required to span the given epochs
+    virtual void keep (const std::vector<MJD>& epochs) = 0;
 
     //! Return true if the Predictor configuration matches this
     virtual bool matches (const Predictor*) const = 0;

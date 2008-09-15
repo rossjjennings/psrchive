@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Predictor.h,v $
-   $Revision: 1.14 $
-   $Date: 2007/08/14 22:15:58 $
+   $Revision: 1.15 $
+   $Date: 2008/09/15 06:26:52 $
    $Author: straten $ */
 
 #ifndef __Tempo2Predictor_h
@@ -71,6 +71,9 @@ namespace Tempo2 {
 
     //! Add the information from the supplied predictor to self
     void insert (const Pulsar::Predictor*);
+
+    //! Keep only the components required to span the given epochs
+    void keep (const std::vector<MJD>& epochs);
 
     //! Return true if the Predictor configuration matches this
     bool matches (const Pulsar::Predictor*) const;
