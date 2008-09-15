@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.52 $
-   $Date: 2008/02/15 02:04:09 $
+   $Revision: 1.53 $
+   $Date: 2008/09/15 06:26:56 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -84,6 +84,9 @@ protected:
 
   //! intializes all values to null
   void init();
+
+  //! used by polyco::keep to determine if this polynomial is used
+  mutable bool keep;
 
 public:
 
@@ -227,6 +230,9 @@ public:
 
   //! Add the information from the supplied predictor to self
   void insert (const Predictor*);
+
+  //! Keep only the components required to span the given epochs
+  void keep (const std::vector<MJD>& epochs);
 
   //! Return true if the Predictor configuration matches this
   bool matches (const Predictor*) const;

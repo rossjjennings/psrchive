@@ -818,6 +818,31 @@ void polyco::append (const polyco& poly)
   std::sort( pollys.begin(), pollys.end(), time_order );
 }
 
+//! Keep only the components required to span the given epochs
+void polyco::keep (const std::vector<MJD>& epochs)
+{
+  unsigned i = 0;
+
+  for (i=0; i<pollys.size(); ++i) 
+    pollys[i].keep = false;
+
+  for (i=0; i<epochs.size(); i++)
+    nearest( epochs[i] )->keep = true;
+
+  unsigned orig_npoly = pollys.size();
+
+  i=0;
+  while (i < pollys.size())
+    if ( !pollys[i].keep )
+      pollys.erase( pollys.begin() + i );
+    else
+      i++;
+
+  if (verbose)
+    cerr << "polyco::keep had " << orig_npoly 
+	 << " kept " << pollys.size() << endl;
+}
+
 void polyco::prettyprint() const 
 {
   for(unsigned i=0; i<pollys.size(); ++i) 
