@@ -4,7 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
+#include "Pulsar/Predictor.h"
+
 #include "TemporaryFile.h"
 #include "dirutil.h"
 #include "Error.h"
@@ -15,7 +19,8 @@
 
 using namespace std;
 
-mode_t getumask(void) {
+mode_t getumask ()
+{
   mode_t mask = umask(0);
   umask(mask);
   return mask;
@@ -40,6 +45,22 @@ void Pulsar::Archive::unload (const char* filename) const
 
   TemporaryFile temp (unload_to_filename);
 
+  Reference::To<Predictor> model_backup;
+
+  if (model)
+  {
+    model_backup = model->clone();
+    Reference::To<Predictor> pared_down = model->clone();
+
+    vector<MJD> epochs( get_nsubint() );
+    for (unsigned isub=0; isub < get_nsubint(); isub++)
+      epochs[isub] = get_Integration(isub)->get_epoch();
+
+    pared_down->keep (epochs);
+
+    const_cast<Archive*>(this)->model = pared_down;
+  }
+
   try
   {
     if (!can_unload())
@@ -55,6 +76,9 @@ void Pulsar::Archive::unload (const char* filename) const
   {
     throw error += "Pulsar::Archive::unload";
   }
+
+  if (model_backup)
+    const_cast<Archive*>(this)->model = model_backup;
 
   // rename the temporary file with the requested filename
   int ret = rename (temp.get_filename().c_str(), unload_to_filename.c_str());
