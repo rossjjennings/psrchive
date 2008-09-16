@@ -58,7 +58,7 @@ while test $# -gt 0; do
         echo -I@includedir@ @PTHREAD_CFLAGS@
         ;;
 
-    --libs)
+    --ldflags | --libs)
         echo -L@libdir@ -lpsrmore -lpsrbase -lpsrutil \
              @LDFLAGS@ @FFT_LIBS@ @CFITSIO_LIBS@ @PUMA_LIBS@ @TEMPO2_LIBS@ \
              @PTHREAD_CFLAGS@ @PTHREAD_LIBS@ @FLIBS@
