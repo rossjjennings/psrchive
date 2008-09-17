@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.100 $
-   $Date: 2008/09/17 01:59:21 $
+   $Revision: 1.101 $
+   $Date: 2008/09/17 02:01:19 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -69,7 +69,7 @@ void usage ()
     "  -V level   set verbosity level [0->4] \n"
     "\n"
     "  -A archive set the output archive class name \n"
-    "  -D name    enable diagnostic: name=report,residual,guess,result \n"
+    "  -D name    enable diagnostic: name=report,guess,residual,result,total\n"
     "  -m model   model: Britton [default] or Hamaker \n"
     "  -l solver  solver: MEAL [default] of GSL \n"
     "  -I impure  load impurity transformation from file \n"
