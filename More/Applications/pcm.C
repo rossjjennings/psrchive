@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.99 $
-   $Date: 2008/08/05 02:09:55 $
+   $Revision: 1.100 $
+   $Date: 2008/09/17 01:59:21 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -67,7 +67,9 @@ void usage ()
     "\n"
     "  -h         this help page \n"
     "  -V level   set verbosity level [0->4] \n"
+    "\n"
     "  -A archive set the output archive class name \n"
+    "  -D name    enable diagnostic: name=report,residual,guess,result \n"
     "  -m model   model: Britton [default] or Hamaker \n"
     "  -l solver  solver: MEAL [default] of GSL \n"
     "  -I impure  load impurity transformation from file \n"
@@ -246,7 +248,7 @@ void plot_constraints (Pulsar::SystemCalibratorPlotter& plotter,
   if (nstate == 0)
     return;
 
-  unsigned incr = nchan/nplot;
+  unsigned incr = 1;
   if (!incr)
     incr = 1;
 
@@ -314,9 +316,6 @@ Pulsar::Calibrator::Type model_type = Pulsar::Calibrator::Britton;
 
 // unloads the solution(s)
 Pulsar::SystemCalibrator::Unloader unloader;
-
-// plot the solution before calibrating with it
-bool display = false;
 
 // verbosity flags
 bool verbose = false;
@@ -460,6 +459,37 @@ Pulsar::Archive* load (const std::string& filename)
   return archive.release();
 }
 
+static bool output_report = false;
+
+static bool plot_guess = false;
+static bool plot_residual = false;
+static bool plot_total = false;
+static bool plot_result = false;
+
+void enable_diagnostic (const string& name)
+{
+  if (name == "report")
+    output_report = true;
+
+  else if (name == "guess")
+    plot_guess = true;
+
+  else if (name == "residual")
+    plot_residual = true;
+
+  else if (name == "total")
+    plot_total = true;
+
+  else if (name == "result")
+    plot_result = true;
+
+  else
+  {
+    cerr << "pcm: unrecognized diagnostic name '" << name << "'" << endl;
+    exit (-1);
+  }
+}
+
 int actual_main (int argc, char *argv[]) try
 {
   unloader.set_program ( "pcm" );
@@ -495,7 +525,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args
-    = "1A:a:B:b:c:C:d:DgHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rsS:t:T:u:vV:X:";
+    = "1A:a:B:b:c:C:d:D:gHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rsS:t:T:u:vV:X:";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -538,7 +568,7 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'D':
-      display = true;
+      enable_diagnostic (optarg);
       break;
 
     case 'g':
@@ -915,12 +945,15 @@ int actual_main (int argc, char *argv[]) try
       if (verbose)
 	cerr << "pcm: add to total" << endl;
 
+#if 0
       if (!total)
 	total = archive;
       else
 	total->append (archive);
 
       total->tscrunch ();
+#endif
+
     }
 
     archive = 0;
@@ -954,26 +987,40 @@ int actual_main (int argc, char *argv[]) try
   Pulsar::SystemCalibratorPlotter plotter (model);
   plotter.use_colour = !publication_plots;
 
-  if (display)
-  {
-    cpgbeg (0, "guess.ps/CPS", 0, 0);
-    cpgask(1);
-    cpgsvp (.1,.9, .1,.9);
+  try {
 
-    cerr << "pcm: plotting initial guess of receiver" << endl;
-    plotter.plot (model);
-
-    cpgpage();
-
-    cerr << "pcm: plotting initial guess of CAL" << endl;
-    plotter.plotcal();
-
-    cpgend();
-
-    if (total) try
+    if (plot_guess)
+    {
+      cpgbeg (0, "guess_response.ps/CPS", 0, 0);
+      cpgask(1);
+      cpgsvp (.1,.9, .1,.9);
+      
+      cerr << "pcm: plotting initial guess of instrumental response" << endl;
+      plotter.plot (model);
+      
+      cpgend();
+      
+      cpgbeg (0, "guess_cal.ps/CPS", 0, 0);
+      cpgsvp (0.1,.9, 0.1,.9);
+      
+      cerr << "pcm: plotting initial guess of CAL" << endl;
+      plotter.plotcal();
+      
+      cpgend();
+      
+      cpgbeg (0, "guess_psr.ps/CPS", 0, 0);
+      cpgsvp (0.1,.9, 0.1,.9);
+      
+      cerr << "pcm: plotting guess pulsar states" << endl;
+      plot_pulsar (plotter, *model);
+      
+      cpgend ();
+    }
+    
+    if (plot_total && total)
     {
       cerr << "pcm: plotting uncalibrated total PSR" << endl;
-
+	
       cpgbeg (0, "uncalibrated.ps/CPS", 0, 0);
       cpgask(1);
       cpgslw(2);
@@ -987,27 +1034,19 @@ int actual_main (int argc, char *argv[]) try
       
       cpgend();
     }
-    catch (Error& error)
+
+    if (plot_residual && model->get_nstate_pulsar())
     {
-      cerr << "pcm: error while producing plots ignored" << endl;
-    }
-
-    if (model->get_nstate_pulsar())
-    {
-      cpgbeg (0, "guess_source.ps/CPS", 0, 0);
-      cpgsvp (0.1,.9, 0.1,.9);
-
-      cerr << "pcm: plotting guess pulsar states" << endl;
-      plot_pulsar (plotter, *model);
-
-      cpgend ();
-
       cerr << "pcm: plotting pulsar constraints" << endl;
       plot_constraints (plotter, model->get_nchan(),
 			model->get_nstate_pulsar(), 12, 
 			model->get_nstate()-model->get_nstate_pulsar());
     }
 
+  }
+  catch (Error& error)
+  {
+    cerr << "pcm: error while producing plots ignored" << endl;
   }
 
 #endif // HAVE_PGPLOT
@@ -1029,19 +1068,30 @@ int actual_main (int argc, char *argv[]) try
 
 #if HAVE_PGPLOT
 
-  if (display)
+  if (plot_result)
   {
-    cpgbeg (0, "result.ps/CPS", 0, 0);
+    cpgbeg (0, "result_response.ps/CPS", 0, 0);
     cpgsvp (0.1,.9, 0.1,.9);
 
     cerr << "pcm: plotting best-fit receiver" << endl;
     plotter.plot (model);
 
-    cpgpage();
+    cpgend ();
+
+    cpgbeg (0, "result_cal.ps/CPS", 0, 0);
+    cpgsvp (0.1,.9, 0.1,.9);
 
     cerr << "pcm: plotting best-fit CAL" << endl;
     plotter.plotcal();
 
+    cpgend ();
+
+    cpgbeg (0, "result_psr.ps/CPS", 0, 0);
+    cpgsvp (0.1,.9, 0.1,.9);
+
+    cerr << "pcm: plotting model pulsar states" << endl;
+    plot_pulsar (plotter, *model);
+      
     cpgend ();
 
     if (get_time_variation())
@@ -1058,25 +1108,16 @@ int actual_main (int argc, char *argv[]) try
       plotter.npanel = panels;
       cpgend ();
     }
+  }
 
-    if (model->get_nstate_pulsar())
-    {
-      cpgbeg (0, "source.ps/CPS", 0, 0);
-      cpgsvp (0.1,.9, 0.1,.9);
-
-      cerr << "pcm: plotting model pulsar states" << endl;
-      plot_pulsar (plotter, *model);
-
-      cpgend ();
-      
-      plotter.set_plot_residual (true);
-      
-      cerr << "pcm: plotting pulsar constraints with model" << endl;
-      plot_constraints (plotter, model->get_nchan(),
-			model->get_nstate_pulsar(), 12,
-			model->get_nstate()-model->get_nstate_pulsar());
-    }
-
+  if (plot_residual && model->get_nstate_pulsar())
+  {
+    plotter.set_plot_residual (true);
+    
+    cerr << "pcm: plotting pulsar constraints with model" << endl;
+    plot_constraints (plotter, model->get_nchan(),
+		      model->get_nstate_pulsar(), 12,
+		      model->get_nstate()-model->get_nstate_pulsar());
   }
 
 #endif // HAVE_PGPLOT
@@ -1134,8 +1175,8 @@ int actual_main (int argc, char *argv[]) try
 
 #if HAVE_PGPLOT
 
-  if (display) {
-
+  if (plot_total && total)
+  {
     cpgbeg (0, "calibrated.ps/CPS", 0, 0);
     cpgask(1);
     cpgslw(2);
@@ -1171,6 +1212,8 @@ using namespace Pulsar;
 SystemCalibrator* time_variation_based (const char* binfile, unsigned nbin) try
 {
   ReceptionCalibrator* model = new ReceptionCalibrator (model_type);
+
+  model->output_report = output_report;
 
   if (measure_cal_V)
     cerr << "pcm: allowing CAL Stokes V to vary" << endl;
