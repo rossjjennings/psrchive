@@ -67,6 +67,24 @@ void Pulsar::Config::load_config ()
     }
   }
 
+  const char* psrchive_config_last = getenv ("PSRCHIVE_CONFIG_LAST");
+  if (psrchive_config_last) {
+#ifdef _DEBUG
+    cerr << "Pulsar::Config::load_config $PSRCHIVE_CONFIG_LAST=" 
+	 << psrchive_config_last << endl;
+#endif
+
+    try {
+      config->load( psrchive_config_last );
+    }
+    catch (Error& error) {
+      // use of a configuration file is optional
+#ifdef _DEBUG
+      cerr << "Pulsar::Config::load_config error loading " <<
+      psrchive_config_last << " "  << error.get_message() << endl;
+#endif
+    }
+  }
 }
 
 
