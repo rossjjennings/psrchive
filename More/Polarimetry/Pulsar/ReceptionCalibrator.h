@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.87 $
-   $Date: 2008/06/20 13:10:35 $
+   $Revision: 1.88 $
+   $Date: 2008/09/17 01:56:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -63,6 +63,9 @@ namespace Pulsar
 
     //! Print an error message if Pointing parameters are not as expected
     bool check_pointing;
+
+    //! Produce reports of reduced chisq for each state in each channel
+    bool output_report;
 
     //! Reflections performed on the calibrator data immediately after loading
     ReflectStokes reflections;
@@ -141,9 +144,6 @@ namespace Pulsar
 
     //! Normalize the Stokes parameters by the invariant interval
     bool normalize_by_invariant;
-
-    //! Produce reports of reduced chisq for each state in each channel
-    bool output_report;
 
     //! Set the initial guesses and update the reference epoch
     void initialize ();
