@@ -21,7 +21,11 @@ using namespace std;
     try {
         $action
     } catch(Error& error) {
-        SWIG_exception(SWIG_RuntimeError,error.get_message().c_str());
+        // Deal with out-of-range errors
+        if (error.get_code()==InvalidRange)
+            SWIG_exception(SWIG_IndexError, error.get_message().c_str());
+        else
+            SWIG_exception(SWIG_RuntimeError,error.get_message().c_str());
     } catch(...) {
         SWIG_exception(SWIG_RuntimeError,"Unknown exception");
     }
