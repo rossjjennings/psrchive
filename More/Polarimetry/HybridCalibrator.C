@@ -120,30 +120,33 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
   // the SingleAxis interpretation of reference signal
   Calibration::SingleAxis pre_single_axis;
 
-  for (unsigned ichan=0; ichan<nchan; ++ichan) try {
-
+  for (unsigned ichan=0; ichan<nchan; ++ichan) try
+  {
     if (verbose > 2)
       cerr << "Pulsar::HybridCalibrator::calculate_transformation"
 	" ichan=" << ichan << endl;
 
-    if (reference_input && !reference_input->get_valid (ichan)) {
+    if (reference_input && !reference_input->get_valid (ichan))
+    {
       if (verbose > 2)
 	cerr << "Pulsar::HybridCalibrator::calculate_transformation"
-	  " invalid reference input" << endl;
+	  " reference input flagged invalid" << endl;
       transformation[ichan] = 0;
       continue;
     }
 
-    if (!precalibrator->get_transformation_valid (ichan)) {
+    if (!precalibrator->get_transformation_valid (ichan))
+    {
       if (verbose > 2)
 	cerr << "Pulsar::HybridCalibrator::calculate_transformation"
-	  " invalid precalibrator" << endl;
+	  " precalibrator flagged invalid" << endl;
       transformation[ichan] = 0;
       continue;
     }
 
     // get the coherency vector of the measured reference source
-    for (unsigned ipol=0; ipol<npol; ++ipol) {
+    for (unsigned ipol=0; ipol<npol; ++ipol)
+    {
       cal[ipol] = cal_hi[ipol][ichan];
       cal[ipol] -= cal_lo[ipol][ichan];
     }
@@ -166,7 +169,8 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     precalibrator->get_transformation (ichan)->evaluate (response);
 
     // get the Receiver correction, if any
-    if (precalibrator->has_Receiver()) {
+    if (precalibrator->has_Receiver())
+    {
       const Receiver* receiver = precalibrator->get_Receiver();
       BasisCorrection basis_correction;
       response *= basis_correction (receiver);
@@ -196,16 +200,15 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     transformation[ichan] = result;
 
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     if (verbose > 1)
       cerr << "Pulsar::HybridCalibrator::calculate_transformation"
-	" error ichan=" << ichan << " " << error.get_message() << endl;
+	" error ichan=" << ichan << error << endl;
     transformation[ichan] = 0;
   }
 
-
   if (verbose > 2)
     cerr << "Pulsar::HybridCalibrator::calculate_transformation exit" << endl;
-
 }
 
