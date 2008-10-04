@@ -21,6 +21,8 @@
 #include "interpolate.h"
 #include "median_smooth.h"
 
+#include <assert.h>
+
 using namespace std;
 
 Pulsar::Option<bool>
@@ -129,6 +131,23 @@ void Pulsar::ReferenceCalibrator::set_nchan (unsigned nchan)
   PolnCalibrator::set_response_nchan (nchan);
 }
 
+void distribute_variance (vector<Estimate<double> >& to,
+                          const vector<Estimate<double> >& from)
+{
+  unsigned ratio = to.size() / from.size();
+  assert (to.size() % from.size() == 0);
+
+  unsigned ito = 0;
+
+  for (unsigned ifrom=0; ifrom<from.size(); ifrom++)
+    for (unsigned i=0; i<ratio; i++)
+    {
+      // variance is increased by the distribution of information
+      to[ito].var = from[ifrom].var * ratio;
+      ito ++;
+    }
+}
+
 /*!
   \param integration the calibrator Integration from which to derive levels
   \param request_nchan the desired frequency resolution
@@ -208,7 +227,9 @@ void Pulsar::ReferenceCalibrator::get_levels
 	   << cal_lo[ipol].size() << " to " << lo[ipol].size() << endl;
 
     fft::interpolate (lo[ipol], cal_lo[ipol]);
+    distribute_variance (lo[ipol], cal_lo[ipol]);
     fft::interpolate (hi[ipol], cal_hi[ipol]);
+    distribute_variance (hi[ipol], cal_lo[ipol]);
   }
 
   cal_lo = lo;
