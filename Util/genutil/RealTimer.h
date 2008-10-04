@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/RealTimer.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.6 $
+   $Date: 2008/10/04 09:51:22 $
    $Author: straten $ */
 
 #ifndef __RealTimer_H
@@ -19,8 +19,10 @@
 
 class RealTimer : public Reference::Able {
  public:
+
   RealTimer();
   virtual ~RealTimer();
+  const RealTimer& operator += (const RealTimer&);
 
   //! start the clock
   void start();

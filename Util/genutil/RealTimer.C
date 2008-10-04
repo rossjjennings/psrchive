@@ -35,6 +35,11 @@ RealTimer::~RealTimer()
 { 
 }
 
+const RealTimer& RealTimer::operator += (const RealTimer& add)
+{
+  total_elapsed += add.total_elapsed;
+}
+
 void RealTimer::start() 
 { 
   gettimeofday (&time1, NULL);
