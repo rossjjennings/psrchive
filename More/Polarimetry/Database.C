@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Database.h"
 
 #include "Pulsar/SingleAxisCalibrator.h"
@@ -984,20 +985,24 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
   
   Entry entry;
 
-  if (m != Pulsar::Calibrator::Britton) try {
+  if (m != Pulsar::Calibrator::Britton) try
+  {
     if (verbose)
       cerr << "Pulsar::Database::generatePolnCalibrator search for " 
 	"Signal::PolnCal match" << endl;
     entry = best_match (criterion (arch, Signal::PolnCal));
   }
-  catch (Error& error) {
-    if (m == Pulsar::Calibrator::Hybrid) {
+  catch (Error& error)
+  {
+    if (m == Pulsar::Calibrator::Hybrid)
+    {
       error << "\n\tHybrid Calibrator requires raw PolnCal observation";
       throw error += "Pulsar::Database::generatePolnCalibrator";
     }
   }
 
-  if (m != Pulsar::Calibrator::Hybrid) try {
+  if (m != Pulsar::Calibrator::Hybrid) try
+  {
     if (verbose)
       cerr << "Pulsar::Database::generatePolnCalibrator search for " 
 	   << Calibrator::Type2str (m) << " match" << endl;
@@ -1006,8 +1011,10 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
     Entry cal_entry = best_match (cal_criterion);
     entry = cal_criterion.best (entry, cal_entry);
   }
-  catch (Error& error) {
-    if (entry.obsType == Signal::Unknown) {
+  catch (Error& error)
+  {
+    if (entry.obsType == Signal::Unknown)
+    {
       error << "\n\tneither raw nor processed calibrator archives found";
       throw error += "Pulsar::Database::generatePolnCalibrator";
     }
@@ -1015,6 +1022,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
 
   if (verbose)
     cout << "Constructing PolnCalibrator from file " << entry.filename << endl;
+
   Reference::To<Pulsar::Archive> polcalarch;
   polcalarch = Pulsar::Archive::load(get_filename(entry));
 
@@ -1108,7 +1116,8 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
     
   }
   
-  if (m == Pulsar::Calibrator::Hybrid)  {
+  if (m == Pulsar::Calibrator::Hybrid)
+  {
     cerr << "Pulsar::Database::generatePolnCalibrator Hybrid" << endl;
     return generateHybridCalibrator (ref_cal, arch);
   }
@@ -1132,28 +1141,27 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
 
   Entry entry;
 
-  try {
-
+  try
+  {
     if (verbose)
       cerr << "  Attempting to find a matching Britton Model" << endl;
+
     entry = best_match (criterion(arch, Calibrator::Britton));
-
   }
-  catch (Error& error) {
-
-    try {
-
+  catch (Error& error)
+  {
+    try
+    {
       if (verbose)
 	cerr << "  Attempting to find a matching Hamaker Model" << endl;
       
       entry = best_match (criterion(arch, Calibrator::Hamaker));
-
     }
-    catch (Error& error) {
+    catch (Error& error)
+    {
       throw Error (InvalidState, "Pulsar::Database::generateHybridCalibrator",
 		   "No complete polarimetric model (pcm output) found");
     }
-    
   }
 
   Reference::To<Pulsar::HybridCalibrator> hybrid;
@@ -1176,7 +1184,8 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
     hybrid->set_reference_observation (arcal);
 
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     throw error += "Pulsar::Database::generateHybridCalibrator";
   }
 
