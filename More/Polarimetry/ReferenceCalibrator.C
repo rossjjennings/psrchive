@@ -81,7 +81,8 @@ Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
     throw Error (InvalidState, "Pulsar::ReferenceCalibrator", "no Archive");
 
   if (verbose > 2)
-    cerr << "Pulsar::ReferenceCalibrator" << endl;
+    cerr << "Pulsar::ReferenceCalibrator archive nchan="
+	 << archive->get_nchan() << endl;
 
   set_calibrator (archive);
   requested_nchan = get_calibrator()->get_nchan();
@@ -137,22 +138,23 @@ void Pulsar::ReferenceCalibrator::set_nchan (unsigned nchan)
 void Pulsar::ReferenceCalibrator::get_levels
 (const Integration* integration, unsigned request_nchan,
  vector<vector<Estimate<double> > >& cal_hi,
- vector<vector<Estimate<double> > >& cal_lo)
-try {
+ vector<vector<Estimate<double> > >& cal_lo) try 
+{
   if (!integration)
     throw Error (InvalidState,
                  "Pulsar::ReferenceCalibrator::get_levels",
                  "no calibrator Integration");
 
-  if (verbose > 2)
-    cerr << "Pulsar::ReferenceCalibrator::get_levels Integration "
-         << " required nchan=" << request_nchan << endl;
-
   unsigned nchan = integration->get_nchan();
+
+  if (verbose > 2)
+    cerr << "Pulsar::ReferenceCalibrator::get_levels Integration"
+      " nchan=" << nchan << " required nchan=" << request_nchan << endl;
 
   Reference::To<Integration> clone;
 
-  if (nchan > request_nchan) {
+  if (nchan > request_nchan)
+  {
     clone = integration->clone();
     clone->expert()->fscrunch( nchan/request_nchan );
     nchan = clone->get_nchan();

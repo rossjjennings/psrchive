@@ -220,8 +220,7 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
   }
   catch (Error& error)
   {
-    cerr << "Pulsar::ReceptionCalibrator::load_calibrators ERROR" 
-	 << endl << error.get_message() << endl;
+    cerr << "Pulsar::ReceptionCalibrator::load_calibrators" << error << endl;
   }
 
   unsigned nchan = model.size();
