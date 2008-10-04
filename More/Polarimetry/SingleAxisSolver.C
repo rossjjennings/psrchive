@@ -35,11 +35,17 @@ Calibration::SingleAxisSolver::operator = (const SingleAxisSolver&)
   return *this;
 }
 
+static Stokes< Estimate<double> > zero;
+
 void
 Calibration::SingleAxisSolver::set_input (const Stokes< Estimate<double> >& S)
 {
   if (MEAL::Function::verbose)
     cerr << "Calibration::SingleAxis::set_input=" << S << endl;
+
+  if (S == zero)
+    throw Error (InvalidParam, "Calibration::SingleAxisSolver::set_input",
+                 "invalid Stokes parameters equal zero");
 
   // Convert to the natural basis
   Quaternion<Estimate<double>,Hermitian> q = natural (S);
@@ -54,6 +60,10 @@ Calibration::SingleAxisSolver::set_output (const Stokes< Estimate<double> >& S)
   if (MEAL::Function::verbose)
     cerr << "Calibration::SingleAxis::set_output=" << S << endl;
 
+  if (S == zero)
+    throw Error (InvalidParam, "Calibration::SingleAxisSolver::set_output",
+	                       "invalid Stokes parameters equal zero");
+
   Quaternion<Estimate<double>,Hermitian> q = natural (S);
 
   for (unsigned ipol=0; ipol<S.size(); ipol++)
@@ -61,8 +71,8 @@ Calibration::SingleAxisSolver::set_output (const Stokes< Estimate<double> >& S)
 }
 
 //! Set the SingleAxis parameters with the current solution
-void Calibration::SingleAxisSolver::solve (SingleAxis* model) try {
-
+void Calibration::SingleAxisSolver::solve (SingleAxis* model) try
+{
   Vector<3, double> model_axis = model->get_axis();
 
   for (unsigned i=0; i<3; i++)
