@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.32 $
-   $Date: 2008/06/17 07:59:23 $
-   $Author: straten $ */
+   $Revision: 1.33 $
+   $Date: 2008/10/07 19:20:58 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
 #define __Pulsar_FluxCalibrator_H
@@ -20,6 +20,7 @@ namespace Pulsar {
 
   class Integration;
   class StandardCandles;
+  class CalibratorStokes;
 
   //! Calibrates flux using standard candles and artificial sources
   class FluxCalibrator : public Calibrator {
@@ -52,6 +53,9 @@ namespace Pulsar {
     
     //! Return the system temperature of a specific channel
     double Tsys (unsigned ichan);
+
+    //! Return an estimate of the artificial cal Stokes parameters
+    CalibratorStokes* get_CalibratorStokes ();
     
     //! Add a FluxCal Pulsar::Archive to the set of constraints
     void add_observation (const Archive* archive);

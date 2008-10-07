@@ -8,6 +8,7 @@
 #include "Pulsar/FluxCalibratorData.h"
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/StandardCandles.h"
+#include "Pulsar/CalibratorStokes.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -90,6 +91,84 @@ double Pulsar::FluxCalibrator::Tsys (unsigned ichan)
                  "ichan=%d > data.size=%d", ichan, data.size());
   
   return data[ichan].get_S_sys().get_value();
+}
+
+//! Return an estimate of the artificial cal Stokes parameters
+/*! This method uses the flux cal measurement to determine 
+ * the intrinsic Stokes parameters of the artifical cal 
+ * source (reference source).  This is based on the assumptions 
+ * that the standard candle is unpolarized, and that the reference
+ * source signal is 100% correlated in each receptor with zero phase,
+ * but may have unequal power in the two sides.
+ */
+Pulsar::CalibratorStokes* Pulsar::FluxCalibrator::get_CalibratorStokes ()
+{
+
+  // Check that we have both polns
+  if (get_nreceptor() != 2) 
+    throw Error (InvalidState, "Pulsar::FluxCalibrator::get_CalibratorStokes",
+        "nreceptor=%d != 2", get_nreceptor());
+
+  Reference::To<CalibratorStokes> calstokes = new CalibratorStokes;
+  calstokes->set_nchan(get_nchan());
+  
+  // Loop over chans
+  for (int ichan=0; ichan<get_nchan(); ichan++) {
+
+    Estimate<double> diff, cross;
+    Stokes < Estimate<double> > stokes;
+
+    // Skip invalid channels
+    if (get_valid(ichan)==false || data[ichan].get_S_cal()==0.0 || 
+        data[ichan].get_S_cal(0)==0.0 || data[ichan].get_S_cal(1)==0.0) { 
+      stokes[0] = Estimate<double> (0.0, 0.0);
+      stokes[1] = Estimate<double> (0.0, 0.0);
+      stokes[2] = Estimate<double> (0.0, 0.0);
+      stokes[3] = Estimate<double> (0.0, 0.0);
+      calstokes->set_stokes(ichan, stokes);
+      calstokes->set_valid(ichan,false);
+      continue;
+    }
+
+    // CalibratorStokes only stores fractional Stokes params
+    stokes[0] = Estimate<double> (1.0,0.0);
+
+    diff = (data[ichan].get_S_cal(0) - data[ichan].get_S_cal(1))
+      / data[ichan].get_S_cal();
+
+    cross = data[ichan].get_S_cal(0) * data[ichan].get_S_cal(1);
+    if (cross<0.0) { cross = -cross; }
+    cross = 2.0 * sqrt(cross) / data[ichan].get_S_cal(); 
+
+    // TODO: Need to take care of hand convention here?
+
+    // This uses the Archive basis as a proxy for the cal signal 
+    // properties.  It could fail if for example the signal was
+    // converted from lin to circ using a hybrid AFTER the cal signal
+    // was coupled in.  In that case, the Archive data would appear
+    // circular, but the cal signal is really linear (nonzero Q not V).
+    // TODO: Use the Receiver reference source angle setting?
+    if (get_Archive()->get_basis() == Signal::Linear) {
+
+      // Linear feeds, Q = diff, U = cross, V = 0
+      stokes[1] = diff;
+      stokes[2] = cross;
+      stokes[3] = Estimate<double> (0.0, cross.var);
+
+    } else if (get_Archive()->get_basis() == Signal::Circular) {
+
+      // Circular feeds, Q = cross, U = 0, V = diff
+      stokes[1] = cross;
+      stokes[2] = Estimate<double> (0.0, cross.var);
+      stokes[3] = diff;
+
+    }
+
+    calstokes->set_stokes(ichan, stokes);
+
+  }
+
+  return calstokes.release();
 }
 
 //! Return true if the flux scale for the specified channel is valid
