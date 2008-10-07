@@ -361,15 +361,36 @@ int main (int argc, char** argv)
 
       if (input->get<Pulsar::FluxCalibratorExtension>())
       {
+
         cerr << "pacv: constructing FluxCalibrator from Extension" << endl;
         fluxcal = new Pulsar::FluxCalibrator (input);
 
 	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
 	  fluxcal->set_invalid (zapchan[ichan]);
 
-        cerr << "pacv: Plotting FluxCalibrator" << endl;
-	cpgpage ();
-        plotter.plot (fluxcal);
+        if (plot_calibrator_stokes) {
+
+          calibrator_stokes = fluxcal->get_CalibratorStokes();
+
+          for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
+            calibrator_stokes->set_valid (zapchan[ichan], false);
+
+          cerr << "pacv: Plotting fluxcal-derived CalibratorStokes" << endl;
+          cpgpage ();
+          plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
+                        fluxcal->get_nchan(),
+                        fluxcal->get_Archive()->get_centre_frequency(),
+                        fluxcal->get_Archive()->get_bandwidth() );
+
+          calibrator_stokes = 0;
+            
+        } else {
+
+          cerr << "pacv: Plotting FluxCalibrator" << endl;
+          cpgpage ();
+          plotter.plot (fluxcal);
+
+        }
 
         // disable attempt to plot again after end of main loop
         fluxcal = 0;
