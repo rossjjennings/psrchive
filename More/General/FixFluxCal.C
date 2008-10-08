@@ -22,7 +22,9 @@ void Pulsar::FixFluxCal::apply (Archive* archive)
 {
   changes = "no changes required";
 
-  if (archive->get_type() != Signal::PolnCal )
+  if (archive->get_type() != Signal::PolnCal 
+      && archive->get_type() != Signal::FluxCalOn
+      && archive->get_type() != Signal::FluxCalOff)
     return;
 
   if (!fluxcals)
