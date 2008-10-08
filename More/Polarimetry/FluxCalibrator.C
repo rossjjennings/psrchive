@@ -13,6 +13,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Receiver.h"
 
 #include "Error.h"
 #include "interpolate.h"
@@ -111,6 +112,8 @@ Pulsar::CalibratorStokes* Pulsar::FluxCalibrator::get_CalibratorStokes ()
 
   Reference::To<CalibratorStokes> calstokes = new CalibratorStokes;
   calstokes->set_nchan(get_nchan());
+
+  const Receiver* receiver = get_Archive()->get<Receiver>();
   
   // Loop over chans
   for (int ichan=0; ichan<get_nchan(); ichan++) {
@@ -140,7 +143,9 @@ Pulsar::CalibratorStokes* Pulsar::FluxCalibrator::get_CalibratorStokes ()
     if (cross<0.0) { cross = -cross; }
     cross = 2.0 * sqrt(cross) / data[ichan].get_S_cal(); 
 
-    // TODO: Need to take care of hand convention here?
+    // Take care of hand convention here
+    if (receiver && receiver->get_hand()==Signal::Left)
+      diff = -diff;
 
     // This uses the Archive basis as a proxy for the cal signal 
     // properties.  It could fail if for example the signal was
