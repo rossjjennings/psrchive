@@ -230,15 +230,18 @@ Pulsar::PolnCalibrator::get_solver (unsigned ichan) const
 }
 
 
-void Pulsar::PolnCalibrator::setup_transformation () const
+void Pulsar::PolnCalibrator::setup_transformation () const try
 {
   if (receiver)
     Pauli::basis.set_basis( receiver->get_basis() );
   const_cast<PolnCalibrator*>(this)->calculate_transformation();
 }
+catch (Error& error) {
+  throw error += "Pulsar::PolnCalibrator::setup_transformation";
+}
 
 //! Derived classes can create and fill the transformation array
-void Pulsar::PolnCalibrator::calculate_transformation ()
+void Pulsar::PolnCalibrator::calculate_transformation () try
 {
   if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::calculate_transformation" << endl;
@@ -260,6 +263,9 @@ void Pulsar::PolnCalibrator::calculate_transformation ()
     if (poln_extension->get_has_covariance())
       poln_extension->get_transformation(i)->get_covariance(covariance[i]);
   }
+}
+catch (Error& error) {
+  throw error += "Pulsar::PolnCalibrator::calculate_transformation";
 }
 
 void Pulsar::PolnCalibrator::build (unsigned nchan) try
