@@ -13,6 +13,8 @@
 
 #include "Pulsar/Database.h"
 #include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/HybridCalibrator.h"
+#include "Pulsar/ReferenceCalibrator.h"
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/IonosphereCalibrator.h"
 #include "Pulsar/FrontendCorrection.h"
@@ -32,7 +34,7 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbCcDd:e:fFGhiIJ:j:M:m:n:O:op:Pqr:sSt:Tu:vVwZ";
+const char* args = "A:aBbCcDd:e:fFGhiIJ:j:M:m:n:O:op:Pqr:sSt:Tu:vVwxZ";
 
 void usage ()
 {
@@ -57,6 +59,7 @@ void usage ()
     "  -S             Use the complete Reception model \n"
     "  -s             Use the Polar Model \n"
     "  -I             Correct ionospheric Faraday rotation using IRI\n"
+    "  -x             Derive calibrator Stokes parameters from fluxcal data\n"
     "\n"
     "Rough Alignment options [not recommended]: \n"
     "  -B             Fix the off-pulse baseline statistics \n"
@@ -94,6 +97,7 @@ int main (int argc, char *argv[]) try
   bool new_database = true;
   bool do_fluxcal = true;
   bool do_polncal = true;
+  bool use_fluxcal_stokes = false;
 
   // Preprocessing jobs
   vector<string> jobs;
@@ -167,7 +171,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.94 2008/08/18 02:33:36 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.95 2008/10/08 14:35:30 demorest Exp $" << endl;
       return 0;
 
     case 'A':
@@ -373,6 +377,11 @@ int main (int argc, char *argv[]) try
       command += " -w";
       break;
 
+    case 'x':
+      use_fluxcal_stokes = true;
+      command += " -x";
+      break;
+
     case 'b':
       criterion.check_bandwidth = false;
       command += " -b";
@@ -447,6 +456,12 @@ int main (int argc, char *argv[]) try
   {
     cerr << "pac: Could not load calibrator from " << model_file << endl;
     cerr << error << endl;
+    return -1;
+  }
+
+  if (use_fluxcal_stokes && pcal_type != Pulsar::Calibrator::SingleAxis) {
+    cerr << "pac: Fluxcal-derived Stokes params are incompatible with the " 
+      << "selected calibration method" << endl;
     return -1;
   }
 
@@ -546,6 +561,32 @@ int main (int argc, char *argv[]) try
 	  cout << "pac: Finding PolnCalibrator" << endl;
 
 	pcal_engine = dbase->generatePolnCalibrator(arch, pcal_type);
+      }
+
+      if (use_fluxcal_stokes) try {
+
+        if (verbose)
+          cout << "pac: Calculating fluxcal Stokes params" << endl;
+
+        // Find appropriate fluxcal from DB 
+        Reference::To<Pulsar::FluxCalibrator> flux_cal;
+        flux_cal = dbase->generateFluxCalibrator(arch);
+
+        // Combine already-selected pcal_engine with fluxcal stokes
+        // into a new HybridCalibrator
+        Reference::To<Pulsar::HybridCalibrator> hybrid_cal;
+        hybrid_cal = new Pulsar::HybridCalibrator;
+        hybrid_cal->set_reference_input(flux_cal->get_CalibratorStokes());
+        hybrid_cal->set_reference_observation(
+            static_cast<Pulsar::ReferenceCalibrator*>(pcal_engine.get()));
+
+        pcal_engine = hybrid_cal;
+
+      }
+      catch (Error& error) {
+        cerr << "pac: Error computing cal Stokes for " << arch->get_filename() 
+          << endl
+          << "\t" << error.get_message() << endl;
       }
       
       pcal_file = pcal_engine->get_filenames();
