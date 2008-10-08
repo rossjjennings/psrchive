@@ -57,6 +57,8 @@ void Pulsar::HybridCalibrator::set_reference_observation (ReferenceCalibrator*
 {
   reference_observation = observation;
 
+  if (!precalibrator) set_calibrator ( observation->get_Archive() );
+
   filenames.resize (2);
   filenames[1] = observation->get_filenames();
 }
@@ -65,6 +67,9 @@ void Pulsar::HybridCalibrator::set_reference_observation (ReferenceCalibrator*
 void Pulsar::HybridCalibrator::set_precalibrator (PolnCalibrator* _calibrator)
 {
   precalibrator = _calibrator;
+
+  if (!precalibrator) return;
+
   set_calibrator( precalibrator->get_Archive() );
 
   // store the Receiver Extension, if any
@@ -76,10 +81,12 @@ void Pulsar::HybridCalibrator::set_precalibrator (PolnCalibrator* _calibrator)
 
 void Pulsar::HybridCalibrator::calculate_transformation ()
 {
+#if 0 
   if (!precalibrator)
     throw Error (InvalidState,
 		 "Pulsar::HybridCalibrator::calculate_transformation",
 		 "no precalibrator PolnCalibrator");
+#endif
 
   if (!reference_input)
     cerr << "Pulsar::HybridCalibrator::calculate_transformation\n"
@@ -90,7 +97,9 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 		 "Pulsar::HybridCalibrator::calculate_transformation",
 		 "no reference observation ReferenceCalibrator");
 
-  unsigned nchan = precalibrator->get_nchan();
+  unsigned nchan;
+  if (precalibrator) nchan = precalibrator->get_nchan();
+  else nchan = reference_observation->get_nchan();
 
   if (reference_input && reference_input->get_nchan() != nchan)
     throw Error (InvalidState,
@@ -135,7 +144,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
       continue;
     }
 
-    if (!precalibrator->get_transformation_valid (ichan))
+    if (precalibrator && !precalibrator->get_transformation_valid (ichan))
     {
       if (verbose > 2)
 	cerr << "Pulsar::HybridCalibrator::calculate_transformation"
@@ -165,14 +174,23 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
       cal_stokes = reference_input->get_stokes(ichan);
 
     // get the precalibrator transformation
-    Jones< Estimate<double> > response;
-    precalibrator->get_transformation (ichan)->evaluate (response);
+    Jones< Estimate<double> > response (1.0);
+    if (precalibrator)
+      precalibrator->get_transformation (ichan)->evaluate (response);
 
     // get the Receiver correction, if any
-    if (precalibrator->has_Receiver())
     {
-      const Receiver* receiver = precalibrator->get_Receiver();
+      const Receiver* receiver;
       BasisCorrection basis_correction;
+
+      // Try using precalibrator's version first
+      if (precalibrator && precalibrator->has_Receiver())
+        receiver = precalibrator->get_Receiver();
+
+      // Next try the reference obs version
+      else if (reference_observation->has_Receiver())
+        receiver = reference_observation->get_Receiver();
+
       response *= basis_correction (receiver);
     }
 
@@ -195,7 +213,8 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     result = new MEAL::ProductRule<MEAL::Complex2>;
 
     *result *= correction;
-    *result *= precalibrator->get_transformation (ichan);
+    if (precalibrator) 
+      *result *= precalibrator->get_transformation (ichan);
 
     transformation[ichan] = result;
 
