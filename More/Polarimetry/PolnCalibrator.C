@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -57,12 +57,15 @@ Pulsar::PolnCalibrator::PolnCalibrator (const Archive* archive)
   filenames.push_back( archive->get_filename() );
 
   built = false;
+
+  observation_nchan = 0;
 }
 
 //! Copy constructor
 Pulsar::PolnCalibrator::PolnCalibrator (const PolnCalibrator& calibrator)
 {
   built = false;
+  observation_nchan = 0;
 }
 
 //! Destructor
@@ -111,6 +114,36 @@ const Pulsar::Receiver* Pulsar::PolnCalibrator::get_Receiver () const
 {
   return receiver;
 }
+
+/*!  
+
+  Some calibrators (e.g. HybridCalibrator) may be capable of shrinking
+  the size of the transformation array to match the number of
+  frequency channels in the observation.  If this is done, and the
+  next observation to be calibrated has more channels than the first,
+  then the transformation array should be recomputed to match the new
+  frequency resolution.
+
+  However, to date, the decision to recompute the transformation array
+  has been based on it having zero size.  It is not possible to
+  compare tranformation.size() with get_nchan(), because
+  PolnCalibrator::get_nchan makes the same comparison and returns
+  transformation.size().
+
+  Rather than add a new method that must be implemented by all of the
+  derived classes, this new method gives shrink-capable classes the
+  opportunity to communicate this feature.
+
+  By default, the method returns zero.  Otherwise, it should return
+  the maximum possible size of the transformation array that can be
+  supported.
+
+*/
+unsigned Pulsar::PolnCalibrator::get_maximum_nchan ()
+{
+  return 0;
+}
+
 
 //! Get the number of frequency channels in the calibrator
 unsigned Pulsar::PolnCalibrator::get_nchan () const
@@ -268,17 +301,111 @@ catch (Error& error) {
   throw error += "Pulsar::PolnCalibrator::calculate_transformation";
 }
 
+
+
+/*!  
+  The unitary component of each Jones matrix is parameterized by a
+  half angle, i.e. -pi/2 < angle < pi/2, and any wrap between +/- pi/2
+  will appear to the Fourier transform as a discontinuity in phase.
+
+  To compensate for this, the unitary component of each Jones matrix
+  is first squared, so that the angle spans 2pi smoothly.  The result
+  is then decomposed and the square root of each unitary component is
+  taken before recomposing the final result.
+*/
+template<typename T>
+void interpolate( std::vector< Jones<T> >& to,
+		  const std::vector< Jones<T> >& from,
+		  const vector<bool>* bad )
+{
+  const complex<T> zero (0.0);
+
+  complex<T> determinant;
+  Quaternion<T, Hermitian> hermitian;
+  Quaternion<T, Unitary> unitary;
+
+  unsigned ichan = 0;
+  const unsigned nchan_from = from.size();
+  const unsigned nchan_to = to.size();
+
+  vector< Jones<T> > copy (nchan_from);
+
+  for (ichan=0; ichan<nchan_from; ichan++)
+  {
+    if (det(from[ichan]) == zero)
+    {
+      copy[ichan] = from[ichan];
+    }
+    else
+    {
+      polar (determinant, hermitian, unitary, from[ichan]);
+      unitary *= unitary;
+      copy[ichan] = determinant * (hermitian * unitary);
+    }
+  }
+
+  fft::interpolate (to, copy);
+  
+  unsigned factor = nchan_to / nchan_from;
+  
+  for (ichan=0; ichan<nchan_to; ichan++)
+  {
+    unsigned orig_ichan = ichan / factor;
+
+    if (orig_ichan >= nchan_from || (bad && (*bad)[orig_ichan]))
+    {
+      to[ichan] = 0;
+      continue;
+    }
+    
+    polar (determinant, hermitian, unitary, to[ichan]);
+    unitary = sqrt(unitary);
+
+    // I don't remember why I did this, sorry ... WvS 16 Oct 2008
+    if (unitary[0] < 0.05)
+      polar (determinant, hermitian, unitary, from[orig_ichan]);
+
+    to[ichan] = determinant * (hermitian * unitary);
+  }
+}
+
+
 void Pulsar::PolnCalibrator::build (unsigned nchan) try
 {
   if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::build transformation size="
 	 << transformation.size() << " nchan=" << nchan << endl;
 
-  if (!built || transformation.size() == 0)
+  bool transformation_built = transformation.size() > 0;
+
+  unsigned maximum_nchan = get_maximum_nchan ();
+
+  /*
+    If the derived class can shrink the transformation array, then
+    it may be necessary to rebuild the transformation array to match
+    the number of frequency channels in the observation
+  */
+
+  if (maximum_nchan)
   {
-    if (verbose > 2) cerr << "Pulsar::PolnCalibrator::build"
-                         " call calculate_transformation" << endl;
+    /*
+      target: the number of channels in the observation, up to the 
+      maximum number of channels supported by the derived class.
+    */
+    unsigned target_nchan = std::min (nchan, maximum_nchan);
+
+    if (transformation.size() != target_nchan)
+      transformation_built = false;
+  }
+
+  if (!built || !transformation_built)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::PolnCalibrator::build setup transformation" << endl;
+
+    observation_nchan = nchan;
     setup_transformation();
+    observation_nchan = 0;
   }
 
   if (!nchan)
@@ -426,6 +553,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
 	   << response.size() << " mod requested nchan=" << nchan << " != 0" 
 	   << endl;
 
+    // integrate the Jones matrices
     scrunch (response, factor);
 
     for (ichan=0; ichan<nchan; ichan++)
@@ -439,46 +567,9 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
     if (verbose > 2)
       cerr << "Pulsar::PolnCalibrator::build interpolating from nchan="
 	   << response.size() << " to " << nchan << endl;
-    
-    complex<float> determinant;
-    Quaternion<float, Hermitian> hermitian;
-    Quaternion<float, Unitary> unitary;
-
-    vector< Jones<float> > backup = response;
-
-    for (ichan=0; ichan<response.size(); ichan++)
-    {
-      if (det(response[ichan]) == zero)
-	continue;
-      polar (determinant, hermitian, unitary, response[ichan]);
-      unitary *= unitary;
-      response[ichan] = determinant * (hermitian * unitary);
-    }
 
     vector< Jones<float> > out_response (nchan);
-    fft::interpolate (out_response, response);
-    
-    unsigned factor = nchan / response.size();
-
-    for (ichan=0; ichan<nchan; ichan++)
-    {
-      unsigned orig_ichan = ichan / factor;
-      if (orig_ichan >= response.size() || bad[orig_ichan])
-      {
-	out_response[ichan] = 0;
-	continue;
-      }
-
-      polar (determinant, hermitian, unitary, out_response[ichan]);
-      unitary = sqrt(unitary);
-      if (unitary[0] < 0.05)
-      {
-        unsigned iback = (ichan * response.size()) / nchan;
-        polar (determinant, hermitian, unitary, backup[iback]);
-      }
-      out_response[ichan] = determinant * (hermitian * unitary);
-    }
-
+    interpolate (out_response, response, &bad);
     response = out_response;
   }
 

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.49 $
-   $Date: 2008/08/04 05:07:25 $
+   $Revision: 1.50 $
+   $Date: 2008/10/16 23:38:30 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -130,9 +130,6 @@ namespace Pulsar {
     //! Set up to call calculate_transformation
     void setup_transformation () const;
 
-    //! Derived classes can create and fill the transformation array
-    virtual void calculate_transformation ();
-
     //! Set up done before calibrating an archive
     void calibration_setup (Archive* arch);
 
@@ -150,6 +147,15 @@ namespace Pulsar {
 
     //! Flag set when response has been built
     bool built;
+
+    //! The number of frequency channels in the observation to be calibrated
+    unsigned observation_nchan;
+
+    //! Derived classes can create and fill the transformation array
+    virtual void calculate_transformation ();
+
+    //! Derived classes may be able to shrink the transformation array
+    virtual unsigned get_maximum_nchan ();
 
   private:
 
