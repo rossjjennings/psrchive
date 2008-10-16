@@ -79,6 +79,21 @@ void Pulsar::HybridCalibrator::set_precalibrator (PolnCalibrator* _calibrator)
   filenames[0] = precalibrator->get_filenames();
 }
 
+unsigned Pulsar::HybridCalibrator::get_maximum_nchan ()
+{
+  if (precalibrator)
+    return precalibrator->get_nchan();
+
+  if (reference_observation)
+    return reference_observation->get_nchan();
+
+  if (reference_input)
+    return reference_input->get_nchan();
+
+  throw Error (InvalidState, "Pulsar::HybridCalibrator::maximum_nchan",
+	       "none of the required data have been added");
+}
+
 void Pulsar::HybridCalibrator::calculate_transformation ()
 {
 #if 0 
@@ -98,8 +113,10 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 		 "no reference observation ReferenceCalibrator");
 
   unsigned nchan;
-  if (precalibrator) nchan = precalibrator->get_nchan();
-  else nchan = reference_observation->get_nchan();
+  if (precalibrator)
+    nchan = precalibrator->get_nchan();
+  else
+    nchan = reference_observation->get_nchan();
 
   if (reference_input && reference_input->get_nchan() != nchan)
     throw Error (InvalidState,
@@ -107,8 +124,9 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 		 "reference input CalibratorStokes nchan=%d != %d",
 		 reference_input->get_nchan(), nchan);
   
-  if (verbose > 2) cerr << "Pulsar::HybridCalibrator::calculate_transformation"
-                       " nchan=" << nchan << endl;
+  if (verbose > 2)
+    cerr << "Pulsar::HybridCalibrator::calculate_transformation"
+      " nchan=" << nchan << endl;
 
   // the calibrator hi and lo levels from the PolnCal archive
   vector<vector<Estimate<double> > > cal_hi;

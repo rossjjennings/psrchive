@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/HybridCalibrator.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.9 $
+   $Date: 2008/10/16 23:38:25 $
    $Author: straten $ */
 
 #ifndef __HybridCalibrator_H
@@ -58,6 +58,9 @@ namespace Pulsar {
 
     //! Fill the transformation vector of the PolnCalibrator base class
     void calculate_transformation ();
+
+    //! Return the number of channels in the PolnCalibrator
+    unsigned get_maximum_nchan ();
 
     //! The Stokes parameters of the input reference signal
     Reference::To<const CalibratorStokes> reference_input;
