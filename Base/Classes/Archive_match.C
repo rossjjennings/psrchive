@@ -50,9 +50,6 @@ bool Pulsar::Archive::processing_match (const Archive* archive,
 bool Pulsar::Archive::calibrator_match (const Archive* archive,
 					string& reason) const
 {
-  if (!calibrator_match_strategy)
-    cerr << "Pulsar::Archive::calibrator_match policy not set" << endl;
-
   setup (calibrator_match_strategy, &ArchiveMatch::set_check_calibrator);
   return apply (calibrator_match_strategy, this, archive, reason);
 }

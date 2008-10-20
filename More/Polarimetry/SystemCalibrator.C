@@ -829,7 +829,7 @@ void Pulsar::SystemCalibrator::solve_prepare ()
     {
       // sanity check
       Estimate<double> I = calibrator_estimate.source[ichan]->get_stokes()[0];
-      if (fabs(I.get_value()-1.0) > 1e-5 && verbose)
+      if (fabs(I.get_value()-1.0) > I.get_error() && verbose)
 	cerr << "Pulsar::SystemCalibrator::solve_prepare warning"
 	  " ichan=" << ichan << " reference flux=" << I << " != 1" << endl;
     }

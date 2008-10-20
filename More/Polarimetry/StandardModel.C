@@ -115,9 +115,6 @@ void Calibration::StandardModel::set_constant_pulsar_gain (bool value)
 //! Get the measurement equation solver
 Calibration::ReceptionModel* Calibration::StandardModel::get_equation ()
 {
-  if (verbose)
-    cerr << "Calibration::StandardModel::get_equation" << endl;
-
   if (!built)
     build ();
 
