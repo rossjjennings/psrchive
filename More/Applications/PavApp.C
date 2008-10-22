@@ -289,26 +289,22 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq )
     double actual_min = ctr_freq - bw_abs / 2.0;
 
     // convert the min and max freq values to (0-1)
-
-    min_freq -= actual_min;
-    max_freq -= actual_min;
-
-    min_freq /= bw_abs;
-    max_freq /= bw_abs;
+    double norm_min_freq = (min_freq-actual_min)/bw_abs;
+    double norm_max_freq = (max_freq-actual_min)/bw_abs;
 
     if( bw < 0 )
     {
-      double tmp = 1 - min_freq;
-      min_freq = 1 - max_freq;
-      max_freq = tmp;
+      double tmp = 1 - norm_min_freq;
+      norm_min_freq = 1 - norm_max_freq;
+      norm_max_freq = tmp;
     }
 
     // construct the command to set the range, the same for all plots (for current plots)
 
     string range_cmd = "y:range=(";
-    range_cmd += tostring<double>( min_freq );
+    range_cmd += tostring<double>( norm_min_freq );
     range_cmd += string(",");
-    range_cmd += tostring<double>( max_freq );
+    range_cmd += tostring<double>( norm_max_freq );
     range_cmd += string(")" );
 
     SetPlotOptions<Plot>( range_cmd );
@@ -686,7 +682,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.59 2008/09/04 02:21:07 jonathan_khoo Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.60 2008/10/22 20:37:02 demorest Exp $" << 
         endl << endl;
       return 0;
     case 'M':
