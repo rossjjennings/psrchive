@@ -114,8 +114,6 @@ void Pulsar::CalibratorSpectrum::draw (const Archive* data)
   {
     cpgsci (ipol+1);
     plotter.plot (ipol);
-    cerr << ipol << " plotted" << endl;
-    getchar();
   }
 }
 
