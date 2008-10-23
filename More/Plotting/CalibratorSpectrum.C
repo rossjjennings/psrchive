@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/CalibratorSpectrum.h"
 #include "Pulsar/PlotFrame.h"
 #include "Pulsar/Archive.h"
@@ -48,7 +49,8 @@ void Pulsar::CalibratorSpectrum::prepare (const Archive* data)
 {
   Reference::To<Archive> clone;
 
-  if (plot_Ip && data->get_state() != Signal::Stokes) {
+  if (plot_Ip && data->get_state() != Signal::Stokes)
+  {
     clone = data -> clone();
     clone->convert_state(Signal::Stokes);
     data = clone;
@@ -76,13 +78,13 @@ void Pulsar::CalibratorSpectrum::prepare (const Archive* data)
       for (ipt=0; ipt<npt; ipt++)
 	hi[ipol][ipt] = lo[ipol][ipt];
 
-  if (plot_Ip) {
-    for (ipt=0; ipt<npt; ipt++) {
+  if (plot_Ip)
+  {
+    for (ipt=0; ipt<npt; ipt++)
       if (hi[0][ipt].get_variance() != 0)
 	hi[1][ipt] = sqrt( sqr(hi[1][ipt]) +
 			   sqr(hi[2][ipt]) +
 			   sqr(hi[3][ipt]) );
-    }
     npol = 2;
   }
 
@@ -108,9 +110,12 @@ void Pulsar::CalibratorSpectrum::draw (const Archive* data)
   if (plot_Ip)
     npol = 2;
 
-  for (unsigned ipol=0; ipol<npol; ipol++) {
+  for (unsigned ipol=0; ipol<npol; ipol++)
+  {
     cpgsci (ipol+1);
     plotter.plot (ipol);
+    cerr << ipol << " plotted" << endl;
+    getchar();
   }
 }
 
@@ -118,11 +123,16 @@ void Pulsar::CalibratorSpectrum::draw (const Archive* data)
 //! Return the label for the y-axis
 std::string Pulsar::CalibratorSpectrum::get_ylabel (const Archive* data)
 {
+  string type = tostring( data->get_state() );
+
+  if (plot_Ip)
+    type = "Total and Polarized Flux";
+
   if (plot_low)
-    return "Off-Pulse Flux";
+    return "Off-Pulse " + type;
   else if (plot_total)
-    return "On-Pulse Flux";
+    return "On-Pulse " + type;
   else 
-    return "Calibrator Flux";
+    return "Calibrator " + type;
 }
 
