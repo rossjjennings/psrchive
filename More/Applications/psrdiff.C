@@ -41,7 +41,7 @@ void usage ()
        << endl;
 }
 
-int main (int argc, char** argv)
+int main (int argc, char** argv) try
 {
   Pulsar::Profile::default_duty_cycle = 0.10;
 
@@ -321,5 +321,10 @@ int main (int argc, char** argv)
 
   return 0;
 
+}
+catch (Error& error)
+{
+  cerr << "psrdiff: error" << error << endl;
+  return -1;
 }
 
