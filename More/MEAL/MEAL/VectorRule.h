@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/VectorRule.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/06/15 16:12:34 $
+   $Revision: 1.7 $
+   $Date: 2008/10/31 03:26:54 $
    $Author: straten $ */
 
 #ifndef __MEAL_VectorRule_H
@@ -137,6 +137,12 @@ void MEAL::VectorRule<T>::assign (T* x)
 {
   if (T::very_verbose)
     std::cerr << get_name() + "assign" << std::endl;
+
+  if (!model.size())
+  {
+    push_back (x);
+    return;
+  }
 
   if (model[model_index])
   {
