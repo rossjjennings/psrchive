@@ -68,7 +68,7 @@ void usage ()
        << endl;
 }
 
-int main (int argc, char** argv) 
+int main (int argc, char** argv) try
 {
   int bscrunch = -1;
   int fscrunch = -1;
@@ -469,6 +469,11 @@ int main (int argc, char** argv)
 #endif
 
   return 0;
+}
+catch (Error& error)
+{
+  cerr << "psrwt: error" << error << endl;
+  return -1;
 }
 
 
