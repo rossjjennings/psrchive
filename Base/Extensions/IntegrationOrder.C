@@ -57,6 +57,11 @@ unsigned Pulsar::IntegrationOrder::size () const
   return indices.size();
 }
 
+void Pulsar::IntegrationOrder::erase (unsigned i)
+{
+  indices.erase( indices.begin() + i );
+}
+
 double Pulsar::IntegrationOrder::get_Index (unsigned subint) const
 {
   if (subint >= indices.size())

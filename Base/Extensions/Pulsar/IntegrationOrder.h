@@ -7,8 +7,8 @@
  ***************************************************************************/
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/IntegrationOrder.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/04/21 06:20:00 $
+   $Revision: 1.13 $
+   $Date: 2008/11/07 22:15:17 $
    $Author: straten $ */
                                                                                 
 #ifndef __IntegrationOrder_h
@@ -57,6 +57,9 @@ namespace Pulsar {
     //! Change the size of the index array
     void resize(unsigned i);
     
+    //! Erase the specified index
+    void erase (unsigned i);
+
     //! Set the custom index value associated with an Integration
     void set_Index (unsigned subint, double i);
     
