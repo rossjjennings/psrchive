@@ -57,18 +57,12 @@ namespace Pulsar {
     //! Base copy constructor
     WAPPArchive (const Archive& archive);
 
-    //! Base extraction constructor
-    WAPPArchive (const Archive&, const std::vector<unsigned>& subint);
-
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const std::vector<unsigned>& subints);
+    void copy (const Archive& archive);
 
     //! Return a new copy-constructed ExampleArchive instance
     WAPPArchive* clone () const;
 
-    //! Return a new extraction-constructed ExampleArchive instance
-    WAPPArchive* extract (const std::vector<unsigned>& subints) const;
-    
   protected:
 
     //! Load the Example header information from filename

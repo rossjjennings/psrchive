@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.26 $
-   $Date: 2008/08/13 11:57:45 $
+   $Revision: 1.27 $
+   $Date: 2008/11/07 22:15:36 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -45,11 +45,8 @@ namespace Pulsar {
     //! Base copy constructor
     TimerArchive (const Archive& archive);
 
-    //! Base extraction constructor
-    TimerArchive (const Archive& archive, const std::vector<unsigned>& subint);
-
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const std::vector<unsigned>& subints);
+    void copy (const Archive& archive);
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -59,12 +56,9 @@ namespace Pulsar {
     //! Return a pointer to a new copy constructed instance equal to this
     TimerArchive* clone () const;
 
-    //! Return a pointer to a new extraction constructed instance equal to this
-    TimerArchive* extract (const std::vector<unsigned>& subints) const;
-
-    //! Get the telescope name
+    //! Get the telescope name
     virtual std::string get_telescope () const;
-    //! Set the telescope name
+    //! Set the telescope name
     virtual void set_telescope (const std::string& telescope);
 
     //! Get the state of the profiles
@@ -208,7 +202,7 @@ namespace Pulsar {
     virtual void set_nsubint (unsigned nsubint);
 
     //! The subints vector will point to TimerIntegrations
-    virtual Integration* new_Integration (Integration* copy_this = 0);
+    virtual Integration* new_Integration (const Integration* copy_this = 0);
 
     //! set code bit in hdr.corrected
     void set_corrected (int code, bool done);

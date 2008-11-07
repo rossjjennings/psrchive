@@ -53,19 +53,7 @@ Pulsar::EPNArchive::EPNArchive (const EPNArchive& arch)
   Archive::copy (arch);
 }
 
-Pulsar::EPNArchive::EPNArchive (const Archive& arch, 
-				const vector<unsigned>& subints)
-{
-  if (verbose == 3)
-    cerr << "EPNArchive construct extract Archive" << endl;
-
-  init ();
-  Archive::copy (arch, subints);
-}
-
-
-void Pulsar::EPNArchive::copy (const Archive& archive, 
-			       const vector<unsigned>& subints)
+void Pulsar::EPNArchive::copy (const Archive& archive) 
 {
   if (verbose == 3)
     cerr << "EPNArchive::copy" << endl;
@@ -73,7 +61,7 @@ void Pulsar::EPNArchive::copy (const Archive& archive,
   if (this == &archive)
     return;
 
-  Archive::copy (archive, subints);
+  Archive::copy (archive);
 
   if (verbose == 3)
     cerr << "EPNArchive::copy dynamic cast call" << endl;
@@ -106,15 +94,6 @@ Pulsar::EPNArchive* Pulsar::EPNArchive::clone () const
     cerr << "EPNArchive::clone" << endl;
   return new EPNArchive (*this);
 }
-
-Pulsar::EPNArchive* 
-Pulsar::EPNArchive::extract (const vector<unsigned>& subints) const
-{
-  if (verbose == 3)
-    cerr << "EPNArchive::extract" << endl;
-  return new EPNArchive (*this, subints);
-}
-
 
 std::string Pulsar::EPNArchive::get_telescope () const
 {
@@ -355,7 +334,7 @@ void Pulsar::EPNArchive::set_dedispersed (bool done)
 //
 //
 Pulsar::Integration* 
-Pulsar::EPNArchive::new_Integration (Integration* subint)
+Pulsar::EPNArchive::new_Integration (const Integration* subint)
 {
   if (verbose == 3)
     cerr << "Pulsar::EPNArchive::new_Integration" << endl;

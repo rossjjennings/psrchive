@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASP/Pulsar/ASPArchive.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/08/13 11:57:45 $
+   $Revision: 1.5 $
+   $Date: 2008/11/07 22:15:36 $
    $Author: straten $ */
 
 #ifndef __ASPArchive_h
@@ -45,18 +45,12 @@ namespace Pulsar {
     //! Base copy constructor
     ASPArchive (const Archive& archive);
 
-    //! Base extraction constructor
-    ASPArchive (const Archive&, const std::vector<unsigned>& subint);
-
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const std::vector<unsigned>& subints);
+    void copy (const Archive& archive);
 
     //! Return a new copy-constructed ASPArchive instance
     ASPArchive* clone () const;
 
-    //! Return a new extraction-constructed ASPArchive instance
-    ASPArchive* extract (const std::vector<unsigned>& subints) const;
-    
   protected:
 
     //! Load the ASP header information from filename

@@ -53,20 +53,7 @@ Pulsar::PuMaArchive::PuMaArchive (const PuMaArchive& arch)
   Archive::copy (arch);
 }
 
-Pulsar::PuMaArchive::PuMaArchive (const Archive& arch, 
-				  const vector<unsigned>& subints)
-{
-  if (verbose == 3)
-    cerr << "PuMaArchive construct extract Archive" << endl;
-
-  init ();
-  Archive::copy (arch, subints);
-}
-
-
-
-void Pulsar::PuMaArchive::copy (const Archive& archive, 
-				const vector<unsigned>& subints)
+void Pulsar::PuMaArchive::copy (const Archive& archive) 
 {
   if (verbose == 3)
     cerr << "PuMaArchive::copy" << endl;
@@ -74,7 +61,7 @@ void Pulsar::PuMaArchive::copy (const Archive& archive,
   if (this == &archive)
     return;
 
-  Archive::copy (archive, subints);
+  Archive::copy (archive);
 
   if (verbose == 3)
     cerr << "PuMaArchive::copy dynamic cast call" << endl;
@@ -98,14 +85,6 @@ Pulsar::Archive* Pulsar::PuMaArchive::clone () const
   if (verbose == 3)
     cerr << "PuMaArchive::clone" << endl;
   return new PuMaArchive (*this);
-}
-
-Pulsar::Archive* 
-Pulsar::PuMaArchive::extract (const vector<unsigned>& subints) const
-{
-  if (verbose == 3)
-    cerr << "PuMaArchive::extract" << endl;
-  return new PuMaArchive (*this, subints);
 }
 
 //! Get the number of pulsar phase bins used

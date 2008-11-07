@@ -46,19 +46,7 @@ Pulsar::ExampleArchive::ExampleArchive (const ExampleArchive& arch)
   Archive::copy (arch);
 }
 
-Pulsar::ExampleArchive::ExampleArchive (const Archive& arch, 
-                                        const vector<unsigned>& subints)
-{
-  if (verbose > 2)
-    cerr << "Pulsar::ExampleArchive construct extract Archive" << endl;
-
-  init ();
-  Archive::copy (arch, subints);
-}
-
-
-void Pulsar::ExampleArchive::copy (const Archive& archive, 
-                                   const vector<unsigned>& subints)
+void Pulsar::ExampleArchive::copy (const Archive& archive) 
 {
   if (verbose > 2)
     cerr << "Pulsar::ExampleArchive::copy" << endl;
@@ -66,7 +54,7 @@ void Pulsar::ExampleArchive::copy (const Archive& archive,
   if (this == &archive)
     return;
 
-  Archive::copy (archive, subints);
+  Archive::copy (archive);
 
   if (verbose > 2)
     cerr << "Pulsar::ExampleArchive::copy dynamic cast call" << endl;
@@ -86,14 +74,6 @@ Pulsar::ExampleArchive* Pulsar::ExampleArchive::clone () const
   if (verbose > 2)
     cerr << "Pulsar::ExampleArchive::clone" << endl;
   return new ExampleArchive (*this);
-}
-
-Pulsar::ExampleArchive* 
-Pulsar::ExampleArchive::extract (const vector<unsigned>& subints) const
-{
-  if (verbose > 2)
-    cerr << "Pulsar::ExampleArchive::extract" << endl;
-  return new ExampleArchive (*this, subints);
 }
 
 void Pulsar::ExampleArchive::load_header (const char* filename)

@@ -44,19 +44,7 @@ Pulsar::ASCIIArchive::ASCIIArchive (const ASCIIArchive& arch)
   Archive::copy (arch);
 }
 
-Pulsar::ASCIIArchive::ASCIIArchive (const Archive& arch, 
-				    const vector<unsigned>& subints)
-{
-  if (verbose > 2)
-    cerr << "Pulsar::ASCIIArchive construct extract Archive" << endl;
-
-  init ();
-  Archive::copy (arch, subints);
-}
-
-
-void Pulsar::ASCIIArchive::copy (const Archive& archive, 
-				 const vector<unsigned>& subints)
+void Pulsar::ASCIIArchive::copy (const Archive& archive) 
 {
   if (verbose > 2)
     cerr << "Pulsar::ASCIIArchive::copy" << endl;
@@ -64,7 +52,7 @@ void Pulsar::ASCIIArchive::copy (const Archive& archive,
   if (this == &archive)
     return;
 
-  Archive::copy (archive, subints);
+  Archive::copy (archive);
 
   if (verbose > 2)
     cerr << "Pulsar::ASCIIArchive::copy dynamic cast call" << endl;
@@ -85,15 +73,6 @@ Pulsar::ASCIIArchive* Pulsar::ASCIIArchive::clone () const
     cerr << "Pulsar::ASCIIArchive::clone" << endl;
   return new ASCIIArchive (*this);
 }
-
-Pulsar::ASCIIArchive* 
-Pulsar::ASCIIArchive::extract (const vector<unsigned>& subints) const
-{
-  if (verbose > 2)
-    cerr << "Pulsar::ASCIIArchive::extract" << endl;
-  return new ASCIIArchive (*this, subints);
-}
-
 
 void Pulsar::ASCIIArchive::load_header (const char* filename)
 {

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/ScintArchive.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/07 13:49:52 $
+   $Revision: 1.7 $
+   $Date: 2008/11/07 22:15:36 $
    $Author: straten $ */
 
 #ifndef __Scint_Archive_h
@@ -40,17 +40,11 @@ namespace Pulsar {
     //! Assignment operator
     const ScintArchive& operator = (const ScintArchive& archive);
     
-    //! Base extraction constructor
-    ScintArchive (const Archive& archive, const std::vector<unsigned>& subint);
-
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const std::vector<unsigned>& subints);
+    void copy (const Archive& archive);
 
     //! Return a pointer to a new copy constructed instance equal to this
     virtual ScintArchive* clone () const;
-
-    //! Return a pointer to a new extraction constructed instance equal to this
-    virtual ScintArchive* extract (const std::vector<unsigned>& subints) const;
 
     // //////////////////////////////////////////////////////////////////
     //

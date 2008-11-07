@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.57 $
-   $Date: 2008/08/13 11:57:45 $
+   $Revision: 1.58 $
+   $Date: 2008/11/07 22:15:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -68,11 +68,8 @@ namespace Pulsar {
     //! Base copy constructor
     FITSArchive (const Archive& archive);
 
-    //! Base extraction constructor
-    FITSArchive (const Archive& archive, const std::vector<unsigned>& subints);
-
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const std::vector<unsigned>& subints);
+    void copy (const Archive& archive);
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -81,9 +78,6 @@ namespace Pulsar {
 
     //! Return a pointer to a new copy constructed instance equal to this
     FITSArchive* clone () const;
-
-    //! Return a pointer to a new extraction constructed instance equal to this
-    FITSArchive* extract (const std::vector<unsigned>& subints) const;
 
     // //////////////////////////////////////////////////////////////////
     //

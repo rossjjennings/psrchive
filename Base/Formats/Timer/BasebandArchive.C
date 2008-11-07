@@ -120,21 +120,7 @@ Pulsar::BasebandArchive::BasebandArchive (const Archive& archive)
 //
 //
 //
-Pulsar::BasebandArchive::BasebandArchive (const Archive& arch,
-					  const vector<unsigned>& subints)
-{
-  if (verbose == 3)
-    cerr << "BasebandArchive base extraction construct" << endl;
-  
-  init ();
-  BasebandArchive::copy (arch, subints);
-}
-
-//
-//
-//
-void Pulsar::BasebandArchive::copy (const Archive& archive,
-				    const vector<unsigned>& subints)
+void Pulsar::BasebandArchive::copy (const Archive& archive)
 {
   if (verbose == 3)
     cerr << "BasebandArchive::copy" << endl;
@@ -142,7 +128,7 @@ void Pulsar::BasebandArchive::copy (const Archive& archive,
   if (this == &archive)
     return;
 
-  TimerArchive::copy (archive, subints);
+  TimerArchive::copy (archive);
   set_be_data_size ();
 
   const BasebandArchive* barchive;
@@ -166,17 +152,6 @@ Pulsar::BasebandArchive* Pulsar::BasebandArchive::clone () const
   if (verbose == 3)
     cerr << "BasebandArchive::clone" << endl;
   return new BasebandArchive (*this);
-}
-
-//
-//
-//
-Pulsar::BasebandArchive* 
-Pulsar::BasebandArchive::extract (const vector<unsigned>& subints) const
-{
-  if (verbose == 3)
-    cerr << "BasebandArchive::extract" << endl;
-  return new BasebandArchive (*this, subints);
 }
 
 // /////////////////////////////////////////////////////////////////////////

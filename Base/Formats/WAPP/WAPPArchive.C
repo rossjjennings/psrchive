@@ -75,19 +75,7 @@ Pulsar::WAPPArchive::WAPPArchive (const WAPPArchive& arch)
   Archive::copy (arch);
 }
 
-Pulsar::WAPPArchive::WAPPArchive (const Archive& arch, 
-                                        const vector<unsigned>& subints)
-{
-  if (verbose > 2)
-    cerr << "Pulsar::WAPPArchive construct extract Archive" << endl;
-
-  init ();
-  Archive::copy (arch, subints);
-}
-
-
-void Pulsar::WAPPArchive::copy (const Archive& archive, 
-                                   const vector<unsigned>& subints)
+void Pulsar::WAPPArchive::copy (const Archive& archive) 
 {
   if (verbose > 2)
     cerr << "Pulsar::WAPPArchive::copy" << endl;
@@ -95,7 +83,7 @@ void Pulsar::WAPPArchive::copy (const Archive& archive,
   if (this == &archive)
     return;
 
-  Archive::copy (archive, subints);
+  Archive::copy (archive);
 
   if (verbose > 2)
     cerr << "Pulsar::WAPPArchive::copy dynamic cast call" << endl;
@@ -115,14 +103,6 @@ Pulsar::WAPPArchive* Pulsar::WAPPArchive::clone () const
   if (verbose > 2)
     cerr << "Pulsar::WAPPArchive::clone" << endl;
   return new WAPPArchive (*this);
-}
-
-Pulsar::WAPPArchive* 
-Pulsar::WAPPArchive::extract (const vector<unsigned>& subints) const
-{
-  if (verbose > 2)
-    cerr << "Pulsar::WAPPArchive::extract" << endl;
-  return new WAPPArchive (*this, subints);
 }
 
 void Pulsar::WAPPArchive::load_header (const char* filename)

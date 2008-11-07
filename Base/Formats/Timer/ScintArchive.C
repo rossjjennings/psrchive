@@ -64,20 +64,7 @@ Pulsar::ScintArchive::operator = (const ScintArchive& arch)
 //
 //
 //
-Pulsar::ScintArchive::ScintArchive (const Archive& arch,
-				    const vector<unsigned>& subints)
-{
-  if (verbose == 3)
-    cerr << "ScintArchive base extraction construct" << endl;
-  
-  ScintArchive::copy (arch, subints);
-}
-
-//
-//
-//
-void Pulsar::ScintArchive::copy (const Archive& archive,
-				 const vector<unsigned>& subints)
+void Pulsar::ScintArchive::copy (const Archive& archive)
 {
   if (verbose == 3)
     cerr << "ScintArchive::copy" << endl;
@@ -85,7 +72,7 @@ void Pulsar::ScintArchive::copy (const Archive& archive,
   if (this == &archive)
     return;
 
-  TimerArchive::copy (archive, subints);
+  TimerArchive::copy (archive);
   set_be_data_size ();
 
   const ScintArchive* barchive;
@@ -110,17 +97,6 @@ Pulsar::ScintArchive* Pulsar::ScintArchive::clone () const
   if (verbose == 3)
     cerr << "ScintArchive::clone" << endl;
   return new ScintArchive (*this);
-}
-
-//
-//
-//
-Pulsar::ScintArchive* 
-Pulsar::ScintArchive::extract (const vector<unsigned>& subints) const
-{
-  if (verbose == 3)
-    cerr << "ScintArchive::extract" << endl;
-  return new ScintArchive (*this, subints);
 }
 
 // /////////////////////////////////////////////////////////////////////////

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASCII/Pulsar/ASCIIArchive.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/08/13 11:57:45 $
+   $Revision: 1.8 $
+   $Date: 2008/11/07 22:15:36 $
    $Author: straten $ */
 
 #ifndef __ASCIIArchive_h
@@ -39,17 +39,11 @@ namespace Pulsar {
     //! Base copy constructor
     ASCIIArchive (const Archive& archive);
 
-    //! Base extraction constructor
-    ASCIIArchive (const Archive& archive, const std::vector<unsigned>& subint);
-
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const std::vector<unsigned>& subints);
+    void copy (const Archive& archive);
 
     //! Return a new copy-constructed ASCIIArchive instance
     ASCIIArchive* clone () const;
-
-    //! Return a new extraction-constructed ASCIIArchive instance
-    ASCIIArchive* extract (const std::vector<unsigned>& subints) const;
 
     //! Load the ASCII header information from filename
     virtual void load_header (const char* filename);

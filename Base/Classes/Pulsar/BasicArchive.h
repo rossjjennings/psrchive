@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.39 $
-   $Date: 2007/12/20 11:50:08 $
+   $Revision: 1.40 $
+   $Date: 2008/11/07 22:15:36 $
    $Author: straten $ */
 
 #ifndef __BasicArchive_h
@@ -39,11 +39,10 @@ namespace Pulsar {
     //! null constructor
     BasicArchive ();
 
-    //! copy constructor, with option to select only some integrations
-    BasicArchive (const BasicArchive& archive,
-		  const std::vector<unsigned>& selected_subints);
-
     //! copy constructor
+    BasicArchive (const BasicArchive& archive);
+
+    //! assignment operator
     const BasicArchive& operator = (const BasicArchive& archive);
 
     //! destructor
@@ -217,7 +216,7 @@ namespace Pulsar {
     bool poln_calibrated;
 
      //! Return a pointer to a new BasicIntegration
-    Integration* new_Integration (Integration* copy_this = 0);
+    Integration* new_Integration (const Integration* copy_this = 0);
     
   };
 

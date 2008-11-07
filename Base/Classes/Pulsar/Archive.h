@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.179 $
-   $Date: 2008/11/07 01:20:12 $
+   $Revision: 1.180 $
+   $Date: 2008/11/07 22:15:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.179 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.180 $"
 
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Config.h"
@@ -144,19 +144,15 @@ namespace Pulsar
     void copy (const Archive&);
     void copy (const Archive*);
 
-    //! Copy all base class attributes, Extensions, and selected Integrations
-    virtual void copy (const Archive&, const std::vector<unsigned>& subints);
-
     //! Return a new copy constructed instance equal to this
     /*! This pure virtual method must be implemented by derived classes */
     virtual Archive* clone () const = 0;
 
-    //! Return a new extraction constructed instance equal to this
-    /*! This pure virtual method must be implemented by derived classes */
-    virtual Archive* extract (const std::vector<unsigned>& subints) const = 0;
-
     //! Return pointer to a new fscrunched, tscrunched and pscrunched clone
     Archive* total () const;
+
+    //! Return pointer to a new instance with only the specified subints
+    Archive* extract (std::vector<unsigned>& subints) const;
 
     //@}
 
@@ -188,6 +184,9 @@ namespace Pulsar
                          unsigned npol  = 0,
                          unsigned nchan = 0,
                          unsigned nbin  = 0);
+
+    //! Remove the specified sub-integration
+    virtual void erase (unsigned isubint);
 
     //@}
 
@@ -695,6 +694,11 @@ namespace Pulsar
       original file in order to read unloaded information from this
       file when it is required. */
     std::string __load_filename;
+
+    //! Clone sub-integrations during copy
+    mutable std::vector<unsigned>* copy_subints;
+    unsigned copy_nsubint () const;
+    unsigned copy_isubint (unsigned) const;
 
     //! Load a new instance of the specified integration from __load_filename
     Integration* load_Integration (unsigned isubint);

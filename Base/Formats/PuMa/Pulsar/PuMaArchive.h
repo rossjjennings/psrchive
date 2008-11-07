@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PuMa/Pulsar/PuMaArchive.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/08/13 11:57:45 $
+   $Revision: 1.5 $
+   $Date: 2008/11/07 22:15:36 $
    $Author: straten $ */
 
 #ifndef __PuMaArchive_h
@@ -43,11 +43,8 @@ namespace Pulsar {
     //! Base copy constructor
     PuMaArchive (const Archive& archive);
 
-    //! Base extraction constructor
-    PuMaArchive (const Archive& archive, const std::vector<unsigned>& subint);
-
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const std::vector<unsigned>& subints);
+    void copy (const Archive& archive);
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -57,9 +54,6 @@ namespace Pulsar {
 
     //! Return a new copy-constructed PuMaArchive instance
     Archive* clone () const;
-
-    //! Return a new extraction-constructed PuMaArchive instance
-    Archive* extract (const std::vector<unsigned>& subints) const;
 
     //! Get the number of pulsar phase bins used
     unsigned get_nbin () const;
@@ -73,9 +67,9 @@ namespace Pulsar {
     //! Get the number of sub-integrations stored in the file
     unsigned get_nsubint () const;
 
-    //! Get the telescope name
+    //! Get the telescope name
     std::string get_telescope () const;
-    //! Set the telescope name
+    //! Set the telescope name
     void set_telescope (const std::string& telescope);
 
     //! Get the state of the profiles

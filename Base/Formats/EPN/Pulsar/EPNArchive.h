@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.16 $
-   $Date: 2008/08/13 11:57:45 $
+   $Revision: 1.17 $
+   $Date: 2008/11/07 22:15:36 $
    $Author: straten $ */
 
 #ifndef __EPN_Archive_h
@@ -40,11 +40,8 @@ namespace Pulsar {
     //! Base copy constructor
     EPNArchive (const Archive& archive);
 
-    //! Base extraction constructor
-    EPNArchive (const Archive& archive, const std::vector<unsigned>& subint);
-
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const std::vector<unsigned>& subints);
+    void copy (const Archive& archive);
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -54,12 +51,9 @@ namespace Pulsar {
     //! Return a pointer to a new copy constructed instance equal to this
     EPNArchive* clone () const;
 
-    //! Return a pointer to a new extraction constructed instance equal to this
-    EPNArchive* extract (const std::vector<unsigned>& subints) const;
-
-    //! Get the telescope name
+    //! Get the telescope name
     std::string get_telescope () const;
-    //! Set the telescope name
+    //! Set the telescope name
     void set_telescope (const std::string&);
 
     //! Get the state of the profiles
@@ -221,8 +215,8 @@ namespace Pulsar {
     //! Set the number of sub-integrations
     virtual void set_nsubint (unsigned nsubint);
 
-    //! The subints vector will point to EPNIntegrations
-    virtual Integration* new_Integration (Integration* copy_this = 0);
+    //! The subints vector will point to BasicIntegrations
+    virtual Integration* new_Integration (const Integration* copy_this = 0);
 
     //! Initialize data structures
     void init();

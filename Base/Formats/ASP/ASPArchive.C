@@ -62,19 +62,7 @@ Pulsar::ASPArchive::ASPArchive (const ASPArchive& arch)
   Archive::copy (arch);
 }
 
-Pulsar::ASPArchive::ASPArchive (const Archive& arch, 
-                                    const vector<unsigned>& subints)
-{
-  if (verbose > 2)
-    cerr << "Pulsar::ASPArchive construct extract Archive" << endl;
-
-  init ();
-  Archive::copy (arch, subints);
-}
-
-
-void Pulsar::ASPArchive::copy (const Archive& archive, 
-                                   const vector<unsigned>& subints)
+void Pulsar::ASPArchive::copy (const Archive& archive) 
 {
   if (verbose > 2)
     cerr << "Pulsar::ASPArchive::copy" << endl;
@@ -82,7 +70,7 @@ void Pulsar::ASPArchive::copy (const Archive& archive,
   if (this == &archive)
     return;
 
-  Archive::copy (archive, subints);
+  Archive::copy (archive);
 
   if (verbose > 2)
     cerr << "Pulsar::ASPArchive::copy dynamic cast call" << endl;
@@ -103,14 +91,6 @@ Pulsar::ASPArchive* Pulsar::ASPArchive::clone () const
   if (verbose > 2)
     cerr << "Pulsar::ASPArchive::clone" << endl;
   return new ASPArchive (*this);
-}
-
-Pulsar::ASPArchive* 
-Pulsar::ASPArchive::extract (const vector<unsigned>& subints) const
-{
-  if (verbose > 2)
-    cerr << "Pulsar::ASPArchive::extract" << endl;
-  return new ASPArchive (*this, subints);
 }
 
 void Pulsar::ASPArchive::load_header (const char* filename)

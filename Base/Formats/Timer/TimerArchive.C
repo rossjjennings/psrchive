@@ -86,35 +86,24 @@ Pulsar::TimerArchive::TimerArchive (const Archive& arch)
 //
 //
 //
-Pulsar::TimerArchive::TimerArchive (const Archive& arch,
-				    const vector<unsigned>& subints)
-{
-  if (verbose == 3)
-    cerr << "Pulsar::TimerArchive base extraction construct " << endl;
-  
-  Timer::init (&hdr);
-  TimerArchive::copy (arch, subints);
-}
-
-//
-//
-//
-void Pulsar::TimerArchive::copy (const Archive& archive, 
-				 const vector<unsigned>& subints)
+void Pulsar::TimerArchive::copy (const Archive& archive) 
 {
   if (verbose == 3)
     cerr << "Pulsar::TimerArchive::copy Entering" << endl;
 
-  if (this == &archive) {
+  if (this == &archive)
+  {
     if (verbose == 3)
       cerr << "Returning from TimerArchive::copy early " << endl;
     return;
-  } else {
+  }
+  else
+  {
     if (verbose == 3)
       cerr << "this == &archive passed test " << endl;
   }
   
-  Archive::copy (archive, subints);
+  Archive::copy (archive);
 
   const TimerArchive* tarchive = dynamic_cast<const TimerArchive*>(&archive);
   if (!tarchive)
@@ -143,23 +132,12 @@ Pulsar::TimerArchive* Pulsar::TimerArchive::clone () const
   return new TimerArchive (*this);
 }
 
-//
-//
-//
-Pulsar::TimerArchive* 
-Pulsar::TimerArchive::extract (const vector<unsigned>& subints) const
-{
-  if (verbose == 3)
-    cerr << "Pulsar::TimerArchive::extract" << endl;
-  return new TimerArchive (*this, subints);
-}
-
 /*!  
   By over-riding this funciton, inherited types may re-define the type
   of Integration to which the elements of the subints vector point.
 */
 Pulsar::Integration* 
-Pulsar::TimerArchive::new_Integration (Integration* subint)
+Pulsar::TimerArchive::new_Integration (const Integration* subint)
 {
   if (verbose == 3)
     cerr << "Pulsar::TimerArchive::new_Integration" << endl;

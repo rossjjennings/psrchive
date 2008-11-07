@@ -41,6 +41,7 @@ libClasses_la_SOURCES = \
 	ArchiveMatch.C \
 	Archive_correct.C \
         Archive_copy.C \
+	Archive_extract.C \
         Archive_init_Integration.C \
 	Archive_load_Integration.C \
         Archive_load.C \

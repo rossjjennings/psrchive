@@ -38,16 +38,6 @@ Pulsar::BasicArchive::BasicArchive ()
   dedispersed = false;
 }
 
-Pulsar::BasicArchive::BasicArchive (const BasicArchive& copy,
-				    const vector<unsigned>& subints)
-{
-  if (verbose == 3)
-    cerr << "Pulsar::BasicArchive:: copy constructor" << endl;
-
-  Archive::copy (copy, subints);
-}
-
-
 const Pulsar::BasicArchive&
 Pulsar::BasicArchive::operator = (const BasicArchive& copy)
 {
@@ -62,11 +52,18 @@ Pulsar::BasicArchive::operator = (const BasicArchive& copy)
   return *this;
 }
 
+Pulsar::BasicArchive::BasicArchive (const BasicArchive& copy)
+{
+  if (verbose == 3)
+    cerr << "Pulsar::BasicArchive:: copy ctor this=" << this << endl;
+
+  Archive::copy (copy);
+}
 
 Pulsar::BasicArchive::~BasicArchive () 
 { 
   if (verbose == 3)
-    cerr << "Pulsar::BasicArchive::destructor" << endl;
+    cerr << "Pulsar::BasicArchive dtor this=" << this << endl;
 }
 
 /*!  
@@ -74,7 +71,7 @@ Pulsar::BasicArchive::~BasicArchive ()
   of Integration to which the elements of the subints vector point.
 */
 Pulsar::Integration*
-Pulsar::BasicArchive::new_Integration (Integration* subint)
+Pulsar::BasicArchive::new_Integration (const Integration* subint)
 {
   Integration* integration;
 

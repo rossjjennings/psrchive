@@ -56,19 +56,7 @@ Pulsar::PRESTOArchive::PRESTOArchive (const PRESTOArchive& arch)
   Archive::copy (arch);
 }
 
-Pulsar::PRESTOArchive::PRESTOArchive (const Archive& arch, 
-                                        const vector<unsigned>& subints)
-{
-  if (verbose > 2)
-    cerr << "Pulsar::PRESTOArchive construct extract Archive" << endl;
-
-  init ();
-  Archive::copy (arch, subints);
-}
-
-
-void Pulsar::PRESTOArchive::copy (const Archive& archive, 
-                                   const vector<unsigned>& subints)
+void Pulsar::PRESTOArchive::copy (const Archive& archive) 
 {
   if (verbose > 2)
     cerr << "Pulsar::PRESTOArchive::copy" << endl;
@@ -76,7 +64,7 @@ void Pulsar::PRESTOArchive::copy (const Archive& archive,
   if (this == &archive)
     return;
 
-  Archive::copy (archive, subints);
+  Archive::copy (archive);
 
   if (verbose > 2)
     cerr << "Pulsar::PRESTOArchive::copy dynamic cast call" << endl;
@@ -96,14 +84,6 @@ Pulsar::PRESTOArchive* Pulsar::PRESTOArchive::clone () const
   if (verbose > 2)
     cerr << "Pulsar::PRESTOArchive::clone" << endl;
   return new PRESTOArchive (*this);
-}
-
-Pulsar::PRESTOArchive* 
-Pulsar::PRESTOArchive::extract (const vector<unsigned>& subints) const
-{
-  if (verbose > 2)
-    cerr << "Pulsar::PRESTOArchive::extract" << endl;
-  return new PRESTOArchive (*this, subints);
 }
 
 int Pulsar::PRESTOArchive::read_string(char **out, FILE *f) 

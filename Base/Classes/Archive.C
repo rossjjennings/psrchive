@@ -31,6 +31,7 @@ void Pulsar::Archive::init ()
     cerr << "Pulsar::Archive::init" << endl;
 
   expert_interface = new Expert (this);
+  copy_subints = 0;
 }
 
 //! Provide access to the expert interface
@@ -73,7 +74,7 @@ Pulsar::Archive::Archive (const Archive& archive)
 Pulsar::Archive::~Archive ()
 {
   if (verbose == 3)
-    cerr << "Pulsar::Archive::destructor" << endl;
+    cerr << "Pulsar::Archive dtor this=" << this << endl;
 }
 
 string Pulsar::Archive::get_revision (const char* revision)

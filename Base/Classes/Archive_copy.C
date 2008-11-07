@@ -23,21 +23,8 @@ void Pulsar::Archive::copy (const Archive* archive)
 
 void Pulsar::Archive::copy (const Archive& archive)
 {
-  if (verbose == 3)
-    cerr << "Pulsar::Archive::copy all Integrations" << endl;
-
-  vector<unsigned> all_subints(archive.get_nsubint());
-  for( unsigned i=0; i<all_subints.size(); i++)
-    all_subints[i] = i;
-
-  copy (archive, all_subints);
-}
-
-void Pulsar::Archive::copy (const Archive& archive,
-			    const vector<unsigned>& selected)
-{
-  unsigned nsub = selected.size();
-
+  const unsigned nsub = archive.copy_nsubint();
+  
   if (verbose == 3)
     cerr << "Pulsar::Archive::copy " << nsub << " Integrations" << endl;
 
@@ -49,7 +36,8 @@ void Pulsar::Archive::copy (const Archive& archive,
   
   for (unsigned isub=0; isub<nsub; isub++)
   {
-    const Integration* subint = archive.get_Integration( selected[isub] );
+    unsigned copy_isub = archive.copy_isubint( isub );
+    const Integration* subint = archive.get_Integration( copy_isub );
     get_Integration(isub) -> copy (subint, false);
   }
   
@@ -124,9 +112,6 @@ void Pulsar::Archive::copy (const Archive& archive,
   processing_match_policy = archive.get_processing_match()->clone();
   calibrator_match_policy = archive.get_calibrator_match()->clone();
 
-  if (selected.empty())
-    return;
-
   // Resize the IntegrationOrder Extension (if there is one)
   Pulsar::IntegrationOrder* tempio = get<Pulsar::IntegrationOrder>();
   if (!tempio)
@@ -140,7 +125,7 @@ void Pulsar::Archive::copy (const Archive& archive,
   if (tempvals.size() > 0)
   {
     for (unsigned i = 0; i < nsub; i++)
-     tempio->set_Index(i, tempvals[selected[i]]);
+     tempio->set_Index(i, tempvals[ archive.copy_isubint(i) ]);
   }
 }
 

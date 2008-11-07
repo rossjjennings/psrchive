@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ExampleArchive.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/08/13 11:57:45 $
+   $Revision: 1.13 $
+   $Date: 2008/11/07 22:15:36 $
    $Author: straten $ */
 
 #ifndef __ExampleArchive_h
@@ -44,18 +44,12 @@ namespace Pulsar {
     //! Base copy constructor
     ExampleArchive (const Archive& archive);
 
-    //! Base extraction constructor
-    ExampleArchive (const Archive&, const std::vector<unsigned>& subint);
-
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const std::vector<unsigned>& subints);
+    void copy (const Archive& archive);
 
     //! Return a new copy-constructed ExampleArchive instance
     ExampleArchive* clone () const;
 
-    //! Return a new extraction-constructed ExampleArchive instance
-    ExampleArchive* extract (const std::vector<unsigned>& subints) const;
-    
   protected:
 
     //! Load the Example header information from filename

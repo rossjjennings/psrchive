@@ -68,19 +68,7 @@ Pulsar::BPPArchive::BPPArchive (const BPPArchive& arch)
   Archive::copy (arch);
 }
 
-Pulsar::BPPArchive::BPPArchive (const Archive& arch, 
-                                const vector<unsigned>& subints)
-{
-  if (verbose > 2)
-    cerr << "Pulsar::BPPArchive construct extract Archive" << endl;
-
-  init ();
-  Archive::copy (arch, subints);
-}
-
-
-void Pulsar::BPPArchive::copy (const Archive& archive, 
-                                   const vector<unsigned>& subints)
+void Pulsar::BPPArchive::copy (const Archive& archive)
 {
   if (verbose > 2)
     cerr << "Pulsar::BPPArchive::copy" << endl;
@@ -88,7 +76,7 @@ void Pulsar::BPPArchive::copy (const Archive& archive,
   if (this == &archive)
     return;
 
-  Archive::copy (archive, subints);
+  Archive::copy (archive);
 
   if (verbose > 2)
     cerr << "Pulsar::BPPArchive::copy dynamic cast call" << endl;
@@ -108,14 +96,6 @@ Pulsar::BPPArchive* Pulsar::BPPArchive::clone () const
   if (verbose > 2)
     cerr << "Pulsar::BPPArchive::clone" << endl;
   return new BPPArchive (*this);
-}
-
-Pulsar::BPPArchive* 
-Pulsar::BPPArchive::extract (const vector<unsigned>& subints) const
-{
-  if (verbose > 2)
-    cerr << "Pulsar::BPPArchive::extract" << endl;
-  return new BPPArchive (*this, subints);
 }
 
 /* Actual data reading code below this point.

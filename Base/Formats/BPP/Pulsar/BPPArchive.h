@@ -40,17 +40,11 @@ namespace Pulsar {
     //! Base copy constructor
     BPPArchive (const Archive& archive);
 
-    //! Base extraction constructor
-    BPPArchive (const Archive&, const std::vector<unsigned>& subint);
-
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const std::vector<unsigned>& subints);
+    void copy (const Archive& archive);
 
     //! Return a new copy-constructed BPPArchive instance
     BPPArchive* clone () const;
-
-    //! Return a new extraction-constructed BPPArchive instance
-    BPPArchive* extract (const std::vector<unsigned>& subints) const;
 
     //! Different linearization methods  
     /*! Mean = use only mean power levels,

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/BasebandArchive.h,v $
-   $Revision: 1.18 $
-   $Date: 2006/10/07 13:49:52 $
+   $Revision: 1.19 $
+   $Date: 2008/11/07 22:15:36 $
    $Author: straten $ */
 
 #ifndef __Baseband_Archive_h
@@ -43,17 +43,11 @@ namespace Pulsar {
     //! Base copy constructor
     BasebandArchive (const Archive& archive);
 
-    //! Base extraction constructor
-    BasebandArchive (const Archive& archive, const std::vector<unsigned>& subint);
-
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const std::vector<unsigned>& subints);
+    void copy (const Archive& archive);
 
     //! Return a pointer to a new copy constructed instance equal to this
     virtual BasebandArchive* clone () const;
-
-    //! Return a pointer to a new extraction constructed instance equal to this
-    virtual BasebandArchive* extract (const std::vector<unsigned>& subints) const;
 
     // //////////////////////////////////////////////////////////////////
     //

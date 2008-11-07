@@ -36,18 +36,12 @@ namespace Pulsar {
     //! Base copy constructor
     PRESTOArchive (const Archive& archive);
 
-    //! Base extraction constructor
-    PRESTOArchive (const Archive&, const std::vector<unsigned>& subint);
-
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const std::vector<unsigned>& subints);
+    void copy (const Archive& archive);
 
     //! Return a new copy-constructed PRESTOArchive instance
     PRESTOArchive* clone () const;
 
-    //! Return a new extraction-constructed PRESTOArchive instance
-    PRESTOArchive* extract (const std::vector<unsigned>& subints) const;
-    
   protected:
 
     //! Load the PRESTO header information from filename

@@ -90,7 +90,7 @@ Pulsar::FITSArchive::FITSArchive (const FITSArchive& arch)
 Pulsar::FITSArchive::~FITSArchive()
 {
   if (verbose > 2)
-    cerr << "FITSArchive destruct" << endl;
+    cerr << "Pulsar::FITSArchive dtor this=" << this << endl;
 }
 
 //
@@ -118,24 +118,9 @@ Pulsar::FITSArchive::FITSArchive (const Archive& arch)
   Archive::copy (arch); // results in call to FITSArchive::copy
 }
 
-//
-//
-//
-Pulsar::FITSArchive::FITSArchive (const Archive& arch, 
-				  const vector<unsigned>& subints)
-{
-  if (verbose > 2)
-    cerr << "FITSArchive base extraction construct" << endl;
-
-  init ();
-  FITSArchive::copy (arch, subints);
-}
-
-
 /*! The Integration subset can contain anywhere between none and all of
    integrations in the source Archive */
-void Pulsar::FITSArchive::copy (const Archive& archive, 
-				const vector<unsigned>& subints)
+void Pulsar::FITSArchive::copy (const Archive& archive)
 {
   if (verbose > 2)
     cerr << "FITSArchive::copy" << endl;
@@ -143,7 +128,7 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
   if (this == &archive)
     return;
   
-  Archive::copy (archive, subints);
+  Archive::copy (archive);
 
   if (verbose > 2)
     cerr << "FITSArchive::copy dynamic cast call" << endl;
@@ -159,6 +144,9 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
   scale_cross_products = farchive->scale_cross_products;
   preserve_reference_epoch = farchive->preserve_reference_epoch;
   reference_epoch = farchive->reference_epoch;
+
+  if (verbose > 2)
+    cerr << "FITSArchive::copy exit" << endl;
 }
 
 //! Returns a pointer to a new copy-constructed FITSArchive instance
@@ -169,16 +157,6 @@ Pulsar::FITSArchive* Pulsar::FITSArchive::clone () const
 
   return new FITSArchive (*this);
 }
-
-//! Returns a pointer to a new select copy-constructed FITSArchive instance
-Pulsar::FITSArchive* 
-Pulsar::FITSArchive::extract (const vector<unsigned>& subints) const
-{
-  if (verbose > 2)
-    cerr << "FITSArchive::extract" << endl;
-  return new FITSArchive (*this, subints);
-}
-
 
 // ////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////////////
