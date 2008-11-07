@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ThresholdMatch.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/08/14 13:17:40 $
+   $Revision: 1.2 $
+   $Date: 2008/11/07 01:20:12 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ThresholdMatch_h
@@ -19,7 +19,7 @@
 namespace Pulsar {
 
   //! Criterion used to determine if two archives match
-  class ThresholdMatch : public ArchiveMatch {
+  class ThresholdMatch : public Archive::Match {
 
   public:
 

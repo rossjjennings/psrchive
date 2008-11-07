@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2002-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,6 +8,7 @@
 #include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/ArchiveInterface.h"
+#include "Pulsar/ArchiveMatch.h"
 
 #include "Pulsar/Agent.h"
 #include "Pulsar/Integration.h"

@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveMatch.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/08/22 17:30:57 $
-   $Author: demorest $ */
+   $Revision: 1.3 $
+   $Date: 2008/11/07 01:20:12 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveMatch_h
 #define __Pulsar_ArchiveMatch_h
@@ -19,22 +19,23 @@
 
 namespace Pulsar {
 
-  //! Criterion used to determine if two archives match
-  class ArchiveMatch {
+  //! Policy used to determine if two archives match
+  class Archive::Match : public Reference::Able
+  {
 
   public:
 
     //! Default constructor
-    ArchiveMatch ();
+    Match ();
 
     //! Empty destructor
-    virtual ~ArchiveMatch () {}
+    virtual ~Match () {}
+
+    //! Clone operator
+    virtual Match* clone () const;
 
     //! Check that the selected attributes match
-    bool match (const Archive* a, const Archive* b);
-
-    //! Functor interface
-    Archive::MatchResult operator () (const Archive* a1, const Archive* a2);
+    virtual bool match (const Archive* a, const Archive* b);
 
     //! Get the mismatch messages from the last call to the match method
     std::string get_reason () const { return reason; }
@@ -117,11 +118,11 @@ namespace Pulsar {
 
     //! Return a matching strategy based on the specified method
     template <typename T>
-    static Archive::MatchFunctor functor (T method)
+    static Match* factory (T method)
     {
-      ArchiveMatch* match = new ArchiveMatch;
+      Match* match = new Match;
       (match->*method) (true);
-      return Archive::MatchFunctor (match);
+      return match;
     }
 
   protected:

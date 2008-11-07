@@ -17,7 +17,7 @@ using namespace std;
   Maximum frequency difference in MHz
 */
 Pulsar::Option<double> 
-Pulsar::ArchiveMatch::max_frequency_difference 
+Pulsar::Archive::Match::max_frequency_difference 
 (
  "Match::max_frequency_difference", 0.1,
 
@@ -31,7 +31,7 @@ Pulsar::ArchiveMatch::max_frequency_difference
   Allow observations with opposite sidebands to match
 */
 Pulsar::Option<bool>
-Pulsar::ArchiveMatch::opposite_sideband
+Pulsar::Archive::Match::opposite_sideband
 (
  "Match::opposite_sideband", false,
 
@@ -44,9 +44,9 @@ Pulsar::ArchiveMatch::opposite_sideband
 /*!
   Added between match report strings in reason attribute
 */
-std::string Pulsar::ArchiveMatch::separator = "\n\t";
+std::string Pulsar::Archive::Match::separator = "\n\t";
 
-Pulsar::ArchiveMatch::ArchiveMatch ()
+Pulsar::Archive::Match::Match ()
 {
   check_state = false;
   check_type = false;
@@ -62,9 +62,14 @@ Pulsar::ArchiveMatch::ArchiveMatch ()
   check_bandwidth = false;
 }
 
+Pulsar::Archive::Match* Pulsar::Archive::Match::clone () const
+{
+  return new Match (*this);
+}
+
 // ///////////////////////////////////////////////////////////////////////
 //
-// ArchiveMatch::check_mixable
+// Archive::Match::check_mixable
 //
 /*!  This state defines the set of observing and processing
   parameters that should be equal (within certain limits) before two
@@ -76,14 +81,14 @@ Pulsar::ArchiveMatch::ArchiveMatch ()
   <LI> set_check_calibrator
   </UL>
 */
-void Pulsar::ArchiveMatch::set_check_mixable (bool flag)
+void Pulsar::Archive::Match::set_check_mixable (bool flag)
 {
   set_check_standard (flag);
   set_check_processing (flag);
   set_check_calibrator (flag);
 }
 
-bool Pulsar::ArchiveMatch::get_check_mixable () const
+bool Pulsar::Archive::Match::get_check_mixable () const
 {
   return
     get_check_standard() &&
@@ -93,7 +98,7 @@ bool Pulsar::ArchiveMatch::get_check_mixable () const
 
 // ///////////////////////////////////////////////////////////////////////
 //
-// ArchiveMatch::check_standard
+// Archive::Match::check_standard
 //
 /*!  This state defines the minimum set of observing parameters
   that should be equal before two archives are compared, as during
@@ -106,7 +111,7 @@ bool Pulsar::ArchiveMatch::get_check_mixable () const
   <LI> check_nbin
   </UL>
 */
-void Pulsar::ArchiveMatch::set_check_standard (bool flag)
+void Pulsar::Archive::Match::set_check_standard (bool flag)
 {
   set_check_state (flag);
   set_check_type (flag);
@@ -114,7 +119,7 @@ void Pulsar::ArchiveMatch::set_check_standard (bool flag)
   set_check_nbin (flag);
 }
 
-bool Pulsar::ArchiveMatch::get_check_standard () const
+bool Pulsar::Archive::Match::get_check_standard () const
 {
   return
     get_check_state() && 
@@ -125,7 +130,7 @@ bool Pulsar::ArchiveMatch::get_check_standard () const
 
 // ///////////////////////////////////////////////////////////////////////
 //
-// ArchiveMatch::check_processing
+// Archive::Match::check_processing
 //
 /*!  This state defines the minimum set of processing parameters
   that should be equal before data from two archives are combined.
@@ -137,7 +142,7 @@ bool Pulsar::ArchiveMatch::get_check_standard () const
   <LI> check_nchan
   </UL>
 */
-void Pulsar::ArchiveMatch::set_check_processing (bool flag)
+void Pulsar::Archive::Match::set_check_processing (bool flag)
 {
   set_check_scale (flag);
   set_check_faraday_corrected (flag);
@@ -145,7 +150,7 @@ void Pulsar::ArchiveMatch::set_check_processing (bool flag)
   set_check_nchan (flag);
 }
 
-bool Pulsar::ArchiveMatch::get_check_processing () const
+bool Pulsar::Archive::Match::get_check_processing () const
 {
   return
     get_check_scale () &&
@@ -156,7 +161,7 @@ bool Pulsar::ArchiveMatch::get_check_processing () const
 
 // ///////////////////////////////////////////////////////////////////////
 //
-// ArchiveMatch::check_calibrator
+// Archive::Match::check_calibrator
 //
 /*!  This state defines the minimum set of observing parameters
   that should be equal (within certain limits) before a calibrator may
@@ -170,14 +175,14 @@ bool Pulsar::ArchiveMatch::get_check_processing () const
 
 */
 
-void Pulsar::ArchiveMatch::set_check_calibrator (bool flag)
+void Pulsar::Archive::Match::set_check_calibrator (bool flag)
 {
   set_check_receiver (flag);
   set_check_centre_frequency (flag);
   set_check_bandwidth (flag);
 }
 
-bool Pulsar::ArchiveMatch::get_check_calibrator () const
+bool Pulsar::Archive::Match::get_check_calibrator () const
 {
   return
     get_check_receiver () &&
@@ -186,133 +191,133 @@ bool Pulsar::ArchiveMatch::get_check_calibrator () const
 }
 
 //! Set to check the state attribute
-void Pulsar::ArchiveMatch::set_check_state (bool flag)
+void Pulsar::Archive::Match::set_check_state (bool flag)
 {
   check_state = flag;
 }
 
-bool Pulsar::ArchiveMatch::get_check_state () const
+bool Pulsar::Archive::Match::get_check_state () const
 {
   return check_state;
 }
 
 //! Set to check the type attribute
-void Pulsar::ArchiveMatch::set_check_type (bool flag)
+void Pulsar::Archive::Match::set_check_type (bool flag)
 {
   check_type = flag;
 }
 
-bool Pulsar::ArchiveMatch::get_check_type () const
+bool Pulsar::Archive::Match::get_check_type () const
 {
   return check_type;
 }
 
 //! Set to check the source attribute
-void Pulsar::ArchiveMatch::set_check_source (bool flag)
+void Pulsar::Archive::Match::set_check_source (bool flag)
 {
   check_source = flag;
 }
 
-bool Pulsar::ArchiveMatch::get_check_source () const
+bool Pulsar::Archive::Match::get_check_source () const
 {
   return check_source;
 }
 
 //! Set to check the scale attribute
-void Pulsar::ArchiveMatch::set_check_scale (bool flag)
+void Pulsar::Archive::Match::set_check_scale (bool flag)
 {
   check_scale = flag;
 }
 
-bool Pulsar::ArchiveMatch::get_check_scale () const
+bool Pulsar::Archive::Match::get_check_scale () const
 {
   return check_scale;
 }
 
 //! Set to check the faraday_corrected attribute
-void Pulsar::ArchiveMatch::set_check_faraday_corrected (bool flag)
+void Pulsar::Archive::Match::set_check_faraday_corrected (bool flag)
 {
   check_faraday_corrected = flag;
 }
 
-bool Pulsar::ArchiveMatch::get_check_faraday_corrected () const
+bool Pulsar::Archive::Match::get_check_faraday_corrected () const
 {
   return check_faraday_corrected;
 }
 
 //! Set to check the dedispersed attribute
-void Pulsar::ArchiveMatch::set_check_dedispersed (bool flag)
+void Pulsar::Archive::Match::set_check_dedispersed (bool flag)
 {
   check_dedispersed = flag;
 }
 
-bool Pulsar::ArchiveMatch::get_check_dedispersed () const
+bool Pulsar::Archive::Match::get_check_dedispersed () const
 {
   return check_dedispersed;
 }
 
 //! Set to check the nbin attribute
-void Pulsar::ArchiveMatch::set_check_nbin (bool flag)
+void Pulsar::Archive::Match::set_check_nbin (bool flag)
 {
   check_nbin = flag;
 }
 
-bool Pulsar::ArchiveMatch::get_check_nbin () const
+bool Pulsar::Archive::Match::get_check_nbin () const
 {
   return check_nbin;
 }
 
 //! Set to check the nchan attribute
-void Pulsar::ArchiveMatch::set_check_nchan (bool flag)
+void Pulsar::Archive::Match::set_check_nchan (bool flag)
 {
   check_nchan = flag;
 }
 
-bool Pulsar::ArchiveMatch::get_check_nchan () const
+bool Pulsar::Archive::Match::get_check_nchan () const
 {
   return check_nchan;
 }
 
 //! Set to check the npol attribute
-void Pulsar::ArchiveMatch::set_check_npol (bool flag)
+void Pulsar::Archive::Match::set_check_npol (bool flag)
 {
   check_npol = flag;
 }
 
-bool Pulsar::ArchiveMatch::get_check_npol () const
+bool Pulsar::Archive::Match::get_check_npol () const
 {
   return check_npol;
 }
 
 //! Set to check the receiver attribute
-void Pulsar::ArchiveMatch::set_check_receiver (bool flag)
+void Pulsar::Archive::Match::set_check_receiver (bool flag)
 {
   check_receiver = flag;
 }
 
-bool Pulsar::ArchiveMatch::get_check_receiver () const
+bool Pulsar::Archive::Match::get_check_receiver () const
 {
   return check_receiver;
 }
 
 //! Set to check the centre_frequency attribute
-void Pulsar::ArchiveMatch::set_check_centre_frequency (bool flag)
+void Pulsar::Archive::Match::set_check_centre_frequency (bool flag)
 {
   check_centre_frequency = flag;
 }
 
-bool Pulsar::ArchiveMatch::get_check_centre_frequency () const
+bool Pulsar::Archive::Match::get_check_centre_frequency () const
 {
   return check_centre_frequency;
 }
 
 //! Set to check the bandwidth attribute
-void Pulsar::ArchiveMatch::set_check_bandwidth (bool flag)
+void Pulsar::Archive::Match::set_check_bandwidth (bool flag)
 {
   check_bandwidth = flag;
 }
 
-bool Pulsar::ArchiveMatch::get_check_bandwidth () const
+bool Pulsar::Archive::Match::get_check_bandwidth () const
 {
   return check_bandwidth;
 }
@@ -334,7 +339,7 @@ bool name_match (std::string a, std::string b)
   message is added to the reason attribute.  If all checked attributes
   match, the result is true. */
 
-bool Pulsar::ArchiveMatch::match (const Archive* a, const Archive* b)
+bool Pulsar::Archive::Match::match (const Archive* a, const Archive* b)
 {
   bool result = true;
   reason = "";
@@ -458,7 +463,8 @@ bool Pulsar::ArchiveMatch::match (const Archive* a, const Archive* b)
   return result;
 }
 
-bool Pulsar::ArchiveMatch::get_bandwidth_match (const Archive* a, const Archive* b) const
+bool Pulsar::Archive::Match::get_bandwidth_match (const Archive* a,
+                                                  const Archive* b) const
 {
   double bw1 = a->get_bandwidth();
   double bw2 = b->get_bandwidth();
@@ -470,14 +476,5 @@ bool Pulsar::ArchiveMatch::get_bandwidth_match (const Archive* a, const Archive*
     return false;
   }
   return true;
-}
-
-Pulsar::Archive::MatchResult
-Pulsar::ArchiveMatch::operator () (const Archive* a1, const Archive* a2)
-{
-  Archive::MatchResult result;
-  result.first = match (a1, a2);
-  result.second = reason;
-  return result;
 }
 

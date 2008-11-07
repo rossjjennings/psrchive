@@ -56,23 +56,23 @@ Pulsar::Option<float> bpp_maximum_relative_bandwidth
 
 //! Return a matching strategy based on the specified method
 template <typename T>
-static Pulsar::Archive::MatchFunctor bpp_functor (T method)
+static Pulsar::Archive::Match* bpp_policy (T method)
 {
   Pulsar::ThresholdMatch* match = new Pulsar::ThresholdMatch;
   match->set_maximum_relative_bandwidth (bpp_maximum_relative_bandwidth);
   (match->*method) (true);
-  return Pulsar::Archive::MatchFunctor (match);
+  return match;
 }
 
 void Pulsar::ThresholdMatch::set_BPP (Archive* a)
 {
-  a->standard_match_strategy 
-    = bpp_functor (&ArchiveMatch::set_check_standard);
-  a->calibrator_match_strategy 
-    = bpp_functor (&ArchiveMatch::set_check_calibrator);
-  a->processing_match_strategy 
-    = bpp_functor (&ArchiveMatch::set_check_processing);
-  a->mixable_strategy 
-    = bpp_functor (&ArchiveMatch::set_check_mixable);
+  a->set_standard_match 
+    ( bpp_policy (&Archive::Match::set_check_standard) );
+  a->set_calibrator_match 
+    ( bpp_policy (&Archive::Match::set_check_calibrator) );
+  a->set_processing_match 
+    ( bpp_policy (&Archive::Match::set_check_processing) );
+  a->set_mixable
+    ( bpp_policy (&Archive::Match::set_check_mixable) );
 }
 

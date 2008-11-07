@@ -4,7 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveMatch.h"
+
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 
@@ -116,27 +119,28 @@ void Pulsar::Archive::copy (const Archive& archive,
     add_extension (ext);
   }
 
-  mixable_strategy = archive.mixable_strategy;
-  standard_match_strategy = archive.standard_match_strategy;
-  processing_match_strategy = archive.processing_match_strategy;
-  calibrator_match_strategy = archive.calibrator_match_strategy;
+  mixable_policy = archive.mixable_policy->clone();
+  standard_match_policy = archive.standard_match_policy->clone();
+  processing_match_policy = archive.processing_match_policy->clone();
+  calibrator_match_policy = archive.calibrator_match_policy->clone();
 
   if (selected.empty())
     return;
 
   // Resize the IntegrationOrder Extension (if there is one)
   Pulsar::IntegrationOrder* tempio = get<Pulsar::IntegrationOrder>();
-  if (tempio) {
-    vector<double> tempvals(tempio->size(), 0.0);
-    for (unsigned i = 0; i < tempio->size(); i++) {
-      tempvals[i] = tempio->get_Index(i);
-    }
-    tempio->resize(nsub);
-    if (tempvals.size() > 0) {
-      for (unsigned i = 0; i < nsub; i++) {
-        tempio->set_Index(i, tempvals[selected[i]]);
-      }
-    }
+  if (!tempio)
+    return;
+
+  vector<double> tempvals(tempio->size(), 0.0);
+  for (unsigned i = 0; i < tempio->size(); i++)
+    tempvals[i] = tempio->get_Index(i);
+
+  tempio->resize(nsub);
+  if (tempvals.size() > 0)
+  {
+    for (unsigned i = 0; i < nsub; i++)
+     tempio->set_Index(i, tempvals[selected[i]]);
   }
 }
 

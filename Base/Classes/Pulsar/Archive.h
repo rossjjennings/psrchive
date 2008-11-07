@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.178 $
-   $Date: 2008/08/14 13:17:44 $
+   $Revision: 1.179 $
+   $Date: 2008/11/07 01:20:12 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.178 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.179 $"
 
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Config.h"
@@ -555,16 +555,24 @@ namespace Pulsar
     //
     // //////////////////////////////////////////////////////////////////
 
-    //! Matching strategies return boolean plus reason if false
-    typedef std::pair<bool,std::string> MatchResult;
+    //! Policy that determines if two archives match
+    class Match;
 
-    //! Matching strategies are implemented as functors to avoid virtual methods
-    typedef Functor<MatchResult (const Archive*, const Archive*)> MatchFunctor;
+    //! Policy determines if a standard/template matches an observation
+    const Match* get_standard_match () const;
+    void set_standard_match (Match*);
 
-    mutable MatchFunctor standard_match_strategy;
-    mutable MatchFunctor calibrator_match_strategy;
-    mutable MatchFunctor processing_match_strategy;
-    mutable MatchFunctor mixable_strategy;
+    //! Policy determines if a calibrator matches an observation
+    const Match* get_calibrator_match () const;
+    void set_calibrator_match (Match*);
+
+    //! Policy determines if data were processed identically
+    const Match* get_processing_match () const;
+    void set_processing_match (Match*);
+
+    //! Policy determines if data can be combined/integrated
+    const Match* get_mixable () const;
+    void set_mixable (Match*);
 
   protected:
 
@@ -670,6 +678,11 @@ namespace Pulsar
 
     //! Text interface
     Reference::To<TextInterface::Parser> text_interface;
+
+    mutable Reference::To<Match> standard_match_policy;
+    mutable Reference::To<Match> calibrator_match_policy;
+    mutable Reference::To<Match> processing_match_policy;
+    mutable Reference::To<Match> mixable_policy;
 
   private:
 
