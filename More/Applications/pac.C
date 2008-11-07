@@ -171,7 +171,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.95 2008/10/08 14:35:30 demorest Exp $" << endl;
+      cout << "$Id: pac.C,v 1.96 2008/11/07 02:31:56 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -289,7 +289,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'o':
-      Pulsar::ArchiveMatch::opposite_sideband = true;
+      Pulsar::Archive::Match::opposite_sideband = true;
       command += " -o";
       break;
 
