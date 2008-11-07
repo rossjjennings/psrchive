@@ -74,7 +74,7 @@ char backward_compatibility (char c)
 paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
 {
   has_manual = true;
-  version = "$Id: paz.C,v 1.52 2008/09/03 01:19:41 straten Exp $";
+  version = "$Id: paz.C,v 1.53 2008/11/07 22:15:23 straten Exp $";
   filter = backward_compatibility;
 
   add( new Pulsar::StandardOptions );
@@ -570,54 +570,47 @@ void paz::process (Pulsar::Archive* arch)
   unsigned nchan = arch->get_nchan ();
   double chan_bw = fabs(arch->get_bandwidth() / (double)nchan);
 
-  if (zap_subints) {
+  if (zap_subints)
+  {
+    unsigned zapped = 0;
 
-    Reference::To < Pulsar::Archive > new_arch;
-
-    vector < unsigned >subs_to_keep;
-    bool ignore;
-
-    for (unsigned i = 0; i < arch->get_nsubint (); i++) {
-      ignore = false;
+    for (unsigned i = 0; i < arch->get_nsubint (); i++)
       for (unsigned j = 0; j < subs_to_zap.size (); j++)
-	if (subs_to_zap[j] == i) {
-	  ignore = true;
+	if (subs_to_zap[j] == i)
+	{
 	  if (verbose)
 	    cout << "Zapping subint " << i << endl;
+
+	  // after each subint is zapped, it is necessary to offset the index
+	  arch->erase (i - zapped);
+	  zapped ++;
 	}
-      if (!ignore) {
-	subs_to_keep.push_back (i);
-      }
-    }
-    new_arch = arch->extract (subs_to_keep);
-    string useful = arch->get_filename ();
-    arch = new_arch;
-    arch->set_filename (useful);
+
+    if (verbose)
+      cerr << "paz: extraction completed" << endl;
   }
 
-  if (nozap_subints) {
+  if (nozap_subints)
+  {
+    unsigned zapped = 0;
 
-    Reference::To < Pulsar::Archive > new_arch;
-
-    vector < unsigned >subs_to_keep;
-    bool keep;
-
-    for (unsigned i = 0; i < arch->get_nsubint (); i++) {
-      keep = false;
+    for (unsigned i = 0; i < arch->get_nsubint (); i++)
+    {
+      bool keep = false;
       for (unsigned j = 0; j < subs_nozap.size (); j++)
-	if (subs_nozap[j] == i) {
+	if (subs_nozap[j] == i)
 	  keep = true;
-	}
-      if (keep) {
-	subs_to_keep.push_back (i);
+
+      if (!keep)
+      {
 	if (verbose)
-	  cout << "Keeping subint " << i << endl;
+	  cout << "Zapping subint " << i << endl;
+
+	// after each subint is zapped, it is necessary to offset the index
+	arch->erase (i - zapped);
+	zapped ++;
       }
     }
-    new_arch = arch->extract (subs_to_keep);
-    string useful = arch->get_filename ();
-    arch = new_arch->clone ();
-    arch->set_filename (useful);
   }
 
   if (median_zapper)
