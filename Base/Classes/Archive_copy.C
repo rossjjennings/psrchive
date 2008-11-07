@@ -119,10 +119,10 @@ void Pulsar::Archive::copy (const Archive& archive,
     add_extension (ext);
   }
 
-  mixable_policy = archive.mixable_policy->clone();
-  standard_match_policy = archive.standard_match_policy->clone();
-  processing_match_policy = archive.processing_match_policy->clone();
-  calibrator_match_policy = archive.calibrator_match_policy->clone();
+  mixable_policy = archive.get_mixable()->clone();
+  standard_match_policy = archive.get_standard_match()->clone();
+  processing_match_policy = archive.get_processing_match()->clone();
+  calibrator_match_policy = archive.get_calibrator_match()->clone();
 
   if (selected.empty())
     return;
