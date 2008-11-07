@@ -264,7 +264,7 @@ void Pulsar::PulsarCalibrator::init_model (unsigned ichan)
 //! Ensure that the pulsar observation can be added to the data set
 void Pulsar::PulsarCalibrator::match (const Archive* data)
 {
-  ArchiveMatch match;
+  Archive::Match match;
 
   match.set_check_standard (true);
   match.set_check_calibrator (true);
