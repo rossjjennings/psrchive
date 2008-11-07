@@ -30,7 +30,7 @@ Pulsar::IntegrationManager::IntegrationManager (const IntegrationManager& o)
 Pulsar::IntegrationManager::~IntegrationManager () 
 { 
   if (verbose == 3)
-    cerr << "IntegrationManager::destructor" << endl;
+    cerr << "Pulsar::IntegrationManager dtor this=" << this << endl;
 }
 
 /*!
@@ -40,25 +40,28 @@ Pulsar::IntegrationManager::~IntegrationManager ()
 Pulsar::Integration* 
 Pulsar::IntegrationManager::get_Integration (unsigned subint)
 {
+  if (verbose > 2) 
+    cerr << "Pulsar::IntegrationManager::get_Integration subint=" 
+	 << subint << endl;
+
   // ensure that the requested subint is valid
   if (subint >= get_nsubint())
     throw Error (InvalidRange, "IntegrationManager::get_Integration",
 		 "isubint=%u nsubint=%u", subint, get_nsubint());
 
   // ensure that the subints vector is as large as the number of subints
-  if (subints.size() != get_nsubint())
-    subints.resize (get_nsubint());
+  subints.resize (get_nsubint());
 
   // if the subint has not already been loaded, call the pure virtual
   // method, load_Integration, to load the requested sub-int.
-  if (!subints[subint]) {
-    if (verbose == 3) cerr << "Pulsar::IntegrationManager::get_Integration"
-                         " load_Integration" << endl;
+  if (!subints[subint])
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::IntegrationManager::get_Integration load" << endl;
     subints[subint] = load_Integration (subint);
   }
 
   return subints[subint];
-
 }
 
 Pulsar::Integration* 
@@ -97,23 +100,60 @@ Pulsar::IntegrationManager::get_last_Integration () const
 
 void Pulsar::IntegrationManager::append (const IntegrationManager* more)
 {
-  for (unsigned isub=0; isub<more->subints.size(); isub++)
-    subints.push_back ( new_Integration (more->subints[isub]) );
+  // ensure that the vector is as large as the current number of subints
+  subints.resize (get_nsubint());
+
+  for (unsigned isub=0; isub<more->get_nsubint(); isub++)
+    subints.push_back ( new_Integration (more->get_Integration(isub)) );
 
   set_nsubint (subints.size());
 }
 
 void Pulsar::IntegrationManager::manage (IntegrationManager* more)
 {
-  for (unsigned isub=0; isub<more->subints.size(); isub++)
-    subints.push_back ( use_Integration (more->subints[isub]) );
+  // ensure that the vector is as large as the current number of subints
+  subints.resize (get_nsubint());
+
+  for (unsigned isub=0; isub<more->get_nsubint(); isub++)
+    subints.push_back ( use_Integration (more->get_Integration(isub)) );
 
   set_nsubint (subints.size());
 }  
 
 void Pulsar::IntegrationManager::manage (Integration* integration)
 {
+  // ensure that the vector is as large as the current number of subints
+  subints.resize (get_nsubint());
+
   subints.push_back( use_Integration (integration) );
+  set_nsubint( subints.size() );
+}
+
+void Pulsar::IntegrationManager::unmanage (const Integration* integration)
+{
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
+    if (get_Integration(isub) == integration)
+    {
+      unmanage (isub);
+      break;
+    }
+}
+
+void Pulsar::IntegrationManager::unmanage (unsigned isubint)
+{
+  if (isubint >= get_nsubint())
+    throw Error (InvalidParam, "Pulsar::IntegrationManager::unmanage",
+                 "isubint=%u >= nsubint=%u", isubint, get_nsubint());
+
+  /*
+    Ensure that all sub-integrations have been loaded from file.  This
+    is necessary so that internal sub-integration indeces do not later
+    mismatch those in the file.
+  */
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
+    get_Integration(isub);
+
+  subints.erase( subints.begin() + isubint );
   set_nsubint( subints.size() );
 }
 

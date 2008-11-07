@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.15 $
-   $Date: 2007/07/12 05:58:20 $
+   $Revision: 1.16 $
+   $Date: 2008/11/07 22:15:11 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationManager_h
@@ -61,7 +61,7 @@ namespace Pulsar {
     const Integration* get_first_Integration () const;
     
     //! Construct new Integration instance
-    virtual Integration* new_Integration (Integration* copy_this = 0) = 0;
+    virtual Integration* new_Integration (const Integration* copy_this = 0) = 0;
 
     //! Use the given Integration instance
     virtual Integration* use_Integration (Integration* use_this) = 0;
@@ -100,6 +100,12 @@ namespace Pulsar {
     //! Directly append the Integration instance (no copy)
     void manage (Integration* integration);
 
+    //! Remove the Integration instance
+    void unmanage (const Integration*);
+
+    //! Remove the Integration at the specified index
+    void unmanage (unsigned isubint);
+
   private:
 
     //! The Integration vector
@@ -117,3 +123,4 @@ namespace Pulsar {
 }
 
 #endif
+
