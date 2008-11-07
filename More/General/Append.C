@@ -8,6 +8,8 @@
 #include "Pulsar/Append.h"
 
 #include "Pulsar/ArchiveExpert.h"
+#include "Pulsar/ArchiveMatch.h"
+
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/IntegrationOrder.h"
 
@@ -34,8 +36,6 @@ Pulsar::Option<bool> default_must_match
 Pulsar::Append::Append ()
 {
   must_match = default_must_match;
-
-  match.set_check_mixable ();
 }
 
 
@@ -56,6 +56,12 @@ bool Pulsar::Append::stop (Archive* into, const Archive* from)
   return false;
 }
 
+const Pulsar::Archive::Match*
+Pulsar::Append::get_mixable_policy (const Archive* a)
+{
+  return a->get_mixable();
+}
+
 void Pulsar::Append::check (Archive* into, const Archive* from)
 {
   if (Archive::verbose == 3)
@@ -63,8 +69,11 @@ void Pulsar::Append::check (Archive* into, const Archive* from)
 
   string reason;
 
-  if (must_match && !match.match (into, from))
-    throw Error (InvalidState, "Pulsar::Append::check", match.get_reason ());
+  Reference::To<const Archive::Match> mixable = get_mixable_policy (into);
+
+  if (must_match && !mixable->match (into, from))
+    throw Error (InvalidState, "Pulsar::Append::check",
+                 mixable->get_reason ());
 
   else if (!into->standard_match (from, reason))
     throw Error (InvalidState, "Pulsar::Append::check", reason);

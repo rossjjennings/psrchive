@@ -11,6 +11,8 @@
 #include "Pulsar/FaradayRotation.h"
 
 #include "Pulsar/ArchiveExpert.h"
+#include "Pulsar/ArchiveMatch.h"
+
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
@@ -39,12 +41,15 @@ static Pulsar::Option<CommandParser> cfg
  "Possible values: radiometer, time, snr, none"
 );
 
-
-Pulsar::FrequencyAppend::FrequencyAppend ()
+const Pulsar::Archive::Match*
+Pulsar::FrequencyAppend::get_mixable_policy (const Archive* a)
 {
-  match.set_check_centre_frequency (false);
-  match.set_check_bandwidth (false);
-  match.set_check_nchan (false);
+  Reference::To<Archive::Match> mixable = a->get_mixable()->clone();
+  mixable->set_check_centre_frequency (false);
+  mixable->set_check_bandwidth (false);
+  mixable->set_check_nchan (false);
+
+  return mixable.release();
 }
 
 bool Pulsar::FrequencyAppend::stop (Archive* into, const Archive* from)

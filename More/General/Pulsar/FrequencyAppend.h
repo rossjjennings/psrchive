@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FrequencyAppend.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/08/05 13:31:02 $
+   $Revision: 1.4 $
+   $Date: 2008/11/07 01:45:32 $
    $Author: straten $ */
 
 #ifndef _Pulsar_FrequencyAppend_H
@@ -26,9 +26,6 @@ namespace Pulsar {
 
   public:
 
-    //! Default constructor
-    FrequencyAppend ();
-
     //! The policy used to weight each profile during combine
     static Functor< void (Integration*) > weight_strategy;
 
@@ -45,6 +42,9 @@ namespace Pulsar {
 
     //! Add the data in 'from' to 'into'
     virtual void combine (Integration* into, Integration* from);
+
+    //! Return the policy used to verify that data are mixable
+    virtual const Archive::Match* get_mixable_policy (const Archive* into);
 
   };
   

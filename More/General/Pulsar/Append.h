@@ -7,19 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Append.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/08/14 13:17:10 $
+   $Revision: 1.5 $
+   $Date: 2008/11/07 01:45:32 $
    $Author: straten $ */
 
 #ifndef _Pulsar_Append_H
 #define _Pulsar_Append_H
 
-#include "Pulsar/ArchiveMatch.h"
-#include "Reference.h"
+#include "Pulsar/Archive.h"
 
 namespace Pulsar {
-
-  class Archive;
 
   //! Algorithms that combine Integration data
   class Append : public Reference::Able {
@@ -42,6 +39,9 @@ namespace Pulsar {
     //! Throw an exception if there is a fatal reason to stop
     virtual void check (Archive* into, const Archive* from);
 
+    //! Return the policy used to verify that data are mixable
+    virtual const Archive::Match* get_mixable_policy (const Archive* into);
+
     //! Add the data in 'from' to 'into'
     /*! 
 
@@ -54,8 +54,6 @@ namespace Pulsar {
 
     */
     virtual void combine (Archive* into, Archive* from) = 0;
-
-    ArchiveMatch match;
 
   };
   
