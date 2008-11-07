@@ -86,6 +86,9 @@ void Pulsar::Integration::add_extension (Extension* ext)
 
 Pulsar::Integration::Integration ()
 {
+  if (verbose)
+    cerr << "Pulsar::Integration ctor this=" << this << endl;
+
   zero_phase_aligned = false;
 
   expert_interface = new Expert (this);
@@ -113,17 +116,15 @@ void Pulsar::Integration::zero ()
 {
   vector<float> zeroes(get_nbin(), 0.0);
 
-  for (unsigned i = 0; i < get_nchan(); i++) {
-    for (unsigned j = 0; j < get_npol(); j++) {
+  for (unsigned i = 0; i < get_nchan(); i++)
+    for (unsigned j = 0; j < get_npol(); j++)
       get_Profile(j,i)->set_amps(zeroes);
-    }
-  }
 }
 
 Pulsar::Integration::~Integration ()
 {
   if (verbose)
-    cerr << "Pulsar::Integration destructor" << endl;
+    cerr << "Pulsar::Integration dtor this=" << this << endl;
 }
 
 

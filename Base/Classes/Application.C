@@ -209,9 +209,13 @@ int Pulsar::Application::main (int argc, char** argv) try
     }
 
   }
-  catch (Error& error) {
-    cerr << name << ": error while processing "
-	 << filenames[ifile] << ":\n" << error.get_message() << endl;
+  catch (Error& error)
+  {
+    cerr << name << ": error while processing " << filenames[ifile] << ":";
+    if (verbose)
+      cerr << error << endl;
+    else
+      cerr << "\n" << error.get_message() << endl;
   }
 
   for (unsigned i=0; i<options.size(); i++)
