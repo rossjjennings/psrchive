@@ -39,8 +39,9 @@ const DigitiserCounts& DigitiserCounts::operator= (const DigitiserCounts& extens
   dig_mode = extension.dig_mode;
   nlev = extension.nlev;
   npthist = extension.npthist;
-  diglev = extension.diglev;
   ndigr = extension.ndigr;
+  diglev = extension.diglev;
+  dyn_levt = extension.dyn_levt;
   subints = extension.subints;
 
   return *this;
