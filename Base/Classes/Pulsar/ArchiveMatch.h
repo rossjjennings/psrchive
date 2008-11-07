@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveMatch.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/11/07 01:20:12 $
+   $Revision: 1.4 $
+   $Date: 2008/11/07 01:46:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveMatch_h
@@ -35,7 +35,7 @@ namespace Pulsar {
     virtual Match* clone () const;
 
     //! Check that the selected attributes match
-    virtual bool match (const Archive* a, const Archive* b);
+    virtual bool match (const Archive* a, const Archive* b) const;
 
     //! Get the mismatch messages from the last call to the match method
     std::string get_reason () const { return reason; }

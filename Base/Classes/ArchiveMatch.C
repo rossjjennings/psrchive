@@ -339,7 +339,7 @@ bool name_match (std::string a, std::string b)
   message is added to the reason attribute.  If all checked attributes
   match, the result is true. */
 
-bool Pulsar::Archive::Match::match (const Archive* a, const Archive* b)
+bool Pulsar::Archive::Match::match (const Archive* a, const Archive* b) const
 {
   bool result = true;
   reason = "";
