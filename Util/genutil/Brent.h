@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Brent.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/04/30 20:32:23 $
-   $Author: demorest $ */
+   $Revision: 1.5 $
+   $Date: 2008/11/07 22:14:59 $
+   $Author: straten $ */
 
 #ifndef __BrentMethod
 #define __BrentMethod
@@ -123,7 +123,7 @@ template<typename T, class Unary>
   T a = x1;
   T b = x3;
   T u=x2, v=x2, w=x2, x=x2;
-  T d, e=0.0;
+  T d = 0.0, e=0.0;
 
   T fu, fv, fw, fx;
   fx = ((T)func_sign) * func(x);

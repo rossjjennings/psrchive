@@ -291,7 +291,6 @@ void Pulsar::ProfileShiftFit::error_mcmc_pdf_var()
   // starting from a known high probability state.
   int mcmc_it = 1000;
   double sum=0.0; 
-  double rsum=0.0, isum=0.0;
   for (int i=0; i<mcmc_it; i++) {
     // "Standard" variance
     double x = mcmc_sample() - shift;
