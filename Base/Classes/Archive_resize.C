@@ -83,3 +83,13 @@ void Pulsar::Archive::resize_Integration (Integration* integration)
 {
   integration->resize (get_npol(), get_nchan(), get_nbin());
 }
+
+//! Remove the specified sub-integration
+void Pulsar::Archive::erase (unsigned isubint)
+{
+  IntegrationManager::unmanage (isubint);
+
+  IntegrationOrder* order = get<IntegrationOrder>();
+  if (order)
+    order->erase (isubint);
+}
