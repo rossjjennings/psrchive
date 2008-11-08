@@ -185,7 +185,7 @@ int main (int argc, char **argv) try
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.64 2008/09/01 02:24:02 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.65 2008/11/08 07:33:14 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -521,7 +521,7 @@ int main (int argc, char **argv) try
       if (verbose)
 	cerr << "psradd: Auto add - gap = " << gap << " seconds" << endl;
       
-      if (gap > interval)
+      if (fabs(gap) > interval)
       {
 	if (verbose)
 	  cerr << "psradd: gap=" << gap << " greater than interval=" 
