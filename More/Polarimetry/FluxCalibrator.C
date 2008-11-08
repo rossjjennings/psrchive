@@ -104,7 +104,6 @@ double Pulsar::FluxCalibrator::Tsys (unsigned ichan)
  */
 Pulsar::CalibratorStokes* Pulsar::FluxCalibrator::get_CalibratorStokes ()
 {
-
   // Check that we have both polns
   if (get_nreceptor() != 2) 
     throw Error (InvalidState, "Pulsar::FluxCalibrator::get_CalibratorStokes",
@@ -116,14 +115,15 @@ Pulsar::CalibratorStokes* Pulsar::FluxCalibrator::get_CalibratorStokes ()
   const Receiver* receiver = get_Archive()->get<Receiver>();
   
   // Loop over chans
-  for (int ichan=0; ichan<get_nchan(); ichan++) {
-
+  for (unsigned ichan=0; ichan<get_nchan(); ichan++)
+  {
     Estimate<double> diff, cross;
     Stokes < Estimate<double> > stokes;
 
     // Skip invalid channels
     if (get_valid(ichan)==false || data[ichan].get_S_cal()==0.0 || 
-        data[ichan].get_S_cal(0)==0.0 || data[ichan].get_S_cal(1)==0.0) { 
+        data[ichan].get_S_cal(0)==0.0 || data[ichan].get_S_cal(1)==0.0)
+    { 
       stokes[0] = Estimate<double> (0.0, 0.0);
       stokes[1] = Estimate<double> (0.0, 0.0);
       stokes[2] = Estimate<double> (0.0, 0.0);
@@ -153,24 +153,22 @@ Pulsar::CalibratorStokes* Pulsar::FluxCalibrator::get_CalibratorStokes ()
     // was coupled in.  In that case, the Archive data would appear
     // circular, but the cal signal is really linear (nonzero Q not V).
     // TODO: Use the Receiver reference source angle setting?
-    if (get_Archive()->get_basis() == Signal::Linear) {
-
+    if (get_Archive()->get_basis() == Signal::Linear)
+    {
       // Linear feeds, Q = diff, U = cross, V = 0
       stokes[1] = diff;
       stokes[2] = cross;
       stokes[3] = Estimate<double> (0.0, cross.var);
-
-    } else if (get_Archive()->get_basis() == Signal::Circular) {
-
+    }
+    else if (get_Archive()->get_basis() == Signal::Circular)
+    {
       // Circular feeds, Q = cross, U = 0, V = diff
       stokes[1] = cross;
       stokes[2] = Estimate<double> (0.0, cross.var);
       stokes[3] = diff;
-
     }
 
     calstokes->set_stokes(ichan, stokes);
-
   }
 
   return calstokes.release();
@@ -516,7 +514,7 @@ unsigned Pulsar::FluxCalibrator::get_nreceptor () const
 
 string Pulsar::FluxCalibrator::Info::get_title () const
 {
-  return "System Temperature and Reference Flux Density";
+  return "System and Noise Source Equivalent Flux Densities";
 }
 
 //! Return the name of the specified class
