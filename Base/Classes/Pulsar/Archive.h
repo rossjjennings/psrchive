@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.180 $
-   $Date: 2008/11/07 22:15:36 $
+   $Revision: 1.181 $
+   $Date: 2008/11/09 03:16:11 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.180 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.181 $"
 
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Config.h"
@@ -149,7 +149,7 @@ namespace Pulsar
     virtual Archive* clone () const = 0;
 
     //! Return pointer to a new fscrunched, tscrunched and pscrunched clone
-    Archive* total () const;
+    Archive* total (bool tscrunch = true) const;
 
     //! Return pointer to a new instance with only the specified subints
     Archive* extract (std::vector<unsigned>& subints) const;
