@@ -788,6 +788,16 @@ int main (int argc, char** argv)
 
 void process (Pulsar::Archive* archive)
 {
+  /* START MIKE_XML before period/DM optimisation */
+
+  Reference::To<Archive> total = archive->total();
+  const unsigned nbin = total->get_nbin();
+  float* amps = total->get_Profile(0,0,0)->get_amps();
+
+  /* amps points to an array of nbin phase bins */
+
+  /* END MIKE_XML */
+
   Plot *phase_plot = factory.construct("freq");
   TextInterface::Parser* fui = phase_plot->get_frame_interface();
 
@@ -861,6 +871,17 @@ void process (Pulsar::Archive* archive)
   // the archive will be tscrunched by the following method
 
   plotPhaseFreq(phaseFreqCopy, phase_plot, fui);
+
+  /* START MIKE_XML after period/DM optimisation */
+
+  phaseFreqCopy->set_dispersion_measure(bestDM);
+
+  total = phaseFreqCopy->total();
+  amps = total->get_Profile(0,0,0)->get_amps();
+
+  /* amps points to an array of nbin phase bins */
+
+  /* END MIKE_XML */
 
   cpgsci(6);
   cpgslw(8);
@@ -2219,12 +2240,32 @@ void plotProfile(const Profile * profile, ProfilePlot* plot, TextInterface::Pars
 	cpgbox ("BINTS", 0.0, 0, "BNTSI", tickSpace, 0);
 }
 
-void plotPhaseFreq(const Archive * archive, Plot* phase_plot, TextInterface::Parser* fui) {
+void plotPhaseFreq (const Archive * archive, 
+		    Plot* phase_plot,
+		    TextInterface::Parser* fui)
+{
 	Reference::To<Archive> phase_freq_copy = archive->clone();
 
 	phase_freq_copy->pscrunch();
 	phase_freq_copy->tscrunch();
 	phase_freq_copy->remove_baseline();
+
+	/* START MIKE_XML phase versus frequency information here */
+
+	Integration* subint = phase_freq_copy->get_Integration(0);
+	const unsigned nchan = subint->get_nchan();
+	const unsigned nbin = subint->get_nbin();
+
+	for (unsigned ichan=0; ichan < nchan; ichan++)
+	{
+	  const unsigned ipol = 0; // total intensity
+
+	  float* amps = subint->get_Profile( ipol, ichan )->get_amps();
+
+	  /* amps points to an array of nbin phase bins */
+	}
+
+	/* END MIKE_XML */
 
 	fui->set_value("x:view", "(0.55, 0.95)");
 	fui->set_value("y:view", "(0.33, 0.56)");
@@ -2258,6 +2299,25 @@ void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* t
 	phase_time_copy->fscrunch();
 	phase_time_copy->pscrunch();
 	phase_time_copy->remove_baseline();
+
+	/* START MIKE_XML phase versus time information here */
+
+	const unsigned nsubint = phase_time_copy->get_nchan();
+	const unsigned nbin = phase_time_copy->get_nbin();
+
+	for (unsigned isub=0; isub < nsubint; isub++)
+	{
+	  Integration* subint = phase_time_copy->get_Integration (isub);
+
+	  const unsigned ipol = 0;  // total intensity
+	  const unsigned ichan = 0; // fscrunched
+
+	  float* amps = subint->get_Profile( ipol, ichan )->get_amps();
+
+	  /* amps points to an array of nbin phase bins */
+	}
+
+	/* END MIKE_XML */
 
 	tui->set_value("x:view", "(0.05, 0.45)");
 	tui->set_value("y:view", "(0.33, 0.56)");
