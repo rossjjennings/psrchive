@@ -16,8 +16,8 @@ using namespace std;
 /*!
   This method is primarily designed for use by the Archive::find_* methods.
 */
-Pulsar::Archive* Pulsar::Archive::total () const
-try {
+Pulsar::Archive* Pulsar::Archive::total (bool tscrunch) const try
+{
 
   if (verbose == 3)
     cerr << "Pulsar::Archive::total extracting an empty copy" << endl;
@@ -36,11 +36,13 @@ try {
   for (unsigned isub=0; isub < get_nsubint(); isub++)
     copy->manage( get_Integration(isub)->total() );
 
-  copy->tscrunch ();
+  if (tscrunch)
+    copy->tscrunch ();
 
   return copy.release();
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::Archive::total";
 }
 
