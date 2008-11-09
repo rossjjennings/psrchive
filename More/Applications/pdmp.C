@@ -741,10 +741,8 @@ int main (int argc, char** argv)
 
 	if (join && filenames.size() > 1)
 	{
-		archive = Pulsar::Archive::load (filenames[0]);
-		joined_archive = archive->clone();
-
 		cout << endl << "Loading archive: " << filenames[0] << endl;
+                joined_archive = Pulsar::Archive::load (filenames[0]);
 
 		for (unsigned ifile = 1; ifile < filenames.size(); ifile++) {
 			cout << "Loading archive: " << filenames[ifile] << endl;
@@ -889,17 +887,16 @@ void solve_and_plot (Archive* archive,
 	vector<float> SNRs;
 	Reference::To<Profile> profile;
 	float snr = 0;
-	Reference::To<Archive> copy = archive;
 
-	unsigned nbin = copy->get_nbin();
-	unsigned nsub = copy->get_nsubint();
-	unsigned nchan = copy->get_nchan();
-	double refP_us = getPeriod(copy) * MICROSEC;
-	double refDM = getDM(copy);
+	unsigned nbin = archive->get_nbin();
+	unsigned nsub = archive->get_nsubint();
+	unsigned nchan = archive->get_nchan();
+	double refP_us = getPeriod(archive) * MICROSEC;
+	double refDM = getDM(archive);
 
 	///////////////
 	// Get the RMS
-	float rms = getRMS(copy);
+	float rms = getRMS(archive);
 
 	// PSRCHIVE normalises the amplitudes after scrunching
 	// so need to compensate for this
@@ -911,16 +908,16 @@ void solve_and_plot (Archive* archive,
 	// Find default step and half range if none provided
 
 	if (dmStep < 0)
-		dmStep = getNaturalDMStep(copy, dmHalfRange);
+		dmStep = getNaturalDMStep(archive, dmHalfRange);
 
 	if (dmHalfRange < 0)
-		dmHalfRange = getNaturalDMHalfRange(copy, dmStep);
+		dmHalfRange = getNaturalDMHalfRange(archive, dmStep);
 
 	if (periodStep_us < 0)
-		periodStep_us = getNaturalPeriodStep(copy, periodHalfRange_us);
+		periodStep_us = getNaturalPeriodStep(archive, periodHalfRange_us);
 
 	if (periodHalfRange_us < 0)
-		periodHalfRange_us = getNaturalperiodHalfRange(copy, periodStep_us);
+		periodHalfRange_us = getNaturalperiodHalfRange(archive, periodStep_us);
 
 	// Make sure that the steps are sensible. Otherwise, just do one step
 	if (nchan == 1 || dmStep <= 0)
@@ -967,12 +964,12 @@ void solve_and_plot (Archive* archive,
 	cout << "Period bins: " << periodBins << endl;
 	cout << "Total bins: " << dmBins * periodBins << endl << endl;
 
-	for (int dmBin = 0; dmBin < dmBins ; dmBin++) {
+        double backup_DM = archive->get_dispersion_measure ();
 
-		Reference::To<Archive> dmLoopCopy = copy->clone();
-		dmLoopCopy->set_dispersion_measure(currDM);
-		dmLoopCopy->dedisperse();
-		dmLoopCopy->fscrunch();
+	for (int dmBin = 0; dmBin < dmBins ; dmBin++)
+        {
+                archive->set_dispersion_measure(currDM);
+		Reference::To<Archive> dmLoopCopy = archive->total(false);
 
 		// Foreach Period (include one extra period bin at the end to scale with
 		// the plot
@@ -981,11 +978,8 @@ void solve_and_plot (Archive* archive,
 			// print out the search progress
 			int percentComplete = (int)floor(100 * ((double)(periodBins*(dmBin) + periodBin) / (double)(periodBins * dmBins)));
 
-			if (!(periodBin == 0 && dmBin == 0))
-				printf("\b\b\b\b");
-
 			int displayPercentage = (int)floor((double)percentComplete/SHOW_EVERY_PERCENT_COMPLETE);
-			printf("%3d%%", displayPercentage*SHOW_EVERY_PERCENT_COMPLETE);
+			printf("%3d%%\r", displayPercentage*SHOW_EVERY_PERCENT_COMPLETE);
 
 			// Create a new (unscrunched) copy so the values can be testedget
 			Reference::To<Archive> periodLoopCopy = dmLoopCopy->clone();
@@ -1042,14 +1036,19 @@ void solve_and_plot (Archive* archive,
 		currDM += dmStep;
 	}
 
+        archive->set_dispersion_measure( backup_DM );
+
 	// get the error
 	periodError_ms = computePeriodError(archive);
 	dmError = computeDMError(archive);
 
 	// Now that the period step is initialised, init the freqError
-	if (nsub == 1 || periodStep_us <= 0) {
+	if (nsub == 1 || periodStep_us <= 0)
+        {
 		freqError = 0;
-	} else {
+	}
+        else
+        {
 		freqError = fabs((periodError_ms/(double)MICROSEC)/pow((bestPeriod_bc_us/(double)MICROSEC), 2));
 		freqError *= 1000;
 	}
@@ -1090,10 +1089,10 @@ void solve_and_plot (Archive* archive,
 }
 
 
-void scrunchPartially(Archive * scrunchedCopy) {
+void scrunchPartially(Archive * archive) {
 
-	int nsub = scrunchedCopy->get_nsubint();
-	int nchan = scrunchedCopy->get_nchan();
+	int nsub = archive->get_nsubint();
+	int nchan = archive->get_nchan();
 
 	if (nsub > maxSubints && maxSubints > 1) {
 
@@ -1103,7 +1102,7 @@ void scrunchPartially(Archive * scrunchedCopy) {
 		for (int i = maxSubints; i > 0; i--) {
 			if ( (nchan % i) == 0) {
 				maxSubints = i;
-				partialTimeScrunch(scrunchedCopy);
+				partialTimeScrunch(archive);
 				break;
 			}
 		}
@@ -1115,7 +1114,7 @@ void scrunchPartially(Archive * scrunchedCopy) {
 		for (int i = maxChannels; i > 0; i--) {
 			if ( (nchan % i) == 0) {
 				maxChannels = i;
-				partialFrequencyScrunch(scrunchedCopy);
+				partialFrequencyScrunch(archive);
 				break;
 			}
 		}
