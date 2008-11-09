@@ -89,15 +89,18 @@ vector<Reference::To<Pulsar::Archive> > get_archives(string filename);
 //   * refP is Topocentric
 //   * refP, periodOffset_us, periodStep_us and periodHalfRange_us are all in microseconds
 
-void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, double dmHalfRange,
-	double periodOffset_us, double periodStep_us, double periodHalfRange_us, ProfilePlot* total_plot, TextInterface::Parser* flui);
+void solve_and_plot (Archive* archive,
+		     double dmOffset, double dmStep, double dmHalfRange,
+		     double periodOffset_us, double periodStep_us, double periodHalfRange_us,
+		     ProfilePlot* total_plot, TextInterface::Parser* flui);
 
 // Default call to solve_and_plot above
 // archive: The archive data
 // refDM: The reference DM
 // refP: The reference Period in microseconds
 
-void solve_and_plot(const Archive* archive, ProfilePlot* total_plot, TextInterface::Parser* flui);
+void solve_and_plot (Archive* archive,
+		     ProfilePlot* total_plot, TextInterface::Parser* flui);
 
 // Gets the natural DM step if none was provided
 // Precondition: nchan > 1
@@ -412,26 +415,28 @@ typedef pair<char, int> entry;
 void usage (bool verbose_usage)
 {
   cout <<
-		"\nA program that searches a specified range of barycentric \n"
-		"period and DM to find values giving the highest S/N ratio.\n"
-    "\nUsage: pdmp [options] file1 [file2 ...]\n"
+    "\n"
+    "pdmp searches a specified range of barycentric period and DM \n"
+    "     for those values giving the highest S/N ratio.\n"
+    "\n"
+    "Usage: pdmp [options] file1 [file2 ...]\n"
     "\n"
     "Preprocessing options:\n"
     " -do  <dm offset>               DM offset in pc/cm^3      (default=0)\n"
     " -dr  <dm half-range>           DM half-range in pc/cm^3  (default=natural)\n"
     " -ds  <dm step>                 DM step in pc/cm^3        (default=natural)\n"
-		" -f , --force                   Force the program to compute without prompting\n"
-		" -j                             Combine multiple archives\n"
-		" -mc, --maxchannels <max chan>  Archive frequency channels will be \n"
-		"                                partially scrunched to <= this maximum\n"
-		"                                before computing \n"
-		" -ms, --maxsubints <max subint> Archive subints will be \n"
-		"                                partially scrunched to <= this maximum\n"
-		"                                before computing\n"
+    " -f , --force                   Force the program to compute without prompting\n"
+    " -j                             Combine multiple archives\n"
+    " -mc, --maxchannels <max chan>  Archive frequency channels will be \n"
+    "                                partially scrunched to <= this maximum\n"
+    "                                before computing \n"
+    " -ms, --maxsubints <max subint> Archive subints will be \n"
+    "                                partially scrunched to <= this maximum\n"
+    "                                before computing\n"
     " -po  <period offset>           Period offset in us       (default=0)\n"
     " -pr  <period half-range>       Period half-range in us   (default=natural)\n"
     " -ps  <period step>             Period step in us         (default=natural)\n"
-		" -s   <profile file>            Use <profile file> as a standard profile to\n"
+    " -s   <profile file>            Use <profile file> as a standard profile to\n"
 		"                                compare with\n"
     "\n"
     "Selection & configuration options:\n"
@@ -680,27 +685,20 @@ void cpg_next ()
   cpgpage ();
 }
 
+void process (Pulsar::Archive* archive);
+
+double periodOffset_us = 0;
+double periodStep_us = -1;
+double periodHalfRange_us = -1;
+double dmOffset = 0;
+double dmStep = -1;
+double dmHalfRange = -1;
+
 int main (int argc, char** argv)
 {
-	Plot *phase_plot = factory.construct("freq");
-	TextInterface::Parser* fui = phase_plot->get_frame_interface();
-
-	Plot *time_plot = factory.construct("time");
-	TextInterface::Parser* tui = time_plot->get_frame_interface();
-
-	ProfilePlot *total_plot = new ProfilePlot();
-	TextInterface::Parser* flui = total_plot->get_frame_interface();
-
-	bool finished = false;
 	RealTimer clock;
 
 	double elapsed;
-	double periodOffset_us = 0;
-	double periodStep_us = -1;
-	double periodHalfRange_us = -1;
-	double dmOffset = 0;
-	double dmStep = -1;
-	double dmHalfRange = -1;
 
 	string plot_device = "/xs";
 
@@ -736,10 +734,11 @@ int main (int argc, char** argv)
 	Reference::To<Pulsar::Archive> archive;
 	Reference::To<Pulsar::Archive> joined_archive;
 
+	clock.start();
+	cpgask(!force);
 
-	if (join && filenames.size() > 1) {
-
-		finished = false;
+	if (join && filenames.size() > 1)
+	{
 		archive = Pulsar::Archive::load (filenames[0]);
 		joined_archive = archive->clone();
 
@@ -754,107 +753,27 @@ int main (int argc, char** argv)
 		cout << endl;
 
 		reorder(joined_archive);
+		process(joined_archive);
+
 		// total->unload(newname); // THIS IS BROKEN!!!
-	} else {
-		join = false;
 	}
+	else
+	{
 
-	clock.start();
-	cpgask(!force);
+	  for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try
+	  {
+	    archive = Pulsar::Archive::load(filenames[ifile]);
 
-	for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try {
+	    // reset global variables
+	    init();
 
-		vector<Reference::To<Pulsar::Archive> > archives =
-		get_archives(filenames[ifile]);
-
-		for( unsigned iarch = 0; iarch < archives.size() && !finished; iarch++){
-
-			// reset global variables
-			init();
-			Reference::To<Pulsar::Archive> archive;
-
-			if (join) {
-				archive = joined_archive->clone();
-				finished = true;
-			} else {
-				archive = archives[iarch];
-			}
-
-			dopplerFactor = getDopplerFactor(archive);
-
-			if (!silent && !join) {
-				cout << "\nWorking on archive " << archive->get_source() <<
-				": " << archive->get_filename() <<
-				endl;
-			}
-
-			if (useStandardProfile) {
-				if (!silent) cout << "Using standard profile: " << standardProfileFilename << endl;
-				Reference::To<Pulsar::Archive> std_arch( Pulsar::Archive::load(standardProfileFilename) );
-				std_arch->fscrunch();
-				std_arch->pscrunch();
-				std_arch->tscrunch();
-
-				std_prof = std_arch->get_Profile(FIRST_SUBINT, FIRST_POL, FIRST_CHAN);
-
-				stdSNR = new StandardSNR();
-				stdSNR->set_standard(std_prof);
-			}
-
-			cpg_next();
-
-			///////////////////////////////////////////////////////////
-			// Get the reference values
-
-			archive->dedisperse();
-			archive->pscrunch();
-
-			///////////////////////////////////////////////////////////
-			// Start searching for the best period and DM
-
-			string emptyString = "";
-			goToDMPViewPort();
-
-			Reference::To<Archive> partiallyScrunchedCopy = archive->clone();
-
-			// Before entering the search loop, scrunch the archive partially
-			// if necessary.
-			scrunchPartially(partiallyScrunchedCopy);
-
-			// Make sure to convert period to microseconds
-			// Then solve for the best period and dm and plot the results
-			solve_and_plot(partiallyScrunchedCopy, dmOffset, dmStep, dmHalfRange, periodOffset_us, periodStep_us,
-			periodHalfRange_us, total_plot, flui);
-
-			// Create two copies. One for the phase time plot and one
-			// for the phase vs. frequency plot.
-			Reference::To<Archive> phaseTimeCopy = partiallyScrunchedCopy->clone();
-			Reference::To<Archive> phaseFreqCopy = partiallyScrunchedCopy->clone();
-
-			phaseTimeCopy->set_dispersion_measure(bestDM);
-			phaseTimeCopy->dedisperse();
-			// the archive will be fscrunched by the following method
-			plotPhaseTime(phaseTimeCopy, time_plot, tui);
-
-			counter_drift( phaseFreqCopy, (bestPeriod_bc_us / (double)MICROSEC)*dopplerFactor );
-			// the archive will be tscrunched by the following method
-
-			plotPhaseFreq(phaseFreqCopy, phase_plot, fui);
-
-			cpgsci(6);
-			cpgslw(8);
-
-			cpgslw(1);
-			cpgsci(1);
-
-			printResults(partiallyScrunchedCopy);
-			writeResultFiles(partiallyScrunchedCopy);
-
-		}
-	} catch (Error& error) {
-		cerr << "Caught Error on file '" << filenames[ifile] << "': " << error << endl;
-	} catch (string& error) {
-		cerr << error << endl;
+	    process(archive);
+	  }
+	  catch (Error& error)
+	  {
+	    cerr << "pdmp: error on file '" << filenames[ifile] << "': "
+		 << error << endl;
+	  }
 	}
 
 	cpgend();
@@ -866,27 +785,109 @@ int main (int argc, char** argv)
 	return 0;
 }
 
-vector<Reference::To<Pulsar::Archive> > get_archives(string filename) {
-	vector<Reference::To<Pulsar::Archive> > archives;
-	Reference::To<Pulsar::Archive> arch( Pulsar::Archive::load(filename) );
 
-	archives.push_back( arch );
-	return archives;
+void process (Pulsar::Archive* archive)
+{
+  Plot *phase_plot = factory.construct("freq");
+  TextInterface::Parser* fui = phase_plot->get_frame_interface();
+
+  Plot *time_plot = factory.construct("time");
+  TextInterface::Parser* tui = time_plot->get_frame_interface();
+
+  ProfilePlot *total_plot = new ProfilePlot();
+  TextInterface::Parser* flui = total_plot->get_frame_interface();
+
+  dopplerFactor = getDopplerFactor(archive);
+
+  if (!silent && !join)
+  {
+    cout << "\nWorking on archive " << archive->get_source() <<
+      ": " << archive->get_filename() << endl;
+  }
+
+  if (useStandardProfile)
+  {
+    if (!silent)
+      cout << "Using standard profile: " << standardProfileFilename << endl;
+    Reference::To<Pulsar::Archive> std_arch;
+    std_arch = Pulsar::Archive::load(standardProfileFilename);
+    std_arch->fscrunch();
+    std_arch->pscrunch();
+    std_arch->tscrunch();
+    
+    std_prof = std_arch->get_Profile(FIRST_SUBINT, FIRST_POL, FIRST_CHAN);
+
+    stdSNR = new StandardSNR();
+    stdSNR->set_standard(std_prof);
+  }
+
+  cpg_next();
+
+  ///////////////////////////////////////////////////////////
+  // Get the reference values
+
+  archive->dedisperse();
+  archive->pscrunch();
+
+  ///////////////////////////////////////////////////////////
+  // Start searching for the best period and DM
+
+  string emptyString = "";
+  goToDMPViewPort();
+
+  // Before entering the search loop, scrunch the archive partially
+  // if necessary.
+  scrunchPartially( archive );
+
+  // Make sure to convert period to microseconds
+  // Then solve for the best period and dm and plot the results
+  solve_and_plot (archive,
+		  dmOffset, dmStep, dmHalfRange, 
+		  periodOffset_us, periodStep_us, periodHalfRange_us,
+		  total_plot, flui);
+
+  // Create two copies. One for the phase time plot and one
+  // for the phase vs. frequency plot.
+  Reference::To<Archive> phaseTimeCopy = archive->clone();
+  Reference::To<Archive> phaseFreqCopy = archive->clone();
+
+  phaseTimeCopy->set_dispersion_measure(bestDM);
+  phaseTimeCopy->dedisperse();
+  // the archive will be fscrunched by the following method
+  plotPhaseTime(phaseTimeCopy, time_plot, tui);
+  
+  counter_drift( phaseFreqCopy,
+		 (bestPeriod_bc_us / (double)MICROSEC)*dopplerFactor );
+  // the archive will be tscrunched by the following method
+
+  plotPhaseFreq(phaseFreqCopy, phase_plot, fui);
+
+  cpgsci(6);
+  cpgslw(8);
+  
+  cpgslw(1);
+  cpgsci(1);
+
+  printResults(archive);
+  writeResultFiles(archive);
+  
 }
-
 
 //  Try to find out the best DM and Period given:
 // 	DM offset, DM step, DM half-range
 //  Period offset (us), Period step (us), Period half-range (us)
 //  NOTE: refP is Barycentric
 
-void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, double dmHalfRange,
-	double periodOffset_us, double periodStep_us, double periodHalfRange_us, ProfilePlot* total_plot, TextInterface::Parser* flui) {
-
+void solve_and_plot (Archive* archive,
+		     double dmOffset, double dmStep, double dmHalfRange,
+		     double periodOffset_us, double periodStep_us,
+		     double periodHalfRange_us,
+		     ProfilePlot* total_plot, TextInterface::Parser* flui)
+{
 	vector<float> SNRs;
 	Reference::To<Profile> profile;
 	float snr = 0;
-	Reference::To<Archive> copy = archive->clone();
+	Reference::To<Archive> copy = archive;
 
 	unsigned nbin = copy->get_nbin();
 	unsigned nsub = copy->get_nsubint();
@@ -945,7 +946,7 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 	// Revert back to the DM vs P vs Intensity viewport
 	goToDMPViewPort();
 
-	double minDM = refDM + dmOffset -	fabs(dmStep*(floor((double)dmBins/2)));
+	double minDM = refDM + dmOffset - fabs(dmStep*(floor((double)dmBins/2)));
 	double currDM = minDM;
 
 	double minP = refP_us +	periodOffset_us - fabs(periodStep_us*(floor((double)periodBins/2)));
@@ -1079,8 +1080,11 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 }
 
 // Use the the default natural values for offset, step and half-range
-void solve_and_plot(const Archive* archive, ProfilePlot* total_plot, TextInterface::Parser* flui) {
-	solve_and_plot(archive, 0,-1,-1, 0,-1,-1, total_plot, flui);
+void solve_and_plot (Archive* archive,
+		     ProfilePlot* total_plot,
+		     TextInterface::Parser* flui)
+{
+  solve_and_plot(archive, 0,-1,-1, 0,-1,-1, total_plot, flui);
 }
 
 
