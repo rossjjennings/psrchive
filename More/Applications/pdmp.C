@@ -696,6 +696,8 @@ double dmHalfRange = -1;
 
 int main (int argc, char** argv)
 {
+  Pulsar::Profile::rotate_in_phase_domain = true;
+
 	RealTimer clock;
 
 	double elapsed;
