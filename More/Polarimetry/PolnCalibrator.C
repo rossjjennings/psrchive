@@ -553,11 +553,11 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
 	   << response.size() << " mod requested nchan=" << nchan << " != 0" 
 	   << endl;
 
-    // integrate the Jones matrices
-    scrunch (response, factor);
+    if (verbose > 2)
+      cerr << "Pulsar::PolnCalibrator::build integrate by " << factor << endl;
 
-    for (ichan=0; ichan<nchan; ichan++)
-      response[ichan] /= factor;
+    // integrate the Jones matrices
+    scrunch (response, factor, true);
   }
 
   complex<float> zero (0.0);
