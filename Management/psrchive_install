@@ -60,22 +60,27 @@ if ( ! -f $tarfile ) then
   # program to be used to download source code
   #
 
-  if ( `which curl` != "" ) set psrchive_download = curl
-  if ( `which lynx` != "" ) set psrchive_download = lynx
+  if ( -x `which lynx` ) set psrchive_download = lynx
+  if ( -x `which curl` ) set psrchive_download = curl
+  if ( -x `which wget` ) set psrchive_download = wget
 
   if ( ! $?psrchive_download ) then
     echo
-    echo "psrchive_install: no suitable download program (curl or lynx)"
+    echo "psrchive_install: no suitable download program (lynx curl or wget)"
     echo
     exit -1
   endif
-
 
   # the SourceForge download server will redirect to the nearest mirror
   #
   set sourceforge=http://downloads.sourceforge.net
 
   echo -n "Downloading $tarfile from sourceforge "
+
+  if ( $psrchive_download == "wget" ) then
+    echo "using wget ..."
+    wget $sourceforge/psrchive/$tarfile
+  endif
 
   if ( $psrchive_download == "curl" ) then
     # curl options used:
