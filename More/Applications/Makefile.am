@@ -61,7 +61,7 @@ if HAVE_PGPLOT
 bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi pav psrsp
 
 pdmp_SOURCES = pdmp.C
-pdmp_LDADD = $(LDADD) @PGPLOT_LIBS@
+pdmp_LDADD = $(LDADD) @PGPLOT_LIBS@ @PSRXML_LIBS@
 
 psrplot_SOURCES = psrplot.C
 psrplot_LDADD = $(LDADD) @PGPLOT_LIBS@
@@ -98,5 +98,5 @@ LDADD = $(top_builddir)/More/libpsrmore.la \
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @GSL_CFLAGS@
+AM_CPPFLAGS += @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @GSL_CFLAGS@ @PSRXML_CFLAGS@
 

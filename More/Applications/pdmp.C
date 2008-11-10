@@ -48,6 +48,10 @@
 #ifdef HAVE_CONFIG_H
 #include<config.h>
 #endif
+#ifdef HAVE_PSRXML
+#include <phcx.h>
+#endif
+
 
 #define F77_smooth_mw F77_FUNC_(smooth_mw,SMOOTH_MW)
 #define MAKE_STRING( msg )  ( ((std::ostringstream&)(std::ostringstream() << msg)).str() )
@@ -160,6 +164,8 @@ float getSNR(const Archive * archive, float rms);
 // Get the RMS of the archive
 float getRMS (const Archive * archive);
 
+void setSensibleStepSizes(const Archive * archive);
+
 // Parse the command line parameters and set the values passed through as arguments
 void parseParameters(int argc, char **argv, double &periodOffset_us, double &periodStep_us, double &periodHalfRange_us,
 	                   double &dmOffset, double &dmStep, double &dmHalfRange,
@@ -200,6 +206,17 @@ double computePeriodError(const Archive * archive);
 
 // Gets the dm error based on the best pulse width
 double computeDMError(const Archive * archive);
+
+#ifdef HAVE_PSRXML
+// some methods for dealing with xml candidates
+
+// 'global' xml candidate file
+phcx* xml_candidate=NULL;
+// Adds a 'section' to a xml candidate file from an archive.
+void setInitialXmlCandiateSection(const Archive * archive);
+void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod,double centreDm,double centreAccn, double centreJerk);
+
+#endif
 
 // slaPvobs written by P.T.Wallace
 //  Position and velocity of an observing station.
@@ -368,6 +385,9 @@ double bestPeriod_bc_us;
 double bestDM;
 double bestFreq;
 unsigned bestPulseWidth;
+// the 'array' of signal-to-noise with varying p/dm trial
+vector<float> SNRs;
+
 
 Reference::To<Pulsar::Profile> bestProfile;
 
@@ -383,6 +403,9 @@ float liney = HEADER_Y;
 bool verbose = false;
 bool force = false;
 bool silent = false;
+
+bool output_phcx=false;
+char output_phcx_file[128];
 
 // If archive contains more than maxChannels and maxSubints, pdmp
 // will partially scrunch it to improve performance
@@ -660,6 +683,18 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 			verbose = false;
 			silent = true;
 		}
+		// make a phcx file
+                else if (strcmp(argv[i], "-output-phcx") == 0) {
+#ifdef HAVE_PSRXML
+                        output_phcx = true;
+			i++;
+			strcpy(output_phcx_file,argv[i]);
+#else
+			printf("Sorry, can't output phcx file as this pdmp was not compiled against the psrxml library.\n");
+			exit(1);
+#endif
+                }
+
 
 		// Handle error if there is no such option
 		else if (argv[i][0] == '-') {
@@ -788,15 +823,27 @@ int main (int argc, char** argv)
 
 void process (Pulsar::Archive* archive)
 {
-  /* START MIKE_XML before period/DM optimisation */
+  dopplerFactor = getDopplerFactor(archive);
 
-  Reference::To<Archive> total = archive->total();
-  const unsigned nbin = total->get_nbin();
-  float* amps = total->get_Profile(0,0,0)->get_amps();
-
-  /* amps points to an array of nbin phase bins */
-
-  /* END MIKE_XML */
+#ifdef HAVE_PSRXML
+  /*
+   * If we have psrxml, we can make a 
+   * 'phcx' xml candidate data structure.
+   *
+   * This can be written out as either a
+   * phcx 'pulsarhunter candidate file'
+   * or a BookKeepr 'raw candidate'
+   * 
+   * This part fills in the inital parameters
+   * and creates plots etc, if the initial section
+   * did not already exist.
+   */
+  if(output_phcx){
+  	xml_candidate = (phcx*)malloc(sizeof(phcx));
+	xml_candidate->nsections=0;
+	setInitialXmlCandiateSection(archive);
+  }
+#endif
 
   Plot *phase_plot = factory.construct("freq");
   TextInterface::Parser* fui = phase_plot->get_frame_interface();
@@ -807,7 +854,6 @@ void process (Pulsar::Archive* archive)
   ProfilePlot *total_plot = new ProfilePlot();
   TextInterface::Parser* flui = total_plot->get_frame_interface();
 
-  dopplerFactor = getDopplerFactor(archive);
 
   if (!silent && !join)
   {
@@ -849,6 +895,8 @@ void process (Pulsar::Archive* archive)
   // if necessary.
   scrunchPartially( archive );
 
+  setSensibleStepSizes(archive);
+
   // Make sure to convert period to microseconds
   // Then solve for the best period and dm and plot the results
   solve_and_plot (archive,
@@ -874,14 +922,33 @@ void process (Pulsar::Archive* archive)
 
   /* START MIKE_XML after period/DM optimisation */
 
-  phaseFreqCopy->set_dispersion_measure(bestDM);
+#ifdef HAVE_PSRXML
+  /*
+   * Again, if we have the psrxml library, 
+   * we can add the optimised parameters
+   * to our 'phcx' data structure, and
+   * then write out the file.
+   *
+   * We first make an 'optimised' clone of
+   * the input archive, which has the optimal
+   * period/dm (acc/jerk) applied to it.
+   *
+   * This is then added to the phcx as a
+   * new section
+   */
+  if(output_phcx){
+	  Reference::To<Archive> optimisedArchive = archive->clone();
+	  counter_drift( optimisedArchive,
+			  (bestPeriod_bc_us / (double)MICROSEC)*dopplerFactor );
+	  optimisedArchive->set_dispersion_measure(bestDM);
+	  optimisedArchive->dedisperse();
 
-  total = phaseFreqCopy->total();
-  amps = total->get_Profile(0,0,0)->get_amps();
+	  addOptimisedXmlCandidateSection(optimisedArchive,getPeriod(archive),getDM(archive),0,0);
+	  printf("Outputting candidate to %s",output_phcx_file);
+	  write_phcx(output_phcx_file,xml_candidate);
+  }
+#endif
 
-  /* amps points to an array of nbin phase bins */
-
-  /* END MIKE_XML */
 
   cpgsci(6);
   cpgslw(8);
@@ -905,7 +972,8 @@ void solve_and_plot (Archive* archive,
 		     double periodHalfRange_us,
 		     ProfilePlot* total_plot, TextInterface::Parser* flui)
 {
-	vector<float> SNRs;
+	// MJK: I have made the SNRs array global.. not sure if this will make
+	// anything not work (i.e. too much memory use?)
 	Reference::To<Profile> profile;
 	float snr = 0;
 
@@ -918,6 +986,7 @@ void solve_and_plot (Archive* archive,
 	///////////////
 	// Get the RMS
 	float rms = getRMS(archive);
+	
 
 	// PSRCHIVE normalises the amplitudes after scrunching
 	// so need to compensate for this
@@ -2250,23 +2319,6 @@ void plotPhaseFreq (const Archive * archive,
 	phase_freq_copy->tscrunch();
 	phase_freq_copy->remove_baseline();
 
-	/* START MIKE_XML phase versus frequency information here */
-
-	Integration* subint = phase_freq_copy->get_Integration(0);
-	const unsigned nchan = subint->get_nchan();
-	const unsigned nbin = subint->get_nbin();
-
-	for (unsigned ichan=0; ichan < nchan; ichan++)
-	{
-	  const unsigned ipol = 0; // total intensity
-
-	  float* amps = subint->get_Profile( ipol, ichan )->get_amps();
-
-	  /* amps points to an array of nbin phase bins */
-	}
-
-	/* END MIKE_XML */
-
 	fui->set_value("x:view", "(0.55, 0.95)");
 	fui->set_value("y:view", "(0.33, 0.56)");
 	fui->set_value("x:range", "(0, 1.2)");
@@ -2300,24 +2352,6 @@ void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* t
 	phase_time_copy->pscrunch();
 	phase_time_copy->remove_baseline();
 
-	/* START MIKE_XML phase versus time information here */
-
-	const unsigned nsubint = phase_time_copy->get_nchan();
-	const unsigned nbin = phase_time_copy->get_nbin();
-
-	for (unsigned isub=0; isub < nsubint; isub++)
-	{
-	  Integration* subint = phase_time_copy->get_Integration (isub);
-
-	  const unsigned ipol = 0;  // total intensity
-	  const unsigned ichan = 0; // fscrunched
-
-	  float* amps = subint->get_Profile( ipol, ichan )->get_amps();
-
-	  /* amps points to an array of nbin phase bins */
-	}
-
-	/* END MIKE_XML */
 
 	tui->set_value("x:view", "(0.05, 0.45)");
 	tui->set_value("y:view", "(0.33, 0.56)");
@@ -2626,3 +2660,301 @@ string get_scale(const Archive * archive)
     else
         return "seconds";
 }
+
+void setSensibleStepSizes(const Archive* archive){
+	unsigned nbin = archive->get_nbin();
+	unsigned nsub = archive->get_nsubint();
+	unsigned nchan = archive->get_nchan();
+
+	if (dmStep < 0)
+		dmStep = getNaturalDMStep(archive, dmHalfRange);
+
+	if (dmHalfRange < 0)
+		dmHalfRange = getNaturalDMHalfRange(archive, dmStep);
+
+	if (periodStep_us < 0)
+		periodStep_us = getNaturalPeriodStep(archive, periodHalfRange_us);
+
+	if (periodHalfRange_us < 0)
+		periodHalfRange_us = getNaturalperiodHalfRange(archive, periodStep_us);
+
+	// Make sure that the steps are sensible. Otherwise, just do one step
+	if (nchan == 1 || dmStep <= 0)
+		dmHalfRange = dmStep/2;
+
+	if (nsub == 1 || periodStep_us <= 0)
+		periodHalfRange_us = periodStep_us/2;
+
+}
+
+
+#ifdef HAVE_PSRXML
+
+void setInitialXmlCandiateSection(const Archive * archive){
+	Reference::To<Archive> total = archive->total();
+	total->remove_baseline();
+	const unsigned nchan = archive->get_nchan();
+	const unsigned nsubint = archive->get_nsubint();
+	const unsigned nbin = total->get_nbin();
+
+
+
+
+	// initialise the section if there is no initial section
+	if (xml_candidate->nsections == 0){
+		xml_candidate->nsections=1;
+		xml_candidate->sections=(phcx_section*)malloc(sizeof(phcx_section));
+
+		xml_candidate->sections[0].subints=NULL;
+		xml_candidate->sections[0].subbands=NULL;
+		xml_candidate->sections[0].pulseProfile=NULL;
+		xml_candidate->sections[0].snrBlock.block=NULL;
+
+		// insert the initial parameters
+		// @todo: How to get the initial params?
+		strcpy(xml_candidate->header.sourceID,archive->get_source().c_str());
+
+		if (strcmp(archive->get_telescope().c_str(),"PKS")==0){
+			strcpy(xml_candidate->header.telescope,"PARKES");
+		} else {
+			strcpy(xml_candidate->header.telescope,archive->get_telescope().c_str());
+		}
+		xml_candidate->header.centreFreq=archive->get_centre_frequency();
+		xml_candidate->header.bandwidth=archive->get_bandwidth();
+		MJD start = archive->get_Integration(0)->get_start_time();
+		xml_candidate->header.mjdStart=(start.intday()+ start.fracday());
+		xml_candidate->header.observationLength= (archive->end_time() - archive->start_time()).in_seconds();
+		Angle ra_angle = (archive->get_coordinates()).ra();
+		Angle dec_angle = (archive->get_coordinates()).dec();
+		xml_candidate->header.ra=ra_angle.getDegrees();
+		xml_candidate->header.dec=dec_angle.getDegrees();
+
+
+		xml_candidate->sections[0].name = (char*)malloc(sizeof(char)*80);
+		strcpy(xml_candidate->sections[0].name,"User Defined");
+		xml_candidate->sections[0].bestWidth=-1;
+		float rms = getRMS(archive);
+		rms = rms / sqrt(float(nchan*nsubint));
+		xml_candidate->sections[0].bestSnr=getSNR(total,rms);
+		float period=getPeriod(archive);
+		xml_candidate->sections[0].bestTopoPeriod=period;
+		xml_candidate->sections[0].bestBaryPeriod=period/dopplerFactor;
+
+		xml_candidate->sections[0].bestDm=getDM(archive);
+	}
+
+	phcx_section* section = xml_candidate->sections; // the first section
+
+	if ((section->pulseProfile != NULL) || (section->subbands != NULL) || (section->subints != NULL)){
+		// we already have an initial section filled out, so continue without doing anything.
+	} else {
+
+		// we put in initial values
+		// we will memcpy for now, since I am not sure what happens to the 'archives'
+		{
+			float* amps = total->get_Profile(0,0,0)->get_amps();
+			// the profile
+			section->nbins=nbin;
+			section->pulseProfile = (float*)malloc(sizeof(float)*nbin);
+			memcpy(section->pulseProfile,amps,sizeof(float)*nbin);
+		}
+		{
+			// make the freq/phase
+			Reference::To<Archive> phase_freq_copy = archive->clone();
+			phase_freq_copy->pscrunch();
+			phase_freq_copy->tscrunch();
+			phase_freq_copy->dedisperse();
+			phase_freq_copy->remove_baseline();
+
+			Integration* subint = phase_freq_copy->get_Integration(0);
+			section->nsubbands=nchan;
+			section->subbands = (float**)malloc(sizeof(float*)*nchan);
+			for (unsigned ichan=0; ichan < nchan; ichan++)
+			{
+				const unsigned ipol = 0; // total intensity
+
+				float* amps = subint->get_Profile( ipol, ichan )->get_amps();
+				section->subbands[ichan] = (float*)malloc(sizeof(float)*nbin);
+				memcpy(section->subbands[ichan],amps,sizeof(float)*nbin);
+
+				/* amps points to an array of nbin phase bins */
+			}
+		}
+		{
+			//make the time/phase
+			Reference::To<Archive> phase_time_copy = archive->clone();
+
+			phase_time_copy->fscrunch();
+			phase_time_copy->pscrunch();
+			phase_time_copy->remove_baseline();
+			phase_time_copy->dedisperse();
+
+
+
+			section->nsubints=nsubint;
+			section->subints = (float**)malloc(sizeof(float*)*nsubint);
+
+			for (unsigned isub=0; isub < nsubint; isub++)
+			{
+				Integration* subint = phase_time_copy->get_Integration (isub);
+
+				const unsigned ipol = 0;  // total intensity
+				const unsigned ichan = 0; // fscrunched
+
+				float* amps = subint->get_Profile( ipol, ichan )->get_amps();
+
+				section->subints[isub] = (float*)malloc(sizeof(float)*nbin);
+				memcpy(section->subints[isub],amps,sizeof(float)*nbin);
+
+				/* amps points to an array of nbin phase bins */
+			}
+
+		}
+	}
+
+}
+void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod,double centreDm,double centreAccn, double centreJerk){
+
+	 Reference::To<Archive> total = archive->total();
+	 total->remove_baseline();
+	 const unsigned nchan = archive->get_nchan();
+	 const unsigned nsubint = archive->get_nsubint();
+	 const unsigned nbin = total->get_nbin();
+
+	xml_candidate->nsections++;
+	xml_candidate->sections = (phcx_section*)realloc(xml_candidate->sections,sizeof(phcx_section)*xml_candidate->nsections);
+	phcx_section* section = xml_candidate->sections+xml_candidate->nsections-1;
+
+	section->subints=NULL;
+	section->subbands=NULL;
+	section->pulseProfile=NULL;
+	section->snrBlock.block=NULL;
+
+	// insert the optimised parameters
+	
+	section->name = (char*)malloc(sizeof(char)*strlen(xml_candidate->sections[xml_candidate->nsections-2].name)+20);
+	sprintf(section->name,"%s-pdmpd",xml_candidate->sections[xml_candidate->nsections-2].name);
+	section->bestWidth=bestPulseWidth/(float)nbin;
+	float rms = getRMS(archive);
+	rms = rms / sqrt(float(nchan*nsubint));
+	section->bestSnr=getSNR(total,rms);
+	section->bestTopoPeriod=bestPeriod_bc_us/1000000.0*dopplerFactor;
+	section->bestBaryPeriod=bestPeriod_bc_us/1000000.0;
+	section->bestDm=bestDM;
+	{
+		float* amps = total->get_Profile(0,0,0)->get_amps();
+		// the profile
+		section->nbins=nbin;
+		section->pulseProfile = (float*)malloc(sizeof(float)*nbin);
+		memcpy(section->pulseProfile,amps,sizeof(float)*nbin);
+	}
+	{
+		// make the freq/phase
+		Reference::To<Archive> phase_freq_copy = archive->clone();
+		phase_freq_copy->pscrunch();
+		phase_freq_copy->tscrunch();
+		phase_freq_copy->dedisperse();
+		phase_freq_copy->remove_baseline();
+
+		Integration* subint = phase_freq_copy->get_Integration(0);
+		section->nsubbands=nchan;
+		section->subbands = (float**)malloc(sizeof(float*)*nchan);
+		for (unsigned ichan=0; ichan < nchan; ichan++)
+		{
+			const unsigned ipol = 0; // total intensity
+
+			float* amps = subint->get_Profile( ipol, ichan )->get_amps();
+			section->subbands[ichan] = (float*)malloc(sizeof(float)*nbin);
+			memcpy(section->subbands[ichan],amps,sizeof(float)*nbin);
+
+			/* amps points to an array of nbin phase bins */
+		}
+	}
+	{
+		//make the time/phase
+		Reference::To<Archive> phase_time_copy = archive->clone();
+
+		phase_time_copy->fscrunch();
+		phase_time_copy->pscrunch();
+		phase_time_copy->remove_baseline();
+		phase_time_copy->dedisperse();
+
+
+
+		section->nsubints=nsubint;
+		section->subints = (float**)malloc(sizeof(float*)*nsubint);
+
+		for (unsigned isub=0; isub < nsubint; isub++)
+		{
+			Integration* subint = phase_time_copy->get_Integration (isub);
+
+			const unsigned ipol = 0;  // total intensity
+			const unsigned ichan = 0; // fscrunched
+
+			float* amps = subint->get_Profile( ipol, ichan )->get_amps();
+
+			section->subints[isub] = (float*)malloc(sizeof(float)*nbin);
+			memcpy(section->subints[isub],amps,sizeof(float)*nbin);
+
+			/* amps points to an array of nbin phase bins */
+		}
+
+	}
+	{
+		//make the 'SNR block'
+		int dmBins, periodBins;
+
+		// Number of bins in the DM axis
+		dmBins = (int)ceil( ( fabs(dmHalfRange)*2 ) / dmStep);
+
+		// Number of bins in the Period axis
+		periodBins = (int)ceil( ( fabs(periodHalfRange_us)*2 ) / periodStep_us);
+
+		section->snrBlock.periodIndex = (double*)malloc(sizeof(double)*periodBins);
+		section->snrBlock.nperiod=periodBins;
+		section->snrBlock.dmIndex = (double*)malloc(sizeof(double)*dmBins);
+		section->snrBlock.ndm = dmBins;
+		section->snrBlock.accnIndex = (double*)malloc(sizeof(double));
+		section->snrBlock.naccn=1;
+		section->snrBlock.jerkIndex = (double*)malloc(sizeof(double));
+		section->snrBlock.njerk=1;
+
+		double periodTrial = centrePeriod-periodHalfRange_us;
+		for(int i = 0; i < periodBins; i++){
+			section->snrBlock.periodIndex[i] = periodTrial*1000000;
+			periodTrial += periodStep_us;
+		}
+
+		double dmTrial = centreDm-dmHalfRange;
+                for(int i = 0; i < dmBins; i++){
+                        section->snrBlock.dmIndex[i] = dmTrial;
+                        dmTrial += dmStep;
+                }
+
+		section->snrBlock.accnIndex[0]=centreAccn;
+                section->snrBlock.jerkIndex[0]=centreJerk;
+
+		int i=0;
+		section->snrBlock.block=(double****)malloc(sizeof(double***)*section->snrBlock.ndm);
+		for(int d=0; d < section->snrBlock.ndm; d++){
+			section->snrBlock.block[d]=(double***)malloc(sizeof(double**)*section->snrBlock.nperiod);
+			for(int p=0; p < section->snrBlock.nperiod; p++){
+				section->snrBlock.block[d][p]=(double**)malloc(sizeof(double*)*section->snrBlock.naccn);
+				for(int a=0; a < section->snrBlock.naccn; a++){
+					section->snrBlock.block[d][p][a]=(double*)malloc(sizeof(double)*section->snrBlock.njerk);
+					for(int j=0; j < section->snrBlock.njerk; j++){
+						section->snrBlock.block[d][p][a][j]=SNRs[i];
+						i++;
+					}
+				}
+			}
+		}
+	}
+
+}
+
+
+
+
+#endif
+

@@ -171,6 +171,9 @@ SWIN_LIB_TEMPO2
 SWIN_LIB_MPI
 SWIN_LIB_READLINE
 SWIN_LIB_GSL
+# Check for psrxml io library
+MJK_LIB_PSRXML
+
 
 #
 # Generate python module if --enable-shared is used
