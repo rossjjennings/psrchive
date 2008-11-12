@@ -43,12 +43,12 @@ nobase_include_HEADERS = \
 	Pulsar/FrequencyAppend.h \
         Pulsar/FrequencyIntegrate.h \
         Pulsar/GaussianBaseline.h \
+	Pulsar/Index.h \
 	Pulsar/Integrate.h \
 	Pulsar/InstallInterpreter.h \
         Pulsar/IntegrationWeight.h \
         Pulsar/Interpreter.h \
 	Pulsar/InterpreterExtension.h \
-        Pulsar/InterpreterVariables.h \
         Pulsar/IterativeBaseline.h \
 	Pulsar/LastHarmonic.h \
 	Pulsar/LastSignificant.h \
@@ -60,6 +60,7 @@ nobase_include_HEADERS = \
 	Pulsar/PeakConsecutive.h \
 	Pulsar/PeakCumulative.h \
         Pulsar/PhaseWeightFunction.h \
+	Pulsar/PhaseWeightInterface.h \
 	Pulsar/PhaseWeightModifier.h \
 	Pulsar/PhaseWeightShift.h \
 	Pulsar/PhaseWeightSmooth.h \
@@ -69,6 +70,7 @@ nobase_include_HEADERS = \
 	Pulsar/ProfilePCA.h \
 	Pulsar/ProfileShiftFit.h \
 	Pulsar/ProfileStats.h \
+	Pulsar/ProfileStatsInterface.h \
         Pulsar/ProfileWeightFunction.h \
 	Pulsar/RadiometerWeight.h \
 	Pulsar/RiseFall.h \
@@ -85,6 +87,8 @@ nobase_include_HEADERS = \
 	Pulsar/StandardOptions.h \
 	Pulsar/StandardCandles.h \
         Pulsar/StandardSNR.h \
+	Pulsar/Statistics.h \
+	Pulsar/StatisticsInterface.h \
 	Pulsar/Subtract.h \
         Pulsar/SyntheticPolnProfile.h \
 	Pulsar/TimeAppend.h \
@@ -156,6 +160,7 @@ libGeneral_la_SOURCES = \
 	FrequencyAppend.C \
         FrequencyIntegrate.C \
         GaussianBaseline.C \
+	Index.C \
 	InstallInterpreter.C \
         Integration_cal_levels.C \
         Integration_convert_state.C \
@@ -173,7 +178,6 @@ libGeneral_la_SOURCES = \
         Integration_weighted_frequency.C \
 	IntegrationWeight.C \
 	Interpreter.C \
-	InterpreterVariables.C \
         IterativeBaseline.C \
 	LastHarmonic.C \
         LastSignificant.C \
@@ -183,12 +187,14 @@ libGeneral_la_SOURCES = \
 	PeakEdgesInterpreter.C \
 	PeakConsecutive.C \
 	PeakCumulative.C \
+	PhaseWeightInterface.C \
 	PhaseWeightModifier.C \
 	PhaseWeightShift.C \
         PhaseWeight.C \
 	ProfileInterpreter.C \
 	ProfileShiftFit.C \
 	ProfileStats.C \
+	ProfileStatsInterface.C \
 	Profile_baseline.C \
         Profile_convolve.C \
         Profile_dedisperse.C \
@@ -213,10 +219,13 @@ libGeneral_la_SOURCES = \
 	SNRatioInterpreter.C \
         SNRWeight.C \
         SquareWave.C \
+	standard_interface.C \
 	standard_shell.C \
 	StandardOptions.C \
         StandardCandles.C \
         StandardSNR.C \
+	Statistics.C \
+	StatisticsInterface.C \
 	Subtract.C \
 	TimeAppend.C \
 	TimeIntegrate.C \
