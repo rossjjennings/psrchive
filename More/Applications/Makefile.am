@@ -6,7 +6,8 @@ bin_SCRIPTS = psrhelp
 
 EXTRA_DIST = psrhelp
 
-bin_PROGRAMS = pam pat paz psradd psrsh psrwt fluxcal pac pcm pdv rmfit sesdiv
+bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrwt \
+	fluxcal pac pcm pdv rmfit sesdiv
 
 pam_SOURCES = pam.C
 
@@ -19,6 +20,8 @@ psradd_SOURCES = psradd.C
 
 psrsh_SOURCES = psrsh.C
 psrsh_LDADD = $(LDADD) @READLINE_LIBS@
+
+psrstat_SOURCES = psrstat.C
 
 psrwt_SOURCES = psrwt.C
 
