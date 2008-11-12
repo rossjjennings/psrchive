@@ -263,12 +263,22 @@ Estimate<double> Pulsar::PhaseWeight::get_mean () const
   return mean;
 }
 
+float Pulsar::PhaseWeight::get_avg () const
+{
+  return get_mean().get_value();
+}
+
 //! Get the weighted variance of the Profile
 Estimate<double> Pulsar::PhaseWeight::get_variance () const
 {
   if (!built)
     const_cast<PhaseWeight*>(this)->build();
   return variance;
+}
+
+float Pulsar::PhaseWeight::get_rms () const
+{
+  return sqrt( get_variance().get_value() );
 }
 
 void

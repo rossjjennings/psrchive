@@ -24,11 +24,17 @@ Pulsar::PhaseWeight::Interface::Interface (PhaseWeight* instance)
   add( &PhaseWeight::get_max,
        "max", "maximum of selected phase bins" );
 
+  add( &PhaseWeight::get_avg,
+       "avg", "average of selected phase bins" );
+
+  add( &PhaseWeight::get_rms,
+       "rms", "standard deviation" );
+
   add( &PhaseWeight::get_median,
        "med", "median of selected phase bins" );
 
   add( &PhaseWeight::get_median_difference,
-       "mdm", "median difference from the median (robust rms)" );
+       "mdm", "median difference from the median" );
 }
 
 

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeight.h,v $
-   $Revision: 1.14 $
-   $Date: 2008/11/12 07:45:36 $
+   $Revision: 1.15 $
+   $Date: 2008/11/12 10:55:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeight_h
@@ -91,8 +91,11 @@ namespace Pulsar {
     //! Get the weighted total of the amplitudes
     double get_weighted_sum () const;
 
-    //! Get the weighted mean of the Profile amplitudes
-    Estimate<double> get_mean () const;
+    //! Get the weighted average of the Profile amplitudes
+    float get_avg () const;
+
+    //! Get the weighted rms of the Profile amplitudes
+    float get_rms () const;
 
     //! Get the minimum amplitude with non-zero weight
     float get_min () const;
@@ -105,6 +108,9 @@ namespace Pulsar {
 
     //! Get the median difference between the median and non-zero amplitudes
     float get_median_difference () const;
+
+    //! Get the weighted mean of the Profile amplitudes
+    Estimate<double> get_mean () const;
 
     //! Get the weighted variance of the Profile amplitudes
     Estimate<double> get_variance () const;
