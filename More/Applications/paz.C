@@ -30,9 +30,7 @@
 
 #include "BoxMuller.h"
 
-//
-//! An example of an application
-//
+//! Pulsar Archive Zapping application
 class paz: public Pulsar::Application
 {
 public:
@@ -74,7 +72,7 @@ char backward_compatibility (char c)
 paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
 {
   has_manual = true;
-  version = "$Id: paz.C,v 1.53 2008/11/07 22:15:23 straten Exp $";
+  version = "$Id: paz.C,v 1.54 2008/11/12 07:44:58 straten Exp $";
   filter = backward_compatibility;
 
   add( new Pulsar::StandardOptions );
