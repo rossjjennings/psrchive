@@ -1,0 +1,83 @@
+//-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+
+/* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Statistics.h,v $
+   $Revision: 1.1 $
+   $Date: 2008/11/12 07:45:16 $
+   $Author: straten $ */
+
+#ifndef __Pulsar_Statistics_h
+#define __Pulsar_Statistics_h
+
+#include "Pulsar/Index.h"
+#include "TextInterface.h"
+
+namespace Pulsar {
+
+  class Archive;
+  class Profile;
+
+  //! Interface to a variety of useful statistics
+  class Statistics : public Reference::Able
+  {
+
+  public:
+
+    //! Default constructor
+    Statistics (const Archive* = 0);
+
+    //! Set the instance from which statistics will be drawn
+    void set_Archive (const Archive*);
+
+    //! Set the sub-integration from which statistics will be drawn
+    void set_subint (Index _isubint) { isubint = _isubint; }
+    Index get_subint () const { return isubint; }
+    
+    //! Set the frequency channel from which statistics will be drawn
+    void set_chan (Index _ichan) { ichan = _ichan; }
+    Index get_chan () const { return ichan; }
+
+    //! Set the polarization to plot
+    void set_pol (Index _ipol) { ipol = _ipol; }
+    Index get_pol () const { return ipol; }
+
+    //! Get the signal-to-noise ratio
+    double get_snr () const;
+
+    //! Get the Fourier-noise-to-noise ratio
+    double get_nfnr () const;
+
+    //! Get the number of cal transitions
+    unsigned get_cal_ntrans () const;
+
+    //! Get the predicted level of 2-bit distortion
+    double get_2bit_dist () const;
+    
+    //! Text interface to statistics
+    class Interface;
+
+    //! Get the text interface to this
+    Interface* get_interface ();
+
+  protected:
+
+    Reference::To<const Archive> archive;
+    Index isubint;
+    Index ichan;
+    Index ipol;
+
+    const Profile* get_Profile () const;
+    mutable Reference::To<const Profile> profile;
+
+  };
+}
+
+// standard interface constructor defined in More/General/standard_interface.C
+TextInterface::Parser* standard_interface (Pulsar::Archive*);
+
+#endif

@@ -6,13 +6,19 @@
  ***************************************************************************/
 
 #include "Pulsar/PlotLabel.h"
-#include "Pulsar/InterpreterVariables.h"
+#include "Pulsar/Statistics.h"
 
 #include "escape.h"
 #include "substitute.h"
 #include "evaluate.h"
 
 #include <cpgplot.h>
+
+#if 0
+#define DEBUG(x) cerr << x << endl
+#else
+#define DEBUG(X)
+#endif
 
 using namespace std;
 
@@ -37,7 +43,7 @@ void Pulsar::PlotLabel::plot (const Archive* data)
 }
 
 void Pulsar::PlotLabel::plot (const Archive* archive, 
-                              const string& label, float side)
+                              const string& label, float side) try
 {
   if (label == PlotLabel::unset)
     return;
@@ -46,28 +52,29 @@ void Pulsar::PlotLabel::plot (const Archive* archive,
   vector<string> labels;
   separate (elabel, labels, "\n");
 
-  TextInterface::Parser* parser=const_cast<Archive*>(archive)->get_interface();
-  parser->insert( new Interpreter::Variables );
+  TextInterface::Parser* parser 
+    = standard_interface( const_cast<Archive*>(archive) );
+  parser->set_indentation ("");
 
   for (unsigned i=0; i < labels.size(); i++)
   {
-    if (Archive::verbose > 2)
-      cerr << "Pulsar::PlotLabel::plot label[" <<i<< "]=" << labels[i] << endl;
+    DEBUG( "Pulsar::PlotLabel::plot label[" <<i<< "]=" << labels[i] );
 
     labels[i] = substitute( labels[i], parser );
 
-    if (Archive::verbose > 2)
-      cerr << "Pulsar::PlotLabel::plot subst label=" << labels[i] << endl;
+    DEBUG( "Pulsar::PlotLabel::plot subst label=" << labels[i] );
 
     labels[i] = evaluate( labels[i] );
 
-    if (Archive::verbose > 2)
-      cerr << "Pulsar::PlotLabel::plot eval label=" << labels[i] << endl;
+    DEBUG( "Pulsar::PlotLabel::plot eval label=" << labels[i] );
 
     row (labels[i], i, labels.size(), side);
   }
 }
-
+catch (Error& error)
+{
+  throw error += "Pulsar::PlotLabel::plot";
+}
 unsigned Pulsar::PlotLabel::get_nrows (const string& label) const
 {
   string elabel = escape (label);

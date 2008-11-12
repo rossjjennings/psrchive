@@ -7,13 +7,13 @@
 
 #include "Pulsar/Interpreter.h"
 #include "Pulsar/InterpreterExtension.h"
-#include "Pulsar/InterpreterVariables.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/Config.h"
+#include "Pulsar/Statistics.h"
 
 #include "Pulsar/ScatteredPowerCorrection.h"
 #include "Pulsar/Dispersion.h"
@@ -621,13 +621,7 @@ catch (Error& error) {
 
 TextInterface::Parser* Pulsar::Interpreter::get_interface ()
 {
-  TextInterface::Parser* interface = get()->get_interface();
-
-  interface->set_indentation (" ");
-
-  interface->insert( new Variables );
-
-  return interface;
+  return standard_interface( get() );
 }
 
 string Pulsar::Interpreter::edit (const string& args) try

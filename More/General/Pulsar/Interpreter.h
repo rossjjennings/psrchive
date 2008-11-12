@@ -52,9 +52,6 @@ namespace Pulsar {
 
     enum Status { Good, Warn, Fail, Undefined };
 
-    //! An enhanced text interface to the Archive class
-    class Variables;
-
     //! default constructor
     Interpreter ();
 
