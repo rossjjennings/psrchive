@@ -36,6 +36,7 @@ include_HEADERS = \
         substitute.h \
 	TextIndex.h \
         TextInterface.h \
+	TextLoop.h \
         tostring.h \
         Traits.h \
         Vector.h \
@@ -57,6 +58,7 @@ libunits_la_SOURCES = \
 	tostring.C \
 	TextIndex.C \
         TextInterface.C \
+	TextLoop.C \
 	Warning.C
 
 EXTRA_DIST = header_PromoteTraits MatrixTest.h
