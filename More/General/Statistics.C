@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/Statistics.h"
+#include "Pulsar/ProfileStats.h"
 
 #include "Pulsar/TwoBitStats.h"
 #include "Pulsar/NoiseStatistics.h"
@@ -70,5 +71,27 @@ Pulsar::Statistics::get_2bit_dist () const
   for (unsigned idig=0; idig < ndig; idig++)
     distortion += tbs->get_distortion(idig);
   return distortion;
+}
+
+//! Get the off-pulse baseline
+Pulsar::PhaseWeight* Pulsar::Statistics::get_baseline ()
+{
+  setup_stats ();
+  return stats->get_baseline();
+}
+
+//! Get the on-pulse phase bins
+Pulsar::PhaseWeight* Pulsar::Statistics::get_onpulse ()
+{
+  setup_stats ();
+  return stats->get_on_pulse();
+}
+
+void Pulsar::Statistics::setup_stats ()
+{
+  if (!stats)
+    stats = new ProfileStats;
+
+  stats->set_profile( get_Profile() );
 }
 

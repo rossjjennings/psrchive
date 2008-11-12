@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/StatisticsInterface.h"
+#include "Pulsar/PhaseWeightInterface.h"
 
 Pulsar::Statistics::Interface::Interface (Statistics* instance)
 {
@@ -23,6 +24,12 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
   add( &Statistics::get_pol,
        &Statistics::set_pol,
        "pol", "Polarization index" );
+
+  import ( "on", PhaseWeight::Interface(), 
+	   &Statistics::get_onpulse );
+
+  import ( "off", PhaseWeight::Interface(), 
+	   &Statistics::get_baseline );
 
   add( &Statistics::get_snr,
        "snr", "Total signal-to-noise ratio" );

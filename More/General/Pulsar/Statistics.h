@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Statistics.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/11/12 07:45:16 $
+   $Revision: 1.2 $
+   $Date: 2008/11/12 10:35:24 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Statistics_h
@@ -21,6 +21,8 @@ namespace Pulsar {
 
   class Archive;
   class Profile;
+  class ProfileStats;
+  class PhaseWeight;
 
   //! Interface to a variety of useful statistics
   class Statistics : public Reference::Able
@@ -58,6 +60,12 @@ namespace Pulsar {
     //! Get the predicted level of 2-bit distortion
     double get_2bit_dist () const;
     
+    //! Get the off-pulse baseline
+    PhaseWeight* get_baseline ();
+
+    //! Get the on-pulse phase bins
+    PhaseWeight* get_onpulse ();
+
     //! Text interface to statistics
     class Interface;
 
@@ -70,6 +78,9 @@ namespace Pulsar {
     Index isubint;
     Index ichan;
     Index ipol;
+
+    void setup_stats ();
+    mutable Reference::To<ProfileStats> stats;
 
     const Profile* get_Profile () const;
     mutable Reference::To<const Profile> profile;
