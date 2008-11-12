@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/AnglePlot.h,v $
-   $Revision: 1.17 $
-   $Date: 2007/11/20 00:41:23 $
-   $Author: nopeer $ */
+   $Revision: 1.18 $
+   $Date: 2008/11/12 07:45:10 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_AnglePlot_h
 #define __Pulsar_AnglePlot_h
 
 #include "Pulsar/PhasePlot.h"
-#include "Pulsar/PlotIndex.h"
+#include "Pulsar/Index.h"
 
 #include "Estimate.h"
 
@@ -52,12 +52,12 @@ namespace Pulsar {
     std::string get_flux_label (const Archive* data);
 
     //! Set the sub-integration to plot (where applicable)
-    void set_subint (const PlotIndex& _isubint) { isubint = _isubint; }
-    PlotIndex get_subint () const { return isubint; }
+    void set_subint (const Index& _isubint) { isubint = _isubint; }
+    Index get_subint () const { return isubint; }
     
     //! Set the frequency channel to plot (where applicable)
-    void set_chan (const PlotIndex& _ichan) { ichan = _ichan; }
-    PlotIndex get_chan () const { return ichan; }
+    void set_chan (const Index& _ichan) { ichan = _ichan; }
+    Index get_chan () const { return ichan; }
 
     //! the mark to be used
     void set_marker (Marker m) { marker = m; }
@@ -85,8 +85,8 @@ namespace Pulsar {
     //! The angles
     std::vector< Estimate<double> > angles;
 
-    PlotIndex ichan;
-    PlotIndex isubint;
+    Index ichan;
+    Index isubint;
   };
 
   std::ostream& operator << (std::ostream& os, AnglePlot::Marker);

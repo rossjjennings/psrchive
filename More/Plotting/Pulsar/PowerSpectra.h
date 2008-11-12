@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PowerSpectra.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/10/02 05:08:15 $
+   $Revision: 1.10 $
+   $Date: 2008/11/12 07:45:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PowerSpectra_h
 #define __Pulsar_PowerSpectra_h
 
 #include "Pulsar/FrequencyPlot.h"
-#include "Pulsar/PlotIndex.h"
+#include "Pulsar/Index.h"
 
 namespace Pulsar {
 
@@ -48,12 +48,12 @@ namespace Pulsar {
     virtual void get_spectra (const Archive*) = 0;
 
     //! Set the sub-integration to plot (where applicable)
-    void set_subint (const PlotIndex& _isubint) { isubint = _isubint; }
-    PlotIndex get_subint () const { return isubint; }
+    void set_subint (const Index& _isubint) { isubint = _isubint; }
+    Index get_subint () const { return isubint; }
     
     //! Set the polarization to plot
-    void set_pol (const PlotIndex& _ipol) { ipol = _ipol; }
-    PlotIndex get_pol () const { return ipol; }
+    void set_pol (const Index& _ipol) { ipol = _ipol; }
+    Index get_pol () const { return ipol; }
 
     //! Set the median filter window size
     void set_median_window (unsigned window) { median_window = window; }
@@ -77,8 +77,8 @@ namespace Pulsar {
     std::vector< int > plot_sci;
     std::vector< int > plot_sls;
 
-    PlotIndex isubint;
-    PlotIndex ipol;
+    Index isubint;
+    Index ipol;
 
     unsigned median_window;
     bool draw_lines;

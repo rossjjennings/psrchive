@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluctPlot.h,v $
-   $Revision: 1.4 $
-   $Date: 2007/10/02 05:08:15 $
+   $Revision: 1.5 $
+   $Date: 2008/11/12 07:45:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluctPlot_h
@@ -16,7 +16,7 @@
 
 #include "Pulsar/SimplePlot.h"
 #include "Pulsar/ProfileVectorPlotter.h"
-#include "Pulsar/PlotIndex.h"
+#include "Pulsar/Index.h"
 
 namespace Pulsar {
 
@@ -55,24 +55,24 @@ namespace Pulsar {
     virtual void get_profiles (const Archive*) = 0;
 
     //! Set the sub-integration to plot (where applicable)
-    void set_subint (PlotIndex _isubint) { isubint = _isubint; }
-    PlotIndex get_subint () const { return isubint; }
+    void set_subint (Index _isubint) { isubint = _isubint; }
+    Index get_subint () const { return isubint; }
     
     //! Set the frequency channel to plot (where applicable)
-    void set_chan (PlotIndex _ichan) { ichan = _ichan; }
-    PlotIndex get_chan () const { return ichan; }
+    void set_chan (Index _ichan) { ichan = _ichan; }
+    Index get_chan () const { return ichan; }
 
     //! Set the polarization to plot
-    void set_pol (PlotIndex _ipol) { ipol = _ipol; }
-    PlotIndex get_pol () const { return ipol; }
+    void set_pol (Index _ipol) { ipol = _ipol; }
+    Index get_pol () const { return ipol; }
 
   protected:
 
     ProfileVectorPlotter plotter;
 
-    PlotIndex isubint;
-    PlotIndex ichan;
-    PlotIndex ipol;
+    Index isubint;
+    Index ichan;
+    Index ipol;
 
   };
 

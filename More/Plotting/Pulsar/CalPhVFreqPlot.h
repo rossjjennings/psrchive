@@ -13,7 +13,7 @@
 
 #include <Pulsar/Plot.h>
 #include <Pulsar/SimplePlot.h>
-#include <Pulsar/PlotIndex.h>
+#include <Pulsar/Index.h>
 #include <vector>
 
 
@@ -46,12 +46,12 @@ namespace Pulsar
     void draw (const Archive*);
 
     //! Set the sub-integration to plot (where applicable)
-    void set_subint (const PlotIndex& _isubint) { isubint = _isubint; }
-    PlotIndex get_subint () const { return isubint; }
+    void set_subint (const Index& _isubint) { isubint = _isubint; }
+    Index get_subint () const { return isubint; }
 
     //! Set the polarization to plot (where applicable)
-    void set_pol( const PlotIndex & _ipol ) { ipol = _ipol; }
-    PlotIndex get_pol() const { return ipol; }
+    void set_pol( const Index & _ipol ) { ipol = _ipol; }
+    Index get_pol() const { return ipol; }
 
     const void minmaxval( std::vector<float> thearray, float &min, float &max );
 
@@ -63,8 +63,8 @@ namespace Pulsar
     };
 
   private:
-    PlotIndex ipol;
-    PlotIndex isubint;
+    Index ipol;
+    Index isubint;
 
     unsigned int npol;
     unsigned int nchan;

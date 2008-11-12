@@ -1,17 +1,18 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/PlotIndex.h"
+
+#include "Pulsar/Index.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/PolnProfile.h"
 
 using namespace std;
 
-Pulsar::PlotIndex::PlotIndex (unsigned value, bool flag)
+Pulsar::Index::Index (unsigned value, bool flag)
 {
   index = value;
   integrate = flag;
@@ -19,7 +20,7 @@ Pulsar::PlotIndex::PlotIndex (unsigned value, bool flag)
 
 const Pulsar::Profile* 
 Pulsar::get_Profile (const Archive* data,
-		     PlotIndex subint, PlotIndex pol, PlotIndex chan)
+		     Index subint, Index pol, Index chan)
 {
   if (!data)
     throw Error (InvalidParam, "Pulsar::get_Profile", "no Archive");
@@ -71,33 +72,33 @@ Pulsar::get_Profile (const Archive* data,
     return profile.release();
 
   }
-  catch (Error& error) {
-    throw error += "Pulsar::get_Profile (PlotIndex)";
+  catch (Error& error)
+  {
+    throw error += "Pulsar::get_Profile (Index)";
   }
 }
 
 const Pulsar::Integration* 
-Pulsar::get_Integration (const Archive* data, PlotIndex subint)
+Pulsar::get_Integration (const Archive* data, Index subint)
 {
   if (!data)
     throw Error (InvalidParam, "Pulsar::get_Integration", "no Archive");
 
-  try {
-
+  try
+  {
     if (Archive::verbose > 2) cerr << "Pulsar::get_Integration "
       "(" << subint << ")" << endl;
 
     Reference::To<const Archive> archive = data;
 
-    if (subint.get_integrate()) {
-
+    if (subint.get_integrate())
+    {
       if (Archive::verbose > 2)
 	cerr << "Pulsar::get_Integration chan=I tscrunch" << endl;
 
       Reference::To<Archive> archive_clone = archive->clone();
       archive_clone->tscrunch();
       archive = archive_clone;
-
     }
 
     Reference::To<const Integration> integration;
@@ -108,20 +109,21 @@ Pulsar::get_Integration (const Archive* data, PlotIndex subint)
 
     return integration.release();
   }
-  catch (Error& error) {
-    throw error += "Pulsar::get_Integration (PlotIndex)";
+  catch (Error& error)
+  {
+    throw error += "Pulsar::get_Integration (Index)";
   }
 }
 
 //! Return a newly constructed PolnProfile with state == Stokes
 const Pulsar::PolnProfile* 
-Pulsar::get_Stokes (const Archive* data, PlotIndex subint, PlotIndex chan)
+Pulsar::get_Stokes (const Archive* data, Index subint, Index chan)
 {
   if (!data)
-    throw Error (InvalidParam, "Pulsar::get_Stokes (PlotIndex)", "no Archive");
+    throw Error (InvalidParam, "Pulsar::get_Stokes (Index)", "no Archive");
 
-  try {
-
+  try
+  {
     if (Archive::verbose > 2) cerr << "Pulsar::get_Stokes "
       "(" << subint << "," << chan << ")" << endl;
 
@@ -130,7 +132,8 @@ Pulsar::get_Stokes (const Archive* data, PlotIndex subint, PlotIndex chan)
 
     Reference::To<Integration> integration_clone;
     
-    if (chan.get_integrate()) {
+    if (chan.get_integrate())
+    {
       integration_clone = integration->clone();
       integration_clone->expert()->fscrunch();
       integration = integration_clone;
@@ -143,7 +146,8 @@ Pulsar::get_Stokes (const Archive* data, PlotIndex subint, PlotIndex chan)
     if (integration_clone)
       profile_clone = integration_clone->new_PolnProfile(chan.get_value());
 
-    if (profile->get_state() != Signal::Stokes) {
+    if (profile->get_state() != Signal::Stokes)
+    {
       if (!profile_clone)
 	profile_clone = profile->clone();
       profile_clone->convert_state(Signal::Stokes);
@@ -158,11 +162,11 @@ Pulsar::get_Stokes (const Archive* data, PlotIndex subint, PlotIndex chan)
 
   }
   catch (Error& error) {
-    throw error += "Pulsar::get_Stokes (PlotIndex)";
+    throw error += "Pulsar::get_Stokes (Index)";
   }
 }
 
-std::ostream& Pulsar::operator << (std::ostream& os, const PlotIndex& i)
+std::ostream& Pulsar::operator << (std::ostream& os, const Index& i)
 {
   if (i.get_integrate())
     return os << "I";
@@ -170,13 +174,15 @@ std::ostream& Pulsar::operator << (std::ostream& os, const PlotIndex& i)
     return os << i.get_value();
 }
 
-std::istream& Pulsar::operator >> (std::istream& is, PlotIndex& i)
+std::istream& Pulsar::operator >> (std::istream& is, Index& i)
 {
-  if (is.peek() == 'I') {
+  if (is.peek() == 'I')
+  {
     is.get();
     i.set_integrate(true);
   }
-  else {
+  else
+  {
     unsigned val;
     is >> val;
     i.set_value(val);

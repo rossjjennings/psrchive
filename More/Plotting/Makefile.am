@@ -9,7 +9,7 @@ if HAVE_PGPLOT
 
 nobase_include_HEADERS =					       \
 	Pulsar/Plot.h Pulsar/PlotFactory.h			       \
-	Pulsar/PlotIndex.h Pulsar/PlotLoop.h			       \
+	Pulsar/PlotLoop.h			       \
 	Pulsar/PlotEdge.h					       \
 	Pulsar/PlotScale.h Pulsar/PhaseScale.h Pulsar/FrequencyScale.h \
 	Pulsar/PlotAxis.h Pulsar/PlotLabel.h Pulsar/PlotAttributes.h   \
@@ -37,7 +37,7 @@ nobase_include_HEADERS =					       \
 	Pulsar/InfoLabel.h
 
 libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
-	PlotIndex.C PlotLoop.C \
+	PlotLoop.C \
 	PlotEdgeTI.C \
 	PlotScale.C PlotScaleTI.C \
 	PhaseScale.C PhaseScaleTI.C \

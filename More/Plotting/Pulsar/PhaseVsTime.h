@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsTime.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/10/02 05:08:15 $
+   $Revision: 1.10 $
+   $Date: 2008/11/12 07:45:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsTime_h
 #define __Pulsar_PhaseVsTime_h
 
 #include "Pulsar/PhaseVsPlot.h"
-#include "Pulsar/PlotIndex.h"
+#include "Pulsar/Index.h"
 
 namespace Pulsar {
 
@@ -49,18 +49,18 @@ namespace Pulsar {
     const Profile* get_Profile (const Archive* data, unsigned row);
 
     //! Set the frequency channel to plot
-    void set_chan (const PlotIndex& _ichan) { ichan = _ichan; }
-    PlotIndex get_chan () const { return ichan; }
+    void set_chan (const Index& _ichan) { ichan = _ichan; }
+    Index get_chan () const { return ichan; }
     
     //! Set the polarization to plot
-    void set_pol (const PlotIndex& _ipol) { ipol = _ipol; }
-    PlotIndex get_pol () const { return ipol; }
+    void set_pol (const Index& _ipol) { ipol = _ipol; }
+    Index get_pol () const { return ipol; }
 
   protected:
 
     std::string time_string;
-    PlotIndex ichan;
-    PlotIndex ipol;
+    Index ichan;
+    Index ipol;
 
   };
 

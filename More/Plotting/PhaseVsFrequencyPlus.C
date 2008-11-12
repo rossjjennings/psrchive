@@ -37,7 +37,7 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   flux.get_frame()->set_viewport (0,.7, .7,1);
 
   // tell the flux plotter to integrate over all frequencies
-  flux.set_chan (PlotIndex (0, true));
+  flux.set_chan (Index (0, true));
   
   // remove the x enumeration
   flux.get_frame()->get_x_axis()->rem_opt('N');

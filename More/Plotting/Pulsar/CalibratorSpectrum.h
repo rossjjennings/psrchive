@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/CalibratorSpectrum.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/10/02 05:08:15 $
+   $Revision: 1.6 $
+   $Date: 2008/11/12 07:45:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CalibratorSpectrum_h
 #define __Pulsar_CalibratorSpectrum_h
 
 #include "Pulsar/FrequencyPlot.h"
-#include "Pulsar/PlotIndex.h"
+#include "Pulsar/Index.h"
 #include "EstimatePlotter.h"
 
 namespace Pulsar {
@@ -43,8 +43,8 @@ namespace Pulsar {
     std::string get_ylabel (const Archive*);
 
     //! Set the sub-integration to plot (where applicable)
-    void set_subint (const PlotIndex& _isubint) { isubint = _isubint; }
-    PlotIndex get_subint () const { return isubint; }
+    void set_subint (const Index& _isubint) { isubint = _isubint; }
+    Index get_subint () const { return isubint; }
 
     //! Plot the total and polarized intensities
     void set_plot_Ip (bool flag = true) { plot_Ip = flag; }
@@ -66,7 +66,7 @@ namespace Pulsar {
 
   protected:
 
-    PlotIndex isubint;
+    Index isubint;
     bool plot_total;
     bool plot_low;
     bool plot_Ip;

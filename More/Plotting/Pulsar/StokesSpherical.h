@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesSpherical.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/10/02 05:08:15 $
+   $Revision: 1.11 $
+   $Date: 2008/11/12 07:45:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesSpherical_h
@@ -42,12 +42,12 @@ namespace Pulsar {
     void prepare (const Archive*);
 
     //! Set the sub-integration to plot (where applicable)
-    void set_subint (const PlotIndex& _isubint) { isubint = _isubint; }
-    PlotIndex get_subint () const { return isubint; }
+    void set_subint (const Index& _isubint) { isubint = _isubint; }
+    Index get_subint () const { return isubint; }
     
     //! Set the frequency channel to plot (where applicable)
-    void set_chan (const PlotIndex& _ichan) { ichan = _ichan; }
-    PlotIndex get_chan () const { return ichan; }
+    void set_chan (const Index& _ichan) { ichan = _ichan; }
+    Index get_chan () const { return ichan; }
 
     //! Get the StokesPlot
     StokesPlot* get_flux () { return &flux; }
@@ -63,8 +63,8 @@ namespace Pulsar {
     StokesPlot flux;
     PosAngPlot orientation;
     EllAngPlot ellipticity;
-    PlotIndex isubint;
-    PlotIndex ichan;
+    Index isubint;
+    Index ichan;
 
     template<class T> void prepare (T* plot)
     {

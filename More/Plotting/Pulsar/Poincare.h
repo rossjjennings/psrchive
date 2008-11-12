@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Poincare.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/10/02 05:08:15 $
+   $Revision: 1.7 $
+   $Date: 2008/11/12 07:45:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Poincare_h
 #define __Pulsar_Poincare_h
 
 #include "Pulsar/FramedPlot.h"
-#include "Pulsar/PlotIndex.h"
+#include "Pulsar/Index.h"
 #include "Pulsar/PlotScale.h"
 
 namespace Pulsar {
@@ -52,12 +52,12 @@ namespace Pulsar {
     float get_latitude () const { return latitude; }
 
     //! Set the sub-integration to plot (where applicable)
-    void set_subint (PlotIndex _isubint) { isubint = _isubint; }
-    PlotIndex get_subint () const { return isubint; }
+    void set_subint (Index _isubint) { isubint = _isubint; }
+    Index get_subint () const { return isubint; }
     
     //! Set the frequency channel to plot (where applicable)
-    void set_chan (PlotIndex _ichan) { ichan = _ichan; }
-    PlotIndex get_chan () const { return ichan; }
+    void set_chan (Index _ichan) { ichan = _ichan; }
+    Index get_chan () const { return ichan; }
 
     //! Provide access to the phase scale
     PlotScale* get_phase_scale () { return &phase_scale; }
@@ -69,8 +69,8 @@ namespace Pulsar {
 
   protected:
 
-    PlotIndex isubint;
-    PlotIndex ichan;
+    Index isubint;
+    Index ichan;
     PlotScale phase_scale;
 
     float longitude;

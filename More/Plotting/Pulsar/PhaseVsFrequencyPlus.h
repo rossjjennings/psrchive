@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsFrequencyPlus.h,v $
-   $Revision: 1.10 $
-   $Date: 2007/10/02 05:08:15 $
+   $Revision: 1.11 $
+   $Date: 2008/11/12 07:45:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsFrequencyPlus_h
@@ -44,12 +44,12 @@ namespace Pulsar {
     void prepare (const Archive*);
 
     //! Set the sub-integration to plot (where applicable)
-    void set_subint (const PlotIndex& _isubint) { isubint = _isubint; }
-    PlotIndex get_subint () const { return isubint; }
+    void set_subint (const Index& _isubint) { isubint = _isubint; }
+    Index get_subint () const { return isubint; }
     
     //! Set the polarization to plot
-    void set_pol (const PlotIndex& _ipol) { ipol = _ipol; }
-    PlotIndex get_pol () const { return ipol; }
+    void set_pol (const Index& _ipol) { ipol = _ipol; }
+    Index get_pol () const { return ipol; }
 
     //! Plot the power spectral density
     void set_plot_psd (bool _plot);
@@ -67,8 +67,8 @@ namespace Pulsar {
     ProfilePlot flux;
     SpectrumPlot psd;
 
-    PlotIndex isubint;
-    PlotIndex ipol;
+    Index isubint;
+    Index ipol;
 
     PhaseScale xaxis;
     FrequencyScale yaxis;
