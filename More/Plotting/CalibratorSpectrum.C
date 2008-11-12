@@ -24,6 +24,7 @@ Pulsar::CalibratorSpectrum::CalibratorSpectrum ()
   plot_Ip = false;
 
   get_frame()->get_y_scale()->set_buf_norm(0.05);
+  get_frame()->get_x_scale()->set_buf_norm(0.05);
 
   plotter.set_control_viewport (false);
   plotter.set_minimum_error (0.0);
