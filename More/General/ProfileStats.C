@@ -161,13 +161,13 @@ Estimate<double> Pulsar::ProfileStats::get_baseline_variance () const
 }
 
 //! Return the on-pulse phase bin mask
-const Pulsar::PhaseWeight* Pulsar::ProfileStats::get_on_pulse ()
+Pulsar::PhaseWeight* Pulsar::ProfileStats::get_on_pulse ()
 {
   return &on_pulse;
 }
 
 //! Return the off-pulse baseline mask
-const Pulsar::PhaseWeight* Pulsar::ProfileStats::get_baseline ()
+Pulsar::PhaseWeight* Pulsar::ProfileStats::get_baseline ()
 {
   return &baseline;
 }
