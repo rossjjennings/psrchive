@@ -65,6 +65,7 @@ void usage ()
     " -d           use the Degree of Polarization Calibrator\n"
     " -f           treat all archives as members of a fluxcal observation\n"
     " -j           print Jones matrix elements of calibrator solution \n"
+    " -m           plot the calibrator solution [default] \n"
     " -p           use the polar model\n"
     " -P           produce publication-quality plots\n"
     " -S pcm.out   combine each calibrator with the pcm solution\n"
