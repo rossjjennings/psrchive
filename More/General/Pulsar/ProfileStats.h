@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/06/19 06:52:28 $
+   $Revision: 1.9 $
+   $Date: 2008/11/12 07:46:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileStats_h
@@ -78,10 +78,13 @@ namespace Pulsar
     Estimate<double> get_baseline_variance () const;
 
     //! Return the on-pulse phase bin mask
-    const PhaseWeight* get_on_pulse ();
+    PhaseWeight* get_on_pulse ();
 
     //! Return the off-pulse baseline mask
-    const PhaseWeight* get_baseline ();
+    PhaseWeight* get_baseline ();
+
+    //! Text interface to methods
+    class Interface;
 
   protected:
 

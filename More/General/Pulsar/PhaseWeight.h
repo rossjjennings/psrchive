@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeight.h,v $
-   $Revision: 1.13 $
-   $Date: 2007/11/02 04:25:19 $
+   $Revision: 1.14 $
+   $Date: 2008/11/12 07:45:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeight_h
@@ -119,6 +119,9 @@ namespace Pulsar {
 
     //! Return the base address of the weights array
     const float* get_weights() const { return &(weight[0]); }
+
+    //! Text interface to methods
+    class Interface;
 
   protected:
 
