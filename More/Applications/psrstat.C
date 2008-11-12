@@ -16,6 +16,9 @@
 #include "Pulsar/Statistics.h"
 #include "Pulsar/Archive.h"
 
+#include "substitute.h"
+#include "evaluate.h"
+
 #include "TextLoop.h"
 #include "dirutil.h"
 #include "strutil.h"
@@ -70,7 +73,7 @@ psrstat::psrstat ()
   : Pulsar::Application ("psrstat", "prints pulsar attributes and statistics")
 {
   has_manual = true;
-  version = "$Id: psrstat.C,v 1.1 2008/11/12 07:45:03 straten Exp $";
+  version = "$Id: psrstat.C,v 1.2 2008/11/12 21:16:44 straten Exp $";
 
   // print/parse in degrees
   Angle::default_type = Angle::Degrees;
@@ -153,10 +156,15 @@ void psrstat::print ()
 {
   for (unsigned j = 0; j < expressions.size(); j++)
   {
-    if (verbose)
-      cerr << "psrstat: processing '" << expressions[j] << "'" << endl;
+    string text = expressions[j];
 
-    cout << interface->process (expressions[j]);
+    if (verbose)
+      cerr << "psrstat: processing '" << text << "'" << endl;
+
+    if ( !text.find('$') )
+      cout << interface->process (expressions[j]);
+    else
+      cout << evaluate( substitute( text, interface.get() ) ); 
   }
   
   cout << endl;
