@@ -44,6 +44,13 @@ void Pulsar::FaradayRotation::execute (Archive* arch)
   arch->set_faraday_corrected( true );
 }
 
+//! Undo the correction for an entire Pulsar::Archive
+void Pulsar::FaradayRotation::revert (Archive* arch)
+{
+  ColdPlasma<Calibration::Faraday,DeFaraday>::revert (arch);
+  arch->set_faraday_corrected( false );
+}
+
 void Pulsar::FaradayRotation::apply (Integration* data, unsigned ichan) try
 {
   Reference::To<PolnProfile> poln_profile = data->new_PolnProfile (ichan);

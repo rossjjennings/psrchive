@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ColdPlasma.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/02/05 05:25:55 $
+   $Revision: 1.11 $
+   $Date: 2008/11/13 07:34:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ColdPlasma_h
@@ -57,8 +57,11 @@ namespace Pulsar {
     //! Derived classes must define how to apply the correction
     virtual void apply (Integration*, unsigned channel) = 0;
 
-    //! Execute the correction for an entire Pulsar::Archive
+    //! Execute the correction for an entire Archive
     virtual void execute (Archive*);
+
+    //! Revert the correction for an entire Archive
+    virtual void revert (Archive*);
 
     //! The default correction
     void transform (Integration*);
@@ -82,6 +85,10 @@ namespace Pulsar {
     //! Execute the correction
     /* \post All data will be corrected to the reference frequency */
     void execute1 (Integration*);
+
+    //! Undo the correction
+    /* \post All data will be uncorrected to the reference frequency */
+    void revert1 (Integration*);
 
     //! Set the reference wavelength in metres
     void set_reference_wavelength (double metres);
@@ -147,7 +154,8 @@ void Pulsar::ColdPlasma<C,H>::transform (Integration* data) try
   setup (data);
   execute1 (data);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::" + name + "::transform";
 }
 
@@ -156,6 +164,13 @@ void Pulsar::ColdPlasma<C,H>::execute (Archive* arch)
 {
   for (unsigned i=0; i<arch->get_nsubint(); i++)
     execute1( arch->get_Integration(i) );
+}
+
+template<class C, class H>
+void Pulsar::ColdPlasma<C,H>::revert (Archive* arch)
+{
+  for (unsigned i=0; i<arch->get_nsubint(); i++)
+    revert1( arch->get_Integration(i) );
 }
 
 template<class C, class H>
@@ -226,15 +241,14 @@ void Pulsar::ColdPlasma<C,History>::update (const Integration* data) try
 
     // set the effective correction measure to the difference
     set_measure( effective_measure );
-
   }
   else
     delta = get_identity();
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::"+name+"::update";
 }
-
 
 template<class C, class History>
 void Pulsar::ColdPlasma<C,History>::execute1 (Integration* data) try
@@ -257,8 +271,39 @@ void Pulsar::ColdPlasma<C,History>::execute1 (Integration* data) try
   data->add_extension( corrected );
 
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::"+name+"::execute1";
+}
+
+template<class C, class History>
+void Pulsar::ColdPlasma<C,History>::revert1 (Integration* data) try
+{
+  if ( !get_corrected(data) )
+    return;
+
+  History* corrected = data->template get<History>();
+ 
+  if (!corrected)
+    throw Error (InvalidState, "Pulsar::" + name + "::revert1",
+		 "no correction history");
+
+  set_measure( -corrected->get_measure() );
+  set_reference_wavelength( corrected->get_reference_wavelength() );
+
+  if (Integration::verbose)
+    std::cerr << "Pulsar::"+name+"::revert1"
+      " effective "+val+"=" << get_measure() <<
+      " reference wavelength=" << get_reference_wavelength() << std::endl;
+
+  range (data, 0, data->get_nchan());
+
+  // this should remove the history
+  delete corrected;
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::"+name+"::revert1";
 }
 
 

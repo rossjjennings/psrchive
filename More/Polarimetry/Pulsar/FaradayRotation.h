@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FaradayRotation.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/02/05 05:25:59 $
+   $Revision: 1.11 $
+   $Date: 2008/11/13 07:34:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FaradayRotation_h
@@ -51,8 +51,11 @@ namespace Pulsar {
     //! Faraday rotate each profile by the correction
     void apply (Integration*, unsigned channel);
 
-    //! Set the Faraday rotation correction attributes in the Archive
+    //! Apply the current correction to all sub-integrations in an archive
     void execute (Archive*);
+
+    //! Undo the correction
+    void revert (Archive*);
 
     //! Set the rotation measure
     void set_rotation_measure (double rotation_measure)

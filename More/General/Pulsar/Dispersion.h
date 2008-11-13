@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Dispersion.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/02/05 05:25:43 $
+   $Revision: 1.7 $
+   $Date: 2008/11/13 07:34:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Dispersion_h
@@ -48,8 +48,11 @@ namespace Pulsar {
     //! Phase rotate each profile by the correction
     void apply (Integration*, unsigned channel);
 
-    //! Set the dedispersion attributes in the Archive
+    //! Apply the current correction to all sub-integrations in an archive
     void execute (Archive*);
+
+    //! Undo the correction
+    void revert (Archive*);
 
     //! Set the dispersion measure
     void set_dispersion_measure (double dispersion_measure)

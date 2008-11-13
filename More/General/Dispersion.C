@@ -44,6 +44,13 @@ void Pulsar::Dispersion::execute (Archive* arch)
   arch->set_dedispersed( true );
 }
 
+//! Undo the correction for an entire Pulsar::Archive
+void Pulsar::Dispersion::revert (Archive* arch)
+{
+  ColdPlasma<DispersionDelay,Dedisperse>::revert (arch);
+  arch->set_dedispersed( false );
+}
+
 void Pulsar::Dispersion::apply (Integration* data, unsigned ichan) try
 {
   folding_period = data->get_folding_period();
