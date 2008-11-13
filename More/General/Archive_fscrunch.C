@@ -28,13 +28,11 @@ void Pulsar::Archive::fscrunch (unsigned nscrunch)
 */
 void Pulsar::Archive::fscrunch_to_nchan (unsigned new_chan)
 {
-  if (get_nchan() % new_chan != 0)
+  if (get_nchan() % new_chan)
     throw Error (InvalidParam, "Pulsar::Archive::fscrunch_to_nchan",
-		 "Invalid nchan request");
-  else if (get_nchan() < new_chan)
-    throw Error (InvalidParam, "Pulsar::Archive::fscrunch_to_nchan",
-		 "Archive has too few channels");
-  else
-    fscrunch(get_nchan() / new_chan);
+		             "requested nchan=%u modulo current nchan=%u is non-zero",
+                 new_chan, get_nchan());
+
+  fscrunch(get_nchan() / new_chan);
 }
 
