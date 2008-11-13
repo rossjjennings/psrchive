@@ -17,9 +17,17 @@ using namespace std;
 
 bool Pulsar::Integration::verbose = false;
 
+template<class T> void clean_dangling (vector<T>& data)
+{
+  for (unsigned i=0; i<data.size(); i++)
+    if (!data[i])
+      data.erase( data.begin() + i );
+}
+
 //! Return the number of extensions available
 unsigned Pulsar::Integration::get_nextension () const
 {
+  clean_dangling (const_cast<Integration*>(this)->extension);
   return extension.size ();
 }
 
