@@ -22,6 +22,7 @@
 #include "Pulsar/Receiver.h"
 
 #include "Pulsar/ScatteredPowerCorrection.h"
+#include "Pulsar/Dispersion.h"
 #include "Pulsar/FaradayRotation.h"
 #include "Pulsar/ReflectStokes.h"
 
@@ -317,7 +318,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.86 2008/11/13 01:46:32 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.87 2008/11/13 07:35:13 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -841,28 +842,16 @@ int main (int argc, char *argv[]) try {
 	  cout << "Archive dedipsersed" << endl;
       }
 
-      if( dededisperse ){
-	if( arch->get_dedispersed() ){
-	  arch->set_dedispersed( false );
-	  double dm = arch->get_dispersion_measure();
-	  arch->set_dispersion_measure( -dm );
-	  arch->dedisperse();
-	  arch->set_dedispersed( false );
-	  arch->set_dispersion_measure( dm );
-	}
-	else
-	  fprintf(stderr,"Can't dededisperse as archive '%s' is not dedispersed\n",
-		  arch->get_filename().c_str());
+      if (dededisperse)
+      {
+	Pulsar::Dispersion correction;
+	correction.revert (arch);
       }
 
-      if( dedefaraday ) {
-	if( arch->get_faraday_corrected() ) {
-	  arch->set_rotation_measure (-arch->get_rotation_measure());
-	  arch->defaraday();
-	  arch->set_faraday_corrected( false );
-	}
-	if (verbose)
-	  cout << "Archive defaraday corrected for a RM of " << arch->get_rotation_measure() << endl;
+      if (dedefaraday)
+      {
+	Pulsar::FaradayRotation correction;
+	correction.revert (arch);
       }
 
       if (stokesify) {
