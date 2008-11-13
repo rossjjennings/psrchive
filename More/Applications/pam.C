@@ -317,7 +317,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.85 2008/05/23 03:43:39 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.86 2008/11/13 01:46:32 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -486,8 +486,8 @@ int main (int argc, char *argv[]) try {
 	flipsb = true;
 	break;
       case 'x' :
-	if (scanf(optarg, "%d %d", 
-		  subint_extract_start, subint_extract_end) !=2 ) {
+	if (sscanf(optarg, "%d %d", 
+		   &subint_extract_start, &subint_extract_end) !=2 ) {
 	  cout << "That is not a valid subint range" << endl;
 	  return -1;
 	}
@@ -644,6 +644,9 @@ int main (int argc, char *argv[]) try {
 	cout << "Unrecognised option" << endl;
       }
     }
+
+   if (verbose)
+     cerr << "pam: parsing filenames" << endl;
  
    vector <string> filenames;
 
@@ -653,20 +656,22 @@ int main (int argc, char *argv[]) try {
       for (int ai=optind; ai<argc; ai++)
         dirglob (&filenames, argv[ai]);
  
-    if (filenames.empty()) {
-      cerr << "No filenames were specified" << endl;
+    if (filenames.empty())
+    {
+      cerr << "pam: no filenames were specified" << endl;
       exit(-1);
     } 
   
     Reference::To<Pulsar::Archive> arch;
 
-    if (!save) {
+    if (!save)
+    {
       cout << "Changes will not be saved. Use -m, -u or -e to write results to disk"
 	   << endl;
     }
 
-    for (unsigned i = 0; i < filenames.size(); i++) try {
-      
+    for (unsigned i = 0; i < filenames.size(); i++) try
+    {
       if (verbose)
 	cerr << "Loading " << filenames[i] << endl;
       
