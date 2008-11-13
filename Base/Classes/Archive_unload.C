@@ -34,7 +34,14 @@ mode_t getumask ()
 void Pulsar::Archive::unload (const char* filename) const
 {
   // run all verifications
-  verify ();
+  try
+  {
+    verify ();
+  }
+  catch (Error& error)
+  {
+    throw error += "Pulsar::Archive::unload";
+  }
 
   string unload_to_filename = unload_filename;
   if (filename)
@@ -74,6 +81,9 @@ void Pulsar::Archive::unload (const char* filename) const
   }
   catch (Error& error)
   {
+    if (model_backup)
+      const_cast<Archive*>(this)->model = model_backup;
+
     throw error += "Pulsar::Archive::unload";
   }
 
@@ -90,7 +100,8 @@ void Pulsar::Archive::unload (const char* filename) const
 
   ret = chmod (unload_to_filename.c_str(), 0666 & ~getumask());
 
-  if (ret < 0 && verbose)  {
+  if (ret < 0 && verbose)
+  {
     char temp[8];
     sprintf (temp, "%x", 0666 & ~getumask());
     cerr << "Pulsar::Archive::unload WARNING failed chmod ("
