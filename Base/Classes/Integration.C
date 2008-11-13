@@ -27,7 +27,7 @@ template<class T> void clean_dangling (vector<T>& data)
 //! Return the number of extensions available
 unsigned Pulsar::Integration::get_nextension () const
 {
-  clean_dangling (const_cast<Integration*>(this)->extension);
+  clean_dangling (extension);
   return extension.size ();
 }
 
