@@ -72,7 +72,7 @@ char backward_compatibility (char c)
 paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
 {
   has_manual = true;
-  version = "$Id: paz.C,v 1.54 2008/11/12 07:44:58 straten Exp $";
+  version = "$Id: paz.C,v 1.55 2008/11/13 01:22:08 straten Exp $";
   filter = backward_compatibility;
 
   add( new Pulsar::StandardOptions );
@@ -571,8 +571,9 @@ void paz::process (Pulsar::Archive* arch)
   if (zap_subints)
   {
     unsigned zapped = 0;
+    unsigned orig_nsubint = arch->get_nsubint ();
 
-    for (unsigned i = 0; i < arch->get_nsubint (); i++)
+    for (unsigned i = 0; i < orig_nsubint; i++)
       for (unsigned j = 0; j < subs_to_zap.size (); j++)
 	if (subs_to_zap[j] == i)
 	{
@@ -591,8 +592,9 @@ void paz::process (Pulsar::Archive* arch)
   if (nozap_subints)
   {
     unsigned zapped = 0;
+    unsigned orig_nsubint = arch->get_nsubint ();
 
-    for (unsigned i = 0; i < arch->get_nsubint (); i++)
+    for (unsigned i = 0; i < orig_nsubint; i++)
     {
       bool keep = false;
       for (unsigned j = 0; j < subs_nozap.size (); j++)
