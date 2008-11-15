@@ -31,6 +31,9 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
   import ( "off", PhaseWeight::Interface(), 
 	   &Statistics::get_baseline );
 
+  import ( "all", PhaseWeight::Interface(),
+           &Statistics::get_all );
+
   add( &Statistics::get_snr,
        "snr", "Total signal-to-noise ratio" );
 
