@@ -87,6 +87,13 @@ Pulsar::PhaseWeight* Pulsar::Statistics::get_onpulse ()
   return stats->get_on_pulse();
 }
 
+//! Get all phase bins
+Pulsar::PhaseWeight* Pulsar::Statistics::get_all ()
+{
+  setup_stats ();
+  return stats->get_all();
+}
+
 void Pulsar::Statistics::setup_stats ()
 {
   if (!stats)

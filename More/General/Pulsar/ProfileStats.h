@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/11/12 07:46:35 $
+   $Revision: 1.10 $
+   $Date: 2008/11/15 18:21:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileStats_h
@@ -82,6 +82,9 @@ namespace Pulsar
 
     //! Return the off-pulse baseline mask
     PhaseWeight* get_baseline ();
+
+    //! Return the all pulse phase bin mask
+    PhaseWeight* get_all ();
 
     //! Text interface to methods
     class Interface;

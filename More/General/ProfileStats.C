@@ -172,6 +172,12 @@ Pulsar::PhaseWeight* Pulsar::ProfileStats::get_baseline ()
   return &baseline;
 }
 
+//! Return the off-pulse baseline mask
+Pulsar::PhaseWeight* Pulsar::ProfileStats::get_all ()
+{
+  return new PhaseWeight (profile.get());
+}
+
 void Pulsar::ProfileStats::build () try
 {
   baseline_variance = 0.0;
