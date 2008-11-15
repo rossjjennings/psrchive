@@ -29,6 +29,15 @@ Pulsar::PhaseWeight::PhaseWeight ()
   init ();
 }
 
+Pulsar::PhaseWeight::PhaseWeight (const Profile* profile)
+{
+  init ();
+
+  set_Profile (profile);
+  weight.resize( profile->get_nbin() );
+  set_all (1.0);
+}
+
 Pulsar::PhaseWeight::PhaseWeight (unsigned nbin)
   : weight (nbin)
 {

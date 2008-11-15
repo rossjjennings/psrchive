@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeight.h,v $
-   $Revision: 1.15 $
-   $Date: 2008/11/12 10:55:17 $
+   $Revision: 1.16 $
+   $Date: 2008/11/15 18:20:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeight_h
@@ -30,6 +30,9 @@ namespace Pulsar {
 
     //! Default constructor
     PhaseWeight ();
+
+    //! Construct with all phase bins selected
+    PhaseWeight (const Profile*);
 
     PhaseWeight (unsigned nbin);
     PhaseWeight (unsigned nbin, float set_all);
