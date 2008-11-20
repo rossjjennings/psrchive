@@ -34,7 +34,7 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbCcDd:e:fFGhiIJ:j:M:m:n:O:op:Pqr:sSt:Tu:vVwxZ";
+const char* args = "A:aBbCcDd:e:fFGhiIJ:j:M:m:n:O:op:Pqr:sSt:Tu:UvVwxZ";
 
 void usage ()
 {
@@ -78,6 +78,7 @@ void usage ()
     "Expert options: \n"
     "  -f             Override flux calibration flag\n"
     "  -G             Normalize profile weights by absolute gain \n"
+    "  -U             Disable frontend corrections (parallactic angle, etc)\n"
     "\n"
     "Input/Output options: \n"
     "  -e ext         Extension added to output filenames (default .calib) \n"
@@ -98,6 +99,7 @@ int main (int argc, char *argv[]) try
   bool do_fluxcal = true;
   bool do_polncal = true;
   bool use_fluxcal_stokes = false;
+  bool enable_frontend = true;
 
   // Preprocessing jobs
   vector<string> jobs;
@@ -171,7 +173,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.97 2008/11/12 07:44:47 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.98 2008/11/20 18:37:08 demorest Exp $" << endl;
       return 0;
 
     case 'A':
@@ -370,6 +372,11 @@ int main (int argc, char *argv[]) try
       }
       command += " -u ";
       command += optarg;
+      break;
+
+    case 'U':
+      enable_frontend = false;
+      command += " -U ";
       break;
 
     case 'w':
@@ -596,11 +603,16 @@ int main (int argc, char *argv[]) try
 
       if (arch->get_npol() == 4)
       {
-	if (verbose)
-	  cerr << "pac: Correcting platform, if necessary" << endl;
+        if (enable_frontend) {
 
-	Pulsar::FrontendCorrection correct;
-	correct.calibrate (arch);
+          if (verbose)
+            cerr << "pac: Correcting platform, if necessary" << endl;
+
+          Pulsar::FrontendCorrection correct;
+          correct.calibrate (arch);
+
+        } else 
+          cerr << "pac: Frontend corrections disabled, skipping" << endl;
       }
 
       if (ionosphere)
