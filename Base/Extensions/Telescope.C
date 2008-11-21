@@ -6,6 +6,9 @@
  ***************************************************************************/
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Site.h"
+#include "Directional.h"
+#include "Horizon.h"
+#include "Meridian.h"
 
 //! Default constructor
 Pulsar::Telescope::Telescope ()
@@ -57,4 +60,20 @@ void Pulsar::Telescope::set_coordinates (const std::string& code)
 
   latitude.setRadians( lat );
   longitude.setRadians( lon );
+}
+
+Directional* 
+Pulsar::Telescope::get_Directional() const
+{
+  Reference::To<Directional> dir;
+  if (mount==Horizon) { dir = new ::Horizon; }
+  else if (mount==Meridian) { dir = new ::Meridian; }
+  else
+    throw Error(InvalidState, "Pulsar::Telescope:get_Directional", 
+        "Mount type currently unsupported");
+
+  dir->set_observatory_latitude(latitude.getRadians());
+  dir->set_observatory_longitude(longitude.getRadians());
+
+  return dir.release();
 }

@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Telescope.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/07/04 06:17:24 $
-   $Author: straten $ */
+   $Revision: 1.11 $
+   $Date: 2008/11/21 19:03:52 $
+   $Author: demorest $ */
 
 #ifndef __Telescope_Extension_h
 #define __Telescope_Extension_h
 
 #include "Pulsar/ArchiveExtension.h"
+#include "Directional.h"
 
 namespace Pulsar
 {
@@ -121,6 +122,9 @@ namespace Pulsar
     Focus get_focus() const { return focus; }
     //! Set the type of focus
     void set_focus (Focus _focus) { focus = _focus; }
+
+    //! Get a Directional object set up for this telescope
+    Directional* get_Directional() const;
 
   protected:
 
