@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.26 $
-   $Date: 2008/02/22 11:20:45 $
+   $Revision: 1.27 $
+   $Date: 2008/11/21 11:32:57 $
    $Author: straten $ */
 
 #ifndef __Types_h
@@ -70,7 +70,8 @@ namespace Signal {
   };
 
   //! Possible states of the data
-  enum State {
+  enum State
+  {
     //! Nyquist sampled voltages (real)
     Nyquist,
     //! In-phase and Quadrature sampled voltages (complex)
@@ -92,7 +93,9 @@ namespace Signal {
     //! Just PP
     PP_State,
     //! Just QQ
-    QQ_State
+    QQ_State,
+    //! Fourth moment of the electric field (covariance of Stokes parameters)
+    FourthMoment
   };
   
   //! States of different polarization dimensions

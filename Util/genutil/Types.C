@@ -313,6 +313,14 @@ bool Signal::valid_state(Signal::State state,unsigned ndim,unsigned npol, string
     }	
     break;
 
+  case Signal::FourthMoment:
+    if( npol != 10 )
+      {
+	reason = "state=FourthMoment and npol is not 10";
+	return false;
+      }
+    break;
+
   default:
     reason = "unknown state";
     return false;
