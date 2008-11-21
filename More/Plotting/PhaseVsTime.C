@@ -8,11 +8,14 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Telescope.h"
+#include "Directional.h"
 
 Pulsar::PhaseVsTime::PhaseVsTime ()
 {
   ichan = 0;
   ipol = 0;
+  use_hour_angle = false;
 }
 
 TextInterface::Parser* Pulsar::PhaseVsTime::get_interface ()
@@ -54,6 +57,36 @@ void Pulsar::PhaseVsTime::prepare (const Archive* data)
     time_string += "(seconds)";
     set_yrange (0, range/mjd_seconds);
   }
+
+  // Replace with hour angle if requested
+  if (use_hour_angle) {
+
+    const Telescope* tel = data->get<Telescope>();
+    if (tel) {
+
+      Reference::To<Directional> dir = tel->get_Directional();
+      dir->set_source_coordinates(data->get_coordinates());
+      time_string = "Hour Angle (hours)";
+
+      double ha0, ha1;
+      dir->set_epoch(data->start_time());
+      ha0 = dir->get_hour_angle();
+      dir->set_epoch(data->end_time());
+      ha1 = dir->get_hour_angle();
+
+      ha0 *= 12.0 / M_PI;
+      ha1 *= 12.0 / M_PI;
+
+      // In case we're circumpolar
+      if (ha1<ha0) ha1 += 24.0;
+
+      set_yrange(ha0, ha1);
+    }
+
+    // TODO : use Pointing extension if available?
+
+  }
+
 }
 
 std::string Pulsar::PhaseVsTime::get_ylabel (const Archive* data)

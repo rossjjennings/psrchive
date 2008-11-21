@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsTime.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/11/12 07:45:10 $
-   $Author: straten $ */
+   $Revision: 1.11 $
+   $Date: 2008/11/21 19:04:51 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_PhaseVsTime_h
 #define __Pulsar_PhaseVsTime_h
@@ -56,11 +56,16 @@ namespace Pulsar {
     void set_pol (const Index& _ipol) { ipol = _ipol; }
     Index get_pol () const { return ipol; }
 
+    //! Set use hour angle flag
+    void set_use_ha(bool flag=true) { use_hour_angle = flag; }
+    bool get_use_ha() const { return use_hour_angle; }
+
   protected:
 
     std::string time_string;
     Index ichan;
     Index ipol;
+    bool use_hour_angle;
 
   };
 

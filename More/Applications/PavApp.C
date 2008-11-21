@@ -196,6 +196,7 @@ void PavApp::PrintUsage( void )
   cout << " --ld           Label phase axes in degrees" << endl;
   cout << " --ebox         Plot an error box, for -D and -S " << endl;
   cout << " --pa_ext       Plot position angle plot from -90 deg to 180 deg, instead of -90,90" << endl;
+  cout << " --ha           Plot versus Hour Angle in '-Y' mode" << endl;
   cout << endl;
   cout << "Integration re-ordering (nsub = final # of subints) (used with pav Y for binary pulsars):" << endl;
   cout << " --convert_binphsperi   nsub" << endl;
@@ -638,6 +639,7 @@ int PavApp::run( int argc, char *argv[] )
   const int PAEXT            = 1011;
   const int STACKLEFT        = 1012;
   const int CH               = 1013;
+  const int USE_HA           = 1014;
 
   static struct option long_options[] =
     {
@@ -654,6 +656,7 @@ int PavApp::run( int argc, char *argv[] )
       { "pa_ext",             0, 0, PAEXT },
       { "sl",                 0, 0, STACKLEFT },
       { "ch",                 1, 0, CH },
+      { "ha",                 0, 0, USE_HA},
       { 0,0,0,0 }
     };
 
@@ -682,7 +685,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.60 2008/10/22 20:37:02 demorest Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.61 2008/11/21 19:04:51 demorest Exp $" << 
         endl << endl;
       return 0;
     case 'M':
@@ -883,6 +886,9 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case CH:
       user_character_height = fromstring<float>( optarg );
+      break;
+    case USE_HA:
+      options.push_back("use_ha=1");
       break;
     case 'x':
       clip_value = fromstring<float>( optarg );

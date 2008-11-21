@@ -20,6 +20,10 @@ Pulsar::PhaseVsTime::Interface::Interface (PhaseVsTime* instance)
        &PhaseVsTime::set_pol,
        "pol", "Polarization to plot" );
 
+  add( &PhaseVsTime::get_use_ha,
+       &PhaseVsTime::set_use_ha,
+       "use_ha", "Plot versus Hour Angle" );
+
   // import the interface of the base class
   import( PhaseVsPlot::Interface() );
 
