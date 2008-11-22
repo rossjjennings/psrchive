@@ -406,7 +406,6 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
 
     observation_nchan = nchan;
     setup_transformation();
-    observation_nchan = 0;
   }
 
   if (!nchan)
