@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/HybridCalibrator.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/10/16 23:38:25 $
+   $Revision: 1.10 $
+   $Date: 2008/11/22 19:16:10 $
    $Author: straten $ */
 
 #ifndef __HybridCalibrator_H
@@ -58,6 +58,9 @@ namespace Pulsar {
 
     //! Fill the transformation vector of the PolnCalibrator base class
     void calculate_transformation ();
+
+    //! Return channel validity at the original resolution, if necessary
+    bool get_valid (unsigned ichan) const;
 
     //! Return the number of channels in the PolnCalibrator
     unsigned get_maximum_nchan ();

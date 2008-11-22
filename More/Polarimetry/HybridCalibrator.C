@@ -193,6 +193,62 @@ Jones<T> val (const Jones< Estimate<T> >& J)
 		   complex<T>(J(1,1).real().val, J(1,1).imag().val));
 }
 
+/*!
+
+  If the reference observation and the pulsar observation have more
+  frequnency channels than the precalibrator, then the reference
+  observation will be integrated down to the resolution of the
+  precalibrator and the final solution will be interpolated back up to
+  the resolution of the pulsar observation.  In this case, it is
+  desireable to flag bad channels at the original resolution of the
+  reference observation.
+
+*/
+bool Pulsar::HybridCalibrator::get_valid (unsigned ichan) const
+{
+  bool valid = true;
+
+  const unsigned ref_nchan = reference_observation->get_nchan();
+
+  if ( observation_nchan > precalibrator->get_nchan() &&
+       ref_nchan > precalibrator->get_nchan() )
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::HybridCalibrator::get_valid nchan: observation="
+	   << observation_nchan << " and reference=" << ref_nchan
+	   << " > precalibrator=" << precalibrator->get_nchan() << endl;
+
+    if (ref_nchan <= observation_nchan)
+    {
+      /*
+	if the reference observation channel is valid, then the
+	corresponding (observation_nchan/ref_nchan) channels of the
+	calibrated observation are also valid.
+      */
+      valid = reference_observation->get_transformation_valid
+	( (ichan * ref_nchan) / observation_nchan );
+    }
+    else 
+    {
+      /*
+	if any of the (ref_chan/observation_nchan) reference
+	observation channels are valid, then the corresponding channel
+	of the calibrated observation is also valid.
+       */
+
+      valid = false;
+      unsigned factor = ref_nchan / observation_nchan;
+      unsigned jchan_start = ichan * factor;
+      unsigned jchan_end = jchan_start + factor;
+      for (unsigned jchan=jchan_start; jchan<jchan_end; jchan++)
+	if (reference_observation->get_transformation_valid(jchan))
+	  valid = true;
+    }
+  }
+
+  return valid && PolnCalibrator::get_valid (ichan);
+}
+
 void Pulsar::HybridCalibrator::calculate_transformation ()
 {
   if (!reference_input)
