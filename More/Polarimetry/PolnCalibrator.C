@@ -103,6 +103,7 @@ Jones<float> Pulsar::PolnCalibrator::get_response (unsigned ichan) const
   return response[ichan];
 }
 
+
 //! Return true if the Receiver is set
 bool Pulsar::PolnCalibrator::has_Receiver () const
 {
@@ -560,8 +561,6 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
     scrunch (response, factor, true);
   }
 
-  complex<float> zero (0.0);
-
   if (nchan > response.size())
   {
     if (verbose > 2)
@@ -598,8 +597,11 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
 
   for (ichan=0; ichan < nchan; ichan++)
   {
-    if (det(response[ichan]) == zero)
+    if (!get_valid(ichan))
+    {
+      response[ichan] = 0.0;
       continue;
+    }
 
     // add the known feed transformation
     response[ichan] *= feed_xform;
@@ -616,10 +618,20 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
 
   built = true;
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::PolnCalibrator::build";
 }
 
+//! Return true if the response for the specified channel is valid
+bool Pulsar::PolnCalibrator::get_valid (unsigned ichan) const
+{
+  if (ichan >= response.size())
+    return false;
+
+  static const complex<float> zero (0.0);
+  return det(response[ichan]) != zero;
+}
 
 void Pulsar::PolnCalibrator::calibration_setup (Archive* arch)
 {

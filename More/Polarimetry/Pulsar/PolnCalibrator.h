@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.50 $
-   $Date: 2008/10/16 23:38:30 $
+   $Revision: 1.51 $
+   $Date: 2008/11/22 19:16:16 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -153,6 +153,9 @@ namespace Pulsar {
 
     //! Derived classes can create and fill the transformation array
     virtual void calculate_transformation ();
+
+    //! Derived classes can add conditions for channel validity
+    virtual bool get_valid (unsigned ichan) const;
 
     //! Derived classes may be able to shrink the transformation array
     virtual unsigned get_maximum_nchan ();
