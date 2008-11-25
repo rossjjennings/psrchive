@@ -208,6 +208,9 @@ bool Pulsar::HybridCalibrator::get_valid (unsigned ichan) const
 {
   bool valid = true;
 
+  if (!reference_observation)
+    return true;
+
   const unsigned ref_nchan = reference_observation->get_nchan();
 
   if ( observation_nchan > precalibrator->get_nchan() &&
