@@ -209,17 +209,22 @@ bool Pulsar::HybridCalibrator::get_valid (unsigned ichan) const
   bool valid = true;
 
   unsigned ref_nchan = 0;
+  unsigned precal_nchan = 0;
 
   if (reference_observation)
     ref_nchan = reference_observation->get_nchan();
 
-  if ( observation_nchan > precalibrator->get_nchan() &&
-       ref_nchan > precalibrator->get_nchan() )
+  if (precalibrator)
+    precal_nchan = precalibrator->get_nchan();
+
+  if ( precal_nchan &&
+       observation_nchan > precal_nchan &&
+       ref_nchan > precal_nchan )
   {
     if (verbose > 2)
       cerr << "Pulsar::HybridCalibrator::get_valid nchan: observation="
 	   << observation_nchan << " and reference=" << ref_nchan
-	   << " > precalibrator=" << precalibrator->get_nchan() << endl;
+	   << " > precalibrator=" << precal_nchan << endl;
 
     if (ref_nchan <= observation_nchan)
     {
