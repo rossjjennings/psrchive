@@ -48,7 +48,10 @@ void Pulsar::FITSArchive::load_Predictor (fitsfile* fptr)
   fits_movnam_hdu (fptr, BINARY_TBL, "T2PREDICT", 0, &status);
   
   if (status == 0)
-    warning << "Pulsar::FITSArchive does not support T2PREDICT" << endl;
+    warning <<
+      "Pulsar::FITSArchive does not support tempo2 predictors \n"
+      "Pulsar::FITSArchive http://psrchive.sourceforge.net/warnings/tempo2"
+	    << endl;
 
 #endif
 
