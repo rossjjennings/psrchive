@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ProfileExtension.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/11/27 05:55:40 $
+   $Revision: 1.2 $
+   $Date: 2008/11/27 06:16:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_Extension_h
@@ -56,14 +56,14 @@ namespace Pulsar
   template<class T>
   const T* Profile::get () const
   {
-    return ::get_extension<T> (this, "Pulsar::Profile::get<Ext>", verbose > 2);
+    return ::get_extension<T> (this, "Pulsar::Profile::get<Ext>", verbose);
   }
 
   template<class T>
   T* Profile::get ()
   {
     return const_cast<T*>
-      ( ::get_extension<T> (this, "Pulsar::Profile::get<Ext>", verbose > 2) );
+      ( ::get_extension<T> (this, "Pulsar::Profile::get<Ext>", verbose) );
   }
 
 }
