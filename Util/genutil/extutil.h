@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/extutil.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/11/27 05:39:17 $
+   $Revision: 1.2 $
+   $Date: 2008/11/27 06:16:20 $
    $Author: straten $ */
 
 #ifndef __Pulsar_get_extension_h
@@ -45,7 +45,7 @@ const T* get_extension (const Container* container,
 }
 
 template<class T> 
-void clean_dangling (vector<T>& data)
+void clean_dangling (std::vector<T>& data)
 {
   for (unsigned i=0; i<data.size(); i++)
     if (!data[i])
