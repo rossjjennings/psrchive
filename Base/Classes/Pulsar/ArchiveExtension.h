@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveExtension.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/04/21 06:19:47 $
+   $Revision: 1.2 $
+   $Date: 2008/11/27 06:12:11 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_Extension_h
 #define __Pulsar_Archive_Extension_h
 
-#include "Archive.h"
+#include "Pulsar/Archive.h"
+#include "extutil.h"
 
 namespace Pulsar
 {
@@ -52,62 +53,38 @@ namespace Pulsar
   };
 
   /*! e.g. MyExtension* ext = archive->get<MyExtension>(); */
-  template<class ExtensionType>
-  const ExtensionType* Archive::get () const
+  template<class T>
+  const T* Archive::get () const
   {
-    const ExtensionType* extension = 0;
-
-    for (unsigned iext=0; iext<get_nextension(); iext++)
-    {
-      const Extension* ext = get_extension (iext);
-
-      if (verbose == 3)
-	std::cerr << "Pulsar::Archive::get<Ext> name="
-		  << ext->get_extension_name() << std::endl;
-      
-      extension = dynamic_cast<const ExtensionType*>( ext );
-      
-      if (extension)
-	return extension;
-    }
-
-    if (verbose==3)
-      std::cerr << "Pulsar::Archive::get<Ext> failed to find extension type="
-		<< typeid(extension).name() << std::endl;
-
-    return extension;
+    return ::get_extension<T> (this, "Pulsar::Archive::get<Ext>", verbose > 2);
   }
 
-  template<class ExtensionType>
-  ExtensionType* Archive::get ()
+  template<class T>
+  T* Archive::get ()
   {
-    const Archive* thiz = this;
-    return const_cast<ExtensionType*>( thiz->get<ExtensionType>() );
+    return const_cast<T*>
+      ( ::get_extension<T> (this, "Pulsar::Archive::get<Ext>", verbose > 2) );
   }
 
-  /*! If the specified ExtensionType does not exist, an atempt is made to
+  /*! If the specified extension type T does not exist, an atempt is made to
       add it using add_extension.  If this fails, NULL is returned. */
-  template<class ExtensionType>
-  ExtensionType* Archive::getadd ()
+  template<class T>
+  T* Archive::getadd ()
   {
-    const Archive* thiz = this;
-    ExtensionType* retv = 0;
-    retv = const_cast<ExtensionType*>( thiz->get<ExtensionType>() );
-
-    if (retv)
-      return retv;
+    T* ext = get<T>();
+    if (ext)
+      return ext;
 
     try
     {
-      Reference::To<ExtensionType> add_ext = new ExtensionType;
+      Reference::To<T> add_ext = new T;
       add_extension (add_ext);
       return add_ext;
     }
     catch (Error& error)
     {
-      return retv;
+      return 0;
     }
-
   }
 
 }
