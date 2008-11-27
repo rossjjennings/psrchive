@@ -16,6 +16,7 @@ include_HEADERS = \
         environ.h \
 	evaluate.h \
 	ExponentialDistribution.h \
+	extutil.h \
 	factory.h \
         fcomp.h \
 	format_it.h \
