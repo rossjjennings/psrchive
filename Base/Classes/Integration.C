@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/IntegrationExtension.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/IntegrationMeta.h"
 #include "Pulsar/Profile.h"
@@ -17,23 +18,16 @@ using namespace std;
 
 bool Pulsar::Integration::verbose = false;
 
-template<class T> void clean_dangling (vector<T>& data)
-{
-  for (unsigned i=0; i<data.size(); i++)
-    if (!data[i])
-      data.erase( data.begin() + i );
-}
-
 //! Return the number of extensions available
 unsigned Pulsar::Integration::get_nextension () const
 {
-  clean_dangling (const_cast<Integration*>(this)->extension);
+  clean_dangling (extension);
   return extension.size ();
 }
 
 Pulsar::Integration::Extension::Extension (const char* _name)
 {
-  name = _name;
+  extension_name = _name;
 }
 
 Pulsar::Integration::Extension::~Extension ()
@@ -42,7 +36,12 @@ Pulsar::Integration::Extension::~Extension ()
 
 string Pulsar::Integration::Extension::get_extension_name () const
 {
-  return name;
+  return extension_name;
+}
+
+string Pulsar::Integration::Extension::get_short_name () const
+{
+  return extension_name;
 }
 
 const Pulsar::Archive* 

@@ -118,17 +118,10 @@ void Pulsar::Archive::agent_list ()
   cout << Agent::get_list () << endl;
 }
 
-template<class T> void clean_dangling (vector<T>& data)
-{
-  for (unsigned i=0; i<data.size(); i++)
-    if (!data[i])
-      data.erase( data.begin() + i );
-}
-
 //! Return the number of extensions available
 unsigned Pulsar::Archive::get_nextension () const
 {
-  clean_dangling (const_cast<Archive*>(this)->extension);
+  clean_dangling (extension);
   return extension.size ();
 }
 
@@ -179,17 +172,6 @@ Pulsar::Archive::get_extension (unsigned iext)
   return extension[iext];
 }
 
-/* Unless a Receiver Extension is present, this method assumes that the
-   signal basis is linear. */
-Signal::Basis Pulsar::Archive::get_basis () const
-{
-  const Receiver* receiver = get<Receiver>();
-  if (receiver)
-    return receiver->get_basis();
-  else
-    return Signal::Linear;
-}
-
 /*! Derived classes need only define this method, as the non-const version
   implemented by the Archive base class simply calls this method. */
 void Pulsar::Archive::add_extension (Extension* ext)
@@ -226,6 +208,17 @@ void Pulsar::Archive::add_extension (Extension* ext)
 	   << ext->get_extension_name() << endl;
     extension.push_back(ext);
   }
+}
+
+/* Unless a Receiver Extension is present, this method assumes that the
+   signal basis is linear. */
+Signal::Basis Pulsar::Archive::get_basis () const
+{
+  const Receiver* receiver = get<Receiver>();
+  if (receiver)
+    return receiver->get_basis();
+  else
+    return Signal::Linear;
 }
 
 void Pulsar::Archive::refresh()
