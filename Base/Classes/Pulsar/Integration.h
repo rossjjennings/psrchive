@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.96 $
-   $Date: 2008/08/08 15:24:55 $
-   $Author: demorest $ */
+   $Revision: 1.97 $
+   $Date: 2008/11/27 06:12:06 $
+   $Author: straten $ */
 
 /*
   
@@ -298,46 +298,13 @@ namespace Pulsar {
 
     /** @name Extension Interface 
      *
-     * Derived classes can provide access to the additional
-     * information available in their associated file format through
+     * Additional algorithms or information can be made available through
      * use of Extension classes. 
      */
     //@{
     
     //! Adds features or data to Integration instances
-    /* Integration-derived classes may provide access to additional 
-       information through Extension-derived objects. */
-    class Extension : public Reference::Able {
-      
-    public:
-      
-      //! Construct with a name
-      Extension (const char* name);
-      
-      //! Destructor
-      virtual ~Extension ();
-      
-      //! Return a new copy-constructed instance identical to this instance
-      virtual Extension* clone () const = 0;
-      
-      //! Integrate information from another Integration
-      virtual void integrate (const Integration* subint) { }
-      
-      //! Update information based on the provided Integration
-      virtual void update (const Integration* subint) { }
-
-      //! Return the name of the Extension
-      std::string get_extension_name () const;
-      
-    protected:
-      
-      //! Extension name - useful when debugging
-      std::string name;
-      
-      //! Provide Extension derived classes with access to parent Archive
-      const Archive* get_parent (const Integration* subint) const;
-
-    };
+    class Extension;
     
     //! Return the number of extensions available
     virtual unsigned get_nextension () const;
@@ -466,7 +433,7 @@ namespace Pulsar {
     virtual Profile* new_Profile ();
 
     //! The Extensions added to this Integration instance
-    std::vector< Reference::To<Extension> > extension;
+    mutable std::vector< Reference::To<Extension> > extension;
 
     //! Data: npol by nchan profiles
     std::vector< std::vector< Reference::To<Profile> > > profiles;
@@ -499,37 +466,6 @@ namespace Pulsar {
     bool zero_phase_aligned;
 
   };
-
-  /*! e.g. MyExtension* ext = integration->get<MyExtension>(); */
-  template<class ExtensionType>
-  const ExtensionType* Integration::get () const
-  {
-    const ExtensionType* extension = 0;
-
-    for (unsigned iext=0; iext<get_nextension(); iext++) {
-
-      const Extension* ext = get_extension (iext);
-
-      if (verbose)
-	std::cerr << "Pulsar::Integration::get<T> name=" 
-                  << ext->get_extension_name() << std::endl;
-
-      extension = dynamic_cast<const ExtensionType*>( ext );
-
-      if (extension)
-	break;
-
-    }
-
-    return extension;
-  }
-
-  template<class ExtensionType>
-  ExtensionType* Integration::get ()
-  {
-    const Integration* thiz = this;
-    return const_cast<ExtensionType*>( thiz->get<ExtensionType>() );
-  }
 
 }
 
