@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Pointing.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/05/22 19:59:41 $
-   $Author: demorest $ */
+   $Revision: 1.11 $
+   $Date: 2008/11/27 06:16:15 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Pointing_h
 #define __Pulsar_Pointing_h
 
-#include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationExtension.h"
 #include "Angle.h"
 #include "Estimate.h"
 #include "TextInterface.h"

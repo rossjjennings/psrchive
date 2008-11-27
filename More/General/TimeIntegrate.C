@@ -4,9 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/TimeIntegrate.h"
 #include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/IntegrationExpert.h"
+#include "Pulsar/IntegrationExtension.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Predictor.h"

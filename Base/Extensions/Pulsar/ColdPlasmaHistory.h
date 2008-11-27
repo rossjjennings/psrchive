@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ColdPlasmaHistory.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.3 $
+   $Date: 2008/11/27 06:16:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ColdPlasmaHistory_h
 #define __Pulsar_ColdPlasmaHistory_h
 
-#include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationExtension.h"
 
 namespace Pulsar {
   
