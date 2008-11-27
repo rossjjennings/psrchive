@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.107 $
-   $Date: 2007/10/03 06:14:13 $
+   $Revision: 1.108 $
+   $Date: 2008/11/27 06:11:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -26,7 +26,7 @@ namespace Pulsar {
 
   class PhaseWeight;
 
-  //! The basic observed quantity; the pulse profile.
+  //! Any quantity recorded as a function of pulse phase
   /*! The Pulsar::Profile class implements a useful, yet minimal, set
     of functionality required to store, manipulate, and analyse pulsar
     profiles.  Note that:
@@ -229,6 +229,44 @@ namespace Pulsar {
     void fftconv (const Profile& std, double& shift, float& eshift,
                   float& snrfft, float& esnrfft) const;
 
+    // //////////////////////////////////////////////////////////////////
+    //
+    // Extension access
+    //
+    // //////////////////////////////////////////////////////////////////
+
+    /** @name Extension Interface 
+     *
+     * Additional algorithms or information can be made available through
+     * use of Extension classes. 
+     */
+    //@{
+    
+    //! Adds features or data to Profile instances
+    class Extension;
+    
+    //! Return the number of extensions available
+    virtual unsigned get_nextension () const;
+
+    //! Return a pointer to the specified extension
+    virtual const Extension* get_extension (unsigned iextension) const;
+
+    //! Return a pointer to the specified extension
+    virtual Extension* get_extension (unsigned iextension);
+
+    //! Template method searches for an Extension of the specified type
+    template<class ExtensionType>
+    const ExtensionType* get () const;
+
+    //! Template method searches for an Extension of the specified type
+    template<class ExtensionType>
+    ExtensionType* get ();
+
+    //! Add an Extension to this instance
+    /*! The derived class must ensure that only one instance of the Extension
+      type is stored. */
+    virtual void add_extension (Extension* extension);
+
   protected:
 
     friend class PolnProfile;
@@ -249,11 +287,12 @@ namespace Pulsar {
     //! polarization measure of amplitude data
     Signal::Component state;
 
+    //! The Extensions added to this Profile instance
+    mutable std::vector< Reference::To<Extension> > extension;
   };
 
   //! Default implementation of Profile::snr method
   double snr_phase (const Profile* profile);
-
 }
 
 

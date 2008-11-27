@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2002-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,9 +8,11 @@
 // #define _DEBUG 1
 
 #include "Pulsar/Profile.h"
+#include "Pulsar/ProfileExtension.h"
 
 #include "Physical.h"
 #include "Error.h"
+#include "typeutil.h"
 
 #include <iostream>
 #include <string>
@@ -115,6 +117,80 @@ const Pulsar::Profile& Pulsar::Profile::operator = (const Profile& input)
   }
 
   return *this;
+}
+
+//! Return the number of extensions available
+unsigned Pulsar::Profile::get_nextension () const
+{
+  clean_dangling (extension);
+  return extension.size ();
+}
+
+Pulsar::Profile::Extension::Extension (const char* _name)
+{
+  extension_name = _name;
+}
+
+Pulsar::Profile::Extension::~Extension ()
+{}
+
+string Pulsar::Profile::Extension::get_extension_name () const
+{
+  return extension_name;
+}
+
+string Pulsar::Profile::Extension::get_short_name () const
+{
+  return extension_name;
+}
+
+/*! Derived classes need only define this method, as the non-const version
+  implemented by the Profile base class simply calls this method. */
+const Pulsar::Profile::Extension*
+Pulsar::Profile::get_extension (unsigned iext) const
+{
+  if ( iext >= extension.size() )
+    throw Error (InvalidRange, "Pulsar::Profile::get_extension",
+                 "index=%d >= nextension=%d", iext, extension.size());
+
+  if ( !extension[iext] )
+    return 0;
+
+  return extension[iext];
+}
+
+/*! Simply calls get_extension const */
+Pulsar::Profile::Extension*
+Pulsar::Profile::get_extension (unsigned iext)
+{
+  if ( iext >= extension.size() )
+    throw Error (InvalidRange, "Pulsar::Profile::get_extension",
+                 "index=%d >= nextension=%d", iext, extension.size());
+
+  if ( !extension[iext] )
+    return 0;
+
+  return extension[iext];
+}
+
+/*! Derived classes need only define this method, as the non-const version
+  implemented by the Profile base class simply calls this method. */
+void Pulsar::Profile::add_extension (Extension* ext)
+{
+  unsigned index = find( extension, ext );
+
+  if (index < extension.size())
+  {
+    if (verbose)
+      cerr << "Pulsar::Profile::add_extension replacing" << endl;
+    extension[index] = ext;
+  }
+  else
+  {
+    if (verbose)
+      cerr << "Pulsar::Profile::add_extension appending" << endl;
+    extension.push_back(ext);
+  }
 }
 
 const Pulsar::Profile& Pulsar::Profile::operator += (const Profile& profile)
