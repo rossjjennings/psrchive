@@ -29,6 +29,7 @@ nobase_include_HEADERS = \
         Pulsar/Profile.h \
 	Pulsar/ProfileAmps.h \
 	Pulsar/ProfileAmpsExpert.h \
+	Pulsar/ProfileExtension.h \
         Pulsar/Pulsar.h \
 	Pulsar/SimplePredictor.h \
 	Pulsar/ThresholdMatch.h \
