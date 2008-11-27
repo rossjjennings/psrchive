@@ -19,8 +19,9 @@ nobase_include_HEADERS = \
 	Pulsar/Correction.h \
         Pulsar/ExampleArchive.h \
 	Pulsar/FITSAlias.h \
-        Pulsar/IntegrationExpert.h \
         Pulsar/Integration.h \
+        Pulsar/IntegrationExpert.h \
+        Pulsar/IntegrationExtension.h \
         Pulsar/IntegrationManagerExpert.h \
         Pulsar/IntegrationManager.h \
 	Pulsar/IntegrationMeta.h \
