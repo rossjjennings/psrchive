@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.181 $
-   $Date: 2008/11/09 03:16:11 $
+   $Revision: 1.182 $
+   $Date: 2008/11/27 06:12:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.181 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.182 $"
 
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Config.h"
@@ -686,7 +686,7 @@ namespace Pulsar
   private:
 
     //! The Extensions added to this Archive instance
-    std::vector< Reference::To<Extension> > extension;
+    mutable std::vector< Reference::To<Extension> > extension;
 
     //! Store the name of the file from which the current instance was loaded
     /*! Although the logical name of the file may be changed with
