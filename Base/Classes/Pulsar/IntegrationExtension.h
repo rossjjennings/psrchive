@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExtension.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/11/27 06:10:55 $
+   $Revision: 1.2 $
+   $Date: 2008/11/28 05:08:11 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Integration_Extension_h
@@ -65,14 +65,14 @@ namespace Pulsar
   template<class T>
   const T* Integration::get () const
   {
-    return ::get_extension<T> (this, "Pulsar::Integration::get<Ext>", verbose);
+    return get_ext<T> (this, "Pulsar::Integration::get<Ext>", verbose);
   }
 
   template<class T>
   T* Integration::get ()
   {
     return const_cast<T*>
-      ( ::get_extension<T> (this, "Pulsar::Integration::get<Ext>", verbose) );
+      ( get_ext<T> (this, "Pulsar::Integration::get<Ext>", verbose) );
   }
 
 }

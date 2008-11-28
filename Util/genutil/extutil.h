@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/extutil.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/11/27 06:16:20 $
+   $Revision: 1.3 $
+   $Date: 2008/11/28 05:08:11 $
    $Author: straten $ */
 
 #ifndef __Pulsar_get_extension_h
@@ -17,8 +17,7 @@
 
 //! implementation of Archive, Integration, and Profile::get<T> methods
 template<class T, class Container>
-const T* get_extension (const Container* container,
-			const char* method, bool verbose)
+const T* get_ext (const Container* container, const char* method, bool verbose)
 {
   const T* extension = 0;
 
@@ -53,3 +52,4 @@ void clean_dangling (std::vector<T>& data)
 }
 
 #endif
+

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveExtension.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/11/27 06:12:11 $
+   $Revision: 1.3 $
+   $Date: 2008/11/28 05:08:11 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_Extension_h
@@ -56,14 +56,14 @@ namespace Pulsar
   template<class T>
   const T* Archive::get () const
   {
-    return ::get_extension<T> (this, "Pulsar::Archive::get<Ext>", verbose > 2);
+    return get_ext<T> (this, "Pulsar::Archive::get<Ext>", verbose > 2);
   }
 
   template<class T>
   T* Archive::get ()
   {
     return const_cast<T*>
-      ( ::get_extension<T> (this, "Pulsar::Archive::get<Ext>", verbose > 2) );
+      ( get_ext<T> (this, "Pulsar::Archive::get<Ext>", verbose > 2) );
   }
 
   /*! If the specified extension type T does not exist, an atempt is made to
