@@ -169,7 +169,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   fits_get_colnum (ffptr, CASEINSEN, "DATA", &colnum, &status);
   fits_modify_vector_len (ffptr, colnum, nchan*npol*nbin, &status);
-  psrfits_update_tdim (ffptr, colnum, nbin, nchan, npol, 1);
+  psrfits_update_tdim (ffptr, colnum, nbin, nchan, npol);
 
   if (verbose > 2)
     cerr << "FITSArchive::unload_integrations DATA resized to "
