@@ -685,7 +685,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.61 2008/11/21 19:04:51 demorest Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.62 2008/11/29 19:11:30 demorest Exp $" << 
         endl << endl;
       return 0;
     case 'M':
@@ -821,27 +821,35 @@ int PavApp::run( int argc, char *argv[] )
       {
       case 0:
         colour_map = pgplot::ColourMap::GreyScale;
+        options.push_back("cmap:map=grey");
         break;
       case 1:
         colour_map = pgplot::ColourMap::Inverse;
+        options.push_back("cmap:map=inv");
         break;
       case 2:
         colour_map = pgplot::ColourMap::Heat;
+        options.push_back("cmap:map=heat");
         break;
       case 3:
         colour_map = pgplot::ColourMap::Cold;
+        options.push_back("cmap:map=cold");
         break;
       case 4:
         colour_map = pgplot::ColourMap::Plasma;
+        options.push_back("cmap:map=plasma");
         break;
       case 5:
         colour_map = pgplot::ColourMap::Forest;
+        options.push_back("cmap:map=forest");
         break;
       case 6:
         colour_map = pgplot::ColourMap::AlienGlow;
+        options.push_back("cmap:map=alien");
         break;
       case 7:
         colour_map = pgplot::ColourMap::Test;
+        options.push_back("cmap:map=test");
         break;
       default:
         cerr << "Unknown colour map, use (0-7)" << endl;
