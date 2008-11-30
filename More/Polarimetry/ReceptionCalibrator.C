@@ -76,6 +76,11 @@ void Pulsar::ReceptionCalibrator::set_standard_data (const Archive* data)
   Reference::To<PolnProfile> p = clone->get_Integration(0)->new_PolnProfile(0);
 
   standard_data = new Calibration::StandardData;
+
+  if (verbose)
+    cerr << "Pulsar::ReceptionCalibrator::set_standard_data"
+      " normalize_by_invariant=" << normalize_by_invariant << endl;
+
   standard_data->set_normalize (normalize_by_invariant);
   standard_data->select_profile( p );
 
@@ -106,7 +111,7 @@ const Pulsar::PhaseWeight* Pulsar::ReceptionCalibrator::get_on_pulse () const
 
 void Pulsar::ReceptionCalibrator::set_normalize_by_invariant (bool set)
 {
-  normalize_by_invariant = true;
+  normalize_by_invariant = set;
   if (standard_data)
     standard_data->set_normalize (normalize_by_invariant);
 }
