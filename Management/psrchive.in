@@ -31,6 +31,7 @@ fi
 
 prefix=@prefix@
 exec_prefix=@exec_prefix@
+datarootdir=@datarootdir@
 
 while test $# -gt 0; do
 
