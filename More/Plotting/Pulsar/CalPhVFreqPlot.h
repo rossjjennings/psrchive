@@ -19,9 +19,7 @@
 
 namespace Pulsar
 {
-  /**
-   * Plots the calibrator phase vs frequency.
-   **/
+  //! Plots the calibrator phase vs frequency.
   class CalPhVFreqPlot : public SimplePlot
   {
   public:

@@ -20,8 +20,7 @@
 namespace Pulsar
 {
 
-
-
+  //! Plot of data weight vs frequency
   class ChannelWeightsPlot : public FrequencyPlot
   {
   public:

@@ -19,6 +19,8 @@
 
 namespace Pulsar
 {
+
+  //! Plot of off-pulse bandpass
   class BandpassPlot : public FrequencyPlot
   {
   public:

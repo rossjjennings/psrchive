@@ -16,8 +16,7 @@
 namespace Pulsar
 {
 
-
-
+  //! Plot of offpulse bandpass and channel weights
   class BandpassChannelWeightPlot : public MultiPlot
   {
   public:
