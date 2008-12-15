@@ -406,6 +406,9 @@ bool silent = false;
 
 bool output_phcx=false;
 char output_phcx_file[128];
+bool input_phcx=false;
+char input_phcx_file[128];
+
 
 // If archive contains more than maxChannels and maxSubints, pdmp
 // will partially scrunch it to improve performance
@@ -694,6 +697,17 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 			exit(1);
 #endif
                 }
+		// read a phcx file
+		else if (strcmp(argv[i], "-input-phcx") == 0) {
+#ifdef HAVE_PSRXML
+			input_phcx = true;
+			i++;
+			strcpy(input_phcx_file,argv[i]);
+#else
+			printf("Sorry, can't read hcx file as this pdmp was not compiled against the psrxml library.\n");
+			exit(1);
+#endif
+		}
 
 
 		// Handle error if there is no such option
@@ -838,9 +852,23 @@ void process (Pulsar::Archive* archive)
    * and creates plots etc, if the initial section
    * did not already exist.
    */
+  if(input_phcx){
+	xml_candidate=read_phcx(input_phcx_file);
+        /*
+	 * Really we should read the last parameters
+	 * from the phcx and use it as input.
+	 *
+	 * But we won't, as we are lazy.
+	 *
+	 */
+  } else {
+	xml_candidate=NULL;
+  }
   if(output_phcx){
-  	xml_candidate = (phcx*)malloc(sizeof(phcx));
-	xml_candidate->nsections=0;
+  	if (xml_candidate==NULL){
+		xml_candidate = (phcx*)malloc(sizeof(phcx));
+		xml_candidate->nsections=0;
+	}
 	setInitialXmlCandiateSection(archive);
   }
 #endif
@@ -2750,6 +2778,25 @@ void setInitialXmlCandiateSection(const Archive * archive){
 	} else {
 
 		// we put in initial values
+
+		strcpy(xml_candidate->header.sourceID,archive->get_source().c_str());
+
+		if (strcmp(archive->get_telescope().c_str(),"PKS")==0){
+			strcpy(xml_candidate->header.telescope,"PARKES");
+		} else {
+			strcpy(xml_candidate->header.telescope,archive->get_telescope().c_str());
+		}
+		xml_candidate->header.centreFreq=archive->get_centre_frequency();
+		xml_candidate->header.bandwidth=archive->get_bandwidth();
+		MJD start = archive->get_Integration(0)->get_start_time();
+		xml_candidate->header.mjdStart=(start.intday()+ start.fracday());
+		xml_candidate->header.observationLength= (archive->end_time() - archive->start_time()).in_seconds();
+		Angle ra_angle = (archive->get_coordinates()).ra();
+		Angle dec_angle = (archive->get_coordinates()).dec();
+		xml_candidate->header.ra=ra_angle.getDegrees();
+		xml_candidate->header.dec=dec_angle.getDegrees();
+
+
 		// we will memcpy for now, since I am not sure what happens to the 'archives'
 		{
 			float* amps = total->get_Profile(0,0,0)->get_amps();
@@ -2908,7 +2955,7 @@ void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod
 		dmBins = (int)ceil( ( fabs(dmHalfRange)*2 ) / dmStep);
 
 		// Number of bins in the Period axis
-		periodBins = (int)ceil( ( fabs(periodHalfRange_us)*2 ) / periodStep_us);
+		periodBins = (int)ceil( ( fabs(periodHalfRange_us)*2 ) / periodStep_us) + 1;
 
 		section->snrBlock.periodIndex = (double*)malloc(sizeof(double)*periodBins);
 		section->snrBlock.nperiod=periodBins;
