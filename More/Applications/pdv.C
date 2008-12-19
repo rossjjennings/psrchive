@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.38 $
-   $Date: 2008/09/04 12:41:20 $
-   $Author: demorest $ */
+   $Revision: 1.39 $
+   $Date: 2008/12/19 00:30:07 $
+   $Author: straten $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -930,8 +930,12 @@ try
   if( !archive )
     return;
 
-  Interpreter preprocessor;
-  preprocessor.set( archive );
+  Interpreter* preprocessor = standard_shell();
+
+  // allow Faraday rotation and dispersion corrections to infinite frequency
+  preprocessor->allow_infinite_frequency = true;
+
+  preprocessor->set( archive );
 
   if (jobs.size())
   {
@@ -944,14 +948,14 @@ try
 	jobs.erase( jobs.begin() + i );
 	i--;
       }
-      preprocessor.script( config_jobs );
+      preprocessor->script( config_jobs );
     }
   }
 
   if( !keep_baseline )
     archive->remove_baseline();
 
-  preprocessor.script( jobs );
+  preprocessor->script( jobs );
 
   if( archive->get_state() != Signal::Stokes && 
       (show_pol_frac || show_lin_frac || show_circ_frac || show_pa ) )
