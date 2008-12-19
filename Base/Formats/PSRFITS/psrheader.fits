@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '3.8             '   / Header version 
+HDRVER  = '3.9             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -72,7 +72,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                   21 / number of fields per row
+TFIELDS =                   23 / number of fields per row
 #
 EXTNAME = HISTORY             / name of this binary table extension
 #
@@ -100,9 +100,15 @@ TUNIT#  = MHz                 / units of field
 TFORM#  = 1D                  / Double
 TTYPE#  = NCHAN               / Number of frequency channels
 TFORM#  = 1I                  / Integer
-TTYPE#  = CHAN_BW             / Channel bandwidth (nominal)
+TTYPE#  = CHAN_BW             / Channel bandwidth
 TFORM#  = 1D                  / Double
 TUNIT#  = MHz                 / units of field
+TTYPE#  = DM                  / DM used for dedispersion
+TFORM#  = 1D                  / Double
+TUNIT#  = CM-3 PC             / units of field
+TTYPE#  = RM                  / RM used for RM correction
+TFORM#  = 1D                  / Double
+TUNIT#  = RAD M-2             / units of field
 TTYPE#  = PR_CORR             / Projection of receptors onto sky corrected
 TFORM#  = 1I                  / Integer flag 
 TTYPE#  = FD_CORR             / Feed basis correction applied
