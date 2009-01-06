@@ -74,6 +74,9 @@ if ( `date +%d` == "01" ) then
   if ( ! -d $dir ) mkdir -p $dir
   cp current/$file $dir/$file
 
+  # delete all monthly backups older than one year
+  rm `find $dir -ctime +370`
+
 endif
 
 if ( `date +%a` == "Sun" ) then
@@ -82,8 +85,8 @@ if ( `date +%a` == "Sun" ) then
   if ( ! -d $dir ) mkdir -p $dir
   cp current/$file $dir/$file
 
-  # delete all weekly backups older than two months
-  rm `find $dir -ctime +57`
+  # delete all weekly backups older than one month
+  rm `find $dir -ctime +30`
 
 endif
 
