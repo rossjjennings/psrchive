@@ -63,8 +63,7 @@ F7 1 1
 F8 1 1
 F9 1 1
 FA 1 1
-FB 1 1
-FC 1 1
+
 PMDEC 1 1     # Proper motion in DEC (mas/yr)
 PMRA 1 1      # Proper motion in RA  (mas/yr)
 PMLAMBDA 1 1  # Proper motion in ecliptic longitude (mas/yr)
@@ -117,6 +116,17 @@ PB_3 1 1
 OM 1 1        # Longitude of periastron of 1st orbit. aka OM_1 
 OM_2 1 1 
 OM_3 1 1 
+
+FB 1 1        # Binary frequency used by BTX model
+FB_1 1 1      # First time derivative of binary frequency 
+FB_2 1 1
+FB_3 1 1
+FB_4 1 1
+FB_5 1 1
+FB_6 1 1
+FB_7 1 1
+FB_8 1 1
+FB_9 1 1
 
 KOM 1 1       # Longitude of ascending node  [DDK-WvS]
 KIN 1 1       # Inclination angle (0 - 180)  [DDK-WvS]
