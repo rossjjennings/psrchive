@@ -711,7 +711,7 @@ void Pulsar::SystemCalibrator::create_model ()
   MEAL::Complex2* basis = 0;
   if (receiver)
   {
-    Pauli::basis.set_basis( receiver->get_basis() );
+    Pauli::basis().set_basis( receiver->get_basis() );
     
     /*
       If the calibrator is a calibrated standard, as is the case with

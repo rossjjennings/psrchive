@@ -91,7 +91,7 @@ Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
 
   if (receiver)
   {
-    Pauli::basis.set_basis( receiver->get_basis() );    
+    Pauli::basis().set_basis( receiver->get_basis() );    
     Stokes<double> cal = receiver->get_reference_source ();
     if (verbose > 2)
       cerr << "Pulsar::ReferenceCalibrator reference source " << cal << endl;

@@ -67,7 +67,7 @@ Pulsar::BasisCorrection::get_symmetry (const Receiver* rcvr) const
   summary += " orientation=" + tostring(rcvr->get_orientation()) + "\n";
 
   // rotate the basis about the Stokes V axis
-  MEAL::Rotation1 rotation ( Pauli::basis.get_basis_vector(2) );
+  MEAL::Rotation1 rotation ( Pauli::basis().get_basis_vector(2) );
 
   // the sign of this rotation may depend on handedness
   rotation.set_phi ( rcvr->get_orientation().getRadians() );

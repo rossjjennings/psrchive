@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.28 $
-   $Date: 2008/06/06 12:37:19 $
+   $Revision: 1.29 $
+   $Date: 2009/01/07 20:58:37 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -24,9 +24,10 @@
 namespace Pauli {
 
   //! The basis through which Stokes parameters are converted to Jones matrices
-  extern Basis<double> basis;
+  Basis<double>& basis();
 
 }
+
 
 // convert Hermitian Quaternion to Jones matrix
 template<typename T>
@@ -67,7 +68,7 @@ const Jones<T> convert (const Stokes< std::complex<T> >& stokes)
   Quaternion<std::complex<T>,Hermitian> q;
 
   q.set_scalar (stokes.get_scalar());
-  q.set_vector (Pauli::basis.get_out(stokes.get_vector()));
+  q.set_vector (Pauli::basis().get_out(stokes.get_vector()));
 
   std::complex<T> half (0.5, 0.0);
   return convert (half*q);
@@ -78,7 +79,7 @@ template<typename T>
 const Jones<T> convert (const Stokes<T>& stokes)
 {
   Quaternion<T,Hermitian> q (stokes.get_scalar(),
-                             Pauli::basis.get_out(stokes.get_vector()));
+                             Pauli::basis().get_out(stokes.get_vector()));
   return convert (T(0.5)*q);
 }
 
@@ -87,13 +88,13 @@ template<typename T>
 const Quaternion<T,Hermitian> natural (const Stokes<T>& stokes)
 {
   return Quaternion<T,Hermitian> 
-    (stokes.get_scalar(), Pauli::basis.get_out(stokes.get_vector()));
+    (stokes.get_scalar(), Pauli::basis().get_out(stokes.get_vector()));
 }
 
 template<typename T>
 const Stokes<T> standard (const Quaternion<T,Hermitian>& q)
 { 
-  return Stokes<T>( q.get_scalar(), Pauli::basis.get_in(q.get_vector()) );
+  return Stokes<T>( q.get_scalar(), Pauli::basis().get_in(q.get_vector()) );
 }
 
 // convert coherency vector to Jones matrix
@@ -172,7 +173,7 @@ template<typename T>
 const Stokes<T> coherency (const Quaternion<T,Hermitian>& q)
 { 
   return Stokes<T>( T(2.0) * q.get_scalar(), 
-		    T(2.0) * Pauli::basis.get_in(q.get_vector()) );
+		    T(2.0) * Pauli::basis().get_in(q.get_vector()) );
 }
 
 // transform the Stokes parameters by the given Jones matrix

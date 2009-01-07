@@ -51,7 +51,7 @@ int main ()
     return -1;
   }
 
-  Pauli::basis.set_basis( Signal::Circular );
+  Pauli::basis().set_basis( Signal::Circular );
 
   J_test = convert(S_test);
 

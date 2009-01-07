@@ -12,7 +12,7 @@
 using namespace std;
 
 Calibration::Faraday::Faraday () :
-  rotation (Pauli::basis.get_basis_vector(2))
+  rotation (Pauli::basis().get_basis_vector(2))
 {
   MEAL::OneParameter* parm = new MEAL::OneParameter (this);
   parm->set_name (0, "RM");

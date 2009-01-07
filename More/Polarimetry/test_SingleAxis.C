@@ -48,11 +48,11 @@ int main () try {
 
     // switch basis for each test
     if (i%2) {
-      Pauli::basis.set_basis (Signal::Circular);
+      Pauli::basis().set_basis (Signal::Circular);
       cal = Stokes<double> (1,1,0,0);
     }
     else {
-      Pauli::basis.set_basis (Signal::Linear);
+      Pauli::basis().set_basis (Signal::Linear);
       cal = Stokes<double> (1,0,1,0);
     }
 

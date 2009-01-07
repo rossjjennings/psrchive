@@ -264,7 +264,7 @@ Jones<double> Pulsar::ProjectionCorrection::get_rotation () const
     return Jones<double> (1.0);
 
   // rotate the basis about the Stokes V axis
-  MEAL::Rotation1 rotation ( Pauli::basis.get_basis_vector(2) );
+  MEAL::Rotation1 rotation ( Pauli::basis().get_basis_vector(2) );
   rotation.set_phi ( feed_rotation.getRadians() );
   return rotation.evaluate();
 }

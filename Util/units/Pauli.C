@@ -6,5 +6,16 @@
  ***************************************************************************/
 #include "Pauli.h"
 
-Basis<double> Pauli::basis;
+Basis<double>& Pauli::basis()
+{
+  /*
+    The order of construction of global variables at runtime is not
+    guaranteed, but the following pointer is initialized at compile time
+  */
 
+  static Basis<double>* basis = 0;
+  if (!basis)
+    basis = new Basis<double>;
+
+  return *basis;
+}
