@@ -6,7 +6,7 @@ AC_DEFUN([ATNF_DISABLE_OPTIMIZE],
 
 	AC_ARG_ENABLE([optimize],
 		AC_HELP_STRING([--disable-optimize],
-			[disable optimization, usefull if -O2 conflicts with -g ] ),
+			[disable optimization] ),
 			[optimize=yes])
 
 	if test x"$optimize" = xyes; then
