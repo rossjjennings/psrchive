@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PuMa/Pulsar/PuMaArchive.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/11/07 22:15:36 $
+   $Revision: 1.6 $
+   $Date: 2009/01/09 11:40:06 $
    $Author: straten $ */
 
 #ifndef __PuMaArchive_h
@@ -158,7 +158,7 @@ namespace Pulsar {
     void set_nsubint (unsigned nsubint);
 
     //! The subints vector will point to BasicIntegrations
-    Integration* new_Integration (Integration* copy_this = 0);
+    Integration* new_Integration (const Integration* copy_this = 0);
 
     //! Load the PuMa header information from filename
     void load_header (const char* filename);

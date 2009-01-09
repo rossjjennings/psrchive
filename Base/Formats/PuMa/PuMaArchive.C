@@ -341,7 +341,7 @@ void Pulsar::PuMaArchive::set_GenType (int code, bool done)
 
 //! The subints vector will point to BasicIntegrations
 Pulsar::Integration* 
-Pulsar::PuMaArchive::new_Integration (Integration* subint)
+Pulsar::PuMaArchive::new_Integration (const Integration* subint)
 {
   Integration* integration;
 
