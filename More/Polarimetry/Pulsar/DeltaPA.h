@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/DeltaPA.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/09/24 11:29:17 $
+   $Revision: 1.4 $
+   $Date: 2009/01/27 07:42:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_DeltaPA_h
 #define __Pulsar_DeltaPA_h
 
 #include "Estimate.h"
+#include <vector>
 
 namespace Pulsar {
 
@@ -41,11 +42,22 @@ namespace Pulsar {
     void set_threshold (float t) { threshold = t; }
     float get_threshold () const { return threshold; }
 
+    //! Set the phase bins to be included in the mean
+    void set_include (const std::vector<unsigned>& bins);
+
+    //! Set the phase bins to be excluded from the mean
+    void set_exclude (const std::vector<unsigned>& bins);
+
   protected:
 
     float threshold;
     mutable unsigned used_bins;
 
+    //! Include only the specified phase bins
+    std::vector<unsigned> include_bins;
+
+    //! Exclude the specified phase bins
+    std::vector<unsigned> exclude_bins;
   };
 
 }

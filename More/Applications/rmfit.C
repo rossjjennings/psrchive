@@ -41,6 +41,7 @@
 #include <cmath>
 
 using namespace std;
+using TextInterface::parse_indeces;
 
 bool verbose = false;
 
@@ -75,6 +76,7 @@ void usage ()
     "  -r                Refine the RM using two halves of band \n"
     "\n"
     "Preprocessing options: \n"
+    "  -b [+/-][range]   Include/exclude phase bins \n"
     "  -B [factor]       Scrunch in phase bins \n"
     "  -F [factor]       Scrunch in frequency \n"
     "  -R RM             Set the input rotation measure \n"
@@ -104,6 +106,9 @@ static unsigned max_iterations = 10;
 
 Estimate<double> best_search_rm;
 
+static vector<unsigned> include_bins;
+static vector<unsigned> exclude_bins;
+
 int main (int argc, char** argv)
 {
   bool refine  = false;
@@ -132,11 +137,32 @@ int main (int argc, char** argv)
 
   vector<string> archives;
 
-  const char* args = "B:DeF:hJK:Lm:pPrR:S:T:tu:U:vVw:W:z:";
+  string exclude_range;
+  string include_range;
+
+  const char* args = "b:B:DeF:hJK:Lm:pPrR:S:T:tu:U:vVw:W:z:";
   int gotc = 0;
 
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
+
+    case 'b':
+      switch (optarg[0])
+	{
+	case '-':
+	  exclude_range = optarg + 1;
+	  cerr << "rmfit: will exclude " << exclude_range << endl;
+	  break;
+	case '+':
+	  include_range = optarg + 1;
+	  cerr << "rmfit: will include " << include_range << endl;
+	  break;
+	default:
+	  cerr << "rmfit: invalid bin inclusion/exclusion string "
+	    "'" << optarg << "'" << endl;
+	  return 0;
+	}
+      break;
 
     case 'B':
       bscrunchme = true;
@@ -278,7 +304,13 @@ int main (int argc, char** argv)
 
       if (rm_set)       data->set_rotation_measure (rotation_measure);
       if (fscrunchme)   data -> fscrunch(fscr);
-      if (bscrunchme)   data -> bscrunch(bscr);      
+      if (bscrunchme)   data -> bscrunch(bscr);
+
+      if (!include_range.empty())
+	parse_indeces (include_bins, include_range, data->get_nbin());
+
+      if (!exclude_range.empty())
+	parse_indeces (exclude_bins, exclude_range, data->get_nbin());
 
       for( unsigned izap=0; izap<zap_chans.size(); izap++)
 	for( unsigned iint=0; iint<data->get_nsubint(); iint++)
@@ -888,6 +920,9 @@ void do_refine (Reference::To<Pulsar::Archive> data, bool log_results)
 
   if (refine_threshold)
     delta_rm.set_threshold (refine_threshold);
+
+  delta_rm.set_include (include_bins);
+  delta_rm.set_exclude (exclude_bins);
 
   bool converged = false;
   unsigned iterations = 0;

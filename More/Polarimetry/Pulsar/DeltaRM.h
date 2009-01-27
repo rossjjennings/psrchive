@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/DeltaRM.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/09/24 11:29:17 $
+   $Revision: 1.7 $
+   $Date: 2009/01/27 07:42:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_DeltaRM_h
@@ -53,10 +53,22 @@ namespace Pulsar {
     void set_threshold (float t) { threshold = t; }
     float get_threshold () const { return threshold; }
 
+    //! Set the phase bins to be included in the computation
+    void set_include (const std::vector<unsigned>& bins);
+
+    //! Set the phase bins to be excluded from the computation
+    void set_exclude (const std::vector<unsigned>& bins);
+
   protected:
 
     float threshold;
     unsigned used_bins;
+
+    //! Include only the specified phase bins
+    std::vector<unsigned> include_bins;
+
+    //! Exclude the specified phase bins
+    std::vector<unsigned> exclude_bins;
 
     //! The rotation measure
     Estimate<double> rotation_measure;

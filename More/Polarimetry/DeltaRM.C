@@ -63,6 +63,18 @@ static void plot (const Pulsar::Archive* archive, unsigned chan)
 
 #endif
 
+//! Set the phase bins to be included in the mean
+void Pulsar::DeltaRM::set_include (const std::vector<unsigned>& bins)
+{
+  include_bins = bins;
+}
+
+//! Set the phase bins to be excluded exclude the mean
+void Pulsar::DeltaRM::set_exclude (const std::vector<unsigned>& bins)
+{
+  exclude_bins = bins;
+}
+
 //! Refine the rotation measure estimate
 void Pulsar::DeltaRM::refine ()
 {
@@ -121,6 +133,8 @@ void Pulsar::DeltaRM::refine ()
   Pulsar::DeltaPA delta_pa;
 
   delta_pa.set_threshold (threshold);
+  delta_pa.set_include (include_bins);
+  delta_pa.set_exclude (exclude_bins);
 
   Estimate<double> delta_PA = delta_pa.get (profile0, profile1);
   Estimate<double> delta_RM = delta_PA/(lambda_1*lambda_1-lambda_0*lambda_0);

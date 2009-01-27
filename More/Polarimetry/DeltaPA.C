@@ -7,6 +7,7 @@
 
 #include "Pulsar/DeltaPA.h"
 #include "Pulsar/PolnProfile.h"
+#include "templates.h"
 
 #include <iostream>
 using namespace std;
@@ -103,6 +104,18 @@ protected:
 
 };
 
+//! Set the phase bins to be included in the mean
+void Pulsar::DeltaPA::set_include (const std::vector<unsigned>& bins)
+{
+  include_bins = bins;
+}
+
+//! Set the phase bins to be excluded exclude the mean
+void Pulsar::DeltaPA::set_exclude (const std::vector<unsigned>& bins)
+{
+  exclude_bins = bins;
+}
+
 #include "Pulsar/GaussianBaseline.h"
 #include "Pulsar/PhaseWeight.h"
 
@@ -159,32 +172,39 @@ Pulsar::DeltaPA::get (const PolnProfile* p0, const PolnProfile* p1) const
   FILE* fptr = fopen ("delta_pa.txt", "w");
   
   for (unsigned ibin=0; ibin<nbin; ibin++)
-    if (linear0.get_amps()[ibin] > cutoff0 &&
-	linear1.get_amps()[ibin] > cutoff1) {
+  {
+    if (include_bins.size() && !found (ibin, include_bins))
+      continue;
 
-      cos_delta_PA += q0[ibin]*q1[ibin] + u0[ibin]*u1[ibin];
-      sin_delta_PA += q0[ibin]*u1[ibin] - q1[ibin]*u0[ibin];
+    if (exclude_bins.size() && found (ibin, exclude_bins))
+      continue;
 
-      MeanArc<double> arc1;
-      arc1.add( Estimate<double> (q0[ibin], var_q0),
-	        Estimate<double> (u0[ibin], var_u0),
-	        Estimate<double> (q1[ibin], var_q1),
-	        Estimate<double> (u1[ibin], var_u1) );
+    if (linear0.get_amps()[ibin] < cutoff0 ||
+	linear1.get_amps()[ibin] < cutoff1)
+      continue;
 
-      Estimate<double> delta_pa = arc1.get_Estimate();
+    cos_delta_PA += q0[ibin]*q1[ibin] + u0[ibin]*u1[ibin];
+    sin_delta_PA += q0[ibin]*u1[ibin] - q1[ibin]*u0[ibin];
 
-      if (fptr)
-        fprintf (fptr, "%u  %lf  %lf\n", ibin,
-			delta_pa.get_value(), delta_pa.get_error());
+    MeanArc<double> arc1;
+    arc1.add( Estimate<double> (q0[ibin], var_q0),
+	      Estimate<double> (u0[ibin], var_u0),
+	      Estimate<double> (q1[ibin], var_q1),
+	      Estimate<double> (u1[ibin], var_u1) );
+
+    Estimate<double> delta_pa = arc1.get_Estimate();
+
+    if (fptr)
+      fprintf (fptr, "%u  %lf  %lf\n", ibin,
+	       delta_pa.get_value(), delta_pa.get_error());
 
 #ifdef _DEBUG
-	cerr << "ibin=" << ibin << " dPA=" << delta_pa << endl;
+    cerr << "ibin=" << ibin << " dPA=" << delta_pa << endl;
 #endif
 
-      arc += arc1; 
-      used_bins ++;
-
-    }
+    arc += arc1; 
+    used_bins ++;
+  }
 
   if (fptr)
     fclose (fptr);
@@ -202,28 +222,36 @@ Pulsar::DeltaPA::get (const PolnProfile* p0, const PolnProfile* p1) const
   double var_delta_PA = 0.0;
 
   for (unsigned ibin=0; ibin<nbin; ibin++)
-    if (linear0.get_amps()[ibin] > cutoff0 &&
-	linear1.get_amps()[ibin] > cutoff1) {
+  {
+    if (include_bins.size() && !found (ibin, include_bins))
+      continue;
 
-      double del = 0;
+    if (exclude_bins.size() && found (ibin, exclude_bins))
+      continue;
 
-      // del delta_PA del q0
-      del = cos_delta_PA * u1[ibin] - sin_delta_PA * q1[ibin];
-      var_delta_PA += del * del * var_q0;
+    if (linear0.get_amps()[ibin] < cutoff0 ||
+	linear1.get_amps()[ibin] < cutoff1)
+      continue;
 
-      // del delta_PA del u0
-      del = -cos_delta_PA * q1[ibin] - sin_delta_PA * u1[ibin];
-      var_delta_PA += del * del * var_u0;
+    double del = 0;
 
-      // del delta_PA del q1
-      del = -cos_delta_PA * u0[ibin] - sin_delta_PA * q0[ibin];
-      var_delta_PA += del * del * var_q1;
+    // del delta_PA del q0
+    del = cos_delta_PA * u1[ibin] - sin_delta_PA * q1[ibin];
+    var_delta_PA += del * del * var_q0;
 
-      // del delta_PA del u1
-      del = cos_delta_PA * q0[ibin] - sin_delta_PA * u0[ibin];
-      var_delta_PA += del * del * var_u1;
-
-    }
+    // del delta_PA del u0
+    del = -cos_delta_PA * q1[ibin] - sin_delta_PA * u1[ibin];
+    var_delta_PA += del * del * var_u0;
+    
+    // del delta_PA del q1
+    del = -cos_delta_PA * u0[ibin] - sin_delta_PA * q0[ibin];
+    var_delta_PA += del * del * var_q1;
+    
+    // del delta_PA del u1
+    del = cos_delta_PA * q0[ibin] - sin_delta_PA * u0[ibin];
+    var_delta_PA += del * del * var_u1;
+    
+  }
 
   Estimate<double> radians( atan2(sin_delta_PA,cos_delta_PA), var_delta_PA );
 
