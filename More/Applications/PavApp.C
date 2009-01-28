@@ -332,7 +332,13 @@ void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
 
   string frequency;
 
-  if (archive->get_dedispersed())
+  /*
+     If the archive has been dedispsersed, then the effective centre
+     frequency associated with pulse phase is that of the header, not
+     the centre frequency stored in the profile.
+  */
+
+  if ( !archive->get_dedispersed() )
     frequency = tostring(archive->get_Profile(0, 0, 0)->get_centre_frequency());
   else
     frequency = tostring(archive->get_centre_frequency());
@@ -685,7 +691,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.62 2008/11/29 19:11:30 demorest Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.63 2009/01/28 01:23:12 straten Exp $" << 
         endl << endl;
       return 0;
     case 'M':
