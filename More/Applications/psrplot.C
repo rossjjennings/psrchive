@@ -78,10 +78,10 @@ void help_frame_options (const char* name);
 void set_options (Pulsar::Plot* plot, const vector<string>& options);
 
 // load the string of options into one of the plots
-void specific_options (string optarg, vector<Plot*>& plots);
+void specific_options (string optarg, vector< Reference::To<Plot> >& plots);
 
 // load the style file into one of the plots
-void specific_style (string optarg, vector<Plot*>& plots);
+void specific_style (string optarg, vector< Reference::To<Plot> >& plots);
 
 // verbosity
 static bool verbose = false;
@@ -98,7 +98,7 @@ int main (int argc, char** argv) try
   string plot_device = "?";
 
   // Plot classes to be used
-  vector<Plot*> plots;
+  vector< Reference::To<Plot> > plots;
 
   // Options to be set
   vector<string> options;
@@ -242,12 +242,14 @@ int main (int argc, char** argv) try
    } 
 
 
-  if (plots.empty()) {
+  if (plots.empty())
+  {
     cout << "psrplot: please choose at least one plot style" << endl;
     return -1;
   } 
 
-  if (options.size()) {
+  if (options.size())
+  {
     if (verbose)
       cerr << "psrplot: parsing options" << endl;
     for (unsigned iplot=0; iplot < plots.size(); iplot++)
@@ -265,13 +267,15 @@ int main (int argc, char** argv) try
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  if (filenames.empty()) {
+  if (filenames.empty())
+  {
     cout << "psrplot: please specify filename[s]" << endl;
     return -1;
   } 
 
   // open the plot device
-  if (cpgopen(plot_device.c_str()) < 0) {
+  if (cpgopen(plot_device.c_str()) < 0)
+  {
     cout << "psrplot: Could not open plot device" << endl;
     return -1;
   }
@@ -328,7 +332,6 @@ int main (int argc, char** argv) try
       loop.set_Archive (toplot);
       loop.set_Plot (plots[iplot]);
       loop.plot();
-
     }
 
   }
@@ -392,7 +395,7 @@ void set_options (Pulsar::Plot* plot, const vector<string>& options)
 }
 
 // parses index from optarg and removes it from the string
-unsigned get_index (string& optarg, vector<Plot*>& plots)
+unsigned get_index (string& optarg, vector< Reference::To<Plot> >& plots)
 {
   unsigned index = fromstring<unsigned> ( stringtok (optarg, ":") );
   if (index >= plots.size())
@@ -405,7 +408,7 @@ unsigned get_index (string& optarg, vector<Plot*>& plots)
 }
 
 // load the string of options into one of the plots
-void specific_options (string optarg, vector<Plot*>& plots)
+void specific_options (string optarg, vector< Reference::To<Plot> >& plots)
 {
   // get the plot index
   unsigned index = get_index (optarg, plots);
@@ -419,7 +422,7 @@ void specific_options (string optarg, vector<Plot*>& plots)
 }
 
 // load the style file into one of the plots
-void specific_style (string optarg, vector<Plot*>& plots)
+void specific_style (string optarg, vector< Reference::To<Plot> >& plots)
 {
   // get the plot index
   unsigned index = get_index (optarg, plots);
