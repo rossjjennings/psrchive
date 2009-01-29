@@ -29,7 +29,7 @@ Pulsar::Poincare::Interface::Interface (Poincare* instance)
        &Poincare::set_latitude,
        "lat", "Camera latitude" );
 
-  add( &Poincare::get_animate,
-       &Poincare::set_animate,
-       "anim", "Animate by rotating axes" );
+  add( &Poincare::get_animate_steps,
+       &Poincare::set_animate_steps,
+       "anim", "Number of animation frames" );
 }

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Poincare.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/11/12 07:45:10 $
+   $Revision: 1.8 $
+   $Date: 2009/01/29 08:11:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Poincare_h
@@ -63,9 +63,9 @@ namespace Pulsar {
     PlotScale* get_phase_scale () { return &phase_scale; }
 
     //! Set the animate of the camera
-    void set_animate (bool f) { animate = f; }
+    void set_animate_steps (unsigned steps) { animate_steps = steps; }
     //! Get the animate of the camera
-    bool get_animate () const { return animate; }
+    unsigned get_animate_steps () const { return animate_steps; }
 
   protected:
 
@@ -73,9 +73,9 @@ namespace Pulsar {
     Index ichan;
     PlotScale phase_scale;
 
-    float longitude;
-    float latitude;
-    bool animate;
+    mutable float longitude;
+    mutable float latitude;
+    unsigned animate_steps;
   };
 
 }
