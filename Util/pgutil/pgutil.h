@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/pgutil.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/02/22 14:06:51 $
+   $Revision: 1.2 $
+   $Date: 2009/01/29 08:12:09 $
    $Author: straten $ */
 
 #ifndef __pgutil_H
@@ -49,8 +49,11 @@ namespace pgplot {
   //! Basis input operator
   std::istream& operator >> (std::istream&, Units&);
 
-  //! Get the current aspect ratio
+  //! Get the current aspect ratio of the paper
   float get_aspect_ratio ();
+
+  //! Get the current aspect ratio of the viewport
+  float get_viewport_aspect_ratio ();
 
   //! Get scale factors to convert from 'from' units to 'to' units
   void get_scale (Units from, Units to, float& width, float& height);

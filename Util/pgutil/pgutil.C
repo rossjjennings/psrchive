@@ -19,6 +19,14 @@ float pgplot::get_aspect_ratio ()
   return y2 / x2;
 }
 
+float pgplot::get_viewport_aspect_ratio ()
+{
+  float x1, x2, y1, y2;
+  cpgqvp (Inches, &x1, &x2, &y1, &y2);
+
+  return (y2-y1) / (x2-x1);
+}
+
 void pgplot::get_scale (Units from, Units to, float& width, float& height)
 {
   float j = 0;
