@@ -8,6 +8,7 @@
 #include "Pulsar/PolnProfile.h"
 
 #include "Plot3D.h"
+#include "pgutil.h"
 
 #include <cpgplot.h>
 
@@ -20,7 +21,7 @@ Pulsar::Poincare::Poincare ()
 {
   longitude = 45;
   latitude = 25;
-  animate = false;
+  animate_steps = 0;
 }
 
 //! Plot in the current viewport
@@ -34,7 +35,8 @@ void Pulsar::Poincare::plot (const Archive* data)
 
   float max = 0;
 
-  for (unsigned ipol=1; ipol < 4; ipol++) {
+  for (unsigned ipol=1; ipol < 4; ipol++)
+  {
     const float* amps = profile->get_Profile(ipol)->get_amps();
 
     float max_amp = *max_element (amps+i_min, amps+i_max);
@@ -47,10 +49,21 @@ void Pulsar::Poincare::plot (const Archive* data)
 
   max *= 1.1;
 
-  cpgpap (0.0, 1.0);
-  cpgswin (-max,max,-max,max);
+  float aspect_ratio = pgplot::get_viewport_aspect_ratio ();
+
+  float xfactor = 1.0;
+  float yfactor = 1.0;
+
+  if (aspect_ratio > 1)
+    yfactor = aspect_ratio;
+  else
+    xfactor = 1.0/aspect_ratio;
+  
+  cpgswin (-max*xfactor, max*xfactor,
+	   -max*yfactor, max*yfactor);
 
   pgplot::Plot3D volume;
+
   Cartesian origin (0,0,0);
   Cartesian x0 (max,0,0);
   Cartesian y0 (0,max,0);
@@ -60,15 +73,12 @@ void Pulsar::Poincare::plot (const Archive* data)
 
   unsigned nplot = 1;
 
-  if (animate)
-    nplot = 360;
+  if (animate_steps)
+    nplot = animate_steps;
 
-  float lat = latitude;
-  float lon = longitude;
-
-  for (unsigned iplot=0; iplot < nplot; iplot++) {
-
-    volume.set_camera (lon, lat);
+  for (unsigned iplot=0; iplot < nplot; iplot++)
+  {
+    volume.set_camera (longitude, latitude);
     
     // draw and label the axis
     cpgsci (2);
@@ -84,8 +94,8 @@ void Pulsar::Poincare::plot (const Archive* data)
     volume.text (z0*(1+textsep), "V");
     
     cpgsci (1);
-    for (unsigned ibin=i_min; ibin < i_max; ibin++) {
-
+    for (unsigned ibin=i_min; ibin < i_max; ibin++)
+    {
       Cartesian p ( profile->get_Profile(1)->get_amps()[ibin],
 		    profile->get_Profile(2)->get_amps()[ibin],
 		    profile->get_Profile(3)->get_amps()[ibin] );
@@ -94,16 +104,16 @@ void Pulsar::Poincare::plot (const Archive* data)
 	volume.move (p);
       else
 	volume.draw (p);
-      
     }
 
     if (nplot > 1)
       cpgpage ();
 
-    lon += 4;
-    lat += 1;
-
+    if (animate_steps)
+    {
+      longitude += 4;
+      latitude += 1;
+    }
   }
-
 }
 
