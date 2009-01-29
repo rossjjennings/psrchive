@@ -19,6 +19,7 @@ void Pulsar::UsingQTDRIV::plotter ()
 
 void Pulsar::UsingQTDRIV::plot_data ()
 {
+  QPgplot::clearScreen();
   // drawPlot sets things up then calls plotter
   QPgplot::drawPlot();
 }
