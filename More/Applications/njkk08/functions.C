@@ -15,21 +15,16 @@
 
 using namespace std;
 
-static string get_default ()
-{
-  return Pulsar::Config::get_runtime() + "/fluxcal.cfg";
-}
-
-static Pulsar::Option<string> default_filename 
+static Pulsar::Option<string> default_pa_error_filename 
 (
- "pa_error::database", get_default(),
+ "rmfit::pa_error",
+ Pulsar::Config::get_runtime() + "/pa_error_matrix.asc",
 
  "nkjj08 PA error matrix filename",
 
  "The name of the file containing the position angle error matrix \n"
  "used in the njkk08 additions to rmfit."
 );
-
 
 #define PI 3.14159265358
 #define c0 299.792458
@@ -41,7 +36,7 @@ float lookup_PA_err(float &xint)
   vector<float> x0s;
   vector<float> x1s;
   
-  string filename = default_filename;
+  string filename = default_pa_error_filename;
 
   ifstream data2D ( filename.c_str() );
 
@@ -83,6 +78,17 @@ float lookup_PA_err(float &xint)
 
 }
 
+static Pulsar::Option<string> default_rm_error_filename 
+(
+ "rmfit::rm_error",
+ Pulsar::Config::get_runtime() + "/2D_data.asc",
+
+ "nkjj08 RM error matrix filename",
+
+ "The name of the file containing the rotation measure error matrix \n"
+ "used in the njkk08 additions to rmfit."
+);
+
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 float lookup_RM_err(vector<float>& xint)
@@ -94,13 +100,14 @@ float lookup_RM_err(vector<float>& xint)
   vector<float> x1s;
   vector<float> fs;
 
-  ifstream data2D;
-  data2D.open("/packages/pulsar/packages/psrchive-10.0/More/Applications/rmfitIncludes/2D_data.asc");
+  string filename = default_rm_error_filename;
 
-//////////// Read in table ////////////
+  ifstream data2D (filename.c_str());
 
-  while(1){
-    
+  //////////// Read in table ////////////
+
+  while(1)
+  {
     data2D >> x0 >> x1 >> f;
     
     if (data2D.eof()) break;
@@ -109,7 +116,6 @@ float lookup_RM_err(vector<float>& xint)
     x1s.push_back(x1);
 
     fs.push_back(f);
-        
   }
 
   data2D.close();
