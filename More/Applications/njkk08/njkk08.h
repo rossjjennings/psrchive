@@ -1,31 +1,31 @@
-#include <cpgplot.h>
+
 #include <fstream>
 #include <iostream>
 #include <vector>
 
 float plotpa0,plotRM,plotRM_err;
 
-vector<double> goodfreqs;
-vector<double> goodpa;
-vector<double> goodpa_stddev;
+std::vector<double> goodfreqs;
+std::vector<double> goodpa;
+std::vector<double> goodpa_stddev;
 
-vector<double> goodi;
-vector<double> goodirms;
-vector<double> goodv;
-vector<double> goodvrms;
-vector<double> goodq;
-vector<double> goodqrms;
-vector<double> goodu;
-vector<double> goodurms;
+std::vector<double> goodi;
+std::vector<double> goodirms;
+std::vector<double> goodv;
+std::vector<double> goodvrms;
+std::vector<double> goodq;
+std::vector<double> goodqrms;
+std::vector<double> goodu;
+std::vector<double> goodurms;
 
-vector<double> goodl;
-vector<double> goodlrms;
+std::vector<double> goodl;
+std::vector<double> goodlrms;
 
 
-vector<double> delta_V;
-vector<double> delta_Verr;
-vector<double> delta_L;
-vector<double> delta_Lerr;
+std::vector<double> delta_V;
+std::vector<double> delta_Verr;
+std::vector<double> delta_L;
+std::vector<double> delta_Lerr;
 
 
 void set_plotparams(float _plotpa0,float _plotRM,float _plotRM_err){
@@ -36,10 +36,10 @@ void set_plotparams(float _plotpa0,float _plotRM,float _plotRM_err){
 
 }
 
-vector<float> fbscr_RMs;
-vector<float> fbscr_RM_errs;
-vector<float> fbscr_RM_probmax;
-//vector<float> fbscr_RM_chisqmin;
+std::vector<float> fbscr_RMs;
+std::vector<float> fbscr_RM_errs;
+std::vector<float> fbscr_RM_probmax;
+//std::vector<float> fbscr_RM_chisqmin;
 
 float best_fbscr_probmax;
 //float best_fbscr_chisqmin;
@@ -62,20 +62,20 @@ unsigned rmsteps;
 
 
 
-float lookup_RM_err2D(vector<float>& xint);
+float lookup_RM_err2D(std::vector<float>& xint);
 
 
 float lookup_PA_err(float &xint);
 
-float lookup_RM_err(vector<float>& xint);
+float lookup_RM_err(std::vector<float>& xint);
 
-vector<int> ibin_vec;
+std::vector<int> ibin_vec;
 
 
 void Kasterg_Fit(float& fRM_low,float& fRM_high,float& fRM_step,
-                 const vector<double>& freqs,
-                 const vector<double>& PAs,
-		 const vector<double>& PA_stddevs,
+                 const std::vector<double>& freqs,
+                 const std::vector<double>& PAs,
+		 const std::vector<double>& PA_stddevs,
                  double& RM,double& PA0,double& sigRM,double& sigPA0,
 		 double& probmax,int& iRM);
 

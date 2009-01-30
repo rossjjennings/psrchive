@@ -1,8 +1,38 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2008 by Aris Noutsos
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+
+#include "Pulsar/Config.h"
+
+#include "4D_interpol.h"
+
+#include <vector>
+#include <string>
+#include <fstream>
+
+using namespace std;
+
+static string get_default ()
+{
+  return Pulsar::Config::get_runtime() + "/fluxcal.cfg";
+}
+
+static Pulsar::Option<string> default_filename 
+(
+ "pa_error::database", get_default(),
+
+ "nkjj08 PA error matrix filename",
+
+ "The name of the file containing the position angle error matrix \n"
+ "used in the njkk08 additions to rmfit."
+);
+
+
 #define PI 3.14159265358
 #define c0 299.792458
-
-
-
 
 float lookup_PA_err(float &xint)
 {
@@ -11,9 +41,9 @@ float lookup_PA_err(float &xint)
   vector<float> x0s;
   vector<float> x1s;
   
+  string filename = default_filename;
 
-  ifstream data2D;
-  data2D.open("/packages/pulsar/packages/psrchive-10.0/More/Applications/rmfitIncludes/pa_error_matrix.asc");
+  ifstream data2D ( filename.c_str() );
 
 //////////// Read in table ////////////
 
@@ -33,14 +63,11 @@ float lookup_PA_err(float &xint)
   float* x0a = new float[x0s.size()+1];
   float* x1a = new float[x0s.size()+1];
 
-
-  for(int iv=0; iv<x0s.size(); iv++){
-  
+  for (unsigned iv=0; iv<x0s.size(); iv++)
+  {  
     x0a[iv+1]=x0s[iv];
     x1a[iv+1]=x1s[iv];
-  
-  }
-  
+  }  
   
   float* y2a = new float[x0s.size()+1];
   float yp1 = -0.523;
@@ -102,18 +129,18 @@ float lookup_RM_err(vector<float>& xint)
   vector<float> xarg; //1D vector for the contents of each column 
   vector<vector<float> > xa;
   
-  for(int i=0; i<x.size(); i++){
-  
+  for (unsigned i=0; i<x.size(); i++)
+  {
     xarg.clear();
     xarg.push_back(x[i][0]);
-    for(int j=1; j<x[i].size(); j++){
+    for (unsigned j=1; j<x[i].size(); j++)
+    {
       if(x[i][j]<x[i][j-1]) break;
       if(x[i][j]>x[i][j-1])
         xarg.push_back(x[i][j]);
     }
   
     xa.push_back(xarg);
-  
   }
 
   
@@ -125,16 +152,16 @@ float lookup_RM_err(vector<float>& xint)
   
   
   int counter=0;
-  for(int i=1; i<=xa[0].size(); i++)
-    for(int j=1; j<=xa[1].size(); j++,counter++)
-            f2D[i][j] = fs[counter];
+  for (unsigned i=1; i<=xa[0].size(); i++)
+    for (unsigned j=1; j<=xa[1].size(); j++,counter++)
+      f2D[i][j] = fs[counter];
 
   
   float* x0a = new float[xa[0].size()+1];
   float* x1a = new float[xa[1].size()+1];
 
-  for(int i=0; i<xa[0].size(); i++) x0a[i+1] = xa[0][i];
-  for(int i=0; i<xa[1].size(); i++) x1a[i+1] = xa[1][i];
+  for (unsigned i=0; i<xa[0].size(); i++) x0a[i+1] = xa[0][i];
+  for (unsigned i=0; i<xa[1].size(); i++) x1a[i+1] = xa[1][i];
   
   
   float** y2a = Make2DArray(xa[0].size()+1, xa[1].size()+1);

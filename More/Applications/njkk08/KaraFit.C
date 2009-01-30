@@ -6,14 +6,11 @@
  ***************************************************************************/
 
 #include "KaraFit.h"
-#include <math.h>
-#include <vector>
-#define PI 3.14159265358
-#define c0 299.792458
 
+#include <math.h>
+#include <iostream>
 
 using namespace std;
-
 
 KaraFit::KaraFit()
 {

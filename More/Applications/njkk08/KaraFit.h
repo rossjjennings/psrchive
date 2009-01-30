@@ -1,10 +1,23 @@
+//-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2008 by Aris Noutsos
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
+/* $Source: /cvsroot/psrchive/psrchive/More/Applications/njkk08/KaraFit.h,v $
+   $Revision: 1.2 $
+   $Date: 2009/01/30 01:08:13 $
+   $Author: straten $ */
+
+#ifndef _KaraFit_h
+#define _KaraFit_h
 
 #define PI 3.14159265358
 #define c0 299.792458
 
-
-
+#include <vector>
 
 class KaraFit
 {
@@ -15,15 +28,15 @@ public:
    ~KaraFit();
    
    
-   void passData(vector<double> _pas, 
-                 vector<double> _errs, 
-	        vector<double> _freqs,
-            double _rm1, 
-	   double _rm2, 
-	  double _drm,
-         double _pa1, 
-	double _pa2, 
-       double _dpa)
+   void passData (const std::vector<double>& _pas, 
+		  const std::vector<double>& _errs, 
+		  const std::vector<double>& _freqs,
+		  double _rm1, 
+		  double _rm2, 
+		  double _drm,
+		  double _pa1, 
+		  double _pa2, 
+		  double _dpa)
    {
 
      rm1 = _rm1; rm2 = _rm2;
@@ -38,7 +51,7 @@ public:
  
    int doFit();
 
-   vector<double> fitValues;
+   std::vector<double> fitValues;
 
 
 private:
@@ -70,9 +83,11 @@ private:
    double bestrm,bestpa;
    double sigpa;
    
-   vector<double> freqs;
-   vector<double> pas;
-   vector<double> errs;
+   std::vector<double> freqs;
+   std::vector<double> pas;
+   std::vector<double> errs;
 
 
 }; 
+
+#endif
