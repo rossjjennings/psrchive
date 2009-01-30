@@ -1,4 +1,6 @@
 
+SUBDIRS = njkk08 .
+
 noinst_PROGRAMS = example
 example_SOURCES = example.C
 
@@ -37,7 +39,8 @@ pdv_SOURCES = pdv.C width.C
 
 # Note that rmfit uses PGPLOT only if it is available
 rmfit_SOURCES = rmfit.C width.C
-rmfit_LDADD = $(LDADD) @PGPLOT_LIBS@
+
+rmfit_LDADD = njkk08/libnjkk08.la $(LDADD) @PGPLOT_LIBS@
 
 sesdiv_SOURCES = sesdiv.C
 
