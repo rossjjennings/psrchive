@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 
-#ifndef __Pulsar_Interpolate_h
-#define __Pulsar_Interpolate_h
+#ifndef __Pulsar_Interpolation_h
+#define __Pulsar_Interpolation_h
 
 #include "Reference.h"
 
@@ -17,16 +17,16 @@
 #include <vector>
 
 //! Interface to GSL interpolation routines
-class Interpolate : public Reference::Able
+class Interpolation : public Reference::Able
 {
 
 public:
 
   //! Default constructor
-  Interpolate ();
+  Interpolation ();
 
   //! Destructor
-  virtual ~Interpolate ();
+  virtual ~Interpolation ();
 
   //! Initialize interpolation object
   void init (const std::vector<double>& x, const std::vector<double>& y);

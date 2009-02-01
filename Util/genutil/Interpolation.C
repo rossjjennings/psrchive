@@ -5,12 +5,12 @@
  *
  ***************************************************************************/
 
-#include "Interpolate.h"
+#include "Interpolation.h"
 
 using namespace std;
 
 //! Default constructor
-Interpolate::Interpolate ()
+Interpolation::Interpolation ()
 {
   xa = ya = 0;
   size = 0;
@@ -19,13 +19,13 @@ Interpolate::Interpolate ()
 }
 
 //! Destructor
-Interpolate::~Interpolate ()
+Interpolation::~Interpolation ()
 {
   destroy ();
 }
 
 //! Initialize interpolation object
-void Interpolate::init (const std::vector<double>& x, 
+void Interpolation::init (const std::vector<double>& x, 
 			const std::vector<double>& y)
 {
   destroy ();
@@ -46,7 +46,7 @@ void Interpolate::init (const std::vector<double>& x,
   acc = gsl_interp_accel_alloc ();
 }
 
-void Interpolate::destroy ()
+void Interpolation::destroy ()
 {
   if (acc)
     gsl_interp_accel_free (acc);
@@ -55,7 +55,7 @@ void Interpolate::destroy ()
 }
 
 //! Evaluate at the given abscissa
-double Interpolate::eval (double x)
+double Interpolation::eval (double x)
 {
   assert (interp);
   assert (acc);
