@@ -60,17 +60,11 @@ float maxrm;
 double rmstep;
 unsigned rmsteps;
 
-
-
-float lookup_RM_err2D(std::vector<float>& xint);
-
-
-float lookup_PA_err(float &xint);
+float lookup_PA_err(float xint);
 
 float lookup_RM_err(std::vector<float>& xint);
 
 std::vector<int> ibin_vec;
-
 
 void Kasterg_Fit(float& fRM_low,float& fRM_high,float& fRM_step,
                  const std::vector<double>& freqs,
