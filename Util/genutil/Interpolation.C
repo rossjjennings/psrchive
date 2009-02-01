@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Interpolation.h"
+#include <assert.h>
 
 using namespace std;
 
