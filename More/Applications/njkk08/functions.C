@@ -11,13 +11,16 @@
 
 #if !HAVE_GSL
 
+#include "Error.h"
+#include <vector>
+
 float lookup_PA_err (float xint)
 {
   throw Error (InvalidState, "lookup_RM_err",
 	       "GSL not available for cubic spline interpolation");
 }
 
-float lookup_RM_err(vector<float>& xint)
+float lookup_RM_err (std::vector<float>& xint)
 {
   throw Error (InvalidState, "lookup_RM_err",
 	       "GSL not available for cubic spline interpolation");
