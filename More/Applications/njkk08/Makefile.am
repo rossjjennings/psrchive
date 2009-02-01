@@ -8,3 +8,5 @@ libnjkk08_la_SOURCES = njkk08.h linchi2.C linchi2.h \
 
 include $(top_srcdir)/config/Makefile.include
 
+AM_CPPFLAGS += @GSL_CFLAGS@
+
