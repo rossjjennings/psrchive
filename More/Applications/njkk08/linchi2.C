@@ -10,7 +10,7 @@
 
 using namespace std;
 
-double gammln(const double xx)
+static double gammln(const double xx)
 {
   int j;
   double x,y,tmp,ser;
@@ -29,7 +29,7 @@ double gammln(const double xx)
   return -tmp+log(2.5066282746310005*ser/x);
 }
 
-void gser(double& gamser, const double a, const double x, double& gln)
+static void gser(double& gamser, const double a, const double x, double& gln)
 {
   const int ITMAX = 100;
   const double EPS = 0.0001;
@@ -62,7 +62,7 @@ void gser(double& gamser, const double a, const double x, double& gln)
   }
 }
 
-void gcf(double& gammcf, const double a, const double x, double& gln)
+static void gcf(double& gammcf, const double a, const double x, double& gln)
 {
   const int ITMAX = 100;
   const double EPS = 0.0001;
@@ -106,7 +106,7 @@ void gcf(double& gammcf, const double a, const double x, double& gln)
   
 }
 
-double gammq(const double a, const double x)
+static double gammq(const double a, const double x)
 {
   double gamser, gammcf, gln;
   
@@ -190,3 +190,4 @@ void lin_chi2_fit(const vector<double>& x, const vector<double>& y,
       q = gammq(0.5*(ndata - 2), 0.5*chi2);
   }
 }
+

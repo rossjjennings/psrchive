@@ -11,29 +11,6 @@
 
 #include <vector>
 
-// A set of routines from Numerical Recipes, used for simple
-// linear chi-squared fitting
-
-// Returns the value of ln(Gamma(xx)) for xx > 0
-
-double gammln(const double xx);
-
-// Returns the incomplete gamma function P(a,x) evaluated by its
-// series representation as gamser. Also returns ln(Gamma(a)) as gln
-
-void gser(double& gamser, const double a, const double x, double& gln);
-
-// Returns the incomplete gamma function Q(a,x) evaluated by its
-// continued fraction representation as gammcf. Also returns
-// ln(Gamma(a)) as gln
-
-void gcf(double& gammcf, const double a, const double x, double& gln);
-
-// Returns the incomplete gamma function Q(a,x) = 1 - P(a,x)
-
-double gammq(const double a, const double x);
-
-
 // A simple linear chi-squared fit routine. Fits the given data
 // to a line of the form y = a + b*x
 // Parameters:
