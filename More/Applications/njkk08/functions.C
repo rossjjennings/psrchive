@@ -9,9 +9,10 @@
 #include <config.h>
 #endif
 
+#include "Error.h"
+
 #if !HAVE_GSL
 
-#include "Error.h"
 #include <vector>
 
 float lookup_PA_err (float xint)
@@ -48,27 +49,28 @@ static Pulsar::Option<string> default_pa_error_filename
 
 float lookup_PA_err (float xint)
 {
+  string filename = default_pa_error_filename;
+  ifstream data ( filename.c_str() );
+  if (!data)
+    throw Error (FileNotFound, "lookup_PA_err", filename + " not found");
+
   double x,y;
   vector<double> xs;
   vector<double> ys;
   
-  string filename = default_pa_error_filename;
-
-  ifstream data2D ( filename.c_str() );
-
   //////////// Read in table ////////////
 
   while (1)
   {  
-    data2D >> x >> y;
+    data >> x >> y;
     
-    if (data2D.eof()) break;
+    if (data.eof()) break;
        
     xs.push_back(x);
     ys.push_back(y);     
   }
 
-  data2D.close();
+  data.close();
 
 #if 0
   float yp1 = -0.523;
@@ -155,8 +157,9 @@ double Interpolate2D::eval (double x0, double x1)
 float lookup_RM_err(vector<float>& xint)
 {
   string filename = default_rm_error_filename;
-
   ifstream data2D (filename.c_str());
+  if (!data2D)
+    throw Error (FileNotFound, "lookup_RM_err", filename + " not found");
 
   //////////// Read in table ////////////
 
