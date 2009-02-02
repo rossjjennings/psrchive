@@ -101,26 +101,35 @@ class Interpolate2D
     Interpolation interp;
   };
 
-  vector<Row> rows;
+  vector<Row*> rows;
 
 public:
 
+  ~Interpolate2D ();
   void add (double x0, const vector<double>& x1, const vector<double>& y);
   double eval (double x0, double x1);
 };
+
+Interpolate2D::~Interpolate2D ()
+{
+  for (unsigned i=0; i<rows.size(); i++)
+    delete rows[i];
+}
 
 void Interpolate2D::add (double x0,
 			 const vector<double>& x1, 
 			 const vector<double>& y)
 {
-  rows.push_back ( Row() );
-  Row& row = rows.back();
+  // cerr << "Interpolate2D::add x0=" << x0 << endl;
 
-  row.x0 = x0;
-  row.x1 = x1;
-  row.y  = y;
+  Row* row = new Row;
+  rows.push_back ( row );
 
-  row.interp.init (row.x1, row.y);
+  row->x0 = x0;
+  row->x1 = x1;
+  row->y  = y;
+
+  row->interp.init (row->x1, row->y);
 }
 
 double Interpolate2D::eval (double x0, double x1)
@@ -132,8 +141,8 @@ double Interpolate2D::eval (double x0, double x1)
 
   for (unsigned i=0; i<size; i++)
   {
-    x[i] = rows[i].x0;
-    y[i] = rows[i].interp.eval (x1); 
+    x[i] = rows[i]->x0;
+    y[i] = rows[i]->interp.eval (x1); 
   }
 
   Interpolation interp;
@@ -168,6 +177,7 @@ float lookup_RM_err(vector<float>& xint)
 
     if (current_x0 < 0)
       current_x0 = x0;
+
     else if (x0 != current_x0)
     {
       interp.add (current_x0, x1s, fs);
