@@ -457,7 +457,9 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
       profile->set_centre_frequency (freq);
       // profile->set_weight (sub_line1.navg[iblock]);
       profile->set_weight (1);
-      profile->set_amps (data.rawdata[iblock]);
+
+      if (!Profile::no_amps)
+	profile->set_amps (data.rawdata[iblock]);
 
       total_freq += freq;
       total_bw   += bw;
