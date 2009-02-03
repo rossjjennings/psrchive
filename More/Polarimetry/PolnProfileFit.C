@@ -216,6 +216,9 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
     uncertainty[ibin-1] = new Calibration::TemplateUncertainty;
     uncertainty[ibin-1] -> set_template_variance (standard_variance);
 
+    if (transformation)
+      uncertainty[ibin-1]->set_transformation (transformation);
+
 #ifdef _DEBUG
     cerr << "Pulsar::PolnProfileFit::set_standard ibin=" << ibin 
 	 << "\n  " << stokes << endl;
