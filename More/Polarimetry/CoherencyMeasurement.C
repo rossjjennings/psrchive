@@ -116,7 +116,7 @@ double Calibration::CoherencyMeasurement::get_weighted_norm
 
 //! Given a coherency matrix, return the weighted conjugate matrix
 Jones<double> Calibration::CoherencyMeasurement::get_weighted_conjugate
-(const Jones<double>& matrix) const
+(const Jones<double>& matrix) const try
 {
   if (!uncertainty)
     throw Error (InvalidState,
@@ -124,6 +124,10 @@ Jones<double> Calibration::CoherencyMeasurement::get_weighted_conjugate
 		 "Uncertainty policy not set");
 
   return uncertainty->get_weighted_conjugate (matrix);
+}
+catch (Error& error)
+{
+  throw error += "Calibration::CoherencyMeasurement::get_weighted_conjugate";
 }
 
 void Calibration::CoherencyMeasurement::get_weighted_components

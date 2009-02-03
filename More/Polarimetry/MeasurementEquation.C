@@ -129,7 +129,7 @@ Calibration::MeasurementEquation::set_transformation_index (unsigned index)
 void 
 Calibration::MeasurementEquation::calculate (Jones<double>& result,
 					     std::vector<Jones<double> >* grad)
-{
+try {
   if (verbose)
     cerr << "Calibration::MeasurementEquation::calculate nparam="
 	 << get_nparam() << " policy=" << parameter_policy.ptr()
@@ -139,3 +139,8 @@ Calibration::MeasurementEquation::calculate (Jones<double>& result,
 
   result = xforms.get_current()->evaluate (grad);
 }
+catch (Error& error)
+{
+  throw error += "Calibration::MeasurementEquation::calculate";
+}
+

@@ -16,7 +16,7 @@ using namespace std;
 bool Calibration::ReceptionModel::Solver::report_chisq = false;
 
 /*! Count the number of parameters that are to be fit, set nparam_infit */
-void Calibration::ReceptionModel::Solver::count_infit ()
+void Calibration::ReceptionModel::Solver::count_infit () try
 {
   if (verbose)
     cerr << "Calibration::ReceptionModel::Solver::count_infit" << endl;
@@ -40,9 +40,13 @@ void Calibration::ReceptionModel::Solver::count_infit ()
   if (report)
     cerr << endl << nparam_infit << " free parameters" << endl << endl;
 }
+catch (Error& error)
+{
+  throw error += "Calibration::ReceptionModel::Solver::count_infit";
+}
 
 
-void Calibration::ReceptionModel::Solver::count_constraint ()
+void Calibration::ReceptionModel::Solver::count_constraint () try
 {
   if (verbose)
     cerr << "Calibration::ReceptionModel::Solver::count_constraint" << endl;
@@ -82,8 +86,12 @@ void Calibration::ReceptionModel::Solver::count_constraint ()
   if (report)
     cerr << endl << ndat_constraint << " indepdendent data" << endl << endl;
 }
+catch (Error& error)
+{
+  throw error += "Calibration::ReceptionModel::Solver::count_constraint";
+}
 
-void Calibration::ReceptionModel::Solver::check_constraints ()
+void Calibration::ReceptionModel::Solver::check_constraints () try
 {
   if (verbose)
     cerr << "Calibration::ReceptionModel::Solver::check_constraints" << endl;
@@ -110,6 +118,10 @@ void Calibration::ReceptionModel::Solver::check_constraints ()
 
     }
   }
+}
+catch (Error& error)
+{
+  throw error += "Calibration::ReceptionModel::Solver::check_constraints";
 }
 
 /*! Uses the Levenberg-Marquardt algorithm of non-linear least-squares

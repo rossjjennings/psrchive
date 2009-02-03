@@ -27,7 +27,7 @@ double Calibration::ObservationUncertainty::get_weighted_norm
 
 //! Given a coherency matrix, return the weighted conjugate matrix
 Jones<double> Calibration::ObservationUncertainty::get_weighted_conjugate
-( const Jones<double>& matrix ) const
+( const Jones<double>& matrix ) const try
 {
   Stokes< complex<double> > stokes = complex_coherency( matrix );
 
@@ -39,6 +39,10 @@ Jones<double> Calibration::ObservationUncertainty::get_weighted_conjugate
 		      -inv_variance[ipol].imag() * stokes[ipol].imag() );
 
   return convert (stokes);
+}
+catch (Error& error)
+{
+  throw error += "Calibration::ObservationUncertainty::get_weighted_conjugate";
 }
 
 Stokes< complex<double> >

@@ -90,12 +90,16 @@ double Calibration::TemplateUncertainty::get_weighted_norm
 
 //! Given a coherency matrix, return the weighted conjugate matrix
 Jones<double> Calibration::TemplateUncertainty::get_weighted_conjugate
-(const Jones<double>& matrix) const
+(const Jones<double>& matrix) const try
 {
   if (!built)
     const_cast<TemplateUncertainty*>(this)->build();
 
   return ObservationUncertainty::get_weighted_conjugate (matrix);
+}
+catch (Error& error)
+{
+  throw error += "Calibration::TemplateUncertainty::get_weighted_conjugate";
 }
 
 Stokes< complex<double> >

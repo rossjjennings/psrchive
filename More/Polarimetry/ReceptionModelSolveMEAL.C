@@ -87,8 +87,11 @@ float lmcoff (// input
 }
 
 
-void Calibration::SolveMEAL::fit ()
+void Calibration::SolveMEAL::fit () try
 {
+  if (!equation)
+    throw Error (InvalidState, "Calibration::SolveMEAL::fit", "no equation");
+
   // the engine used to find the chi-squared minimum
   MEAL::LevenbergMarquardt< Jones<double> > fit;
 
@@ -96,7 +99,7 @@ void Calibration::SolveMEAL::fit ()
   // MEAL::Function::verbose = 1;
 
   // get info from the LevenbergMarquardt algorithm
-  // fit.verbose = 3
+  // fit.verbose = 3;
 
   // get info from this method
   // debug = true;
@@ -106,8 +109,7 @@ void Calibration::SolveMEAL::fit ()
   vector< Estimate<char> > fake (get_data().size());
 
   if (Calibration::ReceptionModel::verbose)
-    cerr << "Calibration::SolveMEAL::fit"
-      " compute initial fit" << endl;
+    cerr << "Calibration::SolveMEAL::fit compute initial fit" << endl;
 
   best_chisq = fit.init (get_data(), fake, *equation);
 
@@ -116,8 +118,7 @@ void Calibration::SolveMEAL::fit ()
   fit.lamda_decrease_factor = 0.5;
 
   if (Calibration::ReceptionModel::verbose)
-    cerr << "Calibration::SolveMEAL::fit chisq="
-	 << best_chisq << endl;
+    cerr << "Calibration::SolveMEAL::fit chisq=" << best_chisq << endl;
 
   float last_lamda = 0.0;
 
@@ -231,5 +232,9 @@ void Calibration::SolveMEAL::fit ()
 		 "MEAL::LevenbergMarquardt<Jones<double>>::result returns"
 		 "\n\tcovariance matrix dimension=%d != nparam=%d",
 		 covariance.size(), equation->get_nparam());
+}
+catch (Error& error)
+{
+  throw error += "Calibration::SolveMEAL::fit";
 }
 

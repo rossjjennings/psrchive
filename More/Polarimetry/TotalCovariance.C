@@ -47,7 +47,7 @@ double Calibration::TotalCovariance::get_weighted_norm
 
 //! Given a coherency matrix, return the weighted conjugate matrix
 Jones<double> Calibration::TotalCovariance::get_weighted_conjugate
-(const Jones<double>& matrix) const
+(const Jones<double>& matrix) const try
 {
   if (!built)
     const_cast<TotalCovariance*>(this)->build();
@@ -57,6 +57,11 @@ Jones<double> Calibration::TotalCovariance::get_weighted_conjugate
 
   return convert (result);
 }
+catch (Error& error)
+{
+  throw error += "Calibration::TotalCovariance::get_weighted_conjugate";
+}
+
 
 void Calibration::TotalCovariance::build ()
 {
