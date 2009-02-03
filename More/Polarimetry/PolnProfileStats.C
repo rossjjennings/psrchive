@@ -53,6 +53,13 @@ void Pulsar::PolnProfileStats::select_profile (const PolnProfile* _profile)
     regions_set = true;
 }
 
+void Pulsar::PolnProfileStats::select_profile (const Profile* total)
+{
+  profile = 0;
+  stats->select_profile( total );
+  regions_set = true;
+}
+
 //! Set the on-pulse and baseline regions
 void Pulsar::PolnProfileStats::set_regions (const PhaseWeight& on,
 					    const PhaseWeight& off)
