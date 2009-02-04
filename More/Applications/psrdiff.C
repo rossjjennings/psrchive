@@ -31,7 +31,8 @@ void usage ()
     "\n"
     "psrdiff [options] filename[s]\n"
     "options:\n"
-    " -d               StokesPlot result\n"
+    " -d               StokesPlot difference\n"
+    " -c min_chisq     StokesPlot difference only when reduced chisq > min \n"
     " -h               Help page \n"
     " -M metafile      Specify list of archive filenames in metafile \n"
     " -q               Quiet mode \n"
@@ -58,18 +59,12 @@ int main (int argc, char** argv) try
   // the frequency channel at which to start
   unsigned ichan_start = 0;
 
-  float bfac = 1.0;
-
   bool verbose = false;
 
   char c;
-  while ((c = getopt(argc, argv, "b:c:dhi:M:qs:vV")) != -1) 
+  while ((c = getopt(argc, argv, "c:dhi:M:qs:vV")) != -1) 
 
     switch (c)  {
-
-    case 'b':
-      bfac = atof(optarg);
-      break;
 
     case 'c':
       plot_when = atof(optarg);
@@ -149,7 +144,9 @@ int main (int argc, char** argv) try
 
   Pulsar::PolnProfileFit fit;
   fit.choose_maximum_harmonic = true;
-  fit.set_fit_debug();
+
+  if (verbose)
+    fit.set_fit_debug();
 
   MEAL::Polar* polar = new MEAL::Polar;
 
@@ -157,7 +154,8 @@ int main (int argc, char** argv) try
 
   Pulsar::StokesPlot splot;
 
-  if (plot || plot_when) {
+  if (plot || plot_when)
+  {
     cpgopen ("?");
     cpgsvp (0.1, 0.9, 0.15, 0.9);
     cpgask (1);
@@ -196,9 +194,14 @@ int main (int argc, char** argv) try
 
     unsigned isub=0;
 
+    double total_chisq = 0.0;
+    unsigned count = 0;
+
     for (isub=0; isub < nsub; isub++) {
 
       Pulsar::Integration* subint = archive->get_Integration(isub);
+
+      vector<float> fit_chisq (nchan, 0.0);
 
       for (unsigned ichan=ichan_start; ichan < nchan; ichan++) try {
 
@@ -222,22 +225,29 @@ int main (int argc, char** argv) try
 
 	float reduced_chisq = chisq / nfree;
 
-	cerr << ichan << " REDUCED CHISQ=" << reduced_chisq << endl;
+	if (verbose)
+	  cerr << ichan << " REDUCED CHISQ=" << reduced_chisq << endl;
+
+	fit_chisq[ichan] = reduced_chisq;
+
+	total_chisq += reduced_chisq;
+	count ++;
 
 	bool plot_this = (plot || (plot_when && reduced_chisq > plot_when));
 
 	Estimate<double> pulse_phase = fit.get_phase ();
 
 	MEAL::Complex2* xform = fit.get_transformation();
-	for (unsigned i=0; i<xform->get_nparam(); i++)
-	  cerr << i << ":" << xform->get_param_name(i) << "=" 
-	       << xform->get_Estimate(i) << endl;
 
-	xform->set_param(1,xform->get_param(1)*bfac);
+	if (verbose)
+	  for (unsigned i=0; i<xform->get_nparam(); i++)
+	    cerr << i << ":" << xform->get_param_name(i) << "=" 
+		 << xform->get_Estimate(i) << endl;
 
 	Jones<double> transformation = xform->evaluate();
 	
-	cerr << "ichan=" << ichan << " shift=" << pulse_phase << endl;
+	if (verbose)
+	  cerr << ichan << " shift=" << pulse_phase << endl;
 
 	profile->rotate_phase (pulse_phase.get_value());
 	profile->transform (inv(transformation));
@@ -263,8 +273,10 @@ int main (int argc, char** argv) try
 
     }
 
-    double total_chisq = 0.0;
-    unsigned count = 0;
+    total_chisq /= count;
+
+    double alt_chisq = 0.0;
+    count = 0;
 
     for (isub=0; isub < nsub; isub++) {
 
@@ -293,22 +305,23 @@ int main (int argc, char** argv) try
 	  }
 
 	  double reduced_chisq = diff / (nbin * var);
-	  
-	  cout << "isub=" << isub << " ichan=" << ichan << " ipol=" << ipol
-	       << " var=" << var << " chisq=" << reduced_chisq << endl;
 
-	  total_chisq += reduced_chisq;
+	  if (verbose)
+	    cout << ichan << " ipol=" << ipol
+		 << " var=" << var << " chisq=" << reduced_chisq << endl;
+
+	  alt_chisq += reduced_chisq;
 	  count ++;
-
 	}
-
-
 
       }
 
     }
 
-    cout << "avg. reduced chisq=" << total_chisq/count << endl;
+    alt_chisq /= count;
+
+    cout << archive->get_filename() << " " << total_chisq << " " << alt_chisq
+	 << endl;
     
   }
   catch (Error& error) {
