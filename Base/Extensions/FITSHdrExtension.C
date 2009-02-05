@@ -63,7 +63,7 @@ TextInterface::Parser* Pulsar::FITSHdrExtension::get_interface()
   return new Interface( this );
 }
 
-void Pulsar::FITSHdrExtension::set_coord_mode (const string mode)
+void Pulsar::FITSHdrExtension::set_coordmode (const string& mode)
 {
   if (mode == "EQUAT")
     coordmode = "J2000";
@@ -82,18 +82,10 @@ void Pulsar::FITSHdrExtension::set_coord_mode (const string mode)
     coordmode = "UNSET";
 }
 
-void Pulsar::FITSHdrExtension::set_date_str (const string date)
+void Pulsar::FITSHdrExtension::set_date_str (const string& date)
 {
   creation_date = date;
 }
-
-
-
-void Pulsar::FITSHdrExtension::set_obs_mode( const string _obs_mode )
-{
-  obs_mode = _obs_mode;
-}
-
 
 void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
     string& coord1,
@@ -103,80 +95,82 @@ void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
 
   if (coordmode == "J2000" || coordmode == "UNSET")
   {
-
     newcoord = coordinates.getRaDec();
 
     coord1 = newcoord.angle1.getHMS();
     coord2 = newcoord.angle2.getDMS();
 
     return;
-
   }
 
   if (coordmode == "GAL")
   {
-
     newcoord = coordinates.getGalactic();
 
     coord1 = tostring (newcoord.angle1.getDegrees());
     coord2 = tostring (newcoord.angle2.getDegrees());
 
     return;
-
   }
 
   warning << "FITSHdrExtension::get_coord_string WARNING COORD_MD="
 	  << coordmode << " not implemented" << endl;
-
 }
 
 void Pulsar::FITSHdrExtension::set_obsfreq( double set_obsfreq )
 {
-	obsfreq = set_obsfreq;
+  obsfreq = set_obsfreq;
 }
 
-
-double Pulsar::FITSHdrExtension::get_obsfreq( void ) const
+double Pulsar::FITSHdrExtension::get_obsfreq () const
 {
   return obsfreq;
 }
 
-
-std::string Pulsar::FITSHdrExtension::get_hdrver( void ) const
+std::string Pulsar::FITSHdrExtension::get_hdrver () const
 {
   return hdrver;
 }
 
-
-std::string Pulsar::FITSHdrExtension::get_creation_date( void ) const
+std::string Pulsar::FITSHdrExtension::get_creation_date () const
 {
   return creation_date;
 }
 
-
-std::string Pulsar::FITSHdrExtension::get_obs_mode( void ) const
-{
-  return obs_mode;
-}
-
-
-
-std::string Pulsar::FITSHdrExtension::get_coordmode( void ) const
+std::string Pulsar::FITSHdrExtension::get_coordmode () const
 {
   return coordmode;
 }
 
-std::string Pulsar::FITSHdrExtension::get_equinox( void ) const
+std::string Pulsar::FITSHdrExtension::get_equinox () const
 {
   return equinox;
 }
 
-
-std::string Pulsar::FITSHdrExtension::get_trk_mode( void ) const
+std::string Pulsar::FITSHdrExtension::get_trk_mode () const
 {
   return trk_mode;
 }
 
+void Pulsar::FITSHdrExtension::set_stt_imjd (int imjd)
+{
+  start_time = MJD (imjd, start_time.get_secs(), start_time.get_fracsec());
+}
+
+void Pulsar::FITSHdrExtension::set_stt_smjd (int smjd)
+{
+  start_time = MJD (start_time.intday(), smjd, start_time.get_fracsec());
+}
+
+void Pulsar::FITSHdrExtension::set_stt_offs (double offs)
+{
+  start_time = MJD (start_time.intday(), start_time.get_secs(), offs);
+}
+
+void Pulsar::FITSHdrExtension::set_start_time (const MJD& mjd)
+{
+  start_time = mjd;
+}
 
 // void Pulsar::FITSHdrExtension::set_end_coordinates( sky_coord _end_coord )
 // {
@@ -184,13 +178,13 @@ std::string Pulsar::FITSHdrExtension::get_trk_mode( void ) const
 // }
 
 
-// sky_coord Pulsar::FITSHdrExtension::get_end_coordinates( void ) const
+// sky_coord Pulsar::FITSHdrExtension::get_end_coordinates () const
 // {
 //   return end_coord;
 // }
 // 
 // 
-// string Pulsar::FITSHdrExtension::get_stp_crd1( void ) const
+// string Pulsar::FITSHdrExtension::get_stp_crd1 () const
 // {
 //   sky_coord coord = get_end_coordinates();
 // 
@@ -205,7 +199,7 @@ std::string Pulsar::FITSHdrExtension::get_trk_mode( void ) const
 // }
 // 
 // 
-// string Pulsar::FITSHdrExtension::get_stp_crd2( void ) const
+// string Pulsar::FITSHdrExtension::get_stp_crd2 () const
 // {
 //   sky_coord coord = get_end_coordinates();
 // 
@@ -221,19 +215,19 @@ std::string Pulsar::FITSHdrExtension::get_trk_mode( void ) const
 
 
 
-// string Pulsar::FITSHdrExtension::get_stt_crd1( void ) const 
+// string Pulsar::FITSHdrExtension::get_stt_crd1 () const 
 // {
 //   return stt_crd1;
 // }
 // 
 // 
-// string Pulsar::FitsHdrExtension::get_stt_crd2( void ) const
+// string Pulsar::FitsHdrExtension::get_stt_crd2 () const
 // {
 //   return stt_crd2;
 // }
 // 
 // 
-// string Pulsar::FITSHdrExtension::get_ra_HMS( void ) const
+// string Pulsar::FITSHdrExtension::get_ra_HMS () const
 // {
 //   sky_coord coords;
 // 
@@ -250,7 +244,7 @@ std::string Pulsar::FITSHdrExtension::get_trk_mode( void ) const
 // }
 // 
 // 
-// string Pulsar::FITSHdrExtension::get_dec_DMS( void ) const
+// string Pulsar::FITSHdrExtension::get_dec_DMS () const
 // {
 //   sky_coord coords;
 // 

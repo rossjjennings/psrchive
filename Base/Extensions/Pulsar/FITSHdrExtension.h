@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.20 $
-   $Date: 2008/07/07 00:26:45 $
+   $Revision: 1.21 $
+   $Date: 2009/02/05 01:32:06 $
    $Author: straten $ */
 
 #ifndef __FITSHdrExtension_h
@@ -57,109 +57,114 @@ namespace Pulsar
     void get_coord_string (const sky_coord& coordinates,
                            std::string& coord1, std::string& coord2) const;
 
+    //! Get the coordinate mode
+    std::string get_coordmode () const;
     //! Set the coordinate mode string
-    void set_coord_mode (const std::string mode);
+    void set_coordmode (const std::string& mode);
 
     //! Set the creation date string
-    void set_date_str (const std::string date);
+    void set_date_str (const std::string& date);
 
-    //! Set the observation mode
-    void set_obs_mode( const std::string _obs_mode );
+    //! Get the header version
+    std::string get_hdrver () const;
+    void set_hdrver (const std::string& txt) { hdrver = txt; }
 
+    //! Get the file creation date
+    std::string get_creation_date () const;
+    void set_creation_date (const std::string& txt) { creation_date = txt; }
+
+    //! Get the observation mode
+    std::string get_obs_mode () const { return obs_mode; }
+    void set_obs_mode (const std::string& txt) { obs_mode = txt; }
+
+    //! Get the equinox
+    std::string get_equinox () const;
+    void set_equinox (const std::string& txt) { equinox = txt; }
+
+    //! Get tracking mode
+    std::string get_trk_mode () const;
+    void set_trk_mode (const std::string& txt) { trk_mode = txt; }
+
+    //! Get the beam position angle
+    double get_bpa () const { return bpa; }
     //! Set the beam position angle
     void set_bpa( const double _bpa ) { bpa = _bpa; }
-
+    
+    //! Get the beam major axis length
+    double get_bmaj () const { return bmaj; }
     //! Set the beam major axis length
     void set_bmaj( const double _bmaj ) { bmaj = _bmaj; }
 
+    //! Get the beam minor axis length
+    double get_bmin () const { return bmin; }
     //! Set the beam minor axis length
     void set_bmin( const double _bmin ) { bmin = _bmin; }
 
-    //! Get the header version
-    std::string get_hdrver( void ) const;
-
-    //! Get the file creation date
-    std::string get_creation_date( void ) const;
-
-    //! Get the observatio mode
-    std::string get_obs_mode( void ) const;
-
-    //! Get the coordinate mode
-    std::string get_coordmode( void ) const;
-
-    //! Get the equinox
-    std::string get_equinox( void ) const;
-
-    //! Get tracking mode
-    std::string get_trk_mode( void ) const;
-
-    //! Get the beam position angle
-    double get_bpa( void ) const { return bpa; }
-
-    //! Get the beam major axis length
-    double get_bmaj( void ) const { return bmaj; }
-
-    //! Get the beam minor axis length
-    double get_bmin( void ) const { return bmin; }
-
     //! Get the start date
-    std::string get_stt_date( void ) const { return stt_date; }
+    std::string get_stt_date () const { return stt_date; }
+    void set_stt_date (const std::string& date) { stt_date = date; }
 
     //! Get the start time
-    std::string get_stt_time( void ) const { return stt_time; }
+    std::string get_stt_time () const { return stt_time; }
+    void set_stt_time (const std::string& time) { stt_time = time; }
 
     //! Get the stt_imjd
-    int get_stt_imjd( void ) const { return start_time.intday(); }
+    int get_stt_imjd () const { return start_time.intday(); }
+    void set_stt_imjd (int);
 
     //! Get the stt_smjd
-    int get_stt_smjd( void ) const { return start_time.get_secs(); }
+    int get_stt_smjd () const { return start_time.get_secs(); }
+    void set_stt_smjd (int);
 
     //! Get the stt_offs
-    double get_stt_offs( void ) const { return start_time.get_fracsec(); }
+    double get_stt_offs () const { return start_time.get_fracsec(); }
+    void set_stt_offs (double);
+
+    //! Get the start time
+    MJD get_start_time () const { return start_time; }
+    void set_start_time (const MJD& mjd);
 
     //! Get stt_lst
-    double get_stt_lst( void ) const { return stt_lst; }
+    double get_stt_lst () const { return stt_lst; }
+    void set_stt_lst (double lst) { stt_lst = lst; }
 
     // ra
     std::string ra;
-    std::string get_ra( void ) const { return ra; }
+    std::string get_ra () const { return ra; }
     void set_ra( std::string new_ra ) { ra = new_ra; }
 
     // dec
     std::string dec;
-    std::string get_dec( void ) const { return dec; }
+    std::string get_dec () const { return dec; }
     void set_dec( std::string new_dec ) { dec = new_dec; }
 
     // stt_crd1
     std::string stt_crd1;
-    std::string get_stt_crd1( void ) const { return stt_crd1; }
+    std::string get_stt_crd1 () const { return stt_crd1; }
     void set_stt_crd1( std::string new_stt_crd1 ) { stt_crd1 = new_stt_crd1; }
 
     // stt_crd2
     std::string stt_crd2;
-    std::string get_stt_crd2( void ) const { return stt_crd2; }
+    std::string get_stt_crd2 () const { return stt_crd2; }
     void set_stt_crd2( std::string new_stt_crd2 ) { stt_crd2 = new_stt_crd2; }
 
     // stp_crd1
     std::string stp_crd1;
-    std::string get_stp_crd1( void ) const { return stp_crd1; }
+    std::string get_stp_crd1 () const { return stp_crd1; }
     void set_stp_crd1( std::string new_stp_crd1 ) { stp_crd1 = new_stp_crd1; }
 
     // stp_crd2
     std::string stp_crd2;
-    std::string get_stp_crd2( void ) const { return stp_crd2; }
+    std::string get_stp_crd2 () const { return stp_crd2; }
     void set_stp_crd2( std::string new_stp_crd2 ) { stp_crd2 = new_stp_crd2; }
 
     //! Set the observed frequency
     void set_obsfreq( double set_obsfreq );
 
     //! Get the observed frequency
-    double get_obsfreq( void ) const;
+    double get_obsfreq () const;
 
     //////////////////////////////////////////////////////////////////////
-
-    //! Header start time (as opposed to subint start time)
-    MJD start_time;
 
     //! Pulsar FITS header version information
     std::string hdrver;
@@ -201,6 +206,11 @@ namespace Pulsar
 
     //! Beam minor axis length
     double bmin;
+
+  protected:
+
+    //! Header start time (as opposed to subint start time)
+    MJD start_time;
 
   };
 
