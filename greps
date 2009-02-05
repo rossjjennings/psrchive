@@ -12,3 +12,5 @@ endif
 
 grep $* `find Util Base More -name "*.[hcC]"`
 
+grep $* `find Util Base More -name Makefile.am`
+
