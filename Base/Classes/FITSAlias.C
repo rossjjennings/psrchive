@@ -17,4 +17,8 @@ Pulsar::FITSAlias::FITSAlias ()
   add( "BACKEND", "be:name" );
   add( "BE_PHASE","be:phase" );
   add( "BE_DCC",  "be:dcc" );
+
+  add( "STT_IMJD", "ext:stt_imjd");
+  add( "STT_SMJD", "ext:stt_smjd");
+  add( "STT_OFFS", "ext:stt_offs");
 }
