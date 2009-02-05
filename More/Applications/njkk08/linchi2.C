@@ -108,7 +108,7 @@ static void gcf(double& gammcf, const double a, const double x, double& gln)
 
 static double gammq(const double a, const double x)
 {
-  double gamser, gammcf, gln;
+  double gamser=0, gammcf=0, gln=0;
   
   if (x < 0.0 || a <= 0.0) {
     cerr << "gammq invalid arguments" << endl;
