@@ -21,10 +21,12 @@
 #include "Pulsar/SingleAxis.h"
 #include "Pulsar/Feed.h"
 #include "Pulsar/MeanInstrument.h"
+#include "Pulsar/Receiver.h"
 
 #include "Pulsar/SystemCalibratorUnloader.h"
 #include "Pulsar/ReceptionModelSolver.h"
 #include "Pulsar/Fourier.h"
+#include "Pulsar/Pulsar.h"
 
 #include "MEAL/Complex2Math.h"
 #include "MEAL/Complex2Value.h"
@@ -110,10 +112,8 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 		 Signal::state_string(data->get_state()));
 
   if (!data->get_poln_calibrated ())
-    throw Error (InvalidParam,
-		 "Pulsar::PulsarCalibrator::set_standard",
-		 "Pulsar::Archive='" + data->get_filename() + "'\n"
-		 "has not been calibrated");
+    warning << "Pulsar::PulsarCalibrator::set_standard '" 
+	    << data->get_filename() << "' has not been calibrated" << endl;
 
   Reference::To<Archive> clone;
 
@@ -264,6 +264,9 @@ void Pulsar::PulsarCalibrator::init_model (unsigned ichan)
 //! Ensure that the pulsar observation can be added to the data set
 void Pulsar::PulsarCalibrator::match (const Archive* data)
 {
+  if (verbose)
+    cerr << "Pulsar::PulsarCalibrator::match" << endl;
+
   Archive::Match match;
 
   match.set_check_standard (true);
@@ -284,6 +287,24 @@ void Pulsar::PulsarCalibrator::match (const Archive* data)
                  "mismatch between calibrator\n\t"
                  + get_calibrator()->get_filename() +
                  " and\n\t" + data->get_filename() + match.get_reason());
+
+  if (!receiver)
+    receiver = get_calibrator()->get<Receiver>();
+
+  if (receiver && receiver->get_basis_corrected())
+  {
+    /*
+      If the standard is calibrated, then its basis will have already
+      been corrected.  In this case, the receiver should be taken from
+      the first archive to be fit.
+    */
+
+    receiver = data->get<Receiver>();
+
+    if (verbose)
+      cerr << "Pulsar::PulsarCalibrator::match"
+	" basis-corrected Receiver from standard replaced" << endl;
+  }
 
   if (one_channel)
     build (data->get_nchan());
