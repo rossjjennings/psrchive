@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.58 $
-   $Date: 2008/11/07 22:15:36 $
+   $Revision: 1.59 $
+   $Date: 2009/02/05 01:32:12 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -257,8 +257,6 @@ namespace Pulsar {
     /* This attribute enables proper handling of time stamps when there
        is no FITSHdrExtension in use (as is the case in psrconv) */
     mutable MJD reference_epoch;
-
-    mutable bool preserve_reference_epoch;
 
     void init ();
 
