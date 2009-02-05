@@ -68,9 +68,10 @@ void usage ()
     " -m           plot the calibrator solution [default] \n"
     " -p           use the polar model\n"
     " -P           produce publication-quality plots\n"
-    " -S pcm.out   combine each calibrator with the pcm solution\n"
-    " -r feed.txt  set the feed transformation [not used]\n"
-    " -2 m or d    multiply or divide cross products by factor of two\n"
+    " -s           plot only the reduced chisq of the pcm solution \n"
+    " -S pcm.out   combine each calibrator with the pcm solution \n"
+    " -r feed.txt  set the feed transformation [not used] \n"
+    " -2 m or d    multiply or divide cross products by factor of two \n"
        << endl;
 }
 
