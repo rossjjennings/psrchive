@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -149,12 +150,12 @@ try {
 		     "fits_read_col OFFS_SUB");
 
 
-  MJD epoch = hdr_ext->start_time + time;
+  MJD epoch = hdr_ext->get_start_time() + time;
 
   if (verbose > 2)
-    cerr << "Pulsar::FITSArchive::load_Integration reference_epoch=" 
-	 << hdr_ext->start_time << "\n  offset=" << time << "s epoch=" << epoch
-	 << endl;
+    cerr << "Pulsar::FITSArchive::load_Integration"
+      " header epoch=" << hdr_ext->get_start_time() << "\n "
+      " offset=" << time << "s epoch=" << epoch << endl;
   
   // Set a preliminary epoch to avoid problems loading the polyco
   integ->set_epoch (epoch);
@@ -205,7 +206,7 @@ try {
 	  cerr << "Pulsar::FITSArchive::load_Integration matching phase(start)"
 	       << endl;
 
-	reference_phs = hdr_model->phase(hdr_ext->start_time);
+	reference_phs = hdr_model->phase(hdr_ext->get_start_time());
       }
 
       Phase off_phs = hdr_model->phase(epoch);
@@ -220,7 +221,7 @@ try {
       	cerr << "Pulsar::FITSArchive::load_Integration row=" << row <<
 	  "\n  PRED_PHS=" << predicted_phase;
 	if (phase_match_start_time)
-	  cerr << "\n  reference epoch=" << hdr_ext->start_time;
+	  cerr << "\n  reference epoch=" << hdr_ext->get_start_time();
 	cerr <<
 	  "\n  reference phase=" << reference_phs <<
 	  "\n      input phase=" << off_phs <<

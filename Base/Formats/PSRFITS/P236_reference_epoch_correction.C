@@ -25,24 +25,23 @@ void Pulsar::FITSArchive::P236_reference_epoch_correction ()
 {
   FITSHdrExtension* hdr_ext = get<FITSHdrExtension>();
 
-  if (!hdr_ext) {
+  if (!hdr_ext)
     throw Error (InvalidParam, "FITSArchive::P236_reference_epoch_correction",
 		 "No FITSHdrExtension found");
-  }
 
   if (!model || get_type() != Signal::Pulsar)
     return;
 
-  MJD original_reference_epoch = hdr_ext->start_time;
-  Phase original_phase = model->phase(hdr_ext->start_time);
+  MJD original_reference_epoch = hdr_ext->get_start_time();
+  Phase original_phase = model->phase(hdr_ext->get_start_time());
 
-  hdr_ext->start_time = model->iphase( original_phase.Floor() );
+  hdr_ext->set_start_time( model->iphase( original_phase.Floor() ) );
 
   if (verbose == 3)
     cerr << "Pulsar::FITSArchive::P236_reference_epoch_correction"
       "\n   original reference epoch=" << original_reference_epoch <<
-      "\n                      phase=" << original_phase <<
-      "\n  corrected reference epoch=" << hdr_ext->start_time <<
-      "\n                      phase=" << model->phase(hdr_ext->start_time)
-         << endl;
+      "\n            phase=" << original_phase <<
+      "\n  corrected reference epoch=" << hdr_ext->get_start_time() <<
+      "\n            phase=" << model->phase(hdr_ext->get_start_time())
+	 << endl;
 }
