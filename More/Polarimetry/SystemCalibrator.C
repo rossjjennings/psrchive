@@ -272,8 +272,7 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   correction.set_archive (data);
   Jones<double> projection = correction (isub);
 
-  if (verbose)
-    cerr << correction.get_summary () << endl;
+  cerr << correction.get_summary () << endl;
 
   // an identifier for this set of data
   string identifier = data->get_filename() + " " + tostring(isub);
@@ -706,37 +705,26 @@ Pulsar::SystemCalibrator::get_CalibratorStokes () const
 
 void Pulsar::SystemCalibrator::create_model ()
 {
-  receiver = get_calibrator()->get<Receiver>();
+  if (!receiver)
+    receiver = get_calibrator()->get<Receiver>();
 
   MEAL::Complex2* basis = 0;
+
   if (receiver)
   {
     Pauli::basis().set_basis( receiver->get_basis() );
     
-    /*
-      If the calibrator is a calibrated standard, as is the case with
-      the template used in matrix template matching, then its basis
-      will have already been corrected.  The receiver should probably
-      be taken from the first uncalibrated archive to be fit, or
-      combined with the platform transformation.
-    */
-    if (receiver->get_basis_corrected())
+    if (!receiver->get_basis_corrected())
     {
-      Receiver* clone = receiver->clone();
-      clone->set_basis_corrected (false);
-      receiver = clone;
+      BasisCorrection basis_correction;
+      basis = new MEAL::Complex2Constant( basis_correction(receiver) );
+
+      if (verbose)
+	cerr << "Pulsar::SystemCalibrator::create_model basis corrections:\n"
+	     << basis_correction.get_summary () << endl
+	     << "Pulsar::SystemCalibrator::create_model receiver=\n  " 
+	     << basis->evaluate() << endl;
     }
-
-    BasisCorrection basis_correction;
-    basis = new MEAL::Complex2Constant( basis_correction(receiver) );
-
-    if (verbose)
-      cerr << "Pulsar::SystemCalibrator::create_model basis corrections:\n"
-           << basis_correction.get_summary () << endl;
-
-    if (verbose)
-      cerr << "Pulsar::SystemCalibrator::create_model receiver=\n  " 
-	   << basis->evaluate() << endl;
   }
 
   unsigned nchan = get_nchan ();
@@ -752,7 +740,7 @@ void Pulsar::SystemCalibrator::create_model ()
 
     if (basis)
       model[ichan]->set_basis (basis);
-  
+
     init_model( ichan );
   }
 
@@ -1071,6 +1059,10 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
 
   vector< Jones<float> > response (nchan);
 
+  // use the ProjectionCorrection class to calculate the transformation
+  ProjectionCorrection correction;
+  correction.set_archive (data);
+
   bool projection_corrected = false;
 
   BackendCorrection correct_backend;
@@ -1080,9 +1072,9 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
   {
     Integration* integration = data->get_Integration (isub);
 
-    // use the ProjectionCorrection class to calculate the transformation
-    ProjectionCorrection correction;
-    correction.set_archive (data);
+    if (correction.required (isub))
+      projection_corrected = true;
+
     Jones<double> projection = correction (isub);
 
     for (unsigned ichan=0; ichan<nchan; ichan++)
