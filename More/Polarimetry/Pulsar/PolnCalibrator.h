@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.51 $
-   $Date: 2008/11/22 19:16:16 $
+   $Revision: 1.52 $
+   $Date: 2009/02/06 00:18:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -94,6 +94,7 @@ namespace Pulsar {
 
     //! Return the transformation for the specified channel
     virtual const MEAL::LeastSquares* get_solver (unsigned ichan) const;
+    MEAL::LeastSquares* get_solver (unsigned ichan);
 
     // ///////////////////////////////////////////////////////////////////
     //
