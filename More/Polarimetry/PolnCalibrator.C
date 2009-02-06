@@ -241,7 +241,7 @@ class TmpSolver : public MEAL::LeastSquares
 public:
   TmpSolver (float _chisq, unsigned _nfree)
   {
-    best_chisq = _chisq; nfree = _nfree;
+    best_chisq = _chisq; nfree = _nfree; solved = true;
   }
   string get_name () const { return "TmpSolver"; }
 };
@@ -256,13 +256,27 @@ Pulsar::PolnCalibrator::get_solver (unsigned ichan) const
 
   tmp_solver.resize( get_nchan() );
 
-  const PolnCalibratorExtension::Transformation* xform 
-    = poln_extension->get_transformation (ichan);
+  if (!tmp_solver[ichan])
+  {
+    const PolnCalibratorExtension::Transformation* xform 
+      = poln_extension->get_transformation (ichan);
 
-  tmp_solver[ichan] = new TmpSolver (xform->get_chisq(), xform->get_nfree());
+    tmp_solver[ichan] = new TmpSolver (xform->get_chisq(), xform->get_nfree());
+  }
+
+#ifdef _DEBUG
+  cerr << "Pulsar::PolnCalibrator::get_solver ichan=" << ichan
+       << " solved=" << solved << endl;
+#endif
+
   return tmp_solver[ichan];
 }
 
+MEAL::LeastSquares* Pulsar::PolnCalibrator::get_solver (unsigned ichan)
+{
+  const PolnCalibrator* thiz = this;
+  return const_cast<MEAL::LeastSquares*> (thiz->get_solver (ichan));
+}
 
 void Pulsar::PolnCalibrator::setup_transformation () const try
 {
