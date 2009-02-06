@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LeastSquares.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/06/03 05:05:50 $
+   $Revision: 1.2 $
+   $Date: 2009/02/06 00:31:30 $
    $Author: straten $ */
 
 #ifndef __MEAL_LeastSquares_H
@@ -49,6 +49,9 @@ namespace MEAL {
 
     //! Set the verbosity during solve
     void set_debug (bool flag = true) { debug = flag; }
+
+    //! Set the solved flag (can be used to flag bad data)
+    void set_solved (bool val) { solved = val; }
 
     //! Return true when the fit has been solved
     bool get_solved () const { return solved; }
