@@ -44,20 +44,14 @@ void usage ()
   cout << "pacv - Pulsar Archive Calibrator Viewer\n"
     "usage: pacv [options] file1 [file2 ...]\n"
     "options:\n"
-    "\n"
     " -n name      add the named plot to the output \n"
-    "              'name' is a three-character string of the form:\n"
-    "                 [which][what][when]  \n"
-    "              where: \n"
+    "              name = three-character string: [which][what][when]  \n"
     "                 which = 'c' for CAL (on-pulse minus off-pulse) \n"
     "                       = 's' for SYS (off-pulse) \n"
-    "              and \n"
     "                 what  = 's' for Stokes parameters \n"
     "                       = 'p' for total and polarized flux \n"
-    "              and \n"
     "                 when  = 'c' for calibrated data \n"
     "                       = 'u' for uncalibrated data \n"
-    "\n"
     " -a archive   set the output archive class name\n"
     " -c [i|j-k]   mark channel or range of channels as bad\n"
     " -C           plot only calibrator Stokes\n"
@@ -450,6 +444,10 @@ int main (int argc, char** argv)
       if (plot_calibrator_solver)
       {
 	cerr << "pacv: Plotting SystemCalibrator solver" << endl;
+
+	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
+	  calibrator->get_solver(zapchan[ichan])->set_solved(false);
+
 	cpgpage ();
 	plotter.plot( new Pulsar::SolverInfo (calibrator),
 		      calibrator->get_nchan(),
