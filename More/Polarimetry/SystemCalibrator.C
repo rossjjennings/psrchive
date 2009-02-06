@@ -435,6 +435,12 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 
   Signal::Source source = cal->get_type();
 
+  if (model.size() == 0)
+    create_model ();
+
+  if (verbose > 2)
+    cerr << "Pulsar::SystemCalibrator::add_calibrator prepare calibrator" << endl;
+
   prepare_calibrator_estimate( source );
 
   vector<vector<Estimate<double> > > cal_hi;
@@ -535,6 +541,10 @@ void Pulsar::SystemCalibrator::init_estimate (SourceEstimate& estimate)
     throw Error (InvalidRange, "Pulsar::SystemCalibrator::init_estimate",
 		 "phase bin=%d >= nbin=%d", estimate.phase_bin, nbin);
 
+  if (verbose > 2)
+    cerr << "Pulsar::SystemCalibrator::init_estimate"
+            " nchan=" << nchan << " nbin=" << nbin << endl;
+
   estimate.source.resize (nchan);
   estimate.source_guess.resize (nchan);
 
@@ -575,6 +585,9 @@ void Pulsar::SystemCalibrator::init_estimate (SourceEstimate& estimate)
 
 void Pulsar::SystemCalibrator::prepare_calibrator_estimate ( Signal::Source s )
 {
+  if (verbose > 2)
+    cerr << "Pulsar::SystemCalibrator::prepare_calibrator_estimate" << endl;
+
   if (calibrator_estimate.source.size() == 0)
     create_calibrator_estimate();
 }
