@@ -23,6 +23,7 @@
 #include "Pulsar/LinePhasePlot.h"
 #include "Pulsar/DynamicSNSpectrum.h"
 #include "Pulsar/DynamicBaselineSpectrum.h"
+#include "Pulsar/DynamicCalSpectrum.h"
 #include "Pulsar/FreqVsSNRPlot.h"
 #include "Pulsar/CalPhVFreqPlot.h"
 #include "Pulsar/BandpassPlot.h"
@@ -87,6 +88,9 @@ Pulsar::PlotFactory::PlotFactory ()
   
   add ( new PlotFactory::Advocate<DynamicBaselineSpectrum>
         ( 'r', "offdspec", "Off-pulse dynamic spectrum" ) );
+  
+  add ( new PlotFactory::Advocate<DynamicCalSpectrum>
+        ( 'l', "dcal", "Calibrator dynamic spectrum" ) );
   
   add ( new PlotFactory::Advocate<FreqVsSNRPlot>
         ( 'n', "snrspec", "S/N ratio" ) );

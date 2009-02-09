@@ -29,6 +29,7 @@ nobase_include_HEADERS =					       \
 	Pulsar/DynamicSpectrum.h				       \
 	Pulsar/DynamicSNSpectrum.h				       \
 	Pulsar/DynamicBaselineSpectrum.h			       \
+	Pulsar/DynamicCalSpectrum.h				       \
 	Pulsar/FreqVsSNRPlot.h					       \
 	Pulsar/CalPhVFreqPlot.h					       \
 	Pulsar/BandpassPlot.h					       \
@@ -75,6 +76,7 @@ libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
 	DynamicSpectrum.C DynamicSpectrumTI.C \
 	DynamicSNSpectrum.C DynamicSNSpectrumTI.C \
 	DynamicBaselineSpectrum.C DynamicBaselineSpectrumTI.C \
+	DynamicCalSpectrum.C DynamicCalSpectrumTI.C \
 	CalibratorSpectrum.C CalibratorSpectrumTI.C \
 	FreqVsSNRPlot.C FreqVsSNRPlotTI.C \
 	BandpassPlot.C BandpassPlotTI.C \
