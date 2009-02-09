@@ -32,7 +32,7 @@ Pulsar::DynamicSpectrum::DynamicSpectrum ()
   // ensure that no labels are printed inside the frame
   get_frame()->get_label_below()->set_all (PlotLabel::unset);
 
-  pol = -1;
+  pol = 0;
 
   srange.first = -1;
   srange.second = -1;
@@ -56,6 +56,7 @@ void Pulsar::DynamicSpectrum::prepare (const Archive* data)
 
   // Figure out subint range
   // TODO make this axis be time...
+  // TODO also, move this to draw()?
   if (srange.first==-1)
   {
     srange.first = 0;
@@ -63,7 +64,13 @@ void Pulsar::DynamicSpectrum::prepare (const Archive* data)
   }
   get_frame()->get_x_scale()->set_minmax(srange.first, srange.second+1);
 
-  // Figure out channel range
+}
+
+void Pulsar::DynamicSpectrum::draw (const Archive* data)
+{
+  colour_map.apply ();
+
+  // Guess we need to do this range stuff here rather than in prepare()..
   unsigned min_chan, max_chan;
   get_frame()->get_y_scale()->get_indeces (data->get_nchan(), 
       min_chan, max_chan);
@@ -71,16 +78,6 @@ void Pulsar::DynamicSpectrum::prepare (const Archive* data)
     max_chan = data->get_nchan() - 1;
   crange.first = min_chan;
   crange.second = max_chan;
-
-  // Figure out pol
-  if (pol < 0)
-    pol = 0;
-
-}
-
-void Pulsar::DynamicSpectrum::draw (const Archive* data)
-{
-  colour_map.apply ();
 
   // Dimensions
   int nchan = crange.second - crange.first + 1;
@@ -94,6 +91,8 @@ void Pulsar::DynamicSpectrum::draw (const Archive* data)
   float data_min = FLT_MAX;
   float data_max = FLT_MIN;
   for (int ii=0; ii<nchan*nsub; ii++) {
+    // Assume any points exactly equal to 0 are zero-weighted
+    if (plot_array[ii]==0.0) continue; 
     if (plot_array[ii] < data_min) 
       data_min = plot_array[ii];
     if (plot_array[ii] > data_max) 
