@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Depolarizer.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/06/15 17:22:59 $
+   $Revision: 1.5 $
+   $Date: 2009/02/10 01:33:20 $
    $Author: straten $ */
 
 #ifndef __MEAL_Depolarizer_H
@@ -20,6 +20,21 @@ namespace MEAL
 {
 
   //! Represents a pure depolarizer transformation
+  /*! The pure depolarizer is parameterized as described in
+
+  Lu, S.H. & Chipman, R.A., 1996, J. Opt. Soc. Am. A, 13, 1106
+
+  \f$ {\bf M}_\Delta = {\bf I} + \left( \begin{array}{cc}
+                                        0 & \mbf{0}^T \\
+                                        \mbf{p}_\Delta & {\bf m}_\Delta
+                                        \end{array}\right) \f$
+
+  where \f$ {\bf I} \f$ is the \f$ 4\times4 \f$ identity matrix,
+  \f$ \mbf{p}_\Delta \f$ is the 3-vector that describes the polarizance, 
+  and \f$ {\bf m}_\Delta \f$ is the \f$ 3\times3 \f$ symmetric 
+  depolarizer matrix.
+  */
+
   class Depolarizer : public Real4
   {
   public:
