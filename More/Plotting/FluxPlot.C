@@ -22,6 +22,7 @@ using namespace std;
 Pulsar::FluxPlot::FluxPlot ()
 {
   isubint = ichan = ipol = 0;
+  logarithmic = false;
 
   peak_zoom = 0;
   peak_centre_origin = true;
@@ -57,11 +58,37 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
   if (peak_zoom)
     auto_scale_phase (plotter.profiles[0], peak_zoom);
 
+  if (logarithmic)
+  {
+    // logarithmic axis
+    frame->get_y_axis()->add_opt ('L');
+    // vertical labels
+    frame->get_y_axis()->add_opt ('V');
+    // exponential notation
+    frame->get_y_axis()->add_opt ('2');
+    // increase the space between the label and the axis
+    frame->get_y_axis()->set_displacement (3.0);
+
+    Reference::To<PhaseWeight> weight = plotter.profiles[0]->baseline();
+
+    // the standard deviation of an exponential distribution equals its mean
+    double rms = weight->get_rms ();
+    float log_noise = log(rms) / log(10.0);
+
+    for (unsigned iprof=0; iprof < plotter.profiles.size(); iprof++)
+    {
+      Reference::To<Profile> temp = plotter.profiles[iprof]->clone();
+      temp->logarithm (10.0, rms);
+      temp->offset( -log_noise );
+      plotter.profiles[iprof] = temp;
+    }
+  }
+
   if (baseline_zoom)
     selection = plotter.profiles[0]->baseline();
 
-  if (selection && baseline_zoom) {
-
+  if (selection && baseline_zoom)
+  {
     if (verbose)
       cerr << "Pulsar::FluxPlot::prepare using selected bins" << endl;
 
@@ -75,7 +102,8 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
 
     frame->get_y_scale()->set_minmax (min, max);
   }
-  else {
+  else
+  {
     if (verbose)
       cerr << "Pulsar::FluxPlot::prepare using all bins" << endl;
     plotter.minmax (get_frame());
@@ -247,7 +275,9 @@ template<typename T> T sqr (T x) { return x*x; }
 //! Return the label for the y-axis
 std::string Pulsar::FluxPlot::get_ylabel (const Archive* data)
 {
-  if (data->get_scale() == Signal::Jansky)
+  if (logarithmic)
+    return "Signal-to-Noise Ratio";
+  else if (data->get_scale() == Signal::Jansky)
     return "Flux Density (mJy)";
   else
     return "Flux";
@@ -268,7 +298,7 @@ float Pulsar::FluxPlot::get_phase_error (const Archive* data)
 
   chan_bw = fabs(chan_bw);
 
-  double period    = data->get_Integration(0)->get_folding_period();
+  double period = data->get_Integration(0)->get_folding_period();
 
   if( verbose )
   {

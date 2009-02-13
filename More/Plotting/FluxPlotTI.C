@@ -24,6 +24,10 @@ Pulsar::FluxPlot::Interface::Interface (FluxPlot* instance)
        &FluxPlot::set_pol,
        "pol", "Polarization to plot" );
 
+  add( &FluxPlot::get_logarithmic,
+       &FluxPlot::set_logarithmic,
+       "log", "Logarithmic scale" );
+
   import( PhasePlot::Interface() );
 
   add( &FluxPlot::get_peak_zoom,

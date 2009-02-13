@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.31 $
-   $Date: 2008/11/12 07:45:10 $
+   $Revision: 1.32 $
+   $Date: 2009/02/13 12:06:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -77,6 +77,10 @@ namespace Pulsar {
     void set_pol (Index _ipol) { ipol = _ipol; }
     Index get_pol () const { return ipol; }
 
+    //! Plot on a logarithmic scale, normalized by noise
+    void set_logarithmic (bool val) { logarithmic = val; }
+    bool get_logarithmic () const { return logarithmic; }
+
     //! Automatically zoom in on the pulse peak
     void set_peak_zoom (float zoom) { peak_zoom = zoom; }
     float get_peak_zoom () const { return peak_zoom; }
@@ -128,6 +132,8 @@ namespace Pulsar {
     Index isubint;
     Index ichan;
     Index ipol;
+
+    bool logarithmic;
 
     int plot_ebox;
     float peak_zoom;
