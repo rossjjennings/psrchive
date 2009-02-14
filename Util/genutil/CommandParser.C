@@ -131,7 +131,10 @@ string CommandParser::parse2 (const string& command, const string& arguments)
     return help (arguments);
 
   if (command == "if")
-    return conditional (arguments);
+    return if_command (arguments);
+
+  if (command == "while")
+    return while_command (arguments);
 
   if (debug)
     cerr << "CommandParser::parse command not help" << endl;
@@ -222,49 +225,75 @@ bool CommandParser::evaluate (const string& expression)
 	       "expression evaluation not implemented");
 }
 
-string CommandParser::conditional (const string& command)
+void CommandParser::conditional (const string& text, 
+				 string& condition,
+				 string& command )
 {
-  string::size_type open_bracket = command.find ("(");
-  if (open_bracket == string::npos)
-    return "if: opening bracket '(' not found \n";
+  string::size_type open_bracket = text.find ("(");
 
-  string::size_type close_bracket = command.rfind (")");
+  if (open_bracket == string::npos)
+    throw Error (InvalidParam, "CommandParser::conditional",
+		 "opening bracket '(' not found");
+
+  string::size_type close_bracket = text.rfind (")");
+
   if (close_bracket == string::npos)
-    return "if: closing bracket ')' not found \n";
+    throw Error (InvalidParam, "CommandParser::conditional",
+		 "closing bracket ')' not found");
 
   if (close_bracket < open_bracket)
-    return "if: syntax error \n";
+    throw Error (InvalidParam, "CommandParser::conditional",
+		 "syntax error");
 
   if (close_bracket - open_bracket < 2)
-    return "if: no text between brackets \n";
+    throw Error (InvalidParam, "CommandParser::conditional",
+		 "no text between brackets");
 
   open_bracket ++;
 
-  string condition = command.substr (open_bracket, close_bracket-open_bracket);
-
+  condition = text.substr (open_bracket, close_bracket-open_bracket);
   if (debug)
-    cerr << "condition ='" << condition << "'" << endl;
+    cerr << "condition='" << condition << "'" << endl;
 
-  bool pass = false;
+  command = text.substr (close_bracket+1);
+  if (debug)
+    cerr << "command='" << command << "'" << endl;
+}
 
-  try
-  {
-    pass = evaluate(condition);
-  }
-  catch (Error& error)
-  {
-    return "if: " + error.get_message() + "\n";
-  }
+string CommandParser::if_command (const string& text) try
+{
+  string condition;
+  string command;
 
-  if (!pass)
+  conditional (text, condition, command);
+
+  if ( evaluate(condition) )
+    return parse (command);
+  else
     return "";
+}
+catch (Error& error)
+{
+  return "if: " + error.get_message() + "\n";
+}
 
-  string remainder = command.substr (close_bracket+1);
+string CommandParser::while_command (const string& text) try
+{
+  string condition;
+  string command;
 
-  if (debug)
-    cerr << "remainder='" << remainder << "'" << endl;
+  conditional (text, condition, command);
 
-  return parse (remainder);
+  string result = "";
+
+  while ( evaluate(condition) )
+    result += parse (command);
+
+  return result;
+}
+catch (Error& error)
+{
+  return "while: " + error.get_message() + "\n";
 }
 
 string CommandParser::help (const string& command)
