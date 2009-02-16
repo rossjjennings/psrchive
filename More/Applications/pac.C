@@ -34,7 +34,7 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbCcDd:e:fFGhiIJ:j:M:m:n:O:op:Pqr:sSt:Tu:UvVwxZ";
+const char* args = "A:aBbCcDd:e:fFGhiIJ:j:M:m:n:O:op:Pqr:sSt:Tu:UvVwW:xZ";
 
 void usage ()
 {
@@ -110,6 +110,9 @@ int main (int argc, char *argv[]) try
   // name of the file containing the list of Archive filenames
   char* metafile = NULL;
 
+  // name of the file containing the list of calibrator Archive filenames
+  char* cals_metafile = NULL;
+
   // known feed transformation
   Calibration::Feed* feed = 0;
 
@@ -173,7 +176,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.98 2008/11/20 18:37:08 demorest Exp $" << endl;
+      cout << "$Id: pac.C,v 1.99 2009/02/16 05:12:37 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -384,6 +387,12 @@ int main (int argc, char *argv[]) try
       command += " -w";
       break;
 
+    case 'W':
+      write_database_file = true;
+      cals_metafile = optarg;
+      command += " -W";
+      break;
+
     case 'x':
       use_fluxcal_stokes = true;
       command += " -x";
@@ -475,21 +484,35 @@ int main (int argc, char *argv[]) try
   else if (new_database) try
   {   
     // Generate the CAL file database
-    
-    exts.push_back("cf");
-    exts.push_back("pcal");
-    exts.push_back("fcal");
-    exts.push_back("pfit");
-    
     cout << "pac: Generating new calibrator database" << endl;
     
-    dbase = new Pulsar::Database (cals_are_here, exts);
-    
-    if (dbase->size() <= 0) {
-      cout << "pac: No calibrators found in " << cals_are_here << endl;
-      return -1;
+    if (cals_metafile)
+    {
+      dbase = new Pulsar::Database (cals_are_here, cals_metafile);
+
+      if (dbase->size() <= 0)
+      {
+	cerr << "pac: No calibrators found in " << cals_are_here
+	     << " listed in " << cals_metafile << endl;
+	return -1;
+      }    
     }
+    else
+    {
+      exts.push_back("cf");
+      exts.push_back("pcal");
+      exts.push_back("fcal");
+      exts.push_back("pfit");
     
+      dbase = new Pulsar::Database (cals_are_here, exts);
+
+      if (dbase->size() <= 0)
+      {
+	cerr << "pac: No calibrators found in " << cals_are_here << endl;
+	return -1;
+      }    
+    }
+
     if (verbose)
       cerr << "pac: " << dbase->size() << " calibrators found" << endl;
     

@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.17 $
-   $Date: 2008/08/08 19:20:13 $
-   $Author: demorest $ */
+   $Revision: 1.18 $
+   $Date: 2009/02/16 05:12:37 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
 #define __Pulsar_Database_h
@@ -84,6 +84,9 @@ namespace Pulsar {
     //! Null constructor
     Database ();
     
+    //! Construct a database from archives in a metafile
+    Database (const std::string& path, const std::string& metafile);
+
     //! Construct a database from archives in a directory
     Database (const std::string& path, const std::vector<std::string>& extensions);
     
@@ -93,6 +96,9 @@ namespace Pulsar {
     //! Destructor.
     ~Database ();
     
+    //! Construct from the list of filenames
+    void construct (const std::vector<std::string>& filenames);
+
     //! Write a text file representing the database to disk for storage.
     void unload (const std::string& dbase_filename);
 

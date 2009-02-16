@@ -580,6 +580,25 @@ string get_current_path ()
   return retval;
 }
 
+//! Construct a database from archives in a metafile
+Pulsar::Database::Database (const std::string& _path, 
+			    const std::string& metafile)
+{
+  vector <string> filenames;
+  stringfload (&filenames, metafile);
+
+  string current = get_current_path ();
+
+  if (chdir(_path.c_str()) != 0)
+    throw Error (FailedSys, "Pulsar::Database", "chdir("+_path+")");
+
+  path = get_current_path ();
+
+  construct (filenames);
+
+  if (chdir(current.c_str()) != 0)
+    throw Error (FailedSys, "Pulsar::Database", "chdir("+current+")");
+}
 
 
 /*! This constructor scans the given directory for calibrator files
@@ -607,6 +626,15 @@ Pulsar::Database::Database (const string& _path,
     cerr << "Pulsar::Database " << filenames.size() 
          << " calibrator files found" << endl;
 
+  construct (filenames);
+  
+  if (chdir(current.c_str()) != 0)
+    throw Error (FailedSys, "Pulsar::Database", "chdir("+current+")");
+
+}
+
+void Pulsar::Database::construct (const vector<string>& filenames)
+{
   ModifyRestore<bool> mod (Profile::no_amps, true);
 
   Reference::To<Pulsar::Archive> newArch;
@@ -630,12 +658,8 @@ Pulsar::Database::Database (const string& _path,
   }
 
   if (verbose)
-    cerr << "Pulsar::Database constructed with "
+    cerr << "Pulsar::Database::construct "
          << entries.size() << " Entries" << endl; 
-  
-  if (chdir(current.c_str()) != 0)
-    throw Error (FailedSys, "Pulsar::Database", "chdir("+current+")");
-
 }
 
 //! Destructor
