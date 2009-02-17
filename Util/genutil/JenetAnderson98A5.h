@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98A5.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.3 $
+   $Date: 2009/02/17 13:26:24 $
    $Author: straten $ */
 
 #ifndef __Jenet_Anderson_98_A5
@@ -27,6 +27,21 @@ class JenetAnderson98::EquationA5 : public Reference::Able {
   //! Set the number of samples used to estimate the undigitized power
   void set_nsamp (unsigned nsamp);
 
+  //! Set the discrete probability distribution; used instead of A6
+  template<typename T>
+  void set_A6 (const std::vector<T>& prob)
+  {
+    double sum = 0.0;
+    for (unsigned i=0; i<prob.size(); i++)
+      sum += prob[i];
+
+    prob_Phi.resize( prob.size() );
+    for (unsigned i=0; i<prob.size(); i++)
+      prob_Phi[i] = prob[i] / sum;
+
+    set_nsamp( prob.size() );
+  }
+
   //! Return the digitized power, given <Phi>
   double evaluate (double mean_Phi);
 
@@ -39,6 +54,8 @@ class JenetAnderson98::EquationA5 : public Reference::Able {
   std::vector<double> hisq;
   std::vector<double> fact;
   double dA5_dmean_Phi;
+
+  std::vector<double> prob_Phi;
 
 };
 

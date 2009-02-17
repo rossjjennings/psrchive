@@ -24,17 +24,16 @@ void JenetAnderson98::EquationA5::set_nsamp (unsigned L)
 
   JenetAnderson98 ja98;
 
-  for (unsigned nlo=0; nlo<L; nlo++) {
-
+  for (unsigned nlo=0; nlo<L; nlo++)
+  {
     fact[nlo] = lnLfact - ln_fact(nlo) - ln_fact(L-nlo);
 
     ja98.set_Phi( double(nlo) / double(L) );
     losq[nlo] = ja98.get_lo() * ja98.get_lo();
     hisq[nlo] = ja98.get_hi() * ja98.get_hi();
-
   }
-
 }
+
 
 static double default_mean_Phi = 0.666656;
 
@@ -61,11 +60,20 @@ double JenetAnderson98::EquationA5::evaluate (double mean_Phi)
       double f = mean_Phi * losq[nlo] + (1-mean_Phi) * hisq[nlo];
       double df_dmean_Phi = losq[nlo] - hisq[nlo];
 
-      double Phi = double(nlo) / double(L);
-      double P = exp( fact[nlo] + L * ( log(pow (mean_Phi, Phi)) +
-					log(pow (1.0-mean_Phi, 1.0-Phi)) ) );
+      double P = 0;
+      double dP_dmean_Phi = 0;
 
-      double dP_dmean_Phi = P * ( nlo/mean_Phi - (L-nlo)/(1.0-mean_Phi) );
+      if (prob_Phi.size())
+	P = prob_Phi[nlo];
+
+      else
+      {
+	double Phi = double(nlo) / double(L);
+	P = exp( fact[nlo] + L * ( log(pow (mean_Phi, Phi)) +
+				   log(pow (1.0-mean_Phi, 1.0-Phi)) ) );
+
+	dP_dmean_Phi = P * ( nlo/mean_Phi - (L-nlo)/(1.0-mean_Phi) );
+      }
 
       double term = f * P;
 
@@ -90,7 +98,8 @@ double JenetAnderson98::EquationA5::invert (double sigma_hat)
 {
   double guess = default_mean_Phi;
 
-  for (unsigned i=0; i<50; i++) {
+  for (unsigned i=0; i<50; i++)
+  {
     double dx = (evaluate(guess) - sigma_hat) / dA5_dmean_Phi;
     guess -= dx;
     if (fabs (dx) <= fabs(guess)*1e-10)
