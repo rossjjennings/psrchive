@@ -8,6 +8,7 @@
 #include "LogFile.h"
 #include "stringtok.h"
 
+#include <algorithm>
 #include <fstream>
 
 //! Construct from a filename
@@ -51,8 +52,8 @@ std::string LogFile::get_message (const std::string& index)
 {
   container::iterator place;
 
-  place = std::lower_bound (messages.begin(), messages.end(), index, compare);
-
+  place = std::upper_bound (messages.begin(), messages.end(), index, compare);
+  
   if (place == messages.begin())
     throw Error (InvalidParam, "LogFile::get_message",
 		 "no log message preceded '" + index + "'");
@@ -61,4 +62,4 @@ std::string LogFile::get_message (const std::string& index)
 
   return place->second;
 }
-  
+
