@@ -4,13 +4,14 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/ScatteredPowerCorrection.h"
-#include "Pulsar/TwoBitStats.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
 #include "Physical.h"
+
+using namespace std;
 
 //! Default constructor
 Pulsar::ScatteredPowerCorrection::ScatteredPowerCorrection ()
@@ -19,10 +20,8 @@ Pulsar::ScatteredPowerCorrection::ScatteredPowerCorrection ()
 
 void Pulsar::ScatteredPowerCorrection::correct (Archive* data)
 {
-  TwoBitStats* tbs = data->get<TwoBitStats>();
-  if (tbs)
-    ja98_a5.set_nsamp (tbs->get_nsample());
-  else
+  twobit_stats = data->get<TwoBitStats>();
+  if (twobit_stats)
     ja98_a5.set_nsamp (512);
 
   for (unsigned isub=0; isub < data->get_nsubint(); isub++)
@@ -35,7 +34,8 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
   unsigned nbin  = data->get_nbin();
   unsigned npol  = data->get_npol();
 
-  if (npol == 4)  {
+  if (npol == 4)
+  {
     if (data->get_state() != Signal::Coherence)
       throw Error (InvalidParam, "Pulsar::ScatteredPowerCorrection::transform",
 		   "data with npol==4 must have state=Signal::Coherence");
@@ -47,7 +47,8 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
   double DM = data->get_dispersion_measure();
   double time_resolution = data->get_folding_period() / nbin;
 
-  for (unsigned ichan = 0; ichan < nchan; ichan++) {
+  for (unsigned ichan = 0; ichan < nchan; ichan++)
+  {
     double c_freq= data->get_centre_frequency(ichan);
     double time_smear = dispersion_smear (DM, c_freq, chan_bw);
     if (time_smear > time_resolution)
@@ -56,36 +57,46 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
 		   ichan, time_smear, time_resolution);
   }
 
-  for (unsigned ipol = 0; ipol < npol; ipol++) {
+  if (Profile::verbose)
+    cerr << "Pulsar::ScatteredPowerCorrection::transform results" << endl;
 
-    for (unsigned ibin = 0; ibin < nbin; ibin++) {
+  for (unsigned ipol = 0; ipol < npol; ipol++)
+  {
+    if (twobit_stats)
+      ja98_a5.set_A6( twobit_stats->get_histogram(ipol) );
 
+    for (unsigned ibin = 0; ibin < nbin; ibin++)
+    {
       unsigned ichan = 0;
       double power = 0.0;
       
-      for (ichan = 0; ichan < nchan; ichan++) {
-
+      for (ichan = 0; ichan < nchan; ichan++)
+      {
 	// scattered power correction requires all channels
 	if (data->get_weight(ichan) == 0.0)
 	  throw Error (InvalidParam,
 		       "Pulsar::ScatteredPowerCorrection::transform",
 		       "ichan=%u has zero weight", ipol, ichan);
 
-
 	power += data->get_Profile(ipol,ichan)->get_amps()[ibin];
-
       }
+
+      power /= nchan;
 
       // compute the quantization noise power in each channel
 
-      ja98.set_Phi ( ja98_a5.invert( power / nchan ) );
-      double scattered_power = power * (1-ja98.get_A()) / nchan;
+      double Phi = ja98_a5.invert( power );
+      ja98.set_Phi ( Phi );
+
+      double A = ja98.get_A();
+      double scattered_power = power * (1-A);
+
+      if (Profile::verbose)
+	cerr << "  ipol=" << ipol << " ibin=" << ibin << " power=" << power
+	     << " Phi=" << Phi << " A=" << A << endl;
 
       for (ichan = 0; ichan < nchan; ichan++)
 	data->get_Profile(ipol,ichan)->get_amps()[ibin] -= scattered_power;
-
     }
-
   }
-
 }

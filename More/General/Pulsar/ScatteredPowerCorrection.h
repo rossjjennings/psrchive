@@ -7,14 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ScatteredPowerCorrection.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.7 $
+   $Date: 2009/02/17 13:25:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ScatteredPowerCorrection_h
 #define __Pulsar_ScatteredPowerCorrection_h
 
 #include "Pulsar/Transformation.h"
+#include "Pulsar/TwoBitStats.h"
+
 #include "JenetAnderson98A5.h"
 
 namespace Pulsar {
@@ -48,6 +50,9 @@ namespace Pulsar {
 
     //! The estimated thresholds at record time
     std::vector<float> thresholds;
+
+    //! Two-bit statistics
+    Reference::To<TwoBitStats> twobit_stats;
 
   };
 
