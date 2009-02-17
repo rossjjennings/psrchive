@@ -26,6 +26,7 @@ include_HEADERS = \
         ierf.h \
         JenetAnderson98A5.h \
         JenetAnderson98.h \
+	LogFile.h \
         machine_endian.h \
 	malloc16.h \
 	Meridian.h \
@@ -86,6 +87,7 @@ libgenutil_la_SOURCES = \
         ierf.c \
         JenetAnderson98A5.C \
         JenetAnderson98.C \
+	LogFile.C \
 	malloc16.c \
 	Meridian.C \
         MJD.C \
@@ -136,7 +138,7 @@ TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98	\
 	test_endian test_environ test_sum test_NormalDistribution	\
 	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord	\
 	test_exponential test_StraightLine test_ThreadStream		\
-	test_Horizon test_VirtualMemory
+	test_Horizon test_VirtualMemory test_LogFile
 
 check_PROGRAMS = $(TESTS) test_CommandParser test_Angle test_expand
 
@@ -160,6 +162,7 @@ test_StraightLine_SOURCES	= test_StraightLine.C
 test_ThreadStream_SOURCES	= test_ThreadStream.C
 test_Horizon_SOURCES		= test_Horizon.C
 test_VirtualMemory_SOURCES	= test_VirtualMemory.C
+test_LogFile_SOURCES		= test_LogFile.C
 
 #############################################################################
 #
