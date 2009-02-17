@@ -114,6 +114,7 @@ void usage()
     "  --DD             Dededisperse (i.e. undo -D option) \n"
     "  -I               Transform to Invariant Interval \n"
     "  -S               Transform to Stokes parameters \n"
+    "  --SS             Transform to coherence parameters (i.e. undo -S option)\n"
     "  -x \"start end\"   Extract subints in this inclusive range \n"
     "\n"
     "The following options take integer arguments \n"
@@ -211,6 +212,7 @@ int main (int argc, char *argv[]) try {
     bool invint = false;
 
     bool stokesify = false;
+    bool unstokesify = false;
 
     bool flipsb = false;
 
@@ -266,6 +268,7 @@ int main (int argc, char *argv[]) try {
     const int RM   = 1216;
     const int MULT = 1218;
     const int PERIOD=1219;
+    const int SS   = 1220;
 
     while (1) {
 
@@ -292,6 +295,7 @@ int main (int argc, char *argv[]) try {
 	{"spc",        no_argument,      0,SPC},
 	{"mult",       required_argument,0,MULT},
 	{"period",     required_argument,0,PERIOD},
+        {"SS",         no_argument,      0,SS},
 	{0, 0, 0, 0}
       };
     
@@ -318,7 +322,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.87 2008/11/13 07:35:13 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.88 2009/02/17 17:35:17 demorest Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -483,6 +487,9 @@ int main (int argc, char *argv[]) try {
       case 'S':
 	stokesify = true;
 	break;
+      case SS:
+        unstokesify = true;
+        break;
       case 'B':
 	flipsb = true;
 	break;
@@ -669,6 +676,13 @@ int main (int argc, char *argv[]) try {
     {
       cout << "Changes will not be saved. Use -m, -u or -e to write results to disk"
 	   << endl;
+    }
+
+    if (stokesify && unstokesify)
+    {
+      cerr << "pam: Both -S and --SS options were given.  Poln state will not be changed!" << endl;
+      stokesify = false;
+      unstokesify = false;
     }
 
     for (unsigned i = 0; i < filenames.size(); i++) try
@@ -861,6 +875,15 @@ int main (int argc, char *argv[]) try {
 	arch->convert_state(Signal::Stokes);
 	if (verbose)
 	  cout << "Archive converted to Stokes parameters" << endl;
+      }
+
+      if (unstokesify) {
+	if (arch->get_npol() != 4)
+	  throw Error(InvalidState, "Convert to coherence",
+		      "Not enough polarisation information");
+	arch->convert_state(Signal::Coherence);
+	if (verbose)
+	  cout << "Archive converted to coherence parameters" << endl;
       }
 
       if (cbppo) {
