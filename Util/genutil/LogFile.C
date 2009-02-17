@@ -41,10 +41,9 @@ void LogFile::add (const std::string& index, const std::string& message)
   messages[index] = message;
 }
 
-bool compare (const std::pair<std::string,std::string>& a,
-	      const std::string& b)
+bool compare (const std::string& a, const std::pair<std::string,std::string>& b)
 {
-  return a.first < b;
+  return a < b.first;
 }
 
 //! get a log message
