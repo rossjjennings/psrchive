@@ -16,6 +16,7 @@
 
 using namespace std;
 
+#include "JenetAnderson98.h"
 #include "Stokes.h"
 #include "Jones.h"
 #include "Pauli.h"
@@ -166,19 +167,8 @@ int main (int argc, char** argv)
 
   if (nbit)
   {
-    assert (nbit > 1 && nbit < 9);
-
-    static double spacing [9] = { 0, 0,  // 0 and 1 bit not handled
-				  0.9674,
-				  0.5605,
-				  0.3188,
-				  0.1789,
-				  0.09925,
-				  0.05445,
-				  0.02957 };
-
     if (digitizer_spacing == 0.0)
-      digitizer_spacing = spacing[nbit];
+      digitizer_spacing = JenetAnderson98::get_optimal_spacing (nbit);
 
     saturation = pow(2.0,double(nbit-1)) - 1.0;
     cerr << "ditigiter saturates at " << saturation << endl;
