@@ -122,7 +122,6 @@ libPolarimetry_la_SOURCES = \
 	PolynomialInfo.C \
 	ProjectionCorrection.C \
         PulsarCalibrator.C \
-        Receiver_load.C \
         ReceptionCalibrator.C \
         ReceptionModel.C \
 	ReceptionModelReport.C \
@@ -156,9 +155,10 @@ SUBDIRS = iri2001
 
 libPolarimetry_la_LIBADD = iri2001/libiri.la @GSL_LIBS@
 
-bin_PROGRAMS = rmrot
+bin_PROGRAMS = rmrot simpol
 
 rmrot_SOURCES = rmrot.C
+simpol_SOURCES = simpol.C
 
 ##############################################################################
 #

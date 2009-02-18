@@ -34,8 +34,8 @@ nobase_include_HEADERS = \
         Pulsar/PolnCalibratorExtension.h \
         Pulsar/PowerEstimator.h \
         Pulsar/ProcHistory.h \
-        Pulsar/Receiver_Field.h \
         Pulsar/Receiver.h \
+	Pulsar/Receiver_Field.h \
         Pulsar/Receiver_Linear.h \
         Pulsar/Receiver_Native.h \
         Pulsar/TapeInfo.h \
@@ -89,6 +89,7 @@ libExtensions_la_SOURCES = \
         Receiver_Field.C \
         Receiver_Linear.C \
         Receiver_Native.C \
+	Receiver_load.C \
         TapeInfo.C \
         Telescope.C \
         Telescopes.C \

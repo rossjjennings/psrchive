@@ -4,8 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Receiver.h"
-#include "MEAL/Factory.h"
+#include "Factory.h"
 
 #include <string.h>
 
