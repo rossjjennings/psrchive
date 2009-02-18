@@ -8,6 +8,7 @@
 #define __Pulsar_Interpreter_h
 
 #include "Pulsar/FixFluxCal.h"
+#include "Pulsar/SetReceiver.h"
 
 #include "CommandParser.h"
 #include "tostring.h"
@@ -240,6 +241,7 @@ namespace Pulsar {
     template<typename T> T setup (const std::string& args, T default_value);
 
     FixFluxCal fix_flux_cal;
+    SetReceiver set_receiver;
 
   private:
     

@@ -237,11 +237,12 @@ void Pulsar::Interpreter::init()
 
   add_command 
     ( &Interpreter::fix, 'f',
-      "fix", "fix each profile by the specified value",
+      "fix", "fix something in the archive",
       "usage: fix <something> \n"
       "  string something  thing to be fixed \n"
       "things that can be fixed: \n"
-      "  'fluxcal'         fix the Archive::Type (FluxCalOn or Off) \n" );
+      "  'fluxcal'         fix the Archive::Type (FluxCalOn or Off) \n"
+      "  'receiver'        fix the receiver information \n" );
 
   add_command 
     ( &Interpreter::scattered_power_correct,
@@ -1077,12 +1078,18 @@ catch (Error& error) {
 //
 string Pulsar::Interpreter::fix (const string& args) try
 {
-
   string what = setup<string>(args);
 
-  if (what == "fluxcal") {
+  if (what == "fluxcal")
+  {
     fix_flux_cal.apply (get());
     return response (Good, fix_flux_cal.get_changes());
+  }
+
+  if (what == "receiver" || what == "rcvr")
+  {
+    set_receiver.apply (get());
+    return response (Good);
   }
 
   return response (Fail, "unrecognized fix '"+args+"'");
