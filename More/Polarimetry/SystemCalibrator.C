@@ -1238,6 +1238,9 @@ Pulsar::SystemCalibrator::new_solution (const string& class_name) const try
     output -> add_extension (stokes);
   }
 
+  if (receiver)
+    output -> add_extension (receiver->clone());
+
   return output.release();
 }
 catch (Error& error)
