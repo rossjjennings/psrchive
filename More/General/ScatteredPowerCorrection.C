@@ -22,7 +22,11 @@ void Pulsar::ScatteredPowerCorrection::correct (Archive* data)
 {
   twobit_stats = data->get<TwoBitStats>();
   if (twobit_stats)
+    ja98_a5.set_nsamp (twobit_stats->get_nsample());
+  else
     ja98_a5.set_nsamp (512);
+
+  twobit_stats = 0;
 
   for (unsigned isub=0; isub < data->get_nsubint(); isub++)
     transform (data->get_Integration(isub));
