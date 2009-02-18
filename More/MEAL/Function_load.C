@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "MEAL/Function.h"
-#include "MEAL/Factory.h"
+#include "Factory.h"
 
 MEAL::Function*
 MEAL::Function::load_Function (const std::string& filename) try

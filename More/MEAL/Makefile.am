@@ -27,7 +27,6 @@ nobase_include_HEADERS = \
 	MEAL/Depolarizer.h \
         MEAL/EvaluationPolicy.h \
 	MEAL/EvaluationTracer.h \
-        MEAL/Factory.h \
         MEAL/ForwardChanged.h \
         MEAL/ForwardResult.h \
         MEAL/Function.h \

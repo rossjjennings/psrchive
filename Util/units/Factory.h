@@ -6,9 +6,9 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Attic/Factory.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:53 $
+/* $Source: /cvsroot/psrchive/psrchive/Util/units/Factory.h,v $
+   $Revision: 1.1 $
+   $Date: 2009/02/18 05:22:17 $
    $Author: straten $ */
 
 #ifndef __MEAL_Factory_H
