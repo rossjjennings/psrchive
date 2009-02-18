@@ -14,8 +14,8 @@
 
 #include "Pulsar/Predictor.h"
 #include "Pulsar/Parameters.h"
-#include "factory.h"
 
+#include "load_factory.h"
 #include "strutil.h"
 #include "timer++.h"
 #include "mini++.h"

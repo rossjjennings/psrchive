@@ -15,7 +15,7 @@
 
 #include "Pulsar/Predictor.h"
 #include "Pulsar/Parameters.h"
-#include "factory.h"
+#include "load_factory.h"
 
 #include "timer++.h"
 #include "mini++.h"
@@ -24,9 +24,8 @@
 using namespace std;
 
 /*****************************************************************************/
-void Pulsar::TimerArchive::unload_file (const char* filename) const 
-try {
-
+void Pulsar::TimerArchive::unload_file (const char* filename) const try
+{
   if (get<IntegrationOrder>())
     throw Error (InvalidState, "Pulsar::TimerArchive::unload_file",
 		 "The TimerArchive class cannot unload files with"
@@ -39,10 +38,12 @@ try {
   if (verbose == 3) 
     cerr << "TimerArchive::unload opened '" << filename << "'" << endl;
   
-  try {
+  try
+  {
     unload (fptr);
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     fclose (fptr);
     throw error += "TimerArchive::unload(" + string(filename) + ")";
   }
@@ -77,8 +78,8 @@ void Pulsar::TimerArchive::subint_unload (FILE* fptr) const
       " npol="    << hdr.banda.npol <<
       " nbin="    << hdr.nbin << endl;
  
-  for (int isub=0; isub < hdr.nsub_int; isub++) { 
-
+  for (int isub=0; isub < hdr.nsub_int; isub++)
+  { 
     if (verbose == 3)
       cerr << "TimerArchive::subint_unload " 
 	   << isub+1 << "/" << hdr.nsub_int << endl;
@@ -97,8 +98,7 @@ void Pulsar::TimerArchive::subint_unload (FILE* fptr) const
     if (verbose == 3)
       cerr << "TimerArchive::subint_unload " 
 	   << isub+1 << "/" << hdr.nsub_int << " unloaded" << endl;
-
-  }        
+  }
 
   if (verbose == 3) 
     cerr << "TimerArchive::subint_unload exit\n";
@@ -124,6 +124,8 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
 
   if (verbose == 3) cerr << "TimerArchive::hdr_unload predictor size = " 
 			 << hdr.nbytespoly << " bytes" << endl;
+
+  // const_cast<TimerArchive*>(this)->ephemeris = 0; // avoid segfault in Fortran code
 
   if (ephemeris)
     header->nbytesephem = nbytes<Parameters> (ephemeris);

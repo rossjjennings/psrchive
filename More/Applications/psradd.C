@@ -22,7 +22,7 @@
 
 #include "Pulsar/Interpreter.h"
 
-#include "factory.h"
+#include "load_factory.h"
 #include "dirutil.h"
 #include "strutil.h"
 #include "separate.h"
@@ -185,7 +185,7 @@ int main (int argc, char **argv) try
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.65 2008/11/08 07:33:14 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.66 2009/02/18 05:22:06 straten Exp $" 
 	   << endl;
       return 0;
 

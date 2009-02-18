@@ -9,7 +9,7 @@
 #include "Pulsar/Predictor.h"
 #include "Pulsar/Parameters.h"
 #include "Pulsar/Receiver.h"
-#include "factory.h"
+#include "load_factory.h"
 
 using namespace std;
 

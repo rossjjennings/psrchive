@@ -17,7 +17,6 @@ include_HEADERS = \
 	evaluate.h \
 	ExponentialDistribution.h \
 	extutil.h \
-	factory.h \
         fcomp.h \
 	format_it.h \
         fsleep.h \
@@ -26,6 +25,7 @@ include_HEADERS = \
         ierf.h \
         JenetAnderson98A5.h \
         JenetAnderson98.h \
+	load_factory.h \
 	LogFile.h \
         machine_endian.h \
 	malloc16.h \
