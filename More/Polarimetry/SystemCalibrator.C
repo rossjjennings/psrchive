@@ -286,7 +286,7 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     if (integration->get_weight (ichan) == 0)
     {
       if (verbose > 2)
-	cerr << "Pulsar::SystemCalibrator::add_observation ichan="
+	cerr << "Pulsar::SystemCalibrator::add_pulsar ichan="
 	     << ichan << " flagged invalid" << endl;
       continue;
     }
@@ -333,7 +333,7 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   }
   catch (Error& error)
   {
-    cerr << "Pulsar::SystemCalibrator::add_observation ichan="
+    cerr << "Pulsar::SystemCalibrator::add_pulsar ichan="
 	 << ichan << " error\n" << error.get_message() << endl;
   }
   
@@ -364,6 +364,9 @@ void Pulsar::SystemCalibrator::add_calibrator (const Archive* data)
     throw Error (InvalidState, 
 		 "Pulsar::SystemCalibrator::add_calibrator (Archive*)",
 		 "No Archive containing pulsar data has yet been added");
+
+  if (!receiver)
+    receiver = data->get<Receiver>();
 
   try
   {
