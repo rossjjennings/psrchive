@@ -312,7 +312,7 @@ void Pulsar::ReceptionCalibrator::set_previous (const Archive* data)
 //! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::match (const Archive* data)
 {
-  check_ready ("Pulsar::ReceptionCalibrator::add_observation", false);
+  check_ready ("Pulsar::ReceptionCalibrator::match", false);
 
   if (!has_calibrator())
     initial_observation (data);
