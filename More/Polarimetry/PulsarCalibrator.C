@@ -289,22 +289,7 @@ void Pulsar::PulsarCalibrator::match (const Archive* data)
                  " and\n\t" + data->get_filename() + match.get_reason());
 
   if (!receiver)
-    receiver = get_calibrator()->get<Receiver>();
-
-  if (receiver && receiver->get_basis_corrected())
-  {
-    /*
-      If the standard is calibrated, then its basis will have already
-      been corrected.  In this case, the receiver should be taken from
-      the first archive to be fit.
-    */
-
     receiver = data->get<Receiver>();
-
-    if (verbose)
-      cerr << "Pulsar::PulsarCalibrator::match"
-	" basis-corrected Receiver from standard replaced" << endl;
-  }
 
   if (one_channel)
     build (data->get_nchan());
