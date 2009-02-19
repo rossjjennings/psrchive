@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.101 $
-   $Date: 2008/09/17 02:01:19 $
+   $Revision: 1.102 $
+   $Date: 2009/02/19 22:26:30 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -707,13 +707,15 @@ int actual_main (int argc, char *argv[]) try
       int level = atoi (optarg);
       verbose = true;
 
-      if (level > 4)
+      if (level >= 4)
         Calibration::ReceptionModel::very_verbose = true;
 
-      if (level > 3) 
+      if (level >= 3) 
         Calibration::ReceptionModel::verbose = true;
 
-      Calibration::StandardModel::verbose = true;
+      if (level >= 2)
+	Calibration::StandardModel::verbose = true;
+
       Pulsar::Calibrator::verbose = level;
       Pulsar::Archive::set_verbosity (level);
 
@@ -843,8 +845,7 @@ int actual_main (int argc, char *argv[]) try
 
     if (!model) try
     {
-      if (verbose)
-	cerr << "pcm: creating mdodel" << endl;
+      cerr << "pcm: creating mdodel" << endl;
 
       if (stdfile)
 	model = matrix_template_matching_based (stdfile);
@@ -926,6 +927,7 @@ int actual_main (int argc, char *argv[]) try
       phase_std = temp->get_Profile (0,0,0);	
     }
 
+    cerr << "pcm: adding observation" << endl;
     model->add_observation( archive );
 
     if (archive->get_type() == Signal::Pulsar)
@@ -1343,7 +1345,9 @@ SystemCalibrator* matrix_template_matching_based (const char* stdname)
   clock.stop();
   cerr << "pcm: standard set in " << clock << endl;
 
-  cerr << "pcm: adding calibrators" << endl;
+  if (calibrator_filenames.size())
+    cerr << "pcm: adding " << calibrator_filenames.size() << " calibrators" 
+	 << endl;
 
   for (unsigned ical=0; ical < calibrator_filenames.size(); ical++)
     model->add_observation( Archive::load (calibrator_filenames[ical]) );
