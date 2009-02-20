@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/CalibratorExtensionInterface.h"
 
 Pulsar::PolnCalibratorExtension::Interface::Interface
 ( PolnCalibratorExtension *s_instance )
@@ -14,16 +15,10 @@ Pulsar::PolnCalibratorExtension::Interface::Interface
     set_instance (s_instance);
 
   // read-only: requires resize
-  add( &PolnCalibratorExtension::get_nchan,
-       "nchan", "Number of frequency channels" );
+  add( &PolnCalibratorExtension::get_nparam,
+       "nparam", "Number of receiver parameters" );
 
-  // read-only: requires resize
-  add( &PolnCalibratorExtension::get_ncpar,
-       "npar", "Number of receiver parameters" );
-
-  add( &PolnCalibratorExtension::get_epoch,
-       &PolnCalibratorExtension::set_epoch,
-       "mjd", "Epoch of calibration observation" );
+  import ( CalibratorExtension::Interface::Interface() );
 }
 
 
