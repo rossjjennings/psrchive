@@ -8,6 +8,7 @@
 #include "Pulsar/Statistics.h"
 #include "Pulsar/ProfileStats.h"
 
+#include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/TwoBitStats.h"
 #include "Pulsar/NoiseStatistics.h"
 #include "Pulsar/SquareWave.h"
@@ -51,16 +52,14 @@ double Pulsar::Statistics::get_nfnr () const
 }
 
 //! Get the number of cal transitions
-unsigned 
-Pulsar::Statistics::get_cal_ntrans () const
+unsigned Pulsar::Statistics::get_cal_ntrans () const
 {
   SquareWave wave;
   return wave.count_transitions (get_Profile());
 }
 
 //! Get the two bit distortion (or distance from theory)
-double
-Pulsar::Statistics::get_2bit_dist () const
+double Pulsar::Statistics::get_2bit_dist () const
 {
   const TwoBitStats* tbs = archive->get<TwoBitStats>();
   if (!tbs)
@@ -71,6 +70,38 @@ Pulsar::Statistics::get_2bit_dist () const
   for (unsigned idig=0; idig < ndig; idig++)
     distortion += tbs->get_distortion(idig);
   return distortion;
+}
+
+//! Get the two bit distortion (or distance from theory)
+double Pulsar::Statistics::get_pcm_good () const
+{
+  const PolnCalibratorExtension* ext = archive->get<PolnCalibratorExtension>();
+  if (!ext)
+    return 0;
+
+  if (!ext->get_has_solver())
+    return 0;
+
+  unsigned nchan = ext->get_nchan();
+
+  double chisq = 0.0;
+  unsigned nfree = 0;
+  const PolnCalibratorExtension::Transformation* xform = 0;
+
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+  {
+    xform = ext->get_transformation(ichan);
+    if (xform->get_valid())
+    {
+      chisq += xform->get_chisq();
+      nfree += xform->get_nfree();
+    }
+  }
+
+  if (nfree == 0)
+    nfree = 1;
+
+  return chisq/nfree;
 }
 
 //! Get the off-pulse baseline

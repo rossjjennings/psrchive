@@ -35,16 +35,20 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
            &Statistics::get_all );
 
   add( &Statistics::get_snr,
-       "snr", "Total signal-to-noise ratio" );
+       "snr", "Signal-to-noise ratio" );
 
   add( &Statistics::get_nfnr,
-       "nfnr", "Total noise-to-Fourier-noise ratio" );
+       "nfnr", "Noise-to-Fourier-noise ratio" );
 
   add( &Statistics::get_cal_ntrans,
-       "ncal", "Count the number of CAL transitions" );
+       "ncal", "Number of CAL transitions" );
 
   add( &Statistics::get_2bit_dist,
-       "2bitd", "Estimate the 2-bit distortion" );
+       "2bitd", "2-bit distortion" );
+
+  add( &Statistics::get_pcm_good,
+       "pcm_good", "Goodness of pcm fit statistic" );
+
 }
 
 
