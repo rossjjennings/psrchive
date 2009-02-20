@@ -291,7 +291,7 @@ void Pulsar::PulsarCalibrator::match (const Archive* data)
   if (!receiver)
     receiver = data->get<Receiver>();
 
-  if (one_channel)
+  if (one_channel && !mtm.size())
     build (data->get_nchan());
 
   if (tim_file)
@@ -562,9 +562,6 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
       transformation[ichan]->copy (backup);
       //cerr << "backup gain=" << transformation[ichan]->get_param(0) << endl;
     }
-
-    if (verbose)
-      cerr << "Pulsar::PulsarCalibrator::solve1 chan=" << ichan << endl;
 
     mtm[ichan]->fit( data->new_PolnProfile (ichan) );
 
