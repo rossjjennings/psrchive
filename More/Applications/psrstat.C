@@ -56,11 +56,16 @@ protected:
   //! Indeces over which to loop
   TextLoop loop;
 
+  //! Print the name of each file
+  bool output_filename;
+
   //! The interface to the current archive
   Reference::To<TextInterface::Parser> interface;
 
   //! Job to be performed on each leaf index
   void print ();
+
+  void set_quiet () { output_filename = false; }
 };
 
 int main (int argc, char** argv)
@@ -73,13 +78,16 @@ psrstat::psrstat ()
   : Pulsar::Application ("psrstat", "prints pulsar attributes and statistics")
 {
   has_manual = true;
-  version = "$Id: psrstat.C,v 1.3 2009/02/03 20:24:52 straten Exp $";
+  version = "$Id: psrstat.C,v 1.4 2009/02/20 19:20:24 straten Exp $";
 
   // print/parse in degrees
   Angle::default_type = Angle::Degrees;
 
   // suppress warnings by default
   Archive::set_verbosity (0);
+
+  // print the name of each file processed
+  output_filename = true;
 
   loop.job.set( this, &psrstat::print );
 
@@ -147,6 +155,9 @@ void psrstat::process (Pulsar::Archive* archive)
     cout << interface->help (true) << endl;;
     return;
   }
+
+  if (output_filename)
+    cout << archive->get_filename();
 
   loop.set_container (interface);
   loop.loop ();
