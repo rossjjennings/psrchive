@@ -10,6 +10,7 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProfileExtension.h"
 
+#include "FTransform.h"
 #include "Physical.h"
 #include "Error.h"
 #include "typeutil.h"
@@ -349,23 +350,24 @@ void Pulsar::Profile::logarithm (double base, double threshold)
   
   float log_threshold = log(threshold)/log(base);
 
-  // cerr << "threshold = " << log_threshold << endl;
-
-  unsigned under = 0;
+  if (!finite(log_threshold))
+    throw Error (InvalidParam, "Pulsar::Profile::logarithm",
+		 "logarithm of threshold=%lf is not finite", threshold);
 
   unsigned nbin = get_nbin();
   float* amps = get_amps();
 
   for (unsigned ibin=0; ibin<nbin; ++ibin)
+  {
     if (amps[ibin] > threshold)
       amps[ibin] = log(amps[ibin])/log(base);
-    else {
+    else
       amps[ibin] = log_threshold;
-      under ++;
-    }
-
-  // cerr << "under = " << under << endl;
-
+    if (!finite(amps[ibin]))
+      throw Error (InvalidParam, "Pulsar::Profile::logarithm",
+		   "logarithm of amps[%u]=%lf is not finite",
+		   ibin, amps[ibin]);
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -400,17 +402,18 @@ void Pulsar::Profile::fold (unsigned nfold)
 //
 // Pulsar::Profile::bscrunch
 //
-void Pulsar::Profile::bscrunch (unsigned nscrunch) { try
+void Pulsar::Profile::bscrunch (unsigned nscrunch) try
 {
-  if (verbose) {
+  if (verbose)
+  {
     cerr << "Pulsar::Profile::bscrunch" << endl;
     cerr << "  Current nbin   = " << get_nbin() << endl;
     cerr << "  Scrunch factor = " << nscrunch << endl;
   }
   
-  if (nscrunch < 1)
+  if (nscrunch < 2)
     throw Error (InvalidParam, "",
-		 "nscrunch cannot be less than unity");
+		 "nscrunch cannot be less than two");
   
   unsigned nbin = get_nbin();
   float* amps = get_amps();
@@ -421,7 +424,8 @@ void Pulsar::Profile::bscrunch (unsigned nscrunch) { try
   
   unsigned newbin = nbin/nscrunch;
 
-  for (unsigned i=0; i<newbin; i++) {
+  for (unsigned i=0; i<newbin; i++)
+  {
     amps[i] = amps[i*nscrunch];
     for (unsigned j=1; j<nscrunch; j++)
       amps[i] += amps[i*nscrunch+j];
@@ -432,10 +436,43 @@ void Pulsar::Profile::bscrunch (unsigned nscrunch) { try
 
   operator *= (1.0/float(nscrunch));
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::Profile::bscrunch";
 }
-} // end function
+
+void Pulsar::Profile::bscrunch_to_nbin (unsigned new_nbin) try
+{
+  if (new_nbin == 0)
+    throw Error (InvalidParam, "",
+		 "new nbin cannot be zero");
+  
+  else if (get_nbin() < new_nbin)
+    throw Error (InvalidParam, "",
+		 "current nbin=%u is less than new nbin=%u",
+		 get_nbin(), new_nbin);
+
+  else if (get_nbin() % new_nbin == 0)
+    bscrunch(get_nbin() / new_nbin);
+
+  else
+  {
+    vector<float> temp( get_nbin()+2 );
+    FTransform::frc1d (get_nbin(), &temp[0], get_amps());
+
+    vector<float> solution (new_nbin);
+    temp[new_nbin+1] = 0.0; // real-valued Nyquist
+
+    FTransform::bcr1d (new_nbin, &solution[0], &temp[0]);
+
+    set_amps (solution);
+  }
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::Profile::bscrunch_to_nbin";
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

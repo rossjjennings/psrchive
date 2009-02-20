@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.108 $
-   $Date: 2008/11/27 06:11:54 $
+   $Revision: 1.109 $
+   $Date: 2009/02/20 04:51:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -218,6 +218,9 @@ namespace Pulsar {
 
     //! integrate neighbouring phase bins in profile
     void bscrunch (unsigned nscrunch);
+
+    //! integrate neighbouring phase bins in profile
+    void bscrunch_to_nbin (unsigned nbin);
 
     //! integrate neighbouring sections of the profile
     void fold (unsigned nfold);
