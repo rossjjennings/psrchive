@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.97 $
-   $Date: 2008/11/27 06:12:06 $
+   $Revision: 1.98 $
+   $Date: 2009/02/20 04:51:53 $
    $Author: straten $ */
 
 /*
@@ -411,6 +411,9 @@ namespace Pulsar {
     //! Call Profile::bsrunch on every profile
     void bscrunch (unsigned nscrunch);
     
+    //! Call Profile::bsrunch_to_nbin on every profile
+    void bscrunch_to_nbin (unsigned nbin);
+
     //! Integrate profiles from neighbouring chans
     void fscrunch (unsigned nscrunch = 0);
 
@@ -465,8 +468,21 @@ namespace Pulsar {
     //! Leading edge of phase bin zero = polyco predicted phase zero
     bool zero_phase_aligned;
 
+    //! Set the number of phase bins to that of profiles[0][0]
+    void update_nbin ();
   };
 
+  template<typename UnaryProfileMethod, typename Argument>
+  void foreach (Integration* integration,
+		UnaryProfileMethod method, const Argument& arg)
+  {
+    const unsigned npol = integration->get_npol();
+    const unsigned nchan = integration->get_nchan();
+
+    for (unsigned ipol=0; ipol<npol; ipol++)
+      for (unsigned ichan=0; ichan<nchan; ichan++)
+	(integration->get_Profile(ipol, ichan)->*(method)) (arg);
+  }
 }
 
 #endif

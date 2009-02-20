@@ -425,42 +425,42 @@ void Pulsar::Integration::swap_profiles (unsigned ipol, unsigned ichan,
   profiles[jpol][jchan] = temp;
 }
 
-void Pulsar::Integration::fold (unsigned nfold)
+void Pulsar::Integration::update_nbin ()
 {
-  if (get_npol()<1 || get_nchan()<1)
-    return;
-
-  try {
-    for (unsigned ipol=0; ipol<get_npol(); ipol++)
-      for (unsigned ichan=0; ichan<get_nchan(); ichan++)
-	profiles[ipol][ichan] -> fold (nfold);
-
+  if (profiles.size() && profiles[0].size())
     set_nbin( profiles[0][0] -> get_nbin() );
-  }
-  catch (Error& error) {
-    throw error += "Integration::fold";
-  }
+  else
+    set_nbin( 0 );
 }
 
-void Pulsar::Integration::bscrunch (unsigned nscrunch)
+void Pulsar::Integration::fold (unsigned nfold) try
 {
-  if (get_npol()<1 || get_nchan()<1)
-    return;
+  foreach (this, &Profile::fold, nfold);
+  update_nbin ();
+}
+catch (Error& error)
+{
+  throw error += "Integration::fold";
+}
 
-  if (verbose)
-    cerr << "Integration::bscrunch npol=" << get_npol() 
-	 << " nchan=" << get_nchan() << endl;
+void Pulsar::Integration::bscrunch (unsigned nscrunch) try
+{
+  foreach (this, &Profile::bscrunch, nscrunch);
+  update_nbin ();
+}
+catch (Error& error)
+{
+  throw error += "Integration::bscrunch";
+}
 
-  try {
-    for (unsigned ipol=0; ipol<get_npol(); ipol++)
-      for (unsigned ichan=0; ichan<get_nchan(); ichan++)
-	profiles[ipol][ichan] -> bscrunch (nscrunch);
-
-    set_nbin ( profiles[0][0] -> get_nbin() );
-  }
-  catch (Error& error) {
-    throw error += "Integration::bscrunch";
-  }
+void Pulsar::Integration::bscrunch_to_nbin (unsigned new_nbin) try
+{
+  foreach (this, &Profile::bscrunch_to_nbin, new_nbin);
+  update_nbin ();
+}
+catch (Error& error)
+{
+  throw error += "Integration::bscrunch_to_nbin";
 }
 
 /*
@@ -502,8 +502,6 @@ MJD Pulsar::Integration::get_end_time () const
 
 void Pulsar::Integration::uniform_weight (float new_weight)
 {
-  for (unsigned ipol=0; ipol < get_npol(); ipol++)
-    for (unsigned ichan=0; ichan < get_nchan(); ichan++)
-      profiles[ipol][ichan] -> set_weight (new_weight);
+  foreach (this, &Profile::set_weight, new_weight);
 }
 
