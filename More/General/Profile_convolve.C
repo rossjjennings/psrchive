@@ -47,22 +47,21 @@ void Pulsar::Profile::fft_convolve (const Profile* p1)
 {
   unsigned bins = get_nbin();
 
-  if (bins != p1->get_nbin()) {
+  if (bins != p1->get_nbin())
     throw Error (InvalidParam, "Profile::fft_convolve", 
 		 "profile nbin values not equal");
-  }
 
-  auto_ptr<float> temp1( new float[bins+2] );
-  auto_ptr<float> temp2( new float[bins+2] );
-  auto_ptr<float> resultant( new float[bins+2] );
+  vector<float> temp1( bins+2 );
+  vector<float> temp2( bins+2 );
+  vector<float> resultant( bins+2 );
 
-  FTransform::frc1d (bins, temp1.get(), get_amps());
-  FTransform::frc1d (bins, temp2.get(), p1->get_amps());
+  FTransform::frc1d (bins, &temp1[0], get_amps());
+  FTransform::frc1d (bins, &temp2[0], p1->get_amps());
 
   // cast the float* arrays to complex<float>*
-  complex<float>* c1 = (complex<float>*) temp1.get();
-  complex<float>* c2 = (complex<float>*) temp2.get();
-  complex<float>* r = (complex<float>*) resultant.get();
+  complex<float>* c1 = (complex<float>*) &temp1[0];
+  complex<float>* c2 = (complex<float>*) &temp2[0];
+  complex<float>* r = (complex<float>*) &resultant[0];
 
   unsigned ncomplex = bins/2+1;
 
@@ -72,15 +71,10 @@ void Pulsar::Profile::fft_convolve (const Profile* p1)
 
   // Transform back to the time domain to get the convolved solution
 
-  vector<float> solution;
+  vector<float> solution (bins);
 
-  solution.resize(bins);
+  FTransform::bcr1d (bins, &(solution[0]), &resultant[0]);
 
-  FTransform::bcr1d (bins, &(solution[0]), resultant.get());
-
-  // Return the profile
-
-  // resize(bins);
   set_amps(solution);
 }
 
