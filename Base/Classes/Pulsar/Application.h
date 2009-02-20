@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/09/03 01:19:37 $
+   $Revision: 1.9 $
+   $Date: 2009/02/20 19:16:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Application_h
@@ -67,6 +67,11 @@ namespace Pulsar {
 
     //! Parse an additional command, return true if understood
     virtual bool parse (char code, const std::string& arg);
+
+    //! Any extra tasks for quiet, verbose, and very verbose options
+    virtual void set_quiet () {}
+    virtual void set_verbose () {}
+    virtual void set_very_verbose () {}
 
     //! Any extra setup before running main loop
     virtual void setup ();

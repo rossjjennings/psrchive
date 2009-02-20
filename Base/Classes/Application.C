@@ -127,17 +127,20 @@ void Pulsar::Application::parse (int argc, char** argv)
 
     case 'q':
       Pulsar::Archive::set_verbosity (0);
+      set_quiet ();
       break;
 
     case 'v':
       Pulsar::Archive::set_verbosity (2);
       verbose = true;
+      set_verbose ();
       break;
 
     case 'V':
       Pulsar::Archive::set_verbosity (3);
       verbose = true;
       very_verbose = true;
+      set_very_verbose ();
       break;
 
     default:
