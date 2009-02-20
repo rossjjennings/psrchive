@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.18 $
-   $Date: 2008/07/26 06:42:47 $
+   $Revision: 1.19 $
+   $Date: 2009/02/20 22:00:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -179,6 +179,9 @@ namespace Pulsar
     //! Set the reduced chisq above which a solution will be flagged invalid
     virtual void set_invalid_reduced_chisq (float);
 
+    //! Report on the projection correction used in add_pulsar method
+    virtual void set_report_projection (bool);
+    
     //! Solve equation for each frequency
     virtual void solve ();
     
@@ -286,6 +289,9 @@ namespace Pulsar
 
     //! The maximum reduced chisq before a fit will be flagged invalid
     float invalid_chisq;
+
+    //! Report on the projection transformation used in add_pulsar
+    bool report_projection;
 
     //! Prepare the measurement equations for fitting
     virtual void solve_prepare ();

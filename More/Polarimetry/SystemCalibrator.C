@@ -50,6 +50,8 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
   get_data_fail = 0;
   get_data_call = 0;
 
+  report_projection = false;
+
   if (archive)
     set_calibrator (archive);
 }
@@ -272,7 +274,8 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   correction.set_archive (data);
   Jones<double> projection = correction (isub);
 
-  cerr << correction.get_summary () << endl;
+  if (report_projection)
+    cerr << correction.get_summary () << endl;
 
   // an identifier for this set of data
   string identifier = data->get_filename() + " " + tostring(isub);
@@ -1259,6 +1262,11 @@ void Pulsar::SystemCalibrator::set_retry_reduced_chisq (float reduced_chisq)
 void Pulsar::SystemCalibrator::set_invalid_reduced_chisq (float reduced_chisq)
 {
   invalid_chisq = reduced_chisq;
+}
+
+void Pulsar::SystemCalibrator::set_report_projection (bool flag)
+{
+  report_projection = true;
 }
 
 void Pulsar::SystemCalibrator::check_ichan (const char* name, unsigned ichan)
