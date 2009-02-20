@@ -457,8 +457,10 @@ void Pulsar::Profile::bscrunch_to_nbin (unsigned new_nbin) try
 
   else
   {
-    vector<float> temp( get_nbin()+2 );
-    FTransform::frc1d (get_nbin(), &temp[0], get_amps());
+    unsigned orig_nbin = get_nbin();
+
+    vector<float> temp( orig_nbin+2 );
+    FTransform::frc1d (orig_nbin, &temp[0], get_amps());
 
     vector<float> solution (new_nbin);
     temp[new_nbin+1] = 0.0; // real-valued Nyquist
@@ -466,6 +468,9 @@ void Pulsar::Profile::bscrunch_to_nbin (unsigned new_nbin) try
     FTransform::bcr1d (new_nbin, &solution[0], &temp[0]);
 
     set_amps (solution);
+
+    if (FTransform::get_norm() == FTransform::unnormalized)
+      scale( 1.0 / orig_nbin );
   }
 }
 catch (Error& error)
