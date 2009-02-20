@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.30 $
-   $Date: 2009/02/20 06:24:23 $
+   $Revision: 1.31 $
+   $Date: 2009/02/20 06:34:32 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -55,6 +55,9 @@ namespace Pulsar {
 
     //! Construct from a PolnCalibrator instance
     PolnCalibratorExtension (const PolnCalibrator*);
+
+    //! Return a short name
+    std::string get_short_name () const { return "pcal"; }
 
     //! Set the type of the instrumental response parameterization
     void set_type (Calibrator::Type type);

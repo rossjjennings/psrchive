@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FluxCalibratorExtension.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/07/25 22:32:48 $
+   $Revision: 1.13 $
+   $Date: 2009/02/20 06:34:32 $
    $Author: straten $ */
 
 #ifndef __FluxCalibratorExtension_h
@@ -58,6 +58,9 @@ namespace Pulsar
 
     //! Construct from a FluxCalibrator instance
     FluxCalibratorExtension (const FluxCalibrator*);
+
+    //! Return a short name
+    std::string get_short_name () const { return "fcal"; }
 
     //! Set the number of frequency channels
     void set_nchan (unsigned nchan);
