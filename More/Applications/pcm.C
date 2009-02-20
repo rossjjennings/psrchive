@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.102 $
-   $Date: 2009/02/19 22:26:30 $
+   $Revision: 1.103 $
+   $Date: 2009/02/20 22:02:21 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -853,6 +853,7 @@ int actual_main (int argc, char *argv[]) try
 	model = time_variation_based (binfile, archive->get_nbin());
 
       model->set_nthread (nthread);
+      model->set_report_projection (true);
 
       if (impurity)
 	model->set_impurity( impurity );
