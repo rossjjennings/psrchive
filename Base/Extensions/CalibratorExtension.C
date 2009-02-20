@@ -1,12 +1,12 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/CalibratorExtension.h"
-#include "Pulsar/Calibrator.h"
 
+#include "Pulsar/CalibratorExtensionInterface.h"
+#include "Pulsar/Calibrator.h"
 
 using namespace Pulsar;
 
@@ -42,12 +42,12 @@ CalibratorExtension::~CalibratorExtension ()
 {
 }
 
-void Pulsar::CalibratorExtension::set_type (Calibrator::Type _type)
+void CalibratorExtension::set_type (Calibrator::Type _type)
 {
   type = _type;
 }
 
-Pulsar::Calibrator::Type Pulsar::CalibratorExtension::get_type () const
+Calibrator::Type CalibratorExtension::get_type () const
 {
   return type;
 }
@@ -78,26 +78,26 @@ unsigned CalibratorExtension::get_nchan () const
 
 float CalibratorExtension::get_weight (unsigned ichan) const
 {
-  range_check (ichan, "Pulsar::CalibratorExtension::get_weight");
+  range_check (ichan, "CalibratorExtension::get_weight");
   return weight[ichan];
 }
 
 void CalibratorExtension::set_weight (unsigned ichan, float _weight)
 {
-  range_check (ichan, "Pulsar::CalibratorExtension::set_weight");
+  range_check (ichan, "CalibratorExtension::set_weight");
   weight[ichan] = _weight;
 }
 
 
 double CalibratorExtension::get_centre_frequency (unsigned ichan) const
 {
-  range_check (ichan, "Pulsar::CalibratorExtension::get_centre_frequency");
+  range_check (ichan, "CalibratorExtension::get_centre_frequency");
   return centre_frequency[ichan];
 }
 
 void CalibratorExtension::set_centre_frequency (unsigned ichan, double freq)
 {
-  range_check (ichan, "Pulsar::CalibratorExtension::set_centre_frequency");
+  range_check (ichan, "CalibratorExtension::set_centre_frequency");
   centre_frequency[ichan] = freq;
 }
 
@@ -107,4 +107,37 @@ void CalibratorExtension::range_check (unsigned ichan,
   if (ichan >= weight.size())
     throw Error (InvalidRange, method, "ichan=%d >= nchan=%d",
 		 ichan, weight.size());
+}
+
+// Text interface to a CalibratorExtension extension
+CalibratorExtension::Interface::Interface (CalibratorExtension *s_instance)
+{
+  if( s_instance )
+    set_instance( s_instance );
+
+  // read-only: requires resize
+  add( &CalibratorExtension::get_nchan,
+       "nchan", "Number of frequency channels" );
+
+  add( &CalibratorExtension::get_epoch,
+       &CalibratorExtension::set_epoch,
+       "mjd", "Epoch of calibration observation" );
+
+  VGenerator<double> dgenerator;
+  add_value(dgenerator( "freq", "Centre frequency of each channel (MHz)",
+			&CalibratorExtension::get_centre_frequency,
+			&CalibratorExtension::set_centre_frequency,
+			&CalibratorExtension::get_nchan ));
+
+  VGenerator<float> fgenerator;
+  add_value(fgenerator( "wt", "Weight assigned to each channel",
+			&CalibratorExtension::get_weight,
+			&CalibratorExtension::set_weight,
+			&CalibratorExtension::get_nchan ));
+}
+
+//! Return a text interfaces that can be used to access this instance
+TextInterface::Parser* CalibratorExtension::get_interface()
+{
+  return new CalibratorExtension::Interface( this );
 }
