@@ -1341,7 +1341,7 @@ string get_npar_feed( Reference::To<Archive> archive )
   if( !ext )
     result = "UNDEF";
   else
-    result = tostring( ext->get_ncpar() );
+    result = tostring( ext->get_nparam() );
 
   return result;
 }
