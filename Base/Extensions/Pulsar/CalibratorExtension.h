@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorExtension.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/07/25 23:29:26 $
+   $Revision: 1.13 $
+   $Date: 2009/02/20 06:24:18 $
    $Author: straten $ */
 
 #ifndef __CalibratorExtension_h
@@ -72,6 +72,11 @@ namespace Pulsar {
 
     //! Return a short name
     std::string get_short_name () const { return "cal"; }
+
+    class Interface;
+
+    //! Return a text interfaces that can be used to access this instance
+    TextInterface::Parser* get_interface();
 
     protected:
 
