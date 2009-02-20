@@ -77,7 +77,6 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
   psrfits_read_key (fptr, "NCPAR", &ncpar, 0, verbose == 3);
   if (ncpar < 0)
     ncpar = 0;
-  pce->set_ncpar( ncpar );
 
   int ncovar = 0;
   psrfits_read_key (fptr, "NCOVAR", &ncovar, 0, verbose == 3);

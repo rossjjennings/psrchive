@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.29 $
-   $Date: 2008/07/25 23:29:32 $
+   $Revision: 1.30 $
+   $Date: 2009/02/20 06:24:23 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -53,12 +53,6 @@ namespace Pulsar {
 	Interface( PolnCalibratorExtension *s_instance = NULL );
     };
 
-    //! set the ncpar
-    void set_ncpar( int s_ncpar ) { ncpar = s_ncpar; }
-    
-    //! get the ncpar
-    int get_ncpar( void ) const { return ncpar; }
-    
     //! Construct from a PolnCalibrator instance
     PolnCalibratorExtension (const PolnCalibrator*);
 
@@ -116,7 +110,6 @@ namespace Pulsar {
 
   private:
     
-    int ncpar;
     void init ();
 
   };
