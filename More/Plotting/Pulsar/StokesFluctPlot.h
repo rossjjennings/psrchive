@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesFluctPlot.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/12/21 04:38:33 $
+   $Revision: 1.8 $
+   $Date: 2009/02/21 20:42:22 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesFluctPlot_h
@@ -53,6 +53,10 @@ namespace Pulsar {
     void set_plot_values (const std::string& plot) { plot_values = plot; }
     std::string get_plot_values () const { return plot_values; }
 
+    //! Signal-to-noise ratio on the y-axis
+    void set_signal_to_noise (const bool plot) { signal_to_noise = plot; }
+    bool get_signal_to_noise () const { return signal_to_noise; }
+
     //! Set the colour for each value plotted
     void set_plot_colours (const std::string& plot) { plot_colours = plot; }
     std::string get_plot_colours () const { return plot_colours; }
@@ -67,6 +71,7 @@ namespace Pulsar {
 
   protected:
  
+    bool signal_to_noise;
     std::string plot_values;
     std::string plot_colours;
     std::string plot_lines;
