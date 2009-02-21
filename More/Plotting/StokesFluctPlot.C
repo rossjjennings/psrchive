@@ -46,6 +46,7 @@ Pulsar::StokesFluctPlot::StokesFluctPlot ()
   below->set_right( below->get_left() );
   below->set_left( PlotLabel::unset );
 
+  signal_to_noise = true;
 }
 
 TextInterface::Parser* Pulsar::StokesFluctPlot::get_interface ()
@@ -80,8 +81,53 @@ void Pulsar::StokesFluctPlot::draw (const Archive* data)
 //! Return the label for the y-axis
 std::string Pulsar::StokesFluctPlot::get_ylabel (const Archive* data)
 {
-  return "Signal-to-Noise Ratio";
+  if (signal_to_noise)
+    return "Signal-to-Noise Ratio";
+  else
+    return "Fluctuation Power";
 }
+
+namespace Pulsar
+{
+  void moddet (Profile* moddet, const PolnProfile* data);
+}
+
+#include "Pauli.h"
+
+void Pulsar::moddet (Profile* moddet, const PolnProfile* data)
+{
+  unsigned nbin = data->get_nbin() / 2;
+  Signal::State state = data->get_state();
+
+  moddet->resize (nbin);
+  float* amps = moddet->get_amps();
+
+  Jones<double> coherence;
+  complex<double> Ci (0,1);
+
+  for (unsigned ibin = 0; ibin < nbin; ibin++)
+  {
+    if (state == Signal::Stokes)
+    {
+      Stokes< complex<double> > real = data->get_Stokes(ibin*2);
+      Stokes< complex<double> > imag = data->get_Stokes(ibin*2+1);
+
+      Stokes< complex<double> > stokes = real + Ci*imag;
+
+      coherence = convert (stokes);
+    }
+    else if (state == Signal::Coherence)
+    {
+      Jones<double> real = data->get_coherence(ibin*2);
+      Jones<double> imag = data->get_coherence(ibin*2+1);
+
+      coherence = real + Ci*imag;
+    }
+
+    amps[ibin] = sqrt(norm(det(coherence)));
+  }
+}
+
 
 Pulsar::Profile* new_Fluct (const Pulsar::PolnProfile* data, char code)
 {
@@ -97,14 +143,16 @@ Pulsar::Profile* new_Fluct (const Pulsar::PolnProfile* data, char code)
   case 'V':
     return data->get_Profile(3)->clone();
 
-  case 'L': {
+  case 'L':
+  {
     // total linearly polarized flux
     profile = data->get_Profile(1)->clone();
     profile->sum (data->get_Profile(2));
     return profile.release();
   }
 
-  case 'p': {
+  case 'p':
+  {
     // total polarized flux
     profile = data->get_Profile(1)->clone();
     profile->sum (data->get_Profile(2));
@@ -112,10 +160,19 @@ Pulsar::Profile* new_Fluct (const Pulsar::PolnProfile* data, char code)
     return profile.release();
   }
 
-  case 'S': {
+  case 'S':
+  {
     // polarimetric invariant flux
     profile = new Pulsar::Profile;
     data->invint(profile);
+    return profile.release();
+  }
+
+  case 'd':
+  {
+    // modulus of undetected determinant
+    profile = new Pulsar::Profile;
+    moddet (profile, data);
     return profile.release();
   }
 
@@ -152,19 +209,28 @@ void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
 
   Pulsar::LastSignificant last_significant;
 
-  for (unsigned ipol=0; ipol < plotter.profiles.size(); ipol++) {
-
+  for (unsigned ipol=0; ipol < plotter.profiles.size(); ipol++)
+  {
     Reference::To<Profile> prof;
 
     // special case for invariant interval: form before FFT
-    if (plot_values[ipol] == 'S') {
+    if (plot_values[ipol] == 'S')
+    {
       prof = new_Fluct (profile, plot_values[ipol]);
       prof = fourier_transform (prof);
       detect (prof);
     }
 
+    // special case for fluctuation determinant: no detection
+    else if (plot_values[ipol] == 'd')
+    {
+      Reference::To<PolnProfile> fft = fourier_transform (profile);
+      prof = new_Fluct (fft, plot_values[ipol]);
+    }
+
     // all other cases: FFT before formation
-    else {
+    else
+    {
       Reference::To<PolnProfile> fft = fourier_transform (profile);
       detect (fft);
       prof = new_Fluct (fft, plot_values[ipol]);
@@ -184,8 +250,7 @@ void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
  
     float log_noise = log(rms) / log(10.0);
 
-    prof->logarithm();
-
+    prof->logarithm (10.0, rms/10.0);
     prof->offset( -log_noise );
 
     plotter.profiles[ipol] = prof;
