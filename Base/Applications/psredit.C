@@ -81,6 +81,9 @@ int main (int argc, char** argv) try
   // print the name of each file processed
   bool output_filename = true;
 
+  // prefix parameter value queries with parameter name=
+  bool prefix_name = true;
+
   // save processed files
   bool save = false;
 
@@ -88,7 +91,7 @@ int main (int argc, char** argv) try
   string save_ext;
 
   int gotc;
-  while ((gotc = getopt (argc, argv, "c:e:hHmqvV")) != -1)
+  while ((gotc = getopt (argc, argv, "c:e:hHmqQvV")) != -1)
     switch (gotc) {
 
     case 'c':
@@ -114,6 +117,10 @@ int main (int argc, char** argv) try
 
     case 'q':
       output_filename = false;
+      break;
+
+    case 'Q':
+      prefix_name = false;
       break;
 
     case 'v':
@@ -165,6 +172,7 @@ int main (int argc, char** argv) try
 
     // so that a space precedes each parameter processed
     interface->set_indentation (" ");
+    interface->set_prefix_name (prefix_name);
 
     if (output_filename)
       cout << archive->get_filename();
