@@ -38,7 +38,7 @@ string TextInterface::Parser::process (const string& command)
     if (prefix_name)
       prefix = name + "=";
 
-    indentation + prefix + value;
+    return indentation + prefix + value;
   }
 
   // string before the equals sign
