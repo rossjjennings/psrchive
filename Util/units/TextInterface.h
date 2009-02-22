@@ -846,6 +846,9 @@ namespace TextInterface {
     //! Set the indentation that precedes the output of a call to process
     void set_indentation (const std::string& indent) { indentation = indent; }
 
+    //! Prefix output with "name="
+    void set_prefix_name (bool flag) { prefix_name = flag; }
+
     //! Set aliases for value names
     void set_aliases (const Alias* alias) { aliases = alias; }
 
@@ -866,8 +869,11 @@ namespace TextInterface {
     //! Maintain alphabetical order of parameter names
     bool alphabetical;
 
-    //! Filters duplicate value names during import
+    //! Filter duplicate value names during import
     bool import_filter;
+
+    //! Prefix "name=" when retrieving a value
+    bool prefix_name;
 
     //! The aliases for the value names
     Reference::To<const Alias> aliases;

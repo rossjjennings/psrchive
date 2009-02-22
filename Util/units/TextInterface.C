@@ -19,6 +19,10 @@ bool TextInterface::label_elements = false;
 
 string TextInterface::Parser::process (const string& command)
 {
+#ifdef _DEBUG
+  cerr << "TextInterface::Parser::process command='" << command << "'" << endl;
+#endif
+
   if (command == "help")
     return help ();
 
@@ -29,7 +33,12 @@ string TextInterface::Parser::process (const string& command)
   {
     string name = command;
     string value = get_name_value (name);
-    return indentation + name + "=" + value;
+
+    string prefix;
+    if (prefix_name)
+      prefix = name + "=";
+
+    indentation + prefix + value;
   }
 
   // string before the equals sign
@@ -126,6 +135,7 @@ TextInterface::Parser::Parser ()
 {
   alphabetical = false;
   import_filter = false;
+  prefix_name = true;
 }
 
 //! Get the value of the value
