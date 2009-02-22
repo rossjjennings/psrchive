@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.31 $
-   $Date: 2009/02/20 06:34:32 $
+   $Revision: 1.32 $
+   $Date: 2009/02/22 06:58:21 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -118,7 +118,7 @@ namespace Pulsar {
   };
  
   //! Intermediate storage of MEAL::Complex parameters 
-  class PolnCalibratorExtension::Transformation
+  class PolnCalibratorExtension::Transformation : public Reference::Able
   {
   public:
 
@@ -179,6 +179,13 @@ namespace Pulsar {
     unsigned get_nfree() const;
     //! Set the number of free parameters
     void set_nfree (unsigned);
+
+    // Text interface to a PolnCalibratorExtension instance
+    class Interface : public TextInterface::To<Transformation>
+    {
+      public:
+	Interface();
+    };
 
   protected:
 
