@@ -18,7 +18,7 @@ Pulsar::PolnCalibratorExtension::Interface::Interface
 
   // read-only: requires resize
   add( &PolnCalibratorExtension::get_nparam,
-       "nparam", "Number of receiver parameters" );
+       "nparam", "Number of calibration parameters" );
 
   import ( CalibratorExtension::Interface::Interface() );
 
