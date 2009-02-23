@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorStokes.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/04/21 06:20:00 $
+   $Revision: 1.7 $
+   $Date: 2009/02/23 19:55:28 $
    $Author: straten $ */
 
 #ifndef __CalibratorStokes_h
@@ -42,6 +42,15 @@ namespace Pulsar {
     //! Clone method
     CalibratorStokes* clone () const { return new CalibratorStokes( *this ); }
 
+    //! Get the text ineterface 
+    TextInterface::Parser* get_interface();
+
+    //! Implements the text interface
+    class Interface;
+
+    //! Return a short name
+    std::string get_short_name () const { return "ref"; }
+
     //! Set the number of frequency channels
     void set_nchan (unsigned nchan);
     //! Get the number of frequency channels
@@ -65,6 +74,16 @@ namespace Pulsar {
 
     //! Ensure that ichan <= get_nchan
     void range_check (unsigned ichan, const char* method) const;
+
+    friend class Interface;
+
+    // Internal convenience interface to the Stokes polarization vector data
+    class PolnVector;
+
+    //! Interface to StokesVector
+    PolnVector* get_poln (unsigned ichan);
+
+    Reference::To<PolnVector> current;
   };
  
 
