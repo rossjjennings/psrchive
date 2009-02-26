@@ -1,5 +1,5 @@
 #include "Pulsar/Parameters.h"
-#include "factory.h"
+#include "load_factory.h"
 
 using namespace std;
 
