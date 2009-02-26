@@ -56,13 +56,10 @@ int main (int argc, char** argv) try
   bool plot = false;
   float plot_when = 0;
 
-  // the frequency channel at which to start
-  unsigned ichan_start = 0;
-
   bool verbose = false;
 
   char c;
-  while ((c = getopt(argc, argv, "c:dhi:M:qs:vV")) != -1) 
+  while ((c = getopt(argc, argv, "c:dhM:qs:vV")) != -1) 
 
     switch (c)  {
 
@@ -77,10 +74,6 @@ int main (int argc, char** argv) try
     case 'h':
       usage();
       return 0;
-
-    case 'i':
-      ichan_start = atoi(optarg);
-      break;
 
     case 'M':
       metafile = optarg;
@@ -203,7 +196,9 @@ int main (int argc, char** argv) try
 
       vector<float> fit_chisq (nchan, 0.0);
 
-      for (unsigned ichan=ichan_start; ichan < nchan; ichan++) try {
+      cerr << "psrdiff: performing fit in " << nchan << " channels" << endl;
+
+      for (unsigned ichan=0; ichan < nchan; ichan++) try {
 
 	if (std_subint->get_weight(ichan) == 0 ||
 	    subint->get_weight(ichan) == 0)
