@@ -9,6 +9,7 @@ nobase_include_HEADERS = \
         Pulsar/BinLngAscOrder.h \
         Pulsar/BinLngPeriOrder.h \
         Pulsar/CalibratorExtension.h \
+	Pulsar/CalibratorExtensionInterface.h \
         Pulsar/CalibratorStokes.h \
         Pulsar/CalInfoExtension.h \
         Pulsar/ColdPlasmaHistory.h \
