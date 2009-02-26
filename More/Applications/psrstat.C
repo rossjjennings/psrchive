@@ -62,6 +62,12 @@ protected:
   //! The interface to the current archive
   Reference::To<TextInterface::Parser> interface;
 
+  //! The current archive
+  Reference::To<Pulsar::Archive> archive;
+
+  //! Precede each value queried with name=
+  bool prefix_name;
+
   //! Job to be performed on each leaf index
   void print ();
 
@@ -78,7 +84,7 @@ psrstat::psrstat ()
   : Pulsar::Application ("psrstat", "prints pulsar attributes and statistics")
 {
   has_manual = true;
-  version = "$Id: psrstat.C,v 1.4 2009/02/20 19:20:24 straten Exp $";
+  version = "$Id: psrstat.C,v 1.5 2009/02/26 08:38:07 straten Exp $";
 
   // print/parse in degrees
   Angle::default_type = Angle::Degrees;
@@ -88,6 +94,7 @@ psrstat::psrstat ()
 
   // print the name of each file processed
   output_filename = true;
+  prefix_name = true;
 
   loop.job.set( this, &psrstat::print );
 
@@ -96,7 +103,7 @@ psrstat::psrstat ()
 
 std::string psrstat::get_options ()
 {
-  return "c:l:";
+  return "c:l:Q";
 }
 
 std::string psrstat::get_usage ()
@@ -139,6 +146,10 @@ bool psrstat::parse (char code, const std::string& arg)
     loop.add_index( new TextIndex(optarg) );
     break;
 
+  case 'Q':
+    prefix_name = false;
+    break;
+
   default:
     return false;
   }
@@ -146,18 +157,18 @@ bool psrstat::parse (char code, const std::string& arg)
   return true;
 }
 
-void psrstat::process (Pulsar::Archive* archive)
+void psrstat::process (Pulsar::Archive* _archive)
 {
-  interface = standard_interface( archive );
+  archive = _archive;
 
+  interface = standard_interface( archive );
+  interface->set_prefix_name (prefix_name);
+    
   if (expressions.size() == 0)
   {
     cout << interface->help (true) << endl;;
     return;
   }
-
-  if (output_filename)
-    cout << archive->get_filename();
 
   loop.set_container (interface);
   loop.loop ();
@@ -165,6 +176,9 @@ void psrstat::process (Pulsar::Archive* archive)
 
 void psrstat::print ()
 {
+  if (output_filename)
+    cout << archive->get_filename() << loop.get_index_state();
+
   for (unsigned j = 0; j < expressions.size(); j++)
   {
     string text = expressions[j];
