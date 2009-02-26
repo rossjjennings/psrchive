@@ -36,6 +36,7 @@ void usage ()
     " -b nbit     digitize using nbit bits \n"
     " -d space    spacing between digitizer levels \n"
     " -n Msamp    simulate Msamp mega samples \n"
+    " -l factor   simulate non-linearity \n"
     " -s i,q,u,v  specify the Stokes parameters of the input signal \n"
     " -p rad      apply differential phase (in radians) to input \n"
        << endl;
@@ -55,6 +56,11 @@ void transform (Jones<double>& jones, double* ex, double* ey)
   t = jones(1,0) * x + jones(1,1) * y;
   ey[0] = t.real();
   ey[1] = t.imag();
+}
+
+void nonlinear (double& value, double factor)
+{
+  value = asinh (factor * value) / factor;
 }
 
 void digitize (double& volts, double scale, double max, double rescale)
@@ -82,9 +88,11 @@ int main (int argc, char** argv)
   Stokes<double> stokes (1,0,0,0);
   double phase = 0;
 
+  double non_linearity = 0.0;
+
   bool verbose = false;
   int c;
-  while ((c = getopt(argc, argv, "hb:d:n:p:s:")) != -1) {
+  while ((c = getopt(argc, argv, "hb:d:l:n:p:s:")) != -1) {
     switch (c)  {
 
     case 'h':
@@ -116,7 +124,12 @@ int main (int argc, char** argv)
 
       break;
     }
-      
+
+    case 'l':
+      non_linearity = atof (optarg);
+      cerr << "simpol: non-linearity factor=" << non_linearity << endl;
+      break;
+
     case 'n':
       ndat *= atoi (optarg);
       break;
@@ -234,6 +247,14 @@ int main (int argc, char** argv)
 
     if (polarized)
       transform (polarizer, e_x, e_y);
+
+    if (non_linearity)
+    {
+      nonlinear (e_x[0], non_linearity);
+      nonlinear (e_y[0], non_linearity);
+      nonlinear (e_x[1], non_linearity);
+      nonlinear (e_y[1], non_linearity);
+    }
 
     if (nbit)
     {
