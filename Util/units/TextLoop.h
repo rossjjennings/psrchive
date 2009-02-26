@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/TextLoop.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/11/12 07:45:56 $
+   $Revision: 1.2 $
+   $Date: 2009/02/26 08:38:25 $
    $Author: straten $ */
 
 #ifndef __Pulsar_TextLoop_h
@@ -38,6 +38,9 @@ public:
   //! Job defined by derived types
   Functor< void() > job;
 
+  //! Retrieve the index state
+  std::string get_index_state () const;
+
 protected:
 
   //! The indeces over which to loop
@@ -50,6 +53,8 @@ protected:
   //! Worker function called recursively down stack
   void loop ( Stack& indeces );
 
+  //! Current state of each index
+  std::string index_state;
 };
 
 #endif
