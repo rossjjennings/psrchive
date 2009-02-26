@@ -24,7 +24,6 @@
 #include <limits>
 
 
-
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -47,7 +46,7 @@ using Pulsar::FluxPlot;
 using Pulsar::Interpreter;
 using Pulsar::RiseFall;
 using Pulsar::Profile;
-
+using Pulsar::Integration;
 
 
 Pulsar::Option<string> PavApp::default_plot_device
@@ -327,9 +326,16 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq )
 
 void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
 {
-  string duration = tostring( archive->get_Integration(0)->get_duration());
-  string snr = tostring( archive->get_Profile(0, 0, 0)->snr() );
+  Reference::To<Integration> integ = archive->get_Integration(0);
+  string duration = tostring( integ->get_duration());
 
+  // fully scrunch archive to get the correct SNR
+  Reference::To<Archive> copy = archive->clone();
+  copy->tscrunch();
+  copy->fscrunch();
+  copy->pscrunch();
+
+  string snr = tostring( copy->get_Profile(0,0,0)->snr() );
   string frequency;
 
   /*
@@ -338,10 +344,11 @@ void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
      the centre frequency stored in the profile.
   */
 
-  if ( !archive->get_dedispersed() )
-    frequency = tostring(archive->get_Profile(0, 0, 0)->get_centre_frequency());
+  if ( archive->get_dedispersed() )
+    frequency = tostring( archive->get_centre_frequency() );
   else
-    frequency = tostring(archive->get_centre_frequency());
+    frequency = tostring( integ->weighted_frequency(0, archive->get_nchan()) );
+
 
   SetPlotOptions<Plot>( "above:c=$name $file\n Freq: " + frequency +
           " MHz BW: $bw Length: " + duration + " S/N: " + snr );
@@ -691,7 +698,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.63 2009/01/28 01:23:12 straten Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.64 2009/02/26 02:46:38 jonathan_khoo Exp $" << 
         endl << endl;
       return 0;
     case 'M':
