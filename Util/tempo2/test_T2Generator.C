@@ -9,7 +9,7 @@
 #include "T2Predictor.h"
 #include "T2Parameters.h"
 #include "Error.h"
-#include "factory.h"
+#include "load_factory.h"
 
 using namespace std;
 
