@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalInterpreter.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/11/28 05:58:45 $
+   $Revision: 1.4 $
+   $Date: 2009/03/01 18:04:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CalInterpreter_h
@@ -45,7 +45,7 @@ namespace Pulsar {
   protected:
 
     //! The type of calibrator to be used
-    Calibrator::Type caltype;
+    Reference::To<const Calibrator::Type> caltype;
 
     //! Calibrator database
     Reference::To<Database> database;

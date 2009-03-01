@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisCalibrator.h,v $
-   $Revision: 1.23 $
-   $Date: 2008/06/17 07:59:23 $
+   $Revision: 1.24 $
+   $Date: 2009/03/01 18:04:42 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SingleAxisCalibrator_H
@@ -30,9 +30,6 @@ namespace Pulsar {
 
     //! Destructor
     ~SingleAxisCalibrator ();
-
-    //! Return Calibrator::SingleAxis
-    Type get_type () const;
 
     //! Communicates SingleAxisCalibrator parameters
     class Info : public PolnCalibrator::Info {

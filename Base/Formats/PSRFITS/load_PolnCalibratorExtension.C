@@ -66,11 +66,11 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
     return;
   }
 
-  pce->set_type( Calibrator::str2Type (cal_mthd.c_str()) );
+  pce->set_type( Calibrator::Type::factory (cal_mthd) );
 
   if (verbose == 3)
     cerr << "FITSArchive::load_PolnCalibratorExtension Calibrator type=" 
-	 << Calibrator::Type2str (pce->get_type()) << endl;
+	 << pce->get_type()->get_name() << endl;
 
   // Get NCPAR 
   int ncpar = 0;

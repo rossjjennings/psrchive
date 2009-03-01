@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.33 $
-   $Date: 2008/10/07 19:20:58 $
-   $Author: demorest $ */
+   $Revision: 1.34 $
+   $Date: 2009/03/01 18:04:41 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
 #define __Pulsar_FluxCalibrator_H
@@ -32,9 +32,6 @@ namespace Pulsar {
 
     //! Destructor
     ~FluxCalibrator ();
-
-    //! Return Calibrator::Flux
-    Type get_type () const;
 
     //! FluxCalibrator parameter communication
     class Info;

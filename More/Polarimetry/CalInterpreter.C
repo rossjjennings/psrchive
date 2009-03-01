@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/CalInterpreter.h"
+#include "Pulsar/CalibratorType.h"
 
 #include "Pulsar/Database.h"
 #include "Pulsar/PolnCalibrator.h"
@@ -17,8 +18,8 @@ using namespace std;
 
 Pulsar::CalInterpreter::CalInterpreter ()
 {
-  // default calibrator type
-  caltype = Calibrator::SingleAxis;
+  // default calibrator: single axis
+  caltype = Calibrator::Type::factory ("single");
 
   add_command 
     ( &CalInterpreter::type,
@@ -42,18 +43,19 @@ Pulsar::CalInterpreter::~CalInterpreter ()
 {
 }
 
-string Pulsar::CalInterpreter::type (const string& args)
+string Pulsar::CalInterpreter::type (const string& args) try
 {
   if (args.empty())
-    return response (Good, "type is " + tostring(caltype));
+    return response (Good, "type is " + caltype->get_name());
 
-  caltype = fromstring<Calibrator::Type>( args );
-  if (caltype != (Calibrator::Type)-1)
-    return response (Good);
+  caltype = Calibrator::Type::factory( args );
 
+  return response (Good);
+}
+catch (Error& error)
+{
   return response (Fail, "unrecognized type '" + args + "'");
 }
-
 
 string Pulsar::CalInterpreter::load (const string& args)
 {

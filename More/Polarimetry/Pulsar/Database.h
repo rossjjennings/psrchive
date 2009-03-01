@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.18 $
-   $Date: 2009/02/16 05:12:37 $
+   $Revision: 1.19 $
+   $Date: 2009/03/01 18:04:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
@@ -64,23 +64,6 @@ namespace Pulsar {
       CalibratorAfter
     };
 
-    enum Type {
-      //! Flux calibrator
-      Flux,
-      //! Instrumental corrections
-      Corrections,
-      //! Gain, differential gain and differential phase
-      SingleAxis,
-      //! Gain, 3-D boost, and two rotations (van Straten 2002)
-      Polar,
-      //! Polar decomposition (Hamaker 2000)
-      Hamaker,
-      //! Phenomenological decomposition, (Britton 2000)
-      Britton,
-      //! Hybrid combines SingleAxis and Britton/Hamaker (Ord et al. 2004)
-      Hybrid
-    };
-
     //! Null constructor
     Database ();
     
@@ -88,8 +71,8 @@ namespace Pulsar {
     Database (const std::string& path, const std::string& metafile);
 
     //! Construct a database from archives in a directory
-    Database (const std::string& path, const std::vector<std::string>& extensions);
-    
+    Database (const std::string& path, const std::vector<std::string>& exts);
+
     //! Construct a database from a pre-built ascii file
     Database (const std::string& filename);
     
@@ -109,7 +92,8 @@ namespace Pulsar {
     void add (const Pulsar::Archive* archive);
 
     //! Return a pointer to a new PolnCalibrator for the given archive
-    PolnCalibrator* generatePolnCalibrator (Archive*, Calibrator::Type m);
+    PolnCalibrator* generatePolnCalibrator (Archive*,
+					    const Calibrator::Type* m);
  
     //! Return a pointer to a new FluxCalibrator for the given archive
     FluxCalibrator* generateFluxCalibrator (Archive*, bool allow_raw=false);
@@ -134,7 +118,9 @@ namespace Pulsar {
       // Critical information about the entry
       
       Signal::Source   obsType;      // FluxCal, PolnCal, Pulsar, etc.
-      Calibrator::Type calType;      // SingleAxis, Britton, etc.
+
+      Reference::To<const Calibrator::Type> calType;
+
       MJD              time;         // Mid time of observation
       sky_coord        position;     // Where the telescope was pointing
       double           bandwidth;    // Bandwidth of observation
@@ -145,18 +131,20 @@ namespace Pulsar {
       std::string      filename;     // relative path of file
       
       //! Null constructor
-      Entry () { init(); }
+      Entry ();
+
       //! Construct from an ASCII string
-      explicit Entry (const char* txt) { load(txt); }
-      explicit Entry (std::string& str) { load(str); }
+      explicit Entry (const std::string&);
+
       //! Construct from a Pulsar::Archive
       Entry (const Archive& arch);
+
       //! Destructor
       ~Entry();
       
       // load from ascii string
-      void load (const char* str);
-      void load (std::string& str) { load(str.c_str()); }
+      void load (const std::string& str);
+
       // unload ascii string
       void unload (std::string& str);
       
@@ -224,7 +212,7 @@ namespace Pulsar {
     
     //! Return the Criterion for the specified Pulsar::Archive
     Criterion criterion (const Pulsar::Archive* archive,
-			 Calibrator::Type calType) const;
+			 const Calibrator::Type* calType) const;
 
     //! Returns the full pathname of the Entry filename
     std::string get_filename (const Entry&) const;

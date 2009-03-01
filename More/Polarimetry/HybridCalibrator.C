@@ -8,6 +8,7 @@
 #include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/ReferenceCalibrator.h"
 #include "Pulsar/CalibratorStokes.h"
+#include "Pulsar/CalibratorTypes.h"
 
 #include "Pulsar/BasisCorrection.h"
 #include "Pulsar/Receiver.h"
@@ -22,24 +23,22 @@ using namespace std;
 
 Pulsar::HybridCalibrator::HybridCalibrator (const Archive* data)
 {
+  type = new CalibratorTypes::ovhb04;
+
   set_precalibrator( new Pulsar::PolnCalibrator (data) );
   set_reference_input( data->get<CalibratorStokes>() );
 }
 
 Pulsar::HybridCalibrator::HybridCalibrator (PolnCalibrator* _calibrator)
 {
+  type = new CalibratorTypes::ovhb04;
+
   set_precalibrator (_calibrator);
 }
 
 //! Destructor
 Pulsar::HybridCalibrator::~HybridCalibrator ()
 {
-}
-
-//! Return Calibrator::Hybrid
-Pulsar::Calibrator::Type Pulsar::HybridCalibrator::get_type () const
-{
-  return Hybrid;
 }
 
 MJD Pulsar::HybridCalibrator::get_epoch () const

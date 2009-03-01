@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Calibrator.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/06/17 07:55:24 $
+   $Revision: 1.7 $
+   $Date: 2009/03/01 18:04:41 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -33,41 +33,8 @@ namespace Pulsar {
     
   public:
 
-    //! Types of Models supported
-    enum Type {
-      //! Flux calibrator
-      Flux,
-      //! Instrumental corrections
-      Corrections,
-      //! Gain, differential gain and differential phase
-      SingleAxis,
-      //! Gain, 3-D boost, and two rotations (van Straten 2002)
-      Polar,
-      //! Polar decomposition (Hamaker 2000)
-      Hamaker,
-      //! Phenomenological decomposition, (Britton 2000)
-      Britton,
-      //! Hybrid combines SingleAxis and Britton/Hamaker (Ord et al. 2004)
-      Hybrid,
-      //! Degree of Polarization Calibrator (P236)
-      DoP,
-      //! Off-pulse Calibrator (P236)
-      OffPulse
-    };
-
-    
-    /** @name global linkage 
-     *  In order that these static methods may be linked into plugin
-     *  libraries, they are defined in Extension/PolnCalibratorExtension.C */
-    //@{
-
-    //! Convert Type to string
-    static const char* Type2str (Type type);
-
-    //! Convert string to Type
-    static Type str2Type (const char* s);
-
-    //@}
+    //! Types of calibrators 
+    class Type;
 
     //! Verbosity level
     static unsigned verbose;
@@ -91,7 +58,7 @@ namespace Pulsar {
     virtual void calibrate (Archive* archive) = 0;
 
     //! Return the Calibrator::Type of derived class
-    virtual Type get_type () const = 0;
+    virtual const Type* get_type () const;
 
     //! Get the number of frequency channels in the calibrator
     virtual unsigned get_nchan () const = 0;
@@ -156,7 +123,16 @@ namespace Pulsar {
     /*! By default, derived classes need not necessarily define Info */
     virtual Info* get_Info () const { return 0; }
 
+    template<class T>
+    bool is_a () const
+    {
+      return dynamic_cast<const T*> (this) != 0;
+    }
+
   protected:
+
+    //! The type of the Calibrator
+    Reference::To<Type> type;
 
     //! The CalibratorExtension of the Archive passed during construction
     Reference::To<const CalibratorExtension> extension;
@@ -181,12 +157,6 @@ namespace Pulsar {
   };
 
 }
-
-//! Calibrator::Type output operator
-std::ostream& operator << (std::ostream&, Pulsar::Calibrator::Type);
-
-//! Calibrator::Type input operator
-std::istream& operator >> (std::istream&, Pulsar::Calibrator::Type&);
 
 #endif
 

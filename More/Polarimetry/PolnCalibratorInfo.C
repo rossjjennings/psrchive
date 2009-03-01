@@ -1,12 +1,14 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/PolarCalibrator.h"
 #include "Pulsar/InstrumentInfo.h"
+#include "Pulsar/CalibratorTypes.h"
 
 using namespace std;
 
@@ -15,21 +17,17 @@ Pulsar::PolnCalibrator::Info::create (const Pulsar::PolnCalibrator* calibrator)
 {
   if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::Info::create type="
-	 << Calibrator::Type2str ( calibrator->get_type() ) << endl;
+	 << calibrator->get_type()->get_name() << endl;
 
-  switch (calibrator->get_type())
-  {
-  case Calibrator::SingleAxis:
+  if (calibrator->get_type()->is_a<CalibratorTypes::SingleAxis>())
     return new SingleAxisCalibrator::Info (calibrator);
 
-  case Calibrator::Polar:
-  case Calibrator::Hamaker:
+  if (calibrator->get_type()->is_a<CalibratorTypes::van02_EqA1>() ||
+      calibrator->get_type()->is_a<CalibratorTypes::van09_Eq>())
     return new PolarCalibrator::Info (calibrator);
 
-  case Calibrator::Britton:
+  if (calibrator->get_type()->is_a<CalibratorTypes::van04_Eq18>())
     return new InstrumentInfo (calibrator);
 
-  default:
-    return new PolnCalibrator::Info (calibrator);
-  }
+  return new PolnCalibrator::Info (calibrator);
 }

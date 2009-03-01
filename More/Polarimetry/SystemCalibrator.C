@@ -12,6 +12,7 @@
 #include "Pulsar/BasisCorrection.h"
 #include "Pulsar/ProjectionCorrection.h"
 
+#include "Pulsar/CalibratorTypes.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/PolarCalibrator.h"
@@ -97,25 +98,12 @@ Pulsar::SystemCalibrator::~SystemCalibrator ()
 {
 }
 
-Pulsar::SystemCalibrator::Info*
+Pulsar::Calibrator::Info*
 Pulsar::SystemCalibrator::get_Info () const
 {
   export_prepare ();
 
-  switch (model_type)
-  {   
-  case Calibrator::Hamaker:
-    return new PolarCalibrator::Info (this);
-  case Calibrator::Britton:
-    return new InstrumentInfo (this);
-  default:
-    return 0;
-  }
-}
-
-Pulsar::Calibrator::Type Pulsar::SystemCalibrator::get_type () const
-{
-  return model_type;
+  return PolnCalibrator::get_Info ();
 }
 
 MJD Pulsar::SystemCalibrator::get_epoch () const
@@ -375,7 +363,7 @@ void Pulsar::SystemCalibrator::add_calibrator (const Archive* data)
   {
     Reference::To<ReferenceCalibrator> polncal;
 
-    if (model_type == Calibrator::Hamaker)
+    if (type->is_a<CalibratorTypes::van09_Eq>())
     {
       if (verbose > 2)
 	cerr << "Pulsar::SystemCalibrator::add_calibrator"
@@ -754,8 +742,7 @@ void Pulsar::SystemCalibrator::create_model ()
     if (verbose > 2)
       cerr << "Pulsar::SystemCalibrator::create_model ichan=" << ichan << endl;
 
-    bool britton = model_type == Calibrator::Britton;
-    model[ichan] = new Calibration::StandardModel (britton);
+    model[ichan] = new Calibration::StandardModel (type);
 
     if (basis)
       model[ichan]->set_basis (basis);

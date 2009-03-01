@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.21 $
-   $Date: 2008/06/15 17:09:17 $
+   $Revision: 1.22 $
+   $Date: 2009/03/01 18:04:42 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -18,13 +18,15 @@
 #include "Pulsar/ReceptionModel.h"
 #include "Pulsar/ReceptionModelSolver.h"
 
+#include "Pulsar/CalibratorType.h"
 #include "Pulsar/MeanPolar.h"
 #include "Pulsar/MeanSingleAxis.h"
-#include "Pulsar/Instrument.h"
 #include "Pulsar/ConvertMJD.h"
 
+#include "MEAL/ProductRule.h"
+#include "MEAL/ChainParameters.h"
 #include "MEAL/Polynomial.h"
-#include "MEAL/Polar.h"
+#include "MEAL/Gain.h"
 #include "MEAL/Axis.h"
 #include "MEAL/Real4.h"
 
@@ -39,7 +41,7 @@ namespace Calibration
     static bool verbose;
 
     //! Default constructor
-    StandardModel (bool phenomenological = true);
+    StandardModel (Pulsar::Calibrator::Type*);
 
     //! Include an impurity transformation
     void set_impurity (MEAL::Real4*);
@@ -171,10 +173,11 @@ namespace Calibration
     //! The Mueller transformation
     Reference::To< MEAL::Real4 > impurity;
 
-    // ////////////////////////////////////////////////////////////////////
-    //
-    //! Polar decomposition of instrumental response (Hamaker)
-    Reference::To< MEAL::Polar > polar;
+    //! The instrumental response
+    Reference::To< MEAL::Complex2 > response;
+
+    //! The best estimate of the backend
+    Calibration::MeanSingleAxis backend_estimate;
 
     //! The best estimate of the polar model
     Calibration::MeanPolar polar_estimate;
@@ -210,14 +213,6 @@ namespace Calibration
 
     // ////////////////////////////////////////////////////////////////////
     //
-    //! Phenomenological decomposition of instrumental response (Britton)
-    Reference::To< Calibration::Instrument > physical;
-
-    //! The best estimate of the physical model
-    Calibration::MeanSingleAxis physical_estimate;
-
-    // ////////////////////////////////////////////////////////////////////
-    //
     //! Additional backend required for flux calibrator signal path
     Reference::To< Calibration::SingleAxis > fluxcal_backend;
 
@@ -240,8 +235,8 @@ namespace Calibration
 
   private:
 
-    //! Use the phenomenological parameterization of the receiver
-    bool phenomenological;
+    //! Parameterization of the instrument
+    Reference::To<Pulsar::Calibrator::Type> type;
 
     //! built flag
     bool built;

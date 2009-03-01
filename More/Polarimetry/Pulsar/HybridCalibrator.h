@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/HybridCalibrator.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/11/22 19:16:10 $
+   $Revision: 1.11 $
+   $Date: 2009/03/01 18:04:42 $
    $Author: straten $ */
 
 #ifndef __HybridCalibrator_H
@@ -38,9 +38,6 @@ namespace Pulsar {
 
     //! Destructor
     ~HybridCalibrator ();
-
-    //! Return Calibrator::Hybrid
-    Type get_type () const;
 
     //! Return the reference epoch of the calibration experiment
     MJD get_epoch () const;

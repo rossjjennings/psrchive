@@ -4,7 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/DoPCalibrator.h"
+#include "Pulsar/CalibratorTypes.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -18,6 +20,7 @@ using namespace std;
 Pulsar::DoPCalibrator::DoPCalibrator (const Archive* archive) 
   : SingleAxisCalibrator (archive)
 {
+  type = new CalibratorTypes::DoP;
   // the Multibeam noise diode is approximately 90% linearly polarized
   dop_reference = 0.9;
 }
@@ -129,10 +132,5 @@ Pulsar::DoPCalibrator::Info*
 Pulsar::DoPCalibrator::get_Info () const
 {
   return new DoPCalibrator::Info (this);
-}
-
-Pulsar::Calibrator::Type Pulsar::DoPCalibrator::get_type () const
-{
-  return DoP;
 }
 

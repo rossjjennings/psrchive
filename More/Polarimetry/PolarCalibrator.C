@@ -1,11 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2008 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/PolarCalibrator.h"
+#include "Pulsar/CalibratorType.h"
+
 #include "MEAL/Rotation.h"
 #include "Pauli.h"
 
@@ -15,6 +17,7 @@ using namespace std;
 Pulsar::PolarCalibrator::PolarCalibrator (const Archive* archive) 
   : ReferenceCalibrator (archive)
 {
+  type = Calibrator::Type::factory (this);
 }
 
 Pulsar::PolarCalibrator::~PolarCalibrator ()
@@ -223,9 +226,4 @@ Pulsar::PolarCalibrator::Info*
 Pulsar::PolarCalibrator::get_Info () const
 {
   return new PolarCalibrator::Info (this);
-}
-
-Pulsar::Calibrator::Type Pulsar::PolarCalibrator::get_type () const
-{
-  return Polar;
 }

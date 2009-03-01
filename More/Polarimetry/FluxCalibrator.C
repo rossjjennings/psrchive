@@ -1,14 +1,16 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003, 2006 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/FluxCalibratorData.h"
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/StandardCandles.h"
 #include "Pulsar/CalibratorStokes.h"
+#include "Pulsar/CalibratorTypes.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -36,8 +38,8 @@ Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
     return;
 
   const FluxCalibratorExtension* fe = archive->get<FluxCalibratorExtension>();
-  if (fe) {
-
+  if (fe)
+  {
     // store the calibrator archive
     set_calibrator( archive );
 
@@ -54,7 +56,6 @@ Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
 
     // disable checks for sufficient data
     have_on = have_off = true;
-
   }
   else
     add_observation (archive);
@@ -66,6 +67,7 @@ Pulsar::FluxCalibrator::~FluxCalibrator ()
 
 void Pulsar::FluxCalibrator::init ()
 {
+  type = new CalibratorTypes::Flux;
   calculated = have_on = have_off = false;
 }
 
@@ -489,12 +491,17 @@ void Pulsar::FluxCalibrator::calibrate (Integration* subint)
   unsigned nchan = subint->get_nchan();
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::FluxCalibrator::calibrate ichan=" << ichan 
+	   << " gain=" << gain[ichan] << endl;
+
     if (gain[ichan] == 0)
       subint->set_weight (ichan, 0.0);
     else
       for (unsigned ipol=0; ipol<npol; ipol++)
 	subint->get_Profile (ipol, ichan) -> scale (gain[ichan]);
-
+  }
 }
 
 //! Get the number of frequency channels in the calibrator
@@ -557,11 +564,6 @@ Pulsar::Calibrator::Info* Pulsar::FluxCalibrator::get_Info () const
 {
   const_cast<FluxCalibrator*>(this)->setup();
   return new FluxCalibrator::Info (this);
-}
-
-Pulsar::Calibrator::Type Pulsar::FluxCalibrator::get_type () const
-{
-  return Flux;
 }
 
 Pulsar::CalibratorExtension*

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.32 $
-   $Date: 2009/02/22 06:58:21 $
+   $Revision: 1.33 $
+   $Date: 2009/03/01 18:04:41 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -60,7 +60,7 @@ namespace Pulsar {
     std::string get_short_name () const { return "pcal"; }
 
     //! Set the type of the instrumental response parameterization
-    void set_type (Calibrator::Type type);
+    void set_type (const Calibrator::Type* type);
 
     //! Set the number of frequency channels
     void set_nchan (unsigned nchan);

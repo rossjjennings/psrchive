@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.52 $
-   $Date: 2009/02/06 00:18:07 $
+   $Revision: 1.53 $
+   $Date: 2009/03/01 18:04:42 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -106,7 +106,7 @@ namespace Pulsar {
     virtual void calibrate (Archive* archive);
 
     //! Return the Calibrator::Type of derived class
-    virtual Type get_type () const;
+    virtual const Type* get_type () const;
 
     //! Get the number of frequency channels in the calibrator
     virtual unsigned get_nchan () const;
@@ -176,7 +176,7 @@ namespace Pulsar {
   new_transformation (const PolnCalibratorExtension*, unsigned ichan);
 
   //! Create a new transformation instance described by the type
-  MEAL::Complex2* new_transformation( Calibrator::Type type );
+  MEAL::Complex2* new_transformation( const Calibrator::Type* type );
 
 
   class PolnCalibrator::Info : public Calibrator::Info

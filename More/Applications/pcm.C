@@ -1,13 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2008 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.103 $
-   $Date: 2009/02/20 22:02:21 $
+   $Revision: 1.104 $
+   $Date: 2009/03/01 18:04:41 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -15,6 +15,7 @@
 #endif
 
 #include "Pulsar/psrchive.h"
+#include "Pulsar/CalibratorTypes.h"
 
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/PulsarCalibrator.h"
@@ -312,7 +313,8 @@ void plot_constraints (Pulsar::SystemCalibratorPlotter& plotter,
 #endif // HAVE_PGPLOT
 
 // name of the default parameterization
-Pulsar::Calibrator::Type model_type = Pulsar::Calibrator::Britton;
+Reference::To<Pulsar::Calibrator::Type> model_type =
+	      new Pulsar::CalibratorTypes::van04_Eq18;
 
 // unloads the solution(s)
 Pulsar::SystemCalibrator::Unloader unloader;
@@ -600,14 +602,7 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'm':
-      if (optarg == Britton)
-	model_type = Pulsar::Calibrator::Britton;
-      else if (optarg == Hamaker)
-	model_type = Pulsar::Calibrator::Hamaker;
-      else {
-	cerr << "pcm: unrecognized model name '" << optarg << "'" << endl;
-	return -1;
-      }
+      model_type = Pulsar::Calibrator::Type::factory (optarg);
       break;
       
     case 'M':

@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/Database.h"
+#include "Pulsar/CalibratorTypes.h"
 
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/HybridCalibrator.h"
@@ -98,7 +99,6 @@ const Pulsar::Archive* Pulsar::Database::any = 0;
 void Pulsar::Database::Entry::init ()
 {
   obsType = Signal::Unknown;
-  calType = Calibrator::SingleAxis;
 
   bandwidth = 0.0;
   frequency = 0.0; 
@@ -107,6 +107,16 @@ void Pulsar::Database::Entry::init ()
   receiver = "unset";
   instrument = "unset";
   filename = "unset";
+}
+
+Pulsar::Database::Entry::Entry ()
+{
+  init ();
+}
+
+Pulsar::Database::Entry::Entry (const std::string& str)
+{
+  load (str);
 }
 
 //! Construct from a Pulsar::Archive
@@ -126,8 +136,8 @@ Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
     throw Error (InvalidParam, "Pulsar::Database::Entry",
 		 "Archive has no Receiver Extension");
 
-  if (obsType == Signal::Calibrator) {
-
+  if (obsType == Signal::Calibrator)
+  {
     const CalibratorExtension* ext = arch.get<CalibratorExtension>();
 
     if (!ext)
@@ -137,10 +147,9 @@ Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
 
     calType = ext->get_type();
     time = ext->get_epoch();
-
   }
-  else {
-
+  else
+  {
     unsigned nsubint = arch.get_nsubint();
 
     if (nsubint == 0)
@@ -153,7 +162,6 @@ Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
       epoch += arch.get_Integration(isub)->get_epoch();
 
     time = epoch / double(nsubint);
-
   }
 
   position = arch.get_coordinates();
@@ -173,7 +181,7 @@ Pulsar::Database::Entry::~Entry ()
 }
 
 // load from ascii string
-void Pulsar::Database::Entry::load (const char* str) 
+void Pulsar::Database::Entry::load (const string& str) try
 {
   const char* whitespace = " \t\n";
   string line = str;
@@ -186,12 +194,17 @@ void Pulsar::Database::Entry::load (const char* str)
   // type
   string typestr = stringtok (&line, whitespace);
 
-  try {
+  try
+  {
     obsType = Signal::string2Source(typestr);
   }
-  catch (Error& e) {
+  catch (Error& e)
+  {
     obsType = Signal::Calibrator;
-    calType = Calibrator::str2Type (typestr.c_str());
+
+    // cerr << "Pulsar::Database::Entry::load name=" << typestr << endl;
+    calType = Calibrator::Type::factory (typestr);
+    // cerr << "Pulsar::Database::Entry::load type=" << calType->get_name() << endl;
   }
 
   // /////////////////////////////////////////////////////////////////
@@ -229,6 +242,10 @@ void Pulsar::Database::Entry::load (const char* str)
                  "Could not parse '%s'");
 
 }
+catch (Error& error)
+{
+  throw error += "Pulsar::Database::Entry::load";
+}
 
 // unload to a string
 void Pulsar::Database::Entry::unload (string& retval)
@@ -236,7 +253,7 @@ void Pulsar::Database::Entry::unload (string& retval)
   retval = filename + " ";
   
   if (obsType == Signal::Calibrator)
-    retval += Calibrator::Type2str (calType);
+    retval += calType->get_name();
   else
     retval += Signal::Source2string (obsType);
 
@@ -249,6 +266,15 @@ void Pulsar::Database::Entry::unload (string& retval)
   retval += stringprintf (" %lf %lf %d", bandwidth, frequency, nchan);
 
   retval += " " + instrument + " " + receiver;
+}
+
+namespace Pulsar
+{
+  bool operator == (const Reference::To<const Calibrator::Type>& a, 
+		    const Reference::To<const Calibrator::Type>& b)
+  {
+    return ( (!a && !b) || (typeid(*a) == typeid(*b)) );
+  }
 }
 
 bool Pulsar::operator == (const Database::Entry& a, const Database::Entry& b)
@@ -348,19 +374,21 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
       return false;
     }
 
-    if (entry.obsType == Signal::Calibrator) {
-
+    if (entry.obsType == Signal::Calibrator)
+    {
       if (match_verbose)
 	cerr << "  Seeking calType="
-	     << Calibrator::Type2str(entry.calType) 
+	     << entry.calType->get_name()
 	     << " have calType="
-	     << Calibrator::Type2str(have.calType);
+	     << have.calType->get_name();
 
-      if (entry.calType == have.calType) {
+      if (entry.calType == have.calType)
+      {
 	if (match_verbose)
 	  cerr << "... matches" << endl; 
       }
-      else {
+      else
+      {
 	if (match_verbose)
 	  cerr << "... no match" << endl;
 	return false;
@@ -711,18 +739,17 @@ void Pulsar::Database::load (const string& dbase_filename)
   entries.resize (0);
   Entry entry;
 
-  while (fgets (temp, 4096, fptr)) try {
-
+  while (fgets (temp, 4096, fptr)) try
+  {
     if (verbose)
       cerr << "Pulsar::Database::load '"<< temp << "'" << endl;
 
-    entry.load(temp);
+    entry.load (temp);
     add (entry);
-
   }
-  catch (Error& error) {
-    cerr << "Pulsar::Database::load discarding entry:\n\t" 
-         << error.get_message() << endl;
+  catch (Error& error)
+  {
+    cerr << "Pulsar::Database::load discarding entry:" << error << endl;
   }
 
   if (verbose)
@@ -757,18 +784,20 @@ void Pulsar::Database::add (const Pulsar::Archive* archive)
   if (!archive)
     throw Error (InvalidParam, "Pulsar::Database::add Archive",
 		 "null Archive*");
-  try {
+  try
+  {
     Entry entry (*archive);
     add (entry);
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     throw error += "Pulsar::Database::add Archive";
   }
 }
 
 
 //! Add the given Archive to the database
-void Pulsar::Database::add (Pulsar::Database::Entry& entry)
+void Pulsar::Database::add (Pulsar::Database::Entry& entry) try
 {
   // strip the base path name off of the entry filename
   if (entry.filename.substr(0, path.length()) == path)
@@ -779,7 +808,8 @@ void Pulsar::Database::add (Pulsar::Database::Entry& entry)
 		 entry.filename + " has epoch = 0 (MJD)");
 
   for (unsigned ie=0; ie < entries.size(); ie++) 
-    if (entries[ie] == entry) {
+    if (entries[ie] == entry)
+    {
       cerr << "Pulsar::Database::add keeping newest of duplicate entries:\n\t"
            << entries[ie].filename << " and\n\t" << entry.filename << endl;
       if ( file_mod_time (get_filename(entry).c_str()) >
@@ -789,6 +819,10 @@ void Pulsar::Database::add (Pulsar::Database::Entry& entry)
     }
 
   entries.push_back (entry);
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::Database::add Entry";
 }
 
 void Pulsar::Database::all_matching (const Criterion& criterion,
@@ -881,22 +915,22 @@ try {
   return criterion;
 
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::Database::criterion Signal::Source";
 }
 
 //! Returns one Entry that matches the given parameters and is nearest in time.
 Pulsar::Database::Criterion
 Pulsar::Database::criterion (const Pulsar::Archive* arch, 
-			     Calibrator::Type calType) const
+			     const Calibrator::Type* calType) const
 try {
 
   Criterion criterion = get_default_criterion();
 
-  if (calType == Calibrator::Flux || 
-      calType == Calibrator::Britton ||
-      calType == Calibrator::Hamaker) {
-
+  if (calType->is_a<CalibratorTypes::Flux>() || 
+      calType->is_a<CalibratorTypes::CompleteJones>())
+  {
     criterion.minutes_apart = long_time_scale;
 
     // these solutions are global
@@ -906,7 +940,6 @@ try {
     criterion.check_instrument = false;
 
     criterion.policy = NoPolicy;
-
   }
   else
     criterion.minutes_apart = short_time_scale;
@@ -921,7 +954,8 @@ try {
 
   return criterion;
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::Database::criterion Calibrator::Type";
 }
 
@@ -939,13 +973,13 @@ catch (Error& error) {
 Pulsar::FluxCalibrator* 
 Pulsar::Database::generateFluxCalibrator (Archive* arch, bool allow_raw) try {
 
-  Entry match = best_match (criterion(arch, Calibrator::Flux));
+  Entry match = best_match (criterion(arch, new CalibratorTypes::Flux));
   Reference::To<Archive> archive = Archive::load( get_filename(match) );
   return new FluxCalibrator (archive);
 
 }
-catch (Error& error) {
-  
+catch (Error& error)
+{  
   if (verbose)
     cerr << "Pulsar::Database::generateFluxCalibrator failure"
       " generating processed FluxCal\n" << error.get_message() << endl;
@@ -955,7 +989,6 @@ catch (Error& error) {
   
   else
     throw error += "Pulsar::Database::generateFluxCalibrator";
-  
 }
 
 Pulsar::FluxCalibrator* 
@@ -1001,7 +1034,8 @@ Pulsar::Database::rawFluxCalibrator (Pulsar::Archive* arch)
   observation. */
 
 Pulsar::PolnCalibrator* 
-Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
+Pulsar::Database::generatePolnCalibrator (Archive* arch,
+					  const Calibrator::Type* type)
 {
   if (!arch)
     throw Error (InvalidParam, "Database::generatePolnCalibrator",
@@ -1009,7 +1043,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
   
   Entry entry;
 
-  if (m != Pulsar::Calibrator::Britton) try
+  if (! type->is_a<CalibratorTypes::CompleteJones>()) try
   {
     if (verbose)
       cerr << "Pulsar::Database::generatePolnCalibrator search for " 
@@ -1018,20 +1052,20 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
   }
   catch (Error& error)
   {
-    if (m == Pulsar::Calibrator::Hybrid)
+    if (type->is_a<CalibratorTypes::Hybrid>())
     {
       error << "\n\tHybrid Calibrator requires raw PolnCal observation";
       throw error += "Pulsar::Database::generatePolnCalibrator";
     }
   }
 
-  if (m != Pulsar::Calibrator::Hybrid) try
+  if (! type->is_a<CalibratorTypes::Hybrid>()) try
   {
     if (verbose)
       cerr << "Pulsar::Database::generatePolnCalibrator search for " 
-	   << Calibrator::Type2str (m) << " match" << endl;
+	   << type->get_name() << " match" << endl;
     
-    Criterion cal_criterion = criterion (arch, m);
+    Criterion cal_criterion = criterion (arch, type);
     Entry cal_entry = best_match (cal_criterion);
     entry = cal_criterion.best (entry, cal_entry);
   }
@@ -1102,7 +1136,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
   if (verbose > 2)
   {
     if (entry.obsType == Signal::Calibrator)
-      cerr << "CAL OF TYPE " <<  Calibrator::Type2str (entry.calType) << endl;
+      cerr << "CAL OF TYPE " <<  entry.calType->get_name() << endl;
     else
       cerr << "FILE OF TYPE " << Signal::Source2string (entry.obsType) << endl;
   }
@@ -1114,33 +1148,24 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
   // otherwise, construct a solution
   Reference::To<Pulsar::ReferenceCalibrator> ref_cal;
 
-  switch (m)
-  {   
-  case Pulsar::Calibrator::Hybrid:
-  case Pulsar::Calibrator::SingleAxis:
+  if ( type->is_a<CalibratorTypes::Hybrid>() ||
+       type->is_a<CalibratorTypes::SingleAxis>() )
     ref_cal = new Pulsar::SingleAxisCalibrator (polcalarch);
-    break;
-    
-  case Pulsar::Calibrator::Polar:
+
+  else if ( type->is_a<CalibratorTypes::van02_EqA1>() )
     ref_cal = new Pulsar::PolarCalibrator (polcalarch);
-    break;
 
-  case Pulsar::Calibrator::DoP:
+  else if ( type->is_a<CalibratorTypes::DoP>() )
     ref_cal = new Pulsar::DoPCalibrator (polcalarch);
-    break;
 
-  case Pulsar::Calibrator::OffPulse:
+  else if ( type->is_a<CalibratorTypes::OffPulse>() )
     ref_cal = new Pulsar::OffPulseCalibrator (polcalarch);
-    break;
 
-  default:
+  else
     cerr << "Pulsar::Database::generatePolnCalibrator"
-      " unknown type" << endl;
-    break;
-    
-  }
+      " unknown type=" << type->get_name() << endl;
   
-  if (m == Pulsar::Calibrator::Hybrid)
+  if ( type->is_a<CalibratorTypes::Hybrid>() )
   {
     cerr << "Pulsar::Database::generatePolnCalibrator Hybrid" << endl;
     return generateHybridCalibrator (ref_cal, arch);
@@ -1168,24 +1193,14 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
   try
   {
     if (verbose)
-      cerr << "  Attempting to find a matching Britton Model" << endl;
+      cerr << "  Attempting to find a matching Phenomenological Model" << endl;
 
-    entry = best_match (criterion(arch, Calibrator::Britton));
+    entry = best_match (criterion(arch, new CalibratorTypes::CompleteJones));
   }
   catch (Error& error)
   {
-    try
-    {
-      if (verbose)
-	cerr << "  Attempting to find a matching Hamaker Model" << endl;
-      
-      entry = best_match (criterion(arch, Calibrator::Hamaker));
-    }
-    catch (Error& error)
-    {
-      throw Error (InvalidState, "Pulsar::Database::generateHybridCalibrator",
-		   "No complete polarimetric model (pcm output) found");
-    }
+    throw Error (InvalidState, "Pulsar::Database::generateHybridCalibrator",
+		 "No complete parameterization (e.g. pcm output) found");
   }
 
   Reference::To<Pulsar::HybridCalibrator> hybrid;

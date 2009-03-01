@@ -42,12 +42,12 @@ CalibratorExtension::~CalibratorExtension ()
 {
 }
 
-void CalibratorExtension::set_type (Calibrator::Type _type)
+void CalibratorExtension::set_type (const Calibrator::Type* _type)
 {
   type = _type;
 }
 
-Calibrator::Type CalibratorExtension::get_type () const
+const Calibrator::Type* CalibratorExtension::get_type () const
 {
   return type;
 }

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/IonosphereCalibrator.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.4 $
+   $Date: 2009/03/01 18:04:42 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IonosphereCalibrator_H
@@ -38,19 +38,12 @@ namespace Pulsar {
     //! Calibrate the Pulsar::Archive
     void calibrate (Archive* archive);
 
-    //! Return the Calibrator::Type of this class
-    Type get_type () const { return Corrections; }
-
     //! Get the number of frequency channels in the calibrator
     unsigned get_nchan () const { return 0; }
 
     //! Returns a new CalibratorExtension
     CalibratorExtension* new_Extension () const { return 0; }
-
-  protected:
-
   };
-
 }
 
 #endif

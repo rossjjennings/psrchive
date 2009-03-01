@@ -1,16 +1,19 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005-2008 by Willem van Straten
+ *   Copyright (C) 2005-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/StandardModel.h"
 #include "Pulsar/SingleAxis.h"
-#include "Pulsar/Feed.h"
+
+#include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/BackendFeed.h"
 
 #include "Pulsar/ReceptionModelSolver.h"
 
+#include "MEAL/Polar.h"
 #include "MEAL/Polynomial.h"
 #include "MEAL/Gain.h"
 #include "MEAL/Steps.h"
@@ -26,18 +29,15 @@ using namespace std;
 
 bool Calibration::StandardModel::verbose = false;
 
-/*! 
-  \param phenomenological if true, use the Britton (2000) decomposition 
-         of the receiver
-*/
-Calibration::StandardModel::StandardModel (bool _phenomenological)
+
+Calibration::StandardModel::StandardModel (Pulsar::Calibrator::Type* _type)
 {
   // ////////////////////////////////////////////////////////////////////
   //
   // initialize the model of the instrument
   //
 
-  phenomenological = _phenomenological;
+  type = _type;
 
   Pulsar_path = 0;
   ReferenceCalibrator_path = 0;
@@ -84,6 +84,7 @@ void Calibration::StandardModel::set_constant_pulsar_gain (bool value)
   if (!built)
     return;
 
+  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (!physical)
     return;
 
@@ -141,13 +142,7 @@ Calibration::StandardModel::get_transformation () const
   if (!built)
     const_build ();
 
-  if (polar)
-    return polar;
-
-  if (physical)
-    return physical;
-
-  return 0;
+  return response;
 }
 
 const MEAL::Complex2*
@@ -193,26 +188,14 @@ void Calibration::StandardModel::build ()
   if (built)
     return;
 
-  if (phenomenological)
-  {
-    if (verbose)
-      cerr << "Calibration::StandardModel using Britton (2000)" << endl;
-    physical = new Calibration::Instrument;
-  }
-  else
-  {
-    if (verbose)
-      cerr << "Calibration::StandardModel using Hamaker (2000)" << endl;
-    polar = new MEAL::Polar;
-  }
+  if (verbose)
+    cerr << "Calibration::StandardModel using " << type->get_name() << endl;
+
+  response = Pulsar::new_transformation (type);
 
   instrument = new MEAL::ProductRule<MEAL::Complex2>;
 
-  if (polar)
-    *instrument *= polar;
-
-  if (physical)
-    *instrument *= physical;
+  *instrument *= response;
 
   if (basis)
     *instrument *= basis;
@@ -261,6 +244,7 @@ void Calibration::StandardModel::add_fluxcal_backend ()
   if (!built)
     build ();
 
+  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (!physical)
     throw Error (InvalidState,
 		 "Calibration::StandardModel::add_fluxcal_backend",
@@ -272,7 +256,7 @@ void Calibration::StandardModel::add_fluxcal_backend ()
   fluxcal_backend = new Calibration::SingleAxis;
 
   *path *= fluxcal_backend;
-  *path *= physical->get_feed();
+  *path *= physical->get_frontend();
 
   if (basis)
     *path *= basis;
@@ -310,44 +294,45 @@ void Calibration::StandardModel::fix_orientation ()
   if (!built)
     build ();
 
-  if (physical)
-    // fix the orientation of the first receptor
-    physical->get_feed()->get_orientation_transformation(0)->set_infit (0, 0);
+  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
+  if (!physical)
+    throw Error (InvalidState, "Calibration::StandardModel::fix_orientation",
+		 "cannot fix orientation when type=" + type->get_name());
 
-  if (polar)
-    // fix the orientation of the last rotation
-    polar->set_infit (6, false);
+  // fix the orientation of the first receptor
+  physical->set_constant_orientation (true);
 }
 
 void Calibration::StandardModel::update () try
 {
+  MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
   if (polar)
     polar_estimate.update (polar);
 
   if (fluxcal_backend)
     fluxcal_backend_estimate.update (fluxcal_backend);
 
-  if (physical) {
+  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
+  if (!physical)
+    return;
 
-    Calibration::SingleAxis* backend = physical->get_backend();
+  Calibration::SingleAxis* backend = physical->get_backend();
 
-    physical_estimate.update (backend);
+  backend_estimate.update (backend);
 
-    if (gain)
-      update_parameter( gain, backend->get_gain().get_value() );
-    else if (pcal_gain)
-      pcal_gain->set_gain( backend->get_gain() );
+  if (gain)
+    update_parameter( gain, backend->get_gain().get_value() );
+  else if (pcal_gain)
+    pcal_gain->set_gain( backend->get_gain() );
 
-    if (pcal_gain)
-      backend->set_gain( 1.0 );
-
-    if (diff_gain)
-      update_parameter( diff_gain, backend->get_diff_gain().get_value() );
+  if (pcal_gain)
+    backend->set_gain( 1.0 );
+  
+  if (diff_gain)
+    update_parameter( diff_gain, backend->get_diff_gain().get_value() );
     
-    if (diff_phase)
-      update_parameter( diff_phase, backend->get_diff_phase().get_value() );
-
-  }
+  if (diff_phase)
+    update_parameter( diff_phase, backend->get_diff_phase().get_value() );
 }
 catch (Error& error)
 {
@@ -365,15 +350,16 @@ void Calibration::StandardModel::update_parameter (MEAL::Scalar* function,
 
 void Calibration::StandardModel::check_constraints ()
 {
-  /* for now, do nothing.  in the future, might implement the code
-     that follows.  it currently causes problems down the line
-     (equal_ellipticities sets both ellipticity parameters equal to a
-     new parameter using the chain rule, which increases the number of
-     parameters, and causes MEAL::Function::copy to fail when writing
-     out the result). */
+  /* for now, do nothing.
+
+  When flux calibrator observations are not available, it is assumed
+  that the noise diode has zero circular polarization.
+
+  */
 
   return;
 
+#if 0
   if (!fluxcal_backend)
   {
     /*
@@ -392,6 +378,8 @@ void Calibration::StandardModel::check_constraints ()
     if (physical)
       physical->equal_ellipticities();
   }
+#endif
+
 }
 
 void copy_param (MEAL::Function* to, const MEAL::Function* from)
@@ -410,25 +398,26 @@ void copy_param (MEAL::Function* to, const MEAL::Function* from)
 void 
 Calibration::StandardModel::copy_transformation (const MEAL::Complex2* xform)
 {
+  MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
   if (polar)
   {
-    const MEAL::Polar* polar_solution;
-    polar_solution = dynamic_cast<const MEAL::Polar*>( xform );
-    if (polar_solution)
-      copy_param( polar, polar_solution );
-    else
+    const MEAL::Polar* copy = dynamic_cast<const MEAL::Polar*>( xform );
+    if (!copy)
       throw Error (InvalidState, "StandardModel::copy_transformation",
 		   "solution is not of the required type");
+
+    copy_param( polar, copy );
   }
 
+  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (physical)
   {
-    const Instrument* instrument = dynamic_cast<const Instrument*>( xform );
-    if (instrument)
-      copy_param( physical, instrument );
-    else
+    const BackendFeed* copy = dynamic_cast<const BackendFeed*>( xform );
+    if (!copy)
       throw Error (InvalidState, "StandardModel::copy_transformation",
 		   "solution is not of the required type");
+
+    copy_param( physical, copy );
   }
 }
 
@@ -451,6 +440,7 @@ void
 Calibration::StandardModel::integrate_calibrator (const MEAL::Complex2* xform,
 						  bool flux_calibrator)
 {
+  MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
   if (polar)
   {
     const MEAL::Polar* polar_solution;
@@ -459,9 +449,11 @@ Calibration::StandardModel::integrate_calibrator (const MEAL::Complex2* xform,
 
     if (polar_solution)
       polar_estimate.integrate( polar_solution );
+
+    return;
   }
 
-
+  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (physical)
   {
     const Calibration::SingleAxis* sa;
@@ -475,7 +467,7 @@ Calibration::StandardModel::integrate_calibrator (const MEAL::Complex2* xform,
       fluxcal_backend_estimate.integrate( sa );
     else
     {
-      physical_estimate.integrate( sa );
+      backend_estimate.integrate( sa );
 
       if (gain)
 	integrate_parameter( gain, sa->get_gain().get_value() );
@@ -485,10 +477,8 @@ Calibration::StandardModel::integrate_calibrator (const MEAL::Complex2* xform,
       
       if (diff_phase)
 	integrate_parameter( diff_phase, sa->get_diff_phase().get_value() );
-      
     }
   }
-
 }
 
 using namespace MEAL;
@@ -508,7 +498,8 @@ void Calibration::StandardModel::set_gain (Univariate<Scalar>* function)
     }
   }
   else
-  {    
+  {
+    BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
     if (!physical)
       throw Error (InvalidState, "Calibration::StandardModel::set_gain",
 		   "cannot set gain variation in polar model");
@@ -527,6 +518,7 @@ void Calibration::StandardModel::set_diff_gain (Univariate<Scalar>* function)
   if (!built)
     build ();
 
+  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (!physical)
     throw Error (InvalidState, "Calibration::StandardModel::set_diff_gain",
 		 "cannot set gain variation in polar model");
@@ -541,6 +533,7 @@ void Calibration::StandardModel::set_diff_phase (Univariate<Scalar>* function)
   if (!built)
     build ();
 
+  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (!physical)
     throw Error (InvalidState, "Calibration::StandardModel::set_diff_phase",
 		 "cannot set diff_phase variation in polar model");
@@ -709,6 +702,7 @@ void Calibration::StandardModel::engage_time_variations () try
 
   time_variations_engaged = true;
 
+  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (!physical)
     return;
 
@@ -770,6 +764,7 @@ try
 
   time_variations_engaged = false;
 
+  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (!physical)
     return;
 
@@ -904,9 +899,10 @@ void Calibration::StandardModel::get_covariance( vector<double>& covar,
   if (diff_phase)
     MEAL::get_imap( get_equation(), diff_phase, diff_phase_imap );
 
-  vector< unsigned > feed_imap;
+  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
+  vector< unsigned > frontend_imap;
   if (physical)
-    MEAL::get_imap( get_equation(), physical->get_feed(), feed_imap );
+    MEAL::get_imap( get_equation(), physical->get_frontend(), frontend_imap );
 
   disengage_time_variations( epoch );
 
@@ -928,8 +924,8 @@ void Calibration::StandardModel::get_covariance( vector<double>& covar,
 
   if (physical) {
     unsigned ifeed = 3;
-    for (unsigned i=0; i<feed_imap.size(); i++)
-      imap[ifeed+i] = feed_imap[i];
+    for (unsigned i=0; i<frontend_imap.size(); i++)
+      imap[ifeed+i] = frontend_imap[i];
   }
 
   unsigned nparam = xform->get_nparam();

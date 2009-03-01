@@ -49,7 +49,7 @@ bool Pulsar::ChannelSubsetMatch::match (const Pulsar::Archive* super,
   }
 
   // Loop over "sub" chans, make sure they all exist in super
-  int n_matched=0;
+  unsigned n_matched=0;
   for (unsigned i=0; i<sub->get_nchan(); i++) {
     double sub_freq = sub->get_Integration(0)->get_centre_frequency(i);
     for (unsigned j=0; j<super->get_nchan(); j++) {
@@ -64,7 +64,7 @@ bool Pulsar::ChannelSubsetMatch::match (const Pulsar::Archive* super,
   if (n_matched==sub->get_nchan())
     return true;
   else {
-    reason = stringprintf("Only matched %d/%d channels", 
+    reason = stringprintf("Only matched %u/%u channels", 
         sub->get_nchan(), n_matched);
     return false;
   }
@@ -93,7 +93,7 @@ bool Pulsar::ChannelSubsetMatch::match (const Pulsar::Database::Entry& super,
   }
 
   // Loop over "sub" chans, make sure they all exist in super
-  int n_matched=0;
+  unsigned n_matched=0;
   for (unsigned i=0; i<sub.nchan; i++) {
     double sub_freq = sub.frequency - sub.bandwidth/2.0 + 
       (double)i * sub_chbw;
@@ -110,7 +110,7 @@ bool Pulsar::ChannelSubsetMatch::match (const Pulsar::Database::Entry& super,
   if (n_matched==sub.nchan)
     return true;
   else {
-    reason = stringprintf("Only matched %d/%d channels", 
+    reason = stringprintf("Only matched %u/%u channels", 
         sub.nchan, n_matched);
     return false;
   }

@@ -1,11 +1,12 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/CalibratorType.h"
 
 #include <string.h>
 #include <assert.h>
@@ -21,8 +22,7 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
 
 void Pulsar::PolnCalibratorExtension::init ()
 {
-  type = Calibrator::SingleAxis;
-  nparam = 3;
+  nparam = 0;
   has_covariance = false;
   has_solver = false;
 }
@@ -67,25 +67,10 @@ Pulsar::PolnCalibratorExtension::~PolnCalibratorExtension ()
 }
 
 //! Set the type of the instrumental response parameterization
-void Pulsar::PolnCalibratorExtension::set_type (Calibrator::Type _type)
+void Pulsar::PolnCalibratorExtension::set_type (const Calibrator::Type* _type)
 {
-  if (type == _type)
-    return;
-
   type = _type;
-
-  switch (type) {
-  case Calibrator::SingleAxis:
-    nparam = 3; break;
-  case Calibrator::Polar:
-    nparam = 6; break;
-  case Calibrator::Hamaker:
-  case Calibrator::Britton:
-    nparam = 7; break;
-  default:
-    throw Error (InvalidParam, "Pulsar::PolnCalibratorExtension::set_type",
-                 "unhandled Calibrator::Type=%s", Calibrator::Type2str (type));
-  }
+  nparam = type->get_nparam();
 }
 
 
@@ -179,53 +164,13 @@ void Pulsar::PolnCalibratorExtension::construct ()
 {
   if (Archive::verbose == 3)
     cerr << "Pulsar::PolnCalibratorExtension::construct nchan="
-         << response.size() << " type=" 
-         << Calibrator::Type2str (get_type()) << endl;
+         << response.size() << " type=" << get_type()->get_name() << endl;
 
   for (unsigned ichan=0; ichan<response.size(); ichan++)
   {
     response[ichan].set_nparam (nparam);
     weight[ichan] = 1.0;
   }
-}
-
-
-const char* Pulsar::Calibrator::Type2str (Type type)
-{
-  switch (type) {
-  case Flux:
-    return "Flux";
-  case SingleAxis:
-    return "SingleAxis";
-  case Polar:
-    return "Polar";
-  case Hamaker:
-    return "Hamaker";
-  case Britton:
-    return "Britton";
-  case Hybrid:
-    return "Hybrid";
-  case Corrections:
-    return "Corrections";
-  default:
-    return "Invalid";
-  }
-}
-
-
-Pulsar::Calibrator::Type Pulsar::Calibrator::str2Type (const char* s)
-{
-  if (strcasecmp(s, "Flux") == 0)
-    return Flux;
-  if (strcasecmp(s, "SingleAxis") == 0)
-    return SingleAxis;
-  if (strcasecmp(s, "Polar") == 0)
-    return Polar;
-  if (strcasecmp(s, "Hamaker") == 0)
-    return Hamaker;
-  if (strcasecmp(s, "Britton") == 0)
-    return Britton;
-  return (Type) -1;
 }
 
 using namespace Pulsar;

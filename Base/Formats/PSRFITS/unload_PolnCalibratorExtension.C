@@ -51,7 +51,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
     cerr << "FITSArchive::unload PolnCalibratorExtension nchan=" 
 	 << nchan <<  " nparam=" << ncpar << " ncovar=" << ncovar << endl;
 
-  string cal_mthd = Calibrator::Type2str( pce->get_type() );
+  string cal_mthd = pce->get_type()->get_name();
 
   // Write CAL_MTHD
   psrfits_update_key (fptr, "CAL_MTHD", cal_mthd);

@@ -731,7 +731,7 @@ catch (Error& error)
 
 
 
-Pulsar::Calibrator::Type Pulsar::PolnCalibrator::get_type () const
+const Pulsar::Calibrator::Type* Pulsar::PolnCalibrator::get_type () const
 {
   if (!poln_extension)
     throw Error (InvalidState,

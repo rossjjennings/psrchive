@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolarCalibrator.h,v $
-   $Revision: 1.23 $
-   $Date: 2008/06/17 07:59:23 $
+   $Revision: 1.24 $
+   $Date: 2009/03/01 18:04:42 $
    $Author: straten $ */
 
 #ifndef __PolarCalibrator_H
@@ -29,9 +29,6 @@ namespace Pulsar {
 
     //! Destructor
     ~PolarCalibrator ();
-
-    //! Return Calibrator::Polar
-    Type get_type () const;
 
     //! Communicates PolarCalibrator parameters to plotting routines
     class Info : public PolnCalibrator::Info {

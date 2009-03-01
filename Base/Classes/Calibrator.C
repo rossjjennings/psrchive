@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -62,6 +62,10 @@ Pulsar::Calibrator::~Calibrator ()
 {
 }
 
+const Pulsar::Calibrator::Type* Pulsar::Calibrator::get_type () const
+{
+  return type;
+}
 
 //! Provide derived classes with access to the calibrator
 bool Pulsar::Calibrator::has_calibrator () const
@@ -134,25 +138,3 @@ Pulsar::Archive* Pulsar::Calibrator::new_solution (const string& arclass) const
   return output.release();
 }
 
-//! Calibrator::Type output operator
-std::ostream& operator << (std::ostream& os, Pulsar::Calibrator::Type type)
-{
-  return os << Pulsar::Calibrator::Type2str (type);
-}
-
-//! Calibrator::Type input operator
-std::istream& operator >> (std::istream& is, Pulsar::Calibrator::Type& type)
-{
-  std::streampos pos = is.tellg();
-  std::string ss;
-
-  is >> ss;
-  type = Pulsar::Calibrator::str2Type (ss.c_str());
-
-  if (type == (Pulsar::Calibrator::Type) -1) {
-    is.setstate(std::istream::failbit);
-    is.seekg(pos);
-  }
-
-  return is;
-}

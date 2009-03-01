@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.88 $
-   $Date: 2008/09/17 01:56:36 $
+   $Revision: 1.89 $
+   $Date: 2009/03/01 18:04:42 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -44,7 +44,7 @@ namespace Pulsar
     friend class SourceInfo;
     
     //! Construct with optional first pulsar archive
-    ReceptionCalibrator (Calibrator::Type model);
+    ReceptionCalibrator (Calibrator::Type*);
 
     //! Descructor
     ~ReceptionCalibrator ();

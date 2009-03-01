@@ -42,9 +42,9 @@ using namespace std;
 
 /*! The Archive passed to this constructor will be used to supply the first
   guess for each pulse phase bin used to constrain the fit. */
-Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type)
+Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type* _type)
 {
-  model_type = type;
+  type = _type;
 
   measure_cal_V = true;
   measure_cal_Q = false;

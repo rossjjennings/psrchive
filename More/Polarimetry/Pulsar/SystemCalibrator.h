@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.19 $
-   $Date: 2009/02/20 22:00:38 $
+   $Revision: 1.20 $
+   $Date: 2009/03/01 18:04:42 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -107,11 +107,8 @@ namespace Pulsar
     //! Destructor
     virtual ~SystemCalibrator ();
 
-    //! Return Calibrator::Hamaker or Calibrator::Britton
-    Type get_type () const;
-
     //! Return the Calibrator information
-    Info* get_Info () const;
+    Calibrator::Info* get_Info () const;
 
     //! Return the reference epoch of the calibration experiment
     MJD get_epoch () const;
@@ -272,9 +269,6 @@ namespace Pulsar
     //! Uncalibrated estimate of calibrator polarization
     SourceEstimate calibrator_estimate;
     
-    //! The model specified on construction
-    Calibrator::Type model_type;
-
     //! Epoch of the first observation
     MJD start_epoch;
 

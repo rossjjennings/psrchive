@@ -1,11 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2008 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/psrchive.h"
+
+#include "Pulsar/CalibratorTypes.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/ArchiveMatch.h"
 
@@ -120,7 +122,8 @@ int main (int argc, char *argv[]) try
   Pulsar::IonosphereCalibrator* ionosphere = 0;
 
   // default calibrator type
-  Pulsar::Calibrator::Type pcal_type = Pulsar::Calibrator::SingleAxis;
+  Reference::To<const Pulsar::Calibrator::Type> pcal_type;
+  pcal_type = new Pulsar::CalibratorTypes::SingleAxis;
 
   // default searching criterion
   Pulsar::Database::Criterion criterion;
@@ -176,7 +179,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.99 2009/02/16 05:12:37 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.100 2009/03/01 18:04:41 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -198,17 +201,17 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'B':
-      pcal_type = Pulsar::Calibrator::OffPulse;
+      pcal_type = new Pulsar::CalibratorTypes::OffPulse;
       command += " -B";
       break;
 
     case 'C':
-      pcal_type = Pulsar::Calibrator::Britton;
+      pcal_type = new Pulsar::CalibratorTypes::van04_Eq18;
       command += " -C";
       break;
 
     case 'D':
-      pcal_type = Pulsar::Calibrator::DoP;
+      pcal_type = new Pulsar::CalibratorTypes::DoP;
       command += " -D";
       break;
 
@@ -355,12 +358,12 @@ int main (int argc, char *argv[]) try
       break;
 
     case 's':
-      pcal_type = Pulsar::Calibrator::Polar;
+      pcal_type = new Pulsar::CalibratorTypes::van02_EqA1;
       command += " -s";
       break;
 
     case 'S':
-      pcal_type = Pulsar::Calibrator::Hybrid;
+      pcal_type = new Pulsar::CalibratorTypes::ovhb04;
       command += " -S";
       break;
 
@@ -475,7 +478,9 @@ int main (int argc, char *argv[]) try
     return -1;
   }
 
-  if (use_fluxcal_stokes && pcal_type != Pulsar::Calibrator::SingleAxis) {
+  if ( use_fluxcal_stokes && 
+      !  pcal_type->is_a<Pulsar::CalibratorTypes::SingleAxis>() )
+  {
     cerr << "pac: Fluxcal-derived Stokes params are incompatible with the " 
       << "selected calibration method" << endl;
     return -1;
@@ -713,27 +718,7 @@ int main (int argc, char *argv[]) try
     {
       if (successful_polncal)
       {
-	switch (pcal_type) {
-	  
-	case Pulsar::Calibrator::SingleAxis:
-	  fitsext->set_cal_mthd("SingleAxis");
-	  break;
-	  
-	case Pulsar::Calibrator::Polar:
-	  fitsext->set_cal_mthd("Polar");
-	  break;
-	  
-	case Pulsar::Calibrator::Britton:
-	case Pulsar::Calibrator::Hybrid:
-	  fitsext->set_cal_mthd("FullCAL");
-	  break;
-	  
-	default:
-	  fitsext->set_cal_mthd("unknown");
-	  break;
-	  
-	}
-
+	fitsext->set_cal_mthd( pcal_type->get_name() );
 	fitsext->set_cal_file( basename(pcal_file) );
       }
       

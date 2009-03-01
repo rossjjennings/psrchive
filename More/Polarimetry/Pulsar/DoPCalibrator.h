@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/DoPCalibrator.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/06/17 07:59:23 $
+   $Revision: 1.8 $
+   $Date: 2009/03/01 18:04:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_DoPCalibrator_H
@@ -37,9 +37,6 @@ namespace Pulsar {
 
     //! Destructor
     ~DoPCalibrator ();
-
-    //! Return Calibrator::DoP
-    Type get_type () const;
 
     //! Calibrate the polarization of the given archive
     void calibrate (Archive* archive);

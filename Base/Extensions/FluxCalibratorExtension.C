@@ -1,17 +1,18 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004-2008 by Willem van Straten
+ *   Copyright (C) 2004-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/FluxCalibratorExtension.h"
+#include "Pulsar/CalibratorType.h"
 
 //! Default constructor
 Pulsar::FluxCalibratorExtension::FluxCalibratorExtension ()
   : CalibratorExtension ("FluxCalibratorExtension")
 {
-  type = Calibrator::Flux;
+  type = Calibrator::Type::factory ("Flux");
 }
 
 //! Copy constructor
@@ -19,7 +20,7 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
 (const FluxCalibratorExtension& copy)
   : CalibratorExtension (copy)
 {
-  type = Calibrator::Flux;
+  type = Calibrator::Type::factory ("Flux");
   operator = (copy);
 }
 

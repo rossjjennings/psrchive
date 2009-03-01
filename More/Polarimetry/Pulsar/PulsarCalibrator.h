@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.32 $
-   $Date: 2008/08/08 19:36:22 $
-   $Author: demorest $ */
+   $Revision: 1.33 $
+   $Date: 2009/03/01 18:04:42 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
 #define __Pulsar_PulsarCalibrator_H
@@ -39,7 +39,7 @@ namespace Pulsar {
   public:
     
     //! Constructor
-    PulsarCalibrator (Calibrator::Type model = Calibrator::Britton);
+    PulsarCalibrator (Calibrator::Type* = 0);
 
     //! Destructor
     ~PulsarCalibrator ();

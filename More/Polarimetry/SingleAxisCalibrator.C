@@ -4,7 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/SingleAxisCalibrator.h"
+#include "Pulsar/CalibratorType.h"
+
 #include "Pauli.h"
 #include "Estimate.h"
 
@@ -14,6 +17,7 @@ using namespace std;
 Pulsar::SingleAxisCalibrator::SingleAxisCalibrator (const Archive* archive) 
   : ReferenceCalibrator (archive)
 {
+  type = Pulsar::Calibrator::Type::factory (this);
 }
 
 Pulsar::SingleAxisCalibrator::~SingleAxisCalibrator ()
@@ -118,10 +122,5 @@ Pulsar::SingleAxisCalibrator::Info*
 Pulsar::SingleAxisCalibrator::get_Info () const
 {
   return new SingleAxisCalibrator::Info (this);
-}
-
-Pulsar::Calibrator::Type Pulsar::SingleAxisCalibrator::get_type () const
-{
-  return SingleAxis;
 }
 

@@ -1,12 +1,15 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/CalibratorTypes.h"
 
+#include "Pulsar/Britton2000.h"
 #include "Pulsar/SingleAxis.h"
 #include "Pulsar/Instrument.h"
 #include "MEAL/Polar.h"
@@ -146,22 +149,25 @@ catch (Error& error)
   throw error += "Pulsar::new_transformation";
 }
 
-MEAL::Complex2* Pulsar::new_transformation( Calibrator::Type type )
+MEAL::Complex2* Pulsar::new_transformation( const Calibrator::Type* type )
 {
-  switch (type)
-  {
-  case Calibrator::SingleAxis:
+  if (type->is_a<CalibratorTypes::SingleAxis>())
     return new Calibration::SingleAxis;
-  case Calibrator::Polar:
+
+  if (type->is_a<CalibratorTypes::van02_EqA1>())
     return new MEAL::Polar;
-  case Calibrator::Hamaker:
+
+  if (type->is_a<CalibratorTypes::van09_Eq>())
     return new MEAL::Polar;
-  case Calibrator::Britton:
+
+  if (type->is_a<CalibratorTypes::van04_Eq18>())
     return new Calibration::Instrument;
-  default:
-    throw Error (InvalidState,
+
+  if (type->is_a<CalibratorTypes::bri00_Eq19>())
+    return new Calibration::Britton2000;
+
+  throw Error (InvalidState,
                "Pulsar::PolnCalibrator::new_transformation",
-               "unrecognized Calibrator::Type = %d", (int) type);
-  }
+               "unrecognized Calibrator::Type=" + type->get_name());
 }
 

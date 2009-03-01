@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FrontendCorrection.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/05/28 08:32:34 $
+   $Revision: 1.3 $
+   $Date: 2009/03/01 18:04:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FrontendCorrection_H
@@ -57,9 +57,6 @@ namespace Pulsar
 
     //! Calibrate the Pulsar::Archive
     void calibrate (Archive* archive);
-
-    //! Return the Calibrator::Type of this class
-    Type get_type () const { return Corrections; }
 
     //! Get the number of frequency channels in the calibrator
     unsigned get_nchan () const { return 0; }

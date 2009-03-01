@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorExtension.h,v $
-   $Revision: 1.13 $
-   $Date: 2009/02/20 06:24:18 $
+   $Revision: 1.14 $
+   $Date: 2009/03/01 18:04:41 $
    $Author: straten $ */
 
 #ifndef __CalibratorExtension_h
 #define __CalibratorExtension_h
 
 #include "Pulsar/ArchiveExtension.h"
-#include "Pulsar/Calibrator.h"
+#include "Pulsar/CalibratorType.h"
 
 namespace Pulsar {
 
@@ -46,9 +46,9 @@ namespace Pulsar {
     void build (const Calibrator*);
 
     //! Set the type of the calibrator
-    virtual void set_type (Calibrator::Type type);
+    virtual void set_type (const Calibrator::Type* type);
     //! Get the type of the calibrator
-    virtual Calibrator::Type get_type () const;
+    virtual const Calibrator::Type* get_type () const;
 
     //! Set the reference epoch of the calibration experiment
     virtual void set_epoch (const MJD& epoch);
@@ -81,7 +81,7 @@ namespace Pulsar {
     protected:
 
     //! Type of the calibrator
-    Calibrator::Type type;
+    Reference::To<const Calibrator::Type> type;
     
     //! The reference epoch of the calibration experiment
     MJD epoch;
