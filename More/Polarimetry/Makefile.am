@@ -4,8 +4,10 @@ noinst_LTLIBRARIES = libPolarimetry.la
 nobase_include_HEADERS = \
 	Pulsar/BackendCorrection.h \
 	Pulsar/BackendFeed.h \
+	Pulsar/BackendFeedInfo.h \
 	Pulsar/BasisCorrection.h \
 	Pulsar/Britton2000.h \
+	Pulsar/BrittonInfo.h \
         Pulsar/CalibratorPlotter.h \
         Pulsar/CalibratorStokesInfo.h \
 	Pulsar/CalInterpreter.h \
@@ -78,8 +80,10 @@ nobase_include_HEADERS = \
 libPolarimetry_la_SOURCES = \
 	BackendCorrection.C \
 	BackendFeed.C \
+	BackendFeedInfo.C \
 	BasisCorrection.C \
 	Britton2000.C \
+	BrittonInfo.C \
         CalibratorStokesInfo.C \
 	CalibratorType_factory.C \
 	CalInterpreter.C \
