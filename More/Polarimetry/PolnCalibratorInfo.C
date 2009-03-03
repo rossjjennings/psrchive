@@ -5,10 +5,12 @@
  *
  ***************************************************************************/
 
+#include "Pulsar/CalibratorTypes.h"
+
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/PolarCalibrator.h"
 #include "Pulsar/InstrumentInfo.h"
-#include "Pulsar/CalibratorTypes.h"
+#include "Pulsar/BrittonInfo.h"
 
 using namespace std;
 
@@ -28,6 +30,9 @@ Pulsar::PolnCalibrator::Info::create (const Pulsar::PolnCalibrator* calibrator)
 
   if (calibrator->get_type()->is_a<CalibratorTypes::van04_Eq18>())
     return new InstrumentInfo (calibrator);
+
+  if (calibrator->get_type()->is_a<CalibratorTypes::bri00_Eq19>())
+    return new BrittonInfo (calibrator);
 
   return new PolnCalibrator::Info (calibrator);
 }
