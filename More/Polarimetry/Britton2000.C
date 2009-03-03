@@ -20,17 +20,24 @@ class Calibration::Britton2000::Feed
   //! Default Constructor
   Feed ()
   {
+    MEAL::Boost1* boost = 0;
+    MEAL::Rotation1* rotation = 0;
+
     // b_{\hat u} (\delta_\theta/2)
-    add_model( new MEAL::Boost1 (Vector<3, double>::basis(1)) );
+    add_model( boost = new MEAL::Boost1 (Vector<3, double>::basis(1)) );
+    boost->set_param_name ("b_1");
 
     // b_{\hat v} (\delta_\chi/2)
-    add_model( new MEAL::Boost1 (Vector<3, double>::basis(2)) );
+    add_model( boost = new MEAL::Boost1 (Vector<3, double>::basis(2)) );
+    boost->set_param_name ("b_2");
 
     // r_{\hat u} (\sigma_\chi/2)
-    add_model( new MEAL::Rotation1 (Vector<3, double>::basis(1)) );
+    add_model( rotation = new MEAL::Rotation1 (Vector<3, double>::basis(1)) );
+    rotation->set_param_name ("r_1");
 
     // b_{\hat v} (\sigma_\theta/2)
-    add_model( new MEAL::Rotation1 (Vector<3, double>::basis(2)) );
+    add_model( rotation = new MEAL::Rotation1 (Vector<3, double>::basis(2)) );
+    rotation->set_param_name ("r_2");
   }
 
   //! Assignment Operator
@@ -89,18 +96,31 @@ string Calibration::Britton2000::get_name () const
 
 void Calibration::Britton2000::equal_ellipticities ()
 {
-  cerr << "Calibration::Britton2000::equal_ellipticities" << endl;
+  if (verbose)
+    cerr << "Calibration::Britton2000::equal_ellipticities name="
+	 << feed->get_param_name (1) << endl;
+  
+  feed->set_param (1, 0.0);
+  feed->set_infit (1, false);
 }
 
 void Calibration::Britton2000::equal_orientations ()
 {
-  cerr << "Calibration::Britton2000::equal_orientations" << endl;
+  if (verbose)
+    cerr << "Calibration::Britton2000::equal_orientations name="
+	 << feed->get_param_name (0) << endl;
+
+  feed->set_param (0, 0.0);
+  feed->set_infit (0, false);
 }
 
 //! Fix the orientation of the frontend
-void Calibration::Britton2000::set_constant_orientation (bool)
+void Calibration::Britton2000::set_constant_orientation (bool flag)
 {
-  cerr << "Calibration::Britton2000::set_constant_orientation" << endl;
+  if (verbose)
+    cerr << "Calibration::Britton2000::set_constant_orientation name="
+	 << feed->get_param_name (3) << endl;
+  feed->set_infit (3, !flag);
 }
 
 const MEAL::Complex2* Calibration::Britton2000::get_frontend () const
