@@ -73,7 +73,7 @@ bool Calibration::ReceptionModelReport::report (ReceptionModel* model)
 	  double divergence = diff * diff / datum[ipol].get_variance();
 
 	  if (divergence > max_divergence)
-	    os << "divergence=" << sqrt(divergence) << " "
+	    os << "divergence[" << ipol << "]=" << sqrt(divergence) << " "
 	       << data.get_identifier() << endl;
 
 	  chisq[ipol] += divergence;
