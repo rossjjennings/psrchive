@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.104 $
-   $Date: 2009/03/01 18:04:41 $
+   $Revision: 1.105 $
+   $Date: 2009/03/03 11:53:30 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -58,9 +58,6 @@
 using namespace std;
 using namespace Pulsar;
 
-static string Britton = "Britton";
-static string Hamaker = "Hamaker";
-
 void usage ()
 {
   cout << "pcm - polarimetric calibration model \n"
@@ -71,7 +68,7 @@ void usage ()
     "\n"
     "  -A archive set the output archive class name \n"
     "  -D name    enable diagnostic: name=report,guess,residual,result,total\n"
-    "  -m model   model: Britton [default] or Hamaker \n"
+    "  -m model   receiver model name [default:van04e18] \n"
     "  -l solver  solver: MEAL [default] of GSL \n"
     "  -I impure  load impurity transformation from file \n"
     "\n"
