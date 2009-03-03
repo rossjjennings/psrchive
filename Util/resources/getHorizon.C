@@ -41,8 +41,10 @@ int main (int argc, char* argv[])
   // Parkes by default
   string telescope = "parkes";
 
+  double duration = 0.0;
+
   int c;
-  while ((c = getopt(argc, argv, "hc:Mm:t:")) != -1)
+  while ((c = getopt(argc, argv, "hc:d:Mm:t:")) != -1)
   {
     switch (c)
     {
@@ -52,6 +54,10 @@ int main (int argc, char* argv[])
 
     case 'c':
       coord.setHMSDMS (optarg);
+      break;
+
+    case 'd':
+      duration = atof (optarg);
       break;
 
     case 'M':
@@ -98,21 +104,35 @@ int main (int argc, char* argv[])
   latitude.setRadians( lat );
   longitude.setRadians( lon );
 
-  cout << "\n*** Inputs:" << endl;
-  cout << "MJD: " << mjd.printdays(4) << endl;
-  cout << "Coordinates: " << coord.getHMSDMS() << endl;
-  cout << "Latitude: " << latitude.getDegrees() << " degrees" << endl;
-  cout << "Longitude: " << longitude.getDegrees() << " degrees" << endl;
-
   directional->set_source_coordinates( coord );
   directional->set_epoch( mjd );
   directional->set_observatory_latitude( latitude.getRadians() );
   directional->set_observatory_longitude( longitude.getRadians() );
   
   double rad2deg = 180.0/M_PI;
+  double rad2hr = 12.0/M_PI;
+
+  if (duration)
+  {
+    unsigned nsteps = 100;
+    for (unsigned i=0; i<nsteps; i++)
+    {
+      double seconds = (duration * i)/nsteps;
+      MJD cur = mjd + seconds;
+      directional->set_epoch( cur );
+      cout << seconds << " " << directional->get_vertical() * rad2deg << endl;
+    }
+    return 0;
+  }
+
+  cout << "\n*** Inputs:" << endl;
+  cout << "MJD: " << mjd.printdays(4) << endl;
+  cout << "Coordinates: " << coord.getHMSDMS() << endl;
+  cout << "Latitude: " << latitude.getDegrees() << " degrees" << endl;
+  cout << "Longitude: " << longitude.getDegrees() << " degrees (East)" << endl;
 
   cout << "\n*** Outputs:\n"
-    "LST: " << directional->get_local_sidereal_time()*12.0/M_PI << " hours \n";
+    "LST: " << directional->get_local_sidereal_time() * rad2hr << " hours \n";
 
   if (directional == &horizon)
   {
