@@ -45,7 +45,7 @@ Pulsar::InstrumentInfo::InstrumentInfo (const PolnCalibrator* calibrator) :
 
 string Pulsar::InstrumentInfo::get_title () const
 {
-  return "Parameterization: van Straten (2004) Equation 19";
+  return "Parameterization: van Straten (2004) Equation 18";
 }
 
 //! Return the name of the specified class
