@@ -730,13 +730,15 @@ catch (Error& error)
 }
 
 
-
 const Pulsar::Calibrator::Type* Pulsar::PolnCalibrator::get_type () const
 {
+  if (type)
+    return type;
+
   if (!poln_extension)
     throw Error (InvalidState,
 		 "Pulsar::PolnCalibrator::get_type",
-		 "no PolnCalibratorExtension available");
+		 "type not set and no extension available");
 
   return poln_extension->get_type();
 }
