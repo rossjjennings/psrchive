@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Observatory.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/05/26 20:35:57 $
+   $Revision: 1.5 $
+   $Date: 2009/03/03 05:03:49 $
    $Author: straten $ */
 
 #ifndef __Tempo_Observatory_h
@@ -58,6 +58,7 @@ namespace Tempo
     virtual void get_xyz (double& x, double& y, double& z) const;
 
     //! Get the latitude and longitude in radians, radius in metres
+    /*! longitude is in degrees East of Greenwich */
     virtual void get_sph (double& lat, double& lon, double& rad) const;
 
   protected:
@@ -75,6 +76,7 @@ namespace Tempo
     virtual void get_xyz (double& x, double& y, double& z) const;
 
     //! Get the latitude and longitude in radians, radius in metres
+    /*! longitude is in degrees East of Greenwich */
     virtual void get_sph (double& lat, double& lon, double& rad) const;
 
   protected:

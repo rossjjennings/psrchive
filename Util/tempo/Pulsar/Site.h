@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Site.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/05/24 12:45:50 $
+   $Revision: 1.2 $
+   $Date: 2009/03/03 05:03:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Site_h
@@ -31,6 +31,7 @@ namespace Pulsar
     virtual void get_xyz (double& x, double& y, double& z) const = 0;
 
     //! Get the latitude and longitude in radians, and radius in metres
+    /*! longitude is in degrees East of Greenwich */
     virtual void get_sph (double& lat, double& lon, double& rad) const = 0;
 
     //! Get the location of the named antenna

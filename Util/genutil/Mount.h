@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Mount.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/07/07 00:27:02 $
+   $Revision: 1.4 $
+   $Date: 2009/03/03 05:03:49 $
    $Author: straten $ */
 
 #ifndef __Mount_H
@@ -39,7 +39,7 @@ public:
   void set_observatory_latitude (double latitude);
   double get_observatory_latitude () const;
 
-  //! Set the longitude of the observatory in radians
+  //! Set the longitude of the observatory in radians East of Greenwich
   void set_observatory_longitude (double longitude);
   double get_observatory_longitude () const;
 
@@ -71,7 +71,7 @@ protected:
   //! The latitude of the observatory in radians
   double latitude;
 
-  //! The latitude of the observatory in radians
+  //! The latitude of the observatory in radians East of Greenwich
   double longitude;
 
   //! The epoch

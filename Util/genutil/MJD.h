@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.30 $
-   $Date: 2008/02/08 12:32:30 $
+   $Revision: 1.31 $
+   $Date: 2009/03/03 05:03:49 $
    $Author: straten $ */
 
 #ifndef __GENUTIL_MJD_H
@@ -129,7 +129,7 @@ class MJD {
   int    get_secs() const {return(secs);};
   double get_fracsec() const {return(fracsec);};
 
-  // return LST in hours (longitude given in degrees)
+  // return LST in hours (longitude given in degrees East of Greenwich)
   double LST (double longitude) const;
 
   std::string printdays (unsigned precision) const;

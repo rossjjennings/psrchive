@@ -40,6 +40,8 @@ geocenter.
 
 The observatory code is a 2-character code used in ITOA format.
 
+NOTE: TEMPO longitude is measured in degrees West of Greenwich
+
 */
 
 using namespace std;
@@ -88,7 +90,8 @@ void Tempo::load_obsys () try
     {
       Angle alat, alon;
       alat.setDegMS (coordinate[0]);
-      alon.setDegMS (coordinate[1]);
+      // obsys.dat lists degrees West longitude!
+      alon.setDegMS (-coordinate[1]);
 
       // cerr << "ddmmss=" << coordinate[0] << " " << coordinate[1] << endl;
       // cerr << "again=" << alat.getDegMS() << " " << alon.getDegMS() << endl;
