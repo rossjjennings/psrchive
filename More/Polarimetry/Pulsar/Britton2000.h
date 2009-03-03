@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Britton2000.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/03/01 18:04:41 $
+   $Revision: 1.3 $
+   $Date: 2009/03/03 16:38:52 $
    $Author: straten $ */
 
 #ifndef __CalibrationBritton2000_H
@@ -22,7 +22,14 @@ namespace Calibration {
 
   //! Phenomenological description of the instrument
   /*! The transformation is represented by the product of a SingleAxis
-    transformation and Feed transformation. */
+    transformation, a two-dimensional boost and a two-dimensional
+    rotation.
+
+    Note that the free parameters are equal to one half of the values
+    shown in Equation 19 of Britton (2000).  For example,
+
+    b_1 = \delta_theta / 2
+  */
   class Britton2000 : public BackendFeed {
 
   public:
