@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -18,7 +18,7 @@ Pulsar::BrittonInfo::BrittonInfo (const PolnCalibrator* calibrator) :
 
 string Pulsar::BrittonInfo::get_title () const
 {
-  return "Parameterization: Britton (2000) Equation 18";
+  return "Parameterization: Britton (2000) Equation 19";
 }
 
 //! Return the name of the specified class
@@ -27,9 +27,9 @@ string Pulsar::BrittonInfo::get_name_feed (unsigned iclass) const
   switch (iclass)
   {
   case 0:
-    return "\\fi\\gd\\d\\gh,\\gc\\u\\fr (hrad.)";
+    return "\\fi\\gd\\dk\\u\\fr (deg.)";
   case 1:
-    return "\\fi\\gs\\d\\gh,\\gc\\u\\fr (deg.)";
+    return "\\fi\\gs\\dk\\u\\fr (deg.)";
   default:
     return "";
   }
@@ -46,10 +46,13 @@ Pulsar::BrittonInfo::get_param_feed (unsigned ichan, unsigned iclass,
 
   const MEAL::Complex2* xform = calibrator->get_transformation (ichan);
 
-  Estimate<double> angle = xform->get_Estimate (3 + iclass*2 + iparam);
+  /*
+    Note that the free parameters are equal to one half of the values
+    shown in Equation 19 of Britton (2000).  For example,
 
-  if (iclass == 1)
-    return 180.0 / M_PI * angle;
-  else
-    return angle;
+    b_1 = \delta_theta / 2
+
+    Therefore, the result is multiplied by two.
+  */
+  return xform->get_Estimate (3 + iclass*2 + iparam) * 2 * 180.0 / M_PI;
 }
