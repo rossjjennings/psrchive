@@ -20,11 +20,14 @@ void usage ()
 {
   cout <<
     "getHorizon - returns azimuth, zenith and parallactic angles\n"
-    "USAGE:\n"
     "\n"
-    "getHorizon -m MJD -c hh:mm:ss[.fs]<+|->dd:mm:ss[.fs] [-t telescope] [-M]"
+    "options:\n"
     "\n"
-    "  -M to switch to Meridian (X-Y) coordinates"
+    "  -c coord   coordinates of source in hh:mm:ss[.fs]<+|->dd:mm:ss[.fs] \n"
+    "  -d hours   duration of observation in hours \n"
+    "  -m mjd     time (MJD) of observation (start time if -d is used) \n"
+    "  -M         use Meridian (X-Y) coordinates \n"
+    "  -t site    telescope \n"
     "\n"
        << endl;
 }
@@ -118,10 +121,10 @@ int main (int argc, char* argv[])
     unsigned nsteps = 100;
     for (unsigned i=0; i<nsteps; i++)
     {
-      double seconds = (duration * i)/nsteps;
-      MJD cur = mjd + seconds;
+      double hours = (duration * i) / nsteps;
+      MJD cur = mjd + hours * 3600.0;
       directional->set_epoch( cur );
-      cout << seconds << " " << directional->get_vertical() * rad2deg << endl;
+      cout << hours << " " << directional->get_vertical() * rad2deg << endl;
     }
     return 0;
   }
