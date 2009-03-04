@@ -1,11 +1,15 @@
 /***************************************************************************
  *
- *   Copyright (C) 1999 by Willem van Straten
+ *   Copyright (C) 1999-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <string.h>
+
 #include "strutil.h"
+
+#include <string.h>
+#include <ctype.h>
+
 using namespace std;
 
 // //////////////////////////////////////////////////////////////////
@@ -94,6 +98,17 @@ int stringfload (vector<string>* lines, const string& filename)
   return ret;
 }
 
+// test that every character in a string is printable
+bool printable (const char* s)
+{
+  size_t length = strlen (s);
+  for (const char* t=s; t < s+length; t++)
+    if ( !isprint(*t) )
+      return false;
+
+  return true;
+}
+
 int stringload (vector<string>* lines, FILE* fptr)
 {
   static char* rdline = NULL;
@@ -101,14 +116,19 @@ int stringload (vector<string>* lines, FILE* fptr)
 
   char* whitespace = " \t\n";
   // load the lines from file
-  while (fgets (rdline, FILENAME_MAX, fptr) != NULL) {
+  while (fgets (rdline, FILENAME_MAX, fptr) != NULL)
+  {
     char* eol = strchr (rdline, '#');
     if (eol)
       *eol = '\0';
     char* line = strtok (rdline, whitespace);
-    if (line) {
+
+    // if the string is not printable, then fptr is likely binary
+    if (!printable (rdline))
+      return -1;
+
+    if (line)
       lines->push_back (string(line));
-    }
   }
   return 0;
 }
@@ -122,10 +142,10 @@ void loadlines (const std::string& filename, std::vector<std::string>& lines)
   if (!input)
     throw Error (FailedSys, "loadlines", "ifstream (" + filename + ")");
 
-  std::string line;\
+  std::string line;
 
-  while (!input.eof()) {
-
+  while (!input.eof())
+  {
     std::getline (input, line);
     line = stringtok (&line, "#\n", false);  // get rid of comments
 
@@ -133,6 +153,5 @@ void loadlines (const std::string& filename, std::vector<std::string>& lines)
       continue;
 
     lines.push_back (line);
-
   }
 }
