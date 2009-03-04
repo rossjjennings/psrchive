@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.39 $
-   $Date: 2008/12/19 00:30:07 $
-   $Author: straten $ */
+   $Revision: 1.40 $
+   $Date: 2009/03/04 03:39:43 $
+   $Author: jonathan_khoo $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -86,6 +86,8 @@ using std::string;
 using std::vector;
 using std::ios;
 using std::ostream;
+using std::setfill;
+using std::setw;
 using Pulsar::Archive;
 using Pulsar::Profile;
 using Pulsar::Integration;
@@ -504,8 +506,7 @@ void Flux( Reference::To< Archive > archive )
     archive->convert_state (Signal::Stokes);
 
   cout << header_marker;
-  cout << "File\t\t\tSub\tChan\tPol\tMJD\t\tFreq\tFlux\tUnit\t10\% Width\t50\% Width"
-  << endl;
+  cout << "File\t\t\t Sub Chan  Pol\t     MJD        Freq\t  S(mJy)    W10       W50" << endl;
 
   int fchan = 0, lchan = archive->get_nchan() - 1;
   if( ichan <= lchan && ichan >= fchan)
@@ -524,27 +525,24 @@ void Flux( Reference::To< Archive > archive )
   float junk;
   cout.setf(ios::fixed,ios::floatfield);
 
+  const string filename = archive->get_filename();
+  const double start_time = archive->start_time().in_days();
+  const double frequency = archive->get_centre_frequency();
+  const uint npol = archive->get_npol();
+
   for (int s = fsub; s <= lsub; s++)
   {
     for (int c = fchan; c <= lchan; c++)
     {
-      for (unsigned k = 0; k < archive->get_npol(); k++)
+      for (unsigned p = 0; p < npol; p++)
       {
-        cout << archive->get_filename() << "\t";
-        cout << s << "\t" << c << "\t" << k << "\t";
-		cout.precision(3);
-		cout << archive->start_time() << "\t";
-		cout.precision(1);
-		cout << archive->get_centre_frequency() << "\t";
-		cout.precision(5);
-        cout << flux(archive->get_Profile(s,k,c),dc, -1);
-        if (archive->get_scale() == Signal::Jansky)
-          cout << "\t" << "mJy";
-        else
-          cout << "\t" << "Arb";
-        cout << "\t" << width(archive->get_Profile(s,k,c),junk, 10,dc);
-        cout << "\t\t" << width(archive->get_Profile(s,k,c),junk, 50,dc)
-        << endl;
+        const float fluxDen = flux(archive->get_Profile(s,p,c),dc, -1);
+        const float width_10 = width(archive->get_Profile(s,p,c),junk, 10,dc);
+        const float width_50 = width(archive->get_Profile(s,p,c),junk, 50,dc);
+
+        printf("%s\t%4d %4d %4d %12.3f %10.3f %8.3f %9.5f %9.5f\n",
+                filename.c_str(), s, c, p, start_time, frequency, fluxDen,
+                width_10, width_50);
       }
     }
   }
