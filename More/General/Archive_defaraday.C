@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,6 +8,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Pulsar.h"
+#include "Pauli.h"
 
 using namespace std;
 
@@ -27,8 +28,11 @@ void Pulsar::Archive::defaraday ()
   if (!get_poln_calibrated() && verbose)
     warning << "Pulsar::Archive::defaraday data not calibrated" << endl;
 
+  Pauli::basis().set_basis( get_basis() );
+
   for (unsigned i = 0; i < get_nsubint(); i++)
     get_Integration(i)->defaraday ();
   
   set_faraday_corrected (true);
 }
+

@@ -1,28 +1,29 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2002-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Integration.h"
 #include "Pulsar/FaradayRotation.h"
+#include "Pauli.h"
 
 #include <iostream>
 using namespace std;
-
-static Pulsar::FaradayRotation* xform = 0;
 
 /*! 
   Calls FaradayRotation::transform
 */
 void Pulsar::Integration::defaraday () try {
 
+  Pauli::basis().set_basis( get_basis() );
+
   if (verbose)
     cerr << "Pulsar::Integration::defaraday RM=" << get_rotation_measure()
 	 << " fixed=" << get_faraday_corrected() << endl;
 
-  if (!xform)
-    xform = new FaradayRotation;
+  Reference::To<Pulsar::FaradayRotation> xform = new FaradayRotation;
 
   xform->transform (this);
 
@@ -44,8 +45,9 @@ void Pulsar::Integration::defaraday (unsigned ichan, unsigned kchan,
                                      double rm, double f0)
 try {
 
-  if (!xform)
-    xform = new FaradayRotation;
+  Pauli::basis().set_basis( get_basis() );
+
+  Reference::To<Pulsar::FaradayRotation> xform = new FaradayRotation;
 
   xform->set_rotation_measure( rm );
   xform->set_reference_frequency( f0 );
@@ -56,6 +58,8 @@ try {
   xform->range (this, ichan, kchan);
 
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::Integration::defaraday [private]";
 }
+
