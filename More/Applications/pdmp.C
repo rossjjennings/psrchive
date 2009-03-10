@@ -7,7 +7,7 @@
 
 //
 // Searches over trial DM and Period ranges and obtains the optimal
-// DM and Period giving the highest S/N, plot SNR vs Period vs DM,
+// DM and Period giving the highest S/N, plots SNR vs Period vs DM,
 // Phase vs Time, Phase vs Frequency
 //
 
@@ -20,7 +20,6 @@
 #include <time.h>
 #include <sstream>
 #include <map>
-#include <algorithm>
 
 #include "ColourMap.h"
 #include "dirutil.h"
@@ -53,21 +52,12 @@
 #include <phcx.h>
 #endif
 
-#define RATIO 10.0
 
 #define F77_smooth_mw F77_FUNC_(smooth_mw,SMOOTH_MW)
 #define MAKE_STRING( msg )  ( ((std::ostringstream&)(std::ostringstream() << msg)).str() )
 
 using namespace std;
 using namespace Pulsar;
-
-#define F77_smooth_mmw F77_FUNC_(smooth_mmw,SMOOTH_MMW)
-  
-extern "C" void F77_smooth_mmw (float* period, int* nbin, int * minw, 
-				int* maxw, float* rms,
-                               int * kwmax, float * snrmax, float * smmax,
-                               float * workspace); 
-
 
 extern "C" void F77_smooth_mw (float* period, int* nbin, int* maxw, float* rms,
                                int * kwmax, float * snrmax, float * smmax,
@@ -103,12 +93,10 @@ vector<Reference::To<Pulsar::Archive> > get_archives(string filename);
 //   * refP is Topocentric
 //   * refP, periodOffset_us, periodStep_us and periodHalfRange_us are all in microseconds
 
-void plotSNRdm (string & filename, double bestDM);
-
 void solve_and_plot (Archive* archive,
 		     double dmOffset, double dmStep, double dmHalfRange,
 		     double periodOffset_us, double periodStep_us, double periodHalfRange_us,
-		     ProfilePlot* total_plot, TextInterface::Parser* flui, double minwidthsecs);
+		     ProfilePlot* total_plot, TextInterface::Parser* flui);
 
 // Default call to solve_and_plot above
 // archive: The archive data
@@ -116,7 +104,7 @@ void solve_and_plot (Archive* archive,
 // refP: The reference Period in microseconds
 
 void solve_and_plot (Archive* archive,
-		     ProfilePlot* total_plot, TextInterface::Parser* flui, double minwidthsecs);
+		     ProfilePlot* total_plot, TextInterface::Parser* flui);
 
 // Gets the natural DM step if none was provided
 // Precondition: nchan > 1
@@ -171,9 +159,7 @@ void goToPhaseTimeTitleViewPort();
 void scrunchPartially(Archive * scrunchedCopy);
 
 // Get the SNR for the archive.
-//float getSNR(const Archive * archive, float rms, int minwidthbins);
-float getSNR(const Profile * p, float rms, int minwidthbins);
-float getSNR(const Profile * p, float rms, int minwidthbins, int maxwidthbins);
+float getSNR(const Archive * archive, float rms);
 
 // Get the RMS of the archive
 float getRMS (const Archive * archive);
@@ -181,11 +167,9 @@ float getRMS (const Archive * archive);
 void setSensibleStepSizes(const Archive * archive);
 
 // Parse the command line parameters and set the values passed through as arguments
-// Parse the command line parameters and set the values passed through as arguments
-void parseParameters(int argc, char **argv, double &periodOffset_us, double &periodStep_us, double &periodHalfRange_us, 
-	                   double &dmOffset, double &dmStep, double &dmHalfRange, 
-		     string &plot_device, pgplot::ColourMap::Name &colour_map, double &minwidth
-		     ,string & bestfilename);
+void parseParameters(int argc, char **argv, double &periodOffset_us, double &periodStep_us, double &periodHalfRange_us,
+	                   double &dmOffset, double &dmStep, double &dmHalfRange,
+									   string &plot_device, pgplot::ColourMap::Name &colour_map);
 
 // Parses a string to a number and checks if that value is a positive value
 //
@@ -333,7 +317,7 @@ void drawBestValuesCrossHair( const Archive * archive,
 void printResults(const Archive * archive);
 
 // Writes important information into output files
-void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint);
+void writeResultFiles(Archive * archive);
 
 string get_scale(const Archive * archive);
 
@@ -404,9 +388,6 @@ unsigned bestPulseWidth;
 // the 'array' of signal-to-noise with varying p/dm trial
 vector<float> SNRs;
 
-vector<float> bestSNRfreq;
-vector<float> bestSNRtime;
-vector<float> bestSNRtimefreq;
 
 Reference::To<Pulsar::Profile> bestProfile;
 
@@ -422,7 +403,6 @@ float liney = HEADER_Y;
 bool verbose = false;
 bool force = false;
 bool silent = false;
-bool debug = false;
 
 bool output_phcx=false;
 char output_phcx_file[128];
@@ -484,7 +464,6 @@ void usage (bool verbose_usage)
     " -ps  <period step>             Period step in us         (default=natural)\n"
     " -s   <profile file>            Use <profile file> as a standard profile to\n"
 		"                                compare with\n"
-    " -b   <bestfilename>            file output from best of SNR vs DM\n"
     "\n"
     "Selection & configuration options:\n"
     " -g <dev>   Manually specify a plot device\n"
@@ -505,7 +484,6 @@ void usage (bool verbose_usage)
 		" --help     Display a complete list of help options\n"
 		" -v         Verbose output\n"
 		" -S         Silent mode. Reduce text written to standard output.\n"
-		" -G         Debug mode. Tell all SCINT SNRs.\n"
 		<< endl;
 		if (verbose_usage) {
 			cout <<
@@ -559,8 +537,7 @@ void init() {
 
 void parseParameters(int argc, char **argv, double &periodOffset_us, double &periodStep_us, double &periodHalfRange_us,
 	                double &dmOffset, double &dmStep, double &dmHalfRange,
-		     string &plot_device, pgplot::ColourMap::Name &colour_map,
-		     double &minwidth, string & bestfilename) {
+									string &plot_device, pgplot::ColourMap::Name &colour_map) {
 	string optionArg;
 
 	// If no command line argument was provided, then print out usage
@@ -612,12 +589,6 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 			parseAndValidateDouble("-do", argv[i], dmOffset);
 		}
 
-		// min width in secs 
-		else if (strcmp(argv[i], "-mw") == 0) { 
-			i++;
-			parseAndValidateDouble("-mw", argv[i], minwidth);			
-		}
-
 		// graph device
 		else if (strcmp(argv[i], "-g") == 0) {
 			i++;
@@ -625,14 +596,6 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 
 			if (verbose)
 				cout << "Using plot device " << plot_device << endl;
-		}
-
-		else if (strcmp(argv[i], "-b") == 0) {
-			i++;
-			bestfilename = argv[i];
-
-			if (verbose)
-				cout << "Using bestfilename " << bestfilename << endl;
 		}
 
 		// colour map
@@ -704,10 +667,6 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 			exit(0);
 	 	}
 
-		else if (strcasecmp(argv[i], "-G") == 0) {
-		  debug = true;
-	 	}
-
 		// verbose
 		else if (strcmp(argv[i], "-v") == 0) {
 			if (silent) {
@@ -775,7 +734,7 @@ void cpg_next ()
   cpgpage ();
 }
 
-void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilename);
+void process (Pulsar::Archive* archive);
 
 double periodOffset_us = 0;
 double periodStep_us = -1;
@@ -783,7 +742,6 @@ double periodHalfRange_us = -1;
 double dmOffset = 0;
 double dmStep = -1;
 double dmHalfRange = -1;
-FortranSNR snr_obj;
 
 int main (int argc, char** argv)
 {
@@ -792,21 +750,16 @@ int main (int argc, char** argv)
 	RealTimer clock;
 
 	double elapsed;
-	double minwidthsecs = 0.0;
 
 	string plot_device = "/xs";
 
 	string option;
-	string bestfilename = "";
 
 	pgplot::ColourMap::Name colour_map = pgplot::ColourMap::Heat;
 
 	// Get the command line parameters
 	parseParameters(argc, argv,  periodOffset_us, periodStep_us, periodHalfRange_us,
-	                dmOffset, dmStep, dmHalfRange, plot_device, colour_map, minwidthsecs,
-			bestfilename);
-
-	cout << "bestfilename " << bestfilename << endl;
+	                dmOffset, dmStep, dmHalfRange, plot_device, colour_map);
 
 	Pulsar::Archive::verbose = 0;
 
@@ -849,7 +802,7 @@ int main (int argc, char** argv)
 		cout << endl;
 
 		reorder(joined_archive);
-		process(joined_archive, minwidthsecs, bestfilename);
+		process(joined_archive);
 
 		// total->unload(newname); // THIS IS BROKEN!!!
 	}
@@ -863,7 +816,7 @@ int main (int argc, char** argv)
 	    // reset global variables
 	    init();
 
-	    process(archive, minwidthsecs, bestfilename);
+	    process(archive);
 	  }
 	  catch (Error& error)
 	  {
@@ -882,7 +835,7 @@ int main (int argc, char** argv)
 }
 
 
-void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilename)
+void process (Pulsar::Archive* archive)
 {
   dopplerFactor = getDopplerFactor(archive);
 
@@ -974,18 +927,15 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
 
   // Make sure to convert period to microseconds
   // Then solve for the best period and dm and plot the results
-  Reference::To<Archive> partial_archive = archive->clone();
   solve_and_plot (archive,
 		  dmOffset, dmStep, dmHalfRange, 
 		  periodOffset_us, periodStep_us, periodHalfRange_us,
-		  total_plot, flui, minwidthsecs);
+		  total_plot, flui);
 
   // Create two copies. One for the phase time plot and one
   // for the phase vs. frequency plot.
   Reference::To<Archive> phaseTimeCopy = archive->clone();
   Reference::To<Archive> phaseFreqCopy = archive->clone();
-
-  if (bestfilename!="") plotSNRdm(bestfilename, bestDM);
 
   phaseTimeCopy->set_dispersion_measure(bestDM);
   phaseTimeCopy->dedisperse();
@@ -1027,6 +977,7 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
   }
 #endif
 
+
   cpgsci(6);
   cpgslw(8);
   
@@ -1034,70 +985,8 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
   cpgsci(1);
 
   printResults(archive);
-
-  int tScint=0; 
-  int fScint=0; 
-  int tfScint=0;
-
-  // Determine SNR as a function of frequency, time and frequency and time into globals
-  // Already have archive, phaseTimeCopy and phaseFrequencyCopy plus bestPulseWidth 
-  phaseTimeCopy->fscrunch();
-  float rms = getRMS(phaseTimeCopy);
-  for (int i=0;i<phaseTimeCopy->get_nsubint();i++) {
-    float snr = getSNR(phaseTimeCopy->get_Profile(i,0,0), rms, bestPulseWidth, bestPulseWidth);
-    bestSNRtime.push_back(snr);
-    if (debug) cout << "SNRtime " << i << " " << snr << " " << bestSNR <<endl;
-    //    if (snr > bestSNR) tScint++; //cout << "TIMESCINTER "<< i << " "<< snr/bestSNR << endl;
-  }
-  sort(bestSNRtime.begin(),bestSNRtime.end());
-  float median_SNRtime = bestSNRtime[bestSNRtime.size()/2-1];
-  for (int i=0;i<bestSNRtime.size();i++){
-    if (bestSNRtime[i]>RATIO*median_SNRtime){
-      cout << "TIMESCINTER RATIO TEST FAIL: RATIO " << bestSNRtime[i]/median_SNRtime << endl;
-      tScint++;
-    }
-  }
-
-  rms = getRMS(phaseFreqCopy);
-  for (int i=0;i<phaseFreqCopy->get_nchan();i++) {
-    float snr = getSNR(phaseFreqCopy->get_Profile(0,0,i), rms, bestPulseWidth, bestPulseWidth);
-    bestSNRfreq.push_back(snr);
-    if (debug) cout << "SNRfreq " << i << " " << snr << endl;
-    //    if (snr > bestSNR) fScint++; //cout << "FREQSCINTER "<< i << " "<< snr/bestSNR << endl;
-  }
-
-  sort(bestSNRfreq.begin(),bestSNRfreq.end());
-  float median_SNRfreq = bestSNRfreq[bestSNRfreq.size()/2-1];
-  for (int i=0;i<bestSNRfreq.size();i++){
-    if (bestSNRfreq[i]>RATIO*median_SNRfreq){
-      cout << "FREQSCINTER RATIO TEST FAIL: RATIO " << bestSNRfreq[i]/median_SNRfreq << endl;
-      fScint++;
-    }
-  }
-
-  rms = getRMS(partial_archive);
-  partial_archive->pscrunch();
-  for (int i=0;i<partial_archive->get_nsubint();i++) {
-    for (int j=0;j<partial_archive->get_nchan();j++) {
-      float snr = getSNR(partial_archive->get_Profile(i,0,j), rms, bestPulseWidth, bestPulseWidth);
-      bestSNRtimefreq.push_back(snr);
-      if (debug) cout << "SNRtimefreq " << i << " " << j << " "<< snr << endl;
-      //if (snr > bestSNR) tfScint++;//cout << "TIMEFREQSCINTER "<< i << " "<< j << " " <<snr/bestSNR << endl;
-    }
-  }
-  sort(bestSNRtimefreq.begin(),bestSNRtimefreq.end());
-  float median_SNRtimefreq = bestSNRtimefreq[bestSNRtimefreq.size()/2-1];
-  for (int i=0;i<bestSNRtimefreq.size();i++){
-    if (bestSNRtimefreq[i]>RATIO*median_SNRtimefreq){ 
-      cout << "TIMEFREQSCINTER RATIO TEST FAIL: RATIO " << bestSNRtimefreq[i]/median_SNRtimefreq << endl;
-      tfScint++; 
-    }
-  }
-
-  writeResultFiles(archive,tScint,fScint,tfScint);
-
-  //&bestSNRtime[0]
-  //bestSNRtime.size()
+  writeResultFiles(archive);
+  
 }
 
 //  Try to find out the best DM and Period given:
@@ -1109,7 +998,7 @@ void solve_and_plot (Archive* archive,
 		     double dmOffset, double dmStep, double dmHalfRange,
 		     double periodOffset_us, double periodStep_us,
 		     double periodHalfRange_us,
-		     ProfilePlot* total_plot, TextInterface::Parser* flui, double minwidthsecs)
+		     ProfilePlot* total_plot, TextInterface::Parser* flui)
 {
 	// MJK: I have made the SNRs array global.. not sure if this will make
 	// anything not work (i.e. too much memory use?)
@@ -1122,18 +1011,16 @@ void solve_and_plot (Archive* archive,
 	double refP_us = getPeriod(archive) * MICROSEC;
 	double refDM = getDM(archive);
 
- 	int minwidthbins = (int) (minwidthsecs / getPeriod(archive) * nbin);
-
-	if (minwidthbins<1) minwidthbins=1;
-	if (minwidthbins>nbin/2) minwidthbins=nbin/2;
-
 	///////////////
 	// Get the RMS
 	float rms = getRMS(archive);
+	
 
 	// PSRCHIVE normalises the amplitudes after scrunching
 	// so need to compensate for this
 	rms = rms / sqrt(float(nchan*nsub));
+
+	//////////////
 
 	//////////////////////////////////////////////////////
 	// Find default step and half range if none provided
@@ -1191,12 +1078,15 @@ void solve_and_plot (Archive* archive,
 	// Begin the search for optimum DM and Period
 	// Foreach DM
 
+	cout << endl << endl << "DM bins: " << dmBins << endl;
+	cout << "Period bins: " << periodBins << endl;
+	cout << "Total bins: " << dmBins * periodBins << endl << endl;
+
         double backup_DM = archive->get_dispersion_measure ();
 
 	for (int dmBin = 0; dmBin < dmBins ; dmBin++)
         {
                 archive->set_dispersion_measure(currDM);
-		// total(false) scrunches in frequency but not time
 		Reference::To<Archive> dmLoopCopy = archive->total(false);
 
 		// Foreach Period (include one extra period bin at the end to scale with
@@ -1204,11 +1094,10 @@ void solve_and_plot (Archive* archive,
 		for (int periodBin = 0; periodBin <= periodBins; periodBin++) {
 
 			// print out the search progress
-			int percentComplete = (int)floor(100 * ((double)(periodBins*(dmBin) + periodBin) / 
-								(double)(periodBins * dmBins)));
+			int percentComplete = (int)floor(100 * ((double)(periodBins*(dmBin) + periodBin) / (double)(periodBins * dmBins)));
 
 			int displayPercentage = (int)floor((double)percentComplete/SHOW_EVERY_PERCENT_COMPLETE);
-			if (!silent) printf("%3d%%\r", displayPercentage*SHOW_EVERY_PERCENT_COMPLETE);
+			printf("%3d%%\r", displayPercentage*SHOW_EVERY_PERCENT_COMPLETE);
 
 			// Create a new (unscrunched) copy so the values can be testedget
 			Reference::To<Archive> periodLoopCopy = dmLoopCopy->clone();
@@ -1221,7 +1110,7 @@ void solve_and_plot (Archive* archive,
 
 			periodLoopCopy->tscrunch();
 
-			snr = getSNR(periodLoopCopy->get_Profile(0,0,0), rms, minwidthbins);
+			snr = getSNR(periodLoopCopy, rms);
 
 			if (verbose)	{
 				printf( "\nrefP topo = %3.10g, Set P = %3.15g dP = %3.15g\n",
@@ -1229,6 +1118,7 @@ void solve_and_plot (Archive* archive,
 				printf( "refDM = %3.10g, Set DM = %3.15g dDM = %3.15g, S/N = %3.10g\n\n",
 				refDM, currDM, currDM - refDM, snr);
 			}
+
 
 			if (snr > bestSNR) {
 
@@ -1245,16 +1135,13 @@ void solve_and_plot (Archive* archive,
 				bestProfile = periodLoopCopy->get_Profile(FIRST_SUBINT, FIRST_POL, FIRST_CHAN);
 
 				// get the width of the pulse
-				
-				bestPulseWidth = snr_obj.get_bestwidth();
+				int rise, fall;
+				find_spike_edges(bestProfile, rise, fall);
 
-				//int rise, fall;
-				//find_spike_edges(bestProfile, rise, fall);
-				//
-				//if (rise > fall)
-				//	bestPulseWidth = fall + (nbin - rise);
-				//else
-				//	bestPulseWidth = fall-rise;
+				if (rise > fall)
+					bestPulseWidth = fall + (nbin - rise);
+				else
+					bestPulseWidth = fall-rise;
 			}
 
 			// put this intensity into array
@@ -1314,9 +1201,9 @@ void solve_and_plot (Archive* archive,
 // Use the the default natural values for offset, step and half-range
 void solve_and_plot (Archive* archive,
 		     ProfilePlot* total_plot,
-		     TextInterface::Parser* flui, double minwidthsecs)
+		     TextInterface::Parser* flui)
 {
-  solve_and_plot(archive, 0,-1,-1, 0,-1,-1, total_plot, flui, minwidthsecs);
+  solve_and_plot(archive, 0,-1,-1, 0,-1,-1, total_plot, flui);
 }
 
 
@@ -1416,12 +1303,7 @@ void goToHeaderViewPort() {
 }
 
 void goToDMPViewPort() {
-	cpgsvp(0.05, 0.45, 0.68, 0.86);
-}
-
-void goToSNRdmViewPort() {
-  	cpgsvp(0.55, 0.95, 0.68, 0.86);
-	//	cpgswin(0.0-0.05*());
+	cpgsvp(0.05, 0.95, 0.68, 0.86);
 }
 
 void goToPhaseTimeViewPort() {
@@ -1506,33 +1388,16 @@ float getRMS (const Archive * archive) {
 	return rms;
 }
 
-/* 
-float getSNR (const Archive * archive, float rms, int minwidthbins) {
 
-Reference::To<Archive> copy = archive->clone();
+float getSNR (const Archive * archive, float rms) {
+
+	Reference::To<Archive> copy = archive->clone();
 	Reference::To<Profile> profile = copy->get_Profile(FIRST_SUBINT, FIRST_POL, FIRST_CHAN);
+	FortranSNR snr_obj;
 
 	snr_obj.set_rms( rms );
-	snr_obj.set_minwidthbins (minwidthbins);
-	return snr_obj.get_snr (profile);
-
-}
-*/
-
-float getSNR (const Profile * p, float rms, int minwidthbins) {
-
-	snr_obj.set_rms( rms );
-	snr_obj.set_minwidthbins (minwidthbins);
-	snr_obj.set_maxwidthbins (p->get_nbin()/2);
-	return snr_obj.get_snr (p);
-}
-
-float getSNR (const Profile * p, float rms, int minwidthbins, int maxwidthbins) {
-
-	snr_obj.set_rms( rms );
-	snr_obj.set_minwidthbins (minwidthbins);
-	snr_obj.set_maxwidthbins (maxwidthbins);
-	return snr_obj.get_snr (p);
+	Profile::snr_strategy.set( &snr_obj, &FortranSNR::get_snr );
+	return profile->snr();
 }
 
 bool isNumber(char * str) {
@@ -2396,7 +2261,7 @@ void printResults(const Archive * archive) {
 
 }
 
-void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
+void writeResultFiles(Archive * archive) {
 
 	double bcPeriod_s = getPeriod(archive) / dopplerFactor;
 	double refP_ms = bcPeriod_s * MILLISEC;
@@ -2416,7 +2281,7 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 	file = fopen("pdmp.posn", "at");
 
 	if (file != NULL) {
-		fprintf(file, " %s\t%3.3f\t%3.3f\t%3.2f\t%3.5f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%s\t%d\t%d\t%d\n",
+		fprintf(file, " %s\t%3.3f\t%3.3f\t%3.2f\t%3.5f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%s\n",
 		archive->get_source().c_str(),
 		glong,
 		glat,
@@ -2426,7 +2291,7 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 		periodError_ms,
 		bestDM,
 		dmError,
-		archive->get_filename().c_str(), tScint, fScint, tfScint);
+		archive->get_filename().c_str());
 	} else {
 		cerr << "pdmp: Failed to open file pdmp.posn for writing results\n";
 	}
@@ -2435,7 +2300,7 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 	file = fopen("pdmp.per", "at");
 
 	if (file != NULL) {
-		fprintf(file, " %3.6f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%3.3f\t%3.2f\t%s %d %d %d\n",
+		fprintf(file, " %3.6f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%3.3f\t%3.2f\t%s\n",
 		archive->start_time().intday() + archive->start_time().fracday(),
 		bestPeriod_bc_us/MILLISEC,
 		periodError_ms,
@@ -2443,7 +2308,7 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 		dmError,
 		bestPulseWidth * tbin_ms,
 		bestSNR,
-			archive->get_filename().c_str(),tScint,fScint,tfScint);
+		archive->get_filename().c_str());
 	} else {
 		cerr << "pdmp: Failed to open file pdmp.per for writing results\n";
 	}
@@ -2470,102 +2335,6 @@ void plotProfile(const Profile * profile, ProfilePlot* plot, TextInterface::Pars
 	double tickSpace = cpgrnd((max-min)/(float)(NUM_VERT_PROFILE_TICKS-1), &div);
 
 	cpgbox ("BINTS", 0.0, 0, "BNTSI", tickSpace, 0);
-}
-
-void readsum (string & filename, int * ndat, float*dms, float*snrs){
-
-  vector<float> d;
-  vector<float> s;
-
-  FILE * f;
-  f=fopen(filename.c_str(), "r");
-  if (f==NULL){
-    fprintf(stderr, "Could not open file %s\n", filename.c_str());
-    *ndat=0;
-    return;
-  }
-
-  char st[200];
-  // skip two lines
-  fgets(st,200,f);
-  fgets(st,200,f);
-
-  // now read in data
-
-  *ndat=0;
-  while (fgets(st,200,f)!='\0'){
-    int count; float dm,ss;
-    sscanf(st,"%d %f %f",&count,&dm,&ss);  
-    d.push_back(dm);
-    s.push_back(ss);
-    //fprintf(stderr, "count = %d\n",count);
-    //fprintf(stderr, "dm = %f\n",dm);
-    (*ndat)++;
-    //fprintf(stderr, "ndat = %d\n",*ndat);
-  }
-  fclose(f);
-
-  //dms = new float[*ndat];
-
-  //  dms = (float *) malloc(*ndat*sizeof(float));
-
-  //snrs = new float[*ndat];
-
-  // snrs = (float *) malloc(*ndat*sizeof(float));
-  for (int i=0;i<*ndat;i++){
-    dms[i]=d[i];
-    snrs[i]=s[i];
-  }
-}
-
-void getrange(int n, float * d, float * xmin, float * xmax){
-  
-  *xmin=d[0];
-  for (int i=1;i<n;i++){
-    if(d[i]<*xmin){
-      *xmin=d[i];
-    }
-  }
-  
-  *xmax=d[0];
-  for (int i=1;i<n;i++){
-    if(d[i]>*xmax){
-      *xmax=d[i];
-    }
-  }
-
-  //fprintf(stderr," xmin = %f, xmax = %f\n", *xmin, *xmax);
-
-}
-
-void plotSNRdm (string & filename, double bestDM){
-  int ndat;
-  float dms[10000], snrs[10000];
-
-  cout << "fn:" << filename << endl;
-
-  readsum(filename, &ndat, dms, snrs);
-
-  float xmin, xmax, ymin, ymax;
-  getrange(ndat, dms, &xmin, &xmax);
-  getrange(ndat, snrs, &ymin, &ymax);
-
-  goToSNRdmViewPort();
-
-  //cout << "ndat " << ndat << endl;
-
-  //cpgswin(0.0,1.0,0.0,1.0);
-  //  cpgswin((float)0.0-0.05*(xmax),(float)xmax*1.05,(float)0.0,(float)ymax*1.05);
-  cpgswin((float)0.0-0.05*(xmax),(float)xmax*1.05,(float)ymin-0.1*(ymin),(float)ymax*1.05);
-  cpgbox("BCNST",0.0,0,"BCNST",0.0,0);
-  cpgsci(2);
-  cpgmove((float) bestDM,0.0);
-  cpgdraw((float) bestDM,xmax);
-  cpgsci(1);
-  cpglab("DM", "SNR", "");
-  if (ndat>1) cpgline(ndat,dms,snrs);
-  if (ndat==1) cpgpt(1,dms,snrs,17);
-
 }
 
 void plotPhaseFreq (const Archive * archive, 
@@ -2994,7 +2763,7 @@ void setInitialXmlCandiateSection(const Archive * archive){
 		xml_candidate->sections[0].bestWidth=-1;
 		float rms = getRMS(archive);
 		rms = rms / sqrt(float(nchan*nsubint));
-		xml_candidate->sections[0].bestSnr=getSNR(total->get_Profile(0,0,0),rms);
+		xml_candidate->sections[0].bestSnr=getSNR(total,rms);
 		float period=getPeriod(archive);
 		xml_candidate->sections[0].bestTopoPeriod=period;
 		xml_candidate->sections[0].bestBaryPeriod=period/dopplerFactor;
@@ -3115,7 +2884,7 @@ void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod
 	section->bestWidth=bestPulseWidth/(float)nbin;
 	float rms = getRMS(archive);
 	rms = rms / sqrt(float(nchan*nsubint));
-	section->bestSnr=getSNR(total->get_Profile(0,0,0),rms);
+	section->bestSnr=getSNR(total,rms);
 	section->bestTopoPeriod=bestPeriod_bc_us/1000000.0*dopplerFactor;
 	section->bestBaryPeriod=bestPeriod_bc_us/1000000.0;
 	section->bestDm=bestDM;
