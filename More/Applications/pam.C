@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -241,7 +242,7 @@ int main (int argc, char *argv[]) try {
     int subint_extract_end = -1;
 
     bool new_cfreq = false;
-    float new_fr = 0.0;
+    double new_fr = 0.0;
     Signal::Source new_type = Signal::Unknown;
     string instrument;
     bool reverse_freqs = false;
@@ -322,7 +323,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.88 2009/02/17 17:35:17 demorest Exp $" << endl;
+	cout << "$Id: pam.C,v 1.89 2009/03/10 06:18:09 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -393,7 +394,7 @@ int main (int argc, char *argv[]) try {
 
       case 'o':
 	new_cfreq = true;
-	if (sscanf(optarg, "%f", &new_fr) != 1) {
+	if (sscanf(optarg, "%lf", &new_fr) != 1) {
 	  cout << "That is not a valid centre frequency" << endl;
 	  return -1;
 	}
@@ -733,12 +734,13 @@ int main (int argc, char *argv[]) try {
 
       reflections.transform( arch );
 
-      if (new_cfreq) {
-	float nc = arch->get_nchan();
-	float bw = arch->get_bandwidth();
-	float cw = bw / nc;
+      if (new_cfreq)
+      {
+	double nc = arch->get_nchan();
+	double bw = arch->get_bandwidth();
+	double cw = bw / nc;
 
-	float fr = new_fr - (bw / 2.0) + (cw / 2.0);
+	double fr = new_fr - (bw / 2.0) + (cw / 2.0);
 	
 	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
 	  for (unsigned j = 0; j < arch->get_nchan(); j++) {
@@ -791,13 +793,13 @@ int main (int argc, char *argv[]) try {
 
       if (flipsb) {
 	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
-	  vector<float> labels;
+	  vector<double> labels;
 	  labels.resize(arch->get_nchan());
 	  for (unsigned j = 0; j < arch->get_nchan(); j++) {
 	    labels[j] = arch->get_Integration(i)->get_centre_frequency(j);
 	  }
 	  for (unsigned j = 0; j < arch->get_nchan(); j++) {
-	    float new_frequency = labels[labels.size()-1-j];
+	    double new_frequency = labels[labels.size()-1-j];
 	    arch->get_Integration(i)->set_centre_frequency(j,new_frequency);
 	  }
 	}
