@@ -27,19 +27,17 @@
   <p>
 
 <p>
-<p>
-<a href="http://sourceforge.net/projects/<!--#echo var="project_name" -->">Summary</a>
-
-<p>
+<br>
+<br>
 <a href="/credits.shtml">Credits</a>
 
 <p>
 <br>
 <br>
 <small>hosted by</small><br>
-<a target="_top" href="http://sourceforge.net">
-<img src="http://sflogo.sourceforge.net/sflogo.php?group_id=<!--#echo var="project_sourceforge" -->&amp;type=1"
-     width="88" height="31" border="0" alt="SourceForge.net Logo"></a>
+
+<a target="_top" href="http://sourceforge.net/projects/<!--#echo var="project_name" -->">
+<img src="http://sflogo.sourceforge.net/sflogo.php?group_id=<!--#echo var="project_sourceforge" -->&type=13" width="120" height="30" border="0" alt="SourceForge.net. Fast, secure and Free Open Source software downloads"></a>
 
 </TD>
 
