@@ -6,7 +6,8 @@
  ***************************************************************************/
 
 #include "FTransform.h"
-#include <vector>
+#include "malloc16.h"
+
 #include <math.h>
 
 using namespace std;
@@ -14,19 +15,21 @@ using namespace std;
 /* Uses the Fourier shift theorem to shift an array */
 void FTransform::shift (unsigned npts, float* arr, double shift)
 {
-  vector<float> cmplx_arr (2*npts);
-  vector<float> fft_cmplx_arr (2*npts);
+  Array16<float> cmplx_arr (2*npts);
+  Array16<float> fft_cmplx_arr (2*npts);
 
   double shiftrad = 2*M_PI*shift/(double)npts;
 
-  for (unsigned i=0; i<npts; ++i) {
+  for (unsigned i=0; i<npts; ++i)
+  {
     cmplx_arr[2*i] = arr[i];
     cmplx_arr[2*i+1] = 0;
   }
 
   FTransform::fcc1d(npts, &(fft_cmplx_arr[0]), &(cmplx_arr[0]));
 
-  for (unsigned i=1; i<npts/2; ++i) {
+  for (unsigned i=1; i<npts/2; ++i)
+  {
     double phase = i*shiftrad;
     double cp = cos(phase);
     double sp = sin(phase);
