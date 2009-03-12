@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/strutil.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/09/08 05:11:53 $
+   $Revision: 1.10 $
+   $Date: 2009/03/12 09:17:08 $
    $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
@@ -31,6 +31,9 @@ std::string lowercase (std::string s);
 
 //! Makes the string uppercase
 std::string uppercase (std::string s);
+
+//! Return true if every character in string is printable
+bool printable (const std::string& s);
 
 // returns the filename without its path
 std::string basename (const std::string& filename);
