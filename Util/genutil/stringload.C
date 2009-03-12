@@ -98,17 +98,6 @@ int stringfload (vector<string>* lines, const string& filename)
   return ret;
 }
 
-// test that every character in a string is printable
-bool printable (const char* s)
-{
-  size_t length = strlen (s);
-  for (const char* t=s; t < s+length; t++)
-    if ( !isprint(*t) )
-      return false;
-
-  return true;
-}
-
 int stringload (vector<string>* lines, FILE* fptr)
 {
   static char* rdline = NULL;
