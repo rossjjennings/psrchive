@@ -95,6 +95,7 @@ libgenutil_la_SOURCES = \
 	FITSUTC.C \
 	NormalDistribution.C \
         Physical.C \
+	printable.C \
 	Probability.C \
         Plugin.C \
         RealTimer.C \
