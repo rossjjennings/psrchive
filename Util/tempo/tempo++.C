@@ -48,7 +48,10 @@ string Tempo::tmpdir = "/tmp/tempo/";
 string Tempo::ephem_filename = "pulsar.eph";
 
 // file to which tempo stderr will be redirected
-string Tempo::stderr_filename = ".stderr";
+string Tempo::stderr_filename = "stderr.txt";
+
+// file to which tempo stdout will be redirected
+string Tempo::stdout_filename = "stdout.txt";
 
 // //////////////////////////////////////////////////////////////////////
 // static storage of the tempo system call.
@@ -274,9 +277,10 @@ void Tempo::tempo (const string& arguments, const string& input)
   string runtempo = get_system() + " " + arguments;
 
   if (!Tempo::verbose)
-    runtempo += " > /dev/null 2> " + stderr_filename;
+    runtempo += " > " + stdout_filename + " 2> " + stderr_filename;
 
-  if (!input.empty()) {
+  if (!input.empty())
+  {
     string tmp_input = input;
     if (input[input.length()-1] != '\n')
       tmp_input += '\n';
@@ -293,8 +297,8 @@ void Tempo::tempo (const string& arguments, const string& input)
     throw Error (InvalidState, "Tempo::tempo",
                  "shell not available; insufficient resources");
 
-  while (retries) {    
-
+  while (retries)
+  {    
     if (chdir (get_directory().c_str()) != 0)
       throw Error (FailedSys, "Tempo::tempo",
 		   "failed chdir(" + get_directory() + ")");

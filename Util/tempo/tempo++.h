@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.28 $
-   $Date: 2009/03/15 06:55:52 $
+   $Revision: 1.29 $
+   $Date: 2009/03/15 15:12:40 $
    $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
@@ -73,6 +73,9 @@ namespace Tempo
 
   // base directory in which tempo will work
   extern std::string tmpdir;
+
+  // file to which tempo stdout output will be redirected
+  extern std::string stdout_filename;
 
   // file to which tempo stderr output will be redirected
   extern std::string stderr_filename;
