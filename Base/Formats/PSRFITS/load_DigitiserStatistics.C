@@ -65,7 +65,7 @@ void load_dig_stats_rows( fitsfile *fptr, DigitiserStatistics *ext )
 }
 
 
-void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
+void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr) try
 {
   int status = 0;
 
@@ -125,4 +125,7 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
   if (verbose > 2)
     cerr << "FITSArchive::load_digistat exiting" << endl;
 }
-
+ catch (Error& error)
+   {
+     throw error += "FITSArchive::load_DigitiserStatistics";
+   }

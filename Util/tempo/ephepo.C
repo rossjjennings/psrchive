@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 using namespace std;
+using Legacy::psrephem;
 
 void usage()
 {

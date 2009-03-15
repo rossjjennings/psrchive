@@ -34,11 +34,9 @@
 #include "Pulsar/ThresholdMatch.h"
 
 #include "Pulsar/Predictor.h"
-#include "fitsio_tempo.h"
 
 #include "psrfitsio.h"
 #include "strutil.h"
-#include "ephio.h"
 
 #include <string.h>
 
@@ -622,32 +620,11 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   // Load the parameters from the SUBINT HDU
   load_FITSSUBHdrExtension( fptr );
 
-  // Load the ephemeris from the FITS file
-  fits_movnam_hdu (fptr, BINARY_TBL, "PSREPHEM", 0, &status);
+  // Load the pulsar parameters
+  if (get_type() == Signal::Pulsar)
+    load_Parameters (fptr);
 
-  if (status == 0 && get_type() == Signal::Pulsar)
-  {
-    psrephem* eph = new psrephem;
-
-    ::load (fptr, eph);
-    set_dispersion_measure( eph->get_dm() );
-    set_rotation_measure( eph->get_double(EPH_RM) );
-
-    ephemeris = eph;
-
-    if (verbose > 2)
-      cerr << "FITSArchive::load_header ephemeris loaded" << endl;
-  }
-  else
-  {
-    ephemeris = 0;
-    set_dispersion_measure (0);
-    set_rotation_measure (0);
-
-    if (verbose > 2)
-      cerr << "FITSArchive::load_header no ephemeris" << endl;
-  }
-
+  // Load the pulse phase predictor
   load_Predictor (fptr);
   hdr_model = model;
 
@@ -947,38 +924,10 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
     cerr << "FITSArchive::unload_file finished with processing history" 
 	 << endl;
 
-  // Write the ephemeris to the FITS file
-  Reference::To<psrephem> write_eph;
-
   if (ephemeris)
-  {
-    write_eph = dynamic_cast<psrephem*>( ephemeris.get() );
-
-    if (!write_eph)
-      throw Error (InvalidState, "Pulsar::FITSArchive::unload",
-		   "pulsar parameter set is not a tempo ephemeris");
-  }
-
-  if (!write_eph && (dispersion_measure != 0.0 || rotation_measure != 0.0))
-  {
-    warning << "FITSArchive::unload_file creating psrephem to store DM/RM"
-	    << endl;
-    
-    write_eph = new psrephem;
-  }
-
-  if (write_eph)
-  {
-    write_eph->set_double (EPH_DM, dispersion_measure);
-    write_eph->set_double (EPH_RM, rotation_measure);
-
-    ::unload (fptr, write_eph);
-
-    if (verbose > 2)
-      cerr << "FITSArchive::unload_file ephemeris written" << endl;
-  }
+    unload_Parameters (fptr);    
   else
-    delete_hdu (fptr, "PSREPHEM");
+    delete_hdu (fptr, "PSRPARAM");
 
   unload_Predictor (fptr);
 

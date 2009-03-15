@@ -8,6 +8,7 @@
 
 #include "tempo++.h"
 #include "tempo_impl.h"
+#include "Angle.h"
 
 #include <fstream>
 #include <math.h>

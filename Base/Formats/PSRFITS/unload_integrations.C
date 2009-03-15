@@ -114,10 +114,13 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   psrfits_update_key (ffptr, "POL_TYPE", state_pol_type);
 
   psrfits_update_key (ffptr, "NPOL", (int) get_npol());
-  psrfits_update_key (ffptr, "NCHAN", (int) get_nchan());
   psrfits_update_key (ffptr, "NBIN", (int) get_nbin());
+  psrfits_update_key (ffptr, "NCHAN", (int) get_nchan());
 
   psrfits_update_key (ffptr, "CHAN_BW", get_bandwidth() / get_nchan());
+
+  psrfits_update_key (ffptr, "DM", get_dispersion_measure ());
+  psrfits_update_key (ffptr, "RM", get_rotation_measure ());
 
   // Set the sizes of the columns which may have changed
   

@@ -7,21 +7,24 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.45 $
-   $Date: 2008/06/17 06:18:55 $
+   $Revision: 1.46 $
+   $Date: 2009/03/15 06:55:52 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
 #define __PSREPHEM_H
 
 #include "Pulsar/Parameters.h"
+
 #include "MJD.h"
-#include "Angle.h"
+#include "sky_coord.h"
 
 #include "Error.h"
 
 #include <vector>
 #include <string>
+
+namespace Legacy {
 
 class psrephem : public Pulsar::Parameters
 {
@@ -84,11 +87,8 @@ class psrephem : public Pulsar::Parameters
   int create (const std::string& psr_name, int use_cwd=0)
     { return create (psr_name.c_str(), use_cwd); }
 
-  int load   (const char* filename);
-  int load   (const std::string& filename) { return load (filename.c_str()); }
-
-  int unload (const char* filename) const;
-  int unload (const std::string& fname) const { return unload (fname.c_str()); }
+  int load   (const std::string& filename);
+  int unload (const std::string& fname) const;
 
   int load   (std::string* str);
   int unload (std::string* str) const;
@@ -122,8 +122,6 @@ class psrephem : public Pulsar::Parameters
 
   // return some values
   std::string psrname() const;
-  friend bool operator == (const psrephem &, const psrephem &);
-  friend bool operator != (const psrephem &, const psrephem &);
 
   double get_dm() const;
   void   set_dm (double dm);
@@ -258,12 +256,17 @@ class psrephem : public Pulsar::Parameters
   void destroy ();
   void zero_work ();
 
-  int old_load (const char* filename);
-  int old_unload (const char* filename) const;
+  int old_load (const std::string& filename);
+  int old_unload (const std::string& filename) const;
 
 };
 
-std::ostream& operator<< (std::ostream& ostr, const psrephem& eph);
+}
+
+bool operator == (const Legacy::psrephem&, const Legacy::psrephem&);
+bool operator != (const Legacy::psrephem&, const Legacy::psrephem&);
+
+std::ostream& operator<< (std::ostream& ostr, const Legacy::psrephem& eph);
 
 #endif
 

@@ -271,5 +271,15 @@ void Pulsar::FITSArchive::load_state (fitsfile* fptr)
 
   if (chan_bw != zero)
     set_bandwidth (chan_bw * nchan);
+
+  double dm = 0.0;
+  psrfits_read_key (fptr, "DM", &dm, zero, verbose > 2);
+  if (dm != zero)
+    set_dispersion_measure (dm);
+
+  double rm = 0.0;
+  psrfits_read_key (fptr, "RM", &rm, zero, verbose > 2);
+  if (rm != zero)
+    set_rotation_measure (rm);
 }
 

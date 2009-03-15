@@ -1,16 +1,17 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Passband.h"
 #include "FITSError.h"
 
 using namespace std;
 
-void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
+void Pulsar::FITSArchive::load_Passband (fitsfile* fptr) try
 {
   int status = 0;
   char* comment = 0;
@@ -21,7 +22,8 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   // Move to the BANDPASS HDU
   fits_movnam_hdu (fptr, BINARY_TBL, "BANDPASS", 0, &status);
 
-  if (status == BAD_HDU_NUM) {
+  if (status == BAD_HDU_NUM)
+  {
     if (verbose == 3)
       cerr << "Pulsar::FITSArchive::load_Passband no BANDPASS HDU" << endl;
 
@@ -41,7 +43,8 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   int nch_orig = 0;
   fits_read_key (fptr, TINT, "NCH_ORIG", &nch_orig, comment, &status);
   
-  if (status != 0) {
+  if (status != 0)
+  {
     if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_key NCH_ORIG").warning() << endl;
@@ -50,8 +53,10 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
 
   int npol = 0;
   fits_read_key (fptr, TINT, "BP_NPOL", &npol, comment, &status);
-  if (status != 0) {
-    if(verbose == 3) {
+  if (status != 0)
+  {
+    if(verbose == 3)
+    {
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_key BP_NPOL").warning() << endl;
       cerr << "FITSArchive::load_Passband assuming BP_NPOL = 2" << endl;
@@ -64,10 +69,10 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
     cerr << "FITSArchive::load_Passband BANDPASS NCH_ORIG=" << nch_orig
          << " BP_NPOL=" << npol << endl;
   
-  if (npol <= 0 || nch_orig <= 0) {
-    if (verbose == 3) {
+  if (npol <= 0 || nch_orig <= 0)
+  {
+    if (verbose == 3)
       cerr << "FITSArchive::load_Passband Extension invalid" << endl; 
-    }
     return;
   }
   
@@ -84,7 +89,9 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   
   fits_read_col (fptr, TFLOAT, colnum, 1, 1, npol, &nullfloat,
 		 data_offsets, &initflag, &status);
-  if (status != 0) {
+
+  if (status != 0)
+  {
     if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_col DAT_OFFS").warning() << endl;
@@ -104,7 +111,9 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   
   fits_read_col (fptr, TFLOAT, colnum, 1, 1, npol, &nullfloat, 
 		 data_scales, &initflag, &status);
-  if (status != 0) {
+
+  if (status != 0)
+  {
     if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_col DAT_SCL").warning() << endl;
@@ -126,7 +135,9 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   
   fits_read_col (fptr, TINT, colnum, 1, 1, dimension, &nullfloat, 
 		 data, &initflag, &status);
-  if (status != 0) {
+
+  if (status != 0)
+  {
     if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_col DATA").warning() << endl;
@@ -141,9 +152,11 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
 
   int counter = 0;
   
-  for (int i = 0; i < npol; i++) {
+  for (int i = 0; i < npol; i++)
+  {
     bandpasses[i].resize(nch_orig);
-    for (int j = 0; j < nch_orig; j++) {
+    for (int j = 0; j < nch_orig; j++)
+    {
       bandpasses[i][j] = data[counter]*data_scales[i] + data_offsets[i];
       counter++;
     }
@@ -160,3 +173,7 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   if (verbose == 3)
     cerr << "FITSArchive::load_Passband exiting" << endl;
 }
+ catch (Error& error)
+   {
+     throw error += "FITSArchive::load_Passband";
+   }

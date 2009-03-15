@@ -26,6 +26,11 @@ install-am:
 	@echo "${PACKAGE_STRING} has been installed in ${prefix}"
 	@echo
 	@echo
+	@echo "  If you make use of PSRCHIVE in your publication, please cite"
+	@echo "             Hotan, van Straten & Manchester (2004)"
+	@echo "          (http://www.publish.csiro.au/?paper=AS04022)"
+	@echo
+	@echo
 
 where:
 	@echo

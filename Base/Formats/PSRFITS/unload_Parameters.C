@@ -5,16 +5,16 @@
  *
  ***************************************************************************/
 
-#include "T2Predictor.h"
+#include "Pulsar/FITSArchive.h"
+#include "Pulsar/Parameters.h"
 #include "unload_text.h"
 
 using namespace std;
 
-void unload_T2Predictor (fitsfile* fptr,
-			 const Tempo2::Predictor* model, bool verbose)
+void Pulsar::FITSArchive::unload_Parameters (fitsfile* fptr) const
 {
   if (verbose)
-    cerr << "unload_T2Predictor entered" << endl;
+    cerr << "Pulsar::FITSArchive::unload_Parameters" << endl;
 
-  unload_text (fptr, "T2PREDICT", "PREDICT", model, verbose);
+  unload_text (fptr, "PSRPARAM", "PARAM", ephemeris.get(), verbose > 3);
 }

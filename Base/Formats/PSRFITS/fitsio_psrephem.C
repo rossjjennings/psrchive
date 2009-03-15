@@ -30,6 +30,7 @@
 #endif
 
 using namespace std;
+using Legacy::psrephem;
 
 // utility function defined at the end of the file
 void datatype_match (int typecode, int ephind);
@@ -372,13 +373,13 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
 	break;
       }
     default:
-      delete strval;
+      delete [] strval;
       throw Error (InvalidState, "psrephem::load",
 		   "invalid parmType[%d]", ieph);
     }
 
     if (status != 0)  {
-      delete strval;
+      delete [] strval;
       throw FITSError (status, "psrephem::load", 
 		       "error parsing %s", parmNames[ieph]);
     }
@@ -395,7 +396,7 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
 
   }
 
-  delete strval;
+  delete [] strval;
 
   if (icol < ephind.size())
     cerr << "psrephem::load PSRFITS read " << icol <<"/" << ephind.size()
@@ -603,18 +604,18 @@ void unload (fitsfile* fptr, const psrephem* ephem, long row)
       }
 
     default:
-      delete strval;
+      delete [] strval;
       throw Error (InvalidState, "psrephem::unload",
 		   "invalid parmTypes[%d]=%d", ieph, parmTypes[ieph]);
 
     }
     
     if (status != 0) {
-      delete strval;
+      delete [] strval;
       throw FITSError (status, "psrephem::unload", "fits_write_col");
     }
   }
-  delete strval;
+  delete [] strval;
 }
 
 

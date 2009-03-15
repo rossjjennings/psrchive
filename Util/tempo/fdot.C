@@ -13,6 +13,7 @@
 #include <unistd.h>
 
 using namespace std;
+using Legacy::psrephem;
 
 void usage ();
 
@@ -61,7 +62,7 @@ int main (int argc, char** argv) try
 
   Tempo::Predict predict;
 
-  predict.set_parameters (ephemeris);
+  predict.set_parameters (&ephemeris);
   predict.set_ncoef (15);
   predict.set_nspan (120);
 

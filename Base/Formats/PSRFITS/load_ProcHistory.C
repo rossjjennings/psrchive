@@ -13,8 +13,17 @@
 #include "Pulsar/Pulsar.h"
 
 #include "psrfitsio.h"
+#include "strutil.h"
 
 using namespace std;
+
+void ensure_printable (string& text)
+{
+  if (printable(text))
+    return;
+
+  text = "";
+}
 
 void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow, float hdr_version )
 {
@@ -64,6 +73,12 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow, float hdr_version )
   psrfits_read_col (fptr, "NCHAN", &(hrow->nchan), row);
 
   psrfits_read_col (fptr, "CHAN_BW", &(hrow->chan_bw), row);
+
+  psrfits_read_col (fptr, "DM", &(hrow->dispersion_measure), row,
+		    zero, zero, Pulsar::Archive::verbose > 2);
+
+  psrfits_read_col (fptr, "RM", &(hrow->rotation_measure), row,
+		    zero, zero, Pulsar::Archive::verbose > 2);
 
   if (hdr_version < 3.5)
   {
@@ -121,23 +136,37 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow, float hdr_version )
   psrfits_read_col (fptr, "DDS_MTHD", &(hrow->dds_mthd), row,
 		    empty, empty, Pulsar::Archive::verbose > 2 );
 
+  ensure_printable (hrow->dds_mthd);
+
   psrfits_read_col (fptr, "SC_MTHD", &(hrow->sc_mthd), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);
+
+  ensure_printable (hrow->sc_mthd);
 
   psrfits_read_col (fptr, "CAL_MTHD", &(hrow->cal_mthd), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);
 
+  ensure_printable (hrow->cal_mthd);
+
   psrfits_read_col (fptr, "CAL_FILE", &(hrow->cal_file), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);
+
+  ensure_printable (hrow->cal_file);
 
   psrfits_read_col (fptr, "RFI_MTHD", &(hrow->rfi_mthd), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);
 
+  ensure_printable (hrow->rfi_mthd);
+
   psrfits_read_col (fptr, "IFR_MTHD", &(hrow->ifr_mthd), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);
 
+  ensure_printable (hrow->ifr_mthd);
+
   psrfits_read_col (fptr, "SCALE", &(hrow->scale), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);
+
+  ensure_printable (hrow->scale);
 
   // scale string interpretation is now done in load_integrations
 

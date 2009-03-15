@@ -2135,6 +2135,7 @@ string FetchValue( Reference::To< Archive > archive, string command )
 }
 
 
+static string current_filename;
 
 /**
 * ProcessArchive - load an archive and process all the command line parameters using the text finder.
@@ -2143,6 +2144,7 @@ string FetchValue( Reference::To< Archive > archive, string command )
 template<typename OS>
 void ProcessArchiveImplementation( OS& os, string filename )
 {
+  current_filename = filename;
   Reference::To< Archive > archive;
   try
   {
@@ -2202,6 +2204,7 @@ void ProcessArchive( string filename )
 
 void ExtractPolyco( string filename )
 {
+  current_filename = filename;
   Reference::To< Archive > archive = Archive::load( filename );
 
   if( !archive )
@@ -2227,12 +2230,16 @@ void ExtractPolyco( string filename )
 
 void ExtractEphemeris( string filename )
 {
+  current_filename = filename;
   Reference::To< Archive > archive = Archive::load( filename );
 
   if( !archive )
     return;
 
-  archive->get_ephemeris()->unload( stdout );
+  if( !archive->has_ephemeris() )
+    cout << "vap: " << filename << " has no ephemeris" << endl;
+  else
+    archive->get_ephemeris()->unload( stdout );
 }
 
 
@@ -2243,6 +2250,7 @@ void ExtractEphemeris( string filename )
 
 void ShowExtensions( string filename )
 {
+  current_filename = filename;
   Reference::To< Archive > archive = Archive::load( filename );
 
   cout << "Extensions for " << filename << endl;
@@ -2304,7 +2312,7 @@ void Header( OS& os )
 * main -
 **/
 
-int main( int argc, char *argv[] )
+int main( int argc, char *argv[] ) try
 {
   tostring_precision = 4;
   Angle::default_type = Angle::Degrees;
@@ -2348,5 +2356,8 @@ int main( int argc, char *argv[] )
 
   return 0;
 }
-
-
+ catch (Error& error)
+   {
+     cerr << "vap: error while handling " << current_filename << error << endl;
+     return -1;
+   }

@@ -16,7 +16,7 @@
 
 using namespace std;
 
-void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
+void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr) try
 {
   int status = 0;
  
@@ -139,3 +139,7 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
   if (verbose > 2)
     cerr << "FITSArchive::load_CalibratorStokes exiting" << endl;
 }
+ catch (Error& error)
+   {
+     throw error += "FITSArchive::load_CalibratorStokes";
+   }

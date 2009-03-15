@@ -13,7 +13,9 @@
 #include <slalib.h>
 
 #include <iostream>
+
 using namespace std;
+using Legacy::psrephem;
 
 // Binary phase wrt periastron at UTC MJD
 double get_binphs_peri(double mjd, const psrephem& eph, double freq, char site)

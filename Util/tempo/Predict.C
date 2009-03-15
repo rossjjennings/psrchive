@@ -1,13 +1,16 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Predict.h"
 
-#include "tempo++.h"
+#include "Pulsar/TextParameters.h"
 #include "psrephem.h"
+
+#include "tempo++.h"
 #include "polyco.h"
 #include "ephio.h"
 
@@ -25,7 +28,7 @@ double Tempo::Predict::maximum_rms = 0;
 
 static Warning warn;
 
-Tempo::Predict::Predict (const psrephem* parameters)
+Tempo::Predict::Predict (const Pulsar::Parameters* parameters)
 {
   nspan  = 120;
   ncoef = 15;
@@ -37,17 +40,6 @@ Tempo::Predict::Predict (const psrephem* parameters)
 
   if (parameters)
     set_parameters (parameters);
-}
-
-//! Set the parameters used to generate the predictor
-void Tempo::Predict::set_parameters (const Pulsar::Parameters* p)
-{
-  const psrephem* ephem = dynamic_cast<const psrephem*> (p);
-  if (!ephem)
-    throw Error (InvalidState, "Tempo::Predict::set_parameters",
-		 "Parameters are not psrephem");
-
-  set_parameters( *ephem );
 }
 
 //! Set the range of epochs over which to generate
@@ -121,24 +113,37 @@ void Tempo::Predict::set_ncoef (unsigned _ncoef)
   ncoef = _ncoef;
 }
 
-void Tempo::Predict::set_parameters (const psrephem& _parameters)
+//! Set the parameters used to generate the predictor
+void Tempo::Predict::set_parameters (const Pulsar::Parameters* p)
 {
-  if (parameters != _parameters)
+  if (parameters.get() != p)
     cached = 0;
 
-  parameters = _parameters;
+  const Pulsar::TextParameters* text_parameters;
+  text_parameters = dynamic_cast<const Pulsar::TextParameters*> (p);
+  if (text_parameters)
+  {
+    text_parameters->get_value (nspan, "TZNSPAN", false);
+    text_parameters->get_value (ncoef, "TZNCOEF", false);
+  }
 
-  if (parameters.parmStatus[EPH_TZNSPAN]==1)
-    nspan = parameters.value_integer[EPH_TZNSPAN];
+  const Legacy::psrephem* old_psrephem;
+  old_psrephem = dynamic_cast<const Legacy::psrephem*> (p);
+  if (old_psrephem)
+  {
+    if (old_psrephem->parmStatus[EPH_TZNSPAN]==1)
+      nspan = old_psrephem->value_integer[EPH_TZNSPAN];
+    if (old_psrephem->parmStatus[EPH_TZNCOEF]==1)
+      ncoef = old_psrephem->value_integer[EPH_TZNCOEF];
+  }
 
-  if (parameters.parmStatus[EPH_TZNCOEF]==1)
-    ncoef = parameters.value_integer[EPH_TZNCOEF];
+  parameters = p;
 
-  psrname = parameters.psrname();
+  psrname = parameters->get_name ();
 
   if (psrname.empty())
-    throw Error (InvalidParam, "Tempo::predict::set_parameters", 
-		 "psrephem::psrname is empty");
+    throw Error (InvalidParam, "Tempo::Predict::set_parameters", 
+		 "pulsar name is empty");
 
   // remove all garbage from front of pulsar name (not just J)
   while (psrname.length() && !isdigit(psrname[0]))
@@ -252,7 +257,7 @@ polyco Tempo::Predict::generate_work () const
 
     if (Tempo::verbose)
       cerr << "Tempo::predict writing " << ephname << endl;
-    parameters.unload (ephname);
+    parameters->unload (ephname);
     
     string arguments = " -z -f " + ephem_filename;
     string input;
@@ -353,9 +358,8 @@ polyco Tempo::Predict::generate_work () const
 
           if (rms_turns > maximum_rms)
           {
-            double rms_us = rms_turns * parameters.p() * 1e6;
             warn << "Tempo::Predict::generate WARNING rms=" 
-                 << rms_us << " microseconds" << endl;
+                 << rms_turns * 1e3 << " milliturns" << endl;
             warn << "Tempo::Predict::generate "
                     "http://psrchive.sourceforge.net/warnings/tempo" << endl;
           }

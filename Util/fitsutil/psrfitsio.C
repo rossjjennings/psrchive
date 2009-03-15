@@ -154,18 +154,18 @@ void psrfits_read_col_work( fitsfile *fptr, const char *name,
     return; 
  
   char* nullstr = const_cast<char*>( null.c_str() );
-  
-  auto_ptr<char> temp( new char[repeat + 1] );
-  char* temp_ptr = temp.get();
+  char* tempstr = new char[repeat + 1];
 
   int anynul = 0;
   fits_read_col( fptr, TSTRING,
 		 colnum, row,
-		 1, 1, &nullstr, &temp_ptr, 
+		 1, 1, &nullstr, &tempstr, 
 		 &anynul, status );
 
   if (*status == 0)
-    *data = temp.get();
+    *data = tempstr;
+
+  delete [] tempstr;
 }
 
 void* FITS_void_ptr (const string& txt)

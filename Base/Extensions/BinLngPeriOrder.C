@@ -9,6 +9,7 @@
 #include "psrephem_orbital.h"
 
 using namespace std;
+using Legacy::psrephem;
 
 //! Default constructor
 Pulsar::BinLngPeriOrder::BinLngPeriOrder ()

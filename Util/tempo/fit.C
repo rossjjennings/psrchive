@@ -9,7 +9,6 @@
 #include "toa.h"
 #include "residual.h"
 #include "resio.h"
-#include "psrephem.h"
 #include "Error.h"
 
 #include <stdio.h>
@@ -22,9 +21,9 @@ using namespace std;
 // ////////////////////////////////////////////////////////////////////////
 // Tempo::fit
 //
-// runs TEMPO on a vector of toa objects, using a given psrephem object.
+// runs TEMPO on a vector of toa objects, using a given Parameters object.
 // returns a vector of residual objects, along with a new "post-fit"
-// psrephem object.
+// Parameters object.
 //
 // model     - input TEMPO-style PSR ephemeris
 // toas      - input toas
@@ -33,8 +32,10 @@ using namespace std;
 //             be loaded
 // ////////////////////////////////////////////////////////////////////////
 
-void Tempo::fit (const psrephem& model, vector<toa>& toas,
-		 psrephem* postfit, bool track, Tempo::toa::State min_state)
+void Tempo::fit (const Pulsar::Parameters* model, vector<toa>& toas,
+		 Pulsar::Parameters* postfit,
+		 bool track,
+		 Tempo::toa::State min_state)
 {
   char* tempo_tim = "arrival.tim";
   char* tempo_par = "arrival.par";
@@ -110,7 +111,7 @@ void Tempo::fit (const psrephem& model, vector<toa>& toas,
   // unload the ephemeris
   if (verbose)
     cerr << "Tempo::fit writing parameters to '" << tempo_par << "'" << endl;
-  model.unload(tempo_par);
+  model->unload(tempo_par);
 
   // run TEMPO
   string runtempo = get_system() + " " + string(tempo_tim) + " > /dev/null";
@@ -131,7 +132,7 @@ void Tempo::fit (const psrephem& model, vector<toa>& toas,
   
   // load the new ephemeris (PSRNAME.par in current working directory)
   if (postfit)
-    postfit->load( (model.psrname() + ".par").c_str() );
+    postfit->load( (model->get_name() + ".par").c_str() );
 
   // load the residuals from resid2.tmp
   fortopen_ (&r2flun, tempo_res, (int) strlen(tempo_res));

@@ -7,15 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.27 $
-   $Date: 2008/05/24 09:06:39 $
+   $Revision: 1.28 $
+   $Date: 2009/03/15 06:55:52 $
    $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
 #define __TEMPO_PP_H
 
+#include "Pulsar/Parameters.h"
+
 #include "polyco.h"
-#include "psrephem.h"
 #include "toa.h"
 #include "Observatory.h"
 
@@ -85,27 +86,13 @@ namespace Tempo
     output files (created by tempo) can be found here. */
   void tempo (const std::string& arguments, const std::string& input);
 
-  // given a tempo ephemeris, generate toas over the range of MJD given
-  // with characteristics specififed by rms and error.
-  //   model      - tempo ephemeris
-  //   toas       - return value
-  //   start,end  - delimit epoch
-  //   interval   - separation between points in minutes
-  //   rms        - gaussian noise specified in microseconds
-  //   error      - width of normal distribution of errors (not implemented)
-  void fake (std::vector<toa>& toas, const psrephem& model,
-	     const MJD& start, const MJD& end, double interval,
-	     float rms = 0.0, float error = 0.0, float lst_range = 8.0);
-
-  // given pulsar parameters and times of arrival, calls TEMPO to determine
-  // the residual TOA.
-  void fit (const psrephem& model, std::vector<toa>& toas,
-	    psrephem* postfit = NULL, bool track=false,
+  //! Run tempo to fit the model to the data
+  void fit (const Pulsar::Parameters* model, 
+	    std::vector<toa>& data,
+	    Pulsar::Parameters* postfit = NULL,
+	    bool track = false,
 	    Tempo::toa::State min_state = Tempo::toa::Normal);
-    
-  polyco span (const polyco& first_poly, const polyco& second_poly,
-	       const psrephem& pephem);
-  
+
 }
 
 #endif

@@ -2,7 +2,7 @@
 noinst_LTLIBRARIES = libtempo.la
 
 nobase_include_HEADERS = Pulsar/Predictor.h Pulsar/Parameters.h \
-	Pulsar/Generator.h Pulsar/Site.h
+	Pulsar/Generator.h Pulsar/Site.h Pulsar/TextParameters.h
 
 include_HEADERS = psrephem.h ephio_func.h psrephem_orbital.h \
 	polyco.h Phase.h toa.h residual.h resio.h tempo++.h Predict.h \
@@ -15,7 +15,8 @@ libtempo_la_SOURCES = keys.dat ephio_c.c ephio.f \
 	getlun.f length.f posparse.f strmatch.f upcase.f zeropad.f \
 	polyco.C Phase.C toa.C residual.C resio.f \
 	tempo++.C Predict.C fit.C inverse_phase.C \
-	Observatory.C obsys.C itoa.C tempo_impl.h
+	Observatory.C obsys.C itoa.C tempo_impl.h \
+	Parameters.C TextParameters.C
 
 nodist_libtempo_la_SOURCES = ephio_def.c
 

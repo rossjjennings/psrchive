@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "ephio.h"
 #include "psrephem.h"
 #include "orbital.h"
@@ -13,6 +14,7 @@
 #include <math.h>
 
 using namespace std;
+using Legacy::psrephem;
 
 #define sqr(x) (x*x)
 #define cube(x) (x*x*x)

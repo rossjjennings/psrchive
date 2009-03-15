@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 using namespace std;
+using Legacy::psrephem;
 
 int main (int argc, char** argv)
 {

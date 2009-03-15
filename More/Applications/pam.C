@@ -9,6 +9,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Parameters.h"
 
 // Extensions this program understands
 
@@ -29,9 +30,7 @@
 
 #include "Pulsar/counter_drift.h"
 
-#include "psrephem.h"
-#include "ephio.h"
-
+#include "load_factory.h"
 #include "dirutil.h"
 #include "strutil.h"
 #include "Error.h"
@@ -217,7 +216,7 @@ int main (int argc, char *argv[]) try {
 
     bool flipsb = false;
 
-    psrephem* new_eph = 0;
+    Pulsar::Parameters* new_eph = 0;
 
     string command = "pam";
 
@@ -323,7 +322,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.89 2009/03/10 06:18:09 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.90 2009/03/15 06:55:52 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -348,7 +347,7 @@ int main (int argc, char *argv[]) try {
       case 'E':
 
 	try {
-	  new_eph = new psrephem (optarg);
+	  new_eph = factory<Pulsar::Parameters> (optarg);
 	}
 	catch (Error& error) {
 	  cerr << "Could not load new ephemeris from " << optarg << endl;
@@ -768,24 +767,12 @@ int main (int argc, char *argv[]) try {
       if( name != string() )
 	arch->set_source( name );
 
-      if (new_eph) try {
-
-	if (new_eph->parmStatus[EPH_DM]) {
-	  arch->set_dispersion_measure( new_eph->value_double[EPH_DM] );
-	  if (arch->get_dedispersed())
-	    arch->dedisperse();  // dedisperse to the new DM
-	}
-
-	if (new_eph->parmStatus[EPH_RM]) {
-	  arch->set_rotation_measure( new_eph->value_double[EPH_RM] );
-	  if (arch->get_faraday_corrected())
-	    arch->defaraday();  // defaraday to the new RM
-	}
-
+      if (new_eph) try
+      {
 	arch->set_ephemeris(new_eph);
-
       }
-      catch (Error& error) {
+      catch (Error& error)
+      {
 	cerr << "Error while installing new ephemeris: " 
 	     << error.get_message() << endl;
         continue;

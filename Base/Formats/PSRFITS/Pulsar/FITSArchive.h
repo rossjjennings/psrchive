@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.59 $
-   $Date: 2009/02/05 01:32:12 $
+   $Revision: 1.60 $
+   $Date: 2009/03/15 06:55:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -178,6 +178,12 @@ namespace Pulsar {
     void load_amps (fitsfile*, Integration*, unsigned isubint, int colnum);
 
     // //////////////////////////////////////////////////////////////////////
+
+    // load the Pulsar::Parameters
+    void load_Parameters (fitsfile*);
+
+    // unload the Pulsar::Parameters
+    void unload_Parameters (fitsfile*) const;
 
     // load the Pulsar::Predictor model
     void load_Predictor (fitsfile*);

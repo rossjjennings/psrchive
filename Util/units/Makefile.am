@@ -50,6 +50,7 @@ libunits_la_SOURCES = \
         Conventions.C \
         Error.C \
 	escape.C \
+	FilePtr.C \
         HeapTracked.C \
         pad.C \
         Pauli.C \

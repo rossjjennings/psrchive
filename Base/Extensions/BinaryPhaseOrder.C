@@ -4,11 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/BinaryPhaseOrder.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "psrephem_orbital.h"
 
 using namespace std;
+using Legacy::psrephem;
 
 //! Default constructor
 Pulsar::BinaryPhaseOrder::BinaryPhaseOrder ()

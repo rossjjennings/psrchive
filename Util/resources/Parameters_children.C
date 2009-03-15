@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 2007-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -9,6 +9,7 @@
 #include "config.h"
 #endif
 
+#include "Pulsar/TextParameters.h"
 #include "psrephem.h"
 
 #ifdef HAVE_TEMPO2
@@ -21,7 +22,9 @@ void Pulsar::Parameters::children (vector< Reference::To<Parameters> >& child)
 {
   child.resize (0);
 
-  child.push_back (new psrephem);
+  child.push_back (new Pulsar::TextParameters);
+  child.push_back (new Legacy::psrephem);
+
 #ifdef HAVE_TEMPO2
   child.push_back (new Tempo2::Parameters);
 #endif

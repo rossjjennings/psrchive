@@ -4,10 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "psrephem.h"
 #include "ephio.h"
 #include "Cartesian.h"
 #include "Error.h"
+
+using Legacy::psrephem;
 
 void pospm_conv (double alpha, double delta, double pmra, double pmdec,
 		 Cartesian& r, Cartesian& u)

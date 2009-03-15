@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Parameters.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/08/29 07:13:58 $
+   $Revision: 1.6 $
+   $Date: 2009/03/15 06:55:53 $
    $Author: straten $ */
 
 #ifndef __Tempo2Parameters_h
@@ -50,18 +50,6 @@ namespace Tempo2 {
     //! Unload to an open stream
     void unload (FILE*) const;
 
-    //! Return the name of the source
-    std::string get_name () const;
-    
-    //! Return the coordinates of the source
-    sky_coord get_coordinates () const;
-    
-    //! Return the dispersion measure
-    double get_dispersion_measure () const;
-    
-    //! Return the rotation measure
-    double get_rotation_measure () const;
-    
   protected:
 
     friend class Generator;

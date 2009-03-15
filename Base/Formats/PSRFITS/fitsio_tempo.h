@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/fitsio_tempo.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/05/16 23:59:04 $
+   $Revision: 1.2 $
+   $Date: 2009/03/15 06:55:51 $
    $Author: straten $ */
 
 #ifndef __FITSIO_TEMPO_H
@@ -19,8 +19,8 @@
 #include "psrephem.h"
 #include "polyco.h"
 
-  void load   (fitsfile*, psrephem*, long row=0);
-  void unload (fitsfile*, const psrephem*, long row=0);
+  void load   (fitsfile*, Legacy::psrephem*, long row=0);
+  void unload (fitsfile*, const Legacy::psrephem*, long row=0);
 
   void fits_map (fitsfile*, std::vector<int>& ephind, int& maxstrlen);
 

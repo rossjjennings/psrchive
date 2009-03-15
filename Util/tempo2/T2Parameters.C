@@ -86,27 +86,3 @@ void Tempo2::Parameters::unload (FILE*) const
 {
   throw Error (InvalidState, "Tempo2::Parameters::unload", "not implemented");
 }
-
-//! Return the name of the source
-std::string Tempo2::Parameters::get_name () const
-{
-  return "Tempo2::Paramters::get_name unknown";
-}
-
-//! Return the coordinates of the source
-sky_coord Tempo2::Parameters::get_coordinates () const
-{
-  return sky_coord();
-}
-
-//! Return the dispersion measure
-double Tempo2::Parameters::get_dispersion_measure () const
-{
-  return 0;
-}
-  
-//! Return the rotation measure
-double Tempo2::Parameters::get_rotation_measure () const
-{
-  return 0;
-}

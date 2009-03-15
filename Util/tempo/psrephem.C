@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -26,20 +27,20 @@
 #include <iostream>
 using namespace std;
 
-psrephem::psrephem()
+Legacy::psrephem::psrephem()
 {
   init ();
   zero ();
 }
 
-psrephem::~psrephem()
+Legacy::psrephem::~psrephem()
 {
   destroy();
 }
 
 
 // defines the recognized filename extensions used for pulsar ephemeris files
-vector<string> psrephem::extensions ()
+vector<string> Legacy::psrephem::extensions ()
 {
   vector <string> retval;
 
@@ -51,7 +52,7 @@ vector<string> psrephem::extensions ()
 
 bool Pulsar::Parameters::verbose = 0;
 
-void psrephem::init()
+void Legacy::psrephem::init()
 {
   nontempo11.erase();
   parmStatus    = NULL;
@@ -63,7 +64,7 @@ void psrephem::init()
   tempo11 = false;
 }
 
-void psrephem::size_dataspace()
+void Legacy::psrephem::size_dataspace()
 {
 //   if (!tempo11)  {
 //     destroy ();
@@ -73,7 +74,7 @@ void psrephem::size_dataspace()
   if (parmStatus != NULL)  {
     // the arrays have already been initialized.  zero them
     if (verbose)
-      fprintf (stderr, "psrephem::size_dataspace zero\n");
+      fprintf (stderr, "Legacy::psrephem::size_dataspace zero\n");
     zero_work();
     return;
   }
@@ -87,14 +88,14 @@ void psrephem::size_dataspace()
   zero_work();
 }
 
-void psrephem::zero()
+void Legacy::psrephem::zero()
 {
   tempo11 = true;
   size_dataspace ();
 }
 
 
-void psrephem::zero_work()
+void Legacy::psrephem::zero_work()
 {
   static string tempo_safe_string (" ");
   
@@ -107,7 +108,7 @@ void psrephem::zero_work()
   }
 }
 
-void psrephem::destroy()
+void Legacy::psrephem::destroy()
 {
   if (parmStatus)  {
     delete [] parmStatus;
@@ -119,59 +120,60 @@ void psrephem::destroy()
   init ();
 }
 
-psrephem::psrephem (const char* psr_name, int use_cwd)
+Legacy::psrephem::psrephem (const char* psr_name, int use_cwd)
 {
   init();
   if (create (psr_name, use_cwd) < 0) {
-    fprintf (stderr, "psrephem::psrephem error creating epemeris for %s.\n",
+    fprintf (stderr, "Legacy::psrephem::psrephem error creating epemeris for %s.\n",
 	     psr_name);
-    throw Error(FailedCall, "psrephem::psrephem");
+    throw Error(FailedCall, "Legacy::psrephem::psrephem");
   }
 }
 
-psrephem::psrephem (const char* filename)
+Legacy::psrephem::psrephem (const char* filename)
 {
   init();
   if (load (filename) < 0) {
-    fprintf (stderr, "psrephem::psrephem error loading %s.\n", filename);
-    throw Error(FailedCall, "psrephem::psrephem");
+    fprintf (stderr, "Legacy::psrephem::psrephem error loading %s.\n", filename);
+    throw Error(FailedCall, "Legacy::psrephem::psrephem");
   }
 }
 
-int psrephem::create (const char* psr_name, int use_cwd)
+int Legacy::psrephem::create (const char* psr_name, int use_cwd)
 {
   if (verbose)
-    fprintf (stderr, "psrephem::create '%s'\n", psr_name);
+    fprintf (stderr, "Legacy::psrephem::create '%s'\n", psr_name);
  
   string filename = par_lookup (psr_name, use_cwd);
   if (filename.empty()) {
-    fprintf (stderr, "psrephem::create no ephemeris file for %s found.\n",
+    fprintf (stderr, "Legacy::psrephem::create no ephemeris file for %s found.\n",
 	     psr_name);
     return -1;
   }
   if (verbose)
-    fprintf (stderr, "psrephem::create loading '%s'\n", filename.c_str());
+    fprintf (stderr, "Legacy::psrephem::create loading '%s'\n", filename.c_str());
   if (load (filename.c_str()) < 0) {
-    fprintf (stderr, "psrephem::create error loading %s.\n", filename.c_str());
+    fprintf (stderr, "Legacy::psrephem::create error loading %s.\n", filename.c_str());
     return -1;
   }
   return 0;
 }
 
-int psrephem::load (const char* filename)
+int Legacy::psrephem::load (const std::string& filename)
 {
   if (verbose) 
-    cerr << "psrephem::load enter" << endl;
+    cerr << "Legacy::psrephem::load enter" << endl;
 
   tempo11 = 1;
   size_dataspace();
   
   if (verbose)
-    cerr << "psrephem::load eph_rd (" << filename << ")" << endl;
+    cerr << "Legacy::psrephem::load eph_rd (" << filename << ")" << endl;
 
   char ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
 
-  eph_rd (const_cast<char*>(filename), parmStatus, ephemstr, value_double, 
+  eph_rd (const_cast<char*>(filename.c_str()),
+	  parmStatus, ephemstr, value_double, 
 	  value_integer, error_double);
 
   int all_zero = 1;
@@ -186,42 +188,42 @@ int psrephem::load (const char* filename)
   }
   if (all_zero) {
     if (verbose)
-      fprintf (stderr, "psrephem::load WARNING "
-	       "tempo11-style load of '%s' failed\n", filename);
+      fprintf (stderr, "Legacy::psrephem::load WARNING "
+	       "tempo11-style load of '%s' failed\n", filename.c_str());
     return old_load (filename);
   }
 
   if (verbose)
-    fprintf (stderr,"psrephem::load tempo11-style loaded '%s' ok\n", filename);
+    fprintf (stderr,"Legacy::psrephem::load tempo11-style loaded '%s' ok\n", filename.c_str());
 
   return 0;
 }
 
-int psrephem::old_load (const char* filename)
+int Legacy::psrephem::old_load (const std::string& filename)
 {
   tempo11 = 0;
   size_dataspace();
 
-  FILE* fptr = fopen(filename,"r");
+  FILE* fptr = fopen(filename.c_str(),"r");
   if (fptr == NULL) {
-    fprintf (stderr, "psrephem::old_load error fopen(%s)", filename);
+    fprintf (stderr, "Legacy::psrephem::old_load error fopen(%s)", filename.c_str());
     perror (":");
   }
   if (stringload (&nontempo11, fptr) < 0)  {
-    fprintf (stderr, "psrephem::old_load error\n");
+    fprintf (stderr, "Legacy::psrephem::old_load error\n");
     return -1;
   }
   fclose(fptr);
   return 0;
 }
 
-int psrephem::unload (const char* filename) const
+int Legacy::psrephem::unload (const std::string& filename) const
 {
 //   if (!tempo11)
 //     return old_unload (filename);
 
   if (verbose)
-    cerr << "psrephem::unload copying strings" << endl;
+    cerr << "Legacy::psrephem::unload copying strings" << endl;
 
   char ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
 
@@ -238,42 +240,42 @@ int psrephem::unload (const char* filename) const
   }
 
   if (verbose)
-    cerr << "psrephem::unload calling eph_wr" << endl;
+    cerr << "Legacy::psrephem::unload calling eph_wr" << endl;
 
-  int istat = eph_wr (const_cast<char*>(filename), parmStatus, ephemstr,
+  int istat = eph_wr (const_cast<char*>(filename.c_str()), parmStatus, ephemstr,
 		      value_double, value_integer, error_double);
   if (!istat) {
-    fprintf (stderr, "psrephem::unload error eph_wr '%s'\n", filename);
+    fprintf (stderr, "Legacy::psrephem::unload error eph_wr '%s'\n", filename.c_str());
     return -1;
   }
 
   if (verbose)
-    fprintf (stderr, "psrephem::unload unloaded %s ok\n", filename);
+    fprintf (stderr, "Legacy::psrephem::unload unloaded %s ok\n", filename.c_str());
 
   return 0;
 }
 
-int psrephem::old_unload (const char* filename) const
+int Legacy::psrephem::old_unload (const std::string& filename) const
 {
   if (tempo11)
     return -1;
 
-  FILE* fptr = fopen (filename,"w");
+  FILE* fptr = fopen (filename.c_str(),"w");
   if (fptr == NULL) {
-    fprintf (stderr, "psrephem::old_unload error fopen(%s)", filename);
+    fprintf (stderr, "Legacy::psrephem::old_unload error fopen(%s)", filename.c_str());
     perror (":");
     return -1;
   }
   if (fwrite (nontempo11.c_str(), 1, nontempo11.length(), fptr) 
 	< nontempo11.length())  {
-    perror ("psrephem::old_unload error");
+    perror ("Legacy::psrephem::old_unload error");
     return -1;
   }
   fclose (fptr);
   return 0;
 }
 
-string psrephem::par_lookup (const char* name, int use_cwd) try
+string Legacy::psrephem::par_lookup (const char* name, int use_cwd) try
 {
   string psr_name;
 
@@ -291,7 +293,7 @@ string psrephem::par_lookup (const char* name, int use_cwd) try
       if (file_exists(filename.c_str()))
       {
 	if (verbose)
-	  cerr << "psrephem::Using " << filename << " from cwd" << endl;
+	  cerr << "Legacy::psrephem::Using " << filename << " from cwd" << endl;
 	return filename;
       }
     }
@@ -307,13 +309,13 @@ string psrephem::par_lookup (const char* name, int use_cwd) try
       string filename = tempo_pardir + psr_name + exts[iext];
 
       if (verbose)
-	cerr << "psrephem::par_lookup in TEMPO PARDIR '" 
+	cerr << "Legacy::psrephem::par_lookup in TEMPO PARDIR '" 
 	     << filename << "'" << endl;
 
       if (file_exists(filename.c_str()))
       {
 	if (verbose)
-	  cerr << "psrephem:: Using " << filename 
+	  cerr << "Legacy::psrephem:: Using " << filename 
 	       << " from PARDIR:" << tempo_pardir << endl;
 	return filename;
       }
@@ -335,7 +337,7 @@ string psrephem::par_lookup (const char* name, int use_cwd) try
 #endif
 
   if (verbose)
-    cerr << "psrephem:: Creating ephemeris by " << catalogue 
+    cerr << "Legacy::psrephem:: Creating ephemeris by " << catalogue 
 	 << " -e " << psr_name <<endl;
 
   // start with a clean working directory
@@ -358,7 +360,7 @@ string psrephem::par_lookup (const char* name, int use_cwd) try
 
   if (retval != 0)
   {
-    cerr << "psrephem:: Error executing system (" + command + ")" << endl;
+    cerr << "Legacy::psrephem:: Error executing system (" + command + ")" << endl;
     return "";
   }
 
@@ -374,22 +376,22 @@ string psrephem::par_lookup (const char* name, int use_cwd) try
   if (file_exists(filename.c_str()))
   {
     if (verbose)
-      cerr << "psrephem:: Using '" + filename + "'" << endl;
+      cerr << "Legacy::psrephem:: Using '" + filename + "'" << endl;
     return filename;
   }
 
   if (verbose)
-    fprintf (stderr, "psrephem:: Cannot find %s after call to %s.\n", 
+    fprintf (stderr, "Legacy::psrephem:: Cannot find %s after call to %s.\n", 
 	     filename.c_str(),catalogue.c_str());
 
   return "";
 }
 catch (Error& error)
 {
-  throw error += "psrephem::par_lookup";
+  throw error += "Legacy::psrephem::par_lookup";
 }
 
-string psrephem::psrname() const
+string Legacy::psrephem::psrname() const
 {
   if (parmStatus[EPH_PSRJ]==1)
     return value_str[EPH_PSRJ];
@@ -401,7 +403,7 @@ string psrephem::psrname() const
 }
 
 
-double psrephem::get_dm() const
+double Legacy::psrephem::get_dm() const
 {
   // Removed tempo11 check because it's now possible
   // to obtain dm for pre-tempo11 ephemeris files
@@ -412,7 +414,7 @@ double psrephem::get_dm() const
   return 0;
 }
 
-void psrephem::set_dm( double dm )
+void Legacy::psrephem::set_dm( double dm )
 {
   if (!parmStatus[EPH_DM])
     parmStatus[EPH_DM] = 1;
@@ -420,52 +422,52 @@ void psrephem::set_dm( double dm )
   value_double[EPH_DM] = dm;
 }
 
-double psrephem::jra() const
+double Legacy::psrephem::jra() const
 {
   if (parmStatus[EPH_RAJ])
     return value_double[EPH_RAJ];
   
-  throw Error(InvalidParam, "psrephem::jra",
+  throw Error(InvalidParam, "Legacy::psrephem::jra",
 	      "Error determining pulsar RA");
 }
 
-double psrephem::jdec() const
+double Legacy::psrephem::jdec() const
 {
   if (parmStatus[EPH_DECJ])
     return value_double[EPH_DECJ];
   
-  throw Error(InvalidParam, "psrephem::jdec",
+  throw Error(InvalidParam, "Legacy::psrephem::jdec",
 	      "Error determining pulsar DEC");
 }
 
-double psrephem::omega() const
+double Legacy::psrephem::omega() const
 {
   if (tempo11 && parmStatus[EPH_OM])
     return value_double[EPH_OM];
   
-  throw Error(InvalidParam, "psrephem::omega",
+  throw Error(InvalidParam, "Legacy::psrephem::omega",
 	      "Error determining pulsar OMEGA");
 }
 
-double psrephem::omdot() const
+double Legacy::psrephem::omdot() const
 {
   if (tempo11 && parmStatus[EPH_OMDOT])
     return value_double[EPH_OMDOT];
   
-  throw Error(InvalidParam, "psrephem::omdot",
+  throw Error(InvalidParam, "Legacy::psrephem::omdot",
 	      "Error determining pulsar OMDOT");
 }
 
-double psrephem::ecc() const
+double Legacy::psrephem::ecc() const
 {
   if (tempo11 && parmStatus[EPH_E])
     return value_double[EPH_E];
   
-  throw Error(InvalidParam, "psrephem::ecc",
+  throw Error(InvalidParam, "Legacy::psrephem::ecc",
 	      "Error determining pulsar E");
 }
 
-double psrephem::t0() const
+double Legacy::psrephem::t0() const
 {
   if (tempo11 && parmStatus[EPH_T0]) {
     MJD current_epoch = MJD (value_integer[EPH_T0],
@@ -473,29 +475,29 @@ double psrephem::t0() const
     return current_epoch.in_days();
   }
   
-  throw Error(InvalidParam, "psrephem::t0",
+  throw Error(InvalidParam, "Legacy::psrephem::t0",
 	      "Error determining pulsar T0");
 }
 
-double psrephem::a1() const
+double Legacy::psrephem::a1() const
 {
   if (tempo11 && parmStatus[EPH_A1])
     return (value_double[EPH_A1]);
   
-  throw Error(InvalidParam, "psrephem::a1",
+  throw Error(InvalidParam, "Legacy::psrephem::a1",
 	      "Error determining pulsar A1");
 }
 
-double psrephem::pb() const
+double Legacy::psrephem::pb() const
 {
   if (tempo11 && parmStatus[EPH_PB])
     return (value_double[EPH_PB]);
   
-  throw Error(InvalidParam, "psrephem::pb",
+  throw Error(InvalidParam, "Legacy::psrephem::pb",
 	      "Error determining pulsar PB");
 }
 
-void psrephem::nofit()
+void Legacy::psrephem::nofit()
 {
   if (!tempo11)
     return;
@@ -505,7 +507,7 @@ void psrephem::nofit()
   }
 }
 
-void psrephem::fitall()
+void Legacy::psrephem::fitall()
 {
   if (!tempo11)
     return;
@@ -515,7 +517,7 @@ void psrephem::fitall()
   }
 }
 
-void psrephem::efac (float fac)
+void Legacy::psrephem::efac (float fac)
 {
   if (!tempo11)
     return;
@@ -524,12 +526,12 @@ void psrephem::efac (float fac)
     if (parmStatus[i]==2) error_double[i]*=fac;
 }
 
-Pulsar::Parameters* psrephem::clone () const
+Pulsar::Parameters* Legacy::psrephem::clone () const
 {
   return new psrephem (*this);
 }
 
-bool psrephem::equals (const Pulsar::Parameters* p) const
+bool Legacy::psrephem::equals (const Pulsar::Parameters* p) const
 {
   const psrephem* that = dynamic_cast<const psrephem*>(p);
   if (!that)
@@ -537,46 +539,46 @@ bool psrephem::equals (const Pulsar::Parameters* p) const
   return *this == *that;
 }
 
-void psrephem::load (FILE* fptr)
+void Legacy::psrephem::load (FILE* fptr)
 {
   string total;
   if (stringload (&total, fptr) < 0)
-    throw Error (FailedSys, "psrephem::load(FILE*)", "stringload");
+    throw Error (FailedSys, "Legacy::psrephem::load(FILE*)", "stringload");
 
   load (&total);
 }
 
-void psrephem::unload (FILE* fptr) const
+void Legacy::psrephem::unload (FILE* fptr) const
 {
   string out;
   if (!tempo11)
     out = nontempo11;
   else if (unload(&out) < 0)
-    throw Error (FailedCall, "psrephem::unload(FILE*)",
+    throw Error (FailedCall, "Legacy::psrephem::unload(FILE*)",
 		 "unload(string*) failed");
 
   size_t size = out.length();
   size_t bout = fwrite (out.c_str(), 1, size, fptr);
   if (bout < size)
-    throw Error (FailedSys, "psrephem::unload(FILE*)", "fprintf");
+    throw Error (FailedSys, "Legacy::psrephem::unload(FILE*)", "fprintf");
 
   fflush (fptr);
 }
 
 //! Return the name of the source
-std::string psrephem::get_name () const
+std::string Legacy::psrephem::get_name () const
 {
   return psrname ();
 }
   
 //! Return the coordinates of the source
-sky_coord psrephem::get_coordinates () const
+sky_coord Legacy::psrephem::get_coordinates () const
 {
   return sky_coord ( jra()*2.0*M_PI, jdec()*2.0*M_PI );
 }
 
 //! Return the dispersion measure
-double psrephem::get_dispersion_measure () const
+double Legacy::psrephem::get_dispersion_measure () const
 {
   if (parmStatus[EPH_DM])
     return value_double[EPH_DM];
@@ -585,7 +587,7 @@ double psrephem::get_dispersion_measure () const
 }
 
 //! Return the rotation measure
-double psrephem::get_rotation_measure () const
+double Legacy::psrephem::get_rotation_measure () const
 {
   if (parmStatus[EPH_RM])
     return value_double[EPH_RM];
@@ -639,10 +641,10 @@ void f2cstr (char* str, unsigned length)
 extern "C" int convertunits (double* value, double* error,
 			     int* status, int* convert);
 
-int psrephem::load (string* instr)
+int Legacy::psrephem::load (string* instr)
 {
   if (verbose)
-    cerr << "psrephem::load (string*) *****" << endl
+    cerr << "Legacy::psrephem::load (string*) *****" << endl
 	 << *instr << "***** END" << endl;
 
   tempo11 = 1;
@@ -658,7 +660,7 @@ int psrephem::load (string* instr)
     // get the next line from the incoming text
     string line ( stringtok (instr, "\n") );
     if (verbose)
-      cerr << "psrephem::load '" << line << "' len=" << line.length() 
+      cerr << "Legacy::psrephem::load '" << line << "' len=" << line.length() 
 	   << " instr.len=" << instr -> length() << endl;
 
     if (line.length() < 1)
@@ -675,7 +677,7 @@ int psrephem::load (string* instr)
   // convertunits_ defined in ephio.f
   convertunits (value_double, error_double, parmStatus, correct);
   if (verbose)
-    cerr << "psrephem::load units converted" << endl;
+    cerr << "Legacy::psrephem::load units converted" << endl;
 
   bool all_zero = 1;
   for (int ieph=0; ieph<EPH_NUM_KEYS; ieph++)  {
@@ -691,7 +693,7 @@ int psrephem::load (string* instr)
   
   if (all_zero) {
     if (verbose) {
-      cerr << "psrephem::load WARNING "
+      cerr << "Legacy::psrephem::load WARNING "
 	"tempo11-style load of '" << nontempo11 << "' failed" << endl;
 		}
 		
@@ -704,7 +706,7 @@ int psrephem::load (string* instr)
   return 0;
 }
 
-void psrephem::read_old_ephem_str(vector<string> lines, 
+void Legacy::psrephem::read_old_ephem_str(vector<string> lines, 
                                   int *pstatus,
                                   string *val_str, 
 																	double * val_double, 
@@ -889,7 +891,7 @@ void psrephem::read_old_ephem_str(vector<string> lines,
 }																
 
 
-int psrephem::unload (string* outstr) const
+int Legacy::psrephem::unload (string* outstr) const
 {
   if (!tempo11)  {
     *outstr += nontempo11;
@@ -935,7 +937,7 @@ int psrephem::unload (string* outstr) const
   return bytes_out;
 }
 
-double psrephem::p(void) const
+double Legacy::psrephem::p(void) const
 {
   if (!tempo11)
     return -1;
@@ -944,11 +946,11 @@ double psrephem::p(void) const
     return (1.0/value_double[EPH_F]);
   } 
   else
-    fprintf (stderr,"psrephem::p warning rotation frequency 0.0\n");
+    fprintf (stderr,"Legacy::psrephem::p warning rotation frequency 0.0\n");
   return(1.0);
 }
 
-double psrephem::p_err(void) const
+double Legacy::psrephem::p_err(void) const
 {
   if (!tempo11)
     return -1;
@@ -957,17 +959,17 @@ double psrephem::p_err(void) const
     return (-1.0/value_double[EPH_F]/value_double[EPH_F]
 	    *error_double[EPH_F]);
   } else
-    fprintf(stderr,"psrephem::p_err warning rotation frequency 0.0\n");
+    fprintf(stderr,"Legacy::psrephem::p_err warning rotation frequency 0.0\n");
   return(1.0);
 }
 
-psrephem::psrephem (const psrephem & p2)
+Legacy::psrephem::psrephem (const psrephem & p2)
 {
   init ();
   *this = p2;
 }
 
-psrephem & psrephem::operator = (const psrephem & p2)
+Legacy::psrephem & Legacy::psrephem::operator = (const psrephem & p2)
 {
   if (this == &p2)
     return *this;
@@ -995,7 +997,7 @@ psrephem & psrephem::operator = (const psrephem & p2)
   return *this;
 }
 
-bool operator == (const psrephem &e1, const psrephem &e2)
+bool operator == (const Legacy::psrephem &e1, const Legacy::psrephem &e2)
 {
   if (e1.parmStatus==NULL && e2.parmStatus==NULL)
     return 1;
@@ -1005,8 +1007,8 @@ bool operator == (const psrephem &e1, const psrephem &e2)
     return 0;
 
   if (e1.tempo11 != e2.tempo11) {
-    if (psrephem::verbose)
-      cerr << "psrephem::operator== unequal tempo11 flags" << endl;
+    if (Legacy::psrephem::verbose)
+      cerr << "Legacy::psrephem::operator== unequal tempo11 flags" << endl;
     return 0;
   }
 
@@ -1016,36 +1018,36 @@ bool operator == (const psrephem &e1, const psrephem &e2)
   for (int ieph=0;ieph<EPH_NUM_KEYS;ieph++) {
 
     if (e1.parmStatus[ieph] != e2.parmStatus[ieph]) {
-      if (psrephem::verbose)
-	cerr << "psrephem::operator== unequal parmStatus["
+      if (Legacy::psrephem::verbose)
+	cerr << "Legacy::psrephem::operator== unequal parmStatus["
 	     << parmNames[ieph] << "]" << endl;
       return 0;
     }
     
     if (e1.value_double[ieph] != e2.value_double[ieph]) {
-      if (psrephem::verbose)
-	cerr << "psrephem::operator== unequal value_double["
+      if (Legacy::psrephem::verbose)
+	cerr << "Legacy::psrephem::operator== unequal value_double["
 	     << parmNames[ieph] << "]" << endl;
       return 0;
     }
     
     if (e1.value_integer[ieph] != e2.value_integer[ieph]) {
-      if (psrephem::verbose)
-	cerr << "psrephem::operator== unequal value_integer["
+      if (Legacy::psrephem::verbose)
+	cerr << "Legacy::psrephem::operator== unequal value_integer["
 	     << parmNames[ieph] << "]" << endl;
       return 0;
     }
     
     if (e1.error_double[ieph] != e2.error_double[ieph]) {
-      if (psrephem::verbose)
-	cerr << "psrephem::operator== unequal value_integer["
+      if (Legacy::psrephem::verbose)
+	cerr << "Legacy::psrephem::operator== unequal value_integer["
 	     << parmNames[ieph] << "]" << endl;
       return 0;
     }
     
     if (e1.value_str[ieph] != e2.value_str[ieph])  {
-      if (psrephem::verbose)
-	cerr << "psrephem::operator== unequal value_integer["
+      if (Legacy::psrephem::verbose)
+	cerr << "Legacy::psrephem::operator== unequal value_integer["
 	     << parmNames[ieph] << "]" << endl;
       return 0;
     }
@@ -1056,11 +1058,11 @@ bool operator == (const psrephem &e1, const psrephem &e2)
 
 }
 
-bool operator != (const psrephem &e1, const psrephem &e2) {
+bool operator != (const Legacy::psrephem &e1, const Legacy::psrephem &e2) {
   return ! operator == (e1,e2);
 }
 
-ostream& operator<< (ostream& ostr, const psrephem& eph)
+ostream& operator<< (ostream& ostr, const Legacy::psrephem& eph)
 {  
   string out;
   eph.unload (&out);
@@ -1074,10 +1076,10 @@ ostream& operator<< (ostream& ostr, const psrephem& eph)
 //
 // ///////////////////////////////////////////////////////////////////////
 
-string psrephem::get_string  (int ephind)
+string Legacy::psrephem::get_string  (int ephind)
 {
   if (parmTypes[ephind] != 0)
-    throw Error (InvalidParam, "psrephem::get_string",
+    throw Error (InvalidParam, "Legacy::psrephem::get_string",
                  "%s is not a string", parmNames[ephind]);
 
   if (tempo11 && parmStatus[ephind])
@@ -1086,10 +1088,10 @@ string psrephem::get_string  (int ephind)
     return "";
 }
 
-double psrephem::get_double  (int ephind)
+double Legacy::psrephem::get_double  (int ephind)
 {
   if (parmTypes[ephind] != 1)
-    throw Error (InvalidParam, "psrephem::get_double",
+    throw Error (InvalidParam, "Legacy::psrephem::get_double",
                  "%s is not a double", parmNames[ephind]);
 
   if (tempo11 && parmStatus[ephind])
@@ -1098,10 +1100,10 @@ double psrephem::get_double  (int ephind)
     return 0.0;
 }
 
-MJD psrephem::get_MJD (int ephind)
+MJD Legacy::psrephem::get_MJD (int ephind)
 {
   if (parmTypes[ephind] != 4)
-    throw Error (InvalidParam, "psrephem::get_MJD",
+    throw Error (InvalidParam, "Legacy::psrephem::get_MJD",
                  "%s is not a MJD", parmNames[ephind]);
 
   if (tempo11 && parmStatus[ephind])
@@ -1110,10 +1112,10 @@ MJD psrephem::get_MJD (int ephind)
     return MJD::zero;
 }
 
-Angle psrephem::get_Angle (int ephind)
+Angle Legacy::psrephem::get_Angle (int ephind)
 {
   if (parmTypes[ephind] != 2 && parmTypes[ephind] != 3)
-    throw Error (InvalidParam, "psrephem::get_Angle",
+    throw Error (InvalidParam, "Legacy::psrephem::get_Angle",
                  "%s is not an  Angle", parmNames[ephind]);
 
   if (tempo11 && parmStatus[ephind]) {
@@ -1125,10 +1127,10 @@ Angle psrephem::get_Angle (int ephind)
     return Angle();
 }
 
-int psrephem::get_integer (int ephind)
+int Legacy::psrephem::get_integer (int ephind)
 {
   if (parmTypes[ephind] != 5)
-    throw Error (InvalidParam, "psrephem::get_integer",
+    throw Error (InvalidParam, "Legacy::psrephem::get_integer",
                  "%s is not an integer", parmNames[ephind]);
 
   if (tempo11 && parmStatus[ephind])
@@ -1137,10 +1139,10 @@ int psrephem::get_integer (int ephind)
     return 0;
 }
 
-void psrephem::set_string (int ephind, const string& value)
+void Legacy::psrephem::set_string (int ephind, const string& value)
 {
   if (parmTypes[ephind] != 0)
-    throw Error (InvalidParam, "psrephem::get_string",
+    throw Error (InvalidParam, "Legacy::psrephem::get_string",
                  "%s is not a string", parmNames[ephind]);
 
   value_str[ephind] = value;
@@ -1149,10 +1151,10 @@ void psrephem::set_string (int ephind, const string& value)
     parmStatus[ephind] = 1;
 }
 
-void psrephem::set_double (int ephind, double value)
+void Legacy::psrephem::set_double (int ephind, double value)
 {
   if (parmTypes[ephind] != 1)
-    throw Error (InvalidParam, "psrephem::get_double",
+    throw Error (InvalidParam, "Legacy::psrephem::get_double",
                  "%s is not a double", parmNames[ephind]);
 
   value_double[ephind] = value;
@@ -1161,10 +1163,10 @@ void psrephem::set_double (int ephind, double value)
     parmStatus[ephind] = 1;
 }
 
-void psrephem::set_MJD (int ephind, const MJD& value)
+void Legacy::psrephem::set_MJD (int ephind, const MJD& value)
 {
   if (parmTypes[ephind] != 4)
-    throw Error (InvalidParam, "psrephem::get_MJD",
+    throw Error (InvalidParam, "Legacy::psrephem::get_MJD",
                  "%s is not a MJD", parmNames[ephind]);
 
   value_integer[ephind] = value.intday();
@@ -1174,10 +1176,10 @@ void psrephem::set_MJD (int ephind, const MJD& value)
     parmStatus[ephind] = 1;
 }
 
-void psrephem::set_Angle (int ephind, const Angle& value)
+void Legacy::psrephem::set_Angle (int ephind, const Angle& value)
 {
   if (parmTypes[ephind] != 2 && parmTypes[ephind] != 3)
-    throw Error (InvalidParam, "psrephem::get_Angle",
+    throw Error (InvalidParam, "Legacy::psrephem::get_Angle",
                  "%s is not an  Angle", parmNames[ephind]);
 
   value_double[ephind] = value.getTurns();
@@ -1186,10 +1188,10 @@ void psrephem::set_Angle (int ephind, const Angle& value)
     parmStatus[ephind] = 1;
 }
 
-void psrephem::set_integer (int ephind, int value)
+void Legacy::psrephem::set_integer (int ephind, int value)
 {
   if (parmTypes[ephind] != 5)
-    throw Error (InvalidParam, "psrephem::get_integer",
+    throw Error (InvalidParam, "Legacy::psrephem::get_integer",
                  "%s is not an integer", parmNames[ephind]);
 
   value_integer[ephind] = value;

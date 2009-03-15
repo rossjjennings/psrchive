@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Predict.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/02/04 02:27:47 $
+   $Revision: 1.10 $
+   $Date: 2009/03/15 06:55:52 $
    $Author: straten $ */
 
 #ifndef __Tempo_Predict_h
@@ -16,7 +16,6 @@
 
 #include "Pulsar/Generator.h"
 
-#include "psrephem.h"
 #include "polyco.h"
 
 namespace Tempo {
@@ -33,7 +32,7 @@ namespace Tempo {
     static double maximum_rms;
 
     //! Default constructor
-    Predict (const psrephem* parameters = 0);
+    Predict (const Pulsar::Parameters* parameters = 0);
 
     //
     // Pulsar::Generator interface
@@ -78,9 +77,6 @@ namespace Tempo {
     /*! Corresponds to NCOEFF in tz.in */
     void set_ncoef (unsigned ncoef);
 
-    //! Set the pulsar parameters
-    void set_parameters (const psrephem& parameters);
-
     //! Set flag to verify time spanned by polynomial ephemerides
     void set_verify (bool verify);
 
@@ -108,7 +104,7 @@ namespace Tempo {
     unsigned ncoef;
 
     //! The pulsar parameters
-    psrephem parameters;
+    Reference::To<const Pulsar::Parameters> parameters;
 
     //! The pulsar name
     std::string psrname;

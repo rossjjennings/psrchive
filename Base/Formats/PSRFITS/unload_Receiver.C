@@ -22,21 +22,21 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
   char* comment = 0;
 
   // temporary string
-  auto_ptr<char> tempstr ( new char[FLEN_VALUE] );
+  char* tempstr = new char[FLEN_VALUE];
 
-  strncpy (tempstr.get(), ext->get_name().c_str(), FLEN_VALUE);
-  fits_update_key (fptr, TSTRING, "FRONTEND", tempstr.get(), comment, &status);
+  strncpy (tempstr, ext->get_name().c_str(), FLEN_VALUE);
+  fits_update_key (fptr, TSTRING, "FRONTEND", tempstr, comment, &status);
     
   if (ext->get_basis() == Signal::Linear)
-    strcpy (tempstr.get(), "LIN");
+    strcpy (tempstr, "LIN");
   
   else if (ext->get_basis() == Signal::Circular)
-    strcpy (tempstr.get(), "CIRC");
+    strcpy (tempstr, "CIRC");
   
   else
-    strcpy (tempstr.get(), "    ");
+    strcpy (tempstr, "    ");
   
-  fits_update_key (fptr, TSTRING, "FD_POLN", tempstr.get(), comment, &status);
+  fits_update_key (fptr, TSTRING, "FD_POLN", tempstr, comment, &status);
   
   float temp;
 
@@ -51,16 +51,16 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
 
   switch (ext->get_tracking_mode()) {
   case Receiver::Feed:
-    strcpy (tempstr.get(), "FA"); break;
+    strcpy (tempstr, "FA"); break;
   case Receiver::Celestial:
-    strcpy (tempstr.get(), "CPA"); break;
+    strcpy (tempstr, "CPA"); break;
   case Receiver::Galactic:
-    strcpy (tempstr.get(), "GPA"); break;
+    strcpy (tempstr, "GPA"); break;
   default:
-    strcpy (tempstr.get(), "   "); break;
+    strcpy (tempstr, "   "); break;
   }
 
-  fits_update_key (fptr, TSTRING, "FD_MODE", tempstr.get(), comment, &status);
+  fits_update_key (fptr, TSTRING, "FD_MODE", tempstr, comment, &status);
   
   temp = ext->get_tracking_angle().getDegrees();
   fits_update_key (fptr, TFLOAT, "FA_REQ", &temp, comment, &status);
@@ -70,6 +70,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
 
   temp = ext->get_atten_b();
   fits_update_key (fptr, TFLOAT, "ATTEN_B", &temp, comment, &status);
+
+  delete [] tempstr;
 
   if (status)
     throw FITSError (status, "Pulsar::FITSArchive::unload Receiver");
