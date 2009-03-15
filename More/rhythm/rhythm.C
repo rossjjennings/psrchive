@@ -370,12 +370,7 @@ void Rhythm::add_toas (std::vector<Tempo::toa> new_toas)
   for (unsigned i = 0; i < new_toas.size(); i++)
     toas.push_back(new_toas[i]);
 
-  char num[8];
-  sprintf(num, "%d", toas.size());
-  
-  str = "Added ";
-  str += num;
-  str += " TOA's";
+  str = "Added " + tostring (toas.size()) + " TOA's";
   
   footer->setText(str);
   
@@ -597,7 +592,7 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
     
     psrephem pf_eph;
     
-    Tempo::fit (eph, toas, &pf_eph, track);
+    Tempo::fit (&eph, toas, &pf_eph, track);
     
     if (load_new && fitpopup) {
       // set_psrephem will result in generation of newEph signal, 
@@ -708,7 +703,7 @@ void Rhythm::fit_selected (const psrephem& eph, bool load_new)
     
     psrephem pf_eph;
     
-    Tempo::fit (eph, toas, &pf_eph, track, Tempo::toa::Selected);
+    Tempo::fit (&eph, toas, &pf_eph, track, Tempo::toa::Selected);
     
     if (load_new && fitpopup) {
       // set_psrephem will result in generation of newEph signal, 

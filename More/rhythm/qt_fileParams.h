@@ -7,10 +7,10 @@
 #ifndef __QT_FILEEPH_H
 #define __QT_FILEEPH_H
 
+#include "psrephem.h"
+
 #include <string>
 #include <qfiledialog.h>
-
-class psrephem;
 
 class qt_fileParams : public QFileDialog
 {
@@ -21,8 +21,8 @@ class qt_fileParams : public QFileDialog
   qt_fileParams (const QString& startname = QString::null, QWidget* parent=0);
 
   // open() and save() return zero if the user cancels, 1 otherwise
-  int open ( psrephem& eph );       // also returns zero if no data is loaded
-  int save ( const psrephem& eph );
+  int open ( Legacy::psrephem& eph );
+  int save ( const Legacy::psrephem& eph );
 
   // string filename () { return string (fileName); };
  protected slots:

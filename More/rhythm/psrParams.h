@@ -14,11 +14,12 @@
 
 #ifndef __PSRPARAMS_H
 #define __PSRPARAMS_H
+   
+#include "psrephem.h"
 
 #include <vector>
 
 class psrParameter;  // implementation detail defined in psrParameter.h
-class psrephem;      // the psrephem class which this class reflects
 
 class psrParams
 {
@@ -29,8 +30,8 @@ class psrParams
   psrParams (const psrParams& p) { *this = p; }
   psrParams& operator = (const psrParams& p);
 
-  void set_psrephem (const psrephem& eph);
-  void get_psrephem (psrephem& eph);
+  void set_psrephem (const Legacy::psrephem& eph);
+  void get_psrephem (Legacy::psrephem& eph);
 
   // static members and methods
   static bool verbose;

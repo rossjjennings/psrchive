@@ -28,7 +28,7 @@ using namespace std;
 // //////////////////////////////////////////////////////////////////////////
 bool qt_psrephem::verbose = false;
 
-qt_psrephem::qt_psrephem (const psrephem& eph,
+qt_psrephem::qt_psrephem (const Legacy::psrephem& eph,
 			  QWidget* parent, const char* name) :
   QHBox (parent, name)
 {
@@ -199,7 +199,7 @@ void qt_psrephem::setFitAll (bool fit) {
       params[ipar]->setFit (fit);
 }
 
-int qt_psrephem::set_psrephem (const psrephem& eph)
+int qt_psrephem::set_psrephem (const Legacy::psrephem& eph)
 {
   unsigned iparm=0;
   for (iparm=0; iparm < params.size(); iparm++)
@@ -215,7 +215,7 @@ int qt_psrephem::set_psrephem (const psrephem& eph)
   return 0;
 }
 
-int qt_psrephem::get_psrephem (psrephem& eph)
+int qt_psrephem::get_psrephem (Legacy::psrephem& eph)
 {
   psrParams meph;
   // duplicate those elements that are not currently hidden
@@ -238,7 +238,7 @@ int qt_psrephem::get_psrephem (psrephem& eph)
 
 void qt_psrephem::unload (FILE* outstream)
 {
-  psrephem data;
+  Legacy::psrephem data;
   if (verbose) cerr << "qt_psrephem::unload calling get_psrephem\n";
   get_psrephem (data);
   if (verbose) cerr << "qt_psrephem::unload calling psrephem::unload\n";

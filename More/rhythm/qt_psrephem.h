@@ -23,11 +23,10 @@
 #include <qhbox.h>
 #include <qlabel.h>
 
-//#include "psrephem.h"
+#include "psrephem.h"
 
 class qt_psrParameter;  // implementation detail defined in qt_psrParameter.h
 class psrParameter;     // base class implementing item of psrephem
-class psrephem;         // class which this class reflects graphically
 class QVBox;
 
 class qt_psrephem : public QHBox
@@ -39,14 +38,14 @@ class qt_psrephem : public QHBox
  public:
   static bool verbose;    // add debugging things to the widget
 
-  qt_psrephem (const psrephem& eph, QWidget* parent=0, const char* name=0);
+  qt_psrephem (const Legacy::psrephem& eph, QWidget* parent=0, const char* name=0);
   qt_psrephem (QWidget* parent=0, const char* name=0);
 
   ~qt_psrephem ();
 
   // display the ephemeris given / get the epehemeris displayed
-  int set_psrephem (const psrephem& eph);
-  int get_psrephem (psrephem& eph);
+  int set_psrephem (const Legacy::psrephem& eph);
+  int get_psrephem (Legacy::psrephem& eph);
 
   void setFitAll (bool fit);
 

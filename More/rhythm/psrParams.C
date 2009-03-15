@@ -25,7 +25,7 @@ using namespace std;
 
 bool  psrParams::verbose = false;
 
-void psrParams::get_psrephem (psrephem& eph)
+void psrParams::get_psrephem (Legacy::psrephem& eph)
 {
   eph.zero ();   // clear the data
 
@@ -99,7 +99,7 @@ void psrParams::get_psrephem (psrephem& eph)
 }
 
 
-void psrParams::set_psrephem (const psrephem& eph)
+void psrParams::set_psrephem (const Legacy::psrephem& eph)
 {
   // remove any old psrParameters
   destroy ();

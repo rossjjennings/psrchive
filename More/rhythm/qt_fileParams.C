@@ -24,7 +24,7 @@ qt_fileParams::qt_fileParams ( const QString& startname, QWidget* parent )
 
   QStringList filter;
  
-  vector<string> ephext = psrephem::extensions ();
+  vector<string> ephext = Legacy::psrephem::extensions ();
   for (vector<string>::iterator str = ephext.begin();
        str != ephext.end(); str ++)
     filter.append ( intro + QString( str->c_str() ) + close );
@@ -36,7 +36,7 @@ qt_fileParams::qt_fileParams ( const QString& startname, QWidget* parent )
 	    this, SLOT ( chosen (const QString&) ) );
 }
 
-int qt_fileParams::open (psrephem& eph)
+int qt_fileParams::open (Legacy::psrephem& eph)
 {
   if (verbose)
     cerr << "qt_fileParams::open exec" << endl;
@@ -54,7 +54,7 @@ int qt_fileParams::open (psrephem& eph)
   return 1;
 }
 
-int qt_fileParams::save (const psrephem& eph)
+int qt_fileParams::save (const Legacy::psrephem& eph)
 {
   setMode (QFileDialog::AnyFile);
   if ( exec () != 1 || fileName.empty() )

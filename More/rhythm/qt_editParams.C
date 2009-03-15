@@ -22,6 +22,7 @@
 #include "qt_toglParams.h"
 #include "qt_fileParams.h"
 #include "qtools.h"
+#include "psrephem.h"
 
 #include <qapplication.h>
 #include <qlayout.h>
@@ -281,13 +282,13 @@ void qt_editParams::unload (const char* filename)
   data.unload (filename);
 }
 
-void qt_editParams::set_psrephem (const psrephem& eph)
+void qt_editParams::set_psrephem (const Legacy::psrephem& eph)
 {
   data = eph;
   new_data ();
 }
 
-void qt_editParams::get_psrephem (psrephem& eph)
+void qt_editParams::get_psrephem (Legacy::psrephem& eph)
 {
   display.get_psrephem (eph);
 }
@@ -297,9 +298,9 @@ int qt_editParams::get_hist_length ()
   return data_history.size();
 }
 
-psrephem qt_editParams::get_historic (unsigned which)
+Legacy::psrephem qt_editParams::get_historic (unsigned which)
 {
-  psrephem mydata;
+  Legacy::psrephem mydata;
   data_history[which].get_psrephem(mydata);
   return mydata;
 }

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.53 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.54 $
+   $Date: 2009/03/15 07:13:21 $
    $Author: straten $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -42,6 +42,8 @@
 #include <qtabwidget.h>
 
 #include "psrephem.h"
+using Legacy::psrephem;
+
 #include "ephio.h"
 #include "toaPlot.h"
 #include "toa.h"

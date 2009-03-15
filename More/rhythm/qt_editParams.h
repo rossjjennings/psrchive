@@ -22,6 +22,8 @@
 #include "psrephem.h"
 #include "psrParams.h"
 
+using Legacy::psrephem;
+
 class qt_fileParams;
 
 class qt_editParams : public QWidget
