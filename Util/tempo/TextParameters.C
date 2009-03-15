@@ -67,7 +67,7 @@ string Pulsar::TextParameters::get_value (const string& keyword) const
   // and the end of the value
   end = text.find_first_of (whitespace, start);
 
-  return text.substr (start, end);
+  return text.substr (start, end-start);
 }
 
 string Pulsar::TextParameters::get_name () const
