@@ -69,3 +69,8 @@ string Pulsar::TextParameters::get_value (const string& keyword) const
 
   return text.substr (start, end);
 }
+
+string Pulsar::TextParameters::get_name () const
+{
+  return get_value ("PSR");
+}

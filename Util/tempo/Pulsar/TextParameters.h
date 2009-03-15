@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/TextParameters.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/03/15 06:55:52 $
+   $Revision: 1.3 $
+   $Date: 2009/03/15 14:32:43 $
    $Author: straten $ */
 
 #ifndef __TextParameters_h
@@ -34,6 +34,9 @@ namespace Pulsar {
 
     //! Unload to an open stream
     void unload (FILE*) const;
+
+    //! Return the pulsar name
+    std::string get_name () const;
 
     //
     //
