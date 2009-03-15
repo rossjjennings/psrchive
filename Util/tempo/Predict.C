@@ -116,7 +116,7 @@ void Tempo::Predict::set_ncoef (unsigned _ncoef)
 //! Set the parameters used to generate the predictor
 void Tempo::Predict::set_parameters (const Pulsar::Parameters* p)
 {
-  if (parameters.get() != p)
+  if (parameters && parameters.get() != p)
     cached = 0;
 
   const Pulsar::TextParameters* text_parameters;
