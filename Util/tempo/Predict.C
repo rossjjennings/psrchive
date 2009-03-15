@@ -123,18 +123,36 @@ void Tempo::Predict::set_parameters (const Pulsar::Parameters* p)
   text_parameters = dynamic_cast<const Pulsar::TextParameters*> (p);
   if (text_parameters)
   {
-    text_parameters->get_value (nspan, "TZNSPAN", false);
-    text_parameters->get_value (ncoef, "TZNCOEF", false);
+    if (verbose)
+      cerr << "Tempo::Predict::set_parameters Pulsar::TextParameters" << endl;
+
+    if (text_parameters->get_value (nspan, "TZNSPAN", false) && verbose)
+      cerr << "Tempo::Predict::set_parameters TZNSPAN=" << nspan << endl;
+
+    if (text_parameters->get_value (ncoef, "TZNCOEF", false) && verbose)
+      cerr << "Tempo::Predict::set_parameters TZNCOEF=" << ncoef << endl;
   }
 
   const Legacy::psrephem* old_psrephem;
   old_psrephem = dynamic_cast<const Legacy::psrephem*> (p);
   if (old_psrephem)
   {
+    if (verbose)
+      cerr << "Tempo::Predict::set_parameters Legacy::psrephem" << endl;
+
     if (old_psrephem->parmStatus[EPH_TZNSPAN]==1)
+    {
       nspan = old_psrephem->value_integer[EPH_TZNSPAN];
+      if (verbose)
+        cerr << "Tempo::Predict::set_parameters TZNSPAN=" << nspan << endl;
+    }
+
     if (old_psrephem->parmStatus[EPH_TZNCOEF]==1)
+    {
       ncoef = old_psrephem->value_integer[EPH_TZNCOEF];
+      if (verbose)
+        cerr << "Tempo::Predict::set_parameters TZNCOEF=" << ncoef << endl;
+    }
   }
 
   parameters = p;
