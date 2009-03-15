@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "psrephem.h"
+using Legacy::psrephem;
 
 #include <stdlib.h>
 
