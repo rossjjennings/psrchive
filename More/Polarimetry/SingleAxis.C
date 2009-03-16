@@ -136,11 +136,18 @@ Vector<3, double> Calibration::SingleAxis::get_axis () const
 
 void Calibration::SingleAxis::set_cyclic (bool flag)
 {
+  const MEAL::OneParameter* current = 
+    dynamic_cast<const MEAL::OneParameter*> (rotation->get_parameter_policy());
+
+  if (!current)
+    throw Error (InvalidState, "Calibration::SingleAxis::set_cyclic",
+		 "Rotation1 parameter policy is not a OneParameter");
+
   if (flag)
   {
     // set up the cyclic boundary for orientation
     MEAL::CyclicParameter* cyclic = 0;
-    cyclic = new MEAL::CyclicParameter (rotation);
+    cyclic = new MEAL::CyclicParameter (*current);
     rotation->set_parameter_policy (cyclic);
 
     cyclic->set_period (M_PI);
@@ -150,7 +157,7 @@ void Calibration::SingleAxis::set_cyclic (bool flag)
   else
   {
     MEAL::OneParameter* noncyclic = 0;
-    noncyclic = new MEAL::OneParameter (rotation);
+    noncyclic = new MEAL::OneParameter (*current);
     rotation->set_parameter_policy (noncyclic);
   }
 }
