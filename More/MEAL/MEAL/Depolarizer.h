@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Depolarizer.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/02/10 01:33:20 $
+   $Revision: 1.6 $
+   $Date: 2009/03/16 12:57:36 $
    $Author: straten $ */
 
 #ifndef __MEAL_Depolarizer_H
@@ -54,7 +54,7 @@ namespace MEAL
 
   protected:
 
-    //! Calculate the Jones matrix and its gradient
+    //! Calculate the Mueller matrix and its gradient
     void calculate (Matrix<4,4,double>& result,
 		    std::vector<Matrix<4,4,double> >*);
 
