@@ -27,6 +27,14 @@ MEAL::CyclicParameter::CyclicParameter (const CyclicParameter& p)
 {
 }
 
+MEAL::CyclicParameter::CyclicParameter (const OneParameter& p)
+  : OneParameter (p)
+{
+  period = 2*M_PI;
+  lower_bound = -M_PI;
+  upper_bound = M_PI;
+}
+
 //! Clone construtor
 MEAL::CyclicParameter* MEAL::CyclicParameter::clone (Function* context) const
 {

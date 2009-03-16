@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/CyclicParameter.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/10/30 02:30:51 $
+   $Revision: 1.8 $
+   $Date: 2009/03/16 12:57:31 $
    $Author: straten $ */
 
 #ifndef __CyclicParameter_H
@@ -32,6 +32,9 @@ namespace MEAL {
 
     //! Copy constructor
     CyclicParameter (const CyclicParameter& np);
+
+    //! Copy constructor
+    CyclicParameter (const OneParameter& np);
 
     //! Assignment operator
     CyclicParameter& operator = (const CyclicParameter& np);
