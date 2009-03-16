@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2008 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Pointing.h"
@@ -145,9 +146,11 @@ void Pulsar::TimerIntegration::load_old (FILE* fptr, bool big_endian)
   unsigned ipol, ichan;
 
   // No weights available.
-  for (ichan=0; ichan<nchan; ichan++) {
+  for (ichan=0; ichan<nchan; ichan++)
+  {
     wts[ichan] = 1.0;
-    for(ipol=0;ipol<npol;ipol++)  {
+    for(ipol=0;ipol<npol;ipol++)
+    {
       med[ipol][ichan]   = 1.0;
       bpass[ipol][ichan] = 1.0;
     }
@@ -160,16 +163,15 @@ void Pulsar::TimerIntegration::load_old (FILE* fptr, bool big_endian)
   double bw = get_bandwidth();
 
   for(ipol=0; ipol<npol; ipol++)
-    for(ichan=0; ichan<nchan; ichan++) {
+  {
+    for(ichan=0; ichan<nchan; ichan++)
+    {
       profiles[ipol][ichan]->set_weight (1.0);
       profiles[ipol][ichan]->set_state (Signal::get_Component (basis, state, ipol));
       double cfreq = centrefreq-(bw/2.0)+(ichan+0.5)*bw/nchan;
       profiles[ipol][ichan]->set_centre_frequency (cfreq);
     }
-
-  int npts = nbin*nchan*npol;
-  auto_ptr<unsigned short> packed (new unsigned short [npts]);
-  assert (packed.get() != NULL);
+  }
 
   float scale = 0;
   // old style + Filter bank
@@ -180,28 +182,34 @@ void Pulsar::TimerIntegration::load_old (FILE* fptr, bool big_endian)
   if (fread (&offset,sizeof(offset),1,fptr) != 1)
     throw Error (FailedSys,"TimerIntegration::load", "fread offset");
 
-  size_t ptsrd = fread(packed.get(), sizeof(unsigned short int), npts, fptr);
+  int npts = nbin*nchan*npol;
 
-  if (int(ptsrd) < npts) {
+  vector<unsigned short> auto_delete (npts);
+  unsigned short* packed = &(auto_delete[0]);
 
+  size_t ptsrd = fread(packed, sizeof(unsigned short int), npts, fptr);
+
+  if (int(ptsrd) < npts)
+  {
     ErrorCode code = InvalidState;
     if (ferror(fptr))
       code = FailedSys;
 
     throw Error (code, "TimerIntegration::load",
                  " read %d/%d pts", ptsrd, npts);
-
   }
 
-  if (big_endian) {
+  if (big_endian)
+  {
     FromBigEndian (scale);
     FromBigEndian (offset);
-    N_FromBigEndian (npts, packed.get());
+    N_FromBigEndian (npts, packed);
   }
-  else {
+  else
+  {
     FromLittleEndian (scale);
     FromLittleEndian (offset);
-    N_FromLittleEndian (npts, packed.get());
+    N_FromLittleEndian (npts, packed);
   }
 
   if (verbose) 
@@ -213,7 +221,5 @@ void Pulsar::TimerIntegration::load_old (FILE* fptr, bool big_endian)
 		     "Corrupted scale factor");
 
   if (!Profile::no_amps)
-    unpackprofiles (profiles, npol, nchan, nbin, packed.get(), scale, offset);
-
-}    // End old style loading
-
+    unpackprofiles (profiles, npol, nchan, nbin, packed, scale, offset);
+}
