@@ -17,7 +17,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationExpert.h"
 
-#include "Pulsar/CalibratorType.h"
+#include "Pulsar/CalibratorTypes.h"
 #include "Pulsar/Instrument.h"
 #include "Pulsar/SingleAxis.h"
 #include "Pulsar/Feed.h"
@@ -44,7 +44,10 @@ using namespace Calibration;
 //! Constructor
 Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type* model)
 {
-  type = model;
+  if (model)
+    type = model;
+  else
+    type = new CalibratorTypes::bri00_Eq19;
 
   maximum_harmonic = 0;
   chosen_maximum_harmonic = 0;
