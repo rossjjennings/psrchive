@@ -478,40 +478,35 @@ catch (Error& error) {
 float Pulsar::PolnProfileFit::ccf_max_phase (const Profile* std,
 					     const Profile* obs) const try
 {
-  unsigned ibin, nbin = std->get_nbin();
-  if (obs->get_nbin() < nbin)
-    nbin = obs->get_nbin();
+  const unsigned nbin = std::min (obs->get_nbin(), std->get_nbin()) / 2;
+
+  const complex<float>* cstd
+    = reinterpret_cast< const complex<float>* >( std->get_amps() );
+  const complex<float>* cobs
+    = reinterpret_cast< const complex<float>* >( obs->get_amps() );
 
   // calculate the cross power spectral density
-  float* cpsd = new float[nbin];
-  auto_ptr<float> delete_cpsd (cpsd);
+  vector< complex<float> > cpsd (nbin);
 
   // don't care about DC term
-  cpsd[0] = cpsd[1] = 0.0;
-  for (ibin=2; ibin < nbin; ibin+=2)
-  {
-    complex<float> c_std (std->get_amps()[ibin], std->get_amps()[ibin+1]);
-    complex<float> c_obs (obs->get_amps()[ibin], obs->get_amps()[ibin+1]);
+  cpsd[0] = 0.0;
 
-    complex<float> c_psd = c_obs * conj(c_std);
-
-    cpsd[ibin]   = c_psd.real();
-    cpsd[ibin+1] = c_psd.imag();
-  }
+  for (unsigned ibin=1; ibin < nbin; ibin++)
+    cpsd[ibin] = cobs[ibin] * conj(cstd[ibin]);
 
   // calculate the (complex) cross correlation function
-  float* ccf = new float[nbin];
-  auto_ptr<float> delete_ccf (ccf);
+  vector< complex<float> > ccf (nbin);
 
-  nbin /= 2;
-  FTransform::bcc1d (nbin, ccf, cpsd);
+  FTransform::bcc1d ( nbin,
+		      reinterpret_cast<float*>( &(ccf[0]) ),
+		      reinterpret_cast<float*>( &(cpsd[0]) ) );
 
   // find the maximum modulus
   float max = 0;
   float imax = 0;
-  for (ibin=0; ibin < nbin; ibin++)
+  for (unsigned ibin=0; ibin < nbin; ibin++)
   {
-    float mod = ccf[2*ibin]*ccf[2*ibin] + ccf[2*ibin+1]*ccf[2*ibin+1];
+    float mod = norm (ccf[ibin]);
     if (mod > max)
     {
       max = mod;
@@ -523,8 +518,8 @@ float Pulsar::PolnProfileFit::ccf_max_phase (const Profile* std,
     imax -= nbin;
 
   return float(imax)/nbin;
-
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::PolnProfileFit::ccf_max_phase";
 }
