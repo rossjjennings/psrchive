@@ -34,9 +34,20 @@ int main () try {
 
   unsigned nparam = instrument.get_nparam();
 
-  for (unsigned iparam=0; iparam < nparam; iparam++)
-    cerr << instrument.get_param_name(iparam) << endl;
+  Instrument* clone = instrument.clone();
+  clone->set_cyclic();
 
+  for (unsigned iparam=0; iparam < nparam; iparam++)
+    if (instrument.get_param_name(iparam) != clone->get_param_name(iparam))
+    {
+      cerr << "invalid param_name[" << iparam << "] of cyclic clone: ";
+      cerr << instrument.get_param_name(iparam) 
+	   << " != '" << clone->get_param_name(iparam) << "'" << endl;
+
+      cerr << endl << "TEST FAILED" << endl;
+      return -1;
+    }
+  
   banner ("set gain to polynomial");
 
   Polynomial* polynomial = new Polynomial(3);
