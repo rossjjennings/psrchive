@@ -1,7 +1,11 @@
 
-
-
       subroutine smooth_mw(pr,nbin,maxwidth, rmsp,kwmax,snrmax,smmax)
+        call smooth_mmw(pr,nbin,1,maxwidth,rmsp,kwmax,snrmax,smmax)
+      end
+
+      subroutine smooth_mmw(pr,nbin,minwidth,maxwidth, rmsp,kwmax,
+     &   snrmax
+     &   ,smmax)
 c******************************************************************
 c
 c  convolves profile pr(nbin) with a boxcar of width kw.  it returns
@@ -13,12 +17,28 @@ c
 c******************************************************************
 c
 
-      integer nbin,kwmax, maxwidth
+      integer nbin,kwmax, maxwidth, minwidth
       real*4 pr(*),rmsp,snrmax,smmax
 c
-      integer ksm,j,k,kw,nn,ja,jj
+      integer ksm,j,k,kw,nn,ja,jj,nvalid
       real*4 s,wrk(2048),al,an,sn,smax
+      logical bail
 c
+c      write(*,*) 'Using new version of smooth_mw'
+c      write(*,*) 'At input, nbin is ',nbin,' rmsp is ', rmsp,'maxw ',
+c     &  maxwidth
+
+      if (minwidth .lt. 1) then
+         minwidth = 1
+      endif
+
+c      sanity check
+      if (minwidth.gt.maxwidth) then
+         write(5,*) 'smooth_mmw error minwidth > maxwidth',
+     &      minwidth, maxwidth
+         stop
+      endif
+
       snrmax=0.
       if (nbin.gt.1024) stop 'smooth.f Increase dim of wrk in smooth_mw'
 c---------------------------------------
@@ -37,12 +57,38 @@ c  remove baseline
         pr(j) = pr(j) - smax
    30 continue
 c--------------------------------------
+c  count # of valid widths
 c
-c
+      nvalid = 0
+      kw = minwidth
+      do 39 nn=1,1000
+        if (kw.ge.minwidth .and. kw .le. maxwidth) nvalid = nvalid + 1
+        kw=kw*1.5
+       if (kw .eq. 1) then
+           kw = 2
+       endif
+ 39   continue   
+C      write(*,*) 'nvalid is ',nvalid
+      if (nvalid .eq. 0) then
+         write(5,*) 'smooth_mmw no valid widths', minwidth, maxwidth
+         minwidth = nbin/2
+         maxwidth = nbin/2
+         bail = .true. 
+      else
+         bail = .false.
+      endif
+      kw = minwidth
       do 40 nn=1,1000
-        kw=2**(nn-1)
-        if (kw.gt.maxwidth) goto 70
-        if(kw.gt.nbin/2) return
+        if (nvalid .ne. 0 ) then
+C          write (*,*) 'kw min max nbin',kw,minwidth,maxwidth,nbin
+          if (kw.lt.minwidth) goto 40
+          if (kw.gt.maxwidth) goto 70
+        else
+           kw = nbin/2
+           bail = .true.
+        endif
+C        write(*,*) 'Attempting kw of ',kw
+        if(kw.gt.nbin * 0.9) return
 	s=0.0
 	do 50 k=1,kw
 	  s=s+pr(k)
@@ -67,20 +113,27 @@ c
           snrmax=sn
           kwmax=kw
           smmax=smax/kw
+C          write(*,*) ' QQ snrmax now ',snrmax, ' kwmax ', kwmax
+        endif
+        if (bail) then
+           goto 70
+        endif
+        kw=kw*1.5
+        if (kw .eq. 1) then
+           kw = 2
         endif
    40 continue
 
- 70   end
-
-
-
+C 70   write(*,*) 'Best width : ',kwmax, ' Best SNR : ', snrmax
+ 70   continue
+      end
 
 C rte old interface
       subroutine smooth(pr,nbin, rmsp,kwmax,snrmax,smmax)
       integer nbin,kwmax, maxwidth
       real*4 pr(*),rmsp,snrmax,smmax
       
-      call smooth_mw(pr,nbin,32, rmsp,kwmax,snrmax,smmax)
+      call smooth_mmw(pr,nbin,1, 32, rmsp,kwmax,snrmax,smmax)
       end
 
 
