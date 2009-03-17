@@ -514,21 +514,28 @@ void polyco::init ()
 //! Default constructor
 polyco::polyco ()
 {
+  if (verbose)
+    cerr << "polyco::polyco this=" << this << endl;
   init();
 }
 
 //! Copy constructor
 polyco::polyco (const polyco& copy)
 {
+  if (verbose)
+    cerr << "polyco::polyco copy this=" << this << endl;
   init();
   operator = (copy);
 }
 
 
-polyco & polyco::operator = (const polyco & copy)
+const polyco& polyco::operator = (const polyco & copy)
 {
   if (this == &copy)
     return *this;
+
+  if (verbose)
+    cerr << "polyco::operator= this=" << this << endl;
 
   pollys = copy.pollys;
 
@@ -546,7 +553,7 @@ polyco & polyco::operator = (const polyco & copy)
 polyco::~polyco ()
 {
   if (verbose)
-    cerr << "polyco dtor" << endl;
+    cerr << "polyco::~polyco this=" << this << endl;
 }
 
 polyco::polyco (const string& filename)
@@ -890,6 +897,9 @@ void polyco::set_last (int i) const
 
 int polyco::i_nearest (const MJD &t, bool throw_exception) const
 {
+  if (verbose)
+    cerr << "polyco::i_nearest this=" << this << endl;
+
   if (last_index >= 0
       && fabs((pollys[last_index].ref_time-t).in_minutes()) < last_span_epoch)
   {

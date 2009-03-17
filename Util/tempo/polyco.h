@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.53 $
-   $Date: 2008/09/15 06:26:56 $
+   $Revision: 1.54 $
+   $Date: 2009/03/17 06:43:37 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -213,7 +213,10 @@ public:
   polyco ();
 
   //! Copy constructor
-  polyco (const polyco& poly);
+  polyco (const polyco&);
+
+  //! Assignment operator
+  const polyco& operator = (const polyco&);
 
   //! Destructor
   ~polyco ();
@@ -275,7 +278,6 @@ public:
 
   //! Load in polycos
   polyco (const std::string& id);
-  polyco& operator = (const polyco& poly);
 
   //! these functions return the number of polynomials successfully loaded
   int load (const std::string& filename);
