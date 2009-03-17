@@ -270,10 +270,16 @@ void Pulsar::Database::Entry::unload (string& retval)
 
 namespace Pulsar
 {
-  bool operator == (const Reference::To<const Calibrator::Type>& a, 
-		    const Reference::To<const Calibrator::Type>& b)
+  bool same (const Reference::To<const Calibrator::Type>& a, 
+	     const Reference::To<const Calibrator::Type>& b)
   {
-    return ( (!a && !b) || (typeid(*a) == typeid(*b)) );
+    if (!a && !b)
+      return true;
+
+    if (!a || !b)
+      return false;
+
+    return a->is_a(b) || b->is_a(a);
   }
 }
 
@@ -281,7 +287,7 @@ bool Pulsar::operator == (const Database::Entry& a, const Database::Entry& b)
 {
   return
     a.obsType == b.obsType &&
-    a.calType == b.calType &&
+    same( a.calType, b.calType ) &&
     a.bandwidth == b.bandwidth &&
     a.frequency == b.frequency &&
     a.instrument == b.instrument &&
@@ -382,7 +388,7 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
 	     << " have calType="
 	     << have.calType->get_name();
 
-      if (entry.calType == have.calType)
+      if (same( entry.calType, have.calType ))
       {
 	if (match_verbose)
 	  cerr << "... matches" << endl; 
@@ -595,7 +601,8 @@ string get_current_path ()
   unsigned size = 128;
   char* fullpath = new char [size];
 
-  while (getcwd(fullpath, size) == 0) {
+  while (getcwd(fullpath, size) == 0)
+  {
     delete fullpath;
     if (errno != ERANGE)
       throw Error (FailedSys, "get_current_path", "getcwd");
@@ -667,8 +674,8 @@ void Pulsar::Database::construct (const vector<string>& filenames)
 
   Reference::To<Pulsar::Archive> newArch;
   
-  for (unsigned ifile=0; ifile<filenames.size(); ifile++) try {
-
+  for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
+  {
     if (verbose)
       cerr << "Pulsar::Database loading "
 	   << filenames[ifile] << endl;
@@ -679,9 +686,9 @@ void Pulsar::Database::construct (const vector<string>& filenames)
       cerr << "Pulsar::Database create new Entry" << endl;
     
     add (newArch);
-    
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << "Pulsar::Database error" << error.get_message() << endl;
   }
 
@@ -709,7 +716,8 @@ void Pulsar::Database::load (const string& dbase_filename)
 
   char temp[4096];
   int scanned = fscanf (fptr, "Pulsar::Database::path %s\n", temp);
-  if (!scanned) {
+  if (!scanned)
+  {
     rewind (fptr);
     scanned = fscanf (fptr, "Pulsar::Calibration::Database::path %s\n", temp);
     if (scanned)
@@ -894,7 +902,8 @@ try {
   Criterion criterion = get_default_criterion();
 
   if (obsType == Signal::FluxCalOn ||
-      obsType == Signal::FluxCalOff) {
+      obsType == Signal::FluxCalOff)
+  {
 
     criterion.minutes_apart = long_time_scale;
     criterion.check_coordinates = false;
@@ -1041,8 +1050,16 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
     throw Error (InvalidParam, "Database::generatePolnCalibrator",
 		 "no Pulsar::Archive given");
   
+  if (verbose)
+    cerr << "Pulsar::Database::generatePolnCalibrator type="
+	 << type->get_name() << endl;
+
   Entry entry;
 
+  //
+  // unless a CompleteJones transformation is requested,
+  // try loading a raw PolnCal observation
+  //
   if (! type->is_a<CalibratorTypes::CompleteJones>()) try
   {
     if (verbose)
@@ -1052,6 +1069,9 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
   }
   catch (Error& error)
   {
+    //
+    // the Hybrid transformations require access to a raw PolnCal observation
+    //
     if (type->is_a<CalibratorTypes::Hybrid>())
     {
       error << "\n\tHybrid Calibrator requires raw PolnCal observation";
@@ -1079,10 +1099,11 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
   }
 
   if (verbose)
-    cout << "Constructing PolnCalibrator from file " << entry.filename << endl;
+    cout << "Pulsar::Database::generatePolnCalibrator constructing from file "
+	 << entry.filename << endl;
 
   Reference::To<Pulsar::Archive> polcalarch;
-  polcalarch = Pulsar::Archive::load(get_filename(entry));
+  polcalarch = Pulsar::Archive::load( get_filename(entry) );
 
   // Truncate cal archive here if needed.
   // How to determine when this is appropriate?  compare BW?
@@ -1107,23 +1128,24 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
     unsigned nremoved=0;
 
     // Loop over polcal channels
-    for (unsigned ichan_pcal=0; ichan_pcal<polcalarch->get_nchan(); 
-        ichan_pcal++) {
+    for (unsigned ichan=0; ichan<polcalarch->get_nchan(); ichan++)
+    {
 
       // Try to match them to archive channels
-      int ichan_arch = chan_match.sub_channel(polcalarch, arch, ichan_pcal);
+      int ichan_arch = chan_match.sub_channel(polcalarch, arch, ichan);
 
       // If no match, delete it
-      if (ichan_arch==-1) {
-        polcalarch->remove_chan(ichan_pcal,ichan_pcal);
-        ichan_pcal--;
+      if (ichan_arch==-1)
+      {
+        polcalarch->remove_chan(ichan,ichan);
+        ichan--;
         nremoved++;
       }
     }
 
     if (verbose) 
       cerr << "Pulsar::Database::generatePolnCalibrator removed " 
-        << nremoved << " channels." << endl;
+	   << nremoved << " channels." << endl;
 
   }
 
@@ -1205,8 +1227,8 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
 
   Reference::To<Pulsar::HybridCalibrator> hybrid;
 
-  try {
-
+  try
+  {
     Reference::To<Pulsar::Archive> polncalarch;
     polncalarch = Pulsar::Archive::load(get_filename(entry));
 
@@ -1221,7 +1243,6 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
     if (calstokes)
       hybrid->set_reference_input (calstokes);
     hybrid->set_reference_observation (arcal);
-
   }
   catch (Error& error)
   {
@@ -1243,4 +1264,3 @@ string Pulsar::Database::get_path () const
 {
   return path;
 }
-
