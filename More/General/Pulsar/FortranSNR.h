@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FortranSNR.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/10/09 04:48:03 $
-   $Author: jonathan_khoo $ */
+   $Revision: 1.2 $
+   $Date: 2009/03/17 05:58:13 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_FortranSNR_h
 #define __Pulsar_FortranSNR_h
@@ -25,16 +25,23 @@ namespace Pulsar {
 
   public:
 
-	FortranSNR(); 
-
+    FortranSNR(); 
+    
     //! Return the signal to noise ratio based on the shift
     float get_snr (const Profile* profile);
+    int get_bestwidth(){ return bestwidth; }
 
-	void set_rms( float new_rms ) { rms = new_rms; rms_set = true; }
+    void set_rms( float new_rms ) { rms = new_rms; rms_set = true; }
+    void set_minwidthbins ( int bins ) { minwidthbins = bins; }
+    void set_maxwidthbins ( int bins ) { maxwidthbins = bins; }
+    void set_bestwidth(int bw) { bestwidth=bw; };
 
-	private:
-	float rms;
-	bool rms_set;
+  private:
+    float rms;
+    int minwidthbins;
+    int maxwidthbins;
+    int bestwidth;
+    bool rms_set;
   };
 
 }
