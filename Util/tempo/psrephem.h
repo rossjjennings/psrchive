@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.46 $
-   $Date: 2009/03/15 06:55:52 $
+   $Revision: 1.47 $
+   $Date: 2009/03/17 06:43:42 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -243,7 +243,7 @@ class psrephem : public Pulsar::Parameters
   // this is specifically for the older style ephemeris file
   // inserts the ephemeris values into the val_str, val_double,
   // and val_int depending on the type of each ephemeris value.
-  void read_old_ephem_str (std::vector<std::string> lines, 
+  void read_old_ephem_str (std::vector<std::string>& lines, 
 			   int *pstatus,
 			   std::string *val_str, 
 			   double *val_double, 

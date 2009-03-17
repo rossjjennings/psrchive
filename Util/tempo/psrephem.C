@@ -654,9 +654,10 @@ int Legacy::psrephem::load (string* instr)
   nontempo11 = *instr;  // just in case parsing fails
   int old_ephem = 0;
 
-	vector<string> eph_lines;
+  vector<string> eph_lines;
 
-  while (instr -> length() > 1) {
+  while (instr -> length() > 1)
+  {
     // get the next line from the incoming text
     string line ( stringtok (instr, "\n") );
     if (verbose)
@@ -666,8 +667,8 @@ int Legacy::psrephem::load (string* instr)
     if (line.length() < 1)
       continue;
 
-		// store the line in a vector for processing later
-		eph_lines.push_back(line);
+    // store the line in a vector for processing later
+    eph_lines.push_back (line);
 
     eph_rd_str (parmStatus, ephemblock, value_double, value_integer,
 		error_double, correct, &old_ephem, 
@@ -680,7 +681,8 @@ int Legacy::psrephem::load (string* instr)
     cerr << "Legacy::psrephem::load units converted" << endl;
 
   bool all_zero = 1;
-  for (int ieph=0; ieph<EPH_NUM_KEYS; ieph++)  {
+  for (int ieph=0; ieph<EPH_NUM_KEYS; ieph++)
+  {
     if (parmStatus[ieph] == 0)
       continue;
 
@@ -691,14 +693,15 @@ int Legacy::psrephem::load (string* instr)
     all_zero = 0;
   }
   
-  if (all_zero) {
-    if (verbose) {
+  if (all_zero)
+  {
+    if (verbose)
       cerr << "Legacy::psrephem::load WARNING "
 	"tempo11-style load of '" << nontempo11 << "' failed" << endl;
-		}
 		
-		// From here, need to parse the older style ephem
-		read_old_ephem_str(eph_lines, parmStatus, value_str, value_double, value_integer);		
+    // From here, need to parse the older style ephem
+    read_old_ephem_str (eph_lines, parmStatus, 
+                        value_str, value_double, value_integer);		
 		
     tempo11 = false;
   }
@@ -706,7 +709,7 @@ int Legacy::psrephem::load (string* instr)
   return 0;
 }
 
-void Legacy::psrephem::read_old_ephem_str(vector<string> lines, 
+void Legacy::psrephem::read_old_ephem_str(vector<string>& lines, 
                                   int *pstatus,
                                   string *val_str, 
 																	double * val_double, 
