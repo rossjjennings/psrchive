@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Config.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/08/05 13:51:07 $
+   $Revision: 1.12 $
+   $Date: 2009/03/17 04:37:16 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Config_h
@@ -83,6 +83,9 @@ namespace Pulsar {
 
     //! Set equal to T operator
     T& operator = (const T& t) { *value = t; return *value; }
+
+    //! Equality test operator
+    bool operator == (const T& t) { return *value == t; }
 
     std::string name;
     std::string description;
