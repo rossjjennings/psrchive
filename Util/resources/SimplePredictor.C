@@ -19,10 +19,13 @@ double Pulsar::SimplePredictor::precision = 1e-10;
 Pulsar::SimplePredictor::SimplePredictor (const char* filename)
 {
   if (verbose)
-    cerr << "Pulsar::SimplePredictor ctor" << endl;
+    cerr << "Pulsar::SimplePredictor this=" << this << endl;
 
   if (!filename)
     return;
+
+  if (verbose)
+    cerr << "Pulsar::SimplePredictor filename=" << filename << endl;
 
   FILE* fptr = fopen (filename, "r");
   if (!fptr)
@@ -103,7 +106,8 @@ Phase Pulsar::SimplePredictor::phase (const MJD& t) const
   long double power_of_t = seconds;
   long double result = 0;
 
-  for (unsigned i=0; i<coefs.size(); i++) {
+  for (unsigned i=0; i<coefs.size(); i++)
+  {
     result += coefs[i] * power_of_t;
     power_of_t *= seconds;
   }
@@ -126,7 +130,8 @@ long double Pulsar::SimplePredictor::frequency (const MJD& t) const
   long double power_of_t = 1.0;
   long double result = 0;
 
-  for (unsigned i=0; i<coefs.size(); i++) {
+  for (unsigned i=0; i<coefs.size(); i++)
+  {
     result += coefs[i] * (i+1) * power_of_t;
     power_of_t *= seconds;
   }
@@ -149,8 +154,8 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
   if (verbose)
     cerr << "Pulsar::SimplePredictor::load" << endl;
 
-  while ( fgets (buf, buffer.size(), fptr) == buf ) {
-
+  while ( fgets (buf, buffer.size(), fptr) == buf )
+  {
     string line = buf;
 
     line = stringtok (&line, "#\n", false);  // get rid of comments
@@ -217,13 +222,14 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
     else
       throw Error (InvalidParam, "Pulsar::SimplePredictor::load",
 		   "unrecognized key='" + key + "'");
-
   }
-
 }
 
 void Pulsar::SimplePredictor::unload (FILE* fptr) const
 {
+  if (verbose)
+    cerr << "Pulsar::SimplePredictor::unload fptr=" << fptr << endl;
+
   if (name.length())
     fprintf (fptr, "SOURCE: %s\n", name.c_str());
 
@@ -232,11 +238,14 @@ void Pulsar::SimplePredictor::unload (FILE* fptr) const
   fprintf (fptr, "RA: %s\n", coordinates.ra().getHMS().c_str());
   fprintf (fptr, "DEC: %s\n", coordinates.dec().getDMS().c_str());
 
-  if (coefs.size()) {
+  if (coefs.size())
+  {
     long double period = 1/coefs[0];
     fprintf (fptr, "PERIOD: %s\n", tostring(period).c_str());
   }
-  if (coefs.size() > 1) {
+
+  if (coefs.size() > 1)
+  {
     long double acc = 2.0 * coefs[1] * Pulsar::speed_of_light / coefs[0];
     fprintf (fptr, "ACC: %s\n", tostring(acc).c_str());
   }

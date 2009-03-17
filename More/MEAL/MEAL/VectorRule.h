@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/VectorRule.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/10/31 03:26:54 $
+   $Revision: 1.8 $
+   $Date: 2009/03/17 06:43:31 $
    $Author: straten $ */
 
 #ifndef __MEAL_VectorRule_H
@@ -170,6 +170,10 @@ T* MEAL::VectorRule<T>::get_current ()
    throw Error (InvalidRange, "MEAL::"+get_name()+"::get_current",
 		 "index=%d >= nmodel=%d", model_index, model.size());
 
+  if (!model[model_index])
+    throw Error (InvalidState, "MEAL::"+get_name()+"::get_current",
+                 "index=%d not set; nmodel=%d", model_index);
+
   return model[model_index];
 }
 
@@ -177,8 +181,12 @@ template<class T>
 MEAL::Project<T>& MEAL::VectorRule<T>::get_projection ()
 {
   if (model_index >= model.size())
-   throw Error (InvalidRange, "MEAL::"+get_name()+"::get_current",
+   throw Error (InvalidRange, "MEAL::"+get_name()+"::get_projection",
 		 "index=%d >= nmodel=%d", model_index, model.size());
+
+  if (!model[model_index])
+    throw Error (InvalidState, "MEAL::"+get_name()+"::get_projection",
+                 "index=%d not set; nmodel=%d", model_index);
 
   return model[model_index];
 }

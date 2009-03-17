@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.14 $
-   $Date: 2008/05/28 08:30:18 $
+   $Revision: 1.15 $
+   $Date: 2009/03/17 06:43:31 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
@@ -271,6 +271,10 @@ float MEAL::LevenbergMarquardt<Grad>::init
     alpha[j].resize (model.get_nparam());
     delta[j].resize (1);
   }
+
+  if (verbose > 2)
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::init calculate chisq"
+              << std::endl;
 
   best_chisq = calculate_chisq (x, y, model);
   best_alpha = alpha;
@@ -713,14 +717,21 @@ float MEAL::lmcoff1 (
 
   Yt w_delta_y = weight.get_weighted_conjugate (delta_y);
 
-  for (unsigned ifit=0; ifit < model.get_nparam(); ifit++) {
-    
-    if (model.get_infit(ifit)) {
-      
+  for (unsigned ifit=0; ifit < model.get_nparam(); ifit++)
+  {
+    if (model.get_infit(ifit))
+    {
       // Equation 15.5.6 (with 15.5.8)
       beta[ifit] += traits.to_real (w_delta_y * gradient[ifit]);
 
+      if (LevenbergMarquardt<Grad>::verbose > 2)
+        std::cerr << "MEAL::lmcoff1 compute weighted conjugate of gradient"
+                     "[" << ifit << "]" << std::endl;
+
       Grad w_gradient = weight.get_weighted_conjugate (gradient[ifit]);
+
+      if (LevenbergMarquardt<Grad>::verbose > 2)
+        std::cerr << "MEAL::lmcoff1 add to curvature matrix" << std::endl;
 
       // Equation 15.5.11
       for (unsigned jfit=0; jfit <= ifit; jfit++)
