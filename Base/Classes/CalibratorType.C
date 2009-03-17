@@ -38,3 +38,10 @@ Pulsar::Calibrator::Type::factory (const std::string& name)
 	       "unrecognized calibrator type name '" + name + "'");
 }
 
+bool Pulsar::Calibrator::Type::is_a (const Type* that) const
+{
+  // cerr << "typeid(this)=" << typeid(*this).name() << endl;
+  // cerr << "typeid(that)=" << typeid(*that).name() << endl;
+
+  return typeid(*this) == typeid(*that);
+}

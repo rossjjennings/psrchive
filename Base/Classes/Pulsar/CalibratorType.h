@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/CalibratorType.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/03/01 18:04:41 $
+   $Revision: 1.3 $
+   $Date: 2009/03/17 04:37:11 $
    $Author: straten $ */
 
 #ifndef __CalibratorType_H
@@ -40,6 +40,10 @@ namespace Pulsar
     //! Return the number of parameters that describe the transformation
     virtual unsigned get_nparam () const = 0;
 
+    //! Return true if that is a this
+    virtual bool is_a (const Type* that) const;
+
+    //! Return true if this is a T
     template<class T>
     bool is_a () const
     {

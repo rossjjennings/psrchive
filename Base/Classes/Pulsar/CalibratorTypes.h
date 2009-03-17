@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/CalibratorTypes.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/03/01 18:04:41 $
+   $Revision: 1.3 $
+   $Date: 2009/03/17 04:37:11 $
    $Author: straten $ */
 
 #ifndef __CalibratorTypes_H
@@ -63,14 +63,22 @@ namespace Pulsar
     //! Full 7 degrees of freedom parameterization of Jones matrix
     class CompleteJones : public Poln
     {
-      std::string get_name () const { return "jones"; }
-      unsigned get_nparam () const { return 7; }
+    public:
+      bool is_a (const Type* that) const
+      { return dynamic_cast<const CompleteJones*>(that) != 0; }
+
+      std::string get_name () const
+      { return "jones"; }
+
+      unsigned get_nparam () const
+      { return 7; }
     };
 
     //! van Straten (2004; ApJSS 152:129), equation 13
     class van04_Eq13 : public CompleteJones
     {
     public:
+      bool is_a (const Type* that) const { return Type::is_a (that); }
       std::string get_name () const { return "van04e13"; }
     };
 
@@ -78,6 +86,7 @@ namespace Pulsar
     class van09_Eq : public CompleteJones
     {
     public:
+      bool is_a (const Type* that) const { return Type::is_a (that); }
       std::string get_name () const { return "van09"; }
     };
     
@@ -86,12 +95,15 @@ namespace Pulsar
       backend to be modeled */
     class Phenomenological : public CompleteJones
     {
+      bool is_a (const Type* that) const
+      { return dynamic_cast<const Phenomenological*>(that) != 0; }
     };
     
     //! Britton (2000; ApJ 532:1240), equation 19
     class bri00_Eq19 : public Phenomenological
     {
     public:
+      bool is_a (const Type* that) const { return Type::is_a (that); }
       std::string get_name () const { return "bri00e19"; }
     };
     
@@ -99,22 +111,31 @@ namespace Pulsar
     class van04_Eq18 : public Phenomenological
     {
     public:
+      bool is_a (const Type* that) const { return Type::is_a (that); }
       std::string get_name () const { return "van04e18"; }
     };
 
     //! Mixes a SingleAxis and Phenomenological parameterization
-    class Hybrid : public CompleteJones
+    class Hybrid : public Poln
     {
+    public:
+      bool is_a (const Type* that) const
+      { return dynamic_cast<const Hybrid*>(that) != 0; }
+
+      std::string get_name () const { return "hybrid"; }
+      // 7 Phenomenological + 3 SingleAxis
+      unsigned get_nparam () const { return 10; }
     };
     
     //! Ord, van Straten, Hotan & Bailes (2004; MNRAS 352:804), section 2.1
     class ovhb04 : public Hybrid
     {
     public:
+      bool is_a (const Type* that) const { return Type::is_a (that); }
       std::string get_name () const { return "ovhb04"; }
     };
     
-    //! Calibrate by brute force and unjustified assumption
+    //! Calibrate by brute force and unjustified assumptions
     class Nefarious : public Poln
     {
     public:
