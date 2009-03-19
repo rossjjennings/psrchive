@@ -34,7 +34,7 @@ void usage ()
     "    A get command is simply the name of the parameter.\n"
     "    A set command is a parameter assignment statement, e.g\n"
     "\n"
-    "    psredit -c freq,NAME=\"Hydra A\"\n"
+    "    psredit -c freq,name=\"Hydra A\"\n"
     "\n"
     "    will print the centre frequency and set the source name.\n"
     "    Note that parameter names are case insensitive.\n"
