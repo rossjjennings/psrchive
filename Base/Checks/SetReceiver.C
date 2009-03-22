@@ -31,7 +31,7 @@ void Pulsar::SetReceiver::apply (Archive* archive) try
 
   if (directory != current)
   {
-    string filename = Pulsar::Config::get_runtime()
+    string filename = Config::get_runtime()
       + "/" + directory + "/receiver.log";
 
     receiver_log = new LogFile (filename);
@@ -47,10 +47,10 @@ void Pulsar::SetReceiver::apply (Archive* archive) try
 
   string name = receiver_log->get_message (utc);
 
-  string filename = Pulsar::Config::get_runtime()
+  string filename = Config::get_runtime()
     + "/" + directory + "/" + name + ".rcvr";
 
-  Reference::To<Receiver> receiver = Pulsar::Receiver::load (filename);
+  Reference::To<Receiver> receiver = Receiver::load (filename);
 
   archive->add_extension( receiver );
 }
