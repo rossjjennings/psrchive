@@ -5,12 +5,11 @@
  *
  ***************************************************************************/
 
-using namespace std;
-
 #include "MEAL/PhaseGradients.h"
 #include "MEAL/OneParameter.h"
-#include <cassert>
 
+#include <cassert>
+using namespace std;
 
 MEAL::PhaseGradients::PhaseGradients (unsigned ncoef)
   : parameters (this)
@@ -140,7 +139,6 @@ void MEAL::PhaseGradients::calculate (Jones<double>& result,
 
   if (grad)
   {
-    grad->resize (get_nparam());
     for (unsigned i=0; i<grad->size(); i++)
       (*grad)[i] = 0.0;
     (*grad)[igradient] = x * complex<double>(-sin_phase, cos_phase);
