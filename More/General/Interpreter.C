@@ -379,7 +379,8 @@ Pulsar::Archive* Pulsar::Interpreter::get ()
 
 void Pulsar::Interpreter::setmap (const string& name, Archive* data)
 {
-  if (!clobber) {
+  if (!clobber)
+  {
     map< string, Reference::To<Archive> >::iterator entry = theMap.find (name);
     if (entry != theMap.end())
       throw Error (InvalidState, "Pulsar::Interpreter::set",
@@ -392,7 +393,8 @@ Pulsar::Archive* Pulsar::Interpreter::getmap (const string& name, bool ex)
 {
   map< string, Reference::To<Archive> >::iterator entry = theMap.find (name);
 
-  if (entry == theMap.end()) {
+  if (entry == theMap.end())
+  {
     // not found
     if (!ex) 
       return 0;
@@ -416,7 +418,8 @@ string Pulsar::Interpreter::load (const string& args) try
 
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -449,7 +452,8 @@ string Pulsar::Interpreter::unload (const string& args) try
 
   return response (Good, "data written to " + filename);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -468,7 +472,8 @@ string Pulsar::Interpreter::push (const string& args) try
 
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -494,7 +499,8 @@ string Pulsar::Interpreter::set (const string& args) try
 
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -509,7 +515,8 @@ string Pulsar::Interpreter::get (const string& args) try
 
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -547,7 +554,8 @@ string Pulsar::Interpreter::clone (const string& args) try
 
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -648,7 +656,8 @@ string Pulsar::Interpreter::edit (const string& args) try
 
   return retval;
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -822,7 +831,8 @@ string Pulsar::Interpreter::pscrunch (const string& args) try
 
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -865,7 +875,8 @@ string Pulsar::Interpreter::fold (const string& args) try
   get() -> fold (factor);
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -910,8 +921,8 @@ catch (Error& error) {
 
 string Pulsar::Interpreter::dedisperse (const string& args) try
 {
-
-  if (!args.length()) {
+  if (!args.length())
+  {
     get()->dedisperse();
     return response (Good);
   }
@@ -922,7 +933,8 @@ string Pulsar::Interpreter::dedisperse (const string& args) try
 
   if (frequency)
     xform.set_reference_frequency( get()->get_centre_frequency() );
-  else {
+  else
+  {
     if (!allow_infinite_frequency)
       return response (Fail, "sorry, infinite frequency is not allowed");
     xform.set_reference_wavelength( 0 );
@@ -932,9 +944,9 @@ string Pulsar::Interpreter::dedisperse (const string& args) try
   xform.execute( get() );
 
   return response (Good);
-
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -942,8 +954,8 @@ catch (Error& error) {
 //
 string Pulsar::Interpreter::defaraday (const string& args) try
 {
-
-  if (!args.length()) {
+  if (!args.length())
+  {
     get()->defaraday();
     return response (Good);
   }
@@ -954,7 +966,8 @@ string Pulsar::Interpreter::defaraday (const string& args) try
 
   if (frequency)
     xform.set_reference_frequency( get()->get_centre_frequency() );
-  else {
+  else
+  {
     if (!allow_infinite_frequency)
       return response (Fail, "sorry, infinite frequency is not allowed");
     xform.set_reference_wavelength( 0 );
@@ -964,9 +977,9 @@ string Pulsar::Interpreter::defaraday (const string& args) try
   xform.execute( get() );
 
   return response (Good);
-
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -986,7 +999,8 @@ string Pulsar::Interpreter::scattered_power_correct (const string& args) try
 
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -1013,7 +1027,8 @@ string Pulsar::Interpreter::weight (const string& args) try
 
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -1036,7 +1051,8 @@ string Pulsar::Interpreter::scale (const string& args) try
 
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -1059,7 +1075,8 @@ string Pulsar::Interpreter::offset (const string& args) try
 
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -1070,7 +1087,8 @@ string Pulsar::Interpreter::rotate (const string& args) try
   get()->rotate_phase( setup<double>(args) );
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -1094,7 +1112,8 @@ string Pulsar::Interpreter::fix (const string& args) try
 
   return response (Fail, "unrecognized fix '"+args+"'");
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
@@ -1158,7 +1177,8 @@ string Pulsar::Interpreter::screen_dump (const string& args) try
 
   return response (Good);
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, "screenDump: " + error.get_message());
 }
 
