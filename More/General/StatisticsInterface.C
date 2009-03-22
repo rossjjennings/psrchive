@@ -7,11 +7,17 @@
 
 #include "Pulsar/StatisticsInterface.h"
 #include "Pulsar/PhaseWeightInterface.h"
+#include "Pulsar/Archive.h"
 
 Pulsar::Statistics::Interface::Interface (Statistics* instance)
 {
   if (instance)
+  {
     set_instance (instance);
+
+    if (instance->get_Archive()->get_nsubint() == 0)
+      return;
+  }
 
   add( &Statistics::get_subint,
        &Statistics::set_subint,
@@ -45,10 +51,6 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
 
   add( &Statistics::get_2bit_dist,
        "2bitd", "2-bit distortion" );
-
-  add( &Statistics::get_pcm_good,
-       "pcm_good", "Goodness of pcm fit statistic" );
-
 }
 
 

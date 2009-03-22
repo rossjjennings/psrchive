@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Statistics.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/02/20 19:19:50 $
+   $Revision: 1.5 $
+   $Date: 2009/03/22 22:47:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Statistics_h
@@ -35,6 +35,8 @@ namespace Pulsar {
 
     //! Set the instance from which statistics will be drawn
     void set_Archive (const Archive*);
+    //! Get the instance from which statistics will be drawn
+    const Archive* get_Archive () const;
 
     //! Set the sub-integration from which statistics will be drawn
     void set_subint (Index _isubint) { isubint = _isubint; }
@@ -60,9 +62,6 @@ namespace Pulsar {
     //! Get the predicted level of 2-bit distortion
     double get_2bit_dist () const;
     
-    //! Get the overall goodness of pcm fits
-    double get_pcm_good () const;
- 
     //! Get the off-pulse baseline
     PhaseWeight* get_baseline ();
 
