@@ -14,11 +14,11 @@
 
 using namespace std;
 
-const static double freq_tol = 1e-7; // Fractional freq matching tolerance
-const static double bw_tol = 1e-3;   // Fractional BW matching tolerance
-
 Pulsar::ChannelSubsetMatch::ChannelSubsetMatch()
 {
+  freq_tol = 1e-7;
+  bw_tol   = 1e-3;
+
   reason="";
 }
 
@@ -117,38 +117,24 @@ bool Pulsar::ChannelSubsetMatch::match (const Pulsar::Database::Entry& super,
 }
 
 int Pulsar::ChannelSubsetMatch::super_channel (const Pulsar::Archive* super,
-    const Pulsar::Archive* sub, int subchan)
+    const Pulsar::Archive* sub, int subchan) try
 {
-  
-  int result=-1;
-
-  double sub_freq = sub->get_Integration(0)->get_centre_frequency(subchan);
-  for (unsigned j=0; j<super->get_nchan(); j++) {
-    double super_freq = super->get_Integration(0)->get_centre_frequency(j);
-    if (fabs((sub_freq-super_freq)/super_freq) < freq_tol) {
-      result = j;
-      break;
-    }
-  }
-
-  return result;
+  double freq = sub->get_Integration(0)->get_centre_frequency(subchan);
+  return match_channel (super->get_Integration(0), freq);
+			
 }
+ catch (Error& error)
+   {
+     return -1;
+   }
 
 int Pulsar::ChannelSubsetMatch::sub_channel (const Pulsar::Archive* super,
-    const Pulsar::Archive* sub, int superchan)
+    const Pulsar::Archive* sub, int superchan) try
 {
-
-  int result=-1;
-
-  double super_freq = 
-    super->get_Integration(0)->get_centre_frequency(superchan);
-  for (unsigned j=0; j<sub->get_nchan(); j++) {
-    double sub_freq = sub->get_Integration(0)->get_centre_frequency(j);
-    if (fabs((sub_freq-super_freq)/super_freq) < freq_tol) {
-      result = j;
-      break;
-    }
-  }
-
-  return result;
+  double freq = super->get_Integration(0)->get_centre_frequency(superchan);
+  return match_channel (sub->get_Integration(0), freq);
 }
+ catch (Error& error)
+   {
+     return -1;
+   }
