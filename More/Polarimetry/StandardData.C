@@ -8,6 +8,8 @@
 #include "Pulsar/StandardData.h"
 #include "Pulsar/PolnProfile.h"
 
+// #define _DEBUG 1
+
 using namespace std;
 
 //! Default constructor
@@ -46,6 +48,10 @@ void Calibration::StandardData::set_profile (const Pulsar::PolnProfile* p)
 //! Normalize estimates by the average determinant
 void Calibration::StandardData::set_normalize (bool norm)
 {
+#ifdef _DEBUG
+  cerr << "Calibration::StandardData::set_normalize " << norm << endl;
+#endif
+
   if (norm)
     normalize = new MEAL::NormalizeStokes;
   else
@@ -60,6 +66,10 @@ Calibration::StandardData::get_stokes (unsigned ibin)
 
   if (normalize)
   {
+#ifdef _DEBUG1
+    cerr << "Calibration::StandardData::get_stokes normalize total_det="
+	 << total_determinant << endl;
+#endif
     normalize->normalize (result, total_determinant);
     result *= sqrt( (double) stats->get_stats()->get_on_pulse_nbin() );
   }

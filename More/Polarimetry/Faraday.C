@@ -124,6 +124,10 @@ double Calibration::Faraday::get_rotation () const
   double lambda_0 = reference_wavelength;
   double lambda = wavelength;
 
+  if (verbose)
+    cerr << "lambda_0=" << reference_wavelength
+	 << " lambda=" << wavelength << " (metres)" << endl;
+
   return rotation_measure * (lambda*lambda - lambda_0*lambda_0);
 }
 
