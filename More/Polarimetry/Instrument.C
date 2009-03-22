@@ -6,7 +6,6 @@
  ***************************************************************************/
 
 #include "Pulsar/Instrument.h"
-#include "Pulsar/SingleAxis.h"
 #include "Pulsar/Feed.h"
 
 #include "Pauli.h"
