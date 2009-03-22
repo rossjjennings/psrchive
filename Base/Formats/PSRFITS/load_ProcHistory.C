@@ -19,10 +19,8 @@ using namespace std;
 
 void ensure_printable (string& text)
 {
-  if (printable(text))
-    return;
-
-  text = "";
+  if (!printable(text))
+    text = "";
 }
 
 void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow, float hdr_version )
