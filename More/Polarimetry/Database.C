@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004-2008 by Willem van Straten
+ *   Copyright (C) 2004-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -1033,7 +1033,52 @@ Pulsar::Database::rawFluxCalibrator (Pulsar::Archive* arch)
 
   return fluxcal.release();
 }
-  
+
+template<class Container>
+double get_centre_frequency (const Container* container, unsigned ichan)
+{
+  return container->get_centre_frequency (ichan);
+}
+
+double get_centre_frequency (const Pulsar::Archive* archive, unsigned ichan)
+{
+  return archive->get_Integration(0)->get_centre_frequency (ichan);
+}
+
+template<class Container>
+void remove_channels (Container* super, Pulsar::Archive* arch)
+{
+  Pulsar::ChannelSubsetMatch chan_match;
+
+  if (Pulsar::Database::verbose)
+    cerr << "Pulsar::Database::generatePolnCalibrator " 
+	 << "BW mismatch, trying channel truncation... " << endl;
+
+  unsigned nremoved = 0;
+
+  // Loop over polcal channels
+  for (unsigned ichan=0; ichan<super->get_nchan(); ichan++)
+  {
+    double freq = get_centre_frequency (super, ichan);
+
+    // Try to match them to archive channels
+    try
+    {
+      chan_match.match_channel (arch->get_Integration(0), freq);
+    }
+    catch (...)
+    {
+      // If no match, delete it
+      super->remove_chan(ichan,ichan);
+      ichan--;
+      nremoved++;
+    }
+  }
+
+  if (Pulsar::Database::verbose) 
+    cerr << "Pulsar::Database::generatePolnCalibrator removed " 
+	 << nremoved << " channels." << endl;
+}
 
 /*! This routine is given a pointer to a Pulsar::Archive. It scans the
   database for all PolnCal observations from the same part of sky that
@@ -1115,38 +1160,11 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
        && polcalarch->get_nchan() > arch->get_nchan()
        && polcalarch->get_nsubint() )
   {
-    // NOTE: this will currently only work when loading in 
-    // raw cal observations.  could/should be updated to deal
-    // with polcal solutions as well.
-
-    ChannelSubsetMatch chan_match;
-
-    if (verbose)
-      cerr << "Pulsar::Database::generatePolnCalibrator " 
-        << "BW mismatch, trying channel truncation... " << endl;
-
-    unsigned nremoved=0;
-
-    // Loop over polcal channels
-    for (unsigned ichan=0; ichan<polcalarch->get_nchan(); ichan++)
-    {
-
-      // Try to match them to archive channels
-      int ichan_arch = chan_match.sub_channel(polcalarch, arch, ichan);
-
-      // If no match, delete it
-      if (ichan_arch==-1)
-      {
-        polcalarch->remove_chan(ichan,ichan);
-        ichan--;
-        nremoved++;
-      }
-    }
-
-    if (verbose) 
-      cerr << "Pulsar::Database::generatePolnCalibrator removed " 
-	   << nremoved << " channels." << endl;
-
+    CalibratorExtension* ext = polcalarch->get<CalibratorExtension>();
+    if (ext)
+      remove_channels (ext, arch);
+    else
+      remove_channels (polcalarch.get(), arch);
   }
 
   if (feed)
