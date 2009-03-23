@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorExtension.h,v $
-   $Revision: 1.14 $
-   $Date: 2009/03/01 18:04:41 $
+   $Revision: 1.15 $
+   $Date: 2009/03/23 11:37:25 $
    $Author: straten $ */
 
 #ifndef __CalibratorExtension_h
@@ -59,6 +59,9 @@ namespace Pulsar {
     virtual void set_nchan (unsigned nchan);
     //! Get the number of frequency channels
     virtual unsigned get_nchan () const;
+
+    //! Remove the specified range of channels
+    virtual void remove_chan (unsigned first, unsigned last);
 
     //! Set the weight of the specified channel
     virtual void set_weight (unsigned ichan, float weight);

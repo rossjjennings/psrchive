@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2008 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -12,6 +12,7 @@
 #include <assert.h>
 
 using namespace std;
+using namespace Pulsar;
 
 //! Default constructor
 Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
@@ -80,6 +81,12 @@ void Pulsar::PolnCalibratorExtension::set_nchan (unsigned _nchan)
   CalibratorExtension::set_nchan( _nchan );
   response.resize( _nchan );
   construct ();
+}
+
+void PolnCalibratorExtension::remove_chan (unsigned first, unsigned last)
+{
+  CalibratorExtension::remove_chan (first, last);
+  response.erase (response.begin()+first, response.begin()+last);
 }
 
 //! Set the weight of the specified channel
@@ -172,8 +179,6 @@ void Pulsar::PolnCalibratorExtension::construct ()
     weight[ichan] = 1.0;
   }
 }
-
-using namespace Pulsar;
 
 PolnCalibratorExtension::Transformation::Transformation ()
 {
@@ -310,7 +315,8 @@ PolnCalibratorExtension::Transformation::get_covariance () const
 
   unsigned count = 0;
   for (unsigned i=0; i<nparam; i++)
-    for (unsigned j=i; j<nparam; j++) {
+    for (unsigned j=i; j<nparam; j++)
+    {
       matrix[i][j] = matrix[j][i] = covariance[count];
       count ++;
     }
@@ -331,9 +337,11 @@ void PolnCalibratorExtension::Transformation::set_covariance
   covariance.resize( nparam * (nparam+1) / 2 );
 
   unsigned count = 0;
-  for (unsigned i=0; i<nparam; i++) {
+  for (unsigned i=0; i<nparam; i++)
+  {
     assert (nparam == covar[i].size());
-    for (unsigned j=i; j<nparam; j++) {
+    for (unsigned j=i; j<nparam; j++)
+    {
       covariance[count] = covar[i][j];
       count ++;
     }
@@ -372,8 +380,10 @@ void PolnCalibratorExtension::Transformation::set_covariance
 
   // set the variance stored in the transformation
   for (unsigned i=0; i<nparam; i++)
-    for (unsigned j=i; j<nparam; j++) {
-      if (i==j) {
+    for (unsigned j=i; j<nparam; j++)
+    {
+      if (i==j)
+      {
 #ifdef _DEBUG
 	cerr << j << " " << covar[icovar] << endl;
 #endif
@@ -395,6 +405,3 @@ TextInterface::Parser* PolnCalibratorExtension::get_interface()
 {
   return new Interface( this );
 }
-
-
-

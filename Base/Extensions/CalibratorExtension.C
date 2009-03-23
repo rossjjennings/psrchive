@@ -70,6 +70,18 @@ void CalibratorExtension::set_nchan (unsigned nchan)
   centre_frequency.resize( nchan );
 }
 
+template<typename C>
+void erase (C& c, unsigned first, unsigned last)
+{
+  c.erase (c.begin()+first, c.begin()+last);
+}
+
+void CalibratorExtension::remove_chan (unsigned first, unsigned last)
+{
+  erase (weight, first, last);
+  erase (centre_frequency, first, last);
+}
+
 //! Get the number of frequency channels
 unsigned CalibratorExtension::get_nchan () const
 {
