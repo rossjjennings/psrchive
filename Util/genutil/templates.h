@@ -240,11 +240,22 @@ bool remove (const T& x, C& c)
   return false;
 }
 
-//! Removes a range of elements from a container
+//! Removes an inclusive range of elements from a container
+/*! Note that STL ranges are not inclusive:
+
+"This example uses a range, just like the example of reversing a
+vector: the first argument to reverse is a pointer to the beginning of
+the range, and the second argument points one element past the end of
+the range. This range is denoted [A, A + 6); the asymmetrical notation
+is a reminder that the two endpoints are different, that the first is
+the beginning of the range and the second is one past the end of the
+range."
+
+*/
 template<typename C>
-void erase (C& c, unsigned first, unsigned last)
+void remove (C& c, unsigned first, unsigned last)
 {
-  c.erase (c.begin()+first, c.begin()+last);
+  c.erase (c.begin()+first, c.begin()+last+1);
 }
 
 //! Return the number nearest to and larger than big and divisible by small
