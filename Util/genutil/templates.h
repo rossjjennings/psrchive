@@ -81,8 +81,8 @@ T sqr (const T& x)
 //! Return the sum of all values on [i1, i2)
 /*! Use this version when you want a different return type than
   iterator value_type */
-template <class I, class T> T
-sum (const I& it1, const I& it2, T& the_sum)
+template <class I, class T>
+T sum (const I& it1, const I& it2, T& the_sum)
 {
   the_sum = 0.0;
 
@@ -238,6 +238,13 @@ bool remove (const T& x, C& c)
     return true;
   }
   return false;
+}
+
+//! Removes a range of elements from a container
+template<typename C>
+void erase (C& c, unsigned first, unsigned last)
+{
+  c.erase (c.begin()+first, c.begin()+last);
 }
 
 //! Return the number nearest to and larger than big and divisible by small
