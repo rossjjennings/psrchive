@@ -7,6 +7,7 @@
 
 #include "Pulsar/CalibratorExtensionInterface.h"
 #include "Pulsar/Calibrator.h"
+#include "templates.h"
 
 using namespace Pulsar;
 
@@ -68,12 +69,6 @@ void CalibratorExtension::set_nchan (unsigned nchan)
 {
   weight.resize( nchan );
   centre_frequency.resize( nchan );
-}
-
-template<typename C>
-void erase (C& c, unsigned first, unsigned last)
-{
-  c.erase (c.begin()+first, c.begin()+last);
 }
 
 void CalibratorExtension::remove_chan (unsigned first, unsigned last)
