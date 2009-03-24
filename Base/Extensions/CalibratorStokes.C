@@ -1,12 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/CalibratorStokes.h"
 #include "TextInterface.h"
+#include "templates.h"
 
 using Pulsar::CalibratorStokes;
 using namespace std;
@@ -50,6 +51,11 @@ void CalibratorStokes::set_nchan (unsigned nchan)
 unsigned CalibratorStokes::get_nchan () const
 {
   return stokes.size();
+}
+
+void CalibratorStokes::remove_chan (unsigned first, unsigned last)
+{
+  erase (stokes, first, last);
 }
 
 //! Set the validity flag for the specified channel
