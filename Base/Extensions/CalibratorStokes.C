@@ -55,7 +55,7 @@ unsigned CalibratorStokes::get_nchan () const
 
 void CalibratorStokes::remove_chan (unsigned first, unsigned last)
 {
-  erase (stokes, first, last);
+  remove (stokes, first, last);
 }
 
 //! Set the validity flag for the specified channel

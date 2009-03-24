@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorExtension.h,v $
-   $Revision: 1.15 $
-   $Date: 2009/03/23 11:37:25 $
+   $Revision: 1.16 $
+   $Date: 2009/03/24 03:00:36 $
    $Author: straten $ */
 
 #ifndef __CalibratorExtension_h
@@ -60,7 +60,7 @@ namespace Pulsar {
     //! Get the number of frequency channels
     virtual unsigned get_nchan () const;
 
-    //! Remove the specified range of channels
+    //! Remove the inclusive range of channels
     virtual void remove_chan (unsigned first, unsigned last);
 
     //! Set the weight of the specified channel

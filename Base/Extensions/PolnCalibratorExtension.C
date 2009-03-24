@@ -7,6 +7,7 @@
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorType.h"
+#include "templates.h"
 
 #include <string.h>
 #include <assert.h>
@@ -86,7 +87,7 @@ void Pulsar::PolnCalibratorExtension::set_nchan (unsigned _nchan)
 void PolnCalibratorExtension::remove_chan (unsigned first, unsigned last)
 {
   CalibratorExtension::remove_chan (first, last);
-  response.erase (response.begin()+first, response.begin()+last);
+  remove (response, first, last);
 }
 
 //! Set the weight of the specified channel

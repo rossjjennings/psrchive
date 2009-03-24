@@ -73,8 +73,8 @@ void CalibratorExtension::set_nchan (unsigned nchan)
 
 void CalibratorExtension::remove_chan (unsigned first, unsigned last)
 {
-  erase (weight, first, last);
-  erase (centre_frequency, first, last);
+  remove (weight, first, last);
+  remove (centre_frequency, first, last);
 }
 
 //! Get the number of frequency channels

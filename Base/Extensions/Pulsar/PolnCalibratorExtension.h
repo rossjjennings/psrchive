@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.34 $
-   $Date: 2009/03/23 11:37:25 $
+   $Revision: 1.35 $
+   $Date: 2009/03/24 03:00:36 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -65,7 +65,7 @@ namespace Pulsar {
     //! Set the number of frequency channels
     void set_nchan (unsigned nchan);
 
-    //! Remove the specified range of channels
+    //! Remove the inclusive range of channels
     void remove_chan (unsigned first, unsigned last);
 
     //! Set the weight of the specified channel

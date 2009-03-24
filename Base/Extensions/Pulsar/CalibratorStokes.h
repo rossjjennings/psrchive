@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorStokes.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/03/24 02:02:21 $
+   $Revision: 1.9 $
+   $Date: 2009/03/24 03:00:36 $
    $Author: straten $ */
 
 #ifndef __CalibratorStokes_h
@@ -56,7 +56,7 @@ namespace Pulsar {
     //! Get the number of frequency channels
     unsigned get_nchan () const;
 
-    //! Remove the specified range of channels
+    //! Remove the inclusive range of channels
     void remove_chan (unsigned first, unsigned last);
 
     //! Set the validity flag for the specified channel
