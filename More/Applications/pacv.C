@@ -29,6 +29,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
 
+#include "Pauli.h"
 #include "strutil.h"
 #include "dirutil.h"
 
@@ -52,6 +53,7 @@ void usage ()
     "                       = 'p' for total and polarized flux \n"
     "                 when  = 'c' for calibrated data \n"
     "                       = 'u' for uncalibrated data \n"
+    " -N           plot the calibrator solution [default] \n"
     " -a archive   set the output archive class name\n"
     " -c [i|j-k]   mark channel or range of channels as bad\n"
     " -C           plot only calibrator Stokes\n"
@@ -59,7 +61,6 @@ void usage ()
     " -d           use the Degree of Polarization Calibrator\n"
     " -f           treat all archives as members of a fluxcal observation\n"
     " -j           print Jones matrix elements of calibrator solution \n"
-    " -m           plot the calibrator solution [default] \n"
     " -p           use the polar model\n"
     " -P           produce publication-quality plots\n"
     " -s           plot only the reduced chisq of the pcm solution \n"
@@ -108,8 +109,10 @@ int main (int argc, char** argv)
   bool plot_calibrator_solver = false;
 
   bool plot_specified = false;
-  bool print_jones = false;
   bool print_titles = true;
+
+  bool print_jones = false;
+  bool print_mueller = false;
 
   //
   float cross_scale_factor = 1.0;
@@ -197,6 +200,10 @@ int main (int argc, char** argv)
       break;
 
     case 'm':
+      print_mueller = true;
+      break;
+
+    case 'N':
       plot_calibrator_solution = true;
       break;
 
@@ -311,7 +318,7 @@ int main (int argc, char** argv)
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  if (!print_jones)
+  if (!(print_jones || print_mueller))
   {
     cpgbeg (0, device.c_str(), 0, 0);
     cpgask(1);
@@ -399,16 +406,30 @@ int main (int argc, char** argv)
       cerr << "pacv: Archive Calibrator with nchan=" 
 	   << calibrator->get_nchan() << endl;
 
-      if (print_jones)
+      if (print_jones || print_mueller)
       {
 	cerr << "pacv: Printing Jones matrix elements" << endl;
 	for (unsigned ichan=0; ichan<calibrator->get_nchan(); ichan++)
 	{
+	  if (!calibrator->get_transformation_valid (ichan))
+	    continue;
+
 	  Jones<double> xform;
-	  if (calibrator->get_transformation_valid (ichan))
-	    xform = calibrator->get_transformation(ichan)->evaluate();
-	  
-	  cout << ichan << " " << xform << endl;
+	  xform = calibrator->get_transformation(ichan)->evaluate();
+
+	  if (print_jones)
+	    cout << ichan << " " << xform << endl;
+
+	  if (print_mueller)
+	  {
+	    cout << ichan;
+	    Matrix<4,4,double> M = Mueller (xform);
+	    for (unsigned i=0; i<4; i++)
+	      for (unsigned j=0; j<4; j++)
+		cout << " " << M[i][j];
+
+	    cout << endl;
+	  }
 	}
 	continue;
       }
