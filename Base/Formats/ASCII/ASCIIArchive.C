@@ -81,11 +81,16 @@ void Pulsar::ASCIIArchive::load_header (const char* filename)
     throw Error (FailedSys, "Pulsar::ASCIIArchive::load_header",
 		 "ifstream(%s)", filename);
 
-  is >> centre_frequency >> nbin >> source >> integration_length;
+  char hash;
+  is >> hash >> centre_frequency >> nbin >> source >> integration_length;
 
   if (is.fail())
     throw Error (InvalidParam, "Pulsar::ASCIIArchive::load_header",
-		 "Could not parse header from%s", filename);
+		 "could not parse header from '%s'", filename);
+
+  if (hash != '#')
+    throw Error (InvalidParam, "Pulsar::ASCIIArchive::load_header",
+		 "header does not start with '#'");
 
   set_nchan   (1);
   set_npol    (4);
