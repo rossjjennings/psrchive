@@ -301,6 +301,13 @@ if test x"$have_qtdriv" != xyes; then
    echo "  rhythm will not be compiled."
 fi
 
+if test x"$have_psrxml" != xyes; then
+	echo
+	echo "The psrxml library was not found:"
+	echo "  pdmp will not write xml candidate files."
+fi
+
+
 fi
 
 echo
