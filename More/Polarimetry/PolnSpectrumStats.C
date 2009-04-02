@@ -133,6 +133,19 @@ Pulsar::PolnProfile* fourier_to_psd (const Pulsar::PolnProfile* fourier)
   return psd.release();
 }
 
+void copy_pad (Pulsar::PhaseWeight& into, Pulsar::PhaseWeight& from, float remainder)
+{
+  const unsigned from_nbin = from.get_nbin();
+  const unsigned into_nbin = into.get_nbin();
+
+  unsigned ibin = 0;
+  for (; ibin < from_nbin; ibin++)
+    into[ibin] = from[ibin];
+
+  for (; ibin < into_nbin; ibin++)
+    into[ibin] = remainder;
+}
+
 void Pulsar::PolnSpectrumStats::build () try
 {
   if (!profile)
@@ -186,13 +199,19 @@ void Pulsar::PolnSpectrumStats::build () try
     imag->set_regions (on_pulse, baseline);
   }
 
-  if (on_pulse.get_nbin () > re->get_nbin())
+  if (on_pulse.get_nbin () != re->get_nbin())
   {
     PhaseWeight on_temp = on_pulse;
     PhaseWeight off_temp = baseline;
 
     on_temp.resize( re->get_nbin() );
     off_temp.resize( re->get_nbin() );
+
+    if (re->get_nbin() > on_pulse.get_nbin ())
+    {
+      copy_pad( on_temp, on_pulse, 0 );
+      copy_pad( off_temp, baseline, 1 );
+    }
 
     real->set_regions (on_temp, off_temp);
     imag->set_regions (on_temp, off_temp);
