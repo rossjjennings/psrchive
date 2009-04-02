@@ -116,11 +116,6 @@ void Pulsar::ReceptionCalibrator::set_normalize_by_invariant (bool set)
     standard_data->set_normalize (normalize_by_invariant);
 }
 
-void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& n)
-{
-  calibrator_filenames = n;
-}
-
 /*!
   This method is called on the first call to add_observation.
   It initializes various arrays and internal book-keeping attributes.
@@ -186,8 +181,11 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   create_model ();
 
-  if (calibrator_estimate.source.size() == 0 && calibrator_filenames.size())
+  if (calibrator_estimate.source.size() == 0)
+  {
+    has_pulsar = true;
     load_calibrators ();
+  }
 
   // initialize any previously added states
   for (unsigned istate=0; istate<pulsar.size(); istate++)
@@ -210,48 +208,7 @@ void Pulsar::ReceptionCalibrator::init_model (unsigned ichan)
     model[ichan] -> fix_orientation ();
 }
 
-void Pulsar::ReceptionCalibrator::load_calibrators ()
-{
-  for (unsigned ifile = 0; ifile < calibrator_filenames.size(); ifile++) try
-  {
-    cerr << "Pulsar::ReceptionCalibrator::load_calibrators loading\n\t"
-	 << calibrator_filenames[ifile] << endl;
 
-    Reference::To<Archive> archive;
-    archive = Pulsar::Archive::load(calibrator_filenames[ifile]);
-    reflections.transform (archive);
-    add_calibrator (archive);
-    
-  }
-  catch (Error& error)
-  {
-    cerr << "Pulsar::ReceptionCalibrator::load_calibrators" << error << endl;
-  }
-
-  unsigned nchan = model.size();
-
-  cerr << "Setting " << nchan << " channel receiver" << endl;
-
-  try
-  {
-    for (unsigned ichan=0; ichan<nchan; ichan++)
-      model[ichan]->update ();
-  }
-  catch (Error& error)
-  {
-    throw error += "Pulsar::ReceptionCalibrator::load_calibrators";
-  }
-
-  if (previous && previous->get_nchan() == nchan)
-  {
-    cerr << "Using previous solution" << endl;
-    set_initial_guess = false;
-    for (unsigned ichan=0; ichan<nchan; ichan++)
-      if (previous->get_transformation_valid(ichan))
-        model[ichan]->copy_transformation(previous->get_transformation(ichan));
-  }
-
-}
 
 
 //! Add the specified pulse phase bin to the set of state constraints

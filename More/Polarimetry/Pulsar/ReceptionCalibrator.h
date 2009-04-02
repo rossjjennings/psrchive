@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.89 $
-   $Date: 2009/03/01 18:04:42 $
+   $Revision: 1.90 $
+   $Date: 2009/04/02 22:52:45 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -79,9 +79,6 @@ namespace Pulsar
     //! Retern a new plot information interface for the specified state
     Calibrator::Info* new_info_pulsar (unsigned istate) const;
 
-    //! Set the calibrator observations to be loaded during initial_observation
-    void set_calibrators (const std::vector<std::string>& filenames);
-    
     //! Set the observation that defines the baseline and on-pulse phase bins
     void set_standard_data (const Archive* data);
 
@@ -111,10 +108,6 @@ namespace Pulsar
     //! Standard data interface
     Reference::To<Calibration::StandardData> standard_data;
 
-    //! A previous solution, if availabe
-    Reference::To<const PolnCalibrator> previous;
-    Reference::To<const CalibratorStokes> previous_cal;
-
     //! The unique transformation for each observation
     MEAL::VectorRule<MEAL::Complex2>* unique;
 
@@ -127,9 +120,6 @@ namespace Pulsar
     //! Uncalibrated estimate of pulsar polarization as a function of phase
     std::vector<SourceEstimate> pulsar;
     
-    //! The calibrators to be loaded during initial_observation
-    std::vector<std::string> calibrator_filenames;
-
     //! The epochs of all loaded calibrators
     std::vector<MJD> calibrator_epochs;
 
@@ -156,9 +146,6 @@ namespace Pulsar
 
     //! Initialization performed using the first observation added
     void initial_observation (const Archive* data);
-
-    //! Load the set of calibrators set by set_calibrators
-    void load_calibrators ();
 
     void valid_mask (const SourceEstimate& src);
 
