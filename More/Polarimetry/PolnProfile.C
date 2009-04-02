@@ -11,6 +11,8 @@
 #include "Pulsar/ExponentialBaseline.h"
 #include "Pulsar/PhaseWeight.h"
 
+#include "Pulsar/Fourier.h"
+#include "FTransform.h"
 #include "ModifyRestore.h"
 #include "Pauli.h"
 #include "Error.h"
@@ -544,6 +546,60 @@ void Pulsar::PolnProfile::invint (Profile* invint, bool second) const
   invint->set_centre_frequency ( get_Profile(0)->get_centre_frequency() );
   invint->set_weight ( get_Profile(0)->get_weight() );
 }
+
+void Pulsar::PolnProfile::invconv (Profile* invconv) const
+{
+  unsigned nbin = get_nbin();
+
+  Reference::To<PolnProfile> fourier = complex_fourier_transform (this);
+
+  Signal::State state = get_state();
+
+  Jones<double> coherence;
+  complex<double> Ci (0,1);
+
+  vector<float> fourier_det (nbin * 2);
+
+  for (unsigned ibin = 0; ibin < nbin; ibin++)
+  {
+    if (state == Signal::Stokes)
+    {
+      Stokes< complex<double> > real = fourier->get_Stokes(ibin*2);
+      Stokes< complex<double> > imag = fourier->get_Stokes(ibin*2+1);
+
+      Stokes< complex<double> > stokes = real + Ci*imag;
+
+      coherence = convert (stokes);
+    }
+    else if (state == Signal::Coherence)
+    {
+      Jones<double> real = fourier->get_coherence(ibin*2);
+      Jones<double> imag = fourier->get_coherence(ibin*2+1);
+
+      coherence = real + Ci*imag;
+    }
+
+    complex<double> determinant = det(coherence);
+    fourier_det[ibin*2]   = determinant.real();
+    fourier_det[ibin*2+1] = determinant.imag();
+  }
+
+  vector<float> complex_data (nbin * 2);
+
+  FTransform::bcc1d (nbin, &(complex_data[0]), &(fourier_det[0]));
+
+  invconv->resize (nbin);
+  float* amps = invconv->get_amps();
+
+  for (unsigned ibin = 0; ibin < nbin; ibin++)
+    amps[ibin] = complex_data[ibin*2];
+
+  invconv->set_state (Signal::Inv);
+
+  invconv->set_centre_frequency ( get_Profile(0)->get_centre_frequency() );
+  invconv->set_weight ( get_Profile(0)->get_weight() );
+}
+
 
 bool pav_backward_compatibility = false;
 

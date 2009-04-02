@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfile.h,v $
-   $Revision: 1.40 $
-   $Date: 2008/03/13 19:18:12 $
+   $Revision: 1.41 $
+   $Date: 2009/04/02 22:52:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -124,6 +124,9 @@ namespace Pulsar {
 
     //! Return the invariant interval
     void invint (Profile* invint, bool second = true) const;
+
+    //! Return the invariant autoconvolution
+    void invconv (Profile* invconv) const;
 
     //! Return the linear polarization profile
     void get_linear (Profile* linear) const;
