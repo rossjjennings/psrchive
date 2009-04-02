@@ -30,9 +30,8 @@ void usage()
        << endl;
 }
 
-int main(int argc, char ** argv)
-{ try {
-
+int main(int argc, char ** argv) try
+{
   bool verbose = false;
   bool quiet = false;
 
@@ -100,13 +99,25 @@ int main(int argc, char ** argv)
   double pa_lo = kernel.get_rotation ();
 
   double delta_PA = (pa_hi - pa_lo) / (2.0*M_PI);
-  // phase delay between RHC and LHS is twice the change in P.A.
-  double dgd = 2.0 * fabs(delta_PA) / centrefreq;
-
+  
   if (!quiet)
+  {
+    // phase delay between RHC and LHS is twice the change in P.A.
+    double dgd = 2.0 * fabs(delta_PA) / centrefreq;
+
+    kernel.set_reference_wavelength (0.0);
+    kernel.set_frequency (centrefreq);
+
+    double abs_delta_PA = kernel.get_rotation () / (2.0*M_PI);
+    double abs_dgd = 2.0 * fabs(abs_delta_PA) / centrefreq;
+
     cout << "\nOutput parameters:\n"
       "Position angle change:    " << delta_PA*360.0 << " deg\n"
-      "Differential group delay: " << dgd << " us\n";
+      "Differential group delay: " << dgd*1e3 << " ns (across band)\n"
+      "\n"
+      "Absolute position angle change: " << abs_delta_PA*360.0 << " deg\n"
+      "Absolute differential delay: " << abs_dgd*1e3 << " ns \n";
+  }
   else
     cout << delta_PA*360.0 << endl;
 
@@ -126,9 +137,10 @@ int main(int argc, char ** argv)
       "maximum RM:    " << M_PI/delta_PA << endl;
 
 }
-catch (...) {
+catch (...)
+{
   cerr << "exception thrown: " << endl;
   return -1;
 }
-}
+
 
