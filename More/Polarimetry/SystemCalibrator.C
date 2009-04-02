@@ -799,6 +799,9 @@ void Pulsar::SystemCalibrator::create_model ()
   unsigned nchan = get_nchan ();
   model.resize (nchan);
 
+  if (verbose)
+    cerr << "Pulsar::SystemCalibrator::create_model nchan=" << nchan << endl;
+
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
     if (verbose > 2)

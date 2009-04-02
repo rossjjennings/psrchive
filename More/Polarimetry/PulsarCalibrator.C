@@ -167,6 +167,9 @@ unsigned Pulsar::PulsarCalibrator::get_nharmonic () const
 
 void Pulsar::PulsarCalibrator::build (unsigned nchan) try
 {
+  if (verbose > 2)
+    cerr << "Pulsar::PulsarCalibrator::build nchan=" << nchan << endl;
+
   transformation.resize (nchan);
   solution.resize (nchan);
   phase_shift.resize (nchan);
