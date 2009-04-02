@@ -84,7 +84,7 @@ void Calibration::ReceptionModel::Solver::count_constraint () try
 		 "ndata=%u <= nfree=%u", ndat_constraint, nparam_infit);
 
   if (report)
-    cerr << endl << ndat_constraint << " indepdendent data" << endl << endl;
+    cerr << endl << ndat_constraint << " independent data" << endl << endl;
 }
 catch (Error& error)
 {
