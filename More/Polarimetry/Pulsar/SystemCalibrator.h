@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.20 $
-   $Date: 2009/03/01 18:04:42 $
+   $Revision: 1.21 $
+   $Date: 2009/04/02 22:52:57 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -128,6 +128,9 @@ namespace Pulsar
     //! Retern a new plot information interface for the specified pulsar state
     virtual Calibrator::Info* new_info_pulsar (unsigned istate) const;
 
+    //! Set the calibrator observations to be loaded after first pulsar
+    void set_calibrators (const std::vector<std::string>& filenames);
+    
     //! Set the calibrator
     virtual void set_calibrator (Archive*);
 
@@ -256,6 +259,9 @@ namespace Pulsar
     virtual void integrate_calibrator_data (const Jones< Estimate<double> >&,
 					    const SourceObservation&);
 
+    //! Load any postponed calibrators and those set by set_calibrators
+    virtual void load_calibrators ();
+
     //! Ensure that the pulsar observation can be added to the data set
     virtual void match (const Archive*);
 
@@ -265,6 +271,9 @@ namespace Pulsar
     //! Derived types must define how pulsar data are incorporated
     virtual void add_pulsar (Calibration::CoherencyMeasurementSet&,
 			     const Integration*, unsigned ichan) = 0;
+
+    //! The calibrators to be loaded after first pulsar observation
+    std::vector<std::string> calibrator_filenames;
 
     //! Uncalibrated estimate of calibrator polarization
     SourceEstimate calibrator_estimate;
@@ -307,6 +316,13 @@ namespace Pulsar
 
     unsigned get_data_fail;
     unsigned get_data_call;
+
+    //! A previous solution, if availabe
+    Reference::To<const PolnCalibrator> previous;
+    Reference::To<const CalibratorStokes> previous_cal;
+
+    //! Flag set after the first pulsar observation is added
+    bool has_pulsar;
 
   private:
 
