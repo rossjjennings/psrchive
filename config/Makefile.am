@@ -8,6 +8,7 @@ dist_aclocal_DATA = \
 nodist_aclocal_DATA = Makefile.aclocal
 
 EXTRA_DIST = aclocal.sh
+CLEANFILES = Makefile.aclocal
 
 #############################################################################
 #
