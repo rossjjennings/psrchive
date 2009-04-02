@@ -119,9 +119,7 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
     warning << "Pulsar::PulsarCalibrator::set_standard '" 
 	    << data->get_filename() << "' has not been calibrated" << endl;
 
-  Reference::To<Archive> clone;
-
-  set_calibrator( clone = data->clone() );
+  set_calibrator( standard = data->clone() );
   
   FrontendCorrection correct;
   if (correct.required(data))
@@ -129,14 +127,14 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
     if (verbose)
       cerr << "Pulsar::PulsarCalibrator::set_standard correcting instrument" 
 	   << endl;
-    correct.calibrate( clone );
+    correct.calibrate( standard );
   }
 
   /*
     Select the on-pulse and baseline regions
   */
   {
-    const Integration* integration = get_calibrator()->get_Integration (0);
+    const Integration* integration = standard->get_Integration (0);
     Reference::To<Integration> clone = integration->clone();
     clone->expert()->fscrunch ();
 
@@ -153,8 +151,8 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
     }
   }
 
-  if (clone->get_nchan () > 1)
-    build (clone->get_nchan());
+  if (standard->get_nchan () > 1)
+    build (standard->get_nchan());
 }
 
 unsigned Pulsar::PulsarCalibrator::get_nharmonic () const
@@ -164,7 +162,7 @@ unsigned Pulsar::PulsarCalibrator::get_nharmonic () const
   else if (maximum_harmonic)
     return maximum_harmonic;
   else
-    return get_calibrator()->get_nbin()/2;
+    return standard->get_nbin()/2;
 }
 
 void Pulsar::PulsarCalibrator::build (unsigned nchan) try
@@ -174,7 +172,7 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
   phase_shift.resize (nchan);
   reduced_chisq.resize (nchan);
 
-  const Integration* integration = get_calibrator()->get_Integration (0);
+  const Integration* integration = standard->get_Integration (0);
   unsigned model_nchan = integration->get_nchan();
   if (model_nchan != 1 && model_nchan != nchan)
     throw Error (InvalidState, "Pulsar::PulsarCalibrator::build",
@@ -269,7 +267,8 @@ void Pulsar::PulsarCalibrator::init_model (unsigned ichan)
 void Pulsar::PulsarCalibrator::match (const Archive* data)
 {
   if (verbose)
-    cerr << "Pulsar::PulsarCalibrator::match" << endl;
+    cerr << "Pulsar::PulsarCalibrator::match"
+      " data->nchan=" << data->get_nchan() << endl;
 
   Archive::Match match;
 
@@ -277,7 +276,8 @@ void Pulsar::PulsarCalibrator::match (const Archive* data)
   match.set_check_calibrator (true);
   match.set_check_nbin (false);
 
-  bool one_channel = get_calibrator()->get_nchan() == 1;
+  bool one_channel = standard->get_nchan() == 1 
+    && data->get_nchan() > 1;
 
   if (one_channel)
   {
@@ -295,8 +295,12 @@ void Pulsar::PulsarCalibrator::match (const Archive* data)
   if (!receiver)
     receiver = data->get<Receiver>();
 
-  if (one_channel && !mtm.size())
-    build (data->get_nchan());
+  if (one_channel)
+  {
+    PolnCalibrator::set_calibrator (data);
+    if (!mtm.size())
+      build (data->get_nchan());
+  }
 
   if (tim_file)
     archive = data;
@@ -342,13 +346,21 @@ void Pulsar::PulsarCalibrator::add_pulsar
     queue.submit( this, &Pulsar::PulsarCalibrator::solve1,
 		  integration, ichan );
   }
-  else
+  else try
   {
     if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::add_pulsar adding to path index="
 	   << measurements.get_transformation_index() << endl;
 
+    get_data_call ++;
     mtm[ichan]->add_observation( integration->new_PolnProfile (ichan) );
+  }
+  catch (Error& error)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::PulsarCalibrator::add_pulsar ichan=" << ichan 
+	   << " error\n\t" << error.get_message() << endl;
+    get_data_fail ++;
   }
 }
 

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.33 $
-   $Date: 2009/03/01 18:04:42 $
+   $Revision: 1.34 $
+   $Date: 2009/04/02 22:52:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -89,6 +89,9 @@ namespace Pulsar {
 
   protected:
     
+    //! The template/standard
+    Reference::To<Pulsar::Archive> standard;
+
     //! Solve the measurement equation for each sub-integration
     bool solve_each;
 
