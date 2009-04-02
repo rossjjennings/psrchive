@@ -29,7 +29,8 @@ Calibration::StandardSpectra::select_profile (const Pulsar::PolnProfile* pp)
 }
 
 //! Set the profile from which estimates will be derived
-void Calibration::StandardSpectra::set_profile (const Pulsar::PolnProfile* p)
+void
+Calibration::StandardSpectra::set_profile (const Pulsar::PolnProfile* p) try
 {
   stats->set_profile (p);
 
@@ -39,6 +40,10 @@ void Calibration::StandardSpectra::set_profile (const Pulsar::PolnProfile* p)
 #endif
 
   total_determinant = stats->get_total_determinant ();
+}
+catch (Error& error)
+{
+  throw error += "Calibration::StandardSpectra::set_profile";
 }
 
 Pulsar::PolnSpectrumStats* Calibration::StandardSpectra::get_stats ()
