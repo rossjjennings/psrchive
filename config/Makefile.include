@@ -17,6 +17,7 @@ CLEANFILES = $(LOCAL_INCLUDE) $(MOC_SOURCES) $(BUILT_SOURCES)
 
 AM_CPPFLAGS = -I$(local_includedir) $(INCLUDE_CPPFLAGS)
 
+AM_LDFLAGS = $(INCLUDE_LDFLAGS)
 
 ###########################################################################
 #
