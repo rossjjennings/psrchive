@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.40 $
-   $Date: 2009/03/04 03:39:43 $
-   $Author: jonathan_khoo $ */
+   $Revision: 1.41 $
+   $Date: 2009/04/05 21:03:11 $
+   $Author: straten $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -77,6 +77,8 @@ const char PER_SUBINT_KEY       = 'S';
 const char HISTORY_KEY          = 'H';
 const char SNR_KEY              = 'N';
 const char MINMAX_KEY           = 'm';
+const char PA_THRESHOLD_KEY     = 'L';
+
 
 
 using std::cerr;
@@ -123,6 +125,7 @@ int ichan = -1;
 int ibin = -1;
 int isub = -1;
 float phase = 0.0;
+float pa_threshold = 3.0;
 
 vector<string> jobs;
 
@@ -164,7 +167,8 @@ void Usage( void )
   "   -" << STOKES_FRACPOL_KEY << "          Convert to Stokes and also print fraction polarisation \n"
   "   -" << STOKES_FRACLIN_KEY << "          Convert to Stokes and also print fraction linear \n"
   "   -" << STOKES_FRACCIR_KEY << "          Convert to Stokes and also print fraction circular \n"
-  "   -" << STOKES_POSANG_KEY <<  "          Convert to Stokes and also print position angle \n"
+  "   -" << STOKES_POSANG_KEY <<  "          Convert to Stokes and also print position angle (P.A.) \n"
+  "   -" << PA_THRESHOLD_KEY <<   " sigma    Minimum linear polarization for P.A. \n"
   "   -" << CALIBRATOR_KEY <<     "          Print out calibrator (square wave) parameters \n"
   "   -" << PULSE_WIDTHS_KEY <<   "[dcyc]    Show pulse widths and mean flux density (mJy) \n"
   "                                          with baseline width dcyc \n"
@@ -349,7 +353,7 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 			{
 			  Reference::To<Pulsar::PolnProfile> profile;
 			  profile = intg->new_PolnProfile(c);
-			  profile->get_orientation (PAs, 3.0);
+			  profile->get_orientation (PAs, pa_threshold);
 			}
 
             if( per_channel_headers )
@@ -1043,6 +1047,7 @@ int main( int argc, char *argv[] ) try
   args += SNR_KEY;
   args += MINMAX_KEY;
   args += HDR_MARKER_KEY;
+  args += PA_THRESHOLD_KEY; args += ":";
 
   vector<string> history_params;
   vector<string> subint_params;
@@ -1140,6 +1145,9 @@ int main( int argc, char *argv[] ) try
       break;
     case STOKES_POSANG_KEY:
       show_pa = true;
+      break;
+    case PA_THRESHOLD_KEY:
+      pa_threshold = atof (optarg);
       break;
     case PER_SUBINT_KEY:
       cmd_subints = true;
