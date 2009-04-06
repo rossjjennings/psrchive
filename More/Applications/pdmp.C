@@ -415,6 +415,8 @@ char output_phcx_file[128];
 bool input_phcx=false;
 char input_phcx_file[128];
 
+float coarseness = 1;
+float range_mult = 1;
 
 // If archive contains more than maxChannels and maxSubints, pdmp
 // will partially scrunch it to improve performance
@@ -748,8 +750,15 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 			printf("Sorry, can't read hcx file as this pdmp was not compiled against the psrxml library.\n");
 			exit(1);
 #endif
+		} 
+		else if (strcmp(argv[i], "-C") == 0) {
+			i++;
+			coarseness = atof(argv[i]);
 		}
-
+		else if (strcmp(argv[i], "-R") == 0) {
+			i++;
+			range_mult = atof(argv[i]);
+		}
 
 		// Handle error if there is no such option
 		else if (argv[i][0] == '-') {
@@ -1181,6 +1190,11 @@ void solve_and_plot (Archive* archive,
 
 	if (periodHalfRange_us < 0)
 		periodHalfRange_us = getNaturalperiodHalfRange(archive, periodStep_us);
+
+	dmStep *= coarseness;
+	periodStep_us *= coarseness;
+	periodHalfRange_us *= range_mult;
+	dmHalfRange *= range_mult;
 
 	// Make sure that the steps are sensible. Otherwise, just do one step
 	if (nchan == 1 || dmStep <= 0)
