@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Aidan Hotan
+ *   Copyright (C) 2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -33,7 +33,7 @@ void usage() {
 
 }
 
-int main(int argc, char *argv[])
+int main (int argc, char** argv)
 {
   string output_format = "PSRFITS";
   string unload_cal_ext = ".cf";
@@ -45,9 +45,10 @@ int main(int argc, char *argv[])
   bool quiet = false;
 
   int gotc = 0;
-  while ((gotc = getopt(argc, argv, "hM:o:qVv")) != -1) {
-    switch (gotc) {
-
+  while ((gotc = getopt(argc, argv, "hM:o:qVv")) != -1)
+  {
+    switch (gotc)
+    {
     case 'o':
       output_format = optarg;
       break;
@@ -74,7 +75,6 @@ int main(int argc, char *argv[])
       Pulsar::Archive::set_verbosity (0);
       quiet = true;
       break;
-
     }
   }
 
@@ -86,18 +86,29 @@ int main(int argc, char *argv[])
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  if (filenames.size() == 0) {
+  if (filenames.size() == 0)
+  {
     usage ();
     return 0;
   }
   
   Reference::To<Pulsar::Archive> input;
   Reference::To<Pulsar::Archive> output;
-  
-  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
+  // ensure that the selected output format can be written
+  output = Pulsar::Archive::new_Archive (output_format);  
+  if (!output->can_unload())
+  {
+    cerr << "psrconv: " << output_format << " unload method not implemented"
+	 << endl;
+    return -1;
+  }
+
+  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try
+  {
     if (!quiet)
       cerr << "Loading " << filenames[ifile] << endl;
+
     input = Pulsar::Archive::load(filenames[ifile]);
     
     output = Pulsar::Archive::new_Archive (output_format);
@@ -106,7 +117,8 @@ int main(int argc, char *argv[])
     if (!quiet)
       cerr << "Conversion complete" << endl;
     
-    if (verbose) {
+    if (verbose)
+    {
       cerr << "Source: " << output -> get_source() << endl;
       cerr << "Frequency: " << output -> get_centre_frequency() << endl;
       cerr << "Bandwidth: " << output -> get_bandwidth() << endl;
@@ -128,7 +140,8 @@ int main(int argc, char *argv[])
     output->unload (newname);
 
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << error << endl;
   }
 }
