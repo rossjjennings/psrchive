@@ -17,7 +17,10 @@
 
 #include <string>
 #include <iostream>
+#include <functional>
+
 #include <math.h>
+#include <ctype.h>
 
 using namespace std;
 
@@ -153,9 +156,10 @@ string evaluate (const string& text, char cstart, char cend) try
     {
       end ++;
 
-      int(*pred)(int) = isdigit;
+      // make an Adaptable Predicate out of std C isdigit
+      Functor< bool(char) > pred ( (int(*)(int)) isdigit );
 
-      string::size_type pend = find_first_not_if (remain, pred, end);
+      string::size_type pend = find_first_if (remain, std::not1(pred), end);
       string::size_type len = (pend != string::npos ) ? pend-end : pend;
 
       precision = fromstring<unsigned> (remain.substr (end, len));
