@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.182 $
-   $Date: 2008/11/27 06:12:00 $
+   $Revision: 1.183 $
+   $Date: 2009/04/07 12:56:14 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.182 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.183 $"
 
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Config.h"
@@ -100,6 +100,9 @@ namespace Pulsar
      * These methods deal with loading and unloading data to and from file.
      */
     //@{
+
+    //! Return true if the unload method is implemented
+    virtual bool can_unload () const = 0;
 
     //! Write the archive to filename
     void unload (const char* filename = 0) const;
@@ -603,9 +606,6 @@ namespace Pulsar
     //! Load the specified Integration from filename, returning new instance
     virtual Integration*
     load_Integration (const char* filename, unsigned subint) = 0;
-
-    //! Return true if unload_file is implemented
-    virtual bool can_unload () const = 0;
 
     //! Unload the Archive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const = 0;
