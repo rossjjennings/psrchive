@@ -13,7 +13,7 @@ using namespace std;
 
 void Pulsar::FITSArchive::unload_Parameters (fitsfile* fptr) const
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::FITSArchive::unload_Parameters" << endl;
 
   unload_text (fptr, "PSRPARAM", "PARAM", ephemeris.get(), verbose > 3);
