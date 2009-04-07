@@ -84,7 +84,7 @@ psrstat::psrstat ()
   : Pulsar::Application ("psrstat", "prints pulsar attributes and statistics")
 {
   has_manual = true;
-  version = "$Id: psrstat.C,v 1.5 2009/02/26 08:38:07 straten Exp $";
+  version = "$Id: psrstat.C,v 1.6 2009/04/07 07:48:23 straten Exp $";
 
   // print/parse in degrees
   Angle::default_type = Angle::Degrees;
@@ -189,7 +189,7 @@ void psrstat::print ()
     if ( text.find('$') == string::npos )
       cout << interface->process ( text );
     else
-      cout << evaluate( substitute( text, interface.get() ) ); 
+      cout << " " << evaluate( substitute( text, interface.get() ) ); 
   }
   
   cout << endl;
