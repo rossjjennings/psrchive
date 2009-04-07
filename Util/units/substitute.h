@@ -6,23 +6,19 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/substitute.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/02/08 02:55:40 $
+   $Revision: 1.7 $
+   $Date: 2009/04/07 07:37:11 $
    $Author: straten $ */
 
 #ifndef __UTILS_UNITS_SUBSTITUTE_H
 #define __UTILS_UNITS_SUBSTITUTE_H
 
+#include "TextInterfaceName.h"
+#include "Functor.h"
+
 #include <string>
 #include <algorithm>
 #include <ctype.h>
-
-//! Return true if c may belong to a valid TextInterface variable name
-inline bool isvar (char c) 
-{
-  static std::string valid = "_[,-]:%";
-  return isalnum(c) || valid.find(c) != std::string::npos;
-}
 
 //! Return first character in text such that pred(c) is true
 template<class Pred> std::string::size_type 
@@ -36,31 +32,12 @@ find_first_if (const std::string& text, Pred pred, std::string::size_type pos)
     return iter - text.begin();
 }
 
-namespace mystd {
-
-//! Returns !Pred(T)
-template<class Pred, class T>
-class negate {
-public:
-  negate (Pred p) { pred = p; }
-  bool operator () (const T& t) const { return !pred(t); }
-protected:
-  Pred pred;
-};
-
-}
-
-//! Return first character in text such that pred(c) is false
-template<class P> std::string::size_type 
-find_first_not_if (const std::string& text, P pred, std::string::size_type pos)
-{
-  mystd::negate<P,std::string::value_type> not_pred (pred);
-  return find_first_if (text, not_pred, pos);
-}
-
 template<class T>
 std::string substitute (const std::string& text, const T* resolver,
-			char substitution = '$', bool(*pred)(char) = isvar)
+			char substitution = '$',
+			Functor< bool(char) > in_name = 
+			Functor< bool(char) > (new TextInterface::Name,
+					       &TextInterface::Name::valid) )
 {
   std::string remain = text;
   std::string result;
@@ -76,7 +53,8 @@ std::string substitute (const std::string& text, const T* resolver,
     start ++;
 
     // find the end of the variable name
-    std::string::size_type end = find_first_not_if (remain, pred, start);
+    std::string::size_type end;
+    end = find_first_if (remain, std::not1(in_name), start);
 
     // length to end of variable name
     std::string::size_type length = std::string::npos;
