@@ -38,6 +38,7 @@ include_HEADERS = \
         substitute.h \
 	TextIndex.h \
         TextInterface.h \
+	TextInterfaceName.h \
 	TextLoop.h \
         tostring.h \
         Traits.h \
@@ -61,6 +62,7 @@ libunits_la_SOURCES = \
 	tostring.C \
 	TextIndex.C \
         TextInterface.C \
+	TextInterfaceName.C \
 	TextLoop.C \
 	Warning.C
 
