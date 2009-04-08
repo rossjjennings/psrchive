@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.21 $
-   $Date: 2009/02/05 01:32:06 $
+   $Revision: 1.22 $
+   $Date: 2009/04/08 05:19:15 $
    $Author: straten $ */
 
 #ifndef __FITSHdrExtension_h
@@ -30,12 +30,6 @@ namespace Pulsar
 
     //! Copy constructor
     FITSHdrExtension (const FITSHdrExtension& extension);
-
-    //! Operator =
-    const FITSHdrExtension& operator= (const FITSHdrExtension& extension);
-
-    //! Destructor
-    ~FITSHdrExtension ();
 
     //! Clone method
     FITSHdrExtension* clone () const { return new FITSHdrExtension( *this ); }

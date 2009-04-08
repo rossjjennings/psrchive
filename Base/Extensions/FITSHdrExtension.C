@@ -12,51 +12,38 @@
 
 using namespace std;
 
+const string unset ("UNSET");
+
 //! Default constructor
 Pulsar::FITSHdrExtension::FITSHdrExtension ()
   : Extension ("FITSHdrExtension")
 {
-  start_time.Construct("00000.00000");
-  hdrver = "UNSET";
-  creation_date = "UNSET";
-  coordmode = "UNSET";
-  equinox  = "UNSET";
-  trk_mode = "UNSET";
-  stt_date = "UNSET";
-  stt_time = "UNSET";
+  hdrver = unset;
+  major_version = minor_version = 0;
+
+  creation_date = unset;
+  coordmode = unset;
+  equinox  = unset;
+  trk_mode = unset;
+  stt_date = unset;
+  stt_time = unset;
+
   stt_lst = 0.0;
   obsfreq = 0.0;
+
+  obs_mode = unset;
+  ra = dec = unset;
+  stt_crd1 = stt_crd2 = stp_crd1 = stp_crd2 = unset;
+
+  bpa = bmaj = bmin = 0.0;
 }
 
 //! Copy constructor
 Pulsar::FITSHdrExtension::FITSHdrExtension (const FITSHdrExtension& extension)
   : Extension ("FITSHdrExtension")
 {
-  operator=(extension);
+  operator = (extension);
 }
-
-//! Operator =
-const Pulsar::FITSHdrExtension&
-Pulsar::FITSHdrExtension::operator= (const FITSHdrExtension& extension)
-{
-  start_time = extension.start_time;
-  hdrver = extension.hdrver;
-  creation_date = extension.creation_date;
-  coordmode = extension.coordmode;
-  equinox = extension.equinox;
-  trk_mode = extension.trk_mode;
-  stt_date = extension.stt_date;
-  stt_time = extension.stt_time;
-  stt_lst = extension.stt_lst;
-
-  return *this;
-}
-
-//! Destructor
-Pulsar::FITSHdrExtension::~FITSHdrExtension ()
-{}
-
-
 
 TextInterface::Parser* Pulsar::FITSHdrExtension::get_interface()
 {
@@ -79,7 +66,7 @@ void Pulsar::FITSHdrExtension::set_coordmode (const string& mode)
     coordmode = mode;
 
   else
-    coordmode = "UNSET";
+    coordmode = unset;
 }
 
 void Pulsar::FITSHdrExtension::set_date_str (const string& date)
@@ -93,7 +80,7 @@ void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
 {
   AnglePair newcoord;
 
-  if (coordmode == "J2000" || coordmode == "UNSET")
+  if (coordmode == "J2000" || coordmode == unset)
   {
     newcoord = coordinates.getRaDec();
 
