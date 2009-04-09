@@ -52,8 +52,8 @@ void Pulsar::FITSArchive::load_integration_state (fitsfile* fptr)
   if (verbose > 2)
     cerr << "FITSArchive::load_integration_state INT_TYPE=" << tempstr << endl;
 
-  if (tempstr != "TIME" && tempstr != "") {
-
+  if (tempstr != "TIME" && tempstr != "")
+  {
     if (tempstr == "BINPHSPERI")
       add_extension(new PeriastronOrder());
     else if (tempstr == "BINPHSASC")
@@ -67,7 +67,6 @@ void Pulsar::FITSArchive::load_integration_state (fitsfile* fptr)
 		  "unknown INT_TYPE=" + tempstr);
     
     get<Pulsar::IntegrationOrder>()->resize(get_nsubint());
-    
   }
  
   Reference::To<ProcHistory> hist = get<ProcHistory>();
@@ -171,58 +170,58 @@ void Pulsar::FITSArchive::interpret_pol_type ()
     if( state_pol_type == "XXYY" || 
 	state_pol_type == "LLRR" ||
 	state_pol_type == "AABB" )
-      {
-	set_state ( Signal::PPQQ );
-	if (verbose > 2)
-	  cerr << "FITSArchive::interpret_pol_type setting Signal::PPQQ" << endl;
-      }
+    {
+      set_state ( Signal::PPQQ );
+      if (verbose > 2)
+	cerr << "FITSArchive::interpret_pol_type Signal::PPQQ" << endl;
+    }
 
     else if( state_pol_type == "STOKE" )
-      {
-	set_state ( Signal::Stokes );
-	if (verbose > 2)
-	  cerr << "FITSArchive::interpret_pol_type setting Signal::Stokes" << endl;
-      }
+    {
+      set_state ( Signal::Stokes );
+      if (verbose > 2)
+	cerr << "FITSArchive::interpret_pol_type Signal::Stokes" << endl;
+    }
 
     else if( state_pol_type == "XXYYCRCI" ||
 	     state_pol_type == "LLRRCRCI" ||
 	     state_pol_type == "AABBCRCI" )
-      {
-	set_state ( Signal::Coherence );
-	if (verbose > 2)
-	  cerr << "FITSArchive::interpret_pol_type setting Signal::Coherence" << endl;
-      }
+    {
+      set_state ( Signal::Coherence );
+      if (verbose > 2)
+	cerr << "FITSArchive::interpret_pol_type Signal::Coherence" << endl;
+    }
 
     else if( state_pol_type == "INTEN" ||
-	   state_pol_type == "AA+BB" )
-      {
-	set_state ( Signal::Intensity );
-	if (verbose > 2)
-	  cerr << "FITSArchive::interpret_pol_type setting Signal::Intensity" << endl;
-      }
+	     state_pol_type == "AA+BB" )
+    {
+      set_state ( Signal::Intensity );
+      if (verbose > 2)
+	cerr << "FITSArchive::interpret_pol_type Signal::Intensity" << endl;
+    }
 
     else if( state_pol_type == "INVAR" )
-      {
-	set_state ( Signal::Invariant );
- 	if (verbose > 2)
-	  cerr << "FITSArchive::interpret_pol_type setting Signal::Invariant" << endl;
-      }
-
+    {
+      set_state ( Signal::Invariant );
+      if (verbose > 2)
+	cerr << "FITSArchive::interpret_pol_type Signal::Invariant" << endl;
+    }
+    
     else
-      {
-	if (verbose > 1)
-	  cerr << "FITSArchive::interpret_pol_type WARNING unknown POL_TYPE='"
-	       << state_pol_type << "'" << endl;
-	pol_type_undefined = true;
-      }
+    {
+      if (verbose > 1)
+	cerr << "FITSArchive::interpret_pol_type WARNING unknown POL_TYPE='"
+	     << state_pol_type << "'" << endl;
+      pol_type_undefined = true;
+    }
   }
 
 
   if (pol_type_undefined)
   {
     if (verbose > 1)
-      cerr << "FITSArchive::interpret_pol_type WARNING guessing state from NPOL="
-	   << get_npol() << endl;
+      cerr << "FITSArchive::interpret_pol_type WARNING"
+	" guessing state from NPOL=" << get_npol() << endl;
 
     if (npol == 4)
       set_state ( Signal::Stokes );
