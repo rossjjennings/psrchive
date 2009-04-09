@@ -54,6 +54,7 @@ void Pulsar::FITSArchive::init ()
 
   scale_cross_products = false;
   correct_P236_reference_epoch = false;
+  search_mode = false;
 }
 
 //
@@ -289,7 +290,11 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     ThresholdMatch::set_BPP (this);
   }
 
+  //
+  //
   // Figure out what kind of observation it was
+  //
+  //
 
   if (verbose > 2)
     cerr << "FITSArchive::load_header reading OBS_MODE" << endl;
@@ -297,9 +302,46 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   psrfits_read_key (fptr, "OBS_MODE", &tempstr);
   string obs_mode = tempstr;
   
+  if (verbose > 2)
+    cerr << "FITSArchive::load_header OBS_MODE='" << obs_mode << "'" << endl;
+
   hdr_ext->set_obs_mode( obs_mode );
 
+  if (obs_mode == "PSR" || obs_mode == "LEVPSR")
+  {
+    set_type ( Signal::Pulsar );
+    if (verbose > 2)
+      cerr << "FITSArchive::load_header using Signal::Pulsar" << endl;
+  }
+  else if (obs_mode == "CAL" || obs_mode == "LEVCAL")
+    set_type ( Signal::PolnCal );
+  else if (obs_mode == "FOF")
+    set_type ( Signal::FluxCalOff );
+  else if (obs_mode == "FON")
+    set_type ( Signal::FluxCalOn );
+  else if (obs_mode == "PCM")
+    set_type ( Signal::Calibrator );
+
+  else if (obs_mode == "SEARCH" || obs_mode == "SRCH")
+  {
+    search_mode = true;
+    set_type ( Signal::Unknown );
+    if (verbose > 2)
+      cerr << "FITSArchive::load_header search mode file" << endl;
+  }
+  else
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_header WARNING unknown OBSTYPE = " 
+	   << tempstr <<endl;
+    set_type ( Signal::Unknown );
+  }
+
+  //
+  //
   // Read the centre frequency of the observation
+  //
+  //
   {
     double dfault = 0.0;
     double centre_frequency;
@@ -325,28 +367,6 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
   psrfits_read_key (fptr, "SRC_NAME", &tempstr);
   set_source ( tempstr );
-  
-  if (obs_mode == "PSR" || obs_mode == "LEVPSR") {
-    set_type ( Signal::Pulsar );
-    if (verbose > 2)
-      cerr << "FITSArchive::load_header using Signal::Pulsar" << endl;
-  }
-  else if (obs_mode == "CAL" || obs_mode == "LEVCAL")
-    set_type ( Signal::PolnCal );
-  else if (obs_mode == "FOF")
-    set_type ( Signal::FluxCalOff );
-  else if (obs_mode == "FON")
-    set_type ( Signal::FluxCalOn );
-  else if (obs_mode == "PCM")
-    set_type ( Signal::Calibrator );
-  else if (obs_mode == "SEARCH")
-    set_type ( Signal::Unknown );
-  else {
-    if (verbose > 2)
-      cerr << "FITSArchive::load_header WARNING unknown OBSTYPE = " 
-	   << tempstr <<endl;
-    set_type ( Signal::Unknown );
-  }
   
   // Read where the telescope was pointing
   
@@ -983,7 +1003,7 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
   {
     // older version files may have SUBINT headers but not all parameters set
 
-    if( sub_hdr->get_nsblk() == -1 && hdr_ext->get_obs_mode() == "SEARCH" )
+    if( sub_hdr->get_nsblk() == -1 && search_mode )
       const_cast<FITSSUBHdrExtension*>(sub_hdr)->set_nsblk( 1 );
 
     unload( fptr, sub_hdr );

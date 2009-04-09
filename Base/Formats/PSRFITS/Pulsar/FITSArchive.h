@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.60 $
-   $Date: 2009/03/15 06:55:52 $
+   $Revision: 1.61 $
+   $Date: 2009/04/09 03:50:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -258,6 +258,9 @@ namespace Pulsar {
 
     // Correct the reference epoch in WBC data taken during commissioning
     bool correct_P236_reference_epoch;
+
+    // The data file contains search mode data, not folded pulse profiles
+    bool search_mode;
 
     // Reference epoch is used during unload_Integration
     /* This attribute enables proper handling of time stamps when there

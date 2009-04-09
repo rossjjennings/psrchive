@@ -32,16 +32,18 @@ void Pulsar::FITSArchive::load_integration_state (fitsfile* fptr)
     return;
   }
 
-  // Get the number of rows (ie. the number of sub-ints)
+  if (!search_mode)
+  {
+    // Get the number of rows (ie. the number of sub-ints)
     
-  long numrows = 0;
-  fits_get_num_rows (fptr, &numrows, &status);
+    long numrows = 0;
+    fits_get_num_rows (fptr, &numrows, &status);
 
-  if (verbose > 2)
-    cerr << "FITSArchive::load_integration_state numrows=" << numrows << endl;
+    if (verbose > 2)
+      cerr << "FITSArchive::load_integration_state nsubint="<< numrows << endl;
 
-  set_nsubint(numrows);
-
+    set_nsubint(numrows);
+  }
 
   string tempstr;
   string dfault = "";

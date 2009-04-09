@@ -37,6 +37,10 @@ try {
     throw Error (InvalidParam, "FITSArchive::load_Integration",
 		 "filename unspecified");
 
+  if (search_mode)
+    throw Error (InvalidParam, "FITSArchive::load_Integration",
+		 "SEARCH mode data -- no Integrations to load");
+
   Reference::To<Pulsar::Integration> integ = new_Integration();
   init_Integration (integ);
 
@@ -97,8 +101,8 @@ try {
   if (epoch_def == "MIDTIME")
     phase_match_start_time = false;
 
-  if (get<Pulsar::IntegrationOrder>()) {
-
+  if (get<Pulsar::IntegrationOrder>())
+  {
     colnum = 0;
     fits_get_colnum (fptr, CASEINSEN, "INDEXVAL", &colnum, &status);
     
@@ -117,7 +121,8 @@ try {
   // Get the reference epoch from the primary header
   const Pulsar::FITSHdrExtension* hdr_ext = get<Pulsar::FITSHdrExtension>();
   
-  if (!hdr_ext) {
+  if (!hdr_ext)
+  {
     throw Error (InvalidParam, "FITSArchive::load_Integration",
 		 "No FITSHdrExtension found");
   }
