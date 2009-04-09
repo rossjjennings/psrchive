@@ -11,7 +11,7 @@ Pulsar::FITSAlias::FITSAlias ()
 {
   add( "FD_POLN", "rcvr:basis" );
   add( "FD_HAND", "rcvr:hand" );
-  add( "FD_SANG", "rcvr:ra" );
+  add( "FD_SANG", "rcvr:sa" );
   add( "FD_XYPH", "rcvr:rph" );
 
   add( "BACKEND", "be:name" );
