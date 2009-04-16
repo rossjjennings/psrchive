@@ -1,0 +1,18 @@
+#!/bin/csh -ef
+
+# @configure_input@
+
+mkdir -p @prefix@/src
+cd @prefix@/src
+
+if ( ! -f cfitsio3060.tar.gz ) then
+  @download@ ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3060.tar.gz
+endif
+
+gunzip -c cfitsio3060.tar.gz | tar xvf -
+cd cfitsio
+
+./configure --prefix=$PSRHOME/packages/$LOGIN_ARCH
+
+make
+make install

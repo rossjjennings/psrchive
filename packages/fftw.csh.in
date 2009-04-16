@@ -1,0 +1,18 @@
+#!/bin/csh -ef
+
+# @configure_input@
+
+mkdir -p @prefix@/src
+cd @prefix@/src
+
+if ( ! -f fftw-3.1.2.tar.gz ) then
+  @download@ http://www.fftw.org/fftw-3.1.2.tar.gz 
+endif
+
+gunzip -c fftw-3.1.2.tar.gz | tar xvf -
+cd fftw-3.1.2
+
+./configure --enable-float --enable-sse --disable-dependency-tracking --prefix=@prefix@
+
+make
+make install

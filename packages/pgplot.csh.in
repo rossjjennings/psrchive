@@ -1,0 +1,45 @@
+#!/bin/csh -ef
+
+# @configure_input@
+
+mkdir -p @prefix@/src
+cd @prefix@/src
+
+setenv PKGS $PSRHOME/packages
+
+if ( ! -f pgplot5.2.tar.gz ) then
+  @download@ ftp://ftp.astro.caltech.edu/pub/pgplot/pgplot5.2.tar.gz
+endif
+
+gunzip -c pgplot5.2.tar.gz | tar xvf -
+
+cd pgplot/sys_linux
+
+# make a gfortran configuration
+cp g77_gcc.conf gfortran_gcc.conf
+perl -pi -e 's/g77/gfortran/' gfortran_gcc.conf 
+
+# remove the -u option from FFLAGC
+perl -pi -e 's/-u //' gfortran_gcc.conf 
+
+mkdir -p $PKGS/$LOGIN_ARCH/pgplot
+
+cd $PKGS/$LOGIN_ARCH/pgplot
+
+cp $PKGS/src/pgplot/drivers.list .
+
+# select PNG
+perl -pi -e 's/! PNDRIV/  PNDRIV/' drivers.list
+
+# select Postscript
+perl -pi -e 's/! PSDRIV/  PSDRIV/' drivers.list
+
+# select X windows
+perl -pi -e 's/! XWDRIV/  XWDRIV/' drivers.list
+
+$PKGS/src/pgplot/makemake $PKGS/src/pgplot linux gfortran_gcc
+
+make
+make cpg
+make pgxwin_server
+make grfont.dat
