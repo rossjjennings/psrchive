@@ -12,7 +12,7 @@
 
 using namespace std;
 
-const string unset ("UNSET");
+#define unset "UNSET"
 
 //! Default constructor
 Pulsar::FITSHdrExtension::FITSHdrExtension ()
