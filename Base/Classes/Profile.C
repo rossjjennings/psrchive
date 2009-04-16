@@ -443,6 +443,9 @@ catch (Error& error)
 
 void Pulsar::Profile::bscrunch_to_nbin (unsigned new_nbin) try
 {
+  if (new_nbin == get_nbin())
+    return;
+
   if (new_nbin == 0)
     throw Error (InvalidParam, "",
 		 "new nbin cannot be zero");
