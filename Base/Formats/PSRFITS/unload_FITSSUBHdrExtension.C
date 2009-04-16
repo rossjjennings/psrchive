@@ -54,7 +54,7 @@ void Pulsar::FITSArchive::unload ( fitsfile *fptr, const FITSSUBHdrExtension *su
   if( !s_data.empty() ) psrfits_update_key( fptr, "INT_TYPE", s_data );
 
   d_data = sub_hdr->get_tsamp();
-  if( d_data != 0.0 ) psrfits_update_key( fptr, "TSAMP", d_data );
+  if( d_data != 0.0 ) psrfits_update_key( fptr, "TBIN", d_data );
 
   i_data = sub_hdr->get_nbits();
   if( i_data != -1 ) psrfits_update_key( fptr, "NBITS", i_data );

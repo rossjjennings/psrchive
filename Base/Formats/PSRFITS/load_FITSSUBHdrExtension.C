@@ -63,7 +63,13 @@ void FITSArchive::load_FITSSUBHdrExtension ( fitsfile *fptr )
   psrfits_read_key( fptr, "INT_TYPE", &s_data, s_default, verbose == 3 );
   si_hdr->set_int_type( s_data );
 
-  psrfits_read_key( fptr, "TSAMP", &d_data, 0.0, verbose == 3 );
+  try {
+    // Try to read TBIN
+    psrfits_read_key( fptr, "TBIN", &d_data );
+  } catch (FITSError &e) {
+    // If that fails, look for TSAMP
+    psrfits_read_key( fptr, "TSAMP", &d_data, 0.0, verbose == 3 );
+  }
   si_hdr->set_tsamp( d_data );
 
   psrfits_read_key( fptr, "NBITS", &i_data, -1, verbose == 3 );
