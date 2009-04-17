@@ -14,6 +14,27 @@ AC_ARG_VAR([PGPLOT_DIR], [Pgplot graphics library directory])
 
 AC_PREFIX_DEFAULT([${PSRHOME:-"/usr/local"}${PSRHOME:+"/$LOGIN_ARCH"}])
 
+################################################################################
+#
+# configure the package installation scripts
+#
+#
+
+if test ! -f "$srcdir/packages/configure"; then
+  AC_MSG_ERROR([packages/configure script not found.
+
+  Please run the bootstrap script.
+])
+fi
+
+AC_CONFIG_SUBDIRS([packages])
+
+
+################################################################################
+#
+# Warn about pulsar group environment variables
+#
+
 if test -z "$PSRHOME"; then
   AC_MSG_WARN([The PSRHOME environment variable is not set])
 else
@@ -22,6 +43,8 @@ else
   fi
 fi
 
+
+################################################################################
 #
 # By default, runtime files will be found in the installation directory
 #
@@ -205,20 +228,6 @@ AM_CONDITIONAL(MAKE_LEAN, [test x"$enable_lean" == xyes])
 # Checks for library functions.
 #
 SWIN_FUNC_GETOPT_LONG
-
-
-################################################################################
-#
-# configure the package installation scripts
-#
-#
-
-if test -f "$srcdir/packages/configure"; then
-  AC_CONFIG_SUBDIRS([packages])
-  enable_packages=yes
-fi
-
-AM_CONDITIONAL(HAVE_PACKAGES, [test x"$enable_packages" == xyes])
 
 
 ################################################################################

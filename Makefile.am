@@ -1,9 +1,5 @@
 
-SUBDIRS	= config Util Base More Management
-
-if HAVE_PACKAGES
-SUBDIRS += packages
-endif
+SUBDIRS	= config packages Util Base More Management
 
 include $(top_srcdir)/config/Makefile.root
 
