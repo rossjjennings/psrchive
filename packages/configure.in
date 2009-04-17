@@ -42,5 +42,7 @@ AC_CONFIG_FILES([Makefile
 		tempo.csh
 		tempo2.csh])
 
+AC_CONFIG_COMMANDS(executable,[chmod a+x *.csh])
+
 AC_OUTPUT
 
