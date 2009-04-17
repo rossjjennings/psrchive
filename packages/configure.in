@@ -4,7 +4,9 @@
 AC_PREREQ(2.57)
 AC_INIT([PSRPKG],[1.0],[psrchive-developers@lists.sourceforge.net])
 
-AC_CONFIG_SRCDIR([tempo.csh])
+AC_CONFIG_SRCDIR([tempo.csh.in])
+
+AM_INIT_AUTOMAKE([foreign])
 
 AC_ARG_VAR([PSRHOME],    [Standard pulsar home directory])
 AC_ARG_VAR([LOGIN_ARCH], [Architecture-dependent sub-directory of PSRHOME])
@@ -30,7 +32,8 @@ if test $download = no; then
   download="$download -f -L -O"
 fi
 
-AC_CONFIG_FILES([all.csh
+AC_CONFIG_FILES([Makefile
+		all.csh
 		cfitsio.csh
 		fftw.csh
 		pgplot.csh
