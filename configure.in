@@ -206,6 +206,26 @@ AM_CONDITIONAL(MAKE_LEAN, [test x"$enable_lean" == xyes])
 #
 SWIN_FUNC_GETOPT_LONG
 
+
+################################################################################
+#
+# configure the package installation scripts
+#
+#
+
+if test -f "$srcdir/packages/configure"; then
+  AC_CONFIG_SUBDIRS([packages])
+  enable_packages=yes
+fi
+
+AM_CONDITIONAL(HAVE_PACKAGES, [test x"$enable_packages" == xyes])
+
+
+################################################################################
+#
+#
+#
+
 AM_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([
 		config/Makefile
