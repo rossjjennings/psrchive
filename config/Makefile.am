@@ -16,7 +16,7 @@ CLEANFILES = Makefile.aclocal
 # that break the other GNU autotools-generated Makefiles
 #
 
-all-local: 11-08-2007 03-09-2007 11-09-2007
+all-local: 11-08-2007 03-09-2007 11-09-2007 17-04-2009
 
 libs:
 
@@ -88,4 +88,25 @@ top_includedir := $(top_builddir)/include
 	fi
 
 file_11092007 := $(top_srcdir)/Util/genutil/CVS/Entries
+
+
+#############################################################################
+#
+# 11 September 2007 - straten
+#
+# The packages/ sub-directory contains scripts that can be used to help
+# install third-party packages.  By making it independently configurable,
+# it can be used before psrchive is configured and compiled.
+#
+# This turns out to be a bit of a headache, as the automake-generated
+# rules that re-run the configure script do not perform the required
+# nested configure.  (running ./configure does the required recursion.)
+#
+# This rule looks out for this problem and runs the nested configure,
+# producing the Makefile required for "make dist" to work.
+
+17-04-2009:
+	@if test ! -f $(top_builddir)/packages/Makefile; then \
+	  cd $(top_builddir)/packages && $(top_srcdir)/packages/configure; \
+	fi
 
