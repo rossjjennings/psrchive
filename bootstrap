@@ -9,7 +9,7 @@ if ( ! $status ) then
   if ( -d packages ) then
     echo "Configuring packages ..."
     cd packages
-    autoconf
+    autoreconf
   endif
 
   echo
