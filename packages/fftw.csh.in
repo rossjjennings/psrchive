@@ -5,14 +5,17 @@
 mkdir -p @prefix@/src
 cd @prefix@/src
 
-if ( ! -f fftw-3.1.2.tar.gz ) then
-  @download@ http://www.fftw.org/fftw-3.1.2.tar.gz 
+set fftw="fftw-3.2.1"
+
+if ( ! -f ${fftw}.tar.gz ) then
+  @download@ http://www.fftw.org/${fftw}.tar.gz 
 endif
 
-gunzip -c fftw-3.1.2.tar.gz | tar xvf -
-cd fftw-3.1.2
+gunzip -c ${fftw}.tar.gz | tar xvf -
+cd $fftw
 
 ./configure --enable-float --enable-sse --disable-dependency-tracking --prefix=@prefix@
 
 make
 make install
+

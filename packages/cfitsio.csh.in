@@ -5,14 +5,17 @@
 mkdir -p @prefix@/src
 cd @prefix@/src
 
-if ( ! -f cfitsio3060.tar.gz ) then
-  @download@ ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3060.tar.gz
+set cfitsio=cfitsio3140
+
+if ( ! -f ${cfitsio}.tar.gz ) then
+  @download@ ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/${cfitsio}.tar.gz
 endif
 
-gunzip -c cfitsio3060.tar.gz | tar xvf -
+gunzip -c ${cfitsio}.tar.gz | tar xvf -
 cd cfitsio
 
-./configure --prefix=$PSRHOME/packages/$LOGIN_ARCH
+./configure --prefix=@prefix@
 
 make
 make install
+
