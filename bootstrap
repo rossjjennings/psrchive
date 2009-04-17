@@ -6,12 +6,6 @@ autoreconf --install --force
 
 if ( ! $status ) then
 
-  if ( -d packages ) then
-    echo "Configuring packages ..."
-    cd packages
-    autoreconf
-  endif
-
   echo
   echo "Bootstrap complete.  You can now run the configure script."
   echo
