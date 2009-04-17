@@ -146,10 +146,15 @@ SWIN_LIB_IPP
 #
 
 if test x"$have_fftw3" = xno -a x"$have_mkl" = xno -a x"$have_ipp" = xno; then
+
+  # produce the package installation scripts before aborting.
+  AC_OUTPUT
+
   AC_MSG_ERROR([No suitable FFT library was found.
 
   Please see http://psrchive.sourceforge.net/third/fftw
 
+  or simply run ./packages/fftw.csh to install FFTW automatically
 ])
 fi
 
@@ -309,6 +314,7 @@ if test x"$have_cfitsio" != xyes; then
    echo
    echo "The CFITSIO library was not found:"
    echo "  PSRCHIVE applications will not be able to load PSRFITS files."
+   echo "  Run ./packages/cfitsio.csh to automatically install."
 fi
 
 if test x"$have_pgplot" != xyes; then
