@@ -64,7 +64,7 @@ endif
 #
 if HAVE_PGPLOT
 
-bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi pav psrsp
+bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi psrzap pav psrsp
 
 pdmp_SOURCES = pdmp.C
 pdmp_LDADD = $(LDADD) @PGPLOT_LIBS@ @PSRXML_LIBS@
@@ -86,6 +86,9 @@ pacv_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 pazi_SOURCES = pazi.C
 pazi_LDADD = $(LDADD) @PGPLOT_LIBS@
+
+psrzap_SOURCES = psrzap.C
+psrzap_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 pav_SOURCES = pav.C PavApp.C PavApp.h
 pav_LDADD = $(LDADD) @PGPLOT_LIBS@
