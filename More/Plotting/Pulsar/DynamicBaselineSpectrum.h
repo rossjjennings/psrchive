@@ -10,6 +10,7 @@
 #define __Pulsar_DynamicBaselineSpectrum_h
 
 #include "Pulsar/DynamicSpectrum.h"
+#include "Pulsar/PhaseWeight.h"
 
 namespace Pulsar {
 
@@ -38,10 +39,14 @@ namespace Pulsar {
     bool get_use_variance() const { return use_variance; }
     void set_use_variance(bool flag=true ) { use_variance = flag; }
 
+    bool get_reuse_baseline() const { return reuse_baseline; }
+    void set_reuse_baseline(bool flag=true ) { reuse_baseline = flag; }
+
   protected:
 
     bool use_variance;
-
+    bool reuse_baseline;
+    Reference::To<PhaseWeight> base;
 
   };
 

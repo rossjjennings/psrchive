@@ -57,9 +57,10 @@ void Pulsar::DynamicSpectrum::prepare (const Archive* data)
   // Figure out subint range
   // TODO make this axis be time...
   // TODO also, move this to draw()?
-  if (srange.first==-1)
-  {
+  if (srange.first<0) {
     srange.first = 0;
+  }
+  if (srange.second>data->get_nsubint()-1 || srange.second<0) {
     srange.second = data->get_nsubint() - 1;
   }
   get_frame()->get_x_scale()->set_minmax(srange.first, srange.second+1);

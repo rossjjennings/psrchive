@@ -15,6 +15,8 @@
 Pulsar::DynamicBaselineSpectrum::DynamicBaselineSpectrum()
 {
   use_variance = false;
+  reuse_baseline = false;
+  base = NULL;
 }
 
 Pulsar::DynamicBaselineSpectrum::~DynamicBaselineSpectrum()
@@ -33,12 +35,18 @@ void Pulsar::DynamicBaselineSpectrum::get_plot_array( const Archive *data,
 
   // Make a copy to dedisperse, need to do this for the 
   // PhaseWeight stuff to work correctly.
-  Reference::To<Archive> data_copy = data->clone();
-  data_copy->dedisperse();
+  Reference::To<Archive> data_copy;
+  if (data->get_dedispersed()) 
+    data_copy = const_cast<Archive *>(data);
+  else {
+    data_copy = data->clone();
+    data_copy->dedisperse();
+  }
 
-  // Find off-pulse region based on full sum
-  Reference::To<PhaseWeight> base = 
-    data_copy->total()->get_Profile(0,0,0)->baseline();
+  // Only recalc baseline if needed 
+  if (base==NULL || !reuse_baseline) { 
+    base = data_copy->total()->get_Profile(0,0,0)->baseline(); 
+  }
 
   int nsub = srange.second - srange.first + 1;
   int nchan = crange.second - crange.first + 1;
