@@ -147,6 +147,7 @@ void usage()
     "  -C               Set feed basis to Circular \n"
     "  -E ephfile       Install a new ephemeris and update model \n"
     "  -B               Flip the sideband sense \n"
+    "  --flip freq      Flip the band about the given frequency \n"
     "  --reverse_freqs  Reverse the ordering of the frequency channels and\n"
     "                   change the bandwidth flag accordingly\n"
     "  -o centre_freq   Change the frequency labels \n"
@@ -215,6 +216,8 @@ int main (int argc, char *argv[]) try {
     bool unstokesify = false;
 
     bool flipsb = false;
+    bool flip_freq = false;
+    double flip_freq_mhz = 0.0;
 
     Pulsar::Parameters* new_eph = 0;
 
@@ -269,6 +272,7 @@ int main (int argc, char *argv[]) try {
     const int MULT = 1218;
     const int PERIOD=1219;
     const int SS   = 1220;
+    const int FLIP = 1221;
 
     while (1) {
 
@@ -287,6 +291,7 @@ int main (int argc, char *argv[]) try {
 	{"type",       1, 0, TYPE},
 	{"inst",       1, 0, INST},
 	{"reverse_freqs",no_argument,0,REVERSE_FREQS},
+        {"flip",       1 ,0, FLIP},
 	{"site",       1, 0, SITE},
 	{"name",       1, 0, NAME},
 	{"DD",         no_argument,      0,DD},
@@ -322,7 +327,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.90 2009/03/15 06:55:52 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.91 2009/04/24 15:59:41 demorest Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -648,6 +653,8 @@ int main (int argc, char *argv[]) try {
 
       case PERIOD: new_folding_period = fromstring<double>(optarg); break;
 
+      case FLIP: flip_freq = true; flip_freq_mhz = atof(optarg); break;
+
       default:
 	cout << "Unrecognised option" << endl;
       }
@@ -683,6 +690,15 @@ int main (int argc, char *argv[]) try {
       cerr << "pam: Both -S and --SS options were given.  Poln state will not be changed!" << endl;
       stokesify = false;
       unstokesify = false;
+    }
+
+    int flip_option_count=0;
+    if (flipsb) flip_option_count++;
+    if (flip_freq) flip_option_count++;
+    if (reverse_freqs) flip_option_count++;
+    if (flip_option_count > 1) {
+      cerr << "pam: More than one band-flip option was given, exiting." << endl;
+      exit(-1);
     }
 
     for (unsigned i = 0; i < filenames.size(); i++) try
@@ -791,6 +807,19 @@ int main (int argc, char *argv[]) try {
 	  }
 	}
 	arch->set_bandwidth(-1.0 * arch->get_bandwidth());
+      }
+
+      if (flip_freq) {
+        for (unsigned isub = 0; isub < arch->get_nsubint(); isub++) {
+          Reference::To<Pulsar::Integration> 
+            subint = arch->get_Integration(isub);
+          for (unsigned ichan = 0; ichan < arch->get_nchan(); ichan++) {
+            double new_freq = flip_freq_mhz 
+              - (subint->get_centre_frequency(ichan) - flip_freq_mhz);
+            subint->set_centre_frequency(ichan, new_freq);
+          }
+        }
+        arch->set_bandwidth(-1.0 * arch->get_bandwidth());
       }
 
       if( reverse_freqs ) {
