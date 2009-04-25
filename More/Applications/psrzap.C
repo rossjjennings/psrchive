@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <unistd.h>
 #include <string.h>
 #include <cpgplot.h>
@@ -19,21 +20,71 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/Integration.h"
 
-#include "Pulsar/PlotFactory.h"
 #include "Pulsar/Plot.h"
 #include "Pulsar/DynamicBaselineSpectrum.h"
-#include "TextInterface.h"
 
 using namespace std;
 using namespace Pulsar;
-
-static PlotFactory factory;
 
 enum cursor_type {
   freq_cursor,
   time_cursor,
   both_cursor
 };
+
+struct zap_range {
+  double freq0;
+  double freq1;
+  int sub0;
+  int sub1;
+};
+
+void swap_zap_range(struct zap_range *z) {
+  double tmp;
+  int itmp;
+  if (z->freq0 > z->freq1) { tmp=z->freq0; z->freq0=z->freq1; z->freq1=tmp; }
+  if (z->sub0 > z->sub1) { itmp=z->sub0; z->sub0=z->sub1; z->sub1=itmp; }
+}
+
+void apply_zap_range(Archive *arch, struct zap_range *z) {
+  swap_zap_range(z);
+  int nsub = arch->get_nsubint();
+  int nchan = arch->get_nchan();
+  double cbw = fabs(arch->get_bandwidth()) / (double)nchan;
+  if (z->sub0 < 0) z->sub0 = 0;
+  if (z->sub1 >= nsub) z->sub1 = nsub-1;
+  for (int isub=z->sub0; isub<=z->sub1; isub++) {
+    Reference::To<Integration> subint = arch->get_Integration(isub);
+    for (int ichan=0; ichan<nchan; ichan++) {
+      double cfreq = subint->get_centre_frequency(ichan);
+      if (cfreq>z->freq0 && cfreq<z->freq1)
+        subint->set_weight(ichan,0.0);
+      if (z->freq0 > (cfreq-cbw/2.0) && z->freq0 < (cfreq+cbw/2.0))
+        subint->set_weight(ichan,0.0);
+      if (z->freq1 > (cfreq-cbw/2.0) && z->freq1 < (cfreq+cbw/2.0))
+        subint->set_weight(ichan,0.0);
+    }
+  }
+}
+
+void zap_freq_range(Archive *arch, struct zap_range *z) {
+  swap_zap_range(z);
+  struct zap_range ztmp;
+  ztmp.freq0 = z->freq0;
+  ztmp.freq1 = z->freq1;
+  ztmp.sub0 = 0;
+  ztmp.sub1 = arch->get_nsubint()-1;
+  apply_zap_range(arch, &ztmp);
+}
+
+void zap_subint_range(Archive *arch, struct zap_range *z) {
+  swap_zap_range(z);
+  int nsub = arch->get_nsubint();
+  if (z->sub0 < 0) z->sub0 = 0;
+  if (z->sub1 >= nsub) z->sub1 = nsub-1;
+  for (int isub=z->sub0; isub<=z->sub1; isub++) 
+    arch->get_Integration(isub)->uniform_weight(0.0);
+}
 
 #define PROG "psrzap"
 
@@ -76,10 +127,10 @@ int main(int argc, char *argv[]) {
   Reference::To<Archive> arch = orig_arch->clone();
   arch->dedisperse();
   arch->convert_state(Signal::Stokes);
+  double bw = arch->get_bandwidth();
 
   /* Create plot */
   DynamicBaselineSpectrum *dsplot = new DynamicBaselineSpectrum;
-  TextInterface::Parser *plotint = dsplot->get_frame_interface();
   dsplot->configure("var=1");
   dsplot->set_reuse_baseline();
   cpgopen("/xs");
@@ -89,16 +140,22 @@ int main(int argc, char *argv[]) {
   enum cursor_type curs=both_cursor;
   float x0=0.0, y0=0.0, x1, y1;
   int click=0, mode=0;
+  int pol=0;
   bool redraw=true, var=true, log=false;
+  struct zap_range zap;
+  vector<struct zap_range> zap_list;
   do {
 
     /* Redraw the plot if necessary */
     if (redraw) {
       cpgeras();
+      char conf[256];
+      sprintf(conf, "above:c=$file\\noff-pulse %s, %s scale", 
+          var ? "variance" : "mean",
+          log ? "log" : "linear");
+      dsplot->configure(conf);
       dsplot->plot(arch);
       redraw = false;
-      cout << PROG ": Currently displaying baseline " << (var?"variance":"mean")
-        << " in " << (log?"log":"linear") << " scale" << endl;
     }
 
     /* On click 0 get start of a range */
@@ -117,8 +174,8 @@ int main(int argc, char *argv[]) {
       cpgband(mode,0,x0,y0,&x1,&y1,&ch);
     }
 
-    /* Debug */
 #if 0 
+    /* Debug */
     printf("x0=%.3f y0=%.3f x1=%.3f y1=%.3f ch='%c' click=%d\n",
         x0, y0, x1, y1, ch, click);
 #endif
@@ -130,14 +187,14 @@ int main(int argc, char *argv[]) {
         /* Do zoom here */
         char conf[256];
         float tmp;
-        int itmp;
         if (curs==freq_cursor || curs==both_cursor) {
-          if (y0>y1) { tmp=y0; y0=y1; y1=tmp; }
+          if (bw>0 && y0>y1) { tmp=y0; y0=y1; y1=tmp; }
+          if (bw<0 && y0<y1) { tmp=y0; y0=y1; y1=tmp; }
           sprintf(conf,"y:win=(%.3f,%.3f)",y0,y1);
           dsplot->configure(string(conf));
         }
         if (curs==time_cursor || curs==both_cursor) {
-          if (x0>x1) { itmp=x0; x0=x1; x1=itmp; }
+          if (x0>x1) { tmp=x0; x0=x1; x1=tmp; }
           sprintf(conf,"srange=(%d,%d)",(int)x0,(int)x1);
           dsplot->configure(string(conf));
         }
@@ -155,26 +212,38 @@ int main(int argc, char *argv[]) {
     /* Right mouse click = zap */
     if (ch=='X') {
 
-      /* Zap a single channel */
+      /* Zap a single row or pixel */
       if (click==0) {
-        /* Do zap */
-        click=0;
-        continue;
+        zap.freq0 = zap.freq1 = y0;
+        zap.sub0 = zap.sub1 = (int)x0;
       }
 
       /* Zap a range */
       if (click==1) {
-        /* Channel range */
-        if (curs==freq_cursor) {
-        }
-        /* Time range */
-        else if (curs==time_cursor) {
-        /* Time/freq rectangle */
-        } else if (curs==both_cursor) {
-        }
-        click = 0;
-        continue;
+        zap.freq0 = y0;
+        zap.freq1 = y1;
+        zap.sub0 = (int)x0;
+        zap.sub1 = (int)x1;
       }
+
+      /* Apply it */
+      if (curs==freq_cursor) 
+        zap_freq_range(arch, &zap);
+      else if (curs==time_cursor) 
+        zap_subint_range(arch, &zap);
+      else if (curs==both_cursor) 
+        apply_zap_range(arch, &zap);
+
+      zap_list.push_back(zap);
+      redraw = true;
+      click=0;
+      continue;
+    }
+
+    /* Esc = cancel */
+    if (ch==27) {
+      click=0;
+      continue;
     }
 
     /* Switch to freq mode */
