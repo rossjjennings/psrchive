@@ -8,6 +8,7 @@
 #include "Pulsar/DynamicSpectrum.h"
 #include "Pulsar/FrequencyScale.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
 #include <float.h>
@@ -60,7 +61,7 @@ void Pulsar::DynamicSpectrum::prepare (const Archive* data)
   if (srange.first<0) {
     srange.first = 0;
   }
-  if (srange.second>data->get_nsubint()-1 || srange.second<0) {
+  if (srange.second>((int)data->get_nsubint()-1) || srange.second<0) {
     srange.second = data->get_nsubint() - 1;
   }
   get_frame()->get_x_scale()->set_minmax(srange.first, srange.second+1);
@@ -71,6 +72,7 @@ void Pulsar::DynamicSpectrum::draw (const Archive* data)
 {
   colour_map.apply ();
 
+  // Freq range stuff
   // Guess we need to do this range stuff here rather than in prepare()..
   unsigned min_chan, max_chan;
   get_frame()->get_y_scale()->get_indeces (data->get_nchan(), 
@@ -79,6 +81,8 @@ void Pulsar::DynamicSpectrum::draw (const Archive* data)
     max_chan = data->get_nchan() - 1;
   crange.first = min_chan;
   crange.second = max_chan;
+  float freq0 = data->get_Integration(0)->get_centre_frequency(crange.first);
+  float freq1 = data->get_Integration(0)->get_centre_frequency(crange.second);
 
   // Dimensions
   int nchan = crange.second - crange.first + 1;
@@ -100,8 +104,8 @@ void Pulsar::DynamicSpectrum::draw (const Archive* data)
       data_max = plot_array[ii];
   }
 
-  cpgswin(srange.first, srange.second+1, crange.first, crange.second+1);
-  float trans[6] = {srange.first-0.5, 1.0, 0.0, crange.first, 0.0, 1.0};
+  float df = (freq1 - freq0) / (float)(nchan-1);
+  float trans[6] = {srange.first-0.5, 1.0, 0.0, freq0-df, 0.0, df};
   cpgimag(plot_array, nsub, nchan, 1, nsub, 1, nchan, 
       data_min, data_max, trans);
 
