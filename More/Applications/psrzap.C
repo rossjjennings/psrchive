@@ -46,40 +46,62 @@ void swap_zap_range(struct zap_range *z) {
   if (z->sub0 > z->sub1) { itmp=z->sub0; z->sub0=z->sub1; z->sub1=itmp; }
 }
 
-void apply_zap_range(Archive *arch, struct zap_range *z) {
+int freq2chan(Archive *arch, double freq, unsigned sub=0) {
+  int nchan = arch->get_nchan();
+  double bw = arch->get_bandwidth();
+  double cbw = fabs(bw) / (double)nchan;
+  for (int ichan=0; ichan<nchan; ichan++) {
+    double cfreq = arch->get_Integration(sub)->get_centre_frequency(ichan);
+    if ((freq > (cfreq-cbw/2.0)) && (freq < (cfreq+cbw/2.0))) 
+      return(ichan);
+  }
+  double cfreq0 = arch->get_Integration(sub)->get_centre_frequency(0);
+  double cfreq1 = arch->get_Integration(sub)->get_centre_frequency(nchan-1);
+  bool swap=false;
+  if (cfreq1 < cfreq0) { 
+    double tmp=cfreq0; 
+    cfreq0=cfreq1; 
+    cfreq1=tmp; 
+    swap=true;
+  }
+  if (freq < cfreq0-cbw/2.0) { return(swap ? 0 : nchan-1); }
+  if (freq > cfreq1+cbw/2.0) { return(swap ? nchan-1 : 0); }
+  return(-1);
+}
+
+void apply_zap_range(Archive *arch, struct zap_range *z,
+    bool undo=false, const Archive *orig=NULL) {
   swap_zap_range(z);
   int nsub = arch->get_nsubint();
-  int nchan = arch->get_nchan();
-  double cbw = fabs(arch->get_bandwidth()) / (double)nchan;
+  int chan0 = freq2chan(arch, z->freq0);
+  int chan1 = freq2chan(arch, z->freq1);
+  if (chan1<chan0) { int tmp=chan0; chan0=chan1; chan1=tmp; }
   if (z->sub0 < 0) z->sub0 = 0;
   if (z->sub1 >= nsub) z->sub1 = nsub-1;
   for (int isub=z->sub0; isub<=z->sub1; isub++) {
     Reference::To<Integration> subint = arch->get_Integration(isub);
-    for (int ichan=0; ichan<nchan; ichan++) {
-      double cfreq = subint->get_centre_frequency(ichan);
-      if (cfreq>z->freq0 && cfreq<z->freq1)
-        subint->set_weight(ichan,0.0);
-      if (z->freq0 > (cfreq-cbw/2.0) && z->freq0 < (cfreq+cbw/2.0))
-        subint->set_weight(ichan,0.0);
-      if (z->freq1 > (cfreq-cbw/2.0) && z->freq1 < (cfreq+cbw/2.0))
+    for (int ichan=chan0; ichan<=chan1; ichan++) {
+      if (undo && orig!=NULL)
+        subint->set_weight(ichan, 
+            orig->get_Integration(isub)->get_weight(ichan));
+      else
         subint->set_weight(ichan,0.0);
     }
   }
 }
 
 void zap_freq_range(Archive *arch, struct zap_range *z) {
-  swap_zap_range(z);
-  struct zap_range ztmp;
-  ztmp.freq0 = z->freq0;
-  ztmp.freq1 = z->freq1;
-  ztmp.sub0 = 0;
-  ztmp.sub1 = arch->get_nsubint()-1;
-  apply_zap_range(arch, &ztmp);
+  z->sub0 = 0;
+  z->sub1 = arch->get_nsubint()-1;
+  apply_zap_range(arch, z);
 }
 
 void zap_subint_range(Archive *arch, struct zap_range *z) {
   swap_zap_range(z);
   int nsub = arch->get_nsubint();
+  int nchan = arch->get_nchan();
+  z->freq0 = arch->get_Integration(0)->get_centre_frequency(0);
+  z->freq1 = arch->get_Integration(0)->get_centre_frequency(nchan-1);
   if (z->sub0 < 0) z->sub0 = 0;
   if (z->sub1 >= nsub) z->sub1 = nsub-1;
   for (int isub=z->sub0; isub<=z->sub1; isub++) 
@@ -126,7 +148,6 @@ int main(int argc, char *argv[]) {
   Reference::To<Archive> orig_arch = Archive::load(filename);
   Reference::To<Archive> arch = orig_arch->clone();
   arch->dedisperse();
-  arch->convert_state(Signal::Stokes);
   double bw = arch->get_bandwidth();
 
   /* Create plot */
@@ -150,9 +171,10 @@ int main(int argc, char *argv[]) {
     if (redraw) {
       cpgeras();
       char conf[256];
-      sprintf(conf, "above:c=$file\\noff-pulse %s, %s scale", 
+      sprintf(conf, "above:c=$file\\noff-pulse %s, %s scale, pol %d", 
           var ? "variance" : "mean",
-          log ? "log" : "linear");
+          log ? "log" : "linear",
+          pol);
       dsplot->configure(conf);
       dsplot->plot(arch);
       redraw = false;
@@ -240,6 +262,23 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
+    /* Undo last zap */
+    if (ch=='u') {
+      if (!zap_list.empty()) {
+        zap = zap_list.back();
+        apply_zap_range(arch, &zap, true, orig_arch);
+        zap_list.pop_back();
+        /* Reapply whole list in case of overlapping zaps */
+        for (unsigned i=0; i<zap_list.size(); i++) {
+          zap = zap_list[i];
+          apply_zap_range(arch, &zap);
+        }
+        redraw = true;
+      }
+      click = 0;
+      continue;
+    }
+
     /* Esc = cancel */
     if (ch==27) {
       click=0;
@@ -287,6 +326,17 @@ int main(int argc, char *argv[]) {
         dsplot->configure("cmap:log=1");
       else
         dsplot->configure("cmap:log=0");
+      click = 0;
+      continue;
+    }
+
+    /* Flip through polarizations */
+    if (ch=='p') {
+      pol = (pol + 1) % arch->get_npol();
+      char conf[256];
+      sprintf(conf, "pol=%d", pol);
+      dsplot->configure(conf);
+      redraw = true;
       click = 0;
       continue;
     }
