@@ -112,6 +112,39 @@ void zap_subint_range(Archive *arch, struct zap_range *z) {
 
 void usage() {
   cout << "psrzap - Interactive RFI zapper using off-pulse dynamic spectra" 
+    << "Usage:  psrzap (filename)" << endl
+    << "  Press 'h' during program for help screen" << endl;
+}
+
+/* Interactive commands */
+#define CMD_QUIT 'q'
+#define CMD_HELP 'h'
+#define CMD_FREQMODE 'f'
+#define CMD_TIMEMODE 't'
+#define CMD_BOTHMODE 'b'
+#define CMD_POL 'p'
+#define CMD_VAR 'v'
+#define CMD_LOG 'l'
+#define CMD_UNDO 'u'
+#define CMD_UNZOOM 'r'
+void usage_interactive() {
+  cout << "pzrzap interactive commands" << endl
+    << endl
+    << "Mouse:" << endl
+    << "  Left-click selects the start of a range" << endl
+    << "    then left-click again to zoom, or right-click to zap." << endl
+    << "  Right-click zaps current cursor location." << endl
+    << "Keyboard:" << endl
+    << "  " << CMD_HELP     << "  Show this help" << endl
+    << "  " << CMD_FREQMODE << "  Use frequency select mode" << endl
+    << "  " << CMD_TIMEMODE << "  Use time select mode" << endl
+    << "  " << CMD_BOTHMODE << "  Use time/freq select mode" << endl
+    << "  " << CMD_VAR      << "  Switch plot between variance and mean" << endl
+    << "  " << CMD_LOG      << "  Toggle logscale" << endl
+    << "  " << CMD_POL      << "  Switch to next polarization" << endl
+    << "  " << CMD_UNDO     << "  Undo last zap command" << endl 
+    << "  " << CMD_UNZOOM   << "  Reset zoom" << endl
+    << "  " << CMD_QUIT     << "  Exit program" << endl
     << endl;
 }
 
@@ -263,7 +296,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* Undo last zap */
-    if (ch=='u') {
+    if (ch==CMD_UNDO) {
       if (!zap_list.empty()) {
         zap = zap_list.back();
         apply_zap_range(arch, &zap, true, orig_arch);
@@ -279,6 +312,13 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
+    /* Show help */
+    if (ch==CMD_HELP) {
+      usage_interactive();
+      click = 0;
+      continue; 
+    }
+
     /* Esc = cancel */
     if (ch==27) {
       click=0;
@@ -286,28 +326,28 @@ int main(int argc, char *argv[]) {
     }
 
     /* Switch to freq mode */
-    if (ch=='f') {
+    if (ch==CMD_FREQMODE) {
       curs = freq_cursor;
       click = 0;
       continue;
     }
 
     /* Switch to time mode */
-    if (ch=='t') {
+    if (ch==CMD_TIMEMODE) {
       curs = time_cursor;
       click = 0;
       continue;
     }
 
     /* Switch to time/freq mode */
-    if (ch=='b') {
+    if (ch==CMD_BOTHMODE) {
       curs = both_cursor;
       click = 0;
       continue;
     }
 
     /* Toggle variance plot */
-    if (ch=='v') {
+    if (ch==CMD_VAR) {
       var = !var;
       redraw = true;
       if (var) 
@@ -319,7 +359,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* toggle log scale */
-    if (ch=='l') {
+    if (ch==CMD_LOG) {
       log = !log;
       redraw = true;
       if (log) 
@@ -331,7 +371,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* Flip through polarizations */
-    if (ch=='p') {
+    if (ch==CMD_POL) {
       pol = (pol + 1) % arch->get_npol();
       char conf[256];
       sprintf(conf, "pol=%d", pol);
@@ -342,7 +382,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* Unset zoom */
-    if (ch=='r') {
+    if (ch==CMD_UNZOOM) {
       dsplot->configure("srange=(-1,-1)");
       dsplot->configure("y:win=(0,0)");
       redraw = true;
@@ -350,7 +390,7 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
-  } while (ch!='q');
+  } while (ch!=CMD_QUIT);
 
 }
 
