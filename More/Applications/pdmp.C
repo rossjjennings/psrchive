@@ -3187,6 +3187,9 @@ void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod
 	section->bestTopoPeriod=bestPeriod_bc_us/1000000.0*dopplerFactor;
 	section->bestBaryPeriod=bestPeriod_bc_us/1000000.0;
 	section->bestDm=bestDM;
+	section->bestAccn=0;
+	section->bestJerk=0;
+
 	{
 		float* amps = total->get_Profile(0,0,0)->get_amps();
 		// the profile
