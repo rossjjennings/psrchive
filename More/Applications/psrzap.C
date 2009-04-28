@@ -21,7 +21,10 @@
 #include "Pulsar/Integration.h"
 
 #include "Pulsar/Plot.h"
+#include "Pulsar/ProfilePlot.h"
 #include "Pulsar/DynamicBaselineSpectrum.h"
+
+#include "strutil.h"
 
 using namespace std;
 using namespace Pulsar;
@@ -119,6 +122,7 @@ void usage() {
 /* Interactive commands */
 #define CMD_QUIT 'q'
 #define CMD_HELP 'h'
+#define CMD_SAVE 's'
 #define CMD_FREQMODE 'f'
 #define CMD_TIMEMODE 't'
 #define CMD_BOTHMODE 'b'
@@ -144,6 +148,7 @@ void usage_interactive() {
     << "  " << CMD_POL      << "  Switch to next polarization" << endl
     << "  " << CMD_UNDO     << "  Undo last zap command" << endl 
     << "  " << CMD_UNZOOM   << "  Reset zoom" << endl
+    << "  " << CMD_SAVE     << "  Save zapped version as (filename).zap" << endl
     << "  " << CMD_QUIT     << "  Exit program" << endl
     << endl;
 }
@@ -153,6 +158,7 @@ int main(int argc, char *argv[]) {
   /* Process any args */
   int opt=0;
   int verb=0;
+  bool show_total = false;
   while ((opt=getopt(argc,argv,"hv"))!=-1) {
     switch (opt) {
 
@@ -164,6 +170,7 @@ int main(int argc, char *argv[]) {
       case 'h':
       default:
         usage();
+        usage_interactive();
         exit(0);
         break;
 
@@ -182,12 +189,31 @@ int main(int argc, char *argv[]) {
   Reference::To<Archive> arch = orig_arch->clone();
   arch->dedisperse();
   double bw = arch->get_bandwidth();
+  string output_filename = replace_extension(filename, "zap");
 
   /* Create plot */
   DynamicBaselineSpectrum *dsplot = new DynamicBaselineSpectrum;
   dsplot->configure("var=1");
   dsplot->set_reuse_baseline();
-  cpgopen("/xs");
+  int dsplot_id = cpgopen("/xs");
+  if (dsplot_id<=0) {
+    cerr << PROG ": PGPLOT xwindows device open failed, exiting." << endl;
+    exit(1);
+  }
+  cpgask(0);
+
+  /* Create total sum if requested */
+  Reference::To<Archive> tot_arch=NULL;
+  ProfilePlot *totplot=NULL;
+  int totplot_id;
+  if (show_total) {
+    totplot = new ProfilePlot;
+    totplot_id = cpgopen("/xs");
+    if (totplot_id<=0) {
+      cerr << PROG ": PGPLOT xwindows device open failed, exiting." << endl;
+      exit(1);
+    }
+  }
 
   /* Input loop */
   char ch='\0';
@@ -195,21 +221,31 @@ int main(int argc, char *argv[]) {
   float x0=0.0, y0=0.0, x1, y1;
   int click=0, mode=0;
   int pol=0;
-  bool redraw=true, var=true, log=false;
+  bool redraw=true, var=true, log=false, resum=true;
   struct zap_range zap;
   vector<struct zap_range> zap_list;
   do {
 
     /* Redraw the plot if necessary */
     if (redraw) {
-      cpgeras();
       char conf[256];
       sprintf(conf, "above:c=$file\\noff-pulse %s, %s scale, pol %d", 
           var ? "variance" : "mean",
           log ? "log" : "linear",
           pol);
       dsplot->configure(conf);
+      cpgslct(dsplot_id);
+      //cpgeras();
+      cpgpage();
       dsplot->plot(arch);
+      if (show_total && resum) {
+        tot_arch = arch->total();
+        cpgslct(totplot_id);
+        cpgeras();
+        totplot->plot(tot_arch);
+        cpgslct(dsplot_id);
+        resum = false;
+      }
       redraw = false;
     }
 
@@ -291,6 +327,7 @@ int main(int argc, char *argv[]) {
 
       zap_list.push_back(zap);
       redraw = true;
+      resum = true;
       click=0;
       continue;
     }
@@ -307,6 +344,7 @@ int main(int argc, char *argv[]) {
           apply_zap_range(arch, &zap);
         }
         redraw = true;
+        resum = true;
       }
       click = 0;
       continue;
@@ -386,6 +424,13 @@ int main(int argc, char *argv[]) {
       dsplot->configure("srange=(-1,-1)");
       dsplot->configure("y:win=(0,0)");
       redraw = true;
+      click = 0;
+      continue;
+    }
+
+    /* Save file */
+    if (ch==CMD_SAVE) {
+      arch->unload(output_filename);
       click = 0;
       continue;
     }
