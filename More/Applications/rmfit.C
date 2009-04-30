@@ -2056,7 +2056,7 @@ do_display(vector<double> freqs,
   cpgsci(1);
 }
 
-
+#endif
 
 
 
@@ -2080,12 +2080,9 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
   double bw = data->get_bandwidth();
   double cf = data->get_centre_frequency();
 
+#if HAVE_PGPLOT
+
   if (display) {
-
-
-
-
-
 
     vector<float> plotf;
     vector<float> plotpa;
@@ -2096,9 +2093,7 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
     unsigned fsize = goodfreqs.size();
     float fbegin = goodfreqs[0];
     float fend = goodfreqs[fsize-1];
-    
 
-   
     float plotf_step = (fend-fbegin)/float(fsize-1);
     
     float pf = fbegin;
@@ -2260,8 +2255,7 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
 
   }
 
-
-
+#endif
 
   double pa1 = a + b*(cf-((bw)/2.0));
   double pa2 = a + b*(cf+((bw)/2.0));  
@@ -2289,7 +2283,7 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
 
 
 
-
+#if HAVE_PGPLOT
 
 void cpg_next ()
 {
