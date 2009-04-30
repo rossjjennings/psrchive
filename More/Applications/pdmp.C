@@ -1064,7 +1064,9 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
 
   phaseTimeCopy->fscrunch();
   float rms = getRMS(phaseTimeCopy);
-  for (int i=0;i<phaseTimeCopy->get_nsubint();i++) {
+
+  for (unsigned i=0;i<phaseTimeCopy->get_nsubint();i++)
+  {
     float snr;
     if (useOwnStandardProfile){
       snr = getSNR(phaseTimeCopy->get_Profile(i,0,0));
@@ -1078,7 +1080,8 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
   }
   sort(bestSNRtime.begin(),bestSNRtime.end());
   float median_SNRtime = bestSNRtime[bestSNRtime.size()/2-1];
-  for (int i=0;i<bestSNRtime.size();i++){
+  for (unsigned i=0;i<bestSNRtime.size();i++)
+  {
     if (bestSNRtime[i]>RATIO*median_SNRtime){
       cout << "TIMESCINTER RATIO TEST FAIL: RATIO " << bestSNRtime[i]/median_SNRtime << endl;
       tScint++;
@@ -1088,7 +1091,8 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
   // SNR as a function of frequency
 
   rms = getRMS(phaseFreqCopy);
-  for (int i=0;i<phaseFreqCopy->get_nchan();i++) {
+  for (unsigned i=0;i<phaseFreqCopy->get_nchan();i++)
+  {
     float snr;
     if (useOwnStandardProfile){
       snr = getSNR(phaseFreqCopy->get_Profile(0,0,i));
@@ -1102,7 +1106,8 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
   }
   sort(bestSNRfreq.begin(),bestSNRfreq.end());
   float median_SNRfreq = bestSNRfreq[bestSNRfreq.size()/2-1];
-  for (int i=0;i<bestSNRfreq.size();i++){
+  for (unsigned i=0;i<bestSNRfreq.size();i++)
+  {
     if (bestSNRfreq[i]>RATIO*median_SNRfreq){
       cout << "FREQSCINTER RATIO TEST FAIL: RATIO " << bestSNRfreq[i]/median_SNRfreq << endl;
       fScint++;
@@ -1113,8 +1118,10 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
 
   rms = getRMS(partial_archive);
   partial_archive->pscrunch();
-  for (int i=0;i<partial_archive->get_nsubint();i++) {
-    for (int j=0;j<partial_archive->get_nchan();j++) {
+  for (unsigned i=0;i<partial_archive->get_nsubint();i++)
+  {
+    for (unsigned j=0;j<partial_archive->get_nchan();j++)
+    {
       float snr;
     if (useOwnStandardProfile){
       snr = getSNR(partial_archive->get_Profile(i,0,j));
@@ -1128,7 +1135,8 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
   }
   sort(bestSNRtimefreq.begin(),bestSNRtimefreq.end());
   float median_SNRtimefreq = bestSNRtimefreq[bestSNRtimefreq.size()/2-1];
-  for (int i=0;i<bestSNRtimefreq.size();i++){
+  for (unsigned i=0;i<bestSNRtimefreq.size();i++)
+  {
     if (bestSNRtimefreq[i]>RATIO*median_SNRtimefreq){ 
       cout << "TIMEFREQSCINTER RATIO TEST FAIL: RATIO " << bestSNRtimefreq[i]/median_SNRtimefreq << endl;
       tfScint++; 
@@ -1163,7 +1171,7 @@ void solve_and_plot (Archive* archive,
 	double refP_us = getPeriod(archive) * MICROSEC;
 	double refDM = getDM(archive);
 
- 	int minwidthbins = (int) (minwidthsecs / getPeriod(archive) * nbin);
+ 	unsigned minwidthbins = unsigned(minwidthsecs/getPeriod(archive)*nbin);
 
 	if (minwidthbins<1) minwidthbins=1;
 	if (minwidthbins>nbin/2) minwidthbins=nbin/2;
@@ -1499,57 +1507,54 @@ void goToProfileViewPort() {
 	cpgsvp(0.05, 0.95, 0.05, 0.205);
 }
 
-float getRMS (const Archive * archive) {
+template<typename T> T sqr (T x) { return x*x; }
 
-	Reference::To<Archive> copy = archive->clone();
+float getRMS (const Archive * archive)
+{
+  unsigned nbin = archive->get_nbin();
+  unsigned nchan = archive->get_nchan();
+  unsigned nsub = archive->get_nsubint();
 
-	double s;
-	double smin = 1e30;
-	int itmin = 0;
-	double minMean;
+  double ss = 0;
+  double wt = 0;
 
-	unsigned nbin = copy->get_nbin();
-	unsigned nchan = copy->get_nchan();
-	unsigned nsub = copy->get_nsubint();
+  for (unsigned is = 0; is < nsub ; is++)
+  {
+    for (unsigned ic = 0; ic < nchan; ic++)
+    {
+      const Profile* profile = archive->get_Profile(is, FIRST_POL, ic);
+      const float* amps = profile->get_amps();
+      const float weight = sqr(profile->get_weight());
 
-	double ss = 0;
+      // find the min mean
+      double smin = -1;
+      int itmin = 0;
 
-	for (unsigned is = 0; is < nsub ; is++) {
+      smin = -1;
+      for (unsigned ib = 0; ib < nbin; ib++)
+      {
+	double s = 0;
+	for (unsigned j = ib; j < ib + nbin/2; j++)
+	  s += amps[j%nbin];
 
-		for (unsigned ic = 0; ic < nchan; ic++) {
-
-			// find the min mean
-			smin = -1;
-			Reference::To<Profile> profile = copy->get_Profile(is, FIRST_POL, ic);
-
-			vector<double> amps;
-			profile->get_amps(amps);
-
-			for (unsigned ib = 0; ib < nbin; ib++) {
-				s = 0;
-
-				for (unsigned j = ib; j < ib + nbin/2; j++)
-					s += amps[j%nbin];
-
-				if ((s < smin) || (smin < 0)) {
-					smin = s;
-					itmin = ib;
-				}
-			}
-
-			minMean = smin / (nbin/2);
-
-			for (unsigned i = 0; i < nbin; i++)
-				amps[i] -= minMean;
-
-			for (unsigned i = itmin; i < itmin + nbin/2 - 1; i++)
-				ss += pow(amps[i%nbin], 2);
-		}
+	if ((s < smin) || (smin < 0))
+	{
+	  smin = s;
+	  itmin = ib;
 	}
+      }
 
-	float rms = sqrt(ss/(float)(nchan*nsub*nbin/2));
+      double minMean = smin / (nbin/2);
 
-	return rms;
+      for (unsigned i = itmin; i < itmin + nbin/2 - 1; i++)
+      {
+	ss += weight * sqr (amps[i%nbin] - minMean);
+	wt += weight;
+      }
+    }
+  }
+
+  return sqrt(ss/wt);
 }
 
 /* 
@@ -1574,6 +1579,8 @@ float getSNR(const Profile * p){
 
 
 float getSNR (const Profile * p, float rms, int minwidthbins) {
+
+  cerr << "getSNR rms=" << rms << " minwidth=" << minwidthbins << endl;
 
 	snr_obj.set_rms( rms );
 	snr_obj.set_minwidthbins (minwidthbins);
@@ -2974,8 +2981,8 @@ string get_scale(const Archive * archive)
         return "seconds";
 }
 
-void setSensibleStepSizes(const Archive* archive){
-	unsigned nbin = archive->get_nbin();
+void setSensibleStepSizes(const Archive* archive)
+{
 	unsigned nsub = archive->get_nsubint();
 	unsigned nchan = archive->get_nchan();
 
