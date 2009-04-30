@@ -1913,6 +1913,7 @@ delta_Lerr.push_back(fabs(Lslopeerr*(goodfreqs[goodfreqs.size()-1]-goodfreqs[0])
 
   set_plotparams(pa0,RM,RM_luperr);
 
+#if HAVE_PGPLOT
 
   if (display)
     do_display(goodfreqs, goodpa, goodpa_stddev, data->get_filename()); //position angle and frequency for a single band can be accessed here
@@ -1985,6 +1986,9 @@ delta_Lerr.push_back(fabs(Lslopeerr*(goodfreqs[goodfreqs.size()-1]-goodfreqs[0])
      cpgend();
 
   }
+
+#endif
+
 }
 
 
