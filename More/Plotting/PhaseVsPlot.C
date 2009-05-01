@@ -36,9 +36,6 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
   style = "image";
   line_colour = -1;
   
-  y_res = -1;
-  y_scale = -1;
-  
   crop_value = 1.0f;
 }
 
@@ -94,8 +91,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   }
 
   float x_res = (x_max-x_min)/nbin;
-  if( y_res == -1 )
-    y_res = (y_max-y_min)/nrow;
+  float y_res = (y_max-y_min)/nrow;
   
 
   /* Added by DS, we crop the data range with crop_value being a
@@ -127,6 +123,9 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       // X = TR(0) + TR(1)*I + TR(2)*J
       // Y = TR(3) + TR(4)*I + TR(5)*J
 
+      cerr << " xoff=" << xoff << " x_min=" << x_min << " x_res=" << x_res
+	   << " y_min=" << y_min << " y_res=" << y_res << endl;
+
       float trf[6] = { xoff + x_min - 0.5*x_res, x_res, 0.0,
                        y_min - 0.5*y_res,        0.0, y_res };
 
@@ -148,10 +147,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     vector<float> xaxis_adjusted;
     xaxis_adjusted.resize( nbin );
 
-    if( y_scale != -1 )
-      y_scale = y_res/max;
-    else
-      y_scale = 1;
+    y_scale = y_res/max;
 
     vector<bool> all_zeroes;
     all_zeroes.resize( max_row );
