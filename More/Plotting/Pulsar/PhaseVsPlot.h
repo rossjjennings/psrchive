@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.17 $
-   $Date: 2008/03/03 03:15:58 $
-   $Author: nopeer $ */
+   $Revision: 1.18 $
+   $Date: 2009/05/01 05:17:28 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsPlot_h
 #define __Pulsar_PhaseVsPlot_h
@@ -79,12 +79,6 @@ namespace Pulsar {
     
     //! The colour to draw the lines
     int line_colour;
-    
-    //! The gap between profiles
-    float y_res;
-    
-    //! The scale factor for the data
-    float y_scale;
     
     //! The percentage of max to crop at
     float crop_value;

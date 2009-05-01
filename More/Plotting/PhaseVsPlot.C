@@ -147,7 +147,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     vector<float> xaxis_adjusted;
     xaxis_adjusted.resize( nbin );
 
-    y_scale = y_res/max;
+    float y_scale = y_res/max;
 
     vector<bool> all_zeroes;
     all_zeroes.resize( max_row );
