@@ -45,6 +45,7 @@
 #include "Pulsar/Site.h"
 
 #include <sys/stat.h>
+#include <assert.h>
 
 #ifdef HAVE_CONFIG_H
 #include<config.h>
@@ -1199,6 +1200,8 @@ void solve_and_plot (Archive* archive,
 	if (periodHalfRange_us < 0)
 		periodHalfRange_us = getNaturalperiodHalfRange(archive, periodStep_us);
 
+	// cerr << "coarseness=" << coarseness << endl;
+
 	dmStep *= coarseness;
 	periodStep_us *= coarseness;
 	periodHalfRange_us *= range_mult;
@@ -1220,8 +1223,12 @@ void solve_and_plot (Archive* archive,
 	// Number of bins in the DM axis
 	dmBins = (int)ceil( ( fabs(dmHalfRange)*2 ) / dmStep);
 
+	// cerr << "periodStep_us=" << periodStep_us << endl;
+
 	// Number of bins in the Period axis
 	periodBins = (int)ceil( ( fabs(periodHalfRange_us)*2 ) / periodStep_us);
+
+	// cerr << "periodBins=" << periodBins << endl;
 
 	// Print the header
 	printHeader(archive, periodOffset_us, periodStep_us, periodHalfRange_us,
@@ -1349,7 +1356,8 @@ void solve_and_plot (Archive* archive,
 	// Plot the deltaPeriod vs. DM vs. SNR plot
 	// and the pulse profile plot
 
-	draw_colour_map(&SNRs[0], dmBins, periodBins+1, -periodHalfRange_us+ periodOffset_us , periodHalfRange_us + periodOffset_us, "delta Period (us)", minDM, maxDM, "DM", "", trf, 5);
+	if (dmBins > 0)
+	  draw_colour_map(&SNRs[0], dmBins, periodBins+1, -periodHalfRange_us+ periodOffset_us , periodHalfRange_us + periodOffset_us, "delta Period (us)", minDM, maxDM, "DM", "", trf, 5);
 	plotProfile (bestProfile, total_plot, flui);
 
 	if (verbose) {
@@ -1420,30 +1428,37 @@ double getNaturalDMStep(const Archive * archive, double halfRange)  {
 }
 
 
-double getNaturalDMHalfRange(const Archive * archive, double step)  {
+double getNaturalDMHalfRange(const Archive * archive, double step)
+{
+  unsigned nbin = archive->get_nbin();
+  double centre_period = archive->get_Integration(FIRST_SUBINT)->get_folding_period() * MILLISEC;
 
-	unsigned nbin = archive->get_nbin();
-  	double centre_period = archive->get_Integration(FIRST_SUBINT)->get_folding_period() * MILLISEC;
+  double tbin = centre_period / (double)nbin;
+  double fcentre = archive->get_centre_frequency();
+  double bw = archive->get_bandwidth();
+  unsigned nchan = archive->get_nchan();
+  double bwband = fabs(bw/(double)nchan);
 
-	double tbin = centre_period / (double)nbin;
-	double fcentre = archive->get_centre_frequency();
-	double bw = archive->get_bandwidth();
-	unsigned nchan = archive->get_nchan();
-	double bwband = fabs(bw/(double)nchan);
-
-	return tbin / DMCONST / (pow(1.0/(fcentre - 0.5*bwband), 2.0) - (pow(1.0/(fcentre + 0.5*bwband), 2.0)));
+  return tbin / DMCONST / (pow(1.0/(fcentre - 0.5*bwband), 2.0) - (pow(1.0/(fcentre + 0.5*bwband), 2.0)));
 }
 
 
-double getNaturalPeriodStep(const Archive * archive, double halfRange)  {
+double getNaturalPeriodStep (const Archive * archive, double halfRange)
+{
+  if (verbose)
+    cerr << "getNaturalPeriodStep: MJD"
+      " start=" << archive->start_time().printdays(13) <<
+      " end=" << archive->end_time().printdays(13) << endl;
 
-	int nbin = archive->get_nbin();
-	double tspan = (archive->end_time() - archive->start_time()).in_seconds() * MICROSEC;
-  	double centre_period = archive->get_Integration(FIRST_SUBINT)->get_folding_period() * MICROSEC;
+  double tspan = (archive->end_time() - archive->start_time()).in_seconds();
+  assert (tspan > 0.0);
 
-	double tbin = centre_period / (double)nbin; // already in microseconds
+  double centre_period = archive->get_Integration(0)->get_folding_period();
+  assert (centre_period > 0.0);
 
-	return centre_period * tbin / tspan;
+  double tbin = centre_period / archive->get_nbin();
+
+  return MICROSEC * centre_period * tbin / tspan;
 }
 
 
@@ -1580,7 +1595,7 @@ float getSNR(const Profile * p){
 
 float getSNR (const Profile * p, float rms, int minwidthbins) {
 
-  cerr << "getSNR rms=" << rms << " minwidth=" << minwidthbins << endl;
+  // cerr << "getSNR rms=" << rms << " minwidth=" << minwidthbins << endl;
 
 	snr_obj.set_rms( rms );
 	snr_obj.set_minwidthbins (minwidthbins);
@@ -2927,6 +2942,10 @@ void draw_colour_map (float *plotarray, int rows, int cols, double minx,
 	cmap.apply();
 
 	float min=0, max=0;
+
+	// cerr << "cols=" << cols << " rows=" << rows << endl;
+        assert (cols > 0 && rows > 0);
+
 	minmaxval (cols*rows, plotarray, &min, &max);
 
 	cpgslw(1);
@@ -2983,28 +3002,27 @@ string get_scale(const Archive * archive)
 
 void setSensibleStepSizes(const Archive* archive)
 {
-	unsigned nsub = archive->get_nsubint();
-	unsigned nchan = archive->get_nchan();
+  unsigned nsub = archive->get_nsubint();
+  unsigned nchan = archive->get_nchan();
 
-	if (dmStep < 0)
-		dmStep = getNaturalDMStep(archive, dmHalfRange);
+  if (dmStep < 0)
+    dmStep = getNaturalDMStep(archive, dmHalfRange);
 
-	if (dmHalfRange < 0)
-		dmHalfRange = getNaturalDMHalfRange(archive, dmStep);
+  if (dmHalfRange < 0)
+    dmHalfRange = getNaturalDMHalfRange(archive, dmStep);
+  
+  if (periodStep_us < 0)
+    periodStep_us = getNaturalPeriodStep(archive, periodHalfRange_us);
+  
+  if (periodHalfRange_us < 0)
+    periodHalfRange_us = getNaturalperiodHalfRange(archive, periodStep_us);
 
-	if (periodStep_us < 0)
-		periodStep_us = getNaturalPeriodStep(archive, periodHalfRange_us);
-
-	if (periodHalfRange_us < 0)
-		periodHalfRange_us = getNaturalperiodHalfRange(archive, periodStep_us);
-
-	// Make sure that the steps are sensible. Otherwise, just do one step
-	if (nchan == 1 || dmStep <= 0)
-		dmHalfRange = dmStep/2;
-
-	if (nsub == 1 || periodStep_us <= 0)
-		periodHalfRange_us = periodStep_us/2;
-
+  // Make sure that the steps are sensible. Otherwise, just do one step
+  if (nchan == 1 || dmStep <= 0)
+    dmHalfRange = dmStep/2;
+  
+  if (nsub == 1 || periodStep_us <= 0)
+    periodHalfRange_us = periodStep_us/2;
 }
 
 
