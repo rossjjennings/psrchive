@@ -32,8 +32,8 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
   // Account for custom Integration ordering:
   IntegrationOrder* order = archive->get<IntegrationOrder>();
 
-  if (order) {
-
+  if (order)
+  {
     Divided* divided = dynamic_kast<Divided>( range_policy );
     if (!divided)
       throw Error( InvalidState, "Pulsar::TimeIntegrate::transform",
@@ -42,7 +42,6 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
 
     order->combine( archive, divided->get_nintegrate() );
     return;
-
   }
 
   unsigned archive_nsub = archive->get_nsubint();
@@ -141,7 +140,7 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
 
       avg_period += cur_weight/total_weight * cur->get_folding_period();
 
-      if (iadd==(stop-start)/2)
+      if (iadd==(stop+start)/2)
         alt_epoch = cur->get_epoch();
     }
 
@@ -209,13 +208,15 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
       }
       else
       {
-        // If no model exists, we can't recompute an aribtrary epoch. 
-        // Instead, we will pick the epoch of one of the two middle
-        // subints (detemined above as alt_epoch).
+        /*
+	  If no model exists, then it is not possible to recompute an 
+	  aribtrary epoch. Instead, use the epoch of a subint near
+	  the middle of the range integrated (saved above as alt_epoch).
+	*/
 
         if (Archive::verbose > 2)
-          cerr << "TimeIntegrate::transform used alt_epoch, diff="
-               << alt_epoch-epoch << endl;
+          cerr << "TimeIntegrate::transform using alt_epoch=" << alt_epoch
+	       << " diff=" << (alt_epoch-epoch).in_seconds() << "s" << endl;
 
         epoch = alt_epoch;
         result->set_folding_period (avg_period);
@@ -260,7 +261,7 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
       }
       
       if (Archive::verbose > 2) 
-	cerr <<  "Pulsar::TimeIntegrate::transform sum profiles" << endl;
+	cerr << "Pulsar::TimeIntegrate::transform sum profiles" << endl;
       
       for (unsigned ipol=0; ipol < archive_npol; ++ipol)
       {
@@ -308,6 +309,7 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
       Integration::Extension* ext = result->get_extension(iext);
       ext->update (result);
     }
+
   } // for each integrated result
 
   archive->resize (output_nsub);
