@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2002-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -10,28 +10,18 @@
 
 using namespace std;
 
-static Pulsar::TimeIntegrate* operation = 0;
-static Pulsar::TimeIntegrate::EvenlySpaced* policy = 0;
-
-static void static_init ()
-{
-  operation = new Pulsar::TimeIntegrate;
-  policy    = new Pulsar::TimeIntegrate::EvenlySpaced;
-
-  operation->set_range_policy( policy );
-}
-
 /*!
   \param nscrunch number of neighbouring Integrations to add. 
                   If nscrunch == 0, then add all Integrations together
  */
 void Pulsar::Archive::tscrunch (unsigned nscrunch)
 {
-  if (!policy)
-    static_init ();
+  TimeIntegrate operation;
+  TimeIntegrate::EvenlySpaced policy;
 
-  policy->set_nintegrate (nscrunch);
-  operation->transform (this);
+  operation.set_range_policy( &policy );
+  policy.set_nintegrate (nscrunch);
+  operation.transform (this);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -41,14 +31,17 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 */
 void Pulsar::Archive::tscrunch_to_nsub (unsigned new_nsub)
 {
-  if (new_nsub <= 0)
+  if (new_nsub == 0)
     throw Error (InvalidParam, "Pulsar::Archive::tscrunch_to_nsub",
-		 "Invalid nsub request (new_nsub=%d nsub=%d)",
-		 new_nsub,get_nsubint());
-  else if (get_nsubint() < new_nsub)
+		 "new nsub == 0");
+
+  if (get_nsubint() < new_nsub)
     throw Error (InvalidParam, "Pulsar::Archive::tscrunch_to_nsub",
-		 "Archive has too few subints (new_nsub=%d nsub=%d)",
-		 new_nsub,get_nsubint());
-  else
-    tscrunch(get_nsubint() / new_nsub);
+		 "new nsub=%u > old nsub=%u", new_nsub,get_nsubint());
+
+  unsigned factor = get_nsubint() / new_nsub;
+  if (get_nsubint() % new_nsub)
+    factor ++;
+
+  tscrunch (factor);
 }
