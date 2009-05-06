@@ -169,6 +169,8 @@ void Pulsar::Application::parse (int argc, char** argv)
     }
   }
 
+  dirglob_program = name;
+
   if (metafile)
     stringfload (&filenames, metafile);
   else
@@ -255,6 +257,12 @@ bool Pulsar::Application::parse (char code, const std::string& arg)
 //! Extra setup, run once before main loop
 void Pulsar::Application::setup ()
 {
+}
+
+//! Return true if application must save data
+bool Pulsar::Application::must_save ()
+{
+  return true;
 }
 
 //! Extra optional processing tasks, run once per Archive (before main process)
