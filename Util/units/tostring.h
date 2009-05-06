@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.16 $
-   $Date: 2007/10/02 05:53:39 $
+   $Revision: 1.17 $
+   $Date: 2009/05/06 13:30:17 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H
@@ -19,7 +19,6 @@
 #include <sstream>
 #include <iomanip>
 #include <limits>
-
 
 extern unsigned tostring_precision;
 extern bool tostring_places;
@@ -46,6 +45,13 @@ std::string tostring (const T& input,
   tostring_ost->str("");
   *tostring_ost << input;
 
+  if (tostring_ost->fail())
+  {
+    Error error (InvalidState, "tostring");
+    error << "failed to convert " << input << " to string:";
+    throw error;
+  }
+
   return tostring_ost->str();
 }
 
@@ -62,6 +68,9 @@ T fromstring (const std::string& input)
 
   T retval;
   *fromstring_ist >> retval;
+
+  if (fromstring_ist->fail())
+    throw Error (InvalidState, "fromstring", "failed to parse '"+ input +"'");
 
   return retval;
 }
@@ -109,11 +118,4 @@ std::istream& extraction (std::istream& is, Type& t, String2Type string2type)
   return is;
 }
 
-
-
-
-
-
 #endif
-
-
