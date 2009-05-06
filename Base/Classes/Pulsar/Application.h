@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.9 $
-   $Date: 2009/02/20 19:16:38 $
+   $Revision: 1.10 $
+   $Date: 2009/05/06 09:54:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Application_h
@@ -47,6 +47,9 @@ namespace Pulsar {
 
     //! Get the verbosity flag
     bool get_verbose () const;
+
+    //! Return true if the application needs to save data
+    virtual bool must_save ();
 
   protected:
 
