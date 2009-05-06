@@ -95,7 +95,6 @@ nobase_include_HEADERS = \
 	Pulsar/TimeIntegrate.h \
         Pulsar/Transformation.h \
         Pulsar/Transposer.h \
-	Pulsar/UnloadOptions.h \
         Pulsar/WaveletSmooth.h \
         Pulsar/WaveletTransform.h \
         Pulsar/Weight.h \
@@ -230,7 +229,6 @@ libGeneral_la_SOURCES = \
 	TimeAppend.C \
 	TimeIntegrate.C \
         Transposer.C \
-	UnloadOptions.C \
         Weight.C \
 	WeightedFrequency.C \
 	WeightInterpreter.C \
