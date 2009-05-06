@@ -55,5 +55,7 @@ unsigned Pulsar::Archive::copy_isubint (unsigned isub) const
   if (isub >= copy_subints->size())
     throw Error (InvalidParam, "Pulsar::Archive::copy_isubint",
                  "isub=%u >= copy_nsubint=%u", isub, copy_subints->size());
+
+  return (*copy_subints)[isub];
 }
 
