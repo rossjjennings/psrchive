@@ -36,6 +36,8 @@ int dirtree (std::vector<std::string>* files, const std::vector<std::string>& pa
 bool is_glob_argument (const char* text);
 bool is_glob_argument (const std::string& text);
 
+extern std::string dirglob_program;
+
 void dirglob (std::vector<std::string>* filenames, const char* text);
 void dirglob (std::vector<std::string>* filenames, const std::string& text);
 

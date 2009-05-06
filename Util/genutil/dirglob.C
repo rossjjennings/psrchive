@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2000 by Willem van Straten
+ *   Copyright (C) 2000-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -14,6 +14,8 @@
 #include <string.h>
 
 using namespace std;
+
+string dirglob_program;
 
 bool is_glob_argument (const char* text)
 {
@@ -41,19 +43,14 @@ void dirglob (vector<string>* filenames, const char* text)
 #ifdef GLOB_NOMATCH
       && ret != GLOB_NOMATCH
 #endif
-              )  {
+              )
     throw Error (FailedSys, "dirglob", "error calling glob");
-  }
 
-  size_t ifile=0;
+  if (!dirglob_program.empty() && rglob.gl_pathc == 0)
+    cerr << dirglob_program << ": '" << text << "' not found" << endl;
 
-  for (ifile=0; ifile < rglob.gl_pathc; ifile++)
+  for (size_t ifile=0; ifile < rglob.gl_pathc; ifile++)
     filenames->push_back (string(rglob.gl_pathv[ifile]));
-
-#if 0
-  if (ifile == 0)
-    cerr << "dirglob: '" << text << "' not found" << endl;
-#endif
 
   globfree (&rglob);
 }
