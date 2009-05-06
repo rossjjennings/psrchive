@@ -1,19 +1,20 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-
-using namespace std;
 
 #include "Pulsar/UnloadOptions.h"
 #include "Pulsar/Archive.h"
 
 #include "strutil.h"
 
+using namespace std;
+
 Pulsar::UnloadOptions::UnloadOptions ()
 {
+  unload = true;
   overwrite = false;
 }
 
@@ -62,6 +63,12 @@ void Pulsar::UnloadOptions::setup ()
   cerr << "Pulsar::UnloadOptions::setup" << endl;
 #endif
 
+  if (!application->must_save())
+  {
+    unload = false;
+    return;
+  }
+
   if (overwrite && (!extension.empty() || !directory.empty()))
     throw Error (InvalidState, "Pulsar::UnloadOptions::setup",
 		 "cannot use -m option with -e and/or -O option");
@@ -74,6 +81,9 @@ void Pulsar::UnloadOptions::setup ()
 //! Unload the archive
 void Pulsar::UnloadOptions::finish (Archive* archive)
 {
+  if (!unload)
+    return;
+
   if (overwrite)
   {
 #ifdef _DEBUG

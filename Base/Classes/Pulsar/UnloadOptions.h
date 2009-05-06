@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/UnloadOptions.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/05/06 06:13:22 $
+   $Revision: 1.2 $
+   $Date: 2009/05/06 09:53:56 $
    $Author: straten $ */
 
 #ifndef __Pulsar_UnloadOptions_h
@@ -44,6 +44,9 @@ namespace Pulsar {
     virtual void finish (Archive*);
 
   private:
+
+    //! Unload
+    bool unload;
 
     //! Overwrite files
     bool overwrite;
