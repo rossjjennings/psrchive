@@ -1,75 +1,105 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/Archive.h"
-#include "tostring.h"
 
-#include <stdlib.h>
-#include <unistd.h>
+#include "Pulsar/Application.h"
+#include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
+
+#include "strutil.h"
 
 using namespace std;
 
-void usage ()
+//! Pulsar Archive Zapping application
+class psrsplit: public Pulsar::Application
 {
-  cerr << 
-    "psrsplit - split a pulsar archive into one or more files\n"
-    "\n"
-    "psrsplit [options] filename\n"
-    "options:\n"
-    "  -n subint  number of sub-integrations per output file \n"
-       << endl;
+public:
+
+  //! Default constructor
+  psrsplit ();
+
+  //! Return usage information 
+  std::string get_usage ();
+
+  //! Return getopt options
+  std::string get_options ();
+
+  //! Parse a command line option
+  bool parse (char code, const std::string& arg);
+
+  //! Verify setup
+  void setup ();
+
+  //! Process the given archive
+  void process (Pulsar::Archive*);
+
+protected:
+
+  unsigned nsubint;
+
+};
+
+int main (int argc, char** argv)
+{
+  psrsplit program;
+  return program.main (argc, argv);
 }
 
-int main (int argc, char** argv) try 
+psrsplit::psrsplit ()
+  : Pulsar::Application ("psrsplit", "splits an archive into multiple files")
 {
-  unsigned nsubint = 0;
+  version = "$Id: psrsplit.C,v 1.3 2009/05/06 10:54:12 straten Exp $";
+  nsubint = 0;
+}
 
-  char c;
-  while ((c = getopt(argc, argv, "n:hqvV")) != -1) 
+std::string psrsplit::get_options ()
+{
+  return "n:";
+}
 
-    switch (c)  {
+std::string psrsplit::get_usage ()
+{
+  return
+    " -n nsubint       number of sub-integrations per output file \n";
+}
 
-    case 'h':
-      usage();
-      return 0;
-    case 'V':
-      Pulsar::Archive::set_verbosity (3);
-      break;
-    case 'v':
-      Pulsar::Archive::set_verbosity (2);
-      break;
-    case 'q':
-      Pulsar::Archive::set_verbosity (0);
-      break;
-
+//! Parse a command line option
+bool psrsplit::parse (char code, const std::string& arg)
+{
+  switch (code)
+    {
     case 'n':
-      nsubint = atoi (optarg);
+      nsubint = atoi (arg.c_str());
       break;
 
-    } 
+    default:
+      return false;
+    }
 
+  return true;
+}
 
-  if (optind >= argc)
-  {
-    cerr << "psrsplit: please specify filename" << endl;
-    return -1;
-  }
-
+void psrsplit::setup ()
+{
   if (nsubint == 0)
-  {
-    cerr << "psrsplit: please specify "
-      "number of sub-integrations per output file" << endl;
-    return -1;
-  }
+    throw Error (InvalidState, "psrsplit::setup",
+		 "please specify number of sub-integrations per output file");
+}
 
-  string filename = argv[optind];
+string get_extension (const std::string& filename)
+{
+  string::size_type index = filename.find_last_of( ".", filename.length() );
+  if (index != string::npos)
+    return filename.substr (index);
+  else
+    return "";
+}
 
-  Reference::To<Pulsar::Archive> archive;
-  archive = Pulsar::Archive::load( filename );
-
+void psrsplit::process (Pulsar::Archive* archive)
+{
   unsigned nsub = archive->get_nsubint();
 
   unsigned isplit = 0;
@@ -89,24 +119,18 @@ int main (int argc, char** argv) try
 
     Reference::To<Pulsar::Archive> sub_archive = archive->extract(subints);
 
-    string new_filename = filename + "." + tostring(isplit);
+    // delete the subintegrations that have been cloned in sub_archive
+    for (unsigned isub=0; isub < subints.size(); isub++)
+      delete archive->get_Integration (isub);
 
-    cerr << "psrsplit: writing " << new_filename << endl;
+    string filename = archive->get_filename();
+    string ext = stringprintf ("%04d", isplit) + get_extension (filename);
+    filename = replace_extension( filename, ext );
 
-    sub_archive->unload( new_filename );
+    cerr << "psrsplit: writing " << filename << endl;
 
-    // by reloading, the sub-integrations that have been loaded will be deleted
-    archive = Pulsar::Archive::load( filename );
+    sub_archive->unload( filename );
 
     isplit ++;
   }
-
-  return 0;
-
 }
-catch (Error& er)
-{
-  cerr << "psrsplit: " << er << endl;
-  return -1;
-}
-
