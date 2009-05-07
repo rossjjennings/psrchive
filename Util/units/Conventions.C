@@ -4,9 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <string>
 
 #include "Conventions.h"
+
+#include <stdlib.h>
 
 using namespace std;
 
