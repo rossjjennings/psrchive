@@ -1539,7 +1539,10 @@ float getRMS (const Archive * archive)
     {
       const Profile* profile = archive->get_Profile(is, FIRST_POL, ic);
       const float* amps = profile->get_amps();
-      const float weight = sqr(profile->get_weight());
+      const float weight = profile->get_weight();
+
+      // sum of all weights
+      wt += weight;
 
       // find the min mean
       double smin = -1;
@@ -1562,14 +1565,11 @@ float getRMS (const Archive * archive)
       double minMean = smin / (nbin/2);
 
       for (unsigned i = itmin; i < itmin + nbin/2 - 1; i++)
-      {
-	ss += weight * sqr (amps[i%nbin] - minMean);
-	wt += weight;
-      }
+	ss += sqr( weight * (amps[i%nbin] - minMean) );
     }
   }
 
-  return sqrt(ss/wt);
+  return sqrt( ss / (sqr(wt) * nbin/2) );
 }
 
 /* 
