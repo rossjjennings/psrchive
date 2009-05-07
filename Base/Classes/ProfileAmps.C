@@ -36,9 +36,11 @@ static VirtualMemory* profile_swap_init ()
   if (filename == "")
     return 0;
 
-  VirtualMemory* swap = new VirtualMemory (profile_swap_filename);
+  VirtualMemory* swap = new VirtualMemory (filename);
 
+#ifdef _DEBUG
   cerr << "psrchive: virtual memory swap file=" << filename << endl;
+#endif
 
   return swap;
 }
