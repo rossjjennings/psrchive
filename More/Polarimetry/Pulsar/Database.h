@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.19 $
-   $Date: 2009/03/01 18:04:41 $
-   $Author: straten $ */
+   $Revision: 1.20 $
+   $Date: 2009/05/07 06:09:40 $
+   $Author: sosl $ */
 
 #ifndef __Pulsar_Database_h
 #define __Pulsar_Database_h
@@ -39,6 +39,8 @@ namespace Pulsar {
 
     //! Verbosity flag
     static bool verbose;
+    //! Cache the last calibrator?
+    static bool cache_last_cal;
 
     //! Time scale over which calibrator flux and cross-coupling remain stable
     static Option<double> long_time_scale;
@@ -224,6 +226,8 @@ namespace Pulsar {
     
     std::vector<Entry> entries;   // list of entries in the database
     std::string path;
+    Entry lastEntry;
+    Reference::To<PolnCalibrator> lastPolnCal;
     
     //! Return a pointer to a new FluxCalibrator for the given archive
     FluxCalibrator* rawFluxCalibrator (Archive* a);

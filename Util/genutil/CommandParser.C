@@ -12,6 +12,8 @@
 using namespace std;
 
 bool CommandParser::debug = false;
+bool CommandParser::startCommand = true;
+bool CommandParser::endCommand = false;
 
 CommandParser::CommandParser()
 {
@@ -40,19 +42,33 @@ void CommandParser::script (const string& filename)
   script (cmds);
 }
 
+static const char* whitespace = " \t\n";
+
 void CommandParser::script (const vector<string>& cmds)
 {
-  fault = false;
+  string cmdargs;
+  string first;
+  string response;
+  fault=false;
   for (unsigned i=0; i<cmds.size(); i++)
   {
-    string response = parse( cmds[i] );
+    cmdargs = cmds[i];
+    first = stringtok(&cmdargs, whitespace);
+    if ( (startCommand && first == "init") || (endCommand && first == "end"))
+    {
+      response = parse (cmdargs);
+    }
+    else if (first != "init" && first != "end")
+    {
+      response = parse(cmds[i]);
+    }
     if (fault && abort)
       throw Error (InvalidState, "CommandParser::script", response);
     cerr << response;
   }
+  if (startCommand)
+    startCommand = false;
 }
-
-static const char* whitespace = " \t\n";
 
 string CommandParser::parse (const string& commandargs)
 {

@@ -36,7 +36,7 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbCcDd:e:fFGhiIJ:j:M:m:n:O:op:Pqr:sSt:Tu:UvVwW:xZ";
+const char* args = "A:aBbCcDd:e:fFGhiIJ:j:lM:m:n:O:op:Pqr:sSt:Tu:UvVwW:xZ";
 
 void usage ()
 {
@@ -53,6 +53,7 @@ void usage ()
     "  -u ext         Add to file extensions recognized in search \n"
     "                 (defaults: .cf .pcal .fcal .pfit) \n"
     "  -w             Write a new database summary file \n"
+    "  -l             Cache last calibrator\n"
     "\n"
     "Calibrator options: \n"
     "  -A filename    Use the calibrator in filename, as output by pcm/pacv \n"
@@ -108,6 +109,8 @@ int main (int argc, char *argv[]) try
 
   bool write_database_file = false;
   bool check_flags = true;
+  // By default, don't use last calibrator caching
+  Pulsar::Database::cache_last_cal = false;
 
   // name of the file containing the list of Archive filenames
   char* metafile = NULL;
@@ -179,7 +182,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.100 2009/03/01 18:04:41 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.101 2009/05/07 06:09:40 sosl Exp $" << endl;
       return 0;
 
     case 'A':
@@ -261,6 +264,11 @@ int main (int argc, char *argv[]) try
       
     case 'J':
       loadlines (optarg, jobs);
+      break;
+
+    case 'l':
+      Pulsar::Database::cache_last_cal = true;
+      command += " -l";
       break;
 
     case 'M':

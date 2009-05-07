@@ -20,6 +20,8 @@ class CommandParser : public Reference::Able {
 
   //! verbose output from CommandParser methods
   static bool debug;
+  //! process 'init' and 'end' commands
+  static bool startCommand, endCommand;
 
   //! the prompt shown to the user
   std::string prompt;

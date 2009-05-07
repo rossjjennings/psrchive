@@ -52,7 +52,7 @@ using namespace Pulsar;
 #endif
 
 bool Pulsar::Database::verbose = false;
-
+bool Pulsar::Database::cache_last_cal = true;
 /*! By default, the long time scale is set to four weeks. */
 Pulsar::Option<double> 
 Pulsar::Database::long_time_scale
@@ -1175,6 +1175,13 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
     }
   }
 
+  if (cache_last_cal && lastPolnCal && entry == lastEntry)
+  {
+    if (verbose)
+      cerr << "Pulsar::Database::generatePolnCalibrator using cached calibrator\n";
+    return lastPolnCal;
+  }
+
   if (verbose)
     cout << "Pulsar::Database::generatePolnCalibrator constructing from file "
 	 << entry.filename << endl;
@@ -1226,6 +1233,15 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
   {
     cerr << "Pulsar::Database::generatePolnCalibrator Hybrid" << endl;
     return generateHybridCalibrator (ref_cal, arch);
+  }
+
+  // store last calibrator, if we are caching
+  if (cache_last_cal)
+  {
+    if (verbose)
+      cerr << "Pulsar::Database::generatePolnCalibrator caching PolnCalibrator" << endl;
+    lastEntry = entry;
+    lastPolnCal = ref_cal;
   }
 
   return ref_cal.release();
