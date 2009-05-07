@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "TextInterface.h"
 #include "stringtok.h"
 #include "pad.h"
@@ -49,7 +50,16 @@ string TextInterface::Parser::process (const string& command)
   // remove any white space from the key
   string param = stringtok (before, " \t");
 
-  set_value (param, after);
+  try
+  {
+    set_value (param, after);
+  }
+  catch (Error& error)
+  {
+    throw Error (InvalidParam, "TextInterface::Parser::process",
+		 "failed to parse '" + after + "' as '" + param + "'");
+  }
+
   return "";
 }
 
@@ -99,7 +109,7 @@ string TextInterface::Parser::help (bool default_value)
 }
 
 static bool alphabetical_lt (const Reference::To<TextInterface::Value>& v1, 
-				const Reference::To<TextInterface::Value>& v2)
+			     const Reference::To<TextInterface::Value>& v2)
 {
   return v1->get_name() < v2->get_name();
 }
@@ -193,8 +203,8 @@ TextInterface::Value*
 TextInterface::Parser::find (const string& name, bool throw_exception) const
 {
 #ifdef _DEBUG
-  cerr << "TextInterface::Parser::find (" << name << ") size=" << values.size() 
-	    << endl;
+  cerr << "TextInterface::Parser::find (" << name << ")"
+    " size=" << values.size() << endl;
 #endif
 
   string key = name;
@@ -207,8 +217,8 @@ TextInterface::Parser::find (const string& name, bool throw_exception) const
     if (values[i]->matches (key))
     {
 #ifdef _DEBUG
-      cerr << "TextInterface::Parser::find value[" << i << "]=" 
-		<< values[i]->get_name() << " matches" << endl;
+      cerr << "TextInterface::Parser::find value[" << i << "]"
+	"=" << values[i]->get_name() << " matches" << endl;
 #endif
       const_cast<Parser*>(this)->setup( values[i] );
       return values[i];
