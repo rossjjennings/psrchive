@@ -73,6 +73,11 @@ istream& input (istream& is, T& argument)
 {
   int code = 0;
   is >> code;
+
+  // Hand and Argument may equal only +/- 1
+  if (abs(code) != 1)
+    is.setstate (ios::failbit);
+
   argument = (T) code;
   return is;
 }
