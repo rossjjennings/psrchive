@@ -1600,15 +1600,15 @@ template<typename T> T sqr (T x) { return x*x; }
 
 float getRMS (const Archive * archive)
 {
- if (user_rms > 0){
-  return user_rms;
- } else {
+  if (user_rms > 0)
+    return user_rms;
+
   unsigned nbin = archive->get_nbin();
   unsigned nchan = archive->get_nchan();
   unsigned nsub = archive->get_nsubint();
 
-  double ss = 0;
-  double wt = 0;
+  double weighted_total_variance = 0;
+  double total_weight = 0;
 
   for (unsigned is = 0; is < nsub ; is++)
   {
@@ -1616,16 +1616,11 @@ float getRMS (const Archive * archive)
     {
       const Profile* profile = archive->get_Profile(is, FIRST_POL, ic);
       const float* amps = profile->get_amps();
-      const float weight = profile->get_weight();
-
-      // sum of all weights
-      wt += weight;
 
       // find the min mean
       double smin = -1;
       int itmin = 0;
 
-      smin = -1;
       for (unsigned ib = 0; ib < nbin; ib++)
       {
         double s = 0;
@@ -1641,13 +1636,21 @@ float getRMS (const Archive * archive)
 
       double minMean = smin / (nbin/2);
 
-      for (unsigned i = itmin; i < itmin + nbin/2 - 1; i++)
-        ss += sqr( weight * (amps[i%nbin] - minMean) );
+      double sumsq = 0.0;
+      for (unsigned i = itmin; i < itmin + nbin/2; i++)
+        sumsq += sqr( amps[i%nbin] - minMean );
+
+      double variance = sumsq / (nbin/2-1);
+      double weight = profile->get_weight();
+
+      weighted_total_variance += sqr(weight) * variance;
+      total_weight += weight;
     }
   }
 
-  return sqrt( ss / (sqr(wt) * nbin/2) );
- }
+  double rms = sqrt( weighted_total_variance / sqr(total_weight) );
+  cerr << "getRMS=" << rms << endl;
+  return rms;
 }
 
 /* 
@@ -2611,7 +2614,7 @@ void plotProfile(const Profile * profile, ProfilePlot* plot, TextInterface::Pars
 
 	flui->set_value("ch", "0.8");
 	flui->set_value("x:view", "(0.05, 0.95)");
-	flui->set_value("y:view", "(0.05, 0.205");
+	flui->set_value("y:view", "(0.05, 0.205)");
 	flui->set_value("x:range", "(0, 1.2)");
 	plot->plot_profile(profile);
 	double min, max;
