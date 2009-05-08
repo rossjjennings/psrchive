@@ -425,6 +425,9 @@ float range_mult = 1;
 int maxChannels = -1;
 int maxSubints = -1;
 
+float user_rms=-1.0;
+bool have_user_rms_file=false;
+char user_rms_file[256];
 
 // The standard profile filename to compare against to compute SNR
 string standardProfileFilename = "";
@@ -760,6 +763,17 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 			i++;
 			range_mult = atof(argv[i]);
 		}
+		else if (strcmp(argv[i], "-rms") == 0) {
+			i++;
+			user_rms = atof(argv[i]);
+		}
+		else if (strcmp(argv[i], "-rms-file") == 0) {
+			i++;
+			strcpy(user_rms_file,argv[i]);
+			have_user_rms_file = 1;
+		}
+
+
 
 		// Handle error if there is no such option
 		else if (argv[i][0] == '-') {
@@ -934,6 +948,66 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
 	setInitialXmlCandiateSection(archive,minwidthsecs);
   }
 #endif
+
+  // compute profile rms if we have a user rms file from dspsr
+
+  if (have_user_rms_file){
+	FILE* rms_file = fopen(user_rms_file,"r");
+	char text[128];
+	float chan_rms;
+	float sumsq;
+	float weight_total,weight_factor;
+	unsigned orig_nchans;
+	unsigned nscr,count;
+	uint64 nadd;
+	uint64 orig_nsamp;
+	sumsq=0;
+	weight_total=0;
+
+	fscanf(rms_file,"# %s %d\n", text, &orig_nchans);
+	fscanf(rms_file,"# %s %lld\n", text, &orig_nsamp);
+	nadd = orig_nsamp/(uint64)(archive->get_nbin() * archive->get_nsubint());
+	nscr = orig_nchans / archive->get_nchan();
+
+/*	for (unsigned i = 0; i < orig_nchans; i++){
+		fscanf(rms_file,"%f\n",&chan_rms);
+		sumsq += chan_rms*chan_rms;
+	}*/
+
+	for (unsigned ic = 0; ic < archive->get_nchan(); ic++)
+	{
+		float ch_wt=0;
+		for (unsigned is = 0; is < archive->get_nsubint() ; is++)
+		{
+			Profile* prof = archive->get_Profile(is, FIRST_POL, ic);
+			ch_wt += prof->get_weight();
+		}
+
+		float factor = ch_wt / archive->get_nsubint();
+		for (unsigned i = 0; i < nscr; i++){
+			fscanf(rms_file,"%f\n",&chan_rms);
+			sumsq += chan_rms*chan_rms * ch_wt*ch_wt;
+		}
+		weight_total += ch_wt;
+		count+=archive->get_nsubint();
+	}
+
+	sumsq /= weight_total*weight_total;
+	sumsq *= archive->get_nchan()*archive->get_nchan();
+	
+//	weight_factor = archive->get_nsubint()*archive->get_nchan()/weight_total;
+//	weight_factor=weight_total/archive->get_nsubint();
+
+	nadd = orig_nsamp/(uint64)(archive->get_nbin() * archive->get_nsubint());
+	user_rms = sqrt(sumsq/orig_nchans/nadd/nscr);
+
+//	user_rms *= sqrt(archive->get_nsubint()*orig_nchans/weight_total);
+	
+//	cout << sqrt(sumsq) << " " << weight_factor << " " << weight_total << endl;
+	if (!silent){
+		cout << "User rms = " << user_rms;
+	}
+  }
 
   Plot *phase_plot = factory.construct("freq");
   TextInterface::Parser* fui = phase_plot->get_frame_interface();
@@ -1526,6 +1600,9 @@ template<typename T> T sqr (T x) { return x*x; }
 
 float getRMS (const Archive * archive)
 {
+ if (user_rms > 0){
+  return user_rms;
+ } else {
   unsigned nbin = archive->get_nbin();
   unsigned nchan = archive->get_nchan();
   unsigned nsub = archive->get_nsubint();
@@ -1551,25 +1628,26 @@ float getRMS (const Archive * archive)
       smin = -1;
       for (unsigned ib = 0; ib < nbin; ib++)
       {
-	double s = 0;
-	for (unsigned j = ib; j < ib + nbin/2; j++)
-	  s += amps[j%nbin];
+        double s = 0;
+        for (unsigned j = ib; j < ib + nbin/2; j++)
+          s += amps[j%nbin];
 
-	if ((s < smin) || (smin < 0))
-	{
-	  smin = s;
-	  itmin = ib;
-	}
+        if ((s < smin) || (smin < 0))
+        {
+          smin = s;
+          itmin = ib;
+        }
       }
 
       double minMean = smin / (nbin/2);
 
       for (unsigned i = itmin; i < itmin + nbin/2 - 1; i++)
-	ss += sqr( weight * (amps[i%nbin] - minMean) );
+        ss += sqr( weight * (amps[i%nbin] - minMean) );
     }
   }
 
   return sqrt( ss / (sqr(wt) * nbin/2) );
+ }
 }
 
 /* 
