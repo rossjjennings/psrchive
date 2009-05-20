@@ -91,6 +91,8 @@ private:
       }
     }
   }
+
+  std::string GetBandpassOrSpectrumPlot( Reference::To<Archive> archive );
   
   void PrintUsage( void );
 

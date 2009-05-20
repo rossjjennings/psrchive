@@ -10,6 +10,7 @@
 #include "PavApp.h"
 #include <tostring.h>
 #include <templates.h>
+#include <limits>
 #include <Pulsar/StokesCylindrical.h>
 #include <Pulsar/BandpassChannelWeightPlot.h>
 #include <Pulsar/StokesSpherical.h>
@@ -21,8 +22,11 @@
 #include <Pulsar/PeakConsecutive.h>
 #include <Pulsar/PlotFactory.h>
 #include <Pulsar/PhaseVsPlot.h>
-#include <limits>
+#include <Pulsar/BandpassPlot.h>
+#include <Pulsar/Passband.h>
 
+#define BANDPASSPLOT_ID "d"
+#define SPECTRUMPLOT_ID "b"
 
 using std::cerr;
 using std::cout;
@@ -47,7 +51,8 @@ using Pulsar::Interpreter;
 using Pulsar::RiseFall;
 using Pulsar::Profile;
 using Pulsar::Integration;
-
+using Pulsar::BandpassPlot;
+using Pulsar::Passband;
 
 Pulsar::Option<string> PavApp::default_plot_device
 (
@@ -474,6 +479,9 @@ void PavApp::PavSpecificOptions( void )
     SetPlotOptions<StokesSpherical>( "ell:above:c=$name $file\n Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
   }
 
+  // BandpassTable plot config
+  SetPlotOptions<BandpassPlot>( "above:c=$name $file Freq: $freq MHz" );
+
   // if we want to plot error bars
 
   if( plot_error_box )
@@ -497,10 +505,10 @@ void PavApp::PavSpecificOptions( void )
   if( pa_min != 0.0 || pa_max != 1.0 )
   {
     SetPlotOptions<StokesCylindrical>( string("pa:y:range=(") +
-                                       tostring<float>(pa_min) +
-                                       string(",") +
-                                       tostring<float>(pa_max) +
-                                       string(")" ) );
+              tostring<float>(pa_min) +
+              string(",") +
+              tostring<float>(pa_max) +
+              string(")" ) );
   }
 
   if( user_character_height != -1 )
@@ -511,6 +519,7 @@ void PavApp::PavSpecificOptions( void )
   tostring_places = old_places;
   tostring_precision = old_precision;
 }
+
 
 
 
@@ -534,11 +543,15 @@ void PavApp::CreatePlotsList( vector< string > filenames,   vector< string > plo
     {
       FilePlots new_fplot;
       new_fplot.filename = filenames[i];
+      new_fplot.archive = Archive::load( filenames[i] );
       for( unsigned p = 0; p < plot_ids.size(); p ++ )
       {
-        new_fplot.plots.push_back( factory.construct( plot_ids[p] ) );
+          string plot_id = plot_ids[p];
+          if (plot_ids[p] == "B")
+              plot_id = GetBandpassOrSpectrumPlot( new_fplot.archive );
+
+          new_fplot.plots.push_back( factory.construct( plot_id ) );
       }
-      new_fplot.archive = Archive::load( filenames[i] );
       plots.push_back( new_fplot );
     }
     catch ( Error e )
@@ -598,7 +611,11 @@ bool PavApp::CheckColour( void )
   return have_colour;
 }
 
-
+string PavApp::GetBandpassOrSpectrumPlot( Reference::To<Archive> archive )
+{
+    Reference::To<Passband> passband = archive->get<Passband>();
+    return passband ? BANDPASSPLOT_ID : SPECTRUMPLOT_ID;
+}
 
 
 
@@ -698,7 +715,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.64 2009/02/26 02:46:38 jonathan_khoo Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.65 2009/05/20 04:05:55 jonathan_khoo Exp $" << 
         endl << endl;
       return 0;
     case 'M':
@@ -764,12 +781,12 @@ int PavApp::run( int argc, char *argv[] )
     case 'Y':
     case 'R':
     case 'n':
+    case 'B':
+      jobs.push_back( "fscrunch" );
+      jobs.push_back( "tscrunch" );
+      jobs.push_back( "pscrunch" );
     case 'j':
       plot_ids.push_back( tostring<char>(c) );
-      break;
-    case 'B':
-      plot_ids.push_back( tostring<char>(c) );
-      clear_labels = false;
       break;
     case 'm':
       plot_ids.push_back( tostring<char>(c) );
@@ -976,6 +993,7 @@ int PavApp::run( int argc, char *argv[] )
     SetPlotOptions<FluxPlot>( string("crop=") + tostring<float>(clip_value) );
     SetPlotOptions<StokesCylindrical>( string("flux:crop=") + tostring<float>(clip_value) );
     SetPlotOptions<PhaseVsPlot>( string("crop=") + tostring<float>(clip_value) );
+    SetPlotOptions<BandpassPlot>( string("crop=") + tostring<float>(clip_value) );
   }
 
   if( label_degrees )
@@ -984,6 +1002,7 @@ int PavApp::run( int argc, char *argv[] )
     SetPlotOptions<PhasePlot>( "x:unit=deg" );
     SetPlotOptions<MultiPhase>( "x:unit=deg" );
   }
+
 
   // If we received a -N option, divide the pgplot window into n1,n2 panels.
 
