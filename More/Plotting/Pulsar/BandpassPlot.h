@@ -1,51 +1,60 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by David Smith
+ *   Copyright (C) 2009 by Jonathan Khoo
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-
-
-#ifndef BANDPASS_PLOT_H_
-#define BANDPASS_PLOT_H_
-
-
+#ifndef BANDPASSTABLE_PLOT_H
+#define BANDPASSTABLE_PLOT_H
 
 #include "Pulsar/FrequencyPlot.h"
 #include <vector>
 
-
-
 namespace Pulsar
 {
-
-  //! Plot of off-pulse bandpass
-  class BandpassPlot : public FrequencyPlot
-  {
-  public:
-    BandpassPlot();
-    ~BandpassPlot();
-
-  class Interface : public TextInterface::To<BandpassPlot>
+    class BandpassPlot : public FrequencyPlot
     {
-    public:
-      Interface ( BandpassPlot *s_instance = 0 );
+        public:
+
+            BandpassPlot();
+
+            ~BandpassPlot();
+
+            class Interface : public TextInterface::To<BandpassPlot>
+            {
+                public:
+                    Interface (BandpassPlot *s_instance = 0);
+            };
+
+            TextInterface::Parser *get_interface();
+
+            void prepare(const Pulsar::Archive *);
+
+            virtual void preprocess(Pulsar::Archive* arch) {}
+
+            void draw(const Pulsar::Archive*);
+
+            //! Set the crop fraction
+            void set_crop( float new_crop ) { crop = new_crop; }
+
+            //! Get the crop level
+            float get_crop() const { return crop; }
+
+        private:
+
+            std::vector<std::vector<float> > means;
+
+            std::pair<float, float> means_minmax;
+
+            std::vector<std::vector<float>::pointer> passbands;
+
+            uint passband_npol;
+
+            uint passband_nchan;
+
+            float crop;
     };
-
-    TextInterface::Parser *get_interface();
-
-    void prepare( const Archive * );
-    
-    virtual void preprocess( Archive *arch ) {}
-    
-    void draw( const Archive * );
-  private:
-    std::vector<double> means;
-    std::pair<double,double> means_minmax;
-  };
 }
 
-
 #endif
-

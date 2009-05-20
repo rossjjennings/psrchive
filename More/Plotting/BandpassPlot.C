@@ -1,96 +1,123 @@
-
-
-
+/***************************************************************************
+ *
+ *   Copyright (C) 2009 by Jonathan Khoo
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 #include "Pulsar/BandpassPlot.h"
-#include <Pulsar/Archive.h>
-#include <Pulsar/Profile.h>
-#include <Pulsar/Integration.h>
+#include "Pulsar/Passband.h"
+
 #include <vector>
-#include <cpgplot.h>
 #include <float.h>
-#include <utility>
+#include <cpgplot.h>
 
+using Pulsar::Archive;
+using std::cerr;
+using std::endl;
+using std::vector;
 
+#define CPG_BLACK 1
+#define CPG_RED 2
 
-using namespace Pulsar;
-using namespace std;
+Pulsar::BandpassPlot::BandpassPlot() : crop(0.0) {}
 
+Pulsar::BandpassPlot::~BandpassPlot() {}
 
-
-BandpassPlot::BandpassPlot()
-{}
-
-
-
-BandpassPlot::~BandpassPlot()
-{}
-
-
-
-void BandpassPlot::prepare( const Archive *data )
+void Pulsar::BandpassPlot::prepare(const Archive* archive)
 {
-  Reference::To<Archive> copy = data->clone();
+    Reference::To<Archive> copy = archive->clone();
+    Reference::To<Passband> passband = copy->get<Passband>();
 
-  int num_chan = copy->get_nchan();
+    if (!passband)
+        throw Error(InvalidState, "Pulsar::BandpassPlot::prepare",
+                "Could not get bandpass extension");
 
-  means.resize( num_chan );
+    means_minmax.first = FLT_MAX;
+    means_minmax.second = FLT_MIN;
 
-  float phase = 0.0;
-  Pulsar::Profile* profile = 0;
+    passband_npol = passband->get_npol();
+    passband_nchan = passband->get_nchan();
 
-  means_minmax.first = FLT_MAX;
-  means_minmax.second = FLT_MIN;
-  
-  for (unsigned i = 0; i < copy->get_nchan(); i++)
-  {
-    profile = copy->get_Integration(0)->get_Profile(0, i);
-    phase = profile->find_min_phase();
-    means[i] = profile->mean(phase);
+    passbands.resize(passband->get_npol());
 
-    if( means[i] < means_minmax.first )
-      means_minmax.first = means[i];
-    if( means[i] > means_minmax.second )
-      means_minmax.second = means[i];
-  }
-  
-  get_frame()->get_y_scale()->set_minmax( means_minmax.first, means_minmax.second );
-  get_frame()->get_y_axis()->set_label( "Amplitude (Arbitrary)" );
+    for (uint i = 0; i < passbands.size(); ++i) {
+        passbands[i] = const_cast<float*>(&(passband->get_passband(i)[0]));
+
+        const float* ptr = passbands[i];
+        ++ptr; // skip the first channel - it tends to be junk
+
+        for (uint j = 0; j < passband_nchan; ++j, ++ptr) {
+            if (*ptr < means_minmax.first)
+                means_minmax.first = *ptr;
+            if (*ptr > means_minmax.second)
+                means_minmax.second = *ptr;
+        }
+    }
+
+    // set a scale buffer of 5% of the max
+    means_minmax.second *= 1.05;
+
+    get_attributes()->get_label_above()->set_offset(2.0);
+    get_frame()->get_y_axis()->set_label("Amplitude (Arbitrary)");
+    get_frame()->get_y_scale()->set_minmax(means_minmax.first,
+            means_minmax.second);
+
+    if (crop != 0.0) {
+        float min, max;
+        get_frame()->get_y_scale()->get_minmax(min, max);
+
+        max *= crop;
+        if (min < 0 && max + min < 0)
+            min = -max;
+
+        std::pair<float,float> coords;
+        coords.first = min;
+        coords.second = max;
+
+        get_frame()->get_y_scale()->set_world(coords);
+    }
+
+    // remove the top x line of box
+    get_frame()->get_x_axis()->rem_opt('C');
 }
 
-
-
-void BandpassPlot::draw( const Archive *data )
+void Pulsar::BandpassPlot::draw(const Archive* archive)
 {
-  int num_chan = data->get_nchan();
+    const uint nchan = passband_nchan;
+    float xs[nchan];
 
-  float xs[num_chan];
-  float ys[num_chan];
+    const float freq = archive->get_centre_frequency();
+    const float bw = archive->get_bandwidth();
+    float nextX = freq - bw / 2;
+    const float stepX = bw / nchan;
 
-  float freq = data->get_centre_frequency();
-  float bw = data->get_bandwidth();
-  float next_x = freq - bw / 2;
-  float step_x = bw / num_chan;
-  
-  for( int i = 0; i < num_chan; i ++ )
-  {
-    xs[i] = next_x;
-    ys[i] = means[i];
-    next_x += step_x;
-  }
+    for (uint i = 0; i < nchan; ++i, nextX += stepX)
+        xs[i] = nextX;
 
-  int old_ci;
-  cpgqci( &old_ci );
-  cpgsci( 2 );
-  cpgline( num_chan, xs, ys );
-  cpgsci( old_ci );
+    for (uint ipol = 0; ipol < passband_npol; ++ipol) {
+        const int cpgColour = ipol == 0 ? CPG_BLACK : CPG_RED;
+        cpgsci(cpgColour);
+        cpgline(nchan, xs, passbands[ipol]);
+    }
+
+    // draw top x-axis label (0 - nchan)
+    float x_min, x_max;
+    get_frame()->get_x_scale(true)->get_range_external(x_min, x_max);
+
+    float y_min, y_max;
+    get_frame()->get_y_scale(true)->get_range_external(y_min, y_max);
+
+    cpgsci(CPG_BLACK);
+    cpgswin(0, nchan, y_min, y_max);
+    cpgbox("MSTC", 0, 0, "", 0, 0);
+
+    cpgmtxt("RV", 1, 0.95, 0.0, "AA");
+    cpgsci(CPG_RED);
+    cpgmtxt("RV", 1, 0.9, 0.0, "BB");
 }
 
-
-
-TextInterface::Parser *BandpassPlot::get_interface()
+TextInterface::Parser *Pulsar::BandpassPlot::get_interface() 
 {
-  return new Interface( this );
+    return new Interface(this);
 }
-
-
