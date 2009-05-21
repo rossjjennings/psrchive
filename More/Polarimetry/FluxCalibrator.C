@@ -11,6 +11,7 @@
 #include "Pulsar/StandardCandles.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/CalibratorTypes.h"
+#include "Pulsar/BasisCorrection.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -20,6 +21,7 @@
 #include "Error.h"
 #include "interpolate.h"
 #include "templates.h"
+#include "Pauli.h"
 
 #include <assert.h>
 
@@ -145,29 +147,54 @@ Pulsar::CalibratorStokes* Pulsar::FluxCalibrator::get_CalibratorStokes ()
     if (cross<0.0) { cross = -cross; }
     cross = 2.0 * sqrt(cross) / data[ichan].get_S_cal(); 
 
-    // Take care of hand convention here
-    if (receiver && receiver->get_hand()==Signal::Left)
-      diff = -diff;
+    // This method may be more general.. applies the inverse basis
+    // correction for the receiver, to produce the cal stokes parameters
+    // "in the sky".  Also tries to account for the reference source 
+    // phase setting.  This may still have trouble with circular feeds
+    // as discussed below.
+    if (receiver) {
 
-    // This uses the Archive basis as a proxy for the cal signal 
-    // properties.  It could fail if for example the signal was
-    // converted from lin to circ using a hybrid AFTER the cal signal
-    // was coupled in.  In that case, the Archive data would appear
-    // circular, but the cal signal is really linear (nonzero Q not V).
-    // TODO: Use the Receiver reference source angle setting?
-    if (get_Archive()->get_basis() == Signal::Linear)
-    {
-      // Linear feeds, Q = diff, U = cross, V = 0
+      Jones<double> basis_correction (1.0);
+      BasisCorrection corr;
+      basis_correction = corr(receiver);
+
+      double phi = receiver->get_reference_source_phase().getRadians();
+
       stokes[1] = diff;
-      stokes[2] = cross;
-      stokes[3] = Estimate<double> (0.0, cross.var);
+      stokes[2] = Estimate<double> (cross.val * cos(phi), cross.var);
+      stokes[3] = Estimate<double> (cross.val * sin(phi), cross.var);
+      stokes = transform(stokes, inv(basis_correction));
+
     }
-    else if (get_Archive()->get_basis() == Signal::Circular)
-    {
-      // Circular feeds, Q = cross, U = 0, V = diff
-      stokes[1] = cross;
-      stokes[2] = Estimate<double> (0.0, cross.var);
-      stokes[3] = diff;
+    
+    // If no receiver extension, fall back on the original code..
+    else {
+
+      // Take care of hand convention here
+      if (receiver && receiver->get_hand()==Signal::Left)
+        diff = -diff;
+
+      // This uses the Archive basis as a proxy for the cal signal 
+      // properties.  It could fail if for example the signal was
+      // converted from lin to circ using a hybrid AFTER the cal signal
+      // was coupled in.  In that case, the Archive data would appear
+      // circular, but the cal signal is really linear (nonzero Q not V).
+      // TODO: Use the Receiver reference source angle setting?
+      if (get_Archive()->get_basis() == Signal::Linear)
+      {
+        // Linear feeds, Q = diff, U = cross, V = 0
+        stokes[1] = diff;
+        stokes[2] = cross;
+        stokes[3] = Estimate<double> (0.0, cross.var);
+      }
+      else if (get_Archive()->get_basis() == Signal::Circular)
+      {
+        // Circular feeds, Q = cross, U = 0, V = diff
+        stokes[1] = cross;
+        stokes[2] = Estimate<double> (0.0, cross.var);
+        stokes[3] = diff;
+      }
+
     }
 
     calstokes->set_stokes(ichan, stokes);
