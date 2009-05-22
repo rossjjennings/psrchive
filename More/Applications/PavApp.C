@@ -546,11 +546,11 @@ void PavApp::CreatePlotsList( vector< string > filenames,   vector< string > plo
       new_fplot.archive = Archive::load( filenames[i] );
       for( unsigned p = 0; p < plot_ids.size(); p ++ )
       {
-          string plot_id = plot_ids[p];
-          if (plot_ids[p] == "B")
-              plot_id = GetBandpassOrSpectrumPlot( new_fplot.archive );
+        string plot_id = plot_ids[p];
+        if (plot_ids[p] == "B")
+          plot_id = GetBandpassOrSpectrumPlot( new_fplot.archive );
 
-          new_fplot.plots.push_back( factory.construct( plot_id ) );
+        new_fplot.plots.push_back( factory.construct( plot_id ) );
       }
       plots.push_back( new_fplot );
     }
@@ -614,7 +614,14 @@ bool PavApp::CheckColour( void )
 string PavApp::GetBandpassOrSpectrumPlot( Reference::To<Archive> archive )
 {
     Reference::To<Passband> passband = archive->get<Passband>();
-    return passband ? BANDPASSPLOT_ID : SPECTRUMPLOT_ID;
+    if (passband) {
+        archive->pscrunch();
+        archive->fscrunch();
+        archive->tscrunch();
+        return BANDPASSPLOT_ID;
+    } else {
+        return SPECTRUMPLOT_ID;
+    }
 }
 
 
@@ -715,7 +722,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.65 2009/05/20 04:05:55 jonathan_khoo Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.66 2009/05/22 00:16:51 jonathan_khoo Exp $" << 
         endl << endl;
       return 0;
     case 'M':
@@ -782,9 +789,6 @@ int PavApp::run( int argc, char *argv[] )
     case 'R':
     case 'n':
     case 'B':
-      jobs.push_back( "fscrunch" );
-      jobs.push_back( "tscrunch" );
-      jobs.push_back( "pscrunch" );
     case 'j':
       plot_ids.push_back( tostring<char>(c) );
       break;
