@@ -299,11 +299,10 @@ void Pulsar::PulsarCalibrator::match (const Archive* data)
     receiver = data->get<Receiver>();
 
   if (one_channel)
-  {
     PolnCalibrator::set_calibrator (data);
-    if (!mtm.size())
-      build (data->get_nchan());
-  }
+
+  if (!mtm.size())
+    build (data->get_nchan());
 
   if (tim_file)
     archive = data;
