@@ -1,9 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#include "Pulsar/Application.h"
+#include "Pulsar/StandardOptions.h"
+#include "Pulsar/PlotOptions.h"
 
 #include "Pulsar/PlotFactory.h"
 #include "Pulsar/PlotLoop.h"
@@ -15,7 +19,6 @@
 #include "TextInterface.h"
 #include "strutil.h"
 #include "dirutil.h"
-#include "pgutil.h"
 
 #include <cpgplot.h>
 
@@ -24,55 +27,115 @@
 using namespace Pulsar;
 using namespace std;
 
-// Available plots
-static PlotFactory factory;
-
-void usage ()
+//! Pulsar Archive Zapping application
+class psrplot: public Pulsar::Application
 {
-  cerr << 
-    "psrplot - pulsar plotting program \n"
-    "\n"
-    "psrplot [options] filename[s]\n"
-    "options:\n"
-    "\n"
+public:
+
+  //! Default constructor
+  psrplot ();
+
+  //! Return usage information 
+  std::string get_usage ();
+
+  //! Return getopt options
+  std::string get_options ();
+
+  //! Parse a command line option
+  bool parse (char code, const std::string& arg);
+
+  //! Verify setup
+  void setup ();
+
+  //! Process the given archive
+  void process (Pulsar::Archive*);
+
+  //! Close the plot
+  void finalize ();
+
+  // -P help
+  void help_plot_types ();
+
+  // -C help
+  void help_plot_options (const string& name);
+
+  // -F help
+  void help_frame_options (const string& name);
+
+protected:
+
+  // Available plots
+  PlotFactory factory;
+
+  // Plot classes to be used
+  vector< Reference::To<Plot> > plots;
+
+  // Options to be set
+  vector<string> options;
+
+  // Indeces over which to loop
+  PlotLoop loop;
+
+  // Allow plot classes to preprocess data before plotting
+  bool preprocess;
+
+  // Overlay plots from different files on top of eachother
+  bool overlay_files;
+};
+
+int main (int argc, char** argv)
+{
+  psrplot program;
+  return program.main (argc, argv);
+}
+
+psrplot::psrplot () : Pulsar::Application ("psrplot",
+					   "pulsar plotting program")
+{
+  has_manual = true;
+  version = "$Id: psrplot.C,v 1.27 2009/05/22 04:40:32 straten Exp $";
+
+  // print angles in degrees
+  Angle::default_type = Angle::Degrees;
+
+  // Allow plot classes to preprocess data before plotting
+  preprocess = true;
+
+  // Do not overlay plots from different files on top of eachother
+  overlay_files = false;
+
+  add( new Pulsar::PlotOptions );
+
+  Pulsar::StandardOptions* preprocessor = new Pulsar::StandardOptions;
+  preprocessor->get_interpreter()->allow_infinite_frequency = true;
+
+  add( preprocessor );
+}
+
+using namespace std;
+
+std::string psrplot::get_options ()
+{
+  return "A:c:C:Fl:Op:Ps:x";
+}
+
+std::string psrplot::get_usage ()
+{
+  return
     " -P               Help: list available plot types \n"
     " -C plot          Help: list options specific to 'plot' \n"
     " -A plot          Help: list common options for 'plot'\n"
-    "\n"
-    " -D device        plot device \n"
-    " -g WxH           plot dimensions in pixels, width times height \n"
-    " -N x,y           plot panels \n"
-    " -O               overlay plots \n"
-    " -r ratio         aspect ratio (height/width) \n"
-    " -w width         plot surface width (in centimetres) \n"
     "\n"
     " -p plot          plot type \n"
     " -c cfg[,cfg2...] plot options \n"
     " -s style         multiple plot options in 'style' file \n"
     "\n"
-    " -j job[,job2...] preprocessing jobs \n"
-    " -J jobs          multiple preprocessing jobs in 'jobs' file \n"
     " -x               disable default preprocessing \n"
+    " -O               overlay plots \n"
+    " -F               overlay plots from multiple files \n"
     "\n"
-    " -l name=<range>  loop over the range of the named parameter \n"
-    "\n"
-    " -h               This help page \n"
-    " -M metafile      Specify list of archive filenames in metafile \n"
-    " -q               Quiet mode \n"
-    " -v               Verbose mode \n"
-    " -V               Very verbose mode \n"
-    "\n"
-       << endl;
+    " -l name=<range>  loop over the range of the named parameter \n";
 }
-
-// -P help
-void help_plot_types ();
-
-// -C help
-void help_plot_options (const char* name);
-
-// -F help
-void help_frame_options (const char* name);
 
 // load the vector of options into the specified plot
 void set_options (Pulsar::Plot* plot, const vector<string>& options);
@@ -83,109 +146,32 @@ void specific_options (string optarg, vector< Reference::To<Plot> >& plots);
 // load the style file into one of the plots
 void specific_style (string optarg, vector< Reference::To<Plot> >& plots);
 
-// verbosity
-static bool verbose = false;
-
-int main (int argc, char** argv) try
+//! Parse a command line option
+bool psrplot::parse (char code, const std::string& arg)
 {
-  // print angles in degrees
-  Angle::default_type = Angle::Degrees;
-
-  // name of file containing list of Archive filenames
-  char* metafile = NULL;
-
-  // PGPLOT device name
-  string plot_device = "?";
-
-  // Plot classes to be used
-  vector< Reference::To<Plot> > plots;
-
-  // Options to be set
-  vector<string> options;
-
-  // Preprocessing jobs
-  vector<string> jobs;
-
-  // Indeces over which to loop
-  PlotLoop loop;
-
-  // Allow plot classes to preprocess data before plotting
-  bool preprocess = true;
-
-  // width of plot surface in cm
-  float surface_width = 0.0;
-
-  // aspect ratio (height/width)
-  float aspect_ratio = 0.0;
-
-  // plot dimensions in pixels
-  unsigned width_pixels = 0, height_pixels = 0;
-
-  int n1 = 1;
-  int n2 = 1;
-
-  static char* args = "A:c:C:D:g:hj:J:K:l:M:N:Op:Pqr:s:vVw:x";
-
-  char c = 0;
-
-  while ((c = getopt (argc, argv, args)) != -1) 
-
-    switch (c)  {
-
+  switch (code)
+  {
     case 'A': 
-      help_frame_options (optarg);
-      return 0;
+      help_frame_options (arg.c_str());
+      exit (0);
 
     case 'c':
-      if (optarg[0] == ':')
-	specific_options (optarg, plots);
+      if (arg[0] == ':')
+	specific_options (arg, plots);
       else
-	separate (optarg, options, ",");
+	separate (arg, options, ",");
       break;
       
     case 'C': 
-      help_plot_options (optarg);
-      return 0;
+      help_plot_options (arg);
+      exit (0);
 
-    case 'D':
-    case 'K': // for backward compatibility with old pav ...
-      plot_device = optarg;
-      break;
-
-    case 'g':
-      if (sscanf (optarg, "%u%c%u", &width_pixels, &c, &height_pixels) != 3)
-      {
-	cerr << "psrplot: could not parse dimensions from " << optarg << endl;
-	return -1;
-      }
-      break;
-
-    case 'h':
-      usage();
-      return 0;
-
-    case 'j':
-      separate (optarg, jobs, ",");
-      break;
-      
-    case 'J':
-      loadlines (optarg, jobs);
+    case 'F':
+      overlay_files = true;
       break;
 
     case 'l':
-      loop.add_index( new TextIndex(optarg) );
-      break;
-
-    case 'M':
-      metafile = optarg;
-      break;
-
-    case 'N':
-      if (sscanf( optarg, "%d%c%d", &n1, &c, &n2 ) != 3)
-      {
-	cerr << "psrplot: error parsing -N " << optarg << endl;
-	return -1;
-      }
+      loop.add_index( new TextIndex(arg) );
       break;
 
     case 'O':
@@ -193,60 +179,37 @@ int main (int argc, char** argv) try
       break;
 
     case 'p':
-      plots.push_back( factory.construct(optarg) );
+      plots.push_back( factory.construct(arg) );
       break;
 
     case 'P':
       help_plot_types ();
-      return 0;
-
-    case 'q':
-      Archive::set_verbosity (0);
-      break;
-
-    case 'r':
-      if (sscanf( optarg, "%f", &aspect_ratio ) != 1) {
-	cerr << "psrplot: error parsing -r " << optarg << endl;
-	return -1;
-      }
-      break;
+      exit (0);
 
     case 's':
-      if (optarg[0] == ':')
-	specific_style (optarg, plots);
+      if (arg[0] == ':')
+	specific_style (arg, plots);
       else
-	loadlines (optarg, options);
-      break;
-
-    case 'v':
-      verbose = true;
-      break;
-
-    case 'V':
-      Archive::set_verbosity (3);
-      Plot::verbose = true;
-      verbose = true;
-      break;
-
-    case 'w':
-      if (sscanf( optarg, "%f", &surface_width ) != 1) {
-	cerr << "psrplot: error parsing -w " << optarg << endl;
-	return -1;
-      }
+	loadlines (arg, options);
       break;
 
     case 'x':
       preprocess = false;
       break;
 
-   } 
+  default:
+    return false;
+  }
+
+  return true;
+}
 
 
+void psrplot::setup ()
+{
   if (plots.empty())
-  {
-    cout << "psrplot: please choose at least one plot style" << endl;
-    return -1;
-  } 
+    throw Error (InvalidState, "psrplot",
+		 "please choose at least one plot style");
 
   if (options.size())
   {
@@ -255,107 +218,41 @@ int main (int argc, char** argv) try
     for (unsigned iplot=0; iplot < plots.size(); iplot++)
       set_options (plots[iplot], options);
   }
-
-  if (verbose)
-    cerr << "psrplot: parsing filenames" << endl;
-
-  vector <string> filenames;
-
-  if (metafile)
-    stringfload (&filenames, metafile);
-  else
-    for (int ai=optind; ai<argc; ai++)
-      dirglob (&filenames, argv[ai]);
-
-  if (filenames.empty())
-  {
-    cout << "psrplot: please specify filename[s]" << endl;
-    return -1;
-  } 
-
-  // open the plot device
-  if (cpgopen(plot_device.c_str()) < 0)
-  {
-    cout << "psrplot: Could not open plot device" << endl;
-    return -1;
-  }
-
-  // set the size of the plot
-  if (surface_width || aspect_ratio)
-    pgplot::set_paper_size (surface_width, aspect_ratio);
-
-  if (width_pixels && height_pixels)
-    pgplot::set_dimensions (width_pixels, height_pixels);
-
-  // prompt before plotting the next page
-  cpgask(1);
-
-  if (n1 > 1 || n2 > 1)
-    cpgsubp(n1,n2);
-
-  Pulsar::Interpreter* preprocessor = standard_shell();
-
-  preprocessor->allow_infinite_frequency = true;
-
-  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try
-  {
-    Reference::To<Archive> archive;
-    archive = Archive::load( filenames[ifile] );
-
-    if (jobs.size())
-    {
-      if (verbose)
-	cerr << "psrplot: preprocessing " << filenames[ifile] << endl;
-      preprocessor->set(archive);
-      preprocessor->script(jobs);
-    }
-
-    if (verbose)
-      cerr << "psrplot: plotting " << filenames[ifile] << endl;
-
-    if( loop.get_overlay() )
-      cpgpage();
-
-    Reference::To<Archive> toplot = archive;
-
-    for (unsigned iplot=0; iplot < plots.size(); iplot++)
-    {
-      if (verbose)
-	cerr << "psrplot: iplot=" << iplot << endl;
-
-      if (plots.size() > 1)
-	toplot = archive->clone();
-
-      if (preprocess)
-	plots[iplot]->preprocess (toplot);
-
-      loop.set_Archive (toplot);
-      loop.set_Plot (plots[iplot]);
-      loop.plot();
-    }
-
-  }
-  catch (Error& error)
-  {
-    cerr << "Error while handling '" << filenames[ifile] << "'" << endl;
-    if (verbose)
-      cerr << error << endl;
-    else
-      cerr << error.get_message() << endl;
-  }
-
-  cpgend();
-
-  return 0;
-
 }
-catch (Error& error)
+
+void psrplot::process (Pulsar::Archive* archive)
 {
-  cerr << "psrplot: " << error << endl;
-  return -1;
+  if (verbose)
+    cerr << "psrplot: plotting " << archive->get_filename() << endl;
+
+  if( !overlay_files && loop.get_overlay() )
+    cpgpage();
+
+  Reference::To<Archive> toplot = archive;
+
+  for (unsigned iplot=0; iplot < plots.size(); iplot++)
+  {
+    if (verbose)
+      cerr << "psrplot: iplot=" << iplot << endl;
+
+    if (plots.size() > 1)
+      toplot = archive->clone();
+    
+    if (preprocess)
+      plots[iplot]->preprocess (toplot);
+    
+    loop.set_Archive (toplot);
+    loop.set_Plot (plots[iplot]);
+    loop.plot();
+  }
+}
+ 
+void psrplot::finalize ()
+{
+  cpgend();
 }
 
-void help_plot_types ()
+void psrplot::help_plot_types ()
 {
   cout << "Available Plots:\n" << factory.help() << endl;
 }
@@ -365,15 +262,15 @@ void help_options (TextInterface::Parser* tui)
   cout << tui->help(true) << endl;
 }
 
-void help_plot_options (const char* name)
+void psrplot::help_plot_options (const string& name)
 {
   Plot* plot = factory.construct(name);
   help_options( plot->get_interface() );
 }
 
-void help_frame_options (const char* name)
+void psrplot::help_frame_options (const string& name)
 {
-  Plot* plot = factory.construct(name);
+  Plot* plot = factory.construct (name);
   help_options( plot->get_frame_interface() );
 }
 
@@ -394,10 +291,10 @@ void set_options (Pulsar::Plot* plot, const vector<string>& options)
   }
 }
 
-// parses index from optarg and removes it from the string
-unsigned get_index (string& optarg, vector< Reference::To<Plot> >& plots)
+// parses index from arg and removes it from the string
+unsigned get_index (string& arg, vector< Reference::To<Plot> >& plots)
 {
-  unsigned index = fromstring<unsigned> ( stringtok (optarg, ":") );
+  unsigned index = fromstring<unsigned> ( stringtok (arg, ":") );
   if (index >= plots.size())
   {
     cerr << "psrplot: invalid plot index = " << index
@@ -408,28 +305,28 @@ unsigned get_index (string& optarg, vector< Reference::To<Plot> >& plots)
 }
 
 // load the string of options into one of the plots
-void specific_options (string optarg, vector< Reference::To<Plot> >& plots)
+void specific_options (string arg, vector< Reference::To<Plot> >& plots)
 {
   // get the plot index
-  unsigned index = get_index (optarg, plots);
+  unsigned index = get_index (arg, plots);
 
   // separate the options
   vector<string> options;
-  separate (optarg, options, ",");
+  separate (arg, options, ",");
 
   // set them for the specified plot
   set_options (plots[index], options);
 }
 
 // load the style file into one of the plots
-void specific_style (string optarg, vector< Reference::To<Plot> >& plots)
+void specific_style (string arg, vector< Reference::To<Plot> >& plots)
 {
   // get the plot index
-  unsigned index = get_index (optarg, plots);
+  unsigned index = get_index (arg, plots);
 
   // load the options
   vector<string> options;
-  loadlines (optarg, options);
+  loadlines (arg, options);
 
   // set them for the specified plot
   set_options (plots[index], options);
