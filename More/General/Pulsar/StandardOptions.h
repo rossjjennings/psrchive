@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardOptions.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/01/17 22:05:05 $
+   $Revision: 1.3 $
+   $Date: 2009/05/22 20:08:42 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StandardOptions_h
@@ -39,6 +39,9 @@ namespace Pulsar {
 
     //! Preprocessing tasks implemented by partially derived classes
     virtual void process (Archive*);
+
+    //! Provide access to the interpreter
+    Interpreter* get_interpreter ();
 
   private:
 
