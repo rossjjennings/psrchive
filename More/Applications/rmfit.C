@@ -52,6 +52,9 @@ bool verbose = false;
 
 void cpg_next ();
 
+// make an estimate of the rotation measure using matrix template matching
+void mtm_estimate (Pulsar::Archive* std, Pulsar::Archive* obs);
+
 void
 do_singlebin(Reference::To<Pulsar::Archive> data,
 	  float x1,float x2,bool display,
@@ -207,7 +210,10 @@ int main (int argc, char** argv)
   string exclude_range;
   string include_range;
 
-  const char* args = "b:B:DeF:i:j:hJK:Lm:p:PrR:S:T:tu:U:vVw:W:Yz:";
+  // estimate the RM using MTM
+  Reference::To<Pulsar::Archive> mtm_std;
+
+  const char* args = "b:B:DeF:i:j:hJK:Lm:M:p:PrR:S:T:tu:U:vVw:W:Yz:";
 
   int gotc = 0;
 
@@ -322,6 +328,10 @@ int main (int argc, char** argv)
       
       break;
 
+    case 'M':
+      mtm_std = get_data(optarg);
+      break;
+
     case 'r':
       refine = true;
       break;
@@ -427,124 +437,132 @@ int main (int argc, char** argv)
 
   Reference::To<Pulsar::Archive> data;
 
-
   for (unsigned i = 0; i < archives.size(); i++) try
+  {
+    data = get_data(archives[i]);
+
+    if (rm_set)
+    { 
+      data->set_rotation_measure (rotation_measure);
+      data -> defaraday();
+    }
+
+    if (mtm_std)
     {
-      data = get_data(archives[i]);
+      mtm_estimate (mtm_std, data);
+      continue;
+    }
 
-      if (rm_set)
-      { 
-	 data->set_rotation_measure (rotation_measure);
-	 data -> defaraday();
+    if (iter_fscr)
+    {
+      cerr <<endl<< "Entering RM-fitting with channel systematics checks:" <<endl;
+	    
+      int the_channo = data -> get_nchan();
+      float the_freq = data->get_centre_frequency();
+      float the_date = atof(data->start_time().printdays(0).c_str());
+	    
+      cerr << "MJD = " << the_date <<endl;
+	    
+      if (the_freq<2000.0 && the_freq>1000.0)
+      {
+	cerr << "*** 20cm data ***" <<endl; 
+	if (the_date > 53900.0)
+	  the_channo = 800;
+	else
+	  the_channo = 768;//OLD DATA
+      }
+      else if (the_freq<4000.0 && the_freq>2000.0)
+      {
+	cerr << "*** 10cm data ***" <<endl; 
+	if (the_date > 53900.0)
+	  the_channo = 829; 
+	else
+	  the_channo = 888;//OLD DATA
+      }
+      else if (the_freq<1000.0 && the_freq>500.0)
+      {
+	cerr << "*** 50cm data ***" <<endl; 
+	the_channo = 308;
       }
 
-      if(iter_fscr){
-          cerr <<endl<< "Entering RM-fitting with channel systematics checks:" <<endl;
+      nfscr = 1+int(ceil( (  log10(float(the_channo)/float(fscr_init)) - log10(float(nchannels))  ) / log10(2.) )); //10cm
+      cerr << "       The data channels will be halved " << nfscr-1 <<" times."<<endl<<endl;
+    }
+
+
+    best_fbscr_probmax = -1e10;
+
+    best_fbscr_RM = -100000.;
+    best_fbscr_RM_err = 0.;
+
+    outofrange_err=false;
+    zero_err = false;
+    anomalous_err = false;
+
+
+    for (unsigned ifscr=0; ifscr<nfscr; ifscr++)
+    {
+      if(fscrunchme){
+	if(iter_fscr){
+	  if(ifscr>0){
 	    
-	    int the_channo = data -> get_nchan();
-	    float the_freq = data->get_centre_frequency();
-	    float the_date = atof(data->start_time().printdays(0).c_str());
+	    cerr <<endl<<endl<< "***************************************" <<endl;
+	    cerr << "Scrunching frequency channels by factor" << fscr <<endl;
+	    cerr << "***************************************" <<endl<<endl;
 	    
-	    cerr << "MJD = " << the_date <<endl;
+	    data -> fscrunch(fscr);
 	    
-	    if(the_freq<2000.0 && the_freq>1000.0)
-	    {
-	        cerr << "*** 20cm data ***" <<endl; 
-		if(the_date > 53900.0) the_channo = 800;
-		else
-		   the_channo = 768;//OLD DATA
-	    }
-            else
-	    if(the_freq<4000.0 && the_freq>2000.0)
-	    {
-	        cerr << "*** 10cm data ***" <<endl; 
-	        if(the_date > 53900.0) the_channo = 829; 
-		else
-		   the_channo = 888;//OLD DATA
-            }
-	    else
-	    if(the_freq<1000.0 && the_freq>500.0)
-	    {
-	        cerr << "*** 50cm data ***" <<endl; 
-	        the_channo = 308;
-	    }
-
-            nfscr = 1+int(ceil( (  log10(float(the_channo)/float(fscr_init)) - log10(float(nchannels))  ) / log10(2.) )); //10cm
-	  cerr << "       The data channels will be halved " << nfscr-1 <<" times."<<endl<<endl;
-      }
-
-
-      best_fbscr_probmax = -1e10;
-
-      best_fbscr_RM = -100000.;
-      best_fbscr_RM_err = 0.;
-
-      outofrange_err=false;
-      zero_err = false;
-      anomalous_err = false;
-
-
-      for(unsigned ifscr=0; ifscr<nfscr; ifscr++){
-	
-	if(fscrunchme){
-          if(iter_fscr){
-	    if(ifscr>0){
-	    
-	       cerr <<endl<<endl<< "***************************************" <<endl;
-	       cerr << "Scrunching frequency channels by factor" << fscr <<endl;
-	       cerr << "***************************************" <<endl<<endl;
-
-               data -> fscrunch(fscr);
-	    
-	    }
-	    else
-	       data -> fscrunch(fscr_init);
 	  }
 	  else
-	    data -> fscrunch(fscr);
+	    data -> fscrunch(fscr_init);
 	}
+	else
+	  data -> fscrunch(fscr);
+      }
 
-        cerr <<endl<<endl<< "Number of frequency channels in data = " << data -> get_nchan() <<endl<<endl;
+      cerr << endl << endl
+	   << "Number of frequency channels = " << data -> get_nchan() 
+	   << endl << endl;
 
-        for(unsigned ibscr=0; ibscr<nbscr+1; ibscr++){
-
-	  if (bscrunchme){   
-	    if(iter_bscr){
-	      if(ibscr>0){
+      for(unsigned ibscr=0; ibscr<nbscr+1; ibscr++)
+      {
+	if (bscrunchme){   
+	  if(iter_bscr){
+	    if(ibscr>0){
 	      	
-		cerr <<endl<<endl<< "***************************************" <<endl;
-	        cerr << "Scrunching phase bins by factor" << bscr <<endl;
-	        cerr << "***************************************" <<endl<<endl;
-
-	        data -> bscrunch(bscr);      
+	      cerr <<endl<<endl<< "***************************************" <<endl;
+	      cerr << "Scrunching phase bins by factor" << bscr <<endl;
+	      cerr << "***************************************" <<endl<<endl;
 	      
-	      }
-	    }
-	    else{
-	      data -> bscrunch(bscr);
-	      cerr <<endl<<endl<<endl<<"Scrunched by factor "<< bscr <<endl<<endl;
+	      data -> bscrunch(bscr);      
+	      
 	    }
 	  }
-	  
-
-	  for( unsigned izap=0; izap<zap_chans.size(); izap++)
-	    for( unsigned iint=0; iint<data->get_nsubint(); iint++)
-	      data->get_Integration(iint)->set_weight(zap_chans[izap],0.0);
-
-	  if (maxmthd && !(singlebin || window)) {
-	  
-	    double best_rm = do_maxmthd (minrm, maxrm, rmsteps, data);
-	    
-
-	    data->set_rotation_measure (best_rm);
-
-	    if( verbose )
-	      fprintf(stderr,"Completed do_maxmthd and got out best_rm=%f\n",
-		      best_rm);
-
-	    if( !refine )
-	      continue;
+	  else{
+	    data -> bscrunch(bscr);
+	    cerr <<endl<<endl<<endl<<"Scrunched by factor "<< bscr <<endl<<endl;
 	  }
+	}
+	
+	
+	for( unsigned izap=0; izap<zap_chans.size(); izap++)
+	  for( unsigned iint=0; iint<data->get_nsubint(); iint++)
+	    data->get_Integration(iint)->set_weight(zap_chans[izap],0.0);
+	
+	if (maxmthd && !(singlebin || window)) {
+	  
+	  double best_rm = do_maxmthd (minrm, maxrm, rmsteps, data);
+	  
+
+	  data->set_rotation_measure (best_rm);
+
+	  if( verbose )
+	    fprintf(stderr,"Completed do_maxmthd and got out best_rm=%f\n",
+		    best_rm);
+	  
+	  if( !refine )
+	    continue;
+	}
 
 	  if( verbose )
 	    fprintf(stderr,"Continuing with specialist methods\n");
@@ -647,6 +665,8 @@ int main (int argc, char** argv)
       continue;
     }
 
+  if (mtm_std)
+    return 0;
 
   ofstream test_bestRMs;
   test_bestRMs.open("all_bestRMs.out",ios::app);
@@ -1365,6 +1385,64 @@ void do_refine (Reference::To<Pulsar::Archive> data, bool log_results)
     rmresult (data, delta_rm.get_rotation_measure(), delta_rm.get_used_bins());
 }
 
+#include "Pulsar/PolnProfileFit.h"
+#include "Pulsar/ReceptionModel.h"
+#include "Pulsar/ReceptionModelSolver.h"
+#include "Pulsar/Faraday.h"
+#include "MEAL/ProductRule.h"
+#include "MEAL/Gain.h"
+
+double get_frequency (const Pulsar::Archive* data)
+{
+  if (data->get_faraday_corrected())
+    return data->get_centre_frequency();
+  else
+    return data->get_Integration(0)->get_centre_frequency(0);
+}
+
+void mtm_estimate (Pulsar::Archive* std, Pulsar::Archive* obs) try
+{
+  Pulsar::PolnProfileFit mtm;
+
+  MEAL::ProductRule<MEAL::Complex2> xform;
+  MEAL::Gain gain;
+  Calibration::Faraday faraday;
+
+  xform.add_model (&gain);
+  xform.add_model (&faraday);
+
+  mtm.set_transformation (&xform);
+
+  faraday.set_reference_frequency( get_frequency(std) );
+  faraday.set_frequency( get_frequency(obs) );
+  faraday.set_rotation_measure( std->get_rotation_measure() );
+
+  cerr << "initial RM=" << std->get_rotation_measure() << endl;
+
+  // mtm.set_choose_maximum_harmonic (true);
+  mtm.set_maximum_harmonic (45);
+  mtm.set_standard( std->get_Integration(0)->new_PolnProfile(0) );
+
+  cerr << "rmfit: last MTM harmonic = " << mtm.get_nharmonic() << endl;
+
+  mtm.add_observation( obs->get_Integration(0)->new_PolnProfile(0) );
+
+  mtm.solve ();
+
+  float chisq = mtm.get_equation()->get_solver()->get_chisq();
+  float nfree = mtm.get_equation()->get_solver()->get_nfree();
+
+  cerr << "reduced chisq=" << chisq <<"/"<< nfree <<"="<< chisq/nfree << endl;
+  cerr << "gain=" << gain.get_gain() << endl;
+  cerr << "phase=" << mtm.get_phase() << endl;
+
+  cerr << "final RM=" << faraday.get_rotation_measure() << endl;
+
+}
+catch (Error& error)
+{
+  cerr << "rmfit: Error MTM " << obs->get_filename() << error << endl;
+}
 
 
 void
