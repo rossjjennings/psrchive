@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/TemplateUncertainty.h,v $
-   $Revision: 1.13 $
-   $Date: 2008/06/03 04:57:10 $
+   $Revision: 1.14 $
+   $Date: 2009/05/22 23:53:11 $
    $Author: straten $ */
 
 #ifndef __Calibration_TemplateUncertainty_H
@@ -44,7 +44,8 @@ namespace Calibration {
     void set_template_variance (const Stokes< std::complex<double> >& var);
 
     //! Set the transformation from template to observation
-    void set_transformation (const MEAL::Complex2* transformation);
+    void set_transformation (MEAL::Complex2* transformation);
+    const MEAL::Complex2* get_transformation () const;
 
     //! Given a coherency matrix, return the weighted norm
     virtual double get_weighted_norm (const Jones<double>&) const;
@@ -76,6 +77,7 @@ namespace Calibration {
     //! Compute inv_var attribute
     virtual void build ();
 
+    void check_build () const;
   };
 
 }
