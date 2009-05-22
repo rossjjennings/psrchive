@@ -49,9 +49,9 @@ namespace Pulsar
 
             std::vector<std::vector<float>::pointer> passbands;
 
-            uint passband_npol;
+            unsigned passband_npol;
 
-            uint passband_nchan;
+            unsigned passband_nchan;
 
             float crop;
     };

@@ -41,13 +41,13 @@ void Pulsar::BandpassPlot::prepare(const Archive* archive)
 
     passbands.resize(passband->get_npol());
 
-    for (uint i = 0; i < passbands.size(); ++i) {
+    for (unsigned i = 0; i < passbands.size(); ++i) {
         passbands[i] = const_cast<float*>(&(passband->get_passband(i)[0]));
 
         const float* ptr = passbands[i];
         ++ptr; // skip the first channel - it tends to be junk
 
-        for (uint j = 0; j < passband_nchan; ++j, ++ptr) {
+        for (unsigned j = 0; j < passband_nchan; ++j, ++ptr) {
             if (*ptr < means_minmax.first)
                 means_minmax.first = *ptr;
             if (*ptr > means_minmax.second)
@@ -84,7 +84,7 @@ void Pulsar::BandpassPlot::prepare(const Archive* archive)
 
 void Pulsar::BandpassPlot::draw(const Archive* archive)
 {
-    const uint nchan = passband_nchan;
+    const unsigned nchan = passband_nchan;
     float xs[nchan];
 
     const float freq = archive->get_centre_frequency();
@@ -92,10 +92,10 @@ void Pulsar::BandpassPlot::draw(const Archive* archive)
     float nextX = freq - bw / 2;
     const float stepX = bw / nchan;
 
-    for (uint i = 0; i < nchan; ++i, nextX += stepX)
+    for (unsigned i = 0; i < nchan; ++i, nextX += stepX)
         xs[i] = nextX;
 
-    for (uint ipol = 0; ipol < passband_npol; ++ipol) {
+    for (unsigned ipol = 0; ipol < passband_npol; ++ipol) {
         const int cpgColour = ipol == 0 ? CPG_BLACK : CPG_RED;
         cpgsci(cpgColour);
         cpgline(nchan, xs, passbands[ipol]);
