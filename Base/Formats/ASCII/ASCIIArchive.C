@@ -81,16 +81,15 @@ void Pulsar::ASCIIArchive::load_header (const char* filename)
     throw Error (FailedSys, "Pulsar::ASCIIArchive::load_header",
 		 "ifstream(%s)", filename);
 
-  char hash;
-  is >> hash >> centre_frequency >> nbin >> source >> integration_length;
+  // clear the optional hash
+  if (is.peek() == '#')
+    is.get();
+
+  is >> centre_frequency >> nbin >> source >> integration_length;
 
   if (is.fail())
     throw Error (InvalidParam, "Pulsar::ASCIIArchive::load_header",
 		 "could not parse header from '%s'", filename);
-
-  if (hash != '#')
-    throw Error (InvalidParam, "Pulsar::ASCIIArchive::load_header",
-		 "header does not start with '#'");
 
   set_nchan   (1);
   set_npol    (4);
@@ -130,8 +129,8 @@ Pulsar::ASCIIArchive::load_Integration (const char* filename, unsigned subint)
 
   integration->set_folding_period (1.0);
 
-  for (unsigned ibin=0; ibin < get_nbin(); ibin++) {
-
+  for (unsigned ibin=0; ibin < get_nbin(); ibin++)
+  {
     is >> bin >> I[ibin] >> Q[ibin] >> U[ibin] >> V[ibin];
 
     for (unsigned i=0; i<4; i++)
@@ -140,7 +139,6 @@ Pulsar::ASCIIArchive::load_Integration (const char* filename, unsigned subint)
     if (is.fail() || bin != ibin)
       throw Error (InvalidParam, "Pulsar::ASCIIArchive::load_Integration",
 		   "Could not parse data from %s", filename);
-
   }
 
   return integration;
@@ -163,16 +161,17 @@ string Pulsar::ASCIIArchive::Agent::get_description ()
 }
 
 
-bool Pulsar::ASCIIArchive::Agent::advocate (const char* filename)
-try {
-    
+bool Pulsar::ASCIIArchive::Agent::advocate (const char* filename) try
+{
   ASCIIArchive archive;
   archive.load_header (filename);
   return true;
-  
 }
 catch (Error& e) 
 {
+  if (Archive::verbose > 2)
+    cerr << e << endl;
+
   return false;
 }
 catch (std::exception& e)
