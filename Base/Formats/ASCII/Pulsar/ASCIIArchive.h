@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASCII/Pulsar/ASCIIArchive.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/11/07 22:15:36 $
+   $Revision: 1.9 $
+   $Date: 2009/05/23 10:54:10 $
    $Author: straten $ */
 
 #ifndef __ASCIIArchive_h
@@ -19,7 +19,7 @@
 
 namespace Pulsar {
 
-  //! Loads and unloads ASCII Pulsar archives
+  //! Loads ASCII data files also known as SIGPROC format
   class ASCIIArchive : public BasicArchive {
 
   public:
