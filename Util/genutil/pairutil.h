@@ -1,15 +1,18 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include <utility>
 #include <iostream>
 
-namespace std {
+namespace std
+{
   template<typename T>
-    class numeric_limits< std::pair<T,T> > {
+  class numeric_limits< std::pair<T,T> >
+  {
     public:
     static const int digits10 = numeric_limits<T>::digits10;
   };
@@ -24,25 +27,28 @@ std::ostream& operator << (std::ostream& os, std::pair<T,U> vals)
 template<class T, class U>
 std::istream& operator >> (std::istream& is, std::pair<T,U>& vals)
 {
-  char c;
-  is >> c;
+  bool bracketed = is.peek() == '(';
 
-  if (c != '(') {
-    is.setstate(std::istream::failbit);
+  if (bracketed)
+    is.get();
+
+  char separator = 0;
+
+  is >> vals.first >> separator >> vals.second;
+
+  if ( (bracketed && separator != ',') || (!bracketed && separator != ':') )
+  {
+    is.setstate (std::istream::failbit);
     return is;
   }
 
-  is >> vals.first >> c >> vals.second;
-
-  if (c != ',') {
-    is.setstate(std::istream::failbit);
-    return is;
+  if (bracketed)
+  {
+    if (is.peek() != ')')
+      is.setstate (std::istream::failbit);
+    else
+      is.get();
   }
-
-  is >> c;
-
-  if (c != ')')
-    is.setstate(std::istream::failbit);
 
   return is;
 }
