@@ -969,11 +969,6 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
 	nadd = orig_nsamp/(uint64)(archive->get_nbin() * archive->get_nsubint());
 	nscr = orig_nchans / archive->get_nchan();
 
-/*	for (unsigned i = 0; i < orig_nchans; i++){
-		fscanf(rms_file,"%f\n",&chan_rms);
-		sumsq += chan_rms*chan_rms;
-	}*/
-
 	for (unsigned ic = 0; ic < archive->get_nchan(); ic++)
 	{
 		float ch_wt=0;
@@ -1002,7 +997,8 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
 	user_rms = sqrt(sumsq/orig_nchans/nadd/nscr);
 
 //	user_rms *= sqrt(archive->get_nsubint()*orig_nchans/weight_total);
-	
+	user_rms /= sqrt(archive->get_nsubint()*archive->get_nchan());
+
 //	cout << sqrt(sumsq) << " " << weight_factor << " " << weight_total << endl;
 	if (!silent){
 		cout << "User rms = " << user_rms;
@@ -1254,10 +1250,6 @@ void solve_and_plot (Archive* archive,
 	///////////////
 	// Get the RMS
 	float rms = getRMS(archive);
-
-	// PSRCHIVE normalises the amplitudes after scrunching
-	// so need to compensate for this
-	rms = rms / sqrt(float(nchan*nsub));
 
 	//////////////////////////////////////////////////////
 	// Find default step and half range if none provided
@@ -1641,6 +1633,7 @@ float getRMS (const Archive * archive)
         sumsq += sqr( amps[i%nbin] - minMean );
 
       double variance = sumsq / (nbin/2-1);
+
       double weight = profile->get_weight();
 
       weighted_total_variance += sqr(weight) * variance;
@@ -1649,7 +1642,7 @@ float getRMS (const Archive * archive)
   }
 
   double rms = sqrt( weighted_total_variance / sqr(total_weight) );
-  cerr << "getRMS=" << rms << endl;
+
   return rms;
 }
 
@@ -2572,8 +2565,13 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 
 	file = fopen("pdmp.posn", "at");
 
-	if (file != NULL) {
-		fprintf(file, " %s\t%3.3f\t%3.3f\t%3.2f\t%3.5f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%s\t%d\t%d\t%d\n",
+	if (file == NULL)
+	{
+	  perror ("pdmp: Failed to open file pdmp.posn for writing results");
+	  exit (-1);
+	}
+
+	fprintf(file, " %s\t%3.3f\t%3.3f\t%3.2f\t%3.5f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%s\t%d\t%d\t%d\n",
 		archive->get_source().c_str(),
 		glong,
 		glat,
@@ -2584,9 +2582,7 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 		bestDM,
 		dmError,
 		archive->get_filename().c_str(), tScint, fScint, tfScint);
-	} else {
-		cerr << "pdmp: Failed to open file pdmp.posn for writing results\n";
-	}
+	
 	fclose(file);
 
 	file = fopen("pdmp.per", "at");
@@ -3153,7 +3149,7 @@ void setInitialXmlCandiateSection(const Archive * archive, float minwidthsecs){
 		strcpy(xml_candidate->sections[0].name,"User Defined");
 		xml_candidate->sections[0].bestWidth=-1;
 		float rms = getRMS(archive);
-		rms = rms / sqrt(float(nchan*nsubint));
+		// rms = rms / sqrt(float(nchan*nsubint));
 
 		int minwidthbins = (int) (minwidthsecs / getPeriod(archive) * nbin);
 
@@ -3281,7 +3277,6 @@ void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod
 	sprintf(section->name,"%s-pdmpd",xml_candidate->sections[xml_candidate->nsections-2].name);
 	section->bestWidth=bestPulseWidth/(float)nbin;
 	float rms = getRMS(archive);
-	rms = rms / sqrt(float(nchan*nsubint));
 
  	int minwidthbins = (int) (minwidthsecs / getPeriod(archive) * nbin);
 
