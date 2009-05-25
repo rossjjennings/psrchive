@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASCII/Pulsar/ASCIIArchive.h,v $
-   $Revision: 1.9 $
-   $Date: 2009/05/23 10:54:10 $
+   $Revision: 1.10 $
+   $Date: 2009/05/25 07:08:15 $
    $Author: straten $ */
 
 #ifndef __ASCIIArchive_h
@@ -82,6 +82,15 @@ namespace Pulsar {
 
     //! The integration length
     double integration_length;
+
+    //! The epoch of the observation
+    MJD epoch;
+
+    //! The folding period
+    double period;
+
+    //! Read more header information
+    void hashed_header (std::istream&);
 
   private:
 

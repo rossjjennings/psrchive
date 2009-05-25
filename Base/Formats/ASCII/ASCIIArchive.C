@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/ASCIIArchive.h"
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Profile.h"
@@ -14,6 +15,7 @@ using namespace std;
 void Pulsar::ASCIIArchive::init ()
 {
   integration_length = 0.0;
+  period = 1.0;
 }
 
 Pulsar::ASCIIArchive::ASCIIArchive()
@@ -83,9 +85,9 @@ void Pulsar::ASCIIArchive::load_header (const char* filename)
 
   // clear the optional hash
   if (is.peek() == '#')
-    is.get();
-
-  is >> centre_frequency >> nbin >> source >> integration_length;
+    hashed_header (is);
+  else
+    is >> centre_frequency >> nbin >> source >> integration_length;
 
   if (is.fail())
     throw Error (InvalidParam, "Pulsar::ASCIIArchive::load_header",
@@ -97,6 +99,38 @@ void Pulsar::ASCIIArchive::load_header (const char* filename)
   set_state (Signal::Stokes);
 }
 
+void Pulsar::ASCIIArchive::hashed_header (istream& is)
+{
+  // clear the hash
+  is.get();
+
+  double epoch_MJD = 0;
+  is >> epoch_MJD;
+
+  double epoch_seconds = 0;
+  is >> epoch_seconds;
+
+  epoch = MJD(epoch_MJD);
+  epoch += epoch_seconds;
+
+  is >> period;
+    
+  int subints = 0;
+  is >> subints;
+
+  is >> centre_frequency >> dispersion_measure >> nbin;
+
+  char site = 0;
+  is >> site;
+
+  int ignore = 0;
+  is >> ignore;
+
+  is >> source;
+
+  double phase;
+  is >> phase;
+}
 
 Pulsar::Integration*
 Pulsar::ASCIIArchive::load_Integration (const char* filename, unsigned subint)
@@ -119,26 +153,43 @@ Pulsar::ASCIIArchive::load_Integration (const char* filename, unsigned subint)
   Pulsar::BasicIntegration* integration = new BasicIntegration;
   resize_Integration (integration);
 
-  float* I = integration->get_Profile (0, 0) -> get_amps();
-  float* Q = integration->get_Profile (1, 0) -> get_amps();
-  float* U = integration->get_Profile (2, 0) -> get_amps();
-  float* V = integration->get_Profile (3, 0) -> get_amps();
-
   unsigned bin = 0;
-  float unused;
 
-  integration->set_folding_period (1.0);
+  integration->set_folding_period (period);
+  integration->set_epoch (epoch);
+
+  if (Profile::no_amps)
+    return integration;
 
   for (unsigned ibin=0; ibin < get_nbin(); ibin++)
   {
-    is >> bin >> I[ibin] >> Q[ibin] >> U[ibin] >> V[ibin];
+    if (verbose > 2)
+      cerr << "Pulsar::ASCIIArchive::load_Integration ibin=" << ibin << endl;
 
-    for (unsigned i=0; i<4; i++)
-      is >> unused;
+    is >> bin;
 
-    if (is.fail() || bin != ibin)
+    for (unsigned ipol=0; ipol < get_npol(); ipol++)
+    {
+      double value;
+      is >> value;
+
+      integration->get_Profile(ipol, 0) -> get_amps()[ibin] = value;
+    }
+
+    if (is.fail())
       throw Error (InvalidParam, "Pulsar::ASCIIArchive::load_Integration",
-		   "Could not parse data from %s", filename);
+		   "data read failed");
+
+    if (bin != ibin)
+      throw Error (InvalidParam, "Pulsar::ASCIIArchive::load_Integration",
+		   "bin number=%u != expected=%u", bin, ibin);
+
+    string unused;
+    getline (is, unused);
+
+    if (is.fail())
+      throw Error (InvalidParam, "Pulsar::ASCIIArchive::load_Integration",
+		   "clear read failed");
   }
 
   return integration;
