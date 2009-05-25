@@ -93,10 +93,28 @@ void Pulsar::ASCIIArchive::load_header (const char* filename)
     throw Error (InvalidParam, "Pulsar::ASCIIArchive::load_header",
 		 "could not parse header from '%s'", filename);
 
+  // get the remainder of the header line, if any
+  string line;
+  getline (is, line);
+
+  // get the first line of data
+  getline (is, line);
+
+  double v;
+  if (sscanf (line.c_str(), "%lf %lf %lf %lf %lf", &v,&v,&v,&v,&v) == 5)
+  {
+    set_npol (4);
+    set_state (Signal::Stokes);
+  }
+  else
+  {
+    set_npol (1);
+    set_state (Signal::Intensity);
+  }
+
   set_nchan   (1);
-  set_npol    (4);
   set_nsubint (1);
-  set_state (Signal::Stokes);
+
 }
 
 void Pulsar::ASCIIArchive::hashed_header (istream& is)
@@ -184,8 +202,8 @@ Pulsar::ASCIIArchive::load_Integration (const char* filename, unsigned subint)
       throw Error (InvalidParam, "Pulsar::ASCIIArchive::load_Integration",
 		   "bin number=%u != expected=%u", bin, ibin);
 
-    string unused;
-    getline (is, unused);
+    // clear the remainder of the line
+    getline (is, line);
 
     if (is.fail())
       throw Error (InvalidParam, "Pulsar::ASCIIArchive::load_Integration",
