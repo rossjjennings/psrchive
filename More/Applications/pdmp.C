@@ -944,6 +944,7 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
   	if (xml_candidate==NULL){
 		xml_candidate = (phcx*)malloc(sizeof(phcx));
 		xml_candidate->nsections=0;
+		xml_candidate->nextrakey=0;
 	}
 	setInitialXmlCandiateSection(archive,minwidthsecs);
   }
@@ -3124,6 +3125,9 @@ void setInitialXmlCandiateSection(const Archive * archive, float minwidthsecs){
 		xml_candidate->sections[0].subbands=NULL;
 		xml_candidate->sections[0].pulseProfile=NULL;
 		xml_candidate->sections[0].snrBlock.block=NULL;
+		xml_candidate->sections[0].nextrakey=0;
+		xml_candidate->sections[0].tsamp=0;
+
 
 		// insert the initial parameters
 		// @todo: How to get the initial params?
@@ -3270,6 +3274,7 @@ void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod
 	section->subbands=NULL;
 	section->pulseProfile=NULL;
 	section->snrBlock.block=NULL;
+	section->tsamp=xml_candidate->sections[0].tsamp;
 
 	// insert the optimised parameters
 	
@@ -3290,6 +3295,7 @@ void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod
 	section->bestDm=bestDM;
 	section->bestAccn=0;
 	section->bestJerk=0;
+	section->nextrakey=0;
 
 	{
 		float* amps = total->get_Profile(0,0,0)->get_amps();
