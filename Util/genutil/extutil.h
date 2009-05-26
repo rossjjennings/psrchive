@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/extutil.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/11/28 05:08:11 $
+   $Revision: 1.4 $
+   $Date: 2009/05/26 03:42:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_get_extension_h
@@ -49,6 +49,35 @@ void clean_dangling (std::vector<T>& data)
   for (unsigned i=0; i<data.size(); i++)
     if (!data[i])
       data.erase( data.begin() + i );
+}
+
+
+//! For each extension of type E in container C, call method M
+template<typename E, typename C, typename M>
+void foreach (C* container, M method)
+{
+  const unsigned next = container->get_nextension ();
+
+  for (unsigned iext=0; iext < next; iext++)
+  {
+    E* ext = dynamic_cast<E*> (container->get_extension (iext));
+    if (ext)
+      (ext->*method) ();
+  }
+}
+
+//! For each extension of type E in container C, call method M with argument A
+template<typename E, typename C, typename M, typename A>
+void foreach (C* container, M method, A argument)
+{
+  const unsigned next = container->get_nextension ();
+
+  for (unsigned iext=0; iext < next; iext++)
+  {
+    E* ext = dynamic_cast<E*> (container->get_extension (iext));
+    if (ext)
+      (ext->*method) (argument);
+  }
 }
 
 #endif
