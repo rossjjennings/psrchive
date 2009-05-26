@@ -34,5 +34,7 @@ double get_binlng_peri(double mjd, const Legacy::psrephem& eph, double freq, cha
 
 double get_binlng_asc(double mjd, const Legacy::psrephem& eph, double freq, char site);
 
+const Legacy::psrephem* new_psrephem (const Pulsar::Parameters*);
+
 #endif
 
