@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.109 $
-   $Date: 2009/02/20 04:51:59 $
+   $Revision: 1.110 $
+   $Date: 2009/05/26 03:48:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -69,6 +69,9 @@ namespace Pulsar {
 
     //! returns a pointer to a new copy of self
     virtual Profile* clone () const;
+
+    //! Resize the data area
+    virtual void resize (unsigned nbin);
 
     //! sets profile equal to another profile
     const Profile& operator = (const Profile& profile);
@@ -225,9 +228,6 @@ namespace Pulsar {
     //! integrate neighbouring sections of the profile
     void fold (unsigned nfold);
 
-    //! halves the number of bins like bscrunch(2^nhalve)
-    void halvebins (unsigned nhalve);
-    
     //! interface to model_profile used by Profile::shift
     void fftconv (const Profile& std, double& shift, float& eshift,
                   float& snrfft, float& esnrfft) const;

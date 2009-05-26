@@ -8,7 +8,7 @@
 // #define _DEBUG 1
 
 #include "Pulsar/Profile.h"
-#include "Pulsar/ProfileExtension.h"
+#include "Pulsar/DataExtension.h"
 
 #include "FTransform.h"
 #include "Physical.h"
@@ -92,6 +92,12 @@ Pulsar::Profile* Pulsar::Profile::clone () const
   return retval;
 }
 
+void Pulsar::Profile::resize (unsigned new_nbin)
+{
+  ProfileAmps::resize (new_nbin);
+  foreach<DataExtension> (this, &DataExtension::resize, new_nbin);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Profile::operator =
@@ -105,15 +111,22 @@ const Pulsar::Profile& Pulsar::Profile::operator = (const Profile& input)
   if (this == &input)
     return *this;
 
-  try {
+  try
+  {
     resize( input.get_nbin() );
     set_amps( input.get_amps() );
 
     set_weight ( input.get_weight() );
     set_centre_frequency ( input.get_centre_frequency() );
     set_state ( input.get_state() );
+
+    // copy the extensions
+    extension.resize (0);
+    for (unsigned iext=0; iext < input.get_nextension(); iext++)
+      add_extension( input.get_extension(iext)->clone() );
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     throw error += "Pulsar::Profile::operator =";
   }
 
@@ -240,6 +253,8 @@ void Pulsar::Profile::offset (double factor)
   float* amps = get_amps();
   for (unsigned i=0;i<nbin;i++)
     amps[i] += factor;
+
+  foreach<DataExtension> (this, &DataExtension::offset, factor);
 }
 
 void Pulsar::Profile::scale (double factor)
@@ -248,6 +263,8 @@ void Pulsar::Profile::scale (double factor)
   float* amps = get_amps();
   for (unsigned i=0;i<nbin;i++)
     amps[i] *= factor;
+
+  foreach<DataExtension> (this, &DataExtension::scale, factor);
 }
 
 void sumdiff (Pulsar::Profile* thiz, const Pulsar::Profile* that, float factor)
@@ -304,6 +321,8 @@ void Pulsar::Profile::zero()
   weight = 0;
   for (unsigned ibin = 0; ibin < nbin; ibin++)
     amps[ibin] = 0;
+
+  foreach<DataExtension> (this, &DataExtension::zero);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -387,15 +406,20 @@ void Pulsar::Profile::fold (unsigned nfold)
 		 "nbin=%d %% nfold=%d != 0", nbin, nfold);
   
   unsigned newbin = nbin/nfold;
+  float scale = 1.0/nfold;
 
   for (unsigned i=0; i<newbin; i++)
+  {
     for (unsigned j=1; j<nfold; j++)
       amps[i] += amps[i+j*newbin];
 
+    amps[i] *= scale;
+  }
+
+  foreach<DataExtension> (this, &DataExtension::fold, nfold);
+
   // note that ProfileAmps::resize will not lose data when newbin < nbin
   resize (newbin);
-
-  operator *= (1.0/float(nfold));
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -423,18 +447,21 @@ void Pulsar::Profile::bscrunch (unsigned nscrunch) try
 		 "Scrunch factor does not divide number of bins");
   
   unsigned newbin = nbin/nscrunch;
+  float scale = 1.0/nscrunch;
 
   for (unsigned i=0; i<newbin; i++)
   {
     amps[i] = amps[i*nscrunch];
     for (unsigned j=1; j<nscrunch; j++)
       amps[i] += amps[i*nscrunch+j];
+
+    amps[i] *= scale;
   }
+
+  foreach<DataExtension> (this, &DataExtension::bscrunch, nscrunch);
 
   // note that ProfileAmps::resize will not lose data when newbin < nbin
   resize (newbin);
-
-  operator *= (1.0/float(nscrunch));
 }
 catch (Error& error)
 {
@@ -460,6 +487,8 @@ void Pulsar::Profile::bscrunch_to_nbin (unsigned new_nbin) try
 
   else
   {
+    foreach<DataExtension> (this, &DataExtension::bscrunch_to_nbin, new_nbin);
+
     unsigned orig_nbin = get_nbin();
 
     vector<float> temp( orig_nbin+2 );
@@ -479,31 +508,6 @@ void Pulsar::Profile::bscrunch_to_nbin (unsigned new_nbin) try
 catch (Error& error)
 {
   throw error += "Pulsar::Profile::bscrunch_to_nbin";
-}
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::halvebins
-//
-void Pulsar::Profile::halvebins (unsigned nhalve)
-{
-  if (verbose)
-    cerr << "Pulsar::Profile::halvebins" << endl;
-  
-  unsigned nbin = get_nbin();
-  float* amps = get_amps();
-
-  for (unsigned i=0; i<nhalve && nbin>1; i++) {
-
-    if (nbin % 2)
-      throw Error (InvalidRange, "Pulsar::Profile::halvebins", 
-		   "nbin=%d %% 2 != 0", nbin);
-    nbin /= 2;
-    for (unsigned nb = 0; nb < nbin; nb++)
-      amps[nb] = 0.5*(amps[2*nb] + amps[2*nb+1]);
-
-  }
 }
 
 /////////////////////////////////////////////////////////////////////////////
