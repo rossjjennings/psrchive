@@ -248,17 +248,9 @@ string Pulsar::TimerArchive::get_source () const
 
 void Pulsar::TimerArchive::set_source (const string& source)
 {
-  const char* name = source.c_str();
-
-  if (name[0] == 'J')
-    name ++;
-
-  strncpy (hdr.psrname, name, PSRNAME_STRLEN);
-
+  strncpy (hdr.psrname, source.c_str(), PSRNAME_STRLEN);
   hdr.psrname[PSRNAME_STRLEN-1]='\0';
 }
-
-
 
 //! Get the coordinates of the source
 sky_coord Pulsar::TimerArchive::get_coordinates () const
