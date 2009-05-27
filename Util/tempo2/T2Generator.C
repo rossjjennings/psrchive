@@ -10,7 +10,7 @@
 #include "T2Parameters.h"
 
 #include "Error.h"
-
+#include "file_cast.h"
 #include "tempo2pred_int.h"
 
 using namespace std;
@@ -39,33 +39,13 @@ Tempo2::Generator::~Generator ()
 }
 
 //! Set the parameters used to generate the predictor
-void Tempo2::Generator::set_parameters (const Pulsar::Parameters* p)
+void Tempo2::Generator::set_parameters (const Pulsar::Parameters* p) try
 {
-  const Parameters* t2p = dynamic_cast<const Parameters*> (p);
-
-  if (t2p) {
-    parameters = t2p;
-    return;
-  }
-
-  // attempt to convert to Tempo2::Parameters
-  FILE* temp = tmpfile();
-  if (!temp)
-    throw Error (FailedSys, "Tempo2::Generator::set_parameters", "tmpfile");
-  
-  try {
-    Reference::To<Parameters> param = new Parameters;
-    p->unload(temp);
-    rewind (temp);
-    param->load(temp);
-    fclose (temp);
-    parameters = param;
-  }
-  catch (Error& error) {
-    fclose (temp);
-    throw error += "Tempo2::Generator::set_parameters conversion";
-  }
-  
+  parameters = dynamic_file_cast<Tempo2::Parameters> (p);
+}
+catch (Error& error)
+{
+  throw error += "Tempo2::Generator::set_parameters (Pulsar::Parameters*)";
 }
 
 //! Set the range of epochs over which to generate
