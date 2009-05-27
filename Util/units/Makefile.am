@@ -16,6 +16,7 @@ include_HEADERS = \
         EstimatePlotter.h \
         EstimateStats.h \
 	Factory.h \
+	file_cast.h \
 	FilePtr.h \
         Functor.h \
         HeapTracked.h \
