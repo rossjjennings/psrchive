@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/file_cast.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/05/27 06:10:32 $
+   $Revision: 1.2 $
+   $Date: 2009/05/27 20:28:03 $
    $Author: straten $ */
 
 #ifndef __UTILS_UNITS_FILE_CAST_H
@@ -25,10 +25,10 @@ To* file_cast (const From* from)
   from->unload (temp);
   rewind (temp);
 
-  To* to = new To;
+  std::auto_ptr<To> to (new To);
   to->load (temp);
 
-  return to;
+  return to.release();
 }
 
 template<typename To, typename From>
