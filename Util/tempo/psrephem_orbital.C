@@ -9,7 +9,7 @@
 #include "tempo++.h"
 #include "coord.h"
 #include "orbital.h"
-#include "FilePtr.h"
+#include "file_cast.h"
 
 #include <slalib.h>
 
@@ -20,22 +20,7 @@ using Legacy::psrephem;
 
 const psrephem* new_psrephem (const Pulsar::Parameters* parameters)
 {
-  const psrephem* eph = dynamic_cast<const psrephem*>( parameters );
-  if (eph)
-    return eph;
-
-  // attempt to convert to psrephem
-  FilePtr temp = tmpfile();
-  if (!temp)
-    throw Error (FailedSys, "new_psrephem", "tmpfile");
-  
-  Reference::To<psrephem> peph = new psrephem;
-  parameters->unload (temp);
-  rewind (temp);
-  peph->load(temp);
-  fclose (temp);
-
-  return peph.release ();
+  return dynamic_file_cast<psrephem>( parameters );
 }
 
 // Binary phase wrt periastron at UTC MJD
