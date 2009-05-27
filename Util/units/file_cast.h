@@ -6,14 +6,15 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/file_cast.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/05/27 20:28:03 $
+   $Revision: 1.3 $
+   $Date: 2009/05/27 23:49:04 $
    $Author: straten $ */
 
 #ifndef __UTILS_UNITS_FILE_CAST_H
 #define __UTILS_UNITS_FILE_CAST_H
 
 #include "FilePtr.h"
+#include <memory>
 
 template<typename To, typename From>
 To* file_cast (const From* from)
