@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotOptions.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/01/17 22:28:25 $
+   $Revision: 1.2 $
+   $Date: 2009/05/27 23:52:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotOptions_h
@@ -43,7 +43,18 @@ namespace Pulsar {
   private:
 
     std::string plot_device;
+
+    // number of panel into which plot surface will be divided
     unsigned x_npanel, y_npanel;
+
+    // width of plot surface in cm
+    float surface_width;
+
+    // aspect ratio (height/width)
+    float aspect_ratio;
+
+    // plot dimensions in pixels
+    unsigned width_pixels, height_pixels;
 
   };
 
