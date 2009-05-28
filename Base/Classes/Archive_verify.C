@@ -10,10 +10,10 @@
 
 using namespace std;
 
-void Pulsar::Archive::verify () const
+void Pulsar::Archive::verify () const try
 {
-  for (unsigned check=0; check<Check::registry.size(); check++) {
-
+  for (unsigned check=0; check<Check::registry.size(); check++)
+  {
     if (verbose == 3)
       cerr << "Pulsar::Archive::verify testing "
            << Check::registry[check]->get_name() << endl;
@@ -29,6 +29,10 @@ void Pulsar::Archive::verify () const
            << verification->get_name() << endl;
 
     verification->apply(this);
-
   }
 }
+catch (Error& error)
+{
+  throw error += "Pulsar::Archive::verify";
+}
+
