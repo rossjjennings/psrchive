@@ -39,7 +39,7 @@ std::string Pulsar::PlotOptions::get_usage ()
 //! Extra option flags implemented by derived classes
 std::string Pulsar::PlotOptions::get_options ()
 {
-  return "D:N:";
+  return "D:N:g:r:w:";
 }
 
 //! Parse a non-standard command
