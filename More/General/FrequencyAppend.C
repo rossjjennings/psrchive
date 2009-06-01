@@ -88,8 +88,9 @@ void Pulsar::FrequencyAppend::combine (Archive* into, Archive* from)
 		   "centre frequency=%d != phase model observing frequency=%d",
 		   centre_frequency, model_frequency);
 
-    cerr << "Pulsar::FrequencyAppend::combine "
-      "dedispersed and phase at infinite frequency" << endl;
+    if (Archive::verbose > 2)
+      cerr << "Pulsar::FrequencyAppend::combine "
+        "dedispersed and phase at infinite frequency" << endl;
 
     equal_models = true;
     check_phase = false;
