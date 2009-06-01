@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FrequencyAppend.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/11/07 01:45:32 $
+   $Revision: 1.5 $
+   $Date: 2009/06/01 10:17:44 $
    $Author: straten $ */
 
 #ifndef _Pulsar_FrequencyAppend_H
@@ -42,6 +42,9 @@ namespace Pulsar {
 
     //! Add the data in 'from' to 'into'
     virtual void combine (Integration* into, Integration* from);
+
+    /* internal */
+    bool check_phase;
 
     //! Return the policy used to verify that data are mixable
     virtual const Archive::Match* get_mixable_policy (const Archive* into);

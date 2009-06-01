@@ -48,7 +48,8 @@ bool Pulsar::Append::stop (Archive* into, const Archive* from)
   if (from->get_nsubint() == 0)
     return true;
   
-  if (into->get_nsubint() == 0) {
+  if (into->get_nsubint() == 0)
+  {
     into->copy (from);
     return true;
   }
@@ -64,7 +65,7 @@ Pulsar::Append::get_mixable_policy (const Archive* a)
 
 void Pulsar::Append::check (Archive* into, const Archive* from)
 {
-  if (Archive::verbose == 3)
+  if (Archive::verbose > 2)
     cerr << "Pulsar::Append::check compare" << endl;
 
   string reason;
@@ -84,7 +85,7 @@ void Pulsar::Append::check (Archive* into, const Archive* from)
  */
 void Pulsar::Append::append (Archive* into, const Archive* from)
 {
-  if (Archive::verbose == 3)
+  if (Archive::verbose > 2)
     cerr << "Pulsar::Append::append into nsub=" << into->get_nsubint()
 	 << " from nsub=" << from->get_nsubint() << endl;
 
@@ -94,15 +95,21 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
   check (into, from);
 
   /* if the Integrations are already properly phased to the polycos,
-     then no corrections are needed */
-  bool aligned = into->expert()->zero_phase_aligned()
+     then corrections may not be necessary */
+  aligned = into->expert()->zero_phase_aligned()
     && from->expert()->zero_phase_aligned ();
+
+  equal_ephemerides = into->has_ephemeris() && from->has_ephemeris()
+    && into->get_ephemeris()->equals (from->get_ephemeris());
+
+  equal_models = into->has_model() && from->has_model()
+    && into->get_model()->matches (from->get_model());
 
   unsigned into_nsubint = into->get_nsubint();
 
   Reference::To<Archive> clone = from->clone ();
 
-  if (Archive::verbose == 3)
+  if (Archive::verbose > 2)
     cerr << "Pulsar::Append::append call combine" << endl;
  
   combine (into, clone);
@@ -110,7 +117,7 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
   // if observation is not a pulsar, no further checks required
   if (into->get_type() != Signal::Pulsar)
   {
-    if (Archive::verbose == 3)
+    if (Archive::verbose > 2)
       cerr << "Pulsar::Append::append no pulsar; no predictor to correct"
 	   << endl;
     return;
@@ -119,16 +126,10 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
   // if neither archive has a polyco, no correction needed
   if (!into->has_model() && !from->has_model())
   {
-    if (Archive::verbose == 3)    
+    if (Archive::verbose > 2)    
       cerr << "Pulsar::Append::append no predictor to correct" << endl;
     return;
   }
-
-  bool equal_ephemerides = into->has_ephemeris() && from->has_ephemeris()
-    && into->get_ephemeris()->equals (from->get_ephemeris());
-
-  bool equal_models = into->has_model() && from->has_model()
-    && into->get_model()->matches (from->get_model());
 
   /*
     If all of the old and new integrations have been zero phase
@@ -138,7 +139,7 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
     predictors.
   */
 
-  if (Archive::verbose == 3)
+  if (Archive::verbose > 2)
   {
     if (!aligned)
       cerr << "Pulsar::Append::append "
@@ -153,7 +154,7 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
 
   if (aligned && equal_ephemerides && equal_models)
   {
-    if (Archive::verbose == 3)
+    if (Archive::verbose > 2)
       cerr << "Pulsar::Append::append "
 	"zero phase aligned and equal ephemerides" << endl;
  
@@ -168,12 +169,12 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
   if (into->has_model() && !into->has_ephemeris())
     return;
 
-  if (Archive::verbose == 3)
+  if (Archive::verbose > 2)
     cerr << "Pulsar::Append::append update predictor" << endl;
 
   into->expert()->update_model (into_nsubint);
   
-  if (Archive::verbose == 3)
+  if (Archive::verbose > 2)
     cerr << "Pulsar::Append::append phasing new integrations" << endl;
 
   /*
@@ -192,7 +193,7 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
 				 from->get_model());
   }
 
-  if (Archive::verbose == 3)
+  if (Archive::verbose > 2)
     cerr << "Pulsar::Append::append exit" << endl;
 }
 

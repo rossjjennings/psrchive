@@ -78,6 +78,25 @@ void Pulsar::FrequencyAppend::combine (Archive* into, Archive* from)
 {
   unsigned nsubint = into->get_nsubint();
 
+  if (from->get_dedispersed() && from->has_model())
+  {
+    double model_frequency = from->get_model()->get_observing_frequency ();
+    double centre_frequency = from->get_centre_frequency ();
+
+    if (model_frequency != centre_frequency)
+      throw Error (InvalidState, "Pulsar::FrequencyAppend::combine",
+		   "centre frequency=%d != phase model observing frequency=%d",
+		   centre_frequency, model_frequency);
+
+    cerr << "Pulsar::FrequencyAppend::combine "
+      "dedispersed and phase at infinite frequency" << endl;
+
+    equal_models = true;
+    check_phase = false;
+  }
+  else
+    check_phase = true;
+
   for (unsigned isub=0; isub < nsubint; isub++)
     combine (into->get_Integration(isub), from->get_Integration(isub));
 
@@ -113,7 +132,7 @@ try
 
   into->expert()->insert(from);
 
-  if (into->get_dedispersed())
+  if (check_phase && into->get_dedispersed())
   {
     Dispersion xform;
     xform.set_reference_frequency( into->get_centre_frequency() );

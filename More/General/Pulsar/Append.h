@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Append.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/11/07 01:45:32 $
+   $Revision: 1.6 $
+   $Date: 2009/06/01 10:17:44 $
    $Author: straten $ */
 
 #ifndef _Pulsar_Append_H
@@ -54,6 +54,11 @@ namespace Pulsar {
 
     */
     virtual void combine (Archive* into, Archive* from) = 0;
+
+    /* Internal variables that may be set by combine method */
+    bool aligned;
+    bool equal_ephemerides;
+    bool equal_models;
 
   };
   
