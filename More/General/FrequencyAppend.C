@@ -94,6 +94,7 @@ void Pulsar::FrequencyAppend::combine (Archive* into, Archive* from)
 
     equal_models = true;
     check_phase = false;
+    insert_model = false;
   }
   else
     check_phase = true;
