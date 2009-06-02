@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Append.h,v $
-   $Revision: 1.6 $
-   $Date: 2009/06/01 10:17:44 $
+   $Revision: 1.7 $
+   $Date: 2009/06/02 04:18:27 $
    $Author: straten $ */
 
 #ifndef _Pulsar_Append_H
@@ -59,7 +59,7 @@ namespace Pulsar {
     bool aligned;
     bool equal_ephemerides;
     bool equal_models;
-
+    bool insert_model;
   };
   
 }

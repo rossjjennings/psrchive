@@ -102,9 +102,9 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
   equal_ephemerides = into->has_ephemeris() && from->has_ephemeris()
     && into->get_ephemeris()->equals (from->get_ephemeris());
 
-  equal_models = into->has_model() && from->has_model()
+  insert_model = equal_models = into->has_model() && from->has_model()
     && into->get_model()->matches (from->get_model());
-
+  
   unsigned into_nsubint = into->get_nsubint();
 
   Reference::To<Archive> clone = from->clone ();
@@ -158,7 +158,8 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
       cerr << "Pulsar::Append::append "
 	"zero phase aligned and equal ephemerides" << endl;
  
-    into->expert()->get_model()->insert (from->get_model());
+    if (insert_model)
+      into->expert()->get_model()->insert (from->get_model());
 
     for (unsigned isub=0; isub < into->get_nsubint(); isub++)
       into->get_Integration(isub)->expert()->set_zero_phase_aligned (true);
