@@ -41,7 +41,7 @@ Tempo2::Generator::~Generator ()
 //! Set the parameters used to generate the predictor
 void Tempo2::Generator::set_parameters (const Pulsar::Parameters* p) try
 {
-  parameters = dynamic_file_cast<Tempo2::Parameters> (p);
+  parameters = dynamic_file_cast<const Tempo2::Parameters> (p);
 }
 catch (Error& error)
 {

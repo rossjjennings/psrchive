@@ -20,7 +20,7 @@ using Legacy::psrephem;
 
 const psrephem* new_psrephem (const Pulsar::Parameters* parameters)
 {
-  return dynamic_file_cast<psrephem>( parameters );
+  return dynamic_file_cast<const psrephem>( parameters );
 }
 
 // Binary phase wrt periastron at UTC MJD
