@@ -97,7 +97,7 @@ void Legacy::psrephem::zero()
 
 void Legacy::psrephem::zero_work()
 {
-  static string tempo_safe_string (" ");
+  string tempo_safe_string (" ");
   
   for (int i=0;i<EPH_NUM_KEYS;i++) {
     parmStatus   [i] = 0;
@@ -595,32 +595,6 @@ double Legacy::psrephem::get_rotation_measure () const
   return 0;
 }
 
-
-
-
-
-
-
-
-static char* ephemblock = NULL;
-static int*  correct    = NULL;
-static void prepare_static_load_area ()
-{
-  if (ephemblock == NULL) {
-    ephemblock = new char [EPH_NUM_KEYS * EPH_STR_LEN];
-    assert (ephemblock != NULL);
-  }
-  if (correct == NULL) {
-    correct = new int [EPH_NUM_KEYS];
-    assert (correct != NULL);
-  }
-  for (int i=0; i<EPH_NUM_KEYS; i++)
-    correct [i] = 0;
-
-  for (int c=0; c<EPH_NUM_KEYS*EPH_STR_LEN; c++)
-    ephemblock[c] = ' ';
-}
-
 void f2cstr (char* str, unsigned length)
 {
   unsigned i = length-1;
@@ -649,12 +623,14 @@ int Legacy::psrephem::load (string* instr)
 
   tempo11 = 1;
   size_dataspace();
-  prepare_static_load_area ();
 
   nontempo11 = *instr;  // just in case parsing fails
   int old_ephem = 0;
 
   vector<string> eph_lines;
+
+  vector<char> ephemblock (EPH_NUM_KEYS * EPH_STR_LEN, ' ');
+  vector<int>  correct (EPH_NUM_KEYS, 0);
 
   while (instr -> length() > 1)
   {
@@ -670,13 +646,13 @@ int Legacy::psrephem::load (string* instr)
     // store the line in a vector for processing later
     eph_lines.push_back (line);
 
-    eph_rd_str (parmStatus, ephemblock, value_double, value_integer,
-		error_double, correct, &old_ephem, 
+    eph_rd_str (parmStatus, &(ephemblock[0]), value_double, value_integer,
+		error_double, &(correct[0]), &old_ephem, 
 		const_cast<char*>( line.c_str() ));
   }
 
   // convertunits_ defined in ephio.f
-  convertunits (value_double, error_double, parmStatus, correct);
+  convertunits (value_double, error_double, parmStatus, &(correct[0]));
   if (verbose)
     cerr << "Legacy::psrephem::load units converted" << endl;
 
@@ -686,7 +662,7 @@ int Legacy::psrephem::load (string* instr)
     if (parmStatus[ieph] == 0)
       continue;
 
-    char* strval = ephemblock + ieph * EPH_STR_LEN;
+    char* strval = &(ephemblock[ieph * EPH_STR_LEN]);
     f2cstr (strval, EPH_STR_LEN);
     value_str[ieph] = strval;
 
