@@ -78,23 +78,37 @@ void Pulsar::FrequencyAppend::combine (Archive* into, Archive* from)
 {
   unsigned nsubint = into->get_nsubint();
 
+  check_phase = true;
+
   if (from->get_dedispersed() && from->has_model())
   {
-    double model_frequency = from->get_model()->get_observing_frequency ();
+    double into_frequency = into->get_model()->get_observing_frequency ();
+    double from_frequency = from->get_model()->get_observing_frequency ();
     double centre_frequency = from->get_centre_frequency ();
 
-    if (model_frequency != centre_frequency)
+    if (from_frequency == centre_frequency)
+    {
+      if (Archive::verbose > 2)
+        cerr << "Pulsar::FrequencyAppend::combine "
+          "dedispersed and phase at infinite frequency" << endl;
+
+      equal_models = true;
+      check_phase = false;
+      insert_model = false;
+    }
+    else if (from_frequency == into_frequency)
+    {
+      if (Archive::verbose > 2)
+        cerr << "Pulsar::FrequencyAppend::combine "
+          "dedispersed and matching predictor frequencies" << endl;
+
+      insert_model = false;
+    }
+    else
       throw Error (InvalidState, "Pulsar::FrequencyAppend::combine",
-		   "centre frequency=%lf != predictor observing frequency=%lf",
-		   centre_frequency, model_frequency);
-
-    if (Archive::verbose > 2)
-      cerr << "Pulsar::FrequencyAppend::combine "
-        "dedispersed and phase at infinite frequency" << endl;
-
-    equal_models = true;
-    check_phase = false;
-    insert_model = false;
+		   "predictor frequency mismatch: from=%lf != into=%lf \n\t"
+	           "from centre frequency=%lf",
+		   from_frequency, into_frequency, centre_frequency);
   }
   else
     check_phase = true;
