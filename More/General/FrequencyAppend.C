@@ -85,7 +85,7 @@ void Pulsar::FrequencyAppend::combine (Archive* into, Archive* from)
 
     if (model_frequency != centre_frequency)
       throw Error (InvalidState, "Pulsar::FrequencyAppend::combine",
-		   "centre frequency=%d != phase model observing frequency=%d",
+		   "centre frequency=%lf != predictor observing frequency=%lf",
 		   centre_frequency, model_frequency);
 
     if (Archive::verbose > 2)
