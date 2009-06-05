@@ -157,6 +157,12 @@ void Pulsar::BinLngAscOrder::append (Archive* thiz, const Archive* that)
 
 void Pulsar::BinLngAscOrder::combine (Archive* arch, unsigned nscr)
 {
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::BinLngAscOrder::combine nscr=" << nscr << endl;
+
+  if (nscr == 0)
+    return;
+
   vector<double> oldind = indices;
   
   unsigned newsub = 0;

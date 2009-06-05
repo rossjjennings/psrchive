@@ -151,6 +151,12 @@ void Pulsar::BinaryPhaseOrder::append (Archive* thiz, const Archive* that)
 
 void Pulsar::BinaryPhaseOrder::combine (Archive* arch, unsigned nscr)
 {
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::BinaryPhaseOrder::combine nscr=" << nscr << endl;
+
+  if (nscr == 0)
+    return;
+
   vector<double> oldind = indices;
   
   unsigned newsub = 0;

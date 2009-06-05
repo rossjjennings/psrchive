@@ -150,6 +150,12 @@ void Pulsar::PeriastronOrder::append (Archive* thiz, const Archive* that)
 
 void Pulsar::PeriastronOrder::combine (Archive* arch, unsigned nscr)
 {
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::PeriastronOrder::combine nscr=" << nscr << endl;
+
+  if (nscr == 0)
+    return;
+
   vector<double> oldind(indices);
   
   unsigned newsub = 0;
