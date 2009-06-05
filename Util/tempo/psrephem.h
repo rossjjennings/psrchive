@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.47 $
-   $Date: 2009/03/17 06:43:42 $
+   $Revision: 1.48 $
+   $Date: 2009/06/05 09:01:59 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -56,9 +56,6 @@ class psrephem : public Pulsar::Parameters
   //! Return the rotation measure
   double get_rotation_measure () const;
 
-  // this string needs to be long enough to hold the above-defined MACRO
-  static std::vector<std::string> extensions();
-
   // makes tex_descriptor return short_tex_descriptor
   static bool short_tex;
 
@@ -82,10 +79,6 @@ class psrephem : public Pulsar::Parameters
   psrephem& operator = (const psrephem &);
 
   void zero ();
-
-  int create (const char* psr_name, int use_cwd=0);
-  int create (const std::string& psr_name, int use_cwd=0)
-    { return create (psr_name.c_str(), use_cwd); }
 
   int load   (const std::string& filename);
   int unload (const std::string& fname) const;
@@ -237,8 +230,6 @@ class psrephem : public Pulsar::Parameters
 
   // returns the directory path in which psrinfo will be run
   std::string get_directory ();
-
-  std::string par_lookup (const char* name, int use_cwd);
 
   // this is specifically for the older style ephemeris file
   // inserts the ephemeris values into the val_str, val_double,

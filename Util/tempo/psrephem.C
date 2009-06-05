@@ -38,18 +38,6 @@ Legacy::psrephem::~psrephem()
   destroy();
 }
 
-
-// defines the recognized filename extensions used for pulsar ephemeris files
-vector<string> Legacy::psrephem::extensions ()
-{
-  vector <string> retval;
-
-  retval.push_back (string (".eph"));
-  retval.push_back (string (".par"));
-
-  return retval;
-}
-
 bool Pulsar::Parameters::verbose = 0;
 
 void Legacy::psrephem::init()
@@ -120,16 +108,6 @@ void Legacy::psrephem::destroy()
   init ();
 }
 
-Legacy::psrephem::psrephem (const char* psr_name, int use_cwd)
-{
-  init();
-  if (create (psr_name, use_cwd) < 0) {
-    fprintf (stderr, "Legacy::psrephem::psrephem error creating epemeris for %s.\n",
-	     psr_name);
-    throw Error(FailedCall, "Legacy::psrephem::psrephem");
-  }
-}
-
 Legacy::psrephem::psrephem (const char* filename)
 {
   init();
@@ -137,26 +115,6 @@ Legacy::psrephem::psrephem (const char* filename)
     fprintf (stderr, "Legacy::psrephem::psrephem error loading %s.\n", filename);
     throw Error(FailedCall, "Legacy::psrephem::psrephem");
   }
-}
-
-int Legacy::psrephem::create (const char* psr_name, int use_cwd)
-{
-  if (verbose)
-    fprintf (stderr, "Legacy::psrephem::create '%s'\n", psr_name);
- 
-  string filename = par_lookup (psr_name, use_cwd);
-  if (filename.empty()) {
-    fprintf (stderr, "Legacy::psrephem::create no ephemeris file for %s found.\n",
-	     psr_name);
-    return -1;
-  }
-  if (verbose)
-    fprintf (stderr, "Legacy::psrephem::create loading '%s'\n", filename.c_str());
-  if (load (filename.c_str()) < 0) {
-    fprintf (stderr, "Legacy::psrephem::create error loading %s.\n", filename.c_str());
-    return -1;
-  }
-  return 0;
 }
 
 int Legacy::psrephem::load (const std::string& filename)
@@ -275,121 +233,6 @@ int Legacy::psrephem::old_unload (const std::string& filename) const
   return 0;
 }
 
-string Legacy::psrephem::par_lookup (const char* name, int use_cwd) try
-{
-  string psr_name;
-
-  if (name[0] == 'J' || name[0] == 'B')
-    psr_name = name + 1;
-  else
-    psr_name = name;
-
-  if (use_cwd) {
-    vector <string> exts = extensions ();
-    for (unsigned iext=0; iext < exts.size(); iext++)
-    {
-      /* Look for jname.ext in current directory */
-      string filename = psr_name + exts[iext];
-      if (file_exists(filename.c_str()))
-      {
-	if (verbose)
-	  cerr << "Legacy::psrephem::Using " << filename << " from cwd" << endl;
-	return filename;
-      }
-    }
-  }
-
-  string tempo_pardir = Tempo::get_configuration("PARDIR");
-
-  if (tempo_pardir.length())
-  {
-    vector <string> exts = extensions ();
-    for (unsigned iext=0; iext < exts.size(); iext++)
-    {
-      string filename = tempo_pardir + psr_name + exts[iext];
-
-      if (verbose)
-	cerr << "Legacy::psrephem::par_lookup in TEMPO PARDIR '" 
-	     << filename << "'" << endl;
-
-      if (file_exists(filename.c_str()))
-      {
-	if (verbose)
-	  cerr << "Legacy::psrephem:: Using " << filename 
-	       << " from PARDIR:" << tempo_pardir << endl;
-	return filename;
-      }
-    }
-  }
-  
-  /* Create name.eph in local directory */ 
-
-#ifdef HAVE_PSRCAT
-
-  string command = "psrcat -e " + psr_name + " > " + psr_name + ".eph";
-  string catalogue = "psrcat";
-
-#else
-
-  string command = "psrinfo -e " + psr_name;
-  string catalogue = "psrinfo";
-
-#endif
-
-  if (verbose)
-    cerr << "Legacy::psrephem:: Creating ephemeris by " << catalogue 
-	 << " -e " << psr_name <<endl;
-
-  // start with a clean working directory
-  removedir (Tempo::get_directory().c_str());
-
-  char cwd[FILENAME_MAX];
-
-  if (getcwd (cwd, FILENAME_MAX) == NULL)
-    throw Error (FailedSys, "psrephem", "failed getcwd");
-
-  // note that Tempo::get_directory creates the directory if it doesn't exist
-  if (chdir (Tempo::get_directory().c_str()) != 0)
-    throw Error (FailedSys, "psrephem",
-		 "failed chdir(" + Tempo::get_directory() + ")");
-
-  int retval = system(command.c_str());
-
-  if (chdir (cwd) != 0)
-    throw Error (FailedSys, "psrephem", "failed chdir(%s)", cwd);
-
-  if (retval != 0)
-  {
-    cerr << "Legacy::psrephem:: Error executing system (" + command + ")" << endl;
-    return "";
-  }
-
-  vector<string> filenames;
-  dirglob (&filenames, Tempo::get_directory() + "/*.eph");
-
-  if (filenames.size() != 1)
-    throw Error (InvalidState, "psrephem", "%s created %d files",
-		 catalogue.c_str(),filenames.size());
-
-  string filename = filenames[0];
-
-  if (file_exists(filename.c_str()))
-  {
-    if (verbose)
-      cerr << "Legacy::psrephem:: Using '" + filename + "'" << endl;
-    return filename;
-  }
-
-  if (verbose)
-    fprintf (stderr, "Legacy::psrephem:: Cannot find %s after call to %s.\n", 
-	     filename.c_str(),catalogue.c_str());
-
-  return "";
-}
-catch (Error& error)
-{
-  throw error += "Legacy::psrephem::par_lookup";
-}
 
 string Legacy::psrephem::psrname() const
 {
