@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Parameters.h,v $
-   $Revision: 1.6 $
-   $Date: 2009/03/15 06:55:52 $
+   $Revision: 1.7 $
+   $Date: 2009/06/05 09:01:54 $
    $Author: straten $ */
 
 #ifndef __PulsarParameters_h
@@ -29,6 +29,8 @@ namespace Pulsar {
 
     //! Verbosity flag
     static bool verbose;
+
+    class Lookup;
 
     //! Factory helper creates a vector of pointers to derived class instances
     static void children (std::vector< Reference::To<Parameters> >&);
