@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.48 $
-   $Date: 2009/06/05 09:01:59 $
+   $Revision: 1.49 $
+   $Date: 2009/06/06 11:24:31 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -73,7 +73,6 @@ class psrephem : public Pulsar::Parameters
 
   psrephem (const psrephem &);
 
-  psrephem (const char* psr_name, int use_cwd);
   psrephem (const char* filename);
 
   psrephem& operator = (const psrephem &);
