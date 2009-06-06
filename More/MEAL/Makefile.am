@@ -17,6 +17,7 @@ nobase_include_HEADERS = \
         MEAL/ChainParameters.h \
         MEAL/Coherency.h \
         MEAL/Complex2Constant.h \
+	MEAL/Complex.h \
         MEAL/Complex2.h \
         MEAL/Complex2Math.h \
         MEAL/Complex2Value.h \
@@ -25,6 +26,7 @@ nobase_include_HEADERS = \
         MEAL/Constant.h \
         MEAL/CyclicParameter.h \
 	MEAL/Depolarizer.h \
+	MEAL/Evaluable.h \
         MEAL/EvaluationPolicy.h \
 	MEAL/EvaluationTracer.h \
         MEAL/ForwardChanged.h \
@@ -113,6 +115,7 @@ libMEAL_la_SOURCES = \
         Boost.C \
 	Boost1.C \
         Coherency.C \
+	Complex.C \
         Complex2.C \
         Complex2Constant.C \
         Complex2Math.C \

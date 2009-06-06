@@ -261,9 +261,7 @@ double MEAL::ScalarMath::evaluate () const
 //! Evaluate the expression and its estimated error
 Estimate<double> MEAL::ScalarMath::get_Estimate () const
 {
-  Estimate<double> value;
-  expression->evaluate( value );
-  return value;
+  return expression->estimate ();
 }
 
 using namespace MEAL;

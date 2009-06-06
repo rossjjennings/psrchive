@@ -170,9 +170,7 @@ get_response (const Pulsar::PolnCalibrator* response,
       continue;
     }
 
-    Jones< Estimate<double> > value;
-    response->get_transformation (response_ichan+i) -> evaluate (value);
-    result += value;
+    result += response->get_transformation (response_ichan+i) -> estimate ();
     valid = true;
   }
 
