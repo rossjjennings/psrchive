@@ -24,7 +24,10 @@ qt_fileParams::qt_fileParams ( const QString& startname, QWidget* parent )
 
   QStringList filter;
  
-  vector<string> ephext = Legacy::psrephem::extensions ();
+  vector<string> ephext;
+  ephext.push_back(".eph");
+  ephext.push_back(".par");
+
   for (vector<string>::iterator str = ephext.begin();
        str != ephext.end(); str ++)
     filter.append ( intro + QString( str->c_str() ) + close );

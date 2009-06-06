@@ -83,7 +83,10 @@ void Rhythm::command_line_parse (int argc, char** argv)
   // read any remaining options as filenames or a basename
   string basename;
 
-  vector<string> ephext = psrephem::extensions();
+  vector<string> ephext;
+  ephext.push_back(".eph");
+  ephext.push_back(".par");
+
   if (vverbose) {
     cerr << "psrephem extensions: ";
     for (unsigned iext=0; iext < ephext.size(); iext++)
