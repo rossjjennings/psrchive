@@ -19,6 +19,7 @@ nobase_include_HEADERS = \
         Pulsar/Config.h \
         Pulsar/Container.h \
 	Pulsar/Correction.h \
+	Pulsar/DataExtension.h \
         Pulsar/ExampleArchive.h \
 	Pulsar/FITSAlias.h \
         Pulsar/Integration.h \
