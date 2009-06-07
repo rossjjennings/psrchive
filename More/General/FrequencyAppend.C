@@ -151,17 +151,13 @@ try
   if (check_phase && into->get_dedispersed())
   {
     Dispersion xform;
-    xform.set_reference_frequency( into->get_centre_frequency() );
-    xform.set_dispersion_measure( into->get_dispersion_measure() );
-    xform.execute1 (from);
+    xform.match (into, from);
   }
 
   if (into->get_faraday_corrected())
   {
     FaradayRotation xform;
-    xform.set_reference_frequency( into->get_centre_frequency() );
-    xform.set_rotation_measure( into->get_rotation_measure() );
-    xform.execute1 (from);
+    xform.match (into, from);
   }
 }
 catch (Error& error)
