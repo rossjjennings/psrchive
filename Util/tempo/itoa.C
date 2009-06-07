@@ -9,6 +9,7 @@
 #include "tempo_impl.h"
 
 #include <string.h>
+#include <assert.h>
 
 using namespace std;
 
@@ -65,6 +66,8 @@ static int default_aliases ()
   return 1;
 }
 
+static int init = default_aliases();
+
 class aliases
 {
 public:
@@ -74,7 +77,7 @@ public:
     aka.push_back (alias);
   }
 
-  bool match (const string& name)
+  bool match (const string& name) const
   {
     for (unsigned i=0; i<aka.size(); i++)
       if (strcasecmp (aka[i].c_str(), name.c_str()) == 0)
@@ -86,18 +89,17 @@ public:
   vector<string> aka;
 };
 
-static int init = 0;
-
-static vector<aliases> itoa_aliases;
+static vector<aliases>* itoa_aliases = 0;
 
 string Tempo::itoa_code (const string& telescope_name)
 {
-  if (!init)
-    default_aliases ();
+  assert (itoa_aliases != 0);
 
-  for (unsigned i=0; i<itoa_aliases.size(); i++)
-    if (itoa_aliases[i].match( telescope_name ))
-      return itoa_aliases[i].itoa_code;
+  const vector<aliases>& itoa = *itoa_aliases;
+
+  for (unsigned i=0; i<itoa.size(); i++)
+    if (itoa[i].match( telescope_name ))
+      return itoa[i].itoa_code;
 
   cerr << "itoa_code no alias found for " << telescope_name << endl;
 
@@ -106,14 +108,19 @@ string Tempo::itoa_code (const string& telescope_name)
 
 void add_alias (const string& itoa_code, const string& alias)
 {
-  for (unsigned i=0; i<itoa_aliases.size(); i++)
-    if (itoa_aliases[i].itoa_code == itoa_code)
+  if (!itoa_aliases)
+    itoa_aliases = new vector<aliases>;
+
+  vector<aliases>& itoa = *itoa_aliases;
+
+  for (unsigned i=0; i<itoa.size(); i++)
+    if (itoa[i].itoa_code == itoa_code)
     {
-      itoa_aliases[i].aka.push_back (alias);
+      itoa[i].aka.push_back (alias);
       return;
     }
 
-  itoa_aliases.push_back ( aliases( itoa_code, alias ) );
+  itoa.push_back ( aliases( itoa_code, alias ) );
 }
 
 
