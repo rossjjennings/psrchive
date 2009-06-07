@@ -24,6 +24,7 @@ include_HEADERS = \
         Jones.h \
         Matrix.h \
         ModifyRestore.h \
+	OwnStream.h \
         pad.h \
         Pauli.h \
         Quaternion.h \
@@ -54,6 +55,7 @@ libunits_la_SOURCES = \
 	escape.C \
 	FilePtr.C \
         HeapTracked.C \
+	OwnStream.C \
         pad.C \
         Pauli.C \
         ReferenceAble.C \
