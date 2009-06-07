@@ -29,17 +29,11 @@ int main (int argc, char** argv)
 
   fprintf (stderr, "Loading TEMPO Parameters\n");
 
-  if (argc == 2) {
-    fprintf (stderr, "Pulsar name: '%s'\n", argv[1]);
-    eph = new psrephem (argv[1], 0);
-  }
-  else {
-    if (argc > 2 && string(argv[1]) == "-f")
-      filename = argv[2];
+  if (argc > 2 && string(argv[1]) == "-f")
+    filename = argv[2];
 
-    fprintf (stderr, "Loading file: '%s'\n", filename.c_str());
-    eph = new psrephem (filename.c_str());
-  }
+  fprintf (stderr, "Loading file: '%s'\n", filename.c_str());
+  eph = new psrephem (filename.c_str());
 
   string tfile = "test.psrephem.out1";
 
