@@ -288,7 +288,9 @@ int polynomial::load (string* instr)
 // ///////////////////////////////////////////////////////////////////
 int polynomial::unload (string* outstr) const
 {
-  char numstr[100];  // max length of string set by princeton at 86...
+  vector<char> temp (100);  // max length of string set by princeton at 86...
+  char* numstr = &(temp[0]);
+
   int bytes = 0;
 
   if (tempov11)
