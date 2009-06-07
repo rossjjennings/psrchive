@@ -57,6 +57,7 @@ libunits_la_SOURCES = \
         HeapTracked.C \
 	OwnStream.C \
         pad.C \
+	parse_indeces.C \
         Pauli.C \
         ReferenceAble.C \
         separate.C \

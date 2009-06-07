@@ -1,9 +1,16 @@
+//-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+/* $Source: /cvsroot/psrchive/psrchive/Util/units/TextInterface.h,v $
+   $Revision: 1.52 $
+   $Date: 2009/06/07 20:22:10 $
+   $Author: straten $ */
+
 #ifndef __TextInterface_h
 #define __TextInterface_h
 
