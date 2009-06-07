@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ColdPlasma.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/11/13 07:34:46 $
+   $Revision: 1.12 $
+   $Date: 2009/06/07 05:41:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ColdPlasma_h
@@ -89,6 +89,9 @@ namespace Pulsar {
     //! Undo the correction
     /* \post All data will be uncorrected to the reference frequency */
     void revert1 (Integration*);
+
+    //! Correct the second argument as the first argument was corrected
+    void match (const Integration* reference, Integration* to_be_corrected);
 
     //! Set the reference wavelength in metres
     void set_reference_wavelength (double metres);
@@ -306,6 +309,21 @@ catch (Error& error)
   throw error += "Pulsar::"+name+"::revert1";
 }
 
+//! Correct the second argument as the first argument was corrected
+template<class C, class History>
+void Pulsar::ColdPlasma<C,History>::match (const Integration* reference,
+					   Integration* to_correct)
+{
+  const History* corrected = reference->template get<History>();
+  if (!corrected)
+    throw Error (InvalidState, "Pulsar::" + name + "::match",
+		 "reference has no correction history");
+
+  set_measure( corrected->get_measure() );
+  set_reference_wavelength( corrected->get_reference_wavelength() );
+ 
+  execute1( to_correct );
+}
 
 /*! This worker method performs the correction on a specified range
     of frequency channels
