@@ -20,8 +20,6 @@ class CommandParser : public Reference::Able {
 
   //! verbose output from CommandParser methods
   static bool debug;
-  //! process 'init' and 'end' commands
-  static bool startCommand, endCommand;
 
   //! the prompt shown to the user
   std::string prompt;
@@ -136,6 +134,9 @@ class CommandParser : public Reference::Able {
   //! the current command
   std::string current_command;
 
+  //! process 'init' and 'end' commands
+  bool startCommand, endCommand;
+
   // readline interface
   static char** completion (const char *text, int start, int end);
   
@@ -213,7 +214,6 @@ template <class Parser> class Command : public CommandParser::Method
 
   //! The detailed help string for this method
   std::string detailed_help;
-
 };
 
 //! derived types may add commands to the list using this method

@@ -12,8 +12,6 @@
 using namespace std;
 
 bool CommandParser::debug = false;
-bool CommandParser::startCommand = true;
-bool CommandParser::endCommand = false;
 
 CommandParser::CommandParser()
 {
@@ -21,6 +19,9 @@ CommandParser::CommandParser()
   verbose = false;
   fault = false;
   abort = true;
+
+  startCommand = true;
+  endCommand = false;
 }
 
 CommandParser::~CommandParser()
