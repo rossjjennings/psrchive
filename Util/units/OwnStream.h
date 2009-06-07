@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/OwnStream.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/06/07 00:01:35 $
+   $Revision: 1.2 $
+   $Date: 2009/06/07 01:11:27 $
    $Author: straten $ */
 
 #ifndef __OwnStream_h
 #define __OwnStream_h
 
-#include "ReferenceAble.h"
+#include "Reference.h"
 #include <ostream>
 
 //! Redefines cerr and cout as attributes of the class
@@ -32,11 +32,14 @@ class OwnStream : public Reference::Able
   //! Copy constructor
   OwnStream (const OwnStream&);
 
+  //! Assignment operator
+  const OwnStream& operator = (const OwnStream&);
+
   //! Set cout
-  void set_cout (std::ostream&) const;
+  virtual void set_cout (std::ostream&) const;
 
   //! Set cerr
-  void set_cerr (std::ostream&) const;
+  virtual void set_cerr (std::ostream&) const;
 
  protected:
 

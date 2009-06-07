@@ -20,8 +20,18 @@ OwnStream::OwnStream (const OwnStream&)
 {
 }
 
-//! Set verbosity ostream
+//! Assignment operator
+const OwnStream& OwnStream::operator = (const OwnStream&)
+{
+}
+
+void OwnStream::set_cout (std::ostream& os) const
+{
+  cout.rdbuf( os.rdbuf() );
+}
+
 void OwnStream::set_cerr (std::ostream& os) const
 {
   cerr.rdbuf( os.rdbuf() );
 }
+
