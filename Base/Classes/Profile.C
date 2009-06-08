@@ -74,7 +74,7 @@ void Pulsar::Profile::init()
 Pulsar::Profile::Profile (unsigned nbin) : ProfileAmps (nbin)
 {
   init();
-  if (nbin)
+  if (!no_amps && nbin)
     zero ();
 }
 
