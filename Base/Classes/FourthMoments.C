@@ -56,6 +56,11 @@ void Pulsar::FourthMoments::fold (unsigned nfold)
   MoreProfiles::scale (1.0/nfold);
 }
 
+void Pulsar::FourthMoments::pscrunch ()
+{
+  delete this;
+}
+
 // defined in Profile_average.C
 void weighted_average (Pulsar::Profile* result,
 		       const Pulsar::Profile* other,

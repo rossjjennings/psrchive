@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/FourthMoments.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/06/08 19:12:58 $
+   $Revision: 1.3 $
+   $Date: 2009/06/08 19:23:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FourthMoments_h
@@ -46,6 +46,9 @@ namespace Pulsar
 
     //! average information from another MoreProfiles
     void average (const MoreProfiles*);
+
+    //! self destruct on pscrunch
+    void pscrunch ();
 
   };
 
