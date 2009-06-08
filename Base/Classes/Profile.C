@@ -384,6 +384,11 @@ void Pulsar::Profile::logarithm (double base, double threshold)
   }
 }
 
+void Pulsar::Profile::pscrunch ()
+{
+  foreach<DataExtension> (this, &DataExtension::pscrunch);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Profile::fold

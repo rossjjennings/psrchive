@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.111 $
-   $Date: 2009/06/08 19:12:58 $
+   $Revision: 1.112 $
+   $Date: 2009/06/08 19:23:37 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -207,6 +207,9 @@ namespace Pulsar {
 
     //! cross-correlates this with the given profile in time domain
     void correlate (const Profile* profile); 
+
+    //! some extensions may have to respond to pscrunch
+    void pscrunch ();
 
     //! integrate neighbouring phase bins in profile
     void bscrunch (unsigned nscrunch);

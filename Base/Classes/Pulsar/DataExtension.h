@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/DataExtension.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/06/08 19:12:58 $
+   $Revision: 1.3 $
+   $Date: 2009/06/08 19:23:37 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Data_Extension_h
@@ -56,6 +56,8 @@ namespace Pulsar
     //! integrate neighbouring sections of the profile
     virtual void fold (unsigned nfold) = 0;
 
+    //! some extensions may have to respond to pscrunching
+    virtual void pscrunch () {}
   };
 
 }
