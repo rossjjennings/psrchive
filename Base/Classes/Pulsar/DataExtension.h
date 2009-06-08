@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/DataExtension.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/05/26 03:45:56 $
+   $Revision: 1.2 $
+   $Date: 2009/06/08 19:12:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Data_Extension_h
@@ -18,16 +18,22 @@
 
 namespace Pulsar
 {
-  /*! Profile Extension with data */
+  /*! Profile Extension with extra phase-resolved data */
   class DataExtension : public Profile::Extension
   {
   public:
 
     //! Construct with a name
-    DataExtension (const char* name);
-    
+    DataExtension (const char* name) : Profile::Extension (name) { }
+
+    //! Get the number of phase bins in the extra data
+    virtual unsigned get_nbin() const = 0;
+   
     //! Resize the data area
     virtual void resize (unsigned nbin) = 0;
+
+    //! set the weight of the profile
+    virtual void set_weight (float wt) = 0;
 
     //! multiplies each bin of the profile by scale
     virtual void scale (double scale) = 0;

@@ -201,7 +201,6 @@ libGeneral_la_SOURCES = \
         Profile_find_minmax_phase.C \
         Profile_find_peak_edges.C \
         Profile_find_transitions.C \
-        Profile_rotate.C \
         Profile_shift.C \
         Profile_snr.C \
         Profile_stats.C \

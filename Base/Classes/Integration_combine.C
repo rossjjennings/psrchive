@@ -41,11 +41,9 @@ void Pulsar::Integration::combine (const Integration* from)
   if (!mixable(from, reason))
     throw Error(InvalidParam, "Pulsar::IntegrationOrder::combine", reason);
   
-  for (unsigned i = 0; i < get_nchan(); i++) {
-    for (unsigned j = 0; j < get_npol(); j++) {
-      *(get_Profile(j,i)) += *(from->get_Profile(j,i));
-    } 
-  }
+  for (unsigned i = 0; i < get_nchan(); i++)
+    for (unsigned j = 0; j < get_npol(); j++)
+      get_Profile(j,i)->average( from->get_Profile(j,i) );
   
   double total = get_duration() + from->get_duration();
   

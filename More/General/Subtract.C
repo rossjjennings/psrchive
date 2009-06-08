@@ -10,5 +10,5 @@
 
 void Pulsar::Subtract::transform (Profile* profile)
 {
-  profile->operator-=( *get_operand() );
+  profile->diff( get_operand() );
 }

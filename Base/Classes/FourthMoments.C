@@ -13,6 +13,11 @@ Pulsar::FourthMoments::FourthMoments (const char* name)
 {
 }
 
+Pulsar::FourthMoments* Pulsar::FourthMoments::clone () const
+{
+  return new FourthMoments (*this);
+}
+
 //! multiplies each bin of the profile by scale
 void Pulsar::FourthMoments::scale (double scale)
 {
@@ -49,4 +54,21 @@ void Pulsar::FourthMoments::fold (unsigned nfold)
 {
   MoreProfiles::fold (nfold);
   MoreProfiles::scale (1.0/nfold);
+}
+
+// defined in Profile_average.C
+void weighted_average (Pulsar::Profile* result,
+		       const Pulsar::Profile* other,
+		       bool second_moment);
+
+//! average information from another MoreProfiles
+void Pulsar::FourthMoments::average (const MoreProfiles* more)
+{
+  const FourthMoments* fourth = dynamic_cast<const FourthMoments*> (more);
+  if (!fourth)
+    return;
+
+  const unsigned nprof = profile.size();
+  for (unsigned iprof=0; iprof < nprof; iprof++)
+    weighted_average (get_Profile(iprof), more->get_Profile(iprof), true);
 }

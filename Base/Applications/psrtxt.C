@@ -4,9 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/MoreProfiles.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -27,6 +29,7 @@ void usage ()
     "\n"
     "  -p phase   select a single phase, from 0.0 to 1.0 (overrides -b) \n"
     "  -m         search for minimum and maximum value in data \n"
+    "  -a         access auxiliary data \n"
     "\n"
     "Each row output by psrtxt contains:\n"
     "\n"
@@ -67,6 +70,8 @@ int main (int argc, char** argv) try
 {
   bool minmax = false;
   bool phase_chosen = false;
+  bool auxiliary = false;
+
   float phase = 0.0;
 
   int cbin  = -1;
@@ -75,7 +80,7 @@ int main (int argc, char** argv) try
   int cpol  = -1;
 
   char c;
-  while ((c = getopt(argc, argv, "b:c:i:mp:s:hqvV")) != -1) 
+  while ((c = getopt(argc, argv, "ab:c:i:mp:s:hqvV")) != -1) 
 
     switch (c)  {
 
@@ -90,6 +95,10 @@ int main (int argc, char** argv) try
       break;
     case 'q':
       Pulsar::Archive::set_verbosity (0);
+      break;
+
+    case 'a':
+      auxiliary = true;
       break;
 
     case 'b':
@@ -133,6 +142,9 @@ int main (int argc, char** argv) try
   unsigned npol = archive->get_npol();
   unsigned nbin = archive->get_nbin();
 
+  if (auxiliary)
+    npol=archive->get_Profile(0,0,0)->get<Pulsar::MoreProfiles>()->get_size();
+
   if (phase_chosen)
     cbin = int (phase * (nbin-1));
 
@@ -145,6 +157,12 @@ int main (int argc, char** argv) try
   if (cchan > 0 && unsigned(cchan) >= nchan)
   {
     cerr << "psrtxt: -c " << cchan << " >= nchan=" << nchan << endl;
+    return -1;
+  }
+
+  if (cpol > 0 && unsigned(cpol) >= npol)
+  {
+    cerr << "psrtxt: -c " << cpol << " >= npol=" << npol << endl;
     return -1;
   }
 
@@ -181,7 +199,14 @@ int main (int argc, char** argv) try
 	  if (cpol >= 0)
 	    ipol = cpol;
 
-	  float value = integration->get_Profile(ipol,ichan)->get_amps()[ibin];
+	  Pulsar::Profile* profile = integration->get_Profile (0,ichan);
+
+	  if (auxiliary)
+	    profile = profile->get<Pulsar::MoreProfiles>()->get_Profile(ipol);
+	  else
+	    profile = integration->get_Profile (ipol,ichan);
+
+	  float value = profile->get_amps()[ibin];
 
 	  if (minmax)
 	  {

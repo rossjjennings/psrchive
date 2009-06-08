@@ -273,7 +273,7 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
 	for (unsigned jsub=start+1; jsub<stop; jsub++)
         {
 	  add = archive->get_Profile (jsub, ipol, ichan);
-	  *(avg) += *(add);
+	  avg->average (add);
 	}
       } // for each poln
     } // for each channel

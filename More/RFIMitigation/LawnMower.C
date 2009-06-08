@@ -130,7 +130,7 @@ bool Pulsar::LawnMower::build_mask (Profile* profile)
     median( smoothed );
 
     Reference::To<Profile> difference = new Profile( *profile );
-    *difference -= *smoothed;
+    difference->diff (smoothed);
 
     /*
       The difference between the profile and its median smoothed

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.110 $
-   $Date: 2009/05/26 03:48:54 $
+   $Revision: 1.111 $
+   $Date: 2009/06/08 19:12:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -76,14 +76,8 @@ namespace Pulsar {
     //! sets profile equal to another profile
     const Profile& operator = (const Profile& profile);
 
-    //! calculates weighted average of profile and another profile
-    const Profile& operator += (const Profile& profile);
-
-    //! calculates weighted average difference of profile and another profile
-    const Profile& operator -= (const Profile& profile);
-
-    //! calculates the weighted sum/difference
-    const Profile& average (const Profile* profile, double sign);
+    //! set this to the weighted average of this and that
+    void average (const Profile* that);
 
     //! add profile to this
     void sum (const Profile* profile);
@@ -203,12 +197,7 @@ namespace Pulsar {
     //! get the weight of the profile
     float get_weight () const { return weight; }
     //! set the weight of the profile
-    virtual void set_weight (float wt) { weight = wt; }
-
-    //! get the state of the polarization measurement
-    Signal::Component get_state () const { return state; }
-    //! set the state of the polarization measurement
-    virtual void set_state (Signal::Component _state) { state = _state; }
+    virtual void set_weight (float);
 
     //! convolves this with the given profile (using fft method)
     void fft_convolve (const Profile* profile); 
@@ -286,9 +275,6 @@ namespace Pulsar {
 
     //! weight of profile
     float weight;
-
-    //! polarization measure of amplitude data
-    Signal::Component state;
 
     //! The Extensions added to this Profile instance
     mutable std::vector< Reference::To<Extension> > extension;

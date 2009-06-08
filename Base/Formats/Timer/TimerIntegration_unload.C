@@ -62,15 +62,15 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
 		   << npol << " nchan=" << nchan << endl;
 
   for (unsigned ipol=0; ipol<npol; ipol++)
-    for (unsigned ichan=0; ichan<nchan; ichan++) try {
-	
+    for (unsigned ichan=0; ichan<nchan; ichan++) try
+    {
       if (verbose) cerr << "TimerIntegration::unload ipol=" << ipol 
                         << "\t ichan=" << ichan << endl;
 	
-      TimerProfile_unload (fptr, profiles[ipol][ichan]);
-	
+      TimerProfile_unload (fptr, profiles[ipol][ichan], ipol);
     }
-    catch (Error& error) {
+    catch (Error& error)
+    {
       error << "\n\tprofile[ipol=" << ipol << "][ichan=" << ichan << "]";
       throw error += "TimerIntegration::unload";
     }

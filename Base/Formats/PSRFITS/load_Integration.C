@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -11,7 +11,10 @@
 
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Integration.h"
+
 #include "Pulsar/Profile.h"
+#include "Pulsar/FourthMoments.h"
+#include "Pulsar/ProfileColumn.h"
 
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Pointing.h"
@@ -20,6 +23,7 @@
 
 #include "Pulsar/Predictor.h"
 
+#include "setup_profiles.h"
 #include "psrfitsio.h"
 
 using namespace std;
@@ -62,10 +66,10 @@ try {
   fitsfile* fptr = 0;
   
   if (verbose > 2)
-    cerr << "FITSArchive::load_Integration fits_open_file (" 
-	 << filename << ")" << endl;
+    cerr << "FITSArchive::load_Integration"
+      " fits_open_file (" << filename << ")" << endl;
   
-  fits_open_file(&fptr, filename, READONLY, &status);
+  fits_open_file (&fptr, filename, READONLY, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Integration", 
@@ -288,6 +292,16 @@ try {
 
   resize_Integration (integ);
 
+  const unsigned nchan = get_nchan();
+
+  if (naux_profile)
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+    {
+      FourthMoments* fourth = new FourthMoments;
+      fourth->resize (naux_profile, get_nbin());
+      integ->get_Profile(0,ichan)->add_extension (fourth);
+    }
+
   // Load the channel centre frequencies
   
   if (verbose > 2)
@@ -370,37 +384,24 @@ try {
   
   if (!Profile::no_amps)
   {
-    colnum = 0;
-    fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status);
-  
-    int typecode = 0;
-    long repeat = 0;
-    long width = 0;
-  
-    fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);  
+    vector<Profile*> profiles;
 
-    if (status != 0)
-      throw FITSError (status, "FITSArchive::load_Integration", 
-		       "fits_get_coltype DATA");
-    
-    if (typecode == TSHORT)
-      load_amps<short> (fptr, integ, isubint, colnum);
-    else if (typecode == TFLOAT)
-      load_amps<float> (fptr, integ, isubint, colnum);
-    else
-      throw Error( InvalidState, "FITSArchive::load_Integration",
-		   "unhandled DATA typecode=%s", fits_datatype_str(typecode) );
+    setup_profiles_dat (integ, profiles);
+    setup_dat_io (fptr);
+    dat_io->load (isubint + 1, profiles);
 
-  }
-  else // Profile::no_amps
-  {
-    // as far as I can tell this is all the above does if we're not
-    // interested in filling the profile amps -- redwards
-    Signal::Component polmeas = Signal::None;
-    for (unsigned a = 0; a < get_npol(); a++) {
-      for (unsigned b = 0; b < get_nchan(); b++) {
-	integ->get_Profile(a,b)->set_state(polmeas);
+    if (scale_cross_products && integ->get_state() == Signal::Coherence)
+      for (unsigned ichan=0; ichan < get_nchan(); ichan++)
+      {
+	integ->get_Profile(2, ichan)->scale(2.0);
+	integ->get_Profile(3, ichan)->scale(2.0);
       }
+
+    if (naux_profile)
+    {
+      setup_profiles<MoreProfiles> (integ, profiles);
+      setup_aux_io (fptr, naux_profile);
+      aux_io->load (isubint + 1, profiles);
     }
   }
 
@@ -413,128 +414,9 @@ try {
 
   return integ.release();
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::FITSArchive::load_Integration";
 }
 
-
-template<typename T>
-void Pulsar::FITSArchive::load_amps (fitsfile* fptr,
-				     Integration* integ,
-				     unsigned isubint,
-				     int data_colnum)
-try {
-
-  unsigned nchan = get_nchan();
-  unsigned npol = get_npol();
-  unsigned nbin = get_nbin();
-
-  float nullfloat = 0.0;
-  int row = isubint + 1;
-  
-  if (verbose > 2)
-    cerr << "Pulsar::FITSArchive::load_amps<> reading offsets" << endl;
-  
-  vector<float> offsets;
-  psrfits_read_col (fptr, "DAT_OFFS", offsets, row, nullfloat);
-
-  if (verbose > 2)
-    cerr << "Pulsar::FITSArchive::load_amps<> reading scales" << endl;
-
-  vector<float> scales;
-  psrfits_read_col (fptr, "DAT_SCL", scales, row, nullfloat);
-
-  if (offsets.size() != scales.size())
-    throw Error( InvalidState, "Pulsar::FITSArchive::load_amps<>",
-		 "DAT_OFFS size=%d != DAT_SCL size=%d",
-		 offsets.size(), scales.size() );
-
-  //
-  // the DAT_SCL and DAT_OFFS array size may be either npol*nchan or nchan
-  //
-  bool npol_by_nchan = false;
-  if (offsets.size() == npol * nchan)
-  {
-    if (verbose > 2)
-      cerr << "Pulsar::FITSArchive::load_amps<> ipol scaled" << endl;
-    npol_by_nchan = true;
-  }
-  else if (offsets.size() == nchan)
-  {
-    if (verbose > 2)
-      cerr << "Pulsar::FITSArchive::load_amps<> npol scaled" << endl;
-    npol_by_nchan = false;
-  }
-  else
-    throw Error( InvalidState, "Pulsar::FITSArchive::load_amps<>",
-		 "DAT_OFFS/DAT_SCL size=%d != nchan=%d or nchan*npol=%d",
-		 offsets.size(), nchan, nchan*npol );
-
-  // Load the data
-  
-  vector<T> temparray (nbin);
-  vector<float> fltarray (nbin);
-
-  if (verbose > 2)
-    cerr << "Pulsar::FITSArchive::load_amps<> reading data" << endl;
-  
-  T null = FITS_traits<T>::null();
-
-  int initflag = 0;
-  int status = 0;  
-  int counter = 1;
-
-  for (unsigned ipol = 0; ipol < npol; ipol++) {
-    for (unsigned ichan = 0; ichan < nchan; ichan++) {
-    
-      Profile* p = integ->get_Profile(ipol,ichan);
-      
-      fits_read_col (fptr, FITS_traits<T>::datatype(),
-		     data_colnum, row, counter, nbin, 
-		     &null, &(temparray[0]), &initflag, &status);
-
-      if (status != 0)
-	throw FITSError( status, "FITSArchive::load_amps",
-			 "Error reading subint data"
-			 " ipol=%d/%d ichan=%d/%d\n\t"
-			 "colnum=%d firstrow=%d firstelem=%d nelements=%d",
-			 ipol, npol, ichan, nchan, 
-			 data_colnum, row, counter, nbin );
-      
-      counter += nbin;
-
-      float scale = scales[ichan];
-      float offset = offsets[ichan];
-
-      if (npol_by_nchan)
-      {
-	scale = scales[ipol*nchan + ichan];
-	offset = offsets[ipol*nchan + ichan];
-      }
-
-#ifdef _DEBUG
-      cerr << " ipol=" << ipol << " ichan=" << ichan
-	   << " scale=" << scale << " offset=" << offset << endl;
-#endif
-
-      if (scale == 0.0)
-	scale = 1.0;
-
-      for(unsigned j = 0; j < nbin; j++) {
-	fltarray[j] = temparray[j] * scale + offset;
-	if (integ->get_state() == Signal::Coherence) {
-	  if (scale_cross_products && (ipol == 2 || ipol == 3))
-	    fltarray[j] *= 2;
-	}
-      }
-      
-      p->set_amps(fltarray);
-      p->set_state(Signal::None);
-      
-    }  
-  }
-}
-catch (Error& error) {
-  throw error += "Pulsar::FITSArchive::load_amps<>";
-}
 

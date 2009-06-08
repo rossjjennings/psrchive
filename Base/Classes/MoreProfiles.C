@@ -6,72 +6,136 @@
  ***************************************************************************/
 
 #include "Pulsar/MoreProfiles.h"
+#include "templates.h"
 
-    //! Construct with a name
+//! Construct with a name
 Pulsar::MoreProfiles::MoreProfiles (const char* name)
   : DataExtension (name)
 {
 }
 
-//! For each element of container C, call method M
-template<typename C, typename M>
-void foreach (C& container, M method)
+//! Copy constructor
+Pulsar::MoreProfiles::MoreProfiles (const MoreProfiles& other)
+  : DataExtension (other.get_extension_name().c_str())
 {
-  for_each (container.begin(), container.end(), std::mem_fun(method));
+  profile.resize (other.profile.size());
+  for (unsigned i=0; i<profile.size(); i++)
+    profile[i] = other.profile[i]->clone();
 }
 
-//! For each element of container C, call method M with argument A
-template<typename C, typename M, typename A>
-void foreach (C& container, M method, const A& a)
+//! resize the profile vector
+void Pulsar::MoreProfiles::resize (unsigned nprofile, unsigned nbin)
 {
-  for_each (container.begin(), container.end(),
-	    std::bind2nd( std::mem_fun(method), a ));
+  profile.resize (nprofile);
+  for (unsigned i=0; i<profile.size(); i++)
+  {
+    if (!profile[i])
+      profile[i] = new Profile (nbin);
+
+    profile[i]->resize (nbin);
+  }
 }
 
-//! Resize the data area
+//! get the size of the profile vector
+unsigned Pulsar::MoreProfiles::get_size () const
+{
+  return profile.size();
+}
+
+static void check (unsigned i, unsigned n)
+{
+  if (i >= n)
+    throw Error (InvalidParam, "Pulsar::MoreProfiles::get_Profile",
+		 "i=%u >= size=%u", i, n);
+}
+
+//! get the ith profile
+Pulsar::Profile* Pulsar::MoreProfiles::get_Profile (unsigned i)
+{
+  check (i, profile.size());
+  return profile[i];
+}
+
+//! get the ith profile
+const Pulsar::Profile* Pulsar::MoreProfiles::get_Profile (unsigned i) const
+{
+  check (i, profile.size());
+  return profile[i];
+}
+
+unsigned Pulsar::MoreProfiles::get_nbin () const try
+{
+  if (profile.size() == 0)
+    return 0;
+
+  return profile[0]->get_nbin();
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::MoreProfiles::get_nbin";
+}
+
 void Pulsar::MoreProfiles::resize (unsigned nbin)
 {
   foreach (profile, &Profile::resize, nbin);
 }
 
-//! multiplies each bin of the profile by scale
+void Pulsar::MoreProfiles::set_weight (float weight)
+{
+  foreach (profile, &Profile::set_weight, weight);
+}
+
 void Pulsar::MoreProfiles::scale (double scale)
 {
   foreach (profile, &Profile::scale, scale);
 }
 
-//! offsets each bin of the profile by offset
 void Pulsar::MoreProfiles::offset (double offset)
 {
   foreach (profile, &Profile::offset, offset);
 }
 
-//! rotates the profile by phase (in turns)
 void Pulsar::MoreProfiles::rotate_phase (double phase)
 {
   foreach (profile, &Profile::rotate_phase, phase);
 }
 
-//! set all amplitudes to zero
 void Pulsar::MoreProfiles::zero ()
 {
   foreach (profile, &Profile::zero);
 }
 
-//! integrate neighbouring phase bins in profile
 void Pulsar::MoreProfiles::bscrunch (unsigned nscrunch)
 {
   foreach (profile, &Profile::bscrunch, nscrunch);
 }
 
-//! integrate neighbouring phase bins in profile
 void Pulsar::MoreProfiles::bscrunch_to_nbin (unsigned nbin)
 {
   foreach (profile, &Profile::bscrunch_to_nbin, nbin);
 }
 
-//! integrate neighbouring sections of the profile
 void Pulsar::MoreProfiles::fold (unsigned nfold)
 {
   foreach (profile, &Profile::fold, nfold);
+}
+
+//! integrate information from another Profile
+void Pulsar::MoreProfiles::integrate (const Profile* p)
+{
+  Functor< void(const MoreProfiles*) > f (this, &MoreProfiles::average);
+  foreach<MoreProfiles> (p, f);
+}
+
+//! integrate data from another MoreProfiles
+void Pulsar::MoreProfiles::average (const MoreProfiles* that)
+{
+  if (this->profile.size() != that->profile.size())
+    throw Error (InvalidParam, "Pulsar::MoreProfiles::average",
+		 "this.size=%u != that.size=%u",
+		 this->profile.size(), that->profile.size());
+
+  const unsigned nprof = profile.size();
+  for (unsigned iprof=0; iprof < nprof; iprof++)
+    profile[iprof] -> average( that->profile[iprof] );
 }

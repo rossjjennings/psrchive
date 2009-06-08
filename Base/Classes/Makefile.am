@@ -22,6 +22,7 @@ nobase_include_HEADERS = \
 	Pulsar/DataExtension.h \
         Pulsar/ExampleArchive.h \
 	Pulsar/FITSAlias.h \
+	Pulsar/FourthMoments.h \
         Pulsar/Integration.h \
         Pulsar/IntegrationExpert.h \
         Pulsar/IntegrationExtension.h \
@@ -29,6 +30,7 @@ nobase_include_HEADERS = \
         Pulsar/IntegrationManager.h \
 	Pulsar/IntegrationMeta.h \
         Pulsar/IntegrationTI.h \
+	Pulsar/MoreProfiles.h \
         Pulsar/Profile.h \
 	Pulsar/ProfileAmps.h \
 	Pulsar/ProfileAmpsExpert.h \
@@ -66,6 +68,7 @@ libClasses_la_SOURCES = \
         Config.C \
         ExampleArchive.C \
 	FITSAlias.C \
+	FourthMoments.C \
         Integration.C \
         IntegrationManager.C \
 	IntegrationMeta.C \
@@ -75,7 +78,9 @@ libClasses_la_SOURCES = \
         Integration_mixable.C \
         Integration_resize.C \
         IntegrationTI.C \
+	MoreProfiles.C \
         Profile_average.C \
+	Profile_rotate.C \
         Profile.C \
 	ProfileAmps.C \
 	Pulsar.C \

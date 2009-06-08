@@ -13,6 +13,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+#include "Pulsar/ProfileColumn.h"
 #include "Pulsar/FITSHdrExtension.h"
 #include "Pulsar/FITSSUBHdrExtension.h"
 #include "Pulsar/ObsExtension.h"
@@ -54,7 +55,12 @@ void Pulsar::FITSArchive::init ()
 
   scale_cross_products = false;
   correct_P236_reference_epoch = false;
+
+  // folded mode by default
   search_mode = false;
+
+  // no auxiliary profiles
+  naux_profile = 0;
 }
 
 //
@@ -730,45 +736,14 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
   string clobbername = "!";
   clobbername += filename;
 
-  /* the following three commands:
-
-     fits_create_file
-     fits_execute_template
-     fits_movabs_hdu
-
-     are equivalent to:
-
-     fits_create_template
-
-     except that they do not cause segmentation faults.
-  */
-
-  if (verbose > 2)
-    cerr << "FITSArchive::unload_file call fits_create_file "
-      "(" << clobbername << ")" << endl;
-
-  fits_create_file (&fptr, clobbername.c_str(), &status);
+  fits_create_template (&fptr, clobbername.c_str(),
+			template_name.c_str(), &status);
   if (status)
     throw FITSError (status, "FITSArchive::unload_file",
-		     "fits_create_file (%s)", clobbername.c_str());
-
-  if (verbose > 2)
-    cerr << "FITSArchive::unload_file call fits_execute_template "
-      "(" << template_name << ")" << endl;
-
-  fits_execute_template (fptr, (char*)template_name.c_str(), &status);
-  if (status)
-    throw FITSError (status, "FITSArchive::unload_file",
-		     "fits_execute_template (%s)", template_name.c_str());
-
-  fits_movabs_hdu (fptr, 1, 0, &status);
-  if (status)
-    throw FITSError (status, "FITSArchive::unload_file",
-		     "fits_moveabs_hdu");
-
+		     "fits_create_template "
+		     "(" + clobbername + ", " + template_name + ")");
 
   psrfits_update_key (fptr, "TELESCOP", get_telescope());
-
   psrfits_update_key (fptr, "SRC_NAME", get_source());
     
   AnglePair radec = get_coordinates().getRaDec();

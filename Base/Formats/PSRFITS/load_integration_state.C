@@ -282,5 +282,11 @@ void Pulsar::FITSArchive::load_state (fitsfile* fptr)
   psrfits_read_key (fptr, "RM", &rm, zero, verbose > 2);
   if (rm != zero)
     set_rotation_measure (rm);
+
+  int naux = 0;
+  undefined = 0;
+  psrfits_read_key (fptr, "NAUX", &naux, undefined, verbose > 2);
+
+  naux_profile = naux;
 }
 

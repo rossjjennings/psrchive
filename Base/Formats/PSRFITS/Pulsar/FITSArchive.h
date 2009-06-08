@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.61 $
-   $Date: 2009/04/09 03:50:26 $
+   $Revision: 1.62 $
+   $Date: 2009/06/08 19:12:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -36,7 +36,8 @@ namespace Pulsar {
   class CalibratorStokes;
   class DigitiserCounts;
   class FITSSUBHdrExtension;
- 
+  class ProfileColumn;
+
   //! Loads and unloads PSRFITS archives
 
   /*!  This class implements load and unload functions to read/write data
@@ -137,6 +138,7 @@ namespace Pulsar {
     
     //! Get the offs_sub value (only present in fits files)
     double get_offs_sub( unsigned int isub ) const;
+
   protected:
     
     friend class Archive::Advocate<FITSArchive>;
@@ -178,6 +180,33 @@ namespace Pulsar {
     void load_amps (fitsfile*, Integration*, unsigned isubint, int colnum);
 
     // //////////////////////////////////////////////////////////////////////
+    //
+    // ADDITIONAL ATTRIBUTES
+    //
+
+    //! The PSRFITS version
+    float psrfits_version;
+
+    //! Channel bandwidth
+    double chanbw;
+    
+    //! Double cross coherence term
+    bool scale_cross_products;
+
+    //! String describing scale
+    std::string state_scale;
+
+    //! String describing polarization state
+    std::string state_pol_type;
+
+    //! Extra polyco information stored in POLYCO HDU
+    double predicted_phase;
+
+    //! The polyco parsed from the PSRFITS file
+    Reference::To<Predictor> hdr_model;
+    
+
+    // //////////////////////////////////////////////////////////////////////
 
     // load the Pulsar::Parameters
     void load_Parameters (fitsfile*);
@@ -190,12 +219,6 @@ namespace Pulsar {
 
     // unload the Pulsar::Predictor model
     void unload_Predictor (fitsfile*) const;
-
-    // Channel bandwidth
-    double chanbw;
-    
-    // Double cross coherence term
-    bool scale_cross_products;
 
     // Archive Extensions used by FITSArchive
     
@@ -223,33 +246,19 @@ namespace Pulsar {
     void interpret_scale ( );
     void interpret_pol_type ( );
 
-    std::string state_scale;
-    std::string state_pol_type;
-
     //! Delete the HDU with the specified name
     void delete_hdu (fitsfile* fptr, char* hdu_name) const;
 
     // //////////////////////////////////////////////////////////////////////
 
-    // Necessary global definitions for FITS file I/O
-    
     // Helper function to write an integration to a file
-    void unload_Integration (int, const Integration*, fitsfile*) const;
+    void unload_Integration (fitsfile*, int row, const Integration*) const;
 
     //! Unload Integration data to the SUBINT HDU of the specified FITS file
     void unload_integrations (fitsfile*) const;
 
     //! Delete Pointing related columns, if not needed
     void clean_Pointing_columns (fitsfile*) const;
-
-    //! Extra polyco information stored in POLYCO HDU
-    double predicted_phase;
-
-    //! The polyco parsed from the PSRFITS file
-    Reference::To<Predictor> hdr_model;
-    
-    //! The PSRFITS version
-    float psrfits_version;
 
   private:
 
@@ -262,13 +271,28 @@ namespace Pulsar {
     // The data file contains search mode data, not folded pulse profiles
     bool search_mode;
 
+    //! Number of auxiliary profiles stored in each channel
+    mutable unsigned naux_profile;
+
     // Reference epoch is used during unload_Integration
     /* This attribute enables proper handling of time stamps when there
        is no FITSHdrExtension in use (as is the case in psrconv) */
     mutable MJD reference_epoch;
 
-    void init ();
+    // Profile load/unload algorithm
+    mutable Reference::To<ProfileColumn> dat_io;
 
+    // Prepare dat_io attribute for use
+    void setup_dat_io (fitsfile* fptr) const;
+
+    // Auxilliary data load/unload algorithm
+    mutable Reference::To<ProfileColumn> aux_io;
+
+    // Prepare dat_io attribute for use
+    void setup_aux_io (fitsfile* fptr, unsigned nprof) const;
+
+    // Set all attributes to default values
+    void init ();
   };
 
 }

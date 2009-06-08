@@ -1,12 +1,15 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2008 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/FITSArchive.h"
+#include "Pulsar/ProfileColumn.h"
+
 #include "Pulsar/IntegrationOrder.h"
+#include "Pulsar/MoreProfiles.h"
 #include "Pulsar/CalInfoExtension.h"
 
 #include "FITSError.h"
@@ -77,14 +80,9 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   if (verbose > 2)
   {
-    long newrownum = 0;
-    fits_get_num_rows (ffptr, &newrownum, &status);
-    if (verbose > 2)
-    {
-      cerr << "FITSArchive::unload_integrations DATA row count = "
-           << newrownum
-           << endl;
-    }
+    long nrows = 0;
+    fits_get_num_rows (ffptr, &nrows, &status); 
+    cerr << "FITSArchive::unload_integrations rows=" << nrows << endl;
   }
   
   if (status != 0)
@@ -122,6 +120,15 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   psrfits_update_key (ffptr, "DM", get_dispersion_measure ());
   psrfits_update_key (ffptr, "RM", get_rotation_measure ());
 
+  naux_profile = 0;
+
+  const MoreProfiles* more = get_Profile(0,0,0)->get<MoreProfiles>();
+  if (more)
+  {
+    naux_profile = more->get_size ();
+    psrfits_update_key (ffptr, "NAUX", (int) naux_profile);
+  }
+
   // Set the sizes of the columns which may have changed
   
   int colnum = 0;
@@ -148,41 +155,20 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     cerr << "FITSArchive::unload_integrations DAT_WTS resized to "
          << nchan << endl;
 
-  fits_get_colnum (ffptr, CASEINSEN, "DAT_OFFS", &colnum, &status);
-  fits_modify_vector_len (ffptr, colnum, nchan*npol, &status);
+  setup_dat_io (ffptr);
+  dat_io->resize ();
 
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_integrations", 
-                     "error resizing DAT_OFFS");
+  if (more)
+  {
+    setup_aux_io (ffptr, more->get_size());
+    aux_io->create (dat_io->get_data_colnum() + 1);
+  }
 
-  if (verbose > 2)
-    cerr << "FITSArchive::unload_integrations DAT_OFFS resized to "
-         << nchan*npol << endl;
-
-  fits_get_colnum (ffptr, CASEINSEN, "DAT_SCL", &colnum, &status);
-  fits_modify_vector_len (ffptr, colnum, nchan*npol, &status);
-
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_integrations", 
-                     "error resizing DAT_SCL");
-
-  if (verbose > 2)
-    cerr << "FITSArchive::unload_integrations DAT_SCL resized to "
-         << nchan*npol << endl;
-
-  fits_get_colnum (ffptr, CASEINSEN, "DATA", &colnum, &status);
-  fits_modify_vector_len (ffptr, colnum, nchan*npol*nbin, &status);
-  psrfits_update_tdim (ffptr, colnum, nbin, nchan, npol);
-
-  if (verbose > 2)
-    cerr << "FITSArchive::unload_integrations DATA resized to "
-         << nchan*npol*nbin << endl;
-  
   // Iterate over all rows, calling the unload_integration function to
   // fill in the next spot in the file.
   
-  for(unsigned i = 0; i < nsubint; i++)
-    unload_Integration (i+1, get_Integration(i), ffptr);
+  for (unsigned i = 0; i < nsubint; i++)
+    unload_Integration (ffptr, i+1, get_Integration(i));
 
   if (verbose > 2)
     cerr << "FITSArchive::unload_integrations exit" << endl;

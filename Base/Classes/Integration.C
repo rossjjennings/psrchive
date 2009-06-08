@@ -475,14 +475,19 @@ void Pulsar::Integration::pscrunch()
     cerr << "Integration::pscrunch " << Signal::state_string(state)
 	 << endl;
 
+  const unsigned nchan = get_nchan ();
+
   if (state == Signal::Coherence || state == Signal::PPQQ)
   {
     if (get_npol() < 2)
       throw Error (InvalidState, "Integration::pscrunch", "npol < 2");
 
-    for (unsigned ichan=0; ichan < get_nchan(); ichan++)
+    for (unsigned ichan=0; ichan < nchan; ichan++)
       profiles[0][ichan] -> sum (profiles[1][ichan]);
   }
+
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+    profiles[0][ichan] -> pscrunch ();
 
   resize (1);
 

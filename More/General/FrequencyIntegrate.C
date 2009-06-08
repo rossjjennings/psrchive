@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FrequencyIntegrate.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Profile.h"
@@ -80,8 +81,8 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
 
   ModifyRestore<bool> mod (range_checking_enabled, false);
 
-  for (unsigned ichan=0; ichan < output_nchan; ichan++) try {
-      
+  for (unsigned ichan=0; ichan < output_nchan; ichan++) try
+  {     
     range_policy->get_range (ichan, start, stop);
     
     double reference_frequency = integration->weighted_frequency (start,stop);
@@ -96,27 +97,27 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
     if (must_defaraday)
       integration->expert()->defaraday (start, stop, rm, reference_frequency);
     
-    for (unsigned ipol=0; ipol < subint_npol; ipol++)  {
-      
+    for (unsigned ipol=0; ipol < subint_npol; ipol++)
+    {
       if (Integration::verbose)
 	cerr << "Pulsar::FrequencyIntegrate::transform ipol=" << ipol << endl;
 
       Profile* output = integration->get_Profile (ipol, ichan);
 
-      for (unsigned jchan=start; jchan<stop; jchan++) {
+      for (unsigned jchan=start; jchan<stop; jchan++)
+      {
 	Profile* input  = integration->get_Profile (ipol, jchan);
 	if (jchan==start)
 	  *(output) = *(input);
 	else
-	  *(output) += *(input);
-      }
-      
+	  output->average (input);
+      } 
     }
 
     integration->set_centre_frequency (ichan, reference_frequency);
-
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
    throw error += "FrequencyIntegrate::transform";
   }
 
@@ -127,6 +128,4 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
 
   if (Integration::verbose) 
     cerr << "Pulsar::FrequencyIntegrate::transform finish" << endl;
-
 } 
-

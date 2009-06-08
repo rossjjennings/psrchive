@@ -156,9 +156,6 @@ void Pulsar::TimerIntegration::load_old (FILE* fptr, bool big_endian)
     }
   }
 
-  Signal::Basis basis = get_basis();
-  Signal::State state = get_state();
-
   double centrefreq = get_centre_frequency();
   double bw = get_bandwidth();
 
@@ -167,7 +164,6 @@ void Pulsar::TimerIntegration::load_old (FILE* fptr, bool big_endian)
     for(ichan=0; ichan<nchan; ichan++)
     {
       profiles[ipol][ichan]->set_weight (1.0);
-      profiles[ipol][ichan]->set_state (Signal::get_Component (basis, state, ipol));
       double cfreq = centrefreq-(bw/2.0)+(ichan+0.5)*bw/nchan;
       profiles[ipol][ichan]->set_centre_frequency (cfreq);
     }

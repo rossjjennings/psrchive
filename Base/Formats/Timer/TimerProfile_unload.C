@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
@@ -18,57 +19,13 @@
 
 using namespace std;
 
-int Pulsar::TimerProfile_poln (Signal::Component state)
-{
-  switch (state) {
-
-  case Signal::Si:
-    return 0;
-
-  case Signal::XX:
-  case Signal::LL:
-    return 1;
-
-  case Signal::YY:
-  case Signal::RR:
-    return 2;
-
-  case Signal::ReXY:
-  case Signal::ReLR:
-    return 3;
-
-  case Signal::ImXY:
-  case Signal::ImLR:
-    return 4;
-
-  case Signal::Sq:
-    return 5;
-
-  case Signal::Su:
-    return 6;
-
-  case Signal::Sv:
-    return 7;
-
-  case Signal::Inv:
-    return 8;
-
-  case Signal::DetRho:
-    return 9;
-
-  default:
-    return -1;
-  }
-}
-
 /*!
   \pre The Profile must have been resized before calling this function
 */
-void Pulsar::TimerProfile_unload (FILE* fptr, const Profile* profile)
+void Pulsar::TimerProfile_unload (FILE* fptr, const Profile* profile, int poln)
 {
   float centrefreq = profile -> get_centre_frequency();
   int   nbin       = profile -> get_nbin();
-  int   poln       = TimerProfile_poln (profile -> get_state());
   float wt         = profile -> get_weight ();
 
   if (nbin < 1)

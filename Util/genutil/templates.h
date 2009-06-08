@@ -14,6 +14,22 @@
 
 #include <assert.h>
 
+//! For each element of container C, call method M
+template<typename C, typename M>
+void foreach (C& container, M method)
+{
+  std::for_each (container.begin(), container.end(), 
+		 std::mem_fun(method));
+}
+
+//! For each element of container C, call method M with argument A
+template<typename C, typename M, typename A>
+void foreach (C& container, M method, const A& a)
+{
+  std::for_each (container.begin(), container.end(),
+		 std::bind2nd( std::mem_fun(method), a ));
+}
+
 template <class T>
 void scrunch (std::vector<T>& vals, unsigned factor, bool mean = true)
 {

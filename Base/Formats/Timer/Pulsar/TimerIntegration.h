@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerIntegration.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/08/10 03:53:04 $
+   $Revision: 1.12 $
+   $Date: 2009/06/08 19:12:58 $
    $Author: straten $ */
 
 /*
@@ -146,10 +146,8 @@ namespace Pulsar {
   void TimerProfile_load (FILE* fptr, Profile* profile, bool big_endian=true);
 
   //! unload a Profile to a timer archive
-  void TimerProfile_unload (FILE* fptr, const Profile* profile);
+  void TimerProfile_unload (FILE* fptr, const Profile* profile, int poln);
 
-  //! return the integer poln code for a timer archive profile
-  int TimerProfile_poln (Signal::Component state);
 }
 
 #endif

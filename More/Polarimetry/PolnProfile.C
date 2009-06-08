@@ -4,8 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
+
+#include "Pulsar/StokesCovariance.h"
+#include "Pulsar/FourthMoments.h"
 
 #include "Pulsar/ProfileAmpsExpert.h"
 #include "Pulsar/ExponentialBaseline.h"
@@ -63,6 +67,10 @@ Pulsar::PolnProfile::PolnProfile (Signal::Basis _basis, Signal::State _state,
       throw Error (InvalidParam, "Pulsar::PolnPofile::PolnProfile",
 		   "ipol=%d unequal nbin=%d != nbin=%d", ipol,
 		   profile[ipol]->get_nbin(), nbin);
+
+  FourthMoments* fourth = profile[0]->get<FourthMoments>();
+  if (fourth && fourth->get_size() == StokesCovariance::nmoment)
+    covariance = new StokesCovariance (fourth);
 }
 
 //
@@ -91,11 +99,15 @@ Pulsar::PolnProfile::~PolnProfile ()
 //
 void Pulsar::PolnProfile::resize (unsigned nbin)
 {
-  for (unsigned ipol=0; ipol < 4; ipol++) {
+  for (unsigned ipol=0; ipol < 4; ipol++)
+  {
     if (!profile[ipol])
       profile[ipol] = new Profile;
     profile[ipol]->resize (nbin);
   }
+
+  if (covariance)
+    covariance->resize (nbin);
 }
 
 //
@@ -139,16 +151,11 @@ const Pulsar::Profile* Pulsar::PolnProfile::get_Profile (unsigned ipol) const
 
   return profile[ipol];
 }
+
+//
+//
+//
 Pulsar::Profile* Pulsar::PolnProfile::get_Profile (unsigned ipol)
-{
-  if (ipol >= 4)
-    throw Error (InvalidRange, "PolnProfile::get_Profile",
-		 "ipol=%d >= npol=4", ipol);
-
-  return profile[ipol];
-}
-
-Pulsar::Profile* Pulsar::PolnProfile::get_profile (unsigned ipol)
 {
   if (ipol >= 4)
     throw Error (InvalidRange, "PolnProfile::get_Profile",
@@ -279,12 +286,18 @@ void Pulsar::PolnProfile::scale (double scale)
 {
   for (unsigned ipol=0; ipol < 4; ipol++)
     profile[ipol]->scale (scale);
+
+  if (covariance)
+    covariance->scale (scale);
 }
 
 void Pulsar::PolnProfile::rotate_phase (double phase)
 {
   for (unsigned ipol=0; ipol < 4; ipol++)
     profile[ipol]->rotate_phase (phase);
+
+  if (covariance)
+    covariance->rotate_phase (phase);
 }
 
 //
@@ -302,22 +315,27 @@ void Pulsar::PolnProfile::transform (const Jones<double>& response)
     throw Error (InvalidParam, "Pulsar::PolnProfile::transform",
                  "non-invertbile response.  det(J)=%f", Gain);
 
-  if (Gain == 0) {
-
+  if (Gain == 0)
+  {
     if (Profile::verbose)
       cerr << "Pulsar::PolnProfile::transform zero response" << endl;
 
     for (unsigned ipol=0; ipol < 4; ipol++)
-      get_profile(ipol)->set_weight ( 0.0 );
+      get_Profile(ipol)->set_weight ( 0.0 );
 
     return;
   }
 
   if (state == Signal::Stokes)
+  {
     for (unsigned ibin = 0; ibin < nbin; ibin++)
       set_Stokes (ibin, ::transform (get_Stokes(ibin), response));
-  
-  else if (state == Signal::Coherence) {
+
+    if (covariance)
+      covariance->transform (response);
+  }  
+  else if (state == Signal::Coherence)
+  {
     Jones<float> response_dagger = herm(response);
     for (unsigned ibin = 0; ibin < nbin; ibin++)
       set_coherence (ibin, (response * get_coherence(ibin)) * response_dagger);
@@ -329,8 +347,7 @@ void Pulsar::PolnProfile::transform (const Jones<double>& response)
 
   if (normalize_weight_by_absolute_gain)
     for (unsigned ipol=0; ipol < 4; ipol++)
-      get_profile(ipol)->set_weight ( get_Profile(ipol)->get_weight() / Gain );
-
+      get_Profile(ipol)->set_weight ( get_Profile(ipol)->get_weight() / Gain );
 }
 
 //
@@ -345,6 +362,9 @@ void Pulsar::PolnProfile::transform (const Matrix<4,4,double>& response)
 
   for (unsigned ibin = 0; ibin < nbin; ibin++)
     set_Stokes (ibin, response * get_Stokes(ibin));
+
+  if (covariance)
+    covariance->transform (response);
 }
 
 //
@@ -377,8 +397,8 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
   if (out_state == state)
     return;
 
-  if (out_state == Signal::Stokes) {
-
+  if (out_state == Signal::Stokes)
+  {
     sum_difference (profile[0], profile[1]);
     
     // data 2 and 3 are equivalent to 2*Re[PQ] and 2*Im[PQ]
@@ -397,13 +417,13 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
 
     // record the new state
     state = Signal::Stokes;
-
   }
-  else if (out_state == Signal::Coherence) {
-
+  else if (out_state == Signal::Coherence)
+  {
     // cerr << "convert_state to Signal::Coherence" << endl;
 
-    if (basis == Signal::Circular) {
+    if (basis == Signal::Circular)
+    {
       float* ReLR   = profile[1]->get_amps();
       float* ImLR   = profile[2]->get_amps();
       float* diffLR = profile[3]->get_amps();
@@ -536,12 +556,7 @@ void Pulsar::PolnProfile::invint (Profile* invint, bool second) const
 
   // return to a second-order moment
   if (second)
-  {
     invint->square_root();
-    invint->set_state (Signal::Inv);
-  }
-  else
-    invint->set_state (Signal::DetRho);
 
   invint->set_centre_frequency ( get_Profile(0)->get_centre_frequency() );
   invint->set_weight ( get_Profile(0)->get_weight() );
@@ -593,8 +608,6 @@ void Pulsar::PolnProfile::invconv (Profile* invconv) const
 
   for (unsigned ibin = 0; ibin < nbin; ibin++)
     amps[ibin] = complex_data[ibin*2];
-
-  invconv->set_state (Signal::Inv);
 
   invconv->set_centre_frequency ( get_Profile(0)->get_centre_frequency() );
   invconv->set_weight ( get_Profile(0)->get_weight() );

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfile.h,v $
-   $Revision: 1.41 $
-   $Date: 2009/04/02 22:52:31 $
+   $Revision: 1.42 $
+   $Date: 2009/06/08 19:12:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -22,6 +22,7 @@
 
 namespace Pulsar {
 
+  class StokesCovariance;
   class BaselineEstimator;
 
   //! Polarimetric pulse profile transformations and derivations
@@ -160,14 +161,14 @@ namespace Pulsar {
     //! The baseline used by some methods
     Reference::To<PhaseWeight> baseline;
 
+    //! The phase-resolved four-dimensional Stokes covariance matrix
+    Reference::To<StokesCovariance> covariance;
+
     //! Efficiently forms the inplace sum and difference of two profiles
     void sum_difference (Profile* sum, Profile* difference);
 
     //! Set everthing to null values
     void init ();
-
-    //! Get the specifed profile (non-const version)
-    Profile* get_profile (unsigned ipol);
 
     //! Does the work for get_polarized and get_linear
     void get_rss( Profile* rss, unsigned jpol, unsigned kpol,

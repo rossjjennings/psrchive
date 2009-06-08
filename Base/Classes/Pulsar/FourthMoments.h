@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/FourthMoments.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/05/27 21:23:53 $
+   $Revision: 1.2 $
+   $Date: 2009/06/08 19:12:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FourthMoments_h
@@ -26,6 +26,9 @@ namespace Pulsar
     //! Construct with a name
     FourthMoments (const char* name = "FourthMoments");
     
+    //! Clone operator
+    FourthMoments* clone () const;
+
     //! multiplies each bin of the profile by scale
     void scale (double scale);
 
@@ -40,6 +43,9 @@ namespace Pulsar
 
     //! integrate neighbouring sections of the profile
     void fold (unsigned nfold);
+
+    //! average information from another MoreProfiles
+    void average (const MoreProfiles*);
 
   };
 

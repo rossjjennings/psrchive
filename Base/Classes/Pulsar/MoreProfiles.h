@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/MoreProfiles.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/05/26 07:45:34 $
+   $Revision: 1.2 $
+   $Date: 2009/06/08 19:12:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MoreProfiles_h
@@ -25,9 +25,18 @@ namespace Pulsar
 
     //! Construct with a name
     MoreProfiles (const char* name);
+
+    //! Copy constructor
+    MoreProfiles (const MoreProfiles&);
+
+    //! Return the number of phase bins
+    unsigned get_nbin () const;
     
     //! Resize the data area
     void resize (unsigned nbin);
+
+    //! set the weight of the profile
+    void set_weight (float wt);
 
     //! multiplies each bin of the profile by scale
     void scale (double scale);
@@ -50,8 +59,27 @@ namespace Pulsar
     //! integrate neighbouring sections of the profile
     void fold (unsigned nfold);
 
+    //! integrate information from another Profile
+    void integrate (const Profile*);
+
+    //! average information from another MoreProfiles
+    virtual void average (const MoreProfiles*);
+
+    //! resize the profile vector
+    virtual void resize (unsigned nprofile, unsigned nbin);
+
+    //! get the size of the profile vector
+    virtual unsigned get_size () const;
+
+    //! get the ith Profile
+    virtual Profile* get_Profile (unsigned i);
+
+    //! get the ith const Profile
+    virtual const Profile* get_Profile (unsigned i) const;
+
   protected:
 
+    //! vector of Profile instances
     std::vector< Reference::To<Profile> > profile;
 
   };

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.27 $
-   $Date: 2008/11/21 11:32:57 $
+   $Revision: 1.28 $
+   $Date: 2009/06/08 19:12:58 $
    $Author: straten $ */
 
 #ifndef __Types_h
@@ -98,29 +98,7 @@ namespace Signal {
     FourthMoment
   };
   
-  //! States of different polarization dimensions
-  enum Component {
-    //! Unknown
-    None,
-    //! Stokes I,Q,U,V
-    Si, Sq, Su, Sv,
-    //! Coherency Products, Linear Basis
-    XX, YY, ReXY, ImXY,
-    //! Coherency Products, Circular Basis
-    LL, RR, ReLR, ImLR,
-    //! Coherency Products, Elliptical Basis
-    PP, QQ, RePQ, ImPQ,
-    //! Stokes Invariant Interval
-    Inv,
-    //! Coherency Matrix Determinant
-    DetRho
-  };
-  
-  
-  Component get_Component (Basis basis, State state, int ipol);
-  
   unsigned State2npol (State s);
-  int get_ipol (State state, Component poln);
   
   const char* source_string (Source source);
   const char* state_string (State state);

@@ -63,7 +63,6 @@ void nbinify (int& istart, int& iend, int nbin)
 //
 void Pulsar::Profile::init()
 {
-  state  = Signal::None;
   weight = 1.0;
   centrefreq = -1.0;
 }
@@ -118,7 +117,6 @@ const Pulsar::Profile& Pulsar::Profile::operator = (const Profile& input)
 
     set_weight ( input.get_weight() );
     set_centre_frequency ( input.get_centre_frequency() );
-    set_state ( input.get_state() );
 
     // copy the extensions
     extension.resize (0);
@@ -131,6 +129,13 @@ const Pulsar::Profile& Pulsar::Profile::operator = (const Profile& input)
   }
 
   return *this;
+}
+
+//! set the weight of the profile
+void Pulsar::Profile::set_weight (float w)
+{
+  weight = w;
+  foreach<DataExtension> (this, &DataExtension::set_weight, weight);
 }
 
 //! Return the number of extensions available
@@ -207,16 +212,6 @@ void Pulsar::Profile::add_extension (Extension* ext)
   }
 }
 
-const Pulsar::Profile& Pulsar::Profile::operator += (const Profile& profile)
-{
-  return average (&profile, 1.0);
-}
-
-const Pulsar::Profile& Pulsar::Profile::operator -= (const Profile& profile)
-{
-  return average (&profile, -1.0);
-}
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Profile::operator +=
@@ -249,7 +244,7 @@ const Pulsar::Profile& Pulsar::Profile::operator *= (float factor)
 
 void Pulsar::Profile::offset (double factor)
 {
-  unsigned nbin = get_nbin();
+  const unsigned nbin = get_nbin();
   float* amps = get_amps();
   for (unsigned i=0;i<nbin;i++)
     amps[i] += factor;
@@ -259,7 +254,7 @@ void Pulsar::Profile::offset (double factor)
 
 void Pulsar::Profile::scale (double factor)
 {
-  unsigned nbin = get_nbin();
+  const unsigned nbin = get_nbin();
   float* amps = get_amps();
   for (unsigned i=0;i<nbin;i++)
     amps[i] *= factor;

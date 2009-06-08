@@ -21,13 +21,13 @@ try
 {
   unsigned npol  = get_npol();
   unsigned nchan = get_nchan();
-  unsigned nbin  = get_nbin();
 
   if (ichan_last>nchan-1 || ichan_first>nchan-1)
     throw Error(InvalidRange, "Pulsar::Integration::remove",
         "channel out of range");
 
-  if (ichan_first > ichan_last) {
+  if (ichan_first > ichan_last)
+  {
     unsigned tmp = ichan_first;
     ichan_first = ichan_last;
     ichan_last = tmp;
@@ -37,15 +37,11 @@ try
   int nchan_to_remove = ichan_last - ichan_first + 1; 
   unsigned new_nchan = nchan - nchan_to_remove;
 
-  for (unsigned ipol=0; ipol < npol; ipol++) {
-
+  for (unsigned ipol=0; ipol < npol; ipol++)
     profiles[ipol].erase(profiles[ipol].begin() + ichan_first, 
         profiles[ipol].begin() + ichan_last + 1);
 
-  }
-
   set_nchan (new_nchan);
-
 }
 catch (Error& error)
 {

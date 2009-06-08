@@ -327,7 +327,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.91 2009/04/24 15:59:41 demorest Exp $" << endl;
+	cout << "$Id: pam.C,v 1.92 2009/06/08 19:12:58 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -1139,7 +1139,6 @@ Pulsar::Profile* hat_profile (int nbin, float duty_cycle)
 
   ptr->set_centre_frequency(0.0);
   ptr->set_weight(1.0);
-  ptr->set_state(Signal::None);
 
   ptr->resize(nbin);
 

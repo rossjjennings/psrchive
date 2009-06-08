@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ProfileExtension.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/11/28 05:08:11 $
+   $Revision: 1.4 $
+   $Date: 2009/06/08 19:12:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_Extension_h
@@ -39,6 +39,9 @@ namespace Pulsar
     //! Return a text interface that can be used to access this instance
     virtual TextInterface::Parser* get_interface () { return 0; }
     
+    //! Integrate information from another Profile
+    virtual void integrate (const Profile* subint) { }
+
     //! Return the name of the Extension
     std::string get_extension_name () const;
     

@@ -1,13 +1,49 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2002-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/Profile.h"
-#include "Error.h"
+
+#include "Pulsar/ProfileExtension.h"
+#include "templates.h"
 
 using namespace std;
+
+void weighted_average (Pulsar::Profile* result, const Pulsar::Profile* other,
+		       bool second_moment = false)
+{
+  if (result->get_nbin() != other->get_nbin())
+    throw Error (InvalidRange, "Pulsar::Profile::weighted_average",
+		 "result.nbin=%d != other.nbin=%d",
+		 result->get_nbin(), other->get_nbin());
+
+  float* amps1 = result->get_amps();
+  const float* amps2 = other->get_amps();
+    
+  double weight1 = result->get_weight();
+  double weight2 = other->get_weight();
+
+  double weight = weight1 + weight2;
+    
+  double norm = 0.0;
+  if (weight != 0)
+    norm = 1.0 / weight;
+
+  if (second_moment)
+  {
+    // square the various scale factors
+    weight1 *= weight1;
+    weight2 *= weight2;
+    norm *= norm;
+  }
+  
+  const unsigned nbin = result->get_nbin();
+  for (unsigned ibin=0; ibin<nbin; ibin++)
+    amps1[ibin] = norm * ( amps1[ibin]*weight1 + amps2[ibin]*weight2 );
+
+  result->set_weight (weight);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -22,44 +58,19 @@ using namespace std;
 
   \f$ W(\bar{x}) = \sum_{i=1}^N W(x_i) \f$
 */
-const Pulsar::Profile& Pulsar::Profile::average (const Profile* profile, 
-						 double sign)
+void Pulsar::Profile::average (const Profile* profile) try
 {
-  if (get_nbin() != profile->get_nbin())
-    throw Error (InvalidRange, "Pulsar::Profile::average",
-		 "nbin=%d != profile.nbin=%d",
-		 get_nbin(), profile->get_nbin());
-
-  try {
-
-    // check if the addition will result in some undefined state
-    if (state != profile->get_state())
-      state = Signal::None;
-    
-    float* amps1 = this->get_amps();
-    const float* amps2 = profile->get_amps();
-    
-    double weight1 = weight;
-    double weight2 = profile->get_weight();
-    
-    weight = weight1 + weight2;
-    
-    double norm = 0.0;
-    if (weight != 0)
-      norm = 1.0 / weight;
-    
-    unsigned nbin = get_nbin();
-    for (unsigned ibin=0; ibin<nbin; ibin++) {
-      *amps1 = norm * ( double(*amps1)*weight1 + sign*double(*amps2)*weight2 );
-      amps1 ++; amps2 ++;
-    }
-
-  }
-  catch (Error& error) {
-    throw error += "Profile::average";
-  }
-
-  return *this;
+  /*
+    It is important to integrate the extensions first, as weighted_average
+    will call set_weight, which will prematurely set weight information in 
+    extensions such as MoreProfiles
+  */
+  foreach (extension, &Profile::Extension::integrate, profile);
+  weighted_average (this, profile);
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::Profile::average";
 }
 
 
