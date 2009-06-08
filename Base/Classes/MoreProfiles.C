@@ -24,7 +24,7 @@ Pulsar::MoreProfiles::MoreProfiles (const MoreProfiles& other)
 }
 
 //! resize the profile vector
-void Pulsar::MoreProfiles::resize (unsigned nprofile, unsigned nbin)
+void Pulsar::MoreProfiles::resize (unsigned nprofile, unsigned nbin) try
 {
   profile.resize (nprofile);
   for (unsigned i=0; i<profile.size(); i++)
@@ -34,6 +34,10 @@ void Pulsar::MoreProfiles::resize (unsigned nprofile, unsigned nbin)
 
     profile[i]->resize (nbin);
   }
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::MoreProfiles::resize";
 }
 
 //! get the size of the profile vector
