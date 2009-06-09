@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/RemoveBaseline.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/06/09 10:21:54 $
+   $Revision: 1.2 $
+   $Date: 2009/06/09 10:44:47 $
    $Author: straten $ */
 
 #ifndef _Pulsar_RemoveBaseline_H
@@ -22,8 +22,10 @@ namespace Pulsar
   //! Algorithms that remove the off-pulse baseline
   class RemoveBaseline : public Transformation<Archive>
   {
+  public:
+
     /* Two simple baseline removal algorithms
-       Not every child of RemoveBaseline need be nested. */
+       (Not every child of RemoveBaseline needs to be nested.) */
 
     class Total;
     class Each;
