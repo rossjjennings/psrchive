@@ -61,6 +61,9 @@ void Pulsar::FITSArchive::init ()
 
   // no auxiliary profiles
   naux_profile = 0;
+
+  // on construction, the data have not been loaded from fits file
+  loaded_from_fits = false;
 }
 
 //
@@ -146,6 +149,7 @@ void Pulsar::FITSArchive::copy (const Archive& archive)
   
   chanbw = farchive->chanbw;
   scale_cross_products = farchive->scale_cross_products;
+  loaded_from_fits = farchive->loaded_from_fits;
 
   if (verbose > 2)
     cerr << "FITSArchive::copy exit" << endl;
@@ -667,6 +671,8 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (status)
     throw FITSError (status, "Pulsar::FITSArchive::load_header",
 		     "fits_close_file");
+
+  loaded_from_fits = true;
 
   if (verbose > 2)
     cerr << "FITSArchive::load_header exit" << endl;

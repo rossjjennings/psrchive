@@ -58,8 +58,14 @@ void Pulsar::FITSArchive::update_history()
 {
   ProcHistory* history = getadd<ProcHistory>();
 
-  // Construct the new final row
-  history->add_blank_row();
+  /*
+    Add a new row only if the data have been loaded from a PSRFITS file,
+    in which case the history should be updated, or there is no current
+    row
+  */
+
+  if (history->get_nrow() == 0 || loaded_from_fits)
+    history->add_blank_row();
   
   time_t timeval = time(0);
   string timestr = ctime (&timeval);

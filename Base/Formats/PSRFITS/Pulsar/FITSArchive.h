@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.62 $
-   $Date: 2009/06/08 19:12:58 $
+   $Revision: 1.63 $
+   $Date: 2009/06/09 06:51:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -19,8 +19,8 @@
 
 #include <fitsio.h>
 
-namespace Pulsar {
-
+namespace Pulsar
+{
   class FITSHdrExtension;
   class Pointing;
   class ObsExtension;
@@ -270,6 +270,9 @@ namespace Pulsar {
 
     // The data file contains search mode data, not folded pulse profiles
     bool search_mode;
+
+    // Flag set when data are loaded from a PSRFITS file
+    bool loaded_from_fits;
 
     //! Number of auxiliary profiles stored in each channel
     mutable unsigned naux_profile;
