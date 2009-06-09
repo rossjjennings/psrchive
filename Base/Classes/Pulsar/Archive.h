@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.183 $
-   $Date: 2009/04/07 12:56:14 $
+   $Revision: 1.184 $
+   $Date: 2009/06/09 10:42:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.183 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.184 $"
 
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Config.h"
@@ -575,6 +575,9 @@ namespace Pulsar
     //! Policy determines if data can be combined/integrated
     const Match* get_mixable () const;
     void set_mixable (Match*);
+
+    //! The default baseline removal strategy
+    static Functor< void (Archive*) > remove_baseline_strategy;
 
   protected:
 
