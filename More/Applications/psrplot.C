@@ -15,6 +15,7 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Interpreter.h"
+#include "Pulsar/RemoveBaseline.h"
 
 #include "TextInterface.h"
 #include "strutil.h"
@@ -93,7 +94,11 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
 					   "pulsar plotting program")
 {
   has_manual = true;
-  version = "$Id: psrplot.C,v 1.27 2009/05/22 04:40:32 straten Exp $";
+  version = "$Id: psrplot.C,v 1.28 2009/06/09 11:05:44 straten Exp $";
+
+  // independently remove the baseline from each subint and channel
+  Archive::remove_baseline_strategy.set( new RemoveBaseline::Each,
+					 &RemoveBaseline::Each::transform );
 
   // print angles in degrees
   Angle::default_type = Angle::Degrees;

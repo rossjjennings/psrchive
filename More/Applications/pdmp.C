@@ -32,6 +32,7 @@
 #include "TextInterface.h"
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/RemoveBaseline.h"
 #include "Pulsar/counter_drift.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/PlotFactory.h"
@@ -955,20 +956,18 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
   if (have_user_rms_file){
 	FILE* rms_file = fopen(user_rms_file,"r");
 	char text[128];
-	float chan_rms;
-	float sumsq;
-	float weight_total,weight_factor;
-	unsigned orig_nchans;
-	unsigned nscr,count;
-	uint64 nadd;
-	uint64 orig_nsamp;
-	sumsq=0;
-	weight_total=0;
+	float sumsq = 0;
+	float weight_total = 0;
+	unsigned count = 0;
 
-	fscanf(rms_file,"# %s %d\n", text, &orig_nchans);
-	fscanf(rms_file,"# %s %lld\n", text, &orig_nsamp);
-	nadd = orig_nsamp/(uint64)(archive->get_nbin() * archive->get_nsubint());
-	nscr = orig_nchans / archive->get_nchan();
+	unsigned orig_nchans = 0;
+	uint64 orig_nsamp = 0;
+
+	assert( fscanf(rms_file,"# %s %d\n", text, &orig_nchans) == 2 );
+	assert( fscanf(rms_file,"# %s %lld\n", text, &orig_nsamp) == 2 );
+
+	uint64 nadd = orig_nsamp/(uint64)(archive->get_nbin() * archive->get_nsubint());
+	unsigned nscr = orig_nchans / archive->get_nchan();
 
 	for (unsigned ic = 0; ic < archive->get_nchan(); ic++)
 	{
@@ -979,10 +978,11 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
 			ch_wt += prof->get_weight();
 		}
 
-		float factor = ch_wt / archive->get_nsubint();
-		for (unsigned i = 0; i < nscr; i++){
-			fscanf(rms_file,"%f\n",&chan_rms);
-			sumsq += chan_rms*chan_rms * ch_wt*ch_wt;
+		for (unsigned i = 0; i < nscr; i++)
+		{
+		  float chan_rms = 0;
+		  assert( fscanf(rms_file,"%f\n",&chan_rms) == 1 );
+		  sumsq += chan_rms*chan_rms * ch_wt*ch_wt;
 		}
 		weight_total += ch_wt;
 		count+=archive->get_nsubint();
@@ -1075,6 +1075,11 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
 
   phaseTimeCopy->set_dispersion_measure(bestDM);
   phaseTimeCopy->dedisperse();
+
+  // independently remove the baseline from each subint and channel
+  Archive::remove_baseline_strategy.set( new RemoveBaseline::Each,
+					 &RemoveBaseline::Each::transform );
+
   // the archive will be fscrunched by the following method
   plotPhaseTime(phaseTimeCopy, time_plot, tui);
   
