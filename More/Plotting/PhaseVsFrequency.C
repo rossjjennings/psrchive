@@ -22,10 +22,6 @@ TextInterface::Parser* Pulsar::PhaseVsFrequency::get_interface ()
   return new Interface (this);
 }
 
-void Pulsar::PhaseVsFrequency::prepare (const Archive* data)
-{
-}
-
 std::string Pulsar::PhaseVsFrequency::get_ylabel (const Archive* data)
 {
   return "Frequency (MHz)";

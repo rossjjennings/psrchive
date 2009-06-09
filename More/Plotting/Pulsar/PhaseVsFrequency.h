@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsFrequency.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/11/12 07:45:10 $
+   $Revision: 1.11 $
+   $Date: 2009/06/09 11:58:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsFrequency_h
@@ -35,9 +35,6 @@ namespace Pulsar {
     public:
       Interface (PhaseVsFrequency* = 0);
     };
-
-    //! Set the minimum and maximum values on the y-axis
-    void prepare (const Archive* data);
 
     //! Get the default label for the y axis
     std::string get_ylabel (const Archive*);
