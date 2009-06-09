@@ -25,6 +25,8 @@ TextInterface::Parser* Pulsar::PhaseVsTime::get_interface ()
 
 void Pulsar::PhaseVsTime::prepare (const Archive* data)
 {
+  PhaseVsPlot::prepare (data);
+
   unsigned rows = data->get_nsubint();
  
   const IntegrationOrder* order = data->get<IntegrationOrder>();
