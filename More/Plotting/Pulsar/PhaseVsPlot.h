@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.18 $
-   $Date: 2009/05/01 05:17:28 $
+   $Revision: 1.19 $
+   $Date: 2009/06/09 12:01:29 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsPlot_h
@@ -44,6 +44,9 @@ namespace Pulsar {
     //! Derived classes must provide the Profile for the specified row
     virtual const Profile* get_Profile (const Archive* data, unsigned row) = 0;
 
+    //! Set the minimum and maximum values on the y-axis
+    void prepare (const Archive* data);
+
     //! Draw in the current viewport
     void draw (const Archive*);
 
@@ -67,10 +70,17 @@ namespace Pulsar {
     void set_crop( float s_crop_value ) { crop_value = s_crop_value; }
     //! Get the crop value
     float get_crop() const { return crop_value; }
-    
+   
+    //! Set the first and last row to plot
+    void set_rows( const std::pair<unsigned,unsigned>& rows );
+    //! Get the crop value
+    std::pair<unsigned,unsigned> get_rows() const { return rows; }
+
   protected:
 
     PlotScale z_scale;
+
+    std::pair<unsigned, unsigned> rows;
 
     pgplot::ColourMap colour_map;
 
@@ -82,6 +92,15 @@ namespace Pulsar {
     
     //! The percentage of max to crop at
     float crop_value;
+
+    //! The number of rows in the plot
+    unsigned nrow;
+
+    //! The minimum and (half interval) maximum row to be plotted
+    unsigned min_row, max_row;
+
+    //! Set when set_rows is accepted
+    bool rows_set;
 
   };
 

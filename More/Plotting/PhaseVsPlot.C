@@ -37,6 +37,9 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
   line_colour = -1;
   
   crop_value = 1.0f;
+
+  min_row = max_row = 0;
+  rows_set = false;
 }
 
 TextInterface::Parser* Pulsar::PhaseVsPlot::get_interface ()
@@ -52,6 +55,40 @@ void Pulsar::PhaseVsPlot::set_style (const string& s)
   style = s;
 }
 
+void Pulsar::PhaseVsPlot::set_rows( const std::pair<unsigned,unsigned>& r )
+{
+  rows = r;
+  rows_set = true;
+}
+
+void Pulsar::PhaseVsPlot::prepare (const Archive* data)
+{
+  nrow = get_nrow (data);
+  min_row = max_row = 0;
+
+  if (!rows_set)
+    return;
+
+  if (rows.second >= nrow)
+    throw Error (InvalidParam, "Pulsar::PhaseVsPlot::prepare",
+		 "end row=%u >= nrow=%u", rows.second, nrow);
+
+  if (rows.first > rows.second)
+    throw Error (InvalidParam, "Pulsar::PhaseVsPlot::prepare",
+		 "start row=%u > end row=%u", rows.first, rows.second);
+
+  min_row = rows.first;
+  max_row = rows.second + 1;
+
+  cerr << "Pulsar::PhaseVsPlot::prepare row"
+    " min=" << min_row << " max=" << max_row << endl;
+
+  float y_min = float(min_row) / float(nrow);
+  float y_max = float(max_row) / float(nrow);
+
+  get_frame()->get_y_scale()->set_range_norm (y_min, y_max);
+}
+
 //! Derived classes must draw in the current viewport
 void Pulsar::PhaseVsPlot::draw (const Archive* data)
 {
@@ -65,14 +102,13 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
 
   // Fill the image data
   unsigned nbin = data->get_nbin();
-  unsigned nrow = get_nrow (data);
 
   bool cyclic = true;
   unsigned min_bin, max_bin;
   get_frame()->get_x_scale()->get_indeces (nbin, min_bin, max_bin, cyclic);
 
-  unsigned min_row, max_row;
-  get_frame()->get_y_scale()->get_indeces (nrow, min_row, max_row);
+  if (!rows_set)
+    get_frame()->get_y_scale()->get_indeces (nrow, min_row, max_row);
 
   float min = FLT_MAX;
   float max = FLT_MIN;
