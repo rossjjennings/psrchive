@@ -55,6 +55,33 @@ void Pulsar::ProcHistory::init ()
   the_ifr_mthd = "NONE";
 }
 
+//! Get the number of rows
+unsigned Pulsar::ProcHistory::get_nrow () const
+{
+  return rows.size ();
+}
+
+//! Get the ith row
+Pulsar::ProcHistory::row* Pulsar::ProcHistory::get_row (unsigned irow)
+{
+  check_irow (irow);
+  return &rows[irow];
+}
+
+const Pulsar::ProcHistory::row* 
+Pulsar::ProcHistory::get_row (unsigned irow) const
+{
+  check_irow (irow);
+  return &rows[irow];
+}
+
+void Pulsar::ProcHistory::check_irow (unsigned irow) const
+{
+  if (irow >= rows.size())
+    throw Error (InvalidParam, "Pulsar::ProcHistory::check_irow",
+		 "irow=%u >= nrow=%u", irow, rows.size());
+}
+
 Pulsar::ProcHistory::row& Pulsar::ProcHistory::get_last ()
 {
   if (rows.size() == 0)

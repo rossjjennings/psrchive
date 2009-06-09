@@ -58,6 +58,13 @@ namespace Pulsar {
       // Default constructor
       row () { init(); }
       
+      // Text interface to a ProcHistory instance
+      class Interface : public TextInterface::To<row>
+      {
+      public:
+	Interface( row *s_instance = NULL );
+      };
+
       int get_nbin() const { return nbin; }
       int get_npol() const { return npol; }
       int get_nsub() const { return nsub; }
@@ -104,7 +111,14 @@ namespace Pulsar {
     
     // The storage array
     std::vector<row> rows;
-    
+
+    //! Get the number of rows
+    unsigned get_nrow () const;
+
+    //! Get the ith row
+    row* get_row (unsigned i);
+    const row* get_row (unsigned i) const;
+
     std::string command_str;
     std::string the_cal_mthd;
     std::string the_sc_mthd;
@@ -137,7 +151,7 @@ namespace Pulsar {
   private:
     
     void init ();
-    
+    void check_irow (unsigned irow) const;
   };
   
 }
