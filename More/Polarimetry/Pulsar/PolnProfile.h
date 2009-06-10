@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfile.h,v $
-   $Revision: 1.42 $
-   $Date: 2009/06/08 19:12:58 $
+   $Revision: 1.43 $
+   $Date: 2009/06/10 21:39:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -74,6 +74,9 @@ namespace Pulsar {
 
     //! Set the baseline used by some methods
     void set_baseline (PhaseWeight*);
+
+    //! Get the baseline (if not the one set above, then the default)
+    PhaseWeight* get_baseline () const;
 
     //! Add that to this
     void sum (const PolnProfile* that);
@@ -144,8 +147,8 @@ namespace Pulsar {
     //! Return the ellipticity and its estimated error for each pulse phase
     void get_ellipticity (std::vector< Estimate<double> >&, float sigma) const;
 
-    //! Does some work for get_orientation and get_ellipticity
-    double get_variance (unsigned ipol, float phase) const;
+    void get_linear (std::vector< std::complex< Estimate<double> > >& L,
+		     float sigma) const;
 
   protected:
 
@@ -158,8 +161,11 @@ namespace Pulsar {
     //! References to the polarimetric profiles
     Reference::To<Profile> profile[4];
 
-    //! The baseline used by some methods
+    //! The baseline set in set_baseline
     Reference::To<PhaseWeight> baseline;
+
+    //! The baseline derived from the data
+    mutable Reference::To<PhaseWeight> my_baseline;
 
     //! The phase-resolved four-dimensional Stokes covariance matrix
     Reference::To<StokesCovariance> covariance;

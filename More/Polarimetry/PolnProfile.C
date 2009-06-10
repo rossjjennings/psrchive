@@ -203,6 +203,20 @@ void Pulsar::PolnProfile::set_amps (unsigned ipol, float* amps)
 //
 //
 //
+Pulsar::PhaseWeight* Pulsar::PolnProfile::get_baseline () const
+{
+  if (baseline)
+    return baseline;
+  
+  if (!my_baseline)
+    my_baseline = profile[0]->baseline();
+
+  return my_baseline;
+}
+
+//
+//
+//
 Stokes<float> Pulsar::PolnProfile::get_Stokes (unsigned ibin) const
 {
   if (state != Signal::Stokes)
@@ -541,12 +555,7 @@ void Pulsar::PolnProfile::invint (Profile* invint, bool second) const
     derive the baseline from the total intensity profile because its
     statistics are better modelled
   */
-  Reference::To<Pulsar::PhaseWeight> use_baseline;
-
-  if (baseline)
-    use_baseline = baseline;
-  else
-    use_baseline = profile[0]->baseline();
+  Reference::To<Pulsar::PhaseWeight> use_baseline = get_baseline ();
 
   /*
     remove the bias due to noise from the invariant profile
@@ -695,31 +704,15 @@ catch (Error& error) {
   throw error += "Pulsar::PolnProfile::get_linear";
 }
 
-void Pulsar::PolnProfile::get_circular (Profile* absV) const
-try {
+void Pulsar::PolnProfile::get_circular (Profile* absV) const try
+{
   absV->operator=( *get_Profile(3) );
   absV->absolute();
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::PolnProfile::get_circular";
 }
-
-/*!
-  This worker function checks that the mean is less than the r.m.s.
-  and prints a warning if it appears that the baseline has not been removed 
-*/
-double Pulsar::PolnProfile::get_variance (unsigned ipol, float phase) const
-{
-  double mean = 0;
-  double var = 0;
-  get_Profile(ipol)->stats (phase, &mean, &var);
-  if (abs(mean) > sqrt(var))
-    cerr << "Pulsar::PolnProfile::get_variance WARNING off-pulse mean="
-	 << mean << " > rms=" << sqrt(var) << endl;
-  return var;
-}
-
-
 
 void Pulsar::PolnProfile::get_ellipticity (vector< Estimate<double> >& ell,
 					   float threshold) const
@@ -730,11 +723,16 @@ void Pulsar::PolnProfile::get_ellipticity (vector< Estimate<double> >& ell,
    
   Profile polarized;
   get_polarized (&polarized);
-  float min_phase = polarized.find_min_phase();
 
-  double var_q = get_variance (1, min_phase);
-  double var_u = get_variance (2, min_phase);
-  double var_v = get_variance (3, min_phase);
+  Reference::To<PhaseWeight> base = get_baseline();
+
+  // Apply I baseline to determine Q, U variance.
+  base->set_Profile(get_Profile(1));
+  double var_q = base->get_variance().get_value();
+  base->set_Profile(get_Profile(2));
+  double var_u = base->get_variance().get_value();
+  base->set_Profile(get_Profile(3));
+  double var_v = base->get_variance().get_value();
 
   float sigma = sqrt (0.5*(var_q + var_u + var_v));
 
@@ -748,8 +746,10 @@ void Pulsar::PolnProfile::get_ellipticity (vector< Estimate<double> >& ell,
   unsigned nbin = get_nbin();
   ell.resize (nbin);
 
-  for (unsigned ibin=0; ibin<nbin; ibin++) {
-    if (!threshold || polarized.get_amps()[ibin] > threshold*sigma) {
+  for (unsigned ibin=0; ibin<nbin; ibin++)
+  {
+    if (!threshold || polarized.get_amps()[ibin] > threshold*sigma)
+    {
       Estimate<double> L (l[ibin], var_l);
       Estimate<double> V (v[ibin], var_v);
       ell[ibin] = 90.0/M_PI * atan2 (V, L);
@@ -760,14 +760,14 @@ void Pulsar::PolnProfile::get_ellipticity (vector< Estimate<double> >& ell,
 
 }
 
-void Pulsar::PolnProfile::get_orientation (vector< Estimate<double> >& posang,
-					   float threshold) const
+void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
+				      float threshold) const
 {
   Profile linear;
   get_linear (&linear);
 
   // Determine baseline weights from I profile.
-  Reference::To<PhaseWeight> base = get_Profile(0)->baseline();
+  Reference::To<PhaseWeight> base = get_baseline();
   double sigma = base->get_variance().get_value();
   sigma = sqrt(sigma);
 
@@ -781,16 +781,41 @@ void Pulsar::PolnProfile::get_orientation (vector< Estimate<double> >& posang,
   const float *u = get_Profile(2)->get_amps(); 
 
   unsigned nbin = get_nbin();
-  posang.resize (nbin);
+  L.resize (nbin);
 
-  for (unsigned ibin=0; ibin<nbin; ibin++) {
-    if (!threshold || linear.get_amps()[ibin] > threshold*sigma) {
+  for (unsigned ibin=0; ibin<nbin; ibin++)
+  {
+    if (!threshold || linear.get_amps()[ibin] > threshold*sigma)
+    {
       Estimate<double> Q (q[ibin], var_q);
       Estimate<double> U (u[ibin], var_u);
+
+      L[ibin] = complex< Estimate<double> > (Q, U);
+    }
+    else
+      L[ibin] = 0.0;
+  }
+
+}
+
+void Pulsar::PolnProfile::get_orientation (vector< Estimate<double> >& posang,
+					   float threshold) const
+{
+  vector< complex< Estimate<double> > > linear;
+  get_linear (linear, threshold);
+
+  unsigned nbin = get_nbin();
+  posang.resize (nbin);
+
+  for (unsigned ibin=0; ibin<nbin; ibin++)
+  {
+    if (linear[ibin].real().get_variance() != 0)
+    {
+      Estimate<double> Q = linear[ibin].real();
+      Estimate<double> U = linear[ibin].imag();
       posang[ibin] = 90.0/M_PI * atan2 (U,Q);
     }
     else
-      posang[ibin] = 0.0;
+      posang[ibin] = 0;
   }
-
 }
