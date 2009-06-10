@@ -18,6 +18,7 @@ nobase_include_HEADERS = \
         MEAL/Coherency.h \
         MEAL/Complex2Constant.h \
 	MEAL/Complex.h \
+	MEAL/ComplexRVM.h \
         MEAL/Complex2.h \
         MEAL/Complex2Math.h \
         MEAL/Complex2Value.h \
@@ -116,6 +117,7 @@ libMEAL_la_SOURCES = \
 	Boost1.C \
         Coherency.C \
 	Complex.C \
+	ComplexRVM.C \
         Complex2.C \
         Complex2Constant.C \
         Complex2Math.C \
@@ -131,7 +133,6 @@ libMEAL_la_SOURCES = \
         Function_parse.C \
         Function_print.C \
 	FunctionPolicy.C \
-        Gain.C \
         Gaussian.C \
 	GimbalLockMonitor.C \
         Invariant.C \
@@ -144,7 +145,6 @@ libMEAL_la_SOURCES = \
         ParameterPolicy.C \
 	ParameterTracer.C \
         Parameters.C \
-        Phase.C \
 	PhaseGradients.C \
         PhysicalCoherency.C \
         Polar.C \
