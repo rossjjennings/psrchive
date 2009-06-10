@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ComplexRVMFit.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/06/10 20:22:59 $
+   $Revision: 1.2 $
+   $Date: 2009/06/10 21:39:03 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ComplexRVMFit_h
@@ -32,11 +32,19 @@ namespace Pulsar
     
   public:
 
+    //! Default constructo
+    ComplexRVMFit ();
+
     //! Set the data to which model will be fit
     void set_observation (const PolnProfile*);
     //! Get the data to which model will be fit
     const PolnProfile* get_observation () const;
 
+    //! Set the threshold below which data are ignored
+    void set_threshold (float sigma);
+    //! Get the threshold below which data are ignored
+    float get_threshold () const;
+    
     //! Get the model to be fit to the data
     MEAL::ComplexRVM* get_model ();
 
@@ -47,7 +55,7 @@ namespace Pulsar
 
     Reference::To<const PolnProfile> data;
     Reference::To<MEAL::ComplexRVM> model;
-
+    float threshold;
   };
 }
 
