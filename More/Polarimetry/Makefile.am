@@ -13,6 +13,7 @@ nobase_include_HEADERS = \
 	Pulsar/CalInterpreter.h \
         Pulsar/CoherencyMeasurement.h \
         Pulsar/CoherencyMeasurementSet.h \
+	Pulsar/ComplexRVMFit.h \
         Pulsar/ConvertMJD.h \
         Pulsar/Database.h \
         Pulsar/DeltaPA.h \
@@ -91,6 +92,7 @@ libPolarimetry_la_SOURCES = \
         choose.C \
         CoherencyMeasurement.C \
         CoherencyMeasurementSet.C \
+	ComplexRVMFit.C \
         ConvertMJD.C \
         Database.C \
         DeltaPA.C \
