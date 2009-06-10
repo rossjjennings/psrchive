@@ -33,6 +33,8 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/RemoveBaseline.h"
+#include "Pulsar/TextParameters.h"
+
 #include "Pulsar/counter_drift.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/PlotFactory.h"
@@ -65,7 +67,7 @@ static PlotFactory factory;
 //////////////////////////
 // Method definitions
 
-void reorder(Reference::To<Pulsar::Archive> arch);
+void reorder(Reference::To<Archive> arch);
 
 void draw_colour_map (float *plotarray, int rows, int cols, double minx,
 		double maxx, const string& xlabel, double miny, double maxy, const string& ylabel,
@@ -76,7 +78,7 @@ void minmaxval (int n, const float *thearray, float *min, float *max);
 // Initialises all the global variables to default values.
 void init();
 
-vector<Reference::To<Pulsar::Archive> > get_archives(string filename);
+vector<Reference::To<Archive> > get_archives(string filename);
 
 // Finds the optimal DM and Period
 // If any of the offset, half-range and step values are < 0,
@@ -165,6 +167,10 @@ float getSNR(const Profile * p, float rms, int minwidthbins, int maxwidthbins);
 
 // Get the RMS of the archive
 float getRMS (const Archive * archive);
+
+// Get the coordinates from the archive
+bool use_ephemeris_coordinates = false;
+sky_coord getCoord (const Archive*);
 
 void setSensibleStepSizes(const Archive * archive);
 
@@ -396,7 +402,7 @@ vector<float> bestSNRfreq;
 vector<float> bestSNRtime;
 vector<float> bestSNRtimefreq;
 
-Reference::To<Pulsar::Profile> bestProfile;
+Reference::To<Profile> bestProfile;
 
 // Errors
 double periodError_ms;
@@ -436,7 +442,7 @@ bool useStandardProfile = false;
 bool useOwnStandardProfile = false;
 bool Thumbnail = false;
 
-Reference::To<Pulsar::Profile> std_prof;
+Reference::To<Profile> std_prof;
 Reference::To<StandardSNR> stdSNR;
 
 int beginFilenamesIndex = -1;
@@ -773,8 +779,9 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 			strcpy(user_rms_file,argv[i]);
 			have_user_rms_file = 1;
 		}
-
-
+		else if (strcmp(argv[i], "-eph-coord") == 0) {
+		  use_ephemeris_coordinates = true;
+		}
 
 		// Handle error if there is no such option
 		else if (argv[i][0] == '-') {
@@ -800,7 +807,7 @@ void cpg_next ()
   cpgpage ();
 }
 
-void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilename);
+void process (Archive* archive, double minwidthsecs, string & bestfilename);
 
 double periodOffset_us = 0;
 double periodStep_us = -1;
@@ -813,7 +820,7 @@ StandardSNR std_obj;
 
 int main (int argc, char** argv)
 {
-  Pulsar::Profile::rotate_in_phase_domain = true;
+  Profile::rotate_in_phase_domain = true;
 
 	RealTimer clock;
 
@@ -834,10 +841,10 @@ int main (int argc, char** argv)
 
 	cout << "bestfilename " << bestfilename << endl;
 
-	Pulsar::Archive::verbose = 0;
+	Archive::verbose = 0;
 
 	if (verbose)
-		Pulsar::Archive::verbose = 3;
+		Archive::verbose = 3;
 
 	if (cpgopen(plot_device.c_str()) < 0) {
 		cout << "Error: Could not open plot device" << endl;
@@ -859,8 +866,8 @@ int main (int argc, char** argv)
 	// Join archives if there is more than 1 input file and the "-j"
 	// option has been specified
 
-	Reference::To<Pulsar::Archive> archive;
-	Reference::To<Pulsar::Archive> joined_archive;
+	Reference::To<Archive> archive;
+	Reference::To<Archive> joined_archive;
 
 	clock.start();
 	cpgask(!force);
@@ -868,11 +875,11 @@ int main (int argc, char** argv)
 	if (join && filenames.size() > 1)
 	{
 		cout << endl << "Loading archive: " << filenames[0] << endl;
-                joined_archive = Pulsar::Archive::load (filenames[0]);
+                joined_archive = Archive::load (filenames[0]);
 
 		for (unsigned ifile = 1; ifile < filenames.size(); ifile++) {
 			cout << "Loading archive: " << filenames[ifile] << endl;
-			archive = Pulsar::Archive::load (filenames[ifile]);
+			archive = Archive::load (filenames[ifile]);
 			joined_archive->append(archive);
 		}
 
@@ -888,7 +895,7 @@ int main (int argc, char** argv)
 
 	  for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try
 	  {
-	    archive = Pulsar::Archive::load(filenames[ifile]);
+	    archive = Archive::load(filenames[ifile]);
 
 	    // reset global variables
 	    init();
@@ -912,7 +919,7 @@ int main (int argc, char** argv)
 }
 
 
-void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilename)
+void process (Archive* archive, double minwidthsecs, string & bestfilename)
 {
   dopplerFactor = getDopplerFactor(archive);
 
@@ -1030,8 +1037,8 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
   {
     if (!silent)
       cout << "Using standard profile: " << standardProfileFilename << endl;
-    Reference::To<Pulsar::Archive> std_arch;
-    std_arch = Pulsar::Archive::load(standardProfileFilename);
+    Reference::To<Archive> std_arch;
+    std_arch = Archive::load(standardProfileFilename);
     std_arch->fscrunch();
     std_arch->pscrunch();
     std_arch->tscrunch();
@@ -1933,7 +1940,7 @@ void slaGeoc ( double p, double h, double *r, double *z )
 
 double getPeriod(const Archive * archive) {
 	Reference::To<Archive> copy = archive->clone();
-	Reference::To<Pulsar::Integration> subint = copy->get_Integration((int)(copy->get_nsubint()/(double)2));
+	Reference::To<Integration> subint = copy->get_Integration((int)(copy->get_nsubint()/(double)2));
 
 	if (verbose) {
 		MJD start = subint->get_start_time();
@@ -1977,8 +1984,9 @@ double getDopplerFactor(const Archive * archive)
 
 	double tmjdctr = 0.5 * (end + start) * (double)86400;
 
-	Angle ra_angle = (copy->get_coordinates()).ra();
-	Angle dec_angle = (copy->get_coordinates()).dec();
+	sky_coord coord = getCoord (copy);
+	Angle ra_angle = coord.ra();
+	Angle dec_angle = coord.dec();
 
 	ra_angle.getHMS(hours, minutes, seconds);
 	if (verbose) {
@@ -2152,6 +2160,38 @@ double getDopplerFactor(const Archive * archive)
 	return 1-evel;
 }
 
+
+// Get the coordinates from the archive
+sky_coord getCoord (const Archive* archive) try
+{
+  if (!use_ephemeris_coordinates)
+  {
+    // cerr << "getCoord hdr: " << archive->get_coordinates() << endl;
+    return archive->get_coordinates();
+  }
+
+  const Parameters* params = archive->get_ephemeris();
+  const TextParameters* text = dynamic_cast<const TextParameters*> (params);
+  if (!text)
+  {
+    cerr << "getCoord: archive does not contain TextParameters" << endl;
+    exit (-1);
+  }
+
+  sky_coord result;
+
+  result.ra().setHMS( text->get<string>("RAJ").c_str() );
+  result.dec().setDMS( text->get<string>("DECJ").c_str() );
+
+  // cerr << "getCoord eph: " << archive->get_coordinates() << endl;
+  return result;
+}
+catch (Error& error)
+{
+  cerr << "getCoord: error=" << error << endl;
+  exit (-1);
+}
+
 double TRUNC(double value) {
 	double result = floor(abs(value));
 	if (value < 0.0)
@@ -2250,7 +2290,7 @@ void printHeader(const Archive * archive,
 	double gal_long;
  	double gal_lat;
 
-	AnglePair glgb = (archive->get_coordinates()).getGalactic();
+	AnglePair glgb = getCoord(archive).getGalactic();
 	glgb.getDegrees(&gal_long, &gal_lat);
 
 	if (gal_long < 0)
@@ -2300,14 +2340,15 @@ void printHeader(const Archive * archive,
 	double tsub = (copy->get_Integration(0))->get_duration();
 	double tbin = (refP_us/1000) / nBin;
 
-	Reference::To<Pulsar::Integration> subint = copy->get_Integration((int)floor(copy->get_nsubint()/(double)2));
+	Reference::To<Integration> subint = copy->get_Integration((int)floor(copy->get_nsubint()/(double)2));
 	MJD start = subint->get_start_time();
 
 	int hours, degrees, ra_minutes, dec_minutes;
 	double ra_seconds, dec_seconds;
 
-	Angle ra_angle = (copy->get_coordinates()).ra();
-	Angle dec_angle = (copy->get_coordinates()).dec();
+        sky_coord coord = getCoord (copy);
+        Angle ra_angle = coord.ra();
+        Angle dec_angle = coord.dec();
 
 	double dec_degs = dec_angle.getDegrees();
 
@@ -2392,7 +2433,7 @@ void printResults(const Archive * archive) {
 
 	char temp [512];
 	Reference::To<Archive> copy = archive->clone();
-	Reference::To<Pulsar::Integration> subint = copy->get_Integration((int)(copy->get_nsubint()/(double)2));
+	Reference::To<Integration> subint = copy->get_Integration((int)(copy->get_nsubint()/(double)2));
 
 	MJD start = subint->get_start_time();
 	double bcPeriod_s = getPeriod(archive) / dopplerFactor;
@@ -2562,7 +2603,7 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 
 	FILE *file;
 
-	AnglePair glgb = (archive->get_coordinates()).getGalactic();
+	AnglePair glgb = getCoord(archive).getGalactic();
 
 	glgb.getDegrees(&glong, &glat);
 
@@ -3007,9 +3048,9 @@ void drawBestValuesCrossHair( const Archive * archive,
 	cpgsci(1);
 }
 
-void reorder(Reference::To<Pulsar::Archive> archive)
+void reorder(Reference::To<Archive> archive)
 {
-	Reference::To<Pulsar::TimeSortedOrder> tso = new Pulsar::TimeSortedOrder;
+	Reference::To<TimeSortedOrder> tso = new TimeSortedOrder;
 	tso->organise(archive,0);
 }
 
@@ -3148,8 +3189,11 @@ void setInitialXmlCandiateSection(const Archive * archive, float minwidthsecs){
 		MJD start = archive->get_Integration(0)->get_start_time();
 		xml_candidate->header.mjdStart=(start.intday()+ start.fracday());
 		xml_candidate->header.observationLength= (archive->end_time() - archive->start_time()).in_seconds();
-		Angle ra_angle = (archive->get_coordinates()).ra();
-		Angle dec_angle = (archive->get_coordinates()).dec();
+
+		sky_coord coord = getCoord (copy);
+		Angle ra_angle = coord.ra();
+		Angle dec_angle = coord.dec();
+
 		xml_candidate->header.ra=ra_angle.getDegrees();
 		xml_candidate->header.dec=dec_angle.getDegrees();
 
@@ -3194,8 +3238,11 @@ void setInitialXmlCandiateSection(const Archive * archive, float minwidthsecs){
 		MJD start = archive->get_Integration(0)->get_start_time();
 		xml_candidate->header.mjdStart=(start.intday()+ start.fracday());
 		xml_candidate->header.observationLength= (archive->end_time() - archive->start_time()).in_seconds();
-		Angle ra_angle = (archive->get_coordinates()).ra();
-		Angle dec_angle = (archive->get_coordinates()).dec();
+
+		sky_coord coord = getCoord (copy);
+		Angle ra_angle = coord.ra();
+		Angle dec_angle = coord.dec();
+
 		xml_candidate->header.ra=ra_angle.getDegrees();
 		xml_candidate->header.dec=dec_angle.getDegrees();
 
