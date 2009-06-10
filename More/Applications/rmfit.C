@@ -1405,7 +1405,7 @@ void mtm_estimate (Pulsar::Archive* std, Pulsar::Archive* obs) try
   Pulsar::PolnProfileFit mtm;
 
   MEAL::ProductRule<MEAL::Complex2> xform;
-  MEAL::Gain gain;
+  MEAL::Gain<MEAL::Complex2> gain;
   Calibration::Faraday faraday;
 
   xform.add_model (&gain);

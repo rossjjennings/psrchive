@@ -23,7 +23,7 @@ using namespace std;
 
 void Calibration::SingleAxis::init ()
 {
-  gain = new MEAL::Gain;
+  gain = new MEAL::Gain<MEAL::Complex2>;
   gain->set_param_name ("G");
   gain->set_param_description ("scalar gain");
   add_model (gain);
@@ -293,7 +293,7 @@ Calibration::SingleAxis::operator *= (const SingleAxis& other)
 }
 
 //! Get the gain transformation
-MEAL::Gain* Calibration::SingleAxis::get_gain_transformation ()
+MEAL::Gain<MEAL::Complex2>* Calibration::SingleAxis::get_gain_transformation ()
 {
   return gain;
 }

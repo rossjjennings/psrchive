@@ -29,7 +29,7 @@ void MEAL::Polar::init ()
   // name = "Polar";
 
   // Note, these objects will be destroyed during Reference::To destructor
-  gain = new MEAL::Gain;
+  gain = new MEAL::Gain<Complex2>;
   add_model (gain);
   // gain->name = "Polar::Gain";
 
@@ -131,12 +131,12 @@ void MEAL::Polar::set_rotation (unsigned i, const Estimate<double>& phi_i)
 }
 
 //! Provide access to the gain transformation
-const MEAL::Gain* MEAL::Polar::get_gain_transformation () const
+const MEAL::Gain<MEAL::Complex2>* MEAL::Polar::get_gain_transformation () const
 {
   return gain;
 }
 
-MEAL::Gain* MEAL::Polar::get_gain_transformation ()
+MEAL::Gain<MEAL::Complex2>* MEAL::Polar::get_gain_transformation ()
 {
   return gain;
 }

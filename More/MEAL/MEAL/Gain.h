@@ -1,25 +1,28 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Gain.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/05/07 02:33:38 $
+   $Revision: 1.10 $
+   $Date: 2009/06/10 10:53:53 $
    $Author: straten $ */
 
 #ifndef __MEAL_Gain_H
 #define __MEAL_Gain_H
 
-#include "MEAL/Complex2.h"
+#include "MEAL/OneParameter.h"
 
-namespace MEAL {
+namespace MEAL
+{
 
   //! A gain transformation
-  class Gain : public Complex2 {
+  template<typename Parent>
+  class Gain : public Parent
+  {
 
   public:
 
@@ -27,16 +30,20 @@ namespace MEAL {
     Gain ();
 
     //! Set the gain
-    void set_gain (const Estimate<double>&);
+    void set_gain (const Estimate<double>& gain)
+    { this->set_Estimate (0, gain); }
 
     //! Get the gain
-    Estimate<double> get_gain () const;
+    Estimate<double> get_gain () const
+    { return this->get_Estimate (0); }
 
     //! Set the name of the parameter
-    void set_param_name (const std::string& name);
+    void set_param_name (const std::string& name)
+    { parameter.set_name (name); }
 
     //! Set the description of the parameter
-    void set_param_description (const std::string& name);
+    void set_param_description (const std::string& name)
+    { parameter.set_description (name); }
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -45,15 +52,46 @@ namespace MEAL {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the name of the class
-    std::string get_name () const;
+    std::string get_name () const
+    { return "Gain<" + std::string(Parent::Name) + ">"; }
 
   protected:
 
-    //! Calculate the Jones matrix and its gradient
-    void calculate (Jones<double>& result, std::vector< Jones<double> >*);
-   
+    typedef typename Parent::Result Return;
+
+    //! Calculate the result and its gradient
+    void calculate (Return& result, std::vector<Return>* gradient);
+
+    OneParameter parameter;
   };
 
+}
+
+template<typename Parent>
+MEAL::Gain<Parent>::Gain () : parameter (this)
+{
+  parameter.set_name ("gain");
+  parameter.set_param (1.0);
+}
+
+//! Calculate the Jones matrix and its gradient, as parameterized by gain
+template<typename Parent>
+void MEAL::Gain<Parent>::calculate (Return& result, std::vector<Return>* grad)
+{
+  result = this->get_param(0);
+
+  if (MEAL::Function::verbose)
+    std::cerr << "MEAL::Gain::calculate gain=" << result << std::endl;
+
+  if (grad)
+  {
+    (*grad)[0] = 1.0;
+    
+    if (MEAL::Function::verbose)
+      std::cerr << "MEAL::Gain::calculate gradient" << std::endl
+	   << "   " << (*grad)[0] << std::endl;
+  }
+  
 }
 
 #endif

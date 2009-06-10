@@ -274,7 +274,7 @@ void Calibration::StandardModel::add_polncal_backend ()
 
   if (constant_pulsar_gain)
   {
-    pcal_gain = new MEAL::Gain;
+    pcal_gain = new MEAL::Gain<MEAL::Complex2>;
     pcal_gain_chain = new MEAL::ChainParameters<MEAL::Complex2>;
     pcal_gain_chain->set_model( pcal_gain );
     if (gain)
