@@ -1,15 +1,18 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Faraday.h"
 #include "MEAL/OneParameter.h"
 #include "Physical.h"
 #include "Pauli.h"
 
 using namespace std;
+
+// #define _DEBUG 1
 
 Calibration::Faraday::Faraday () :
   rotation (Pauli::basis().get_basis_vector(2))
@@ -124,11 +127,22 @@ double Calibration::Faraday::get_rotation () const
   double lambda_0 = reference_wavelength;
   double lambda = wavelength;
 
+#ifndef _DEBUG
   if (verbose)
-    cerr << "lambda_0=" << reference_wavelength
+#endif
+    cerr << "Calibration::Faraday::get_rotation lambda_0=" 
+	 << reference_wavelength
 	 << " lambda=" << wavelength << " (metres)" << endl;
 
-  return rotation_measure * (lambda*lambda - lambda_0*lambda_0);
+  double rot = rotation_measure * (lambda*lambda - lambda_0*lambda_0);
+
+#ifndef _DEBUG
+  if (verbose)
+#endif
+    cerr << "Calibration::Faraday::get_rotation RM=" << rotation_measure
+	 << " result=" << rot << " radians" << endl;
+
+  return rot;
 }
 
 //! Calculate the Jones matrix and its gradient
@@ -156,5 +170,10 @@ void Calibration::Faraday::calculate (Jones<double>& result,
   double dphi_dRM = rotation.get_phi().get_value() / get_param(0);
 
   (*grad)[0] *= dphi_dRM;
+
+#ifdef _DEBUG
+  cerr << " det(grad)=" << det((*grad)[0]) << endl;
+#endif
+
 }
 
