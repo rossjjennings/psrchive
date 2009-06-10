@@ -5,7 +5,7 @@ include_HEADERS = Pulsar/FITSArchive.h
 
 dist_data_DATA = psrheader.fits
 
-libpsrfits_la_SOURCES = setup_io.C \
+libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	CalibratorExtensionIO.h FITSArchive.C \
 	ProfileColumn.C Pulsar/ProfileColumn.h \
 	unload_FITSHdrExtension.C unload_ObsExtension.C \
