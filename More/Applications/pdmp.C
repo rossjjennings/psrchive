@@ -916,6 +916,10 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
 {
   dopplerFactor = getDopplerFactor(archive);
 
+  // independently remove the baseline from each subint and channel
+  Archive::remove_baseline_strategy.set( new RemoveBaseline::Each,
+		  &RemoveBaseline::Each::transform );
+
 #ifdef HAVE_PSRXML
   /*
    * If we have psrxml, we can make a 
@@ -1075,10 +1079,6 @@ void process (Pulsar::Archive* archive, double minwidthsecs, string & bestfilena
 
   phaseTimeCopy->set_dispersion_measure(bestDM);
   phaseTimeCopy->dedisperse();
-
-  // independently remove the baseline from each subint and channel
-  Archive::remove_baseline_strategy.set( new RemoveBaseline::Each,
-					 &RemoveBaseline::Each::transform );
 
   // the archive will be fscrunched by the following method
   plotPhaseTime(phaseTimeCopy, time_plot, tui);
@@ -3113,7 +3113,7 @@ void setSensibleStepSizes(const Archive* archive)
 
 void setInitialXmlCandiateSection(const Archive * archive, float minwidthsecs){
 	Reference::To<Archive> total = archive->total();
-	total->remove_baseline();
+//	total->remove_baseline();
 	const unsigned nchan = archive->get_nchan();
 	const unsigned nsubint = archive->get_nsubint();
 	const unsigned nbin = total->get_nbin();
@@ -3236,7 +3236,7 @@ void setInitialXmlCandiateSection(const Archive * archive, float minwidthsecs){
 
 			phase_time_copy->fscrunch();
 			phase_time_copy->pscrunch();
-			phase_time_copy->remove_baseline();
+		//	phase_time_copy->remove_baseline();
 			phase_time_copy->dedisperse();
 
 
@@ -3266,7 +3266,7 @@ void setInitialXmlCandiateSection(const Archive * archive, float minwidthsecs){
 void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod,double centreDm,double centreAccn, double centreJerk, float minwidthsecs){
 
 	 Reference::To<Archive> total = archive->total();
-	 total->remove_baseline();
+//	 total->remove_baseline();
 	 const unsigned nchan = archive->get_nchan();
 	 const unsigned nsubint = archive->get_nsubint();
 	 const unsigned nbin = total->get_nbin();
@@ -3337,7 +3337,7 @@ void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod
 
 		phase_time_copy->fscrunch();
 		phase_time_copy->pscrunch();
-		phase_time_copy->remove_baseline();
+		//phase_time_copy->remove_baseline();
 		phase_time_copy->dedisperse();
 
 
