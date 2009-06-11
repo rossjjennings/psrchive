@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.15 $
-   $Date: 2009/03/17 06:43:31 $
+   $Revision: 1.16 $
+   $Date: 2009/06/11 00:28:21 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
@@ -25,9 +25,10 @@
 #include <ieeefp.h>
 #endif
 
-namespace MEAL {
+namespace MEAL
+{
 
-  //! Implements the Levenberg-Marquardt algorithm for non-linear least squares
+  //! Levenberg-Marquardt algorithm for non-linear least squares minimization
   /*! This template class implements the nonlinear least squares
     fitting algorithm suggested by Levenberg, developed by Marquardt,
     and described in Numerical Recipes Chapter 15.5.  Use of the
@@ -56,7 +57,7 @@ namespace MEAL {
     </pre>
 
     The type of the gradient, Gt, is explicity specified in the
-    declaration of this template class.  The types of Xt and Yt are
+    declaration of this template class.  The types of At and Yt are
     implicitly specified by the template instantiation of the methods
     of this class.  If Yt or Gt is not of type float or double, there
     must also be defined:
@@ -79,27 +80,34 @@ namespace MEAL {
     </UL>
   */
   template <class Grad>
-  class LevenbergMarquardt {
+  class LevenbergMarquardt
+  {
     
   public:
     static unsigned verbose;
     
-    LevenbergMarquardt () { 
+    LevenbergMarquardt ()
+    { 
       lamda_increase_factor = 10.0;
       lamda_decrease_factor = 0.1;
       singular_threshold = 1e-8;
     }
     
     //! returns initial chi-squared
-    template <class Xt, class Yt, class Et, class Mt>
-    float init (const std::vector< Xt >& x,
-		const std::vector< Estimate<Yt,Et> >& y,
+    /*!
+      At = abscissa type
+      Et = estimate type
+      Mt = model type
+    */
+    template <class At, class Et, class Mt>
+    float init (const std::vector< At >& x,
+		const std::vector< Et >& y,
 		Mt& model);
     
     //! returns next chi-squared (better or worse)
-    template <class Xt, class Yt, class Et, class Mt>
-    float iter (const std::vector< Xt >& x,
-		const std::vector< Estimate<Yt,Et> >& y,
+    template <class At, class Et, class Mt>
+    float iter (const std::vector< At >& x,
+		const std::vector< Et >& y,
 		Mt& model);
 
     //! returns the best-fit answers
@@ -125,9 +133,9 @@ namespace MEAL {
     template <class Mt> void solve_delta (const Mt& model);
     
     //! returns chi-squared and calculates the Hessian matrix and gradient
-    template <class Xt, class Yt, class Et, class Mt>
-    float calculate_chisq (const std::vector< Xt >& x,
-			   const std::vector< Estimate<Yt,Et> >& y,
+    template <class At, class Et, class Mt>
+    float calculate_chisq (const std::vector< At >& x,
+			   const std::vector< Et >& y,
 			   Mt& model);
 
   private:
@@ -159,16 +167,18 @@ namespace MEAL {
 
   };
 
-  template<class Xt>
-  class AbscissaTraits {
+  template<class At>
+  class AbscissaTraits
+  {
   public:
     template<class Mt>
-    static void apply (Mt& model, const Xt& abscissa)
+    static void apply (Mt& model, const At& abscissa)
     { abscissa.apply(); }
   };
 
   template<>
-  class AbscissaTraits<double> {
+  class AbscissaTraits<double>
+  {
   public:
     template<class Mt>
     static void apply (Mt& model, double abscissa)
@@ -176,53 +186,116 @@ namespace MEAL {
   };
 
 
-  //! Enables broader use of the LevenberMarquardt algorithm
+  //! Defines the weighted inner product and norm
   template<class Et>
-  class WeightingScheme {
-
+  class WeightingScheme
+  {
   public:
 
+    typedef typename Et::val_type val_type;
+    typedef typename Et::var_type var_type;
+    
     //! Default constructor
-    WeightingScheme (Et variance = 1.0)
+    WeightingScheme (const Et& estimate)
     {
-      set_variance (variance);
+      set_variance (estimate.get_variance());
     }
 
     //! Set the variance
-    void set_variance (const Et& variance)
+    void set_variance (const var_type& variance)
     {
       inverse_variance = 1.0 / variance;
     }
 
+    //! Return the difference between data and model
+    val_type difference (const Et& estimate, const val_type& model)
+    {
+      return estimate.get_value() - model;
+    }
+
     //! Return the norm of the value
-    template<class Type>
-    inline Type norm (const Type& x) const
+    val_type norm (const val_type& x) const
     {
       return x*x; 
     }
 
-    template<class Type>
-    Type get_weighted_conjugate (const Type& data) const
+    val_type get_weighted_conjugate (const val_type& data) const
     {
       return data * inverse_variance;
     }
 
-    template<class Type>
-    Type get_weighted_norm (const Type& data) const
+    float get_weighted_norm (const val_type& data) const
     { 
       return norm(data) * inverse_variance;
     }
 
-    Et inverse_variance;
+    var_type inverse_variance;
 
   };
 
+
+
+  //! Specialization for std::complex<Estimate<T>>
+  template<class Et>
+  class WeightingScheme< std::complex<Et> >
+  {
+
+  public:
+
+    typedef std::complex<Et> type;
+    typedef std::complex<typename Et::val_type> val_type;
+    typedef typename Et::var_type var_type;
+    
+    //! Default constructor
+    WeightingScheme (const type& estimate)
+    {
+      set_variance (estimate);
+    }
+
+    //! Set the variance
+    void set_variance (const type& estimate)
+    {
+      inv_var_real = 1.0 / estimate.real().get_variance();
+      inv_var_imag = 1.0 / estimate.imag().get_variance();
+    }
+
+    //! Return the difference between data and model
+    val_type difference (const type& estimate, const val_type& model)
+    {
+      val_type val (estimate.real().get_value(), estimate.imag().get_value());
+      return val - model;
+    }
+
+    //! Return the norm of the value
+    val_type norm (const val_type& x) const
+    {
+      return std::norm(x); 
+    }
+
+    val_type get_weighted_conjugate (const val_type& data) const
+    {
+      return val_type (data.real()*inv_var_real, -data.imag()*inv_var_imag);
+    }
+
+    float get_weighted_norm (const val_type& data) const
+    { 
+      return data.real()*data.real()*inv_var_real 
+	+ data.imag()*data.imag()*inv_var_imag;
+    }
+
+    var_type inv_var_real;
+    var_type inv_var_imag;
+
+  };
+
+
+
   //! Calculates alpha and beta
-  template <class Mt, class Xt, class Yt, class Et, class Grad>
+  template <class Mt, class At, class Et, class Grad>
   float lmcoff (// input
 		Mt& model,
-		const Xt& abscissa,
-		const Estimate<Yt,Et>& data,
+		const At& abscissa,
+		const Et& data,
 		// storage
 		std::vector<Grad>& gradient,
 		// output
@@ -253,10 +326,10 @@ template <class Grad>
 unsigned MEAL::LevenbergMarquardt<Grad>::verbose = 0;
 
 template <class Grad>
-template <class Xt, class Yt, class Et, class Mt>
+template <class At, class Et, class Mt>
 float MEAL::LevenbergMarquardt<Grad>::init
-(const std::vector< Xt >& x,
- const std::vector< Estimate<Yt,Et> >& y,
+(const std::vector< At >& x,
+ const std::vector< Et >& y,
  Mt& model)
 {
   if (verbose > 2)
@@ -485,10 +558,10 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
   This method also uses the beta attribute to unpack delta.
 */
 template <class Grad>
-template <class Xt, class Yt, class Et, class Mt>
+template <class At, class Et, class Mt>
 float MEAL::LevenbergMarquardt<Grad>::iter
-( const std::vector< Xt >& x,
-  const std::vector< Estimate<Yt,Et> >& y,
+( const std::vector< At >& x,
+  const std::vector< Et >& y,
   Mt& model )
 {
   if (verbose > 2)
@@ -626,10 +699,10 @@ void MEAL::LevenbergMarquardt<Grad>::result
    This method uses the gradient attribute to store the model gradient
 */ 
 template <class Grad>
-template <class Xt, class Yt, class Et, class Mt>
+template <class At, class Et, class Mt>
 float MEAL::LevenbergMarquardt<Grad>::calculate_chisq
-(const std::vector< Xt >& x,
- const std::vector< Estimate<Yt,Et> >& y,
+(const std::vector< At >& x,
+ const std::vector< Et >& y,
  Mt& model)
 {
   if (verbose > 2)
@@ -670,12 +743,12 @@ float MEAL::LevenbergMarquardt<Grad>::calculate_chisq
   return Chisq;
 }
 
-template <class Mt, class Xt, class Yt, class Et, class Grad>
+template <class Mt, class At, class Et, class Grad>
 float MEAL::lmcoff (
 		    // input
 		    Mt& model,
-		    const Xt& abscissa,
-		    const Estimate<Yt,Et>& data,
+		    const At& abscissa,
+		    const Et& data,
 		    // storage
 		    std::vector<Grad>& gradient,
 		    // output
@@ -684,18 +757,15 @@ float MEAL::lmcoff (
 		    )
 {
   if (LevenbergMarquardt<Grad>::verbose > 2)
-    std::cerr << "MEAL::lmcoff data val=" << data.val
-	 << " var=" << data.var << std::endl;
+    std::cerr << "MEAL::lmcoff data=" << data << std::endl;
 
-  AbscissaTraits<Xt>::apply (model, abscissa);
+  AbscissaTraits<At>::apply (model, abscissa);
 
-  WeightingScheme<Et> weight (data.var);
-  Yt model_y = model.evaluate (&gradient);
-  Yt delta_y = data.val - model_y;
+  WeightingScheme<Et> weight (data);
 
-  return lmcoff1 (model, delta_y, weight, gradient, alpha, beta);
+  return lmcoff1 (model, weight.difference (data, model.evaluate (&gradient)),
+		  weight, gradient, alpha, beta);
 }
-
 
 template <class Mt, class Yt, class Wt, class Grad>
 float MEAL::lmcoff1 (
