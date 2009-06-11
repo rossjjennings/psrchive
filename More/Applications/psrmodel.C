@@ -48,6 +48,7 @@ protected:
 
   Reference::To<ComplexRVMFit> rvm;
   bool rvm_fit;
+  bool global_search;
 };
 
 int main (int argc, char** argv)
@@ -60,22 +61,24 @@ psrmodel::psrmodel () : Pulsar::Application ("psrmodel",
 					     "pulsar modeling program")
 {
   has_manual = false;
-  version = "$Id: psrmodel.C,v 1.2 2009/06/11 07:38:11 straten Exp $";
+  version = "$Id: psrmodel.C,v 1.3 2009/06/11 09:01:05 straten Exp $";
 
   add( new Pulsar::StandardOptions );
 
   rvm = new ComplexRVMFit;
   rvm_fit = false;
+  global_search = false;
 }
 
 std::string psrmodel::get_options ()
 {
-  return "AZBPa:z:b:p:";
+  return "AZBPga:z:b:p:";
 }
 
 std::string psrmodel::get_usage ()
 {
   return
+    " -g               do a global minimum search \n"
     " -a degrees       alpha: colatitude of magnetic axis \n"
     " -z degrees       zeta: colatitude of line of sight \n"
     " -b degrees       longitude of magnetic meridian \n"
@@ -95,6 +98,10 @@ bool psrmodel::parse (char code, const std::string& arg)
 
   switch (code)
   {
+
+  case 'g':
+    global_search = true;
+    break;
 
   case 'a':
     RVM->magnetic_axis->set_value (radians (arg));
@@ -151,15 +158,30 @@ void psrmodel::process (Pulsar::Archive* data)
 
   Reference::To<PolnProfile> p = data->get_Integration(0)->new_PolnProfile(0);
   rvm->set_observation (p);
-  rvm->solve();
+
+  if (global_search)
+    rvm->global_search ();
+  else
+    rvm->solve();
 
   MEAL::RotatingVectorModel* RVM = rvm->get_model()->get_rvm();
 
-  double r = 180/M_PI;
+  double d = 180/M_PI;
+  double t = 0.5/M_PI;
 
-  cerr << "PA_0="  << r*RVM->reference_position_angle->get_value() << endl;
-  cerr << "zeta="  << r*RVM->line_of_sight->get_value() << endl;
-  cerr << "alpha=" << r*RVM->magnetic_axis->get_value() << endl;
-  cerr << "phi_0=" << r*RVM->magnetic_meridian->get_value() << endl;
+  // negative because sign of PA in RVM is opposite to IAU convention
+  Estimate<double> PA = - RVM->reference_position_angle->get_value();
+  PA.val = fmod (PA.val, M_PI);
+  if (PA.val > M_PI/2)
+    PA.val -= M_PI/2;
+  if (PA.val < -M_PI/2)
+    PA.val += M_PI/2;
+
+  cerr <<
+    "PA_0="  << d*PA << " deg\n"
+    "zeta="  << d*RVM->line_of_sight->get_value() << " deg\n"
+    "alpha=" << d*RVM->magnetic_axis->get_value() << " deg\n"
+    "phi_0=" << t*RVM->magnetic_meridian->get_value() << " turns"
+	     << endl;
 
 }
