@@ -18,6 +18,9 @@ using namespace std;
 
 void MEAL::ComplexRVM::init ()
 {
+  if (verbose)
+    cerr << "MEAL::ComplexRVM::init" << endl;
+
   rvm = new RotatingVectorModel;
 
   ChainParameters<Complex>* phase = new ChainParameters<Complex>;
@@ -96,6 +99,12 @@ void MEAL::ComplexRVM::add_state (double phase, double L)
 
   state.push_back( s );
   gain->push_back( s.gain );
+}
+
+//! Get the number of states
+unsigned MEAL::ComplexRVM::get_nstate () const
+{
+  return state.size();
 }
 
 //! Set the current state for which the model will be evaluated

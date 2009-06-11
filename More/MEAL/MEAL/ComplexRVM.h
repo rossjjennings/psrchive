@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ComplexRVM.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/06/10 19:37:57 $
+   $Revision: 1.3 $
+   $Date: 2009/06/11 07:33:27 $
    $Author: straten $ */
 
 #ifndef __ComplexRVM_H
@@ -47,6 +47,9 @@ namespace MEAL {
     void add_state (double phase, double L);
     //! Set the current state for which the model will be evaluated
     void set_state (unsigned i);
+
+    //! Get the number of states
+    unsigned get_nstate () const;
 
     //! Set the phase of the ith state
     void set_phase (unsigned i, double phase);
