@@ -7,7 +7,7 @@
 
 #include "Pulsar/Application.h"
 #include "Pulsar/StandardOptions.h"
-#include "Pulsar/PlotOptions.h"
+//#include "Pulsar/PlotOptions.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -16,6 +16,7 @@
 #include "Pulsar/ComplexRVMFit.h"
 #include "MEAL/ComplexRVM.h"
 #include "MEAL/RotatingVectorModel.h"
+#include "MEAL/ScalarParameter.h"
 
 using namespace Pulsar;
 using namespace std;
@@ -59,10 +60,9 @@ psrmodel::psrmodel () : Pulsar::Application ("psrmodel",
 					     "pulsar modeling program")
 {
   has_manual = false;
-  version = "$Id: psrmodel.C,v 1.1 2009/06/11 05:03:27 straten Exp $";
+  version = "$Id: psrmodel.C,v 1.2 2009/06/11 07:38:11 straten Exp $";
 
   add( new Pulsar::StandardOptions );
-  add( new Pulsar::PlotOptions );
 
   rvm = new ComplexRVMFit;
   rvm_fit = false;
@@ -70,16 +70,15 @@ psrmodel::psrmodel () : Pulsar::Application ("psrmodel",
 
 std::string psrmodel::get_options ()
 {
-  return "Ra:z:m:p:";
+  return "AZBPa:z:b:p:";
 }
 
 std::string psrmodel::get_usage ()
 {
   return
-    " -R               fit the rotating vector model \n"
     " -a degrees       alpha: colatitude of magnetic axis \n"
     " -z degrees       zeta: colatitude of line of sight \n"
-    " -m degrees       longitude of magnetic meridian \n"
+    " -b degrees       longitude of magnetic meridian \n"
     " -p degrees       position angle at magnetic meridian \n";
 }
 
@@ -91,26 +90,38 @@ double radians (const std::string& arg)
 //! Parse a command line option
 bool psrmodel::parse (char code, const std::string& arg)
 {
+  MEAL::RotatingVectorModel* RVM = rvm->get_model()->get_rvm();
+  rvm_fit = true;
+
   switch (code)
   {
-  case 'R':
-    rvm_fit = true;
-    break;
 
   case 'a':
-    rvm->get_model()->get_rvm()->set_magnetic_axis (radians (arg));
+    RVM->magnetic_axis->set_value (radians (arg));
     break;
-    
+  case 'A':
+    RVM->magnetic_axis->set_infit (0, false);
+    break;
+
   case 'z':
-    rvm->get_model()->get_rvm()->set_line_of_sight (radians (arg));
+    RVM->line_of_sight->set_value (radians (arg));
     break;
-    
-  case 'm':
-    rvm->get_model()->get_rvm()->set_magnetic_meridian (radians (arg));
+  case 'Z':
+    RVM->line_of_sight->set_infit (0, false);
     break;
-    
+   
+  case 'b':
+    RVM->magnetic_meridian->set_value (radians (arg));
+    break;
+  case 'B':
+    RVM->magnetic_meridian->set_infit (0, false);
+    break;
+            
   case 'p':
-    rvm->get_model()->get_rvm()->set_reference_position_angle (radians (arg));
+    RVM->reference_position_angle->set_value (radians (arg));
+    break;
+  case 'P':
+    RVM->reference_position_angle->set_infit (0, false);
     break;
 
   default:
@@ -136,8 +147,19 @@ void psrmodel::process (Pulsar::Archive* data)
   data->tscrunch();
   data->fscrunch();
   data->convert_state(Signal::Stokes);
+  data->remove_baseline();
 
   Reference::To<PolnProfile> p = data->get_Integration(0)->new_PolnProfile(0);
   rvm->set_observation (p);
   rvm->solve();
+
+  MEAL::RotatingVectorModel* RVM = rvm->get_model()->get_rvm();
+
+  double r = 180/M_PI;
+
+  cerr << "PA_0="  << r*RVM->reference_position_angle->get_value() << endl;
+  cerr << "zeta="  << r*RVM->line_of_sight->get_value() << endl;
+  cerr << "alpha=" << r*RVM->magnetic_axis->get_value() << endl;
+  cerr << "phi_0=" << r*RVM->magnetic_meridian->get_value() << endl;
+
 }
