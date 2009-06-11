@@ -7,14 +7,17 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ComplexRVMFit.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/06/10 21:39:03 $
+   $Revision: 1.3 $
+   $Date: 2009/06/11 09:01:20 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ComplexRVMFit_h
 #define __Pulsar_ComplexRVMFit_h
 
 #include "MEAL/Axis.h"
+#include "Estimate.h"
+
+#include <complex>
 
 // forward declarations
 namespace MEAL
@@ -51,11 +54,20 @@ namespace Pulsar
     //! Fit data to the model
     void solve ();
 
+    void global_search ();
+
   protected:
 
     Reference::To<const PolnProfile> data;
     Reference::To<MEAL::ComplexRVM> model;
     float threshold;
+
+    MEAL::Axis<unsigned> state;
+    std::vector< MEAL::Axis<unsigned>::Value > data_x;
+    std::vector< std::complex< Estimate<double> > > data_y;
+    float chisq;
+    float peak_phase;
+    float peak_pa;
   };
 }
 
