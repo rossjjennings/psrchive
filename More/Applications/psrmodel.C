@@ -61,7 +61,7 @@ psrmodel::psrmodel () : Pulsar::Application ("psrmodel",
 					     "pulsar modeling program")
 {
   has_manual = false;
-  version = "$Id: psrmodel.C,v 1.3 2009/06/11 09:01:05 straten Exp $";
+  version = "$Id: psrmodel.C,v 1.4 2009/06/11 09:55:58 straten Exp $";
 
   add( new Pulsar::StandardOptions );
 
@@ -72,13 +72,14 @@ psrmodel::psrmodel () : Pulsar::Application ("psrmodel",
 
 std::string psrmodel::get_options ()
 {
-  return "AZBPga:z:b:p:";
+  return "AZBPga:z:b:p:t:";
 }
 
 std::string psrmodel::get_usage ()
 {
   return
     " -g               do a global minimum search \n"
+    " -t sigma         cutoff threshold when selecting bins [default 3] \n"
     " -a degrees       alpha: colatitude of magnetic axis \n"
     " -z degrees       zeta: colatitude of line of sight \n"
     " -b degrees       longitude of magnetic meridian \n"
@@ -101,6 +102,10 @@ bool psrmodel::parse (char code, const std::string& arg)
 
   case 'g':
     global_search = true;
+    break;
+
+  case 't':
+    rvm->set_threshold ( fromstring<float>(arg) );
     break;
 
   case 'a':
@@ -163,6 +168,9 @@ void psrmodel::process (Pulsar::Archive* data)
     rvm->global_search ();
   else
     rvm->solve();
+
+  cerr << "chisq=" << rvm->get_chisq() << "/nfree=" << rvm->get_nfree()
+       << " = " << rvm->get_chisq()/ rvm->get_nfree() << endl;
 
   MEAL::RotatingVectorModel* RVM = rvm->get_model()->get_rvm();
 
