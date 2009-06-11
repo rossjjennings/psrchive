@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Phase.h,v $
-   $Revision: 1.9 $
-   $Date: 2009/06/11 01:33:21 $
+   $Revision: 1.10 $
+   $Date: 2009/06/11 01:35:24 $
    $Author: straten $ */
 
 #ifndef __MEAL_Phase_H
@@ -48,6 +48,7 @@ namespace MEAL
     void calculate (Return& result, std::vector<Return>* gradient);
    
     OneParameter parameter;
+    double scale;
   };
 
 }
