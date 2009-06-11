@@ -8,6 +8,8 @@
 #include "Pulsar/PhaseVsPlot.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/RemoveBaseline.h"
+
 #include "templates.h"
 
 #include <cpgplot.h>
@@ -45,6 +47,12 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
 TextInterface::Parser* Pulsar::PhaseVsPlot::get_interface ()
 {
   return new Interface (this);
+}
+
+void Pulsar::PhaseVsPlot::preprocess (Archive* archive)
+{
+  RemoveBaseline::Each each;
+  each (archive);
 }
 
 void Pulsar::PhaseVsPlot::set_style (const string& s)

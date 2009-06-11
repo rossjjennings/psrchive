@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.19 $
-   $Date: 2009/06/09 12:01:29 $
+   $Revision: 1.20 $
+   $Date: 2009/06/11 05:05:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsPlot_h
@@ -43,6 +43,9 @@ namespace Pulsar {
 
     //! Derived classes must provide the Profile for the specified row
     virtual const Profile* get_Profile (const Archive* data, unsigned row) = 0;
+
+    //! Remove the baseline from each sub-integration and channel independently
+    void preprocess (Archive*);
 
     //! Set the minimum and maximum values on the y-axis
     void prepare (const Archive* data);
