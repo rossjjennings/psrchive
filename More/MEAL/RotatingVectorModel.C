@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/RotatingVectorModel.h"
 #include "MEAL/ScalarMath.h"
 #include "MEAL/ScalarParameter.h"
@@ -13,12 +14,22 @@ using namespace std;
 
 void MEAL::RotatingVectorModel::init ()
 {
+  if (verbose)
+    cerr << "MEAL::RotatingVectorModel::init" << endl;
+
   ScalarArgument* argument = new ScalarArgument; 
 
   reference_position_angle = new ScalarParameter;
+  reference_position_angle->set_value_name ("PA_0");
+
   line_of_sight = new ScalarParameter;
+  line_of_sight->set_value_name ("zeta");
+
   magnetic_axis = new ScalarParameter;
+  magnetic_axis->set_value_name ("alpha");
+
   magnetic_meridian = new ScalarParameter;
+  magnetic_meridian->set_value_name ("phi_0");
 
   ScalarMath longitude = *argument - *magnetic_meridian;
 
@@ -26,7 +37,7 @@ void MEAL::RotatingVectorModel::init ()
   ScalarMath denominator = cos(*magnetic_axis) * sin(*line_of_sight)
     - sin(*magnetic_axis) * cos(*line_of_sight) * cos(longitude);  
 
-  ScalarMath result = atan2(numerator,denominator) + *reference_position_angle;
+  ScalarMath result = -atan(numerator/denominator) + *reference_position_angle;
 
   expression = result.get_expression();
 
@@ -58,56 +69,6 @@ MEAL::RotatingVectorModel::operator = (const RotatingVectorModel& copy)
 MEAL::RotatingVectorModel::~RotatingVectorModel ()
 {
 }
-
-void MEAL::RotatingVectorModel::set_reference_position_angle
-(const Estimate<double>& position_angle)
-{
-  reference_position_angle->set_value (position_angle);
-}
-
-Estimate<double> 
-MEAL::RotatingVectorModel::get_reference_position_angle () const
-{
-  return reference_position_angle->get_value ();
-}
-
-//! Set the latitude of the line of sight
-void MEAL::RotatingVectorModel::set_line_of_sight (const Estimate<double>& l)
-{
-  line_of_sight->set_value (l);
-}
-
-//! Get the latitude of the line of sight
-Estimate<double> MEAL::RotatingVectorModel::get_line_of_sight () const
-{
-  return line_of_sight->get_value ();
-}
-
-//! Set the latitude of the magnetic axis
-void MEAL::RotatingVectorModel::set_magnetic_axis (const Estimate<double>& m)
-{
-  magnetic_axis->set_value (m);
-}
-
-//! Get the latitude of the magnetic axis
-Estimate<double> MEAL::RotatingVectorModel::get_magnetic_axis () const
-{
-  return magnetic_axis->get_value ();
-}
-
-//! Set the longitude of the magnetic meridian
-void 
-MEAL::RotatingVectorModel::set_magnetic_meridian (const Estimate<double>& m)
-{
-  magnetic_meridian->set_value (m);
-}
-
-//! Get the longitude of the magnetic meridian
-Estimate<double> MEAL::RotatingVectorModel::get_magnetic_meridian () const
-{
-  return magnetic_meridian->get_value ();
-}
-
 
 //! Return the name of the class
 string MEAL::RotatingVectorModel::get_name () const
