@@ -37,7 +37,7 @@ void MEAL::RotatingVectorModel::init ()
   ScalarMath denominator = cos(*magnetic_axis) * sin(*line_of_sight)
     - sin(*magnetic_axis) * cos(*line_of_sight) * cos(longitude);  
 
-  ScalarMath result = -atan(numerator/denominator) + *reference_position_angle;
+  ScalarMath result = atan(numerator/denominator) + *reference_position_angle;
 
   expression = result.get_expression();
 
