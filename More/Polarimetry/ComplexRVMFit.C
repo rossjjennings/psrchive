@@ -12,6 +12,8 @@
 #include "MEAL/ComplexRVM.h"
 #include "MEAL/LevenbergMarquardt.h"
 
+#include <assert.h>
+
 using namespace std;
 
 Pulsar::ComplexRVMFit::ComplexRVMFit()
@@ -39,7 +41,9 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 		 "data are not Stokes parameters");
 
   data = _data;
-  model = 0;
+
+  if (model->get_nstate())
+    model = 0;
 }
 
 //! Get the data to which model will be fit
@@ -85,18 +89,29 @@ void Pulsar::ComplexRVMFit::solve ()
       data_x.push_back ( state.get_Value(count) );
       data_y.push_back ( linear[ibin] );
 
-      model->add_state ( (ibin + 0.5)/nbin, sqrt(norm(linear[ibin]).val) );
+      double phase = (ibin + 0.5)*2*M_PI / nbin;
+      double L = sqrt( norm(linear[ibin]).val );
+
+      cerr << "adding phase=" << phase << " L=" << L << endl;
+      model->add_state (phase, L);
       count ++;
     }
+
+  state.signal.connect (model, &MEAL::ComplexRVM::set_state);
+
+  assert( count == model->get_nstate() );
 
   cerr << "Pulsar::ComplexRVMFit::solve using " << count << " bins" << endl;
 
   MEAL::LevenbergMarquardt< complex<double> > fit;
   fit.verbose = MEAL::Function::verbose;
-  
+
+  // MEAL::Function::verbose = true;
+
   float chisq = fit.init (data_x, data_y, *model);
   cerr << "initial chisq = " << chisq << endl;
-  
+
+  float close = 1e-3;
   unsigned iter = 1;
   unsigned not_improving = 0;
   while (not_improving < 25)
@@ -110,7 +125,8 @@ void Pulsar::ComplexRVMFit::solve ()
       float diffchisq = chisq - nchisq;
       chisq = nchisq;
       not_improving = 0;
-      if (diffchisq/chisq < threshold && diffchisq > 0) {
+      if (diffchisq/chisq < close && diffchisq > 0)
+      {
 	cerr << "no big diff in chisq = " << diffchisq << endl;
 	break;
       }
