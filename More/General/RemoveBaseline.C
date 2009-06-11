@@ -43,7 +43,11 @@ void Pulsar::RemoveBaseline::Each::transform (Archive* archive)
       Reference::To<PhaseWeight> baseline = profile->baseline();
 
       for (unsigned ipol=0; ipol < npol; ipol++)
-	subint->get_Profile(ipol, ichan)->offset (-baseline->get_mean().val);
+      {
+	Profile* p = subint->get_Profile(ipol, ichan);
+	baseline->set_Profile (p);
+	p->offset (-baseline->get_mean().val);
+      }
     }
   }
 };
