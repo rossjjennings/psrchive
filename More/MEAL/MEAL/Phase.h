@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Phase.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/06/10 10:53:45 $
+   $Revision: 1.9 $
+   $Date: 2009/06/11 01:33:21 $
    $Author: straten $ */
 
 #ifndef __MEAL_Phase_H
@@ -27,8 +27,8 @@ namespace MEAL
   public:
 
     //! Default constructor
-    Phase () : parameter (this)
-    { parameter.set_name ("phase"); }
+    Phase (double _scale = 1.0) : parameter (this)
+    { parameter.set_name ("phase"); scale = _scale; }
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -61,14 +61,14 @@ void MEAL::Phase<Parent>::calculate (Return& result, std::vector<Return>* grad)
   if (MEAL::Function::verbose)
     std::cerr << "MEAL::Phase<Parent>::calculate phase=" << phase << std::endl;
 
-  double cos_phase = cos(phase);
-  double sin_phase = sin(phase);
+  double cos_phase = cos( scale * phase);
+  double sin_phase = sin( scale * phase);
 
   result = std::complex<double>(cos_phase, sin_phase);
 
   if (grad)
   {
-    (*grad)[0] = std::complex<double>(-sin_phase, cos_phase);
+    (*grad)[0] = scale * std::complex<double>(-sin_phase, cos_phase);
     
     if (MEAL::Function::verbose)
       std::cerr << "MEAL::Phase<Parent>::calculate gradient" << std::endl
