@@ -15,15 +15,11 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Interpreter.h"
-#include "Pulsar/RemoveBaseline.h"
 
 #include "TextInterface.h"
 #include "strutil.h"
-#include "dirutil.h"
 
 #include <cpgplot.h>
-
-#include <unistd.h>
 
 using namespace Pulsar;
 using namespace std;
@@ -50,9 +46,6 @@ public:
 
   //! Process the given archive
   void process (Pulsar::Archive*);
-
-  //! Close the plot
-  void finalize ();
 
   // -P help
   void help_plot_types ();
@@ -94,11 +87,7 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
 					   "pulsar plotting program")
 {
   has_manual = true;
-  version = "$Id: psrplot.C,v 1.28 2009/06/09 11:05:44 straten Exp $";
-
-  // independently remove the baseline from each subint and channel
-  Archive::remove_baseline_strategy.set( new RemoveBaseline::Each,
-					 &RemoveBaseline::Each::transform );
+  version = "$Id: psrplot.C,v 1.29 2009/06/11 05:06:07 straten Exp $";
 
   // print angles in degrees
   Angle::default_type = Angle::Degrees;
@@ -250,11 +239,6 @@ void psrplot::process (Pulsar::Archive* archive)
     loop.set_Plot (plots[iplot]);
     loop.plot();
   }
-}
- 
-void psrplot::finalize ()
-{
-  cpgend();
 }
 
 void psrplot::help_plot_types ()
