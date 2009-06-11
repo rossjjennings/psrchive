@@ -91,9 +91,6 @@ void Pulsar::ComplexRVMFit::solve ()
 
   cerr << "Pulsar::ComplexRVMFit::solve using " << count << " bins" << endl;
 
-#if 0
-  GET ESTIMATE OUT OF LEVENBERGE MARQUARDT = USE MORE TRAITS
-
   MEAL::LevenbergMarquardt< complex<double> > fit;
   fit.verbose = MEAL::Function::verbose;
   
@@ -123,7 +120,5 @@ void Pulsar::ComplexRVMFit::solve ()
 
     iter ++;
   }
-
-#endif
 
 }
