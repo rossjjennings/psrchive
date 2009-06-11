@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarMath.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.10 $
+   $Date: 2009/06/11 06:39:43 $
    $Author: straten $ */
 
 #ifndef __ScalarMath_H
@@ -92,6 +92,9 @@ namespace MEAL {
   //! Return a ScalarMath instance representing atanh(x)
   const ScalarMath atanh (const ScalarMath& x);
 
+  //! Return a ScalarMath instance representing atan(x)
+  const ScalarMath atan (const ScalarMath& x);
+
   //! Return a ScalarMath instance representing tan(y/x)
   const ScalarMath atan2 (const ScalarMath& y, const ScalarMath& x);
 
@@ -130,83 +133,35 @@ namespace MEAL {
     //! Division operator
     const ScalarMath operator /= (const ScalarMath& b);
 
-    //! Negation operator
     friend const ScalarMath operator - (const ScalarMath& b);
-
-    //! Nothing operator
     friend const ScalarMath operator + (const ScalarMath& b);
-
-    //! Return a ScalarMath instance representing a+b
     friend const ScalarMath operator + (const ScalarMath& a,
 					const ScalarMath& b);
-
-    //! Return a ScalarMath instance representing a-b
     friend const ScalarMath operator - (const ScalarMath& a,
 					const ScalarMath& b);
-
-    //! Return a ScalarMath instance representing a*b
     friend const ScalarMath operator * (const ScalarMath& a,
 					const ScalarMath& b);
-    
-    //! Return a ScalarMath instance representing a/b
     friend const ScalarMath operator / (const ScalarMath& a,
 					const ScalarMath& b);
-
-    //! Return true if the expression evaluations are equal
     friend bool operator == (const ScalarMath& a, const ScalarMath& b);
-
-    //! Return true if the expression evaluations are not equal
     friend bool operator != (const ScalarMath& a, const ScalarMath& b);
-
-    //! Return true if the expression evaluation of a is less than that of b
     friend bool operator < (const ScalarMath& a, const ScalarMath& b);
-
-    //! Return true if the expression evaluation of a is less than that of b
     friend bool operator > (const ScalarMath& a, const ScalarMath& b);
-
-    //! Comparison operator
     friend bool operator <= (const ScalarMath&, const ScalarMath&);
-
-    //! Comparison operator
     friend bool operator >= (const ScalarMath&, const ScalarMath&);
-
-    //! Return a ScalarMath instance representing x^y
     friend const ScalarMath pow (const ScalarMath& x, const ScalarMath& y);
-
-    //! Return a ScalarMath instance representing x^.5
     friend const ScalarMath sqrt (const ScalarMath& x);
-
-    //! Return a ScalarMath instance representing |x|
     friend const ScalarMath abs (const ScalarMath& x);
-
-    //! Return a ScalarMath instance representing sin(x)
     friend const ScalarMath sin (const ScalarMath& x);
-
-    //! Return a ScalarMath instance representing cos(x)
     friend const ScalarMath cos (const ScalarMath& x);
-
-    //! Return a ScalarMath instance representing tan(x)
     friend const ScalarMath tan (const ScalarMath& x);
-
-    //! Return a ScalarMath instance representing sinh(x)
     friend const ScalarMath sinh (const ScalarMath& x);
-
-    //! Return a ScalarMath instance representing cosh(x)
     friend const ScalarMath cosh (const ScalarMath& x);
-
-    //! Return a ScalarMath instance representing tanh(x)
     friend const ScalarMath tanh (const ScalarMath& x);
-
-    //! Return a ScalarMath instance representing exp(x)
     friend const ScalarMath exp (const ScalarMath& x);
-
-    //! Return a ScalarMath instance representing log(x)
     friend const ScalarMath log (const ScalarMath& x);
-
-    //! Return a ScalarMath instance representing atanh(x)
     friend const ScalarMath atanh (const ScalarMath& x);
-
-    //! Return a ScalarMath instance representing tan(y/x)
+    friend const ScalarMath atan (const ScalarMath& x);
     friend const ScalarMath atan2 (const ScalarMath& y, const ScalarMath& x);
 
     //! Evaluate the expression

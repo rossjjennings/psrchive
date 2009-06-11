@@ -84,6 +84,7 @@ nobase_include_HEADERS = \
         MEAL/ScalarHypSine.h \
         MEAL/ScalarHypTangent.h \
         MEAL/ScalarInverseHypTangent.h \
+	MEAL/ScalarInverseTangent.h \
         MEAL/ScalarInverseTangent2.h \
         MEAL/ScalarLogarithm.h \
         MEAL/ScalarMath.h \
@@ -168,6 +169,7 @@ libMEAL_la_SOURCES = \
         ScalarHypSine.C \
         ScalarHypTangent.C \
         ScalarInverseHypTangent.C \
+        ScalarInverseTangent.C \
         ScalarInverseTangent2.C \
         ScalarLogarithm.C \
         ScalarMath.C \

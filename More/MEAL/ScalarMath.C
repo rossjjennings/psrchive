@@ -19,6 +19,7 @@
 #include "MEAL/ScalarLogarithm.h"
 #include "MEAL/ScalarAbsolute.h"
 #include "MEAL/ScalarInverseHypTangent.h"
+#include "MEAL/ScalarInverseTangent.h"
 #include "MEAL/ScalarInverseTangent2.h"
 #include "MEAL/ScalarPower.h"
 
@@ -234,6 +235,13 @@ MEAL::atanh (const ScalarMath& x)
   return *result;
 }
 
+const MEAL::ScalarMath
+MEAL::atan (const ScalarMath& x)
+{
+  UnaryScalar* result = new ScalarInverseTangent;
+  result->set_model( x.expression );
+  return *result;
+}
 const MEAL::ScalarMath
 MEAL::atan2 (const ScalarMath& y, const ScalarMath& x)
 {
