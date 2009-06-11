@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.38 $
-   $Date: 2007/11/21 19:47:55 $
+   $Revision: 1.39 $
+   $Date: 2009/06/11 00:27:25 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -37,6 +37,9 @@ class Estimate
 {
 
  public:
+
+  typedef T val_type;
+  typedef U var_type;
 
   //! The value, \f$ x \f$
   T val;
