@@ -23,7 +23,7 @@ void MEAL::ComplexRVM::init ()
   ChainParameters<Complex>* phase = new ChainParameters<Complex>;
 
   // Set up a complex phase function with phase equal to RVM P.A.
-  phase->set_model( new Phase<Complex> );
+  phase->set_model( new Phase<Complex>(2.0) );
   phase->set_constraint( 0, rvm );
 
   gain = new VectorRule<Complex>;
