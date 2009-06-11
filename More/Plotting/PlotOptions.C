@@ -122,3 +122,8 @@ void Pulsar::PlotOptions::setup ()
   // set the viewport with room for titles
   cpgsvp (0.15,0.9, 0.15,0.9);
 }
+
+void Pulsar::PlotOptions::finalize ()
+{
+  cpgend();
+}

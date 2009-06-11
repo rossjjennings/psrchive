@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PlotOptions.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/05/27 23:52:26 $
+   $Revision: 1.3 $
+   $Date: 2009/06/11 09:01:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotOptions_h
@@ -29,16 +29,19 @@ namespace Pulsar {
     PlotOptions ();
 
     //! Additional usage information implemented by derived classes
-    virtual std::string get_usage ();
+    std::string get_usage ();
 
     //! Additional getopt options
-    virtual std::string get_options ();
+    std::string get_options ();
 
     //! Parse a command line option, return true if understood
-    virtual bool parse (char code, const std::string& arg);
+    bool parse (char code, const std::string& arg);
 
     //! Open the plot device and configure it
-    virtual void setup ();
+    void setup ();
+
+    //! Close the plot device
+    void finalize ();
 
   private:
 
