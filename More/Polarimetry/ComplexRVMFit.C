@@ -150,10 +150,34 @@ void Pulsar::ComplexRVMFit::solve ()
     iter ++;
   }
 
+  std::vector<std::vector<double> > covariance;
+  fit.result (*model, covariance);
+
+  nfree = 2 * model->get_nstate();
+  for (unsigned iparm=0; iparm < model->get_nparam(); iparm++)
+  {
+    if (model->get_infit(iparm))
+      nfree --;
+
+    if (nfree == 0)
+      throw Error (InvalidState, "Pulsar::ComplexRVMFit::solve",
+		   "nfree <= 0");
+
+    model->set_variance (iparm, covariance[iparm][iparm]);
+  }
 }
 
 void Pulsar::ComplexRVMFit::global_search ()
 {
+  const unsigned nstate = get_model()->get_nstate();
+  if (!nstate)
+    throw Error (InvalidState, "Pulsar::ComplexRVMFit::global_search",
+		 "no data");
+
+  vector<double> linear (nstate);
+  for (unsigned i=0; i<nstate; i++)
+    linear[i] = get_model()->get_linear(i).get_value();
+
   double alpha_step = M_PI/10;
   double zeta_step = alpha_step;
 
@@ -170,6 +194,8 @@ void Pulsar::ComplexRVMFit::global_search ()
       RVM->line_of_sight->set_value (zeta);
       RVM->magnetic_meridian->set_value (peak_phase);
       RVM->reference_position_angle->set_value (peak_pa);
+      for (unsigned i=0; i<nstate; i++)
+	get_model()->set_linear(i, linear[i]);
 
       solve ();
 
@@ -183,7 +209,8 @@ void Pulsar::ComplexRVMFit::global_search ()
     }
     catch (Error& error)
     {
-      cerr << "exception thrown alpha=" << alpha << " zeta=" << zeta << endl;
+      cerr << "exception thrown alpha=" << alpha << " zeta=" << zeta << endl
+	   << error.get_message() << endl;
     }
 
 

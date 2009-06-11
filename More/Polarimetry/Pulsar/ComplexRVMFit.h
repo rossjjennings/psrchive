@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ComplexRVMFit.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/06/11 09:01:20 $
+   $Revision: 1.4 $
+   $Date: 2009/06/11 09:56:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ComplexRVMFit_h
@@ -56,6 +56,9 @@ namespace Pulsar
 
     void global_search ();
 
+    float get_chisq () const { return chisq; }
+    unsigned get_nfree () const { return nfree; }
+
   protected:
 
     Reference::To<const PolnProfile> data;
@@ -65,9 +68,12 @@ namespace Pulsar
     MEAL::Axis<unsigned> state;
     std::vector< MEAL::Axis<unsigned>::Value > data_x;
     std::vector< std::complex< Estimate<double> > > data_y;
-    float chisq;
+
     float peak_phase;
     float peak_pa;
+
+    float chisq;
+    unsigned nfree;
   };
 }
 
