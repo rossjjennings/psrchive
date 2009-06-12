@@ -21,6 +21,7 @@ using namespace std;
 Pulsar::ComplexRVMFit::ComplexRVMFit()
 {
   threshold = 3.0;
+  chisq_map = false;
 }
 
 //! Set the threshold below which data are ignored
@@ -62,9 +63,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
     if (linear[ibin].real().get_variance() > 0)
     {
       data_x.push_back ( state.get_Value(count) );
-
-      // conj because sign of PA in RVM is opposite to IAU convention
-      data_y.push_back ( conj( linear[ibin] ) );
+      data_y.push_back ( linear[ibin] );
       
       double phase = (ibin + 0.5)*2*M_PI / nbin;
       double L = sqrt( norm(linear[ibin]).val );
@@ -75,8 +74,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
     }
 
     if (int(ibin) == max_bin)
-      // negative because sign of PA in RVM is opposite to IAU convention
-      peak_pa = -0.5 * atan2 (linear[ibin].imag().val,linear[ibin].real().val);
+      peak_pa = 0.5 * atan2 (linear[ibin].imag().val, linear[ibin].real().val);
   }
 
   cerr << "peak phase=" << peak_phase*0.5/M_PI
@@ -150,6 +148,9 @@ void Pulsar::ComplexRVMFit::solve ()
     iter ++;
   }
 
+  if (chisq_map)
+    return;
+
   std::vector<std::vector<double> > covariance;
   fit.result (*model, covariance);
 
@@ -167,41 +168,61 @@ void Pulsar::ComplexRVMFit::solve ()
   }
 }
 
-void Pulsar::ComplexRVMFit::global_search ()
+void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
 {
   const unsigned nstate = get_model()->get_nstate();
   if (!nstate)
     throw Error (InvalidState, "Pulsar::ComplexRVMFit::global_search",
 		 "no data");
 
+  MEAL::ComplexRVM* cRVM = get_model();
+  MEAL::RotatingVectorModel* RVM = cRVM->get_rvm();
+
   vector<double> linear (nstate);
   for (unsigned i=0; i<nstate; i++)
-    linear[i] = get_model()->get_linear(i).get_value();
+  {
+    linear[i] = cRVM->get_linear(i).get_value();
+    // cerr << "linear[" << i << "]=" << linear[i] << endl;
+  }
 
-  double alpha_step = M_PI/10;
-  double zeta_step = alpha_step;
-
-  MEAL::RotatingVectorModel* RVM = get_model()->get_rvm();
+  double alpha_step = M_PI/(nstep-1);
+  double zeta_step = M_PI/(nstep-2);
 
   float best_chisq = 0.0;
   float best_alpha = 0.0;
   float best_zeta = 0.0;
   
+  if (chisq_map)
+  {
+    RVM->magnetic_axis->set_infit (0, false);
+    RVM->line_of_sight->set_infit (0, false);
+  }
+
   for (double alpha=alpha_step/2; alpha < M_PI; alpha += alpha_step)
     for (double zeta=zeta_step/2; zeta < M_PI; zeta += zeta_step) try
     {
       RVM->magnetic_axis->set_value (alpha);
       RVM->line_of_sight->set_value (zeta);
+
+      // ensure that each attempt starts with the same guess
       RVM->magnetic_meridian->set_value (peak_phase);
       RVM->reference_position_angle->set_value (peak_pa);
       for (unsigned i=0; i<nstate; i++)
-	get_model()->set_linear(i, linear[i]);
+	cRVM->set_linear(i, linear[i]);
 
       solve ();
 
+      for (unsigned i=0; i<nstate; i++)
+	if (cRVM->get_linear(i).get_value() < 0)
+	  cerr << "negative linear[" << i << "]=" 
+	       << cRVM->get_linear(i).val << endl;
+
+      if (chisq_map)
+	cout << alpha << " " << zeta << " " << chisq << endl;
+
       if (best_chisq == 0 || chisq < best_chisq)
       {
-	cerr << "current best chisq=" << chisq << endl;
+	// cerr << "current best chisq=" << chisq << endl;
 	best_chisq = chisq;
 	best_alpha = alpha;
 	best_zeta = zeta;
@@ -209,15 +230,18 @@ void Pulsar::ComplexRVMFit::global_search ()
     }
     catch (Error& error)
     {
-      cerr << "exception thrown alpha=" << alpha << " zeta=" << zeta << endl
-	   << error.get_message() << endl;
+      if (MEAL::Function::verbose)
+	cerr << "exception thrown alpha=" << alpha << " zeta=" << zeta << endl
+	     << error.get_message() << endl;
     }
 
 
-  cerr << "BEST chisq=" << best_chisq << endl;
+  // cerr << "BEST chisq=" << best_chisq << endl;
 
   RVM->magnetic_axis->set_value (best_alpha);
   RVM->line_of_sight->set_value (best_zeta);
+
+  chisq_map = false;
 
   solve ();
 }
