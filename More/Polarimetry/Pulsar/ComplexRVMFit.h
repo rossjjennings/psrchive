@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ComplexRVMFit.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/06/11 09:56:04 $
+   $Revision: 1.5 $
+   $Date: 2009/06/12 09:10:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ComplexRVMFit_h
@@ -54,7 +54,9 @@ namespace Pulsar
     //! Fit data to the model
     void solve ();
 
-    void global_search ();
+    void set_chisq_map (bool flag) { chisq_map = flag; }
+
+    void global_search (unsigned nstep);
 
     float get_chisq () const { return chisq; }
     unsigned get_nfree () const { return nfree; }
@@ -74,6 +76,7 @@ namespace Pulsar
 
     float chisq;
     unsigned nfree;
+    bool chisq_map;
   };
 }
 
