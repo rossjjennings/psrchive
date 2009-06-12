@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Univariate.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/11/07 18:39:00 $
+   $Revision: 1.9 $
+   $Date: 2009/06/12 09:10:26 $
    $Author: straten $ */
 
 #ifndef __MEAL_Univariate_H
@@ -46,6 +46,10 @@ namespace MEAL {
     //! Get the abscissa value
     double get_abscissa () const
     { return univariate_policy->get_abscissa (); }
+
+    //! Evaluate the function
+    typename T::Result compute (double x)
+    { set_abscissa (x); return this->evaluate (); }
 
   protected:
 
