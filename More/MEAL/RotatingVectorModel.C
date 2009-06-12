@@ -34,8 +34,14 @@ void MEAL::RotatingVectorModel::init ()
   ScalarMath longitude = *argument - *magnetic_meridian;
 
   ScalarMath numerator = sin(*magnetic_axis) * sin(longitude);
-  ScalarMath denominator = cos(*magnetic_axis) * sin(*line_of_sight)
-    - sin(*magnetic_axis) * cos(*line_of_sight) * cos(longitude);  
+
+  /*
+    The original RVM sign convention for PA is opposite to that of the IAU.
+    See Everett & Weisberg (2001; ApJ 553:341) for more details.
+  */
+  ScalarMath denominator = 
+    sin(*magnetic_axis) * cos(*line_of_sight) * cos(longitude)
+  - cos(*magnetic_axis) * sin(*line_of_sight);
 
   ScalarMath result = atan(numerator/denominator) + *reference_position_angle;
 
