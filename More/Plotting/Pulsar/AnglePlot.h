@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/AnglePlot.h,v $
-   $Revision: 1.18 $
-   $Date: 2008/11/12 07:45:10 $
+   $Revision: 1.19 $
+   $Date: 2009/06/12 09:10:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_AnglePlot_h
@@ -17,6 +17,7 @@
 #include "Pulsar/PhasePlot.h"
 #include "Pulsar/Index.h"
 
+#include "Functor.h"
 #include "Estimate.h"
 
 namespace Pulsar {
@@ -70,7 +71,9 @@ namespace Pulsar {
     //! span of value in degrees
     void set_span (float t) { span = t; }
     float get_span () const { return span; }
-    
+
+    Functor< float(float) > model;
+
   protected:
 
     //! Marker used to plot each point

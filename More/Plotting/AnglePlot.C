@@ -104,13 +104,19 @@ void Pulsar::AnglePlot::draw (const Archive *data)
 
   int y_range_start = int(floor(y_range.first));
   int y_range_end = int(ceil(y_range.second));
+
+  double x_scale = get_scale()->get_scale(data);
+
+  float old_ch;
+  cpgqch( &old_ch );
+  cpgsch( 0.5 );
   
   for( int range = range_start; range < range_end; range ++ )
   {
     //     float yoff = 0;
     //     unsigned times = 1;
 
-    float xoff = float(range) * get_scale()->get_scale(data);
+    float xoff = float(range) * x_scale;
 
     //     if (span)
     //     {
@@ -133,32 +139,60 @@ void Pulsar::AnglePlot::draw (const Archive *data)
       err1 = true;
     }
 
-    float old_ch;
-    cpgqch( &old_ch );
-    cpgsch( 0.5 );
-//     for (unsigned ioff=0; ioff < times; ioff++)
-//     {
-      for (unsigned ibin=0; ibin < phases.size(); ibin++)
-        if (angles[ibin].get_variance() != 0)
-        {
-          for( int yoff = y_range_start; yoff <= y_range_end; yoff ++ )
-          {
-            if (err1)
-              cpgerr1 (6, phases[ibin]+xoff, angles[ibin].get_value() + yoff*180,
-                       angles[ibin].get_error(), terminal);
-            if (marker & Dot)
-            {
-              cpgpt1 (phases[ibin]+xoff, angles[ibin].get_value() + yoff*180, 17);
-            }
-          }
-        }
+    for (unsigned ibin=0; ibin < phases.size(); ibin++)
+    {
+      double x = phases[ibin]+xoff;
 
-      //       yoff += span;
-//     }
-    cpgsch( old_ch );
+      if (angles[ibin].get_variance() != 0)
+      {
+	for( int yoff = y_range_start; yoff <= y_range_end; yoff ++ )
+        {
+	  if (err1)
+	    cpgerr1 (6, x, angles[ibin].get_value() + yoff*180,
+		     angles[ibin].get_error(), terminal);
+	  if (marker & Dot)
+	    cpgpt1 (x, angles[ibin].get_value() + yoff*180, 17);
+	}
+      }
+    }
   }
 
+  if (model)
+  {
+    for( int yoff = y_range_start; yoff <= y_range_end; yoff ++ )
+    {
+      bool start_new_line = true;
+
+      for( int range = range_start; range < range_end; range ++ )
+      {
+	float xoff = float(range) * x_scale;
+	float ylast = 0;
+
+	for (unsigned ibin=0; ibin < phases.size(); ibin++)
+	{
+	  double x = phases[ibin]+xoff;
+	  float y = model (x*2*M_PI/x_scale) * 180/M_PI + yoff * 180;
+
+	  if (fabs(y-ylast) > 120)
+	    start_new_line = true;
+
+	  // cerr << "x=" << x << " y=" << y << endl;
+
+	  if (start_new_line)
+	    cpgmove (x, y);
+	  else
+	    cpgdraw (x, y);
+	  
+	  start_new_line = false;
+	  ylast = y;
+	}
+      }
+    }
+  }
+
+  cpgsch( old_ch );
 }
+
 
 //! Return the label for the y-axis
 std::string Pulsar::AnglePlot::get_flux_label (const Archive* data)
