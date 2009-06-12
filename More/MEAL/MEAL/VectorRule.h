@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/VectorRule.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/03/17 06:43:31 $
+   $Revision: 1.9 $
+   $Date: 2009/06/12 09:10:20 $
    $Author: straten $ */
 
 #ifndef __MEAL_VectorRule_H
@@ -260,7 +260,8 @@ void MEAL::VectorRule<T>::calculate (Result& result,
 
   if (T::very_verbose)
   {
-    std::cerr << get_name() + "calculate result\n   " << result << std::endl;
+    std::cerr << get_name() + "calculate model index=" << model_index
+	      << " result\n   " << result << std::endl;
     if (grad)
     {
       std::cerr << get_name() + "calculate gradient" << std::endl;
