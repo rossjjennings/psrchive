@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PlotOptions.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/06/11 09:01:10 $
+   $Revision: 1.4 $
+   $Date: 2009/06/12 09:10:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotOptions_h
@@ -26,7 +26,10 @@ namespace Pulsar {
   public:
 
     //! Default constructor
-    PlotOptions ();
+    PlotOptions (bool open_device = true);
+
+    //! Enable/disable pgplot device open and close
+    void set_open_device (bool flag);
 
     //! Additional usage information implemented by derived classes
     std::string get_usage ();
@@ -59,6 +62,8 @@ namespace Pulsar {
     // plot dimensions in pixels
     unsigned width_pixels, height_pixels;
 
+    // always open device
+    bool open_device;
   };
 
 }

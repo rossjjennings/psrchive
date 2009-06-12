@@ -12,7 +12,7 @@
 
 using namespace std;
 
-Pulsar::PlotOptions::PlotOptions ()
+Pulsar::PlotOptions::PlotOptions (bool open)
 {
   plot_device = "?";
 
@@ -23,6 +23,13 @@ Pulsar::PlotOptions::PlotOptions ()
   aspect_ratio = 0.0;
 
   width_pixels = height_pixels = 0;
+
+  open_device = open;
+}
+
+void Pulsar::PlotOptions::set_open_device (bool flag)
+{
+  open_device = flag;
 }
 
 //! Extra usage information implemented by derived classes
@@ -100,6 +107,9 @@ bool Pulsar::PlotOptions::parse (char code, const std::string& arg)
 //! Open the graphics device and configure it
 void Pulsar::PlotOptions::setup ()
 {
+  if (!open_device)
+    return;
+
   // open the plot device
   if (cpgopen(plot_device.c_str()) < 0)
     throw Error (InvalidParam, "Pulsar::PlotOptions::setup",
@@ -125,5 +135,6 @@ void Pulsar::PlotOptions::setup ()
 
 void Pulsar::PlotOptions::finalize ()
 {
-  cpgend();
+  if (open_device)
+    cpgend();
 }
