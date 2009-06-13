@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Instrument.h,v $
-   $Revision: 1.11 $
-   $Date: 2009/03/01 18:04:42 $
+   $Revision: 1.12 $
+   $Date: 2009/06/13 05:11:05 $
    $Author: straten $ */
 
 #ifndef __CalibrationInstrument_H
@@ -86,8 +86,8 @@ namespace Calibration {
     //! Feed model: \f$\theta_0-1\f$ and \f$\chi_0-1\f$
     Reference::To<Feed> feed;
 
-    //! ChainParameters used to bind Feed parameters
-    Reference::To< MEAL::ChainParameters<MEAL::Complex2> > feed_chain;
+    //! ChainRule used to bind Feed parameters
+    Reference::To< MEAL::ChainRule<MEAL::Complex2> > feed_chain;
 
     //! ScalarParameter used to bind ellipticities
     Reference::To<MEAL::ScalarParameter> ellipticities;

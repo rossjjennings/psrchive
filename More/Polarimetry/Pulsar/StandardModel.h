@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.23 $
-   $Date: 2009/06/10 10:53:53 $
+   $Revision: 1.24 $
+   $Date: 2009/06/13 05:11:05 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -24,7 +24,7 @@
 #include "Pulsar/ConvertMJD.h"
 
 #include "MEAL/ProductRule.h"
-#include "MEAL/ChainParameters.h"
+#include "MEAL/ChainRule.h"
 #include "MEAL/Polynomial.h"
 #include "MEAL/Gain.h"
 #include "MEAL/Axis.h"
@@ -161,7 +161,7 @@ namespace Calibration
 
     //! The signal path experienced by the calibrator
     Reference::To< MEAL::ProductRule<MEAL::Complex2> > pcal_path;
-    Reference::To< MEAL::ChainParameters<MEAL::Complex2> > pcal_gain_chain;
+    Reference::To< MEAL::ChainRule<MEAL::Complex2> > pcal_gain_chain;
     Reference::To< MEAL::Gain<MEAL::Complex2> > pcal_gain;
 
     //! The signal path experienced by the pulsar

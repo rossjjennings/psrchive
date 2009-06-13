@@ -16,7 +16,7 @@ using namespace std;
 void Calibration::BackendFeed::init ()
 {
   backend = new Calibration::SingleAxis;
-  backend_chain = new MEAL::ChainParameters<MEAL::Complex2>;
+  backend_chain = new MEAL::ChainRule<MEAL::Complex2>;
   backend_chain->set_model( backend );
 
   add_model( backend_chain );

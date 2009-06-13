@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/BackendFeed.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/03/01 18:04:41 $
+   $Revision: 1.3 $
+   $Date: 2009/06/13 05:11:05 $
    $Author: straten $ */
 
 #ifndef __CalibrationBackendFeed_H
 #define __CalibrationBackendFeed_H
 
 #include "MEAL/ProductRule.h"
-#include "MEAL/ChainParameters.h"
+#include "MEAL/ChainRule.h"
 #include "MEAL/Complex2.h"
 #include "MEAL/ScalarParameter.h"
 
@@ -113,8 +113,8 @@ namespace Calibration {
     //! SingleAxis model: \f$G\f$, \f$\gamma\f$, and \f$\varphi\f$
     Reference::To<SingleAxis> backend;
 
-    //! ChainParameters used to model Backend parameter variations
-    Reference::To< MEAL::ChainParameters<MEAL::Complex2> > backend_chain;
+    //! ChainRule used to model Backend parameter variations
+    Reference::To< MEAL::ChainRule<MEAL::Complex2> > backend_chain;
 
     //! Scalar function used to model gain variation
     Reference::To<MEAL::Scalar> gain_variation;
