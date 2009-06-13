@@ -77,8 +77,8 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
       peak_pa = 0.5 * atan2 (linear[ibin].imag().val, linear[ibin].real().val);
   }
 
-  cerr << "peak phase=" << peak_phase*0.5/M_PI
-       << " turns; PA=" << peak_pa*180/M_PI << " deg" << endl;
+  cerr << "peak phase=" << peak_phase*180/M_PI
+       << " deg; PA=" << peak_pa*180/M_PI << " deg" << endl;
 
   state.signal.connect (model, &MEAL::ComplexRVM::set_state);
   
@@ -145,6 +145,7 @@ void Pulsar::ComplexRVMFit::solve ()
       float diffchisq = chisq - nchisq;
       chisq = nchisq;
       not_improving = 0;
+
       if (diffchisq/chisq < close && diffchisq > 0)
 	break;
     }
@@ -174,9 +175,69 @@ void Pulsar::ComplexRVMFit::solve ()
 
     model->set_variance (iparm, 2.0*covariance[iparm][iparm]);
   }
+}
+
+// ensure that phi lies on 0 -> 2*PI
+double twopi (double phi)
+{
+  const double s = 2*M_PI;
+  phi /= s;
+  return s*(phi-floor(phi));
+}
+
+void Pulsar::ComplexRVMFit::check_parameters ()
+{
+  MEAL::ComplexRVM* cRVM = get_model();
+  MEAL::RotatingVectorModel* RVM = cRVM->get_rvm();
+
+  const unsigned nstate = cRVM->get_nstate();
+
+  double total_linear = 0.0;
+  for (unsigned i=0; i<nstate; i++)
+    total_linear += cRVM->get_linear(i).get_value();
+
+  double PA0 = RVM->reference_position_angle->get_param(0);
+
+  if (total_linear < 0.0)
+  {
+    cerr << "correcting negative gain" << endl;
+    for (unsigned i=0; i<nstate; i++)
+      cRVM->set_linear(i,-cRVM->get_linear(i).get_value());
+
+    // shift the reference P.A. by 90 degrees
+    PA0 += M_PI/2;
+  }
+
+  // ensure that PA0 lies on -pi/2 -> pi/2
+  PA0 = atan ( tan(PA0) );
+
+  bool turn180 = false;
+
+  double alpha = twopi (RVM->magnetic_axis->get_param(0));
+  if (alpha > M_PI)
+  {
+    alpha -= M_PI;
+    turn180 = true;
+  }
+
+  double zeta = twopi (RVM->line_of_sight->get_param(0));
+  if (zeta > M_PI)
+  {
+    zeta -= M_PI;
+    turn180 = true;
+  }
+
+  double phi0 = twopi (RVM->magnetic_meridian->get_param(0));
+  if (turn180)
+    phi0 = twopi (phi0+M_PI);
+
+  RVM->magnetic_axis->set_param(0, alpha);
+  RVM->line_of_sight->set_param(0, zeta);
+  RVM->magnetic_meridian->set_param(0, phi0);
+  RVM->reference_position_angle->set_param (0, PA0);
+}
 
 #if 0
-
   double chisq2 = 0;
   double deg=180/M_PI;
 
@@ -198,35 +259,6 @@ void Pulsar::ComplexRVMFit::solve ()
 
   cerr << "CHISQ=" << chisq2 << endl;
 #endif
-
-}
-
-void Pulsar::ComplexRVMFit::check_parameters ()
-{
-  MEAL::ComplexRVM* cRVM = get_model();
-  MEAL::RotatingVectorModel* RVM = cRVM->get_rvm();
-
-  const unsigned nstate = cRVM->get_nstate();
-
-  double total_linear = 0.0;
-  for (unsigned i=0; i<nstate; i++)
-    total_linear += cRVM->get_linear(i).get_value();
-
-  if (total_linear < 0.0)
-  {
-    cerr << "correcting negative gain" << endl;
-    for (unsigned i=0; i<nstate; i++)
-      cRVM->set_linear(i,-cRVM->get_linear(i).get_value());
-
-    double PA0 = RVM->reference_position_angle->get_value().get_value();
-    if (PA0 < 0)
-      PA0 += M_PI/2;
-    else
-      PA0 -= M_PI/2;
-
-    RVM->reference_position_angle->set_value (PA0);
-  }
-}
 
 void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
 {
@@ -256,6 +288,7 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
   }
 
   for (double alpha=alpha_step/2; alpha < M_PI; alpha += alpha_step)
+  {
     for (double zeta=zeta_step/2; zeta < M_PI; zeta += zeta_step) try
     {
       RVM->magnetic_axis->set_value (alpha);
@@ -287,11 +320,20 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
 	     << error.get_message() << endl;
     }
 
+    if (chisq_map)
+      cout << endl;
+  }
 
   // cerr << "BEST chisq=" << best_chisq << endl;
 
   RVM->magnetic_axis->set_value (best_alpha);
   RVM->line_of_sight->set_value (best_zeta);
+
+  // ensure that each attempt starts with the same guess
+  RVM->magnetic_meridian->set_value (peak_phase);
+  RVM->reference_position_angle->set_value (peak_pa);
+  for (unsigned i=0; i<nstate; i++)
+    cRVM->set_linear(i, linear[i]);
 
   chisq_map = false;
 
