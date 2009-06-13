@@ -67,7 +67,7 @@ psrmodel::psrmodel () :
   plot (false)
 {
   has_manual = false;
-  version = "$Id: psrmodel.C,v 1.5 2009/06/12 09:10:05 straten Exp $";
+  version = "$Id: psrmodel.C,v 1.6 2009/06/13 06:44:19 straten Exp $";
 
   add( new Pulsar::StandardOptions );
   add( &plot );
@@ -87,9 +87,10 @@ std::string psrmodel::get_options ()
 std::string psrmodel::get_usage ()
 {
   return
-    " -d               plot the resulting model over the data \n"
+    " -d               plot the resulting model with data \n"
     " -s nstep         do a global minimum search on nstep^2 grid \n"
     " -t sigma         cutoff threshold when selecting bins [default 3] \n"
+    "\n"
     " -a degrees       alpha: colatitude of magnetic axis \n"
     " -z degrees       zeta: colatitude of line of sight \n"
     " -b degrees       longitude of magnetic meridian \n"
@@ -184,6 +185,9 @@ void psrmodel::process (Pulsar::Archive* data)
   Reference::To<PolnProfile> p = data->get_Integration(0)->new_PolnProfile(0);
   rvm->set_observation (p);
 
+  MEAL::RotatingVectorModel* RVM = rvm->get_model()->get_rvm();
+  double deg = 180/M_PI;
+
   if (global_search)
   {
     cerr << "psrmodel: performing global search over " << global_search
@@ -193,35 +197,26 @@ void psrmodel::process (Pulsar::Archive* data)
   }
   else
   {
-    cerr << "psrmodel: solving with initial guess: " << endl;
+    cerr << "psrmodel: solving with initial guess: \n"
+      "PA_0="  << deg*RVM->reference_position_angle->get_param(0) << " deg\n"
+      "zeta="  << deg*RVM->line_of_sight->get_param(0) << " deg\n"
+      "alpha=" << deg*RVM->magnetic_axis->get_param(0) << " deg\n"
+      "phi_0=" << deg*RVM->magnetic_meridian->get_param(0) << " deg"
+	 << endl;
+
     rvm->solve();
   }
 
-  cerr << "chisq=" << rvm->get_chisq() << "/nfree=" << rvm->get_nfree()
-       << " = " << rvm->get_chisq()/ rvm->get_nfree() << endl;
-
-  MEAL::RotatingVectorModel* RVM = rvm->get_model()->get_rvm();
-
-  double d = 180/M_PI;
-  double t = 0.5/M_PI;
-
-  Estimate<double> PA = RVM->reference_position_angle->get_value();
-
-#if 0
-  PA.val = fmod (PA.val, M_PI);
-  if (PA.val > M_PI/2)
-    PA.val -= M_PI;
-  if (PA.val < -M_PI/2)
-    PA.val += M_PI;
-
-  // RVM->line_of_sight->set_value( RVM->line_of_sight->get_value() - 2*MPI );
-#endif
+  cerr << endl
+       << "chisq=" << rvm->get_chisq() << "/nfree=" << rvm->get_nfree()
+       << " = " << rvm->get_chisq()/ rvm->get_nfree() 
+       << endl;
 
   cerr <<
-    "PA_0="  << d*PA << " deg\n"
-    "zeta="  << d*RVM->line_of_sight->get_value() << " deg\n"
-    "alpha=" << d*RVM->magnetic_axis->get_value() << " deg\n"
-    "phi_0=" << t*RVM->magnetic_meridian->get_value() << " turns"
+    "PA_0="  << deg*RVM->reference_position_angle->get_value() << " deg\n"
+    "zeta="  << deg*RVM->line_of_sight->get_value() << " deg\n"
+    "alpha=" << deg*RVM->magnetic_axis->get_value() << " deg\n"
+    "phi_0=" << deg*RVM->magnetic_meridian->get_value() << " deg"
 	     << endl;
 
   if (plot_result)
@@ -234,6 +229,7 @@ void psrmodel::process (Pulsar::Archive* data)
     pa->model.set (RVM, &MEAL::RotatingVectorModel::compute);
     pa->get_frame()->get_y_scale()->set_range_norm (0, 1.5);
 
+    plotter.get_scale()->set_units( PhaseScale::Degrees );
     plotter.plot( data );
   }
 }
