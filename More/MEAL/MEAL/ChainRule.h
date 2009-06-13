@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ChainRule.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/04/07 00:38:12 $
+   $Revision: 1.10 $
+   $Date: 2009/06/13 06:44:25 $
    $Author: straten $ */
 
 #ifndef __MEAL_ChainRule_H
@@ -133,8 +133,8 @@ MEAL::ChainRule<T>::operator = (const ChainRule& rule)
 template<class T>
 void MEAL::ChainRule<T>::set_constraint (unsigned iparam, Scalar* scalar)
 {
-  if (T::verbose) 
-    std::cerr << "MEAL::ChainRule::set_constraint iparam=" << iparam
+  if (this->get_verbose()) 
+    std::cerr << get_name() + "::set_constraint iparam=" << iparam
 	      << std::endl;
 
   // only one scalar may control a parameter
@@ -142,8 +142,8 @@ void MEAL::ChainRule<T>::set_constraint (unsigned iparam, Scalar* scalar)
 
     if (constraints[ifunc].parameter == iparam) {
 
-      if (T::verbose)
-	std::cerr << "MEAL::ChainRule::set_constraint"
+      if (this->get_verbose())
+	std::cerr << get_name() + "::set_constraint"
 	  " remove param=" << iparam << std::endl;
 
       composite.unmap (constraints[ifunc].scalar);
@@ -167,15 +167,14 @@ void MEAL::ChainRule<T>::set_constraint (unsigned iparam, Scalar* scalar)
 
   constraints.push_back (ConstrainedParameter (iparam, infit, scalar));
 
-  if (T::verbose)
-    std::cerr << "MEAL::ChainRule::set_constraint"
+  if (this->get_verbose())
+    std::cerr << get_name() + "::set_constraint"
       " add param=" << iparam << std::endl;
 
   composite.map (constraints.back().scalar);
 
   if (model)
     model->set_infit (iparam, false);
-
 }
 
 template<class T>
@@ -186,16 +185,16 @@ void MEAL::ChainRule<T>::set_model (T* _model)
 
   if (model)
   {
-    if (T::verbose)
-      std::cerr << "MEAL::ChainRule::set_model"
+    if (this->get_verbose())
+      std::cerr << get_name() + "::set_model"
 	" unmap old model" << std::endl;
     composite.unmap (model);
   }
 
   model = _model;
 
-  if (T::verbose)
-    std::cerr << "MEAL::ChainRule::set_model"
+  if (this->get_verbose())
+    std::cerr << get_name() + "::set_model"
       " map new model" << std::endl;
 
   composite.map (model);
@@ -213,23 +212,25 @@ void MEAL::ChainRule<T>::calculate (Result& result,
 				    std::vector<Result>* grad)
 {
   if (!model)
-    throw Error (InvalidState, "MEAL::ChainRule::calculate","no model");
+    throw Error (InvalidState, get_name() + "::calculate","no model");
 
-  if (T::verbose)
-    std::cerr << "MEAL::ChainRule::calculate" << std::endl;
+  if (this->get_verbose())
+    std::cerr << get_name() + "::calculate" << std::endl;
 
-  for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++) {
-
+  for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++)
+  {
     if (T::very_verbose)
-      std::cerr << "MEAL::ChainRule::calculate iconstraint="<< ifunc <<std::endl;
+      std::cerr << get_name() + "::calculate constraint on iparam=" 
+		<< constraints[ifunc].parameter << " by "
+		<< constraints[ifunc].scalar->get_name () << std::endl;
 
     std::vector<double>* fgrad = 0;
+
     if (grad)
       fgrad = &(constraints[ifunc].gradient);
 
     model->set_param (constraints[ifunc].parameter,
 		      constraints[ifunc].scalar->evaluate(fgrad));
-
   }
 
   std::vector<Result> model_grad;
@@ -239,8 +240,8 @@ void MEAL::ChainRule<T>::calculate (Result& result,
 
   result = model->evaluate (model_grad_ptr);
   
-  if (grad) {
-
+  if (grad)
+  {
     unsigned ngrad = this->get_nparam();
     grad->resize (ngrad);
 
@@ -254,8 +255,8 @@ void MEAL::ChainRule<T>::calculate (Result& result,
     // map the scalar gradients
     std::vector<Result> fgrad;
 
-    for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++) {
-
+    for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++)
+    {
       unsigned iparam = constraints[ifunc].parameter;
 
       ngrad = constraints[ifunc].gradient.size();
@@ -265,18 +266,17 @@ void MEAL::ChainRule<T>::calculate (Result& result,
       for (igrad=0; igrad<ngrad; igrad++)
 	fgrad[igrad] = model_grad[iparam] * constraints[ifunc].gradient[igrad];
 
-
       ProjectGradient (constraints[ifunc].scalar, fgrad, *(grad));
-
     }
-  
   }
 
-  if (T::verbose) {
-    std::cerr << "MEAL::ChainRule::calculate result\n"
+  if (this->get_verbose())
+  {
+    std::cerr << get_name() + "::calculate result\n"
       "   " << result << std::endl;
-    if (grad) {
-      std::cerr << "MEAL::ChainRule::calculate gradient\n";
+    if (grad)
+    {
+      std::cerr << get_name() + "::calculate gradient\n";
       for (unsigned i=0; i<grad->size(); i++)
 	std::cerr << "   " << i << ":" << this->get_infit(i) << "=" 
                   << (*grad)[i] << std::endl;
