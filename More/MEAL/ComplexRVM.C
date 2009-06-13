@@ -8,7 +8,7 @@
 #include "MEAL/ComplexRVM.h"
 #include "MEAL/RotatingVectorModel.h"
 
-#include "MEAL/ChainParameters.h"
+#include "MEAL/ChainRule.h"
 #include "MEAL/VectorRule.h"
 
 #include "MEAL/Gain.h"
@@ -23,13 +23,15 @@ void MEAL::ComplexRVM::init ()
 
   rvm = new RotatingVectorModel;
 
-  ChainParameters<Complex>* phase = new ChainParameters<Complex>;
+  ChainRule<Complex>* phase = new ChainRule<Complex>;
 
   // Set up a complex phase function with phase equal to RVM P.A.
   phase->set_model( new Phase<Complex>(2.0) );
   phase->set_constraint( 0, rvm );
 
   gain = new VectorRule<Complex>;
+
+  // gain->set_verbose (true);
 
   add_model (gain);
   add_model (phase);
@@ -45,13 +47,6 @@ public:
   { 
     phase_radians = 0;
     gain = new Gain<Complex>;
-  }
-
-  State (const State& s)
-  { 
-    phase_radians = s.phase_radians;
-    gain = new Gain<Complex>;
-    gain->set_gain( s.gain->get_gain() );
   }
 };
 
