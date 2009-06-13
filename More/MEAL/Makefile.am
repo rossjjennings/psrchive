@@ -14,7 +14,7 @@ nobase_include_HEADERS = \
 	MEAL/Boost1.h \
         MEAL/Cached.h \
         MEAL/CalculatePolicy.h \
-        MEAL/ChainParameters.h \
+        MEAL/ChainRule.h \
         MEAL/Coherency.h \
         MEAL/Complex2Constant.h \
 	MEAL/Complex.h \
