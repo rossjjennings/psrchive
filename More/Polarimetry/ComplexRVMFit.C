@@ -106,6 +106,12 @@ MEAL::ComplexRVM* Pulsar::ComplexRVMFit::get_model ()
   return model;
 }
 
+template<typename T, typename U>
+double chisq (const Estimate<T,U>& e)
+{
+  return e.val * e.val / e.var;
+}
+
 //! Fit data to the model
 void Pulsar::ComplexRVMFit::solve ()
 {
@@ -148,6 +154,8 @@ void Pulsar::ComplexRVMFit::solve ()
     iter ++;
   }
 
+  check_parameters ();
+
   if (chisq_map)
     return;
 
@@ -164,26 +172,75 @@ void Pulsar::ComplexRVMFit::solve ()
       throw Error (InvalidState, "Pulsar::ComplexRVMFit::solve",
 		   "nfree <= 0");
 
-    model->set_variance (iparm, covariance[iparm][iparm]);
+    model->set_variance (iparm, 2.0*covariance[iparm][iparm]);
+  }
+
+#if 0
+
+  double chisq2 = 0;
+  double deg=180/M_PI;
+
+  for (unsigned i=0; i < data_x.size(); i++)
+  {
+    data_x[i].apply();
+    std::complex<double> model = cRVM->evaluate();
+    double gain = cRVM->get_linear(i).get_value();
+
+    cerr << i << " data=" << data_y[i] << " arg=" << arg(data_y[i])*deg/2
+	 << " model=" << model << " PA=" << RVM->evaluate()*deg 
+	 << " Q=" << gain*cos(2*RVM->evaluate())
+	 << " U=" << gain*sin(2*RVM->evaluate()) << endl;
+
+    data_y[i] -= model;
+
+    chisq2 += ::chisq(data_y[i].real()) + ::chisq(data_y[i].imag());
+  }
+
+  cerr << "CHISQ=" << chisq2 << endl;
+#endif
+
+}
+
+void Pulsar::ComplexRVMFit::check_parameters ()
+{
+  MEAL::ComplexRVM* cRVM = get_model();
+  MEAL::RotatingVectorModel* RVM = cRVM->get_rvm();
+
+  const unsigned nstate = cRVM->get_nstate();
+
+  double total_linear = 0.0;
+  for (unsigned i=0; i<nstate; i++)
+    total_linear += cRVM->get_linear(i).get_value();
+
+  if (total_linear < 0.0)
+  {
+    cerr << "correcting negative gain" << endl;
+    for (unsigned i=0; i<nstate; i++)
+      cRVM->set_linear(i,-cRVM->get_linear(i).get_value());
+
+    double PA0 = RVM->reference_position_angle->get_value().get_value();
+    if (PA0 < 0)
+      PA0 += M_PI/2;
+    else
+      PA0 -= M_PI/2;
+
+    RVM->reference_position_angle->set_value (PA0);
   }
 }
 
 void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
 {
-  const unsigned nstate = get_model()->get_nstate();
+  MEAL::ComplexRVM* cRVM = get_model();
+  MEAL::RotatingVectorModel* RVM = cRVM->get_rvm();
+
+  const unsigned nstate = cRVM->get_nstate();
   if (!nstate)
     throw Error (InvalidState, "Pulsar::ComplexRVMFit::global_search",
 		 "no data");
 
-  MEAL::ComplexRVM* cRVM = get_model();
-  MEAL::RotatingVectorModel* RVM = cRVM->get_rvm();
-
   vector<double> linear (nstate);
   for (unsigned i=0; i<nstate; i++)
-  {
     linear[i] = cRVM->get_linear(i).get_value();
-    // cerr << "linear[" << i << "]=" << linear[i] << endl;
-  }
 
   double alpha_step = M_PI/(nstep-1);
   double zeta_step = M_PI/(nstep-2);
@@ -212,11 +269,6 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
 
       solve ();
 
-      for (unsigned i=0; i<nstate; i++)
-	if (cRVM->get_linear(i).get_value() < 0)
-	  cerr << "negative linear[" << i << "]=" 
-	       << cRVM->get_linear(i).val << endl;
-
       if (chisq_map)
 	cout << alpha << " " << zeta << " " << chisq << endl;
 
@@ -244,4 +296,9 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
   chisq_map = false;
 
   solve ();
+
+  for (unsigned i=0; i<nstate; i++)
+    if (cRVM->get_linear(i).get_value() < 0)
+      cerr << "orthogonal mode L=" << cRVM->get_linear(i).val 
+	   << " phase=" << cRVM->get_phase(i)*0.5/M_PI  << endl;
 }

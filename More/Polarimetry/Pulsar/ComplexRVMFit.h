@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ComplexRVMFit.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/06/12 09:10:41 $
+   $Revision: 1.6 $
+   $Date: 2009/06/13 05:09:30 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ComplexRVMFit_h
@@ -62,6 +62,8 @@ namespace Pulsar
     unsigned get_nfree () const { return nfree; }
 
   protected:
+
+    void check_parameters ();
 
     Reference::To<const PolnProfile> data;
     Reference::To<MEAL::ComplexRVM> model;
