@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/GroupRule.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/06/19 10:22:10 $
+   $Revision: 1.10 $
+   $Date: 2009/06/13 05:09:24 $
    $Author: straten $ */
 
 #ifndef __GroupRule_H
@@ -232,6 +232,11 @@ void MEAL::GroupRule<T>::calculate (Result& retval,
 
       // evaluate the model and its gradient
       comp_result = model[imodel]->evaluate (comp_gradient_ptr);
+
+      if (this->get_verbose()) 
+	std::cerr << class_name() + "calculate " 
+		  << model[imodel]->get_name() 
+		  << " result=" << comp_result << std::endl;
 
       operate( result, comp_result );
       

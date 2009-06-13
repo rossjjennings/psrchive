@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/VectorRule.h,v $
-   $Revision: 1.9 $
-   $Date: 2009/06/12 09:10:20 $
+   $Revision: 1.10 $
+   $Date: 2009/06/13 05:09:24 $
    $Author: straten $ */
 
 #ifndef __MEAL_VectorRule_H
@@ -222,13 +222,19 @@ void MEAL::VectorRule<T>::calculate (Result& result,
   if (grad)
     comp_gradient_ptr = &comp_gradient;
 
-  if (T::very_verbose) std::cerr << get_name() + "calculate evaluate " 
-			      << model[model_index]->get_name() << std::endl;
+  if (this->get_verbose())
+    std::cerr << get_name() + "calculate evaluate " 
+	      << model[model_index]->get_name() << std::endl;
 
   try {
 
     // evaluate the model and its gradient
     result = model[model_index]->evaluate (comp_gradient_ptr);
+
+    if (this->get_verbose())
+      std::cerr << get_name() + "calculate " 
+		<< model[model_index]->get_name()
+		<< " result=" << result << std::endl;
 
   }
   catch (Error& error) {

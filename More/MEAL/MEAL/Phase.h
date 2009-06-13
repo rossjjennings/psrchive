@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Phase.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/06/11 01:35:24 $
+   $Revision: 1.11 $
+   $Date: 2009/06/13 05:09:24 $
    $Author: straten $ */
 
 #ifndef __MEAL_Phase_H
@@ -59,11 +59,13 @@ void MEAL::Phase<Parent>::calculate (Return& result, std::vector<Return>* grad)
 {
   double phase = this->get_param(0);
 
-  if (MEAL::Function::verbose)
-    std::cerr << "MEAL::Phase<Parent>::calculate phase=" << phase << std::endl;
+  double cos_phase = cos(scale * phase);
+  double sin_phase = sin(scale * phase);
 
-  double cos_phase = cos( scale * phase);
-  double sin_phase = sin( scale * phase);
+  if (MEAL::Function::verbose)
+    std::cerr << get_name () << "::calculate scale=" << scale 
+	      << " phase=" << phase*180/M_PI << " deg" 
+	      << " cos=" << cos_phase << " sin=" << sin_phase << std::endl;
 
   result = std::complex<double>(cos_phase, sin_phase);
 
