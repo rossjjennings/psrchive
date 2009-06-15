@@ -12,12 +12,15 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
+#include "Pulsar/FaradayRotation.h"
 #include "Pulsar/StokesCylindrical.h"
 
 #include "Pulsar/ComplexRVMFit.h"
 #include "MEAL/ComplexRVM.h"
 #include "MEAL/RotatingVectorModel.h"
 #include "MEAL/ScalarParameter.h"
+
+#include "pairutil.h"
 
 using namespace Pulsar;
 using namespace std;
@@ -47,12 +50,19 @@ public:
 
 protected:
 
+  // complex rotating vector model
   Reference::To<ComplexRVMFit> rvm;
+
+  // perform a global search over first guesses in alpha and beta
   unsigned global_search;
 
+  // perform a rotating vector model fit
   bool rvm_fit;
+
+  // plot the result
   bool plot_result;
 
+  // configures the plotting device
   Pulsar::PlotOptions plot;
 };
 
@@ -67,7 +77,7 @@ psrmodel::psrmodel () :
   plot (false)
 {
   has_manual = false;
-  version = "$Id: psrmodel.C,v 1.6 2009/06/13 06:44:19 straten Exp $";
+  version = "$Id: psrmodel.C,v 1.7 2009/06/15 01:58:39 straten Exp $";
 
   add( new Pulsar::StandardOptions );
   add( &plot );
@@ -81,7 +91,7 @@ psrmodel::psrmodel () :
 
 std::string psrmodel::get_options ()
 {
-  return "AZBPds:a:z:b:p:t:x";
+  return "AZBPdo:s:a:z:b:p:t:x";
 }
 
 std::string psrmodel::get_usage ()
@@ -94,7 +104,9 @@ std::string psrmodel::get_usage ()
     " -a degrees       alpha: colatitude of magnetic axis \n"
     " -z degrees       zeta: colatitude of line of sight \n"
     " -b degrees       longitude of magnetic meridian \n"
-    " -p degrees       position angle at magnetic meridian \n";
+    " -p degrees       position angle at magnetic meridian \n"
+    "\n"
+    " -o deg0:deg1     window over which an orthogonal mode dominates \n";
 }
 
 double radians (const std::string& arg)
@@ -110,6 +122,16 @@ bool psrmodel::parse (char code, const std::string& arg)
 
   switch (code)
   {
+
+  case 'o':
+    {
+      range opm = fromstring<range>(arg);
+      cerr << "psrmodel: OPM at " << opm << " degrees" << endl;
+      opm.first *= M_PI/180;
+      opm.second *= M_PI/180;
+      rvm->add_opm( opm );
+      break;
+    }
 
   case 'd':
     plot.set_open_device (true);
@@ -175,6 +197,12 @@ void psrmodel::process (Pulsar::Archive* data)
 {
   if (verbose)
     cerr << "psrmodel: fitting " << data->get_filename() << endl;
+
+  // correct PA to infinite frequency
+  FaradayRotation xform;
+  xform.set_reference_wavelength( 0 );
+  xform.set_measure( data->get_rotation_measure() );
+  xform.execute( data );
 
   data->tscrunch();
   data->fscrunch();
