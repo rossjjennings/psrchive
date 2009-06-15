@@ -5,6 +5,10 @@
  *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -22,12 +26,21 @@
 #include "Pulsar/Receiver.h"
 #include <Pulsar/Pointing.h>
 #include <Pulsar/WidebandCorrelator.h>
+#include <Pulsar/FITSHdrExtension.h>
+
+#if HAVE_PGPLOT
+#include "Pulsar/PlotFactory.h"
+#include "Pulsar/Plot.h"
+#include "Pulsar/ProfilePlot.h"
+#include <cpgplot.h>
+#endif
 
 #include "Phase.h"
 #include "toa.h"
 #include "Error.h"
 #include "dirutil.h"
 #include "strutil.h"
+#include <tostring.h>
 
 #include <fstream>
 #include <iostream>
@@ -47,6 +60,68 @@ void loadGaussian(string file,
 
 string FetchValue( Reference::To< Archive > archive, string command );
 
+double get_period(Reference::To<Archive> arch);
+
+double get_stt_offs(Reference::To<Archive> arch);
+
+int get_stt_smjd(Reference::To<Archive> arch);
+
+int get_stt_imjd(Reference::To<Archive> arch);
+
+void compute_dt(Reference::To<Archive> archive, vector<Tempo::toa>& toas,
+        string std_name);
+
+double truncateDecimals(double d, int decimalPlaces);
+
+#if HAVE_PGPLOT
+void plotDifferences(Reference::To<Archive> arch,
+        Reference::To<Archive> stdarch,
+        vector<Tempo::toa>& toas, const double min_phase,
+        const double max_phase);
+
+void set_phase_zoom(vector<Reference::To<Plot> >& plots,
+        const double min, const double max);
+
+void setPlotLabels(Reference::To<Archive> diff, Reference::To<Archive> arch, 
+        Reference::To<Archive> profile, Pulsar::Plot* diff_plot, 
+        vector<Tempo::toa>& toas, const uint subint, const uint chan);
+
+void calculateDifference(Pulsar::Profile* diff, const float* prof,
+        const float* std);
+
+void setupPlotters(Pulsar::Plot* diff_plot, Pulsar::Plot* profile_plot,
+        Pulsar::Plot* template_plot, const double min_phase,
+        const double max_phase, const string filename);
+
+void scaleProfile(Reference::To<Profile> profile);
+
+void rotate_archive(Reference::To<Archive> archive, vector<Tempo::toa>& toas);
+
+float getMean(const float rms, const float* bins, const uint nbin);
+
+float getRms(const float* bins, const uint nbin, const float mean, const float oldRms);
+
+void resize_archives(Reference::To<Archive> archive,
+        Reference::To<Archive> diff, Reference::To<Archive> original);
+
+void prepare_difference_archive(Reference::To<Archive> diff,
+        Reference::To<Archive> arch, Reference::To<Profile> prof);
+
+void difference_plot(Reference::To<Plot> plot,
+        Reference::To<Archive> arch, Reference::To<Archive> diff_arch,
+        vector<Tempo::toa>& toas, const uint subint, const uint chan);
+
+void template_plot(Reference::To<Plot> plot, Reference::To<Archive> arch);
+
+void profile_plot(Reference::To<Plot> plot,
+        Reference::To<Archive> profile_archive,
+        Reference::To<Profile> profile_to_copy, Reference::To<Archive> archive,
+        const double freq);
+
+void diff_profiles(Reference::To<Archive> diff, Reference::To<Archive> stdarch, Reference::To<Profile> profile);
+
+string get_xrange(const double min, const double max);
+#endif // HAVE_PGPLOT
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // PRECISION FOR tostring
@@ -114,7 +189,13 @@ void usage ()
     "                   Available formats: parkes tempo2, itoa, princeton \n"
     "                   For tempo2, <flags> include i = display instrument \n"
     "                                               r = display receiver   \n"
-	"  -C \"<options>\"   Select vap-like options to be displayed on output\n"
+	"  -C \"<options>\"   Select vap-like options to be displayed on output \n"
+    "  -r               Print reference phase and dt \n"
+    "  -u               Print as pat-like format smjd + dt \n"
+    "\n"
+    "Plotting options (if compiled with pgplot):\n"
+    "  -K               Specify plot device\n"
+    "  -t               Plot template, profile and difference \n"
     "\n"
     "See "PSRCHIVE_HTTP"/manuals/pat for more details\n"
        << endl;
@@ -137,6 +218,12 @@ int main (int argc, char *argv[]) try {
   bool fscrunch = false;
   bool tscrunch = false;
   bool skip_bad = false;
+  bool phase_info = false;
+  bool tempo2_output = false;
+
+#if HAVE_PGPLOT
+  bool plot_difference = false;
+#endif
 
   char *metafile = NULL;
 
@@ -144,6 +231,11 @@ int main (int argc, char *argv[]) try {
 
   string std,gaussFile;
   string outFormat("parkes"),outFormatFlags;
+  string tname;
+
+  double min_phase = 0.0;
+  double max_phase = 1.0;
+  string plot_device = "/xs";
 
   vector<string> archives;
   vector<string> stdprofiles;
@@ -155,7 +247,12 @@ int main (int argc, char *argv[]) try {
 
   float chisq_max = 2.0;
 
-  const char* args = "a:A:cDdf:C:Fg:hiM:n:pPqS:s:tTvVx:";
+#if HAVE_PGPLOT
+  const char* args = "a:A:cDdf:C:Fg:hiK:M:n:pPqrS:s:tTuvVx:z:";
+#else
+  const char* args = "a:A:cDdf:C:Fg:hiK:M:n:pPqrS:s:TuvVx:z:";
+#endif
+
   int gotc = 0;
 
   while ((gotc = getopt(argc, argv, args)) != -1)
@@ -251,8 +348,12 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.84 2008/08/08 19:36:41 demorest Exp $" << endl;
+      cout << "$Id: pat.C,v 1.85 2009/06/15 06:12:13 jonathan_khoo Exp $" << endl;
       return 0;
+
+    case 'K':
+      plot_device = optarg;
+      break;
 
     case 'M':
       metafile = optarg;
@@ -271,8 +372,13 @@ int main (int argc, char *argv[]) try {
       full_poln->set_solve_each ();
       break;
 
-   case 'q':
+    case 'q':
       Archive::set_verbosity(0);
+      break;
+
+    case 'r':
+      phase_info = true;
+      outFormat = "tempo2";
       break;
 
     case 'S':
@@ -287,6 +393,17 @@ int main (int argc, char *argv[]) try {
 
     case 'T':
       tscrunch = true;
+      break;
+
+#if HAVE_PGPLOT
+    case 't':
+      plot_difference = true;
+      break;
+#endif
+
+    case 'u':
+      tempo2_output = true;
+      outFormat = "tempo2";
       break;
 
     case 'v':
@@ -309,10 +426,25 @@ int main (int argc, char *argv[]) try {
         cerr << "pat: omitting TOAs with reduced chisq > " << chisq_max << endl;
       break;
 
+    case 'z':
+      {
+        string s1, s2;
+        string_split(optarg, s1, s2, ",");
+        min_phase = fromstring<double>(s1);
+        max_phase = fromstring<double>(s2);
+      }
+      break;
+
     default:
       cout << "Unrecognised option " << gotc << endl;
     }
   }
+
+#if HAVE_PGPLOT
+  if (plot_difference)
+      if (cpgopen(plot_device.c_str()) <= 0)
+          cpgopen("?");
+#endif
 
   if (metafile)
     stringfload (&archives, metafile);
@@ -383,13 +515,17 @@ int main (int argc, char *argv[]) try {
   }
 
   // Give format information for Tempo2 output 
-  if (strcasecmp(outFormat.c_str(),"tempo2")==0)
-    cout << "FORMAT 1" << endl;
+
+  if (strcasecmp(outFormat.c_str(),"tempo2")==0 && !phase_info)
+#if HAVE_PGPLOT
+      if (!plot_difference)
+#endif
+          cout << "FORMAT 1" << endl;
 
   for (unsigned i = 0; i < archives.size(); i++) {
     
     try {
-      
+
       if (verbose)
 	cerr << "Loading " << archives[i] << endl;
       
@@ -489,6 +625,7 @@ int main (int argc, char *argv[]) try {
 	      args += " -" + commands[i] + " " + value;
 	    }
 
+
 	    if (outFormatFlags.find("o")!=string::npos) /* Include observer info. */
 	      {
 		const ObsExtension* ext = 0;
@@ -501,13 +638,32 @@ int main (int argc, char *argv[]) try {
 		}
 
 	      }
+
 	    arch->toas(toas, stdarch, args, Tempo::toa::Tempo2, skip_bad); 
 	  }
       }
 
-      for (unsigned i = 0; i < toas.size(); i++) {
-		toas[i].unload(stdout);
-	  }
+#if HAVE_PGPLOT
+      if (plot_difference) {
+          rotate_archive(arch, toas);
+          arch->remove_baseline();
+          plotDifferences(arch, stdarch, toas, min_phase, max_phase);
+          continue;
+      }
+#endif
+
+      if (phase_info) {
+          compute_dt(arch, toas, std);
+      } else {
+          if (tempo2_output) {
+              vector<Tempo::toa>::iterator tit;
+              for (tit = toas.begin(); tit != toas.end(); ++tit)
+                  (*tit).set_phase_info(true);
+          }
+
+          for (unsigned i = 0; i < toas.size(); i++)
+              toas[i].unload(stdout);
+      }
     }
     catch (Error& error) {
       fflush(stdout); 
@@ -515,6 +671,11 @@ int main (int argc, char *argv[]) try {
     }
     //    if (gaussian)delete stdarch;
   }
+
+#if HAVE_PGPLOT
+  if (plot_difference)
+      cpgend();
+#endif
 
   fflush(stdout);
   return 0;
@@ -730,7 +891,7 @@ string get_backend( Reference::To< Archive > archive )
   	return result;
 }
 
-string get_period( Reference::To<Archive> archive )
+string get_period_as_string( Reference::To<Archive> archive )
 {
   	// TODO check this
 	set_precision( 14 );
@@ -738,6 +899,26 @@ string get_period( Reference::To<Archive> archive )
 	restore_precision();
 
 	return result;
+}
+
+double get_period(Reference::To<Archive> arch)
+{
+    return arch->get_Integration(0)->get_folding_period();
+}
+
+double get_stt_offs(Reference::To<Archive> arch)
+{
+    return arch->get<FITSHdrExtension>()->get_stt_offs();
+}
+
+int get_stt_smjd(Reference::To<Archive> arch)
+{
+    return arch->get<FITSHdrExtension>()->get_stt_smjd();
+}
+
+int get_stt_imjd(Reference::To<Archive> arch)
+{
+    return arch->get<FITSHdrExtension>()->get_stt_imjd();
 }
 
 string get_be_delay( Reference::To< Archive > archive )
@@ -774,7 +955,7 @@ string FetchValue (Reference::To<Archive> archive, string command)
 		else if(command == "projid") return get_projid( archive );
 		else if(command == "rcvr") return get_rcvr( archive );
 		else if(command == "backend") return get_backend( archive );
-		else if(command == "period") return get_period( archive );
+		else if(command == "period") return get_period_as_string( archive );
 		else if(command == "be_delay") return get_be_delay( archive );
 		else if(command == "subint") return "";
 		else if(command == "chan") return "";
@@ -786,5 +967,348 @@ string FetchValue (Reference::To<Archive> archive, string command)
 	}
 }
 
+/**
+ * @brief Plot three profiles on one page:
+ *        - difference between the template and profile
+ *        - template
+ *        - archive for each subint and channel
+ *
+ * @param arch Target archive whose profiles will be subtracted from the
+ *             template.
+ * @param stdarch Template archive.
+ * @param min_phase min x-value when zooming
+ * @param max_phase max x-value when zooming
+ */
+
+#if HAVE_PGPLOT
+void plotDifferences(Reference::To<Archive> arch,
+        Reference::To<Archive> stdarch, vector<Tempo::toa>& toas,
+        const double min_phase, const double max_phase)
+{
+    // remove baseline for all templates (except caldelay)
+    const bool cal_delay_file = arch->get_source() == "CalDelay";
+    if (!cal_delay_file)
+        stdarch->remove_baseline();
+
+    // difference between template and profile
+    Reference::To<Archive> profile_diff = Archive::new_Archive("PSRFITS");
+
+    // current profile
+    Reference::To<Archive> profile_archive = Archive::new_Archive("PSRFITS");
+    resize_archives(profile_archive, profile_diff, arch);
+
+    Pulsar::PlotFactory factory;
+    Reference::To<Plot> plotter = factory.construct("flux");
+
+    // adjust x-range if zoom has been specified
+    if (min_phase != 0.0 || max_phase != 1.0)
+        plotter->configure("x:range=" + get_xrange(min_phase, max_phase));
+
+    cpgsubp(1, 3);
+    for (uint isub = 0; isub < arch->get_nsubint(); ++isub) {
+        for (uint ichan = 0; ichan < arch->get_nchan(); ++ichan) {
+            cpgpage();
+            Pulsar::Profile* profile = arch->get_Profile(isub, 0, ichan);
+            if (cal_delay_file)
+                scaleProfile(profile);
+
+            double freq = profile->get_centre_frequency();
+            freq = truncateDecimals(freq, 3);
+
+            diff_profiles(profile_diff, stdarch, profile);
+            difference_plot(plotter, arch, profile_diff, toas, isub, ichan);
+            template_plot(plotter, stdarch);
+            profile_plot(plotter, profile_archive, profile, arch, freq);
+        }
+    }
+    cout << "Plotting " << arch->get_filename() << endl;
+}
+#endif
+
+/**
+ * @brief compute delta time using the phase shift and start time offset
+ * @param archive archive where the TOAs were calculated
+ * @param toas vector of TOAs for each subint and chan
+ * @param std_name filename of the standard template
+ */
+
+void compute_dt(Reference::To<Archive> archive, vector<Tempo::toa>& toas,
+        string std_name)
+{
+    const double period = get_period(archive);
+    const double stt_offs = get_stt_offs(archive);
+
+    vector<Tempo::toa>::iterator tit;
+    for (tit = toas.begin(); tit != toas.end(); ++tit) {
+        const double phaseShift = (*tit).get_phase_shift();
+        double dt = phaseShift * period;
+
+        dt += stt_offs;
+        dt *= 1000.0; // ms
+        dt = fmod(dt + 10.0, 1.0); // to allow for dt < 1.0
+
+        if (dt > 0.5)
+            dt -= 1.0;
+
+        dt *= 1000.0;  // microsec
+
+        // remove preceeding path to shorten output line
+        uint pos = std_name.find_last_of('/');
+        if (pos != string::npos)
+            std_name = std_name.substr(pos + 1, std_name.length() - pos);
+
+        cout << fixed << archive->get_filename() << " " <<  std_name << " " <<
+            (*tit).get_subint() << " " << (*tit).get_channel() << " ";
+
+        cout << setprecision(9) << stt_offs << " "; 
+        cout << setprecision(7) << phaseShift << " "; 
+
+        cout << setprecision(3) << dt << " " << setprecision(3) <<
+            (*tit).get_error() << endl;
+    }
+}
 
 
+/**
+ * @param min min x-value
+ * @param max max x-value
+ * @throws InvalidRange if input min >= max
+ * @returns the x:range string command to implement zoom 
+ */
+
+string get_xrange(const double min, const double max)
+{
+    if (min >= max)
+        throw Error(InvalidRange, "set_phase_zoom", "min (%g) >= max (%g)",
+                min, max);
+
+    return string("(") +
+        tostring<double>(min) +
+        string(")") +
+        tostring<double>(max) +
+        string( ")");
+}
+
+
+/**
+ * @brief resize the new archives (for plotting) to match the original
+ *        archive
+ */
+
+void resize_archives(Reference::To<Archive> archive,
+        Reference::To<Archive> diff, Reference::To<Archive> original)
+{
+    const uint nsub = original->get_nsubint();
+    const uint nchan = original->get_nchan();
+    const uint npol = original->get_npol();
+    const uint nbin = original->get_nbin();
+
+    diff->resize(nsub, npol, nchan, nbin);
+    archive->resize(nsub, npol, nchan, nbin);
+}
+
+
+/**
+ * @brief rotate each profile in the archive by the corresponding phase shift
+ * @param archive archive whose profiles will be rotated
+ * @param toas vector of TOAs for each subint and chan
+ */
+
+void rotate_archive(Reference::To<Archive> archive, vector<Tempo::toa>& toas)
+{
+    const uint nchan = archive->get_nchan();
+    const uint nsub = archive->get_nsubint();
+
+    vector<Tempo::toa>::iterator it = toas.begin();
+    for (uint isub = 0; isub < nsub; ++isub) {
+        for (uint ichan = 0; ichan < nchan; ++ichan, ++it) {
+            const double phase_shift = (*it).get_phase_shift();
+            archive->get_Profile(isub, 0, ichan)->rotate_phase(phase_shift);
+        }
+    }
+}
+
+
+/**
+ * @brief copy the frequency (3dp) and source name from one archive to another
+ * @param prof profile of the current plotted profile
+ */
+
+void prepare_difference_archive(Reference::To<Archive> diff,
+        Reference::To<Archive> arch, Reference::To<Profile> prof)
+{
+    const double freq = truncateDecimals(prof->get_centre_frequency(), 3);
+    diff->set_source(arch->get_source());
+    diff->set_centre_frequency(freq);
+}
+
+/**
+ * @brief set up and plot the difference profile
+ */
+
+#if HAVE_PGPLOT
+void difference_plot(Reference::To<Plot> plot,
+        Reference::To<Archive> arch, Reference::To<Archive> diff_arch,
+        vector<Tempo::toa>& toas, const uint subint, const uint chan)
+{
+    Reference::To<Profile> profile = arch->get_Profile(subint, 0, chan);
+    prepare_difference_archive(diff_arch, arch, profile);
+
+    const uint i = subint * arch->get_nchan() + chan;
+    const double snr = diff_arch->get_Profile(0,0,0)->snr();
+
+    char phaseShift[50];
+    char phaseError[50];
+    sprintf(phaseShift, "%.4f", toas[i].get_phase_shift());
+    sprintf(phaseError, "%.4g", toas[i].get_error());
+
+    // set the heading to read:
+    // filename, subint, channel, snr, phase shift, phase error
+    plot->configure("above:c=File: " + arch->get_filename() +
+            "\nSubint: " + tostring(subint) + " Chan: " + tostring(chan) +
+            " S/N: " + tostring(snr) + " Phase Shift: " + phaseShift +
+            " Phase Error: " + phaseError);
+
+    plot->configure("ch=2");
+    plot->plot(diff_arch);
+    cpgpage();
+}
+
+
+/**
+ * @brief set up and plot the standard template
+ */
+
+void template_plot(Reference::To<Plot> plot, Reference::To<Archive> arch)
+{
+    plot->configure("above:c=Template: " + arch->get_filename());
+    plot->plot(arch);
+    cpgpage();
+}
+
+void profile_plot(Reference::To<Plot> plot,
+        Reference::To<Archive> profile_archive,
+        Reference::To<Profile> profile_to_copy, Reference::To<Archive> archive,
+        const double freq)
+{
+    *(profile_archive->get_Profile(0,0,0)) = *profile_to_copy;
+
+    profile_archive->set_source(archive->get_source());
+    profile_archive->set_centre_frequency(freq);
+
+    plot->configure("above:c=Profile");
+    plot->plot(profile_archive);
+}
+
+/**
+ * @brief calculate the difference between the template and current profile
+ *        and store it as a separate profile - 'diff'
+ */
+
+void diff_profiles(Reference::To<Archive> diff, Reference::To<Archive> stdarch, Reference::To<Profile> profile)
+{
+    Reference::To<Profile> std_profile = stdarch->get_Profile(0,0,0);
+    const double stdarch_area = std_profile->sum();
+    const double profile_area = profile->sum();
+    const double scale = stdarch_area / profile_area;
+    profile->scale(fabs(scale));
+
+    *(diff->get_Profile(0,0,0)) = *std_profile;
+    diff->get_Profile(0,0,0)->diff(profile);
+}
+
+void scaleProfile(Reference::To<Profile> profile)
+{
+    float* bins = profile->get_amps();
+    const uint nbin = profile->get_nbin();
+
+    // if baseline removal is not effective, subtract the mean from the profile
+    double stats_mean = profile->mean(1.0);
+
+    if (profile->min(0, profile->get_nbin()) > 0.0)
+        *profile -= stats_mean;
+
+    // calculate mean and rms from all points < 3 * rms
+    // subtract mean from all points
+    // recompute mean and rms of all points < 3 * rms
+    // repeat until delta_mean < 0.01*RMS
+
+    float mean = 0.0;
+    float deviation = 0.0;
+    float oldMean = 0.0;
+
+    while (true) {
+        mean = getMean(deviation, bins, nbin);
+        deviation = getRms(bins, nbin, mean, deviation);
+
+        if (fabs(mean - oldMean) < 0.01 * fabs(deviation)) {
+            *profile -= mean;
+            break;
+        }
+
+        *profile -= mean;
+        oldMean = mean;
+    }
+}
+
+
+/**
+ * @brief calculate new mean for all points < 3(rms)
+ */
+
+float getMean(const float rms, const float* bins, const uint nbin)
+{
+    float mean = 0.0;
+    int count = 0;
+
+    // calculate mean
+    for (uint i = 0; i < nbin; ++i) {
+        if (bins[i] < 3.0 * rms) {
+            mean += bins[i];
+            ++count;
+        }
+    }
+
+    mean /= (float)count;
+    return mean;
+}
+
+
+/**
+ * @brief calculate new rms for all points < 3(rms)
+ */
+
+float getRms(const float* bins, const uint nbin, const float mean,
+        const float oldRms)
+{
+    float deviation = 0.0;
+    int count = 0;
+
+    for (uint i = 0; i < nbin; ++i) {
+        if (bins[i] < 3.0 * oldRms) {
+            deviation += pow((bins[i] - mean), 2); // square
+            ++count;
+        }
+    }
+
+    deviation /= (float)count;
+    return sqrt(deviation);
+}
+#endif // if HAVE_PGPLOT
+
+
+/**
+ * @brief a (stupid?) way to remove decimal places from a number
+ * @param d floating-point number to be truncated
+ * @param decimalPlaces number of decimal places to truncate to
+ * @returns a truncated floating-point number
+ */
+
+double truncateDecimals(double d, int decimalPlaces)
+{
+    double result = d * pow(10, (double)decimalPlaces);
+    result = (int)result;
+    result /= pow(10, (double)decimalPlaces);
+
+    return result;
+}
