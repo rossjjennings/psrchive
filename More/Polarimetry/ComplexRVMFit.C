@@ -67,7 +67,15 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
       
       double phase = (ibin + 0.5)*2*M_PI / nbin;
       double L = sqrt( norm(linear[ibin]).val );
-      
+
+      if (is_opm(phase))
+      {
+	if (MEAL::Function::verbose)
+	  cerr << "Pulsar::ComplexRVMFit::set_observation OPM at "
+	       << phase << " rad" << endl;
+	L *= -1.0;
+      }
+
       // cerr << "adding phase=" << phase << " L=" << L << endl;
       get_model()->add_state (phase, L);
       count ++;
@@ -85,6 +93,27 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
   assert( count == model->get_nstate() );
 
   cerr <<"Pulsar::ComplexRVMFit::set_observation "<< count <<" bins"<< endl;
+}
+
+void Pulsar::ComplexRVMFit::add_opm (range r)
+{
+  if (r.first > r.second)
+    r.second += 2*M_PI;
+
+  opm.push_back (r);
+}
+
+bool between (const range& r, double p)
+{
+  return p > r.first && p < r.second;
+}
+
+bool Pulsar::ComplexRVMFit::is_opm (double phase) const
+{
+  for (unsigned i=0; i<opm.size(); i++)
+    if (between(opm[i],phase) || between(opm[i],phase+2*M_PI))
+      return true;
+  return false;
 }
 
 //! Get the data to which model will be fit

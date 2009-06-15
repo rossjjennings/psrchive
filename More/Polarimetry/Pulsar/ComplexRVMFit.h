@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ComplexRVMFit.h,v $
-   $Revision: 1.6 $
-   $Date: 2009/06/13 05:09:30 $
+   $Revision: 1.7 $
+   $Date: 2009/06/15 00:58:56 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ComplexRVMFit_h
@@ -25,6 +25,8 @@ namespace MEAL
   class ComplexRVM;
 }
 
+typedef std::pair<double,double> range;
+
 namespace Pulsar
 {
   class PolnProfile;
@@ -37,6 +39,13 @@ namespace Pulsar
 
     //! Default constructo
     ComplexRVMFit ();
+
+    //! Add a range of pulse phase containing an orthogonally polarized mode
+    /*! Must be called before set_observation */
+    void add_opm (range radians);
+
+    //! Return true if pulse phase falls within an OPM range
+    bool is_opm (double phase_in_radians) const;
 
     //! Set the data to which model will be fit
     void set_observation (const PolnProfile*);
@@ -72,6 +81,9 @@ namespace Pulsar
     MEAL::Axis<unsigned> state;
     std::vector< MEAL::Axis<unsigned>::Value > data_x;
     std::vector< std::complex< Estimate<double> > > data_y;
+
+    // orthogonally polarized mode phase ranges
+    std::vector<range> opm;
 
     float peak_phase;
     float peak_pa;
