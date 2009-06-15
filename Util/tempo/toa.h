@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.27 $
-   $Date: 2008/03/12 17:54:46 $
-   $Author: demorest $ */
+   $Revision: 1.28 $
+   $Date: 2009/06/15 06:15:07 $
+   $Author: jonathan_khoo $ */
 
 #ifndef __TOA_H
 #define __TOA_H
@@ -75,10 +75,10 @@ namespace Tempo {
     MJD    arrival;        // TOA
     float  error;          // TOA uncertainty
     char   telescope;      // Observatory (one-character code)
+	uint   channel;        // Corresponding channel
+	uint   subint;         // Corresponding subint
+    double phase_shift;    // Phase shift
 
-	unsigned channel;
-	unsigned subint;
-    
     // Parkes Format specific
 
     float  phs;            // Phase offset (fraction of P0, added to TOA)
@@ -102,6 +102,8 @@ namespace Tempo {
     float bw;
     float dur;
     float dm;
+
+    bool phase_info;
 
     // one of the available formats on loading
 
@@ -146,9 +148,10 @@ namespace Tempo {
     void set_error     (float err)   { error = err; };
     void set_telescope (const std::string& telcode);
     void set_auxilliary_text (const std::string& text) { auxinfo = text; };
-
-	void set_channel	(unsigned chan) {channel = chan; };
-	void set_subint		(unsigned subint) {subint = subint; };
+	void set_channel   (uint chan)   { channel = chan; };
+	void set_subint    (uint sub)    { subint = sub; };
+    void set_phase_shift (double shift) { phase_shift = shift; };
+    void set_phase_info  (bool info)    { phase_info = info; };
 
     Format get_format    () const { return format; };
     float  get_StoN      () const { return ston; };
@@ -162,6 +165,10 @@ namespace Tempo {
     float  get_error     () const { return error; };
     char   get_telescope () const { return telescope; };
     std::string get_auxilliary_text () const { return auxinfo; };
+    double get_phase_shift () const { return phase_shift; };
+	uint   get_channel     () const { return channel; };
+	uint   get_subint      () const { return subint; };
+
 
 #if POLYCO_INTERFACE_RESTORED
     double shift (const polyco & poly) const;

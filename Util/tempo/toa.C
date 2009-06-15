@@ -47,8 +47,8 @@ Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
   if (this == &in_toa)
    return *this;
 
-
   channel = in_toa.channel;
+  subint = in_toa.subint;
   frequency = in_toa.frequency;
   arrival = in_toa.arrival;
   error = in_toa.error; 
@@ -73,8 +73,8 @@ Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
 
   resid = in_toa.resid;
 
-  subint = in_toa.subint;
-  channel = in_toa.channel;
+  phase_shift = in_toa.phase_shift;
+  phase_info = in_toa.phase_info;
 
   return *this;
 }
@@ -139,6 +139,12 @@ int Tempo::toa::parkes_parse (const char* instring)
     auxinfo += instring;
     auxinfo = auxinfo.substr(0,auxinfo.length()-1);
     format = Comment;
+
+    phase_shift = 0.0;
+    phase_info = false;
+    channel = 0;
+    subint = 0;
+
     return 0;
   }
   if (arrival.Construct(datestr) < 0)  {
@@ -281,25 +287,39 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
   if (auxinfo.find(" ")!=string::npos) 
 	  flags = auxinfo.substr(auxinfo.find(" "));
 
-  int sub = -1;
-  int chan = -1;
+  uint sub;
+  uint chan;
+
+  bool subint_given = false;
+  bool chan_given = false;
 
   sub = flags.find("-subint");
-  if (sub != -1)
-	  flags.erase(sub, 8);
+  if (sub != string::npos) {
+	  flags.erase(sub, 8); // remove '-subint' from flags
+      subint_given = true;
+  }
 
   chan = flags.find("-chan");
-  if (chan != -1)
-	  flags.erase(chan, 6);
+  if (chan != string::npos) {
+	  flags.erase(chan, 6); // remove '-chan' from flags
+      subint_given = true;
+  }
 
-  if (sub == -1 && chan == -1) {
-	  sprintf (outstring,"%s %8.3f %s %7.3f %c %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,flags.c_str());
-  } else if (sub != -1 && chan == -1) {
-	  sprintf (outstring,"%s %8.3f %s %7.3f %c -subint %d %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,subint,flags.c_str());
-  } else if (sub == -1 && chan != -1) {
-	  sprintf (outstring,"%s %8.3f %s %7.3f %c -chan %d %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,channel,flags.c_str());
-  } else if (sub != -1 && chan != -1) {
-	  sprintf (outstring,"%s %8.3f %s %7.3f %c -subint %d -chan %d %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,subint,channel,flags.c_str());
+  sprintf(outstring, "%s %8.3f %s %7.3f ", fname.c_str(), frequency,
+          arrival.printdays(13).c_str(), error);
+
+  if (phase_info) {
+      sprintf(outstring, "%s @", outstring);
+  } else {
+      sprintf(outstring, "%s %c", outstring, telescope);
+
+      if (subint_given)
+          sprintf(outstring, "%s -subint %d", outstring, subint);
+
+      if (chan_given)
+          sprintf(outstring, "%s -chan %d", outstring, channel);
+
+      sprintf(outstring, "%s %s", outstring, flags.c_str());
   }
 
   return 0;
@@ -710,8 +730,10 @@ char   Tempo::toa::datestr [25];
 
 void Tempo::toa::init()
 {
-  subint = 0;
   channel = 0;
+  subint = 0;
+  phase_shift = 0.0;
+  phase_info = false;
 
   format = Unspecified;
   // auxdata = NULL;
