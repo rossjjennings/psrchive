@@ -1097,7 +1097,8 @@ void remove_channels (const Pulsar::Archive* arch,
 void match_channels (Pulsar::Archive* calarch, const Pulsar::Archive* arch)
 {
   if ( calarch->get_bandwidth() == arch->get_bandwidth()
-       || calarch->get_nchan() <= arch->get_nchan() )
+       || calarch->get_nchan() <= arch->get_nchan()
+       || arch->get_nchan() == 0 )
     return;
 
   CalibratorStokes* calstokes = calarch->get<CalibratorStokes>();
