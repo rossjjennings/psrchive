@@ -23,7 +23,7 @@ Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd,
 
   float  ephase;
   double phase;
-  
+
   Estimate<double> Ephase = shift (std);
   phase = Ephase.val;
   ephase = sqrt(Ephase.var);
@@ -33,9 +33,10 @@ Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd,
     cerr << "Pulsar::Profile::toa phase error = " << ephase << endl;
   }
 
-  retval.set_frequency (centrefreq);
-  retval.set_arrival   (mjd + phase * period);
-  retval.set_error     (ephase * period * 1e6);
+  retval.set_phase_shift (phase);
+  retval.set_frequency   (centrefreq);
+  retval.set_arrival     (mjd + phase * period);
+  retval.set_error       (ephase * period * 1e6);
 
   retval.set_telescope (nsite);
   retval.set_auxilliary_text(arguments);
