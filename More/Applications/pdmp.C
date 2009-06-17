@@ -1823,7 +1823,6 @@ double computePeriodError(const Archive * archive) {
 	unsigned nbin = archive->get_nbin();
 	double tbin_ms = (refP_ms) / nbin;
 
-	Reference::To<Archive> copy = archive->clone();
 	pulseWidth_ms = bestPulseWidth * tbin_ms;
 	error = pulseWidth_ms / bestSNR;
 
@@ -1855,8 +1854,7 @@ double computeDMError(const Archive * archive) {
 	unsigned nbin = archive->get_nbin();
 	unsigned nchan = archive->get_nchan();
 
-	Reference::To<Archive> copy = archive->clone();
-	double channelBW = copy->get_bandwidth() / copy->get_nchan();
+	double channelBW = archive->get_bandwidth() / archive->get_nchan();
 	double refP_ms = bcPeriod_s * MILLISEC;
 	double tbin_ms = (refP_ms) / nbin;
 	pulseWidth_ms = bestPulseWidth * tbin_ms;
@@ -1870,13 +1868,13 @@ double computeDMError(const Archive * archive) {
 		error = (bcPeriod_s / nbin ) * 0.5 * MILLISEC;
 	}
 
-	frequency1 = copy->get_centre_frequency() + 0.5 * fabs(copy->get_bandwidth()) - fabs(channelBW/2);
-	frequency2 = copy->get_centre_frequency() - 0.5 * fabs(copy->get_bandwidth()) + fabs(channelBW/2);
+	frequency1 = archive->get_centre_frequency() + 0.5 * fabs(archive->get_bandwidth()) - fabs(channelBW/2);
+	frequency2 = archive->get_centre_frequency() - 0.5 * fabs(archive->get_bandwidth()) + fabs(channelBW/2);
 
 	double deltaf = frequency1 - frequency2;
 
 	if (nchan > 1)
-		return error / ( (8.297616/MILLISEC) * deltaf * pow(copy->get_centre_frequency()/(double)1000, -3));
+		return error / ( (8.297616/MILLISEC) * deltaf * pow(archive->get_centre_frequency()/(double)1000, -3));
 	else if (nchan <= 0)
 		throw "nchan <= 0?";
 	else
@@ -1939,9 +1937,9 @@ void slaGeoc ( double p, double h, double *r, double *z )
 }
 
 
-double getPeriod(const Archive * archive) {
-	Reference::To<Archive> copy = archive->clone();
-	Reference::To<Integration> subint = copy->get_Integration((int)(copy->get_nsubint()/(double)2));
+double getPeriod(const Archive * data)
+{
+	const Integration* subint = data->get_Integration (data->get_nsubint()/2);
 
 	if (verbose) {
 		MJD start = subint->get_start_time();
@@ -1978,14 +1976,12 @@ double getDopplerFactor(const Archive * archive)
 	double seconds, ra_secs, ra_degs, dec_degs;
 	double R2000, D2000;
 
-	Reference::To<Archive> copy = archive->clone();
-
-	double start = copy->start_time().intday() + copy->start_time().fracday();
-	double end = copy->end_time().intday() + copy->end_time().fracday();
+	double start = archive->start_time().intday() + archive->start_time().fracday();
+	double end = archive->end_time().intday() + archive->end_time().fracday();
 
 	double tmjdctr = 0.5 * (end + start) * (double)86400;
 
-	sky_coord coord = getCoord (copy);
+	sky_coord coord = getCoord (archive);
 	Angle ra_angle = coord.ra();
 	Angle dec_angle = coord.dec();
 
@@ -2037,14 +2033,14 @@ double getDopplerFactor(const Archive * archive)
 	double z = 0;
 
 	try {
-		Reference::To<ITRFExtension> ext = copy->get<ITRFExtension>();
+		Reference::To<const ITRFExtension> ext = archive->get<ITRFExtension>();
 		x = ext->ant_x;
 		y = ext->ant_y;
 		z = ext->ant_z;
 	} catch (Error &error)
         {
 	  using Pulsar::Site;
-	  const Site* site = Site::location (copy->get_telescope());
+	  const Site* site = Site::location (archive->get_telescope());
 	  if (site)
 	    site->get_xyz (x, y, z);
 	  else
@@ -2305,10 +2301,8 @@ void printHeader(const Archive * archive,
 	// Set the view port to the top row to display the header information
 	goToHeaderViewPort();
 
-	Reference::To<Archive> copy = archive->clone();
-
 	if (join) {
-		temp_str = copy->get_source() + ": ";
+		temp_str = archive->get_source() + ": ";
 		if (filenames.size() > 5) {
 			for (unsigned i = 0; i < 6; i++) {
 				temp_str = temp_str + " " + filenames[i];
@@ -2322,7 +2316,7 @@ void printHeader(const Archive * archive,
 		}
 
 	} else {
-		temp_str = copy->get_source() + ": " + copy->get_filename();
+		temp_str = archive->get_source() + ": " + archive->get_filename();
 	}
 
 	// Display the pulsar name and archive file
@@ -2332,22 +2326,22 @@ void printHeader(const Archive * archive,
 	liney = HEADER_Y;
 
 
-	double refP_us = getPeriod(copy) * MICROSEC;
-	double refDM = getDM(copy);
-	int nBin = copy->get_nbin();
-	int nChan = copy->get_nchan();
-	int nSub = copy->get_nsubint();
-	double tspan = (copy->end_time() - copy->start_time()).in_seconds();
-	double tsub = (copy->get_Integration(0))->get_duration();
+	double refP_us = getPeriod(archive) * MICROSEC;
+	double refDM = getDM(archive);
+	int nBin = archive->get_nbin();
+	int nChan = archive->get_nchan();
+	int nSub = archive->get_nsubint();
+	double tspan = (archive->end_time() - archive->start_time()).in_seconds();
+	double tsub = (archive->get_Integration(0))->get_duration();
 	double tbin = (refP_us/1000) / nBin;
 
-	Reference::To<Integration> subint = copy->get_Integration((int)floor(copy->get_nsubint()/(double)2));
+	Reference::To<const Integration> subint = archive->get_Integration((int)floor(archive->get_nsubint()/(double)2));
 	MJD start = subint->get_start_time();
 
 	int hours, degrees, ra_minutes, dec_minutes;
 	double ra_seconds, dec_seconds;
 
-        sky_coord coord = getCoord (copy);
+        sky_coord coord = getCoord (archive);
         Angle ra_angle = coord.ra();
         Angle dec_angle = coord.dec();
 
@@ -2364,7 +2358,7 @@ void printHeader(const Archive * archive,
 
 	sprintf(temp, "BC P(ms)= %3.9f TC P(ms)= %3.9f DM= %3.3f RAJ= %02d:%02d:%05.2f DecJ= %02d:%02d:%04.1f",
 		(refP_us/1000) / dopplerFactor,
-		getPeriod(copy) * MILLISEC,
+		getPeriod(archive) * MILLISEC,
 		refDM,
 		hours, ra_minutes, ra_seconds,
 		degrees, dec_minutes, dec_seconds);
@@ -2380,11 +2374,11 @@ void printHeader(const Archive * archive,
 	start.intday() + start.fracday());
 	temp_str = temp;
 
-	sprintf(temp, "Centre freq(MHz) = %3.3f ", copy->get_centre_frequency());
+	sprintf(temp, "Centre freq(MHz) = %3.3f ", archive->get_centre_frequency());
 	temp_str += temp;
 
 	sprintf(temp, "Bandwidth(MHz) = %3.9g ",
-	copy->get_bandwidth());
+	archive->get_bandwidth());
 	temp_str += temp;
 
 	sprintf(temp, "l = %.3f b = %.3f",
@@ -2433,8 +2427,7 @@ void printResults(const Archive * archive) {
 	// Print the best values and corrections
 
 	char temp [512];
-	Reference::To<Archive> copy = archive->clone();
-	Reference::To<Integration> subint = copy->get_Integration((int)(copy->get_nsubint()/(double)2));
+	Reference::To<const Integration> subint = archive->get_Integration((int)(archive->get_nsubint()/(double)2));
 
 	MJD start = subint->get_start_time();
 	double bcPeriod_s = getPeriod(archive) / dopplerFactor;
@@ -2499,7 +2492,7 @@ void printResults(const Archive * archive) {
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 	bestValues_y -= lineHeight;
-	sprintf(temp, "%3.9f", (dopplerFactor * bestPeriod_bc_us / MILLISEC) - getPeriod(copy) * MILLISEC);
+	sprintf(temp, "%3.9f", (dopplerFactor * bestPeriod_bc_us / MILLISEC) - getPeriod(archive) * MILLISEC);
 	cpgptxt(bestValues_x, bestValues_y, HORIZONTAL, RIGHT_JUSTIFY, temp);
 
 	bestValues_y -= lineHeight;
@@ -2572,14 +2565,14 @@ void printResults(const Archive * archive) {
 		printf("BC MJD = %.6f\n", start.intday() + start.fracday());
 
 		printf("BC Period (ms) = %3.10g  TC Period (ms) =  %3.10g  DM = %3.3g\n",
-						bcPeriod_s * MILLISEC,	getPeriod(copy) * MILLISEC, getDM(copy));
+						bcPeriod_s * MILLISEC,	getPeriod(archive) * MILLISEC, getDM(archive));
 
 		printf("Best BC Period (ms) = %3.10g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n",
 						bestPeriod_bc_us / MILLISEC,	(bestPeriod_bc_us-refP_us) / MILLISEC, periodError_ms / MILLISEC);
 
 		printf("Best TC Period (ms) = %3.10g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n",
 						dopplerFactor * bestPeriod_bc_us / MILLISEC,
-						(dopplerFactor * bestPeriod_bc_us / MILLISEC) - (getPeriod(copy) * MILLISEC),
+						(dopplerFactor * bestPeriod_bc_us / MILLISEC) - (getPeriod(archive) * MILLISEC),
 						periodError_ms / MILLISEC);
 
 		printf("Best DM = %3.3g  Correction = %3.3g  Error = %3.3g\n",
@@ -2841,10 +2834,9 @@ void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* t
 
 void drawBestFitPhaseFreq(const Archive * archive) {
 
-	Reference::To<Archive> copy = archive->clone();
 	Reference::To<Profile> profile;
 	unsigned nchan = archive->get_nchan();
-	double dm = getDM(copy);
+	double dm = getDM(archive);
 	double bw = archive->get_bandwidth();
 	double bwband = fabs(bw/(double)nchan);
 	double fspan = fabs((nchan) * bwband);
@@ -2918,7 +2910,6 @@ void drawBestFitPhaseTime(const Archive * archive) {
 	else if (scale == "minutes")
 		divisor = 60;
 
-	Reference::To<Archive> copy = archive->clone();
 	Reference::To<Profile> profile;
 
 	double intLength = (archive->end_time() - archive->start_time()).in_seconds();
@@ -3191,7 +3182,7 @@ void setInitialXmlCandiateSection(const Archive * archive, float minwidthsecs){
 		xml_candidate->header.mjdStart=(start.intday()+ start.fracday());
 		xml_candidate->header.observationLength= (archive->end_time() - archive->start_time()).in_seconds();
 
-		sky_coord coord = getCoord (copy);
+		sky_coord coord = getCoord (archive);
 		Angle ra_angle = coord.ra();
 		Angle dec_angle = coord.dec();
 
@@ -3240,7 +3231,7 @@ void setInitialXmlCandiateSection(const Archive * archive, float minwidthsecs){
 		xml_candidate->header.mjdStart=(start.intday()+ start.fracday());
 		xml_candidate->header.observationLength= (archive->end_time() - archive->start_time()).in_seconds();
 
-		sky_coord coord = getCoord (copy);
+		sky_coord coord = getCoord (archive);
 		Angle ra_angle = coord.ra();
 		Angle dec_angle = coord.dec();
 
