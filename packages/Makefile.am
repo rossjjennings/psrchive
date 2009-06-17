@@ -1,11 +1,8 @@
 
-#
-# All of the work is done by the configure script.
-# This line is useful only to 'make dist'.
-#
+noinst_SCRIPTS = fftw.csh pgplot.csh tempo2.csh cfitsio.csh psrcat.csh tempo.csh
 
-EXTRA_DIST = all.csh.in psrchive.csh.in fftw.csh.in pgplot.csh.in \
-	tempo2.csh.in cfitsio.csh.in psrcat.csh.in tempo.csh.in
+all:
+	chmod +x *.csh
 
-all libs:
+libs:
 
