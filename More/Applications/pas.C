@@ -58,9 +58,9 @@ void usage ()
        << endl;
 }
 
-uint64 power_of_two (uint64 number)
+uint64_t power_of_two (uint64_t number)
 {
-  uint64 twos = 1;
+  uint64_t twos = 1;
   while (twos < number)
     twos *= 2;
   if (twos != number)
@@ -101,7 +101,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.27 2008/06/11 15:53:26 demorest Exp $" << endl;
+      cout << "$Id: pas.C,v 1.28 2009/06/17 08:12:19 straten Exp $" << endl;
       return 0;
 
     case 'r':

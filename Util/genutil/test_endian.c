@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include <stdio.h>
 
-#include "environ.h"
+#include <inttypes.h>
 #include "machine_endian.h"
 
 #define BITSPERBYTE 8
@@ -18,17 +18,17 @@ int main ()
   int i;
   unsigned char* x1 = NULL;
  
-  uint32 data = 0x8f04c014;
+  uint32_t data = 0x8f04c014;
 
   unsigned char equiv[4] = { 0x8f, 0x04, 0xc0, 0x14 };
 
   printf ("\nThe test starts with the following number:\n\n");
-  printf ("uint64: %08x\n\n", data);
+  printf ("uint64_t: %08x\n\n", data);
 
   printf ("The following bits are printed from highest to lowest order.\n");
 
   printf ("bits shifted right    : ");
-  for (i=sizeof(uint32)*BITSPERBYTE-1; i>=0; i--) {
+  for (i=sizeof(uint32_t)*BITSPERBYTE-1; i>=0; i--) {
     if ((i+1)%8 == 0) printf ("*");
     bit = (data >> i) & 0x0001;
     printf ("%d", bit);

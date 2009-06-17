@@ -181,7 +181,7 @@ MJD to_MJD (long double t)
 //! convert a long double to Phase
 Phase to_Phase (long double p)
 {
-  int64 turns = int64 (p);
+  int64_t turns = int64_t (p);
   double fturns = p - turns;
 
   return Phase (turns, fturns);

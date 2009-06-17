@@ -973,12 +973,12 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename)
 	unsigned count = 0;
 
 	unsigned orig_nchans = 0;
-	uint64 orig_nsamp = 0;
+	uint64_t orig_nsamp = 0;
 
 	assert( fscanf(rms_file,"# %s %d\n", text, &orig_nchans) == 2 );
 	assert( fscanf(rms_file,"# %s %lld\n", text, &orig_nsamp) == 2 );
 
-	uint64 nadd = orig_nsamp/(uint64)(archive->get_nbin() * archive->get_nsubint());
+	uint64_t nadd = orig_nsamp/(uint64_t)(archive->get_nbin() * archive->get_nsubint());
 	unsigned nscr = orig_nchans / archive->get_nchan();
 
 	for (unsigned ic = 0; ic < archive->get_nchan(); ic++)
@@ -1006,7 +1006,7 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename)
 //	weight_factor = archive->get_nsubint()*archive->get_nchan()/weight_total;
 //	weight_factor=weight_total/archive->get_nsubint();
 
-	nadd = orig_nsamp/(uint64)(archive->get_nbin() * archive->get_nsubint());
+	nadd = orig_nsamp/(uint64_t)(archive->get_nbin() * archive->get_nsubint());
 	user_rms = sqrt(sumsq/orig_nchans/nadd/nscr);
 
 //	user_rms *= sqrt(archive->get_nsubint()*orig_nchans/weight_total);

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/dspReduction.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/10/30 13:05:18 $
+   $Revision: 1.12 $
+   $Date: 2009/06/17 08:12:19 $
    $Author: straten $ */
 
 #ifndef __dspReduction_h
@@ -60,21 +60,21 @@ namespace Pulsar {
     //@{
 
     //! The total number of time samples
-    uint64 get_total_samples () const { return total_samples; }
+    uint64_t get_total_samples () const { return total_samples; }
     //! The total number of time samples
-    void set_total_samples (uint64 _total_samples)
+    void set_total_samples (uint64_t _total_samples)
     { total_samples= _total_samples; }
 
     //! The number of time samples in each block
-    uint64 get_block_size () const { return block_size; }
+    uint64_t get_block_size () const { return block_size; }
     //! The number of time samples in each block
-    void set_block_size (uint64 _block_size)
+    void set_block_size (uint64_t _block_size)
     { block_size = _block_size; }
 
     //! The number of time samples by which consecutive blocks overlap
-    uint64 get_overlap () const { return overlap; }
+    uint64_t get_overlap () const { return overlap; }
     //! The number of time samples by which consecutive blocks overlap
-    void set_overlap (uint64 _overlap)
+    void set_overlap (uint64_t _overlap)
     { overlap = _overlap; }
 
     //! The state of the signal from Input::info
@@ -180,13 +180,13 @@ namespace Pulsar {
     //@{
 
     //! The total number of time samples
-    uint64 total_samples;
+    uint64_t total_samples;
 
     //! The number of time samples in each block
-    uint64 block_size;
+    uint64_t block_size;
 
     //! The number of time samples by which consecutive blocks overlap
-    uint64 overlap;
+    uint64_t overlap;
 
     //! The state of the signal from Input::info
     Signal::State state;

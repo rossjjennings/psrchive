@@ -11,7 +11,7 @@
 #if HAVE_MKL
 
 #include "MKL_Transform.h"
-#include "environ.h"
+#include <inttypes.h>
 
 #include <assert.h>
 
@@ -54,10 +54,10 @@ FTransform::MKL::Plan::Plan (size_t n_fft, type t)
 
   int signed_ndat = n_fft;
 
-  if( int64(uint64(n_fft)) != signed_ndat )
+  if( int64_t(uint64_t(n_fft)) != signed_ndat )
     throw Error(InvalidState,"FTransform::MKL::Plan::MKL::Plan",
 		"Could not convert nfft="UI64" to an integer",
-		uint64(n_fft));
+		uint64_t(n_fft));
 
   int isign = 0;
   if( t == frc )

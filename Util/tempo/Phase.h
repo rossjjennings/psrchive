@@ -7,7 +7,7 @@
 #ifndef __POLYCO_PHASE_H
 #define __POLYCO_PHASE_H
 
-#include "environ.h"
+#include <inttypes.h>
 #include "MJD.h"
 
 #include <string>
@@ -20,7 +20,7 @@
 class Phase {
 
  private:
-  int64 turns;
+  int64_t turns;
   double fturns;
 
   void settle ();
@@ -35,7 +35,7 @@ class Phase {
   //! Default constructor
   Phase (double turns=0);
 
-  Phase (int64 tns, double ftns);
+  Phase (int64_t tns, double ftns);
 
   const Phase& operator= (const Phase&);
 
@@ -70,10 +70,10 @@ class Phase {
   Phase Floor ();
   Phase Rint  ();
 
-  void set (int64 tns, double ftns);
+  void set (int64_t tns, double ftns);
 
   double in_turns() const;
-  int64  intturns() const;
+  int64_t  intturns() const;
   double fracturns() const;
   std::string strprint(int precision) const;
 

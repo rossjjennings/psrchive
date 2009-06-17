@@ -1,20 +1,21 @@
 /***************************************************************************
  *
- *   Copyright (C) 1999 by Willem van Straten
+ *   Copyright (C) 1999-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-using namespace std;
-
 #include "Phase.h"
 #include "Error.h"
+#include "tostring.h"
 
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
 #include <float.h>
 #include <math.h>
+
+using namespace std;
 
 double Phase::rounding_threshold = 1e-9;
 
@@ -36,19 +37,19 @@ void Phase::settle ()
 
 Phase::Phase (double tns)
 {
-  turns = (int64) tns;
+  turns = (int64_t) tns;
   fturns = tns - double (turns);
   settle ();
 }
 
-Phase::Phase (int64 tns, double ftns) 
+Phase::Phase (int64_t tns, double ftns) 
 {
   set (tns, ftns);
 }
 
-void Phase::set (int64 tns, double ftns)
+void Phase::set (int64_t tns, double ftns)
 {
-  int64 iturns = (int64) ftns;
+  int64_t iturns = (int64_t) ftns;
   turns = tns + iturns;
   fturns = ftns - double (iturns);
   settle ();
@@ -59,7 +60,7 @@ double Phase::in_turns() const
   return double(turns)+fturns;
 }
 
-int64 Phase::intturns() const
+int64_t Phase::intturns() const
 {
   return turns;
 }
@@ -78,33 +79,19 @@ string Phase::strprint (int precision) const
     cerr << "- truncating to a precision of " << DBL_DIG << endl;
   }
 
-  const unsigned size = precision + 64;
-  char ftn[size];
-
-  // I64 is defined in environ.h.
-  int retval = snprintf (ftn, size, I64, turns);
-  if (retval >= int(size))
-    throw Error (InvalidState, "Phase::strprint",
-                 "turns="I64" overflows text buffer length=%u", turns, size);
-
-  string s = ftn;
-  retval = snprintf (ftn, size, "%.*lf", precision, fturns);
-  if (retval >= int(size))
-    throw Error (InvalidState, "Phase::strprint",
-                 "fturns=%lf overflows text buffer length=%u", fturns, size);
+  string s = tostring (turns);
+  string f = tostring (fturns, precision);
 
   if (!finite(fturns))
-  {
     s += ".NaN";
-  }
   else
   {
-    sprintf(ftn, "%.*lf", precision, fturns);
-
     if (fturns>=0)
-      s += &(ftn[1]);
+      f.erase(0,1);
     else
-      s += &(ftn[2]);
+      f.erase(0,2);
+
+    s += f;
   }
 
   return s;
@@ -139,13 +126,13 @@ Phase operator - (const Phase &p)
 // period is assumed to be given in seconds
 MJD operator * (const Phase &p1, double period) 
 {
-  const int64 secs_per_day = 86400;
+  const int64_t secs_per_day = 86400;
 
   double bigseconds = double (p1.turns) * period;
   double smallseconds = p1.fturns * period;
 
-  int64 b_seconds = int64 (bigseconds);
-  int64 s_seconds = int64 (smallseconds);
+  int64_t b_seconds = int64_t (bigseconds);
+  int64_t s_seconds = int64_t (smallseconds);
 
   double b_fracsec = bigseconds - double (b_seconds);
   double s_fracsec = smallseconds - double (s_seconds);
@@ -207,7 +194,7 @@ Phase operator - (const Phase &p1, double turns)
 
 const Phase& Phase::operator += (double tns)
 {
-  int64 add_turns = (int64) tns;
+  int64_t add_turns = (int64_t) tns;
   double add_fturns = tns - double (add_turns);
 
   set (turns + add_turns, fturns + add_fturns);
@@ -216,7 +203,7 @@ const Phase& Phase::operator += (double tns)
 
 const Phase& Phase::operator -= (double tns)
 {
-  int64 sub_turns = (int64) tns;
+  int64_t sub_turns = (int64_t) tns;
   double sub_fturns = tns - double (sub_turns);
 
   set (turns - sub_turns, fturns - sub_fturns);
@@ -280,15 +267,15 @@ bool operator != (const Phase &p1, const Phase &p2)
 
 Phase Phase::Ceil ()
 {
-  return Phase (turns + (int64) ceil(fturns), 0.0);
+  return Phase (turns + (int64_t) ceil(fturns), 0.0);
 }
 
 Phase Phase::Floor ()
 {
-  return Phase (turns + (int64) floor(fturns), 0.0);
+  return Phase (turns + (int64_t) floor(fturns), 0.0);
 }
 
 Phase Phase::Rint ()
 {
-  return Phase (turns + (int64) rint(fturns), 0.0);
+  return Phase (turns + (int64_t) rint(fturns), 0.0);
 }

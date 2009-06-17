@@ -131,7 +131,7 @@ void Pulsar::ScintArchive::set_be_data_size ()
     cerr << "Pulsar::ScintArchive::set_be_data_size" << endl;
 
   // size of the compressed float vector header (see fwrite_compressed)
-  unsigned c_hdr = (unsigned) 2 * sizeof(float) + sizeof(uint64);
+  unsigned c_hdr = (unsigned) 2 * sizeof(float) + sizeof(uint64_t);
   // size of unsigned short (elements of compressed float vector
   unsigned s_ush = sizeof(unsigned short);
 

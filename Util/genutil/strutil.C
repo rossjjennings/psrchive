@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include "strutil.h"
 #include "Error.h"
-#include "environ.h"
+#include <inttypes.h>
 
 #include <algorithm>
 

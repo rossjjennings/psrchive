@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.18 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.19 $
+   $Date: 2009/06/17 08:12:19 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */
@@ -104,7 +104,7 @@ corresponds to a sub_int. It is only at the archiver stage
 that we get several dumps becoming a sub_int.
 
 */
-#include "environ.h"
+#include <inttypes.h>
 #include "band.h"
 
 struct timer {
@@ -206,7 +206,7 @@ struct timer {
 
   char  backend[BACKEND_STRLEN];     /* 8-byte code checked for recognized backend */
 
-  uint32 be_data_size;            /* if backend is recognized, this value is
+  uint32_t be_data_size;            /* if backend is recognized, this value is
 				     interpreted by archive::load as the number
 				     of bytes to skip immediately following the
 				     end of the timer header.  It is in this

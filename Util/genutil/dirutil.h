@@ -55,7 +55,7 @@ std::string expand (const std::string& filename);
 extern "C" {
 #endif /* #ifdef __cplusplus */
 
-#include "environ.h"
+#include <inttypes.h>
 #include <sys/types.h>
 
   /* recursively constructs a new directory named 'path' */
@@ -73,7 +73,7 @@ extern "C" {
   int file_is_directory (const char* filename);
 
   /* returns the file size in bytes */
-  uint64 filesize (const char* filename);
+  uint64_t filesize (const char* filename);
 
 #ifdef __cplusplus
 }

@@ -4,6 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#include "environ.h"
 #include "polyco.h"
 #include "Predict.h"
 
@@ -205,7 +207,7 @@ int polynomial::load (string* instr)
   if (refphstr.length() < 1)
     return -1;
 
-  int64 turns;
+  int64_t turns;
   double fracturns;
 
   sscanf (refphstr.c_str(), I64" %lf\n", &turns, &fracturns);

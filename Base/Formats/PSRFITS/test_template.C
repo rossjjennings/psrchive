@@ -172,7 +172,7 @@ void test_template (const char* tplate, bool populate, bool verbose)
       throw FITSError (status, "test_template", "fits_movnam_hdu SUBINT");
 
     int npol = 2, nbin=3, nchan=4;
-    int16 data[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
+    int16_t data[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
     int colnum = 0;
 
     if (verbose)

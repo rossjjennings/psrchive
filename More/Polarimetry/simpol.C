@@ -23,7 +23,7 @@ using namespace std;
 
 #include "NormalDistribution.h"
 #include "BoxMuller.h"
-#include "environ.h"
+#include <inttypes.h>
 
 void usage ()
 {
@@ -77,7 +77,7 @@ void digitize (double& volts, double scale, double max, double rescale)
 
 int main (int argc, char** argv)
 {
-  uint64 ndat = 1024 * 1024;       // 1Mpt set of random samples
+  uint64_t ndat = 1024 * 1024;       // 1Mpt set of random samples
 
   unsigned nbit = 0;               // number of bits per sample in digitizer
   double digitizer_spacing = 0;    // spacing between digitizer levels
@@ -238,7 +238,7 @@ int main (int argc, char** argv)
   Vector<4, double> tot;
   Matrix<4,4, double> totsq;
 
-  for (uint64 idat=0; idat<ndat; idat++)
+  for (uint64_t idat=0; idat<ndat; idat++)
   {
     e_x[0] = input_rms * gasdev ();
     e_y[0] = input_rms * gasdev ();

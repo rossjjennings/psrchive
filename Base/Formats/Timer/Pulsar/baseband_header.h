@@ -7,7 +7,7 @@
 #ifndef __BASEBAND_HEADER_H
 #define __BASEBAND_HEADER_H
 
-#include "environ.h"
+#include <inttypes.h>
 
 // Q: why a C struct?
 // A: to minimize the chances of discrepency between state as understood
@@ -16,14 +16,14 @@
 typedef struct baseband_header_t {
 
   // Endian-ness code
-  uint32         endian;
+  uint32_t         endian;
   unsigned int   version;
   unsigned int   size;
 
   // How the data was read from file during processing
   unsigned int   totaljobs;
-  uint64         gulpsize;
-  uint64         seeksize;
+  uint64_t         gulpsize;
+  uint64_t         seeksize;
 
   // state of voltage: analytic(complex)=2 or Nyquist(real)=1
   int  voltage_state;
@@ -70,8 +70,8 @@ typedef struct baseband_header_t {
 
   // various flags for various states and operations performed.
 
-  uint64 time_domain;
-  uint64 frequency_domain;
+  uint64_t time_domain;
+  uint64_t frequency_domain;
 
   // Version 1 additions
   float mean_power_cutoff;

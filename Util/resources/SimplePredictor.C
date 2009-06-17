@@ -112,7 +112,7 @@ Phase Pulsar::SimplePredictor::phase (const MJD& t) const
     power_of_t *= seconds;
   }
 
-  int64 iphase = int64(result);
+  int64_t iphase = int64_t(result);
 
   return Phase(iphase,result-iphase);
 }

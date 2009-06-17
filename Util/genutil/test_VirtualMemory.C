@@ -45,8 +45,8 @@ int main ()
       }
     }
 
-    uint64 size = filesize (filename.c_str());
-    uint64 expected = number_of_arrays * array_size * sizeof(float);
+    uint64_t size = filesize (filename.c_str());
+    uint64_t expected = number_of_arrays * array_size * sizeof(float);
     if (size < expected)
     {
       cerr << "swap space size=" << size << " < expected=" << expected << endl;

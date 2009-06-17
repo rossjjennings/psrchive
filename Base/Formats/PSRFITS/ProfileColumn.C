@@ -254,10 +254,10 @@ void Pulsar::ProfileColumn::unload (int row,
     // Apply the scale factor
    
     // 16 bit representation of profile amplitudes
-    vector<int16> compressed (nbin);
+    vector<int16_t> compressed (nbin);
    
     for (unsigned ibin = 0; ibin < nbin; ibin++)
-      compressed[ibin] = int16 ((amps[ibin]-offset) / scale);
+      compressed[ibin] = int16_t ((amps[ibin]-offset) / scale);
 
     // Write the offset to file
 

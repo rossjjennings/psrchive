@@ -407,7 +407,7 @@ void Pulsar::BasebandArchive::check_be_data_size ()
   //
 
   // size of the compressed float vector header (see fwrite_compressed)
-  int c_hdr = (int) 2 * sizeof(float) + sizeof(uint64);
+  int c_hdr = (int) 2 * sizeof(float) + sizeof(uint64_t);
   // size of unsigned short (elements of compressed float vector
   int s_ush = (int) sizeof(unsigned short);
 
@@ -443,7 +443,7 @@ void Pulsar::BasebandArchive::fix_header_memory_alignment ()
 
 // written for the sake of fixing a limited set of broken files
 // that first came out on monolith
-static bool uint64_bug = false;
+static bool uint64_t_bug = false;
 
 void Pulsar::BasebandArchive::backend_load (FILE* fptr)
 {
@@ -612,7 +612,7 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
 		 "loaded %d bytes != %d bytes",
 		 file_end - file_start, hdr.be_data_size);
 
-  if (uint64_bug) {
+  if (uint64_t_bug) {
     hdr.be_data_size += (bhdr.pband_channels + bhdr.analog_channels) * 4;
     bhdr.size = hdr.be_data_size;
   }

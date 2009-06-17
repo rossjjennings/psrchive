@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <stdio.h>
 
-uint64 filesize (const char* filename)
+uint64_t filesize (const char* filename)
 {
   struct stat statistics;
   if (stat (filename, &statistics) < 0)
@@ -25,5 +25,5 @@ uint64 filesize (const char* filename)
     perror ("");
     return 0;
   }
-  return (uint64) statistics.st_size;
+  return (uint64_t) statistics.st_size;
 }

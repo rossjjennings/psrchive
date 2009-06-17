@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.31 $
-   $Date: 2009/03/03 05:03:49 $
+   $Revision: 1.32 $
+   $Date: 2009/06/17 08:12:20 $
    $Author: straten $ */
 
 #ifndef __GENUTIL_MJD_H
 #define __GENUTIL_MJD_H
 
-#include "environ.h"
+#include <inttypes.h>
 #include "utc.h"
 
 #include <iostream>
