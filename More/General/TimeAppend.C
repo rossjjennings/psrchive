@@ -53,8 +53,10 @@ bool Pulsar::TimeAppend::stop (Archive* into, const Archive* from)
   IntegrationOrder* order_into = into->get<IntegrationOrder>();
   const IntegrationOrder* order_from = from->get<IntegrationOrder>();
   
-  if (order_into && order_from) {
-    if (order_into->get_IndexState() == order_from->get_IndexState()) {
+  if (order_into && order_from)
+  {
+    if (order_into->get_IndexState() == order_from->get_IndexState())
+    {
       order_into->append(into, from);
       return true;
     }
