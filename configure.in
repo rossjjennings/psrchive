@@ -16,22 +16,6 @@ AC_PREFIX_DEFAULT([${PSRHOME:-"/usr/local"}${PSRHOME:+"/$LOGIN_ARCH"}])
 
 ################################################################################
 #
-# configure the package installation scripts
-#
-#
-
-if test ! -f "$srcdir/packages/configure"; then
-  AC_MSG_ERROR([packages/configure script not found.
-
-  Please run the bootstrap script.
-])
-fi
-
-AC_CONFIG_SUBDIRS([packages])
-
-
-################################################################################
-#
 # Warn about pulsar group environment variables
 #
 
@@ -142,12 +126,27 @@ SWIN_LIB_MKL
 SWIN_LIB_IPP
 
 #
+# Set up for automatic package installation
+#
+SWIN_DOWNLOAD
+AC_CONFIG_FILES([packages/Makefile
+	packages/cfitsio.csh
+	packages/fftw.csh
+	packages/pgplot.csh
+	packages/psrcat.csh
+	packages/tempo.csh
+	packages/tempo2.csh])
+
+AC_CONFIG_COMMANDS(executable,[chmod a+x packages/*.csh])
+
+#
 # Check that at least one FFT library is available
 #
 
 if test x"$have_fftw3" = xno -a x"$have_mkl" = xno -a x"$have_ipp" = xno; then
 
   # produce the package installation scripts before aborting.
+  AC_CONFIG_FILES([$PACKAGE_SCRIPTS])
   AC_OUTPUT
 
   AC_MSG_ERROR([No suitable FFT library was found.
