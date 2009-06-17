@@ -5,15 +5,22 @@
  *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/Application.h"
 #include "Pulsar/StandardOptions.h"
-#include "Pulsar/PlotOptions.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/FaradayRotation.h"
+
+#if HAVE_PGPLOT
+#include "Pulsar/PlotOptions.h"
 #include "Pulsar/StokesCylindrical.h"
+#endif
 
 #include "Pulsar/ComplexRVMFit.h"
 #include "MEAL/ComplexRVM.h"
@@ -62,8 +69,10 @@ protected:
   // plot the result
   bool plot_result;
 
+#if HAVE_PGPLOT
   // configures the plotting device
   Pulsar::PlotOptions plot;
+#endif
 };
 
 int main (int argc, char** argv)
@@ -73,14 +82,18 @@ int main (int argc, char** argv)
 }
 
 psrmodel::psrmodel () :
-  Pulsar::Application ("psrmodel", "pulsar modeling program"),
-  plot (false)
+  Pulsar::Application ("psrmodel", "pulsar modeling program")
+#if HAVE_PGPLOT
+  , plot (false)
+#endif
 {
   has_manual = false;
-  version = "$Id: psrmodel.C,v 1.7 2009/06/15 01:58:39 straten Exp $";
+  version = "$Id: psrmodel.C,v 1.8 2009/06/17 04:02:21 straten Exp $";
 
   add( new Pulsar::StandardOptions );
+#if HAVE_PGPLOT
   add( &plot );
+#endif
 
   rvm = new ComplexRVMFit;
   global_search = 0;
@@ -97,7 +110,9 @@ std::string psrmodel::get_options ()
 std::string psrmodel::get_usage ()
 {
   return
+#if HAVE_PGPLOT
     " -d               plot the resulting model with data \n"
+#endif
     " -s nstep         do a global minimum search on nstep^2 grid \n"
     " -t sigma         cutoff threshold when selecting bins [default 3] \n"
     "\n"
@@ -133,10 +148,12 @@ bool psrmodel::parse (char code, const std::string& arg)
       break;
     }
 
+#if HAVE_PGPLOT
   case 'd':
     plot.set_open_device (true);
     plot_result = true;
     break;
+#endif
 
   case 's':
     global_search = fromstring<unsigned>(arg);
@@ -247,6 +264,7 @@ void psrmodel::process (Pulsar::Archive* data)
     "phi_0=" << deg*RVM->magnetic_meridian->get_value() << " deg"
 	     << endl;
 
+#if HAVE_PGPLOT
   if (plot_result)
   {
     StokesCylindrical plotter;
@@ -260,4 +278,6 @@ void psrmodel::process (Pulsar::Archive* data)
     plotter.get_scale()->set_units( PhaseScale::Degrees );
     plotter.plot( data );
   }
+#endif
+
 }
