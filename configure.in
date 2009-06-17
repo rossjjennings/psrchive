@@ -30,14 +30,13 @@ fi
 
 ################################################################################
 #
-# By default, runtime files will be found in the installation directory
+# Set the @prefix@ variable in autoconf-generated files
 #
-if test "x$prefix" != xNONE; then
-  PSRCHIVE_INSTALL=$prefix
-else
-  PSRCHIVE_INSTALL=$ac_default_prefix
+if test "x$prefix" = xNONE; then
+  prefix=$ac_default_prefix
 fi
 
+PSRCHIVE_INSTALL=$prefix
 PSRCHIVE_HTTP="http://psrchive.sourceforge.net"
 
 AC_SUBST(PSRCHIVE_INSTALL)
@@ -146,7 +145,6 @@ AC_CONFIG_COMMANDS(executable,[chmod a+x packages/*.csh])
 if test x"$have_fftw3" = xno -a x"$have_mkl" = xno -a x"$have_ipp" = xno; then
 
   # produce the package installation scripts before aborting.
-  AC_CONFIG_FILES([$PACKAGE_SCRIPTS])
   AC_OUTPUT
 
   AC_MSG_ERROR([No suitable FFT library was found.
