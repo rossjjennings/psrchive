@@ -11,7 +11,6 @@
 #include "Pulsar/ArchiveMatch.h"
 
 #include "Pulsar/IntegrationExpert.h"
-#include "Pulsar/IntegrationOrder.h"
 
 #include "Pulsar/Parameters.h"
 #include "Pulsar/Predictor.h"
