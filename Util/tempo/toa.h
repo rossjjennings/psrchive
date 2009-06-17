@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.28 $
-   $Date: 2009/06/15 06:15:07 $
-   $Author: jonathan_khoo $ */
+   $Revision: 1.29 $
+   $Date: 2009/06/17 03:06:13 $
+   $Author: straten $ */
 
 #ifndef __TOA_H
 #define __TOA_H
@@ -75,8 +75,8 @@ namespace Tempo {
     MJD    arrival;        // TOA
     float  error;          // TOA uncertainty
     char   telescope;      // Observatory (one-character code)
-	uint   channel;        // Corresponding channel
-	uint   subint;         // Corresponding subint
+	unsigned   channel;        // Corresponding channel
+	unsigned   subint;         // Corresponding subint
     double phase_shift;    // Phase shift
 
     // Parkes Format specific
@@ -148,8 +148,8 @@ namespace Tempo {
     void set_error     (float err)   { error = err; };
     void set_telescope (const std::string& telcode);
     void set_auxilliary_text (const std::string& text) { auxinfo = text; };
-	void set_channel   (uint chan)   { channel = chan; };
-	void set_subint    (uint sub)    { subint = sub; };
+	void set_channel   (unsigned chan)   { channel = chan; };
+	void set_subint    (unsigned sub)    { subint = sub; };
     void set_phase_shift (double shift) { phase_shift = shift; };
     void set_phase_info  (bool info)    { phase_info = info; };
 
@@ -166,8 +166,8 @@ namespace Tempo {
     char   get_telescope () const { return telescope; };
     std::string get_auxilliary_text () const { return auxinfo; };
     double get_phase_shift () const { return phase_shift; };
-	uint   get_channel     () const { return channel; };
-	uint   get_subint      () const { return subint; };
+	unsigned   get_channel     () const { return channel; };
+	unsigned   get_subint      () const { return subint; };
 
 
 #if POLYCO_INTERFACE_RESTORED

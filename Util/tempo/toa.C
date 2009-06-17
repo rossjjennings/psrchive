@@ -287,8 +287,8 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
   if (auxinfo.find(" ")!=string::npos) 
 	  flags = auxinfo.substr(auxinfo.find(" "));
 
-  uint sub;
-  uint chan;
+  unsigned sub;
+  unsigned chan;
 
   bool subint_given = false;
   bool chan_given = false;

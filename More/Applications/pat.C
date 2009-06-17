@@ -84,7 +84,7 @@ void set_phase_zoom(vector<Reference::To<Plot> >& plots,
 
 void setPlotLabels(Reference::To<Archive> diff, Reference::To<Archive> arch, 
         Reference::To<Archive> profile, Pulsar::Plot* diff_plot, 
-        vector<Tempo::toa>& toas, const uint subint, const uint chan);
+        vector<Tempo::toa>& toas, const unsigned subint, const unsigned chan);
 
 void calculateDifference(Pulsar::Profile* diff, const float* prof,
         const float* std);
@@ -97,9 +97,9 @@ void scaleProfile(Reference::To<Profile> profile);
 
 void rotate_archive(Reference::To<Archive> archive, vector<Tempo::toa>& toas);
 
-float getMean(const float rms, const float* bins, const uint nbin);
+float getMean(const float rms, const float* bins, const unsigned nbin);
 
-float getRms(const float* bins, const uint nbin, const float mean, const float oldRms);
+float getRms(const float* bins, const unsigned nbin, const float mean, const float oldRms);
 
 void resize_archives(Reference::To<Archive> archive,
         Reference::To<Archive> diff, Reference::To<Archive> original);
@@ -109,7 +109,7 @@ void prepare_difference_archive(Reference::To<Archive> diff,
 
 void difference_plot(Reference::To<Plot> plot,
         Reference::To<Archive> arch, Reference::To<Archive> diff_arch,
-        vector<Tempo::toa>& toas, const uint subint, const uint chan);
+        vector<Tempo::toa>& toas, const unsigned subint, const unsigned chan);
 
 void template_plot(Reference::To<Plot> plot, Reference::To<Archive> arch);
 
@@ -348,7 +348,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.85 2009/06/15 06:12:13 jonathan_khoo Exp $" << endl;
+      cout << "$Id: pat.C,v 1.86 2009/06/17 03:06:12 straten Exp $" << endl;
       return 0;
 
     case 'K':
@@ -1005,8 +1005,8 @@ void plotDifferences(Reference::To<Archive> arch,
         plotter->configure("x:range=" + get_xrange(min_phase, max_phase));
 
     cpgsubp(1, 3);
-    for (uint isub = 0; isub < arch->get_nsubint(); ++isub) {
-        for (uint ichan = 0; ichan < arch->get_nchan(); ++ichan) {
+    for (unsigned isub = 0; isub < arch->get_nsubint(); ++isub) {
+        for (unsigned ichan = 0; ichan < arch->get_nchan(); ++ichan) {
             cpgpage();
             Pulsar::Profile* profile = arch->get_Profile(isub, 0, ichan);
             if (cal_delay_file)
@@ -1053,7 +1053,7 @@ void compute_dt(Reference::To<Archive> archive, vector<Tempo::toa>& toas,
         dt *= 1000.0;  // microsec
 
         // remove preceeding path to shorten output line
-        uint pos = std_name.find_last_of('/');
+        unsigned pos = std_name.find_last_of('/');
         if (pos != string::npos)
             std_name = std_name.substr(pos + 1, std_name.length() - pos);
 
@@ -1098,10 +1098,10 @@ string get_xrange(const double min, const double max)
 void resize_archives(Reference::To<Archive> archive,
         Reference::To<Archive> diff, Reference::To<Archive> original)
 {
-    const uint nsub = original->get_nsubint();
-    const uint nchan = original->get_nchan();
-    const uint npol = original->get_npol();
-    const uint nbin = original->get_nbin();
+    const unsigned nsub = original->get_nsubint();
+    const unsigned nchan = original->get_nchan();
+    const unsigned npol = original->get_npol();
+    const unsigned nbin = original->get_nbin();
 
     diff->resize(nsub, npol, nchan, nbin);
     archive->resize(nsub, npol, nchan, nbin);
@@ -1116,12 +1116,12 @@ void resize_archives(Reference::To<Archive> archive,
 
 void rotate_archive(Reference::To<Archive> archive, vector<Tempo::toa>& toas)
 {
-    const uint nchan = archive->get_nchan();
-    const uint nsub = archive->get_nsubint();
+    const unsigned nchan = archive->get_nchan();
+    const unsigned nsub = archive->get_nsubint();
 
     vector<Tempo::toa>::iterator it = toas.begin();
-    for (uint isub = 0; isub < nsub; ++isub) {
-        for (uint ichan = 0; ichan < nchan; ++ichan, ++it) {
+    for (unsigned isub = 0; isub < nsub; ++isub) {
+        for (unsigned ichan = 0; ichan < nchan; ++ichan, ++it) {
             const double phase_shift = (*it).get_phase_shift();
             archive->get_Profile(isub, 0, ichan)->rotate_phase(phase_shift);
         }
@@ -1149,12 +1149,12 @@ void prepare_difference_archive(Reference::To<Archive> diff,
 #if HAVE_PGPLOT
 void difference_plot(Reference::To<Plot> plot,
         Reference::To<Archive> arch, Reference::To<Archive> diff_arch,
-        vector<Tempo::toa>& toas, const uint subint, const uint chan)
+        vector<Tempo::toa>& toas, const unsigned subint, const unsigned chan)
 {
     Reference::To<Profile> profile = arch->get_Profile(subint, 0, chan);
     prepare_difference_archive(diff_arch, arch, profile);
 
-    const uint i = subint * arch->get_nchan() + chan;
+    const unsigned i = subint * arch->get_nchan() + chan;
     const double snr = diff_arch->get_Profile(0,0,0)->snr();
 
     char phaseShift[50];
@@ -1220,7 +1220,7 @@ void diff_profiles(Reference::To<Archive> diff, Reference::To<Archive> stdarch, 
 void scaleProfile(Reference::To<Profile> profile)
 {
     float* bins = profile->get_amps();
-    const uint nbin = profile->get_nbin();
+    const unsigned nbin = profile->get_nbin();
 
     // if baseline removal is not effective, subtract the mean from the profile
     double stats_mean = profile->mean(1.0);
@@ -1256,13 +1256,13 @@ void scaleProfile(Reference::To<Profile> profile)
  * @brief calculate new mean for all points < 3(rms)
  */
 
-float getMean(const float rms, const float* bins, const uint nbin)
+float getMean(const float rms, const float* bins, const unsigned nbin)
 {
     float mean = 0.0;
     int count = 0;
 
     // calculate mean
-    for (uint i = 0; i < nbin; ++i) {
+    for (unsigned i = 0; i < nbin; ++i) {
         if (bins[i] < 3.0 * rms) {
             mean += bins[i];
             ++count;
@@ -1278,13 +1278,13 @@ float getMean(const float rms, const float* bins, const uint nbin)
  * @brief calculate new rms for all points < 3(rms)
  */
 
-float getRms(const float* bins, const uint nbin, const float mean,
+float getRms(const float* bins, const unsigned nbin, const float mean,
         const float oldRms)
 {
     float deviation = 0.0;
     int count = 0;
 
-    for (uint i = 0; i < nbin; ++i) {
+    for (unsigned i = 0; i < nbin; ++i) {
         if (bins[i] < 3.0 * oldRms) {
             deviation += pow((bins[i] - mean), 2); // square
             ++count;

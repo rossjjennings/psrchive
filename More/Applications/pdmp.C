@@ -1818,7 +1818,7 @@ double computePeriodError(const Archive * archive) {
 	double bcPeriod_s = getPeriod(archive) / dopplerFactor;
 	double refP_ms = bcPeriod_s * MILLISEC;
 	double tsub = archive->get_Integration(0)->get_duration();
-	unsigned nsub = (uint)(tspan / tsub);
+	unsigned nsub = (unsigned)(tspan / tsub);
 	double integrationLength = tsub * (nsub - 1);
 	unsigned nbin = archive->get_nbin();
 	double tbin_ms = (refP_ms) / nbin;
@@ -2928,7 +2928,7 @@ void drawBestFitPhaseTime(const Archive * archive) {
 	unsigned nsub;
 
 	if (join) {
-		nsub = (uint)(tspan / tsub);
+		nsub = (unsigned)(tspan / tsub);
 	} else {
 		nsub = archive->get_nsubint();
 	}

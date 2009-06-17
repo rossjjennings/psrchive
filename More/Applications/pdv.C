@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.41 $
-   $Date: 2009/04/05 21:03:11 $
+   $Revision: 1.42 $
+   $Date: 2009/06/17 03:06:13 $
    $Author: straten $ */
 
 
@@ -532,7 +532,7 @@ void Flux( Reference::To< Archive > archive )
   const string filename = archive->get_filename();
   const double start_time = archive->start_time().in_days();
   const double frequency = archive->get_centre_frequency();
-  const uint npol = archive->get_npol();
+  const unsigned npol = archive->get_npol();
 
   for (int s = fsub; s <= lsub; s++)
   {
