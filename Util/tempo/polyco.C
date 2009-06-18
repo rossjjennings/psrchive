@@ -5,7 +5,10 @@
  *
  ***************************************************************************/
 
-#include "environ.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "polyco.h"
 #include "Predict.h"
 
@@ -210,7 +213,7 @@ int polynomial::load (string* instr)
   int64_t turns;
   double fracturns;
 
-  sscanf (refphstr.c_str(), I64" %lf\n", &turns, &fracturns);
+  sscanf (refphstr.c_str(), "%"PRIi64" %lf\n", &turns, &fracturns);
   if (polyco::verbose)
     cerr << "polynomial::load scanned phase=" << turns
 	 << "+" << fracturns << endl;
@@ -343,7 +346,7 @@ int polynomial::unload (string* outstr) const
     cerr << "polynomial::unload nrows=" << nrows << endl;
 #endif
 
-  char* newline = "\n";
+  const char* newline = "\n";
 
   for (unsigned i=0; i<nrows; ++i){
 

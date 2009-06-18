@@ -111,6 +111,11 @@ if test -d $PSRCHIVE_INSTALL -a x"$enable_existing" != x"no"; then
 fi
 
 #
+# enable POSIX C99 format macros
+#
+AC_DEFINE([__STDC_FORMAT_MACROS], [1], [enable POSIX C99 format macros])
+
+#
 # Checks for header files.
 #
 AC_HEADER_SYS_WAIT

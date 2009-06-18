@@ -13,7 +13,6 @@ include_HEADERS = \
         coord_parse.h \
 	Directional.h \
         dirutil.h \
-        environ.h \
 	evaluate.h \
 	ExponentialDistribution.h \
 	extutil.h \
