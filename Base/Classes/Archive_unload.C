@@ -57,13 +57,32 @@ void Pulsar::Archive::unload (const char* filename) const
   if (model)
   {
     model_backup = model->clone();
+
+    if (verbose > 2)
+    {
+      cerr << "Pulsar::Archive::unload paring down predictor=" << endl;
+      model->unload (stderr);
+    }
+
     Reference::To<Predictor> pared_down = model->clone();
+
+    if (verbose > 2)
+    {
+      cerr << "Pulsar::Archive::unload paring down clone=" << endl;
+      pared_down->unload (stderr);
+    }
 
     vector<MJD> epochs( get_nsubint() );
     for (unsigned isub=0; isub < get_nsubint(); isub++)
       epochs[isub] = get_Integration(isub)->get_epoch();
 
     pared_down->keep (epochs);
+
+    if (verbose > 2)
+    {
+      cerr << "Pulsar::Archive::unload pared down result=" << endl;
+      pared_down->unload (stderr);
+    }
 
     const_cast<Archive*>(this)->model = pared_down;
   }

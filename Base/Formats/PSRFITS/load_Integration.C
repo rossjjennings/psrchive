@@ -163,8 +163,8 @@ try {
 
   if (verbose > 2)
     cerr << "Pulsar::FITSArchive::load_Integration"
-      " header epoch=" << hdr_ext->get_start_time() << "\n "
-      " offset=" << time << "s epoch=" << epoch << endl;
+      " header epoch=" << hdr_ext->get_start_time().printdays(13) << "\n "
+      " offset=" << time << "s epoch=" << epoch.printdays(13) << endl;
   
   // Set a preliminary epoch to avoid problems loading the polyco
   integ->set_epoch (epoch);
@@ -229,13 +229,16 @@ try {
       {
       	cerr << "Pulsar::FITSArchive::load_Integration row=" << row <<
 	  "\n  PRED_PHS=" << predicted_phase;
+
 	if (phase_match_start_time)
-	  cerr << "\n  reference epoch=" << hdr_ext->get_start_time();
+	  cerr << "\n  reference epoch=" 
+	       << hdr_ext->get_start_time().printdays(13);
+
 	cerr <<
 	  "\n  reference phase=" << reference_phs <<
 	  "\n      input phase=" << off_phs <<
 	  "\n     phase offset=" << dphase << " = " << dtime << "s" 
-	  "\n     subint epoch=" << epoch << 
+	  "\n     subint epoch=" << epoch.printdays(13) << 
 	  "\n     subint phase=" << hdr_model->phase(epoch) << endl;
       }
     }
