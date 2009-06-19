@@ -149,12 +149,6 @@ int polynomial::load (string* instr)
   if (polyco::verbose)
     cerr << "polynomial::load line 1='" << line << "'" << endl;
 
-  // rte: this doesn't work for pulsars with letter suffices
-  //  psrname = stringtok (&line, whitespace);
-  // if (psrname.length() < 1)
-  //    return -1;
-
-  // wvs: substr(0,9) didn't work on Sun :(
   psrname = line.substr(0,10);
   psrname = stringtok(&psrname, whitespace);
   line.erase(0,10);
@@ -175,16 +169,15 @@ int polynomial::load (string* instr)
   double frac_mjd;
   int scanned = sscanf (line.c_str(), "%d %lf %f %lf %lf\n",
 		&mjd_day_num, &frac_mjd, &dm, &doppler_shift, &log_rms_resid);
-  if (scanned < 3)  {
+  if (scanned < 3)
+  {
     fprintf (stderr, "polynomial::load(string*) error stage 1 parsing '%s'",
 		line.c_str());
-    if (scanned < 1) {
+    if (scanned < 1)
       perror ("::");
-    }
-    else {
+    else
       fprintf (stderr, "\npolynomial::load(string*) scanned %d/5 values\n",
 	       scanned);
-    }
     return -1;
   }
   if (polyco::verbose)
@@ -228,9 +221,11 @@ int polynomial::load (string* instr)
 
   char teletxt[8];
   scanned = sscanf (line.c_str(), "%lf %s %lf %d %lf %lf %lf\n",
-  	    &ref_freq, teletxt, &nspan_mins, &ncoeftmp, &freq, &binph, &binfreq);
+		    &ref_freq, teletxt, &nspan_mins, 
+		    &ncoeftmp, &freq, &binph, &binfreq);
 
-  if (scanned < 5) {
+  if (scanned < 5)
+  {
     fprintf (stderr, "polynomial::load(string*) error stage 2 parsing '%s'\n",
                 line.c_str());
     return -1;
@@ -242,7 +237,8 @@ int polynomial::load (string* instr)
 
   if (strlen(teletxt) == 1)
     telescope = teletxt[0];
-  else {
+  else
+  {
     telescope = 'a';
     int code = 0;
     sscanf (teletxt, "%d", &code);
@@ -255,14 +251,18 @@ int polynomial::load (string* instr)
   coefs.resize(ncoeftmp);  
   // Read in the coefficients 
   int i;
-  for (i = 0;i<ncoeftmp;i++){
+  for (i = 0;i<ncoeftmp;i++)
+  {
     line = stringtok (instr, whitespace);
 
     size_t letterd = line.find('D');
-    if (letterd != string::npos) line[letterd] = 'e';
-    if (sscanf (line.c_str(), "%lf", &coefs[i]) != 1)  {
+    if (letterd != string::npos)
+      line[letterd] = 'e';
+
+    if (sscanf (line.c_str(), "%lf", &coefs[i]) != 1)
+    {
       fprintf (stderr, "polynomial::load(string*) did not parse '%s'\n",
-        line.c_str());
+	       line.c_str());
       return -1;
     }
 
@@ -271,13 +271,6 @@ int polynomial::load (string* instr)
 	       i, line.c_str(), coefs[i]);
 
   }
-
-#if 0
-  size_t endline = instr->find('\n');
-  if (endline)  {
-    instr->erase(0, endline);
-  }
-#endif
 
   if (polyco::verbose)
     cerr << "polynomial::load parsed " << i << " coefficients" << endl;
@@ -320,7 +313,8 @@ int polynomial::unload (string* outstr) const
 
   *outstr += numstr;
   
-  if(binary)  {
+  if (binary)
+  {
 
 #ifdef _DEBUG
     cerr << "polynomial::unload binary" << endl;
@@ -348,14 +342,15 @@ int polynomial::unload (string* outstr) const
 
   const char* newline = "\n";
 
-  for (unsigned i=0; i<nrows; ++i){
+  for (unsigned i=0; i<nrows; ++i)
+  {
 
 #ifdef _DEBUG
       cerr << "polynomial::unload row=" << i << endl;
 #endif
 
-    for (unsigned j=0; j<3 && (i*3+j)<coefs.size(); ++j) {
-
+    for (unsigned j=0; j<3 && (i*3+j)<coefs.size(); ++j)
+    {
       bytes += sprintf (numstr, " %+22.17le", coefs[i*3+j]);
       char* ep = strchr (numstr, 'e');
       if (ep)
@@ -377,9 +372,10 @@ int polynomial::unload (FILE* fptr) const
 
   int size = (int) out.length();
   int bout = fprintf (fptr, out.c_str());
-  if (bout < size)  {
+  if (bout < size)
+  {
     fprintf (stderr, "polynomial::unload(FILE*) ERROR fprintf only %d/%d",
-	bout, size);
+	     bout, size);
     perror ("");
     return -1;
   }
@@ -387,14 +383,15 @@ int polynomial::unload (FILE* fptr) const
   return bout;
 }
 
-Phase polynomial::phase(const MJD& t) const
+Phase polynomial::phase (const MJD& t) const
 {
   Phase dp (0.0);
   MJD dt = t - ref_time;
   long double tm = dt.in_minutes();
 
   long double poweroft = 1.0;
-  for (unsigned i=0;i<coefs.size();i++) {
+  for (unsigned i=0;i<coefs.size();i++)
+  {
     dp += double(coefs[i]*poweroft);
     poweroft *= tm;
   }
@@ -406,7 +403,7 @@ Phase polynomial::phase(const MJD& t) const
 // /////////////////////////////////////////////////////////////////////////
 // polynomial::iphase
 
-MJD polynomial::iphase(const Phase& p, const MJD* guess) const
+MJD polynomial::iphase (const Phase& p, const MJD* guess) const
 {
   if (guess)
     return Pulsar::inverse_phase (*this, p, *guess);
@@ -421,7 +418,8 @@ long double polynomial::frequency (const MJD& t) const
   long double tm = dt.in_minutes();
 
   long double poweroft = 1.0;
-  for (unsigned i=1; i<coefs.size(); i++) {
+  for (unsigned i=1; i<coefs.size(); i++)
+  {
     dp+=(long double)(i)*coefs[i]*poweroft;
     poweroft *= tm;
   }
@@ -430,14 +428,15 @@ long double polynomial::frequency (const MJD& t) const
   return dp;
 }
 
-double polynomial::chirp(const MJD& t) const
+double polynomial::chirp (const MJD& t) const
 {
   double d2p = 0;                    // d^2phase/dt^2 starts as phase/minute^2
   MJD dt = t - ref_time;
   double tm = dt.in_minutes();
 
   double poweroft = 1.0;
-  for (unsigned i=2; i<coefs.size(); i++) {
+  for (unsigned i=2; i<coefs.size(); i++)
+  {
     d2p+=(double)(i)*(i-1)*coefs[i]*poweroft;
     poweroft *= tm;
   }
@@ -447,8 +446,9 @@ double polynomial::chirp(const MJD& t) const
 }
 
 // Seconds per turn = period of pulsar
-double polynomial::period (const MJD& t) const {
-   return(1.0/frequency(t));
+double polynomial::period (const MJD& t) const
+{
+   return 1.0/frequency(t);
 }
 
 Phase polynomial::dispersion (const MJD& t, long double obs_freq) const
@@ -460,8 +460,8 @@ Phase polynomial::dispersion (const MJD& t, long double obs_freq) const
   return - dm_delay_in_secs * frequency(t);
 }
 
-void polynomial::prettyprint() const {
-
+void polynomial::prettyprint() const
+{
   cout << "PSR Name\t\t\t" << psrname << endl;
   cout << "Date\t\t\t\t" << date << endl;
   cout << "UTC\t\t\t\t" << utc << endl;
@@ -492,17 +492,20 @@ bool operator == (const polynomial & p1, const polynomial & p2)
 
 bool operator != (const polynomial & p1, const polynomial & p2)
 {
-  return (p1.dm != p2.dm ||
-	    p1.doppler_shift != p2.doppler_shift ||
-	    p1.log_rms_resid != p2.log_rms_resid ||
-	    p1.ref_freq != p2.ref_freq ||
-	    p1.telescope != p2.telescope ||
-	    p1.nspan_mins != p2.nspan_mins ||
-	    p1.freq != p2.freq ||
-	    p1.binph != p2.binph ||
-	    p1.binfreq != p2.binfreq ||
-	    p1.binary != p2.binary ||
-	    p1.tempov11 != p2.tempov11);
+  return 
+    p1.ref_phase != p2.ref_phase ||
+    p1.ref_time != p2.ref_time ||
+    p1.dm != p2.dm ||
+    p1.doppler_shift != p2.doppler_shift ||
+    p1.log_rms_resid != p2.log_rms_resid ||
+    p1.ref_freq != p2.ref_freq ||
+    p1.telescope != p2.telescope ||
+    p1.nspan_mins != p2.nspan_mins ||
+    p1.freq != p2.freq ||
+    p1.binph != p2.binph ||
+    p1.binfreq != p2.binfreq ||
+    p1.binary != p2.binary ||
+    p1.tempov11 != p2.tempov11;
 }
 
 bool time_order (const polynomial & p1, const polynomial & p2)
@@ -584,8 +587,6 @@ Pulsar::Generator* polyco::generator () const
   predict->set_ncoef( get_ncoeff() );
   return predict;
 }
-
-
 
 //! Add the information from the supplied predictor to self
 void polyco::insert (const Predictor* other)
@@ -823,9 +824,27 @@ void polyco::append (const polyco& poly)
     bool is_new = true;
     for (unsigned ihave=0; ihave<pollys.size(); ihave++)
       if (pollys[ihave] == poly.pollys[iget])
+      {
+	if (verbose)
+        {
+	  cerr << "polyco::append have["<< ihave <<"]=" << endl;
+	  pollys[ihave].unload(stderr);
+	  cerr << "polyco::append equals get["<< iget <<"]=" << endl;
+	  poly.pollys[iget].unload(stderr);
+	}
 	is_new = false;
+      }
+
     if (is_new)
+    {
+      if (verbose)
+      {
+	cerr << "polyco::append new get["<< iget <<"]=" << endl;
+	poly.pollys[iget].unload(stderr);
+      }
+
       pollys.push_back (poly.pollys[iget]);
+    }
     else if (verbose)
       cerr << "polyco::append already have iget=" << iget << endl;
   }
@@ -900,6 +919,11 @@ void polyco::set_last (int i) const
     = 0.5 * (poly->end_phase(0.0)-poly->start_phase(0.0)).in_turns();
 
   last_index = i;
+
+  if (verbose)
+    cerr << "polyco::set_last index=" << i << " limits: "
+	 << " minutes=" << last_span_epoch 
+	 << " turns=" << last_span_phase << endl;
 }
 
 int polyco::i_nearest (const MJD &t, bool throw_exception) const
@@ -955,7 +979,8 @@ int polyco::i_nearest (const MJD &t, bool throw_exception) const
   }
 
   // return if the time is within the range of the matched polynomial
-  if ( (t > pollys[imin].start_time()) && (t < pollys[imin].end_time()) ) {
+  if ( (t > pollys[imin].start_time()) && (t < pollys[imin].end_time()) )
+  {
     set_last (imin);
     return imin;
   }
