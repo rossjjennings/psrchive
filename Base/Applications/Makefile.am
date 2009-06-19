@@ -1,5 +1,5 @@
 
-bin_PROGRAMS = psredit psrtxt psrconv psrsplit vip vap
+bin_PROGRAMS = psredit psrtxt psrconv psrsplit vip vap getHorizon
 
 psredit_SOURCES		= psredit.C
 psrtxt_SOURCES		= psrtxt.C
@@ -7,6 +7,7 @@ psrconv_SOURCES		= psrconv.C
 psrsplit_SOURCES	= psrsplit.C
 vip_SOURCES		= vip.C
 vap_SOURCES		= vap.C
+getHorizon_SOURCES	= getHorizon.C
 
 check_PROGRAMS = test_threads
 
