@@ -28,5 +28,8 @@ if HAVE_QT
   libpsrutil_la_LIBADD += qtutil/libqtutil.la
 endif
 
+SUBDIRS += resources
+libpsrutil_la_LIBADD += resources/libresources.la
+
 include $(top_srcdir)/config/Makefile.local
 
