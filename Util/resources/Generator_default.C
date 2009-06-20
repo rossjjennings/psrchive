@@ -12,7 +12,6 @@
 #endif
 
 #include "Pulsar/Predictor.h"
-#include "Pulsar/Config.h"
 
 #ifdef HAVE_TEMPO2
 #include "T2Generator.h"
