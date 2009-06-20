@@ -16,6 +16,11 @@
 
 using namespace std;
 
+// defined in Base/Resources/Tempo_config.C
+namespace Tempo { int config (); }
+
+static int ensure_tempo_configuration = Tempo::config ();
+
 // ///////////////////////////////////////////////////////////////////////
 //
 // Archive::update_model

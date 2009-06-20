@@ -21,10 +21,16 @@
 
 using namespace std;
 
+namespace Tempo
+{
+  int config ()
+  {
 #ifdef _DEBUG
-static int runme () { cerr << "Tempo::config" << endl; return 0; }
-static int test = runme ();
+    cerr << "Tempo::config" << endl;
 #endif
+    return 0;
+  }
+}
 
 /* ***********************************************************************
 
