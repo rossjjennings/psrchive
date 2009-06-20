@@ -135,7 +135,7 @@ bin_PROGRAMS = getMJD
 getMJD_SOURCES = getMJD.C
 
 TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98	\
-	test_endian test_environ test_sum test_NormalDistribution	\
+	test_endian test_sum test_NormalDistribution			\
 	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord	\
 	test_exponential test_StraightLine test_ThreadStream		\
 	test_Horizon test_VirtualMemory test_LogFile
