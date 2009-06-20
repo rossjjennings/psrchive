@@ -21,8 +21,13 @@ include $(top_srcdir)/config/Makefile.local
 
 AM_CPPFLAGS = -I$(top_builddir)/local_include @TEMPO2_CFLAGS@
 
-LDADD = libresources.la \
-	$(top_builddir)/Util/tempo/libtempo.la \
+LDADD = libresources.la
+
+if HAVE_TEMPO2
+  LDADD += $(top_builddir)/Util/tempo2/libtempo_2.la
+endif
+
+LDADD += $(top_builddir)/Util/tempo/libtempo.la \
 	$(top_builddir)/Util/genutil/libgenutil.la \
 	$(top_builddir)/Util/units/libunits.la \
 	$(top_builddir)/Util/third/libthird.la @FLIBS@
