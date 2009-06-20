@@ -36,7 +36,6 @@ nobase_include_HEADERS = \
 	Pulsar/ProfileAmpsExpert.h \
 	Pulsar/ProfileExtension.h \
         Pulsar/Pulsar.h \
-	Pulsar/SimplePredictor.h \
 	Pulsar/ThresholdMatch.h \
 	Pulsar/UnloadOptions.h \
 	Pulsar/Verification.h
@@ -84,7 +83,6 @@ libClasses_la_SOURCES = \
         Profile.C \
 	ProfileAmps.C \
 	Pulsar.C \
-	SimplePredictor.C \
 	ThresholdMatch.C \
 	UnloadOptions.C
 
