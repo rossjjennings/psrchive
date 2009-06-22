@@ -42,6 +42,12 @@ Tempo::Predict::Predict (const Pulsar::Parameters* parameters)
     set_parameters (parameters);
 }
 
+//! Return a new, copy constructed instance of self
+Tempo::Predict::Predict* Tempo::Predict::clone () const
+{
+  return new Predict (*this);
+}
+
 //! Set the range of epochs over which to generate
 void Tempo::Predict::set_time_span (const MJD& start, const MJD& finish)
 {

@@ -30,8 +30,9 @@ Tempo2::Generator::Generator (const Parameters* parameters)
     set_parameters( parameters );
 }
 
-Tempo2::Generator::Generator (const Generator& copy)
+Tempo2::Generator* Tempo2::Generator::clone () const
 {
+  return new Generator (*this);
 }
 
 Tempo2::Generator::~Generator ()

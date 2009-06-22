@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Generator.h,v $
-   $Revision: 1.3 $
-   $Date: 2007/06/21 17:32:46 $
+   $Revision: 1.4 $
+   $Date: 2009/06/22 14:02:47 $
    $Author: straten $ */
 
 #ifndef __Tempo2Generator_h
@@ -29,11 +29,11 @@ namespace Tempo2 {
     //! Default constructor
     Generator (const Parameters* parameters = 0);
 
-    //! Copy constructor
-    Generator (const Generator&);
-
     //! Destructor
     ~Generator ();
+
+    //! Return a new, copy constructed instance of self
+    Generator* clone () const;
 
     //! Set the parameters used to generate the predictor
     void set_parameters (const Pulsar::Parameters*);

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Predict.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/03/15 06:55:52 $
+   $Revision: 1.11 $
+   $Date: 2009/06/22 14:02:47 $
    $Author: straten $ */
 
 #ifndef __Tempo_Predict_h
@@ -37,6 +37,9 @@ namespace Tempo {
     //
     // Pulsar::Generator interface
     //
+
+    //! Return a new, copy constructed instance of self
+    Predict* clone () const;
 
     //! Set the parameters used to generate the predictor
     void set_parameters (const Pulsar::Parameters*);
