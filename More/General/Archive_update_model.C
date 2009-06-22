@@ -180,13 +180,15 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
 	 << Predictor::policy << endl;
 
   Reference::To<Generator> generator;
-  if (model && Pulsar::Predictor::policy == "input") {
+  if (model && Pulsar::Predictor::policy == Pulsar::Predictor::Input)
+  {
     if (verbose > 2)
       cerr << "Pulsar::Archive::update_model get matching generator "
               "from current predictor" << endl;
     generator = model->generator();
   }
-  else {
+  else
+  {
     if (verbose > 2)
       cerr << "Pulsar::Archive::update_model using default generator" << endl;
     generator = Generator::get_default();

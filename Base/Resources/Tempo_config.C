@@ -1,16 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 2007-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 // #define _DEBUG 1
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
+#include "Pulsar/GeneratorInterpreter.h"
 #include "Pulsar/Predictor.h"
 #include "Pulsar/Config.h"
 
@@ -32,17 +29,44 @@ namespace Tempo
   }
 }
 
+std::ostream& operator<< (std::ostream& ostr, Pulsar::Predictor::Policy p)
+{
+  if (p == Pulsar::Predictor::Input)
+    ostr << "input";
+
+  else if (p == Pulsar::Predictor::Default)
+    ostr << "default";
+
+  return ostr;
+}
+
+std::istream& operator>> (std::istream& istr, Pulsar::Predictor::Policy& p)
+{
+  std::string policy;
+  istr >> policy;
+
+  if (policy == "input")
+    p = Pulsar::Predictor::Input;
+  else if (policy == "default")
+    p = Pulsar::Predictor::Default;
+  else
+    istr.setstate (std::istream::failbit);
+
+  return istr;
+}
+
+
 /* ***********************************************************************
 
    Predictor::policy configuration
 
    *********************************************************************** */
 
-Pulsar::Option<string> 
+Pulsar::Option<Pulsar::Predictor::Policy>
 policy_config_wrapper 
 (
  &Pulsar::Predictor::policy, 
- "Predictor::policy", "input",
+ "Predictor::policy", Pulsar::Predictor::Input,
 
  "Policy for generating new predictors",
 
@@ -61,10 +85,10 @@ policy_config_wrapper
 
    *********************************************************************** */
 
-Pulsar::Option<string>
-default_type_config_wrapper
+Pulsar::Option<CommandParser> default_type_config_wrapper
 (
- &Pulsar::Predictor::default_type,
+ new Pulsar::Generator::Interpreter,
+
  "Predictor::default", "polyco",
 
  "Default predictor type",

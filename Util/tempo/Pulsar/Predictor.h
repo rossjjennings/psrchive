@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Predictor.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/09/15 06:26:52 $
+   $Revision: 1.7 $
+   $Date: 2009/06/22 14:02:41 $
    $Author: straten $ */
 
 #ifndef __PulsarPredictor_h
@@ -31,14 +31,20 @@ namespace Pulsar {
 
   public:
 
-    //! Verbosity flag
-    static bool verbose;
+    //! Policy for creating new predictors
+    enum Policy 
+    {
+      //! Clone the input predictor
+      Input,
+      //! Generate a new predictor using the default generator
+      Default
+    };
 
     //! Policy for creating new predictors: "input" or "default"
-    static std::string policy;
+    static Policy policy;
 
-    //! Default predictor type: "polyco" or "tempo2"
-    static std::string default_type;
+    //! Verbosity flag
+    static bool verbose;
 
     //! Return a new, copy constructed instance of self
     virtual Predictor* clone () const = 0;

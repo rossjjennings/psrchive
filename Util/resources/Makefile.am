@@ -1,25 +1,27 @@
 
 noinst_LTLIBRARIES = libresources.la
 
-nobase_include_HEADERS = Pulsar/SimplePredictor.h
+nobase_include_HEADERS = Pulsar/SimplePredictor.h Pulsar/GeneratorInterpreter.h
 
 libresources_la_SOURCES = Generator_default.C SimplePredictor.C \
-	Parameters_children.C Predictor_children.C Site_location.C
+	Parameters_children.C Predictor_children.C Site_location.C \
+	GeneratorInterpreter.C
 
 bin_PROGRAMS = getHorizon
 
+getHorizon_SOURCES = getHorizon.C
+
 check_PROGRAMS = test_Parameters_factory test_Predictor_factory
 
-getHorizon_SOURCES = getHorizon.C
 test_Parameters_factory_SOURCES = test_Parameters_factory.C
 test_Predictor_factory_SOURCES = test_Predictor_factory.C
 
 #############################################################################
 #
 
-include $(top_srcdir)/config/Makefile.local
+include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS = -I$(top_builddir)/local_include @TEMPO2_CFLAGS@
+AM_CPPFLAGS += @TEMPO2_CFLAGS@
 
 LDADD = libresources.la
 
