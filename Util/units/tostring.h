@@ -1,13 +1,13 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.17 $
-   $Date: 2009/05/06 13:30:17 $
+   $Revision: 1.18 $
+   $Date: 2009/06/24 15:58:08 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H
@@ -27,49 +27,43 @@ template<class T>
 std::string tostring (const T& input,
 		      unsigned precision = std::numeric_limits<T>::digits10)
 {
-  extern std::ostringstream* tostring_ost;
-
-  if (!tostring_ost)
-    tostring_ost = new std::ostringstream;
+  std::ostringstream ost;
 
   if( tostring_places )
-    *tostring_ost << setiosflags( std::ios::fixed );
+    ost << setiosflags( std::ios::fixed );
   else
-    *tostring_ost << resetiosflags( std::ios::fixed );
+    ost << resetiosflags( std::ios::fixed );
   
   if (tostring_precision)
-    tostring_ost->precision(tostring_precision);
+    ost.precision(tostring_precision);
   else
-    tostring_ost->precision(precision);
+    ost.precision(precision);
 
-  tostring_ost->str("");
-  *tostring_ost << input;
+  ost.str("");
+  ost << input;
 
-  if (tostring_ost->fail())
+  if (ost.fail())
   {
     Error error (InvalidState, "tostring");
     error << "failed to convert " << input << " to string:";
     throw error;
   }
 
-  return tostring_ost->str();
+  return ost.str();
 }
 
 template<class T>
 T fromstring (const std::string& input)
 {
-  extern std::istringstream* fromstring_ist;
+  std::istringstream ist;
 
-  if (!fromstring_ist)
-    fromstring_ist = new std::istringstream;
-
-  fromstring_ist->clear();
-  fromstring_ist->str(input);
+  ist.clear();
+  ist.str(input);
 
   T retval;
-  *fromstring_ist >> retval;
+  ist >> retval;
 
-  if (fromstring_ist->fail())
+  if (ist.fail())
     throw Error (InvalidState, "fromstring", "failed to parse '"+ input +"'");
 
   return retval;
