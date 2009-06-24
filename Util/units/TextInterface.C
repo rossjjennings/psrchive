@@ -195,7 +195,7 @@ string TextInterface::Parser::get_name (unsigned i) const
 //! Get the name of the value
 string TextInterface::Parser::get_value (unsigned i) const 
 {
-  // const_cast<Parser*>(this)->setup( values[i] );
+  const_cast<Parser*>(this)->setup( values[i] );
   return values[i]->get_value();
 }
 
