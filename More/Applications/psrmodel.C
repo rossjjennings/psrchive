@@ -88,7 +88,7 @@ psrmodel::psrmodel () :
 #endif
 {
   has_manual = false;
-  version = "$Id: psrmodel.C,v 1.8 2009/06/17 04:02:21 straten Exp $";
+  version = "$Id: psrmodel.C,v 1.9 2009/06/24 05:11:22 straten Exp $";
 
   add( new Pulsar::StandardOptions );
 #if HAVE_PGPLOT
@@ -118,7 +118,7 @@ std::string psrmodel::get_usage ()
     "\n"
     " -a degrees       alpha: colatitude of magnetic axis \n"
     " -z degrees       zeta: colatitude of line of sight \n"
-    " -b degrees       longitude of magnetic meridian \n"
+    " -b degrees       longitude of magnetic meridian (agonic line) \n"
     " -p degrees       position angle at magnetic meridian \n"
     "\n"
     " -o deg0:deg1     window over which an orthogonal mode dominates \n";
