@@ -303,8 +303,8 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
   for (unsigned i=0; i<nstate; i++)
     linear[i] = cRVM->get_linear(i).get_value();
 
-  double alpha_step = M_PI/(nstep-1);
-  double zeta_step = M_PI/(nstep-2);
+  double alpha_step = M_PI/(nstep);
+  double zeta_step = M_PI/(nstep-1);
 
   float best_chisq = 0.0;
   float best_alpha = 0.0;
