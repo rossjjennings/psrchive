@@ -24,6 +24,11 @@ Pulsar::GaussianBaseline::GaussianBaseline ()
   smooth_bins = 4;
 }
 
+Pulsar::GaussianBaseline* Pulsar::GaussianBaseline::clone () const
+{
+  return new GaussianBaseline (*this);
+}
+
 void Pulsar::GaussianBaseline::set_smoothing (unsigned nbins)
 {
   smooth_bins = nbins;
@@ -169,4 +174,28 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight,
   cerr << "after peel mean=" << weight->get_mean() << endl;
 #endif
 
+}
+
+class Pulsar::GaussianBaseline::Interface 
+  : public TextInterface::To<GaussianBaseline>
+{
+public:
+  Interface (GaussianBaseline* instance)
+  {
+    if (instance)
+      set_instance (instance);
+
+    add( &GaussianBaseline::get_threshold,
+	 &GaussianBaseline::set_threshold,
+	 "threshold", "cutoff threshold used to avoid outliers" );
+
+  }
+  
+  std::string get_interface_name () const { return "normal"; }
+};
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::GaussianBaseline::get_interface ()
+{
+  return new Interface (this);
 }

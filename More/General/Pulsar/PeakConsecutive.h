@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PeakConsecutive.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/06/18 12:56:46 $
+   $Revision: 1.4 $
+   $Date: 2009/06/24 05:02:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PeakConsecutive_h
@@ -60,6 +60,15 @@ namespace Pulsar {
 
     //! Get the pulse phase bin indeces of the rise and fall
     void get_indeces (int& rise, int& fall) const;
+
+    //! Return a text interface that can be used to configure this instance
+    TextInterface::Parser* get_interface ();
+
+    //! Interface to the algorithm
+    class Interface;
+
+    //! Return new copy of self
+    PeakConsecutive* clone () const;
 
   protected:
 

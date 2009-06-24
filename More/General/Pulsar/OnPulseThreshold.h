@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/OnPulseThreshold.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/11/02 04:25:39 $
+   $Revision: 1.7 $
+   $Date: 2009/06/24 05:02:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_OnPulseThreshold_h
@@ -51,6 +51,15 @@ namespace Pulsar {
 
     //! Set the start and end bins of the search
     void set_range (int bin_start, int bin_end);
+
+    //! Return a text interface that can be used to configure this instance
+    TextInterface::Parser* get_interface ();
+
+    //! Interface to the algorithm
+    class Interface;
+
+    //! Return new copy of self
+    OnPulseThreshold* clone () const;
 
   protected:
 

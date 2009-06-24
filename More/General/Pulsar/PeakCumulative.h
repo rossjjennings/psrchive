@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PeakCumulative.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/09/24 08:03:15 $
+   $Revision: 1.2 $
+   $Date: 2009/06/24 05:02:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PeakCumulative_h
@@ -84,6 +84,15 @@ namespace Pulsar {
 
     //! Get the pulse phase bin indeces of the rise and fall
     void get_indeces (int& rise, int& fall) const;
+
+    //! Return a text interface that can be used to configure this instance
+    TextInterface::Parser* get_interface ();
+
+    //! Interface to the algorithm
+    class Interface;
+
+    //! Return new copy of self
+    PeakCumulative* clone () const;
 
   protected:
 

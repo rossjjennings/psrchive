@@ -36,6 +36,11 @@ Pulsar::PeakConsecutive::PeakConsecutive ()
   built = false;
 }
 
+Pulsar::PeakConsecutive* Pulsar::PeakConsecutive::clone () const
+{
+  return new PeakConsecutive (*this);
+}
+
 void Pulsar::PeakConsecutive::set_Profile (const Profile* p)
 {
   profile = p;
@@ -115,7 +120,7 @@ void regions( unsigned ndat, const float* data,
 	      std::vector<unsigned>& on_transitions,
 	      std::vector<unsigned>& off_transitions )
 {
-  const int on_pulse = 1;
+  const int onpulse = 1;
   const int undefined = 0;
   const int off_pulse = -1;
 
@@ -128,7 +133,7 @@ void regions( unsigned ndat, const float* data,
 
 #ifdef _DEBUG
     cerr << "idat=" << idat << " ";
-    if (current == on_pulse)
+    if (current == onpulse)
       cerr << "on" << endl;
     if (current == off_pulse)
       cerr << "off" << endl;
@@ -148,11 +153,11 @@ void regions( unsigned ndat, const float* data,
 	cerr << "TURNED ON" << endl;
 #endif
       }
-      current = on_pulse;
+      current = onpulse;
     }
 
     if (consecutive_on == 0) {
-      if (current == on_pulse) {
+      if (current == onpulse) {
 	off_transitions.push_back (idat-1);
 #ifdef _DEBUG
 	cerr << "TURNED OFF" << endl;
@@ -181,7 +186,7 @@ void regions( unsigned ndat, const float* data,
     return;
 
   // if the pulse was on in the first phase bin, then shift and correct
-  if (started == on_pulse)
+  if (started == onpulse)
     cyclic_shift (off_transitions);
 }
 
@@ -302,4 +307,32 @@ void Pulsar::PeakConsecutive::calculate (PhaseWeight* weight)
     for (int ibin=bin_rise; ibin<bin_fall; ibin++)
       (*weight)[ibin % nbin] = 1.0;
   }
+}
+
+class Pulsar::PeakConsecutive::Interface 
+  : public TextInterface::To<PeakConsecutive>
+{
+public:
+  Interface (PeakConsecutive* instance)
+  {
+    if (instance)
+      set_instance (instance);
+
+    add( &PeakConsecutive::get_threshold,
+	 &PeakConsecutive::set_threshold,
+	 "threshold", "threshold above which consecutive points must fall" );
+
+    add( &PeakConsecutive::get_consecutive,
+	 &PeakConsecutive::set_consecutive,
+	 "consecutive", "consecutive points required above threshold" );
+  }
+
+  std::string get_interface_name () const { return "consecutive"; }
+};
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::PeakConsecutive::get_interface ()
+{
+  cerr << "Pulsar::PeakConsecutive::get_interface" << endl;
+  return new Interface (this);
 }

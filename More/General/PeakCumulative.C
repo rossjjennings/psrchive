@@ -34,6 +34,11 @@ Pulsar::PeakCumulative::PeakCumulative ()
   built = false;
 }
 
+Pulsar::PeakCumulative* Pulsar::PeakCumulative::clone () const
+{
+  return new PeakCumulative (*this);
+}
+
 void Pulsar::PeakCumulative::set_Profile (const Profile* p)
 {
   profile = p;
@@ -238,4 +243,27 @@ void Pulsar::PeakCumulative::get_indeces (int& rise, int& fall) const
 
   rise = bin_rise;
   fall = bin_fall;
+}
+
+class Pulsar::PeakCumulative::Interface 
+  : public TextInterface::To<PeakCumulative>
+{
+public:
+  Interface (PeakCumulative* instance)
+  {
+    if (instance)
+      set_instance (instance);
+
+    add( &PeakCumulative::get_threshold,
+	 &PeakCumulative::set_threshold,
+	 "threshold", "percentage of total cumulative power at edge" );
+  }
+
+  std::string get_interface_name () const { return "cumulative"; }
+};
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::PeakCumulative::get_interface ()
+{
+  return new Interface (this);
 }

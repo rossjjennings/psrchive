@@ -38,6 +38,11 @@ Pulsar::BaselineWindow::BaselineWindow ()
   */
 }
 
+Pulsar::BaselineWindow* Pulsar::BaselineWindow::clone () const
+{
+  return new BaselineWindow (*this);
+}
+
 //! Set the smoothing function
 void Pulsar::BaselineWindow::set_smooth (Smooth* function)
 {
@@ -151,7 +156,8 @@ try {
   unsigned start = 0;
   unsigned stop = nbin;
   
-  if (range_specified) {
+  if (range_specified)
+  {
     nbinify (bin_start, bin_end, nbin);
     start = bin_start;
     stop = bin_end;
@@ -166,13 +172,15 @@ try {
   float found_val = 0;
   unsigned found_bin = 0;
 
-  for (unsigned ibin=start; ibin < stop; ibin++) {
-
+  for (unsigned ibin=start; ibin < stop; ibin++)
+  {
     float value = temp.get_amps()[ibin%nbin];
 
-    if ( find_mean ) {
+    if ( find_mean )
+    {
       double diff = fabs( value - mean );
-      if ( first || diff < found_val ) {
+      if ( first || diff < found_val )
+      {
 	found_val = diff;
 	found_bin = ibin;
       }
@@ -181,11 +189,10 @@ try {
 
 
     if ( first ||
-	 (find_max && value>found_val) || (!find_max && value<found_val) ) {
-
+	 (find_max && value>found_val) || (!find_max && value<found_val) )
+    {
       found_val = value;
       found_bin = ibin;
-
     }
 
     first = false;
@@ -199,8 +206,29 @@ try {
 #endif
 
   return phase;
-
 }
-catch (Error& error) {
+catch (Error& error)
+{
   throw error += "Pulsar::BaselineWindow::find_phase";
+}
+
+class Pulsar::BaselineWindow::Interface 
+  : public TextInterface::To<BaselineWindow>
+{
+public:
+  Interface (BaselineWindow* instance)
+  {
+    if (instance)
+      set_instance (instance);
+
+    // set the smoothing function someday
+  }
+
+  std::string get_interface_name () const { return "minimum"; }
+};
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::BaselineWindow::get_interface ()
+{
+  return new Interface (this);
 }

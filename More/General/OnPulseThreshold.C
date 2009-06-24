@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/OnPulseThreshold.h"
 #include "Pulsar/BaselineEstimator.h"
 #include "Pulsar/PhaseWeight.h"
@@ -23,6 +24,11 @@ Pulsar::OnPulseThreshold::OnPulseThreshold ()
 
   bin_start = bin_end = 0;
   range_specified = false;
+}
+
+Pulsar::OnPulseThreshold* Pulsar::OnPulseThreshold::clone () const
+{
+  return new OnPulseThreshold (*this);
 }
 
 //! Set the duty cycle
@@ -70,9 +76,8 @@ void Pulsar::OnPulseThreshold::set_range (int start, int end)
 }
 
 //! Retrieve the PhaseWeight
-void Pulsar::OnPulseThreshold::calculate (PhaseWeight* weight)
-try {
-
+void Pulsar::OnPulseThreshold::calculate (PhaseWeight* weight) try
+{
   if (!profile)
     throw Error (InvalidState, "Pulsar::OnPulseThreshold::calculate",
 		 "Profile not set");
@@ -99,7 +104,8 @@ try {
   int start = 0;
   int stop = nbin;
 
-  if (range_specified) {
+  if (range_specified)
+  {
     start = bin_start;
     stop  = bin_end;
     nbinify (start, stop, nbin);
@@ -109,18 +115,40 @@ try {
 
   float cutoff = threshold * rms.get_value();
 
-  for (int ibin=start; ibin<stop; ibin++) {
-
+  for (int ibin=start; ibin<stop; ibin++)
+  {
     float diff = amps[ibin % nbin] - mean.get_value();
     if (allow_negative)
       diff = fabs(diff);
 
     if ( diff > cutoff )
       (*weight)[ibin] = 1.0;
+  }
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::OnPulseThreshold::calculate";
+}
 
+class Pulsar::OnPulseThreshold::Interface 
+  : public TextInterface::To<OnPulseThreshold>
+{
+public:
+  Interface (OnPulseThreshold* instance)
+  {
+    if (instance)
+      set_instance (instance);
+
+    add( &OnPulseThreshold::get_threshold,
+	 &OnPulseThreshold::set_threshold,
+	 "threshold", "threshold above which points must fall" );
   }
 
-}
-catch (Error& error) {
-  throw error += "Pulsar::OnPulseThreshold::calculate";
+  std::string get_interface_name () const { return "above"; }  
+};
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::OnPulseThreshold::get_interface ()
+{
+  return new Interface (this);
 }

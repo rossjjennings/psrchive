@@ -20,6 +20,11 @@ Pulsar::ExponentialBaseline::ExponentialBaseline ()
   set_threshold (1.0);
 }
 
+Pulsar::ExponentialBaseline* Pulsar::ExponentialBaseline::clone () const
+{
+  return new ExponentialBaseline (*this);
+}
+
 //! Set the threshold below which samples are included in the baseline
 void Pulsar::ExponentialBaseline::set_threshold (float sigma)
 {
@@ -51,4 +56,27 @@ void Pulsar::ExponentialBaseline::get_bounds (PhaseWeight* weight,
   if (!get_initial_bounds())
     upper *= moment_correction;
 
+}
+
+class Pulsar::ExponentialBaseline::Interface 
+  : public TextInterface::To<ExponentialBaseline>
+{
+public:
+  Interface (ExponentialBaseline* instance)
+  {
+    if (instance)
+      set_instance (instance);
+
+    add( &ExponentialBaseline::get_threshold,
+	 &ExponentialBaseline::set_threshold,
+	 "threshold", "cutoff threshold used to avoid outliers" );
+  }
+
+  std::string get_interface_name () const { return "exponential"; }
+};
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::ExponentialBaseline::get_interface ()
+{
+  return new Interface (this);
 }

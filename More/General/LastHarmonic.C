@@ -28,6 +28,11 @@ Pulsar::LastHarmonic::LastHarmonic ()
   set_consecutive (3);
 }
 
+Pulsar::LastHarmonic* Pulsar::LastHarmonic::clone () const
+{
+  return new LastHarmonic (*this);
+}
+
 void Pulsar::LastHarmonic::set_Profile (const Profile* p)
 {
   profile = p;
@@ -136,4 +141,28 @@ void Pulsar::LastHarmonic::get_indeces (int& rise, int& fall) const
 
   rise = bin_rise;
   fall = bin_fall;
+}
+
+class Pulsar::LastHarmonic::Interface : public TextInterface::To<LastHarmonic>
+{
+public:
+  Interface (LastHarmonic* instance)
+  {
+    if (instance)
+      set_instance (instance);
+
+    add( &LastHarmonic::get_threshold,
+	 &LastHarmonic::set_threshold,
+	 "threshold", "threshold above which consecutive points must fall" );
+
+    add( &LastHarmonic::get_consecutive,
+	 &LastHarmonic::set_consecutive,
+	 "consecutive", "consecutive points required above threshold" );
+  }
+};
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::LastHarmonic::get_interface ()
+{
+  return new Interface (this);
 }

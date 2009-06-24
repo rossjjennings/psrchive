@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineWindow.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/11/02 04:24:59 $
+   $Revision: 1.10 $
+   $Date: 2009/06/24 05:02:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BaselineWindow_h
@@ -52,6 +52,15 @@ namespace Pulsar {
 
     //! Return the phase at which minimum or maximum mean is found
     float find_phase (unsigned nbin, const float* amps);
+
+    //! Return a text interface that can be used to configure this instance
+    TextInterface::Parser* get_interface ();
+
+    //! Interface to the algorithm
+    class Interface;
+
+    //! Return a copy constructed instance of self
+    BaselineWindow* clone () const;
 
   protected:
 
