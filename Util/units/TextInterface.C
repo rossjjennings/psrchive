@@ -192,6 +192,13 @@ string TextInterface::Parser::get_name (unsigned i) const
   return values[i]->get_name();
 }
 
+//! Get the name of the value
+string TextInterface::Parser::get_value (unsigned i) const 
+{
+  // const_cast<Parser*>(this)->setup( values[i] );
+  return values[i]->get_value();
+}
+
 //! Get the description of the value
 string TextInterface::Parser::get_description (unsigned i) const
 {
