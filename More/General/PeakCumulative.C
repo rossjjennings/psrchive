@@ -256,7 +256,7 @@ public:
 
     add( &PeakCumulative::get_threshold,
 	 &PeakCumulative::set_threshold,
-	 "threshold", "percentage of total cumulative power at edge" );
+	 "threshold", "fractional cumulative power at edge" );
   }
 
   std::string get_interface_name () const { return "cumulative"; }
