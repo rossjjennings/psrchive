@@ -45,3 +45,10 @@ void Pulsar::PhaseWeightModifier::get_weight (PhaseWeight* weight)
   if (output_weight != weight)
     *weight = *output_weight;
 }
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::PhaseWeightModifier::get_interface ()
+{
+  throw Error (InvalidState, "Pulsar::PhaseWeightModifier::get_interface",
+	       "not implemented");
+}

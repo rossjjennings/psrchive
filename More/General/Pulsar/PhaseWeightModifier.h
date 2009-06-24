@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeightModifier.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/11/02 04:25:39 $
+   $Revision: 1.3 $
+   $Date: 2009/06/24 05:02:13 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeightModifier_h
@@ -30,6 +30,9 @@ namespace Pulsar {
 
     //! Returns a PhaseWeight 
     virtual void get_weight (PhaseWeight* weight);
+
+    //! Return a text interface that can be used to configure this instance
+    TextInterface::Parser* get_interface ();
 
   protected:
 
