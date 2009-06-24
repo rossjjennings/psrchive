@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileStats.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/02/03 23:22:15 $
+   $Revision: 1.11 $
+   $Date: 2009/06/24 05:11:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileStats_h
@@ -86,7 +86,7 @@ namespace Pulsar {
     //! Computes the statistics of a single pulse profile
     Reference::To<ProfileStats> stats;
 
-    //! True when the on_pulse and baseline regions have been set
+    //! True when the onpulse and baseline regions have been set
     bool regions_set;
 
     //! True when zero determinant phase bins should be avoided

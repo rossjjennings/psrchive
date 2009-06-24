@@ -42,7 +42,7 @@ void Pulsar::PolnSpectrumStats::set_profile (const PolnProfile* _profile)
   build ();
 }
 
-//! Set the PolnProfile from which baseline and on_pulse mask will be selected
+//! Set the PolnProfile from which baseline and onpulse mask will be selected
 /*! It is assumed that all subsequent PolnProfile instances passed to
   set_profile will have the same phase as set_profile */
 void Pulsar::PolnSpectrumStats::select_profile (const PolnProfile* _profile)
@@ -61,7 +61,7 @@ void Pulsar::PolnSpectrumStats::set_regions (const PhaseWeight& on,
   real->set_regions (on, off);
   imag->set_regions (on, off);
 
-  on_pulse = on;
+  onpulse = on;
   baseline = off;
 
   regions_set = true;
@@ -72,7 +72,7 @@ void Pulsar::PolnSpectrumStats::set_regions (const PhaseWeight& on,
 void Pulsar::PolnSpectrumStats::get_regions (PhaseWeight& on, 
 					     PhaseWeight& off) const
 {
-  on = on_pulse;
+  on = onpulse;
   off = baseline;
 }
 
@@ -185,31 +185,31 @@ void Pulsar::PolnSpectrumStats::build () try
     LastHarmonic last;
     last.set_Profile( psd->get_Profile(0) );
 
-    last.get_weight (&on_pulse);
+    last.get_weight (&onpulse);
     last.get_baseline_estimator()->get_weight (&baseline);
 
     last_harmonic = last.get_last_harmonic();
 
 #ifdef _DEBUG
     cerr << "Pulsar::PolnSpectrumStats::build last harmonic=" 
-	 << last_harmonic << " nbin on=" << on_pulse.get_weight_sum() << endl;
+	 << last_harmonic << " nbin on=" << onpulse.get_weight_sum() << endl;
 #endif
 
-    real->set_regions (on_pulse, baseline);
-    imag->set_regions (on_pulse, baseline);
+    real->set_regions (onpulse, baseline);
+    imag->set_regions (onpulse, baseline);
   }
 
-  if (on_pulse.get_nbin () != re->get_nbin())
+  if (onpulse.get_nbin () != re->get_nbin())
   {
-    PhaseWeight on_temp = on_pulse;
+    PhaseWeight on_temp = onpulse;
     PhaseWeight off_temp = baseline;
 
     on_temp.resize( re->get_nbin() );
     off_temp.resize( re->get_nbin() );
 
-    if (re->get_nbin() > on_pulse.get_nbin ())
+    if (re->get_nbin() > onpulse.get_nbin ())
     {
-      copy_pad( on_temp, on_pulse, 0 );
+      copy_pad( on_temp, onpulse, 0 );
       copy_pad( off_temp, baseline, 1 );
     }
 

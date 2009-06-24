@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.90 $
-   $Date: 2009/04/02 22:52:45 $
+   $Revision: 1.91 $
+   $Date: 2009/06/24 05:11:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -86,7 +86,7 @@ namespace Pulsar
     const PhaseWeight* get_baseline () const;
 
     //! Get the on-pulse mask
-    const PhaseWeight* get_on_pulse () const;
+    const PhaseWeight* get_onpulse () const;
 
     //! Add the calibrator observation to the set of constraints
     void add_calibrator (const Archive* data);
@@ -182,7 +182,7 @@ namespace Pulsar
     void export_prepare () const;
 
     //! Ensure that selected phase bins are represented in on-pulse mask
-    void ensure_consistent_on_pulse ();
+    void ensure_consistent_onpulse ();
    };
 
 }

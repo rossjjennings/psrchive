@@ -84,10 +84,10 @@ void Pulsar::ReceptionCalibrator::set_standard_data (const Archive* data)
   standard_data->set_normalize (normalize_by_invariant);
   standard_data->select_profile( p );
 
-  ensure_consistent_on_pulse ();
+  ensure_consistent_onpulse ();
 }
 
-void Pulsar::ReceptionCalibrator::ensure_consistent_on_pulse ()
+void Pulsar::ReceptionCalibrator::ensure_consistent_onpulse ()
 {
   if (!standard_data)
     return;
@@ -95,7 +95,7 @@ void Pulsar::ReceptionCalibrator::ensure_consistent_on_pulse ()
   ProfileStats* stats = standard_data->get_poln_stats()->get_stats();
 
   for (unsigned istate=0; istate < pulsar.size(); istate++)
-    stats->set_on_pulse (pulsar[istate].phase_bin, true);
+    stats->set_onpulse (pulsar[istate].phase_bin, true);
 }
 
 const Pulsar::PhaseWeight* Pulsar::ReceptionCalibrator::get_baseline () const
@@ -104,9 +104,9 @@ const Pulsar::PhaseWeight* Pulsar::ReceptionCalibrator::get_baseline () const
 }
 
 //! Get the on-pulse mask
-const Pulsar::PhaseWeight* Pulsar::ReceptionCalibrator::get_on_pulse () const
+const Pulsar::PhaseWeight* Pulsar::ReceptionCalibrator::get_onpulse () const
 {
-  return standard_data->get_poln_stats()->get_stats()->get_on_pulse();
+  return standard_data->get_poln_stats()->get_stats()->get_onpulse();
 }
 
 void Pulsar::ReceptionCalibrator::set_normalize_by_invariant (bool set)

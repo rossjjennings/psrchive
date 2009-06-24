@@ -36,7 +36,7 @@ Calibration::StandardSpectra::set_profile (const Pulsar::PolnProfile* p) try
 
 #ifdef _DEBUG
   cerr << "Calibration::StandardSpectra::set_profile onpulse nbin=" 
-       << stats->get_real()->get_stats()->get_on_pulse_nbin() << endl;
+       << stats->get_real()->get_stats()->get_onpulse_nbin() << endl;
 #endif
 
   total_determinant = stats->get_total_determinant ();
@@ -88,7 +88,7 @@ Calibration::StandardSpectra::get_stokes (unsigned ibin)
     normalize->normalize (re, total_determinant);
     normalize->normalize (im, total_determinant);
 
-    unsigned nbin = stats->get_real()->get_stats()->get_on_pulse_nbin();
+    unsigned nbin = stats->get_real()->get_stats()->get_onpulse_nbin();
 
     re *= sqrt( (double) nbin );
     im *= sqrt( (double) nbin );

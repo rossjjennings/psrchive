@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnSpectrumStats.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/04/07 07:14:54 $
+   $Revision: 1.5 $
+   $Date: 2009/06/24 05:11:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnSpectrumStats_h
@@ -86,10 +86,10 @@ namespace Pulsar {
     //! Computes the statistics of the imaginary component
     Reference::To<PolnProfileStats> imag;
 
-    //! When, true the on_pulse and baseline estimators have been selected
+    //! When, true the onpulse and baseline estimators have been selected
     bool regions_set;
 
-    PhaseWeight on_pulse;
+    PhaseWeight onpulse;
     PhaseWeight baseline;
 
     unsigned last_harmonic;

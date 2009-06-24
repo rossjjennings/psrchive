@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardData.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/06/18 12:57:13 $
+   $Revision: 1.5 $
+   $Date: 2009/06/24 05:11:32 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardData_H
@@ -43,9 +43,9 @@ namespace Calibration {
     polarized, the other less polarized on-pulse phase bins will produce
     a mean invariant greater than zero
 
-    2) the mean invariant interval has sqrt(on_pulse_nbin) greater S/N
+    2) the mean invariant interval has sqrt(onpulse_nbin) greater S/N
 
-    3) the mean invariant is chi distributed with on_pulse_nbin * 4
+    3) the mean invariant is chi distributed with onpulse_nbin * 4
     degrees of freedom (much more like normally distributed than 4 d.o.f)
 
   */

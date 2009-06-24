@@ -41,7 +41,7 @@ void Pulsar::PolnProfileStats::set_profile (const PolnProfile* _profile)
   build ();
 }
 
-//! Set the PolnProfile from which baseline and on_pulse mask will be selected
+//! Set the PolnProfile from which baseline and onpulse mask will be selected
 /*! It is assumed that all subsequent PolnProfile instances passed to
   set_profile will have the same phase as set_profile */
 void Pulsar::PolnProfileStats::select_profile (const PolnProfile* _profile)
@@ -142,7 +142,7 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_determinant () const
   Estimate<double> total_det;
 
   for (unsigned ibin=0; ibin < profile->get_nbin(); ibin++)
-    if (stats->get_on_pulse(ibin))
+    if (stats->get_onpulse(ibin))
       total_det += invariant( get_stokes(ibin) );
 
 #if 0
@@ -202,11 +202,11 @@ void Pulsar::PolnProfileStats::build () try
       double threshold = 3.0 * sqrt (invint_variance);
 
 #ifdef _DEBUG
-      cerr << "before avoid " << stats->get_on_pulse_nbin() << endl;
+      cerr << "before avoid " << stats->get_onpulse_nbin() << endl;
 #endif
       stats->deselect_onpulse (&invint, threshold);
 #ifdef _DEBUG
-      cerr << "after avoid " << stats->get_on_pulse_nbin() << endl;
+      cerr << "after avoid " << stats->get_onpulse_nbin() << endl;
 #endif
     }
   }

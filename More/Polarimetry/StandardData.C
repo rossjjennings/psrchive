@@ -39,7 +39,7 @@ void Calibration::StandardData::set_profile (const Pulsar::PolnProfile* p)
 
 #ifdef _DEBUG
   cerr << "Calibration::StandardData::set_profile onpulse nbin=" 
-       << stats->get_stats()->get_on_pulse_nbin() << endl;
+       << stats->get_stats()->get_onpulse_nbin() << endl;
 #endif
 
   total_determinant = stats->get_total_determinant ();
@@ -71,7 +71,7 @@ Calibration::StandardData::get_stokes (unsigned ibin)
 	 << total_determinant << endl;
 #endif
     normalize->normalize (result, total_determinant);
-    result *= sqrt( (double) stats->get_stats()->get_on_pulse_nbin() );
+    result *= sqrt( (double) stats->get_stats()->get_onpulse_nbin() );
   }
 
 #ifdef _DEBUG
