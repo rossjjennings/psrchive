@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Statistics.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/03/22 22:47:40 $
+   $Revision: 1.6 $
+   $Date: 2009/06/24 05:02:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Statistics_h
@@ -71,11 +71,14 @@ namespace Pulsar {
     //! Get all phase bins
     PhaseWeight* get_all ();
 
+    //! Get the Profile statistics interface
+    ProfileStats* get_stats ();
+
     //! Text interface to statistics
     class Interface;
 
     //! Get the text interface to this
-    Interface* get_interface ();
+    TextInterface::Parser* get_interface ();
 
   protected:
 
