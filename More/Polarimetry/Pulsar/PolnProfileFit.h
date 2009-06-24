@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.37 $
-   $Date: 2008/07/25 23:30:28 $
+   $Revision: 1.38 $
+   $Date: 2009/06/24 05:11:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -130,6 +130,9 @@ namespace Pulsar
 
     //! Lock pulse phase; i.e., do not allow pulse phase to vary in fit
     void set_phase_lock (bool locked);
+
+    //! Remove pulse phase from model (may be more efficient, but irreversible)
+    void remove_phase ();
 
     //! Get the arrival time estimate
     Tempo::toa get_toa (const PolnProfile* observation,

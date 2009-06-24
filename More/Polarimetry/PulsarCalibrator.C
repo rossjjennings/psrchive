@@ -56,6 +56,7 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type* model)
   normalize_by_invariant = false;
   monitor_gimbal_lock = false;
   solve_each = false;
+  fixed_phase = false;
 
   tim_file = 0;
   archive = 0;
@@ -91,6 +92,11 @@ void Pulsar::PulsarCalibrator::set_choose_maximum_harmonic (bool flag)
 void Pulsar::PulsarCalibrator::set_normalize_by_invariant (bool flag)
 {
   normalize_by_invariant = flag;
+}
+
+void Pulsar::PulsarCalibrator::set_fixed_phase (bool flag)
+{
+  fixed_phase = flag;
 }
 
 void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
@@ -140,7 +146,7 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 
     Pulsar::PolnSpectrumStats stats;
     stats.select_profile( clone->new_PolnProfile (0) );
-    stats.get_regions( on_pulse, baseline );
+    stats.get_regions( onpulse, baseline );
 
     if (choose_maximum_harmonic)
     {
@@ -207,6 +213,9 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
 
     mtm[ichan] = new PolnProfileFit;
 
+    if (fixed_phase)
+      mtm[ichan]->remove_phase ();
+
     // the equation transformation will be managed by the StandardModel class
     mtm[ichan]->manage_equation_transformation = false;
 
@@ -217,7 +226,7 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
     else if (maximum_harmonic)
       mtm[ichan]->set_maximum_harmonic( maximum_harmonic );
 
-    mtm[ichan]->set_regions ( on_pulse, baseline );
+    mtm[ichan]->set_regions ( onpulse, baseline );
     mtm[ichan]->set_standard ( integration->new_PolnProfile (mchan) );
 
   }
@@ -248,11 +257,11 @@ void Pulsar::PulsarCalibrator::init_model (unsigned ichan)
 
   if (ichan >= mtm.size())
     throw Error (InvalidParam, "Pulsar::PulsarCalibrator::init_model",
-		 "ichan=%u >= mtm.size=%u", ichan, mtm.size());
+		 "ichan=%u >= mtm.size()=%u", ichan, mtm.size());
 
   if (ichan >= model.size())
     throw Error (InvalidParam, "Pulsar::PulsarCalibrator::init_model",
-		 "ichan=%u >= model.size=%u", ichan, model.size());
+		 "ichan=%u >= model.size()=%u", ichan, model.size());
 
   // share the measurement equations between PolnProfileFit and StandardModel
   if (mtm[ichan])
