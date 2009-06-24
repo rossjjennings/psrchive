@@ -21,6 +21,11 @@ Pulsar::ConvertIsolated::ConvertIsolated ()
   convert_value = 1.0;
 }
 
+Pulsar::ConvertIsolated* Pulsar::ConvertIsolated::clone () const
+{
+  return new ConvertIsolated (*this);
+}
+
 //! Set the smoothing neighbourhood fraction
 void Pulsar::ConvertIsolated::set_neighbourhood (float fraction)
 {

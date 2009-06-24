@@ -27,6 +27,11 @@ Pulsar::PhaseWeightShift::PhaseWeightShift ()
 
 }
 
+Pulsar::PhaseWeightShift* Pulsar::PhaseWeightShift::clone () const
+{
+  return new PhaseWeightShift (*this);
+}
+
 //! Shift the input PhaseWeight array into the result
 void Pulsar::PhaseWeightShift::calculate (PhaseWeight* result)
 {

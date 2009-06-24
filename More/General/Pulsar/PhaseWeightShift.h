@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeightShift.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/07/30 06:04:29 $
+   $Revision: 1.2 $
+   $Date: 2009/06/24 05:02:08 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeightShift_h
@@ -26,6 +26,9 @@ namespace Pulsar {
 
     //! Default constructor
     PhaseWeightShift ();
+
+    //! Return a new copy of self
+    PhaseWeightShift* clone () const;
 
     //! Returns the shift
     Functor< double() > get_shift;

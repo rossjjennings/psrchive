@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/DisperseWeight.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/03/13 19:06:05 $
+   $Revision: 1.2 $
+   $Date: 2009/06/24 05:02:08 $
    $Author: straten $ */
 
 #ifndef __Pulsar_DisperseWeight_h
@@ -35,6 +35,9 @@ namespace Pulsar {
 
     //! Destructor
     ~DisperseWeight  ();
+
+    //! Return a copy constructed instance of self
+    DisperseWeight* clone () const;
 
     //! Set the PhaseWeight mask to be shifted
     void set_weight (const PhaseWeight*);

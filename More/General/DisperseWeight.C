@@ -32,6 +32,11 @@ Pulsar::DisperseWeight::~DisperseWeight  ()
 {
 }
 
+Pulsar::DisperseWeight* Pulsar::DisperseWeight::clone () const
+{
+  return new DisperseWeight (*this);
+}
+
 //! Set the PhaseWeight mask to be shifted
 void Pulsar::DisperseWeight::set_weight (const PhaseWeight* weight)
 {

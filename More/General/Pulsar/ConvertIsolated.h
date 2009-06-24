@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ConvertIsolated.h,v $
-   $Revision: 1.2 $
-   $Date: 2007/11/02 04:25:03 $
+   $Revision: 1.3 $
+   $Date: 2009/06/24 05:02:08 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ConvertIsolated_h
@@ -27,6 +27,9 @@ namespace Pulsar {
 
     //! Default constructor
     ConvertIsolated ();
+
+    //! Return new copy of self
+    ConvertIsolated* clone () const;
 
     //! Set the size of the neighbourhood checked to the right or left
     void set_neighbourhood (float);
