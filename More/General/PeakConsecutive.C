@@ -333,6 +333,6 @@ public:
 //! Return a text interface that can be used to configure this instance
 TextInterface::Parser* Pulsar::PeakConsecutive::get_interface ()
 {
-  cerr << "Pulsar::PeakConsecutive::get_interface" << endl;
+  // cerr << "Pulsar::PeakConsecutive::get_interface" << endl;
   return new Interface (this);
 }

@@ -36,7 +36,7 @@ Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance)
   if (instance)
     set_instance (instance);
 
-  cerr << "Pulsar::ProfileStats::Interface constructor" << endl;
+  // cerr << "Pulsar::ProfileStats::Interface constructor" << endl;
 
   typedef PhaseWeight* (ProfileStats::*Method) (void);
 
