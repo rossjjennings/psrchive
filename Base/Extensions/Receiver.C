@@ -279,7 +279,7 @@ public:
 	 "ta", "Tracking angle of feed" );
   }
   
-  virtual std::string get_interface_name() { return "ReceiverTI"; }
+  virtual std::string get_interface_name() const { return "ReceiverTI"; }
 };
 
 TextInterface::Parser* Pulsar::Receiver::get_interface()

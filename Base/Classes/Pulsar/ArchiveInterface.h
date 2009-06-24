@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveInterface.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/04/21 06:19:43 $
+   $Revision: 1.2 $
+   $Date: 2009/06/24 05:01:39 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveTI_h
@@ -36,7 +36,7 @@ namespace Pulsar
     TextInterface::Parser *clone();
     
     //! Get the interface name
-    std::string get_interface_name() { return "Archive::Interface"; }
+    std::string get_interface_name() const { return "Archive::Interface"; }
 
   };
 
