@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/11/15 18:21:04 $
+   $Revision: 1.11 $
+   $Date: 2009/06/24 05:02:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileStats_h
@@ -16,6 +16,8 @@
 
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Algorithm.h"
+
+#include "TextInterface.h"
 #include "Estimate.h"
 
 namespace Pulsar
@@ -45,10 +47,12 @@ namespace Pulsar
     void deselect_onpulse (const Profile* profile, float threshold);
 
     //! The algorithm used to find the on-pulse phase bins
-    void set_on_pulse_estimator (OnPulseEstimator*);
+    void set_onpulse_estimator (OnPulseEstimator*);
+    OnPulseEstimator* get_onpulse_estimator () const;
 
     //! The algorithm used to find the off-pulse phase bins
     void set_baseline_estimator (BaselineEstimator*);
+    BaselineEstimator* get_baseline_estimator () const;
 
     //! Set the on-pulse and baseline regions
     void set_regions (const PhaseWeight& pulse, const PhaseWeight& baseline);
@@ -57,13 +61,13 @@ namespace Pulsar
     void get_regions (PhaseWeight& pulse, PhaseWeight& base) const;
 
     //! Get the number of phase bins in the on pulse window
-    unsigned get_on_pulse_nbin () const;
+    unsigned get_onpulse_nbin () const;
 
     //! Return true if the specified phase bin is in the on pulse window
-    bool get_on_pulse (unsigned ibin) const;
+    bool get_onpulse (unsigned ibin) const;
 
     //! Set if the specified phase bin is in the on pulse window
-    void set_on_pulse (unsigned ibin, bool);
+    void set_onpulse (unsigned ibin, bool);
 
     //! Get the number of phase bins in the baseline window
     unsigned get_baseline_nbin () const;
@@ -78,13 +82,16 @@ namespace Pulsar
     Estimate<double> get_baseline_variance () const;
 
     //! Return the on-pulse phase bin mask
-    PhaseWeight* get_on_pulse ();
+    PhaseWeight* get_onpulse ();
 
     //! Return the off-pulse baseline mask
     PhaseWeight* get_baseline ();
 
     //! Return the all pulse phase bin mask
     PhaseWeight* get_all ();
+
+    //! Return a text interface that can be used to configure this instance
+    TextInterface::Parser* get_interface ();
 
     //! Text interface to methods
     class Interface;
@@ -95,16 +102,16 @@ namespace Pulsar
     Reference::To<const Profile> profile;
 
     //! The algorithm used to find the on-pulse phase bins
-    Reference::To<OnPulseEstimator> on_pulse_estimator;
+    Reference::To<OnPulseEstimator> onpulse_estimator;
 
     //! The algorithm used to find the off-pulse phase bins
     Reference::To<BaselineEstimator> baseline_estimator;
 
-    //! True when the on_pulse and baseline regions have been set
+    //! True when the onpulse and baseline regions have been set
     bool regions_set;
 
     //! The on-pulse phase bin mask
-    mutable PhaseWeight on_pulse;
+    mutable PhaseWeight onpulse;
 
     //! The off-pulse baseline mask
     mutable PhaseWeight baseline;

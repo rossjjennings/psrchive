@@ -17,7 +17,7 @@ using namespace std;
 Pulsar::ProfileStats::ProfileStats (const Profile* _profile)
 {
   PeakConsecutive* on_est = new PeakConsecutive;
-  set_on_pulse_estimator (on_est);
+  set_onpulse_estimator (on_est);
 
   GaussianBaseline* off_est = new GaussianBaseline;
   set_baseline_estimator (off_est);
@@ -40,7 +40,7 @@ void Pulsar::ProfileStats::set_profile (const Profile* _profile)
     build ();
 }
 
-//! Set the Profile from which baseline and on_pulse mask will be selected
+//! Set the Profile from which baseline and onpulse mask will be selected
 /*! It is assumed that all subsequent Profile instances passed to
   set_profile will have the same phase as set_profile */
 void Pulsar::ProfileStats::select_profile (const Profile* set_profile)
@@ -60,13 +60,13 @@ void Pulsar::ProfileStats::deselect_onpulse (const Profile* prof, float thresh)
 {
   for (unsigned i=0; i<prof->get_nbin(); i++)
     if (prof->get_amps()[i] < thresh)
-      on_pulse[i] = 0;
+      onpulse[i] = 0;
 }
 
 //! The algorithm used to find the on-pulse phase bins
-void Pulsar::ProfileStats::set_on_pulse_estimator (OnPulseEstimator* est)
+void Pulsar::ProfileStats::set_onpulse_estimator (OnPulseEstimator* est)
 {
-  on_pulse_estimator = est;
+  onpulse_estimator = est;
   if (profile)
     build ();
 }
@@ -79,11 +79,23 @@ void Pulsar::ProfileStats::set_baseline_estimator (BaselineEstimator* est)
     build ();
 }
 
+Pulsar::OnPulseEstimator*
+Pulsar::ProfileStats::get_onpulse_estimator () const
+{
+  return onpulse_estimator;
+}
+    
+Pulsar::BaselineEstimator*
+Pulsar::ProfileStats::get_baseline_estimator () const
+{
+  return baseline_estimator;
+}
+
 //! Set the on-pulse and baseline regions
 void Pulsar::ProfileStats::set_regions (const PhaseWeight& on,
 					const PhaseWeight& off)
 {
-  on_pulse = on;
+  onpulse = on;
   baseline = off;
 
   regions_set = true;
@@ -95,7 +107,7 @@ void Pulsar::ProfileStats::set_regions (const PhaseWeight& on,
 void Pulsar::ProfileStats::get_regions (PhaseWeight& on, 
 					PhaseWeight& off) const
 {
-  on = on_pulse;
+  on = onpulse;
   off = baseline;
 }
 
@@ -109,8 +121,8 @@ Estimate<double> Pulsar::ProfileStats::get_total (bool subtract_baseline) const
 
   double variance = baseline.get_variance().get_value ();
 
-  double navg = on_pulse.get_weight_sum();
-  double total = on_pulse.get_weighted_sum();
+  double navg = onpulse.get_weight_sum();
+  double total = onpulse.get_weighted_sum();
 
 #if 0
   navg = profile->get_nbin();
@@ -125,9 +137,9 @@ Estimate<double> Pulsar::ProfileStats::get_total (bool subtract_baseline) const
   return Estimate<double> (total - offmean * navg, variance * navg);
 }
 
-unsigned Pulsar::ProfileStats::get_on_pulse_nbin () const
+unsigned Pulsar::ProfileStats::get_onpulse_nbin () const
 {
-  return (unsigned) on_pulse.get_weight_sum();
+  return (unsigned) onpulse.get_weight_sum();
 }
 
 unsigned Pulsar::ProfileStats::get_baseline_nbin () const
@@ -136,14 +148,14 @@ unsigned Pulsar::ProfileStats::get_baseline_nbin () const
 }
 
 //! Return true if the specified phase bin is in the on pulse window
-bool Pulsar::ProfileStats::get_on_pulse (unsigned ibin) const
+bool Pulsar::ProfileStats::get_onpulse (unsigned ibin) const
 {
-  return on_pulse[ibin];
+  return onpulse[ibin];
 }
 
-void Pulsar::ProfileStats::set_on_pulse (unsigned ibin, bool val)
+void Pulsar::ProfileStats::set_onpulse (unsigned ibin, bool val)
 {
-  on_pulse[ibin] = val;
+  onpulse[ibin] = val;
 }
 
 //! Return true if the specified phase bin is in the baseline window
@@ -161,9 +173,9 @@ Estimate<double> Pulsar::ProfileStats::get_baseline_variance () const
 }
 
 //! Return the on-pulse phase bin mask
-Pulsar::PhaseWeight* Pulsar::ProfileStats::get_on_pulse ()
+Pulsar::PhaseWeight* Pulsar::ProfileStats::get_onpulse ()
 {
-  return &on_pulse;
+  return &onpulse;
 }
 
 //! Return the off-pulse baseline mask
@@ -186,13 +198,13 @@ void Pulsar::ProfileStats::build () try
   {
     if (Profile::verbose)
       cerr << "Pulsar::ProfileStats::build regions set" << endl;
-    on_pulse.set_Profile (profile);
+    onpulse.set_Profile (profile);
     baseline.set_Profile (profile);
     return;
   }
 
-  on_pulse_estimator->set_Profile (profile);
-  on_pulse_estimator->get_weight (&on_pulse);
+  onpulse_estimator->set_Profile (profile);
+  onpulse_estimator->get_weight (&onpulse);
     
   baseline_estimator->set_Profile (profile);
   baseline_estimator->get_weight (&baseline);
@@ -200,12 +212,12 @@ void Pulsar::ProfileStats::build () try
   if (Profile::verbose)
   {
     cerr << "Pulsar::ProfileStats::build nbin=" << profile->get_nbin()
-	 << " on-pulse=" << on_pulse.get_weight_sum()
+	 << " on-pulse=" << onpulse.get_weight_sum()
 	 << " baseline=" << baseline.get_weight_sum() << endl;
 
     cerr << "onpulse ";
     for (unsigned ibin=0; ibin<profile->get_nbin(); ibin++)
-      if (on_pulse[ibin])
+      if (onpulse[ibin])
         cerr << ibin << " ";
     cerr << endl;
 
@@ -220,4 +232,14 @@ catch (Error& error)
 {
   throw error += "Pulsar::ProfileStats::build";
 }
+
+
+#include "Pulsar/ProfileStatsInterface.h"
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::ProfileStats::get_interface ()
+{
+  return new Interface (this);
+}
+
 
