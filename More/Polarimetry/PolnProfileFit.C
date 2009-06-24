@@ -224,11 +224,15 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 	 << "\n  " << stokes << endl;
 #endif
 
-    // each complex phase bin is phase related
-    Reference::To<MEAL::Complex2> input = jones;
-    Reference::To<MEAL::Complex2> ph = phases.get();
-
-    equation->add_input( input * ph );
+    if (phases)
+    {
+      // each complex phase bin is phase related
+      Reference::To<MEAL::Complex2> input = jones;
+      Reference::To<MEAL::Complex2> ph = phases.get();
+      equation->add_input( input * ph );
+    }
+    else
+      equation->add_input( jones );
   }
 }
 
@@ -260,8 +264,19 @@ void Pulsar::PolnProfileFit::set_fit_debug (bool flag)
 
 void Pulsar::PolnProfileFit::set_phase_lock (bool locked)
 {
+  if (!phases)
+    return;
+
   for (unsigned i=0; i<phases->get_ngradient(); i++)
     phases->set_infit( i, !locked );
+}
+
+void Pulsar::PolnProfileFit::remove_phase ()
+{
+  if (!phases)
+    return;
+
+  delete phases;
 }
 
 //! Fit the specified observation to the standard
@@ -274,7 +289,8 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   equation->delete_data ();
 
   // (re)set the number of phases to zero
-  phases->resize (0);
+  if (phases)
+    phases->resize (0);
 
   add_observation (observation);
 
@@ -329,21 +345,30 @@ try
   if (verbose)
     cerr << "Pulsar::PolnProfileFit::add_observation add gradient" << endl;
 
-  phases->add_gradient();
+  unsigned index = 0;
 
-  unsigned index = phases->get_igradient();
-
-  phases->set_param (index, phase_guess);
+  if (phases)
+  {
+    phases->add_gradient();
+    index = phases->get_igradient();
+    phases->set_param (index, phase_guess);
+  }
 
   unsigned nbin_std = standard->get_nbin();
   unsigned nbin_obs = observation->get_nbin();
 
   /* 
-     if the standard (template) and observed profiles have different
+     If the standard (template) and observed profiles have different
      numbers of bins, account for the offset between the centres of
-     bin 0 of each profile 
+     bin 0 of each profile.
+
+     This will likely cause trouble if phases have been removed from
+     the model.
+
+     A potential fix: multiply the observation by the required phase
+     gradient.
   */
-  if (nbin_std != nbin_obs)
+  if (phases && nbin_std != nbin_obs)
     phases->set_offset (index, 0.5/nbin_std - 0.5/nbin_obs);
 
   // initialize the measurement sets
@@ -356,6 +381,16 @@ try
 
     Calibration::TemplateUncertainty* error = uncertainty[ibin-1]->clone();
     error -> set_variance (var);
+
+#ifdef _DEBUG
+    if (error->get_transformation() != transformation)
+      {
+	cerr << "error.xform=" << error->get_transformation() << " != "
+	     << transformation.get() << endl;
+      }
+    else
+      cerr << "clone ok!" << endl;
+#endif
 
     Calibration::CoherencyMeasurement measurement (ibin-1);
     measurement.set_stokes (val, error);
@@ -428,6 +463,9 @@ Pulsar::PolnProfileFit::get_spectra ()
 //! Get the phase offset between the observation and the standard
 Estimate<double> Pulsar::PolnProfileFit::get_phase () const
 {
+  if (!phases)
+    return 0;
+
   if (phases->get_ngradient() == 0)
     throw Error (InvalidState, "Pulsar::PolnProfileFit::get_phase",
 		 "no phases have been added to the equation");
@@ -438,6 +476,9 @@ Estimate<double> Pulsar::PolnProfileFit::get_phase () const
 //! Get the phase offset between the observation and the standard
 void Pulsar::PolnProfileFit::set_phase (const Estimate<double>& value)
 {
+  if (!phases)
+    return;
+
   if (phases->get_ngradient() == 0)
     throw Error (InvalidState, "Pulsar::PolnProfileFit::get_phase",
 		 "no phases have been added to the equation");
