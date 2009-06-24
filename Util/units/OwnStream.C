@@ -23,6 +23,7 @@ OwnStream::OwnStream (const OwnStream&)
 //! Assignment operator
 const OwnStream& OwnStream::operator = (const OwnStream&)
 {
+  return *this;
 }
 
 void OwnStream::set_cout (std::ostream& os) const
