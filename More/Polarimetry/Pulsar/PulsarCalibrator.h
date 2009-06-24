@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.34 $
-   $Date: 2009/04/02 22:52:38 $
+   $Revision: 1.35 $
+   $Date: 2009/06/24 05:11:12 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -43,6 +43,9 @@ namespace Pulsar {
 
     //! Destructor
     ~PulsarCalibrator ();
+
+    //! When set, pulse phase is removed from the model
+    void set_fixed_phase (bool flag = true);
 
     //! Get the number of frequency channels
     unsigned get_nchan () const;
@@ -119,6 +122,9 @@ namespace Pulsar {
     //! The array of transformation Model instances
     Reference::Vector<MeanXform> solution;
 
+    //! Flag set when phase should be held fixed
+    bool fixed_phase;
+
     //! The maximum number of harmonics to include in the fit
     unsigned maximum_harmonic;
 
@@ -132,7 +138,7 @@ namespace Pulsar {
     bool normalize_by_invariant;
 
     //! The on-pulse region
-    PhaseWeight on_pulse;
+    PhaseWeight onpulse;
 
     //! The baseline region
     PhaseWeight baseline;

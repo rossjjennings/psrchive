@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.105 $
-   $Date: 2009/03/03 11:53:30 $
+   $Revision: 1.106 $
+   $Date: 2009/06/24 05:11:12 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -181,7 +181,7 @@ void auto_select (Pulsar::ReceptionCalibrator& model,
   cpgsvp (.1,.9, .1,.9);
 
   cerr << "pcm: plotting on-pulse phase bins" << endl;
-  plot.get_flux()->set_selection( model.get_on_pulse() );
+  plot.get_flux()->set_selection( model.get_onpulse() );
   plot.plot (archive);
 
   cpgend();
@@ -336,6 +336,9 @@ bool choose_maximum_harmonic = false;
 
 // Mode B: Solve the measurement equation for each observation
 bool solve_each = false;
+
+// Mode B: Do not allow pulse phase to vary as a free parameter
+bool fixed_phase = false;
 
 // significance of phase shift required to fail test
 float alignment_threshold = 4.0; // sigma
@@ -634,13 +637,17 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'p':
-      if (sscanf (optarg, "%f,%f", &phmin, &phmax) != 2) {
+    {
+      char dummy;
+      if (sscanf (optarg, "%f%c%f", &phmin, &dummy, &phmax) != 3)
+      {
 	cerr << "pcm: error parsing " << optarg << " as phase range" << endl;
 	return -1;
       }
       cerr << "pcm: selecting input states from " << phmin << " to " << phmax
 	   << endl;
       break;
+    }
 
     case 'r':
       physical_coherency = true;
@@ -699,13 +706,13 @@ int actual_main (int argc, char *argv[]) try
       int level = atoi (optarg);
       verbose = true;
 
-      if (level >= 4)
+      if (level > 4)
         Calibration::ReceptionModel::very_verbose = true;
 
-      if (level >= 3) 
+      if (level > 3) 
         Calibration::ReceptionModel::verbose = true;
 
-      if (level >= 2)
+      if (level > 2)
 	Calibration::StandardModel::verbose = true;
 
       Pulsar::Calibrator::verbose = level;
@@ -714,6 +721,9 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     }
+
+    case 'z':
+      fixed_phase = true;
 
     default:
       cout << "Unrecognised option" << endl;
@@ -1290,6 +1300,8 @@ catch (Error& error)
 SystemCalibrator* matrix_template_matching_based (const char* stdname)
 {
   PulsarCalibrator* model = new PulsarCalibrator (model_type);
+
+  model->set_fixed_phase (fixed_phase);
 
   if (maxbins_set)
     model->set_maximum_harmonic (maxbins);
