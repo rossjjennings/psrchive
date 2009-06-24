@@ -61,7 +61,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   for (int i = 0; i < npol; i++) {
     minmax(bandpass->get_passband(i), min, max);
     data_offsets[i] = 0.5 * (max + min);
-    data_scales[i] = (max - min) / max_int;
+    data_scales[i] = ((max - min) / max_int) / 2.0;
   }
   
   if (verbose == 3)
@@ -96,7 +96,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   for (int i = 0; i < npol; i++) {
     temp = bandpass->get_passband(i);
     for (int j = 0; j < nch_orig; j++) {
-      data[count] = (int)((temp[j]-data_offsets[i])*data_scales[i]);
+      data[count] = (int)((temp[j]-data_offsets[i])/data_scales[i]);
       count ++;
     }
   }
@@ -112,7 +112,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status);
   fits_modify_vector_len (fptr, colnum, dimension, &status);
   psrfits_update_tdim (fptr, colnum, nch_orig, npol);
-  fits_write_col (fptr, TFLOAT, colnum, 1, 1, dimension, data, &status);
+  fits_write_col (fptr, TINT, colnum, 1, 1, dimension, data, &status);
 
   delete [] data;
   delete [] data_scales;
