@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineEstimator.h,v $
-   $Revision: 1.8 $
-   $Date: 2007/11/02 04:24:55 $
+   $Revision: 1.9 $
+   $Date: 2009/06/24 05:01:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BaselineFunction_h
@@ -37,6 +37,12 @@ namespace Pulsar {
 
     //! Cut samples from baseline with median difference over threshold
     void set_median_cut (float threshold);
+
+    //! Construct a new BaselineEstimator from a string
+    static BaselineEstimator* factory (const std::string& name_and_parse);
+
+    //! Return a copy constructed instance of self
+    virtual BaselineEstimator* clone () const = 0;
 
   protected:
 

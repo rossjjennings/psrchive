@@ -184,6 +184,7 @@ libGeneral_la_SOURCES = \
         LastSignificant.C \
 	MaskSmooth.C \
         NoiseStatistics.C \
+	OnPulseEstimator.C \
 	OnPulseThreshold.C \
 	PeakEdgesInterpreter.C \
 	PeakConsecutive.C \
