@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalInterpreter.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/03/01 18:04:41 $
+   $Revision: 1.5 $
+   $Date: 2009/06/25 05:28:25 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CalInterpreter_h
@@ -41,6 +41,9 @@ namespace Pulsar {
 
     //! load the specifed file (database or calibrator)
     std::string load (const std::string& arg);
+
+    //! perform the frontend (basis and projection) correction
+    std::string frontend (const std::string& arg);
 
   protected:
 

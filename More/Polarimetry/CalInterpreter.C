@@ -37,6 +37,9 @@ Pulsar::CalInterpreter::CalInterpreter ()
     ( &CalInterpreter::cal,
       "", "calibrate the current archive using the current settings" );
 
+  add_command 
+    ( &CalInterpreter::frontend,
+      "frontend", "frontend (basis and projection) correction" );
 }
 
 Pulsar::CalInterpreter::~CalInterpreter ()
@@ -123,8 +126,17 @@ string Pulsar::CalInterpreter::cal (const string& arg) try {
   return response (Good);
 
 }
-catch (Error& error) {
+catch (Error& error)
+{
   return response (Fail, error.get_message());
 }
 
-
+string Pulsar::CalInterpreter::frontend (const string& args) try
+{
+  Pulsar::FrontendCorrection correct;
+  correct.calibrate( get() );
+}
+catch (Error& error)
+{
+  return response (Fail, error.get_message());
+}
