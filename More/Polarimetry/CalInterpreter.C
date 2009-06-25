@@ -135,8 +135,11 @@ string Pulsar::CalInterpreter::frontend (const string& args) try
 {
   Pulsar::FrontendCorrection correct;
   correct.calibrate( get() );
+
+  return response (Good);
 }
 catch (Error& error)
 {
   return response (Fail, error.get_message());
 }
+
