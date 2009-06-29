@@ -37,13 +37,13 @@ void usage()
   cout << endl <<
 
     "A user-interactive program for zapping subints, channels and bins.\n"
-    "Usage: pazi [options] filename\n\n"
+    "Usage: pazi [filename]\n\n"
     "Options.\n"
     "  -h                         This help page.\n\n"
-    "The following are the possible mouse and keyboard commands.\n"
-    "  zoom:                      left click twice\n"
+    "Mouse and keyboard commands.\n"
+    "  zoom:                      left click, then left click\n"
     "  zap:                       right click\n"
-    "  zap (multiple):            left click and 'z'\n"
+    "  zap (multiple):            left click, then 'z'\n"
     "  reset zoom:                'r'\n"
     "  frequency:                 'f'\n"
     "  time:                      't'\n"
