@@ -377,8 +377,10 @@ int main(int argc, char* argv[]) try
 				break;
 
 			case 's': {// save current archive changes
-				Pulsar::ProcHistory* fitsext = base_archive->get<Pulsar::ProcHistory>();
-				fitsext->set_command_str("pazi");
+				Pulsar::ProcHistory* ext = base_archive->get<Pulsar::ProcHistory>();
+                if (ext)
+                    ext->set_command_str("pazi");
+
 				base_archive->unload(write_filename);
 				break;
 			}
