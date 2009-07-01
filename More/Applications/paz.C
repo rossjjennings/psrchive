@@ -72,7 +72,7 @@ char backward_compatibility (char c)
 paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
 {
   has_manual = true;
-  version = "$Id: paz.C,v 1.55 2008/11/13 01:22:08 straten Exp $";
+  version = "$Id: paz.C,v 1.56 2009/07/01 16:41:22 demorest Exp $";
   filter = backward_compatibility;
 
   add( new Pulsar::StandardOptions );
@@ -123,7 +123,8 @@ std::string paz::get_usage ()
     "need to experiment to find the best value for your archives\n";
 }
 
-void zap_periodic_spikes (Pulsar::Profile * profile, int period, int phase);
+void zap_periodic_spikes (Pulsar::Profile * profile, int period, int phase, 
+    int width=1);
 void binzap (Pulsar::Archive * arch, Pulsar::Integration * integ, int subint,
 	     int lower_bin, int upper_bin, int lower_range, int upper_range);
 
@@ -172,7 +173,7 @@ bool std_given = false;
 Reference::To < Pulsar::Profile > thestd;
 
 bool periodic_zap = false;
-int periodic_zap_period = 8, periodic_zap_phase = 0;
+int periodic_zap_period = 8, periodic_zap_phase = 0, periodic_zap_width = 1;
 
 bool dropout_zap = false;
 float dropout_sigma = 5.0;
@@ -274,10 +275,14 @@ bool paz::parse (char code, const std::string& arg)
       {
 	periodic_zap = true;
 
-	if (sscanf (c_arg, "%d %d", &periodic_zap_period,
-		    &periodic_zap_phase) != 2)
+        int rv = sscanf (c_arg, "%d %d %d", &periodic_zap_period,
+            &periodic_zap_phase, &periodic_zap_width);
+
+        if (rv<2 || rv>3)
 	  throw Error (InvalidState, "paz::parse",
-		       "Invalid parameter to option -Z");
+		       "Invalid parameter to option -p");
+        else if (rv==2) 
+          periodic_zap_width = 1;
 
 	command += " -p ";
 	command += c_arg;
@@ -539,7 +544,8 @@ void paz::process (Pulsar::Archive* arch)
       for (unsigned chan = 0; chan < arch->get_nchan (); chan++)
 	for (unsigned subint = 0; subint < arch->get_nsubint (); subint++)
 	  zap_periodic_spikes (arch->get_Profile (subint, pol, chan),
-			       periodic_zap_period, periodic_zap_phase);
+			       periodic_zap_period, periodic_zap_phase,
+                               periodic_zap_width);
   }
 
   if (eightBinZap) {		// To fix early wide-band correlator problem
