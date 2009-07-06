@@ -10,12 +10,14 @@
 #include "Pulsar/StokesPlot.h"
 #include "Pulsar/PhaseVsFrequency.h"
 #include "Pulsar/PhaseVsTime.h"
+#include "Pulsar/PhaseVsHist.h"
 #include "Pulsar/PosAngPlot.h"
 #include "Pulsar/EllAngPlot.h"
 #include "Pulsar/StokesCylindrical.h"
 #include "Pulsar/StokesSpherical.h"
 #include "Pulsar/SpectrumPlot.h"
 #include "Pulsar/PhaseVsFrequencyPlus.h"
+#include "Pulsar/PhaseVsHistPlus.h"
 #include "Pulsar/StokesFluctPlot.h"
 #include "Pulsar/TwoBitPlot.h"
 #include "Pulsar/Poincare.h"
@@ -70,6 +72,12 @@ Pulsar::PlotFactory::PlotFactory ()
 
   add ( new PlotFactory::Advocate<Poincare>
 	('P', "p3d", "Stokes vector in Poincare space") );
+
+  add ( new PlotFactory::Advocate<PhaseVsHist>
+	('h', "pahist", "Phase-resolved position angle histogram") );
+
+  add ( new PlotFactory::Advocate<PhaseVsHistPlus>
+	('H', "pahist+", "Phase-resolved PA histogram and total profile") );
 
   add ( new PlotFactory::Advocate<SpectrumPlot>
 	('b', "psd", "Pulsed power spectrum") );

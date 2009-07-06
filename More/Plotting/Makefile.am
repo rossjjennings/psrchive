@@ -20,6 +20,7 @@ nobase_include_HEADERS =					       \
 	Pulsar/AnglePlot.h Pulsar/PosAngPlot.h Pulsar/EllAngPlot.h     \
 	Pulsar/PhaseVsPlot.h Pulsar/PhaseVsTime.h		       \
 	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyPlus.h	       \
+	Pulsar/PhaseVsHist.h Pulsar/PhaseVsHistPlus.h                  \
 	Pulsar/MultiPlot.h Pulsar/MultiPhase.h			       \
 	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h	       \
 	Pulsar/FluctPlot.h Pulsar/StokesFluctPlot.h		       \
@@ -62,11 +63,13 @@ libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
 	PhaseVsPlot.C PhaseVsPlotTI.C \
 	PhaseVsFrequency.C PhaseVsFrequencyTI.C \
 	PhaseVsTime.C PhaseVsTimeTI.C \
+	PhaseVsHist.C PhaseVsHistTI.C \
 	MultiPlot.C \
 	MultiPhase.C MultiPhaseTI.C\
 	StokesCylindrical.C StokesCylindricalTI.C \
 	StokesSpherical.C StokesSphericalTI.C \
 	PhaseVsFrequencyPlus.C PhaseVsFrequencyPlusTI.C \
+	PhaseVsHistPlus.C PhaseVsHistPlusTI.C \
 	FluctPlot.C FluctPlotTI.C \
 	StokesFluctPlot.C StokesFluctPlotTI.C \
 	TwoBitPlot.C TwoBitPlotTI.C \
@@ -93,5 +96,5 @@ endif
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @PGPLOT_CFLAGS@
+AM_CPPFLAGS += @PGPLOT_CFLAGS@ @GSL_CFLAGS@
 
