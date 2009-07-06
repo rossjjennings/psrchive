@@ -41,6 +41,9 @@ void Pulsar::GBT::Rcvr1_2 (Receiver* r)
   r->set_basis(Signal::Linear);
   r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
+  Angle a;
+  a.setDegrees(-45.0);
+  r->set_field_orientation(a);
 }
 
 void Pulsar::GBT::Rcvr2_3 (Receiver* r)
@@ -49,6 +52,9 @@ void Pulsar::GBT::Rcvr2_3 (Receiver* r)
   r->set_basis(Signal::Linear);
   r->set_nrcvr(2); 
   r->set_tracking_mode(Receiver::Feed);
+  Angle a;
+  a.setDegrees(-45.0);
+  r->set_field_orientation(a);
 }
 
 //! Initialize the Receiver Extension with GBT best guess
