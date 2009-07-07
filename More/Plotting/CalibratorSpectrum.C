@@ -19,6 +19,7 @@ using namespace std;
 Pulsar::CalibratorSpectrum::CalibratorSpectrum ()
 {
   isubint = 0;
+  isubint.set_integrate(true); // Default to summing to match previous
   plot_total = false;
   plot_low = false;
   plot_Ip = false;
@@ -63,7 +64,8 @@ void Pulsar::CalibratorSpectrum::prepare (const Archive* data)
   unsigned nchan = data->get_nchan();
   unsigned npol = data->get_npol();
 
-  ReferenceCalibrator::get_levels (data, nchan, hi, lo);
+  Reference::To<const Integration> subint = get_Integration(data, isubint);
+  ReferenceCalibrator::get_levels (subint, nchan, hi, lo);
 
   assert (hi.size() == npol);
 
