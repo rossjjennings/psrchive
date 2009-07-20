@@ -327,7 +327,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.92 2009/06/08 19:12:58 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.93 2009/07/20 23:35:17 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -862,13 +862,23 @@ int main (int argc, char *argv[]) try {
 
       }
 
-      if (newdm) {
+      if (newdm)
+      {
 	arch->set_dispersion_measure(dm);
 	if (verbose)
 	  cout << "Archive dispersion measure set to " << dm << endl;
+
+	if (arch->get_dedispersed())
+        {
+	  arch->dedisperse();
+
+	  if (verbose)
+	    cout << "Archive re-dedipsersed" << endl;
+        }
       }
 
-      if (dedisperse) {
+      if (dedisperse)
+      {
 	arch->dedisperse();
 	if (verbose)
 	  cout << "Archive dedipsersed" << endl;
