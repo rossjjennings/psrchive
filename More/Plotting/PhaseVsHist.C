@@ -26,9 +26,12 @@ Pulsar::PhaseVsHist::PhaseVsHist ()
   ichan = 0;
   histarray = NULL;
   weight_scheme = "none";
-  hist_kernel = "mises";
+
 #if HAVE_GSL
+  hist_kernel = "mises";
   gsl_set_error_handler_off();
+#else
+  hist_kernel = "delta";
 #endif
 }
 
@@ -108,9 +111,6 @@ void Pulsar::PhaseVsHist::prepare (const Archive* data)
         wt = sqrt(q*q+u*u);
       else if (weight_scheme == "snr")
         wt = sqrt(k);
-      else
-        throw Error (InvalidParam, "Pulsar::PhaseVsHist::prepare",
-                     "'"+ weight_scheme +"' is not a valid weighting scheme");
 
       // Delta-fn kernel
       if (hist_kernel == "delta") {
