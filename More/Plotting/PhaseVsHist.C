@@ -4,6 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <math.h>
 #include "Pulsar/PhaseVsHist.h"
 #include "Pulsar/Archive.h"
@@ -11,8 +16,12 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/PolnProfile.h"
 
+#if HAVE_GSL
 #include <gsl/gsl_sf_bessel.h>
 #include <gsl/gsl_errno.h>
+#else
+#include "MEAL/VonMises.h"
+#endif
 
 Pulsar::PhaseVsHist::PhaseVsHist ()
 {
@@ -20,7 +29,9 @@ Pulsar::PhaseVsHist::PhaseVsHist ()
   histarray = NULL;
   weight_scheme = "none";
   hist_kernel = "mises";
+#if HAVE_GSL
   gsl_set_error_handler_off();
+#endif
 }
 
 TextInterface::Parser* Pulsar::PhaseVsHist::get_interface ()
@@ -109,6 +120,8 @@ void Pulsar::PhaseVsHist::prepare (const Archive* data)
       // Von Mises kernel
       else if (hist_kernel == "mises") {
 
+#if HAVE_GSL
+
         double spa = sin(2.0*pa);
         double cpa = cos(2.0*pa);
         double norm=2.0*M_PI*gsl_sf_bessel_I0_scaled(k);
@@ -124,6 +137,16 @@ void Pulsar::PhaseVsHist::prepare (const Archive* data)
 
         }
 
+#else
+        MEAL::VonMises p;
+        p.set_centre(2.0*pa);
+        p.set_concentration(k);
+        for (unsigned irow=0; irow<nrow; irow++)
+        {
+          double pa_row = M_PI * ((double)irow / (double)nrow - 0.5);
+          histarray[irow*nbin + ibin] += wt*p.compute(2.0*pa_row);
+        }
+#endif
       }
 
     }
