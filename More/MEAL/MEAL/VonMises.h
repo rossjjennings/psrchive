@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/VonMises.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.4 $
+   $Date: 2009/07/20 19:49:04 $
    $Author: straten $ */
 
 #ifndef __VonMises_H
@@ -20,15 +20,25 @@
 #include "MEAL/ScalarArgument.h"
 #include "MEAL/ScalarMath.h"
 
-namespace MEAL {
+namespace MEAL
+{
 
-  //! VonMises function 
-  class VonMises : //public ArgumentBehaviour, 
-      public ProductRule<Scalar> {
-
+  //! Von Mises function 
+  class VonMises : public Univariate<Scalar> 
+  {
   public:
 
+    //! Default constructor
     VonMises ();
+
+    //! Copy constructor
+    VonMises (const VonMises& copy);
+
+    //! Assignment operator
+    VonMises& operator = (const VonMises& copy);
+
+    //! Destructor
+    ~VonMises ();
 
     //! Set the centre
     void set_centre (double centre);
@@ -42,22 +52,25 @@ namespace MEAL {
     //! Get the concentration
     double get_concentration () const;
 
-    //! Set the height
-    void set_height (double height);
+    // ///////////////////////////////////////////////////////////////////
+    //
+    // Function implementation
+    //
+    // ///////////////////////////////////////////////////////////////////
 
-    //! Get the height
-    double get_height () const;
-
-    //! Connect the set_abscissa method to the axis value
-    void set_argument (unsigned dimension, Argument* axis);
-
+    //! Get the name of the class
     std::string get_name() const;
 
     //! Parses the values of model parameters and fit flags from a string
     void parse (const std::string& text);
   
   protected:
-    ScalarArgument x;
+
+    void calculate (double&, std::vector<double>*) {}
+    void init ();
+
+    Reference::To<Scalar> expression;
+
     ScalarParameter centre;
     ScalarParameter concentration;
 

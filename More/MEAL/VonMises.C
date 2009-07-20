@@ -14,29 +14,51 @@ using namespace std;
 //InverseRule needs this... maybe not the best place to define it??
 static inline double inv(double x) { return 1.0/x;} 
 
-MEAL::VonMises::VonMises () 
-  : x(*new ScalarArgument)
+void MEAL::VonMises::init ()
 {
   centre.set_value_name("centre");
   concentration.set_value_name("concentration");
   
-  //  x.changed.connect(this, &MEAL::VonMises::attribute_changed);
+  ScalarArgument* argument = new ScalarArgument; 
 
   ScalarMath numerator = exp (ScalarMath(concentration)
-			      *cos(ScalarMath(x)-ScalarMath(centre)));
+			      *cos(ScalarMath(argument)-ScalarMath(centre)));
+
   ScalarBesselI0 *bessel = new ScalarBesselI0;
   bessel->set_model(&concentration);
   ScalarMath denominator(*bessel);
   
-  InverseRule<Scalar> *inverse_denominator = new InverseRule<Scalar>;
-  inverse_denominator->set_model(denominator.get_expression());
-  
-  *this *= numerator.get_expression();
-  *this *= inverse_denominator;
-  *this *= new ScalarConstant (0.5/M_PI);
+  ScalarMath result = numerator / (2.0*M_PI*denominator);
+
+  expression = result.get_expression();
+
+  copy_parameter_policy  (expression);
+  copy_evaluation_policy (expression);
+  copy_univariate_policy (argument);
 }
 
+MEAL::VonMises::VonMises ()
+{
+  init ();
+}
 
+//! Copy constructor
+MEAL::VonMises::VonMises (const VonMises& copy)
+{
+  init ();
+  operator = (copy);
+}
+
+//! Assignment operator
+MEAL::VonMises& MEAL::VonMises::operator = (const VonMises& copy)
+{
+  Univariate<Scalar>::operator = (copy);
+  return *this;
+}
+
+MEAL::VonMises::~VonMises ()
+{
+}
 
 //! Set the centre
 void MEAL::VonMises::set_centre (double centre_)

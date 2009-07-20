@@ -187,7 +187,8 @@ libMEAL_la_SOURCES = \
         Tracer.C \
         UnaryScalar.C \
         UnivariatePolicy.C \
-        VelocityModel.C
+        VelocityModel.C \
+	VonMises.C
 
 bin_PROGRAMS = lmfit
 
