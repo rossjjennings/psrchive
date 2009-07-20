@@ -19,8 +19,6 @@
 #if HAVE_GSL
 #include <gsl/gsl_sf_bessel.h>
 #include <gsl/gsl_errno.h>
-#else
-#include "MEAL/VonMises.h"
 #endif
 
 Pulsar::PhaseVsHist::PhaseVsHist ()
@@ -110,17 +108,20 @@ void Pulsar::PhaseVsHist::prepare (const Archive* data)
         wt = sqrt(q*q+u*u);
       else if (weight_scheme == "snr")
         wt = sqrt(k);
+      else
+        throw Error (InvalidParam, "Pulsar::PhaseVsHist::prepare",
+                     "'"+ weight_scheme +"' is not a valid weighting scheme");
 
       // Delta-fn kernel
       if (hist_kernel == "delta") {
-        unsigned idx = (pa+M_PI/2.0)*(double)nrow/M_PI;
+        unsigned idx = unsigned( (pa+M_PI/2.0)*(double)nrow/M_PI );
         histarray[idx*nbin + ibin] += wt;
       }
 
+#if HAVE_GSL
+
       // Von Mises kernel
       else if (hist_kernel == "mises") {
-
-#if HAVE_GSL
 
         double spa = sin(2.0*pa);
         double cpa = cos(2.0*pa);
@@ -137,17 +138,13 @@ void Pulsar::PhaseVsHist::prepare (const Archive* data)
 
         }
 
-#else
-        MEAL::VonMises p;
-        p.set_centre(2.0*pa);
-        p.set_concentration(k);
-        for (unsigned irow=0; irow<nrow; irow++)
-        {
-          double pa_row = M_PI * ((double)irow / (double)nrow - 0.5);
-          histarray[irow*nbin + ibin] += wt*p.compute(2.0*pa_row);
-        }
-#endif
       }
+
+#endif
+
+      else
+        throw Error (InvalidParam, "Pulsar::PhaseVsHist::prepare", 
+                     "'"+ hist_kernel +"' is not a valid histogram kernel");
 
     }
   }
