@@ -6,31 +6,31 @@
  *
  ***************************************************************************/
 
-#ifndef __Pulsar_DynamicCalSpectrum_h
-#define __Pulsar_DynamicCalSpectrum_h
+#ifndef __Pulsar_DynamicCalSpectrumPlot_h
+#define __Pulsar_DynamicCalSpectrumPlot_h
 
 #include "Pulsar/DynamicSpectrumPlot.h"
 
 namespace Pulsar {
 
   //! Plots off-pulse mean or variance as a func of time and freq.
-  class DynamicCalSpectrum : public DynamicSpectrum {
+  class DynamicCalSpectrumPlot : public DynamicSpectrumPlot {
 
   public:
 
     //! Default constructor
-    DynamicCalSpectrum ();
+    DynamicCalSpectrumPlot ();
 
     //! Default constructor
-    ~DynamicCalSpectrum ();
+    ~DynamicCalSpectrumPlot ();
 
     //! Get the text interface to the configuration attributes
     TextInterface::Parser* get_interface ();
 
     // Text interface to the PhaseVsFrequency class
-    class Interface : public TextInterface::To<DynamicCalSpectrum> {
+    class Interface : public TextInterface::To<DynamicCalSpectrumPlot> {
     public:
-      Interface (DynamicCalSpectrum* = 0);
+      Interface (DynamicCalSpectrumPlot* = 0);
     };
 
     void get_plot_array(const Archive *data, float *array);

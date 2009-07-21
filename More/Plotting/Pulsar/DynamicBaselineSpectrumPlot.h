@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 
-#ifndef __Pulsar_DynamicBaselineSpectrum_h
-#define __Pulsar_DynamicBaselineSpectrum_h
+#ifndef __Pulsar_DynamicBaselineSpectrumPlot_h
+#define __Pulsar_DynamicBaselineSpectrumPlot_h
 
 #include "Pulsar/DynamicSpectrumPlot.h"
 #include "Pulsar/PhaseWeight.h"
@@ -15,23 +15,23 @@
 namespace Pulsar {
 
   //! Plots off-pulse mean or variance as a func of time and freq.
-  class DynamicBaselineSpectrum : public DynamicSpectrum {
+  class DynamicBaselineSpectrumPlot : public DynamicSpectrumPlot {
 
   public:
 
     //! Default constructor
-    DynamicBaselineSpectrum ();
+    DynamicBaselineSpectrumPlot ();
 
     //! Default constructor
-    ~DynamicBaselineSpectrum ();
+    ~DynamicBaselineSpectrumPlot ();
 
     //! Get the text interface to the configuration attributes
     TextInterface::Parser* get_interface ();
 
     // Text interface to the PhaseVsFrequency class
-    class Interface : public TextInterface::To<DynamicBaselineSpectrum> {
+    class Interface : public TextInterface::To<DynamicBaselineSpectrumPlot> {
     public:
-      Interface (DynamicBaselineSpectrum* = 0);
+      Interface (DynamicBaselineSpectrumPlot* = 0);
     };
 
     void get_plot_array(const Archive *data, float *array);

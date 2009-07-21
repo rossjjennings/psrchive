@@ -91,13 +91,13 @@ Pulsar::PlotFactory::PlotFactory ()
   add ( new PlotFactory::Advocate<LinePhasePlot>
         ('R', "line", "Line phase subints" ) );
   
-  add ( new PlotFactory::Advocate<DynamicSNSpectrum>
+  add ( new PlotFactory::Advocate<DynamicSNSpectrumPlot>
         ( 'j', "dspec", "Dynamic S/N spectrum" ) );
   
-  add ( new PlotFactory::Advocate<DynamicBaselineSpectrum>
+  add ( new PlotFactory::Advocate<DynamicBaselineSpectrumPlot>
         ( 'r', "offdspec", "Dynamic baseline spectrum" ) );
   
-  add ( new PlotFactory::Advocate<DynamicCalSpectrum>
+  add ( new PlotFactory::Advocate<DynamicCalSpectrumPlot>
         ( 'l', "dcal", "Calibrator dynamic spectrum" ) );
   
   add ( new PlotFactory::Advocate<FreqVsSNRPlot>

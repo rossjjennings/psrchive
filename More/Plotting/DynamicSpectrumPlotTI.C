@@ -7,20 +7,21 @@
 #include "Pulsar/DynamicSpectrumPlot.h"
 #include <pairutil.h>
 
-Pulsar::DynamicSpectrum::Interface::Interface (DynamicSpectrum* instance)
+Pulsar::DynamicSpectrumPlot::Interface::Interface (
+    DynamicSpectrumPlot* instance)
 {
   if (instance)
     set_instance (instance);
 
-  add( &DynamicSpectrum::get_srange,
-      &DynamicSpectrum::set_srange, 
+  add( &DynamicSpectrumPlot::get_srange,
+      &DynamicSpectrumPlot::set_srange, 
       "srange", "Range of subints to plot" );
 
-  add( &DynamicSpectrum::get_pol,
-      &DynamicSpectrum::set_pol,
+  add( &DynamicSpectrumPlot::get_pol,
+      &DynamicSpectrumPlot::set_pol,
       "pol", "Polarization to plot" );
 
   import("cmap", pgplot::ColourMap::Interface(), 
-      &DynamicSpectrum::get_colour_map);
+      &DynamicSpectrumPlot::get_colour_map);
 
 }

@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 
-#ifndef __Pulsar_DynamicSpectrum_h
-#define __Pulsar_DynamicSpectrum_h
+#ifndef __Pulsar_DynamicSpectrumPlot_h
+#define __Pulsar_DynamicSpectrumPlot_h
 
 #include "Pulsar/SimplePlot.h"
 #include "ColourMap.h"
@@ -17,20 +17,20 @@ namespace Pulsar {
   class Profile;
 
   //! Base class for image plots of something vs time and frequency
-  class DynamicSpectrum : public SimplePlot {
+  class DynamicSpectrumPlot : public SimplePlot {
 
   public:
 
     //! Default constructor
-    DynamicSpectrum ();
+    DynamicSpectrumPlot ();
 
     //! Get the text interface to the configuration attributes
     TextInterface::Parser* get_interface ();
 
-    // Text interface to the DynamicSpectrum class
-    class Interface : public TextInterface::To<DynamicSpectrum> {
+    // Text interface to the DynamicSpectrumPlot class
+    class Interface : public TextInterface::To<DynamicSpectrumPlot> {
     public:
-      Interface (DynamicSpectrum* = 0);
+      Interface (DynamicSpectrumPlot* = 0);
     };
 
     //! Figure out axis limits

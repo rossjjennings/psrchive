@@ -9,12 +9,12 @@
 #include "Pulsar/DynamicCalSpectrumPlot.h"
 #include "Pulsar/DynamicSpectrumPlot.h"
 
-Pulsar::DynamicCalSpectrum::Interface::Interface( 
-    DynamicCalSpectrum *instance )
+Pulsar::DynamicCalSpectrumPlot::Interface::Interface( 
+    DynamicCalSpectrumPlot *instance )
 {
   if( instance )
     set_instance( instance );
 
-  import( DynamicSpectrum::Interface() );
+  import( DynamicSpectrumPlot::Interface() );
 }
 

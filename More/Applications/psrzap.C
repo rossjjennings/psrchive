@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
   string output_filename = replace_extension(filename, "zap");
 
   /* Create plot */
-  DynamicBaselineSpectrum *dsplot = new DynamicBaselineSpectrum;
+  DynamicBaselineSpectrumPlot *dsplot = new DynamicBaselineSpectrumPlot;
   dsplot->configure("var=1");
   dsplot->set_reuse_baseline();
   int dsplot_id = cpgopen("/xs");

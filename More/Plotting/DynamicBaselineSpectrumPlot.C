@@ -12,24 +12,24 @@
 #include <Pulsar/Profile.h>
 #include <Pulsar/PhaseWeight.h>
 
-Pulsar::DynamicBaselineSpectrum::DynamicBaselineSpectrum()
+Pulsar::DynamicBaselineSpectrumPlot::DynamicBaselineSpectrumPlot()
 {
   use_variance = false;
   reuse_baseline = false;
   base = NULL;
 }
 
-Pulsar::DynamicBaselineSpectrum::~DynamicBaselineSpectrum()
+Pulsar::DynamicBaselineSpectrumPlot::~DynamicBaselineSpectrumPlot()
 {
 }
 
-TextInterface::Parser* Pulsar::DynamicBaselineSpectrum::get_interface ()
+TextInterface::Parser* Pulsar::DynamicBaselineSpectrumPlot::get_interface ()
 {
   return new Interface (this);
 }
 
 // Calculate values to fill in to plot array
-void Pulsar::DynamicBaselineSpectrum::get_plot_array( const Archive *data, 
+void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data, 
     float *array )
 {
 

@@ -9,16 +9,16 @@
 #include "Pulsar/DynamicBaselineSpectrumPlot.h"
 #include "Pulsar/DynamicSpectrumPlot.h"
 
-Pulsar::DynamicBaselineSpectrum::Interface::Interface( 
-    DynamicBaselineSpectrum *instance )
+Pulsar::DynamicBaselineSpectrumPlot::Interface::Interface( 
+    DynamicBaselineSpectrumPlot *instance )
 {
   if( instance )
     set_instance( instance );
 
-  add( &DynamicBaselineSpectrum::get_use_variance,
-      &DynamicBaselineSpectrum::set_use_variance,
+  add( &DynamicBaselineSpectrumPlot::get_use_variance,
+      &DynamicBaselineSpectrumPlot::set_use_variance,
       "var", "Plot off-pulse variance rather than mean");
 
-  import( DynamicSpectrum::Interface() );
+  import( DynamicSpectrumPlot::Interface() );
 }
 

@@ -16,7 +16,7 @@
 
 using namespace std;
 
-Pulsar::DynamicSpectrum::DynamicSpectrum ()
+Pulsar::DynamicSpectrumPlot::DynamicSpectrumPlot ()
 {
   colour_map.set_name( pgplot::ColourMap::Heat );
 
@@ -43,16 +43,16 @@ Pulsar::DynamicSpectrum::DynamicSpectrum ()
 
 }
 
-TextInterface::Parser* Pulsar::DynamicSpectrum::get_interface ()
+TextInterface::Parser* Pulsar::DynamicSpectrumPlot::get_interface ()
 {
   return new Interface (this);
 }
 
-void Pulsar::DynamicSpectrum::preprocess (const Archive* data)
+void Pulsar::DynamicSpectrumPlot::preprocess (const Archive* data)
 {
 }
 
-void Pulsar::DynamicSpectrum::prepare (const Archive* data)
+void Pulsar::DynamicSpectrumPlot::prepare (const Archive* data)
 {
 
   // Figure out subint range
@@ -68,7 +68,7 @@ void Pulsar::DynamicSpectrum::prepare (const Archive* data)
 
 }
 
-void Pulsar::DynamicSpectrum::draw (const Archive* data)
+void Pulsar::DynamicSpectrumPlot::draw (const Archive* data)
 {
   colour_map.apply ();
 
@@ -113,12 +113,12 @@ void Pulsar::DynamicSpectrum::draw (const Archive* data)
 
 }
 
-std::string Pulsar::DynamicSpectrum::get_xlabel (const Archive *data)
+std::string Pulsar::DynamicSpectrumPlot::get_xlabel (const Archive *data)
 {
   return "Subintegration";
 }
 
-std::string Pulsar::DynamicSpectrum::get_ylabel (const Archive *data)
+std::string Pulsar::DynamicSpectrumPlot::get_ylabel (const Archive *data)
 {
   return "Frequency (MHz)";
 }

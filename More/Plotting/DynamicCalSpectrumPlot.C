@@ -12,21 +12,21 @@
 #include <Pulsar/Integration.h>
 #include <Pulsar/Profile.h>
 
-Pulsar::DynamicCalSpectrum::DynamicCalSpectrum()
+Pulsar::DynamicCalSpectrumPlot::DynamicCalSpectrumPlot()
 {
 }
 
-Pulsar::DynamicCalSpectrum::~DynamicCalSpectrum()
+Pulsar::DynamicCalSpectrumPlot::~DynamicCalSpectrumPlot()
 {
 }
 
-TextInterface::Parser* Pulsar::DynamicCalSpectrum::get_interface ()
+TextInterface::Parser* Pulsar::DynamicCalSpectrumPlot::get_interface ()
 {
   return new Interface (this);
 }
 
 // Calculate values to fill in to plot array
-void Pulsar::DynamicCalSpectrum::get_plot_array( const Archive *data, 
+void Pulsar::DynamicCalSpectrumPlot::get_plot_array( const Archive *data, 
     float *array )
 {
 

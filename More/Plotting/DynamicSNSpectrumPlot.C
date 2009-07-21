@@ -12,21 +12,21 @@
 #include <Pulsar/Profile.h>
 #include <Pulsar/StandardSNR.h>
 
-Pulsar::DynamicSNSpectrum::DynamicSNSpectrum()
+Pulsar::DynamicSNSpectrumPlot::DynamicSNSpectrumPlot()
 {
 }
 
-Pulsar::DynamicSNSpectrum::~DynamicSNSpectrum()
+Pulsar::DynamicSNSpectrumPlot::~DynamicSNSpectrumPlot()
 {
 }
 
-TextInterface::Parser* Pulsar::DynamicSNSpectrum::get_interface ()
+TextInterface::Parser* Pulsar::DynamicSNSpectrumPlot::get_interface ()
 {
   return new Interface (this);
 }
 
 // Calculate SNR to fill in to plot array
-void Pulsar::DynamicSNSpectrum::get_plot_array( const Archive *data, 
+void Pulsar::DynamicSNSpectrumPlot::get_plot_array( const Archive *data, 
     float *array )
 {
 

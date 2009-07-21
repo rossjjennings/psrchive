@@ -40,7 +40,7 @@ using Pulsar::PhaseVsPlot;
 using Pulsar::StokesSpherical;
 using Pulsar::PhaseVsTime;
 using Pulsar::PhaseVsFrequency;
-using Pulsar::DynamicSNSpectrum;
+using Pulsar::DynamicSNSpectrumPlot;
 using Pulsar::ProfilePlot;
 using Pulsar::PosAngPlot;
 using Pulsar::PeakConsecutive;
@@ -452,12 +452,12 @@ void PavApp::PavSpecificOptions( void )
 
   // DynamicSNSpectrum plot config
 
-  SetPlotOptions<DynamicSNSpectrum>( "below:l=" );
-  SetPlotOptions<DynamicSNSpectrum>( "below:r=" );
+  SetPlotOptions<DynamicSNSpectrumPlot>( "below:l=" );
+  SetPlotOptions<DynamicSNSpectrumPlot>( "below:r=" );
   if( publn )
   {
-    SetPlotOptions<DynamicSNSpectrum>( "above:l=$name" );
-    SetPlotOptions<DynamicSNSpectrum>( "above:r=$freq MHz" );
+    SetPlotOptions<DynamicSNSpectrumPlot>( "above:l=$name" );
+    SetPlotOptions<DynamicSNSpectrumPlot>( "above:r=$freq MHz" );
   }
 
   // StokesSpherical plot config
@@ -722,7 +722,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.67 2009/07/21 21:33:01 demorest Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.68 2009/07/21 21:49:54 demorest Exp $" << 
         endl << endl;
       return 0;
     case 'M':
