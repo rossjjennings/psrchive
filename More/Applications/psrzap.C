@@ -22,7 +22,7 @@
 
 #include "Pulsar/Plot.h"
 #include "Pulsar/ProfilePlot.h"
-#include "Pulsar/DynamicBaselineSpectrum.h"
+#include "Pulsar/DynamicBaselineSpectrumPlot.h"
 
 #include "strutil.h"
 

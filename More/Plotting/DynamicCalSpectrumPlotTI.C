@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/DynamicCalSpectrum.h"
-#include "Pulsar/DynamicSpectrum.h"
+#include "Pulsar/DynamicCalSpectrumPlot.h"
+#include "Pulsar/DynamicSpectrumPlot.h"
 
 Pulsar::DynamicCalSpectrum::Interface::Interface( 
     DynamicCalSpectrum *instance )

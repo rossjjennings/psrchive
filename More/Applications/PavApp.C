@@ -16,7 +16,7 @@
 #include <Pulsar/StokesSpherical.h>
 #include <Pulsar/PhaseVsTime.h>
 #include <Pulsar/PhaseVsFrequency.h>
-#include <Pulsar/DynamicSNSpectrum.h>
+#include <Pulsar/DynamicSNSpectrumPlot.h>
 #include <Pulsar/ProfilePlot.h>
 #include <Pulsar/PosAngPlot.h>
 #include <Pulsar/PeakConsecutive.h>
@@ -722,7 +722,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.66 2009/05/22 00:16:51 jonathan_khoo Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.67 2009/07/21 21:33:01 demorest Exp $" << 
         endl << endl;
       return 0;
     case 'M':

@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 
-#include "Pulsar/DynamicSNSpectrum.h"
-#include "Pulsar/DynamicSpectrum.h"
+#include "Pulsar/DynamicSNSpectrumPlot.h"
+#include "Pulsar/DynamicSpectrumPlot.h"
 #include <Pulsar/Archive.h>
 #include <Pulsar/Profile.h>
 #include <Pulsar/StandardSNR.h>

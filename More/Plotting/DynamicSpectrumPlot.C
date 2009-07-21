@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/DynamicSpectrum.h"
+#include "Pulsar/DynamicSpectrumPlot.h"
 #include "Pulsar/FrequencyScale.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"

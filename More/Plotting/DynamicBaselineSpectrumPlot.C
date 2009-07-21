@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 
-#include "Pulsar/DynamicBaselineSpectrum.h"
-#include "Pulsar/DynamicSpectrum.h"
+#include "Pulsar/DynamicBaselineSpectrumPlot.h"
+#include "Pulsar/DynamicSpectrumPlot.h"
 #include <Pulsar/Archive.h>
 #include <Pulsar/Profile.h>
 #include <Pulsar/PhaseWeight.h>

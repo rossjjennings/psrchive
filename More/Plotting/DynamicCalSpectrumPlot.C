@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 
-#include "Pulsar/DynamicCalSpectrum.h"
-#include "Pulsar/DynamicSpectrum.h"
+#include "Pulsar/DynamicCalSpectrumPlot.h"
+#include "Pulsar/DynamicSpectrumPlot.h"
 #include <Pulsar/Archive.h>
 #include <Pulsar/Integration.h>
 #include <Pulsar/Profile.h>

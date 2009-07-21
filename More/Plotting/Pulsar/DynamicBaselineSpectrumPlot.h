@@ -9,7 +9,7 @@
 #ifndef __Pulsar_DynamicBaselineSpectrum_h
 #define __Pulsar_DynamicBaselineSpectrum_h
 
-#include "Pulsar/DynamicSpectrum.h"
+#include "Pulsar/DynamicSpectrumPlot.h"
 #include "Pulsar/PhaseWeight.h"
 
 namespace Pulsar {

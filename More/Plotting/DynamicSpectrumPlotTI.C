@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/DynamicSpectrum.h"
+#include "Pulsar/DynamicSpectrumPlot.h"
 #include <pairutil.h>
 
 Pulsar::DynamicSpectrum::Interface::Interface (DynamicSpectrum* instance)
