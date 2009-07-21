@@ -24,9 +24,9 @@
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/Backend.h"
 #include "Pulsar/Receiver.h"
-#include <Pulsar/Pointing.h>
-#include <Pulsar/WidebandCorrelator.h>
-#include <Pulsar/FITSHdrExtension.h>
+#include "Pulsar/Pointing.h"
+#include "Pulsar/WidebandCorrelator.h"
+#include "Pulsar/FITSHdrExtension.h"
 
 #if HAVE_PGPLOT
 #include "Pulsar/PlotFactory.h"
@@ -40,7 +40,7 @@
 #include "Error.h"
 #include "dirutil.h"
 #include "strutil.h"
-#include <tostring.h>
+#include "tostring.h"
 
 #include <fstream>
 #include <iostream>
@@ -348,7 +348,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.86 2009/06/17 03:06:12 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.87 2009/07/21 00:06:02 straten Exp $" << endl;
       return 0;
 
     case 'K':
@@ -686,6 +686,8 @@ catch (Error& error) {
   return -1;
 }
 
+//! Return the square of x
+template<typename T> T sqr (T x) { return x*x; }
 
 void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<Archive> arch)
 {
@@ -732,24 +734,30 @@ void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<
   stdarch->pscrunch();
   
   // Now replace profile with Gaussian components
-  Reference::To<Profile> prof;
-  float *amps;
-  double x,y;
-  unsigned int i,j;
+  Reference::To<Profile> prof = stdarch->get_Profile(0,0,0);
+  prof->zero();
 
-  prof = stdarch->get_Profile(0,0,0);
-  amps = prof->get_amps();
-  for (i=0;i<stdarch->get_nbin();i++)
+  float* amps = prof->get_amps();
+
+  double degrees = 360.0;
+
+  for (double offset = -degrees; offset <= degrees; offset += degrees)
+  {
+    for (unsigned i=0;i<stdarch->get_nbin();i++)
     {
-      x = double(i)*360.0/double(stdarch->get_nbin());
-      y = 0.0;
-      double two = 2.0;
-      for (j=0;j<ncomp;j++)
-	y+=amp[j]*exp(-pow(x-pos[j],two)/pow(double(width[j]),two));
-      amps[i]=y;
-      if (firstTime) cout << i << " " << y << " PROFILE " << endl;
+      double x = double(i)/double(stdarch->get_nbin()) * degrees - offset;
+      double y = 0.0;
+
+      for (unsigned j=0;j<ncomp;j++)
+	y+=amp[j]*exp(-sqr(x-pos[j])/sqr(width[j]));
+
+      amps[i] += y;
+
+      if (firstTime && offset == 0.0)
+        cout << i << " " << y << " PROFILE " << endl;
     }
-  prof->set_amps(amps);
+  }
+
   firstTime=false;
 }
 
@@ -1286,7 +1294,7 @@ float getRms(const float* bins, const unsigned nbin, const float mean,
 
     for (unsigned i = 0; i < nbin; ++i) {
         if (bins[i] < 3.0 * oldRms) {
-            deviation += pow((bins[i] - mean), 2); // square
+            deviation += sqr(bins[i] - mean);
             ++count;
         }
     }
