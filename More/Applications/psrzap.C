@@ -40,6 +40,7 @@ struct zap_range {
   double freq1;
   int sub0;
   int sub1;
+  enum cursor_type type;
 };
 
 void swap_zap_range(struct zap_range *z) {
@@ -111,18 +112,35 @@ void zap_subint_range(Archive *arch, struct zap_range *z) {
     arch->get_Integration(isub)->uniform_weight(0.0);
 }
 
+void apply_zap(Archive *arch, struct zap_range *z) {
+  if (z->type==freq_cursor) 
+    zap_freq_range(arch, z);
+  else if (z->type==time_cursor) 
+    zap_subint_range(arch, z);
+  else if (z->type==both_cursor) 
+    apply_zap_range(arch, z);
+}
+
 #define PROG "psrzap"
 
 void usage() {
   cout << "psrzap - Interactive RFI zapper using off-pulse dynamic spectra" 
+    << endl
     << "Usage:  psrzap (filename)" << endl
-    << "  Press 'h' during program for help screen" << endl;
+    << "Command line options:" << endl
+    << "  -h   Show this help screen" << endl
+    << "  -v   Verbose mode" << endl
+    << "  -T   Show current total profile during operation" << endl
+    << endl
+    << "  Press 'h' during program for interactive usage info:" << endl
+    << endl;
 }
 
 /* Interactive commands */
 #define CMD_QUIT 'q'
 #define CMD_HELP 'h'
 #define CMD_SAVE 's'
+#define CMD_PRINT 'P'
 #define CMD_FREQMODE 'f'
 #define CMD_TIMEMODE 't'
 #define CMD_BOTHMODE 'b'
@@ -149,6 +167,7 @@ void usage_interactive() {
     << "  " << CMD_UNDO     << "  Undo last zap command" << endl 
     << "  " << CMD_UNZOOM   << "  Reset zoom" << endl
     << "  " << CMD_SAVE     << "  Save zapped version as (filename).zap" << endl
+    << "  " << CMD_PRINT    << "  Print equivalent paz command" << endl
     << "  " << CMD_QUIT     << "  Exit program" << endl
     << endl;
 }
@@ -159,12 +178,16 @@ int main(int argc, char *argv[]) {
   int opt=0;
   int verb=0;
   bool show_total = false;
-  while ((opt=getopt(argc,argv,"hv"))!=-1) {
+  while ((opt=getopt(argc,argv,"hvT"))!=-1) {
     switch (opt) {
 
       case 'v':
         verb++;
         Archive::set_verbosity(verb);
+        break;
+        
+      case 'T':
+        show_total=true;
         break;
 
       case 'h':
@@ -318,12 +341,8 @@ int main(int argc, char *argv[]) {
       }
 
       /* Apply it */
-      if (curs==freq_cursor) 
-        zap_freq_range(arch, &zap);
-      else if (curs==time_cursor) 
-        zap_subint_range(arch, &zap);
-      else if (curs==both_cursor) 
-        apply_zap_range(arch, &zap);
+      zap.type = curs;
+      apply_zap(arch, &zap);
 
       zap_list.push_back(zap);
       redraw = true;
@@ -430,9 +449,40 @@ int main(int argc, char *argv[]) {
 
     /* Save file */
     if (ch==CMD_SAVE) {
-      arch->unload(output_filename);
+      /* Apply zaps to original file */
+      for (unsigned i=0; i<zap_list.size(); i++) {
+        zap = zap_list[i];
+        apply_zap_range(orig_arch, &zap);
+      }
+      orig_arch->unload(output_filename);
       click = 0;
       continue;
+    }
+
+    /* Print paz command */
+    if (ch==CMD_PRINT) {
+      if (zap_list.size()>0) 
+        printf("paz -e zap");
+      /* Full time/freq zaps */
+      for (unsigned i=0; i<zap_list.size(); i++) {
+        if (zap_list[i].type == freq_cursor) {
+          int chan0 = freq2chan(arch, zap_list[i].freq0);
+          int chan1 = freq2chan(arch, zap_list[i].freq1);
+          if (chan1<chan0) { int tmp=chan0; chan0=chan1; chan1=tmp; }
+          if (chan0==chan1) printf(" -z %d", chan0);
+          else printf(" -Z \"%d %d\"", chan0, chan1);
+        } else if (zap_list[i].type == time_cursor) {
+          if (zap_list[i].sub0==zap_list[i].sub1) 
+            printf(" -w %d", zap_list[i].sub0);
+          else 
+            printf(" -W \"%d %d\"", zap_list[i].sub0, zap_list[i].sub1);
+        }
+      }
+      if (zap_list.size()>0) 
+        printf(" %s\n", filename.c_str());
+      /* Small ranges */
+      for (unsigned i=0; i<zap_list.size(); i++) {
+      }
     }
 
   } while (ch!=CMD_QUIT);
