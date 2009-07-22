@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/BandpassPlotter.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/05/18 21:19:38 $
+   $Revision: 1.6 $
+   $Date: 2009/07/22 21:08:53 $
    $Author: straten $*/
 
 #ifndef __fft_BandpassPlotter_h
@@ -28,8 +28,15 @@ namespace fft {
     //! Default constructor
     BandpassPlotter ()
     { 
-      user_max = user_min = 0; ignore_fraction = 0.0; 
-      logarithmic = false; xlabel_ichan = false;
+      user_max = user_min = 0;
+      user_fmax = user_fmin = 0;
+
+      ignore_fraction = 0.0; 
+
+      logarithmic = false; 
+      xlabel_ichan = false;
+      histogram = false;
+
       title = "Original Bandpass";
     }
 
@@ -50,19 +57,27 @@ namespace fft {
     void set_minmax (float min, float max)
     { user_min = min; user_max = max; }
 
+    //! Set minimum and maximum values on frequency axis
+    void set_fminmax (float min, float max)
+    { user_fmin = min; user_fmax = max; }
+
     //! Ignore band edges
     float ignore_fraction;
 
     //! Use logarithmic axis
     bool logarithmic;
 
+    //! Plot using histogram style
+    bool histogram;
+
     //! Label x-axis with channel number
     bool xlabel_ichan;
 
     std::string title;
 
-    protected:
-      float user_min, user_max;
+  protected:
+    float user_min, user_max;
+    float user_fmin, user_fmax;
 
   };
 
@@ -81,15 +96,21 @@ template<class Data, class Info>
 void fft::BandpassPlotter<Data,Info>::plot (Data* data, Info* info) const
 {
   unsigned ipol, npol = data->get_npol ();
+  unsigned nchan = 0;
 
   float min = 0;
   float max = 0;
   for (ipol=0; ipol<npol; ipol++)
   {
     std::vector<float> pband = data->get_passband (ipol);
+
     this->preprocess (pband);
     if (logarithmic)
       log (pband);
+
+    if (ipol == 0)
+      nchan = pband.size();
+
     minmax (pband, min, max, ipol);
   }
   
@@ -110,14 +131,20 @@ void fft::BandpassPlotter<Data,Info>::plot (Data* data, Info* info) const
   if (xlabel_ichan)
   {
     fmin = 0;
-    fmax = 1;
+    fmax = nchan;
     xlabel = "Frequency channel";
   }
 
-  cpgsci(1);
-  cpgswin(fmin, fmax, min, max);
+  if (user_fmin != user_fmax)
+  {
+    fmin = user_fmin;
+    fmax = user_fmax;
+  }
 
-  unsigned nchan = 0;
+  float fbuf = 0.05 * ( fmax - fmin );
+
+  cpgsci(1);
+  cpgswin (fmin-fbuf, fmax+fbuf, min, max);
 
   // std::cerr << "npol=" << npol << std::endl;
 
@@ -128,33 +155,29 @@ void fft::BandpassPlotter<Data,Info>::plot (Data* data, Info* info) const
     if (logarithmic)
       log (pband);
 
-    nchan = pband.size();
-
     // std::cerr << "ipol=" << ipol << " nchan=" << nchan << std::endl;
 
     double fstep = bw/(nchan-1);
     if (xlabel_ichan)
-      fstep = 1.0/nchan;
+      fstep = 1.0;
  
     cpgsci(ipol+2);
+
+    std::vector<float> xaxis (nchan);
+    float offset = 0;
+    if (histogram)
+      offset = 0.5;
+
     for (unsigned ichan=0; ichan<nchan; ichan++)
-    {
-      float x = fmin + ichan*fstep;
-      float y = pband[ichan];
+      xaxis[ichan] = fmin + (ichan+offset)*fstep;
 
-      // std::cerr << "ichan=" << ichan << " x=" << x << " y=" << y << std::endl;
+    float* x = &xaxis[0];
+    float* y = &pband[0];
 
-      if (ichan == 0)
-	cpgmove (x, y);
-      else
-	cpgdraw (x, y);
-    }
-  }
-
-  if (xlabel_ichan)
-  {
-    fmax = nchan;
-    cpgswin(fmin, fmax, min, max);
+    if (histogram)
+      cpgbin (nchan, x, y, true);
+    else
+      cpgline (nchan, x, y);
   }
 
   cpgsci (1);
