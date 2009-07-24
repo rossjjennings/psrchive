@@ -20,30 +20,28 @@ Pulsar::IntegrationTI::IntegrationTI ()
  
   add( &Integration::get_duration,
        &Integration::set_duration,
-       "duration", "Duration of integration (seconds)" );
+       "duration", "Integration length (s)" );
 
   add( &Integration::get_folding_period,
        &Integration::set_folding_period, 
-       "period", "Period at which data were folded (seconds)" );
+       "period", "Folding period (s)" );
 
   // note that explicit casts are required for overloaded methods
 
   VGenerator<double> dgenerator;
-  add_value(dgenerator( "freq", "Centre frequency of each channel (MHz)",
+  add_value(dgenerator( "freq", "Channel centre frequency (MHz)",
 			( double (Integration::*) (unsigned) const )
 			&Integration::get_centre_frequency,
 			&Integration::set_centre_frequency,
 			&Integration::get_nchan ));
 
   VGenerator<float> fgenerator;
-  add_value(fgenerator( "wt", "Weight assigned to each channel",
+  add_value(fgenerator( "wt", "Channel weight",
 			&Integration::get_weight,
 			&Integration::set_weight,
 			&Integration::get_nchan ));
 
   import( "point", Pulsar::Pointing::Interface(),
 	  ( Pointing* (Integration::*) () ) &Integration::get<Pointing> );
-
-
 }
 

@@ -18,11 +18,11 @@ WidebandCorrelator::Interface::Interface( WidebandCorrelator *s_instance )
   import ( Backend::Interface() );
 
   add( &WidebandCorrelator::get_config,
-       "beconfig", "Backend Config file" );
+       "config", "Configuration filename" );
 
   add( &WidebandCorrelator::get_nrcvr,
        "nrcvr", "Number of receiver channels" );
 
   add( &WidebandCorrelator::get_tcycle,
-       "tcycle", "Get the correlator cycle time" );
+       "tcycle", "Correlator cycle time" );
 }

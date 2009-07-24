@@ -23,11 +23,11 @@ FITSHdrExtension::Interface::Interface( FITSHdrExtension *s_instance )
 
   add( &FITSHdrExtension::get_obs_mode,
        &FITSHdrExtension::set_obs_mode,
-       "obs_mode", "Observation Mode (PSR, CAL, SEARCH)" );
+       "obs_mode", "Observation Mode" );
 
   add( &FITSHdrExtension::get_obsfreq,
        &FITSHdrExtension::set_obsfreq,
-       "obsfreq", "[MHz] Centre frequency for observation" );
+       "obsfreq", "Centre frequency" );
 
   add( &FITSHdrExtension::get_hdrver,
        &FITSHdrExtension::set_hdrver,
@@ -39,75 +39,75 @@ FITSHdrExtension::Interface::Interface( FITSHdrExtension *s_instance )
 
   add( &FITSHdrExtension::get_coordmode,
        &FITSHdrExtension::set_coordmode,
-       "coord_md", "The coordinate mode (EQUAT, GAL, ECLIP, etc )." );
+       "coord_md", "Coordinate mode" );
 
   add( &FITSHdrExtension::get_equinox,
        &FITSHdrExtension::set_equinox,
-       "equinox", "Equinox of coords (J2000, B1950)" );
+       "equinox", "Coordinate equinox" );
 
   add( &FITSHdrExtension::get_trk_mode,
        &FITSHdrExtension::set_trk_mode,
-       "trk_mode", "Track mode ( TRACK, SCANGC, SCANLAT )" );
+       "trk_mode", "Tracking mode" );
 
   add( &FITSHdrExtension::get_bpa,
        &FITSHdrExtension::set_bpa,
-       "bpa", "[deg] beam position angle" );
+       "bpa", "Beam position angle" );
 
   add( &FITSHdrExtension::get_bmaj,
        &FITSHdrExtension::set_bmaj,
-       "bmaj", "[deg] beam major axis" );
+       "bmaj", "Beam major axis" );
 
   add( &FITSHdrExtension::get_bmin,
        &FITSHdrExtension::set_bmin,
-       "bmin", "[deg] beam minor axis" );
+       "bmin", "Beam minor axis" );
 
   add( &FITSHdrExtension::get_stt_date,
        &FITSHdrExtension::set_stt_date,
-       "stt_date", "Start UT date (YYYY-MM-DD)" );
+       "stt_date", "Start UT date" );
 
   add( &FITSHdrExtension::get_stt_time,
        &FITSHdrExtension::set_stt_time,
-       "stt_time", "Start UT (hh:mm:ss)" );
+       "stt_time", "Start UT" );
 
   add( &FITSHdrExtension::get_stt_imjd,
        &FITSHdrExtension::set_stt_imjd,
-       "stt_imjd", "Start MJD (UTC days) (J - long integer)" );
+       "stt_imjd", "Start MJD" );
 
   add( &FITSHdrExtension::get_stt_smjd,
        &FITSHdrExtension::set_stt_smjd,
-       "stt_smjd", "[s] Start time (sec past UTC 00h) (J)" );
+       "stt_smjd", "Start second" );
 
   add( &FITSHdrExtension::get_stt_offs,
        &FITSHdrExtension::set_stt_offs,
-       "stt_offs", "[s] Start time offset (D)" );
+       "stt_offs", "Start fractional second" );
 
   add( &FITSHdrExtension::get_stt_lst,
        &FITSHdrExtension::set_stt_lst,
-       "stt_lst", "Start LST (D)" );
+       "stt_lst", "Start LST" );
 
   add( &FITSHdrExtension::get_stt_crd1,
        &FITSHdrExtension::set_stt_crd1,
-       "stt_crd1", "Start coord 1 (hh:mm:ss.sss or ddd.ddd)" );
+       "stt_crd1", "Start coord 1" );
 
   add( &FITSHdrExtension::get_stt_crd2,
        &FITSHdrExtension::set_stt_crd2,
-       "stt_crd2", "Start coord 2 (-dd:mm:ss.sss or -dd.ddd)" );
+       "stt_crd2", "Start coord 2" );
 
   add( &FITSHdrExtension::get_stp_crd1,
        &FITSHdrExtension::set_stp_crd1,
-       "stp_crd1", "Stop coord 1 (hh:mm:ss.sss or ddd.ddd)" );
+       "stp_crd1", "Stop coord 1" );
 
   add( &FITSHdrExtension::get_stp_crd2,
        &FITSHdrExtension::set_stp_crd2,
-       "stp_crd2", "Stop coord 2 (-dd:mm:ss.sss or -dd.ddd)" );
+       "stp_crd2", "Stop coord 2" );
 
   add( &FITSHdrExtension::get_ra,
        &FITSHdrExtension::set_ra,
-       "ra", "Right ascension (hh:mm:ss.ssss)" );
+       "ra", "Right ascension" );
 
   add( &FITSHdrExtension::get_dec,
        &FITSHdrExtension::set_dec,
-       "dec", "Declination (-dd:mm:ss.sss)" );
+       "dec", "Declination" );
 }
 
 

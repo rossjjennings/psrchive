@@ -22,7 +22,7 @@ Pulsar::Archive::Interface::Interface( Archive *c )
 
   add( &Archive::get_type,
        &Archive::set_type,
-       "type", "Observation type (Pulsar, PolnCal, etc.)" );
+       "type", "Observation type" );
 
   add( &Archive::get_telescope,
        &Archive::set_telescope,
@@ -30,11 +30,11 @@ Pulsar::Archive::Interface::Interface( Archive *c )
 
   add( &Archive::get_source,
        &Archive::set_source,
-       "name", "Name of the source" );
+       "name", "Source name" );
 
   add( &Archive::get_coordinates,
        &Archive::set_coordinates,
-       "coord", "Coordinates of the source" );
+       "coord", "Source coordinates" );
 
   add( &Archive::get_centre_frequency,
        &Archive::set_centre_frequency,
@@ -54,26 +54,26 @@ Pulsar::Archive::Interface::Interface( Archive *c )
 
   add( &Archive::get_dedispersed,
        &Archive::set_dedispersed,
-       "dmc", "Dispersion corrected (boolean)");
+       "dmc", "Dispersion corrected");
 
   add( &Archive::get_faraday_corrected,
        &Archive::set_faraday_corrected,
-       "rmc", "Faraday Rotation corrected (boolean)" );
+       "rmc", "Faraday Rotation corrected" );
 
   add( &Archive::get_poln_calibrated,
        &Archive::set_poln_calibrated,
-       "polc", "Polarization calibrated (boolean)" );
+       "polc", "Polarization calibrated" );
 
   add( &Archive::get_scale,
        &Archive::set_scale,
-       "scale", "Units of profile amplitudes" );
+       "scale", "Data units" );
 
   add( &Archive::get_state,
        &Archive::set_state,
-       "state", "State of profile amplitudes" );
+       "state", "Data state" );
   
   add( &Archive::integration_length,
-       "length", "The full duration of the observation (s)" );
+       "length", "Observation duration (s)" );
   
   import( "int", IntegrationTI(),
           (Integration*(Archive::*)(unsigned)) &Archive::get_Integration,
