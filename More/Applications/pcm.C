@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.106 $
-   $Date: 2009/06/24 05:11:12 $
+   $Revision: 1.107 $
+   $Date: 2009/07/24 00:39:19 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -78,7 +78,7 @@ void usage ()
     "  -j job     preprocessing job \n"
     "  -J jobs    multiple preprocessing jobs in 'jobs' file \n"
     "\n"
-    "MODE A: Fit multiple observations of unknown source \n"
+    "MEM: Measurement Equation Modeling - observations of an unknown source \n"
     "\n"
     "  -t nproc   solve using nproc threads \n"
     "\n"
@@ -107,7 +107,7 @@ void usage ()
     "  -v         assume that CAL Stokes V = 0 (linear feeds only)\n"
     "  -L hours   maximum time between middle of experiment and calibrators\n"
     "\n"
-    "MODE B: Fit observations to a known source (matrix template matching) \n"
+    "MTM: Matrix Template Matching -- observations of a known source \n"
     "\n"
     "  -S fname   filename of calibrated standard \n"
     "  -H         allow software to choose the number of harmonics \n"
