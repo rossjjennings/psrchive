@@ -348,7 +348,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.87 2009/07/21 00:06:02 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.88 2009/07/26 23:35:34 straten Exp $" << endl;
       return 0;
 
     case 'K':
@@ -752,13 +752,14 @@ void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<
 	y+=amp[j]*exp(-sqr(x-pos[j])/sqr(width[j]));
 
       amps[i] += y;
-
-      if (firstTime && offset == 0.0)
-        cout << i << " " << y << " PROFILE " << endl;
     }
   }
 
-  firstTime=false;
+  if (firstTime)
+    for (unsigned i=0;i<stdarch->get_nbin();i++)
+      cout << i << " " << amps[i] << " PROFILE " << endl;
+
+  firstTime = false;
 }
 
 string get_name( Reference::To< Archive > archive )
