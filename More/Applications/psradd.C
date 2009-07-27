@@ -120,6 +120,9 @@ static string log_filename;
 // the ephemeris to be installed
 static Reference::To<Pulsar::Parameters> ephemeris;
 
+// the append algorithm in use
+static Pulsar::Append* append = 0;
+
 int main (int argc, char **argv) try
 {
   // append in the time direction
@@ -176,6 +179,8 @@ int main (int argc, char **argv) try
   Pulsar::TimeAppend time;
   Pulsar::FrequencyAppend frequency;
 
+  append = &time;
+
   int c;  
   while ((c = getopt(argc, argv, args)) != -1)  {
     switch (c)  {
@@ -185,7 +190,7 @@ int main (int argc, char **argv) try
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.66 2009/02/18 05:22:06 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.67 2009/07/27 03:56:35 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -320,6 +325,7 @@ int main (int argc, char **argv) try
 
     case 'R':
       time_direction = false;
+      append = &frequency;
       break;
 
     case 'r':
@@ -790,6 +796,8 @@ reorder(Reference::To<Pulsar::Archive> arch)
 void set_total (Pulsar::Archive* archive)
 {
   total = archive;
+
+  append->init (total);
 
   if (auto_add)
   {

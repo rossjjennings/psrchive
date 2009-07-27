@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Append.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/06/02 04:18:27 $
+   $Revision: 1.8 $
+   $Date: 2009/07/27 03:56:13 $
    $Author: straten $ */
 
 #ifndef _Pulsar_Append_H
@@ -25,6 +25,9 @@ namespace Pulsar {
 
     //! Default constructor
     Append ();
+
+    //! Initialize an archive for appending
+    virtual void init (Archive* into) { }
 
     //! Copy the data in 'from' to 'into'
     void append (Archive* into, const Archive* from);

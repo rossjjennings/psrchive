@@ -140,6 +140,18 @@ void Pulsar::FrequencyAppend::combine (Archive* into, Archive* from)
       " bw=" << into->get_bandwidth() << endl;
 }
 
+//! Initialize an archive for appending
+void Pulsar::FrequencyAppend::init (Archive* into)
+{
+  if (!weight_strategy)
+    return;
+
+  const unsigned nsubint = into->get_nsubint();
+
+  for (unsigned isub=0; isub < nsubint; isub++)
+    weight_strategy( into->get_Integration (isub) );
+}
+
 void Pulsar::FrequencyAppend::combine (Integration* into, Integration* from)
 try 
 {

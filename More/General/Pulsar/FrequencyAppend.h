@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FrequencyAppend.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/06/01 10:17:44 $
+   $Revision: 1.6 $
+   $Date: 2009/07/27 03:56:13 $
    $Author: straten $ */
 
 #ifndef _Pulsar_FrequencyAppend_H
@@ -25,6 +25,9 @@ namespace Pulsar {
   class FrequencyAppend : public Append {
 
   public:
+
+    //! Initialize an archive for appending
+    void init (Archive* into);
 
     //! The policy used to weight each profile during combine
     static Functor< void (Integration*) > weight_strategy;
