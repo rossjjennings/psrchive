@@ -44,7 +44,7 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
        "ncal", "Number of CAL transitions" );
 
   add( &Statistics::get_2bit_dist,
-       "2bitd", "2-bit distortion" );
+       "d2bit", "2-bit distortion" );
 }
 
 
