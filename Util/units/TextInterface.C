@@ -234,7 +234,7 @@ TextInterface::Parser::find (const string& name, bool throw_exception) const
 
   if (throw_exception)
     throw Error (InvalidParam, "TextInterface::Parser::find",
-		 "no value named " + name);
+		 "no value named '%s'", name.c_str());
 
   return 0;
 }

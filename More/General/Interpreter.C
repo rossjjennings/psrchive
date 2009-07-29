@@ -667,6 +667,10 @@ bool Pulsar::Interpreter::evaluate (const std::string& expression)
 
   evaluate_expression = substitute (expression, get_interface());
 
+  if (VERBOSE)
+    cerr << "Pulsar::Interpreter::evaluate expression="
+            "'" << evaluate_expression << "'" << endl;
+
   string evaluate = result + " = (" + evaluate_expression + ")";
 
   // Call parser function from Parsifal Software

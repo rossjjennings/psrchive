@@ -54,6 +54,8 @@ int main (int argc, char** argv)
   char* metafile = NULL;
   // help requested
   bool help = false;
+  //
+  bool verbose = false;
 
   Pulsar::Interpreter* interpreter = standard_shell();
 
@@ -80,10 +82,12 @@ int main (int argc, char** argv)
 
     case 'v':
       Pulsar::Archive::set_verbosity (2);
+      verbose = true;
       break;
 
     case 'V':
       Pulsar::Archive::set_verbosity (3);
+      verbose = true;
       break;
 
     } 
@@ -131,14 +135,19 @@ int main (int argc, char** argv)
 
     // two or more arguments: script mode
 
-    for (unsigned i=0; i<filenames.size(); i++) try {
+    for (unsigned i=0; i<filenames.size(); i++) try
+    {
       interpreter->set( Pulsar::Archive::load (filenames[i]) );
       interpreter->script( script );
     }
-    catch (Error& error) {
-      cerr << "psrsh: error while processing " << filenames[i] << ":\n"
-	   << error.get_message() << "\n"
-	"script = " << script << endl;
+    catch (Error& error)
+    {
+      cerr << "psrsh: error while processing " << filenames[i] << ":" << endl;
+      if (verbose)
+        cerr << error << endl;
+      else
+	cerr << error.get_message() << endl;
+      cerr << "script = " << script << endl;
     }
 
   }
