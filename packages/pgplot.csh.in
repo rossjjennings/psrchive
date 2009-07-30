@@ -39,6 +39,9 @@ perl -pi -e 's/! XWDRIV/  XWDRIV/' drivers.list
 
 $PGPLOT_SRC/makemake $PGPLOT_SRC linux psrchive
 
+# remove the broken dependency on png.h, etc.
+perl -pi -e 's/^pndriv\.o :/# /' makefile
+
 make
 make cpg
 make pgxwin_server
