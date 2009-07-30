@@ -47,3 +47,15 @@ make cpg
 make pgxwin_server
 make grfont.dat
 
+echo
+echo
+echo "PGPLOT compilation completed"
+echo
+echo "To use the library, please set the environment variables"
+echo
+echo 'setenv PGPLOT_DIR @prefix@/pgplot'
+echo 'setenv PGPLOT_FONT $PGPLOT_DIR/grfont.dat'
+echo
+echo "and then re-run the PSRCHIVE configure script"
+echo
+
