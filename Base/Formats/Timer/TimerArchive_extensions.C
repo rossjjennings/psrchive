@@ -18,7 +18,7 @@
 
 using namespace std;
 
-void Pulsar::TimerArchive::unpack_extensions ()
+void Pulsar::TimerArchive::unpack_extensions () try
 {
   if (verbose == 3)
     cerr << "Pulsar::TimerArchive::unpack_extensions" << endl;
@@ -27,8 +27,17 @@ void Pulsar::TimerArchive::unpack_extensions ()
   unpack (receiver);
 
   Telescope* telescope = getadd<Telescope>();
-  telescope->set_coordinates (get_telescope());
 
+  try
+  {
+    telescope->set_coordinates (get_telescope());
+  }
+  catch (Error& error)
+  {
+    warning << "Pulsar::TimerArchive::unpack_extensions " 
+            << error.get_message().c_str() << endl;
+  }
+  
   TapeInfo* tape = getadd<TapeInfo>();
   unpack (tape);
 
@@ -49,6 +58,10 @@ void Pulsar::TimerArchive::unpack_extensions ()
 	 << backend->get_extension_name() << " name="
 	 << backend->get_name() << endl;
 
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::TimerArchive::unpack_extensions";
 }
 
 void Pulsar::TimerArchive::pack_extensions () const
