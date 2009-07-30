@@ -281,8 +281,8 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
     } // if S2 data
 
 
-    if (baseband && telescope) {
-
+    if (baseband && telescope) try
+    {
       // Correct the direction and parallactic angles
       if (verbose == 3)
         cerr << "TimerArchive::subint_load correcting parallactic angle\n";
@@ -302,8 +302,10 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
       subint->mini.tel_az = horizon.get_azimuth() * rad2deg;
       subint->mini.tel_zen = horizon.get_zenith() * rad2deg;
       subint->mini.para_angle = horizon.get_parallactic_angle() * rad2deg;
-
-
+    }
+    catch (Error& error)
+    {
+      cerr << error << endl;
     }
 
     if (reverse_U && !Profile::no_amps) {
@@ -314,7 +316,8 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 	*(subint->profiles[2][ichan]) *= -1.0;
     }
     
-    if (reverse_V && !Profile::no_amps) {
+    if (reverse_V && !Profile::no_amps)
+    {
       if (verbose == 3)
 	cerr << "TimerArchive::subint_load reversing sign of ipol=3" 
 	     << endl;
@@ -339,8 +342,8 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
   // profile weights from the S2 set to zero during software coherent
   // dedispersion.  Here we fill in the weights with the integration
   // time if they are all zero, but leave them alone if they are not.
-  if (strcmp(hdr.machine_id, "S2")==0) {
-
+  if (strcmp(hdr.machine_id, "S2")==0)
+  {
     int weights = 0;
 
     for (unsigned i=0; i < get_nsubint(); i++)
@@ -349,7 +352,8 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 	  if (get_Profile(i,j,k)->get_weight() != 0) 
 	    weights = 1;
 
-    if (weights==0) {
+    if (weights==0)
+    {
       cerr << "TimerArchive::subint_load"
 	"replacing profile weights by sub int time" << endl;
       
@@ -362,7 +366,8 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 
   // Weight correction and calibration for FB archives
   // RNM Feb 17, 2000
-  if(strcmp(hdr.machine_id, "FB")==0){
+  if(strcmp(hdr.machine_id, "FB")==0)
+  {
     int weights = 0; float nch_sub, tdmp;  double chbw;
     tdmp = hdr.sub_int_time / hdr.ndump_sub_int;
     chbw = fabs(hdr.banda.bw)/hdr.banda.nlag;
