@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -202,7 +202,10 @@ void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
   if (verbose)
     cerr << "Pulsar::StokesFluctPlot::get_profiles calling get_Stokes" << endl;
 
-  Reference::To<const PolnProfile> profile = get_Stokes (data, isubint, ichan);
+  Reference::To<const PolnProfile> profile;
+
+  if (plot_values != "I")
+    profile = get_Stokes (data, isubint, ichan);
 
   if (verbose)
     cerr << "Pulsar::StokesFluctPlot::get_profiles filling vector" << endl;
@@ -213,8 +216,20 @@ void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
   {
     Reference::To<Profile> prof;
 
+    if (plot_values == "I")
+    {
+      Index ipol;
+      ipol.set_integrate (true);
+      
+      Reference::To<const Profile> I;
+      I = get_Profile (data, isubint, ipol, ichan);
+
+      prof = fourier_transform (I);
+      detect (prof);
+    }
+
     // special case for invariant interval: form before FFT
-    if (plot_values[ipol] == 'S')
+    else if (plot_values[ipol] == 'S')
     {
       prof = new_Fluct (profile, plot_values[ipol]);
       prof = fourier_transform (prof);
