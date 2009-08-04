@@ -72,7 +72,7 @@ char backward_compatibility (char c)
 paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
 {
   has_manual = true;
-  version = "$Id: paz.C,v 1.56 2009/07/01 16:41:22 demorest Exp $";
+  version = "$Id: paz.C,v 1.57 2009/08/04 06:15:12 straten Exp $";
   filter = backward_compatibility;
 
   add( new Pulsar::StandardOptions );
@@ -293,11 +293,12 @@ bool paz::parse (char code, const std::string& arg)
       {
 	unsigned first = 1;
 	unsigned last = 0;
+	char delimiter = 0;
 
 	zero_channels = true;
-	if (sscanf (c_arg, "%d %d", &first, &last) != 2)
+	if (sscanf (c_arg, "%u%c%u", &first, &delimiter, &last) != 3)
 	  throw Error (InvalidState, "paz::parse",
-		       "Invalid parameter to option -Z");
+		       " '-Z %s' not understood", c_arg);
 
 	for (unsigned i = first; i <= last; i++)
 	  chans_to_zap.push_back (i);
