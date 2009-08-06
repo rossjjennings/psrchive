@@ -223,10 +223,10 @@ int Pulsar::Application::main (int argc, char** argv) try
       cerr << "\n" << error.get_message() << endl;
   }
 
+  finalize ();
+
   for (unsigned i=0; i<options.size(); i++)
     options[i]->finalize ();
-
-  finalize ();
 
   return 0;
 }
