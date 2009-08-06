@@ -1310,7 +1310,10 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
 //! Returns the full pathname of the Entry filename
 string Pulsar::Database::get_filename (const Entry& entry) const
 {
-  return path + "/" + entry.filename;
+  if (entry.filename[0] == '/')
+    return entry.filename;
+  else
+    return path + "/" + entry.filename;
 }
 
 //! Returns the full pathname of the Entry filename
