@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotOptions.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/06/12 09:10:10 $
+   $Revision: 1.5 $
+   $Date: 2009/08/06 02:53:16 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotOptions_h
@@ -31,11 +31,21 @@ namespace Pulsar {
     //! Enable/disable pgplot device open and close
     void set_open_device (bool flag);
 
+    //! Set the plot device
+    void set_device (const std::string& dev) { plot_device = dev; }
+
     //! Additional usage information implemented by derived classes
     std::string get_usage ();
 
     //! Additional getopt options
     std::string get_options ();
+
+    //! Get the number of panels into which the plot surface is divided
+    unsigned get_x_npanel () const { return x_npanel; }
+    void set_x_npanel (unsigned n) { x_npanel = n; }
+
+    unsigned get_y_npanel () const { return y_npanel; }
+    void set_y_npanel (unsigned n) { y_npanel = n; }
 
     //! Parse a command line option, return true if understood
     bool parse (char code, const std::string& arg);
@@ -62,7 +72,7 @@ namespace Pulsar {
     // plot dimensions in pixels
     unsigned width_pixels, height_pixels;
 
-    // always open device
+    // open device
     bool open_device;
   };
 
