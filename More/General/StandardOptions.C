@@ -51,9 +51,17 @@ bool Pulsar::StandardOptions::parse (char code, const std::string& arg)
   return true;
 }
 
+void Pulsar::StandardOptions::add_default_job (const std::string& job)
+{
+  default_jobs.push_back (job);
+}
+
 //! Preprocessing tasks implemented by partially derived classes
 void Pulsar::StandardOptions::process (Archive* archive)
 {
+  if (jobs.size() == 0)
+    jobs = default_jobs;
+
   if (jobs.size() == 0)
     return;
 

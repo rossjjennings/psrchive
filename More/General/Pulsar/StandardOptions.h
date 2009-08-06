@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardOptions.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/05/22 20:08:42 $
+   $Revision: 1.4 $
+   $Date: 2009/08/06 02:53:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StandardOptions_h
@@ -40,6 +40,9 @@ namespace Pulsar {
     //! Preprocessing tasks implemented by partially derived classes
     virtual void process (Archive*);
 
+    //! Add to the default preprocessing jobs (ignored if jobs are set)
+    void add_default_job (const std::string& job);
+
     //! Provide access to the interpreter
     Interpreter* get_interpreter ();
 
@@ -47,6 +50,9 @@ namespace Pulsar {
 
     // Preprocessing jobs
     std::vector<std::string> jobs;
+
+    // Default preprocessing jobs
+    std::vector<std::string> default_jobs;
 
     // standard interpreter
     Reference::To<Interpreter> interpreter;
