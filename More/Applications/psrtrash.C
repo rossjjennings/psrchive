@@ -154,7 +154,7 @@ void trash::select ()
       if (index >= plotted)
 	continue;
 
-      cerr << "trash: " << files[index] << endl;
+      cout << "trash: " << files[index] << endl;
 
       // draw a big red x
       cpgpanl (xip+1, yip+1);
