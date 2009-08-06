@@ -51,6 +51,8 @@ protected:
 
   // List of archives plotted
   vector<string> files;
+
+  void select ();
 };
 
 
@@ -59,6 +61,7 @@ trash::trash ()
 {
   plot_options.set_x_npanel (5);
   plot_options.set_y_npanel (4);
+  plot_options.set_device ("/xs");
 
   // by default, pscrunch, tscrunch, and fscrunch
   standard_options.add_default_job ("pTFC");
@@ -75,6 +78,7 @@ trash::trash ()
 void trash::process (Pulsar::Archive* archive)
 {
   cpgpage ();
+  cpgask (0);
 
   if (!plot)
   {
@@ -104,8 +108,7 @@ void trash::process (Pulsar::Archive* archive)
 
   if (plotted == files.size())
   {
-    cerr << "this is where the interaction would take place" << endl;
-
+    select ();
     plotted = 0;
   }
 }
@@ -114,9 +117,47 @@ void trash::finalize ()
 {
   if (plotted)
   {
-    cerr << "this is where the final interaction would take place" << endl;
-
+    select ();
     plotted = 0;
+  }
+}
+
+void trash::select ()
+{
+  char ans='j';
+  float x=0.5, y=0.5;
+
+  cpgsvp (0,1, 0,1);
+
+  // last plot is in bottom right-hand corner, so reverse x-axis
+  cpgswin (1,0, 0,1);
+
+  unsigned xpanel = plot_options.get_x_npanel();
+  unsigned ypanel = plot_options.get_y_npanel();
+
+  while (ans != ' ')
+  {
+    cpgcurs (&x,&y,&ans);
+
+    if (ans == 'A')
+    {
+      if (x < 0) x = 0;
+      if (y < 0) y = 0;
+
+      unsigned xip = unsigned (x);
+      unsigned yip = unsigned (y);
+
+      if (xip >= xpanel) xip = xpanel - 1;
+      if (yip >= ypanel) yip = ypanel - 1;
+
+      unsigned back_index = yip * xpanel + xip;
+
+      assert (back_index < files.size());
+
+      unsigned index = files.size() - back_index - 1;
+
+      cerr << "trash: " << files[index] << endl;
+    }
   }
 }
 
