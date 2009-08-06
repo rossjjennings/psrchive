@@ -103,6 +103,7 @@ int main (int argc, char** argv)
   bool publication = false;
 
   bool plot_derived_calibrator = false;
+  bool unload_derived_calibrator = false;
 
   bool plot_calibrator_solution = true;
   bool plot_calibrator_stokes = false;
@@ -129,7 +130,7 @@ int main (int argc, char** argv)
   bool verbose = false;
   char c;
 
-  while ((c = getopt(argc, argv, "2:a:c:CD:dfhjM:mn:Ppr:S:stqvV")) != -1)
+  while ((c = getopt(argc, argv, "2:a:c:CD:dfhjM:mn:Ppr:S:stuqvV")) != -1)
   {
     switch (c)
     {
@@ -283,6 +284,10 @@ int main (int argc, char** argv)
 
     case 't':
       print_titles = true;
+      break;
+
+    case 'u':
+      unload_derived_calibrator = true;
       break;
 
     case 'V':
@@ -587,14 +592,15 @@ int main (int argc, char** argv)
 
       if (dop_calibrator)
 	continue;
-      
-      cerr << "pacv: Creating " << archive_class << " Archive" << endl;
-      
-      output = calibrator->new_solution (archive_class);
 
-      string newname = replace_extension (filenames[ifile], "pacv");
-      cerr << "pacv: Unloading " << newname << endl;
-      output -> unload (newname);
+      if (unload_derived_calibrator)
+      {
+	output = calibrator->new_solution (archive_class);
+
+	string newname = replace_extension (filenames[ifile], "pacv");
+	cerr << "pacv: Unloading solution " << newname << endl;
+	output -> unload (newname);
+      }
     }
   }
   catch (Error& error)
