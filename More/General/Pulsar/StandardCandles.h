@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardCandles.h,v $
-   $Revision: 1.11 $
-   $Date: 2007/10/02 05:19:32 $
-   $Author: straten $ */
+   $Revision: 1.12 $
+   $Date: 2009/08/06 17:55:56 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_StandardCandles_h
 #define __Pulsar_StandardCandles_h
@@ -127,6 +127,9 @@ namespace Pulsar {
 
     //! Returns a best guess of the Source type
     Signal::Source guess (std::string& name, sky_coord& pos) const;
+
+    //! Returns a given entry
+    Entry get_entry (const unsigned idx) const { return entries[idx]; }
 
   protected:
     
