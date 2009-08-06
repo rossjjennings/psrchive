@@ -167,8 +167,8 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       // X = TR(0) + TR(1)*I + TR(2)*J
       // Y = TR(3) + TR(4)*I + TR(5)*J
 
-      cerr << " xoff=" << xoff << " x_min=" << x_min << " x_res=" << x_res
-	   << " y_min=" << y_min << " y_res=" << y_res << endl;
+      // cerr << " xoff=" << xoff << " x_min=" << x_min << " x_res=" << x_res
+      //      << " y_min=" << y_min << " y_res=" << y_res << endl;
 
       float trf[6] = { xoff + x_min - 0.5*x_res, x_res, 0.0,
                        y_min - 0.5*y_res,        0.0, y_res };
