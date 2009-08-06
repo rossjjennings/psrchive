@@ -164,6 +164,14 @@ void trash::select ()
       cpgmove (0,1);
       cpgdraw (1,0);
     }
+    else if (ans == 'a' || ans == 'e')
+    {
+      cerr << "psrtrash: trashing all plotted" << endl;
+      for (unsigned i=0; i<plotted; i++)
+        cout << "trash: " << files[i] << endl;
+
+      break;
+    }
   }
 
   cpgpanl (xpanel,ypanel);
