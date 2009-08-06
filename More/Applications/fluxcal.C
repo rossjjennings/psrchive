@@ -48,6 +48,7 @@ void usage ()
     "  -e extension filename extension added to output archives\n"
     "  -f           fix the type and name attributes, based on coordinates\n"
     "  -i minutes   maximum number of minutes between archives in same set\n"
+    "  -I freq_mhz  Print all cal sources fluxes at the given frequency\n"
     "\n"
     "By default, standard candle information is read from \n" 
        << Pulsar::StandardCandles::default_filename << "\n"
@@ -95,6 +96,9 @@ catch (Error& error) {
 // print configuration information to cerr
 void configuration_report (Reference::To<Pulsar::StandardCandles>);
 
+// print all fluxes to cerr
+void print_fluxes (Reference::To<Pulsar::StandardCandles>, double freq);
+
 int main (int argc, char** argv) try {
 
   Pulsar::Option<bool> self_calibrate ("fluxcal::self_calibrate", false);
@@ -107,8 +111,11 @@ int main (int argc, char** argv) try {
 
   string database_filename;
 
+  bool print_flux = false;
+  double print_ref_freq = 0.0;
+
   char c;
-  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:fi:")) != -1) 
+  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:fi:I:")) != -1) 
 
     switch (c)  {
 
@@ -166,6 +173,11 @@ int main (int argc, char** argv) try {
 	   << " minutes" << endl;
       break;
 
+    case 'I':
+      print_flux = true;
+      print_ref_freq = atof(optarg);
+      break;
+
     default:
       cerr << "fluxcal: invalid command line option: -" << c << endl;
       break;
@@ -174,13 +186,20 @@ int main (int argc, char** argv) try {
   if (verbose)
     configuration_report (standards);
 
+  if (print_flux)
+    print_fluxes(standards, print_ref_freq);
+
   vector<string> filenames;
   for (int ai=optind; ai<argc; ai++)
     dirglob (&filenames, argv[ai]);
 
   if (filenames.size() == 0 && !database) {
-    cerr << "fluxcal: please specify filename[s]" << endl;
-    return -1;
+    if (print_flux)
+      return 0;
+    else {
+      cerr << "fluxcal: please specify filename[s]" << endl;
+      return -1;
+    }
   }
 
   sort (filenames.begin(), filenames.end());
@@ -346,3 +365,24 @@ void configuration_report (Reference::To<Pulsar::StandardCandles> standards)
        << correct->get_off_filename () << endl
        << endl;
 }
+
+void print_fluxes (Reference::To<Pulsar::StandardCandles> standards, 
+    double freq)
+{
+  if (!standards)
+    standards = new Pulsar::StandardCandles;
+
+  cerr << endl
+    << "fluxcal: using file " << standards->get_filename() 
+    << endl;
+  cerr << "  Cal source fluxes at " << freq << " MHz:"
+    << endl;
+
+  for (unsigned i=0; i<standards->size(); i++) 
+    cerr << "  " << setw(11) << standards->get_entry(i).source_name[0]
+      << ":  " << standards->get_entry(i).get_flux_mJy(freq)/1000. 
+      << " Jy" << endl;
+
+  cerr << endl;
+}
+
