@@ -127,16 +127,15 @@ void trash::select ()
   char ans='j';
   float x=0.5, y=0.5;
 
-  cpgsvp (0,1, 0,1);
-
-  // last plot is in bottom right-hand corner, so reverse x-axis
-  cpgswin (1,0, 0,1);
-
   unsigned xpanel = plot_options.get_x_npanel();
   unsigned ypanel = plot_options.get_y_npanel();
 
   while (ans != ' ')
   {
+    cpgpanl (1,1);
+    cpgsvp (0,1, 0,1);
+    // left-to-right top-to-bottom
+    cpgswin (0,1, 1,0);
     cpgcurs (&x,&y,&ans);
 
     if (ans == 'A')
@@ -150,15 +149,25 @@ void trash::select ()
       if (xip >= xpanel) xip = xpanel - 1;
       if (yip >= ypanel) yip = ypanel - 1;
 
-      unsigned back_index = yip * xpanel + xip;
+      unsigned index = yip * xpanel + xip;
+      assert (index < files.size());
 
-      assert (back_index < files.size());
-
-      unsigned index = files.size() - back_index - 1;
+      if (index >= plotted)
+	continue;
 
       cerr << "trash: " << files[index] << endl;
+
+      // draw a big red x
+      cpgpanl (xip+1, yip+1);
+      cpgsci (2);
+      cpgmove (0,0);
+      cpgdraw (1,1);
+      cpgmove (0,1);
+      cpgdraw (1,0);
     }
   }
+
+  cpgpanl (xpanel,ypanel);
 }
 
 int main (int argc, char** argv)
