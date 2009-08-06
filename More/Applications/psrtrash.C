@@ -1,0 +1,128 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2009 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+
+#include "Pulsar/Application.h"
+#include "Pulsar/StandardOptions.h"
+#include "Pulsar/PlotOptions.h"
+
+#include "Pulsar/PlotFactory.h"
+#include "Pulsar/FramedPlot.h"
+#include "Pulsar/Archive.h"
+
+#include <cpgplot.h>
+
+using namespace std;
+using namespace Pulsar;
+
+//
+//! An application to interactively trash files
+//
+class trash : public Pulsar::Application
+{
+public:
+
+  //! Default constructor
+  trash ();
+
+  //! Process the given archive
+  void process (Pulsar::Archive*);
+
+  //! Process any remaining archives
+  void finalize ();
+
+protected:
+
+  unsigned plotted;
+  string plot_name;
+
+  // Available plots
+  PlotFactory factory;
+
+  // Plot classes to be used
+  Reference::To<Plot> plot;
+
+  // Plot options
+  Pulsar::PlotOptions plot_options;
+  Pulsar::StandardOptions standard_options;
+
+  // List of archives plotted
+  vector<string> files;
+};
+
+
+trash::trash ()
+  : Application ("trash", "quickly visually inspect and trash files")
+{
+  plot_options.set_x_npanel (5);
+  plot_options.set_y_npanel (4);
+
+  // by default, pscrunch, tscrunch, and fscrunch
+  standard_options.add_default_job ("pTFC");
+
+  // by default, plot the total intensity
+  plot_name = "flux";
+
+  add( &plot_options );
+  add( &standard_options );
+
+  plotted = 0;
+}
+
+void trash::process (Pulsar::Archive* archive)
+{
+  cpgpage ();
+
+  if (!plot)
+  {
+    plot = factory.construct( plot_name );
+    
+    FramedPlot* framed = dynamic_cast<FramedPlot*> (plot.get());
+
+    if (framed)
+    {
+      // make the plot larger
+      framed -> get_frame() -> set_viewport (0.05, 0.95, 0.05, 0.95);
+      
+      // remove the above frame labels
+      framed -> get_frame() -> get_label_above()->set_all ("");
+    }
+  }
+
+  plot->preprocess (archive);
+  plot->plot (archive);
+
+  if (files.size() == 0)
+    files.resize( plot_options.get_x_npanel() * plot_options.get_y_npanel() );
+
+  files[plotted] = archive->get_filename();
+
+  plotted ++;
+
+  if (plotted == files.size())
+  {
+    cerr << "this is where the interaction would take place" << endl;
+
+    plotted = 0;
+  }
+}
+
+void trash::finalize ()
+{
+  if (plotted)
+  {
+    cerr << "this is where the final interaction would take place" << endl;
+
+    plotted = 0;
+  }
+}
+
+int main (int argc, char** argv)
+{
+  trash program;
+  return program.main (argc, argv);
+}
+
