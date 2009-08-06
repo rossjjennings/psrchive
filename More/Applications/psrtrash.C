@@ -150,7 +150,6 @@ void trash::select ()
       if (yip >= ypanel) yip = ypanel - 1;
 
       unsigned index = yip * xpanel + xip;
-      assert (index < files.size());
 
       if (index >= plotted)
 	continue;
