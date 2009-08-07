@@ -265,21 +265,39 @@ void Calibration::StandardModel::add_fluxcal_backend ()
   FluxCalibrator_path = equation->get_transformation_index ();
 }
 
+void
+Calibration::StandardModel::set_foreach_calibrator (const MEAL::Complex2* x)
+{
+  foreach_pcal = x;
+}
+
+
 void Calibration::StandardModel::add_polncal_backend ()
 {
   if (!built)
     build ();
 
+  Reference::To< MEAL::ProductRule<MEAL::Complex2> > pcal_path;
   pcal_path = new MEAL::ProductRule<MEAL::Complex2>;
 
   if (constant_pulsar_gain)
   {
-    pcal_gain = new MEAL::Gain<MEAL::Complex2>;
-    pcal_gain_chain = new MEAL::ChainRule<MEAL::Complex2>;
-    pcal_gain_chain->set_model( pcal_gain );
-    if (gain)
-      pcal_gain_chain->set_constraint( 0, gain );
+    if (!pcal_gain)
+    {
+      pcal_gain = new MEAL::Gain<MEAL::Complex2>;
+      pcal_gain_chain = new MEAL::ChainRule<MEAL::Complex2>;
+      pcal_gain_chain->set_model( pcal_gain );
+      if (gain)
+	pcal_gain_chain->set_constraint( 0, gain );
+    }
+
     *pcal_path *= pcal_gain_chain;
+  }
+
+  if (foreach_pcal && ReferenceCalibrator_path)
+  {
+    Reference::To< MEAL::Complex2 > clone = foreach_pcal->clone();
+    *pcal_path *= clone;
   }
 
   *pcal_path *= instrument;
@@ -661,6 +679,17 @@ void Calibration::StandardModel::add_calibrator_epoch (const MJD& epoch)
 
   if (convert.get_reference_epoch() == zero)
     convert.set_reference_epoch ( epoch );
+
+  // it may be necessary to remove this signal path if
+  // the add_data step fails and no other calibrator succeeds
+  if (!get_polncal_path() || foreach_pcal)
+  {
+    if (verbose)
+      cerr << "Calibration::StandardModel::add_calibrator_epoch"
+	" add_polncal_backend" << endl;
+
+    add_polncal_backend();
+  }
 
 #ifdef _DEBUG
   cerr << "Calibration::StandardModel::add_calibrator_epoch epoch="

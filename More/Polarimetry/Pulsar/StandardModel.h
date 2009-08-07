@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.24 $
-   $Date: 2009/06/13 05:11:05 $
+   $Revision: 1.25 $
+   $Date: 2009/08/07 14:05:47 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -51,6 +51,9 @@ namespace Calibration
 
     //! Set true when the pulsar Stokes parameters have been normalized
     void set_constant_pulsar_gain (bool = true);
+
+    //! Set the transformation to be cloned for each calibrator transformation
+    void set_foreach_calibrator (const MEAL::Complex2*);
 
     //! Set gain to the univariate function of time
     void set_gain (MEAL::Univariate<MEAL::Scalar>*);
@@ -160,9 +163,10 @@ namespace Calibration
     Calibration::ConvertMJD convert;
 
     //! The signal path experienced by the calibrator
-    Reference::To< MEAL::ProductRule<MEAL::Complex2> > pcal_path;
     Reference::To< MEAL::ChainRule<MEAL::Complex2> > pcal_gain_chain;
     Reference::To< MEAL::Gain<MEAL::Complex2> > pcal_gain;
+    //! Transformation cloned for each calibrator observation
+    Reference::To< const MEAL::Complex2 > foreach_pcal;
 
     //! The signal path experienced by the pulsar
     Reference::To< MEAL::ProductRule<MEAL::Complex2> > pulsar_path;

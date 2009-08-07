@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.21 $
-   $Date: 2009/04/02 22:52:57 $
+   $Revision: 1.22 $
+   $Date: 2009/08/07 14:05:47 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -146,6 +146,9 @@ namespace Pulsar
     //! Set the time variation of differential phase
     virtual void set_diff_phase( MEAL::Univariate<MEAL::Scalar>* );
 
+    //! Set the transformation to be cloned for each calibrator
+    virtual void set_foreach_calibrator( const MEAL::Complex2* );
+
     //! Add the observation to the set of constraints
     virtual void add_observation (const Archive* data);
 
@@ -240,6 +243,9 @@ namespace Pulsar
 
     //! Time variation of differential phase
     Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
+
+    //! Transformation cloned for each calibrator observation
+    Reference::To< const MEAL::Complex2 > foreach_calibrator;
 
     //! Initialize the StandardModel of the specified channel
     virtual void init_model (unsigned ichan);

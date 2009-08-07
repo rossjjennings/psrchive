@@ -173,6 +173,11 @@ void Pulsar::SystemCalibrator::set_impurity( MEAL::Real4* f )
   impurity = f;
 }
 
+void Pulsar::SystemCalibrator::set_foreach_calibrator (const MEAL::Complex2* x)
+{
+  foreach_calibrator = x;
+}
+
 void Pulsar::SystemCalibrator::set_gain( Univariate<Scalar>* f )
 {
   gain_variation = f;
@@ -688,19 +693,6 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
 
   check_ichan ("subit_calibrator_data", data.ichan);
 
-  // it may be necessary to remove this signal path if
-  // the add_data step fails and no other calibrator succeeds
-  if (!model[data.ichan]->get_polncal_path())
-  {
-    if (verbose > 2)
-      cerr << "Pulsar::SystemCalibrator::submit_calibrator_data add polncal"
-	   << endl;
-    model[data.ichan]->add_polncal_backend();
-  }
-
-  measurements.set_transformation_index
-    ( model[data.ichan]->get_polncal_path() );
-
   if (!epoch_added[data.ichan])
   {
 #ifdef _DEBUG
@@ -710,6 +702,9 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
     model[data.ichan]->add_calibrator_epoch (data.epoch);
     epoch_added[data.ichan] = true;
   }
+
+  measurements.set_transformation_index
+    ( model[data.ichan]->get_polncal_path() );
 
   model[data.ichan]->get_equation()->add_data (measurements);
 }
@@ -830,6 +825,9 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
       cerr << "Pulsar::SystemCalibrator::init_model impurity" << endl;
     model[ichan]->set_impurity( impurity->clone() );
   }
+
+  if (foreach_calibrator)
+    model[ichan]->set_foreach_calibrator( foreach_calibrator );
 
   if (gain_variation)
     model[ichan]->set_gain( gain_variation->clone() );

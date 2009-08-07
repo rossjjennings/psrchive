@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.107 $
-   $Date: 2009/07/24 00:39:19 $
+   $Revision: 1.108 $
+   $Date: 2009/08/07 14:06:42 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -36,6 +36,8 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
+
+#include "Pulsar/SingleAxis.h"
 #include "Pulsar/ReflectStokes.h"
 
 #include "RealTimer.h"
@@ -82,6 +84,7 @@ void usage ()
     "\n"
     "  -t nproc   solve using nproc threads \n"
     "\n"
+    "  -U PAR     model PAR with a unique value for each CAL \n"
     "  -u PAR     model PAR with a step at each CAL \n"
     "  -o PAR:N   model PAR as N degree polyomial \n"
     "             where PAR is one of \n"
@@ -417,6 +420,45 @@ void set_time_variation (char code, MEAL::Univariate<MEAL::Scalar>* function)
 	       "unrecognized PAR code = %c", code);
 }
 
+
+bool gain_foreach_calibrator = false;
+bool diff_gain_foreach_calibrator = false;
+bool diff_phase_foreach_calibrator = false;
+
+bool get_foreach_calibrator ()
+{
+  return gain_foreach_calibrator ||
+    diff_gain_foreach_calibrator ||
+    diff_phase_foreach_calibrator;
+}
+
+void set_foreach_calibrator (char code)
+{
+  switch (code)
+  {
+  case 'g':
+    cerr << "gain" << endl;
+    gain_foreach_calibrator = true;
+    return;
+  case 'b':
+    cerr << "differential gain" << endl;
+    diff_gain_foreach_calibrator = true;
+    return;
+  case 'r':
+    cerr << "differential phase" << endl;
+    diff_phase_foreach_calibrator = true;
+    return;
+  case 'a':
+    cerr << "all backend parameters" << endl;
+    gain_foreach_calibrator = true;
+    diff_gain_foreach_calibrator = true;
+    diff_phase_foreach_calibrator = true;
+    return;
+  }
+  throw Error (InvalidParam, "set_foreach_calibrator",
+	       "unrecognized PAR code = %c", code);
+}
+
 Calibration::ReceptionModel::Solver* new_solver (const string& name)
 {
   if (name == "MEAL")
@@ -527,7 +569,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args
-    = "1A:a:B:b:c:C:d:D:gHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rsS:t:T:u:vV:X:";
+    = "1A:a:B:b:c:C:d:D:gHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rsS:t:T:u:U:vV:X:";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -683,6 +725,11 @@ int actual_main (int argc, char *argv[]) try
     case 'u':
       cerr << "pcm: using a multiple-step function to model ";
       set_time_variation( optarg[0], new MEAL::Steps );
+      break;
+
+    case 'U':
+      cerr << "pcm: for each calibrator, a unique value of ";
+      set_foreach_calibrator( optarg[0] );
       break;
 
     case 'q':
@@ -868,6 +915,17 @@ int actual_main (int argc, char *argv[]) try
 
       if (diff_phase_variation)
 	model->set_diff_phase( diff_phase_variation );
+
+      if (get_foreach_calibrator())
+      {
+	Reference::To< Calibration::SingleAxis > foreach;
+	foreach = new Calibration::SingleAxis;
+	foreach->set_infit (0, gain_foreach_calibrator);
+	foreach->set_infit (1, diff_gain_foreach_calibrator);
+	foreach->set_infit (2, diff_phase_foreach_calibrator);
+
+	model->set_foreach_calibrator (foreach);
+      }
 
       if (least_squares)
 	model->set_solver( new_solver(least_squares) );
