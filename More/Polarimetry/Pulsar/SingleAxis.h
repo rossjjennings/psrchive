@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxis.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/06/10 10:53:53 $
+   $Revision: 1.11 $
+   $Date: 2009/08/07 14:05:40 $
    $Author: straten $ */
 
 #ifndef __Calibration_SingleAxis_H
@@ -53,6 +53,9 @@ namespace Calibration {
 
     //! Destructor
     ~SingleAxis ();
+
+    //! Clone operator
+    SingleAxis* clone () const;
 
     //! Set cyclical bounds on the differential phase
     void set_cyclic (bool flag = true);

@@ -68,6 +68,11 @@ Calibration::SingleAxis::operator = (const SingleAxis& s)
   return *this;
 }
 
+Calibration::SingleAxis* Calibration::SingleAxis::clone () const
+{
+  return new SingleAxis (*this);
+}
+
 //! Return the name of the class
 string Calibration::SingleAxis::get_name () const
 {
