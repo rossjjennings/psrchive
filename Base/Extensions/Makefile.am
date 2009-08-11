@@ -63,6 +63,7 @@ libExtensions_la_SOURCES = \
         DigitiserStatistics.C \
 	DigitiserCounts.C \
         dspReduction.C \
+	dspReductionTI.C \
 	Effelsberg.C \
         ExampleExtension.C \
         FeedExtension.C \

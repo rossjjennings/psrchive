@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/dspReduction.h,v $
-   $Revision: 1.12 $
-   $Date: 2009/06/17 08:12:19 $
+   $Revision: 1.13 $
+   $Date: 2009/08/11 06:08:04 $
    $Author: straten $ */
 
 #ifndef __dspReduction_h
@@ -18,9 +18,9 @@
 
 namespace Pulsar {
 
-  //! Stores baseband/dsp data reduction parameters
+  //! Stores dspsr data reduction parameters
   /*! This class stores backend information specific to the baseband
-    recording and processing system implemented by baseband/dsp.
+    recording and processing system implemented by dspsr.
    */
   class dspReduction : public Pulsar::Backend {
 
@@ -40,6 +40,19 @@ namespace Pulsar {
 
     //! Clone method
     dspReduction* clone () const;
+
+    //! get the text interface 
+    TextInterface::Parser* get_interface();
+
+    // Text interface to a dspReduction instance
+    class Interface : public TextInterface::To<dspReduction>
+    {
+      public:
+	Interface( dspReduction *s_instance = NULL );
+    };
+
+    //! Return a short name
+    std::string get_short_name () const { return "dspsr"; }
 
     //////////////////////////////////////////////////////////////////////
     //
