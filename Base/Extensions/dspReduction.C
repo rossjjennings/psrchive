@@ -79,3 +79,8 @@ Pulsar::dspReduction::operator= (const dspReduction& dsp)
 Pulsar::dspReduction::~dspReduction ()
 {
 }
+
+TextInterface::Parser* Pulsar::dspReduction::get_interface()
+{
+  return new dspReduction::Interface( this );
+}
