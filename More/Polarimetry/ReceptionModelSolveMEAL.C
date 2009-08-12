@@ -217,7 +217,10 @@ void Calibration::SolveMEAL::fit () try
       }
     }
   }
-  
+
+  if (iterations == maximum_iterations)
+    return;
+
   try
   {
     fit.result (*equation, covariance);
