@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.20 $
-   $Date: 2009/08/12 07:08:14 $
+   $Revision: 1.21 $
+   $Date: 2009/08/12 23:26:00 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
@@ -57,6 +57,12 @@ template<> struct FITS_traits<int>
 template<> struct FITS_traits<long> {
   static inline int datatype() { return TLONG; }
   static inline long null () { return -1; }
+};
+
+//! Template specialization for long
+template<> struct FITS_traits<unsigned> {
+  static inline int datatype() { return TUINT; }
+  static inline long null () { return 0; }
 };
 
 //! Template specialization for long
