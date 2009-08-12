@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.18 $
-   $Date: 2008/08/14 12:57:19 $
+   $Revision: 1.19 $
+   $Date: 2009/08/12 07:02:18 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
@@ -190,7 +190,16 @@ void psrfits_write_col (fitsfile* fptr, const char* name, int row,
 
   fits_get_colnum (fptr, CASEINSEN, const_cast<char*>(name), &colnum, &status);
 
+  if (status)
+    throw FITSError (status, "psrfits_write_col(vector<T>)",
+                     "fits_get_colnum name=%s", name);
+
   fits_modify_vector_len (fptr, colnum, data.size(), &status);
+
+  if (status)
+    throw FITSError (status, "psrfits_write_col(vector<T>)",
+                     "fits_modify_vector_len colnum=%d size=%u",
+		     colnum, data.size());
 
   if (dims.size() > 1)
     psrfits_update_tdim (fptr, colnum, dims);
@@ -201,7 +210,10 @@ void psrfits_write_col (fitsfile* fptr, const char* name, int row,
 		  const_cast<T*>(&(data[0])), &status);
 
   if (status)
-    throw FITSError (status, "psrfits_write_col(vector<T>)", name);
+    throw FITSError (status, "psrfits_write_col(vector<T>)",
+                     "fits_write_col (type=%s colnum=%d row=%d size=%u)",
+                     fits_datatype_str(FITS_traits<T>::datatype()),
+		     colnum, row, data.size());
 }
 
 template<typename T>
