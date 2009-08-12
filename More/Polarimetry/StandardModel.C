@@ -858,6 +858,9 @@ void Calibration::StandardModel::solve () try
 
   get_equation()->solve();
 
+  if (!get_equation()->get_solved())
+    valid = false;
+
   if (impurity)
     for (unsigned i=0; i<impurity->get_nparam(); i++)
     {
