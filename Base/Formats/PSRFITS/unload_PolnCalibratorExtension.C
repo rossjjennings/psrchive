@@ -221,7 +221,7 @@ void unload_solver (fitsfile* fptr,
   unsigned nchan = pce->get_nchan();
 
   data.resize( nchan );
-  vector<int> nfree( nchan, 0 );
+  vector<unsigned> nfree( nchan, 0 );
 
   for (unsigned i = 0; i < nchan; i++)
   {
