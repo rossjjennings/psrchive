@@ -61,6 +61,12 @@ void Calibration::ReceptionModel::solve ()
   solver->solve();
 }
 
+//! Return true when solved
+bool Calibration::ReceptionModel::get_solved () const
+{
+  return solver->get_solved();
+}
+
 void Calibration::ReceptionModel::copy_fit (const ReceptionModel* other)
 {
   if (get_nparam() != other->get_nparam())
