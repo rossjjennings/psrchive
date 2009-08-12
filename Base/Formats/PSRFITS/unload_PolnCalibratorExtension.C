@@ -191,22 +191,15 @@ void unload_covariances (fitsfile* fptr,
 
     if (covar.size() == 0)
       zero = true;
+    else
+      assert (covar.size() == unsigned(ncovar));
 
-    if (zero)
+    for (int icovar = 0; icovar < ncovar; icovar++)
     {
-      for (int j = 0; j < ncovar; j++)
-      {
-	data[count] = 0.0;
-	count++;
-      }
-      continue;
-    }
-
-    assert (covar.size() == unsigned(ncovar));
-
-    for (int j = 0; j < ncovar; j++)
-    {
-      data[count] = covar[j];
+      if (zero)
+	data[count] = 0;
+      else
+	data[count] = covar[icovar];
       count++;
     }
   }
@@ -238,7 +231,10 @@ void unload_solver (fitsfile* fptr,
       nfree[i] = pce->get_transformation(i)->get_nfree();
     }
     else
+    {
       data[i] = 0.0;
+      nfree[i] = 0.0;
+    }
   }
 
   vector<unsigned> no_dimensions;
