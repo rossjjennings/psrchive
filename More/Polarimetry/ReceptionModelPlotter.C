@@ -77,7 +77,8 @@ void Calibration::ReceptionModelPlotter::set_output (const char* filename)
 
 void Calibration::ReceptionModelPlotter::plot_observations ()
 {
-  std::vector< Estimate<float> > stokes[4];
+  std::vector< Estimate<float> > re_stokes[4];
+  std::vector< Estimate<float> > im_stokes[4];
 
   if (model_solved && plot_residual)
   {
@@ -86,6 +87,9 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   }
   
   unsigned ndat = model->get_ndata ();
+
+  bool complex_data = false;
+
   for (unsigned idat=0; idat < ndat; idat++) try
   {
     // get the specified CoherencyMeasurementSet
@@ -103,17 +107,26 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
     {
       if (data[jstate].get_input_index() != isource)
 	continue;
+
+      if (data[jstate].get_nconstraint() == 8)
+	complex_data = true;
+
+      Stokes< std::complex< Estimate<double> > > datum
+	= data[jstate].get_complex_stokes();
       
-      Stokes< Estimate<float> > datum = data[jstate].get_stokes();
-      
-      if (model_solved && plot_residual) {
-	Stokes<double> ms = coherency( model->evaluate() );
+      if (model_solved && plot_residual)
+      {
+	Stokes< complex<double> > ms = complex_coherency( model->evaluate() );
 	datum -= ms;
       }
       
       for (unsigned ipol=0; ipol<4; ipol++)
-	stokes[ipol].push_back (datum[ipol]);
-	
+      {
+	re_stokes[ipol].push_back (datum[ipol].real());
+	if (complex_data)
+	  im_stokes[ipol].push_back (datum[ipol].imag());
+      }
+
       abscissa->push_back (); 
     }
   }
@@ -123,7 +136,7 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
          << idat << error << endl;
   }
 
-  if (stokes[0].size() == 0)
+  if (re_stokes[0].size() == 0)
   {
     cerr << "Calibration::ReceptionModelPlotter::plot_observations "
             "ipath=" << ipath << " isource=" << isource << " no data" << endl;
@@ -145,7 +158,8 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
       fprintf (fptr, "%f ", values[ipt]);
 
       for (unsigned ipol=0; ipol<4; ipol++)
-	fprintf (fptr, "%f %f ", stokes[ipol][ipt].val, stokes[ipol][ipt].var);
+	fprintf (fptr, "%f %f ",
+		 re_stokes[ipol][ipt].val, re_stokes[ipol][ipt].var);
 
       fprintf (fptr, "\n");
 
@@ -172,7 +186,10 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
 
   cpgsvp (x1, x2, y1, y1+(y2-y1)*Ispace);
   
-  plotter.add_plot (values, stokes[0]);
+  plotter.add_plot (values, re_stokes[0]);
+  if (complex_data)
+    plotter.add_plot (values, im_stokes[0]);
+
   plotter.set_border (xborder, Iyborder);
 
   set_ipol (0);
@@ -187,8 +204,12 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   cpgsvp (x1, x2, y1+(y2-y1)*(Ispace+space), y2);
   
   for (unsigned ipol=1; ipol<4; ipol++)
-    plotter.add_plot (values, stokes[ipol]);
-  
+  {
+    plotter.add_plot (values, re_stokes[ipol]);
+    if (complex_data)
+      plotter.add_plot (values, im_stokes[ipol]);
+  }
+
   plotter.separate_viewports();
   
   for (unsigned iplot=0; iplot<3; iplot++)

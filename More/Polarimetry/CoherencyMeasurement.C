@@ -70,6 +70,24 @@ Calibration::CoherencyMeasurement::get_stokes () const
   return result;
 }
 
+//! Get the measured complex Stokes parameters
+Stokes< std::complex< Estimate<double> > > 
+Calibration::CoherencyMeasurement::get_complex_stokes () const
+{
+  Stokes< std::complex< Estimate<double> > > result;
+  Stokes< std::complex<double> > val = complex_coherency (rho);
+
+  for (unsigned ipol=0; ipol<4; ipol++)
+  {
+    Estimate<double> re ( val[ipol].real(), variance[ipol] );
+    Estimate<double> im ( val[ipol].imag(), variance[ipol] );
+
+    result[ipol] = std::complex< Estimate<double> > (re, im);
+  }
+
+  return result;
+}
+
 //! Set the measured complex Stokes parameters
 void Calibration::CoherencyMeasurement::set_stokes
 (const Stokes< complex<double> >& stokes, const Stokes<double>& var)
