@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.21 $
-   $Date: 2008/03/03 21:03:16 $
+   $Revision: 1.22 $
+   $Date: 2009/08/13 21:09:09 $
    $Author: straten $ */
 
 #ifndef __Stokes_H
@@ -25,7 +25,7 @@ class Stokes : public Vector<4,T>
  public:
   
   //! Default constructor
-  Stokes (T a=0.0, T b=0.0, T c=0.0, T d=0.0)
+  Stokes (T a = T(0.0), T b = T(0.0), T c = T(0.0), T d = T(0.0))
     : Vector<4,T> (a,b,c,d) {}
 
   //! Construct from a 4-vector

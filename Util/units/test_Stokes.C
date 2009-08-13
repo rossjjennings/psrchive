@@ -11,6 +11,8 @@ using namespace std;
 
 int main ()
 {
+  Stokes< complex< Estimate<double> > > test_default_constructor;
+
   Jones<float> jones;
   Stokes<float> in;
 
