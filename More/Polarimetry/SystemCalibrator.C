@@ -123,11 +123,12 @@ void Pulsar::SystemCalibrator::add_epoch (const MJD& epoch)
 //! Get the total number of input polarization states
 unsigned Pulsar::SystemCalibrator::get_nstate () const
 {
-  if (model.size() == 0)
-    return 0;
+  unsigned nstate = 0;
 
-  check_ichan ("get_nstate", 0);
-  return model[0]->get_equation()->get_num_input ();
+  for (unsigned i=0; i<model.size(); i++)
+    nstate = std::max (nstate, model[i]->get_equation()->get_num_input ());
+
+  return nstate;
 }
 
 //! Get the number of pulsar polarization states in the model
