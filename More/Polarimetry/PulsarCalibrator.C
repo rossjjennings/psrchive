@@ -171,6 +171,12 @@ unsigned Pulsar::PulsarCalibrator::get_nharmonic () const
     return standard->get_nbin()/2;
 }
 
+//! Get the number of pulsar phase bin input polarization states
+unsigned Pulsar::PulsarCalibrator::get_nstate_pulsar () const
+{
+  return get_nharmonic ();
+}
+
 void Pulsar::PulsarCalibrator::build (unsigned nchan) try
 {
   if (verbose > 2)

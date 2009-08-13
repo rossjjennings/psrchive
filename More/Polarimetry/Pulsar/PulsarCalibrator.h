@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.35 $
-   $Date: 2009/06/24 05:11:12 $
+   $Revision: 1.36 $
+   $Date: 2009/08/13 21:22:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -49,6 +49,9 @@ namespace Pulsar {
 
     //! Get the number of frequency channels
     unsigned get_nchan () const;
+
+    //! Get the number of pulsar harmonics (input polarization states)
+    unsigned get_nstate_pulsar () const;
 
     //! Set the maximum number of harmonics to include in fit
     void set_maximum_harmonic (unsigned max);
