@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CoherencyMeasurement.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/06/03 04:57:10 $
+   $Revision: 1.11 $
+   $Date: 2009/08/13 21:18:21 $
    $Author: straten $ */
 
 #ifndef __Calibration_CoherencyMeasurement_H
@@ -61,6 +61,9 @@ namespace Calibration {
 
     //! Get the measured Stokes parameters
     Stokes< Estimate<double> > get_stokes () const;
+
+    //! Get the measured Stokes parameters
+    Stokes< std::complex< Estimate<double> > > get_complex_stokes () const;
 
     //! Given a coherency matrix, return the weighted norm
     double get_weighted_norm (const Jones<double>& matrix) const;
