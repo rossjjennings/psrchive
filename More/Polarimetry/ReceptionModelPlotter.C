@@ -128,7 +128,7 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
          << idat << error << endl;
   }
 
-  if (R_stokes[0].size() == 0)
+  if (R_stokes[0].size() == 0 && C_stokes[0].size() == 0)
   {
     cerr << "Calibration::ReceptionModelPlotter::plot_observations "
             "isource=" << isource << " no data" << endl;
