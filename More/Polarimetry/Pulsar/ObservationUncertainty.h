@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ObservationUncertainty.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/06/03 04:57:10 $
+   $Revision: 1.6 $
+   $Date: 2009/08/14 07:35:30 $
    $Author: straten $ */
 
 #ifndef __Calibration_ObservationUncertainty_H
@@ -45,6 +45,9 @@ namespace Calibration {
     //! Given a coherency matrix, return the weighted Stokes parameters
     Stokes< std::complex<double> >
     get_weighted_components (const Jones<double>&) const;
+
+    //! Return the variance of each Stokes parameter
+    Stokes< std::complex<double> > get_variance () const;
 
   protected:
 

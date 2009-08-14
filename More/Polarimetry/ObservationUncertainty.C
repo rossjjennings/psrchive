@@ -77,6 +77,19 @@ void Calibration::ObservationUncertainty::set_variance
 					  1.0 / variance[ipol] );
 }
 
+//! Return the variance of each Stokes parameter
+Stokes< std::complex<double> > 
+Calibration::ObservationUncertainty::get_variance () const
+{
+  Stokes< std::complex<double> > result;
+
+  for (unsigned ipol=0; ipol < 4; ipol++)
+    result[ipol] = complex<double>( 1.0 / inv_variance[ipol].real(),
+				    1.0 / inv_variance[ipol].imag() );
+
+  return result;
+}
+
 //! Construct with the uncertainty of the observation
 Calibration::ObservationUncertainty::ObservationUncertainty
 ( const Stokes<double>& variance )
