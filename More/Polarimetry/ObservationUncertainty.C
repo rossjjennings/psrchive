@@ -84,8 +84,17 @@ Calibration::ObservationUncertainty::get_variance () const
   Stokes< std::complex<double> > result;
 
   for (unsigned ipol=0; ipol < 4; ipol++)
-    result[ipol] = complex<double>( 1.0 / inv_variance[ipol].real(),
-				    1.0 / inv_variance[ipol].imag() );
+  {
+    double re = 0.0;
+    if (inv_variance[ipol].real())
+      re = 1.0/inv_variance[ipol].real();
+
+    double im = 0.0;
+    if (inv_variance[ipol].imag())
+      im = 1.0/inv_variance[ipol].imag();
+
+    result[ipol] = complex<double>( re, im );
+  }
 
   return result;
 }
