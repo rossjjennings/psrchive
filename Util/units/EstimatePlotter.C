@@ -1,13 +1,17 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "EstimatePlotter.h"
 #include "Error.h"
 
 #include <cpgplot.h>
+#include <assert.h>
+
+using namespace std;
 
 bool EstimatePlotter::report_mean = false;
 
@@ -98,8 +102,11 @@ void EstimatePlotter::separate_viewports (bool scaled, bool vertical)
       }
 
     for (unsigned idim=0; idim < ndim; idim++)
+    {
+      unsigned yndex = index*ndim+idim;
       minmax (xrange, xmin, xmax, yrange, ymin, ymax,
-	      xval[index], yval[index*ndim+idim], yerr[index*ndim+idim]);
+	      xval[index], yval[yndex], yerr[yndex]);
+    }
 
     // cerr << "index=" << index << " xmin=" << xmin << " xmax=" << xmax
 	 // << " ymin=" << ymin << " ymax=" << ymax << endl;
@@ -153,13 +160,15 @@ void EstimatePlotter::set_viewport (unsigned index)
 
   for (unsigned iplot=0; iplot < xval.size(); iplot++)
   {
-
     double size = 0.0;
     
     if (viewports_vertical)
       size = data_ymax[iplot] - data_ymin[iplot];
     else
       size = data_xmax[iplot] - data_xmin[iplot];
+
+    if (size == 0.0)
+      size = 1.0;
 
     if (iplot <= index)
     {
@@ -192,7 +201,9 @@ void EstimatePlotter::set_viewport (unsigned index)
     float xbuf = x_border * (data_xmax[index]-data_xmin[index]);
     if (xbuf == 0)
       xbuf = data_xmin[index] * 0.25;
-    
+    if (xbuf == 0)
+      xbuf = 1.0;
+
     // cerr << "xswin " << data_xmin[index]-xbuf << " " << data_xmax[index]+xbuf << " " << data_ymin[index]-buffer << " " << data_ymax[index]+buffer << endl;
     
     cpgswin (data_xmin[index]-xbuf, data_xmax[index]+xbuf, 
@@ -230,9 +241,14 @@ void EstimatePlotter::set_world (float x1, float x2, float y1, float y2)
   float xbuf = x_border * (x2-x1);
   if (xbuf == 0.0)
     xbuf = 0.25 * x1;
+  if (xbuf == 0.0)
+    xbuf = 1.0;
+
   float ybuf = y_border * (y2-y1);
   if (ybuf == 0.0)
     ybuf = 0.25 * y1;
+  if (ybuf == 0.0)
+    ybuf = 1.0;
 
   // cerr << "x1=" << x1 << " x2=" << x2 << endl;
   // cerr << "swin " << x1-xbuf << " " <<  x2+xbuf << " " << y1-ybuf << " " << y2+ybuf << endl;
@@ -291,17 +307,21 @@ unsigned EstimatePlotter::plot (unsigned index)
     }
   }
 
+  cpgsci (1);
   return plotted;
 }
 
 
 void EstimatePlotter::minmax (bool& xrange, float& xmin, float& xmax,
 			      bool& yrange, float& ymin, float& ymax,
-			      const std::vector<float>& x,
-			      const std::vector<float>& y,
-			      const std::vector<float>& ye)
+			      const vector<float>& x,
+			      const vector<float>& y,
+			      const vector<float>& ye)
 {
   unsigned npt = x.size();
+
+  assert (y.size() == npt);
+  assert (ye.size() == npt);
 
   for (unsigned ipt=0; ipt<npt; ipt++) {
 
