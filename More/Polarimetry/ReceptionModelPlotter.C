@@ -71,8 +71,8 @@ void Calibration::ReceptionModelPlotter::set_output (const char* filename)
 
 void Calibration::ReceptionModelPlotter::plot_observations ()
 {
-  std::vector< Estimate<float> > re_stokes[4];
-  std::vector< Estimate<float> > im_stokes[4];
+  std::vector< Estimate<float> > R_stokes[4];
+  std::vector< std::complex< Estimate<float> > > C_stokes[4];
 
   if (model_solved && plot_residual)
     model->set_input_index (isource);
@@ -113,9 +113,10 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
       
       for (unsigned ipol=0; ipol<4; ipol++)
       {
-	re_stokes[ipol].push_back (datum[ipol].real());
 	if (complex_data)
-	  im_stokes[ipol].push_back (datum[ipol].imag());
+	  C_stokes[ipol].push_back (datum[ipol]);
+	else
+	  R_stokes[ipol].push_back (datum[ipol].real());
       }
 
       abscissa->push_back (); 
@@ -127,7 +128,7 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
          << idat << error << endl;
   }
 
-  if (re_stokes[0].size() == 0)
+  if (R_stokes[0].size() == 0)
   {
     cerr << "Calibration::ReceptionModelPlotter::plot_observations "
             "isource=" << isource << " no data" << endl;
@@ -150,7 +151,7 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
 
       for (unsigned ipol=0; ipol<4; ipol++)
 	fprintf (fptr, "%f %f ",
-		 re_stokes[ipol][ipt].val, re_stokes[ipol][ipt].var);
+		 R_stokes[ipol][ipt].val, R_stokes[ipol][ipt].var);
 
       fprintf (fptr, "\n");
 
@@ -177,9 +178,10 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
 
   cpgsvp (x1, x2, y1, y1+(y2-y1)*Ispace);
   
-  plotter.add_plot (values, re_stokes[0]);
   if (complex_data)
-    plotter.add_plot (values, im_stokes[0]);
+    plotter.add_plot (values, C_stokes[0]);
+  else
+    plotter.add_plot (values, R_stokes[0]);
 
   plotter.set_border (xborder, Iyborder);
 
@@ -196,9 +198,10 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   
   for (unsigned ipol=1; ipol<4; ipol++)
   {
-    plotter.add_plot (values, re_stokes[ipol]);
     if (complex_data)
-      plotter.add_plot (values, im_stokes[ipol]);
+      plotter.add_plot (values, C_stokes[ipol]);
+    else
+      plotter.add_plot (values, R_stokes[ipol]);
   }
 
   plotter.separate_viewports();
