@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModelPlotter.h,v $
-   $Revision: 1.6 $
-   $Date: 2008/06/11 12:17:13 $
-   $Author: demorest $ */
+   $Revision: 1.7 $
+   $Date: 2009/08/14 01:53:39 $
+   $Author: straten $ */
 
 #ifndef __Calibration_ReceptionModelPlotter_H
 #define __Calibration_ReceptionModelPlotter_H
@@ -48,9 +48,6 @@ namespace Calibration {
 
     //! Set the index of the source to be plotted
     void set_isource (unsigned isource);
-
-    //! Set the index of the signal path
-    void set_ipath (unsigned ipath);
 
     //! Set the model solved flag
     void set_model_solved (bool solved = true);

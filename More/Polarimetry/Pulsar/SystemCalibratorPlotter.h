@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibratorPlotter.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/06/20 13:10:40 $
+   $Revision: 1.4 $
+   $Date: 2009/08/14 01:53:39 $
    $Author: straten $ */
 
 #ifndef __SystemCalibratorPlotter_H
@@ -60,7 +60,7 @@ namespace Pulsar
   protected:
 
     //! Plot the observed Stokes parameters versus parallactic angle
-    void plot_constraints (unsigned ichan, unsigned istate, unsigned ipath);
+    void plot_constraints (unsigned ichan, unsigned istate);
 
     //! Plot the given time variation function
     void plot_time_variation (VariationInfo::Which, const MEAL::Scalar*);

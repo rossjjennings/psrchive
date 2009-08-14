@@ -35,14 +35,13 @@ Pulsar::SystemCalibratorPlotter::~SystemCalibratorPlotter ()
 
 void Pulsar::SystemCalibratorPlotter::plot_cal_constraints (unsigned chan)
 {
-  plot_constraints (chan, calibrator->calibrator_estimate.input_index,
-		    calibrator->model[chan]->get_polncal_path());
+  plot_constraints (chan, calibrator->calibrator_estimate.input_index);
 }
 
 void Pulsar::SystemCalibratorPlotter::plot_psr_constraints (unsigned chan,
-							       unsigned state)
+							    unsigned state)
 {
-  plot_constraints (chan, state, calibrator->model[chan]->get_pulsar_path());
+  plot_constraints (chan, state);
 }
 
 
@@ -77,8 +76,7 @@ protected:
 
 
 void Pulsar::SystemCalibratorPlotter::plot_constraints (unsigned ichan,
-							unsigned istate,
-							unsigned ipath)
+							unsigned istate)
 {
   if (!calibrator)
     throw Error (InvalidState,
@@ -106,7 +104,6 @@ void Pulsar::SystemCalibratorPlotter::plot_constraints (unsigned ichan,
   plotter.set_abscissa( new MJDAbscissa( &(calibrator->model[ichan]->time) ) );
 
   plotter.set_isource (istate);
-  plotter.set_ipath (ipath);
 
   plotter.set_axis( &(calibrator->model[ichan]->time) );
   plotter.set_min ( calibrator->start_epoch );

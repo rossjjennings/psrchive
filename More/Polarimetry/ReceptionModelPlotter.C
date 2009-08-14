@@ -20,7 +20,7 @@ using namespace std;
 
 Calibration::ReceptionModelPlotter::ReceptionModelPlotter ()
 {
-  ipol = isource = ipath = 0;
+  ipol = isource = 0;
   model_solved = false;
   plot_residual = false;
 }
@@ -53,12 +53,6 @@ void Calibration::ReceptionModelPlotter::set_isource (unsigned _isource)
 }
 
 
-void Calibration::ReceptionModelPlotter::set_ipath (unsigned _ipath)
-{
-  ipath = _ipath;
-}
-
-
 void Calibration::ReceptionModelPlotter::set_model_solved (bool solved)
 {
   model_solved = solved;
@@ -81,10 +75,7 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   std::vector< Estimate<float> > im_stokes[4];
 
   if (model_solved && plot_residual)
-  {
-    model->set_transformation_index (ipath);
     model->set_input_index (isource);
-  }
   
   unsigned ndat = model->get_ndata ();
 
@@ -95,8 +86,8 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
     // get the specified CoherencyMeasurementSet
     const Calibration::CoherencyMeasurementSet& data = model->get_data (idat);
     
-    if (data.get_transformation_index() != ipath)
-      continue;
+    if (model_solved && plot_residual)
+      model->set_transformation_index (data.get_transformation_index());
     
     // set the independent variables for this observation
     data.set_coordinates();
@@ -139,7 +130,7 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   if (re_stokes[0].size() == 0)
   {
     cerr << "Calibration::ReceptionModelPlotter::plot_observations "
-            "ipath=" << ipath << " isource=" << isource << " no data" << endl;
+            "isource=" << isource << " no data" << endl;
     return;
   }
 
