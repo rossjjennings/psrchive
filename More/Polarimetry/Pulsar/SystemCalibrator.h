@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.22 $
-   $Date: 2009/08/07 14:05:47 $
+   $Revision: 1.23 $
+   $Date: 2009/08/14 01:53:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -124,7 +124,10 @@ namespace Pulsar
     
     //! Get the number of pulsar polarization states in the model
     virtual unsigned get_nstate_pulsar () const;
-    
+
+    //! Return true if the state index is a pulsar
+    virtual unsigned get_state_is_pulsar (unsigned istate) const;
+
     //! Retern a new plot information interface for the specified pulsar state
     virtual Calibrator::Info* new_info_pulsar (unsigned istate) const;
 

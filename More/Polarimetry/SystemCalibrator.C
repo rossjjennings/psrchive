@@ -131,6 +131,12 @@ unsigned Pulsar::SystemCalibrator::get_nstate () const
   return nstate;
 }
 
+//! Return true if the state index is a pulsar
+unsigned Pulsar::SystemCalibrator::get_state_is_pulsar (unsigned istate) const
+{
+  return istate != calibrator_estimate.input_index;
+}
+
 //! Get the number of pulsar polarization states in the model
 unsigned Pulsar::SystemCalibrator::get_nstate_pulsar () const
 {

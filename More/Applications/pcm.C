@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.108 $
-   $Date: 2009/08/07 14:06:42 $
+   $Revision: 1.109 $
+   $Date: 2009/08/14 01:53:32 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -243,43 +243,24 @@ void plot_pulsar (Pulsar::SystemCalibratorPlotter& plotter,
 }
 
 void plot_constraints (Pulsar::SystemCalibratorPlotter& plotter,
-		       unsigned nchan, unsigned nstate, unsigned nplot,
-		       unsigned start_state, unsigned only_chan=0)
+		       unsigned nchan, unsigned only_chan=0)
 {
-  if (nstate == 0)
-    return;
-
-  unsigned incr = 1;
-  if (!incr)
-    incr = 1;
-
   unsigned ichan = 1;
 
-  if (nplot == 1)
+  if (nchan == 1)
     ichan = only_chan;
 
-  if (nstate == 1)
-    cpgbeg (0, "states.ps/CPS", 0, 0);
+  const unsigned nstate = plotter.get_calibrator()->get_nstate();
 
-  for (; ichan < nchan; ichan+=incr)
+  for (; ichan < nchan; ichan++)
   {
     // don't try to plot if the equation for this channel has no data
-    while (plotter.get_calibrator()->get_ndata (ichan) == 0)
-    {
-      ichan ++;
-      if (ichan >= nchan)
-      {
-	cpgend();
-	return;
-      }
-    }
+    if (plotter.get_calibrator()->get_ndata (ichan) == 0)
+      continue;
 
-    if (nstate > 1)
-    {
-      char filename [256];
-      sprintf (filename, "channel_%d.ps/CPS", ichan);
-      cpgbeg (0, filename, 0, 0);
-    }
+    char filename [256];
+    sprintf (filename, "channel_%d.ps/CPS", ichan);
+    cpgbeg (0, filename, 0, 0);
 
     if (plotter.use_colour)
       cpgsvp (.15,.9, .15,.9);
@@ -291,23 +272,17 @@ void plot_constraints (Pulsar::SystemCalibratorPlotter& plotter,
     // cerr << "pcm: nstate=" << nstate << endl;
     for (unsigned istate=0; istate<nstate; istate++)
     {
+      if (!plotter.get_calibrator()->get_state_is_pulsar (istate))
+	continue;
+
       cpgpage();
 
-      unsigned plot_state = istate+start_state;
-
       // cerr << "ichan=" << ichan << " istate=" << plot_state << endl;
-      plotter.plot_psr_constraints (ichan, plot_state);
+      plotter.plot_psr_constraints (ichan, istate);
     }
 
-    if (nstate > 1)
-      cpgend ();
-    else if (ichan+incr < nchan)
-      cpgpage ();
-
-  }
-
-  if (nstate == 1)
     cpgend ();
+  }
 }
 
 #endif // HAVE_PGPLOT
@@ -1101,9 +1076,7 @@ int actual_main (int argc, char *argv[]) try
     if (plot_residual && model->get_nstate_pulsar())
     {
       cerr << "pcm: plotting pulsar constraints" << endl;
-      plot_constraints (plotter, model->get_nchan(),
-			model->get_nstate_pulsar(), 12, 
-			model->get_nstate()-model->get_nstate_pulsar());
+      plot_constraints (plotter, model->get_nchan());
     }
 
   }
@@ -1178,9 +1151,7 @@ int actual_main (int argc, char *argv[]) try
     plotter.set_plot_residual (true);
     
     cerr << "pcm: plotting pulsar constraints with model" << endl;
-    plot_constraints (plotter, model->get_nchan(),
-		      model->get_nstate_pulsar(), 12,
-		      model->get_nstate()-model->get_nstate_pulsar());
+    plot_constraints (plotter, model->get_nchan());
   }
 
 #endif // HAVE_PGPLOT
