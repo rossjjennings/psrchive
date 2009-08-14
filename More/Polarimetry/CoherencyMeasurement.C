@@ -76,11 +76,15 @@ Calibration::CoherencyMeasurement::get_complex_stokes () const
 {
   Stokes< std::complex< Estimate<double> > > result;
   Stokes< std::complex<double> > val = complex_coherency (rho);
+  Stokes< std::complex<double> > var = variance;
+
+  if (uncertainty)
+    var = uncertainty->get_variance ();
 
   for (unsigned ipol=0; ipol<4; ipol++)
   {
-    Estimate<double> re ( val[ipol].real(), variance[ipol] );
-    Estimate<double> im ( val[ipol].imag(), variance[ipol] );
+    Estimate<double> re ( val[ipol].real(), var[ipol].real() );
+    Estimate<double> im ( val[ipol].imag(), var[ipol].imag() );
 
     result[ipol] = std::complex< Estimate<double> > (re, im);
   }
