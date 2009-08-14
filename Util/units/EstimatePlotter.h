@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.19 $
-   $Date: 2009/08/14 05:21:31 $
+   $Revision: 1.20 $
+   $Date: 2009/08/14 06:21:40 $
    $Author: straten $ */
 
 #ifndef __EstimatePlotter_h
@@ -239,17 +239,11 @@ void EstimatePlotter::add_plot
   xval.push_back ( std::vector<float>(npt) );
   std::vector<float>& x = xval.back();
 
-  yval.push_back ( std::vector<float>(npt) );
-  yerr.push_back ( std::vector<float>(npt) );
+  std::vector<float> re_y (npt);
+  std::vector<float> re_ye (npt);
 
-  std::vector<float>& re_y = yval.back();
-  std::vector<float>& re_ye = yerr.back();
-
-  yval.push_back ( std::vector<float>(npt) );
-  yerr.push_back ( std::vector<float>(npt) );
-
-  std::vector<float>& im_y = yval.back();
-  std::vector<float>& im_ye = yerr.back();
+  std::vector<float> im_y (npt);
+  std::vector<float> im_ye (npt);
 
   for (ipt=0; ipt<npt; ipt++)
   {
@@ -264,6 +258,12 @@ void EstimatePlotter::add_plot
 
   minmax (xrange_set, x_min, x_max, yrange_set, y_min, y_max, x, re_y, re_ye);
   minmax (xrange_set, x_min, x_max, yrange_set, y_min, y_max, x, im_y, im_ye);
+
+  yval.push_back ( re_y );
+  yval.push_back ( im_y );
+
+  yerr.push_back ( re_ye );
+  yerr.push_back ( im_ye );
 }
 
 #endif
