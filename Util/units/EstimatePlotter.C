@@ -77,8 +77,11 @@ void EstimatePlotter::separate_viewports (bool scaled, bool vertical)
 
   unsigned index;
 
-  for (index=0; index<xval.size(); index++) {
+  // complex data, for example, have ndim = 2
+  unsigned ndim = yval.size() / xval.size();
 
+  for (index=0; index<xval.size(); index++)
+  {
     float& xmin = data_xmin[index];
     float& xmax = data_xmax[index];
     float& ymin = data_ymin[index];
@@ -94,8 +97,9 @@ void EstimatePlotter::separate_viewports (bool scaled, bool vertical)
 	ymax = y_max;
       }
 
-    minmax (xrange, xmin, xmax, yrange, ymin, ymax,
-	    xval[index], yval[index], yerr[index]);
+    for (unsigned idim=0; idim < ndim; idim++)
+      minmax (xrange, xmin, xmax, yrange, ymin, ymax,
+	      xval[index], yval[index*ndim+idim], yerr[index*ndim+idim]);
 
     // cerr << "index=" << index << " xmin=" << xmin << " xmax=" << xmax
 	 // << " ymin=" << ymin << " ymax=" << ymax << endl;
@@ -138,74 +142,75 @@ void EstimatePlotter::set_viewport (unsigned index)
     throw Error (InvalidState, "EstimatePlotter::set_viewport",
 		 "must first call EstimatePlotter::separate_viewports");
 
-  if (viewports_scaled) {
+  if (!viewports_scaled)
+    return;
 
-    double start_size = 0.0;
-    double end_size = 0.0;
-    double total_size = 0.0;
+  double start_size = 0.0;
+  double end_size = 0.0;
+  double total_size = 0.0;
 
-    double max_size = 0.0;
+  double max_size = 0.0;
 
-    for (unsigned iplot=0; iplot < xval.size(); iplot++) {
+  for (unsigned iplot=0; iplot < xval.size(); iplot++)
+  {
 
-      double size = 0.0;
-
-      if (viewports_vertical)
-	size = data_ymax[iplot] - data_ymin[iplot];
-      else
-	size = data_xmax[iplot] - data_xmin[iplot];
-
-      if (iplot <= index) {
-	start_size = end_size;
-	end_size += size;
-      }
-
-      total_size += size;
-
-      if (size > max_size)
-	max_size = size;
-
-    }
-
-    double border = 0.0;
-
+    double size = 0.0;
+    
     if (viewports_vertical)
-      border = y_border;
+      size = data_ymax[iplot] - data_ymin[iplot];
     else
-      border = x_border;
+      size = data_xmax[iplot] - data_xmin[iplot];
 
-    double buffer = border * max_size;
-    total_size += 2.0 * buffer * xval.size();
-    start_size += 2.0 * buffer * index;
-    end_size   += 2.0 * buffer * (index+1);
-
-    if (viewports_vertical) {
-      double scale = (vp_y2 - vp_y1) / total_size;
-      cpgsvp (vp_x1, vp_x2, vp_y1+scale*start_size, vp_y1+scale*end_size);
-      float xbuf = x_border * (data_xmax[index]-data_xmin[index]);
-      if (xbuf == 0)
-        xbuf = data_xmin[index] * 0.25;
-
-      // cerr << "xswin " << data_xmin[index]-xbuf << " " << data_xmax[index]+xbuf << " " << data_ymin[index]-buffer << " " << data_ymax[index]+buffer << endl;
-
-      cpgswin (data_xmin[index]-xbuf, data_xmax[index]+xbuf, 
-	       data_ymin[index]-buffer, data_ymax[index]+buffer);
-    }
-    else {
-      double scale = (vp_x2 - vp_x1) / total_size;
-      cpgsvp (vp_x1+scale*start_size, vp_x1+scale*end_size, vp_y1, vp_y2);
-      float ybuf = y_border * (data_ymax[index]-data_ymin[index]);
-      if (ybuf == 0)
-        ybuf = data_ymin[index] * 0.25;
-
-      // cerr << "xswin " << data_xmin[index]-buffer << " " << data_xmax[index]+buffer << " " << data_ymin[index]-ybuf << " " << data_ymax[index]+ybuf << endl;
-
-      cpgswin (data_xmin[index]-buffer, data_xmax[index]+buffer, 
-	       data_ymin[index]-ybuf, data_ymax[index]+ybuf);
+    if (iplot <= index)
+    {
+      start_size = end_size;
+      end_size += size;
     }
 
+    total_size += size;
+    
+    if (size > max_size)
+      max_size = size;
   }
 
+  double border = 0.0;
+
+  if (viewports_vertical)
+    border = y_border;
+  else
+    border = x_border;
+  
+  double buffer = border * max_size;
+  total_size += 2.0 * buffer * xval.size();
+  start_size += 2.0 * buffer * index;
+  end_size   += 2.0 * buffer * (index+1);
+  
+  if (viewports_vertical)
+  {
+    double scale = (vp_y2 - vp_y1) / total_size;
+    cpgsvp (vp_x1, vp_x2, vp_y1+scale*start_size, vp_y1+scale*end_size);
+    float xbuf = x_border * (data_xmax[index]-data_xmin[index]);
+    if (xbuf == 0)
+      xbuf = data_xmin[index] * 0.25;
+    
+    // cerr << "xswin " << data_xmin[index]-xbuf << " " << data_xmax[index]+xbuf << " " << data_ymin[index]-buffer << " " << data_ymax[index]+buffer << endl;
+    
+    cpgswin (data_xmin[index]-xbuf, data_xmax[index]+xbuf, 
+	     data_ymin[index]-buffer, data_ymax[index]+buffer);
+  }
+  else
+  {
+    double scale = (vp_x2 - vp_x1) / total_size;
+    cpgsvp (vp_x1+scale*start_size, vp_x1+scale*end_size, vp_y1, vp_y2);
+    float ybuf = y_border * (data_ymax[index]-data_ymin[index]);
+    if (ybuf == 0)
+      ybuf = data_ymin[index] * 0.25;
+    
+    // cerr << "xswin " << data_xmin[index]-buffer << " " << data_xmax[index]+buffer << " " << data_ymin[index]-ybuf << " " << data_ymax[index]+ybuf << endl;
+    
+    cpgswin (data_xmin[index]-buffer, data_xmax[index]+buffer, 
+	     data_ymin[index]-ybuf, data_ymax[index]+ybuf);
+  }
 }
 
 //! Set the viewport to plot the specified member of the current data set
@@ -251,35 +256,39 @@ unsigned EstimatePlotter::plot (unsigned index)
     throw Error (InvalidRange, "EstimatePlotter::plot",
 		 "iplot=%d >= nplot=%d", index, xval.size());
 
-  if (control_viewport) {
-
-    if (!viewports_set) {
-      // cerr << "set_world xmin=" << x_min << " xmax=" << x_max 
-      // << " ymin=" << y_min << " ymax=" << y_max << endl;
+  if (control_viewport)
+  {
+    if (!viewports_set)
       set_world (x_min, x_max, y_min, y_max);
-    }
-    else {
-      // cerr << "set_viewport" << endl;
+    else
       set_viewport (index);
-    }
-
   }
 
   unsigned npt = xval[index].size();
   unsigned plotted = 0;
 
-  for (unsigned ipt=0; ipt<npt; ipt++) {
+  const unsigned ndim = yval.size() / xval.size();
 
-    if (minimum_error >= 0.0 && yerr[index][ipt] <= minimum_error)
-      continue;
+  for (unsigned idim=0; idim < ndim; idim++)
+  {
+    if (ndim > 1)
+      cpgsci (idim+1);
 
-    if (maximum_error >= 0.0 && yerr[index][ipt] >= maximum_error)
-      continue;
+    unsigned yndex = index*ndim + idim;
 
-    cpgerr1 (6, xval[index][ipt], yval[index][ipt], yerr[index][ipt], 1.0);
-    cpgpt1 (xval[index][ipt], yval[index][ipt], graph_marker);
+    for (unsigned ipt=0; ipt<npt; ipt++)
+    {
+      if (minimum_error >= 0.0 && yerr[yndex][ipt] <= minimum_error)
+	continue;
 
-    plotted ++;
+      if (maximum_error >= 0.0 && yerr[yndex][ipt] >= maximum_error)
+	continue;
+
+      cpgerr1 (6, xval[index][ipt], yval[yndex][ipt], yerr[yndex][ipt], 1.0);
+      cpgpt1 (xval[index][ipt], yval[yndex][ipt], graph_marker);
+
+      plotted ++;
+    }
   }
 
   return plotted;

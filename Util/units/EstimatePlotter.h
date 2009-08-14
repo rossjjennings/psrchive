@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.18 $
-   $Date: 2007/10/25 05:40:12 $
+   $Revision: 1.19 $
+   $Date: 2009/08/14 05:21:31 $
    $Author: straten $ */
 
 #ifndef __EstimatePlotter_h
@@ -73,6 +73,10 @@ class EstimatePlotter {
 
   template<class Xt, class Yt>
   void add_plot (const std::vector<Xt>&, const std::vector< Estimate<Yt> >&);
+
+  template<class Xt, class Yt> 
+  void add_plot (const std::vector<Xt>& xdata,
+		 const std::vector< std::complex< Estimate<Yt> > >& ydata);
 
   //! Plot the specified data set
   template<class T> void plot (const std::vector< Estimate<T> >& data);
@@ -217,6 +221,49 @@ void EstimatePlotter::add_plot (const std::vector<Xt>& xdata,
   }
 
   minmax (xrange_set, x_min, x_max, yrange_set, y_min, y_max, x, y, ye);
+}
+
+template<class Xt, class Yt> 
+void EstimatePlotter::add_plot
+(const std::vector<Xt>& xdata,
+ const std::vector< std::complex< Estimate<Yt> > >& ydata)
+{
+  unsigned ipt = 0, npt = xdata.size();
+  if (npt == 0)
+    return;
+  
+  if (ydata.size() != npt)
+    throw Error (InvalidParam, "EstimatePlotter::add_plot (Xt, Yt)",
+		 "xdata.size=%d != ydata.size=%d", npt, ydata.size());
+
+  xval.push_back ( std::vector<float>(npt) );
+  std::vector<float>& x = xval.back();
+
+  yval.push_back ( std::vector<float>(npt) );
+  yerr.push_back ( std::vector<float>(npt) );
+
+  std::vector<float>& re_y = yval.back();
+  std::vector<float>& re_ye = yerr.back();
+
+  yval.push_back ( std::vector<float>(npt) );
+  yerr.push_back ( std::vector<float>(npt) );
+
+  std::vector<float>& im_y = yval.back();
+  std::vector<float>& im_ye = yerr.back();
+
+  for (ipt=0; ipt<npt; ipt++)
+  {
+    x[ipt] = xdata[ipt];
+
+    re_y[ipt] = ydata[ipt].real().val;
+    re_ye[ipt] = sqrt (ydata[ipt].real().var);
+
+    im_y[ipt] = ydata[ipt].imag().val;
+    im_ye[ipt] = sqrt (ydata[ipt].imag().var);
+  }
+
+  minmax (xrange_set, x_min, x_max, yrange_set, y_min, y_max, x, re_y, re_ye);
+  minmax (xrange_set, x_min, x_max, yrange_set, y_min, y_max, x, im_y, im_ye);
 }
 
 #endif
