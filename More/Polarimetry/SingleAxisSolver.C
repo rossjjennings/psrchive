@@ -83,7 +83,13 @@ void Calibration::SingleAxisSolver::solve (SingleAxis* model) try
   model->set_gain( gain.get_Estimate() );
 
 }
-catch (Error& error) {
+catch (Error& error)
+{
+  error << "\n\t"
+    "input=" << input
+	<< "\n\t"
+    "output=" << output;
+
   throw error += "Calibration::SingleAxisSolver::solve";
 }
 
