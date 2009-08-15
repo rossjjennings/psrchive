@@ -98,7 +98,6 @@ void usage ()
 int main (int argc, char *argv[]) try
 {    
   bool verbose = false;
-  bool new_database = true;
   bool do_fluxcal = true;
   bool do_polncal = true;
   bool use_fluxcal_stokes = false;
@@ -132,6 +131,8 @@ int main (int argc, char *argv[]) try
   Pulsar::Database::Criterion criterion;
 
   string cals_are_here = "./";
+
+  vector<string> cal_dbase_filenames;
 
   // directory to which calibrated output files are written
   string unload_path;
@@ -182,7 +183,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.101 2009/05/07 06:09:40 sosl Exp $" << endl;
+      cout << "$Id: pac.C,v 1.102 2009/08/15 09:20:17 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -219,8 +220,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'd':
-      cals_are_here = optarg;
-      new_database = false;
+      cal_dbase_filenames.push_back (optarg);
       command += " -d ";
 
       // Just take the filename, not the full path
@@ -487,14 +487,31 @@ int main (int argc, char *argv[]) try
   }
 
   if ( use_fluxcal_stokes && 
-      !  pcal_type->is_a<Pulsar::CalibratorTypes::SingleAxis>() )
+       ! pcal_type->is_a<Pulsar::CalibratorTypes::SingleAxis>() )
   {
     cerr << "pac: Fluxcal-derived Stokes params are incompatible with the " 
       << "selected calibration method" << endl;
     return -1;
   }
 
-  else if (new_database) try
+  if (cal_dbase_filenames.size()) try
+  {
+    for (unsigned i=0; i<cal_dbase_filenames.size(); i++)
+    {
+      cout << "pac: Loading database from " << cal_dbase_filenames[i] << endl;
+      if (i==0)
+	dbase = new Pulsar::Database (cal_dbase_filenames[i]);
+      else
+	dbase->load (cal_dbase_filenames[i]);
+    }
+  }
+  catch (Error& error)
+  {
+    cerr << "pac: Error loading CAL database" << error << endl;
+    return -1;
+  }
+
+  else try
   {   
     // Generate the CAL file database
     cout << "pac: Generating new calibrator database" << endl;
@@ -545,16 +562,7 @@ int main (int argc, char *argv[]) try
     return -1;
   }
 
-  else try
-  {   
-    cout << "pac: Reading from database summary file" << endl;
-    dbase = new Pulsar::Database (cals_are_here);
-  }
-  catch (Error& error)
-  {
-    cerr << "pac: Error loading CAL database" << error << endl;
-    return -1;
-  }
+
     
   if (feed)
     dbase -> set_feed (feed);
