@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -286,13 +286,13 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
   // get the Receiver correction, if any
   const Receiver* receiver = 0;
 
-  // Try using precalibrator's version first
-  if (precalibrator && precalibrator->has_Receiver())
-    receiver = precalibrator->get_Receiver();
-
-  // Next try the reference obs version
-  else if (reference_observation->has_Receiver())
+  // Try the reference observation's version first ...
+  if (reference_observation->has_Receiver())
     receiver = reference_observation->get_Receiver();
+
+  // ... otherwise, try using precalibrator's version
+  else if (precalibrator && precalibrator->has_Receiver())
+    receiver = precalibrator->get_Receiver();
 
   Jones<double> basis_correction (1.0);
 
