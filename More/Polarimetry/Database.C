@@ -751,7 +751,6 @@ void Pulsar::Database::load (const string& dbase_filename)
   if (verbose)
     cerr << "Pulsar::Database::loading " << count << " entries" << endl;
 
-  entries.resize (0);
   Entry entry;
 
   while (fgets (temp, 4096, fptr)) try
@@ -768,7 +767,7 @@ void Pulsar::Database::load (const string& dbase_filename)
   }
 
   if (verbose)
-    cerr << "Pulsar::Database::loaded " << entries.size() << " entries" <<endl;
+    cerr << "Pulsar::Database::load " << entries.size() << " entries" <<endl;
 
   fclose (fptr);
 }
