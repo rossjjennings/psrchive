@@ -18,6 +18,10 @@ string MEAL::ScalarInverseHypTangent::get_name () const
 //! The function
 double MEAL::ScalarInverseHypTangent::function (double x) const
 {
+  if (fabs(x) > 1.0)
+    throw Error (InvalidParam, "MEAL::ScalarInverseHypTangent::function",
+		 "|x|=%lf > 1.0 is out of range of atanh(x)", x);
+
   return atanh(x); 
 }
 
