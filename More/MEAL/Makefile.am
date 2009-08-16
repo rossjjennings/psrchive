@@ -33,6 +33,7 @@ nobase_include_HEADERS = \
         MEAL/ForwardChanged.h \
         MEAL/ForwardResult.h \
         MEAL/Function.h \
+	MEAL/FunctionInterface.h \
         MEAL/FunctionPolicy.h \
         MEAL/Gain.h \
         MEAL/Gaussian.h \
@@ -133,6 +134,7 @@ libMEAL_la_SOURCES = \
         Function_load.C \
         Function_parse.C \
         Function_print.C \
+	FunctionInterface.C \
 	FunctionPolicy.C \
         Gaussian.C \
 	GimbalLockMonitor.C \
