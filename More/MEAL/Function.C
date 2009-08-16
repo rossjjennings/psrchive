@@ -1,10 +1,12 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/Function.h"
+#include "MEAL/FunctionInterface.h"
 
 bool MEAL::Function::verbose = false;
 bool MEAL::Function::very_verbose = false;
@@ -140,4 +142,10 @@ void MEAL::Function::set_evaluation_changed (bool _changed)
 	      << this << std::endl;
 
   evaluation_changed = _changed;
+}
+
+//! Return a text interface that can be used to access this instance
+TextInterface::Parser* MEAL::Function::get_interface ()
+{
+  return new Interface (this);
 }

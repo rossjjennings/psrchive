@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Function.h,v $
-   $Revision: 1.15 $
-   $Date: 2008/06/19 10:22:10 $
+   $Revision: 1.16 $
+   $Date: 2009/08/16 21:16:47 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -36,6 +36,9 @@
 #include "Estimate.h"
 
 #include <string>
+
+// forward declaration of text interface
+namespace TextInterface { class Parser; };
 
 //! Namespace in which all modeling and calibration related code is declared
 /*! The MEAL namespace is documented in the introduction. */
@@ -92,6 +95,12 @@ namespace MEAL {
 
     //! Does the work for operator =
     virtual void copy (const Function* model);
+
+    //! Textual interface to Function attributes
+    class Interface;
+
+    //! Return a text interface that can be used to access this instance
+    virtual TextInterface::Parser* get_interface ();
 
     //! Parses the values of model parameters and fit flags from a string
     virtual void parse (const std::string& text);
