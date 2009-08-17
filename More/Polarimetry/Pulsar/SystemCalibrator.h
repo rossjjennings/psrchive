@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.24 $
-   $Date: 2009/08/17 00:49:44 $
+   $Revision: 1.25 $
+   $Date: 2009/08/17 01:46:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -313,6 +313,9 @@ namespace Pulsar
 
     //! Prepare the measurement equations for fitting
     virtual void solve_prepare ();
+
+    //! Configure a measurement equation 
+    void configure ( MEAL::Function* equation );
 
     //! Prepare to export the solution in current state; e.g. for plotting
     virtual void export_prepare () const = 0;

@@ -868,6 +868,27 @@ Pulsar::SystemCalibrator::set_equation_configuration (const vector<string>& c)
   equation_configuration = c;
 }
 
+void Pulsar::SystemCalibrator::configure ( MEAL::Function* equation ) try
+{
+  if (equation_configuration.size() == 0)
+    return;
+
+  Reference::To<TextInterface::Parser> interface = equation ->get_interface();
+  for (unsigned i=0; i<equation_configuration.size(); i++)
+    interface->process (equation_configuration[i]);
+}
+catch (Error& error)
+{
+  cerr << "Pulsar::SystemCalibrator::configure " << error << endl;
+
+  unsigned nparam = equation->get_nparam();
+  cerr << "Pulsar::SystemCalibrator::configure nparam=" << nparam << endl;
+  for (unsigned i=0; i<nparam; i++)
+    cerr << i << " name=" << equation->get_param_name(i) << endl;
+
+  exit (-1);
+}
+
 void Pulsar::SystemCalibrator::solve_prepare ()
 {
   if (is_prepared)
@@ -905,14 +926,7 @@ void Pulsar::SystemCalibrator::solve_prepare ()
 
     model[ichan]->set_reference_epoch ( epoch );
 
-    if (equation_configuration.size())
-    {
-      Reference::To<TextInterface::Parser> interface 
-	= model[ichan]->get_equation()->get_interface();
-
-      for (unsigned i=0; i<equation_configuration.size(); i++)
-	interface->process (equation_configuration[i]);
-    }
+    configure (model[ichan]->get_equation());
 
     model[ichan]->check_constraints ();
     
