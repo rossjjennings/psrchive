@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.109 $
-   $Date: 2009/08/14 01:53:32 $
+   $Revision: 1.110 $
+   $Date: 2009/08/17 00:49:36 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -535,6 +535,9 @@ int actual_main (int argc, char *argv[]) try
   // name of least squares minimization algorithm
   char* least_squares = NULL;
 
+  // name of file containing MEAL::Function text interface commands
+  vector<string> equation_configuration;
+
   // number of hours over which CALs will be found from Database
   float hours = 12.0;
 
@@ -544,7 +547,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args
-    = "1A:a:B:b:c:C:d:D:gHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rsS:t:T:u:U:vV:X:";
+    = "1A:a:B:b:C:c:D:d:E:e:gHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rsS:t:T:u:U:vV:X:";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -588,6 +591,14 @@ int actual_main (int argc, char *argv[]) try
 
     case 'D':
       enable_diagnostic (optarg);
+      break;
+
+    case 'e':
+      separate (optarg, equation_configuration, ",");
+      break;
+
+    case 'E':
+      loadlines (optarg, equation_configuration);
       break;
 
     case 'g':
@@ -910,6 +921,8 @@ int actual_main (int argc, char *argv[]) try
 
       if (invalid_chisq)
         model->set_invalid_reduced_chisq( invalid_chisq );
+
+      model->set_equation_configuration( equation_configuration );
 
     }
     catch (Error& error)
