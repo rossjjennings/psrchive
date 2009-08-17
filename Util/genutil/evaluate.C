@@ -129,8 +129,8 @@ string evaluate (const string& text, char cstart, char cend) try
   string::size_type start;
   string::size_type end;
 
-  while ( (start = remain.find(cstart)) != string::npos &&
-	  (end = remain.find(cend, start)) != string::npos )
+  while ( (end = remain.find(cend)) != string::npos &&
+	  (start = remain.rfind(cstart, end)) != string::npos )
   {
 
     // find the end of the variable name
