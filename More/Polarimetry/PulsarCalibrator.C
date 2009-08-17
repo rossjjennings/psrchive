@@ -597,9 +597,11 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
       //cerr << "backup gain=" << transformation[ichan]->get_param(0) << endl;
     }
 
+    mtm[ichan]->set_observation( data->new_PolnProfile (ichan) );
+
     configure( mtm[ichan]->get_equation() );
 
-    mtm[ichan]->fit( data->new_PolnProfile (ichan) );
+    mtm[ichan]->solve ();
 
     unsigned nfree = mtm[ichan]->get_equation()->get_solver()->get_nfree ();
     float chisq = mtm[ichan]->get_equation()->get_solver()->get_chisq ();
