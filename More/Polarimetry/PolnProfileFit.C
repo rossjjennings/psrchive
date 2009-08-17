@@ -282,8 +282,19 @@ void Pulsar::PolnProfileFit::remove_phase ()
 //! Fit the specified observation to the standard
 void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 {
+  set_observation (observation);
+  solve ();
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::PolnProfileFit::fit";
+}
+
+void Pulsar::PolnProfileFit::set_observation (const PolnProfile* only) try
+{
   if (!equation)
-    throw Error (InvalidState, "Pulsar::PolnProfileFit::fit", "no equation");
+    throw Error (InvalidState, "Pulsar::PolnProfileFit::set_observation",
+		 "no measurement equation");
 
   // delete any previously set data
   equation->delete_data ();
@@ -292,13 +303,11 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   if (phases)
     phases->resize (0);
 
-  add_observation (observation);
-
-  solve ();
+  add_observation (only);
 }
 catch (Error& error)
 {
-  throw error += "Pulsar::PolnProfileFit::fit";
+  throw error += "Pulsar::PolnProfileFit::set_observation";
 }
 
 void Pulsar::PolnProfileFit::set_measurement_set

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.38 $
-   $Date: 2009/06/24 05:11:18 $
+   $Revision: 1.39 $
+   $Date: 2009/08/17 02:19:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -91,8 +91,11 @@ namespace Pulsar
     //! Get the standard to which observations will be fit
     const PolnProfile* get_standard () const;
 
-    //! Add the specified observation to be fitted to the standard
+    //! Add the specified observation to be fit to the standard
     void add_observation (const PolnProfile* observation);
+
+    //! Set the only observation to be fit to the standard
+    void set_observation (const PolnProfile* observation);
 
     //! Set the template from which measurment sets will be constructed
     void set_measurement_set (const Calibration::CoherencyMeasurementSet&);
