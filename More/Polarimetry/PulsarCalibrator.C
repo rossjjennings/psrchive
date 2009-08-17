@@ -55,6 +55,7 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type* model)
 
   normalize_by_invariant = false;
   monitor_gimbal_lock = false;
+
   solve_each = false;
   fixed_phase = false;
 
@@ -595,6 +596,8 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
       transformation[ichan]->copy (backup);
       //cerr << "backup gain=" << transformation[ichan]->get_param(0) << endl;
     }
+
+    configure( mtm[ichan]->get_equation() );
 
     mtm[ichan]->fit( data->new_PolnProfile (ichan) );
 
