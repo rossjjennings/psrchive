@@ -862,6 +862,11 @@ void Pulsar::SystemCalibrator::set_nthread (unsigned nthread)
   queue.resize (nthread);
 }
 
+void
+Pulsar::SystemCalibrator::set_equation_configuration (const vector<string>& c)
+{
+  equation_configuration = c;
+}
 
 void Pulsar::SystemCalibrator::solve_prepare ()
 {
@@ -899,7 +904,16 @@ void Pulsar::SystemCalibrator::solve_prepare ()
     }
 
     model[ichan]->set_reference_epoch ( epoch );
-    
+
+    if (equation_configuration.size())
+    {
+      Reference::To<TextInterface::Parser> interface 
+	= model[ichan]->get_equation()->get_interface();
+
+      for (unsigned i=0; i<equation_configuration.size(); i++)
+	interface->process (equation_configuration[i]);
+    }
+
     model[ichan]->check_constraints ();
     
     if (set_initial_guess)

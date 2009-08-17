@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.23 $
-   $Date: 2009/08/14 01:53:32 $
+   $Revision: 1.24 $
+   $Date: 2009/08/17 00:49:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -170,6 +170,9 @@ namespace Pulsar
     //! Set the number of channels that may be simultaneously solved
     virtual void set_nthread (unsigned nthread);
 
+    //! Set the measurement equation configuration options
+    virtual void set_equation_configuration (const std::vector<std::string>&);
+
     //! Return true if least squares minimization solvers are available
     virtual bool has_solver () const;
 
@@ -228,6 +231,9 @@ namespace Pulsar
 
     //! The standard calibration model as a function of frequency
     Reference::Vector<Calibration::StandardModel> model;
+
+    //! Meausrement equation configuration options
+    std::vector<std::string> equation_configuration;
 
     //! The algorithm used to solve the measurement equation
     Reference::To<Calibration::ReceptionModel::Solver> solver;
