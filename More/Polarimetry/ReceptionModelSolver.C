@@ -135,6 +135,9 @@ void Calibration::ReceptionModel::Solver::solve () try
 
   check_constraints ();
 
+  singular = false;
+  solved = false;
+
   fit ();
 
   check_solution ();
