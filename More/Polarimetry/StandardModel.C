@@ -24,6 +24,7 @@
 #include <assert.h>
 
 using namespace std;
+using namespace MEAL;
 
 // #define _DEBUG 1
 
@@ -88,8 +89,8 @@ void Calibration::StandardModel::set_constant_pulsar_gain (bool value)
   if (!physical)
     return;
 
-  MEAL::Scalar* function 
-    = const_cast<MEAL::Scalar*>( physical->get_gain_variation() );
+  Scalar* function 
+    = const_cast<Scalar*>( physical->get_gain_variation() );
 
   if (function)
   {
@@ -400,6 +401,42 @@ void Calibration::StandardModel::check_constraints ()
 
 }
 
+bool decrement_nfree (MEAL::Scalar* function)
+{
+  MEAL::Steps* steps = dynamic_cast<MEAL::Steps*> (function);
+  if (steps && steps->get_nstep())
+  {
+    steps->remove_step (0);
+    return true;
+  }
+
+  MEAL::Polynomial* poly = dynamic_cast<MEAL::Polynomial*> (function);
+  if (poly && poly->get_nparam() > 1)
+  {
+    poly->resize( poly->get_nparam() - 1 );
+    return true;
+  }
+
+  return false;
+}
+
+//! Attempt to reduce the number of degrees of freedom in the model
+bool Calibration::StandardModel::reduce_nfree ()
+{
+  bool reduced = false;
+
+  if (gain && decrement_nfree (gain))
+    reduced = true;
+
+  if (diff_gain && decrement_nfree (diff_gain))
+    reduced = true;
+
+  if (diff_phase && decrement_nfree (diff_phase))
+    reduced = true;
+
+  return reduced;
+}
+
 void copy_param (MEAL::Function* to, const MEAL::Function* from)
 {
   unsigned nparam = to->get_nparam ();
@@ -498,8 +535,6 @@ Calibration::StandardModel::integrate_calibrator (const MEAL::Complex2* xform,
     }
   }
 }
-
-using namespace MEAL;
 
 void Calibration::StandardModel::set_gain (Univariate<Scalar>* function)
 {

@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.25 $
-   $Date: 2009/08/07 14:05:47 $
+   $Revision: 1.26 $
+   $Date: 2009/08/19 21:31:09 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -84,6 +84,9 @@ namespace Calibration
 
     //! Update the relevant estimate
     void update ();
+
+    //! Attempt to reduce the number of degrees of freedom in the model
+    bool reduce_nfree ();
 
     //! Check all relevant constraints
     void check_constraints ();
