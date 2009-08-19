@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LeastSquares.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/02/06 00:31:30 $
+   $Revision: 1.3 $
+   $Date: 2009/08/19 21:06:44 $
    $Author: straten $ */
 
 #ifndef __MEAL_LeastSquares_H
@@ -55,6 +55,12 @@ namespace MEAL {
 
     //! Return true when the fit has been solved
     bool get_solved () const { return solved; }
+
+    //! Set the singular flag (can be used to flag bad data)
+    void set_singular (bool val) { singular = val; }
+
+    //! Return true when the fit has failed due to singularity
+    bool get_singular () const { return singular; }
 
     //! The number of iterations in last call to solve method
     unsigned get_iterations () const { return iterations; }
@@ -111,6 +117,9 @@ namespace MEAL {
 
     //! Set true when fit has been solved
     bool solved;
+
+    //! Set true when the fit failed due to a singular Hessian matrix
+    bool singular;
 
     //! The covariance matrix set after fitting
     matrix covariance;

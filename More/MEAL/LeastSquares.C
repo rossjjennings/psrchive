@@ -30,6 +30,7 @@ MEAL::LeastSquares::LeastSquares ()
   debug = false;
   report = false;
   solved = false;
+  singular = false;
 }
 
 void MEAL::LeastSquares::set_convergence_chisq (float chisq)
