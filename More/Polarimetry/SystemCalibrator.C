@@ -983,6 +983,22 @@ void Pulsar::SystemCalibrator::solve ()
 
   queue.wait ();
 
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+  {
+    if (!model[ichan]->get_equation()->get_solver()->get_singular())
+      continue;
+
+    if (model[ichan]->reduce_nfree())
+    {
+      cerr << "retry after reducing number of free parameters in channel "
+	   << ichan << endl;
+      resolve (ichan);
+    }
+  }
+
+  queue.wait ();
+
+
   if (retry_chisq > 0.0)
   { 
     // attempt to fix up any channels that didn't converge well
