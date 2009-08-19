@@ -148,8 +148,6 @@ void Calibration::ReceptionModel::Solver::solve () try
 catch (Error& error)
 {
   cerr << "Calibration::ReceptionModel::Solver::solve " << error << endl;
-  for (unsigned iparam=0; iparam < equation->get_nparam(); iparam++)
-    equation->set_Estimate (iparam, 0.0);
 }
 
 void Calibration::ReceptionModel::Solver::check_solution ()
