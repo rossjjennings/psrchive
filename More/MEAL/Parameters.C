@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/Parameters.h"
 #include "MEAL/Function.h"
 
@@ -103,3 +104,13 @@ void MEAL::Parameters::resize (unsigned nparam)
   get_context()->changed.send (Function::ParameterCount);
 }
 
+//! Erase the specified parameter
+void MEAL::Parameters::erase (unsigned iparam)
+{
+  params.erase (params.begin() + iparam);
+  fit.erase (fit.begin() + iparam);
+  names.erase (names.begin() + iparam);
+  descriptions.erase (descriptions.begin() + iparam);
+  
+  get_context()->changed.send (Function::ParameterCount);
+}

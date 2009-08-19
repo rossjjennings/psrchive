@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Parameters.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/05/07 01:21:11 $
+   $Revision: 1.11 $
+   $Date: 2009/08/19 21:06:49 $
    $Author: straten $ */
 
 #ifndef __Parameters_H
@@ -122,6 +122,9 @@ namespace MEAL {
 
     //! Resize arrays, setting fit=true for new parameters
     void resize (unsigned nparam);
+
+    //! Erase the specified parameter
+    void erase (unsigned iparam);
 
   protected:
 
