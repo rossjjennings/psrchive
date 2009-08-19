@@ -77,6 +77,13 @@ void MEAL::Steps::add_step (double x)
   }
 }
 
+void MEAL::Steps::remove_step (unsigned istep)
+{
+  assert( istep < step.size() );
+  step.erase (step.begin() + istep);
+  parameters.erase (istep);
+}
+
 //! Set the abscissa of the specified step
 void MEAL::Steps::set_step (unsigned istep, double x)
 {
