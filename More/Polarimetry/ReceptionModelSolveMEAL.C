@@ -87,7 +87,7 @@ float lmcoff (// input
 }
 
 
-void Calibration::SolveMEAL::fit () try
+void Calibration::SolveMEAL::fit ()
 {
   if (!equation)
     throw Error (InvalidState, "Calibration::SolveMEAL::fit", "no equation");
@@ -111,7 +111,14 @@ void Calibration::SolveMEAL::fit () try
   if (Calibration::ReceptionModel::verbose)
     cerr << "Calibration::SolveMEAL::fit compute initial fit" << endl;
 
-  best_chisq = fit.init (get_data(), fake, *equation);
+  try {
+    best_chisq = fit.init (get_data(), fake, *equation);
+  }
+  catch (Error& error)
+  {
+    error << "\n\t" "init";
+    throw error += "Calibration::SolveMEAL::fit";
+  }
 
   fit.lamda = 1e-5;
   fit.lamda_increase_factor = 10;
@@ -125,7 +132,7 @@ void Calibration::SolveMEAL::fit () try
   unsigned stick_to_steepest_decent = 0;
   unsigned patience = 5;
 
-  for (iterations = 0; iterations < maximum_iterations; iterations++)
+  for (iterations = 0; iterations < maximum_iterations; iterations++) try
   {
     float chisq = fit.iter (get_data(), fake, *equation);
 
@@ -217,6 +224,16 @@ void Calibration::SolveMEAL::fit () try
       }
     }
   }
+  catch (Error& error)
+  {
+    /* Each iterative step includes inversion of the Hessian matrix.
+       If this fails, then it is likely singular (i.e. there is an
+       ill-constrained free parameter). */
+
+    singular = true;
+    error << "\n\t" "iteration=" << iterations;
+    throw error += "Calibration::SolveMEAL::fit";
+  }
 
   if (iterations == maximum_iterations)
     return;
@@ -227,6 +244,7 @@ void Calibration::SolveMEAL::fit () try
   }
   catch (Error& error)
   {
+    error << "\n\t" "result";
     throw error += "Calibration::SolveMEAL::fit";
   }
 
@@ -236,8 +254,3 @@ void Calibration::SolveMEAL::fit () try
 		 "\n\tcovariance matrix dimension=%d != nparam=%d",
 		 covariance.size(), equation->get_nparam());
 }
-catch (Error& error)
-{
-  throw error += "Calibration::SolveMEAL::fit";
-}
-
