@@ -998,7 +998,6 @@ void Pulsar::SystemCalibrator::solve ()
 
   queue.wait ();
 
-
   if (retry_chisq > 0.0)
   { 
     // attempt to fix up any channels that didn't converge well
@@ -1044,6 +1043,9 @@ void Pulsar::SystemCalibrator::solve ()
 
   for (unsigned ichan=0; ichan < nchan; ichan++) try
   {
+    if (!model[ichan]->get_equation()->get_solver()->get_solved())
+      model[ichan]->valid = false;
+
     if (!model[ichan]->valid)
       continue;
 
