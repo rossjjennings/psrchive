@@ -1122,6 +1122,12 @@ void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
   }
 
   cerr << "could not find a suitable solution to copy for retry" << endl;
+
+  if (model[ichan]->get_equation()->get_solver()->get_singular())
+  {
+    cerr << "retry singular anyhow" << endl;
+    queue.submit( model[ichan].get(), &StandardModel::solve );
+  }
 }
 catch (Error& error)
 {
