@@ -556,17 +556,21 @@ void Pulsar::PulsarCalibrator::setup (const Integration* data, unsigned ichan)
   }
 }
 
+string get_state (MEAL::Function* f)
+{
+  string state;
+  f->print (state);
+  return state;
+}
+
 void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
 {
   if (verbose)
     cerr << "Pulsar::PulsarCalibrator::solve1 ichan=" << ichan << endl;
 
-  MEAL::Function* backup = 0;
+  Reference::To<MEAL::Function> backup;
 
   assert (ichan < transformation.size());
-
-  if (transformation[ichan])
-    backup = transformation[ichan]->clone();
 
   for (unsigned tries=0 ; tries < 2; tries ++) try
   {
@@ -574,6 +578,9 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
 
     if (!transformation[ichan])
       return;
+
+    if (!backup)
+      backup = transformation[ichan]->clone();
 
     assert (ichan < solution.size());
     assert (ichan < reduced_chisq.size());
@@ -591,17 +598,28 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
       solution[ichan-1]->update( transformation[ichan] );
       //cerr << "copy gain=" << transformation[ichan]->get_param(0) << endl;
     }
-    else if (backup)
+    else if (tries && backup)
     {
+      if (verbose)
+        cerr << "Pulsar::PulsarCalibrator::solve1 backup "
+             << get_state(backup) << endl;
+
       transformation[ichan]->copy (backup);
-      //cerr << "backup gain=" << transformation[ichan]->get_param(0) << endl;
     }
 
     mtm[ichan]->set_observation( data->new_PolnProfile (ichan) );
 
     configure( mtm[ichan]->get_equation() );
 
+    if (verbose)
+      cerr << "Pulsar::PulsarCalibrator::solve1 pre-fit " 
+           << get_state(transformation[ichan]) << endl;
+
     mtm[ichan]->solve ();
+
+    if (verbose)
+      cerr << "Pulsar::PulsarCalibrator::solve1 post-fit " 
+           << get_state(transformation[ichan]) << endl;
 
     unsigned nfree = mtm[ichan]->get_equation()->get_solver()->get_nfree ();
     float chisq = mtm[ichan]->get_equation()->get_solver()->get_chisq ();
@@ -640,6 +658,9 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
     else
       cerr << error.get_message() << endl;
 #endif
+
+    transformation[ichan]->copy (backup);
+
     transformation[ichan] = 0;
     solution[ichan] = 0;
   }
