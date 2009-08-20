@@ -630,6 +630,9 @@ catch (Error& error) {
 
 TextInterface::Parser* Pulsar::Interpreter::get_interface ()
 {
+  if (VERBOSE)
+    cerr << "Pulsar::Interpreter::get_interface" << endl;
+
   return standard_interface( get() );
 }
 

@@ -9,6 +9,8 @@
 #include "Pulsar/ProfileStatsInterface.h"
 #include "Pulsar/Archive.h"
 
+using namespace std;
+
 Pulsar::Statistics::Interface::Interface (Statistics* instance)
 {
   if (instance)
@@ -32,7 +34,12 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
        "pol", "Polarization index" );
 
   if (instance)
+  {
+    if (Archive::verbose > 2) cerr << "Pulsar::Statistics::Interface::ctor"
+      " call Statistics::get_stats" << endl;
+
     insert ( instance->get_stats()->get_interface() );
+  }
 
   add( &Statistics::get_snr,
        "snr", "Signal-to-noise ratio" );
