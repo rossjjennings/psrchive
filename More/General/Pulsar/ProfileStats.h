@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.11 $
-   $Date: 2009/06/24 05:02:17 $
+   $Revision: 1.12 $
+   $Date: 2009/08/20 11:32:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileStats_h
@@ -120,11 +120,12 @@ namespace Pulsar
     mutable Estimate<double> baseline_variance;
 
     //! Computes the phase bin masks
-    void build ();
+    void build () const;
 
-    //! Sets up the algorithms to compute the required quantities
-    void setup (const Profile*) const;
+  private:
 
+    //! flag set when built
+    mutable bool built;
   };
 
 }

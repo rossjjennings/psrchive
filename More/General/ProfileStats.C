@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -36,8 +36,7 @@ Pulsar::ProfileStats::~ProfileStats()
 void Pulsar::ProfileStats::set_profile (const Profile* _profile)
 {
   profile = _profile;
-  if (profile)
-    build ();
+  built = false;
 }
 
 //! Set the Profile from which baseline and onpulse mask will be selected
@@ -67,16 +66,14 @@ void Pulsar::ProfileStats::deselect_onpulse (const Profile* prof, float thresh)
 void Pulsar::ProfileStats::set_onpulse_estimator (OnPulseEstimator* est)
 {
   onpulse_estimator = est;
-  if (profile)
-    build ();
+  built = false;
 }
 
 //! The algorithm used to find the off-pulse phase bins
 void Pulsar::ProfileStats::set_baseline_estimator (BaselineEstimator* est)
 {
   baseline_estimator = est;
-  if (profile)
-    build ();
+  built = false;
 }
 
 Pulsar::OnPulseEstimator*
@@ -99,8 +96,7 @@ void Pulsar::ProfileStats::set_regions (const PhaseWeight& on,
   baseline = off;
 
   regions_set = true;
-  if (profile)
-    build ();
+  built = false;
 }
 
 //! Set the on-pulse and baseline regions
@@ -114,6 +110,9 @@ void Pulsar::ProfileStats::get_regions (PhaseWeight& on,
 //! Returns the total flux of the on-pulse phase bins
 Estimate<double> Pulsar::ProfileStats::get_total (bool subtract_baseline) const
 {
+  if (!built)
+    build ();
+
   double offmean = 0.0;
   
   if (subtract_baseline)
@@ -139,33 +138,46 @@ Estimate<double> Pulsar::ProfileStats::get_total (bool subtract_baseline) const
 
 unsigned Pulsar::ProfileStats::get_onpulse_nbin () const
 {
+  if (!built)
+    build ();
   return (unsigned) onpulse.get_weight_sum();
 }
 
 unsigned Pulsar::ProfileStats::get_baseline_nbin () const
 {
+  if (!built)
+    build ();
   return (unsigned) baseline.get_weight_sum();
 }
 
 //! Return true if the specified phase bin is in the on pulse window
 bool Pulsar::ProfileStats::get_onpulse (unsigned ibin) const
 {
+  if (!built)
+    build ();
   return onpulse[ibin];
 }
 
 void Pulsar::ProfileStats::set_onpulse (unsigned ibin, bool val)
 {
+  if (!built)
+    build ();
   onpulse[ibin] = val;
 }
 
 //! Return true if the specified phase bin is in the baseline window
 bool Pulsar::ProfileStats::get_baseline (unsigned ibin) const
 {
+  if (!built)
+    build ();
   return baseline[ibin];
 }
 
 Estimate<double> Pulsar::ProfileStats::get_baseline_variance () const
 {
+  if (!built)
+    build ();
+
   if (baseline_variance.get_value() == 0)
     baseline_variance = baseline.get_variance();
 
@@ -175,12 +187,16 @@ Estimate<double> Pulsar::ProfileStats::get_baseline_variance () const
 //! Return the on-pulse phase bin mask
 Pulsar::PhaseWeight* Pulsar::ProfileStats::get_onpulse ()
 {
+  if (!built)
+    build ();
   return &onpulse;
 }
 
 //! Return the off-pulse baseline mask
 Pulsar::PhaseWeight* Pulsar::ProfileStats::get_baseline ()
 {
+  if (!built)
+    build ();
   return &baseline;
 }
 
@@ -190,7 +206,7 @@ Pulsar::PhaseWeight* Pulsar::ProfileStats::get_all ()
   return new PhaseWeight (profile.get());
 }
 
-void Pulsar::ProfileStats::build () try
+void Pulsar::ProfileStats::build () const try
 {
   baseline_variance = 0.0;
 
@@ -198,8 +214,11 @@ void Pulsar::ProfileStats::build () try
   {
     if (Profile::verbose)
       cerr << "Pulsar::ProfileStats::build regions set" << endl;
+
     onpulse.set_Profile (profile);
     baseline.set_Profile (profile);
+
+    built = true;
     return;
   }
 
@@ -208,6 +227,8 @@ void Pulsar::ProfileStats::build () try
     
   baseline_estimator->set_Profile (profile);
   baseline_estimator->get_weight (&baseline);
+
+  built = true;
 
   if (Profile::verbose)
   {
