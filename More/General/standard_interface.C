@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -12,11 +12,11 @@ using namespace Pulsar;
 
 TextInterface::Parser* standard_interface (Archive* archive)
 {
-  TextInterface::Parser* interface = archive->get_interface();
+  Reference::To<TextInterface::Parser> interface = archive->get_interface();
 
   interface->set_indentation (" ");
 
   interface->insert( new Statistics::Interface( new Statistics(archive) ) );
 
-  return interface;
+  return interface.release();
 }
