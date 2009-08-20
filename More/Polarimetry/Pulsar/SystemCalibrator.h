@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.25 $
-   $Date: 2009/08/17 01:46:53 $
+   $Revision: 1.26 $
+   $Date: 2009/08/20 04:51:42 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -98,6 +98,8 @@ namespace Pulsar
 
   public:
 
+    typedef Calibration::ReceptionModel::Solver Solver;
+
     //! Construct with optional processed calibrator Archive
     SystemCalibrator (Archive* archive = 0);
 
@@ -177,10 +179,10 @@ namespace Pulsar
     virtual bool has_solver () const;
 
     //! Return the transformation for the specified channel
-    virtual const MEAL::LeastSquares* get_solver (unsigned ichan) const;
+    virtual const Solver* get_solver (unsigned ichan) const;
 
     //! Set the algorithm used to solve the measurement equation
-    virtual void set_solver (Calibration::ReceptionModel::Solver*);
+    virtual void set_solver (Solver*);
 
     //! Set the reduced chisq above which the solution will be retried
     virtual void set_retry_reduced_chisq (float);
@@ -190,7 +192,10 @@ namespace Pulsar
 
     //! Report on the projection correction used in add_pulsar method
     virtual void set_report_projection (bool);
-    
+
+    //! Report on the initial state of the model before fitting
+    virtual void set_report_initial_state (bool flag = true);
+
     //! Solve equation for each frequency
     virtual void solve ();
     
@@ -236,7 +241,7 @@ namespace Pulsar
     std::vector<std::string> equation_configuration;
 
     //! The algorithm used to solve the measurement equation
-    Reference::To<Calibration::ReceptionModel::Solver> solver;
+    Reference::To<Solver> solver;
 
     //! The CalibratorStokesExtension of the Archive passed during construction
     mutable Reference::To<CalibratorStokes> calibrator_stokes;
@@ -311,6 +316,9 @@ namespace Pulsar
     //! Report on the projection transformation used in add_pulsar
     bool report_projection;
 
+    //! Report the initial state of model before fitting
+    bool report_initial_state;
+
     //! Prepare the measurement equations for fitting
     virtual void solve_prepare ();
 
@@ -325,6 +333,9 @@ namespace Pulsar
 
     //! Get the state of the prepared flag
     bool get_prepared () const;
+
+    //! Return the transformation for the specified channel
+    Solver* get_solver (unsigned ichan);
 
     //! Solve the specified channel after copying a good solution from another
     void resolve (unsigned ichan);

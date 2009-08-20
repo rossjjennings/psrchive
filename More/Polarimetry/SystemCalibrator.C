@@ -53,6 +53,7 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
   get_data_call = 0;
 
   report_projection = false;
+  report_initial_state = false;
 
   if (archive)
     set_calibrator (archive);
@@ -76,10 +77,18 @@ bool Pulsar::SystemCalibrator::has_solver () const
 }
 
 //! Return the transformation for the specified channel
-const MEAL::LeastSquares* 
+const Calibration::ReceptionModel::Solver* 
 Pulsar::SystemCalibrator::get_solver (unsigned ichan) const
 {
   check_ichan ("get_solver", ichan);
+  return model[ichan]->get_equation()->get_solver();
+}
+
+//! Return the transformation for the specified channel
+Calibration::ReceptionModel::Solver* 
+Pulsar::SystemCalibrator::get_solver (unsigned ichan)
+{
+  assert (ichan < model.size());
   return model[ichan]->get_equation()->get_solver();
 }
 
@@ -847,6 +856,12 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
   
   if (solver)
     model[ichan]->set_solver( solver->clone() );
+
+  if (report_initial_state)
+  {
+    string filename = "prefit_model_" + tostring(ichan) + ".txt";
+    get_solver(ichan)->set_prefit_report (filename);
+  }
 }
 
 //! Return the StandardModel for the specified channel
@@ -934,7 +949,7 @@ void Pulsar::SystemCalibrator::solve_prepare ()
       model[ichan]->update ();
     
     if (verbose > 2)
-      model[ichan]->get_equation()->get_solver()->set_debug();
+      get_solver(ichan)->set_debug();
   }
 
   is_prepared = true;
@@ -962,7 +977,6 @@ void Pulsar::SystemCalibrator::solve ()
   solve_prepare ();
 
   unsigned nchan = get_nchan ();
-  unsigned valid = 0;
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
@@ -972,31 +986,32 @@ void Pulsar::SystemCalibrator::solve ()
       continue;
     }
 
-    valid ++;
-
-    // first valid channel, print a report
-    if (valid == 1)
-      model[ichan]->get_equation()->get_solver()->set_report ();
-
     queue.submit( model[ichan].get(), &StandardModel::solve );
   }
 
   queue.wait ();
 
-  for (unsigned ichan=0; ichan<nchan; ichan++)
+  unsigned resolve_singular = 1;
+
+  while (resolve_singular)
   {
-    if (!model[ichan]->get_equation()->get_solver()->get_singular())
-      continue;
+    resolve_singular = 0;
 
-    if (model[ichan]->reduce_nfree())
+    for (unsigned ichan=0; ichan<nchan; ichan++)
     {
-      cerr << "retry after reducing number of free parameters in channel "
-	   << ichan << endl;
-      resolve (ichan);
-    }
-  }
+      if (!get_solver(ichan)->get_singular())
+	continue;
 
-  queue.wait ();
+      if (model[ichan]->reduce_nfree())
+      {
+	cerr << "retry singular channel " << ichan << endl;
+	resolve (ichan);
+	resolve_singular ++;
+      }
+    }
+
+    queue.wait ();
+  }
 
   if (retry_chisq > 0.0)
   { 
@@ -1043,7 +1058,7 @@ void Pulsar::SystemCalibrator::solve ()
 
   for (unsigned ichan=0; ichan < nchan; ichan++) try
   {
-    if (!model[ichan]->get_equation()->get_solver()->get_solved())
+    if (!get_solver(ichan)->get_solved())
       model[ichan]->valid = false;
 
     if (!model[ichan]->valid)
@@ -1123,13 +1138,12 @@ void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
     }
   }
 
-  cerr << "could not find a suitable solution to copy for retry" << endl;
-
-  if (model[ichan]->get_equation()->get_solver()->get_singular())
+  if (get_solver(ichan)->get_singular())
   {
-    cerr << "retry singular anyhow" << endl;
     queue.submit( model[ichan].get(), &StandardModel::solve );
   }
+  else
+    cerr << "could not find a suitable solution to copy for retry" << endl;
 }
 catch (Error& error)
 {
@@ -1375,7 +1389,12 @@ void Pulsar::SystemCalibrator::set_invalid_reduced_chisq (float reduced_chisq)
 
 void Pulsar::SystemCalibrator::set_report_projection (bool flag)
 {
-  report_projection = true;
+  report_projection = flag;
+}
+
+void Pulsar::SystemCalibrator::set_report_initial_state (bool flag)
+{
+  report_initial_state = flag;
 }
 
 void Pulsar::SystemCalibrator::check_ichan (const char* name, unsigned ichan)
