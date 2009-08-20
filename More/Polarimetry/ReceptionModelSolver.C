@@ -159,7 +159,7 @@ void Calibration::ReceptionModel::Solver::solve () try
 }
 catch (Error& error)
 {
-  cerr << "Calibration::ReceptionModel::Solver::solve " << error << endl;
+  throw error += "Calibration::ReceptionModel::Solver::solve";
 }
 
 void Calibration::ReceptionModel::Solver::check_solution ()
