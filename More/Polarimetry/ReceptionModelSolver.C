@@ -9,11 +9,17 @@
 #include "Pulsar/ReceptionModelReport.h"
 #include "Pulsar/CoherencyMeasurementSet.h"
 
-#include <iostream>
+#include <fstream>
 
 using namespace std;
 
 bool Calibration::ReceptionModel::Solver::report_chisq = false;
+
+void Calibration::ReceptionModel::Solver::set_prefit_report
+(const std::string& filename)
+{
+  prefit_report_filename = filename;
+}
 
 /*! Count the number of parameters that are to be fit, set nparam_infit */
 void Calibration::ReceptionModel::Solver::count_infit () try
@@ -22,23 +28,23 @@ void Calibration::ReceptionModel::Solver::count_infit () try
     cerr << "Calibration::ReceptionModel::Solver::count_infit" << endl;
 
   if (report)
-    cerr << endl << equation->get_nparam()
-         << " model parameters [index:free name=value]" << endl << endl;
+    report << equation->get_nparam()
+	   << " model parameters [index:free name=value]" << endl << endl;
 
   nparam_infit = 0;
 
   for (unsigned iparm=0; iparm < equation->get_nparam(); iparm++)
   {
-    if (verbose || report)
-      cerr << iparm << ":" << equation->get_infit(iparm) << " "
-           << equation->get_param_name(iparm)
-	   << "=" << equation->get_param(iparm) << endl;
+    if (report)
+      report << iparm << ":" << equation->get_infit(iparm) << " "
+	     << equation->get_param_name(iparm)
+	     << "=" << equation->get_param(iparm) << endl;
     if (equation->get_infit(iparm))
       nparam_infit ++;
   }
 
   if (report)
-    cerr << endl << nparam_infit << " free parameters" << endl << endl;
+    report << nparam_infit << " free parameters" << endl;
 }
 catch (Error& error)
 {
@@ -128,8 +134,14 @@ catch (Error& error)
     minimization in order to find the best fit to the observations. */
 void Calibration::ReceptionModel::Solver::solve () try
 {
+  if (!prefit_report_filename.empty())
+    report.open( prefit_report_filename.c_str() );
+
   count_infit ();
   count_constraint ();
+
+  if (report)
+    report.close();
 
   nfree = ndat_constraint - nparam_infit;
 
