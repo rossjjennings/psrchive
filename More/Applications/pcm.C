@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.110 $
-   $Date: 2009/08/17 00:49:36 $
+   $Revision: 1.111 $
+   $Date: 2009/08/20 04:50:52 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -479,6 +479,7 @@ Pulsar::Archive* load (const std::string& filename)
 }
 
 static bool output_report = false;
+static bool prefit_report = false;
 
 static bool plot_guess = false;
 static bool plot_residual = false;
@@ -487,7 +488,10 @@ static bool plot_result = false;
 
 void enable_diagnostic (const string& name)
 {
-  if (name == "report")
+  if (name == "prefit")
+    prefit_report = true;
+
+  else if (name == "report")
     output_report = true;
 
   else if (name == "guess")
@@ -889,6 +893,8 @@ int actual_main (int argc, char *argv[]) try
 
       model->set_nthread (nthread);
       model->set_report_projection (true);
+
+      model->set_report_initial_state (prefit_report);
 
       if (impurity)
 	model->set_impurity( impurity );
