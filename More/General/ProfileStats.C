@@ -42,7 +42,7 @@ void Pulsar::ProfileStats::set_profile (const Profile* _profile)
 //! Set the Profile from which baseline and onpulse mask will be selected
 /*! It is assumed that all subsequent Profile instances passed to
   set_profile will have the same phase as set_profile */
-void Pulsar::ProfileStats::select_profile (const Profile* set_profile)
+void Pulsar::ProfileStats::select_profile (const Profile* set_profile) try
 {
   regions_set = false;
 
@@ -54,6 +54,10 @@ void Pulsar::ProfileStats::select_profile (const Profile* set_profile)
   if (set_profile)
     regions_set = true;
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::ProfileStats::select_profile";
+   }
 
 void Pulsar::ProfileStats::deselect_onpulse (const Profile* prof, float thresh)
 {
@@ -151,29 +155,41 @@ unsigned Pulsar::ProfileStats::get_baseline_nbin () const
 }
 
 //! Return true if the specified phase bin is in the on pulse window
-bool Pulsar::ProfileStats::get_onpulse (unsigned ibin) const
+bool Pulsar::ProfileStats::get_onpulse (unsigned ibin) const try
 {
   if (!built)
     build ();
   return onpulse[ibin];
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::ProfileStats::get_onpulse (ibin)";
+   }
 
-void Pulsar::ProfileStats::set_onpulse (unsigned ibin, bool val)
+void Pulsar::ProfileStats::set_onpulse (unsigned ibin, bool val) try
 {
   if (!built)
     build ();
   onpulse[ibin] = val;
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::ProfileStats::set_onpulse (ibin, val)";
+   }
 
 //! Return true if the specified phase bin is in the baseline window
-bool Pulsar::ProfileStats::get_baseline (unsigned ibin) const
+bool Pulsar::ProfileStats::get_baseline (unsigned ibin) const try
 {
   if (!built)
     build ();
   return baseline[ibin];
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::ProfileStats::get_baseline (ibin)";
+   }
 
-Estimate<double> Pulsar::ProfileStats::get_baseline_variance () const
+Estimate<double> Pulsar::ProfileStats::get_baseline_variance () const try
 {
   if (!built)
     build ();
@@ -183,22 +199,34 @@ Estimate<double> Pulsar::ProfileStats::get_baseline_variance () const
 
   return baseline_variance;
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::ProfileStats::get_baseline_variance";
+   }
 
 //! Return the on-pulse phase bin mask
-Pulsar::PhaseWeight* Pulsar::ProfileStats::get_onpulse ()
+Pulsar::PhaseWeight* Pulsar::ProfileStats::get_onpulse () try
 {
   if (!built)
     build ();
   return &onpulse;
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::ProfileStats::get_onpulse";
+   }
 
 //! Return the off-pulse baseline mask
-Pulsar::PhaseWeight* Pulsar::ProfileStats::get_baseline ()
+Pulsar::PhaseWeight* Pulsar::ProfileStats::get_baseline () try
 {
   if (!built)
     build ();
   return &baseline;
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::ProfileStats::get_baseline";
+   }
 
 //! Return the off-pulse baseline mask
 Pulsar::PhaseWeight* Pulsar::ProfileStats::get_all ()
@@ -209,6 +237,9 @@ Pulsar::PhaseWeight* Pulsar::ProfileStats::get_all ()
 void Pulsar::ProfileStats::build () const try
 {
   baseline_variance = 0.0;
+
+  if (!profile)
+    return;
 
   if (regions_set)
   {
