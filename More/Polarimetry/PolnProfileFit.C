@@ -429,9 +429,6 @@ void Pulsar::PolnProfileFit::solve () try
 
   clock.start();
 
-  if (verbose)
-    equation->get_solver()->set_report ();
-
   equation->solve ();
 
   clock.stop();

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LeastSquares.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/08/19 21:06:44 $
+   $Revision: 1.4 $
+   $Date: 2009/08/20 04:51:00 $
    $Author: straten $ */
 
 #ifndef __MEAL_LeastSquares_H
@@ -43,9 +43,6 @@ namespace MEAL {
 
     //! Set the reduced chi-squared above which the fit is considered bad
     void set_maximum_reduced_chisq (float maximum_reduced_chisq);
-
-    //! Set the fit report flag
-    void set_report (bool flag = true) { report = flag; }
 
     //! Set the verbosity during solve
     void set_debug (bool flag = true) { debug = flag; }
@@ -111,9 +108,6 @@ namespace MEAL {
 
     //! The fit debug mode
     bool debug;
-
-    //! Solve method will report parameter names, free parameters, etc.
-    bool report;
 
     //! Set true when fit has been solved
     bool solved;

@@ -28,7 +28,6 @@ MEAL::LeastSquares::LeastSquares ()
 
   // used during solve
   debug = false;
-  report = false;
   solved = false;
   singular = false;
 }
