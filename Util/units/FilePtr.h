@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/FilePtr.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/03/15 06:55:53 $
+   $Revision: 1.3 $
+   $Date: 2009/08/21 01:28:58 $
    $Author: straten $ */
 
 #ifndef __FilePtr_H
@@ -18,14 +18,13 @@
 #include <string>
 
 //! Closes a FILE* when it goes out of scope
-/*! This may be the most useful class ever written */
 class FilePtr
 {
 public:
 
   FilePtr (const std::string& filename, const std::string& mode);
-
   FilePtr (FILE* f) { fptr = f; }
+  FilePtr () { fptr = 0; }
   ~FilePtr () { if (fptr) fclose (fptr); }
   operator FILE* () { return fptr; }
   bool operator ! () { return fptr == 0; }
