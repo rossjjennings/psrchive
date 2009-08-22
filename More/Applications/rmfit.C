@@ -2177,12 +2177,13 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
     float pf = fbegin;
     float ppa = plotpa0;
 
+    const double c0 = Pulsar::speed_of_light * 1e-6;
 
     for (unsigned i=0; i<fsize; i++)
     {
       plotf.push_back(freqs[i]);
 
-      ppa = plotpa0+(180./PI)*c0*c0*plotRM*( 1./pow(freqs[i],2) - 1./pow(fbegin,2) );
+      ppa = plotpa0+(180./M_PI)*c0*c0*plotRM*( 1./pow(freqs[i],2) - 1./pow(fbegin,2) );
 
       ppa = modf(ppa/180.,&dumdum);
       ppa *= 180.;
