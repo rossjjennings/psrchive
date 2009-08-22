@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 #include "KaraFit.h"
+#include "Physical.h"
 
-#include <math.h>
 #include <iostream>
 
 using namespace std;
@@ -66,6 +66,8 @@ int KaraFit::doFit()
     int count = 0;
     
     cerr << "[";   
+
+    const double c0 = Pulsar::speed_of_light * 1e-6;
 
     for (rm = rm1 ; rm < rm2 ; rm += drm){ 
 

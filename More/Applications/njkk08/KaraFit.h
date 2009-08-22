@@ -7,17 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/njkk08/KaraFit.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/01/30 01:08:13 $
+   $Revision: 1.3 $
+   $Date: 2009/08/22 13:42:31 $
    $Author: straten $ */
 
 #ifndef _KaraFit_h
 #define _KaraFit_h
 
-#define PI 3.14159265358
-#define c0 299.792458
-
 #include <vector>
+#include <math.h>
 
 class KaraFit
 {
@@ -61,8 +59,8 @@ private:
 
 
 
-   double r2d(){return 180.0/PI;}
-   double d2r(){return PI/180.0;}
+   double r2d(){return 180.0/M_PI;}
+   double d2r(){return M_PI/180.0;}
 
    double rm;
    double drm;
