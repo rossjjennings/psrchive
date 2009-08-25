@@ -507,8 +507,6 @@ AC_DEFUN([BNV_PATH_QT_DIRECT],
               # Success.
               # We can link with no special library directory.
               bnv_qt_lib_dir=
-            ], [
-              # Leave bnv_qt_lib_dir defined
             ])
           ])
         ])
