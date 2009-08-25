@@ -18,6 +18,8 @@ public:
 
   string text;
   double x;
+  vector<int> indeces;
+
   bool pole;
 };
 
@@ -36,9 +38,10 @@ void Test::parseOptions (int argc, char** argv)
   CommandLine::Argument* arg;
 
   menu.add (text, 's');
+  menu.add (x, 'x');
 
-  arg = menu.add (x, 'x');
-  arg->set_long_name ("abscissa");
+  arg = menu.add (indeces, 'i');
+  arg->set_long_name ("index");
 
   //
   // Parse the command line.

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/CommandLine.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/08/25 08:11:35 $
+   $Revision: 1.2 $
+   $Date: 2009/08/25 08:16:35 $
    $Author: straten $ */
 
 #ifndef __CommandLine_h
@@ -99,6 +99,25 @@ namespace CommandLine {
     void handle (const std::string& arg) { value = fromstring<T>(arg); }
   };
 
+  //! A command line value that may be specified multiple times
+  template<typename T>
+  class Value< std::vector<T> > : public Argument
+  {
+  protected:
+
+    //! Reference to the value to be set
+    std::vector<T>& values;
+
+  public:
+
+    //! Default constructor
+    Value (std::vector<T>& _values) : values (_values) { }
+
+    //! Handle the argument
+    void handle (const std::string& arg)
+    { values.push_back( fromstring<T>(arg) ); }
+
+  };
 
   class Heading : public Item
   {
