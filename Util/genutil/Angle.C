@@ -10,6 +10,7 @@
 #include "coord_parse.h"
 #include "Error.h"
 
+#include <stdio.h>
 #include <math.h>
 #include <limits.h>
 #include <float.h>

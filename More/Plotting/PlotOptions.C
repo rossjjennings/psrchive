@@ -8,6 +8,7 @@
 #include "Pulsar/PlotOptions.h"
 #include "pgutil.h"
 
+#include <stdio.h>
 #include <cpgplot.h>
 
 using namespace std;

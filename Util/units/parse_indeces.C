@@ -7,6 +7,7 @@
 
 #include "TextInterface.h"
 #include "stringtok.h"
+#include <stdio.h>
 
 using namespace std;
 
