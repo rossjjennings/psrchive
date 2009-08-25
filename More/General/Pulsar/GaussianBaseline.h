@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/GaussianBaseline.h,v $
-   $Revision: 1.9 $
-   $Date: 2009/08/25 05:29:27 $
+   $Revision: 1.10 $
+   $Date: 2009/08/25 05:45:21 $
    $Author: straten $ */
 
 #ifndef __Pulsar_GaussianBaseline_h
@@ -21,7 +21,7 @@ namespace Pulsar {
   //! Adaptively computes the baseline, assuming normally distributed noise
   /*!  
 
-  The GaussianBaseline class uses an iterative method better estimate
+  The GaussianBaseline class uses an iterative method to better estimate
   of the off-pulse baseline.  The BaselineWindow algorithm
   systematically under-estimates the mean of the off-pulse baseline
   and, for pulsars with small duty cycles, does not make full use of
@@ -37,7 +37,7 @@ namespace Pulsar {
 
   \f$ \int_{-t}^{+t} x^2 P(x) \f$
 
-  where \f$t\f$ is the threshold (with no cutoff, \f$t\f$->infinity)
+  where \f$t\f$ is the threshold (with no cutoff, \f$t \rightarrow \infty\f$)
 
   Computation of the correction factor requires an assumption about
   the probability distribution, \f$P(x)\f$; GaussianBaseline assumes
@@ -55,11 +55,11 @@ namespace Pulsar {
   2) A list is made of all of the transitions from masked to
   not-masked regions (and vice versa), a box-car smoothed version of
   the profile is made (default smoothing factor equals 4) and,
-  beginning at each transition from not-masked to masked, converts
-  masked points to not-masked until the smoothed profile falls below
+  beginning at each transition from not-masked to masked, masked points 
+  are converted to not-masked until the smoothed profile falls below
   the off-pulse mean.  This step peels the baseline mask away from the
-  on-pulse regions (e.g. where the pulse is weak, the iterative
-  baseline can creep up the shallow wings of the pulse).
+  on-pulse regions (where the pulse is weak, the iterative
+  baseline can creep up the wings of the pulse).
 
   When any of the above steps fails, GaussianBaseline reverts to
   the dependable BaselineWindow method.
