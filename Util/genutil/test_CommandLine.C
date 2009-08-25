@@ -14,6 +14,9 @@ using namespace std;
 class Test
 {
 public:
+
+  Test () { x = 0.0; flag = false; }
+
   void parseOptions (int argc, char** argv);
 
   string text;
@@ -27,7 +30,11 @@ int main(int argc, char** argv)
   Test test;
   test.parseOptions (argc,argv);
 
-  cerr << "test_CommandLine: -s " << test.text << endl;
+  cerr << "test_CommandLine:\n"
+    " -s " << test.text << "\n"
+    " -x " << test.x << "\n"
+    " -i " << test.indeces.size() << "\n"
+    " -f " << test.flag << endl;
 }
 
 

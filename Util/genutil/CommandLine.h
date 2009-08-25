@@ -7,16 +7,19 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/CommandLine.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/08/25 08:21:07 $
+   $Revision: 1.4 $
+   $Date: 2009/08/25 09:06:10 $
    $Author: straten $ */
 
 #ifndef __CommandLine_h
 #define __CommandLine_h
 
 #include "tostring.h"
+
 #include <string>
 #include <vector>
+
+#include <getopt.h>
 
 namespace CommandLine {
 
@@ -39,6 +42,8 @@ namespace CommandLine {
     virtual Help get_help () const = 0;
   };
 
+  class Menu;
+
   //! A single command line argument
   class Argument : public Item
   {
@@ -60,22 +65,27 @@ namespace CommandLine {
     //! Detailed description of value
     std::string long_help;
 
+    //! The has_arg attribute used by getopt_long
+    int has_arg;
+
     //! Code assigned to this Argument by Menu class
-    int code;
+    int val;
+
+    friend class Menu;
 
   public:
 
-    Argument () { code = 0; }
+    Argument () { val = 0; has_arg = no_argument; }
 
     void set_short_name (char c) { short_name = std::string(1,c); }
     void set_long_name (const std::string& s) { long_name = s; }
     void set_type (const std::string& s) { type = s; }
     void set_reminder (const std::string& s) { reminder = s; }
     void set_long_help (const std::string& s) { long_help = s; }
-    void set_code (int c) { code = c; }
+    void set_has_arg (int h) { has_arg = h; }
 
     //! Return true if key matches
-    bool matches (int c) const { return code == c; }
+    bool matches (int c) const { return val == c; }
 
     Help get_help () const;
   
@@ -93,7 +103,8 @@ namespace CommandLine {
   public:
 
     //! Default constructor
-    Value (T& _value) : value (_value) { }
+    Value (T& _value)
+      : value (_value) { has_arg = required_argument; }
 
     //! Handle the argument
     void handle (const std::string& arg) { value = fromstring<T>(arg); }
@@ -111,7 +122,8 @@ namespace CommandLine {
   public:
 
     //! Default constructor
-    Value (std::vector<T>& _values) : values (_values) { }
+    Value (std::vector<T>& _values)
+      : values (_values) { has_arg = required_argument; }
 
     //! Handle the argument
     void handle (const std::string& arg) 
