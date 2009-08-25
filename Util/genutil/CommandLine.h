@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/CommandLine.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/08/25 09:06:10 $
+   $Revision: 1.5 $
+   $Date: 2009/08/25 18:52:16 $
    $Author: straten $ */
 
 #ifndef __CommandLine_h
@@ -60,7 +60,7 @@ namespace CommandLine {
     std::string type;
 
     //! Brief description of value
-    std::string reminder;
+    std::string help;
 
     //! Detailed description of value
     std::string long_help;
@@ -80,7 +80,7 @@ namespace CommandLine {
     void set_short_name (char c) { short_name = std::string(1,c); }
     void set_long_name (const std::string& s) { long_name = s; }
     void set_type (const std::string& s) { type = s; }
-    void set_reminder (const std::string& s) { reminder = s; }
+    void set_help (const std::string& s) { help = s; }
     void set_long_help (const std::string& s) { long_help = s; }
     void set_has_arg (int h) { has_arg = h; }
 
@@ -181,6 +181,15 @@ namespace CommandLine {
 
     virtual ~Menu ();
 
+    //! Set the version information string (activates -i,--version)
+    virtual void set_version (const std::string& s) { version_info = s; }
+
+    //! Set the help header (activates -h,--help)
+    virtual void set_help_header (const std::string& s) { help_header=s; }
+
+    //! Set the help footer
+    virtual void set_help_footer (const std::string& s) { help_footer=s; }
+
     //! Parse the command line
     virtual void parse (int argc, char* const *argv);
 
@@ -210,6 +219,15 @@ namespace CommandLine {
   protected:
 
     std::vector<Item*> item;
+    std::string version_info;
+    std::string help_header;
+    std::string help_footer;
+
+    //! Print help and exit
+    void help (const char*);
+
+    //! Print version and exit
+    void version ();
   };
 
 

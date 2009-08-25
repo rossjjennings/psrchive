@@ -43,12 +43,26 @@ void Test::parseOptions (int argc, char** argv)
   CommandLine::Menu menu;
   CommandLine::Argument* arg;
 
-  menu.add (flag, 'f');
-  menu.add (text, 's');
+  menu.set_help_header ("test_CommandLine - simple test");
+  menu.set_version ("test_CommandLine version 1.0");
+
+  arg = menu.add (flag, 'f');
+  arg->set_help ("flag is toggled on every use");
+
+  arg = menu.add (text, 's');
+  arg->set_help ("string of text");
+
   menu.add (x, 'x');
 
   arg = menu.add (indeces, 'i');
   arg->set_long_name ("index");
+  arg->set_help ("multiple indeces may be specified");
+  arg->set_long_help
+    ("This option can be used to specify the indeces of an array. \n"
+     "Multiple indeces are specified by using the option more than once. \n"
+     "e.g. \n"
+     "\n"
+     "  test_CommandLine -i 3 -i 55\n");
 
   //
   // Parse the command line.
