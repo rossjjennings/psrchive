@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/CommandLine.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/08/25 08:16:35 $
+   $Revision: 1.3 $
+   $Date: 2009/08/25 08:21:07 $
    $Author: straten $ */
 
 #ifndef __CommandLine_h
@@ -114,9 +114,29 @@ namespace CommandLine {
     Value (std::vector<T>& _values) : values (_values) { }
 
     //! Handle the argument
-    void handle (const std::string& arg)
-    { values.push_back( fromstring<T>(arg) ); }
+    void handle (const std::string& arg) 
+    {
+      values.push_back( fromstring<T>(arg) );
+    }
 
+  };
+
+  //! A command line toggle
+  template<>
+  class Value<bool> : public Argument
+  {
+  protected:
+
+    //! Reference to the value to be set
+    bool& value;
+
+  public:
+
+    //! Default constructor
+    Value (bool& _value) : value (_value) { }
+
+    //! Handle the argument
+    void handle (const std::string& arg) { value = !value; }
   };
 
   class Heading : public Item

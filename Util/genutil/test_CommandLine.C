@@ -19,8 +19,7 @@ public:
   string text;
   double x;
   vector<int> indeces;
-
-  bool pole;
+  bool flag;
 };
 
 int main(int argc, char** argv)
@@ -37,6 +36,7 @@ void Test::parseOptions (int argc, char** argv)
   CommandLine::Menu menu;
   CommandLine::Argument* arg;
 
+  menu.add (flag, 'f');
   menu.add (text, 's');
   menu.add (x, 'x');
 
