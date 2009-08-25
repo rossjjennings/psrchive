@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/GaussianBaseline.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/06/24 05:02:23 $
+   $Revision: 1.9 $
+   $Date: 2009/08/25 05:29:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_GaussianBaseline_h
@@ -18,7 +18,53 @@
 
 namespace Pulsar {
 
-  //! Finds a baseline that contains gaussian white noise
+  //! Adaptively computes the baseline, assuming normally distributed noise
+  /*!  
+
+  The GaussianBaseline class uses an iterative method better estimate
+  of the off-pulse baseline.  The BaselineWindow algorithm
+  systematically under-estimates the mean of the off-pulse baseline
+  and, for pulsars with small duty cycles, does not make full use of
+  all off-pulse samples (more samples reduce the uncertainty in the
+  estimate of the off-pulse mean).
+
+  GaussianBaseline addresses these issues by iteratively computing the
+  mean and r.m.s. and excluding all points that lie greater than
+  threshold (default threshold equals one sigma) away from the current
+  mean.  The one-sigma cutoff neatly omits the on-pulse points, but also
+  necessitates correction of the estimate of the variance, which is
+  given by the integral
+
+  \f$ \int_{-t}^{+t} x^2 P(x) \f$
+
+  where \f$t\f$ is the threshold (with no cutoff, \f$t\f$->infinity)
+
+  Computation of the correction factor requires an assumption about
+  the probability distribution, \f$P(x)\f$; GaussianBaseline assumes
+  normally distributed measurement noise.
+
+  After creating the baseline mask, GaussianBaseline performs two
+  clean-up tasks:
+
+  1) Any isolated masked samples are converted to not-masked (not
+  necessarily on-pulse), and any isolated not-masked samples are
+  converted to masked.  "Isolated" is defined as a single state
+  surrounded by opposite states.  This step fills in the few random
+  holes left by samples greater than threshold from the mean.
+
+  2) A list is made of all of the transitions from masked to
+  not-masked regions (and vice versa), a box-car smoothed version of
+  the profile is made (default smoothing factor equals 4) and,
+  beginning at each transition from not-masked to masked, converts
+  masked points to not-masked until the smoothed profile falls below
+  the off-pulse mean.  This step peels the baseline mask away from the
+  on-pulse regions (e.g. where the pulse is weak, the iterative
+  baseline can creep up the shallow wings of the pulse).
+
+  When any of the above steps fails, GaussianBaseline reverts to
+  the dependable BaselineWindow method.
+
+  */
   class GaussianBaseline : public IterativeBaseline {
 
   public:
