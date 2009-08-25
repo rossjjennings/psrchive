@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -219,27 +219,35 @@ void Pulsar::IterativeBaseline::calculate (PhaseWeight* weight)
       drift_detected = true;
       initial_baseline->get_weight (weight);
     }
-
   }
 
-  if (iter >= max_iterations)
+  if (iter < max_iterations) try
+  {
+    postprocess (weight, profile);
+    return;
+  }
+  catch (Error& error)
+  {
+#ifndef _DEBUG
+    if (Profile::verbose)
+#endif
+      cerr << "Pulsar::IterativeBaseline::get_weight postprocess failed"
+	   << endl;
+  }
+  else
   {
 #ifndef _DEBUG
     if (Profile::verbose)
 #endif
       cerr << "Pulsar::IterativeBaseline::get_weight did not converge in "
 	   << max_iterations << " iterations" << endl;
-
-    // return to the initial baseline estimate
-    if (!initial_baseline)
-      initial_baseline = default_initial_baseline ();
-    
-    initial_baseline->get_weight (weight);
-
-    return;
   }
 
-  postprocess (weight, profile);
+  // return to the initial baseline estimate
+  if (!initial_baseline)
+    initial_baseline = default_initial_baseline ();
+  
+  initial_baseline->get_weight (weight);
 
 #ifdef _DEBUG
   unsigned total = 0;
