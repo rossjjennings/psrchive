@@ -7,6 +7,7 @@ include_HEADERS = \
         Brent.h \
 	BoxMuller.h \
         Cartesian.h \
+	CommandLine.h \
         CommandParser.h \
         compressed_io.h \
 	coord.h \
@@ -61,6 +62,7 @@ libgenutil_la_SOURCES = \
 	BatchQueue.C \
 	BoxMuller.C \
         Cartesian.C \
+	CommandLine.C \
         CommandParser.C \
         companion_mass.c \
         completion.C \
@@ -140,13 +142,15 @@ TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98	\
 	test_exponential test_StraightLine test_ThreadStream		\
 	test_Horizon test_VirtualMemory test_LogFile
 
-check_PROGRAMS = $(TESTS) test_CommandParser test_Angle test_expand
+check_PROGRAMS = $(TESTS) test_CommandLine test_CommandParser \
+	test_Angle test_expand
 
 test_evaluate_SOURCES           = test_evaluate.C
 test_Cartesian_SOURCES		= test_Cartesian.C
 test_MJD_SOURCES		= test_MJD.C
 test_Angle_SOURCES		= test_Angle.C
 test_Angle_LDADD		= $(LDADD) @FLIBS@
+test_CommandLine_SOURCES	= test_CommandLine.C
 test_CommandParser_SOURCES      = test_CommandParser.C
 test_CommandParser_LDADD	= $(LDADD) @READLINE_LIBS@
 test_ja98_SOURCES		= test_ja98.C
