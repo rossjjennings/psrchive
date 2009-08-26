@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/CommandLine.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/08/25 18:52:16 $
+   $Revision: 1.6 $
+   $Date: 2009/08/26 07:30:06 $
    $Author: straten $ */
 
 #ifndef __CommandLine_h
@@ -159,8 +159,8 @@ namespace CommandLine {
     //! Default constructor
     Heading (const std::string& _text) { text = _text; }
 
-    //! Return true if key matches
-    bool matches (const std::string& key) const { return false; }
+    //! Always eturn false
+    bool matches (int) const { return false; }
 
     //! Handle the argument
     void handle (const std::string& arg) { }
@@ -198,23 +198,30 @@ namespace CommandLine {
 
     //! Add a Value with only a single letter name
     template<typename T>
-    Argument* add (T& value, char short_name)
+    Argument* add (T& value, char short_name, const char* type = 0)
     { 
       Argument* argument = new Value<T> (value);
       argument->set_short_name (short_name);
+      if (type)
+	argument->set_type (type);
       item.push_back (argument);
       return argument;
     }
 
     //! Add a Value with only a long string name
     template<typename T>
-    Argument* add (T& value, const std::string& long_name)
+    Argument* add (T& value, const std::string& name, const char* type = 0)
     { 
       Argument* argument = new Value<T> (value);
-      argument->set_long_name (long_name);
+      argument->set_long_name (name);
+      if (type)
+	argument->set_type (type);
       item.push_back (argument);
       return argument;
     }
+
+    //! Add a Heading with the given text
+    void add (const std::string&);
 
   protected:
 

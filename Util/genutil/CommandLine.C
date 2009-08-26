@@ -43,6 +43,12 @@ void CommandLine::Menu::add (Item* i)
   item.push_back (i);
 }
 
+//! Add a Heading with the given text
+void CommandLine::Menu::add (const std::string& text)
+{
+  add( new Heading (text) );
+}
+
 template<typename T>
 void resize (T* &ptr, unsigned size)
 {
