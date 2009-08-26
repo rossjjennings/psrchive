@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/CommandLine.h,v $
-   $Revision: 1.6 $
-   $Date: 2009/08/26 07:30:06 $
+   $Revision: 1.7 $
+   $Date: 2009/08/26 19:05:31 $
    $Author: straten $ */
 
 #ifndef __CommandLine_h
@@ -223,6 +223,12 @@ namespace CommandLine {
     //! Add a Heading with the given text
     void add (const std::string&);
 
+    //! Print help and exit
+    void help (const char* arg = 0);
+
+    //! Print version and exit
+    void version ();
+
   protected:
 
     std::vector<Item*> item;
@@ -230,11 +236,6 @@ namespace CommandLine {
     std::string help_header;
     std::string help_footer;
 
-    //! Print help and exit
-    void help (const char*);
-
-    //! Print version and exit
-    void version ();
   };
 
 
