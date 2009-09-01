@@ -59,7 +59,7 @@ void* VirtualMemory::mmap (uint64_t size)
   if (block->second < size)
   {
     cerr << "VirtualMemory::mmap block size=" << block->second 
-	     << " < required size=" << size;
+	     << " < required size=" << size << endl;
     exit (-1);
   }
 
@@ -163,14 +163,18 @@ VirtualMemory::Block VirtualMemory::add_available (char* ptr, uint64_t size)
 
 VirtualMemory::Block VirtualMemory::extend (uint64_t size)
 {
+  const uint64_t MB = 1024 * 1024;
+  const uint64_t maximum_increment = 1024*MB; // 1GB
   uint64_t current = swap_space;
 
   do
   {
     if (swap_space == 0)
       swap_space = getpagesize();
-    else
+    else if (swap_space < maximum_increment)
       swap_space *= 2;
+    else
+	  swap_space += maximum_increment;
   }
   while (swap_space-current < size);
 
@@ -179,7 +183,7 @@ VirtualMemory::Block VirtualMemory::extend (uint64_t size)
   */
   off_t result = lseek( get_fd(), swap_space-1, SEEK_SET );
 
-  if (result != swap_space-1)
+  if (result == (off_t)-1)
   {
     cerr << "VirtualMemory::extend could not lseek swap file to " 
 	     << swap_space-1 << " - " << strerror (errno) << endl;
@@ -193,13 +197,15 @@ VirtualMemory::Block VirtualMemory::extend (uint64_t size)
   if (result != 1)
   {
     cerr << "VirtualMemory::extend could not write to swap file at " 
-	     << swap_space << " - " << strerror (errno);
+	     << swap_space << " - " << strerror (errno) << endl;
     exit (-1);
   }
 
   /*
     Map the new swap space into memory
   */
+  // cerr << "mmap new=" << swap_space-current << " bytes" << endl;
+
   void* ptr = ::mmap( 0, swap_space-current,
 		      PROT_READ | PROT_WRITE, MAP_SHARED,
 		      get_fd(), current );
@@ -208,7 +214,7 @@ VirtualMemory::Block VirtualMemory::extend (uint64_t size)
   {
     cerr << "VirtualMemory::extend could not mmap swap file from " 
 	     << current << " to " << swap_space
-	     << " - " << strerror (errno);
+	     << " - " << strerror (errno) << endl;
     exit (-1);
   }
 
