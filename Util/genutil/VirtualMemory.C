@@ -46,7 +46,7 @@ VirtualMemory::~VirtualMemory ()
 }
 
 //! Map the specified number of bytes into memory
-void* VirtualMemory::mmap (size_t size) try
+void* VirtualMemory::mmap (uint64_t size)
 {
   // cerr << "VirtualMemory::mmap size=" << size << endl;
 
@@ -58,9 +58,9 @@ void* VirtualMemory::mmap (size_t size) try
   Block block = find_available (size);
   if (block->second < size)
   {
-    Error error (InvalidState, "");
-    error << "block size=" << block->second << " < required size=" << size;
-    throw error;
+    cerr << "VirtualMemory::mmap block size=" << block->second 
+	     << " < required size=" << size;
+    exit (-1);
   }
 
   char* ptr = block->first;
@@ -68,7 +68,7 @@ void* VirtualMemory::mmap (size_t size) try
   /*
     cannot set block->first, so must create a new entry and delete the old
   */
-  size_t remaining = block->second - size;
+  uint64_t remaining = block->second - size;
   if (remaining)
     add_available (ptr+size, remaining);
 
@@ -81,13 +81,9 @@ void* VirtualMemory::mmap (size_t size) try
 
   return ptr;
 }
- catch (Error& error)
-   {
-     throw error += "VirtualMemory::mmap";
-   }
 
 //! Free the memory to which the char* points
-void VirtualMemory::munmap (void* ptr) try
+void VirtualMemory::munmap (void* ptr)
 {
   Block block = find_allocated( static_cast<char*>(ptr) );
 
@@ -95,14 +91,9 @@ void VirtualMemory::munmap (void* ptr) try
 
   allocated.erase (block);
 }
- catch (Error& error)
-   {
-     throw error += "VirtualMemory::munmap";
-   }
-
 
 //! Add allocated memory
-void VirtualMemory::add_allocated (char* ptr, size_t size)
+void VirtualMemory::add_allocated (char* ptr, uint64_t size)
 {
   allocated[ptr] = size;
 }
@@ -114,12 +105,13 @@ VirtualMemory::Block VirtualMemory::find_allocated (char* ptr)
     if (block->first == ptr)
       return block;
 
-  throw Error (InvalidState, "VirtualMemory::find_allocated",
-	       "address=%s not in allocated list", ptr);
+  cerr << "VirtualMemory::find_allocated address=" << ptr 
+       << " not in allocated list" << endl;
+  exit (-1);
 }
 
 //! Find available memory
-VirtualMemory::Block VirtualMemory::find_available (size_t size)
+VirtualMemory::Block VirtualMemory::find_available (uint64_t size)
 {
   for (Block block = available.begin(); block != available.end(); block++)
     if (block->second >= size)
@@ -129,7 +121,7 @@ VirtualMemory::Block VirtualMemory::find_available (size_t size)
 }
 
 //! Add available memory
-VirtualMemory::Block VirtualMemory::add_available (char* ptr, size_t size)
+VirtualMemory::Block VirtualMemory::add_available (char* ptr, uint64_t size)
 {
   char* end = ptr+size;
 
@@ -169,9 +161,9 @@ VirtualMemory::Block VirtualMemory::add_available (char* ptr, size_t size)
   return available.find (ptr);
 }
 
-VirtualMemory::Block VirtualMemory::extend (size_t size)
+VirtualMemory::Block VirtualMemory::extend (uint64_t size)
 {
-  size_t current = swap_space;
+  uint64_t current = swap_space;
 
   do
   {
@@ -185,28 +177,24 @@ VirtualMemory::Block VirtualMemory::extend (size_t size)
   /*
     Stretch the file size to swap_space
   */
-  int result = lseek( get_fd(), swap_space-1, SEEK_SET );
+  off_t result = lseek( get_fd(), swap_space-1, SEEK_SET );
 
-  if (result == -1)
+  if (result != swap_space-1)
   {
-    close ();
-    Error error (InvalidState, "VirtualMemory::extend");
-    error << "could not lseek swap file to " << swap_space-1
-	  << " - " << strerror (errno);
-    throw error;
+    cerr << "VirtualMemory::extend could not lseek swap file to " 
+	     << swap_space-1 << " - " << strerror (errno) << endl;
+    exit (-1);
   }
-    
+
   /*
     Write a null character at the end of the file
   */
   result = write( get_fd(), "", 1 );
   if (result != 1)
   {
-    close ();
-    Error error (InvalidState, "VirtualMemory::extend");
-    error << "could not write end of swap file at " << swap_space 
-	  << " - " << strerror (errno);
-    throw error;
+    cerr << "VirtualMemory::extend could not write to swap file at " 
+	     << swap_space << " - " << strerror (errno);
+    exit (-1);
   }
 
   /*
@@ -218,22 +206,13 @@ VirtualMemory::Block VirtualMemory::extend (size_t size)
 
   if (ptr == MAP_FAILED)
   {
-    close ();
-    Error error (InvalidState, "VirtualMemory::extend");
-    error << "could not mmap swap file from " << current
-	  << " to " << swap_space
-	  << " - " << strerror (errno);
-    throw error;
+    cerr << "VirtualMemory::extend could not mmap swap file from " 
+	     << current << " to " << swap_space
+	     << " - " << strerror (errno);
+    exit (-1);
   }
 
-  try
-    {
-      return add_available( static_cast<char*>(ptr), swap_space-current );
-    }
-  catch (Error& error)
-    {
-      throw error += "VirtualMemory::extend";
-    }
+  return add_available( static_cast<char*>(ptr), swap_space-current );
 }
 
 #if 0
