@@ -129,7 +129,9 @@ void Pulsar::ProfileAmps::resize (unsigned _nbin)
       amps = (float*) malloc16 (sizeof(float) * nbin);
 
     if (!amps)
-      throw Error (BadAllocation, "Pulsar::ProfileAmps::resize");
+      throw Error (BadAllocation, "Pulsar::ProfileAmps::resize",
+	               "failed to allocate %u floats (using %s swap space)",
+				   nbin, (profile_swap) ? "custom" : "system");
 
     amps_size = nbin;
   }
