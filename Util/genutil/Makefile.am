@@ -140,10 +140,10 @@ TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98	\
 	test_endian test_sum test_NormalDistribution			\
 	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord	\
 	test_exponential test_StraightLine test_ThreadStream		\
-	test_Horizon test_VirtualMemory test_LogFile
+	test_Horizon test_LogFile
 
 check_PROGRAMS = $(TESTS) test_CommandLine test_CommandParser \
-	test_Angle test_expand
+	test_Angle test_expand test_VirtualMemory
 
 test_evaluate_SOURCES           = test_evaluate.C
 test_Cartesian_SOURCES		= test_Cartesian.C
