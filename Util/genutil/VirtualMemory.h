@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/VirtualMemory.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/07/15 19:35:40 $
+   $Revision: 1.5 $
+   $Date: 2009/09/01 06:29:02 $
    $Author: straten $ */
 
 #ifndef __VirtualMemory_h
@@ -18,6 +18,7 @@
 #include "ThreadContext.h"
 
 #include <map>
+#include <inttypes.h>
 
 //! Virtual memory manager
 class VirtualMemory : public TemporaryFile
@@ -42,25 +43,25 @@ class VirtualMemory : public TemporaryFile
  private:
 
   //! Map the specified number of bytes into memory
-  void* mmap (size_t length);
+  void* mmap (uint64_t length);
 
   //! Free the memory to which the pointer points
   void munmap (void*);
 
-  typedef std::map<char*, size_t> Map;
+  typedef std::map<char*, uint64_t> Map;
   typedef Map::iterator Block;
 
   //! Add allocated memory
-  void add_allocated (char* ptr, size_t size);
+  void add_allocated (char* ptr, uint64_t size);
 
   //! Find allocated memory
   Block find_allocated (char* ptr);
 
   //! Add available memory
-  Block add_available (char* ptr, size_t size);
+  Block add_available (char* ptr, uint64_t size);
 
   //! Find available memory
-  Block find_available (size_t size);
+  Block find_available (uint64_t size);
 
   //! List of available blocks: base addresses and lengths
   Map available;
@@ -72,10 +73,10 @@ class VirtualMemory : public TemporaryFile
   ThreadContext* context;
 
   //! Extend the swap space
-  Block extend (size_t size);
+  Block extend (uint64_t size);
 
   //! The total number of bytes mapped into the temporary file
-  size_t swap_space;
+  uint64_t swap_space;
 
   //! Cleanup all resources
   void destroy ();
