@@ -17,6 +17,10 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include <algorithm>
 
 using namespace std;
@@ -103,7 +107,21 @@ TemporaryFile::TemporaryFile (const string& basename)
   fd = mkstemp (const_cast<char*> (filename.c_str()));
   if (fd < 0)
     throw Error (FailedSys, "TemporaryFile",
-		 "failed mkstemp(" + filename + ")");
+                 "mkstemp(" + filename + ")");
+
+#if 0
+  // close and re-open just in case mkstemp returns a file descriptor that
+  // is incapable of going past 2GB in size
+
+  if (::close (fd) < 0)
+    throw Error (FailedSys, "TemporaryFile",
+                 "close (%d)", fd);
+
+  fd = ::open (filename.c_str(), O_RDWR);
+  if (fd < 0)
+    throw Error (FailedSys, "TemporaryFile",
+                 "open (" + filename + ")");
+#endif
 
   unlinked = false;
 
