@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/extutil.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/06/08 19:12:58 $
+   $Revision: 1.6 $
+   $Date: 2009/09/02 21:28:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_get_extension_h
@@ -54,9 +54,9 @@ void clean_dangling (std::vector<T>& data)
 }
 
 
-//! For each extension of type E in container C, call method M
-template<typename E, typename C, typename M>
-void foreach (C* container, M method)
+//! For each extension of type E in container C, call method B::method
+template<typename E, typename C, typename B>
+void foreach (C* container, void (B::*method)())
 {
   const unsigned next = container->get_nextension ();
 
