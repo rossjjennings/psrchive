@@ -34,6 +34,32 @@ CommandLine::Help CommandLine::Argument::get_help () const
   return Help ( first, help );
 }
 
+CommandLine::Menu::Menu ()
+{
+  help_item = version_item = 0;
+}
+
+void CommandLine::Menu::add_help ()
+{
+  if (help_item)
+    return;
+
+  help_item = add (this, &Menu::help, 'h');
+  help_item->set_long_name ("help");
+  help_item->set_help ("print this help page");
+  help_item->has_arg = optional_argument;
+}
+
+void CommandLine::Menu::add_version ()
+{
+  if (version_item)
+    return;
+
+  version_item = add (this, &Menu::version, 'i');
+  version_item->set_long_name ("version");
+  version_item->set_help ("version information");
+}
+
 CommandLine::Menu::~Menu ()
 {
 }
@@ -58,45 +84,13 @@ void resize (T* &ptr, unsigned size)
 
 void CommandLine::Menu::parse (int argc, char* const * argv)
 {
+  string shortopts;
   struct option* longopts = 0;
   unsigned nlong = 0;
 
-  string shortopts;
-
-  int help_val = 0;
-  int version_val = 0;
-
-  if (!help_header.empty())
-  {
-    shortopts += "h";
-
-    resize (longopts, nlong+1);
-
-    longopts[nlong].name = strdup ("help");
-    longopts[nlong].has_arg = optional_argument;
-    longopts[nlong].flag = NULL;
-    longopts[nlong].val = help_val = 'h';
-
-    nlong ++;
-  }
-
-  if (!version_info.empty())
-  {
-    shortopts += "i";
-
-    resize (longopts, nlong+1);
-
-    longopts[nlong].name = strdup ("version");
-    longopts[nlong].has_arg = no_argument;
-    longopts[nlong].flag = NULL;
-    longopts[nlong].val = version_val = 'i';
-
-    nlong ++;
-  }
-
   for (unsigned i=0; i<item.size(); i++)
   {
-    Argument* arg = dynamic_cast<Argument*>( item[i] );
+    Argument* arg = dynamic_cast<Argument*>( item[i].get() );
     if (!arg)
       continue;
 
@@ -135,11 +129,8 @@ void CommandLine::Menu::parse (int argc, char* const * argv)
 
   while ((code = getopt_long(argc, argv, optstring, longopts, NULL)) != -1) 
   {
-    if (code == help_val)
-      help (optarg);
-
-    if (code == version_val)
-      version ();
+    if (filter)
+      code = filter (code);
 
     for (unsigned i=0; i<item.size(); i++)
     {
@@ -156,15 +147,15 @@ void CommandLine::Menu::parse (int argc, char* const * argv)
   }
 }
 
-void CommandLine::Menu::help (const char* name)
+void CommandLine::Menu::help (const std::string& name)
 {
-  if (name)
+  if (!name.empty())
   {
     // cerr << "CommandLine::Menu::help name='" << name << "'" << endl;
 
     for (unsigned i=0; i<item.size(); i++)
     {
-      Argument* arg = dynamic_cast<Argument*>( item[i] );
+      Argument* arg = dynamic_cast<Argument*>( item[i].get() );
       if (!arg)
 	continue;
 

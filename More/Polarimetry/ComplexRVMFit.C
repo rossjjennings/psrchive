@@ -14,6 +14,8 @@
 #include "MEAL/ScalarParameter.h"
 #include "MEAL/LevenbergMarquardt.h"
 
+#include "templates.h"
+
 #include <assert.h>
 
 using namespace std;
@@ -310,10 +312,14 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
   float best_alpha = 0.0;
   float best_zeta = 0.0;
   
+  vector<double> chisq_surface;
+  unsigned chisq_index = 0;
+
   if (chisq_map)
   {
     RVM->magnetic_axis->set_infit (0, false);
     RVM->line_of_sight->set_infit (0, false);
+    chisq_surface.resize (nstep * (nstep-1));
   }
 
   for (double alpha=alpha_step/2; alpha < M_PI; alpha += alpha_step)
@@ -332,7 +338,10 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
       solve ();
 
       if (chisq_map)
-	cout << alpha << " " << zeta << " " << chisq << endl;
+      {
+	assert (chisq_index < chisq_surface.size());
+	chisq_surface[chisq_index] = chisq;
+      }
 
       if (best_chisq == 0 || chisq < best_chisq)
       {
@@ -341,16 +350,40 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
 	best_alpha = alpha;
 	best_zeta = zeta;
       }
+
+      chisq_index ++;
     }
     catch (Error& error)
     {
       if (MEAL::Function::verbose)
 	cerr << "exception thrown alpha=" << alpha << " zeta=" << zeta << endl
 	     << error.get_message() << endl;
-    }
 
-    if (chisq_map)
+      chisq_index ++;
+    }
+  }
+
+  if (chisq_map)
+  {
+    assert (chisq_index == chisq_surface.size());
+    double min=0, max=0;
+    minmax (chisq_surface, min, max);
+    for (unsigned i=0; i<chisq_index; i++)
+      chisq_surface[i] -= min;
+
+    chisq_index = 0;
+
+    for (double alpha=alpha_step/2; alpha < M_PI; alpha += alpha_step)
+    {
+      for (double zeta=zeta_step/2; zeta < M_PI; zeta += zeta_step)
+      {
+	const double deg = 180/M_PI;
+	cout << alpha*deg << " " << zeta*deg 
+	     << " " << chisq_surface[chisq_index] << endl;
+	chisq_index ++;
+      }
       cout << endl;
+    }
   }
 
   // cerr << "BEST chisq=" << best_chisq << endl;

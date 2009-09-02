@@ -65,7 +65,6 @@ nobase_include_HEADERS = \
 	Pulsar/PhaseWeightShift.h \
 	Pulsar/PhaseWeightSmooth.h \
         Pulsar/PhaseWeight.h \
-	Pulsar/PlotOptions.h \
 	Pulsar/ProfileInterpreter.h \
 	Pulsar/ProfilePCA.h \
 	Pulsar/ProfileShiftFit.h \
@@ -237,15 +236,6 @@ libGeneral_la_SOURCES = \
 	WeightInterpreter.C \
 	ZapInterpreter.C
 
-##############################################################################
-#
-# PGPLOT-specific code
-#
-if HAVE_PGPLOT
-
-libGeneral_la_SOURCES += PlotOptions.C
-
-endif
 
 ##############################################################################
 #

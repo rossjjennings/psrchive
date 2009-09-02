@@ -23,6 +23,11 @@ public:
 
   //! Process the given archive
   void process (Pulsar::Archive*);
+
+protected:
+
+  //! Add command line options
+  void add_options (CommandLine::Menu&) {}
 };
 
 

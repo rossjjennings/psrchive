@@ -40,14 +40,11 @@ public:
   //! Default constructor
   psrmodel ();
 
-  //! Return usage information 
-  std::string get_usage ();
+  //! Add an orthogonally polarized mode
+  void add_opm (const std::string& arg);
 
-  //! Return getopt options
-  std::string get_options ();
-
-  //! Parse a command line option
-  bool parse (char code, const std::string& arg);
+  //! Produce a chi-sqared map
+  void map_chisq ();
 
   //! Verify setup
   void setup ();
@@ -56,6 +53,9 @@ public:
   void process (Pulsar::Archive*);
 
 protected:
+
+  //! Add command line options
+  void add_options (CommandLine::Menu&);
 
   // complex rotating vector model
   Reference::To<ComplexRVMFit> rvm;
@@ -88,7 +88,7 @@ psrmodel::psrmodel () :
 #endif
 {
   has_manual = false;
-  version = "$Id: psrmodel.C,v 1.9 2009/06/24 05:11:22 straten Exp $";
+  version = "$Id: psrmodel.C,v 1.10 2009/09/02 02:54:31 straten Exp $";
 
   add( new Pulsar::StandardOptions );
 #if HAVE_PGPLOT
@@ -98,116 +98,109 @@ psrmodel::psrmodel () :
   rvm = new ComplexRVMFit;
   global_search = 0;
 
-  rvm_fit = false;
+  rvm_fit = true;
   plot_result = false;
 }
 
-std::string psrmodel::get_options ()
-{
-  return "AZBPdo:s:a:z:b:p:t:x";
-}
-
-std::string psrmodel::get_usage ()
-{
-  return
-#if HAVE_PGPLOT
-    " -d               plot the resulting model with data \n"
-#endif
-    " -s nstep         do a global minimum search on nstep^2 grid \n"
-    " -t sigma         cutoff threshold when selecting bins [default 3] \n"
-    "\n"
-    " -a degrees       alpha: colatitude of magnetic axis \n"
-    " -z degrees       zeta: colatitude of line of sight \n"
-    " -b degrees       longitude of magnetic meridian (agonic line) \n"
-    " -p degrees       position angle at magnetic meridian \n"
-    "\n"
-    " -o deg0:deg1     window over which an orthogonal mode dominates \n";
-}
-
-double radians (const std::string& arg)
+double deg_to_rad (const std::string& arg)
 {
   return fromstring<double> (arg) * M_PI/180.0;
 }
 
-//! Parse a command line option
-bool psrmodel::parse (char code, const std::string& arg)
+void psrmodel::add_options (CommandLine::Menu& menu)
 {
   MEAL::RotatingVectorModel* RVM = rvm->get_model()->get_rvm();
   rvm_fit = true;
 
-  switch (code)
-  {
+  CommandLine::Argument* arg;
 
-  case 'o':
-    {
-      range opm = fromstring<range>(arg);
-      cerr << "psrmodel: OPM at " << opm << " degrees" << endl;
-      opm.first *= M_PI/180;
-      opm.second *= M_PI/180;
-      rvm->add_opm( opm );
-      break;
-    }
+  // blank line in help
+  menu.add ("");
 
 #if HAVE_PGPLOT
-  case 'd':
-    plot.set_open_device (true);
-    plot_result = true;
-    break;
+  arg = menu.add (plot_result, 'd');
+  arg->set_help ("plot the resulting model with data");
 #endif
 
-  case 's':
-    global_search = fromstring<unsigned>(arg);
-    break;
+  arg = menu.add (global_search, 's', "nstep");
+  arg->set_help ("do a global minimum search on nstep^2 grid");
 
-  case 't':
-    rvm->set_threshold ( fromstring<float>(arg) );
-    break;
+  arg = menu.add (rvm.get(), &ComplexRVMFit::set_threshold, 't', "sigma");
+  arg->set_help ("cutoff threshold when selecting bins "
+		 "[default " + tostring(rvm->get_threshold()) + "]");
 
-  case 'a':
-    RVM->magnetic_axis->set_value (radians (arg));
-    break;
+  arg = menu.add (RVM->magnetic_axis.get(),
+		  &MEAL::ScalarParameter::set_value,
+		  deg_to_rad, 'a', "degrees");
+  arg->set_help ("alpha: colatitude of magnetic axis");
+
+  arg = menu.add (RVM->line_of_sight.get(),
+		  &MEAL::ScalarParameter::set_value,
+		  deg_to_rad, 'z', "degree");
+  arg->set_help ("zeta: colatitude of line of sight");
+
+  arg = menu.add (RVM->magnetic_meridian.get(),
+		  &MEAL::ScalarParameter::set_value,
+		  deg_to_rad, 'b', "degrees");
+  arg->set_help ("longitude of magnetic meridian (agonic line)");
+
+  arg = menu.add (RVM->reference_position_angle.get(),
+		  &MEAL::ScalarParameter::set_value,
+		  deg_to_rad, 'p', "degrees");
+  arg->set_help ("position angle at magnetic meridian");
+
+  arg = menu.add (this, &psrmodel::add_opm, 'o', "deg0:deg1");
+  arg->set_help ("window over which an orthogonal mode dominates");
+
+  arg = menu.add (this, &psrmodel::map_chisq, 'x');
+  arg->set_help ("produce map of chi-sqared surface");
+
+}
+
+#if 0
   case 'A':
     RVM->magnetic_axis->set_infit (0, false);
     break;
 
-  case 'z':
-    RVM->line_of_sight->set_value (radians (arg));
-    break;
   case 'Z':
     RVM->line_of_sight->set_infit (0, false);
     break;
    
-  case 'b':
-    RVM->magnetic_meridian->set_value (radians (arg));
-    break;
   case 'B':
     RVM->magnetic_meridian->set_infit (0, false);
     break;
             
-  case 'p':
-    RVM->reference_position_angle->set_value (radians (arg));
-    break;
   case 'P':
     RVM->reference_position_angle->set_infit (0, false);
     break;
+#endif
 
-  case 'x':
-    rvm->set_chisq_map (true);
-    break;
-
-  default:
-    return false;
-  }
-
-  return true;
+void psrmodel::map_chisq()
+{
+  rvm->set_chisq_map (true);
 }
 
+
+void psrmodel::add_opm (const std::string& arg)
+{
+  range opm = fromstring<range>(arg);
+  cerr << "psrmodel: OPM at " << opm << " degrees" << endl;
+  opm.first *= M_PI/180;
+  opm.second *= M_PI/180;
+  rvm->add_opm( opm );
+}
 
 void psrmodel::setup ()
 {
   if (!rvm_fit)
     throw Error (InvalidState, "psrmodel",
 		 "please use -r (can only do RVM fit for now)");
+
+#if HAVE_PGPLOT
+  if (plot_result)
+    plot.set_open_device (true);
+#endif
+
 }
 
 void psrmodel::process (Pulsar::Archive* data)

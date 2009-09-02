@@ -18,43 +18,20 @@ Pulsar::UnloadOptions::UnloadOptions ()
   overwrite = false;
 }
 
-//! Extra usage information implemented by derived classes
-std::string Pulsar::UnloadOptions::get_usage ()
+void Pulsar::UnloadOptions::add_options (CommandLine::Menu& menu)
 {
-  return 
-    " -m               modify (overwrite) the original file \n"
-    " -e ext           write files with a new extension \n"
-    " -O path          write files to a new directory \n";
-}
+  CommandLine::Argument* arg;
 
-//! Extra option flags implemented by derived classes
-std::string Pulsar::UnloadOptions::get_options ()
-{
-  return "e:mO:";
-}
+  menu.add ("\n" "Output options:");
 
-//! Parse a non-unload command
-bool Pulsar::UnloadOptions::parse (char code, const std::string& arg)
-{
-  switch (code)
-  {
-  case 'e':
-    extension = arg;
-    break;
-    
-  case 'm':
-    overwrite = true;
-    break;
+  arg = menu.add (overwrite, 'm');
+  arg->set_help ("modify (overwrite) the original file");
 
-  case 'O':
-    directory = arg;
-    break;
+  arg = menu.add (extension, 'e', "ext");
+  arg->set_help ("write files with a new extension");
 
-  default:
-    return false;
-  }
-
-  return true;
+  arg = menu.add (directory, 'O', "path");
+  arg->set_help ("write files to a new directory");
 }
 
 void Pulsar::UnloadOptions::setup ()
@@ -91,9 +68,9 @@ void Pulsar::UnloadOptions::finish (Archive* archive)
 	 << archive->get_filename() << endl;
 #endif
 
-    cout << "Unloading " << archive->get_filename () << " ..." << endl;
+    cout << "Updating " << archive->get_filename () << " ... ";
     archive->unload ();
-    cout << archive->get_filename () << " updated on disk" << endl;
+    cout << "done" << endl;
     return;
   }
 
@@ -109,7 +86,7 @@ void Pulsar::UnloadOptions::finish (Archive* archive)
   cerr << "Pulsar::UnloadOptions::finish writing " << newname << endl;
 #endif
 
-  cout << "Unloading " << newname << " ..." << endl;
+  cout << "Unloading " << newname << " ... ";
   archive->unload (newname);
-  cout << "New file " << newname << " written to disk" << endl;
+  cout << "done" << endl;
 }

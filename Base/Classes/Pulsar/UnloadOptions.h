@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/UnloadOptions.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/05/06 09:53:56 $
+   $Revision: 1.3 $
+   $Date: 2009/09/02 02:54:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_UnloadOptions_h
@@ -28,14 +28,8 @@ namespace Pulsar {
     //! Default constructor
     UnloadOptions ();
 
-    //! Additional usage information implemented by derived classes
-    virtual std::string get_usage ();
-
-    //! Additional getopt options
-    virtual std::string get_options ();
-
-    //! Parse a non-unload command
-    virtual bool parse (char code, const std::string& arg);
+    //! Add options to the menu
+    virtual void add_options (CommandLine::Menu&);
 
     //! Verify setup
     virtual void setup ();

@@ -21,15 +21,6 @@ public:
   //! Default constructor
   psrsplit ();
 
-  //! Return usage information 
-  std::string get_usage ();
-
-  //! Return getopt options
-  std::string get_options ();
-
-  //! Parse a command line option
-  bool parse (char code, const std::string& arg);
-
   //! Verify setup
   void setup ();
 
@@ -37,6 +28,9 @@ public:
   void process (Pulsar::Archive*);
 
 protected:
+
+  //! Add command line options
+  void add_options (CommandLine::Menu&);
 
   unsigned nsubint;
 
@@ -51,35 +45,16 @@ int main (int argc, char** argv)
 psrsplit::psrsplit ()
   : Pulsar::Application ("psrsplit", "splits an archive into multiple files")
 {
-  version = "$Id: psrsplit.C,v 1.3 2009/05/06 10:54:12 straten Exp $";
+  version = "$Id: psrsplit.C,v 1.4 2009/09/02 02:54:31 straten Exp $";
   nsubint = 0;
 }
 
-std::string psrsplit::get_options ()
+void psrsplit::add_options (CommandLine::Menu& menu)
 {
-  return "n:";
-}
+  CommandLine::Argument* arg;
 
-std::string psrsplit::get_usage ()
-{
-  return
-    " -n nsubint       number of sub-integrations per output file \n";
-}
-
-//! Parse a command line option
-bool psrsplit::parse (char code, const std::string& arg)
-{
-  switch (code)
-    {
-    case 'n':
-      nsubint = atoi (arg.c_str());
-      break;
-
-    default:
-      return false;
-    }
-
-  return true;
+  arg = menu.add (nsubint, 'n', "nsubint");
+  arg->set_help ("number of sub-integrations per output file");
 }
 
 void psrsplit::setup ()

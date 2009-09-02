@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardOptions.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/08/06 02:53:10 $
+   $Revision: 1.5 $
+   $Date: 2009/09/02 02:54:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StandardOptions_h
@@ -28,17 +28,14 @@ namespace Pulsar {
     //! Default constructor
     StandardOptions ();
 
-    //! Additional usage information implemented by derived classes
-    virtual std::string get_usage ();
-
-    //! Additional getopt options
-    virtual std::string get_options ();
-
-    //! Parse a non-standard command
-    virtual bool parse (char code, const std::string& arg);
-
     //! Preprocessing tasks implemented by partially derived classes
     virtual void process (Archive*);
+
+    //! Add to the jobs
+    void add_job (const std::string& job);
+
+    //! Load a script into the jobs
+    void add_script (const std::string& job);
 
     //! Add to the default preprocessing jobs (ignored if jobs are set)
     void add_default_job (const std::string& job);
@@ -47,6 +44,9 @@ namespace Pulsar {
     Interpreter* get_interpreter ();
 
   private:
+
+    //! Add options to the menu
+    void add_options (CommandLine::Menu&);
 
     // Preprocessing jobs
     std::vector<std::string> jobs;

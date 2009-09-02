@@ -30,6 +30,13 @@
 
 #include "BoxMuller.h"
 
+using namespace std;
+
+struct FreqRange {
+  double lo;
+  double hi;
+};
+
 //! Pulsar Archive Zapping application
 class paz: public Pulsar::Application
 {
@@ -38,20 +45,44 @@ public:
   //! Default constructor
   paz ();
 
-  //! Return usage information 
-  std::string get_usage ();
-
-  //! Return getopt options
-  std::string get_options ();
-
-  //! Parse a command line option
-  bool parse (char code, const std::string& arg);
-
   //! Verify setup
   void setup ();
 
   //! Process the given archive
   void process (Pulsar::Archive*);
+
+  void add_subints_to_mow (const std::string& arg);
+
+  vector<unsigned> bins_to_zap;
+  void add_bins_to_zap (const std::string& arg);
+
+  vector<unsigned> chans_to_zero;
+  void add_chans_to_zero (const std::string& arg);
+  void range_chans_to_zero (const std::string& arg);
+
+  vector<unsigned> subs_to_zero;
+  void add_subs_to_zero (const std::string& arg);
+  void range_subs_to_zero (const std::string& arg);
+
+  vector<unsigned> subs_to_delete;
+  void add_subs_to_delete (const std::string& arg);
+  void range_subs_to_delete (const std::string& arg);
+
+  vector<unsigned> subs_no_delete;
+  void add_subs_no_delete (const std::string& arg);
+  void range_subs_no_delete (const std::string& arg);
+
+  vector<double> freqs_to_zero;
+  void add_freqs_to_zero (const std::string& arg);
+  vector<FreqRange> freq_ranges_to_zero;
+  void range_freqs_to_zero (const std::string& arg);
+
+  void parse_periodic_zap (const std::string& arg);
+
+protected:
+
+  //! Add command line options
+  void add_options (CommandLine::Menu&);
 };
 
 int main (int argc, char** argv)
@@ -60,7 +91,18 @@ int main (int argc, char** argv)
   return program.main (argc, argv);
 }
 
-char backward_compatibility (char c)
+paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
+{
+  version = "$Id: paz.C,v 1.58 2009/09/02 02:54:31 straten Exp $";
+
+  has_manual = true;
+  update_history = true;
+
+  add( new Pulsar::StandardOptions );
+  add( new Pulsar::UnloadOptions );
+}
+
+int backward_compatibility (int c)
 {
   // paz used to accept -u to specify the output directory, now it is -O
   if (c == 'u')
@@ -69,478 +111,334 @@ char backward_compatibility (char c)
   return c;
 }
 
-paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
-{
-  has_manual = true;
-  version = "$Id: paz.C,v 1.57 2009/08/04 06:15:12 straten Exp $";
-  filter = backward_compatibility;
 
-  add( new Pulsar::StandardOptions );
-  add( new Pulsar::UnloadOptions );
-}
-
-using namespace std;
-
-std::string paz::get_options ()
-{
-  return "8bC:B:dDE:f:F:Iik:l:Lno:p:P:rR:s:S:u:w:W:x:X:z:Z:";
-}
-
-std::string paz::get_usage ()
-{
-  return
-    "Manual zapping options:\n"
-    "  -I               Zero weight the intersection of -[wW] and -[zZk]\n"
-    "  -k filename      Zero weight chans listed in this kill file\n"
-    "  -z \"a b c ...\"   Zero weight these particular channels\n"
-    "  -Z \"a b\"         Zero weight chans between a & b inclusive\n"
-    "  -f \"a b c ...\"   Zero weight channels with these frequencies (MHz)\n"
-    "  -F \"a b\"         Zero weight this frequency range, inclusive (MHz)\n"
-    "  -x \"a b c ...\"   Delete all sub-integrations except these\n"
-    "  -X \"a b\"         Delete all sub-ints except a to b inclusive\n"
-    "  -E percent       Zero weight this much of each band edge\n"
-    "  -s \"a b c ...\"   Delete these sub-integrations\n"
-    "  -S \"a b\"         Delete sub-ints between a & b inclusive\n"
-    "  -w \"a b c ...\"   Zero weight these sub-integrations\n"
-    "  -W \"a b\"         Zero weight sub-ints between a & b inclusive\n"
-    "  -p \"p i\"         Interpolate over every p-th phase bin, start at i\n"
-    "\n"
-    "Automatic zapping algorithms:\n"
-    "  -r               Zap channels using median smoothed difference\n"
-    "  -R size          Set the size of the median smoothing window\n"
-    "  -l subint        Mow the lawn of the specified subint \n"
-    "  -L               Mow the lawn of all subints \n"
-    "  -d               Zero weight chans using mean offset rejection\n"
-    "  -C cutoff        Zero weight chans based on S/N (std optional)\n"
-    "  -P stdfile       Use this standard profile\n"
-    "  -o cutoff sigma  Zero weight subints with negative dropouts\n"
-    "  -8               Fix ATNF WBCORR 8 bin problem (see also -p)\n"
-    "\n"
-    "The format of the kill file used with the -k option is simply\n"
-    "a list of channel numbers, separated by white space\n"
-    "\n"
-    "The cutoff S/N value used with -C is largely arbitrary. You will\n"
-    "need to experiment to find the best value for your archives\n";
-}
-
-void zap_periodic_spikes (Pulsar::Profile * profile, int period, int phase, 
-    int width=1);
-void binzap (Pulsar::Archive * arch, Pulsar::Integration * integ, int subint,
-	     int lower_bin, int upper_bin, int lower_range, int upper_range);
-
-struct FreqRange {
-  double lo;
-  double hi;
-};
-
-
-bool bin_zap = false;
-vector < int >bins_to_zap;
-
-bool verbose = false;
 bool eightBinZap = false;
-vector < string > archives;
-
-string ulpath;
 
 string killfile;
 
-char *metafile = NULL;
-
-bool zero_channels = false;
-vector < int >chans_to_zap;
-vector < double >freqs_to_zap;
-vector < FreqRange >freq_ranges_to_zap;
-
-bool zero_subints = false;
-vector < unsigned >subs_to_zap;
-
 bool zero_intersection = false;
 
-bool zap_subints = false;
-bool nozap_subints = false;
-vector < unsigned >subs_nozap;
-
-bool edge_zap = false;
-float percent = 0.0;
+float edge_zap_percent = 0.0;
 
 bool simple = false;
 
-bool zap_ston = false;
 double ston_cutoff = 0.0;
 
-bool std_given = false;
+string std_filename;
 Reference::To < Pulsar::Profile > thestd;
 
 bool periodic_zap = false;
 int periodic_zap_period = 8, periodic_zap_phase = 0, periodic_zap_width = 1;
 
-bool dropout_zap = false;
-float dropout_sigma = 5.0;
-
-string ext;
-
-int placeholder;
-double placeholder_f;
-
-int gotc = 0;
-char *key = NULL;
-char whitespace[5] = " \n\t";
+float dropout_sigma = 0.0;
 
 Pulsar::LawnMower * mower = 0;
-vector < unsigned >subints_to_mow;
+vector<unsigned> subints_to_mow;
+bool mow_all_subints = false;
 
 Pulsar::StandardSNR standard_snr;
+
 Pulsar::ChannelZapMedian * median_zapper = 0;
+bool median_zap = false;
+bool median_zap_bybin = false;
+unsigned median_zap_window = 0;
+
 Pulsar::ChannelZapModulation * modulation_zapper = 0;
 
-string command = "paz";
 
-//! Parse a command line option
-bool paz::parse (char code, const std::string& arg)
+void paz::add_options (CommandLine::Menu& menu)
 {
-  char* c_arg = const_cast<char*>( arg.c_str() );
+  CommandLine::Argument* arg;
 
-  switch (code)
-    {
-    case 'I':
-      zero_intersection = true;
-      command += " -I";
-      break;
+  menu.filter = backward_compatibility;
 
-    case 'k':
-      killfile = c_arg;
-      zero_channels = true;
-      command += " -k ";
-      command += c_arg;
-      break;
+  menu.add ("\n" "Manual zapping options:");
 
-    case 'l':
-      command += " l ";
-      command += c_arg;
-      subints_to_mow.push_back (atoi (c_arg));
-      mower = new Pulsar::LawnMower;
-      break;
-    case 'L':
-      command += " -L ";
-      mower = new Pulsar::LawnMower;
-      break;
+  arg = menu.add (zero_intersection, 'I');
+  arg->set_help ("Zero weight the intersection of -[wW] and -[zZk]");
 
-    case 'z':
-      command += " -z ";
-      command += c_arg;
-      key = strtok (c_arg, whitespace);
-      zero_channels = true;
-      while (key) {
-	if (sscanf (key, "%d", &placeholder) == 1) {
-	  chans_to_zap.push_back (placeholder);
-	}
-	key = strtok (NULL, whitespace);
-      }
-      break;
+  arg = menu.add (killfile, 'k', "filename");
+  arg->set_help ("Zero weight chans listed in this kill file");
 
-    case 'f':
-      command += " -f ";
-      command += c_arg;
-      key = strtok (c_arg, whitespace);
-      zero_channels = true;
-      while (key) {
-	if (sscanf (key, "%lf", &placeholder_f) == 1) {
-	  freqs_to_zap.push_back (placeholder_f);
-	}
-	key = strtok (NULL, whitespace);
-      }
-      break;
+  arg = menu.add (this, &paz::add_bins_to_zap, 'B', "\"a b c ...\"");
+  arg->set_help ("Zap these pulse phase bins");
 
-    case 'B':
-      command += " -B ";
-      command += c_arg;
-      key = strtok (c_arg, whitespace);
-      bin_zap = true;
-      while (key) {
-	if (sscanf (key, "%d", &placeholder) == 1) {
-	  bins_to_zap.push_back (placeholder);
-	}
-	key = strtok (NULL, whitespace);
-      }
-      break;
+  arg = menu.add (this, &paz::add_chans_to_zero, 'z', "\"a b c ...\"");
+  arg->set_help ("Zero weight these particular channels");
 
-    case '8':
-      // The aim here is to zero every eight time bins starting from number 6
-      eightBinZap = true;
-      command += " -8";
-      break;
+  arg = menu.add (this, &paz::range_chans_to_zero, 'Z', "\"a b\"");
+  arg->set_help ("Zero weight chans between a & b inclusive");
 
-    case 'p':
-      {
-	periodic_zap = true;
+  arg = menu.add (this, &paz::add_freqs_to_zero, 'f', "\"a b c ...\"");
+  arg->set_help ("Zero weight channels with these frequencies (MHz)");
 
-        int rv = sscanf (c_arg, "%d %d %d", &periodic_zap_period,
-            &periodic_zap_phase, &periodic_zap_width);
+  arg = menu.add (this, &paz::range_freqs_to_zero, 'F', "\"a b\"");
+  arg->set_help ("Zero weight this frequency range, inclusive (MHz)");
 
-        if (rv<2 || rv>3)
-	  throw Error (InvalidState, "paz::parse",
-		       "Invalid parameter to option -p");
-        else if (rv==2) 
-          periodic_zap_width = 1;
+  arg = menu.add (this, &paz::add_subs_no_delete, 'x', "\"a b c ...\"");
+  arg->set_help ("Delete all sub-integrations except these");
 
-	command += " -p ";
-	command += c_arg;
-	break;
-      }
+  arg = menu.add (this, &paz::range_subs_no_delete, 'X', "\"a b\"");
+  arg->set_help ("Delete all sub-ints except a to b inclusive");
 
-    case 'Z':
-      {
-	unsigned first = 1;
-	unsigned last = 0;
-	char delimiter = 0;
+  arg = menu.add (edge_zap_percent, 'E', "percent");
+  arg->set_help ("Zero weight this much of each band edge");
 
-	zero_channels = true;
-	if (sscanf (c_arg, "%u%c%u", &first, &delimiter, &last) != 3)
-	  throw Error (InvalidState, "paz::parse",
-		       " '-Z %s' not understood", c_arg);
+  arg = menu.add (this, &paz::add_subs_to_delete, 's', "\"a b c ...\"");
+  arg->set_help ("Delete these sub-integrations");
 
-	for (unsigned i = first; i <= last; i++)
-	  chans_to_zap.push_back (i);
-      }
-      command += " -Z ";
-      command += c_arg;
-      break;
+  arg = menu.add (this, &paz::range_subs_to_delete, 'S', "\"a b\"");
+  arg->set_help ("Delete sub-ints between a & b inclusive");
 
-    case 'F':
-      {
-        FreqRange range;
-        zero_channels= true;
-        if (sscanf (c_arg, "%lf %lf", &range.lo, &range.hi) !=2)
-	  throw Error (InvalidState, "paz::parse",
-		       "Invalid parameter to option -F");
+  arg = menu.add (this, &paz::add_subs_to_zero, 'w', "\"a b c ...\"");
+  arg->set_help ("Zero weight these sub-integrations");
 
-        if (range.lo > range.hi)
-        { 
-          double tmp = range.lo;
-          range.lo = range.hi;
-          range.hi = tmp;
-        }
-        freq_ranges_to_zap.push_back(range);
-      }
-      command += " -F ";
-      command += c_arg;
-      break;
+  arg = menu.add (this, &paz::range_subs_to_zero, 'W', "\"a b\"");
+  arg->set_help ("Zero weight sub-ints between a & b inclusive");
 
-    case 'x':
-      command += " -x ";
-      command += c_arg;
-      key = strtok (c_arg, whitespace);
-      nozap_subints = true;
-      while (key) {
-	if (sscanf (key, "%d", &placeholder) == 1) {
-	  subs_nozap.push_back (placeholder);
-	}
-	key = strtok (NULL, whitespace);
-      }
-      break;
+  arg = menu.add (this, &paz::parse_periodic_zap, 'p', "\"p i\"");
+  arg->set_help ("Interpolate over every p-th phase bin, start at i");
 
-    case 'X':
-      {
-	unsigned first = 1;
-	unsigned last = 0;
+  menu.add ("\n" "Automatic zapping algorithms:");
 
-	nozap_subints = true;
-	if (sscanf (c_arg, "%d %d", &first, &last) != 2)
-	  throw Error (InvalidState, "paz::parse",
-		       "Invalid parameter to option -X");
+  arg = menu.add (median_zap, 'r');
+  arg->set_help ("Zap channels using median smoothed difference");
 
-	for (unsigned i = first; i <= last; i++)
-	  subs_nozap.push_back (i);
-      }
-      command += " -X ";
-      command += c_arg;
-      break;
+  arg = menu.add (median_zap_window, 'R', "size");
+  arg->set_help ("Set the size of the median smoothing window");
 
-    case 'd':
-      simple = true;
-      command += " -d";
-      break;
+  arg = menu.add (this, &paz::add_subints_to_mow, 'l', "subint");
+  arg->set_help ("Mow the lawn of the specified subint");
 
-    case 'b':
-      if (!median_zapper)
-	median_zapper = new Pulsar::ChannelZapMedian;
-      median_zapper->set_bybin (true);
-      command += " -b";
-      break;
+  arg = menu.add (mow_all_subints, 'L');
+  arg->set_help ("Mow the lawn of all subints");
 
-    case 'r':
-      if (!median_zapper)
-	median_zapper = new Pulsar::ChannelZapMedian;
-      command += " -r";
-      break;
+  arg = menu.add (simple, 'd');
+  arg->set_help ("Zero weight chans using mean offset rejection");
 
-    case 'R':{
-	unsigned window = atoi (c_arg);
+  arg = menu.add (ston_cutoff, 'C', "cutoff");
+  arg->set_help ("Zero weight chans based on S/N (std optional)");
 
-	if (!median_zapper)
-	  median_zapper = new Pulsar::ChannelZapMedian;
+  arg = menu.add (std_filename, 'P', "stdfile");
+  arg->set_help ("Use this standard profile");
 
-	median_zapper->set_window_size (window);
-	command += " -R ";
-	command += c_arg;
-	break;
-      }
+  arg = menu.add (dropout_sigma, 'o', "cutoff");
+  arg->set_help ("Zero weight subints with negative dropouts");
 
-    case 'u':
-      ulpath = c_arg;
-      if (ulpath.substr (ulpath.length () - 1, 1) != "/")
-	ulpath += "/";
-      command += " -u ";
-      command += c_arg;
-      break;
+  arg = menu.add (eightBinZap, '8');
+  arg->set_help ("Fix ATNF WBCORR 8 bin problem (see also -p)");
 
-    case 'E':
-      edge_zap = true;
-      if (sscanf (c_arg, "%f", &percent) != 1)
-	  throw Error (InvalidState, "paz::parse",
-		       "Invalid parameter to option -E");
-
-      if (percent <= 0.0 || percent >= 100.0)
-	  throw Error (InvalidState, "paz::parse",
-		       "Invalid parameter to option -E");
-
-      command += " -E ";
-      command += c_arg;
-      break;
-
-    case 's':
-      command += " -s ";
-      command += c_arg;
-      key = strtok (c_arg, whitespace);
-      zap_subints = true;
-      while (key) {
-	if (sscanf (key, "%d", &placeholder) == 1) {
-	  subs_to_zap.push_back (placeholder);
-	}
-	key = strtok (NULL, whitespace);
-      }
-      break;
-
-    case 'S':
-      {
-	unsigned first = 1;
-	unsigned last = 0;
-
-	zap_subints = true;
-	if (sscanf (c_arg, "%d %d", &first, &last) != 2)
-	  throw Error (InvalidState, "paz::parse",
-		       "Invalid parameter to option -S");
-
-	for (unsigned i = first; i <= last; i++)
-	  subs_to_zap.push_back (i);
-      }
-      command += " -S ";
-      command += c_arg;
-      break;
-
-    case 'w':
-      command += " -w ";
-      command += c_arg;
-      key = strtok (c_arg, whitespace);
-      zero_subints = true;
-      while (key) {
-	if (sscanf (key, "%d", &placeholder) == 1) {
-	  subs_to_zap.push_back (placeholder);
-	}
-	key = strtok (NULL, whitespace);
-      }
-      break;
-
-    case 'W':
-      {
-	unsigned first = 1;
-	unsigned last = 0;
-
-	zero_subints = true;
-
-	if (sscanf (c_arg, "%d %d", &first, &last) != 2)
-	  throw Error (InvalidState, "paz::parse",
-		       "Invalid parameter to option -W");
-
-	for (unsigned i = first; i <= last; i++)
-	  subs_to_zap.push_back (i);
-      }
-      command += " -W ";
-      command += c_arg;
-      break;
-
-    case 'C':
-      zap_ston = true;
-      if (sscanf (c_arg, "%lf", &ston_cutoff) != 1)
-	  throw Error (InvalidState, "paz::parse",
-		       "Invalid parameter to option -C");
-
-      command += " -C ";
-      command += c_arg;
-      break;
-
-    case 'o':
-      dropout_zap = true;
-      if (sscanf (c_arg, "%f", &dropout_sigma) != 1)
-	  throw Error (InvalidState, "paz::parse",
-		       "Invalid parameter to option -o");
-
-      command += " -o ";
-      command += c_arg;
-      break;
-
-    case 'P':
-      try {
-	Reference::To < Pulsar::Archive > data =
-	  Pulsar::Archive::load (c_arg);
-	data->pscrunch ();
-	data->fscrunch ();
-	data->tscrunch ();
-	thestd = data->get_Profile (0, 0, 0);
-	std_given = true;
-
-	standard_snr.set_standard (thestd);
-
-	Pulsar::Profile::snr_strategy.set (&standard_snr,
-					   &Pulsar::StandardSNR::get_snr);
-
-      }
-      catch (Error & error) {
-	cout << error << endl;
-	cout << "Could not load given standard profile" << endl;
-	std_given = false;
-      }
-      command += " -P ";
-      command += c_arg;
-      break;
-
-    default:
-      return false;
-    }
-
-  return true;
+  menu.add
+    ("\n"
+     "The format of the kill file used with the -k option is simply\n"
+     "a list of channel numbers, separated by white space\n"
+     "\n"
+     "The cutoff S/N value used with -C is largely arbitrary. You will\n"
+     "need to experiment to find the best value for your archives");
 }
+
+const char* whitespace = " ,\n\t";
+
+template<typename T>
+void parse_array (std::vector<T>& array, std::string text)
+{
+  char* c_arg = const_cast<char*>( text.c_str() );
+
+  char* key = strtok (c_arg, whitespace);
+
+  while (key)
+  {
+    array.push_back( fromstring<T>(key) );
+    key = strtok (NULL, whitespace);
+  }
+}
+
+void parse_range (std::vector<unsigned>& array, std::string text)
+{
+  unsigned first = 1;
+  unsigned last = 0;
+  char delimiter = 0;
+
+  if (sscanf (text.c_str(), "%u%c%u", &first, &delimiter, &last) != 3)
+    throw Error (InvalidState, "paz::parse",
+		 "range '" + text + "' not understood");
+
+  for (unsigned i = first; i <= last; i++)
+    array.push_back (i);
+}
+
+void paz::add_subints_to_mow (const std::string& arg)
+{
+  parse_array (subints_to_mow, arg);
+}
+
+void paz::add_bins_to_zap (const std::string& arg)
+{
+  parse_array (bins_to_zap, arg);
+}
+
+
+void paz::add_chans_to_zero (const std::string& arg)
+{
+  parse_array (chans_to_zero, arg);
+}
+void paz::range_chans_to_zero (const std::string& arg)
+{
+  parse_range (chans_to_zero, arg);
+}
+
+
+void paz::add_subs_to_delete (const std::string& arg)
+{
+  parse_array (subs_to_delete, arg);
+}
+void paz::range_subs_to_delete (const std::string& arg)
+{
+  parse_range (subs_to_delete, arg);
+}
+
+
+void paz::add_subs_no_delete (const std::string& arg)
+{
+  parse_array (subs_no_delete, arg);
+}
+void paz::range_subs_no_delete (const std::string& arg)
+{
+  parse_range (subs_no_delete, arg);
+}
+
+
+void paz::add_subs_to_zero (const std::string& arg)
+{
+  parse_array (subs_to_zero, arg);
+}
+void paz::range_subs_to_zero (const std::string& arg)
+{
+  parse_range (subs_to_zero, arg);
+}
+
+
+void paz::add_freqs_to_zero (const std::string& arg)
+{
+  parse_array (freqs_to_zero, arg);
+}
+void paz::range_freqs_to_zero (const std::string& arg)
+{
+  FreqRange range;
+
+  char separator = 0;
+  if (sscanf (arg.c_str(), "%lf%c%lf", &range.lo, &separator, &range.hi) != 3)
+    throw Error (InvalidState, "paz::parse",
+		 "Invalid parameter to option -F");
+
+  if (range.lo > range.hi)
+  { 
+    double tmp = range.lo;
+    range.lo = range.hi;
+    range.hi = tmp;
+  }
+
+  freq_ranges_to_zero.push_back(range);
+}
+
+
+void paz::parse_periodic_zap (const std::string& arg)
+{
+  periodic_zap = true;
+
+  int rv = sscanf (arg.c_str(), "%d %d %d", &periodic_zap_period,
+		   &periodic_zap_phase, &periodic_zap_width);
+
+  if (rv<2 || rv>3)
+    throw Error (InvalidState, "paz::parse",
+		 "Invalid parameter to option -p");
+  else if (rv==2) 
+    periodic_zap_width = 1;
+}
+
+bool zero_channels = false;
 
 void paz::setup ()
 {
+  if (!killfile.empty ())
+  {
+    FILE *fptr = fopen (killfile.c_str (), "r");
+
+    if (!fptr)
+      throw Error (FailedSys, "paz::setup", "fopen " + killfile);
+
+    char *buffer = new char[4096];
+    while (fgets (buffer, 4096, fptr))
+    {
+      char* key = strtok (buffer, whitespace);
+      while (key)
+      {
+	chans_to_zero.push_back (fromstring<unsigned>(key));
+	key = strtok (NULL, whitespace);
+      }
+    }
+  }
+
+  zero_channels = chans_to_zero.size()
+    || freqs_to_zero.size() || freq_ranges_to_zero.size();
+
+  bool zero_subints = subs_to_zero.size ();
+
   if (zero_intersection && !(zero_channels && zero_subints))
     throw Error (InvalidState, "paz::setup",
-		 "cannot use -I with both -s|S|k *and* -w|W");
+		 "must use -I with both -s|S|k *and* -w|W");
+  
+  if (mow_all_subints || subints_to_mow.size())
+    mower = new Pulsar::LawnMower;
+  
+  if (median_zap || median_zap_bybin || median_zap_window)
+  {
+    median_zapper = new Pulsar::ChannelZapMedian;
+    median_zapper->set_bybin (median_zap_bybin);
+
+    if (median_zap_window)
+      median_zapper->set_window_size (median_zap_window);
+  }
+
+  if (edge_zap_percent < 0.0 || edge_zap_percent >= 100.0)
+    throw Error (InvalidState, "paz::setup",
+		 "invalid parameter to option -E");
+
+  if (!std_filename.empty())
+  {
+    Reference::To<Pulsar::Archive> data = Pulsar::Archive::load (std_filename);
+    data->pscrunch ();
+    data->fscrunch ();
+    data->tscrunch ();
+    thestd = data->get_Profile (0, 0, 0);
+    
+    standard_snr.set_standard (thestd);
+    Pulsar::Profile::snr_strategy.set (&standard_snr,
+				       &Pulsar::StandardSNR::get_snr);
+  }
 }
 
 // Instantiate an RFIMitigation class
 Pulsar::RFIMitigation* zapper = new Pulsar::RFIMitigation;
 
+void zap_periodic_spikes (Pulsar::Profile * profile,
+			  int period, int phase, int width=1);
+
+void binzap (Pulsar::Archive * arch, Pulsar::Integration * integ, int subint,
+	     int lower_bin, int upper_bin, int lower_range, int upper_range);
+
+
+const char* periodic_zap_warning =
+  "Warning! Periodic spike zapping on frequency-scrunched dedispersed data\n"
+  "may not be what you intended! (spikes will wash out)\n";
+
 void paz::process (Pulsar::Archive* arch)
 {
   if (periodic_zap)
   {
-    if (arch->get_nchan () == 1) {
-      printf
-	("Warning! Periodic spike zapping on frequency-scrunched dedispersed data may\n");
-      printf ("not be what you intended! (spikes will wash out)\n");
-    }
+    if (arch->get_nchan () == 1)
+      cout << periodic_zap_warning << endl;
+
     for (unsigned pol = 0; pol < arch->get_npol (); pol++)
       for (unsigned chan = 0; chan < arch->get_nchan (); chan++)
 	for (unsigned subint = 0; subint < arch->get_nsubint (); subint++)
@@ -549,8 +447,9 @@ void paz::process (Pulsar::Archive* arch)
                                periodic_zap_width);
   }
 
-  if (eightBinZap) {		// To fix early wide-band correlator problem
-
+  // To fix early wide-band correlator problem
+  if (eightBinZap)
+  {
     for (unsigned pol = 0; pol < arch->get_npol (); pol++) {
       for (unsigned chan = 0; chan < arch->get_nchan (); chan++) {
 	for (unsigned subint = 0; subint < arch->get_nsubint (); subint++) {
@@ -575,17 +474,17 @@ void paz::process (Pulsar::Archive* arch)
   unsigned nchan = arch->get_nchan ();
   double chan_bw = fabs(arch->get_bandwidth() / (double)nchan);
 
-  if (zap_subints)
+  if (subs_to_delete.size())
   {
     unsigned zapped = 0;
     unsigned orig_nsubint = arch->get_nsubint ();
 
     for (unsigned i = 0; i < orig_nsubint; i++)
-      for (unsigned j = 0; j < subs_to_zap.size (); j++)
-	if (subs_to_zap[j] == i)
+      for (unsigned j = 0; j < subs_to_delete.size (); j++)
+	if (subs_to_delete[j] == i)
 	{
 	  if (verbose)
-	    cout << "Zapping subint " << i << endl;
+	    cout << "Deleting subint " << i << endl;
 
 	  // after each subint is zapped, it is necessary to offset the index
 	  arch->erase (i - zapped);
@@ -593,10 +492,10 @@ void paz::process (Pulsar::Archive* arch)
 	}
 
     if (verbose)
-      cerr << "paz: extraction completed" << endl;
+      cerr << "paz: deletion completed" << endl;
   }
 
-  if (nozap_subints)
+  if (subs_no_delete.size())
   {
     unsigned zapped = 0;
     unsigned orig_nsubint = arch->get_nsubint ();
@@ -604,147 +503,132 @@ void paz::process (Pulsar::Archive* arch)
     for (unsigned i = 0; i < orig_nsubint; i++)
     {
       bool keep = false;
-      for (unsigned j = 0; j < subs_nozap.size (); j++)
-	if (subs_nozap[j] == i)
+      for (unsigned j = 0; j < subs_no_delete.size (); j++)
+	if (subs_no_delete[j] == i)
 	  keep = true;
 
       if (!keep)
       {
 	if (verbose)
-	  cout << "Zapping subint " << i << endl;
+	  cout << "Deleting subint " << i << endl;
 
 	// after each subint is zapped, it is necessary to offset the index
 	arch->erase (i - zapped);
 	zapped ++;
       }
     }
+
+    if (verbose)
+      cerr << "paz: deletion completed" << endl;
   }
 
   if (median_zapper)
-    {
-      cout << "Using median smoothed difference zapper" << endl;
-      (*median_zapper) (arch);
-    }
+  {
+    cout << "Using median smoothed difference zapper" << endl;
+    (*median_zapper) (arch);
+  }
 
   if (modulation_zapper)
-    {
-      cout << "Using modulation index zapper" << endl;
-      (*modulation_zapper) (arch);
-    }
+  {
+    cout << "Using modulation index zapper" << endl;
+    (*modulation_zapper) (arch);
+  }
 
   if (simple)
-    {
-      cout << "Using simple mean offset zapper" << endl;
-      zapper->zap_chans (arch);
-      cout << "Zapping complete" << endl;
-    }
+  {
+    cout << "Using simple mean offset zapper" << endl;
+    zapper->zap_chans (arch);
+    cout << "Zapping complete" << endl;
+  }
 
-  if (zero_subints && !zero_intersection)
-    {
-      vector < float >mask (nchan, 0.0);
-      zapper->zap_very_specific (arch, mask, subs_to_zap);
-    }
+  if (subs_to_zero.size() && !zero_intersection)
+  {
+    vector<float> mask (nchan, 0.0);
+    zapper->zap_very_specific (arch, mask, subs_to_zero);
+  }
 
-  if (bin_zap && bins_to_zap.size ())
-    {
-      for (unsigned i = 0; i + 5 <= bins_to_zap.size (); i += 5)
-	binzap (arch, arch->get_Integration (bins_to_zap[i]), bins_to_zap[i],
-		bins_to_zap[i + 1], bins_to_zap[i + 2], bins_to_zap[i + 3],
-		bins_to_zap[i + 4]);
-    }
+  if (bins_to_zap.size ())
+  {
+    for (unsigned i = 0; i + 5 <= bins_to_zap.size (); i += 5)
+      binzap (arch, arch->get_Integration (bins_to_zap[i]), bins_to_zap[i],
+	      bins_to_zap[i + 1], bins_to_zap[i + 2], bins_to_zap[i + 3],
+	      bins_to_zap[i + 4]);
+  }
 
   if (zero_channels)
+  {
+    vector<float> mask (nchan, 1.0);
+    for (unsigned i = 0; i < chans_to_zero.size (); i++)
+      mask[chans_to_zero[i]] = 0.0;
+
+    for (unsigned i = 0; i < freqs_to_zero.size (); i++)
     {
-      if (!killfile.empty ()) {
-	vector < int >some_chans;
-	char *useful = new char[4096];
-	FILE *fptr = fopen (killfile.c_str (), "r");
-
-	while (fgets (useful, 4096, fptr)) {
-	  key = strtok (useful, whitespace);
-	  while (key) {
-	    if (sscanf (key, "%d", &placeholder) == 1) {
-	      some_chans.push_back (placeholder);
-	    }
-	    key = strtok (NULL, whitespace);
-	  }
-	  for (unsigned x = 0; x < some_chans.size (); x++) {
-	    chans_to_zap.push_back (some_chans[x]);
-	  }
-
-	  some_chans.resize (0);
-	}
-	delete[]useful;
+      for (unsigned ic=0; ic<nchan; ic++)
+      {
+	double chan_freq=arch->get_Integration(0)->get_centre_frequency(ic);
+	if ( freqs_to_zero[i] > chan_freq - chan_bw/2.0 
+	     && freqs_to_zero[i] < chan_freq + chan_bw/2.0 )
+	  mask[ic] = 0.0;
       }
-
-      vector < float >mask (nchan, 1.0);
-      for (unsigned i = 0; i < chans_to_zap.size (); i++) {
-	mask[chans_to_zap[i]] = 0.0;
-      }
-
-      for (unsigned i = 0; i < freqs_to_zap.size (); i++) {
-        for (unsigned ic=0; ic<nchan; ic++) {
-          double chan_freq=arch->get_Integration(0)->get_centre_frequency(ic);
-          if ( freqs_to_zap[i] > chan_freq - chan_bw/2.0 
-	       && freqs_to_zap[i] < chan_freq + chan_bw/2.0 )
-            mask[ic] = 0.0;
-        }
-      }
-
-      for (unsigned i=0; i< freq_ranges_to_zap.size(); i++) {
-        for (unsigned ic=0; ic<nchan; ic++) {
-          FreqRange chan;
-          chan.lo=arch->get_Integration(0)->get_centre_frequency(ic) 
-            - chan_bw/2.0;
-          chan.hi=arch->get_Integration(0)->get_centre_frequency(ic) 
-            + chan_bw/2.0;
-          if (chan.lo > freq_ranges_to_zap[i].lo 
-              && chan.lo < freq_ranges_to_zap[i].hi)
-            mask[ic] = 0.0;
-          else if (chan.hi > freq_ranges_to_zap[i].lo 
-		   && chan.hi < freq_ranges_to_zap[i].hi)
-            mask[ic] = 0.0;
-          else if (freq_ranges_to_zap[i].lo > chan.lo 
-		   && freq_ranges_to_zap[i].lo < chan.hi)
-            mask[ic] = 0.0;
-        }
-      }
-
-      if (zero_intersection)
-	zapper->zap_very_specific (arch, mask, subs_to_zap);
-      else
-	zapper->zap_specific (arch, mask);
     }
 
-  if (edge_zap)
+    for (unsigned i=0; i< freq_ranges_to_zero.size(); i++)
     {
-      float fraction = percent / 100.0;
-      unsigned buffer = unsigned (float (nchan) * fraction);
-
-      vector < float >mask (nchan, 0.0);
-
-      for (unsigned i = buffer; i < (nchan - buffer); i++)
-	mask[i] = 1.0;
-
+      for (unsigned ic=0; ic<nchan; ic++)
+      {
+	FreqRange chan;
+	chan.lo=arch->get_Integration(0)->get_centre_frequency(ic) 
+	  - chan_bw/2.0;
+	chan.hi=arch->get_Integration(0)->get_centre_frequency(ic) 
+	  + chan_bw/2.0;
+	if (chan.lo > freq_ranges_to_zero[i].lo 
+	    && chan.lo < freq_ranges_to_zero[i].hi)
+	  mask[ic] = 0.0;
+	else if (chan.hi > freq_ranges_to_zero[i].lo 
+		 && chan.hi < freq_ranges_to_zero[i].hi)
+	  mask[ic] = 0.0;
+	else if (freq_ranges_to_zero[i].lo > chan.lo 
+		 && freq_ranges_to_zero[i].lo < chan.hi)
+	  mask[ic] = 0.0;
+      }
+    }
+    
+    if (zero_intersection)
+      zapper->zap_very_specific (arch, mask, subs_to_zero);
+    else
       zapper->zap_specific (arch, mask);
-    }
+  }
+  
+  if (edge_zap_percent)
+  {
+    float fraction = edge_zap_percent / 100.0;
+    unsigned buffer = unsigned (float (nchan) * fraction);
 
-  if (zap_ston)
-    {
-      double theston = 0.0;
-      Reference::To<Pulsar::Archive> cloned = arch->clone();
-      cloned->pscrunch ();
-      for (unsigned isub = 0; isub < arch->get_nsubint (); isub++) {
-	for (unsigned ichan = 0; ichan < arch->get_nchan (); ichan++) {
-	  theston = cloned->get_Profile (isub, 0, ichan)->snr ();
-	  if (theston < ston_cutoff) {
-	    arch->get_Integration (isub)->set_weight (ichan, 0.0);
-	  }
+    vector < float >mask (nchan, 0.0);
+
+    for (unsigned i = buffer; i < (nchan - buffer); i++)
+      mask[i] = 1.0;
+
+    zapper->zap_specific (arch, mask);
+  }
+
+  if (ston_cutoff > 0.0)
+  {
+    double theston = 0.0;
+    Reference::To<Pulsar::Archive> cloned = arch->clone();
+    cloned->pscrunch ();
+    for (unsigned isub = 0; isub < arch->get_nsubint (); isub++) {
+      for (unsigned ichan = 0; ichan < arch->get_nchan (); ichan++) {
+	theston = cloned->get_Profile (isub, 0, ichan)->snr ();
+	if (theston < ston_cutoff) {
+	  arch->get_Integration (isub)->set_weight (ichan, 0.0);
 	}
       }
     }
+  }
 
-  if (dropout_zap) {
+  if (dropout_sigma)
+  {
     Reference::To < Pulsar::Archive > cloned = arch->clone ();
     Reference::To < Pulsar::Profile > testprof = 0;
 
@@ -775,40 +659,19 @@ void paz::process (Pulsar::Archive* arch)
 
   if (mower)
   {
-    vector < unsigned > mowing;
-
-    if (subints_to_mow.size ())
-      mowing = subints_to_mow;
-    else
+    if (mow_all_subints)
     {
-      mowing.resize (arch->get_nsubint ());
+      subints_to_mow.resize (arch->get_nsubint ());
       for (unsigned isub = 0; isub < arch->get_nsubint (); isub++)
-	mowing[isub] = isub;
+	subints_to_mow[isub] = isub;
     }
 
-    for (unsigned isub = 0; isub < mowing.size (); isub++)
+    for (unsigned isub = 0; isub < subints_to_mow.size (); isub++)
     {
-      cerr << "paz: mowing subint " << mowing[isub] << endl;
-      mower->transform (arch->get_Integration (mowing[isub]));
+      cerr << "paz: mowing subint " << subints_to_mow[isub] << endl;
+      mower->transform (arch->get_Integration (subints_to_mow[isub]));
     }
   }
-
-  /////////////////////////////////////////////////////////////////
-    // See if the archive contains a history that should be updated:
-    
-    Pulsar::ProcHistory * fitsext = arch->get < Pulsar::ProcHistory > ();
-
-    if (fitsext) {
-
-      if (command.length () > 80) {
-	cout << "WARNING: ProcHistory command string truncated to 80 chars"
-	     << endl;
-	fitsext->set_command_str (command.substr (0, 80));
-      } else {
-	fitsext->set_command_str (command);
-      }
-
-    }
 }
 
 void

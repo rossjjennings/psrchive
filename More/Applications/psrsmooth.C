@@ -28,15 +28,6 @@ public:
   //! Default constructor
   psrsmooth ();
 
-  //! Return extra cmd line args
-  std::string get_options() { return "Wne:H"; }
-
-  //! Parse extra command line opts
-  bool parse(char code, const std::string& arg);
-
-  //! Extra usage info
-  std::string get_usage();
-
   //! Process the given archive
   void process (Pulsar::Archive*);
 
@@ -52,6 +43,12 @@ public:
   //! Harmonics output
   bool print_harm;
 
+protected:
+
+  //! Add command line options
+  void add_options (CommandLine::Menu&);
+
+  void use_wavelet () { method = "wavelet"; }
 };
 
 
@@ -64,31 +61,22 @@ psrsmooth::psrsmooth ()
   print_harm = false;
 }
 
-std::string psrsmooth::get_usage() {
-  return 
-    " -W               Use Wavelet smoothing (default Sinc)\n"
-    " -n               Normalize smoothed profile\n"
-    " -e ext           Append extention to output (default .sm)\n"
-    " -H               Only print the smoothed number of harmonics\n";
-}
+void psrsmooth::add_options (CommandLine::Menu& menu)
+{
+  CommandLine::Argument* arg;
 
-bool psrsmooth::parse(char code, const std::string& arg) {
-  if (code=='W') {
-    method = "wavelet";
-    return true;
-  } else if (code=='e') {
-    ext = arg;
-    return true;
-  } else if (code=='n') {
-    normalize = true;
-    return true;
-  } else if (code=='H') {
-    print_harm = true;
-    return true;
-  } else 
-    return false;
-}
+  arg = menu.add (this, &psrsmooth::use_wavelet, 'W');
+  arg->set_help ("Use Wavelet smoothing (default Sinc)");
 
+  arg = menu.add (normalize, 'n');
+  arg->set_help ("Normalize smoothed profile");
+
+  arg = menu.add (ext, 'e', "ext");
+  arg->set_help ("Append extention to output (default .sm)");
+
+  arg = menu.add (print_harm, 'H');
+  arg->set_help ("Only print the smoothed number of harmonics");
+}
 
 void psrsmooth::process (Pulsar::Archive* archive)
 {

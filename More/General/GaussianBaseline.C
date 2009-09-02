@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -14,6 +14,7 @@
 
 #include <assert.h>
 #include <iostream>
+
 using namespace std;
 
 // #define _DEBUG 1
@@ -133,10 +134,11 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight,
 #endif
 
   
-  for (unsigned ioff=0; ioff < off_transitions.size(); ioff++) {
-
+  for (unsigned ioff=0; ioff < off_transitions.size(); ioff++)
+  {
     unsigned ibin=off_transitions[ioff];
-    while ( smoothed.get_amps()[ibin%nbin] > last_mean ) {
+    while ( smoothed.get_amps()[ibin%nbin] > last_mean )
+    {
 #ifdef _DEBUG
       cerr << "right peel " << ibin%nbin << endl;
 #endif
@@ -147,13 +149,13 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight,
                      "right peel failure on %u transitions",
 		      off_transitions.size() );
     }
-
   }
 
-  for (unsigned ion=0; ion < on_transitions.size(); ion++) {
-
+  for (unsigned ion=0; ion < on_transitions.size(); ion++)
+  {
     unsigned ibin=on_transitions[ion] + nbin;
-    while ( smoothed.get_amps()[ibin%nbin] > last_mean ) {
+    while ( smoothed.get_amps()[ibin%nbin] > last_mean )
+    {
 #ifdef _DEBUG
       cerr << "left peel " << ibin%nbin << endl;
 #endif
@@ -163,9 +165,7 @@ void Pulsar::GaussianBaseline::postprocess (PhaseWeight* weight,
         throw Error (InvalidState, "Pulsar::GaussianBaseline::postprocess",
                      "right peel failure on %u transitions",
                      on_transitions.size() );
-
     }
-
   }
 
   weight->set_Profile (profile);

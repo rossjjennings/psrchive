@@ -36,19 +36,19 @@ public:
   //! Default constructor
   psrstat ();
 
-  //! Return usage information 
-  std::string get_usage ();
-
-  //! Return getopt options
-  std::string get_options ();
-
-  //! Parse a command line option
-  bool parse (char code, const std::string& arg);
-
   //! Process the given archive
   void process (Pulsar::Archive*);
 
+  void add_expressions (const std::string& str)
+  { separate (str, expressions, ","); }
+
+  void add_loop (const std::string& str)
+  { loop.add_index( new TextIndex(optarg) ); }
+
 protected:
+
+  //! Add command line options
+  void add_options (CommandLine::Menu&);
 
   //! The expressions to be evaluated
   vector<string> expressions;
@@ -71,7 +71,7 @@ protected:
   //! Job to be performed on each leaf index
   void print ();
 
-  void set_quiet () { output_filename = false; }
+  void set_quiet () { Application::set_quiet(); output_filename = false; }
 };
 
 int main (int argc, char** argv)
@@ -84,7 +84,7 @@ psrstat::psrstat ()
   : Pulsar::Application ("psrstat", "prints pulsar attributes and statistics")
 {
   has_manual = true;
-  version = "$Id: psrstat.C,v 1.6 2009/04/07 07:48:23 straten Exp $";
+  version = "$Id: psrstat.C,v 1.7 2009/09/02 02:54:31 straten Exp $";
 
   // print/parse in degrees
   Angle::default_type = Angle::Degrees;
@@ -101,60 +101,38 @@ psrstat::psrstat ()
   add( new Pulsar::StandardOptions );
 }
 
-std::string psrstat::get_options ()
+void psrstat::add_options (CommandLine::Menu& menu)
 {
-  return "c:l:Q";
-}
+  CommandLine::Argument* arg;
 
-std::string psrstat::get_usage ()
-{
-  return
-    " -c exp1[,exp2]  expressions to be evaluated and printed \n"
-    " -l name=<range> loop over the range of the named parameter \n"
-    "\n"
-    " Multiple expressions and/or index ranges may be specified by using \n"
-    " the -c and/or -l options multiple times. \n"
-    "\n"
-    " expn is either the name of a parameter (attribute or statistic) \n"
-    " or a mathematical expression involving one or more parameters. \n"
-    "\n"
-    " Note that parameter names are case insensitive.\n"
-    "\n"
-    " For the complete list of all available parameters in an archive, \n"
-    " run \"psrstat <filename>\" without any command line options. \n";
+  // blank line in help
+  menu.add ("");
 
-#if 0
-    "\n"
-    "INDn describes an index (e.g. subint, pol, chan) over which to loop. \n"
-    "     For example: \n"
-    "\n"
-    "     -l chan=0-5     loop over frequency channels 0 to 5 (inclusive) \n"
-    "     -l subint=2,5-  loop over sub-integrations 2 and 5 to last \n";
-#endif
-}
+  arg = menu.add (this, &psrstat::add_expressions, 'c', "exp[s]");
+  arg->set_help ("expressions to be evaluated and printed");
+  arg->set_long_help
+    ("exp is either the name of a parameter (attribute or statistic) \n"
+     "or a mathematical expression involving one or more parameters and \n"
+     "enclosed in braces");
 
-//! Parse a command line option
-bool psrstat::parse (char code, const std::string& arg)
-{
-  switch (code)
-  {
-  case 'c':
-    separate (arg, expressions, ",");
-    break;
+  arg = menu.add (this, &psrstat::add_loop, 'l', "name=<range>");
+  arg->set_help ("loop over the range of the named parameter");
+  arg->set_long_help
+    ("e.g.\n"
+     " -l chan=0-5     loop over frequency channels 0 to 5 (inclusive) \n"
+     " -l subint=2,5-  loop over sub-integrations 2, then 5 to last");
 
-  case 'l':
-    loop.add_index( new TextIndex(optarg) );
-    break;
+  arg = menu.add (prefix_name, 'Q');
+  arg->set_help ("do not prefix output with 'keyword='");
 
-  case 'Q':
-    prefix_name = false;
-    break;
-
-  default:
-    return false;
-  }
-
-  return true;
+  menu.set_help_footer
+    ("\n"
+     "Multiple expressions and/or index ranges may be specified by using \n"
+     "the -c and/or -l options multiple times. \n"
+     "\n"
+     "For the complete list of all available parameters in an archive, \n"
+     "run \"psrstat <filename>\" without any command line options.\n"
+     + menu.get_help_footer());
 }
 
 void psrstat::process (Pulsar::Archive* _archive)

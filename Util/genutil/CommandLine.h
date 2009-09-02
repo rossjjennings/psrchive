@@ -7,13 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/CommandLine.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/08/26 19:05:31 $
+   $Revision: 1.8 $
+   $Date: 2009/09/02 02:54:31 $
    $Author: straten $ */
 
 #ifndef __CommandLine_h
 #define __CommandLine_h
 
+#include "Reference.h"
+#include "Functor.h"
 #include "tostring.h"
 
 #include <string>
@@ -21,12 +23,19 @@
 
 #include <getopt.h>
 
+//! Enable a single template that works for both func(T) and func(const T&)
+template<typename T>
+struct arg_traits { typedef T unref; };
+
+template<typename T>
+struct arg_traits<const T&> { typedef T unref; };
+
 namespace CommandLine {
 
   typedef std::pair<std::string,std::string> Help;
 
   //! A single item in a command line menu
-  class Item
+  class Item : public Reference::Able
   {
   public:
 
@@ -151,6 +160,52 @@ namespace CommandLine {
     void handle (const std::string& arg) { value = !value; }
   };
 
+  //! A command line corresponding to a class attribute
+  template<class C, typename M, typename P>
+  class Attribute : public Argument
+  {
+  protected:
+
+    //! Pointer to the instance
+    C* instance;
+
+    //! Pointer to the method (unary member function)
+    M method;
+
+    //! Pointer to the parser (unary)
+    P parse;
+
+  public:
+
+    //! Default constructor
+    Attribute (C* _instance, M _method, P _parse)
+      : instance (_instance), method (_method), parse (_parse)
+    { has_arg = required_argument; }
+
+    //! Handle the argument
+    void handle (const std::string& arg)
+    { (instance->*method) (parse(arg)); }
+  };
+
+  //! A command line Action
+  class Action : public Argument
+  {
+  protected:
+
+    //! The action to be taken
+    Functor < void() > action;
+
+  public:
+
+    //! Default constructor
+    template<class C, typename M>
+    Action (C* instance, M method)
+    { action = Functor< void() > (instance, method); }
+
+    //! Handle the argument
+    void handle (const std::string& arg) { action(); }
+  };
+
   class Heading : public Item
   {
 
@@ -175,20 +230,38 @@ namespace CommandLine {
 
 
   //! A command line menu
-  class Menu
+  class Menu : public Reference::Able
   {
   public:
 
+    //! Construct with two default options: --help and --version
+    Menu ();
+
     virtual ~Menu ();
 
-    //! Set the version information string (activates -i,--version)
-    virtual void set_version (const std::string& s) { version_info = s; }
-
     //! Set the help header (activates -h,--help)
-    virtual void set_help_header (const std::string& s) { help_header=s; }
+    virtual void set_help_header (const std::string& s)
+    { help_header=s; add_help (); }
+
+    //! Get the help header
+    std::string get_help_header () const
+    { return help_header; }
 
     //! Set the help footer
     virtual void set_help_footer (const std::string& s) { help_footer=s; }
+
+    //! Get the help footer
+    std::string get_help_footer () const { return help_footer; }
+
+    //! Add the --help command line option
+    virtual void add_help ();
+
+    //! Set the version information string (activates -i,--version)
+    virtual void set_version (const std::string& s)
+    { version_info = s; add_version (); }
+
+    //! Add the --version command line option
+    virtual void add_version ();
 
     //! Parse the command line
     virtual void parse (int argc, char* const *argv);
@@ -198,43 +271,126 @@ namespace CommandLine {
 
     //! Add a Value with only a single letter name
     template<typename T>
-    Argument* add (T& value, char short_name, const char* type = 0)
-    { 
-      Argument* argument = new Value<T> (value);
-      argument->set_short_name (short_name);
-      if (type)
-	argument->set_type (type);
-      item.push_back (argument);
-      return argument;
+    Argument* add (T& value, char name, const char* type = 0)
+    {
+      return add_value (value, name, &Argument::set_short_name, type);
     }
 
     //! Add a Value with only a long string name
     template<typename T>
     Argument* add (T& value, const std::string& name, const char* type = 0)
     { 
-      Argument* argument = new Value<T> (value);
-      argument->set_long_name (name);
-      if (type)
-	argument->set_type (type);
-      item.push_back (argument);
-      return argument;
+      return add_value (value, name, &Argument::set_long_name, type);
+    }
+
+    //! Add an Attribute with only a single letter name
+    template<class C, typename T>
+    Argument* add (C* ptr, void (C::*method)(T), char name, 
+		   const char* type = 0)
+    {
+      return add_attribute (ptr, method,
+			    &fromstring< typename arg_traits<T>::unref >,
+			    name, &Argument::set_short_name, type);
+    }
+
+    //! Add an Attribute with only a long string name
+    template<class C, typename T>
+    Argument* add (C* ptr, void (C::*method)(T), const std::string& name, 
+		   const char* type = 0)
+    {
+      return add_attribute (ptr, method,
+			    &fromstring< typename arg_traits<T>::unref >,
+			    name, &Argument::set_long_name, type);
+    }
+
+    //! Add an Attribute with only a single letter name
+    template<class C, typename M, typename P>
+    Argument* add (C* ptr, M method, P parse, char name, const char* type)
+    {
+      return add_attribute (ptr, method, parse,
+			    name, &Argument::set_short_name, type);
+    }
+
+    //! Add an Attribute with only a long string name
+    template<class C, typename M, typename P>
+    Argument* add (C* ptr, M method, P parse, const std::string& name, 
+		   const char* type)
+    {
+      return add_attribute (ptr, method, parse,
+			    name, &Argument::set_long_name, type);
+    }
+
+    //! Add an Action with only a single letter name
+    template<class C, typename M>
+    Argument* add (C* ptr, M method, char name)
+    {
+      return add_action (ptr, method, name, &Argument::set_short_name);
+    }
+
+    //! Add an Action with only a long string name
+    template<class C, typename M>
+    Argument* add (C* ptr, M method, const std::string& name)
+    {
+      return add_action (ptr, method, name, &Argument::set_long_name);
     }
 
     //! Add a Heading with the given text
     void add (const std::string&);
 
     //! Print help and exit
-    void help (const char* arg = 0);
+    void help (const std::string&);
 
     //! Print version and exit
     void version ();
 
+    //! Optional Argument::val filter 
+    /*! can be used to address backward compatibility issues */
+    Functor< int(int) > filter;
+
   protected:
 
-    std::vector<Item*> item;
+    std::vector< Reference::To<Item> > item;
+ 
     std::string version_info;
+    Argument* version_item;
+
     std::string help_header;
     std::string help_footer;
+    Argument* help_item;
+
+    //! Add a Value with only a long string name
+    template<typename T, typename N, typename S>
+    Argument* add_value (T& value, N name, S set, const char* type)
+    { 
+      Argument* argument = new Value<T> (value);
+      (argument->*set) (name);
+      if (type)
+	argument->set_type (type);
+      item.push_back (argument);
+      return argument;
+    }
+
+    template<class C, typename M, typename P, typename N, typename S>
+    Argument* add_attribute (C* ptr, M method, P parse, N name, S set,
+			     const char* type)
+    {
+      Argument* argument = new Attribute<C,M,P> (ptr, method, parse);
+      (argument->*set) (name);
+      if (type)
+	argument->set_type (type);
+      item.push_back (argument);
+      return argument;
+    }
+
+    template<class C, typename M, typename N, typename S>
+    Argument* add_action (C* ptr, M method, N name, S set)
+    {
+      Argument* argument = new Action (ptr, method);
+
+      (argument->*set) (name);
+      item.push_back (argument);
+      return argument;
+    }
 
   };
 

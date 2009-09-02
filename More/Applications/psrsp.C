@@ -41,6 +41,11 @@ public:
   // used to compute profile statistics
   Pulsar::ProfileStats stats;
 
+protected:
+
+  //! Add command line options
+  void add_options (CommandLine::Menu&) {}
+
 };
 
 

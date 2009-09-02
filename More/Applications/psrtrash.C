@@ -36,6 +36,9 @@ public:
 
 protected:
 
+  //! Add command line options
+  void add_options (CommandLine::Menu&) {}
+
   unsigned plotted;
   string plot_name;
 

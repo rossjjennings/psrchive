@@ -27,33 +27,31 @@ public:
   //! Default constructor
   psredit ();
 
-  //! Return usage information 
-  std::string get_usage ();
-
-  //! Return getopt options
-  std::string get_options ();
-
-  //! Parse a command line option
-  bool parse (char code, const std::string& arg);
-
   //! Return true if an edit command is used
   bool must_save ();
 
   //! Process the given archive
   void process (Pulsar::Archive*);
 
+  void add_commands (const std::string& str) { separate (str, commands, ","); }
+
+  void set_quiet () { Application::set_quiet(); output_filename = false; }
+
+  void detailed_help ();
+
 protected:
 
+  //! Add command line options
+  void add_options (CommandLine::Menu&);
+
   //! commands to be executed
-  vector <string> commands;
+  vector<string> commands;
 
   //! prefix parameter value queries with parameter name=
   bool prefix_name;
 
   // print the name of each file processed
   bool output_filename;
-
-  void set_quiet () { output_filename = false; }
 };
 
 int main (int argc, char** argv)
@@ -66,7 +64,7 @@ psredit::psredit ()
   : Pulsar::Application ("psredit", "query and/or set archive attributes")
 {
   has_manual = true;
-  version = "$Id: psredit.C,v 1.32 2009/05/06 09:53:46 straten Exp $";
+  version = "$Id: psredit.C,v 1.33 2009/09/02 02:54:31 straten Exp $";
 
   // print/parse in degrees
   Angle::default_type = Angle::Degrees;
@@ -84,28 +82,23 @@ psredit::psredit ()
   add( new Pulsar::UnloadOptions );
 }
 
-//
-//
-//
-std::string psredit::get_options ()
+void psredit::add_options (CommandLine::Menu& menu)
 {
-  return "c:HQ";
+  CommandLine::Argument* arg;
+
+  // blank line in help
+  menu.add ("");
+
+  arg = menu.add (this, &psredit::add_commands, 'c', "command[s]");
+  arg->set_help ("one or more commands, separated by commas");
+
+  arg = menu.add (this, &psredit::detailed_help, 'H');
+  arg->set_help ("more detailed help");
+
+  arg = menu.add (prefix_name, 'Q');
+  arg->set_help ("do not prefix output with 'keyword='");
 }
 
-//
-//
-//
-std::string psredit::get_usage ()
-{
-  return
-    " -c command[s]    one or more commands, separated by commas \n"
-    " -H               more detailed help \n"
-    " -Q               do not prefix output with 'keyword=' \n";
-}
-
-//
-//
-//
 const char* long_help = 
   "\n"
   "Detailed Help: \n"
@@ -133,27 +126,10 @@ const char* long_help =
   "    Output values will be separated by commas.  If a range is not \n"
   "    specified, all values will be output. \n";
 
-bool psredit::parse (char code, const std::string& arg)
+void psredit::detailed_help ()
 {
-  switch (code)
-  {
-    case 'c':
-      separate (optarg, commands, ",");
-      break;
-
-    case 'H':
-      cerr << long_help << endl;
-      exit (0);
-
-    case 'Q':
-      prefix_name = false;
-      break;
-
-    default:
-      return false;
-  }
-
-  return true;
+  cerr << long_help << endl;
+  exit (0);
 }
 
 //

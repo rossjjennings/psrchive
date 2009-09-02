@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/05/06 09:54:00 $
+   $Revision: 1.11 $
+   $Date: 2009/09/02 02:54:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Application_h
 #define __Pulsar_Application_h
 
+#include "CommandLine.h"
 #include "Functor.h"
-#include <string>
 
 namespace Pulsar {
 
@@ -56,25 +56,20 @@ namespace Pulsar {
     //! Available options
     std::vector< Reference::To<Options> > options;
 
-    //! Provide usage information
-    virtual void usage ();
-
-    //! Additional usage information implemented by derived classes
-    virtual std::string get_usage ();
-
-    //! Additional getopt options
-    virtual std::string get_options ();
+    //! Add command line options
+    virtual void add_options (CommandLine::Menu&) = 0;
 
     //! Parse the command line options
     virtual void parse (int argc, char** argv);
 
-    //! Parse an additional command, return true if understood
-    virtual bool parse (char code, const std::string& arg);
+    //! Operate in quiet mode
+    virtual void set_quiet ();
 
-    //! Any extra tasks for quiet, verbose, and very verbose options
-    virtual void set_quiet () {}
-    virtual void set_verbose () {}
-    virtual void set_very_verbose () {}
+    //! Operate in verbose mode
+    virtual void set_verbose ();
+
+    //! Operate in very verbose mode
+    virtual void set_very_verbose ();
 
     //! Any extra setup before running main loop
     virtual void setup ();
@@ -85,12 +80,11 @@ namespace Pulsar {
     //! Any final work after main loop finishes
     virtual void finalize ();
 
-    //! getopt options filter 
-    /*! can be used to address backward compatibility issues */
-    Functor<char(char)> filter;
-    
     //! set to true if this application has an online manual
     bool has_manual;
+
+    //! set to true if this application should update the processing history
+    bool update_history;
 
     // name of the application
     std::string name;
@@ -101,11 +95,14 @@ namespace Pulsar {
     // revision information
     std::string version;
 
+    // command line used to execute this program
+    std::string command;
+
     // list of file names on which to operate
     std::vector <std::string> filenames;
 
     // name of file containing list of Archive filenames
-    char* metafile;
+    std::string metafile;
 
     // verbosity flags
     bool verbose;
@@ -118,14 +115,8 @@ namespace Pulsar {
   {
     public:
 
-    //! Additional usage information
-    virtual std::string get_usage () = 0;
-
     //! Additional getopt options
-    virtual std::string get_options () = 0;
-
-    //! Parse an additional command, return true if understood
-    virtual bool parse (char code, const std::string& arg) = 0;
+    virtual void add_options (CommandLine::Menu&) = 0;
 
     //! Additional one-time setup tasks
     virtual void setup ();

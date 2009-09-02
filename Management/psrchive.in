@@ -62,7 +62,7 @@ while test $# -gt 0; do
     --ldflags | --libs)
         echo -L@libdir@ -lpsrmore -lpsrbase -lpsrutil \
              @LDFLAGS@ @FFT_LIBS@ @CFITSIO_LIBS@ @PUMA_LIBS@ @TEMPO2_LIBS@ \
-             @PTHREAD_CFLAGS@ @PTHREAD_LIBS@ @FLIBS@
+             @GSL_LIBS@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@ @FLIBS@
         ;;
 
     --pgplot-libs)

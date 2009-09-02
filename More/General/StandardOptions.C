@@ -17,38 +17,27 @@ Pulsar::StandardOptions::StandardOptions ()
 {
 }
 
-//! Extra usage information implemented by derived classes
-std::string Pulsar::StandardOptions::get_usage ()
+void Pulsar::StandardOptions::add_options (CommandLine::Menu& menu)
 {
-  return 
-    " -j commands      execute pulsar shell preprocessing commands \n"
-    " -J script        execute pulsar shell preprocessing script \n";
+  CommandLine::Argument* arg;
+
+  menu.add ("\n" "Preprocessing options:");
+
+  arg = menu.add (this, &StandardOptions::add_job, 'j', "commands");
+  arg->set_help ("execute pulsar shell preprocessing commands");
+
+  arg = menu.add (this, &StandardOptions::add_script, 'J', "script");
+  arg->set_help ("execute pulsar shell preprocessing script");
 }
 
-//! Extra option flags implemented by derived classes
-std::string Pulsar::StandardOptions::get_options ()
+void Pulsar::StandardOptions::add_job (const std::string& arg)
 {
-  return "j:J:";
+  separate (arg, jobs, ",");
 }
 
-//! Parse a non-standard command
-bool Pulsar::StandardOptions::parse (char code, const std::string& arg)
+void Pulsar::StandardOptions::add_script (const std::string& arg)
 {
-  switch (code)
-  {
-  case 'j':
-    separate (optarg, jobs, ",");
-    break;
-    
-  case 'J':
-    loadlines (optarg, jobs);
-    break;
-
-  default:
-    return false;
-  }
-
-  return true;
+  loadlines (arg, jobs);
 }
 
 void Pulsar::StandardOptions::add_default_job (const std::string& job)

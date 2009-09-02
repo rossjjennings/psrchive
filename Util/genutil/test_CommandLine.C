@@ -6,18 +6,25 @@
  ***************************************************************************/
 
 #include "CommandLine.h"
+#include "tostring.h"
 
 #include <iostream>
 
 using namespace std;
 
-class Test
+class Test : public Reference::Able
 {
 public:
 
   Test () { x = 0.0; flag = false; }
 
   void parseOptions (int argc, char** argv);
+
+  void action () { cerr << "action" << endl; }
+
+  void parse (const std::string& arg) { cerr << "parse arg=" << arg << endl; }
+
+  void set (double x) { cerr << "set x=" << x << endl; }
 
   string text;
   double x;
@@ -37,7 +44,6 @@ int main(int argc, char** argv)
     " -f " << test.flag << endl;
 }
 
-
 void Test::parseOptions (int argc, char** argv)
 {
   CommandLine::Menu menu;
@@ -51,6 +57,15 @@ void Test::parseOptions (int argc, char** argv)
 
   arg = menu.add (text, 's');
   arg->set_help ("string of text");
+
+  arg = menu.add (this, &Test::parse, 'p', "arg");
+  arg->set_help ("prints the argument");
+
+  arg = menu.add (this, &Test::action, "action");
+  arg->set_help ("does something");
+
+  arg = menu.add (this, &Test::set, "set", "arg");
+  arg->set_help ("sets something");
 
   menu.add (x, 'x');
 

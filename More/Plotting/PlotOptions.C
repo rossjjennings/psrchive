@@ -33,76 +33,45 @@ void Pulsar::PlotOptions::set_open_device (bool flag)
   open_device = flag;
 }
 
-//! Extra usage information implemented by derived classes
-std::string Pulsar::PlotOptions::get_usage ()
+void Pulsar::PlotOptions::add_options (CommandLine::Menu& menu)
 {
-  return 
-    " -D device        plot to the specified device \n"
-    " -g WxH           plot dimensions in pixels, width times height \n"
-    " -N XxY           plot panels, width by height \n"
-    " -r ratio         aspect ratio (height/width) \n"
-    " -w width         plot surface width (in centimetres) \n";
+  CommandLine::Argument* arg;
+
+  menu.add ("\n" "Plot device options:");
+
+  arg = menu.add (plot_device, 'D', "device");
+  arg->set_help ("plot to the specified device");
+
+  arg = menu.add (this, &PlotOptions::set_pixels, 'g', "WxH");
+  arg->set_help ("plot dimensions in pixels, width times height");
+
+  arg = menu.add (this, &PlotOptions::set_panels, 'N', "XxY");
+  arg->set_help ("plot panels, width by height");
+
+  arg = menu.add (aspect_ratio, 'r', "ratio");
+  arg->set_help ("aspect ratio (height/width)");
+
+  arg = menu.add (surface_width, 'w', "width");
+  arg->set_help ("plot surface width (in centimetres)");
+
 }
 
-//! Extra option flags implemented by derived classes
-std::string Pulsar::PlotOptions::get_options ()
+//! Set the plot dimensions in pixels
+void Pulsar::PlotOptions::set_pixels (const std::string& arg)
 {
-  return "D:N:g:r:w:";
+  char c = 0;
+  if (sscanf (arg.c_str(), "%u%c%u", &width_pixels, &c, &height_pixels) != 3)
+    throw Error (InvalidParam, "Pulsar::PlotOptions::set_pixels",
+		 "could not parse '" + arg + "' as plot dimensions");
 }
 
-//! Parse a non-standard command
-bool Pulsar::PlotOptions::parse (char code, const std::string& arg)
+//! Set the number of panels into which the plot surface is divided
+void Pulsar::PlotOptions::set_panels (const std::string& arg)
 {
-  const char* carg = arg.c_str();
-
-  char delimiter;
-
-  switch (code)
-  {
-  case 'D':
-    plot_device = carg;
-    break;
-    
-  case 'g':
-    if (sscanf (carg, "%u%c%u", &width_pixels, &delimiter, &height_pixels) != 3)
-    {
-      cerr << application->get_name()
-	   << ": error parsing -g " << carg << endl;
-      return false;
-    }
-    break;
-
-  case 'N':
-    if (sscanf( carg, "%u%c%u", &x_npanel, &delimiter, &y_npanel ) != 3)
-    {
-      cerr << application->get_name() 
-	   << ": error parsing -N " << carg << endl;
-      return false;
-    }
-    break;
-
-  case 'r':
-    if (sscanf( carg, "%f", &aspect_ratio ) != 1)
-    {
-      cerr << application->get_name() 
-	   << ": error parsing -r " << carg << endl;
-      return false;
-    }
-    break;
-
-  case 'w':
-    if (sscanf( carg, "%f", &surface_width ) != 1) {
-      cerr << application->get_name() 
-	   << ": error parsing -w " << carg << endl;
-      return false;
-    }
-    break;
-   
-  default:
-    return false;
-  }
-  
-  return true;
+  char c = 0;
+  if (sscanf (arg.c_str(), "%u%c%u", &x_npanel, &c, &y_npanel ) != 3)
+    throw Error (InvalidParam, "Pulsar::PlotOptions::set_pixels",
+		 "could not parse '" + arg + "' as number of panels");
 }
 
 //! Open the graphics device and configure it

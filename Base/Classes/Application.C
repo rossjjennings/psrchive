@@ -1,14 +1,14 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-using namespace std;
-
 #include "Pulsar/Application.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/ProcHistory.h"
+
 #include "Pulsar/psrchive.h"
 
 #include "strutil.h"
@@ -16,15 +16,17 @@ using namespace std;
 
 #include <unistd.h>
 
+using namespace std;
+
 Pulsar::Application::Application (const string& n, const string& d)
 {
   name = n;
   description = d;
 
-  metafile     = NULL;
-  has_manual   = false;
+  has_manual = false;
+  update_history = false;
 
-  verbose      = false;
+  verbose = false;
   very_verbose = false;
 }
 
@@ -53,133 +55,88 @@ bool Pulsar::Application::get_verbose () const
   return verbose;
 }
 
-//! Provide usage information
-void Pulsar::Application::usage ()
+void Pulsar::Application::set_quiet ()
 {
-  cout << 
-    "\n" + name + " - " + description + "\n"
-    "\n"
-    "usage: " + name + " [options] filename[s] \n"
-    "\n"
-    "where options are:\n"
-       << endl;
-
-  if (!version.empty())
-    cout << " -i               revision information \n";
-
-  cout <<
-    " -h               help page \n"
-    " -q               quiet mode \n"
-    " -v               verbose mode \n"
-    " -V               very verbose mode \n"
-    "\n"
-    " -M metafile      metafile contains list of archive filenames \n"
-       << endl;
-
-  for (unsigned i=0; i<options.size(); i++)
-    if (options[i]->get_usage().length())
-      cout << options[i]->get_usage() << endl;
-
-  if (get_usage().length())
-    cout << get_usage () << endl;
-
-  if (!has_manual)
-    exit (0);
-
-  cout << 
-    "See "PSRCHIVE_HTTP"/manuals/" + name + " for more details \n" 
-       << endl;
+  Archive::set_verbosity (0);
 }
 
+void Pulsar::Application::set_verbose ()
+{
+  Archive::set_verbosity (2);
+  verbose = true;
+}
+
+void Pulsar::Application::set_very_verbose ()
+{
+  Archive::set_verbosity (3);
+  very_verbose = verbose = true;
+}
 
 //! Parse the command line options
 void Pulsar::Application::parse (int argc, char** argv)
 {
-  string args = "hM:qvV";
+  CommandLine::Menu menu;
+  CommandLine::Argument* arg;
 
-  if (!version.empty())
-    args += "i";
+  menu.set_help_header
+    ("\n" + name + " - " + description + "\n"
+     "\n"
+     "usage: " + name + " [options] filename[s] \n"
+     "\n"
+     "where options are:");
+
+  if (has_manual) menu.set_help_footer
+    ("\n" "See "PSRCHIVE_HTTP"/manuals/" + name + " for more details \n");
+
+  menu.set_version (version);
+
+  arg = menu.add (this, &Application::set_quiet, 'q');
+  arg->set_help ("quiet mode");
+
+  arg = menu.add (this, &Application::set_verbose, 'v');
+  arg->set_help ("verbose mode");
+
+  arg = menu.add (this, &Application::set_very_verbose, 'V');
+  arg->set_help ("very verbose mode");
+
+  arg = menu.add (metafile, 'M', "metafile");
+  arg->set_help ("metafile contains list of archive filenames");
 
   for (unsigned i=0; i<options.size(); i++)
-    args += options[i]->get_options();
+    options[i]->add_options (menu);
 
-  args += get_options ();
+  add_options (menu);
 
-  char code;
-  while ((code = getopt(argc, argv, args.c_str())) != -1) 
-  {    
-    if (filter)
-      code = filter (code);
-
-    switch (code)  {
-
-    case 'i':
-      cout << version << endl;
-      exit (0);
-
-    case 'h':
-      usage ();
-      exit (0);
-
-    case 'M':
-      metafile = optarg;
-      break;
-
-    case 'q':
-      Pulsar::Archive::set_verbosity (0);
-      set_quiet ();
-      break;
-
-    case 'v':
-      Pulsar::Archive::set_verbosity (2);
-      verbose = true;
-      set_verbose ();
-      break;
-
-    case 'V':
-      Pulsar::Archive::set_verbosity (3);
-      verbose = true;
-      very_verbose = true;
-      set_very_verbose ();
-      break;
-
-    default:
-      {
-	bool parsed = false;
-        std::string arg = "";
-
-        if (optarg!=NULL) arg = optarg;
-	
-	for (unsigned i=0; i<options.size(); i++)
-	  if (options[i]->parse (code, arg))
-	    {
-	      parsed = true;
-	      break;
-	    }
-	
-	if (!parsed)
-	  parsed = parse (code, arg);
-	
-	if (parsed)
-	  break;
-	
-	throw Error (InvalidParam, name,
-		     "option -%c not understood", code);
-      } 
-    }
-  }
+  menu.parse (argc, argv);
 
   dirglob_program = name;
 
-  if (metafile)
+  if (!metafile.empty())
     stringfload (&filenames, metafile);
   else
-    for (int ai=optind; ai<argc; ai++)
-      dirglob (&filenames, argv[ai]);
+    for (int i=optind; i<argc; i++)
+      dirglob (&filenames, argv[i]);
 
   if (filenames.empty())
     throw Error (InvalidParam, name,
 		 "please specify filename[s]");
+
+  if (update_history)
+  {
+    string separator = " ";
+
+    command += name + separator;
+
+    for (int i=1; i<optind; i++)
+      command += argv[i] + separator;
+
+    if (command.length () > 80)
+    {
+      cerr << "WARNING: ProcHistory command string truncated to 80 characters"
+	   << endl;
+      command = command.substr (0, 80);
+    }
+  }
 }
 
 //! Execute the main loop
@@ -194,8 +151,8 @@ int Pulsar::Application::main (int argc, char** argv) try
 
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
   {
-    Reference::To<Pulsar::Archive> archive;
-    archive = Pulsar::Archive::load (filenames[ifile]);
+    Reference::To<Archive> archive;
+    archive = Archive::load (filenames[ifile]);
 
     for (unsigned i=0; i<options.size(); i++)
     {
@@ -205,6 +162,13 @@ int Pulsar::Application::main (int argc, char** argv) try
     }
 
     process (archive);
+
+    if (update_history)
+    {
+      ProcHistory * fitsext = archive->get<ProcHistory> ();
+      if (fitsext)
+	fitsext->set_command_str (command);
+    }
 
     for (unsigned i=0; i<options.size(); i++)
     {
@@ -236,24 +200,6 @@ catch (Error& error)
   return -1;
 }
 
-//! Extra usage information implemented by derived classes
-string Pulsar::Application::get_usage ()
-{
-  return "";
-}
-
-//! Extra option flags implemented by derived classes
-string Pulsar::Application::get_options ()
-{
-  return "";
-}
-
-//! Parse a non-standard command
-bool Pulsar::Application::parse (char code, const std::string& arg)
-{
-  return false;
-}
-
 //! Extra setup, run once before main loop
 void Pulsar::Application::setup ()
 {
@@ -265,28 +211,28 @@ bool Pulsar::Application::must_save ()
   return true;
 }
 
-//! Extra optional processing tasks, run once per Archive (before main process)
-void Pulsar::Application::Options::process (Archive*)
-{
-}
-
 //! Final steps, run once at end of program
 void Pulsar::Application::finalize ()
 {
 }
 
-//! Optional final steps, run once at end
-void Pulsar::Application::Options::finalize ()
-{
-}
-
-//! Optional setup steps, run once at start
+/*! Optional setup steps, run once at start (before main finalize) */
 void Pulsar::Application::Options::setup ()
 {
 }
 
-//! Optional finishing tasks, run once per Archive (after main process)
+/*! Optional processing tasks, run once per Archive (before main process) */
+void Pulsar::Application::Options::process (Archive*)
+{
+}
+
+/*! Optional finishing tasks, run once per Archive (after main process) */
 void Pulsar::Application::Options::finish (Archive*)
+{
+}
+
+/*! Optional final steps, run once at end (after main finalize) */
+void Pulsar::Application::Options::finalize ()
 {
 }
 

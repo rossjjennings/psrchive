@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotOptions.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/08/06 02:53:16 $
+   $Revision: 1.6 $
+   $Date: 2009/09/02 02:54:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotOptions_h
@@ -34,11 +34,11 @@ namespace Pulsar {
     //! Set the plot device
     void set_device (const std::string& dev) { plot_device = dev; }
 
-    //! Additional usage information implemented by derived classes
-    std::string get_usage ();
+    //! Set the plot dimensions in pixels
+    void set_pixels (const std::string&);
 
-    //! Additional getopt options
-    std::string get_options ();
+    //! Set the number of panels into which the plot surface is divided
+    void set_panels (const std::string&);
 
     //! Get the number of panels into which the plot surface is divided
     unsigned get_x_npanel () const { return x_npanel; }
@@ -47,9 +47,6 @@ namespace Pulsar {
     unsigned get_y_npanel () const { return y_npanel; }
     void set_y_npanel (unsigned n) { y_npanel = n; }
 
-    //! Parse a command line option, return true if understood
-    bool parse (char code, const std::string& arg);
-
     //! Open the plot device and configure it
     void setup ();
 
@@ -57,6 +54,9 @@ namespace Pulsar {
     void finalize ();
 
   private:
+
+    //! Add options to the menu
+    virtual void add_options (CommandLine::Menu&);
 
     std::string plot_device;
 

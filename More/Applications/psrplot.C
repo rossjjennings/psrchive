@@ -32,15 +32,6 @@ public:
   //! Default constructor
   psrplot ();
 
-  //! Return usage information 
-  std::string get_usage ();
-
-  //! Return getopt options
-  std::string get_options ();
-
-  //! Parse a command line option
-  bool parse (char code, const std::string& arg);
-
   //! Verify setup
   void setup ();
 
@@ -56,7 +47,23 @@ public:
   // -F help
   void help_frame_options (const string& name);
 
+  // -p add plot
+  void add_plot (const string& name)
+  { plots.push_back( factory.construct(name) ); }
+
+  // -c add plot options
+  void add_plot_options (const string& name);
+
+  // -s load plot options
+  void load_plot_options (const string& name);
+
+  // -l add loop index
+  void add_loop_index (const string& name);
+
 protected:
+
+  //! Add command line options
+  void add_options (CommandLine::Menu&);
 
   // Available plots
   PlotFactory factory;
@@ -75,6 +82,9 @@ protected:
 
   // Overlay plots from different files on top of eachother
   bool overlay_files;
+
+  // Overlay plots on top of eachother
+  bool overlay_plots;
 };
 
 int main (int argc, char** argv)
@@ -87,7 +97,7 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
 					   "pulsar plotting program")
 {
   has_manual = true;
-  version = "$Id: psrplot.C,v 1.29 2009/06/11 05:06:07 straten Exp $";
+  version = "$Id: psrplot.C,v 1.30 2009/09/02 02:54:31 straten Exp $";
 
   // print angles in degrees
   Angle::default_type = Angle::Degrees;
@@ -98,6 +108,9 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
   // Do not overlay plots from different files on top of eachother
   overlay_files = false;
 
+  // Do not overlay plots
+  overlay_plots = false;
+
   add( new Pulsar::PlotOptions );
 
   Pulsar::StandardOptions* preprocessor = new Pulsar::StandardOptions;
@@ -106,98 +119,82 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
   add( preprocessor );
 }
 
-using namespace std;
-
-std::string psrplot::get_options ()
+void psrplot::add_options (CommandLine::Menu& menu)
 {
-  return "A:c:C:Fl:Op:Ps:x";
-}
+  CommandLine::Argument* arg;
 
-std::string psrplot::get_usage ()
-{
-  return
-    " -P               Help: list available plot types \n"
-    " -C plot          Help: list options specific to 'plot' \n"
-    " -A plot          Help: list common options for 'plot'\n"
-    "\n"
-    " -p plot          plot type \n"
-    " -c cfg[,cfg2...] plot options \n"
-    " -s style         multiple plot options in 'style' file \n"
-    "\n"
-    " -x               disable default preprocessing \n"
-    " -O               overlay plots \n"
-    " -F               overlay plots from multiple files \n"
-    "\n"
-    " -l name=<range>  loop over the range of the named parameter \n";
-}
+  // blank line in help
+  menu.add ("");
 
-// load the vector of options into the specified plot
-void set_options (Pulsar::Plot* plot, const vector<string>& options);
+  arg = menu.add (this, &psrplot::help_plot_types, 'P');
+  arg->set_help ("Help: list available plot types");
+
+  arg = menu.add (this, &psrplot::help_plot_options, 'C', "plot");
+  arg->set_help ("Help: list options specific to 'plot'");
+
+  arg = menu.add (this, &psrplot::help_frame_options, 'A', "plot");
+  arg->set_help ("Help: list common options for 'plot'");
+
+  // blank line in help
+  menu.add ("");
+
+  arg = menu.add (this, &psrplot::add_plot, 'p', "plot");
+  arg->set_help ("add plot type");
+
+  arg = menu.add (this, &psrplot::add_plot_options, 'c', "cfg[s]");
+  arg->set_help ("add plot options");
+
+  arg = menu.add (this, &psrplot::load_plot_options, 's', "style");
+  arg->set_help ("add plot options in 'style' file");
+
+  // blank line in help
+  menu.add ("");
+
+  arg = menu.add (preprocess, 'x');
+  arg->set_help ("disable default preprocessing");
+
+  arg = menu.add (overlay_plots, 'O');
+  arg->set_help ("overlay plots");
+
+  arg = menu.add (overlay_files, 'F');
+  arg->set_help ("overlay plots from multiple files");
+
+  // blank line in help
+  menu.add ("");
+
+  arg = menu.add (this, &psrplot::add_loop_index, 'l', "name=<range>");
+  arg->set_help ("loop over the range of the named parameter");
+}
 
 // load the string of options into one of the plots
 void specific_options (string optarg, vector< Reference::To<Plot> >& plots);
 
+void psrplot::add_plot_options (const std::string& arg)
+{
+  if (arg[0] == ':')
+    specific_options (arg, plots);
+  else
+    separate (arg, options, ",");
+}
+      
 // load the style file into one of the plots
 void specific_style (string optarg, vector< Reference::To<Plot> >& plots);
 
-//! Parse a command line option
-bool psrplot::parse (char code, const std::string& arg)
+void psrplot::load_plot_options (const std::string& arg)
 {
-  switch (code)
-  {
-    case 'A': 
-      help_frame_options (arg.c_str());
-      exit (0);
-
-    case 'c':
-      if (arg[0] == ':')
-	specific_options (arg, plots);
-      else
-	separate (arg, options, ",");
-      break;
-      
-    case 'C': 
-      help_plot_options (arg);
-      exit (0);
-
-    case 'F':
-      overlay_files = true;
-      break;
-
-    case 'l':
-      loop.add_index( new TextIndex(arg) );
-      break;
-
-    case 'O':
-      loop.set_overlay( true );
-      break;
-
-    case 'p':
-      plots.push_back( factory.construct(arg) );
-      break;
-
-    case 'P':
-      help_plot_types ();
-      exit (0);
-
-    case 's':
-      if (arg[0] == ':')
-	specific_style (arg, plots);
-      else
-	loadlines (arg, options);
-      break;
-
-    case 'x':
-      preprocess = false;
-      break;
-
-  default:
-    return false;
-  }
-
-  return true;
+  if (arg[0] == ':')
+    specific_style (arg, plots);
+  else
+    loadlines (arg, options);
 }
 
+void psrplot::add_loop_index (const std::string& arg)
+{
+  loop.add_index( new TextIndex(arg) );
+}
+
+// load the vector of options into the specified plot
+void set_options (Pulsar::Plot* plot, const vector<string>& options);
 
 void psrplot::setup ()
 {
@@ -212,6 +209,8 @@ void psrplot::setup ()
     for (unsigned iplot=0; iplot < plots.size(); iplot++)
       set_options (plots[iplot], options);
   }
+
+  loop.set_overlay (overlay_plots);
 }
 
 void psrplot::process (Pulsar::Archive* archive)
