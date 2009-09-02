@@ -194,7 +194,11 @@ void CommandLine::Menu::help (const std::string& name)
   for (unsigned i=0; i<item.size(); i++)
   {
     Help help = item[i]->get_help();
-    cout << pad(max_length, help.first) << "   " << help.second << endl;
+
+    if (dynamic_cast<Heading*>(item[i].get()))
+      cout << help.first << endl;
+    else
+      cout <<"  "<< pad(max_length, help.first) <<"  "<< help.second << endl;
   }
 
   cout << help_footer << endl;
