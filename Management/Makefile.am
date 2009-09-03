@@ -6,6 +6,8 @@ psrchive_config_SOURCES = psrchive_config.C Config_ensure_linkage.C
 
 bin_SCRIPTS = psrchive
 
+noinst_SCRIPTS = release.csh
+
 dist_bin_SCRIPTS = psrchive_install
 
 dist_data_DATA = psrchive_version
@@ -24,6 +26,9 @@ LDADD = $(top_builddir)/More/libpsrmore.la \
 	$(top_builddir)/Util/libpsrutil.la
 
 include $(top_srcdir)/config/Makefile.include
+
+all:
+	chmod +x $(noinst_SCRIPTS)
 
 libs include:
 	@echo > /dev/null
