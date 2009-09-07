@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/CommandLine.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/09/02 02:54:31 $
+   $Revision: 1.9 $
+   $Date: 2009/09/07 18:16:17 $
    $Author: straten $ */
 
 #ifndef __CommandLine_h
@@ -321,15 +321,15 @@ namespace CommandLine {
     }
 
     //! Add an Action with only a single letter name
-    template<class C, typename M>
-    Argument* add (C* ptr, M method, char name)
+    template<class C>
+    Argument* add (C* ptr, void (C::*method)(), char name)
     {
       return add_action (ptr, method, name, &Argument::set_short_name);
     }
 
     //! Add an Action with only a long string name
-    template<class C, typename M>
-    Argument* add (C* ptr, M method, const std::string& name)
+    template<class C>
+    Argument* add (C* ptr, void (C::*method)(), const std::string& name)
     {
       return add_action (ptr, method, name, &Argument::set_long_name);
     }
