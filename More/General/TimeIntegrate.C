@@ -13,6 +13,7 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/Predictor.h"
 #include "Pulsar/Pulsar.h"
+#include "Pulsar/DigitiserCounts.h"
 
 #include "ModifyRestore.h"
 #include "Error.h"
@@ -80,7 +81,9 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
   unsigned stop = 0;
 
   ModifyRestore<bool> mod (range_checking_enabled, false);
-    
+
+  DigitiserCounts *digitiserCounts = archive->get<DigitiserCounts>();
+
   for (unsigned isub=0; isub < output_nsub; isub++)
   {
     range_policy->get_range (isub, start, stop);
@@ -143,6 +146,9 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
       if (iadd==(stop+start)/2)
         alt_epoch = cur->get_epoch();
     }
+
+    if (digitiserCounts != NULL)
+      digitiserCounts->CombineSubints(isub, start, stop);
 
     if (Archive::verbose > 2)
       cerr << "Pulsar::TimeIntegrate::transform weighted epoch=" 
@@ -311,6 +317,9 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
     }
 
   } // for each integrated result
+
+  if (digitiserCounts != NULL)
+    digitiserCounts->subints.resize(output_nsub);
 
   archive->resize (output_nsub);
 }
