@@ -120,5 +120,34 @@ void DigitiserCounts::Accumulate( const DigitiserCounts &src )
 }
 
 
+/**
+ * CombineSubints       Add the count values between two subints to a target subint.
+ *
+ * @param subint        The target subint which the values will be added to.
+ * @param start         The beginning of the range.
+ * @param stop          The end of the range.
+ * @throws InvalidRange If the start subint is > the stop subint.
+ * @throws InvalidRange If the target subint index is greater than or equal to the number of existing subints.
+ **/
 
+void DigitiserCounts::CombineSubints(const unsigned subint, const unsigned start,
+        const unsigned stop)
+{
+    if (Archive::verbose > 2)
+        cerr << "Pulsar::DigitiserCounts::CombineSubints subint=" << subint <<
+            " start=" << start << " stop=" << stop << endl;
 
+    if (start > stop)
+        throw Error(InvalidRange, "DigitiserCounts::CombineSubints", 
+                "first subint=%u > last subint=%u", start, stop);
+
+    if (subint >= subints.size())
+        throw Error(InvalidRange, "DigitiserCounts::CombineSubints",
+                "subint=%u >= number of existing subints");
+
+    const unsigned dataSize = subints[0].data.size();
+
+    for (unsigned iadd = start; iadd < stop; ++iadd)
+        for (unsigned idata = 0; idata < dataSize; ++idata)
+            subints[subint].data[idata] = subints[iadd].data[idata];
+}

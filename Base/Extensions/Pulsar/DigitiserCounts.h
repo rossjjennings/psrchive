@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/DigitiserCounts.h,v $
-   $Revision: 1.9 $
-   $Date: 2008/04/21 06:20:00 $
-   $Author: straten $ */
+   $Revision: 1.10 $
+   $Date: 2009/09/14 05:32:21 $
+   $Author: jonathan_khoo $ */
 
 
 
@@ -48,6 +48,10 @@ namespace Pulsar
 
     //! Clone method
     DigitiserCounts* clone () const { return new DigitiserCounts( *this ); }
+
+    //! Combine, by adding, multiple subints into one
+    void CombineSubints(const unsigned subint, const unsigned start,
+            const unsigned stop);
 
     //! Get the text interface
     TextInterface::Parser* get_interface();
