@@ -125,7 +125,7 @@ void TextInterface::Parser::add_value (Value* value)
 }
 
 //! Remove the named value interface
-void TextInterface::Parser::remove (const std::string& name)
+void TextInterface::Parser::remove (const string& name)
 {
   delete find (name);
   clean_invalid ();
@@ -159,9 +159,9 @@ string TextInterface::Parser::get_value (const string& name) const
 string TextInterface::Parser::get_name_value (string& name) const
 {
   // an optional precision may be specified
-  std::string::size_type dot = name.find('%');
+  string::size_type dot = name.find('%');
 
-  if (dot == std::string::npos)
+  if (dot == string::npos)
     return find(name)->get_value();
 
   // strip off the precision
@@ -204,6 +204,22 @@ string TextInterface::Parser::get_description (unsigned i) const
 {
   return values[i]->get_description();
 }
+
+//! Return true if the named value is found
+bool TextInterface::Parser::found (const string& name) const
+{
+  return find (name, false);
+}
+
+//! Return true if prefix:name is found
+bool TextInterface::Parser::found (const string& p, const string& name) const
+{
+  if (p.length())
+    return found (p + ":" + name);
+  else
+    return found (name);
+}
+
 
 //! Return a pointer to the named class value interface
 TextInterface::Value* 
@@ -254,7 +270,7 @@ void TextInterface::Parser::insert (Parser* other)
 }
 
 //! Import a nested interface
-void TextInterface::Parser::insert (const std::string& prefix, Parser* other)
+void TextInterface::Parser::insert (const string& prefix, Parser* other)
 {
   if (!other)
     return;
@@ -282,8 +298,8 @@ void TextInterface::Parser::clean ()
 
 
 
-bool TextInterface::NestedValue::matches (const std::string& name,
-					  const std::string& prefix,
+bool TextInterface::NestedValue::matches (const string& name,
+					  const string& prefix,
 					  const Value* value)
 {
 #ifdef _DEBUG
@@ -291,7 +307,7 @@ bool TextInterface::NestedValue::matches (const std::string& name,
        << " name=" << name;
 #endif
 
-  std::string::size_type length = prefix.length();
+  string::size_type length = prefix.length();
 
   if ( name[length] != ':' )
   {
@@ -309,7 +325,7 @@ bool TextInterface::NestedValue::matches (const std::string& name,
     return false;
   }
 
-  std::string remainder = name.substr (length+1);
+  string remainder = name.substr (length+1);
 
 #ifdef _DEBUG
   cerr << " maybe" << endl;

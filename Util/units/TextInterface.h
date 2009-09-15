@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/TextInterface.h,v $
-   $Revision: 1.53 $
-   $Date: 2009/06/24 05:02:29 $
+   $Revision: 1.54 $
+   $Date: 2009/09/15 12:54:42 $
    $Author: straten $ */
 
 #ifndef __TextInterface_h
@@ -829,6 +829,12 @@ namespace TextInterface {
     //! Find the named value
     Value* find (const std::string& name, bool throw_exception = true) const;
 
+    //! Return true if the named value is found
+    bool found (const std::string& name) const;
+
+    //! Return true if prefix:name is found
+    bool found (const std::string& prefix, const std::string& name) const;
+
     //! Allow derived types to setup a Value instance before use
     virtual void setup (const Value*) { }
 
@@ -930,7 +936,7 @@ namespace TextInterface {
       void import (const To<P>* parent)
       {
 	for (unsigned i=0; i < parent->size(); i++)
-	  if (!import_filter || !find(parent->get(i)->get_name(),false))
+	  if (!import_filter || !found(parent->get(i)->get_name()))
 	    add_value( new IsAProxy<C,P>(parent->get(i)) );
       }
 
@@ -938,11 +944,11 @@ namespace TextInterface {
     /*! In this template, G should be of the type pointer to member function
       of C that returns pointer to M */
     template<class M, class G> 
-      void import ( const std::string& name, const To<M>* member, G get )
+      void import (const std::string& name, const To<M>* member, G get)
       {
 	for (unsigned i=0; i < member->size(); i++)
-	  if (!import_filter || !find(member->get(i)->get_name(),false))
-	    add_value( new HasAProxy<C,M,G>(name, member->get(i),get) );
+	  if (!import_filter || !found(name, member->get(i)->get_name()))
+	    add_value( new HasAProxy<C,M,G>(name, member->get(i), get) );
       }
 
     //! Import the attribute interfaces from a vector element text interface
@@ -951,10 +957,10 @@ namespace TextInterface {
       S should be a pointer to the member function that returns the
       number of elements of type E in C. */
     template<class E, class G, class S>
-      void import ( const std::string& name, const To<E>* member, G g, S s)
+      void import (const std::string& name, const To<E>* member, G g, S s)
       {
 	for (unsigned i=0; i < member->size(); i++)
-	  if (!import_filter || !find(member->get(i)->get_name(),false))
+	  if (!import_filter || !found(name, member->get(i)->get_name()))
 	    add_value(new VectorOfProxy<C,E,G,S>(name, member->get(i), g, s));
       }
 
@@ -963,10 +969,10 @@ namespace TextInterface {
       function of C that accepts key K and returns pointer to data element E. 
     */
     template<class K, class E, class G>
-      void import ( const std::string& name, K k, const To<E>* member, G g)
+      void import (const std::string& name, K k, const To<E>* member, G g)
       {
 	for (unsigned i=0; i < member->size(); i++)
-	  if (!import_filter || !find(member->get(i)->get_name(),false))
+	  if (!import_filter || !found(name, member->get(i)->get_name()))
 	    add_value( new MapOfProxy<C,K,E,G>(name, member->get(i), g) );
       }
 
