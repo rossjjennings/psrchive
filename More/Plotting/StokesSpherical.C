@@ -4,8 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/StokesSpherical.h"
 #include "Pulsar/Profile.h"
+
+using namespace std;
 
 Pulsar::StokesSpherical::StokesSpherical ()
 {
@@ -52,9 +55,12 @@ TextInterface::Parser* Pulsar::StokesSpherical::get_interface ()
   return new Interface (this);
 }
 
-void Pulsar::StokesSpherical::prepare (const Archive*)
+void Pulsar::StokesSpherical::prepare (const Archive* data)
 {
-  prepare( &flux );
+  if (verbose)
+    cerr << "Pulsar::StokesSpherical::prepare" << endl;
+
+  prepare( &flux, data );
   prepare( &orientation );
   prepare( &ellipticity );
 }

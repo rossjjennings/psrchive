@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesSpherical.h,v $
-   $Revision: 1.11 $
-   $Date: 2008/11/12 07:45:10 $
+   $Revision: 1.12 $
+   $Date: 2009/09/15 14:03:42 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesSpherical_h
@@ -66,10 +66,12 @@ namespace Pulsar {
     Index isubint;
     Index ichan;
 
-    template<class T> void prepare (T* plot)
+    template<class T> void prepare (T* plot, const Archive* data = 0)
     {
       plot->set_subint (isubint);
       plot->set_chan (ichan);
+      if (data)
+	plot->prepare (data);
     }
 
   };
