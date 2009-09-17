@@ -327,7 +327,7 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
 
 int Tempo::toa::Tempo2_unload (FILE* outstream) const
 {
-  sizebuf (128);
+  sizebuf (128 + auxinfo.length());
   Tempo2_unload (buffer);
   fprintf (outstream, "%s\n", buffer);
 
