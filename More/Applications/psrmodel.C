@@ -66,12 +66,19 @@ protected:
   // perform a rotating vector model fit
   bool rvm_fit;
 
+#if HAVE_PGPLOT
+
   // plot the result
   bool plot_result;
+  void set_plot_result ()
+  {
+    plot_result = true; 
+    plot.set_open_device (true);
+  }
 
-#if HAVE_PGPLOT
   // configures the plotting device
   Pulsar::PlotOptions plot;
+
 #endif
 };
 
@@ -88,18 +95,18 @@ psrmodel::psrmodel () :
 #endif
 {
   has_manual = false;
-  version = "$Id: psrmodel.C,v 1.10 2009/09/02 02:54:31 straten Exp $";
+  version = "$Id: psrmodel.C,v 1.11 2009/09/21 21:32:23 straten Exp $";
 
   add( new Pulsar::StandardOptions );
 #if HAVE_PGPLOT
   add( &plot );
+  plot_result = false;
 #endif
 
   rvm = new ComplexRVMFit;
   global_search = 0;
 
   rvm_fit = true;
-  plot_result = false;
 }
 
 double deg_to_rad (const std::string& arg)
@@ -118,7 +125,7 @@ void psrmodel::add_options (CommandLine::Menu& menu)
   menu.add ("");
 
 #if HAVE_PGPLOT
-  arg = menu.add (plot_result, 'd');
+  arg = menu.add (this, &psrmodel::set_plot_result, 'd');
   arg->set_help ("plot the resulting model with data");
 #endif
 
@@ -195,12 +202,6 @@ void psrmodel::setup ()
   if (!rvm_fit)
     throw Error (InvalidState, "psrmodel",
 		 "please use -r (can only do RVM fit for now)");
-
-#if HAVE_PGPLOT
-  if (plot_result)
-    plot.set_open_device (true);
-#endif
-
 }
 
 void psrmodel::process (Pulsar::Archive* data)
@@ -218,7 +219,9 @@ void psrmodel::process (Pulsar::Archive* data)
   data->fscrunch();
   data->convert_state(Signal::Stokes);
   data->remove_baseline();
-  data->centre();
+
+  if (data->has_model())
+    data->centre();
 
   Reference::To<PolnProfile> p = data->get_Integration(0)->new_PolnProfile(0);
   rvm->set_observation (p);
