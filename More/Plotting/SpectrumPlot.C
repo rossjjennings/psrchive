@@ -28,7 +28,7 @@ void Pulsar::SpectrumPlot::get_spectra (const Archive* data)
     if (profile -> get_weight() == 0.0)
       spectra[0][ichan] = 0.0;
     else if (ibin.get_integrate())
-      spectra[0][ichan] = profile->sum();
+      spectra[0][ichan] = profile->sum() / (float)profile->get_nbin();
     else
       spectra[0][ichan] = profile->get_amps()[ibin.get_value()];
   }
