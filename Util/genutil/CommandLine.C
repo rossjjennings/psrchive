@@ -55,6 +55,9 @@ void CommandLine::Menu::add_version ()
   if (version_item)
     return;
 
+  if (version_info.empty())
+    return;
+
   version_item = add (this, &Menu::version, 'i');
   version_item->set_long_name ("version");
   version_item->set_help ("version information");
