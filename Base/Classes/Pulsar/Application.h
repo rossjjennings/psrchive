@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.11 $
-   $Date: 2009/09/02 02:54:31 $
+   $Revision: 1.12 $
+   $Date: 2009/09/22 11:43:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Application_h
@@ -73,6 +73,9 @@ namespace Pulsar {
 
     //! Any extra setup before running main loop
     virtual void setup ();
+
+    //! The main loop
+    virtual void run ();
 
     //! Data analysis tasks implemented by most derived classes
     virtual void process (Archive*) = 0;

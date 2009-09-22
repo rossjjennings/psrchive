@@ -117,10 +117,6 @@ void Pulsar::Application::parse (int argc, char** argv)
     for (int i=optind; i<argc; i++)
       dirglob (&filenames, argv[i]);
 
-  if (filenames.empty())
-    throw Error (InvalidParam, name,
-		 "please specify filename[s]");
-
   if (update_history)
   {
     string separator = " ";
@@ -139,15 +135,11 @@ void Pulsar::Application::parse (int argc, char** argv)
   }
 }
 
-//! Execute the main loop
-int Pulsar::Application::main (int argc, char** argv) try
+void Pulsar::Application::run ()
 {
-  parse (argc, argv);
-
-  for (unsigned i=0; i<options.size(); i++)
-    options[i]->setup ();
-
-  setup ();
+  if (filenames.empty())
+    throw Error (InvalidParam, name,
+		 "please specify filename[s]");
 
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
   {
@@ -186,6 +178,19 @@ int Pulsar::Application::main (int argc, char** argv) try
     else
       cerr << "\n" << error.get_message() << endl;
   }
+}
+
+//! Execute the main loop
+int Pulsar::Application::main (int argc, char** argv) try
+{
+  parse (argc, argv);
+
+  for (unsigned i=0; i<options.size(); i++)
+    options[i]->setup ();
+
+  setup ();
+
+  run ();
 
   finalize ();
 
