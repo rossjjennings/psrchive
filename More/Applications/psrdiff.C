@@ -61,8 +61,8 @@ int main (int argc, char** argv) try
   char c;
   while ((c = getopt(argc, argv, "c:dhM:qs:vV")) != -1) 
 
-    switch (c)  {
-
+    switch (c)
+    {
     case 'c':
       plot_when = atof(optarg);
       break;
@@ -95,7 +95,6 @@ int main (int argc, char** argv) try
     case 'V':
       Pulsar::Archive::set_verbosity (3);
       break;
-
     } 
 
 
@@ -107,13 +106,15 @@ int main (int argc, char** argv) try
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  if (filenames.empty()) {
-    cout << "psrdiff: please specify filename[s]" << endl;
+  if (filenames.empty())
+  {
+    cerr << "psrdiff: please specify filename[s]" << endl;
     return -1;
   } 
 
-  if (!std_filename) {
-    cout << "psrdiff: please specify standard (-s std.ar)" << endl;
+  if (!std_filename)
+  {
+    cerr << "psrdiff: please specify standard (-s std.ar)" << endl;
     return -1;
   } 
 
@@ -154,8 +155,8 @@ int main (int argc, char** argv) try
     cpgask (1);
   }
 
-  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
-
+  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try
+  {
     Reference::To<Pulsar::Archive> archive;
     archive = Pulsar::Archive::load( filenames[ifile] );
 
@@ -164,19 +165,22 @@ int main (int argc, char** argv) try
     unsigned npol = archive->get_npol();
     unsigned nbin = archive->get_nbin();
 
-    if (nbin != std_nbin) {
+    if (nbin != std_nbin)
+    {
       cerr << "psrdiff: " << archive->get_filename() << "\n    nbin=" << nbin
 	   << " != standard nbin=" << std_nbin << endl;
       continue;
     }
 
-    if (nchan != std_nchan) {
+    if (nchan != std_nchan)
+    {
       cerr << "psrdiff: " << archive->get_filename() << "\n    nchan=" << nchan
 	   << " != standard nchan=" << std_nchan << endl;
       continue;
     }
 
-    if (npol != std_npol) {
+    if (npol != std_npol)
+    {
       cerr << "psrdiff: " << archive->get_filename() << "\n    npol=" << npol
 	   << " != standard npol=" << std_npol << endl;
       continue;
@@ -190,16 +194,16 @@ int main (int argc, char** argv) try
     double total_chisq = 0.0;
     unsigned count = 0;
 
-    for (isub=0; isub < nsub; isub++) {
-
+    for (isub=0; isub < nsub; isub++)
+    {
       Pulsar::Integration* subint = archive->get_Integration(isub);
 
       vector<float> fit_chisq (nchan, 0.0);
 
       cerr << "psrdiff: performing fit in " << nchan << " channels" << endl;
 
-      for (unsigned ichan=0; ichan < nchan; ichan++) try {
-
+      for (unsigned ichan=0; ichan < nchan; ichan++) try
+      {
 	if (std_subint->get_weight(ichan) == 0 ||
 	    subint->get_weight(ichan) == 0)
 	  continue;
@@ -273,28 +277,29 @@ int main (int argc, char** argv) try
     double alt_chisq = 0.0;
     count = 0;
 
-    for (isub=0; isub < nsub; isub++) {
-
+    for (isub=0; isub < nsub; isub++)
+    {
       Pulsar::Integration* subint = archive->get_Integration(isub);
 
       vector< vector< double > > variance;
       subint->baseline_stats (0, &variance);
 
-      for (unsigned ichan=0; ichan < nchan; ichan++) {
-
+      for (unsigned ichan=0; ichan < nchan; ichan++)
+      {
 	if (std_subint->get_weight(ichan) == 0 ||
 	    subint->get_weight(ichan) == 0)
 	  continue;
 
-	for (unsigned ipol=0; ipol < npol; ipol++) {
-
+	for (unsigned ipol=0; ipol < npol; ipol++)
+	{
 	  double var = variance[ipol][ichan] + std_variance[ipol][ichan];
 
 	  float* std_amps = std_subint->get_Profile(ipol,ichan)->get_amps();
 	  float* amps = subint->get_Profile (ipol,ichan)->get_amps();
 
 	  double diff = 0;
-	  for (unsigned ibin = 0; ibin < nbin; ibin++) {
+	  for (unsigned ibin = 0; ibin < nbin; ibin++)
+	  {
 	    double val = std_amps[ibin] - amps[ibin];
 	    diff += val * val;
 	  }
