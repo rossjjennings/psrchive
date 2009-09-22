@@ -14,7 +14,7 @@ using namespace std;
 
 Pulsar::UnloadOptions::UnloadOptions ()
 {
-  unload = true;
+  unload = false;
   overwrite = false;
 }
 
@@ -40,19 +40,17 @@ void Pulsar::UnloadOptions::setup ()
   cerr << "Pulsar::UnloadOptions::setup" << endl;
 #endif
 
-  if (!application->must_save())
-  {
-    unload = false;
-    return;
-  }
-
   if (overwrite && (!extension.empty() || !directory.empty()))
     throw Error (InvalidState, "Pulsar::UnloadOptions::setup",
 		 "cannot use -m option with -e and/or -O option");
 
-  if (!overwrite && extension.empty() && directory.empty())
+  if (overwrite || !extension.empty() || !directory.empty())
+    unload = true;
+
+  else if (application->must_save())
     throw Error (InvalidState, "Pulsar::UnloadOptions::setup",
-		 "please specify either the -m option or the -e or -O option");
+		 "please specify either the -m option"
+		 " or the -e and/or -O option");
 }
 
 //! Unload the archive
