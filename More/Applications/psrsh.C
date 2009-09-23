@@ -42,7 +42,7 @@ protected:
   Reference::To<Pulsar::Interpreter> interpreter;
   string script;
 
-  void interpreter_help () { interpreter->help(""); }
+  void interpreter_help (const string& cmd);
 };
 
 int main (int argc, char** argv)
@@ -55,7 +55,7 @@ psrsh::psrsh ()
   : Application ("psrsh", "command language interpreter")
 {
   has_manual = true;
-  version = "$Id: psrsh.C,v 1.17 2009/09/22 11:46:04 straten Exp $";
+  version = "$Id: psrsh.C,v 1.18 2009/09/23 23:30:49 straten Exp $";
 
   add( new Pulsar::UnloadOptions );
 
@@ -67,7 +67,9 @@ void psrsh::add_options (CommandLine::Menu& menu)
   CommandLine::Argument* arg;
 
   arg = menu.add (this, &psrsh::interpreter_help, 'H');
+  arg->set_long_name ("cmd");
   arg->set_help ("list available commands");
+  arg->set_has_arg (optional_argument);
 
   menu.set_help_footer
     ("\n"
@@ -104,4 +106,13 @@ void psrsh::process (Pulsar::Archive* archive)
 {
   interpreter->set( archive );
   interpreter->script( script );
+}
+
+void psrsh::interpreter_help (const string& cmd)
+{
+  // cerr << "psrsh::interpreter_help cmd='" << cmd << "'" << endl;
+
+  cout << endl << interpreter->help (cmd);
+
+  exit (0);
 }
