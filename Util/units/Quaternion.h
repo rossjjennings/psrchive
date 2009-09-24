@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.32 $
-   $Date: 2007/05/22 08:05:59 $
+   $Revision: 1.33 $
+   $Date: 2009/09/24 21:38:47 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -18,11 +18,18 @@
 #include "complex_promote.h"
 #include "Vector.h"
 
-//! Quaternion algebra is isomorphic with either Hermitian or Unitary matrices
+//! Quaternion multiplication is isomorphic with that of 2x2 Unitary matrices
+/*!
+  Although the product of two Hermitian matrices is not necessarily Hermitian
+  (and therefore is not a group operation), it is still useful to represent 
+  Hermitian matrices in scalar+vector form.  The Quaternion class is used;
+  however, calling something a Hermitian quaternion is conceptually misleading.
+*/
 enum QBasis { Hermitian, Unitary };
 
 //! Quaternion
-template<typename T, QBasis B = Unitary> class Quaternion {
+template<typename T, QBasis B = Unitary> 
+class Quaternion {
   
 public:
   T s0,s1,s2,s3;
@@ -322,24 +329,61 @@ const Quaternion<T,B> sqrt (const Quaternion<T,B>& h)
   return Quaternion<T,B> (scalar, h.get_vector()/(2*scalar));
 }
 
-// return a unitary matrix with rows equal to the eigenvectors of q
+//! return a unitary matrix with rows equal to the eigenvectors of q
+/*!
+  Note that the eigenvalues of the hermitian input q=(I,Q,U,V)
+  are I+p and I-p, where p is the magnitude of (Q,U,V)
+
+  To derive the eigenvectors, start with
+
+  For I+p: 
+    e0=e1*(U-iV)/(p-Q)   [used when Q<0]
+  or
+    e1=e0*(U+iV)/(p+Q)   [used when Q>=0]
+
+  For I-p:
+    e0=-e1*(U-iV)/(p+Q)  [used when Q>=0]
+  or
+    e1=-e0*(U+iV)/(p-Q)  [used when Q<0]
+
+  Plugging these directly into the columns of two Jones matrices (one
+  for Q<0 and the other for Q>=0) and taking the Hermitian transpose
+  produces the required basis transformation.  The determinant of the
+  matrix in each case is
+
+  det(J) = 2p/(p+Q)      [Q>=0]
+  and
+  det(J) = -2p/(p-Q)     [Q<0]
+
+  Normalize each matrix by the sqrt of its determinant, and convert
+  the result to a Unitary Quaternion ... done!
+*/
+
 template<typename T>
 const Quaternion<T,Unitary> eigen (const Quaternion<T,Hermitian>& q)
 {
   T p = norm( q.get_vector() );
-  T m = 1.0 / sqrt( 2.0*p*(p+q.s1) );
 
-  return Quaternion<T,Unitary> (m*(p+q.s1), 0.0, -m*q.s3, m*q.s2);
+  if (q.s1 < 0)
+  {
+    T m = 1.0 / sqrt( 2.0*p*(p-q.s1) );
+    return Quaternion<T,Unitary> (m*q.s3, -m*q.s2, -m*(p-q.s1), 0.0);
+  }
+  else
+  {
+    T m = 1.0 / sqrt( 2.0*p*(p+q.s1) );
+    return Quaternion<T,Unitary> (m*(p+q.s1), 0.0, -m*q.s3, m*q.s2);
+  }
 }
 
-//! Useful for quickly printing the components
+//! Insertion operator
 template<typename T>
 std::ostream& operator<< (std::ostream& ostr, const Quaternion<T,Hermitian>& j)
 {
   return ostr << "[h:" << j.s0 <<","<< j.s1 <<","<< j.s2 <<","<< j.s3 << "]";
 }
 
-//! Useful for quickly printing the components
+//! Insertion operator
 template<typename T>
 std::ostream& operator<< (std::ostream& ostr, const Quaternion<T,Unitary>& j)
 {
