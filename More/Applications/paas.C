@@ -30,6 +30,8 @@
 #include "cpgplot.h"
 #include <map>
 
+#include <fstream>
+
 using namespace MEAL;
 using namespace Pulsar;
 using namespace std;
@@ -60,8 +62,8 @@ void usage ()
     "  -C            Centre profile using ephemeris\n"
     "  -p            Rotate profile to place peak at centre\n"
     "  -R phase      Rotate profile by specified number of turns\n"
-    "  -a            After loading a model, rotate it to align to profile\n";
-
+    "  -a            After loading a model, rotate it to align to profile\n"
+    "  -j[filename]  Output details to [filename]    [Default: paas.txt]\n";
 }
 
 class ComponentModel
@@ -94,6 +96,10 @@ public:
   void plot(int npts, bool line_plot=false, int icomp=-1) ;
   void plot_difference(const Profile *profile, bool line_plot=false);
 
+  // Text output
+  void write_details_to_file(Reference::To<Pulsar::Archive> input_archive,
+          Reference::To<Pulsar::Archive> model, const string& filename);
+
 protected:
   vector<ScaledVonMises> components;
   vector<string> component_names;
@@ -101,6 +107,47 @@ protected:
 
   void clear();
 };
+
+void
+ComponentModel::write_details_to_file(Reference::To<Pulsar::Archive> input_archive,
+        Reference::To<Pulsar::Archive> model, const string& filename)
+{
+    ofstream out(filename.c_str());
+
+    if (!out)
+        throw Error(InvalidState, "ComponentModel::write_details_to_file",
+                "Unable to write to file=" + filename);
+
+    cerr << "paas: writing details to " << filename << endl;
+
+    const unsigned nbin = input_archive->get_nbin();
+    const unsigned ncomp = get_ncomponents();
+
+    out << "# " << input_archive->get_filename() << " " <<
+        input_archive->get_source() << " " << 
+        input_archive->get_centre_frequency() << " " << nbin << " " <<
+        ncomp << endl;
+
+    float* in_bin = input_archive->get_Profile(0,0,0)->get_amps();
+    float* model_bin = model->get_Profile(0,0,0)->get_amps();
+
+    vector<vector<float> > values(ncomp);
+    for (unsigned icomp = 0; icomp < ncomp; ++icomp) {
+        values[icomp].resize(nbin);
+        evaluate(&values[icomp][0], nbin, icomp);
+    }
+
+    for (unsigned ibin = 0; ibin < nbin; ++ibin, ++in_bin, ++model_bin) {
+        out << ibin << " " << *in_bin << " " << *model_bin;
+
+        for (unsigned icomp = 0; icomp < ncomp; ++icomp)
+            out << " " << values[icomp][ibin];
+
+        out << endl;
+    }
+
+    out.close();
+}
 
 
 void
@@ -155,7 +202,7 @@ ComponentModel::unload(const char *fname) const
   if (!f)
     throw Error(FileNotFound, "ComponentModel::unload");
   
-  int iline, icomp=0;
+  unsigned iline, icomp = 0;
   bool done=false;
   map<int, string>::const_iterator comment_it;
   for (iline=0; !done; iline++)
@@ -193,7 +240,7 @@ ComponentModel::add_component(double centre, double concentration,
 void
 ComponentModel::remove_component(int icomp)
 {
-  if (icomp < 0 || icomp >= components.size())
+  if (icomp < 0 || icomp >= (int)components.size())
     throw Error(InvalidParam, "ComponentModel::remove_component",
 		"Component index out of range");
   components.erase(components.begin()+icomp);
@@ -202,7 +249,7 @@ ComponentModel::remove_component(int icomp)
 ScaledVonMises *
 ComponentModel::get_component(int icomp)
 {
-  if (icomp < 0 || icomp >= components.size())
+  if (icomp < 0 || icomp >= (int)components.size())
     throw Error(InvalidParam, "ComponentModel::get_component",
 		"Component index out of range");
   return &components[icomp];
@@ -225,8 +272,8 @@ ComponentModel::align(const Profile *profile)
   Estimate<double> shift = profile->shift(modelprof);
 
   printf("Shift=%.5lf\n", shift.val);
-  int icomp;
-  for (icomp=0; icomp < components.size(); icomp++)
+
+  for (unsigned icomp=0; icomp < components.size(); icomp++)
   {
     Estimate<double> centre = components[icomp].get_centre()+  shift*M_PI*2.0;
     if (centre.val >= M_PI)
@@ -241,7 +288,7 @@ ComponentModel::align(const Profile *profile)
 void
 ComponentModel::set_infit(int icomponent, int iparam, bool infit)
 {
-  if (icomponent < 0 || icomponent > components.size())
+  if (icomponent < 0 || icomponent > (int)components.size())
     throw Error(InvalidParam, "ComponentModel::get_component",
 		"Component index out of range");
   if (iparam < 0 || iparam > 2)
@@ -254,9 +301,9 @@ ComponentModel::set_infit(int icomponent, int iparam, bool infit)
 void 
 ComponentModel::set_infit(const char *fitstring)
 {
-  int iparam, icomp, ic=0, nc=strlen(fitstring);
-  for (icomp=0; icomp < components.size(); icomp++)
-    for (iparam=0; iparam < 3; iparam++)
+  int ic=0, nc=strlen(fitstring);
+  for (unsigned icomp=0; icomp < components.size(); icomp++)
+    for (unsigned iparam=0; iparam < 3; iparam++)
     {
       if (ic==nc)
 	return;
@@ -283,7 +330,6 @@ ComponentModel::fit(const Profile *profile, bool fit_derivative,
   SumRule<Univariate<Scalar> > m; 
   int i, nbin=profile->get_nbin(); 
   vector<float> data(nbin);
-  int icomp;
 
   // Construct the model and the array to fit, depending on whether
   // we work on the actual profile or its derivative
@@ -291,7 +337,7 @@ ComponentModel::fit(const Profile *profile, bool fit_derivative,
   if (fit_derivative)
   {
     // setup model using derivative components
-    for (icomp=0; icomp < components.size(); icomp++)
+    for (unsigned icomp=0; icomp < components.size(); icomp++)
     {
       derivative_components[icomp].set_centre(components[icomp].get_centre());
       derivative_components[icomp].set_concentration
@@ -324,7 +370,7 @@ ComponentModel::fit(const Profile *profile, bool fit_derivative,
   else // normal profile
   {
     //Construct the summed model
-    for (icomp=0; icomp < components.size(); icomp++)
+    for (unsigned icomp=0; icomp < components.size(); icomp++)
       m += &components[icomp];
     // copy data
     for (i=0; i < nbin; i++)
@@ -381,7 +427,7 @@ ComponentModel::fit(const Profile *profile, bool fit_derivative,
 
   if (fit_derivative) // copy best-fit parameters back
   {
-    for (icomp=0; icomp < components.size(); icomp++)
+    for (unsigned icomp=0; icomp < components.size(); icomp++)
     {
       components[icomp].set_centre(derivative_components[icomp].get_centre());
       components[icomp].set_concentration
@@ -391,7 +437,7 @@ ComponentModel::fit(const Profile *profile, bool fit_derivative,
   }
 
   printf("Results of fit:\n");
-  for (icomp=0; icomp < components.size(); icomp++)
+  for (unsigned icomp=0; icomp < components.size(); icomp++)
     printf("Component %2d: %12lg %12lg %12lg %s\n",  icomp+1,
 	   components[icomp].get_centre().val/M_PI*0.5 + 0.5,
 	   components[icomp].get_concentration().val,
@@ -420,15 +466,14 @@ ComponentModel::evaluate(float *vals, int nvals, int icomp_selected)
   SumRule<Univariate<Scalar> > m; 
   if (icomp_selected >= 0)
   {
-    if (icomp_selected >= components.size())
+    if (icomp_selected >= (int)components.size())
       throw Error(InvalidParam, "ComponentModel::plot",
 		  "Component index out of range");
     m += &components[icomp_selected];
   }
   else
   {
-    int icomp;
-    for (icomp=0; icomp < components.size(); icomp++)
+    for (unsigned icomp=0; icomp < components.size(); icomp++)
       m += &components[icomp];
   }
 
@@ -501,7 +546,7 @@ ComponentModel::clear()
 
 int main (int argc, char** argv) 
 {
-  const char* args = "hb:r:w:c:fF:it:d:Dl:Ws:CpR:a";
+  const char* args = "hb:r:w:c:fF:it:d:Dl:j::Ws:CpR:a";
   string model_filename_in, model_filename_out;
   bool fit=false;
   vector<string> new_components;
@@ -519,6 +564,8 @@ int main (int argc, char** argv)
   bool centre_model = false, centre_peak=false;
   float rotate_amount = 0.0;
   bool align = false;
+  bool write_details = false;
+  string details_filename = "paas.txt";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -593,6 +640,11 @@ int main (int argc, char** argv)
       align = true;
       break;
 
+    case 'j':
+      write_details = true;
+      if (optarg) { details_filename = optarg; }
+      break;
+
    default:
       cerr << "invalid param '" << c << "'" << endl;
     }
@@ -624,6 +676,8 @@ int main (int argc, char** argv)
       archive->rotate_phase(-rotate_amount);
 
     archive->remove_baseline();
+
+    Reference::To<Pulsar::Archive> copy = archive->clone();
 
     // make empty model
     ComponentModel model;
@@ -788,14 +842,16 @@ int main (int argc, char** argv)
 
     }
 
-
     // write out standard
     model.evaluate(archive->get_Integration(0)->get_Profile(0,0)->get_amps(),
 		   archive->get_nbin());
 
+    if (write_details)
+        model.write_details_to_file(copy, archive, details_filename);
+
     archive->unload(std_filename);
 
-  } 
+  }
   catch (Error& error) {
     cerr << error << endl;
   }
