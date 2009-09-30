@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ArrivalTime.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/09/30 07:17:25 $
+   $Revision: 1.2 $
+   $Date: 2009/09/30 08:40:06 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArrivalTime_h
@@ -19,8 +19,11 @@
 
 namespace Pulsar {
 
+  class ProfileShiftEstimator;
   class ShiftEstimator;
   class Archive;
+  class Integration;
+  class Profile;
 
   //! Manages arrival time estimation
   /*! 
@@ -63,7 +66,6 @@ namespace Pulsar {
     //! Add to the vector of time-of-arrival estimates
     void get_toas (std::vector<Tempo::toa>&);
 
-
   protected:
 
     Reference::To<const Archive> observation;
@@ -86,7 +88,17 @@ namespace Pulsar {
       Perhaps Tempo::toa::Format should be a base class, such that
       each child of the class does its own formatting
     */
-    std::string get_tempo2_arguments ();
+    std::string get_tempo2_aux_txt ();
+
+    void get_toas (const Integration* subint,
+		   std::vector<Tempo::toa>& toas);
+
+    Tempo::toa get_toa (const Profile* profile,
+			const MJD& mjd, double period);
+
+  private:
+
+    Reference::To<ProfileShiftEstimator> profile_shift;
   };
 
 }
