@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/SincInterpShift.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/09/30 02:17:24 $
+   $Revision: 1.2 $
+   $Date: 2009/09/30 08:40:21 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SincInterpShift_h
@@ -24,8 +24,8 @@ namespace Pulsar {
 
   public:
 
-    //! Fundamental period of spike sequence to be zapped
-    static unsigned zap_period;
+    //! Default constructor
+    SincInterpShift ();
 
     //! Return the shift estimate
     Estimate<double> get_shift () const;
@@ -35,6 +35,13 @@ namespace Pulsar {
 
     //! Return a copy constructed instance of self
     SincInterpShift* clone () const { return new SincInterpShift(*this); }
+
+    void set_zap_period (unsigned p) { zap_period = p; }
+
+  protected:
+
+    //! Fundamental period of spike sequence to be zapped
+    unsigned zap_period;
 
   };
 
