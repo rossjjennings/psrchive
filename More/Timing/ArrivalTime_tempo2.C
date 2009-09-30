@@ -247,7 +247,7 @@ catch (Error& e)
   return "*error*";
 }
 
-std::string Pulsar::ArrivalTime::get_tempo2_arguments ()
+std::string Pulsar::ArrivalTime::get_tempo2_aux_txt ()
 {
   string args;
 
