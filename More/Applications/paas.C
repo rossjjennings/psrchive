@@ -60,10 +60,10 @@ void usage ()
     "  -s filename   Write analytic standard to given filename [Default: paas.std]\n"
     "  -i            Interactively select components \n"
     "  -C            Centre profile using ephemeris\n"
-    "  -p            Rotate profile to place peak at centre\n"
+    "  -p            Rotate profile to place peak at bin 0\n"
     "  -R phase      Rotate profile by specified number of turns\n"
     "  -a            After loading a model, rotate it to align to profile\n"
-    "  -j[filename]  Output details to [filename]    [Default: paas.txt]\n";
+    "  -j filename   Output details to given filename    [Default: paas.txt]\n";
 }
 
 class ComponentModel
@@ -117,8 +117,6 @@ ComponentModel::write_details_to_file(Reference::To<Pulsar::Archive> input_archi
     if (!out)
         throw Error(InvalidState, "ComponentModel::write_details_to_file",
                 "Unable to write to file=" + filename);
-
-    cerr << "paas: writing details to " << filename << endl;
 
     const unsigned nbin = input_archive->get_nbin();
     const unsigned ncomp = get_ncomponents();
@@ -546,7 +544,7 @@ ComponentModel::clear()
 
 int main (int argc, char** argv) 
 {
-  const char* args = "hb:r:w:c:fF:it:d:Dl:j::Ws:CpR:a";
+  const char* args = "hb:r:w:c:fF:it:d:Dl:j:Ws:CpR:a";
   string model_filename_in, model_filename_out;
   bool fit=false;
   vector<string> new_components;
@@ -561,10 +559,9 @@ int main (int argc, char** argv)
   bool fit_deriv=false;
   bool line_plot=false;
   bool interactive = false;
-  bool centre_model = false, centre_peak=false;
+  bool centre_model = false, rotate_peak=false;
   float rotate_amount = 0.0;
   bool align = false;
-  bool write_details = false;
   string details_filename = "paas.txt";
 
   while ((c = getopt(argc, argv, args)) != -1)
@@ -629,7 +626,7 @@ int main (int argc, char** argv)
       break;
 
     case 'p':
-      centre_peak = true;
+      rotate_peak = true;
       break;
 
     case 'R':
@@ -641,8 +638,7 @@ int main (int argc, char** argv)
       break;
 
     case 'j':
-      write_details = true;
-      if (optarg) { details_filename = optarg; }
+      details_filename = optarg;
       break;
 
    default:
@@ -669,8 +665,8 @@ int main (int argc, char** argv)
     // phase up as requested
     if (centre_model)
       archive->centre();
-    else if (centre_peak)
-      archive->centre_max_bin(); 
+    else if (rotate_peak)
+      archive->centre_max_bin(0.0);
 
     if (rotate_amount != 0.0)
       archive->rotate_phase(-rotate_amount);
@@ -846,8 +842,7 @@ int main (int argc, char** argv)
     model.evaluate(archive->get_Integration(0)->get_Profile(0,0)->get_amps(),
 		   archive->get_nbin());
 
-    if (write_details)
-        model.write_details_to_file(copy, archive, details_filename);
+    model.write_details_to_file(copy, archive, details_filename);
 
     archive->unload(std_filename);
 
