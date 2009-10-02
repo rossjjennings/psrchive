@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ProfileStandardShift.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/09/30 02:16:43 $
+   $Revision: 1.2 $
+   $Date: 2009/10/02 03:38:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileStandardShift_h
@@ -25,7 +25,7 @@ namespace Pulsar {
   public:
 
     //! Set the profile with respect to which the shift will be estimated
-    void set_standard (const Profile* p) { standard = p; }
+    virtual void set_standard (const Profile* p) { standard = p; }
 
     //! Get the profile with respect to which the shift will be estimated
     const Profile* get_standard () const { return standard; }
