@@ -269,7 +269,7 @@ ComponentModel::align(const Profile *profile)
 
   Estimate<double> shift = profile->shift(modelprof);
 
-  printf("Shift=%.5lf\n", shift.val);
+  printf("Shift= %.6lf\n", shift.val);
 
   for (unsigned icomp=0; icomp < components.size(); icomp++)
   {
