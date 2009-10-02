@@ -123,14 +123,19 @@ void apply_zap(Archive *arch, struct zap_range *z) {
 
 #define PROG "psrzap"
 
+/* Extension for output file */
+string output_ext = "zap";
+
 void usage() {
   cout << "psrzap - Interactive RFI zapper using off-pulse dynamic spectra" 
     << endl
     << "Usage:  psrzap (filename)" << endl
     << "Command line options:" << endl
-    << "  -h   Show this help screen" << endl
-    << "  -v   Verbose mode" << endl
-    << "  -T   Show current total profile during operation" << endl
+    << "  -h     Show this help screen" << endl
+    << "  -v     Verbose mode" << endl
+    << "  -e ext Extension for output file (default: " << output_ext 
+      << ")" << endl
+    << "  -T     Show current total profile during operation" << endl
     << endl
     << "  Press 'h' during program for interactive usage info:" << endl
     << endl;
@@ -166,7 +171,8 @@ void usage_interactive() {
     << "  " << CMD_POL      << "  Switch to next polarization" << endl
     << "  " << CMD_UNDO     << "  Undo last zap command" << endl 
     << "  " << CMD_UNZOOM   << "  Reset zoom" << endl
-    << "  " << CMD_SAVE     << "  Save zapped version as (filename).zap" << endl
+    << "  " << CMD_SAVE     << "  Save zapped version as (filename)." 
+     << output_ext << endl
     << "  " << CMD_PRINT    << "  Print equivalent paz command" << endl
     << "  " << CMD_QUIT     << "  Exit program" << endl
     << endl;
@@ -178,7 +184,7 @@ int main(int argc, char *argv[]) {
   int opt=0;
   int verb=0;
   bool show_total = false;
-  while ((opt=getopt(argc,argv,"hvT"))!=-1) {
+  while ((opt=getopt(argc,argv,"hvTe:"))!=-1) {
     switch (opt) {
 
       case 'v':
@@ -188,6 +194,10 @@ int main(int argc, char *argv[]) {
         
       case 'T':
         show_total=true;
+        break;
+
+      case 'e':
+        output_ext.assign(optarg);
         break;
 
       case 'h':
@@ -212,7 +222,7 @@ int main(int argc, char *argv[]) {
   Reference::To<Archive> arch = orig_arch->clone();
   arch->dedisperse();
   double bw = arch->get_bandwidth();
-  string output_filename = replace_extension(filename, "zap");
+  string output_filename = replace_extension(filename, output_ext);
 
   /* Create plot */
   DynamicBaselineSpectrumPlot *dsplot = new DynamicBaselineSpectrumPlot;
