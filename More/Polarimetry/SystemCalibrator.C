@@ -209,12 +209,26 @@ void Pulsar::SystemCalibrator::set_diff_phase( Univariate<Scalar>* f )
   diff_phase_variation = f;
 }
 
+void Pulsar::SystemCalibrator::preprocess (Archive* data)
+{
+  if (data->get_type() == Signal::Pulsar)
+  {
+    BackendCorrection correct_backend;
+    if( correct_backend.required (data) )
+    {
+      if (verbose)
+	cerr << "Pulsar::SystemCalibrator::preprocess correct backend" << endl;
+      correct_backend (data);
+    }
+  }
+}
+
 //! Add the observation to the set of constraints
 void Pulsar::SystemCalibrator::add_observation (const Archive* data) try
 {
   if (!data)
     return;
-
+  
   if (data->get_type() == Signal::Pulsar)
     add_pulsar (data);
   else
@@ -232,26 +246,7 @@ void Pulsar::SystemCalibrator::add_pulsar (const Archive* data) try
     cerr << "Pulsar::SystemCalibrator::add_pulsar"
       " data->nchan=" << data->get_nchan() << endl;
 
-  match (data);
-
-  if (model.size() == 0)
-    create_model ();
-
-  has_pulsar = true;
-
-  load_calibrators ();
-
-  Reference::To<Archive> clone;
-
-  BackendCorrection correct_backend;
-  if( correct_backend.required (data) )
-  {
-    if (verbose)
-      cerr << "Pulsar::SystemCalibrator::add_pulsar correct backend" << endl;
-    clone = data->clone();
-    correct_backend (clone);
-    data = clone;
-  }
+  prepare (data);
 
   unsigned nsub = data->get_nsubint ();
 
@@ -268,6 +263,22 @@ void Pulsar::SystemCalibrator::add_pulsar (const Archive* data) try
 catch (Error& error)
 {
   throw error += "Pulsar::SystemCalibrator::add_pulsar";
+}
+
+void Pulsar::SystemCalibrator::prepare (const Archive* data) try
+{
+  match (data);
+
+  if (model.size() == 0)
+    create_model ();
+
+  has_pulsar = true;
+
+  load_calibrators ();
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::SystemCalibrator::prepare";
 }
 
 //! Add the specified pulsar observation to the set of constraints

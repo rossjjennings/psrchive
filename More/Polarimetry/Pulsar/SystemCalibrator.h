@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.26 $
-   $Date: 2009/08/20 04:51:42 $
+   $Revision: 1.27 $
+   $Date: 2009/10/02 03:38:29 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -154,6 +154,9 @@ namespace Pulsar
     //! Set the transformation to be cloned for each calibrator
     virtual void set_foreach_calibrator( const MEAL::Complex2* );
 
+    //! Prepare the data for inclusion in the model
+    virtual void preprocess (Archive* data);
+
     //! Add the observation to the set of constraints
     virtual void add_observation (const Archive* data);
 
@@ -227,6 +230,10 @@ namespace Pulsar
   protected:
 
     friend class SystemCalibratorPlotter;
+    friend class MatrixTemplateMatching;
+
+    //! Prepare the model
+    virtual void prepare (const Archive* data);
 
     //! Initialize the PolnCalibration::transformation attribute
     virtual void calculate_transformation ();
