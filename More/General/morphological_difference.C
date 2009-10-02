@@ -4,8 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "morphological_difference.h"
-#include "Pulsar/shift_methods.h"
+#include "Pulsar/PhaseGradShift.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
@@ -43,12 +44,17 @@ Pulsar::morphological_difference (const Profile* p1, const Profile* p2,
   // to an incoherent cross correlation, accurate only to the
   // nearest bin.
   
-  try {
-    Estimate<double> Ephase = PhaseGradShift (*temp2, *temp1);
+  try
+  {
+    PhaseGradShift shift;
+    shift.set_standard (temp2);
+    shift.set_observation (temp1);
+    Estimate<double> Ephase = shift.get_shift();
     phase = Ephase.val;
     ephase = sqrt(Ephase.var);
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     cerr << "Pulsar::difference FFT shift failed" 
 	 << endl;
     cerr << "  Trying simple cross correlation instead..." << endl;
