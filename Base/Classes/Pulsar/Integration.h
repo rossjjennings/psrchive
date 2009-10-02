@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.98 $
-   $Date: 2009/02/20 04:51:53 $
+   $Revision: 1.99 $
+   $Date: 2009/10/02 03:11:12 $
    $Author: straten $ */
 
 /*
@@ -27,7 +27,6 @@
 #include "Types.h"
 #include "Estimate.h"
 #include "Jones.h"
-#include "toa.h"
 
 #include <vector>
 
@@ -112,13 +111,7 @@ namespace Pulsar {
 
     //! Computes the weighted centre frequency of an interval of sub-chans.
     double weighted_frequency (unsigned ch_start=0, unsigned ch_end=0) const;
-    
-    //! Return a vector of tempo++ toa objects
-    void toas (std::vector<Tempo::toa>& toas, const Integration& std_subint,
-	       const std::string& nsite, std::string arguments = "", 
-	       Tempo::toa::Format fmt = Tempo::toa::Parkes,
-	       bool discard_bad = false) const;
-    
+        
     //! Set the weight of each profile to the given number
     void uniform_weight (float new_weight = 1.0);
     

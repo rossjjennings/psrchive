@@ -7,20 +7,20 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.184 $
-   $Date: 2009/06/09 10:42:38 $
+   $Revision: 1.185 $
+   $Date: 2009/10/02 03:11:12 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.184 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.185 $"
 
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Config.h"
 
 #include "sky_coord.h"
-#include "toa.h"
+#include "MJD.h"
 
 #include "Functor.h"
 #include "Estimate.h"
@@ -385,20 +385,14 @@ namespace Pulsar
     //! Correct the Faraday rotation of Q into U
     void defaraday ();
 
-    //! Fit Profiles to the standard and return toas
-    void toas (std::vector<Tempo::toa>& toas, const Archive* std,
-               std::string arguments = "",
-               Tempo::toa::Format fmt = Tempo::toa::Parkes,
-               bool discard_bad = false) const;
-
     //! Perform the transformation on each polarimetric profile
-    void transform (const Jones<float>& transformation);
+    void transform (const Jones<float>&);
 
     //! Perform frequency response on each polarimetric profile
-    void transform (const std::vector< Jones<float> >& response);
+    void transform (const std::vector< Jones<float> >&);
 
     //! Perform the time and frequency response on each polarimetric profile
-    void transform (const std::vector< std::vector< Jones<float> > >& response);
+    void transform (const std::vector< std::vector< Jones<float> > >&);
 
     //! Transform Stokes I,Q,U,V into the polarimetric invariant interval
     void invint ();

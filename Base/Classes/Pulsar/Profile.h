@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2002-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.112 $
-   $Date: 2009/06/08 19:23:37 $
+   $Revision: 1.113 $
+   $Date: 2009/10/02 03:11:12 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -17,7 +17,6 @@
 #include "Pulsar/ProfileAmps.h"
 #include "Pulsar/Config.h"
 
-#include "toa.h"
 #include "Types.h"
 #include "Functor.h"
 #include "Estimate.h"
@@ -152,7 +151,7 @@ namespace Pulsar {
     //! Returns the bin number with the minimum amplitude
     int find_min_bin (int bin_start=0, int bin_end=0) const;
 
-    //! The default implementation of the baseline finding algorithm
+    //! The default implementation of the edge detection algorithm
     static Functor< std::pair<int,int> (const Profile*) > peak_edges_strategy;
 
     //! Find the bin numbers at which the cumulative power crosses thresholds
@@ -164,6 +163,12 @@ namespace Pulsar {
     //! Return a new PhaseWeight instance with the baseline phase bins masked
     PhaseWeight* baseline () const;
 
+    //! The default implementation of the onpulse finding algorithm
+    static Functor< PhaseWeight* (const Profile*) > onpulse_strategy;
+
+    //! Return a new PhaseWeight instance with the onpulse phase bins masked
+    PhaseWeight* onpulse () const;
+
     //! The default implementation of the snr method
     static Functor< float (const Pulsar::Profile*) > snr_strategy;
 
@@ -173,17 +178,8 @@ namespace Pulsar {
     //! Rotates the profile to remove dispersion delay
     void dedisperse (double dm, double ref_freq, double pfold);
     
-    //! The default implementation of the shift method
-    static Functor<Estimate<double>(Profile, Profile)> shift_strategy;
-
     //! Returns the shift (in turns) between profile and standard
     Estimate<double> shift (const Profile& std) const;
-
-    //! fit to the standard and return a Tempo::toa object
-    Tempo::toa toa (const Profile& std, const MJD& mjd, 
-		    double period, const std::string& nsite, 
-		    std::string arguments = "",
-		    Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
 
     /*! returns a vector representation of the array of amplitudes,
      with all zero-weighted points cleaned out */
