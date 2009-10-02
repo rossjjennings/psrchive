@@ -48,8 +48,7 @@ public:
   void help_frame_options (const string& name);
 
   // -p add plot
-  void add_plot (const string& name)
-  { plots.push_back( factory.construct(name) ); }
+  void add_plot (const string& name);
 
   // -c add plot options
   void add_plot_options (const string& name);
@@ -68,7 +67,7 @@ protected:
   // Available plots
   PlotFactory factory;
 
-  // Plot classes to be used
+  // Plots
   vector< Reference::To<Plot> > plots;
 
   // Options to be set
@@ -97,7 +96,7 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
 					   "pulsar plotting program")
 {
   has_manual = true;
-  version = "$Id: psrplot.C,v 1.30 2009/09/02 02:54:31 straten Exp $";
+  version = "$Id: psrplot.C,v 1.31 2009/10/02 10:28:49 straten Exp $";
 
   // print angles in degrees
   Angle::default_type = Angle::Degrees;
@@ -166,6 +165,12 @@ void psrplot::add_options (CommandLine::Menu& menu)
   arg->set_help ("loop over the range of the named parameter");
 }
 
+void psrplot::add_plot (const string& name)
+{
+  plots.push_back( factory.construct(name) );
+  loop.add_Plot (plots.back());
+}
+
 // load the string of options into one of the plots
 void specific_options (string optarg, vector< Reference::To<Plot> >& plots);
 
@@ -211,6 +216,7 @@ void psrplot::setup ()
   }
 
   loop.set_overlay (overlay_plots);
+  loop.set_preprocess (preprocess);
 }
 
 void psrplot::process (Pulsar::Archive* archive)
@@ -221,23 +227,8 @@ void psrplot::process (Pulsar::Archive* archive)
   if( !overlay_files && loop.get_overlay() )
     cpgpage();
 
-  Reference::To<Archive> toplot = archive;
-
-  for (unsigned iplot=0; iplot < plots.size(); iplot++)
-  {
-    if (verbose)
-      cerr << "psrplot: iplot=" << iplot << endl;
-
-    if (plots.size() > 1)
-      toplot = archive->clone();
-    
-    if (preprocess)
-      plots[iplot]->preprocess (toplot);
-    
-    loop.set_Archive (toplot);
-    loop.set_Plot (plots[iplot]);
-    loop.plot();
-  }
+  loop.set_Archive (archive);
+  loop.plot();
 }
 
 void psrplot::help_plot_types ()
