@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Statistics.h,v $
-   $Revision: 1.6 $
-   $Date: 2009/06/24 05:02:00 $
+   $Revision: 1.7 $
+   $Date: 2009/10/02 03:38:13 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Statistics_h
@@ -39,16 +39,16 @@ namespace Pulsar {
     const Archive* get_Archive () const;
 
     //! Set the sub-integration from which statistics will be drawn
-    void set_subint (Index _isubint) { isubint = _isubint; }
-    Index get_subint () const { return isubint; }
+    void set_subint (Index _isubint);
+    Index get_subint () const;
     
     //! Set the frequency channel from which statistics will be drawn
-    void set_chan (Index _ichan) { ichan = _ichan; }
-    Index get_chan () const { return ichan; }
+    void set_chan (Index _ichan);
+    Index get_chan () const;
 
     //! Set the polarization to plot
-    void set_pol (Index _ipol) { ipol = _ipol; }
-    Index get_pol () const { return ipol; }
+    void set_pol (Index _ipol);
+    Index get_pol () const;
 
     //! Get the signal-to-noise ratio
     double get_snr () const;

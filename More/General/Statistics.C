@@ -41,6 +41,42 @@ const Pulsar::Profile* Pulsar::Statistics::get_Profile () const
   return profile;
 }
 
+//! Set the sub-integration from which statistics will be drawn
+void Pulsar::Statistics::set_subint (Index _isubint)
+{
+  isubint = _isubint;
+  setup_stats ();
+}
+
+Pulsar::Index Pulsar::Statistics::get_subint () const
+{
+  return isubint;
+}
+    
+//! Set the frequency channel from which statistics will be drawn
+void Pulsar::Statistics::set_chan (Index _ichan)
+{
+  ichan = _ichan;
+  setup_stats ();
+}
+
+Pulsar::Index Pulsar::Statistics::get_chan () const
+{
+  return ichan;
+}
+
+//! Set the polarization to plot
+void Pulsar::Statistics::set_pol (Index _ipol)
+{
+  ipol = _ipol;
+  setup_stats ();
+}
+
+Pulsar::Index Pulsar::Statistics::get_pol () const
+{
+  return ipol;
+}
+
 //! Get the signal-to-noise ratio
 double Pulsar::Statistics::get_snr () const
 {
@@ -112,4 +148,3 @@ void Pulsar::Statistics::setup_stats ()
 
   stats->set_profile( get_Profile() );
 }
-
