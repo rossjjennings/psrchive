@@ -9,7 +9,6 @@ nobase_include_HEADERS = \
         morphological_difference.h \
 	Pulsar/Append.h \
 	Pulsar/counter_drift.h \
-	Pulsar/shift_methods.h \
 	Pulsar/Accumulate.h \
         Pulsar/AdaptiveSNR.h \
         Pulsar/AdaptiveSmooth.h \
@@ -133,8 +132,7 @@ libGeneral_la_SOURCES = \
         Archive_set_ephemeris.C \
         Archive_set_model.C \
         ArchiveSort.C \
-        Archive_toas.C \
-        Archive_total.C \
+	Archive_total.C \
         Archive_transform.C \
         Archive_tscrunch.C \
         Archive_update_model.C \
@@ -172,7 +170,6 @@ libGeneral_la_SOURCES = \
         Integration_new_PolnProfile.C \
         Integration_remove_baseline.C \
         Integration_rotate.C \
-        Integration_toas.C \
         Integration_total.C \
         Integration_transform.C \
         Integration_weighted_frequency.C \
@@ -206,7 +203,6 @@ libGeneral_la_SOURCES = \
         Profile_shift.C \
         Profile_snr.C \
         Profile_stats.C \
-        Profile_toa.C \
         ProfileWeightFunction.C \
 	RadiometerWeight.C \
 	RemoveBaseline.C \
@@ -256,6 +252,7 @@ endif
 #
 
 INCLUDES = \
+	-I$(top_srcdir)/More/Timing \
 	-I$(top_srcdir)/More/Polarimetry \
 	-I$(top_srcdir)/More/MEAL \
 	-I$(top_srcdir)/More/RFIMitigation
