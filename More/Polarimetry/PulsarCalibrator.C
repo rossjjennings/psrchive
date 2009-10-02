@@ -58,17 +58,11 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type* model)
 
   solve_each = false;
   fixed_phase = false;
-
-  tim_file = 0;
-  archive = 0;
-  toa_format = Tempo::toa::Parkes;
 }
 
 //! Constructor
 Pulsar::PulsarCalibrator::~PulsarCalibrator ()
 {
-  if (tim_file)
-    fclose (tim_file);
 }
 
 void Pulsar::PulsarCalibrator::export_prepare () const try
@@ -185,7 +179,6 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
 
   transformation.resize (nchan);
   solution.resize (nchan);
-  phase_shift.resize (nchan);
   reduced_chisq.resize (nchan);
 
   const Integration* integration = standard->get_Integration (0);
@@ -319,9 +312,6 @@ void Pulsar::PulsarCalibrator::match (const Archive* data)
 
   if (!mtm.size())
     build (data->get_nchan());
-
-  if (tim_file)
-    archive = data;
 }
 
 /*!
@@ -410,53 +400,6 @@ try
     for (unsigned i=0; i < store.size(); i++)
       if (transformation[i])
 	store[i] = transformation[i]->clone();
-  }
-
-  if (!tim_file)
-    return;
-
-  // produce TOAs
-
-  const Integration* integration = data->get_Integration (isub);
-  unsigned nchan = integration->get_nchan();
-
-  for (unsigned ichan=0; ichan<nchan; ichan++)
-  {
-    assert (ichan < transformation.size());
-
-    if (!transformation[ichan])
-      continue;
-
-    Tempo::toa toa (toa_format);
-
-    double freq = integration->get_centre_frequency (ichan);
-    toa.set_frequency (freq);
-
-    double period = integration->get_folding_period();
-
-    assert (ichan < phase_shift.size());
-
-    Estimate<double> phase = phase_shift[ichan];
-
-    // Skip messed up toas
-    if (phase.var<=0.0) 
-      continue;
-
-    toa.set_arrival   (integration->get_epoch() + phase.val * period);
-    toa.set_error     (sqrt(phase.var) * period * 1e6);
-
-    toa.set_telescope (archive->get_telescope());
-      
-    string aux = basename (archive->get_filename());
-    toa.set_auxilliary_text (aux);
-    
-    toa.unload (tim_file);
-
-    assert (ichan < reduced_chisq.size());
-
-    if (verbose > 2)
-      cerr << aux << " freq=" << freq << " chisq=" << reduced_chisq[ichan]
-	   << " phase=" << phase.val << " +/- " << phase.get_error() << endl;
   }
 }
 catch (Error& error)
@@ -584,7 +527,6 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
 
     assert (ichan < solution.size());
     assert (ichan < reduced_chisq.size());
-    assert (ichan < phase_shift.size());
     assert (ichan < mtm.size());
 
     if (solution[ichan])
@@ -629,8 +571,6 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
     if (verbose)
       cerr << "Pulsar::PulsarCalibrator::solve1 chisq=" << chisq 
 	   << "/nfree=" << nfree << " = " << reduced_chisq[ichan] << endl;
-
-    phase_shift[ichan] = mtm[ichan]->get_phase();
 
     if (reduced_chisq[ichan] < 2.0)
       break;

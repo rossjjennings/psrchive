@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.36 $
-   $Date: 2009/08/13 21:22:18 $
+   $Revision: 1.37 $
+   $Date: 2009/10/02 03:37:57 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -81,12 +81,6 @@ namespace Pulsar {
     MEAL::Complex2* get_transformation (const Archive* data,
 					unsigned isub, unsigned ichan);
 
-    //! File to which arrival time estimates should be written
-    void set_tim_file (FILE* fptr) { tim_file = fptr; }
-
-    //! Output TOA format
-    void set_toa_format (Tempo::toa::Format fmt) { toa_format = fmt; }
-
     //! The matrix template matching engine used to fit the specified channel
     const PolnProfileFit* get_mtm (unsigned ichan) const;
 
@@ -95,6 +89,8 @@ namespace Pulsar {
 
   protected:
     
+    friend class MatrixTemplateMatching;
+
     //! The template/standard
     Reference::To<Pulsar::Archive> standard;
 
@@ -116,9 +112,6 @@ namespace Pulsar {
 
     //! The reduced chi-squared as a function of frequency
     std::vector<float> reduced_chisq;
-
-    //! The phase shift estimate as a function of frequency
-    std::vector< Estimate<double> > phase_shift;
 
     typedef MEAL::Mean< MEAL::Complex2 > MeanXform;
 
@@ -172,15 +165,6 @@ namespace Pulsar {
 
     // used to communicate between solve and add_observation
     unsigned big_difference;
-
-    //! File to which arrival time estimates should be written
-    FILE* tim_file;
-
-    //! TOA format to use
-    Tempo::toa::Format toa_format;
-
-    //! Archive instance that is currently in use
-    const Archive* archive;
 
     //! Build the arrays
     void build (unsigned nchan);

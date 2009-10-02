@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.111 $
-   $Date: 2009/08/20 04:50:52 $
+   $Revision: 1.112 $
+   $Date: 2009/10/02 03:37:57 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -115,7 +115,6 @@ void usage ()
     "  -S fname   filename of calibrated standard \n"
     "  -H         allow software to choose the number of harmonics \n"
     "  -n nbin    set the number of harmonics to use as input states \n"
-    "  -T toa.tim filename to which arrival time estimates will be written \n"
     "  -1         solve independently for each observation \n"
     "\n"
     "See "PSRCHIVE_HTTP"/manuals/pcm for more details\n"
@@ -323,9 +322,6 @@ float alignment_threshold = 4.0; // sigma
 
 // total instensity profile of first archive, used to check for phase jumps
 Reference::To<Pulsar::Profile> phase_std;
-
-// Name of file to which arrival time estimates will be written
-char* tim_file = 0;
 
 // names of the calibrator files
 vector<string> calibrator_filenames;
@@ -708,10 +704,6 @@ int actual_main (int argc, char *argv[]) try
       cerr << "pcm: solving using " << nthread << " threads" << endl;
       break;
 
-    case 'T':
-      tim_file = optarg;
-      break;
-
     case 'u':
       cerr << "pcm: using a multiple-step function to model ";
       set_time_variation( optarg[0], new MEAL::Steps );
@@ -983,6 +975,7 @@ int actual_main (int argc, char *argv[]) try
     }
 
     cerr << "pcm: adding observation" << endl;
+    model->preprocess( archive );
     model->add_observation( archive );
 
     if (archive->get_type() == Signal::Pulsar)
@@ -1371,15 +1364,6 @@ SystemCalibrator* matrix_template_matching_based (const char* stdname)
     cerr << "pcm: not normalizing Stokes parameters" << endl;
 
   model->set_normalize_by_invariant( normalize_by_invariant );
-
-  if (tim_file)
-  {
-    FILE* fptr = fopen (tim_file, "w");
-    if (!fptr)
-      throw Error (InvalidState, "pcm:mode B",
-		   "could not open '%s': %s\n", tim_file, strerror(errno));
-    model->set_tim_file (fptr);
-  }
 
   Reference::To<Archive> standard;
 
