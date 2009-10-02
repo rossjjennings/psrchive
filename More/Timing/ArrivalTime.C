@@ -25,6 +25,12 @@ Pulsar::ArrivalTime::~ArrivalTime ()
 {
 }
 
+//! Prepare the data for use
+void Pulsar::ArrivalTime::preprocess (Archive* archive)
+{
+  archive->pscrunch ();
+}
+
 //! Set the observation from which the arrival times will be derived
 void Pulsar::ArrivalTime::set_observation (const Archive* archive)
 {
@@ -35,6 +41,7 @@ void Pulsar::ArrivalTime::set_observation (const Archive* archive)
 void Pulsar::ArrivalTime::set_standard (const Archive* archive)
 {
   standard = archive;
+  standard_update ();
 }
 
 //! Set the algorithm used to estimate the phase shift
@@ -43,6 +50,23 @@ void Pulsar::ArrivalTime::set_shift_estimator (ShiftEstimator* shift)
   shift_estimator = shift;
 
   profile_shift = dynamic_cast<ProfileShiftEstimator*> (shift);
+
+  standard_update();
+}
+
+void Pulsar::ArrivalTime::standard_update()
+{
+  if (!standard)
+    return;
+
+  if (!shift_estimator)
+    return;
+
+  ProfileStandardShift* shift;
+  shift = dynamic_cast<ProfileStandardShift*> (shift_estimator.get());
+
+  if (shift)
+    shift->set_standard (standard->get_Profile (0,0,0));
 }
 
 //! Set the format of the output time-of-arrival estimates
@@ -73,50 +97,33 @@ void Pulsar::ArrivalTime::get_toas (std::vector<Tempo::toa>& toas)
 	" standard= " << cf2 << " != observation=" << cf1 << endl;
   }
 
-  std::string nsite = observation->get_telescope();
-  std::string aux_txt;
-
-  if (format == Tempo::toa::Tempo2)
-    aux_txt = get_tempo2_aux_txt ();
 
   for (unsigned isub=0; isub<observation->get_nsubint(); isub++)
   {
-    unsigned ntoa = toas.size();
+    vector<Tempo::toa> new_toas;
 
-    get_toas (observation->get_Integration(isub), toas);
+    get_toas (isub, new_toas);
 
-    if (format == Tempo::toa::Parkes || format == Tempo::toa::Psrclock)
-      aux_txt = observation->get_filename() + " " + tostring(isub);
+    dress_toas (isub, new_toas);
 
-    for (unsigned i=ntoa; i < toas.size(); i++)
-    {
-      toas[i].set_subint (isub);
-      toas[i].set_telescope (nsite);
-
-      string txt = toas[i].get_auxilliary_text ();
-      if (txt.length())
-	txt = aux_txt + " " + txt;
-      else
-	txt = aux_txt;
-
-      toas[i].set_auxilliary_text (txt);
-    }
+    for (unsigned i=0; i<new_toas.size(); i++)
+      toas.push_back (new_toas[i]);
   }
 }
 
-void Pulsar::ArrivalTime::get_toas (const Pulsar::Integration* subint,
+void Pulsar::ArrivalTime::get_toas (unsigned isub,
 				    std::vector<Tempo::toa>& toas)
 {
-  // get the topocentric folding period
-  double folding_period = subint->get_folding_period();
-
-  // get the mid time of the integration (rise time of bin 0 in each profile)
-  MJD epoch = subint->get_epoch ();
+  if (!profile_shift)
+    throw Error (InvalidState, "Pulsar::ArrivalTime::get_toas",
+		 "shift estimator is not a profile shift estimator");
 
   ProfileStandardShift* shift = 0;
 
   if (standard && standard->get_nchan() > 1)
     shift = dynamic_cast<ProfileStandardShift*>( shift_estimator.get() );
+
+  const Integration* subint = observation->get_Integration(isub);
 
   for (unsigned ichan=0; ichan < subint->get_nchan(); ++ichan)
   {
@@ -128,22 +135,11 @@ void Pulsar::ArrivalTime::get_toas (const Pulsar::Integration* subint,
     if (skip_bad && profile->get_weight() == 0)
       continue;
     
-    try {
-      
-      Tempo::toa toa = get_toa (profile, epoch, folding_period);
-      
-      if (subint->get_dedispersed())
-	toa.set_frequency (subint->get_centre_frequency());
-      else
-	toa.set_frequency (profile->get_centre_frequency());
-
-      toa.set_channel (ichan);
-
-      // would like to see this go somewhere else
-      if (format == Tempo::toa::Parkes || format == Tempo::toa::Psrclock)
-	toa.set_auxilliary_text( tostring(ichan) );      
-
-      toas.push_back (toa);
+    try
+    {
+      profile_shift->set_observation (profile);
+      Estimate<double> shift = profile_shift->get_shift ();
+      toas.push_back( get_toa (shift, subint, ichan) );
     }
     catch (Error& error)
     {
@@ -154,35 +150,66 @@ void Pulsar::ArrivalTime::get_toas (const Pulsar::Integration* subint,
   }
 }
 
-Tempo::toa Pulsar::ArrivalTime::get_toa (const Pulsar::Profile* profile,
-					 const MJD& mjd, double period)
+void Pulsar::ArrivalTime::dress_toas (unsigned isub,
+				      std::vector<Tempo::toa>& toas)
 {
-  Tempo::toa retval (format);
+  std::string nsite = observation->get_telescope();
+  std::string aux_txt;
 
-  if (!profile_shift)
-    throw Error (InvalidState, "Pulsar::ArrivalTime::get_toa",
-		 "shift estimator is not a profile shift estimator");
+  if (format == Tempo::toa::Tempo2)
+    aux_txt = get_tempo2_aux_txt ();
+  if (format == Tempo::toa::Parkes || format == Tempo::toa::Psrclock)
+    aux_txt = observation->get_filename() + " " + tostring(isub);
 
-  profile_shift->set_observation (profile);
-  
-  Estimate<double> Ephase = profile_shift->get_shift ();
-
-  retval.set_phase_shift (Ephase.get_value());
-  retval.set_arrival     (mjd + Ephase.get_value() * period);
-  retval.set_error       (Ephase.get_error() * period * 1e6);
-
-  if (Archive::verbose > 3)
+  for (unsigned i=0; i < toas.size(); i++)
   {
-    fprintf (stderr, "Pulsar::ArrivalTime::get_toa created:\n");
-    retval.unload (stderr);
-  }
+    toas[i].set_subint (isub);
+    toas[i].set_telescope (nsite);
 
-  return retval;
+    string txt = toas[i].get_auxilliary_text ();
+    if (txt.length())
+      txt = aux_txt + " " + txt;
+    else
+      txt = aux_txt;
+
+    toas[i].set_auxilliary_text (txt);
+  }
 }
 
+Tempo::toa Pulsar::ArrivalTime::get_toa (Estimate<double>& shift,
+					 const Pulsar::Integration* subint,
+					 unsigned ichan)
+{
+  Tempo::toa toa (format);
 
+  // phase shift in turns
+  toa.set_phase_shift (shift.get_value());
 
+  // topocentric folding period
+  double period = subint->get_folding_period();
 
+  // epoch of the integration (rise time of bin 0 in each profile)
+  MJD epoch = subint->get_epoch ();
+
+  // arrival time 
+  toa.set_arrival (epoch + shift.get_value() * period);
+
+  // arrival time error in microseconds
+  toa.set_error (shift.get_error() * period * 1e6);
+
+  if (subint->get_dedispersed())
+    toa.set_frequency (subint->get_centre_frequency());
+  else
+    toa.set_frequency (subint->get_centre_frequency(ichan));
+
+  toa.set_channel (ichan);
+
+  // would like to see this go somewhere else
+  if (format == Tempo::toa::Parkes || format == Tempo::toa::Psrclock)
+    toa.set_auxilliary_text( tostring(ichan) );
+
+  return toa;
+}
 
 
 

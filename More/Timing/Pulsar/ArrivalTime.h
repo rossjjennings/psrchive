@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ArrivalTime.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/09/30 08:40:06 $
+   $Revision: 1.3 $
+   $Date: 2009/10/02 03:38:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArrivalTime_h
 #define __Pulsar_ArrivalTime_h
 
 #include "Pulsar/Algorithm.h"
+#include "Estimate.h"
 #include "toa.h"
 
 namespace Pulsar {
@@ -42,11 +43,14 @@ namespace Pulsar {
     //! Destructor
     ~ArrivalTime ();
 
+    //! Prepare the data for use
+    virtual void preprocess (Archive* archive);
+
     //! Set the observation from which the arrival times will be derived
-    void set_observation (const Archive*);
+    virtual void set_observation (const Archive*);
 
     //! Set the standard/template used by some phase shift estimators
-    void set_standard (const Archive*);
+    virtual void set_standard (const Archive*);
 
     //! Set the algorithm used to estimate the phase shift
     void set_shift_estimator (ShiftEstimator*);
@@ -90,15 +94,21 @@ namespace Pulsar {
     */
     std::string get_tempo2_aux_txt ();
 
-    void get_toas (const Integration* subint,
-		   std::vector<Tempo::toa>& toas);
+    //! get the arrival times for the specified sub-integration
+    virtual void get_toas (unsigned subint, std::vector<Tempo::toa>& toas);
 
-    Tempo::toa get_toa (const Profile* profile,
-			const MJD& mjd, double period);
+    //! add any additional information as requested
+    virtual void dress_toas (unsigned subint, std::vector<Tempo::toa>& toas);
+
+    Tempo::toa get_toa (Estimate<double>& shift,
+			const Pulsar::Integration*, unsigned ichan);
 
   private:
 
     Reference::To<ProfileShiftEstimator> profile_shift;
+
+    void standard_update ();
+
   };
 
 }
