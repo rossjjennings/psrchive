@@ -1,10 +1,11 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/shift_methods.h"
+
+#include "Pulsar/GaussianShift.h"
 #include "Pulsar/Profile.h"
 
 #include "MEAL/LevenbergMarquardt.h"
@@ -31,8 +32,7 @@ void wrap (int& binval, int nbin) {
 */
 #define WINDOW 0.0125
 
-Estimate<double>
-Pulsar::GaussianShift (const Profile& std, const Profile& obs)
+Estimate<double> Pulsar::GaussianShift::get_shift () const
 {
   // This algorithm interpolates the time domain cross correlation
   // function by fitting a Gaussian.
@@ -41,14 +41,14 @@ Pulsar::GaussianShift (const Profile& std, const Profile& obs)
 
   // First compute the standard cross correlation function:
 
-  Reference::To<Pulsar::Profile> ptr = obs.clone();
-  Reference::To<Pulsar::Profile> stp = std.clone();
+  Reference::To<Pulsar::Profile> ptr = observation->clone();
+  Reference::To<Pulsar::Profile> stp = standard->clone();
 
   // Remove the baseline
   *ptr -= ptr->mean(ptr->find_min_phase(0.15));
 
   // Perform the correlation
-  ptr->correlate(&std);
+  ptr->correlate (standard);
 
   // Remove the baseline
   *ptr -= ptr->mean(ptr->find_min_phase(0.15));

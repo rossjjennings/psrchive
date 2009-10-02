@@ -4,16 +4,16 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/shift_methods.h"
+
+#include "Pulsar/PhaseGradShift.h"
 #include "Pulsar/Profile.h"
 
 using namespace std;
 
-Estimate<double> 
-Pulsar::PhaseGradShift (const Profile& std, const Profile& obs)
+Estimate<double> Pulsar::PhaseGradShift::get_shift () const
 {
-  Profile stdcopy = std;
-  Profile prfcopy = obs;
+  Profile stdcopy = *standard;
+  Profile prfcopy = *observation;
 
   float snrfft = 0;
   float esnrfft = 999;
@@ -29,27 +29,29 @@ Pulsar::PhaseGradShift (const Profile& std, const Profile& obs)
     throw Error (InvalidState, "Profile::PhaseGradShift", 
 		 "profile DC=%lf > max float", stdcopy.sum());
 
+  const unsigned nbin = observation->get_nbin();
+
   if (Profile::verbose)
-    cerr << "Profile::PhaseGradShift compare nbin="<< obs.get_nbin()
+    cerr << "Profile::PhaseGradShift compare nbin="<< nbin
 	 <<" "<< stdcopy.get_nbin() <<endl;
 
-  if (obs.get_nbin() > stdcopy.get_nbin()) {
-    if (obs.get_nbin() % stdcopy.get_nbin())
+  if (nbin > stdcopy.get_nbin()) {
+    if (nbin % stdcopy.get_nbin())
       throw Error (InvalidState, "Profile::PhaseGradShift", 
 		   "profile nbin=%d standard nbin=%d",
-                   obs.get_nbin(), stdcopy.get_nbin());
+                   nbin, stdcopy.get_nbin());
 
-    unsigned nscrunch = obs.get_nbin() / stdcopy.get_nbin();
+    unsigned nscrunch = nbin / stdcopy.get_nbin();
     prfcopy.bscrunch (nscrunch);
   }
 
-  if (obs.get_nbin() < stdcopy.get_nbin()) {
-    if (stdcopy.get_nbin() % obs.get_nbin())
+  if (nbin < stdcopy.get_nbin()) {
+    if (stdcopy.get_nbin() % nbin)
       throw Error (InvalidState, "Profile::PhaseGradShift", 
 		   "profile nbin=%d standard nbin=%d",
-                   obs.get_nbin(), stdcopy.get_nbin());
+                   nbin, stdcopy.get_nbin());
 
-    unsigned nscrunch = stdcopy.get_nbin() / obs.get_nbin();
+    unsigned nscrunch = stdcopy.get_nbin() / nbin;
     stdcopy.bscrunch (nscrunch);
   }
 

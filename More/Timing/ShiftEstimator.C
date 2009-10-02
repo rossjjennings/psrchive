@@ -7,17 +7,27 @@
 
 #include "Pulsar/ShiftEstimator.h"
 
+#include "Pulsar/FourierDomainFit.h"
+#include "Pulsar/GaussianShift.h"
+#include "Pulsar/ParIntShift.h"
+#include "Pulsar/PhaseGradShift.h"
+#include "Pulsar/SincInterpShift.h"
+#include "Pulsar/ZeroPadShift.h"
+
 //! Construct a new ShiftEstimator from a string
 Pulsar::ShiftEstimator* 
 Pulsar::ShiftEstimator::factory (const std::string& name_parse)
 {
   std::vector< Reference::To<ShiftEstimator> > instances;
 
-#if 0
-  instances.push_back( new ExponentialBaseline );
-  instances.push_back( new GaussianBaseline );
-  instances.push_back( new BaselineWindow );
-#endif
+  instances.push_back( new FourierDomainFit );
+  instances.push_back( new GaussianShift );
+  instances.push_back( new ParIntShift );
+  instances.push_back( new PhaseGradShift );
+  instances.push_back( new SincInterpShift );
+  instances.push_back( new ZeroPadShift );
+
+  // instances.push_back( new  );
 
   return TextInterface::factory<ShiftEstimator> (instances, name_parse);
 }

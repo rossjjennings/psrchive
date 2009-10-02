@@ -4,20 +4,18 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/shift_methods.h"
-#include "Pulsar/Profile.h"
+
+#include "Pulsar/FourierDomainFit.h"
 #include "Pulsar/ProfileShiftFit.h"
 
 using namespace std;
 
-Estimate<double> 
-Pulsar::FourierDomainFit (const Profile& std, const Profile& obs)
+Estimate<double> Pulsar::FourierDomainFit::get_shift () const
 {
-
   // TODO: figure out a way to reliably cache a standard profile
   // Do we really need to make copies here?
-  Profile stdcopy = std;
-  Profile prfcopy = obs;
+  Profile stdcopy = *standard;
+  Profile prfcopy = *observation;
 
   Reference::To<Profile> std_p = &stdcopy;
   Reference::To<Profile> obs_p = &prfcopy;

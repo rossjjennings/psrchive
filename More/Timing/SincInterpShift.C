@@ -4,7 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/shift_methods.h"
+
+#include "Pulsar/SincInterpShift.h"
 #include "Pulsar/Profile.h"
 #include "FTransform.h"
 
@@ -16,7 +17,10 @@ using namespace std;
 // redwards --- code for finding the phase shift w.r.t. a template profile,
 // using sinc interpolation of the cross correlation function
 
-unsigned Pulsar::SIS_zap_period = 0;
+Pulsar::SincInterpShift::SincInterpShift ()
+{
+  zap_period = 0;
+}
 
 static float
 sinc_interp(float *f, double x, int n)
@@ -216,10 +220,10 @@ find_peak(float *f, unsigned n,
  
   
 
-Estimate<double>
-Pulsar::SincInterpShift (const Profile& std, const Profile& obs)
+Estimate<double> Pulsar::SincInterpShift::get_shift () const
 {
-  unsigned nbin_std = std.get_nbin(), nbin_obs = obs.get_nbin();
+  unsigned nbin_std = standard->get_nbin();
+  unsigned nbin_obs = observation->get_nbin();
   unsigned i, nbin = std::min(nbin_std, nbin_obs), nby2 = nbin/2, ncoeff=nby2+2;
   double mismatch_shift=0.0;
 
@@ -239,14 +243,14 @@ Pulsar::SincInterpShift (const Profile& std, const Profile& obs)
   const std::complex<float> zero(0.0, 0.0); 
   float *ccf = new float [nbin];
 
-  FTransform::frc1d (nbin_obs, (float*)obs_spec, obs.get_amps());
-  FTransform::frc1d (nbin_std, (float*)std_spec, std.get_amps());
+  FTransform::frc1d (nbin_obs, (float*)obs_spec, observation->get_amps());
+  FTransform::frc1d (nbin_std, (float*)std_spec, standard->get_amps());
 
   // Zap harmonics of periodic spikes if necessary
   int nadd = nby2-1; //keep track of how many coefficients are used
-  if (SIS_zap_period > 1)
+  if (zap_period > 1)
   {
-    int freq = nbin / SIS_zap_period;
+    int freq = nbin / zap_period;
     for (i=freq; i < nby2; i+=freq)
     {
       obs_spec[i] = zero;

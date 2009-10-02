@@ -4,16 +4,15 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/shift_methods.h"
+
+#include "Pulsar/ZeroPadShift.h"
 #include "Pulsar/Profile.h"
 #include "interpolate.h"
 
 using namespace std;
 
-/*!
-  Interpolate by this factor when using ZeroPadShift
-*/
-Pulsar::Option<unsigned> Pulsar::ZPSF ("zero_pad_interpolate", 64);
+Pulsar::Option<unsigned> 
+Pulsar::ZeroPadShift::interpolate ("zero_pad_interpolate", 64);
 
 /* This algorithm uses zero padding in the fourier domain to
    interpolate the cross correlation function in the time domain. The
@@ -21,32 +20,33 @@ Pulsar::Option<unsigned> Pulsar::ZPSF ("zero_pad_interpolate", 64);
   
    http://www.dspguru.com/howto/tech/zeropad2.htm 
 */
-Estimate<double>
-Pulsar::ZeroPadShift (const Profile& std, const Profile& obs)
+Estimate<double> Pulsar::ZeroPadShift::get_shift () const
 {
   // First compute the standard cross correlation function:
 
-  Reference::To<Pulsar::Profile> ptr = obs.clone();
-  Reference::To<Pulsar::Profile> stp = std.clone();
+  Reference::To<Pulsar::Profile> ptr = observation->clone();
+  Reference::To<Pulsar::Profile> stp = standard->clone();
 
   // Remove the baseline
   *ptr -= ptr->mean(ptr->find_min_phase(0.15));
 
   // Perform the correlation
-  ptr->correlate(&std);
+  ptr->correlate (standard);
 
   // Remove the baseline
   *ptr -= ptr->mean(ptr->find_min_phase(0.15));
   
   vector< Estimate<float> > correlation;
-  
-  for (unsigned i = 0; i < obs.get_nbin(); i++) {
+
+  const unsigned nbin = observation->get_nbin();
+ 
+  for (unsigned i = 0; i < nbin; i++) {
     correlation.push_back(ptr->get_amps()[i]);
   }
   
   vector< Estimate<float> > interpolated;
   
-  interpolated.resize(correlation.size() * Pulsar::ZPSF);
+  interpolated.resize(correlation.size() * interpolate);
   
   // Perform the zero-pad interpolation
   
@@ -60,14 +60,14 @@ Pulsar::ZeroPadShift (const Profile& std, const Profile& obs)
   for (unsigned i = 0; i < interpolated.size(); i++) {
     if (interpolated[i].val > maxval) {
       maxval = interpolated[i].val;
-      maxloc = float(i) / Pulsar::ZPSF;
+      maxloc = float(i) / interpolate;
     }
   }
   
   // Error estimate (???)
-  float ephase = 1.0 / float(obs.get_nbin());
+  float ephase = 1.0 / float(nbin);
   
-  double shift = double(maxloc) / double(obs.get_nbin());
+  double shift = double(maxloc) / double(nbin);
   
   if (shift < -0.5)
     shift += 1.0;
