@@ -182,16 +182,6 @@ string get_period_as_string (const Archive* archive )
   return result;
 }
 
-double get_period (const Archive* arch)
-{
-  return arch->get_Integration(0)->get_folding_period();
-}
-
-double get_stt_offs (const Archive* arch)
-{
-  return arch->get<FITSHdrExtension>()->get_stt_offs();
-}
-
 int get_stt_smjd (const Archive* arch)
 {
   return arch->get<FITSHdrExtension>()->get_stt_smjd();
