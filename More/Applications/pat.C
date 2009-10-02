@@ -9,24 +9,25 @@
 #include <config.h>
 #endif
 
+#include "Pulsar/ArrivalTime.h"
+#include "Pulsar/MatrixTemplateMatching.h"
+
+#include "Pulsar/PhaseGradShift.h"
+#include "Pulsar/SincInterpShift.h"
+#include "Pulsar/GaussianShift.h"
+#include "Pulsar/ParIntShift.h"
+#include "Pulsar/ZeroPadShift.h"
+#include "Pulsar/FourierDomainFit.h"
+#include "Pulsar/FluxCentroid.h"
+
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/FITSHdrExtension.h"
 
 #include "Pulsar/ArchiveTemplates.h"
 #include "Pulsar/SmoothSinc.h"
-
-#include "Pulsar/shift_methods.h"
-
-#include "Pulsar/PulsarCalibrator.h"
-
-#include "Pulsar/ObsExtension.h"
-#include "Pulsar/Backend.h"
-#include "Pulsar/Receiver.h"
-#include "Pulsar/Pointing.h"
-#include "Pulsar/WidebandCorrelator.h"
-#include "Pulsar/FITSHdrExtension.h"
 
 #if HAVE_PGPLOT
 #include "Pulsar/PlotFactory.h"
@@ -57,16 +58,6 @@ vector<string> commands;
 void loadGaussian(string file,  
 		  Reference::To<Pulsar::Archive> &stdarch,  
 		  Reference::To<Pulsar::Archive> arch);
-
-string FetchValue( Reference::To< Archive > archive, string command );
-
-double get_period(Reference::To<Archive> arch);
-
-double get_stt_offs(Reference::To<Archive> arch);
-
-int get_stt_smjd(Reference::To<Archive> arch);
-
-int get_stt_imjd(Reference::To<Archive> arch);
 
 void compute_dt(Reference::To<Archive> archive, vector<Tempo::toa>& toas,
         string std_name);
@@ -123,29 +114,6 @@ void diff_profiles(Reference::To<Archive> diff, Reference::To<Archive> stdarch, 
 string get_xrange(const double min, const double max);
 #endif // HAVE_PGPLOT
 
-////////////////////////////////////////////////////////////////////////////////////////////
-// PRECISION FOR tostring
-////////////////////////////////////////////////////////////////////////////////////////////
-
-
-unsigned int old_precision;
-bool old_places;
-
-void set_precision( unsigned int num_digits, unsigned int places = true )
-{
-  old_precision = tostring_precision;
-  old_places = tostring_places;
-
-  tostring_precision = num_digits;
-  tostring_places = places;
-}
-
-
-void restore_precision( void )
-{
-  tostring_precision = old_precision;
-  tostring_places = old_places;
-}
 
 void usage ()
 {
@@ -183,14 +151,17 @@ void usage ()
     "                   PIS = Parabolic interpolation \n"
     "                   ZPF = Zero pad interpolation \n"
     "                   SIS = Sinc interpolation of cross-corration function\n"
+    "                   FDM = Fourier domain with Markov chain Monte Carlo \n"
+    "                   COF = Centre of Flux \n"
     "\n"
     "Output options:\n"
     "  -f \"fmt <flags>\" Select output format [default: parkes]\n"
     "                   Available formats: parkes tempo2, itoa, princeton \n"
     "                   For tempo2, <flags> include i = display instrument \n"
     "                                               r = display receiver   \n"
-	"  -C \"<options>\"   Select vap-like options to be displayed on output \n"
+    "  -C \"<options>\"   Select vap-like options to be displayed on output \n"
     "  -r               Print reference phase and dt \n"
+    "  -R               Print only the phase shift and error in turns \n"
     "  -u               Print as pat-like format smjd + dt \n"
     "\n"
     "Plotting options (if compiled with pgplot):\n"
@@ -202,16 +173,21 @@ void usage ()
 }
 
 
-int main (int argc, char *argv[]) try {
+int main (int argc, char** argv) try
+{
+  Reference::To<ArrivalTime> arrival = new ArrivalTime;
+
+  arrival->set_shift_estimator (new PhaseGradShift);
   
   bool verbose = false;
   bool std_given = false;
   bool std_multiple = false;
   bool gaussian = false;
   bool full_freq = false;
+  bool phase_only = false;
 
-  // the reception calibration class
-  Pulsar::PulsarCalibrator* full_poln = 0;
+  // the matrix template matching algorithm and related flags
+  Pulsar::MatrixTemplateMatching* full_poln = 0;
   bool choose_maximum_harmonic = false;
   unsigned maximum_harmonic = 0;
 
@@ -248,10 +224,10 @@ int main (int argc, char *argv[]) try {
   float chisq_max = 2.0;
 
 #if HAVE_PGPLOT
-  const char* args = "a:A:cDdf:C:Fg:hiK:M:n:pPqrS:s:tTuvVx:z:";
-#else
-  const char* args = "a:A:cDdf:C:Fg:hiK:M:n:pPqrS:s:TuvVx:z:";
+#define PLOT_ARGS "t";
 #endif
+
+  const char* args = "a:A:cC:Ddf:Fg:hiK:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
 
   int gotc = 0;
 
@@ -261,8 +237,8 @@ int main (int argc, char *argv[]) try {
     {
 
     case 'a':
-      std_given     = true;
-      std_multiple  = true;
+      std_given = true;
+      std_multiple = true;
       std = optarg;
 
       /* Break up inputs (e.g. have "10cm.std 20cm.std 50*.std") */
@@ -284,37 +260,42 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'A':
+    {
+      ShiftEstimator* shift = 0;
 
       if (strcasecmp (optarg, "PGS") == 0)
-	Profile::shift_strategy.set(&PhaseGradShift);
-      
+        shift = new PhaseGradShift;
+
       else if (strcasecmp (optarg, "GIS") == 0)
-	Profile::shift_strategy.set(&GaussianShift);
-      
+        shift = new GaussianShift;
+
       else if (strcasecmp (optarg, "PIS") == 0)
-	Profile::shift_strategy.set(&ParIntShift);
+        shift = new ParIntShift;
 
       else if (strcasecmp (optarg, "ZPS") == 0)
-	Profile::shift_strategy.set(&ZeroPadShift);
-      
+        shift = new ZeroPadShift;
+
       else if (strcasecmp (optarg, "SIS") == 0)
-	Profile::shift_strategy.set(&SincInterpShift);
+        shift = new SincInterpShift;
 
       else if (strcasecmp (optarg, "FDM") == 0)
-	Profile::shift_strategy.set(&FourierDomainFit);
-      
-      else
-	cerr << "pat: unrecognized shift method '" << optarg << "'" << endl;
+        shift = new FourierDomainFit;
+
+      else if (strcasecmp (optarg, "COF") == 0)
+        shift = new FluxCentroid;
+
+      arrival->set_shift_estimator( shift );
 
       break;
+    }
 
     case 'c':
       choose_maximum_harmonic = true;
       break;
 
-	case 'C':
-		separate(optarg, commands, " ,");
-		break;
+    case 'C':
+      separate(optarg, commands, " ,");
+      break;
 
     case 'D':
       sinc = new Pulsar::SmoothSinc;
@@ -348,7 +329,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.88 2009/07/26 23:35:34 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.89 2009/10/02 03:37:49 straten Exp $" << endl;
       return 0;
 
     case 'K':
@@ -368,8 +349,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'p':
-      full_poln = new Pulsar::PulsarCalibrator;
-      full_poln->set_solve_each ();
+      arrival = full_poln = new Pulsar::MatrixTemplateMatching;
       break;
 
     case 'q':
@@ -381,10 +361,17 @@ int main (int argc, char *argv[]) try {
       outFormat = "tempo2";
       break;
 
-    case 'S':
-      Profile::shift_strategy.set(&SincInterpShift);      
-      Pulsar::SIS_zap_period = atoi(optarg);
+    case 'R':
+      phase_only = true;
       break;
+
+    case 'S':
+    {
+      Pulsar::SincInterpShift* sis = new Pulsar::SincInterpShift;
+      sis->set_zap_period (atoi(optarg));
+      arrival->set_shift_estimator( sis );
+      break;
+    }
 
     case 's':
       std_given = true;
@@ -408,13 +395,11 @@ int main (int argc, char *argv[]) try {
 
     case 'v':
       Archive::set_verbosity(2);
-      PulsarCalibrator::verbose = 2;
       verbose = true;
       break;
 
     case 'V':
       Archive::set_verbosity(3);
-      PulsarCalibrator::verbose = 3;
       verbose = true;
       break;
 
@@ -457,60 +442,34 @@ int main (int argc, char *argv[]) try {
     return -1;
   } 
   
-  if (!std_given && !gaussian) {
-    cerr << "You must specify the standard profile to use!" << endl;
-    return -1;
+  if (full_poln)
+  {
+    cerr << "pat: using full polarization" << endl;
+
+    if (maximum_harmonic)
+      full_poln->set_maximum_harmonic (maximum_harmonic);
+
+    full_poln->set_choose_maximum_harmonic (choose_maximum_harmonic);
   }
 
-  if (!std_multiple && !gaussian) try {
-
-    // If only using one standard profile ...
-
+  if (!std.empty() && !std_multiple && !gaussian) try
+  {
     stdarch = Archive::load(std);
 
     if (!full_freq)
-		stdarch->fscrunch();
+      stdarch->fscrunch();
 
     stdarch->tscrunch();
     
     if (sinc)
       Pulsar::foreach (stdarch, sinc);
     
-    if (full_poln) {
-      
-      cerr << "pat: using full polarization" << endl;
-
-      if (maximum_harmonic)
-	full_poln->set_maximum_harmonic (maximum_harmonic);
-
-      full_poln->set_choose_maximum_harmonic (choose_maximum_harmonic);
-
-      full_poln->set_tim_file (stdout);
-
-      if (strcasecmp(outFormat.c_str(),"parkes")==0) 
-        full_poln->set_toa_format(Tempo::toa::Parkes);
-      else if (strcasecmp(outFormat.c_str(),"princeton")==0)
-        full_poln->set_toa_format(Tempo::toa::Princeton);
-      else if (strcasecmp(outFormat.c_str(),"itoa")==0)
-        full_poln->set_toa_format(Tempo::toa::ITOA);
-      else if (strcasecmp(outFormat.c_str(),"psrclock")==0)
-        full_poln->set_toa_format(Tempo::toa::Psrclock);
-      else if (strcasecmp(outFormat.c_str(),"tempo2")==0)
-        full_poln->set_toa_format(Tempo::toa::Tempo2);
-
-      stdarch->convert_state (Signal::Stokes);
-      full_poln->set_standard( stdarch );
-
-      cerr << "pat: last harmonic = " << full_poln->get_nharmonic() << endl;
-
-    }
-    else
-      stdarch->pscrunch();
-
+    arrival->preprocess( stdarch );
+    arrival->set_standard( stdarch );
   }
-  catch (Error& error) {
-    cerr << "Error processing standard profile:" << endl;
-    cerr << error << endl;
+  catch (Error& error)
+  {
+    cerr << "\n" "Error processing standard profile:" << error << endl;
     return -1;
   }
 
@@ -522,166 +481,123 @@ int main (int argc, char *argv[]) try {
 #endif
           cout << "FORMAT 1" << endl;
 
-  for (unsigned i = 0; i < archives.size(); i++) {
-    
-    try {
+  for (unsigned i = 0; i < archives.size(); i++) try {
 
-      if (verbose)
-	cerr << "Loading " << archives[i] << endl;
+    if (verbose)
+      cerr << "Loading " << archives[i] << endl;
       
-      arch = Archive::load(archives[i]);
-      if (i==0 && gaussian)
-	loadGaussian(gaussFile, stdarch, arch);
-      if (fscrunch)
-	arch->fscrunch();
-      if (tscrunch)
-	arch->tscrunch();
+    arch = Archive::load(archives[i]);
+    if (i==0 && gaussian)
+    {
+      loadGaussian(gaussFile, stdarch, arch);
+      arrival->set_standard (stdarch);
+    }
 
-	if (full_freq) {
-	  if (stdarch->get_nchan() < arch->get_nchan()) {
-		  arch->fscrunch(arch->get_nchan() / stdarch->get_nchan());
-	  } else if (stdarch->get_nchan() > arch->get_nchan()) {
-		  stdarch->fscrunch(stdarch->get_nchan() / arch->get_nchan());
-	  } 
+    if (fscrunch)
+      arch->fscrunch();
+    if (tscrunch)
+      arch->tscrunch();
+    
+    if (full_freq)
+    {
+      if (stdarch->get_nchan() < arch->get_nchan())
+	arch->fscrunch(arch->get_nchan() / stdarch->get_nchan());
+      else if (stdarch->get_nchan() > arch->get_nchan())
+	stdarch->fscrunch(stdarch->get_nchan() / arch->get_nchan());
+    }
+
+    arrival->preprocess (arch);
+
+    /* If multiple standard profiles given must now choose and load 
+       the one closest in frequency */
+    if (std_multiple)
+    {	  
+      double freq = arch->get_centre_frequency();
+      double minDiff=0.0;
+      int    jDiff=0;
+      unsigned j;
+      for (j = 0;j < stdprofiles.size();j++)	    
+      {
+	stdarch = Archive::load(stdprofiles[j]);	      
+	if (j==0 || fabs(stdarch->get_centre_frequency() - freq)<minDiff)
+	{
+	  minDiff = fabs(stdarch->get_centre_frequency()-freq);
+	  jDiff   = j;
 	}
-
-      if (full_poln) try
-      {
-	arch->convert_state (Signal::Stokes);
-	full_poln->add_observation( arch );
       }
-      catch (Error& error)
-      {
-	cerr << "pat: Error MTM " << arch->get_filename() << error << endl;
-      }
-      else
-      {
-	arch->convert_state (Signal::Intensity);
+      stdarch = Archive::load(stdprofiles[jDiff]);
+      stdarch->fscrunch();
+      stdarch->tscrunch();
+      
+      if (sinc)
+	Pulsar::foreach (stdarch, sinc);
+      
+      stdarch->convert_state(Signal::Intensity);
+      arrival->set_standard (stdarch);
+    }
 
-	/* If multiple standard profiles given must now choose and load 
-           the one closest in frequency */
-	if (std_multiple) {	  
-	  double freq = arch->get_centre_frequency();
-	  double minDiff=0.0;
-	  int    jDiff=0;
-	  unsigned j;
-	  for (j = 0;j < stdprofiles.size();j++)	    
-	    {
-	      stdarch = Archive::load(stdprofiles[j]);	      
-	      if (j==0 || fabs(stdarch->get_centre_frequency() - freq)<minDiff)
-		{
-		  minDiff = fabs(stdarch->get_centre_frequency()-freq);
-		  jDiff   = j;
-		}
-	    }
-	  stdarch = Archive::load(stdprofiles[jDiff]);
-	  stdarch->fscrunch();
-	  stdarch->tscrunch();
-	
-          if (sinc)
-            Pulsar::foreach (stdarch, sinc);
-	
-	  stdarch->convert_state(Signal::Intensity);
-	}
-	if (strcasecmp(outFormat.c_str(),"parkes")==0)
-	  {
-	    arch->toas(toas, stdarch, "", Tempo::toa::Parkes, skip_bad); 
-	  }
-	else if (strcasecmp(outFormat.c_str(),"princeton")==0)
-	  arch->toas(toas, stdarch, "", Tempo::toa::Princeton, skip_bad); 
-	else if (strcasecmp(outFormat.c_str(),"itoa")==0)
-	  arch->toas(toas, stdarch, "", Tempo::toa::ITOA, skip_bad); 
-	else if (strcasecmp(outFormat.c_str(),"psrclock")==0)
-	  arch->toas(toas, stdarch, "", Tempo::toa::Psrclock, skip_bad); 
-	else if (strcasecmp(outFormat.c_str(),"tempo2")==0)
-	  {
-	    string args;
-	    args = archives[i];
+    toas.resize (0);
 
-	    if (outFormatFlags.find("i")!=string::npos)
-	    {
-	      Backend* backend;
-	      backend = arch->get<Backend>();
-	      if (backend)
-		args += " -i " + backend->get_name();
-	    }
-
-	    if (outFormatFlags.find("r")!=string::npos)
-	    {
-	      Receiver* receiver = arch->get<Receiver>();
-	      if (receiver)
-		args += " -r " + receiver->get_name();
-	    }
-
-	    if (outFormatFlags.find("c")!=string::npos)
-	      args += " -c " + tostring(arch->get_nchan());
-
-	    if (outFormatFlags.find("s")!=string::npos)
-	      args += " -s " + tostring(arch->get_nsubint());
-
-	    for (unsigned i = 0; i < commands.size(); i++)
-	    {
-	      string value = FetchValue(arch, commands[i]);
-	      args += " -" + commands[i] + " " + value;
-	    }
-
-
-	    if (outFormatFlags.find("o")!=string::npos) /* Include observer info. */
-	      {
-		const ObsExtension* ext = 0;
-		ext = arch->get<ObsExtension>();
-		if (!ext) {
-		  args += " -o N/A";
-		}
-		else {
-		  args += " -o " + ext->observer;
-		}
-
-	      }
-
-	    arch->toas(toas, stdarch, args, Tempo::toa::Tempo2, skip_bad); 
-	  }
-      }
-
+    arrival->set_observation (arch);
+    arrival->get_toas (toas);
+    
 #if HAVE_PGPLOT
-      if (plot_difference) {
-          rotate_archive(arch, toas);
-          arch->remove_baseline();
-          plotDifferences(arch, stdarch, toas, min_phase, max_phase);
-          continue;
-      }
+    if (plot_difference)
+    {
+      rotate_archive(arch, toas);
+      arch->remove_baseline();
+      plotDifferences(arch, stdarch, toas, min_phase, max_phase);
+      continue;
+    }
 #endif
 
-      if (phase_info) {
-          compute_dt(arch, toas, std);
-      } else {
-          if (tempo2_output) {
-              vector<Tempo::toa>::iterator tit;
-              for (tit = toas.begin(); tit != toas.end(); ++tit)
-                  (*tit).set_phase_info(true);
-          }
+    if (phase_info)
+    {
+      compute_dt(arch, toas, std);
+    }
+    else if (phase_only)
+    {
+      for (unsigned i = 0; i < toas.size(); i++)
+      {
+	unsigned isub = toas[i].get_subint();
+	unsigned ichan = toas[i].get_channel();
+	Integration* subint = arch->get_Integration(isub);
+	double P = subint->get_folding_period();
 
-          for (unsigned i = 0; i < toas.size(); i++)
-              toas[i].unload(stdout);
+	cout << arch->get_filename() << " " << isub << " " << ichan << " "
+	     << toas[i].get_phase_shift () << " "
+	     << toas[i].get_error()*1e-6 / P << endl;
       }
     }
-    catch (Error& error) {
-      fflush(stdout); 
-      cerr << error << endl;
+    else
+    {
+      if (tempo2_output)
+      {
+	vector<Tempo::toa>::iterator tit;
+	for (tit = toas.begin(); tit != toas.end(); ++tit)
+	  (*tit).set_phase_info(true);
+      }
+
+      for (unsigned i = 0; i < toas.size(); i++)
+	toas[i].unload(stdout);
     }
-    //    if (gaussian)delete stdarch;
+  }
+  catch (Error& error)
+  {
+    fflush(stdout); 
+    cerr << error << endl;
   }
 
 #if HAVE_PGPLOT
   if (plot_difference)
-      cpgend();
+    cpgend();
 #endif
 
   fflush(stdout);
   return 0;
-
 }
-catch (Error& error) {
+catch (Error& error)
+{
   cerr << error << endl;
   return -1;
 }
@@ -762,219 +678,6 @@ void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<
   firstTime = false;
 }
 
-string get_name( Reference::To< Archive > archive )
-{
-	return archive->get_source();
-}
-
-string get_nbin( Reference::To< Archive > archive )
-{
-	return tostring( archive->get_nbin() );
-}
-
-string get_nchan( Reference::To< Archive > archive )
-{
-	return tostring( archive->get_nchan() );
-}
-
-string get_npol( Reference::To< Archive > archive )
-{
-	return tostring( archive->get_npol() );
-}
-
-string get_nsub( Reference::To< Archive > archive )
-{
-	return tostring( archive->get_nsubint() );
-}
-
-string get_length( Reference::To< Archive > archive )
-{
-  tostring_precision = 6;
-  return tostring( archive->integration_length() );
-}
-
-string get_bw( Reference::To< Archive > archive )
-{
-  	set_precision(3);
-  	string result = tostring(archive->get_bandwidth());
-  	restore_precision();
-  	return result;
-}
-
-string get_parang( Reference::To< Archive > archive )
-{
-  	stringstream result;
-  	int nsubs = archive->get_nsubint();
-
-  	if (nsubs != 0) {
-		Reference::To< Integration > integration = archive->get_Integration( nsubs / 2 );
-
-    	if (integration) {
-      		Reference::To< Pointing > ext = integration->get<Pointing>();
-
-      		if (ext) {
-        		result << ext->get_parallactic_angle().getDegrees();
-      		}
-    	}
-  	}
-
-  	return result.str();
-}
-
-string get_tsub( Reference::To< Archive > archive )
-{
-  	string result;
-  	int nsubs = archive->get_nsubint();
-
-  	if( nsubs != 0 ) {
-    	Reference::To< Integration > first_int = archive->get_first_Integration();
-
-    		if( first_int ) {
-      			set_precision( 6 );
-      			result = tostring( first_int->get_duration() );
-      			restore_precision();
-    		}
-  	}
-
-  	return result;
-}
-
-string get_observer( Reference::To<Archive> archive )
-{
-  	string result;
-  	Reference::To< ObsExtension > ext = archive->get<ObsExtension>();
-
-  	if( !ext ) {
-    	result = "UNDEF";
-
-  	} else {
-    	result = ext->get_observer();
-  	}
-
-  	return result;
-}
-
-string get_projid( Reference::To<Archive> archive )
-{
-  	string result = "";
-  	Reference::To<ObsExtension> ext = archive->get<ObsExtension>();
-
-  	if( !ext ) {
-    	result = "UNDEF";
-
-  	} else {
-    	result = ext->get_project_ID();
-  	}
-
-  	return result;
-}
-
-string get_rcvr( Reference::To<Archive> archive )
-{
-  	string result;
-  	Reference::To<Receiver> ext = archive->get<Receiver>();
-
-  	if( ext ) {
-    	result = ext->get_name();
-  	}
-
-  	return result;
-}
-
-string get_backend( Reference::To< Archive > archive )
-{
-  	string result = "";
-  	Reference::To<Backend> ext;
-  	ext = archive->get<Backend>();
-
-  	if( !ext ) {
-    	ext = archive->get<WidebandCorrelator>();
-  	}
-
-  	if( !ext ) {
-    	result = "UNDEF";
-	} else {
-    	result = ext->get_name();
-	}
-
-  	return result;
-}
-
-string get_period_as_string( Reference::To<Archive> archive )
-{
-  	// TODO check this
-	set_precision( 14 );
-	string result = tostring<double>( archive->get_Integration(0)->get_folding_period() );
-	restore_precision();
-
-	return result;
-}
-
-double get_period(Reference::To<Archive> arch)
-{
-    return arch->get_Integration(0)->get_folding_period();
-}
-
-double get_stt_offs(Reference::To<Archive> arch)
-{
-    return arch->get<FITSHdrExtension>()->get_stt_offs();
-}
-
-int get_stt_smjd(Reference::To<Archive> arch)
-{
-    return arch->get<FITSHdrExtension>()->get_stt_smjd();
-}
-
-int get_stt_imjd(Reference::To<Archive> arch)
-{
-    return arch->get<FITSHdrExtension>()->get_stt_imjd();
-}
-
-string get_be_delay( Reference::To< Archive > archive )
-{
-	string result;
-	Reference::To<Backend> ext = archive->get<WidebandCorrelator>();
-	set_precision( 14 );
-
-	if( !ext ) {
-		result = "UNDEF";
-
-	} else {
-		result = tostring<double>( ext->get_delay() );
-	}
-
-	restore_precision();
-	return result;
-}
-
-string FetchValue (Reference::To<Archive> archive, string command)
-{
-	try {
-
-		if (command == "name") return get_name( archive );
-		else if(command == "nbin") return get_nbin( archive );
-		else if(command == "nchan") return get_nchan( archive );
-		else if(command == "npol") return get_npol( archive );
-		else if(command == "nsub") return get_nsub( archive );
-		else if(command == "length") return get_length( archive );
-		else if(command == "bw") return get_bw( archive );
-		else if(command == "parang") return get_parang( archive );
-		else if(command == "tsub") return get_tsub( archive );
-		else if(command == "observer") return get_observer( archive );
-		else if(command == "projid") return get_projid( archive );
-		else if(command == "rcvr") return get_rcvr( archive );
-		else if(command == "backend") return get_backend( archive );
-		else if(command == "period") return get_period_as_string( archive );
-		else if(command == "be_delay") return get_be_delay( archive );
-		else if(command == "subint") return "";
-		else if(command == "chan") return "";
-
-		else return "INVALID";
-
-	} catch (Error e) {
-		return "*error*";
-	}
-}
 
 /**
  * @brief Plot three profiles on one page:
@@ -1041,6 +744,21 @@ void plotDifferences(Reference::To<Archive> arch,
  * @param std_name filename of the standard template
  */
 
+double get_stt_offs (const Archive* arch)
+{
+  const FITSHdrExtension* ext = arch->get<FITSHdrExtension>();
+  if (ext)
+    return ext->get_stt_offs();
+
+  throw Error (InvalidParam, "get_stt_offs",
+	       arch->get_filename() + " does not contain a FITSHdrExtension");
+}
+
+double get_period (const Archive* arch)
+{
+  return arch->get_Integration(0)->get_folding_period();
+}
+
 void compute_dt(Reference::To<Archive> archive, vector<Tempo::toa>& toas,
         string std_name)
 {
@@ -1062,7 +780,7 @@ void compute_dt(Reference::To<Archive> archive, vector<Tempo::toa>& toas,
         dt *= 1000.0;  // microsec
 
         // remove preceeding path to shorten output line
-        unsigned pos = std_name.find_last_of('/');
+        string::size_type pos = std_name.find_last_of('/');
         if (pos != string::npos)
             std_name = std_name.substr(pos + 1, std_name.length() - pos);
 
