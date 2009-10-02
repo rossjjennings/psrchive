@@ -9,6 +9,7 @@
 #include "Pulsar/Profile.h"
 #include "FTransform.h"
 
+#include <stdio.h>
 #include <algorithm>
 #include <math.h>
 

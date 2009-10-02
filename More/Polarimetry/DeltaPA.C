@@ -9,6 +9,7 @@
 #include "Pulsar/PolnProfile.h"
 #include "templates.h"
 
+#include "stdio.h"
 #include <iostream>
 using namespace std;
 

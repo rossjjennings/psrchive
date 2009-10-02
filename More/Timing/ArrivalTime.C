@@ -13,6 +13,8 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/IntegrationOrder.h"
 
+#include <strings.h>
+
 using namespace std;
 
 Pulsar::ArrivalTime::ArrivalTime ()
