@@ -11,24 +11,38 @@
 
 #include <cpgplot.h>
 
+#define VERBOSE(x) if (Plot::verbose) cerr << x << endl
+
+// #define VERBOSE(x) cerr << x << endl
+
 using namespace std;
 
 //! Default constructor
 Pulsar::PlotLoop::PlotLoop ()
 {
+  preprocess = true;
   overlay = false;
 }
 
 //! Set the Plot to be executed
-void Pulsar::PlotLoop::set_Plot (Plot* p)
+void Pulsar::PlotLoop::add_Plot (Plot* p)
 {
-  the_plot = p;
+  plots.push_back (p);
 }
 
 //! Set the Archive to be plotted
-void Pulsar::PlotLoop::set_Archive (const Archive* a)
+void Pulsar::PlotLoop::set_Archive (Archive* a)
 {
-  archive = a;
+  archives.resize( plots.size() );
+  for (unsigned iplot=0; iplot < plots.size(); iplot++)
+  {
+    archives[iplot] = a;
+    if (preprocess)
+    {
+      archives[iplot] = a->clone();
+      plots[iplot]->preprocess (archives[iplot]);
+    }
+  }
 }
 
 //! Set the overlay flag
@@ -40,6 +54,16 @@ void Pulsar::PlotLoop::set_overlay (bool flag)
 bool Pulsar::PlotLoop::get_overlay () const
 {
   return overlay;
+}
+
+void Pulsar::PlotLoop::set_preprocess (bool flag)
+{
+  preprocess = flag;
+}
+
+bool Pulsar::PlotLoop::get_preprocess () const
+{
+  return preprocess;
 }
 
 //! Add an index over which to loop
@@ -56,50 +80,78 @@ void Pulsar::PlotLoop::plot ()
 
 void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
 {
-  if( indeces.empty() )
+  if (indeces.empty())
   {
-    // bottom of stack; just plot the archive
-    if (!overlay)
-      cpgpage ();
+    VERBOSE("Pulsar::PlotLoop::plot plotting");
 
-    if (Plot::verbose)
-      cerr << "Pulsar::PlotLoop::plot plotting" << endl;
+    for (unsigned i=0; i<plots.size(); i++)
+    {
+      if (!overlay)
+        cpgpage ();
 
-    the_plot->plot (archive);
+      plots[i]->plot (archives[i]);
+    }
     return;
   }
 
   Reference::To<TextIndex> index = indeces.top();
   indeces.pop();
 
-  index->set_container( const_cast<Archive*>(archive.get())->get_interface() );
+  vector<string> current (plots.size());
 
-  PlotLabel* label = the_plot->get_attributes()->get_label_above();
-  string current = label->get_centre();
-
-  for (unsigned i=0; i<index->size(); i++) try
+  unsigned loop_size = 0;
+  for (unsigned iplot=0; iplot < plots.size(); iplot++)
   {
-    string index_command = index->get_index(i);
+    index->set_container( archives[iplot]->get_interface() );
 
-    if (Plot::verbose)
-      cerr << "Pulsar::PlotLoop::plot " << index_command << endl;
-
-    the_plot->configure( index_command );
-
-    label->set_centre( current + " " + index_command );
-
-    plot (indeces);
-
-    label->set_centre( current );
+    if (iplot == 0)
+      loop_size = index->size();
+    else if ( loop_size != index->size() )
+      throw Error (InvalidState, "Pulsar::PlotLoop::plot",
+                   "loop size for plot[0]=%u != that of plot[%u]=%u",
+                   loop_size, iplot, index->size());
   }
-  catch (Error& error)
-  {
-    cerr << "Pulsar::PlotLoop::plot error plotting " << index->get_index(i) 
-         << " of "
-         << "\n\t" << archive->get_filename()
-         << "\n\t" << error.get_message() << endl;
 
-    label->set_centre( current );
+  for (unsigned i=0; i<loop_size; i++)
+  {
+    for (unsigned iplot=0; iplot < plots.size(); iplot++) try
+    {
+      index->set_container( archives[iplot]->get_interface() );
+
+      string index_command = index->get_index(i);
+
+      VERBOSE("Pulsar::PlotLoop::plot " << index_command);
+
+      PlotLabel* label = plots[iplot]->get_attributes()->get_label_above();
+      current[iplot] = label->get_centre();
+
+      plots[iplot]->configure( index_command );
+  
+      label->set_centre( current[iplot] + " " + index_command );
+    }
+    catch (Error& error)
+    {
+      cerr << "Pulsar::PlotLoop::plot error configuring " << index->get_index(i)
+           << " of "
+           << "\n\t" << archives[iplot]->get_filename()
+           << "\n\t" << error.get_message() << endl;
+    }
+
+    try
+    {
+      plot (indeces);
+    }
+    catch (Error& error)
+    {
+      cerr << "Pulsar::PlotLoop::plot error plotting " 
+           << "\n\t" << error.get_message() << endl;
+    }
+
+    for (unsigned iplot=0; iplot < plots.size(); iplot++)
+    {
+      PlotLabel* label = plots[iplot]->get_attributes()->get_label_above();
+      label->set_centre( current[iplot] );
+    }
   }
 
   indeces.push( index );

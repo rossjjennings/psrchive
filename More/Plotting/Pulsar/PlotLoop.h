@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotLoop.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/11/18 11:56:44 $
+   $Revision: 1.2 $
+   $Date: 2009/10/02 10:28:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotLoop_h
@@ -31,16 +31,22 @@ namespace Pulsar {
     PlotLoop ();
 
     //! Set the Plot to be executed
-    void set_Plot (Plot*);
+    void add_Plot (Plot*);
 
     //! Set the Archive to be plotted
-    void set_Archive (const Archive*);
+    void set_Archive (Archive*);
 
     //! Set the overlay flag
     void set_overlay (bool);
 
     //! Get the overlay flag
     bool get_overlay () const;
+
+    //! Set the preprocess flag
+    void set_preprocess (bool);
+
+    //! Get the preprocess flag
+    bool get_preprocess () const;
 
     //! Add an index over which to loop
     void add_index (TextIndex*);
@@ -50,10 +56,11 @@ namespace Pulsar {
 
   protected:
 
-    Reference::To<Plot> the_plot;
+    std::vector< Reference::To<Plot> > plots;
 
-    Reference::To<const Archive> archive;
+    std::vector< Reference::To<Archive> > archives;
 
+    bool preprocess;
     bool overlay;
 
     std::stack< Reference::To<TextIndex> > index_stack;
