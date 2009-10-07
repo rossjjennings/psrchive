@@ -418,7 +418,7 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
 
   if (out_state == Signal::Stokes)
   {
-    if (state == Coherence)
+    if (state == Signal::Coherence)
     {
       sum_difference (profile[0], profile[1]);
     
