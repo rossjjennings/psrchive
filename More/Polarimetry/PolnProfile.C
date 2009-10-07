@@ -214,6 +214,11 @@ Pulsar::PhaseWeight* Pulsar::PolnProfile::get_baseline () const
   return my_baseline;
 }
 
+const Pulsar::StokesCovariance* Pulsar::PolnProfile::get_covariance () const
+{
+  return covariance;
+}
+
 //
 //
 //
@@ -340,7 +345,7 @@ void Pulsar::PolnProfile::transform (const Jones<double>& response)
     return;
   }
 
-  if (state == Signal::Stokes)
+  if (state == Signal::Stokes || state == Signal::PseudoStokes)
   {
     for (unsigned ibin = 0; ibin < nbin; ibin++)
       set_Stokes (ibin, ::transform (get_Stokes(ibin), response));
@@ -413,13 +418,19 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
 
   if (out_state == Signal::Stokes)
   {
-    sum_difference (profile[0], profile[1]);
+    if (state == Coherence)
+    {
+      sum_difference (profile[0], profile[1]);
     
-    // data 2 and 3 are equivalent to 2*Re[PQ] and 2*Im[PQ]
-    *(profile[2]) *= 2.0;
-    *(profile[3]) *= 2.0;
+      // data 2 and 3 are equivalent to 2*Re[PQ] and 2*Im[PQ]
+      *(profile[2]) *= 2.0;
+      *(profile[3]) *= 2.0;
 
-    if (basis == Signal::Circular) {
+      state = Signal::PseudoStokes;
+    }
+
+    if (basis == Signal::Circular)
+    {
       float* V = profile[1]->get_amps();
       float* Q = profile[2]->get_amps();
       float* U = profile[3]->get_amps();
@@ -436,7 +447,7 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
   {
     // cerr << "convert_state to Signal::Coherence" << endl;
 
-    if (basis == Signal::Circular)
+    if (state == Signal::Stokes && basis == Signal::Circular)
     {
       float* ReLR   = profile[1]->get_amps();
       float* ImLR   = profile[2]->get_amps();
@@ -445,6 +456,8 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
       ProfileAmps::Expert::set_amps_ptr( profile[1], diffLR );
       ProfileAmps::Expert::set_amps_ptr( profile[2], ReLR );
       ProfileAmps::Expert::set_amps_ptr( profile[3], ImLR );
+
+      state = Signal::PseudoStokes;
     }
 
     sum_difference (profile[0], profile[1]);
@@ -543,7 +556,7 @@ void Pulsar::PolnProfile::invint (Profile* invint, bool second) const
   unsigned nbin = get_nbin();
   invint->resize (nbin);
 
-  if (state == Signal::Stokes)
+  if (state == Signal::Stokes || state == Signal::PseudoStokes)
     for (unsigned ibin = 0; ibin < nbin; ibin++)
       invint->get_amps()[ibin] = get_Stokes(ibin).invariant ();
   
@@ -586,7 +599,7 @@ void Pulsar::PolnProfile::invconv (Profile* invconv) const
 
   for (unsigned ibin = 0; ibin < nbin; ibin++)
   {
-    if (state == Signal::Stokes)
+    if (state == Signal::Stokes || state == Signal::PseudoStokes)
     {
       Stokes< complex<double> > real = fourier->get_Stokes(ibin*2);
       Stokes< complex<double> > imag = fourier->get_Stokes(ibin*2+1);
