@@ -41,6 +41,8 @@ string fits_state_string (Signal::State state, bool verbose)
     return "AABB";
   case Signal::Stokes:
     return "STOKE";
+  case Signal::PseudoStokes:
+    return "PSTOKES";
   case Signal::Coherence:
     return "AABBCRCI";
   case Signal::Intensity:
