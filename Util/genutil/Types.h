@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.28 $
-   $Date: 2009/06/08 19:12:58 $
+   $Revision: 1.29 $
+   $Date: 2009/10/07 03:32:42 $
    $Author: straten $ */
 
 #ifndef __Types_h
@@ -86,6 +86,8 @@ namespace Signal {
     Coherence,
     //! Stokes I,Q,U,V
     Stokes,
+    //! PseudoStokes S0,S2,S2,S3
+    PseudoStokes,
     //! Stokes invariant interval
     Invariant,
     //! Other

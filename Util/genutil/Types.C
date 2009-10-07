@@ -19,6 +19,8 @@ const char* Signal::state_string (State state)
     return "Baseband Quadrature";
   case Stokes:
     return "Stokes Parameters";
+  case PseudoStokes:
+    return "Pseudo-Stokes Parameters";
   case Coherence:
     return "Coherency Products";
   case PPQQ:
@@ -72,19 +74,16 @@ unsigned Signal::State2npol (State s)
 {
   if( s==Nyquist || s==Analytic || s==PPQQ )
     return 2;
-  if( s==Coherence || s==Stokes || s==Invariant )
+  else if( s==Coherence || s==Stokes || s==PseudoStokes )
     return 4;
-  if( s==Intensity )
+  else if( s==Intensity || s==Invariant )
     return 1;
-  if( s==NthPower )
+  esle if( s==NthPower )
     return 1;
-  if( s==PP_State || s==QQ_State )
+  else if( s==PP_State || s==QQ_State )
     return 1;
 
-  throw Error(InvalidState,"Signal::State2npol()",
-	      "State unknown!");
-
-  return 1;
+  throw Error (InvalidState, "Signal::State2npol", "invalid state");
 }
 
 //! Tells you if your state is consistent with your npol and ndim
@@ -123,6 +122,7 @@ bool Signal::valid_state(Signal::State state,unsigned ndim,unsigned npol, string
 
   case Signal::Coherence:
   case Signal::Stokes:
+  case Signal::PseudoStokes:
     if (ndim*npol != 4) {
       reason = "state=" + string(state_string(state)) + " and ndim*npol!=4";
       return false;
@@ -157,6 +157,7 @@ Signal::State Signal::pscrunch (State state)
   switch (state)
     {
     case Stokes:
+    case PseudoStokes:
     case Coherence:
     case PPQQ:
       return Intensity;
@@ -180,6 +181,8 @@ const string Signal::State2string (State state)
     return "Analytic";
   case Stokes:
     return "Stokes";
+  case PseudoStokes:
+    return "PseudoStokes";
   case Coherence:
     return "Coherence";
   case PPQQ:
@@ -215,6 +218,8 @@ Signal::State Signal::string2State (const string& ss)
     return Coherence;
   if(ss=="Stokes")
     return Stokes;
+  if(ss=="PseudoStokes")
+    return PseudoStokes;
   if(ss=="PP")
     return PP_State;
   if(ss=="QQ")
