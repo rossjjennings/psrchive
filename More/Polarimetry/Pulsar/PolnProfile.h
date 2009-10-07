@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfile.h,v $
-   $Revision: 1.43 $
-   $Date: 2009/06/10 21:39:10 $
+   $Revision: 1.44 $
+   $Date: 2009/10/07 03:34:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -149,6 +149,8 @@ namespace Pulsar {
 
     void get_linear (std::vector< std::complex< Estimate<double> > >& L,
 		     float sigma) const;
+
+    const StokesCovariance* get_covariance () const;
 
   protected:
 
