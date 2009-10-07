@@ -46,7 +46,9 @@ void Pulsar::ReferenceCalibrator::set_calibrator (const Archive* archive)
   // Here the decision is made about full stokes or dual band observations.
   Signal::State state = archive->get_state();
 
-  bool fullStokes = state == Signal::Stokes || state == Signal::Coherence;
+  bool fullStokes = state == Signal::Stokes 
+    || state == Signal::Coherence 
+    || state == Signal::PseudoStokes;
   bool calibratable = fullStokes || state == Signal::PPQQ;
 
   if (!calibratable)

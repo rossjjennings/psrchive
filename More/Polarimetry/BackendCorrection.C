@@ -95,12 +95,15 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
 	flip[2] = !flip[2];   // Flip Stokes U and ...
       else if (state == Signal::Stokes && basis == Signal::Linear)
 	flip[1] = !flip[1];   // Flip Stokes Q and ...
+      else if (state == Signal::PseudoStokes)
+	flip[1] = !flip[1];   // Flip AA-BB and ...
       flip[3] = !flip[3];     // Flip Stokes V or Im[AB]
     }
   }
 
   // If state == Coherence or PPQQ ...
-  if (hand == Signal::Left && state != Signal::Stokes)
+  if (hand == Signal::Left && 
+      (state == Signal::Coherence || state == Signal::PPQQ))
     swap01 = true;
 
   bool flip_something = false;
