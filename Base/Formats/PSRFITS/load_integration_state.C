@@ -183,7 +183,7 @@ void Pulsar::FITSArchive::interpret_pol_type ()
 	cerr << "FITSArchive::interpret_pol_type Signal::Stokes" << endl;
     }
 
-    else if( state_pol_type == "PSEUDO" )
+    else if( state_pol_type == "PSTOKES" )
     {
       set_state ( Signal::PseudoStokes );
       if (verbose > 2)
