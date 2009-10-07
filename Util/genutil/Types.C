@@ -78,7 +78,7 @@ unsigned Signal::State2npol (State s)
     return 4;
   else if( s==Intensity || s==Invariant )
     return 1;
-  esle if( s==NthPower )
+  else if( s==NthPower )
     return 1;
   else if( s==PP_State || s==QQ_State )
     return 1;
