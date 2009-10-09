@@ -219,17 +219,27 @@ const Pulsar::StokesCovariance* Pulsar::PolnProfile::get_covariance () const
   return covariance;
 }
 
+
+void Pulsar::PolnProfile::check (const char* method,
+				 Signal::State want_state,
+				 unsigned want_ibin) const
+{
+  if (state != want_state)
+    throw Error (InvalidRange, "PolnProfile::" + string(method),
+		 "state=" + Signal::State2string(state) + " != " 
+		 "want=" + Signal::State2string(state));
+
+  if (want_ibin >= get_nbin())
+    throw Error (InvalidRange, "PolnProfile::" + string(method),
+		 "ibin=%d >= nbin=%d", want_ibin, get_nbin());
+}
+
 //
 //
 //
 Stokes<float> Pulsar::PolnProfile::get_Stokes (unsigned ibin) const
 {
-  if (state != Signal::Stokes)
-    const_cast<PolnProfile*>(this)->convert_state (Signal::Stokes);
-
-  if (ibin >= profile[0]->get_nbin())
-    throw Error (InvalidRange, "PolnProfile::get_Stokes",
-		 "ibin=%d >= nbin=%d", ibin, profile[0]->get_nbin());
+  check ("get_Stokes", Signal::Stokes, ibin);
 
   return Stokes<float> (profile[0]->get_amps()[ibin],
 			profile[1]->get_amps()[ibin],
@@ -243,12 +253,7 @@ Stokes<float> Pulsar::PolnProfile::get_Stokes (unsigned ibin) const
 void Pulsar::PolnProfile::set_Stokes (unsigned ibin, 
 				      const Stokes<float>& new_amps)
 {
-  if (state != Signal::Stokes)
-    convert_state (Signal::Stokes);
-
-  if (ibin >= profile[0]->get_nbin())
-    throw Error (InvalidRange, "PolnProfile::set_Stokes",
-		 "ibin=%d >= nbin=%d", ibin, profile[0]->get_nbin());
+  check ("set_Stokes", Signal::Stokes, ibin);
 
   profile[0]->get_amps()[ibin] = new_amps[0];
   profile[1]->get_amps()[ibin] = new_amps[1];
@@ -259,14 +264,38 @@ void Pulsar::PolnProfile::set_Stokes (unsigned ibin,
 //
 //
 //
+Quaternion<float,Hermitian>
+Pulsar::PolnProfile::get_pseudoStokes (unsigned ibin) const
+{
+  check ("get_pseudoStokes", Signal::PseudoStokes, ibin);
+
+  return Quaternion<float,Hermitian> (profile[0]->get_amps()[ibin],
+				      profile[1]->get_amps()[ibin],
+				      profile[2]->get_amps()[ibin],
+				      profile[3]->get_amps()[ibin]);
+}
+
+//
+//
+//
+void 
+Pulsar::PolnProfile::set_pseudoStokes (unsigned ibin, 
+				       const Quaternion<float,Hermitian>& S)
+{
+  check ("set_pseudoStokes", Signal::PseudoStokes, ibin);
+
+  profile[0]->get_amps()[ibin] = S[0];
+  profile[1]->get_amps()[ibin] = S[1];
+  profile[2]->get_amps()[ibin] = S[2];
+  profile[3]->get_amps()[ibin] = S[3];
+}
+
+//
+//
+//
 Jones<double> Pulsar::PolnProfile::get_coherence (unsigned ibin) const
 {
-  if (state != Signal::Coherence)
-    const_cast<PolnProfile*>(this)->convert_state (Signal::Coherence);
-
-  if (ibin >= profile[0]->get_nbin())
-    throw Error (InvalidRange, "PolnProfile::get_coherence",
-                 "ibin=%d >= nbin=%d", ibin, profile[0]->get_nbin());
+  check ("get_coherence", Signal::Coherence, ibin);
 
   complex<double> cross (profile[2]->get_amps()[ibin], 
                          profile[3]->get_amps()[ibin]);
@@ -281,12 +310,7 @@ Jones<double> Pulsar::PolnProfile::get_coherence (unsigned ibin) const
 void Pulsar::PolnProfile::set_coherence (unsigned ibin,
                                          const Jones<double>& new_amps)
 {
-  if (state != Signal::Coherence)
-    convert_state (Signal::Coherence);
-
-  if (ibin >= profile[0]->get_nbin())
-    throw Error (InvalidRange, "PolnProfile::set_coherence",
-                 "ibin=%d >= nbin=%d", ibin, profile[0]->get_nbin());
+  check ("set_coherence", Signal::Coherence, ibin);
 
   profile[0]->get_amps()[ibin] = new_amps(0,0).real();
   profile[1]->get_amps()[ibin] = new_amps(1,1).real();
@@ -319,6 +343,13 @@ void Pulsar::PolnProfile::rotate_phase (double phase)
     covariance->rotate_phase (phase);
 }
 
+template<typename T, typename U>
+const Quaternion<T,Hermitian> transform (const Quaternion<T,Hermitian>& input,
+					 const Jones<U>& jones)
+{
+  return real( convert (jones * convert(input) * herm(jones)) );
+}
+
 //
 //
 //
@@ -345,7 +376,7 @@ void Pulsar::PolnProfile::transform (const Jones<double>& response)
     return;
   }
 
-  if (state == Signal::Stokes || state == Signal::PseudoStokes)
+  if (state == Signal::Stokes)
   {
     for (unsigned ibin = 0; ibin < nbin; ibin++)
       set_Stokes (ibin, ::transform (get_Stokes(ibin), response));
@@ -359,7 +390,11 @@ void Pulsar::PolnProfile::transform (const Jones<double>& response)
     for (unsigned ibin = 0; ibin < nbin; ibin++)
       set_coherence (ibin, (response * get_coherence(ibin)) * response_dagger);
   }
-  
+  else if (state == Signal::PseudoStokes)
+  {
+    for (unsigned ibin = 0; ibin < nbin; ibin++)
+      set_pseudoStokes (ibin, ::transform (get_pseudoStokes(ibin), response));
+  }
   else
     throw Error (InvalidState, "Pulsar::PolnProfile::transform",
 		 "unknown state=" + Signal::State2string(state));
@@ -499,47 +534,28 @@ void Pulsar::PolnProfile::sum_difference (Profile* sum, Profile* difference)
     d[ibin] = temp - d[ibin];
   }
 }
-void Pulsar::PolnProfile::convert_basis (Signal::Basis to) {
-// The way this works is simple. If an archive has been formaed assuming a linear basis
-// and the true basis was actually circular - then the Stokes parameters in a full Stokes archvie will be misslabeled
-// I think ...
-//
-// linear basis
-// ============
-// S = |L|^2 + |R|^2
-// Q = |L|^2 - |R|^2
-// U = 2Re(L*R)
-// V = 2Im(L*R)
-//
-// Circular basis
-// ==============
-// S = |L|^2 + |R|^2
-// Q = 2Re(L*R)
-// U = 2Im(L*R)
-// V = |L|^2 - |R|^2
-//
-// Which means to go from one to the other - Say in the example that you somehow decided to produce Stokes 
-// assuming you had linear feeds but it later turns out that they were circular - well you have to
-// S->S
-// Q->V
-// U->Q
-// V->U
-// Then tyou make sure the basis label is Signal::Circular and robert's your mum's brother.
-//
-// 
 
-  if (state == Signal::Stokes) {
-    if (to == Signal::Circular) {
-      cout << "Converting to Circular" << endl;
-      float* V = profile[1]->get_amps();
-      float* Q = profile[2]->get_amps();
-      float* U = profile[3]->get_amps();
 
-      ProfileAmps::Expert::set_amps_ptr( profile[1], Q );
-      ProfileAmps::Expert::set_amps_ptr( profile[2], U );
-      ProfileAmps::Expert::set_amps_ptr( profile[3], V );
-    }  
-  } 
+/*!
+  Currently, this method should be used only to correct Stokes parameters
+  that have been formed assuming linearly polarized receptors when in
+  fact the receptors are circularly polarized.
+*/
+void Pulsar::PolnProfile::convert_basis (Signal::Basis to)
+{
+  if (state == Signal::Stokes && to == Signal::Circular)
+  {
+    cout << "Converting to Circular" << endl;
+    float* V = profile[1]->get_amps();
+    float* Q = profile[2]->get_amps();
+    float* U = profile[3]->get_amps();
+    
+    ProfileAmps::Expert::set_amps_ptr( profile[1], Q );
+    ProfileAmps::Expert::set_amps_ptr( profile[2], U );
+    ProfileAmps::Expert::set_amps_ptr( profile[3], V );
+
+    basis = to;
+  }
 }
 				      
 

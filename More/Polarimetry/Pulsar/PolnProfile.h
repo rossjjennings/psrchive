@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfile.h,v $
-   $Revision: 1.44 $
-   $Date: 2009/10/07 03:34:36 $
+   $Revision: 1.45 $
+   $Date: 2009/10/09 10:20:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -19,6 +19,7 @@
 #include "Stokes.h"
 #include "Jones.h"
 #include "Matrix.h"
+#include "Quaternion.h"
 
 namespace Pulsar {
 
@@ -94,13 +95,19 @@ namespace Pulsar {
     Stokes<float> get_Stokes (unsigned ibin) const;
 
     //! Set the Stokes 4-vector for the specified bin
-    void set_Stokes (unsigned ibin, const Stokes<float>& stokes);
+    void set_Stokes (unsigned ibin, const Stokes<float>&);
 
     //! Get the coherency matrix for the specified bin
     Jones<double> get_coherence (unsigned ibin) const;
 
     //! Set the coherency matrix for the specified bin
-    void set_coherence (unsigned ibin, const Jones<double>& coherency);
+    void set_coherence (unsigned ibin, const Jones<double>&);
+
+    //! Get the pseudo-Stokes 4-vector for the specified bin
+    Quaternion<float,Hermitian> get_pseudoStokes (unsigned ibin) const;
+
+    //! Set the pseudo-Stokes 4-vector for the specified bin
+    void set_pseudoStokes (unsigned ibin, const Quaternion<float,Hermitian>&);
 
     //! Returns the sum of all amplitudes
     double sum (int bin_start=0, int bin_end=0) const;
@@ -171,6 +178,11 @@ namespace Pulsar {
 
     //! The phase-resolved four-dimensional Stokes covariance matrix
     Reference::To<StokesCovariance> covariance;
+
+    //! Throw an exception if want_state != state or want_ibin >= nbin
+    void check (const char* method, 
+		Signal::State want_state,
+		unsigned want_ibin) const;
 
     //! Efficiently forms the inplace sum and difference of two profiles
     void sum_difference (Profile* sum, Profile* difference);
