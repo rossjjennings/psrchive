@@ -329,7 +329,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.91 2009/10/13 16:56:29 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.92 2009/10/13 17:09:04 straten Exp $" << endl;
       return 0;
 
     case 'K':
@@ -551,7 +551,6 @@ int main (int argc, char** argv) try
       rotate_archive(arch, toas);
       arch->remove_baseline();
       plotDifferences(arch, stdarch, toas, min_phase, max_phase);
-      continue;
     }
 #endif
 
