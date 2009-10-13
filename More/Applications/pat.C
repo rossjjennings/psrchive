@@ -329,7 +329,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.90 2009/10/13 02:00:22 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.91 2009/10/13 16:56:29 straten Exp $" << endl;
       return 0;
 
     case 'K':
@@ -444,6 +444,7 @@ int main (int argc, char** argv) try
   
   arrival->set_format (outFormat);
   arrival->set_format_flags (outFormatFlags);
+  arrival->set_attributes (commands);
 
   if (full_poln)
   {
