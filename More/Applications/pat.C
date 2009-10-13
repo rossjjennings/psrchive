@@ -329,7 +329,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.89 2009/10/02 03:37:49 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.90 2009/10/13 02:00:22 straten Exp $" << endl;
       return 0;
 
     case 'K':
@@ -442,6 +442,9 @@ int main (int argc, char** argv) try
     return -1;
   } 
   
+  arrival->set_format (outFormat);
+  arrival->set_format_flags (outFormatFlags);
+
   if (full_poln)
   {
     cerr << "pat: using full polarization" << endl;
