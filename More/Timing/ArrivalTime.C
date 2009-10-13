@@ -83,6 +83,12 @@ void Pulsar::ArrivalTime::set_format_flags (const std::string& flags)
   format_flags = flags;
 }
 
+//! Set additional format flags
+void Pulsar::ArrivalTime::set_attributes (const std::vector<std::string>& attr)
+{
+  attributes = attr;
+}
+
 //! Add to the vector of time-of-arrival estimates
 void Pulsar::ArrivalTime::get_toas (std::vector<Tempo::toa>& toas)
 {

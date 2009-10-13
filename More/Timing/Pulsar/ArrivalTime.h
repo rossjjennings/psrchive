@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ArrivalTime.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/10/02 03:38:35 $
+   $Revision: 1.4 $
+   $Date: 2009/10/13 16:56:57 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArrivalTime_h
@@ -63,6 +63,9 @@ namespace Pulsar {
 
     //! Set additional format flags
     void set_format_flags (const std::string&);
+
+    //! Set additional attributes
+    void set_attributes (const std::vector< std::string >&);
 
     //! Skip data with zero weight
     void set_skip_bad (bool flag) { skip_bad = flag; }
