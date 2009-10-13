@@ -77,6 +77,12 @@ void Pulsar::ArrivalTime::set_format (Tempo::toa::Format fmt)
   format = fmt;
 }
 
+//! Set additional format flags
+void Pulsar::ArrivalTime::set_format_flags (const std::string& flags)
+{
+  format_flags = flags;
+}
+
 //! Add to the vector of time-of-arrival estimates
 void Pulsar::ArrivalTime::get_toas (std::vector<Tempo::toa>& toas)
 {
@@ -99,8 +105,8 @@ void Pulsar::ArrivalTime::get_toas (std::vector<Tempo::toa>& toas)
 	" standard= " << cf2 << " != observation=" << cf1 << endl;
   }
 
-
-  for (unsigned isub=0; isub<observation->get_nsubint(); isub++)
+  const unsigned nsub = observation->get_nsubint();
+  for (unsigned isub=0; isub<nsub; isub++)
   {
     vector<Tempo::toa> new_toas;
 
