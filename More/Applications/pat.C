@@ -329,7 +329,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.92 2009/10/13 17:09:04 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.93 2009/10/13 17:18:46 straten Exp $" << endl;
       return 0;
 
     case 'K':
@@ -536,7 +536,7 @@ int main (int argc, char** argv) try
       if (sinc)
 	Pulsar::foreach (stdarch, sinc);
       
-      stdarch->convert_state(Signal::Intensity);
+      stdarch->pscrunch ();
       arrival->set_standard (stdarch);
     }
 
