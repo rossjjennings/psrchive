@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PlotFrame.h"
 #include "Pulsar/PlotScale.h"
 #include "Pulsar/PlotAxis.h"
@@ -11,13 +12,14 @@
 
 Pulsar::PlotFrame::Interface::Interface (PlotFrame* instance)
 {
-  if (instance)
-    set_instance (instance);
+  if (!instance)
+    throw Error (InvalidState, "Pulsar::PlotFrame::Interface",
+		 "instance not set");
 
-  import ( "x", PlotScale::Interface(), 
-      (PlotScale* (PlotFrame::*)(void))&PlotFrame::get_x_scale );
-  import ( "y", PlotScale::Interface(), 
-      (PlotScale* (PlotFrame::*)(void))&PlotFrame::get_y_scale );
+  set_instance (instance);
+
+  insert ( "x", instance->get_x_scale()->get_interface() );
+  insert ( "y", instance->get_y_scale()->get_interface() );
 
   import ( "x", PlotAxis::Interface(), 
       (PlotAxis* (PlotFrame::*)(void))&PlotFrame::get_x_axis );

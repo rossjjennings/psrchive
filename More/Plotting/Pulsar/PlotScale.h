@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotScale.h,v $
-   $Revision: 1.13 $
-   $Date: 2007/09/20 12:25:41 $
+   $Revision: 1.14 $
+   $Date: 2009/10/16 17:35:34 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotScale_h
@@ -29,10 +29,14 @@ namespace Pulsar {
     PlotScale ();
 
     // Text interface to the PlotScale class
-    class Interface : public TextInterface::To<PlotScale> {
+    class Interface : public TextInterface::To<PlotScale>
+    {
     public:
       Interface (PlotScale* = 0);
     };
+
+    virtual TextInterface::Parser* get_interface () 
+    { return new Interface(this); }
 
     //! Initialize internal attributes according to Archive data
     virtual void init (const Archive*);
