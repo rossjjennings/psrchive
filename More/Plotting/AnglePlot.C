@@ -92,6 +92,9 @@ void Pulsar::AnglePlot::prepare (const Archive* data)
 
 void Pulsar::AnglePlot::draw (const Archive *data)
 {
+  if (verbose)
+    cerr << "Pulsar::AnglePlot::draw scale ptr=" << get_scale() << endl;
+
   std::vector<float> phases;
   get_scale()->get_ordinates (data, phases);
 
@@ -106,6 +109,9 @@ void Pulsar::AnglePlot::draw (const Archive *data)
   int y_range_end = int(ceil(y_range.second));
 
   double x_scale = get_scale()->get_scale(data);
+
+  if (verbose)
+    cerr << "Pulsar::AnglePlot::draw x_scale=" << x_scale << endl;
 
   float old_ch;
   cpgqch( &old_ch );
