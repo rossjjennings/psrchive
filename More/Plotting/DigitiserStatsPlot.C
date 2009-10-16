@@ -226,7 +226,6 @@ void DigitiserStatsPlot::draw( const Archive *const_arch )
 
     float x_step = 1.0 / (((ncycsub)*(nsub))-1);
 
-    float y_step = (y_max - y_min);
     for( int g = 0; g < ndigr; g ++ )
     {
       // adjust the xs array for this digitiser channel
@@ -269,7 +268,6 @@ void DigitiserStatsPlot::draw( const Archive *const_arch )
     for( int c = 0; c < ndigr; c ++ )
     {
       cpgsvp( nx, nx + xw, ty_min, ty_max );
-      float y_range = srange.second - srange.first + 1;
       cpgswin( 0, duration, w_y1, w_y2 );
       if( nx == tx_min )
         cpgbox("bcnt", 0.0, 0, "bcnt", 20.0, 0);
