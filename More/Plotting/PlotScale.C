@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PlotScale.h"
 #include "Pulsar/PlotLabel.h"
 #include "pairutil.h"
@@ -37,8 +38,7 @@ void Pulsar::PlotScale::set_minmax (float min, float max)
 }
 
 //! Get the minimum and maximum value in the data
-void
-Pulsar::PlotScale::get_minmax (float& min, float& max) const
+void Pulsar::PlotScale::get_minmax (float& min, float& max) const
 {
   min = minval;
   max = maxval;
@@ -47,13 +47,11 @@ Pulsar::PlotScale::get_minmax (float& min, float& max) const
 void Pulsar::PlotScale::set_range_norm (const std::pair<float,float>& f)
 {
   range_norm = f;
-  world = unset_world;
 }
 
 void Pulsar::PlotScale::set_world (const std::pair<float,float>& f)
 {
   world = f;
-  range_norm = unset_range_norm;
 }
 
 void Pulsar::PlotScale::set_world_external (const std::pair<float,float>& f)
@@ -66,12 +64,12 @@ std::pair<float,float> Pulsar::PlotScale::get_world_external () const
   return world_external;
 }
 
-void 
-Pulsar::PlotScale::get_range (float& min, float& max) const
+void Pulsar::PlotScale::get_range (float& min, float& max) const
 {
   get_minmax (min, max);
 
-  if (world != unset_world) {
+  if (world != unset_world)
+  {
     min = world.first;
     max = world.second;
   }
@@ -79,7 +77,8 @@ Pulsar::PlotScale::get_range (float& min, float& max) const
   if (range_norm != unset_range_norm)
     stretch (range_norm, min, max);
 
-  if (buf_norm > 0) {
+  if (buf_norm > 0)
+  {
     float space = (max - min) * buf_norm;
     min -= space;
     max += space;
@@ -88,12 +87,12 @@ Pulsar::PlotScale::get_range (float& min, float& max) const
 }
 
 //! Return min and max scaled according to zoom attributes
-void 
-Pulsar::PlotScale::get_range_external (float& min, float& max) const
+void Pulsar::PlotScale::get_range_external (float& min, float& max) const
 {
   if (world_external == unset_world)
     get_range (min, max);
-  else {
+  else
+  {
     min = world_external.first;
     max = world_external.second;
   }
@@ -103,30 +102,29 @@ void Pulsar::PlotScale::get_indeces (unsigned n,
 				     unsigned& imin, unsigned& imax,
 				     bool cyclic) const
 {
-  // by default, the zoom is defined by the range_norm attribute
-  std::pair<float,float> zoom = range_norm;
+  float min = 0.0;
+  float max = 1.0;
 
-  // however, it can also be over-ridden by set_world
-  if (world != unset_world) {
-
+  if (world != unset_world)
+  {
     float wmin = 0.0;
     float wmax = 1.0;
 
     get_minmax (wmin, wmax);
     float length = wmax - wmin;
 
+    std::pair<float,float> zoom;
+
     zoom.first = (world.first - wmin) / length;
     zoom.second = (world.second - wmin) / length;
 
+    stretch (zoom, min, max);
   }
 
-  float min = 0.0;
-  float max = 1.0;
+  stretch (range_norm, min, max);
 
-  stretch (zoom, min, max);
-
-  if (cyclic) {
-
+  if (cyclic)
+  {
     double diff = max - min;
 
     // fold onto 0->1
@@ -140,27 +138,24 @@ void Pulsar::PlotScale::get_indeces (unsigned n,
     // and ensure that the difference is preserved
     if (diff > 0 && (max - min) < diff)
       max += 1.0;
-
   }
-  else {
-
+  else
+  {
     if (min < 0)
       min = 0;
     if (max < 0)
       max = 0;
-
   }
 
   imin = unsigned( min * n );
   imax = unsigned( max * n );
 
-  if (!cyclic) {
-
+  if (!cyclic)
+  {
     if (imin > n)
       imin = n;
 
     if (imax > n)
       imax = n;
-
   }
 }
