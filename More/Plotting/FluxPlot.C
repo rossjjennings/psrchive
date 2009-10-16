@@ -244,7 +244,7 @@ void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)
   if (start >= stop)
     stop += 1.0;
 
-  if( verbose )
+  if (verbose)
     cerr << "AUTO ZOOM rise=" << rise << " fall=" << fall 
 	<< " nbin=" << nbin << endl
 	<< "AUTO ZOOM phase rise=" << start << " fall=" << stop << endl;
@@ -260,7 +260,7 @@ void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)
   start = mean - span;
   stop  = mean + span;
 
-  if( verbose )
+  if (verbose)
     cerr << "AUTO ZOOM scaled rise=" << start << " fall=" << stop << endl;
 
   get_frame()->get_x_scale()->set_range_norm (start, stop);
@@ -300,7 +300,7 @@ float Pulsar::FluxPlot::get_phase_error (const Archive* data)
 
   double period = data->get_Integration(0)->get_folding_period();
 
-  if( verbose )
+  if (verbose)
   {
     cerr << "Frequency = " << freq << endl;
     cerr << "Channel bandwidth = " << chan_bw << endl;
@@ -310,25 +310,25 @@ float Pulsar::FluxPlot::get_phase_error (const Archive* data)
 
   // DM smearing in seconds
   double dm_smearing = dispersion_smear (dm, freq, chan_bw);
-  if( verbose )
+  if (verbose)
     cerr << "Dispersion smearing = " << dm_smearing*1e3 << " ms" << endl;
 
   // Scattering in seconds
   double scattering = pow(dm/1000,3.5) * pow(400/freq,4);
-  if( verbose )
+  if (verbose)
     cerr << "Predicted scattering = " << scattering*1e3 << " ms" << endl;
 
   // Time resolution in seconds
   double time_res = period / data->get_nbin();
-  if( verbose )
+  if (verbose)
     cerr << "Time resolution = " << time_res*1e3 << " ms" << endl;
 
   time_res = sqrt( sqr(dm_smearing) + sqr(scattering) + sqr(time_res) );
-  if( verbose )
+  if (verbose)
     cerr << "TOTAL resolution = " << time_res*1e3 << " ms" << endl;
   
   float x_error = time_res / period;
-  if( verbose )
+  if (verbose)
     cerr << "Phase error = " << x_error << " turns" << endl;
 
   return x_error;
@@ -340,8 +340,8 @@ float Pulsar::FluxPlot::get_flux_error (const Profile* profile)
   double var = profile->baseline()->get_variance().get_value();
   float y_error = sqrt((double)var);
 
-  if( verbose )
-	cerr << "Flux error = " << y_error << endl;
+  if (verbose)
+    cerr << "Flux error = " << y_error << endl;
 
   return y_error;
 }
@@ -397,8 +397,9 @@ void Pulsar::FluxPlot::plot_error_box (const Archive* data)
 		   "unknown error box code = %d", plot_ebox);
     }
 
-  if( verbose )
-    cerr << "x1=" << x1 << " x2=" << x2 << " y1=" << y1 << " y2=" << y2 << endl;
+  if (verbose)
+    cerr << "x1=" << x1 << " x2=" << x2 
+	 << " y1=" << y1 << " y2=" << y2 << endl;
 
   cpgmove (x1,y1);
   cpgdraw (x2,y1);
