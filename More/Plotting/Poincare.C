@@ -9,6 +9,7 @@
 
 #include "Plot3D.h"
 #include "pgutil.h"
+#include "templates.h"
 
 #include <cpgplot.h>
 
@@ -21,13 +22,22 @@ Pulsar::Poincare::Poincare ()
 {
   longitude = 45;
   latitude = 25;
-  animate_steps = 0;
+
+  longitude_step = 4;
+  latitude_step = 1;
+
+  nstep = 1;
 }
 
 //! Plot in the current viewport
 void Pulsar::Poincare::plot (const Archive* data)
 {
   Reference::To<const PolnProfile> profile = get_Stokes (data, isubint, ichan);
+
+  vector<unsigned> bins;
+
+  if (!label_bins.empty())
+    TextInterface::parse_indeces (bins, label_bins, profile->get_nbin());
 
   unsigned i_min, i_max, nbin = profile->get_nbin();
 
@@ -71,12 +81,7 @@ void Pulsar::Poincare::plot (const Archive* data)
 
   float textsep = 0.05;
 
-  unsigned nplot = 1;
-
-  if (animate_steps)
-    nplot = animate_steps;
-
-  for (unsigned iplot=0; iplot < nplot; iplot++)
+  for (unsigned istep=0; istep < nstep; istep++)
   {
     volume.set_camera (longitude, latitude);
     
@@ -104,15 +109,22 @@ void Pulsar::Poincare::plot (const Archive* data)
 	volume.move (p);
       else
 	volume.draw (p);
+
+      if (found (ibin, bins))
+      {
+	string text = tostring (ibin);
+	volume.text (p, text.c_str(), 0.5);
+	volume.move (p);
+      }
     }
 
-    if (nplot > 1)
-      cpgpage ();
+    get_frame()->decorate (data);
 
-    if (animate_steps)
+    if (nstep > 1)
     {
-      longitude += 4;
-      latitude += 1;
+      cpgpage ();
+      longitude += longitude_step;
+      latitude += latitude_step;
     }
   }
 }

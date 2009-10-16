@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Poincare.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/01/29 08:11:28 $
+   $Revision: 1.9 $
+   $Date: 2009/10/16 17:35:47 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Poincare_h
@@ -63,9 +63,24 @@ namespace Pulsar {
     PlotScale* get_phase_scale () { return &phase_scale; }
 
     //! Set the animate of the camera
-    void set_animate_steps (unsigned steps) { animate_steps = steps; }
+    void set_nstep (unsigned steps) { nstep = steps; }
     //! Get the animate of the camera
-    unsigned get_animate_steps () const { return animate_steps; }
+    unsigned get_nstep () const { return nstep; }
+
+    //! Set the longitude of the camera
+    void set_longitude_step (float f) { longitude_step = f; }
+    //! Get the longitude of the camera
+    float get_longitude_step () const { return longitude_step; }
+
+    //! Set the latitude of the camera
+    void set_latitude_step (float f) { latitude_step = f; }
+    //! Get the latitude of the camera
+    float get_latitude_step () const { return latitude_step; }
+
+    //! Set the animate of the camera
+    void set_label_bins (const std::string& bins) { label_bins = bins; }
+    //! Get the animate of the camera
+    std::string get_label_bins () const { return label_bins; }
 
   protected:
 
@@ -75,7 +90,12 @@ namespace Pulsar {
 
     mutable float longitude;
     mutable float latitude;
-    unsigned animate_steps;
+
+    unsigned nstep;
+    float longitude_step;
+    float latitude_step;
+
+    std::string label_bins;
   };
 
 }

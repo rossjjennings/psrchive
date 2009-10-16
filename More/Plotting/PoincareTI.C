@@ -29,7 +29,19 @@ Pulsar::Poincare::Interface::Interface (Poincare* instance)
        &Poincare::set_latitude,
        "lat", "Camera latitude" );
 
-  add( &Poincare::get_animate_steps,
-       &Poincare::set_animate_steps,
-       "anim", "Number of animation frames" );
+  add( &Poincare::get_nstep,
+       &Poincare::set_nstep,
+       "nstep", "Number of animation steps" );
+
+  add( &Poincare::get_longitude_step,
+       &Poincare::set_longitude_step,
+       "dlong", "Change in longitude on each step" );
+
+  add( &Poincare::get_latitude_step,
+       &Poincare::set_latitude_step,
+       "dlat", "Change in latitude on each step" );
+
+  add( &Poincare::get_label_bins,
+       &Poincare::set_label_bins,
+       "bins", "Phase bins to be labeled" );
 }
