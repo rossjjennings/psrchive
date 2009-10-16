@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FrequencyScale.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/09/20 12:25:38 $
+   $Revision: 1.7 $
+   $Date: 2009/10/16 17:35:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FrequencyScale_h
@@ -28,6 +28,15 @@ namespace Pulsar {
     //! Default constructor
     FrequencyScale ();
 
+    // Text interface to the FrequencyScale class
+    class Interface : public TextInterface::To<FrequencyScale>
+    {
+    public:
+      Interface (FrequencyScale* = 0);
+    };
+
+    TextInterface::Parser* get_interface () { return new Interface(this); }
+
     //! Initialize internal attributes according to Archive data
     void init (const Archive*);
 
@@ -40,7 +49,13 @@ namespace Pulsar {
     //! Get a description of the units
     std::string get_label ();
 
+    void set_reverse (bool flag=true) { reverse = flag; }
+    bool get_reverse () const { return reverse; }
+
   protected:
+
+    //! Reverse the order on the axis
+    bool reverse;
 
   };
 

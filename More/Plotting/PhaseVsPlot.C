@@ -108,6 +108,9 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   float y_min, y_max;
   get_frame()->get_y_scale()->PlotScale::get_minmax (y_min, y_max);
 
+  cerr << "Pulsar::PhaseVsPlot::draw y_min=" << y_min << " y_max=" << y_max
+       << endl;
+
   // Fill the image data
   unsigned nbin = data->get_nbin();
 
@@ -121,6 +124,9 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   float min = FLT_MAX;
   float max = FLT_MIN;
 
+  unsigned eff_min_row = std::min (min_row, max_row);
+  unsigned eff_max_row = std::max (min_row, max_row);
+
   vector<float> plotarray (nbin * nrow);
   for (unsigned irow = 0; irow < nrow; irow++)
   {
@@ -128,7 +134,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     for (unsigned ibin=0; ibin<nbin; ibin++)
       plotarray[irow*nbin + ibin] = amps[ibin];
 
-    if (irow < min_row || irow >= max_row)
+    if (irow < eff_min_row || irow >= eff_max_row)
       continue;
 
     cyclic_minmax (amps, min_bin, max_bin, min, max, true );
@@ -196,7 +202,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     vector<bool> all_zeroes;
     all_zeroes.resize( max_row );
 
-    for ( unsigned irow = min_row; irow < max_row; irow ++ )
+    for ( unsigned irow = eff_min_row; irow < eff_max_row; irow ++ )
     {
       all_zeroes[irow] = true;
       for( unsigned ibin=0; ibin < nbin; ibin ++ )
@@ -214,7 +220,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       for( unsigned b = 0; b < nbin; b ++ )
         xaxis_adjusted[b] = xaxis[b] + xoff;
 
-      for ( unsigned irow = min_row; irow < max_row; irow++ )
+      for ( unsigned irow = eff_min_row; irow < eff_max_row; irow++ )
       {
         if (!all_zeroes[irow])
           cpgline (nbin, &xaxis_adjusted[0], &plotarray[irow*nbin]);

@@ -4,19 +4,24 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FrequencyScale.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
 Pulsar::FrequencyScale::FrequencyScale ()
 {
+  reverse = false;
 }
 
 void Pulsar::FrequencyScale::init (const Archive* data)
 {
   double freq = data->get_centre_frequency();
   double bw = data->get_bandwidth();
- 
+
+  if (reverse)
+    set_world (std::pair<float,float>(freq+0.5*bw, freq-0.5*bw));
+
   set_minmax (freq - 0.5*bw, freq + 0.5*bw);
 }
 
@@ -43,3 +48,15 @@ void Pulsar::FrequencyScale::get_ordinates (const Archive* data,
     x_axis[ibin] = min_freq + bw * (double(ibin) + 0.5) / x_axis.size();
 }
 
+Pulsar::FrequencyScale::Interface::Interface (FrequencyScale* instance)
+
+{
+  if (instance)
+    set_instance (instance);
+
+  import( PlotScale::Interface() );
+
+  add( &FrequencyScale::get_reverse,
+       &FrequencyScale::set_reverse,
+       "reverse", "Reverse order" );  
+}
