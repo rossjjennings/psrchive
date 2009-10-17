@@ -26,6 +26,7 @@ void usage ()
     "  -c coord   coordinates of source in hh:mm:ss[.fs]<+|->dd:mm:ss[.fs] \n"
     "  -d hours   duration of observation in hours \n"
     "  -m mjd     time (MJD) of observation (start time if -d is used) \n"
+    "  -l lst     time (LST) of observation (start time if -d is used) \n"
     "  -M         use Meridian (X-Y) coordinates \n"
     "  -t site    telescope \n"
     "\n"
@@ -36,6 +37,9 @@ int main (int argc, char* argv[])
 {
   MJD mjd;
   sky_coord coord;
+
+  bool use_lst = false;
+  double lst = 0.0;
 
   Horizon horizon;
   Meridian meridian;
@@ -48,7 +52,7 @@ int main (int argc, char* argv[])
   double duration = 0.0;
 
   int c;
-  while ((c = getopt(argc, argv, "hc:d:Mm:t:")) != -1)
+  while ((c = getopt(argc, argv, "hc:d:Ml:m:t:")) != -1)
   {
     switch (c)
     {
@@ -66,6 +70,11 @@ int main (int argc, char* argv[])
 
     case 'M':
       directional = &meridian;
+      break;
+
+    case 'l':
+      lst = atof (optarg);
+      use_lst = true;
       break;
 
     case 'm':
@@ -91,12 +100,13 @@ int main (int argc, char* argv[])
     return -1;
   }
 
-  if (mjd == MJD::zero)
+  if (mjd == MJD::zero && !use_lst)
   {
     time_t temp = time(NULL);
     struct tm date = *gmtime(&temp);
     cerr << "\nUsing current date/time: " << asctime(&date);
     mjd = MJD (date);
+    cerr << "MJD=" << mjd.printdays(5) << endl;
   }
 
   double lat, lon, rad;
@@ -108,13 +118,18 @@ int main (int argc, char* argv[])
   latitude.setRadians( lat );
   longitude.setRadians( lon );
 
+  double rad2deg = 180.0/M_PI;
+  double rad2hr = 12.0/M_PI;
+
   directional->set_source_coordinates( coord );
-  directional->set_epoch( mjd );
+  if (use_lst)
+    directional->set_local_sidereal_time( lst/rad2hr );
+  else
+    directional->set_epoch( mjd );
+
   directional->set_observatory_latitude( latitude.getRadians() );
   directional->set_observatory_longitude( longitude.getRadians() );
   
-  double rad2deg = 180.0/M_PI;
-  double rad2hr = 12.0/M_PI;
 
   if (duration)
   {
@@ -122,9 +137,16 @@ int main (int argc, char* argv[])
     for (unsigned i=0; i<nsteps; i++)
     {
       double hours = (duration * i) / nsteps;
-      MJD cur = mjd + hours * 3600.0;
-      directional->set_epoch( cur );
-      cout << hours << " " << directional->get_vertical() * rad2deg << endl;
+      if (use_lst)
+	directional->set_local_sidereal_time( (lst + hours)/rad2hr );
+      else
+      {
+	MJD cur = mjd + hours * 3600.0;
+	directional->set_epoch( cur );
+      }
+
+      cout << hours << " " << directional->get_vertical() * rad2deg
+	   << " " << directional->get_local_sidereal_time() * rad2hr << endl;
     }
     return 0;
   }
