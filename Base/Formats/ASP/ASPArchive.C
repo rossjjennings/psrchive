@@ -233,9 +233,11 @@ void Pulsar::ASPArchive::load_header (const char* filename)
   int bw_sign=1;
   fits_get_colnum(f, CASEINSEN, "CFRQ0", &col, &status);
   fits_read_col(f, TFLOAT, col, 1, 1, 1, NULL, &flt_tmp, NULL, &status);
-  fits_get_colnum(f, CASEINSEN, "CFRQ1", &col, &status);
-  fits_read_col(f, TFLOAT, col, 1, 1, 1, NULL, &flt_tmp2, NULL, &status);
-  if (flt_tmp2<flt_tmp) { bw_sign=-1; }
+  if (get_nchan() > 1) {
+    fits_get_colnum(f, CASEINSEN, "CFRQ1", &col, &status);
+    fits_read_col(f, TFLOAT, col, 1, 1, 1, NULL, &flt_tmp2, NULL, &status);
+    if (flt_tmp2<flt_tmp) { bw_sign=-1; }
+  }
   flt_tmp2=0.0;
   for (unsigned i=0; i<nchan; i++) {
     sprintf(ctmp, "CFRQ%d", i);
