@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Mount.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/03/03 05:03:49 $
+   $Revision: 1.5 $
+   $Date: 2009/10/17 07:55:54 $
    $Author: straten $ */
 
 #ifndef __Mount_H
@@ -51,7 +51,8 @@ public:
   void set_hour_angle (double rad);
   double get_hour_angle () const;
 
-  //! Get the LST in radians
+  //! Set the LST in radians
+  void set_local_sidereal_time (double rad);
   double get_local_sidereal_time () const;
 
   //! Get the name of the mount

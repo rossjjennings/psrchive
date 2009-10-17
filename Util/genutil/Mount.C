@@ -7,7 +7,7 @@
 
 #include "Mount.h"
 
-// #define _DEBUG
+//#define _DEBUG
 
 #ifdef _DEBUG
 #include <iostream>
@@ -80,7 +80,6 @@ MJD Mount::get_epoch () const
 void Mount::set_hour_angle (double rad)
 {
   hour_angle = rad;
-
   lst = unset;
 }
 
@@ -89,6 +88,13 @@ double Mount::get_hour_angle () const
 {
   build ();
   return hour_angle;
+}
+
+//! Set the hour_angle in radians
+void Mount::set_local_sidereal_time (double rad)
+{
+  lst = rad;
+  hour_angle = unset;
 }
 
 //! Get the LST in radians
@@ -105,12 +111,16 @@ void Mount::build () const
 
   if (hour_angle == unset)
   {
+    double long_deg = longitude * 180/M_PI;
+
 #ifdef _DEBUG
-    cerr << "Mount::build epoch=" << epoch << endl;
+    cerr << "Mount::build epoch=" << epoch << endl
+	 << "Mount::build longitude=" << long_deg << " deg" << endl;
 #endif
 
-    // MJD::LST receives longitude in degrees and returns LST in hours
-    lst = epoch.LST (longitude * 180/M_PI) * M_PI/12.0;
+    if (epoch != MJD::zero)
+      // MJD::LST receives longitude in degrees and returns LST in hours
+      lst = epoch.LST (long_deg) * M_PI/12.0;
 
     // compute hour angle in radians
     hour_angle = lst - right_ascension;
@@ -143,5 +153,5 @@ void Mount::build () const
 
 bool Mount::get_built () const
 {
-  return lst != unset;
+  return lst != unset && hour_angle != unset;
 }
