@@ -42,6 +42,9 @@ protected:
   Reference::To<Pulsar::Interpreter> interpreter;
   string script;
 
+  //! Load data from filenames provided as arguments
+  bool load_files;
+
   void interpreter_help (const string& cmd);
 };
 
@@ -55,7 +58,9 @@ psrsh::psrsh ()
   : Application ("psrsh", "command language interpreter")
 {
   has_manual = true;
-  version = "$Id: psrsh.C,v 1.18 2009/09/23 23:30:49 straten Exp $";
+  version = "$Id: psrsh.C,v 1.19 2009/10/18 01:32:57 straten Exp $";
+
+  load_files = true;
 
   add( new Pulsar::UnloadOptions );
 
@@ -70,6 +75,10 @@ void psrsh::add_options (CommandLine::Menu& menu)
   arg->set_long_name ("cmd");
   arg->set_help ("list available commands");
   arg->set_has_arg (optional_argument);
+
+  arg = menu.add (load_files, 'n');
+  arg->set_long_name ("nofiles");
+  arg->set_help ("no filenames required");
 
   menu.set_help_footer
     ("\n"
@@ -87,9 +96,12 @@ void psrsh::run ()
   {
     script = filenames[0];
     filenames.erase (filenames.begin());
-
     name = basename (script);
-    Application::run ();
+
+    if (load_files)
+      Application::run ();
+    else
+      interpreter->script( script );
   }
   else
   {
