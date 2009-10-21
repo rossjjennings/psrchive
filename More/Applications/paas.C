@@ -10,27 +10,24 @@
 // paas -- Pulsar archive analytic standard  maker
 //  (Deze programma heeft niks te maken met het christelijke feest, Pasen! :)
 
-#include <iostream>
-#include <unistd.h>
-#include <string.h>
 
-#include "Reference.h"
+#include "Pulsar/ComponentModel.h"
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
-#include "FTransform.h"
+
 #include "Error.h"
 #include "dirutil.h"
 #include "strutil.h"
-#include "MEAL/ScaledVonMises.h"
-#include "MEAL/ScaledVonMisesDeriv.h"
-#include "MEAL/Axis.h"
-#include "MEAL/LevenbergMarquardt.h"
-#include "MEAL/SumRule.h"
-#include "cpgplot.h"
-#include <map>
+
+#include <cpgplot.h>
 
 #include <fstream>
+#include <iostream>
+
+#include <unistd.h>
+#include <string.h>
 
 using namespace MEAL;
 using namespace Pulsar;
@@ -45,7 +42,7 @@ void usage ()
 
   cout << "Options:  \n" 
     "  -r filename   Read model from file        [Default: use empty model]\n"
-    "  -w filename   Write model to file         \n"
+    "  -w filename   Write model to file         [Default: paas.m] \n"
     "  -c \"a b c\"    Add component (a=centre, b=concentration, d=height)\n"
     "  -f            Fit model to pulse profile  \n"
     "  -F flags      Set parameters in/out of fit, e.g. -F 011101 fits only\n"
@@ -66,503 +63,43 @@ void usage ()
     "  -j filename   Output details to given filename    [Default: paas.txt]\n";
 }
 
-class ComponentModel
+// Text output
+void write_details_to_file (ComponentModel& model, 
+			    Archive* observation, Archive* model,
+			    const string& filename);
+
+void plot (ComponentModel& model, unsigned npts,
+	   bool line_plot, int icomp_selected = -1);
+
+void plot_difference (ComponentModel& model, const Profile *profile,
+		      bool line_plot);
+
+int main (int argc, char** argv) try
 {
-public:
-  ComponentModel() {}
+  // the multiple component model
+  ComponentModel model;
 
-  // I/O
-  void load(const char *fname);
-  void unload(const char *fname) const;
+  string model_filename_in;
+  string model_filename_out = "paas.m";
+  string details_filename   = "paas.txt";
+  string std_filename       = "paas.std";
 
-  // Manipulation
-  void add_component(double centre, double concentration, double height,
-		     const char *name);
-  void remove_component(int icomp);
-  ScaledVonMises *get_component(int icomp);
-  int get_ncomponents() const;
-  void align(const Profile *profile);
-
-  // Fitting
-  void set_infit(int icomponent, int iparam, bool infit);
-  void set_infit(const char *fitstring);
-  void fit(const Profile *profile, bool fit_derivative=true,
-	   float threshold=1e-6);
-
-  // Evaluating
-  void evaluate(float *vals, int nvals, int icomp=-1) ;
-
-  // Plotting
-  void plot(int npts, bool line_plot=false, int icomp=-1) ;
-  void plot_difference(const Profile *profile, bool line_plot=false);
-
-  // Text output
-  void write_details_to_file(Reference::To<Pulsar::Archive> input_archive,
-          Reference::To<Pulsar::Archive> model, const string& filename);
-
-protected:
-  vector<ScaledVonMises> components;
-  vector<string> component_names;
-  map<int, string> comments; // comments, indexed by line number
-
-  void clear();
-};
-
-void
-ComponentModel::write_details_to_file(Reference::To<Pulsar::Archive> input_archive,
-        Reference::To<Pulsar::Archive> model, const string& filename)
-{
-    ofstream out(filename.c_str());
-
-    if (!out)
-        throw Error(InvalidState, "ComponentModel::write_details_to_file",
-                "Unable to write to file=" + filename);
-
-    const unsigned nbin = input_archive->get_nbin();
-    const unsigned ncomp = get_ncomponents();
-
-    out << "# " << input_archive->get_filename() << " " <<
-        input_archive->get_source() << " " << 
-        input_archive->get_centre_frequency() << " " << nbin << " " <<
-        ncomp << endl;
-
-    float* in_bin = input_archive->get_Profile(0,0,0)->get_amps();
-    float* model_bin = model->get_Profile(0,0,0)->get_amps();
-
-    vector<vector<float> > values(ncomp);
-    for (unsigned icomp = 0; icomp < ncomp; ++icomp) {
-        values[icomp].resize(nbin);
-        evaluate(&values[icomp][0], nbin, icomp);
-    }
-
-    for (unsigned ibin = 0; ibin < nbin; ++ibin, ++in_bin, ++model_bin) {
-        out << ibin << " " << *in_bin << " " << *model_bin;
-
-        for (unsigned icomp = 0; icomp < ncomp; ++icomp)
-            out << " " << values[icomp][ibin];
-
-        out << endl;
-    }
-
-    out.close();
-}
-
-
-void
-ComponentModel::load(const char *fname)
-{
-  clear();
-  FILE *f = fopen(fname, "r");
-  if (!f)
-    throw Error(FileNotFound, "ComponentModel::load");
-  
-  char line[1024];
-  int iline=0;
-  double centre, concentration, height;
-  int name_start, len;
-  while (fgets(line, 1023, f)!=NULL)
-  {
-    if (line[0]=='#') // # .. comment
-      comments[iline] = line;
-    else
-    {
-      int ic;
-      bool allwhite=true;
-      len = strlen(line);
-      for (ic=0; ic < len && allwhite; ic++)
-	if (!isspace(line[ic]))
-	  allwhite = false;
-      if (allwhite) // empty line
-	comments[iline] = line;
-      else
-      {
-	if (line[len-1]=='\n')
-	  line[len-1]='\0';
-	if (sscanf(line, "%lf %lf %lf %n", &centre, &concentration, &height,
-		   &name_start)!=3)
-	  throw Error(InvalidState, "ComponentModel::load", string("Could not parse file") );
-	components.push_back(ScaledVonMises());
-	components[components.size()-1].set_centre((centre-0.5)*2.0*M_PI);
-	components[components.size()-1].set_concentration(concentration);
-	components[components.size()-1].set_height(height);
-	component_names.push_back(line+name_start);
-      }
-    }
-    iline++;
-  }
-  fclose(f);
-}
-
-void
-ComponentModel::unload(const char *fname) const
-{
-  FILE *f = fopen(fname, "w");
-  if (!f)
-    throw Error(FileNotFound, "ComponentModel::unload");
-  
-  unsigned iline, icomp = 0;
-  bool done=false;
-  map<int, string>::const_iterator comment_it;
-  for (iline=0; !done; iline++)
-  {
-    comment_it = comments.find(iline);
-    if (comment_it!=comments.end())
-      fputs(comment_it->second.c_str(), f);
-    else if (icomp < components.size())
-    {
-      fprintf(f, "%12lg %12lg %12lg %s\n", 
-	      components[icomp].get_centre().val/M_PI*0.5 + 0.5,
-	      components[icomp].get_concentration().val,
-	      components[icomp].get_height().val,
-	      component_names[icomp].c_str());
-      icomp++;
-    }
-    else
-      done = true;
-  }
-
-  fclose(f);
-}
-
-void
-ComponentModel::add_component(double centre, double concentration, 
-			      double height, const char *name)
-{
-  components.push_back(ScaledVonMises());
-  components[components.size()-1].set_centre((centre-0.5)*M_PI*2.0);
-  components[components.size()-1].set_concentration(concentration);
-  components[components.size()-1].set_height(height);
-  component_names.push_back(name);
-}
-
-void
-ComponentModel::remove_component(int icomp)
-{
-  if (icomp < 0 || icomp >= (int)components.size())
-    throw Error(InvalidParam, "ComponentModel::remove_component",
-		"Component index out of range");
-  components.erase(components.begin()+icomp);
-}
-
-ScaledVonMises *
-ComponentModel::get_component(int icomp)
-{
-  if (icomp < 0 || icomp >= (int)components.size())
-    throw Error(InvalidParam, "ComponentModel::get_component",
-		"Component index out of range");
-  return &components[icomp];
-}
-
-int 
-ComponentModel::get_ncomponents() const
-{
-  return components.size();
-}
-
-
-void 
-ComponentModel::align(const Profile *profile)
-{
-  Profile modelprof(*profile);
-
-  evaluate(modelprof.get_amps(), modelprof.get_nbin());
-
-  Estimate<double> shift = profile->shift(modelprof);
-
-  printf("Shift= %.6lf\n", shift.val);
-
-  for (unsigned icomp=0; icomp < components.size(); icomp++)
-  {
-    Estimate<double> centre = components[icomp].get_centre()+  shift*M_PI*2.0;
-    if (centre.val >= M_PI)
-      centre -= M_PI*2.0;
-    if (centre.val < -M_PI)
-      centre += M_PI*2.0;
-    components[icomp].set_centre(centre);
-  }
-}
-
-
-void
-ComponentModel::set_infit(int icomponent, int iparam, bool infit)
-{
-  if (icomponent < 0 || icomponent > (int)components.size())
-    throw Error(InvalidParam, "ComponentModel::get_component",
-		"Component index out of range");
-  if (iparam < 0 || iparam > 2)
-    throw Error(InvalidParam, "ComponentModel::set_infit",
-		"Parameter index out of range");
-
-  components[icomponent].set_infit(iparam, infit);
-}
-
-void 
-ComponentModel::set_infit(const char *fitstring)
-{
-  int ic=0, nc=strlen(fitstring);
-  for (unsigned icomp=0; icomp < components.size(); icomp++)
-    for (unsigned iparam=0; iparam < 3; iparam++)
-    {
-      if (ic==nc)
-	return;
-      components[icomp].set_infit(iparam, 
-				       fitstring[ic]=='1'
-				       ||fitstring[ic]=='t'
-				       ||fitstring[ic]=='T'
-				       ||fitstring[ic]=='y'
-				       ||fitstring[ic]=='Y');
-      printf("Set comp[%d].infit %d\n", icomp,
-	     (int)(fitstring[ic]=='1'
-				       ||fitstring[ic]=='t'
-				       ||fitstring[ic]=='T'
-				       ||fitstring[ic]=='y'
-		   ||fitstring[ic]=='Y'));
-      ic++;
-    }
-}
-
-void 
-ComponentModel::fit(const Profile *profile, bool fit_derivative,
-		    float threshold)
-{
-  SumRule<Univariate<Scalar> > m; 
-  int i, nbin=profile->get_nbin(); 
-  vector<float> data(nbin);
-
-  // Construct the model and the array to fit, depending on whether
-  // we work on the actual profile or its derivative
-  vector<ScaledVonMisesDeriv> derivative_components(components.size());
-  if (fit_derivative)
-  {
-    // setup model using derivative components
-    for (unsigned icomp=0; icomp < components.size(); icomp++)
-    {
-      derivative_components[icomp].set_centre(components[icomp].get_centre());
-      derivative_components[icomp].set_concentration
-	(components[icomp].get_concentration());
-      derivative_components[icomp].set_height(components[icomp].get_height());
-      m += &derivative_components[icomp];
-    }
-    // setup data array as derivative of profile, using fft
-//     vector<float> data_in(nbin); //... testing
-//     float x;
-//      for (i=0; i < nbin; i++)
-//      {
-//        x = (i/((double)nbin)-0.5) * 2.0 * M_PI;
-//        data_in[i] = 0.018*exp(18.0*(cos(x)-1.0));
-//      }
-     //       data_in[i] = sin(i/((double)nbin) * 2.0 * M_PI * 2.0);
-    vector<complex<float> > spec(nbin/2+2);
-    /// fft::frc1d(nbin, (float*)&spec[0], &data_in[0]); // FFT
-      FTransform::frc1d(nbin, (float*)&spec[0], profile->get_amps()); // FFT
-    int ic, nc=nbin/2+1;
-    float scale = 1.0/nbin;
-    for (ic=0; ic < nc; ic++)
-      spec[ic] *= complex<float>(0.0f, ic) // scale by i*frequency
-	* scale; // correction for DFT normalisation
-    FTransform::bcr1d(nbin, &data[0], (float*)&spec[0]); // IFFT
-    //     for (i=0; i < nbin; i++)
-    //    printf("%f %f\n", data[i], data_in[i]);
-    //  exit(1);
-  }
-  else // normal profile
-  {
-    //Construct the summed model
-    for (unsigned icomp=0; icomp < components.size(); icomp++)
-      m += &components[icomp];
-    // copy data
-    for (i=0; i < nbin; i++)
-      data[i] = profile->get_amps()[i];
-  }
-  
-  // make data arrays for fit
-  MEAL::Scalar* scalar = dynamic_cast<MEAL::Scalar*>(&m);
-  MEAL::Axis<double> argument; 
-  scalar->set_argument (0, &argument);
-  argument.signal.connect (&m, &Univariate<Scalar>::set_abscissa);
-  vector<Axis<double>::Value> xval;  
-  vector< Estimate<double> > yval;
-  for (i=0; i < nbin; i++)
-  {
-    xval.push_back(argument.get_Value((((i+0.5)/((double)nbin)-0.5)*M_PI*2.0)));
-    yval.push_back(Estimate<double>(data[i], 1.0));
-  }
-  
-  // fit
-  if (!scalar) {
-    throw Error(InvalidState, "ComponentModel::fit","Model is not Scalar");
-  }
-  MEAL::LevenbergMarquardt<double> fit;
-  fit.verbose = MEAL::Function::verbose;
-    
-  float chisq = fit.init (xval, yval, *scalar);
-  fit.singular_threshold = 1e-15; // dodge covariance problems
-  unsigned iter = 1;
-  unsigned not_improving = 0;
-  while (not_improving < 25) { 
-    //            if (iter==5) break;
-    cerr << "iteration " << iter;
-    float nchisq = fit.iter (xval, yval, *scalar);
-    cerr << "     RMS = " << nchisq << endl;
-    
-    if (nchisq < chisq) {
-      float diffchisq = chisq - nchisq;
-      chisq = nchisq;
-      not_improving = 0;
-      if (diffchisq/chisq < threshold && diffchisq > 0) {
-	cerr << "converged, delta RMS = " << diffchisq << endl;
-	break;
-      }
-    }
-    else
-      not_improving ++;
-    
-    iter ++;
-  }
-  
-  //    fit.result (*scalar);
-
-
-  if (fit_derivative) // copy best-fit parameters back
-  {
-    for (unsigned icomp=0; icomp < components.size(); icomp++)
-    {
-      components[icomp].set_centre(derivative_components[icomp].get_centre());
-      components[icomp].set_concentration
-	(derivative_components[icomp].get_concentration());
-      components[icomp].set_height(derivative_components[icomp].get_height());
-    }
-  }
-
-  printf("Results of fit:\n");
-  for (unsigned icomp=0; icomp < components.size(); icomp++)
-    printf("Component %2d: %12lg %12lg %12lg %s\n",  icomp+1,
-	   components[icomp].get_centre().val/M_PI*0.5 + 0.5,
-	   components[icomp].get_concentration().val,
-	   components[icomp].get_height().val,
-	   component_names[icomp].c_str());
-
-
-  // debugging
-  //  Axis<double> argument;  
-  //  m.set_argument(0,&argument);
-  // argument.signal.connect (&m, &Univariate<Scalar>::set_abscissa);
-#if 0
-  for (i=0; i < nbin; i++) 
-  { 
-    argument.set_value((i/((double)nbin)-0.5)*M_PI*2.0);
-    printf("%lf %lf %f\n", (i/((double)nbin)-0.5)*M_PI*2.0, 
-	   m.evaluate(), data[i]);
-  }
-#endif
-}
-
-void 
-ComponentModel::evaluate(float *vals, int nvals, int icomp_selected) 
-{
-  //Construct the summed model
-  SumRule<Univariate<Scalar> > m; 
-  if (icomp_selected >= 0)
-  {
-    if (icomp_selected >= (int)components.size())
-      throw Error(InvalidParam, "ComponentModel::plot",
-		  "Component index out of range");
-    m += &components[icomp_selected];
-  }
-  else
-  {
-    for (unsigned icomp=0; icomp < components.size(); icomp++)
-      m += &components[icomp];
-  }
-
-  // evaluate
-  Axis<double> argument;  
-  m.set_argument(0,&argument);
-  argument.signal.connect (&m, &Univariate<Scalar>::set_abscissa);
-  int i;
-  for (i=0; i < nvals; i++)
-  { 
-    argument.set_value(((i+0.5)/((double)nvals)-0.5)*M_PI*2.0);
-    vals[i] = m.evaluate();
-  }
-}
-
-
-void
-ComponentModel::plot(int npts, bool line_plot, int icomp_selected) 
-{
-  // evaluate
-  vector<float> xvals(npts);
-  vector<float> yvals(npts);
-
-  evaluate(&yvals[0], npts, icomp_selected);
-
-  int i;
-  for (i=0; i < npts; i++)
-    xvals[i] = i/((double)npts);
-
-  //plot
-  if (line_plot)
-    cpgline(npts, &xvals[0], &yvals[0]);
-  else
-    cpgbin(npts, &xvals[0], &yvals[0], 0);
-}
-
-void 
-ComponentModel::plot_difference(const Profile *profile, bool line_plot) 
-{
-
-  // evaluate
-  int i, npts = profile->get_nbin();
-  vector<float> xvals(npts);
-  vector<float> yvals(npts);
-  evaluate(&yvals[0], npts);
-
-  for (i=0; i < npts; i++)
-  { 
-    xvals[i] = i/((double)npts);
-    yvals[i] =  profile->get_amps()[i]- yvals[i];
-  }
-
-  //plot
-  if (line_plot)
-    cpgline(npts, &xvals[0], &yvals[0]);
-  else
-    cpgbin(npts, &xvals[0], &yvals[0], 0);
-}
-
-
-void 
-ComponentModel::clear()
-{
-  components.clear();
-  component_names.clear();
-  comments.clear();
-}
-
-
-
-int main (int argc, char** argv) 
-{
-  const char* args = "hb:r:w:c:fF:it:d:Dl:j:Ws:CpR:a";
-  string model_filename_in, model_filename_out;
-  bool fit=false;
+  bool fit = false;
   vector<string> new_components;
   string fit_flags;
-  char c;
+
   int bscrunch = 1;
-  float threshold=1e-6;
-  char pgdev[1024];
-  pgdev[0]='\0';
-  char std_filename[1024];
-  strcpy(std_filename, "paas.std");
-  bool fit_deriv=false;
+
+  string pgdev;
+
   bool line_plot=false;
   bool interactive = false;
   bool centre_model = false, rotate_peak=false;
   float rotate_amount = 0.0;
   bool align = false;
-  string details_filename = "paas.txt";
+
+  const char* args = "hb:r:w:c:fF:it:d:Dl:j:Ws:CpR:a";
+  int c;
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -584,7 +121,7 @@ int main (int argc, char** argv)
       break;
 
     case 'W':
-      fit_deriv = true;
+      model.set_fit_derivative (true);
       break;
 
     case 'c':
@@ -600,17 +137,17 @@ int main (int argc, char** argv)
       break;
 
     case 't':
-      threshold = atof(optarg);
+      model.set_threshold( atof(optarg) );
       break;
 
     case 'd':
-      strcpy(pgdev, optarg);
+      pgdev = optarg;
       break;
 
     case 'i':
       interactive = true;
     case 'D':
-      strcpy(pgdev, "/xs");
+      pgdev = "/xs";
       break;
       
     case 'l':
@@ -618,7 +155,7 @@ int main (int argc, char** argv)
       break;
 
     case 's':
-      strcpy(std_filename, optarg);
+      std_filename = optarg;
       break;
 
     case 'C':
@@ -645,219 +182,301 @@ int main (int argc, char** argv)
       cerr << "invalid param '" << c << "'" << endl;
     }
 
-  if (pgdev[0]!='\0')
-    {
-      cpgopen(pgdev);
-      cpgask(0);
-      cpgsvp(0.1, 0.9, 0.1, 0.9);
-    }
-  
-  try
+  if (!pgdev.empty())
   {
-    Reference::To<Pulsar::Archive> archive
-      = Pulsar::Archive::load (argv[optind]);
+    cpgopen(pgdev.c_str());
+    cpgask(0);
+    cpgsvp(0.1, 0.9, 0.1, 0.9);
+  }
+  
+  Reference::To<Archive> archive = Archive::load (argv[optind]);
 
-    // preprocess
-    archive->fscrunch();
-    archive->tscrunch();
-    archive->pscrunch();
+  // preprocess
+  archive->fscrunch();
+  archive->tscrunch();
+  archive->pscrunch();
 
-    // phase up as requested
-    if (centre_model)
-      archive->centre();
-    else if (rotate_peak)
-      archive->centre_max_bin(0.0);
+  // phase up as requested
+  if (centre_model)
+    archive->centre();
+  else if (rotate_peak)
+    archive->centre_max_bin(0.0);
+  
+  if (rotate_amount != 0.0)
+    archive->rotate_phase(-rotate_amount);
+  
+  archive->remove_baseline();
 
-    if (rotate_amount != 0.0)
-      archive->rotate_phase(-rotate_amount);
+  // load from file if specified
+  if (!model_filename_in.empty())
+  {
+    cerr << "paas: loading model from " << model_filename_in << endl;
+    model.load(model_filename_in.c_str());
+    
+    // align to profile first if asked
+    if (align)
+      model.align(archive->get_Integration(0)->get_Profile(0,0));
+  }
 
-    archive->remove_baseline();
-
-    Reference::To<Pulsar::Archive> copy = archive->clone();
-
-    // make empty model
-    ComponentModel model;
-
-    // load from file if specified
-    if (!model_filename_in.empty())
+  // add any new components specified
+  unsigned ic, nc=new_components.size();
+  double centre, concentration, height;
+  int name_start;
+  for (ic=0; ic < nc; ic++)
+  {
+    if (sscanf(new_components[ic].c_str(), 
+	       "%lf %lf %lf %n", &centre, &concentration, &height,
+	       &name_start)!=3)
     {
-      model.load(model_filename_in.c_str());
-
-      // align to profile first if asked
-      if (align)
-	model.align(archive->get_Integration(0)->get_Profile(0,0));
+      cerr << "Could not parse component " << ic << endl;
+      return -1;
     }
 
-    // add any new components specified
-    int ic, nc=new_components.size();
-    double centre, concentration, height;
-    int name_start;
-    for (ic=0; ic < nc; ic++)
+    model.add_component(centre, concentration, height, 
+			new_components[ic].c_str()+name_start);
+  }
+
+  bool iterate = true;
+
+  while (iterate)
+  {
+    iterate = false;
+
+    // fit if specified
+    if (fit)
     {
-      if (sscanf(new_components[ic].c_str(), 
-		 "%lf %lf %lf %n", &centre, &concentration, &height,
-		 &name_start)!=3)
-	throw Error(InvalidState, "main()", string("Could not parse component definition") );
-      model.add_component(centre, concentration, height, 
-			  new_components[ic].c_str()+name_start);
+      // set fit flags
+      model.set_infit(fit_flags.c_str());
+      // fit
+      model.fit(archive->get_Integration(0)->get_Profile(0,0));
     }
+ 
+    // plot
+    if (!pgdev.empty())
+    {
+      Reference::To<Pulsar::Archive> scrunched;
+      scrunched = archive->clone();
+      if (bscrunch > 1)
+	scrunched->bscrunch(bscrunch);
 
-    bool iterate = true;
+      cpgpage();
 
-    while (iterate) {
+      Profile *prof = scrunched->get_Integration(0)->get_Profile(0,0);
+      float ymin = prof->min();
+      float ymax = prof->max();
+      float extra = 0.05*(ymax-ymin);
 
-      iterate = false;
+      ymin -= extra;
+      ymax += extra;
+      cpgswin(0.0, 1.0, ymin, ymax);
+      cpgbox("bcnst", 0, 0, "bcnst", 0, 0);
+      cpglab("Pulse phase", "Intensity", "");
+      unsigned i, npts=prof->get_nbin();
+      cpgsci(14);
+      for (ic=0; ic < model.get_ncomponents(); ic++)
+	plot(model, npts, true, ic);
+      vector<float> xvals(npts);
+      cpgsci(4);
+      for (i=0; i < npts; i++)
+	xvals[i] = i/((double)npts);
+      if (line_plot)
+	cpgline(npts, &xvals[0], prof->get_amps());
+      else
+	cpgbin(npts, &xvals[0], prof->get_amps(), 0);
+      cpgsci(2);
+      plot_difference(model, prof, line_plot);
+      cpgsci(1);
+      plot(model, npts, true);
+    }
+    
+    
+    while (interactive)
+    {
+      iterate = true;
+      fit = false;
 
-      // fit if specified
-      if (fit)
-	{
-	  // set fit flags
-	  model.set_infit(fit_flags.c_str());
-	  // fit
-	  model.fit(archive->get_Integration(0)->get_Profile(0,0),
-		    fit_deriv, threshold);
-	}
+      cerr << "Enter command ('h' for help)" << endl;
 
-      // write out if specified
-      if (!model_filename_out.empty())
-	model.unload(model_filename_out.c_str());
-      
-      // plot
-      if (pgdev[0]!='\0')
-	{
-	  Reference::To<Pulsar::Archive> scrunched;
-	  scrunched = archive->clone();
-	  if (bscrunch > 1)
-	    scrunched->bscrunch(bscrunch);
-
-	  cpgpage();
-
-	  Profile *prof = scrunched->get_Integration(0)->get_Profile(0,0);
-	  float ymin = prof->min();
-	  float ymax = prof->max();
-	  float extra = 0.05*(ymax-ymin);
-	  ymin -= extra;
-	  ymax += extra;
-	  cpgswin(0.0, 1.0, ymin, ymax);
-	  cpgbox("bcnst", 0, 0, "bcnst", 0, 0);
-	  cpglab("Pulse phase", "Intensity", "");
-	  int i, npts=prof->get_nbin();
-	  cpgsci(14);
-	  for (ic=0; ic < model.get_ncomponents(); ic++)
-	    model.plot(npts, true, ic);
-	  vector<float> xvals(npts);
-	  cpgsci(4);
-	  for (i=0; i < npts; i++)
-	    xvals[i] = i/((double)npts);
-	  if (line_plot)
-	    cpgline(npts, &xvals[0], prof->get_amps());
-	  else
-	    cpgbin(npts, &xvals[0], prof->get_amps(), 0);
-	  cpgsci(2);
-	  model.plot_difference(prof, line_plot);
-	  cpgsci(1);
-	  model.plot(npts, true);
-	}
-
-
-      while (interactive) {
-
-	iterate = true;
-	fit = false;
-
-	cerr << "Enter command ('h' for help)" << endl;
-
-	float curs_x=0, curs_y=0;
-	char key = ' ';
-	if (cpgband(6,0,0,0,&curs_x, &curs_y, &key) != 1 || key == 'q') {
-	  cerr << "Quitting ..." << endl;
-	  iterate = false;
-	  break;
-	}
-
-	if (key == 'h') {
-	  cerr << 
-	    "\n"
-	    "left click - add a component at cursor position\n"
-	    "f key      - fit current set of components\n"
-	    "q key      - quit\n"
-	    "\n"
-	    "After left click:\n"
-	    "   1) any key    - select width of new component, then \n"
-	    "   2) any key    - select height of new component \n"
-	    "\n"
-	    "   right click or <Escape> to abort addition of new component \n"
-	       << endl;
-	  continue;
-	}
-
-	if (key == 'f') {
-	  cerr << "Fitting components" << endl;
-	  fit = true;
-	  break;
-	}
-
-	if (key == 'a' || key == 65) {
-
-	  cerr << "Adding component centred at pulse phase " << curs_x << endl;
-	  double centre = curs_x;
-
-	  cerr << "Select width and hit any key" << endl;
-	  if (cpgband(4, 1, curs_x, curs_y, &curs_x, &curs_y, &key) != 1) {
-	    cerr << "paas: cpgband error" << endl;
-	    return -1;
-	  }
-
-	  // right click or escape to abort
-	  if (key == 88 || key == 27)
-	    continue;
-
-	  double width = fabs(centre - curs_x);
-
-	  cerr << "Select height and hit any key" << endl;
-	  if (cpgband(5,0,0,0,&curs_x, &curs_y, &key) != 1) {
-	    cerr << "paas: cpgband error" << endl;
-	    return -1;
-	  }
-
-	  // right click or escape to abort
-	  if (key == 88 || key == 27)
-	    continue;
-
-	  double height = curs_y;
-
-	  model.add_component (centre, 0.25/(width*width), height, "");
-
-	  break;
-
-	}
-
-	cerr << "Unrecognized command" << endl;
-
+      float curs_x=0, curs_y=0;
+      char key = ' ';
+      if (cpgband(6,0,0,0,&curs_x, &curs_y, &key) != 1 || key == 'q')
+      {
+	cerr << "Quitting ..." << endl;
+	iterate = false;
+	break;
       }
 
+      if (key == 'h')
+      {
+	cerr << 
+	  "\n"
+	  "left click - add a component at cursor position\n"
+	  "f key      - fit current set of components\n"
+	  "q key      - quit\n"
+	  "\n"
+	  "After left click:\n"
+	  "   1) any key    - select width of new component, then \n"
+	  "   2) any key    - select height of new component \n"
+	  "\n"
+	  "   right click or <Escape> to abort addition of new component \n"
+	     << endl;
+	continue;
+      }
+      
+      if (key == 'f')
+      {
+	cerr << "Fitting components" << endl;
+	fit = true;
+	break;
+      }
+      
+      if (key == 'a' || key == 65)
+      {
+	cerr << "Adding component centred at pulse phase " << curs_x << endl;
+	double centre = curs_x;
+
+	cerr << "Select width and hit any key" << endl;
+	if (cpgband(4, 1, curs_x, curs_y, &curs_x, &curs_y, &key) != 1) {
+	  cerr << "paas: cpgband error" << endl;
+	  return -1;
+	}
+	
+	// right click or escape to abort
+	if (key == 88 || key == 27)
+	  continue;
+	
+	double width = fabs(centre - curs_x);
+	
+	cerr << "Select height and hit any key" << endl;
+	if (cpgband(5,0,0,0,&curs_x, &curs_y, &key) != 1) {
+	  cerr << "paas: cpgband error" << endl;
+	  return -1;
+	}
+	
+	// right click or escape to abort
+	if (key == 88 || key == 27)
+	  continue;
+	
+	double height = curs_y;
+	
+	model.add_component (centre, 0.25/(width*width), height, "");
+	
+	break;
+	
+      }
+      
+      cerr << "Unrecognized command" << endl;
+      
     }
-
-    // write out standard
-    model.evaluate(archive->get_Integration(0)->get_Profile(0,0)->get_amps(),
-		   archive->get_nbin());
-
-    model.write_details_to_file(copy, archive, details_filename);
-
-    archive->unload(std_filename);
-
-  }
-  catch (Error& error) {
-    cerr << error << endl;
-  }
-  catch (string& error) {
-    cerr << error << endl;
+    
   }
   
-  if (pgdev[0]!='\0')
+  // write out if specified
+  if (!model_filename_out.empty())
+  {
+    cerr << "paas: writing model to " << model_filename_out << endl;
+    model.unload (model_filename_out.c_str());
+  }
+  
+  Reference::To<Pulsar::Archive> copy = archive->clone();
+
+  // write out standard
+  model.evaluate (archive->get_Integration(0)->get_Profile(0,0)->get_amps(),
+		  archive->get_nbin());
+
+  write_details_to_file (model, copy, archive, details_filename);
+  
+  cerr << "paas: writing standard to " << std_filename << endl;
+  archive->unload (std_filename);
+
+  if (!pgdev.empty())
     cpgend();
 
   return 0;
 }
+catch (Error& error)
+{
+  cerr << error << endl;
+  return -1;
+}
 
+void write_details_to_file (ComponentModel& m, Archive* input_archive,
+			    Archive* model, const string& filename)
+{
+  ofstream out (filename.c_str());
 
+  if (!out)
+    throw Error (FailedSys, "ComponentModel::write_details_to_file",
+		 "Unable to open file=" + filename);
+
+  const unsigned nbin = input_archive->get_nbin();
+  const unsigned ncomp = m.get_ncomponents();
+
+  out << "# " << input_archive->get_filename() << " " <<
+    input_archive->get_source() << " " << 
+    input_archive->get_centre_frequency() << " " << nbin << " " <<
+    ncomp << endl;
+
+  float* in_bin = input_archive->get_Profile(0,0,0)->get_amps();
+  float* model_bin = model->get_Profile(0,0,0)->get_amps();
+  
+  vector<vector<float> > values(ncomp);
+  for (unsigned icomp = 0; icomp < ncomp; ++icomp)
+  {
+    values[icomp].resize(nbin);
+    m.evaluate(&values[icomp][0], nbin, icomp);
+  }
+
+  for (unsigned ibin = 0; ibin < nbin; ++ibin, ++in_bin, ++model_bin)
+  {
+    out << ibin << " " << *in_bin << " " << *model_bin;
+
+    for (unsigned icomp = 0; icomp < ncomp; ++icomp)
+      out << " " << values[icomp][ibin];
+
+    out << endl;
+  }
+}
+
+void plot (ComponentModel& model, unsigned npts,
+	   bool line_plot, int icomp_selected) 
+{
+  // evaluate
+  vector<float> xvals(npts);
+  vector<float> yvals(npts);
+
+  model.evaluate (&yvals[0], npts, icomp_selected);
+
+  for (unsigned i=0; i < npts; i++)
+    xvals[i] = i/((double)npts);
+
+  //plot
+  if (line_plot)
+    cpgline(npts, &xvals[0], &yvals[0]);
+  else
+    cpgbin(npts, &xvals[0], &yvals[0], 0);
+}
+
+void plot_difference (ComponentModel& model, const Profile *profile,
+		      bool line_plot) 
+{
+
+  // evaluate
+  unsigned i, npts = profile->get_nbin();
+  vector<float> xvals(npts);
+  vector<float> yvals(npts);
+
+  model.evaluate (&yvals[0], npts);
+
+  for (i=0; i < npts; i++)
+  { 
+    xvals[i] = i/((double)npts);
+    yvals[i] =  profile->get_amps()[i]- yvals[i];
+  }
+
+  //plot
+  if (line_plot)
+    cpgline(npts, &xvals[0], &yvals[0]);
+  else
+    cpgbin(npts, &xvals[0], &yvals[0], 0);
+}
