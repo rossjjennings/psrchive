@@ -237,13 +237,12 @@ void Pulsar::BPPArchive::load_header (const char* filename)
 
   set_scale(Signal::FluxDensity);
 
-  string src = hdr.pulsar_name;
-  set_source(src);
-
   char site_tmp[2];
   site_tmp[0] = (char)hdr.telescope;
   site_tmp[1] = '\0';
   set_telescope(site_tmp);
+
+  string src = hdr.pulsar_name;
 
   if (src[0]=='c' || src[0]=='C') {
     set_type(Signal::PolnCal);
@@ -255,6 +254,12 @@ void Pulsar::BPPArchive::load_header (const char* filename)
   } else {
     set_type(Signal::Pulsar);
   }
+
+  // Strip leading d or c from cal scans
+  if (get_type()!=Signal::Pulsar) 
+    src.erase(0,1);
+
+  set_source(src);
 
   // Read in RFs array now 
   if ((hdr.chsbd<0) || (hdr.chsbd>64)) {
@@ -425,6 +430,14 @@ Pulsar::BPPArchive::load_Integration (const char* filename, unsigned subint)
   resize_Integration(integration); // Sizes integration to npol,nchan,nbin
 
   // Date/time stuff 
+  // NOTES: the MJD/time stored in the BPP header refers to the START of
+  // the scan, at which point the pulsar phase is 0.  To avoid systematic
+  // timing problems, we need to know a reference epoch near the middle
+  // of the subint where phase==0.  Unfortunately this can't be accurately
+  // determined from the data in a single BPP file, so the correction
+  // will have to be handled at a higher level somehow.  This is the
+  // infamous "midscan correction" problem.  The hdr.apparent_period
+  // parameter refers to the psr period at midscan.
   MJD epoch(get_mjd_from_hdr(), hdr.seconds, hdr.second_fraction);
   integration->set_epoch(epoch);
   integration->set_duration(hdr.integration_time);
