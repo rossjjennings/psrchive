@@ -19,8 +19,6 @@ void Pulsar::Archive::transform (const Jones<float>& jones) try {
   for (unsigned isub=0; isub < nsub; isub++)
     get_Integration (isub) -> transform (jones);
 
-  if (get_state() == Signal::PseudoStokes)
-    set_state (Signal::Stokes);
 }
 catch (Error& error)
 {
@@ -36,8 +34,6 @@ void Pulsar::Archive::transform (const vector<Jones<float> >& jones) try {
   for (unsigned isub=0; isub < nsub; isub++)
     get_Integration (isub) -> transform (jones);
 
-  if (get_state() == Signal::PseudoStokes)
-    set_state (Signal::Stokes);
 }
 catch (Error& error)
 {
@@ -57,8 +53,6 @@ void Pulsar::Archive::transform (const vector<vector<Jones<float> > >& J) try
   for (unsigned isub=0; isub < nsub; isub++)
     get_Integration (isub) -> transform (J[isub]);
   
-  if (get_state() == Signal::PseudoStokes)
-    set_state (Signal::Stokes);
 }
 catch (Error& error)
 {
