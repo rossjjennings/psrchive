@@ -64,7 +64,7 @@ void usage ()
 }
 
 // Text output
-void write_details_to_file (ComponentModel& model, 
+void write_details_to_file (ComponentModel& m,
 			    Archive* observation, Archive* model,
 			    const string& filename);
 
