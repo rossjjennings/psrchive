@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASCII/Pulsar/ASCIIArchive.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/05/25 07:08:15 $
-   $Author: straten $ */
+   $Revision: 1.11 $
+   $Date: 2009/10/21 19:57:35 $
+   $Author: demorest $ */
 
 #ifndef __ASCIIArchive_h
 #define __ASCIIArchive_h
@@ -54,8 +54,8 @@ namespace Pulsar {
     virtual Integration*
     load_Integration (const char* filename, unsigned subint);
 
-    //! The unload_file method is not implemented
-    bool can_unload () const { return false; }
+    //! The unload_file method is implemented
+    bool can_unload () const { return true; }
 
     //! Unload the ASCIIArchive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;
@@ -73,7 +73,7 @@ namespace Pulsar {
         bool advocate (const char* filename);
 
         //! Return the name of the TimerArchive plugin
-        std::string get_name () { return "ASCIIArchive"; }
+        std::string get_name () { return "ASCII"; }
     
         //! Return description of this plugin
         std::string get_description ();
