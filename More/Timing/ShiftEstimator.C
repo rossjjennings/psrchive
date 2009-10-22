@@ -14,6 +14,8 @@
 #include "Pulsar/SincInterpShift.h"
 #include "Pulsar/ZeroPadShift.h"
 
+bool Pulsar::ShiftEstimator::verbose = false;
+
 //! Construct a new ShiftEstimator from a string
 Pulsar::ShiftEstimator* 
 Pulsar::ShiftEstimator::factory (const std::string& name_parse)

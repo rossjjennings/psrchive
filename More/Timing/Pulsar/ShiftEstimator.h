@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ShiftEstimator.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/09/29 22:22:09 $
+   $Revision: 1.2 $
+   $Date: 2009/10/22 17:37:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ShiftEstimator_h
@@ -26,6 +26,8 @@ namespace Pulsar {
   {
 
   public:
+
+    static bool verbose;
 
     //! Return the shift estimate
     virtual Estimate<double> get_shift () const = 0;
