@@ -19,6 +19,7 @@
 #include "Pulsar/ZeroPadShift.h"
 #include "Pulsar/FourierDomainFit.h"
 #include "Pulsar/FluxCentroid.h"
+#include "Pulsar/ComponentModel.h"
 
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Archive.h"
@@ -154,6 +155,8 @@ void usage ()
     "                   FDM = Fourier domain with Markov chain Monte Carlo \n"
     "                   COF = Centre of Flux \n"
     "\n"
+    "  -m filename      Load a component model as output by paas \n"
+    "\n"
     "Output options:\n"
     "  -f \"fmt <flags>\" Select output format [default: parkes]\n"
     "                   Available formats: parkes tempo2, itoa, princeton \n"
@@ -227,7 +230,7 @@ int main (int argc, char** argv) try
 #define PLOT_ARGS "t";
 #endif
 
-  const char* args = "a:A:cC:Ddf:Fg:hiK:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
+  const char* args = "a:A:cC:Ddf:Fg:hiK:m:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
 
   int gotc = 0;
 
@@ -329,11 +332,16 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.93 2009/10/13 17:18:46 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.94 2009/10/22 17:41:58 straten Exp $" << endl;
       return 0;
 
     case 'K':
       plot_device = optarg;
+      break;
+
+    case 'm':
+      cerr << "pat: loading component model from " << optarg << endl;
+      arrival->set_shift_estimator( new ComponentModel(optarg) );
       break;
 
     case 'M':
@@ -544,7 +552,10 @@ int main (int argc, char** argv) try
 
     arrival->set_observation (arch);
     arrival->get_toas (toas);
-    
+
+    if (verbose)
+      cerr << "pat: got " << toas.size() << " TOAs" << endl;
+
 #if HAVE_PGPLOT
     if (plot_difference)
     {
