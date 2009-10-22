@@ -104,6 +104,12 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %ignore Pulsar::Profile::transition_duty_cycle;
 %ignore Pulsar::Profile::default_duty_cycle;
 
+// Also Functor
+%ignore Pulsar::Profile::peak_edges_strategy;
+%ignore Pulsar::Profile::baseline_strategy;
+%ignore Pulsar::Profile::onpulse_strategy;
+%ignore Pulsar::Profile::snr_strategy;
+
 // Header files included here will be wrapped
 %include "ReferenceAble.h"
 %include "Pulsar/Container.h"
