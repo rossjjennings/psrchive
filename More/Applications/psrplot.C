@@ -35,6 +35,10 @@ public:
   //! Verify setup
   void setup ();
 
+  //! Very verbose mode
+  void set_very_verbose ()
+  { Application::set_very_verbose(); Pulsar::Plot::verbose = true; }
+
   //! Process the given archive
   void process (Pulsar::Archive*);
 
@@ -96,7 +100,7 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
 					   "pulsar plotting program")
 {
   has_manual = true;
-  version = "$Id: psrplot.C,v 1.31 2009/10/02 10:28:49 straten Exp $";
+  version = "$Id: psrplot.C,v 1.32 2009/10/22 17:42:04 straten Exp $";
 
   // print angles in degrees
   Angle::default_type = Angle::Degrees;
@@ -234,11 +238,13 @@ void psrplot::process (Pulsar::Archive* archive)
 void psrplot::help_plot_types ()
 {
   cout << "Available Plots:\n" << factory.help() << endl;
+  exit (0);
 }
 
 void help_options (TextInterface::Parser* tui)
 {
   cout << tui->help(true) << endl;
+  exit (0);
 }
 
 void psrplot::help_plot_options (const string& name)
