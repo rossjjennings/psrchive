@@ -52,9 +52,13 @@ Estimate<double> Pulsar::ComponentModel::get_shift () const try
   if (verbose)
     cerr << "Pulsar::ComponentModel::get_shift" << endl;
 
-  phase = new ScalarParameter (0.0);
-  phase->set_value_name ("phase");
+  if (!phase)
+  {
+    phase = new ScalarParameter (0.0);
+    phase->set_value_name ("phase");
+  }
 
+  const_cast<ComponentModel*>(this)->align (observation);
   const_cast<ComponentModel*>(this)->fit (observation);
 
   if (verbose)
@@ -120,12 +124,12 @@ void Pulsar::ComponentModel::load (const char *fname)
   fclose(f);
 }
 
-void
-Pulsar::ComponentModel::unload(const char *fname) const
+void Pulsar::ComponentModel::unload (const char *fname) const
 {
   FILE *f = fopen(fname, "w");
   if (!f)
-    throw Error(FileNotFound, "Pulsar::ComponentModel::unload");
+    throw Error (FailedSys, "Pulsar::ComponentModel::unload",
+		 "fopen (%s)", fname);
   
   unsigned iline, icomp = 0;
   bool done=false;
@@ -161,21 +165,27 @@ void Pulsar::ComponentModel::add_component (double centre,
   components[components.size()-1]->set_concentration(concentration);
   components[components.size()-1]->set_height(height);
   component_names.push_back(name);
+
+  model = 0;
+}
+
+void Pulsar::ComponentModel::check (const char* method, unsigned icomp) const
+{
+  if (icomp >= components.size())
+    throw Error (InvalidParam, "Pulsar::ComponentModel::" + string(method),
+		 "icomponent=%u >= ncomponent=%u",
+		 icomp, components.size());
 }
 
 void Pulsar::ComponentModel::remove_component (unsigned icomp)
 {
-  if (icomp >= components.size())
-    throw Error(InvalidParam, "Pulsar::ComponentModel::remove_component",
-		"Pulsar::Component index out of range");
-  components.erase(components.begin()+icomp);
+  check ("remove_component", icomp);
+  components.erase (components.begin()+icomp);
 }
 
 ScaledVonMises* Pulsar::ComponentModel::get_component (unsigned icomp)
 {
-  if (icomp >= components.size())
-    throw Error(InvalidParam, "Pulsar::ComponentModel::get_component",
-		"Component index out of range");
+  check ("get_component", icomp);
   return components[icomp];
 }
 
@@ -196,6 +206,12 @@ void Pulsar::ComponentModel::align (const Profile *profile)
   if (verbose)
     cerr << "Pulsar::ComponentModel::align shift=" << shift << endl;
 
+  if (phase)
+  {
+    phase->set_value (phase->get_value() + shift.get_value() * 2*M_PI);
+    return;
+  }
+
   for (unsigned icomp=0; icomp < components.size(); icomp++)
   {
     Estimate<double> centre = components[icomp]->get_centre() + shift * 2*M_PI;
@@ -212,10 +228,7 @@ void Pulsar::ComponentModel::set_infit (unsigned icomponent,
 					unsigned iparam,
 					bool infit)
 {
-  if (icomponent >= components.size())
-    throw Error(InvalidParam, "Pulsar::ComponentModel::get_component",
-		"icomponent=%u >= ncomponent=%u",
-		icomponent, components.size());
+  check ("set_infit", icomponent);
 
   if (iparam > 2)
     throw Error(InvalidParam, "Pulsar::ComponentModel::set_infit",
@@ -250,20 +263,13 @@ void Pulsar::ComponentModel::set_infit (const char *fitstring)
     }
 }
 
-void Pulsar::ComponentModel::fit (const Profile *profile)
+void Pulsar::ComponentModel::build () const
 {
-  SumRule< Univariate<Scalar> > sum; 
+  if (model)
+    return;
 
-  unsigned nbin = profile->get_nbin(); 
-  vector<float> data (nbin);
-
-  float mean = 0.0;
-  float variance = 1.0;
-
-  // Construct the model and the array to fit, depending on whether
-  // we work on the actual profile or its derivative
-
-  vector< Reference::To<ScaledVonMisesDeriv> > derivative;
+  SumRule< Univariate<Scalar> >* sum = new SumRule< Univariate<Scalar> >; 
+  model = sum;
 
   if (fit_derivative)
   {
@@ -278,9 +284,54 @@ void Pulsar::ComponentModel::fit (const Profile *profile)
       derivative[icomp]->set_concentration
 	(components[icomp]->get_concentration());
       derivative[icomp]->set_height(components[icomp]->get_height());
-      sum += derivative[icomp];
+      sum->add_model( derivative[icomp] );
     }
+  }
+  else
+  {
+    for (unsigned icomp=0; icomp < components.size(); icomp++)
+      sum->add_model( components[icomp] );
+  }
 
+  if (phase)
+  {
+    if (verbose)
+      cerr << "Pulsar::ComponentModel::build single phase" << endl;
+
+    ChainRule<Univariate<Scalar> >* chain = new ChainRule<Univariate<Scalar> >;
+    chain->set_model (sum);
+
+    model = chain;
+
+    for (unsigned icomp=0; icomp < components.size(); icomp++)
+    {
+      if (sum->get_param_name(icomp*3) != "centre")
+	throw Error (InvalidState, "Pulsar::ComponentModel::fit",
+		     "iparam=%u name='%s'", icomp*3,
+		     sum->get_param_name(icomp*3).c_str());
+
+      SumRule<Scalar>* psum = new SumRule<Scalar>;
+      psum->add_model (phase);
+      psum->add_model (new ScalarConstant (sum->get_param(icomp*3)));
+
+      chain->set_constraint (icomp*3, psum);
+    }
+  }
+}
+
+
+void Pulsar::ComponentModel::fit (const Profile *profile)
+{
+  build ();
+
+  unsigned nbin = profile->get_nbin(); 
+  vector<float> data (nbin);
+
+  float mean = 0.0;
+  float variance = 1.0;
+
+  if (fit_derivative)
+  {
     vector<complex<float> > spec(nbin/2+2);
 
     // FFT
@@ -297,10 +348,6 @@ void Pulsar::ComponentModel::fit (const Profile *profile)
   }
   else // normal profile
   {
-    // Construct the summed model
-    for (unsigned icomp=0; icomp < components.size(); icomp++)
-      sum += components[icomp];
-
     Reference::To<PhaseWeight> baseline = profile->baseline();
     variance = baseline->get_variance().get_value();
     mean = baseline->get_mean().get_value();
@@ -312,33 +359,6 @@ void Pulsar::ComponentModel::fit (const Profile *profile)
     // copy data
     for (unsigned i=0; i < nbin; i++)
       data[i] = profile->get_amps()[i] - mean;
-  }
-
-  Reference::To< Univariate<Scalar> > scalar = &sum;
-
-  if (phase)
-  {
-    if (verbose)
-      cerr << "Pulsar::ComponentModel::fit single phase" << endl;
-
-    ChainRule<Univariate<Scalar> >* chain = new ChainRule<Univariate<Scalar> >;
-    scalar = chain;
-
-    chain->set_model (&sum);
-
-    for (unsigned ic=0; ic < components.size(); ic++)
-    {
-      if (sum.get_param_name(ic*3) != "centre")
-	throw Error (InvalidState, "Pulsar::ComponentModel::fit",
-		     "iparam=%u name='%s'", ic*3,
-		     sum.get_param_name(ic*3).c_str());
-
-      SumRule<Scalar>* psum = new SumRule<Scalar>;
-      psum->add_model (phase);
-      psum->add_model (new ScalarConstant (sum.get_param(ic*3)));
-
-      chain->set_constraint (ic*3, psum);
-    }
   }
 
 #ifdef _DEBUG
@@ -353,7 +373,7 @@ void Pulsar::ComponentModel::fit (const Profile *profile)
 #endif
 
   Axis<double> argument; 
-  scalar->set_argument (0, &argument);
+  model->set_argument (0, &argument);
 
   vector< Axis<double>::Value > xval;  
   vector< Estimate<double> > yval;
@@ -370,8 +390,8 @@ void Pulsar::ComponentModel::fit (const Profile *profile)
     nfree ++;
   }
   
-  for (unsigned i=0; i<scalar->get_nparam(); i++)
-    if (scalar->get_infit(i))
+  for (unsigned i=0; i<model->get_nparam(); i++)
+    if (model->get_infit(i))
     {
       if (nfree == 0)
 	throw Error (InvalidState, "Pulsar::ComponentModel::fit",
@@ -384,7 +404,7 @@ void Pulsar::ComponentModel::fit (const Profile *profile)
   LevenbergMarquardt<double> fit;
   fit.verbose = Function::verbose;
     
-  chisq = fit.init (xval, yval, *scalar);
+  chisq = fit.init (xval, yval, *model);
 
   // fit.singular_threshold = 1e-15; // dodge covariance problems
   unsigned iter = 1;
@@ -399,7 +419,7 @@ void Pulsar::ComponentModel::fit (const Profile *profile)
     if (verbose)
       cerr << "iteration " << iter;
 
-    float nchisq = fit.iter (xval, yval, *scalar);
+    float nchisq = fit.iter (xval, yval, *model);
 
     if (verbose)
       cerr << "     " << result << " = " << nchisq << endl;
@@ -424,9 +444,9 @@ void Pulsar::ComponentModel::fit (const Profile *profile)
   }
   
   std::vector<std::vector<double> > covar;
-  fit.result (*scalar, covar);
+  fit.result (*model, covar);
   
-  for (unsigned iparam=0; iparam < scalar->get_nparam(); iparam++)
+  for (unsigned iparam=0; iparam < model->get_nparam(); iparam++)
   {
     double variance = covar[iparam][iparam];
 
@@ -438,24 +458,24 @@ void Pulsar::ComponentModel::fit (const Profile *profile)
       throw Error (InvalidState, 
 		   "Pulsar::ComponentModel::fit",
 		   "non-finite variance "
-		   + scalar->get_param_name(iparam));
+		   + model->get_param_name(iparam));
 
-    if (!scalar->get_infit(iparam) && variance != 0)
+    if (!model->get_infit(iparam) && variance != 0)
       throw Error (InvalidState,
 		   "Pulsar::ComponentModel::fit",
 		   "non-zero unfit variance "
-		   + scalar->get_param_name(iparam)
+		   + model->get_param_name(iparam)
 		   + " = " + tostring(variance) );
 
     if (variance < 0)
       throw Error (InvalidState,
 		   "Pulsar::ComponentModel::fit",
-		   "invalid variance " + scalar->get_param_name(iparam)
+		   "invalid variance " + model->get_param_name(iparam)
 		   + " = " + tostring(variance) );
 
     // cerr << iparam << ".var=" << variance << endl;
 
-    scalar->set_variance (iparam, variance);
+    model->set_variance (iparam, variance);
   }
 
   if (fit_derivative) // copy best-fit parameters back
@@ -477,9 +497,7 @@ void Pulsar::ComponentModel::evaluate (float *vals,
   SumRule< Univariate<Scalar> > m; 
   if (icomp_selected >= 0)
   {
-    if (icomp_selected >= (int)components.size())
-      throw Error(InvalidParam, "Pulsar::ComponentModel::plot",
-		  "Component index out of range");
+    check ("evaluate", icomp_selected);
     m += components[icomp_selected];
   }
   else
@@ -504,4 +522,5 @@ void Pulsar::ComponentModel::clear()
   components.clear();
   component_names.clear();
   comments.clear();
+  model = 0;
 }

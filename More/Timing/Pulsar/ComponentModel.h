@@ -7,20 +7,24 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ComponentModel.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/10/22 17:37:22 $
+   $Revision: 1.3 $
+   $Date: 2009/10/22 18:36:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ComponentModel_h
 #define __Pulsar_ComponentModel_h
 
 #include "Pulsar/ProfileShiftEstimator.h"
+#include "MEAL/Univariate.h"
+
 #include <map>
 
 namespace MEAL 
 {
-  class ScaledVonMises;
+  class Scalar;
   class ScalarParameter;
+  class ScaledVonMises;
+  class ScaledVonMisesDeriv;
 }
 
 namespace Pulsar
@@ -86,13 +90,19 @@ namespace Pulsar
     std::vector< Reference::To<MEAL::ScaledVonMises> > components;
     std::vector<std::string> component_names;
 
+    mutable std::vector< Reference::To<MEAL::ScaledVonMisesDeriv> > derivative;
+
     //! comments, indexed by line number
     std::map<unsigned, std::string> comments;
     
-    mutable Reference::To<MEAL::ScalarParameter> phase;
+    mutable Reference::To< MEAL::ScalarParameter > phase;
+    mutable Reference::To< MEAL::Univariate<MEAL::Scalar> > model;
 
     bool fit_derivative;
     float threshold;
+
+    void build () const;
+    void check (const char* method, unsigned icomponent) const;
 
     void clear ();
     void init ();
