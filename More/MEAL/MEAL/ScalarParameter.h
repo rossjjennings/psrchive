@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarParameter.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.5 $
+   $Date: 2009/10/22 17:28:32 $
    $Author: straten $ */
 
 #ifndef __ScalarParameter_H
@@ -54,9 +54,6 @@ namespace MEAL {
 
     //! Return the value (and gradient, if requested) of the function
     void calculate (double& x, std::vector<double>* grad=0);
-
-    //! The name of the value
-    std::string value_name;
 
   };
 

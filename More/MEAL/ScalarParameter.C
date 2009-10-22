@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/ScalarParameter.h"
 #include "MEAL/OneParameter.h"
+
+#include <assert.h>
 
 using namespace std;
 
@@ -13,7 +16,7 @@ MEAL::ScalarParameter::ScalarParameter (const Estimate<double>& value)
 {
   new OneParameter (this);
   set_value (value);
-  value_name = "value";
+  set_value_name ("value");
 }
 
 //! Return the name of the class
@@ -34,12 +37,14 @@ Estimate<double> MEAL::ScalarParameter::get_value () const
 
 string MEAL::ScalarParameter::get_value_name () const
 {
-  return value_name;
+  return get_param_name (0);
 }
 
 void MEAL::ScalarParameter::set_value_name (const string& name)
 {
-  value_name = name;
+  OneParameter* one = dynamic_cast<OneParameter*>( parameter_policy.get() );
+  assert (one != NULL);
+  one->set_name (name);
 }
 
 //! Return the value (and gradient, if requested) of the function
@@ -50,7 +55,7 @@ void MEAL::ScalarParameter::calculate (double& result,
 
   if (verbose) 
     cerr << "MEAL::ScalarParameter::calculate result\n"
-         "   " << result << endl;
+      "   " << result << " name=" << get_value_name() << endl;
  
   if (!grad)
     return;
@@ -58,7 +63,8 @@ void MEAL::ScalarParameter::calculate (double& result,
   grad->resize (1);
   (*grad)[0] = 1.0;
 
-  if (verbose)  {
+  if (verbose)
+  {
     cerr << "MEAL::ScalarParameter::calculate gradient" << endl;
     for (unsigned i=0; i<grad->size(); i++)
       cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
