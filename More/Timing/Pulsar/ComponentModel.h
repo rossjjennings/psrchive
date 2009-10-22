@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ComponentModel.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/10/21 01:33:52 $
+   $Revision: 1.2 $
+   $Date: 2009/10/22 17:37:22 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ComponentModel_h
@@ -17,7 +17,11 @@
 #include "Pulsar/ProfileShiftEstimator.h"
 #include <map>
 
-namespace MEAL { class ScaledVonMises; }
+namespace MEAL 
+{
+  class ScaledVonMises;
+  class ScalarParameter;
+}
 
 namespace Pulsar
 {
@@ -30,8 +34,11 @@ namespace Pulsar
   {
   public:
 
-    //! 
-    ComponentModel();
+    //! Default constructor
+    ComponentModel ();
+
+    //! Load model from file
+    ComponentModel (const std::string& filename);
 
     //! Return the shift estimate
     Estimate<double> get_shift () const;
@@ -68,6 +75,9 @@ namespace Pulsar
 
     void fit (const Profile *profile);
 
+    float get_chisq () const { return chisq; }
+    unsigned get_nfree () const { return nfree; }
+    
     // Evaluating
     void evaluate (float *vals, unsigned nvals, int icomp=-1) ;
 
@@ -78,11 +88,19 @@ namespace Pulsar
 
     //! comments, indexed by line number
     std::map<unsigned, std::string> comments;
+    
+    mutable Reference::To<MEAL::ScalarParameter> phase;
 
     bool fit_derivative;
     float threshold;
 
-    void clear();
+    void clear ();
+    void init ();
+
+  private:
+
+    float chisq;
+    unsigned nfree;
   };
 }
 
