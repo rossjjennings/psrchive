@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.113 $
-   $Date: 2009/10/02 03:11:12 $
-   $Author: straten $ */
+   $Revision: 1.114 $
+   $Date: 2009/10/22 01:25:13 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -165,9 +165,6 @@ namespace Pulsar {
 
     //! The default implementation of the onpulse finding algorithm
     static Functor< PhaseWeight* (const Profile*) > onpulse_strategy;
-
-    //! Return a new PhaseWeight instance with the onpulse phase bins masked
-    PhaseWeight* onpulse () const;
 
     //! The default implementation of the snr method
     static Functor< float (const Pulsar::Profile*) > snr_strategy;
