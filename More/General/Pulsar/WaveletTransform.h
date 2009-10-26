@@ -53,6 +53,9 @@ namespace Pulsar {
        */
       void set_order(int o) { order=o; };
 
+      //! Set wavelet type and order using short string notation
+      void set_wavelet(std::string s);
+
       //! Perform forward transform
       void transform(unsigned npts, const float *in);
 

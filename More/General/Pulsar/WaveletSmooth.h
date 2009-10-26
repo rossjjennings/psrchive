@@ -37,11 +37,17 @@ namespace Pulsar {
     //! Set wavelet type, order
     void set_wavelet(const gsl_wavelet_type *t, int order);
 
+    //! Set wavelet type, order from a string
+    void set_wavelet(std::string s);
+
     //! Available threshold types
     enum Threshold { Hard, Soft };
 
     //! Set threshold method
     void set_threshold(Threshold t) { thresh = t; };
+
+    //! Adjust cutoff
+    void set_cutoff(double cut) { cutoff_factor = cut; }
 
   protected:
 
@@ -53,6 +59,9 @@ namespace Pulsar {
 
     //! Threshold cutoff
     double cutoff;
+
+    //! Cutoff multiplier, for fine-tuning
+    double cutoff_factor;
 
     //! Noise level in wavelet coeffs
     double sigma;

@@ -18,10 +18,15 @@ Pulsar::WaveletSmooth::WaveletSmooth ()
   // These seem like good defaults
   thresh = Hard;
   set_wavelet(gsl_wavelet_daubechies, 8);
+  cutoff_factor = 1.3;
 }
 
 Pulsar::WaveletSmooth::~WaveletSmooth ()
 {
+}
+
+void Pulsar::WaveletSmooth::set_wavelet(const string wstring) {
+  wt.set_wavelet(wstring);
 }
 
 void Pulsar::WaveletSmooth::set_wavelet(const gsl_wavelet_type *t, int order) {
@@ -45,7 +50,7 @@ void Pulsar::WaveletSmooth::transform(Pulsar::Profile *prof) {
 
   // Threshold wavelet coeffs
   ncoeff = prof->get_nbin();
-  cutoff = 1.3*sqrt(2.0 * log((double)ncoeff));
+  cutoff = cutoff_factor*sqrt(2.0 * log((double)ncoeff));
   for (unsigned i=1; i<prof->get_nbin(); i++) {
     if (thresh==Hard) wt.get_data()[i] = thresh_hard(wt.get_data(i));
     else if (thresh==Soft) wt.get_data()[i] = thresh_soft(wt.get_data(i));

@@ -32,6 +32,18 @@ Pulsar::WaveletTransform::~WaveletTransform ()
   free_mem();
 }
 
+void Pulsar::WaveletTransform::set_wavelet(string s) {
+  // First char gives wavelet type, rest should give order
+  if (s[0]=='H' || s[0]=='h') set_type(gsl_wavelet_haar);
+  else if (s[0]=='D' || s[0]=='d') set_type(gsl_wavelet_daubechies);
+  else if (s[0]=='B' || s[0]=='b') set_type(gsl_wavelet_bspline);
+  else
+    throw Error (InvalidParam, "Pulsar::WaveletTransform::set_wavelet",
+        "Wavelet class '%c' not known", s[0]);
+  int order = atoi(s.substr(1).c_str());
+  set_order(order);
+}
+
 void Pulsar::WaveletTransform::free_mem() {
   if (data!=NULL) delete [] data;
   if (work!=NULL) gsl_wavelet_workspace_free(work);
