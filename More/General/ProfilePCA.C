@@ -58,6 +58,7 @@ void Pulsar::ProfilePCA::set_nharm_cov(unsigned nharm)
   nharm_cov = nharm;
   cov = new double[4*nharm_cov*nharm_cov]; // No DC terms
   mean = new double[2*nharm_cov + 2];      // Includes DC
+  reset();
 }
 
 unsigned Pulsar::ProfilePCA::get_nharm_cov()
@@ -96,6 +97,10 @@ void Pulsar::ProfilePCA::add_Profile(const Profile *p)
       <<"Not enough profile bins for requested number of harmonics." 
       << endl;
 
+  // If weight==0.0, quit
+  float wt = p->get_weight();
+  if (wt==0.0) return;
+
   // FFT input profile
   // If we'll be adding a lot of profiles, it might
   // be more efficient to calc time domain cov matrix then
@@ -107,7 +112,6 @@ void Pulsar::ProfilePCA::add_Profile(const Profile *p)
   // cov indices are offset by 2 since we're ignoring
   // the DC terms.
   unsigned lim = (nfbins-2<2*nharm_cov) ? nfbins-2 : 2*nharm_cov;
-  float wt = p->get_weight();
   for (unsigned i=2; i<=lim; i++) {
     mean[i] += wt*fprof[i];
     for (unsigned j=i; j<=lim; j++) {
