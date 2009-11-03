@@ -840,8 +840,6 @@ int main (int argc, char** argv)
 	                dmOffset, dmStep, dmHalfRange, plot_device, colour_map, minwidthsecs,
 			bestfilename);
 
-	cout << "bestfilename " << bestfilename << endl;
-
 	Archive::verbose = 0;
 
 	if (verbose)
@@ -2612,12 +2610,14 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 	  exit (-1);
 	}
 
+    const MJD start = archive->get_Integration((int)floor(archive->get_nsubint()/(double)2))->get_start_time();
+
 	fprintf(file, " %s\t%3.3f\t%3.3f\t%3.2f\t%3.5f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%s\t%d\t%d\t%d\n",
 		archive->get_source().c_str(),
 		glong,
 		glat,
 		bestSNR,
-		archive->start_time().intday() + archive->start_time().fracday(),
+		start.intday() + start.fracday(),
 		bestPeriod_bc_us/MILLISEC,
 		periodError_ms,
 		bestDM,
@@ -2630,7 +2630,7 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 
 	if (file != NULL) {
 		fprintf(file, " %3.6f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%3.3f\t%3.2f\t%s %d %d %d\n",
-		archive->start_time().intday() + archive->start_time().fracday(),
+		start.intday() + start.fracday(),
 		bestPeriod_bc_us/MILLISEC,
 		periodError_ms,
 		bestDM,
