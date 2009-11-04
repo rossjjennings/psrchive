@@ -43,7 +43,7 @@ namespace Pulsar {
     void transform(Profile *);
 
     //! Different types of filter
-    enum Method { Wiener, Sinc_MSE, Sinc_IC };
+    enum Method { Wiener, Sinc_MSE, Sinc_IC, VonMises };
 
     //! Set filter method
     void set_method(Method m);
@@ -82,6 +82,9 @@ namespace Pulsar {
     //! Compute using a generic filter func
     void compute_lpf(const float *pspec, double sigma2, int nh,
         float (*filter_func)(float,float));
+
+    //! Compute using a Von Mises filter func
+    void compute_vonmises_lpf(const float *pspec, double sigma2, int nh);
 
   };
 

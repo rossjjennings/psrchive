@@ -9,6 +9,9 @@
 #include "Pulsar/Profile.h"
 #include "FTransform.h"
 
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_sf_bessel.h>
+
 #include <complex>
 #include <math.h>
 
@@ -20,6 +23,7 @@ Pulsar::AdaptiveSmooth::AdaptiveSmooth ()
   hold=false;
   noise_band=0.3;
   method = Sinc_IC;
+  gsl_set_error_handler_off();
 }
 
 Pulsar::AdaptiveSmooth::~AdaptiveSmooth ()
@@ -108,6 +112,8 @@ void Pulsar::AdaptiveSmooth::compute(const float *fprof, int nbin)
     compute_sinc_ic(pspec, sigma2, nh);
   else if (method==Sinc_MSE)
     compute_sinc_mse(pspec, sigma2, nh);
+  else if (method==VonMises)
+    compute_vonmises_lpf(pspec, sigma2, nh);
   else 
     throw Error(InvalidState, "Pulsar::AdaptiveSmooth::compute",
         "Invalid filter method selected");
@@ -197,6 +203,23 @@ void Pulsar::AdaptiveSmooth::compute_lpf(const float *pspec,
   for (unsigned ih=0; ih<nh; ih++) 
     filter[ih] = filter_func((float)ih, (float)ih_min);
 
+}
+
+/* Return freq-domain representation of von mises smoothing kernel */
+static float von_mises_filter(float freq, float freq_cutoff) {
+  const double k = freq_cutoff*freq_cutoff;
+  const int n = (int)freq;
+  gsl_sf_result top,bot;
+  int rv = gsl_sf_bessel_In_scaled_e(n,k,&top);
+  if (rv!=GSL_SUCCESS) return 0.0;
+  rv = gsl_sf_bessel_I0_scaled_e(k,&bot);
+  if (rv!=GSL_SUCCESS) return 0.0;
+  return top.val/bot.val;
+}
+
+void Pulsar::AdaptiveSmooth::compute_vonmises_lpf(const float *pspec, 
+    double sigma2, int nh) {
+  compute_lpf(pspec, sigma2, nh, von_mises_filter);
 }
 
 void Pulsar::AdaptiveSmooth::compute_sinc_ic(const float *pspec,
