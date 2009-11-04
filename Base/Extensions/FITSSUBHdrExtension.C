@@ -25,6 +25,7 @@ FITSSUBHdrExtension::FITSSUBHdrExtension ()
   nbits = -1;
   nch_strt = -1;
   nsblk = -1;
+  nrows = -1;
 }
 
 // Copy constructor
@@ -43,6 +44,7 @@ const FITSSUBHdrExtension& FITSSUBHdrExtension::operator= (const FITSSUBHdrExten
   nbits = extension.nbits;
   nch_strt = extension.nch_strt;
   nsblk = extension.nsblk;
+  nrows = extension.nrows;
 
   return *this;
 }
