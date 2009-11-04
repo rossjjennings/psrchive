@@ -37,6 +37,12 @@ public:
   //! Extension to append
   std::string ext;
 
+  //! Wavelet class/order
+  std::string wavelet_type;
+
+  //! Cutoff (number of sigma)
+  float wavelet_cutoff;
+
   //! Normalize outputs?
   bool normalize;
 
@@ -59,6 +65,8 @@ psrsmooth::psrsmooth ()
   ext = "sm";
   normalize = false;
   print_harm = false;
+  wavelet_type = "D8";
+  wavelet_cutoff = 1.3;
 }
 
 void psrsmooth::add_options (CommandLine::Menu& menu)
@@ -67,6 +75,12 @@ void psrsmooth::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (this, &psrsmooth::use_wavelet, 'W');
   arg->set_help ("Use Wavelet smoothing (default Sinc)");
+
+  arg = menu.add(wavelet_type, 't');
+  arg->set_help ("Use specified wavelet type");
+
+  arg = menu.add(wavelet_cutoff, 'c');
+  arg->set_help ("Set wavelet cutoff factor");
 
   arg = menu.add (normalize, 'n');
   arg->set_help ("Normalize smoothed profile");
@@ -89,6 +103,7 @@ void psrsmooth::process (Pulsar::Archive* archive)
   // Set up transformation
   Reference::To< Transformation<Profile> > smooth;
   Reference::To<AdaptiveSmooth> asmooth = NULL;
+  Reference::To<WaveletSmooth> wsmooth = NULL;
 
   // Print harmonics needs Sinc method
   if (print_harm) method = "sinc";
@@ -102,6 +117,12 @@ void psrsmooth::process (Pulsar::Archive* archive)
         "Unrecognized smoothing method (%s) selected", method.c_str());
 
   asmooth = dynamic_cast<AdaptiveSmooth*>(smooth.get());
+  wsmooth = dynamic_cast<WaveletSmooth*>(smooth.get());
+
+  if (wsmooth) {
+    wsmooth->set_wavelet(wavelet_type);
+    wsmooth->set_cutoff(wavelet_cutoff);
+  }
 
   Reference::To<Integration> subint;
 
