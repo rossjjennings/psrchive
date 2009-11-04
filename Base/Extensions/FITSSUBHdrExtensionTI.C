@@ -23,12 +23,10 @@ FITSSUBHdrExtension::Interface::Interface ( FITSSUBHdrExtension *s_instance )
   add( &FITSSUBHdrExtension::get_int_type, "int_type", "Time axis (TIME, BINPHSPERI, BINLNGASC, etc)" );
   add( &FITSSUBHdrExtension::get_int_unit, "int_unit", "Unit of time axis (SEC, PHS (0-1), DEG)" );
   add( &FITSSUBHdrExtension::get_tsamp, "tsamp", "[s] Sample interval for SEARCH-mode data" );
-
   add( &FITSSUBHdrExtension::get_nbits, "nbits", "Nr of bits/datum (SEARCH mode 'X' data, else 1)" );
-
   add( &FITSSUBHdrExtension::get_nch_strt, "nch_strt", "Start channel/sub-band number (0 to NCHAN-1)" );
-
   add( &FITSSUBHdrExtension::get_nsblk, "nsblk", "Samples/row (SEARCH mode, else 1)" );
+  add( &FITSSUBHdrExtension::get_nrows, "nrows", "Nr of rows in subint table (search mode)" );
 }
 
 
