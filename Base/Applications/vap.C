@@ -134,8 +134,34 @@ string get_etime( Reference::To< Archive > archive )
 
 string get_length( Reference::To< Archive > archive )
 {
-  tostring_precision = 6;
-  return tostring( archive->integration_length() );
+  set_precision( 3, true );
+  string result;
+
+  Reference::To<FITSHdrExtension> hdr_ext = archive->get<FITSHdrExtension>();
+
+  if ( hdr_ext ) {
+    const string obs_mode = hdr_ext->get_obs_mode();
+
+    if ( obs_mode == "SEARCH" || obs_mode == "SRCH" ) {
+      Reference::To<FITSSUBHdrExtension> sub_hdr_ext =
+        archive->get<FITSSUBHdrExtension>();
+
+      if ( sub_hdr_ext ) {
+        const double tsamp = sub_hdr_ext->get_tsamp();
+        const int nrows = sub_hdr_ext->get_nrows();
+        const int nsblk = sub_hdr_ext->get_nsblk();
+        result = tostring( tsamp * nrows * nsblk );
+      }
+    }
+  }
+
+  if ( result.empty() ) {
+    result = tostring( archive->integration_length() );
+  }
+
+  restore_precision();
+
+  return result;
 }
 
 string get_nbin_obs( Reference::To<Archive> archive )
@@ -1291,7 +1317,19 @@ string get_npol( Reference::To< Archive > archive )
 
 string get_nsub( Reference::To< Archive > archive )
 {
-  return tostring( archive->get_nsubint() );
+  string result;
+
+  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
+
+  if ( ext ) {
+    result = tostring( ext->get_nrows() );
+  }
+
+  if ( result.empty() ) {
+    return tostring( archive->get_nsubint() );
+  } else {
+    return result;
+  }
 }
 
 
