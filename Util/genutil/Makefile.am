@@ -126,8 +126,8 @@ libgenutil_la_SOURCES += JenetAnderson98Plot.C
 endif
 
 if HAVE_GSL
-include_HEADERS += PolynomialFit.h Interpolation.h
-libgenutil_la_SOURCES += PolynomialFit.C Interpolation.C
+include_HEADERS += PolynomialFit.h Interpolation.h dwt_undec.h
+libgenutil_la_SOURCES += PolynomialFit.C Interpolation.C dwt_undec.c
 endif
 
 libgenutil_la_LIBADD = @READLINE_LIBS@ @GSL_LIBS@
