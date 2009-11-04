@@ -56,6 +56,9 @@ namespace Pulsar {
       //! Set wavelet type and order using short string notation
       void set_wavelet(std::string s);
 
+      //! Set whether or not to decimate during transform
+      void set_decimate(bool _dec=true) { decimate = _dec; }
+
       //! Perform forward transform
       void transform(unsigned npts, const float *in);
 
@@ -70,6 +73,9 @@ namespace Pulsar {
 
       //! Possible states of the data
       enum State { Wavelet, Time, Empty };
+
+      //! Get decimation setting
+      const bool get_decimate() const { return decimate; }
 
       //! Get current state
       State get_state() { return state; }
@@ -92,10 +98,19 @@ namespace Pulsar {
       //! Get log2 of number of pts currently in use
       const int get_log2_npts() const { return log2_npts; };
 
+      //! Get total number of wavelet coeffs computed
+      const int get_ncoeff() const { return decimate ? npts : log2_npts*npts; }
+
+      //! Get number of coeffs at a given level
+      const int get_ncoeff(int level) const;
+
     protected:
 
       //! Wavelet type
       const gsl_wavelet_type *type;
+
+      //! Use decimated (standard) or undecimated transform
+      bool decimate;
 
       //! Wavelet order
       int order;
@@ -111,6 +126,9 @@ namespace Pulsar {
 
       //! Data storage
       double *data;
+
+      //! Mean of data
+      double mean;
 
       //! Current state of the data
       State state;

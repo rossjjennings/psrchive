@@ -35,7 +35,7 @@ namespace Pulsar {
     void transform(Profile *);
 
     //! Set wavelet type, order
-    void set_wavelet(const gsl_wavelet_type *t, int order);
+    void set_wavelet(const gsl_wavelet_type *t, int order, bool decimate=true);
 
     //! Set wavelet type, order from a string
     void set_wavelet(std::string s);
