@@ -262,7 +262,7 @@ Pulsar::ProfilePCA::decompose(const Profile *p, unsigned n_pc)
   for (unsigned ipc=0; ipc<n_pc; ipc++) {
     result[ipc] = 0.0;
     for (unsigned ibin=0; ibin<limit; ibin++) {
-      result[ipc] += fprof[ibin-2] * pc_vectors[2*ipc*nharm_pca + ibin];
+      result[ipc] += fprof[ibin+2] * pc_vectors[2*ipc*nharm_pca + ibin];
     }
   }
 
