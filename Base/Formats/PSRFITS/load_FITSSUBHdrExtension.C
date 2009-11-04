@@ -53,6 +53,7 @@ void FITSArchive::load_FITSSUBHdrExtension ( fitsfile *fptr )
 
   int i_data;
   double d_data;
+  long l_data;
   string s_data, s_default="";
 
   Reference::To< FITSSUBHdrExtension > si_hdr = new FITSSUBHdrExtension();
@@ -80,6 +81,9 @@ void FITSArchive::load_FITSSUBHdrExtension ( fitsfile *fptr )
 
   psrfits_read_key( fptr, "NSBLK", &i_data, -1, verbose == 3 );
   si_hdr->set_nsblk( i_data );
+
+  fits_get_num_rows( fptr, &l_data, &status );
+  si_hdr->set_nrows( l_data );
 
   add_extension( si_hdr );
 }
