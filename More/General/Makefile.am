@@ -108,7 +108,6 @@ libGeneral_la_SOURCES = \
 	morphological_difference.C \
 	Accumulate.C \
         AdaptiveSNR.C \
-        AdaptiveSmooth.C \
 	Append.C \
 	ArchiveTemplates.C \
         Archive_append.C \
@@ -239,7 +238,7 @@ libGeneral_la_SOURCES = \
 #
 if HAVE_GSL
 
-libGeneral_la_SOURCES += WaveletSmooth.C WaveletTransform.C
+libGeneral_la_SOURCES += WaveletSmooth.C WaveletTransform.C AdaptiveSmooth.C
 
 if HAVE_CFITSIO
 
