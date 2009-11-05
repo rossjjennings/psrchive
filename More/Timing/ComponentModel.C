@@ -212,6 +212,9 @@ void Pulsar::ComponentModel::align (const Profile *profile)
     return;
   }
 
+  // Dick requires this
+  cout << setprecision(6) << fixed << "Shift= " << shift.val << endl;
+
   for (unsigned icomp=0; icomp < components.size(); icomp++)
   {
     Estimate<double> centre = components[icomp]->get_centre() + shift * 2*M_PI;
