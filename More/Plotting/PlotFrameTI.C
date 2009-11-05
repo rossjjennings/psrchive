@@ -12,19 +12,24 @@
 
 Pulsar::PlotFrame::Interface::Interface (PlotFrame* instance)
 {
-  if (!instance)
-    throw Error (InvalidState, "Pulsar::PlotFrame::Interface",
-		 "instance not set");
-
-  set_instance (instance);
-
-  insert ( "x", instance->get_x_scale()->get_interface() );
-  insert ( "y", instance->get_y_scale()->get_interface() );
+  if (instance)
+  {
+    set_instance (instance);
+    insert ( "x", instance->get_x_scale()->get_interface() );
+    insert ( "y", instance->get_y_scale()->get_interface() );
+  }
+  else
+  {
+    import ( "x", PlotScale::Interface(),
+	     (PlotScale* (PlotFrame::*)(void)) &PlotFrame::get_x_scale );
+    import ( "y", PlotScale::Interface(),
+	     (PlotScale* (PlotFrame::*)(void)) &PlotFrame::get_y_scale );
+  }
 
   import ( "x", PlotAxis::Interface(), 
-      (PlotAxis* (PlotFrame::*)(void))&PlotFrame::get_x_axis );
+	   (PlotAxis* (PlotFrame::*)(void)) &PlotFrame::get_x_axis );
   import ( "y", PlotAxis::Interface(),
-      (PlotAxis* (PlotFrame::*)(void))&PlotFrame::get_y_axis );
+	   (PlotAxis* (PlotFrame::*)(void)) &PlotFrame::get_y_axis );
 
   import ( PlotAttributes::Interface() );
 
