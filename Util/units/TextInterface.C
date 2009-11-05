@@ -276,7 +276,8 @@ void TextInterface::Parser::insert (const string& prefix, Parser* other)
     return;
 
   for (unsigned i=0; i < other->values.size(); i++)
-    if (!import_filter || !find(other->values[i]->get_name(),false))
+    if ( !import_filter ||
+	 !find( prefix + ":" + other->values[i]->get_name(), false ) )
     {
       other->setup( other->values[i] );
       add_value( new NestedValue(prefix, other->values[i]) );
