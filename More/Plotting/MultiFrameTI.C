@@ -22,12 +22,12 @@ Pulsar::MultiFrame::Interface::Interface (MultiFrame* instance)
   import ( "x", PlotEdge::Interface(), &MultiFrame::get_x_edge );
 
   if (instance && instance->has_shared_x_scale())
-    import ( "x", PlotScale::Interface(), &MultiFrame::get_shared_x_scale );
+    insert ( "x", instance->get_shared_x_scale()->get_interface() );
 
   import ( "y", PlotEdge::Interface(), &MultiFrame::get_y_edge );
 
   if (instance && instance->has_shared_y_scale())
-    import ( "y", PlotScale::Interface(), &MultiFrame::get_shared_y_scale );
+    insert ( "y", instance->get_shared_y_scale()->get_interface() );
 
   import ( PlotAttributes::Interface() );
 
