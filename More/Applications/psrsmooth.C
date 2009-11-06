@@ -65,7 +65,7 @@ psrsmooth::psrsmooth ()
   ext = "sm";
   normalize = false;
   print_harm = false;
-  wavelet_type = "D8";
+  wavelet_type = "UD8";
   wavelet_cutoff = 1.3;
 }
 
