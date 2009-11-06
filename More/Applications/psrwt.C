@@ -42,6 +42,7 @@ void usage ()
     " -h        this help page \n"
     " -v        verbose output \n"
     " -V        very verbose output \n"
+    " -q        quiet output \n"
     " -M meta   meta names a file containing the list of files\n"
     "\n"
     "Weighting options: \n"
@@ -76,6 +77,7 @@ int main (int argc, char** argv) try
   int pscrunch = -1;
 
   bool verbose = false;
+  bool quiet = false;
   bool display = false;
   bool unload_result = true;
   bool normal = true;
@@ -102,7 +104,7 @@ int main (int argc, char** argv) try
   Pulsar::Smooth* smooth = 0;
 
   int c = 0;
-  const char* args = "b:c:DdFGhm:M:o:Pp:rTUs:S:vVw:";
+  const char* args = "b:c:DdFGhm:M:o:Pp:qrTUs:S:vVw:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -271,6 +273,10 @@ int main (int argc, char** argv) try
       verbose = true;
       break;
 
+    case 'q':
+      quiet = true;
+      break;
+
     default:
       cerr << "invalid param '" << c << "'" << endl;
     }
@@ -309,11 +315,13 @@ int main (int argc, char** argv) try
 
       if ( standard->get_nchan() > 1 
 	   && standard->get_nchan() == archive->get_nchan() ) {
-	cerr << "psrwt: standard profile varies with frequency" << endl;
+        if (!quiet)
+          cerr << "psrwt: standard profile varies with frequency" << endl;
 	channel_standard = true;
       }
       else {
-	cerr << "psrwt: fscrunching standard" << endl;
+        if (!quiet)
+          cerr << "psrwt: fscrunching standard" << endl;
 	copy = standard->total();
 	standard_snr.set_standard( copy->get_Profile (0,0,0) );
       }
@@ -384,9 +392,11 @@ int main (int argc, char** argv) try
 	  float max = profile->get_amps()[maxbin] - mean;
 	    
 	  double phase = double(maxbin) / double(subint->get_nbin());
-	  cerr << "phase=" << phase << endl;
+          if (!quiet)
+            cerr << "phase=" << phase << endl;
 	  double seconds = phase * subint->get_folding_period();
-	  cerr << "seconds=" << seconds << endl;
+          if (!quiet)
+            cerr << "seconds=" << seconds << endl;
 	    
 	  // calculate the epoch of the maximum
 	  MJD epoch = subint->get_epoch() + seconds;
