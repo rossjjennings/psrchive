@@ -32,7 +32,7 @@ using namespace std;
 void Pulsar::ComponentModel::init ()
 {
   fit_derivative = false;
-  threshold = 1e-6;
+  threshold = 1e-3;
 }
 
 Pulsar::ComponentModel::ComponentModel ()
@@ -58,8 +58,27 @@ Estimate<double> Pulsar::ComponentModel::get_shift () const try
     phase->set_value_name ("phase");
   }
 
-  const_cast<ComponentModel*>(this)->align (observation);
-  const_cast<ComponentModel*>(this)->fit (observation);
+  if (backup.size() == components.size())
+  {
+    if (verbose)
+      cerr << "Pulsar::ComponentModel::get_shift restore backup" << endl;
+
+    for (unsigned i=0; i<components.size(); i++)
+    {
+      components[i]->set_height( backup[i]->get_height() );
+      components[i]->set_concentration( backup[i]->get_concentration() );
+    }
+  }
+
+  try
+  {
+    const_cast<ComponentModel*>(this)->align (observation);
+    const_cast<ComponentModel*>(this)->fit (observation);
+  }
+  catch (Error& error)
+  {
+    throw error += "Pulsar::ComponentModel::get_shift";
+  }
 
   if (verbose)
     cerr << "Pulsar::ComponentModel::get_shift phase="
@@ -199,15 +218,27 @@ void Pulsar::ComponentModel::align (const Profile *profile)
 {
   Profile modelprof(*profile);
 
-  evaluate(modelprof.get_amps(), modelprof.get_nbin());
+  evaluate (modelprof.get_amps(), modelprof.get_nbin());
 
-  Estimate<double> shift = profile->shift(modelprof);
+  Estimate<double> shift = profile->shift (modelprof);
 
   if (verbose)
     cerr << "Pulsar::ComponentModel::align shift=" << shift << endl;
 
   if (phase)
   {
+    float normalization = profile->sum() / modelprof.sum();
+    
+    if (verbose)
+      cerr << "Pulsar::ComponentModel::align normalization="
+	   << normalization << endl;
+
+    for (unsigned icomp=0; icomp < components.size(); icomp++)
+    {
+      Estimate<double> height = components[icomp]->get_height();
+      components[icomp]->set_height ( height * normalization );
+    }
+
     phase->set_value (phase->get_value() + shift.get_value() * 2*M_PI);
     return;
   }
@@ -301,6 +332,8 @@ void Pulsar::ComponentModel::build () const
     if (verbose)
       cerr << "Pulsar::ComponentModel::build single phase" << endl;
 
+    backup.resize (components.size());
+
     ChainRule<Univariate<Scalar> >* chain = new ChainRule<Univariate<Scalar> >;
     chain->set_model (sum);
 
@@ -312,6 +345,8 @@ void Pulsar::ComponentModel::build () const
 	throw Error (InvalidState, "Pulsar::ComponentModel::fit",
 		     "iparam=%u name='%s'", icomp*3,
 		     sum->get_param_name(icomp*3).c_str());
+
+      backup[icomp] = components[icomp]->clone();
 
       SumRule<Scalar>* psum = new SumRule<Scalar>;
       psum->add_model (phase);
@@ -417,7 +452,9 @@ void Pulsar::ComponentModel::fit (const Profile *profile)
   if (variance)
     result = "chisq";
 
-  while (not_improving < 25)
+  unsigned max_iter = 100;
+
+  while (not_improving < 25 && iter < max_iter)
   { 
     if (verbose)
       cerr << "iteration " << iter;

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ComponentModel.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/10/22 18:36:07 $
+   $Revision: 1.4 $
+   $Date: 2009/11/10 04:39:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ComponentModel_h
@@ -88,6 +88,9 @@ namespace Pulsar
   protected:
 
     std::vector< Reference::To<MEAL::ScaledVonMises> > components;
+
+    mutable std::vector< Reference::To<MEAL::ScaledVonMises> > backup;
+
     std::vector<std::string> component_names;
 
     mutable std::vector< Reference::To<MEAL::ScaledVonMisesDeriv> > derivative;
