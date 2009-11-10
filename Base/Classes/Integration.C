@@ -207,18 +207,30 @@ void Pulsar::Integration::orphan ()
   parent = 0;
 }
 
+void Pulsar::Integration::range_check (unsigned ipol, unsigned ichan) const
+{
+  if (ipol >= get_npol())
+    throw Error (InvalidRange, "Integration::get_Profile",
+	         "ipol=%u >= npol=%u", ipol, get_npol());
+
+  if (ipol >= profiles.size())
+    throw Error (InvalidRange, "Integration::get_Profile",
+                 "ipol=%u >= size=%u", ipol, profiles.size());
+
+  if (ichan >= get_nchan())
+    throw Error (InvalidRange, "Integration::get_Profile",
+                 "ichan=%u >= nchan=%u", ichan, get_nchan());
+
+  if (ichan >= profiles[ipol].size())
+    throw Error (InvalidRange, "Integration::get_Profile",
+                 "ichan=%u >= size=%u", ichan, profiles[ipol].size());
+}
+
 Pulsar::Profile*
 Pulsar::Integration::get_Profile (unsigned ipol, unsigned ichan)
 {
-  if (range_checking_enabled) {
-    if (ipol>=get_npol())
-      throw Error (InvalidRange, "Integration::get_Profile",
-		   "ipol=%d npol=%d", ipol, get_npol());
-    
-    if (ichan>=get_nchan())
-      throw Error (InvalidRange, "Integration::get_Profile",
-		   "ichan=%d nchan=%d", ichan, get_nchan());
-  }
+  if (range_checking_enabled) 
+    range_check (ipol, ichan); 
 
   return profiles[ipol][ichan];
 }
@@ -226,15 +238,8 @@ Pulsar::Integration::get_Profile (unsigned ipol, unsigned ichan)
 const Pulsar::Profile*
 Pulsar::Integration::get_Profile (unsigned ipol, unsigned ichan) const
 {
-  if (range_checking_enabled) {
-    if (ipol>=get_npol())
-      throw Error (InvalidRange, "Integration::get_Profile",
-		   "ipol=%d npol=%d", ipol, get_npol());
-    
-    if (ichan>=get_nchan())
-      throw Error (InvalidRange, "Integration::get_Profile",
-		   "ichan=%d nchan=%d", ichan, get_nchan());
-  }
+  if (range_checking_enabled)
+    range_check (ipol, ichan);
 
   return profiles[ipol][ichan];
 }

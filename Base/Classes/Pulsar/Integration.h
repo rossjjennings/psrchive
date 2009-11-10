@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.99 $
-   $Date: 2009/10/02 03:11:12 $
+   $Revision: 1.100 $
+   $Date: 2009/11/10 03:24:35 $
    $Author: straten $ */
 
 /*
@@ -449,6 +449,9 @@ namespace Pulsar {
     //! Defaraday worker function
     void defaraday (unsigned ichan, unsigned kchan,
                     double rm, double f0);
+
+    //! Throw exception if ipol or ichan are out of range
+    void range_check (unsigned ipol, unsigned ichan) const;
 
     //! Expert interface
     Reference::To<Expert> expert_interface;
