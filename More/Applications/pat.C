@@ -332,7 +332,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.94 2009/10/22 17:41:58 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.95 2009/11/10 03:24:41 straten Exp $" << endl;
       return 0;
 
     case 'K':
@@ -408,6 +408,7 @@ int main (int argc, char** argv) try
 
     case 'V':
       Archive::set_verbosity(3);
+      ShiftEstimator::verbose = true;
       verbose = true;
       break;
 
