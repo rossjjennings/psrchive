@@ -7,15 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/VonMises.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/07/20 19:49:04 $
+   $Revision: 1.5 $
+   $Date: 2009/11/10 04:38:59 $
    $Author: straten $ */
 
 #ifndef __VonMises_H
 #define __VonMises_H
 
 #include "MEAL/ProductRule.h"
-//#include "MEAL/ArgumentBehaviour.h"
 #include "MEAL/ScalarParameter.h"
 #include "MEAL/ScalarArgument.h"
 #include "MEAL/ScalarMath.h"
@@ -39,6 +38,9 @@ namespace MEAL
 
     //! Destructor
     ~VonMises ();
+
+    //! Clone operator
+    VonMises* clone () const { return new VonMises(*this); }
 
     //! Set the centre
     void set_centre (double centre);

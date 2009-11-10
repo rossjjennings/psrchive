@@ -7,15 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScaledVonMises.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.4 $
+   $Date: 2009/11/10 04:38:59 $
    $Author: straten $ */
 
 #ifndef __ScaledVonMises_H
 #define __ScaledVonMises_H
 
 #include "MEAL/ProductRule.h"
-//#include "MEAL/ArgumentBehaviour.h"
 #include "MEAL/ScalarParameter.h"
 #include "MEAL/ScalarArgument.h"
 #include "MEAL/ScalarMath.h"
@@ -31,6 +30,9 @@ namespace MEAL {
     ScaledVonMises ();
     ScaledVonMises (const ScaledVonMises& copy);
     ScaledVonMises & operator = (const ScaledVonMises& copy);
+
+    //! Clone operator
+    ScaledVonMises* clone () const { return new ScaledVonMises(*this); }
 
     //! Set the centre
     void set_centre (const Estimate<double> &centre);
