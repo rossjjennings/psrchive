@@ -346,6 +346,14 @@ void Pulsar::ComponentModel::build () const
 		     "iparam=%u name='%s'", icomp*3,
 		     sum->get_param_name(icomp*3).c_str());
 
+      if (sum->get_param_name(icomp*3+1) != "concentration")
+	throw Error (InvalidState, "Pulsar::ComponentModel::fit",
+		     "iparam=%u name='%s'", icomp*3,
+		     sum->get_param_name(icomp*3).c_str());
+
+      // don't allow the widths to vary
+      sum->set_infit(icomp*3+1, false);
+
       backup[icomp] = components[icomp]->clone();
 
       SumRule<Scalar>* psum = new SumRule<Scalar>;
