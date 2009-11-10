@@ -171,13 +171,14 @@ int polynomial::load (string* instr)
 		&mjd_day_num, &frac_mjd, &dm, &doppler_shift, &log_rms_resid);
   if (scanned < 3)
   {
-    fprintf (stderr, "polynomial::load(string*) error stage 1 parsing '%s'",
-		line.c_str());
-    if (scanned < 1)
-      perror ("::");
-    else
-      fprintf (stderr, "\npolynomial::load(string*) scanned %d/5 values\n",
-	       scanned);
+    if (polyco::verbose)
+    {
+      cerr << "polynomial::load(string*) error stage 1 parsing '"<<line<<"'";
+      if (scanned < 1)
+        perror ("");
+      else
+        cerr << "\npolynomial::load(string*) scanned "<<scanned<<"/5 values\n";
+    }
     return -1;
   }
   if (polyco::verbose)
