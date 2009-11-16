@@ -163,6 +163,7 @@ void usage ()
     "                   For tempo2, <flags> include i = display instrument \n"
     "                                               r = display receiver   \n"
     "  -C \"<options>\"   Select vap-like options to be displayed on output \n"
+    "  -C \"<subint> <chan>\" Print subint and/or channel                    \n"
     "  -r               Print reference phase and dt \n"
     "  -R               Print only the phase shift and error in turns \n"
     "  -u               Print as pat-like format smjd + dt \n"
@@ -202,6 +203,7 @@ int main (int argc, char** argv) try
 
 #if HAVE_PGPLOT
   bool plot_difference = false;
+  bool centre_template_peak = false;
 #endif
 
   char *metafile = NULL;
@@ -227,7 +229,7 @@ int main (int argc, char** argv) try
   float chisq_max = 2.0;
 
 #if HAVE_PGPLOT
-#define PLOT_ARGS "t";
+#define PLOT_ARGS "t::";
 #endif
 
   const char* args = "a:A:cC:Ddf:Fg:hiK:m:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
@@ -332,7 +334,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.95 2009/11/10 03:24:41 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.96 2009/11/16 05:06:45 jonathan_khoo Exp $" << endl;
       return 0;
 
     case 'K':
@@ -392,6 +394,9 @@ int main (int argc, char** argv) try
 
 #if HAVE_PGPLOT
     case 't':
+      if (optarg && tostring(optarg) == "2") {
+        centre_template_peak = true;
+      }
       plot_difference = true;
       break;
 #endif
@@ -549,6 +554,10 @@ int main (int argc, char** argv) try
       arrival->set_standard (stdarch);
     }
 
+    if (centre_template_peak) {
+      stdarch->centre_max_bin(0.5);
+    }
+
     toas.resize (0);
 
     arrival->set_observation (arch);
@@ -560,17 +569,13 @@ int main (int argc, char** argv) try
 #if HAVE_PGPLOT
     if (plot_difference)
     {
-      rotate_archive(arch, toas);
       arch->remove_baseline();
+      rotate_archive(arch, toas);
       plotDifferences(arch, stdarch, toas, min_phase, max_phase);
     }
 #endif
 
-    if (phase_info)
-    {
-      compute_dt(arch, toas, std);
-    }
-    else if (phase_only)
+    if (phase_only)
     {
       for (unsigned i = 0; i < toas.size(); i++)
       {
@@ -586,15 +591,19 @@ int main (int argc, char** argv) try
     }
     else
     {
-      if (tempo2_output)
-      {
-	vector<Tempo::toa>::iterator tit;
-	for (tit = toas.begin(); tit != toas.end(); ++tit)
-	  (*tit).set_phase_info(true);
-      }
+        if (phase_info) {
+            compute_dt(arch, toas, std);
+        }
 
-      for (unsigned i = 0; i < toas.size(); i++)
-	toas[i].unload(stdout);
+        if (tempo2_output)
+        {
+            vector<Tempo::toa>::iterator tit;
+            for (tit = toas.begin(); tit != toas.end(); ++tit)
+                (*tit).set_phase_info(true);
+        }
+
+        for (unsigned i = 0; i < toas.size(); i++)
+            toas[i].unload(stdout);
     }
   }
   catch (Error& error)
@@ -858,16 +867,20 @@ void resize_archives(Reference::To<Archive> archive,
 
 void rotate_archive(Reference::To<Archive> archive, vector<Tempo::toa>& toas)
 {
-    const unsigned nchan = archive->get_nchan();
-    const unsigned nsub = archive->get_nsubint();
+  const unsigned nchan = archive->get_nchan();
+  const unsigned nsub = archive->get_nsubint();
 
-    vector<Tempo::toa>::iterator it = toas.begin();
-    for (unsigned isub = 0; isub < nsub; ++isub) {
-        for (unsigned ichan = 0; ichan < nchan; ++ichan, ++it) {
-            const double phase_shift = (*it).get_phase_shift();
-            archive->get_Profile(isub, 0, ichan)->rotate_phase(phase_shift);
-        }
+  vector<Tempo::toa>::iterator it = toas.begin();
+  for (unsigned isub = 0; isub < nsub; ++isub) {
+    for (unsigned ichan = 0; ichan < nchan; ++ichan) {
+
+      if (isub == (*it).get_subint() && ichan == (*it).get_channel()) {
+        const double phase_shift = (*it).get_phase_shift();
+        archive->get_Profile(isub, 0, ichan)->rotate_phase(phase_shift);
+        ++it;
+      }
     }
+  }
 }
 
 
