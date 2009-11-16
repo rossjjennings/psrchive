@@ -302,7 +302,7 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
   chan = flags.find("-chan");
   if (chan != string::npos) {
 	  flags.erase(chan, 6); // remove '-chan' from flags
-      subint_given = true;
+      chan_given = true;
   }
 
   sprintf(outstring, "%s %8.3f %s %7.3f ", fname.c_str(), frequency,
