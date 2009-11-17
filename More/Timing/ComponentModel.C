@@ -23,6 +23,7 @@
 #include "FTransform.h"
 
 #include <string.h>
+#include <stdio.h>
 
 using namespace MEAL;
 using namespace std;
