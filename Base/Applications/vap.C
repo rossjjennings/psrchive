@@ -233,7 +233,13 @@ string get_nsub_obs( Reference::To<Archive> archive )
 
 string get_dm( Reference::To< Archive > archive )
 {
-  return tostring( archive->get_dispersion_measure() );
+  set_precision( 6, true );
+
+  string result = tostring( archive->get_dispersion_measure() );
+
+  restore_precision();
+
+  return result;
 }
 
 string get_rm( Reference::To< Archive > archive )
