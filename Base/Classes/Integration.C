@@ -121,11 +121,9 @@ Pulsar::Integration& Pulsar::Integration::operator= (const Integration& subint)
 
 void Pulsar::Integration::zero ()
 {
-  vector<float> zeroes(get_nbin(), 0.0);
-
-  for (unsigned i = 0; i < get_nchan(); i++)
-    for (unsigned j = 0; j < get_npol(); j++)
-      get_Profile(j,i)->set_amps(zeroes);
+  for (unsigned ichan = 0; ichan < get_nchan(); ichan++)
+    for (unsigned ipol = 0; ipol < get_npol(); ipol++)
+      get_Profile (ipol, ichan)->zero();
 }
 
 Pulsar::Integration::~Integration ()
