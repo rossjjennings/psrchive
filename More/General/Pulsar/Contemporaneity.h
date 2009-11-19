@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Contemporaneity.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/11/19 11:52:31 $
+   $Revision: 1.2 $
+   $Date: 2009/11/19 20:27:02 $
    $Author: straten $ */
 
 #ifndef _Pulsar_Contemporaneity_H
@@ -27,15 +27,12 @@ namespace Pulsar {
   {
     
   public:
-    
-    //! Default constructor
-    Contemporaneity ();
-    
+
     //! Retrieve any additional information that may be required
-    virtual void set_archives (const Archive*, const Archive*)=0;
+    virtual void set_archives (const Archive*, const Archive*) = 0;
 
     //! Return a fraction between 0 (no overlap) and 1 (complete overlap) 
-    virtual double evaluate (const Integration*, const Integration*)=0;
+    virtual double evaluate (const Integration*, const Integration*) = 0;
 
     //! Contemporaneity at the pulsar, as determined by the phase model
     class AtPulsar;
