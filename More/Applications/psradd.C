@@ -9,6 +9,7 @@
 
 #include "Pulsar/TimeAppend.h"
 #include "Pulsar/FrequencyAppend.h"
+#include "Pulsar/PatchTime.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -35,7 +36,7 @@
 
 using namespace std;
 
-static const char* args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:o:p:PqRr:sS:tTUvVwZ:";
+static const char* args = "b:c:C:E:e:f:FG:hiI:j:J:LM:m:O:o:p:PqRr:sS:tTUvVwZ:";
 
 void reorder(Reference::To<Pulsar::Archive> arch);
 
@@ -56,6 +57,7 @@ void usage () {
     " -J jobs     multiple preprocessing jobs in 'jobs' file \n"
     " -L          Log results in source.log \n"
     " -M meta     Filename with list of files \n"
+    " -m domain   Patch missing sub-integrations: domain = time or phase \n"
     " -P          Phase align archive with total before adding \n"
     " -R          Append data in the frequency direction \n"
     " -r freq     Add archive only if it has this centre frequency \n"
@@ -175,9 +177,12 @@ int main (int argc, char **argv) try
   // Preprocessing jobs
   vector<string> jobs;
 
-  // The append algorithms
+  // Append algorithms
   Pulsar::TimeAppend time;
   Pulsar::FrequencyAppend frequency;
+
+  // Patch algorithm
+  Reference::To<Pulsar::PatchTime> patch;
 
   append = &time;
 
@@ -190,7 +195,7 @@ int main (int argc, char **argv) try
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.67 2009/07/27 03:56:35 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.68 2009/11/19 20:25:44 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -313,6 +318,24 @@ int main (int argc, char **argv) try
       command += " -M ";
       command += optarg;
       break;
+
+    case 'm':
+    {
+      Pulsar::Contemporaneity* policy = 0;
+      if (optarg == string("time"))
+	policy = new Pulsar::Contemporaneity::AtEarth;
+      else if (optarg == string("phase"))
+	policy = new Pulsar::Contemporaneity::AtPulsar;
+      else
+      {
+	cerr << "psradd: unknown contemporaneity policy '"<<optarg<<"'"<< endl;
+	return -1;
+      }
+
+      patch = new Pulsar::PatchTime;
+      patch->set_contemporaneity_policy( policy );
+      break;
+    }
 
     case 'P':
       phase_align = true;
@@ -597,6 +620,13 @@ int main (int argc, char **argv) try
 	  
 	  archive->convert_state( total->get_state() );
 
+	}
+
+	if (patch)
+	{
+	  if (verbose)
+	    cerr << "psradd: patching any missing sub-integrations" << endl;
+	  patch->operate (total, archive);
 	}
 
 	if (verbose)
