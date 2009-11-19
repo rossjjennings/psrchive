@@ -122,10 +122,26 @@ void Pulsar::IntegrationManager::manage (IntegrationManager* more)
 
 void Pulsar::IntegrationManager::manage (Integration* integration)
 {
-  // ensure that the vector is as large as the current number of subints
-  subints.resize (get_nsubint());
+  insert (get_nsubint(), integration);
+}
 
-  subints.push_back( use_Integration (integration) );
+void Pulsar::IntegrationManager::insert (unsigned isubint, 
+					 Integration* integration)
+{
+  if (isubint < get_nsubint())
+  {
+    // insert, ensuring that all Integrations have been loaded
+    subints.resize ( get_nsubint() + 1 );
+    for (unsigned i=get_nsubint(); i > isubint; i--)
+      subints[i] = get_Integration (i-1);
+  }
+  else
+  {
+    // append, possibly leaving a gap if isubint > nsubint
+    subints.resize (isubint + 1);
+  }
+
+  subints[isubint] = use_Integration (integration);
   set_nsubint( subints.size() );
 }
 

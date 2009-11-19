@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.16 $
-   $Date: 2008/11/07 22:15:11 $
+   $Revision: 1.17 $
+   $Date: 2009/11/19 11:53:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationManager_h
@@ -99,6 +99,9 @@ namespace Pulsar {
 
     //! Directly append the Integration instance (no copy)
     void manage (Integration* integration);
+
+    //! Insert the Integration instance into the specified location
+    void insert (unsigned isubint, Integration* integration);
 
     //! Remove the Integration instance
     void unmanage (const Integration*);
