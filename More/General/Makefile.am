@@ -25,6 +25,7 @@ nobase_include_HEADERS = \
         Pulsar/ColdPlasma.h \
 	Pulsar/Combination.h \
 	Pulsar/CommonOptions.h \
+	Pulsar/Contemporaneity.h \
 	Pulsar/ConvertIsolated.h \
 	Pulsar/Differentiate.h \
 	Pulsar/DisperseWeight.h \
@@ -55,6 +56,7 @@ nobase_include_HEADERS = \
         Pulsar/NoiseStatistics.h \
         Pulsar/OnPulseEstimator.h \
         Pulsar/OnPulseThreshold.h \
+	Pulsar/PatchTime.h \
 	Pulsar/PeakEdgesInterpreter.h \
 	Pulsar/PeakConsecutive.h \
 	Pulsar/PeakCumulative.h \
@@ -144,6 +146,7 @@ libGeneral_la_SOURCES = \
         ChannelZapModulation.C \
 	CommonOptions.C \
 	ConvertIsolated.C \
+	Contemporaneity.C \
 	Differentiate.C \
 	DisperseWeight.C \
         Dispersion.C \
@@ -181,6 +184,7 @@ libGeneral_la_SOURCES = \
         NoiseStatistics.C \
 	OnPulseEstimator.C \
 	OnPulseThreshold.C \
+	PatchTime.C \
 	PeakEdgesInterpreter.C \
 	PeakConsecutive.C \
 	PeakCumulative.C \
