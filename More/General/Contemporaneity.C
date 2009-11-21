@@ -41,16 +41,20 @@ double get_overlap_ratio (const T& startA, const T& endA,
   return overlap_length / total_length;
 }
 
-void 
-Contemporaneity::AtPulsar::set_archives (const Archive* A, const Archive* B)
+void Contemporaneity::AtPulsar::set_archives (const Archive* A,
+                                              const Archive* B) try
 {
   predA = A->get_model ();
   predB = B->get_model ();
 }
+catch (Error& error)
+{
+  throw error += "Pulsar::Contemporaneity::AtPulsar::set_archives";
+}
 
 //! Return a fraction between 0 (no overlap) and 1 (complete overlap) 
 double Contemporaneity::AtPulsar::evaluate (const Integration* A,
-					    const Integration* B)
+					    const Integration* B) try
 {
   Phase startA = predA->phase( A->get_epoch() );
   Phase endA = startA + 1.0;
@@ -60,7 +64,10 @@ double Contemporaneity::AtPulsar::evaluate (const Integration* A,
 
   return get_overlap_ratio (startA, endA, startB, endB);
 }
-
+catch (Error& error)
+{
+  throw error += "Pulsar::Contemporaneity::AtPulsar::evaluate";
+}
 
 
 //! Retrieve any additional information that may be required
