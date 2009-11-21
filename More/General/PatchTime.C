@@ -11,6 +11,9 @@
 
 #include "Pulsar/ArchiveExpert.h"
 
+#include <iostream>
+using namespace std;
+
 //! Default constructor
 Pulsar::PatchTime::PatchTime ()
 {
@@ -29,7 +32,7 @@ void Pulsar::PatchTime::set_minimum_contemporaneity (double min)
   minimum_contemporaneity = min;
 }
 
-void insert (Pulsar::Archive* archive, unsigned isub, const MJD& epoch)
+void insert (Pulsar::Archive* archive, unsigned& isub, const MJD& epoch)
 {
   Reference::To<Pulsar::Integration> empty;
   empty = archive->get_Integration(0)->clone();
@@ -37,16 +40,30 @@ void insert (Pulsar::Archive* archive, unsigned isub, const MJD& epoch)
   empty->set_epoch( epoch );
 
   archive->expert()->insert (isub, empty);
+  isub ++;
+}
+
+void tail (Pulsar::Archive* A, Pulsar::Archive* B, unsigned& isubA)
+{
+  while (isubA < A->get_nsubint()) 
+  {
+    Pulsar::Integration* subA = A->get_Integration (isubA);
+    cerr << "tail empty sub-integration isubA=" << isubA 
+         << " A::nsubint=" << A->get_nsubint()
+         << " B::nsubint=" << B->get_nsubint() << endl;
+    insert (B, isubA, subA->get_epoch());
+  }
 }
 
 //! Add to A whatever is missing with respect to B, and vice versa
-void Pulsar::PatchTime::operate (Archive* A, Archive* B)
+void Pulsar::PatchTime::operate (Archive* A, Archive* B) try
 {
+  contemporaneity_policy->set_archives (A, B);
+
   unsigned isubA = 0;
   unsigned isubB = 0;
 
-  while (isubA < A->get_nsubint() && isubB < B->get_nsubint() 
-	 || A->get_nsubint() != B->get_nsubint() )
+  while (isubA < A->get_nsubint() && isubB < B->get_nsubint())
   {
     Integration* subA = A->get_Integration (isubA);
     Integration* subB = B->get_Integration (isubB);
@@ -57,17 +74,24 @@ void Pulsar::PatchTime::operate (Archive* A, Archive* B)
     {
       // one of the archives requires an empty sub-integration
 
+#if 0
+    cerr << "mismatch isubA=" << isubA << " isubB=" << isubB
+         << " A::nsubint=" << A->get_nsubint()
+         << " B::nsubint=" << B->get_nsubint() << endl;
+
+    cerr << "A::epoch=" << subA->get_epoch().printdays(13) << endl;
+    cerr << "B::epoch=" << subB->get_epoch().printdays(13) << endl;
+#endif
+
       if (subA->get_epoch() > subB->get_epoch())
       {
-	// A requires an empty sub-integration
-	insert (A, isubA, subB->get_epoch());
-	isubA ++;
+	// cerr << "A requires an empty sub-integration" << endl;
+	insert (A, isubA, subB->get_epoch()); isubB++;
       }
       else
       {
-	// B requires an empty sub-integration
-	insert (B, isubB, subA->get_epoch());
-	isubB ++;
+	// cerr << "B requires an empty sub-integration" << endl;
+	insert (B, isubB, subA->get_epoch()); isubA++;
       }
     }
     else
@@ -77,4 +101,12 @@ void Pulsar::PatchTime::operate (Archive* A, Archive* B)
       isubB++;
     }
   }
+
+  tail (A, B, isubA);
+  tail (B, A, isubB);
 }
+catch (Error& error)
+{
+  throw error += "Pulsar::PatchTime::operate";
+}
+
