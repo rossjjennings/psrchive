@@ -50,7 +50,8 @@ Pulsar::IntegrationManager::get_Integration (unsigned subint)
 		 "isubint=%u nsubint=%u", subint, get_nsubint());
 
   // ensure that the subints vector is as large as the number of subints
-  subints.resize (get_nsubint());
+  if (subints.size() < get_nsubint())
+    subints.resize (get_nsubint());
 
   // if the subint has not already been loaded, call the pure virtual
   // method, load_Integration, to load the requested sub-int.
@@ -130,6 +131,10 @@ void Pulsar::IntegrationManager::insert (unsigned isubint,
 {
   if (isubint < get_nsubint())
   {
+    if (verbose > 2)
+      cerr << "Pulsar::IntegrationManager::insert"
+              " nsubint=" << get_nsubint() << endl;
+
     // insert, ensuring that all Integrations have been loaded
     subints.resize ( get_nsubint() + 1 );
     for (unsigned i=get_nsubint(); i > isubint; i--)
@@ -142,6 +147,11 @@ void Pulsar::IntegrationManager::insert (unsigned isubint,
   }
 
   subints[isubint] = use_Integration (integration);
+
+  if (verbose > 2)
+    cerr << "Pulsar::IntegrationManager::insert nsubint=" << get_nsubint() 
+         << " size=" << subints.size() << endl;
+
   set_nsubint( subints.size() );
 }
 
