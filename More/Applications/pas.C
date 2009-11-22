@@ -68,6 +68,10 @@ uint64_t power_of_two (uint64_t number)
   return 1;
 }
 
+bool auto_align = false;
+bool auto_align_invariant = false;
+void auto_align_files (std::vector<std::string>& filename);
+
 int main (int argc, char** argv) 
 {
   string refname, the_old, the_new;
@@ -91,18 +95,26 @@ int main (int argc, char** argv)
   int ci_tex = 1;  //white
   int ci_dis = 15; //dark 
   float xmin=0.0, xmax=1.0;
-  const char* args = "hir:vV";
+  const char* args = "ahiIr:vV";
 
   while ((c = getopt(argc, argv, args)) != -1) {
     switch (c) {
-      
+
+    case 'a':
+      auto_align = true;
+      break;
+
     case 'h':
       usage ();
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.28 2009/06/17 08:12:19 straten Exp $" << endl;
+      cout << "$Id: pas.C,v 1.29 2009/11/22 19:39:48 straten Exp $" << endl;
       return 0;
+
+    case 'I':
+      auto_align_invariant = true;
+      break;
 
     case 'r':
       refflag = true;
@@ -136,6 +148,17 @@ int main (int argc, char** argv)
     cerr << "No specified standard profile " << endl <<endl;
     usage();
     exit(-1);    
+  }
+
+  if (auto_align)
+  {
+    vector <string> filename;
+    for (int ai=optind; ai<argc; ai++)
+      dirglob (&filename, argv[ai]);
+
+    auto_align_files (filename);
+
+    return 0;
   }
 
   dirglob (&stdname, argv[optind]);
@@ -650,4 +673,46 @@ double convt(Reference::To<Pulsar::Archive> arch, float nbin, bool verbose)
   phase_in_time=nbin*arch->get_Integration(0)->get_folding_period()/arch->get_nbin();
   if (verbose)  cout << "Convert: phase in time " << phase_in_time <<" (s)" << endl;
   return phase_in_time;
+}
+
+void auto_align_files (std::vector<std::string>& filename)
+{
+  if (filename.size() < 2)
+  {
+    cerr << "pas: auto align requires more than one filename" << endl;
+    return;
+  }
+
+  Reference::To<Pulsar::Profile> standard;
+
+  for (unsigned i=0; i < filename.size(); i++)
+  {
+    cerr << "pas: auto align loading " << filename[i] << endl;
+
+    Reference::To<Pulsar::Archive> arch = Pulsar::Archive::load(filename[i]);
+    Reference::To<Pulsar::Archive> clone = arch->clone();
+
+    if (auto_align_invariant)
+      clone->invint();
+    else
+      clone->pscrunch();
+
+    clone->fscrunch();
+    clone->tscrunch();
+    
+    if (i == 0)
+    {
+      standard = clone->get_Profile (0,0,0);
+      continue;
+    }
+    
+    Estimate<double> shift = clone->get_Profile(0,0,0)->shift (*standard);
+      
+    cerr << "pas: auto align shift = " << shift << endl;
+    
+    arch->rotate_phase (shift.get_value());
+    
+    cerr << "pas: auto align unloading " << filename[i] << endl;
+    arch->unload ();
+  }
 }
