@@ -47,6 +47,8 @@ void usage ()
     "Other possible options are as follows:\n"
     " -h        This help page\n"
     " -i        Show revision information\n"
+    " -a        auto-align all files to first file (overwrites originals) \n"
+    " -I        auto-align using invariant profile to estimate phase shift \n"
     " -r ref    Reference profile\n"
     " -v        Verbose output\n"
     " -V        Very verbose output \n\n"
@@ -109,7 +111,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.29 2009/11/22 19:39:48 straten Exp $" << endl;
+      cout << "$Id: pas.C,v 1.30 2009/11/22 19:47:28 straten Exp $" << endl;
       return 0;
 
     case 'I':
