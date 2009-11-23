@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.112 $
-   $Date: 2009/10/02 03:37:57 $
+   $Revision: 1.113 $
+   $Date: 2009/11/23 05:28:08 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -121,11 +121,12 @@ void usage ()
        << endl;
 }
 
-// Construct a calibrator model for mode A
-SystemCalibrator* time_variation_based (const char* binname, unsigned nbin);
+// Construct a calibrator model for MEM mode
+SystemCalibrator* measurement_equation_modeling (const char* binname,
+						 unsigned nbin);
 
-// Construct a calibrator model for mode B
-SystemCalibrator* matrix_template_matching_based (const char* stdname);
+// Construct a calibrator model for MTM mode
+SystemCalibrator* matrix_template_matching (const char* stdname);
 
 Reference::To<Calibration::StandardPrepare> prepare;
 
@@ -547,7 +548,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args
-    = "1A:a:B:b:C:c:D:d:E:e:gHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rsS:t:T:u:U:vV:X:";
+    = "1A:a:B:b:C:c:D:d:E:e:gHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rS:st:T:u:U:vV:X:";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -730,8 +731,8 @@ int actual_main (int argc, char *argv[]) try
       usage ();
       return 0;
 
-    case 'V': {
-
+    case 'V':
+    {
       int level = atoi (optarg);
       verbose = true;
 
@@ -748,7 +749,6 @@ int actual_main (int argc, char *argv[]) try
       Pulsar::Archive::set_verbosity (level);
 
       break;
-
     }
 
     case 'z':
@@ -876,12 +876,12 @@ int actual_main (int argc, char *argv[]) try
 
     if (!model) try
     {
-      cerr << "pcm: creating mdodel" << endl;
+      cerr << "pcm: creating model" << endl;
 
       if (stdfile)
-	model = matrix_template_matching_based (stdfile);
+	model = matrix_template_matching (stdfile);
       else
-	model = time_variation_based (binfile, archive->get_nbin());
+	model = measurement_equation_modeling (binfile, archive->get_nbin());
 
       model->set_nthread (nthread);
       model->set_report_projection (true);
@@ -1244,18 +1244,17 @@ int actual_main (int argc, char *argv[]) try
 
   return 0;
 }
-catch (Error& error) {
+catch (Error& error)
+{
   cerr << "pcm: error" << error << endl;
   return -1;
 }
-catch (const char* error) {
-  cerr << "pcm: error " << error << endl;
-  return -1;
-}
+
 
 using namespace Pulsar;
 
-SystemCalibrator* time_variation_based (const char* binfile, unsigned nbin) try
+SystemCalibrator* measurement_equation_modeling (const char* binfile, 
+						 unsigned nbin) try
 {
   ReceptionCalibrator* model = new ReceptionCalibrator (model_type);
 
@@ -1338,7 +1337,7 @@ catch (Error& error)
   throw error += "pcm:mode A";
 }
 
-SystemCalibrator* matrix_template_matching_based (const char* stdname)
+SystemCalibrator* matrix_template_matching (const char* stdname)
 {
   PulsarCalibrator* model = new PulsarCalibrator (model_type);
 
