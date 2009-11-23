@@ -116,6 +116,16 @@ void Calibration::Instrument::equal_ellipticities ()
   feed_chain->set_constraint (2, ellipticities);
 }
 
+void Calibration::Instrument::independent_ellipticities ()
+{
+  if (!ellipticities)
+    return;
+
+  ellipticities = 0;
+  feed_chain->set_constraint (0, ellipticities.ptr());
+  feed_chain->set_constraint (2, ellipticities.ptr());
+}
+
 void Calibration::Instrument::equal_orientations ()
 {
   if (orientations)
@@ -124,6 +134,16 @@ void Calibration::Instrument::equal_orientations ()
   orientations = new MEAL::ScalarParameter;
   feed_chain->set_constraint (1, orientations);
   feed_chain->set_constraint (3, orientations);
+}
+
+void Calibration::Instrument::independent_orientations ()
+{
+  if (!orientations)
+    return;
+
+  orientations = 0;
+  feed_chain->set_constraint (1, orientations.ptr());
+  feed_chain->set_constraint (3, orientations.ptr());
 }
 
 void Calibration::Instrument::set_cyclic (bool flag)

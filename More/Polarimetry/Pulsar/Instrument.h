@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Instrument.h,v $
-   $Revision: 1.12 $
-   $Date: 2009/06/13 05:11:05 $
+   $Revision: 1.13 $
+   $Date: 2009/11/23 05:28:13 $
    $Author: straten $ */
 
 #ifndef __CalibrationInstrument_H
@@ -44,9 +44,11 @@ namespace Calibration {
 
     //! Model the ellipticities of both receptors using the same value
     void equal_ellipticities ();
+    void independent_ellipticities ();
 
     //! Model the orientations of both receptors using the same value
     void equal_orientations ();
+    void independent_orientations ();
 
     //! Set cyclical limits on the model parameters
     void set_cyclic (bool flag = true);
