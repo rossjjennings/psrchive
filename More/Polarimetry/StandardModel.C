@@ -9,7 +9,8 @@
 #include "Pulsar/SingleAxis.h"
 
 #include "Pulsar/PolnCalibrator.h"
-#include "Pulsar/BackendFeed.h"
+#include "Pulsar/Instrument.h"
+#include "Pulsar/Britton2000.h"
 
 #include "Pulsar/ReceptionModelSolver.h"
 
@@ -375,30 +376,48 @@ void Calibration::StandardModel::check_constraints ()
   that the noise diode has zero circular polarization.
 
   */
+}
 
-  return;
+void Calibration::StandardModel::no_reference_calibrators ()
+{
+  /*
+    ReferenceCalibrator observations are used to constrain the boost
+    component of the degeneracy along the Stokes V axis.  If there
+    no such observations, then it is assumed that the boost is 
+    zero ...
+  */
 
-#if 0
-  if (!fluxcal_backend)
+  MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
+  if (polar)
   {
-    /*
-      Flux calibrator observations are used to constrain the boost
-      component of the degeneracy along the Stokes V axis.  If there
-      no such observations, then it is assumed that the boost is 
-      zero ...
-    */
-    if (polar)
-      polar->set_infit (3, false);
-
-    /*
-      ... in the phenomenological parameterization, no boost along
-      the Stokes V axis means that the ellipticities are equal.
-    */
-    if (physical)
-      physical->equal_ellipticities();
+    polar->set_infit (0, false); // gain
+    polar->set_infit (3, false); // boost along V
+    return;
   }
-#endif
 
+  /*
+    ... in the phenomenological parameterization, no boost along
+    the Stokes V axis means that the ellipticities are equal.
+  */
+  Britton2000* bri00 = dynamic_cast<Britton2000*>( response.get() );
+  if (bri00)
+  {
+    bri00->set_infit (0, false); // gain
+    bri00->equal_ellipticities();
+    return;
+  }
+
+  Instrument* van04 = dynamic_cast<Instrument*>( response.get() );
+  if (van04)
+  {
+    van04->set_infit (0, false); // gain
+    van04->equal_ellipticities();
+    return;
+  }
+
+  throw Error (InvalidState, 
+               "Calibration::StandardModel::no_reference_calibrators",
+               "don't know how to handle this");
 }
 
 bool decrement_nfree (MEAL::Scalar* function)
@@ -823,6 +842,16 @@ catch (Error& error)
 void Calibration::StandardModel::disengage_time_variations (const MJD& epoch) 
 try
 {
+  /*
+  If the Instrument class ellipticities are set equal to one
+  independent parameter via a ChainRule, then it will look as though
+  the model has eight parameters (instead of seven), which messes up
+  the creation of the PolnCalibrator extension.
+  */
+  Instrument* van04 = dynamic_cast<Instrument*>( response.get() );
+  if (van04)
+    van04->independent_ellipticities();
+
   if (!time_variations_engaged)
     return;
 
@@ -840,7 +869,8 @@ try
   cerr << "before disengage nparam = " << physical->get_nparam() << endl;
 #endif
 
-  if (gain) {
+  if (gain)
+  {
 #ifdef _DEBUG
     cerr << "disengage gain" << endl;
 #endif
@@ -861,7 +891,8 @@ try
   if (pcal_gain)
     physical->set_gain( pcal_gain->get_gain() );
 
-  if (diff_gain) {
+  if (diff_gain)
+  {
 #ifdef _DEBUG
     cerr << "disengage diff_gain" << endl;
 #endif
@@ -869,7 +900,8 @@ try
     physical->set_diff_gain( diff_gain->estimate() );
   }
 
-  if (diff_phase) {
+  if (diff_phase)
+  {
 #ifdef _DEBUG
     cerr << "disengage diff_phase" << endl;
 #endif
@@ -916,8 +948,8 @@ void Calibration::StandardModel::compute_covariance
   function->evaluate( &gradient );
   unsigned nparam = function->get_nparam();
 
-  for (unsigned i=0; i<covar.size(); i++) {
-
+  for (unsigned i=0; i<covar.size(); i++)
+  {
     assert( covar[index][i] == 0.0 );
 
     if (i == index) {
@@ -930,9 +962,7 @@ void Calibration::StandardModel::compute_covariance
       covariance += gradient[iparam] * covar[ function_imap[iparam] ][i];
 
     covar[index][i] = covar[i][index] = covariance;
-
   }
-
 }
 
 void Calibration::StandardModel::get_covariance( vector<double>& covar,
@@ -985,7 +1015,8 @@ void Calibration::StandardModel::get_covariance( vector<double>& covar,
   if (diff_phase)
     compute_covariance( imap[2], Ctotal, diff_phase_imap, diff_phase );
 
-  if (physical) {
+  if (physical)
+  {
     unsigned ifeed = 3;
     for (unsigned i=0; i<frontend_imap.size(); i++)
       imap[ifeed+i] = frontend_imap[i];
@@ -1002,7 +1033,8 @@ void Calibration::StandardModel::get_covariance( vector<double>& covar,
 #ifdef _DEBUG
     cerr << i << ":" << imap[i] << " " << xform->get_param_name(i) << endl;
 #endif
-    for (unsigned j=i; j<nparam; j++) {
+    for (unsigned j=i; j<nparam; j++)
+    {
       assert( count < ncovar );
       covar[count] = Ctotal[imap[i]][imap[j]];
 
@@ -1015,11 +1047,8 @@ void Calibration::StandardModel::get_covariance( vector<double>& covar,
 		       "invalid %s variance=%lf",
 		       physical->get_param_name(i).c_str(), covar[count] );
       }
-
       count ++;
-
     }
-
   }
 
   if (count != ncovar)

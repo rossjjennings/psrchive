@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.26 $
-   $Date: 2009/08/19 21:31:09 $
+   $Revision: 1.27 $
+   $Date: 2009/11/23 05:28:23 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -84,6 +84,9 @@ namespace Calibration
 
     //! Update the relevant estimate
     void update ();
+
+    //! Work around the fact that no reference calibrators are available
+    void no_reference_calibrators ();
 
     //! Attempt to reduce the number of degrees of freedom in the model
     bool reduce_nfree ();
