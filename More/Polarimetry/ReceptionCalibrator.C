@@ -490,9 +490,20 @@ void Pulsar::ReceptionCalibrator::export_prepare () const
 void Pulsar::ReceptionCalibrator::initialize ()
 {
   if (calibrator_estimate.source.size() == 0)
-    throw Error (InvalidState, "Pulsar::ReceptionCalibrator::solve",
-		 "Without a ReferenceCalibrator observation,\n\t"
-		 "there remains a degeneracy along the Stokes V axis");
+  {
+    cerr <<
+      "Pulsar::ReceptionCalibrator::initialize WARNING: \n\t"
+      "Without a ReferenceCalibrator observation, \n\t"
+      "there remains a degeneracy along the Stokes V axis and \n\t"
+      "an unconstrained scalar gain. \n"
+      "\n\t"
+      "Therefore, the boost along the Stokes V axis \n\t"
+      "and the absolute gain will be fixed."
+	 << endl;
+
+    for (unsigned ichan=0; ichan<model.size(); ichan++)
+      model[ichan]->no_reference_calibrators ();
+  }
 
   /*
     Time variations are disengaged at the end of the call to solve.
