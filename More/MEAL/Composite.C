@@ -347,15 +347,18 @@ void MEAL::Composite::remove_component (Function* model)
   }
   else
   {   
-    unsigned imodel = find_Function(model);
+    unsigned imodel = find_Function (model);
 
     if (Function::very_verbose)
       cerr << class_name() + "remove_component imodel=" << imodel << endl;
 
     if (imodel >= models.size())
-      throw Error (InvalidRange, class_name() + "remove_component",
-		   "imodel=%d > nmodel=%d", imodel, models.size());
-  
+    {
+      if (Function::very_verbose)
+	cerr << class_name() + "remove_component function not found" << endl;
+      return;
+    }
+
     reference_check (imodel, "remove_component");
 
     nparameters -= model->get_nparam();
