@@ -1080,8 +1080,8 @@ void Pulsar::SystemCalibrator::solve ()
   catch (Error& error)
   {
     if (verbose)
-      cerr << "Pulsar::SystemCalibrator::solve failure " 
-           << error.get_message() << endl;
+      cerr << "Pulsar::SystemCalibrator::solve get_covariance error"
+	   << error << endl;
     model[ichan]->valid = false;
   }
 
