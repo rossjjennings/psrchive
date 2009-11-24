@@ -121,7 +121,7 @@ void Pulsar::ASCIIArchive::load_header (const char* filename)
   }
   else
     throw Error (InvalidState, "Pulsar::ASCIIArchive::load_header",
-        "could not parse first data line:\n%s", line);
+        "could not parse first data line:\n%s", line.c_str());
 
   set_nchan   (1);
   set_nsubint (1);
