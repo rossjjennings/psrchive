@@ -99,7 +99,8 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
     throw Error (InvalidState, "Tempo2::Generator::generate",
 		 "Tempo2::Parameters not properly initialized");
 
-  const pulsar* psr = parameters->psr;
+  pulsar psr = *(parameters->psr);
+  psr.fitMode = 0;
 
   ChebyModelSet* cms = &pred->predictor.modelset.cheby;
   pred->predictor.kind = Cheby;
@@ -107,7 +108,8 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
   long double use_epoch1 = epoch1;
   long double use_epoch2 = epoch2;
 
-  if (epoch1 == epoch2) {
+  if (epoch1 == epoch2)
+  {
     use_epoch1 -= 0.4 * segment_length;
     use_epoch2 += 0.4 * segment_length;
   }
@@ -121,7 +123,7 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
       " coeffs: ntime=" << ntimecoeff << " nfreq=" << nfreqcoeff
 	 << endl;
 
-  ChebyModelSet_Construct( cms, psr, sitename.c_str(), use_epoch1, use_epoch2,
+  ChebyModelSet_Construct( cms, &psr, sitename.c_str(), use_epoch1, use_epoch2,
 			   segment_length, segment_length*0.1, 
 			   freq1, freq2, ntimecoeff, nfreqcoeff );
 
@@ -130,10 +132,12 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
          << cms->nsegments << endl;
 
   long double rms, mav;
-  ChebyModelSet_Test( cms, psr, ntimecoeff*5*cms->nsegments, 
+  ChebyModelSet_Test( cms, &psr, ntimecoeff*5*cms->nsegments, 
 		      nfreqcoeff*5*cms->nsegments, &rms, &mav );
-  printf("RMS error = %.3Lg s MAV= %.3Lg s\n", 
-	 rms/psr[0].param[param_f].val[0], mav/psr[0].param[param_f].val[0]);
+
+  if (Predictor::verbose)
+    printf("RMS error = %.3Lg s MAV= %.3Lg s\n", 
+	   rms/psr.param[param_f].val[0], mav/psr.param[param_f].val[0]);
 
   pred->set_observing_frequency (0.5L * (freq1 + freq2));
 
