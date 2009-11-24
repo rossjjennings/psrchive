@@ -51,7 +51,7 @@ void CommandParser::initialize_readline (const char* prog_name)
 
 #ifdef HAVE_READLINE
   /* Allow conditional parsing of the ~/.inputrc file. */
-  rl_readline_name = prog_name;
+  rl_readline_name = const_cast<char*> (prog_name);
 
   /* Tell the completer that we want a crack first. */
   rl_attempted_completion_function = CommandParser::completion;
