@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Contemporaneity.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/11/19 20:27:02 $
+   $Revision: 1.3 $
+   $Date: 2009/11/24 01:09:52 $
    $Author: straten $ */
 
 #ifndef _Pulsar_Contemporaneity_H
@@ -41,6 +41,16 @@ namespace Pulsar {
     class AtEarth;
   };
 
+  /*!
+    This class should be used when combining single pulse data from
+    different bands, in which case each sub-band will be folded using a 
+    Pulsar::Predictor that has been "tuned" to a different centre frequency.
+    Consequently, the MJD of pulse #N will vary from band-to-band by the 
+    dispersion smearing time.  Instead of computing the overlap from the
+    Integration epochs, this class computes the overlap of the pulse phase 
+    regions predicted by the Pulsar::Predictor phase model at the Integration
+    epochs.
+  */
   class Contemporaneity::AtPulsar : public Contemporaneity
   {
   public:
