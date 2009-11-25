@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 
-// #define _DEBUG 1
+#define _DEBUG 1
 
 #include "Pulsar/Config.h"
 
@@ -20,6 +20,8 @@
 
 using namespace std;
 
+#include "debug.h"
+
 // global configuration
 Configuration* Pulsar::Config::config = 0;
 
@@ -31,59 +33,40 @@ void Pulsar::Config::load_config ()
   config = new Configuration;
 
   const char* psrchive_config = getenv ("PSRCHIVE_CONFIG");
-  if (psrchive_config) {
-#ifdef _DEBUG
-    cerr << "Pulsar::Config::load_config $PSRCHIVE_CONFIG=" 
-	 << psrchive_config << endl;
-#endif
-    try {
-      config->load( psrchive_config );
-    }
-    catch (Error& error) {
-      // use of a configuration file is optional
-#ifdef _DEBUG
-      cerr << "Pulsar::Config::load_config error loading " << psrchive_config
-	   << " "  << error.get_message() << endl;
-#endif
-    }
+  if (psrchive_config) try
+  {
+    DEBUG("Pulsar::Config::load_config $PSRCHIVE_CONFIG=" << psrchive_config);
+    config->load( psrchive_config );
+  }
+  catch (Error& error)
+  {
+    // use of a configuration file is optional
+    DEBUG("Pulsar::Config::load_config error loading " << psrchive_config << " "  << error.get_message());
   }
   
   const char* home = getenv ("HOME");
-  if (home) {
-#ifdef _DEBUG
-    cerr << "Pulsar::Config::load_config $HOME=" << home << endl;
-#endif
+  if (home) try
+  {
+    DEBUG("Pulsar::Config::load_config WVS 2 JV $HOME=" << home);
     string home_config = string(home) + "/.psrchive.cfg";
-
-    try {
-      config->load( home_config );
-    }
-    catch (Error& error) {
-      // use of a configuration file is optional
-#ifdef _DEBUG
-      cerr << "Pulsar::Config::load_config error loading " << home_config
-	   << " "  << error.get_message() << endl;
-#endif
-    }
+    config->load( home_config );
+  }
+  catch (Error& error)
+  {
+    // use of a configuration file is optional
+    DEBUG("Pulsar::Config::load_config error loading " << home << "/.psrchive.cfg "  << error.get_message());
   }
 
   const char* psrchive_config_last = getenv ("PSRCHIVE_CONFIG_LAST");
-  if (psrchive_config_last) {
-#ifdef _DEBUG
-    cerr << "Pulsar::Config::load_config $PSRCHIVE_CONFIG_LAST=" 
-	 << psrchive_config_last << endl;
-#endif
-
-    try {
-      config->load( psrchive_config_last );
-    }
-    catch (Error& error) {
-      // use of a configuration file is optional
-#ifdef _DEBUG
-      cerr << "Pulsar::Config::load_config error loading " <<
-      psrchive_config_last << " "  << error.get_message() << endl;
-#endif
-    }
+  if (psrchive_config_last) try
+  {
+    DEBUG("Pulsar::Config::load_config $PSRCHIVE_CONFIG_LAST=" << psrchive_config_last);
+    config->load( psrchive_config_last );
+  }
+  catch (Error& error)
+  {
+    // use of a configuration file is optional
+    DEBUG("Pulsar::Config::load_config error loading " << psrchive_config_last << " "  << error.get_message());
   }
 }
 
@@ -109,9 +92,7 @@ Configuration* Pulsar::Config::get_configuration ()
   if (!config)
     load_config ();
 
-#ifdef _DEBUG
-  cerr << "Pulsar::Config::get_configuration return " << config << endl;
-#endif
+  DEBUG("Pulsar::Config::get_configuration return " << config);
 
   return config;
 }
@@ -122,9 +103,7 @@ Pulsar::Config::Interface* Pulsar::Config::get_interface ()
   if (!interface)
     interface = new Interface;
 
-#ifdef _DEBUG
-  cerr << "Pulsar::Config::get_interface return " << interface << endl;
-#endif
+  DEBUG("Pulsar::Config::get_interface return " << interface);
 
   return interface;
 }
