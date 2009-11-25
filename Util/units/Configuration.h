@@ -7,14 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Configuration.h,v $
-   $Revision: 1.6 $
-   $Date: 2007/10/04 21:01:21 $
+   $Revision: 1.7 $
+   $Date: 2009/11/25 05:05:46 $
    $Author: straten $ */
 
 #ifndef __Configuration_h
 #define __Configuration_h
 
 #include "tostring.h"
+#include "Error.h"
+
 #include <vector>
 #include <iostream>
 #include <sstream>
@@ -30,7 +32,7 @@ public:
   Configuration (const char* filename = 0);
 
   //! Load the configuration from the specified file
-  void load (const std::string& filename);
+  void load (const std::string& filename) throw (Error);
 
   //! Keyword-value pair
   class Entry;

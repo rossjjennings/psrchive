@@ -4,9 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Configuration.h"
 #include "stringtok.h"
 #include "Error.h"
+
+#define _DEBUG
+#include "debug.h"
 
 #include <fstream>
 
@@ -21,16 +25,21 @@ Configuration::Configuration (const char* filename)
   load (filename);
 }
 
-void Configuration::load (const string& filename)
+void Configuration::load (const string& filename) throw (Error)
 {
+  DEBUG("Configuration::load filename='" << filename << "'");
+
   ifstream input (filename.c_str());
   if (!input)
+  {
+    DEBUG("Configuration::load throwing exception of type Error");
     throw Error (FailedSys, "Configuration::load", "ifstream("+filename+")");
-  
+  }
+ 
   string line;
   
-  while (!input.eof()) {
-
+  while (!input.eof())
+  {
     getline (input, line);
     line = stringtok (line, "#\n", false);  // get rid of comments
 
