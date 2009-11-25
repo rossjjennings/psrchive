@@ -10,6 +10,7 @@ include_HEADERS = \
 	complex_public.h \
         Configuration.h \
         Conventions.h \
+	debug.h \
         Error.h \
 	escape.h \
         Estimate.h \
