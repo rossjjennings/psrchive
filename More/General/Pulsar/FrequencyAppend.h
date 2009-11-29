@@ -7,16 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FrequencyAppend.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/11/29 12:13:49 $
+   $Revision: 1.8 $
+   $Date: 2009/11/29 12:23:25 $
    $Author: straten $ */
 
 #ifndef _Pulsar_FrequencyAppend_H
 #define _Pulsar_FrequencyAppend_H
 
 #include "Pulsar/Append.h"
+#include "Pulsar/Config.h"
 #include "Functor.h"
-#include "Config.h"
 
 namespace Pulsar {
 
