@@ -23,16 +23,14 @@
 using namespace Pulsar;
 using namespace std;
 
+void ensure_FrequencyAppend_linkage()
+{
+}
 
-/*! 
-  This use of the Functor template implements the Strategy design
-  pattern (ghjv94 p.315) for calculating the profile baseline mask.
-*/
-Functor< void (Integration*) > FrequencyAppend::weight_strategy;
-
-static Pulsar::Option<CommandParser> cfg
+Pulsar::Option<FrequencyAppend::Weight> FrequencyAppend::weight_strategy
 (
  new Pulsar::WeightInterpreter (FrequencyAppend::weight_strategy),
+
  "FrequencyAppend::weight", "radiometer",
 
  "Weighting policy",
@@ -143,20 +141,20 @@ void Pulsar::FrequencyAppend::combine (Archive* into, Archive* from)
 //! Initialize an archive for appending
 void Pulsar::FrequencyAppend::init (Archive* into)
 {
-  if (!weight_strategy)
+  if (!weight_strategy.get_value())
     return;
 
   const unsigned nsubint = into->get_nsubint();
 
   for (unsigned isub=0; isub < nsubint; isub++)
-    weight_strategy( into->get_Integration (isub) );
+    weight_strategy.get_value() ( into->get_Integration (isub) );
 }
 
 void Pulsar::FrequencyAppend::combine (Integration* into, Integration* from)
 try 
 {
-  if (weight_strategy)
-    weight_strategy ( from );
+  if (weight_strategy.get_value())
+    weight_strategy.get_value() ( from );
 
   into->expert()->insert(from);
 

@@ -177,10 +177,10 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
 
   if (verbose > 2)
     cerr << "Pulsar::Archive::update_model Predictor::policy=" 
-	 << Predictor::policy << endl;
+	 << Predictor::get_policy() << endl;
 
   Reference::To<Generator> generator;
-  if (model && Pulsar::Predictor::policy == Pulsar::Predictor::Input)
+  if (model && Pulsar::Predictor::get_policy() == Pulsar::Predictor::Input)
   {
     if (verbose > 2)
       cerr << "Pulsar::Archive::update_model get matching generator "

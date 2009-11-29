@@ -31,7 +31,6 @@ Pulsar::Option<bool> default_must_match
  "if certain observational parameters do not match (see ArchiveMatch)"
 );
 
-
 Pulsar::Append::Append ()
 {
   must_match = default_must_match;

@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Predict.h,v $
-   $Revision: 1.11 $
-   $Date: 2009/06/22 14:02:47 $
+   $Revision: 1.12 $
+   $Date: 2009/11/29 12:13:50 $
    $Author: straten $ */
 
 #ifndef __Tempo_Predict_h
 #define __Tempo_Predict_h
 
 #include "Pulsar/Generator.h"
-
+#include "Configuration.h"
 #include "polyco.h"
 
 namespace Tempo {
@@ -26,10 +26,10 @@ namespace Tempo {
   public:
 
     //! The minimum value of nspan allowed
-    static unsigned minimum_nspan;
+    static Configuration::Parameter<unsigned>& get_minimum_nspan();
 
     //! The maximum rms allowed, in turns
-    static double maximum_rms;
+    static Configuration::Parameter<double>& get_maximum_rms();
 
     //! Default constructor
     Predict (const Pulsar::Parameters* parameters = 0);

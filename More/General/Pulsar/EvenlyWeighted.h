@@ -7,19 +7,21 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/EvenlyWeighted.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/06/21 17:32:23 $
+   $Revision: 1.2 $
+   $Date: 2009/11/29 12:13:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_EvenlyWeighted_h
 #define __Pulsar_EvenlyWeighted_h
 
 #include "Pulsar/Divided.h"
+#include "debug.h"
 
 namespace Pulsar {
 
   template<class C>
-  class Integrate<C>::EvenlyWeighted : public Integrate<C>::Divided {
+  class Integrate<C>::EvenlyWeighted : public Integrate<C>::Divided
+  {
 
     //! Initialize ranges for the specified parameters
     void initialize (Integrate*, C*);
@@ -55,9 +57,7 @@ void Pulsar::Integrate<C>::EvenlyWeighted::initialize (Integrate*,
     if (get_weight(container,ielement) != 0)
       good_elements ++;
 
-#ifdef _DEBUG
-  cerr << "EvenlyWeighted::initialize good_elements=" << good_elements << endl;
-#endif
+  DEBUG("EvenlyWeighted::initialize good_elements=" << good_elements);
 
   // divide them up
   unsigned output_elements = 0;
@@ -68,16 +68,14 @@ void Pulsar::Integrate<C>::EvenlyWeighted::initialize (Integrate*,
 
   // and count off 'spacing' good channels per range
   unsigned ielement = 0;
-  for (unsigned irange=0; irange < output_elements; irange++) {
-
+  for (unsigned irange=0; irange < output_elements; irange++)
+  {
     for (good_elements=0;
 	 good_elements < spacing && ielement < container_size; ielement++)
       if (get_weight(container,ielement) != 0)
 	good_elements ++;
 
-#ifdef _DEBUG
-    cerr << "  stop[" << irange << "] = " << element << endl;
-#endif
+    DEBUG("  stop[" << irange << "] = " << ielement);
 
     stop_indeces[irange] = ielement;
 

@@ -23,6 +23,7 @@ include_HEADERS = \
         HeapTracked.h \
         Jacobi.h \
         Jones.h \
+	lazy.h \
         Matrix.h \
         ModifyRestore.h \
 	OwnStream.h \

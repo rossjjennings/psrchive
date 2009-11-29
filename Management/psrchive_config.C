@@ -41,6 +41,16 @@ int main (int argc, char** argv)
 {
   Pulsar::Config::ensure_linkage ();
 
+  Pulsar::Config* configuration = Pulsar::Config::get_configuration();
+
+  if (configuration->get_find_count ())
+  {
+    cerr << "psrchive_config: lazy construction model failure \n\t"
+        "Global configuration variables have been constructed \n\t"
+	"before any operations have taken place. \n" << endl;
+    return -1;
+  }
+
   Pulsar::Config::Interface* interface = Pulsar::Config::get_interface();
 
   // find the maximum string length of the name and description

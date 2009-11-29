@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/TextInterface.h,v $
-   $Revision: 1.54 $
-   $Date: 2009/09/15 12:54:42 $
+   $Revision: 1.55 $
+   $Date: 2009/11/29 12:13:50 $
    $Author: straten $ */
 
 #ifndef __TextInterface_h
@@ -279,7 +279,10 @@ namespace TextInterface {
     //! Set the description of the value
     virtual void set_description (const std::string&) = 0;
 
-    //! Pointer to the instance from which attribute value will be obtained
+    //! Set the detailed description of the value
+    virtual void set_detailed_description (const std::string&) = 0;
+
+     //! Pointer to the instance from which attribute value will be obtained
     mutable C* instance;
 
   };
@@ -321,6 +324,10 @@ namespace TextInterface {
     //! Set the description of the attribute
     void set_description (const std::string& description)
       { attribute->set_description (description); }
+
+    //! Set the detailed description of the attribute
+    void set_detailed_description (const std::string& description)
+      { attribute->set_detailed_description (description); }
 
     bool matches (const std::string& name) const
       { return attribute->matches (name); }
@@ -370,6 +377,10 @@ namespace TextInterface {
     //! Set the description of the attribute
     void set_description (const std::string& description)
       { attribute->set_description (description); }
+
+    //! Set the detailed description of the attribute
+    void set_detailed_description (const std::string& description)
+      { attribute->set_detailed_description (description); }
 
     //! Return true if the name argument matches
     bool matches (const std::string& name) const
@@ -427,6 +438,10 @@ namespace TextInterface {
     //! Set the description of the attribute
     void set_description (const std::string& description)
       { attribute->set_description (description); }
+
+    //! Set the detailed description of the attribute
+    void set_detailed_description (const std::string& description)
+      { attribute->set_detailed_description (description); }
 
     //! Return true if the name argument matches
     bool matches (const std::string& name) const;
@@ -491,6 +506,10 @@ namespace TextInterface {
     void set_description (const std::string& description)
       { attribute->set_description (description); }
 
+    //! Set the detailed description of the attribute
+    void set_detailed_description (const std::string& description)
+      { attribute->set_detailed_description (description); }
+
     //! Return true if the name argument matches
     bool matches (const std::string& name) const;
 
@@ -540,6 +559,14 @@ namespace TextInterface {
     //! Get the description of the attribute
     void set_description (const std::string& d) { description = d; }
 
+    //! Get the detailed description of the attribute
+    std::string get_detailed_description () const
+    { return detailed_description; }
+
+    //! Get the detailed description of the attribute
+    void set_detailed_description (const std::string& d)
+    { detailed_description = d; }
+
     //! Get the value of the attribute
     std::string get_value (const C* ptr) const
       { if (!ptr) return ""; return tostring( (ptr->*get) () ); }
@@ -556,6 +583,9 @@ namespace TextInterface {
 
     //! The description of the attribute
     std::string description;
+
+    //! The detailed description of the attribute
+    std::string detailed_description;
 
     //! The get method
     Get get;
@@ -593,6 +623,14 @@ namespace TextInterface {
     //! Get the description of the attribute
     void set_description (const std::string& d) { description = d; }
 
+    //! Get the detailed description of the attribute
+    std::string get_detailed_description () const
+    { return detailed_description; }
+
+    //! Get the detailed description of the attribute
+    void set_detailed_description (const std::string& d)
+    { detailed_description = d; }
+
     //! Get the value of the attribute
     std::string get_value (const C* ptr) const;
 
@@ -611,6 +649,9 @@ namespace TextInterface {
 
     //! The description of the attribute
     std::string description;
+
+    //! The detailed description of the attribute
+    std::string detailed_description;
 
     //! The get method
     Get get;
@@ -649,6 +690,14 @@ namespace TextInterface {
     //! Get the description of the attribute
     void set_description (const std::string& d) { description = d; }
 
+    //! Get the detailed description of the attribute
+    std::string get_detailed_description () const
+    { return detailed_description; }
+
+    //! Get the detailed description of the attribute
+    void set_detailed_description (const std::string& d)
+    { detailed_description = d; }
+
     //! Get the value of the attribute
     std::string get_value (const C* ptr) const
       { if (!ptr) return ""; return tostring( get(ptr) ); }
@@ -665,6 +714,9 @@ namespace TextInterface {
 
     //! The description of the attribute
     std::string description;
+
+    //! The detailed description of the attribute
+    std::string detailed_description;
 
     //! The get function object (functor)
     Unary get;

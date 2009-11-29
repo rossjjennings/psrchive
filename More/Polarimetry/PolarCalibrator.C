@@ -44,7 +44,7 @@ void solve (MEAL::Polar* polar,
   Quaternion<Estimate<double>, Hermitian> boost = sqrt( sky );
   boost /= sqrt( det(boost) );
 
-#if _DEBUG
+#ifdef _DEBUG
   Quaternion<double,Hermitian> b;
   for (unsigned i=0; i<4; i++)
     b[i] = boost[i].val;
@@ -54,7 +54,7 @@ void solve (MEAL::Polar* polar,
   Quaternion<double, Hermitian> hq;
   Quaternion<double, Unitary> uq;
 
-  polar (d, hq, uq, j);
+  ::polar (d, hq, uq, j);
 
   cerr << "hq=" << hq << endl;
   cerr << "uq=" << uq << endl;

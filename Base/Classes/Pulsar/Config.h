@@ -7,23 +7,31 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Config.h,v $
-   $Revision: 1.12 $
-   $Date: 2009/03/17 04:37:16 $
+   $Revision: 1.13 $
+   $Date: 2009/11/29 12:13:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Config_h
 #define __Pulsar_Config_h
 
+// #define _DEBUG
+
 #include "Configuration.h"
 #include "TextInterface.h"
 #include "CommandParser.h"
 
-namespace Pulsar {
-
+namespace Pulsar 
+{
   //! Stores PSRCHIVE configuration parameters
-  class Config {
-
+  class Config : public Configuration 
+  {
   public:
+
+    //! Default constructor
+    Config ();
+
+    //! Set the configuration filename
+    void set_filename (const std::string&);
 
     //! Return the name of the installation directory
     static std::string get_home ();
@@ -32,7 +40,7 @@ namespace Pulsar {
     static std::string get_runtime ();
 
     //! Return the configuration key/value pairs
-    static Configuration* get_configuration ();
+    static Config* get_configuration ();
 
     class Interface;
 
@@ -47,185 +55,208 @@ namespace Pulsar {
   protected:
 
     //! The global configuration file
-    static Configuration* config;
+    static Config* config;
     
     //! The global configuration interpreter
     static Interface* interface;
 
-    //! Load the global configuration file
-    static void load_config ();
+    //! Load the global configuration files
+    void load ();
 
+    std::string filename;
+    bool databases_loaded;
   };
+
 
   //! Configuration option
-  template<typename T, bool Mutable = true>
-  class Option {
+  template<typename T>
+  class Option : public Configuration::Parameter<T>
+  {
 
   public:
 
+    //! Construct a new Configuration::Parameter
     Option (const std::string& name, const T& default_value,
 	    const std::string& description = "none",
-	    const std::string& detailed_description = "none" )
-    { init (0, name, default_value, description, detailed_description); }
+	    const std::string& detailed_description = "none" );
 
-    Option (T* ptr, const std::string& name, const T& default_value,
+    //! Construct a new Configuration::Parameter with an associated parser
+    Option (CommandParser* parser,
+	    const std::string& name,
+	    const std::string& default_value,
 	    const std::string& description = "none",
-	    const std::string& detailed_description = "none")
-    { init (ptr, name, default_value, description, detailed_description); }
+	    const std::string& detailed_description = "none" );
 
-    Option (CommandParser* ptr,
-	    const std::string& _name, const std::string& default_value,
+    //! Wrap an existing Configuration::Parameter
+    Option (Configuration::Parameter<T>& parameter,
+	    const std::string& name, const T& default_value,
 	    const std::string& description = "none",
-	    const std::string& detailed_description = "none");
+	    const std::string& detailed_description = "none" );
 
-    //! Cast to T& operator
-    operator T& () { return *value; }
+    //! Wrap an existing Configuration::Parameter with an associated parser
+    Option (Configuration::Parameter<T>& parameter,
+	    CommandParser* parser,
+	    const std::string& name,
+	    const std::string& default_value,
+	    const std::string& description = "none",
+	    const std::string& detailed_description = "none" );
 
     //! Set equal to T operator
-    T& operator = (const T& t) { *value = t; return *value; }
+    T& operator = (const T& t)
+    { Configuration::Parameter<T>::set_value(t); return *this; }
 
-    //! Equality test operator
-    bool operator == (const T& t) { return *value == t; }
-
-    std::string name;
     std::string description;
     std::string detailed_description;
-    T* value;
-
-  protected:
-
-    void init (T* ptr, const std::string& name, const T& default_value,
-	       const std::string& description,
-	       const std::string& detailed_description);
-
   };
 
-  template<typename T, bool Mutable>
-  std::ostream& operator << (std::ostream& ostr, const Option<T,Mutable>& o)
-  { return ostr << *(o.value); }
-
-  template<typename T, bool Mutable>
-  std::istream& operator >> (std::istream& istr, Option<T,Mutable>& option)
-  { return istr >> *(option.value); }
-
-  template<typename T, bool Mutable>
-  class OptionInterfaceGenerator {
-  public:
-    TextInterface::Value* operator() (Option<T,Mutable>* option)
-    { 
-      TextInterface::ValueGetSet<T>* value;
-      value = new TextInterface::ValueGetSet<T>( option->value,
-						 option->name,
-						 option->description );
-      value -> set_detailed_description ( option->detailed_description );
-      return value;
-    }
-  };
-
-  // specialization for read-only parameters
   template<typename T>
-  class OptionInterfaceGenerator<T,false> {
-    public:
-    TextInterface::Value* operator() (Option<T,false>* option)
-    { 
-      TextInterface::ValueGet<T>* value;
-      value = new TextInterface::ValueGet<T>( option->value,
-					      option->name,
-					      option->description );
-      value -> set_detailed_description ( option->detailed_description );
-      return value;
-    }
-  };
+  std::ostream& operator << (std::ostream& ostr, const Option<T>& o)
+  { return ostr << o.get_value(); }
 
+  template<typename T>
+  std::istream& operator >> (std::istream& istr, Option<T>& option)
+  { T val; istr >> val; option.set_value (val); return istr; }
 
-  // specialization for CommandParser classes
-  template<bool Mutable>
-  class OptionInterfaceGenerator<CommandParser,Mutable> {
-    public:
-    TextInterface::Value* operator() (Option<CommandParser,Mutable>* option)
-    {
-      return TextInterface::new_Interpreter( option->name,
-		                             option->description,
-					     option->detailed_description,
-					     option->value,
-					     &CommandParser::empty,
-					     &CommandParser::parse );
-    }
-  };
-
-  class Config::Interface : public TextInterface::Parser {
-
+  class Config::Interface : public TextInterface::Parser
+  {
   public:
 
     Interface () { alphabetical = true; }
 
-    template<typename T, bool Mutable>
-    void add (Option<T,Mutable>* option)
+    template<typename T>
+    class Element
     {
-      OptionInterfaceGenerator<T,Mutable> generator;
-      add_value ( generator(option) );
+    public:
+      typedef TextInterface::Attribute< Configuration::Parameter<T> > Type;
+    };
+
+    template<typename T>
+    typename Element<T>::Type* add (Option<T>* option)
+    {
+      TextInterface::Allocator< Configuration::Parameter<T>,T > gen;
+      
+      typename Element<T>::Type* getset;
+
+      getset = gen (option->get_key(),
+		    &Configuration::Parameter<T>::get_value,
+		    &Configuration::Parameter<T>::set_value);
+
+      getset->instance = option;
+      getset->set_description (option->description);
+      getset->set_detailed_description (option->detailed_description);
+
+      add_value( getset );
+      return getset;
     }
 
-
+    template<typename T, typename Parser>
+    void add (Option<T>* option, Parser* parser)
+    {
+      add_value( TextInterface::new_Interpreter( option->get_key(),
+						 option->description,
+						 option->detailed_description,
+						 parser,
+						 &CommandParser::empty,
+						 &CommandParser::parse ) );
+    }
   };
-
 }
 
 
-template<typename T,bool Mutable>
-void Pulsar::Option<T,Mutable>::init (T* ptr, const std::string& _name,
-				      const T& default_value,
-				      const std::string& _description,
-				      const std::string& _detailed_description)
+template<typename T>
+Pulsar::Option<T>::Option (const std::string& _name,
+			   const T& _default,
+			   const std::string& _description,
+			   const std::string& _detailed_description)
+  : Configuration::Parameter<T> (_name, Config::get_configuration(), _default)
 {
-#ifdef _DEBUG
-  std::cerr << "Pulsar::Option<T>::init ptr=" << ptr << " name=" << _name
-	    << " description=" << _description << " default=" << default_value
-	    << std::endl;
-#endif
+  DEBUG("Pulsar::Option<T> name=" << _name \
+	<< " description=" << _description << " default=" << _default);
 
-  name = _name;
   description = _description;
   detailed_description = _detailed_description;
 
-  if (!ptr)
-    value = new T;
-  else
-    value = ptr;
-
-#ifdef _DEBUG
-  std::cerr << "Pulsar::Option<T>::init get configuration" << std::endl;
-#endif
-
-  *value = Config::get_configuration()->get (name, default_value);
-  
-#ifdef _DEBUG
-  std::cerr << "Pulsar::Option<T>::init add to interface" << std::endl;
-#endif
+  DEBUG("Pulsar::Option<T> add to interface");
 
   Config::get_interface()->add (this);
 
-#ifdef _DEBUG
-  std::cerr << "Pulsar::Option<T>::init return" << std::endl;
-#endif
-
+  DEBUG("Pulsar::Option<T> return");
 }
 
-template<typename T,bool Mutable>
-Pulsar::Option<T,Mutable>::Option (CommandParser* ptr,
-				   const std::string& _name,
-				   const std::string& default_value,
-				   const std::string& _description,
-				   const std::string& _detailed_description)
+template<typename T>
+Pulsar::Option<T>::Option (CommandParser* parser,
+			   const std::string& _name,
+			   const std::string& _default,
+			   const std::string& _description,
+			   const std::string& _detailed_description )
+  : Configuration::Parameter<T> (_name, Config::get_configuration(),
+				 parser, _default)
 {
-  name = _name;
+  DEBUG("Pulsar::Option<T> parser around Configuration::parameter");
+
   description = _description;
   detailed_description = _detailed_description;
-  value = ptr;
 
-  value->parse( Config::get_configuration()->get (name, default_value) );
-  
-  Config::get_interface()->add (this);
+  DEBUG("Pulsar::Option<T> parser add to interface");
+
+  Config::get_interface()->add (this, parser);
+
+  DEBUG("Pulsar::Option<T> parser return");
 }
 
+template<typename T>
+Pulsar::Option<T>::Option (Configuration::Parameter<T>& parameter,
+			   const std::string& _name, const T& _default,
+			   const std::string& _description,
+			   const std::string& _detailed_description )
+  : Configuration::Parameter<T> (_name, Config::get_configuration(), _default)
+{
+  DEBUG("Pulsar::Option<T> wrap Configuration::parameter");
+
+  description = _description;
+  detailed_description = _detailed_description;
+  parameter.set_key (_name);
+
+  parameter.set_loader( this->loader );
+  this->loader = 0;
+
+  DEBUG("Pulsar::Option<T> wrap add to interface");
+
+  Config::get_interface()->add(this)->instance = &parameter;
+
+  DEBUG("Pulsar::Option<T> wrap return");
+}
+
+template<typename T>
+Pulsar::Option<T>::Option (Configuration::Parameter<T>& parameter,
+			   CommandParser* parser,
+			   const std::string& _name,
+			   const std::string& _default,
+			   const std::string& _description,
+			   const std::string& _detailed_description )
+  : Configuration::Parameter<T> (_name, Config::get_configuration(),
+				 parser, _default)
+{
+  DEBUG("Pulsar::Option<T> wrap parser around Configuration::parameter");
+
+  description = _description;
+  detailed_description = _detailed_description;
+  parameter.set_key (_name);
+
+  DEBUG("Pulsar::Option<T> wrap parser that=" << &parameter \
+	<< " loader=" << this->loader);
+
+  parameter.set_loader( this->loader );
+  this->loader = 0;
+
+  DEBUG("Pulsar::Option<T> wrap parser add to interface");
+
+  Config::get_interface()->add (this, parser);
+
+  DEBUG("Pulsar::Option<T> wrap parser return");
+}
+
+
+
 #endif
+

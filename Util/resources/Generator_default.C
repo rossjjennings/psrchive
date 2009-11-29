@@ -5,19 +5,49 @@
  *
  ***************************************************************************/
 
+// #define _DEBUG
+
 #include "Predict.h"
+#include "lazy.h"
 
 using namespace std;
 
-Pulsar::Predictor::Policy Pulsar::Predictor::policy = Pulsar::Predictor::Input;
+std::ostream& operator<< (std::ostream& ostr, Pulsar::Predictor::Policy p)
+{
+  if (p == Pulsar::Predictor::Input)
+    ostr << "input";
 
-Pulsar::Generator* Pulsar::Generator::default_generator = 0;
+  else if (p == Pulsar::Predictor::Default)
+    ostr << "default";
+
+  return ostr;
+}
+
+std::istream& operator>> (std::istream& istr, Pulsar::Predictor::Policy& p)
+{
+  std::string policy;
+  istr >> policy;
+
+  if (policy == "input")
+    p = Pulsar::Predictor::Input;
+  else if (policy == "default")
+    p = Pulsar::Predictor::Default;
+  else
+    istr.setstate (std::istream::failbit);
+
+  return istr;
+}
+
+LAZY_GLOBAL(Pulsar::Predictor, \
+	    Configuration::Parameter<Pulsar::Predictor::Policy>, \
+	    policy, Pulsar::Predictor::Input );
+
+LAZY_GLOBAL(Pulsar::Generator, \
+	    Configuration::Parameter<Pulsar::Generator*>, \
+	    default_generator, 0);
 
 Pulsar::Generator* Pulsar::Generator::get_default ()
 {
-  if (!default_generator)
-    default_generator = new Tempo::Predict;
-
-  return default_generator->clone ();
+  return get_default_generator().get_value()->clone ();
 }
 

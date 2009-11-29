@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/resources/Pulsar/GeneratorInterpreter.h,v $
-   $Revision: 1.1 $
-   $Date: 2009/06/22 13:53:36 $
+   $Revision: 1.2 $
+   $Date: 2009/11/29 12:13:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_GeneratorInterpreter_h
@@ -36,6 +36,8 @@ namespace Pulsar
 
     //! Return the configuration string of the current baseline policy
     std::string empty ();
+
+    static Configuration::Parameter<Generator*>& get_option ();
 
   protected:
 

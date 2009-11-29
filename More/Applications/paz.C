@@ -93,7 +93,7 @@ int main (int argc, char** argv)
 
 paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
 {
-  version = "$Id: paz.C,v 1.58 2009/09/02 02:54:31 straten Exp $";
+  version = "$Id: paz.C,v 1.59 2009/11/29 12:13:49 straten Exp $";
 
   has_manual = true;
   update_history = true;
@@ -413,8 +413,8 @@ void paz::setup ()
     thestd = data->get_Profile (0, 0, 0);
     
     standard_snr.set_standard (thestd);
-    Pulsar::Profile::snr_strategy.set (&standard_snr,
-				       &Pulsar::StandardSNR::get_snr);
+    Pulsar::Profile::snr_strategy.get_value().set (&standard_snr,
+						   &Pulsar::StandardSNR::get_snr);
   }
 }
 

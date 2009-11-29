@@ -219,11 +219,6 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
     if (transformation)
       uncertainty[ibin-1]->set_transformation (transformation);
 
-#ifdef _DEBUG
-    cerr << "Pulsar::PolnProfileFit::set_standard ibin=" << ibin 
-	 << "\n  " << stokes << endl;
-#endif
-
     if (phases)
     {
       // each complex phase bin is phase related

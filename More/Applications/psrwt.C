@@ -32,6 +32,7 @@
 #include <unistd.h>
 #include <string.h>
 
+using namespace Pulsar;
 using namespace std;
 
 void usage ()
@@ -92,16 +93,16 @@ int main (int argc, char** argv) try
   bool snr_chosen = false;
   bool reset_weights = false;
 
-  Pulsar::FourierSNR fourier_snr;
-  Pulsar::StandardSNR standard_snr;
-  Pulsar::AdaptiveSNR adaptive_snr;
+  FourierSNR fourier_snr;
+  StandardSNR standard_snr;
+  AdaptiveSNR adaptive_snr;
 
-  Pulsar::GaussianBaseline mask;
+  GaussianBaseline mask;
   adaptive_snr.set_baseline_estimator (&mask);
 
-  Reference::To<Pulsar::Archive> standard;
+  Reference::To<Archive> standard;
 
-  Pulsar::Smooth* smooth = 0;
+  Smooth* smooth = 0;
 
   int c = 0;
   const char* args = "b:c:DdFGhm:M:o:Pp:qrTUs:S:vVw:";
@@ -147,12 +148,12 @@ int main (int argc, char** argv) try
       }
 
       if (strcasecmp (optarg, "fourier") == 0)
-	Pulsar::Profile::snr_strategy.set (&fourier_snr,
-					   &Pulsar::FourierSNR::get_snr);
+	Profile::snr_strategy.get_value().set (&fourier_snr,
+						       &FourierSNR::get_snr);
       
       else if (strcasecmp (optarg, "adaptive") == 0)
-	Pulsar::Profile::snr_strategy.set (&adaptive_snr,
-					   &Pulsar::AdaptiveSNR::get_snr);
+	Profile::snr_strategy.get_value().set (&adaptive_snr,
+						       &AdaptiveSNR::get_snr);
 
       else {
 	cerr << "psrwt: unrecognized S/N method '" << optarg << "'" << endl;
@@ -184,9 +185,9 @@ int main (int argc, char** argv) try
       }
 
       if (strcasecmp (name, "median") == 0)
-	smooth = new Pulsar::SmoothMedian;
+	smooth = new SmoothMedian;
       else if (strcasecmp (name, "mean") == 0)
-	smooth = new Pulsar::SmoothMean;
+	smooth = new SmoothMean;
       else {
 	cerr << "psrwt: smooth " << name << " not recognized" << endl;
 	return -1;
@@ -230,11 +231,11 @@ int main (int argc, char** argv) try
 	return -1;
       }
      
-      Pulsar::Profile::snr_strategy.set (&standard_snr,
-					 &Pulsar::StandardSNR::get_snr);
+      Profile::snr_strategy.get_value().set (&standard_snr,
+					     &StandardSNR::get_snr);
 
       cerr << "psrwt: loading standard from " << optarg << endl;
-      standard = Pulsar::Archive::load (optarg);
+      standard = Archive::load (optarg);
       standard->convert_state (Signal::Intensity);
 
       snr_chosen = true;
@@ -246,7 +247,7 @@ int main (int argc, char** argv) try
       break;
 
     case 'U':
-      Pulsar::Profile::rotate_in_phase_domain = true;
+      Profile::rotate_in_phase_domain = true;
       break;
 
     case 'w': {

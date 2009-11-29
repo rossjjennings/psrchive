@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Generator.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/06/22 14:02:41 $
+   $Revision: 1.4 $
+   $Date: 2009/11/29 12:13:50 $
    $Author: straten $ */
 
 #ifndef __PulsarGenerator_h
 #define __PulsarGenerator_h
 
 #include "Reference.h"
+#include "Configuration.h"
 #include "MJD.h"
 
 namespace Pulsar {
@@ -55,7 +56,7 @@ namespace Pulsar {
   protected:
 
     //! Default generator of new predictors
-    static Generator* default_generator;
+    static Configuration::Parameter<Generator*>& get_default_generator();
 
   };
 

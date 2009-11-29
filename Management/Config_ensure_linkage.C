@@ -6,15 +6,15 @@
  ***************************************************************************/
 
 #include "Pulsar/Config.h"
-
 #include "Pulsar/Interpreter.h"
-#include "Pulsar/FrequencyAppend.h"
+
+void ensure_FrequencyAppend_linkage ();
 
 void Pulsar::Config::ensure_linkage ()
 {
   // the standard shell uses a lot of different options
   Reference::To<Interpreter> temp = standard_shell();
 
-  FrequencyAppend append;
+  ensure_FrequencyAppend_linkage ();
 }
 

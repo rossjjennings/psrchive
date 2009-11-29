@@ -29,23 +29,22 @@ static Pulsar::Option<string> profile_swap_filename
  "processes will not conflict."
 );
 
-static VirtualMemory* profile_swap_init ()
+static Reference::To<VirtualMemory> profile_swap;
+static bool profile_swap_initialized = false;
+
+void profile_swap_initialize ()
 {
+  profile_swap_initialized = true;
+
   string filename = profile_swap_filename;
 
   if (filename == "")
-    return 0;
+    return;
 
-  VirtualMemory* swap = new VirtualMemory (filename);
+  DEBUG("psrchive: virtual memory swap file=" << filename);
 
-#ifdef _DEBUG
-  cerr << "psrchive: virtual memory swap file=" << filename << endl;
-#endif
-
-  return swap;
+  profile_swap = new VirtualMemory (filename);
 }
-
-static Reference::To<VirtualMemory> profile_swap = profile_swap_init();
 
 /*! 
   Do not allocate memory for the amps
@@ -54,10 +53,8 @@ bool Pulsar::ProfileAmps::no_amps = false;
 
 Pulsar::ProfileAmps::ProfileAmps (unsigned _nbin)
 {
-#ifdef _DEBUG
-  cerr << "Pulsar::ProfileAmps ctor nbin=" << nbin << endl;
-#endif
-
+  DEBUG("Pulsar::ProfileAmps ctor nbin=" << nbin);
+  
   nbin = 0;
   amps = NULL;
   amps_size = 0;
@@ -67,9 +64,7 @@ Pulsar::ProfileAmps::ProfileAmps (unsigned _nbin)
 
 Pulsar::ProfileAmps::ProfileAmps (const ProfileAmps& copy)
 {
-#ifdef _DEBUG
-  cerr << "Pulsar::ProfileAmps copy ctor nbin=" << copy.nbin << endl;
-#endif
+  DEBUG("Pulsar::ProfileAmps copy ctor nbin=" << copy.nbin);
 
   nbin = 0;
   amps = NULL;
@@ -91,9 +86,7 @@ static void amps_free (float* amps)
 
 Pulsar::ProfileAmps::~ProfileAmps () 
 {
-#ifdef _DEBUG
-  cerr << "Pulsar::ProfileAmps dtor amps=" << amps << endl;
-#endif
+  DEBUG("Pulsar::ProfileAmps dtor amps=" << amps);
 
   if (amps != NULL) amps_free (amps); amps = 0;
 }
@@ -119,9 +112,10 @@ void Pulsar::ProfileAmps::resize (unsigned _nbin)
 
   if (!no_amps)
   {
-#ifdef _DEBUG
-    cerr << "Pulsar::ProfileAmps::resize nbin=" << nbin << endl;
-#endif
+    DEBUG("Pulsar::ProfileAmps::resize nbin=" << nbin);
+
+    if (!profile_swap_initialized)
+      profile_swap_initialize();
 
     if (profile_swap)
       amps = profile_swap->create<float> (nbin);
@@ -130,8 +124,8 @@ void Pulsar::ProfileAmps::resize (unsigned _nbin)
 
     if (!amps)
       throw Error (BadAllocation, "Pulsar::ProfileAmps::resize",
-	               "failed to allocate %u floats (using %s swap space)",
-				   nbin, (profile_swap) ? "custom" : "system");
+		   "failed to allocate %u floats (using %s swap space)",
+		   nbin, (profile_swap) ? "custom" : "system");
 
     amps_size = nbin;
   }

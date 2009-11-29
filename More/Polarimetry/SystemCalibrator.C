@@ -722,10 +722,6 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
 
   if (!epoch_added[data.ichan])
   {
-#ifdef _DEBUG
-    cerr << "isub=" << isub 
-	 << " add epoch[" << data.ichan << "]=" << epoch << endl;
-#endif
     model[data.ichan]->add_calibrator_epoch (data.epoch);
     epoch_added[data.ichan] = true;
   }

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Predictor.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/06/22 14:02:41 $
+   $Revision: 1.8 $
+   $Date: 2009/11/29 12:13:50 $
    $Author: straten $ */
 
 #ifndef __PulsarPredictor_h
@@ -17,6 +17,7 @@
 #include "Reference.h"
 #include "Phase.h"
 #include "MJD.h"
+#include "Configuration.h"
 
 #include <stdio.h>
 
@@ -40,8 +41,8 @@ namespace Pulsar {
       Default
     };
 
-    //! Policy for creating new predictors: "input" or "default"
-    static Policy policy;
+    //! Policy for creating new predictors
+    static Configuration::Parameter<Policy>& get_policy ();
 
     //! Verbosity flag
     static bool verbose;
@@ -92,5 +93,9 @@ namespace Pulsar {
   };
 
 }
+
+std::ostream& operator<< (std::ostream& ostr, Pulsar::Predictor::Policy p);
+
+std::istream& operator>> (std::istream& istr, Pulsar::Predictor::Policy& p);
 
 #endif

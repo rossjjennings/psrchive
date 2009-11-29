@@ -9,6 +9,8 @@
 #include "config.h"
 #endif
 
+// #define _DEBUG
+
 #include "Pulsar/GeneratorInterpreter.h"
 
 #ifdef HAVE_TEMPO2
@@ -20,6 +22,8 @@ using namespace std;
 
 Pulsar::Generator::Interpreter::Interpreter ()
 {
+  DEBUG("Pulsar::Generator::Interpreter");
+
   add_command 
     ( &Generator::Interpreter::polyco,
       "polyco", "use tempo polyco by default",
@@ -36,7 +40,9 @@ Pulsar::Generator::Interpreter::Interpreter ()
 
 string Pulsar::Generator::Interpreter::polyco (const string& args) try
 {
-  default_generator = new Tempo::Predict;
+  DEBUG("Pulsar::Generator::Interpreter::polyco");
+
+  get_default_generator().set_value( new Tempo::Predict );
   current = "polyco";
   return "";
 }
@@ -49,7 +55,9 @@ catch (Error& error)
 
 string Pulsar::Generator::Interpreter::tempo2 (const string& args) try
 { 
-  default_generator = new Tempo2::Generator;
+  DEBUG("Pulsar::Generator::Interpreter::tempo2");
+
+  get_default_generator().set_value( new Tempo2::Generator );
   current = "tempo2";
   return "";
 }
@@ -60,7 +68,19 @@ catch (Error& error) {
 #endif
     
 string Pulsar::Generator::Interpreter::empty ()
-{ 
+{
+  DEBUG("Pulsar::Generator::Interpreter::empty");
+
+  // ensure that the Configuration::Parameter is loaded
+  get_default_generator().get_value();
+
   return current;
+}
+
+Configuration::Parameter<Pulsar::Generator*>&
+Pulsar::Generator::Interpreter::get_option ()
+{
+  DEBUG("Pulsar::Generator::Interpreter::get_option");
+  return get_default_generator();
 }
 

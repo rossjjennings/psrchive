@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 
-// #define _DEBUG 1
+// #define _DEBUG
 
 #include "Pulsar/GeneratorInterpreter.h"
 #include "Pulsar/Predictor.h"
@@ -22,39 +22,10 @@ namespace Tempo
 {
   int config ()
   {
-#ifdef _DEBUG
-    cerr << "Tempo::config" << endl;
-#endif
+    DEBUG("Tempo::config");
     return 0;
   }
 }
-
-std::ostream& operator<< (std::ostream& ostr, Pulsar::Predictor::Policy p)
-{
-  if (p == Pulsar::Predictor::Input)
-    ostr << "input";
-
-  else if (p == Pulsar::Predictor::Default)
-    ostr << "default";
-
-  return ostr;
-}
-
-std::istream& operator>> (std::istream& istr, Pulsar::Predictor::Policy& p)
-{
-  std::string policy;
-  istr >> policy;
-
-  if (policy == "input")
-    p = Pulsar::Predictor::Input;
-  else if (policy == "default")
-    p = Pulsar::Predictor::Default;
-  else
-    istr.setstate (std::istream::failbit);
-
-  return istr;
-}
-
 
 /* ***********************************************************************
 
@@ -65,7 +36,7 @@ std::istream& operator>> (std::istream& istr, Pulsar::Predictor::Policy& p)
 Pulsar::Option<Pulsar::Predictor::Policy>
 policy_config_wrapper 
 (
- &Pulsar::Predictor::policy, 
+ Pulsar::Predictor::get_policy(), 
  "Predictor::policy", Pulsar::Predictor::Input,
 
  "Policy for generating new predictors",
@@ -85,8 +56,10 @@ policy_config_wrapper
 
    *********************************************************************** */
 
-Pulsar::Option<CommandParser> default_type_config_wrapper
+Pulsar::Option<Pulsar::Generator*> default_type_config_wrapper
 (
+ Pulsar::Generator::Interpreter::get_option(),
+ 
  new Pulsar::Generator::Interpreter,
 
  "Predictor::default", "polyco",
@@ -105,7 +78,7 @@ Pulsar::Option<CommandParser> default_type_config_wrapper
 Pulsar::Option<unsigned>
 minimum_nspan_config_wrapper
 (
- &Tempo::Predict::minimum_nspan,
+ Tempo::Predict::get_minimum_nspan(),
  "Tempo::minimum_nspan", 0,
 
  "Minimum value of 'nspan' [minutes]",
@@ -127,7 +100,7 @@ minimum_nspan_config_wrapper
 Pulsar::Option<double>
 maximum_rms_config_wrapper
 (
- &Tempo::Predict::maximum_rms,
+ Tempo::Predict::get_maximum_rms(),
  "Tempo::maximum_rms", 1e-5,    // default is 10 microturns
 
  "Maximum value of fit rms residual [turns]",

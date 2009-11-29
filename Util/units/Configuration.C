@@ -9,9 +9,6 @@
 #include "stringtok.h"
 #include "Error.h"
 
-#define _DEBUG
-#include "debug.h"
-
 #include <fstream>
 
 using namespace std;
@@ -19,6 +16,8 @@ using namespace std;
 //! Construct from the specified file
 Configuration::Configuration (const char* filename)
 {
+  find_count = 0;
+
   if (!filename)
     return;
 
@@ -49,9 +48,7 @@ void Configuration::load (const string& filename) throw (Error)
     // parse the key
     string key = stringtok (line, " \t");
 
-#ifdef _DEBUG
-    cerr << "Configuration::load key=" << key << endl;
-#endif
+    DEBUG("Configuration::load key=" << key);
 
     if (!line.length())
       continue;
@@ -62,22 +59,18 @@ void Configuration::load (const string& filename) throw (Error)
     if (equals != "=" || !line.length())
       continue;
 
-#ifdef _DEBUG
-    cerr << "Configuration::load value=" << line << endl;
-#endif
+    DEBUG("Configuration::load value=" << line);
+
 
     Entry* entry = find (key);
-    if (entry) {
-#ifdef _DEBUG
-      cerr << "Configuration::load over-ride " << key << " = " << line << endl;
-#endif
+    if (entry)
+    {
+      DEBUG("Configuration::load over-ride " << key << " = " << line);
       entry->value = line;
     }
-
-    else {
-#ifdef _DEBUG
-      cerr << "Configuration::load new " << key << " = " << line << endl;
-#endif
+    else
+    {
+      DEBUG("Configuration::load new " << key << " = " << line);
       entries.push_back( Entry(key,line) );
     }
 
@@ -89,25 +82,22 @@ void Configuration::load (const string& filename) throw (Error)
 
 Configuration::Entry* Configuration::find (const string& key) const
 {
-#ifdef _DEBUG
-  cerr << "Configuration::find size=" << entries.size();
-  cerr << " key=" << key << endl;
-#endif
+  find_count ++;
 
-  for (unsigned i=0; i<entries.size(); i++) {
-    if (entries[i].key == key) {
+  const_cast<Configuration*>(this)->load ();
 
-#ifdef _DEBUG
-      cerr << "Configuration::find value=" << entries[i].value << endl;
-#endif
+  DEBUG("Configuration::find size=" << entries.size() << " key=" << key);
+
+  for (unsigned i=0; i<entries.size(); i++)
+  {
+    if (entries[i].key == key)
+    {
+      DEBUG("Configuration::find value=" << entries[i].value);
       return const_cast<Entry*>( &(entries[i]) );
-
     }
   }
 
-#ifdef _DEBUG
-  cerr << "Configuration::find NO FIND" << endl;
-#endif
+  DEBUG("Configuration::find " << key << " NOT FOUND");
 
   return 0;
 }

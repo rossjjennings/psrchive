@@ -13,7 +13,7 @@
 #include <iostream>
 using namespace std;
 
-#define _DEBUG 1
+// #define _DEBUG 1
 
 template <typename T, typename U = T>
 class MeanArc

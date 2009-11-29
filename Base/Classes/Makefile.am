@@ -86,8 +86,17 @@ libClasses_la_SOURCES = \
 	ThresholdMatch.C \
 	UnloadOptions.C
 
+TESTS = test_Config
+
+check_PROGRAMS = $(TESTS)
+
+test_Config_SOURCES = test_Config.C
+
 #############################################################################
 #
+
+LDADD = libClasses.la \
+	$(top_builddir)/Util/libpsrutil.la
 
 INCLUDES = -I$(top_srcdir)/Base/Extensions
 

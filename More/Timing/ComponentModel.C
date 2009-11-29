@@ -408,17 +408,6 @@ void Pulsar::ComponentModel::fit (const Profile *profile)
       data[i] = profile->get_amps()[i] - mean;
   }
 
-#ifdef _DEBUG
-
-  cerr << "Pulsar::ComponentModel::fit nparam=" << scalar->get_nparam() <<endl;
-  for (unsigned i=0; i<scalar->get_nparam(); i++)
-    cerr << i 
-	 << " " << scalar->get_param_name(i)
-	 << " " << scalar->get_param(i)
-	 << " " << scalar->get_infit(i)
-	 << endl;
-#endif
-
   Axis<double> argument; 
   model->set_argument (0, &argument);
 

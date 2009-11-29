@@ -1,4 +1,6 @@
 
+TESTS = psrchive_config
+
 bin_PROGRAMS = psrchive_info psrchive_config
 
 psrchive_info_SOURCES   = psrchive_info.C

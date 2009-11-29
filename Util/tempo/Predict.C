@@ -15,16 +15,21 @@
 #include "ephio.h"
 
 #include "Error.h"
-#include "strutil.h"
 #include "Warning.h"
+
+#include "strutil.h"
+#include "lazy.h"
 
 #include <unistd.h>
 #include <ctype.h>
 
 using namespace std;
 
-unsigned Tempo::Predict::minimum_nspan = 0;
-double Tempo::Predict::maximum_rms = 0;
+LAZY_GLOBAL(Tempo::Predict, \
+	    Configuration::Parameter<unsigned>,	minimum_nspan, 0);
+
+LAZY_GLOBAL(Tempo::Predict, \
+	    Configuration::Parameter<double>, maximum_rms, 0.0);
 
 static Warning warn;
 
@@ -99,13 +104,13 @@ void Tempo::Predict::set_nspan (unsigned minutes)
   if (nspan != minutes)
     cached = 0;
 
-  if (minimum_nspan && minutes < minimum_nspan)
+  if (get_minimum_nspan() && minutes < get_minimum_nspan())
   {
     if (Tempo::verbose)
       cerr << "Tempo::Predict::set_nspan avoiding 'Nspan too small' feature"
-	"\n\t(nspan requested=" << minutes << " minimum=" << minimum_nspan
-	   << ")" << endl;
-    minutes = minimum_nspan;
+	"\n\t(nspan requested=" << minutes 
+	   << " minimum=" << get_minimum_nspan() << ")" << endl;
+    minutes = get_minimum_nspan();
   }
 
   nspan = minutes;
@@ -369,7 +374,7 @@ polyco Tempo::Predict::generate_work () const
     else
     {  // polyco OK
 
-      if (maximum_rms)
+      if (get_maximum_rms())
       {
         for (unsigned i=0; i < cached->pollys.size(); i++)
         {
@@ -380,7 +385,7 @@ polyco Tempo::Predict::generate_work () const
             cerr << "Tempo::Predict::generate rms[" << i << "]=" 
                  << rms_turns << " turns" << endl;
 
-          if (rms_turns > maximum_rms)
+          if (rms_turns > get_maximum_rms())
           {
             warn << "Tempo::Predict::generate WARNING rms=" 
                  << rms_turns * 1e3 << " milliturns" << endl;

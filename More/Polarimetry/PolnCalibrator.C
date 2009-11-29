@@ -264,11 +264,6 @@ Pulsar::PolnCalibrator::get_solver (unsigned ichan) const
     tmp_solver[ichan] = new TmpSolver (xform->get_chisq(), xform->get_nfree());
   }
 
-#ifdef _DEBUG
-  cerr << "Pulsar::PolnCalibrator::get_solver ichan=" << ichan
-       << " solved=" << solved << endl;
-#endif
-
   return tmp_solver[ichan];
 }
 

@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.114 $
-   $Date: 2009/10/22 01:25:13 $
-   $Author: demorest $ */
+   $Revision: 1.115 $
+   $Date: 2009/11/29 12:13:49 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -151,23 +151,26 @@ namespace Pulsar {
     //! Returns the bin number with the minimum amplitude
     int find_min_bin (int bin_start=0, int bin_end=0) const;
 
+    typedef Functor< std::pair<int,int> (const Profile*) > Edges;
     //! The default implementation of the edge detection algorithm
-    static Functor< std::pair<int,int> (const Profile*) > peak_edges_strategy;
+    static Option<Edges> peak_edges_strategy;
 
     //! Find the bin numbers at which the cumulative power crosses thresholds
     void find_peak_edges (int& rise, int& fall) const;
     
+    typedef Functor< PhaseWeight* (const Profile*) > Mask;
     //! The default implementation of the baseline finding algorithm
-    static Functor< PhaseWeight* (const Profile*) > baseline_strategy;
+    static Option<Mask> baseline_strategy;
 
     //! Return a new PhaseWeight instance with the baseline phase bins masked
     PhaseWeight* baseline () const;
 
     //! The default implementation of the onpulse finding algorithm
-    static Functor< PhaseWeight* (const Profile*) > onpulse_strategy;
+    static Option<Mask> onpulse_strategy;
 
+    typedef Functor< float (const Pulsar::Profile*) > Float;
     //! The default implementation of the snr method
-    static Functor< float (const Pulsar::Profile*) > snr_strategy;
+    static Option<Float> snr_strategy;
 
     //! Returns the signal to noise ratio of the profile
     float snr () const;

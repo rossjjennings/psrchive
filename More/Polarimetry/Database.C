@@ -45,14 +45,9 @@
 using namespace std;
 using namespace Pulsar;
 
-#ifdef _DEBUG
-#define DEBUG(x) cerr << x << endl
-#else
-#define DEBUG(x)
-#endif
-
 bool Pulsar::Database::verbose = false;
 bool Pulsar::Database::cache_last_cal = true;
+
 /*! By default, the long time scale is set to four weeks. */
 Pulsar::Option<double> 
 Pulsar::Database::long_time_scale
@@ -883,18 +878,24 @@ Pulsar::Database::Criterion::best (const Entry& a, const Entry& b) const
     return b;
 }
 
-static Pulsar::Database::Criterion default_criterion;
+static Pulsar::Database::Criterion* default_criterion = 0;
 
 //! Get the default matching criterion for PolnCal observations
 Pulsar::Database::Criterion
 Pulsar::Database::get_default_criterion ()
 {
-  return default_criterion;
+  if (!default_criterion)
+    default_criterion = new Criterion;
+
+  return *default_criterion;
 }
 
 void Pulsar::Database::set_default_criterion (const Criterion& criterion)
 {
-  default_criterion = criterion;
+  if (!default_criterion)
+    default_criterion = new Criterion;
+
+  *default_criterion = criterion;
 }
 
 
