@@ -229,7 +229,9 @@ int main (int argc, char** argv) try
   float chisq_max = 2.0;
 
 #if HAVE_PGPLOT
-#define PLOT_ARGS "t::";
+#define PLOT_ARGS "t::"
+#else
+#define PLOT_ARGS ""
 #endif
 
   const char* args = "a:A:cC:Ddf:Fg:hiK:m:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
@@ -334,7 +336,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.96 2009/11/16 05:06:45 jonathan_khoo Exp $" << endl;
+      cout << "$Id: pat.C,v 1.97 2009/11/30 02:39:21 sixbynine Exp $" << endl;
       return 0;
 
     case 'K':
