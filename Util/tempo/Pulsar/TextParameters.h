@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/TextParameters.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/06/10 07:47:58 $
+   $Revision: 1.5 $
+   $Date: 2009/11/30 03:12:37 $
    $Author: straten $ */
 
 #ifndef __TextParameters_h
@@ -42,6 +42,9 @@ namespace Pulsar {
     //
     //
 
+    //! Set the text
+    void set_text (const std::string& t) { text = t; }
+
     //! Retrieve a string from the text
     std::string get_value (const std::string& keyword) const;
 
@@ -62,6 +65,33 @@ namespace Pulsar {
 
 }
 
+template<typename T>
+T parse (const std::string& value)
+{
+  return fromstring<T> (value);
+}
+
+inline std::string defortran (std::string value)
+{
+  std::string::size_type D = value.find ('D');
+  if (D != std::string::npos)
+    value[D] = 'E';
+  return value;
+}
+
+// specializations for float and double address Fortran formatting issue
+template<>
+inline float parse<float> (const std::string& value)
+{
+  return fromstring<float> ( defortran(value) );
+}
+
+template<>
+inline double parse<double> (const std::string& value)
+{
+  return fromstring<double> ( defortran(value) );
+}
+
 //! Retrieve a value from the text
 template<typename T>
 bool Pulsar::TextParameters::get_value (T& value, 
@@ -79,7 +109,7 @@ bool Pulsar::TextParameters::get_value (T& value,
 		 "keyword='" + keyword + "' not found");
   }
 
-  value = fromstring<T> (value_string);
+  value = parse<T> (value_string);
   return true;
 }
 
