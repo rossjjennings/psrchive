@@ -7,14 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.18 $
-   $Date: 2009/11/30 06:27:57 $
-   $Author: straten $ */
+   $Revision: 1.19 $
+   $Date: 2009/11/30 16:51:52 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_IntegrationManager_h
 #define __Pulsar_IntegrationManager_h
 
 #include "Pulsar/Container.h"
+
+#include <algorithm>
 
 namespace Pulsar {
 
