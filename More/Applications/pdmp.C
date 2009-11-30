@@ -761,11 +761,17 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 			i++;
 			strcpy(input_phcx_file,argv[i]);
 #else
-			printf("Sorry, can't read phcx file as this pdmp was not compiled against the psrxml library.\n");
+			cerr << "pdmp: can't read phcx file (psrchive compiled without psrxml)" << endl;
 			exit(1);
 #endif
-		}else if (strcmp(argv[i], "-dont-normalise-subints") == 0) {
+		}
+		else if (strcmp(argv[i], "-dont-normalise-subints") == 0)
+	        {
+#ifdef HAVE_PSRXML
 			normaliseSubints=false;
+#else
+			cerr << "pdmp: -dont-normalise-subints ignored (psrchive compiled without psrxml)" << endl;
+#endif
 		}else if (strcmp(argv[i], "-C") == 0) {
 			i++;
 			coarseness = atof(argv[i]);
