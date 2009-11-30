@@ -58,6 +58,9 @@ void tail (Pulsar::Archive* A, Pulsar::Archive* B, unsigned& isubA)
 //! Add to A whatever is missing with respect to B, and vice versa
 void Pulsar::PatchTime::operate (Archive* A, Archive* B) try
 {
+  A->expert()->sort();
+  B->expert()->sort();
+
   contemporaneity_policy->set_archives (A, B);
 
   unsigned isubA = 0;
