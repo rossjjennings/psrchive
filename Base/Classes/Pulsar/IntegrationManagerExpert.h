@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManagerExpert.h,v $
-   $Revision: 1.6 $
-   $Date: 2009/11/19 11:53:54 $
+   $Revision: 1.7 $
+   $Date: 2009/11/30 06:28:01 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationManagerExpert_h
@@ -53,6 +53,14 @@ namespace Pulsar {
     //! Insert the Integration instance into the specified location
     void insert (unsigned isubint, Integration* integration)
     { instance->insert (isubint, integration); }
+
+    //! Sort the Integrations according to the specified order
+    template<class StrictWeakOrdering>
+    void sort (StrictWeakOrdering comp)
+    { instance->sort (comp); }
+
+    void sort ()
+    { instance->sort (Pulsar::temporal_order); }
 
     //! Return the size of the subints vector
     unsigned get_size () const
