@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.17 $
-   $Date: 2009/11/19 11:53:54 $
+   $Revision: 1.18 $
+   $Date: 2009/11/30 06:27:57 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationManager_h
@@ -19,6 +19,9 @@
 namespace Pulsar {
 
   class Integration;
+
+  bool temporal_order (const Reference::To<Integration>& A,
+		       const Reference::To<Integration>& B);
 
   //! Manages a vector of Integration instances
   /*! This pure virtual base class implements the storage and manipulation
@@ -61,10 +64,10 @@ namespace Pulsar {
     const Integration* get_first_Integration () const;
     
     //! Construct new Integration instance
-    virtual Integration* new_Integration (const Integration* copy_this = 0) = 0;
+    virtual Integration* new_Integration (const Integration* copy = 0) = 0;
 
     //! Use the given Integration instance
-    virtual Integration* use_Integration (Integration* use_this) = 0;
+    virtual Integration* use_Integration (Integration* use) = 0;
 
     //! Load new Integration instance
     virtual Integration* load_Integration (unsigned isubint) = 0;
@@ -108,6 +111,16 @@ namespace Pulsar {
 
     //! Remove the Integration at the specified index
     void unmanage (unsigned isubint);
+
+    //! Sort the Integrations according to the specified order
+    template<class StrictWeakOrdering>
+    void sort (StrictWeakOrdering comp = temporal_order)
+    {
+      load_all ();
+      std::sort (subints.begin(), subints.begin()+get_nsubint(), comp);
+    }
+
+    void load_all ();
 
   private:
 

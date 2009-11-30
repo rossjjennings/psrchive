@@ -211,6 +211,18 @@ void Pulsar::IntegrationManager::resize (unsigned nsubint, bool instances)
     cerr << "Pulsar::IntegrationManager::resize exit" << endl;
 }
 
+bool Pulsar::temporal_order (const Reference::To<Integration>& A,
+			     const Reference::To<Integration>& B)
+{
+  return A->get_epoch() < B->get_epoch();
+}
+
+void Pulsar::IntegrationManager::load_all ()
+{
+  for (unsigned i=0; i < get_nsubint(); i++)
+    get_Integration (i);
+}
+
 //! Provides access to the expert interface
 Pulsar::IntegrationManager::Expert* Pulsar::IntegrationManager::expert ()
 {
