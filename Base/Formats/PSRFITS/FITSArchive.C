@@ -722,6 +722,8 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
   if (!filename)
     throw Error (InvalidParam, string(), "filename unspecified");
 
+  fits_version_check( verbose > 2 );
+
   if (verbose > 2)
     cerr << "FITSArchive::unload_file (" << filename << ")" << endl
 	 << "  with " << get_nextension() << " Extensions" << endl;
