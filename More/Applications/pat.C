@@ -231,7 +231,7 @@ int main (int argc, char** argv) try
 #if HAVE_PGPLOT
 #define PLOT_ARGS "t::"
 #else
-#define PLOT_ARGS ""
+#define PLOT_ARGS
 #endif
 
   const char* args = "a:A:cC:Ddf:Fg:hiK:m:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
@@ -336,7 +336,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.97 2009/11/30 02:39:21 sixbynine Exp $" << endl;
+      cout << "$Id: pat.C,v 1.98 2009/11/30 03:15:12 sixbynine Exp $" << endl;
       return 0;
 
     case 'K':
@@ -556,9 +556,11 @@ int main (int argc, char** argv) try
       arrival->set_standard (stdarch);
     }
 
+#if HAVE_PGPLOT
     if (centre_template_peak) {
       stdarch->centre_max_bin(0.5);
     }
+#endif
 
     toas.resize (0);
 
