@@ -21,6 +21,7 @@
 #include <sstream>
 #include <map>
 #include <algorithm>
+#include <float.h>
 
 #include "ColourMap.h"
 #include "dirutil.h"
@@ -222,6 +223,7 @@ double computeDMError(const Archive * archive);
 
 // 'global' xml candidate file
 phcx* xml_candidate=NULL;
+bool normaliseSubints=true;
 // Adds a 'section' to a xml candidate file from an archive.
 void setInitialXmlCandiateSection(const Archive * archive,float minwidthsecs);
 void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod,double centreDm,double centreAccn, double centreJerk,float minwidthsecs);
@@ -759,11 +761,12 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 			i++;
 			strcpy(input_phcx_file,argv[i]);
 #else
-			printf("Sorry, can't read hcx file as this pdmp was not compiled against the psrxml library.\n");
+			printf("Sorry, can't read phcx file as this pdmp was not compiled against the psrxml library.\n");
 			exit(1);
 #endif
-		} 
-		else if (strcmp(argv[i], "-C") == 0) {
+		}else if (strcmp(argv[i], "-dont-normalise-subints") == 0) {
+			normaliseSubints=false;
+		}else if (strcmp(argv[i], "-C") == 0) {
 			i++;
 			coarseness = atof(argv[i]);
 		}
@@ -3143,7 +3146,20 @@ void setSensibleStepSizes(const Archive* archive)
 
 
 #ifdef HAVE_PSRXML
+void normaliseXmlSubints(float* amps,unsigned int nbin){
+	if (normaliseSubints){
+		float max=-FLT_MAX;
+		float min=FLT_MAX;
+		for (int i = 0; i < nbin; i++){
+			max = (amps[i] > max) ? amps[i] : max;
+			min = (amps[i] < min) ? amps[i] : min;
+		}
 
+		for (int i = 0; i < nbin; i++){
+			amps[i] = (amps[i] - min) / (max-min);
+		}
+	}
+}
 void setInitialXmlCandiateSection(const Archive * archive, float minwidthsecs){
 	Reference::To<Archive> total = archive->total();
 //	total->remove_baseline();
@@ -3292,6 +3308,9 @@ void setInitialXmlCandiateSection(const Archive * archive, float minwidthsecs){
 
 				float* amps = subint->get_Profile( ipol, ichan )->get_amps();
 
+				
+				normaliseXmlSubints(amps,nbin);
+
 				section->subints[isub] = (float*)malloc(sizeof(float)*nbin);
 				memcpy(section->subints[isub],amps,sizeof(float)*nbin);
 
@@ -3392,6 +3411,8 @@ void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod
 			const unsigned ichan = 0; // fscrunched
 
 			float* amps = subint->get_Profile( ipol, ichan )->get_amps();
+
+			normaliseXmlSubints(amps,nbin);
 
 			section->subints[isub] = (float*)malloc(sizeof(float)*nbin);
 			memcpy(section->subints[isub],amps,sizeof(float)*nbin);
