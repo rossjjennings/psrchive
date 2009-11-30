@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.33 $
-   $Date: 2009/09/24 21:38:47 $
+   $Revision: 1.34 $
+   $Date: 2009/11/30 01:31:33 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -17,6 +17,7 @@
 #include "Traits.h"
 #include "complex_promote.h"
 #include "Vector.h"
+#include "debug.h"
 
 //! Quaternion multiplication is isomorphic with that of 2x2 Unitary matrices
 /*!
@@ -364,13 +365,24 @@ const Quaternion<T,Unitary> eigen (const Quaternion<T,Hermitian>& q)
 {
   T p = norm( q.get_vector() );
 
-  if (q.s1 < 0)
+  /*
+    q.s0 == 0 is a special case used by calculate_Jacobi and is required
+    for the Jacobi method to work on Hermitian matrices.  Unfortunately,
+    at the moment I can't remember how I derived calculate_Jacobi for
+    Hermitian matrices and I can't update it to work in the case of 
+    q.s1 < 0 ... another time ...
+
+    Willem van Straten - 30 November 2009
+  */
+  if (q.s1 < 0 && q.s0 != 0)
   {
+    DEBUG("eigen(Quaternion): s1 < 0");
     T m = 1.0 / sqrt( 2.0*p*(p-q.s1) );
     return Quaternion<T,Unitary> (m*q.s3, -m*q.s2, -m*(p-q.s1), 0.0);
   }
   else
   {
+    DEBUG("eigen(Quaternion): s1 >= 0");
     T m = 1.0 / sqrt( 2.0*p*(p+q.s1) );
     return Quaternion<T,Unitary> (m*(p+q.s1), 0.0, -m*q.s3, m*q.s2);
   }
