@@ -244,7 +244,13 @@ string get_dm( Reference::To< Archive > archive )
 
 string get_rm( Reference::To< Archive > archive )
 {
-  return tostring( archive->get_rotation_measure() );
+  set_precision( 3, true );
+
+  string result = tostring( archive->get_rotation_measure() );
+
+  restore_precision();
+
+  return result;
 }
 
 string get_state( Reference::To< Archive > archive )
