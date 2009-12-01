@@ -14,7 +14,7 @@
 
 using namespace std;
 
-// #define DEBUG 1
+// #define _DEBUG 1
 
 // ///////////////////////////////////////////////////////////////////////
 //
@@ -26,7 +26,7 @@ using namespace std;
 
 void load (fitsfile* fptr, polyco* model, int back)
 {
-#ifdef DEBUG
+#ifdef _DEBUG
   cerr << "load polyco PSRFITS 1" << endl;
 #endif
 
@@ -76,7 +76,7 @@ void load (fitsfile* fptr, polynomial* poly, long row)
 
   int status = 0;          // status returned by FITSIO routines
 
-#ifdef DEBUG
+#ifdef _DEBUG
   cerr << "load polynomial PSRFITS 2" << endl;
 #endif
 
@@ -92,7 +92,7 @@ void load (fitsfile* fptr, polynomial* poly, long row)
   // set the attribute
   set.set_nspan (nspan);
 
-#ifdef DEBUG
+#ifdef _DEBUG
   cerr << "load polynomial PSRFITS 2.3" << endl;
 #endif
 
@@ -103,12 +103,12 @@ void load (fitsfile* fptr, polynomial* poly, long row)
   if (anynul || status)
     throw FITSError (status, "load polynomial failed to parse NCOEF");
 
-#ifdef DEBUG
+#ifdef _DEBUG
   cerr << "load polynomial PSRFITS 2.4" << endl;
 #endif
 
 
-#ifdef DEBUG
+#ifdef _DEBUG
   cerr << "load polynomial PSRFITS 2.5" << endl;
 #endif
 
@@ -122,7 +122,7 @@ void load (fitsfile* fptr, polynomial* poly, long row)
   // set the attribute
   set.set_telescope (site[0]);
 
-#ifdef DEBUG
+#ifdef _DEBUG
   cerr << "load polynomial PSRFITS 2.6" << endl;
 #endif
 
@@ -136,7 +136,7 @@ void load (fitsfile* fptr, polynomial* poly, long row)
   // set the attribute
   set.set_freq (freq);
 
-#ifdef DEBUG
+#ifdef _DEBUG
   cerr << "load polynomial PSRFITS 3" << endl;
 #endif
 
@@ -150,7 +150,7 @@ void load (fitsfile* fptr, polynomial* poly, long row)
   // set the attribute
   set.set_reftime (ref_mjd);
 
-#ifdef DEBUG
+#ifdef _DEBUG
   cerr << "load polynomial PSRFITS 4" << endl;
 #endif
 
@@ -180,7 +180,7 @@ void load (fitsfile* fptr, polynomial* poly, long row)
   long repeat = 0;
   long width = 0;
   
-#ifdef DEBUG
+#ifdef _DEBUG
   cerr << "load polynomial PSRFITS 5" << endl;
 #endif
 
@@ -211,7 +211,7 @@ void load (fitsfile* fptr, polynomial* poly, long row)
 //
 void unload (fitsfile* fptr, const polyco* model, int back)
 {
-#ifdef DEBUG
+#ifdef _DEBUG
   cerr << "unload polyco PSRFITS 1" << endl;
 #endif
 
