@@ -5,6 +5,8 @@
  *
  ***************************************************************************/
 
+//#define _DEBUG
+
 #include "Pulsar/Contemporaneity.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -32,13 +34,26 @@ double get_overlap_ratio (const T& startA, const T& endA,
   if (overlap_end < overlap_start)
     return 0;
 
+  double overlap_length = double_cast( overlap_end - overlap_start );
+
+#if LIFE_WAS_PERFECT
+
   T total_start = std::min (startA, startB);
   T total_end = std::max (endA, endB);
 
-  double overlap_length = double_cast( overlap_end - overlap_start );
   double total_length = double_cast( total_end - total_start );
 
   return overlap_length / total_length;
+
+#else // an integration with bad data may appear shorter, but still overlap
+
+  double lengthA = double_cast( endA - startA );
+  double lengthB = double_cast( endB - startB );
+
+  return overlap_length / std::min( lengthA, lengthB );
+
+#endif
+
 }
 
 void Contemporaneity::AtPulsar::set_archives (const Archive* A,
@@ -56,6 +71,8 @@ catch (Error& error)
 double Contemporaneity::AtPulsar::evaluate (const Integration* A,
 					    const Integration* B) try
 {
+  DEBUG("Contemporaneity::AtPulsar::evaluate");
+
   Phase startA = predA->phase( A->get_epoch() );
   Phase endA = startA + 1.0;
 
@@ -90,6 +107,8 @@ void get_start_end (const Integration* subint, MJD& start, MJD& end)
 
     start = end = epoch;
     end += period;
+
+    DEBUG("START=" << start << " END=" << end << " period=" << period);
   }
   else
   {
@@ -99,6 +118,8 @@ void get_start_end (const Integration* subint, MJD& start, MJD& end)
     start = end = epoch;
     start -= 0.5 * length;
     end += 0.5 * length;
+
+    DEBUG("START=" << start << " END=" << end << " length=" << length);
   }
 }
 
@@ -106,6 +127,8 @@ void get_start_end (const Integration* subint, MJD& start, MJD& end)
 double Contemporaneity::AtEarth::evaluate (const Integration* A,
 					   const Integration* B)
 {
+  DEBUG("Contemporaneity::AtEarth::evaluate");
+
   MJD startA, endA;
   get_start_end (A, startA, endA);
   
