@@ -48,9 +48,9 @@ void tail (Pulsar::Archive* A, Pulsar::Archive* B, unsigned& isubA)
   while (isubA < A->get_nsubint()) 
   {
     Pulsar::Integration* subA = A->get_Integration (isubA);
-    cerr << "tail empty sub-integration isubA=" << isubA 
-         << " A::nsubint=" << A->get_nsubint()
-         << " B::nsubint=" << B->get_nsubint() << endl;
+    DEBUG("tail empty sub-integration isubA=" << isubA  \
+         << " A::nsubint=" << A->get_nsubint() \
+         << " B::nsubint=" << B->get_nsubint());
     insert (B, isubA, subA->get_epoch());
   }
 }
@@ -78,7 +78,7 @@ void Pulsar::PatchTime::operate (Archive* A, Archive* B) try
       // one of the archives requires an empty sub-integration
 
 #if 0
-    cerr << "mismatch isubA=" << isubA << " isubB=" << isubB
+    cerr << "mismatch ratio=" << ratio << " isubA=" << isubA << " isubB=" << isubB
          << " A::nsubint=" << A->get_nsubint()
          << " B::nsubint=" << B->get_nsubint() << endl;
 
@@ -88,12 +88,12 @@ void Pulsar::PatchTime::operate (Archive* A, Archive* B) try
 
       if (subA->get_epoch() > subB->get_epoch())
       {
-	// cerr << "A requires an empty sub-integration" << endl;
+	DEBUG("A requires an empty sub-integration isubA=" << isubA);
 	insert (A, isubA, subB->get_epoch()); isubB++;
       }
       else
       {
-	// cerr << "B requires an empty sub-integration" << endl;
+	DEBUG("B requires an empty sub-integration isubB=" << isubB);
 	insert (B, isubB, subA->get_epoch()); isubA++;
       }
     }
