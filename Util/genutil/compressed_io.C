@@ -20,7 +20,8 @@ int fwrite_compressed (FILE* fptr, const vector<float>& vals)
   vector<float>::const_iterator maxel = max_element(vals.begin(), vals.end());
   vector<float>::const_iterator ind;
 
-  if (minel == vals.end() || maxel == vals.end()) {
+  if (minel == vals.end() || maxel == vals.end())
+  {
     cerr << "fwrite_compressed: empty range" << endl;
     return -1;
   }
@@ -28,38 +29,39 @@ int fwrite_compressed (FILE* fptr, const vector<float>& vals)
   float xmax = *maxel;
   float ratio = 1.0;
 
-  if (xmin == xmax) {
-    fprintf (stderr, "fwrite_compressed: WARNING! no range in values!\n");
-    fprintf (stderr, "fwrite_compressed: min == max == %e!\n", xmin);
-  }
-  else
-    // dynamic range of quantization in this packing scheme is given by
-    // the maximum value of an unsigned short or: (unsigned short)(~0x0)
+  // dynamic range of quantization in this packing scheme is given by
+  // the maximum value of an unsigned short or: (unsigned short)(~0x0)
+  if (xmin != xmax)
     ratio = (xmax - xmin) / float((unsigned short)(~0x0));
 
   size_t writ = fwrite (&xmin, sizeof(float), 1, fptr);
-  if (writ < 1) {
+  if (writ < 1)
+  {
     perror ("fwrite_compressed: error fwrite(offset)\n");
     return -1;
   }
   writ = fwrite (&ratio, sizeof(float), 1, fptr);
-  if (writ < 1) {
+  if (writ < 1)
+  {
     perror ("fwrite_compressed: error fwrite(ratio)\n");
     return -1;
   }
 
   uint64_t size = vals.size();
   writ = fwrite (&size, sizeof(uint64_t), 1, fptr);
-  if (writ < 1) {
+  if (writ < 1)
+  {
     perror ("fwrite_compressed: error fwrite(size)\n");
     return -1;
   }
 
   unsigned short value = 0;
-  for (ind = vals.begin(); ind != vals.end(); ind++) {
+  for (ind = vals.begin(); ind != vals.end(); ind++)
+  {
     value = (unsigned short) ((*ind - xmin) / ratio);
     writ = fwrite (&value, sizeof(unsigned short), 1, fptr);
-    if (writ < 1) {
+    if (writ < 1)
+    {
       perror ("fwrite_compressed: error fwrite(value)\n");
       return -1;
     }
@@ -76,39 +78,45 @@ int fread_compressed (FILE* fptr, vector<float>* vals, bool swapendian)
 
   float offset = 0.0;
   red = fread (&offset, sizeof(float), 1, fptr);
-  if (red < 1) {
+  if (red < 1)
+  {
     perror ("fread_compressed: error fread(offset)\n");
     return -1;
   }
 
   float ratio  = 1.0;
   red = fread (&ratio, sizeof(float), 1, fptr);
-  if (red < 1) {
+  if (red < 1)
+  {
     perror ("fread_compressed: error fread(ratio)\n");
     return -1;
   }
 
   uint64_t size = 0;
 
-  if (correct_uint64_t_bug) {
+  if (correct_uint64_t_bug)
+  {
     uint32_t fix_size;
     red = fread (&fix_size, sizeof(uint32_t), 1, fptr);
     if (swapendian)
       ChangeEndian (fix_size);
     size = fix_size;
   }
-  else {
+  else
+  {
     red = fread (&size, sizeof(uint64_t), 1, fptr);
     if (swapendian)
       ChangeEndian (size);
   }
 
-  if (red < 1) {
+  if (red < 1)
+  {
     perror ("fread_compressed: error fread(size)\n");
     return -1;
   }
   
-  if (swapendian) {
+  if (swapendian)
+  {
     ChangeEndian (offset);
     ChangeEndian (ratio);
   }
@@ -116,9 +124,11 @@ int fread_compressed (FILE* fptr, vector<float>* vals, bool swapendian)
   vals->resize (size);
   
   unsigned short value = 0;
-  for (vector<float>::iterator ind=vals->begin(); ind!=vals->end(); ind++) {
+  for (vector<float>::iterator ind=vals->begin(); ind!=vals->end(); ind++)
+  {
     red = fread (&value, sizeof(unsigned short), 1, fptr);
-    if (red < 1) {
+    if (red < 1)
+    {
       perror ("fread_compressed: error fread(value)\n");
       return -1;
     }
@@ -129,3 +139,4 @@ int fread_compressed (FILE* fptr, vector<float>* vals, bool swapendian)
   }
   return 0;
 }
+
