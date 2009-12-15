@@ -197,12 +197,6 @@ void parseAndValidatePositiveInt(string optionName, char * numberString, int &va
 void parseAndValidateDouble(string optionName, char * numberString, double &value);
 void parseAndValidateInt(string optionName, char * numberString, int &value);
 
-// Partially scrunch over time
-void partialTimeScrunch(Archive * archive);
-
-// Partially scrunch over frequency
-void partialFrequencyScrunch(Archive * archive);
-
 // Checks if the string is a valid number (any of float, double, int, etc...)
 bool isNumber(char * str);
 
@@ -433,6 +427,7 @@ float range_mult = 1;
 // These values are set by the -ms and -mc flags on command line
 int maxChannels = -1;
 int maxSubints = -1;
+int maxBins = -1;
 
 float user_rms=-1.0;
 bool have_user_rms_file=false;
@@ -464,77 +459,80 @@ typedef pair<char, int> entry;
 void usage (bool verbose_usage)
 {
   cout <<
-    "\n"
-    "pdmp searches a specified range of barycentric period and DM \n"
-    "     for those values giving the highest S/N ratio.\n"
-    "\n"
-    "Usage: pdmp [options] file1 [file2 ...]\n"
-    "\n"
-    "options:\n"
-    " -do  <dm offset>               DM offset in pc/cm^3      (default=0)\n"
-    " -dr  <dm half-range>           DM half-range in pc/cm^3  (default=natural)\n"
-    " -ds  <dm step>                 DM step in pc/cm^3        (default=natural)\n"
-    " -eph-coord                     Use tempo parameter (not header) coordinates\n"
-    " -f , --force                   Force the program to compute without prompting\n"
-    " -j                             Combine multiple archives\n"
-    " -mc, --maxchannels <max chan>  Archive frequency channels will be \n"
-    "                                partially scrunched to <= this maximum\n"
-    "                                before computing \n"
-    " -ms, --maxsubints <max subint> Archive subints will be \n"
-    "                                partially scrunched to <= this maximum\n"
-    "                                before computing\n"
-    " -po  <period offset>           Period offset in us       (default=0)\n"
-    " -pr  <period half-range>       Period half-range in us   (default=natural)\n"
-    " -ps  <period step>             Period step in us         (default=natural)\n"
-    " -s   <profile file>            Use <profile file> as a standard profile to\n"
-		"                                compare with\n"
-    " -b   <bestfilename>            file output from best of SNR vs DM\n"
-    "\n"
-    "Selection & configuration options:\n"
-    " -g <dev>   Manually specify a plot device\n"
-    "\n"
-    "Other plotting options: \n"
-    " -c <index>  Select a colour map for PGIMAG style plots\n"
-    "             The available indices are:\n"
-    "               0 -> Greyscale\n"
-    "               1 -> Inverse Greyscale\n"
-    "               2 -> Heat (default)\n"
-    "               3 -> Cold\n"
-    "               4 -> Plasma\n"
-    "               5 -> Forest\n"
-    "               6 -> Alien Glow\n"
-    "\n"
-    "Utility options:\n"
-    " -h         Display this useful help page (most useful options)\n"
-		" --help     Display a complete list of help options\n"
-		" -v         Verbose output\n"
-		" -S         Silent mode. Reduce text written to standard output.\n"
-		" -G         Debug mode. Tell all SCINT SNRs.\n"
-                " -o         Use own (self-generated) standard profile for Scint analysis\n"
-		<< endl;
-		if (verbose_usage) {
-			cout <<
-			" -lc <index> Select the colour index for the line of best fit\n"
-			"             The available indices are:\n"
-			"               0 -> Black\n"
-			"               1 -> White\n"
-			"               2 -> Red (default)\n"
-			"               3 -> Lime green\n"
-			"               4 -> Navy blue\n"
-			"               5 -> Cyan\n"
-			"               6 -> Pink\n"
-			"               7 -> Yellow\n"
-			"               8 -> Orange\n"
-			"               9 -> Green\n"
-			"               10 -> Aqua green\n"
-			"               11 -> Blue\n"
-			"               12 -> Purple\n"
-			"               13 -> Pinkish red\n"
-			"               14 -> Dark grey\n"
-			"               15 -> Light grey\n"
-    	"\n"
-    	<< endl;
-		}
+    "                                                                               \n"
+    "pdmp searches a specified range of barycentric period and DM                   \n"
+    "     for those values giving the highest S/N ratio.                            \n"
+    "                                                                               \n"
+    "Usage: pdmp [options] file1 [file2 ...]                                        \n"
+    "                                                                               \n"
+    "options:                                                                       \n"
+    " -do  <dm offset>               DM offset in pc/cm^3      (default=0)          \n"
+    " -dr  <dm half-range>           DM half-range in pc/cm^3  (default=natural)    \n"
+    " -ds  <dm step>                 DM step in pc/cm^3        (default=natural)    \n"
+    " -eph-coord                     Use tempo parameter (not header) coordinates   \n"
+    " -f , --force                   Force the program to compute without prompting \n"
+    " -j                             Combine multiple archives                      \n"
+    " -mc, --maxchannels <max chan>  Archive frequency channels will be             \n"
+    "                                partially scrunched to <= this maximum         \n"
+    "                                before computing                               \n"
+    " -ms, --maxsubints <max subint> Archive subints will be                        \n"
+    "                                partially scrunched to <= this maximum         \n"
+    "                                before computing                               \n"
+    " -mb, --maxbins <max bin>       Archive bins will be                           \n"
+    "                                partially scrunched to <= this maximum         \n"
+    " -po  <period offset>           Period offset in us       (default=0)          \n"
+    " -pr  <period half-range>       Period half-range in us   (default=natural)    \n"
+    " -ps  <period step>             Period step in us         (default=natural)    \n"
+    " -s   <profile file>            Use <profile file> as a standard profile to    \n"
+		"                                compare with                                   \n"
+    " -b   <bestfilename>            file output from best of SNR vs DM             \n"
+    "                                                                               \n"
+    "Selection & configuration options:                                             \n"
+    " -g <dev>   Manually specify a plot device                                     \n"
+    "                                                                               \n"
+    "Other plotting options:                                                        \n"
+    " -c <index>  Select a colour map for PGIMAG style plots                        \n"
+    "             The available indices are:                                        \n"
+    "               0 -> Greyscale                                                  \n"
+    "               1 -> Inverse Greyscale                                          \n"
+    "               2 -> Heat (default)                                             \n"
+    "               3 -> Cold                                                       \n"
+    "               4 -> Plasma                                                     \n"
+    "               5 -> Forest                                                     \n"
+    "               6 -> Alien Glow                                                 \n"
+    "                                                                               \n"
+    "Utility options:                                                               \n"
+    " -h         Display this useful help page (most useful options)                \n"
+		" --help     Display a complete list of help options                            \n"
+		" -v         Verbose output                                                     \n"
+		" -S         Silent mode. Reduce text written to standard output.               \n"
+		" -G         Debug mode. Tell all SCINT SNRs.                                   \n"
+    " -o         Use own (self-generated) standard profile for Scint analysis       \n"
+    << endl;
+
+  if (verbose_usage) {
+    cout <<
+      " -lc <index> Select the colour index for the line of best fit    \n"
+      "             The available indices are:                          \n"
+      "               0 -> Black                                        \n"
+      "               1 -> White                                        \n"
+      "               2 -> Red (default)                                \n"
+      "               3 -> Lime green                                   \n"
+      "               4 -> Navy blue                                    \n"
+      "               5 -> Cyan                                         \n"
+      "               6 -> Pink                                         \n"
+      "               7 -> Yellow                                       \n"
+      "               8 -> Orange                                       \n"
+      "               9 -> Green                                        \n"
+      "               10 -> Aqua green                                  \n"
+      "               11 -> Blue                                        \n"
+      "               12 -> Purple                                      \n"
+      "               13 -> Pinkish red                                 \n"
+      "               14 -> Dark grey                                   \n"
+      "               15 -> Light grey                                  \n"
+      "                                                                 \n"
+      << endl;
+  }
 }
 
 void init() {
@@ -672,6 +670,11 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 		else if (strcmp(argv[i], "-ms") == 0 || strcasecmp(argv[i], "--maxsubints") == 0) {
 			i++;
 			parseAndValidatePositiveInt("-ms", argv[i], maxSubints);
+		}
+		// maximum bin limit
+		else if (strcmp(argv[i], "-mb") == 0 || strcasecmp(argv[i], "--maxbins") == 0) {
+			i++;
+			parseAndValidatePositiveInt("-mb", argv[i], maxBins);
 		}
 
 		// use own standard for Scint work
@@ -1076,7 +1079,7 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename)
 
   // Before entering the search loop, scrunch the archive partially
   // if necessary.
-  scrunchPartially( archive );
+  scrunchPartially(archive);
 
   setSensibleStepSizes(archive);
 
@@ -1473,35 +1476,17 @@ void solve_and_plot (Archive* archive,
 
 
 void scrunchPartially(Archive * archive) {
+  if (maxSubints > 1) {
+    archive->tscrunch_to_nsub(maxSubints);
+  }
 
-	int nsub = archive->get_nsubint();
-	int nchan = archive->get_nchan();
+  if (maxChannels > 1) {
+    archive->fscrunch_to_nchan(maxChannels);
+  }
 
-	if (nsub > maxSubints && maxSubints > 1) {
-
-		// Find the largest legitimate channel limit below the user
-		// specified limit
-		// TODO: Make this more efficient
-		for (int i = maxSubints; i > 0; i--) {
-			if ( (nchan % i) == 0) {
-				maxSubints = i;
-				partialTimeScrunch(archive);
-				break;
-			}
-		}
-	}
-
-	if (nchan > maxChannels && maxChannels > 1) {
-		// Find the largest legitimate channel limit below the user
-		// specified limit
-		for (int i = maxChannels; i > 0; i--) {
-			if ( (nchan % i) == 0) {
-				maxChannels = i;
-				partialFrequencyScrunch(archive);
-				break;
-			}
-		}
-	}
+  if (maxBins > 1) {
+    archive->bscrunch_to_nbin(maxBins);
+  }
 }
 
 
@@ -1782,42 +1767,6 @@ void parseAndValidatePositiveInt(string optionName, char * numberString, int &va
 		exit(1);
 	}
 
-}
-
-void partialTimeScrunch(Archive * archive) {
-	unsigned nsub = archive->get_nsubint();
-	unsigned nscrunch;
-	// do a partial time scrunch
-
-	// Determine how many bins to scrunch at a time
-	nscrunch = (unsigned)ceil((double)nsub/(double)maxSubints);
-
-	if (verbose)
-		cout << "Partially time scrunching every " << nscrunch << " bins\n";
-
-	archive->tscrunch(nscrunch);
-
-	int afterSub = archive->get_nsubint();
-
-	if (!silent) cout << "Time scrunched from " << nsub << " subints to " << afterSub << " subints." << endl;
-}
-
-void partialFrequencyScrunch(Archive * archive) {
-	unsigned nchan = archive->get_nchan();
-	unsigned nscrunch;
-
-	// do a partial frequency scrunch
-
-	nscrunch = (unsigned)ceil((double)nchan/(double)maxChannels);
-
-	if (verbose)
-		cout << "Partially frequency scrunching every " << nscrunch << " bins\n";
-
-	archive->fscrunch(nscrunch);
-
-	int afterChan = archive->get_nchan();
-
-	if (!silent) cout << "Frequency scrunched from " << nchan << " channels to " << afterChan << " channels." << endl;
 }
 
 double computePeriodError(const Archive * archive) {
