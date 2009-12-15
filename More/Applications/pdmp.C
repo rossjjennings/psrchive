@@ -559,6 +559,9 @@ void init() {
 	// Coords of header text
 	linex = HEADER_X;
 	liney = HEADER_Y;
+
+  // Computed SNRs
+  SNRs.clear();
 }
 
 
