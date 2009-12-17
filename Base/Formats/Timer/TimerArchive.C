@@ -4,6 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#include "Pulsar/Pulsar.h"
 #include "Pulsar/TimerArchive.h"
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Telescope.h"
@@ -546,23 +548,22 @@ void Pulsar::TimerArchive::correct_Integrations () try {
       continue;
     }
 
-    if (telescope) {
+    if (telescope)
+    {
+      Horizon hzon;
 
-      Horizon horizon;
-
-      horizon.set_epoch( subint->get_epoch() );
-      horizon.set_source_coordinates(get_coordinates());
-      horizon.set_observatory_latitude(telescope->get_latitude().getRadians());
-      horizon.set_observatory_longitude(telescope->get_longitude().getRadians());
+      hzon.set_epoch (subint->get_epoch());
+      hzon.set_source_coordinates (get_coordinates());
+      hzon.set_observatory_latitude (telescope->get_latitude().getRadians());
+      hzon.set_observatory_longitude (telescope->get_longitude().getRadians());
 
       // correct the mini header LST
-      subint->mini.lst_start = horizon.get_local_sidereal_time() * 12.0/M_PI;
+      subint->mini.lst_start = hzon.get_local_sidereal_time() * 12.0/M_PI;
 
       double rad2deg = 180.0/M_PI;
-      subint->mini.tel_az = horizon.get_azimuth() * rad2deg;
-      subint->mini.tel_zen = horizon.get_zenith() * rad2deg;
-      subint->mini.para_angle = horizon.get_parallactic_angle() * rad2deg;
-
+      subint->mini.tel_az = hzon.get_azimuth() * rad2deg;
+      subint->mini.tel_zen = hzon.get_zenith() * rad2deg;
+      subint->mini.para_angle = hzon.get_parallactic_angle() * rad2deg;
     }
 
     // set the mini header version
@@ -582,11 +583,8 @@ catch (Error& error) {
   throw error += "Pulsar::TimerArchive::correct_Integrations";
 }
 
-void Pulsar::TimerArchive::correct () try {
-
-  Telescope* telescope = getadd<Telescope>();
-  telescope->set_coordinates (get_telescope());
-
+void Pulsar::TimerArchive::correct () try
+{
   MJD mjd = start_time();
 
   // correct the MJD
@@ -596,8 +594,21 @@ void Pulsar::TimerArchive::correct () try {
   // correct the utdate string
   mjd.datestr (hdr.utdate, 16, "%d-%m-%Y");
 
-  // correct the LST
-  hdr.lst_start = mjd.LST (telescope->get_longitude().getDegrees());
+  try
+  {
+    Telescope* telescope = getadd<Telescope>();
+    telescope->set_coordinates (get_telescope());
+
+    // correct the LST
+    hdr.lst_start = mjd.LST (telescope->get_longitude().getDegrees());
+  }
+  catch (Error& error)
+  {
+    if (verbose)
+      warning << "Pulsar::TimerArchive::correct"
+                 " could not set telescope coordinates \n\t"
+              << error.get_message() << endl;
+  }
 
   // correct the folding period and integration length
   hdr.nominal_period = 0.0;
