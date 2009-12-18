@@ -116,8 +116,10 @@ bool Timer::is_timer (const struct timer& hdr, std::string* reason)
 
 int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
 {
-  if (fread (hdr, sizeof(struct timer), 1, fptr) < 1)  {
-    if (verbose) {
+  if (fread (hdr, sizeof(struct timer), 1, fptr) < 1)
+  {
+    if (verbose)
+    {
       fprintf (stderr, "Timer::load Cannot read timer struct from FILE*");
       perror ("");
     }
@@ -132,7 +134,8 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
 
   // sanity check and return -1 on error
   string why_not;
-  if (! is_timer (*hdr, &why_not) )  {
+  if (! is_timer (*hdr, &why_not) )
+  {
     if (verbose)
       cerr << "Timer::load not a timer header\n  " << why_not << endl;
     return -1;
@@ -140,7 +143,8 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
   
   if (verbose) cerr << "Timer::load correct header" << endl;
 
-  if (!strcmp (hdr->machine_id, "S2") && !strstr (hdr->software, "psrdisp")) {
+  if (!strcmp (hdr->machine_id, "S2") && !strstr (hdr->software, "psrdisp"))
+  {
     if (verbose) cerr << "Timer::load S2 version=" << hdr->version << ":" 
                       << hdr->minorversion << " reset to 5.0" << endl;
     hdr->version = 5.0;
@@ -150,21 +154,25 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
 
   // correct an endian mistake made in initial baseband header version
   float version = hdr->version + hdr->minorversion/10.0;
-  if (version >= 8.0 && version < 8.3) {
+  if (version >= 8.0 && version < 8.3)
+  {
     ChangeEndian (hdr->be_data_size);
     hdr->minorversion = 3.0;
   }
 
-  if (hdr->mjd < 51401 && !strcmp(hdr->machine_id,"CPSR") && version==10.0) { 
+  if (hdr->mjd < 51401 && !strcmp(hdr->machine_id,"CPSR") && version==10.0)
+  { 
     double seconds_per_file = 53.6870912;
     Timer::set_MJD (*hdr, Timer::get_MJD (*hdr) - seconds_per_file);
   }
 
   if (hdr->calibrated == 1)
+  {
     if(strcmp(hdr->machine_id, "FB")==0)
       hdr->calibrated = FB_CALIBRATED;
     else
       hdr->calibrated = FLUX_CALIBRATED & POLN_CALIBRATED;
+  }
 
   // this is an old value that was used to initialize the RM
   if (hdr->rotm == -100000)
