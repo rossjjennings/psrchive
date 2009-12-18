@@ -14,19 +14,10 @@ std::string Mini::reason;
 
 void Mini::init (struct mini& hdr)
 {
-  hdr.junk = hdr.junk2 = hdr.junk3 = -1;
+  // ensure that the entire struct is set to zero
+  memset (&hdr, 0, sizeof(struct mini));
 
-  hdr.mjd = 0;
-  hdr.fracmjd = 0.0;
-  hdr.lst_start = 0.0;
-  hdr.pfold = 0.0;
-  hdr.tel_zen = hdr.tel_az =0.0;
-  hdr.feed_ang = hdr.para_angle = 0.0;
-  hdr.version = 0.0;
-  hdr.pulse_phase = 0.0;
-  hdr.flux_A = hdr.flux_B = 0.0;
-  hdr.integration = 0.0;
-  hdr.space[0] = '\0';
+  hdr.junk = hdr.junk2 = hdr.junk3 = -1;
 }
 
 int Mini::fload (const char* fname, struct mini* hdr, bool big_endian)
