@@ -4,14 +4,28 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Pointing.h"
 #include "Error.h"
 
 #include "convert_endian.h"
+#include <assert.h>
 
 using namespace std;
+
+template<typename T>
+void unload_big_endian (FILE* fptr, unsigned size, const std::vector<T>& data)
+{
+  assert (size <= data.size());
+ 
+  T* ptr = const_cast<T*>( &(data[0]) );
+
+  N_ToBigEndian (size, ptr);
+  fwrite (ptr, size*sizeof(T), 1, fptr);
+  N_FromBigEndian (size, ptr);
+}
 
 //! unload the subint to file
 void Pulsar::TimerIntegration::unload (FILE* fptr) const
@@ -34,24 +48,25 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
 
   if (verbose) cerr << "TimerIntegration::unload writing " << nchan
                     << " weights" << endl;
-  N_ToBigEndian (nchan, const_cast<float*>(&(wts[0])));
-  fwrite(&(wts[0]),nchan*sizeof(float),1,fptr);
-  N_FromBigEndian (nchan, const_cast<float*>(&(wts[0])));
+
+  unload_big_endian (fptr, nchan, wts);
  
   if (verbose) cerr << "TimerIntegration::unload writing " << npol
                     << "x" << nchan << " med" << endl;
-  for (unsigned ipol=0; ipol<npol; ipol++) {
-    N_ToBigEndian (nchan, const_cast<float*>(&(med[ipol][0])));
-    fwrite(&(med[ipol][0]),nchan*sizeof(float),1,fptr);
-    N_FromBigEndian (nchan, const_cast<float*>(&(med[ipol][0])));
+
+  for (unsigned ipol=0; ipol<npol; ipol++)
+  {
+    assert (ipol < med.size());
+    unload_big_endian (fptr, nchan, med[ipol]);
   }
 
   if (verbose) cerr << "TimerIntegration::unload writing " << npol
                     << "x" << nchan << " bpass" << endl; 
-  for (unsigned ipol=0; ipol<npol; ipol++) {
-    N_ToBigEndian (nchan, const_cast<float*>(&(bpass[ipol][0])));
-    fwrite(&(bpass[ipol][0]),nchan*sizeof(float),1,fptr);
-    N_FromBigEndian (nchan, const_cast<float*>(&(bpass[ipol][0])));
+
+  for (unsigned ipol=0; ipol<npol; ipol++)
+  {
+    assert (ipol < bpass.size());
+    unload_big_endian (fptr, nchan, bpass[ipol]);
   }
 
   if (verbose) cerr << "Pulsar::TimerIntegration::unload extra end offset="
@@ -62,6 +77,7 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
 		   << npol << " nchan=" << nchan << endl;
 
   for (unsigned ipol=0; ipol<npol; ipol++)
+  {
     for (unsigned ichan=0; ichan<nchan; ichan++) try
     {
       if (verbose) cerr << "TimerIntegration::unload ipol=" << ipol 
@@ -74,9 +90,9 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
       error << "\n\tprofile[ipol=" << ipol << "][ichan=" << ichan << "]";
       throw error += "TimerIntegration::unload";
     }
-  
-  if (verbose) cerr << "TimerIntegration::unload exit" << endl;
+  }
 
+  if (verbose) cerr << "TimerIntegration::unload exit" << endl;
 }
 
 void Pulsar::TimerIntegration::pack_Pointing () const
