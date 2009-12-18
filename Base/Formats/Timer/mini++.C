@@ -4,11 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <stdio.h>
-#include <math.h>
 
 #include "mini++.h"
 #include "convert_endian.h"
+
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
 
 std::string Mini::reason;
 
