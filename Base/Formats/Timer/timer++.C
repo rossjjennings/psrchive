@@ -318,6 +318,9 @@ void band_init (struct band * bd)
 
 void Timer::init (struct timer * hdr)
 {
+  // ensure that entire struct is set to zero
+  memset (hdr, 0, sizeof(struct timer));
+
   band_init (&(hdr->banda));
   band_init (&(hdr->bandb));
 
