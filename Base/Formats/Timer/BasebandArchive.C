@@ -18,40 +18,11 @@ using namespace std;
 
 void init (baseband_header& bhdr)
 {
+  memset (&bhdr, 0, sizeof(baseband_header));
+
   bhdr.endian  = BASEBAND_HEADER_ENDIAN;
   bhdr.version = BASEBAND_HEADER_VERSION;
   bhdr.size =    BASEBAND_HEADER_SIZE;
-
-  bhdr.totaljobs = 0;
-  bhdr.gulpsize = 0;
-  bhdr.seeksize = 0;
-
-  bhdr.voltage_state = 0;
-  bhdr.analog_channels = 0;
-  bhdr.ppweight = 0;
-  bhdr.dls_threshold_limit = 0;
-
-  bhdr.pband_channels = 0;
-  bhdr.pband_resolution = 0;
-  bhdr.nfft = 0;
-  bhdr.nsmear_pos = 0;
-  bhdr.nscrunch = 0;
-
-  bhdr.power_normalization = 0;
-
-  bhdr.f_resolution = 0;
-  bhdr.t_resolution = 0;
-
-  bhdr.time_domain = 0;
-  bhdr.frequency_domain = 0;
-
-  bhdr.mean_power_cutoff = 0;
-  bhdr.hanning_smoothing = 0;
-
-  bhdr.pcalid[0] = '\0';
-
-  bhdr.nsmear_neg = 0;
-
 }
 
 void Pulsar::BasebandArchive::init ()
