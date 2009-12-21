@@ -5,6 +5,10 @@
  *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 // #define _DEBUG
 
 #include "Pulsar/GeneratorInterpreter.h"
@@ -110,3 +114,26 @@ maximum_rms_config_wrapper
  "a warning will be issued if the rms reported by tempo exceeds this value."
 );
 
+#ifdef HAVE_TEMPO2
+
+/* ***********************************************************************
+
+   Tempo2::Generator::parameter_filename configuration
+
+   *********************************************************************** */
+
+Pulsar::Option<std::string>
+parameter_filename_wrapper
+(
+ Tempo2::Generator::get_keyword_filename (),
+ "Tempo2::keywords", Pulsar::Config::get_runtime() + "tempo2.key",
+
+ "Name of file containing tempo2-specific keywords",
+
+ "When choosing a Generator with which to create a Predictor (and if tempo2 \n"
+ "support is available) a list of keywords will be used to determine if a \n"
+ "tempo2 predictor should be generated.  The list of keywords is parsed \n"
+ "this file."
+);
+
+#endif
