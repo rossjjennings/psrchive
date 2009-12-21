@@ -1,6 +1,8 @@
 
 noinst_LTLIBRARIES = libtempo_2.la
 
+dist_data_DATA = tempo2.key
+
 include_HEADERS = T2Generator.h T2Predictor.h T2Parameters.h T2Observatory.h
 
 libtempo_2_la_SOURCES = \
