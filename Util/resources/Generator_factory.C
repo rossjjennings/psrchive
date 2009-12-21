@@ -56,10 +56,20 @@ vector<string> parsewords (T* data)
 Pulsar::Generator* Pulsar::Generator::factory (const Pulsar::Parameters* param)
 {
 #ifdef HAVE_TEMPO2
+
+  Pulsar::Generator* default_generator = get_default_generator();
+
+  // if the default generator is a tempo2 generator, usea a tempo2 generator
+  if (dynamic_cast<Tempo2::Generator*> (default_generator))
+    return new Tempo2::Generator;
+
+  // or if the parameters contain tempo2 keywords, use a tempo2 generator
   vector<string> words = parsewords (param);
   for (unsigned i=0; i < words.size(); i++)
     if (found (words[i], Tempo2::Generator::get_keywords()))
       return new Tempo2::Generator;
+
 #endif
+
   return new Tempo::Predict;
 }
