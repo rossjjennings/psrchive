@@ -29,7 +29,7 @@ Pulsar::Option<string> Pulsar::CalSource::default_on
 
  "Standard candle on-source aliases filename",
  
- "The name of the file from which commonly used source name alises for\n"
+ "The name of the file from which commonly used source name aliases for\n"
  "on-source flux calibrator observation are read."
 );
 
@@ -39,7 +39,7 @@ Pulsar::Option<string> Pulsar::CalSource::default_off
  
  "Standard candle off-source aliases filename",
  
- "The name of the file from which commonly used source name alises for\n"
+ "The name of the file from which commonly used source name aliases for\n"
  "off-source flux calibrator observation are read."
 );
 
