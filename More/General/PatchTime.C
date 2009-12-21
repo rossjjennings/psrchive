@@ -40,7 +40,6 @@ void insert (Pulsar::Archive* archive, unsigned& isub, const MJD& epoch)
   empty->set_epoch( epoch );
 
   archive->expert()->insert (isub, empty);
-  isub ++;
 }
 
 void tail (Pulsar::Archive* A, Pulsar::Archive* B, unsigned& isubA)
@@ -52,6 +51,7 @@ void tail (Pulsar::Archive* A, Pulsar::Archive* B, unsigned& isubA)
          << " A::nsubint=" << A->get_nsubint() \
          << " B::nsubint=" << B->get_nsubint());
     insert (B, isubA, subA->get_epoch());
+    isubA++;
   }
 }
 
@@ -89,12 +89,12 @@ void Pulsar::PatchTime::operate (Archive* A, Archive* B) try
       if (subA->get_epoch() > subB->get_epoch())
       {
 	DEBUG("A requires an empty sub-integration isubA=" << isubA);
-	insert (A, isubA, subB->get_epoch()); isubB++;
+	insert (A, isubA, subB->get_epoch()); isubB++; isubA++;
       }
       else
       {
 	DEBUG("B requires an empty sub-integration isubB=" << isubB);
-	insert (B, isubB, subA->get_epoch()); isubA++;
+	insert (B, isubB, subA->get_epoch()); isubA++; isubB++;
       }
     }
     else
