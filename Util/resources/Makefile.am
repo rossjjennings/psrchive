@@ -5,7 +5,7 @@ nobase_include_HEADERS = Pulsar/SimplePredictor.h Pulsar/GeneratorInterpreter.h
 
 libresources_la_SOURCES = Generator_default.C SimplePredictor.C \
 	Parameters_children.C Predictor_children.C Site_location.C \
-	GeneratorInterpreter.C
+	GeneratorInterpreter.C Generator_factory.C
 
 bin_PROGRAMS = getHorizon
 
