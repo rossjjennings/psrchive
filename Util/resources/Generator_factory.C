@@ -18,6 +18,7 @@
 
 #include "templates.h"
 #include "FilePtr.h"
+#include <string.h>
 
 using namespace std;
 
@@ -33,7 +34,7 @@ vector<string> parsewords (T* data)
   vector<char> buffer (FILENAME_MAX);
   char* line = &(buffer[0]);
 
-  char* whitespace = " \t\n";
+  const char* whitespace = " \t\n";
 
   while (fgets (line, FILENAME_MAX, temp) != NULL)
   {
