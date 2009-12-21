@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Generator.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/06/22 14:02:47 $
+   $Revision: 1.5 $
+   $Date: 2009/12/21 04:47:14 $
    $Author: straten $ */
 
 #ifndef __Tempo2Generator_h
@@ -58,6 +58,12 @@ namespace Tempo2 {
 
     //! Return a new Predictor instance
     Pulsar::Predictor* generate () const;
+
+    //! Return a list of keywords that are specific to tempo2
+    static std::vector<std::string>& get_keywords ();
+
+    //! Name of file containing list of Tempo2 keywords
+    static Configuration::Parameter<std::string>& get_keyword_filename();
 
   private:
 

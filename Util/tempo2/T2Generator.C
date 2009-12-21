@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 2007-2009 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -11,9 +11,40 @@
 
 #include "Error.h"
 #include "file_cast.h"
-#include "tempo2pred_int.h"
+#include "strutil.h"
+#include "lazy.h"
+
+#include <tempo2pred_int.h>
 
 using namespace std;
+
+LAZY_GLOBAL(Tempo2::Generator, \
+	    Configuration::Parameter<std::string>, keyword_filename, "");
+
+static bool loaded = false;
+static std::vector<std::string> keywords;
+
+std::vector<std::string>& Tempo2::Generator::get_keywords ()
+{
+  if (loaded)
+    return keywords;
+
+  loaded = true;
+
+  string filename = get_keyword_filename();
+  if (!filename.empty()) try
+  {
+    stringfload (&keywords, filename);
+  }
+  catch (Error& error)
+  {
+    if (Predictor::verbose)
+      cerr << "Tempo2::Generator::get_keywords could not load filename "
+	   << error.get_message() << endl;
+  }
+
+  return keywords;
+}
 
 Tempo2::Generator::Generator (const Parameters* parameters)
 {
