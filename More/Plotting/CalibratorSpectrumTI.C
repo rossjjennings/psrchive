@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/CalibratorSpectrum.h"
 
 Pulsar::CalibratorSpectrum::Interface::Interface (CalibratorSpectrum* instance)
@@ -19,4 +20,11 @@ Pulsar::CalibratorSpectrum::Interface::Interface (CalibratorSpectrum* instance)
        &CalibratorSpectrum::set_plot_Ip,
        "Ip", "Plot total and polarized intensities" );
 
+  add( &CalibratorSpectrum::get_plot_total,
+       &CalibratorSpectrum::set_plot_total,
+       "sum", "Plot sum of on- and off-pulse fluxes" );
+
+  add( &CalibratorSpectrum::get_plot_low,
+       &CalibratorSpectrum::set_plot_low,
+       "off", "Plot off-pulse flux" );
 }
