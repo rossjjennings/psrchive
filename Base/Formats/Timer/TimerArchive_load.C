@@ -255,8 +255,8 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 	 subint->mini.mjd<50647 && !hdr.corrected)  {
       /* get the year data was processed */
       char comment[64];
-      char * key;
-      char * whitespace = " \n\t";
+      char* key;
+      const char* whitespace = " \n\t";
       int year;
       strcpy(comment, hdr.comment);
       key = strtok(comment, whitespace);
