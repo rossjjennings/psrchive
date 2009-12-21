@@ -7,6 +7,8 @@
 
 #include "Reference.h"
 #include "Error.h"
+#include "FilePtr.h"
+
 #include "strutil.h"
 #include "dirutil.h"
 
@@ -55,22 +57,14 @@ Parent* factory (FILE* fptr)
 template<class Parent>
 Parent* factory (FILE* fptr, size_t nbytes)
 {
-  FILE* temp = tmpfile();
+  FilePtr temp = tmpfile();
   if (!temp)
     throw Error (FailedSys, "factory (FILE*, size_t)", "tmpfile");
 
   ::copy (fptr, temp, nbytes);
 
-  Parent* model = 0;
-
-  try {
-    rewind (temp);
-    model = factory<Parent> (temp);
-  }
-  catch (Error& error) { }
-
-  fclose (temp);
-  return model;
+  rewind (temp);
+  return factory<Parent> (temp);
 }
 
 template<class Parent>
@@ -78,21 +72,12 @@ Parent* factory (const std::string& filename)
 {
   std::string use_filename = expand (filename);
 
-  FILE* temp = fopen (use_filename.c_str(), "r");
-
+  FilePtr temp = fopen (use_filename.c_str(), "r");
   if (!temp)
     throw Error (FailedSys, "factory (std::string&)",
 		 "fopen (%s)", use_filename.c_str());
 
-  try {
-    Parent* model = factory<Parent> (temp);
-    fclose (temp);
-    return model;
-  }
-  catch (Error& error) {
-    fclose (temp);
-    throw error += "factory (std::string&)";
-  }
+  return factory<Parent> (temp);
 }
 
 //
@@ -104,41 +89,23 @@ Any* load (const std::string& filename)
 {
   std::string use_filename = expand (filename);
 
-  FILE* temp = fopen (use_filename.c_str(), "r");
+  FilePtr temp = fopen (use_filename.c_str(), "r");
   if (!temp)
     throw Error (FailedSys, "Any* load (std::string&)",
 		 "fopen (%s)", use_filename.c_str());
 
-  try {
-    Any* any = new Any;
-    any -> load (temp);
-    fclose (temp);
-    return any;
-  }
-  catch (Error& error) {
-    fclose (temp);
-    throw error += "Any* load (std::string&)";
-  }
+  Any* any = new Any;
+  any -> load (temp);
+  return any;
 }
 
 template<class Any>
 size_t nbytes (const Any* any)
 {
-  FILE* temp = tmpfile();
+  FilePtr temp = tmpfile();
   if (!temp)
     throw Error (FailedSys, "nbytes (Any*)", "tmpfile");
 
-  size_t nbytes = 0;
-  try {
-    any->unload (temp);
-    nbytes = ftell(temp);
-  }
-  catch (Error& error)
-    {
-      fclose (temp);
-      throw error += "nbytes (Any*)";
-    }
-
-  fclose (temp);
-  return nbytes;
+  any->unload (temp);
+  return ftell (temp);
 }
