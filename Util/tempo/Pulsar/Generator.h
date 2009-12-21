@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Generator.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/11/29 12:13:50 $
+   $Revision: 1.5 $
+   $Date: 2009/12/21 03:02:05 $
    $Author: straten $ */
 
 #ifndef __PulsarGenerator_h
@@ -48,8 +48,11 @@ namespace Pulsar {
     //! Return a new Predictor instance
     virtual Predictor* generate () const = 0;
 
-    //! Returns a pointer to a new Generator of the default derived type
+    //! Return a pointer to a new Generator of the default derived type
     static Generator* get_default ();
+
+    //! Return a pointer to a new Generator that can best handle the parameters
+    static Generator* factory (const Parameters*);
 
     class Interpreter;
 
