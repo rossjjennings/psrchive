@@ -45,32 +45,54 @@ string Pulsar::TextParameters::get_value (const string& keyword) const
 {
   const string whitespace = " \t\n";
 
-  string result;
+  string empty;
 
   // find the start of the keyword
-  string::size_type start = text.find (keyword);
+  string::size_type start = 0;
 
-  // no keyword
-  if (start == string::npos)
-    return result;
+  while ( (start = text.find (keyword, start)) != string::npos )
+  {
+    // find the end of the keyword
+    string::size_type end = text.find_first_of (whitespace, start);
 
-  // find the end of the keyword
-  string::size_type end = text.find_first_of (whitespace, start);
+    // keyword not followed by whitespace
+    if (end == string::npos)
+      return empty;
 
-  // keyword not followed by whitespace
-  if (end == string::npos)
-    return result;
+    // check that the keyword is preceded by whitespace
+    if (! (start == 0 || whitespace.find( text[start-1] )))
+    {
+      start = end;
+      continue;
+    }
 
-  // find the start of the value
-  start = text.find_first_not_of (whitespace, end);
+    // check that the keyword is followed by whitespace
+    if (text.substr (start, end - start) != keyword)
+    {
+      start = end;
+      continue;
+    }
 
-  // and the end of the value
-  end = text.find_first_of (whitespace, start);
+    // find the start of the value
+    start = text.find_first_not_of (whitespace, end);
 
-  return text.substr (start, end-start);
+    // and the end of the value
+    end = text.find_first_of (whitespace, start);
+
+    return text.substr (start, end-start);
+  }
+
+  return empty;
 }
 
 string Pulsar::TextParameters::get_name () const
 {
-  return get_value ("PSR");
+  string name = get_value ("PSR");
+  if (name.empty())
+    name = get_value ("PSRJ");
+  if (name.empty())
+    name = get_value ("PSRB");
+
+  return name;
 }
+
