@@ -5,6 +5,8 @@
  *
  ***************************************************************************/
 
+// #define _DEBUG
+
 #include "T2Generator.h"
 #include "T2Predictor.h"
 #include "T2Parameters.h"
@@ -13,6 +15,7 @@
 #include "file_cast.h"
 #include "strutil.h"
 #include "lazy.h"
+#include "debug.h"
 
 #include <tempo2pred_int.h>
 
@@ -32,9 +35,14 @@ std::vector<std::string>& Tempo2::Generator::get_keywords ()
   loaded = true;
 
   string filename = get_keyword_filename();
+
+  DEBUG("Tempo2::Generator::get_keywords filename=" << filename);
+
   if (!filename.empty()) try
   {
     stringfload (&keywords, filename);
+
+    DEBUG("Tempo2::Generator::get_keywords array size=" << keywords.size());
   }
   catch (Error& error)
   {
