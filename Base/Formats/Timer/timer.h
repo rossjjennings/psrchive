@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.19 $
-   $Date: 2009/06/17 08:12:19 $
+   $Revision: 1.20 $
+   $Date: 2009/12/22 14:25:02 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */
@@ -69,6 +69,9 @@
 #define PARA_CORRECTED    0x0004  /* parallactic angle */
 #define FEED_CORRECTED    0x0008  /* feed angle */
 #define DEDISPERSED       0x0010  /* dispersion delays removed */
+
+#define NINT_CORRECTED    0x1000  /* nint bug corrected */
+#define S2ROS_CORRECTED   0x2000  /* S2 ROS time offset corrected */
 
 /* bit fields in timer.calibrated flag
 

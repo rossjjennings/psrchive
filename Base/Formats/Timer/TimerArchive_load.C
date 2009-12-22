@@ -28,7 +28,7 @@ using namespace std;
 /*****************************************************************************/
 void Pulsar::TimerArchive::load_header (const char* filename)
 {
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "TimerArchive::load (" << filename << ")" << endl;
 
   FILE* fptr = fopen (filename,"r");
@@ -36,7 +36,7 @@ void Pulsar::TimerArchive::load_header (const char* filename)
   if (fptr == NULL)
     throw Error (FailedSys, "TimerArchive::load", "fopen");
 
-  if (verbose == 3) 
+  if (verbose > 2) 
     cerr << "TimerArchive::load Opened '" << filename << endl;
   
   try {
@@ -48,14 +48,14 @@ void Pulsar::TimerArchive::load_header (const char* filename)
   }
   fclose (fptr);
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "TimerArchive::load (" << filename << ") exit" << endl;
 }
 
 
 void Pulsar::TimerArchive::load (FILE* fptr)
 {
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "TimerArchive::load FILE*" << endl;
 
   hdr_load (fptr);
@@ -81,14 +81,14 @@ void Pulsar::TimerArchive::load (FILE* fptr)
 
   valid = true;
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "TimerArchive::load FILE* exit" << endl;
 }
 
 
 void Pulsar::TimerArchive::subint_load (FILE* fptr)
 {
-  if (verbose == 3) 
+  if (verbose > 2) 
     cerr << "TimerArchive::subint_load"
       " nsubint=" << hdr.nsub_int <<
       " nchan="   << hdr.nsub_band <<
@@ -116,7 +116,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 
     if (baseband && version < 15.1 && hdr.banda.npol==4 && circular) {
       
-      if (verbose == 3)
+      if (verbose > 2)
 	cerr << "TimerArchive::subint_load correct psrdisp circular" << endl;
       
       // an unjustified sign reversal of Stokes U in psrdisp was 
@@ -156,7 +156,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
       // Before psrdisp v.18.1, lower sideband data did not have their sign
       // of Stokes V (linear) or Stokes U (circular) properly flipped.
  
-      if (verbose == 3)
+      if (verbose > 2)
 	cerr << "TimerArchive::subint_load"
 	  " correcting lower-sideband downconversion" << endl;
       
@@ -166,7 +166,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 
     }    
 
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "TimerArchive::subint_load"
 	" setting downconversion corrected" << endl;
 
@@ -174,8 +174,12 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 
   }
 
-  for (unsigned isub=0; isub < get_nsubint(); isub++) { 
-    if (verbose == 3)
+  bool nint_corrected = false;
+  bool s2ros_corrected = false;
+
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
+  { 
+    if (verbose > 2)
       cerr << "TimerArchive::subint_load " 
 	   << isub+1 << "/" << get_nsubint() << endl;
     
@@ -190,7 +194,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 
     subint -> load (fptr, hdr.wts_and_bpass, big_endian);
 
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "TimerArchive::subint_load " 
 	   << isub+1 << "/" << get_nsubint() << " loaded" << endl;
 
@@ -198,7 +202,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
     if (subint->mini.version < 1.1) {
       // update the mini header with the integration time of the sub_int
       // added by WvS 24 Sep, 1999
-      if (verbose == 3)
+      if (verbose > 2)
         cerr << "TimerArchive::subint_load updating mini version" << endl;
       subint->mini.integration = hdr.sub_int_time;
       subint->mini.version = 1.1;
@@ -210,7 +214,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
     if (hdr.mjd < 51401 && strcmp(hdr.machine_id,"CPSR")==0 
         && version == 10.0)  {
  
-      if (verbose == 3) 
+      if (verbose > 2) 
 	cerr << "TimerArchive::subint_load Correcting psrdisp v10.0 MJD error"
 	     << endl;
       
@@ -227,64 +231,83 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
     /* nint() correction  jss */
     /***** test mjd and correct if less than NOV 94     *******/
     /***** and not already corrected && Correlator data *******/
-    if (hdr.mjd < 49650 && hdr.corrected != 1 && 
-	((strncmp(hdr.machine_id,"A=Jo",4) ==0)||
-	 (strncmp(hdr.machine_id,"FPTM",4)==0)) ) {
-      /* nint() correction  jss */
-      double difftime,tcorr;
-      double freqerror = 32.0e6/4.0/(pow(2.0,32.0))/2.0/1024.0;
-      /* end nint() correction  jss */
-      if(verbose == 3) 
-	cerr << "TimerArchive::subint_load Correcting nint error" << endl;
-      difftime = subint->mini.mjd + subint->mini.fracmjd 
-	- hdr.mjd - hdr.fracmjd; 
-      tcorr = difftime*freqerror*subint->mini.pfold;
-      subint->mini.fracmjd += tcorr;
-      if (subint->mini.fracmjd > 1.0) 
-	{ subint->mini.mjd++; subint->mini.fracmjd -= 1.0;}
+
+    string machine = hdr.machine_id;
+
+    if (hdr.mjd < 49650 && (machine == "A=Jo" || machine == "FPTM"))
+    {
+      if (hdr.corrected == 1)
+        hdr.corrected = NINT_CORRECTED;
+
+      if (hdr.corrected & NINT_CORRECTED == 0)
+      {
+        /* nint() correction  jss */
+        double difftime,tcorr;
+        double freqerror = 32.0e6/4.0/(pow(2.0,32.0))/2.0/1024.0;
+        /* end nint() correction  jss */
+        if (verbose > 2) 
+	  cerr << "TimerArchive::subint_load Correcting nint error" << endl;
+        difftime = subint->mini.mjd + subint->mini.fracmjd 
+	  - hdr.mjd - hdr.fracmjd; 
+        tcorr = difftime*freqerror*subint->mini.pfold;
+        subint->mini.fracmjd += tcorr;
+        if (subint->mini.fracmjd > 1.0) 
+	{
+          subint->mini.mjd++;
+          subint->mini.fracmjd -= 1.0;
+        }
+
+        nint_corrected = true;
+      }
     }
-    /* end nint() correction  jss */
-    
+
     // fix ROS 1 second error if necessary
     // This bug labels the times 1 second earlier than they should be.
     // The error occurs in archives prior to julian date 200 in 1997 (MJD 50647)
     // that were also processed before the end of 1997 (at which point
     // ROS was upgraded to a new version without the bug)
 
-    if ( strcmp(hdr.machine_id, "S2")==0 && 
-	 subint->mini.mjd<50647 && !hdr.corrected)  {
-      /* get the year data was processed */
-      char comment[64];
-      char* key;
-      const char* whitespace = " \n\t";
-      int year;
-      strcpy(comment, hdr.comment);
-      key = strtok(comment, whitespace);
-      for(int ntok = 0; ntok<6; ++ntok){
-	if(key==NULL) break;
-	key = strtok(NULL, whitespace);
-      }
-      if(key==NULL || sscanf(key, "%d", &year)!=1){
-	break;
-      }
-      if (year<=1997) {
-	cerr << "TimerArchive::subint_load performing S2 MJD correction" 
-	     << endl;
-	MJD old_mjd = Mini::get_MJD (subint->mini);
-	Mini::set_MJD (subint->mini, old_mjd + 1.0);
+    if (subint->mini.mjd < 50647 && machine == "S2")
+    {
+      if (hdr.corrected == 1)
+        hdr.corrected = S2ROS_CORRECTED;
 
-	if (isub == 0) {
-	  old_mjd = Timer::get_MJD (hdr);
-	  Timer::set_MJD (hdr, old_mjd + 1.0);
-	}
-      }
-    } // if S2 data
+      if (hdr.corrected & S2ROS_CORRECTED == 0)
+      {
+        /* get the year data was processed */
+        char comment[64];
+        char* key;
+        const char* whitespace = " \n\t";
+        int year;
+        strcpy(comment, hdr.comment);
+        key = strtok(comment, whitespace);
+        for (int ntok = 0; ntok<6; ++ntok)
+        {
+	  if (key==NULL)
+            break;
+	  key = strtok(NULL, whitespace);
+        }
+        if (key && sscanf(key, "%d", &year)==1 && year<=1997)
+        {
+	  cerr << "TimerArchive::subint_load performing S2 MJD correction" 
+	       << endl;
+	  MJD old_mjd = Mini::get_MJD (subint->mini);
+	  Mini::set_MJD (subint->mini, old_mjd + 1.0);
 
+	  if (isub == 0)
+          {
+	    old_mjd = Timer::get_MJD (hdr);
+	    Timer::set_MJD (hdr, old_mjd + 1.0);
+	  }
+          s2ros_corrected = true;
+        }
+      } // if S2 ROS bug was not already corrected
+    } // if S2 ROS bug might need correction
 
     if (baseband && telescope) try
     {
       // Correct the direction and parallactic angles
-      if (verbose == 3)
+      if (verbose > 2)
         cerr << "TimerArchive::subint_load correcting parallactic angle\n";
 
       Horizon horizon;
@@ -309,7 +332,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
     }
 
     if (reverse_U && !Profile::no_amps) {
-      if (verbose == 3)
+      if (verbose > 2)
 	cerr << "TimerArchive::subint_load reversing sign of ipol=2" 
 	     << endl;
       for (int ichan=0; ichan<hdr.nsub_band; ichan++)
@@ -318,7 +341,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
     
     if (reverse_V && !Profile::no_amps)
     {
-      if (verbose == 3)
+      if (verbose > 2)
 	cerr << "TimerArchive::subint_load reversing sign of ipol=3" 
 	     << endl;
       for (int ichan=0; ichan<hdr.nsub_band; ichan++)
@@ -334,7 +357,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
   // unloaded as such - MCB
   hdr.wts_and_bpass = 1;
 
-  if (verbose == 3) 
+  if (verbose > 2) 
     cerr << "TimerArchive::subint_load Read in " << get_nsubint()
          << " sub-Integrations" << endl;
 
@@ -376,7 +399,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
       nch_sub = (float)hdr.banda.nlag / (float)get_nchan();
       for(unsigned j=0; j<get_npol(); ++j){
 	for(unsigned k=0; k<get_nchan(); ++k){
-	  if(verbose == 3)printf("wt,nch_sub,tdmp: %f %f %f\n",
+	  if(verbose > 2)printf("wt,nch_sub,tdmp: %f %f %f\n",
 	       get_Profile(i,j,k)->get_weight(),nch_sub,tdmp);
 	  if(get_Profile(i,j,k)->get_weight() > nch_sub*hdr.ndump_sub_int) weights = 1;
 	}
@@ -384,7 +407,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
     }
     
     if(hdr.wts_and_bpass == 0 || weights == 0){
-      if(verbose == 3) 
+      if(verbose > 2) 
 	cerr << "Multiply FB wts by dump time:" << tdmp << endl;
       for(unsigned i=0;i<get_nsubint();i++)
 	for(unsigned j=0; j<get_npol(); ++j)
@@ -394,7 +417,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 	  }
     }
     if(!(hdr.calibrated & FB_CALIBRATED)){
-      if(verbose == 3) 
+      if(verbose > 2) 
 	cerr << "Setting FB calibration" << endl;
       if (!Profile::no_amps)
         for(unsigned i=0;i<get_nsubint();i++)
@@ -406,7 +429,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 	      *get_Profile(i,j,k) *= hdr.tsmp / tdmp * sqrt(chbw * hdr.tsmp);
 	  }
 
-      if(verbose == 3) 
+      if(verbose > 2) 
 	cerr << "ndmp:" <<hdr.ndump_sub_int << " tsmp:" << hdr.tsmp 
 	     << " tsub_int:" << hdr.sub_int_time
 	     << " chbw: " << chbw << endl;
@@ -418,16 +441,16 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
   hdr.wts_and_bpass = 1;
 
   /* set a flag to indicate nint() correction has been done */
-  /* don't worry about the s2 hdr.corrected - no data taken until 1996 */
-  if (hdr.mjd < 49650 && hdr.corrected != 1) hdr.corrected =1;
-  
-  /* set a flag to indicate ROS 1 second error has been corrected */
-  if (strcmp(hdr.machine_id, "S2")==0 && !hdr.corrected) hdr.corrected = 1;
+  if (nint_corrected)
+    hdr.corrected |= NINT_CORRECTED;
+
+  if (s2ros_corrected)
+    hdr.corrected |= S2ROS_CORRECTED;
 
   /* Unpack the Pointing class attributes */
 
-  for (int isub=0; isub < hdr.nsub_int; isub++) { 
-
+  for (int isub=0; isub < hdr.nsub_int; isub++)
+  { 
     Pointing* pointing = get_Integration(isub)->get<Pointing>();
     if (!pointing)
       continue;
@@ -445,17 +468,16 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 
     angle.setDegrees (hdr.b);
     pointing->set_galactic_longitude (angle);
-
   }
 
-  if (verbose == 3) 
+  if (verbose > 2) 
     cerr << "TimerArchive::subint_load - exiting" << endl;
 }
 
 
 void Pulsar::TimerArchive::hdr_load (FILE* fptr)
 {
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "TimerArchive::hdr_load reading timer header" << endl;
 
   if (Timer::load (fptr, &hdr, big_endian) < 0)
@@ -472,7 +494,7 @@ void Pulsar::TimerArchive::backend_load (FILE* fptr)
 {
   unsigned long backend_offset = Timer::backend_data_size(hdr);
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "TimerArchive::backend_load offset=" << backend_offset << endl;
 
   if (backend_offset == 0)
@@ -491,13 +513,13 @@ void Pulsar::TimerArchive::backend_load (FILE* fptr)
 void Pulsar::TimerArchive::psr_load (FILE* fptr)
 {
   if (hdr.nbytespoly > 0) {
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "TimerArchive::psr_load "
 	   << hdr.nbytespoly << " bytes in polyco" << endl;
 
     model = factory<Pulsar::Predictor> (fptr, hdr.nbytespoly);
 
-    if (verbose == 3) {
+    if (verbose > 2) {
       if (model) {
         cerr << "TimerArchive::psr_load read predictor:" << endl;
         model->unload (stderr);
@@ -507,17 +529,17 @@ void Pulsar::TimerArchive::psr_load (FILE* fptr)
         cerr << "TimerArchive::psr_load failed to read predictor" << endl;
     }
   }
-  else if (verbose == 3)
+  else if (verbose > 2)
     cerr << "TimerArchive::psr_load no predictor" << endl;
 
   if (hdr.nbytesephem > 0) {
-    if (verbose == 3) 
+    if (verbose > 2) 
       cerr << "TimerArchive::psr_load "
 	   << hdr.nbytesephem << " bytes in ephemeris" << endl;
 
     ephemeris = factory<Pulsar::Parameters> (fptr, hdr.nbytesephem);
 
-    if (verbose == 3)
+    if (verbose > 2)
     {
       if (ephemeris)
       {
@@ -530,7 +552,7 @@ void Pulsar::TimerArchive::psr_load (FILE* fptr)
     }
   }
   else {
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "TimerArchive::psr_load no ephemeris" << endl;
   }
 }
