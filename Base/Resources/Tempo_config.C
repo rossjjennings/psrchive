@@ -126,7 +126,7 @@ Pulsar::Option<std::string>
 parameter_filename_wrapper
 (
  Tempo2::Generator::get_keyword_filename (),
- "Tempo2::keywords", Pulsar::Config::get_runtime() + "tempo2.key",
+ "Tempo2::keywords", Pulsar::Config::get_runtime() + "/tempo2.key",
 
  "Name of file containing tempo2-specific keywords",
 
