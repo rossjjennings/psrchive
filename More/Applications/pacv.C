@@ -63,9 +63,10 @@ void usage ()
     " -j           print Jones matrix elements of calibrator solution \n"
     " -p           use the polar model\n"
     " -P           produce publication-quality plots\n"
+    " -r feed.txt  set the feed transformation [not used] \n"
     " -s           plot only the reduced chisq of the pcm solution \n"
     " -S pcm.out   combine each calibrator with the pcm solution \n"
-    " -r feed.txt  set the feed transformation [not used] \n"
+    " -u           unload the derived calibrator \n"
     " -2 m or d    multiply or divide cross products by factor of two \n"
        << endl;
 }
@@ -288,6 +289,7 @@ int main (int argc, char** argv)
 
     case 'u':
       unload_derived_calibrator = true;
+      plot_calibrator_solution = false;
       break;
 
     case 'V':
@@ -323,7 +325,7 @@ int main (int argc, char** argv)
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  if (!(print_jones || print_mueller))
+  if (!(print_jones || print_mueller || unload_derived_calibrator))
   {
     cpgbeg (0, device.c_str(), 0, 0);
     cpgask(1);
