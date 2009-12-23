@@ -183,7 +183,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.102 2009/08/15 09:20:17 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.103 2009/12/23 12:25:11 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -511,7 +511,7 @@ int main (int argc, char *argv[]) try
     return -1;
   }
 
-  else try
+  else if ( model_file.empty() ) try
   {   
     // Generate the CAL file database
     cout << "pac: Generating new calibrator database" << endl;
