@@ -1,22 +1,77 @@
-#! /bin/csh
+#!/bin/sh
 
-set nthread = 1
+nthread=1
+library="default"
 
-if ( $1 != "" ) set nthread = $1
+usage()
+{
+cat <<EOF
 
-echo Testing on $nthread threads
+Usage: fft_bench [OPTION]
 
-set nfft = 4
+Known values for OPTION are:
+
+  --nthread=N        number of threads to run
+  --library=name     name of FFT library to use
+
+EOF
+
+exit $1
+}
+
+while test $# -gt 0; do
+
+case "$1" in
+    -*=*)
+    arg=`echo "$1" | awk -F= '{print $1}'`
+    optarg=`echo "$1" | awk -F= '{print $2}'`
+      ;;
+
+    *)
+    arg=$1
+    optarg=
+    ;;
+esac
+
+case "$arg" in
+
+    --library)
+    library=$optarg
+    ;;
+
+    --nthread)
+    nthread=$optarg
+    ;;
+
+    --help)
+    usage 0
+    ;;
+
+    *)
+    usage 1
+    ;;
+
+esac
+shift
+done
+
+echo Testing $library FFT library on $nthread threads
+
+nfft=4
+
+if test $library != "default"; then
+  libarg="-l$library"
+fi
 
 rm -f fft_bench.out
 
-while ( $nfft <= 16777216 )
+while test $nfft -le 16777216; do
 
   echo -n "Testing nfft=$nfft "
   
-  time fft_speed -t$nthread -n$nfft >> fft_bench.out
+  time fft_speed $libarg -t$nthread -n$nfft >> fft_bench.out
 
-  @ nfft = $nfft * 2
+  nfft=`expr $nfft '*' 2`
 
-end
+done
 
