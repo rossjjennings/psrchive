@@ -7,10 +7,12 @@
 
 #include "FTransformAgent.h"
 #include "CommandLine.h"
+#include "BatchQueue.h"
 #include "RealTimer.h"
 #include "malloc16.h"
 
 #include <iostream>
+#include <math.h>
 
 using namespace FTransform;
 using namespace std;
@@ -37,22 +39,48 @@ protected:
   unsigned nloop;
   unsigned nfft;
   bool real_to_complex;
+
+  class Thread;
 };
+
+class Speed::Thread : public Reference::Able
+{
+ protected:
+
+  friend class Speed;
+
+  unsigned nloop;
+  unsigned nfft;
+  bool real_to_complex;
+
+  FTransform::Plan* plan;
+
+  void run ();
+
+  double time;
+};
+
 
 Speed::Speed ()
 {
-  nloop = 1000 * 1000;
+  nloop = 0;
   nfft = 4;
   nthread = 1;
   real_to_complex = false;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char** argv) try
 {
   Speed speed;
   speed.parseOptions (argc, argv);
   speed.runTest ();
+  return 0;
 }
+ catch (Error& error)
+   {
+     cerr << error << endl;
+     return -1;
+   }
 
 void Speed::parseOptions (int argc, char** argv)
 {
@@ -77,7 +105,7 @@ void Speed::parseOptions (int argc, char** argv)
   arg = menu.add (library, 'i', "niter");
   arg->set_help ("number of iterations");
 
-  arg = menu.add (library, 't', "nthread");
+  arg = menu.add (nthread, 't', "nthread");
   arg->set_help ("number of threads");
 
   menu.parse (argc, argv);
@@ -93,10 +121,17 @@ void Speed::listLibraries ()
   exit (0);
 }
 
+double order (unsigned nfft)
+{
+  return nfft * log2 (nfft);
+}
+
 void Speed::runTest ()
 {
   if (!library.empty())
     FTransform::set_library (library);
+
+  FTransform::nthread = nthread;
 
   FTransform::Plan* plan;
   if (real_to_complex)
@@ -104,9 +139,45 @@ void Speed::runTest ()
   else
     plan = Agent::current->get_plan (nfft, FTransform::fcc);
 
-  float* in = (float*) malloc16 (sizeof(float) * nfft);
-  memset (in, 0, nfft*sizeof(float));
-  float* out = (float*) malloc16 (sizeof(float) * (nfft+2));
+  BatchQueue queue (nthread);
+  vector<Thread*> thread (nthread);
+
+  if (!nloop)
+    nloop = unsigned (10000 * order(8192)/order(nfft));
+
+  cerr << "nloop=" << nloop << endl;
+
+  for (unsigned ithread=0; ithread < nthread; ithread++)
+  {
+    thread[ithread] = new Thread;
+    thread[ithread]->nloop = nloop;
+    thread[ithread]->nfft = nfft;
+    thread[ithread]->real_to_complex = real_to_complex;
+    thread[ithread]->plan = plan;
+
+    queue.submit (thread[ithread], &Thread::run);
+  }
+
+  queue.wait ();
+
+  delete plan;
+
+  double total_time = 0.0;
+  for (unsigned ithread=0; ithread < nthread; ithread++)
+    total_time += thread[ithread]->time;
+
+  cout << nfft << " " << total_time/nthread << endl;
+}
+
+void Speed::Thread::run ()
+{
+  unsigned size = sizeof(float) * nfft;
+  if (!real_to_complex)
+    size *= 2;
+
+  float* in = (float*) malloc16 (size);
+  memset (in, 0, size);
+  float* out = (float*) malloc16 (size + 2*sizeof(float));
 
   RealTimer timer;
   timer.start ();
@@ -120,9 +191,10 @@ void Speed::runTest ()
 
   timer.stop ();
 
-  delete plan;
+  time = timer.get_elapsed()/nloop;
+
+  // cerr << "time=" << time << endl;
+
   free16 (in);
   free16 (out);
-
-  cout << nfft << " " << timer.get_elapsed()/nloop << endl;
 }
