@@ -132,6 +132,7 @@ void Speed::runTest ()
     FTransform::set_library (library);
 
   FTransform::nthread = nthread;
+  FTransform::simd = true;
 
   FTransform::Plan* plan;
   if (real_to_complex)
