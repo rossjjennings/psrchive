@@ -38,6 +38,11 @@ test_interpolate_LDADD		= $(LDADD) ../units/libunits.la
 test_real_complex_SOURCES	= test_real_complex.C
 test_QuaternionFT_SOURCES	= test_QuaternionFT.C
 
+bin_PROGRAMS = fft_speed
+bin_SCRIPTS = fft_bench
+
+fft_speed_SOURCES = fft_speed.C
+
 #############################################################################
 #
 
