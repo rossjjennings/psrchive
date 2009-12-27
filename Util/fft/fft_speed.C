@@ -145,7 +145,7 @@ void Speed::runTest ()
   if (!nloop)
     nloop = unsigned (40000 * order(8192)/order(nfft));
 
-  cerr << "nloop=" << nloop << endl;
+  cerr << "nloop=" << nloop << " library=" << get_library() << endl;
 
   for (unsigned ithread=0; ithread < nthread; ithread++)
   {
