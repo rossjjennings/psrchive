@@ -143,7 +143,7 @@ void Speed::runTest ()
   vector<Thread*> thread (nthread);
 
   if (!nloop)
-    nloop = unsigned (10000 * order(8192)/order(nfft));
+    nloop = unsigned (40000 * order(8192)/order(nfft));
 
   cerr << "nloop=" << nloop << endl;
 
@@ -166,7 +166,15 @@ void Speed::runTest ()
   for (unsigned ithread=0; ithread < nthread; ithread++)
     total_time += thread[ithread]->time;
 
-  cout << nfft << " " << total_time/nthread << endl;
+  double time_us = total_time * 1e6 / nthread;
+  double log2_nfft = log2(nfft);
+
+  double mflops = 5.0 * nfft * log2_nfft / time_us;
+
+  cerr << "nfft=" << nfft << " time=" << time_us << "us"
+    " log2(nfft)=" << log2_nfft << " mflops=" << mflops << endl;
+
+  cout << nfft << " " << time_us << " " << log2_nfft << " " << mflops << endl;
 }
 
 void Speed::Thread::run ()
