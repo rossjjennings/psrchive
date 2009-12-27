@@ -1,0 +1,22 @@
+#! /bin/csh
+
+set nthread = 1
+
+if ( $1 != "" ) set nthread = $1
+
+echo Testing on $nthread threads
+
+set nfft = 4
+
+rm -f fft_bench.out
+
+while ( $nfft <= 16777216 )
+
+  echo -n "Testing nfft=$nfft "
+  
+  time fft_speed -t$nthread -n$nfft >> fft_bench.out
+
+  @ nfft = $nfft * 2
+
+end
+
