@@ -72,6 +72,8 @@ namespace Pulsar {
     std::pair<int,int> crange;
     int pol;
 
+    bool zero_check;
+
   };
 
 }

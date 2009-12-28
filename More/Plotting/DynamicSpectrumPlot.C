@@ -41,6 +41,8 @@ Pulsar::DynamicSpectrumPlot::DynamicSpectrumPlot ()
   crange.first = -1;
   crange.second = -1;
 
+  zero_check = true;
+
 }
 
 TextInterface::Parser* Pulsar::DynamicSpectrumPlot::get_interface ()
@@ -97,12 +99,16 @@ void Pulsar::DynamicSpectrumPlot::draw (const Archive* data)
   float data_max = FLT_MIN;
   for (int ii=0; ii<nchan*nsub; ii++) {
     // Assume any points exactly equal to 0 are zero-weighted
-    if (plot_array[ii]==0.0) continue; 
+    if (zero_check && plot_array[ii]==0.0) continue; 
     if (plot_array[ii] < data_min) 
       data_min = plot_array[ii];
     if (plot_array[ii] > data_max) 
       data_max = plot_array[ii];
   }
+
+  // XXX debug
+  cerr << "DynamicSpectrumPlot data min/max = (" << data_min 
+    << "," << data_max << ")" << endl;
 
   float df = (freq1 - freq0) / (float)(nchan-1);
   float trans[6] = {srange.first-0.5, 1.0, 0.0, freq0-df, 0.0, df};

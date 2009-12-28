@@ -26,6 +26,7 @@
 #include "Pulsar/DynamicSNSpectrumPlot.h"
 #include "Pulsar/DynamicBaselineSpectrumPlot.h"
 #include "Pulsar/DynamicCalSpectrumPlot.h"
+#include "Pulsar/DynamicWeightSpectrumPlot.h"
 #include "Pulsar/FreqVsSNRPlot.h"
 #include "Pulsar/CalPhVFreqPlot.h"
 #include "Pulsar/BandpassPlot.h"
@@ -99,6 +100,9 @@ Pulsar::PlotFactory::PlotFactory ()
   
   add ( new PlotFactory::Advocate<DynamicCalSpectrumPlot>
         ( 'l', "dcal", "Calibrator dynamic spectrum" ) );
+  
+  add ( new PlotFactory::Advocate<DynamicWeightSpectrumPlot>
+        ( 'w', "dweight", "Weights dynamic spectrum" ) );
   
   add ( new PlotFactory::Advocate<FreqVsSNRPlot>
         ( 'n', "snrspec", "S/N ratio" ) );
