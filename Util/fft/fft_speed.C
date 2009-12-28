@@ -11,6 +11,8 @@
 #include "RealTimer.h"
 #include "malloc16.h"
 
+#include <stdlib.h>
+#include <string.h>
 #include <iostream>
 #include <math.h>
 
