@@ -3,7 +3,7 @@ noinst_LTLIBRARIES = libpsrfft.la
 
 noinst_SCRIPTS = install_bench
 
-bin_SCRIPTS = fft_bench
+dist_bin_SCRIPTS = fft_bench
 
 bin_PROGRAMS = fft_speed
 
