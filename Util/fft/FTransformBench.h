@@ -35,13 +35,16 @@ namespace FTransform {
   protected:
 
     //! Database entries
-    mutable std::vector<Entry> entry;
+    mutable std::vector<Entry> entries;
+    mutable unsigned max_nfft;
+    mutable bool loaded;
 
     std::string path;
     unsigned nthread;
 
+    void reset ();
     void load () const;
-    void load (const std::string& filename) const;
+    void load (const std::string& library, const std::string& filename) const;
   };
 
   class Bench::Entry
@@ -50,6 +53,8 @@ namespace FTransform {
     std::string library;
     unsigned nfft;
     double speed;
+
+    Entry () { nfft = 0; speed = 0.0; }
   };
 }
 
