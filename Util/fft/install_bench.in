@@ -1,10 +1,33 @@
+#!/bin/csh -f
 
-foreach lib ( FFTW3 IPP )
+# @configure_input@
 
-  foreach nthread ( 1 2 4 8 )
+#
+# This script installs the FFT benchmarks for each FFT library
+# 
 
-    fft_bench --library=$lib --nthread=$nthread
-    mv fft_bench.out fft_bench_${lib}_${nthread}.out
+set prefix=@prefix@
+set datarootdir=@datarootdir@
+
+set max_nthread = 1
+
+if ( -f /proc/cpuinfo ) then
+  set max_nthread = `cat /proc/cpuinfo | grep processor | wc -l`
+else
+  set max_nthread = `sysctl hw.ncpu | awk '{print $2}'`
+endif
+
+echo Maximum number of threads = $max_nthread
+
+foreach lib ( $* )
+
+  set nthread = 1
+  while ($nthread <= $max_nthread)
+
+    ./fft_bench --library=$lib --nthread=$nthread
+    mv fft_bench.out ${datarootdir}/fft_bench_${lib}_${nthread}.out
+
+    @ nthread = $nthread * 2
 
   end
 
