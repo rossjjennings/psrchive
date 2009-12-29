@@ -10,11 +10,11 @@ bin_PROGRAMS = fft_speed
 fft_speed_SOURCES = fft_speed.C
 
 include_HEADERS = interpolate.h median_smooth.h \
-	FTransform.h FTransformAgent.h FTransformPlan.h \
+	FTransform.h FTransformAgent.h FTransformPlan.h FTransformBench.h \
 	QuaternionFT.h
 
 libpsrfft_la_SOURCES = test_libraries.h shift.C fccf.f ffft.f \
-	FTransformAgent.C FTransform.C QuaternionFT.C
+	FTransformAgent.C FTransform.C FTransformBench.C QuaternionFT.C
 
 FFT_BENCH =
 
