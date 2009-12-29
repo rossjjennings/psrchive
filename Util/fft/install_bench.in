@@ -1,0 +1,12 @@
+
+foreach lib ( FFTW3 IPP )
+
+  foreach nthread ( 1 2 4 8 )
+
+    fft_bench --library=$lib --nthread=$nthread
+    mv fft_bench.out fft_bench_${lib}_${nthread}.out
+
+  end
+
+end
+
