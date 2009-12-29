@@ -252,6 +252,7 @@ AC_CONFIG_FILES([
 		Util/third/gnu/Makefile
 		Util/units/Makefile
 		Util/fft/Makefile
+		Util/fft/install_bench
 		Util/genutil/Makefile
 		Util/pgutil/Makefile
 		Util/qtutil/Makefile
