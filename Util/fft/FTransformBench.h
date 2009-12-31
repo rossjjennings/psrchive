@@ -18,6 +18,8 @@ namespace FTransform {
   {
   public:
 
+    static bool verbose;
+
     //! Construct from installed benchmarks
     Bench ();
 
@@ -27,9 +29,12 @@ namespace FTransform {
     //! Set the number of threads for which benchmarks will be loaded
     void set_nthread (unsigned nthread);
 
+    //! Get the maximum FFT length measured
+    unsigned get_max_nfft () const;
+
     class Entry;
 
-    //! Get the best FFT speed for the specified transform length
+    //! Get the best FFT cost for the specified transform length
     Entry get_best (unsigned nfft) const;
 
   protected:
@@ -52,9 +57,9 @@ namespace FTransform {
   public:
     std::string library;
     unsigned nfft;
-    double speed;
+    double cost;
 
-    Entry () { nfft = 0; speed = 0.0; }
+    Entry () { nfft = 0; cost = 0.0; }
   };
 }
 

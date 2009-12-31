@@ -13,6 +13,8 @@
 
 using namespace std;
 
+bool FTransform::Bench::verbose = false;
+
 FTransform::Bench::Bench ()
 {
   nthread = FTransform::nthread;
@@ -40,6 +42,15 @@ void FTransform::Bench::reset ()
   entries.resize (0);
   max_nfft = 0;
   loaded = false;
+}
+
+//! Get the maximum FFT length measured
+unsigned FTransform::Bench::get_max_nfft () const
+{
+  if (!loaded)
+    load ();
+
+  return max_nfft;
 }
 
 void FTransform::Bench::load () const
@@ -83,14 +94,14 @@ void FTransform::Bench::load (const std::string& library,
     Entry entry;
     double log2nfft, mflops;
 
-    in >> entry.nfft >> entry.speed >> log2nfft >> mflops;
+    in >> entry.nfft >> entry.cost >> log2nfft >> mflops;
 
     if (in.eof())
       continue;
 
     entry.library = library;
     
-    DEBUG(library << " " << entry.nfft << " " << entry.speed);
+    DEBUG(library << " " << entry.nfft << " " << entry.cost);
 
     entries.push_back (entry);
 
@@ -101,10 +112,10 @@ void FTransform::Bench::load (const std::string& library,
 
 double theoretical (unsigned nfft)
 {
-  return 5.0 * nfft * log2 (nfft);
+  return nfft * log2 (nfft);
 }
 
-//! Get the best FFT speed for the transform length
+//! Get the best FFT cost for the transform length
 FTransform::Bench::Entry FTransform::Bench::get_best (unsigned nfft) const
 {
   if (!loaded)
@@ -119,15 +130,19 @@ FTransform::Bench::Entry FTransform::Bench::get_best (unsigned nfft) const
 
   for (unsigned i=0; i<entries.size(); i++)
     if ( entries[i].nfft == use_nfft &&
-	 (entry.nfft == 0 || entries[i].speed < entry.speed) )
+	 (entry.nfft == 0 || entries[i].cost < entry.cost) )
       entry = entries[i];
 
   if (entry.nfft == 0)
   {
     entry.library = "theoretical";
     entry.nfft = nfft;
-    entry.speed = theoretical (nfft);
+    entry.cost = theoretical (nfft);
   }
+
+  if (verbose)
+    cerr << "FTransform::Bench::get_best lib=" << entry.library
+	 << " nfft=" << entry.nfft << " cost=" << entry.cost << endl;
 
   return entry;
 }
