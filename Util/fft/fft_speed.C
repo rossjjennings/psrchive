@@ -41,6 +41,7 @@ protected:
   unsigned nloop;
   unsigned nfft;
   bool real_to_complex;
+  unsigned streaming_cache;
 
   class Thread;
 };
@@ -54,6 +55,7 @@ class Speed::Thread : public Reference::Able
   unsigned nloop;
   unsigned nfft;
   bool real_to_complex;
+  unsigned streaming_cache;
 
   FTransform::Plan* plan;
 
@@ -69,6 +71,7 @@ Speed::Speed ()
   nfft = 4;
   nthread = 1;
   real_to_complex = false;
+  streaming_cache = 0;
 }
 
 int main(int argc, char** argv) try
@@ -109,6 +112,9 @@ void Speed::parseOptions (int argc, char** argv)
 
   arg = menu.add (nthread, 't', "nthread");
   arg->set_help ("number of threads");
+
+  arg = menu.add (streaming_cache, 'c', "bytes");
+  arg->set_help ("streaming cache size in bytes");
 
   menu.parse (argc, argv);
 }
@@ -156,6 +162,8 @@ void Speed::runTest ()
     thread[ithread]->nloop = nloop;
     thread[ithread]->nfft = nfft;
     thread[ithread]->real_to_complex = real_to_complex;
+    thread[ithread]->streaming_cache = streaming_cache;
+
     thread[ithread]->plan = plan;
 
     queue.submit (thread[ithread], &Thread::run);
@@ -186,8 +194,19 @@ void Speed::Thread::run ()
   if (!real_to_complex)
     size *= 2;
 
-  float* in = (float*) malloc16 (size);
-  memset (in, 0, size);
+  unsigned npart = 1;
+  unsigned in_size = size;
+
+  if (streaming_cache && size < streaming_cache)
+  {
+    in_size = streaming_cache;
+    npart = streaming_cache / size;
+    cerr << "Speed::Thread::run cache=" << streaming_cache
+	 << " parts=" << npart << endl;
+  }
+
+  float* in = (float*) malloc16 (in_size);
+  memset (in, 0, in_size);
   float* out = (float*) malloc16 (size + 2*sizeof(float));
 
   RealTimer timer;
@@ -195,10 +214,16 @@ void Speed::Thread::run ()
 
   if (real_to_complex)
     for (unsigned i=0; i<nloop; i++)
-      plan->frc1d (nfft, out, in);
+    {
+      float* inptr = in + (i%npart) * size;
+      plan->frc1d (nfft, out, inptr);
+    }
   else
     for (unsigned i=0; i<nloop; i++)
-      plan->fcc1d (nfft, out, in);
+    {
+      float* inptr = in + (i%npart) * size;
+      plan->fcc1d (nfft, out, inptr);
+    }
 
   timer.stop ();
 
