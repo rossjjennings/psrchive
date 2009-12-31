@@ -766,23 +766,7 @@ string get_ant_z( Reference::To< Archive > archive )
 
 string get_telescop( Reference::To< Archive > archive )
 {
-  string result = "";
-  Reference::To<ObsExtension> ext = archive->get<ObsExtension>();
-
-  if( !ext )
-  {
-    Reference::To<Telescope> text = archive->get<Telescope>();
-    if( text )
-    {
-      result = text->get_name();
-    }
-    else 
-      result = archive->get_telescope();
-  }
-  else
-    result = ext->get_telescope();
-
-  return result;
+  return archive->get_telescope();
 }
 
 string get_date( Reference::To< Archive > archive )

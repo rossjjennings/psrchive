@@ -5,24 +5,15 @@
  *
  ***************************************************************************/
 
-
-
 #include "Pulsar/ObsExtension.h"
 
-
-
-using Pulsar::ObsExtension;
-
-
-
-ObsExtension::Interface::Interface ( ObsExtension *s_instance )
+Pulsar::ObsExtension::Interface::Interface (ObsExtension *s_instance)
 {
-  if( s_instance )
-    set_instance( s_instance );
+  if (s_instance)
+    set_instance (s_instance);
 
   add( &ObsExtension::get_observer, "observer", "Observer name(s)" );
   add( &ObsExtension::get_project_ID, "projid", "Project name" );
-  add( &ObsExtension::get_telescope, "telescop", "Telescope name" );
 }
 
 

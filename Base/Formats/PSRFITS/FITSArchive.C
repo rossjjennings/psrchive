@@ -247,14 +247,13 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (verbose > 2)
     cerr << "FITSArchive::load_header reading telescope name" << endl;
 
-  dfault = obs_ext->telescope;
+  dfault = get_telescope();
   psrfits_read_key (fptr, "TELESCOP", &tempstr, dfault, verbose > 2);
-  obs_ext->telescope = stringtok (&tempstr, " ");
   
   if (verbose > 2)
-    cerr << "Got telescope: " << obs_ext->telescope << endl;
+    cerr << "FITSArchive::load_header TELESCOP=" << tempstr << endl;
   
-  set_telescope ( obs_ext->telescope );
+  set_telescope ( tempstr );
 
   Telescope* telescope = getadd<Telescope>();
 
@@ -266,7 +265,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   {
     if (verbose > 2)
       cerr << "FITSArchive::load_header WARNING"
-	" could not set telescope info for " << obs_ext->telescope << "\n\t"
+	" could not set telescope info for " << get_telescope() << "\n\t"
 	   << error.get_message() << endl;
   }
 
@@ -795,9 +794,13 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
 #endif
 
   if (verbose > 2)
-    cerr << "FITSArchive::unload_file file created" << endl;
+    cerr << "FITSArchive::unload_file TELESCOP=" << get_telescope() << endl;
 
   psrfits_update_key (fptr, "TELESCOP", get_telescope());
+
+  if (verbose > 2)
+    cerr << "FITSArchive::unload_file SRC_NAME=" << get_source() << endl;
+
   psrfits_update_key (fptr, "SRC_NAME", get_source());
     
   AnglePair radec = get_coordinates().getRaDec();

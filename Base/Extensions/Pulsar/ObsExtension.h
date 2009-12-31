@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ObsExtension.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/05/12 20:46:06 $
+   $Revision: 1.13 $
+   $Date: 2009/12/31 06:29:19 $
    $Author: straten $ */
 
 #ifndef __ObsExtension_h
@@ -60,7 +60,6 @@ namespace Pulsar {
     std::string get_observer() const { return observer; }
     std::string get_affiliate() const { return affiliation; }
     std::string get_project_ID() const { return project_ID; }
-    std::string get_telescope() const { return telescope; }
 
     //////////////////////////////////////////////////////////////
 
@@ -72,10 +71,6 @@ namespace Pulsar {
 
     //! Project ID
     std::string project_ID;
-    
-    //! Name of the telescope
-    std::string telescope;
-
   };
  
 }

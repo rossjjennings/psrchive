@@ -624,7 +624,6 @@ void Pulsar::WAPPArchive::load_extensions()
   ObsExtension *o = getadd<ObsExtension>();
   o->observer = hdr->observers;
   o->project_ID = hdr->project_id;
-  o->telescope = get_telescope();
 
   // Receiver
   Receiver *r = getadd<Receiver>();
