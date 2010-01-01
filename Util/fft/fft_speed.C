@@ -190,9 +190,11 @@ void Speed::runTest ()
 
 void Speed::Thread::run ()
 {
-  unsigned size = sizeof(float) * nfft;
+  unsigned nfloat = nfft;
   if (!real_to_complex)
-    size *= 2;
+    nfloat *= 2;
+
+  unsigned size = sizeof(float) * nfloat;
 
   unsigned npart = 1;
   unsigned in_size = size;
@@ -212,18 +214,15 @@ void Speed::Thread::run ()
   RealTimer timer;
   timer.start ();
 
-  if (real_to_complex)
-    for (unsigned i=0; i<nloop; i++)
-    {
-      float* inptr = in + (i%npart) * size;
+  for (unsigned i=0; i<nloop; i++)
+  {
+    unsigned ipart = i % npart;
+    float* inptr = in + ipart * nfloat;
+    if (real_to_complex)
       plan->frc1d (nfft, out, inptr);
-    }
-  else
-    for (unsigned i=0; i<nloop; i++)
-    {
-      float* inptr = in + (i%npart) * size;
+    else
       plan->fcc1d (nfft, out, inptr);
-    }
+  }
 
   timer.stop ();
 
