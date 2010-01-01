@@ -25,7 +25,7 @@ foreach lib ( $* )
   while ($nthread <= $max_nthread)
 
     ./fft_bench --library=$lib --nthread=$nthread
-    mv fft_bench.out ${datarootdir}/fft_bench_${lib}_${nthread}.dat
+    mv fft_bench.out @datadir@/fft_bench_${lib}_${nthread}.dat
 
     @ nthread = $nthread * 2
 
