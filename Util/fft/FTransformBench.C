@@ -70,13 +70,15 @@ void FTransform::Bench::load () const
 
     string filename = path + "/fft_bench_" + library + "_" + nt + ".dat";
 
-    DEBUG("FTransform::Bench::load filename=" << filename);
+    if (verbose)
+      cerr << "FTransform::Bench::load filename=" << filename << endl;
 
     load (library, filename);
   }
   catch (Error& error)
   {
-    cerr << error << endl;
+    if (verbose)
+      cerr << "FTransform::Bench::load " << error.get_message() << endl;
   }
 
   loaded = true;
@@ -87,7 +89,8 @@ void FTransform::Bench::load (const std::string& library,
 {
   ifstream in (filename.c_str());
   if (!in)
-    throw Error (FailedSys, "FTransform::Bench::load", "std::ifstream");
+    throw Error (FailedSys, "FTransform::Bench::load",
+                 "std::ifstream (" + filename + ")");
 
   while (!in.eof())
   {
