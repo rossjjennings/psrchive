@@ -70,6 +70,8 @@ static PlotFactory factory;
 
 void reorder(Reference::To<Archive> arch);
 
+void setCentreMjd(const Archive* archive);
+
 void draw_colour_map (float *plotarray, int rows, int cols, double minx,
 		double maxx, const string& xlabel, double miny, double maxy, const string& ylabel,
 		const string& title, float * trf, int numVertTicks);
@@ -383,6 +385,8 @@ bool join = false;
 // The Barycentric period in seconds
 double dopplerFactor;
 
+double tmjdctr;
+
 // Best values
 double bestSNR;
 
@@ -539,6 +543,8 @@ void init() {
 
 	// The Barycentric period in seconds
 	dopplerFactor = -1;
+
+  tmjdctr = 0.0;
 
 	// Best values
 	bestSNR = -1;
@@ -900,13 +906,13 @@ int main (int argc, char** argv)
 		cout << endl;
 
 		reorder(joined_archive);
+    setCentreMjd(joined_archive);
 		process(joined_archive, minwidthsecs, bestfilename);
 
 		// total->unload(newname); // THIS IS BROKEN!!!
 	}
 	else
 	{
-
 	  for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try
 	  {
 	    archive = Archive::load(filenames[ifile]);
@@ -1938,7 +1944,10 @@ double getDopplerFactor(const Archive * archive)
 	double start = archive->start_time().intday() + archive->start_time().fracday();
 	double end = archive->end_time().intday() + archive->end_time().fracday();
 
-	double tmjdctr = 0.5 * (end + start) * (double)86400;
+  if (tmjdctr == 0.0) {
+    tmjdctr = (archive->start_time().in_days() + 0.5 *
+        archive->integration_length()) * 86400.0;
+  }
 
 	sky_coord coord = getCoord (archive);
 	Angle ra_angle = coord.ra();
@@ -3100,6 +3109,24 @@ void setSensibleStepSizes(const Archive* archive)
   
   if (nsub == 1 || periodStep_us <= 0)
     periodHalfRange_us = periodStep_us/2;
+}
+
+void setCentreMjd(const Archive* archive)
+{
+  const double mid_length = archive->integration_length() / 2;
+  const unsigned nsubint = archive->get_nsubint();
+  double accumulated_length = 0.0;
+
+  for (unsigned isub = 0; isub < nsubint; ++isub) {
+    const double duration = archive->get_Integration(isub)->get_duration();
+    if (accumulated_length + duration > mid_length) {
+      tmjdctr = archive->get_Integration(isub)->get_start_time().in_seconds() +
+        mid_length - accumulated_length;
+      return;
+    } else {
+      accumulated_length += duration;
+    }
+  }
 }
 
 
