@@ -110,8 +110,10 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   float y_min, y_max;
   get_frame()->get_y_scale()->PlotScale::get_minmax (y_min, y_max);
 
-  cerr << "Pulsar::PhaseVsPlot::draw y_min=" << y_min << " y_max=" << y_max
-       << endl;
+  if (verbose) {
+    cerr << "Pulsar::PhaseVsPlot::draw y_min=" << y_min << " y_max=" << y_max
+      << endl;
+  }
 
   // Fill the image data
   unsigned nbin = data->get_nbin();
