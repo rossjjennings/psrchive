@@ -88,8 +88,10 @@ void Pulsar::PhaseVsPlot::prepare (const Archive* data)
   min_row = rows.first;
   max_row = rows.second + 1;
 
-  cerr << "Pulsar::PhaseVsPlot::prepare row"
-    " min=" << min_row << " max=" << max_row << endl;
+  if (verbose) {
+    cerr << "Pulsar::PhaseVsPlot::prepare row"
+      " min=" << min_row << " max=" << max_row << endl;
+  }
 
   float y_min = float(min_row) / float(nrow);
   float y_max = float(max_row) / float(nrow);
