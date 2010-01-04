@@ -1467,9 +1467,9 @@ void solve_and_plot (Archive* archive,
 		cout << "number of S/Ns = " << SNRs.size() << endl;
 	}
 
-	//	drawBestValuesCrossHair( archive,
-	//    periodOffset_us, periodStep_us, periodHalfRange_us,
-	//   dmOffset, dmStep, dmHalfRange);
+  drawBestValuesCrossHair( archive,
+      periodOffset_us, periodStep_us, periodHalfRange_us,
+      dmOffset, dmStep, dmHalfRange);
 }
 
 // Use the the default natural values for offset, step and half-range
