@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/ColourMap.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:54 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2010/01/05 05:41:57 $
+   $Author: jonathan_khoo $ */
 
 #ifndef __ColourMap_H
 #define __ColourMap_H
@@ -22,10 +22,6 @@ namespace pgplot {
   class ColourMap : public Reference::Able {
 
   public:
-
-    //! Default constructor
-    ColourMap ();
-
     //! Available colour map names
     enum Name {
       GreyScale,
@@ -37,6 +33,11 @@ namespace pgplot {
       AlienGlow,
       Test
     };
+
+    //! Default constructor
+    ColourMap ();
+
+    ColourMap (const Name _name);
 
     //! Set the colour map name
     void set_name (Name name);

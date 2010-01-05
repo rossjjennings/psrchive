@@ -16,6 +16,14 @@ pgplot::ColourMap::ColourMap ()
   logarithmic = false;
 }
 
+pgplot::ColourMap::ColourMap (const Name _name) :
+  contrast(1.0),
+  brightness(0.5),
+  logarithmic(false)
+{
+  name = _name;
+}
+
 //! Set the contrast (0 to 1; normally 1)
 void pgplot::ColourMap::set_contrast (float _contrast)
 {
