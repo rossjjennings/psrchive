@@ -76,6 +76,9 @@ void draw_colour_map (float *plotarray, int rows, int cols, double minx,
 		double maxx, const string& xlabel, double miny, double maxy, const string& ylabel,
 		const string& title, float * trf, int numVertTicks);
 
+void draw_colour_map_only(const int rows, const int columns, const double minx,
+    const double maxx, const double miny, const double maxy, const float* trf);
+
 void minmaxval (int n, const float *thearray, float *min, float *max);
 
 // Initialises all the global variables to default values.
@@ -163,7 +166,6 @@ void goToPhaseTimeTitleViewPort();
 void scrunchPartially(Archive * scrunchedCopy);
 
 // Get the SNR for the archive.
-//float getSNR(const Archive * archive, float rms, int minwidthbins);
 float getSNR(const Profile * p);  // For use with standard profiles!
 float getSNR(const Profile * p, float rms, int minwidthbins);
 float getSNR(const Profile * p, float rms, int minwidthbins, int maxwidthbins);
@@ -178,11 +180,10 @@ sky_coord getCoord (const Archive*);
 void setSensibleStepSizes(const Archive * archive);
 
 // Parse the command line parameters and set the values passed through as arguments
-// Parse the command line parameters and set the values passed through as arguments
-void parseParameters(int argc, char **argv, double &periodOffset_us, double &periodStep_us, double &periodHalfRange_us, 
-	                   double &dmOffset, double &dmStep, double &dmHalfRange, 
-		     string &plot_device, pgplot::ColourMap::Name &colour_map, double &minwidth
-		     ,string & bestfilename);
+void parseParameters(int argc, char **argv, double &periodOffset_us,
+    double &periodStep_us, double &periodHalfRange_us, double &dmOffset,
+    double &dmStep, double &dmHalfRange, pgplot::ColourMap::Name &colour_map,
+    double &minwidth, string &bestfilename);
 
 // Parses a string to a number and checks if that value is a positive value
 //
@@ -441,7 +442,34 @@ char user_rms_file[256];
 string standardProfileFilename = "";
 bool useStandardProfile = false;
 bool useOwnStandardProfile = false;
-bool Thumbnail = false;
+bool thumbnail = false;
+
+// Set to true when the -k option is specified.
+// When onlyDisplayDmPlot is true, only the DM vs period plot will be
+// displayed on the pgplot device specified by plot_device (-g option)
+bool onlyDisplayDmPlot = false;
+
+// Minimal greyscale level for DM vs period plot
+float onlyDisplayDmPlotMin = 0.0;
+
+// Minimal greyscale level for DM vs period plot
+float onlyDisplayDmPlotMax = 0.0;
+
+// Number of contour levels when the contour map is drawn
+unsigned numContourLevels = 0;
+
+// Value of the first contour line
+float contourFirstLevel = 0.0;
+
+// Value of the step between each line
+float contourLevelStep = 0.0;
+
+// Set to true when the -con option is specified.
+// When drawContourMap is true, a contour map will be drawn over the DM vs period
+// plot
+bool drawContourMap = false;
+
+string plot_device = "/xs";
 
 Reference::To<Profile> std_prof;
 Reference::To<StandardSNR> stdSNR;
@@ -493,6 +521,18 @@ void usage (bool verbose_usage)
     "                                                                               \n"
     "Selection & configuration options:                                             \n"
     " -g <dev>   Manually specify a plot device                                     \n"
+    "                                                                               \n"
+    "Plotting options:                                                              \n"
+    " -k <min level> <max level>     Only show the DM vs period plot                \n"
+    "                                If <min level> and <max level> = 0,            \n"
+    "                                pdmp will automatically determine these values \n"
+    " -con <clevel1> <cstep> <nc>    Draw a contour map which overlays the DM vs    \n"
+    "                                period plot (-k ...)                           \n"
+    "       clevel1 = value of the first contour line                               \n"
+    "       cstep   = step between each contour line                                \n"
+    "       nc      = number of contour lines                                       \n"
+    "                                                                               \n"
+    "                                                                               \n"
     "                                                                               \n"
     "Other plotting options:                                                        \n"
     " -c <index>  Select a colour map for PGIMAG style plots                        \n"
@@ -569,10 +609,11 @@ void init() {
 }
 
 
-void parseParameters(int argc, char **argv, double &periodOffset_us, double &periodStep_us, double &periodHalfRange_us,
-	                double &dmOffset, double &dmStep, double &dmHalfRange,
-		     string &plot_device, pgplot::ColourMap::Name &colour_map,
-		     double &minwidth, string & bestfilename) {
+void parseParameters(int argc, char **argv, double &periodOffset_us,
+    double &periodStep_us, double &periodHalfRange_us, double &dmOffset,
+    double &dmStep, double &dmHalfRange, pgplot::ColourMap::Name &colour_map,
+    double &minwidth, string &bestfilename)
+{
 	string optionArg;
 
 	// If no command line argument was provided, then print out usage
@@ -690,8 +731,8 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 		}
 
 		else if (strcmp(argv[i], "-t") == 0) {
-		  Thumbnail = true;
-		  cout << "Thumbnail on"<< endl;
+		  thumbnail = true;
+		  cout << "thumbnail on"<< endl;
 		}
 
 		// use the standard profile
@@ -792,6 +833,26 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 			i++;
 			range_mult = atof(argv[i]);
 		}
+		else if (strcmp(argv[i], "-k") == 0) {
+			onlyDisplayDmPlot = true;
+
+            i++;
+			onlyDisplayDmPlotMin = atof(argv[i]);
+
+            i++;
+			onlyDisplayDmPlotMax = atof(argv[i]);
+		}
+    else if (strcmp(argv[i], "-con") == 0) {
+      drawContourMap = true;
+      i++;
+      contourFirstLevel = atoi(argv[i]);
+
+      i++;
+      contourLevelStep = atoi(argv[i]);
+
+      i++;
+      numContourLevels = atoi(argv[i]);
+    }
 		else if (strcmp(argv[i], "-rms") == 0) {
 			i++;
 			user_rms = atof(argv[i]);
@@ -849,7 +910,6 @@ int main (int argc, char** argv)
 	double elapsed;
 	double minwidthsecs = 0.0;
 
-	string plot_device = "/xs";
 
 	string option;
 	string bestfilename = "";
@@ -857,24 +917,25 @@ int main (int argc, char** argv)
 	pgplot::ColourMap::Name colour_map = pgplot::ColourMap::Heat;
 
 	// Get the command line parameters
-	parseParameters(argc, argv,  periodOffset_us, periodStep_us, periodHalfRange_us,
-	                dmOffset, dmStep, dmHalfRange, plot_device, colour_map, minwidthsecs,
-			bestfilename);
+	parseParameters(argc, argv,  periodOffset_us, periodStep_us,
+      periodHalfRange_us, dmOffset, dmStep, dmHalfRange, colour_map,
+      minwidthsecs, bestfilename);
 
 	Archive::verbose = 0;
 
 	if (verbose)
 		Archive::verbose = 3;
 
-	if (cpgopen(plot_device.c_str()) < 0) {
-		cout << "Error: Could not open plot device" << endl;
-		return -1;
-	}
+  if (!onlyDisplayDmPlot) {
+    if (cpgopen(plot_device.c_str()) < 0) {
+      cout << "Error: Could not open plot device" << endl;
+      return -1;
+    }
 
-	if (Thumbnail){
-	  cpgpap(5.0,0.7);
-	}
-
+    if (thumbnail) {
+      cpgpap(5.0,0.7);
+    }
+  }
 	for (int i = beginFilenamesIndex; i < argc; i++)
 		dirglob (&filenames, argv[i]);
 
@@ -889,8 +950,10 @@ int main (int argc, char** argv)
 	Reference::To<Archive> archive;
 	Reference::To<Archive> joined_archive;
 
-	clock.start();
-	cpgask(!force);
+  if (!onlyDisplayDmPlot) {
+    clock.start();
+    cpgask(!force);
+  }
 
 	if (join && filenames.size() > 1)
 	{
@@ -1069,7 +1132,9 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename)
     stdSNR->set_standard(std_prof);
   }
 
-  cpg_next();
+  if (!onlyDisplayDmPlot) {
+    cpg_next();
+  }
 
   ///////////////////////////////////////////////////////////
   // Get the reference values
@@ -1081,7 +1146,10 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename)
   // Start searching for the best period and DM
 
   string emptyString = "";
-  goToDMPViewPort();
+
+  if (!onlyDisplayDmPlot) {
+    goToDMPViewPort();
+  }
 
   // Before entering the search loop, scrunch the archive partially
   // if necessary.
@@ -1102,7 +1170,11 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename)
   Reference::To<Archive> phaseTimeCopy = archive->clone();
   Reference::To<Archive> phaseFreqCopy = archive->clone();
 
-  if (bestfilename!="") plotSNRdm(bestfilename, bestDM);
+  if (!onlyDisplayDmPlot) {
+    if (bestfilename != "") {
+      plotSNRdm(bestfilename, bestDM);
+    }
+  }
 
   phaseTimeCopy->set_dispersion_measure(bestDM);
   phaseTimeCopy->dedisperse();
@@ -1145,16 +1217,18 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename)
   }
 #endif
 
-  cpgsci(6);
-  cpgslw(8);
-  
-  cpgslw(1);
-  cpgsci(1);
+  if (!onlyDisplayDmPlot) {
+    cpgsci(6);
+    cpgslw(8);
 
-  printResults(archive);
+    cpgslw(1);
+    cpgsci(1);
 
-  int tScint=0; 
-  int fScint=0; 
+    printResults(archive);
+  }
+
+  int tScint=0;
+  int fScint=0;
   int tfScint=0;
 
   // Determine SNR as a function of frequency, time and frequency and time into globals
@@ -1329,12 +1403,14 @@ void solve_and_plot (Archive* archive,
 
 	// cerr << "periodBins=" << periodBins << endl;
 
-	// Print the header
-	printHeader(archive, periodOffset_us, periodStep_us, periodHalfRange_us,
-	           dmOffset, dmStep, dmHalfRange);
+  if (!onlyDisplayDmPlot) {
+    // Print the header
+    printHeader(archive, periodOffset_us, periodStep_us, periodHalfRange_us,
+        dmOffset, dmStep, dmHalfRange);
 
-	// Revert back to the DM vs P vs Intensity viewport
-	goToDMPViewPort();
+    // Revert back to the DM vs P vs Intensity viewport
+    goToDMPViewPort();
+  }
 
 	double minDM = refDM + dmOffset - fabs(dmStep*(floor((double)dmBins/2)));
 	double currDM = minDM;
@@ -1455,8 +1531,18 @@ void solve_and_plot (Archive* archive,
 	// Plot the deltaPeriod vs. DM vs. SNR plot
 	// and the pulse profile plot
 
-	if (dmBins > 0)
-	  draw_colour_map(&SNRs[0], dmBins, periodBins+1, -periodHalfRange_us+ periodOffset_us , periodHalfRange_us + periodOffset_us, "delta Period (us)", minDM, maxDM, "DM", "", trf, 5);
+	if (dmBins > 0) {
+    const double minx = periodOffset_us - periodHalfRange_us;
+    const double maxx = periodOffset_us + periodHalfRange_us;
+
+    if (onlyDisplayDmPlot) {
+      draw_colour_map_only(dmBins, periodBins + 1, minx, maxx, minDM, maxDM, trf);
+    } else {
+      draw_colour_map(&SNRs[0], dmBins, periodBins+1, minx, maxx,
+          "delta Period (us)", minDM, maxDM, "DM", "", trf, 5);
+    }
+  }
+
 	plotProfile (bestProfile, total_plot, flui);
 
 	if (verbose) {
@@ -1531,7 +1617,7 @@ double getNaturalPeriodStep (const Archive * archive, double halfRange)
       " start=" << archive->start_time().printdays(13) <<
       " end=" << archive->end_time().printdays(13) << endl;
 
-  double tspan = (archive->end_time() - archive->start_time()).in_seconds();
+  double tspan = archive->integration_length();
   assert (tspan > 0.0);
 
   double centre_period = archive->get_Integration(0)->get_folding_period();
@@ -1779,7 +1865,7 @@ double computePeriodError(const Archive * archive) {
 
 	double pulseWidth_ms = 0;
 	double error = 0;
-	double tspan = (archive->end_time() - archive->start_time()).in_seconds();
+	double tspan = archive->integration_length();
 	double bcPeriod_s = getPeriod(archive) / dopplerFactor;
 	double refP_ms = bcPeriod_s * MILLISEC;
 	double tsub = archive->get_Integration(0)->get_duration();
@@ -2299,7 +2385,7 @@ void printHeader(const Archive * archive,
 	int nBin = archive->get_nbin();
 	int nChan = archive->get_nchan();
 	int nSub = archive->get_nsubint();
-	double tspan = (archive->end_time() - archive->start_time()).in_seconds();
+	double tspan = archive->integration_length();
 	double tsub = (archive->get_Integration(0))->get_duration();
 	double tbin = (refP_us/1000) / nBin;
 
@@ -2893,7 +2979,7 @@ void drawBestFitPhaseTime(const Archive * archive) {
 		deltaP = bestPeriod_bc_us - p;
 	}
 
-	double tspan = (archive->end_time() - archive->start_time()).in_seconds();
+	double tspan = archive->integration_length();
 	double tsub = archive->get_Integration(0)->get_duration();
 	unsigned nsub;
 
@@ -3014,6 +3100,62 @@ void reorder(Reference::To<Archive> archive)
 {
 	Reference::To<TimeSortedOrder> tso = new TimeSortedOrder;
 	tso->organise(archive,0);
+}
+
+void draw_colour_map_only(const int rows, const int columns, const double minx,
+    const double maxx, const double miny, const double maxy, const float* trf)
+{
+  if (columns <= 0 || rows <= 0) {
+    throw Error(InvalidRange, "draw_colour_map_only",
+        "columns=%d rows=%d", columns, rows);
+  }
+
+  if (cpgopen(plot_device.c_str()) < 0) {
+    cerr << "Error: Could not open plot device" << endl;
+    exit(-1);
+  }
+
+  cpgslw(2);    // line width
+  cpgsch(1.2);  // character height
+  cpgscf(2);    // Roman font
+	cpgsci(1);    // colour index 
+
+	pgplot::ColourMap cmap(pgplot::ColourMap::Heat);
+	cmap.apply();
+
+	cpgswin(minx, maxx, miny, maxy);
+
+	float min = 0, max = 0;
+
+  if (onlyDisplayDmPlotMin != 0.0 || onlyDisplayDmPlotMax != 0.0) {
+    min = onlyDisplayDmPlotMin;
+    max = onlyDisplayDmPlotMax;
+  } else {
+    minmaxval(columns*rows, &SNRs[0], &min, &max);
+  }
+
+  cout << "Plotting DM vs period with min=" << min << " max=" << max << endl;
+
+  cpgimag(&SNRs[0], columns, rows, 1, columns, 1, rows, max, min, trf);
+
+  if (drawContourMap) {
+    vector<float> contourLevels;
+    float contourLevel = contourFirstLevel;
+
+    for (unsigned i = 0; i < numContourLevels; ++i) {
+      contourLevels.push_back(contourLevel);
+      contourLevel += contourLevelStep;
+    }
+
+    cpgcont(&SNRs[0], columns, rows, 1, columns,
+        1, rows, &contourLevels[0], numContourLevels, trf);
+  }
+
+  cpglab("Delta P (microsec)", "DM (cm\\u-3\\d pc)", "");
+  cpgbox("BCNTS", 0.0, 5, "BCNTS", 0.0, 2);
+
+  cpgend();
+  exit(0);
 }
 
 void draw_colour_map (float *plotarray, int rows, int cols, double minx,
