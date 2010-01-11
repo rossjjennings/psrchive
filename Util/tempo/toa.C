@@ -287,21 +287,18 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
   if (auxinfo.find(" ")!=string::npos) 
 	  flags = auxinfo.substr(auxinfo.find(" "));
 
-  unsigned sub;
-  unsigned chan;
-
   bool subint_given = false;
   bool chan_given = false;
 
-  sub = flags.find("-subint");
-  if (sub != string::npos) {
-	  flags.erase(sub, 8); // remove '-subint' from flags
+  string::size_type i_sub = flags.find("-subint");
+  if (i_sub != string::npos) {
+	  flags.erase(i_sub, 8); // remove '-subint' from flags
       subint_given = true;
   }
 
-  chan = flags.find("-chan");
-  if (chan != string::npos) {
-	  flags.erase(chan, 6); // remove '-chan' from flags
+  string::size_type i_chan = flags.find("-chan");
+  if (i_chan != string::npos) {
+	  flags.erase(i_chan, 6); // remove '-chan' from flags
       chan_given = true;
   }
 
