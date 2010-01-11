@@ -174,7 +174,9 @@ int main(int argc, char* argv[]) try
 	double centre_freq = base_archive->get_centre_frequency();
 	double bandwidth = base_archive->get_bandwidth();
 	int num_chan = base_archive->get_nchan();
-	double int_length = base_archive->integration_length();
+  double int_length = base_archive->end_time().in_seconds() -
+    base_archive->start_time().in_seconds();
+
 	int num_subints = base_archive->get_nsubint();
 	double original_bandwidth = bandwidth;
 	int num_bins = base_archive->get_nbin();
@@ -439,15 +441,18 @@ int main(int argc, char* argv[]) try
 						time_zap_subint(base_archive, time_get_channel(mouseY2, int_length, num_subints, scale));
 						time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot, zoomed);
 
-					} else {
-						if (((upper_range + 1 == base_archive->get_nbin()) && (upper_range - 1 - lower_range > 0)) || ((upper_range + 1 != base_archive->get_nbin()) && (upper_range - lower_range > 0))) {
-							int bin = (int)(mouseX2 * num_bins);
-							binzap(mod_archive, base_archive, subint, lower_range, upper_range, bin, bin+1);
-							redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
-						}
-					}
-					update_total(scrunched_archive, base_archive, total_plot);
-				}
+          } else {
+            if ((upper_range + 1 == static_cast<int>(base_archive->get_nbin()) &&
+                  (upper_range - 1 - lower_range > 0)) ||
+                (upper_range + 1 != static_cast<int>(base_archive->get_nbin()) &&
+                 upper_range - lower_range > 0)) {
+              int bin = (int)(mouseX2 * num_bins);
+              binzap(mod_archive, base_archive, subint, lower_range, upper_range, bin, bin+1);
+              redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
+            }
+          }
+          update_total(scrunched_archive, base_archive, total_plot);
+        }
 				break;
 
 			case 'z': // zap multiple channels
@@ -571,11 +576,15 @@ string vertical_join_option(float x, float x2, int &upper_chan, int &lower_chan,
 
 void freq_zap_chan(Pulsar::Archive* arch, int zap_chan)
 {
-	for (int pol = 0; pol < arch->get_npol(); pol++ ) {
-		for (int sub = 0; sub < arch->get_nsubint(); sub++) {
-			for (int chan = 0; chan < arch->get_nchan(); chan++) {
-				if (chan == zap_chan) {
-					arch->get_Profile(sub,pol,chan)->set_weight(0);
+  const unsigned npol = arch->get_npol();
+  const unsigned nsubint = arch->get_nsubint();
+  const unsigned nchan = arch->get_nchan();
+
+	for (unsigned ipol = 0; ipol < npol; ++ipol) {
+		for (unsigned isub = 0; isub < nsubint; ++isub) {
+			for (unsigned ichan = 0; ichan < nchan; ++ichan) {
+				if (ichan == static_cast<unsigned>(zap_chan)) {
+					arch->get_Profile(isub, ipol, ichan)->set_weight(0);
 				}
 			}
 		}
@@ -584,9 +593,12 @@ void freq_zap_chan(Pulsar::Archive* arch, int zap_chan)
 
 void time_zap_subint(Pulsar::Archive* arch, int zap_subint)
 {
-	for (int pol = 0; pol < arch->get_npol(); pol++ ) {
-		for (int chan = 0; chan < arch->get_nchan(); chan++) {
-			arch->get_Profile(zap_subint,pol,chan)->set_weight(0);
+  const unsigned npol = arch->get_npol();
+  const unsigned nchan = arch->get_nchan();
+
+	for (unsigned ipol = 0; ipol < npol; ++ipol) {
+		for (unsigned ichan = 0; ichan < nchan; ++ichan) {
+			arch->get_Profile(zap_subint, ipol, ichan)->set_weight(0);
 		}
 	}
 }
