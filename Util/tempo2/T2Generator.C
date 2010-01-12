@@ -12,6 +12,7 @@
 #include "T2Parameters.h"
 
 #include "Error.h"
+#include "RealTimer.h"
 #include "file_cast.h"
 #include "strutil.h"
 #include "lazy.h"
@@ -26,6 +27,8 @@ LAZY_GLOBAL(Tempo2::Generator, \
 
 static bool loaded = false;
 static std::vector<std::string> keywords;
+
+bool Tempo2::Generator::print_time = false;
 
 std::vector<std::string>& Tempo2::Generator::get_keywords ()
 {
@@ -162,6 +165,10 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
       " coeffs: ntime=" << ntimecoeff << " nfreq=" << nfreqcoeff
 	 << endl;
 
+  RealTimer timer;
+  if (print_time)
+    timer.start ();
+
   ChebyModelSet_Construct( cms, &psr, sitename.c_str(), use_epoch1, use_epoch2,
 			   segment_length, segment_length*0.1, 
 			   freq1, freq2, ntimecoeff, nfreqcoeff );
@@ -173,6 +180,12 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
   long double rms, mav;
   ChebyModelSet_Test( cms, &psr, ntimecoeff*5*cms->nsegments, 
 		      nfreqcoeff*5*cms->nsegments, &rms, &mav );
+
+  if (print_time)
+  {
+    timer.stop ();
+    cerr << "Tempo2::Generator::generate construction took " << timer << endl;
+  }
 
   if (Predictor::verbose)
     printf("RMS error = %.3Lg s MAV= %.3Lg s\n", 

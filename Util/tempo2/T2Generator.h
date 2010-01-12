@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Generator.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/12/21 04:47:14 $
+   $Revision: 1.6 $
+   $Date: 2010/01/12 04:56:24 $
    $Author: straten $ */
 
 #ifndef __Tempo2Generator_h
@@ -25,6 +25,9 @@ namespace Tempo2 {
   class Generator : public Pulsar::Generator {
 
   public:
+
+    //! Print the time required to generate the predictor
+    static bool print_time;
 
     //! Default constructor
     Generator (const Parameters* parameters = 0);
