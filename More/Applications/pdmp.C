@@ -1338,6 +1338,12 @@ void solve_and_plot (Archive* archive,
 		     double periodHalfRange_us,
 		     ProfilePlot* total_plot, TextInterface::Parser* flui, double minwidthsecs)
 {
+  /* optimization: setting the phase prediction model to NULL disables
+     the phase prediction model resynchronization that may otherwise take
+     place when tscrunch is called - van Straten, January 2010 */
+
+  archive->set_model(NULL);
+
 	// MJK: I have made the SNRs array global.. not sure if this will make
 	// anything not work (i.e. too much memory use?)
 	Reference::To<Profile> profile;
