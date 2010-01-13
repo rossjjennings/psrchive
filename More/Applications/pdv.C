@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.42 $
-   $Date: 2009/06/17 03:06:13 $
+   $Revision: 1.43 $
+   $Date: 2010/01/13 07:00:35 $
    $Author: straten $ */
 
 
@@ -320,7 +320,7 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
     lsub = isub;
   }
 
-  tostring_places = true;
+  tostring_setf = ios::fixed;
 
   try
   {

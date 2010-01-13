@@ -24,6 +24,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <iomanip>
 
 using namespace MEAL;
 using namespace std;

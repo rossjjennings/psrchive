@@ -87,31 +87,6 @@ bool full_paths = false;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-// PRECISION FOR tostring
-////////////////////////////////////////////////////////////////////////////////////////////
-
-
-unsigned int old_precision;
-bool old_places;
-
-void set_precision( unsigned int num_digits, unsigned int places = true )
-{
-  old_precision = tostring_precision;
-  old_places = tostring_places;
-
-  tostring_precision = num_digits;
-  tostring_places = places;
-}
-
-
-void restore_precision( void )
-{
-  tostring_precision = old_precision;
-  tostring_places = old_places;
-}
-
-
-////////////////////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS FOR RETREIVING OBSERVATION PARAMETERS
 ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -134,34 +109,28 @@ string get_etime( Reference::To< Archive > archive )
 
 string get_length( Reference::To< Archive > archive )
 {
-  set_precision( 3, true );
-  string result;
-
   Reference::To<FITSHdrExtension> hdr_ext = archive->get<FITSHdrExtension>();
 
-  if ( hdr_ext ) {
+  if ( hdr_ext )
+  {
     const string obs_mode = hdr_ext->get_obs_mode();
 
-    if ( obs_mode == "SEARCH" || obs_mode == "SRCH" ) {
+    if ( obs_mode == "SEARCH" || obs_mode == "SRCH" )
+    {
       Reference::To<FITSSUBHdrExtension> sub_hdr_ext =
         archive->get<FITSSUBHdrExtension>();
 
-      if ( sub_hdr_ext ) {
+      if ( sub_hdr_ext )
+      {
         const double tsamp = sub_hdr_ext->get_tsamp();
         const int nrows = sub_hdr_ext->get_nrows();
         const int nsblk = sub_hdr_ext->get_nsblk();
-        result = tostring( tsamp * nrows * nsblk );
+        return tostring( tsamp * nrows * nsblk, 3, ios::fixed );
       }
     }
   }
 
-  if ( result.empty() ) {
-    result = tostring( archive->integration_length() );
-  }
-
-  restore_precision();
-
-  return result;
+  return tostring( archive->integration_length(), 3, ios::fixed );
 }
 
 string get_nbin_obs( Reference::To<Archive> archive )
@@ -233,24 +202,12 @@ string get_nsub_obs( Reference::To<Archive> archive )
 
 string get_dm( Reference::To< Archive > archive )
 {
-  set_precision( 6, true );
-
-  string result = tostring( archive->get_dispersion_measure() );
-
-  restore_precision();
-
-  return result;
+  return tostring( archive->get_dispersion_measure(), 6, ios::fixed );
 }
 
 string get_rm( Reference::To< Archive > archive )
 {
-  set_precision( 3, true );
-
-  string result = tostring( archive->get_rotation_measure() );
-
-  restore_precision();
-
-  return result;
+  return tostring( archive->get_rotation_measure(), 3, ios::fixed );
 }
 
 string get_state( Reference::To< Archive > archive )
@@ -291,36 +248,25 @@ string get_polc( Reference::To< Archive > archive )
 
 string get_freq( Reference::To< Archive > archive )
 {
-  string result;
-
-  set_precision( 3, true );
-
-  result = tostring( archive->get_centre_frequency() );
-
-  restore_precision();
-
-  return result;
+  return tostring( archive->get_centre_frequency(), 3, ios::fixed );
 }
 
 
 string get_profile_centre_frequency( Reference::To< Archive > archive )
 {
   double freq = archive->get_Profile(0, 0, 0)->get_centre_frequency();
-  return tostring(freq);
+  return tostring( freq, 3, ios::fixed );
 }
 
 
 string get_freq_pa( Reference::To< Archive > archive )
 {
   string result = "UNDEF";
-  set_precision( 3, true );
 
   if (archive->get_faraday_corrected())
     result = get_freq(archive);
   else if (archive->get_nchan() == 1)
     result = get_profile_centre_frequency(archive);
-
-  restore_precision();
 
   return result;
 }
@@ -329,14 +275,11 @@ string get_freq_pa( Reference::To< Archive > archive )
 string get_freq_phs( Reference::To< Archive > archive )
 {
   string result = "UNDEF";
-  set_precision( 3, true );
 
   if (archive->get_dedispersed())
     result = get_freq(archive);
   else if (archive->get_nchan() == 1)
     result = get_profile_centre_frequency(archive);
-
-  restore_precision();
 
   return result;
 }
@@ -344,14 +287,7 @@ string get_freq_phs( Reference::To< Archive > archive )
 
 string get_bw( Reference::To< Archive > archive )
 {
-  set_precision( 3, true );
-
-  double bandwidth = archive->get_bandwidth();
-  string result = tostring( bandwidth );
-
-  restore_precision();
-
-  return result;
+  return tostring( archive->get_bandwidth(), 3, ios::fixed );
 }
 
 
@@ -374,16 +310,12 @@ string get_fracmjd( Reference::To< Archive > archive )
 {
   string fracmjd;
 
-  set_precision( 14 );
-
   try
   {
     MJD t = archive->start_time();
-    fracmjd = tostring( t.fracday() );
+    fracmjd = tostring( t.fracday(), 14 );
   }
   catch( Error e ) {}
-
-  restore_precision();
 
   return fracmjd;
 }
@@ -391,8 +323,6 @@ string get_fracmjd( Reference::To< Archive > archive )
 string get_mjd( Reference::To< Archive > archive )
 {
   string mjd;
-
-  set_precision( 19 );
 
   try
   {
@@ -407,11 +337,9 @@ string get_mjd( Reference::To< Archive > archive )
     else
       epoch = archive->start_time();
 
-    mjd = tostring( epoch, 15 );
+    mjd = tostring( epoch, 19 );
   } 
   catch( Error e ) {}
-
-  restore_precision();
 
   return mjd;
 }
@@ -449,11 +377,7 @@ string get_tsub( Reference::To< Archive > archive )
   {
     Reference::To< Integration > first_int = archive->get_first_Integration();
     if( first_int )
-    {
-      set_precision( 6 );
-      result = tostring( first_int->get_duration() );
-      restore_precision();
-    }
+      result = tostring( first_int->get_duration(), 6 );
   }
 
   return result;
@@ -465,38 +389,24 @@ string get_tsub( Reference::To< Archive > archive )
 
 string get_observer( Reference::To<Archive> archive )
 {
-  string result;
   Reference::To< ObsExtension > ext = archive->get<ObsExtension>();
 
   if( !ext )
-  {
-    result = "UNDEF";
-  }
+    return "UNDEF";
   else
-  {
-    result = ext->get_observer();
-  }
-
-  return result;
+    return ext->get_observer();
 }
 
 
 
 string get_projid( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<ObsExtension> ext = archive->get<ObsExtension>();
 
   if( !ext )
-  {
-    result = "UNDEF";
-  }
+    return "UNDEF";
   else
-  {
-    result = ext->get_project_ID();
-  }
-
-  return result;
+    return ext->get_project_ID();
 }
 
 
@@ -507,44 +417,33 @@ string get_projid( Reference::To<Archive> archive )
 
 string get_rcvr( Reference::To<Archive> archive )
 {
-  string result;
-
   Reference::To<Receiver> ext = archive->get<Receiver>();
 
-  if( ext )
-  {
-    result = ext->get_name();
-  }
-
-  return result;
+  if( !ext )
+    return "UNDEF";
+  else
+    return ext->get_name();
 }
 
 string get_nrcpt( Reference::To<Archive> archive )
 {
-  string result;
-
   Reference::To<Receiver> ext = archive->get<Receiver>();
 
-  if( ext )
-  {
-    result = tostring( ext->get_nrcvr() );
-  }
-
-  return result;
+  if( !ext )
+    return "UNDEF";
+  else
+    return tostring( ext->get_nrcvr() );
 }
 
 
 string get_fac( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<Receiver> recv = archive->get<Receiver>();
 
   if( !recv )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( recv->get_basis_corrected() );
-
-  return result;
+    return tostring( recv->get_basis_corrected() );
 }
 
 string get_fa_req( Reference::To<Archive> archive )
@@ -577,28 +476,22 @@ string get_fda( Reference::To<Archive> archive )
 
 string get_basis( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<Receiver> recv = archive->get<Receiver>();
 
   if( !recv )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( recv->get_basis() );
-
-  return result;
+    return tostring( recv->get_basis() );
 }
 
 string get_fd_hand( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<Receiver> recv = archive->get<Receiver>();
 
   if( !recv )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( recv->get_hand() );
-
-  return result;
+    return tostring( recv->get_hand() );
 }
 
 string get_fd_mode( Reference::To<Archive> archive )
@@ -630,80 +523,62 @@ string get_fd_mode( Reference::To<Archive> archive )
 
 string get_fd_xyph( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<Receiver> recv = archive->get<Receiver>();
 
   if( !recv )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( recv->get_reference_source_phase() );
-
-  return result;
+    return tostring( recv->get_reference_source_phase() );
 }
 
 string get_oa( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<Receiver> recv = archive->get<Receiver>();
 
   if( !recv )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( recv->get_orientation() );
-
-  return result;
+    return tostring( recv->get_orientation() );
 }
 
 string get_fd_sang( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<Receiver> recv = archive->get<Receiver>();
 
   if( !recv )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( recv->get_field_orientation() );
-
-  return result;
+    return tostring( recv->get_field_orientation() );
 }
 
 string get_xoffset( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<Receiver> recv = archive->get<Receiver>();
 
   if( !recv )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( recv->get_X_offset() );
-
-  return result;
+    return tostring( recv->get_X_offset() );
 }
 
 string get_yo( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<Receiver> recv = archive->get<Receiver>();
 
   if( !recv )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( recv->get_Y_offset() );
-
-  return result;
+    return tostring( recv->get_Y_offset() );
 }
 
 string get_co( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<Receiver> recv = archive->get<Receiver>();
 
   if( !recv )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( recv->get_calibrator_offset() );
-
-  return result;
+    return tostring( recv->get_calibrator_offset() );
 }
 
 
@@ -713,55 +588,32 @@ string get_co( Reference::To<Archive> archive )
 
 string get_ant_x( Reference::To< Archive > archive )
 {
-  string result = "";
   Reference::To<ITRFExtension> ext = archive->get<ITRFExtension>();
 
-  set_precision( 3, true );
-  
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->ant_x );
-
-  restore_precision();
-
-  return result;
+    return tostring( ext->ant_x, 3, ios::fixed );
 }
 
 string get_ant_y( Reference::To< Archive > archive )
 {
-  string result = "";
   Reference::To<ITRFExtension> ext = archive->get<ITRFExtension>();
 
-  set_precision( 3, true );
-
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->ant_y );
-
-  restore_precision();
-
-  return result;
+    return tostring( ext->ant_y, 3, ios::fixed );
 }
 
 string get_ant_z( Reference::To< Archive > archive )
 {
-  string result = "";
   Reference::To<ITRFExtension> ext = archive->get<ITRFExtension>();
   
-  set_precision( 3, true );
-
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->ant_z );
-  
-  restore_precision();
-
-// // //   if( tostring_places == true ) return "f";
-
-  return result;
+    return tostring( ext->ant_z, 3, ios::fixed );
 }
 
 string get_telescop( Reference::To< Archive > archive )
@@ -771,16 +623,12 @@ string get_telescop( Reference::To< Archive > archive )
 
 string get_date( Reference::To< Archive > archive )
 {
-  string result = "";
-
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_creation_date();
-
-  return result;
+    return ext->get_creation_date();
 }
 
 
@@ -828,103 +676,68 @@ string get_tlabel( Reference::To<Archive > archive )
 
 string get_backend( Reference::To< Archive > archive )
 {
-  string result = "";
-
-  Reference::To<Backend> ext;
-  ext = archive->get<Backend>();
+  Reference::To<Backend> ext = archive->get<Backend>();
   if( !ext )
-  {
     ext = archive->get<WidebandCorrelator>();
-  }
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_name();
-
-  return result;
+    return ext->get_name();
 }
 
 string get_be_dcc( Reference::To< Archive > archive )
 {
-  string result = "";
-  Reference::To<Backend> ext;
-  ext = archive->get<Backend>();
+  Reference::To<Backend> ext = archive->get<Backend>();
   if( !ext )
-  {
     ext = archive->get<WidebandCorrelator>();
-  }
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_downconversion_corrected() );
-
-  return result;
+    return tostring( ext->get_downconversion_corrected() );
 }
 
 string get_be_phase( Reference::To< Archive > archive )
 {
-  string result;
-  Reference::To<Backend> ext;
-  ext = archive->get<Backend>();
+  Reference::To<Backend> ext = archive->get<Backend>();
   if( !ext )
-  {
     ext = archive->get<WidebandCorrelator>();
-  }
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_argument() );
-
-  return result;
+    return tostring( ext->get_argument() );
 }
 
 string get_beconfig( Reference::To< Archive > archive )
 {
-  string result;
   Reference::To<WidebandCorrelator> ext = archive->get<WidebandCorrelator>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_config();
-
-  return result;
+    return ext->get_config();
 }
 
 
 
 string get_be_delay( Reference::To< Archive > archive )
 {
-  string result;
   Reference::To<Backend> ext = archive->get<Backend>();
   if( !ext )
-  {
     ext = archive->get<WidebandCorrelator>();
-  }
-
-  set_precision( 14 );
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring<double>( ext->get_delay() );
-  restore_precision();
-
-  return result;
+    return tostring( ext->get_delay(), 14 );
 }
 
 
 
 string get_period( Reference::To<Archive> archive )
 {
-  // TODO check this
-  set_precision( 14 );
-  string result = tostring<double>( archive->get_Integration(0)->get_folding_period() );
-  restore_precision();
-
-  return result;
+  return tostring( archive->get_Integration(0)->get_folding_period(), 14 );
 }
 
 
@@ -934,9 +747,9 @@ string get_tcycle( Reference::To< Archive > archive )
   Reference::To<WidebandCorrelator> ext = archive->get<WidebandCorrelator>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_tcycle() );
+    return tostring( ext->get_tcycle() );
 
   return result;
 }
@@ -951,97 +764,73 @@ string get_tcycle( Reference::To< Archive > archive )
 
 string get_obs_mode( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_obs_mode();
-
-  return result;
+    return ext->get_obs_mode();
 }
 
 
 string get_hdrver( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_hdrver();
-
-  return result;
+    return ext->get_hdrver();
 }
 
 string get_stt_date( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_stt_date();
-
-  return result;
+    return ext->get_stt_date();
 }
 
 string get_stt_time( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_stt_time();
-
-  return result;
+    return ext->get_stt_time();
 }
 
 
 string get_stt_lst( Reference::To<Archive> archive )
 {
-  string result = "UNDEF";
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
-
-  set_precision( 10 );
-
-  if( ext )
-    result = tostring( ext->get_stt_lst() );
-
-  restore_precision();
-
-  return result;
+  if (!ext)
+    return "UNDEF";
+  else 
+    return tostring( ext->get_stt_lst(), 10 );
 }
 
 string get_coord_md( Reference::To<Archive> archive )
 {
-  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_coordmode();
-
-  return result;
+    return ext->get_coordmode();
 }
 
 string get_equinox( Reference::To<Archive> archive )
 {
-  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_equinox();
-
-  return result;
+    return ext->get_equinox();
 }
 
 string get_trk_mode( Reference::To<Archive> archive )
@@ -1050,9 +839,9 @@ string get_trk_mode( Reference::To<Archive> archive )
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_trk_mode();
+    return ext->get_trk_mode();
 
   return result;
 }
@@ -1063,67 +852,51 @@ string get_bpa( Reference::To<Archive> archive )
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_bpa() );
+    return tostring( ext->get_bpa() );
 
   return result;
 }
 
 string get_bmaj( Reference::To<Archive> archive )
 {
-  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
-  set_precision(5,true);
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_bmaj() );
-  restore_precision();
-
-  return result;
+    return tostring( ext->get_bmaj(), 5, ios::fixed );
 }
 
 string get_bmin( Reference::To<Archive> archive )
 {
-  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
-  set_precision(5,true);
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_bmin() );
-  restore_precision();
-
-  return result;
+    return tostring( ext->get_bmin(), 5, ios::fixed );
 }
 
 string get_stt_imjd( Reference::To<Archive> archive )
 {
-  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_stt_imjd() );
-
-  return result;
+    return tostring( ext->get_stt_imjd() );
 }
 
 string get_stt_smjd( Reference::To<Archive> archive )
 {
-  string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_stt_smjd() );
-
-  return result;
+    return tostring( ext->get_stt_smjd() );
 }
 
 string get_stt_offs( Reference::To<Archive> archive )
@@ -1131,14 +904,10 @@ string get_stt_offs( Reference::To<Archive> archive )
   string result;
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
-  set_precision( 9 );
-
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_stt_offs() );
-
-  restore_precision();
+    return tostring( ext->get_stt_offs(), 9 );
 
   return result;
 }
@@ -1159,9 +928,9 @@ string get_stt_crd1( Reference::To<Archive> archive )
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_stt_crd1();
+    return ext->get_stt_crd1();
 
   return result;
 }
@@ -1172,9 +941,9 @@ string get_stt_crd2( Reference::To<Archive> archive )
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_stt_crd2();
+    return ext->get_stt_crd2();
 
   return result;
 }
@@ -1185,9 +954,9 @@ string get_stp_crd1( Reference::To<Archive> archive )
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_stp_crd1();
+    return ext->get_stp_crd1();
 
   return result;
 }
@@ -1198,9 +967,9 @@ string get_stp_crd2( Reference::To<Archive> archive )
   Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_stp_crd2();
+    return ext->get_stp_crd2();
 
   return result;
 }
@@ -1215,15 +984,12 @@ string get_stp_crd2( Reference::To<Archive> archive )
 
 string get_nchan_fluxcal( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<FluxCalibratorExtension> ext = archive->get<FluxCalibratorExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_nchan() );
-
-  return result;
+    return tostring( ext->get_nchan() );
 }
 
 string get_nrcvr_fluxcal( Reference::To<Archive> archive )
@@ -1232,28 +998,21 @@ string get_nrcvr_fluxcal( Reference::To<Archive> archive )
   Reference::To<FluxCalibratorExtension> ext = archive->get<FluxCalibratorExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring<double>( ext->get_nreceptor() );
+    return tostring<double>( ext->get_nreceptor() );
 
   return result;
 }
 
 string get_epoch_fluxcal( Reference::To<Archive> archive )
 {
-  string result = "";
   Reference::To<FluxCalibratorExtension> ext = archive->get<FluxCalibratorExtension>();
 
-  set_precision( 6, true );
-
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_epoch() );
-
-  restore_precision ();
-
-  return result;
+    return tostring( ext->get_epoch(), 6, ios::fixed );
 }
 
 
@@ -1269,7 +1028,7 @@ string get_nbin_prd( Reference::To<Archive> archive )
   Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
 
   if( ext )
-    result = tostring( ext->get_last_nbin_prd() );
+    return tostring( ext->get_last_nbin_prd() );
 
   return result;
 }
@@ -1280,7 +1039,7 @@ string get_tbin( Reference::To<Archive> archive )
   Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
 
   if( ext )
-    result = tostring( ext->get_last_tbin() );
+    return tostring( ext->get_last_tbin() );
 
   return result;
 }
@@ -1291,7 +1050,7 @@ string get_chbw( Reference::To<Archive> archive )
   Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
 
   if( ext )
-    result = tostring( ext->get_last_chan_bw() );
+    return tostring( ext->get_last_chan_bw() );
 
   return result;
 }
@@ -1318,7 +1077,7 @@ string get_nsub( Reference::To< Archive > archive )
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if ( ext ) {
-    result = tostring( ext->get_nrows() );
+    return tostring( ext->get_nrows() );
   }
 
   if ( result.empty() ) {
@@ -1340,9 +1099,9 @@ string get_npol_bp( Reference::To<Archive> archive )
   Reference::To<Passband> ext = archive->get<Passband>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_npol() );
+    return tostring( ext->get_npol() );
 
   return result;
 }
@@ -1353,9 +1112,9 @@ string get_nch_bp( Reference::To<Archive> archive )
   Reference::To<Passband> ext = archive->get<Passband>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_nchan() );
+    return tostring( ext->get_nchan() );
 
   return result;
 }
@@ -1373,9 +1132,9 @@ string get_npar_feed( Reference::To<Archive> archive )
   Reference::To<PolnCalibratorExtension> ext = archive->get<PolnCalibratorExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_nparam() );
+    return tostring( ext->get_nparam() );
 
   return result;
 }
@@ -1386,9 +1145,9 @@ string get_nchan_feed( Reference::To<Archive> archive )
   Reference::To<PolnCalibratorExtension> ext = archive->get<PolnCalibratorExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_nchan() );
+    return tostring( ext->get_nchan() );
 
   return result;
 }
@@ -1398,16 +1157,10 @@ string get_MJD_feed( Reference::To<Archive> archive )
   string result;
   Reference::To<PolnCalibratorExtension> ext = archive->get<PolnCalibratorExtension>();
 
-  set_precision( 6, true );
-
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_epoch() );
-
-  restore_precision ();
-
-  return result;
+    return tostring( ext->get_epoch(), 6, ios::fixed );
 }
 
 
@@ -1443,9 +1196,9 @@ string get_ndigstat( Reference::To<Archive> archive )
   Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_ndigr() );
+    return tostring( ext->get_ndigr() );
 
   return result;
 }
@@ -1456,9 +1209,9 @@ string get_npar_digstat( Reference::To<Archive> archive )
   Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_npar() );
+    return tostring( ext->get_npar() );
 
   return result;
 }
@@ -1469,9 +1222,9 @@ string get_ncycsub( Reference::To<Archive> archive )
   Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_ncycsub() );
+    return tostring( ext->get_ncycsub() );
 
   return result;
 }
@@ -1482,9 +1235,9 @@ string get_levmode_digstat( Reference::To<Archive> archive )
   Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_diglev() );
+    return tostring( ext->get_diglev() );
 
   return result;
 }
@@ -1502,9 +1255,9 @@ string get_dig_mode( Reference::To<Archive> archive )
   Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_dig_mode() );
+    return tostring( ext->get_dig_mode() );
 
   return result;
 }
@@ -1516,7 +1269,7 @@ string get_dyn_levt( Reference::To<Archive> archive )
 
   if( ext )
   {
-    result = tostring<float>( ext->get_dyn_levt() );
+    return tostring<float>( ext->get_dyn_levt() );
   }
 
   return result;
@@ -1528,9 +1281,9 @@ string get_nlev_digcnts( Reference::To<Archive> archive )
   Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_nlev() );
+    return tostring( ext->get_nlev() );
 
   return result;
 }
@@ -1541,9 +1294,9 @@ string get_npthist( Reference::To<Archive> archive )
   Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_npthist() );
+    return tostring( ext->get_npthist() );
 
   return result;
 }
@@ -1554,9 +1307,9 @@ string get_levmode_digcnts( Reference::To<Archive> archive )
   Reference::To<DigitiserCounts> ext = archive->get<DigitiserCounts>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_diglev() );
+    return tostring( ext->get_diglev() );
 
   return result;
 }
@@ -1572,9 +1325,9 @@ string get_subint_type( Reference::To<Archive> archive )
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_int_type();
+    return ext->get_int_type();
 
   return result;
 }
@@ -1585,9 +1338,9 @@ string get_subint_unit( Reference::To<Archive> archive )
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = ext->get_int_unit();
+    return ext->get_int_unit();
 
   return result;
 }
@@ -1598,9 +1351,9 @@ string get_tsamp( Reference::To<Archive> archive )
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_tsamp() );
+    return tostring( ext->get_tsamp() );
 
   return result;
 }
@@ -1612,9 +1365,9 @@ string get_nbits( Reference::To<Archive> archive )
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_nbits() );
+    return tostring( ext->get_nbits() );
 
   return result;
 }
@@ -1626,9 +1379,9 @@ string get_nch_strt( Reference::To<Archive> archive )
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_nch_strt() );
+    return tostring( ext->get_nch_strt() );
 
   return result;
 }
@@ -1640,9 +1393,9 @@ string get_nsblk( Reference::To<Archive> archive )
   Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
 
   if( !ext )
-    result = "UNDEF";
+    return "UNDEF";
   else
-    result = tostring( ext->get_nsblk() );
+    return tostring( ext->get_nsblk() );
 
   return result;
 }
@@ -1656,78 +1409,42 @@ string get_nsblk( Reference::To<Archive> archive )
 
 string get_cal_mode( Reference::To<Archive> archive )
 {
-  string result = "UNDEF";
-
   Reference::To<CalInfoExtension> ext = archive->get<CalInfoExtension>();
-
-  if( ext )
-  {
-    result = ext->cal_mode;
-  }
-
-  return result;
+  if( !ext )
+    return "UNDEF";
+  else
+    return ext->cal_mode;
 }
 
 
 string get_cal_freq( Reference::To<Archive> archive )
 {
-  string result = "UNDEF";
-
   Reference::To<CalInfoExtension> ext = archive->get<CalInfoExtension>();
-
-  if( ext )
-  {
-    set_precision( 6 );
-    result = tostring( ext->cal_frequency );
-    restore_precision();
-  }
-
-  return result;
+  if( !ext )
+    return "UNDEF";
+  else
+    return tostring( ext->cal_frequency, 6 );
 }
 
 
 string get_cal_dcyc( Reference::To<Archive> archive )
 {
-  string result = "UNDEF";
-
   Reference::To<CalInfoExtension> ext = archive->get<CalInfoExtension>();
-
-  if( ext )
-  {
-    set_precision(3);
-    result = tostring( ext->cal_dutycycle );
-    restore_precision();
-  }
-
-  return result;
+  if( !ext )
+    return "UNDEF";
+  else
+    return tostring( ext->cal_dutycycle, 3 );
 }
 
 
 string get_cal_phs( Reference::To<Archive> archive )
 {
-  string result = "UNDEF";
-
   Reference::To<CalInfoExtension> ext = archive->get<CalInfoExtension>();
-
-  if( ext )
-  {
-    set_precision(3);
-    result = tostring( ext->cal_phase );
-    restore_precision();
-  }
-
-  return result;
+  if( !ext )
+    return "UNDEF";
+  else
+    return tostring( ext->cal_phase, 3 );
 }
-
-
-
-
-
-
-
-
-
-
 
 
 // NOTE - who would have thought is_numeric would be so complicated, need to find a better one, this comes nowhere

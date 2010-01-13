@@ -28,6 +28,7 @@
 #define BANDPASSPLOT_ID "d"
 #define SPECTRUMPLOT_ID "b"
 
+using std::ios;
 using std::cerr;
 using std::cout;
 using std::endl;
@@ -496,28 +497,21 @@ void PavApp::PavSpecificOptions( void )
     SetPlotOptions<StokesCylindrical>( "pa:y:range=(0,1.5)" );
   }
 
-  int old_precision = tostring_precision;
-  bool old_places = tostring_places;
-  tostring_precision = 3;
-  tostring_places = true;
-
   // if we have a range of position angles
   if( pa_min != 0.0 || pa_max != 1.0 )
   {
     SetPlotOptions<StokesCylindrical>( string("pa:y:range=(") +
-              tostring<float>(pa_min) +
-              string(",") +
-              tostring<float>(pa_max) +
-              string(")" ) );
+				       tostring<float>(pa_min,3,ios::fixed) +
+				       string(",") +
+				       tostring<float>(pa_max,3,ios::fixed) +
+				       string(")" ) );
   }
 
   if( user_character_height != -1 )
   {
-    SetPlotOptions<Plot>( string("ch=") + tostring<float>(user_character_height) );
+    SetPlotOptions<Plot>( string("ch=")
+			  + tostring(user_character_height,3,ios::fixed) );
   }
-
-  tostring_places = old_places;
-  tostring_precision = old_precision;
 }
 
 
@@ -722,7 +716,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.68 2009/07/21 21:49:54 demorest Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.69 2010/01/13 07:00:34 straten Exp $" << 
         endl << endl;
       return 0;
     case 'M':
@@ -1131,7 +1125,7 @@ int PavApp::run( int argc, char *argv[] )
       }
 
       // set the precision that plot will use for labels
-      tostring_places = true;
+      tostring_setf = ios::fixed;
       if( !publn )
         tostring_precision = 3;
       else

@@ -18,24 +18,6 @@
 using namespace Pulsar;
 using namespace std;
 
-unsigned int old_precision;
-bool old_places;
-
-void set_precision( unsigned int num_digits, unsigned int places = true )
-{
-  old_precision = tostring_precision;
-  old_places = tostring_places;
-
-  tostring_precision = num_digits;
-  tostring_places = places;
-}
-
-void restore_precision( void )
-{
-  tostring_precision = old_precision;
-  tostring_places = old_places;
-}
-
 string get_name (const Archive* archive )
 {
   return archive->get_source();
@@ -63,16 +45,12 @@ string get_nsub (const Archive* archive )
 
 string get_length (const Archive* archive )
 {
-  tostring_precision = 6;
-  return tostring( archive->integration_length() );
+  return tostring( archive->integration_length(), 6 );
 }
 
 string get_bw (const Archive* archive )
 {
-  set_precision(3);
-  string result = tostring(archive->get_bandwidth());
-  restore_precision();
-  return result;
+  return tostring(archive->get_bandwidth(), 3);
 }
 
 string get_parang (const Archive* archive )
@@ -100,14 +78,12 @@ string get_tsub (const Archive* archive )
   string result;
   int nsubs = archive->get_nsubint();
   
-  if( nsubs != 0 ) {
+  if ( nsubs != 0 )
+  {
     const Integration* first_int = archive->get_first_Integration();
     
-    if( first_int ) {
-      set_precision( 6 );
-      result = tostring( first_int->get_duration() );
-      restore_precision();
-    }
+    if( first_int )
+      return tostring( first_int->get_duration(), 6 );
   }
   
   return result;
@@ -175,11 +151,7 @@ string get_backend (const Archive* archive )
 string get_period_as_string (const Archive* archive )
 {
   // TODO check this
-  set_precision( 14 );
-  string result = tostring<double>( archive->get_Integration(0)->get_folding_period() );
-  restore_precision();
-  
-  return result;
+  return tostring( archive->get_Integration(0)->get_folding_period(), 14 );
 }
 
 int get_stt_smjd (const Archive* arch)
@@ -194,19 +166,12 @@ int get_stt_imjd (const Archive* arch)
 
 string get_be_delay (const Archive* archive )
 {
-  string result;
   const Backend* ext = archive->get<WidebandCorrelator>();
-  set_precision( 14 );
   
-  if( !ext ) {
-    result = "UNDEF";
-    
-  } else {
-    result = tostring<double>( ext->get_delay() );
-  }
-  
-  restore_precision();
-  return result;
+  if ( !ext )
+    return "UNDEF";
+  else
+    return tostring ( ext->get_delay(), 14 );
 }
 
 string FetchValue (const Archive* archive, string command) try
