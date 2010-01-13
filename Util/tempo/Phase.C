@@ -80,16 +80,27 @@ string Phase::strprint (int precision) const
   }
 
   string s = tostring (turns);
-  string f = tostring (fturns, precision);
+  string f = tostring (fturns, precision, std::ios::fixed);
 
   if (!finite(fturns))
     s += ".NaN";
   else
   {
-    if (fturns>=0)
-      f.erase(0,1);
-    else
-      f.erase(0,2);
+    int adjust = 1;
+
+    if (fturns < 0)
+    {
+      // erase the leading negative sign
+      f.erase (0,1);
+      adjust = -1;
+    }
+
+    // if the rounded fturns are greater than one, adjust the integer turns
+    if (f[0] == '1')
+      s = tostring (turns + adjust);
+
+    // remove the leading 0 or 1
+    f.erase (0,1);
 
     s += f;
   }
