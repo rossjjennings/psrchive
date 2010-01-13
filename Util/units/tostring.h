@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.19 $
-   $Date: 2010/01/13 07:00:51 $
+   $Revision: 1.20 $
+   $Date: 2010/01/13 07:10:30 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H
@@ -17,6 +17,7 @@
 
 #include <string>
 #include <sstream>
+#include <limits>
 
 /* the following global variables are not nested-call or multi-thread
    safe and should be used only when it is extremely difficult to pass
