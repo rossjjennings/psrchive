@@ -54,6 +54,14 @@ int main ()
   if (test (string("string test"), "string test"))
     return -1;
 
+  string result = tostring((double)1e-15, 5, ios::fixed);
+  string expected = "0.00000";
+  if (result != expected)
+  {
+    cerr << "result=" << result << " expected=" << expected << endl;
+    return -1;
+  }
+
   cerr << "All tests passed" << endl;
   return 0;
 }
