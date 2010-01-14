@@ -665,7 +665,13 @@ catch (Error& error)
 
 bool Pulsar::Interpreter::evaluate (const std::string& expression)
 {
-  double value = compute (expression);
+  evaluate_expression = substitute (expression, get_interface());
+
+  if (VERBOSE)
+    cerr << "Pulsar::Interpreter::evaluate expression="
+            "'" << evaluate_expression << "'" << endl;
+
+  double value = compute (evaluate_expression);
 
   if (value == 1)
     return true;
