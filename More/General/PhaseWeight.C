@@ -147,7 +147,7 @@ float Pulsar::PhaseWeight::get_max () const
 
   const float* amps = profile->get_amps();
 
-  float max = FLT_MIN;
+  float max = -FLT_MAX;
   for (unsigned i=0; i<nbin; i++)
     if (weight[i] && amps[i] > max)
       max = amps[i];
