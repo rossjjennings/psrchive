@@ -93,7 +93,7 @@ int main (int argc, char** argv)
 
 paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
 {
-  version = "$Id: paz.C,v 1.59 2009/11/29 12:13:49 straten Exp $";
+  version = "$Id: paz.C,v 1.60 2010/01/14 11:52:08 straten Exp $";
 
   has_manual = true;
   update_history = true;
@@ -395,6 +395,7 @@ void paz::setup ()
   {
     median_zapper = new Pulsar::ChannelZapMedian;
     median_zapper->set_bybin (median_zap_bybin);
+    median_zapper->set_paz_report (true);
 
     if (median_zap_window)
       median_zapper->set_window_size (median_zap_window);
