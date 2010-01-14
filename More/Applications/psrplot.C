@@ -100,7 +100,7 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
 					   "pulsar plotting program")
 {
   has_manual = true;
-  version = "$Id: psrplot.C,v 1.32 2009/10/22 17:42:04 straten Exp $";
+  version = "$Id: psrplot.C,v 1.33 2010/01/14 13:14:30 straten Exp $";
 
   // print angles in degrees
   Angle::default_type = Angle::Degrees;
@@ -189,12 +189,37 @@ void psrplot::add_plot_options (const std::string& arg)
 // load the style file into one of the plots
 void specific_style (string optarg, vector< Reference::To<Plot> >& plots);
 
+// set the option for the specified plot
+void set_option (Pulsar::Plot* plot, const string& option);
+
 void psrplot::load_plot_options (const std::string& arg)
 {
   if (arg[0] == ':')
+  {
     specific_style (arg, plots);
-  else
-    loadlines (arg, options);
+    return;
+  }
+
+  vector<string> style;
+  loadlines (arg, style);
+
+  Reference::To<Plot> current_plot;
+
+  for (unsigned i=0; i<style.size(); i++)
+  {
+    string line = style[i];
+
+    string key = stringtok (line, " \t\n");
+    if (key == "plot")
+    {
+      add_plot (line);
+      current_plot = plots.back();
+    }
+    else if (current_plot)
+      set_option( current_plot, style[i] );
+    else
+      options.push_back( style[i] );
+  }
 }
 
 void psrplot::add_loop_index (const std::string& arg)
@@ -259,21 +284,21 @@ void psrplot::help_frame_options (const string& name)
   help_options( plot->get_frame_interface() );
 }
 
+void set_option (Pulsar::Plot* plot, const string& option) try
+{
+  plot->configure (option);
+}
+catch (Error& error)
+{
+  cerr << "psrplot: Invalid option '" << option << "' " 
+       << error.get_message() << endl;
+  exit (-1);
+}
+
 void set_options (Pulsar::Plot* plot, const vector<string>& options)
 {
   for (unsigned j = 0; j < options.size(); j++)
-  {
-    try
-    {
-      plot->configure (options[j]);
-    }
-    catch (Error& error)
-    {
-      cerr << "psrplot: Invalid option '" << options[j] << "' " 
-	   << error.get_message() << endl;
-      exit (-1);
-    }
-  }
+    set_option (plot, options[j]);
 }
 
 // parses index from arg and removes it from the string
