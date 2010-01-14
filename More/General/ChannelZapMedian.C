@@ -20,6 +20,7 @@ Pulsar::ChannelZapMedian::ChannelZapMedian ()
   cutoff_threshold = 4.0;
   window_size = 21;
   bybin = false;
+  paz_report = false;
 }
 
 //! Get the text interface to the configuration attributes
@@ -128,11 +129,12 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
 
     }
 
-  cerr << "Pulsar::ChannelZapMedian::weight zapped " << total_zapped
-       << " channels" << endl;
+  if (Pulsar::Integration::verbose)
+    cerr << "Pulsar::ChannelZapMedian::weight zapped " << total_zapped
+	 << " channels" << endl;
 
-  cout << "Equivalent paz cmd: paz -z \"" << oss.str() << "\"" << endl;
-
+  if (paz_report)
+    cout << "Equivalent paz cmd: paz -z \"" << oss.str() << "\"" << endl;
 }
 
 void zap (vector<bool>& mask, vector<float>& spectrum,

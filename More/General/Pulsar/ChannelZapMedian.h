@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ChannelZapMedian.h,v $
-   $Revision: 1.7 $
-   $Date: 2007/10/02 05:19:32 $
+   $Revision: 1.8 $
+   $Date: 2010/01/14 11:51:37 $
    $Author: straten $ */
 
 #ifndef _Pulsar_ChannelZapMedian_H
@@ -57,6 +57,12 @@ namespace Pulsar {
     //! Run the algorithm on the spectra of each bin
     bool get_bybin () const { return bybin; }
 
+    //! Print equivalent paz command on cout
+    void set_paz_report (bool t) { paz_report = t; }
+
+    //! Print equivalent paz command on cout
+    bool get_paz_report () const { return paz_report; }
+
   protected:
 
     //! The size of the window over which median will be computed
@@ -67,7 +73,7 @@ namespace Pulsar {
 
     //! Median smooth the spectra of each bin
     bool bybin;
-
+    bool paz_report;
   };
   
 }
