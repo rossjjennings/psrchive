@@ -126,7 +126,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     get_frame()->get_y_scale()->get_indeces (nrow, min_row, max_row);
 
   float min = FLT_MAX;
-  float max = FLT_MIN;
+  float max = -FLT_MAX;
 
   unsigned eff_min_row = std::min (min_row, max_row);
   unsigned eff_max_row = std::max (min_row, max_row);

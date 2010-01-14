@@ -34,7 +34,7 @@ void Pulsar::BandpassPlot::prepare(const Archive* archive)
                 "Could not get bandpass extension");
 
     means_minmax.first = FLT_MAX;
-    means_minmax.second = FLT_MIN;
+    means_minmax.second = -FLT_MAX;
 
     passband_npol = passband->get_npol();
     passband_nchan = passband->get_nchan();

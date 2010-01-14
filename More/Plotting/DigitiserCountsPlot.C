@@ -197,12 +197,10 @@ void DigitiserCountsPlot::prepare( const Archive *const_data )
 
   // Find the min and max counts for all subints and channels
   min_count = FLT_MAX;
-  max_count = FLT_MIN;
+  max_count = -FLT_MAX;
   for( int s = srange.first ; s <= srange.second; s ++ )
-  {
-    //cyclic_minmax( counts->rows[s].data, first_nz, last_nz, min_count, max_count );
-    cyclic_minmax( counts->subints[s].data, first_nz, last_nz, min_count, max_count );
-  }
+    cyclic_minmax( counts->subints[s].data, first_nz, last_nz, 
+                   min_count, max_count );
 
   // y_range is how far up the y axis each subint goes
   float y_range = max_count - min_count;

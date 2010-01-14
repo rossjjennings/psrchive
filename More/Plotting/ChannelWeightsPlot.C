@@ -48,7 +48,7 @@ void ChannelWeightsPlot::prepare( const Archive *data )
   Pulsar::Profile* profile = 0;
 
   weights_minmax.first = FLT_MAX;
-  weights_minmax.second = FLT_MIN;
+  weights_minmax.second = -FLT_MAX;
   
   for (unsigned i = 0; i < copy->get_nchan(); i++)
   {

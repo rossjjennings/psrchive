@@ -96,8 +96,9 @@ void Pulsar::DynamicSpectrumPlot::draw (const Archive* data)
 
   // Determine data min/max
   float data_min = FLT_MAX;
-  float data_max = FLT_MIN;
-  for (int ii=0; ii<nchan*nsub; ii++) {
+  float data_max = -FLT_MAX;
+  for (int ii=0; ii<nchan*nsub; ii++)
+  {
     // Assume any points exactly equal to 0 are zero-weighted
     if (zero_check && plot_array[ii]==0.0) continue; 
     if (plot_array[ii] < data_min) 
