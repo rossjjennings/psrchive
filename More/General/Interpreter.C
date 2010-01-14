@@ -28,8 +28,7 @@
 #include "tostring.h"
 #include "Error.h"
 
-// evaluateExpression from Parsifal Software
-#include "evaldefs.h"
+#include "evaluate.h"
 
 using namespace std;
 
@@ -666,29 +665,7 @@ catch (Error& error)
 
 bool Pulsar::Interpreter::evaluate (const std::string& expression)
 {
-  string result = "result";
-
-  evaluate_expression = substitute (expression, get_interface());
-
-  if (VERBOSE)
-    cerr << "Pulsar::Interpreter::evaluate expression="
-            "'" << evaluate_expression << "'" << endl;
-
-  string evaluate = result + " = (" + evaluate_expression + ")";
-
-  // Call parser function from Parsifal Software
-  int errorFlag = evaluateExpression (const_cast<char*>(evaluate.c_str()));
-
-  if (errorFlag)
-    throw Error (InvalidParam, "evaluateBoolean",
-		 "%s in expression\n\n  %s\n  %s",
-		 errorRecord.message, evaluate_expression.c_str(), 
-		 pad (errorRecord.column-10, "^", false).c_str());
-
-  double value = -1;
-  for (int i = 0; i < nVariables; i++)
-    if (variable[i].name == result)
-      value = variable[i].value;
+  double value = compute (expression);
 
   if (value == 1)
     return true;
