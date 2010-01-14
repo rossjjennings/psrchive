@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/evaluate.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/02/08 13:07:25 $
+   $Revision: 1.2 $
+   $Date: 2010/01/14 05:52:32 $
    $Author: straten $ */
 
 #ifndef __UTILS_UNITS_EVALUATE_H
@@ -17,5 +17,8 @@
 
 //! Replaces strings enclosed in { } with the mathematical expression
 std::string evaluate (const std::string& text, char cstart='{', char cend='}');
+
+//! Evaluates a mathematical expression
+double compute (const std::string& text);
 
 #endif

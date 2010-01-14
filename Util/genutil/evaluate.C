@@ -1,9 +1,12 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007-2009 by Willem van Straten
+ *   Copyright (C) 2007-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#include "evaluate.h"
+#include "ThreadContext.h"
 
 #include "templates.h"
 #include "Error.h"
@@ -30,8 +33,14 @@ using namespace std;
 #define DEBUG(x)
 #endif
 
-string evaluate1 (const string& eval, unsigned precision)
+double compute (const string& eval)
 {
+  static ThreadContext* context = 0;
+  if (!context)
+    context = new ThreadContext;
+
+  ThreadContext::Lock lock (context);
+
   string result = "__result";
   string expression = result + " = (" + eval + ")";
 
@@ -39,16 +48,22 @@ string evaluate1 (const string& eval, unsigned precision)
   int errorFlag = evaluateExpression (const_cast<char*>(expression.c_str()));
 
   if (errorFlag)
-    throw Error (InvalidParam, "evaluate",
+    throw Error (InvalidParam, "compute",
 		 "%s in expression\n\n  %s\n  %s",
 		 errorRecord.message, eval.c_str(), 
 		 pad (errorRecord.column-10, "^", false).c_str());
     
-  double value = -1;
   for (int i = 0; i < nVariables; i++)
     if (variable[i].name == result)
-      value = variable[i].value;
-  
+      return variable[i].value;
+
+  throw Error (InvalidParam, "compute", "internal error");
+}
+
+string evaluate1 (const string& eval, unsigned precision)
+{
+  double value = compute (eval);
+
   if (precision)
     return tostring (value, precision);
   else
