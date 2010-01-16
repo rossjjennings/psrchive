@@ -296,9 +296,8 @@ double Legacy::psrephem::omdot() const
 {
   if (tempo11 && parmStatus[EPH_OMDOT])
     return value_double[EPH_OMDOT];
-  
-  throw Error(InvalidParam, "Legacy::psrephem::omdot",
-	      "Error determining pulsar OMDOT");
+
+  return 0;  
 }
 
 double Legacy::psrephem::ecc() const
