@@ -35,10 +35,9 @@ void usage()
     "  -s char  site code from $TEMPO/obsys.dat \n"
     "  -f freq  observing frequency \n"
     "\n"
-    "  -p       binary phase wrt periastron \n"
-    "  -P       binary longitude wrt periastron \n"
-    "  -a       binary phase wrt ascending node \n"
-    "  -A       binary longitude wrt ascending node \n"
+    "  -p       phase wrt periastron \n"
+    "  -P       longitude wrt periastron \n"
+    "  -A       longitude wrt ascending node \n"
        << endl;
 }
 
@@ -46,7 +45,6 @@ int main (int argc, char ** argv) try
 {
   bool phase_periastron = false;
   bool longitude_periastron = false;
-  bool phase_ascending = false;
   bool longitude_ascending = false;
 
   MJD mjd;
@@ -81,10 +79,6 @@ int main (int argc, char ** argv) try
       longitude_periastron = true;
       break;
 
-    case 'a':
-      phase_ascending = true;
-      break;
-
     case 'A':
       longitude_ascending = true;
       break;
@@ -111,19 +105,15 @@ int main (int argc, char ** argv) try
   double epoch = mjd.in_days();
 
   if ( phase_periastron )
-    cout << "periastron phase = " 
+    cout << "phase_periastron = " 
 	 << get_binphs_peri (epoch, eph, freq, site)*360.0 << " deg" << endl;
   
   if ( longitude_periastron )
-    cout << "periastron longitude = " 
+    cout << "longitude_periastron = " 
 	 << get_binlng_peri (epoch, eph, freq, site) << " deg" << endl;
   
-  if ( phase_ascending )
-    cout << "ascending phase = " 
-	 << get_binphs_asc (epoch, eph, freq, site)*360.0 << " deg" << endl;
-  
   if ( longitude_ascending )
-    cout << "ascending longitude = " 
+    cout << "longitude_ascending = " 
 	 << get_binlng_asc (epoch, eph, freq, site) << " deg" << endl;
   
   return 0;
