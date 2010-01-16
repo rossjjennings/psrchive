@@ -33,7 +33,7 @@ void usage()
     "\n"
     "  -m MJD   MJD [default: now] \n"
     "  -s char  site code from $TEMPO/obsys.dat \n"
-    "  -f freq  observing frequency \n"
+    "  -f freq  observing frequency in MHz \n"
     "\n"
     "  -p       phase wrt periastron (mean anomaly) \n"
     "  -P       longitude wrt periastron (true anomaly)\n"
@@ -107,18 +107,29 @@ int main (int argc, char ** argv) try
 
   double epoch = mjd.in_days();
 
+  cout << "================================================" << endl;
+
   if ( phase_periastron )
-    cout << "phase_periastron = " 
+    cout << "Binary phase (wrt periastron) = " 
 	 << get_binphs_peri (epoch, eph, freq, site)*360.0 << " deg" << endl;
   
   if ( longitude_periastron )
-    cout << "longitude_periastron = " 
+    cout << "Longitude wrt periastron = " 
 	 << get_binlng_peri (epoch, eph, freq, site) << " deg" << endl;
   
   if ( longitude_ascending )
-    cout << "longitude_ascending = " 
+    cout << "Longitude wrt ascending node = "
 	 << get_binlng_asc (epoch, eph, freq, site) << " deg" << endl;
   
+  cout << "================================================" << endl;
+
+  if ( longitude_ascending )
+    cout <<
+      "\n"
+      "Superior conjunction occurs when longitude wrt ascending node = 90 deg"
+      "\n"
+	 << endl;
+
   return 0;
 }
 catch (Error& error)
