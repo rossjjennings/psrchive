@@ -288,8 +288,7 @@ double Legacy::psrephem::omega() const
   if (tempo11 && parmStatus[EPH_OM])
     return value_double[EPH_OM];
   
-  throw Error(InvalidParam, "Legacy::psrephem::omega",
-	      "Error determining pulsar OMEGA");
+  return 0.0;
 }
 
 double Legacy::psrephem::omdot() const
@@ -297,7 +296,7 @@ double Legacy::psrephem::omdot() const
   if (tempo11 && parmStatus[EPH_OMDOT])
     return value_double[EPH_OMDOT];
 
-  return 0;  
+  return 0.0;  
 }
 
 double Legacy::psrephem::ecc() const
@@ -305,13 +304,13 @@ double Legacy::psrephem::ecc() const
   if (tempo11 && parmStatus[EPH_E])
     return value_double[EPH_E];
   
-  throw Error(InvalidParam, "Legacy::psrephem::ecc",
-	      "Error determining pulsar E");
+  return 0.0;
 }
 
 double Legacy::psrephem::t0() const
 {
-  if (tempo11 && parmStatus[EPH_T0]) {
+  if (tempo11 && parmStatus[EPH_T0])
+  {
     MJD current_epoch = MJD (value_integer[EPH_T0],
 			     value_double [EPH_T0]);
     return current_epoch.in_days();
