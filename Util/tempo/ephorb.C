@@ -112,19 +112,19 @@ int main (int argc, char ** argv) try
 
   if ( phase_periastron )
     cout << "periastron phase = " 
-	 << get_binphs_peri (epoch, eph, freq, site) << endl;
+	 << get_binphs_peri (epoch, eph, freq, site)*360.0 << " deg" << endl;
   
   if ( longitude_periastron )
     cout << "periastron longitude = " 
-	 << get_binlng_peri (epoch, eph, freq, site) << endl;
+	 << get_binlng_peri (epoch, eph, freq, site) << " deg" << endl;
   
   if ( phase_ascending )
     cout << "ascending phase = " 
-	 << get_binphs_asc (epoch, eph, freq, site) << endl;
+	 << get_binphs_asc (epoch, eph, freq, site)*360.0 << " deg" << endl;
   
   if ( longitude_ascending )
     cout << "ascending longitude = " 
-	 << get_binlng_asc (epoch, eph, freq, site) << endl;
+	 << get_binlng_asc (epoch, eph, freq, site) << " deg" << endl;
   
   return 0;
 }
