@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.29 $
-   $Date: 2009/06/17 03:06:13 $
+   $Revision: 1.30 $
+   $Date: 2010/01/16 07:41:57 $
    $Author: straten $ */
 
 #ifndef __TOA_H
@@ -20,8 +20,6 @@
 #include "residual.h"
 #include "MJD.h"
 
-class polyco;   // tempo-generated polynomial describing pulsar phase = f(MJD)
-
 namespace Tempo {
 
   class toaInfo;
@@ -29,10 +27,6 @@ namespace Tempo {
   // //////////////////////////////////////////////////////////////////////////
   //
   // toa - class that encapsulates TEMPO data format
-  // 
-  // Note that very few of the parameters defined here are essential. Most are
-  // provided just in case they might be useful. The default values have in
-  // most cases been set to something that is obviously not real.
   //
   // //////////////////////////////////////////////////////////////////////////
 
@@ -73,10 +67,10 @@ namespace Tempo {
 
     double frequency;      // Observing frequency (MHz)
     MJD    arrival;        // TOA
-    float  error;          // TOA uncertainty
+    float  error;          // TOA uncertainty in microseconds
     char   telescope;      // Observatory (one-character code)
-	unsigned   channel;        // Corresponding channel
-	unsigned   subint;         // Corresponding subint
+    unsigned channel;      // Corresponding channel
+    unsigned subint;       // Corresponding subint
     double phase_shift;    // Phase shift
 
     // Parkes Format specific
@@ -148,8 +142,8 @@ namespace Tempo {
     void set_error     (float err)   { error = err; };
     void set_telescope (const std::string& telcode);
     void set_auxilliary_text (const std::string& text) { auxinfo = text; };
-	void set_channel   (unsigned chan)   { channel = chan; };
-	void set_subint    (unsigned sub)    { subint = sub; };
+    void set_channel   (unsigned chan)   { channel = chan; };
+    void set_subint    (unsigned sub)    { subint = sub; };
     void set_phase_shift (double shift) { phase_shift = shift; };
     void set_phase_info  (bool info)    { phase_info = info; };
 
@@ -166,13 +160,9 @@ namespace Tempo {
     char   get_telescope () const { return telescope; };
     std::string get_auxilliary_text () const { return auxinfo; };
     double get_phase_shift () const { return phase_shift; };
-	unsigned   get_channel     () const { return channel; };
-	unsigned   get_subint      () const { return subint; };
+    unsigned get_channel     () const { return channel; };
+    unsigned get_subint      () const { return subint; };
 
-
-#if POLYCO_INTERFACE_RESTORED
-    double shift (const polyco & poly) const;
-#endif
 
     // loading and unloading to/from file and string
     int    load   (FILE* instream);
