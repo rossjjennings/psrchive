@@ -35,9 +35,12 @@ void usage()
     "  -s char  site code from $TEMPO/obsys.dat \n"
     "  -f freq  observing frequency \n"
     "\n"
-    "  -p       phase wrt periastron \n"
-    "  -P       longitude wrt periastron \n"
+    "  -p       phase wrt periastron (mean anomaly) \n"
+    "  -P       longitude wrt periastron (true anomaly)\n"
     "  -A       longitude wrt ascending node \n"
+    "           (true anomaly + longitude of periastron) \n"
+    "\n"
+    "The longitude of periastron is computed using OM and OMDOT \n"
        << endl;
 }
 
