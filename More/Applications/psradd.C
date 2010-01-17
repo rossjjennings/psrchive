@@ -36,7 +36,8 @@
 
 using namespace std;
 
-static const char* args = "b:c:C:E:e:f:FG:hiI:j:J:LM:m:O:o:p:PqRr:sS:tTUvVwZ:";
+static const char* args
+= "b:c:C:E:e:f:FG:hiI:j:J:LM:m:O:o:p:PqRr:sS:tTUvVwzZ:";
 
 void reorder(Reference::To<Pulsar::Archive> arch);
 
@@ -63,7 +64,7 @@ void usage () {
     " -r freq     Add archive only if it has this centre frequency \n"
     " -t          Make no changes to file system (testing mode) \n"
     " -T          Tscrunch result after each new file (nice on RAM) \n"
-    " -z tempo    System call to tempo \n"
+    " -z          Only add archives that have integration length > 0 \n"
     " -Z time     Only add archives that are time (+/- 0.5) seconds long \n"
     "\n"
     "AUTO ADD options:\n"
@@ -140,7 +141,7 @@ int main (int argc, char **argv) try
   int nchan = 0;
 
   // ensure that archive has data before adding
-  bool check_has_data = true;
+  bool check_has_data = false;
 
   // tscrunch total after each new file is appended
   bool tscrunch_total = false;
@@ -195,7 +196,7 @@ int main (int argc, char **argv) try
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.68 2009/11/19 20:25:44 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.69 2010/01/17 23:07:00 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -258,8 +259,6 @@ int main (int argc, char **argv) try
 
       frequency.must_match = false;
 
-      check_has_data = false;
-      
       command += " -F";
       
       break;
@@ -382,6 +381,10 @@ int main (int argc, char **argv) try
       Pulsar::Archive::set_verbosity (3);
       vverbose = true;
       verbose = true;
+      break;
+
+    case 'z':
+      check_has_data = true;
       break;
 
     case 'Z': 
