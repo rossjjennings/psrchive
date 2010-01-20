@@ -16,6 +16,8 @@
 #include "Pulsar/SingleAxisSolver.h"
 #include "Pulsar/SingleAxis.h"
 
+#include "Pulsar/MeanJones.h"
+
 #include "MEAL/Complex2Value.h"
 #include "Pauli.h"
 
@@ -144,9 +146,10 @@ get_stokes (const Pulsar::CalibratorStokes* stokes,
   return answer;
 }
 
-Jones< Estimate<double> > 
-get_response (const Pulsar::PolnCalibrator* response,
-	      const unsigned ichan, unsigned target_nchan)
+
+
+Jones<double> get_response (const Pulsar::PolnCalibrator* response,
+			    const unsigned ichan, unsigned target_nchan)
 {
   const unsigned have_nchan = response->get_nchan();
   const unsigned factor = have_nchan / target_nchan;
@@ -156,9 +159,23 @@ get_response (const Pulsar::PolnCalibrator* response,
 		 "PolnCalibrator nchan=%u < required=%u",
 		 have_nchan, target_nchan);
 
-  Jones< MeanEstimate<double> > result;
+  if (Pulsar::Calibrator::verbose > 2)
+    cerr << "get_response(PolnCalibrator) ichan=" << ichan << endl;
+
+  if (factor == 1)
+  {
+    if (!response->get_transformation_valid (ichan))
+      throw Error (InvalidParam, "get_response(PolnCalibrator)",
+		   "ichan=%u flagged invalid", ichan);
+    
+    return response->get_transformation(ichan)->evaluate();
+  }
+
   unsigned response_ichan = ichan * factor;
   bool valid = false;
+
+  Calibration::MeanJones mean;
+  Calibration::MeanJones::verbose = Pulsar::Calibrator::verbose > 2;
 
   for (unsigned i=0; i<factor; i++)
   {
@@ -170,7 +187,7 @@ get_response (const Pulsar::PolnCalibrator* response,
       continue;
     }
 
-    result += response->get_transformation (response_ichan+i) -> estimate ();
+    mean.integrate( response->get_transformation (response_ichan+i) );
     valid = true;
   }
 
@@ -178,7 +195,7 @@ get_response (const Pulsar::PolnCalibrator* response,
     throw Error (InvalidParam, "get_response(PolnCalibrator)",
 		 "no valid data for ichan=%d", ichan);
 
-  return result;
+  return mean.get_mean ();
 }
 
 template<typename T>
@@ -342,7 +359,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     }
 
     // get the precalibrator transformation
-    Jones< Estimate<double> > response (1.0);
+    Jones<double> response (1.0);
     if (precalibrator)
     {
       response = ::get_response (precalibrator, ichan, target_nchan);
@@ -371,7 +388,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 
     result->add_model( correction );
     if (precalibrator) 
-      result->add_model( new MEAL::Complex2Value (val(response)) );
+      result->add_model( new MEAL::Complex2Value(response) );
 
     transformation[ichan] = result;
 
