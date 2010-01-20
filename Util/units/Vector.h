@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.18 $
-   $Date: 2008/09/10 21:01:28 $
+   $Revision: 1.19 $
+   $Date: 2010/01/20 03:28:58 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -26,7 +26,7 @@ public:
 
   //! Null constructor
   Vector () 
-  { for (unsigned i=0; i<N; i++) x[i] = 0; }
+  { for (unsigned i=0; i<N; i++) x[i] = T(0); }
 
   Vector (T x0)
   { x[0] = x0; }
