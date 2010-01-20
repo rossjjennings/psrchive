@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Cloude.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/10/06 21:13:55 $
+   $Revision: 1.7 $
+   $Date: 2010/01/20 00:54:42 $
    $Author: straten $ */
 
 #ifndef __Cloude_H
@@ -41,6 +41,35 @@ Matrix< 4,4, std::complex<T> > coherence (const Jones<T>& jones)
 
   // Eq. 4.9
   return outer(vect,herm);
+}
+
+
+//! Return the Hermitian target coherency matrix derivative
+template<typename T>
+Matrix< 4,4, std::complex<T> > coherence (const Jones<T>& J,
+					  const Jones<T>& Jgrad)
+{
+  // form the Hermitian biquaternion (Eq. 4.6)
+  Quaternion<std::complex<T>,Hermitian> q = convert( J );
+  Quaternion<std::complex<T>,Hermitian> qgrad = convert( Jgrad );
+
+  // convert to the equivalent complex vector and its Hermitian transpose
+  Vector< 4, std::complex<T> > v;
+  Vector< 4, std::complex<T> > h;
+
+  Vector< 4, std::complex<T> > vgrad;
+  Vector< 4, std::complex<T> > hgrad;
+
+  for (unsigned i=0; i<4; i++)
+  {
+    v[i] = q[i];
+    h[i] = conj(q[i]);
+
+    vgrad[i] = qgrad[i];
+    hgrad[i] = conj(qgrad[i]);
+  }
+
+  return outer(v,hgrad) + outer(vgrad,h); 
 }
 
 //! Return the Jones matrix of the target coherency matrix left eigenvector
