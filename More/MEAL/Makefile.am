@@ -22,6 +22,7 @@ nobase_include_HEADERS = \
         MEAL/Complex2.h \
         MEAL/Complex2Math.h \
         MEAL/Complex2Value.h \
+	MEAL/Complex4.h \
         MEAL/Composite.h \
         MEAL/CongruenceTransformation.h \
         MEAL/Constant.h \
@@ -43,6 +44,7 @@ nobase_include_HEADERS = \
         MEAL/Invariant.h \
         MEAL/InverseRule.h \
 	MEAL/JonesMueller.h \
+	MEAL/JonesCloude.h \
 	MEAL/LeastSquares.h \
         MEAL/LevenbergMarquardt.h \
         MEAL/Mean.h \
@@ -124,6 +126,7 @@ libMEAL_la_SOURCES = \
         Complex2Constant.C \
         Complex2Math.C \
         Complex2Value.C \
+	Complex4.C \
         Composite.C \
         CongruenceTransformation.C \
         CyclicParameter.C \
@@ -140,6 +143,7 @@ libMEAL_la_SOURCES = \
 	GimbalLockMonitor.C \
         Invariant.C \
 	JonesMueller.C \
+	JonesCloude.C \
 	LeastSquares.C \
 	MuellerTransformation.C \
         NormalizeStokes.C \
