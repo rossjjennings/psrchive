@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.19 $
-   $Date: 2010/01/20 03:28:58 $
+   $Revision: 1.20 $
+   $Date: 2010/01/20 05:00:21 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -20,13 +20,21 @@
 //! Vector
 template <unsigned N, typename T> 
 class Vector {
-  
+
+  template<typename U> 
+  static void zero (Vector<N, U>& v)
+  { for (unsigned i=0; i<N; i++) v.x[i] = T(0.0); }
+
+  //! overloaded template fixes Vector<M,Vector<M,T>> default constructor 
+  template<unsigned M, typename U> 
+  static void zero (Vector<N, Vector<M, U> >& v)
+  { /* do nothing */ }
+
 public:
   T x[N];
 
-  //! Null constructor
-  Vector () 
-  { for (unsigned i=0; i<N; i++) x[i] = T(0); }
+  //! Default constructor
+  Vector () { zero (*this); }
 
   Vector (T x0)
   { x[0] = x0; }
