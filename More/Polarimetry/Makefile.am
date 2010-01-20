@@ -33,6 +33,7 @@ nobase_include_HEADERS = \
         Pulsar/MeanCoherency.h \
         Pulsar/MeanFeed.h \
         Pulsar/MeanInstrument.h \
+	Pulsar/MeanJones.h \
         Pulsar/MeanPolar.h \
         Pulsar/MeanSingleAxis.h \
         Pulsar/MeasurementEquation.h \
@@ -115,6 +116,7 @@ libPolarimetry_la_SOURCES = \
         MeanCoherency.C \
         MeanFeed.C \
         MeanInstrument.C \
+	MeanJones.C \
         MeanPolar.C \
         MeanSingleAxis.C \
         MeasurementEquation.C \
