@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.23 $
-   $Date: 2008/07/02 11:27:30 $
+   $Revision: 1.24 $
+   $Date: 2010/01/20 03:28:53 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -25,11 +25,17 @@ class Matrix : public Vector< Rows, Vector<Columns,T> > {
 public:
 
   //! Null constructor
-  Matrix () { for (unsigned i=0; i<Rows; i++) this->x[i] = 0; }
+  Matrix () { for (unsigned i=0; i<Rows; i++) this->x[i] = T(0); }
 
-  //! Scalar constructor
+  //! Scalar constructor (identity times scalar)
   Matrix (T s) 
-  { for (unsigned i=0; i<Rows; i++) { this->x[i] = 0; this->x[i][i] = s; } }
+  {
+    for (unsigned i=0; i<Rows; i++)
+    {
+      this->x[i] = T(0);
+      this->x[i][i] = s;
+    }
+  }
 
   //! Construct from another Vector of Vector<U> instance
   template<typename U> Matrix (const Vector< Rows, Vector<Columns,U> >& s)
@@ -38,12 +44,20 @@ public:
   //! Set this instance equal to another Matrix<U> instance
   template<typename U> Matrix& operator = 
     (const Vector< Rows,Vector<Columns,U> >& s)
-  { for (unsigned i=0; i<Rows; i++) this->x[i] = s.x[i]; return *this; }
+  {
+    for (unsigned i=0; i<Rows; i++) 
+      this->x[i] = s.x[i];
+    return *this;
+  }
   
   //! Negation
   const friend Matrix operator - (Matrix s)
-  { for (unsigned i=0; i<Rows; i++) for (unsigned j=0; j<Columns; j++)
-    s.x[i][j] = -s.x[i][j]; return s; }
+  {
+    for (unsigned i=0; i<Rows; i++) 
+      for (unsigned j=0; j<Columns; j++)
+	s.x[i][j] = -s.x[i][j];
+    return s;
+  }
   
 };
 
@@ -244,14 +258,16 @@ void partition (const Matrix<U+B,L+R,T>& A,
 {
   unsigned i, j;
 
-  for (i=0; i<U; i++) {
+  for (i=0; i<U; i++)
+  {
     for (j=0; j<L; j++)
       upper_left[i][j] = A[i][j];
     for (j=0; j<R; j++)
       upper_right[i][j] = A[i][j+L];
   }
 
-  for (i=0; i<B; i++) {
+  for (i=0; i<B; i++)
+  {
     for (j=0; j<L; j++)
       bottom_left[i][j] = A[i+U][j];
     for (j=0; j<R; j++)
@@ -261,22 +277,24 @@ void partition (const Matrix<U+B,L+R,T>& A,
 
 //! Merge four matrices into one
 template<unsigned U, unsigned L, unsigned B, unsigned R, typename T>
-void merge (Matrix<U+B,L+R,T>& A,
-	    const Matrix<U,L,T>& upper_left,
-	    const Matrix<U,R,T>& upper_right,
-	    const Matrix<B,L,T>& bottom_left,
-	    const Matrix<B,R,T>& bottom_right)
+void compose (Matrix<U+B,L+R,T>& A,
+	      const Matrix<U,L,T>& upper_left,
+	      const Matrix<U,R,T>& upper_right,
+	      const Matrix<B,L,T>& bottom_left,
+	      const Matrix<B,R,T>& bottom_right)
 {
   unsigned i, j;
 
-  for (i=0; i<U; i++) {
+  for (i=0; i<U; i++)
+  {
     for (j=0; j<L; j++)
       A[i][j] = upper_left[i][j];
     for (j=0; j<R; j++)
       A[i][j+L] = upper_right[i][j];
   }
 
-  for (i=0; i<B; i++) {
+  for (i=0; i<B; i++)
+  {
     for (j=0; j<L; j++)
       A[i+U][j] = bottom_left[i][j];
     for (j=0; j<R; j++)
@@ -299,6 +317,25 @@ void partition (const Matrix<M+1,M+1,T>& covariance,
 
   variance  = ul[0][0];
   cov_vector = ur[0];
+}
+
+//! Convenience interface for square, symmetric matrices
+template<unsigned M, typename T>
+void compose (Matrix<M+1,M+1,T>& covariance,
+	      T variance,
+	      const Vector <M,T>& cov_vector,
+	      const Matrix <M,M,T>& cov_matrix)
+{
+  Matrix<1,1,T> ul;
+  Matrix<M,1,T> bl;
+  Matrix<1,M,T> ur;
+
+  ul[0][0] = variance;
+
+  for (unsigned i=0; i<M; i++)
+    ur[0][i] = bl[i][0] = cov_vector[i];
+
+  compose (covariance, ul, ur, bl, cov_matrix);
 }
 
 //! Return a 3-dimensional rotation about an arbitrary axis
