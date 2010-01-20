@@ -28,7 +28,7 @@ int test (T exp, const string& txt)
   return 0;
 }
 
-int main ()
+int main () try
 {
   cerr << "numeric_limits<int>::digits10="
        << numeric_limits<int>::digits10 << endl;
@@ -65,3 +65,9 @@ int main ()
   cerr << "All tests passed" << endl;
   return 0;
 }
+catch (Error& error)
+{
+  cerr << error << endl;
+  return -1;
+}
+
