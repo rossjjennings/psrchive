@@ -60,7 +60,15 @@ Jones<double> Calibration::MeanJones::get_mean ()
   for (unsigned i=0; i<4; i++)
   {
     if (verbose)
-      cerr << " " << eigenvalues[i] << endl;
+      cerr << " " << eigenvalues[i];
+
+    /*
+      The target coherency matrix is not a covariance matrix and
+      therefore may not be positive semi-definite and may have
+      negative eigenvalues.
+    */
+
+    eigenvalues[i] = fabs( eigenvalues[i] );
 
     if (eigenvalues[i] > max)
     {
@@ -74,8 +82,8 @@ Jones<double> Calibration::MeanJones::get_mean ()
   if (verbose)
   {
     double H_T = entropy (eigenvalues);
-    cerr << "Calibration::MeanJones::get_mean imax=" << imax 
-	 << " entropy=" << H_T << endl
+    cerr << "\n"
+      "Calibration::MeanJones::get_mean imax=" << imax << " entropy=" << H_T 
 	 << "\n\tresult=" << result << endl;
   }
 
