@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.24 $
-   $Date: 2010/01/20 03:28:53 $
+   $Revision: 1.25 $
+   $Date: 2010/01/20 05:00:16 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -20,21 +20,19 @@
 
 //! Matrix is a column vector of row vectors
 template <unsigned Rows, unsigned Columns, typename T> 
-class Matrix : public Vector< Rows, Vector<Columns,T> > {
-  
+class Matrix : public Vector< Rows, Vector<Columns,T> > 
+{
 public:
 
   //! Null constructor
-  Matrix () { for (unsigned i=0; i<Rows; i++) this->x[i] = T(0); }
+  Matrix () { zero (); }
 
   //! Scalar constructor (identity times scalar)
   Matrix (T s) 
   {
+    zero ();
     for (unsigned i=0; i<Rows; i++)
-    {
-      this->x[i] = T(0);
       this->x[i][i] = s;
-    }
   }
 
   //! Construct from another Vector of Vector<U> instance
@@ -58,8 +56,15 @@ public:
 	s.x[i][j] = -s.x[i][j];
     return s;
   }
-  
+
+  void zero ()
+  {
+    for (unsigned i=0; i<Rows; i++) 
+      for (unsigned j=0; j<Columns; j++)
+	this->x[i][j] = T(0.0);
+  }
 };
+
 
 //! Vector multiplication
 template<unsigned Rows, unsigned Columns, typename T, typename U>
