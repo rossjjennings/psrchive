@@ -333,7 +333,6 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq )
 void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
 {
   Reference::To<Integration> integ = archive->get_Integration(0);
-  string duration = tostring( integ->get_duration());
 
   // fully scrunch archive to get the correct SNR
   Reference::To<Archive> copy = archive->clone();
@@ -355,6 +354,7 @@ void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
   else
     frequency = tostring( integ->weighted_frequency(0, archive->get_nchan()) );
 
+  const string duration = tostring<double>( archive->integration_length() );
 
   SetPlotOptions<Plot>( "above:c=$name $file\n Freq: " + frequency +
           " MHz BW: $bw Length: " + duration + " S/N: " + snr );
@@ -716,7 +716,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.69 2010/01/13 07:00:34 straten Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.70 2010/01/22 00:25:44 jonathan_khoo Exp $" << 
         endl << endl;
       return 0;
     case 'M':
