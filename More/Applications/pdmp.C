@@ -1343,6 +1343,7 @@ void solve_and_plot (Archive* archive,
      place when tscrunch is called - van Straten, January 2010 */
 
   archive->set_model(NULL);
+  archive->set_ephemeris(NULL);
 
 	// MJK: I have made the SNRs array global.. not sure if this will make
 	// anything not work (i.e. too much memory use?)
