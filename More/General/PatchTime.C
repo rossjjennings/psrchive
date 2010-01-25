@@ -32,7 +32,7 @@ void Pulsar::PatchTime::set_minimum_contemporaneity (double min)
   minimum_contemporaneity = min;
 }
 
-void insert (Pulsar::Archive* archive, unsigned& isub, const MJD& epoch)
+void insert (Pulsar::Archive* archive, unsigned isub, const MJD& epoch)
 {
   Reference::To<Pulsar::Integration> empty;
   empty = archive->get_Integration(0)->clone();
@@ -42,14 +42,15 @@ void insert (Pulsar::Archive* archive, unsigned& isub, const MJD& epoch)
   archive->expert()->insert (isub, empty);
 }
 
-void tail (Pulsar::Archive* A, Pulsar::Archive* B, unsigned& isubA)
+void tail (Pulsar::Archive* A, Pulsar::Archive* B, unsigned isubA)
 {
   while (isubA < A->get_nsubint()) 
   {
     Pulsar::Integration* subA = A->get_Integration (isubA);
-    DEBUG("tail empty sub-integration isubA=" << isubA  \
-         << " A::nsubint=" << A->get_nsubint() \
-         << " B::nsubint=" << B->get_nsubint());
+    if (Pulsar::Archive::verbose > 2)
+      cerr << "tail empty sub-integration isubA=" << isubA
+         << " A::nsubint=" << A->get_nsubint()
+         << " B::nsubint=" << B->get_nsubint() << endl;
     insert (B, isubA, subA->get_epoch());
     isubA++;
   }
@@ -88,12 +89,14 @@ void Pulsar::PatchTime::operate (Archive* A, Archive* B) try
 
       if (subA->get_epoch() > subB->get_epoch())
       {
-	DEBUG("A requires an empty sub-integration isubA=" << isubA);
+	if (Archive::verbose > 2)
+          cerr << "Pulsar::PatchTime::operate A requires an empty sub-integration isubA=" << isubA << endl;
 	insert (A, isubA, subB->get_epoch()); isubB++; isubA++;
       }
       else
       {
-	DEBUG("B requires an empty sub-integration isubB=" << isubB);
+	if (Archive::verbose > 2)
+          cerr << "Pulsar::PatchTime::operate B requires an empty sub-integration isubB=" << isubB << endl;
 	insert (B, isubB, subA->get_epoch()); isubA++; isubB++;
       }
     }
@@ -105,8 +108,10 @@ void Pulsar::PatchTime::operate (Archive* A, Archive* B) try
     }
   }
 
-  tail (A, B, isubA);
-  tail (B, A, isubB);
+  if (isubA < A->get_nsubint())
+    tail (A, B, isubA);
+  else if (isubB < B->get_nsubint())
+    tail (B, A, isubB);
 }
 catch (Error& error)
 {
