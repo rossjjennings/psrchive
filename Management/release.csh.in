@@ -15,7 +15,7 @@ set SFUSER = `awk -F@ '{print $1}' CVS/Root`
 
 # the sourceforge file release system details
 set frslogin = ${SFUSER},psrchive@frs.sourceforge.net
-set frspath = /home/frs/project/p/ps/psrchive/psrchive/@PACKAGE_VERSION@
+set frspath = /home/frs/project/p/ps/psrchive/psrchive/@PACKAGE_VERSION@/$tarfile
 
 echo
 echo "This script will install the public release of $tarfile as $SFUSER"
