@@ -37,7 +37,7 @@
 using namespace std;
 
 static const char* args
-= "b:c:C:E:e:f:FG:hiI:j:J:LM:m:O:o:p:PqRr:sS:tTUvVwzZ:";
+= "b:c:C:E:e:f:Fg:G:hiI:j:J:LM:m:O:o:p:PqRr:sS:tTUvVwzZ:";
 
 void reorder(Reference::To<Pulsar::Archive> arch);
 
@@ -71,6 +71,7 @@ void usage () {
     " -e ext      Extension added to output filenames (default .it) \n"
     " -C turns    Tscrunch+unload when CAL phase changes by >= turns \n"
     " -G sec      Tscrunch+unload when time to next archive > 'sec' seconds \n"
+    " -g sec      Tscrunch+unload when tiime between start and end of integrated archive > 'sec' seconds \n"
     " -I sec      Tscrunch+unload when archive contains 'sec' seconds \n"
     " -O path     Path to which output files are written \n"
     " -S s/n      Tscrunch+unload when archive has this S/N \n"
@@ -156,6 +157,8 @@ int main (int argc, char **argv) try
   float max_ston = 0.0;
   // maximum interval (in seconds) across which integration should occur
   float interval = 0.0;
+  // maximum total integration interval (in seconds)  that goes into one archive
+  float integrate_interval = 0.0;
   // maximum amount by which cal phase can differ
   float cal_phase_diff = 0.0;
 
@@ -196,7 +199,7 @@ int main (int argc, char **argv) try
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.69 2010/01/17 23:07:00 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.70 2010/01/28 00:31:54 sosl Exp $" 
 	   << endl;
       return 0;
 
@@ -272,6 +275,17 @@ int main (int argc, char **argv) try
       command += " -G ";
       command += optarg;
       
+      break;
+
+    case 'g':
+      if (sscanf (optarg, "%f", &integrate_interval) !=1) {
+	cerr << "psradd error parsing '" << optarg << "' as maximum integration interval\n";
+	return -1;
+      }
+      auto_add = true;
+      command += " -g ";
+      command += optarg;
+
       break;
 
     case 'I':
@@ -558,6 +572,25 @@ int main (int argc, char **argv) try
 	if (verbose)
 	  cerr << "psradd: gap=" << gap << " greater than interval=" 
 	       << interval << endl;
+	reset_total_current = true;
+      }
+    }
+
+    if (integrate_interval != 0.0)
+    {
+      // ///////////////////////////////////////////////////////////////
+      //
+      // auto_add -g: check the gap between the start and end of total
+
+      double gap = (total->start_time() - total->end_time()).in_seconds();
+
+      if (verbose)
+	cerr << "psradd: Auto add - gap " << gap << " seconds" << endl;
+
+      if (fabs(gap) > integrate_interval)
+      {
+	if (verbose)
+	  cerr << "psradd: gap=" << gap << " greater than integrate interval=" << integrate_interval << endl;
 	reset_total_current = true;
       }
     }
