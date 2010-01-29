@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.185 $
-   $Date: 2009/10/02 03:11:12 $
-   $Author: straten $ */
+   $Revision: 1.186 $
+   $Date: 2010/01/29 01:44:34 $
+   $Author: sosl $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.185 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.186 $"
 
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Config.h"
@@ -596,6 +596,9 @@ namespace Pulsar
 
     //! Name of class to which data are converted if unload_file unimplemented
     static Option<std::string> unload_class;
+
+    //! Default policy for overwriting archive files
+    static Option<bool> no_clobber;
 
     //! Load the header information from filename
     virtual void load_header (const char* filename) = 0;

@@ -9,6 +9,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Predictor.h"
 
+#include "Pulsar/Config.h"
+
 #include "TemporaryFile.h"
 #include "dirutil.h"
 #include "Error.h"
@@ -44,6 +46,11 @@ void Pulsar::Archive::unload (const char* filename) const
   }
 
   string unload_to_filename = unload_filename;
+  if (no_clobber && file_exists(filename))
+  {
+    cerr << "Pulsar::Archive:unload file " << filename << " exists and no_clobber=" << no_clobber << endl << "Exiting..." << endl;
+    exit(-1);
+  }
   if (filename)
     unload_to_filename = expand(filename);
 
@@ -130,3 +137,12 @@ void Pulsar::Archive::unload (const char* filename) const
   const_cast<Archive*>(this)->unload_filename = unload_to_filename;
   const_cast<Archive*>(this)->__load_filename = unload_to_filename;
 }
+
+Pulsar::Option<bool> Pulsar::Archive::no_clobber
+(
+ "Archive::no_clobber",
+ false,
+ "Default policy for overwriting archive files",
+ "This variables controls the behaviour of psrchive during attempt \n"
+ "to overwrite an existing file while unloading a new archive."
+);
