@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) try
 	string filename = argv[optind];
 	string extension = filename.substr(filename.length() - 2, 2);
 
-	int plot_type; // 0 = time, 1 = freq, 2 = subint
+	int plot_type = 0; // 0 = time, 1 = freq, 2 = subint
 
 	if ((extension != "rf") && (extension != "cf")) {
 		extension = "pazi";
