@@ -70,7 +70,7 @@ static PlotFactory factory;
 
 void reorder(Reference::To<Archive> arch);
 
-void setCentreMjd(const Archive* archive);
+MJD getMeanMjd(const Archive* archive);
 
 void draw_colour_map (float *plotarray, int rows, int cols, double minx,
 		double maxx, const string& xlabel, double miny, double maxy, const string& ylabel,
@@ -264,7 +264,7 @@ void slaGeoc ( double p, double h, double *r, double *z );
 
 // Gets the doppler factor, used by multiplying with Topocentric
 // period to obtain the Barycentric period
-double getDopplerFactor(const Archive * archive);
+void getDopplerFactor(const Archive * archive, double& dopplerFactor, MJD& b_mjd);
 
 // Calculates the sidereal time
 double lmst2(double mjd,double olong,double *tsid,double *tsid_der);
@@ -364,7 +364,7 @@ const float HEADER_Y = 0.65; // y ordinate of the header.
 // Approx. number of ticks to be drawn on the profile
 const int NUM_VERT_PROFILE_TICKS = 4;
 
-const unsigned DEFAULT_BEST_FIT_LINE_COLOUR = 2;
+const unsigned DEFAULT_BEST_FIT_LINE_COLOUR = 4;
 
 const unsigned BEST_FIT_LINE_WIDTH = 1;
 
@@ -385,6 +385,8 @@ bool join = false;
 
 // The Barycentric period in seconds
 double dopplerFactor;
+
+MJD barycentricMjd;
 
 double tmjdctr;
 
@@ -969,7 +971,7 @@ int main (int argc, char** argv)
 		cout << endl;
 
 		reorder(joined_archive);
-    setCentreMjd(joined_archive);
+    tmjdctr = getMeanMjd(joined_archive).in_seconds();
 		process(joined_archive, minwidthsecs, bestfilename);
 
 		// total->unload(newname); // THIS IS BROKEN!!!
@@ -1004,7 +1006,7 @@ int main (int argc, char** argv)
 
 void process (Archive* archive, double minwidthsecs, string & bestfilename)
 {
-  dopplerFactor = getDopplerFactor(archive);
+  getDopplerFactor(archive, dopplerFactor, barycentricMjd);
 
   // independently remove the baseline from each subint and channel
   Archive::remove_baseline_strategy.set( new RemoveBaseline::Each,
@@ -1624,7 +1626,7 @@ double getNaturalPeriodStep (const Archive * archive, double halfRange)
       " start=" << archive->start_time().printdays(13) <<
       " end=" << archive->end_time().printdays(13) << endl;
 
-  double tspan = archive->integration_length();
+  double tspan = (archive->end_time() - archive->start_time()).in_seconds();
   assert (tspan > 0.0);
 
   double centre_period = archive->get_Integration(0)->get_folding_period();
@@ -1872,7 +1874,7 @@ double computePeriodError(const Archive * archive) {
 
 	double pulseWidth_ms = 0;
 	double error = 0;
-	double tspan = archive->integration_length();
+	double tspan = (archive->end_time() - archive->start_time()).in_seconds();
 	double bcPeriod_s = getPeriod(archive) / dopplerFactor;
 	double refP_ms = bcPeriod_s * MILLISEC;
 	double tsub = archive->get_Integration(0)->get_duration();
@@ -2015,9 +2017,7 @@ double getDM(const Archive * archive) {
 	return archive->get_dispersion_measure();
 }
 
-
-
-double getDopplerFactor(const Archive * archive)
+void getDopplerFactor(const Archive * archive, double& dopplerFactor, MJD& b_mjd)
 {
 	// Astronomical units
 	double AUS     = 499.004786;
@@ -2038,8 +2038,7 @@ double getDopplerFactor(const Archive * archive)
 	double end = archive->end_time().intday() + archive->end_time().fracday();
 
   if (tmjdctr == 0.0) {
-    tmjdctr = (archive->start_time().in_days() + 0.5 *
-        archive->integration_length()) * 86400.0;
+    tmjdctr = 0.5 * (end + start) * 86400.0;
   }
 
 	sky_coord coord = getCoord (archive);
@@ -2211,11 +2210,14 @@ double getDopplerFactor(const Archive * archive)
 	}
 
 	double evel = slaDvdv(dvb, dps);
+  const double edelay = AUS * slaDvdv(dpb, dps);
+  const double btdb = tdb + edelay;
+
+  b_mjd = btdb / 86400;
+  dopplerFactor = 1 - evel;
 
 	if (verbose)
-		printf("pdmp: getDopplerFactor: dopps = %3.20g\n", 1-evel);
-
-	return 1-evel;
+		printf("pdmp: getDopplerFactor: dopps = %3.20g\n", dopplerFactor);
 }
 
 
@@ -2392,7 +2394,7 @@ void printHeader(const Archive * archive,
 	int nBin = archive->get_nbin();
 	int nChan = archive->get_nchan();
 	int nSub = archive->get_nsubint();
-	double tspan = archive->integration_length();
+	double tspan = (archive->end_time() - archive->start_time()).in_seconds();
 	double tsub = (archive->get_Integration(0))->get_duration();
 	double tbin = (refP_us/1000) / nBin;
 
@@ -2432,7 +2434,7 @@ void printHeader(const Archive * archive,
 
 	// Newline
 	sprintf(temp, "BC MJD = %.6f " ,
-	start.intday() + start.fracday());
+      barycentricMjd.in_days());
 	temp_str = temp;
 
 	sprintf(temp, "Centre freq(MHz) = %3.3f ", archive->get_centre_frequency());
@@ -2456,8 +2458,8 @@ void printHeader(const Archive * archive,
 	sprintf(temp, "NBin = %d NChan = %d NSub = %d ", nBin, nChan, nSub);
 	temp_str = temp;
 
-    sprintf(temp , "TBin(ms) = %.3f TSub(s) = %.3f TSpan(s) = %.3f", tbin,
-        tsub, tspan);
+  sprintf(temp , "TBin(ms) = %.3f TSub(s) = %.3f TSpan(s) = %.3f", tbin,
+      tsub, tspan);
 
 	temp_str += temp;
 
@@ -2623,7 +2625,7 @@ void printResults(const Archive * archive) {
 
 		printf("\n\nBest S/N = %.2f\n", bestSNR);
 
-		printf("BC MJD = %.6f\n", start.intday() + start.fracday());
+		printf("BC MJD = %.6f\n", barycentricMjd.in_days());
 
 		printf("BC Period (ms) = %3.10g  TC Period (ms) =  %3.10g  DM = %3.3g\n",
 						bcPeriod_s * MILLISEC,	getPeriod(archive) * MILLISEC, getDM(archive));
@@ -2680,7 +2682,7 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 		glong,
 		glat,
 		bestSNR,
-		start.intday() + start.fracday(),
+		barycentricMjd.in_days(),
 		bestPeriod_bc_us/MILLISEC,
 		periodError_ms,
 		bestDM,
@@ -2693,7 +2695,7 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 
 	if (file != NULL) {
 		fprintf(file, " %3.6f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%3.3f\t%3.2f\t%s %d %d %d\n",
-		start.intday() + start.fracday(),
+		barycentricMjd.in_days(),
 		bestPeriod_bc_us/MILLISEC,
 		periodError_ms,
 		bestDM,
@@ -2961,88 +2963,46 @@ void drawBestFitPhaseFreq(const Archive * archive) {
 
 }
 
-void drawBestFitPhaseTime(const Archive * archive) {
+void drawBestFitPhaseTime(const Archive * archive)
+{
+  const string scale = get_scale(archive);
+  float divisor = 1.0;
 
-	string scale = get_scale(archive);
-	int divisor = 1;
+  if (scale == "days") {
+    divisor = 86400.0;
+  } else if (scale == "hours") {
+    divisor = 3600.0;
+  } else if (scale == "minutes") {
+    divisor = 60.0;
+  }
 
-	if (scale == "days")
-		divisor = 60 * 60 * 24;
-	else if (scale == "hours")
-		divisor = 60 * 60;
-	else if (scale == "minutes")
-		divisor = 60;
+  const double bcPeriod_s = getPeriod(archive) / dopplerFactor;
+  const unsigned nsubint = archive->get_nsubint();
 
-	Reference::To<Profile> profile;
+	vector<float> xpoints(nsubint);
+	vector<float> ypoints(nsubint);
 
-	double intLength = (archive->end_time() - archive->start_time()).in_seconds();
-	double bcPeriod_s = getPeriod(archive) / dopplerFactor;
-	double p = bcPeriod_s*MICROSEC;
-	double deltaP;
+  const double bcPeriod_correction = (bestPeriod_bc_us / MICROSEC) -
+    bcPeriod_s;
 
-	if (join) {
-		deltaP = bestPeriod_bc_us - p * MICROSEC;
-	} else {
-		deltaP = bestPeriod_bc_us - p;
-	}
+  const double tspan = (archive->end_time() - archive->start_time()).in_seconds() /
+    divisor;
 
-	double tspan = archive->integration_length();
-	double tsub = archive->get_Integration(0)->get_duration();
-	unsigned nsub;
+  for (unsigned i = 0; i < nsubint; ++i) {
+    const double elasped_time = (archive->get_Integration(i)->get_start_time() -
+        archive->start_time()).in_seconds();
 
-	if (join) {
-		nsub = (unsigned)(tspan / tsub);
-	} else {
-		nsub = archive->get_nsubint();
-	}
+    double phase = 0.5 + (bcPeriod_correction / bcPeriod_s) *
+      (elasped_time / bcPeriod_s);
 
-	vector<float> xpoints;
-	vector<float> ypoints;
-	double refPhase = 0.5;
+    if (phase < 0.0) {
+      phase = 1.0 - (1.0 - (phase - floor(phase)));
+    }
 
-	// This equation is derived from the property
-	// deltaP / P = deltaT / T
-	// Note that this deltaPhase refers to the midpoint of the
-	// first subint to the midpoint of the second subint
-
-	double deltaPhase = ((nsub-1) * tsub * (deltaP / MICROSEC)) / pow((bestPeriod_bc_us/MICROSEC), 2);
-	double gradient;
-
-	if (nsub == 1) {
-		deltaPhase = 0;
-		gradient = 0;
-
-	} else {
-
-		if (join) {
-			gradient = (bestPeriod_bc_us - bcPeriod_s * MICROSEC) / MILLISEC;
-		} else {
-			gradient = deltaPhase / (nsub - 1);
-		}
-	}
-
-	// get the deltaPhase for the entire length of the subints
-	// This draws a nice line from top to bottom, instead of midway
-	// through the first and last subints
-
-	deltaPhase = gradient * nsub;
-
-	if (verbose)
-		printf("deltaPhase = %3.10g, deltaP = %3.10g, bestPeriod_bc_us = %3.10g\n", deltaPhase, deltaP, bestPeriod_bc_us);
-
-	// The first point is the centre of the first subint
-	xpoints.push_back(refPhase);
-	ypoints.push_back(FIRST_SUBINT);
-
-	// Second point is the point on the last subint
-	// which is offseted by delta phase
-	xpoints.push_back(refPhase + deltaPhase);
-	ypoints.push_back(intLength / divisor);
-
-	if (verbose) {
-		printf("Drawing line of best fit for phase time with coords: (%3.10g, %3.10g) to (%3.10g, %3.10g)\n",
-		xpoints[0], ypoints[0], xpoints[1], ypoints[1]);
-	}
+    xpoints[i] = phase;
+    ypoints[i] = ((static_cast<float>(i) + 0.5) /
+          static_cast<float>(nsubint)) * tspan;
+  }
 
 	cpgsci(bestFitLineColour);
 	cpgslw(BEST_FIT_LINE_WIDTH);
@@ -3260,24 +3220,20 @@ void setSensibleStepSizes(const Archive* archive)
     periodHalfRange_us = periodStep_us/2;
 }
 
-void setCentreMjd(const Archive* archive)
+MJD getMeanMjd(const Archive* archive)
 {
-  const double mid_length = archive->integration_length() / 2;
+  MJD total_mjd = 0.0;
   const unsigned nsubint = archive->get_nsubint();
-  double accumulated_length = 0.0;
 
-  for (unsigned isub = 0; isub < nsubint; ++isub) {
-    const double duration = archive->get_Integration(isub)->get_duration();
-    if (accumulated_length + duration > mid_length) {
-      tmjdctr = archive->get_Integration(isub)->get_start_time().in_seconds() +
-        mid_length - accumulated_length;
-      return;
-    } else {
-      accumulated_length += duration;
-    }
+  for (unsigned i = 0; i < nsubint; ++i) {
+    const double subint_duration = archive->get_Integration(i)->get_duration();
+
+    total_mjd += archive->get_Integration(i)->get_start_time() +
+      0.5 * subint_duration;
   }
-}
 
+  return total_mjd / nsubint;
+}
 
 #ifdef HAVE_PSRXML
 void normaliseXmlSubints(float* amps,unsigned int nbin){
