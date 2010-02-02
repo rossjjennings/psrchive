@@ -9,6 +9,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/ProfileAmps.h"
 #include "Pulsar/Profile.h"
+
+#include "Pulsar/Pointing.h"
 %}
 
 // Language independent exception handler
@@ -90,7 +92,6 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %ignore Pulsar::Archive::get_basis() const;
 %ignore Pulsar::Integration::get_Profile(unsigned,unsigned) const;
 %ignore Pulsar::Integration::new_PolnProfile(unsigned) const;
-%ignore Pulsar::Integration::get_epoch() const;
 %ignore Pulsar::IntegrationManager::get_Integration(unsigned) const;
 %ignore Pulsar::IntegrationManager::get_last_Integration() const;
 %ignore Pulsar::IntegrationManager::get_first_Integration() const;
@@ -109,6 +110,21 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %ignore Pulsar::Profile::baseline_strategy;
 %ignore Pulsar::Profile::onpulse_strategy;
 %ignore Pulsar::Profile::snr_strategy;
+
+// Return psrchive's Estimate class as a Python tuple
+%typemap(out) Estimate<double> {
+    PyTupleObject *res = (PyTupleObject *)PyTuple_New(2);
+    PyTuple_SetItem((PyObject *)res, 0, PyFloat_FromDouble($1.get_value()));
+    PyTuple_SetItem((PyObject *)res, 1, PyFloat_FromDouble($1.get_variance()));
+    $result = (PyObject *)res;
+}
+%typemap(out) Estimate<float> = Estimate<double>;
+
+// Return psrchive's MJD class as a Python double.
+// NOTE this loses precision so may not be appropriate for all cases.
+%typemap(out) MJD {
+    $result = PyFloat_FromDouble($1.in_days());
+}
 
 // Header files included here will be wrapped
 %include "ReferenceAble.h"
@@ -158,9 +174,18 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 
 %extend Pulsar::Integration
 {
-    // Return MJD as double
-    // TODO: probably can do this better with typemap?
-    double get_epoch() { return self->get_epoch().in_days(); }
+
+    // Interface to Pointing
+    double get_telescope_zenith() {
+        Pulsar::Pointing *p = self->get<Pulsar::Pointing>();
+        if (p==NULL) return 0.0;
+        return p->get_telescope_zenith().getDegrees();
+    }
+    double get_telescope_azimuth() {
+        Pulsar::Pointing *p = self->get<Pulsar::Pointing>();
+        if (p==NULL) return 0.0;
+        return p->get_telescope_azimuth().getDegrees();
+    }
 
     // Return baseline_stats as numpy arrays
     PyObject *baseline_stats() {
