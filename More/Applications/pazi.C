@@ -856,44 +856,22 @@ string get_scale(Pulsar::Archive* arch)
 
 void binzap(Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint, int lower_range, int upper_range, int lower_bin, int upper_bin)
 {
-	BoxMuller gasdev;
-	float mean;
-	float deviation;
-	float* this_int;
-	int j;
-	int npol = old_arch->get_npol();
-	int nchan = old_arch->get_nchan();
+  const unsigned npol = old_arch->get_npol();
+  const unsigned nchan = old_arch->get_nchan();
 
-	if (lower_bin > upper_bin)
-		swap_chans(upper_bin, lower_bin);
+  for (unsigned ipol = 0; ipol < npol; ++ipol) {
+    for (unsigned ichan = 0; ichan < nchan; ++ichan) {
 
-	for (int pol = 0; pol < npol; pol++) {
-		for (int chan = 0; chan < nchan; chan++) {
-			this_int = old_arch->get_Profile(subint,pol,chan)->get_amps();
-			mean = 0;
-			deviation = 0;
+      const double baseline_mean =
+        old_arch->get_Profile(subint,ipol,ichan)->baseline()->get_mean().get_value();
 
-			for (j = lower_range; j < lower_bin; j++)
-				mean += this_int[j];
+      float* bins = old_arch->get_Profile(subint,ipol,ichan)->get_amps();
 
-			for (j = upper_bin; j < upper_range; j++)
-				mean += this_int[j];
-
-			mean = mean / ((upper_range - lower_range) - (upper_bin - lower_bin));
-
-			for (j = lower_range; j < lower_bin; j++)
-				deviation += (this_int[j] - mean) * (this_int[j] - mean);
-
-			for (j = upper_bin; j < upper_range; j++)
-				deviation += (this_int[j] - mean) * (this_int[j] - mean);
-
-			deviation = deviation / ((upper_range - lower_range) - (upper_bin - lower_bin - 1));
-			deviation = sqrt(deviation);
-
-			for (j = lower_bin; j < upper_bin; j++)
-				this_int[j] = mean + (gasdev() * deviation);
-		}
-	}
+      for (int ibin = lower_bin; ibin < upper_bin; ++ibin) {
+        bins[ibin] = baseline_mean;
+      }
+    }
+  }
 
 	bins_to_zap.push_back(subint);
 	bins_to_zap.push_back(lower_range);
@@ -904,8 +882,8 @@ void binzap(Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint, int lo
 	*arch = *old_arch;
 	arch->set_dispersion_measure(0);
 	arch->pscrunch();
-	arch->remove_baseline();
 	arch->fscrunch();
+	arch->remove_baseline();
 }
 
 static Pulsar::LawnMower* mower = 0;
