@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.20 $
-   $Date: 2009/05/07 06:09:40 $
+   $Revision: 1.21 $
+   $Date: 2010/02/09 04:42:28 $
    $Author: sosl $ */
 
 #ifndef __Pulsar_Database_h
@@ -228,6 +228,7 @@ namespace Pulsar {
     std::string path;
     Entry lastEntry;
     Reference::To<PolnCalibrator> lastPolnCal;
+    Reference::To<HybridCalibrator> lastHybridCal;
     
     //! Return a pointer to a new FluxCalibrator for the given archive
     FluxCalibrator* rawFluxCalibrator (Archive* a);

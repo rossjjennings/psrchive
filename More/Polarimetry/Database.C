@@ -1277,6 +1277,13 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
 		 "No complete parameterization (e.g. pcm output) found");
   }
 
+  if (cache_last_cal && lastHybridCal && entry == lastEntry)
+  {
+    if (verbose)
+      cerr << "Pulsar::Database::generateHybridCalibrator using cached calibrator\n";
+    return lastHybridCal;
+  }
+
   Reference::To<Pulsar::HybridCalibrator> hybrid;
 
   try
@@ -1301,6 +1308,14 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
   catch (Error& error)
   {
     throw error += "Pulsar::Database::generateHybridCalibrator";
+  }
+
+  if (cache_last_cal)
+  {
+    if (verbose)
+      cerr << "Pulsar::Database::generateHybridCalibrator caching HybridCalibrator" << endl;
+    lastEntry = entry;
+    lastHybridCal = hybrid;
   }
 
   return hybrid.release();
