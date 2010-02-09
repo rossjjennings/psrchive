@@ -40,7 +40,9 @@ protected:
   void set_number_of_turns (long int _turns);
   void set_number_of_turns_seconds (double seconds);
   void set_path_for_output (string _path);
+  void set_output_extension (string _ext);
   void set_profile_count_offset (long int _offset);
+  void set_form_invint();
 
   vector<string> files;
 
@@ -58,6 +60,7 @@ protected:
   //char outnamechar[256];
   //char path[128];
   string path;
+  string ext;
   string outnamechar;
 
   stringstream ss;
@@ -68,6 +71,7 @@ protected:
 
   // buffer control variables
   bool buffer_exists;
+  bool form_invariant;
   long buffer_left;
   long buffer_size;
 
@@ -82,11 +86,14 @@ stability::stability()
   i=0;
   set_number_of_turns(52106);
   set_profile_count_offset(0);
-  timeApp.must_match = false;
+  timeApp.must_match = true;
   buffer_exists = false;
   buffer_left = 0;
+  form_invariant = false;
 
   start = time (NULL);
+
+  ext = "ar";
 }
 
 void stability::add_options ( CommandLine::Menu& menu)
@@ -108,25 +115,44 @@ void stability::add_options ( CommandLine::Menu& menu)
 		      "WARNING:This assumes J0437-4715 period \n");
 
   arg = menu.add (this, &stability::set_path_for_output, 'O',"path");
-  arg->set_help ("set path for output, has to finish with '/'");
+  arg->set_help ("write files to this location\n");
 
   arg = menu.add (this, &stability::set_profile_count_offset, 'o',"offset");
   arg->set_help ("set profile count offset");
   arg->set_long_help ("This option is useful when splitting the stability study\n"
 		      "over many processors");
+
+  arg = menu.add (this, &stability::set_form_invint, 'i');
+  arg->set_help ("form invariant profile");
+
+  arg = menu.add(this, &stability::set_output_extension, 'e', "extension");
+  arg->set_help("Write output files with this extension\n");
+
 }
 
 void stability::set_path_for_output (string _path)
 {
-  //cout << "received _path=" << _path << endl;
   path = _path;
-  //cout << "set the output path to " << path << endl;
+  if (path.substr(path.length()-1,1) != "/")
+    path += "/";
+}
+
+void stability::set_output_extension(string _ext)
+{
+  cout << "setting extension to " << _ext << endl;
+  ext = _ext;
 }
 
 void stability::set_number_of_turns (long int _turns)
 {
   turns = _turns;
   //cout << "set the number of turns to " << turns << endl;
+}
+
+void stability::set_form_invint ()
+{
+  form_invariant = true;
+  cerr << "setting form_invariant to " << form_invariant << endl;
 }
 
 void stability::set_number_of_turns_seconds (double seconds)
@@ -142,8 +168,12 @@ void stability::set_profile_count_offset (long int _offset)
 
 void stability::process (Pulsar::Archive* archive)
 {
-  archive->fscrunch_to_nchan(1);
-  archive->pscrunch();
+  if ( ! form_invariant )
+  {
+    cerr << "Fp scrunching!" << endl;
+    archive->fscrunch_to_nchan(1);
+    archive->pscrunch();
+  }
 
   if (i < 1)
   {
@@ -190,7 +220,10 @@ void stability::process (Pulsar::Archive* archive)
 
       buffer = total->extract(buffer_subints);
       //timeApp.init(buffer);
-      buffer->tscrunch();
+      if ( ! form_invariant )
+      {
+	buffer->tscrunch();
+      }
 
       out_of_buffer = total->extract(out_of_buffer_subints);
 
@@ -198,11 +231,23 @@ void stability::process (Pulsar::Archive* archive)
       timeApp.init(total_buffered);
       timeApp.append(total_buffered, buffer);
     }
-    output = total_buffered->total(true);
+    if ( ! form_invariant )
+    {
+      output = total_buffered->total( true );
+    }
     
-    ss << path << "profile_" << i-turns << ".ar";
+    ss << path << "profile_" << i-turns << "." << ext;
     outnamechar = ss.str();
     ss.str("");
+    if ( form_invariant)
+    {
+      output = total_buffered->clone();
+      output->invint();
+      output->fscrunch_to_nchan(1);
+      output->pscrunch();
+      output->tscrunch();
+      //output->total( true );
+    }
     output->unload(outnamechar);
     timeApp.append(total, archive);
     timeApp.append(total_buffered, archive);
