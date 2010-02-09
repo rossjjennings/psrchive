@@ -9,6 +9,8 @@
 #include "Pulsar/DigitiserCounts.h"
 #include "TextInterface.h"
 
+#include <assert.h>
+
 
 
 using Pulsar::DigitiserCounts;
@@ -131,23 +133,33 @@ void DigitiserCounts::Accumulate( const DigitiserCounts &src )
  **/
 
 void DigitiserCounts::CombineSubints(const unsigned subint, const unsigned start,
-        const unsigned stop)
+    const unsigned stop)
 {
-    if (Archive::verbose > 2)
-        cerr << "Pulsar::DigitiserCounts::CombineSubints subint=" << subint <<
-            " start=" << start << " stop=" << stop << endl;
+  if (Archive::verbose > 2) {
+    cerr << "Pulsar::DigitiserCounts::CombineSubints subint=" << subint <<
+      " start=" << start << " stop=" << stop << endl;
+  }
 
-    if (start > stop)
-        throw Error(InvalidRange, "DigitiserCounts::CombineSubints", 
-                "first subint=%u > last subint=%u", start, stop);
+  if (start > stop) {
+    throw Error(InvalidRange, "DigitiserCounts::CombineSubints", 
+        "first subint=%u > last subint=%u", start, stop);
+  }
 
-    if (subint >= subints.size())
-        throw Error(InvalidRange, "DigitiserCounts::CombineSubints",
-                "subint=%u >= number of existing subints");
+  if (subint >= subints.size()) {
+    throw Error(InvalidRange, "DigitiserCounts::CombineSubints",
+        "subint=%u >= number of existing subints", subint);
+  }
 
-    const unsigned dataSize = subints[0].data.size();
+  if (start >= subints.size() || stop >= subints.size()) {
+    throw Error(InvalidRange, "DigitiserCounts::CombineSubints",
+        "start=%u stop=%u subints size=%u", start, stop, subints.size());
+  }
 
-    for (unsigned iadd = start; iadd < stop; ++iadd)
-        for (unsigned idata = 0; idata < dataSize; ++idata)
-            subints[subint].data[idata] = subints[iadd].data[idata];
+  const unsigned dataSize = subints[0].data.size();
+
+  for (unsigned iadd = start; iadd < stop; ++iadd) {
+    for (unsigned idata = 0; idata < dataSize; ++idata) {
+      subints[subint].data[idata] = subints[iadd].data[idata];
+    }
+  }
 }
