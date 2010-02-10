@@ -74,6 +74,7 @@ nobase_include_HEADERS = \
         Pulsar/ProfileWeightFunction.h \
 	Pulsar/RadiometerWeight.h \
 	Pulsar/RemoveBaseline.h \
+	Pulsar/RemoveVariableBaseline.h \
 	Pulsar/RiseFall.h \
         Pulsar/RFIMitigation.h \
         Pulsar/ScatteredPowerCorrection.h \
@@ -209,6 +210,7 @@ libGeneral_la_SOURCES = \
         ProfileWeightFunction.C \
 	RadiometerWeight.C \
 	RemoveBaseline.C \
+	RemoveVariableBaseline.C \
 	RiseFall.C \
         RFIMitigation.C \
         ScatteredPowerCorrection.C \
