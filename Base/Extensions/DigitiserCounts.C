@@ -141,7 +141,7 @@ void DigitiserCounts::CombineSubints(const unsigned subint, const unsigned start
   }
 
   if (start > stop) {
-    throw Error(InvalidRange, "DigitiserCounts::CombineSubints", 
+    throw Error(InvalidRange, "DigitiserCounts::CombineSubints",
         "first subint=%u > last subint=%u", start, stop);
   }
 
@@ -150,7 +150,7 @@ void DigitiserCounts::CombineSubints(const unsigned subint, const unsigned start
         "subint=%u >= number of existing subints", subint);
   }
 
-  if (start >= subints.size() || stop >= subints.size()) {
+  if (stop > subints.size()) {
     throw Error(InvalidRange, "DigitiserCounts::CombineSubints",
         "start=%u stop=%u subints size=%u", start, stop, subints.size());
   }
