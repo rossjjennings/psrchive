@@ -11,16 +11,21 @@ if ( ! -f $tarfile ) then
 endif
 
 # determine the SourceForge user name from CVS/Root
-set SFUSER = `awk -F@ '{print $1}' CVS/Root`
+set SFUSER = `awk -F@ '{print $1}' @abs_top_srcdir@/CVS/Root`
 
 # the sourceforge file release system details
 set frslogin = ${SFUSER},psrchive@frs.sourceforge.net
-set frspath = /home/frs/project/p/ps/psrchive/psrchive/@PACKAGE_VERSION@/$tarfile
+set frspath = /home/frs/project/p/ps/psrchive/psrchive/
 
 echo
 echo "This script will install the public release of $tarfile as $SFUSER"
 echo "Please hit <Enter> to continue or <Ctrl-C> to abort"
 $<
 
-rsync -e ssh $tarfile ${frslogin}:${frspath}
+mkdir -p @PACKAGE_VERSION@
+cp $tarfile @PACKAGE_VERSION@/
+
+rsync -e ssh -r @PACKAGE_VERSION@ ${frslogin}:${frspath}
+
+echo PSRCHIVE @PACKAGE_VERSION@ released
 
