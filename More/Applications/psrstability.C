@@ -10,6 +10,7 @@
 #include "Pulsar/StandardOptions.h"
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
 
 #include "Pulsar/TimeAppend.h"
 
@@ -20,6 +21,7 @@ using namespace std;
 using namespace Pulsar;
 
 #include <time.h>
+#include "strutil.h"
 
 class stability : public Pulsar::Application
 {
@@ -42,9 +44,11 @@ protected:
   void set_path_for_output (string _path);
   void set_output_extension (string _ext);
   void set_profile_count_offset (long int _offset);
+  void load_MJDs_for_random_from_archives(std::string _random_list);
   void set_form_invint();
 
   vector<string> files;
+  vector<string> mjd_archives;
 
   long int turns;
   long int offset;
@@ -54,6 +58,7 @@ protected:
   Reference::To<Pulsar::Archive> output;
   Reference::To<Pulsar::Archive> buffer;
   Reference::To<Pulsar::Archive> out_of_buffer;
+  Reference::To<Pulsar::Archive> mjd_archive;
   //Pulsar::Archive* output;
   //Pulsar::Archive* total;
 
@@ -71,9 +76,11 @@ protected:
 
   // buffer control variables
   bool buffer_exists;
-  bool form_invariant;
   long buffer_left;
   long buffer_size;
+
+  bool form_invariant;
+  bool mjd_archives_provided;
 
   time_t seconds;
   time_t start;
@@ -128,6 +135,9 @@ void stability::add_options ( CommandLine::Menu& menu)
   arg = menu.add(this, &stability::set_output_extension, 'e', "extension");
   arg->set_help("Write output files with this extension\n");
 
+  arg = menu.add(this, &stability::load_MJDs_for_random_from_archives, 'R',"random - slower");
+  arg->set_help ("Load random pulses but set their MJD to MJD of normally ordered pulses\n"
+		  "useful when testing stability on random sequence of pulses\n");
 }
 
 void stability::set_path_for_output (string _path)
@@ -155,11 +165,18 @@ void stability::set_form_invint ()
   cerr << "setting form_invariant to " << form_invariant << endl;
 }
 
+void stability::load_MJDs_for_random_from_archives (std::string _random_list)
+{
+  stringfload(&mjd_archives, _random_list);
+  mjd_archives_provided = true;
+}
+
 void stability::set_number_of_turns_seconds (double seconds)
 {
   turns = (long int)(seconds / PERIOD);
   cout << "set the number of turns to " << turns << endl;
 }
+
 
 void stability::set_profile_count_offset (long int _offset)
 {
@@ -168,6 +185,12 @@ void stability::set_profile_count_offset (long int _offset)
 
 void stability::process (Pulsar::Archive* archive)
 {
+  if (mjd_archives_provided)
+  {
+    mjd_archive = Pulsar::Archive::load(mjd_archives[i]);
+    archive->get_Integration(0)->set_epoch (mjd_archive->get_Integration(0)->get_epoch());
+  }
+
   if ( ! form_invariant )
   {
     cerr << "Fp scrunching!" << endl;
