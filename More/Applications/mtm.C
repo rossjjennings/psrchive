@@ -69,6 +69,10 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
   if (fit.choose_maximum_harmonic)
     cout << "\nMaximum harmonic = " << fit.get_nharmonic() << endl;
 
+  cout <<
+    "\nThe following four values are those presented (in the same order) \n"
+    "in Table 1 of van Straten (2006 ApJ, 642:1004)" << endl;
+
   cout << "\nFull Polarization TOA (matrix template matching): "
     "\n MTM Relative conditional error = "
        << analysis.get_relative_conditional_error () <<
@@ -138,7 +142,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: mtm.C,v 1.1 2010/02/11 21:10:05 straten Exp $" << endl;
+      cout << "$Id: mtm.C,v 1.2 2010/02/11 21:14:26 straten Exp $" << endl;
       return 0;
 
     case 'F':
