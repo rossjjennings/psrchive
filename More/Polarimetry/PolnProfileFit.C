@@ -204,7 +204,6 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   for (unsigned ibin=1; ibin<n_harmonic; ibin++)
   {
     Stokes< complex<double> > standard_value;
-    Stokes< complex<double> > standard_variance;
 
     valvar( standard_data->get_stokes(ibin),
 	    standard_value, standard_variance );
