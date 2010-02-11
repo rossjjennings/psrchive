@@ -45,6 +45,7 @@ nobase_include_HEADERS = \
         Pulsar/PolnCalibrator.h \
         Pulsar/PolnProfile.h \
         Pulsar/PolnProfileFit.h \
+        Pulsar/PolnProfileFitAnalysis.h \
         Pulsar/PolnProfileStats.h \
 	Pulsar/PolnSpectrumStats.h \
 	Pulsar/PolynomialInfo.h \
@@ -131,6 +132,7 @@ libPolarimetry_la_SOURCES = \
         PolnCalibratorInfo.C \
         PolnProfile.C \
         PolnProfileFit.C \
+        PolnProfileFitAnalysis.C \
         PolnProfileStats.C \
 	PolnSpectrumStats.C \
 	PolynomialInfo.C \
@@ -174,6 +176,7 @@ bin_PROGRAMS = rmrot simpol
 
 rmrot_SOURCES = rmrot.C
 simpol_SOURCES = simpol.C
+
 
 ##############################################################################
 #
