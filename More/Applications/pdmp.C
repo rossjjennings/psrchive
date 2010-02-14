@@ -2995,8 +2995,11 @@ void drawBestFitPhaseTime(const Archive * archive)
     double phase = 0.5 + (bcPeriod_correction / bcPeriod_s) *
       (elasped_time / bcPeriod_s);
 
+    // modify the plotted x value so it lies between 0 and 1
     if (phase < 0.0) {
       phase = 1.0 - (1.0 - (phase - floor(phase)));
+    } else if (phase > 1.0) {
+      phase -= floor(phase);
     }
 
     xpoints[i] = phase;
