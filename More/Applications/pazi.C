@@ -9,6 +9,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <assert.h>
+
 #include "Pulsar/psrchive.h"
 #include "Pulsar/PlotFactory.h"
 #include "Pulsar/Plot.h"
@@ -26,6 +28,13 @@
 #include "TextInterface.h"
 #include "strutil.h"
 #include "BoxMuller.h"
+
+#define HORIZONTAL_BAND 3
+#define VERTICAL_BAND 4
+#define ZERO_PAIR std::pair<float, float>(0.0, 0.0)
+
+typedef std::pair<float, float> MouseType;
+typedef std::pair<unsigned, unsigned> RangeType;
 
 using namespace Pulsar;
 using namespace std;
@@ -60,28 +69,39 @@ void usage()
     "See "PSRCHIVE_HTTP"/manuals/pazi for more details\n" << endl;
 }
 
-int freq_get_channel(float mouseY, double bandwidth, int num_chans, double centre_freq);
-int time_get_channel(float mouseY, double int_length, int num_subints, string scale);
-string join_option(float y, float y2, double bandwidth, int type);
-void freq_zap_chan(Pulsar::Archive* arch, int zap_chan);
+string get_zoom_option(const unsigned bottom_range, const unsigned top_range,
+    const unsigned max_value);
+
+RangeType get_range(const MouseType& mouse_ref, const MouseType& mouse,
+    const RangeType& ranges, const bool horizontal);
+
+unsigned get_subint_indexed_value(const MouseType& mouse);
+
+void zap_bin(Pulsar::Archive* arch, Pulsar::Archive* old_arch, const unsigned subint,
+    const unsigned bin);
+
+unsigned get_max_value(const Pulsar::Archive* archive, const int plot_type);
+
+void reorder_ranges(RangeType& p);
+
+unsigned get_indexed_value(const MouseType& mouse);
+
+bool add_zapped_value(const unsigned value, vector<int>& zapped_values);
+
+void time_zap_subint(Pulsar::Archive* archive, const unsigned subint);
+
+void freq_zap_chan(Pulsar::Archive* arch, const unsigned zap_chan);
 void freq_unzap_chan(Pulsar::Archive* arch, Pulsar::Archive* backup, int zap_chan);
-void time_zap_subint(Pulsar::Archive* arch, int zap_subint);
 void time_unzap_subint(Pulsar::Archive* arch, Pulsar::Archive* backup, int zap_subint);
 void redraw(Pulsar::Archive* arch, Plot* orig_plot, Plot* mod_plot, bool zoom);
 void freq_redraw(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* orig_plot, Plot* mod_plot, bool zoom);
 void time_redraw(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* orig_plot, Plot* mod_plot, bool zoom);
 void update_total(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* plot);
-void freq_get_limits(int &lower_chan, int &upper_chan, float mouseY, float mouseY2, double bandwidth, int num_chan, double centre_freq);
-void time_get_limits(int &lower_chan, int &upper_chan, float mouseY, float mouseY2, double int_length, int num_subints, string scale);
-void swap_chans(int &chan1, int &chan2);
 bool add_channel(int chan, vector<int>& delete_channels);
 bool remove_channel(int chan, vector<int>& delete_channels);
 void print_command(vector<int>& freq_chans, vector<int>& subints, string extension, string filename);
 void set_dedispersion(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &dedispersed);
 //void set_centre(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &centered, int type, bool dedispersed);
-string get_scale(Pulsar::Archive* arch);
-string vertical_join_option(float x, float x2, int &upper_chan, int &lower_chan, int num_bins);
-void binzap(Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint, int lower_range, int upper_range, int lower_bin, int upper_bin);
 void mowlawn (Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint);
 
 static bool dedispersed = true;
@@ -90,8 +110,10 @@ static vector<int> subints_to_zap;
 static vector<int> bins_to_zap;
 static vector<int> subints_to_mow;
 
+RangeType ranges(0, 0);
+bool positive_direction = true;
+
 //static bool centered = true;
-//static bool centered = false;
 
 int main(int argc, char* argv[]) try
 {
@@ -120,14 +142,11 @@ int main(int argc, char* argv[]) try
 		cerr << "pazi: please specify filename" << endl;
 		return -1;
 	}
-	float mouseX = 0;
-	float mouseY = 0;
-	float mouseX2;
-	float mouseY2;
-	int mouseY_chan;
-	int mouseY2_chan;
-	int lower_channel;
-	int upper_channel;
+
+  // where the mouse clicks are stored
+  MouseType mouse(0.0, 0.0);
+  MouseType mouse_ref(0.0, 0.0);
+
 	int subint = 0;
 	char ch;
 	bool zoomed = false;
@@ -165,28 +184,11 @@ int main(int argc, char* argv[]) try
 	mod_archive->dedisperse();
 	mod_archive->fscrunch();
 
-	//mod_archive->centre();
-	//printf("centre\n");
-
 	Reference::To<Pulsar::Archive> scrunched_archive = mod_archive->clone();
 	scrunched_archive->tscrunch();
 
-	double centre_freq = base_archive->get_centre_frequency();
-	double bandwidth = base_archive->get_bandwidth();
-	int num_chan = base_archive->get_nchan();
-  double int_length = base_archive->end_time().in_seconds() -
-    base_archive->start_time().in_seconds();
-
-	int num_subints = base_archive->get_nsubint();
-	double original_bandwidth = bandwidth;
-	int num_bins = base_archive->get_nbin();
-	string scale = get_scale(base_archive);
-
-	int upper_range = num_bins - 1;
-	int lower_range = 0;
-
-	if (bandwidth < 0)
-		bandwidth = bandwidth * 1;
+  ranges.second = get_max_value(base_archive, plot_type);
+  positive_direction = base_archive->get_bandwidth() < 0.0;
 
 	Plot *time_orig_plot = factory.construct("time");
 	Plot *time_mod_plot = factory.construct("time");
@@ -209,87 +211,103 @@ int main(int argc, char* argv[]) try
 	cpgopen("2/XS");
 	cpgask(0);
 
-	cerr << endl << "Total S/N = " << scrunched_archive->get_Profile(0,0,0)->snr() << endl << endl;
+	cerr << endl << "Total S/N = " <<
+    scrunched_archive->get_Profile(0,0,0)->snr() << endl << endl;
 
 	total_plot->plot(scrunched_archive);
 	cpgslct(1);
 	time_orig_plot->plot(mod_archive);
 
 	do {
-		if (plot_type != 2)
-			cpgband(3, 0, mouseX, mouseY, &mouseX2, &mouseY2, &ch);
-		else
-			cpgband(4, 0, mouseX, mouseY, &mouseX2, &mouseY2, &ch);
+    cpgswin(0, 1, 0, 1);
+
+    // plot:
+    //   frequency = horizontal mouse band
+    //   time      = horizontal mouse band
+    //   profile   = vertical mouse band
+    const int band = plot_type == 2 ? VERTICAL_BAND : HORIZONTAL_BAND;
+    cpgband(band, 0, mouse_ref.first, mouse_ref.second, &(mouse.first),
+        &(mouse.second), &ch);
 
 		switch (ch) {
-			case 'A': // zoom
-				if (plot_type == 2) {
-					if (!mouseX) {
-						mouseX = mouseX2;
-					} else {
-						zoomed = true;
-						subint_fui->set_value("x:win", vertical_join_option(mouseX, mouseX2, upper_range, lower_range, num_bins));
-						redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
-						mouseX = 0;
-					}
+      case 'A': // zoom
+        {
+          if (mouse_ref == ZERO_PAIR) { // if position anchor has not been set,
+            mouse_ref = mouse; // set it
+            continue;
+          }
 
-				} else {
-					if (!mouseY) {
-						mouseY = mouseY2;
-					} else {
-						if (plot_type == 1) {
-							mouseY_chan = freq_get_channel(mouseY, original_bandwidth, num_chan, centre_freq);
-							mouseY2_chan = freq_get_channel(mouseY2, original_bandwidth, num_chan, centre_freq);
-						} else {
-							mouseY_chan = time_get_channel(mouseY, int_length, num_subints, scale);
-							mouseY2_chan = time_get_channel(mouseY2, int_length, num_subints, scale);
-						}
+          zoomed = true;
 
-						if ((mouseY_chan - mouseY2_chan < -1) || (mouseY_chan - mouseY2_chan > 1)) {
-							zoomed = true;
-							if (plot_type == 1) {
-								freq_fui->set_value("y:win", join_option(mouseY, mouseY2, original_bandwidth, plot_type));
-								redraw(mod_archive, freq_orig_plot, freq_mod_plot, zoomed);
-							} else {
-								time_fui->set_value("y:win", join_option(mouseY, mouseY2, bandwidth, plot_type));
-								redraw(mod_archive, time_orig_plot, time_mod_plot, zoomed);
-							}
-						}
-						mouseY = 0;
-					}
-				}
-				break;
+          // store the current range so it can be restored if the user selects
+          // a zoom region too small
+          const RangeType old_ranges = ranges;
+          bool horizontal = plot_type == 2 ? false : true;
+          ranges = get_range(mouse_ref, mouse, ranges, horizontal);
 
+          // ignore mouse clicks if the index values are too close (< 1)
+          if (ranges.first == ranges.second) {
+            mouse_ref = ZERO_PAIR;
+            ranges = old_ranges;
+            continue;
+          }
+
+          const unsigned max_value = get_max_value(base_archive, plot_type);
+          const string zoom_option =
+            get_zoom_option(ranges.first, ranges.second, max_value);
+
+          switch (plot_type) {
+            case 0: // time
+              time_fui->set_value("y:range", zoom_option);
+              redraw(mod_archive, time_orig_plot, time_mod_plot, true);
+              break;
+            case 1: // freq
+              freq_fui->set_value("y:range", zoom_option);
+              freq_redraw(mod_archive, base_archive, freq_orig_plot,
+                  freq_mod_plot, true);
+              break;
+            case 2: // subint
+              subint_fui->set_value("x:range", zoom_option);
+              redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
+              break;
+          }
+          mouse_ref = ZERO_PAIR;
+        }
+        break; // case 'A'
 		case 'h':
 		  usage();
 		  break;
 
-			case 'b': // plot specific subint
-				if (plot_type == 0) {
-					//centered = false;
-					zoomed = false;
-					mouseX = 0;
-					plot_type = 2;
-					*mod_archive = *base_archive;
-					mod_archive->set_dispersion_measure(0);
-					mod_archive->fscrunch();
-					mod_archive->pscrunch();
-					mod_archive->remove_baseline();
-					subint = time_get_channel(mouseY2, int_length, num_subints, scale);
+    case 'b': // plot specific subint
+      if (plot_type == 0) {
+        plot_type = 2;
+        zoomed = false;
+        mouse_ref = ZERO_PAIR;
 
-					char add[3];
-					sprintf(add, "%d", subint);
-					string subint_option = "subint=";
-					subint_option += add;
+        *mod_archive = *base_archive;
+        mod_archive->set_dispersion_measure(0);
+        mod_archive->fscrunch();
+        mod_archive->pscrunch();
+        mod_archive->remove_baseline();
 
-					subint_orig_plot->configure(subint_option);
-					subint_mod_plot->configure(subint_option);
+        subint = get_indexed_value(mouse);
 
-					cpgeras();
-					subint_orig_plot->plot(mod_archive);
-					update_total(scrunched_archive, base_archive, total_plot);
-				}
-					break;
+        ranges.first = 0;
+        ranges.second = get_max_value(base_archive, plot_type);
+
+        char add[3];
+        sprintf(add, "%d", subint);
+        string subint_option = "subint=";
+        subint_option += add;
+
+        subint_orig_plot->configure(subint_option);
+        subint_mod_plot->configure(subint_option);
+
+        cpgeras();
+        subint_orig_plot->plot(mod_archive);
+        update_total(scrunched_archive, base_archive, total_plot);
+      }
+      break;
 
 			/*case 'c': // center pulse
 				set_centre(mod_archive, base_archive, centered, plot_type, dedispersed);
@@ -317,29 +335,28 @@ int main(int argc, char* argv[]) try
 				break;
 
 			case 'f': // frequency plot
-				mouseY = 0;
 				plot_type = 1;
+        ranges.first = 0;
+        ranges.second = get_max_value(base_archive, plot_type);
 				zoomed = false;
 				freq_redraw(mod_archive, base_archive, freq_orig_plot, freq_mod_plot, zoomed);
 				break;
 
-                case 'm':
+      case 'm':
+        if (plot_type != 2) {
+          cerr << "pazi: can only mow lawn of subint" << endl;
+          continue;
+        }
 
-                  if (plot_type != 2) {
-                    cerr << "pazi: can only mow lawn of subint" << endl;
-                    continue;
-                  }
-		  
-		  cerr << "pazi: mowing lawn" << endl;
-                  mowlawn (mod_archive, base_archive, subint);
+        cerr << "pazi: mowing lawn" << endl;
+        mowlawn (mod_archive, base_archive, subint);
 
-		  cerr << "pazi: replotting" << endl;
-                  redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
-		  cerr << "pazi: updating total" << endl;
-                  update_total(scrunched_archive, base_archive, total_plot);
-                  mouseX = 0;
+        cerr << "pazi: replotting" << endl;
+        redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
+        cerr << "pazi: updating total" << endl;
+        update_total(scrunched_archive, base_archive, total_plot);
 
-                  break;
+        break;
 
 			case 'o': // toggle frequency scrunching on/off
 				if (plot_type == 0) {
@@ -364,135 +381,162 @@ int main(int argc, char* argv[]) try
 
 			case 'r': // reset zoom
 				zoomed = false;
-				mouseY = 0;
-				mouseX = 0;
+        ranges.first = 0;
+        ranges.second = get_max_value(base_archive, plot_type);
 
-				if (plot_type == 1)
-					redraw(mod_archive, freq_orig_plot, freq_mod_plot, zoomed);
-				else if (plot_type == 0)
-					redraw(mod_archive, time_orig_plot, time_mod_plot, zoomed);
-				else {
-					upper_range = base_archive->get_nbin() - 1;
-					lower_range = 0;
-					redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
-				}
-				break;
+        switch (plot_type) {
+          case 0:
+            redraw(mod_archive, time_orig_plot, time_mod_plot, zoomed);
+            break;
+          case 1:
+            freq_redraw(mod_archive, base_archive, freq_orig_plot,
+                freq_mod_plot, true);
+            break;
+          case 2:
+            redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
+            break;
+        }
+        break;
 
-			case 's': {// save current archive changes
-				Pulsar::ProcHistory* ext = base_archive->get<Pulsar::ProcHistory>();
-                if (ext)
-                    ext->set_command_str("pazi");
+      case 's': // save current archive changes:
+        {
+          Pulsar::ProcHistory* ext = base_archive->get<Pulsar::ProcHistory>();
+          if (ext) {
+            ext->set_command_str("pazi");
+          }
 
-				base_archive->unload(write_filename);
-				break;
-			}
+          base_archive->unload(write_filename);
+          break;
+        }
 
-			case 't': // time plot
-				mouseY = 0;
+      case 't': // time plot
 				plot_type = 0;
+        ranges.first = 0;
+        ranges.second = get_max_value(base_archive, plot_type);
 				zoomed = false;
 				time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot, zoomed);
 				break;
 
-			case 'u': // undo last change
-				if (mouseY) {
-					mouseY = 0;
-				} else {
-					if (plot_type == 1) {
-						remove_channel(freq_get_channel(mouseY2, bandwidth, num_chan, centre_freq), channels_to_zap);
-						freq_unzap_chan(base_archive, backup_archive, freq_get_channel(mouseY2, bandwidth, num_chan, centre_freq));
-						freq_redraw(mod_archive, base_archive, freq_orig_plot, freq_mod_plot, zoomed);
-					} else if (plot_type == 0) {
-						remove_channel(time_get_channel(mouseY2, int_length, num_subints, scale), subints_to_zap);
-						time_unzap_subint(base_archive, backup_archive, time_get_channel(mouseY2, int_length, num_subints, scale));
-						time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot, zoomed);
-					} else { // this most likely doesn't work as desired...
-						if (bins_to_zap.size()) { 
-							bins_to_zap.erase(bins_to_zap.end() - 5, bins_to_zap.end());
+      case 'u': // undo last change
+        if (mouse_ref != ZERO_PAIR) {
+          mouse_ref = ZERO_PAIR;
+          continue;
+        }
 
-							*base_archive = *backup_archive;
-							*mod_archive = *backup_archive;
+        switch (plot_type) {
+          case 0:
+            {
+              const unsigned value = get_indexed_value(mouse);
+              remove_channel(value, subints_to_zap);
+              time_unzap_subint(base_archive, backup_archive, value);
+              time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot, zoomed);
+            }
+            break;
+          case 1:
+            {
+            const unsigned value = get_indexed_value(mouse);
+            remove_channel(value, channels_to_zap);
+            freq_unzap_chan(base_archive, backup_archive, value);
+            freq_redraw(mod_archive, base_archive, freq_orig_plot, freq_mod_plot, true);
+            }
+            break;
+          case 2:
+            if (bins_to_zap.size()) { 
+              bins_to_zap.erase(bins_to_zap.end() - 5, bins_to_zap.end());
 
-							mod_archive->set_dispersion_measure(0);
-							mod_archive->pscrunch();
-							mod_archive->fscrunch();
-							mod_archive->remove_baseline();
-							redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
-						}
-					}
-				}
-				update_total(scrunched_archive, base_archive, total_plot);
-				break;
+              *base_archive = *backup_archive;
+              *mod_archive = *backup_archive;
 
-            case 'X': // zap single channel
-				if (mouseY || mouseX) {
-					mouseY = 0;
-					mouseX = 0;
-				} else {
-					*backup_archive = *base_archive;
-
-					if (plot_type == 1) {
-						add_channel(freq_get_channel(mouseY2, bandwidth, num_chan, centre_freq), channels_to_zap);
-						freq_zap_chan(base_archive, freq_get_channel(mouseY2, bandwidth, num_chan, centre_freq));
-						freq_redraw(mod_archive, base_archive, freq_orig_plot, freq_mod_plot, zoomed);
-
-					} else if (plot_type == 0) {
-						add_channel(time_get_channel(mouseY2, int_length, num_subints, scale), subints_to_zap);
-						time_zap_subint(base_archive, time_get_channel(mouseY2, int_length, num_subints, scale));
-						time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot, zoomed);
-
-          } else {
-            if ((upper_range + 1 == static_cast<int>(base_archive->get_nbin()) &&
-                  (upper_range - 1 - lower_range > 0)) ||
-                (upper_range + 1 != static_cast<int>(base_archive->get_nbin()) &&
-                 upper_range - lower_range > 0)) {
-              int bin = (int)(mouseX2 * num_bins);
-              binzap(mod_archive, base_archive, subint, lower_range, upper_range, bin, bin+1);
+              mod_archive->set_dispersion_measure(0);
+              mod_archive->pscrunch();
+              mod_archive->fscrunch();
+              mod_archive->remove_baseline();
               redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
             }
-          }
-          update_total(scrunched_archive, base_archive, total_plot);
+            break;
         }
+        update_total(scrunched_archive, base_archive, total_plot);
 				break;
 
+      case 'X': // zap single channel
+        if (mouse_ref != ZERO_PAIR) {
+          mouse_ref = ZERO_PAIR;
+          continue;
+        }
+
+        *backup_archive = *base_archive;
+
+        switch (plot_type) {
+          case 0:
+            {
+              const unsigned value = get_indexed_value(mouse);
+              time_zap_subint(base_archive, value);
+              time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot, zoomed);
+              break;
+            }
+          case 1:
+            {
+              const unsigned value = get_indexed_value(mouse);
+              freq_zap_chan(base_archive, value);
+              freq_redraw(mod_archive, base_archive, freq_orig_plot, freq_mod_plot, true);
+              break;
+            }
+          case 2: // subint
+            {
+              const unsigned value = get_subint_indexed_value(mouse);
+              zap_bin(mod_archive, base_archive, subint, value);
+              redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
+              break;
+            }
+        }
+
+        update_total(scrunched_archive, base_archive, total_plot);
+        break;
 			case 'z': // zap multiple channels
-				if (plot_type == 2) {
-					if (mouseX) {
-						binzap(mod_archive, base_archive, subint, lower_range, upper_range, (int)(mouseX * num_bins), (int)(mouseX2 * num_bins));
-						redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
-						update_total(scrunched_archive, base_archive, total_plot);
-						mouseX = 0;
-					}
+        if (mouse_ref == ZERO_PAIR) {
+          continue;
+        }
 
-				} else {
+        *backup_archive = *base_archive;
 
-				*backup_archive = *base_archive;
+        bool horizontal = plot_type == 2 ? false : true;
+        RangeType range_to_zap = get_range(mouse_ref, mouse, ranges, horizontal);
 
-					if (mouseY) {
-						if (plot_type == 1) {
-							freq_get_limits(lower_channel, upper_channel, mouseY, mouseY2, bandwidth, num_chan, centre_freq);
+        switch (plot_type) {
+          case 0: // time
+            {
+              for (unsigned i = range_to_zap.first; i <= range_to_zap.second; ++i) {
+                time_zap_subint(base_archive, i);
+              }
 
-							for (int i = lower_channel; i <= upper_channel; i++) {
-								channels_to_zap.push_back(i);
-								freq_zap_chan(base_archive, i);
-							}
-							freq_redraw(mod_archive, base_archive, freq_orig_plot, freq_mod_plot, zoomed);
+              time_redraw(mod_archive, base_archive, time_orig_plot,
+                  time_mod_plot, zoomed);
+            }
+            break;
+          case 1: // freq
+            {
+              for (unsigned i = range_to_zap.first; i <= range_to_zap.second; ++i) {
+                freq_zap_chan(base_archive, i);
+              }
 
-						} else {
-							time_get_limits(lower_channel, upper_channel, mouseY, mouseY2, int_length, num_subints, scale);
+              freq_redraw(mod_archive, base_archive, freq_orig_plot,
+                  freq_mod_plot, zoomed);
+            }
+            break;
+          case 2:
+            {
+              for (unsigned i = range_to_zap.first; i <= range_to_zap.second; ++i) {
+                zap_bin(mod_archive, base_archive, subint, i);
+              }
 
+              redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
+            }
+            break;
+        }
 
-							for (int i = lower_channel; i <= upper_channel; i++) {
-								subints_to_zap.push_back(i);
-								time_zap_subint(base_archive, i);
-							}
-							time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot, zoomed);
-						}
-						mouseY = 0;
-					}
-				}
-				update_total(scrunched_archive, base_archive, total_plot);
-				break;
+        mouse_ref = ZERO_PAIR;
+        update_total(scrunched_archive, base_archive, total_plot);
+        break;
 		}
 	} while (ch != 'q');
 
@@ -505,85 +549,96 @@ catch (Error& error) {
   return -1;
 }
 
-
-int freq_get_channel(float mouseY, double bandwidth, int num_chans, double centre_freq)
+// ensure p.first < p.second
+void reorder_ranges(RangeType& p, bool normal)
 {
-	double channel = ((mouseY - centre_freq - (bandwidth / 2)) / bandwidth) * num_chans;
-	if (channel < 0)
-		channel = channel * -1;
-	return num_chans - (int)channel - 1;
+    if (p.first > p.second) {
+      std::swap(p.first, p.second);
+    }
 }
 
-int time_get_channel(float mouseY, double int_length, int num_subints, string scale)
+unsigned get_indexed_value(const MouseType& mouse)
 {
-	if (scale == "days")
-		return (int)((mouseY * 60 * 60 * 24) / int_length * num_subints);
-	else if (scale == "hours")
-		return (int)((mouseY * 60 * 60) / int_length * num_subints);
-	else if (scale == "minutes")
-		return (int)((mouseY * 60) / int_length * num_subints);
-	else
-		return (int)(mouseY / int_length * num_subints);
+  return static_cast<unsigned>(mouse.second *
+      float(ranges.second - ranges.first) + ranges.first);
 }
 
-string join_option(float y, float y2, double bandwidth, int type)
+unsigned get_subint_indexed_value(const MouseType& mouse)
+{
+  return static_cast<unsigned>(mouse.first *
+      float(ranges.second - ranges.first) + ranges.first);
+}
+
+RangeType get_range(const MouseType& mouse_ref, const MouseType& mouse,
+    const RangeType& ranges, const bool horizontal)
+{
+  RangeType new_ranges;
+
+  const MouseType mouse_values = horizontal ?
+    make_pair(mouse_ref.second, mouse.second) :
+    make_pair(mouse_ref.first, mouse.first);
+
+  new_ranges.first = static_cast<unsigned>(mouse_values.first *
+      float(ranges.second - ranges.first) + ranges.first);
+
+  new_ranges.second = static_cast<unsigned>(mouse_values.second *
+      float(ranges.second - ranges.first) + ranges.first);
+
+  reorder_ranges(new_ranges, positive_direction);
+
+  return new_ranges;
+}
+
+unsigned get_max_value(const Pulsar::Archive* archive, const int plot_type)
+{
+  switch (plot_type) {
+    case 0:
+      return archive->get_nsubint();
+    case 1:
+      return archive->get_nchan();
+    case 2:
+      return archive->get_nbin();
+    default:
+      // throw something
+      return 0;
+  }
+}
+
+// pre: y < y2
+string get_zoom_option(const unsigned bottom_range, const unsigned top_range,
+    const unsigned max_value)
 {
 	string option = "(";
 	char add[5];
-	if ((type == 0 && y > y2) || (type == 1 && y > y2 && bandwidth > 0) || (type == 1 && y < y2 && bandwidth < 0)) {
-		sprintf(add, "%2.2f", y2);
-		option += add;
-		option += ",";
-		sprintf(add, "%2.2f", y);
-		option += add;
-		option += ")";
-	} else {
-		sprintf(add, "%2.2f", y);
-		option += add;
-		option += ",";
-		sprintf(add, "%2.2f", y2);
-		option += add;
-		option += ")";
-	}
+
+  const float bottom = static_cast<float>(bottom_range) /
+     static_cast<float>(max_value);
+
+  const float top = static_cast<float>(top_range) /
+     static_cast<float>(max_value);
+
+  sprintf(add, "%2.2f", bottom);
+  option += add;
+  option += ",";
+  sprintf(add, "%2.2f", top);
+  option += add;
+  option += ")";
+
 	return option;
 }
 
-string vertical_join_option(float x, float x2, int &upper_chan, int &lower_chan, int num_bins)
-{
-	string option = "(";
-	char add[3];
-	if (x > x2) {
-		sprintf(add, "%2.2f", x2);
-		option += add;
-		option += ",";
-		sprintf(add, "%2.2f", x);
-		option += add;
-		option += ")";
-		upper_chan = (int)(x * num_bins);
-		lower_chan = (int)(x2 * num_bins);
-	} else {
-		sprintf(add, "%2.2f", x);
-		option += add;
-		option += ",";
-		sprintf(add, "%2.2f", x2);
-		option += add;
-		option += ")";
-		upper_chan = (int)(x2 * num_bins);
-		lower_chan = (int)(x * num_bins);
-	}
-	return option;
-}
-
-void freq_zap_chan(Pulsar::Archive* arch, int zap_chan)
+void freq_zap_chan(Pulsar::Archive* arch, const unsigned zap_chan)
 {
   const unsigned npol = arch->get_npol();
   const unsigned nsubint = arch->get_nsubint();
   const unsigned nchan = arch->get_nchan();
 
+  add_zapped_value(zap_chan, channels_to_zap);
+
 	for (unsigned ipol = 0; ipol < npol; ++ipol) {
 		for (unsigned isub = 0; isub < nsubint; ++isub) {
 			for (unsigned ichan = 0; ichan < nchan; ++ichan) {
-				if (ichan == static_cast<unsigned>(zap_chan)) {
+				if (ichan == zap_chan) {
 					arch->get_Profile(isub, ipol, ichan)->set_weight(0);
 				}
 			}
@@ -591,14 +646,16 @@ void freq_zap_chan(Pulsar::Archive* arch, int zap_chan)
 	}
 }
 
-void time_zap_subint(Pulsar::Archive* arch, int zap_subint)
+void time_zap_subint(Pulsar::Archive* archive, const unsigned subint)
 {
-  const unsigned npol = arch->get_npol();
-  const unsigned nchan = arch->get_nchan();
+  add_zapped_value(subint, subints_to_zap);
+
+  const unsigned npol = archive->get_npol();
+  const unsigned nchan = archive->get_nchan();
 
 	for (unsigned ipol = 0; ipol < npol; ++ipol) {
 		for (unsigned ichan = 0; ichan < nchan; ++ichan) {
-			arch->get_Profile(zap_subint, ipol, ichan)->set_weight(0);
+			archive->get_Profile(subint,ipol,ichan)->set_weight(0);
 		}
 	}
 }
@@ -701,30 +758,15 @@ void update_total(Pulsar::Archive* arch, Pulsar::Archive* old_arch, Plot* plot)
 	cpgslct(1);
 }
 
-void freq_get_limits(int &lower_chan, int &upper_chan, float mouseY, float mouseY2, double bandwidth, int num_chan, double centre_freq)
+bool add_zapped_value(const unsigned value, vector<int>& zapped_values)
 {
-	lower_chan = freq_get_channel(mouseY, bandwidth, num_chan, centre_freq);
-	upper_chan = freq_get_channel(mouseY2, bandwidth, num_chan, centre_freq);
-
-	if (upper_chan < lower_chan)
-		swap_chans(upper_chan, lower_chan);
+  if (!is_zapped(zapped_values, value)) {
+    zapped_values.push_back(value);
+    return true;
+  }
+  return false;
 }
 
-void time_get_limits(int &lower_chan, int &upper_chan, float mouseY, float mouseY2, double int_length, int num_subints, string scale)
-{
-	lower_chan = time_get_channel(mouseY, int_length, num_subints, scale);
-	upper_chan = time_get_channel(mouseY2, int_length, num_subints, scale);
-
-	if (upper_chan < lower_chan)
-		swap_chans(upper_chan, lower_chan);
-}
-
-void swap_chans(int &chan1, int &chan2)
-{
-	int temp = chan1;
-	chan1 = chan2;
-	chan2 = temp;
-}
 
 bool add_channel(int chan, vector<int>& delete_channels)
 {
@@ -837,24 +879,8 @@ void set_dedispersion(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &de
 	}
 }*/
 
-string get_scale(Pulsar::Archive* arch)
-{
-	double range = (arch->end_time() - arch->start_time()).in_days();
-
-	const float mjd_hours = 1.0 / 24.0;
-	const float mjd_minutes = mjd_hours / 60.0;
-
-	if (range > 1.0)
-		return "days";
-	else if (range > mjd_hours)
-		return "hours";
-	else if (range > mjd_minutes)
-		return "minutes";
-	else
-		return "seconds";
-}
-
-void binzap(Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint, int lower_range, int upper_range, int lower_bin, int upper_bin)
+void zap_bin(Pulsar::Archive* arch, Pulsar::Archive* old_arch, const unsigned subint,
+    const unsigned bin)
 {
   const unsigned npol = old_arch->get_npol();
   const unsigned nchan = old_arch->get_nchan();
@@ -866,18 +892,9 @@ void binzap(Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint, int lo
         old_arch->get_Profile(subint,ipol,ichan)->baseline()->get_mean().get_value();
 
       float* bins = old_arch->get_Profile(subint,ipol,ichan)->get_amps();
-
-      for (int ibin = lower_bin; ibin < upper_bin; ++ibin) {
-        bins[ibin] = baseline_mean;
-      }
+      bins[bin] = baseline_mean;
     }
   }
-
-	bins_to_zap.push_back(subint);
-	bins_to_zap.push_back(lower_range);
-	bins_to_zap.push_back(upper_range);
-	bins_to_zap.push_back(lower_bin);
-	bins_to_zap.push_back(upper_bin);
 
 	*arch = *old_arch;
 	arch->set_dispersion_measure(0);
