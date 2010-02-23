@@ -69,8 +69,7 @@ void usage()
     "See "PSRCHIVE_HTTP"/manuals/pazi for more details\n" << endl;
 }
 
-string get_zoom_option(const unsigned bottom_range, const unsigned top_range,
-    const unsigned max_value);
+string get_zoom_option(const RangeType& ranges, const unsigned max_value);
 
 RangeType get_range(const MouseType& mouse_ref, const MouseType& mouse,
     const RangeType& ranges, const bool horizontal);
@@ -237,7 +236,6 @@ int main(int argc, char* argv[]) try
             continue;
           }
 
-          zoomed = true;
 
           // store the current range so it can be restored if the user selects
           // a zoom region too small
@@ -252,19 +250,20 @@ int main(int argc, char* argv[]) try
             continue;
           }
 
+          zoomed = true;
+
           const unsigned max_value = get_max_value(base_archive, plot_type);
-          const string zoom_option =
-            get_zoom_option(ranges.first, ranges.second, max_value);
+          const string zoom_option = get_zoom_option(ranges, max_value);
 
           switch (plot_type) {
             case 0: // time
               time_fui->set_value("y:range", zoom_option);
-              redraw(mod_archive, time_orig_plot, time_mod_plot, true);
+              redraw(mod_archive, time_orig_plot, time_mod_plot, zoomed);
               break;
             case 1: // freq
               freq_fui->set_value("y:range", zoom_option);
               freq_redraw(mod_archive, base_archive, freq_orig_plot,
-                  freq_mod_plot, true);
+                  freq_mod_plot, zoomed);
               break;
             case 2: // subint
               subint_fui->set_value("x:range", zoom_option);
@@ -390,7 +389,7 @@ int main(int argc, char* argv[]) try
             break;
           case 1:
             freq_redraw(mod_archive, base_archive, freq_orig_plot,
-                freq_mod_plot, true);
+                freq_mod_plot, zoomed);
             break;
           case 2:
             redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
@@ -429,7 +428,8 @@ int main(int argc, char* argv[]) try
               const unsigned value = get_indexed_value(mouse);
               remove_channel(value, subints_to_zap);
               time_unzap_subint(base_archive, backup_archive, value);
-              time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot, zoomed);
+              time_redraw(mod_archive, base_archive, time_orig_plot,
+                  time_mod_plot, zoomed);
             }
             break;
           case 1:
@@ -437,11 +437,12 @@ int main(int argc, char* argv[]) try
             const unsigned value = get_indexed_value(mouse);
             remove_channel(value, channels_to_zap);
             freq_unzap_chan(base_archive, backup_archive, value);
-            freq_redraw(mod_archive, base_archive, freq_orig_plot, freq_mod_plot, true);
+            freq_redraw(mod_archive, base_archive, freq_orig_plot,
+                freq_mod_plot, zoomed);
             }
             break;
           case 2:
-            if (bins_to_zap.size()) { 
+            if (bins_to_zap.size()) {
               bins_to_zap.erase(bins_to_zap.end() - 5, bins_to_zap.end());
 
               *base_archive = *backup_archive;
@@ -471,14 +472,16 @@ int main(int argc, char* argv[]) try
             {
               const unsigned value = get_indexed_value(mouse);
               time_zap_subint(base_archive, value);
-              time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot, zoomed);
+              time_redraw(mod_archive, base_archive, time_orig_plot, time_mod_plot,
+                  zoomed);
               break;
             }
           case 1:
             {
               const unsigned value = get_indexed_value(mouse);
               freq_zap_chan(base_archive, value);
-              freq_redraw(mod_archive, base_archive, freq_orig_plot, freq_mod_plot, true);
+              freq_redraw(mod_archive, base_archive, freq_orig_plot,
+                  freq_mod_plot, zoomed);
               break;
             }
           case 2: // subint
@@ -499,7 +502,7 @@ int main(int argc, char* argv[]) try
 
         *backup_archive = *base_archive;
 
-        bool horizontal = plot_type == 2 ? false : true;
+        const bool horizontal = plot_type == 2 ? false : true;
         RangeType range_to_zap = get_range(mouse_ref, mouse, ranges, horizontal);
 
         switch (plot_type) {
@@ -550,7 +553,7 @@ catch (Error& error) {
 }
 
 // ensure p.first < p.second
-void reorder_ranges(RangeType& p, bool normal)
+void reorder_ranges(RangeType& p)
 {
     if (p.first > p.second) {
       std::swap(p.first, p.second);
@@ -584,7 +587,7 @@ RangeType get_range(const MouseType& mouse_ref, const MouseType& mouse,
   new_ranges.second = static_cast<unsigned>(mouse_values.second *
       float(ranges.second - ranges.first) + ranges.first);
 
-  reorder_ranges(new_ranges, positive_direction);
+  reorder_ranges(new_ranges);
 
   return new_ranges;
 }
@@ -605,22 +608,21 @@ unsigned get_max_value(const Pulsar::Archive* archive, const int plot_type)
 }
 
 // pre: y < y2
-string get_zoom_option(const unsigned bottom_range, const unsigned top_range,
-    const unsigned max_value)
+string get_zoom_option(const RangeType& ranges, const unsigned max_value)
 {
 	string option = "(";
-	char add[5];
+	char add[10];
 
-  const float bottom = static_cast<float>(bottom_range) /
+  const float bottom = static_cast<float>(ranges.first) /
      static_cast<float>(max_value);
 
-  const float top = static_cast<float>(top_range) /
+  const float top = static_cast<float>(ranges.second) /
      static_cast<float>(max_value);
 
-  sprintf(add, "%2.2f", bottom);
+  sprintf(add, "%2.6f", bottom);
   option += add;
   option += ",";
-  sprintf(add, "%2.2f", top);
+  sprintf(add, "%2.6f", top);
   option += add;
   option += ")";
 
