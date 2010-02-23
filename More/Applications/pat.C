@@ -211,7 +211,7 @@ int main (int argc, char** argv) try
   Pulsar::SmoothSinc* sinc = 0;
 
   string std,gaussFile;
-  string outFormat("parkes"),outFormatFlags;
+  string outFormat(""),outFormatFlags;
   string tname;
 
   double min_phase = 0.0;
@@ -336,7 +336,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.98 2009/11/30 03:15:12 sixbynine Exp $" << endl;
+      cout << "$Id: pat.C,v 1.99 2010/02/23 18:06:51 demorest Exp $" << endl;
       return 0;
 
     case 'K':
@@ -458,7 +458,7 @@ int main (int argc, char** argv) try
     return -1;
   } 
   
-  arrival->set_format (outFormat);
+  if (!outFormat.empty()) arrival->set_format (outFormat);
   arrival->set_format_flags (outFormatFlags);
   arrival->set_attributes (commands);
 
