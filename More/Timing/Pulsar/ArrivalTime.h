@@ -7,13 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ArrivalTime.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/10/13 16:56:57 $
-   $Author: straten $ */
+   $Revision: 1.5 $
+   $Date: 2010/02/23 18:05:55 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_ArrivalTime_h
 #define __Pulsar_ArrivalTime_h
 
+#include "Pulsar/Config.h"
 #include "Pulsar/Algorithm.h"
 #include "Estimate.h"
 #include "toa.h"
@@ -78,6 +79,9 @@ namespace Pulsar {
     Reference::To<const Archive> observation;
     Reference::To<const Archive> standard;
     Reference::To<ShiftEstimator> shift_estimator;
+
+    //! default TOA output format
+    static Option<std::string> default_format;
 
     //! the output TOA format
     Tempo::toa::Format format;

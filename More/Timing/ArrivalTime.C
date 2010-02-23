@@ -17,9 +17,18 @@
 
 using namespace std;
 
+Pulsar::Option<std::string> 
+Pulsar::ArrivalTime::default_format (
+    "ArrivalTime::default_format", "Parkes",
+    "Default TOA line format",
+    "TOAs can be generated in a number of different formats.  Valid choices\n"
+    "are:  Parkes, Princeton, ITOA, Psrclock and Tempo2."
+    );
+
 Pulsar::ArrivalTime::ArrivalTime ()
 {
   format = Tempo::toa::Parkes;
+  set_format(default_format);
   skip_bad = true;
 }
 
