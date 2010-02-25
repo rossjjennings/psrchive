@@ -69,6 +69,8 @@ void usage()
     "See "PSRCHIVE_HTTP"/manuals/pazi for more details\n" << endl;
 }
 
+void constrain_range(float& f);
+
 string get_zoom_option(const RangeType& ranges, const unsigned max_value);
 
 RangeType get_range(const MouseType& mouse_ref, const MouseType& mouse,
@@ -231,6 +233,9 @@ int main(int argc, char* argv[]) try
 		switch (ch) {
       case 'A': // zoom
         {
+          constrain_range(mouse.first);
+          constrain_range(mouse.second);
+
           if (mouse_ref == ZERO_PAIR) { // if position anchor has not been set,
             mouse_ref = mouse; // set it
             continue;
@@ -592,6 +597,16 @@ RangeType get_range(const MouseType& mouse_ref, const MouseType& mouse,
   return new_ranges;
 }
 
+// ensure mouse range [0:1]
+void constrain_range(float& f)
+{
+  if (f < 0.0) {
+    f = 0.0;
+  } else if (f > 1.0) {
+    f = 1.0;
+  }
+}
+
 unsigned get_max_value(const Pulsar::Archive* archive, const int plot_type)
 {
   switch (plot_type) {
@@ -939,7 +954,6 @@ bool accept_mow (Pulsar::Profile* profile, Pulsar::PhaseWeight* weight)
   else
     return false;
 }
-
 
 void mowlawn (Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint)
 {
