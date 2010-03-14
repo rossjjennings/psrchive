@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.43 $
-   $Date: 2010/01/13 07:00:35 $
-   $Author: straten $ */
+   $Revision: 1.44 $
+   $Date: 2010/03/14 21:58:13 $
+   $Author: jonathan_khoo $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -63,8 +63,6 @@ const char PSCRUNCH_KEY         = 'p';
 const char CENTRE_KEY           = 'C';
 const char BSCRUNCH_KEY         = 'B';
 const char STOKES_FRACPOL_KEY   = 'x';
-const char STOKES_FRACLIN_KEY   = 'y';
-const char STOKES_FRACCIR_KEY   = 'z';
 const char STOKES_POSANG_KEY    = 'Z';
 const char CALIBRATOR_KEY       = 'c';
 const char PULSE_WIDTHS_KEY     = 'f';
@@ -114,8 +112,6 @@ bool cal_parameters = false;
 bool keep_baseline = false;
 
 bool show_pol_frac = false;
-bool show_lin_frac = false;
-bool show_circ_frac = false;
 bool show_pa = false;
 bool show_min_max = false;
 
@@ -164,9 +160,7 @@ void Usage( void )
   "   -" << BSCRUNCH_KEY <<       " factor   Bscrunch by this factor first \n"
   "   -" << JOB_KEY <<            " job      Do anything first \n"
   "   -" << JOBS_KEY <<           " script   Do many things first \n"
-  "   -" << STOKES_FRACPOL_KEY << "          Convert to Stokes and also print fraction polarisation \n"
-  "   -" << STOKES_FRACLIN_KEY << "          Convert to Stokes and also print fraction linear \n"
-  "   -" << STOKES_FRACCIR_KEY << "          Convert to Stokes and also print fraction circular \n"
+  "   -" << STOKES_FRACPOL_KEY << "          Convert to Stokes, print fraction polarisation (L & |V| biased corrected) \n"
   "   -" << STOKES_POSANG_KEY <<  "          Convert to Stokes and also print position angle (P.A.) \n"
   "   -" << PA_THRESHOLD_KEY <<   " sigma    Minimum linear polarization for P.A. \n"
   "   -" << CALIBRATOR_KEY <<     "          Print out calibrator (square wave) parameters \n"
@@ -370,22 +364,19 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 			  for(int ipol=0; ipol<npol; ipol++)
 			  {
 			    Profile *p = intg->get_Profile( ipol, c );
-				cout << " " << p->get_amps()[b];
+          cout << " " << p->get_amps()[b];
 			  }
-			  if( show_pol_frac || show_lin_frac || show_circ_frac || show_pa )
+			  if( show_pol_frac ||  show_pa )
 			  {
 				float stokesI = intg->get_Profile(0,c)->get_amps()[b];
 				float stokesQ = intg->get_Profile(1,c)->get_amps()[b];
 				float stokesU = intg->get_Profile(2,c)->get_amps()[b];
 				float stokesV = intg->get_Profile(3,c)->get_amps()[b];
 
-				float frac_lin  = sqrt(stokesQ*stokesQ + stokesU*stokesU)/stokesI;
-				float frac_circ = fabs(stokesV)/stokesI;
+
 				float frac_pol  = sqrt(stokesQ*stokesQ + stokesU*stokesU + stokesV*stokesV)/stokesI;
 
 				if( show_pol_frac )  cout << " " << frac_pol;
-				if( show_lin_frac )  cout << " " << frac_lin;
-				if( show_circ_frac ) cout << " " << frac_circ;
 				if( show_pa ) {
 				  cout << " " << PAs[b].get_value();
 				  cout << " " << sqrt(PAs[b].get_variance());
@@ -497,9 +488,86 @@ void CalParameters( Reference::To< Archive > archive )
     }
 
   }
-
 }
 
+void FracPol(Pulsar::Archive* archive)
+{
+  archive->remove_baseline();
+
+  if (archive->get_state() != Signal::Stokes) {
+    archive->convert_state(Signal::Stokes);
+  }
+
+  cout << "File\t\t\t Sub Chan\t   MJD       Freq\t L/I\t    V/I\t     |V|/I" << endl;
+
+  const char* filename   = archive->get_filename().c_str();
+  const double mjd       = archive->start_time().in_days();
+  const double frequency = archive->get_centre_frequency();
+
+  const unsigned nsubint = archive->get_nsubint();
+  const unsigned nchan   = archive->get_nchan();
+
+  for (unsigned isub = 0; isub < nsubint; ++isub) {
+    for (unsigned ichan = 0; ichan < nchan; ++ichan) {
+      // poln 0 = Stokes I
+      //      1 =        Q
+      //      2 =        U
+      //      3 =        V
+
+      vector<float> I_weights;
+      archive->get_Profile(isub,1,ichan)->baseline()->get_weights(I_weights);
+
+      float* Q_ptr = archive->get_Profile(isub,1,ichan)->get_amps();
+      float* U_ptr = archive->get_Profile(isub,2,ichan)->get_amps();
+      float* V_ptr = archive->get_Profile(isub,3,ichan)->get_amps();
+
+      float L_sum     = 0.0;
+      float V_mod_sum = 0.0;
+
+      const float I_rms =
+        archive->get_Profile(isub,0,ichan)->baseline()->get_rms();
+
+      for (vector<float>::iterator it = I_weights.begin(); it != I_weights.end();
+          ++it) {
+
+        // only sum the bins if it not part of the the stokes I baseline
+        if (!*it) {
+          // L = linear poln intensity = (U*U + Q*Q)^(1/2)
+          const float L = sqrt(pow(*U_ptr, 2) + pow(*Q_ptr, 2));
+          if (L/I_rms >= 1.57) {
+            L_sum += I_rms * sqrt(pow(L/I_rms, 2) - 1);
+          }
+
+          const float V_mod = fabs(*V_ptr);
+          if (V_mod >= I_rms) {
+            V_mod_sum += pow(pow(V_mod, 4) - pow(I_rms, 4), 0.25);
+          }
+        }
+
+        ++Q_ptr;
+        ++U_ptr;
+        ++V_ptr;
+      }
+
+      // off-pulse region
+      const float I_sum =
+        archive->get_Profile(isub,0,ichan)->sum() -
+        archive->get_Profile(isub,0,ichan)->baseline()->get_weighted_sum();
+
+      const float V_sum =
+        archive->get_Profile(isub,3,ichan)->sum() -
+        archive->get_Profile(isub,3,ichan)->baseline()->get_weighted_sum();
+
+      const float L_I     = L_sum / I_sum;
+      const float V_I     = V_sum / I_sum;
+      const float V_mod_I = V_mod_sum / I_sum;
+
+      printf("%s\t%4u %4u %12.3f %10.3f %10.5f %10.5f %10.5f\n",
+        filename, isub, ichan, mjd, frequency, L_I,
+        V_I, V_mod_I);
+    }
+  }
+}
 
 void Flux( Reference::To< Archive > archive )
 {
@@ -960,7 +1028,7 @@ try
   preprocessor->script( jobs );
 
   if( archive->get_state() != Signal::Stokes && 
-      (show_pol_frac || show_lin_frac || show_circ_frac || show_pa ) )
+      (show_pol_frac || show_pa ) )
     archive->convert_state(Signal::Stokes);
 
 
@@ -974,6 +1042,8 @@ try
       Flux( archive );
     if( cmd_flux2 )
       Flux2( archive );
+    if( show_pol_frac )
+      FracPol( archive );
   }
 }
 catch( Error e )
@@ -1033,8 +1103,6 @@ int main( int argc, char *argv[] ) try
   args += CENTRE_KEY;
   args += BSCRUNCH_KEY; args += ':';
   args += STOKES_FRACPOL_KEY;
-  args += STOKES_FRACLIN_KEY;
-  args += STOKES_FRACCIR_KEY;
   args += STOKES_POSANG_KEY;
   args += CALIBRATOR_KEY;
   args += BASELINE_KEY;
@@ -1137,12 +1205,6 @@ int main( int argc, char *argv[] ) try
     case STOKES_FRACPOL_KEY:
       show_pol_frac = true;
       break;
-    case STOKES_FRACLIN_KEY:
-      show_lin_frac = true;
-      break;
-    case STOKES_FRACCIR_KEY:
-      show_circ_frac = true;
-      break;
     case STOKES_POSANG_KEY:
       show_pa = true;
       break;
@@ -1203,7 +1265,8 @@ int main( int argc, char *argv[] ) try
   if( cmd_snr )
     PrintSNR( filenames );
 
-  if( cal_parameters || cmd_text || cmd_flux || cmd_flux2 || show_min_max )
+  if( cal_parameters || cmd_text || cmd_flux || cmd_flux2 || show_min_max ||
+      show_pol_frac )
   {
     for_each( filenames.begin(), filenames.end(), ProcessArchive );
   }
