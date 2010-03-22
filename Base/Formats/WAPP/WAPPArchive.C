@@ -14,6 +14,7 @@
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Backend.h"
 #include "Pulsar/ObsExtension.h"
+#include "Pulsar/FITSSUBHdrExtension.h"
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Arecibo.h"
 
@@ -636,6 +637,10 @@ void Pulsar::WAPPArchive::load_extensions()
   else if (rcode=="cb") Arecibo::C_band(r);
   else r->set_name(rcode);
   // TODO : figure out hybrid field in hdr
+
+  // FITSUBHdr
+  FITSSUBHdrExtension *fs = getadd<FITSSUBHdrExtension>();
+  fs->set_tsamp(hdr->samp_time*1e-6);
 
 }
 
