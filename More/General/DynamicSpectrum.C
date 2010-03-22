@@ -107,7 +107,7 @@ void Pulsar::DynamicSpectrum::compute()
     for (int ichan=0; ichan<nchan; ichan++) {
       Reference::To<const Profile> p = i->get_Profile(0,ichan);
       Estimate<double> e(0.0,0.0);
-      if (p->get_weight()>0.0) e = flux->get_flux(p);
+      if (p->get_weight()!=0.0) e = flux->get_flux(p);
       ds_data[idx(ichan,isub)] = e.get_value();
       ds_data_err[idx(ichan,isub)] = e.get_error();
       if (ichan==0 && isub==0) { ds_max=ds_min=e.get_value(); }
