@@ -155,6 +155,10 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   if (!standard)
     return;
 
+#ifdef _DEBUG
+  cerr << "Pulsar::PolnProfileFit::set_standard set profile" << endl;
+#endif
+
   if (regions_set)
     standard_data->set_profile (standard);
   else
@@ -164,6 +168,10 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 
   // number of complex phase bins in Fourier domain
   unsigned std_harmonic = standard->get_nbin() / 2;
+
+#ifdef _DEBUG
+  cerr << "Pulsar::PolnProfileFit::set_standard max harmonic" << endl;
+#endif
 
   if (choose_maximum_harmonic)
   {
@@ -187,15 +195,31 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 	   << std_harmonic << " harmonics" << endl;
   }
 
+#ifdef _DEBUG
+  cerr << "Pulsar::PolnProfileFit::set_standard create ReceptionModel" << endl;
+#endif
+
   equation = new Calibration::ReceptionModel;
 
   // equation->set_fit_debug( fit_debug );
 
+#ifdef _DEBUG
+  cerr << "Pulsar::PolnProfileFit::set_standard created" << endl;
+#endif
+
   if (manage_equation_transformation)
   {
+#ifndef _DEBUG
+    if (verbose)
+#endif
+      cerr << "Pulsar::PolnProfileFit::set_standard init transformation" << endl;
     // initialize the model transformation
     equation->set_transformation (transformation);
   }
+
+#ifdef _DEBUG
+  cerr << "Pulsar::PolnProfileFit::set_standard resize " << n_harmonic - 1 << endl;
+#endif
 
   uncertainty.resize (n_harmonic - 1);
 
@@ -203,10 +227,18 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 
   for (unsigned ibin=1; ibin<n_harmonic; ibin++)
   {
+#ifdef _DEBUG
+    cerr << "Pulsar::PolnProfileFit::set_standard ibin=" << ibin << endl;
+#endif
+
     Stokes< complex<double> > standard_value;
 
     valvar( standard_data->get_stokes(ibin),
 	    standard_value, standard_variance );
+
+#ifdef _DEBUG
+    cerr << "Pulsar::PolnProfileFit::set_standard create Constant" << endl;
+#endif
 
     // each complex phase bin of the standard is treated as a known constant
     MEAL::Complex2Constant* jones;
@@ -217,6 +249,8 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 
     if (transformation)
       uncertainty[ibin-1]->set_transformation (transformation);
+
+    DEBUG("Pulsar::PolnProfileFit::set_standard set things" << ibin);
 
     if (phases)
     {
