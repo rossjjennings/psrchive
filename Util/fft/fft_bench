@@ -71,7 +71,7 @@ while test $nfft -le 16777216; do
 
   echo -n "Testing nfft=$nfft "
   
-  time fft_speed $library $cache -t$nthread -n$nfft >> fft_bench.out
+  time ./fft_speed $library $cache -t$nthread -n$nfft >> fft_bench.out
 
   nfft=`expr $nfft '*' 2`
 
