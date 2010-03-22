@@ -9,7 +9,7 @@ bin_SCRIPTS = psrhelp
 EXTRA_DIST = psrhelp
 
 bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
-	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability
+	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux
 
 pam_SOURCES = pam.C
 
@@ -19,6 +19,8 @@ pat_LDADD = $(LDADD) @PTHREAD_LIBS@
 paz_SOURCES = paz.C zap_periodic_spikes.C
 
 psradd_SOURCES = psradd.C
+
+psrflux_SOURCES = psrflux.C
 
 psrsh_SOURCES = psrsh.C
 psrsh_LDADD = $(LDADD) @READLINE_LIBS@
