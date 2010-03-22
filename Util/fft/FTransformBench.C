@@ -142,6 +142,11 @@ FTransform::Bench::Entry FTransform::Bench::get_best (unsigned nfft) const
     entry.nfft = nfft;
     entry.cost = theoretical (nfft);
   }
+  else if (nfft > max_nfft)
+  {
+    entry.library += "+theory";
+    entry.cost *= theoretical (nfft) / theoretical (max_nfft);
+  }
 
   if (verbose)
     cerr << "FTransform::Bench::get_best lib=" << entry.library
