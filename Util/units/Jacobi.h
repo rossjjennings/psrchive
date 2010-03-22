@@ -7,18 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jacobi.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/06 21:13:55 $
-   $Author: straten $ */
+   $Revision: 1.10 $
+   $Date: 2010/03/22 15:22:42 $
+   $Author: demorest $ */
 
 #ifndef __Jacobi_H
 #define __Jacobi_H
 
 #include "Matrix.h"
 #include "Quaternion.h"
-
-double real (double x) { return x; }
-double conj (double x) { return x; }
 
 template <typename T>
 T norm (T x) { return fabs(x); }
