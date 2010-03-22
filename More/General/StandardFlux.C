@@ -8,6 +8,7 @@
 #include "Pulsar/StandardFlux.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProfileShiftFit.h"
+#include "Pulsar/PhaseWeight.h"
 
 #include <math.h>
 
@@ -28,8 +29,9 @@ void Pulsar::StandardFlux::set_standard(const Profile *p)
   psf.set_standard(const_cast<Profile *>(stdprof.get()));
   psf.set_nharm(stdprof->get_nbin()/4);
   psf.set_error_method(ProfileShiftFit::Traditional_Chi2);
-  // TODO: compute correct scale factor
-  stdfac = 1.0;
+  Reference::To<PhaseWeight> base = stdprof->baseline();
+  stdfac = stdprof->sum()/(double)stdprof->get_nbin() 
+    - base->get_mean().get_value();
 }
 
 Estimate<double> Pulsar::StandardFlux::get_flux(const Profile *p)
