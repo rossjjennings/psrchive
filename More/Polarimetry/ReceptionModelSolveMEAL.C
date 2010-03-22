@@ -111,13 +111,13 @@ void Calibration::SolveMEAL::fit ()
   if (Calibration::ReceptionModel::verbose)
     cerr << "Calibration::SolveMEAL::fit compute initial fit" << endl;
 
-  try {
+  try
+  {
     best_chisq = fit.init (get_data(), fake, *equation);
   }
   catch (Error& error)
   {
-    error << "\n\t" "init";
-    throw error += "Calibration::SolveMEAL::fit";
+    throw error += "Calibration::SolveMEAL::fit (init)";
   }
 
   fit.lamda = 1e-5;
