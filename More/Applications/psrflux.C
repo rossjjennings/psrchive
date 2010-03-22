@@ -45,6 +45,9 @@ public:
   //! Standard archive
   Reference::To<Archive> stdarch;
 
+  //! Setup to use the given file as a standard
+  void set_standard(Archive *arch);
+
 protected:
 
   //! Add command line options
@@ -72,32 +75,41 @@ void psrflux::add_options (CommandLine::Menu& menu)
 
 }
 
-void psrflux::setup ()
+void psrflux::set_standard(Archive *arch)
 {
-
-  // We need a standard for now.  Eventually different methods
-  // will be allowed.
-  if (stdfile=="") 
-    throw Error(InvalidState, "psrflux", 
-        "No standard specified");
-
-  // Load std
-  stdarch = Archive::load(stdfile);
+  // Convert
+  stdarch = arch->total();
   stdarch->convert_state(Signal::Intensity);
-  stdarch->total();
 
   // Set up DS calculation
   Reference::To<StandardFlux> flux = new StandardFlux;
   flux->set_standard(stdarch->get_Profile(0,0,0));
   ds.set_flux_method(flux);
-  
+}
+
+void psrflux::setup ()
+{
+
+  // If a standard was given, load it.  Otherwise compute a standard
+  // from each input file (with warning).
+  if (stdfile != "") {
+    Reference::To<Archive> arch = Archive::load(stdfile);
+    set_standard(arch);
+  } else {
+    cerr 
+      << "psrflux: No standard given, will \"self-standard\" each file."
+      << endl;
+  }
+
 }
 
 void psrflux::process (Pulsar::Archive* archive)
 {
-
   // Convert to total intensity
   archive->convert_state(Signal::Intensity);
+
+  // Set self-standard if needed
+  if (stdfile=="") set_standard(archive);
 
   // Compute DS
   ds.set_Archive(archive);
@@ -105,7 +117,7 @@ void psrflux::process (Pulsar::Archive* archive)
 
   // Unload archive with .sm extension
   std::string outf = archive->get_filename() + "." + ext;
-  cout << "Unloading " << outf << endl;
+  cerr << "psrflux: unloading " << outf << endl;
   ds.unload(outf);
 
 }
