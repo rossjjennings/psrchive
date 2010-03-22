@@ -11,6 +11,7 @@
 
 #include "Pulsar/Algorithm.h"
 #include "Estimate.h"
+#include "MJD.h"
 
 namespace Pulsar
 {
@@ -48,6 +49,18 @@ namespace Pulsar
 
     //! Get pointer to uncertainties
     const double *get_ds_err();
+
+    //! Get number of channels in ds
+    const unsigned get_nchan() const { return nchan; }
+
+    //! Get number of subints in ds
+    const unsigned get_nsub() const { return nsub; }
+
+    //! Get time of subint relative to start of file
+    const MJD get_rel_epoch(unsigned isub);
+
+    //! Get freq of a given channel
+    const double get_freq(unsigned ichan, unsigned isub=0);
 
     //! Unload the results to a file.
     void unload(const std::string& filename);

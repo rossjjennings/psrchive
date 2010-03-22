@@ -87,6 +87,16 @@ const double *Pulsar::DynamicSpectrum::get_ds_err()
   return (const double *)ds_data_err;
 }
 
+const MJD Pulsar::DynamicSpectrum::get_rel_epoch(unsigned isub) 
+{
+  return arch->get_Integration(isub)->get_epoch() - arch->start_time();
+}
+
+const double Pulsar::DynamicSpectrum::get_freq(unsigned ichan, unsigned isub)
+{
+  return arch->get_Integration(isub)->get_centre_frequency(ichan);
+}
+
 // The actual dyn spectrum computation
 void Pulsar::DynamicSpectrum::compute() 
 {
@@ -132,9 +142,20 @@ void Pulsar::DynamicSpectrum::unload(const std::string& filename)
     throw Error(FailedSys, "DynamicSpectrum::unload",
         "fopen failed on %s", filename.c_str());
 
+  // Write some header info
+  fprintf(fout, "# Dynamic spectrum computed by psrflux\n");
+  fprintf(fout, "# Data file: %s\n", arch->get_filename().c_str());
+  fprintf(fout, "# Flux method: %s\n", flux->get_method().c_str());
+  fprintf(fout, "# Flux units: %s\n", Scale2string(arch->get_scale()).c_str());
+  fprintf(fout, "# MJD0: %.10f\n", arch->start_time().in_days());
+
+  fprintf(fout, "# Data columns:\n");
+  fprintf(fout, "# isub ichan time(min) freq(MHz) flux flux_err\n");
   for (int isub=0; isub<nsub; isub++) {
     for (int ichan=0; ichan<nchan; ichan++) {
-      fprintf(fout, "%4d %4d %+.6e %+.6e\n", isub, ichan,
+      fprintf(fout, "%4d %4d %8.2f %8.2f %+.6e %+.6e\n", isub, ichan,
+          get_rel_epoch(isub).in_minutes(),
+          get_freq(ichan),
           ds_data[idx(ichan,isub)],
           ds_data_err[idx(ichan,isub)]);
     }
