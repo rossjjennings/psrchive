@@ -13,18 +13,23 @@ set max_nthread = 1
 
 if ( -f /proc/cpuinfo ) then
   set max_nthread = `cat /proc/cpuinfo | grep processor | wc -l`
+  set noglob
+  set eval=`grep 'cache size' /proc/cpuinfo | head -1 | awk -F: '{print $2}' | sed -e 's/KB/\* 1024/'`
+  @ cache = $eval / 2
+  unset noglob
 else
   set max_nthread = `sysctl hw.ncpu | awk '{print $2}'`
 endif
 
 echo Maximum number of threads = $max_nthread
+echo Streaming cache size = $cache
 
 foreach lib ( $* )
 
   set nthread = 1
   while ($nthread <= $max_nthread)
 
-    ./fft_bench --library=$lib --nthread=$nthread
+    ./fft_bench --library=$lib --nthread=$nthread --cache=$cache
     mv fft_bench.out @datadir@/fft_bench_${lib}_${nthread}.dat
 
     @ nthread = $nthread * 2
