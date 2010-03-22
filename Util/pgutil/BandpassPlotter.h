@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/BandpassPlotter.h,v $
-   $Revision: 1.6 $
-   $Date: 2009/07/22 21:08:53 $
+   $Revision: 1.7 $
+   $Date: 2010/03/22 02:07:08 $
    $Author: straten $*/
 
 #ifndef __fft_BandpassPlotter_h
@@ -135,16 +135,19 @@ void fft::BandpassPlotter<Data,Info>::plot (Data* data, Info* info) const
     xlabel = "Frequency channel";
   }
 
+  float wfmin = fmin;
+  float wfmax = fmax;
+
   if (user_fmin != user_fmax)
   {
-    fmin = user_fmin;
-    fmax = user_fmax;
+    wfmin = user_fmin;
+    wfmax = user_fmax;
   }
 
-  float fbuf = 0.05 * ( fmax - fmin );
+  float fbuf = 0.05 * ( wfmax - wfmin );
 
   cpgsci(1);
-  cpgswin (fmin-fbuf, fmax+fbuf, min, max);
+  cpgswin (wfmin-fbuf, wfmax+fbuf, min, max);
 
   // std::cerr << "npol=" << npol << std::endl;
 
