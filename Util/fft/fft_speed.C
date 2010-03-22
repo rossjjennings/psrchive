@@ -201,15 +201,21 @@ void Speed::Thread::run ()
 
   if (streaming_cache && size < streaming_cache)
   {
-    in_size = streaming_cache;
-    npart = streaming_cache / size;
+    // leave size * 2 for out and plan
+    in_size = streaming_cache - size * 2;
+    npart = in_size / size;
     cerr << "Speed::Thread::run cache=" << streaming_cache
 	 << " parts=" << npart << endl;
   }
 
   float* in = (float*) malloc16 (in_size);
   memset (in, 0, in_size);
-  float* out = (float*) malloc16 (size + 2*sizeof(float));
+
+  unsigned out_size = size;
+  if (real_to_complex)
+    out_size += 2*sizeof(float);
+
+  float* out = (float*) malloc16 (out_size);
 
   RealTimer timer;
   timer.start ();
@@ -233,3 +239,4 @@ void Speed::Thread::run ()
   free16 (in);
   free16 (out);
 }
+
