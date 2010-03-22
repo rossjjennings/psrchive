@@ -33,10 +33,12 @@ nobase_include_HEADERS = \
         Pulsar/Dispersion.h \
 	Pulsar/Divided.h \
         Pulsar/DurationWeight.h \
+        Pulsar/DynamicSpectrum.h \
 	Pulsar/EvenlySpaced.h \
 	Pulsar/EvenlyWeighted.h \
         Pulsar/ExponentialBaseline.h \
 	Pulsar/FixFluxCal.h \
+	Pulsar/Flux.h \
 	Pulsar/FortranSNR.h \
         Pulsar/Fourier.h \
         Pulsar/FourierSNR.h \
@@ -88,6 +90,7 @@ nobase_include_HEADERS = \
         Pulsar/SquareWave.h \
 	Pulsar/StandardOptions.h \
 	Pulsar/StandardCandles.h \
+        Pulsar/StandardFlux.h \
         Pulsar/StandardSNR.h \
 	Pulsar/Statistics.h \
 	Pulsar/StatisticsInterface.h \
@@ -153,6 +156,7 @@ libGeneral_la_SOURCES = \
         Dispersion.C \
         DispersionDelay.C \
         DurationWeight.C \
+        DynamicSpectrum.C \
         ExponentialBaseline.C \
 	FixFluxCal.C \
 	FortranSNR.C \
@@ -225,6 +229,7 @@ libGeneral_la_SOURCES = \
 	standard_shell.C \
 	StandardOptions.C \
         StandardCandles.C \
+        StandardFlux.C \
         StandardSNR.C \
 	Statistics.C \
 	StatisticsInterface.C \
