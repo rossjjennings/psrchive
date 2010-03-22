@@ -155,6 +155,9 @@ namespace Pulsar
     //! Calculate shift uncertainty as posterior PDF variance using MCMC
     void error_mcmc_pdf_var();
 
+    //! Have valid results been computed
+    bool computed;
+
     //! Current shift result
     double shift;
 

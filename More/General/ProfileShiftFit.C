@@ -42,6 +42,7 @@ void Pulsar::ProfileShiftFit::init ()
 
   err_meth = Traditional_Chi2;
 
+  computed=false;
   shift=0.0;
   eshift=0.0;
   scale=0.0;
@@ -81,6 +82,9 @@ void Pulsar::ProfileShiftFit::set_nharm(unsigned nh)
     for (unsigned ih=1; ih<=nharm; ih++) 
       std_pow += norm(cstd[ih]);
   }
+
+  // Reset valid flag
+  computed = false;
 }
 unsigned Pulsar::ProfileShiftFit::get_nharm() { return(nharm); }
 
@@ -103,6 +107,9 @@ void Pulsar::ProfileShiftFit::set_standard(Profile *p)
     set_nharm(std->get_nbin() / 2 - 1);
   else 
     set_nharm(nharm);
+
+  // Reset valid flag
+  computed = false;
 }
 
 void Pulsar::ProfileShiftFit::set_Profile(Profile *p)
@@ -132,6 +139,9 @@ void Pulsar::ProfileShiftFit::set_Profile(Profile *p)
   complex<float> *cccf  = (complex<float> *)fccf;
   for (unsigned ih=1; ih<=nharm; ih++) 
     cccf[ih] = conj(cstd[ih]) * cprof[ih];
+
+  // Reset valid flag
+  computed = false;
 }
 
 double Pulsar::ProfileShiftFit::ccf(double phi) 
@@ -255,6 +265,9 @@ void Pulsar::ProfileShiftFit::compute()
     default:
       error_traditional();
   }
+
+  // Set valid flag
+  computed = true;
 }
 
 double Pulsar::ProfileShiftFit::log_shift_pdf(double phi)
@@ -353,6 +366,7 @@ double Pulsar::ProfileShiftFit::mcmc_sample()
 
 Tempo::toa Pulsar::ProfileShiftFit::toa(Integration *i)
 {
+  if (!computed) compute();
   Integration::Expert e(i);
   Tempo::toa result(Tempo::toa::Parkes);
 
@@ -367,20 +381,24 @@ Tempo::toa Pulsar::ProfileShiftFit::toa(Integration *i)
 
 Estimate<double> Pulsar::ProfileShiftFit::get_shift()
 {
+  if (!computed) compute();
   return(Estimate<double>(shift, eshift*eshift));
 }
 
 Estimate<double> Pulsar::ProfileShiftFit::get_scale()
 {
+  if (!computed) compute();
   return(Estimate<double>(scale, escale*escale));
 }
 
 double Pulsar::ProfileShiftFit::get_mse()
 {
+  if (!computed) compute();
   return(mse);
 }
 
 double Pulsar::ProfileShiftFit::get_snr()
 {
+  if (!computed) compute();
   return(snr);
 }
