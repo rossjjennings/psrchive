@@ -17,7 +17,7 @@
 #include "Pulsar/LawnMower.h"
 
 #include "Pulsar/StandardSNR.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProcHistory.h"
 
@@ -93,7 +93,7 @@ int main (int argc, char** argv)
 
 paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
 {
-  version = "$Id: paz.C,v 1.60 2010/01/14 11:52:08 straten Exp $";
+  version = "$Id: paz.C,v 1.61 2010/03/24 04:44:04 straten Exp $";
 
   has_manual = true;
   update_history = true;
@@ -145,6 +145,7 @@ unsigned median_zap_window = 0;
 
 Pulsar::ChannelZapModulation * modulation_zapper = 0;
 
+int pol_to_delete = -1;
 
 void paz::add_options (CommandLine::Menu& menu)
 {
@@ -198,6 +199,9 @@ void paz::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (this, &paz::parse_periodic_zap, 'p', "\"p i\"");
   arg->set_help ("Interpolate over every p-th phase bin, start at i");
+
+  arg = menu.add (pol_to_delete, "poln", "0/1");
+  arg->set_help ("Delete the specified polarization");
 
   menu.add ("\n" "Automatic zapping algorithms:");
 
@@ -447,6 +451,51 @@ void paz::process (Pulsar::Archive* arch)
 			       periodic_zap_period, periodic_zap_phase,
                                periodic_zap_width);
   }
+
+  if (pol_to_delete != -1)
+  {
+    /*
+      Delete either PP=(pol 0) or QQ=(pol 1) by resizing to npol = 1
+
+      If PP is to be deleted, PP and QQ are first swapped.
+    */
+
+    if (pol_to_delete != 0 && pol_to_delete != 1)
+      throw Error (InvalidState, "paz::process",
+		   "--pol = either 0 or 1, not %d", pol_to_delete);
+
+    if (arch->get_state() == Signal::Stokes)
+      arch->convert_state( Signal::Coherence );
+
+    Signal::State state = arch->get_state();
+
+    if (state != Signal::Coherence && state != Signal::PPQQ)
+      throw Error (InvalidState, "paz::process",
+		   "cannot delete polarization when state = %s", 
+		   Signal::state_string(state));
+
+    if (verbose)
+      cerr << "paz: deleting ipol=" << pol_to_delete 
+	   << " current state=" << Signal::state_string(state) << endl;
+
+    const unsigned nchan = arch->get_nchan ();
+    const unsigned nsub = arch->get_nsubint ();
+
+    if (pol_to_delete == 0)
+    {
+      // Swap pol 0 and pol 1 in each sub-integration and frequency channel
+      for (unsigned isub = 0; isub < nsub; isub++)
+      {
+	Pulsar::Integration* subint = arch->get_Integration (isub);
+	for (unsigned ichan = 0; ichan < nchan; ichan++)
+	  subint->expert()->swap_profiles (0, ichan, 1, ichan);
+      }
+    }
+
+    // resize to npol = 1
+    arch->resize (nsub, 1);
+    arch->set_state( Signal::Intensity );
+  } 
 
   // To fix early wide-band correlator problem
   if (eightBinZap)
