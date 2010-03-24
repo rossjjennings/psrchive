@@ -93,7 +93,7 @@ int main (int argc, char** argv)
 
 paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
 {
-  version = "$Id: paz.C,v 1.61 2010/03/24 04:44:04 straten Exp $";
+  version = "$Id: paz.C,v 1.62 2010/03/24 11:09:53 straten Exp $";
 
   has_manual = true;
   update_history = true;
@@ -481,12 +481,14 @@ void paz::process (Pulsar::Archive* arch)
     const unsigned nchan = arch->get_nchan ();
     const unsigned nsub = arch->get_nsubint ();
 
-    if (pol_to_delete == 0)
+    for (unsigned isub = 0; isub < nsub; isub++)
     {
-      // Swap pol 0 and pol 1 in each sub-integration and frequency channel
-      for (unsigned isub = 0; isub < nsub; isub++)
+      // ensure that the sub-integration is loaded from file
+      Pulsar::Integration* subint = arch->get_Integration (isub);
+
+      if (pol_to_delete == 0)
       {
-	Pulsar::Integration* subint = arch->get_Integration (isub);
+        // Swap pol 0 and pol 1 in each sub-integration and frequency channel
 	for (unsigned ichan = 0; ichan < nchan; ichan++)
 	  subint->expert()->swap_profiles (0, ichan, 1, ichan);
       }
