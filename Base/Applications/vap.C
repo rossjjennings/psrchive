@@ -337,7 +337,7 @@ string get_mjd( Reference::To< Archive > archive )
     else
       epoch = archive->start_time();
 
-    mjd = tostring( epoch, 19 );
+    mjd = tostring( epoch, 19, ios::fixed );
   } 
   catch( Error e ) {}
 
