@@ -337,7 +337,7 @@ string get_mjd( Reference::To< Archive > archive )
     else
       epoch = archive->start_time();
 
-    mjd = tostring( epoch, 19, ios::fixed );
+    mjd = tostring( epoch, 11 );
   } 
   catch( Error e ) {}
 
@@ -2065,7 +2065,6 @@ void Header( OS& os )
 
 int main( int argc, char *argv[] ) try
 {
-  tostring_precision = 4;
   Angle::default_type = Angle::Degrees;
 
   // load files more quickly by ignoring profile data
