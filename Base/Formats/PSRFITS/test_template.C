@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "FITSError.h"
+#include "fitsutil.h"
 #include "dirutil.h"
 
 #include <fitsio.h>
@@ -21,7 +22,9 @@ void parse_template (const char* tplate, bool verbose = true);
 
 static bool verbose = false;
 
-int main (int argc, char** argv) try {
+int main (int argc, char** argv) try
+{
+  fits_version_check (true);
 
   if (argc > 1 && string(argv[1]) == "-v")
     verbose = true;
