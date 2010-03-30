@@ -8,6 +8,9 @@
 #include "Jacobi.h"
 #include "MatrixTest.h"
 
+double real (double x) { return x; }
+double conj (double x) { return x; }
+
 // specialize for complex matrices
 template <unsigned RC, typename T>
 void test_Jacobi (Matrix<RC,RC,T>& matrix, float tolerance)
