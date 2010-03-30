@@ -37,7 +37,7 @@ public:
 protected:
 
   //! Add command line options
-  void add_options (CommandLine::Menu&) {}
+  void add_options (CommandLine::Menu&);
 
   unsigned plotted;
   string plot_name;
@@ -76,6 +76,17 @@ trash::trash ()
   add( &standard_options );
 
   plotted = 0;
+}
+
+void trash::add_options (CommandLine::Menu& menu)
+{
+  CommandLine::Argument* arg;
+
+  // blank line in help
+  menu.add ("");
+
+  arg = menu.add (plot_name, 'p', "plot");
+  arg->set_help ("set plot type");
 }
 
 void trash::process (Pulsar::Archive* archive)
