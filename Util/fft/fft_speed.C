@@ -199,11 +199,13 @@ void Speed::Thread::run ()
   unsigned npart = 1;
   unsigned in_size = size;
 
-  if (streaming_cache && size < streaming_cache)
+  if (streaming_cache && size*2 < streaming_cache)
   {
     // leave size * 2 for out and plan
     in_size = streaming_cache - size * 2;
     npart = in_size / size;
+    if (npart == 0)
+      npart = 1;
     cerr << "Speed::Thread::run cache=" << streaming_cache
 	 << " parts=" << npart << endl;
   }
