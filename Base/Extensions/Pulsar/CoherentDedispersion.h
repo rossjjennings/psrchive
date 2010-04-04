@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CoherentDedispersion.h,v $
-   $Revision: 1.2 $
-   $Date: 2010/04/04 00:57:21 $
+   $Revision: 1.3 $
+   $Date: 2010/04/04 05:27:31 $
    $Author: straten $ */
 
 #ifndef __CoherentDedispersion_h
@@ -47,15 +47,108 @@ namespace Pulsar {
 
     //////////////////////////////////////////////////////////////////////
     //
-    // implementation
+    // OutputChannel nested class
+    //
+    //////////////////////////////////////////////////////////////////////
+
+    //! Coherent dedispersion attributes specific to output frequency channel
+    class OutputChannel
+    {
+
+    public:
+
+      //! Centre frequency of output channel
+      double get_centre_frequency () const { return centre_frequency; }
+      //! Centre frequency of output channel
+      void set_centre_frequency (double val) { centre_frequency = val; }
+
+      //! Bandwidth of output channel
+      double get_bandwidth () const { return bandwidth; }
+      //! Bandwidth of output channel
+      void set_bandwidth (double val) { bandwidth = val; }
+
+      //! Number of complex time samples in each cyclical convolution
+      unsigned get_nsamp () const { return nsamp; }
+      //! Number of complex time samples in each cyclical convolution
+      void set_nsamp (unsigned val) { nsamp = val; }
+
+      //! Number of complex time samples in wrap-around region, left-hand side
+      unsigned get_nsamp_overlap_pos () const { return nsamp_overlap_pos; }
+      //! Number of complex time samples in wrap-around region, left-hand side
+      void set_nsamp_overlap_pos (unsigned val) { nsamp_overlap_pos = val; }
+      
+      //! Number of complex time samples in wrap-around region, right-hand side
+      unsigned get_nsamp_overlap_neg () const { return nsamp_overlap_neg; }
+      //! Number of complex time samples in wrap-around region, right-hand side
+      void set_nsamp_overlap_neg (unsigned val) { nsamp_overlap_neg = val; }
+
+    protected:
+      
+      //! Centre frequency of output channel
+      double centre_frequency;
+      
+      //! Bandwidth of output channel
+      double bandwidth;
+      
+      //! Number of complex time samples in each cyclical convolution
+      unsigned nsamp;
+      
+      //! Number of complex time samples in wrap-around region, left-hand side
+      unsigned nsamp_overlap_pos;
+      
+      //! Number of complex time samples in wrap-around region, right-hand side
+      unsigned nsamp_overlap_neg;
+
+    };
+
+    //////////////////////////////////////////////////////////////////////
+    //
+    // InputChannel nested class
     //
     //////////////////////////////////////////////////////////////////////
 
     //! Coherent dedispersion attributes specific to input frequency channel
-    class InputChannel;
+    class InputChannel
+    {
 
-    //! Coherent dedispersion attributes specific to output frequency channel
-    class OutputChannel;
+    public:
+
+      //! Centre frequency of input channel
+      double get_centre_frequency () const { return centre_frequency; }
+      //! Centre frequency of input channel
+      void set_centre_frequency (double val) { centre_frequency = val; }
+      
+      //! Bandwidth of input channel
+      double get_bandwidth () const { return bandwidth; }
+      //! Bandwidth of input channel
+      void set_bandwidth (double val) { bandwidth = val; }
+      
+      //! Number of frequency channels into which this channel was divided
+      unsigned get_nchan_output () const { return output.size(); }
+      void set_nchan_output (unsigned nchan) { output.resize( nchan ); }
+      
+      const OutputChannel& get_output (unsigned ichan_output) const;
+      OutputChannel& get_output (unsigned ichan_output);
+      
+    protected:
+      
+      //! Centre frequency of input channel
+      double centre_frequency;
+      
+      //! Bandwidth of input channel
+      double bandwidth;
+      
+      //! Information specific to each output frequency channel
+      std::vector<OutputChannel> output;
+      
+      void check_index (unsigned ichan_output) const;
+    };
+
+    //////////////////////////////////////////////////////////////////////
+    //
+    // CoherentDedisperion class attributes/methods
+    //
+    //////////////////////////////////////////////////////////////////////
 
     //! Domain in which the algorithm operates (time or frequency)
     Signal::Dimension get_domain () const { return domain; }
@@ -113,91 +206,6 @@ namespace Pulsar {
 
     //! Throw an exception if index is out of range
     void check_index (unsigned ichan_input) const;
-  };
-
-  class CoherentDedispersion::InputChannel
-  {
-
-  public:
-
-    //! Centre frequency of input channel
-    double get_centre_frequency () const { return centre_frequency; }
-    //! Centre frequency of input channel
-    void set_centre_frequency (double val) { centre_frequency = val; }
-
-    //! Bandwidth of input channel
-    double get_bandwidth () const { return bandwidth; }
-    //! Bandwidth of input channel
-    void set_bandwidth (double val) { bandwidth = val; }
-
-    //! Number of frequency channels into which this channel was divided
-    unsigned get_nchan_output () const { return output.size(); }
-    void set_nchan_output (unsigned nchan) { output.resize( nchan ); }
-
-    const OutputChannel& get_output (unsigned ichan_output) const;
-    OutputChannel& get_output (unsigned ichan_output);
-
-  protected:
-
-    //! Centre frequency of input channel
-    double centre_frequency;
-
-    //! Bandwidth of input channel
-    double bandwidth;
-
-    //! Information specific to each output frequency channel
-    std::vector<OutputChannel> output;
-
-    void check_index (unsigned ichan_output) const;
-  };
-
-  class CoherentDedispersion::OutputChannel
-  {
-
-  public:
-
-    //! Centre frequency of output channel
-    double get_centre_frequency () const { return centre_frequency; }
-    //! Centre frequency of output channel
-    void set_centre_frequency (double val) { centre_frequency = val; }
-
-    //! Bandwidth of output channel
-    double get_bandwidth () const { return bandwidth; }
-    //! Bandwidth of output channel
-    void set_bandwidth (double val) { bandwidth = val; }
-
-    //! Number of complex time samples in each cyclical convolution
-    unsigned get_nsamp () const { return nsamp; }
-    //! Number of complex time samples in each cyclical convolution
-    void set_nsamp (unsigned val) { nsamp = val; }
-
-    //! Number of complex time samples in wrap-around region, left-hand side
-    unsigned get_nsamp_overlap_pos () const { return nsamp_overlap_pos; }
-    //! Number of complex time samples in wrap-around region, left-hand side
-    void set_nsamp_overlap_pos (unsigned val) { nsamp_overlap_pos = val; }
-
-    //! Number of complex time samples in wrap-around region, right-hand side
-    unsigned get_nsamp_overlap_neg () const { return nsamp_overlap_neg; }
-    //! Number of complex time samples in wrap-around region, right-hand side
-    void set_nsamp_overlap_neg (unsigned val) { nsamp_overlap_neg = val; }
-
-  protected:
-
-    //! Centre frequency of output channel
-    double centre_frequency;
-
-    //! Bandwidth of output channel
-    double bandwidth;
-
-    //! Number of complex time samples in each cyclical convolution
-    unsigned nsamp;
-
-    //! Number of complex time samples in wrap-around region, left-hand side
-    unsigned nsamp_overlap_pos;
-
-    //! Number of complex time samples in wrap-around region, right-hand side
-    unsigned nsamp_overlap_neg;
-
   };
 
 }
