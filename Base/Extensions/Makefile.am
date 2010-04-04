@@ -12,6 +12,7 @@ nobase_include_HEADERS = \
 	Pulsar/CalibratorExtensionInterface.h \
         Pulsar/CalibratorStokes.h \
         Pulsar/CalInfoExtension.h \
+	Pulsar/CoherentDedispersion.h \
         Pulsar/ColdPlasmaHistory.h \
         Pulsar/Dedisperse.h \
         Pulsar/DeFaraday.h \
@@ -57,6 +58,7 @@ libExtensions_la_SOURCES = \
         CalibratorExtension.C \
         CalibratorStokes.C \
         CalInfoExtension.C \
+	CoherentDedispersion.C \
         ColdPlasmaHistory.C \
         Dedisperse.C \
         DeFaraday.C \
