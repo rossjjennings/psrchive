@@ -11,6 +11,9 @@
 
 using namespace std;
 
+typedef Pulsar::CoherentDedispersion::InputChannel InputChannel;
+typedef Pulsar::CoherentDedispersion::OutputChannel OutputChannel;
+
 template<typename T, class C, class Method>
 void pack (std::vector<T>& result, const C& ext, unsigned n, Method get)
 {
@@ -30,8 +33,7 @@ void pack (std::vector<T>& result, const C& ext, unsigned n, Method get)
 
 
 template<typename T, class Method>
-void output (fitsfile* fptr, const char* colname,
-	     const Pulsar::CoherentDedispersion::InputChannel& ext,
+void write (fitsfile* fptr, const char* colname, const InputChannel& ext,
 	     unsigned ichan, Method get)
 {
   vector<T> data;
@@ -47,7 +49,16 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   if (verbose)
     cerr << "Pulsar::FITSArchive::unload CoherentDedispersion" << endl;
 
-  string domain = tostring (ext->get_domain());
+  unsigned nchan = ext->get_nchan_input();
+
+  psrfits_init_hdu (fptr, "COHDDISP", nchan);
+
+  string domain;
+  if (ext->get_domain() == Signal::Time)
+    domain = "TIME";
+  else
+    domain = "FREQ";
+
   psrfits_update_key (fptr, "DOMAIN", domain);
   psrfits_update_key (fptr, "CHRPTYPE", ext->get_description());
 
@@ -57,13 +68,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   psrfits_update_key (fptr, "DATANBIT", ext->get_nbit_data());
   psrfits_update_key (fptr, "CHRPNBIT", ext->get_nbit_chirp());
 
-  unsigned nchan = ext->get_nchan_input();
   psrfits_update_key (fptr, "NCHAN", nchan);
-
-  psrfits_set_rows (fptr, nchan);
-
-  typedef Pulsar::CoherentDedispersion::InputChannel InputChannel;
-  typedef Pulsar::CoherentDedispersion::OutputChannel OutputChannel;
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
@@ -73,17 +78,17 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
     psrfits_write_col (fptr, "BW", ichan+1, input.get_bandwidth());
     psrfits_write_col (fptr, "OUT_NCHAN", ichan+1, input.get_nchan_output());
 
-    output<double> (fptr, "OUT_FREQ", input, ichan,
-		    &OutputChannel::get_centre_frequency);
-    output<double> (fptr, "OUT_BW", input, ichan,
-		    &OutputChannel::get_bandwidth);
+    write<double> (fptr, "OUT_FREQ", input, ichan,
+		   &OutputChannel::get_centre_frequency);
+    write<double> (fptr, "OUT_BW", input, ichan,
+		   &OutputChannel::get_bandwidth);
     
-    output<unsigned> (fptr, "NCHIRP", input, ichan,
-		      &OutputChannel::get_nsamp);
-    output<unsigned> (fptr, "NCYC_POS", input, ichan,
-		      &OutputChannel::get_nsamp_overlap_pos);
-    output<unsigned> (fptr, "NCYC_NEG", input, ichan,
-		      &OutputChannel::get_nsamp_overlap_neg);
+    write<unsigned> (fptr, "NCHIRP", input, ichan,
+		     &OutputChannel::get_nsamp);
+    write<unsigned> (fptr, "NCYC_POS", input, ichan,
+		     &OutputChannel::get_nsamp_overlap_pos);
+    write<unsigned> (fptr, "NCYC_NEG", input, ichan,
+		     &OutputChannel::get_nsamp_overlap_neg);
   }
 }
 
