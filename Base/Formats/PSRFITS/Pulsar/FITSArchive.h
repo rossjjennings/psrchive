@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.63 $
-   $Date: 2009/06/09 06:51:51 $
+   $Revision: 1.64 $
+   $Date: 2010/04/06 21:44:21 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -37,6 +37,7 @@ namespace Pulsar
   class DigitiserCounts;
   class FITSSUBHdrExtension;
   class ProfileColumn;
+  class CoherentDedispersion;
 
   //! Loads and unloads PSRFITS archives
 
@@ -92,50 +93,53 @@ namespace Pulsar
     static std::string get_template_name ();
 
     //! Unload FITSHdrExtension to the current HDU of the specified FITS file
-    static void unload (fitsfile* fptr, const FITSHdrExtension* ext);
+    static void unload (fitsfile* fptr, const FITSHdrExtension*);
 
     //! Unload Pointing to the specified row of the subint table
-    static void unload (fitsfile* fptr, const Pointing* ext, int row);
+    static void unload (fitsfile* fptr, const Pointing*, int row);
 
     //! Unload ObsExtension to the current HDU of the specified FITS file
-    static void unload (fitsfile* fptr, const ObsExtension* ext);
+    static void unload (fitsfile* fptr, const ObsExtension*);
     
     //! Unload Receiver to the current HDU of the specified FITS file
-    static void unload (fitsfile* fptr, const Receiver* ext);
+    static void unload (fitsfile* fptr, const Receiver*);
 
     //! Unload WidebandCorrelator to the current HDU of the specified FITS file
-    static void unload (fitsfile* fptr, const WidebandCorrelator* ext);
+    static void unload (fitsfile* fptr, const WidebandCorrelator*);
 
     //! Unload ITRFExtension to the current HDU of the specified FITS file
-    static void unload (fitsfile* fptr, const ITRFExtension* ext);
+    static void unload (fitsfile* fptr, const ITRFExtension*);
 
     //! Unload CalInfoExtension to the current HDU of the specified FITS file
-    static void unload (fitsfile* fptr, const CalInfoExtension* ext);
+    static void unload (fitsfile* fptr, const CalInfoExtension*);
     
     //! Unload ProcHistory to the HISTORY HDU
-    static void unload (fitsfile* fptr, const ProcHistory* ext);
+    static void unload (fitsfile* fptr, const ProcHistory*);
     
     //! Unload Passband to the BANDPASS HDU
-    static void unload (fitsfile* fptr, const Passband* ext);
+    static void unload (fitsfile* fptr, const Passband*);
     
     //! Unload DigitiserStatistics to the DIG_STAT HDU
-    static void unload (fitsfile* fptr, const DigitiserStatistics* ext);
+    static void unload (fitsfile* fptr, const DigitiserStatistics*);
     
     //! Unload DigitiserCounts to DIG_CNTS HDU
-    static void unload (fitsfile* fptr, const DigitiserCounts *ext);
+    static void unload (fitsfile* fptr, const DigitiserCounts*);
     
     //! Unload PolnCalibratorExtension to the FEEDPAR HDU
-    static void unload (fitsfile* fptr, const PolnCalibratorExtension* ext);
+    static void unload (fitsfile* fptr, const PolnCalibratorExtension*);
     
     //! Unload FluxCalibratorExtension to the FLUX_CAL HDU
-    static void unload (fitsfile* fptr, const FluxCalibratorExtension* ext);
+    static void unload (fitsfile* fptr, const FluxCalibratorExtension*);
 
-     //! Unload CalibratorStokes to the CAL_POLN HDU
-    static void unload (fitsfile* fptr, const CalibratorStokes* ext);
+    //! Unload CalibratorStokes to the CAL_POLN HDU
+    static void unload (fitsfile* fptr, const CalibratorStokes*);
     
     //! Unload FITSSUBHdrExtension
-    static void unload (fitsfile *fptr, const FITSSUBHdrExtension *sub_hdr );
+    static void unload (fitsfile *fptr, const FITSSUBHdrExtension*);
     
+    //! Unload CoherentDedispersion
+    static void unload (fitsfile* fptr, const CoherentDedispersion*);
+
     //! Get the offs_sub value (only present in fits files)
     double get_offs_sub( unsigned int isub ) const;
 
@@ -239,6 +243,7 @@ namespace Pulsar
     void load_CalInfoExtension (fitsfile*);
     void load_WidebandCorrelator (fitsfile*);
     void load_FITSSUBHdrExtension ( fitsfile * );
+    void load_CoherentDedispersion (fitsfile*);
 
     void load_integration_state ( fitsfile * );
     void load_state ( fitsfile * );

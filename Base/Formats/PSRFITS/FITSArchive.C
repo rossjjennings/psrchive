@@ -29,6 +29,7 @@
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/IntegrationOrder.h"
+#include "Pulsar/CoherentDedispersion.h"
 
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Telescope.h"
@@ -639,6 +640,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   // Load the original bandpass data
   load_Passband (fptr);
 
+  // Load the coherent dedispersion extension
+  load_CoherentDedispersion (fptr);
+
   // Load the flux calibrator extension
   load_FluxCalibratorExtension (fptr);
 
@@ -1011,6 +1015,12 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
     unload (fptr, passband);
   else
     delete_hdu (fptr, "BANDPASS");
+
+  const CoherentDedispersion* cdedisp = get<CoherentDedispersion>();
+  if (cdedisp)
+    unload (fptr, cdedisp);
+  else
+    delete_hdu (fptr, "COHDDISP");
 
   const FluxCalibratorExtension* fce = get<FluxCalibratorExtension>();
   if (fce)

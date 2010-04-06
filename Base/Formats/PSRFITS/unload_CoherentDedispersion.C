@@ -14,8 +14,9 @@ using namespace std;
 typedef Pulsar::CoherentDedispersion::InputChannel InputChannel;
 typedef Pulsar::CoherentDedispersion::OutputChannel OutputChannel;
 
-template<typename T, class C, class Method>
-void pack (std::vector<T>& result, const C& ext, unsigned n, Method get)
+template<typename T, class Method>
+void pack (std::vector<T>& result, const InputChannel& ext,
+	   unsigned n, Method get)
 {
   result.resize(n);
   bool all_equal = true;
@@ -46,7 +47,7 @@ void write (fitsfile* fptr, const char* colname, const InputChannel& ext,
 void Pulsar::FITSArchive::unload (fitsfile* fptr,
 				  const CoherentDedispersion* ext)
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::FITSArchive::unload CoherentDedispersion" << endl;
 
   unsigned nchan = ext->get_nchan_input();

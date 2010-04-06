@@ -11,7 +11,9 @@ libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	unload_FITSHdrExtension.C unload_ObsExtension.C \
 	unload_Receiver.C load_Receiver.C \
 	unload_WidebandCorrelator.C load_WidebandCorrelator.C \
+	unload_CalibratorStokes.C load_CalibratorStokes.C \
 	unload_CalInfoExtension.C load_CalInfoExtension.C \
+	unload_CoherentDedispersion.C load_CoherentDedispersion.C \
 	unload_ITRFExtension.C load_ITRFExtension.C \
 	unload_ProcHistory.C load_ProcHistory.C \
 	unload_DigitiserStatistics.C load_DigitiserStatistics.C \
@@ -19,7 +21,6 @@ libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	unload_CalibratorExtension.C load_CalibratorExtension.C \
 	unload_PolnCalibratorExtension.C load_PolnCalibratorExtension.C \
 	unload_FluxCalibratorExtension.C load_FluxCalibratorExtension.C \
-	unload_CalibratorStokes.C load_CalibratorStokes.C \
 	unload_FITSSUBHdrExtension.C load_FITSSUBHdrExtension.C \
 	unload_Passband.C load_Passband.C \
 	unload_Pointing.C load_Pointing.C clean_Pointing_columns.C \

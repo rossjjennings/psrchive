@@ -14,8 +14,8 @@ using namespace std;
 typedef Pulsar::CoherentDedispersion::InputChannel InputChannel;
 typedef Pulsar::CoherentDedispersion::OutputChannel OutputChannel;
 
-template<typename T, class C, class Method>
-void pack (std::vector<T>& data, C& ext, unsigned n, Method set)
+template<typename T, class Method>
+void pack (std::vector<T>& data, InputChannel& ext, unsigned n, Method set)
 {
   unsigned idata = 0;
   for (unsigned i=0; i<n; i++)
@@ -26,10 +26,8 @@ void pack (std::vector<T>& data, C& ext, unsigned n, Method set)
   }
 }
 
-
 template<typename T, class Method>
-void read (fitsfile* fptr, const char* colname,
-	   Pulsar::CoherentDedispersion::InputChannel& ext,
+void read (fitsfile* fptr, const char* colname, InputChannel& ext,
 	   unsigned ichan, Method set)
 {
   vector<T> data;
@@ -37,11 +35,9 @@ void read (fitsfile* fptr, const char* colname,
   pack (data, ext, ext.get_nchan_output(), set);
 }
 
-
-
 void Pulsar::FITSArchive::load_CoherentDedispersion (fitsfile* fptr) try
 {
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "FITSArchive::load_CoherentDedispersion entered" << endl;
   
   // Move to the COHDDISP
@@ -54,14 +50,14 @@ void Pulsar::FITSArchive::load_CoherentDedispersion (fitsfile* fptr) try
   string text;
 
   // Get DOMAIN
-  psrfits_read_key (fptr, "DOMAIN", &text, unknown, verbose == 3);
+  psrfits_read_key (fptr, "DOMAIN", &text, unknown, verbose > 2);
   if (text == "TIME")
     ext->set_domain( Signal::Time );
   else
     ext->set_domain( Signal::Frequency );
 
   // Get CHRPTYPE
-  psrfits_read_key (fptr, "CHRPTYPE", &text, unknown, verbose == 3);
+  psrfits_read_key (fptr, "CHRPTYPE", &text, unknown, verbose > 2);
   ext->set_description( text );
 
   double value = 0.0;
@@ -70,23 +66,23 @@ void Pulsar::FITSArchive::load_CoherentDedispersion (fitsfile* fptr) try
   psrfits_read_key (fptr, "DM", &value);
   ext->set_dispersion_measure( value );
 
-  psrfits_read_key (fptr, "DOPPLER", &value, zero, verbose == 3);
+  psrfits_read_key (fptr, "DOPPLER", &value, zero, verbose > 2);
   ext->set_doppler_correction( value );
 
   int nbit = 0;
   int ieee = -32;
 
-  psrfits_read_key (fptr, "DATANBIT", &nbit, ieee, verbose == 3);
+  psrfits_read_key (fptr, "DATANBIT", &nbit, ieee, verbose > 2);
   ext->set_nbit_data (nbit);
 
-  psrfits_read_key (fptr, "CHRPNBIT", &nbit, ieee, verbose == 3);
+  psrfits_read_key (fptr, "CHRPNBIT", &nbit, ieee, verbose > 2);
   ext->set_nbit_chirp (nbit);
 
-  unsigned nchan;
-  psrfits_read_key (fptr, "NCHAN", &nchan);
-  ext->set_nchan_input (nchan);
+  int nchan_input;
+  psrfits_read_key (fptr, "NCHAN", &nchan_input);
+  ext->set_nchan_input (nchan_input);
 
-  for (unsigned ichan=0; ichan<nchan; ichan++)
+  for (int ichan=0; ichan<nchan_input; ichan++)
   {
     InputChannel& input = ext->get_input (ichan);
 
@@ -97,8 +93,9 @@ void Pulsar::FITSArchive::load_CoherentDedispersion (fitsfile* fptr) try
     psrfits_read_col (fptr, "BW", &value, ichan+1);
     input.set_bandwidth (value);
 
-    psrfits_read_col (fptr, "OUT_NCHAN", &nchan, ichan+1);
-    input.set_nchan_output (nchan);
+    unsigned nchan_output = 0;
+    psrfits_read_col (fptr, "OUT_NCHAN", &nchan_output, ichan+1);
+    input.set_nchan_output (nchan_output);
 
     read<double> (fptr, "OUT_FREQ", input, ichan,
 		  &OutputChannel::set_centre_frequency);
@@ -112,8 +109,13 @@ void Pulsar::FITSArchive::load_CoherentDedispersion (fitsfile* fptr) try
     read<unsigned> (fptr, "NCYC_NEG", input, ichan,
 		    &OutputChannel::set_nsamp_overlap_neg);
   }
+
+  if (verbose > 2)
+    cerr << "FITSArchive::load_CoherentDedispersion adding extension" << endl;
+
+  add_extension (ext);
 }
- catch (Error& error)
-   {
-     throw error += "Pulsar::FITSArchive::load_CoherentDedispersion";
-   }
+catch (Error& error)
+{
+  throw error += "Pulsar::FITSArchive::load_CoherentDedispersion";
+}
