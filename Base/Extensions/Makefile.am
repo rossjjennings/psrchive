@@ -59,6 +59,7 @@ libExtensions_la_SOURCES = \
         CalibratorStokes.C \
         CalInfoExtension.C \
 	CoherentDedispersion.C \
+	CoherentDedispersionTI.C \
         ColdPlasmaHistory.C \
         Dedisperse.C \
         DeFaraday.C \

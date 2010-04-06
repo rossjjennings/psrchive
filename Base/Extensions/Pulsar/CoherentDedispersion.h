@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CoherentDedispersion.h,v $
-   $Revision: 1.3 $
-   $Date: 2010/04/04 05:27:31 $
+   $Revision: 1.4 $
+   $Date: 2010/04/06 21:44:07 $
    $Author: straten $ */
 
 #ifndef __CoherentDedispersion_h
@@ -19,8 +19,8 @@
 namespace Pulsar {
 
   //! Record of phase-coherent dispersion removal algorithm
-  /*! This class stores backend information specific to phase-coherent
-    dispersion removal.
+  /*! This class stores information about any phase-coherent
+    dispersion removal performed by the backend, if applicable.
    */
   class CoherentDedispersion : public Pulsar::Archive::Extension {
 

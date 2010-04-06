@@ -32,7 +32,7 @@ CoherentDedispersion* CoherentDedispersion::clone () const
 //! get the text interface 
 TextInterface::Parser* CoherentDedispersion::get_interface()
 {
-  return 0;
+  return new Interface (this);
 }
 
 const CoherentDedispersion::InputChannel& 
