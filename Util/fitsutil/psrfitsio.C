@@ -231,6 +231,18 @@ void psrfits_clean_rows (fitsfile* ffptr)
     throw FITSError (status, "psrfits_clean_rows", "fits_delete_rows");
 }
 
+void psrfits_set_rows (fitsfile* ffptr, unsigned nrow)
+{
+  psrfits_clean_rows (ffptr);
+
+  int status = 0;
+
+  fits_insert_rows (ffptr, 0, nrow, &status);
+
+  if (status != 0)
+    throw FITSError (status, "psrfits_set_rows", "fits_insert_rows");
+}
+
 void psrfits_insert_row (fitsfile* fptr)
 {
   int status = 0;

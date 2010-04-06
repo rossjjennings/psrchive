@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.21 $
-   $Date: 2009/08/12 23:26:00 $
+   $Revision: 1.22 $
+   $Date: 2010/04/06 00:15:26 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
@@ -377,6 +377,9 @@ void psrfits_move_hdu (fitsfile *fptr, const char *name,
 
 //! Remove any existing rows from the current binary table
 void psrfits_clean_rows (fitsfile*);
+
+//! Set the number of rows in the current binary table (i.e. resize)
+void psrfits_set_rows (fitsfile*, unsigned nrow);
 
 //! Insert a single new row at the start of the current binary table
 void psrfits_insert_row (fitsfile* fptr);
