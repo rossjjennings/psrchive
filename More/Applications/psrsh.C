@@ -16,8 +16,11 @@
 using namespace std;
 
 //
-//! An application to interactively trash files
-//
+//! Command language interpreter interface
+/*! 
+  Can be used as either an interactive shell or a shell script command
+  processor.
+ */
 class psrsh : public Pulsar::Application
 {
 public:
@@ -25,7 +28,7 @@ public:
   //! Default constructor
   psrsh ();
 
-  //! Saving is options
+  //! Saving is optional
   bool must_save () { return false; }
 
   //! The main loop
@@ -58,7 +61,7 @@ psrsh::psrsh ()
   : Application ("psrsh", "command language interpreter")
 {
   has_manual = true;
-  version = "$Id: psrsh.C,v 1.19 2009/10/18 01:32:57 straten Exp $";
+  version = "$Id: psrsh.C,v 1.20 2010/04/06 00:14:59 straten Exp $";
 
   load_files = true;
 
