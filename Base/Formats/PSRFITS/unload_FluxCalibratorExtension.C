@@ -15,29 +15,12 @@ using namespace std;
 void Pulsar::FITSArchive::unload (fitsfile* fptr, 
 				  const FluxCalibratorExtension* fce)
 {
-  int status = 0;
-
   if (verbose == 3)
     cerr << "Pulsar::FITSArchive::unload FluxCalibratorExtension" << endl;
   
   // Move to the FLUX_CAL Binary Table
   
-  fits_movnam_hdu (fptr, BINARY_TBL, "FLUX_CAL", 0, &status);
-  
-  if (status != 0)
-    throw FITSError (status, 
-                     "Pulsar::FITSArchive::unload FluxCalibratorExtension", 
-		     "fits_movnam_hdu FLUX_CAL");
-  
-  psrfits_clean_rows (fptr);
-
-  // Initialise a new row
-  
-  fits_insert_rows (fptr, 0, 1, &status);
-  if (status != 0)
-    throw FITSError (status, 
-                     "Pulsar::FITSArchive::unload FluxCalibratorExtension", 
-		     "fits_insert_rows FLUX_CAL");
+  psrfits_init_hdu (fptr, "FLUX_CAL");
 
   // Write the number of receptors (receiver channels)
   psrfits_update_key (fptr, "NRCVR", (int)fce->get_nreceptor());
