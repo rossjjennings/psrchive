@@ -29,6 +29,12 @@ CoherentDedispersion* CoherentDedispersion::clone () const
   return new CoherentDedispersion (*this);
 }
 
+//! get the text interface 
+TextInterface::Parser* CoherentDedispersion::get_interface()
+{
+  return 0;
+}
+
 const CoherentDedispersion::InputChannel& 
 CoherentDedispersion::get_input (unsigned ichan) const
 {
