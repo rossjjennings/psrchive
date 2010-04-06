@@ -35,6 +35,9 @@ public:
   //! Get the current degree
   int get_order() { return order; }
 
+  //! Set uniform breakpoints to span the data
+  void set_uniform_breaks(int nint);
+
   //! Add a data point
   void add_data(double x, Estimate<double> y);
 

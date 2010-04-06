@@ -75,6 +75,20 @@ void SplineFit::add_data(double x_in, Estimate<double> y_in)
   calculated=false;
 }
 
+void SplineFit::set_uniform_breaks(int nint)
+{
+  calculated = false;
+  bp.resize(nint+1);
+  double x0 = *min_element(x.begin(),x.end());
+  double x1 = *max_element(x.begin(),x.end());
+  bp[0] = x0;
+  bp[nint] = x1;
+  double step = (x1 - x0) / (double)nint;
+  for (int i=1; i<nint; i++) {
+    bp[i] = x0 + step*(double)i;
+  }
+}
+
 double SplineFit::evaluate(double x_in)
 {
   if (!calculated)
@@ -93,12 +107,14 @@ double SplineFit::evaluate(double x_in)
   gsl_vector_free(c);
   return result;
 
+#if 0 
   // To calculate variance
   double result_var;
   gsl_vector *c2 = gsl_vector_alloc(nc);
   gsl_blas_dsymv(CblasUpper, 1.0, cov, c, 0.0, c2);
   gsl_blas_ddot(c, c2, &result_var);
-
+  gsl_vector_free(c2);
+#endif
 }
 
 double SplineFit::evaluate_deriv(double x_in)
@@ -162,12 +178,12 @@ void SplineFit::compute()
   gsl_vector *xv = vector_convert(x);
   gsl_vector *yv = gsl_vector_alloc(np);
   gsl_vector *wv = gsl_vector_alloc(np);
-  gsl_vector *bv = gsl_vector_alloc(nc);
   for (unsigned i=0; i<np; i++) {
     gsl_vector_set(yv, i, y[i].get_value());
     gsl_vector_set(wv, i, 1.0/y[i].get_variance());
   }
   gsl_matrix *A = gsl_matrix_alloc(np, nc);
+  gsl_vector *bv = gsl_vector_alloc(nc);
   for (unsigned ip=0; ip<np; ip++) {
     gsl_bspline_eval(gsl_vector_get(xv,ip), bv, bwork);
     for (unsigned ic=0; ic<nc; ic++) {
