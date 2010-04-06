@@ -69,25 +69,12 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 			"Spin period in seconds");
   }
 
-  psrfits_clean_rows (ffptr);
-
   // Insert nsubint rows
 
   if (verbose > 2)
     cerr << "FITSArchive::unload_integrations nsubint=" << nsubint << endl;
 
-  fits_insert_rows (ffptr, 0, nsubint, &status);
-
-  if (verbose > 2)
-  {
-    long nrows = 0;
-    fits_get_num_rows (ffptr, &nrows, &status); 
-    cerr << "FITSArchive::unload_integrations rows=" << nrows << endl;
-  }
-  
-  if (status != 0)
-    throw FITSError (status, "FITS:Archive::unload_integrations", 
-                     "error clearing old subints");
+  psrfits_set_rows (ffptr, nsubint);
 
   // Update the header information
   
