@@ -22,7 +22,6 @@ SplineFit::SplineFit ()
   ndof = 0;
   calculated = false;
   bwork = NULL;
-  bdwork = NULL;
   coeffs = NULL;
   cov = NULL;
 }
@@ -46,11 +45,9 @@ void SplineFit::reset ()
 void SplineFit::free_workspaces()
 {
   if (bwork!=NULL) gsl_bspline_free(bwork);
-  if (bdwork!=NULL) gsl_bspline_deriv_free(bdwork);
   if (coeffs!=NULL) gsl_vector_free(coeffs);
   if (cov!=NULL) gsl_matrix_free(cov);
   bwork = NULL;
-  bdwork = NULL;
   coeffs = NULL;
   cov = NULL;
 }

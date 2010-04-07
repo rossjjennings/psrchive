@@ -13,6 +13,7 @@
 #include "Reference.h"
 
 #include <gsl/gsl_bspline.h>
+#include <gsl/gsl_matrix.h>
 
 //! Spline fitting for smoothing and/or interpolation, using 
 //! GSL's bspline routines.
@@ -93,7 +94,6 @@ protected:
 
   //! bspline temp space
   gsl_bspline_workspace *bwork;
-  gsl_bspline_deriv_workspace *bdwork;
 
 private:
 
