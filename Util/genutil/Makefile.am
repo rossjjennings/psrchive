@@ -142,6 +142,10 @@ TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98	\
 	test_exponential test_StraightLine test_ThreadStream		\
 	test_Horizon test_LogFile
 
+if HAVE_GSL
+TESTS += test_SplineFit
+endif
+
 check_PROGRAMS = $(TESTS) test_CommandLine test_CommandParser \
 	test_Angle test_expand test_VirtualMemory
 
@@ -163,6 +167,7 @@ test_sky_coord_SOURCES		= test_sky_coord.C
 test_expand_SOURCES		= test_expand.C
 test_NormalDistribution_SOURCES = test_NormalDistribution.C
 test_StraightLine_SOURCES	= test_StraightLine.C
+test_SplineFit_SOURCES	        = test_SplineFit.C
 test_ThreadStream_SOURCES	= test_ThreadStream.C
 test_Horizon_SOURCES		= test_Horizon.C
 test_VirtualMemory_SOURCES	= test_VirtualMemory.C
