@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fitsutil/psrfitsio.h,v $
-   $Revision: 1.22 $
-   $Date: 2010/04/06 00:15:26 $
+   $Revision: 1.23 $
+   $Date: 2010/04/07 03:24:49 $
    $Author: straten $ */
 
 #ifndef __psrfitsio_h
@@ -369,10 +369,11 @@ void psrfits_read_col( fitsfile *fptr, const char *name, T *data,
 }
 
 //! Move to the named HDU, remove any existing rows, and insert a new one
-void psrfits_init_hdu (fitsfile *fptr, const char *name);
+void psrfits_init_hdu (fitsfile *fptr, const char *name, unsigned nrows=1);
 
 //! Move to the named HDU
-void psrfits_move_hdu (fitsfile *fptr, const char *name,
+bool psrfits_move_hdu (fitsfile *fptr, const char *name,
+		       bool optional = false,
 		       int table_type = BINARY_TBL, int version = 0);
 
 //! Remove any existing rows from the current binary table

@@ -177,11 +177,10 @@ void* FITS_void_ptr (const string& txt)
 }
 
 
-void psrfits_init_hdu( fitsfile *fptr, const char *name  )
+void psrfits_init_hdu (fitsfile *fptr, const char *name, unsigned nrow)
 {
   psrfits_move_hdu (fptr, name);
-  psrfits_clean_rows (fptr);
-  psrfits_insert_row (fptr);
+  psrfits_set_rows (fptr, nrow);
 }
 
 /**
@@ -193,23 +192,22 @@ void psrfits_init_hdu( fitsfile *fptr, const char *name  )
  * @param version             Some version number ???, we always use 0
  **/
 
-void psrfits_move_hdu( fitsfile *fptr, const char *hdu_name,
-		       int table_type, int version )
+bool psrfits_move_hdu (fitsfile *fptr, const char *hdu_name, bool optional,
+		       int table_type, int version)
 {
   int status = 0;
+
   fits_movnam_hdu (fptr, table_type, const_cast<char*>(hdu_name), 
 		   version, &status);
 
-  if( status == BAD_HDU_NUM )
-  {
-    string msg = "Bad HDU number '";
-    msg += hdu_name;
-    msg += "'";
-    throw FITSError( status, "psrfits_move_hdu", msg.c_str() );
-  }
+  if ( status == BAD_HDU_NUM && optional )
+    return false;
 
-  if( status != 0 )
-    throw FITSError( status, "psrfits_move_hdu", "Failed to move to HDU" );
+  if ( status != 0 )
+    throw FITSError( status, "psrfits_move_hdu",
+		     "fits_movnam_hdu (%s)", hdu_name );
+
+  return true;
 }
 
 void psrfits_clean_rows (fitsfile* ffptr)
