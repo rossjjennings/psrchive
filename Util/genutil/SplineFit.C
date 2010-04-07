@@ -143,6 +143,47 @@ void SplineFit::interval_check(bool fix)
   // Determine if data points are appropriately distributed
   // to use with the current knot vector.  If fix is true,
   // remove knots as appropriate to fix the siutation.
+  unsigned np = x.size();
+  unsigned nb = bp.size() - 1;
+  std::vector<double> counts;
+  counts.resize(nb);
+  for (unsigned i=0; i<np; i++) {
+    // Yes, this is not efficient..
+    for (unsigned j=0; j<nb; j++) {
+      if (x[i]>bp[j] && x[i]<bp[j+1]) {
+        counts[j]++;
+        break;
+      }
+    }
+  }
+
+  if (fix) {
+
+    bool skip=false;
+    int s0=0, s1=0;
+    for (unsigned i=0; i<nb; i++) {
+      if (skip==false && counts[i]==0) {
+        // Start of a new skipped range
+        skip = true;
+        s0 = i;
+        s1 = i+1;
+      } else if (skip==true && counts[i]==0) {
+        // Extend current skipped range
+        s1 = i+1;
+      } else if (skip==true && counts[i]!=0) {
+        // Close current skipped range:
+        //   Erase range of missing breakpoints
+        bp.erase(bp.begin()+s0,bp.begin()+s1+1);
+        counts.erase(counts.begin()+s0,counts.begin()+s1+1);
+        //   Update loop indices
+        nb -= (s1-s0+1);
+        i -= (s1-s0+1);
+        skip = false;
+      }
+    }
+
+  }
+
 }
 
 // Make a new gsl vector filled with values from std::vector input
@@ -158,7 +199,7 @@ void SplineFit::compute()
 {
 
   // Check that intervals are set up ok
-  interval_check();
+  interval_check(true);
   
   // If old results are hanging around, free them
   // then allocate new ones
