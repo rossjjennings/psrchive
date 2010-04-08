@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.35 $
-   $Date: 2010/04/08 15:47:01 $
+   $Revision: 1.36 $
+   $Date: 2010/04/08 18:35:12 $
    $Author: demorest $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -74,6 +74,9 @@ namespace Pulsar {
 
     //! Set the flux scale invalid flag for the specified channel
     void set_invalid (unsigned ch);
+
+    //! Print all the fluxcal info
+    void print(std::ostream& os=std::cout);
 
   protected:
 

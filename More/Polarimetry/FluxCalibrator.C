@@ -98,6 +98,27 @@ double Pulsar::FluxCalibrator::Tsys (unsigned ichan)
   return data[ichan].get_S_sys().get_value();
 }
 
+//! Print all the fluxcal info in simple ascii columns
+void Pulsar::FluxCalibrator::print (std::ostream& os)
+{
+  if (!has_calibrator())
+    throw Error (InvalidState, "Pulsar::FluxCalibrator::print",
+		 "no FluxCal Archive");
+
+  for (unsigned ic=0; ic<get_nchan(); ic++) {
+    // Skip invalid channels
+    if (!get_valid(ic)) continue;
+    os << ic << " ";
+    for (unsigned ir=0; ir<get_nreceptor(); ir++) {
+      os << data[ic].get_S_sys(ir).get_value() << " " 
+        << data[ic].get_S_sys(ir).get_error() << "  "
+        << data[ic].get_S_cal(ir).get_value() << " "
+        << data[ic].get_S_cal(ir).get_error() << "  ";
+    }
+    os << std::endl;
+  }
+}
+
 //! Return an estimate of the artificial cal Stokes parameters
 /*! This method uses the flux cal measurement to determine 
  * the intrinsic Stokes parameters of the artifical cal 
