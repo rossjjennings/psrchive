@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.34 $
-   $Date: 2009/03/01 18:04:41 $
-   $Author: straten $ */
+   $Revision: 1.35 $
+   $Date: 2010/04/08 15:47:01 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
 #define __Pulsar_FluxCalibrator_H
@@ -85,9 +85,6 @@ namespace Pulsar {
 
     //! Create the cal_flux spectrum at the requested resolution
     void create (unsigned nchan = 0);
-
-    //! Calculate the ratio_on and ratio_off
-    void calculate ();
 
     //! Calibrate a single sub-integration
     void calibrate (Integration* subint);
