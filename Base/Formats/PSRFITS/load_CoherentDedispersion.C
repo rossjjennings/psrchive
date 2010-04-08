@@ -44,6 +44,15 @@ void Pulsar::FITSArchive::load_CoherentDedispersion (fitsfile* fptr) try
   if (!psrfits_move_hdu (fptr, "COHDDISP", true))
     return;
 
+  // Check for old/invalid COHDDISP HDUs
+  long nrows = 0;
+  int status = 0;
+  fits_get_num_rows(fptr, &nrows, &status);
+  if (status)
+    throw FITSError (status, "FITSArchve::load_CoherentDedispersion", 
+        "fits_get_num_rows");
+  if (nrows==0) return;
+
   Reference::To<CoherentDedispersion> ext = new CoherentDedispersion;
 
   string unknown = "unknown";
