@@ -60,6 +60,7 @@ void usage ()
     " -D dev       specify PGPLOT device\n"
     " -d           use the Degree of Polarization Calibrator\n"
     " -f           treat all archives as members of a fluxcal observation\n"
+    " -F           print fluxcal parameters (S_sys, S_cal)\n"
     " -j           print Jones matrix elements of calibrator solution \n"
     " -p           use the polar model\n"
     " -P           produce publication-quality plots\n"
@@ -115,6 +116,7 @@ int main (int argc, char** argv)
 
   bool print_jones = false;
   bool print_mueller = false;
+  bool print_fluxcal = false;
 
   //
   float cross_scale_factor = 1.0;
@@ -131,7 +133,7 @@ int main (int argc, char** argv)
   bool verbose = false;
   char c;
 
-  while ((c = getopt(argc, argv, "2:a:c:CD:dfhjM:mn:Ppr:S:stuqvV")) != -1)
+  while ((c = getopt(argc, argv, "2:a:c:CD:dfFhjM:mn:Ppr:S:stuqvV")) != -1)
   {
     switch (c)
     {
@@ -191,6 +193,10 @@ int main (int argc, char** argv)
 
     case 'f':
       fluxcal = new Pulsar::FluxCalibrator;
+      break;
+
+    case 'F':
+      print_fluxcal = true;
       break;
 
     case 'j':
@@ -325,7 +331,8 @@ int main (int argc, char** argv)
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  if (!(print_jones || print_mueller || unload_derived_calibrator))
+  if (!(print_jones || print_mueller || print_fluxcal 
+        || unload_derived_calibrator))
   {
     cpgbeg (0, device.c_str(), 0, 0);
     cpgask(1);
@@ -378,27 +385,36 @@ int main (int argc, char** argv)
 	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
 	  fluxcal->set_invalid (zapchan[ichan]);
 
-        if (plot_calibrator_stokes) {
+        if (print_fluxcal) {
 
-          calibrator_stokes = fluxcal->get_CalibratorStokes();
+          // Note, printing disables fluxcal plotting
+          fluxcal->print();
 
-          for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
-            calibrator_stokes->set_valid (zapchan[ichan], false);
-
-          cerr << "pacv: Plotting fluxcal-derived CalibratorStokes" << endl;
-          cpgpage ();
-          plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
-                        fluxcal->get_nchan(),
-                        fluxcal->get_Archive()->get_centre_frequency(),
-                        fluxcal->get_Archive()->get_bandwidth() );
-
-          calibrator_stokes = 0;
-            
         } else {
 
-          cerr << "pacv: Plotting FluxCalibrator" << endl;
-          cpgpage ();
-          plotter.plot (fluxcal);
+          if (plot_calibrator_stokes) {
+
+            calibrator_stokes = fluxcal->get_CalibratorStokes();
+
+            for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
+              calibrator_stokes->set_valid (zapchan[ichan], false);
+
+            cerr << "pacv: Plotting fluxcal-derived CalibratorStokes" << endl;
+            cpgpage ();
+            plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
+                          fluxcal->get_nchan(),
+                          fluxcal->get_Archive()->get_centre_frequency(),
+                          fluxcal->get_Archive()->get_bandwidth() );
+
+            calibrator_stokes = 0;
+              
+          } else {
+
+            cerr << "pacv: Plotting FluxCalibrator" << endl;
+            cpgpage ();
+            plotter.plot (fluxcal);
+
+          }
 
         }
 
