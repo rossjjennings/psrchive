@@ -7,6 +7,10 @@ libpgutil_la_SOURCES = ColourMap.C pgutil.C quickimage.C Plot3D.C
 
 libpgutil_la_LIBADD = @PGPLOT_LIBS@
 
+bin_PROGRAMS = psrlst
+
+LDADD = @PGPLOT_LIBS@
+
 #############################################################################
 #
 
