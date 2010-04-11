@@ -14,6 +14,7 @@
 #include "Pulsar/PosAngPlot.h"
 #include "Pulsar/EllAngPlot.h"
 #include "Pulsar/StokesCylindrical.h"
+#include "Pulsar/StokesCylindricalPlus.h"
 #include "Pulsar/StokesSpherical.h"
 #include "Pulsar/SpectrumPlot.h"
 #include "Pulsar/PhaseVsFrequencyPlus.h"
@@ -49,6 +50,9 @@ Pulsar::PlotFactory::PlotFactory ()
 
   add ( new PlotFactory::Advocate<StokesCylindrical>
 	('S', "Scyl",   "Stokes; vector in cylindrical") );
+
+  add ( new PlotFactory::Advocate<StokesCylindricalPlus>
+	('E', "Scyl+",   "Stokes; vector in cylindrical+") );
 
   add ( new PlotFactory::Advocate<StokesSpherical>
 	('m', "Ssph",   "Stokes; vector in spherical") );
