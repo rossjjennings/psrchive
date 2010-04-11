@@ -87,8 +87,9 @@ AC_DEFUN([SWIN_PACKAGE_FIND],
 
   swin_[$1]_found=""
 
-  if test x"$PACKAGES" != x; then
-    for cf_file in `find $PACKAGES -name "[$2]" 2> /dev/null`; do
+  TEST_PACKAGES=`echo $LD_LIBRARY_PATH $PACKAGES | sed -e 's/:/ /g'`
+  if test x"$TEST_PACKAGES" != x; then
+    for cf_file in `find $TEST_PACKAGES -name "[$2]" 2> /dev/null`; do
       cf_path=`dirname $cf_file`
       swin_[$1]_found="$swin_[$1]_found $cf_path"
     done
@@ -127,10 +128,14 @@ AC_DEFUN([SWIN_PACKAGE_TRY_LINK],
   AC_PROVIDE([SWIN_PACKAGE_TRY_LINK])
 
   swin_search_path="$swin_[$1]_found"
+
+  #
+  # If a path/include/ directory is found, then add path/lib/ to the search
+  #
   if test x"$swin_[$1]_include_dir" != x; then
     swin_base=`dirname $swin_[$1]_include_dir`
     if test -d $swin_base/lib; then
-      swin_search_path="$swin_base/lib $swin_search_path"
+      swin_search_path="$swin_search_path $swin_base/lib"
     fi
   fi
 
