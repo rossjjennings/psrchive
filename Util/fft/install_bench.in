@@ -51,7 +51,7 @@ foreach lib ( $* )
 
     echo Threads: $nthread Cache: $use_cache
 
-    ${prefix}/bin/fft_bench --library=$lib --nthread=$nthread --cache=$use_cache
+    @srcdir@/fft_bench --library=$lib --nthread=$nthread --cache=$use_cache
     mv fft_bench.out @datadir@/fft_bench_${lib}_${nthread}.dat
 
     @ nthread = $nthread * 2
