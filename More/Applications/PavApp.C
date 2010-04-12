@@ -254,9 +254,9 @@ float PavApp::PADegreesToTurns( const int deg )
 void PavApp::SetPhaseZoom( double min_phase, double max_phase  )
 {
   string range_str = string("(") +
-                     tostring< double >(min_phase ) +
+                     tostring<double>(min_phase,3,ios::fixed) +
                      string(",") +
-                     tostring< double >( max_phase ) +
+                     tostring<double>(max_phase,3,ios::fixed) +
                      string( ")");
 
   // Now set the range for all the plots that have phase on the x axis.
@@ -311,9 +311,9 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq )
     // construct the command to set the range, the same for all plots (for current plots)
 
     string range_cmd = "y:range=(";
-    range_cmd += tostring<double>( norm_min_freq );
+    range_cmd += tostring<double>(norm_min_freq,3,ios::fixed);
     range_cmd += string(",");
-    range_cmd += tostring<double>( norm_max_freq );
+    range_cmd += tostring<double>(norm_max_freq,3,ios::fixed);
     range_cmd += string(")" );
 
     SetPlotOptions<Plot>( range_cmd );
@@ -343,7 +343,7 @@ void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
   copy->fscrunch();
   copy->pscrunch();
 
-  string snr = tostring( copy->get_Profile(0,0,0)->snr() );
+  string snr = tostring( copy->get_Profile(0,0,0)->snr(),3,ios::fixed );
   string frequency;
 
   /*
@@ -353,11 +353,19 @@ void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
   */
 
   if ( archive->get_dedispersed() )
-    frequency = tostring( archive->get_centre_frequency() );
-  else
-    frequency = tostring( integ->weighted_frequency(0, archive->get_nchan()) );
+  {
+    frequency = tostring( archive->get_centre_frequency(),3,ios::fixed );
+  }
+  else 
+  {
+    const double weighted_frequency =
+      integ->weighted_frequency(0, archive->get_nchan());
 
-  const string duration = tostring<double>( archive->integration_length() );
+    frequency = tostring<double>( weighted_frequency,3,ios::fixed );
+  }
+
+  const string duration =
+    tostring<double>( archive->integration_length(),3,ios::fixed );
 
   SetPlotOptions<Plot>( "above:c=$name $file\n Freq: " + frequency +
           " MHz BW: $bw Length: " + duration + " S/N: " + snr );
@@ -380,7 +388,6 @@ void PavApp::PavSpecificOptions( void )
 
   if( publn )
   {
-    tostring_precision = 1;
     SetPlotOptions<Plot>( "ch=1.2" );
     if( freq_under_name )
       SetPlotOptions<Plot>( "below:l=$name.$freq MHz" );
@@ -422,6 +429,7 @@ void PavApp::PavSpecificOptions( void )
   SetPlotOptions<StokesCylindricalPlus>( "flux:below:l=" );
   SetPlotOptions<StokesCylindricalPlus>( "flux:y:buf=0.07" );
   SetPlotOptions<StokesCylindricalPlus>( "pa:mark=dot+tick" );
+
   if( !publn )
   {
     SetPlotOptions<StokesCylindrical>( "pa:above:c=$name $file\n Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
@@ -730,7 +738,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.71 2010/04/12 00:23:27 jonathan_khoo Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.72 2010/04/12 05:54:25 jonathan_khoo Exp $" << 
         endl << endl;
       return 0;
     case 'M':
@@ -1158,10 +1166,8 @@ int PavApp::run( int argc, char *argv[] )
 
       // set the precision that plot will use for labels
       tostring_setf = ios::fixed;
-      if( !publn )
-        tostring_precision = 3;
-      else
-        tostring_precision = 1;
+      tostring_precision = 3;
+
       for (unsigned p=0; p < plots[i].plots.size(); p++)
       {
         cpgpage ();
