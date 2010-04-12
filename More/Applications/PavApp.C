@@ -12,6 +12,7 @@
 #include <templates.h>
 #include <limits>
 #include <Pulsar/StokesCylindrical.h>
+#include <Pulsar/StokesCylindricalPlus.h>
 #include <Pulsar/BandpassChannelWeightPlot.h>
 #include <Pulsar/StokesSpherical.h>
 #include <Pulsar/PhaseVsTime.h>
@@ -36,6 +37,7 @@ using std::ostringstream;
 using Pulsar::PhasePlot;
 using Pulsar::MultiPlot;
 using Pulsar::StokesCylindrical;
+using Pulsar::StokesCylindricalPlus;
 using Pulsar::BandpassChannelWeightPlot;
 using Pulsar::PhaseVsPlot;
 using Pulsar::StokesSpherical;
@@ -177,6 +179,7 @@ void PavApp::PrintUsage( void )
   cout << " -n        Plot S/N against frequency" << endl;
   cout << " -R        Plot stacked sub-integration profiles" << endl;
   cout << " -S        Plot polarization parameters (I,L,V,PA)" << endl;
+  cout << " -E        Plot polarization parameters (I,L,V,PA) with an intermediate cropped flux plot" << endl;
   cout << " -A        Plot Digitiser Counts histogram" << endl;
   cout << " -X        Plot cal amplitude and phase vs frequency channel" << endl;
   cout << " -Y        Plot colour map of sub-integrations against pulse phase" << endl;
@@ -414,20 +417,31 @@ void PavApp::PavSpecificOptions( void )
   SetPlotOptions<StokesCylindrical>( "flux:below:l=" );
   SetPlotOptions<StokesCylindrical>( "flux:y:buf=0.07" );
   SetPlotOptions<StokesCylindrical>( "pa:mark=dot+tick" );
+
+  SetPlotOptions<StokesCylindricalPlus>( "pa:below:l=" );
+  SetPlotOptions<StokesCylindricalPlus>( "flux:below:l=" );
+  SetPlotOptions<StokesCylindricalPlus>( "flux:y:buf=0.07" );
+  SetPlotOptions<StokesCylindricalPlus>( "pa:mark=dot+tick" );
   if( !publn )
   {
     SetPlotOptions<StokesCylindrical>( "pa:above:c=$name $file\n Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
+    SetPlotOptions<StokesCylindricalPlus>( "pa:above:c=$name $file\n Freq: $freq MHz BW: $bw Length: $length S/N: $snr" );
   }
   else
   {
     SetPlotOptions<StokesCylindrical>( "pa:above:c=" );
+    SetPlotOptions<StokesCylindricalPlus>( "pa:above:c=" );
     if( freq_under_name )
+    {
       SetPlotOptions<StokesCylindrical>( "flux:below:l=$name.$freq MHz" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:below:l=$name.$freq MHz" );
+    }
     else
     {
-
       SetPlotOptions<StokesCylindrical>( "flux:below:l=$name" );
       SetPlotOptions<StokesCylindrical>( "flux:below:r=$freq MHz" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:below:l=$name" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:below:r=$freq MHz" );
     }
   }
 
@@ -693,7 +707,7 @@ int PavApp::run( int argc, char *argv[] )
 
   float clip_value = 0.0;
 
-  char valid_args[] = "Az:hb:M:KDcCdr:f:Ft:TGYSXBRmnjpP:y:H:I:N:k:ivVax:g:l:";
+  char valid_args[] = "Az:hb:M:KDcCdr:f:Ft:ETGYSXBRmnjpP:y:H:I:N:k:ivVax:g:l:";
   opterr = 0;
 
   int c = '\0';
@@ -716,7 +730,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.70 2010/01/22 00:25:44 jonathan_khoo Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.71 2010/04/12 00:23:27 jonathan_khoo Exp $" << 
         endl << endl;
       return 0;
     case 'M':
@@ -773,6 +787,8 @@ int PavApp::run( int argc, char *argv[] )
       jobs.push_back( "pscrunch" );
       break;
     case 'S':
+      clear_labels = false;
+    case 'E':
       clear_labels = false;
     case 'A':
     case 'X':
@@ -990,13 +1006,13 @@ int PavApp::run( int argc, char *argv[] )
   {
     SetPlotOptions<FluxPlot>( string("crop=") + tostring<float>(clip_value) );
     SetPlotOptions<StokesCylindrical>( string("flux:crop=") + tostring<float>(clip_value) );
+    SetPlotOptions<StokesCylindricalPlus>( string("crop=") + tostring<float>(clip_value) );
     SetPlotOptions<PhaseVsPlot>( string("crop=") + tostring<float>(clip_value) );
     SetPlotOptions<BandpassPlot>( string("crop=") + tostring<float>(clip_value) );
   }
 
   if( label_degrees )
   {
-    //SetPlotOptions<StokesCylindrical>( "x:unit=deg" );
     SetPlotOptions<PhasePlot>( "x:unit=deg" );
     SetPlotOptions<MultiPhase>( "x:unit=deg" );
   }
@@ -1018,11 +1034,19 @@ int PavApp::run( int argc, char *argv[] )
     {
       SetPlotOptions<StokesCylindrical>( "flux:ci=1111" );
       SetPlotOptions<StokesCylindrical>( "flux:ls=1234" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:ci=1111" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:ls=1234" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:ci=1111" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:ls=1234" );
     }
     else
     {
       SetPlotOptions<StokesCylindrical>( "flux:ci=1264" );
       SetPlotOptions<StokesCylindrical>( "flux:ls=1111" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:ci=1264" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:ls=1111" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:ci=1264" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:ls=1111" );
     }
   }
   else
@@ -1031,11 +1055,19 @@ int PavApp::run( int argc, char *argv[] )
     {
       SetPlotOptions<StokesCylindrical>( "flux:ci=111" );
       SetPlotOptions<StokesCylindrical>( "flux:ls=124" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:ci=111" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:ls=124" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:ci=111" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:ls=124" );
     }
     else
     {
       SetPlotOptions<StokesCylindrical>( "flux:ci=124" );
       SetPlotOptions<StokesCylindrical>( "flux:ls=111" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:ci=124" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:ls=111" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:ci=124" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:ls=111" );
     }
   }
 
