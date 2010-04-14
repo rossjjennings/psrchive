@@ -46,6 +46,7 @@ protected:
   void set_profile_count_offset (long int _offset);
   void load_MJDs_for_random_from_archives(std::string _random_list);
   void set_form_invint();
+  void preserve_time_resolution();
 
   vector<string> files;
   vector<string> mjd_archives;
@@ -82,6 +83,8 @@ protected:
   bool form_invariant;
   bool mjd_archives_provided;
 
+  bool perform_tscrunch;
+
   time_t seconds;
   time_t start;
   time_t duration;
@@ -97,6 +100,8 @@ stability::stability()
   buffer_exists = false;
   buffer_left = 0;
   form_invariant = false;
+  perform_tscrunch = true;
+  mjd_archives_provided = false;
 
   start = time (NULL);
 
@@ -138,6 +143,10 @@ void stability::add_options ( CommandLine::Menu& menu)
   arg = menu.add(this, &stability::load_MJDs_for_random_from_archives, 'R',"random - slower");
   arg->set_help ("Load random pulses but set their MJD to MJD of normally ordered pulses\n"
 		  "useful when testing stability on random sequence of pulses\n");
+
+  arg = menu.add(this, &stability::preserve_time_resolution,'F');
+  arg->set_help("Preserve full time resolution - do not tscrunch");
+
 }
 
 void stability::set_path_for_output (string _path)
@@ -177,6 +186,10 @@ void stability::set_number_of_turns_seconds (double seconds)
   cout << "set the number of turns to " << turns << endl;
 }
 
+void stability::preserve_time_resolution()
+{
+  perform_tscrunch = false;
+}
 
 void stability::set_profile_count_offset (long int _offset)
 {
@@ -193,7 +206,6 @@ void stability::process (Pulsar::Archive* archive)
 
   if ( ! form_invariant )
   {
-    cerr << "Fp scrunching!" << endl;
     archive->fscrunch_to_nchan(1);
     archive->pscrunch();
   }
@@ -231,19 +243,8 @@ void stability::process (Pulsar::Archive* archive)
 	}
       }
 
-/*      cout << "got subints! " << endl;
-      cout << "contents of out_of_buffer_subints:" << endl;
-      for (int _i=0; _i < out_of_buffer_subints.size(); _i++)
-	cout << " " << out_of_buffer_subints[_i];
-      cout << endl;
-      cout << "contents of buffer_subints:" << endl;
-      for (int _i=0; _i < buffer_subints.size(); _i++)
-	cout << " " << buffer_subints[_i];
-      cout << endl; */
-
       buffer = total->extract(buffer_subints);
-      //timeApp.init(buffer);
-      if ( ! form_invariant )
+      if ( ! form_invariant && perform_tscrunch)
       {
 	buffer->tscrunch();
       }
@@ -256,7 +257,7 @@ void stability::process (Pulsar::Archive* archive)
     }
     if ( ! form_invariant )
     {
-      output = total_buffered->total( true );
+      output = total_buffered->total( perform_tscrunch );
     }
     
     ss << path << "profile_" << i-turns << "." << ext;
@@ -268,7 +269,10 @@ void stability::process (Pulsar::Archive* archive)
       output->invint();
       output->fscrunch_to_nchan(1);
       output->pscrunch();
-      output->tscrunch();
+      if ( perform_tscrunch )
+      {
+	output->tscrunch();
+      }
       //output->total( true );
     }
     output->unload(outnamechar);

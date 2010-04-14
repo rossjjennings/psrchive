@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.115 $
-   $Date: 2009/11/29 12:13:49 $
-   $Author: straten $ */
+   $Revision: 1.116 $
+   $Date: 2010/04/14 03:59:25 $
+   $Author: sosl $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -203,6 +203,9 @@ namespace Pulsar {
 
     //! cross-correlates this with the given profile in time domain
     void correlate (const Profile* profile); 
+
+    //! cross-correlates and normalizes this with the given profile in time domain
+    void correlate_normalized (const Profile* profile); 
 
     //! some extensions may have to respond to pscrunch
     void pscrunch ();
