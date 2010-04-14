@@ -34,6 +34,9 @@ Pulsar::Calibrator::Type::factory (const std::string& name)
        strcasecmp(name.c_str(), "Hamaker") == 0 )
     return new CalibratorTypes::van09_Eq;
 
+  if ( strcasecmp(name.c_str(), "ovhb04") == 0 )
+    return new Pulsar::CalibratorTypes::ovhb04;
+
   throw Error (InvalidParam, "Pulsar::Calibrator::Type::factory",
 	       "unrecognized calibrator type name '" + name + "'");
 }
