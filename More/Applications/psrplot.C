@@ -100,7 +100,7 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
 					   "pulsar plotting program")
 {
   has_manual = true;
-  version = "$Id: psrplot.C,v 1.33 2010/01/14 13:14:30 straten Exp $";
+  version = "$Id: psrplot.C,v 1.34 2010/04/15 02:46:53 sosl Exp $";
 
   // print angles in degrees
   Angle::default_type = Angle::Degrees;
@@ -243,6 +243,10 @@ void psrplot::setup ()
     for (unsigned iplot=0; iplot < plots.size(); iplot++)
       set_options (plots[iplot], options);
   }
+
+  //-F should activate -O automatically:
+  if (overlay_files)
+    overlay_plots = true;
 
   loop.set_overlay (overlay_plots);
   loop.set_preprocess (preprocess);
