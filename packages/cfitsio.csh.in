@@ -16,6 +16,7 @@ cd cfitsio
 
 ./configure --prefix=@prefix@
 
+make clean
 make
 make install
 
