@@ -336,7 +336,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.99 2010/02/23 18:06:51 demorest Exp $" << endl;
+      cout << "$Id: pat.C,v 1.100 2010/04/20 00:27:29 jonathan_khoo Exp $" << endl;
       return 0;
 
     case 'K':
@@ -788,41 +788,51 @@ double get_period (const Archive* arch)
 }
 
 void compute_dt(Reference::To<Archive> archive, vector<Tempo::toa>& toas,
-        string std_name)
+    string std_name)
 {
-    const double period = get_period(archive);
-    const double stt_offs = get_stt_offs(archive);
+  const double period = get_period(archive);
+  const double stt_offs = get_stt_offs(archive);
 
-    vector<Tempo::toa>::iterator tit;
-    for (tit = toas.begin(); tit != toas.end(); ++tit) {
-        const double phaseShift = (*tit).get_phase_shift();
-        double dt = phaseShift * period;
+  // accommodate for 1-Hz cals
+  const bool skip_ms_mod = get_cal_freq(archive) == 1.0;
 
-        dt += stt_offs;
-        dt *= 1000.0; // ms
-        dt = fmod(dt + 10.0, 1.0); // to allow for dt < 1.0
+  vector<Tempo::toa>::iterator tit;
+  for (tit = toas.begin(); tit != toas.end(); ++tit) {
+    const double phaseShift = (*tit).get_phase_shift();
+    double dt = phaseShift * period;
 
-        if (dt > 0.5)
-            dt -= 1.0;
+    dt += stt_offs;
 
-        dt *= 1000.0;  // microsec
-
-        // remove preceeding path to shorten output line
-        string::size_type pos = std_name.find_last_of('/');
-        if (pos != string::npos)
-            std_name = std_name.substr(pos + 1, std_name.length() - pos);
-
-        cout << fixed << archive->get_filename() << " " <<  std_name << " " <<
-            (*tit).get_subint() << " " << (*tit).get_channel() << " ";
-
-        cout << setprecision(9) << stt_offs << " "; 
-        cout << setprecision(7) << phaseShift << " "; 
-
-        cout << setprecision(3) << dt << " " << setprecision(3) <<
-            (*tit).get_error() << endl;
+    if (!skip_ms_mod) {
+      dt *= 1000.0; // ms
+      dt = fmod(dt + 10.0, 1.0); // to allow dt < 1.0
     }
-}
 
+    if (dt > 0.5) {
+      dt -= 1.0;
+    }
+
+    if (skip_ms_mod) {
+      dt *= 1000.0;  // ms
+    }
+
+    dt *= 1000.0;  // us
+
+    // remove preceeding path to shorten output line
+    string::size_type pos = std_name.find_last_of('/');
+    if (pos != string::npos)
+      std_name = std_name.substr(pos + 1, std_name.length() - pos);
+
+    cout << fixed << archive->get_filename() << " " <<  std_name << " " <<
+      (*tit).get_subint() << " " << (*tit).get_channel() << " ";
+
+    cout << setprecision(9) << stt_offs << " ";
+    cout << setprecision(7) << phaseShift << " ";
+
+    cout << setprecision(3) << dt << " " << setprecision(3) <<
+      (*tit).get_error() << endl;
+  }
+}
 
 /**
  * @param min min x-value
