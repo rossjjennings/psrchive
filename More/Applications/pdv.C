@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.44 $
-   $Date: 2010/03/14 21:58:13 $
+   $Revision: 1.45 $
+   $Date: 2010/04/21 05:04:56 $
    $Author: jonathan_khoo $ */
 
 
@@ -50,33 +50,31 @@ using Pulsar::FITSArchive;
 #include <vector>
 
 
-const char HELP_KEY             = 'h';
-const char IBIN_KEY             = 'b';
-const char ICHAN_KEY            = 'n';
-const char ISUB_KEY             = 'i';
-const char JOB_KEY              = 'j';
-const char JOBS_KEY             = 'J';
-const char PHASE_KEY            = 'r';
-const char FSCRUNCH_KEY         = 'F';
-const char TSCRUNCH_KEY         = 'T';
-const char PSCRUNCH_KEY         = 'p';
-const char CENTRE_KEY           = 'C';
+const char TEXT_HEADERS_KEY     = 'A';
 const char BSCRUNCH_KEY         = 'B';
+const char IBIN_KEY             = 'b';
+const char CENTRE_KEY           = 'C';
+const char CALIBRATOR_KEY       = 'c';
+const char FSCRUNCH_KEY         = 'F';
+const char PULSE_WIDTHS_KEY     = 'f';
+const char HISTORY_KEY          = 'H';
+const char HELP_KEY             = 'h';
+const char PULSE_FLUX_KEY       = 'I';
+const char ISUB_KEY             = 'i';
+const char JOBS_KEY             = 'J';
+const char JOB_KEY              = 'j';
+const char HDR_MARKER_KEY       = 'K';
+const char PA_THRESHOLD_KEY     = 'L';
+const char MINMAX_KEY           = 'm';
+const char ICHAN_KEY            = 'n';
+const char PSCRUNCH_KEY         = 'p';
+const char BASELINE_KEY         = 'R';
+const char PHASE_KEY            = 'r';
+const char PER_SUBINT_KEY       = 'S';
+const char TSCRUNCH_KEY         = 'T';
+const char TEXT_KEY             = 't';
 const char STOKES_FRACPOL_KEY   = 'x';
 const char STOKES_POSANG_KEY    = 'Z';
-const char CALIBRATOR_KEY       = 'c';
-const char PULSE_WIDTHS_KEY     = 'f';
-const char PULSE_FLUX_KEY       = 'I';
-const char BASELINE_KEY         = 'R';
-const char TEXT_KEY             = 't';
-const char TEXT_HEADERS_KEY     = 'A';
-const char HDR_MARKER_KEY       = 'K';
-const char PER_SUBINT_KEY       = 'S';
-const char HISTORY_KEY          = 'H';
-const char SNR_KEY              = 'N';
-const char MINMAX_KEY           = 'm';
-const char PA_THRESHOLD_KEY     = 'L';
-
 
 
 using std::cerr;
@@ -106,7 +104,6 @@ bool cmd_flux = false;
 bool cmd_flux2 = false;
 bool cmd_subints = false;
 bool cmd_history = false;
-bool cmd_snr = false;
 bool per_channel_headers = false;
 bool cal_parameters = false;
 bool keep_baseline = false;
@@ -124,9 +121,6 @@ float phase = 0.0;
 float pa_threshold = 3.0;
 
 vector<string> jobs;
-
-// default duty cycle
-float dc = 0.15;
 
 struct min_max_data {
 	float max;
@@ -164,7 +158,7 @@ void Usage( void )
   "   -" << STOKES_POSANG_KEY <<  "          Convert to Stokes and also print position angle (P.A.) \n"
   "   -" << PA_THRESHOLD_KEY <<   " sigma    Minimum linear polarization for P.A. \n"
   "   -" << CALIBRATOR_KEY <<     "          Print out calibrator (square wave) parameters \n"
-  "   -" << PULSE_WIDTHS_KEY <<   "[dcyc]    Show pulse widths and mean flux density (mJy) \n"
+  "   -" << PULSE_WIDTHS_KEY <<   "          Show pulse widths and mean flux density (mJy) \n"
   "                                          with baseline width dcyc \n"
   "   -" << PULSE_FLUX_KEY <<     "          print the mean flux density \n"
   "   -" << BASELINE_KEY <<       "          Do not remove baseline \n"
@@ -173,7 +167,6 @@ void Usage( void )
   "   -" << HDR_MARKER_KEY <<     "          Start header lines with #\n"
   "   -" << PER_SUBINT_KEY <<     " params   Print out per subint data (no params for argument list) \n"
   "   -" << HISTORY_KEY <<        " params   Print out the history table for the archive (no params for argument list) \n"
-  "   -" << SNR_KEY <<            "          Print the S/N \n"
   "   -" << MINMAX_KEY <<         "          Print out the min and max bin value for each subint \n"
   " \n"
   "   For more detailed list of options use \"pdv -h param\", ie \"pdv -h S\" \n"
@@ -578,7 +571,7 @@ void Flux( Reference::To< Archive > archive )
     archive->convert_state (Signal::Stokes);
 
   cout << header_marker;
-  cout << "File\t\t\t Sub Chan  Pol\t     MJD        Freq\t  S(mJy)    W10       W50" << endl;
+  cout << "File\t\t\t Sub Chan  Pol\t     MJD        Freq\t  S(mJy)    W10       W50       SNR" << endl;
 
   int fchan = 0, lchan = archive->get_nchan() - 1;
   if( ichan <= lchan && ichan >= fchan)
@@ -601,6 +594,7 @@ void Flux( Reference::To< Archive > archive )
   const double start_time = archive->start_time().in_days();
   const double frequency = archive->get_centre_frequency();
   const unsigned npol = archive->get_npol();
+  const double dc = Profile::default_duty_cycle;
 
   for (int s = fsub; s <= lsub; s++)
   {
@@ -611,10 +605,11 @@ void Flux( Reference::To< Archive > archive )
         const float fluxDen = flux(archive->get_Profile(s,p,c),dc, -1);
         const float width_10 = width(archive->get_Profile(s,p,c),junk, 10,dc);
         const float width_50 = width(archive->get_Profile(s,p,c),junk, 50,dc);
+        const double snr = archive->get_Profile(s,p,c)->snr();
 
-        printf("%s\t%4d %4d %4d %12.3f %10.3f %8.3f %9.5f %9.5f\n",
-                filename.c_str(), s, c, p, start_time, frequency, fluxDen,
-                width_10, width_50);
+        printf("%s\t%4d %4d %4d %12.3f %10.3f %8.3f %9.5f %9.5f %8.2f\n",
+            filename.c_str(), s, c, p, start_time, frequency, fluxDen,
+            width_10, width_50, snr);
       }
     }
   }
@@ -1106,13 +1101,12 @@ int main( int argc, char *argv[] ) try
   args += STOKES_POSANG_KEY;
   args += CALIBRATOR_KEY;
   args += BASELINE_KEY;
-  args += PULSE_WIDTHS_KEY; args += "::";
+  args += PULSE_WIDTHS_KEY;
   args += PULSE_FLUX_KEY;
   args += TEXT_KEY;
   args += TEXT_HEADERS_KEY;
   args += PER_SUBINT_KEY; args += ":";
   args += HISTORY_KEY; args += ":";
-  args += SNR_KEY;
   args += MINMAX_KEY;
   args += HDR_MARKER_KEY;
   args += PA_THRESHOLD_KEY; args += ":";
@@ -1150,13 +1144,6 @@ int main( int argc, char *argv[] ) try
       per_channel_headers = true;
       break;
     case PULSE_WIDTHS_KEY:
-	  if (optarg == NULL) {
-	    dc = Pulsar::Profile::default_duty_cycle;
-	  } else {
-        dc = fromstring<float>( string(optarg) );
-		Pulsar::Profile::default_duty_cycle = dc;
-		jobs.push_back("config Profile::baseline=minimum");
-	  }
       cmd_flux = true;
       break;
     case PULSE_FLUX_KEY:
@@ -1221,9 +1208,6 @@ int main( int argc, char *argv[] ) try
       if( optarg != NULL )
         separate (optarg, history_params, " ,");
       break;
-    case SNR_KEY:
-      cmd_snr = true;
-      break;
 	case MINMAX_KEY:
 	  show_min_max = true;
 	  break;
@@ -1261,9 +1245,6 @@ int main( int argc, char *argv[] ) try
   }
 
   vector< string > filenames = GetFilenames( argc, argv );
-
-  if( cmd_snr )
-    PrintSNR( filenames );
 
   if( cal_parameters || cmd_text || cmd_flux || cmd_flux2 || show_min_max ||
       show_pol_frac )
