@@ -26,6 +26,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/FITSHdrExtension.h"
+#include "Pulsar/CalInfoExtension.h"
 
 #include "Pulsar/ArchiveTemplates.h"
 #include "Pulsar/SmoothSinc.h"
@@ -64,6 +65,15 @@ void compute_dt(Reference::To<Archive> archive, vector<Tempo::toa>& toas,
         string std_name);
 
 double truncateDecimals(double d, int decimalPlaces);
+
+void compute_dt(Reference::To<Archive> archive, vector<Tempo::toa>& toas,
+        string std_name);
+
+double get_cal_freq(const Archive* archive);
+
+double truncateDecimals(double d, int decimalPlaces);
+
+double get_cal_freq(Archive* archive);
 
 #if HAVE_PGPLOT
 void plotDifferences(Reference::To<Archive> arch,
@@ -336,7 +346,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.100 2010/04/20 00:27:29 jonathan_khoo Exp $" << endl;
+      cout << "$Id: pat.C,v 1.101 2010/04/21 00:17:06 jonathan_khoo Exp $" << endl;
       return 0;
 
     case 'K':
@@ -764,6 +774,18 @@ void plotDifferences(Reference::To<Archive> arch,
     cout << "Plotting " << arch->get_filename() << endl;
 }
 #endif
+
+double get_cal_freq(Archive* archive)
+{                                                                                        
+  double cal_frequency = 0.0;
+
+  Reference::To<CalInfoExtension> ext = archive->get<CalInfoExtension>();                
+  if (ext) {
+    cal_frequency = ext->cal_frequency;
+  }
+
+  return cal_frequency;
+} 
 
 /**
  * @brief compute delta time using the phase shift and start time offset
