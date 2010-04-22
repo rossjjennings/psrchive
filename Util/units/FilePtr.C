@@ -7,6 +7,7 @@
 
 #include "FilePtr.h"
 #include "Error.h"
+#include "debug.h"
 
 FilePtr::FilePtr (const std::string& filename, const std::string& mode)
 {
@@ -15,3 +16,36 @@ FilePtr::FilePtr (const std::string& filename, const std::string& mode)
     throw Error (FailedSys, "FilePtr::FilePtr",
 		 "could not open " + filename + " for " + mode);
 }
+
+FilePtr::FilePtr (FILE* f)
+{
+  DEBUG("FilePtr ctor FILE* this=" << this);
+  fptr = f;
+}
+
+FilePtr::~FilePtr ()
+{
+  DEBUG("FilePtr dtor this=" << this);
+  close();
+}
+
+const FilePtr& FilePtr::operator = (FILE* f)
+{
+  DEBUG("FilePtr operator =");
+  close();
+  fptr = f;
+}
+
+void FilePtr::close ()
+{
+  DEBUG("FilePtr::close");
+
+  if (fptr)
+  {
+    DEBUG("closing ptr=" << fptr);
+    fclose (fptr);
+  }
+
+  fptr=0;
+}
+

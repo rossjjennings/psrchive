@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/FilePtr.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/08/21 01:28:58 $
+   $Revision: 1.4 $
+   $Date: 2010/04/22 02:42:51 $
    $Author: straten $ */
 
 #ifndef __FilePtr_H
@@ -23,13 +23,15 @@ class FilePtr
 public:
 
   FilePtr (const std::string& filename, const std::string& mode);
-  FilePtr (FILE* f) { fptr = f; }
+  FilePtr (FILE*);
   FilePtr () { fptr = 0; }
-  ~FilePtr () { if (fptr) fclose (fptr); }
+  ~FilePtr ();
+  const FilePtr& operator = (FILE*);
   operator FILE* () { return fptr; }
   bool operator ! () { return fptr == 0; }
 
 protected:
+  void close ();
   FILE* fptr;
 };
 
