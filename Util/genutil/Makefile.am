@@ -53,7 +53,8 @@ include_HEADERS = \
         utc.h \
 	VanVleck.h \
 	VirtualMemory.h \
-	table_stream.h
+	table_stream.h \
+	Warning.h
 
 
 libgenutil_la_SOURCES = \
@@ -118,7 +119,8 @@ libgenutil_la_SOURCES = \
         utc.c \
 	VanVleck.C \
 	VirtualMemory.C \
-	table_stream.C
+	table_stream.C \
+	Warning.C
 
 if HAVE_PGPLOT
 include_HEADERS += JenetAnderson98Plot.h
@@ -140,7 +142,7 @@ TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98	\
 	test_endian test_sum test_NormalDistribution			\
 	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord	\
 	test_exponential test_StraightLine test_ThreadStream		\
-	test_Horizon test_LogFile
+	test_Horizon test_LogFile test_Warning
 
 if HAVE_GSL
 TESTS += test_SplineFit
@@ -172,6 +174,7 @@ test_ThreadStream_SOURCES	= test_ThreadStream.C
 test_Horizon_SOURCES		= test_Horizon.C
 test_VirtualMemory_SOURCES	= test_VirtualMemory.C
 test_LogFile_SOURCES		= test_LogFile.C
+test_Warning_SOURCES		= test_Warning.C
 
 #############################################################################
 #
