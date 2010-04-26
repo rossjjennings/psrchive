@@ -46,8 +46,7 @@ include_HEADERS = \
 	TextLoop.h \
         tostring.h \
         Traits.h \
-        Vector.h \
-	Warning.h
+        Vector.h
 
 libunits_la_SOURCES = \
 	Alias.C \
@@ -69,8 +68,7 @@ libunits_la_SOURCES = \
 	TextIndex.C \
         TextInterface.C \
 	TextInterfaceName.C \
-	TextLoop.C \
-	Warning.C
+	TextLoop.C
 
 EXTRA_DIST = header_PromoteTraits MatrixTest.h
 
@@ -79,7 +77,7 @@ nodist_include_HEADERS = PromoteTraits.h
 
 
 TESTS = test_Alias test_tostring test_Conventions		    \
-	test_Warning test_Error test_Configuration		    \
+	test_Error test_Configuration		    \
 	test_HeapTracked test_Reference test_circular_Reference	    \
 	test_Registry test_Functor test_Callback test_separate	    \
 	test_substitute test_escape test_Mueller test_inner_product \
@@ -89,12 +87,11 @@ TESTS = test_Alias test_tostring test_Conventions		    \
 	test_Jones test_Quaternion test_Pauli			    \
 	test_ModifyRestore
 
-check_PROGRAMS = $(TESTS) many_references many_calls
+check_PROGRAMS = $(TESTS) many_references many_calls benchmark_tostring
 
 test_Alias_SOURCES		= test_Alias.C
 test_tostring_SOURCES		= test_tostring.C
 test_Conventions_SOURCES	= test_Conventions.C
-test_Warning_SOURCES		= test_Warning.C
 test_Error_SOURCES		= test_Error.C
 test_Configuration_SOURCES	= test_Configuration.C
 test_HeapTracked_SOURCES	= test_HeapTracked.C
@@ -128,6 +125,8 @@ test_inner_product_SOURCES	= test_inner_product.C
 
 many_references_SOURCES		= many_references.C
 many_calls_SOURCES		= many_calls.C
+
+benchmark_tostring_SOURCES	= benchmark_tostring.C
 
 #############################################################################
 #
