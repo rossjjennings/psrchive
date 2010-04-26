@@ -34,6 +34,8 @@ Warning::~Warning ()
 
 Warning& operator<< (Warning& warning, const char* t)
 {
+  ThreadContext::Lock (warning.context);
+
   if (Warning::verbose)
     cerr << "Warning::operator << const char*" << endl;
 
@@ -45,6 +47,8 @@ Warning& operator<< (Warning& warning, const char* t)
 
 Warning& operator<< (Warning& warning, manipulator m)
 {
+  ThreadContext::Lock (warning.context);
+
   if (Warning::verbose)
     cerr << "Warning::operator << manipulator" << endl;
 
@@ -71,5 +75,5 @@ void Warning::insertion (manipulator m)
   // empty the buffers
   buffer.str("");
   message = "";
-
 }
+

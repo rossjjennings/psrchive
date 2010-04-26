@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Warning.h,v $
-   $Revision: 1.1 $
-   $Date: 2010/04/26 19:59:20 $
+   $Revision: 1.2 $
+   $Date: 2010/04/26 20:03:34 $
    $Author: straten $ */
 
 #ifndef __Warning_h
@@ -63,7 +63,7 @@ class Warning {
   template<class T>
   friend Warning& operator<< (Warning& warning, const T& t)
   {
-    ThreadContext::Lock (context);
+    ThreadContext::Lock (warning.context);
 
     warning.buffer << t;
     warning.message += "*";
