@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.12 $
-   $Date: 2009/09/22 11:43:54 $
+   $Revision: 1.13 $
+   $Date: 2010/05/02 16:08:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Application_h
@@ -111,6 +111,8 @@ namespace Pulsar {
     bool verbose;
     bool very_verbose;
 
+    // sort filenames returned by dirglob
+    bool sort_filenames;
   };
 
   //! Describes application command line options.

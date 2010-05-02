@@ -28,6 +28,8 @@ Pulsar::Application::Application (const string& n, const string& d)
 
   verbose = false;
   very_verbose = false;
+
+  sort_filenames = false;
 }
 
 //! Add options to the application
@@ -62,7 +64,6 @@ void Pulsar::Application::set_quiet ()
 
 void Pulsar::Application::set_verbose ()
 {
-  Archive::set_verbosity (2);
   verbose = true;
 }
 
@@ -114,8 +115,13 @@ void Pulsar::Application::parse (int argc, char** argv)
   if (!metafile.empty())
     stringfload (&filenames, metafile);
   else
+  {
     for (int i=optind; i<argc; i++)
       dirglob (&filenames, argv[i]);
+
+    if (sort_filenames)
+      sort (filenames.begin(), filenames.end());
+  }
 
   if (update_history)
   {
