@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Traits.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/05/22 08:05:59 $
+   $Revision: 1.6 $
+   $Date: 2010/05/02 14:11:23 $
    $Author: straten $ */
 
 /*
@@ -33,6 +33,8 @@
 //! Traits of an element type
 template< class E > struct ElementTraits
 {
+  typedef E real;
+
   //! How to cast a complex type to the element type
   template< class T >
   static inline E from_complex (const std::complex<T>& value)
@@ -50,6 +52,8 @@ template< class E > struct ElementTraits
 //! Partial specialization for complex elements
 template< class E > struct ElementTraits< std::complex<E> >
 {
+  typedef E real;
+
   //! How to cast a complex type to the complex element type
   template< class T >
   static inline std::complex<E> from_complex (const std::complex<T>& value)
@@ -93,6 +97,11 @@ std::complex<T> ci (const T& real)
 //! Return the conjugate of a real number
 template<typename T>
 T myconj (const T& x) { return ElementTraits<T>::conjugate(x); };
+
+//! Return the real part of a real number
+template<typename T>
+typename ElementTraits<T>::real
+myreal (const T& x) { return ElementTraits<T>::to_real(x); };
 
 #endif
 

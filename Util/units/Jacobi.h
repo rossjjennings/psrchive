@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jacobi.h,v $
-   $Revision: 1.10 $
-   $Date: 2010/03/22 15:22:42 $
-   $Author: demorest $ */
+   $Revision: 1.11 $
+   $Date: 2010/05/02 14:11:23 $
+   $Author: straten $ */
 
 #ifndef __Jacobi_H
 #define __Jacobi_H
@@ -95,7 +95,7 @@ inline void rotate_Jacobi (Matrix<RC,RC,T>& x, T s, T tau,
   T h=x[k][l];
 
   // Equation 11.1.16
-  x[i][j] -= conj(s)*(h+g*conj(tau));
+  x[i][j] -= myconj(s)*(h+g*myconj(tau));
   // Equation 11.1.17
   x[k][l] += s*(g-h*tau);
 }
@@ -135,8 +135,8 @@ U JacobiRotation ( unsigned ip, unsigned iq,
   for (j=0; j<RC; j++)
     rotate_Jacobi(a,s,tau,j,ip,j,iq);
 
-  s = conj(s);
-  tau = conj(tau);
+  s = myconj(s);
+  tau = myconj(tau);
 
   // rotate the rows of the input matrix
   for (j=0; j<RC; j++)
@@ -166,7 +166,7 @@ void Jacobi (Matrix<RC,RC,T>& a, Matrix<RC,RC,T>& evec, Vector<RC,U>& eval)
   // copy the diagonal elements into d and b
   unsigned ip, iq;
   for (ip=0; ip<RC; ip++)
-    b[ip] = eval[ip] = real( a[ip][ip] );
+    b[ip] = eval[ip] = myreal( a[ip][ip] );
 
   // start with the identity matrix
   matrix_identity (evec);
