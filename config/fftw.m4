@@ -34,7 +34,6 @@ AC_DEFUN([SWIN_LIB_FFTW],
 
   AC_SUBST(FFTW_LIBS)
   AC_SUBST(FFTW_CFLAGS)
-  LIBS="$ac_save_LIBS"
 
   AM_CONDITIONAL(HAVE_FFTW3,[test "$have_fftw3" = yes])
 
