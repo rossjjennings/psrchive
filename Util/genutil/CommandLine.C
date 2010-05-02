@@ -144,6 +144,8 @@ void CommandLine::Menu::parse (int argc, char* const * argv)
 	  arg = optarg;
 
 	item[i]->handle (arg);
+	item[i]->set_handled (true);
+
 	break;
       }
     }

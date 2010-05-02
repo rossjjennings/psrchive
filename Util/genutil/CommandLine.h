@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/CommandLine.h,v $
-   $Revision: 1.9 $
-   $Date: 2009/09/07 18:16:17 $
+   $Revision: 1.10 $
+   $Date: 2010/05/02 16:08:58 $
    $Author: straten $ */
 
 #ifndef __CommandLine_h
@@ -47,6 +47,9 @@ namespace CommandLine {
     //! Handle the argument
     virtual void handle (const std::string& arg) = 0;
 
+    //! Set the handled flag
+    virtual void set_handled (bool) { /* do nothing by default */ }
+
     //! Return two columns of help text
     virtual Help get_help () const = 0;
   };
@@ -80,11 +83,14 @@ namespace CommandLine {
     //! Code assigned to this Argument by Menu class
     int val;
 
+    //! bool handled notification
+    bool* handled;
+
     friend class Menu;
 
   public:
 
-    Argument () { val = 0; has_arg = no_argument; }
+    Argument () { val = 0; has_arg = no_argument; handled = 0; }
 
     void set_short_name (char c) { short_name = std::string(1,c); }
     void set_long_name (const std::string& s) { long_name = s; }
@@ -92,6 +98,9 @@ namespace CommandLine {
     void set_help (const std::string& s) { help = s; }
     void set_long_help (const std::string& s) { long_help = s; }
     void set_has_arg (int h) { has_arg = h; }
+
+    void set_handled (bool f) { if (handled) *handled = f; }
+    void set_notification (bool& f) { handled = &f; };
 
     //! Return true if key matches
     bool matches (int c) const { return val == c; }
