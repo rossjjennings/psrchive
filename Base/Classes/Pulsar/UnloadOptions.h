@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/UnloadOptions.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/09/02 02:54:31 $
+   $Revision: 1.4 $
+   $Date: 2010/05/02 16:08:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_UnloadOptions_h
@@ -28,6 +28,20 @@ namespace Pulsar {
     //! Default constructor
     UnloadOptions ();
 
+    //! The application produces an output for each input
+    void set_output_each (bool);
+
+    //! Return the output filename for the input
+    std::string get_output_filename (const Archive*);
+
+    //! Set the extension added to output filenames
+    void set_extension (const std::string&);
+    std::string get_extension () const { return extension; }
+
+    //! Set the directory to which output files will be written
+    void set_directory (const std::string&);
+    std::string get_directory () const { return directory; }
+
     //! Add options to the menu
     virtual void add_options (CommandLine::Menu&);
 
@@ -38,6 +52,9 @@ namespace Pulsar {
     virtual void finish (Archive*);
 
   private:
+
+    //! The application produces and output for each input
+    bool output_each;
 
     //! Unload
     bool unload;

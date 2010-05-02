@@ -16,6 +16,37 @@ Pulsar::UnloadOptions::UnloadOptions ()
 {
   unload = false;
   overwrite = false;
+  output_each = true;
+}
+
+//! The application produces an output for each input
+void Pulsar::UnloadOptions::set_output_each (bool flag)
+{
+  output_each = flag;
+}
+
+//! Return the output filename for the input
+string Pulsar::UnloadOptions::get_output_filename (const Archive* archive)
+{
+  string newname = archive->get_filename();
+
+  if (!extension.empty())
+    newname = replace_extension( newname, extension );
+
+  if (!directory.empty())
+    newname = directory + "/" + basename (newname);
+
+  return newname;
+}
+
+void Pulsar::UnloadOptions::set_extension (const string& ext)
+{
+  extension = ext;
+}
+
+void Pulsar::UnloadOptions::set_directory (const string& dir)
+{
+  directory = dir;
 }
 
 void Pulsar::UnloadOptions::add_options (CommandLine::Menu& menu)
@@ -24,8 +55,11 @@ void Pulsar::UnloadOptions::add_options (CommandLine::Menu& menu)
 
   menu.add ("\n" "Output options:");
 
-  arg = menu.add (overwrite, 'm');
-  arg->set_help ("modify (overwrite) the original file");
+  if (output_each)
+  {
+    arg = menu.add (overwrite, 'm');
+    arg->set_help ("modify (overwrite) the original file");
+  }
 
   arg = menu.add (extension, 'e', "ext");
   arg->set_help ("write files with a new extension");
@@ -39,6 +73,9 @@ void Pulsar::UnloadOptions::setup ()
 #ifdef _DEBUG
   cerr << "Pulsar::UnloadOptions::setup" << endl;
 #endif
+
+  if (!output_each)
+    return;
 
   if (overwrite && (!extension.empty() || !directory.empty()))
     throw Error (InvalidState, "Pulsar::UnloadOptions::setup",
@@ -72,13 +109,7 @@ void Pulsar::UnloadOptions::finish (Archive* archive)
     return;
   }
 
-  string newname = archive->get_filename();
-
-  if (!extension.empty())
-    newname = replace_extension( newname, extension );
-
-  if (!directory.empty())
-    newname = directory + "/" + basename (newname);
+  string newname = get_output_filename (archive);
 
 #ifdef _DEBUG
   cerr << "Pulsar::UnloadOptions::finish writing " << newname << endl;
