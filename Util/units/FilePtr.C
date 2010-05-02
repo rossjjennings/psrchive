@@ -31,9 +31,10 @@ FilePtr::~FilePtr ()
 
 const FilePtr& FilePtr::operator = (FILE* f)
 {
-  DEBUG("FilePtr operator =");
+  DEBUG("FilePtr::operator= fptr=" << f);
   close();
   fptr = f;
+  return *this;
 }
 
 void FilePtr::close ()
