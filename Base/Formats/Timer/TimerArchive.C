@@ -604,7 +604,7 @@ void Pulsar::TimerArchive::correct () try
   }
   catch (Error& error)
   {
-    if (verbose)
+    if (verbose > 2)
       warning << "Pulsar::TimerArchive::correct"
                  " could not set telescope coordinates \n\t"
               << error.get_message() << endl;
