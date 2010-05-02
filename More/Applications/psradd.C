@@ -1,11 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002-2008 by Willem van Straten
+ *   Copyright (C) 2002-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-#include "Pulsar/psrchive.h"
+#include "Pulsar/Application.h"
+#include "Pulsar/StandardOptions.h"
+#include "Pulsar/UnloadOptions.h"
 
 #include "Pulsar/TimeAppend.h"
 #include "Pulsar/FrequencyAppend.h"
@@ -18,436 +20,301 @@
 #include "Pulsar/Parameters.h"
 #include "Pulsar/Predictor.h"
 
-#include "Pulsar/ProcHistory.h"
-#include "Pulsar/TimeSortedOrder.h"
-
 #include "Pulsar/Interpreter.h"
 
 #include "load_factory.h"
-#include "dirutil.h"
-#include "strutil.h"
-#include "separate.h"
 
 #include <iostream>
-#include <algorithm>
-
-#include <unistd.h>
-#include <math.h>
 
 using namespace std;
 
-static const char* args
-= "b:c:C:E:e:f:Fg:G:hiI:j:J:LM:m:O:o:p:PqRr:sS:tTUvVwzZ:";
-
-void reorder(Reference::To<Pulsar::Archive> arch);
-
-void usage () {
-  cout <<
-    "A program for adding Pulsar::Archives together \n"
-    "USAGE: psradd [" << args << "] filenames \n"
-    " -h          This help page \n"
-    " -i          Show revision information \n"
-    " -q          Quiet mode (suppress warnings) \n"
-    " -v          Verbose mode (informational) \n"
-    " -V          Very verbose mode (debugging) \n"
-    "\n"
-    " -E f.eph    Load and install new ephemeris from f.eph \n"
-    " -o fname    Output result to 'fname' \n"
-    " -F          Force append despite mismatch of header parameters \n"
-    " -j j1[,jN]  preprocessing job[s] \n"
-    " -J jobs     multiple preprocessing jobs in 'jobs' file \n"
-    " -L          Log results in source.log \n"
-    " -M meta     Filename with list of files \n"
-    " -m domain   Patch missing sub-integrations: domain = time or phase \n"
-    " -P          Phase align archive with total before adding \n"
-    " -R          Append data in the frequency direction \n"
-    " -r freq     Add archive only if it has this centre frequency \n"
-    " -t          Make no changes to file system (testing mode) \n"
-    " -T          Tscrunch result after each new file (nice on RAM) \n"
-    " -z          Only add archives that have integration length > 0 \n"
-    " -Z time     Only add archives that are time (+/- 0.5) seconds long \n"
-    "\n"
-    "AUTO ADD options:\n"
-    " -e ext      Extension added to output filenames (default .it) \n"
-    " -C turns    Tscrunch+unload when CAL phase changes by >= turns \n"
-    " -G sec      Tscrunch+unload when time to next archive > 'sec' seconds \n"
-    " -g sec      Tscrunch+unload when tiime between start and end of integrated archive > 'sec' seconds \n"
-    " -I sec      Tscrunch+unload when archive contains 'sec' seconds \n"
-    " -O path     Path to which output files are written \n"
-    " -S s/n      Tscrunch+unload when archive has this S/N \n"
-    "\n"
-    "Note: AUTO ADD options (-C, -G, -I, and -S) are incompatible with -f \n"
-    "\n"
-    "See "PSRCHIVE_HTTP"/manuals/psradd for more details\n"
-       << endl;
-}
-
-// returns the phase of the mid-point of the on cal hi
-static float mid_hi (Pulsar::Archive* archive);
-
-// set the total to the specified archive
-static void set_total (Pulsar::Archive* archive);
-
-// the accumulated total
-static Reference::To<Pulsar::Archive> total;
-
-// name of the output file
-static string unload_name;
-
-// verbose output
-static bool verbose = false;
-
-// very verbose output
-static bool vverbose = false;
-
-// log the results
-static bool log_results = false;
-
-// tscrunch+unload when certain limiting conditions are met
-static bool auto_add = false; 
-
-// after loading the next archive, reset the total
-static bool reset_total_next_load = true;
-
-// extension added to auto-added output files
-static string integrated_extension ("it");
-
-// directory to which auto-added output files are written
-static string integrated_path;
-
-// the file stream to which log messages are written
-static FILE* log_file = 0;
-
-// the name of the currently open log file
-static string log_filename;
-
-// the ephemeris to be installed
-static Reference::To<Pulsar::Parameters> ephemeris;
-
-// the append algorithm in use
-static Pulsar::Append* append = 0;
-
-int main (int argc, char **argv) try
+//! Pulsar Archive combination/integration application
+class psradd: public Pulsar::Application
 {
-  // append in the time direction
-  bool time_direction = true;
+public:
 
-  // do not make changes to file system when true
-  bool testing = false;
+  //! Default constructor
+  psradd ();
 
-  // if specified, bscrunch each archive to nbin
-  int nbin = 0;
+  //! Verify setup
+  void setup ();
 
-  // if specified, fscrunch each archive to nchan
-  int nchan = 0;
+  //! Process the given archive
+  void process (Pulsar::Archive*);
 
-  // ensure that archive has data before adding
-  bool check_has_data = false;
+  //! Unload the total
+  void finalize ();
 
-  // tscrunch total after each new file is appended
-  bool tscrunch_total = false;
+  //! Disable various sanity checks
+  void force ();
 
-  // phase align each archive before appending to total
-  bool phase_align = false;
+protected:
 
-  // auto_add features:
-  // maximum amount of data (in seconds) to integrate into one archive
-  float integrate = 0.0;
-  // maximum signal to noise to integrate into one archive
-  float max_ston = 0.0;
-  // maximum interval (in seconds) across which integration should occur
-  float interval = 0.0;
-  // maximum total integration interval (in seconds)  that goes into one archive
-  float integrate_interval = 0.0;
-  // maximum amount by which cal phase can differ
-  float cal_phase_diff = 0.0;
+  //! Add command line options
+  void add_options (CommandLine::Menu&);
 
+  // set the total to the archive
+  void set_total (Pulsar::Archive* archive);
 
-  // name of file containing list of Archive filenames
-  char* metafile = NULL;
+  // add the archive to the total
+  void append (Pulsar::Archive* archive);
 
-  // name of the new ephemeris file
-  string parname;
+  //! check the gap between the end of total and start of archive
+  void check_interval_between (Pulsar::Archive*);
 
-  // The centre frequency to select upon
-  double centre_frequency = -1.0;
+  //! check that the total and current calibrator observations are aligned
+  void check_cal_phase_diff (Pulsar::Archive*);
 
-  // Only add in archives if their length matches this time
-  float required_archive_length = -1.0;
+  //! check that the total and current archive are from the same division
+  void check_division (Pulsar::Archive*);
 
-  // for writing into history
-  string command = "psradd";
+  //! check the integration length of integrated total
+  void check_integration_length ();
+
+  //! check the S/N of the integrated total
+  void check_signal_to_noise ();
+
+  //! check the gap between the start and end of total
+  void check_interval_within ();
+
+  // the accumulated total
+  Reference::To<Pulsar::Archive> total;
+
+  // name of the output file
+  string unload_name;
   
-  // Preprocessing jobs
-  vector<string> jobs;
+  // log the results
+  bool log_results;
+
+  // the file stream to which log messages are written
+  FilePtr log_file;
+
+  // the name of the currently open log file
+  string log_filename;
+
+  // the ephemeris to be installed
+  Reference::To<Pulsar::Parameters> ephemeris;
 
   // Append algorithms
   Pulsar::TimeAppend time;
   Pulsar::FrequencyAppend frequency;
 
+  // use the TimeAppend algorithm
+  bool time_direction;
+
   // Patch algorithm
   Reference::To<Pulsar::PatchTime> patch;
+  string patch_name;
 
-  append = &time;
+  // Unload options
+  Reference::To<Pulsar::UnloadOptions> unload;
 
-  int c;  
-  while ((c = getopt(argc, argv, args)) != -1)  {
-    switch (c)  {
+private:
 
-    case 'h':
-      usage();
-      return 0;
-      
-    case 'i':
-      cout << "$Id: psradd.C,v 1.70 2010/01/28 00:31:54 sosl Exp $" 
-	   << endl;
-      return 0;
+  // tscrunch+unload when certain limiting conditions are met
+  bool auto_add;
 
-    case 'b':
-      nbin = atoi (optarg);
-      
-      command += " -b ";
-      command += optarg;
-      
-      break;
+  // reset the total to the current archive
+  bool reset_total;
+};
 
-    case 'c':
-      nchan = atoi(optarg);
-      
-      command += " -c ";
-      command += optarg;
-      
-      break;
+int main (int argc, char** argv)
+{
+  psradd program;
+  return program.main (argc, argv);
+}
 
-    case 'C':
-      if (sscanf (optarg, "%f", &cal_phase_diff) != 1) {
-	cerr << "psradd error parsing '"<< optarg <<"'"
-	  " as max CAL phase change" << endl;
-	return -1;
-      }
-      auto_add = true;
-      command += " -C ";
-      command += optarg;
-      break;
+psradd::psradd () : Pulsar::Application ("psradd", 
+					 "combines archives together")
+{
+  version = "$Id: psradd.C,v 1.71 2010/05/02 16:08:52 straten Exp $";
 
-    case 'e':
-      integrated_extension = optarg;
-      
-      command += " -e ";
-      command += optarg;
-      
-      break;  
+  has_manual = true;
+  update_history = true;
+  sort_filenames = true;
 
-    case 'E':
-    case 'p':
-      parname = optarg;
-      command += " -p ";
-      command += optarg;
-      break;
+  unload = new Pulsar::UnloadOptions;
+  unload->set_output_each( false );
+  unload->set_extension( "it" );
 
-    case 'o':
-      command += " -o ";
-    case 'f':
-      unload_name = optarg;
-      command += optarg;
-      
-      if (c == 'f')
-	command += " -f ";
-      break;
+  add( new Pulsar::StandardOptions );
+  add( unload );
 
-    case 'F':
+  // append in the time direction by default
+  time_direction = true;
 
-      time.chronological = false;
-      time.must_match = false;
+  // do not log results by default
+  log_results = false;
 
-      frequency.must_match = false;
+  auto_add = false; 
 
-      command += " -F";
-      
-      break;
+  reset_total = true;
+}
 
-    case 'G':
-      if (sscanf (optarg, "%f", &interval) != 1) {
-	cerr << "psradd error parsing '"<< optarg <<"' as maximum interval\n";
-	return -1;
-      }
-      auto_add = true;
-      command += " -G ";
-      command += optarg;
-      
-      break;
+/* ********************************************************************
 
-    case 'g':
-      if (sscanf (optarg, "%f", &integrate_interval) !=1) {
-	cerr << "psradd error parsing '" << optarg << "' as maximum integration interval\n";
-	return -1;
-      }
-      auto_add = true;
-      command += " -g ";
-      command += optarg;
+   Global variables
 
-      break;
+   These eventually may/should be turned into attributes of the psradd
+   class ... one thing I don't like about attributes is that they must
+   be separately declared in the class definition and initialized in
+   the constructor.
 
-    case 'I':
-      if (sscanf (optarg, "%f", &integrate) != 1) {
-	cerr << "psradd error parsing '"<< optarg <<"' as integration total\n";
-	return -1;
-      }
-      auto_add = true;
-      command += " -I ";
-      command += optarg;
-      break;
+   ******************************************************************** */
 
-    case 'j':
-      separate (optarg, jobs, ",");
-      break;
-      
-    case 'J':
-      loadlines (optarg, jobs);
-      break;
+// write results to disk by default
+bool testing = false;
 
-    case 'O':
-      integrated_path = optarg;
-      command += " -O ";
-      command += optarg;
-      break;
+// ensure that archive has data before adding
+bool check_has_data = false;
 
-    case 'S':
-      if (sscanf (optarg, "%f", &max_ston) != 1) {
-	cerr << "psradd error parsing '"<< optarg <<"' as max S/N\n";
-	return -1;
-      }
-      auto_add = true;
-      command += " -S ";
-      command += optarg;
-      break;
+// tscrunch total after each new file is appended
+bool tscrunch_total = false;
 
-    case 'L':
-      log_results = true;
-      break;
+// phase align each archive before appending to total
+bool phase_align = false;
 
-    case 'M':
-      metafile = optarg;
-      command += " -M ";
-      command += optarg;
-      break;
+// auto_add features:
+// maximum amount of data (in seconds) to integrate into one archive
+float max_integration_length = 0.0;
+// maximum signal to noise to integrate into one archive
+float max_signal_to_noise = 0.0;
+// maximum interval (in seconds) across which integration should occur
+float max_interval_between = 0.0;
+// interval (in seconds) into which to divide the day
+unsigned division_seconds = 0;
+// maximum total integration interval (in seconds)  that goes into one archive
+float max_interval_within = 0.0;
+// maximum amount by which cal phase can differ
+float cal_phase_diff = 0.0;
 
-    case 'm':
-    {
-      Pulsar::Contemporaneity* policy = 0;
-      if (optarg == string("time"))
-	policy = new Pulsar::Contemporaneity::AtEarth;
-      else if (optarg == string("phase"))
-	policy = new Pulsar::Contemporaneity::AtPulsar;
-      else
-      {
-	cerr << "psradd: unknown contemporaneity policy '"<<optarg<<"'"<< endl;
-	return -1;
-      }
+// name of the new ephemeris file
+string parname;
 
-      patch = new Pulsar::PatchTime;
-      patch->set_contemporaneity_policy( policy );
-      break;
-    }
+// The centre frequency to select upon
+double centre_frequency = -1.0;
 
-    case 'P':
-      phase_align = true;
-      command += " -P";
-      break;
+// Only add in archives if their length matches this time
+float required_archive_length = -1.0;
 
-    case 'q':
-      Pulsar::Archive::set_verbosity (0);
-      break;
+int backward_compatibility (int c)
+{
+  if (c == 'f')
+    return 'o';
 
-    case 'R':
-      time_direction = false;
-      append = &frequency;
-      break;
+  if (c == 'p')
+    return 'E';
 
-    case 'r':
-      centre_frequency = atof(optarg);
-      command += " -r ";
-      command += optarg;
-      break;
+  if (c == 's')
+    return 'T';
 
-      // lower-case 's' kept for backward-compatibility
-    case 's':
-    case 'T':
-      tscrunch_total = true;
-      command += " -T";
-      break;
+  return c;
+}
 
-    case 't':
-      testing = true;
-      break;
+void psradd::add_options (CommandLine::Menu& menu)
+{
+  CommandLine::Argument* arg;
 
-    case 'U':
-      cerr << "Will print message on Error creation" << endl;
-      Error::verbose = true;
-      break;
+  menu.filter = backward_compatibility;
 
-    case 'v':
-      Pulsar::Archive::set_verbosity (2);
-      verbose = true;
-      break;
+  arg = menu.add (unload_name, 'o', "fname");
+  arg->set_help ("output result to 'fname'");
 
-    case 'V':
-      Pulsar::Archive::set_verbosity (3);
-      vverbose = true;
-      verbose = true;
-      break;
+  menu.add ("\n" "General options:");
 
-    case 'z':
-      check_has_data = true;
-      break;
+  arg = menu.add (parname, 'E', "f.eph");
+  arg->set_help ("Load and install new ephemeris from 'f.eph'");
 
-    case 'Z': 
-      required_archive_length = atof(optarg); 
-      command += " -Z ";
-      command += optarg;
-      break;
+  arg = menu.add (tscrunch_total, 'T');
+  arg->set_help ("Tscrunch result after each new file added");
 
-    } 
-  }
+  arg = menu.add (time_direction, 'R');
+  arg->set_help ("Append data in the frequency direction");
 
-  if (!auto_add && !unload_name.length()) {
-    cerr << "psradd requires a new filename on the command line (use -f) \n";
-    return -1;
-  }
+  arg = menu.add (patch_name, 'm', "domain");
+  arg->set_help ("Patch missing sub-integrations: domain = time or phase");
 
-  if (auto_add && !time_direction) {
-    cerr << "psradd cannot combine AUTO ADD features with -R option \n";
-    return -1;
-  }
+  arg = menu.add (phase_align, 'P');
+  arg->set_help ("Phase align archive with total before adding");
 
-  if (auto_add && interval && tscrunch_total) {
-    cerr << "psradd cannot combine AUTO ADD -G with tscrunch -T \n";
-    return -1;
-  }
+  arg = menu.add (log_results, 'L');
+  arg->set_help ("Log results in <source>.log");
+
+  arg = menu.add (testing, 't');
+  arg->set_help ("Test mode: make no changes to file system");
+
+  menu.add ("\n" "Restrictions:");
+
+  arg = menu.add (this, &psradd::force, 'F');
+  arg->set_help ("Force append against all conventional wisdom");
+
+  arg = menu.add (centre_frequency, 'r', "freq");
+  arg->set_help ("Add archives only with this centre frequency");
+
+  arg = menu.add (check_has_data, 'z');
+  arg->set_help ("Only add archives that have integration length > 0");
+
+  arg = menu.add (required_archive_length, 'Z', "time");
+  arg->set_help ("Only add archives that are time (+/- 0.5) seconds long");
+
+  menu.add ("\n" "AUTO ADD: tscrunch and unload when ...");
+
+  arg = menu.add (cal_phase_diff, 'C', "turns");
+  arg->set_help ("... CAL phase changes by >= turns");
+  arg->set_notification (auto_add);
+
+  arg = menu.add (division_seconds, 'D', "sec");
+  arg->set_help ("... next archive is from different 'sec' division of MJD");
+  arg->set_notification (auto_add);
+
+  arg = menu.add (max_interval_between, 'G', "sec");
+  arg->set_help ("... time to next archive > 'sec' seconds");
+  arg->set_notification (auto_add);
+
+  arg = menu.add (max_interval_within, 'g', "sec");
+  arg->set_help ("... time spanned exceeds 'sec' seconds");
+  arg->set_notification (auto_add);
+
+  arg = menu.add (max_integration_length, 'I', "sec");
+  arg->set_help ("... integration length exceeds 'sec' seconds");
+  arg->set_notification (auto_add);
+
+  arg = menu.add (max_signal_to_noise, 'S', "s/n");
+  arg->set_help ("... signal-to-noise ratio exceeds 's/n'");
+  arg->set_notification (auto_add);
+
+  menu.add ("\n" "Note: AUTO ADD options are incompatible with -o and -T");
+}
+
+void psradd::setup ()
+{
+  if (!auto_add && !unload_name.length())
+    throw Error (InvalidState, "psradd::setup",
+		 "please specify the output filename (use -o)");
+
+  if (auto_add && !time_direction)
+    throw Error (InvalidState, "psradd::setup",
+		 "cannot combine AUTO ADD features with -R option");
+
+  if (auto_add && tscrunch_total)
+    throw Error (InvalidState, "psradd::setup",
+		 "cannot combine AUTO ADD features with -T option\n");
 
   if (auto_add && unload_name.length())
-    cerr << "psradd ignores -f when AUTO ADD features are used\n";
+    cerr << "psradd ignores -o when AUTO ADD features are used\n";
 
-  if (integrated_path.length() && unload_name.length())
-    cerr << "psradd ignores -O when -f is used \n";
+  if (unload->get_directory().length() && unload_name.length())
+    cerr << "psradd ignores -O when -o is used \n";
 
-  if (!parname.empty()) {
-
+  if (!parname.empty())
+  {
     if (verbose)
       cerr << "psradd: loading ephemeris from '"<< parname <<"'" << endl;
 
-    try {
+    ephemeris = factory<Pulsar::Parameters> (parname);
 
-      ephemeris = factory<Pulsar::Parameters> (parname);
-
-    }
-    catch (Error& error) {
-      cerr << "psradd could not load ephemeris from '" << parname << "'\n" 
-	   << error.get_message() << endl;
-      return -1;
-    }
-
-    if (vverbose) {
+    if (very_verbose)
+    {
       cerr << "psradd: ephemeris loaded=" << endl;
       ephemeris->unload(stderr); 
       cerr << endl;
@@ -455,389 +322,146 @@ int main (int argc, char **argv) try
 
   }
 
-  vector <string> filenames;
-
-  if (metafile)
-    stringfload (&filenames, metafile);
-  else
+  if (!patch_name.empty())
   {
-    for (int ai=optind; ai<argc; ai++)
-      dirglob (&filenames, argv[ai]);
+    Pulsar::Contemporaneity* policy = 0;
+    if (patch_name == string("time"))
+      policy = new Pulsar::Contemporaneity::AtEarth;
+    else if (patch_name == string("phase"))
+      policy = new Pulsar::Contemporaneity::AtPulsar;
+    else
+      throw Error (InvalidParam, "psradd::setup",
+		   "unknown contemporaneity policy '" + patch_name + "'");
 
-    sort (filenames.begin(), filenames.end());
+    patch = new Pulsar::PatchTime;
+    patch->set_contemporaneity_policy( policy );
   }
-
-  if (!filenames.size()) {
-    cerr << "psradd requires a list of archive filenames as parameters.\n";
-    return -1;
-  }
-
-  // the individual archive
-  Reference::To<Pulsar::Archive> archive;
-
-  Pulsar::Interpreter* preprocessor = standard_shell();
-
-  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
-
-    if (verbose) 
-      cerr << "psradd: Loading [" << filenames[ifile] << "]\n";
-    
-    archive = Pulsar::Archive::load (filenames[ifile]);
-
-    if (vverbose)
-      cerr << "psradd: after load, instance count = " 
-	   << Reference::Able::get_instance_count() << endl;
-
-    if (vverbose && archive->has_model())
-    {
-      for (unsigned isub=0; isub < archive->get_nsubint(); isub++) {
-	MJD epoch = archive->get_Integration(isub)->get_epoch();
-	cerr << isub << ": phase=" 
-	     << archive->get_model()->phase( epoch ) << endl;
-      }
-    }
-
-    if (check_has_data && archive->integration_length() == 0) {
-      cerr << "psradd: archive [" << filenames[ifile] << "]"
-              "  integration length is zero.\n"
-              "  (use -F to disable this check)" << endl;
-      continue;
-    }
-
-    if (required_archive_length > 0
-	&& fabs(archive->integration_length()-required_archive_length) > 0.5)
-      {
-	cerr << "psradd: archive [" <<filenames[ifile] << "] not "
-	     << required_archive_length << " seconds long- it was "
-	     << archive->integration_length() << " seconds long" << endl;
-	continue;
-      }
-
-    if( centre_frequency > 0.0 
-	&& fabs(archive->get_centre_frequency()-centre_frequency) > 0.0001 )
-      continue;
-
-    try
-    {
-      if (jobs.size())
-      {
-	if (verbose)
-	  cerr << "psradd: preprocessing " << filenames[ifile] << endl;
-	preprocessor->set(archive);
-	preprocessor->script(jobs);
-      }
-
-      if (nbin)
-	archive->bscrunch_to_nbin (nbin);
-
-      if (nchan)
-	archive->fscrunch_to_nchan (nchan);
-    }
-    catch (Error& error) {
-      cerr << "psradd: preprocessing error\n"
-	"  " << error.get_message() << "\n"
-	"  on " << filenames[ifile] << endl;
-      continue;
-    }
-
-    if (reset_total_next_load)
-    {
-      if (verbose) cerr << "psradd: Setting total" << endl;
-      set_total (archive);
-      
-      if (vverbose)
-	cerr << "psradd: after reset total, instance count = " 
-	     << Reference::Able::get_instance_count() << endl;
-
-      reset_total_next_load = false;
-      continue;
-    }
-
-    bool reset_total_current = false;
-    
-    if (interval != 0.0)
-    {   
-      // ///////////////////////////////////////////////////////////////
-      //
-      // auto_add -G: check the gap between the end of total
-      // and the start of archive
-      
-      double gap = (archive->start_time() - total->end_time()).in_seconds();
-      
-      if (verbose)
-	cerr << "psradd: Auto add - gap = " << gap << " seconds" << endl;
-      
-      if (fabs(gap) > interval)
-      {
-	if (verbose)
-	  cerr << "psradd: gap=" << gap << " greater than interval=" 
-	       << interval << endl;
-	reset_total_current = true;
-      }
-    }
-
-    if (integrate_interval != 0.0)
-    {
-      // ///////////////////////////////////////////////////////////////
-      //
-      // auto_add -g: check the gap between the start and end of total
-
-      double gap = (total->start_time() - total->end_time()).in_seconds();
-
-      if (verbose)
-	cerr << "psradd: Auto add - gap " << gap << " seconds" << endl;
-
-      if (fabs(gap) > integrate_interval)
-      {
-	if (verbose)
-	  cerr << "psradd: gap=" << gap << " greater than integrate interval=" << integrate_interval << endl;
-	reset_total_current = true;
-      }
-    }
-
-    if( cal_phase_diff )
-    {
-      // ///////////////////////////////////////////////////////////////
-      //
-      // auto_add -C: check that the calibrator observations are aligned
-
-      if (!archive->type_is_cal())
-      {
-	cerr << "psradd: Auto add - not a CAL" << endl;
-	continue;
-      }
-
-      total->tscrunch();
-      archive->tscrunch();
-
-      float midhi0 = mid_hi (total);
-      float midhi1 = mid_hi (archive);
-
-      float diff = fabs( midhi1 - midhi0 );
-
-      if (verbose)
-	cerr << "psradd: Auto add - CAL phase diff = " << diff << endl;
-
-      if ( diff > cal_phase_diff )
-      {
-	if (verbose)
-	  cerr << "psradd: diff=" << diff << " greater than max diff=" 
-	       << cal_phase_diff << endl;
-	reset_total_current = true;
-      }
-
-    }
-
-    if (!reset_total_current)
-    {
-
-      try {
-
-	if (phase_align) {
-
-	  Reference::To<Pulsar::Archive> standard;
-	  standard = total->total();
-	  Pulsar::Profile* std = standard->get_Profile(0,0,0);
-
-	  Reference::To<Pulsar::Archive> observation;
-	  observation = archive->total();
-	  Pulsar::Profile* obs = observation->get_Profile(0,0,0);
-
-	  archive->rotate_phase( obs->shift(std).get_value() );
-
-	}
-
-	if (archive->get_state() != total->get_state()) {
-
-	  if (verbose)
-	    cerr << "psradd: converting state" 
-		 << " from " << archive->get_state()
-		 << " to " << total->get_state() << endl;
-	  
-	  archive->convert_state( total->get_state() );
-
-	}
-
-	if (patch)
-	{
-	  if (verbose)
-	    cerr << "psradd: patching any missing sub-integrations" << endl;
-	  patch->operate (total, archive);
-	}
-
-	if (verbose)
-	  cerr << "psradd: appending archive to total" << endl;
-
-	if (time_direction)
-	  time.append (total, archive);
-	else
-	  frequency.append (total, archive);
-
-	if (vverbose)
-	  cerr << "psradd: after append, instance count = " 
-	       << Reference::Able::get_instance_count() << endl;
-
-      }
-      catch (Error& error) {
-	cerr << "psradd: Archive::append exception:\n" << error << endl;
-	if (auto_add)
-	  reset_total_current = true;
-      }
-      catch (...) {
-        cerr << "psradd: Archive::append exception thrown" << endl;
-        if (auto_add)
-          reset_total_current = true;
-      }
-
-      if (log_file)
-	fprintf (log_file, " %s", archive->get_filename().c_str());
-    }
-
-    if (integrate != 0.0)
-    {
-      // ///////////////////////////////////////////////////////////////
-      //
-      // auto_add -I: check that amount of data integrated in total
-      // is less than the limit
-      
-      double integration = total->integration_length();
-
-      if (verbose)
-	cerr << "psradd: Auto add - integration = " << integration
-	     << " seconds" << endl;
-
-      if (integration > integrate)
-	reset_total_next_load = true;
-    }
-
-    if (max_ston != 0.0)
-    {
-      // ///////////////////////////////////////////////////////////////
-      //
-      // auto_add -S: check that S/N of the integrated data is less
-      // than the limit
-      
-      float ston = total->total()->get_Profile(0,0,0)->snr();
-      
-      if (verbose)
-	cerr << "psradd: Auto add - S/N = " << ston
-	     << " seconds" << endl;
-      
-      if (ston > max_ston)
-	reset_total_next_load = true;
-    }
-    
-    if (tscrunch_total)
-    {
-      if (verbose) cerr << "psradd: tscrunch total" << endl;
-
-      // tscrunch the archive
-      total->tscrunch();
-
-      if (vverbose)
-	cerr << "psradd: after tscrunch, instance count = " 
-	     << Reference::Able::get_instance_count() << endl;
-    }
-
-    /////////////////////////////////////////////////////////////////
-    // See if the archive contains a history that should be updated:
-
-    Pulsar::ProcHistory* fitsext = total->get<Pulsar::ProcHistory>();
-
-    if (fitsext)
-      fitsext->set_command_str(command);
-
-    if (reset_total_next_load || reset_total_current)
-    {
-      if (verbose)
-	cerr << "psradd: Auto add - tscrunch and unload " 
-	     << total->integration_length() << " s archive" << endl;
-
-      total->tscrunch();
-
-      if (vverbose)
-	cerr << "psradd: after tscrunch, instance count = " 
-	     << Reference::Able::get_instance_count() << endl;
-
-      if (!testing)
-      {
-	reorder( total );
-	total->unload (unload_name);
-      }      
-
-      if (reset_total_current)
-      {
-	if (verbose)
-	  cerr << "psradd: Auto add - reset total to current" << endl;
-
-	set_total( archive );
-
-	if (vverbose)
-	  cerr << "psradd: after reset total, instance count = " 
-	       << Reference::Able::get_instance_count() << endl;
-      }
-    }
-  }
-  catch (Error& error)
-  {
-    cerr << "psradd: Error handling [" << filenames[ifile] << "]\n" 
-	 << error << endl;
-  }
-
-  if (!reset_total_next_load) try
-  {
-    if (auto_add)
-    {      
-      if (verbose) cerr << "psradd: Auto add - tscrunching last " 
-			<< total->integration_length()
-			<< " seconds of data." << endl;
-      total->tscrunch();
-    }
-
-    if (!time_direction)
-    {
-      // dedisperse to the new centre frequency
-      if (total->get_dedispersed())
-	total->dedisperse();
-
-      // correct Faraday rotation to the new centre frequency
-      if (total->get_faraday_corrected())
-	total->defaraday();
-
-      // re-compute the phase predictor to the new centre frequency
-      if (total->has_model() && total->has_ephemeris())
-        total->update_model ();
-    }
-
-    if (!testing)
-    {
-      if (verbose)
-	cerr << "psradd: Unloading archive: '" << unload_name << "'" << endl;
-    
-      reorder( total );
-      total->unload (unload_name);
-    }
-  }
-  catch (Error& error)
-  {
-    cerr << "psradd: Error unloading total\n" << error << endl;
-    return -1;
-  }
-
-  if (log_file)
-  {
-    fprintf (log_file, "\n");
-    fclose (log_file);
-  }
-
-  return 0;
 }
-catch (Error& error)
+
+void psradd::force ()
 {
-  cerr << "psradd: Unhandled error" << error << endl;
-  return -1;
+  time.chronological = false;
+  time.must_match = false;
+
+  frequency.must_match = false;
 }
 
+//! Process the given archive
+void psradd::process (Pulsar::Archive* archive)
+{
+  if (very_verbose && archive->has_model())
+  {
+    for (unsigned isub=0; isub < archive->get_nsubint(); isub++)
+    {
+      MJD epoch = archive->get_Integration(isub)->get_epoch();
+      cerr << isub << ": phase=" 
+	   << archive->get_model()->phase( epoch ) << endl;
+    }
+  }
+
+  if (check_has_data && archive->integration_length() == 0)
+  {
+    cerr << "psradd: archive [" << archive->get_filename() << "]"
+      " integration length is zero." << endl;
+    return;
+  }
+
+  if (required_archive_length > 0
+      && fabs(archive->integration_length()-required_archive_length) > 0.5)
+  {
+    cerr << "psradd: archive [" <<archive->get_filename() << "] not "
+	 << required_archive_length << " seconds long- it was "
+	 << archive->integration_length() << " seconds long" << endl;
+    return;
+  }
+
+  if (centre_frequency > 0.0 
+      && fabs(archive->get_centre_frequency()-centre_frequency) > 0.0001 )
+  {
+    cerr << "psradd: archive [" << archive->get_filename() << "]"
+      " centre frequency=" << archive->get_centre_frequency() << " != "
+      " required=" << centre_frequency << endl;
+    return;
+  }
+
+  if (total)
+  {
+    if (max_integration_length != 0.0)
+      check_integration_length ();
+
+    if (max_signal_to_noise != 0.0)
+      check_signal_to_noise ();
+
+    if (max_interval_within != 0.0)
+      check_interval_within ();
+
+    if (division_seconds)
+      check_division (archive);
+
+    if (max_interval_between != 0.0)
+      check_interval_between (archive);
+
+    if (cal_phase_diff)
+      check_cal_phase_diff (archive);
+  }
+
+  if (reset_total)
+    set_total (archive);
+  else
+    append (archive);
+
+  if (tscrunch_total)
+  {
+    if (verbose) cerr << "psradd: tscrunch total" << endl;
+
+    // tscrunch the archive
+    total->tscrunch();
+    
+    if (very_verbose)
+      cerr << "psradd: after tscrunch, instance count = " 
+	   << Reference::Able::get_instance_count() << endl;
+  }
+}
+
+void psradd::finalize ()
+{
+  if (log_file)
+    fprintf (log_file, "\n");
+
+  if (reset_total)
+    return;
+
+  if (auto_add)
+  {      
+    if (verbose) cerr << "psradd: Auto add - tscrunching last " 
+		      << total->integration_length()
+		      << " seconds of data." << endl;
+    total->tscrunch();
+  }
+
+  if (!time_direction)
+  {
+    // dedisperse to the new centre frequency
+    if (total->get_dedispersed())
+      total->dedisperse();
+    
+    // correct Faraday rotation to the new centre frequency
+    if (total->get_faraday_corrected())
+      total->defaraday();
+    
+    // re-compute the phase predictor to the new centre frequency
+    if (total->has_model() && total->has_ephemeris())
+      total->update_model ();
+  }
+
+  if (!testing)
+  {
+    if (verbose)
+      cerr << "psradd: Unloading archive: '" << unload_name << "'" << endl;
+
+    total->unload (unload_name);
+  }
+}
 
 float mid_hi (Pulsar::Archive* archive)
 {
@@ -852,25 +476,33 @@ float mid_hi (Pulsar::Archive* archive)
   return float (hi2lo + lo2hi) / (2.0 * nbin);
 }
 
-void
-reorder(Reference::To<Pulsar::Archive> arch)
+void psradd::set_total (Pulsar::Archive* archive)
 {
-  Reference::To<Pulsar::TimeSortedOrder> tso = new Pulsar::TimeSortedOrder;
-  tso->organise(arch,0);
-}
+  if (total)
+  {
+    if (verbose)
+      cerr << "psradd: Auto add - tscrunch and unload " 
+	   << total->integration_length() << " s archive" << endl;
 
-void set_total (Pulsar::Archive* archive)
-{
+    total->tscrunch();
+
+    if (very_verbose)
+      cerr << "psradd: after tscrunch, instance count = " 
+	   << Reference::Able::get_instance_count() << endl;
+
+    if (!testing)
+      total->unload (unload_name);
+  }
+
   total = archive;
 
-  append->init (total);
+  if (time_direction)
+    time.init (total);
+  else
+    frequency.init (total);
 
   if (auto_add)
-  {
-    unload_name = total->get_filename() + "." + integrated_extension;
-    if (!integrated_path.empty())
-      unload_name = integrated_path + "/" + basename (unload_name);
-  }
+    unload_name = unload->get_output_filename( total );
 
   if (log_results)
   {
@@ -920,8 +552,205 @@ void set_total (Pulsar::Archive* archive)
     if (!auto_add)
       exit (-1);
     
-    reset_total_next_load = true;
-
     throw error;
   }
+
+  reset_total = false;
 }
+
+void psradd::append (Pulsar::Archive* archive) try
+{
+  if (phase_align)
+  {
+    Reference::To<Pulsar::Archive> standard;
+    standard = total->total();
+    Pulsar::Profile* std = standard->get_Profile(0,0,0);
+    
+    Reference::To<Pulsar::Archive> observation;
+    observation = archive->total();
+    Pulsar::Profile* obs = observation->get_Profile(0,0,0);
+    
+    archive->rotate_phase( obs->shift(std).get_value() );
+  }
+
+  if (archive->get_state() != total->get_state())
+  {
+    if (verbose)
+      cerr << "psradd: converting state" 
+	   << " from " << archive->get_state()
+	   << " to " << total->get_state() << endl;
+    
+    archive->convert_state( total->get_state() );
+  }
+  
+  if (patch)
+  {
+    if (verbose)
+      cerr << "psradd: patching any missing sub-integrations" << endl;
+    patch->operate (total, archive);
+  }
+  
+  if (verbose)
+    cerr << "psradd: appending archive to total" << endl;
+
+  if (time_direction)
+    time.append (total, archive);
+  else
+    frequency.append (total, archive);
+
+  if (log_file)
+    fprintf (log_file, " %s", archive->get_filename().c_str());
+
+  if (very_verbose)
+    cerr << "psradd: after append, instance count = " 
+	 << Reference::Able::get_instance_count() << endl;
+}
+catch (Error& error)
+{
+  cerr << "psradd: Archive::append exception:\n" << error << endl;
+  if (auto_add)
+    reset_total = true;
+}
+catch (...)
+{
+  cerr << "psradd: Archive::append exception thrown" << endl;
+  if (auto_add)
+    reset_total = true;
+}
+
+
+// ///////////////////////////////////////////////////////////////
+//
+// auto_add -G
+//
+void psradd::check_interval_between (Pulsar::Archive* archive)
+{   
+  double gap = (archive->start_time() - total->end_time()).in_seconds();
+      
+  if (verbose)
+    cerr << "psradd: Auto add - gap = " << gap << " seconds" << endl;
+      
+  if (fabs(gap) > max_interval_between)
+  {
+    if (verbose)
+      cerr << "psradd: gap=" << gap << " greater than interval between=" 
+	   << max_interval_between << endl;
+    reset_total = true;
+  }
+}
+
+// ///////////////////////////////////////////////////////////////
+//
+// auto_add -C
+//
+void psradd::check_cal_phase_diff (Pulsar::Archive* archive)
+{
+  if (!archive->type_is_cal())
+  {
+    cerr << "psradd: Auto add - not a CAL" << endl;
+    return;
+  }
+
+  total->tscrunch();
+  archive->tscrunch();
+
+  float midhi0 = mid_hi (total);
+  float midhi1 = mid_hi (archive);
+
+  float diff = fabs( midhi1 - midhi0 );
+
+  if (verbose)
+    cerr << "psradd: Auto add - CAL phase diff = " << diff << endl;
+
+  if ( diff > cal_phase_diff )
+  {
+    if (verbose)
+      cerr << "psradd: diff=" << diff << " greater than max diff=" 
+	   << cal_phase_diff << endl;
+    reset_total = true;
+  }
+}
+
+MJD midtime (Pulsar::Archive* archive)
+{
+  return 0.5 * (archive->start_time() + archive->end_time());
+}
+
+double second (const MJD& mjd)
+{
+  return  mjd.get_secs() + mjd.get_fracsec();
+}
+
+// ///////////////////////////////////////////////////////////////
+//
+// auto_add -D
+//
+void psradd::check_division (Pulsar::Archive* archive)
+{
+  unsigned total_division = second( midtime( total ) ) / division_seconds;
+  unsigned archive_division = second( midtime( archive ) ) / division_seconds;
+
+  if (verbose)
+    cerr << "psradd: Auto add - division = " << archive_division << endl;
+
+  if ( total_division != archive_division )
+  {
+    if (verbose)
+      cerr << "psradd: not in current division = " << total_division << endl;
+    reset_total = true;
+  }
+}
+
+
+// ///////////////////////////////////////////////////////////////
+//
+// auto_add -I
+//
+void psradd::check_integration_length ()
+{
+  double integration = total->integration_length();
+
+  if (verbose)
+    cerr << "psradd: Auto add - integration = " << integration
+	 << " seconds" << endl;
+
+  if (integration > max_integration_length)
+    reset_total = true;
+}
+
+// ///////////////////////////////////////////////////////////////
+//
+// auto_add -S
+//
+void psradd::check_signal_to_noise ()
+{     
+  float signal_to_noise = total->total()->get_Profile(0,0,0)->snr();
+      
+  if (verbose)
+    cerr << "psradd: Auto add - S/N = " << signal_to_noise
+	 << " seconds" << endl;
+      
+  if (signal_to_noise > max_signal_to_noise)
+    reset_total = true;
+}
+
+// ///////////////////////////////////////////////////////////////
+//
+// auto_add -g
+//
+void psradd::check_interval_within ()
+{
+  double gap = (total->start_time() - total->end_time()).in_seconds();
+
+  if (verbose)
+    cerr << "psradd: Auto add - gap " << gap << " seconds" << endl;
+
+  if (fabs(gap) > max_interval_within)
+  {
+    if (verbose)
+      cerr << "psradd: gap=" << gap << " greater than interval within="
+	   << max_interval_within << endl;
+    reset_total = true;
+  }
+}
+
