@@ -127,7 +127,7 @@ int main (int argc, char** argv)
 psradd::psradd () : Pulsar::Application ("psradd", 
 					 "combines archives together")
 {
-  version = "$Id: psradd.C,v 1.71 2010/05/02 16:08:52 straten Exp $";
+  version = "$Id: psradd.C,v 1.72 2010/05/03 04:46:20 straten Exp $";
 
   has_manual = true;
   update_history = true;
@@ -410,6 +410,9 @@ void psradd::process (Pulsar::Archive* archive)
   else
     append (archive);
 
+  if (very_verbose)
+    cerr << "psradd: total nsubint=" << total->get_nsubint() << endl;
+
   if (tscrunch_total)
   {
     if (verbose) cerr << "psradd: tscrunch total" << endl;
@@ -493,6 +496,9 @@ void psradd::set_total (Pulsar::Archive* archive)
     if (!testing)
       total->unload (unload_name);
   }
+
+  if (verbose)
+    cerr << "psradd: starting with " << archive->get_filename() << endl;
 
   total = archive;
 
@@ -591,7 +597,7 @@ void psradd::append (Pulsar::Archive* archive) try
   }
   
   if (verbose)
-    cerr << "psradd: appending archive to total" << endl;
+    cerr << "psradd: appending " << archive->get_filename() << endl;
 
   if (time_direction)
     time.append (total, archive);
