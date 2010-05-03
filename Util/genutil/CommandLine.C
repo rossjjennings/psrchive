@@ -130,10 +130,13 @@ void CommandLine::Menu::parse (int argc, char* const * argv)
   int code = 0;
   const char* optstring = shortopts.c_str();
 
+  // disable getopt_long error messages
+  opterr = 0;
+
   while ((code = getopt_long(argc, argv, optstring, longopts, NULL)) != -1) 
   {
-    if (filter)
-      code = filter (code);
+    if (code == '?')
+      code = process_error ();
 
     for (unsigned i=0; i<item.size(); i++)
     {
@@ -150,6 +153,26 @@ void CommandLine::Menu::parse (int argc, char* const * argv)
       }
     }
   }
+}
+
+int CommandLine::Menu::process_error ()
+{
+  if (filter)
+    code = filter (optopt);
+
+  for (unsigned i=0; i<item.size(); i++)
+  {
+    Argument* arg = dynamic_cast<Argument*>( item[i].get() );
+    if (arg && arg->matches (code) && arg->has_arg == required_argument)
+    {
+      optarg = argv[optind];
+      optind ++;
+      return code;
+    }
+  }
+
+  throw Error (InvalidParam, "CommandLine::Menu::parse",
+	       "invalid option '%s'", argv[optind-1]);
 }
 
 void CommandLine::Menu::help (const std::string& name)
