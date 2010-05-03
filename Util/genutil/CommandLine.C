@@ -136,7 +136,7 @@ void CommandLine::Menu::parse (int argc, char* const * argv)
   while ((code = getopt_long(argc, argv, optstring, longopts, NULL)) != -1) 
   {
     if (code == '?')
-      code = process_error ();
+      code = process_error (code, argv);
 
     for (unsigned i=0; i<item.size(); i++)
     {
@@ -155,7 +155,7 @@ void CommandLine::Menu::parse (int argc, char* const * argv)
   }
 }
 
-int CommandLine::Menu::process_error ()
+int CommandLine::Menu::process_error (int code, char* const *argv)
 {
   if (filter)
     code = filter (optopt);

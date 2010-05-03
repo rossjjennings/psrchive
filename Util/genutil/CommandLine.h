@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/CommandLine.h,v $
-   $Revision: 1.11 $
-   $Date: 2010/05/03 04:46:26 $
+   $Revision: 1.12 $
+   $Date: 2010/05/03 10:41:04 $
    $Author: straten $ */
 
 #ifndef __CommandLine_h
@@ -276,7 +276,7 @@ namespace CommandLine {
     virtual void parse (int argc, char* const *argv);
 
     //! Process any option parsing error and return a new code
-    virtual int process_error ();
+    virtual int process_error (int code, char* const *argv);
 
     //! Add an item to the menu
     virtual void add (Item*);
