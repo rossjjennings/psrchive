@@ -64,11 +64,13 @@ bool Pulsar::TimeAppend::stop (Archive* into, const Archive* from)
       throw Error(InvalidState, "TimeAppend::stop",
 		  "Archives have incompatible IntegrationOrder extensions");
   }
-  else if (!order_into && order_from) {
+  else if (!order_into && order_from)
+  {
     throw Error(InvalidState, "TimeAppend::stop",
 		"Archives have incompatible IntegrationOrder extensions");
   }
-  else if (order_into && !order_from) {
+  else if (order_into && !order_from)
+  {
     Reference::To<Pulsar::Archive> copy = from->clone();
     copy->add_extension(order_into->clone());
     // This next line is a bit tricky... There are issues when the index
@@ -88,8 +90,8 @@ void Pulsar::TimeAppend::check (Archive* into, const Archive* from)
 {
   Append::check (into, from);
 
-  if (chronological) {
-    
+  if (chronological)
+  {   
     if (Archive::verbose == 3) 
       cerr << "Pulsar::TimeAppend::check ensuring chronological order" << endl;
     
@@ -99,9 +101,7 @@ void Pulsar::TimeAppend::check (Archive* into, const Archive* from)
     if (curlast > newfirst + max_overlap)
       throw Error (InvalidState, "TimeAppend::check",
 		   "startime overlaps or precedes endtime");
-
   }
-
 }
 
 void Pulsar::TimeAppend::combine (Archive* into, Archive* from)
@@ -111,10 +111,12 @@ void Pulsar::TimeAppend::combine (Archive* into, Archive* from)
 	 << endl;
  
   into->expert()->manage (from);
-  
+  into->expert()->sort ();
+
   // Append the Digitiser counts
   DigitiserCounts *into_counts = into->get<DigitiserCounts>();
   DigitiserCounts *from_counts = from->get<DigitiserCounts>();
+
   if( into_counts != NULL && from_counts != NULL )
     into_counts->Append( *from_counts );
 }
