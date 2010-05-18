@@ -48,8 +48,10 @@ namespace FTransform {
     unsigned nthread;
 
     void reset ();
-    void load () const;
-    void load (const std::string& library, const std::string& filename) const;
+
+    virtual void load () const;
+    virtual void load (const std::string& library,
+		       const std::string& filename) const;
   };
 
   class Bench::Entry
