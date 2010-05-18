@@ -61,7 +61,12 @@ using std::bad_alloc;
 using std::exception;
 using Pulsar::Archive;
 
-
+/**
+ * Number of possible DM entries in the input ephemeris
+ * format: DMX
+ * where X = [1-9]
+ */
+const unsigned NUMBER_OF_DM_KEYWORDS = 9;
 
 /**
  * @brief Create a string listing the names of the registered Archive classes
@@ -92,6 +97,29 @@ string GetArchiveTypes( void )
   return agents_string;
 }
 
+//! Returns the difference between the start of observation and TEPOCH
+double get_delta_time(Pulsar::Archive* archive,
+        const MJD tepoch);
+
+//! Populate the dms vector with the input DM[1-9] values
+void get_dms(vector<double>& dms, const Pulsar::Archive* archive);
+
+//! Returns the input value of 'DMEPOCH' (if it exists), otherwise, 'PEPOCH'
+MJD get_tepoch(const Pulsar::Archive* archive);
+
+//! Returns the input value of 'DM'
+double get_dm(const Pulsar::Archive* archive);
+
+//! Uses the input DM and DM[1-9] values to calculate the new DM
+double calculate_new_dm(vector<double>& dms, const double dm,
+        const double delta_time);
+
+//! Calculates new DM from input ephemeris and sets it in the loaded Archive
+void update_dm(Pulsar::Archive* archive);
+
+//! Populates the keywords vector
+//  "DM[1-9]"
+void get_dm_keywords(vector<string>& keywords);
 
 void usage()
 {
@@ -156,6 +184,8 @@ void usage()
     "  --inst inst      Change the instrument name \n"
     "  --site site      Correct 'site' of telescope (One letter tempo code- GBT=1, PKS=7 etc)\n"
     "  --name name      Change source name\n"
+    "  --update_dm      Replace header DM with current value from input ephemeris\n"
+
     "\n"
     "See "PSRCHIVE_HTTP"/manuals/pam for more details\n"
        << endl;
@@ -253,6 +283,8 @@ int main (int argc, char *argv[]) try {
     float mult = -1.0;
     double new_folding_period = -1.0;
 
+    bool update_dm_from_eph = false;
+
     Reference::To<Pulsar::IntegrationOrder> myio;
     Reference::To<Pulsar::Receiver> install_receiver;
 
@@ -273,6 +305,7 @@ int main (int argc, char *argv[]) try {
     const int PERIOD=1219;
     const int SS   = 1220;
     const int FLIP = 1221;
+    const int UPDATE_DM = 1222;
 
     while (1) {
 
@@ -288,11 +321,11 @@ int main (int argc, char *argv[]) try {
 	{"binlngasc",  1, 0, 206},
 	{"receiver",   1, 0, 207},
 	{"settsub",    1, 0, 208},
-	{"type",       1, 0, TYPE},
-	{"inst",       1, 0, INST},
-	{"reverse_freqs",no_argument,0,REVERSE_FREQS},
-        {"flip",       1 ,0, FLIP},
-	{"site",       1, 0, SITE},
+  {"type",       1, 0, TYPE},
+  {"inst",       1, 0, INST},
+  {"reverse_freqs",no_argument,0,REVERSE_FREQS},
+  {"flip",       1 ,0, FLIP},
+  {"site",       1, 0, SITE},
 	{"name",       1, 0, NAME},
 	{"DD",         no_argument,      0,DD},
 	{"RR",         no_argument,      0,RR},
@@ -300,13 +333,14 @@ int main (int argc, char *argv[]) try {
 	{"spc",        no_argument,      0,SPC},
 	{"mult",       required_argument,0,MULT},
 	{"period",     required_argument,0,PERIOD},
-        {"SS",         no_argument,      0,SS},
+  {"SS",         no_argument,      0,SS},
+  {"update_dm",   no_argument,      0,UPDATE_DM},
 	{0, 0, 0, 0}
       };
-    
+
       c = getopt_long(argc, argv, "hqvViM:mn:a:e:E:TFpIt:f:b:d:o:s:r:u:w:DSBLCx:R:",
 		      long_options, &options_index);
-    
+
       if (c == -1)
 	break;
 
@@ -327,7 +361,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.93 2009/07/20 23:35:17 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.94 2010/05/18 02:13:51 jonathan_khoo Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -655,6 +689,8 @@ int main (int argc, char *argv[]) try {
 
       case FLIP: flip_freq = true; flip_freq_mhz = atof(optarg); break;
 
+      case UPDATE_DM: update_dm_from_eph = true; break;
+
       default:
 	cout << "Unrecognised option" << endl;
       }
@@ -785,7 +821,11 @@ int main (int argc, char *argv[]) try {
 
       if (new_eph) try
       {
-	arch->set_ephemeris(new_eph);
+        arch->set_ephemeris(new_eph);
+
+        if (update_dm_from_eph) {
+          update_dm(arch);
+        }
       }
       catch (Error& error)
       {
@@ -1190,7 +1230,85 @@ void smear (Pulsar::Profile* profile, float duty_cycle)
   profile->fft_convolve( hat_profile(profile->get_nbin(), duty_cycle) );
 }
 
+double get_delta_time(Pulsar::Archive* archive, const MJD tepoch)
+{
+  const MJD start = archive->start_time();
 
+  return (start - tepoch).in_days() / 365.25; // convert from days to years
+}
 
+MJD get_tepoch(const Pulsar::Archive* archive)
+{
+  string str = archive->get_ephemeris()->get_value("DMEPOCH");
+  if (!str.empty()) {
+    return MJD(fromstring<double>(str));
+  }
 
+  str = archive->get_ephemeris()->get_value("PEPOCH");
+  if (!str.empty()) {
+    return MJD(fromstring<double>(str));
+  }
 
+  throw Error(InvalidState, "pam - get_tepoch",
+      "cannot find DMEPOCH or PEPOCH in new ephermeris");
+}
+
+double get_dm(const Pulsar::Archive* archive)
+{
+  string str = archive->get_ephemeris()->get_value("DM");
+
+  if (!str.empty()) {
+    return fromstring<double>(str);
+  } else {
+    throw Error(InvalidState, "pam - get_dm",
+        "cannot find DM value in new ephermeris");
+  }
+}
+
+void get_dms(vector<double>& dms, const Pulsar::Archive* archive)
+{
+  vector<string> dm_keywords;
+  get_dm_keywords(dm_keywords);
+
+  for (unsigned i = 0; i < dm_keywords.size(); ++i) {
+    string str = archive->get_ephemeris()->get_value(dm_keywords[i]);
+
+    if (!str.empty()) {
+      dms.push_back(fromstring<double>(str));
+    }
+  }
+}
+
+double calculate_new_dm(vector<double>& dms, const double dm, const double delta_time)
+{
+    double new_dm = dm;
+    unsigned power = 1;
+
+    for (unsigned i = 0; i < dms.size(); ++i) {
+        new_dm += dms[i] * pow(delta_time, power);
+        ++power;
+    }
+
+    return new_dm;
+}
+
+void update_dm(Pulsar::Archive* archive)
+{
+  const MJD tepoch = get_tepoch(archive);
+  const double delta_time = get_delta_time(archive, tepoch);
+  const double dm = get_dm(archive);
+
+  vector<double> dms;
+  get_dms(dms, archive);
+
+  const double new_dm = calculate_new_dm(dms, dm, delta_time);
+
+  archive->set_dispersion_measure(new_dm);
+}
+
+void get_dm_keywords(vector<string>& keywords)
+{
+  for (unsigned i = 1; i <= NUMBER_OF_DM_KEYWORDS; ++i) {
+    keywords.push_back("DM" + tostring<unsigned>(i));
+  }
+}
