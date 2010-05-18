@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Parameters.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/06/05 09:01:54 $
-   $Author: straten $ */
+   $Revision: 1.8 $
+   $Date: 2010/05/18 02:10:34 $
+   $Author: jonathan_khoo $ */
 
 #ifndef __PulsarParameters_h
 #define __PulsarParameters_h
@@ -56,6 +56,8 @@ namespace Pulsar {
     //! Return the pulsar name
     virtual std::string get_name () const;
 
+    //! Retrieve a string from the text
+    virtual std::string get_value (const std::string& keyword) const;
   };
 
 }
