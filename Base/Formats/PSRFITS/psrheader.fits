@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '4.2             '   / Header version 
+HDRVER  = '4.3             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -16,7 +16,8 @@ TELESCOP= '                '   / Telescope name
 ANT_X   =                    * / [m] Antenna ITRF X-coordinate (D)
 ANT_Y   =                    * / [m] Antenna ITRF Y-coordinate (D)
 ANT_Z   =                    * / [m] Antenna ITRF Z-coordinate (D)
-FRONTEND= '                '   / Rx and feed ID
+FRONTEND= '                '   / Receiver ID
+IBEAM   =                    * / Beam number for multibeam systems (1=ctr beam)
 NRCVR   =                    * / Number of receiver polarisation channels
 FD_POLN = '                '   / LIN or CIRC
 FD_HAND =                    * / +/- 1. +1 is LIN:A=X,B=Y, CIRC:A=L,B=R (I)
@@ -34,6 +35,7 @@ OBSFREQ =                    * / [MHz] Centre frequency for observation
 OBSBW   =                    * / [MHz] Bandwidth for observation
 OBSNCHAN=                    * / Number of frequency channels (original)
 CHAN_DM =                    * / [cm-3 pc] DM used for on-line dedispersion
+PNT_ID  = '                '   / Name or ID for pointing ctr (multibeam feeds)
 SRC_NAME= '                '   / Source or scan ID 
 COORD_MD= '                '   / Coordinate mode (J2000, GAL, ECLIP, etc.)
 EQUINOX = '                '   / Equinox of coords (e.g. 2000.0) 
