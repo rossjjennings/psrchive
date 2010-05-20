@@ -37,6 +37,9 @@ namespace Pulsar
     //! Set the standard profile to use
     void set_standard(const Profile *p);
 
+    //! Fit for shift as well as scale
+    void set_fit_shift(bool _fit=true) { fit_shift=_fit; }
+
   protected:
 
     //! Shift/scale fit
@@ -47,6 +50,12 @@ namespace Pulsar
 
     //! Std normalization factor
     double stdfac;
+
+    //! Sum of std values
+    double sumstd;
+
+    //! Sum of squared std values
+    double sumstd2;
 
     //! Fit shift or just scale
     bool fit_shift;
