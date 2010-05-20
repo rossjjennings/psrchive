@@ -20,6 +20,8 @@
 
 using namespace std;
 
+bool Pulsar::ComplexRVMFit::verbose = false;
+
 Pulsar::ComplexRVMFit::ComplexRVMFit()
 {
   threshold = 3.0;
@@ -72,13 +74,16 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 
       if (is_opm(phase))
       {
-	if (MEAL::Function::verbose)
+	if (verbose)
 	  cerr << "Pulsar::ComplexRVMFit::set_observation OPM at "
 	       << phase << " rad" << endl;
 	L *= -1.0;
       }
 
-      // cerr << "adding phase=" << phase << " L=" << L << endl;
+      if (verbose)
+        cerr << "Pulsar::ComplexRVMFit::set_observation phase=" << phase 
+             << " L=" << L << endl;
+
       get_model()->add_state (phase, L);
       count ++;
     }
@@ -87,8 +92,9 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
       peak_pa = 0.5 * atan2 (linear[ibin].imag().val, linear[ibin].real().val);
   }
 
-  cerr << "peak phase=" << peak_phase*180/M_PI
-       << " deg; PA=" << peak_pa*180/M_PI << " deg" << endl;
+  cerr << "Pulsar::ComplexRVMFit::set_observation"
+          " peak phase=" << peak_phase*180/M_PI << " deg;"
+          " PA=" << peak_pa*180/M_PI << " deg" << endl;
 
   state.signal.connect (model, &MEAL::ComplexRVM::set_state);
   
@@ -152,20 +158,23 @@ void Pulsar::ComplexRVMFit::solve ()
   MEAL::LevenbergMarquardt< complex<double> > fit;
   fit.verbose = MEAL::Function::verbose;
 
-  // MEAL::Function::verbose = true;
-
   chisq = fit.init (data_x, data_y, *model);
 
-  // cerr << "initial chisq = " << chisq << endl;
+  if (verbose)
+    cerr << "Pulsar::ComplexRVMFit::solve initial chisq = " << chisq << endl;
 
   float close = 1e-3;
   unsigned iter = 1;
   unsigned not_improving = 0;
   while (not_improving < 25)
   {
-    // cerr << "iteration " << iter << endl;
+    if (verbose)
+      cerr << "Pulsar::ComplexRVMFit::solve iteration " << iter << endl;
+
     float nchisq = fit.iter (data_x, data_y, *model);
-    // cerr << "     chisq = " << nchisq << endl;
+
+    if (verbose)
+      cerr << "     chisq = " << nchisq << endl;
 
     if (!isfinite (nchisq))
       throw Error (InvalidState, "Pulsar::ComplexRVMFit::solve",
@@ -225,13 +234,31 @@ void Pulsar::ComplexRVMFit::check_parameters ()
 
   double total_linear = 0.0;
   for (unsigned i=0; i<nstate; i++)
+  {
+    if (verbose)
+      cerr << "Pulsar::ComplexRVMFit::check_parameters L[" << i << "]="
+           << cRVM->get_linear(i).get_value() << endl;
+
     total_linear += cRVM->get_linear(i).get_value();
+  }
 
   double PA0 = RVM->reference_position_angle->get_param(0);
+  double zeta = RVM->line_of_sight->get_param(0);
+  double alpha = RVM->magnetic_axis->get_param(0);
+  double phi0 = RVM->magnetic_meridian->get_param(0);
+
+  if (verbose)
+    cerr << "Pulsar::ComplexRVMFit::check_parameters initial values:\n"
+            "  PA_0=" << PA0*180/M_PI << " deg \n"
+            "  zeta=" << zeta*180/M_PI << " deg \n"
+            "  alpha=" << alpha*180/M_PI << " deg \n"
+            "  phi0=" << phi0*180/M_PI << " deg" << endl;
 
   if (total_linear < 0.0)
   {
-    cerr << "correcting negative gain" << endl;
+    if (verbose)
+      cerr << "Pulsar::ComplexRVMFit::check_parameters negative gain" << endl;
+
     for (unsigned i=0; i<nstate; i++)
       cRVM->set_linear(i,-cRVM->get_linear(i).get_value());
 
@@ -242,25 +269,29 @@ void Pulsar::ComplexRVMFit::check_parameters ()
   // ensure that PA0 lies on -pi/2 -> pi/2
   PA0 = atan ( tan(PA0) );
 
-  bool turn180 = false;
-
-  double alpha = twopi (RVM->magnetic_axis->get_param(0));
+  // ensure that alpha lies on 0 -> pi
+  alpha = twopi (alpha);
   if (alpha > M_PI)
   {
+    if (verbose)
+      cerr << "Pulsar::ComplexRVMFit::check_parameters alpha -= pi" << endl;
+
     alpha -= M_PI;
-    turn180 = true;
   }
 
-  double zeta = twopi (RVM->line_of_sight->get_param(0));
+  // ensure that zeta lies on 0 -> pi
+  zeta = twopi (zeta);
   if (zeta > M_PI)
   {
-    zeta -= M_PI;
-    turn180 = true;
+    if (verbose)
+      cerr << "Pulsar::ComplexRVMFit::check_parameters zeta = 2pi - zeta" << endl;
+
+    zeta = 2*M_PI - zeta;
+    phi0 -= M_PI;
   }
 
-  double phi0 = twopi (RVM->magnetic_meridian->get_param(0));
-  if (turn180)
-    phi0 = twopi (phi0+M_PI);
+  // ensure that phi0 lies on 0 -> 2pi
+  phi0 = twopi (phi0);
 
   RVM->magnetic_axis->set_param(0, alpha);
   RVM->line_of_sight->set_param(0, zeta);
@@ -355,7 +386,7 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
     }
     catch (Error& error)
     {
-      if (MEAL::Function::verbose)
+      if (verbose)
 	cerr << "exception thrown alpha=" << alpha << " zeta=" << zeta << endl
 	     << error.get_message() << endl;
 
