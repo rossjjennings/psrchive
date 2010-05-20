@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ComplexRVMFit.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/06/15 00:58:56 $
+   $Revision: 1.8 $
+   $Date: 2010/05/20 00:39:56 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ComplexRVMFit_h
@@ -37,7 +37,10 @@ namespace Pulsar
     
   public:
 
-    //! Default constructo
+    //! Verbosity flag
+    static bool verbose;
+
+    //! Default constructor
     ComplexRVMFit ();
 
     //! Add a range of pulse phase containing an orthogonally polarized mode
