@@ -39,6 +39,9 @@ public:
   //! Flux calculation
   DynamicSpectrum ds;
 
+  //! For profile aligment if needed
+  ProfileShiftFit psf;
+
   //! Standard profile file
   std::string stdfile;
 
@@ -47,6 +50,9 @@ public:
 
   //! Setup to use the given file as a standard
   void set_standard(Archive *arch);
+
+  //! Align w/ each input profile separately
+  bool align;
 
 protected:
 
@@ -61,6 +67,7 @@ psrflux::psrflux ()
 {
   ext = "ds";
   stdfile = "";
+  align = false;
 }
 
 void psrflux::add_options (CommandLine::Menu& menu)
@@ -73,6 +80,9 @@ void psrflux::add_options (CommandLine::Menu& menu)
   arg = menu.add (stdfile, 's', "std");
   arg->set_help ("Standard profile file");
 
+  arg = menu.add (align, 'a', "align");
+  arg->set_help ("Align standard with each profile separately");
+
 }
 
 void psrflux::set_standard(Archive *arch)
@@ -83,6 +93,7 @@ void psrflux::set_standard(Archive *arch)
 
   // Set up DS calculation
   Reference::To<StandardFlux> flux = new StandardFlux;
+  flux->set_fit_shift(align);
   flux->set_standard(stdarch->get_Profile(0,0,0));
   ds.set_flux_method(flux);
 }
@@ -110,6 +121,16 @@ void psrflux::process (Pulsar::Archive* archive)
 
   // Set self-standard if needed
   if (stdfile=="") set_standard(archive);
+
+  // If shifts not fit, need to dedisperse and possibly align total
+  // with standard.
+  if (!align) {
+    archive->dedisperse();
+    Reference::To<Archive> arch_tot = archive->total();
+    Estimate<double> shift = 
+      arch_tot->get_Profile(0,0,0)->shift(stdarch->get_Profile(0,0,0));
+    stdarch->get_Profile(0,0,0)->rotate_phase(-1.0*shift.get_value());
+  }
 
   // Compute DS
   ds.set_Archive(archive);
