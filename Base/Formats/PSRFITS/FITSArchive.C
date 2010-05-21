@@ -619,6 +619,14 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
   psrfits_read_key (fptr, "STT_LST", &(hdr_ext->stt_lst), 0.0, verbose > 2);
 
+  // Read the IBEAM value (for multibeam data)
+
+  if (verbose > 2)
+    cerr << "FITSArchive::load_header reading IBEAM" << endl;
+
+  // If the keyword does not exist, set ibeam value to 1
+  psrfits_read_key (fptr, "IBEAM", &(hdr_ext->ibeam), 1, verbose > 2);
+
   // ////////////////////////////////////////////////////////////////
   
   // Finished with primary header information   
