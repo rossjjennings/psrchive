@@ -627,6 +627,25 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   // If the keyword does not exist, set ibeam value to 1
   psrfits_read_key (fptr, "IBEAM", &(hdr_ext->ibeam), 1, verbose > 2);
 
+  if (verbose > 2)
+    cerr << "FITSArchive::load_header IBEAM='" << hdr_ext->ibeam << "'" << endl;
+
+  // Read the PNT_ID (for multibeam data)
+
+  if (verbose > 2)
+    cerr << "FITSArchive::load_header reading PNT_ID" << endl;
+
+  // If PNT_ID does not exist, set pnt_id to ""
+
+  string default_pnt_id_value  = "";
+  psrfits_read_key (fptr, "PNT_ID", &(hdr_ext->pnt_id), default_pnt_id_value,
+      verbose > 2);
+
+  if (verbose > 2)
+    cerr << "FITSArchive::load_header PNT_ID='" << hdr_ext->pnt_id << "'" << endl;
+
+
+
   // ////////////////////////////////////////////////////////////////
   
   // Finished with primary header information   
