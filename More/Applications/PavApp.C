@@ -738,7 +738,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.72 2010/04/12 05:54:25 jonathan_khoo Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.73 2010/05/21 19:52:14 demorest Exp $" << 
         endl << endl;
       return 0;
     case 'M':
@@ -821,6 +821,7 @@ int PavApp::run( int argc, char *argv[] )
       {
 	string range_string = string("(") + string(optarg) + string(")");
 	options.push_back( string( "srange=" ) + range_string );
+	options.push_back( string( "rows=" ) + range_string );
       }
       break;
     case 'H':
