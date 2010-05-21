@@ -1025,6 +1025,16 @@ string get_ibeam( const Pulsar::Archive* archive)
     return tostring( ext->get_ibeam() );
 }
 
+string get_pnt_id( const Pulsar::Archive* archive)
+{
+  const Pulsar::FITSHdrExtension* ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    return "UNDEF";
+  else
+    return ext->get_pnt_id();
+}
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -1884,6 +1894,7 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "nchan_fluxcal" ) return get_nchan_fluxcal( archive );
     else if( command == "nrcvr_fluxcal" ) return get_nrcvr_fluxcal( archive );
     else if( command == "ibeam" ) return get_ibeam( archive );
+    else if( command == "pnt_id" ) return get_pnt_id( archive );
 
     else return "INVALID";
   }
