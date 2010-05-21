@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.23 $
-   $Date: 2010/05/21 01:23:25 $
+   $Revision: 1.24 $
+   $Date: 2010/05/21 05:48:30 $
    $Author: jonathan_khoo $ */
 
 #ifndef __FITSHdrExtension_h
@@ -156,6 +156,11 @@ namespace Pulsar
     int ibeam;
     int get_ibeam () const { return ibeam; }
     void set_ibeam (const int _ibeam) { ibeam = _ibeam; }
+
+    //! Name or ID for pointing ctr (multibeam feeds)
+    std::string pnt_id;
+    std::string get_pnt_id () const { return pnt_id; }
+    void set_pnt_id (const std::string& _pnt_id) { pnt_id = _pnt_id; }
 
     //! Set the observed frequency
     void set_obsfreq( double set_obsfreq );
