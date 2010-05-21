@@ -36,6 +36,8 @@ Pulsar::FITSHdrExtension::FITSHdrExtension ()
   stt_crd1 = stt_crd2 = stp_crd1 = stp_crd2 = unset;
 
   bpa = bmaj = bmin = 0.0;
+
+  ibeam = 1;
 }
 
 //! Copy constructor

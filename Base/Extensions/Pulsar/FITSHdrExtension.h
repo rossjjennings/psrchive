@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.22 $
-   $Date: 2009/04/08 05:19:15 $
-   $Author: straten $ */
+   $Revision: 1.23 $
+   $Date: 2010/05/21 01:23:25 $
+   $Author: jonathan_khoo $ */
 
 #ifndef __FITSHdrExtension_h
 #define __FITSHdrExtension_h
@@ -151,6 +151,11 @@ namespace Pulsar
     std::string stp_crd2;
     std::string get_stp_crd2 () const { return stp_crd2; }
     void set_stp_crd2( std::string new_stp_crd2 ) { stp_crd2 = new_stp_crd2; }
+
+    //! Beam number for multibeam systems (1=ctr beam)
+    int ibeam;
+    int get_ibeam () const { return ibeam; }
+    void set_ibeam (const int _ibeam) { ibeam = _ibeam; }
 
     //! Set the observed frequency
     void set_obsfreq( double set_obsfreq );
