@@ -1015,6 +1015,15 @@ string get_epoch_fluxcal( Reference::To<Archive> archive )
     return tostring( ext->get_epoch(), 6, ios::fixed );
 }
 
+string get_ibeam( const Pulsar::Archive* archive)
+{
+  const Pulsar::FITSHdrExtension* ext = archive->get<FITSHdrExtension>();
+
+  if( !ext )
+    return "UNDEF";
+  else
+    return tostring( ext->get_ibeam() );
+}
 
 
 
@@ -1874,6 +1883,7 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "epoch_fluxcal" ) return get_epoch_fluxcal( archive );
     else if( command == "nchan_fluxcal" ) return get_nchan_fluxcal( archive );
     else if( command == "nrcvr_fluxcal" ) return get_nrcvr_fluxcal( archive );
+    else if( command == "ibeam" ) return get_ibeam( archive );
 
     else return "INVALID";
   }
