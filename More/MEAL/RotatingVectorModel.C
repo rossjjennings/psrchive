@@ -33,23 +33,36 @@ void MEAL::RotatingVectorModel::init ()
 
   ScalarMath longitude = *argument - *magnetic_meridian;
 
-  ScalarMath numerator = sin(*magnetic_axis) * sin(longitude);
-
   /*
     The original RVM sign convention for PA is opposite to that of the IAU.
     See Everett & Weisberg (2001; ApJ 553:341) for more details.
-  */
-  ScalarMath denominator = 
-    sin(*magnetic_axis) * cos(*line_of_sight) * cos(longitude)
-  - cos(*magnetic_axis) * sin(*line_of_sight);
 
-  ScalarMath result = atan(numerator/denominator) + *reference_position_angle;
+    Note that (x,-y) = (-x,y) for all atan cares
+  */
+
+  ScalarMath y = sin(*magnetic_axis) * sin(longitude);
+
+  ScalarMath x = sin(*magnetic_axis) * cos(*line_of_sight) * cos(longitude)
+    - cos(*magnetic_axis) * sin(*line_of_sight);
+
+  ScalarMath result = atan(y/x) + *reference_position_angle;
 
   expression = result.get_expression();
 
   copy_parameter_policy  (expression);
   copy_evaluation_policy (expression);
   copy_univariate_policy (argument);
+
+  // ... to avoid division by zero:
+
+  ScalarMath cos_psi0 = cos(*reference_position_angle);
+  ScalarMath sin_psi0 = sin(*reference_position_angle);
+
+  ScalarMath N = x*cos_psi0 - y*sin_psi0;
+  ScalarMath E = x*sin_psi0 + y*cos_psi0;
+
+  north = N.get_expression ();
+  east = E.get_expression ();
 }
 
 MEAL::RotatingVectorModel::RotatingVectorModel ()

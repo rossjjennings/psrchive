@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/RotatingVectorModel.h,v $
-   $Revision: 1.6 $
-   $Date: 2009/06/11 07:33:31 $
+   $Revision: 1.7 $
+   $Date: 2010/05/24 06:38:07 $
    $Author: straten $ */
 
 #ifndef __RotatingVectorModel_H
@@ -54,11 +54,23 @@ namespace MEAL {
     //! Return the name of the class
     std::string get_name () const;
 
+    //! Get the projection onto North
+    Scalar* get_north () { return north; }
+    //! Get the projection onto East
+    Scalar* get_east () { return east; }
+
   private:
 
     void calculate (double&, std::vector<double>*) {}
     void init ();
 
+    // the magnetic field line projected onto North
+    Reference::To<Scalar> north;
+
+    // the magnetic field line projected onto East
+    Reference::To<Scalar> east;
+
+    // the answer
     Reference::To<Scalar> expression;
 
   };
