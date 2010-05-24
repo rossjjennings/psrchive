@@ -10,9 +10,9 @@
 
 #include "MEAL/ChainRule.h"
 #include "MEAL/VectorRule.h"
-
 #include "MEAL/Gain.h"
-#include "MEAL/Phase.h"
+#include "MEAL/ComplexCartesian.h"
+#include "MEAL/ScalarMath.h"
 
 using namespace std;
 
@@ -23,11 +23,18 @@ void MEAL::ComplexRVM::init ()
 
   rvm = new RotatingVectorModel;
 
+  ScalarMath N = *(rvm->get_north());
+  ScalarMath E = *(rvm->get_east ());
+
+  ScalarMath Q = N*N - E*E;
+  ScalarMath U = 2.0 * N * E;
+
   ChainRule<Complex>* phase = new ChainRule<Complex>;
 
   // Set up a complex phase function with phase equal to RVM P.A.
-  phase->set_model( new Phase<Complex>(2.0) );
-  phase->set_constraint( 0, rvm );
+  phase->set_model( new ComplexCartesian );
+  phase->set_constraint( 0, Q.get_expression() );
+  phase->set_constraint( 1, U.get_expression() );
 
   gain = new VectorRule<Complex>;
 
@@ -136,6 +143,10 @@ Estimate<double> MEAL::ComplexRVM::get_linear (unsigned i) const
 {
   check (i, "get_linear");
   return state[i].gain->get_gain();
+}
+
+void temp ()
+{
 }
 
 void MEAL::ComplexRVM::check (unsigned i, const char* method) const
