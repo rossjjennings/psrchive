@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/WidebandCorrelator.h,v $
-   $Revision: 1.12 $
-   $Date: 2008/04/21 06:20:00 $
+   $Revision: 1.13 $
+   $Date: 2010/05/24 07:21:01 $
    $Author: straten $ */
 
 #ifndef __Pulsar_WideBandCorrelator_h
@@ -62,7 +62,8 @@ namespace Pulsar {
 
     //! Get the configuration file name
     std::string get_config() const { return configfile; }
-    
+    void set_config( const std::string& config ) { configfile = config; }
+
     //! Get the tcycle
     double get_tcycle() const { return tcycle; }
     

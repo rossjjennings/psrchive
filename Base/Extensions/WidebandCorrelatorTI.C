@@ -18,6 +18,7 @@ WidebandCorrelator::Interface::Interface( WidebandCorrelator *s_instance )
   import ( Backend::Interface() );
 
   add( &WidebandCorrelator::get_config,
+       &WidebandCorrelator::set_config,
        "config", "Configuration filename" );
 
   add( &WidebandCorrelator::get_nrcvr,
