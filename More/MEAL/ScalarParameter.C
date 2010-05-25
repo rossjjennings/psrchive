@@ -35,6 +35,16 @@ Estimate<double> MEAL::ScalarParameter::get_value () const
   return get_Estimate (0);
 }
 
+void MEAL::ScalarParameter::set_fit (bool flag)
+{
+  set_infit (0, flag);
+}
+
+bool MEAL::ScalarParameter::get_fit () const
+{
+  return get_infit (0);
+}
+
 string MEAL::ScalarParameter::get_value_name () const
 {
   return get_param_name (0);
@@ -67,7 +77,7 @@ void MEAL::ScalarParameter::calculate (double& result,
   {
     cerr << "MEAL::ScalarParameter::calculate gradient" << endl;
     for (unsigned i=0; i<grad->size(); i++)
-      cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
+      cerr << "   " << i << ":" << get_fit() << "=" << (*grad)[i] << endl;
   }
 
 }

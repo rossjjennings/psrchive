@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarParameter.h,v $
-   $Revision: 1.5 $
-   $Date: 2009/10/22 17:28:32 $
+   $Revision: 1.6 $
+   $Date: 2010/05/25 09:44:36 $
    $Author: straten $ */
 
 #ifndef __ScalarParameter_H
@@ -28,6 +28,9 @@ namespace MEAL {
 
     void set_value (const Estimate<double>& value);
     Estimate<double> get_value () const;
+
+    void set_fit (bool flag);
+    bool get_fit () const;
 
     //! Get the name of the parameter
     std::string get_value_name () const;
