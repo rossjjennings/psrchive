@@ -57,6 +57,9 @@ protected:
   //! Add command line options
   void add_options (CommandLine::Menu&);
 
+  void set_very_verbose () 
+  { ComplexRVMFit::verbose = true; Application::set_very_verbose(); }
+
   // complex rotating vector model
   Reference::To<ComplexRVMFit> rvm;
 
@@ -95,7 +98,7 @@ psrmodel::psrmodel () :
 #endif
 {
   has_manual = false;
-  version = "$Id: psrmodel.C,v 1.11 2009/09/21 21:32:23 straten Exp $";
+  version = "$Id: psrmodel.C,v 1.12 2010/05/25 07:55:07 straten Exp $";
 
   add( new Pulsar::StandardOptions );
 #if HAVE_PGPLOT
@@ -129,58 +132,61 @@ void psrmodel::add_options (CommandLine::Menu& menu)
   arg->set_help ("plot the resulting model with data");
 #endif
 
-  arg = menu.add (global_search, 's', "nstep");
-  arg->set_help ("do a global minimum search on nstep^2 grid");
-
   arg = menu.add (rvm.get(), &ComplexRVMFit::set_threshold, 't', "sigma");
   arg->set_help ("cutoff threshold when selecting bins "
 		 "[default " + tostring(rvm->get_threshold()) + "]");
+
+  arg = menu.add (this, &psrmodel::add_opm, 'o', "deg0:deg1");
+  arg->set_help ("window over which an orthogonal mode dominates");
+
+  menu.add ("");
 
   arg = menu.add (RVM->magnetic_axis.get(),
 		  &MEAL::ScalarParameter::set_value,
 		  deg_to_rad, 'a', "degrees");
   arg->set_help ("alpha: colatitude of magnetic axis");
 
+  arg = menu.add (RVM->magnetic_axis.get(),
+		  &MEAL::ScalarParameter::set_fit, 'A', false);
+  arg->set_help ("hold alpha constant");
+
   arg = menu.add (RVM->line_of_sight.get(),
 		  &MEAL::ScalarParameter::set_value,
 		  deg_to_rad, 'z', "degree");
   arg->set_help ("zeta: colatitude of line of sight");
 
+  arg = menu.add (RVM->line_of_sight.get(),
+		  &MEAL::ScalarParameter::set_fit, 'Z', false);
+  arg->set_help ("hold zeta constant");
+
   arg = menu.add (RVM->magnetic_meridian.get(),
 		  &MEAL::ScalarParameter::set_value,
 		  deg_to_rad, 'b', "degrees");
-  arg->set_help ("longitude of magnetic meridian (agonic line)");
+  arg->set_help ("phi0: longitude of magnetic meridian");
+
+  arg = menu.add (RVM->magnetic_meridian.get(),
+		  &MEAL::ScalarParameter::set_fit, 'B', false);
+  arg->set_help ("hold phi0 constant");
 
   arg = menu.add (RVM->reference_position_angle.get(),
 		  &MEAL::ScalarParameter::set_value,
 		  deg_to_rad, 'p', "degrees");
-  arg->set_help ("position angle at magnetic meridian");
+  arg->set_help ("psi0: position angle at magnetic meridian");
 
-  arg = menu.add (this, &psrmodel::add_opm, 'o', "deg0:deg1");
-  arg->set_help ("window over which an orthogonal mode dominates");
+  arg = menu.add (RVM->reference_position_angle.get(),
+		  &MEAL::ScalarParameter::set_fit, 'P', false);
+  arg->set_help ("hold psi0 constant");
+
+  menu.add ("\n" "chi^2 map options:");
 
   arg = menu.add (this, &psrmodel::map_chisq, 'x');
-  arg->set_help ("produce map of chi-sqared surface");
+  arg->set_help ("produce map of chi^2 surface");
 
+  arg = menu.add (global_search, 's', "nstep");
+  arg->set_help ("do a global minimum search on nstep^2 grid");
 }
 
-#if 0
-  case 'A':
-    RVM->magnetic_axis->set_infit (0, false);
-    break;
 
-  case 'Z':
-    RVM->line_of_sight->set_infit (0, false);
-    break;
-   
-  case 'B':
-    RVM->magnetic_meridian->set_infit (0, false);
-    break;
-            
-  case 'P':
-    RVM->reference_position_angle->set_infit (0, false);
-    break;
-#endif
 
 void psrmodel::map_chisq()
 {
@@ -239,8 +245,8 @@ void psrmodel::process (Pulsar::Archive* data)
   else
   {
     cerr << "psrmodel: solving with initial guess: \n"
-      "PA_0="  << deg*RVM->reference_position_angle->get_param(0) << " deg\n"
-      "zeta="  << deg*RVM->line_of_sight->get_param(0) << " deg\n"
+      "psi_0=" << deg*RVM->reference_position_angle->get_param(0) << " deg\n"
+      "zeta =" << deg*RVM->line_of_sight->get_param(0) << " deg\n"
       "alpha=" << deg*RVM->magnetic_axis->get_param(0) << " deg\n"
       "phi_0=" << deg*RVM->magnetic_meridian->get_param(0) << " deg"
 	 << endl;
@@ -254,8 +260,8 @@ void psrmodel::process (Pulsar::Archive* data)
        << endl;
 
   cerr <<
-    "PA_0="  << deg*RVM->reference_position_angle->get_value() << " deg\n"
-    "zeta="  << deg*RVM->line_of_sight->get_value() << " deg\n"
+    "psi_0=" << deg*RVM->reference_position_angle->get_value() << " deg\n"
+    "zeta =" << deg*RVM->line_of_sight->get_value() << " deg\n"
     "alpha=" << deg*RVM->magnetic_axis->get_value() << " deg\n"
     "phi_0=" << deg*RVM->magnetic_meridian->get_value() << " deg"
 	     << endl;
