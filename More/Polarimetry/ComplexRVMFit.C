@@ -58,9 +58,12 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
   const unsigned nbin = data->get_nbin();
 
   int max_bin = data->get_Profile(0)->find_max_bin();
-
   peak_phase = (max_bin+ 0.5)*2*M_PI / nbin;
+
   unsigned count = 0;
+
+  double max_sin = 0;
+  double delpsi_delphi = 0;
 
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
@@ -85,16 +88,92 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
              << " L=" << L << endl;
 
       get_model()->add_state (phase, L);
+
+      if (data_y.size() > 1)
+      {
+	/*
+
+	Find the maximum slope in dpsi/dphi
+
+	This defines both phi0 and psi0 and will be used to pick the
+	first guess of alpha and zeta
+
+	*/
+
+	std::complex< Estimate<double> > c0 ( data_y[ data_y.size()-2 ] );
+	std::complex< Estimate<double> > c1 ( data_y[ data_y.size()-1 ] );
+
+	// sin of the angle between the vectors, weighted by their amplitude
+	Estimate<double> s = c0.real()*c1.imag() - c0.imag()*c1.real();
+
+	if ( fabs(s.val) > max_sin )
+	{
+	  max_sin = fabs(s.val);
+
+	  double phi_per_bin = 2*M_PI / nbin;
+
+	  Estimate<double> c = c0.real()*c1.real() + c0.imag()*c1.imag();
+
+	  delpsi_delphi = 0.5 * atan2(s.val,c.val) / phi_per_bin;
+	  peak_pa = 0.5 * atan2(c0.imag().val, c0.real().val);
+	  peak_phase = (ibin - 0.5) * phi_per_bin;
+	}
+      }
+
       count ++;
     }
-
-    if (int(ibin) == max_bin)
-      peak_pa = 0.5 * atan2 (linear[ibin].imag().val, linear[ibin].real().val);
   }
 
-  cerr << "Pulsar::ComplexRVMFit::set_observation"
-          " peak phase=" << peak_phase*180/M_PI << " deg;"
-          " PA=" << peak_pa*180/M_PI << " deg" << endl;
+  if (verbose)
+    cerr << "Pulsar::ComplexRVMFit::set_observation"
+      " peak phase=" << peak_phase*180/M_PI << " deg;"
+      " PA=" << peak_pa*180/M_PI << " deg;"
+      " dpsi/dphi=" << delpsi_delphi << endl;
+  
+  MEAL::RotatingVectorModel* RVM = get_model()->get_rvm();
+
+  if (RVM->reference_position_angle->get_param(0) == 0)
+  {
+    cerr << "Pulsar::ComplexRVMFit::set_observation using"
+      " psi0=" << peak_pa*180/M_PI << endl;
+
+    RVM->reference_position_angle->set_param (0, peak_pa);
+  }
+
+  if (RVM->magnetic_meridian->get_param(0) == 0)
+  {
+    cerr << "Pulsar::ComplexRVMFit::set_observation using"
+      " phi0=" << peak_phase*180/M_PI << endl;
+
+    RVM->magnetic_meridian->set_param (0, peak_phase);
+  }
+
+  if (RVM->line_of_sight->get_param(0) == 0 &&
+      RVM->magnetic_axis->get_param(0) == 0)
+  {
+    cerr << "Pulsar::ComplexRVMFit::set_observation using"
+      " delpsi_delphi=" << delpsi_delphi << endl;
+
+    /*
+
+    Choose a reasonable first guess for alpha and zeta
+      
+    Use Equation 5 of Everett & Weisberg (2001) and alpha = (pi + beta) / 2
+
+    */
+
+    double alpha = acos (1/(2*delpsi_delphi));
+    double beta = 2 * alpha - M_PI;
+
+    if (verbose)
+      cerr << "Pulsar::ComplexRVMFit::set_observation"
+	" alpha=" << alpha << " beta=" << beta << endl;
+
+    double zeta = alpha + beta;
+
+    RVM->magnetic_axis->set_param (0, alpha);
+    RVM->line_of_sight->set_param (0, zeta);
+  }
 
   state.signal.connect (model, &MEAL::ComplexRVM::set_state);
   
@@ -233,6 +312,7 @@ void Pulsar::ComplexRVMFit::check_parameters ()
   const unsigned nstate = cRVM->get_nstate();
 
   double total_linear = 0.0;
+  unsigned negative_count = 0;
   for (unsigned i=0; i<nstate; i++)
   {
     if (verbose)
@@ -240,6 +320,9 @@ void Pulsar::ComplexRVMFit::check_parameters ()
            << cRVM->get_linear(i).get_value() << endl;
 
     total_linear += cRVM->get_linear(i).get_value();
+
+    if (cRVM->get_linear(i).get_value() <= 0)
+      negative_count ++;
   }
 
   double PA0 = RVM->reference_position_angle->get_param(0);
@@ -248,7 +331,7 @@ void Pulsar::ComplexRVMFit::check_parameters ()
   double phi0 = RVM->magnetic_meridian->get_param(0);
 
   if (verbose)
-    cerr << "Pulsar::ComplexRVMFit::check_parameters initial values:\n"
+    cerr << "Pulsar::ComplexRVMFit::check_parameters initial result:\n"
             "  PA_0=" << PA0*180/M_PI << " deg \n"
             "  zeta=" << zeta*180/M_PI << " deg \n"
             "  alpha=" << alpha*180/M_PI << " deg \n"
@@ -289,6 +372,8 @@ void Pulsar::ComplexRVMFit::check_parameters ()
     zeta = 2*M_PI - zeta;
     phi0 -= M_PI;
   }
+
+  DEBUG("alpha=" << alpha << " zeta=" << zeta << " neg=" << negative_count);
 
   // ensure that phi0 lies on 0 -> 2pi
   phi0 = twopi (phi0);
