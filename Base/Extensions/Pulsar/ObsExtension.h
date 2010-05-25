@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ObsExtension.h,v $
-   $Revision: 1.13 $
-   $Date: 2009/12/31 06:29:19 $
+   $Revision: 1.14 $
+   $Date: 2010/05/25 08:21:42 $
    $Author: straten $ */
 
 #ifndef __ObsExtension_h
@@ -59,7 +59,9 @@ namespace Pulsar {
     // get methods
     std::string get_observer() const { return observer; }
     std::string get_affiliate() const { return affiliation; }
+
     std::string get_project_ID() const { return project_ID; }
+    void set_project_ID (const std::string& pid) { project_ID = pid; }
 
     //////////////////////////////////////////////////////////////
 
