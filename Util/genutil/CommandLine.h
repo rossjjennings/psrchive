@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/CommandLine.h,v $
-   $Revision: 1.12 $
-   $Date: 2010/05/03 10:41:04 $
+   $Revision: 1.13 $
+   $Date: 2010/05/25 07:55:17 $
    $Author: straten $ */
 
 #ifndef __CommandLine_h
@@ -212,7 +212,30 @@ namespace CommandLine {
     { action = Functor< void() > (instance, method); }
 
     //! Handle the argument
-    void handle (const std::string& arg) { action(); }
+    void handle (const std::string&) { action(); }
+  };
+
+  //! A command line Action with a single argument
+  template<class T>
+  class UnaryAction : public Argument
+  {
+  protected:
+
+    //! The action to be taken
+    Functor < void(T) > action;
+
+    //! The argument to be passed
+    T argument;
+
+  public:
+
+    //! Default constructor
+    template<class C, typename M>
+    UnaryAction (C* instance, M method, T arg)
+    { action = Functor< void(T) > (instance, method); argument=arg; }
+
+    //! Handle the argument
+    void handle (const std::string&) { action(argument); }
   };
 
   class Heading : public Item
@@ -346,6 +369,20 @@ namespace CommandLine {
       return add_action (ptr, method, name, &Argument::set_long_name);
     }
 
+    //! Add an UnaryAction with only a single letter name
+    template<class C, class T>
+    Argument* add (C* ptr, void (C::*method)(T), char name, T arg)
+    {
+      return add_action (ptr, method, name, &Argument::set_short_name, arg);
+    }
+
+    //! Add an UnaryAction with only a long string name
+    template<class C, class T>
+    Argument* add (C* ptr, void (C::*method)(), const std::string& name, T arg)
+    {
+      return add_action (ptr, method, name, &Argument::set_long_name, arg);
+    }
+
     //! Add a Heading with the given text
     void add (const std::string&);
 
@@ -404,6 +441,15 @@ namespace CommandLine {
       return argument;
     }
 
+    template<class C, typename M, typename N, typename S, typename T>
+    Argument* add_action (C* ptr, M method, N name, S set, T arg)
+    {
+      Argument* argument = new UnaryAction<T> (ptr, method, arg);
+
+      (argument->*set) (name);
+      item.push_back (argument);
+      return argument;
+    }
   };
 
 
