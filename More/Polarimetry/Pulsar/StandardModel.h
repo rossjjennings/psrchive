@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.27 $
-   $Date: 2009/11/23 05:28:23 $
+   $Revision: 1.28 $
+   $Date: 2010/05/27 08:32:16 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -120,6 +120,7 @@ namespace Calibration
 
     //! Get the measurement equation solver
     Calibration::ReceptionModel* get_equation ();
+    const Calibration::ReceptionModel* get_equation () const;
 
     //! Set the measurement equation
     void set_equation (Calibration::ReceptionModel*);

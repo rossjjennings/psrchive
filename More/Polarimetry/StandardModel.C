@@ -116,11 +116,19 @@ void Calibration::StandardModel::set_constant_pulsar_gain (bool value)
 }
 
 //! Get the measurement equation solver
-Calibration::ReceptionModel* Calibration::StandardModel::get_equation ()
+Calibration::ReceptionModel*
+Calibration::StandardModel::get_equation ()
 {
   if (!built)
     build ();
 
+  return equation;
+}
+
+//! Get the measurement equation solver
+const Calibration::ReceptionModel*
+Calibration::StandardModel::get_equation () const
+{
   return equation;
 }
 
