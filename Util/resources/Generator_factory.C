@@ -9,8 +9,6 @@
 #include "config.h"
 #endif
 
-// #define _DEBUG
-
 #include "Pulsar/Generator.h"
 #include "Pulsar/Parameters.h"
 
@@ -63,30 +61,40 @@ Pulsar::Generator* Pulsar::Generator::factory (const Pulsar::Parameters* param)
 {
 #ifdef HAVE_TEMPO2
 
-  DEBUG("Pulsar::Generator::factory tempo2 is an option");
+  if (Predictor::verbose)
+    cerr << "Pulsar::Generator::factory tempo2 is an option" << endl;
 
   Pulsar::Generator* default_generator = get_default_generator();
 
   // if the default generator is a tempo2 generator, usea a tempo2 generator
   if (dynamic_cast<Tempo2::Generator*> (default_generator))
-    return new Tempo2::Generator;
+  {
+    if (Predictor::verbose)
+      cerr << "Pulsar::Generator::factory tempo2 is the default" << endl;
 
-  DEBUG("Pulsar::Generator::factory tempo2 is not the default");
+    return new Tempo2::Generator;
+  }
+
+  if (Predictor::verbose)
+    cerr << "Pulsar::Generator::factory tempo2 is not the default" << endl;
 
   // or if the parameters contain tempo2 keywords, use a tempo2 generator
   vector<string> words = parsewords (param);
 
-  DEBUG("Pulsar::Generator::factory testing " << words.size() << " words");
-
   for (unsigned i=0; i < words.size(); i++)
   {
-    DEBUG("Pulsar::Generator::factory testing '" << words[i] << "'");
-
     if (found (words[i], Tempo2::Generator::get_keywords()))
+    {
+      if (Predictor::verbose)
+	cerr << "Pulsar::Generator::factory '" << words[i] << "' is a tempo2"
+	  " keyword" << endl;
+
       return new Tempo2::Generator;
+    }
   }
 
-  DEBUG("Pulsar::Generator::factory tempo2 is not required");
+  if (Predictor::verbose)
+    cerr << "Pulsar::Generator::factory tempo2 is not required" << endl;
 
 #endif
 
