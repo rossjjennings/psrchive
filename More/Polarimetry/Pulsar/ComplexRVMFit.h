@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ComplexRVMFit.h,v $
-   $Revision: 1.8 $
-   $Date: 2010/05/20 00:39:56 $
+   $Revision: 1.9 $
+   $Date: 2010/05/28 21:57:21 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ComplexRVMFit_h
@@ -68,7 +68,11 @@ namespace Pulsar
 
     void set_chisq_map (bool flag) { chisq_map = flag; }
 
-    void global_search (unsigned nstep);
+    void set_range_alpha (const range& r) { range_alpha = r; }
+    void set_range_zeta (const range& r) { range_zeta = r; }
+    void set_range_beta (const range& r) { range_beta = r; }
+
+    void global_search (unsigned nalpha, unsigned nzeta);
 
     float get_chisq () const { return chisq; }
     unsigned get_nfree () const { return nfree; }
@@ -87,6 +91,10 @@ namespace Pulsar
 
     // orthogonally polarized mode phase ranges
     std::vector<range> opm;
+
+    range range_alpha;
+    range range_beta;
+    range range_zeta;
 
     float peak_phase;
     float peak_pa;

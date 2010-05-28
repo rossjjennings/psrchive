@@ -26,6 +26,8 @@ Pulsar::ComplexRVMFit::ComplexRVMFit()
 {
   threshold = 3.0;
   chisq_map = false;
+
+  range_alpha = range_beta = range_zeta = range (0,0);
 }
 
 //! Set the threshold below which data are ignored
@@ -367,7 +369,7 @@ void Pulsar::ComplexRVMFit::check_parameters ()
   if (zeta > M_PI)
   {
     if (verbose)
-      cerr << "Pulsar::ComplexRVMFit::check_parameters zeta = 2pi - zeta" << endl;
+      cerr << "Pulsar::ComplexRVMFit::check_parameters zeta=2pi-zeta" << endl;
 
     zeta = 2*M_PI - zeta;
     phi0 -= M_PI;
@@ -407,7 +409,7 @@ void Pulsar::ComplexRVMFit::check_parameters ()
   cerr << "CHISQ=" << chisq2 << endl;
 #endif
 
-void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
+void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
 {
   MEAL::ComplexRVM* cRVM = get_model();
   MEAL::RotatingVectorModel* RVM = cRVM->get_rvm();
@@ -421,8 +423,36 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
   for (unsigned i=0; i<nstate; i++)
     linear[i] = cRVM->get_linear(i).get_value();
 
-  double alpha_step = M_PI/(nstep);
-  double zeta_step = M_PI/(nstep-1);
+  bool map_beta = range_beta.first != range_beta.second;
+  if (map_beta)
+    range_zeta = range_beta;
+
+  double step_alpha = M_PI/nalpha;
+  double step_zeta = M_PI/nzeta;
+
+  if ( range_alpha.first == range_alpha.second )
+  {
+    range_alpha.first = step_alpha/2;
+    range_alpha.second = M_PI;
+  }
+  else
+  {
+    step_alpha = (range_alpha.second - range_alpha.first) / (nalpha - 1);
+    // ensure that for loop ends on range_alpha.second within rounding error
+    range_alpha.second += step_alpha / 2;
+  }
+
+  if ( range_zeta.first == range_zeta.second )
+  {
+    range_zeta.first = step_zeta/2;
+    range_zeta.second = M_PI;
+  }
+  else
+  {
+    step_zeta = (range_zeta.second - range_zeta.first) / (nzeta - 1);
+    // ensure that for loop ends on range_zeta.second within rounding error
+    range_zeta.second += step_zeta / 2;
+  }
 
   float best_chisq = 0.0;
   float best_alpha = 0.0;
@@ -435,15 +465,23 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
   {
     RVM->magnetic_axis->set_infit (0, false);
     RVM->line_of_sight->set_infit (0, false);
-    chisq_surface.resize (nstep * (nstep-1));
+    chisq_surface.resize (nalpha * nzeta);
   }
 
-  for (double alpha=alpha_step/2; alpha < M_PI; alpha += alpha_step)
+  for (double alpha=range_alpha.first; 
+       alpha < range_alpha.second; 
+       alpha += step_alpha)
   {
-    for (double zeta=zeta_step/2; zeta < M_PI; zeta += zeta_step) try
+    for (double zeta=range_zeta.first; 
+	 zeta < range_zeta.second;
+	 zeta += step_zeta) try
     {
       RVM->magnetic_axis->set_value (alpha);
-      RVM->line_of_sight->set_value (zeta);
+
+      if (map_beta)
+	RVM->line_of_sight->set_value (alpha + zeta);
+      else
+	RVM->line_of_sight->set_value (zeta);
 
       // ensure that each attempt starts with the same guess
       RVM->magnetic_meridian->set_value (peak_phase);
@@ -489,9 +527,13 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
 
     chisq_index = 0;
 
-    for (double alpha=alpha_step/2; alpha < M_PI; alpha += alpha_step)
+    for (double alpha=range_alpha.first; 
+	 alpha < range_alpha.second; 
+	 alpha += step_alpha)
     {
-      for (double zeta=zeta_step/2; zeta < M_PI; zeta += zeta_step)
+      for (double zeta=range_zeta.first; 
+	   zeta < range_zeta.second;
+	   zeta += step_zeta)
       {
 	const double deg = 180/M_PI;
 	cout << alpha*deg << " " << zeta*deg 
@@ -505,7 +547,11 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nstep)
   // cerr << "BEST chisq=" << best_chisq << endl;
 
   RVM->magnetic_axis->set_value (best_alpha);
-  RVM->line_of_sight->set_value (best_zeta);
+
+  if (map_beta)
+    RVM->line_of_sight->set_value (best_alpha + best_zeta);
+  else
+    RVM->line_of_sight->set_value (best_zeta);
 
   // ensure that each attempt starts with the same guess
   RVM->magnetic_meridian->set_value (peak_phase);
