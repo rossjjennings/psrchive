@@ -63,8 +63,10 @@ protected:
   // complex rotating vector model
   Reference::To<ComplexRVMFit> rvm;
 
-  // perform a global search over first guesses in alpha and beta
-  unsigned global_search;
+  // perform a global search over first guesses in alpha and zeta
+  string global_search;
+  unsigned nalpha;
+  unsigned nzeta;
 
   // perform a rotating vector model fit
   bool rvm_fit;
@@ -98,7 +100,7 @@ psrmodel::psrmodel () :
 #endif
 {
   has_manual = false;
-  version = "$Id: psrmodel.C,v 1.12 2010/05/25 07:55:07 straten Exp $";
+  version = "$Id: psrmodel.C,v 1.13 2010/05/28 21:56:32 straten Exp $";
 
   add( new Pulsar::StandardOptions );
 #if HAVE_PGPLOT
@@ -107,14 +109,23 @@ psrmodel::psrmodel () :
 #endif
 
   rvm = new ComplexRVMFit;
-  global_search = 0;
-
   rvm_fit = true;
+
+  nalpha = nzeta = 0;
 }
 
 double deg_to_rad (const std::string& arg)
 {
   return fromstring<double> (arg) * M_PI/180.0;
+}
+
+range range_deg_to_rad (const std::string& arg)
+{
+  range result = fromstring<range> (arg);
+  result.first *= M_PI/180;
+  result.second *= M_PI/180;
+
+  return result;
 }
 
 void psrmodel::add_options (CommandLine::Menu& menu)
@@ -179,11 +190,24 @@ void psrmodel::add_options (CommandLine::Menu& menu)
 
   menu.add ("\n" "chi^2 map options:");
 
-  arg = menu.add (this, &psrmodel::map_chisq, 'x');
-  arg->set_help ("produce map of chi^2 surface");
+  arg = menu.add (global_search, 's', "NxM");
+  arg->set_help ("map an NxM grid in alpha X zeta/beta");
 
-  arg = menu.add (global_search, 's', "nstep");
-  arg->set_help ("do a global minimum search on nstep^2 grid");
+  arg = menu.add (this, &psrmodel::map_chisq, 'x');
+  arg->set_help ("output map to stdout: alpha, zeta/beta, chi^2");
+
+  arg = menu.add (rvm.get(), &ComplexRVMFit::set_range_alpha,
+		  range_deg_to_rad, "alpha", "deg0:deg1");
+  arg->set_help ("range of alpha on x-axis of grid");
+
+  arg = menu.add (rvm.get(), &ComplexRVMFit::set_range_beta,
+		  range_deg_to_rad, "beta", "deg0:deg1");
+  arg->set_help ("range of beta on y-axis of grid");
+
+  arg = menu.add (rvm.get(), &ComplexRVMFit::set_range_zeta,
+		  range_deg_to_rad, "zeta", "deg0:deg1");
+  arg->set_help ("range of zeta on y-axis of grid");
+
 }
 
 
@@ -196,10 +220,9 @@ void psrmodel::map_chisq()
 
 void psrmodel::add_opm (const std::string& arg)
 {
-  range opm = fromstring<range>(arg);
+  range opm = range_deg_to_rad (arg);
   cerr << "psrmodel: OPM at " << opm << " degrees" << endl;
-  opm.first *= M_PI/180;
-  opm.second *= M_PI/180;
+
   rvm->add_opm( opm );
 }
 
@@ -208,6 +231,25 @@ void psrmodel::setup ()
   if (!rvm_fit)
     throw Error (InvalidState, "psrmodel",
 		 "please use -r (can only do RVM fit for now)");
+
+  if (!global_search.empty())
+  {
+    const char* str = global_search.c_str();
+    char separator = 0;
+
+    if ( sscanf (str, "%u%c%u", &nalpha, &separator, &nzeta) == 3 )
+      {}
+    else if ( sscanf (str, "%u", &nalpha) == 1 )
+    {
+      // avoid alpha == zeta pole crossing
+      nzeta = nalpha - 1;
+    }
+    else
+      throw Error (InvalidState, "psrmodel",
+		   "cannot parse chi^2 map dimensions from '%s'", str);
+
+    cerr << "psrmodel: search " << nalpha << "X" << nzeta << " grid" << endl;
+  }
 }
 
 void psrmodel::process (Pulsar::Archive* data)
@@ -235,12 +277,11 @@ void psrmodel::process (Pulsar::Archive* data)
   MEAL::RotatingVectorModel* RVM = rvm->get_model()->get_rvm();
   double deg = 180/M_PI;
 
-  if (global_search)
+  if (nalpha && nzeta)
   {
-    cerr << "psrmodel: performing global search over " << global_search
-	 << " square grid" << endl;
+    cerr << "psrmodel: performing search of chi^2 map" << endl;
 
-    rvm->global_search (global_search);
+    rvm->global_search (nalpha, nzeta);
   }
   else
   {
