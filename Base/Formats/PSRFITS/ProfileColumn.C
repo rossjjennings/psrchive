@@ -207,7 +207,10 @@ void Pulsar::ProfileColumn::unload (int row,
 		 "fitsfile not set");
 
   if (verbose)
-    cerr << "Pulsar::ProfileColumn::unload" << endl;
+    cerr << "Pulsar::ProfileColumn::unload"
+         << " data_colnum=" << data_colnum
+         << " offset_colnum=" << offset_colnum 
+         << " scale_colnum=" << scale_colnum << endl;
 
   const bool save_signed = true;
 

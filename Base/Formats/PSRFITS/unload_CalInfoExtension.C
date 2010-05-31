@@ -4,12 +4,18 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/CalInfoExtension.h"
 #include "FITSError.h"
 
+using namespace std;
+
 void Pulsar::FITSArchive::unload (fitsfile* fptr, const CalInfoExtension* ext)
 {
+  if (verbose > 2)
+    cerr << "Pulsar::FITSArchive::unload CalInfoExtension*=" << ext << endl;
+
   // status returned by FITSIO routines
   int status = 0;
   // do not return comments in fits_read_key
@@ -29,5 +35,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const CalInfoExtension* ext)
 
   if (status)
     throw FITSError (status, "Pulsar::FITSArchive::unload CalInfoExtension");
+
+  if (verbose > 2)
+    cerr << "Pulsar::FITSArchive::unload CalInfoExtension return" << endl;
 }
 

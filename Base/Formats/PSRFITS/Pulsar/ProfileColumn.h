@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/ProfileColumn.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/06/08 19:12:58 $
+   $Revision: 1.3 $
+   $Date: 2010/05/31 05:50:48 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileColumn_h
@@ -73,6 +73,8 @@ namespace Pulsar {
     //! Load the given vector of profiles
     void load (int row, const std::vector<Profile*>&);
 
+    bool verbose;
+
   protected:
 
     fitsfile* fptr;
@@ -86,8 +88,6 @@ namespace Pulsar {
     int scale_colnum;
 
     unsigned nbin, nchan, nprof;
-
-    bool verbose;
 
     //! reset the column indeces
     void reset ();
