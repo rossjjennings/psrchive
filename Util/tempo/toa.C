@@ -287,21 +287,6 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
   if (auxinfo.find(" ")!=string::npos) 
 	  flags = auxinfo.substr(auxinfo.find(" "));
 
-  bool subint_given = false;
-  bool chan_given = false;
-
-  string::size_type i_sub = flags.find("-subint");
-  if (i_sub != string::npos) {
-	  flags.erase(i_sub, 8); // remove '-subint' from flags
-      subint_given = true;
-  }
-
-  string::size_type i_chan = flags.find("-chan");
-  if (i_chan != string::npos) {
-	  flags.erase(i_chan, 6); // remove '-chan' from flags
-      chan_given = true;
-  }
-
   sprintf(outstring, "%s %8.3f %s %7.3f ", fname.c_str(), frequency,
           arrival.printdays(13).c_str(), error);
 
@@ -309,13 +294,6 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
       sprintf(outstring, "%s @", outstring);
   } else {
       sprintf(outstring, "%s %c", outstring, telescope);
-
-      if (subint_given)
-          sprintf(outstring, "%s -subint %d", outstring, subint);
-
-      if (chan_given)
-          sprintf(outstring, "%s -chan %d", outstring, channel);
-
       sprintf(outstring, "%s %s", outstring, flags.c_str());
   }
 
