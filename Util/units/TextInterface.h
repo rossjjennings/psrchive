@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/TextInterface.h,v $
-   $Revision: 1.55 $
-   $Date: 2009/11/29 12:13:50 $
+   $Revision: 1.56 $
+   $Date: 2010/05/31 21:38:44 $
    $Author: straten $ */
 
 #ifndef __TextInterface_h
@@ -913,6 +913,7 @@ namespace TextInterface {
 
     //! Set the indentation that precedes the output of a call to process
     void set_indentation (const std::string& indent) { indentation = indent; }
+    std::string get_indentation () const { return indentation; }
 
     //! Prefix output with "name="
     void set_prefix_name (bool flag) { prefix_name = flag; }
