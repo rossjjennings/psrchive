@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ArrivalTime.h,v $
-   $Revision: 1.5 $
-   $Date: 2010/02/23 18:05:55 $
-   $Author: demorest $ */
+   $Revision: 1.6 $
+   $Date: 2010/05/31 22:25:39 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_ArrivalTime_h
 #define __Pulsar_ArrivalTime_h
@@ -74,6 +74,9 @@ namespace Pulsar {
     //! Add to the vector of time-of-arrival estimates
     void get_toas (std::vector<Tempo::toa>&);
 
+    //! Get auxilliary information
+    std::string get_value (const std::string& key);
+
   protected:
 
     Reference::To<const Archive> observation;
@@ -91,6 +94,8 @@ namespace Pulsar {
 
     //! for formats that support it, a list of attributes to add
     std::vector<std::string> attributes;
+    unsigned toa_subint;
+    unsigned toa_chan;
 
     //! when true, skip data with zero weight
     bool skip_bad;

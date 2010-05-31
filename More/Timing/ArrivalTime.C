@@ -12,6 +12,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/IntegrationOrder.h"
+#include "Pulsar/Statistics.h"
 
 #include <strings.h>
 
@@ -148,6 +149,10 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub,
 
   const Integration* subint = observation->get_Integration(isub);
 
+  if (Archive::verbose > 3)
+    cerr << "Pulsar::ArrivalTime::get_toas isub=" << isub 
+	 << " nchan=" << subint->get_nchan() << endl;
+
   for (unsigned ichan=0; ichan < subint->get_nchan(); ++ichan)
   {
     if (shift)
@@ -168,6 +173,8 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub,
     {
       if (Archive::verbose > 3)
 	cerr << "Pulsar::Integration::toas error" << error << endl;
+      else if (Archive::verbose)
+	cerr << error.get_message() << endl;
       continue;
     }
   }
@@ -179,8 +186,6 @@ void Pulsar::ArrivalTime::dress_toas (unsigned isub,
   std::string nsite = observation->get_telescope();
   std::string aux_txt;
 
-  if (format == Tempo::toa::Tempo2)
-    aux_txt = get_tempo2_aux_txt ();
   if (format == Tempo::toa::Parkes || format == Tempo::toa::Psrclock)
     aux_txt = observation->get_filename() + " " + tostring(isub);
 
@@ -188,6 +193,12 @@ void Pulsar::ArrivalTime::dress_toas (unsigned isub,
   {
     toas[i].set_subint (isub);
     toas[i].set_telescope (nsite);
+
+    toa_subint = isub;
+    toa_chan = toas[i].get_channel();
+
+    if (format == Tempo::toa::Tempo2)
+      aux_txt = get_tempo2_aux_txt ();
 
     string txt = toas[i].get_auxilliary_text ();
     if (txt.length())
@@ -257,4 +268,170 @@ void Pulsar::ArrivalTime::set_format (const string& fmt)
     format = Tempo::toa::Tempo2;
 }
 
+/* *************************************************************************
 
+             KLUDGEY FUNCTIONS TO DUPLICATE PAV-LIKE BEHAVIOUR
+
+   ************************************************************************* */
+
+#include "Pulsar/ObsExtension.h"
+#include "Pulsar/Backend.h"
+#include "Pulsar/Receiver.h"
+#include "Pulsar/Pointing.h"
+#include "Pulsar/WidebandCorrelator.h"
+#include "Pulsar/FITSHdrExtension.h"
+
+using namespace Pulsar;
+
+string get_parang (const Archive* archive )
+{
+  stringstream result;
+  int nsubs = archive->get_nsubint();
+
+  if (nsubs != 0) {
+    const Integration* integration = archive->get_Integration( nsubs / 2 );
+
+    if (integration) {
+      const Pointing* ext = integration->get<Pointing>();
+      
+      if (ext) {
+	result << ext->get_parallactic_angle().getDegrees();
+      }
+    }
+  }
+  
+  return result.str();
+}
+
+string get_tsub (const Archive* archive)
+{
+  string result;
+  int nsubs = archive->get_nsubint();
+  
+  if ( nsubs != 0 )
+  {
+    const Integration* first_int = archive->get_first_Integration();
+    
+    if( first_int )
+      return tostring( first_int->get_duration(), 6 );
+  }
+  
+  return result;
+}
+
+string get_observer (const Archive* archive)
+{
+  string result;
+  const ObsExtension* ext = archive->get<ObsExtension>();
+  
+  if( !ext ) {
+    result = "UNDEF";
+    
+  } else {
+    result = ext->get_observer();
+  }
+  
+  return result;
+}
+
+string get_projid (const Archive* archive)
+{
+  string result = "";
+  const ObsExtension* ext = archive->get<ObsExtension>();
+  
+  if( !ext ) {
+    result = "UNDEF";
+    
+  } else {
+    result = ext->get_project_ID();
+  }
+  
+  return result;
+}
+
+string get_rcvr (const Archive* archive)
+{
+  string result;
+  const Receiver* ext = archive->get<Receiver>();
+  
+  if( ext ) {
+    result = ext->get_name();
+  }
+  
+  return result;
+}
+
+string get_backend (const Archive* archive)
+{
+  string result = "";
+  const Backend* ext = archive->get<Backend>();
+  
+  if (!ext)
+    ext = archive->get<WidebandCorrelator>();
+  
+  if( !ext ) {
+    result = "UNDEF";
+  } else {
+    result = ext->get_name();
+  }
+  
+  return result;
+}
+
+string get_period_as_string (const Archive* archive)
+{
+  // TODO check this
+  return tostring( archive->get_Integration(0)->get_folding_period(), 14 );
+}
+
+int get_stt_smjd (const Archive* arch)
+{
+  return arch->get<FITSHdrExtension>()->get_stt_smjd();
+}
+
+int get_stt_imjd (const Archive* arch)
+{
+  return arch->get<FITSHdrExtension>()->get_stt_imjd();
+}
+
+string get_be_delay (const Archive* archive)
+{
+  const Backend* ext = archive->get<WidebandCorrelator>();
+  
+  if ( !ext )
+    return "UNDEF";
+  else
+    return tostring ( ext->get_delay(), 14 );
+}
+
+std::string Pulsar::ArrivalTime::get_value (const std::string& key) try
+{
+  if(key == "parang") return get_parang( observation );
+  else if(key == "tsub") return get_tsub( observation );
+  else if(key == "observer") return get_observer( observation );
+  else if(key == "projid") return get_projid( observation );
+  else if(key == "rcvr") return get_rcvr( observation );
+  else if(key == "backend") return get_backend( observation );
+  else if(key == "period") return get_period_as_string( observation );
+  else if(key == "be_delay") return get_be_delay( observation );
+  else if(key == "subint") return tostring(toa_subint);
+  else if(key == "chan") return tostring(toa_chan);
+  
+  else
+  {
+    Reference::To<TextInterface::Parser> interface;
+    interface = standard_interface (const_cast<Archive*>(observation.get()));
+
+    interface->set_prefix_name (false);
+    interface->set_indentation ("");
+
+    interface->process( "subint=" + tostring(toa_subint) );
+    interface->process( "chan=" + tostring(toa_chan) );
+
+    return process( interface, key );
+  }
+} 
+catch (Error& e)
+{
+  return "*error*";
+}
