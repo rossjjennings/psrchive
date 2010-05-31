@@ -144,6 +144,17 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
   pulsar psr = *(parameters->psr);
   psr.fitMode = 0;
 
+  work_around_tempo2_tzr_bug (psr);
+
+
+
+
+
+
+
+
+
+
   ChebyModelSet* cms = &pred->predictor.modelset.cheby;
   pred->predictor.kind = Cheby;
 
@@ -196,4 +207,41 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
   return pred;
 }
 
+template<typename T> 
+void Tempo2::Generator::work_around_tempo2_tzr_bug (T& psr) const
+{
+  /*
+    Work around TZRMJD, TZRFRQ, and TZRSITE bugs in older versions of
+    the tempo2 predictor library
+  */
 
+  if (psr.param[param_tzrmjd].paramSet[0]==0)
+  {
+    if (Predictor::verbose)
+      cerr << "Tempo2::Generator::generate TZRMJD not set. Setting to "
+	   << psr.param[param_pepoch].val[0] << endl;
+
+    psr.param[param_tzrmjd].paramSet[0]=1;
+    psr.param[param_tzrmjd].val[0] = psr.param[param_pepoch].val[0];
+  }
+
+  if (psr.param[param_tzrfrq].paramSet[0]==0)
+  {
+    if (Predictor::verbose)
+      cerr << "Tempo2::Generator::generate TZRFRQ not set. Setting to "
+	   << 0.5L * (freq1 + freq2) << endl;
+
+    psr.param[param_tzrfrq].paramSet[0]=1;
+    psr.param[param_tzrfrq].val[0] = 0.5L * (freq1 + freq2);
+  }
+
+  if (strlen(psr.tzrsite)<1)
+  {
+    if (Predictor::verbose)
+      cerr << "Tempo2::Generator::generate TZRSITE not set. Setting to "
+	   << sitename << endl;
+
+    // tzrsite[100] defined in tempo2.h
+    strncpy (psr.tzrsite, sitename.c_str(), 100);
+  }
+}

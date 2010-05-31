@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo2/T2Generator.h,v $
-   $Revision: 1.6 $
-   $Date: 2010/01/12 04:56:24 $
+   $Revision: 1.7 $
+   $Date: 2010/05/31 04:44:05 $
    $Author: straten $ */
 
 #ifndef __Tempo2Generator_h
@@ -81,6 +81,7 @@ namespace Tempo2 {
     //! length of each segment in days
     long double segment_length;
 
+    template<typename T> void work_around_tempo2_tzr_bug (T& psr) const;
   };
 
 }
