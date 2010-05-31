@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Statistics.h,v $
-   $Revision: 1.7 $
-   $Date: 2009/10/02 03:38:13 $
+   $Revision: 1.8 $
+   $Date: 2010/05/31 22:25:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Statistics_h
@@ -98,5 +98,8 @@ namespace Pulsar {
 
 // standard interface constructor defined in More/General/standard_interface.C
 TextInterface::Parser* standard_interface (Pulsar::Archive*);
+
+// also defined in More/General/standard_interface.C
+std::string process (TextInterface::Parser* interface, const std::string& txt);
 
 #endif

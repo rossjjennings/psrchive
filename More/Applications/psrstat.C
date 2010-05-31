@@ -16,9 +16,6 @@
 #include "Pulsar/Statistics.h"
 #include "Pulsar/Archive.h"
 
-#include "substitute.h"
-#include "evaluate.h"
-
 #include "TextLoop.h"
 #include "dirutil.h"
 #include "strutil.h"
@@ -28,7 +25,7 @@
 using namespace std;
 using namespace Pulsar;
 
-//! Pulsar Statistics application
+//! Pulsar statistics application
 class psrstat: public Pulsar::Application
 {
 public:
@@ -84,7 +81,7 @@ psrstat::psrstat ()
   : Pulsar::Application ("psrstat", "prints pulsar attributes and statistics")
 {
   has_manual = true;
-  version = "$Id: psrstat.C,v 1.7 2009/09/02 02:54:31 straten Exp $";
+  version = "$Id: psrstat.C,v 1.8 2010/05/31 22:25:33 straten Exp $";
 
   // print/parse in degrees
   Angle::default_type = Angle::Degrees;
@@ -164,10 +161,7 @@ void psrstat::print ()
     if (verbose)
       cerr << "psrstat: processing '" << text << "'" << endl;
 
-    if ( text.find('$') == string::npos )
-      cout << interface->process ( text );
-    else
-      cout << " " << evaluate( substitute( text, interface.get() ) ); 
+    cout << ::process (interface, text);
   }
   
   cout << endl;
