@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.64 $
-   $Date: 2010/04/06 21:44:21 $
+   $Revision: 1.65 $
+   $Date: 2010/05/31 05:50:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -288,16 +288,16 @@ namespace Pulsar
     mutable MJD reference_epoch;
 
     // Profile load/unload algorithm
-    mutable Reference::To<ProfileColumn> dat_io;
+    mutable Reference::To<ProfileColumn> load_dat_io, unload_dat_io;
 
     // Prepare dat_io attribute for use
-    void setup_dat_io (fitsfile* fptr) const;
+    void setup_dat (fitsfile*, Reference::To<ProfileColumn>&) const;
 
     // Auxilliary data load/unload algorithm
-    mutable Reference::To<ProfileColumn> aux_io;
+    mutable Reference::To<ProfileColumn> load_aux_io, unload_aux_io;
 
     // Prepare dat_io attribute for use
-    void setup_aux_io (fitsfile* fptr, unsigned nprof) const;
+    void setup_aux (fitsfile*, Reference::To<ProfileColumn>&, unsigned) const;
 
     // Set all attributes to default values
     void init ();

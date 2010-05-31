@@ -71,9 +71,19 @@ void Pulsar::FITSArchive::unload_Integration (fitsfile* thefptr, int row,
 
   // Write folding period if predictor model does not exist
   if (!has_model() && !calfreq_set)
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::unload_integration"
+              " neither predictor nor calibrator frequency set" << endl;
+
     psrfits_write_col (thefptr, "PERIOD", row, integ->get_folding_period());
 
-  // Write the channel centre frequencies
+    if (verbose > 2)
+      cerr << "FITSArchive::unload_integration PERIOD column written" << endl;
+  }
+
+  if (verbose > 2)
+    cerr << "FITSArchive::unload_integration writing DAT_FREQ" << endl;
 
   vector<float> temp (nchan);
 
@@ -82,18 +92,29 @@ void Pulsar::FITSArchive::unload_Integration (fitsfile* thefptr, int row,
 
   psrfits_write_col (thefptr, "DAT_FREQ", row, temp, vector<unsigned> ());
 
-  // Write the profile weights
+  if (verbose > 2)
+    cerr << "FITSArchive::unload_integration writing DAT_WTS" << endl;
 
   for (unsigned j = 0; j < nchan; j++)
     temp[j] = integ->get_weight(j);
 
   psrfits_write_col (thefptr, "DAT_WTS", row, temp, vector<unsigned> ());
 
+  if (verbose > 2)
+    cerr << "FITSArchive::unload_integration setup profiles" << endl;
+
   // Temporary profiles vector
   vector<const Profile*> profiles;
-
   setup_profiles_dat (integ, profiles);
-  dat_io->unload (row, profiles);
+
+  if (verbose > 2)
+    cerr << "FITSArchive::unload_integration profile vector size=" 
+         << profiles.size () << " dat_io=" << unload_dat_io.ptr() << endl;
+
+  unload_dat_io->unload (row, profiles);
+
+  if (verbose > 2)
+    cerr << "FITSArchive::unload_integration DATA written" << endl;
 
   if (naux_profile)
   {
@@ -102,7 +123,7 @@ void Pulsar::FITSArchive::unload_Integration (fitsfile* thefptr, int row,
 	   << naux_profile << endl;
 
     setup_profiles<const MoreProfiles> (integ, profiles);
-    aux_io->unload (row, profiles);
+    unload_aux_io->unload (row, profiles);
   }
 
   if (verbose > 2)

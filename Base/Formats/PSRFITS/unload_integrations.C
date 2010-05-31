@@ -142,13 +142,17 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     cerr << "FITSArchive::unload_integrations DAT_WTS resized to "
          << nchan << endl;
 
-  setup_dat_io (ffptr);
-  dat_io->resize ();
+  setup_dat (ffptr, unload_dat_io);
+  unload_dat_io->resize ();
+
+  if (verbose > 2)
+    cerr << "FITSArchive::unload_integrations dat_io=" << unload_dat_io.ptr()
+         << endl;
 
   if (more)
   {
-    setup_aux_io (ffptr, more->get_size());
-    aux_io->create (dat_io->get_data_colnum() + 1);
+    setup_aux (ffptr, unload_aux_io, more->get_size());
+    unload_aux_io->create (unload_dat_io->get_data_colnum() + 1);
   }
 
   // Iterate over all rows, calling the unload_integration function to
@@ -159,5 +163,5 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   if (verbose > 2)
     cerr << "FITSArchive::unload_integrations exit" << endl;
-
 }
+

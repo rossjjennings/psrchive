@@ -390,8 +390,13 @@ try {
     vector<Profile*> profiles;
 
     setup_profiles_dat (integ, profiles);
-    setup_dat_io (fptr);
-    dat_io->load (isubint + 1, profiles);
+    setup_dat (fptr, load_dat_io);
+
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Integration dat_io=" << load_dat_io.ptr()
+           << endl;
+
+    load_dat_io->load (isubint + 1, profiles);
 
     if (scale_cross_products && integ->get_state() == Signal::Coherence)
       for (unsigned ichan=0; ichan < get_nchan(); ichan++)
@@ -403,8 +408,8 @@ try {
     if (naux_profile)
     {
       setup_profiles<MoreProfiles> (integ, profiles);
-      setup_aux_io (fptr, naux_profile);
-      aux_io->load (isubint + 1, profiles);
+      setup_aux (fptr, load_aux_io, naux_profile);
+      load_aux_io->load (isubint + 1, profiles);
     }
   }
 
