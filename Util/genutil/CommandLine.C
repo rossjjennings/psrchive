@@ -25,7 +25,7 @@ CommandLine::Help CommandLine::Argument::get_help () const
     if (!first.empty())
       first += ",";
 
-    first += "--" + long_name;
+    first += "-" + long_name;
   }
 
   if ( !type.empty() )
@@ -133,7 +133,7 @@ void CommandLine::Menu::parse (int argc, char* const * argv)
   // disable getopt_long error messages
   opterr = 0;
 
-  while ((code = getopt_long(argc, argv, optstring, longopts, NULL)) != -1) 
+  while ((code = getopt_long_only(argc, argv, optstring, longopts, NULL)) != -1) 
   {
     if (code == '?')
       code = process_error (code, argv);
@@ -193,7 +193,7 @@ void CommandLine::Menu::help (const std::string& name)
 	prefix = "-";
 
       if (arg->long_name == name)
-	prefix = "--";
+	prefix = "-";
 
       if (!prefix.empty())
       {
