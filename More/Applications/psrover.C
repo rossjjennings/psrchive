@@ -58,21 +58,19 @@ class psrover : public Pulsar::Application
 
  protected:
 
-  Reference::To<Pulsar::Archive> output;
-
-  string archive_class;
-
   void add_options (CommandLine::Menu&);
   void set_noise (string);
   void set_fwhms (string);
   void set_bins (string);
   void set_ascii_file (string);
   void set_nbins (int);
+  void set_output_filename (string);
 
   time_t seconds;
   BoxMuller gasdev;
 
   string ascii_filename;
+  string output_filename;
 
   vector<float> noise_to_add;
   vector<float> fwhms;
@@ -105,7 +103,7 @@ psrover::psrover()
 
   got_nbins = got_ascii_file = got_noises = got_fwhms = got_bins = false;
 
-  archive_class = "PSRFITS";
+  output_filename = "temp_archive.ar";
 }
 
 void psrover::add_options ( CommandLine::Menu& menu)
@@ -134,6 +132,13 @@ void psrover::add_options ( CommandLine::Menu& menu)
   arg = menu.add(this, &psrover::set_ascii_file,'n',"number of bins");
   arg->set_help ("the number of bins in the requested profile");
   arg->set_long_help("This will be overriden by the ascii file or archive, if any given");
+
+  arg = menu.add(this, &psrover::set_output_filename,'o',"output file");
+  arg->set_help ("name of the output, defaults to temp_archive.ar");
+}
+
+void psrover::set_output_filename (string _output) {
+  output_filename = _output;
 }
 
 void psrover::set_nbins (int _nbins) {
@@ -258,21 +263,10 @@ void psrover::process (Pulsar::Archive* archive) {
     }
   }
 
-  cout << "Unloading temp_archive.ar" << endl;
-  archive->unload("temp_archive.ar");
+  if (verbose)
+    cerr << "Unloading " << endl;
+  archive->unload(output_filename);
 }
-// method below was an attempt to make it possible to create a new archive out of nowhere.
-// this works, but it wouldn't be possible to plot it or do anything with it
-/*
-void psrover::finalize () {
-  if (filenames.empty()) {
-    output = Pulsar::Archive::new_Archive (archive_class);
-    output->resize(1, 1, 1, 1);
-    cout << "created archive" << endl;
-    cout << output->get_nsubint() << " " << output->get_nbin()<< endl;
-    output->unload("temp_archive.ar");
-  }
-}*/
 
 int main (int argc, char** argv) 
 {
