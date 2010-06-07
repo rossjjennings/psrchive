@@ -251,7 +251,7 @@ void psrover::process (Pulsar::Archive* archive) {
     }
     for (int j = 0; j < fwhms.size(); j++ ) {
       if (fwhms[j] > 0 && bins[j] > 0) {
-	data -= 1024;
+	data -= nbin;
 	cout << "Adding gaussian noise:" << endl;
 	cout << "maximum: " << noise_to_add[j] << " peak at the bin: " << bins[j] << " fwhm: " << fwhms[j] << endl;
 	for (unsigned i = 0; i < nbin; ++i) {
