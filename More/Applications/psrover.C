@@ -112,6 +112,8 @@ void psrover::add_options ( CommandLine::Menu& menu)
 
   menu.add("");
 
+  menu.add("");
+
   arg = menu.add(this, &psrover::set_noise,'r',"noise amplitudes");
   arg->set_help ("coma separated list of noise amplitudes to be added");
 
@@ -135,6 +137,18 @@ void psrover::add_options ( CommandLine::Menu& menu)
 
   arg = menu.add(this, &psrover::set_output_filename,'o',"output file");
   arg->set_help ("name of the output, defaults to temp_archive.ar");
+
+  menu.add("");
+
+  menu.add("For example the command:\npsrover -r 100,3,30,65,142 -f 30,-1,250,-1,-1 -b 250,-1,400,800,124 inp.ar -a inp.txt\n"
+		  "will take input from the ascii file inp.txt, containing one column, and top of that it will add:\n"
+		  "  - first gaussian compoonent at bin 250 with FWHM 30 and amplitude 100\n"
+		  "  - seocnd gaussian compoonent at bin 400 with FWHM 250 and amplitude 30\n"
+		  "  - first spike at bin 800 with amplitude of 65\n"
+		  "  - second spike at bin 124 with amplitude of 142\n"
+		  "  - white noise with amplitude of 3\n"
+		  " The result will be stored in the file inp.ar\n");
+  menu.add("");
 }
 
 void psrover::set_output_filename (string _output) {
@@ -179,12 +193,6 @@ void psrover::set_ascii_file (string _file) {
   ascii_filename = _file;
   got_ascii_file = true;
 }
-
-/*void psrover::run ()
-{
-  if (!filenames.empty())
-    Application::run ();
-}*/
 
 void psrover::setup () {
   if (got_ascii_file) {
@@ -241,9 +249,9 @@ void psrover::process (Pulsar::Archive* archive) {
       }
       ++data;
     }
-    data -= 1024;
     for (int j = 0; j < fwhms.size(); j++ ) {
       if (fwhms[j] > 0 && bins[j] > 0) {
+	data -= 1024;
 	cout << "Adding gaussian noise:" << endl;
 	cout << "maximum: " << noise_to_add[j] << " peak at the bin: " << bins[j] << " fwhm: " << fwhms[j] << endl;
 	for (unsigned i = 0; i < nbin; ++i) {
