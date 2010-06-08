@@ -29,7 +29,7 @@ LDADD = $(top_builddir)/More/libpsrmore.la \
 
 include $(top_srcdir)/config/Makefile.include
 
-distdir:
+dist-hook:
 	-chmod +x $(noinst_SCRIPTS)
 
 libs include:
