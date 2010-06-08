@@ -16,16 +16,11 @@
 #include <iostream>
 
 #include "BoxMuller.h"
-#include <dirutil.h>
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Integration.h"
-
-#include <algorithm>
-
-#include <boost/tokenizer.hpp>
 
 #define sub_bin 10
 
@@ -82,8 +77,6 @@ class psrover : public Pulsar::Application
   float tmp_rand;
 
   int nbin;
-
-  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
   bool got_noises;
   bool got_fwhms;
@@ -161,29 +154,20 @@ void psrover::set_nbins (int _nbins) {
 }
 
 void psrover::set_noise(string _noise) {
-  boost::char_separator<char> sep(",");
-  tokenizer tokens(_noise, sep);
-  tokenizer::iterator tok_iter;
-  for (tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter)
-    noise_to_add.push_back(fromstring<float>(*tok_iter));
+  for (string sub=stringtok(_noise,","); !sub.empty(); sub=stringtok(_noise,","))
+    noise_to_add.push_back(fromstring<float>(sub));
   got_noises = true;
 }
 
 void psrover::set_fwhms(string _fwhms) {
-  boost::char_separator<char> sep(",");
-  tokenizer tokens(_fwhms, sep);
-  tokenizer::iterator tok_iter;
-  for (tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter)
-    fwhms.push_back(fromstring<float>(*tok_iter));
+  for (string sub=stringtok(_fwhms,","); !sub.empty(); sub=stringtok(_fwhms,","))
+    fwhms.push_back(fromstring<float>(sub));
   got_fwhms = true;
 }
 
 void psrover::set_bins(string _bins) {
-  boost::char_separator<char> sep(",");
-  tokenizer tokens(_bins, sep);
-  tokenizer::iterator tok_iter;
-  for (tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter)
-    bins.push_back(fromstring<float>(*tok_iter));
+  for (string sub=stringtok(_bins,","); !sub.empty(); sub=stringtok(_bins,","))
+    bins.push_back(fromstring<float>(sub));
   got_bins = true;
 }
 
