@@ -28,25 +28,29 @@ void usage ()
 {
   cout << "mtm - matrix template matching analysis \n"
     "Usage: mtm [options] filenames \n"
-    "  -q               Quiet mode \n"
-    "  -v               Verbose mode \n"
-    "  -V               Very verbose mode \n"
+    "  -q            Quiet mode \n"
+    "  -v            Verbose mode \n"
+    "  -V            Very verbose mode \n"
     "\n"
     "Preprocessing options:\n"
-    "  -F               Frequency scrunch template \n"
-    "  -T               Time scrunch template \n"
+    "  -F            Frequency scrunch template \n"
+    "  -T            Time scrunch template \n"
     "\n"
     "Fitting options:\n"
-    "  -c               Choose the maximum harmonic \n"
-    "  -n harmonics     Use up to the specified number of harmonics\n"
+    "  -c            Choose the maximum harmonic \n"
+    "  -n harmonics  Use up to the specified number of harmonics\n"
     "\n"
     "Output options: \n"
-    "  -p               Print degree of polarization + multiple correlation \n"
+    "  -p            Print degree of polarization + multiple correlation \n"
+    "  -t            Output latex table like Figure 1 of van Straten (2006) \n"
        << endl;
 
 }
 
 static bool verbose = false;
+static bool tabular = false;
+
+static string source;
 
 void mtm_analysis (PolnProfileFit::Analysis& analysis,
 		   PolnProfileFit& fit,
@@ -56,7 +60,7 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
     cerr << "mtm: set fit" << endl;
 
   if (!fit.choose_maximum_harmonic && !fit.get_maximum_harmonic())
-    cout <<
+    cerr <<
       "\nWARNING: The maximum harmonic was not set (with -n) \n"
       "nor was it allowed to be automatically chosen (with -c). \n"
       "As described in Section 3.2 of van Straten (2006) [first full \n"
@@ -66,21 +70,31 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
 
   analysis.set_fit (&fit);
 
-  if (fit.choose_maximum_harmonic)
-    cout << "\nMaximum harmonic = " << fit.get_nharmonic() << endl;
+  if (tabular)
+  {
+    cout << source 
+	 << " & " << latex( analysis.get_relative_conditional_error() )
+	 << " & " << latex( analysis.get_multiple_correlation() )
+	 << " & " << latex( analysis.get_relative_error() );
+  }
+  else
+  {
+    if (fit.choose_maximum_harmonic)
+      cout << "\nMaximum harmonic = " << fit.get_nharmonic() << endl;
 
-  cout <<
-    "\nThe following four values are those presented (in the same order) \n"
-    "in Table 1 of van Straten (2006 ApJ, 642:1004)" << endl;
+    cout <<
+      "\nThe following four values are those presented (in the same order) \n"
+      "in Table 1 of van Straten (2006 ApJ, 642:1004)" << endl;
 
-  cout << "\nFull Polarization TOA (matrix template matching): "
-    "\n MTM Relative conditional error = "
-       << analysis.get_relative_conditional_error () <<
-    "\n Multiple correlation = "
-       << analysis.get_multiple_correlation() << 
-    "\n MTM Relative error = "
-       << analysis.get_relative_error () << endl;
-  
+    cout << "\nFull Polarization TOA (matrix template matching): "
+      "\n MTM Relative conditional error = "
+	 << analysis.get_relative_conditional_error () <<
+      "\n Multiple correlation = "
+	 << analysis.get_multiple_correlation() << 
+      "\n MTM Relative error = "
+	 << analysis.get_relative_error () << endl;
+  }
+
   ScalarProfileFitAnalysis scalar;
   scalar.set_fit (&fit);
 
@@ -100,8 +114,11 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
   if (verbose)
     cerr << "S_error=" << S_error << endl;
 
-  cout << "\nLorentz Invariant TOA: "
-    "\n Invariant relative error = " << S_error/I_error << endl << endl;
+  if (tabular)
+    cout << " & " << latex( S_error/I_error ) << " \\\\" << endl;
+  else
+    cout << "\nLorentz Invariant TOA: "
+      "\n Invariant relative error = " << S_error/I_error << endl << endl;
 }
 
 int main (int argc, char *argv[])
@@ -109,12 +126,12 @@ int main (int argc, char *argv[])
   bool fscrunch = false;
   bool tscrunch = false;
 
-  Pulsar::PolnProfileFit::Analysis analysis;
-  Pulsar::PolnProfileFit fit;
-  
+  bool choose_maximum_harmonic = false;
+  unsigned maximum_harmonic = 0;
+
   int gotc = 0;
 
-  while ((gotc = getopt(argc, argv, "cFhn:qTvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "cFhn:qTtvV")) != -1) {
     switch (gotc) {
 
     case 'h':
@@ -138,11 +155,15 @@ int main (int argc, char *argv[])
       break;
 
     case 'c':
-      fit.choose_maximum_harmonic = true;
+      choose_maximum_harmonic = true;
+      break;
+
+    case 't':
+      tabular = true;
       break;
 
     case 'i':
-      cout << "$Id: mtm.C,v 1.2 2010/02/11 21:14:26 straten Exp $" << endl;
+      cout << "$Id: mtm.C,v 1.3 2010/06/10 07:27:30 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -150,7 +171,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'n':
-      fit.set_maximum_harmonic( atoi(optarg) );
+      maximum_harmonic = atoi(optarg);
       break;
 
     case 'T':
@@ -168,11 +189,29 @@ int main (int argc, char *argv[])
   for (int ai=optind; ai<argc; ai++)
     dirglob (&filenames, argv[ai]);
   
-  if (filenames.empty()) {
+  if (filenames.empty())
+  {
     cerr << "mtm: no filenames were specified" << endl;
     return -1;
   } 
   
+  if (tabular)
+  {
+    cout << 
+      "\\begin{table*} \n"
+      "\\caption{Relative Arrival Time Uncertainties} \n"
+      "\\begin{center} \n"
+      "\\begin{tabular}{lllll} \n"
+      "\\tableline \n"
+      "\\tableline \n"
+      "Pulsar &"
+         " $\\hat\\sigma_{\\varphi|{\\bf J}}$ &"
+         " $R_{\\varphi{\\bf J}}$ & $\\hat\\sigma_{\\varphi}$ &"
+         " $\\hat\\sigma_{\\tilde\\varphi}$ \\\\ \n"
+      "\\tableline \n"
+	 << endl;
+  }
+
   for (unsigned i = 0; i < filenames.size(); i++) try
   {     
     if (verbose)
@@ -191,11 +230,21 @@ int main (int argc, char *argv[])
     arch->remove_baseline();
     arch->convert_state( Signal::Stokes );
 
+    source = arch->get_source();
+
     if (verbose)
       cerr << "mtm: creating new PolnProfile" << endl;
 
     Reference::To<Pulsar::PolnProfile> profile;
     profile = arch->get_Integration(0)->new_PolnProfile(0);
+
+    Pulsar::PolnProfileFit::Analysis analysis;
+    Pulsar::PolnProfileFit fit;
+  
+    fit.choose_maximum_harmonic = choose_maximum_harmonic;
+
+    if (maximum_harmonic)
+      fit.set_maximum_harmonic( maximum_harmonic );
 
     MEAL::Polar polar;
 
@@ -219,6 +268,15 @@ int main (int argc, char *argv[])
     cerr << error << endl;
   }
 
+  if (tabular)
+  {
+    cout << "\n"
+      "\\tableline \n"
+      "\\end{tabular} \n"
+      "\\end{center} \n"
+      "\\end{table*} \n"
+	 << endl;
+  }
   return 0;
 
 }
