@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.32 $
-   $Date: 2009/02/13 12:06:52 $
+   $Revision: 1.33 $
+   $Date: 2010/06/10 20:46:39 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -111,6 +111,9 @@ namespace Pulsar {
     void draw (const Archive*);
 
     //! Draw a profile in the currently open window
+    /*! This method sets the viewport (cpgsvp) and window (cpgswin)
+      dimensions, but does not draw the axes or label the frame.  To
+      draw the axes, cpgbox must be called *after* this method. */
     void plot_profile (const Profile*);
 
     //! Provide limited access to the plotter
