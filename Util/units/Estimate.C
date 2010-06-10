@@ -16,11 +16,16 @@ string latex (const Estimate<double>& estimate)
   double val = estimate.get_value();
   double err = estimate.get_error();
 
+  string value;
+
   string error;
 
   if (err > 0.0)
   {
-    double scale = pow (10.0, -floor(log(err)/log(10.0)));
+    int digits = -floor(log(err)/log(10.0));
+    // cerr << "digits=" << digits << endl;
+
+    double scale = pow (10.0, digits);
     err = rint (err*scale);
     if (err == 10)
       err = 1;
@@ -28,9 +33,11 @@ string latex (const Estimate<double>& estimate)
     error = "(" + tostring (err) + ")";
 
     val = rint(val*scale)/scale;
-  }
 
-  string value = tostring (val);
+    value = tostring (val, digits, std::ios_base::fixed);
+  }
+  else
+     value = tostring (val);
 
   string::size_type exp = value.find('e');
   string exponent;
