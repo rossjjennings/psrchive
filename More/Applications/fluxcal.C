@@ -30,6 +30,8 @@ using namespace std;
 // class name of the processed calibrator archive
 static string archive_class = "PSRFITS";
 static string output_ext = "fluxcal";
+static string unload_path;
+
 static double interval = 5.0 * 60.0;
 static Pulsar::Database* database = 0;
 
@@ -46,6 +48,7 @@ void usage ()
     "  -C           calibrate flux calibrator observation with itself \n"
     "  -d database  get FluxCal archives from database and file solutions\n"
     "  -e extension filename extension added to output archives\n"
+    "  -O path      directory in which output will be written \n"
     "  -f           fix the type and name attributes, based on coordinates\n"
     "  -i minutes   maximum number of minutes between archives in same set\n"
     "  -I freq_mhz  Print all cal sources fluxes at the given frequency\n"
@@ -78,6 +81,9 @@ void unload (Pulsar::FluxCalibrator* fluxcal) try {
   string newname = fluxcal->get_filenames ();
   char* whitespace = " ,\t\n";
   newname = replace_extension( stringtok (&newname, whitespace), output_ext );
+
+  if (!unload_path.empty())
+    newname = unload_path + "/" + basename (newname);
 
   cerr << "fluxcal: unloading " << newname << endl;
   archive -> unload (newname);
@@ -115,7 +121,7 @@ int main (int argc, char** argv) try {
   double print_ref_freq = 0.0;
 
   char c;
-  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:fi:I:")) != -1) 
+  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:fi:I:O:")) != -1) 
 
     switch (c)  {
 
@@ -176,6 +182,10 @@ int main (int argc, char** argv) try {
     case 'I':
       print_flux = true;
       print_ref_freq = atof(optarg);
+      break;
+
+    case 'O':
+      unload_path = optarg;
       break;
 
     default:
