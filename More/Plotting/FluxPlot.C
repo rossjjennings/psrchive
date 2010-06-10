@@ -218,6 +218,8 @@ void Pulsar::FluxPlot::plot_profile (const Profile* data)
 {
   plotter.profiles.clear();
   plotter.profiles.push_back (data);
+  plotter.ordinates.resize( data->get_nbin() );
+
   plotter.minmax (get_frame());
 
   get_frame()->focus (0);

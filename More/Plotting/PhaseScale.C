@@ -4,9 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PhaseScale.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+
+using namespace std;
 
 Pulsar::PhaseScale::PhaseScale ()
 {
@@ -45,16 +48,14 @@ void Pulsar::PhaseScale::get_ordinates (const Archive* data,
     scale = get_scale (data);
   }
 
-  for (unsigned ibin = 0; ibin < axis.size(); ibin++) {
+  for (unsigned ibin = 0; ibin < axis.size(); ibin++)
     axis[ibin] = scale * (origin_norm + (float(ibin) + 0.5) / axis.size());
-    // cerr << "x[" << ibin << "]=" << axis[ibin] << endl;
-  }
 }
 
 
 float Pulsar::PhaseScale::get_scale (const Archive* data) const
 {
-  if (units == Milliseconds)
+  if (units == Milliseconds && data != 0)
     return data->get_Integration(0)->get_folding_period() * 1e3;
 
   else if (units == Radians)
