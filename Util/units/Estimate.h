@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.39 $
-   $Date: 2009/06/11 00:27:25 $
+   $Revision: 1.40 $
+   $Date: 2010/06/10 04:36:58 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -256,6 +256,9 @@ std::istream& operator >> (std::istream& is, Estimate<T,U>& estimate)
   estimate.set_error (error);
   return is;
 }
+
+//! output latex-formatted Estimate with error in last digit in parentheses
+std::string latex (const Estimate<double>&);
 
 /*!
   \f$ {\bar{x} over \bar{\sigma}^2} = \sum_{i=1}^n {x_i \over \sigma_i^2} \f$

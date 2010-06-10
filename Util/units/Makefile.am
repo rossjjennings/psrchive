@@ -53,6 +53,7 @@ libunits_la_SOURCES = \
         Configuration.C \
         Conventions.C \
         Error.C \
+	Estimate.C \
 	escape.C \
 	FilePtr.C \
         HeapTracked.C \
