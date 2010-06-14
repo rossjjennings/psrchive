@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.24 $
-   $Date: 2010/05/21 05:48:30 $
+   $Revision: 1.25 $
+   $Date: 2010/06/14 06:17:12 $
    $Author: jonathan_khoo $ */
 
 #ifndef __FITSHdrExtension_h
@@ -153,9 +153,9 @@ namespace Pulsar
     void set_stp_crd2( std::string new_stp_crd2 ) { stp_crd2 = new_stp_crd2; }
 
     //! Beam number for multibeam systems (1=ctr beam)
-    int ibeam;
-    int get_ibeam () const { return ibeam; }
-    void set_ibeam (const int _ibeam) { ibeam = _ibeam; }
+    std::string ibeam;
+    std::string get_ibeam () const { return ibeam; }
+    void set_ibeam (const std::string& _ibeam) { ibeam = _ibeam; }
 
     //! Name or ID for pointing ctr (multibeam feeds)
     std::string pnt_id;
