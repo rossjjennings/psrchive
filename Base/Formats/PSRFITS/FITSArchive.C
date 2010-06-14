@@ -624,8 +624,11 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (verbose > 2)
     cerr << "FITSArchive::load_header reading IBEAM" << endl;
 
-  // If the keyword does not exist, set ibeam value to 1
-  psrfits_read_key (fptr, "IBEAM", &(hdr_ext->ibeam), 1, verbose > 2);
+  // If the keyword does not exist, set ibeam value to a blank string
+
+  dfault = "";
+  psrfits_read_key (fptr, "IBEAM", &tempstr, dfault, verbose > 2);
+  hdr_ext->ibeam = tempstr;
 
   if (verbose > 2)
     cerr << "FITSArchive::load_header IBEAM='" << hdr_ext->ibeam << "'" << endl;

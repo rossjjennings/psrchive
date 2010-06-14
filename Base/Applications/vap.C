@@ -1022,7 +1022,7 @@ string get_ibeam( const Pulsar::Archive* archive)
   if( !ext )
     return "UNDEF";
   else
-    return tostring( ext->get_ibeam() );
+    return ext->get_ibeam();
 }
 
 string get_pnt_id( const Pulsar::Archive* archive)
