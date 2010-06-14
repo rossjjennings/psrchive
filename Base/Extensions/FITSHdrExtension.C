@@ -37,7 +37,7 @@ Pulsar::FITSHdrExtension::FITSHdrExtension ()
 
   bpa = bmaj = bmin = 0.0;
 
-  ibeam = 1;
+  ibeam = "";
   pnt_id = "";
 }
 
