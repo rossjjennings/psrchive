@@ -316,7 +316,7 @@ int main (int argc, char** argv)
     } 
   }
 
-  if (!plot_specified)
+  if (!plot_specified && !unload_derived_calibrator)
     plot_derived_calibrator = true;
 
   if (!metafile && optind >= argc) {
