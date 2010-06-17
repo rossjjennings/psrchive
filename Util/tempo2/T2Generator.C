@@ -19,6 +19,7 @@
 #include "debug.h"
 
 #include <tempo2pred_int.h>
+#include <string.h>
 
 using namespace std;
 
