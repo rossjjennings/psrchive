@@ -1232,7 +1232,8 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
   
   if ( type->is_a<CalibratorTypes::Hybrid>() )
   {
-    cerr << "Pulsar::Database::generatePolnCalibrator Hybrid" << endl;
+    if (verbose)
+      cerr << "Pulsar::Database::generatePolnCalibrator Hybrid" << endl;
     return generateHybridCalibrator (ref_cal, arch);
   }
 
