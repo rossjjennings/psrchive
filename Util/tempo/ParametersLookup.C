@@ -79,7 +79,7 @@ Pulsar::Parameters::Lookup::operator() (const string& name) const try
 
 #ifdef HAVE_PSRCAT
 
-  string command = "psrcat -e " + psr_name + " > " + psr_name + ".eph";
+  string command = "psrcat -all -e " + psr_name + " > " + psr_name + ".eph";
   string catalogue = "psrcat";
 
 #else
