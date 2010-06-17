@@ -22,7 +22,7 @@ string latex (const Estimate<double>& estimate)
 
   if (err > 0.0)
   {
-    int digits = -floor(log(err)/log(10.0));
+    int digits = (int) -floor(log(err)/log(10.0));
     // cerr << "digits=" << digits << endl;
 
     double scale = pow (10.0, digits);
