@@ -72,8 +72,17 @@ void Pulsar::FITSArchive::load_CoherentDedispersion (fitsfile* fptr) try
   double value = 0.0;
   double zero = 0.0;
 
-  psrfits_read_key (fptr, "DM", &value);
-  ext->set_dispersion_measure( value );
+  try {
+    psrfits_read_key (fptr, "DM", &value);
+    ext->set_dispersion_measure( value );
+  }
+  catch (Error& error)
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_CoherentDedispersion " << error.get_message()
+           << " ... aborting" << endl;
+    return;
+  }
 
   psrfits_read_key (fptr, "DOPPLER", &value, zero, verbose > 2);
   ext->set_doppler_correction( value );
