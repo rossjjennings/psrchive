@@ -3247,10 +3247,14 @@ void normaliseXmlSubints(float* amps,unsigned int nbin){
 			max = (amps[i] > max) ? amps[i] : max;
 			min = (amps[i] < min) ? amps[i] : min;
 		}
+		if (max==min){
+			max=min+1;
+		}
 
 		for (int i = 0; i < nbin; i++){
 			amps[i] = (amps[i] - min) / (max-min);
 		}
+
 	}
 }
 void setInitialXmlCandiateSection(const Archive * archive, float minwidthsecs){
@@ -3372,6 +3376,8 @@ void setInitialXmlCandiateSection(const Archive * archive, float minwidthsecs){
 				const unsigned ipol = 0; // total intensity
 
 				float* amps = subint->get_Profile( ipol, ichan )->get_amps();
+
+				normaliseXmlSubints(amps,nbin);
 				section->subbands[ichan] = (float*)malloc(sizeof(float)*nbin);
 				memcpy(section->subbands[ichan],amps,sizeof(float)*nbin);
 
@@ -3449,8 +3455,8 @@ void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod
 	section->bestTopoPeriod=bestPeriod_bc_us/1000000.0*dopplerFactor;
 	section->bestBaryPeriod=bestPeriod_bc_us/1000000.0;
 	section->bestDm=bestDM;
-	section->bestAccn=0;
-	section->bestJerk=0;
+	section->bestAccn=xml_candidate->sections->bestAccn;
+	section->bestJerk=xml_candidate->sections->bestJerk;
 	section->nextrakey=0;
 
 	{
@@ -3476,6 +3482,8 @@ void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod
 			const unsigned ipol = 0; // total intensity
 
 			float* amps = subint->get_Profile( ipol, ichan )->get_amps();
+
+			normaliseXmlSubints(amps,nbin);
 			section->subbands[ichan] = (float*)malloc(sizeof(float)*nbin);
 			memcpy(section->subbands[ichan],amps,sizeof(float)*nbin);
 

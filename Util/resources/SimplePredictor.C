@@ -218,6 +218,10 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
 	coefs.resize(2);
       coefs[1] = -0.5 * coefs[0] * acc / Pulsar::speed_of_light;
     }
+    else if (key == "EPOCH:")
+    {
+	    reference_epoch = MJD::MJD(fromstring<double>(val));
+    }
 
     else
       throw Error (InvalidParam, "Pulsar::SimplePredictor::load",
@@ -248,6 +252,10 @@ void Pulsar::SimplePredictor::unload (FILE* fptr) const
   {
     long double acc = 2.0 * coefs[1] * Pulsar::speed_of_light / coefs[0];
     fprintf (fptr, "ACC: %s\n", tostring(acc).c_str());
+  }
+
+  if (reference_epoch != MJD::zero){
+	  fprintf (fptr, "EPOCH: %s\n", tostring(reference_epoch).c_str());
   }
 }
 
