@@ -27,6 +27,7 @@ Pulsar::FluxCalibrator::Data::Data ( const std::vector< Estimate<double> >& s,
   S_sys = s;
   S_cal = c;
   calculated = true;
+  valid = true;
 }
 
 void 
