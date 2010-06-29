@@ -170,7 +170,8 @@ void PavApp::PrintUsage( void )
   cout << " -I subint Select which sub-integration to display" << endl;
   cout << endl;
   cout << "Plotting options:" << endl;
-  cout << " -B        Display off-pulse bandpass & channel weights" << endl;
+  cout << " -B        Plot original bandpass" << endl;
+  cout << " -J        Plot off-pulse bandpass & channel weights" << endl;
   cout << " -D        Plot a single profile (chan 0, poln 0, subint 0 by default)" << endl;
   cout << " -G        Plot an image of amplitude against frequency & phase" << endl;
   cout << " -K        Plot Digitiser Statistics" << endl;
@@ -527,6 +528,12 @@ void PavApp::PavSpecificOptions( void )
 				       string(",") +
 				       tostring<float>(pa_max,3,ios::fixed) +
 				       string(")" ) );
+
+    SetPlotOptions<StokesCylindricalPlus>( string("pa:y:range=(") +
+				       tostring<float>(pa_min,3,ios::fixed) +
+				       string(",") +
+				       tostring<float>(pa_max,3,ios::fixed) +
+				       string(")" ) );
   }
 
   if( user_character_height != -1 )
@@ -563,9 +570,6 @@ void PavApp::CreatePlotsList( vector< string > filenames,   vector< string > plo
       for( unsigned p = 0; p < plot_ids.size(); p ++ )
       {
         string plot_id = plot_ids[p];
-        if (plot_ids[p] == "B")
-          plot_id = GetBandpassOrSpectrumPlot( new_fplot.archive );
-
         new_fplot.plots.push_back( factory.construct( plot_id ) );
       }
       plots.push_back( new_fplot );
@@ -715,7 +719,7 @@ int PavApp::run( int argc, char *argv[] )
 
   float clip_value = 0.0;
 
-  char valid_args[] = "Az:hb:M:KDcCdr:f:Ft:ETGYSXBRmnjpP:y:H:I:N:k:ivVax:g:l:";
+  char valid_args[] = "Az:hb:M:KDcCdr:f:Ft:ETGYSXBJRmnjpP:y:H:I:N:k:ivVax:g:l:";
   opterr = 0;
 
   int c = '\0';
@@ -738,7 +742,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.73 2010/05/21 19:52:14 demorest Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.74 2010/06/29 02:06:44 jonathan_khoo Exp $" << 
         endl << endl;
       return 0;
     case 'M':
@@ -808,8 +812,7 @@ int PavApp::run( int argc, char *argv[] )
     case 'n':
     case 'B':
     case 'j':
-      plot_ids.push_back( tostring<char>(c) );
-      break;
+    case 'J':
     case 'm':
       plot_ids.push_back( tostring<char>(c) );
       break;
@@ -1166,8 +1169,15 @@ int PavApp::run( int argc, char *argv[] )
       }
 
       // set the precision that plot will use for labels
-      tostring_setf = ios::fixed;
-      tostring_precision = 3;
+      if (publn)
+      {
+        tostring_precision = 0;
+      }
+      else
+      {
+        tostring_setf = ios::fixed;
+        tostring_precision = 3;
+      }
 
       for (unsigned p=0; p < plots[i].plots.size(); p++)
       {
