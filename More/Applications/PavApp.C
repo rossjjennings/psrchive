@@ -742,7 +742,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.74 2010/06/29 02:06:44 jonathan_khoo Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.75 2010/07/01 04:58:38 jonathan_khoo Exp $" << 
         endl << endl;
       return 0;
     case 'M':
@@ -1044,9 +1044,11 @@ int PavApp::run( int argc, char *argv[] )
 
     if( !have_colour )
     {
+
       SetPlotOptions<StokesCylindrical>( "flux:ci=1111" );
       SetPlotOptions<StokesCylindrical>( "flux:ls=1234" );
       SetPlotOptions<StokesCylindricalPlus>( "flux:ci=1111" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:ls=1234" );
       SetPlotOptions<StokesCylindricalPlus>( "flux:ls=1234" );
       SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:ci=1111" );
       SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:ls=1234" );
@@ -1066,11 +1068,14 @@ int PavApp::run( int argc, char *argv[] )
     if( !have_colour )
     {
       SetPlotOptions<StokesCylindrical>( "flux:ci=111" );
-      SetPlotOptions<StokesCylindrical>( "flux:ls=124" );
+      SetPlotOptions<StokesCylindrical>( "flux:lw=311" );
+      SetPlotOptions<StokesCylindrical>( "flux:ls=114" );
       SetPlotOptions<StokesCylindricalPlus>( "flux:ci=111" );
-      SetPlotOptions<StokesCylindricalPlus>( "flux:ls=124" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:lw=311" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux:ls=114" );
       SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:ci=111" );
-      SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:ls=124" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:lw=311" );
+      SetPlotOptions<StokesCylindricalPlus>( "flux_cropped:ls=114" );
     }
     else
     {
