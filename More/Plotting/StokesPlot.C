@@ -16,6 +16,7 @@ Pulsar::StokesPlot::StokesPlot ()
   plot_values  = "IQUV";
   plot_colours = "1234";
   plot_lines   = "1111";
+  plot_widths = "3111";
 }
 
 TextInterface::Parser* Pulsar::StokesPlot::get_interface ()
@@ -28,6 +29,7 @@ void Pulsar::StokesPlot::get_profiles (const Archive* data)
   plotter.profiles.resize( plot_values.size() );
   plotter.plot_sci.resize( plot_values.size() );
   plotter.plot_sls.resize( plot_values.size() );
+  plotter.plot_slw.resize( plot_values.size() );
 
   if (plot_values.size() > plot_colours.size())
     throw Error (InvalidState, "Pulsar::StokesPlot::get_profiles",
@@ -53,6 +55,7 @@ void Pulsar::StokesPlot::get_profiles (const Archive* data)
     plotter.profiles[ipol] = new_Profile (profile, plot_values[ipol]);
     plotter.plot_sci[ipol] = plot_colours[ipol] - '0';
     plotter.plot_sls[ipol] = plot_lines[ipol] - '0';
+    plotter.plot_slw[ipol] = plot_widths[ipol] - '0';
 
   }
 }
