@@ -115,13 +115,13 @@ Pulsar::PlotFactory::PlotFactory ()
         ( 'X', "calphvf", "Calibrator phase vs frequency plot" ) );
   
   add ( new PlotFactory::Advocate<BandpassPlot>
-        ( 'd', "bandpass", "Display off-pulse bandpass" ) );
+        ( 'B', "bandpass", "Display original bandpass" ) );
   
   add ( new PlotFactory::Advocate<ChannelWeightsPlot>
         ( 'c', "chweight", "Display Channel Weights" ) );
   
   add ( new PlotFactory::Advocate<BandpassChannelWeightPlot>
-        ( 'B', "bpcw", "Plot off-pulse bandpass and channel weights" ) );
+        ( 'J', "bpcw", "Plot off-pulse bandpass and channel weights" ) );
   
   add ( new PlotFactory::Advocate<DigitiserStatsPlot>
         ( 'K', "digstats", "Digitiser Statistics" ) );
