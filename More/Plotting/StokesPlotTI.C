@@ -28,6 +28,10 @@ Pulsar::StokesPlot::Interface::Interface (StokesPlot* instance)
        &StokesPlot::set_plot_lines,
        "ls", "PGPLOT line style for each value" );
 
+  add( &StokesPlot::get_plot_widths,
+       &StokesPlot::set_plot_widths,
+       "lw", "PGPLOT line style for each value" );
+
   add( &StokesPlot::get_pav_bias,
        &StokesPlot::set_pav_bias,
        "pav", "Handle bias as done in pav" );
