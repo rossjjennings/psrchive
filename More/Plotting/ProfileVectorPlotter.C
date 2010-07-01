@@ -65,6 +65,9 @@ void Pulsar::ProfileVectorPlotter::draw ( float sx, float ex )
     else
       cpgsls (iprof+1);
 
+    if (plot_slw.size() == profiles.size())
+      cpgslw (plot_slw[iprof]);
+
     draw (profiles[iprof], sx, ex );
   }
 }

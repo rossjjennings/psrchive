@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/ProfileVectorPlotter.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/09/20 04:14:22 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2010/07/01 04:59:23 $
+   $Author: jonathan_khoo $ */
 
 #ifndef __Pulsar_ProfileVectorPlotter_h
 #define __Pulsar_ProfileVectorPlotter_h
@@ -49,6 +49,9 @@ namespace Pulsar {
 
     //! the PGPLOT line style for each profile
     std::vector< int > plot_sls;
+
+    //! the PGPLOT line width for each profile
+    std::vector< int > plot_slw;
 
     //! Plot histogram style
     bool plot_histogram;
