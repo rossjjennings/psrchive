@@ -40,7 +40,7 @@ string fits_state_string (Signal::State state, bool verbose)
   case Signal::PPQQ:
     return "AABB";
   case Signal::Stokes:
-    return "STOKE";
+    return "IQUV";
   case Signal::PseudoStokes:
     return "PSTOKES";
   case Signal::Coherence:
