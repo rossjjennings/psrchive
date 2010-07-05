@@ -1,9 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 2007-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "T2Parameters.h"
 
@@ -75,7 +79,12 @@ void Tempo2::Parameters::load (FILE* fptr)
   if (verbose)
     cerr << "Tempo2::Parameters::load readSimpleParfile completed" << endl;
 
+#ifdef HAVE_TEMPO2_SIMPLE
+  preProcessSimple (psr);
+#else
   preProcess (psr, 1, 0, 0);
+#endif
+
   if (verbose)
     cerr << "Tempo2::Parameters::load preProcess completed" << endl;
 
