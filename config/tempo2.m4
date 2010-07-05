@@ -35,10 +35,15 @@ AC_DEFUN([SWIN_LIB_TEMPO2],
 
   AC_TRY_LINK([#include "tempo2pred.h"
                #include "tempo2.h"],
-              [T2Predictor p; T2Predictor_Read (&p, 0); destroyOne(0); ],
-               have_tempo2=yes, have_tempo2=no)
+              [T2Predictor p; T2Predictor_Read (&p, 0); destroyOne(0);],
+              have_tempo2=yes, have_tempo2=no)
 
   AC_MSG_RESULT($have_tempo2)
+
+  if test x"$have_tempo2" = xyes; then
+    AC_TRY_LINK([#include "tempo2.h"],[preProcessSimple(0);],
+       [AC_DEFINE([HAVE_TEMPO2_SIMPLE], [1], [preProcessSimple defined])],[])
+  fi
 
   LIBS="$ac_save_LIBS"
   CXXFLAGS="$ac_save_CXXFLAGS"
