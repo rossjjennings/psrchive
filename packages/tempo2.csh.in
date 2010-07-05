@@ -2,6 +2,8 @@
 
 # @configure_input@
 
+setenv $TEMPO2 @prefix@/tempo2
+
 mkdir -p @prefix@/src
 cd @prefix@/src
 
@@ -13,7 +15,9 @@ endif
 gunzip -c tempo2-1.11.tar.gz | tar xvf -
 
 cd tempo2-1.11
-mv runtime $PSRHOME/runtime/tempo2
+
+mkdir -p $TEMPO2
+mv runtime/* $TEMPO2
 
 cd src
 
@@ -24,12 +28,19 @@ perl -pi -e 's/FC = g77/FC = gfortran/' Makefile.config
 
 make tempo2 libtempo2pred.a
 
-setenv TEMPO2 $PSRHOME/runtime/tempo2
-
 mkdir -p $TEMPO2/lib
 mkdir -p $TEMPO2/include
 
 cp -p libtempo2pred.a libtempo2.a sofa/libsofa.a $TEMPO2/lib
 cp -p tempo2.h tempo2pred.h tempo2pred_int.h $TEMPO2/include
 
-
+echo
+echo
+echo "TEMPO2 library installation completed"
+echo
+echo "To use the library, please set the environment variable"
+echo
+echo 'setenv TEMPO2 @prefix@/tempo2'
+echo
+echo "and then re-run the PSRCHIVE configure script"
+echo
