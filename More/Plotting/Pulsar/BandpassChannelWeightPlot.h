@@ -8,7 +8,8 @@
 
 
 #include "Pulsar/MultiPlot.h"
-#include "Pulsar/BandpassPlot.h"
+#include "Pulsar/SpectrumPlot.h"
+
 #include "Pulsar/ChannelWeightsPlot.h"
 
 
@@ -32,16 +33,17 @@ namespace Pulsar
     TextInterface::Parser *get_interface();
 
     void prepare( const Archive *data );
-    
+
     virtual void preprocess( Archive *data ) {};
-    
-    BandpassPlot *get_band() { return &band; }
+
+    SpectrumPlot *get_psd() { return &psd; }
     ChannelWeightsPlot *get_weights() { return &weights; }
-    
-    PlotScale *get_x_scale() { return band.get_frame()->get_x_scale(); }
-    PlotScale *get_y_scale() { return band.get_frame()->get_y_scale(); }
+
+    PlotScale *get_x_scale() { return psd.get_frame()->get_x_scale(); }
+    PlotScale *get_y_scale() { return psd.get_frame()->get_y_scale(); }
+
   private:
-    BandpassPlot band;
+    SpectrumPlot psd;
     ChannelWeightsPlot weights;
   };
 

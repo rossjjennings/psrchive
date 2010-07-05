@@ -15,7 +15,7 @@ BandpassChannelWeightPlot::Interface::Interface( BandpassChannelWeightPlot *s_in
   if( s_instance )
     set_instance( s_instance );
   
-  import ( "band", BandpassPlot::Interface(), &BandpassChannelWeightPlot::get_band );
+  import ( "psd", SpectrumPlot::Interface(), &BandpassChannelWeightPlot::get_psd );
   import ( "weights", ChannelWeightsPlot::Interface(), &BandpassChannelWeightPlot::get_weights );
   
   import( "x", PlotScale::Interface(), &BandpassChannelWeightPlot::get_x_scale );
