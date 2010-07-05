@@ -7,22 +7,27 @@ setenv TEMPO2 @prefix@/tempo2
 mkdir -p @prefix@/src
 cd @prefix@/src
 
-if ( ! -f tempo2-1.11.tar.gz ) then
+if ( ! -d tempo2 ) then
+
   echo "Downloading TEMPO2 source code"
-  @download@ http://www.atnf.csiro.au/research/pulsar/tempo2/tempo2-1.11.tar.gz
+
+  touch $HOME/.cvspass
+  setenv TEMPO2_CVS anonymous@tempo2.cvs.sourceforge.net:/cvsroot/tempo2
+
+  echo "When prompted for CVS password: <ENTER>"
+
+  cvs -d :pserver:$TEMPO2_CVS login
+  cvs -z3 -d:pserver:$TEMPO2_CVS co -P tempo2
+
 endif
 
-gunzip -c tempo2-1.11.tar.gz | tar xvf -
-
-cd tempo2-1.11
+cd tempo2
 
 mkdir -p $TEMPO2
-mv runtime/* $TEMPO2
+rsync -t T2runtime/* $TEMPO2
 
-cd src
-
-# use gfortran
-perl -pi -e 's/FC = g77/FC = gfortran/' Makefile.config
+# use the same Fortran compiler
+perl -pi -e 's/FC = g77/FC = @F77@/' Makefile.config
 
 # don't compile the plugins
 
