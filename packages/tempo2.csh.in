@@ -31,13 +31,8 @@ perl -pi -e 's/FC = g77/FC = @F77@/' Makefile.config
 
 # don't compile the plugins
 
-make tempo2 libtempo2pred.a
-
-mkdir -p $TEMPO2/lib
-mkdir -p $TEMPO2/include
-
-cp -p libtempo2pred.a libtempo2.a sofa/libsofa.a $TEMPO2/lib
-cp -p tempo2.h tempo2pred.h tempo2pred_int.h $TEMPO2/include
+make slim
+make sliminstall
 
 echo
 echo
