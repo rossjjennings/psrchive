@@ -93,7 +93,7 @@ int main (int argc, char** argv)
 
 paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
 {
-  version = "$Id: paz.C,v 1.62 2010/03/24 11:09:53 straten Exp $";
+  version = "$Id: paz.C,v 1.63 2010/07/05 13:27:13 straten Exp $";
 
   has_manual = true;
   update_history = true;
@@ -101,16 +101,6 @@ paz::paz () : Pulsar::Application ("paz", "zaps RFI in archives")
   add( new Pulsar::StandardOptions );
   add( new Pulsar::UnloadOptions );
 }
-
-int backward_compatibility (int c)
-{
-  // paz used to accept -u to specify the output directory, now it is -O
-  if (c == 'u')
-    return 'O';
-
-  return c;
-}
-
 
 bool eightBinZap = false;
 
@@ -149,9 +139,10 @@ int pol_to_delete = -1;
 
 void paz::add_options (CommandLine::Menu& menu)
 {
-  CommandLine::Argument* arg;
+  CommandLine::Argument* arg = 0;
 
-  menu.filter = backward_compatibility;
+  // backward compatibility: -u == -O
+  menu.add( new CommandLine::Alias( menu.find("O"), 'u' ) );
 
   menu.add ("\n" "Manual zapping options:");
 

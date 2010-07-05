@@ -127,7 +127,7 @@ int main (int argc, char** argv)
 psradd::psradd () : Pulsar::Application ("psradd", 
 					 "combines archives together")
 {
-  version = "$Id: psradd.C,v 1.72 2010/05/03 04:46:20 straten Exp $";
+  version = "$Id: psradd.C,v 1.73 2010/07/05 13:27:14 straten Exp $";
 
   has_manual = true;
   update_history = true;
@@ -197,36 +197,29 @@ double centre_frequency = -1.0;
 // Only add in archives if their length matches this time
 float required_archive_length = -1.0;
 
-int backward_compatibility (int c)
-{
-  if (c == 'f')
-    return 'o';
-
-  if (c == 'p')
-    return 'E';
-
-  if (c == 's')
-    return 'T';
-
-  return c;
-}
-
 void psradd::add_options (CommandLine::Menu& menu)
 {
   CommandLine::Argument* arg;
 
-  menu.filter = backward_compatibility;
-
   arg = menu.add (unload_name, 'o', "fname");
   arg->set_help ("output result to 'fname'");
+
+  // backward compatibility: -f == -o
+  menu.add( new CommandLine::Alias( arg, 'f' ) );
 
   menu.add ("\n" "General options:");
 
   arg = menu.add (parname, 'E', "f.eph");
   arg->set_help ("Load and install new ephemeris from 'f.eph'");
 
+  // backward compatibility: -p == -E
+  menu.add( new CommandLine::Alias( arg, 'p' ) );
+
   arg = menu.add (tscrunch_total, 'T');
   arg->set_help ("Tscrunch result after each new file added");
+
+  // backward compatibility: -s == -T
+  menu.add( new CommandLine::Alias( arg, 's' ) );
 
   arg = menu.add (time_direction, 'R');
   arg->set_help ("Append data in the frequency direction");
