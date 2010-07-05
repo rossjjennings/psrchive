@@ -33,6 +33,8 @@ void usage()
     "where options are:\n"
     "\n"
     "  -m MJD   MJD [default: now] \n"
+    "  -d hours duration of observation in hours \n"
+    "\n"
     "  -s char  site code from $TEMPO/obsys.dat \n"
     "  -f freq  observing frequency in MHz \n"
     "\n"
@@ -52,16 +54,23 @@ int main (int argc, char ** argv) try
   bool longitude_ascending = false;
 
   MJD mjd;
+  double duration = 0.0;
+
   char site = '7';
   double freq = 1400.0;
 
   int gotc = 0;
-  while ((gotc = getopt(argc, argv, "hf:m:s:pPaA")) != -1) {
-    switch (gotc) {
-
+  while ((gotc = getopt(argc, argv, "hd:f:m:s:pPaA")) != -1)
+  {
+    switch (gotc)
+    {
     case 'h':
       usage ();
       return 0;
+
+    case 'd':
+      duration = atof (optarg);
+      break;
 
     case 'f':
       freq = atof (optarg);
@@ -100,13 +109,29 @@ int main (int argc, char ** argv) try
   {
     time_t temp = time(NULL);
     struct tm date = *gmtime(&temp);
-    fprintf (stderr, "Using current date/time: %s\n", asctime(&date));
+    fprintf (stderr, "\nUsing current date/time: %s\n", asctime(&date));
     mjd = MJD (date);
   }
 
   psrephem eph (argv[optind]);
 
   double epoch = mjd.in_days();
+
+  if (duration)
+  {
+    unsigned nsteps = 100;
+    for (unsigned i=0; i<nsteps; i++)
+    {
+      double hours = (duration * i) / nsteps;
+      double seconds = hours * 3600.0;
+
+      MJD t = mjd + seconds;
+
+      cout << hours << " " << t.datestr("%H:%M:%S") << " "
+	   << get_binlng_asc (t.in_days(), eph, freq, site) << endl;
+    }
+    return 0;
+  }
 
   cout << "================================================" << endl;
 
