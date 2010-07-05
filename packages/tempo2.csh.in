@@ -2,7 +2,7 @@
 
 # @configure_input@
 
-setenv $TEMPO2 @prefix@/tempo2
+setenv TEMPO2 @prefix@/tempo2
 
 mkdir -p @prefix@/src
 cd @prefix@/src
