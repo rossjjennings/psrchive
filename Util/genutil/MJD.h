@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.32 $
-   $Date: 2009/06/17 08:12:20 $
+   $Revision: 1.33 $
+   $Date: 2010/07/05 13:27:26 $
    $Author: straten $ */
 
 #ifndef __GENUTIL_MJD_H
@@ -145,6 +145,9 @@ class MJD {
   // returns a string formatted by strftime
   // e.g. format = "%Y-%m-%d %H:%M:%S"
   char* datestr (char* dstr, int len, const char* format) const;
+
+  // more convenient interface
+  std::string datestr (const char* format) const;
 
 #ifdef HAVE_MPI
   friend int mpiPack_size (const MJD&, MPI_Comm comm, int* size);

@@ -113,6 +113,14 @@ string MJD::printall() const
   return dummy;
 }
 
+// more convenient interface
+std::string MJD::datestr (const char* format) const
+{
+  // assumes that result will be less than 4 times the length of format
+  vector<char> temp ( strlen(format) * 4 );
+  return datestr (&(temp[0]), temp.size(), format);
+}
+
 char* MJD::datestr (char* dstr, int len, const char* format) const
 {
   struct tm greg;
