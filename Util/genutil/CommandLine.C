@@ -34,6 +34,22 @@ CommandLine::Help CommandLine::Argument::get_help () const
   return Help ( first, help );
 }
 
+CommandLine::Help CommandLine::Alias::get_help () const 
+{
+  Help my_help = Argument::get_help ();
+  Help arg_help = argument->get_help();
+
+  my_help.second = "alias to " + arg_help.first;
+  return my_help;
+}
+
+void CommandLine::Alias::set_argument (Argument* _arg)
+{
+  argument = _arg;
+  has_arg = argument->has_arg;
+  handled = 0;
+}
+
 CommandLine::Menu::Menu ()
 {
   help_item = version_item = 0;
@@ -133,7 +149,7 @@ void CommandLine::Menu::parse (int argc, char* const * argv)
   // disable getopt_long error messages
   opterr = 0;
 
-  while ((code = getopt_long_only(argc, argv, optstring, longopts, NULL)) != -1) 
+  while ((code = getopt_long_only(argc, argv, optstring, longopts, 0)) != -1) 
   {
     if (code == '?')
       code = process_error (code, argv);
@@ -157,22 +173,21 @@ void CommandLine::Menu::parse (int argc, char* const * argv)
 
 int CommandLine::Menu::process_error (int code, char* const *argv)
 {
-  if (filter)
-    code = filter (optopt);
+  throw Error (InvalidParam, "CommandLine::Menu::parse",
+	       "invalid option '%s'", argv[optind-1]);
+}
 
+//! Find the named Argument
+CommandLine::Argument* CommandLine::Menu::find (const std::string& name)
+{
   for (unsigned i=0; i<item.size(); i++)
   {
     Argument* arg = dynamic_cast<Argument*>( item[i].get() );
-    if (arg && arg->matches (code) && arg->has_arg == required_argument)
-    {
-      optarg = argv[optind];
-      optind ++;
-      return code;
-    }
+    if (arg && (arg->short_name == name || arg->long_name == name))
+      return arg;
   }
-
-  throw Error (InvalidParam, "CommandLine::Menu::parse",
-	       "invalid option '%s'", argv[optind-1]);
+  throw Error (InvalidParam, "CommandLine::Menu::find",
+	       "no option named '" + name + "'");
 }
 
 void CommandLine::Menu::help (const std::string& name)
@@ -180,33 +195,19 @@ void CommandLine::Menu::help (const std::string& name)
   if (!name.empty())
   {
     // cerr << "CommandLine::Menu::help name='" << name << "'" << endl;
+    Argument* arg = find (name);
 
-    for (unsigned i=0; i<item.size(); i++)
-    {
-      Argument* arg = dynamic_cast<Argument*>( item[i].get() );
-      if (!arg)
-	continue;
+    if (dynamic_cast<Alias*>(arg))
+      cout << "-" << name << " is an " << arg->get_help().second << endl;
 
-      std::string prefix;
-
-      if (arg->short_name == name)
-	prefix = "-";
-
-      if (arg->long_name == name)
-	prefix = "-";
-
-      if (!prefix.empty())
-      {
-	if (arg->long_help.empty())
-	  cout << "no further help available for " << prefix << name << endl;
-	else
-	  cout << prefix << name << " help:\n\n" << arg->long_help << endl;
-
-	exit (0);
-      }
-    }
+    else if (arg->long_help.empty())
+      cout << "no further help available for -" << name << endl;
+    
+    else
+      cout << "-" << name << " help:\n\n" << arg->long_help << endl;
+    
+    exit (0);
   }
-
 
   size_t max_length = 0;
 
@@ -222,6 +223,9 @@ void CommandLine::Menu::help (const std::string& name)
   for (unsigned i=0; i<item.size(); i++)
   {
     Help help = item[i]->get_help();
+
+    if (dynamic_cast<Alias*>(item[i].get()))
+      continue;
 
     if (dynamic_cast<Heading*>(item[i].get()))
       cout << help.first << endl;

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/CommandLine.h,v $
-   $Revision: 1.13 $
-   $Date: 2010/05/25 07:55:17 $
+   $Revision: 1.14 $
+   $Date: 2010/07/05 13:27:21 $
    $Author: straten $ */
 
 #ifndef __CommandLine_h
@@ -55,6 +55,7 @@ namespace CommandLine {
   };
 
   class Menu;
+  class Alias;
 
   //! A single command line argument
   class Argument : public Item
@@ -87,6 +88,7 @@ namespace CommandLine {
     bool* handled;
 
     friend class Menu;
+    friend class Alias;
 
   public:
 
@@ -107,6 +109,29 @@ namespace CommandLine {
 
     Help get_help () const;
   
+  };
+
+
+  //! Alias to a single command line argument
+  class Alias : public Argument
+  {
+
+  protected:
+
+    Reference::To<Argument> argument;
+    void set_argument (Argument*);
+
+  public:
+
+    Alias (Argument* a, char short_alias)
+    { set_argument (a); short_name = short_alias;}
+
+    Alias (Argument* a, const std::string& long_alias)
+    { set_argument (a); long_name = long_alias; }
+
+    void set_handled (bool f) { argument->set_handled (f); }
+    void handle (const std::string& arg) { argument->handle (arg); }
+    Help get_help () const;
   };
 
   //! A command line value
@@ -383,6 +408,9 @@ namespace CommandLine {
       return add_action (ptr, method, name, &Argument::set_long_name, arg);
     }
 
+    //! Find the named Argument
+    Argument* find (const std::string& name);
+
     //! Add a Heading with the given text
     void add (const std::string&);
 
@@ -391,10 +419,6 @@ namespace CommandLine {
 
     //! Print version and exit
     void version ();
-
-    //! Optional Argument::val filter 
-    /*! can be used to address backward compatibility issues */
-    Functor< int(int) > filter;
 
   protected:
 
