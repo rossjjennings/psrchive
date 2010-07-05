@@ -142,7 +142,7 @@ int polynomial::load (string* instr)
   string whitespace (" \t\n");
   string line;
 
-  line = stringtok (instr, "\n");
+  line = stringtok (*instr, "\n");
   if (line.length() < 1)
     return -1;
 
@@ -150,14 +150,14 @@ int polynomial::load (string* instr)
     cerr << "polynomial::load line 1='" << line << "'" << endl;
 
   psrname = line.substr(0,10);
-  psrname = stringtok(&psrname, whitespace);
+  psrname = stringtok(psrname, whitespace);
   line.erase(0,10);
 
-  date = stringtok (&line, whitespace);
+  date = stringtok (line, whitespace);
   if (date.length() < 1)
     return -1;
 
-  utc = stringtok (&line, whitespace);
+  utc = stringtok (line, whitespace);
   if (utc.length() < 1)
     return -1;
 
@@ -193,14 +193,14 @@ int polynomial::load (string* instr)
   else
     tempov11 = 1;
 
-  line = stringtok (instr, "\n");
+  line = stringtok (*instr, "\n");
   if (line.length() < 1)
     return -1;
 
   if (polyco::verbose)
     cerr << "polynomial::load line 2='" << line << "'" << endl;
 
-  string refphstr = stringtok (&line, whitespace);
+  string refphstr = stringtok (line, whitespace);
   if (refphstr.length() < 1)
     return -1;
 
@@ -254,7 +254,7 @@ int polynomial::load (string* instr)
   int i;
   for (i = 0;i<ncoeftmp;i++)
   {
-    line = stringtok (instr, whitespace);
+    line = stringtok (*instr, whitespace);
 
     size_t letterd = line.find('D');
     if (letterd != string::npos)

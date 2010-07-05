@@ -54,7 +54,7 @@ void CommandParser::script (const vector<string>& cmds)
   for (unsigned i=0; i<cmds.size(); i++)
   {
     cmdargs = cmds[i];
-    first = stringtok(&cmdargs, whitespace);
+    first = stringtok(cmdargs, whitespace);
     if ( (startCommand && first == "init") || (endCommand && first == "end"))
     {
       response = parse (cmdargs);
@@ -77,7 +77,7 @@ string CommandParser::parse (const string& commandargs)
     cerr << "CommandParser::parse '" << commandargs << "'" << endl;
 
   string cmdargs = commandargs;
-  string command = stringtok (&cmdargs, whitespace);
+  string command = stringtok (cmdargs, whitespace);
 
   if (debug)
     cerr << "CommandParser::parse '"<< command <<"' '"<< cmdargs <<"'"<<endl;

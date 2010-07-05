@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/strutil.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/03/12 09:17:08 $
+   $Revision: 1.11 $
+   $Date: 2010/07/05 11:58:29 $
    $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
@@ -25,6 +25,7 @@
 
 #include "pad.h"
 #include "tostring.h"
+#include "stringtok.h"
 
 //! Makes the string lowercase
 std::string lowercase (std::string s);
@@ -83,23 +84,6 @@ int stringload (std::vector<std::string>* lines, FILE* fptr);
 // A line is delimited by \n or commented by #.
 // ///////////////////////////////////////////////////////////
 void loadlines (const std::string& filename, std::vector<std::string>& lines);
-
-// ///////////////////////////////////////////////////////////
-// returns the first sub-std::string of 'instr' delimited by
-// characters in 'delimiters'.  the substd::string and any leading
-// delimiter characters are removed from 'instr'
-// ///////////////////////////////////////////////////////////
-std::string stringtok (std::string * instr, const std::string & delimiters,
-		       bool skip_leading_delimiters = true,
-		       bool strip_leading_delimiters_from_remainder = true);
-
-inline
-std::string stringtok (std::string* instr, char delimiter,
-		       bool skip_leading_delimiters = true,
-		       bool strip_leading_delimiters_from_remainder = true)
-{ return stringtok (instr, std::string(1, delimiter),
-		    skip_leading_delimiters,
-		    strip_leading_delimiters_from_remainder); }
 
 // ///////////////////////////////////////////////////////////
 // like sprintf, but returns a string

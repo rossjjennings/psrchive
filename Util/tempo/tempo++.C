@@ -173,19 +173,19 @@ std::string Tempo::get_configuration (const std::string& parameter)
   while (!input.eof()) {
 
     getline (input, line);
-    line = stringtok (&line, "#\n", false);  // get rid of comments
+    line = stringtok (line, "#\n", false);  // get rid of comments
 
     if (!line.length())
       continue;
 
     // the first key loaded should be the name of the instance
-    string key = stringtok (&line, " \t");
+    string key = stringtok (line, " \t");
 
     if (verbose)
       cerr << "Tempo::get_configuration key=" << key << endl;
 
     if (key == parameter)
-      return stringtok (&line, " \t");
+      return stringtok (line, " \t");
 
   }
 

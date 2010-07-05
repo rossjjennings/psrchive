@@ -476,7 +476,7 @@ int Legacy::psrephem::load (string* instr)
   while (instr -> length() > 1)
   {
     // get the next line from the incoming text
-    string line ( stringtok (instr, "\n") );
+    string line ( stringtok (*instr, "\n") );
     if (verbose)
       cerr << "Legacy::psrephem::load '" << line << "' len=" << line.length() 
 	   << " instr.len=" << instr -> length() << endl;

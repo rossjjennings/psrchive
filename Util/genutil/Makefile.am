@@ -109,7 +109,6 @@ libgenutil_la_SOURCES = \
 	smooth.f \
         stringload.C \
         stringprintf.C \
-        stringtok.C \
         strutil.C \
 	TemporaryFile.C \
 	ThreadContext.C \

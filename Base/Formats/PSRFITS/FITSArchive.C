@@ -251,7 +251,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   dfault = get_telescope();
   psrfits_read_key (fptr, "TELESCOP", &tempstr, dfault, verbose > 2);
 
-  tempstr = stringtok (&tempstr, " ");
+  tempstr = stringtok (tempstr, " ");
   
   if (verbose > 2)
     cerr << "FITSArchive::load_header TELESCOP=" << tempstr << endl;

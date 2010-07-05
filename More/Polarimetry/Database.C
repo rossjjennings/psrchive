@@ -190,11 +190,11 @@ void Pulsar::Database::Entry::load (const string& str) try
 
   // /////////////////////////////////////////////////////////////////
   // filename
-  filename = stringtok (&line, whitespace);
+  filename = stringtok (line, whitespace);
   
   // /////////////////////////////////////////////////////////////////
   // type
-  string typestr = stringtok (&line, whitespace);
+  string typestr = stringtok (line, whitespace);
 
   try
   {
@@ -211,13 +211,13 @@ void Pulsar::Database::Entry::load (const string& str) try
 
   // /////////////////////////////////////////////////////////////////
   // RA DEC
-  string coordstr = stringtok (&line, whitespace);
-  coordstr += " " + stringtok (&line, whitespace);
+  string coordstr = stringtok (line, whitespace);
+  coordstr += " " + stringtok (line, whitespace);
   position = sky_coord (coordstr.c_str());
 
   // /////////////////////////////////////////////////////////////////
   // MJD
-  string mjdstr  = stringtok (&line, whitespace);
+  string mjdstr  = stringtok (line, whitespace);
   time = MJD (mjdstr);
 
   // /////////////////////////////////////////////////////////////////
@@ -227,17 +227,17 @@ void Pulsar::Database::Entry::load (const string& str) try
     throw Error (FailedSys, "Pulsar::Database::Entry::load",
                  "sscanf(" + line + ") != 3");
 
-  stringtok (&line, whitespace);
-  stringtok (&line, whitespace);
-  stringtok (&line, whitespace);
+  stringtok (line, whitespace);
+  stringtok (line, whitespace);
+  stringtok (line, whitespace);
 
   // /////////////////////////////////////////////////////////////////
   // instrument
-  instrument = stringtok (&line, whitespace);
+  instrument = stringtok (line, whitespace);
 
   // /////////////////////////////////////////////////////////////////
   // receiver
-  receiver = stringtok (&line, whitespace);
+  receiver = stringtok (line, whitespace);
 
   if (receiver.length() == 0)
     throw Error (InvalidParam, "Pulsar::Database::Entry::load",

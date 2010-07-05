@@ -110,12 +110,12 @@ void Pulsar::StandardCandles::Entry::load (const string& str)
 
   // /////////////////////////////////////////////////////////////////
   // NAME
-  source_name.push_back( stringtok (&temp, whitespace) );
+  source_name.push_back( stringtok (temp, whitespace) );
 
   // /////////////////////////////////////////////////////////////////
   // RA DEC
-  string coordstr = stringtok (&temp, whitespace);
-  coordstr += " " + stringtok (&temp, whitespace);
+  string coordstr = stringtok (temp, whitespace);
+  coordstr += " " + stringtok (temp, whitespace);
   position = sky_coord (coordstr.c_str());
 
   int s = sscanf (temp.c_str(), "%lf %lf %lf",
@@ -241,7 +241,7 @@ void Pulsar::StandardCandles::load (const std::string& filename)
 
     getline (input, line);
 
-    line = stringtok (&line, "#\n", false);  // get rid of comments
+    line = stringtok (line, "#\n", false);  // get rid of comments
 
     if (!line.length())
       continue;
@@ -256,9 +256,9 @@ void Pulsar::StandardCandles::load (const std::string& filename)
 		     "cannot add aliases before entries");
 
       // take off the aka
-      string name = stringtok (&line, " \t\n");
+      string name = stringtok (line, " \t\n");
       // get the name
-      name = stringtok (&line, " \t\n");
+      name = stringtok (line, " \t\n");
 
       if (verbose)
 	cerr << "Pulsar::StandardCandles::load alias: " 

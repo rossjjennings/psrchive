@@ -136,7 +136,7 @@ void loadlines (const std::string& filename, std::vector<std::string>& lines)
   while (!input.eof())
   {
     std::getline (input, line);
-    line = stringtok (&line, "#\n", false);  // get rid of comments
+    line = stringtok (line, "#\n", false);  // get rid of comments
 
     if (!line.length())
       continue;

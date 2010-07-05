@@ -158,13 +158,13 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
   {
     string line = buf;
 
-    line = stringtok (&line, "#\n", false);  // get rid of comments
+    line = stringtok (line, "#\n", false);  // get rid of comments
 
     if (!line.length())
       continue;
 
     // the first key loaded should be the name of the instance
-    string key = stringtok (&line, " \t");
+    string key = stringtok (line, " \t");
 
     if (verbose)
       cerr << "Pulsar::SimplePredictor::load key ='" << key << "'" << endl;
@@ -172,7 +172,7 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
     if (!line.length())
       continue;
 
-    string val = stringtok (&line, " \t");
+    string val = stringtok (line, " \t");
 
     if (verbose)
       cerr << "Pulsar::SimplePredictor::load val ='" << val << "'" << endl;
