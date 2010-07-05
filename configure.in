@@ -313,6 +313,7 @@ if test x"$have_tempo2" != xyes; then
    echo
    echo "The TEMPO2 Predictor library was not found:"
    echo "  PSRCHIVE applications will not be able to use TEMPO2 predictors."
+   echo "  Run ./packages/tempo2.csh to automatically install."
 fi
 
 if test x"$have_cfitsio" != xyes; then
@@ -326,7 +327,7 @@ if test x"$have_pgplot" != xyes; then
    echo
    echo "The PGPLOT library was not found:"
    echo "  PSRCHIVE applications will not be able to plot."
-   echo "  Please see http://psrchive.sourceforge.net/third/pgplot"
+   echo "  Run ./packages/pgplot.csh to automatically install."
 fi
 
 if test x"$have_qt" != xyes; then
