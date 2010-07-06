@@ -351,20 +351,38 @@ std::istream& operator >> (std::istream& is, Angle& angle)
 {
   double value;
   is >> value;
-  std::streampos pos = is.tellg();
 
-  std::string unit;
-  is >> unit;
-  if (unit == "deg")
-    angle.setDegrees (value);
-  else if (unit == "rad")
-    angle.setRadians (value);
-  else if (unit == "trn")
-    angle.setTurns (value);
-  else {
-    // replace the text
-    is.seekg (pos);
-    switch (Angle::default_type) {
+  if (is.fail())
+    return is;
+
+  bool use_default = true;
+
+  if (!is.eof())
+  {
+    use_default = false;
+
+    std::streampos pos = is.tellg();
+
+    std::string unit;
+    is >> unit;
+    if (unit == "deg")
+      angle.setDegrees (value);
+    else if (unit == "rad")
+      angle.setRadians (value);
+    else if (unit == "trn")
+      angle.setTurns (value);
+    else 
+    {
+      // replace the text and revert to the default
+      is.seekg (pos);
+      use_default = true;
+    }
+  }
+
+  if (use_default)
+  {
+    switch (Angle::default_type)
+    {
     case Angle::Radians:
       angle.setRadians (value); break;
     case Angle::Degrees:
