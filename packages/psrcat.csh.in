@@ -14,9 +14,10 @@ cd psrcat
 
 source makeit
 
-mv psrcat $PSRHOME/$LOGIN_ARCH/bin
+mkdir -p @prefix@/bin
+mv psrcat @prefix@/bin
 
-mkdir -p $PSRHOME/runtime/psrcat
+mkdir -p @prefix@/psrcat
 
-mv psrcat.db $PSRHOME/runtime/psrcat
+mv psrcat.db @prefix@/psrcat
 
