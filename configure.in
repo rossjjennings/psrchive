@@ -174,9 +174,9 @@ SWIN_LIB_TEMPO2
 SWIN_LIB_MPI
 SWIN_LIB_READLINE
 SWIN_LIB_GSL
+
 # Check for psrxml io library
 MJK_LIB_PSRXML
-
 
 #
 # Generate python module if --enable-shared is used
@@ -311,43 +311,36 @@ else
 
 if test x"$have_tempo2" != xyes; then
    echo
-   echo "The TEMPO2 Predictor library was not found:"
+   echo "The TEMPO2 Predictor library was not found: (desirable)"
    echo "  PSRCHIVE applications will not be able to use TEMPO2 predictors."
    echo "  Run ./packages/tempo2.csh to automatically install."
 fi
 
 if test x"$have_cfitsio" != xyes; then
    echo
-   echo "The CFITSIO library was not found:"
+   echo "The CFITSIO library was not found: (desirable)"
    echo "  PSRCHIVE applications will not be able to load PSRFITS files."
    echo "  Run ./packages/cfitsio.csh to automatically install."
 fi
 
 if test x"$have_pgplot" != xyes; then
    echo
-   echo "The PGPLOT library was not found:"
+   echo "The PGPLOT library was not found: (desirable)"
    echo "  PSRCHIVE applications will not be able to plot."
    echo "  Run ./packages/pgplot.csh to automatically install."
 fi
 
 if test x"$have_qt" != xyes; then
    echo
-   echo "The Qt library was not found:"
+   echo "The Qt library was not found: (optional)"
    echo "  PSRCHIVE graphical user interfaces will not be compiled."
 fi
 
 if test x"$have_qtdriv" != xyes; then
    echo
-   echo "The qtdriv device handler is not installed:"
+   echo "The qtdriv device handler is not installed: (optional)"
    echo "  rhythm will not be compiled."
 fi
-
-if test x"$have_psrxml" != xyes; then
-	echo
-	echo "The psrxml library was not found:"
-	echo "  pdmp will not write xml candidate files."
-fi
-
 
 fi
 
