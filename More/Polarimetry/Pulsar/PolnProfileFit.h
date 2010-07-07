@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.40 $
-   $Date: 2010/02/11 21:18:17 $
+   $Revision: 1.41 $
+   $Date: 2010/07/07 12:14:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -150,9 +150,6 @@ namespace Pulsar
 
     //! Set true when set_standard should choose the maximum harmonic
     bool choose_maximum_harmonic;
-
-    //! Set true when only the total intensity should be used
-    bool emulate_scalar;
 
     //! Manage the equation transformation
     bool manage_equation_transformation;

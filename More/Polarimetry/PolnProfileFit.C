@@ -50,7 +50,6 @@ Pulsar::PolnProfileFit::operator = (const PolnProfileFit& fit)
   cerr << "Pulsar::PolnProfileFit::operator = WARNING not implemented" << endl;
 
   choose_maximum_harmonic = fit.choose_maximum_harmonic;
-  emulate_scalar = fit.emulate_scalar;
 
   manage_equation_transformation = fit.manage_equation_transformation;
 
