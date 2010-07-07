@@ -32,23 +32,23 @@ gunzip -c tempo11.010.tar.gz | tar xvf -
 
 cd src
 make
-mkdir -p $PSRHOME/$LOGIN_ARCH/bin
-mv tempo $PSRHOME/$LOGIN_ARCH/bin
+mkdir -p @prefix@/bin
+mv tempo @prefix@/bin
 cd ..
 
-mkdir -p $PSRHOME/runtime/tempo
+mkdir -p @prefix@/tempo
 
-cp -R clock obsys.dat tempo.cfg tempo.hlp tzpar $PSRHOME/runtime/tempo
+cp -R clock obsys.dat tempo.cfg tempo.hlp tzpar @prefix@/tempo
 
-mkdir -p $PSRHOME/runtime/tempo/tempo_ephem
+mkdir -p @prefix@/tempo/tempo_ephem
 
-cp DE200.1950.2050.gz $PSRHOME/runtime/tempo/tempo_ephem
-cp DE405.1950.2050.gz $PSRHOME/runtime/tempo/tempo_ephem
-cp TDB.1950.2050.gz $PSRHOME/runtime/tempo/tempo_ephem
+cp DE200.1950.2050.gz @prefix@/tempo/tempo_ephem
+cp DE405.1950.2050.gz @prefix@/tempo/tempo_ephem
+cp TDB.1950.2050.gz   @prefix@/tempo/tempo_ephem
 
-cd $PSRHOME/runtime/tempo
+cd @prefix@/tempo
 
-perl -pi -e "s|/pulsar/psr|$PSRHOME|" tempo.cfg
+perl -pi -e "s|/pulsar/psr/runtime|@prefix@|" tempo.cfg
 
 cd tempo_ephem
 
