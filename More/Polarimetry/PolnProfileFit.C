@@ -207,7 +207,7 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   cerr << "Pulsar::PolnProfileFit::set_standard created" << endl;
 #endif
 
-  if (manage_equation_transformation)
+  if (manage_equation_transformation && transformation)
   {
 #ifndef _DEBUG
     if (verbose)
