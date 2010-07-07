@@ -343,7 +343,8 @@ void MEAL::Composite::remove_component (Function* model)
 
     unsigned nmodel = meta->get_nmodel();
     for (unsigned imodel=0; imodel<nmodel; imodel++)
-      remove_component (meta->models[imodel]);
+      if (meta->models[imodel])
+	remove_component (meta->models[imodel]);
   }
   else
   {   
