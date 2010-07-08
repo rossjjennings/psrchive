@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.114 $
-   $Date: 2010/07/08 03:36:47 $
+   $Revision: 1.115 $
+   $Date: 2010/07/08 07:41:48 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -108,7 +108,9 @@ void usage ()
     "\n"
     "  -q         assume that CAL Stokes Q = 0 (linear feeds only)\n"
     "  -v         assume that CAL Stokes V = 0 (linear feeds only)\n"
-    "  -L hours   maximum time between middle of experiment and calibrators\n"
+    "\n"
+    "  -F days    use flux calibrators within days of experimental mid-time \n"
+    "  -L hours   use polarization calibrators within hours of mid-time \n"
     "\n"
     "MTM: Matrix Template Matching -- observations of a known source \n"
     "\n"
@@ -534,8 +536,11 @@ int actual_main (int argc, char *argv[]) try
   // name of file containing MEAL::Function text interface commands
   vector<string> equation_configuration;
 
-  // number of hours over which CALs will be found from Database
-  float hours = 12.0;
+  // hours from mid-time within which PolnCal observations will be selected
+  float polncal_hours = 12.0;
+
+  // days from mid-time within which FluxCalOn observations will be selected
+  float fluxcal_days = 7.0;
 
   bool unload_each_calibrated = true;
   bool must_have_cals = true;
@@ -544,7 +549,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args
-    = "1A:a:B:b:C:c:D:d:E:e:gHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rS:st:T:u:U:vV:X:";
+    = "1A:a:B:b:C:c:D:d:E:e:F:gHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rS:st:T:u:U:vV:X:";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -598,6 +603,10 @@ int actual_main (int argc, char *argv[]) try
       loadlines (optarg, equation_configuration);
       break;
 
+    case 'F':
+      fluxcal_days = atof (optarg);
+      break;
+
     case 'g':
       independent_gains = true;
       break;
@@ -619,7 +628,7 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'L':
-      hours = atof (optarg);
+      polncal_hours = atof (optarg);
       break;
 
     case 'l':
@@ -806,42 +815,50 @@ int actual_main (int argc, char *argv[]) try
 
     char buffer[256];
 
-    cerr << "pcm: searching for calibrator observations within " << hours
-	 << " hours of midtime" << endl;
+    cerr << "pcm: searching for polarization calibrator observations"
+      " within " << polncal_hours << " hours of midtime" << endl;
+
     cerr << "pcm: midtime = "
          << mid.datestr (buffer, 256, "%Y-%m-%d-%H:%M:00") << endl;
 
     Pulsar::Database::Criterion criterion;
     criterion = database.criterion (archive, Signal::PolnCal);
     criterion.entry.time = mid;
-    criterion.minutes_apart = hours * 60.0;
+    criterion.minutes_apart = polncal_hours * 60.0;
 
     vector<Pulsar::Database::Entry> oncals;
     database.all_matching (criterion, oncals);
 
     unsigned poln_cals = oncals.size();
 
-    if (poln_cals == 0)  {
+    if (poln_cals == 0)
+    {
       cerr << "pcm: no PolnCal observations found" << endl;
-      if (must_have_cals && !calfile)  {
+      if (must_have_cals && !calfile)
+      {
         cerr << "pcm: cannot continue" << endl;
         return -1;
       }
     }
 
+    cerr << "pcm: searching for flux calibrator observations"
+      " within " << fluxcal_days << " days of midtime" << endl;
+
     criterion.entry.obsType = Signal::FluxCalOn;
     criterion.check_coordinates = false;
+    criterion.minutes_apart = fluxcal_days * 24.0 * 60.0;
+
     database.all_matching (criterion, oncals);
 
     if (oncals.size() == poln_cals)
       cerr << "pcm: no FluxCalOn observations found" << endl;
 
-    for (unsigned i = 0; i < oncals.size(); i++) {
+    for (unsigned i = 0; i < oncals.size(); i++)
+    {
       string filename = database.get_filename( oncals[i] );
       cerr << "pcm: adding " << oncals[i].filename << endl;
       calibrator_filenames.push_back (filename);
     }
-
   }
 
   if (!prepare)
