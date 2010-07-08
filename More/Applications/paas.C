@@ -59,6 +59,7 @@ void usage ()
     "  -C            Centre profile using ephemeris\n"
     "  -p            Rotate profile to place peak at bin 0\n"
     "  -R phase      Rotate profile by specified number of turns\n"
+    "  -z ph1,ph2    Zoom in on pulse phase region \n"
     "  -a            After loading a model, rotate it to align to profile\n"
     "  -j filename   Output details to given filename    [Default: paas.txt]\n";
 }
@@ -189,6 +190,7 @@ int main (int argc, char** argv) try
 	     << endl;
 	return -1;
       }
+      break;
     }
 
    default:
@@ -326,13 +328,15 @@ int main (int argc, char** argv) try
       {
 	cerr << 
 	  "\n"
+	  "z key      - start phase zoom (any key to finish) \n"
+	  "r          - reset phase zoom (0 -> 1) \n"
 	  "left click - add a component at cursor position\n"
 	  "f key      - fit current set of components\n"
 	  "q key      - quit\n"
 	  "\n"
 	  "After left click:\n"
-	  "   1) any key    - select width of new component, then \n"
-	  "   2) any key    - select height of new component \n"
+	  "   1) any key - select width of new component, then \n"
+	  "   2) any key - select height of new component \n"
 	  "\n"
 	  "   right click or <Escape> to abort addition of new component \n"
 	     << endl;
@@ -346,6 +350,32 @@ int main (int argc, char** argv) try
 	break;
       }
       
+      if (key == 'r')
+      {
+	xmin = 0;
+	xmax = 1;
+	break;
+      }
+
+      if (key == 'z')
+      {
+	float new_x = curs_x;
+	cerr << "Select other end of zoom region and hit any key" << endl;
+	if (cpgband(4, 1, curs_x, curs_y, &curs_x, &curs_y, &key) != 1) {
+	  cerr << "paas: cpgband error" << endl;
+	  return -1;
+	}
+
+	// right click or escape to abort
+	if (key == 88 || key == 27)
+	  continue;
+	
+	xmax = std::max (new_x, curs_x);
+	xmin = std::min (new_x, curs_x);
+
+	break;
+      }
+
       if (key == 'a' || key == 65)
       {
 	cerr << "Adding component centred at pulse phase " << curs_x << endl;
