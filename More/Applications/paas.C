@@ -100,7 +100,7 @@ int main (int argc, char** argv) try
 
   float xmin=0.0, xmax=1.0;
 
-  const char* args = "hb:r:w:c:fF:it:d:Dl:j:Ws:CpR:az:";
+  const char* args = "hb:r:w:c:fF:it:d:Dlj:Ws:CpR:az:";
   int c;
 
   while ((c = getopt(argc, argv, args)) != -1)
