@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.113 $
-   $Date: 2009/11/23 05:28:08 $
+   $Revision: 1.114 $
+   $Date: 2010/07/08 03:36:47 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -104,7 +104,7 @@ void usage ()
     "  -a align   set the threshold for testing input data phase alignment \n"
     "  -g         unique absolute gain for each pulsar observation [DEVEL]\n"
     "  -r         enforce physically realizable Stokes parameters [DEVEL]\n"
-    "  -s         normalize Stokes parameters by invariant interval \n"
+    "  -s         normalize Stokes parameters by total invariant interval \n"
     "\n"
     "  -q         assume that CAL Stokes Q = 0 (linear feeds only)\n"
     "  -v         assume that CAL Stokes V = 0 (linear feeds only)\n"
@@ -450,9 +450,6 @@ Reference::To<Pulsar::Interpreter> preprocessor = standard_shell();
 // preprocessing jobs
 vector<string> jobs;
 
-// The Stokes parameters to be inverted
-Pulsar::ReflectStokes reflections;
-
 Pulsar::Archive* load (const std::string& filename)
 {
   if (verbose)
@@ -461,8 +458,6 @@ Pulsar::Archive* load (const std::string& filename)
   Reference::To<Pulsar::Archive> archive = Pulsar::Archive::load (filename);
 
   cout << "pcm: loaded archive: " << filename << endl;
-
-  reflections.transform (archive);
 
   if (jobs.size())
   {
@@ -542,6 +537,7 @@ int actual_main (int argc, char *argv[]) try
   // number of hours over which CALs will be found from Database
   float hours = 12.0;
 
+  bool unload_each_calibrated = true;
   bool must_have_cals = true;
   bool publication_plots = false;
 
@@ -646,7 +642,7 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'N':
-      reflections.add_reflection (optarg[0]);
+      unload_each_calibrated = false;
       break;
 
     case 'o': {
@@ -1179,21 +1175,23 @@ int actual_main (int argc, char *argv[]) try
       cerr << "pcm: loading " << filenames[i] << endl;
 
     archive = Pulsar::Archive::load(filenames[i]);
-    reflections.transform (archive);
 
     cout << "pcm: loaded archive: " << filenames[i] << endl;
     
     model->precalibrate( archive );
 
-    string newname = replace_extension (filenames[i], ".calib");
+    if (unload_each_calibrated)
+    {
+      string newname = replace_extension (filenames[i], ".calib");
     
-    if (verbose)
-      cerr << "pcm: calibrated Archive name '" << newname << "'" << endl;
+      if (verbose)
+	cerr << "pcm: calibrated Archive name '" << newname << "'" << endl;
 
-    archive->unload (newname);
+      archive->unload (newname);
     
-    cout << "New file " << newname << " unloaded" << endl;
-    
+      cout << "New file " << newname << " unloaded" << endl;
+    }
+
     if (archive->get_type() == Signal::Pulsar)
     {
       if (verbose)
@@ -1203,10 +1201,9 @@ int actual_main (int argc, char *argv[]) try
 	total = archive;
       else
 	total->append (archive);
-
+      
       total->tscrunch ();
     }
-    
   }
   catch (Error& error)
   {
@@ -1293,8 +1290,6 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
 
   model->physical_coherency = physical_coherency;
 
-  model->reflections = reflections;
-
   // add the specified phase bins
   for (unsigned ibin=0; ibin<phase_bins.size(); ibin++)
     model->add_state (phase_bins[ibin]);
@@ -1370,7 +1365,6 @@ SystemCalibrator* matrix_template_matching (const char* stdname)
 
   standard = Archive::load (stdname);
   standard->convert_state (Signal::Stokes);
-  reflections.transform (standard);
 
   RealTimer clock;
 
