@@ -98,7 +98,9 @@ int main (int argc, char** argv) try
   float rotate_amount = 0.0;
   bool align = false;
 
-  const char* args = "hb:r:w:c:fF:it:d:Dl:j:Ws:CpR:a";
+  float xmin=0.0, xmax=1.0;
+
+  const char* args = "hb:r:w:c:fF:it:d:Dl:j:Ws:CpR:az:";
   int c;
 
   while ((c = getopt(argc, argv, args)) != -1)
@@ -178,6 +180,17 @@ int main (int argc, char** argv) try
       details_filename = optarg;
       break;
 
+    case 'z':
+    {
+      char separator = 0;
+      if (sscanf (optarg, "%f%c%f", &xmin, &separator, &xmax) != 3)
+      {
+	cerr << "paas: could not parse phase zoom from '" << optarg << "'"
+	     << endl;
+	return -1;
+      }
+    }
+
    default:
       cerr << "invalid param '" << c << "'" << endl;
     }
@@ -249,6 +262,9 @@ int main (int argc, char** argv) try
       model.set_infit(fit_flags.c_str());
       // fit
       model.fit(archive->get_Integration(0)->get_Profile(0,0));
+
+      cerr << "paas: reduced chisq=" << model.get_chisq() / model.get_nfree()
+	   << endl;
     }
  
     // plot
@@ -268,7 +284,7 @@ int main (int argc, char** argv) try
 
       ymin -= extra;
       ymax += extra;
-      cpgswin(0.0, 1.0, ymin, ymax);
+      cpgswin (xmin, xmax, ymin, ymax);
       cpgbox("bcnst", 0, 0, "bcnst", 0, 0);
       cpglab("Pulse phase", "Intensity", "");
       unsigned i, npts=prof->get_nbin();
