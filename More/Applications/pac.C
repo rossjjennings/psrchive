@@ -183,7 +183,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.103 2009/12/23 12:25:11 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.104 2010/07/11 03:08:04 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -606,22 +606,38 @@ int main (int argc, char *argv[]) try
 
 	pcal_engine = model_calibrator;
       }
-      else
+
+      else try
       {
 	if (verbose)
 	  cout << "pac: Finding PolnCalibrator" << endl;
 
 	pcal_engine = dbase->generatePolnCalibrator(arch, pcal_type);
       }
+      catch (Error& error)
+      {
+	error << " -- closest match: \n\n"
+	      << dbase->get_closest_match_report ();
+	throw error;
+      }
 
-      if (use_fluxcal_stokes) try {
-
+      if (use_fluxcal_stokes) try
+      {
         if (verbose)
           cout << "pac: Calculating fluxcal Stokes params" << endl;
 
         // Find appropriate fluxcal from DB 
         Reference::To<Pulsar::FluxCalibrator> flux_cal;
-        flux_cal = dbase->generateFluxCalibrator(arch);
+	try
+	{
+	  flux_cal = dbase->generateFluxCalibrator(arch);
+	}
+	catch (Error& error)
+	{
+	  error << " -- closest match: \n\n"
+		<< dbase->get_closest_match_report ();
+	  throw error;
+	}
 
         // Combine already-selected pcal_engine with fluxcal stokes
         // into a new HybridCalibrator
@@ -632,9 +648,9 @@ int main (int argc, char *argv[]) try
             static_cast<Pulsar::ReferenceCalibrator*>(pcal_engine.get()));
 
         pcal_engine = hybrid_cal;
-
       }
-      catch (Error& error) {
+      catch (Error& error)
+      {
         cerr << "pac: Error computing cal Stokes for " << arch->get_filename() 
           << endl
           << "\t" << error.get_message() << endl;
@@ -647,15 +663,16 @@ int main (int argc, char *argv[]) try
 
       if (arch->get_npol() == 4)
       {
-        if (enable_frontend) {
-
+        if (enable_frontend)
+	{
           if (verbose)
             cerr << "pac: Correcting platform, if necessary" << endl;
 
           Pulsar::FrontendCorrection correct;
           correct.calibrate (arch);
 
-        } else 
+        }
+	else 
           cerr << "pac: Frontend corrections disabled, skipping" << endl;
       }
 
@@ -668,7 +685,6 @@ int main (int argc, char *argv[]) try
       cout << "pac: Poln calibration complete" << endl;
 
       successful_polncal = true;
-
     }
         
     /* The PolnCalibrator classes normalize everything so that flux
@@ -690,8 +706,18 @@ int main (int argc, char *argv[]) try
 	cout << "pac: Generating flux calibrator" << endl;
       
       Reference::To<Pulsar::FluxCalibrator> fcal_engine;
-      fcal_engine = dbase->generateFluxCalibrator(arch);
-      
+
+      try
+      {
+	fcal_engine = dbase->generateFluxCalibrator(arch);
+      }
+      catch (Error& error)
+      {
+	error << " -- closest match: \n\n"
+	      << dbase->get_closest_match_report ();
+	throw error;
+      }
+
       cout << "pac: FluxCalibrator constructed from:\n\t"
 	   << fcal_engine->get_filenames() << endl;
 
