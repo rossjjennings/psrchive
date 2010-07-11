@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.22 $
-   $Date: 2010/07/11 02:42:29 $
+   $Revision: 1.23 $
+   $Date: 2010/07/11 04:27:08 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
@@ -196,10 +196,19 @@ namespace Pulsar {
        * These attributes are set by the match method
        */
       //@{
+
+      //! log of the attributes compared and the result of the comparison
       mutable std::string match_report;
+
+      //! count of the number of match conditions that tested positive
       mutable unsigned match_count;
+
+      //! time between calibrator and requested epoch (in minutes)
       mutable double diff_minutes;
+
+      //! distance between calibrator and requested position (in degrees)
       mutable double diff_degrees;
+
       //@}
 
       //! Return the best of two entries
@@ -272,8 +281,7 @@ namespace Pulsar {
     void add (Pulsar::Database::Entry& entry);
 
     //! Get the closest match report
-    std::string get_closest_match_report () const
-    { return closest_match.match_report; }
+    std::string get_closest_match_report () const;
 
   protected:
     
