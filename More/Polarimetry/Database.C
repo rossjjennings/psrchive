@@ -355,199 +355,102 @@ void Pulsar::Database::Criterion::no_data ()
   check_frequency_array = false;
 }
 
-//! returns true if this matches observation parameters
-bool Pulsar::Database::Criterion::match (const Entry& have) const
+bool freq_close (double f1, double f2)
 {
+  double diff = fabs(f1 - f2);
+  if (diff)
+    diff /= f1 + f2;
+  return diff < 1e-12;
+}
 
+bool Pulsar::Database::Criterion::compare_times (const MJD& want,
+						 const MJD& have) const
+{
+  diff_minutes = (have - want).in_minutes();
+
+  switch (policy)
+  {
+  case NoPolicy:
+  default:
+    diff_minutes = fabs( diff_minutes );
+    break;
+  case CalibratorBefore:
+    // do nothing
+    break;
+  case CalibratorAfter:
+    diff_minutes = -diff_minutes;
+    break;
+  }
+
+  match_report += "\n\t" "difference=" + tostring(diff_minutes) + " minutes "
+    "(max=" + tostring(minutes_apart) + ") ... ";
+
+  return diff_minutes < minutes_apart && diff_minutes >= 0;
+}
+
+
+bool Pulsar::Database::Criterion::compare_coordinates (const sky_coord& want,
+						       const sky_coord& have) 
+  const
+{
+  diff_degrees = have.angularSeparation(want).getDegrees();
+
+  match_report += "\n\t" "difference=" + tostring(diff_degrees) + " degrees "
+    "(max=" + tostring(deg_apart) + ") ... ";
+
+  return diff_degrees < deg_apart;
+}
+
+std::ostream& operator<< (std::ostream& ostr, const Reference::To<const Calibrator::Type>& type)
+{
+  ostr << type->get_name();
+  return ostr;
+}
+
+//! returns true if this matches observation parameters
+bool Pulsar::Database::Criterion::match (const Entry& have) const try
+{
   if (match_verbose)
     cerr << "Pulsar::Database::Criterion::match" << endl;
  
+  match_report = "";
+  match_count = 0;
+  diff_degrees = diff_minutes = 0.0;
+
   if (check_obs_type)
   {
-    if (match_verbose)
-      cerr << "  Seeking obsType="
-	   << Signal::source_string(entry.obsType) 
-	   << " have obsType="
-	   << Signal::source_string(have.obsType);
+    compare( "obsType", entry.obsType, have.obsType );
     
-    if (entry.obsType == have.obsType)
-    {
-      if (match_verbose)
-	cerr << "... matches" << endl; 
-    }
-    else
-    {
-      if (match_verbose)
-	cerr << "... no match" << endl;
-      return false;
-    }
-
     if (entry.obsType == Signal::Calibrator)
-    {
-      if (match_verbose)
-	cerr << "  Seeking calType="
-	     << entry.calType->get_name()
-	     << " have calType="
-	     << have.calType->get_name();
-
-      if (same( entry.calType, have.calType ))
-      {
-	if (match_verbose)
-	  cerr << "... matches" << endl; 
-      }
-      else
-      {
-	if (match_verbose)
-	  cerr << "... no match" << endl;
-	return false;
-      }
-    }
+      compare( "calType", entry.calType, have.calType, &Pulsar::same );
   }
 
   if (check_receiver)
-  {
-    if (match_verbose)
-      cerr << "  Seeking receiver=" << entry.receiver
-           << " have receiver=" << have.receiver;
-
-    if (entry.receiver==have.receiver)
-    {
-      if (match_verbose)
-        cerr << " ... matches" << endl;
-    }
-    else
-    {
-      if (match_verbose)
-        cerr << "... no match" << endl;
-      return false;
-    }
-  }
+    compare( "receiver", entry.receiver, have.receiver );
 
   if (check_instrument)
-  {
-    if (match_verbose)
-      cerr << "  Seeking instrument=" << entry.instrument
-           << " have instrument=" << have.instrument;
-
-    if (entry.instrument==have.instrument)
-    {
-      if (match_verbose)
-        cerr << " ... matches" << endl;
-    }
-    else
-    {
-      if (match_verbose)
-        cerr << "... no match" << endl;
-      return false;
-    }
-  }
+    compare( "instrument", entry.instrument, have.instrument );
 
   if (check_frequency)
-  {
-    if (match_verbose)
-      cerr << "  Seeking frequency=" << entry.frequency
-	   << " have frequency=" << have.frequency;
-
-    double diff = fabs(entry.frequency - have.frequency);
-    if (diff)
-      diff /= entry.frequency + have.frequency;
-
-    if ( diff < 1e-12 )
-    {
-      if (match_verbose)
-	cerr << " ... matches" << endl; 
-    }
-    else
-    {
-      if (match_verbose)
-	cerr << "... no match" << endl;
-      return false;
-    }
-  }
+    compare( "frequency", entry.frequency, have.frequency, &freq_close );
 
   if (check_bandwidth)
-  {
-    if (match_verbose)
-      cerr << "  Seeking bandwidth=" << entry.bandwidth
-           << " have bandwidth=" << have.bandwidth;
-
-    if (entry.bandwidth==have.bandwidth)
-    {
-      if (match_verbose)
-        cerr << " ... matches" << endl;
-    }
-    else
-    {
-      if (match_verbose)
-        cerr << "... no match" << endl;
-      return false;
-    }
-  }
-
-  double diff;
+    compare( "bandwidth", entry.bandwidth, have.bandwidth);
 
   if (check_time)
   {
-    diff = (have.time - entry.time).in_minutes();
-
-    switch (policy)
-    {
-    case NoPolicy:
-    default:
-      diff = fabs( diff );
-      break;
-    case CalibratorBefore:
-      // do nothing
-      break;
-    case CalibratorAfter:
-      diff = -diff;
-      break;
-    }
-
-    if (match_verbose)
-    {
-      cerr << "  Seeking time=" << entry.time
-	   << " have time=" << have.time
-	   << "\n    difference=" << diff << " minutes "
-	"(max=" << minutes_apart << ")";
-    }
-
-    if (diff < minutes_apart && diff >= 0)
-    {
-      if (match_verbose)
-	cerr << " ... matches" << endl;
-    }
-    else
-    {
-      if (match_verbose)
-	cerr << " do not match" << endl;
-      return false;
-    }
+    Functor< bool (MJD, MJD) >
+      predicate (this, &Criterion::compare_times);
+    compare( "time", entry.time, have.time, predicate );
   }
 
   if (check_coordinates)
   {
-    diff = have.position.angularSeparation(entry.position).getDegrees();
-
-    if (match_verbose)
-      cerr << "  Seeking position=" << entry.position.getHMSDMS() 
-           << " have position=" << have.position.getHMSDMS()
-           << "\n    difference=" << diff << " degrees "
-           << "(max=" << deg_apart << ")";
-
-    if (diff < deg_apart)
-    {
-      if (match_verbose)
-	cerr << " ... matches" << endl;
-    }
-    else
-    {
-      if (match_verbose)
-	cerr << "... no match" << endl;
-      return false;
-    }
-
+    Functor< bool (sky_coord, sky_coord) > 
+      predicate (this, &Criterion::compare_coordinates);
+    compare( "position", entry.position, have.position, predicate );
   }
+
 
   if (check_frequency_array)
   {
@@ -555,17 +458,18 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
     // freq arrays from nchan, bw, and freq.
 
     ChannelSubsetMatch chan_match;
-    bool result = chan_match.match(have, entry);
-    if (match_verbose)
+
+    match_report += "channel subset ... ";
+    if (chan_match.match(have, entry))
     {
-      cerr << "  Seeking channel subset match";
-      if (result==true)
-        cerr << "... matches!" << endl;
-      else 
-        cerr << "... no match (" << chan_match.get_reason() << ")" << endl;
+      match_report += "match";
+      match_count ++;
     }
-    if (result==false)
+    else 
+    {
+      match_report += "no match (" + chan_match.get_reason() + ")";
       return false;
+    }
   }
 
   if (match_verbose)
@@ -573,7 +477,7 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
   
   return true;
 }
-
+ catch (bool f) { return f; }
 
 // //////////////////////////////////////////////////////////////////////
 //
@@ -840,10 +744,16 @@ void Pulsar::Database::all_matching (const Criterion& criterion,
   if (verbose)
     cerr << "Pulsar::Database::all_matching " << entries.size()
          << " entries" << endl;
-  
-  for (unsigned j = 0; j < entries.size(); j++)   
+
+  closest_match = Criterion();
+
+  for (unsigned j = 0; j < entries.size(); j++)
+  {
     if (criterion.match (entries[j]))
       matches.push_back(entries[j]);
+    else
+      closest_match = Criterion::closest (closest_match, criterion);
+  }
 }
 
 Pulsar::Database::Entry 
@@ -854,10 +764,14 @@ Pulsar::Database::best_match (const Criterion& criterion) const
 	 << " entries" << endl;
   
   Entry best_match;
+
+  closest_match = Criterion();
   
   for (unsigned ient = 0; ient < entries.size(); ient++)
     if (criterion.match (entries[ient]))
       best_match = criterion.best (entries[ient], best_match);
+    else
+      closest_match = Criterion::closest (closest_match, criterion);
 
   if (best_match.obsType == Signal::Unknown)
     throw Error (InvalidParam, "Pulsar::Calibration::Database::best_match",
@@ -876,6 +790,21 @@ Pulsar::Database::Criterion::best (const Entry& a, const Entry& b) const
     return a;
   else
     return b;
+}
+
+Pulsar::Database::Criterion
+Pulsar::Database::Criterion::closest (const Criterion& a, const Criterion& b)
+{
+  if (a.match_count > b.match_count)
+    return a;
+
+  if (b.match_count > a.match_count)
+    return b;
+
+  if (a.diff_minutes < b.diff_minutes)
+    return a;
+
+  return b;
 }
 
 static Pulsar::Database::Criterion* default_criterion = 0;

@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.21 $
-   $Date: 2010/02/09 04:42:28 $
-   $Author: sosl $ */
+   $Revision: 1.22 $
+   $Date: 2010/07/11 02:42:29 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
 #define __Pulsar_Database_h
@@ -158,7 +158,7 @@ namespace Pulsar {
     };
     
     //! Describes Database matching criteria
-    class Criterion  {
+    class Criterion : public Reference::Able {
       
     public:
       
@@ -191,8 +191,57 @@ namespace Pulsar {
       //! Return true if entry matches within the criterion
       bool match (const Entry& entry) const;
       
+      /** @name match results
+       *  
+       * These attributes are set by the match method
+       */
+      //@{
+      mutable std::string match_report;
+      mutable unsigned match_count;
+      mutable double diff_minutes;
+      mutable double diff_degrees;
+      //@}
+
       //! Return the best of two entries
       Entry best (const Entry& a, const Entry& b) const;
+
+      //! Return the criterion that came closest to matching
+      static Criterion closest (const Criterion& a, const Criterion& b);
+
+    protected:
+
+      template<typename T, typename Predicate>
+      void compare (const std::string& name,
+		    const T& want, const T& have,
+		    Predicate equal ) const
+      {
+	match_report += "\t" + name
+	  + " want=" + tostring(want) + " have=" + tostring(have) + " ... ";
+	
+	if ( equal (want, have) )
+	{
+	  match_report += "match \n";
+	  match_count ++;
+	}
+	else
+	{
+	  match_report += "no match \n";
+	  throw false;
+	}
+      }
+
+      template<typename T>
+      void compare (const std::string& name,
+		    const T& want, const T& have) const
+      {
+	compare (name, want, have, std::equal_to<T>());
+      }
+
+      bool compare_times (const MJD& want, 
+			  const MJD& have) const;
+
+      bool compare_coordinates (const sky_coord& want,
+				const sky_coord& have) const;
     };
     
     
@@ -222,6 +271,10 @@ namespace Pulsar {
     //! Add the given entry to the database
     void add (Pulsar::Database::Entry& entry);
 
+    //! Get the closest match report
+    std::string get_closest_match_report () const
+    { return closest_match.match_report; }
+
   protected:
     
     std::vector<Entry> entries;   // list of entries in the database
@@ -236,6 +289,8 @@ namespace Pulsar {
     //! If set, this model of the feed is incorporated into all solutions
     Reference::To<MEAL::Complex2> feed;
 
+    //! The criterion that last came closest to matching
+    mutable Criterion closest_match;
   };
 
   bool operator < (const Database::Entry& a, const Database::Entry& b);
