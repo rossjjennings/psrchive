@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.115 $
-   $Date: 2010/07/08 07:41:48 $
+   $Revision: 1.116 $
+   $Date: 2010/07/11 02:41:27 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -109,8 +109,8 @@ void usage ()
     "  -q         assume that CAL Stokes Q = 0 (linear feeds only)\n"
     "  -v         assume that CAL Stokes V = 0 (linear feeds only)\n"
     "\n"
-    "  -F days    use flux calibrators within days of experimental mid-time \n"
-    "  -L hours   use polarization calibrators within hours of mid-time \n"
+    "  -F days    use flux calibrators within days of pulsar data mid-time\n"
+    "  -L hours   use reference sources within hours of pulsar data mid-time\n"
     "\n"
     "MTM: Matrix Template Matching -- observations of a known source \n"
     "\n"
@@ -549,7 +549,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args
-    = "1A:a:B:b:C:c:D:d:E:e:F:gHhI:j:J:L:l:M:m:N:n:o:Pp:qR:rS:st:T:u:U:vV:X:";
+    = "1A:a:B:b:C:c:D:d:E:e:F:gHhI:j:J:L:l:M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -815,7 +815,7 @@ int actual_main (int argc, char *argv[]) try
 
     char buffer[256];
 
-    cerr << "pcm: searching for polarization calibrator observations"
+    cerr << "pcm: searching for reference source observations"
       " within " << polncal_hours << " hours of midtime" << endl;
 
     cerr << "pcm: midtime = "
@@ -833,7 +833,9 @@ int actual_main (int argc, char *argv[]) try
 
     if (poln_cals == 0)
     {
-      cerr << "pcm: no PolnCal observations found" << endl;
+      cerr << "pcm: no PolnCal observations found; closest match was \n\n"
+           << database.get_closest_match_report () << endl;
+
       if (must_have_cals && !calfile)
       {
         cerr << "pcm: cannot continue" << endl;
@@ -851,7 +853,8 @@ int actual_main (int argc, char *argv[]) try
     database.all_matching (criterion, oncals);
 
     if (oncals.size() == poln_cals)
-      cerr << "pcm: no FluxCalOn observations found" << endl;
+      cerr << "pcm: no FluxCalOn observations found; closest match was \n\n"
+           << database.get_closest_match_report () << endl;
 
     for (unsigned i = 0; i < oncals.size(); i++)
     {
