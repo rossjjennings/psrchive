@@ -341,6 +341,9 @@ Pulsar::Database::Criterion::Criterion ()
   check_time        = true;
   check_coordinates = true;
   check_frequency_array = false;
+
+  match_count = 0;
+  diff_degrees = diff_minutes = 0;
 }
 
 void Pulsar::Database::Criterion::no_data ()
@@ -780,6 +783,14 @@ Pulsar::Database::best_match (const Criterion& criterion) const
   return best_match;
 }
 
+std::string Pulsar::Database::get_closest_match_report () const
+{ 
+  if (!closest_match.match_count)
+    return "empty";
+  else
+    return closest_match.match_report;
+}
+
 Pulsar::Database::Entry 
 Pulsar::Database::Criterion::best (const Entry& a, const Entry& b) const
 {
@@ -795,6 +806,11 @@ Pulsar::Database::Criterion::best (const Entry& a, const Entry& b) const
 Pulsar::Database::Criterion
 Pulsar::Database::Criterion::closest (const Criterion& a, const Criterion& b)
 {
+  if (match_verbose)
+    cerr << "Pulsar::Database::Criterion::closest \n"
+      " A:" << a.match_count << "=" << a.match_report << "\n"
+      " B:" << b.match_count << "=" << b.match_report << endl;
+
   if (a.match_count > b.match_count)
     return a;
 
@@ -802,6 +818,9 @@ Pulsar::Database::Criterion::closest (const Criterion& a, const Criterion& b)
     return b;
 
   if (a.diff_minutes < b.diff_minutes)
+    return a;
+
+  if (a.match_report.length() > b.match_report.length())
     return a;
 
   return b;
