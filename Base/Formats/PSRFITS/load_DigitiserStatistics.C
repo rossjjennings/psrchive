@@ -95,24 +95,26 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr) try
   psrfits_read_key( fptr, "DIGLEV", &s_data );
   dstats->set_diglev( s_data );
 
+  unsigned temp_int = 0;
+
   // load the NPAR from HDU
   try
   {
-    psrfits_read_key( fptr, "NPAR", &s_data );
+    psrfits_read_key( fptr, "NPAR", &temp_int );
   }
   catch( Error& e )
   {
-    psrfits_read_key( fptr, "NLEV", &s_data );
+    psrfits_read_key( fptr, "NLEV", &temp_int );
   }
-  dstats->set_npar( fromstring<unsigned int>(s_data) );
+  dstats->set_npar( temp_int );
 
   // load the NCYCSUB from the HDU
-  psrfits_read_key( fptr, "NCYCSUB", &s_data );
-  dstats->set_ncycsub( fromstring<unsigned int>(s_data) );
+  psrfits_read_key( fptr, "NCYCSUB", &temp_int );
+  dstats->set_ncycsub( temp_int );
 
   // load the NDIGR from HDU
-  psrfits_read_key( fptr, "NDIGR", &s_data );
-  dstats->set_ndigr( fromstring<unsigned int>(s_data) );
+  psrfits_read_key( fptr, "NDIGR", &temp_int );
+  dstats->set_ndigr( temp_int );
 
   // load the DIG_MODE
   psrfits_read_key (fptr, "DIG_MODE", &s_data );
@@ -127,5 +129,8 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr) try
 }
  catch (Error& error)
    {
-     throw error += "FITSArchive::load_DigitiserStatistics";
+     if (verbose > 2)
+        cerr << "FITSArchive::load_DigitiserStatistics error " 
+             << error.get_message() << endl;
    }
+
