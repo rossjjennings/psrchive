@@ -24,7 +24,7 @@ Pulsar::PowerSpectra::PowerSpectra ()
 {
   isubint = ipol = 0;
   draw_lines = true;
-  median_window = 3;
+  median_window = 0;
 
   get_frame()->get_y_scale()->set_buf_norm(0.05);
 }
@@ -49,19 +49,19 @@ void Pulsar::PowerSpectra::prepare (const Archive* data)
   get_scale()->get_indeces (data, i_min, i_max);
 
   float min = FLT_MAX;
-  float max = 0;
+  float max = -FLT_MAX;
 
-  for (unsigned iprof=0; iprof < spectra.size(); iprof++) {
-
+  for (unsigned iprof=0; iprof < spectra.size(); iprof++)
+  {
     if (median_window)
       fft::median_smooth (spectra[iprof], median_window);
 
-    for (unsigned ichan=0; ichan < spectra[iprof].size(); ichan++)
-      if (spectra[iprof][ichan] != 0) {
+    for (unsigned ichan=i_min; ichan < i_max; ichan++)
+      if (spectra[iprof][ichan] != 0)
+      {
 	min = std::min( min, spectra[iprof][ichan] );
 	max = std::max( max, spectra[iprof][ichan] );
       }
-
   }
 
   if (verbose)
@@ -77,8 +77,8 @@ void Pulsar::PowerSpectra::draw (const Archive* data)
 {
   get_scale()->get_ordinates (data, frequencies);
 
-  for (unsigned iprof=0; iprof < spectra.size(); iprof++) {
-
+  for (unsigned iprof=0; iprof < spectra.size(); iprof++)
+  {
     if (plot_sci.size() == spectra.size())
       cpgsci (plot_sci[iprof]);
     else
@@ -91,13 +91,13 @@ void Pulsar::PowerSpectra::draw (const Archive* data)
 
     draw (spectra[iprof]);
   }
-
 }
 
 //! draw the profile in the current viewport and window
 void Pulsar::PowerSpectra::draw (const vector<float>& data) const
 {
-  if (verbose) {
+  if (verbose)
+  {
     float x_min, x_max;
     float y_min, y_max;
     cpgqwin (&x_min, &x_max, &y_min, &y_max);
