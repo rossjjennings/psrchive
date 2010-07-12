@@ -196,6 +196,10 @@ void load (fitsfile* fptr, psrephem* ephem, long row)
     cerr << "psrephem::load PSRFITS nrows=" << nrows << " ncols=" 
 	 << ephind.size() << " loading row=" << row << endl;
 
+  if (nrows == 0)
+    throw Error (InvalidState, "psrephem::load PSRFITS",
+                 "PSREPHEM HDU has now rows");
+
   // get ready to parse the values
   ephem->zero ();
 
