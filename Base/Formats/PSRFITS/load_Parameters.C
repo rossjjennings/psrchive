@@ -52,7 +52,7 @@ void Pulsar::FITSArchive::load_Parameters (fitsfile* fptr) try
   // Load the ephemeris from the FITS file
   fits_movnam_hdu (fptr, BINARY_TBL, "PSREPHEM", 0, &status);
 
-  if (status == 0)
+  if (status == 0) try
   {
     Legacy::psrephem* eph = new Legacy::psrephem;
 
@@ -65,18 +65,25 @@ void Pulsar::FITSArchive::load_Parameters (fitsfile* fptr) try
 
     if (verbose > 2)
       cerr << "FITSArchive::load_Parameters ephemeris loaded" << endl;
-  }
-  else
-  {
-    ephemeris = 0;
-    set_dispersion_measure (0);
-    set_rotation_measure (0);
 
-    if (verbose > 2)
-      cerr << "FITSArchive::load_Parameters no ephemeris" << endl;
+    return;
   }
+  catch (Error& error)
+  {
+    if (verbose > 2)
+      cerr << "FITSArchive::load_Parameters load PSREPHEM failed "
+           << error.get_message() << endl;
+  }
+
+  ephemeris = 0;
+  set_dispersion_measure (0);
+  set_rotation_measure (0);
+
+  if (verbose > 2)
+    cerr << "FITSArchive::load_Parameters no ephemeris" << endl;
 }
 catch (Error& error)
 {
   throw error += "FITSArchive::load_Parameters";
 }
+
