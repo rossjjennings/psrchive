@@ -14,6 +14,8 @@
 #include "tempo++.h"
 #include "dirutil.h"
 
+#include <stdlib.h>
+
 using namespace std;
 
 Pulsar::Parameters::Lookup::Lookup ()
@@ -79,8 +81,13 @@ Pulsar::Parameters::Lookup::operator() (const string& name) const try
 
 #ifdef HAVE_PSRCAT
 
-  string command = "psrcat -all -e " + psr_name + " > " + psr_name + ".eph";
   string catalogue = "psrcat";
+  string command = catalogue;
+
+  if (getenv("PSRCAT_RUNDIR") != 0)
+    command += " -all ";
+
+  command += " -e " + psr_name + " > " + psr_name + ".eph";
 
 #else
 
