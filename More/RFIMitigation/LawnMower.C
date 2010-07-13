@@ -201,7 +201,7 @@ void Pulsar::LawnMower::transform (Integration* subint)
 
     integrate (total);
 
-    if (!build_mask( total->get_Profile(0,0) ))
+    if (!build_mask( total->get_Profile(0,0) ) && !prune)
       return;
   }
 
@@ -218,7 +218,7 @@ void Pulsar::LawnMower::transform (Integration* subint)
     if (subint->get_weight(ichan) == 0)
       continue;
 
-    if (!broadband && !build_mask( total->get_Profile (0,ichan) ))
+    if (!broadband && !build_mask( total->get_Profile (0,ichan) ) && !prune)
       continue;
 
     Reference::To<PhaseWeight> base = 
@@ -263,7 +263,7 @@ void Pulsar::LawnMower::transform (Integration* subint)
 
 	    diff = amps[ibin] - smamps[ibin];
 	  }
-	  while ( (*mowed)[ibin] || (prune && (*prune)[i]) 
+	  while ( (*mowed)[ibin] || (prune && (*prune)[ibin]) 
 		  || fabs(diff) > rms * 2.5 );
 
 	  amps[i] = smamps[i] + diff;
