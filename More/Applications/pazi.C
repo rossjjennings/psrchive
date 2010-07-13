@@ -13,7 +13,7 @@
 
 #include "Pulsar/psrchive.h"
 #include "Pulsar/PlotFactory.h"
-#include "Pulsar/Plot.h"
+#include "Pulsar/ProfilePlot.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/ProcHistory.h"
 
@@ -28,10 +28,16 @@
 #include "TextInterface.h"
 #include "strutil.h"
 #include "BoxMuller.h"
+#include "pairutil.h"
 
-#define HORIZONTAL_BAND 3
-#define VERTICAL_BAND 4
+#define BOX_ANCHOR 2
+#define HORIZONTAL_ANCHOR 3
+#define VERTICAL_ANCHOR 4
+#define HORIZONTAL_LINE 3
+#define VERTICAL_LINE 4
+
 #define ZERO_PAIR std::pair<float, float>(0.0, 0.0)
+#define UNDEF_MOUSE std::pair<float, float>(-1.0, -1.0)
 
 typedef std::pair<float, float> MouseType;
 typedef std::pair<unsigned, unsigned> RangeType;
@@ -53,21 +59,23 @@ void usage()
     "  zoom:                      left click, then left click\n"
     "  reset zoom:                'r'\n"
     "\n"
-    "  frequency:                 'f'\n"
-    "  time:                      't'\n"
+    "Modes: \n"
+    "  phase-vs-frequency:        'f'\n"
+    "  phase-vs-time:             't'\n"
+    "  binzap-integration:        'b' (must be in phase-vs-time mode)\n"
+    "\n"
     "  center pulse:              'c'\n"
     "  toggle dedispersion:       'd'\n"
     "\n"
     "  zap:                       right click \n"
-    "  zap (multiple):            left click, then 'z' or right click \n"
+    "  zap (multiple):            left click, then right click \n"
     "  undo last:                 'u'\n"
     "\n"
-    "  Enter binzap mode:         'b' (must be in phase-vs-time mode)\n"
     "  In binzap mode: \n"
     "    -  zoom and reset zoom as above \n"
-    "    -  zap phase range:      left click, then 'z' or right click \n"
+    "    -  zap phase range:      left click, then right click \n"
     "    -  mow the lawn:         'm'\n"
-    "    -  prune the hedge:      'p' to start box, 'p' to finish\n"
+    "    -  prune the hedge:      'x' to start box, 'x' to finish\n"
     "\n"
     "  save (<filename>.pazi):    's'\n"
     "  quit:                      'q'\n"
@@ -121,7 +129,12 @@ bool remove_channel(int chan, vector<int>& delete_channels);
 void print_command(vector<int>& freq_chans, vector<int>& subints, string extension, string filename);
 void set_dedispersion(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &dedispersed);
 //void set_centre(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &centered, int type, bool dedispersed);
-void mowlawn (Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint);
+
+void mowlawn (Pulsar::Archive* arch, Pulsar::Archive* old, int subint);
+
+void prune_hedge (Pulsar::Archive* arch, Pulsar::Archive* old, int subint);
+MouseType prune_start = UNDEF_MOUSE;
+MouseType prune_end = UNDEF_MOUSE;
 
 static bool dedispersed = true;
 static vector<int> channels_to_zap;
@@ -153,19 +166,19 @@ bool fscrunched = true;
 MouseType mouse_ref(0.0, 0.0);
 MouseType mouse(0.0, 0.0);
 
-Plot *time_orig_plot = factory.construct("time");
-Plot *time_mod_plot = factory.construct("time");
-TextInterface::Parser* time_fui = time_mod_plot->get_frame_interface();
+Reference::To<Plot> time_orig_plot;
+Reference::To<Plot> time_mod_plot;
+Reference::To<TextInterface::Parser> time_fui;
 
-Plot *freq_orig_plot = factory.construct("freq");
-Plot *freq_mod_plot = factory.construct("freq");
-TextInterface::Parser* freq_fui = freq_mod_plot->get_frame_interface();
+Reference::To<Plot> freq_orig_plot;
+Reference::To<Plot> freq_mod_plot;
+Reference::To<TextInterface::Parser> freq_fui;
 
-Plot *total_plot = factory.construct("flux");
+Reference::To<Plot> total_plot;
 
-Plot *subint_orig_plot = factory.construct("flux");
-Plot *subint_mod_plot = factory.construct("flux");
-TextInterface::Parser* subint_fui = subint_mod_plot->get_frame_interface();
+Reference::To<ProfilePlot> subint_orig_plot;
+Reference::To<ProfilePlot> subint_mod_plot;
+Reference::To<TextInterface::Parser> subint_fui;
 
 int main(int argc, char* argv[]) try
 {
@@ -229,7 +242,20 @@ int main(int argc, char* argv[]) try
   ranges.second = get_max_value(base_archive, plot_type);
   positive_direction = base_archive->get_bandwidth() < 0.0;
 
+  time_orig_plot = factory.construct("time");
+  time_mod_plot = factory.construct("time");
+  time_fui = time_mod_plot->get_frame_interface();
+
+  freq_orig_plot = factory.construct("freq");
+  freq_mod_plot = factory.construct("freq");
+  freq_fui = freq_mod_plot->get_frame_interface();
+
+  total_plot = factory.construct("flux");
   total_plot->configure("info=1");
+
+  subint_orig_plot = new ProfilePlot;
+  subint_mod_plot = new ProfilePlot;
+  subint_fui = subint_mod_plot->get_frame_interface();
 
   subint_orig_plot->configure("info=1");
   subint_mod_plot->configure("info=1");
@@ -245,25 +271,52 @@ int main(int argc, char* argv[]) try
   cpgslct(1);
   time_orig_plot->plot(mod_archive);
 
-  do {
+  do
+  {
     cpgswin(0, 1, 0, 1);
 
     // plot:
     //   frequency = horizontal mouse band
     //   time      = horizontal mouse band
     //   profile   = vertical mouse band
-    const int band = plot_type == 2 ? VERTICAL_BAND : HORIZONTAL_BAND;
+
+    int band = 0;
+
+    if (prune_start != UNDEF_MOUSE)
+    {
+      band = BOX_ANCHOR;
+      mouse_ref = prune_start;
+    }
+    else if (mouse_ref != UNDEF_MOUSE)
+    {
+      if (plot_type == FscrunchedSubint)
+	band = VERTICAL_ANCHOR;
+      else
+	band = HORIZONTAL_ANCHOR;
+    }
+    else
+    {
+      if (plot_type == FscrunchedSubint)
+	band = VERTICAL_LINE;
+      else
+	band = HORIZONTAL_LINE;
+    }
+
+
     cpgband(band, 0, mouse_ref.first, mouse_ref.second, &(mouse.first),
 	    &(mouse.second), &ch);
 
-    switch (ch) {
+    switch (ch)
+    {
+
     case 'A': // zoom
       {
 	constrain_range(mouse.first);
 	constrain_range(mouse.second);
 
-	if (mouse_ref == ZERO_PAIR) { // if position anchor has not been set,
-	  mouse_ref = mouse; // set it
+	if (mouse_ref == UNDEF_MOUSE)
+        {
+	  mouse_ref = mouse;
 	  continue;
 	}
 
@@ -271,14 +324,13 @@ int main(int argc, char* argv[]) try
 	// store the current range so it can be restored if the user selects
 	// a zoom region too small
 	const RangeType old_ranges = ranges;
-	bool horizontal = plot_type == 2 ? false : true;
+	bool horizontal = plot_type == FscrunchedSubint ? false : true;
 	ranges = get_range(mouse_ref, mouse, ranges, horizontal);
 
 	// ignore mouse clicks if the index values are too close (< 1)
 	if (ranges.first == ranges.second) {
-	  mouse_ref = ZERO_PAIR;
 	  ranges = old_ranges;
-	  continue;
+	  break;
 	}
 
 	zoomed = true;
@@ -287,21 +339,20 @@ int main(int argc, char* argv[]) try
 	const string zoom_option = get_zoom_option(ranges, max_value);
 
 	switch (plot_type) {
-	case 0: // time
+	case PhaseVsTime:
 	  time_fui->set_value("y:range", zoom_option);
 	  redraw(mod_archive, time_orig_plot, time_mod_plot, zoomed);
 	  break;
-	case 1: // freq
+	case PhaseVsFrequency:
 	  freq_fui->set_value("y:range", zoom_option);
 	  freq_redraw(mod_archive, base_archive, freq_orig_plot,
 		      freq_mod_plot, zoomed);
 	  break;
-	case 2: // subint
+	case FscrunchedSubint:
 	  subint_fui->set_value("x:range", zoom_option);
 	  redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
 	  break;
 	}
-	mouse_ref = ZERO_PAIR;
       }
       break; // case 'A'
     case 'h':
@@ -312,7 +363,6 @@ int main(int argc, char* argv[]) try
       if (plot_type == PhaseVsTime) {
 	plot_type = FscrunchedSubint;
 	zoomed = false;
-	mouse_ref = ZERO_PAIR;
 
 	*mod_archive = *base_archive;
 	mod_archive->set_dispersion_measure(0);
@@ -373,8 +423,10 @@ int main(int argc, char* argv[]) try
       break;
 
     case 'm':
-      if (plot_type != FscrunchedSubint) {
-	cerr << "pazi: can only mow lawn of subint" << endl;
+
+      if (plot_type != FscrunchedSubint)
+      {
+	cerr << "pazi: can only mow lawn in binzap-subint mode" << endl;
 	continue;
       }
 
@@ -388,12 +440,43 @@ int main(int argc, char* argv[]) try
 
       break;
 
+    case 'x': // prune
+
+      if (plot_type != FscrunchedSubint)
+      {
+	cerr << "pazi: can only prune hedge in binzap-subint mode" << endl;
+	continue;
+      }
+
+      constrain_range(mouse.first);
+      constrain_range(mouse.second);
+
+      if (prune_start == UNDEF_MOUSE)
+      {
+	prune_start = mouse;
+	continue;
+      }
+
+      prune_end = mouse;
+
+      cerr << "pazi: pruning hedge" << endl;
+      prune_hedge (mod_archive, base_archive, subint);
+
+      cerr << "pazi: replotting" << endl;
+      redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
+      cerr << "pazi: updating total" << endl;
+      update_total(scrunched_archive, base_archive, total_plot);
+
+      break;
+
     case 'o': // toggle frequency scrunching on/off
-      if (plot_type == PhaseVsTime) {
+      if (plot_type == PhaseVsTime)
+      {
 	if (fscrunched) {
 	  fscrunched = false;
 	  *mod_archive = *base_archive;
-	} else {
+	}
+	else {
 	  fscrunched = true;
 	  mod_archive->fscrunch();
 	}
@@ -448,8 +531,9 @@ int main(int argc, char* argv[]) try
       break;
 
     case 'u': // undo last change
-      if (mouse_ref != ZERO_PAIR) {
-	mouse_ref = ZERO_PAIR;
+
+      if (mouse_ref != UNDEF_MOUSE) {
+	mouse_ref = UNDEF_MOUSE;
 	continue;
       }
 
@@ -493,13 +577,17 @@ int main(int argc, char* argv[]) try
     case 'z':
     case 'X': // zap single channel
 
-      if (mouse_ref == ZERO_PAIR)
+      if (mouse_ref == UNDEF_MOUSE)
 	zap_single ();
       else
 	zap_multiple ();
 
       break;
     }
+
+    prune_start = UNDEF_MOUSE;
+    mouse_ref = UNDEF_MOUSE;
+
   } while (ch != 'q');
 
   return 0;
@@ -534,6 +622,8 @@ unsigned get_subint_indexed_value(const MouseType& mouse)
 RangeType get_range(const MouseType& mouse_ref, const MouseType& mouse,
 		    const RangeType& ranges, const bool horizontal)
 {
+  cerr << "get_range mouse_ref=" << mouse_ref << endl;
+
   RangeType new_ranges;
 
   const MouseType mouse_values = horizontal ?
@@ -600,6 +690,8 @@ string get_zoom_option(const RangeType& ranges, const unsigned max_value)
 
 void zap_single ()
 {
+  cerr << "zap single" << endl;
+
   *backup_archive = *base_archive;
 
   unsigned value = 0;
@@ -631,6 +723,8 @@ void zap_single ()
 
 void zap_multiple ()
 {
+  cerr << "zap multiple" << endl;
+
   *backup_archive = *base_archive;
 
   const bool horizontal = plot_type == FscrunchedSubint ? false : true;
@@ -897,6 +991,7 @@ void set_dedispersion(Pulsar::Archive* arch, Pulsar::Archive* old_arch, bool &de
       arch->set_dispersion_measure(old_arch->get_dispersion_measure());
       arch->set_dedispersed (false);
     }
+
   arch->remove_baseline();
 }
 
@@ -932,10 +1027,11 @@ void zap_bin (Pulsar::Archive* arch, Pulsar::Archive* old_arch,
   const unsigned npol = old_arch->get_npol();
   const unsigned nchan = old_arch->get_nchan();
 
-  for (unsigned ipol = 0; ipol < npol; ++ipol) {
-    for (unsigned ichan = 0; ichan < nchan; ++ichan) {
-
-      const double baseline_mean =
+  for (unsigned ipol = 0; ipol < npol; ++ipol)
+  {
+    for (unsigned ichan = 0; ichan < nchan; ++ichan)
+    {    
+      double baseline_mean =
         old_arch->get_Profile(subint,ipol,ichan)->baseline()->get_mean().get_value();
 
       float* bins = old_arch->get_Profile(subint,ipol,ichan)->get_amps();
@@ -950,7 +1046,7 @@ void zap_bin (Pulsar::Archive* arch, Pulsar::Archive* old_arch,
   arch->remove_baseline();
 }
 
-static Pulsar::LawnMower* mower = 0;
+Reference::To<Pulsar::LawnMower> mower;
 unsigned mowing_subint = 0;
 
 bool accept_mow (Pulsar::Profile* profile, Pulsar::PhaseWeight* weight)
@@ -997,6 +1093,62 @@ void mowlawn (Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint)
 
   mowing_subint = subint;
   mower->transform( old_arch->get_Integration(subint) );
+
+  *arch = *old_arch;
+  arch->set_dispersion_measure(0);
+  arch->pscrunch();
+  arch->remove_baseline();
+  arch->fscrunch();
+}
+
+static Reference::To<Pulsar::LawnMower> prune_mower;
+
+void prune_hedge (Pulsar::Archive* arch, Pulsar::Archive* old_arch, int subint)
+{
+  if (!prune_mower)
+    prune_mower = new Pulsar::LawnMower;
+
+  ProfilePlot* use = (zoomed) ? subint_mod_plot : subint_orig_plot;
+
+  PlotFrame* frame = use->get_frame();
+  PlotScale* xscale = frame->get_x_scale();
+  PlotScale* yscale = frame->get_y_scale();
+
+  MouseType xrange ( std::min(prune_start.first, prune_end.first),
+		     std::max(prune_start.first, prune_end.first) );
+
+  MouseType yrange ( std::min(prune_start.second, prune_end.second),
+		     std::max(prune_start.second, prune_end.second) );
+
+  std::pair<float,float> prune_x = xscale->viewport_to_world ( xrange );
+  std::pair<float,float> prune_y = yscale->viewport_to_world ( yrange );
+
+  unsigned nbin = old_arch->get_nbin();
+
+  PhaseWeight prune_mask (nbin, 0.0);
+
+  cerr << "prune";
+
+  constrain_range( prune_x.first );
+  constrain_range( prune_x.second );
+
+  unsigned ibin_start = unsigned (prune_x.first * nbin);
+  unsigned ibin_end = unsigned (prune_x.second * nbin);
+
+  assert( use->get_plotter()->profiles.size() == 1 );
+  const float* amps = use->get_plotter()->profiles[0]->get_amps();
+
+  for (unsigned i=ibin_start; i<=ibin_end; i++)
+    if ( amps[i] > prune_y.first && amps[i] < prune_y.second )
+    {
+      prune_mask[i] = 1.0;
+      cerr << " " << i;
+    }
+
+  cerr << endl;
+
+  prune_mower->set_prune( &prune_mask );
+  prune_mower->transform( old_arch->get_Integration(subint) );
 
   *arch = *old_arch;
   arch->set_dispersion_measure(0);
