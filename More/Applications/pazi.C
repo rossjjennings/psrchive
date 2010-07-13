@@ -260,8 +260,15 @@ int main(int argc, char* argv[]) try
   subint_orig_plot->configure("info=1");
   subint_mod_plot->configure("info=1");
 
-  cpgopen("1/XS");
-  cpgopen("2/XS");
+  unsigned window = 0;
+  char device [8];
+
+  for (unsigned i=0; i<2; i++) do {
+    window ++;
+    snprintf (device, 8, "%u/XS", window);
+  }
+  while ( cpgopen (device) < 0 );
+
   cpgask(0);
 
   cerr << endl << "Total S/N = " <<
@@ -622,8 +629,6 @@ unsigned get_subint_indexed_value(const MouseType& mouse)
 RangeType get_range(const MouseType& mouse_ref, const MouseType& mouse,
 		    const RangeType& ranges, const bool horizontal)
 {
-  cerr << "get_range mouse_ref=" << mouse_ref << endl;
-
   RangeType new_ranges;
 
   const MouseType mouse_values = horizontal ?
