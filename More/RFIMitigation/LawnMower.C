@@ -102,6 +102,16 @@ void Pulsar::LawnMower::set_broadband (bool flag)
   broadband = flag;
 }
 
+void Pulsar::LawnMower::set_prune (const PhaseWeight* prune_mask)
+{
+  prune = prune_mask;
+}
+
+const Pulsar::PhaseWeight* Pulsar::LawnMower::get_prune () const
+{
+  return prune;
+}
+
 //! One or more preconditions can be added
 void Pulsar::LawnMower::add_precondition
 ( Functor< bool(Profile*,PhaseWeight*) > f )
@@ -236,7 +246,7 @@ void Pulsar::LawnMower::transform (Integration* subint)
       // 2.5 sigma should get most valid baseline samples
       for (unsigned i=0; i<nbin; i++)
       {
-	if ( (*mowed)[i] )
+	if( (prune && (*prune)[i]) || (!prune && (*mowed)[i]) )
 	{
 	  unsigned count = 0;
 	  unsigned ibin = 0;
@@ -247,13 +257,14 @@ void Pulsar::LawnMower::transform (Integration* subint)
 	    ibin = lrand48() % nbin;
 	    count ++;
 
-	    if (count == nbin)
+	    if (count == 4*nbin)
 	      throw Error (InvalidState, "Pulsar::LawnMower::transform",
 			   "no baseline points available for replacement");
 
 	    diff = amps[ibin] - smamps[ibin];
 	  }
-	  while ( (*mowed)[ibin] || fabs(diff) > rms * 2.5 );
+	  while ( (*mowed)[ibin] || (prune && (*prune)[i]) 
+		  || fabs(diff) > rms * 2.5 );
 
 	  amps[i] = smamps[i] + diff;
 	}

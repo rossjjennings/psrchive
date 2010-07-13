@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/RFIMitigation/Pulsar/LawnMower.h,v $
-   $Revision: 1.4 $
-   $Date: 2008/02/20 10:22:53 $
+   $Revision: 1.5 $
+   $Date: 2010/07/13 09:36:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_LawnMower_h
@@ -65,6 +65,10 @@ namespace Pulsar {
     //! If set, search for spikes in fscrunched (DM=0) total
     virtual void set_broadband (bool);
 
+    //! If set, mow only the points flagged in the prune mask
+    virtual void set_prune (const PhaseWeight* prune_mask);
+    const PhaseWeight* get_prune () const;
+
     //! One or more preconditions can be added
     virtual void add_precondition( Functor< bool(Profile*,PhaseWeight*) > );
 
@@ -75,6 +79,9 @@ namespace Pulsar {
 
     //! Points to be mowed
     Reference::To<PhaseWeight> mowed;
+
+    //! Specific points to be pruned
+    Reference::To<const PhaseWeight> prune;
 
     //! Points to be included in baseline estimator used by mower
     Reference::To<PhaseWeight> include;
