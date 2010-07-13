@@ -64,6 +64,23 @@ std::pair<float,float> Pulsar::PlotScale::get_world_external () const
   return world_external;
 }
 
+std::pair<float,float>
+Pulsar::PlotScale::viewport_to_world (const std::pair<float,float>& viewport)
+{
+  std::pair<float,float> result;
+  result.first = viewport_to_world( viewport.first );
+  result.second = viewport_to_world( viewport.second );
+  return result;  
+}
+
+double Pulsar::PlotScale::viewport_to_world (double viewport)
+{
+  float min = 0, max = 0;
+  get_range (min, max);
+
+  return min + (max-min) * viewport;
+}
+
 void Pulsar::PlotScale::get_range (float& min, float& max) const
 {
   get_minmax (min, max);

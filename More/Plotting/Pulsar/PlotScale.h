@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotScale.h,v $
-   $Revision: 1.14 $
-   $Date: 2009/10/16 17:35:34 $
+   $Revision: 1.15 $
+   $Date: 2010/07/13 09:36:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotScale_h
@@ -84,6 +84,9 @@ namespace Pulsar {
 
     //! Get the world coordinate range printed on the axis
     std::pair<float,float> get_world_external () const;
+
+    std::pair<float,float> viewport_to_world (const std::pair<float,float>&);
+    double viewport_to_world (const double);
 
   protected:
 
