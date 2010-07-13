@@ -480,7 +480,13 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const try
   
   return true;
 }
- catch (bool f) { return f; }
+catch (bool f)
+{
+  if (match_verbose)
+    cerr << "Pulsar::Database::Criterion::match not found \n\n"
+	 << match_report << endl;
+  return f;
+}
 
 // //////////////////////////////////////////////////////////////////////
 //
@@ -762,7 +768,7 @@ void Pulsar::Database::all_matching (const Criterion& criterion,
 Pulsar::Database::Entry 
 Pulsar::Database::best_match (const Criterion& criterion) const
 {
-  if (verbose)
+  if (Criterion::match_verbose)
     cerr << "Pulsar::Database::best_match " << entries.size()
 	 << " entries" << endl;
   
@@ -786,7 +792,7 @@ Pulsar::Database::best_match (const Criterion& criterion) const
 std::string Pulsar::Database::get_closest_match_report () const
 { 
   if (!closest_match.match_count)
-    return "empty";
+    return "\t" "empty" "\n";
   else
     return closest_match.match_report;
 }
