@@ -19,18 +19,23 @@ bool must_correct_lsb (const Pulsar::Backend* be, const Pulsar::Archive* ar)
   return !be->get_downconversion_corrected() && ar->get_bandwidth() < 0;
 }
 
+bool must_correct_phase (const Pulsar::Backend* be)
+{
+  return !be->get_corrected() && be->get_argument() == Signal::Conjugate;
+}
+
 bool Pulsar::BackendCorrection::required (const Archive* arch) const
 {
   const Backend* backend = arch->get<Backend>();
 
-  if (!backend || backend->get_corrected())
+  if (!backend)
     return false;
 
   Signal::Hand hand = backend->get_hand();
-  Signal::Argument argument = backend->get_argument();
   bool correct_lsb = must_correct_lsb (backend, arch);
+  bool correct_phase = must_correct_phase (backend);
 
-  return argument == Signal::Conjugate || hand == Signal::Left || correct_lsb;
+  return hand == Signal::Left || correct_phase || correct_lsb;
 }
 
 void Pulsar::BackendCorrection::operator () (Archive* arch) const try
@@ -46,6 +51,7 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
   Signal::Argument argument = backend->get_argument();
 
   bool correct_lsb = must_correct_lsb (backend, arch);
+  bool correct_phase = must_correct_phase (backend);
 
   if (Archive::verbose > 2)
     cerr << "Pulsar::BackendCorrection::operator basis=" << basis
@@ -135,7 +141,10 @@ void Pulsar::BackendCorrection::operator () (Archive* arch) const try
     }
   }
 
-  backend->set_corrected ();
+  if (correct_phase)
+    backend->set_corrected ();
+  if (correct_lsb)
+    backend->set_downconversion_corrected ();
 }
 catch (Error& error)
 {
