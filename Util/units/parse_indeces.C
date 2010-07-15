@@ -24,7 +24,7 @@ void check_range (int i, int n, const char* name)
 
 bool valid_char (char c)
 {
-  return c == '-' || c == ',' || c == '+';
+  return c == ':' || c == '-' || c == ',' || c == '+';
 }
 
 /*!  
@@ -118,7 +118,7 @@ void TextInterface::parse_indeces (vector<unsigned>& index,
 
     if (scanned == 3)
     {
-      if (c != '-')
+      if (c != '-' && c != ':')
         throw Error (InvalidParam, "TextInterface::parse_indeces",
                      "invalid sub-range '" + range + "'");
 
@@ -140,7 +140,7 @@ void TextInterface::parse_indeces (vector<unsigned>& index,
 
     else if (scanned == 2)
     {
-      if (c != '-')
+      if (c != '-' && c != ':')
         throw Error (InvalidParam, "TextInterface::parse_indeces",
                      "invalid sub-range '" + range + "'");
 
