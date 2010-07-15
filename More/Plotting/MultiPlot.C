@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/MultiPlot.h"
 #include "Pulsar/FramedPlot.h"
 #include "Pulsar/MultiFrame.h"
@@ -29,7 +30,13 @@ Pulsar::PlotAttributes* Pulsar::MultiPlot::get_attributes ()
 
 void Pulsar::MultiPlot::plot (const Archive* data)
 {
+  if (verbose)
+    cerr << "Pulsar::MultiPlot::plot call prepare" << endl;
+
   prepare (data);
+
+  if (verbose)
+    cerr << "Pulsar::MultiPlot::plot done prepare" << endl;
   
   std::map< std::string, Reference::To<FramedPlot> >::iterator ptr;
   for (ptr = plots.begin(); ptr != plots.end(); ptr++)
@@ -101,15 +108,26 @@ void Pulsar::MultiPlot::set_viewport (PlotFrame* frame,
 //! Manage a plot
 void Pulsar::MultiPlot::manage (const std::string& name, FramedPlot* plot)
 {
+  if (verbose)
+    cerr << "Pulsar::MultiPlot::manage name=" << name << endl;
+
   frames.manage (name, plot->get_frame());
 
   plot->get_frame()->get_label_above()->set_all( PlotLabel::unset );
 
   if (frames.has_shared_x_scale())
+  {
+    if (verbose)
+      cerr << "Pulsar::MultiPlot::manage shared x_scale" << endl;
     plot->get_frame()->set_x_scale( frames.get_shared_x_scale() );
+  }
 
   if (frames.has_shared_y_scale())
+  {
+    if (verbose)
+      cerr << "Pulsar::MultiPlot::manage shared y_scale" << endl;
     plot->get_frame()->set_y_scale( frames.get_shared_y_scale() );
+  }
 
   plots[name] = plot;
 }

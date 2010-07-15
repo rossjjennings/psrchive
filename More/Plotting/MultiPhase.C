@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/MultiPhase.h"
 
 using namespace std;
@@ -20,5 +21,8 @@ Pulsar::PhaseScale* Pulsar::MultiPhase::get_scale ()
   if (!scale)
     throw Error (InvalidState, "Pulsar::MultiPhase::get_scale",
 		 "x scale is not a PhaseScale");
+  
+  if (verbose)
+    cerr << "Pulsar::MultiPhase::get_scale" << endl;
   return scale;
 }
