@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseScale.h,v $
-   $Revision: 1.13 $
-   $Date: 2007/09/20 12:25:38 $
+   $Revision: 1.14 $
+   $Date: 2010/07/15 05:39:42 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseScale_h
@@ -26,7 +26,7 @@ namespace Pulsar {
   public:
 
     //! The units on the phase axis
-    enum Units { Turns, Degrees, Radians, Milliseconds };
+    enum Units { Turns, Degrees, Radians, Milliseconds, Bins };
 
     //! Default constructor
     PhaseScale ();

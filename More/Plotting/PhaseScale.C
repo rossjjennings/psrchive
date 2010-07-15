@@ -64,6 +64,9 @@ float Pulsar::PhaseScale::get_scale (const Archive* data) const
   else if (units == Degrees)
     return 360.0;
 
+  else if (units == Bins)
+    return data->get_nbin();
+
   else
     return 1.0;
 }
@@ -76,6 +79,7 @@ std::string Pulsar::PhaseScale::get_label () const
   case Degrees: return "Phase (deg.)";
   case Radians: return "Phase (rad.)";
   case Milliseconds: return "Time (ms)";
+  case Bins: return "Bin Number";
   default: return "Unknown";
   }
 }
@@ -91,6 +95,8 @@ std::ostream& Pulsar::operator << (std::ostream& os, PhaseScale::Units units)
     return os << "rad";
   case PhaseScale::Milliseconds:
     return os << "ms";
+  case PhaseScale::Bins:
+    return os << "bin";
   default:
     return os << "unknown";
   }
@@ -110,6 +116,8 @@ std::istream& Pulsar::operator >> (std::istream& is, PhaseScale::Units& units)
     units = PhaseScale::Radians;
   else if (unit == "ms")
     units = PhaseScale::Milliseconds;
+  else if (unit == "bin")
+    units = PhaseScale::Bins;
   else
     is.setstate(std::istream::failbit);
 
