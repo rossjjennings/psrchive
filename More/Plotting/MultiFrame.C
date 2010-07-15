@@ -32,8 +32,7 @@ void Pulsar::MultiFrame::focus (const Archive* data)
 
 void Pulsar::MultiFrame::decorate (const Archive* data)
 {
-  cpgsls (1);
-  cpgsci (1);
+  setup ();
 
   get_label_above()->plot(data);
 }

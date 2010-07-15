@@ -68,15 +68,12 @@ void Pulsar::PlotFrame::focus (const Archive* data)
 
   cpgswin (x_min, x_max, y_min, y_max);
 
-  cpgsch (character_height);
-  cpgscf (character_font);
-  cpgslw (line_width);
+  setup ();
 }
 
 void Pulsar::PlotFrame::draw_axes (const Archive* data)
 {
-  cpgsls (1);
-  cpgsci (1);
+  setup ();
 
   float x_min, x_max;
   get_x_scale(true)->get_range_external (x_min, x_max);
@@ -115,8 +112,7 @@ void Pulsar::PlotFrame::draw_axes (const Archive* data)
 void Pulsar::PlotFrame::label_axes (const string& default_x,
 				    const string& default_y)
 {
-  cpgsls (1);
-  cpgsci (1);
+  setup ();
 
   string xlabel = get_x_axis()->get_label();
   if (xlabel == PlotLabel::unset)
@@ -146,8 +142,7 @@ void Pulsar::PlotFrame::label_axes (const string& default_x,
 
 void Pulsar::PlotFrame::decorate (const Archive* data)
 {
-  cpgsls (1);
-  cpgsci (1);
+  setup ();
 
   get_label_above()->plot(data);
   get_label_below()->plot(data);

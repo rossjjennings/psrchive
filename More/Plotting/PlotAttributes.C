@@ -1,11 +1,12 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/PlotAttributes.h"
+#include <cpgplot.h>
 
 Pulsar::PlotAttributes::PlotAttributes ()
 {
@@ -72,4 +73,12 @@ void Pulsar::PlotAttributes::apply_set (const std::string& name)
 		 "unrecognized set name '" + name + "'");
 }
 
+void Pulsar::PlotAttributes::setup ()
+{
+  cpgsch (character_height);
+  cpgscf (character_font);
+  cpgslw (line_width);
 
+  cpgsls (1);
+  cpgsci (1);
+}

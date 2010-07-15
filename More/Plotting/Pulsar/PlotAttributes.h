@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotAttributes.h,v $
-   $Revision: 1.8 $
-   $Date: 2008/01/14 04:55:49 $
+   $Revision: 1.9 $
+   $Date: 2010/07/15 08:20:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotAttributes_h
@@ -64,8 +64,8 @@ namespace Pulsar {
     //! Remove all plot labels
     virtual void no_labels ();
 
-    //! Set the plot surface size, if necessary
-    void initialize_surface ();
+    //! Set the plot colour line and text attributes
+    void setup ();
 
   protected:
 
