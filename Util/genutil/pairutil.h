@@ -21,7 +21,7 @@ namespace std
 template<class T, class U>
 std::ostream& operator << (std::ostream& os, std::pair<T,U> vals)
 {
-  return os << "(" << vals.first << "," << vals.second << ")";
+  return os << vals.first << ":" << vals.second;
 }
 
 template<class T, class U>
