@@ -71,16 +71,17 @@ void Pulsar::AnglePlot::prepare (const Archive* data)
   }
   else
   {
-    min = -90;
-    max = 90;
+    // keep pgplot from drawing the 90 or 180 at the edge
+    max = 89.99;
+    min = -max;
     
     float range_total = range.second - range.first;
-    if( range_total > 1.5 )
+    if( range_total >= 1.5 )
     {
       get_frame()->get_y_axis()->set_tick( 90.0 );
       get_frame()->get_y_axis()->set_nsub( 3 );
     }
-    if( range_total > 2 )
+    if( range_total >= 2 )
     {
       get_frame()->get_y_axis()->set_tick( 120.0 );
       get_frame()->get_y_axis()->set_nsub( 3 );
