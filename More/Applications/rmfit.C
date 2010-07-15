@@ -123,17 +123,17 @@ void usage ()
     "  -r                Refine the RM using two halves of band \n"
     "\n"
     "Preprocessing options: \n"
-    "  -b [+/-][range]   Include/exclude phase bins \n"
-    "  -B [factor]       Scrunch in phase bins \n"
-    "  -F [factor]       Scrunch in frequency \n"
+    "  -b +/-range       Include/exclude phase bins; e.g. range=I,J:K and/or M-N \n"
+    "  -B factor         Scrunch in phase bins \n"
+    "  -F factor         Scrunch in frequency \n"
     "  -R RM             Set the input rotation measure \n"
     "  -z \"z1 z2 z3...\"  Zap these channels\n"
     "\n"
     "Plotting options: \n"
     "  -D                Display results \n"
     "  -K dev            Specify pgplot device\n"
-    "  -p [x1,x2]        Fit for every phase bin in window \n"
-    "  -w [x1,x2]        Average over phase window \n"
+    "  -p x1,x2          Fit for every phase bin in window \n"
+    "  -w x1,x2          Average over phase window \n"
     "  -Y                Produce a postscript plot of V against frequency\n"
     "\n"
     "Standard options:\n"
@@ -765,6 +765,11 @@ void rmresult (Pulsar::Archive* archive,
   archive->remove_baseline();
   archive->centre_max_bin();
 
+  cerr << "\n"
+    "rmresult: selected phase bins, P.A. values, and P.A. errors "
+    "in delta_pa.txt"
+       << endl;
+
 #if HAVE_PGPLOT
 
   string dev = archive->get_source () + ".ps/cps";
@@ -798,11 +803,8 @@ void rmresult (Pulsar::Archive* archive,
   plot.get_flux()->get_frame()->get_label_below()->set_right ("$freq MHz");
 
   // plot -90 to 180 in the PA plot
-  plot.get_orientation()->set_span (180.0);
   plot.get_orientation()->get_frame()->get_y_scale()->set_range_norm (0, 1.5);
-
-  plot.get_orientation()->set_marker( (Pulsar::AnglePlot::Marker)
-				      ( Pulsar::AnglePlot::ErrorTick ) );
+  plot.get_orientation()->set_marker( Pulsar::AnglePlot::ErrorTick );
 
   plot.plot (archive);
 
