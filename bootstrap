@@ -1,10 +1,8 @@
-#! /bin/csh -f
+#! /bin/sh
 
 echo "Running the GNU autotools.  Please be patient ..."
 
-autoreconf --install --force
-
-if ( ! $status ) then
+if autoreconf --install --force; then
 
   echo
   echo "Bootstrap complete.  You can now run the configure script."
@@ -19,5 +17,5 @@ else
   echo
   exit -1
 
-endif
+fi
 
