@@ -10,11 +10,9 @@ set prefix=@prefix@
 set datarootdir=@datarootdir@
 
 set max_nthread = 1
-set ncache = 0
+set ncache = 1
 
 if ( -f /proc/cpuinfo ) then
-  set max_nthread = `cat /proc/cpuinfo | grep processor | wc -l`
-  set ncache = $max_nthread
 
   set noglob
   set eval=`grep 'cache size' /proc/cpuinfo | head -1 | awk -F: '{print $2}' | sed -e 's/KB/\* 1024/'`
@@ -23,16 +21,25 @@ if ( -f /proc/cpuinfo ) then
   echo Chip set: $chips
   if ( $chips == E5520 ) then
     echo Nehalem Level 3 cache shared by 4 cores
+    set max_nthread = 8
     set ncache = 2
-  endif
-  if ( $chips == E5345 ) then
+  else if ( $chips == E5345 ) then
     echo Clovertown Level 2 cache shared by 2 cores
+    set max_nthread = 8
     set ncache = 4
+  else if ( $chips == X7560 ) then
+    echo Knights Ferry Level 3 cache shared by 4 cores
+    set max_nthread = 32
+    set ncache = 8
+  else
+    set max_nthread = `cat /proc/cpuinfo | grep processor | wc -l`
+    set ncache = $max_nthread
   endif
 
   @ cache = $eval / 2
   unset noglob
 else
+  set cache = 1
   set max_nthread = `sysctl hw.ncpu | awk '{print $2}'`
 endif
 
