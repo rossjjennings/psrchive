@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Statistics.h,v $
-   $Revision: 1.8 $
-   $Date: 2010/05/31 22:25:33 $
+   $Revision: 1.9 $
+   $Date: 2010/07/23 23:52:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Statistics_h
@@ -82,7 +82,7 @@ namespace Pulsar {
 
   protected:
 
-    Reference::To<const Archive> archive;
+    Reference::To<const Archive, false> archive;
     Index isubint;
     Index ichan;
     Index ipol;
