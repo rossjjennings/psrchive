@@ -360,8 +360,11 @@ void Pulsar::Interpreter::set (Archive* data)
     theStack.top() = data;
   }
 
+  current_interface = 0;
+
   if (VERBOSE)
-    cerr << "Pulsar::Interpreter::set stack size=" << theStack.size() << endl;
+    cerr << "Pulsar::Interpreter::set stack size=" << theStack.size() 
+	 << " map size=" << theMap.size () << endl;
 }
 
 Pulsar::Archive* Pulsar::Interpreter::get ()
@@ -469,6 +472,8 @@ string Pulsar::Interpreter::push (const string& args) try
   else
     theStack.push( get()->clone() );
 
+  current_interface = 0;
+
   return response (Good);
 }
 catch (Error& error)
@@ -484,6 +489,9 @@ string Pulsar::Interpreter::pop (const string& args)
     return response (Warn, "currently at bottom");
 
   theStack.pop();
+
+  current_interface = 0;
+
   return response (Good);
 }
 
@@ -632,7 +640,10 @@ TextInterface::Parser* Pulsar::Interpreter::get_interface ()
   if (VERBOSE)
     cerr << "Pulsar::Interpreter::get_interface" << endl;
 
-  return standard_interface( get() );
+  if (!current_interface)
+    current_interface = standard_interface( get() );
+
+  return current_interface;
 }
 
 string Pulsar::Interpreter::edit (const string& args) try
@@ -640,9 +651,7 @@ string Pulsar::Interpreter::edit (const string& args) try
 
   // replace variable names with values
   if (args == "help")
-  {
     return get_interface()->help (true);
-  }
 
   vector<string> arguments = setup (args);
 
@@ -650,7 +659,8 @@ string Pulsar::Interpreter::edit (const string& args) try
     return response (Fail, "please specify at least one editor command");
 
   string retval;
-  for (unsigned icmd=0; icmd < arguments.size(); icmd++) {
+  for (unsigned icmd=0; icmd < arguments.size(); icmd++)
+  {
     if (icmd)
       retval += " ";
     retval += get_interface()->process (arguments[icmd]);

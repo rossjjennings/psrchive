@@ -250,6 +250,8 @@ namespace Pulsar {
     //! the last expression evaluated by evaluate method
     std::string evaluate_expression;
 
+    //! the current archive interface
+    Reference::To<TextInterface::Parser> current_interface;
   };
   
 }
