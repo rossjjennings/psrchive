@@ -102,6 +102,7 @@ void Pulsar::PolnProfileFit::init ()
   choose_maximum_harmonic = false;
   manage_equation_transformation = true;
   fit_debug = false;
+  phase_lock = false;
 }
 
 void Pulsar::PolnProfileFit::set_plan (FTransform::Plan* p)
@@ -291,11 +292,7 @@ void Pulsar::PolnProfileFit::set_fit_debug (bool flag)
 
 void Pulsar::PolnProfileFit::set_phase_lock (bool locked)
 {
-  if (!phases)
-    return;
-
-  for (unsigned i=0; i<phases->get_ngradient(); i++)
-    phases->set_infit( i, !locked );
+  phase_lock = locked;
 }
 
 void Pulsar::PolnProfileFit::remove_phase ()
@@ -387,6 +384,7 @@ try
   {
     phases->add_gradient();
     index = phases->get_igradient();
+    phases->set_infit(index, !phase_lock);
     phases->set_param (index, phase_guess);
   }
 

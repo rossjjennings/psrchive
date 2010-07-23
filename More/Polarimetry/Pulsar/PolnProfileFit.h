@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.41 $
-   $Date: 2010/07/07 12:14:46 $
-   $Author: straten $ */
+   $Revision: 1.42 $
+   $Date: 2010/07/23 05:59:33 $
+   $Author: sosl $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
 #define __Pulsar_PolnProfileFit_h
@@ -134,6 +134,8 @@ namespace Pulsar
     //! Set the phase offset between the observation and the standard
     void set_phase (const Estimate<double>& phase);
 
+    //! Lock the phases?
+    bool phase_lock;
     //! Lock pulse phase; i.e., do not allow pulse phase to vary in fit
     void set_phase_lock (bool locked);
 
