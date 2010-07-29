@@ -456,15 +456,35 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   {
     dfault = "";
 
-    psrfits_read_key (fptr, "STT_CRD1", &tempstr, dfault, verbose > 2);
-    if( tempstr == "" )
-      psrfits_read_key ( fptr, "RA", &tempstr, dfault, verbose > 2 );
-    string hms = tempstr;
-    psrfits_read_key (fptr, "STT_CRD2", &tempstr, dfault, verbose > 2);
-    if( tempstr == "" )
-      psrfits_read_key ( fptr, "DEC", &tempstr, dfault, verbose > 2 );
-    coord.setHMSDMS (hms.c_str(),tempstr.c_str());
-  }     
+    psrfits_read_key (fptr, "RA", &tempstr, dfault, verbose > 2);
+
+    string stt_crd1 = "";
+    psrfits_read_key (fptr, "STT_CRD1", &stt_crd1, dfault, verbose > 2);
+    hdr_ext->set_stt_crd1(stt_crd1);
+
+    // If RA exists, set the ra from the value of RA.
+    // Otherwise, set the ra to the value of STT_CRD1
+    const string hms = !tempstr.empty() ? tempstr : stt_crd1;
+
+    psrfits_read_key (fptr, "DEC", &tempstr, dfault, verbose > 2);
+
+    string stt_crd2 = "";
+    psrfits_read_key (fptr, "STT_CRD2", &stt_crd2, dfault, verbose > 2);
+    hdr_ext->set_stt_crd2(stt_crd2);
+
+    // If DEC exists, set the dec from the value of DEC.
+    // Otherwise, set the dec to the value of STT_CRD2
+    const string dec = !tempstr.empty() ? tempstr : stt_crd2;
+    coord.setHMSDMS (hms.c_str(), dec.c_str());
+
+    psrfits_read_key (fptr, "STP_CRD1", &tempstr, dfault, verbose > 2);
+    if (!tempstr.empty())
+      hdr_ext->set_stp_crd1(tempstr);
+
+    psrfits_read_key (fptr, "STP_CRD2", &tempstr, dfault, verbose > 2);
+    if (!tempstr.empty())
+      hdr_ext->set_stp_crd2(tempstr);
+  }
   else if (hdr_ext->coordmode == "GAL")
   {
     double dfault = 0.0;
