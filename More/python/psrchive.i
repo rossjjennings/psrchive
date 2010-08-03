@@ -86,10 +86,6 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 // Also does not distinguish between const and non-const overloaded methods
 %ignore Pulsar::Archive::get_Profile(unsigned,unsigned,unsigned) const;
 %ignore Pulsar::Archive::expert() const;
-%ignore Pulsar::Archive::get_type() const;
-%ignore Pulsar::Archive::get_state() const;
-%ignore Pulsar::Archive::get_scale() const;
-%ignore Pulsar::Archive::get_basis() const;
 %ignore Pulsar::Integration::get_Profile(unsigned,unsigned) const;
 %ignore Pulsar::Integration::new_PolnProfile(unsigned) const;
 %ignore Pulsar::IntegrationManager::get_Integration(unsigned) const;
@@ -125,6 +121,24 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %typemap(out) MJD {
     $result = PyFloat_FromDouble($1.in_days());
 }
+
+// Convert various enums to/from string
+%define %map_enum(TYPE)
+%typemap(out) Signal:: ## TYPE {
+    $result = PyString_FromString( TYPE ## 2string($1).c_str());
+}
+%typemap(in) Signal:: ## TYPE {
+    try {
+        $1 = Signal::string2 ## TYPE (PyString_AsString($input));
+    } catch (Error &error) {
+        SWIG_exception(SWIG_RuntimeError,error.get_message().c_str());
+    } 
+}
+%enddef
+%map_enum(State)
+%map_enum(Basis)
+%map_enum(Scale)
+%map_enum(Source)
 
 // Header files included here will be wrapped
 %include "ReferenceAble.h"
@@ -274,15 +288,6 @@ void pointer_tracker_remove(Reference::Able *ptr) {
     std::string __str__()
     {
         return "PSRCHIVE Archive object: " + self->get_filename();
-    }
-
-    // String representation of various enums
-    std::string get_type() { return Source2string(self->get_type()); }
-    std::string get_state() { return State2string(self->get_state()); }
-    std::string get_basis() { return Basis2string(self->get_basis()); }
-    std::string get_scale() { return Scale2string(self->get_scale()); }
-    void convert_state(std::string s) { 
-        self->convert_state(Signal::string2State(s)); 
     }
 
     // Return a copy of all the data as a numpy array
