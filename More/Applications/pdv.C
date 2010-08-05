@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.45 $
-   $Date: 2010/04/21 05:04:56 $
+   $Revision: 1.46 $
+   $Date: 2010/08/05 06:39:20 $
    $Author: jonathan_khoo $ */
 
 
@@ -158,15 +158,15 @@ void Usage( void )
   "   -" << STOKES_POSANG_KEY <<  "          Convert to Stokes and also print position angle (P.A.) \n"
   "   -" << PA_THRESHOLD_KEY <<   " sigma    Minimum linear polarization for P.A. \n"
   "   -" << CALIBRATOR_KEY <<     "          Print out calibrator (square wave) parameters \n"
-  "   -" << PULSE_WIDTHS_KEY <<   "          Show pulse widths and mean flux density (mJy) \n"
+  "   -" << PULSE_WIDTHS_KEY <<   "          Show pulse widths, mean flux density (mJy), and S/N \n"
   "                                          with baseline width dcyc \n"
   "   -" << PULSE_FLUX_KEY <<     "          print the mean flux density \n"
   "   -" << BASELINE_KEY <<       "          Do not remove baseline \n"
   "   -" << TEXT_KEY <<           "          Print out profiles as ASCII text \n"
   "   -" << TEXT_HEADERS_KEY <<   "          Print out profiles as ASCII text (with per channel headers) \n"
   "   -" << HDR_MARKER_KEY <<     "          Start header lines with #\n"
-  "   -" << PER_SUBINT_KEY <<     " params   Print out per subint data (no params for argument list) \n"
-  "   -" << HISTORY_KEY <<        " params   Print out the history table for the archive (no params for argument list) \n"
+  "   -" << PER_SUBINT_KEY <<     " params   Print out per subint data \n"
+  "   -" << HISTORY_KEY <<        " params   Print out the history table for the archive \n"
   "   -" << MINMAX_KEY <<         "          Print out the min and max bin value for each subint \n"
   " \n"
   "   For more detailed list of options use \"pdv -h param\", ie \"pdv -h S\" \n"
@@ -200,7 +200,7 @@ void DisplaySubintsUsage( void )
   "    PAR_ANG            [deg] Parallactic angle at subint centre \n"
   "    TEL_AZ             [deg] Telescope azimuth at subint centre \n"
   "    TEL_ZEN            [deg] Telescope zenith angle at subint centre \n"
-  "    S/N                Signal to noise ration for each subint\n"
+  "    S/N                Signal to noise ratio for each subint\n"
   << endl;
 }
 
@@ -564,14 +564,13 @@ void FracPol(Pulsar::Archive* archive)
 
 void Flux( Reference::To< Archive > archive )
 {
-  if (archive->has_model())
-    archive->centre();
+  archive->dedisperse();
 
   if (archive->get_npol() == 4)
     archive->convert_state (Signal::Stokes);
 
   cout << header_marker;
-  cout << "File\t\t\t Sub Chan  Pol\t     MJD        Freq\t  S(mJy)    W10       W50       SNR" << endl;
+  cout << "File\t\t\t Sub Chan  Pol\t     MJD        Freq\t  S(mJy)    W10       W50       S/N" << endl;
 
   int fchan = 0, lchan = archive->get_nchan() - 1;
   if( ichan <= lchan && ichan >= fchan)
@@ -654,16 +653,6 @@ void Flux2( Reference::To< Archive > archive )
 }
 
 
-bool CheckPointing( Reference::To<Pointing> pointing, table_stream &ts )
-{
-  if( pointing )
-    return true;
-
-  ts << "INVALID";
-  return false;
-}
-
-
 
 /**
  * DisplaySubints    Display a subint table header parameters.
@@ -693,16 +682,17 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
       break;
     }
 
-    cout << (*fit) << endl;
+    data->remove_baseline();
 
-    table_stream ts( &cout );
+    cout << (*fit) << endl;
 
     vector<string>::iterator pit;
     for( pit = parameters.begin(); pit != parameters.end(); pit ++ )
     {
-      ts << (*pit);
+      cout << (*pit);
     }
-    ts << endl;
+
+    cout << endl;
 
     // Get references to any extensions we may be interested in
     Reference::To<DigitiserStatistics> stats = data->get<DigitiserStatistics>();
@@ -728,16 +718,16 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
           if( (*pit) == "INDEXVAL" )
           {
             if( !integ_order )
-              ts << "INVALID";
+              cout << "INVALID";
             else
-              ts << tostring<double>( integ_order->get_Index(i) );
+              cout << tostring<double>( integ_order->get_Index(i) );
           }
           else if( (*pit) == "TSUBINT" )
           {
             if( !integ )
-              ts << "INVALID";
+              cout << "INVALID";
             else
-              ts << tostring<double>( integ->get_duration() );
+              cout << tostring<double>( integ->get_duration() );
           }
 
 #ifdef HAVE_CFITSIO
@@ -746,38 +736,35 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
           {
             Reference::To<FITSArchive> data_fits = dynamic_cast<FITSArchive*>( data.get() );
             if( ! data_fits )
-              ts << "INVALID";
+              cout << "INVALID";
             else
-              ts << tostring<double>( data_fits->get_offs_sub( i ) );
+              cout << tostring<double>( data_fits->get_offs_sub( i ) );
           }
 
 #endif
 
-          else if( (*pit) == "LST_SUB" && CheckPointing( pointing, ts ) )
-            ts << tostring<double>( pointing->get_local_sidereal_time () );
-          else if( (*pit) == "RA_SUB" && CheckPointing( pointing, ts ))
-            ts << tostring<double>( pointing->get_right_ascension().getDegrees() );
-          else if( (*pit) == "DEC_SUB" && CheckPointing( pointing, ts ))
-            ts << tostring<double>( pointing->get_declination().getDegrees() );
-          else if( (*pit) == "GLON_SUB" && CheckPointing( pointing, ts ))
-            ts << tostring<double>( pointing->get_galactic_longitude().getDegrees() );
-          else if( (*pit) == "GLAT_SUB" && CheckPointing( pointing, ts ))
-            ts << tostring<double>( pointing->get_galactic_latitude().getDegrees() );
-          else if( (*pit) == "FD_ANG" && CheckPointing( pointing, ts ))
-            ts << tostring<double>( pointing->get_feed_angle().getDegrees() );
-          else if( (*pit) == "POS_ANG" && CheckPointing( pointing, ts ))
-            ts << tostring<double>( pointing->get_position_angle().getDegrees() );
-          else if( (*pit) == "PAR_ANG" && CheckPointing( pointing, ts ))
-            ts << tostring<double>( pointing->get_parallactic_angle().getDegrees() );
-          else if( (*pit) == "TEL_AZ" && CheckPointing( pointing, ts ) )
-            ts << tostring<double>( pointing->get_telescope_azimuth().getDegrees() );
-          else if( (*pit) == "TEL_ZEN" && CheckPointing( pointing, ts ) )
-            ts << tostring<double>( pointing->get_telescope_zenith().getDegrees() );
+          else if( (*pit) == "LST_SUB" && pointing )
+            cout << tostring<double>( pointing->get_local_sidereal_time () );
+          else if( (*pit) == "RA_SUB" && pointing )
+            cout << tostring<double>( pointing->get_right_ascension().getDegrees() );
+          else if( (*pit) == "DEC_SUB" && pointing )
+            cout << tostring<double>( pointing->get_declination().getDegrees() );
+          else if( (*pit) == "GLON_SUB" && pointing )
+            cout << tostring<double>( pointing->get_galactic_longitude().getDegrees() );
+          else if( (*pit) == "GLAT_SUB" && pointing )
+            cout << tostring<double>( pointing->get_galactic_latitude().getDegrees() );
+          else if( (*pit) == "FD_ANG" && pointing )
+            cout << tostring<double>( pointing->get_feed_angle().getDegrees() );
+          else if( (*pit) == "POS_ANG" && pointing )
+            cout << tostring<double>( pointing->get_position_angle().getDegrees() );
+          else if( (*pit) == "PAR_ANG" && pointing )
+            cout << tostring<double>( pointing->get_parallactic_angle().getDegrees() );
+          else if( (*pit) == "TEL_AZ" && pointing )
+            cout << tostring<double>( pointing->get_telescope_azimuth().getDegrees() );
+          else if( (*pit) == "TEL_ZEN" && pointing )
+            cout << tostring<double>( pointing->get_telescope_zenith().getDegrees() );
           else if( (*pit) == "S/N" )
-          {
-            ts << tostring<double>( integ->total()->get_Profile(0,0)->snr() );
-          }
-
+            cout << tostring<double>( integ->total()->get_Profile(0,0)->snr(), 3, ios::fixed );
 
           // parameters from the DIG_CNTS table
           else if( (*pit) == "ATTEN" )
@@ -796,10 +783,10 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
             }
             else
               atten_string = "INVALID";
-            ts << atten_string;
+            cout << atten_string;
           }
         }
-        ts << endl;
+        cout << endl;
       }
       catch( Error e )
       {
@@ -807,8 +794,6 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
         break;
       }
     }
-
-    ts.flush();
   }
 }
 
@@ -1200,13 +1185,11 @@ int main( int argc, char *argv[] ) try
       break;
     case PER_SUBINT_KEY:
       cmd_subints = true;
-      if( optarg != NULL )
-        separate( optarg, subint_params, " ," );
+      separate( optarg, subint_params, " ," );
       break;
     case HISTORY_KEY:
       cmd_history = true;
-      if( optarg != NULL )
-        separate (optarg, history_params, " ,");
+      separate (optarg, history_params, " ,");
       break;
 	case MINMAX_KEY:
 	  show_min_max = true;
