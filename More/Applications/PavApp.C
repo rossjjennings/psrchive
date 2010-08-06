@@ -338,14 +338,9 @@ void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
 {
   Reference::To<Integration> integ = archive->get_Integration(0);
 
-  // fully scrunch archive to get the correct SNR
-  Reference::To<Archive> copy = archive->clone();
-  copy->tscrunch();
-  copy->fscrunch();
-  copy->pscrunch();
-
-  string snr = tostring( copy->get_Profile(0,0,0)->snr(),3,ios::fixed );
-  string frequency;
+  // Display the SNR of the fully scrunched archive.
+  const string snr =
+    tostring( archive->total()->get_Profile(0,0,0)->snr(), 3, ios::fixed );
 
   /*
      If the archive has been dedispsersed, then the effective centre
@@ -353,11 +348,13 @@ void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
      the centre frequency stored in the profile.
   */
 
+  string frequency;
+
   if ( archive->get_dedispersed() )
   {
     frequency = tostring( archive->get_centre_frequency(),3,ios::fixed );
   }
-  else 
+  else
   {
     const double weighted_frequency =
       integ->weighted_frequency(0, archive->get_nchan());
@@ -567,6 +564,7 @@ void PavApp::CreatePlotsList( vector< string > filenames,   vector< string > plo
       FilePlots new_fplot;
       new_fplot.filename = filenames[i];
       new_fplot.archive = Archive::load( filenames[i] );
+
       for( unsigned p = 0; p < plot_ids.size(); p ++ )
       {
         string plot_id = plot_ids[p];
@@ -742,7 +740,7 @@ int PavApp::run( int argc, char *argv[] )
       break;
     case 'i':
       cout << 
-        "pav VERSION $Id: PavApp.C,v 1.75 2010/07/01 04:58:38 jonathan_khoo Exp $" << 
+        "pav VERSION $Id: PavApp.C,v 1.76 2010/08/06 00:29:31 jonathan_khoo Exp $" << 
         endl << endl;
       return 0;
     case 'M':
@@ -1187,6 +1185,7 @@ int PavApp::run( int argc, char *argv[] )
       for (unsigned p=0; p < plots[i].plots.size(); p++)
       {
         cpgpage ();
+
         if( remove_baseline )
           plots[i].plots[p]->preprocess( plots[i].archive );
 
