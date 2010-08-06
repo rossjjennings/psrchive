@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASP/Pulsar/ASPArchive.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/11/07 22:15:36 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2010/08/06 03:00:07 $
+   $Author: demorest $ */
 
 #ifndef __ASPArchive_h
 #define __ASPArchive_h
@@ -82,6 +82,9 @@ namespace Pulsar {
 
     //! ASP file version
     int asp_file_version;
+
+    //! Is this an ASP Stokes file
+    bool have_asp_stokes;
 
   };
  

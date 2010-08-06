@@ -32,6 +32,7 @@ void Pulsar::ASPArchive::init ()
   //   - filetype version
   //   - per-channel timestamps?
   asp_file_version=0;
+  have_asp_stokes=false;
 }
 
 Pulsar::ASPArchive::ASPArchive()
@@ -168,12 +169,25 @@ void Pulsar::ASPArchive::load_header (const char* filename)
   fits_get_num_rows(f, &int_tmp2, &status);
   if (int_tmp2==0) set_nsubint(int_tmp-1);
 
+  // Figure out if we have an ASP Stokes file
+  fits_movnam_hdu(f, BINARY_TBL, "STOKES0", 0, &status);
+  if (status==0) {
+    have_asp_stokes = true;
+  } else {
+    status = 0;
+  }
+
   // Pol info always the same for ASP
   set_npol(4);
-  set_state(Signal::Coherence);
+  if (have_asp_stokes) {
+    set_state(Signal::Stokes);
+    set_poln_calibrated(true);
+  } else {
+    set_state(Signal::Coherence);
+    set_poln_calibrated(false);
+  }
   set_scale(Signal::FluxDensity);
   set_faraday_corrected(false);
-  set_poln_calibrated(false);
 
   // TODO: This may change for multi-polyco support
   set_dedispersed(false);
@@ -408,7 +422,6 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
 
   integration->uniform_weight(1.0);
 
-#if 1 
   // Create pointing extension
   Reference::To<Pointing> pnt = new Pointing;
   pnt->set_right_ascension(get_coordinates().ra());
@@ -423,7 +436,6 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
   pnt->set_telescope_zenith(0.0);
   pnt->update(integration,this);
   integration->add_extension(pnt);
-#endif
 
   // If the "no_amps" flag is set, the actual data is not called for, 
   // so we can exit early.  (Trying to actually load the data 
@@ -442,15 +454,23 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
   // Still relies on column numbers... probably ok, though.
   float *data = new float[nbin]; // Temporary storage space
   int *count = new int[nbin];
+
   for (unsigned ichan=0; ichan<nchan; ichan++) {
     // Load counts for this chan
-    fits_read_col(f, TINT, 5*ichan+5, 1, 1, nbin, NULL, count, NULL, &status);
+    if (have_asp_stokes==false)
+      fits_read_col(f, TINT, 5*ichan+5, 1, 1, nbin, NULL, count, NULL, &status);
     for (unsigned ipol=0; ipol<npol; ipol++) {
       // Load data for ipol, ichan 
-      fits_read_col(f, TFLOAT, 5*ichan+ipol+1, 1, 1, nbin, NULL, data, NULL, 
+      if (have_asp_stokes) 
+        col = 4*ichan + ipol + 1;
+      else 
+        col = 5*ichan + ipol + 1;
+      fits_read_col(f, TFLOAT, col, 1, 1, nbin, NULL, data, NULL, 
           &status);
       // Normalize by counts
-      for (unsigned ibin=0; ibin<nbin; ibin++) data[ibin] /= (float)count[ibin];
+      if (have_asp_stokes==false)
+        for (unsigned ibin=0; ibin<nbin; ibin++) 
+          data[ibin] /= (float)count[ibin];
       // Rotate to align phase0 w/ epoch.
       // TODO: This will change for multi-polyco support
       FTransform::shift(nbin, data, (double)nbin*(midphase[ichan]-refphase));
