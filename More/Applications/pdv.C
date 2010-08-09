@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.46 $
-   $Date: 2010/08/05 06:39:20 $
+   $Revision: 1.47 $
+   $Date: 2010/08/09 03:40:14 $
    $Author: jonathan_khoo $ */
 
 
@@ -159,7 +159,6 @@ void Usage( void )
   "   -" << PA_THRESHOLD_KEY <<   " sigma    Minimum linear polarization for P.A. \n"
   "   -" << CALIBRATOR_KEY <<     "          Print out calibrator (square wave) parameters \n"
   "   -" << PULSE_WIDTHS_KEY <<   "          Show pulse widths, mean flux density (mJy), and S/N \n"
-  "                                          with baseline width dcyc \n"
   "   -" << PULSE_FLUX_KEY <<     "          print the mean flux density \n"
   "   -" << BASELINE_KEY <<       "          Do not remove baseline \n"
   "   -" << TEXT_KEY <<           "          Print out profiles as ASCII text \n"
