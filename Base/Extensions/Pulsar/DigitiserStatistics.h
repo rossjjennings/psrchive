@@ -74,7 +74,11 @@ namespace Pulsar
     //! get dig_mode
     std::string get_dig_mode( void ) const { return dig_mode; }
 
-
+    //! Resize the extension
+    void resize (unsigned nsubint,
+		    unsigned npol  = 0,
+		    unsigned nchan = 0,
+		    unsigned nbin  = 0);
 
     ///////////////////////////////////////////////////////////////
     // The information container

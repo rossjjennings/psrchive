@@ -85,6 +85,11 @@ void Pulsar::DigitiserStatistics::row::init ()
   data.resize(0);
 }
 
+void Pulsar::DigitiserStatistics::resize (unsigned nsubint, unsigned npol,
+			      unsigned nchan, unsigned nbin)
+{
+  rows.resize(nsubint);
+}
 
 class Pulsar::DigitiserStatistics::Interface
   : public TextInterface::To<DigitiserStatistics>

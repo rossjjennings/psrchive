@@ -163,3 +163,8 @@ void DigitiserCounts::CombineSubints(const unsigned subint, const unsigned start
     }
   }
 }
+
+void DigitiserCounts::resize (unsigned nsubint, unsigned npol, unsigned nchan, unsigned nbin)
+{
+  subints.resize(nsubint);
+}

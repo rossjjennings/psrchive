@@ -76,6 +76,12 @@ void Pulsar::Archive::resize (unsigned nsubint, unsigned npol,
   set_nbin (nbin);
 
   if (verbose == 3)
+    cerr << "Pulsar::Archive::resize calling resize for each extension" << endl;
+
+  for (unsigned iext=0; iext < get_nextension(); ++iext)
+    get_extension( iext )->resize(nsubint, npol, nchan, nbin);
+
+  if (verbose == 3)
     cerr << "Pulsar::Archive::resize exit" << endl;
 }
 

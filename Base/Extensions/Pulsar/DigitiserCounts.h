@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/DigitiserCounts.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/09/14 05:32:21 $
-   $Author: jonathan_khoo $ */
+   $Revision: 1.11 $
+   $Date: 2010/08/20 03:15:20 $
+   $Author: sosl $ */
 
 
 
@@ -67,6 +67,12 @@ namespace Pulsar
 	vector<long> data;
     };
     vector<SubintCounts> subints;
+
+    //! Resize the extension
+    void resize (unsigned nsubint,
+		    unsigned npol  = 0,
+		    unsigned nchan = 0,
+		    unsigned nbin  = 0);
 
     void set_dig_mode( string s_dig_mode ) { dig_mode = s_dig_mode; }
     void set_nlev( int s_nlev ) { nlev = s_nlev; }

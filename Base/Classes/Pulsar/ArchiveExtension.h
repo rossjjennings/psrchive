@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveExtension.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/11/28 05:08:11 $
-   $Author: straten $ */
+   $Revision: 1.4 $
+   $Date: 2010/08/20 03:15:20 $
+   $Author: sosl $ */
 
 #ifndef __Pulsar_Archive_Extension_h
 #define __Pulsar_Archive_Extension_h
@@ -44,7 +44,12 @@ namespace Pulsar
     
     //! Return an abbreviated name that can be typed relatively quickly
     virtual std::string get_short_name () const;
-    
+
+    //! Resize the Extension
+    virtual void resize (unsigned nsubint,
+		    unsigned npol  = 0,
+		    unsigned nchan = 0,
+		    unsigned nbin  = 0) {}
   protected:
     
     //! Extension name - useful when debugging
