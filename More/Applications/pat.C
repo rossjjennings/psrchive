@@ -346,7 +346,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.101 2010/04/21 00:17:06 jonathan_khoo Exp $" << endl;
+      cout << "$Id: pat.C,v 1.102 2010/08/20 05:46:01 sosl Exp $" << endl;
       return 0;
 
     case 'K':
@@ -488,6 +488,8 @@ int main (int argc, char** argv) try
 
     if (!full_freq)
       stdarch->fscrunch();
+    else if (!stdarch->get_dedispersed())
+	throw Error (InvalidParam, "pat", "Standard wasn't dedispersed. pam -D can do it for you.");
 
     stdarch->tscrunch();
     
