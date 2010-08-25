@@ -117,6 +117,13 @@ void Pulsar::TimeAppend::combine (Archive* into, Archive* from)
   DigitiserCounts *into_counts = into->get<DigitiserCounts>();
   DigitiserCounts *from_counts = from->get<DigitiserCounts>();
 
-  if( into_counts != NULL && from_counts != NULL )
-    into_counts->Append( *from_counts );
+  try
+  {
+    if (into_counts && from_counts)
+      into_counts->Append(*from_counts);
+  }
+  catch (Error& error)
+  {
+    throw error += "Pulsar::TimeAppend::combine";
+  }
 }

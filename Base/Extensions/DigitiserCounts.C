@@ -92,11 +92,25 @@ TextInterface::Parser* DigitiserCounts::get_interface()
 
 void DigitiserCounts::Append( const DigitiserCounts &src )
 {
-  if( subints.size() != 0 && src.subints.size() != 0 )
-    if( subints[0].data.size() != src.subints[0].data.size() )
-      throw Error( InvalidState, "DigitiserCounts::Append", "Can\'t append DigitiserCounts with differing nbin" );
+  if (Archive::verbose > 2) {
+    cerr << "Pulsar::DigitiserCounts::Append" << endl;
+  }
 
-  for( unsigned s = 0; s < src.subints.size(); s ++ )
+  // Check to see if one or more rows from the DIG_CNTS table will be appended.
+  if (!subints.size() || !src.subints.size()) {
+    throw Error(InvalidState, "DigitiserCounts::Append",
+        "Missing DigitiserCounts rows (into=%d from=%d)", subints.size(),
+        src.subints.size());
+  }
+
+  // Check to see that the row size is the same in the extension that is being 
+  // appended and the extension that is being appended to.
+  if (subints[0].data.size() != src.subints[0].data.size()) {
+    throw Error( InvalidState, "DigitiserCounts::Append",
+        "Can\'t append DigitiserCounts with differing nbin" );
+  }
+
+  for (unsigned s = 0; s < src.subints.size(); ++s)
     subints.push_back( src.subints[s] );
 }
 
