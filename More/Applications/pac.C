@@ -183,7 +183,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.104 2010/07/11 03:08:04 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.105 2010/08/29 23:20:20 jonathan_khoo Exp $" << endl;
       return 0;
 
     case 'A':
@@ -730,8 +730,10 @@ int main (int argc, char *argv[]) try
       
       successful_fluxcal = true;
       
-      cout << "pac: Mean SEFD = " << fcal_engine->meanTsys() * 1e-3
-	   << " Jy" << endl;
+      if (verbose)
+  cout << "pac: Mean SEFD = " << fcal_engine->meanTsys() * 1e-3
+    << " Jy" << endl;
+
     }
     catch (Error& error)
     {
