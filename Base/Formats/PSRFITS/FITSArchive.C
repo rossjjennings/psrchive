@@ -437,7 +437,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   //
   // ... also, since PSRFITS definition version 2.8, "Gal" is "GAL"
   //
-  if (hdr_ext->coordmode == "Gal")
+  if (hdr_ext->coordmode == "Gal" || hdr_ext->coordmode == "GALACTIC")
     hdr_ext->coordmode = "GAL";
 
   //
