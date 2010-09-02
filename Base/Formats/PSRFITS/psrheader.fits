@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '4.3             '   / Header version 
+HDRVER  = '4.4             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -138,33 +138,6 @@ END
 #
 ###############################################################################
 #
-# Coherent Dedispersion Parameters Binary Table Extension
-#
-###############################################################################
-#
-XTENSION= BINTABLE             / ***** Coherent Dedispersion Parameters *****
-BITPIX  =                    8 / N/A
-NAXIS   =                    2 / 2-dimensional binary table
-NAXIS1  =                    * / width of table in bytes
-NAXIS2  =                    * / number of rows in table (NCHAN)
-PCOUNT  =                    0 / size of special data area
-GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    3 / number of fields per row
-#
-NFFT    =                    * / Size of forward FFT 
-EXTNAME = COHDDISP             / name of this binary table extension
-#
-TTYPE#  = NOVERLAP             / Number of overlap points for each sub-band
-TFORM#  = 1I                   / Integer
-TTYPE#  = NCHIRP               / Number of points in chirp function
-TFORM#  = 1I                   / Integer
-TTYPE#  = ACBANDPASS           / Bandpass for autocorrelations
-TUNIT#  = Jy                   / Bandpass amplitude units
-TFORM#  = E                    / NCHIRP floats
-END
-#
-###############################################################################
-#
 # Ephemeris Binary Table Extension
 #
 ###############################################################################
@@ -250,6 +223,52 @@ EXTNAME = T2PREDICT            / Name of this binary table extension
 #
 TTYPE#  = PREDICT              / Text file stored row by row
 TFORM#  = 128A                 / Allow 128 char per row
+END
+#
+###############################################################################
+#
+# Coherent Dedispersion Parameters Binary Table Extension
+#
+###############################################################################
+#
+XTENSION= BINTABLE             / ***** Coherent Dedispersion Parameters *****
+BITPIX  =                    8 / N/A
+NAXIS   =                    2 / 2-dimensional binary table
+NAXIS1  =                    * / width of table in bytes
+NAXIS2  =                    * / number of rows in table (NCHAN)
+PCOUNT  =                    0 / size of special data area
+GCOUNT  =                    1 / one data group (required keyword)
+TFIELDS =                    3 / number of fields per row
+#
+EXTNAME = COHDDISP             / name of this binary table extension
+#
+DOMAIN  =                    * / Coherent dedisp domain (TIME/FREQ)
+CHRPTYPE=                    * / Chirp function descriptor
+DM      =                    * / [cm-3 pc] DM used for coherent dedispersion
+DOPPLER =                    * / [v/c] Doppler correction factor
+DATANBIT=                    * / Number of quantization levels for data
+CHRPNBIT=                    * / Number of quantization levels for chirp
+NCHAN   =                    * / Number of input frequency channels
+TTYPE#  = FREQ                 / Center frequency of input channel
+TFORM#  = 1E                   / Float
+TUNIT#  = MHz                  / Units of field
+TTYPE#  = BW                   / Bandwidth of input channel
+TFORM#  = 1E                   / Float
+TUNIT#  = MHz                  / Units of field
+TTYPE#  = OUT_NCHAN            / Number of output frequency channels
+TFORM#  = 1I                   / Integer
+TTYPE#  = OUT_FREQ             / Center frequency of each output channel
+TFORM#  = 1E                   / OUT_NCHAN floats
+TUNIT#  = MHz                  / Units of field
+TTYPE#  = OUT_BW               / Bandwidth of each output channel
+TFORM#  = 1E                   / OUT_NCHAN floats or one float for all
+TUNIT#  = MHz                  / Units of field
+TTYPE#  = NCHIRP               / Number of complex samples in FFT or FIR filter
+TFORM#  = 1I                   / OUT_NCHAN integers or one integer for all
+TTYPE#  = NCYC_POS             / Number of complex samples discarded from start
+TFORM#  = 1I                   / OUT_NCHAN integers or one integer for all
+TTYPE#  = NCYC_NEG             / Number of complex samples discarded from end
+TFORM#  = 1I                   / OUT_NCHAN integers or one integer for all
 END
 #
 ###############################################################################
