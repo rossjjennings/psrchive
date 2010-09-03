@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '4.4             '   / Header version 
+HDRVER  = '4.5             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -17,7 +17,7 @@ ANT_X   =                    * / [m] Antenna ITRF X-coordinate (D)
 ANT_Y   =                    * / [m] Antenna ITRF Y-coordinate (D)
 ANT_Z   =                    * / [m] Antenna ITRF Z-coordinate (D)
 FRONTEND= '                '   / Receiver ID
-IBEAM   =                    * / Beam number for multibeam systems (1=ctr beam)
+IBEAM   = '                '   / Beam ID for multibeam systems
 NRCVR   =                    * / Number of receiver polarisation channels
 FD_POLN = '                '   / LIN or CIRC
 FD_HAND =                    * / +/- 1. +1 is LIN:A=X,B=Y, CIRC:A=L,B=R (I)
@@ -37,7 +37,7 @@ OBSNCHAN=                    * / Number of frequency channels (original)
 CHAN_DM =                    * / [cm-3 pc] DM used for on-line dedispersion
 PNT_ID  = '                '   / Name or ID for pointing ctr (multibeam feeds)
 SRC_NAME= '                '   / Source or scan ID 
-COORD_MD= '                '   / Coordinate mode (J2000, GAL, ECLIP, etc.)
+COORD_MD= '                '   / Coordinate mode (J2000, GALACTIC, ECLIPTIC, etc.)
 EQUINOX = '                '   / Equinox of coords (e.g. 2000.0) 
 RA      = '                '   / Right ascension (hh:mm:ss.ssss)
 DEC     = '                '   / Declination (-dd:mm:ss.sss)
@@ -273,6 +273,35 @@ END
 #
 ###############################################################################
 #
+# Original Bandpass Binary Table Extension
+#
+###############################################################################
+#
+XTENSION= BINTABLE             / ***** Original bandpasses *****
+BITPIX  =                    8 / N/A
+NAXIS   =                    2 / 2-dimensional binary table
+NAXIS1  =                    * / width of table in bytes
+NAXIS2  =                    * / number of rows in table
+PCOUNT  =                    0 / size of special data area
+GCOUNT  =                    1 / one data group (required keyword)
+TFIELDS =                    3 / number of fields per row
+#
+NCH_ORIG=                    * / Number of channels in original bandpass
+BP_NPOL =                    * / Number of polarizations in bandpass
+EXTNAME = BANDPASS             / name of this binary table extension
+#
+TTYPE#  = DAT_OFFS             / Data offset for each bandpass
+TFORM#  = E                    / BP_NPOL floats
+TTYPE#  = DAT_SCL              / Data scale factor: Val=Data*DAT_SCL + DAT_OFFS
+TFORM#  = E                    / BP_NPOL floats
+TTYPE#  = DATA                 / Bandpass for autocorrelations
+TDIM#   = (*,*)                / Data table dimensions = (NCH_ORIG,BP_NPOL)
+TUNIT#  = Jy                   / Bandpass amplitude units
+TFORM#  = I                    / NCH_ORIG*BP_NPOL integers
+END
+#
+###############################################################################
+#
 # Flux Calibration Data Binary Table Extension
 #
 ###############################################################################
@@ -410,8 +439,9 @@ TBIN    =                    * / [s] Time per bin or sample
 NBIN    =                    * / Nr of bins (PSR/CAL mode; else 1)
 NBIN_PRD=                    * / Nr of bins/pulse period (for gated data)
 PHS_OFFS=                    * / Phase offset of bin 0 for gated data
-NBITS   =                    * / Nr of bits/datum (SEARCH mode 'X' data, else 1)
-ZERO_OFF=                    * / Zero offset for SEARCH-mode 'X' data   
+NBITS   =                    * / Nr of bits/datum (SEARCH mode data, else 1)
+ZERO_OFF=                    * / Zero offset for SEARCH-mode data   
+SIGNINT =                    * / 1 for signed ints in SEARCH-mode data, else 0
 NSUBOFFS=                    * / Subint offset (Contiguous SEARCH-mode files)
 NCHAN   =                    * / Number of channels/sub-bands in this file
 CHAN_BW =                    * / [MHz] Channel/sub-band width
@@ -535,34 +565,5 @@ TFORM#  = E                    / NDIGR floats
 TTYPE#  = DATA                 / Digitiser count data
 TDIM#   = (*,*)                / Data table dimensions (NPTHIST,NDIGR)         
 TFORM#  = I                    / NPTHIST*NDIGR integers
-END
-#
-###############################################################################
-#
-# Original Bandpass Binary Table Extension
-#
-###############################################################################
-#
-XTENSION= BINTABLE             / ***** Original bandpasses *****
-BITPIX  =                    8 / N/A
-NAXIS   =                    2 / 2-dimensional binary table
-NAXIS1  =                    * / width of table in bytes
-NAXIS2  =                    * / number of rows in table
-PCOUNT  =                    0 / size of special data area
-GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    3 / number of fields per row
-#
-NCH_ORIG=                    * / Number of channels in original bandpass
-BP_NPOL =                    * / Number of polarizations in bandpass
-EXTNAME = BANDPASS             / name of this binary table extension
-#
-TTYPE#  = DAT_OFFS             / Data offset for each bandpass
-TFORM#  = E                    / BP_NPOL floats
-TTYPE#  = DAT_SCL              / Data scale factor: Val=Data*DAT_SCL + DAT_OFFS
-TFORM#  = E                    / BP_NPOL floats
-TTYPE#  = DATA                 / Bandpass for autocorrelations
-TDIM#   = (*,*)                / Data table dimensions = (NCH_ORIG,BP_NPOL)
-TUNIT#  = Jy                   / Bandpass amplitude units
-TFORM#  = I                    / NCH_ORIG*BP_NPOL integers
 END
 
