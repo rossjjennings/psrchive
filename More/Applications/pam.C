@@ -117,6 +117,9 @@ double calculate_new_dm(vector<double>& dms, const double dm,
 //! Calculates new DM from input ephemeris and sets it in the loaded Archive
 void update_dm(Pulsar::Archive* archive);
 
+//! Correct the absolute ionospheric Farday rotation
+void correct_ionospheric_rm (Pulsar::Archive*, double iono_rm);
+
 //! Populates the keywords vector
 //  "DM[1-9]"
 void get_dm_keywords(vector<string>& keywords);
@@ -163,6 +166,7 @@ void usage()
     "  -R RM            Correct for ISM faraday rotation \n"
     "  --RR             Dedefaraday (i.e. undo -R option) \n"
     "  --RM RM          Install a new RM but don't defaraday \n"
+    "  --iono_rm RM     Correct absolute ionospheric Faraday rotation \n"
     "  -s               Smear with this duty cycle \n"
     "  -r               Rotate profiles by this many turns \n" 
     "  -w               Reset profile weights to this value \n"
@@ -284,6 +288,7 @@ int main (int argc, char *argv[]) try {
     double new_folding_period = -1.0;
 
     bool update_dm_from_eph = false;
+    double iono_rm = 0.0;
 
     Reference::To<Pulsar::IntegrationOrder> myio;
     Reference::To<Pulsar::Receiver> install_receiver;
@@ -306,6 +311,7 @@ int main (int argc, char *argv[]) try {
     const int SS   = 1220;
     const int FLIP = 1221;
     const int UPDATE_DM = 1222;
+    const int IONO_RM = 1223;
 
     while (1) {
 
@@ -321,11 +327,11 @@ int main (int argc, char *argv[]) try {
 	{"binlngasc",  1, 0, 206},
 	{"receiver",   1, 0, 207},
 	{"settsub",    1, 0, 208},
-  {"type",       1, 0, TYPE},
-  {"inst",       1, 0, INST},
-  {"reverse_freqs",no_argument,0,REVERSE_FREQS},
-  {"flip",       1 ,0, FLIP},
-  {"site",       1, 0, SITE},
+	{"type",       1, 0, TYPE},
+	{"inst",       1, 0, INST},
+	{"reverse_freqs",no_argument,0,REVERSE_FREQS},
+	{"flip",       1 ,0, FLIP},
+	{"site",       1, 0, SITE},
 	{"name",       1, 0, NAME},
 	{"DD",         no_argument,      0,DD},
 	{"RR",         no_argument,      0,RR},
@@ -333,8 +339,9 @@ int main (int argc, char *argv[]) try {
 	{"spc",        no_argument,      0,SPC},
 	{"mult",       required_argument,0,MULT},
 	{"period",     required_argument,0,PERIOD},
-  {"SS",         no_argument,      0,SS},
-  {"update_dm",   no_argument,      0,UPDATE_DM},
+	{"SS",         no_argument,      0,SS},
+	{"update_dm",   no_argument,      0,UPDATE_DM},
+	{"iono_rm",    required_argument,0,IONO_RM},
 	{0, 0, 0, 0}
       };
 
@@ -361,7 +368,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.94 2010/05/18 02:13:51 jonathan_khoo Exp $" << endl;
+	cout << "$Id: pam.C,v 1.95 2010/09/07 05:12:46 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -690,6 +697,8 @@ int main (int argc, char *argv[]) try {
       case FLIP: flip_freq = true; flip_freq_mhz = atof(optarg); break;
 
       case UPDATE_DM: update_dm_from_eph = true; break;
+
+      case IONO_RM: iono_rm = fromstring<double>(optarg); break;
 
       default:
 	cout << "Unrecognised option" << endl;
@@ -1050,6 +1059,14 @@ int main (int argc, char *argv[]) try {
 	  cout << arch->get_filename() << " defaradayed" <<endl;
       }
 
+      if (iono_rm)
+      {
+	if (verbose)
+	  cout << "pam: correct ionospheric Faraday rotation; iono RM="
+	       << iono_rm << endl;
+	correct_ionospheric_rm (arch, iono_rm);
+      }
+
       if (fscr) {
 	if (new_nchn > 0) {
 	  arch->fscrunch_to_nchan(new_nchn);
@@ -1311,4 +1328,24 @@ void get_dm_keywords(vector<string>& keywords)
   for (unsigned i = 1; i <= NUMBER_OF_DM_KEYWORDS; ++i) {
     keywords.push_back("DM" + tostring<unsigned>(i));
   }
+}
+
+#include "Pauli.h"
+
+#include "Pulsar/FaradayRotation.h"
+#include "Pulsar/ProcHistory.h"
+
+void correct_ionospheric_rm (Pulsar::Archive* archive, double iono_rm)
+{
+  Pauli::basis().set_basis( archive->get_basis() );
+
+  Reference::To<Pulsar::FaradayRotation> xform = new Pulsar::FaradayRotation;
+
+  xform->set_rotation_measure( iono_rm );
+  xform->set_reference_wavelength( 0 );
+  xform->execute (archive);
+
+  Pulsar::ProcHistory* history = archive->get<Pulsar::ProcHistory>();
+  if ( history )
+    history->set_ifr_mthd ( "pam --iono_rm " + tostring(iono_rm) );
 }
