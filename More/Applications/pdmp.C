@@ -378,7 +378,7 @@ const unsigned BEST_FIT_LINE_WIDTH = 1;
 const unsigned DEFAULT_SITE_CODE_INDEX = 6;
 
 // Display every this many percent on the progress
-const unsigned SHOW_EVERY_PERCENT_COMPLETE = 5;
+const unsigned SHOW_EVERY_PERCENT_COMPLETE = 1;
 
 //////////////////////////////////
 ///
@@ -616,6 +616,7 @@ void init() {
 
   // Computed SNRs
   SNRs.clear();
+  pdotSNRs.clear();
 }
 
 
@@ -3143,11 +3144,20 @@ void drawBestFitPhaseTime(const Archive * archive)
   const double tspan = (archive->end_time() - archive->start_time()).in_seconds() /
     divisor;
 
-  const double tspan_s = (archive->end_time() - archive->start_time()).in_seconds();
+  const double subSt = (archive->get_Integration(0)->get_end_time() -
+		   archive->get_Integration(0)->get_start_time()).in_seconds();
+  const double subEt = (archive->get_Integration(nsubint-1)->get_end_time() -
+		   archive->get_Integration(nsubint-1)->get_start_time()).in_seconds();
+
+  const double tspan_s = (archive->end_time() - archive->start_time()).in_seconds() +subSt - subEt;
+
+
 
   for (unsigned i = 0; i < nsubint; ++i) {
+    const double subtime = (archive->get_Integration(i)->get_end_time() -
+			          archive->get_Integration(i)->get_start_time()).in_seconds();
     const double elasped_time = (archive->get_Integration(i)->get_start_time() -
-        archive->start_time()).in_seconds() -tspan_s/2.0;
+        archive->start_time()).in_seconds() -tspan_s/2.0 + subtime/2.0;
 
     double phase = 0.5 + (bcPeriod_correction / bcPeriod_s) *
       (elasped_time / bcPeriod_s) - (bestPdot * elasped_time * elasped_time ) / (bcPeriod_s*bcPeriod_s);
