@@ -253,7 +253,24 @@ string get_freq( Reference::To< Archive > archive )
 
 string get_wt_freq( Reference::To< Archive > archive )
 {
-  return tostring( archive->get_weighted_frequency(), 3, ios::fixed );
+  //XXX: will be implemented very soon - just fixing the build.
+
+  /*const unsigned nsub  = archive->get_nsubint();
+  const unsigned nchan = archive->get_nchan();
+  double weighted_frequency_sum = 0.0;
+
+  // Iterate over every channel and sub-integration to calculate the centre
+  // frequency weighted value.
+  for (unsigned ichan = 0; ichan < nchan; ++ichan) {
+    weighted_frequency_sum += archive->weighted_frequency(ichan,0,nsub);
+  }
+
+  const double weighted_frequency =
+    weighted_frequency_sum / static_cast<double>(nchan);
+
+  return tostring( weighted_frequency, 3, ios::fixed );*/
+
+  return "";
 }
 
 string get_profile_centre_frequency( Reference::To< Archive > archive )
