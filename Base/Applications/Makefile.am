@@ -7,6 +7,7 @@ psrconv_SOURCES		= psrconv.C
 psrsplit_SOURCES	= psrsplit.C
 vip_SOURCES		= vip.C
 vap_SOURCES		= vap.C
+vap_LDADD     = $(LDADD) $(top_builddir)/More/libpsrmore.la
 
 check_PROGRAMS = test_threads
 

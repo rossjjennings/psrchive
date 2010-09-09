@@ -251,6 +251,10 @@ string get_freq( Reference::To< Archive > archive )
   return tostring( archive->get_centre_frequency(), 3, ios::fixed );
 }
 
+string get_wt_freq( Reference::To< Archive > archive )
+{
+  return tostring( archive->get_weighted_frequency(), 3, ios::fixed );
+}
 
 string get_profile_centre_frequency( Reference::To< Archive > archive )
 {
@@ -1560,9 +1564,9 @@ void PrintExtdHlp( void )
     "bw                              Observation Bandwidth (MHz) \n"
     "dm                              Dispersion measure \n"
     "dmc                             Dispersion corrected (boolean) \n"
+    "wt_freq                         Centre frequency weighted value \n"
     "freq_phs                        Pulse phase frequency \n"
     "freq_pa                         Position angle frequency \n"
-    //"freq_obs                        Observed frequency\n"
     "length                          The full duration of the observation (s) \n"
     "name                            Name of the source \n"
     "nbin_obs                        Observed number of pulse phase bins \n"
@@ -1806,6 +1810,7 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "freq" ) return get_freq( archive );
     else if( command == "freq_pa" ) return get_freq_pa( archive );
     else if( command == "freq_phs" ) return get_freq_phs( archive );
+    else if( command == "wt_freq" ) return get_wt_freq( archive );
     else if( command == "bw" ) return get_bw( archive );
     else if( command == "intmjd" ) return get_intmjd( archive );
     else if( command == "fracmjd" ) return get_fracmjd( archive );
