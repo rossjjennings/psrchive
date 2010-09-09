@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.187 $
-   $Date: 2010/09/09 04:44:28 $
+   $Revision: 1.188 $
+   $Date: 2010/09/09 11:11:50 $
    $Author: jonathan_khoo $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.187 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.188 $"
 
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Config.h"
@@ -421,10 +421,6 @@ namespace Pulsar
     //! Computes the weighted channel frequency over an Integration interval.
     double weighted_frequency (unsigned ichan,
                                unsigned start, unsigned end) const;
-
-    //! Computes the weighted channel frequency over all channels and 
-    //  Integrations.
-    double get_weighted_frequency () const;
 
     //! Call bscrunch with the appropriate value
     void bscrunch_to_nbin (unsigned new_nbin);
