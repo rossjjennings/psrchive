@@ -18,7 +18,7 @@ namespace Pulsar {
 
   //! Rotates subints to counter a drifting pulse due to incorrect P/Pdot
   void counter_drift (Archive* archive,
-		      double trial_p, double trial_pdot=0.0);
+		      double trial_p, double trial_pdot=0.0, MJD reference_time = MJD::zero);
 
   //! Same as above, but inputs are in frequency domain
   void counter_frequency_drift (Archive* archive,

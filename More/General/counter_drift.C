@@ -15,7 +15,7 @@ template<class T> T SQR (T x) { return x*x; }
 //! Rotates subints to counter a drifting pulse due to incorrect P/Pdot
 void
 Pulsar::counter_drift(Archive* archive,
-		      double trial_p, double trial_pdot)
+		      double trial_p, double trial_pdot, MJD reference_time)
 {
   unsigned midsub = unsigned(archive->get_nsubint()/2);
   double centre_period = archive->get_Integration(midsub)->get_folding_period();
@@ -34,7 +34,7 @@ Pulsar::counter_drift(Archive* archive,
   double delta_nu = -nu0 + 1.0/(centre_period + delta_P);
   double nu1      = -trial_pdot / SQR(centre_period + delta_P);
 
-  counter_frequency_drift(archive,nu0+delta_nu,nu1);
+  counter_frequency_drift(archive,nu0+delta_nu,nu1,reference_time);
 }
 
 //! Same as above, but inputs are in frequency domain

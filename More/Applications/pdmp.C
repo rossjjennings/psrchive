@@ -79,8 +79,12 @@ void draw_colour_map (float *plotarray, int rows, int cols, double minx,
 void draw_colour_map_only(const int rows, const int columns, const double minx,
     const double maxx, const double miny, const double maxy, const float* trf);
 
+
+void plotPdotCurve(float* data, float xmin, float xmax, int npts);
+
 void minmaxval (int n, const float *thearray, float *min, float *max);
 
+void goToSNRdmViewPort();
 // Initialises all the global variables to default values.
 void init();
 
@@ -103,6 +107,7 @@ void plotSNRdm (string & filename, double bestDM);
 void solve_and_plot (Archive* archive,
 		     double dmOffset, double dmStep, double dmHalfRange,
 		     double periodOffset_us, double periodStep_us, double periodHalfRange_us,
+		     double pdotOffset, double pdotStep, double pdotHalfRange,
 		     ProfilePlot* total_plot, TextInterface::Parser* flui, double minwidthsecs);
 
 // Default call to solve_and_plot above
@@ -181,7 +186,8 @@ void setSensibleStepSizes(const Archive * archive);
 
 // Parse the command line parameters and set the values passed through as arguments
 void parseParameters(int argc, char **argv, double &periodOffset_us,
-    double &periodStep_us, double &periodHalfRange_us, double &dmOffset,
+    double &periodStep_us, double &periodHalfRange_us,
+    double &pdotOffset, double &pdotStep, double &pdotHalfRange, double &dmOffset,
     double &dmStep, double &dmHalfRange, pgplot::ColourMap::Name &colour_map,
     double &minwidth, string &bestfilename);
 
@@ -395,11 +401,13 @@ double bestSNR;
 
 // best period value in microseconds
 double bestPeriod_bc_us;
+double bestPdot;
 double bestDM;
 double bestFreq;
 unsigned bestPulseWidth;
 // the 'array' of signal-to-noise with varying p/dm trial
 vector<float> SNRs;
+vector<float> pdotSNRs;
 
 vector<float> bestSNRfreq;
 vector<float> bestSNRtime;
@@ -612,7 +620,8 @@ void init() {
 
 
 void parseParameters(int argc, char **argv, double &periodOffset_us,
-    double &periodStep_us, double &periodHalfRange_us, double &dmOffset,
+    double &periodStep_us, double &periodHalfRange_us,
+    double &pdotOffset, double &pdotStep, double &pdotHalfRange, double &dmOffset,
     double &dmStep, double &dmHalfRange, pgplot::ColourMap::Name &colour_map,
     double &minwidth, string &bestfilename)
 {
@@ -648,6 +657,26 @@ void parseParameters(int argc, char **argv, double &periodOffset_us,
 			i++;
 			parseAndValidateDouble("-po", argv[i], periodOffset_us);
 		}
+
+
+		// acc step
+		if (strcmp(argv[i], "-as") == 0) {
+			i++;
+			parseAndValidatePositiveDouble("-as", argv[i], pdotStep);
+		}
+
+		// acc range
+		else if (strcmp(argv[i], "-ar") == 0) {
+			i++;
+			parseAndValidatePositiveDouble("-ar", argv[i], pdotHalfRange);
+		}
+
+		// acc offset
+		else if (strcmp(argv[i], "-ao") == 0) {
+			i++;
+			parseAndValidateDouble("-ao", argv[i], pdotOffset);
+		}
+
 
 		// dm step
 		else if (strcmp(argv[i], "-ds") == 0) {
@@ -897,6 +926,12 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename);
 double periodOffset_us = 0;
 double periodStep_us = -1;
 double periodHalfRange_us = -1;
+double pdotOffset = 0;
+double pdotStep = -1;
+double pdotHalfRange = -1;
+double accnOffset = 0;
+double accnStep = -1;
+double accnHalfRange = -1;
 double dmOffset = 0;
 double dmStep = -1;
 double dmHalfRange = -1;
@@ -918,10 +953,13 @@ int main (int argc, char** argv)
 
 	pgplot::ColourMap::Name colour_map = pgplot::ColourMap::Heat;
 
+
+
 	// Get the command line parameters
 	parseParameters(argc, argv,  periodOffset_us, periodStep_us,
-      periodHalfRange_us, dmOffset, dmStep, dmHalfRange, colour_map,
-      minwidthsecs, bestfilename);
+			periodHalfRange_us,accnOffset, accnStep, accnHalfRange,
+			dmOffset, dmStep, dmHalfRange, colour_map,
+			minwidthsecs, bestfilename);
 
 	Archive::verbose = 0;
 
@@ -1011,6 +1049,15 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename)
   // independently remove the baseline from each subint and channel
   Archive::remove_baseline_strategy.set( new RemoveBaseline::Each,
 		  &RemoveBaseline::Each::transform );
+
+
+// work out the pdots!
+
+double accn2pdot = getPeriod(archive) / 3e8;
+pdotOffset = accn2pdot*accnOffset;
+pdotStep = accn2pdot*accnStep;
+pdotHalfRange = accn2pdot*accnHalfRange;
+
 
 #ifdef HAVE_PSRXML
   /*
@@ -1165,6 +1212,7 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename)
   solve_and_plot (archive,
 		  dmOffset, dmStep, dmHalfRange, 
 		  periodOffset_us, periodStep_us, periodHalfRange_us,
+		  pdotOffset, pdotStep, pdotHalfRange,
 		  total_plot, flui, minwidthsecs);
 
   // Create two copies. One for the phase time plot and one
@@ -1181,11 +1229,15 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename)
   phaseTimeCopy->set_dispersion_measure(bestDM);
   phaseTimeCopy->dedisperse();
 
+  MJD reference_time = archive->start_time() + (archive->end_time() - archive->start_time())/2.0;
+
   // the archive will be fscrunched by the following method
   plotPhaseTime(phaseTimeCopy, time_plot, tui);
-  
+
+
   counter_drift( phaseFreqCopy,
-		 (bestPeriod_bc_us / (double)MICROSEC)*dopplerFactor );
+		 (bestPeriod_bc_us / (double)MICROSEC)*dopplerFactor,bestPdot ,reference_time);
+  
   // the archive will be tscrunched by the following method
 
   plotPhaseFreq(phaseFreqCopy, phase_plot, fui);
@@ -1209,7 +1261,7 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename)
   if(output_phcx){
 	  Reference::To<Archive> optimisedArchive = archive->clone();
 	  counter_drift( optimisedArchive,
-			  (bestPeriod_bc_us / (double)MICROSEC)*dopplerFactor );
+			  (bestPeriod_bc_us / (double)MICROSEC)*dopplerFactor, bestPdot, reference_time );
 	  optimisedArchive->set_dispersion_measure(bestDM);
 	  optimisedArchive->dedisperse();
 
@@ -1338,6 +1390,8 @@ void solve_and_plot (Archive* archive,
 		     double dmOffset, double dmStep, double dmHalfRange,
 		     double periodOffset_us, double periodStep_us,
 		     double periodHalfRange_us,
+		     double pdotOffset, double pdotStep,
+		     double pdotHalfRange,
 		     ProfilePlot* total_plot, TextInterface::Parser* flui, double minwidthsecs)
 {
   /* optimization: setting the phase prediction model to NULL disables
@@ -1356,6 +1410,7 @@ void solve_and_plot (Archive* archive,
 	unsigned nsub = archive->get_nsubint();
 	unsigned nchan = archive->get_nchan();
 	double refP_us = getPeriod(archive) * MICROSEC;
+	double refPd = 0; // TODO: MJK How to get refPdot???
 	double refDM = getDM(archive);
 
  	unsigned minwidthbins = unsigned(minwidthsecs/getPeriod(archive)*nbin);
@@ -1363,6 +1418,8 @@ void solve_and_plot (Archive* archive,
 	if (minwidthbins<1) minwidthbins=1;
 	if (minwidthbins>nbin/2) minwidthbins=nbin/2;
 
+
+	MJD reference_time = archive->start_time() + (archive->end_time() - archive->start_time())/2.0;
 	///////////////
 	// Get the RMS
 	float rms = getRMS(archive);
@@ -1382,6 +1439,13 @@ void solve_and_plot (Archive* archive,
 	if (periodHalfRange_us < 0)
 		periodHalfRange_us = getNaturalperiodHalfRange(archive, periodStep_us);
 
+	if (pdotHalfRange < 0)
+//		pdotHalfRange = getNaturalpdotHalfRange(archive, pdotStep);
+		pdotHalfRange = 0;
+
+
+	
+
 	// cerr << "coarseness=" << coarseness << endl;
 
 	dmStep *= coarseness;
@@ -1400,7 +1464,7 @@ void solve_and_plot (Archive* archive,
 	//////////////////////////////////////////////////////
 
 	// Now that everything's initialised, do all the searching
-	int dmBins, periodBins;
+	int dmBins, periodBins, pdotBins;
 
 	// Number of bins in the DM axis
 	dmBins = (int)ceil( ( fabs(dmHalfRange)*2 ) / dmStep);
@@ -1411,6 +1475,10 @@ void solve_and_plot (Archive* archive,
 	periodBins = (int)ceil( ( fabs(periodHalfRange_us)*2 ) / periodStep_us);
 
 	// cerr << "periodBins=" << periodBins << endl;
+	
+	pdotBins = (int)ceil( ( fabs(pdotHalfRange)*2 ) / pdotStep);
+	 cerr << "pdotBins=" << pdotBins << endl;
+
 
   if (!onlyDisplayDmPlot) {
     // Print the header
@@ -1426,6 +1494,10 @@ void solve_and_plot (Archive* archive,
 
 	double minP = refP_us +	periodOffset_us - fabs(periodStep_us*(floor((double)periodBins/2)));
 	double currP = minP;
+
+	double minPd = refPd + pdotOffset - fabs(pdotStep*(floor((double)pdotBins/2)));
+	double currPd = minPd;
+	double maxPd = minPd + pdotStep * pdotBins;
 
 	double maxDM = minDM + dmStep * dmBins;
 
@@ -1444,75 +1516,122 @@ void solve_and_plot (Archive* archive,
 		// total(false) scrunches in frequency but not time
 		Reference::To<Archive> dmLoopCopy = archive->total(false);
 
-		// Foreach Period (include one extra period bin at the end to scale with
-		// the plot
-		for (int periodBin = 0; periodBin <= periodBins; periodBin++) {
+		// Foreach Pdot
 
-			// print out the search progress
-			int percentComplete = (int)floor(100 * ((double)(periodBins*(dmBin) + periodBin) / 
-								(double)(periodBins * dmBins)));
+		for (int pdotBin=0; pdotBin <= pdotBins; pdotBin++){
+			int nptrial=0;
+			// Foreach Period (include one extra period bin at the end to scale with
+			// the plot
+			for (int periodBin = 0; periodBin <= periodBins; periodBin++) {
 
-			int displayPercentage = (int)floor((double)percentComplete/SHOW_EVERY_PERCENT_COMPLETE);
-			if (!silent) printf("%3d%%\r", displayPercentage*SHOW_EVERY_PERCENT_COMPLETE);
+				// print out the search progress
+				int percentComplete = (int)floor(100 * ((double)(periodBins*(1+pdotBins)*dmBin + periodBins*pdotBin + periodBin) / 
+							(double)(periodBins * dmBins * (1+pdotBins))));
 
-			// Create a new (unscrunched) copy so the values can be testedget
-			Reference::To<Archive> periodLoopCopy = dmLoopCopy->clone();
+				int displayPercentage = (int)floor((double)percentComplete/SHOW_EVERY_PERCENT_COMPLETE);
+				if (!silent) printf("%3d%%\r", displayPercentage*SHOW_EVERY_PERCENT_COMPLETE);
 
-			// set the trial period and dm value and update
-			double newFoldingPeriod = currP/(double)MICROSEC;
+				// Create a new (unscrunched) copy so the values can be testedget
+				Reference::To<Archive> periodLoopCopy = dmLoopCopy->clone();
 
-			// Make sure the new folding period is topocentric
-			counter_drift(periodLoopCopy, newFoldingPeriod);
+				// set the trial period and dm value and update
+				double newFoldingPeriod = currP/(double)MICROSEC;
 
-			periodLoopCopy->tscrunch();
+				// Make sure the new folding period is topocentric
+				counter_drift(periodLoopCopy, newFoldingPeriod,currPd, reference_time);
 
-			snr = getSNR(periodLoopCopy->get_Profile(0,0,0), rms, minwidthbins);
+				periodLoopCopy->tscrunch();
 
-			if (verbose)	{
-				printf( "\nrefP topo = %3.10g, Set P = %3.15g dP = %3.15g\n",
-				refP_us, currP, currP - refP_us);
-				printf( "refDM = %3.10g, Set DM = %3.15g dDM = %3.15g, S/N = %3.10g\n\n",
-				refDM, currDM, currDM - refDM, snr);
-			}
+				snr = getSNR(periodLoopCopy->get_Profile(0,0,0), rms, minwidthbins);
 
-			if (snr > bestSNR) {
-
-				if (verbose) {
-					fprintf(stderr, "Better S/N found: Old snr = %3.15g, New snr = %3.15g, Best DM = %3.15g and period = %3.15g \n", bestSNR, snr, currDM, newFoldingPeriod * MILLISEC);
+				if (verbose)	{
+					printf( "\nrefP topo = %3.10g, Set P = %3.15g dP = %3.15g\n",
+							refP_us, currP, currP - refP_us);
+					printf( "refDM = %3.10g, Set DM = %3.15g dDM = %3.15g, S/N = %3.10g\n\n",
+							refDM, currDM, currDM - refDM, snr);
 				}
 
-				bestSNR = snr;
-				bestPeriod_bc_us = currP / dopplerFactor;
-				bestDM = currDM;
-				bestFreq = 1/(bestPeriod_bc_us/(double)MICROSEC);
-				freqError = fabs((periodStep_us/(double)MICROSEC)/pow((bestPeriod_bc_us/(double)MICROSEC), 2));
-				periodLoopCopy->remove_baseline();
-				bestProfile = periodLoopCopy->get_Profile(FIRST_SUBINT, FIRST_POL, FIRST_CHAN);
+				if (snr > bestSNR) {
 
-				// get the width of the pulse
-				
-				bestPulseWidth = snr_obj.get_bestwidth();
+					if (verbose) {
+						fprintf(stderr, "Better S/N found: Old snr = %3.15g, New snr = %3.15g, Best DM = %3.15g and period = %3.15g \n", bestSNR, snr, currDM, newFoldingPeriod * MILLISEC);
+					}
 
-				//int rise, fall;
-				//find_spike_edges(bestProfile, rise, fall);
-				//
-				//if (rise > fall)
-				//	bestPulseWidth = fall + (nbin - rise);
-				//else
-				//	bestPulseWidth = fall-rise;
+					bestSNR = snr;
+					bestPeriod_bc_us = currP / dopplerFactor;
+					bestPdot = currPd;
+					bestDM = currDM;
+					bestFreq = 1/(bestPeriod_bc_us/(double)MICROSEC);
+					freqError = fabs((periodStep_us/(double)MICROSEC)/pow((bestPeriod_bc_us/(double)MICROSEC), 2));
+					periodLoopCopy->remove_baseline();
+					bestProfile = periodLoopCopy->get_Profile(FIRST_SUBINT, FIRST_POL, FIRST_CHAN);
+
+					// get the width of the pulse
+
+					bestPulseWidth = snr_obj.get_bestwidth();
+
+					//int rise, fall;
+					//find_spike_edges(bestProfile, rise, fall);
+					//
+					//if (rise > fall)
+					//	bestPulseWidth = fall + (nbin - rise);
+					//else
+					//	bestPulseWidth = fall-rise;
+				}
+
+				// put this intensity into array
+				SNRs.push_back((float)snr);
+				currP += periodStep_us;
+				nptrial++;
 			}
 
-			// put this intensity into array
-			SNRs.push_back((float)snr);
-			currP += periodStep_us;
+			int i = 0;
+			int snroff = SNRs.size() - nptrial;
+			snr=0;
+			// get best SNR for this pdot trial...
+			for (int periodBin = 0; periodBin <= periodBins; periodBin++) {
+				if (SNRs[snroff+i] > snr)snr=SNRs[snroff+i];
+				i++;
+			}
+
+			if (dmBin==0){
+				// first time, so populate the pdotSNR array
+				pdotSNRs.push_back((float)snr);
+			} else {
+				if ( snr > pdotSNRs[pdotBin])pdotSNRs[pdotBin]=snr;
+			}
+
+
+			if (pdotBin){
+
+				int snroff = SNRs.size() - nptrial;
+				int i = 1;
+				// correct the SNR array to account for pdot.
+				for (int periodBin = 0; periodBin <= periodBins; periodBin++) {
+					snr = SNRs.back();
+					SNRs.pop_back();
+					if ( snr > SNRs[snroff-i]){
+						SNRs[snroff-i]=(float)snr;
+					}
+					i++;
+				}
+			}
+
+
+
+			// Reset the initial period value
+			currP = minP;
+			currPd += pdotStep;
 		}
 
 		// Reset the initial period value
 		currP = minP;
+		currPd = minPd;
 		currDM += dmStep;
 	}
 
         archive->set_dispersion_measure( backup_DM );
+
 
 	// get the error
 	periodError_ms = computePeriodError(archive);
@@ -1552,6 +1671,13 @@ void solve_and_plot (Archive* archive,
     }
   }
 
+	if (pdotBins > 0){
+
+		goToSNRdmViewPort();
+		double pdot2acc = -3e8/(bestPeriod_bc_us/1e6);
+		plotPdotCurve(&pdotSNRs[0], maxPd * pdot2acc, minPd* pdot2acc, pdotBins);
+	}
+
 	plotProfile (bestProfile, total_plot, flui);
 
 	if (verbose) {
@@ -1572,7 +1698,7 @@ void solve_and_plot (Archive* archive,
 		     ProfilePlot* total_plot,
 		     TextInterface::Parser* flui, double minwidthsecs)
 {
-  solve_and_plot(archive, 0,-1,-1, 0,-1,-1, total_plot, flui, minwidthsecs);
+  solve_and_plot(archive, 0,-1,-1, 0,-1,-1,0,-1,-1, total_plot, flui, minwidthsecs);
 }
 
 
@@ -2646,6 +2772,12 @@ void printResults(const Archive * archive) {
 
 		printf("Pulse width (bins) = %d\n",
 	        	bestPulseWidth);
+
+		printf("Best Pdot = %3.10g s/s\n",
+	        	bestPdot);
+
+		printf("Best Accn = %3.10g m/s\n",
+	        	-3e8*bestPdot/(bestPeriod_bc_us/1e6));
 	}
 
 }
@@ -2707,6 +2839,29 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 		cerr << "pdmp: Failed to open file pdmp.per for writing results\n";
 	}
 	fclose(file);
+}
+
+
+void plotPdotCurve(float* data, float xmin, float xmax, int npts){
+	float min=0, max=0;
+        minmaxval (npts, data, &min, &max);
+
+        cpgslw(1);
+        cpgsci(1);
+
+        cpgsch(PLOT_CHAR_HEIGHT);
+        cpgscf(1);
+
+        cpgswin(xmin,xmax,min,max);
+
+	cpgbox("BCINTS", 0.0, 5, "BCINTS", 5, 5);
+
+	float xstep=(xmax-xmin)/npts;
+	for (int i=0; i < npts; i++){
+		cpgpt1(i*xstep+xmin, data[i], 0);
+	}
+
+        cpglab("Accn","SNR","");
 }
 
 void plotProfile(const Profile * profile, ProfilePlot* plot, TextInterface::Parser* flui) {
@@ -2988,12 +3143,14 @@ void drawBestFitPhaseTime(const Archive * archive)
   const double tspan = (archive->end_time() - archive->start_time()).in_seconds() /
     divisor;
 
+  const double tspan_s = (archive->end_time() - archive->start_time()).in_seconds();
+
   for (unsigned i = 0; i < nsubint; ++i) {
     const double elasped_time = (archive->get_Integration(i)->get_start_time() -
-        archive->start_time()).in_seconds();
+        archive->start_time()).in_seconds() -tspan_s/2.0;
 
     double phase = 0.5 + (bcPeriod_correction / bcPeriod_s) *
-      (elasped_time / bcPeriod_s);
+      (elasped_time / bcPeriod_s) - (bestPdot * elasped_time * elasped_time ) / (bcPeriod_s*bcPeriod_s);
 
     // modify the plotted x value so it lies between 0 and 1
     if (phase < 0.0) {
