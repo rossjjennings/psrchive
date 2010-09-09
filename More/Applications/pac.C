@@ -36,7 +36,7 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbCcDd:e:fFGhiIJ:j:lM:m:n:O:op:Pqr:sSt:Tu:UvVwW:xZ";
+const char* args = "A:aBbCcDd:Ee:fFGhiIJ:j:lM:m:n:O:op:Pqr:sSt:Tu:UvVwW:xZ";
 
 void usage ()
 {
@@ -102,6 +102,9 @@ int main (int argc, char *argv[]) try
   bool do_polncal = true;
   bool use_fluxcal_stokes = false;
   bool enable_frontend = true;
+
+  // Flag for only displaying the system-equivalent flux density.
+  bool only_display_sefd = false;
 
   // Preprocessing jobs
   vector<string> jobs;
@@ -183,7 +186,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.105 2010/08/29 23:20:20 jonathan_khoo Exp $" << endl;
+      cout << "$Id: pac.C,v 1.106 2010/09/09 06:06:56 jonathan_khoo Exp $" << endl;
       return 0;
 
     case 'A':
@@ -242,6 +245,11 @@ int main (int argc, char *argv[]) try
       unload_ext = optarg;
       command += " -e ";
       command += optarg;
+      break;
+
+    case 'E':
+      only_display_sefd = true;
+      do_polncal = false;
       break;
 
     case 'f':
@@ -718,22 +726,29 @@ int main (int argc, char *argv[]) try
 	throw error;
       }
 
-      cout << "pac: FluxCalibrator constructed from:\n\t"
-	   << fcal_engine->get_filenames() << endl;
+      cout << "pac: Mean SEFD = " << fcal_engine->meanTsys() * 1e-3
+        << " Jy" << endl;
 
-      if (verbose) 
-	cerr << "pac: Calibrating Archive fluxes" << endl;
-      
-      fcal_engine->calibrate(arch);
-      
-      cout << "pac: Flux calibration complete" << endl;
-      
-      successful_fluxcal = true;
-      
-      if (verbose)
-  cout << "pac: Mean SEFD = " << fcal_engine->meanTsys() * 1e-3
-    << " Jy" << endl;
+      if (only_display_sefd)
+      {
+        // Skip the flux-calibration, HISTORY table modification, and unloading 
+        // of a new file.
+        continue;
+      }
+      else
+      {
+        cout << "pac: FluxCalibrator constructed from:\n\t"
+          << fcal_engine->get_filenames() << endl;
 
+        if (verbose) 
+          cerr << "pac: Calibrating Archive fluxes" << endl;
+
+        fcal_engine->calibrate(arch);
+
+        cout << "pac: Flux calibration complete" << endl;
+
+        successful_fluxcal = true;
+      }
     }
     catch (Error& error)
     {
@@ -757,7 +772,7 @@ int main (int argc, char *argv[]) try
     // See if the archive contains a history that should be updated
     
     Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
-    
+
     if (fitsext)
     {
       if (successful_polncal)
