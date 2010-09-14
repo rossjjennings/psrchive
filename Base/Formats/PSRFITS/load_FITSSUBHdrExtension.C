@@ -85,7 +85,11 @@ void FITSArchive::load_FITSSUBHdrExtension ( fitsfile *fptr )
   fits_get_num_rows( fptr, &l_data, &status );
   si_hdr->set_nrows( l_data );
 
+  psrfits_read_key( fptr, "ZERO_OFF", &d_data, 0.0, verbose == 3 );
+  si_hdr->set_zero_off( d_data );
+
+  psrfits_read_key( fptr, "SIGNINT", &i_data, 0, verbose == 3 );
+  si_hdr->set_signint( i_data );
+
   add_extension( si_hdr );
 }
-
-

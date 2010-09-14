@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSSUBHdrExtension.h,v $
-   $Revision: 1.9 $
-   $Date: 2009/11/04 00:13:32 $
+   $Revision: 1.10 $
+   $Date: 2010/09/14 05:24:44 $
    $Author: jonathan_khoo $ */
 
 #ifndef __Pulsar_FITSSUBHdrExtension_h
@@ -61,6 +61,8 @@ namespace Pulsar
     int get_nch_strt( void ) const { return nch_strt; }
     int get_nsblk( void ) const { return nsblk; }
     long get_nrows( void ) const { return nrows; }
+    double get_zero_off( void ) const { return zero_off; }
+    int get_signint( void ) const { return signint; }
 
     void set_int_type( std::string s_int_type )  { int_type = s_int_type; }
     void set_int_unit( std::string s_int_unit )  { int_unit = s_int_unit; }
@@ -69,6 +71,8 @@ namespace Pulsar
     void set_nch_strt( int s_nch_strt )  { nch_strt = s_nch_strt; }
     void set_nsblk( int s_nsblk )  { nsblk = s_nsblk; }
     void set_nrows( int s_nrows )  { nrows = s_nrows; }
+    void set_zero_off( float s_zero_off )  { zero_off = s_zero_off; }
+    void set_signint( bool s_signint )  { signint = s_signint; }
 
   private:
     std::string int_type;
@@ -78,6 +82,8 @@ namespace Pulsar
     int nch_strt;
     int nsblk;
     long nrows;
+    double zero_off;
+    int signint;
   };
 }
 
