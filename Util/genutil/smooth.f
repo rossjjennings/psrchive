@@ -89,23 +89,23 @@ C          write (*,*) 'kw min max nbin',kw,minwidth,maxwidth,nbin
         endif
 C        write(*,*) 'Attempting kw of ',kw
         if(kw.gt.nbin * 0.9) return
-	s=0.0
-	do 50 k=1,kw
-	  s=s+pr(k)
-	  wrk(k)=pr(k)
+        s=0.0
+        do 50 k=1,kw
+          s=s+pr(k)
+          wrk(k)=pr(k)
    50   continue
-	ja=0
-	smax=s
-	do 60 j=2,nbin
-	  ja=ja+1
-	  if(ja.gt.kw) ja=ja-kw
-	  al=wrk(ja)
-	  jj=j+kw-1
-	  if(jj.gt.nbin)jj=jj-nbin
-	  an=pr(jj)
-	  s=s+an-al
-	  wrk(ja)=an
-	  if(s.gt.smax) smax=s
+        ja=0
+        smax=s
+        do 60 j=2,nbin
+          ja=ja+1
+          if(ja.gt.kw) ja=ja-kw
+          al=wrk(ja)
+          jj=j+kw-1
+          if(jj.gt.nbin)jj=jj-nbin
+          an=pr(jj)
+          s=s+an-al
+          wrk(ja)=an
+          if(s.gt.smax) smax=s
    60   continue
 
         sn=smax/(rmsp*sqrt(kw*(1.+float(kw)/nbin)))
