@@ -29,6 +29,10 @@
 #include <Pulsar/CalInfoExtension.h>
 #include <Pulsar/TapeInfo.h>
 
+#include <Pulsar/WeightedFrequency.h>
+
+
+
 #include <dirutil.h>
 #include <strutil.h>
 #include <tostring.h>
@@ -1398,6 +1402,31 @@ string get_tsamp( Reference::To<Archive> archive )
   return result;
 }
 
+string get_zero_off( Reference::To<Archive> archive )
+{
+  string result;
+  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
+
+  if( !ext )
+    return "UNDEF";
+  else
+    return tostring<double>( ext->get_zero_off(), 1, ios::fixed );
+
+  return result;
+}
+
+string get_signint( Reference::To<Archive> archive )
+{
+  string result;
+  Reference::To<FITSSUBHdrExtension> ext = archive->get<FITSSUBHdrExtension>();
+
+  if( !ext )
+    return "UNDEF";
+  else
+    return tostring( ext->get_signint() );
+
+  return result;
+}
 
 string get_nbits( Reference::To<Archive> archive )
 {
@@ -1689,6 +1718,8 @@ void PrintExtdHlp( void )
     "subint_type                     Time axis (TIME, BINPHSPERI, BINLNGASC, etc) \n"
     "subint_unit                     Unit of time axis (SEC, PHS (0-1), DEG) \n"
     "tsamp                           [s] Sample interval for SEARCH-mode data \n"
+    "zero_off                        Zero offset for SEARCH-mode data \n"
+    "signint                         1 for signed ints in SEARCH-mode data, else 0 \n"
     " \n"
 
     "FILE & TELESCOPE PARAMETERS \n"
@@ -1896,6 +1927,8 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "subint_type" ) return get_subint_type( archive );
     else if( command == "subint_unit" ) return get_subint_unit( archive );
     else if( command == "tsamp" ) return get_tsamp( archive );
+    else if( command == "zero_off" ) return get_zero_off( archive );
+    else if( command == "signint" ) return get_signint( archive );
     else if( command == "nbits" ) return get_nbits( archive );
     else if( command == "nch_strt" ) return get_nch_strt( archive );
     else if( command == "nsblk" ) return get_nsblk( archive );
