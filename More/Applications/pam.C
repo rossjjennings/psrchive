@@ -124,6 +124,10 @@ void correct_ionospheric_rm (Pulsar::Archive*, double iono_rm);
 //  "DM[1-9]"
 void get_dm_keywords(vector<string>& keywords);
 
+//! Sets the rotation measure for each subint and the archive
+void correct_rotation_measure(Pulsar::Archive* archive,
+    const double rotation_measure);
+
 void usage()
 {
   cout << "A program for manipulating Pulsar::Archives \n"
@@ -368,7 +372,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.95 2010/09/07 05:12:46 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.96 2010/09/16 01:48:34 jonathan_khoo Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -698,7 +702,11 @@ int main (int argc, char *argv[]) try {
 
       case UPDATE_DM: update_dm_from_eph = true; break;
 
-      case IONO_RM: iono_rm = fromstring<double>(optarg); break;
+      case IONO_RM:
+        iono_rm = fromstring<double>(optarg);
+        command += " --iono_rm ";
+        command += optarg;
+        break;
 
       default:
 	cout << "Unrecognised option" << endl;
@@ -1337,15 +1345,47 @@ void get_dm_keywords(vector<string>& keywords)
 
 void correct_ionospheric_rm (Pulsar::Archive* archive, double iono_rm)
 {
-  Pauli::basis().set_basis( archive->get_basis() );
+  const double rotation_measure = archive->get_rotation_measure();
+
+  Pauli::basis().set_basis(archive->get_basis());
 
   Reference::To<Pulsar::FaradayRotation> xform = new Pulsar::FaradayRotation;
+  xform->set_rotation_measure(iono_rm);
+  xform->set_reference_wavelength(0);
+  xform->execute(archive);
 
-  xform->set_rotation_measure( iono_rm );
-  xform->set_reference_wavelength( 0 );
-  xform->execute (archive);
+  const double new_rotation_measure = rotation_measure - iono_rm;
 
-  Pulsar::ProcHistory* history = archive->get<Pulsar::ProcHistory>();
-  if ( history )
-    history->set_ifr_mthd ( "pam --iono_rm " + tostring(iono_rm) );
+  // Set the rotation measure of the archive to the new value:
+  //    RM = RM - RMi
+  try {
+    correct_rotation_measure(archive, new_rotation_measure);
+  } catch (Error& error) {
+    throw error;
+  }
+}
+
+#include "Pulsar/DeFaraday.h"
+
+/**
+ * Iterate through each subint and set the rotation measure via the DeFaraday
+ * extension; set the rotation measure of the archive.
+ */
+void correct_rotation_measure(Pulsar::Archive* archive,
+    const double rotation_measure)
+{
+  const unsigned nsub = archive->get_nsubint();
+  for (unsigned isub = 0; isub < nsub; ++isub) {
+    Pulsar::DeFaraday* ext =
+      archive->get_Integration(isub)->get<Pulsar::DeFaraday>();
+
+    if (ext) {
+      ext->set_rotation_measure(rotation_measure);
+    } else {
+      throw Error(InvalidState, "Setting rotation measure",
+          "Could not get DeFaraday extension for Subint %d", isub);
+    }
+  }
+
+  archive->set_rotation_measure(rotation_measure);
 }
