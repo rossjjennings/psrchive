@@ -170,7 +170,7 @@ void usage()
     "  -R RM            Correct for ISM faraday rotation \n"
     "  --RR             Dedefaraday (i.e. undo -R option) \n"
     "  --RM RM          Install a new RM but don't defaraday \n"
-    "  --iono_rm RM     Correct absolute ionospheric Faraday rotation \n"
+    "  --iono_rm RMi    Correct absolute ionospheric Faraday rotation \n"
     "  -s               Smear with this duty cycle \n"
     "  -r               Rotate profiles by this many turns \n" 
     "  -w               Reset profile weights to this value \n"
@@ -372,7 +372,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.96 2010/09/16 01:48:34 jonathan_khoo Exp $" << endl;
+	cout << "$Id: pam.C,v 1.97 2010/09/16 01:51:48 jonathan_khoo Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
