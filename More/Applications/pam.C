@@ -372,7 +372,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.97 2010/09/16 01:51:48 jonathan_khoo Exp $" << endl;
+	cout << "$Id: pam.C,v 1.98 2010/09/16 13:29:39 jonathan_khoo Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -1345,24 +1345,12 @@ void get_dm_keywords(vector<string>& keywords)
 
 void correct_ionospheric_rm (Pulsar::Archive* archive, double iono_rm)
 {
-  const double rotation_measure = archive->get_rotation_measure();
-
   Pauli::basis().set_basis(archive->get_basis());
 
   Reference::To<Pulsar::FaradayRotation> xform = new Pulsar::FaradayRotation;
   xform->set_rotation_measure(iono_rm);
   xform->set_reference_wavelength(0);
-  xform->execute(archive);
-
-  const double new_rotation_measure = rotation_measure - iono_rm;
-
-  // Set the rotation measure of the archive to the new value:
-  //    RM = RM - RMi
-  try {
-    correct_rotation_measure(archive, new_rotation_measure);
-  } catch (Error& error) {
-    throw error;
-  }
+  xform->just_do_it(archive);
 }
 
 #include "Pulsar/DeFaraday.h"
