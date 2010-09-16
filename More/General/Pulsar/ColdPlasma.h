@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ColdPlasma.h,v $
-   $Revision: 1.12 $
-   $Date: 2009/06/07 05:41:44 $
+   $Revision: 1.13 $
+   $Date: 2010/09/16 13:11:12 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ColdPlasma_h
@@ -59,6 +59,9 @@ namespace Pulsar {
 
     //! Execute the correction for an entire Archive
     virtual void execute (Archive*);
+
+    //! Just do the correction (off the books)
+    void just_do_it (Archive*);
 
     //! Revert the correction for an entire Archive
     virtual void revert (Archive*);
@@ -174,6 +177,15 @@ void Pulsar::ColdPlasma<C,H>::revert (Archive* arch)
 {
   for (unsigned i=0; i<arch->get_nsubint(); i++)
     revert1( arch->get_Integration(i) );
+}
+
+template<class C, class H>
+void Pulsar::ColdPlasma<C,H>::just_do_it (Archive* arch)
+{
+  delta = get_identity ();
+
+  for (unsigned i=0; i<arch->get_nsubint(); i++)
+    range (arch->get_Integration(i), 0, arch->get_nchan());
 }
 
 template<class C, class H>
