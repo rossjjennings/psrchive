@@ -124,10 +124,6 @@ void correct_ionospheric_rm (Pulsar::Archive*, double iono_rm);
 //  "DM[1-9]"
 void get_dm_keywords(vector<string>& keywords);
 
-//! Sets the rotation measure for each subint and the archive
-void correct_rotation_measure(Pulsar::Archive* archive,
-    const double rotation_measure);
-
 void usage()
 {
   cout << "A program for manipulating Pulsar::Archives \n"
@@ -372,7 +368,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.98 2010/09/16 13:29:39 jonathan_khoo Exp $" << endl;
+	cout << "$Id: pam.C,v 1.99 2010/09/16 13:38:05 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -1348,32 +1344,12 @@ void correct_ionospheric_rm (Pulsar::Archive* archive, double iono_rm)
   Pauli::basis().set_basis(archive->get_basis());
 
   Reference::To<Pulsar::FaradayRotation> xform = new Pulsar::FaradayRotation;
-  xform->set_rotation_measure(iono_rm);
-  xform->set_reference_wavelength(0);
-  xform->just_do_it(archive);
+  xform->set_rotation_measure( iono_rm );
+  xform->set_reference_wavelength( 0 );
+  xform->just_do_it (archive);
+
+  Pulsar::ProcHistory* history = archive->get<Pulsar::ProcHistory>();
+  if ( history )
+    history->set_ifr_mthd ( "pam --iono_rm " + tostring(iono_rm) );
 }
 
-#include "Pulsar/DeFaraday.h"
-
-/**
- * Iterate through each subint and set the rotation measure via the DeFaraday
- * extension; set the rotation measure of the archive.
- */
-void correct_rotation_measure(Pulsar::Archive* archive,
-    const double rotation_measure)
-{
-  const unsigned nsub = archive->get_nsubint();
-  for (unsigned isub = 0; isub < nsub; ++isub) {
-    Pulsar::DeFaraday* ext =
-      archive->get_Integration(isub)->get<Pulsar::DeFaraday>();
-
-    if (ext) {
-      ext->set_rotation_measure(rotation_measure);
-    } else {
-      throw Error(InvalidState, "Setting rotation measure",
-          "Could not get DeFaraday extension for Subint %d", isub);
-    }
-  }
-
-  archive->set_rotation_measure(rotation_measure);
-}
