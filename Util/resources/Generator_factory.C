@@ -19,7 +19,9 @@
 
 #include "templates.h"
 #include "FilePtr.h"
+
 #include <string.h>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -66,7 +68,7 @@ Pulsar::Generator* Pulsar::Generator::factory (const Pulsar::Parameters* param)
 
   Pulsar::Generator* default_generator = get_default_generator();
 
-  // if the default generator is a tempo2 generator, usea a tempo2 generator
+  // if the default generator is a tempo2 generator, use a tempo2 generator
   if (dynamic_cast<Tempo2::Generator*> (default_generator))
   {
     if (Predictor::verbose)
@@ -91,6 +93,14 @@ Pulsar::Generator* Pulsar::Generator::factory (const Pulsar::Parameters* param)
 
       return new Tempo2::Generator;
     }
+  }
+
+  if (!getenv ("TEMPO"))
+  {
+    if (Predictor::verbose)
+      cerr << "Pulsar::Generator::factory $TEMPO not defined" << endl;
+
+    return new Tempo2::Generator;
   }
 
   if (Predictor::verbose)
