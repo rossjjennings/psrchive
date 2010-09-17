@@ -321,12 +321,17 @@ void unload (fitsfile* fptr, const polynomial* poly, long row)
   
   fits_get_colnum (fptr, CASEINSEN, "COEFF", &colnum, &status);
   fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);  
+
   if (repeat < ncoef)
-    throw Error (InvalidState, "unload polynomial",
-	       "COEFF vector repeat count=%ld < NCOEF=%d", repeat, ncoef);
+  {
+    fits_modify_vector_len (fptr, colnum, ncoef, &status);
+    if (status)
+      throw FITSError (status, "unload polynomial",
+		       "fits_modify_vector_len COEFF from %d to %d",
+		       repeat, ncoef);
+  }
 
   polynomial::Expert expert (const_cast<polynomial*>(poly));
-
   fits_write_col (fptr, TDOUBLE, colnum, row, firstelem, ncoef,
 		  expert.get_coefs(), &status);
 
