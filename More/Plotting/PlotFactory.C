@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PlotFactory.h"
 
 #include "Pulsar/ProfilePlot.h"
@@ -140,7 +141,11 @@ Pulsar::Plot* Pulsar::PlotFactory::construct (std::string name)
   for (unsigned i=0; i < agents.size(); i++)
     if ( (shortcut && shortcut == agents[i]->get_shortcut()) ||
 	 (name == agents[i]->get_name()) )
-      return agents[i]->construct();
+    {
+      Plot* plot = agents[i]->construct();
+      plot->set_constructor (agents[i]);
+      return plot;
+    }
 
   throw Error (InvalidParam, "Pulsar::PlotFactory::construct",
 	       "no Plot named " + name);

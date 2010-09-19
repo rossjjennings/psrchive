@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Plot.h,v $
-   $Revision: 1.17 $
-   $Date: 2008/01/14 04:55:41 $
+   $Revision: 1.18 $
+   $Date: 2010/09/19 01:23:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Plot_h
@@ -29,6 +29,9 @@ namespace Pulsar {
     //! Verbosity flag
     static bool verbose;
 
+    //! Default constructor
+    Plot () { constructor = 0; }
+
     //! Process the Archive as needed before calling plot
     virtual void preprocess (Archive*);
 
@@ -47,12 +50,38 @@ namespace Pulsar {
     //! Process a configuration command
     virtual void configure (const std::string&);
 
+    //! Creates a default constructed instance of a derived type
+    class Constructor;
+
+    //! Set the constructor
+    void set_constructor (Constructor* c) { constructor = c; }
+
+    //! Get the constructor
+    Constructor* get_constructor ();
+
   private:
 
     // used by the configure method
     Reference::To<TextInterface::Parser> tui;
     Reference::To<TextInterface::Parser> fui;
 
+    //! The constructor for the derived type of this instance
+    Constructor* constructor;
+  };
+
+  /*!  
+    This class provides a dynamic clone-like functionality without
+    having to go through the entire inheritance hierarchy.
+    PlotFactory installs the Constructor for the derived type.
+  */
+  class Plot::Constructor
+  {
+  public:
+
+    virtual ~Constructor ();
+
+    //! Return a new default constructed instance of a derived type
+    virtual Plot* construct () = 0;
   };
 
 }

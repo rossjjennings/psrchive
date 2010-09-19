@@ -1,27 +1,27 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFactory.h,v $
-   $Revision: 1.9 $
-   $Date: 2007/08/17 06:10:02 $
+   $Revision: 1.10 $
+   $Date: 2010/09/19 01:23:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFactory_h
 #define __Pulsar_PlotFactory_h
+
+#include "Pulsar/Plot.h"
 
 #include <string>
 #include <vector>
 
 namespace Pulsar {
 
-  class Plot;
-
-  //! Provides a text interface to get and set Plot attributes
+  //! Provides a text interface to create new plots
   class PlotFactory {
 
   public:
@@ -59,18 +59,12 @@ namespace Pulsar {
 
   };
 
-  class PlotFactory::Agent
+  class PlotFactory::Agent : public Plot::Constructor
   {
   public:
 
     Agent (char c, std::string n, std::string d)
       : shortcut(c), name (n), description (d) {}
-
-    //! Virtual destructor
-    virtual ~Agent () { }
-
-    //! Return a new instance of Plot class
-    virtual Plot* construct () = 0;
 
     //! Return the name of the Plot class
     std::string get_name () { return name; }
