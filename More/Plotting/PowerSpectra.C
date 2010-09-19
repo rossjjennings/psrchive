@@ -38,7 +38,6 @@ TextInterface::Parser* Pulsar::PowerSpectra::get_interface ()
 void Pulsar::PowerSpectra::prepare (const Archive* data)
 {
   spectra.clear();
-
   get_spectra (data);
 
   if (!spectra.size())
@@ -47,6 +46,10 @@ void Pulsar::PowerSpectra::prepare (const Archive* data)
 
   unsigned i_min, i_max;
   get_scale()->get_indeces (data, i_min, i_max);
+
+  if (i_min >= i_max)
+    throw Error (InvalidState, "Pulsar::PowerSpectra::prepare",
+		 "frequency scale i_min=%d >= i_max=%d", i_min, i_max);
 
   float min = FLT_MAX;
   float max = -FLT_MAX;
