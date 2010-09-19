@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFactory.h,v $
-   $Revision: 1.10 $
-   $Date: 2010/09/19 01:23:07 $
+   $Revision: 1.11 $
+   $Date: 2010/09/19 04:33:24 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFactory_h
@@ -96,7 +96,12 @@ namespace Pulsar {
       : Agent (shortcut, _name, _description) {}
  
     //! Return a new instance of Plot class
-    Plot* construct () { return new P; }
+    Plot* construct ()
+    {
+      P* plot = new P;
+      plot->set_constructor(this);
+      return plot;
+    }
 
   };
 

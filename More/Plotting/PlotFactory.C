@@ -141,11 +141,7 @@ Pulsar::Plot* Pulsar::PlotFactory::construct (std::string name)
   for (unsigned i=0; i < agents.size(); i++)
     if ( (shortcut && shortcut == agents[i]->get_shortcut()) ||
 	 (name == agents[i]->get_name()) )
-    {
-      Plot* plot = agents[i]->construct();
-      plot->set_constructor (agents[i]);
-      return plot;
-    }
+      return agents[i]->construct();
 
   throw Error (InvalidParam, "Pulsar::PlotFactory::construct",
 	       "no Plot named " + name);
