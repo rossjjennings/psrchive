@@ -22,7 +22,7 @@ nobase_include_HEADERS =					       \
 	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyPlus.h	       \
 	Pulsar/PhaseVsHist.h Pulsar/PhaseVsHistPlus.h		       \
 	Pulsar/MultiPlot.h Pulsar/MultiPhase.h			       \
-	Pulsar/MultiData.h					       \
+	Pulsar/MultiData.h Pulsar/MultiDataSimple.h		       \
 	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h	       \
 	Pulsar/StokesCylindricalPlus.h				       \
 	Pulsar/FluctPlot.h Pulsar/StokesFluctPlot.h		       \
@@ -68,6 +68,7 @@ libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
 	PhaseVsTime.C PhaseVsTimeTI.C \
 	PhaseVsHist.C PhaseVsHistTI.C \
 	MultiData.C \
+	MultiDataSimple.C \
 	MultiPlot.C \
 	MultiPhase.C MultiPhaseTI.C\
 	StokesCylindrical.C StokesCylindricalTI.C \

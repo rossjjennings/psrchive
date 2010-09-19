@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiData.h,v $
-   $Revision: 1.1 $
-   $Date: 2010/09/19 01:23:02 $
+   $Revision: 1.2 $
+   $Date: 2010/09/19 04:33:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiData_h
@@ -25,7 +25,7 @@ namespace Pulsar {
   public:
 
     //! Factory returns appropriate derived class
-    static MultiData* factory (Plot*);
+    static Plot* factory (Plot*);
 
     //! Process the Archive as needed before calling plot
     void preprocess (Archive*);

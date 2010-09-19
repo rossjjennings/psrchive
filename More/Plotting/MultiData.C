@@ -6,10 +6,15 @@
  ***************************************************************************/
 
 #include "Pulsar/MultiData.h"
+#include "Pulsar/MultiDataSimple.h"
 
-Pulsar::MultiData* Pulsar::MultiData::factory (Plot*)
+Pulsar::Plot* Pulsar::MultiData::factory (Plot* plot)
 {
-  return 0;
+  SimplePlot* simple = dynamic_cast<SimplePlot*>(plot);
+  if (simple)
+    return new MultiDataSimple (simple);
+
+  return plot;
 }
 
 //! Process the Archive as needed before calling plot
