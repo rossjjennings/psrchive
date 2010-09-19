@@ -30,6 +30,13 @@ void Pulsar::PlotScale::init (const Archive*)
 {
 }
 
+//! Expand as necessary to include another PlotScale
+void Pulsar::PlotScale::include (PlotScale* other)
+{
+  minval = std::min (minval, other->minval);
+  maxval = std::max (maxval, other->maxval);
+}
+
 //! Set the minimum and maximum value in the data
 void Pulsar::PlotScale::set_minmax (float min, float max)
 {

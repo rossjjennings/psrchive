@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotScale.h,v $
-   $Revision: 1.15 $
-   $Date: 2010/07/13 09:36:28 $
+   $Revision: 1.16 $
+   $Date: 2010/09/19 04:33:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotScale_h
@@ -40,6 +40,9 @@ namespace Pulsar {
 
     //! Initialize internal attributes according to Archive data
     virtual void init (const Archive*);
+
+    //! Expand as necessary to include another PlotScale
+    void include (PlotScale* other);
 
     //! Set the minimum and maximum value in the data
     void set_minmax (float min, float max);
