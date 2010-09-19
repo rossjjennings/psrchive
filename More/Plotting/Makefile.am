@@ -9,7 +9,7 @@ if HAVE_PGPLOT
 
 nobase_include_HEADERS =					       \
 	Pulsar/Plot.h Pulsar/PlotFactory.h			       \
-	Pulsar/PlotLoop.h			       \
+	Pulsar/PlotLoop.h					       \
 	Pulsar/PlotEdge.h					       \
 	Pulsar/PlotScale.h Pulsar/PhaseScale.h Pulsar/FrequencyScale.h \
 	Pulsar/PlotAxis.h Pulsar/PlotLabel.h Pulsar/PlotAttributes.h   \
@@ -20,10 +20,11 @@ nobase_include_HEADERS =					       \
 	Pulsar/AnglePlot.h Pulsar/PosAngPlot.h Pulsar/EllAngPlot.h     \
 	Pulsar/PhaseVsPlot.h Pulsar/PhaseVsTime.h		       \
 	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyPlus.h	       \
-	Pulsar/PhaseVsHist.h Pulsar/PhaseVsHistPlus.h                  \
+	Pulsar/PhaseVsHist.h Pulsar/PhaseVsHistPlus.h		       \
 	Pulsar/MultiPlot.h Pulsar/MultiPhase.h			       \
+	Pulsar/MultiData.h					       \
 	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h	       \
-	Pulsar/StokesCylindricalPlus.h        \
+	Pulsar/StokesCylindricalPlus.h				       \
 	Pulsar/FluctPlot.h Pulsar/StokesFluctPlot.h		       \
 	Pulsar/Poincare.h Pulsar/ProfileVectorPlotter.h		       \
 	Pulsar/TwoBitPlot.h Pulsar/CalibratorSpectrum.h		       \
@@ -66,6 +67,7 @@ libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
 	PhaseVsFrequency.C PhaseVsFrequencyTI.C \
 	PhaseVsTime.C PhaseVsTimeTI.C \
 	PhaseVsHist.C PhaseVsHistTI.C \
+	MultiData.C \
 	MultiPlot.C \
 	MultiPhase.C MultiPhaseTI.C\
 	StokesCylindrical.C StokesCylindricalTI.C \
