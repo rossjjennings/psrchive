@@ -21,3 +21,12 @@ mkdir -p @prefix@/psrcat
 
 mv psrcat.db @prefix@/psrcat
 
+echo
+echo
+echo "PSRCAT installation completed"
+echo
+echo "To use psrcat, please set the environment variable"
+echo
+echo 'setenv PSRCAT_FILE @prefix@/psrcat/psrcat.db'
+echo
+echo
