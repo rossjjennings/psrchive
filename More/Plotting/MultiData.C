@@ -41,3 +41,10 @@ TextInterface::Parser* Pulsar::MultiData::get_frame_interface ()
   return managed_plot->get_frame_interface ();
 }
 
+//! Process a configuration command and store it for later use
+void Pulsar::MultiData::configure (const std::string& option)
+{
+  managed_plot->configure (option);
+  options.push_back (option);
+}
+

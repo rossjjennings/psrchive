@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiData.h,v $
-   $Revision: 1.2 $
-   $Date: 2010/09/19 04:33:19 $
+   $Revision: 1.3 $
+   $Date: 2010/09/19 08:26:14 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiData_h
@@ -39,10 +39,16 @@ namespace Pulsar {
     //! Get the text interface to the frame attributes
     TextInterface::Parser* get_frame_interface ();
 
+    //! Process a configuration command and store it for later use
+    void configure (const std::string& option);
+
   protected:
 
     //! The plot that is managed by this instance
     Reference::To<Plot> managed_plot;
+
+    //! The options passed to configure
+    std::vector< std::string > options;
   };
 
 }
