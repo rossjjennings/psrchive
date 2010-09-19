@@ -181,5 +181,8 @@ void Pulsar::PlotScale::get_indeces (unsigned n,
 
     if (imax > n)
       imax = n;
+
+    if (imin > imax)
+      std::swap (imin, imax);
   }
 }
