@@ -51,6 +51,9 @@ void Pulsar::MultiDataSimple::finalize ()
   if (verbose)
     cerr << "Pulsar::MultiDataSimple::finalize" << endl;
 
+  if (!data_sets.size())
+    return;
+
   const Archive* main_data = data_sets[0];
   SimplePlot* main_plot = plots[0];
 
