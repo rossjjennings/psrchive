@@ -26,6 +26,7 @@ void Pulsar::MultiDataSimple::manage (SimplePlot* simple)
 //! prepare the Simple Plot and push it onto the plots vector
 void Pulsar::MultiDataSimple::plot (const Archive* data)
 {
+  simple_plot->get_frame()->init (data);
   simple_plot->prepare (data);
 
   plots.push_back (simple_plot);
@@ -38,9 +39,14 @@ void Pulsar::MultiDataSimple::plot (const Archive* data)
     throw Error (InvalidState, "Pulsar::MultiDataSimple::plot",
 		 "Plot::Constructor::construct does not return a SimplePlot");
 
-  // copy the user configuration from simple_plot to new_simple
-
-  // TO DO
+  // configure new_simple using the saved options
+  for (unsigned i=0; i<options.size(); i++)
+  {
+    if (verbose)
+      cerr << "Pulsar::MultiDataSimple::plot apply "
+	"'" << options[i] << "'" << endl;
+    new_simple->configure( options[i] );
+  }
 
   // then replace simple_plot with new_simple
   manage (new_simple);
