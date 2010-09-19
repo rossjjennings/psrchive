@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotLoop.h,v $
-   $Revision: 1.2 $
-   $Date: 2009/10/02 10:28:17 $
+   $Revision: 1.3 $
+   $Date: 2010/09/19 04:33:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotLoop_h
@@ -32,6 +32,12 @@ namespace Pulsar {
 
     //! Set the Plot to be executed
     void add_Plot (Plot*);
+
+    //! Perform any preparations
+    void setup ();
+
+    //! Perform any cleanup
+    void finalize ();
 
     //! Set the Archive to be plotted
     void set_Archive (Archive*);

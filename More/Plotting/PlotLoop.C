@@ -1,11 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/PlotLoop.h"
+#include "Pulsar/MultiData.h"
+
 #include "Pulsar/Plot.h"
 #include "Pulsar/Archive.h"
 
@@ -28,6 +30,21 @@ Pulsar::PlotLoop::PlotLoop ()
 void Pulsar::PlotLoop::add_Plot (Plot* p)
 {
   plots.push_back (p);
+}
+
+void Pulsar::PlotLoop::setup ()
+{
+  if (!overlay)
+    return;
+
+  for (unsigned i=0; i<plots.size(); i++)
+    plots[i] = MultiData::factory (plots[i]);
+}
+
+void Pulsar::PlotLoop::finalize ()
+{
+  for (unsigned i=0; i<plots.size(); i++)
+    plots[i]->finalize ();
 }
 
 //! Set the Archive to be plotted
