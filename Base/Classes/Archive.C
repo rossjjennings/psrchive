@@ -55,10 +55,15 @@ TextInterface::Parser* Pulsar::Archive::get_interface ()
   return text_interface;
 }
 
+static unsigned instance_count = 0;
+
 Pulsar::Archive::Archive ()
 {
+  instance_count ++;
+
   if (verbose == 3)
-    cerr << "Pulsar::Archive::null constructor" << endl;
+    cerr << "Pulsar::Archive ctor this=" << this 
+	 << " instances=" << instance_count << endl;
 
   init();
 }
@@ -73,8 +78,11 @@ Pulsar::Archive::Archive (const Archive& archive)
 
 Pulsar::Archive::~Archive ()
 {
+  instance_count --;
+
   if (verbose == 3)
-    cerr << "Pulsar::Archive dtor this=" << this << endl;
+    cerr << "Pulsar::Archive dtor this=" << this
+	 << " instances=" << instance_count << endl;
 }
 
 string Pulsar::Archive::get_revision (const char* revision)
