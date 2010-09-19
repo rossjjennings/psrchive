@@ -139,17 +139,20 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
 
       VERBOSE("Pulsar::PlotLoop::plot " << index_command);
 
-      PlotLabel* label = plots[iplot]->get_attributes()->get_label_above();
-      current[iplot] = label->get_centre();
+      if (!overlay)
+      {
+	PlotLabel* label = plots[iplot]->get_attributes()->get_label_above();
+	current[iplot] = label->get_centre();
+	label->set_centre( current[iplot] + " " + index_command );
+      }
 
       plots[iplot]->configure( index_command );
   
-      label->set_centre( current[iplot] + " " + index_command );
     }
     catch (Error& error)
     {
-      cerr << "Pulsar::PlotLoop::plot error configuring " << index->get_index(i)
-           << " of "
+      cerr << "Pulsar::PlotLoop::plot error configuring "
+	   << index->get_index(i) << " of "
            << "\n\t" << archives[iplot]->get_filename()
            << "\n\t" << error.get_message() << endl;
     }
@@ -164,11 +167,12 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
            << "\n\t" << error.get_message() << endl;
     }
 
-    for (unsigned iplot=0; iplot < plots.size(); iplot++)
-    {
-      PlotLabel* label = plots[iplot]->get_attributes()->get_label_above();
-      label->set_centre( current[iplot] );
-    }
+    if (!overlay)
+      for (unsigned iplot=0; iplot < plots.size(); iplot++)
+      {
+	PlotLabel* label = plots[iplot]->get_attributes()->get_label_above();
+	label->set_centre( current[iplot] );
+      }
   }
 
   indeces.push( index );
