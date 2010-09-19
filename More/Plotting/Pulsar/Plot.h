@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Plot.h,v $
-   $Revision: 1.18 $
-   $Date: 2010/09/19 01:23:07 $
+   $Revision: 1.19 $
+   $Date: 2010/09/19 04:33:37 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Plot_h
@@ -37,6 +37,9 @@ namespace Pulsar {
 
     //! Plot in the current viewport
     virtual void plot (const Archive*) = 0;
+
+    //! Some plots may postpone plotting
+    virtual void finalize () { }
 
     //! Provide access to the plot attributes
     virtual PlotAttributes* get_attributes () = 0;
@@ -78,7 +81,7 @@ namespace Pulsar {
   {
   public:
 
-    virtual ~Constructor ();
+    virtual ~Constructor () { }
 
     //! Return a new default constructed instance of a derived type
     virtual Plot* construct () = 0;
