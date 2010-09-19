@@ -40,10 +40,15 @@ Pulsar::PlotFrame::~PlotFrame ()
 
 #include "pairutil.h"
 
-void Pulsar::PlotFrame::focus (const Archive* data)
+void Pulsar::PlotFrame::init (const Archive* data)
 {
   get_x_scale(true)->init (data);
   get_y_scale(true)->init (data);
+}
+
+void Pulsar::PlotFrame::focus (const Archive* data)
+{
+  init (data);
 
   std::pair<float,float> xvp = get_x_scale(true)->get_viewport ();
   std::pair<float,float> yvp = get_y_scale(true)->get_viewport ();

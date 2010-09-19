@@ -4,12 +4,19 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/SimplePlot.h"
 
 using namespace std;
 
 void Pulsar::SimplePlot::plot (const Archive* data)
 {
+  if (verbose)
+    cerr << "Pulsar::SimplePlot::plot init" << endl;
+  get_frame()->init (data);
+
+  if (verbose)
+    cerr << "Pulsar::SimplePlot::plot prepare" << endl;
   prepare (data);
 
   if (verbose)
