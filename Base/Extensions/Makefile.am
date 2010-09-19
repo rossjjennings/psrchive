@@ -3,6 +3,8 @@ noinst_LTLIBRARIES = libExtensions.la
 
 nobase_include_HEADERS = \
         Pulsar/Arecibo.h \
+	Pulsar/AuxColdPlasma.h \
+	Pulsar/AuxColdPlasmaHistory.h \
         Pulsar/Backend.h \
 	Pulsar/BackendInterface.h \
         Pulsar/BinaryPhaseOrder.h \
@@ -50,6 +52,8 @@ nobase_include_HEADERS = \
 
 libExtensions_la_SOURCES = \
         Arecibo.C \
+	AuxColdPlasma.C \
+	AuxColdPlasmaHistory.C \
         Backend.C \
         BinaryPhaseOrder.C \
         BinLngAscOrder.C \
