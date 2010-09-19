@@ -42,6 +42,9 @@ public:
   //! Process the given archive
   void process (Pulsar::Archive*);
 
+  //! Detroy the plots (some destructors will plot accumulated results)
+  void finalize ();
+
   // -P help
   void help_plot_types ();
 
@@ -100,7 +103,7 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
 					   "pulsar plotting program")
 {
   has_manual = true;
-  version = "$Id: psrplot.C,v 1.34 2010/04/15 02:46:53 sosl Exp $";
+  version = "$Id: psrplot.C,v 1.35 2010/09/19 08:30:00 straten Exp $";
 
   // print angles in degrees
   Angle::default_type = Angle::Degrees;
@@ -236,20 +239,13 @@ void psrplot::setup ()
     throw Error (InvalidState, "psrplot",
 		 "please choose at least one plot style");
 
-  if (options.size())
-  {
-    if (verbose)
-      cerr << "psrplot: parsing options" << endl;
-    for (unsigned iplot=0; iplot < plots.size(); iplot++)
-      set_options (plots[iplot], options);
-  }
-
-  //-F should activate -O automatically:
+  // -F should activate -O automatically:
   if (overlay_files)
     overlay_plots = true;
 
   loop.set_overlay (overlay_plots);
   loop.set_preprocess (preprocess);
+  loop.configure (options);
 }
 
 void psrplot::process (Pulsar::Archive* archive)
@@ -262,6 +258,15 @@ void psrplot::process (Pulsar::Archive* archive)
 
   loop.set_Archive (archive);
   loop.plot();
+
+  if( !overlay_files )
+    loop.finalize();
+}
+
+//! Final steps, run once at end of program
+void psrplot::finalize ()
+{
+  loop.finalize ();
 }
 
 void psrplot::help_plot_types ()
