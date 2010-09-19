@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotLoop.h,v $
-   $Revision: 1.3 $
-   $Date: 2010/09/19 04:33:28 $
+   $Revision: 1.4 $
+   $Date: 2010/09/19 08:26:22 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotLoop_h
@@ -33,8 +33,8 @@ namespace Pulsar {
     //! Set the Plot to be executed
     void add_Plot (Plot*);
 
-    //! Perform any preparations
-    void setup ();
+    //! Configure the plots
+    void configure (const std::vector<std::string>& options);
 
     //! Perform any cleanup
     void finalize ();

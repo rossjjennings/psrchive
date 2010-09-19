@@ -32,13 +32,15 @@ void Pulsar::PlotLoop::add_Plot (Plot* p)
   plots.push_back (p);
 }
 
-void Pulsar::PlotLoop::setup ()
+void Pulsar::PlotLoop::configure (const std::vector<std::string>& options)
 {
-  if (!overlay)
-    return;
+  if (overlay)
+    for (unsigned i=0; i<plots.size(); i++)
+      plots[i] = MultiData::factory (plots[i]);
 
-  for (unsigned i=0; i<plots.size(); i++)
-    plots[i] = MultiData::factory (plots[i]);
+  for (unsigned iopt=0; iopt < options.size(); iopt++)
+    for (unsigned iplot=0; iplot < plots.size(); iplot++)
+      plots[iplot]->configure( options[iopt] );
 }
 
 void Pulsar::PlotLoop::finalize ()
@@ -128,6 +130,8 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
                    "loop size for plot[0]=%u != that of plot[%u]=%u",
                    loop_size, iplot, index->size());
   }
+  
+  Reference::To<TextInterface::Parser> interface;
 
   for (unsigned i=0; i<loop_size; i++)
   {
@@ -146,7 +150,12 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
 	label->set_centre( current[iplot] + " " + index_command );
       }
 
-      plots[iplot]->configure( index_command );
+      //
+      // by not calling Plot::configure, we avoid MultiData::configure,
+      // which will add each of these temporary options to its common list
+      //
+      interface = plots[iplot]->get_interface();
+      interface->process( index_command );
   
     }
     catch (Error& error)
