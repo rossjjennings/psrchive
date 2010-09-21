@@ -1470,16 +1470,9 @@ void solve_and_plot (Archive* archive,
 	// Number of bins in the DM axis
 	dmBins = (int)ceil( ( fabs(dmHalfRange)*2 ) / dmStep);
 
-	// cerr << "periodStep_us=" << periodStep_us << endl;
-
 	// Number of bins in the Period axis
 	periodBins = (int)ceil( ( fabs(periodHalfRange_us)*2 ) / periodStep_us);
-
-	// cerr << "periodBins=" << periodBins << endl;
-	
 	pdotBins = (int)ceil( ( fabs(pdotHalfRange)*2 ) / pdotStep);
-	 cerr << "pdotBins=" << pdotBins << endl;
-
 
   if (!onlyDisplayDmPlot) {
     // Print the header
