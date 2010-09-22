@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008-2009 by Willem van Straten
+ *   Copyright (C) 2008-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -104,6 +104,10 @@ void Pulsar::Application::parse (int argc, char** argv)
 
   arg = menu.add (metafile, 'M', "metafile");
   arg->set_help ("metafile contains list of archive filenames");
+
+  arg = menu.add (Config::get_configuration(), &Config::set_filename,
+		  "config", "file");
+  arg->set_help ("configuration file");
 
   for (unsigned i=0; i<options.size(); i++)
     options[i]->add_options (menu);
