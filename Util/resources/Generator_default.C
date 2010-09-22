@@ -7,7 +7,8 @@
 
 // #define _DEBUG
 
-#include "Predict.h"
+#include "Pulsar/Generator.h"
+#include "Pulsar/Predictor.h"
 #include "lazy.h"
 
 using namespace std;
