@@ -3,6 +3,7 @@ noinst_LTLIBRARIES = libgenutil.la
 
 include_HEADERS = \
         Angle.h \
+	Barycentre.h \
 	BatchQueue.h \
         Brent.h \
 	BoxMuller.h \
@@ -60,6 +61,7 @@ include_HEADERS = \
 libgenutil_la_SOURCES = \
         Angle.C \
         angleconv.c \
+	Barycentre.C \
 	BatchQueue.C \
 	BoxMuller.C \
         Cartesian.C \
