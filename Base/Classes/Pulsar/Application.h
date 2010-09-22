@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.13 $
-   $Date: 2010/05/02 16:08:40 $
+   $Revision: 1.14 $
+   $Date: 2010/09/22 03:12:03 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Application_h
@@ -83,11 +83,14 @@ namespace Pulsar {
     //! Any final work after main loop finishes
     virtual void finalize ();
 
-    //! set to true if this application has an online manual
+    //! true if application has an online manual
     bool has_manual;
 
-    //! set to true if this application should update the processing history
+    //! true if application should update the processing history
     bool update_history;
+
+    //! true if application receives a script name as the first file
+    bool stow_script;
 
     // name of the application
     std::string name;
@@ -100,6 +103,9 @@ namespace Pulsar {
 
     // command line used to execute this program
     std::string command;
+
+    // filename of script
+    std::string script;
 
     // list of file names on which to operate
     std::vector <std::string> filenames;

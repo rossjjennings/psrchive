@@ -26,6 +26,8 @@ Pulsar::Application::Application (const string& n, const string& d)
   has_manual = false;
   update_history = false;
 
+  stow_script = false;
+
   verbose = false;
   very_verbose = false;
 
@@ -111,6 +113,12 @@ void Pulsar::Application::parse (int argc, char** argv)
   menu.parse (argc, argv);
 
   dirglob_program = name;
+
+  if ( stow_script && optind < argc )
+  {
+    script = argv[optind];
+    optind ++;
+  }
 
   if (!metafile.empty())
     stringfload (&filenames, metafile);
