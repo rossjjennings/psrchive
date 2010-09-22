@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Pulsar/Predictor.h,v $
-   $Revision: 1.8 $
-   $Date: 2009/11/29 12:13:50 $
+   $Revision: 1.9 $
+   $Date: 2010/09/22 05:45:52 $
    $Author: straten $ */
 
 #ifndef __PulsarPredictor_h
@@ -38,7 +38,9 @@ namespace Pulsar {
       //! Clone the input predictor
       Input,
       //! Generate a new predictor using the default generator
-      Default
+      Default,
+      //! Generate a new predictor based on the input ephemeris
+      Ephemeris
     };
 
     //! Policy for creating new predictors
