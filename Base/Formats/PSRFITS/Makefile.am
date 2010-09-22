@@ -8,6 +8,7 @@ dist_data_DATA = psrheader.fits
 libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	CalibratorExtensionIO.h FITSArchive.C \
 	ProfileColumn.C Pulsar/ProfileColumn.h \
+	unload_Plasma.C load_Plasma.C \
 	unload_FITSHdrExtension.C unload_ObsExtension.C \
 	unload_Receiver.C load_Receiver.C \
 	unload_WidebandCorrelator.C load_WidebandCorrelator.C \

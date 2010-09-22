@@ -117,8 +117,8 @@ double calculate_new_dm(vector<double>& dms, const double dm,
 //! Calculates new DM from input ephemeris and sets it in the loaded Archive
 void update_dm(Pulsar::Archive* archive);
 
-//! Correct the absolute ionospheric Farday rotation
-void correct_ionospheric_rm (Pulsar::Archive*, double iono_rm);
+//! Correct the absolute auxiliary Farday rotation
+void correct_auxiliary_rm (Pulsar::Archive*, double aux_rm);
 
 //! Populates the keywords vector
 //  "DM[1-9]"
@@ -166,7 +166,7 @@ void usage()
     "  -R RM            Correct for ISM faraday rotation \n"
     "  --RR             Dedefaraday (i.e. undo -R option) \n"
     "  --RM RM          Install a new RM but don't defaraday \n"
-    "  --iono_rm RMi    Correct absolute ionospheric Faraday rotation \n"
+    "  --aux_rm RMi    Correct absolute auxiliary Faraday rotation \n"
     "  -s               Smear with this duty cycle \n"
     "  -r               Rotate profiles by this many turns \n" 
     "  -w               Reset profile weights to this value \n"
@@ -288,7 +288,7 @@ int main (int argc, char *argv[]) try {
     double new_folding_period = -1.0;
 
     bool update_dm_from_eph = false;
-    double iono_rm = 0.0;
+    double aux_rm = 0.0;
 
     Reference::To<Pulsar::IntegrationOrder> myio;
     Reference::To<Pulsar::Receiver> install_receiver;
@@ -311,7 +311,7 @@ int main (int argc, char *argv[]) try {
     const int SS   = 1220;
     const int FLIP = 1221;
     const int UPDATE_DM = 1222;
-    const int IONO_RM = 1223;
+    const int AUX_RM = 1223;
 
     while (1) {
 
@@ -341,7 +341,7 @@ int main (int argc, char *argv[]) try {
 	{"period",     required_argument,0,PERIOD},
 	{"SS",         no_argument,      0,SS},
 	{"update_dm",   no_argument,      0,UPDATE_DM},
-	{"iono_rm",    required_argument,0,IONO_RM},
+	{"aux_rm",    required_argument,0,AUX_RM},
 	{0, 0, 0, 0}
       };
 
@@ -368,7 +368,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.99 2010/09/16 13:38:05 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.100 2010/09/22 02:18:38 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -698,9 +698,9 @@ int main (int argc, char *argv[]) try {
 
       case UPDATE_DM: update_dm_from_eph = true; break;
 
-      case IONO_RM:
-        iono_rm = fromstring<double>(optarg);
-        command += " --iono_rm ";
+      case AUX_RM:
+        aux_rm = fromstring<double>(optarg);
+        command += " --aux_rm ";
         command += optarg;
         break;
 
@@ -1063,12 +1063,12 @@ int main (int argc, char *argv[]) try {
 	  cout << arch->get_filename() << " defaradayed" <<endl;
       }
 
-      if (iono_rm)
+      if (aux_rm)
       {
 	if (verbose)
-	  cout << "pam: correct ionospheric Faraday rotation; iono RM="
-	       << iono_rm << endl;
-	correct_ionospheric_rm (arch, iono_rm);
+	  cout << "pam: correct auxiliary Faraday rotation; iono RM="
+	       << aux_rm << endl;
+	correct_auxiliary_rm (arch, aux_rm);
       }
 
       if (fscr) {
@@ -1337,19 +1337,28 @@ void get_dm_keywords(vector<string>& keywords)
 #include "Pauli.h"
 
 #include "Pulsar/FaradayRotation.h"
-#include "Pulsar/ProcHistory.h"
+#include "Pulsar/AuxColdPlasma.h"
+#include "Pulsar/AuxColdPlasmaMeasures.h"
 
-void correct_ionospheric_rm (Pulsar::Archive* archive, double iono_rm)
+using namespace Pulsar;
+
+void correct_auxiliary_rm (Archive* archive, double aux_rm)
 {
   Pauli::basis().set_basis(archive->get_basis());
 
-  Reference::To<Pulsar::FaradayRotation> xform = new Pulsar::FaradayRotation;
-  xform->set_rotation_measure( iono_rm );
+  Reference::To<FaradayRotation> xform = new FaradayRotation;
+  xform->set_rotation_measure( aux_rm );
   xform->set_reference_wavelength( 0 );
   xform->just_do_it (archive);
 
-  Pulsar::ProcHistory* history = archive->get<Pulsar::ProcHistory>();
-  if ( history )
-    history->set_ifr_mthd ( "pam --iono_rm " + tostring(iono_rm) );
-}
+  AuxColdPlasma* history = archive->getadd<AuxColdPlasma>();
+  history->set_birefringence_model_name ( "pam --aux_rm" );
+  history->set_birefringence_corrected (true);
 
+  for (unsigned i=0; i<archive->get_nsubint(); i++)
+  {
+    Integration* subint = archive->get_Integration(i);
+    AuxColdPlasmaMeasures* aux = subint->getadd<AuxColdPlasmaMeasures>();
+    aux->set_rotation_measure (aux_rm);
+  }
+}

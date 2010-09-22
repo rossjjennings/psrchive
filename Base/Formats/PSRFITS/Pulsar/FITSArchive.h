@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.65 $
-   $Date: 2010/05/31 05:50:54 $
+   $Revision: 1.66 $
+   $Date: 2010/09/22 02:18:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -22,7 +22,6 @@
 namespace Pulsar
 {
   class FITSHdrExtension;
-  class Pointing;
   class ObsExtension;
   class WidebandCorrelator;
   class Receiver;
@@ -38,6 +37,9 @@ namespace Pulsar
   class FITSSUBHdrExtension;
   class ProfileColumn;
   class CoherentDedispersion;
+
+  class Pointing;
+  class AuxColdPlasmaMeasures;
 
   //! Loads and unloads PSRFITS archives
 
@@ -95,9 +97,6 @@ namespace Pulsar
     //! Unload FITSHdrExtension to the current HDU of the specified FITS file
     static void unload (fitsfile* fptr, const FITSHdrExtension*);
 
-    //! Unload Pointing to the specified row of the subint table
-    static void unload (fitsfile* fptr, const Pointing*, int row);
-
     //! Unload ObsExtension to the current HDU of the specified FITS file
     static void unload (fitsfile* fptr, const ObsExtension*);
     
@@ -139,6 +138,13 @@ namespace Pulsar
     
     //! Unload CoherentDedispersion
     static void unload (fitsfile* fptr, const CoherentDedispersion*);
+
+    //! Unload Pointing to the specified row of the subint table
+    static void unload (fitsfile* fptr, const Pointing*, int row);
+
+    //! Unload Pointing to the specified row of the subint table
+    static void unload (fitsfile* fptr, const AuxColdPlasmaMeasures*, int row);
+
 
     //! Get the offs_sub value (only present in fits files)
     double get_offs_sub( unsigned int isub ) const;
@@ -236,8 +242,6 @@ namespace Pulsar
     void load_PolnCalibratorExtension (fitsfile*);
     void load_FluxCalibratorExtension (fitsfile*);
     void load_CalibratorStokes (fitsfile*);
-    void load_Pointing (fitsfile* fptr, int row,
-			Pulsar::Integration* integ);
     void load_Receiver (fitsfile*);
     void load_ITRFExtension (fitsfile*);
     void load_CalInfoExtension (fitsfile*);
@@ -247,6 +251,9 @@ namespace Pulsar
 
     void load_integration_state ( fitsfile * );
     void load_state ( fitsfile * );
+
+    void load_Pointing (fitsfile* fptr, int row, Integration*);
+    void load_Plasma (fitsfile* fptr, int row, Integration*);
 
     void interpret_scale ( );
     void interpret_pol_type ( );

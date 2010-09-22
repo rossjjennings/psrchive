@@ -7,6 +7,7 @@
 
 #include "Pulsar/IntegrationTI.h"
 #include "Pulsar/Pointing.h"
+#include "Pulsar/AuxColdPlasmaMeasures.h"
 
 Pulsar::IntegrationTI::IntegrationTI ()
 {
@@ -42,6 +43,9 @@ Pulsar::IntegrationTI::IntegrationTI ()
 			&Integration::get_nchan ));
 
   import( "point", Pulsar::Pointing::Interface(),
-	  ( Pointing* (Integration::*) () ) &Integration::get<Pointing> );
+	  &Integration::getadd<Pointing> );
+
+  import( "aux", Pulsar::AuxColdPlasmaMeasures::Interface(),
+	  &Integration::getadd<AuxColdPlasmaMeasures> );
 }
 

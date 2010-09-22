@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveExtension.h,v $
-   $Revision: 1.4 $
-   $Date: 2010/08/20 03:15:20 $
-   $Author: sosl $ */
+   $Revision: 1.5 $
+   $Date: 2010/09/22 02:18:38 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Archive_Extension_h
 #define __Pulsar_Archive_Extension_h
@@ -80,16 +80,9 @@ namespace Pulsar
     if (ext)
       return ext;
 
-    try
-    {
-      Reference::To<T> add_ext = new T;
-      add_extension (add_ext);
-      return add_ext;
-    }
-    catch (Error& error)
-    {
-      return 0;
-    }
+    Reference::To<T> add_ext = new T;
+    add_extension (add_ext);
+    return add_ext;
   }
 
 }

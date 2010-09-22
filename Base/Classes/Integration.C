@@ -1,15 +1,19 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2002-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/Archive.h"
+
 #include "Pulsar/IntegrationExtension.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/IntegrationMeta.h"
 #include "Pulsar/Profile.h"
+
+#include "Pulsar/AuxColdPlasma.h"
+#include "Pulsar/AuxColdPlasmaMeasures.h"
 
 #include "Error.h"
 #include "typeutil.h"
@@ -395,6 +399,85 @@ try {
 }
 catch (Error& error) {
   throw error += "Pulsar::Integration::get_faraday_corrected";
+}
+
+
+double Pulsar::Integration::get_effective_dispersion_measure () const try
+{
+  double dm = 0;
+
+  if (! get_dedispersed())
+    dm += get_dispersion_measure ();
+
+  if (! get_auxiliary_dispersion_corrected())
+  {    
+    const AuxColdPlasmaMeasures* aux = get<AuxColdPlasmaMeasures>();
+    if (aux)
+      dm += aux->get_dispersion_measure();
+  }
+  return dm;
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::Integration::get_effective_dispersion_measure";
+}
+
+//! Auxiliary inter-channel dispersion delay has been removed
+bool Pulsar::Integration::get_auxiliary_dispersion_corrected () const
+try
+{
+  if (orphaned)
+    return orphaned->get_auxiliary_dispersion_corrected ();
+
+  const AuxColdPlasma* aux = parent->get<AuxColdPlasma>();
+  if (aux)
+    return aux->get_dispersion_corrected();
+
+  return false;
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::Integration::get_auxiliary_dispersion_corrected ";
+}
+
+
+
+double Pulsar::Integration::get_effective_rotation_measure () const try
+{
+  double rm = 0;
+
+  if (! get_faraday_corrected())
+    rm += get_rotation_measure ();
+
+  if (! get_auxiliary_birefringence_corrected())
+  {    
+    const AuxColdPlasmaMeasures* aux = get<AuxColdPlasmaMeasures>();
+    if (aux)
+      rm += aux->get_rotation_measure();
+  }
+  return rm;
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::Integration::get_effective_rotation_measure";
+}
+
+//! Auxiliary inter-channel birefringence has been removed
+bool Pulsar::Integration::get_auxiliary_birefringence_corrected () const
+try
+{
+  if (orphaned)
+    return orphaned->get_auxiliary_birefringence_corrected ();
+
+  const AuxColdPlasma* aux = parent->get<AuxColdPlasma>();
+  if (aux)
+    return aux->get_birefringence_corrected();
+
+  return false;
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::Integration::get_auxiliary_birefringence_corrected ";
 }
 
 //! Get the feed configuration of the receiver

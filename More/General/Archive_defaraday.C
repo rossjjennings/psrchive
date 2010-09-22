@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006-2009 by Willem van Straten
+ *   Copyright (C) 2006-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,6 +8,9 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Pulsar.h"
+
+#include "Pulsar/AuxColdPlasma.h"
+
 #include "Pauli.h"
 
 using namespace std;
@@ -34,5 +37,6 @@ void Pulsar::Archive::defaraday ()
     get_Integration(i)->defaraday ();
   
   set_faraday_corrected (true);
+  getadd<AuxColdPlasma>()->set_birefringence_corrected (true);
 }
 

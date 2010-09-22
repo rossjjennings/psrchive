@@ -1,21 +1,22 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+
+#include "Pulsar/AuxColdPlasma.h"
 
 /*!
   The dedisperse method removes the dispersive delay between
   each frequency channel and that of the reference frequency
   defined by get_centre_frequency.
 */
-void Pulsar::Archive::dedisperse () try {
-
+void Pulsar::Archive::dedisperse () try
+{
   if (get_nsubint() == 0)
     return;
 
@@ -23,7 +24,7 @@ void Pulsar::Archive::dedisperse () try {
     get_Integration(isub) -> dedisperse ();
 
   set_dedispersed (true);
-
+  getadd<AuxColdPlasma>()->set_dispersion_corrected (true);
 }
 catch (Error& error) {
   throw error += "Pulsar::Archive::dedisperse";

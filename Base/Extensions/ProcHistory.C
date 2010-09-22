@@ -18,41 +18,11 @@ using namespace std;
 Pulsar::ProcHistory::ProcHistory ()
   : Extension ("ProcHistory")
 {
-  init();
-}
-
-Pulsar::ProcHistory::ProcHistory (const ProcHistory& extension)
-  : Extension ("ProcHistory")
-{
-  operator = (extension);
-}
-
-const Pulsar::ProcHistory& 
-Pulsar::ProcHistory::operator= (const ProcHistory& extension)
-{
-  rows = extension.rows;
-  command_str = extension.command_str; 
-  the_cal_mthd = extension.the_cal_mthd;
-  the_sc_mthd = extension.the_sc_mthd;
-  the_cal_file = extension.the_cal_file;
-  the_rfi_mthd = extension.the_rfi_mthd;
-  the_ifr_mthd = extension.the_ifr_mthd;
-  return *this;
-}
-
-Pulsar::ProcHistory::~ProcHistory ()
-{
-}
-
-void Pulsar::ProcHistory::init ()
-{
-  rows.resize (0);
   command_str  = "UNKNOWN";
   the_cal_mthd = "NONE";
   the_sc_mthd  = "NONE";
   the_cal_file = "NONE";
   the_rfi_mthd = "NONE";
-  the_ifr_mthd = "NONE";
 }
 
 //! Get the number of rows
@@ -136,7 +106,7 @@ string Pulsar::ProcHistory::get_cal_file()
   return the_cal_file;
 }
 
-void Pulsar::ProcHistory::set_rfi_mthd(string str)
+void Pulsar::ProcHistory::set_rfi_mthd (string str)
 {
   the_rfi_mthd = str;
 }
@@ -144,16 +114,6 @@ void Pulsar::ProcHistory::set_rfi_mthd(string str)
 string Pulsar::ProcHistory::get_rfi_mthd()
 {
   return the_rfi_mthd;
-}
-
-void Pulsar::ProcHistory::set_ifr_mthd(string str)
-{
-  the_ifr_mthd = str;
-}
-
-string Pulsar::ProcHistory::get_ifr_mthd()
-{
-  return the_ifr_mthd;
 }
 
 void Pulsar::ProcHistory::add_blank_row ()
@@ -166,11 +126,7 @@ void Pulsar::ProcHistory::add_blank_row ()
 // ProcHistory::row methods
 //
 
-Pulsar::ProcHistory::row::~row ()
-{
-}
-
-void Pulsar::ProcHistory::row::init ()
+Pulsar::ProcHistory::row::row ()
 {
   date_pro = "UNSET";
   proc_cmd = "UNSET";
@@ -179,8 +135,10 @@ void Pulsar::ProcHistory::row::init ()
   cal_mthd = "NONE";
   cal_file = "NONE";
   rfi_mthd = "NONE";
-  ifr_mthd = "NONE";
   dds_mthd = "UNSET";
+
+  aux_rm_model = "NONE";
+  aux_dm_model = "NONE";
 
   nsub     = 0;
   npol     = 0;
@@ -197,6 +155,10 @@ void Pulsar::ProcHistory::row::init ()
   be_corr  = 0;
   rm_corr  = 0;
   dedisp   = 0;
+
+  aux_rm_corr = 0;
+  aux_dm_corr = 0;
+
   scale    = Signal::FluxDensity;
 }
 

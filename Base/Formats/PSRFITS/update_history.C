@@ -1,11 +1,9 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2008 by Willem van Straten
+ *   Copyright (C) 2003-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-
-using namespace std;
 
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Integration.h"
@@ -13,8 +11,11 @@ using namespace std;
 
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Backend.h"
+#include "Pulsar/AuxColdPlasma.h"
 
 #include "strutil.h"
+
+using namespace std;
 
 string fits_scale_string (Signal::Scale scale, bool verbose)
 {
@@ -126,5 +127,19 @@ void Pulsar::FITSArchive::update_history()
     last.cal_mthd = "NONE";
 
   last.cal_file = history->get_cal_file();
-  last.rfi_mthd = history->get_rfi_mthd();;
+  last.rfi_mthd = history->get_rfi_mthd();
+
+  /*
+    Auxiliary RM and DM correction information
+  */
+
+  AuxColdPlasma* aux = get<AuxColdPlasma> ();
+  if (aux)
+  {
+    last.aux_dm_model = aux->get_dispersion_model_name ();
+    last.aux_dm_corr = aux->get_dispersion_corrected ();
+
+    last.aux_rm_model = aux->get_birefringence_model_name ();
+    last.aux_rm_corr = aux->get_birefringence_corrected ();
+  }
 }

@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '4.6             '   / Header version 
+HDRVER  = '4.7             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -132,8 +132,14 @@ TTYPE#  = CAL_FILE            / Name of gain calibration file
 TFORM#  = 32A                 / 32-char string
 TTYPE#  = RFI_MTHD            / RFI excision method
 TFORM#  = 32A                 / 32-char string
-TTYPE#  = IFR_MTHD            / Ionospheric Faraday rotation correction method
+TTYPE#  = RM_MODEL            / Auxiliary Faraday rotation model description
 TFORM#  = 32A                 / 32-char string
+TTYPE#  = AUX_RM_C            / Auxiliary Faraday rotation corrected flag
+TFORM#  = 1I                  / Integer flag 
+TTYPE#  = DM_MODEL            / Auxiliary dispersion model description
+TFORM#  = 32A                 / 32-char string
+TTYPE#  = AUX_DM_C            / Auxiliary dispersion corrected flag
+TFORM#  = 1I                  / Integer flag
 END
 #
 ###############################################################################
@@ -490,6 +496,12 @@ TUNIT#  = deg                  / Units of field
 TTYPE#  = TEL_ZEN              / [deg] Telescope zenith angle at subint centre
 TFORM#  = 1E                   / Float
 TUNIT#  = deg                  / Units of field
+TTYPE#  = AUX_DM               / additional DM (ionosphere, corona, etc.)
+TFORM#  = 1D                   / Double
+TUNIT#  = CM-3 PC              / units of field
+TTYPE#  = AUX_RM               / additional RM (ionosphere, corona, etc.)
+TFORM#  = 1D                   / Double
+TUNIT#  = RAD M-2              / units of field
 TTYPE#  = DAT_FREQ             / [MHz] Centre frequency for each channel
 TFORM#  = E                    / NCHAN floats
 TUNIT#  = MHz                  / Units of field

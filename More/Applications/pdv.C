@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.47 $
-   $Date: 2010/08/09 03:40:14 $
-   $Author: jonathan_khoo $ */
+   $Revision: 1.48 $
+   $Date: 2010/09/22 02:18:38 $
+   $Author: straten $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -235,7 +235,7 @@ void DisplayHistoryUsage( void )
   "    CAL_MTHD           Calibration method \n"
   "    CAL_FILE           Name of gain calibration file \n"
   "    RFI_MTHD           RFI excision method \n"
-  "    IFR_MTHD           Ionospheric Faraday rotation correction method \n"
+  "    RM_MODEL           Auxiliary Faraday rotation model name \n"
   << endl;
 }
 
@@ -894,8 +894,8 @@ void DisplayHistory( vector<string> filenames, vector<string> params )
                 ts << (*rit).cal_file;
               else if( (*pit) == "RFI_MTHD" )
                 ts << (*rit).rfi_mthd;
-              else if( (*pit) == "IFR_MTHD" )
-                ts << (*rit).ifr_mthd;
+              else if( (*pit) == "RM_MODEL" )
+                ts << (*rit).aux_rm_model;
               else
                 ts << "INVALID";
             }

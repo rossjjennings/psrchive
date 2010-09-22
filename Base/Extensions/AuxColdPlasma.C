@@ -13,3 +13,9 @@ Pulsar::AuxColdPlasma::AuxColdPlasma ()
 {
   dispersion_corrected = birefringence_corrected = false;
 }
+
+//! Return a text interfaces that can be used to access this instance
+TextInterface::Parser* Pulsar::AuxColdPlasma::get_interface()
+{
+  return new Interface( this );
+}

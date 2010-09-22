@@ -23,15 +23,6 @@ namespace Pulsar {
     //Default constructor
     ProcHistory ();
     
-    // Copy constructor
-    ProcHistory (const Pulsar::ProcHistory& extension);
-    
-    // Operator =
-    const ProcHistory& operator= (const ProcHistory& extension);
-    
-    // Destructor
-    ~ProcHistory ();
-    
     //! Clone method
     ProcHistory* clone () const { return new ProcHistory( *this ); }
     
@@ -56,7 +47,7 @@ namespace Pulsar {
     public:
       
       // Default constructor
-      row () { init(); }
+      row ();
       
       // Text interface to a ProcHistory instance
       class Interface : public TextInterface::To<row>
@@ -93,20 +84,20 @@ namespace Pulsar {
       int be_corr;
       int rm_corr;
       int dedisp;
+
+      int aux_rm_corr;
+      int aux_dm_corr;
+
       std::string dds_mthd;
       std::string sc_mthd;
       std::string cal_mthd;
       std::string cal_file;
       std::string rfi_mthd;
-      std::string ifr_mthd;
-      std::string scale;
 
-      //Destructor
-      ~row ();
-      
-      //Initialisation
-      void init ();
-      
+      std::string aux_rm_model;
+      std::string aux_dm_model;
+
+      std::string scale;      
     };
     
     // The storage array
@@ -124,7 +115,6 @@ namespace Pulsar {
     std::string the_sc_mthd;
     std::string the_cal_file;
     std::string the_rfi_mthd;
-    std::string the_ifr_mthd;
 
     ProcHistory::row& get_first ();
     ProcHistory::row& get_last ();
@@ -139,9 +129,7 @@ namespace Pulsar {
     std::string get_cal_file ();
     void   set_rfi_mthd (std::string str);
     std::string get_rfi_mthd ();
-    void   set_ifr_mthd (std::string str);
-    std::string get_ifr_mthd ();
-    
+
     int get_last_nbin_prd( void ) const { return rows.back().nbin_prd; }
     double get_last_tbin( void ) const { return rows.back().tbin; }
     double get_last_chan_bw( void ) const { return rows.back().chan_bw; }
@@ -150,7 +138,6 @@ namespace Pulsar {
     
   private:
     
-    void init ();
     void check_irow (unsigned irow) const;
   };
   

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExpert.h,v $
-   $Revision: 1.13 $
-   $Date: 2008/02/05 05:25:30 $
+   $Revision: 1.14 $
+   $Date: 2010/09/22 02:18:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationExpert_h
@@ -72,12 +72,12 @@ namespace Pulsar {
     { instance->pscrunch (); }
 
     //! Dedispersion worker function
-    void dedisperse (unsigned ichan, unsigned kchan, double dm, double f0)
-    { instance->dedisperse (ichan, kchan, dm, f0); }
+    void dedisperse (unsigned ichan, unsigned kchan, double f0)
+    { instance->dedisperse (ichan, kchan, f0); }
 
     //! Defaraday worker function
-    void defaraday (unsigned ichan, unsigned kchan, double rm, double f0)
-    { instance->defaraday (ichan, kchan, rm, f0); }
+    void defaraday (unsigned ichan, unsigned kchan, double f0)
+    { instance->defaraday (ichan, kchan, f0); }
 
     //! Swap the two specified Profiles
     void swap_profiles (unsigned ipol, unsigned ichan,

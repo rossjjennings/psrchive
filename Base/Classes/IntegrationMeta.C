@@ -7,6 +7,7 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationMeta.h"
+#include "Pulsar/AuxColdPlasma.h"
 
 //! Construct from the parent Archive instance
 Pulsar::Integration::Meta::Meta (const Archive* parent)
@@ -15,8 +16,22 @@ Pulsar::Integration::Meta::Meta (const Archive* parent)
   set_bandwidth( parent->get_bandwidth() );
   set_dispersion_measure( parent->get_dispersion_measure() );
   set_dedispersed( parent->get_dedispersed() );
+
   set_rotation_measure( parent->get_rotation_measure() );
   set_faraday_corrected( parent->get_faraday_corrected() );
+
+  const AuxColdPlasma* aux = parent->get<AuxColdPlasma> ();
+  if (aux)
+  {
+    set_auxiliary_dispersion_corrected (aux->get_dispersion_corrected());
+    set_auxiliary_birefringence_corrected (aux->get_birefringence_corrected());
+  }
+  else
+  {
+    set_auxiliary_dispersion_corrected (false);
+    set_auxiliary_birefringence_corrected (false);
+  }
+
   set_state( parent->get_state() );
   set_basis( parent->get_basis() );
 }
@@ -109,3 +124,24 @@ void Pulsar::Integration::Meta::set_state (Signal::State v)
   state = v;
 }
 
+//! Auxiliary inter-channel dispersion delay has been removed
+bool Pulsar::Integration::Meta::get_auxiliary_dispersion_corrected () const
+{
+  return auxiliary_dispersion_corrected;
+}
+
+void Pulsar::Integration::Meta::set_auxiliary_dispersion_corrected (bool flag)
+{
+  auxiliary_dispersion_corrected = flag;
+}
+
+//! Auxiliary inter-channel birefringence has been removed
+bool Pulsar::Integration::Meta::get_auxiliary_birefringence_corrected () const
+{
+  return auxiliary_birefringence_corrected;
+}
+
+void Pulsar::Integration::Meta::set_auxiliary_birefringence_corrected (bool f)
+{
+  auxiliary_birefringence_corrected = f;
+}

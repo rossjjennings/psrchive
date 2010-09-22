@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006-2008 by Willem van Straten
+ *   Copyright (C) 2006-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Dispersion.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/11/13 07:34:46 $
+   $Revision: 1.8 $
+   $Date: 2010/09/22 02:18:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Dispersion_h
@@ -33,14 +33,23 @@ namespace Pulsar {
     //! Default constructor
     Dispersion ();
 
-    //! Return the dispersion measure
+    //! Return the dispersion measure due to the ISM
     double get_correction_measure (const Integration*);
+
+    //! Return the auxiliary dispersion measure (0 if corrected)
+    double get_absolute_measure (const Integration*);
 
     //! Return true if the Integration has been dedispersed
     bool get_corrected (const Integration* data);
 
+    //! Return the effective dispersion measure that remains to be corrected
+    double get_effective_measure (const Integration*);
+
     //! Return zero delay
     double get_identity () { return 0; }
+
+    //! Combine delays
+    void combine (double& result, const double& add) { result += add; }
 
     //! Setup all necessary attributes
     void set (const Integration*);

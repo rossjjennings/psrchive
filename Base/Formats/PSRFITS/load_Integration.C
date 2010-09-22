@@ -290,6 +290,7 @@ try {
   // Load other useful info
 
   load_Pointing (fptr,row,integ);
+  load_Plasma (fptr,row,integ);
 
   // Set up the data vector, only Pulsar::Archive base class is friend
 

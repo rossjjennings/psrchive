@@ -1,17 +1,20 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006-2008 by Willem van Straten
+ *   Copyright (C) 2006-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-
-using namespace std;
 
 #include "Pulsar/Dispersion.h"
 
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
+
+#include "Pulsar/AuxColdPlasmaMeasures.h"
+#include "Pulsar/AuxColdPlasma.h"
+
+using namespace std;
 
 Pulsar::Dispersion::Dispersion ()
 {
@@ -28,6 +31,28 @@ double Pulsar::Dispersion::get_correction_measure (const Integration* data)
   return data->get_dispersion_measure ();
 }
 
+//! Return the auxiliary dispersion measure (0 if corrected)
+double Pulsar::Dispersion::get_absolute_measure (const Integration* data)
+{
+  if (data->get_auxiliary_dispersion_corrected ())
+    return 0;
+
+  const AuxColdPlasmaMeasures* aux = data->get<AuxColdPlasmaMeasures> ();
+  if (!aux)
+    return 0;
+
+  return aux->get_dispersion_measure ();
+}
+
+double Pulsar::Dispersion::get_effective_measure (const Integration* data)
+{
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::Dispersion::get_effective_measure DM="
+         << data->get_effective_dispersion_measure () << endl;
+
+  return data->get_effective_dispersion_measure ();
+}
+
 bool Pulsar::Dispersion::get_corrected (const Integration* data)
 {
   if (Archive::verbose > 2)
@@ -42,6 +67,7 @@ void Pulsar::Dispersion::execute (Archive* arch)
   ColdPlasma<DispersionDelay,Dedisperse>::execute (arch);
   arch->set_dispersion_measure( get_dispersion_measure() );
   arch->set_dedispersed( true );
+  arch->get<AuxColdPlasma>()->set_dispersion_corrected( true );
 }
 
 //! Undo the correction for an entire Pulsar::Archive
@@ -84,4 +110,3 @@ double Pulsar::Dispersion::get_shift () const
 
   return shift / folding_period;
 }
-

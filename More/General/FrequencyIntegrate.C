@@ -60,13 +60,11 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
     return;
   }
 
-  double dm = integration->get_dispersion_measure();
-  bool must_dedisperse = dedisperse && 
-    dm != 0 && !integration->get_dedispersed();
+  double dm = integration->get_effective_dispersion_measure();
+  bool must_dedisperse = dedisperse &&  dm != 0;
 
-  double rm = integration->get_rotation_measure();
-  bool must_defaraday = defaraday && subint_npol == 4 &&
-    rm != 0 && !integration->get_faraday_corrected();
+  double rm = integration->get_effective_rotation_measure();
+  bool must_defaraday = defaraday && subint_npol == 4 && rm != 0;
 
   if (Integration::verbose)
     cerr << 
@@ -92,11 +90,11 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
 	   << " freq=" << reference_frequency << endl;
 
     if (must_dedisperse)
-      integration->expert()->dedisperse (start, stop, dm, reference_frequency);
+      integration->expert()->dedisperse (start, stop, reference_frequency);
 
     if (must_defaraday)
-      integration->expert()->defaraday (start, stop, rm, reference_frequency);
-    
+      integration->expert()->defaraday (start, stop, reference_frequency);
+
     for (unsigned ipol=0; ipol < subint_npol; ipol++)
     {
       if (Integration::verbose)

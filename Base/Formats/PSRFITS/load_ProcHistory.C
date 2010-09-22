@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -10,6 +10,7 @@
 
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Backend.h"
+#include "Pulsar/AuxColdPlasma.h"
 #include "Pulsar/Pulsar.h"
 
 #include "psrfitsio.h"
@@ -156,10 +157,20 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow, float hdr_version )
 
   ensure_printable (hrow->rfi_mthd);
 
-  psrfits_read_col (fptr, "IFR_MTHD", &(hrow->ifr_mthd), row,
+  psrfits_read_col (fptr, "RM_MODEL", &(hrow->aux_rm_model), row,
+		    empty, empty, Pulsar::Archive::verbose > 2);
+  ensure_printable (hrow->aux_rm_model);
+
+  psrfits_read_col (fptr, "AUX_RM_C", &(hrow->aux_rm_corr), row,
+		    0, 0, Pulsar::Archive::verbose > 2);
+
+  psrfits_read_col (fptr, "DM_MODEL", &(hrow->aux_dm_model), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);
 
-  ensure_printable (hrow->ifr_mthd);
+  psrfits_read_col (fptr, "AUX_DM_C", &(hrow->aux_dm_corr), row,
+		    0, 0, Pulsar::Archive::verbose > 2);
+
+  ensure_printable (hrow->aux_dm_model);
 
   psrfits_read_col (fptr, "SCALE", &(hrow->scale), row,
 		    empty, empty, Pulsar::Archive::verbose > 2);
@@ -273,7 +284,6 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   history->set_sc_mthd (last.sc_mthd);
   history->set_cal_file(last.cal_file);
   history->set_rfi_mthd(last.rfi_mthd);
-  history->set_ifr_mthd(last.ifr_mthd);
 
   /*
     WvS - 23 Jun 2004
@@ -357,6 +367,18 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   }
 
   add_extension (history);
+
+  /*
+    Auxiliary RM and DM correction information
+  */
+
+  AuxColdPlasma* aux = getadd<AuxColdPlasma> ();
+
+  aux->set_dispersion_model_name (last.aux_dm_model);
+  aux->set_dispersion_corrected (last.aux_dm_corr);
+
+  aux->set_birefringence_model_name (last.aux_rm_model);
+  aux->set_birefringence_corrected (last.aux_rm_corr);
 
   if (verbose > 2)
     cerr << "FITSArchive::load_ProcHistory exiting" << endl;

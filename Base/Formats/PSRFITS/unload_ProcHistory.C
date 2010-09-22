@@ -46,7 +46,13 @@ void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow) try
   psrfits_write_col (fptr, "CAL_MTHD", row, hrow->cal_mthd);
   psrfits_write_col (fptr, "CAL_FILE", row, hrow->cal_file);
   psrfits_write_col (fptr, "RFI_MTHD", row, hrow->rfi_mthd);
-  psrfits_write_col (fptr, "IFR_MTHD", row, hrow->ifr_mthd);
+
+  psrfits_write_col (fptr, "RM_MODEL", row, hrow->aux_rm_model);
+  psrfits_write_col (fptr, "AUX_RM_C", row, hrow->aux_rm_corr);
+
+  psrfits_write_col (fptr, "DM_MODEL", row, hrow->aux_dm_model);
+  psrfits_write_col (fptr, "AUX_DM_C", row, hrow->aux_dm_corr);
+
   psrfits_write_col (fptr, "SCALE",    row, hrow->scale);
 
   if (Pulsar::Archive::verbose > 2)

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.100 $
-   $Date: 2009/11/10 03:24:35 $
+   $Revision: 1.101 $
+   $Date: 2010/09/22 02:18:38 $
    $Author: straten $ */
 
 /*
@@ -249,6 +249,18 @@ namespace Pulsar {
     //! Get the polarimetric state of the profiles
     Signal::State get_state () const;
 
+    //! Auxiliary inter-channel dispersion delay has been removed
+    bool get_auxiliary_dispersion_corrected () const;
+
+    //! Auxiliary inter-channel birefringence has been removed
+    bool get_auxiliary_birefringence_corrected () const;
+
+    //! Get the effective dispersion measure that remains to be corrected
+    double get_effective_dispersion_measure () const;
+
+    //! Get the effective rotation measure that remains to be corrected
+    double get_effective_rotation_measure () const;
+
     //@}
 
 
@@ -315,6 +327,10 @@ namespace Pulsar {
     //! Template method searches for an Extension of the specified type
     template<class ExtensionType>
     ExtensionType* get ();
+
+    //! Template method returns an Extension of the specified type
+    template<class ExtensionType>
+    ExtensionType* getadd ();
 
     //! Add an Extension to the Integration instance
     /*! The derived class must ensure that only one instance of the Extension
@@ -442,14 +458,6 @@ namespace Pulsar {
     //! The orphaned Integration's attributes
     Reference::To<Meta> orphaned;
 
-    //! Dedispersion worker function
-    void dedisperse (unsigned ichan, unsigned kchan,
-                     double dm, double f0);
-
-    //! Defaraday worker function
-    void defaraday (unsigned ichan, unsigned kchan,
-                    double rm, double f0);
-
     //! Throw exception if ipol or ichan are out of range
     void range_check (unsigned ipol, unsigned ichan) const;
 
@@ -457,6 +465,14 @@ namespace Pulsar {
     Reference::To<Expert> expert_interface;
 
   private:
+
+    //! Dedispersion worker function
+    void dedisperse (unsigned ichan, unsigned kchan,
+                     double reference_frequency);
+
+    //! Defaraday worker function
+    void defaraday (unsigned ichan, unsigned kchan,
+                    double reference_frequency);
 
     //! Converts between coherency products and Stokes parameters
     void poln_convert (Signal::State out_state);

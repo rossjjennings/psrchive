@@ -65,17 +65,9 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
     cerr << "Pulsar::TimeIntegrate::transfrom WARNING"
       " not all Integrations are zero phase aligned" << endl;
 
-  double dm = archive->get_dispersion_measure();
-  bool must_dedisperse = dm != 0 && !archive->get_dedispersed();
-
-  double rm = archive->get_rotation_measure();
-  bool must_defaraday = archive_npol == 4 &&
-    rm != 0 && !archive->get_faraday_corrected();
-
   if (Archive::verbose > 2)
     cerr << "Pulsar::TimeIntegrate::transform nsubint"
-      " input=" << archive_nsub << " output=" << output_nsub << 
-      " dm=" << dm << " rm=" << rm << endl;
+      " input=" << archive_nsub << " output=" << output_nsub << endl;
 
   unsigned start = 0;
   unsigned stop = 0;
@@ -254,15 +246,17 @@ void Pulsar::TimeIntegrate::transform (Archive* archive) try
       for (unsigned iadd=start; iadd < stop; iadd++)
       {
 	Integration* subint = archive->get_Integration (iadd);
-	
-	if (must_dedisperse)
+
+	double dm = subint->get_effective_dispersion_measure();
+	if (dm != 0)
 	  subint->expert()->dedisperse (ichan, ichan+1,
-					dm, reference_frequency);
+					reference_frequency);
 	
-	if (must_defaraday)
+	double rm = subint->get_effective_rotation_measure();
+	if (archive_npol == 4 && rm != 0)
 	  subint->expert()->defaraday (ichan, ichan+1,
-				       rm, reference_frequency);
-	
+				       reference_frequency);
+
 	subint->set_centre_frequency (ichan, reference_frequency);
       }
       

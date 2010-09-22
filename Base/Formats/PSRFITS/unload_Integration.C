@@ -12,7 +12,9 @@
 #include "Pulsar/ProfileColumn.h"
 #include "Pulsar/MoreProfiles.h"
 #include "Pulsar/IntegrationOrder.h"
+
 #include "Pulsar/Pointing.h"
+#include "Pulsar/AuxColdPlasmaMeasures.h"
 
 #include "Pulsar/FITSHdrExtension.h"
 #include "Pulsar/CalInfoExtension.h"
@@ -62,9 +64,13 @@ void Pulsar::FITSArchive::unload_Integration (fitsfile* thefptr, int row,
 
   // Write other useful info
   
-  const Pointing* theExt = integ->get<Pointing>();
-  if (theExt)
-    unload (thefptr,theExt,row);
+  const Pointing* pointing = integ->get<Pointing>();
+  if (pointing)
+    unload (thefptr,pointing,row);
+
+  const AuxColdPlasmaMeasures* plasma = integ->get<AuxColdPlasmaMeasures>();
+  if (plasma)
+    unload (thefptr,plasma,row);
 
   const CalInfoExtension* calinfo = get<CalInfoExtension>();
   bool calfreq_set = calinfo && calinfo->cal_frequency > 0.0;

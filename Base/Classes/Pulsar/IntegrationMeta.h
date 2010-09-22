@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationMeta.h,v $
-   $Revision: 1.1 $
-   $Date: 2008/02/05 05:09:55 $
+   $Revision: 1.2 $
+   $Date: 2010/09/22 02:18:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Integration_Meta_h
@@ -60,16 +60,30 @@ namespace Pulsar {
     Signal::State get_state () const;
     void set_state (Signal::State);
 
+    //! Auxiliary inter-channel dispersion delay has been removed
+    bool get_auxiliary_dispersion_corrected () const;
+    void set_auxiliary_dispersion_corrected (bool);
+
+    //! Auxiliary inter-channel birefringence has been removed
+    bool get_auxiliary_birefringence_corrected () const;
+    void set_auxiliary_birefringence_corrected (bool);
+
   protected:
 
     double centre_frequency;
     double bandwidth;
+
     double dispersion_measure;
     bool dedispersed;
+
     double rotation_measure;
     bool faraday_corrected;
+
     Signal::Basis basis;
     Signal::State state;
+
+    bool auxiliary_dispersion_corrected;
+    bool auxiliary_birefringence_corrected;
 
   };
 

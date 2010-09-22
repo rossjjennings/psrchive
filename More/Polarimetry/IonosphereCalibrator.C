@@ -4,12 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/IonosphereCalibrator.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationExpert.h"
 
 #include "Pulsar/Telescope.h"
-#include "Pulsar/ProcHistory.h"
+#include "Pulsar/AuxColdPlasma.h"
 
 #include "Pulsar/IRIonosphere.h"
 
@@ -29,11 +30,12 @@ void Pulsar::IonosphereCalibrator::calibrate (Archive* archive)
     return;
   }
 
-  ProcHistory* history = archive->get<ProcHistory>();
-  if ( history && history->get_ifr_mthd () != "NONE" ) {
+  AuxColdPlasma* history = archive->get<AuxColdPlasma>();
+  if ( history && history->get_birefringence_corrected () )
+  {
     if (verbose > 2)
       cerr << "Pulsar::IonosphereCalibrator already corrected with " 
-	   << history->get_ifr_mthd() << endl;
+	   << history->get_birefringence_model_name() << endl;
     return;
   }
 
@@ -72,6 +74,8 @@ void Pulsar::IonosphereCalibrator::calibrate (Archive* archive)
   }
 
   if ( history )
-    history->set_ifr_mthd ( "IRI2001 HJL" );
-
+  {
+    history->set_birefringence_corrected (true);
+    history->set_birefringence_model_name ( "IRI2001 HJL" );
+  }
 }

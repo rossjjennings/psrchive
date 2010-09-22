@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/AuxColdPlasma.h,v $
-   $Revision: 1.1 $
-   $Date: 2010/09/19 05:52:34 $
+   $Revision: 1.2 $
+   $Date: 2010/09/22 02:18:38 $
    $Author: straten $ */
 
 #ifndef __AuxColdPlasma_h
@@ -37,6 +37,12 @@ namespace Pulsar {
     //! Clone method
     AuxColdPlasma* clone () const { return new AuxColdPlasma( *this ); }
 
+    //! Return a text interfaces that can be used to access this instance
+    TextInterface::Parser* get_interface();
+
+    //! Return an abbreviated name that can be typed relatively quickly
+    std::string get_short_name () const { return "aux"; }
+
     void set_dispersion_model_name (const std::string& name)
     { dispersion_model_name = name; }
     std::string get_dispersion_model_name () const
@@ -56,6 +62,13 @@ namespace Pulsar {
     { birefringence_corrected = flag; }
     bool get_birefringence_corrected () const
     { return birefringence_corrected; }
+
+    //! Text interface to a AuxColdPlasma instance
+    class Interface : public TextInterface::To<AuxColdPlasma>
+    {
+    public:
+      Interface (AuxColdPlasma* = NULL);
+    };
 
   };
  

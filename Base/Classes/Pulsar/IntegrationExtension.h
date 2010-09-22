@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExtension.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/11/28 05:08:11 $
+   $Revision: 1.3 $
+   $Date: 2010/09/22 02:18:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Integration_Extension_h
@@ -75,6 +75,19 @@ namespace Pulsar
       ( get_ext<T> (this, "Pulsar::Integration::get<Ext>", verbose) );
   }
 
+  /*! If the specified extension type T does not exist, an atempt is made to
+      add it using add_extension. */
+  template<class T>
+  T* Integration::getadd ()
+  {
+    T* ext = get<T>();
+    if (ext)
+      return ext;
+
+    Reference::To<T> add_ext = new T;
+    add_extension (add_ext);
+    return add_ext;
+  }
 }
 
 #endif
