@@ -43,7 +43,6 @@ protected:
   void add_options (CommandLine::Menu&);
 
   Reference::To<Pulsar::Interpreter> interpreter;
-  string script;
 
   //! Load data from filenames provided as arguments
   bool load_files;
@@ -60,8 +59,9 @@ int main (int argc, char** argv)
 psrsh::psrsh ()
   : Application ("psrsh", "command language interpreter")
 {
+  stow_script = true;
   has_manual = true;
-  version = "$Id: psrsh.C,v 1.20 2010/04/06 00:14:59 straten Exp $";
+  version = "$Id: psrsh.C,v 1.21 2010/09/22 03:13:07 straten Exp $";
 
   load_files = true;
 
@@ -95,10 +95,8 @@ void psrsh::add_options (CommandLine::Menu& menu)
 
 void psrsh::run ()
 {
-  if (!filenames.empty())
+  if (!script.empty())
   {
-    script = filenames[0];
-    filenames.erase (filenames.begin());
     name = basename (script);
 
     if (load_files)
@@ -125,8 +123,6 @@ void psrsh::process (Pulsar::Archive* archive)
 
 void psrsh::interpreter_help (const string& cmd)
 {
-  // cerr << "psrsh::interpreter_help cmd='" << cmd << "'" << endl;
-
   cout << endl << interpreter->help (cmd);
 
   exit (0);
