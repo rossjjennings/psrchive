@@ -45,7 +45,6 @@
 using namespace std;
 using namespace Pulsar;
 
-bool Pulsar::Database::verbose = false;
 bool Pulsar::Database::cache_last_cal = true;
 
 /*! By default, the long time scale is set to four weeks. */
@@ -323,9 +322,6 @@ bool Pulsar::operator < (const Database::Entry& a, const Database::Entry& b)
   return a.time < b.time;
 }
 
-
-bool Pulsar::Database::Criterion::match_verbose = false;
-
 Pulsar::Database::Criterion::Criterion ()
 {
   minutes_apart = short_time_scale;
@@ -413,7 +409,7 @@ std::ostream& operator<< (std::ostream& ostr, const Reference::To<const Calibrat
 //! returns true if this matches observation parameters
 bool Pulsar::Database::Criterion::match (const Entry& have) const try
 {
-  if (match_verbose)
+  if (Calibrator::verbose > 1)
     cerr << "Pulsar::Database::Criterion::match" << endl;
  
   match_report = "";
@@ -475,14 +471,14 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const try
     }
   }
 
-  if (match_verbose)
+  if (Calibrator::verbose > 1)
     cerr << "Pulsar::Database::Criterion::match found" << endl;
   
   return true;
 }
 catch (bool f)
 {
-  if (match_verbose)
+  if (Calibrator::verbose > 1)
     cerr << "Pulsar::Database::Criterion::match not found \n\n"
 	 << match_report << endl;
   return f;
@@ -505,7 +501,7 @@ Pulsar::Database::Database (const string& filename)
 {
   path = "unset";
 
-  if (verbose)
+  if (Calibrator::verbose > 2)
     cerr << "Pulsar::Database load " << filename << endl;
 
   load (filename);
@@ -572,7 +568,7 @@ Pulsar::Database::Database (const string& _path,
 
   dirglobtree (&filenames, "", patterns);
 
-  if (verbose)
+  if (Calibrator::verbose > 2)
     cerr << "Pulsar::Database " << filenames.size() 
          << " calibrator files found" << endl;
 
@@ -591,13 +587,13 @@ void Pulsar::Database::construct (const vector<string>& filenames)
   
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
   {
-    if (verbose)
+    if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database loading "
 	   << filenames[ifile] << endl;
     
     newArch = Archive::load(filenames[ifile]);
     
-    if (verbose)
+    if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database create new Entry" << endl;
     
     add (newArch);
@@ -607,7 +603,7 @@ void Pulsar::Database::construct (const vector<string>& filenames)
     cerr << "Pulsar::Database error" << error.get_message() << endl;
   }
 
-  if (verbose)
+  if (Calibrator::verbose > 2)
     cerr << "Pulsar::Database::construct "
          << entries.size() << " Entries" << endl; 
 }
@@ -645,7 +641,7 @@ void Pulsar::Database::load (const string& dbase_filename)
 
   path = temp;
 
-  if (verbose)
+  if (Calibrator::verbose > 2)
     cerr << "Pulsar::Database::load setting path = "
 	 << path << endl;
 
@@ -656,14 +652,14 @@ void Pulsar::Database::load (const string& dbase_filename)
   else
     fscanf (fptr, "Pulsar::Calibration::Database # of entries = %d\n", &count);
 
-  if (verbose)
+  if (Calibrator::verbose > 2)
     cerr << "Pulsar::Database::loading " << count << " entries" << endl;
 
   Entry entry;
 
   while (fgets (temp, 4096, fptr)) try
   {
-    if (verbose)
+    if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database::load '"<< temp << "'" << endl;
 
     entry.load (temp);
@@ -674,7 +670,7 @@ void Pulsar::Database::load (const string& dbase_filename)
     cerr << "Pulsar::Database::load discarding entry:" << error << endl;
   }
 
-  if (verbose)
+  if (Calibrator::verbose > 2)
     cerr << "Pulsar::Database::load " << entries.size() << " entries" <<endl;
 
   fclose (fptr);
@@ -750,7 +746,7 @@ catch (Error& error)
 void Pulsar::Database::all_matching (const Criterion& criterion,
 				     vector<Entry>& matches) const
 {
-  if (verbose)
+  if (Calibrator::verbose > 2)
     cerr << "Pulsar::Database::all_matching " << entries.size()
          << " entries" << endl;
 
@@ -768,7 +764,7 @@ void Pulsar::Database::all_matching (const Criterion& criterion,
 Pulsar::Database::Entry 
 Pulsar::Database::best_match (const Criterion& criterion) const
 {
-  if (Criterion::match_verbose)
+  if (Calibrator::verbose > 1)
     cerr << "Pulsar::Database::best_match " << entries.size()
 	 << " entries" << endl;
   
@@ -812,7 +808,7 @@ Pulsar::Database::Criterion::best (const Entry& a, const Entry& b) const
 Pulsar::Database::Criterion
 Pulsar::Database::Criterion::closest (const Criterion& a, const Criterion& b)
 {
-  if (match_verbose)
+  if (Calibrator::verbose > 1)
     cerr << "Pulsar::Database::Criterion::closest \n"
       " A:" << a.match_count << "=" << a.match_report << "\n"
       " B:" << b.match_count << "=" << b.match_report << endl;
@@ -950,7 +946,7 @@ Pulsar::Database::generateFluxCalibrator (Archive* arch, bool allow_raw) try {
 }
 catch (Error& error)
 {  
-  if (verbose)
+  if (Calibrator::verbose > 2)
     cerr << "Pulsar::Database::generateFluxCalibrator failure"
       " generating processed FluxCal\n" << error.get_message() << endl;
   
@@ -1012,7 +1008,7 @@ void remove_channels (const Pulsar::Archive* arch,
 {
   Pulsar::ChannelSubsetMatch chan_match;
 
-  if (Pulsar::Database::verbose)
+  if (Calibrator::verbose > 2)
     cerr << "Pulsar::Database::generatePolnCalibrator " 
 	 << "BW mismatch, trying channel truncation... " << endl;
 
@@ -1042,7 +1038,7 @@ void remove_channels (const Pulsar::Archive* arch,
     }
   }
 
-  if (Pulsar::Database::verbose) 
+  if (Calibrator::verbose > 2) 
     cerr << "Pulsar::Database::generatePolnCalibrator removed " 
 	 << nremoved << " channels." << endl;
 }
@@ -1082,7 +1078,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
     throw Error (InvalidParam, "Database::generatePolnCalibrator",
 		 "no Pulsar::Archive given");
   
-  if (verbose)
+  if (Calibrator::verbose > 2)
     cerr << "Pulsar::Database::generatePolnCalibrator type="
 	 << type->get_name() << endl;
 
@@ -1094,7 +1090,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
   //
   if (! type->is_a<CalibratorTypes::CompleteJones>()) try
   {
-    if (verbose)
+    if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database::generatePolnCalibrator search for " 
 	"Signal::PolnCal match" << endl;
     entry = best_match (criterion (arch, Signal::PolnCal));
@@ -1113,7 +1109,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
 
   if (! type->is_a<CalibratorTypes::Hybrid>()) try
   {
-    if (verbose)
+    if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database::generatePolnCalibrator search for " 
 	   << type->get_name() << " match" << endl;
     
@@ -1132,12 +1128,12 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
 
   if (cache_last_cal && lastPolnCal && entry == lastEntry)
   {
-    if (verbose)
+    if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database::generatePolnCalibrator using cached calibrator\n";
     return lastPolnCal;
   }
 
-  if (verbose)
+  if (Calibrator::verbose > 2)
     cout << "Pulsar::Database::generatePolnCalibrator constructing from file "
 	 << entry.filename << endl;
 
@@ -1152,7 +1148,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
     feed_ext -> set_transformation ( feed->evaluate() );
   }
 
-  if (verbose > 2)
+  if (Calibrator::verbose > 2)
   {
     if (entry.obsType == Signal::Calibrator)
       cerr << "CAL OF TYPE " <<  entry.calType->get_name() << endl;
@@ -1186,7 +1182,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
   
   if ( type->is_a<CalibratorTypes::Hybrid>() )
   {
-    if (verbose)
+    if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database::generatePolnCalibrator Hybrid" << endl;
     return generateHybridCalibrator (ref_cal, arch);
   }
@@ -1194,7 +1190,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
   // store last calibrator, if we are caching
   if (cache_last_cal)
   {
-    if (verbose)
+    if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database::generatePolnCalibrator caching PolnCalibrator" << endl;
     lastEntry = entry;
     lastPolnCal = ref_cal;
@@ -1214,14 +1210,14 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
 			    "Database::generateHybridCalibrator",
 			    "no Pulsar::ReferenceCalibrator given");
  
-  if (verbose)
+  if (Calibrator::verbose > 2)
     cerr << "Pulsar::Database::generateHybridCalibrator" << endl;
 
   Entry entry;
 
   try
   {
-    if (verbose)
+    if (Calibrator::verbose > 2)
       cerr << "  Attempting to find a matching Phenomenological Model" << endl;
 
     entry = best_match (criterion(arch, new CalibratorTypes::CompleteJones));
@@ -1234,7 +1230,7 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
 
   if (cache_last_cal && lastHybridCal && entry == lastEntry)
   {
-    if (verbose)
+    if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database::generateHybridCalibrator using cached calibrator\n";
     return lastHybridCal;
   }
@@ -1267,7 +1263,7 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
 
   if (cache_last_cal)
   {
-    if (verbose)
+    if (Calibrator::verbose > 2)
       cerr << "Pulsar::Database::generateHybridCalibrator caching HybridCalibrator" << endl;
     lastEntry = entry;
     lastHybridCal = hybrid;

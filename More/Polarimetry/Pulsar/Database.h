@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.23 $
-   $Date: 2010/07/11 04:27:08 $
+   $Revision: 1.24 $
+   $Date: 2010/09/23 05:40:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
@@ -37,8 +37,6 @@ namespace Pulsar {
 
   public:
 
-    //! Verbosity flag
-    static bool verbose;
     //! Cache the last calibrator?
     static bool cache_last_cal;
 
@@ -162,8 +160,6 @@ namespace Pulsar {
       
     public:
       
-      static bool match_verbose;
-
       //! The parameters to match
       Entry entry;
 
