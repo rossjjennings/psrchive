@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/resources/Pulsar/SimplePredictor.h,v $
-   $Revision: 1.3 $
-   $Date: 2008/09/15 06:26:52 $
+   $Revision: 1.4 $
+   $Date: 2010/09/24 01:53:21 $
    $Author: straten $ */
 
 #ifndef __SimplePredictor_h
@@ -103,6 +103,9 @@ namespace Pulsar {
 
     //! Dispersion measure
     double dispersion_measure;
+
+    //! Telescope name
+    std::string telescope;
 
   };
 

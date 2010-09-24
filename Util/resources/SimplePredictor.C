@@ -1,13 +1,16 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Willem van Straten
+ *   Copyright (C) 2007-2010 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/SimplePredictor.h"
+#include "Pulsar/Site.h"
 
 #include "inverse_phase.h"
+
+#include "Barycentre.h"
 #include "Physical.h"
 #include "strutil.h"
 #include "Error.h"
@@ -218,9 +221,46 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
 	coefs.resize(2);
       coefs[1] = -0.5 * coefs[0] * acc / Pulsar::speed_of_light;
     }
+
     else if (key == "EPOCH:")
     {
-	    reference_epoch = MJD::MJD(fromstring<double>(val));
+      reference_epoch = MJD::MJD(val);
+    }
+
+    else if (key == "TELESCOPE:")
+    {
+      telescope = val;
+    }
+
+    else if (key == "BARYPERIOD:")
+    {
+      long double period = fromstring<long double>(val);
+      if (coefs.size() == 0)
+	coefs.resize(1);
+
+      Barycentre barry;
+      barry.set_epoch( reference_epoch );
+      barry.set_coordinates( coordinates );
+
+      using Pulsar::Site;
+      const Site* site = Site::location (telescope);
+
+      double x=0, y=0, z=0;
+
+      if (site)
+	site->get_xyz (x, y, z);
+      else
+      {
+	cerr << "Pulsar::SimplePredictor::load"
+	  " cannot determine coordinates of antenna"
+	  "\n\t" "defaulting to geocenter" << endl;
+	x = y = z = 0.0;
+      }
+
+      barry.set_observatory_xyz (x, y, z);
+
+      period *= barry.get_Doppler();
+      coefs[0] = 1/period;
     }
 
     else
