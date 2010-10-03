@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.48 $
-   $Date: 2010/09/22 02:18:38 $
-   $Author: straten $ */
+   $Revision: 1.49 $
+   $Date: 2010/10/03 11:39:23 $
+   $Author: jonathan_khoo $ */
 
 
 #ifdef HAVE_CONFIG_H
@@ -242,12 +242,18 @@ void DisplayHistoryUsage( void )
 
 void MinMaxHeader( Reference::To< Pulsar::Archive > archive )
 {
+  Pulsar::WidebandCorrelator* wbc = archive->get<WidebandCorrelator>();
+
   cout << "@" << archive->get_filename()
   << " " << archive->start_time()
   << " " << archive->get_centre_frequency()
   << " " << archive->get<WidebandCorrelator>()->get_config()
-  << " nchan: " << archive->get_nchan()
-  << " npol: " << archive->get_npol()
+  << " nchan: " << archive->get_nchan();
+
+  if (wbc)
+    cout << " " << archive->get<WidebandCorrelator>()->get_config();
+
+  cout << " npol: " << archive->get_npol()
   << " nsub: " << archive->get_nsubint() << endl
   << "sub     pol chan  bin      max      pol chan  bin      min" << endl;
 }
