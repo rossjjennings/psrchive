@@ -368,7 +368,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.100 2010/09/22 02:18:38 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.101 2010/10/05 23:59:50 jonathan_khoo Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -684,9 +684,17 @@ int main (int argc, char *argv[]) try {
 
       case DD: dededisperse = true; break;
 	  
-      case RR: dedefaraday = true; break;
+      case RR:
+        dedefaraday = true;
+        command += " --RR ";
+        break;
 
-      case RM: rm = atof(optarg); newrm = true; break;
+      case RM:
+        aux_rm = fromstring<double>(optarg);
+        newrm = true;
+        command += " --RM ";
+        command += optarg;
+        break;
 
       case SPC: scattered_power_correction = true; break;
 	
