@@ -29,6 +29,8 @@
 #include <Pulsar/CalInfoExtension.h>
 #include <Pulsar/TapeInfo.h>
 
+#include <Pulsar/AuxColdPlasma.h>
+
 #include <Pulsar/WeightedFrequency.h>
 
 
@@ -238,13 +240,73 @@ string get_dmc( Reference::To< Archive > archive )
 }
 
 
-string get_rmc( Reference::To< Archive > archive )
+string get_dm_aux_c( Reference::To< Archive > archive )
+{
+  string result = "UNDEF";
+
+  Reference::To<AuxColdPlasma> ext = archive->get<AuxColdPlasma>();
+
+  if( ext )
+  {
+    result = tostring<bool>( ext->get_dispersion_corrected() );
+  }
+
+  return result;
+}
+
+
+string get_dm_model( Reference::To< Archive > archive )
+{
+  string result = "UNDEF";
+
+  Reference::To<AuxColdPlasma> ext = archive->get<AuxColdPlasma>();
+
+  if( ext )
+  {
+    result = ext->get_dispersion_model_name();
+  }
+
+  return result;
+}
+
+
+string get_rm_c( Reference::To< Archive > archive )
 {
   return tostring( archive->get_faraday_corrected() );
 }
 
 
-string get_polc( Reference::To< Archive > archive )
+string get_rm_aux_c( Reference::To< Archive > archive )
+{
+  string result = "UNDEF";
+
+  Reference::To<AuxColdPlasma> ext = archive->get<AuxColdPlasma>();
+
+  if( ext )
+  {
+    result = tostring<bool>( ext->get_birefringence_corrected() );
+  }
+
+  return result;
+}
+
+
+string get_rm_model( Reference::To< Archive > archive )
+{
+  string result = "UNDEF";
+
+  Reference::To<AuxColdPlasma> ext = archive->get<AuxColdPlasma>();
+
+  if( ext )
+  {
+    result = ext->get_birefringence_model_name();
+  }
+
+  return result;
+}
+
+
+string get_pol_c( Reference::To< Archive > archive )
 {
   return tostring( archive->get_poln_calibrated() );
 }
@@ -1608,8 +1670,10 @@ void PrintExtdHlp( void )
 
     "OBSERVATION PARAMETERS \n"
     "bw                              Observation Bandwidth (MHz) \n"
-    "dm                              Dispersion measure \n"
+    "dm                              Intersteller dispersion measure \n"
     "dmc                             Dispersion corrected (boolean) \n"
+    "dm_aux_c                        Auxiliary dispersion corrected (boolean) \n"
+    "dm_model                        Dispersion model name \n"
     "wt_freq                         Centre frequency weighted value \n"
     "freq_phs                        Pulse phase frequency \n"
     "freq_pa                         Position angle frequency \n"
@@ -1620,9 +1684,11 @@ void PrintExtdHlp( void )
     "npol_obs                        Observed number of polarizations \n"
     "nsub_obs                        Observed number of Sub-Integrations \n"
     "obs_mode                        Observation Mode (PSR, CAL, SEARCH) \n"
-    "polc                            Polarization calibrated (boolean) \n"
-    "rm                              Rotation measure (rad/m^2) \n"
-    "rmc                             Faraday Rotation corrected (boolean) \n"
+    "pol_c                           Polarization calibrated (boolean) \n"
+    "rm                              Interstellar rotation measure (rad/m^2) \n"
+    "rm_c                            Faraday Rotation corrected (boolean) \n"
+    "rm_aux_c                        Auxiliary rotation corrected (boolean) \n"
+    "rm_model                        Rotation model name \n"
     "scale                           Units of profile amplitudes \n"
     "state                           State of profile amplitudes \n"
     "tsub                            The duration of the first subint (s) \n"
@@ -1853,8 +1919,12 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "scale" ) return get_scale( archive );
     else if( command == "type" ) return get_type( archive );
     else if( command == "dmc" ) return get_dmc( archive );
-    else if( command == "rmc" ) return get_rmc( archive );
-    else if( command == "polc" ) return get_polc( archive );
+    else if( command == "dm_aux_c" ) return get_dm_aux_c( archive );
+    else if( command == "dm_model" ) return get_dm_model( archive );
+    else if( command == "rm_c" ) return get_rm_c( archive );
+    else if( command == "rm_aux_c" ) return get_rm_aux_c( archive );
+    else if( command == "rm_model" ) return get_rm_model( archive );
+    else if( command == "pol_c" ) return get_pol_c( archive );
     else if( command == "freq" ) return get_freq( archive );
     else if( command == "freq_pa" ) return get_freq_pa( archive );
     else if( command == "freq_phs" ) return get_freq_phs( archive );
