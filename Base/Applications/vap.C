@@ -1670,7 +1670,7 @@ void PrintExtdHlp( void )
 
     "OBSERVATION PARAMETERS \n"
     "bw                              Observation Bandwidth (MHz) \n"
-    "dm                              Intersteller dispersion measure \n"
+    "dm                              Interstellar dispersion measure \n"
     "dmc                             Dispersion corrected (boolean) \n"
     "dm_aux_c                        Auxiliary dispersion corrected (boolean) \n"
     "dm_model                        Dispersion model name \n"
