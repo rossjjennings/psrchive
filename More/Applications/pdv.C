@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pdv.C,v $
-   $Revision: 1.49 $
-   $Date: 2010/10/03 11:39:23 $
+   $Revision: 1.50 $
+   $Date: 2010/10/06 00:35:45 $
    $Author: jonathan_khoo $ */
 
 
@@ -36,6 +36,7 @@ using Pulsar::FITSArchive;
 #include <Pulsar/Integration.h>
 #include <Pulsar/Pointing.h>
 #include <Pulsar/WidebandCorrelator.h>
+#include <Pulsar/AuxColdPlasmaMeasures.h>
 
 #include <table_stream.h>
 #include <algorithm>
@@ -95,6 +96,7 @@ using Pulsar::Interpreter;
 using Pulsar::ProcHistory;
 using Pulsar::IntegrationOrder;
 using Pulsar::WidebandCorrelator;
+using Pulsar::AuxColdPlasmaMeasures;
 
 
 
@@ -200,6 +202,8 @@ void DisplaySubintsUsage( void )
   "    TEL_AZ             [deg] Telescope azimuth at subint centre \n"
   "    TEL_ZEN            [deg] Telescope zenith angle at subint centre \n"
   "    S/N                Signal to noise ratio for each subint\n"
+  "    AUX_RM             Auxiliary rotation measure for each subint\n"
+  "    AUX_DM             Auxiliary dispersion measure for each subint\n"
   << endl;
 }
 
@@ -789,6 +793,26 @@ void DisplaySubints( vector<string> filenames, vector<string> parameters )
             else
               atten_string = "INVALID";
             cout << atten_string;
+          }
+
+          // auxiliary rotation measure from AuxColdPlasmaMeasures Integration extension
+          else if( (*pit) == "AUX_RM" )
+          {
+            AuxColdPlasmaMeasures* ext = integ->getadd<AuxColdPlasmaMeasures>();
+            if( ext )
+            {
+              cout << ext->get_rotation_measure();
+            }
+          }
+
+          // auxiliary dispersion measure from AuxColdPlasmaMeasures Integration extension
+          else if( (*pit) == "AUX_DM" )
+          {
+            AuxColdPlasmaMeasures* ext = integ->getadd<AuxColdPlasmaMeasures>();
+            if( ext )
+            {
+              cout << ext->get_dispersion_measure();
+            }
           }
         }
         cout << endl;
