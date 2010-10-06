@@ -64,7 +64,9 @@ psredit::psredit ()
   : Pulsar::Application ("psredit", "query and/or set archive attributes")
 {
   has_manual = true;
-  version = "$Id: psredit.C,v 1.33 2009/09/02 02:54:31 straten Exp $";
+  update_history = true;
+
+  version = "$Id: psredit.C,v 1.34 2010/10/06 10:41:49 straten Exp $";
 
   // print/parse in degrees
   Angle::default_type = Angle::Degrees;
