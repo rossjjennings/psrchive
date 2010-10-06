@@ -31,7 +31,7 @@
 
 #include <Pulsar/AuxColdPlasma.h>
 
-#include <Pulsar/WeightedFrequency.h>
+//#include <Pulsar/WeightedFrequency.h>
 
 
 
