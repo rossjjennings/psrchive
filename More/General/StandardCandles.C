@@ -325,19 +325,36 @@ Pulsar::StandardCandles::match (const string& source, double MHz) const
 Signal::Source
 Pulsar::StandardCandles::guess (string& name, sky_coord& p) const
 {
+  if (!entries.size())
+  {
+    if (verbose)
+      cerr << "Pulsar::StandardCandles::guess no entries loaded" << endl;
+    return Signal::Unknown;
+  }
+
   double closest = 0.0;
   Entry match;
 
-  for (unsigned i=0; i<entries.size(); i++) {
-
+  for (unsigned i=0; i<entries.size(); i++)
+  {
     double separation = entries[i].position.angularSeparation(p).getDegrees();
 
-    if (closest == 0.0 || separation < closest) {
+    if (verbose)
+      cerr << "Pulsar::StandardCandles::guess"
+	   << " name=" << entries[i].source_name[0]
+	   << " separation=" << separation << endl;
+
+    if (i == 0 || separation < closest)
+    {
+      if (verbose)
+	cerr << "Pulsar::StandardCandles::guess closest" << endl;
       closest = separation;
       match = entries[i];
     }
-
   }
+
+  if (verbose && closest > off_radius)
+    cerr << "Pulsar::StandardCandles::guess nothing close" << endl;
 
   if (match.reference_frequency == 0 || closest > off_radius)
     return Signal::Unknown;
@@ -352,5 +369,4 @@ Pulsar::StandardCandles::guess (string& name, sky_coord& p) const
     return Signal::FluxCalOff;
   else
     return Signal::FluxCalOn;
-
 }
