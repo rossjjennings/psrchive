@@ -2523,12 +2523,12 @@ void printResults(const Archive * archive) {
 						bcPeriod_s * MILLISEC,	getPeriod(archive) * MILLISEC, getDM(archive));
 
 		printf("Best BC Period (ms) = %3.10g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n",
-						bestPeriod_bc_us / MILLISEC,	(bestPeriod_bc_us-refP_us) / MILLISEC, periodError_ms / MILLISEC);
+						bestPeriod_bc_us / MILLISEC,	(bestPeriod_bc_us-refP_us) / MILLISEC, periodError_ms);
 
 		printf("Best TC Period (ms) = %3.10g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n",
 						dopplerFactor * bestPeriod_bc_us / MILLISEC,
 						(dopplerFactor * bestPeriod_bc_us / MILLISEC) - (getPeriod(archive) * MILLISEC),
-						periodError_ms / MILLISEC);
+						periodError_ms);
 
 		printf("Best DM = %3.3g  Correction = %3.3g  Error = %3.3g\n",
 	        	bestDM, bestDM-refDM, dmError);
