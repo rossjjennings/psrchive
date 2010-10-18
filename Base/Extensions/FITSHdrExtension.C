@@ -30,6 +30,8 @@ Pulsar::FITSHdrExtension::FITSHdrExtension ()
 
   stt_lst = 0.0;
   obsfreq = 0.0;
+  obsbw   = 0.0;
+  obsnchan = 0;
 
   obs_mode = unset;
   ra = dec = unset;
@@ -115,6 +117,26 @@ void Pulsar::FITSHdrExtension::set_obsfreq( double set_obsfreq )
 double Pulsar::FITSHdrExtension::get_obsfreq () const
 {
   return obsfreq;
+}
+
+void Pulsar::FITSHdrExtension::set_obsbw( double set_obsbw )
+{
+  obsbw = set_obsbw;
+}
+
+double Pulsar::FITSHdrExtension::get_obsbw () const
+{
+  return obsbw;
+}
+
+void Pulsar::FITSHdrExtension::set_obsnchan( int set_obsnchan )
+{
+  obsnchan = set_obsnchan;
+}
+
+int Pulsar::FITSHdrExtension::get_obsnchan () const
+{
+  return obsnchan;
 }
 
 std::string Pulsar::FITSHdrExtension::get_hdrver () const

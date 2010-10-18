@@ -29,6 +29,14 @@ FITSHdrExtension::Interface::Interface( FITSHdrExtension *s_instance )
        &FITSHdrExtension::set_obsfreq,
        "obsfreq", "Centre frequency" );
 
+  add( &FITSHdrExtension::get_obsbw,
+       &FITSHdrExtension::set_obsbw,
+       "obsbw", "Bandwidth" );
+
+  add( &FITSHdrExtension::get_obsnchan,
+       &FITSHdrExtension::set_obsnchan,
+       "obsnchan", "Number of channels" );
+
   add( &FITSHdrExtension::get_hdrver,
        &FITSHdrExtension::set_hdrver,
        "hdrver", "Header Version" );

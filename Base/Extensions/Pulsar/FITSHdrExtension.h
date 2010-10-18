@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.25 $
-   $Date: 2010/06/14 06:17:12 $
+   $Revision: 1.26 $
+   $Date: 2010/10/18 00:22:22 $
    $Author: jonathan_khoo $ */
 
 #ifndef __FITSHdrExtension_h
@@ -168,6 +168,18 @@ namespace Pulsar
     //! Get the observed frequency
     double get_obsfreq () const;
 
+    //! Set the observed bandwidth
+    void set_obsbw( double set_obsbw );
+
+    //! Get the observed bandwidth
+    double get_obsbw() const;
+
+    //! Set the observed number of channels
+    void set_obsnchan( int set_obsnchan );
+
+    //! Get the observed number of channels
+    int get_obsnchan() const;
+
     //////////////////////////////////////////////////////////////////////
 
     //! Pulsar FITS header version information
@@ -198,6 +210,12 @@ namespace Pulsar
 
     //! Observed Frequency
     double obsfreq;
+
+    //! Observed bandwidth
+    double obsbw;
+
+    //! Observed number of channels
+    int obsnchan;
 
     //! Observation Mode
     std::string obs_mode;

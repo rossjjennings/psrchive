@@ -31,6 +31,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const FITSHdrExtension* ext)
   psrfits_update_key (fptr, "STT_TIME", ext->stt_time);
   psrfits_update_key (fptr, "STT_DATE", ext->stt_date);
   psrfits_update_key (fptr, "OBSFREQ", ext->obsfreq);
+  psrfits_update_key (fptr, "OBSBW", ext->obsbw);
+  psrfits_update_key (fptr, "OBSNCHAN", ext->obsnchan);
   psrfits_update_key (fptr, "IBEAM", ext->ibeam);
   psrfits_update_key (fptr, "PNT_ID", ext->pnt_id);
 }

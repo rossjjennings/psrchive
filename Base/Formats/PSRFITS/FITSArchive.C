@@ -370,6 +370,15 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
     psrfits_read_key (fptr, "OBSBW", &bandwidth, dfault, verbose > 2);
     set_bandwidth( bandwidth );
+    hdr_ext->set_obsbw( bandwidth );
+  }
+
+  // Read the number of channels of the observation
+  {
+    int obsnchan;
+
+    psrfits_read_key (fptr, "OBSNCHAN", &obsnchan, 0, verbose > 2);
+    hdr_ext->set_obsnchan( obsnchan );
   }
 
   // Read the name of the source
