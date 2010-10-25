@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Application.h,v $
-   $Revision: 1.14 $
-   $Date: 2010/09/22 03:12:03 $
-   $Author: straten $ */
+   $Revision: 1.15 $
+   $Date: 2010/10/25 05:21:26 $
+   $Author: ajameson $ */
 
 #ifndef __Pulsar_Application_h
 #define __Pulsar_Application_h
@@ -76,6 +76,9 @@ namespace Pulsar {
 
     //! The main loop
     virtual void run ();
+
+    //! Load file
+    Archive * load (const std::string& filename);
 
     //! Data analysis tasks implemented by most derived classes
     virtual void process (Archive*) = 0;

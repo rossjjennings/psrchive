@@ -106,6 +106,9 @@ protected:
   Reference::To<Pulsar::PatchTime> patch;
   string patch_name;
 
+  // for in place operations on an existing archive
+  string inplace_name;
+
   // Unload options
   Reference::To<Pulsar::UnloadOptions> unload;
 
@@ -127,7 +130,7 @@ int main (int argc, char** argv)
 psradd::psradd () : Pulsar::Application ("psradd", 
 					 "combines archives together")
 {
-  version = "$Id: psradd.C,v 1.73 2010/07/05 13:27:14 straten Exp $";
+  version = "$Id: psradd.C,v 1.74 2010/10/25 05:21:26 ajameson Exp $";
 
   has_manual = true;
   update_history = true;
@@ -227,6 +230,9 @@ void psradd::add_options (CommandLine::Menu& menu)
   arg = menu.add (patch_name, 'm', "domain");
   arg->set_help ("Patch missing sub-integrations: domain = time or phase");
 
+  arg = menu.add (inplace_name, "inplace", "filename");
+  arg->set_help ("Append archives to the specified file");
+
   arg = menu.add (phase_align, 'P');
   arg->set_help ("Phase align archive with total before adding");
 
@@ -281,7 +287,7 @@ void psradd::add_options (CommandLine::Menu& menu)
 
 void psradd::setup ()
 {
-  if (!auto_add && !unload_name.length())
+  if (!auto_add && !unload_name.length() && inplace_name.empty())
     throw Error (InvalidState, "psradd::setup",
 		 "please specify the output filename (use -o)");
 
@@ -328,6 +334,16 @@ void psradd::setup ()
 
     patch = new Pulsar::PatchTime;
     patch->set_contemporaneity_policy( policy );
+  }
+
+  if (!inplace_name.empty())
+  {
+    if (!unload_name.length())
+    {
+      unload_name = inplace_name;
+      Pulsar::Archive * inplace_archive = Pulsar::Application::load (unload_name);
+      set_total (inplace_archive);
+    }
   }
 }
 

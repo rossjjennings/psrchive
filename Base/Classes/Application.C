@@ -153,6 +153,20 @@ void Pulsar::Application::parse (int argc, char** argv)
   }
 }
 
+Pulsar::Archive * Pulsar::Application::load (const string& filename)
+{
+  Reference::To<Archive> archive;
+  archive = Archive::load (filename);
+
+  for (unsigned i=0; i<options.size(); i++)
+  {
+    if (very_verbose)
+      cerr << "Pulsar::Application::main feature "<< i <<" process" << endl;
+    options[i]->process (archive);
+  }
+  return archive.release();
+}
+
 void Pulsar::Application::run ()
 {
   if (filenames.empty())
@@ -161,16 +175,7 @@ void Pulsar::Application::run ()
 
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
   {
-    Reference::To<Archive> archive;
-    archive = Archive::load (filenames[ifile]);
-
-    for (unsigned i=0; i<options.size(); i++)
-    {
-      if (very_verbose)
-	cerr << "Pulsar::Application::main feature "<< i <<" process" << endl;
-      options[i]->process (archive);
-    }
-
+    Reference::To<Archive> archive = load (filenames[ifile]);
     process (archive);
 
     if (update_history)
