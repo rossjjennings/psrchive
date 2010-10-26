@@ -20,8 +20,7 @@ bool Pulsar::TextParameters::equals (const Parameters* that) const
   const TextParameters* like = dynamic_cast<const TextParameters*>( that );
 
   if (!like)
-    throw Error (InvalidState, "Pular::TextParameters::equals",
-		 "Parameters is not a TextParamters");
+    return false;
 
   return this->text == like->text;
 }
