@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/BoostShiftAnalysis.h,v $
-   $Revision: 1.1 $
-   $Date: 2010/11/01 07:03:53 $
+   $Revision: 1.2 $
+   $Date: 2010/11/01 07:17:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BoostShiftAnalysis_h
 #define __Pulsar_BoostShiftAnalysis_h
 
-#include "PolnProfile.h"
+#include "Pulsar/PolnProfile.h"
 
 namespace Pulsar {
 
