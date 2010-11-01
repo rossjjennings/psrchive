@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/PolnProfileFitAnalysis.h"
+#include "Pulsar/BoostShiftAnalysis.h"
 #include "Pulsar/PolnProfile.h"
 
 #include "Pulsar/Archive.h"
@@ -41,7 +42,7 @@ void usage ()
     "  -n harmonics  Use up to the specified number of harmonics\n"
     "\n"
     "Output options: \n"
-    "  -p            Print degree of polarization + multiple correlation \n"
+    "  -b            Print the systematic phase shifts induced by boosts \n"
     "  -t            Output latex table like Figure 1 of van Straten (2006) \n"
        << endl;
 
@@ -121,17 +122,38 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
       "\n Invariant relative error = " << S_error/I_error << endl << endl;
 }
 
+void boost_analysis (PolnProfile* profile, double period)
+{
+  Pulsar::BoostShiftAnalysis boost;
+  boost.set_profile (profile);
+
+  double total = 0.0;
+  for (unsigned k=1; k<=3; k++)
+  {
+    double delshift = boost.delvarphi_delb (k);
+    cerr << "boost k=" << k << " " << delshift  << endl;
+    total += delshift * delshift;
+  }
+
+  double delshift = sqrt(total);
+
+  cerr << "BOOST factor=" << delshift << " P=" << period << endl
+       << "\t-> " << period * delshift * 1e6
+       << " us per unit of boost" << endl;
+}
+
 int main (int argc, char *argv[])
 {
   bool fscrunch = false;
   bool tscrunch = false;
 
+  bool boost_shift = false;
   bool choose_maximum_harmonic = false;
   unsigned maximum_harmonic = 0;
 
   int gotc = 0;
 
-  while ((gotc = getopt(argc, argv, "cFhn:qTtvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "bcFhn:qTtvV")) != -1) {
     switch (gotc) {
 
     case 'h':
@@ -154,6 +176,10 @@ int main (int argc, char *argv[])
       MEAL::Function::verbose = true;
       break;
 
+    case 'b':
+      boost_shift = true;
+      break;
+
     case 'c':
       choose_maximum_harmonic = true;
       break;
@@ -163,7 +189,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: mtm.C,v 1.3 2010/06/10 07:27:30 straten Exp $" << endl;
+      cout << "$Id: mtm.C,v 1.4 2010/11/01 07:06:00 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -262,6 +288,10 @@ int main (int argc, char *argv[])
       cerr << "mtm: running analysis" << endl;
 
     mtm_analysis (analysis, fit, arch->get_source());
+
+    if (boost_shift)
+      boost_analysis (profile, arch->get_Integration(0)->get_folding_period());
+
   }
   catch (Error& error) {
     cerr << "Error processing " << filenames[i] << endl;
