@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.30 $
-   $Date: 2010/02/11 21:18:17 $
+   $Revision: 1.31 $
+   $Date: 2010/11/01 07:04:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -42,9 +42,6 @@ namespace Pulsar {
 
     //! Set the PolnProfileFit algorithm to be analysed
     void set_fit (PolnProfileFit*);
-
-    //! Set the maximum harmonic used when optimizing
-    void set_optimal_harmonic_max (unsigned max);
 
     //! Get the relative arrival time error
     Estimate<double> get_relative_error () const;
