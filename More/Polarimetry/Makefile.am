@@ -6,6 +6,7 @@ nobase_include_HEADERS = \
 	Pulsar/BackendFeed.h \
 	Pulsar/BackendFeedInfo.h \
 	Pulsar/BasisCorrection.h \
+	Pulsar/BoostShiftAnalysis.h \
 	Pulsar/Britton2000.h \
 	Pulsar/BrittonInfo.h \
         Pulsar/CalibratorPlotter.h \
@@ -86,6 +87,7 @@ libPolarimetry_la_SOURCES = \
 	BackendFeed.C \
 	BackendFeedInfo.C \
 	BasisCorrection.C \
+	BoostShiftAnalysis.C \
 	Britton2000.C \
 	BrittonInfo.C \
         CalibratorStokesInfo.C \
