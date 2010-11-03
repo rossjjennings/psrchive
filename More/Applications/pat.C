@@ -57,6 +57,10 @@ using namespace Pulsar;
 
 vector<string> commands;
 
+// Extension for the output of the profile difference of the standard and
+// archive. (pat -t)
+const string plot_difference_extension = "diff";
+
 void loadGaussian(string file,  
 		  Reference::To<Pulsar::Archive> &stdarch,  
 		  Reference::To<Pulsar::Archive> arch);
@@ -76,10 +80,9 @@ double truncateDecimals(double d, int decimalPlaces);
 double get_cal_freq(Archive* archive);
 
 #if HAVE_PGPLOT
-void plotDifferences(Reference::To<Archive> arch,
-        Reference::To<Archive> stdarch,
-        vector<Tempo::toa>& toas, const double min_phase,
-        const double max_phase);
+void plotDifferences(Pulsar::Archive* arch, Pulsar::Archive* stdarch,
+    vector<Tempo::toa>& toas, const double min_phase, const double max_phase,
+    const bool output_plot_difference);
 
 void set_phase_zoom(vector<Reference::To<Plot> >& plots,
         const double min, const double max);
@@ -213,6 +216,7 @@ int main (int argc, char** argv) try
 
 #if HAVE_PGPLOT
   bool plot_difference = false;
+  bool output_plot_difference = false;
   bool centre_template_peak = false;
 #endif
 
@@ -244,7 +248,7 @@ int main (int argc, char** argv) try
 #define PLOT_ARGS
 #endif
 
-  const char* args = "a:A:cC:Ddf:Fg:hiK:m:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
+  const char* args = "a:A:bcC:Ddf:Fg:hiK:m:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
 
   int gotc = 0;
 
@@ -306,6 +310,10 @@ int main (int argc, char** argv) try
       break;
     }
 
+    case 'b':
+      output_plot_difference = true;
+      break;
+
     case 'c':
       choose_maximum_harmonic = true;
       break;
@@ -346,7 +354,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.102 2010/08/20 05:46:01 sosl Exp $" << endl;
+      cout << "$Id: pat.C,v 1.103 2010/11/03 23:25:59 jonathan_khoo Exp $" << endl;
       return 0;
 
     case 'K':
@@ -587,7 +595,8 @@ int main (int argc, char** argv) try
     {
       arch->remove_baseline();
       rotate_archive(arch, toas);
-      plotDifferences(arch, stdarch, toas, min_phase, max_phase);
+      plotDifferences(arch, stdarch, toas, min_phase, max_phase,
+          output_plot_difference);
     }
 #endif
 
@@ -730,50 +739,84 @@ void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<
  * @param stdarch Template archive.
  * @param min_phase min x-value when zooming
  * @param max_phase max x-value when zooming
+ * @param output_plot_difference whether or not the difference profile
+ *        should be written out to <filename>.diff
  */
 
 #if HAVE_PGPLOT
-void plotDifferences(Reference::To<Archive> arch,
-        Reference::To<Archive> stdarch, vector<Tempo::toa>& toas,
-        const double min_phase, const double max_phase)
+void plotDifferences(Pulsar::Archive* arch, Pulsar::Archive* stdarch,
+    vector<Tempo::toa>& toas, const double min_phase, const double max_phase,
+    const bool output_plot_difference)
+
 {
-    // remove baseline for all templates (except caldelay)
-    const bool cal_delay_file = arch->get_source() == "CalDelay";
-    if (!cal_delay_file)
-        stdarch->remove_baseline();
+  // remove baseline for all templates (except caldelay)
+  const bool cal_delay_file = arch->get_source() == "CalDelay";
+  if (!cal_delay_file)
+    stdarch->remove_baseline();
 
-    // difference between template and profile
-    Reference::To<Archive> profile_diff = Archive::new_Archive("PSRFITS");
+  // difference between template and profile
+  Reference::To<Archive> profile_diff = Archive::new_Archive("PSRFITS");
 
-    // current profile
-    Reference::To<Archive> profile_archive = Archive::new_Archive("PSRFITS");
-    resize_archives(profile_archive, profile_diff, arch);
+  // current profile
+  Reference::To<Archive> profile_archive = Archive::new_Archive("PSRFITS");
+  resize_archives(profile_archive, profile_diff, arch);
 
-    Pulsar::PlotFactory factory;
-    Reference::To<Plot> plotter = factory.construct("flux");
+  Pulsar::PlotFactory factory;
+  Reference::To<Plot> plotter = factory.construct("flux");
 
-    // adjust x-range if zoom has been specified
-    if (min_phase != 0.0 || max_phase != 1.0)
-        plotter->configure("x:range=" + get_xrange(min_phase, max_phase));
+  // adjust x-range if zoom has been specified
+  if (min_phase != 0.0 || max_phase != 1.0)
+    plotter->configure("x:range=" + get_xrange(min_phase, max_phase));
 
-    cpgsubp(1, 3);
-    for (unsigned isub = 0; isub < arch->get_nsubint(); ++isub) {
-        for (unsigned ichan = 0; ichan < arch->get_nchan(); ++ichan) {
-            cpgpage();
-            Pulsar::Profile* profile = arch->get_Profile(isub, 0, ichan);
-            if (cal_delay_file)
-                scaleProfile(profile);
+  ofstream f;
+  if (output_plot_difference) {
+    string output_filename =
+      replace_extension(arch->get_filename(), plot_difference_extension);
 
-            double freq = profile->get_centre_frequency();
-            freq = truncateDecimals(freq, 3);
+    f.open(output_filename.c_str());
+  }
 
-            diff_profiles(profile_diff, stdarch, profile);
-            difference_plot(plotter, arch, profile_diff, toas, isub, ichan);
-            template_plot(plotter, stdarch);
-            profile_plot(plotter, profile_archive, profile, arch, freq);
+  // Split the plot window into 3 horizontal plots.
+  cpgsubp(1, 3);
+
+  const unsigned nbin  = arch->get_nbin();
+  const unsigned nsub  = arch->get_nsubint();
+  const unsigned nchan = arch->get_nchan();
+
+  for (unsigned isub = 0; isub < nsub; ++isub) {
+    for (unsigned ichan = 0; ichan < nchan; ++ichan) {
+      // Each profile gets its own page.
+      cpgpage();
+
+      Pulsar::Profile* profile = arch->get_Profile(isub, 0, ichan);
+      if (cal_delay_file) {
+        scaleProfile(profile);
+      }
+
+      diff_profiles(profile_diff, stdarch, profile);
+      difference_plot(plotter, arch, profile_diff, toas, isub, ichan);
+      template_plot(plotter, stdarch);
+
+      const double centre_frequency =
+        truncateDecimals(profile->get_centre_frequency(), 3);
+
+      profile_plot(plotter, profile_archive, profile, arch, centre_frequency);
+
+      if (output_plot_difference) {
+        // Output (to <filename>.diff):
+        //      <subint> <channel> <bin> <bin value>
+        float* bins = profile_diff->get_Profile(0,0,0)->get_amps();
+        for (unsigned ibin = 0; ibin < nbin; ++ibin) {
+          f << isub << " " <<
+            ichan << " " <<
+            ibin << " " <<
+            bins[ibin] << endl;
         }
+      }
     }
-    cout << "Plotting " << arch->get_filename() << endl;
+  }
+  cout << "Plotting " << arch->get_filename() << endl;
+  f.close();
 }
 #endif
 
