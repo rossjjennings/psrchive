@@ -5,9 +5,9 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/sky_coord.h,v $
-   $Revision: 1.12 $
-   $Date: 2007/07/18 02:51:32 $
-   $Author: straten $ */
+   $Revision: 1.13 $
+   $Date: 2010/11/04 14:17:05 $
+   $Author: demorest $ */
 
 #ifndef __SKY_COORD_H
 #define __SKY_COORD_H
@@ -15,9 +15,10 @@
 
 #include "Angle.h"
 
-// Class for sky coordinates. Inherits AnglePair, where members
-// angle1 and angle2 are J2000.0 right ascension and declination
-// respectively.
+//! Class for sky coordinates. 
+/*! Inherits AnglePair, where members
+   angle1 and angle2 are J2000.0 right ascension and declination
+   respectively. */
 class sky_coord  : public AnglePair
 {
  public:

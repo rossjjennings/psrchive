@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.28 $
-   $Date: 2008/09/09 04:52:14 $
-   $Author: straten $ */
+   $Revision: 1.29 $
+   $Date: 2010/11/04 14:17:04 $
+   $Author: demorest $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
 // angle and sky coordinate functions
@@ -26,6 +26,7 @@ static const double MilliSecin12Hours = 4.32e7;
 
 #define ANGLE_STRLEN 128
 
+//! Class for dealing with angular info
 class Angle
 {
 
@@ -161,9 +162,9 @@ namespace std {
 //inline Angle Arctangle(double rad) {Angle a(rad); a.makeArctangle(); return a;}
 
  
-// AnglePair class : useful for sky positions.
-// Sign convention should be as per usual output, that is in general
-// angle 1 is 0 to 2pi and angle 2 is -pi to pi
+//! AnglePair class : useful for sky positions.
+/*! Sign convention should be as per usual output, that is in general
+   angle 1 is 0 to 2pi and angle 2 is -pi to pi */
 class AnglePair
 {
  public:
