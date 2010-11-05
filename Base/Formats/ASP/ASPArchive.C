@@ -569,12 +569,14 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
     c->cal_frequency = 25.0;
     c->cal_dutycycle = 0.5;
     c->cal_phase = 0.0; // We generally don't know this
+    c->cal_nstate = 2;
   } else {
     // Fill this in even in non-cal mode to make PSRFITS happy.
     c->cal_mode = "OFF";
     c->cal_frequency = 0.0;
     c->cal_dutycycle = 0.0;
     c->cal_phase = 0.0;
+    c->cal_nstate = 2;
   }
   // Nancay uses 3-state cal
   if (get_telescope()=="f" || get_telescope()=="Nancay") {
