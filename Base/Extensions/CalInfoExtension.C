@@ -14,6 +14,7 @@ Pulsar::CalInfoExtension::CalInfoExtension ()
   cal_frequency = 0.0;
   cal_dutycycle = 0.0;
   cal_phase     = 0.0;
+  cal_nstate    = 2;
 }
 
 //! Copy constructor
@@ -31,6 +32,7 @@ Pulsar::CalInfoExtension::operator= (const CalInfoExtension& extension)
   cal_frequency = extension.cal_frequency;
   cal_dutycycle = extension.cal_dutycycle;
   cal_phase = extension.cal_phase;
+  cal_nstate = extension.cal_nstate;
 
   return *this;
 }

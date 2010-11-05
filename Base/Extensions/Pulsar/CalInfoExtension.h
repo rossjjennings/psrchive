@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalInfoExtension.h,v $
-   $Revision: 1.7 $
-   $Date: 2008/04/21 06:20:00 $
-   $Author: straten $ */
+   $Revision: 1.8 $
+   $Date: 2010/11/05 19:08:55 $
+   $Author: demorest $ */
 
 #ifndef __CalInfoExtension_h
 #define __CalInfoExtension_h
@@ -55,6 +55,9 @@ namespace Pulsar {
     
     //! Calibrator phase
     double cal_phase;
+
+    //! Number of different states during cal period
+    int cal_nstate;
 
   };
  
