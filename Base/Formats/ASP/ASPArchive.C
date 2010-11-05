@@ -14,6 +14,7 @@
 #include "Pulsar/Receiver.h"
 #include "Pulsar/GBT.h"
 #include "Pulsar/Arecibo.h"
+#include "Pulsar/Nancay.h"
 #include "Pulsar/Backend.h"
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/CalInfoExtension.h"
@@ -542,6 +543,8 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
     // Arecibo recvrs need hand=-1, at least for ASP.  So far
     // I've only checked this for L-wide and S-wide (July 2008).
     r->set_hand(Signal::Left);
+  } else if (get_telescope()=="f" || get_telescope()=="Nancay") {
+    Nancay::guess(r, this);
   } 
   // If still no recvr found, use info from FITS
   if (r->get_name()=="unknown") {
@@ -572,6 +575,10 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
     c->cal_frequency = 0.0;
     c->cal_dutycycle = 0.0;
     c->cal_phase = 0.0;
+  }
+  // Nancay uses 3-state cal
+  if (get_telescope()=="f" || get_telescope()=="Nancay") {
+    c->cal_nstate = 3;
   }
 
 }
