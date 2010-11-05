@@ -59,5 +59,11 @@ void Pulsar::FITSArchive::load_CalInfoExtension (fitsfile* fptr)
   if (status != 0 && verbose == 3)
     cerr << FITSError (status, "FITSArchive::load_CalInfoExtension",
 		       "fits_read_key CAL_MODE").warning() << endl;
+
+  // Read the CAL number of states (if present)
+  status = 0;
+
+  fits_read_key(fptr, TINT, "CAL_NPHS", &(ext->cal_nstate), comment, &status);
+
 }
 

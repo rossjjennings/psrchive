@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '4.7             '   / Header version 
+HDRVER  = '4.8             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -56,6 +56,7 @@ CAL_MODE= '                '   / Cal mode (OFF, SYNC, EXT1, EXT2)
 CAL_FREQ=                    * / [Hz] Cal modulation frequency (E)
 CAL_DCYC=                    * / Cal duty cycle (E)
 CAL_PHS =                    * / Cal phase (wrt start time) (E)
+CAL_NPHS=                    * / Number of states in cal pulse (I)
 STT_IMJD=                    * / Start MJD (UTC days) (J - long integer)
 STT_SMJD=                    * / [s] Start time (sec past UTC 00h) (J)
 STT_OFFS=                    * / [s] Start time offset (D)   

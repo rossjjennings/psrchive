@@ -33,6 +33,9 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const CalInfoExtension* ext)
   char* tempstr = const_cast<char*>(ext->cal_mode.c_str());
   fits_update_key (fptr, TSTRING, "CAL_MODE", tempstr, comment, &status);
 
+  int tempint = ext->cal_nstate;
+  fits_update_key (fptr, TINT, "CAL_NPHS", &tempint, comment, &status);
+
   if (status)
     throw FITSError (status, "Pulsar::FITSArchive::unload CalInfoExtension");
 
