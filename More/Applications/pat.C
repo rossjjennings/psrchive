@@ -354,7 +354,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.103 2010/11/03 23:25:59 jonathan_khoo Exp $" << endl;
+      cout << "$Id: pat.C,v 1.104 2010/11/06 13:55:43 sosl Exp $" << endl;
       return 0;
 
     case 'K':
@@ -1043,14 +1043,28 @@ void profile_plot(Reference::To<Plot> plot,
 
 void diff_profiles(Reference::To<Archive> diff, Reference::To<Archive> stdarch, Reference::To<Profile> profile)
 {
-    Reference::To<Profile> std_profile = stdarch->get_Profile(0,0,0);
-    const double stdarch_area = std_profile->sum();
-    const double profile_area = profile->sum();
-    const double scale = stdarch_area / profile_area;
-    profile->scale(fabs(scale));
+  Reference::To<Pulsar::Profile> s = stdarch->get_Profile(0, 0, 0);
+  double scale = 0.0;
+  float *s_amps = s->get_amps();
+  float *p_amps = profile->get_amps();
+  for (unsigned i=0; i<profile->get_nbin(); i++) {
+    scale += s_amps[i] * p_amps[i];
+  }
 
-    *(diff->get_Profile(0,0,0)) = *std_profile;
-    diff->get_Profile(0,0,0)->diff(profile);
+  scale = (profile->get_nbin()* scale - profile->sum() * s->sum()) /
+	  (profile->get_nbin()* s->sumsq() - s->sum() * s->sum());
+
+  double offset = 0.0;
+
+  offset = (scale * s->sum() - profile->sum()) / profile->get_nbin();
+
+  Reference::To<Pulsar::Profile> diff_prof =  diff->get_Profile(0, 0, 0);
+   
+  *diff_prof = *s;
+  
+  diff_prof->offset(-offset);
+  diff_prof->scale(scale);
+  diff_prof->diff(profile);
 }
 
 void scaleProfile(Reference::To<Profile> profile)
