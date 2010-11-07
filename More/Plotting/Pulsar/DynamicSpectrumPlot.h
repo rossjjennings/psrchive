@@ -55,6 +55,11 @@ namespace Pulsar {
       set_srange(std::pair<int,int>(fsub,lsub)); 
     }
 
+    std::string get_dump_filename() const 
+    { return dump_filename; }
+    void set_dump_filename (const std::string &filename) 
+    { dump_filename = filename; }
+
     //! Returns x axis label
     std::string get_xlabel (const Archive *data);
     //! Returns y axis label
@@ -74,6 +79,7 @@ namespace Pulsar {
 
     bool zero_check;
 
+    std::string dump_filename;
   };
 
 }
