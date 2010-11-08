@@ -62,6 +62,7 @@ class psrover : public Pulsar::Application
   void set_output_filename (string);
 
   time_t seconds;
+  long seed;
   BoxMuller gasdev;
 
   string ascii_filename;
@@ -91,8 +92,7 @@ psrover::psrover()
   Pulsar::StandardOptions* preprocessor = new Pulsar::StandardOptions;
   add (preprocessor );
 
-  seconds = time(NULL);
-  gasdev = BoxMuller(seconds);
+  seed = 0;
 
   got_nbins = got_ascii_file = got_noises = got_fwhms = got_bins = false;
 
@@ -109,6 +109,9 @@ void psrover::add_options ( CommandLine::Menu& menu)
 
   arg = menu.add(this, &psrover::set_noise,'r',"noise amplitudes");
   arg->set_help ("coma separated list of noise amplitudes to be added");
+
+  arg = menu.add(seed, 's',"seed");
+  arg->set_help ("set seed used for generating random numbers");
 
   arg = menu.add(this, &psrover::set_fwhms,'f',"fwhms");
   arg->set_help ("coma separated list of FWHM of gaussian peaks");
@@ -133,14 +136,14 @@ void psrover::add_options ( CommandLine::Menu& menu)
 
   menu.add("");
 
-  menu.add("For example the command:\npsrover -r 100,3,30,65,142 -f 30,-1,250,-1,-1 -b 250,-1,400,800,124 inp.ar -a inp.txt\n"
+  menu.add("For example the command:\npsrover -r 100,3,30,65,142 -f 30,-1,250,-1,-1 -b 250,-1,400,800,124 inp.ar -a inp.txt -o out.ar\n"
 		  "will take input from the ascii file inp.txt, containing one column, and top of that it will add:\n"
 		  "  - first gaussian compoonent at bin 250 with FWHM 30 and amplitude 100\n"
 		  "  - seocnd gaussian compoonent at bin 400 with FWHM 250 and amplitude 30\n"
 		  "  - first spike at bin 800 with amplitude of 65\n"
 		  "  - second spike at bin 124 with amplitude of 142\n"
 		  "  - white noise with amplitude of 3\n"
-		  " The result will be stored in the file inp.ar\n");
+		  " The result will be stored in the file out.ar\n");
   menu.add("");
 }
 
@@ -192,7 +195,7 @@ void psrover::setup () {
       }
       in_file.close();
     } 
-  }
+  } //got_ascii_file
   else {
     if (verbose)
       cerr << "psrover::setup defaulting to an empty profile" << endl;
@@ -204,6 +207,19 @@ void psrover::setup () {
     for (int i = 0 ; i < nbin ; i++) {
       profile_values.push_back(0.0);
     }
+  } // didn't get ascii file
+
+  //set the seed
+  if (seed == 0)
+  {
+    cout << "seed from time " << endl;
+    seconds = time(NULL);
+    gasdev = BoxMuller(seconds);
+  }
+  else
+  {
+    cout << "seed from command line " << seed << endl;
+    gasdev = BoxMuller(seed);
   }
 }
 
@@ -215,7 +231,7 @@ void psrover::process (Pulsar::Archive* archive) {
 
   float* data = archive->get_Integration(0)->get_Profile(0, 0)->get_amps();
 
-  if (noise_to_add[0] != 0.0) {
+  if (!noise_to_add.empty()) {
     for (unsigned i = 0; i < nbin; ++i) {
       if (got_ascii_file)
 	*data = profile_values[i];
