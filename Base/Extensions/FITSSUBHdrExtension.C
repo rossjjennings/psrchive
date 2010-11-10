@@ -47,6 +47,8 @@ const FITSSUBHdrExtension& FITSSUBHdrExtension::operator= (const FITSSUBHdrExten
   nch_strt = extension.nch_strt;
   nsblk = extension.nsblk;
   nrows = extension.nrows;
+  zero_off = extension.zero_off;
+  signint = extension.signint;
 
   return *this;
 }
