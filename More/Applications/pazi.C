@@ -107,6 +107,10 @@ unsigned get_subint_indexed_value(const MouseType& mouse);
 void zap_bin(Pulsar::Archive* arch, Pulsar::Archive* old_arch, const unsigned subint,
 	     const unsigned bin);
 
+// Zap bins in polns [0:npol-1] across a range of bins.
+void zap_bins(Pulsar::Archive* arch, Pulsar::Archive* old_arch,
+    const unsigned subint, const unsigned start_bin, const unsigned end_bin);
+
 unsigned get_max_value(const Pulsar::Archive* archive, PlotType plot_type);
 
 void reorder_ranges(RangeType& p);
@@ -759,9 +763,9 @@ void zap_multiple ()
     break;
 
   case FscrunchedSubint:
-    
-    for (unsigned i = range_to_zap.first; i <= range_to_zap.second; ++i)
-      zap_bin(mod_archive, base_archive, subint, i);
+
+    zap_bins(mod_archive, base_archive, subint, range_to_zap.first,
+        range_to_zap.second);
   
     redraw(mod_archive, subint_orig_plot, subint_mod_plot, zoomed);
 
@@ -1041,6 +1045,50 @@ void zap_bin (Pulsar::Archive* arch, Pulsar::Archive* old_arch,
 
       float* bins = old_arch->get_Profile(subint,ipol,ichan)->get_amps();
       bins[bin] = baseline_mean;
+    }
+  }
+
+  *arch = *old_arch;
+  arch->set_dispersion_measure(0);
+  arch->pscrunch();
+  arch->fscrunch();
+  arch->remove_baseline();
+}
+
+/**
+ * Zap a specified range of bins by substituting their values with the
+ * baseline mean for each profile.
+ */
+void zap_bins(Pulsar::Archive* arch, Pulsar::Archive* old_arch,
+    const unsigned s, const unsigned start_bin, const unsigned end_bin)
+{
+  const unsigned npol  = old_arch->get_npol();
+  const unsigned nchan = old_arch->get_nchan();
+
+  // Get the baseline region from what is displayed on screen (pscrunched
+  // and fscrunched integration).
+  Reference::To<Pulsar::Archive> copy = old_arch->clone();
+  copy->pscrunch();
+  copy->fscrunch();
+
+  Reference::To<Pulsar::PhaseWeight> baseline_weights =
+    copy->get_Profile(s,0,0)->baseline();
+
+  vector<float> weights;
+  baseline_weights->get_weights(weights);
+
+  for (unsigned ipol = 0; ipol < npol; ++ipol) {
+    for (unsigned ichan = 0; ichan < nchan; ++ichan) {
+      // Apply the baseline region to each profile and get the mean.
+      baseline_weights->set_Profile(old_arch->get_Profile(s,ipol,ichan));
+      const double baseline_mean = baseline_weights->get_mean().get_value();
+      float* bins = old_arch->get_Profile(s,ipol,ichan)->get_amps();
+
+      // Set all the bins between start_bin and end_bin to the mean of the
+      // baseline.
+      for (unsigned ibin = start_bin; ibin <= end_bin; ++ibin) {
+        bins[ibin] = baseline_mean;
+      }
     }
   }
 
