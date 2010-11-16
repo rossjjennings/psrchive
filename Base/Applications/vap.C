@@ -159,13 +159,11 @@ string get_nchan_obs( Reference::To<Archive> archive )
 {
   string result = "UNDEF";
 
-  Reference::To<ProcHistory> ext = archive->get<ProcHistory>();
+  Reference::To<FITSHdrExtension> ext = archive->get<FITSHdrExtension>();
 
   if( ext )
   {
-    ProcHistory::row first;
-    first = ( *(ext->rows.begin()) );
-    result = tostring( first.nchan );
+    result = tostring( ext->get_obsnchan() );
   }
 
   return result;
