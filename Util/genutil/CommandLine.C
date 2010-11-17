@@ -190,21 +190,40 @@ CommandLine::Argument* CommandLine::Menu::find (const std::string& name)
 	       "no option named '" + name + "'");
 }
 
-void CommandLine::Menu::help (const std::string& name)
+void CommandLine::Menu::help (const std::string& _name)
 {
-  if (!name.empty())
+
+  if (!_name.empty())
   {
-    // cerr << "CommandLine::Menu::help name='" << name << "'" << endl;
+    // cerr << "CommandLine::Menu::help name='" << _name << "'" << endl;
+
+    // Copy input and strip any leading -'s
+    string name = _name;
+    while (name[0]=='-') 
+      name.erase(0,1);
+
     Argument* arg = find (name);
 
-    if (dynamic_cast<Alias*>(arg))
-      cout << "-" << name << " is an " << arg->get_help().second << endl;
+    cout << "Detailed help for -" << name << ":" << endl;
 
-    else if (arg->long_help.empty())
-      cout << "no further help available for -" << name << endl;
+    if (dynamic_cast<Alias*>(arg))
+      cout << "  -" << name << " is an " << arg->get_help().second << endl;
+
+    else 
+    {
+
+      cout << endl << 
+        "  " << arg->get_help().first << "  " << arg->get_help().second
+        << endl << endl;
+
+      if (arg->long_help.empty())
+        cout << "no further help available for -" << name << endl;
     
-    else
-      cout << "-" << name << " help:\n\n" << arg->long_help << endl;
+      else
+        cout << arg->long_help << endl;
+    }
+
+    cout << endl;
     
     exit (0);
   }
@@ -220,6 +239,8 @@ void CommandLine::Menu::help (const std::string& name)
 
   cout << help_header << endl << endl;
 
+  bool any_long_help = false;
+
   for (unsigned i=0; i<item.size(); i++)
   {
     Help help = item[i]->get_help();
@@ -227,11 +248,25 @@ void CommandLine::Menu::help (const std::string& name)
     if (dynamic_cast<Alias*>(item[i].get()))
       continue;
 
+    bool has_long_help = false;
+    Argument *arg = dynamic_cast<Argument*>(item[i].get());
+    if (arg)
+      has_long_help = !(arg->long_help.empty());
+
+    if (has_long_help)
+      any_long_help = true;
+
     if (dynamic_cast<Heading*>(item[i].get()))
       cout << help.first << endl;
     else
-      cout <<"  "<< pad(max_length, help.first) <<"  "<< help.second << endl;
+      cout <<"  "<< pad(max_length, help.first) << " "
+        << (has_long_help ? "*" : " ") << " " << help.second << endl;
   }
+
+  if (any_long_help)
+    cout  <<
+      "\nOptions marked with '*' have extra help available via '-help=option'."
+      << endl;
 
   cout << help_footer << endl;
 
