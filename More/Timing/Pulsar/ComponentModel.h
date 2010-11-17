@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Timing/Pulsar/ComponentModel.h,v $
-   $Revision: 1.4 $
-   $Date: 2009/11/10 04:39:04 $
-   $Author: straten $ */
+   $Revision: 1.5 $
+   $Date: 2010/11/17 06:51:20 $
+   $Author: sosl $ */
 
 #ifndef __Pulsar_ComponentModel_h
 #define __Pulsar_ComponentModel_h
@@ -58,6 +58,10 @@ namespace Pulsar
     void unload (const char *fname) const;
 
     // Manipulation
+    /*! \param centre the centre of the component in turns of pulse phase
+     *  \param concentration the concentration of the component equal 1 / variance in radians
+     *  \param height is the absolute height of the component
+     */
     void add_component (double centre, double concentration, double height,
 			const char *name);
 
