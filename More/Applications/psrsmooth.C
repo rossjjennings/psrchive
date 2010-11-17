@@ -76,17 +76,39 @@ void psrsmooth::add_options (CommandLine::Menu& menu)
   arg = menu.add (this, &psrsmooth::use_wavelet, 'W');
   arg->set_help ("Use Wavelet smoothing (default Sinc)");
 
-  arg = menu.add(wavelet_type, 't');
-  arg->set_help ("Use specified wavelet type");
+  arg = menu.add(wavelet_type, 't', "type");
+  arg->set_help ("Use specified wavelet type (default " + wavelet_type + ")");
+  arg->set_long_help(
+      "Specify type of wavelet via a letter-number code: D4, B103, UD8, etc.\n"
+      "Letter specifies wavelet family, and the number specifies the order.\n"
+      "A 'U' prefix will enable the 'undecimated' aka 'translation-invariant'\n"
+      "type of DWT (this is highly _recommended_ for profile smoothing).  The\n"
+      "currently available wavelet families are (see GSL docs for more info):\n"
+      "\n"
+      "  H = Haar.  Order 2 only.  (Not very good for profiles.)\n"
+      "  D = Daubechies.  Supported orders 4, 6, 8, ..., 20.\n"
+      "  B = B-spline.  Orders 103, 105, 202, 204, 206, 208,\n"
+      "                        301, 303, 305, 307, 309\n"
+      "\n"
+      "In general for a given family, higher order results in a smoother\n"
+      "function but has less ability to track sharp variations.  If you are\n"
+      "unsure which to use, 'UD8' seems to be a generally good choice.\n"
+      );
 
-  arg = menu.add(wavelet_cutoff, 'c');
-  arg->set_help ("Set wavelet cutoff factor");
+  stringstream tmp;
+  tmp << "Set wavelet cutoff factor (default " << wavelet_cutoff << ")";
+  arg = menu.add(wavelet_cutoff, 'c', "factor");
+  arg->set_help (tmp.str());
+  arg->set_long_help(
+      "Smoothing is accomplished by keeping only those wavelet components\n"
+      "with a magnitude greater than factor*sqrt(2*log(N_bins)) sigma.\n"
+      );
 
   arg = menu.add (normalize, 'n');
   arg->set_help ("Normalize smoothed profile");
 
   arg = menu.add (ext, 'e', "ext");
-  arg->set_help ("Append extention to output (default .sm)");
+  arg->set_help ("Append extention to output (default ." + ext + ")");
 
   arg = menu.add (print_harm, 'H');
   arg->set_help ("Only print the smoothed number of harmonics");
