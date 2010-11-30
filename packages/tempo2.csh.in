@@ -26,13 +26,10 @@ cd tempo2
 mkdir -p $TEMPO2
 rsync -t T2runtime/* $TEMPO2
 
-# use the same Fortran compiler
-perl -pi -e 's/FC = g77/FC = @F77@/' Makefile.config
-
-# don't compile the plugins
-
-make slim
-make sliminstall
+./bootstrap
+./configure
+make
+make install
 
 echo
 echo
