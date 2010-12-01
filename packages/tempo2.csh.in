@@ -24,7 +24,7 @@ endif
 cd tempo2
 
 mkdir -p $TEMPO2
-rsync -t T2runtime/* $TEMPO2
+rsync -at T2runtime/* $TEMPO2
 
 ./bootstrap
 ./configure
