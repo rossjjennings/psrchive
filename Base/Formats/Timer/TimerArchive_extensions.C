@@ -34,8 +34,9 @@ void Pulsar::TimerArchive::unpack_extensions () try
   }
   catch (Error& error)
   {
-    warning << "Pulsar::TimerArchive::unpack_extensions " 
-            << error.get_message().c_str() << endl;
+    if (verbose > 2)
+      warning << "Pulsar::TimerArchive::unpack_extensions " 
+              << error.get_message().c_str() << endl;
   }
   
   TapeInfo* tape = getadd<TapeInfo>();
