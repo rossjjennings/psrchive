@@ -18,14 +18,22 @@
 
 using namespace std;
 
-Pulsar::Parameters::Lookup::Lookup ()
+Pulsar::Parameters::Lookup::Lookup () 
 {
   ext.push_back (".eph");
   ext.push_back (".par");
 
-  string tempo_pardir = Tempo::get_configuration("PARDIR");
-  if (tempo_pardir.length())
-    path.push_back (tempo_pardir);
+  try
+  {
+    string tempo_pardir = Tempo::get_configuration("PARDIR");
+    if (tempo_pardir.length())
+      path.push_back (tempo_pardir);
+  }
+  catch (Error& error)
+  {
+    if (verbose)
+      cerr << "Pulsar::Parameters::Lookup error " << error.get_message() << endl;
+  }
 }
 
 void Pulsar::Parameters::Lookup::add_extension (const string& e)
@@ -112,6 +120,7 @@ Pulsar::Parameters::Lookup::operator() (const string& name) const try
   if (chdir (Tempo::get_directory().c_str()) != 0)
     throw Error (FailedSys, "Pulsar::Parameters::Lookup",
 		 "failed chdir(" + Tempo::get_directory() + ")");
+
 
   int retval = system(command.c_str());
 
