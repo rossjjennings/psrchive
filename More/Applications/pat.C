@@ -123,7 +123,8 @@ void profile_plot(Reference::To<Plot> plot,
         Reference::To<Profile> profile_to_copy, Reference::To<Archive> archive,
         const double freq);
 
-void diff_profiles(Reference::To<Archive> diff, Reference::To<Archive> stdarch, Reference::To<Profile> profile);
+void diff_profiles(Pulsar::Archive* diff, Pulsar::Archive* stdarch,
+    Pulsar::Profile* profile);
 
 string get_xrange(const double min, const double max);
 #endif // HAVE_PGPLOT
@@ -354,7 +355,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.104 2010/11/06 13:55:43 sosl Exp $" << endl;
+      cout << "$Id: pat.C,v 1.105 2010/12/16 02:06:59 jonathan_khoo Exp $" << endl;
       return 0;
 
     case 'K':
@@ -1037,26 +1038,29 @@ void profile_plot(Reference::To<Plot> plot,
 }
 
 /**
- * @brief calculate the difference between the template and current profile
- *        and store it as a separate profile - 'diff'
+ * @brief calculate the difference between profile and stdarch
+ *        and store it as diff
  */
 
-void diff_profiles(Reference::To<Archive> diff, Reference::To<Archive> stdarch, Reference::To<Profile> profile)
+void diff_profiles(Pulsar::Archive* diff, Pulsar::Archive* stdarch,
+    Pulsar::Profile* profile)
 {
   Reference::To<Pulsar::Profile> s = stdarch->get_Profile(0, 0, 0);
-  double scale = 0.0;
   float *s_amps = s->get_amps();
   float *p_amps = profile->get_amps();
-  for (unsigned i=0; i<profile->get_nbin(); i++) {
+
+  const float nbin = profile->get_nbin();
+  double scale = 0.0;
+
+  for (unsigned i = 0; i < nbin; ++i) {
     scale += s_amps[i] * p_amps[i];
   }
 
   scale = (profile->get_nbin()* scale - profile->sum() * s->sum()) /
 	  (profile->get_nbin()* s->sumsq() - s->sum() * s->sum());
 
-  double offset = 0.0;
-
-  offset = (scale * s->sum() - profile->sum()) / profile->get_nbin();
+  const double offset = 
+    (scale * s->sum() - profile->sum()) / profile->get_nbin();
 
   Reference::To<Pulsar::Profile> diff_prof =  diff->get_Profile(0, 0, 0);
    
@@ -1065,7 +1069,47 @@ void diff_profiles(Reference::To<Archive> diff, Reference::To<Archive> stdarch, 
   diff_prof->offset(-offset);
   diff_prof->scale(scale);
   diff_prof->diff(profile);
+
+  // A quick fix to make the difference be calculated by:
+  //    profile - template
+  diff_prof->scale(-1);
 }
+
+/**
+ * @brief calculate the difference between profile and template
+ *        and store it as 'diff'
+ */
+
+/*void diff_profiles(Pulsar::Archive* diff, Pulsar::Archive* stdarch,
+    Pulsar::Profile* profile)
+{
+  float *s_amps = stdarch->get_Profile(0,0,0)->get_amps();
+  float *p_amps = profile->get_amps();
+  double scale = 0.0;
+
+  for (unsigned i = 0; i < profile->get_nbin(); ++i) {
+    scale += s_amps[i] * p_amps[i];
+  }
+
+  const double template_sum   = stdarch->get_Profile(0,0,0)->sum();
+  const double template_sumsq = stdarch->get_Profile(0,0,0)->sumsq();
+
+  scale = (profile->get_nbin()* scale - profile->sum() * template_sum) /
+	  (profile->get_nbin()* template_sumsq - template_sum * template_sum);
+
+  const double offset =
+    (scale * template_sum - profile->sum()) / profile->get_nbin();
+
+  // A copy of the template.
+  Reference::To<Pulsar::Profile> copy = stdarch->get_Profile(0,0,0)->clone();
+
+  // template -> offset, scale and then diff
+
+  Reference::To<Pulsar::Profile> diff_prof = profile->clone();
+  diff_prof->offset(-offset);
+  diff_prof->scale(scale);
+  diff_prof->diff(copy);
+}*/
 
 void scaleProfile(Reference::To<Profile> profile)
 {
