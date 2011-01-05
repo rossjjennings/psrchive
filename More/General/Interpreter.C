@@ -702,13 +702,13 @@ string Pulsar::Interpreter::test (const string& args) try
   if (evaluate (args))
     return response (Good);
   else
-    return response (Fail,
-		     "assertion '"+args+"'\n"
-		     "        = '"+evaluate_expression+"' failed");
+    throw Error (InvalidState, "Pulsar::Interpreter::test",
+		 "assertion '"+args+"'\n"
+		 "        = '"+evaluate_expression+"' failed");
 }
 catch (Error& error)
 {
-  return response (Fail, error.get_message());
+  throw error += "Pulsar::Interpreter::test";
 }
 
 
