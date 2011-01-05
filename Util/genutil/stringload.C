@@ -103,7 +103,7 @@ int stringload (vector<string>* lines, FILE* fptr)
   static char* rdline = NULL;
   if (!rdline) rdline = new char [FILENAME_MAX+1];
 
-  char* whitespace = " \t\n";
+  const char* whitespace = " \t\n";
   // load the lines from file
   while (fgets (rdline, FILENAME_MAX, fptr) != NULL)
   {
@@ -125,15 +125,11 @@ int stringload (vector<string>* lines, FILE* fptr)
 #include <fstream>
 #include "Error.h"
 
-void loadlines (const std::string& filename, std::vector<std::string>& lines)
+void loadlines (std::istream& input, std::vector<std::string>& lines)
 {
-  std::ifstream input (filename.c_str());
-  if (!input)
-    throw Error (FailedSys, "loadlines", "ifstream (" + filename + ")");
-
   std::string line;
 
-  while (!input.eof())
+  while (input)
   {
     std::getline (input, line);
     line = stringtok (line, "#\n", false);  // get rid of comments
@@ -144,3 +140,18 @@ void loadlines (const std::string& filename, std::vector<std::string>& lines)
     lines.push_back (line);
   }
 }
+
+void loadlines (const std::string& filename, std::vector<std::string>& lines)
+{
+  if (filename == "-")
+    loadlines (cin, lines);
+  else
+  {
+    std::ifstream input (filename.c_str());
+    if (!input)
+      throw Error (FailedSys, "loadlines", "ifstream (" + filename + ")");
+    
+    loadlines (input, lines);
+  }
+}
+
