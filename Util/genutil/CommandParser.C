@@ -21,6 +21,7 @@ CommandParser::CommandParser()
   verbose = false;
   fault = false;
   abort = true;
+  interactive = true;
 
   startCommand = true;
   endCommand = false;
