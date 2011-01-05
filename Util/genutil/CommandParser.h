@@ -42,6 +42,9 @@ class CommandParser : public Reference::Able {
   //! Process a vector of commands
   virtual void script (const std::vector<std::string>& commands);
 
+  //! Process the standard input (terminal, pipe, here-doc, file, etc.)
+  virtual void standard_input (const std::string& prompt);
+
   //! return a help string
   std::string help (const std::string& command = "");
 
@@ -76,6 +79,9 @@ class CommandParser : public Reference::Able {
   class Method;
 
  protected:
+
+  //! Flag raised when input is an interactive terminal
+  bool interactive;
 
   //! Flag raised whenever a parsing error or other fault occurs
   bool fault;

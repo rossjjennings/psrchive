@@ -1,13 +1,15 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002, 2006 by Willem van Straten
+ *   Copyright (C) 2002 - 2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "CommandParser.h"
 #include "strutil.h"
 
 #include <fstream>
+#include <unistd.h>
 
 using namespace std;
 
@@ -69,6 +71,26 @@ void CommandParser::script (const vector<string>& cmds)
   }
   if (startCommand)
     startCommand = false;
+}
+
+#define STDIN_FILEDES 0
+
+void CommandParser::standard_input (const std::string& prompt)
+{
+  // check if stdin/cin is attached to a terminal (not a pipe or file)
+  interactive = isatty (STDIN_FILEDES);
+
+  if (interactive)
+    initialize_readline ("psrsh");
+
+  while (!quit)
+  {
+    string response = parse( readline() );
+    cout << response;
+
+    if (!interactive && fault && abort)
+      throw Error (InvalidState, "CommandParser::standard_input", response);
+  }
 }
 
 string CommandParser::parse (const string& commandargs)
