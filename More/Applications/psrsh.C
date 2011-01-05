@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002-2009 by Willem van Straten
+ *   Copyright (C) 2002-2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -61,7 +61,7 @@ psrsh::psrsh ()
 {
   stow_script = true;
   has_manual = true;
-  version = "$Id: psrsh.C,v 1.21 2010/09/22 03:13:07 straten Exp $";
+  version = "$Id: psrsh.C,v 1.22 2011/01/05 23:16:16 straten Exp $";
 
   load_files = true;
 
@@ -107,11 +107,8 @@ void psrsh::run ()
   else
   {
     // no arguments: interactive mode
-    interpreter->initialize_readline ("psrsh");
     interpreter->set_reply( true );
-    
-    while (!interpreter->quit)
-      cout << interpreter->parse( interpreter->readline() );
+    interpreter->standard_input ("psrsh");
   }
 }
 
