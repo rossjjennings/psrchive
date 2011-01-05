@@ -26,16 +26,29 @@ string CommandParser::readline ()
   string command;
 
 #ifdef HAVE_READLINE
-  char* cmd = 0;
-  while (cmd == 0)
-    cmd = ::readline (prompt.c_str());
+
+  char* cmd = ::readline (prompt.c_str());
+  if (!cmd)
+  {
+    quit = true;
+    return command;
+  }
 
   add_history (cmd);
   command = cmd;
   free (cmd);
+
 #else
+
+  if (!cin)
+  {
+    quit = true;
+    return command;
+  }
+
   cout << prompt;
   getline (cin, command);
+
 #endif
 
   return command;
