@@ -27,29 +27,34 @@ string CommandParser::readline ()
 
 #ifdef HAVE_READLINE
 
-  char* cmd = ::readline (prompt.c_str());
-  if (!cmd)
+  if (interactive)
   {
-    quit = true;
+    char* cmd = ::readline (prompt.c_str());
+    if (!cmd)
+    {
+      quit = true;
+      return command;
+    }
+
+    add_history (cmd);
+    command = cmd;
+    free (cmd);
+
     return command;
   }
 
-  add_history (cmd);
-  command = cmd;
-  free (cmd);
-
-#else
+#endif
 
   if (!cin)
   {
     quit = true;
     return command;
   }
+  
+  if (interactive)
+    cout << prompt;
 
-  cout << prompt;
   getline (cin, command);
-
-#endif
 
   return command;
 }
