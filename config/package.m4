@@ -87,7 +87,10 @@ AC_DEFUN([SWIN_PACKAGE_FIND],
 
   swin_[$1]_found=""
 
-  TEST_PACKAGES=`echo $LD_LIBRARY_PATH $PACKAGES | sed -e 's/:/ /g'`
+  TEST_INCS=`echo $CPPFLAGS | awk '{ for (i=1; i<=NF; i++) printf ("%s\n", $i);}' | grep '^-I' | sed -e 's/-I//g'`
+  TEST_LIBS=`echo $LDFLAGS | awk '{ for (i=1; i<=NF; i++) printf ("%s\n", $i);}' | grep '^-L' | sed -e 's/-L//g'`
+  TEST_PACKAGES=`echo $TEST_INCS $TEST_LIBS $LD_LIBRARY_PATH $PACKAGES | sed -e 's/:/ /g'`
+
   if test x"$TEST_PACKAGES" != x; then
     for cf_file in `find $TEST_PACKAGES -name "[$2]" 2> /dev/null`; do
       cf_path=`dirname $cf_file`
