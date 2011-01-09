@@ -350,7 +350,12 @@ int main (int argc, char** argv) try
 
 	Pulsar::Profile* profile = subint->get_Profile (0,ichan);
 
-	float snr = profile->snr ();
+	float snr = 0.0;
+
+        if (standard)
+          snr = standard_snr.get_snr( profile );
+        else
+          snr = profile->snr ();
 
         if (normal)
 	  cout << filenames[ifile] << "(" << isub << ", " << ichan << ")"
