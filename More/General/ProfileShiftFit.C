@@ -248,7 +248,11 @@ void Pulsar::ProfileShiftFit::compute()
   sigma2 /= 2.0*(double)count;
 
   // Put params/etc in correct place
-  shift = phi;
+
+  // Correct shift for different FFT length phase offset, if any
+  double correction = 0.5/nbins_prof - 0.5/nbins_std;
+  shift = phi + correction;
+
   scale = max_ccf/std_pow;
   int dof = 2*nharm - 2;
   chi2 = (prof_pow - scale*max_ccf)/sigma2;
