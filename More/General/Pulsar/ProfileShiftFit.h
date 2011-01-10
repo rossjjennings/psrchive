@@ -69,10 +69,10 @@ namespace Pulsar
     void set_error_method(Error_Method e) { err_meth = e; }
 
     //! Set the standard or template profile to use
-    void set_standard(Profile* p);
+    void set_standard (const Profile* p);
 
     //! Set the data profile to use
-    void set_Profile(Profile* p);
+    void set_Profile (const Profile* p);
 
     //! Run the fit
     void compute();
@@ -105,7 +105,7 @@ namespace Pulsar
     unsigned nharm;
 
     //! Current template profile
-    Reference::To<Profile> std;
+    Reference::To<const Profile> std;
 
     //! Current template nbin
     unsigned nbins_std;
@@ -117,7 +117,7 @@ namespace Pulsar
     double std_pow;
 
     //! Current data profile
-    Reference::To<Profile> prof;
+    Reference::To<const Profile> prof;
 
     //! Number of bins in profile
     unsigned nbins_prof;
