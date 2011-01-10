@@ -104,6 +104,9 @@ namespace Pulsar
     //! Number of harmonics to use
     unsigned nharm;
 
+    //! Effective number of harmonics = min (nharm, nbins_prof/2-1)
+    unsigned effective_nharm;
+
     //! Current template profile
     Reference::To<const Profile> std;
 
@@ -131,6 +134,7 @@ namespace Pulsar
     //! Number of bins in ccf
     unsigned nbins_ccf;
 
+    
     //! Evaluate ccf at phase shift phi
     double ccf(double phi);
 

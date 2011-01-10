@@ -84,6 +84,8 @@ void Pulsar::ProfileShiftFit::set_nharm(unsigned nh)
       std_pow += norm(cstd[ih]);
   }
 
+  effective_nharm = std::min(nharm, nbins_prof/2 - 1);
+
   // Reset valid flag
   computed = false;
 }
@@ -128,11 +130,14 @@ void Pulsar::ProfileShiftFit::set_Profile (const Profile *p)
   prof = p;
 
   // Alloc new mem if we need to
-  if (prof->get_nbin() != nbins_prof) {
+  if (prof->get_nbin() != nbins_prof)
+  {
     nbins_prof = prof->get_nbin();
     if (fprof!=NULL) delete [] fprof;
     fprof = new float[nbins_prof + 2];
   }
+
+  effective_nharm = std::min(nharm, nbins_prof/2 - 1);
 
   // FFT profile
   FTransform::frc1d(nbins_prof, fprof, prof->get_amps());
@@ -146,9 +151,6 @@ void Pulsar::ProfileShiftFit::set_Profile (const Profile *p)
   complex<float> *cstd  = (complex<float> *)fstd;
   complex<float> *cprof = (complex<float> *)fprof;
   complex<float> *cccf  = (complex<float> *)fccf;
-
-  unsigned effective_nharm = std::min(nharm, nbins_prof/2 - 1);
-  cerr << "effective nharm=" << nharm << endl;
 
   for (unsigned ih=1; ih<=effective_nharm; ih++) 
     cccf[ih] = conj(cstd[ih]) * cprof[ih];
@@ -166,8 +168,6 @@ double Pulsar::ProfileShiftFit::ccf(double phi)
   double result=0.0, arg;
   complex<float> *cccf  = (complex<float> *)fccf;
   complex<double> e;
-
-  unsigned effective_nharm = std::min(nharm, nbins_prof/2 - 1);
 
   for (unsigned ih=1; ih<=effective_nharm; ih++) {
     arg = 2.0*M_PI*phi*(double)ih;
@@ -187,8 +187,6 @@ double Pulsar::ProfileShiftFit::dccf(double phi)
   complex<float> *cccf  = (complex<float> *)fccf;
   complex<double> e;
 
-  unsigned effective_nharm = std::min(nharm, nbins_prof/2 - 1);
-
   for (unsigned ih=1; ih<=effective_nharm; ih++) {
     tmp = 2.0*M_PI*(double)ih;
     result += (complex<double>(cccf[ih]) 
@@ -207,8 +205,6 @@ double Pulsar::ProfileShiftFit::d2ccf(double phi)
   double result=0.0, tmp;
   complex<float> *cccf  = (complex<float> *)fccf;
   complex<double> e;
-
-  unsigned effective_nharm = std::min(nharm, nbins_prof/2 - 1);
 
   for (unsigned ih=1; ih<=effective_nharm; ih++) {
     tmp = 2.0*M_PI*(double)ih;
@@ -255,8 +251,6 @@ void Pulsar::ProfileShiftFit::compute()
   double prof_pow=0.0;
   complex<float> *cprof = (complex<float> *)fprof;
 
-  unsigned effective_nharm = std::min(nharm, nbins_prof/2 - 1);
- 
   for (unsigned ih=1; ih<=effective_nharm; ih++) 
     prof_pow += norm(cprof[ih]);
 
