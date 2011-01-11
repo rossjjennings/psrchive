@@ -92,6 +92,9 @@ namespace Pulsar
     //! Get the resulting SNR
     double get_snr();
 
+    //! Get the reduced chi-squared
+    double get_reduced_chisq () const { return chi2 / dof; }
+
     //! Current MCMC accept stats
     int mcmc_trials;
     int mcmc_accept;
@@ -188,6 +191,9 @@ namespace Pulsar
 
     //! Current fit Chi^2 (not reduced)
     double chi2;
+
+    //! Current degrees of freedom
+    unsigned dof;
 
     //! Current profile SNR
     double snr;
