@@ -92,6 +92,7 @@ nobase_include_HEADERS = \
 	Pulsar/StandardCandles.h \
         Pulsar/StandardFlux.h \
         Pulsar/StandardSNR.h \
+        Pulsar/StandardSNRWeight.h \
 	Pulsar/Statistics.h \
 	Pulsar/StatisticsInterface.h \
 	Pulsar/Subtract.h \
@@ -231,6 +232,7 @@ libGeneral_la_SOURCES = \
         StandardCandles.C \
         StandardFlux.C \
         StandardSNR.C \
+        StandardSNRWeight.C \
 	Statistics.C \
 	StatisticsInterface.C \
 	Subtract.C \
