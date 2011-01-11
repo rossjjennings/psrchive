@@ -12,6 +12,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+using namespace std;
+
 //! Set the weights of all Profiles in the Archive
 void Pulsar::StandardSNRWeight::operator () (Archive* archive)
 {
@@ -22,6 +24,9 @@ void Pulsar::StandardSNRWeight::operator () (Archive* archive)
 //! Default constructor
 Pulsar::StandardSNRWeight::StandardSNRWeight (const std::string& filename)
 {
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::StandardSNRWeight filename=" << filename << endl;
+
   Reference::To<Archive> archive = Archive::load(filename);
   archive->pscrunch();
   archive->tscrunch();
@@ -47,11 +52,18 @@ Pulsar::StandardSNRWeight::StandardSNRWeight (const std::string& filename)
 double Pulsar::StandardSNRWeight::get_weight (const Integration* integration,
 					      unsigned ichan)
 {
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::StandardSNRWeight::get_weight ichan=" << ichan << endl;
+
   ProfileShiftFit* use = total;
   if (use_chan)
     use = chan[ichan];
 
   use->set_Profile( integration->get_Profile(0,ichan) );
   double snr = use->get_snr();
+
+  if (Archive::verbose > 2)
+    cerr << "Pulsar::StandardSNRWeight::get_weight snr=" << snr << endl;
+
   return snr*snr;
 }
