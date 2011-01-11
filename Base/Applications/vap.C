@@ -2190,8 +2190,9 @@ void ExpandMetafile( string meta_filename, vector< string > &filenames )
 template<typename OS>
 void Header( OS& os )
 {
-  // first heading is always the filename
-  os << "filename";
+  // first heading is always the filename (unless there are no commands)
+  if (commands.size())
+    os << "filename";
 
   // add the commands as headings for the table.
   vector< string >::iterator it;
