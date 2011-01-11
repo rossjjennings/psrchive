@@ -1198,7 +1198,7 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	  } catch (Error& error) {}
 	  if (stdprof) {
 	    snrobj.set_standard(stdprof);
-	    toas[i].set_StoN(snrobj.get_morph_snr(data->get_Profile(sub,0,chn)));
+	    toas[i].set_StoN(snrobj.get_snr(data->get_Profile(sub,0,chn)));
 	  }
 	  else {
 	    toas[i].set_StoN(data->get_Profile(sub,0,chn)->snr());
