@@ -11,7 +11,7 @@
 //! Default constructor
 Pulsar::IntegrationWeight::IntegrationWeight ()
 {
-  weight_absolute = false;
+  weight_absolute = true;
 }
 
 //! Set integration weights
