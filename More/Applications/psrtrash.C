@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009 by Willem van Straten
+ *   Copyright (C) 2009-2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -11,7 +11,9 @@
 
 #include "Pulsar/PlotFactory.h"
 #include "Pulsar/FramedPlot.h"
+
 #include "Pulsar/Archive.h"
+#include "Pulsar/ProfileShiftFit.h"
 
 #include <cpgplot.h>
 
@@ -34,11 +36,19 @@ public:
   //! Process any remaining archives
   void finalize ();
 
+  //! Set the standard profile used to automatically trash
+  void set_standard (const std::string& filename);
+
 protected:
 
   //! Add command line options
   void add_options (CommandLine::Menu&);
 
+  //! Automatically discard profiles that do not fit the template well
+  Reference::To<ProfileShiftFit> fit;
+  //! Threshold used for automatic template-based trash algorithm
+  double fit_threshold;
+  
   unsigned plotted;
   string plot_name;
 
@@ -76,6 +86,8 @@ trash::trash ()
   add( &standard_options );
 
   plotted = 0;
+
+  fit_threshold = 2.0;
 }
 
 void trash::add_options (CommandLine::Menu& menu)
@@ -87,10 +99,34 @@ void trash::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (plot_name, 'p', "plot");
   arg->set_help ("set plot type");
+
+  arg = menu.add (this, &trash::set_standard, 'S', "std.ar");
+  arg->set_help ("use goodness of template fit");
+}
+
+//! Set the standard profile used to automatically trash
+void trash::set_standard (const std::string& filename)
+{
+  Reference::To<Archive> std = Pulsar::Archive::load (filename);
+  std = std->total();
+
+  fit = new ProfileShiftFit;
+  fit->choose_maximum_harmonic = true;
+  fit->set_standard (std->get_Profile(0,0,0));
 }
 
 void trash::process (Pulsar::Archive* archive)
 {
+  if (fit)
+  {
+    fit->set_Profile( archive->get_Profile(0,0,0) );
+    if (fit->get_reduced_chisq() > fit_threshold)
+      cout << "trash: " << archive->get_filename()
+	   << " fit=" << fit->get_reduced_chisq() << endl;
+
+    return;
+  }
+
   cpgpage ();
   cpgask (0);
 
