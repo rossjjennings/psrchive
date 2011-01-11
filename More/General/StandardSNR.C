@@ -9,6 +9,7 @@
 
 void Pulsar::StandardSNR::set_standard (const Profile* profile)
 {
+  fit.choose_maximum_harmonic = true;
   fit.set_standard (profile);
 }
 
