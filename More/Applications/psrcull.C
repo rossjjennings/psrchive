@@ -75,10 +75,10 @@ void cull::add_options (CommandLine::Menu& menu)
   arg = menu.add (fit_threshold, "fit", "threshold");
   arg->set_help ("goodness of fit threshold (default: 10)");
 
-  arg = menu.add (fit_threshold, "snr", "threshold");
+  arg = menu.add (snr_threshold, "snr", "threshold");
   arg->set_help ("S/N threshold (default: 10)");
 
-  arg = menu.add (fit_threshold, "shift", "threshold");
+  arg = menu.add (shift_threshold, "shift", "threshold");
   arg->set_help ("phase shift threshold (default: 6 sigma)");
 }
 
