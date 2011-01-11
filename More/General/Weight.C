@@ -10,6 +10,9 @@
 
 void Pulsar::Weight::operator () (Archive* archive)
 {
+  if (archive->get_state() == Signal::Coherence)
+    archive->convert_state (Signal::Stokes);
+
   for (unsigned isub = 0; isub < archive->get_nsubint(); isub++)
     weight (archive->get_Integration (isub));
 }
