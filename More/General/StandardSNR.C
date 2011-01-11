@@ -15,9 +15,6 @@ void Pulsar::StandardSNR::set_standard (const Profile* profile)
 float Pulsar::StandardSNR::get_snr (const Profile* profile)
 {
   fit.set_Profile (profile);
-
-  // factor of two determined empirically
-  return 2 * fit.get_snr();
+  return fit.get_snr();
 }    
-
 
