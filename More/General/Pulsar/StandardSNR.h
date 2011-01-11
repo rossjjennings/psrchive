@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardSNR.h,v $
-   $Revision: 1.6 $
-   $Date: 2011/01/11 01:15:27 $
+   $Revision: 1.7 $
+   $Date: 2011/01/11 01:16:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StandardSNR_h
@@ -35,9 +35,6 @@ namespace Pulsar {
 
     //! Used to perform the fit and compute the S/N
     ProfileShiftFit fit;
-
-    //! The nbin-invariant signal in the standard
-    double standard_signal;
   };
 
 }
