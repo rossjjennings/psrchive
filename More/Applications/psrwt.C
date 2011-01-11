@@ -306,27 +306,30 @@ int main (int argc, char** argv) try
 
   Reference::To<Pulsar::Archive> archive, copy;
 
-  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
-
+  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try
+  {
     archive = Pulsar::Archive::load (filenames[ifile]);
 
     bool channel_standard = false;
 
-    if ( standard )  {
-
+    if ( standard )
+    {
       if ( standard->get_nchan() > 1 
-	   && standard->get_nchan() == archive->get_nchan() ) {
+	   && standard->get_nchan() == archive->get_nchan() )
+      {
         if (!quiet)
           cerr << "psrwt: standard profile varies with frequency" << endl;
 	channel_standard = true;
       }
-      else {
-        if (!quiet)
-          cerr << "psrwt: fscrunching standard" << endl;
-	copy = standard->total();
+      else
+      {
+	copy = standard;
+
+        if ( standard->get_nchan() > 1 )
+          copy = standard->total();
+      
 	standard_snr.set_standard( copy->get_Profile (0,0,0) );
       }
-
     }
 
     copy = archive->clone();
