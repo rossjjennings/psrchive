@@ -20,6 +20,7 @@
 namespace Pulsar {
   
   class Archive;
+  class Weight;
 
   //! Pulsar data processing command language interpreter
   /*!
@@ -242,6 +243,9 @@ namespace Pulsar {
 
     FixFluxCal fix_flux_cal;
     SetReceiver set_receiver;
+
+    //! The current weighting scheme
+    Reference::To<Weight> weight_policy;
 
   private:
     

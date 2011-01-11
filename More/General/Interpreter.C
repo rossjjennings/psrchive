@@ -20,6 +20,7 @@
 #include "Pulsar/FaradayRotation.h"
 
 #include "Pulsar/DurationWeight.h"
+#include "Pulsar/StandardSNRWeight.h"
 #include "Pulsar/SNRWeight.h"
 #include "Pulsar/Transposer.h"
 
@@ -1010,20 +1011,22 @@ string Pulsar::Interpreter::weight (const string& args) try
 { 
   vector<string> arguments = setup (args);
 
-  if (!arguments.size())
+  if (!weight_policy && !arguments.size())
     return response (Fail, "please specify weighting scheme");
 
-  Reference::To<Weight> weight;
   if (arguments.size() == 1 && arguments[0] == "time")
-    weight = new DurationWeight;
+    weight_policy = new DurationWeight;
 
   else if (arguments.size() == 1 && arguments[0] == "snr")
-    weight = new SNRWeight;
+    weight_policy = new SNRWeight;
 
-  else
+  else if (arguments.size() == 2 && arguments[0] == "std")
+    weight_policy = new StandardSNRWeight (arguments[1]);
+
+  else if (arguments.size())
     return response (Fail, "unrecognized weighting scheme '" + args + "'");
 
-  (*weight)( get() );
+  (*weight_policy)( get() );
 
   return response (Good);
 }
