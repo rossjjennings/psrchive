@@ -703,7 +703,7 @@ string Pulsar::Interpreter::test (const string& args) try
     return response (Good);
   else
     throw Error (InvalidState, "Pulsar::Interpreter::test",
-		 "assertion '"+args+"'\n"
+		 "assertion '"+args+"'\n\t"
 		 "        = '"+evaluate_expression+"' failed");
 }
 catch (Error& error)
