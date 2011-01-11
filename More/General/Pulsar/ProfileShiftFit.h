@@ -96,10 +96,16 @@ namespace Pulsar
     int mcmc_trials;
     int mcmc_accept;
 
+    //! Set true when set_standard should choose the maximum harmonic
+    bool choose_maximum_harmonic;
+
   protected:
 
     //! Initialize vars
     void init();
+
+    //! Choose the maximum number of harmonics using LastHarmonic
+    void choose_nharm ();
 
     //! Number of harmonics to use
     unsigned nharm;

@@ -9,6 +9,8 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationExpert.h"
+#include "Pulsar/LastHarmonic.h"
+#include "Pulsar/Fourier.h"
 
 #include "toa.h"
 
@@ -51,7 +53,11 @@ void Pulsar::ProfileShiftFit::init ()
   mse=0.0;
 }
 
-Pulsar::ProfileShiftFit::ProfileShiftFit() { init(); }
+Pulsar::ProfileShiftFit::ProfileShiftFit()
+{
+  init();
+  choose_maximum_harmonic = false;
+}
 
 Pulsar::ProfileShiftFit::~ProfileShiftFit() { reset(); }
 
@@ -84,12 +90,17 @@ void Pulsar::ProfileShiftFit::set_nharm(unsigned nh)
       std_pow += norm(cstd[ih]);
   }
 
-  effective_nharm = std::min(nharm, nbins_prof/2 - 1);
+  if (nbins_prof)
+    effective_nharm = std::min(nharm, nbins_prof/2 - 1);
 
   // Reset valid flag
   computed = false;
 }
-unsigned Pulsar::ProfileShiftFit::get_nharm() { return(nharm); }
+
+unsigned Pulsar::ProfileShiftFit::get_nharm()
+{
+  return(nharm);
+}
 
 void Pulsar::ProfileShiftFit::set_standard (const Profile *p)
 {
@@ -110,13 +121,26 @@ void Pulsar::ProfileShiftFit::set_standard (const Profile *p)
     fstd[i] *= fnorm*fnorm;
 
   // Set up nharm, default to use whole template
-  if (nharm==0 || nharm > std->get_nbin()/2 - 1) 
+  if (choose_maximum_harmonic)
+    choose_nharm ();
+  else if (nharm==0 || nharm > std->get_nbin()/2 - 1) 
     set_nharm(std->get_nbin() / 2 - 1);
   else 
     set_nharm(nharm);
 
   // Reset valid flag
   computed = false;
+}
+
+void Pulsar::ProfileShiftFit::choose_nharm ()
+{
+  Profile temp_std_psd (std->get_nbin());
+  temp_std_psd.set_amps (fstd);
+  detect (&temp_std_psd);
+
+  LastHarmonic last;
+  last.set_Profile( &temp_std_psd );
+  set_nharm ( last.get_last_harmonic() );
 }
 
 void Pulsar::ProfileShiftFit::set_Profile (const Profile *p)
