@@ -122,7 +122,7 @@ void cull::process (Pulsar::Archive* archive)
     
     if (redchi2 > fit_threshold)
     {
-      cout << archive->get_filename()
+      cout << "trash: " << archive->get_filename()
 	   << " fit=" << redchi2 << endl;
       return;
     }
@@ -138,7 +138,7 @@ void cull::process (Pulsar::Archive* archive)
     
     if (snr < snr_threshold)
     {
-      cout << archive->get_filename()
+      cout << "trash: " << archive->get_filename()
 	   << " S/N=" << snr << endl;
       return;
     }
@@ -154,7 +154,7 @@ void cull::process (Pulsar::Archive* archive)
     
     if ( absturn(shift.get_value()) > shift_threshold * shift.get_error())
     {
-      cout << archive->get_filename()
+      cout << "trash: " << archive->get_filename()
 	   << " shift=" << shift << endl;
       return;
     }
