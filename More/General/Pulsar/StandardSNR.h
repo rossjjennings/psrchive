@@ -1,20 +1,20 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardSNR.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:53 $
+   $Revision: 1.6 $
+   $Date: 2011/01/11 01:15:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StandardSNR_h
 #define __Pulsar_StandardSNR_h
 
-#include "Reference.h"
+#include "Pulsar/ProfileShiftFit.h"
 
 namespace Pulsar {
 
@@ -31,14 +31,13 @@ namespace Pulsar {
     //! Return the signal to noise ratio based on the shift
     float get_snr (const Profile* profile);
 
-    //! Return the S/N based on a difference power computation
-    float get_morph_snr (const Profile* profile);
-
   protected:
 
-    //! The standard against which the S/N will be calculated
-    Reference::To<const Profile> standard;
+    //! Used to perform the fit and compute the S/N
+    ProfileShiftFit fit;
 
+    //! The nbin-invariant signal in the standard
+    double standard_signal;
   };
 
 }

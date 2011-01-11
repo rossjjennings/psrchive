@@ -1,94 +1,50 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/StandardSNR.h"
-#include "Pulsar/Profile.h"
-#include "morphological_difference.h"
 
-#include <math.h>
+#include "Pulsar/ProfileStats.h"
 using namespace std;
 
 void Pulsar::StandardSNR::set_standard (const Profile* profile)
 {
-  standard = profile->clone();
+  fit.set_standard (profile);
+
+  ProfileStats stats;
+  stats.set_profile (profile);
+
+  double on_sum = stats.get_total().get_value();
+  double on_count = stats.get_onpulse()->get_weight_sum();
+
+  standard_signal = on_sum / on_count;
+
+  cerr << "std signal=" << standard_signal << endl;
 }
 
 float Pulsar::StandardSNR::get_snr (const Profile* profile)
 {
-  if (Pulsar::Profile::verbose)
-    cerr << "Pulsar::StandardSNR::get_snr" << endl;
+  fit.set_Profile (profile);
 
-  double shift;
-  float ephase, snrfft, esnrfft;
+  // factor of two determined empirically
+  return 2 * fit.get_snr();
 
-  try {
-    profile->fftconv(*standard, shift, ephase, snrfft, esnrfft);
-  }
-  catch (...) {
-    return 0.0;
-  }
+  cerr << "fit snr=" << fit.get_snr() << endl;
 
-  return snrfft;
+  //! Get the resulting scale factor
+  double scale = fit.get_scale().get_value();
+
+  //! Get the resulting Mean Squared Error (per fit DOF)
+  double rms = sqrt( fit.get_mse() );
+
+  cerr << "scale=" << scale << " rms=" << rms << endl;
+
+  double snr = standard_signal * scale / rms;
+
+  cerr << "snr ratio=" << fit.get_snr()/snr << endl;
 }    
-
-float Pulsar::StandardSNR::get_morph_snr (const Profile* profile)
-{
-  if (Pulsar::Profile::verbose)
-    cerr << "Pulsar::StandardSNR::get_morph_snr" << endl;
-
-  Reference::To<Pulsar::Profile> pcopy = profile->clone();
-  Reference::To<Pulsar::Profile> scopy = standard->clone();
-
-  if (pcopy->get_nbin() > scopy->get_nbin()) {
-    pcopy->bscrunch(pcopy->get_nbin() / scopy->get_nbin());
-  }
-  if (pcopy->get_nbin() < scopy->get_nbin()) {
-    scopy->bscrunch(scopy->get_nbin() / pcopy->get_nbin());
-  }
-
-  float minphs = pcopy->find_min_phase(0.6);
-  *pcopy -= (pcopy->mean(minphs));
-
-  minphs = scopy->find_min_phase(0.6);
-  *scopy -= (scopy->mean(minphs));
-
-  double shift = 0.0;
-  double scale = 0.0;
-
-  Reference::To<Pulsar::Profile> diff = 
-    morphological_difference(pcopy, scopy, scale, shift);
-
-  pcopy->rotate_phase (shift);
-
-  double mean    = 0.0;
-  double var     = 0.0;
-  double varmean = 0.0;
-
-  // Find the statistics of the difference profile
-
-  diff->stats(&mean, &var, &varmean);
-  double stddev1 = sqrt(var);
-
-  // Now it gets interesting...
-
-  int rise, fall;
-
-  scopy->find_peak_edges(rise, fall);
-
-  if (fall <= rise)
-    fall += ( (rise-fall)/scopy->get_nbin() + 1 ) * scopy->get_nbin();
-
-  double puls_flux = pcopy->sum(rise, fall)*scale - mean * double(fall-rise);
-
-  // divide by the sqrt of the number of bins
-  puls_flux /= sqrt (double(fall-rise));
-
-  return (puls_flux / stddev1);
-}
-
 
 
