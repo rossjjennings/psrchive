@@ -19,6 +19,11 @@ void Pulsar::Profile::fftconv (const Profile& std,
   double chisq;
 
   unsigned nbin = get_nbin();
+
+  if (std.get_nbin() != nbin)
+    throw Error (InvalidState, "Pulsar::Profile::fftconv",
+		 "nbin=%u != std.nbin=%u", nbin, std.get_nbin());
+
   const float* obsamps = get_amps();
   const float* stdamps = std.get_amps();
 
