@@ -450,3 +450,13 @@ double Pulsar::ProfileShiftFit::get_snr()
   if (!computed) compute();
   return(snr);
 }
+
+//! Get the reduced chi-squared
+double Pulsar::ProfileShiftFit::get_reduced_chisq () const
+{
+  if (!computed)
+    const_cast<ProfileShiftFit*>(this)->compute();
+
+  return chi2/dof;
+}
+

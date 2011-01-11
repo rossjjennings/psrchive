@@ -93,7 +93,7 @@ namespace Pulsar
     double get_snr();
 
     //! Get the reduced chi-squared
-    double get_reduced_chisq () const { return chi2 / dof; }
+    double get_reduced_chisq () const;
 
     //! Current MCMC accept stats
     int mcmc_trials;
