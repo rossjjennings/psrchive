@@ -89,6 +89,9 @@ ssize_t stringload (string* str, istream &istr, streamsize nbytes)
 
 int stringfload (vector<string>* lines, const string& filename)
 {
+  if (filename == "-")
+    return stringload (lines, stdin);
+
   FILE* fptr = fopen (filename.c_str(), "r");
   if (fptr == NULL)
     return -1;
