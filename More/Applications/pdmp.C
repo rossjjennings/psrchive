@@ -1438,6 +1438,9 @@ void solve_and_plot (Archive* archive,
 	if (pdotHalfRange < 0)
 //		pdotHalfRange = getNaturalpdotHalfRange(archive, pdotStep);
 		pdotHalfRange = 0;
+	if (pdotStep <= 0){
+		pdotStep=pdotHalfRange/50.0;
+	}
 
 
 	
@@ -3457,6 +3460,11 @@ void addOptimisedXmlCandidateSection(const Archive * archive,double centrePeriod
 	{
 		//make the 'SNR block'
 		int dmBins, periodBins;
+
+		dmStep *= coarseness;
+		periodStep_us *= coarseness;
+		periodHalfRange_us *= range_mult;
+		dmHalfRange *= range_mult;
 
 		// Number of bins in the DM axis
 		dmBins = (int)ceil( ( fabs(dmHalfRange)*2 ) / dmStep);
