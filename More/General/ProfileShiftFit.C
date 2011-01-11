@@ -297,7 +297,7 @@ void Pulsar::ProfileShiftFit::compute()
   shift = phi + correction;
 
   scale = max_ccf / std_pow;
-  int dof = 2*effective_nharm - 2;
+  dof = 2*effective_nharm - 2;
   chi2 = (prof_pow - scale*max_ccf)/sigma2;
   mse = (prof_pow - scale*max_ccf)/(double)dof;
 
