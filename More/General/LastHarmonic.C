@@ -73,6 +73,9 @@ unsigned Pulsar::LastHarmonic::get_consecutive () const
 //
 unsigned Pulsar::LastHarmonic::get_last_harmonic () const
 {
+  if (!built)
+    const_cast<LastHarmonic*>(this)->build ();
+
   return significant.get();
 }
 
