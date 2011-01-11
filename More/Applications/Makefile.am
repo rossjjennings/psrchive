@@ -10,7 +10,7 @@ EXTRA_DIST = psrhelp
 
 bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
-	psrover
+	psrover psrcull
 
 pam_SOURCES = pam.C
 
@@ -54,6 +54,8 @@ rmfit_LDADD = njkk08/libnjkk08.la $(LDADD) @PGPLOT_LIBS@
 mtm_SOURCES = mtm.C
 
 sesdiv_SOURCES = sesdiv.C
+
+psrcull_SOURCES = psrcull.C
 
 # ######################################################################
 #
