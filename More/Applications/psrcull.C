@@ -59,7 +59,7 @@ cull::cull ()
 
   fit_threshold = 10.0;
   snr_threshold = 10.0;
-  shift_threshold = 6.0;
+  shift_threshold = 0.01;
 }
 
 void cull::add_options (CommandLine::Menu& menu)
@@ -79,7 +79,7 @@ void cull::add_options (CommandLine::Menu& menu)
   arg->set_help ("S/N threshold (default: 10)");
 
   arg = menu.add (shift_threshold, "shift", "threshold");
-  arg->set_help ("phase shift threshold (default: 6 sigma)");
+  arg->set_help ("phase shift threshold (default: 0.01 turns)");
 }
 
 //! Set the standard profile used to automatically cull
@@ -146,13 +146,13 @@ void cull::process (Pulsar::Archive* archive)
   
   if (shift_threshold)
   {
-    Estimate<double> shift = fit->get_shift();
+    double shift = fit->get_shift().get_value();
     
     if (verbose)
       cerr << "psrcull: " << archive->get_filename() 
 	   << " shift=" << shift << endl;
     
-    if ( absturn(shift.get_value()) > shift_threshold * shift.get_error())
+    if ( absturn(shift) > shift_threshold )
     {
       cout << "trash: " << archive->get_filename()
 	   << " shift=" << shift << endl;
