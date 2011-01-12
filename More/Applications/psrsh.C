@@ -42,10 +42,14 @@ protected:
   //! Add command line options
   void add_options (CommandLine::Menu&);
 
+  //! The interpreter used to parse commands
   Reference::To<Pulsar::Interpreter> interpreter;
 
   //! Load data from filenames provided as arguments
   bool load_files;
+
+  //! Lines read from the script
+  vector<string> script_lines;
 
   void interpreter_help (const string& cmd);
 };
@@ -61,7 +65,7 @@ psrsh::psrsh ()
 {
   stow_script = true;
   has_manual = true;
-  version = "$Id: psrsh.C,v 1.22 2011/01/05 23:16:16 straten Exp $";
+  version = "$Id: psrsh.C,v 1.23 2011/01/12 04:13:18 straten Exp $";
 
   load_files = true;
 
@@ -97,12 +101,17 @@ void psrsh::run ()
 {
   if (!script.empty())
   {
-    name = basename (script);
+    loadlines (script, script_lines);
+
+    if (script == "-")
+      name = "STDIN";
+    else
+      name = basename (script);
 
     if (load_files)
       Application::run ();
     else
-      interpreter->script( script );
+      interpreter->script( script_lines );
   }
   else
   {
@@ -115,12 +124,11 @@ void psrsh::run ()
 void psrsh::process (Pulsar::Archive* archive)
 {
   interpreter->set( archive );
-  interpreter->script( script );
+  interpreter->script( script_lines );
 }
 
 void psrsh::interpreter_help (const string& cmd)
 {
   cout << endl << interpreter->help (cmd);
-
   exit (0);
 }
