@@ -275,7 +275,7 @@ void zap (vector<bool>& mask, vector<float>& spectrum,
       if (mask[ichan])
 	continue;
 
-      if (spectrum[ichan] > cutoff)
+      if (fabs(spectrum[ichan]) > cutoff)
       {
 	// cerr << "cutoff " << ichan << " " << spectrum[ichan] << endl;
 	mask[ichan] = true;
