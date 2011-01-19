@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ChannelZapMedian.h,v $
-   $Revision: 1.8 $
-   $Date: 2010/01/14 11:51:37 $
+   $Revision: 1.9 $
+   $Date: 2011/01/19 10:13:49 $
    $Author: straten $ */
 
 #ifndef _Pulsar_ChannelZapMedian_H
@@ -19,6 +19,8 @@
 
 namespace Pulsar {
   
+  class Statistics;
+
   //! Uses a median smoothed spectrum to find birdies and zap them
   class ChannelZapMedian : public ChannelWeight {
     
@@ -35,6 +37,9 @@ namespace Pulsar {
     public:
       Interface (ChannelZapMedian* = 0);
     };
+
+    //! Set up attributes that apply to the whole archive
+    void operator () (Archive*);
 
     //! Set integration weights
     void weight (Integration* integration);
@@ -63,6 +68,18 @@ namespace Pulsar {
     //! Print equivalent paz command on cout
     bool get_paz_report () const { return paz_report; }
 
+    //! Compute a single zap mask from the total
+    void set_from_total (bool t) { from_total = t; }
+
+    //! Compute a single zap mask from the total
+    bool get_from_total () const { return from_total; }
+
+    //! Set the statistical expression
+    void set_expression (const std::string& exp) { expression = exp; }
+
+    //! Get the statistical expression
+    std::string get_expression () const { return expression; }
+
   protected:
 
     //! The size of the window over which median will be computed
@@ -73,7 +90,22 @@ namespace Pulsar {
 
     //! Median smooth the spectra of each bin
     bool bybin;
+
+    //! Print the verbose message used by paz
     bool paz_report;
+
+    //! Compute the zap mask from the tscrunched total
+    bool from_total;
+
+    //! The single mask to apply to every sub-integration
+    std::vector<bool> single_mask;
+
+    //! Set the expression to evaluate in each channel (as in psrstat)
+    std::string expression;
+
+    //! The Statistics estimator used to evaluate the expression
+    Reference::To<Statistics> stats;
+    Reference::To<TextInterface::Parser> parser;
   };
   
 }
