@@ -1,11 +1,12 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008 - 2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/Statistics.h"
+#include "Pulsar/StatisticsInterface.h"
 #include "Pulsar/ProfileStats.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
@@ -22,6 +23,12 @@ Pulsar::Statistics::Statistics (const Archive* data)
 {
   if (data)
     set_Archive (data);
+}
+
+//! Get the text interface to this
+TextInterface::Parser* Pulsar::Statistics::get_interface ()
+{
+  return new Interface (this);
 }
 
 //! Set the instance from which statistics will be drawn
