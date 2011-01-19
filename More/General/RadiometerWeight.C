@@ -12,5 +12,5 @@ double Pulsar::RadiometerWeight::get_weight (const Integration* integration,
 					   unsigned ichan)
 {
   return integration->get_duration()
-    * integration->get_bandwidth() / integration->get_nchan();
+    * fabs(integration->get_bandwidth()) / integration->get_nchan();
 }
