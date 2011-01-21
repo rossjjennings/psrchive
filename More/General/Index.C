@@ -30,47 +30,56 @@ Pulsar::get_Profile (const Archive* data,
     if (Archive::verbose > 2) cerr << "Pulsar::get_Profile "
       "(" << subint << "," << pol << "," << chan << ")" << endl;
 
+    bool pscrunched = data->get_npol() == 1
+      || data->get_state () == Signal::Stokes
+      || data->get_state () == Signal::Intensity;
+
     Reference::To<const Integration> integration;
     integration = get_Integration( data, subint );
 
     Reference::To<Integration> integration_clone;
     
-    if (pol.get_integrate()) {
-
-      if (Archive::verbose > 2)
-	cerr << "Pulsar::get_Profile pol=I pscrunch" << endl;
-
-      if (!integration_clone)
-	integration_clone = integration->clone();
-
-      integration_clone->expert()->pscrunch();
-      integration = integration_clone;
-
-    }
-    
-    if (chan.get_integrate()) {
-
+    if (chan.get_integrate())
+    {
       if (Archive::verbose > 2)
 	cerr << "Pulsar::get_Profile chan=I fscrunch" << endl;
 
       if (!integration_clone)
 	integration_clone = integration->clone();
 
+      if (pol.get_integrate())
+      {
+	if (Archive::verbose > 2)
+	  cerr << "Pulsar::get_Profile pol=I pscrunch" << endl;
+	integration_clone->expert()->pscrunch();
+	pscrunched = true;
+      }
+
       integration_clone->expert()->fscrunch();
       integration = integration_clone;
-
     }
 
     Reference::To<const Profile> profile;
-    profile = integration -> get_Profile (pol.get_value(), chan.get_value());
+
+    if (pol.get_integrate() && !pscrunched)
+    {
+      if (Archive::verbose > 2)
+	cerr << "Pulsar::get_Profile pol=I pscrunch optimization" << endl;
+
+      Reference::To<Profile> temp;
+      temp = integration -> get_Profile (0, chan.get_value()) -> clone();
+      temp -> sum( integration -> get_Profile (1, chan.get_value()) );
+
+      profile = temp;
+    }
+    else
+      profile = integration -> get_Profile (pol.get_value(), chan.get_value());
     
     // ensure that no one destroys the profile when they go out of scope
-    integration.release();
-    if (integration_clone)
-      integration_clone.release();
+    integration = 0;
+    integration_clone = 0;
 
     return profile.release();
-
   }
   catch (Error& error)
   {
@@ -104,8 +113,8 @@ Pulsar::get_Integration (const Archive* data, Index subint)
     Reference::To<const Integration> integration;
     integration = archive->get_Integration(subint.get_value());
     
-    // ensure that no one destroys the profile when they go out of scope
-    archive.release();
+    // ensure archive doesn't destroy integration when it goes out of scope
+    archive = 0;
 
     return integration.release();
   }
@@ -154,9 +163,8 @@ Pulsar::get_Stokes (const Archive* data, Index subint, Index chan)
       profile = profile_clone;
     }
     
-    // ensure that profile_clone doesn't destroy as it goes out of scope
-    if (profile_clone)
-      profile_clone.release();
+    // ensure profile_clone doesn't destroy profile as it goes out of scope
+    profile_clone = 0;
     
     return profile.release();
 
