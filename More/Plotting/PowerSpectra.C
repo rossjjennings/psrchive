@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006 - 2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -25,6 +25,7 @@ Pulsar::PowerSpectra::PowerSpectra ()
   isubint = ipol = 0;
   draw_lines = true;
   median_window = 0;
+  logarithmic = false;
 
   get_frame()->get_y_scale()->set_buf_norm(0.05);
 }
@@ -44,6 +45,18 @@ void Pulsar::PowerSpectra::prepare (const Archive* data)
     throw Error (InvalidState, "Pulsar::PowerSpectra::prepare",
 		 "Spectra array empty after call to get_spectra");
 
+  if (logarithmic)
+  {
+    // logarithmic axis
+    frame->get_y_axis()->add_opt ('L');
+    // vertical labels
+    frame->get_y_axis()->add_opt ('V');
+    // exponential notation
+    frame->get_y_axis()->add_opt ('2');
+    // increase the space between the label and the axis
+    frame->get_y_axis()->set_displacement (3.0);
+  }
+
   unsigned i_min, i_max;
   get_scale()->get_indeces (data, i_min, i_max);
 
@@ -58,6 +71,20 @@ void Pulsar::PowerSpectra::prepare (const Archive* data)
   {
     if (median_window)
       fft::median_smooth (spectra[iprof], median_window);
+
+    if (logarithmic)
+    {
+      double log_base = 1.0/log(10.0);
+
+      unsigned nchan = data->get_nchan();
+      for (unsigned ichan=0; ichan < nchan; ichan++)
+      {
+	if (spectra[iprof][ichan] <= 0)
+	  throw Error (InvalidState, "Pulsar::PowerSpectra::prepare",
+		       "cannot plot -ve flux on log scale");
+	spectra[iprof][ichan] = log_base * log( spectra[iprof][ichan] );
+      }
+    }
 
     for (unsigned ichan=i_min; ichan < i_max; ichan++)
       if (spectra[iprof][ichan] != 0)
@@ -128,6 +155,8 @@ std::string Pulsar::PowerSpectra::get_ylabel (const Archive* data)
 {
   if (data->get_scale() == Signal::Jansky)
     return "Flux Density (mJy)";
+  else if (logarithmic)
+    return "Log (Flux)";
   else
     return "Relative Flux Units";
 }

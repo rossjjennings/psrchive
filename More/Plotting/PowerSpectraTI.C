@@ -19,6 +19,10 @@ Pulsar::PowerSpectra::Interface::Interface (PowerSpectra* instance)
        &PowerSpectra::set_pol,
        "pol", "Polarization to plot" );
 
+  add( &PowerSpectra::get_logarithmic,
+       &PowerSpectra::set_logarithmic,
+       "log", "Logarithmic scale" );
+
   add( &PowerSpectra::get_median_window,
        &PowerSpectra::set_median_window,
        "med", "Median smoothing window size" );

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PowerSpectra.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/11/12 07:45:10 $
+   $Revision: 1.11 $
+   $Date: 2011/01/25 01:51:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PowerSpectra_h
@@ -65,6 +65,10 @@ namespace Pulsar {
     //! Get draw lines flag
     bool get_draw_lines () const { return draw_lines; }
 
+    //! Plot on a logarithmic scale
+    void set_logarithmic (bool val) { logarithmic = val; }
+    bool get_logarithmic () const { return logarithmic; }
+
     //! Draw the spectra
     void draw (const Archive*);
 
@@ -82,6 +86,7 @@ namespace Pulsar {
 
     unsigned median_window;
     bool draw_lines;
+    bool logarithmic;
 
   private:
 
