@@ -11,6 +11,8 @@
 #include "Pulsar/ChannelZapMedian.h"
 #include "Pulsar/LawnMower.h"
 
+#include "Pulsar/Profile.h"
+
 #include "TextInterface.h"
 #include "pairutil.h"
 
@@ -64,6 +66,13 @@ Pulsar::ZapInterpreter::ZapInterpreter ()
       "edge", "zap fraction of band edges",
       "usage: edge <fraction> \n"
       "  float <fraction>  fraction of band zapped on each edge \n");
+
+  add_command
+    ( &ZapInterpreter::zerodm,
+      "zerodm", "",
+      "usage: zerodm \n"
+      "  Use the 'ZeroDM' RFI removal scheme. \n");
+
 }
 
 Pulsar::ZapInterpreter::~ZapInterpreter ()
@@ -268,6 +277,50 @@ try {
   return response (Good);
 
 }
+
+
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
+
+string Pulsar::ZapInterpreter::zerodm (const string& args)
+try {
+
+  Archive* archive = get();
+
+  unsigned isub,  nsub = archive->get_nsubint();
+  unsigned ichan, nchan = archive->get_nchan();
+  for( isub=0; isub<nsub;isub++){
+	  int nbins=archive->get_Profile(isub,0,0)->get_nbin();
+	  float* mean=(float*)calloc(nbins,sizeof(float));
+	  for( ichan=0; ichan < nchan;ichan++){
+		  float* profile = archive->get_Profile(isub,0,ichan)->get_amps();
+		  for ( unsigned ibin=0; ibin<nbins;ibin++)
+		  {
+			  mean[ibin]+=profile[ibin];
+		  }
+	  }
+	  for ( unsigned ibin=0; ibin<nbins;ibin++)
+	  {
+		  mean[ibin]/=(float)nchan;
+	  }
+
+	  for( ichan=0; ichan<nchan;ichan++){
+		  float* profile = archive->get_Profile(isub,0,ichan)->get_amps();
+		  for ( unsigned ibin=0; ibin<nbins;ibin++)
+		  {
+			  profile[ibin] -= mean[ibin];
+		  }
+	  }
+	  free(mean);
+  }
+
+  return response (Good);
+
+}
+
+
 catch (Error& error) {
   return response (Fail, error.get_message());
 }

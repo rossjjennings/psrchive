@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ZapInterpreter.h,v $
-   $Revision: 1.5 $
-   $Date: 2008/02/20 10:22:49 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2011/02/12 23:48:54 $
+   $Author: sixbynine $ */
 
 #ifndef __Pulsar_ZapInterpreter_h
 #define __Pulsar_ZapInterpreter_h
@@ -48,6 +48,8 @@ namespace Pulsar {
 
     //! zap the specified fraction of the band at the edges
     std::string edge (const std::string& args);
+
+    std::string zerodm (const std::string& args);
 
     //! no empty commands
     std::string empty ();
