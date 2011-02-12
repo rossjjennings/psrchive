@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.12 $
-   $Date: 2009/08/20 11:32:40 $
+   $Revision: 1.13 $
+   $Date: 2011/02/12 21:06:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileStats_h
@@ -39,6 +39,7 @@ namespace Pulsar
 
     //! Set the Profile from which statistics will be derived
     void set_profile (const Profile*);
+    void set_Profile (const Profile* profile) { set_profile(profile); }
 
     //! Set the Profile that defines the baseline and on-pulse regions
     void select_profile (const Profile*);
