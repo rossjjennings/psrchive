@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExpert.h,v $
-   $Revision: 1.14 $
-   $Date: 2010/09/22 02:18:38 $
+   $Revision: 1.15 $
+   $Date: 2011/02/12 21:06:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationExpert_h
@@ -32,8 +32,11 @@ namespace Pulsar {
 
   public:
 
+    Expert (const Integration* inst)
+    { const_instance = inst; instance = 0; }
+
     Expert (Integration* inst)
-    { instance = inst; }
+    { const_instance = instance = inst; }
 
     //! Set the number of pulsar phase bins
     void set_nbin (unsigned numbins)
@@ -114,16 +117,19 @@ namespace Pulsar {
 
     //! Return true if the Integration has a parent Archive
     bool has_parent ()
-    { return instance->parent; }
+    { return const_instance->parent; }
 
     //! Provide access to the parent Archive
     const Archive* get_parent ()
-    { return instance->parent; }
+    { return const_instance->parent; }
 
   private:
 
     //! instance
     Reference::To<Integration, false> instance;
+
+    //! const instance
+    Reference::To<const Integration, false> const_instance;
 
   };
 
