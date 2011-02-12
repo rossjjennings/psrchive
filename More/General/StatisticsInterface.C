@@ -41,6 +41,9 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
     insert ( instance->get_stats()->get_interface() );
   }
 
+  add( &Statistics::get_effective_duty_cycle,
+       "weff", "Effective pulse width (turns)" );
+
   add( &Statistics::get_snr,
        "snr", "Signal-to-noise ratio" );
 

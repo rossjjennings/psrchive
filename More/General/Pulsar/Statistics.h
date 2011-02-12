@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Statistics.h,v $
-   $Revision: 1.9 $
-   $Date: 2010/07/23 23:52:38 $
+   $Revision: 1.10 $
+   $Date: 2011/02/12 21:06:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Statistics_h
@@ -52,6 +52,9 @@ namespace Pulsar {
 
     //! Get the signal-to-noise ratio
     double get_snr () const;
+
+    //! Get the effective duty cycle
+    double get_effective_duty_cycle () const;
 
     //! Get the Fourier-noise-to-noise ratio
     double get_nfnr () const;

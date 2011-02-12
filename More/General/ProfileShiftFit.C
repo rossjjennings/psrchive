@@ -6,7 +6,9 @@
  ***************************************************************************/
 
 #include "Pulsar/ProfileShiftFit.h"
+#include "Pulsar/ProfileStats.h"
 #include "Pulsar/Profile.h"
+
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/LastHarmonic.h"
@@ -412,17 +414,17 @@ double Pulsar::ProfileShiftFit::mcmc_sample()
   return(mcmc_state);
 }
 
-Tempo::toa Pulsar::ProfileShiftFit::toa(Integration *i)
+Tempo::toa Pulsar::ProfileShiftFit::toa(const Integration* subint)
 {
   if (!computed) compute();
-  Integration::Expert e(i);
+  Integration::Expert expert (subint);
   Tempo::toa result(Tempo::toa::Parkes);
 
-  double per = i->get_folding_period();
+  double per = subint->get_folding_period();
   result.set_frequency(prof->get_centre_frequency());
-  result.set_arrival(i->get_epoch() + per * shift);
+  result.set_arrival(subint->get_epoch() + per * shift);
   result.set_error(eshift * per * 1e6);
-  result.set_telescope(e.get_parent()->get_telescope());
+  result.set_telescope(expert.get_parent()->get_telescope());
 
   return(result);
 }
@@ -449,6 +451,26 @@ double Pulsar::ProfileShiftFit::get_snr()
 {
   if (!computed) compute();
   return(snr);
+}
+
+double Pulsar::ProfileShiftFit::get_effective_duty_cycle () const
+{
+  if (!std)
+    throw Error (InvalidState, "Pulsar::ProfileShiftFit::effective_duty_cycle",
+		 "standard not set");
+
+  ProfileStats stats;
+  stats.set_profile (std);
+  double total_flux = stats.get_total().get_value();
+  double avg_flux = total_flux / stats.get_onpulse_nbin();
+
+  double weighted_power = 0.0;
+  complex<float>* cstd  = reinterpret_cast< complex<float>* > (fstd);
+
+  for (unsigned ih=1; ih<=nharm; ih++) 
+    weighted_power += ih*ih *norm(cstd[ih]);
+
+  return avg_flux / (2*M_PI*sqrt(weighted_power));
 }
 
 //! Get the reduced chi-squared

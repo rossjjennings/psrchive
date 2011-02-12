@@ -78,7 +78,7 @@ namespace Pulsar
     void compute();
 
     //! Return a TOA object for the current fit.
-    Tempo::toa toa(Integration *i);
+    Tempo::toa toa (const Integration*);
 
     //! Get the resulting shift
     Estimate<double> get_shift();
@@ -94,6 +94,13 @@ namespace Pulsar
 
     //! Get the reduced chi-squared
     double get_reduced_chisq () const;
+
+    //! Get the effective duty cycle of the standard
+    /*! Refer to Equation 13 of van Straten (2006) or Equation B1 of
+      Downs & Reichley (1983) [these equations are Fourier transform
+      pairs].  The effective duty cycle is obtained when gain, g, and
+      noise, sigma, both equal unity. */
+    double get_effective_duty_cycle () const;
 
     //! Current MCMC accept stats
     int mcmc_trials;

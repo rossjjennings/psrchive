@@ -7,7 +7,9 @@
 
 #include "Pulsar/Statistics.h"
 #include "Pulsar/StatisticsInterface.h"
+
 #include "Pulsar/ProfileStats.h"
+#include "Pulsar/ProfileShiftFit.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/TwoBitStats.h"
@@ -97,6 +99,14 @@ double Pulsar::Statistics::get_nfnr () const
   if (archive->type_is_cal())
     noise.set_baseline_time (0.4);
   return noise.get_nfnr (get_Profile());
+}
+
+double Pulsar::Statistics::get_effective_duty_cycle () const
+{
+  ProfileShiftFit fit;
+  fit.choose_maximum_harmonic = true;
+  fit.set_standard( get_Profile() );
+  return fit.get_effective_duty_cycle ();
 }
 
 //! Get the number of cal transitions
