@@ -630,7 +630,9 @@ void parseParameters(int argc, char **argv, double &periodOffset_us,
 	}
 
 	// Get command line options and arguments as necessary
+	int origi=0;
 	for (int i = 1; i < argc; i++) {
+		origi=i; // store the value of i when entering the loop
 		if (strcmp(argv[i], "-j") == 0) {
 			i++;
 			join = true;
@@ -653,10 +655,8 @@ void parseParameters(int argc, char **argv, double &periodOffset_us,
 			i++;
 			parseAndValidateDouble("-po", argv[i], periodOffset_us);
 		}
-
-
 		// acc step
-		if (strcmp(argv[i], "-as") == 0) {
+		else if (strcmp(argv[i], "-as") == 0) {
 			i++;
 			parseAndValidatePositiveDouble("-as", argv[i], pdotStep);
 		}
@@ -894,7 +894,10 @@ void parseParameters(int argc, char **argv, double &periodOffset_us,
 		}
 
 		// Handle error if there is no such option
-		else if (argv[i][0] == '-') {
+		// Only do this if we haven't incremented i
+		// otherwise arguments begining with - cannot
+		// be passed!
+		else if (origi==i && argv[i][0] == '-') {
 			fprintf(stderr, "pdmp error: No such option \"%s\"\n", argv[i]);
 			exit(1);
 		}
@@ -1470,7 +1473,10 @@ void solve_and_plot (Archive* archive,
 
 	// Number of bins in the Period axis
 	periodBins = (int)ceil( ( fabs(periodHalfRange_us)*2 ) / periodStep_us);
-	pdotBins = (int)ceil( ( fabs(pdotHalfRange)*2 ) / pdotStep);
+	pdotBins=0;
+	if (pdotHalfRange >0){
+		pdotBins = (int)ceil( ( fabs(pdotHalfRange)*2 ) / pdotStep);
+	}
 
   if (!onlyDisplayDmPlot) {
     // Print the header
@@ -1502,6 +1508,8 @@ void solve_and_plot (Archive* archive,
 
         double backup_DM = archive->get_dispersion_measure ();
 
+
+	printf("\n DM: %d   P1: %d   P0: %d\n",dmBins,pdotBins,periodBins);
 	for (int dmBin = 0; dmBin < dmBins ; dmBin++)
         {
                 archive->set_dispersion_measure(currDM);
