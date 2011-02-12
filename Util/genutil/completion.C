@@ -1,9 +1,18 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004-2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+/*
+  Some CommandParser methods have been moved to this file,
+  completion.C, because they require use of the readline library.  If
+  these methods aren't used, then the application need not be linked
+  unecessarily against this library.  Note that these methods cannot be
+  virtual because all virtual methods must be resolved by the linker.
+*/
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -57,6 +66,26 @@ string CommandParser::readline ()
   getline (cin, command);
 
   return command;
+}
+
+#define STDIN_FILEDES 0
+
+void CommandParser::standard_input (const std::string& prompt)
+{
+  // check if stdin/cin is attached to a terminal (not a pipe or file)
+  interactive = isatty (STDIN_FILEDES);
+
+  if (interactive)
+    initialize_readline ("psrsh");
+
+  while (!quit)
+  {
+    string response = parse( readline() );
+    cout << response;
+
+    if (!interactive && fault && abort)
+      throw Error (InvalidState, "CommandParser::standard_input", response);
+  }
 }
 
 static const CommandParser* parser = 0;
