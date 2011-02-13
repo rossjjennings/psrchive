@@ -25,7 +25,7 @@ try
 {
   const Calibration::StandardModel* model = calibrator->get_model( ichan );
 
-  if (!model->valid)
+  if (!model->get_valid())
     return 0;
 
   switch (which)

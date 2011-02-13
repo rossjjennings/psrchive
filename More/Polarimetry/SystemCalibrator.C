@@ -552,7 +552,7 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
-      if (integration->get_weight (ichan) == 0 || !model[ichan]->valid)
+      if (integration->get_weight (ichan) == 0 || !model[ichan]->get_valid())
       {
 	if (verbose > 2)
 	  cerr << "Pulsar::SystemCalibrator::add_calibrator ichan="
@@ -642,7 +642,7 @@ void Pulsar::SystemCalibrator::init_estimate (SourceEstimate& estimate)
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
-    if (!model[ichan]->valid)
+    if (!model[ichan]->get_valid())
       continue;
 
 #if 0
@@ -931,10 +931,10 @@ void Pulsar::SystemCalibrator::solve_prepare ()
       if (verbose)
 	cerr << "Pulsar::SystemCalibrator::solve_prepare warning"
 	  " ichan=" << ichan << " has no data" << endl;
-      model[ichan]->valid = false;
+      model[ichan]->set_valid( false, "no data" );
     }
 
-    if (!model[ichan]->valid)
+    if (!model[ichan]->get_valid())
       continue;
 
     if (ichan < calibrator_estimate.source.size())
@@ -966,7 +966,7 @@ float Pulsar::SystemCalibrator::get_reduced_chisq (unsigned ichan) const
 {
   check_ichan ("get_reduced_chisq", ichan);
 
-  if (!model[ichan]->valid)
+  if (!model[ichan]->get_valid ())
     return 0.0;
 
   const ReceptionModel* equation = model[ichan]->get_equation();
@@ -987,7 +987,7 @@ void Pulsar::SystemCalibrator::solve ()
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
-    if (!model[ichan]->valid)
+    if (!model[ichan]->get_valid())
     {
       cerr << "channel " << ichan << " flagged invalid" << endl;
       continue;
@@ -1025,7 +1025,7 @@ void Pulsar::SystemCalibrator::solve ()
     // attempt to fix up any channels that didn't converge well
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
-      if (!model[ichan]->valid)
+      if (!model[ichan]->get_valid())
 	continue;
 
       float reduced_chisq = get_reduced_chisq (ichan);
@@ -1046,7 +1046,7 @@ void Pulsar::SystemCalibrator::solve ()
   {
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
-      if (!model[ichan]->valid)
+      if (!model[ichan]->get_valid())
 	continue;
 
       float reduced_chisq = get_reduced_chisq (ichan);
@@ -1056,7 +1056,7 @@ void Pulsar::SystemCalibrator::solve ()
 	cerr << "invalid fit in ichan=" << ichan 
 	     << " chisq/nfree=" << reduced_chisq << endl;
 
-	model[ichan]->valid = false;
+	model[ichan]->set_valid( false, "bad fit" );
       }
     }
   }
@@ -1066,9 +1066,9 @@ void Pulsar::SystemCalibrator::solve ()
   for (unsigned ichan=0; ichan < nchan; ichan++) try
   {
     if (!get_solver(ichan)->get_solved())
-      model[ichan]->valid = false;
+      model[ichan]->set_valid( false, "not solved" );
 
-    if (!model[ichan]->valid)
+    if (!model[ichan]->get_valid())
       continue;
 
     model[ichan]->get_covariance( covariance[ichan], get_epoch() );
@@ -1078,7 +1078,7 @@ void Pulsar::SystemCalibrator::solve ()
     if (verbose)
       cerr << "Pulsar::SystemCalibrator::solve get_covariance error"
 	   << error << endl;
-    model[ichan]->valid = false;
+    model[ichan]->set_valid( false, "covariance error" );
   }
 
   // ensure that calculate_transformation is called again
@@ -1105,7 +1105,7 @@ void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
       cerr << "testing " << jchan << " ... ";
 #endif
 
-      if (!model[jchan]->valid)
+      if (!model[jchan]->get_valid())
       {
 #ifdef _DEBUG
         cerr << "not valid" << endl;
@@ -1180,7 +1180,7 @@ void Pulsar::SystemCalibrator::calculate_transformation ()
 
     assert (ichan < model.size());
 
-    if (model[ichan]->valid)
+    if (model[ichan]->get_valid())
       transformation[ichan] = model[ichan]->get_transformation();   
   }
 }
@@ -1230,7 +1230,7 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
     {
       assert (ichan < model.size());
 
-      if (!model[ichan]->valid)
+      if (!model[ichan]->get_valid())
       {
 	if (verbose > 2)
 	  cerr << "Pulsar::SystemCalibrator::precalibrate ichan=" << ichan 

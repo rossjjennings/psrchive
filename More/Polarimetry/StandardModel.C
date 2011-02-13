@@ -57,6 +57,14 @@ Calibration::StandardModel::StandardModel (Pulsar::Calibrator::Type* _type)
   foreach_fcal = new Calibration::SingleAxis;
 }
 
+void Calibration::StandardModel::set_valid (bool f, const char* reason)
+{
+  valid = f;
+
+  if (reason)
+    cerr << "Calibration::StandardModel::set_valid reason: " << reason << endl;
+}
+
 void Calibration::StandardModel::set_impurity (MEAL::Real4* x)
 {
   impurity = x;

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.29 $
-   $Date: 2011/02/13 14:24:02 $
+   $Revision: 1.30 $
+   $Date: 2011/02/13 15:33:04 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -152,16 +152,19 @@ namespace Calibration
     //! The known transformations from the sky to the receptors
     MEAL::Axis< Jones<double> > projection;
 
-    //! validity flag
-    bool valid;
-
     //! Deactivate time variations and set the Instrument to the given epoch
     void disengage_time_variations (const MJD& epoch);
 
     //! Activate time varations
     void engage_time_variations ();
 
+    void set_valid (bool f, const char* reason = 0);
+    bool get_valid () const { return valid; }
+
  protected:
+
+    //! validity flag
+    bool valid;
 
     //! ReceptionModel
     Reference::To< Calibration::ReceptionModel > equation;

@@ -267,7 +267,7 @@ void Pulsar::PulsarCalibrator::init_model (unsigned ichan)
   if (mtm[ichan])
     model[ichan]->set_equation( mtm[ichan]->get_equation() );
   else
-    model[ichan]->valid = false;
+    model[ichan]->set_valid( false );
 
   if (normalize_by_invariant)
     model[ichan]->set_constant_pulsar_gain ();

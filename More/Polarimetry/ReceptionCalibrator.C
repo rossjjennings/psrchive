@@ -566,7 +566,7 @@ void Pulsar::ReceptionCalibrator::valid_mask (const Pulsar::SourceEstimate& src)
                  src.valid.size (), model.size());
 
   for (unsigned ichan=0; ichan < model.size(); ichan++)
-    model[ichan]->valid &= src.valid[ichan];
+    model[ichan]->set_valid( model[ichan]->get_valid() && src.valid[ichan] );
 }
 
 //! Construct with the specified bin from Archive
@@ -616,7 +616,7 @@ void Pulsar::ReceptionCalibrator::solve_prepare ()
   SystemCalibrator::solve_prepare ();
 
   for (unsigned ichan=0; ichan < model.size(); ichan++)
-    if (output_report && model[ichan]->valid)
+    if (output_report && model[ichan]->get_valid())
     {
       string report_name = "pcm_report_" + tostring(ichan) + ".txt";
       model[ichan]->get_equation()->get_solver()->add_acceptance_condition
