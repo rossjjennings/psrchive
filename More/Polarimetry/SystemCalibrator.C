@@ -1077,8 +1077,8 @@ void Pulsar::SystemCalibrator::solve ()
   {
     if (verbose)
       cerr << "Pulsar::SystemCalibrator::solve get_covariance error"
-	   << error << endl;
-    model[ichan]->set_valid( false, "covariance error" );
+	         << error << endl;
+    model[ichan]->set_valid( false, error.get_message().c_str() );
   }
 
   // ensure that calculate_transformation is called again
