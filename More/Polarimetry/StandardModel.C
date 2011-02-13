@@ -52,6 +52,12 @@ Calibration::StandardModel::StandardModel (Pulsar::Calibrator::Type* _type)
   constant_pulsar_gain = false;
 
   time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
+
+  Reference::To< Calibration::SingleAxis > foreach;
+  foreach_fcal = foreach = new Calibration::SingleAxis;
+
+  // probably no need to fit for differential phase
+  foreach->set_infit (2, false);
 }
 
 void Calibration::StandardModel::set_impurity (MEAL::Real4* x)
@@ -254,24 +260,18 @@ void Calibration::StandardModel::add_fluxcal_backend ()
   if (!built)
     build ();
 
-  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
-  if (!physical)
-    throw Error (InvalidState,
-		 "Calibration::StandardModel::add_fluxcal_backend",
-		 "Cannot model flux calibrator with Hamaker model");
+  Reference::To< MEAL::ProductRule<MEAL::Complex2> > fcal_path;
+  fcal_path = new MEAL::ProductRule<MEAL::Complex2>;
 
-  MEAL::ProductRule<MEAL::Complex2>* path = 0;
-  path = new MEAL::ProductRule<MEAL::Complex2>;
+  if (foreach_fcal)
+  {
+    Reference::To< MEAL::Complex2 > clone = foreach_fcal->clone();
+    *fcal_path *= clone;
+  }
 
-  fluxcal_backend = new Calibration::SingleAxis;
+  *fcal_path *= instrument;
 
-  *path *= fluxcal_backend;
-  *path *= physical->get_frontend();
-
-  if (basis)
-    *path *= basis;
-
-  add_transformation ( path );
+  add_transformation ( fcal_path );
   FluxCalibrator_path = equation->get_transformation_index ();
 }
 
@@ -281,6 +281,11 @@ Calibration::StandardModel::set_foreach_calibrator (const MEAL::Complex2* x)
   foreach_pcal = x;
 }
 
+void
+Calibration::StandardModel::set_foreach_flux_calibrator(const MEAL::Complex2* x)
+{
+  foreach_fcal = x;
+}
 
 void Calibration::StandardModel::add_polncal_backend ()
 {
@@ -313,7 +318,6 @@ void Calibration::StandardModel::add_polncal_backend ()
   *pcal_path *= instrument;
 
   add_transformation ( pcal_path );
-
   ReferenceCalibrator_path = equation->get_transformation_index ();
 }
 

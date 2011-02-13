@@ -408,6 +408,12 @@ void Pulsar::ReceptionCalibrator::prepare_calibrator_estimate
       model[ichan]->add_fluxcal_backend();
     }
   }
+  else
+  {
+    // each flux calibrator observation is made through a different backend
+    for (unsigned ichan=0; ichan<get_nchan(); ichan++)
+      model[ichan]->add_fluxcal_backend();
+  }
 }
 
 
