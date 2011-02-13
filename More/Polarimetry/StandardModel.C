@@ -61,7 +61,7 @@ void Calibration::StandardModel::set_valid (bool f, const char* reason)
 {
   valid = f;
 
-  if (reason)
+  if (!valid && reason)
     cerr << "Calibration::StandardModel::set_valid reason: " << reason << endl;
 }
 
