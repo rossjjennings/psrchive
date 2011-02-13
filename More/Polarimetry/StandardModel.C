@@ -53,11 +53,8 @@ Calibration::StandardModel::StandardModel (Pulsar::Calibrator::Type* _type)
 
   time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
 
-  Reference::To< Calibration::SingleAxis > foreach;
-  foreach_fcal = foreach = new Calibration::SingleAxis;
-
-  // probably no need to fit for differential phase
-  foreach->set_infit (2, false);
+  // each flux calibrator observed through a unique backend transformation
+  foreach_fcal = new Calibration::SingleAxis;
 }
 
 void Calibration::StandardModel::set_impurity (MEAL::Real4* x)
@@ -223,6 +220,8 @@ void Calibration::StandardModel::build ()
   MEAL::Complex2Value* sky_to_receptors = new MEAL::Complex2Value;
   projection.signal.connect (sky_to_receptors,
 			     &MEAL::Complex2Value::set_value);
+
+  // new MEAL::EvaluationTracer<MEAL::Complex2>( known );
 
   // ////////////////////////////////////////////////////////////////////
   //
