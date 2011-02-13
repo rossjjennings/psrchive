@@ -24,17 +24,24 @@ Pulsar::InstrumentInfo::InstrumentInfo (const PolnCalibrator* calibrator) :
   // find the first valid transformation
   const MEAL::Complex2* xform = 0;
   for (unsigned ichan = 0; ichan < nchan; ichan++)
-    if ( calibrator->get_transformation_valid (ichan) ) {
+  {
+    if ( calibrator->get_transformation_valid (ichan) )
+    {
       xform = calibrator->get_transformation (ichan);
       break;
     }
+  }
+
+  if (!xform)
+    throw Error (InvalidParam, "Pulsar::InstrumentInfo::InstrumentInfo",
+                 "no valid transformation in PolnCalibrator");
 
   const Calibration::Instrument* instrument;
   instrument = dynamic_cast<const Calibration::Instrument*> (xform);
 
   if (!instrument)
     throw Error (InvalidParam, "Pulsar::InstrumentInfo::InstrumentInfo",
-		 "no valid Instrument transformation in PolnCalibrator");
+                 "first valid transformation is not an Instrument");
 
   if (instrument->get_orientation(0).var == 0)
   {
