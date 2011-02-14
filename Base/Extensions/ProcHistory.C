@@ -61,14 +61,16 @@ Pulsar::ProcHistory::row& Pulsar::ProcHistory::get_last ()
   return rows.back();
 }
 
-void Pulsar::ProcHistory::set_command_str (string str)
+void Pulsar::ProcHistory::set_command_str (const string& str)
 {
-  if (str.length() > 80) {
+  if (str.length() > 80)
+  {
     cerr << "ProcHistory::set_command_str WARNING truncated to 80 chars" 
 	 << endl;
-    str = str.substr(0, 80);
+    command_str = str.substr(0, 80);
   }
-  command_str = str;
+  else
+    command_str = str;
 }
 
 string Pulsar::ProcHistory::get_command_str()
@@ -76,7 +78,7 @@ string Pulsar::ProcHistory::get_command_str()
   return command_str;
 }
 
-void Pulsar::ProcHistory::set_cal_mthd(string str)
+void Pulsar::ProcHistory::set_cal_mthd (const string& str)
 {
   the_cal_mthd = str;
 }
@@ -86,7 +88,7 @@ string Pulsar::ProcHistory::get_cal_mthd()
   return the_cal_mthd;
 }
 
-void Pulsar::ProcHistory::set_sc_mthd(string str)
+void Pulsar::ProcHistory::set_sc_mthd (const string& str)
 {
   the_sc_mthd = str;
 }
@@ -96,17 +98,12 @@ string Pulsar::ProcHistory::get_sc_mthd()
   return the_sc_mthd;
 }
 
-void Pulsar::ProcHistory::set_cal_file(string str)
+void Pulsar::ProcHistory::set_cal_file (const string& str)
 {
   the_cal_file = str;
 }
 
-string Pulsar::ProcHistory::get_cal_file()
-{
-  return the_cal_file;
-}
-
-void Pulsar::ProcHistory::set_rfi_mthd (string str)
+void Pulsar::ProcHistory::set_rfi_mthd (const string& str)
 {
   the_rfi_mthd = str;
 }
