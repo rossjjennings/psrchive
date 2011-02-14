@@ -18,6 +18,7 @@ ProcHistory::Interface::Interface( ProcHistory *s_instance )
   add( &ProcHistory::get_last_nbin_prd, "nbin_prd", "Nr of bins per period" );
   add( &ProcHistory::get_last_tbin, "tbin", "Time per bin or sample" );
   add( &ProcHistory::get_last_chan_bw, "chan_bw", "Channel bandwidth" );
+  add( &ProcHistory::get_cal_file, "cal_file", "Calibrator filename" );
 }
 
 
