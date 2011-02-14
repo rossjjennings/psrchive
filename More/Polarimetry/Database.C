@@ -374,10 +374,10 @@ bool Pulsar::Database::Criterion::compare_times (const MJD& want,
     diff_minutes = fabs( diff_minutes );
     break;
   case CalibratorBefore:
-    // do nothing
+    diff_minutes = -diff_minutes;
     break;
   case CalibratorAfter:
-    diff_minutes = -diff_minutes;
+    // do nothing
     break;
   }
 
