@@ -119,20 +119,20 @@ namespace Pulsar {
     ProcHistory::row& get_first ();
     ProcHistory::row& get_last ();
 
-    void   set_command_str (std::string str);
+    void   set_command_str (const std::string&);
     std::string get_command_str ();
-    void   set_cal_mthd (std::string str);
+    void   set_cal_mthd (const std::string&);
     std::string get_cal_mthd ();
-    void   set_sc_mthd (std::string str);
+    void   set_sc_mthd (const std::string&);
     std::string get_sc_mthd ();
-    void   set_cal_file (std::string str);
-    std::string get_cal_file ();
-    void   set_rfi_mthd (std::string str);
+    void   set_cal_file (const std::string&);
+    std::string get_cal_file () const { return the_cal_file; }
+    void   set_rfi_mthd (const std::string&);
     std::string get_rfi_mthd ();
 
-    int get_last_nbin_prd( void ) const { return rows.back().nbin_prd; }
-    double get_last_tbin( void ) const { return rows.back().tbin; }
-    double get_last_chan_bw( void ) const { return rows.back().chan_bw; }
+    int get_last_nbin_prd () const { return rows.back().nbin_prd; }
+    double get_last_tbin () const { return rows.back().tbin; }
+    double get_last_chan_bw () const { return rows.back().chan_bw; }
 
     void   add_blank_row ();
     
