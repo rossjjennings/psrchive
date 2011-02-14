@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2008 by Willem van Straten
+ *   Copyright (C) 2003-2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -12,6 +12,7 @@
 #include "Pulsar/BasisCorrection.h"
 #include "Pulsar/BackendCorrection.h"
 #include "Pulsar/FeedExtension.h"
+#include "Pulsar/ProcHistory.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationExpert.h"
@@ -23,6 +24,7 @@
 #include "interpolate.h"
 #include "templates.h"
 #include "median_smooth.h"
+#include "strutil.h"
 
 #ifdef sun
 #include <ieeefp.h>
@@ -716,6 +718,17 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try
   else
     throw Error (InvalidParam, "Pulsar::PolnCalibrator::calibrate",
 		 "Archive::npol == %d not yet implemented", arch->get_npol());
+
+  ProcHistory* history = arch->getadd<ProcHistory>();
+  if (history)
+  {
+    string fnames;
+    for (unsigned i=0; i<filenames.size(); i++)
+      fnames += " " + basename( filenames[i] );
+    fnames.erase (0, 1);
+
+    history->set_cal_file( fnames );
+  }
 
   arch->set_scale (Signal::ReferenceFluxDensity);
 }
