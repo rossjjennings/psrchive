@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2003-2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -36,7 +36,7 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbCcDd:Ee:fFGhiIJ:j:lM:m:n:O:op:Pqr:sSt:Tu:UvVwW:xZ";
+const char* args = "A:aBbCcDd:Ee:fFGhiIJ:j:k:lM:m:n:O:op:Pqr:sSt:Tu:UvVwW:xZ";
 
 void usage ()
 {
@@ -53,6 +53,8 @@ void usage ()
     "  -u ext         Add to file extensions recognized in search \n"
     "                 (defaults: .cf .pcal .fcal .pfit) \n"
     "  -w             Write a new database summary file \n"
+    "  -W meta        Create database using calibrators listed in meta \n"
+    "  -k filename    Output database to filename \n"
     "  -l             Cache last calibrator\n"
     "\n"
     "Calibrator options: \n"
@@ -135,6 +137,7 @@ int main (int argc, char *argv[]) try
 
   string cals_are_here = "./";
 
+  string database_filename;
   vector<string> cal_dbase_filenames;
 
   // directory to which calibrated output files are written
@@ -181,8 +184,12 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.107 2010/09/23 09:18:08 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.108 2011/02/17 01:00:40 straten Exp $" << endl;
       return 0;
+
+    case 'k':
+      database_filename = optarg;
+      break;
 
     case 'A':
       model_file = optarg;
@@ -549,14 +556,15 @@ int main (int argc, char *argv[]) try
     if (verbose)
       cerr << "pac: " << dbase->size() << " calibrators found" << endl;
     
-    if (write_database_file) {
-      
-      string output_filename = dbase->get_path() + "/database.txt";
-      
+    if (write_database_file)
+    {
+      if (database_filename.empty ())
+	database_filename = dbase->get_path() + "/database.txt";
+
       cout << "pac: Writing database summary file to " 
-	   << output_filename << endl;
+	   << database_filename << endl;
       
-      dbase -> unload (output_filename);
+      dbase -> unload (database_filename);
     }
   }
   catch (Error& error)
