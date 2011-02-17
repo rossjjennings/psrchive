@@ -6,8 +6,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.116 $
-   $Date: 2010/07/11 02:41:27 $
+   $Revision: 1.117 $
+   $Date: 2011/02/17 13:07:23 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -39,6 +39,7 @@
 
 #include "Pulsar/SingleAxis.h"
 #include "Pulsar/ReflectStokes.h"
+#include "Pulsar/ProjectionCorrection.h"
 
 #include "RealTimer.h"
 #include "Error.h"
@@ -73,6 +74,7 @@ void usage ()
     "  -m model   receiver model name [default:van04e18] \n"
     "  -l solver  solver: MEAL [default] of GSL \n"
     "  -I impure  load impurity transformation from file \n"
+    "  -y         always trust the Pointing::feed_angle attribute \n"
     "\n"
     "  -C meta    filename with list of calibrator files \n"
     "  -d dbase   filename of Calibration Database \n"
@@ -549,7 +551,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args
-    = "1A:a:B:b:C:c:D:d:E:e:F:gHhI:j:J:L:l:M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:";
+    = "1A:a:B:b:C:c:D:d:E:e:F:gHhI:j:J:L:l:M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:y";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -730,6 +732,10 @@ int actual_main (int argc, char *argv[]) try
 
     case 'X':
       invalid_chisq = atof (optarg);
+      break;
+
+    case 'y':
+      ProjectionCorrection::trust_pointing_feed_angle = true;
       break;
 
     case 'h':
