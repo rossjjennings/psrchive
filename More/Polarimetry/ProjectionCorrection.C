@@ -228,6 +228,7 @@ Jones<double> Pulsar::ProjectionCorrection::get_rotation () const
     if (pointing)
     {
       Angle pointing_pa = pointing->get_parallactic_angle();
+      Angle feed_angle = pointing->get_feed_angle ();
 
       if (!equal_pi( pointing_pa, para_pa ))
       {
@@ -260,15 +261,13 @@ Jones<double> Pulsar::ProjectionCorrection::get_rotation () const
         {
           if (Archive::verbose)
             cerr << endl << "  correcting Pointing" << endl;
-
-	  Angle feed_angle = pointing->get_feed_angle ();
-
-	  // correct parallactic angle
           const_kast(pointing)->set_parallactic_angle (para_pa);
-	  // correct position angle
-	  const_kast(pointing)->set_position_angle (para_pa + feed_angle);
         }
       }
+
+      // correct position angle
+      if (trust_pointing_feed_angle)
+        const_kast(pointing)->set_position_angle (para_pa + feed_angle);
     }
 
     summary += " using " + origin + "::parallactic angle=" 
