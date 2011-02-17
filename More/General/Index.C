@@ -39,7 +39,7 @@ Pulsar::get_Profile (const Archive* data,
 
     Reference::To<Integration> integration_clone;
     
-    if (chan.get_integrate())
+    if (chan.get_integrate() && integration->get_nchan() > 1)
     {
       if (Archive::verbose > 2)
 	cerr << "Pulsar::get_Profile chan=I fscrunch" << endl;
@@ -95,26 +95,27 @@ Pulsar::get_Integration (const Archive* data, Index subint)
 
   try
   {
-    if (Archive::verbose > 2) cerr << "Pulsar::get_Integration "
-      "(" << subint << ")" << endl;
+    if (Archive::verbose > 2)
+      cerr << "Pulsar::get_Integration (" << subint << ")" << endl;
 
-    Reference::To<const Archive> archive = data;
+    const Archive* archive = data;
+    Reference::To<Archive> archive_clone;
 
-    if (subint.get_integrate())
+    if (subint.get_integrate() && archive->get_nsubint() > 1)
     {
       if (Archive::verbose > 2)
 	cerr << "Pulsar::get_Integration chan=I tscrunch" << endl;
 
-      Reference::To<Archive> archive_clone = archive->clone();
+      archive_clone = archive->clone();
       archive_clone->tscrunch();
       archive = archive_clone;
     }
 
     Reference::To<const Integration> integration;
-    integration = archive->get_Integration(subint.get_value());
+    integration = archive->get_Integration (subint.get_value());
     
     // ensure archive doesn't destroy integration when it goes out of scope
-    archive = 0;
+    archive_clone = 0;
 
     return integration.release();
   }
@@ -141,7 +142,7 @@ Pulsar::get_Stokes (const Archive* data, Index subint, Index chan)
 
     Reference::To<Integration> integration_clone;
     
-    if (chan.get_integrate())
+    if (chan.get_integrate() && integration->get_nchan() > 1)
     {
       integration_clone = integration->clone();
       integration_clone->expert()->fscrunch();
@@ -169,7 +170,8 @@ Pulsar::get_Stokes (const Archive* data, Index subint, Index chan)
     return profile.release();
 
   }
-  catch (Error& error) {
+  catch (Error& error)
+  {
     throw error += "Pulsar::get_Stokes (Index)";
   }
 }
