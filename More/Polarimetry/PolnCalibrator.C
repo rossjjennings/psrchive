@@ -725,9 +725,12 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try
     string fnames;
     for (unsigned i=0; i<filenames.size(); i++)
       fnames += " " + basename( filenames[i] );
+
+    // erase the first space
     fnames.erase (0, 1);
 
     history->set_cal_file( fnames );
+    history->set_cal_mthd( get_type()->get_name() );
   }
 
   arch->set_scale (Signal::ReferenceFluxDensity);
