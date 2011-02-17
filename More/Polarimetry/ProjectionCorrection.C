@@ -22,6 +22,7 @@
 using namespace std;
 
 bool Pulsar::ProjectionCorrection::pointing_over_computed = false;
+bool Pulsar::ProjectionCorrection::trust_pointing_feed_angle = false;
 
 Pulsar::ProjectionCorrection::ProjectionCorrection ()
 {
@@ -109,8 +110,28 @@ bool Pulsar::ProjectionCorrection::required (unsigned isub) const try
            << " != feed_angle+parallactic_angle="
 	   << pointing->get_feed_angle() + pointing->get_parallactic_angle()
 	   << endl;
-    
-    pointing = 0;
+
+    if (trust_pointing_feed_angle)
+    {
+      if (Archive::verbose > 2)
+	cerr << "Pulsar::ProjectionCorrection::required"
+	  "\n  temporarily set Pointing::position_angle = feed_angle" << endl;
+
+      /*
+	Normally, if the numbers don't add up, then it is assumed that they
+	were never set to proper values and the Pointing data is ignored.
+
+	If trust_pointing_feed_angle is set, then the feed angle was
+	likely set to a non-zero value that should be applied.
+
+	Temporarily set the pointing position angle to this value;
+	it will be corrected to equal feed angle + parallactic angle
+	following the comment "correct position angle"
+      */
+      const_kast(pointing)->set_position_angle( pointing->get_feed_angle() );
+    }
+    else
+      pointing = 0;
   }
 
   // determine if if is necessary to correct for known platform projections
@@ -204,8 +225,8 @@ Jones<double> Pulsar::ProjectionCorrection::get_rotation () const
 
     // check that the para_ang is equal
 
-    if (pointing) {
-
+    if (pointing)
+    {
       Angle pointing_pa = pointing->get_parallactic_angle();
 
       if (!equal_pi( pointing_pa, para_pa ))
@@ -234,13 +255,18 @@ Jones<double> Pulsar::ProjectionCorrection::get_rotation () const
         {
           origin = "Pointing::";
           para_pa = pointing->get_parallactic_angle();
-
         }
         else
         {
           if (Archive::verbose)
             cerr << endl << "  correcting Pointing" << endl;
+
+	  Angle feed_angle = pointing->get_feed_angle ();
+
+	  // correct parallactic angle
           const_kast(pointing)->set_parallactic_angle (para_pa);
+	  // correct position angle
+	  const_kast(pointing)->set_position_angle (para_pa + feed_angle);
         }
       }
     }

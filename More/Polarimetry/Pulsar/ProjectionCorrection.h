@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ProjectionCorrection.h,v $
-   $Revision: 1.2 $
-   $Date: 2008/05/28 08:32:34 $
+   $Revision: 1.3 $
+   $Date: 2011/02/17 07:43:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProjectionCorrection_H
@@ -33,6 +33,9 @@ namespace Pulsar
 
     //! Trust Pointing parallactic angle more than computed value
     static bool pointing_over_computed;
+
+    //! Always trust the feed angle stored in the Pointing extension
+    static bool trust_pointing_feed_angle;
 
     //! Default constructor
     ProjectionCorrection ();

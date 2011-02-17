@@ -5,9 +5,17 @@
  *
  ***************************************************************************/
 
+#if 1
 #include "Pulsar/psrchive.h"
+#include "Pulsar/Interpreter.h"
+#else
+#include "Pulsar/Application.h"
+#include "Pulsar/StandardOptions.h"
+#include "Pulsar/UnloadOptions.h"
+#endif
 
 #include "Pulsar/CalibratorTypes.h"
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/ArchiveMatch.h"
 
@@ -20,8 +28,8 @@
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/IonosphereCalibrator.h"
 #include "Pulsar/FrontendCorrection.h"
+#include "Pulsar/ProjectionCorrection.h"
 #include "Pulsar/ReflectStokes.h"
-#include "Pulsar/Interpreter.h"
 
 #include "Pulsar/ProcHistory.h"
 #include "Pulsar/Feed.h"
@@ -36,7 +44,7 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbCcDd:Ee:fFGhiIJ:j:k:lM:m:n:O:op:Pqr:sSt:Tu:UvVwW:xZ";
+const char* args = "A:aBbCcDd:Ee:fFGhiIJ:j:k:lM:m:n:O:op:Pqr:sSt:Tu:UvVwW:xyZ";
 
 void usage ()
 {
@@ -65,6 +73,7 @@ void usage ()
     "  -s             Use the Polar Model \n"
     "  -I             Correct ionospheric Faraday rotation using IRI\n"
     "  -x             Derive calibrator Stokes parameters from fluxcal data\n"
+    "  -y             Always trust the Pointing::feed_angle attribute \n"
     "\n"
     "Rough Alignment options [not recommended]: \n"
     "  -B             Fix the off-pulse baseline statistics \n"
@@ -184,7 +193,7 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.108 2011/02/17 01:00:40 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.109 2011/02/17 07:43:53 straten Exp $" << endl;
       return 0;
 
     case 'k':
@@ -417,6 +426,11 @@ int main (int argc, char *argv[]) try
     case 'x':
       use_fluxcal_stokes = true;
       command += " -x";
+      break;
+
+    case 'y':
+      Pulsar::ProjectionCorrection::trust_pointing_feed_angle = true;
+      command += " -y";
       break;
 
     case 'b':
@@ -778,12 +792,6 @@ int main (int argc, char *argv[]) try
 
     if (fitsext)
     {
-      if (successful_polncal)
-      {
-	fitsext->set_cal_mthd( pcal_type->get_name() );
-	fitsext->set_cal_file( basename(pcal_file) );
-      }
-      
       if (command.length() > 80)
       {
 	cerr << "pac: ProcHistory command string truncated to 80 chars"
