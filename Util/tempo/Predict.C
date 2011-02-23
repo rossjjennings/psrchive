@@ -48,7 +48,7 @@ Tempo::Predict::Predict (const Pulsar::Parameters* parameters)
 }
 
 //! Return a new, copy constructed instance of self
-Tempo::Predict::Predict* Tempo::Predict::clone () const
+Tempo::Predict* Tempo::Predict::clone () const
 {
   return new Predict (*this);
 }
@@ -248,13 +248,12 @@ Pulsar::Predictor* Tempo::Predict::generate () const
 
 polyco Tempo::Predict::generate_work () const
 {
-  if (cached && cached->start_time() < m1 && cached->end_time() > m2  ) {
-
+  if (cached && cached->start_time() < m1 && cached->end_time() > m2  )
+  {
     if (Tempo::verbose)
       cerr << "Tempo::Predict::get_polyco returning cached polyco" << endl;
 
     return *cached;
-
   }
 
   MJD to_tempo_m1 = m1;
@@ -269,8 +268,8 @@ polyco Tempo::Predict::generate_work () const
 
   unsigned retries = 5;
   
-  for (unsigned trial=0; trial < retries; trial++) {
-    
+  for (unsigned trial=0; trial < retries; trial++)
+  {   
     /* TEMPO will often return a polyco that does not span the range of
        MJDs requested (even when you give it half a day of forgiveness on
        either end)...  so: increase the range until TEMPO gets it right
@@ -308,26 +307,30 @@ polyco Tempo::Predict::generate_work () const
 
     // check for error and/or warning messages
     FILE* tempo_err = fopen (stderr_name.c_str(), "r");
-    if (tempo_err) {
+    if (tempo_err)
+    {
       char* inbuf = new char[80];
-      while (fgets (inbuf, 80, tempo_err) != NULL) {
+      while (fgets (inbuf, 80, tempo_err) != NULL)
+      {
 	if (!error)
 	  fprintf (stderr, "Tempo::predict Errors/Warnings detected:\n");
 	error = true;
-	fprintf (stderr, inbuf);
+	fputs (inbuf, stderr);
       }
       fclose (tempo_err);
       delete [] inbuf;
     }
 
-    if (error) {
+    if (error)
+    {
       unlock ();
       throw Error (FailedSys, "Tempo::predict", "TEMPO Warnings detected");
     }
 
     string polyco_dat = get_directory() + "/polyco.dat";
 
-    if (Tempo::verbose)  {
+    if (Tempo::verbose)
+    {
       fprintf (stderr, "Tempo::predict loading polyco.dat\n");
       fprintf (stderr, "****** BEGINNING OF FILE ******\n");
       system( ("cat " + polyco_dat).c_str() );
@@ -351,8 +354,8 @@ polyco Tempo::Predict::generate_work () const
       return *cached;
     
     // a simple validity check
-    if ( cached->start_time() > m1 || cached->end_time() < m2  ) {
-
+    if ( cached->start_time() > m1 || cached->end_time() < m2  )
+    {
       if (verbose)
 	cerr << "Tempo::predict insufficient span: "
 	     << cached->start_time().in_days() << " -> " 
@@ -395,7 +398,8 @@ polyco Tempo::Predict::generate_work () const
         }
       }
 
-      if (Tempo::verbose) {
+      if (Tempo::verbose)
+      {
 	fprintf (stderr, 
 		 "Tempo::predict:: polyco span OK.\n");
 	fprintf (stderr, "span: %g->%g\n",

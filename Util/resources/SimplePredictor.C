@@ -224,7 +224,7 @@ void Pulsar::SimplePredictor::load (FILE* fptr)
 
     else if (key == "EPOCH:")
     {
-      reference_epoch = MJD::MJD(val);
+      reference_epoch = MJD(val);
     }
 
     else if (key == "TELESCOPE:")
