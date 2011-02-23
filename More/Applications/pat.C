@@ -355,7 +355,7 @@ int main (int argc, char** argv) try
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.105 2010/12/16 02:06:59 jonathan_khoo Exp $" << endl;
+      cout << "$Id: pat.C,v 1.106 2011/02/23 20:53:38 straten Exp $" << endl;
       return 0;
 
     case 'K':
@@ -617,19 +617,18 @@ int main (int argc, char** argv) try
     }
     else
     {
-        if (phase_info) {
-            compute_dt(arch, toas, std);
-        }
+      if (phase_info)
+	compute_dt(arch, toas, std);
 
-        if (tempo2_output)
-        {
-            vector<Tempo::toa>::iterator tit;
-            for (tit = toas.begin(); tit != toas.end(); ++tit)
-                (*tit).set_phase_info(true);
-        }
+      if (tempo2_output)
+      {
+	vector<Tempo::toa>::iterator iter;
+	for (iter = toas.begin(); iter != toas.end(); ++iter)
+	  (*iter).set_phase_info(true);
+      }
 
-        for (unsigned i = 0; i < toas.size(); i++)
-            toas[i].unload(stdout);
+      for (unsigned i = 0; i < toas.size(); i++)
+	toas[i].unload(stdout);
     }
   }
   catch (Error& error)
