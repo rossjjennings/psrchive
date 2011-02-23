@@ -24,7 +24,7 @@ void weighted_average (Pulsar::Profile* result, const Pulsar::Profile* other,
   double weight1 = result->get_weight();
   double weight2 = other->get_weight();
 
-  double weight = weight1 + weight2;
+  double weight = fabs(weight1) + fabs(weight2);
     
   double norm = 0.0;
   if (weight != 0)
