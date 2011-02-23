@@ -20,7 +20,7 @@ Pulsar::PolnCalibratorExtension::Interface::Interface
   add( &PolnCalibratorExtension::get_nparam,
        "nparam", "Number of calibration parameters" );
 
-  import ( CalibratorExtension::Interface::Interface() );
+  import ( CalibratorExtension::Interface() );
 
   import( "eqn", Transformation::Interface(),
           (Transformation*(PolnCalibratorExtension::*)(unsigned))
