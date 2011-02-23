@@ -54,21 +54,26 @@ void usage ()
     "                 when  = 'c' for calibrated data \n"
     "                       = 'u' for uncalibrated data \n"
     " -N           plot the calibrator solution [default] \n"
-    " -a archive   set the output archive class name\n"
-    " -c [i|j-k]   mark channel or range of channels as bad\n"
     " -C           plot only calibrator Stokes\n"
+    " -s           plot only the reduced chisq of the pcm solution \n"
+    "\n"
+    " -c [i|j-k]   mark channel or range of channels as bad\n"
+    " -2 m or d    multiply or divide cross products by factor of two \n"
+    "\n"
     " -D dev       specify PGPLOT device\n"
+    " -P           produce publication-quality plots\n"
+    "\n"
     " -d           use the Degree of Polarization Calibrator\n"
+    " -p           use the polar model\n"
     " -f           treat all archives as members of a fluxcal observation\n"
+    " -S pcm.out   combine each calibrator with the pcm solution \n"
+    "\n"
+    " -u           unload the derived calibrator \n"
+    " -a archive   set the output archive class name\n"
+    "\n"
     " -F           print fluxcal parameters (S_sys, S_cal)\n"
     " -j           print Jones matrix elements of calibrator solution \n"
-    " -p           use the polar model\n"
-    " -P           produce publication-quality plots\n"
-    " -r feed.txt  set the feed transformation [not used] \n"
-    " -s           plot only the reduced chisq of the pcm solution \n"
-    " -S pcm.out   combine each calibrator with the pcm solution \n"
-    " -u           unload the derived calibrator \n"
-    " -2 m or d    multiply or divide cross products by factor of two \n"
+    " -m           print Mueller matrix elements of calibrator solution \n"
        << endl;
 }
 
@@ -441,7 +446,14 @@ int main (int argc, char** argv)
 	  xform = calibrator->get_transformation(ichan)->evaluate();
 
 	  if (print_jones)
-	    cout << ichan << " " << xform << endl;
+	  {
+	    cout << ichan;
+	    for (unsigned i=0; i<2; i++)
+	      for (unsigned j=0; j<2; j++)
+		cout << " " << xform(i,j).real() << " " << xform(i,j).imag();
+
+	    cout << endl;
+	  }
 
 	  if (print_mueller)
 	  {
