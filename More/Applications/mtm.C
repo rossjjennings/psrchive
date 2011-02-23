@@ -19,6 +19,7 @@
 #include "dirutil.h"
 
 #include <iostream>
+#include <iomanip>
 
 #include <getopt.h>
 
@@ -50,8 +51,10 @@ void usage ()
 
 static bool verbose = false;
 static bool tabular = false;
+static bool boost_analysis = false;
 
 static string source;
+static double folding_period = 0.0;
 
 void mtm_analysis (PolnProfileFit::Analysis& analysis,
 		   PolnProfileFit& fit,
@@ -116,30 +119,34 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
     cerr << "S_error=" << S_error << endl;
 
   if (tabular)
-    cout << " & " << latex( S_error/I_error ) << " \\\\" << endl;
+    cout << " & " << latex( S_error/I_error );
   else
     cout << "\nLorentz Invariant TOA: "
       "\n Invariant relative error = " << S_error/I_error << endl << endl;
-}
 
-void boost_analysis (PolnProfile* profile, double period)
-{
-  Pulsar::BoostShiftAnalysis boost;
-  boost.set_profile (profile);
-
-  double total = 0.0;
-  for (unsigned k=1; k<=3; k++)
+  if (boost_analysis)
   {
-    double delshift = boost.delvarphi_delb (k);
-    cerr << "boost k=" << k << " " << delshift  << endl;
-    total += delshift * delshift;
+    Pulsar::BoostShiftAnalysis boost;
+    boost.set_profile (fit.get_standard());
+    double delshift = boost.delvarphi_delbeta ();
+
+    // a 1% gain error
+    double boost0 = 5e-3;
+
+    // nanoseconds
+    double ns = 1e9;
+
+    if (tabular)
+      cout << " & " << setprecision(2) << delshift << setprecision(4)
+	   << " & " << folding_period * delshift * ns * boost0;
+    else
+      cout << "BOOST factor=" << delshift
+	   << " or " << folding_period * delshift * ns * boost0
+	   << " ns per unit of boost" << endl;
   }
 
-  double delshift = sqrt(total);
-
-  cerr << "BOOST factor=" << delshift << " P=" << period << endl
-       << "\t-> " << period * delshift * 1e6
-       << " us per unit of boost" << endl;
+  if (tabular)
+    cout << " \\\\" << endl;
 }
 
 int main (int argc, char *argv[])
@@ -147,7 +154,6 @@ int main (int argc, char *argv[])
   bool fscrunch = false;
   bool tscrunch = false;
 
-  bool boost_shift = false;
   bool choose_maximum_harmonic = false;
   unsigned maximum_harmonic = 0;
 
@@ -177,7 +183,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'b':
-      boost_shift = true;
+      boost_analysis = true;
       break;
 
     case 'c':
@@ -189,7 +195,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: mtm.C,v 1.4 2010/11/01 07:06:00 straten Exp $" << endl;
+      cout << "$Id: mtm.C,v 1.5 2011/02/23 20:53:21 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -231,9 +237,17 @@ int main (int argc, char *argv[])
       "\\tableline \n"
       "\\tableline \n"
       "Pulsar &"
-         " $\\hat\\sigma_{\\varphi|{\\bf J}}$ &"
-         " $R_{\\varphi{\\bf J}}$ & $\\hat\\sigma_{\\varphi}$ &"
-         " $\\hat\\sigma_{\\tilde\\varphi}$ \\\\ \n"
+      " $\\hat\\sigma_{\\varphi|{\\bf J}}$ &"
+      " $R_{\\varphi{\\bf J}}$ & $\\hat\\sigma_{\\varphi}$ &"
+      " $\\hat\\sigma_{\\tilde\\varphi}$ ";
+
+    if (boost_analysis)
+      cout <<
+	" & \\dot\\varphi_\\beta "
+	" & \\tau_\\beta (ns)";
+
+    cout <<
+      "\\\\ \n"
       "\\tableline \n"
 	 << endl;
   }
@@ -287,11 +301,9 @@ int main (int argc, char *argv[])
     if (verbose)
       cerr << "mtm: running analysis" << endl;
 
+    folding_period = arch->get_Integration(0)->get_folding_period();
+
     mtm_analysis (analysis, fit, arch->get_source());
-
-    if (boost_shift)
-      boost_analysis (profile, arch->get_Integration(0)->get_folding_period());
-
   }
   catch (Error& error) {
     cerr << "Error processing " << filenames[i] << endl;
