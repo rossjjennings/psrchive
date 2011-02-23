@@ -467,8 +467,8 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
       if (sub_line1.tstart[iblock] != sub_line1.tstart[0])
 	throw Error (InvalidState, "Pulsar::EPNArchive::load_Integration",
 		     "ipol=%d ichan=%d tstart=%lf != %lf",
-		     sub_line1.tstart[iblock] != sub_line1.tstart[0]);
-
+		     ipol, ichan,
+		     sub_line1.tstart[iblock], sub_line1.tstart[0]);
     }
 
     double avg_freq = total_freq / get_nchan();
