@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/BoostShiftAnalysis.h,v $
-   $Revision: 1.2 $
-   $Date: 2010/11/01 07:17:33 $
+   $Revision: 1.3 $
+   $Date: 2011/02/24 05:31:08 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BoostShiftAnalysis_h
@@ -33,8 +33,12 @@ namespace Pulsar {
     void set_profile (const PolnProfile*);
 
     //! Partial derivative of varphi with respect to b_k (beta=0)
-    /*! See Equation (27) of 1 November 2010 companion to van Straten (2006) */
-    double delvarphi_delb (unsigned k);
+    /*! Equation (26) of 1 November 2010 companion to van Straten (2006) */
+    double delvarphi_delb (unsigned k) const;
+
+    //! Partial derivative of varphi with respect to beta
+    /*! Equation (27) of 1 November 2010 companion to van Straten (2006) */
+    double delvarphi_delbeta () const;
 
   protected:
 
@@ -46,11 +50,10 @@ namespace Pulsar {
 
     //! Partial derivative of Z with respect to b_k in mth harmonic (beta=0)
     /*! See Equation (24) of 1 November 2010 companion to van Straten (2006) */
-    std::complex<double> delZ_delb (unsigned k, unsigned m);
+    std::complex<double> delZ_delb (unsigned k, unsigned m) const;
 
     //! Magnitude squared of S0 in mth harmonic
-    double S0sq (unsigned m);
-
+    double S0sq (unsigned m) const;
 
   };
 }

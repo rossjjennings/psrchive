@@ -51,7 +51,7 @@ void Pulsar::BoostShiftAnalysis::set_profile (const PolnProfile* profile)
 }
 
 std::complex<double> 
-Pulsar::BoostShiftAnalysis::delZ_delb (unsigned k, unsigned m)
+Pulsar::BoostShiftAnalysis::delZ_delb (unsigned k, unsigned m) const
 {
   float* S0 = fourier->get_Profile(0)->get_amps();
   float* Sk = fourier->get_Profile(k)->get_amps();
@@ -63,14 +63,14 @@ Pulsar::BoostShiftAnalysis::delZ_delb (unsigned k, unsigned m)
   return Skm * conj(S0m);
 }
 
-double Pulsar::BoostShiftAnalysis::S0sq (unsigned m)
+double Pulsar::BoostShiftAnalysis::S0sq (unsigned m) const
 {
   float* S0 = fourier->get_Profile(0)->get_amps();
   std::complex<double> S0m (S0[m*2], S0[m*2+1]);
   return norm (S0m);
 }
 
-double Pulsar::BoostShiftAnalysis::delvarphi_delb (unsigned k)
+double Pulsar::BoostShiftAnalysis::delvarphi_delb (unsigned k) const
 {
   double numerator = 0.0;
   double denominator = 0.0;
@@ -85,4 +85,15 @@ double Pulsar::BoostShiftAnalysis::delvarphi_delb (unsigned k)
   }
 
   return numerator / (2*M_PI*denominator);
+}
+
+double Pulsar::BoostShiftAnalysis::delvarphi_delbeta () const
+{
+  double beta_sq = 0;
+  for (unsigned k=1; k<4; k++)
+  {
+    double delb = delvarphi_delb (k);
+    beta_sq += delb * delb;
+  }
+  return sqrt(beta_sq);
 }
