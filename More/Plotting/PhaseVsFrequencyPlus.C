@@ -104,10 +104,16 @@ void Pulsar::PhaseVsFrequencyPlus::set_plot_psd (bool _plot)
     return;
 
   plot_psd = _plot;
-  if (plot_psd)
+  if (plot_psd) {
     manage ("psd", &psd);
-  else
+    freq.get_frame()->set_viewport (0,0.7,0,.7);
+    flux.get_frame()->set_viewport (0,0.7,.7,1);
+  } else {
     unmanage (&psd);
+    freq.get_frame()->set_viewport (0,1,0,.7);
+    flux.get_frame()->set_viewport (0,1,.7,1);
+  }
+
 }
 
 //! Plot the power spectral density
