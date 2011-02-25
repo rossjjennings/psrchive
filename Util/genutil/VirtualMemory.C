@@ -16,6 +16,7 @@
 #include <sys/mman.h>
 #include <errno.h>
 #include <string.h>
+#include <fcntl.h>
 
 using namespace std;
 
@@ -30,6 +31,11 @@ VirtualMemory::VirtualMemory (const string& filename, bool unlink_swapfile)
   // so the swap file will automatically be deleted when the program exists
   if (unlink_swapfile)
     unlink ();
+
+#ifdef O_DIRECT
+  // write directly to file (do not buffer)
+  fcntl (get_fd(), F_SETFL, O_DIRECT);
+#endif
 
   swap_space = 0;
 
