@@ -17,6 +17,7 @@ nobase_include_HEADERS = \
 	Pulsar/ArchiveTemplates.h \
         Pulsar/BaselineEstimator.h \
 	Pulsar/BaselineInterpreter.h \
+	Pulsar/BaselineStatic.h \
         Pulsar/BaselineWindow.h \
         Pulsar/ChannelSubsetMatch.h \
         Pulsar/ChannelWeight.h \
@@ -57,6 +58,7 @@ nobase_include_HEADERS = \
 	Pulsar/MaskSmooth.h \
         Pulsar/NoiseStatistics.h \
         Pulsar/OnPulseEstimator.h \
+	Pulsar/OnPulseStatic.h \
         Pulsar/OnPulseThreshold.h \
 	Pulsar/PatchTime.h \
 	Pulsar/PeakEdgesInterpreter.h \
@@ -93,7 +95,6 @@ nobase_include_HEADERS = \
         Pulsar/StandardFlux.h \
         Pulsar/StandardSNR.h \
         Pulsar/StandardSNRWeight.h \
-	Pulsar/StaticBaseline.h \
 	Pulsar/Statistics.h \
 	Pulsar/StatisticsInterface.h \
 	Pulsar/Subtract.h \
@@ -146,6 +147,7 @@ libGeneral_la_SOURCES = \
 	Archive_weighted_frequency.C \
 	BaselineEstimator.C \
 	BaselineInterpreter.C \
+	BaselineStatic.C \
         BaselineWindow.C \
         ChannelSubsetMatch.C \
         ChannelZapMedian.C \
@@ -190,6 +192,7 @@ libGeneral_la_SOURCES = \
 	MaskSmooth.C \
         NoiseStatistics.C \
 	OnPulseEstimator.C \
+	OnPulseStatic.C \
 	OnPulseThreshold.C \
 	PatchTime.C \
 	PeakEdgesInterpreter.C \
@@ -234,7 +237,6 @@ libGeneral_la_SOURCES = \
         StandardFlux.C \
         StandardSNR.C \
         StandardSNRWeight.C \
-	StaticBaseline.C \
 	Statistics.C \
 	StatisticsInterface.C \
 	Subtract.C \

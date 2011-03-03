@@ -87,7 +87,7 @@ void Pulsar::BaselineEstimator::set_include (PhaseWeight* _include)
 #include "Pulsar/ExponentialBaseline.h"
 #include "Pulsar/GaussianBaseline.h"
 #include "Pulsar/BaselineWindow.h"
-#include "Pulsar/StaticBaseline.h"
+#include "Pulsar/BaselineStatic.h"
 
 //! Construct a new BaselineEstimator from a string
 Pulsar::BaselineEstimator* 
@@ -98,7 +98,7 @@ Pulsar::BaselineEstimator::factory (const std::string& name_parse)
   instances.push_back( new ExponentialBaseline );
   instances.push_back( new GaussianBaseline );
   instances.push_back( new BaselineWindow );
-  instances.push_back( new StaticBaseline );
+  instances.push_back( new BaselineStatic );
 
   return TextInterface::factory<BaselineEstimator> (instances, name_parse);
 }

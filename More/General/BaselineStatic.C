@@ -5,41 +5,41 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/StaticBaseline.h"
+#include "Pulsar/BaselineStatic.h"
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 
 using namespace std;
 
-Pulsar::StaticBaseline::StaticBaseline ()
+Pulsar::BaselineStatic::BaselineStatic ()
 {
 }
 
-Pulsar::StaticBaseline::~StaticBaseline ()
+Pulsar::BaselineStatic::~BaselineStatic ()
 {
 }
 
-Pulsar::StaticBaseline* Pulsar::StaticBaseline::clone () const
+Pulsar::BaselineStatic* Pulsar::BaselineStatic::clone () const
 {
-  return new StaticBaseline (*this);
+  return new BaselineStatic (*this);
 }
 
-void Pulsar::StaticBaseline::calculate (PhaseWeight* weight)
+void Pulsar::BaselineStatic::calculate (PhaseWeight* weight)
 {
 }
 
-class Pulsar::StaticBaseline::Interface 
-  : public TextInterface::To<StaticBaseline>
+class Pulsar::BaselineStatic::Interface 
+  : public TextInterface::To<BaselineStatic>
 {
 public:
-  Interface (StaticBaseline* instance)
+  Interface (BaselineStatic* instance)
   {
     if (instance)
       set_instance (instance);
 
 #if 0
-    add( &StaticBaseline::get_threshold,
-	 &StaticBaseline::set_threshold,
+    add( &BaselineStatic::get_threshold,
+	 &BaselineStatic::set_threshold,
 	 "threshold", "cutoff threshold used to avoid outliers" );
 #endif
   }
@@ -48,7 +48,7 @@ public:
 };
 
 //! Return a text interface that can be used to configure this instance
-TextInterface::Parser* Pulsar::StaticBaseline::get_interface ()
+TextInterface::Parser* Pulsar::BaselineStatic::get_interface ()
 {
   return new Interface (this);
 }
