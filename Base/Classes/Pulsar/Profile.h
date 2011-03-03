@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.116 $
-   $Date: 2010/04/14 03:59:25 $
-   $Author: sosl $ */
+   $Revision: 1.117 $
+   $Date: 2011/03/03 16:16:03 $
+   $Author: demorest $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -191,7 +191,7 @@ namespace Pulsar {
     virtual void set_centre_frequency (double cfreq) { centrefreq = cfreq; }
 
     //! get the weight of the profile
-    float get_weight () const { return weight; }
+    float get_weight () const { return fabs(weight); }
     //! set the weight of the profile
     virtual void set_weight (float);
 
