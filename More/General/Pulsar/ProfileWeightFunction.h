@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileWeightFunction.h,v $
-   $Revision: 1.5 $
-   $Date: 2007/11/02 04:25:39 $
+   $Revision: 1.6 $
+   $Date: 2011/03/03 20:47:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileWeightFunction_h
@@ -24,6 +24,9 @@ namespace Pulsar {
   class ProfileWeightFunction : public PhaseWeightFunction {
 
   public:
+
+    //! Default constructor
+    ProfileWeightFunction ();
 
     //! Set the Profile from which the PhaseWeight will be derived
     virtual void set_Profile (const Profile*);

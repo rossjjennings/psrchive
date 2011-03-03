@@ -9,6 +9,10 @@
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 
+Pulsar::ProfileWeightFunction::ProfileWeightFunction ()
+{
+}
+
 //! Set the Profile from which the PhaseWeight will be derived
 void Pulsar::ProfileWeightFunction::set_Profile (const Profile* _profile)
 {
