@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/OnPulseEstimator.h,v $
-   $Revision: 1.6 $
-   $Date: 2011/03/03 20:47:41 $
+   $Revision: 1.7 $
+   $Date: 2011/03/04 06:01:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_OnPulseEstimator_h
@@ -22,9 +22,6 @@ namespace Pulsar
   class OnPulseEstimator : public ProfileWeightFunction
   {
   public:
-
-    //! Construct a new BaselineEstimator from a string
-    static OnPulseEstimator* factory (const std::string& name_and_parse);
 
     //! Return a copy constructed instance of self
     virtual OnPulseEstimator* clone () const = 0;
