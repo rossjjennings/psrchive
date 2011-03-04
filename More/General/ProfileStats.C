@@ -67,26 +67,26 @@ void Pulsar::ProfileStats::deselect_onpulse (const Profile* prof, float thresh)
 }
 
 //! The algorithm used to find the on-pulse phase bins
-void Pulsar::ProfileStats::set_onpulse_estimator (OnPulseEstimator* est)
+void Pulsar::ProfileStats::set_onpulse_estimator (ProfileWeightFunction* est)
 {
   onpulse_estimator = est;
   built = false;
 }
 
 //! The algorithm used to find the off-pulse phase bins
-void Pulsar::ProfileStats::set_baseline_estimator (BaselineEstimator* est)
+void Pulsar::ProfileStats::set_baseline_estimator (ProfileWeightFunction* est)
 {
   baseline_estimator = est;
   built = false;
 }
 
-Pulsar::OnPulseEstimator*
+Pulsar::ProfileWeightFunction*
 Pulsar::ProfileStats::get_onpulse_estimator () const
 {
   return onpulse_estimator;
 }
     
-Pulsar::BaselineEstimator*
+Pulsar::ProfileWeightFunction*
 Pulsar::ProfileStats::get_baseline_estimator () const
 {
   return baseline_estimator;

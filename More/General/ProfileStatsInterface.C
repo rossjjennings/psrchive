@@ -8,25 +8,17 @@
 #include "Pulsar/ProfileStatsInterface.h"
 #include "Pulsar/PhaseWeightInterface.h"
 
-#include "Pulsar/OnPulseEstimator.h"
-#include "Pulsar/BaselineEstimator.h"
+#include "Pulsar/ProfileWeightFunction.h"
 
 using namespace std;
 
-std::ostream& operator<< (std::ostream& ostr, Pulsar::OnPulseEstimator* e)
+std::ostream& operator<< (std::ostream& ostr,
+			  Pulsar::ProfileWeightFunction* e)
 {
   return TextInterface::insertion (ostr, e);
 }
-std::istream& operator>> (std::istream& istr, Pulsar::OnPulseEstimator* &e)
-{
-  return TextInterface::extraction (istr, e);
-}
-
-std::ostream& operator<< (std::ostream& ostr, Pulsar::BaselineEstimator* e)
-{
-  return TextInterface::insertion (ostr, e);
-}
-std::istream& operator>> (std::istream& istr, Pulsar::BaselineEstimator* &e)
+std::istream& operator>> (std::istream& istr,
+			  Pulsar::ProfileWeightFunction* &e)
 {
   return TextInterface::extraction (istr, e);
 }

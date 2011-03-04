@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ProfileStats.h,v $
-   $Revision: 1.13 $
-   $Date: 2011/02/12 21:06:38 $
+   $Revision: 1.14 $
+   $Date: 2011/03/04 06:02:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfileStats_h
@@ -23,8 +23,7 @@
 namespace Pulsar
 {
   class Profile;
-  class BaselineEstimator;
-  class OnPulseEstimator;
+  class ProfileWeightFunction;
 
   //! Computes pulse profile statistics
   class ProfileStats : public Algorithm
@@ -48,12 +47,12 @@ namespace Pulsar
     void deselect_onpulse (const Profile* profile, float threshold);
 
     //! The algorithm used to find the on-pulse phase bins
-    void set_onpulse_estimator (OnPulseEstimator*);
-    OnPulseEstimator* get_onpulse_estimator () const;
+    void set_onpulse_estimator (ProfileWeightFunction*);
+    ProfileWeightFunction* get_onpulse_estimator () const;
 
     //! The algorithm used to find the off-pulse phase bins
-    void set_baseline_estimator (BaselineEstimator*);
-    BaselineEstimator* get_baseline_estimator () const;
+    void set_baseline_estimator (ProfileWeightFunction*);
+    ProfileWeightFunction* get_baseline_estimator () const;
 
     //! Set the on-pulse and baseline regions
     void set_regions (const PhaseWeight& pulse, const PhaseWeight& baseline);
@@ -103,10 +102,10 @@ namespace Pulsar
     Reference::To<const Profile> profile;
 
     //! The algorithm used to find the on-pulse phase bins
-    Reference::To<OnPulseEstimator> onpulse_estimator;
+    Reference::To<ProfileWeightFunction> onpulse_estimator;
 
     //! The algorithm used to find the off-pulse phase bins
-    Reference::To<BaselineEstimator> baseline_estimator;
+    Reference::To<ProfileWeightFunction> baseline_estimator;
 
     //! True when the onpulse and baseline regions have been set
     bool regions_set;
