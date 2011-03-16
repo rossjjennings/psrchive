@@ -88,9 +88,9 @@ Pulsar::get_Profile (const Archive* data,
 }
 
 const Pulsar::Integration* 
-Pulsar::get_Integration (const Archive* data, Index subint)
+Pulsar::get_Integration (const Archive* archive, Index subint)
 {
-  if (!data)
+  if (!archive)
     throw Error (InvalidParam, "Pulsar::get_Integration", "no Archive");
 
   try
@@ -98,26 +98,24 @@ Pulsar::get_Integration (const Archive* data, Index subint)
     if (Archive::verbose > 2)
       cerr << "Pulsar::get_Integration (" << subint << ")" << endl;
 
-    const Archive* archive = data;
-    Reference::To<Archive> archive_clone;
-
     if (subint.get_integrate() && archive->get_nsubint() > 1)
     {
       if (Archive::verbose > 2)
 	cerr << "Pulsar::get_Integration chan=I tscrunch" << endl;
 
-      archive_clone = archive->clone();
+      Reference::To<Archive> archive_clone = archive->clone();
       archive_clone->tscrunch();
-      archive = archive_clone;
+
+      Reference::To<Integration> integration;
+      integration = archive_clone->get_Integration(0);
+
+      integration->orphan();
+      archive_clone = 0;
+
+      return integration.release ();
     }
 
-    Reference::To<const Integration> integration;
-    integration = archive->get_Integration (subint.get_value());
-    
-    // ensure archive doesn't destroy integration when it goes out of scope
-    archive_clone = 0;
-
-    return integration.release();
+    return archive->get_Integration (subint.get_value());
   }
   catch (Error& error)
   {
