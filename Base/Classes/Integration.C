@@ -182,15 +182,14 @@ void Pulsar::Integration::copy (const Integration* subint, bool management)
 
   extension.resize (0);
 
-  for (unsigned iext=0; iext < subint->get_nextension(); iext++) {
-
+  for (unsigned iext=0; iext < subint->get_nextension(); iext++)
+  {
     if (verbose)
       cerr << "Pulsar::Integration::copy clone " 
 	   << subint->get_extension(iext)->get_extension_name() << endl;
 
     Reference::To<Extension> ext = subint->get_extension(iext)->clone();
     add_extension (ext);
-
   }
 
   set_epoch ( subint->get_epoch());
@@ -199,6 +198,9 @@ void Pulsar::Integration::copy (const Integration* subint, bool management)
 
   if (management)
     parent = subint->parent;
+
+  if (subint->orphaned)
+    orphaned = new Meta( *(subint->orphaned) );
 
   zero_phase_aligned = false;
 }
