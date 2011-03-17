@@ -104,6 +104,7 @@ packages/psrcat.csh
 packages/tempo.csh
 packages/tempo2.csh
 stamp-h1
+update.log
 conf.cmd
 build
 diff
