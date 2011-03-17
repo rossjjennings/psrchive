@@ -51,6 +51,10 @@ string Pulsar::Integration::Extension::get_short_name () const
 const Pulsar::Archive* 
 Pulsar::Integration::Extension::get_parent (const Integration* subint) const
 {
+  if (!subint->parent)
+    throw Error (InvalidState, "Pulsar::Integration::Extension::get_parent",
+		 "no parent");
+
   return subint->parent;
 }
 
@@ -207,8 +211,28 @@ void Pulsar::Integration::copy (const Integration* subint, bool management)
 
 void Pulsar::Integration::orphan ()
 {
+  if (orphaned)
+    return;
+
+  if (!parent)
+    throw Error (InvalidState, "Pulsar::Integration::orphan",
+		 "not already orphaned and no parent");
+
+  if (verbose)
+    cerr << "Pulsar::Integration::orphan from parent" << endl;
+  
   orphaned = new Meta(parent);
   parent = 0;
+}
+
+//! Connect to a new parent archive (also useful after cloning)
+void Pulsar::Integration::adopt (const Archive* archive)
+{
+  if (verbose)
+    cerr << "Pulsar::Integration::adopt new parent" << endl;
+
+  orphaned = 0;
+  parent = archive;
 }
 
 void Pulsar::Integration::range_check (unsigned ipol, unsigned ichan) const

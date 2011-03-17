@@ -53,6 +53,9 @@ void Pulsar::CalibratorSpectrum::prepare (const Archive* data)
 
   if (plot_Ip && data->get_state() != Signal::Stokes)
   {
+    if (verbose)
+      cerr << "Pulsar::CalibratorSpectrum::prepare convert to Stokes" << endl;
+
     clone = data -> clone();
     clone->convert_state(Signal::Stokes);
     data = clone;
