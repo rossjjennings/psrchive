@@ -38,9 +38,14 @@ Pulsar::Integration::cal_levels (vector<vector<Estimate<double> > >& high,
 
   // Get CalInfo extension to see what cal type is
   unsigned cal_nstate = 2; // Default to normal 2-state cal
-  Reference::To<const CalInfoExtension> ext = parent->get<CalInfoExtension>();
+
+  Reference::To<const CalInfoExtension> ext;
+  if (parent)
+    ext = parent->get<CalInfoExtension>();
+
   if (ext) 
     cal_nstate = ext->cal_nstate;
+
   if (cal_nstate<2 || cal_nstate>3) 
     throw Error (InvalidState, "Pulsar::Integration::cal_levels", 
         "unexpected nstate = %d", cal_nstate);
@@ -54,7 +59,8 @@ Pulsar::Integration::cal_levels (vector<vector<Estimate<double> > >& high,
   // For a "3-state" cal (eg Nancay), we want to ignore the 2nd half
   // of the high state.  This could be generalized/improved to do
   // something more intelligent at some point.
-  if (cal_nstate==3) { 
+  if (cal_nstate==3)
+  { 
     int high_mid = (hightolow > lowtohigh) 
       ? (lowtohigh + hightolow) / 2
       : (lowtohigh + nbin + hightolow) / 2;
