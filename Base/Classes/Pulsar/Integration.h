@@ -140,6 +140,9 @@ namespace Pulsar {
     //! Disconnect from parent archive (useful after cloning a working copy)
     void orphan ();
 
+    //! Connect to a new parent archive (also useful after cloning)
+    void adopt (const Archive*);
+
     //! Return an orphaned pscrunched dedispersed fscrunched clone of self
     Integration* total () const;
     
