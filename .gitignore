@@ -105,3 +105,5 @@ packages/tempo.csh
 packages/tempo2.csh
 stamp-h1
 conf.cmd
+build
+diff
