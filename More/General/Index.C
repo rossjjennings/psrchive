@@ -109,7 +109,10 @@ Pulsar::get_Integration (const Archive* archive, Index subint)
       Reference::To<Integration> integration;
       integration = archive_clone->get_Integration(0);
 
-      integration->orphan();
+      // adopt original parent (for extension information, etc.
+      integration->adopt (archive);
+
+      // delete clone so that it does not delete released integration
       archive_clone = 0;
 
       return integration.release ();
