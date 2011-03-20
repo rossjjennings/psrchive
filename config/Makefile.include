@@ -40,13 +40,13 @@ AM_LDFLAGS = $(INCLUDE_LDFLAGS)
 #
 # generate dvi file from LaTeX input
 #
-%.dvi: %.tex
+%.dvi: $(srcdir)/%.tex
 # Get new refs
-	latex $*
+	latex $<
 # Generate tex for em
 	bibtex $* ; date
 # Tell latex about them
-	latex $*
+	latex $<
 # Second pass to fix cross-references
-	latex $*
+	latex $<
 
