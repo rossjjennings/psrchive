@@ -6,6 +6,8 @@
  ***************************************************************************/
 
 #include "Pulsar/Profile.h"
+#include "Pulsar/DataExtension.h"
+
 #include "FTransform.h"
 #include "templates.h"
 
@@ -35,10 +37,9 @@ void Pulsar::Profile::rotate_phase (double phase)
     throw Error (InvalidParam, "Pulsar::Profile::rotate_phase",
 		 "non-finite phase = %lf\n", phase);
 
-#ifdef _DEBUG
+  if (verbose)
     cerr << "Pulsar::Profile::rotate phase=" << phase 
 	 << " nbin=" << get_nbin() << endl;
-#endif
 
   if (phase == 0.0)
     return;
@@ -59,12 +60,11 @@ void Pulsar::Profile::rotate_phase (double phase)
     // after using floor as above, phase is always greater than zero
     unsigned binshift = unsigned (phase * double(nbin) + 0.5);
 
-#ifdef _DEBUG
     if (verbose)
       cerr << "Pulsar::Profile::rotate " << binshift << " bins" << endl;
-#endif
 
     ::shift (nbin, binshift, amps);
   }
 
+  foreach<DataExtension> (this, &DataExtension::rotate_phase, phase);
 }
