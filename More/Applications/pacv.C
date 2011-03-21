@@ -71,6 +71,7 @@ void usage ()
     " -u           unload the derived calibrator \n"
     " -a archive   set the output archive class name\n"
     "\n"
+    " -o           print mean and RMS on a single line\n"
     " -F           print fluxcal parameters (S_sys, S_cal)\n"
     " -j           print Jones matrix elements of calibrator solution \n"
     " -m           print Mueller matrix elements of calibrator solution \n"
@@ -142,7 +143,7 @@ int main (int argc, char** argv)
   // Hybrid transformation
   Reference::To<Pulsar::HybridCalibrator> hybrid;
 
-  string device = "?";
+  string device = "/NULL";
 
   // verbosity flag
   bool verbose = false;
