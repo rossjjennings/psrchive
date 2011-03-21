@@ -94,7 +94,7 @@ endif
 if HAVE_PGPLOT
 
 bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi psrzap pav \
-	psrsp psrtrash spa
+	psrsp psrtrash spa psr4th
 
 pdmp_SOURCES = pdmp.C
 pdmp_LDADD = $(LDADD) @PGPLOT_LIBS@ @PSRXML_LIBS@
@@ -131,6 +131,9 @@ psrsp_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 psrtrash_SOURCES = psrtrash.C
 psrtrash_LDADD = $(LDADD) @PGPLOT_LIBS@
+
+psr4th_SOURCES = psr4th.C
+psr4th_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 endif
 
