@@ -27,6 +27,8 @@ class EstimatePlotter {
   //! Flag controls verbosity
   static bool report_mean;
 
+  bool report_mean_on_single_line;
+
   //! Default constructor
   EstimatePlotter ();
 
@@ -188,8 +190,12 @@ void EstimatePlotter::add_plot (const std::vector< Estimate<T> >& data)
   }
 
   // useful at times, excessive at others ...
-  if (report_mean)
+  if (report_mean) {
     std::cerr << "Mean = " << mean << std::endl;
+  } else if (report_mean_on_single_line) {
+    std::cerr << mean.get_Estimate().get_value() << " ";
+    std::cerr << mean.get_Estimate().get_error() << " ";
+  }
 
   minmax (xrange_set, x_min, x_max, yrange_set, y_min, y_max, x, y, ye);
 }

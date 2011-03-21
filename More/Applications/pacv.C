@@ -71,6 +71,7 @@ void usage ()
     " -u           unload the derived calibrator \n"
     " -a archive   set the output archive class name\n"
     "\n"
+    " -o           print mean and RMS on a single line\n"
     " -F           print fluxcal parameters (S_sys, S_cal)\n"
     " -j           print Jones matrix elements of calibrator solution \n"
     " -m           print Mueller matrix elements of calibrator solution \n"
@@ -123,6 +124,16 @@ int main (int argc, char** argv)
   bool print_mueller = false;
   bool print_fluxcal = false;
 
+  // Controls how the mean(s) is/are displayed.
+  // False:
+  //    Use the default mean report from EstimatePlotter class. Prints:
+  //        Mean = ...
+  //        Mean = ...
+  // True:
+  //    The means and rms-es are displayed on one line. Prints:
+  //        Means:<mean1> <rms1> <mean2> <rms2> ...
+  bool print_means_on_single_line = false;
+
   //
   float cross_scale_factor = 1.0;
 
@@ -132,13 +143,13 @@ int main (int argc, char** argv)
   // Hybrid transformation
   Reference::To<Pulsar::HybridCalibrator> hybrid;
 
-  string device = "?";
+  string device = "/NULL";
 
   // verbosity flag
   bool verbose = false;
   char c;
 
-  while ((c = getopt(argc, argv, "2:a:c:CD:dfFhjM:mn:Ppr:S:stuqvV")) != -1)
+  while ((c = getopt(argc, argv, "2:a:c:CD:dfFhjM:mn:oPpr:S:stuqvV")) != -1)
   {
     switch (c)
     {
@@ -258,6 +269,10 @@ int main (int argc, char** argv)
       break;
     }
 
+    case 'o':
+      print_means_on_single_line = true;
+      break;
+
     case 'P':
       publication = true;
       print_titles = false;
@@ -355,6 +370,8 @@ int main (int argc, char** argv)
   
   Pulsar::CalibratorPlotter plotter;
 
+  plotter.set_report_mean(!print_means_on_single_line);
+
   if (publication)
   {
     plotter.npanel = 5;
@@ -417,6 +434,7 @@ int main (int argc, char** argv)
 
             cerr << "pacv: Plotting FluxCalibrator" << endl;
             cpgpage ();
+
             plotter.plot (fluxcal);
 
           }
