@@ -43,6 +43,14 @@ namespace Pulsar {
     //! Plot the titles over the plot frames
     void plot_labels (const Calibrator::Info* info);
 
+    //! Set whether or not the default output from EstimatePlotter is
+    //  displayed
+    void set_report_mean(const bool _report_mean);
+
+    //! Get whether or not the default output from EstimatePlotter is
+    //  displayed
+    bool get_report_mean() const;
+
     //! Number of panels (vertical)
     unsigned npanel;
 
@@ -57,6 +65,12 @@ namespace Pulsar {
 
     //! Title to print over top panel
     std::string title;
+
+  private:
+
+    //! Whether or not the default output (of the means) from the
+    //  EstimatePlotter class should be displayed
+    bool report_mean;
 
   };
 

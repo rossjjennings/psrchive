@@ -25,6 +25,7 @@ Pulsar::CalibratorPlotter::CalibratorPlotter ()
   between_panels = 0.1;
   use_colour = true;
   print_titles = true;
+  report_mean = true;
 }
 
 Pulsar::CalibratorPlotter::~CalibratorPlotter ()
@@ -97,6 +98,16 @@ try
   // the plotting class
   EstimatePlotter plotter;
 
+  // If we're not using the default (multi-line) mean output from EstimatePlotter.
+  if (!get_report_mean()) {
+    plotter.report_mean = false;
+    plotter.report_mean_on_single_line = true;
+
+    std::cerr << "Means = ";
+  }
+
+  plotter.report_mean = get_report_mean();
+
   plotter.set_xrange (cfreq-0.5*bw, cfreq+0.5*bw);
 
   // don't plot points with zero variance
@@ -164,6 +175,7 @@ try
       for (unsigned ichan=0; ichan<nchan; ichan++)
 	data[ichan] = info->get_param (ichan, iplot, iparam);
 
+
       plotter.add_plot (data);
     }
 
@@ -220,7 +232,6 @@ try
     cerr << "Pulsar::Calibrator::plot end " << iplot << "/" 
 	 << info->get_nclass() << endl;
 #endif
-
   }
 
   if (print_titles)
@@ -228,6 +239,12 @@ try
 
   // restore the viewport
   cpgsvp (xmin, xmax, ymin, ymax);
+
+  // Formatting: if the means have been displayed on on line, 
+  // add a blank line after the plot.
+  if (!get_report_mean()) {
+    cerr << std::endl;
+  }
 
 #ifndef _DEBUG
   if (verbose)
@@ -240,8 +257,7 @@ catch (Error& error)
   throw error += "Pulsar::CalibratorPlotter::plot(Calibrator::Info*)";
 }
 
-void Pulsar::CalibratorPlotter::plot_labels (const Calibrator::Info* info)
-{
+void Pulsar::CalibratorPlotter::plot_labels (const Calibrator::Info* info) {
   float offset = 0.5;
   
   string plot_title = info->get_title ();
@@ -254,4 +270,12 @@ void Pulsar::CalibratorPlotter::plot_labels (const Calibrator::Info* info)
 
   if (!title.empty())
     cpgmtxt( "T", offset, .5,.5, title.c_str());
+}
+
+void Pulsar::CalibratorPlotter::set_report_mean(const bool _report_mean) {
+  report_mean = _report_mean;
+}
+
+bool Pulsar::CalibratorPlotter::get_report_mean() const {
+  return report_mean;
 }

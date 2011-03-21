@@ -29,6 +29,8 @@ EstimatePlotter::EstimatePlotter ()
   xrange_set = yrange_set = false;
   viewports_set = false;
   control_viewport = true;
+
+  report_mean_on_single_line = false;
 }
 
 //! Set the border used when setting the world coordinates of the viewport
