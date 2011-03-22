@@ -25,7 +25,7 @@ Pulsar::CalibratorPlotter::CalibratorPlotter ()
   between_panels = 0.1;
   use_colour = true;
   print_titles = true;
-  report_mean = true;
+  display_mean_single_line = false;
 }
 
 Pulsar::CalibratorPlotter::~CalibratorPlotter ()
@@ -41,9 +41,28 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calibrator) try
   if (verbose)
     cerr << "Pulsar::CalibratorPlotter::plot" << endl;
 
+  const bool display_mean_single_line = get_display_mean_single_line();
+
+  if (display_mean_single_line) {
+    const string filename = calibrator->get_Archive()->get_filename();
+    const MJD epoch = calibrator->get_epoch();
+    const double freq = calibrator->get_Archive()->get_centre_frequency();
+
+    cout <<
+      filename << " " <<
+      tostring<MJD>(epoch, 3, ios::fixed) << " " <<
+      tostring<double>(freq, 1, ios::fixed) << " ";
+  }
+
   plot( calibrator->get_Info (), calibrator->get_nchan (),
 	calibrator->get_Archive()->get_centre_frequency(),
 	calibrator->get_Archive()->get_bandwidth() );
+
+  // Formatting: if the means have been displayed on on line, 
+  // add a blank line after the plot.
+  if (display_mean_single_line) {
+    cout << endl;
+  }
 }
 catch (Error& error)
 {
@@ -51,6 +70,7 @@ catch (Error& error)
 }
 
 
+// TODO: Add MJD as an argument here
 void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
 				      unsigned nchan, double cfreq, double bw)
 try
@@ -62,6 +82,7 @@ try
   }
 
   Reference::To<const Calibrator::Info> manage = info;
+
 
   if (nchan == 0)
   {
@@ -98,15 +119,16 @@ try
   // the plotting class
   EstimatePlotter plotter;
 
-  // If we're not using the default (multi-line) mean output from EstimatePlotter.
-  if (!get_report_mean()) {
+  const bool display_mean_single_line = get_display_mean_single_line();
+
+  // If the mean is to be displayed on one line, prevent EstimatePlotter
+  // from displaying it again (in its multi-line format).
+  if (display_mean_single_line) {
     plotter.report_mean = false;
     plotter.report_mean_on_single_line = true;
-
-    std::cerr << "Means = ";
   }
 
-  plotter.report_mean = get_report_mean();
+  //plotter.report_mean = display_mean_single_line
 
   plotter.set_xrange (cfreq-0.5*bw, cfreq+0.5*bw);
 
@@ -240,12 +262,6 @@ try
   // restore the viewport
   cpgsvp (xmin, xmax, ymin, ymax);
 
-  // Formatting: if the means have been displayed on on line, 
-  // add a blank line after the plot.
-  if (!get_report_mean()) {
-    cerr << std::endl;
-  }
-
 #ifndef _DEBUG
   if (verbose)
 #endif
@@ -272,10 +288,11 @@ void Pulsar::CalibratorPlotter::plot_labels (const Calibrator::Info* info) {
     cpgmtxt( "T", offset, .5,.5, title.c_str());
 }
 
-void Pulsar::CalibratorPlotter::set_report_mean(const bool _report_mean) {
-  report_mean = _report_mean;
+void Pulsar::CalibratorPlotter::set_display_mean_single_line(
+    const bool _display_mean_single_line) {
+  display_mean_single_line = _display_mean_single_line;
 }
 
-bool Pulsar::CalibratorPlotter::get_report_mean() const {
-  return report_mean;
+bool Pulsar::CalibratorPlotter::get_display_mean_single_line() const {
+  return display_mean_single_line;
 }

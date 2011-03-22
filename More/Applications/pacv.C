@@ -370,7 +370,7 @@ int main (int argc, char** argv)
   
   Pulsar::CalibratorPlotter plotter;
 
-  plotter.set_report_mean(!print_means_on_single_line);
+  plotter.set_display_mean_single_line(print_means_on_single_line);
 
   if (publication)
   {

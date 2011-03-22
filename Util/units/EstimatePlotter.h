@@ -193,8 +193,8 @@ void EstimatePlotter::add_plot (const std::vector< Estimate<T> >& data)
   if (report_mean) {
     std::cerr << "Mean = " << mean << std::endl;
   } else if (report_mean_on_single_line) {
-    std::cerr << mean.get_Estimate().get_value() << " ";
-    std::cerr << mean.get_Estimate().get_error() << " ";
+    std::cout << mean.get_Estimate().get_value() << " ";
+    std::cout << mean.get_Estimate().get_error() << " ";
   }
 
   minmax (xrange_set, x_min, x_max, yrange_set, y_min, y_max, x, y, ye);
