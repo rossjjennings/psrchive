@@ -81,9 +81,6 @@ bool verbose = false;
 bool show_extensions = false;
 bool hide_headers = false;
 vector< string > commands;
-vector< vector< string > > results;
-vector< string > current_row;
-bool new_new_vap = false;
 string meta_filename = "";
 
 bool neat_table = false;
