@@ -75,10 +75,29 @@ template< class T, class E = ElementTraits<T> > struct DatumTraits
   //! Traits of the elements of the data type
   E element_traits;
 
+  //! The element type
+  typedef T element_type;
+
   static inline unsigned ndim () { return 1; }
   static inline T& element (T& t, unsigned idim) { return t; }
   static inline const T& element (const T& t, unsigned idim) { return t; }
 };
+
+//! Partial specialization for complex data
+template< class T > 
+struct DatumTraits< std::complex<T> >
+{
+  ElementTraits<T> element_traits;
+  typedef T element_type;
+
+  static inline unsigned ndim () { return 2; }
+  static inline T& element (std::complex<T>& t, unsigned idim)
+  { return reinterpret_cast<T*>(&t)[idim]; }
+
+  static inline const T& element (const std::complex<T>& t, unsigned idim)
+  { return reinterpret_cast<const T*>(&t)[idim]; }
+};
+
 
 //! Quick multiplication of a complex number by i
 template<typename T>

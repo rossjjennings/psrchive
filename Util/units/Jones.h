@@ -193,6 +193,8 @@ const Jones<T>& Jones<T>::identity ()
 template<typename T> struct DatumTraits< Jones<T> >
 {
   ElementTraits< std::complex<T> > element_traits;
+  typedef std::complex<T> element_type;
+
   static inline unsigned ndim () { return 4; }
   static inline std::complex<T>& element (Jones<T>& t, unsigned i) 
   { return t[i]; }
