@@ -98,6 +98,7 @@ nobase_include_HEADERS = \
         MEAL/ScalarSine.h \
         MEAL/ScalarTangent.h \
         MEAL/ScalarValue.h \
+	MEAL/ScalarVector.h \
         MEAL/ScaledVonMisesDeriv.h \
         MEAL/ScaledVonMises.h \
 	MEAL/Steps.h \
@@ -187,6 +188,7 @@ libMEAL_la_SOURCES = \
         ScalarSine.C \
         ScalarTangent.C \
         ScalarValue.C \
+	ScalarVector.C \
         ScaledVonMises.C \
         ScaledVonMisesDeriv.C \
 	Steps.C \
@@ -206,7 +208,7 @@ TESTS = \
 	test_BasisRule test_Scalar test_Complex2Product                  \
 	test_Polar test_Rotation                                         \
 	test_Invariant test_CyclicParameter test_Univariate              \
-	test_StokesError test_StokesCovariance
+	test_StokesError test_StokesCovariance test_Vectorize
 
 check_PROGRAMS = $(TESTS) test_Function_load 
 
@@ -226,6 +228,7 @@ test_Invariant_SOURCES		= test_Invariant.C
 test_StokesError_SOURCES	= test_StokesError.C 
 test_StokesCovariance_SOURCES	= test_StokesCovariance.C 
 test_Function_load_SOURCES	= test_Function_load.C
+test_Vectorize_SOURCES		= test_Vectorize.C
 
 ##############################################################################
 #
