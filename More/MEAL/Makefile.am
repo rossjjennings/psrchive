@@ -110,6 +110,7 @@ nobase_include_HEADERS = \
         MEAL/UnaryRule.h \
         MEAL/UnaryScalar.h \
 	MEAL/Union.h \
+	MEAL/UnitTangent.h \
         MEAL/Univariate.h \
         MEAL/UnivariatePolicy.h \
         MEAL/VectorRule.h \
@@ -198,6 +199,7 @@ libMEAL_la_SOURCES = \
         Tracer.C \
         UnaryScalar.C \
 	Union.C \
+	UnitTangent.C \
         UnivariatePolicy.C \
         VelocityModel.C 
 
@@ -210,7 +212,8 @@ TESTS = \
 	test_BasisRule test_Scalar test_Complex2Product                  \
 	test_Polar test_Rotation                                         \
 	test_Invariant test_CyclicParameter test_Univariate              \
-	test_StokesError test_StokesCovariance test_Vectorize
+	test_StokesError test_StokesCovariance test_Vectorize \
+	test_UnitTangent
 
 check_PROGRAMS = $(TESTS) test_Function_load 
 
@@ -231,6 +234,7 @@ test_StokesError_SOURCES	= test_StokesError.C
 test_StokesCovariance_SOURCES	= test_StokesCovariance.C 
 test_Function_load_SOURCES	= test_Function_load.C
 test_Vectorize_SOURCES		= test_Vectorize.C
+test_UnitTangent_SOURCES	= test_UnitTangent.C
 
 ##############################################################################
 #
