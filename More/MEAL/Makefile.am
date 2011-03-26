@@ -109,6 +109,7 @@ nobase_include_HEADERS = \
 	MEAL/Transformation.h \
         MEAL/UnaryRule.h \
         MEAL/UnaryScalar.h \
+	MEAL/Union.h \
         MEAL/Univariate.h \
         MEAL/UnivariatePolicy.h \
         MEAL/VectorRule.h \
@@ -196,6 +197,7 @@ libMEAL_la_SOURCES = \
 	StokesError.C \
         Tracer.C \
         UnaryScalar.C \
+	Union.C \
         UnivariatePolicy.C \
         VelocityModel.C 
 
