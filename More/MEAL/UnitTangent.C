@@ -12,7 +12,9 @@ using namespace std;
 
 MEAL::UnitTangent::UnitTangent ()
 {
-  new Parameters (this, 3);
+  // a unit vector in three dimensions has two degrees of freedom
+  new Parameters (this, 2);
+
   for (unsigned i=0; i<3; i++)
     basis[i] = Vector<3,double>::basis(i);
 }
@@ -93,7 +95,7 @@ void MEAL::UnitTangent::calculate (Vector<3,double>& result,
   if (verbose)
   {
     cerr << "MEAL::UnitTangent::calculate gradient" << endl;
-    for (unsigned i=0; i<3; i++)
+    for (unsigned i=0; i<2; i++)
       cerr << "   " << (*grad)[i] << endl;
   }
 }
