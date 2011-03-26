@@ -11,31 +11,6 @@
 #include "MEAL/Boost.h"
 #include "MEAL/Depolarizer.h"
 
-//! Maps the structure of Vector to other template methods
-template<unsigned N, typename T> struct DatumTraits< Vector<N,T> >
-{
-  typedef T element_type;
-
-  static inline unsigned ndim () { return N; }
-  static inline T& element (Vector<N,T>& t, unsigned i) 
-  { return t[i]; }
-  static inline const T& element (const Vector<N,T>& t, unsigned i)
-  { return t[i]; }
-};
-
-//! Maps the structure of Matrix to other template methods
-template<unsigned N, unsigned M, typename T> 
-struct DatumTraits< Matrix<N,M,T> >
-{
-  typedef T element_type;
-
-  static inline unsigned ndim () { return N*M; }
-  static inline T& element (Matrix<N,M,T>& t, unsigned i) 
-  { return t[i/M][i%M]; }
-  static inline const T element (const Matrix<N,M,T>& t, unsigned i)
-  { return t[i/M][i%M]; }
-};
-
 #include <iostream>
 using namespace std;
 
