@@ -273,17 +273,13 @@ void MEAL::VectorRule<T>::calculate (Result& result,
 		   model_index, model[model_index]->get_name().c_str(),
 		   model[model_index]->get_nparam(), comp_gradient.size());
     
-    /* re-map the components of the gradient into the Composite space,
-       summing duplicates implements both the sum and product rules. */
-
     unsigned nparam = this->get_nparam();
 
     grad->resize (nparam);
-    // set each element of the gradient to zero
     for (unsigned iparam=0; iparam<nparam; iparam++)
       (*grad)[iparam] = 0.0;
 
-    // this verion of ProjectGradient initializes the gradient vector to zero
+    // re-map the elements of the component gradient into the Composite space
     ProjectGradient (model[model_index], comp_gradient, *grad);
   }
 
