@@ -14,7 +14,6 @@
 #ifndef __Matrix_H
 #define __Matrix_H
 
-#include "Traits.h"
 #include "Vector.h"
 #include "Error.h"
 
@@ -362,6 +361,20 @@ Matrix<3,3,T> rotation (const Vector<3,T>& v, double radians)
 
   return result;
 }
+
+
+//! Maps the structure of Matrix to other template methods
+template<unsigned R, unsigned C, typename T> 
+struct DatumTraits< Matrix<R,C,T> >
+{
+  typedef T element_type;
+
+  static inline unsigned ndim () { return R*C; }
+  static inline T& element (Matrix<R,C,T>& t, unsigned i) 
+  { return t[i/C][i%C]; }
+  static inline const T element (const Matrix<R,C,T>& t, unsigned i)
+  { return t[i/C][i%C]; }
+};
 
 
 //! Useful for printing the components
