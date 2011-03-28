@@ -50,6 +50,7 @@ nobase_include_HEADERS = \
 	MEAL/LeastSquares.h \
         MEAL/LevenbergMarquardt.h \
         MEAL/Mean.h \
+	MEAL/ModeCoherency.h \
 	MEAL/MuellerTransformation.h \
         MEAL/NegationRule.h \
         MEAL/NoParameters.h \
@@ -152,6 +153,7 @@ libMEAL_la_SOURCES = \
 	JonesMueller.C \
 	JonesCloude.C \
 	LeastSquares.C \
+	ModeCoherency.C \
 	MuellerTransformation.C \
         NormalizeStokes.C \
 	Null.C \
