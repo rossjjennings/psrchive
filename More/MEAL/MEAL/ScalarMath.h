@@ -107,7 +107,7 @@ namespace MEAL {
     ScalarMath (double value = 0.0);
 
     //! Construct from a scalar value
-    ScalarMath (const Estimate<double>& value);
+    explicit ScalarMath (const Estimate<double>& value);
 
     //! Copy constructor
     ScalarMath (const ScalarMath& s);
@@ -171,7 +171,7 @@ namespace MEAL {
     Estimate<double> get_Estimate () const;
 
     //! Access the expression
-    Scalar* get_expression () { return expression; }
+    Scalar* get_expression () const { return expression; }
 
   protected:
 
