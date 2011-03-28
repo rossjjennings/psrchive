@@ -151,6 +151,10 @@ class Estimate
   friend const Estimate log (const Estimate& u)
   { return Estimate (::log (u.val), u.var/(u.val*u.val)); }
 
+  //! \f$ {\partial\over\partial x} x^{1\over2} = {1\over2}x^{-{1\over2}} \f$
+  friend const Estimate sqrt (const Estimate& u)
+  { return Estimate (::sqrt (u.val), 0.25*u.var/fabs(u.val)); }
+
   //! \f$ \left({\partial\sin x\over\partial x}\right)^2 = (1-\sin^2x) \f$
   friend const Estimate sin (const Estimate& u)
   { T val = ::sin (u.val); return Estimate (val, (1-val*val)*u.var); }
@@ -160,14 +164,27 @@ class Estimate
   { T val = ::cos (u.val); return Estimate (val, (1-val*val)*u.var); }
 
   //! \f$ {\partial\over\partial x} \tan^-1 (x) = (1+x^2)^{-1} \f$
+  friend const Estimate atan (const Estimate& u)
+  { T val = ::atan (u.val); T del=1/(1+u.val*u.val);
+    return Estimate (val, del*del*u.var); }
+
+  //! \f$ {\partial\over\partial x} \tan^-1 (x) = (1+x^2)^{-1} \f$
   friend const Estimate atan2 (const Estimate& s, const Estimate& c)
   { T c2 = c.val*c.val;  T s2 = s.val*s.val;  T sc2 = c2+s2;
     return Estimate (::atan2 (s.val, c.val),(c2*s.var+s2*c.var)/(sc2*sc2)); }
-  
-  //! \f$ {\partial\over\partial x} x^{1\over2} = {1\over2}x^{-{1\over2}} \f$
-  friend const Estimate sqrt (const Estimate& u)
-  { return Estimate (::sqrt (u.val), 0.25*u.var/fabs(u.val)); }
 
+  //! \f$ \left({\partial\sinh x\over\partial x}\right)^2 = (1+\sinh^2x) \f$
+  friend const Estimate sinh (const Estimate& u)
+  { T val = ::sinh (u.val); return Estimate (val, (1+val*val)*u.var); }
+
+  //! \f$ \left({\partial\cosh x\over\partial x}\right)^2 = (\cosh^2x-1) \f$
+  friend const Estimate cosh (const Estimate& u)
+  { T val = ::cosh (u.val); return Estimate (val, (val*val-1)*u.var); }
+
+  //! \f$ {\partial\over\partial x} \tanh^-1 (x) = (1-x^2)^{-1} \f$
+  friend const Estimate atanh (const Estimate& u)
+  { T val = ::atanh (u.val); T del=1/(1-u.val*u.val);
+    return Estimate (val, del*del*u.var); }
 };
 
 
