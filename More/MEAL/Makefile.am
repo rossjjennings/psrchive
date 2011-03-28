@@ -12,6 +12,7 @@ nobase_include_HEADERS = \
         MEAL/BinaryScalar.h \
         MEAL/Boost.h \
 	MEAL/Boost1.h \
+	MEAL/BoostUnion.h \
         MEAL/Cached.h \
         MEAL/CalculatePolicy.h \
         MEAL/ChainRule.h \
@@ -123,6 +124,7 @@ libMEAL_la_SOURCES = \
         BinaryScalar.C \
         Boost.C \
 	Boost1.C \
+	BoostUnion.C \
         Coherency.C \
 	Complex.C \
 	ComplexCartesian.C \
