@@ -68,6 +68,15 @@ void MEAL::UnitTangent::set_vector (Vector<3,double> direction)
   set_param (1, 0.0);
 }
 
+//! Set the direction of the unit vector with error
+void MEAL::UnitTangent::set_vector (const Vector<3,Estimate<double> >& est)
+{
+  Vector<3,double> direction;
+  for (unsigned i=0; i<3; i++)
+    direction[i]=est[i].get_value();
+  set_vector (direction);
+}
+
 //! Calculate the Jones matrix and its gradient
 void MEAL::UnitTangent::calculate (Vector<3,double>& result,
 				   vector<Vector<3,double> >* grad)
