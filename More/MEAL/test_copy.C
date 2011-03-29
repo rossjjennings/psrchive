@@ -9,6 +9,7 @@
 #include "MEAL/Polynomial.h"
 #include "MEAL/RotatingVectorModel.h"
 #include "MEAL/ModeCoherency.h"
+#include "MEAL/OrthogonalModes.h"
 
 #include <inttypes.h>
 
@@ -101,8 +102,11 @@ int main (int argc, char** argv) try {
   cerr << "test_copy: testing MEAL::RotatingVectorModel" << endl;
   test_leak (new MEAL::RotatingVectorModel, "MEAL::RotatingVectorModel");
 
-  cerr << "test_copy: testing MEAL::RotatingVectorModel" << endl;
+  cerr << "test_copy: testing MEAL::ModeCoherency" << endl;
   test_leak (new MEAL::ModeCoherency, "MEAL::ModeCoherency");
+
+  cerr << "test_copy: testing MEAL::OrthogonalModes" << endl;
+  test_leak (new MEAL::OrthogonalModes, "MEAL::OrthogonalModes");
 
   cerr << "test_copy: copy constructors pass test" << endl;
   return 0;

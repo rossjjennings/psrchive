@@ -58,6 +58,7 @@ nobase_include_HEADERS = \
         MEAL/NotCached.h \
 	MEAL/Null.h \
         MEAL/OneParameter.h \
+	MEAL/OrthogonalModes.h \
         MEAL/ParameterPolicy.h \
 	MEAL/ParameterTracer.h \
         MEAL/Parameters.h \
@@ -158,6 +159,7 @@ libMEAL_la_SOURCES = \
         NormalizeStokes.C \
 	Null.C \
         OneParameter.C \
+	OrthogonalModes.C \
         ParameterPolicy.C \
 	ParameterTracer.C \
         Parameters.C \
