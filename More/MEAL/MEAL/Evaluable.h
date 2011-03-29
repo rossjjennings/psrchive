@@ -42,6 +42,9 @@ namespace MEAL {
     //! The return type of the evaluate method
     typedef T Result;
 
+    //! The name of the class
+    static const char* Name;
+
     //! Default constructor
     Evaluable ()
     {
@@ -109,5 +112,8 @@ namespace MEAL {
   };
 
 }
+
+template<typename T>
+const char* MEAL::Evaluable<T>::Name = "Evaluable<T>";
 
 #endif
