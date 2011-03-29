@@ -37,12 +37,11 @@ void MEAL::ModeCoherency::init ()
 
   Complex2* gain = cast<Complex2> (exp( *log_intensity ).get_expression());
 
-  ProductRule<Complex2>* result = new ProductRule<Complex2>;
-  result->add_model( gain );
-  result->add_model( boost );
+  ProductRule<Complex2>* product = new ProductRule<Complex2>;
+  product->add_model( gain );
+  product->add_model( boost );
 
-  copy_parameter_policy  (result);
-  copy_evaluation_policy (result);
+  wrap (product);
 }
 
 MEAL::ModeCoherency::ModeCoherency ()
@@ -129,6 +128,5 @@ void MEAL::ModeCoherency::set_stokes (const Stokes<Estimate<double> >& stokes)
 //! Set the Stokes parameters of the model
 Stokes< Estimate<double> > MEAL::ModeCoherency::get_stokes () const
 {
-  Jones< Estimate<double> > result = estimate();
-  return coherency(result);
+  return coherency( estimate() );
 }
