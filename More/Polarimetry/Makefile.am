@@ -39,6 +39,7 @@ nobase_include_HEADERS = \
         Pulsar/MeanPolar.h \
         Pulsar/MeanSingleAxis.h \
         Pulsar/MeasurementEquation.h \
+	Pulsar/ModeSeparation.h \
         Pulsar/ObservationUncertainty.h \
         Pulsar/OffPulseCalibrator.h \
         Pulsar/Parallactic.h \
@@ -126,6 +127,7 @@ libPolarimetry_la_SOURCES = \
         MeanPolar.C \
         MeanSingleAxis.C \
         MeasurementEquation.C \
+	ModeSeparation.C \
         ObservationUncertainty.C \
         OffPulseCalibrator.C \
         Parallactic.C \
