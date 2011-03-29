@@ -54,7 +54,7 @@ namespace Pulsar
 
             std::pair<float, float> means_minmax;
 
-            std::vector<std::vector<float>::pointer> passbands;
+            std::vector<std::vector<float> > passbands;
 
             unsigned passband_npol;
 
