@@ -149,10 +149,10 @@ int main (int argc, char** argv) try {
   Estimate<double> V (-0.05, 0.00070);
   Estimate<double> inv;
 
-  MEAL::ScalarMath SI = I;
-  MEAL::ScalarMath SQ = Q;
-  MEAL::ScalarMath SU = U;
-  MEAL::ScalarMath SV = V;
+  MEAL::ScalarMath SI (I);
+  MEAL::ScalarMath SQ (Q);
+  MEAL::ScalarMath SU (U);
+  MEAL::ScalarMath SV (V);
 
   MEAL::ScalarMath Sinv = sqrt (SI*SI -SQ*SQ -SU*SU -SV*SV);
 
