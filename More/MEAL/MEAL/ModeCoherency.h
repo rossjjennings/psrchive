@@ -12,6 +12,7 @@
 #define __MEAL_ModeCoherency_H
 
 #include "MEAL/Coherency.h"
+#include "MEAL/Wrap.h"
 #include "Vector.h"
 
 namespace MEAL {
@@ -28,7 +29,8 @@ namespace MEAL {
    <li> log(beta), where beta = atanh(p) and p is the degree of polarization
    <li> unit 3-vector, so that orthogonal mode may be well-defined
   */
-  class ModeCoherency : public Coherency {
+  class ModeCoherency : public Wrap<Coherency>
+  {
 
   public:
 
@@ -70,9 +72,6 @@ namespace MEAL {
 
   protected:
 
-    //! Implemented by ProductRule
-    void calculate (Jones<double>&, std::vector<Jones<double> >*) {}
-
     //! Works for the constructors
     void init ();
 
@@ -80,7 +79,6 @@ namespace MEAL {
     Reference::To<UnitTangent> axis;
     Reference::To<ScalarParameter> log_beta;
     Reference::To<ScalarParameter> log_intensity;
-
   };
 
 }
