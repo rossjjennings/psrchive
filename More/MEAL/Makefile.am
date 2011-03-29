@@ -15,6 +15,7 @@ nobase_include_HEADERS = \
 	MEAL/BoostUnion.h \
         MEAL/Cached.h \
         MEAL/CalculatePolicy.h \
+	MEAL/Cast.h \
         MEAL/ChainRule.h \
         MEAL/Coherency.h \
         MEAL/Complex2Constant.h \
@@ -116,9 +117,11 @@ nobase_include_HEADERS = \
 	MEAL/UnitTangent.h \
         MEAL/Univariate.h \
         MEAL/UnivariatePolicy.h \
+	MEAL/Vectorize.h \
         MEAL/VectorRule.h \
         MEAL/VelocityModel.h \
-        MEAL/VonMises.h
+        MEAL/VonMises.h \
+	MEAL/Wrap.h
 
 libMEAL_la_SOURCES = \
         Argument.C \
