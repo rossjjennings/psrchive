@@ -47,10 +47,10 @@ namespace MEAL {
     ~ModeCoherency ();
 
     //! Get the model of the unit vector
-    Evaluable< Vector<3,double> >* get_axis ();
+    UnitTangent* get_axis ();
 
     //! Set the model of the unit vector
-    void set_axis (Evaluable< Vector<3,double> >*);
+    void set_axis (UnitTangent*);
 
     //! Set the Stokes parameters of the model
     virtual void set_stokes (const Stokes<double>& stokes);

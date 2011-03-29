@@ -81,6 +81,19 @@ string MEAL::ModeCoherency::get_name () const
   return "ModeCoherency";
 }
 
+//! Get the model of the unit vector
+MEAL::UnitTangent* MEAL::ModeCoherency::get_axis ()
+{
+  return axis;
+}
+
+//! Set the model of the unit vector
+void MEAL::ModeCoherency::set_axis (UnitTangent* _axis)
+{
+  axis = _axis;
+  boost->set_axis (axis);
+}
+
 //! Set the Stokes parameters of the model
 void MEAL::ModeCoherency::set_stokes (const Stokes<double>& stokes)
 {
