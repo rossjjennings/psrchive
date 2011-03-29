@@ -41,6 +41,8 @@ namespace MEAL {
 
   };
 
+  template<class T>
+  Vectorize<T>* vectorize (T* function) { return new Vectorize<T>(function); }
 }
 
 template<class T>
