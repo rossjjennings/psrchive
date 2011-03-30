@@ -8,6 +8,8 @@
 #include "MEAL/Union.h"
 #include "MEAL/ProjectGradient.h"
 
+using namespace std;
+
 MEAL::Union::Union (Composite* policy)
 {
   if (policy)
@@ -54,6 +56,7 @@ void MEAL::Union::push_back (ScalarVector* subspace)
 void MEAL::Union::calculate (double& result, std::vector<double>* grad)
 {
   unsigned nmodel = model.size();
+
   if (very_verbose)
     std::cerr << "MEAL::Union::calculate nmodel=" << nmodel << std::endl;
 
@@ -61,13 +64,15 @@ void MEAL::Union::calculate (double& result, std::vector<double>* grad)
   std::vector<double> comp_gradient;
 
   // the pointer to the above array, if grad != 0
-  std::vector<double>* comp_gradient_ptr = 0;
-
-  if (grad)
-    comp_gradient_ptr = &comp_gradient;
+  std::vector<double>* comp_gradient_ptr = &comp_gradient;
+  if (!grad)
+    comp_gradient_ptr = 0;
 
   unsigned model_index = 0;
   unsigned remaining_index = get_index();
+
+  if (very_verbose)
+    cerr << "MEAL::Union::calculate index=" << remaining_index << endl;
 
   while (model_index < model.size())
   {
@@ -79,7 +84,11 @@ void MEAL::Union::calculate (double& result, std::vector<double>* grad)
     model_index ++;
   }
 
-  if (this->get_verbose())
+  if (model_index == model.size())
+    throw Error (InvalidState, "MEAL::Union::calculate",
+		 "index=%u out of range", get_index());
+
+  if (get_verbose())
     std::cerr << "MEAL::Union::calculate evaluate " 
 	      << model[model_index]->get_name() << std::endl;
 
@@ -90,7 +99,7 @@ void MEAL::Union::calculate (double& result, std::vector<double>* grad)
     // evaluate the model and its gradient
     result = model[model_index]->evaluate (comp_gradient_ptr);
 
-    if (this->get_verbose())
+    if (get_verbose())
       std::cerr << "MEAL::Union::calculate " 
 		<< model[model_index]->get_name()
 		<< " result=" << result << std::endl;
@@ -110,14 +119,20 @@ void MEAL::Union::calculate (double& result, std::vector<double>* grad)
 		   model_index, model[model_index]->get_name().c_str(),
 		   model[model_index]->get_nparam(), comp_gradient.size());
     
-    unsigned nparam = this->get_nparam();
+    unsigned nparam = get_nparam();
 
     grad->resize (nparam);
     for (unsigned iparam=0; iparam<nparam; iparam++)
       (*grad)[iparam] = 0.0;
 
+    if (get_verbose())
+      cerr << "MEAL::Union::calculate project gradient" << endl;
+
     // re-map the elements of the component gradient into the Composite space
     ProjectGradient (model[model_index], comp_gradient, *grad);
+
+    if (get_verbose())
+      cerr << "MEAL::Union::calculate gradient projected" << endl;
   }
 
   if (very_verbose)
@@ -128,7 +143,7 @@ void MEAL::Union::calculate (double& result, std::vector<double>* grad)
     {
       std::cerr << "MEAL::Union::calculate gradient" << std::endl;
       for (unsigned i=0; i<grad->size(); i++)
-	std::cerr << "   " << i << ":" << this->get_infit(i) 
+	std::cerr << "   " << i << ":" << get_infit(i) 
 		  << "=" << (*grad)[i] << std::endl;
     }
   }
