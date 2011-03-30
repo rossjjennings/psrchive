@@ -35,10 +35,10 @@ namespace MEAL {
     ~OrthogonalModes ();
 
     //! Mode A
-    Coherency* get_modeA () const;
+    Coherency* get_modeA () const { return modeA; }
 
     //! Mode B
-    Coherency* get_modeB () const;
+    Coherency* get_modeB () const { return modeB; }
 
     //! Return the name of the class
     std::string get_name () const;
