@@ -95,26 +95,26 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr) try
   psrfits_read_key( fptr, "DIGLEV", &s_data );
   dstats->set_diglev( s_data );
 
-  unsigned temp_int = 0;
+  long temp_long = 0;
 
   // load the NPAR from HDU
   try
   {
-    psrfits_read_key( fptr, "NPAR", &temp_int );
+    psrfits_read_key( fptr, "NPAR", &temp_long );
   }
   catch( Error& e )
   {
-    psrfits_read_key( fptr, "NLEV", &temp_int );
+    psrfits_read_key( fptr, "NLEV", &temp_long );
   }
-  dstats->set_npar( temp_int );
+  dstats->set_npar( temp_long );
 
   // load the NCYCSUB from the HDU
-  psrfits_read_key( fptr, "NCYCSUB", &temp_int );
-  dstats->set_ncycsub( temp_int );
+  psrfits_read_key( fptr, "NCYCSUB", &temp_long );
+  dstats->set_ncycsub( static_cast<int>(temp_long) );
 
   // load the NDIGR from HDU
-  psrfits_read_key( fptr, "NDIGR", &temp_int );
-  dstats->set_ndigr( temp_int );
+  psrfits_read_key( fptr, "NDIGR", &temp_long);
+  dstats->set_ndigr( static_cast<int>(temp_long) );
 
   // load the DIG_MODE
   psrfits_read_key (fptr, "DIG_MODE", &s_data );
