@@ -7,6 +7,8 @@
 
 #include "MEAL/ScalarVector.h"
 
+using namespace std;
+
 MEAL::ScalarVector::ScalarVector ()
 {
   index = 0;
@@ -18,11 +20,13 @@ void MEAL::ScalarVector::set_index (unsigned i)
   if (index != i)
     set_evaluation_changed ();
 
+  // cerr << "MEAL::ScalarVector::set_index index=" << i << endl;
   index = i;
 }
 
 //! Get the index of the position angle array
 unsigned MEAL::ScalarVector::get_index () const
 {
+  // cerr << "MEAL::ScalarVector::get_index index=" << index << endl;
   return index;
 }
