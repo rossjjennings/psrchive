@@ -12,6 +12,7 @@
 #define __Vectorize_H
 
 #include "MEAL/ScalarVector.h"
+#include "Error.h"
 
 namespace MEAL {
 
@@ -21,12 +22,14 @@ namespace MEAL {
   {
   public:
 
+    typedef typename T::Result Result;
+
     //! Default contructor
     Vectorize (T* function);
 
     //! Return the name of the class
     std::string get_name () const
-    { return "Vectorize<" + std::string(T::Name)+ ">"; }
+    { return "Vectorize<" + function->get_name() + ">"; }
 
     //! Return the dimension of the vector
     unsigned size () const;
@@ -82,7 +85,10 @@ template<class T>
 void MEAL::Vectorize<T>::calculate (double& result,
 				    std::vector<double>* gradient)
 {
-  typedef typename T::Result Result;
+  if (index >= size())
+    throw Error (InvalidState,
+		 "MEAL::Vectorize<" + std::string(T::Name) + ">::calculate",
+		 "index=%u >= size=%u", index, size());
 
   Result m_result;
   std::vector<Result> m_gradient;
@@ -90,25 +96,37 @@ void MEAL::Vectorize<T>::calculate (double& result,
   if (!gradient)
     m_gradptr = 0;
 
+  if (this->get_verbose())
+    std::cerr << get_name() + "::calculate call evaluate" << std::endl;
+
   m_result = function->evaluate (m_gradptr);
 
   ScalarMapping<Result> map;
 
+  if (this->get_verbose())
+    std::cerr << get_name() + "::calculate index=" << index << std::endl;
+
   result = map.element( m_result, index );
 
-  if (gradient)
-  {
-    gradient->resize( m_gradient.size() );
-    for (unsigned i=0; i<m_gradient.size(); i++)
-      (*gradient)[i] = map.element( m_gradient[i], index );
-  }
+  if (!gradient)
+    return;
+
+  if (this->get_verbose())
+    std::cerr << get_name() + "::calculate map gradient" << std::endl;
+
+  gradient->resize( m_gradient.size() );
+  for (unsigned i=0; i<m_gradient.size(); i++)
+    (*gradient)[i] = map.element( m_gradient[i], index );
+
+  if (this->get_verbose())
+    std::cerr << get_name() + "::calculate return" << std::endl;
 }
 
 //! Return the dimension of the vector
 template<class T>
 unsigned MEAL::Vectorize<T>::size () const
 {
-  return ScalarMapping< typename T::Result >::ndim();
+  return ScalarMapping<Result>::ndim();
 }
 
 #endif

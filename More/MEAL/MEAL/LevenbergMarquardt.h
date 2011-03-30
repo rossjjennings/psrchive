@@ -707,7 +707,8 @@ float MEAL::LevenbergMarquardt<Grad>::calculate_chisq
  Mt& model)
 {
   if (verbose > 2)
-    std::cerr << "MEAL::LevenbergMarquardt<Grad>::chisq" << std::endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::chisq nparam="
+	      << model.get_nparam() << std::endl;
 
   if (alpha.size() != model.get_nparam())
     throw Error (InvalidState, "MEAL::LevenbergMarquardt<Grad>::chisq",
@@ -720,14 +721,15 @@ float MEAL::LevenbergMarquardt<Grad>::calculate_chisq
 
   // initialize sums
   double Chisq = 0.0;
-  for (unsigned j=0; j<alpha.size(); j++) {
+  for (unsigned j=0; j<alpha.size(); j++)
+  {
     for (unsigned k=0; k<=j; k++)
       alpha[j][k] = 0.0;
     beta[j] = 0.0;
   }
 
-  for (unsigned ipt=0; ipt < x.size(); ipt++) {
-
+  for (unsigned ipt=0; ipt < x.size(); ipt++)
+  {
     if (verbose > 2)
       std::cerr << "MEAL::LevenbergMarquardt<Grad>::chisq lmcoff[" << ipt
 	   << "/" << x.size() << "]" << std::endl;
@@ -762,10 +764,19 @@ float MEAL::lmcoff (
 
   AbscissaTraits<At>::apply (model, abscissa);
 
+  if (LevenbergMarquardt<Grad>::verbose > 2)
+    std::cerr << "MEAL::lmcoff abscissa applied" << std::endl;
+
   WeightingScheme<Et> weight (data);
 
-  return lmcoff1 (model, weight.difference (data, model.evaluate (&gradient)),
-		  weight, gradient, alpha, beta);
+  float result = lmcoff1 (model,
+			  weight.difference (data, model.evaluate (&gradient)),
+			  weight, gradient, alpha, beta);
+
+  if (LevenbergMarquardt<Grad>::verbose > 2)
+    std::cerr << "MEAL::lmcoff lmcoff1 computed" << std::endl;
+
+  return result;
 }
 
 template <class Mt, class Yt, class Wt, class Grad>
