@@ -86,6 +86,7 @@ nobase_include_HEADERS = \
         MEAL/ScalarBesselI0.h \
         MEAL/ScalarConstant.h \
         MEAL/ScalarCosine.h \
+	MEAL/ScalarErrorFunction.h \
         MEAL/ScalarExponential.h \
         MEAL/Scalar.h \
         MEAL/ScalarHypCosine.h \
@@ -184,6 +185,7 @@ libMEAL_la_SOURCES = \
         Scalar.C \
         ScalarConstant.C \
         ScalarCosine.C \
+	ScalarErrorFunction.C \
         ScalarExponential.C \
         ScalarHypCosine.C \
         ScalarHypSine.C \
