@@ -66,6 +66,9 @@ void Pulsar::FluxCalibratorExtension::set_nreceptor (unsigned nreceptor)
     throw Error (InvalidParam,"Pulsar::FluxCalibratorExtension::set_nreceptor",
 		 "cannot set nreceptor to 0");
 
+
+  std::cerr << "setting nreceptor to: " << nreceptor << std::endl;
+
   for (unsigned ichan=0; ichan < S_cal.size(); ichan++) {
     S_cal[ichan].resize( nreceptor );
     S_sys[ichan].resize( nreceptor );
@@ -95,6 +98,12 @@ FluxCalibratorExtension::get_S_sys (unsigned ichan, unsigned ireceptor) const
   return S_sys[ichan][ireceptor];
 }
 
+std::vector< std::vector< Estimate<double> > >
+FluxCalibratorExtension::get_S_sys () const
+{
+  return S_sys;
+}
+
 void FluxCalibratorExtension::set_S_cal (unsigned ichan, unsigned ireceptor,
 					 const Estimate<double>& _S_cal)
 {
@@ -113,6 +122,4 @@ TextInterface::Parser* FluxCalibratorExtension::get_interface()
 {
   return new Interface( this );
 }
-
-
 
