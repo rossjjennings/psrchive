@@ -85,6 +85,8 @@ namespace Pulsar
     void set_S_cal (unsigned chan, unsigned receptor, const Estimate<double>&);
     //! Get the calibrator flux density of the specified channel
     Estimate<double> get_S_cal (unsigned chan, unsigned receptor) const;
+    //! Get the calibrator flux densities of the fluxcal 
+    std::vector< std::vector< Estimate<double> > > get_S_cal () const;
 
   protected:
 
