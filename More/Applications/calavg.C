@@ -351,9 +351,7 @@ void calavg::finalize()
   }
 
   unload_name = unload->get_output_filename(average);
-  if (verbose) {
-    cerr << "calavg: Unloading archive: '" << unload_name << "'" << endl;
-  }
+  cerr << "calavg: Unloading archive: '" << unload_name << "'" << endl;
 
   set_history_command();
   average->unload(unload_name);
