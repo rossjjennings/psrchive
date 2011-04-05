@@ -248,28 +248,42 @@ void calavg::process(Pulsar::Archive* archive)
 
   // Compare parameters if not first file.
   if (average) {
-    if (get_receiver(average) != get_receiver(archive)) {
-      throw Error(InvalidState, "calavg::process",
-          "Receivers are different (%s and %s)", get_receiver(average).c_str(),
-          get_receiver(archive).c_str());
-    }
-
-    if (get_frequency(average) != get_frequency(archive)) {
-      throw Error(InvalidState, "calavg::process",
-          "frequencies are different (%g and %g)", get_frequency(average),
-          get_frequency(archive));
-    }
-
-    if (get_bw(average) != get_bw(archive)) {
-      throw Error(InvalidState, "calavg::process",
-          "bandwidths are different (%g and %g)", get_bw(average),
-          get_bw(archive));
-    }
-
-    if (get_nchan(average) != get_nchan(archive)) {
-      throw Error(InvalidState, "calavg::process",
-          "nchans are different (%g and %g)", get_nchan(average),
-          get_nchan(archive));
+    try {
+      if (get_receiver(average) != get_receiver(archive)) {
+        throw Error(InvalidState, "calavg::process",
+            "Receivers are different (%s=%s; %s=%s)",
+            average->get_filename().c_str(),
+            get_receiver(average).c_str(),
+            archive->get_filename().c_str(),
+            get_receiver(archive).c_str());
+      }
+      if (get_frequency(average) != get_frequency(archive)) {
+        throw Error(InvalidState, "calavg::process",
+            "frequencies are different (%s=%g; %s=%g)",
+            average->get_filename().c_str(),
+            get_frequency(average),
+            archive->get_filename().c_str(),
+            get_frequency(archive));
+      }
+      if (get_bw(average) != get_bw(archive)) {
+        throw Error(InvalidState, "calavg::process",
+            "bandwidths are different (%s=%g; %s=%g)",
+            average->get_filename().c_str(),
+            get_bw(average),
+            archive->get_filename().c_str(),
+            get_bw(archive));
+      }
+      if (get_nchan(average) != get_nchan(archive)) {
+        throw Error(InvalidState, "calavg::process",
+            "nchans are different (%s=%g; %s=%g)",
+            average->get_filename().c_str(),
+            get_nchan(average),
+            archive->get_filename().c_str(),
+            get_nchan(archive));
+      }
+    } catch (Error& e) {
+      cerr << "calavg error: " << e.get_message() << endl;
+      exit(0);
     }
   }
 
