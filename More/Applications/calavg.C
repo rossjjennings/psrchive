@@ -12,7 +12,9 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/Receiver.h"
+#include "Pulsar/ProcHistory.h"
 #include "Pulsar/StandardOptions.h"
+#include "Pulsar/UnloadOptions.h"
 
 using std::cerr;
 using std::cout;
@@ -33,14 +35,19 @@ class calavg : public Pulsar::Application
     void process(Pulsar::Archive*);
 
     //! Calculates the weighted average over all fluxcal files and outputs
-    //  the results as XXX: <new filename here>
+    //  the results in a new fluxcal file
     void finalize();
 
   protected:
 
-    //! Add command line options: none yet; just including this to conform
-    //  to the design of Pulsar::Application
-    void add_options(CommandLine::Menu&) {}
+    //! Add command line options
+    void add_options(CommandLine::Menu&);
+
+    //! Name of the output file
+    string unload_name;
+
+    //! Unload options
+    Reference::To<Pulsar::UnloadOptions> unload;
 
   private:
 
@@ -59,6 +66,10 @@ class calavg : public Pulsar::Application
     //! Calculate the channel weight from error.
     //      weight = 1/error^2
     template<typename T> T get_weight_from_error(const T error);
+
+    //! Enter command into the HISTORY table. Required because
+    //  Pulsar::Application sets the command after average is cloned???
+    void set_history_command();
 
     //!
     //  Extract - methods used to extract the must-be-consistent parameters.
@@ -205,6 +216,18 @@ T calavg::get_weight_from_error(const T error)
   return 1.0/pow(error, 2);
 }
 
+//! Enter command into the HISTORY table. This required because
+//  Pulsar::Application sets the command after average is cloned???
+void calavg::set_history_command()
+{
+  Reference::To<Pulsar::ProcHistory> ext =
+    average->get<Pulsar::ProcHistory>();
+
+  if (ext) {
+    ext->set_command_str(command);
+  }
+}
+
 //! Extract the S_sys and S_cal values from the FLUXCAL table of the given
 //  archive.
 void calavg::process(Pulsar::Archive* archive)
@@ -253,6 +276,9 @@ void calavg::process(Pulsar::Archive* archive)
   // Copy all S_sys values from the current fluxcal.
   S_sys_values.push_back(ext->get_S_sys());
 
+  // Copy all S_cal values from the current fluxcal.
+  S_cal_values.push_back(ext->get_S_cal());
+
   // If first file, extract parameters and store them for easy comparison.
   if (average == NULL) {
     if (verbose) {
@@ -287,7 +313,7 @@ void calavg::finalize()
   for (unsigned ipol = 0; ipol < NPOL; ++ipol) {
 
     // Ensure we're not going to read off the end of the vector.
-    if (nchan > S_sys_values[ipol].size()) {
+    if (nchan > S_sys_values[ipol].size() || nchan > S_cal_values[ipol].size()) {
       throw Error(InvalidState, "calavg::finalize",
           "Error in extracting all frequency channels (nchan >= vector size %d)",
           S_sys_values.size());
@@ -297,36 +323,50 @@ void calavg::finalize()
       // Iterate over the S_sys and S_sys_err values of each file and calculate
       // the average mean (for the current channel and receptor).
       MeanEstimate<double, double> total_S_sys; // Can I get away with this...?
+      MeanEstimate<double, double> total_S_cal;
 
       // Perform the weighted average across each file.
       for (unsigned ifile = 0; ifile < S_sys_values.size(); ++ifile) {
-        const MeanEstimate<double, double> S_sys =
-          S_sys_values[ifile][ichan][ipol];
-
-        total_S_sys += S_sys;
+        total_S_sys += S_sys_values[ifile][ichan][ipol];
+        total_S_cal += S_cal_values[ifile][ichan][ipol];
       }
 
       ext->set_S_sys(ichan, ipol, total_S_sys);
+      ext->set_S_cal(ichan, ipol, total_S_cal);
     }
   }
 
   // Calculate the channel weight by summing the channel weights (calculated
   // from the error) across both receptors.
   for (unsigned ichan = 0; ichan < nchan; ++ichan) {
-    MeanEstimate<double, double> total_S_sys; // ... and get away with this...?
+    MeanEstimate<double, double> total_S_cal; // ... and get away with this...?
     for (unsigned ipol = 0; ipol < NPOL; ++ipol) {
-      const MeanEstimate<double, double> S_sys = ext->get_S_sys(ichan, ipol);
-      total_S_sys += S_sys;
+      total_S_cal += ext->get_S_cal(ichan, ipol);
     }
 
     // Calculate channel weight from error.
-    const double error = total_S_sys.get_Estimate().get_error();
+    const double error = total_S_cal.get_Estimate().get_error();
     const double weight = get_weight_from_error(error); // UNCHECKED
     ext->set_weight(ichan, weight); // CHECKED
   }
 
-  average->unload("test.rf");
+  unload_name = unload->get_output_filename(average);
+  if (verbose) {
+    cerr << "calavg: Unloading archive: '" << unload_name << "'" << endl;
+  }
+
+  set_history_command();
+  average->unload(unload_name);
 }
+
+void calavg::add_options(CommandLine::Menu& menu)
+{
+  CommandLine::Argument* arg;
+
+  arg = menu.add(unload_name, 'o', "fname");
+  arg->set_help("output result to 'fname'");
+}
+
 static calavg program;
 
 int main(int argc, char *argv[])
@@ -338,6 +378,13 @@ calavg::calavg() :
   Pulsar::Application("calavg", "averages cal files"),
   average(NULL)
 {
-  add( new Pulsar::StandardOptions );
+  update_history = true;
+
+  add(new Pulsar::StandardOptions);
+
+  unload = new Pulsar::UnloadOptions;
+  unload->set_output_each(false);
+  unload->set_extension("avg");
+  add(unload);
 }
 
