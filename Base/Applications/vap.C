@@ -1270,9 +1270,29 @@ string get_MJD_feed( Reference::To<Archive> archive )
 // DIGITISER STATISTICS FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * The values of ATTEN_A and ATTEN_B are derived from either:
+ *  - the main header (for earlier versions of psfits), or
+ *  - the DIG_STAT table
+ *
+ * Return the values from the main header if they are non-zero. Otherwise,
+ * return the values from the DIG_STAT table.
+ */
 string get_dig_atten( Reference::To<Archive> archive )
 {
   ostringstream result;
+  Reference::To<Receiver> receiver_ext = archive->get<Receiver>();
+
+  if (receiver_ext) {
+    const float atten_a = receiver_ext->get_atten_a();
+    const float atten_b = receiver_ext->get_atten_b();
+
+    if (atten_a != 0.0 || atten_b != 0.0) {
+      result << atten_a << "," << atten_b;
+      return result.str();
+    }
+  }
+
   Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
 
   if( !ext )
