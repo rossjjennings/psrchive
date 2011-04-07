@@ -38,14 +38,19 @@ void Pulsar::BandpassPlot::prepare(const Archive* archive)
 
     passband_npol = passband->get_npol();
     passband_nchan = passband->get_nchan();
-
     passbands.resize(passband->get_npol());
 
     for (unsigned i = 0; i < passbands.size(); ++i) {
-        passbands[i] = const_cast<float*>(&(passband->get_passband(i)[0]));
+        passbands[i] = passband->get_passband(i);
 
-        const float* ptr = passbands[i];
+        vector<float>::iterator ptr = passbands[i].begin();
         ++ptr; // skip the first channel - it tends to be junk
+
+        if (passbands[i].size() > passband_nchan) {
+          throw Error(InvalidState, "Pulsar::BandpassPlot::prepare",
+              "Passband size (%d) > passband nchan (%d) pol=%d",
+              passbands[i].size(), passband_nchan, i);
+        }
 
         for (unsigned j = 0; j < passband_nchan; ++j, ++ptr) {
             if (*ptr < means_minmax.first)
@@ -98,7 +103,7 @@ void Pulsar::BandpassPlot::draw(const Archive* archive)
     for (unsigned ipol = 0; ipol < passband_npol; ++ipol) {
         const int cpgColour = ipol == 0 ? CPG_BLACK : CPG_RED;
         cpgsci(cpgColour);
-        cpgline(nchan, xs, passbands[ipol]);
+        cpgline(nchan, xs, &passbands[ipol][0]);
     }
 
     // draw top x-axis label (0 - nchan)
