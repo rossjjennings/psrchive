@@ -17,9 +17,10 @@
 
 namespace MEAL {
 
+  class Scalar;
+  class ScalarParameter;
   class BoostUnion;
   class UnitTangent;
-  class ScalarParameter;
 
   //! A coherency matrix parameterized by a logarithmic gain times a boost
   /*! This class ensures that the result is a positive definite Hermitian
@@ -52,6 +53,12 @@ namespace MEAL {
     //! Set the model of the unit vector
     void set_axis (UnitTangent*);
 
+    //! Get beta
+    Scalar* get_beta ();
+
+    //! Get the intensity
+    Scalar* get_intensity ();
+
     //! Set the Stokes parameters of the model
     virtual void set_stokes (const Stokes<double>& stokes);
     
@@ -79,6 +86,9 @@ namespace MEAL {
     Reference::To<UnitTangent> axis;
     Reference::To<ScalarParameter> log_beta;
     Reference::To<ScalarParameter> log_intensity;
+
+    Reference::To<Scalar> beta;
+    Reference::To<Scalar> intensity;
   };
 
 }

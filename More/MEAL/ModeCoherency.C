@@ -30,12 +30,13 @@ void MEAL::ModeCoherency::init ()
 
   log_beta = new ScalarParameter;
   log_beta->set_value_name( "log(beta)" );
-  boost->set_beta (exp( *log_beta ).get_expression());
+  beta = exp( *log_beta ).get_expression();
+  boost->set_beta (beta);
 
   log_intensity = new ScalarParameter;
   log_intensity->set_value_name( "log(I)" );
-
-  Complex2* gain = cast<Complex2> (exp( *log_intensity ).get_expression());
+  intensity = exp( *log_intensity ).get_expression();
+  Complex2* gain = cast<Complex2> (intensity.get());
 
   ProductRule<Complex2>* product = new ProductRule<Complex2>;
   product->add_model( gain );
@@ -94,6 +95,18 @@ void MEAL::ModeCoherency::set_axis (UnitTangent* _axis)
   boost->set_axis (axis);
 }
 
+//! Get beta
+MEAL::Scalar* MEAL::ModeCoherency::get_beta ()
+{
+  return beta;
+}
+
+//! Get the intensity
+MEAL::Scalar* MEAL::ModeCoherency::get_intensity ()
+{
+  return intensity;
+}
+
 //! Set the Stokes parameters of the model
 void MEAL::ModeCoherency::set_stokes (const Stokes<double>& stokes)
 {
@@ -111,9 +124,12 @@ void MEAL::ModeCoherency::set_stokes (const Stokes<double>& stokes)
     throw Error (InvalidParam, "MEAL::ModeCoherency::set_stokes",
 		 "degree of polarization p==0");
 
-  log_intensity->set_value ( ::log(stokes[0]) );
+  log_intensity->set_value ( ::log( 0.5 * stokes[0] * ::sqrt(1.0-p*p) ) );
   log_beta->set_value ( ::log(::atanh(p)) );
   axis->set_vector (stokes.get_vector());
+
+  cerr << "MEAL::ModeCoherency::set_stokes in=" << stokes
+       << " result=" << get_stokes() << endl;
 }
 
 //! Set the Stokes parameters of the model
@@ -133,7 +149,7 @@ void MEAL::ModeCoherency::set_stokes (const Stokes<Estimate<double> >& stokes)
     throw Error (InvalidParam, "MEAL::ModeCoherency::set_stokes",
 		 "degree of polarization p==0");
 
-  log_intensity->set_value ( log(stokes[0]) );
+  log_intensity->set_value ( log( 0.5 * stokes[0] * sqrt(1-p*p) ) );
   log_beta->set_value ( log(atanh(p)) );
   axis->set_vector (stokes.get_vector());
 }
