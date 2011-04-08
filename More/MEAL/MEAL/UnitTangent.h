@@ -54,6 +54,9 @@ namespace MEAL {
     //! Set the direction of the unit vector with error
     void set_vector (const Vector<3,Estimate<double> >& direction);
 
+    //! Get the basis vector
+    Vector<3,double> get_basis (unsigned i) { return basis[i]; }
+
   protected:
 
     //! Calculate the Vector and its gradient
