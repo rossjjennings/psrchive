@@ -13,7 +13,9 @@ using namespace std;
 MEAL::UnitTangent::UnitTangent ()
 {
   // a unit vector in three dimensions has two degrees of freedom
-  new Parameters (this, 2);
+  Parameters* params = new Parameters (this, 2);
+  params->set_name (0, "orth0");
+  params->set_name (1, "orth1");
 
   for (unsigned i=0; i<3; i++)
     basis[i] = Vector<3,double>::basis(i);
@@ -39,18 +41,19 @@ void MEAL::UnitTangent::set_vector (Vector<3,double> direction)
 
   // the squared magnitude of the vector in the plane perpendicular to b0
   double perp_sq = direction[b1]*direction[b1] + direction[b2]*direction[b2];
+  double dperp = sqrt( perp_sq );
 
   // the magnitude of the vector
-  double norm = sqrt( direction[b0]*direction[b0] + perp_sq );
+  double dnorm = sqrt( direction[b0]*direction[b0] + perp_sq );
 
   // the unit vector
-  direction /= norm;
+  direction /= dnorm;
 
   basis[0] = direction;
 
   // phi is the angle between direction and the most distant axis
   // sin = opposite / hypotenuse = perp / norm
-  double sin_phi = sqrt(perp_sq) / norm;
+  double sin_phi = dperp / dnorm;
   double cos_phi = direction[b0];
 
   // basis[1] points along the meridian to the most distant axis
@@ -59,10 +62,21 @@ void MEAL::UnitTangent::set_vector (Vector<3,double> direction)
   basis[1][b1] *= -cos_phi/sin_phi;
   basis[1][b2] *= -cos_phi/sin_phi;
 
+#if _DEBUG
+  cerr << "norm basis[1]=" << norm(basis[1]) << endl;
+  cerr << "b0 dot b1=" << basis[0] * basis[1] << endl;
+#endif
+
   // basis[2] is perpendicular to the first two
   basis[2][b0] = 0;
-  basis[2][b1] = -direction[b2];
-  basis[2][b2] = direction[b1];
+  basis[2][b1] = -direction[b2]/sin_phi;
+  basis[2][b2] = direction[b1]/sin_phi;
+
+#if _DEBUG
+  cerr << "norm basis[2]=" << norm(basis[2]) << endl;
+  cerr << "b0 dot b2=" << basis[0] * basis[2] << endl;
+  cerr << "b1 dot b2=" << basis[1] * basis[2] << endl;
+#endif
 
   set_param (0, 0.0);
   set_param (1, 0.0);
