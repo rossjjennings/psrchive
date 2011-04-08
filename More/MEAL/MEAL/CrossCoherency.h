@@ -17,6 +17,7 @@
 namespace MEAL {
 
   class OrthogonalModes;
+  class UnitTangent;
   class Scalar;
 
   //! Partial coherence of orthogonally polarized modes
@@ -45,10 +46,11 @@ namespace MEAL {
     //! The orthogonal modes
     Project<OrthogonalModes> modes;
 
-    Project<Scalar> corrA1;
-    Project<Scalar> corrB1;
-    Project<Scalar> corrC2;
-    Project<Scalar> corrC3;
+    //! The axis that defines the modes
+    Project<UnitTangent> axis;
+
+    //! The quasi-Stokes parameters in the natural basis
+    Project<Scalar> stokes[4];
 
     //! Calculate the Jones matrix and its gradient
     void calculate (Jones<double>& result, std::vector<Jones<double> >*);
@@ -58,7 +60,6 @@ namespace MEAL {
 
     //! Works for the constructors
     void init ();
-    void setup (Project<Scalar>&);
   };
 
 }
