@@ -29,6 +29,7 @@ nobase_include_HEADERS = \
         MEAL/Composite.h \
         MEAL/CongruenceTransformation.h \
         MEAL/Constant.h \
+	MEAL/CrossCoherency.h \
         MEAL/CyclicParameter.h \
 	MEAL/Depolarizer.h \
 	MEAL/Evaluable.h \
@@ -142,6 +143,7 @@ libMEAL_la_SOURCES = \
 	Complex4.C \
         Composite.C \
         CongruenceTransformation.C \
+	CrossCoherency.C \
         CyclicParameter.C \
 	Depolarizer.C \
         ForwardChanged.C \
