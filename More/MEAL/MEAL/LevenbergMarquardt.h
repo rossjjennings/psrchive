@@ -27,6 +27,7 @@
 
 namespace MEAL
 {
+  class RestorePolicy;
 
   //! Levenberg-Marquardt algorithm for non-linear least squares minimization
   /*! This template class implements the nonlinear least squares
@@ -91,6 +92,7 @@ namespace MEAL
       lamda_increase_factor = 10.0;
       lamda_decrease_factor = 0.1;
       singular_threshold = 1e-8;
+      restore_policy = NULL;
     }
     
     //! returns initial chi-squared
@@ -126,6 +128,8 @@ namespace MEAL
     /*! Passed to MEAL::GaussJordan, this attribute is used to
       decide when the curvature matrix is close to singular. */
     float singular_threshold;
+
+    RestorePolicy* restore_policy;
 
   protected:
 
@@ -185,6 +189,14 @@ namespace MEAL
     { model.set_abscissa(abscissa); }
   };
 
+  class RestorePolicy
+  {
+  public:
+    //! Store the current state of the model
+    virtual void store () = 0;
+    //! Set the state of the model to the last stored state
+    virtual void restore () = 0;
+  };
 
   //! Defines the weighted inner product and norm
   template<class Et>
@@ -426,7 +438,7 @@ void verify_orthogonal (const std::vector<std::vector<double > >& alpha,
         degen += alpha[krow][jcol] * alpha[irow][jcol];
       degen /= row_mod[krow] * row_mod[irow];
 
-      if (degen > 0.99999)
+      if (degen > 0.8)
       {
         double ival = model.get_param(indeces[irow]);
 	double kval = model.get_param(indeces[krow]);
@@ -578,11 +590,12 @@ float MEAL::LevenbergMarquardt<Grad>::iter
 	      << std::endl;
 
   unsigned iinfit = 0;
-  for (unsigned ifit=0; ifit<model.get_nparam(); ifit++) {
-
+  for (unsigned ifit=0; ifit<model.get_nparam(); ifit++)
+  {
     double change = 0.0;
 
-    if (model.get_infit(ifit)) {
+    if (model.get_infit(ifit))
+    {
       change = delta[iinfit][0];
       iinfit ++;
     }
@@ -600,31 +613,35 @@ float MEAL::LevenbergMarquardt<Grad>::iter
       " calculate new chisq" << std::endl;
   float new_chisq = calculate_chisq (x, y, model);
 
-  if (new_chisq < best_chisq) {
-
+  if (new_chisq < best_chisq)
+  {
     lamda *= lamda_decrease_factor;
 
     if (verbose)
       std::cerr << "MEAL::LevenbergMarquardt<Grad>::iter new chisq="
            << new_chisq << "\n  better fit; lamda=" << lamda << std::endl;
 
+    if (restore_policy)
+      restore_policy->store ();
+
     best_chisq = new_chisq;
     best_alpha = alpha;
     best_beta  = beta;
-
   }
-  else {
-
+  else
+  {
     lamda *= lamda_increase_factor;
 
     if (verbose)
       std::cerr << "MEAL::LevenbergMarquardt<Grad>::iter new chisq="
            << new_chisq << "\n  worse fit; lamda=" << lamda << std::endl;
 
+    if (restore_policy)
+      restore_policy->restore ();
+
     // restore the old model
     for (unsigned iparm=0; iparm<model.get_nparam(); iparm++)
       model.set_param (iparm, backup[iparm]);
-
   }
 
   return new_chisq;
@@ -663,16 +680,19 @@ void MEAL::LevenbergMarquardt<Grad>::result
   covar.resize (model.get_nparam());
 
   unsigned iindim = 0;
-  for (unsigned idim=0; idim < model.get_nparam(); idim++) {
+  for (unsigned idim=0; idim < model.get_nparam(); idim++)
+  {
     covar[idim].resize (model.get_nparam());
  
     if (!model.get_infit(idim))
       for (unsigned jdim=0; jdim < model.get_nparam(); jdim++)
 	covar[idim][jdim] = 0;
-    else {
+    else
+    {
       unsigned jindim = 0;
       for (unsigned jdim=0; jdim < model.get_nparam(); jdim++)
-	if (model.get_infit(jdim)) {
+	if (model.get_infit(jdim))
+        {
 	  covar[idim][jdim] = alpha [iindim][jindim];
 	  jindim ++;
 	}
