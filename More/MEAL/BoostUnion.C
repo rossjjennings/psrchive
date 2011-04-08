@@ -106,7 +106,7 @@ void MEAL::BoostUnion::calculate (Jones<double>& result,
   for (unsigned iparam=0; iparam < beta_gradient.size(); iparam++)
   {
     Quaternion<double, Hermitian> bgrad (sinh_beta*beta_gradient[iparam],
-					 cosh_beta*beta_gradient[iparam]*axis);
+					 cosh_beta*beta_gradient[iparam]*unit);
     comp_gradient[iparam] = convert(bgrad);
   }
 
@@ -126,7 +126,8 @@ void MEAL::BoostUnion::calculate (Jones<double>& result,
   // re-map the elements of the component gradient into the Composite space
   ProjectGradient (axis, comp_gradient, *grad);
   
-  if (verbose) {
+  if (verbose)
+  {
     cerr << "MEAL::BoostUnion::calculate gradient" << endl;
     for (unsigned i=0; i<grad->size(); i++)
       cerr << "   " << (*grad)[i] << endl;
