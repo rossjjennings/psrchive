@@ -43,12 +43,17 @@ namespace Pulsar {
     void set_bin (const Index& _ibin) { ibin = _ibin; }
     Index get_bin () const { return ibin; }
 
+    //! Set the ProfileStats expression to evaluate
+    void set_expression (const std::string& str) { expression = str; }
+    std::string get_expression () const { return expression; }
+
     //! Disable baseline removal
     void preprocess (Archive*);
 
   protected:
 
     Index ibin;
+    std::string expression;
 
   };
 

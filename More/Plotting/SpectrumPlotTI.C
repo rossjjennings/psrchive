@@ -16,5 +16,9 @@ Pulsar::SpectrumPlot::Interface::Interface (SpectrumPlot* instance)
        &SpectrumPlot::set_bin,
        "bin", "Phase bin to plot" );
 
+  add( &SpectrumPlot::get_expression,
+       &SpectrumPlot::set_expression,
+       "exp", "Expression to evaluate" );
+
   import( PowerSpectra::Interface() );
 }
