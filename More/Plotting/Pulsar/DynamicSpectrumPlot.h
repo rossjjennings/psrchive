@@ -55,11 +55,6 @@ namespace Pulsar {
       set_srange(std::pair<int,int>(fsub,lsub)); 
     }
 
-    std::string get_dump_filename() const 
-    { return dump_filename; }
-    void set_dump_filename (const std::string &filename) 
-    { dump_filename = filename; }
-
     //! Returns x axis label
     std::string get_xlabel (const Archive *data);
     //! Returns y axis label
@@ -68,6 +63,10 @@ namespace Pulsar {
     //! Pick a polarization
     void set_pol (int s_pol) { pol = s_pol; }
     int get_pol() const { return pol; }
+
+    //! Set a method
+    void set_method (int s_method) { method = s_method; }
+    int get_method() const { return method; }
     
   protected:
 
@@ -76,10 +75,10 @@ namespace Pulsar {
     std::pair<int,int> srange;
     std::pair<int,int> crange;
     int pol;
+    int method;
 
     bool zero_check;
 
-    std::string dump_filename;
   };
 
 }
