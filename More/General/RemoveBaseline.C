@@ -50,6 +50,10 @@ void Pulsar::RemoveBaseline::Each::transform (Archive* archive)
 	p->offset (-baseline->get_mean().val);
 
 	MoreProfiles* more = p->get<MoreProfiles>();
+
+	if (!more)
+	  continue;
+
 	unsigned nmore = more->get_size();
 	for (unsigned imore=0; imore < nmore; imore++)
 	{
@@ -57,7 +61,7 @@ void Pulsar::RemoveBaseline::Each::transform (Archive* archive)
 	  baseline->set_Profile (p);
 	  p->offset (-baseline->get_mean().val);
 	}
-      }
-    }
-  }
+      } // for each poln
+    } // for each chan
+  } // for each subint
 };
