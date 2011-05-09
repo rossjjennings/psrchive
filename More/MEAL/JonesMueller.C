@@ -7,6 +7,7 @@
 
 #include "MEAL/JonesMueller.h"
 #include "Pauli.h"
+#include <assert.h>
 
 MEAL::JonesMueller::JonesMueller (Complex2* xform) : composite (this)
 {
@@ -67,6 +68,8 @@ void MEAL::JonesMueller::calculate (Matrix<4,4,double>& result,
 
   if (!grad)
     return;
+
+  assert( grad->size() == jones_grad.size() );
 
   for (unsigned i=0; i<grad->size(); i++)
     (*grad)[i] = Mueller( jones_result, jones_grad[i] );
