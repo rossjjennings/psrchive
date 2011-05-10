@@ -220,7 +220,10 @@ int main(int argc, char *argv[]) {
   /* Process any args */
   int opt=0;
   int verb=0;
-  while ((opt=getopt(argc,argv,"hve:"))!=-1) {
+
+  string expression;
+
+  while ((opt=getopt(argc,argv,"hve:E:"))!=-1) {
     switch (opt) {
 
       case 'v':
@@ -231,6 +234,10 @@ int main(int argc, char *argv[]) {
       case 'e':
         output_ext.assign(optarg);
         break;
+
+      case 'E':
+	expression = optarg;
+	break;
 
       case 'h':
       default:
@@ -270,15 +277,19 @@ int main(int argc, char *argv[]) {
   ptplot= new PhaseVsTime;
 
   // Create window and subdivide
-  totplot_id = cpgopen("/xw");
+  totplot_id = cpgopen("/xs");
   cpgpap(0.0,1.5);
   cpgsubp(1,3);
 
   // Create Dynamic Spectrum Plot
   DynamicBaselineSpectrumPlot *dsplot = new DynamicBaselineSpectrumPlot;
-  dsplot->configure("var=1");
+  if (!expression.empty())
+    dsplot->configure("exp="+expression);
+  else
+    dsplot->configure("var=1");
+
   dsplot->set_reuse_baseline();
-  int dsplot_id = cpgopen("/xw");
+  int dsplot_id = cpgopen("/xs");
   if (dsplot_id<=0) {
     cerr << PROG ": PGPLOT xwindows device open failed, exiting." << endl;
     exit(1);
