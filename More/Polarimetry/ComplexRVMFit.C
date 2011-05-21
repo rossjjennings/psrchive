@@ -42,6 +42,12 @@ float Pulsar::ComplexRVMFit::get_threshold () const
   return threshold;
 }
 
+template<class T>
+bool notset (T& model)
+{
+  return model->get_infit(0) && model->get_param(0) == 0.0;
+}
+
 //! Set the data to which model will be fit
 void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 {
@@ -134,7 +140,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
   
   MEAL::RotatingVectorModel* RVM = get_model()->get_rvm();
 
-  if (RVM->reference_position_angle->get_param(0) == 0)
+  if (notset( RVM->reference_position_angle ))
   {
     cerr << "Pulsar::ComplexRVMFit::set_observation using"
       " psi0=" << peak_pa*180/M_PI << endl;
@@ -142,7 +148,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
     RVM->reference_position_angle->set_param (0, peak_pa);
   }
 
-  if (RVM->magnetic_meridian->get_param(0) == 0)
+  if (notset( RVM->magnetic_meridian ))
   {
     cerr << "Pulsar::ComplexRVMFit::set_observation using"
       " phi0=" << peak_phase*180/M_PI << endl;
@@ -150,8 +156,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
     RVM->magnetic_meridian->set_param (0, peak_phase);
   }
 
-  if (RVM->line_of_sight->get_param(0) == 0 &&
-      RVM->magnetic_axis->get_param(0) == 0)
+  if (notset( RVM->line_of_sight ) && notset( RVM->magnetic_axis ))
   {
     cerr << "Pulsar::ComplexRVMFit::set_observation using"
       " delpsi_delphi=" << delpsi_delphi << endl;
