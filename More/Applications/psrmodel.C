@@ -252,6 +252,19 @@ void psrmodel::setup ()
   }
 }
 
+static const double deg = 180/M_PI;
+
+template<class T>
+string state (T& model)
+{
+  ostringstream os;
+
+  os << ((model->get_infit(0))? "[fit]":"[fix]")
+     << " = " << deg*model->get_param(0);
+
+  return os.str();
+}
+
 void psrmodel::process (Pulsar::Archive* data)
 {
   if (verbose)
@@ -275,7 +288,6 @@ void psrmodel::process (Pulsar::Archive* data)
   rvm->set_observation (p);
 
   MEAL::RotatingVectorModel* RVM = rvm->get_model()->get_rvm();
-  double deg = 180/M_PI;
 
   if (nalpha && nzeta)
   {
@@ -286,10 +298,10 @@ void psrmodel::process (Pulsar::Archive* data)
   else
   {
     cerr << "psrmodel: solving with initial guess: \n"
-      "psi_0=" << deg*RVM->reference_position_angle->get_param(0) << " deg\n"
-      "zeta =" << deg*RVM->line_of_sight->get_param(0) << " deg\n"
-      "alpha=" << deg*RVM->magnetic_axis->get_param(0) << " deg\n"
-      "phi_0=" << deg*RVM->magnetic_meridian->get_param(0) << " deg"
+      "psi_0 " << state(RVM->reference_position_angle) << " deg\n"
+      "zeta  " << state(RVM->line_of_sight) << " deg\n"
+      "alpha " << state(RVM->magnetic_axis) << " deg\n"
+      "phi_0 " << state(RVM->magnetic_meridian) << " deg"
 	 << endl;
 
     rvm->solve();
