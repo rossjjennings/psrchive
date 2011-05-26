@@ -29,6 +29,8 @@
 
 #include "pairutil.h"
 
+#include <fstream>
+
 using namespace Pulsar;
 using namespace std;
 
@@ -52,6 +54,9 @@ public:
   //! Process the given archive
   void process (Pulsar::Archive*);
 
+  //! Output the post-fit residuals to file
+  void output_residuals ();
+
 protected:
 
   //! Add command line options
@@ -70,6 +75,11 @@ protected:
 
   // perform a rotating vector model fit
   bool rvm_fit;
+
+  // output the post-fit Stokes Q and U residuals
+  bool output_QU_residuals;
+  // output the post-fit position angle residuals
+  bool output_psi_residuals;
 
 #if HAVE_PGPLOT
 
@@ -110,6 +120,9 @@ psrmodel::psrmodel () :
 
   rvm = new ComplexRVMFit;
   rvm_fit = true;
+
+  output_QU_residuals = false;
+  output_psi_residuals = false;
 
   nalpha = nzeta = 0;
 }
@@ -207,6 +220,15 @@ void psrmodel::add_options (CommandLine::Menu& menu)
   arg = menu.add (rvm.get(), &ComplexRVMFit::set_range_zeta,
 		  range_deg_to_rad, "zeta", "deg0:deg1");
   arg->set_help ("range of zeta on y-axis of grid");
+
+
+  menu.add ("\n" "residual output options:");
+
+  arg = menu.add (output_QU_residuals, "resid");
+  arg->set_help ("output post-fit Stokes Q and U residuals");
+
+  arg = menu.add (output_psi_residuals, "psi-resid");
+  arg->set_help ("output post-fit position angle residuals");
 
 }
 
@@ -319,6 +341,8 @@ void psrmodel::process (Pulsar::Archive* data)
     "phi_0=" << deg*RVM->magnetic_meridian->get_value() << " deg"
 	     << endl;
 
+  output_residuals();
+
 #if HAVE_PGPLOT
   if (plot_result)
   {
@@ -335,4 +359,54 @@ void psrmodel::process (Pulsar::Archive* data)
   }
 #endif
 
+}
+
+
+void psrmodel::output_residuals ()
+{
+  if (output_QU_residuals)
+  {
+    string filename = "psrmodel_QU_residuals.txt";
+    ofstream out (filename.c_str());
+    if (!out)
+      throw Error (FailedSys, "psrmodel", "could not open " + filename);
+    else
+      cerr << "\n" "post-fit Stokes Q and U residuals in " << filename << endl;
+
+    vector<double> phases;
+    vector< complex< Estimate<double> > > residuals;
+
+    rvm->get_residuals (phases, residuals);
+
+    for (unsigned i=0; i < residuals.size(); i++)
+    {
+      out << phases[i] << " " 
+	  << residuals[i].real().get_value() << " "
+	  << residuals[i].real().get_error() << " "
+	  << residuals[i].imag().get_value() << " "
+	  << residuals[i].imag().get_error() << endl;
+    }
+  }
+
+  if (output_psi_residuals)
+  {
+    string filename = "psrmodel_psi_residuals.txt";
+    ofstream out (filename.c_str());
+    if (!out)
+      throw Error (FailedSys, "psrmodel", "could not open " + filename);
+    else
+      cerr << "\n" "post-fit position angle residuals in " << filename << endl;
+
+    vector<double> phases;
+    vector< Estimate<double> > residuals;
+
+    rvm->get_psi_residuals (phases, residuals);
+
+    for (unsigned i=0; i < residuals.size(); i++)
+    {
+      out << phases[i] << " "
+	   << residuals[i].get_value() << " "
+	   << residuals[i].get_error() << endl;
+    }
+  }
 }
