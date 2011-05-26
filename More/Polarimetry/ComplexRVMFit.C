@@ -391,28 +391,50 @@ void Pulsar::ComplexRVMFit::check_parameters ()
   RVM->reference_position_angle->set_param (0, PA0);
 }
 
-#if 0
-  double chisq2 = 0;
-  double deg=180/M_PI;
+void Pulsar::ComplexRVMFit::get_residuals 
+( vector<double>& phases,
+  vector< std::complex< Estimate<double> > >& residuals)
+{
+  MEAL::ComplexRVM* cRVM = get_model();
 
-  for (unsigned i=0; i < data_x.size(); i++)
+  unsigned ndat = data_x.size();
+
+  phases.resize (ndat);
+  residuals.resize (ndat);
+
+  for (unsigned i=0; i < ndat; i++)
   {
     data_x[i].apply();
     std::complex<double> model = cRVM->evaluate();
-    double gain = cRVM->get_linear(i).get_value();
-
-    cerr << i << " data=" << data_y[i] << " arg=" << arg(data_y[i])*deg/2
-	 << " model=" << model << " PA=" << RVM->evaluate()*deg 
-	 << " Q=" << gain*cos(2*RVM->evaluate())
-	 << " U=" << gain*sin(2*RVM->evaluate()) << endl;
-
-    data_y[i] -= model;
-
-    chisq2 += ::chisq(data_y[i].real()) + ::chisq(data_y[i].imag());
+    phases[i] = cRVM->get_phase(i);
+    residuals[i] = data_y[i];
+    residuals[i] -= model;
   }
+}
 
-  cerr << "CHISQ=" << chisq2 << endl;
-#endif
+void Pulsar::ComplexRVMFit::get_psi_residuals 
+( vector<double>& phases,
+  vector< Estimate<double> > & residuals)
+{
+  MEAL::ComplexRVM* cRVM = get_model();
+
+  unsigned ndat = data_x.size();
+
+  phases.resize (ndat);
+  residuals.resize (ndat);
+
+  for (unsigned i=0; i < ndat; i++)
+  {
+    data_x[i].apply();
+    std::complex<double> model = cRVM->evaluate();
+    phases[i] = cRVM->get_phase(i);
+
+    residuals[i] = 0.5 * atan2( data_y[i].imag(), data_y[i].real() );
+    residuals[i] -= 0.5 * atan2( model.imag(), model.real() );
+  }
+}
+
+
 
 void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
 {
