@@ -14,6 +14,8 @@
 #ifndef __TextInterface_h
 #define __TextInterface_h
 
+#include <stdlib.h>
+
 #include "ModifyRestore.h"
 #include "Alias.h"
 #include "Error.h"
