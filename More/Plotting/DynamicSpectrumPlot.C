@@ -11,8 +11,6 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
-#include <fstream>
-
 #include <float.h>
 #include <cpgplot.h>
 
@@ -36,6 +34,8 @@ Pulsar::DynamicSpectrumPlot::DynamicSpectrumPlot ()
   get_frame()->get_label_below()->set_all (PlotLabel::unset);
 
   pol = 0;
+
+  method = 0;
 
   srange.first = -1;
   srange.second = -1;
@@ -95,17 +95,6 @@ void Pulsar::DynamicSpectrumPlot::draw (const Archive* data)
   // Fill in data array
   float *plot_array = new float [nchan * nsub];
   get_plot_array(data, plot_array);
-
-  if ( !dump_filename.empty() )
-  {
-    std::ofstream output (dump_filename.c_str());
-    if (!output)
-      throw Error (InvalidParam, "Pulsar::DynamicSpectrumPlot::draw",
-		   "could not open " + dump_filename + " for writing");
-
-    output.write (reinterpret_cast<char*>(plot_array), 
-		  nchan * nsub * sizeof(float));
-  }
 
   // Determine data min/max
   float data_min = FLT_MAX;

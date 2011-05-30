@@ -143,7 +143,7 @@ int main (int argc, char** argv)
   // Hybrid transformation
   Reference::To<Pulsar::HybridCalibrator> hybrid;
 
-  string device = "/NULL";
+  string device = "?";
 
   // verbosity flag
   bool verbose = false;

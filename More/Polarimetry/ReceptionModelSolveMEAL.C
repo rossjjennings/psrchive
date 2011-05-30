@@ -44,6 +44,11 @@ float lmcoff (// input
     cerr << "Calibration::ReceptionModel::lmcoff input index=" 
 	 << obs.get_input_index() << endl;
 
+  /*
+    Calibration::CoherencyMeasurement has an index, such as the pulse
+    phase bin number or harmonic number (the x-axis-like abscissa).
+  */
+
   model.set_input_index (obs.get_input_index());
 
   Jones<double> result = model.evaluate (&gradient);
@@ -53,10 +58,35 @@ float lmcoff (// input
       "\n  data=" << obs.get_coherency() <<
       "\n  model=" << result << endl;
 
+  /*
+    Calibration::CoherencyMeasurement also contains the measured value
+    (the y-axis-like ordinate).
+  */
   Jones<double> delta_y = obs.get_coherency() - result;
 
-  /* Note that Calibration::CoherencyMeasurement implements the interface
-     of the WeightingScheme template class used by LevenbergMacquardt */
+#if 0
+  if (generalized template matching)
+  {
+    /*
+      compute the contribution to chisq, alpha, and beta corresponding
+      to a single index in the vector product that includes the GTM
+      covariance matrix.
+      
+      the contributions to alpha and beta will include the partial
+      derivatives of the model (gradient) as well as the partial
+      derivatives of the covariance matrix (all with respect to the
+      free parameters in the fit).
+    */
+
+    return chisq;
+  }
+#endif
+
+  /* 
+     Calibration::CoherencyMeasurement implements the interface
+     of the WeightingScheme template class used by LevenbergMacquardt.
+     The weight depends on the error (sigma-like).
+  */
   return MEAL::lmcoff1 (model, delta_y, obs, gradient, alpha, beta);
 }
 

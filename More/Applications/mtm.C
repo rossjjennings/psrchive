@@ -229,11 +229,17 @@ int main (int argc, char *argv[])
   
   if (tabular)
   {
+    // five columns by default
+    string columns = "lllll";
+    // boost analysis adds two more
+    if (boost_analysis)
+      columns += "ll";
+
     cout << 
       "\\begin{table*} \n"
       "\\caption{Relative Arrival Time Uncertainties} \n"
       "\\begin{center} \n"
-      "\\begin{tabular}{lllll} \n"
+      "\\begin{tabular}{" << columns << "} \n"
       "\\tableline \n"
       "\\tableline \n"
       "Pulsar &"
@@ -243,8 +249,8 @@ int main (int argc, char *argv[])
 
     if (boost_analysis)
       cout <<
-	" & \\dot\\varphi_\\beta "
-	" & \\tau_\\beta (ns)";
+	" & $\\dot\\varphi_\\beta$ "
+	" & $\\tau_\\beta$ (ns)";
 
     cout <<
       "\\\\ \n"

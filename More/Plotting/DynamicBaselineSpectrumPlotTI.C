@@ -19,6 +19,10 @@ Pulsar::DynamicBaselineSpectrumPlot::Interface::Interface(
       &DynamicBaselineSpectrumPlot::set_use_variance,
       "var", "Plot off-pulse variance rather than mean");
 
+  add( &DynamicBaselineSpectrumPlot::get_expression,
+       &DynamicBaselineSpectrumPlot::set_expression,
+       "exp", "Expression to evaluate" );
+
   import( DynamicSpectrumPlot::Interface() );
 }
 

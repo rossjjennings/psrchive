@@ -16,6 +16,9 @@
 #include <iostream>
 #include <math.h>
 
+#include <unistd.h>
+#include <sys/syscall.h>   /* For SYS_xxx definitions */
+
 using namespace FTransform;
 using namespace std;
 
@@ -37,6 +40,7 @@ public:
 protected:
 
   string library;
+  unsigned ncore;
   unsigned nthread;
   unsigned nloop;
   unsigned nfft;
@@ -52,8 +56,11 @@ class Speed::Thread : public Reference::Able
 
   friend class Speed;
 
+  unsigned ncore;
   unsigned nloop;
   unsigned nfft;
+  unsigned ithread, nthread;
+ 
   bool real_to_complex;
   unsigned streaming_cache;
 
@@ -70,6 +77,7 @@ Speed::Speed ()
   nloop = 0;
   nfft = 4;
   nthread = 1;
+  ncore = 1;
   real_to_complex = false;
   streaming_cache = 0;
 }
@@ -116,6 +124,9 @@ void Speed::parseOptions (int argc, char** argv)
   arg = menu.add (streaming_cache, 'c', "bytes");
   arg->set_help ("streaming cache size in bytes");
 
+  arg = menu.add (ncore, 'p', "ncore");
+  arg->set_help ("number of processing cores");
+
   menu.parse (argc, argv);
 }
 
@@ -156,11 +167,19 @@ void Speed::runTest ()
 
   cerr << "nloop=" << nloop << " library=" << get_library() << endl;
 
+  if (ncore < nthread)
+    ncore = nthread;
+
   for (unsigned ithread=0; ithread < nthread; ithread++)
   {
     thread[ithread] = new Thread;
+
+    thread[ithread]->ncore = ncore;
     thread[ithread]->nloop = nloop;
     thread[ithread]->nfft = nfft;
+    thread[ithread]->ithread = ithread;
+    thread[ithread]->nthread = nthread;
+
     thread[ithread]->real_to_complex = real_to_complex;
     thread[ithread]->streaming_cache = streaming_cache;
 
@@ -190,6 +209,24 @@ void Speed::runTest ()
 
 void Speed::Thread::run ()
 {
+#if HAVE_SCHED_SETAFFINITY
+  cpu_set_t set;
+  CPU_ZERO (&set);
+
+  unsigned core = (ithread * ncore) / nthread;
+
+  CPU_SET (core, &set);
+
+  pid_t tpid = syscall (SYS_gettid);
+
+  cerr << "Speed::Thread::run set_affinity thread=" << ithread
+         << " tpid=" << tpid << " core=" << core << endl;
+
+  if (sched_setaffinity(tpid, sizeof(cpu_set_t), &set) < 0)
+    throw Error (FailedSys, "dsp::LoadToFold1::set_affinity",
+                 "sched_setaffinity (%d)", core);
+#endif
+
   unsigned nfloat = nfft;
   if (!real_to_complex)
     nfloat *= 2;

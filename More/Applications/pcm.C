@@ -71,7 +71,7 @@ void usage ()
     "\n"
     "  -A archive set the output archive class name \n"
     "  -D name    enable diagnostic: name=report,guess,residual,result,total\n"
-    "  -m model   receiver model name [default:van04e18] \n"
+    "  -m model   receiver model name: van09, bri00e19 or van04e18 [default]\n"
     "  -l solver  solver: MEAL [default] of GSL \n"
     "  -I impure  load impurity transformation from file \n"
     "  -y         always trust the Pointing::feed_angle attribute \n"

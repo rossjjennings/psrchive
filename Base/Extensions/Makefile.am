@@ -48,8 +48,7 @@ nobase_include_HEADERS = \
         Pulsar/Telescopes.h \
         Pulsar/TimeSortedOrder.h \
         Pulsar/TwoBitStats.h \
-        Pulsar/WidebandCorrelator.h \
-	Pulsar/ExtensionRegister.h
+        Pulsar/WidebandCorrelator.h
 
 libExtensions_la_SOURCES = \
         Arecibo.C \
@@ -109,8 +108,7 @@ libExtensions_la_SOURCES = \
         TimeSortedOrder.C \
         TwoBitStats.C \
         WidebandCorrelator.C \
-        WidebandCorrelatorTI.C \
-	ExtensionRegister.C
+        WidebandCorrelatorTI.C
 
 #############################################################################
 #

@@ -50,8 +50,15 @@ void Pulsar::BoostShiftAnalysis::set_profile (const PolnProfile* profile)
 	 << max_harmonic << endl;
 }
 
+
+/*! Returns the partial derivative of the m^th total intensity
+  cross-spectral harmonic with respect to the k^th boost vector
+  component, evaluated at \f$ \beta = 0 \f$.
+
+  See Equation (24) of 1 November 2010 companion to van Straten (2006). */
+
 std::complex<double> 
-Pulsar::BoostShiftAnalysis::delZ_delb (unsigned k, unsigned m) const
+Pulsar::BoostShiftAnalysis::delS_delb (unsigned m, unsigned k) const
 {
   float* S0 = fourier->get_Profile(0)->get_amps();
   float* Sk = fourier->get_Profile(k)->get_amps();
@@ -63,10 +70,16 @@ Pulsar::BoostShiftAnalysis::delZ_delb (unsigned k, unsigned m) const
   return Skm * conj(S0m);
 }
 
+
+/*! Returns the squared modulus of the m^th total intensity
+  cross-spectral harmonic. */
+
 double Pulsar::BoostShiftAnalysis::S0sq (unsigned m) const
 {
   float* S0 = fourier->get_Profile(0)->get_amps();
+
   std::complex<double> S0m (S0[m*2], S0[m*2+1]);
+
   return norm (S0m);
 }
 
@@ -77,11 +90,11 @@ double Pulsar::BoostShiftAnalysis::delvarphi_delb (unsigned k) const
 
   for (unsigned m=1; m<max_harmonic; m++)
   {
-    std::complex<double> delZm_delbk = delZ_delb (k, m);
-    double S0m_sq = S0sq (m);
+    std::complex<double> delZm_delbk = delS_delb (m, k);
+    numerator += delZm_delbk.imag() * m;
 
-    numerator += S0m_sq * delZm_delbk.imag() * m;
-    denominator += S0m_sq * m * S0m_sq * m;
+    double S0m_sq = S0sq (m);
+    denominator += m * S0m_sq * m;
   }
 
   return numerator / (2*M_PI*denominator);

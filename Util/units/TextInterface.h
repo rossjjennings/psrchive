@@ -14,6 +14,8 @@
 #ifndef __TextInterface_h
 #define __TextInterface_h
 
+#include <stdlib.h>
+
 #include "ModifyRestore.h"
 #include "Alias.h"
 #include "Error.h"
@@ -906,7 +908,9 @@ namespace TextInterface {
     virtual std::string process (const std::string& command);
     
     //! Return the list of available values
-    virtual std::string help (bool show_default_values = false);
+    virtual std::string help (bool show_default_values = false,
+			      bool show_header = false,
+			      const char* indent = 0);
 
     //! Get the name of this interface
     virtual std::string get_interface_name () const { return ""; }
@@ -1325,11 +1329,17 @@ void TextInterface::ElementGetSet<C,T,G,S,Z>::set_value (C* ptr,
 }
 
 template<typename T, typename C>
-T* TextInterface::factory ( C& ptrs, std::string name_parse)
+T* TextInterface::factory (C& ptrs, std::string name_parse)
 {
   std::string name = stringtok (name_parse, ":");
 
   Reference::To<T> result;
+
+  if (name == "help")
+    std::cerr <<
+      "\n\n"
+      "Options:"
+      "\n\n";
 
   for (typename C::iterator ptr=ptrs.begin(); ptr != ptrs.end(); ptr++)
   {
@@ -1339,6 +1349,17 @@ T* TextInterface::factory ( C& ptrs, std::string name_parse)
       result = (*ptr)->clone ();
       break;
     }
+    else if (name == "help")
+    {
+      std::cerr << interface->get_interface_name() << std::endl
+		<< interface->help (true, false, "   ") << std::endl;
+    }
+  }
+
+  if (name == "help")
+  {
+    std::cerr << std::endl;
+    exit (0);
   }
 
   if (!result)

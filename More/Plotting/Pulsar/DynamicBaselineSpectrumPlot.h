@@ -42,12 +42,18 @@ namespace Pulsar {
     bool get_reuse_baseline() const { return reuse_baseline; }
     void set_reuse_baseline(bool flag=true ) { reuse_baseline = flag; }
 
+    //! Set the ProfileStats expression to evaluate
+    void set_expression (const std::string& str) { expression = str; }
+    std::string get_expression () const { return expression; }
+
   protected:
 
     bool use_variance;
     bool reuse_baseline;
     Reference::To<PhaseWeight> base;
 
+    // expression evaluated by ProfileStats
+    std::string expression;
   };
 
 }

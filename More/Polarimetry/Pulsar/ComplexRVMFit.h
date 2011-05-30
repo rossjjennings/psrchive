@@ -77,6 +77,14 @@ namespace Pulsar
     float get_chisq () const { return chisq; }
     unsigned get_nfree () const { return nfree; }
 
+    // get the post-fit residuals of Stokes Q and U
+    void get_residuals (std::vector<double>& phases,
+			std::vector< std::complex< Estimate<double> > >& res);
+
+    // get the post-fit residuals of position angle
+    void get_psi_residuals (std::vector<double>& phases,
+			    std::vector< Estimate<double> >& res);
+
   protected:
 
     void check_parameters ();
