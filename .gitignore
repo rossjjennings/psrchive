@@ -22,6 +22,7 @@ Management/psrchive_config
 Management/psrchive_info
 Management/psrchive_install.h
 Management/release.csh
+More/Applications/calavg
 More/Applications/example
 More/Applications/fluxcal
 More/Applications/mtm
