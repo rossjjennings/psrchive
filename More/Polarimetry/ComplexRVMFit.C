@@ -431,6 +431,11 @@ void Pulsar::ComplexRVMFit::get_psi_residuals
 
     residuals[i] = 0.5 * atan2( data_y[i].imag(), data_y[i].real() );
     residuals[i] -= 0.5 * atan2( model.imag(), model.real() );
+
+    if (residuals[i].val > M_PI/2)
+      residuals[i].val -= M_PI;
+    else if (residuals[i].val < -M_PI/2)
+      residuals[i].val += M_PI;
   }
 }
 
