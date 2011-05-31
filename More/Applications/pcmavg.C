@@ -232,10 +232,15 @@ void pcmavg::perform_averaging(Pulsar::Archive* archive)
     average_ext->get_transformation(ichan)->set_nfree(nfree);
 
     for (unsigned iparam = 0; iparam < nparam; ++iparam) {
-      const Estimate<double, double> value =
+
+      MeanRadian<double, double> average_value =
+        average_ext->get_transformation(ichan)->get_Estimate(iparam);
+
+      MeanRadian<double, double> value =
         ext->get_transformation(ichan)->get_Estimate(iparam);
 
-      average_ext->get_transformation(ichan)->set_Estimate(iparam, value);
+      average_value += value;
+      average_ext->get_transformation(ichan)->set_Estimate(iparam, average_value);
     }
   }
 }
