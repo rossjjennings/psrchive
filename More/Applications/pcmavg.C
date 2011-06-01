@@ -10,9 +10,10 @@
 #include "Error.h"
 #include "Pulsar/Application.h"
 #include "Pulsar/Archive.h"
-#include "Pulsar/Receiver.h"
+#include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/ProcHistory.h"
+#include "Pulsar/Receiver.h"
 #include "Pulsar/StandardOptions.h"
 #include "Pulsar/UnloadOptions.h"
 
@@ -55,7 +56,9 @@ class pcmavg : public Pulsar::Application
 
     bool has_same_attributes(Pulsar::Archive* archive) const;
 
-    void perform_averaging(Pulsar::Archive* archive);
+    void average_pce(Pulsar::Archive* archive);
+
+    void average_cse(Pulsar::Archive* archive);
 
     void setup(Pulsar::Archive* archive);
 
@@ -205,7 +208,7 @@ bool pcmavg::has_same_attributes(Pulsar::Archive* archive) const
     get_nchan(average) == get_nchan(archive);
 }
 
-void pcmavg::perform_averaging(Pulsar::Archive* archive)
+void pcmavg::average_pce(Pulsar::Archive* archive)
 {
   Reference::To<Pulsar::PolnCalibratorExtension> average_ext =
     average->get<Pulsar::PolnCalibratorExtension>();
@@ -236,6 +239,36 @@ void pcmavg::perform_averaging(Pulsar::Archive* archive)
       average_value += value;
       average_ext->get_transformation(ichan)->set_Estimate(iparam, average_value);
     }
+  }
+}
+
+void pcmavg::average_cse(Pulsar::Archive* archive)
+{
+  Reference::To<Pulsar::CalibratorStokes> avg_cs =
+    average->get<Pulsar::CalibratorStokes>();
+
+  Reference::To<Pulsar::CalibratorStokes> cs =
+    archive->get<Pulsar::CalibratorStokes>();
+
+  const unsigned nchan = avg_cs->get_nchan();
+  for (unsigned i = 0; i < nchan; ++i) {
+    // Get Stokes of ith channel of the average.
+    Stokes<MeanEstimate<float> > avg_stokes = avg_cs->get_stokes(i);
+
+    // The Vector of the Stokes values - average.
+    Vector<3, MeanEstimate<float> > avg_stokes_vec = avg_stokes.get_vector();
+
+    // Get Stokes of ith channel of the current.
+    Stokes<MeanEstimate<float> > stokes = cs->get_stokes(i);
+
+    // The Vector of the Stokes values - current.
+    Vector<3, MeanEstimate<float> > stokes_vec = stokes.get_vector();
+
+    // Weighted average of the average and current stokes parameters
+    avg_stokes_vec += stokes_vec;
+    avg_stokes.set_vector(avg_stokes_vec);
+    
+    avg_cs->set_stokes(i, avg_stokes);
   }
 }
 
@@ -285,7 +318,8 @@ void pcmavg::process(Pulsar::Archive* archive)
 
   // Compare parameters if not first file.
   if (has_same_attributes(archive)) {
-    perform_averaging(archive);
+    average_pce(archive);
+    average_cse(archive);
   } else {
     throw Error(InvalidState, "pcmavg::process",
         "file attributes (%s) differ from first pcm file",
