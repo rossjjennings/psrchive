@@ -111,12 +111,6 @@ class pcmavg : public Pulsar::Application
 
     //! Number of frequency chnanels of the first file.
     unsigned nchan;
-
-    vector<vector<MeanRadian<double, double> > > total_data;
-
-    vector<double> total_chisq;
-
-    vector<unsigned> total_nfree;
 };
 
 string pcmavg::get_receiver(Pulsar::Archive* archive) const
@@ -265,18 +259,6 @@ void pcmavg::setup(Pulsar::Archive* archive)
 
   Reference::To<Pulsar::PolnCalibratorExtension> ext =
     archive->get<Pulsar::PolnCalibratorExtension>();
-
-  const unsigned nparam = ext->get_nparam();
-  const unsigned nchan  = ext->get_nchan();
-
-  // Resize vectors
-  total_chisq.resize(nchan);
-  total_nfree.resize(nchan);
-
-  total_data.resize(get_nchan(average));
-  for (unsigned i = 0; i < nchan; ++i) {
-    total_data[i].resize(nparam);
-  }
 }
 
 void pcmavg::process(Pulsar::Archive* archive)
