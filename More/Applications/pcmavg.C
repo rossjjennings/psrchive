@@ -318,8 +318,8 @@ void pcmavg::process(Pulsar::Archive* archive)
 
   // Compare parameters if not first file.
   if (has_same_attributes(archive)) {
-    average_pce(archive);
     average_cse(archive);
+    average_pce(archive);
   } else {
     throw Error(InvalidState, "pcmavg::process",
         "file attributes (%s) differ from first pcm file",
