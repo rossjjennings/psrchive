@@ -364,7 +364,10 @@ void calavg::finalize()
     ext->set_weight(ichan, weight); // CHECKED
   }
 
-  unload_name = unload->get_output_filename(average);
+  if (unload_name.empty()) {
+    unload_name = unload->get_output_filename(average);
+  }
+
   cerr << "calavg: Unloading archive: '" << unload_name << "'" << endl;
 
   set_history_command();
