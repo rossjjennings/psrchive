@@ -335,7 +335,12 @@ void pcmavg::process(Pulsar::Archive* archive)
 
 void pcmavg::finalize()
 {
-  unload_name = unload->get_output_filename(average);
+  // If no user-specified unload name has been given, use filename of the first
+  // pcm file and append as the extension.
+  if (unload_name.empty()) {
+    unload_name = unload->get_output_filename(average);
+  }
+
   cerr << "pcmavg: Unloading archive: '" << unload_name << "'" << endl;
 
   set_history_command();
