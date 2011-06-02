@@ -50,9 +50,9 @@ class pcmavg : public Pulsar::Application
 
   private:
 
-    //! Calculate the channel weight from error.
-    //      weight = 1/error^2
-    template<typename T> T get_weight_from_error(const T error);
+    //! Enter command into the HISTORY table. Required because
+    //  Pulsar::Application sets the command after average is cloned???
+    void set_history_command();
 
     bool has_same_attributes(Pulsar::Archive* archive) const;
 
@@ -193,12 +193,6 @@ string pcmavg::get_average_receiver() const
   return average_receiver;
 }
 
-template<typename T>
-T pcmavg::get_weight_from_error(const T error)
-{
-  return 1.0/pow(error, 2);
-}
-
 bool pcmavg::has_same_attributes(Pulsar::Archive* archive) const
 {
   return
@@ -267,7 +261,7 @@ void pcmavg::average_cse(Pulsar::Archive* archive)
     // Weighted average of the average and current stokes parameters
     avg_stokes_vec += stokes_vec;
     avg_stokes.set_vector(avg_stokes_vec);
-    
+
     avg_cs->set_stokes(i, avg_stokes);
   }
 }
@@ -292,6 +286,18 @@ void pcmavg::setup(Pulsar::Archive* archive)
 
   Reference::To<Pulsar::PolnCalibratorExtension> ext =
     archive->get<Pulsar::PolnCalibratorExtension>();
+}
+
+//! Enter command into the HISTORY table. This required because
+//  Pulsar::Application sets the command after average is cloned???
+void pcmavg::set_history_command()
+{
+  Reference::To<Pulsar::ProcHistory> ext =
+    average->get<Pulsar::ProcHistory>();
+
+  if (ext) {
+    ext->set_command_str(command);
+  }
 }
 
 void pcmavg::process(Pulsar::Archive* archive)
@@ -329,36 +335,10 @@ void pcmavg::process(Pulsar::Archive* archive)
 
 void pcmavg::finalize()
 {
-  // Write:
-  // * DATA column -- yes
-  // * COVAR column -- TODO -- NO (covariance matrix not properly loaded)
-  // * calculate DAT_WTS values (from DATA column error - use routine) -- should be yes, check
-  // * CHISQ total -- yes
-  // * NFREE total -- yes 
-
-  Reference::To<Pulsar::PolnCalibratorExtension> ext =
-    average->get<Pulsar::PolnCalibratorExtension>();
-
-  const unsigned nparam = ext->get_nparam();
-  const unsigned nchan  = ext->get_nchan();
-
-  // For the DAT_WTS values, sum DATA values for each channel (across each param).
-  for (unsigned ichan = 0; ichan < nchan; ++ichan) {
-    MeanEstimate<double, double> total_chan_data;
-    for (unsigned iparam = 0; iparam < nparam; ++iparam) {
-      total_chan_data += ext->get_transformation(ichan)->get_Estimate(iparam);
-    }
-
-    const double error = total_chan_data.get_Estimate().get_error(); // UNCHECKED
-    const double weight = get_weight_from_error(error); // UNCHECKED
-
-    ext->set_weight(ichan, weight);
-  }
-
   unload_name = unload->get_output_filename(average);
   cerr << "pcmavg: Unloading archive: '" << unload_name << "'" << endl;
 
-  //set_history_command();
+  set_history_command();
   average->unload(unload_name);
 }
 
