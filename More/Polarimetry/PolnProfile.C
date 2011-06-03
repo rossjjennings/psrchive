@@ -812,6 +812,10 @@ void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
   unsigned nbin = get_nbin();
   L.resize (nbin);
 
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfile::get_linear"
+      " cutoff=" << threshold*sigma << endl;
+
   for (unsigned ibin=0; ibin<nbin; ibin++)
   {
     if (!threshold || linear.get_amps()[ibin] > threshold*sigma)
