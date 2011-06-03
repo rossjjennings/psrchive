@@ -57,10 +57,15 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 
   data = _data;
 
-  if (model->get_nstate())
+  if (model && model->get_nstate())
     model = 0;
 
   std::vector< std::complex< Estimate<double> > > linear;
+
+  if (verbose)
+    cerr << "Pulsar::ComplexRVMFit::set_observation"
+      " threshold=" << threshold << endl;
+
   data->get_linear (linear, threshold);
 
   const unsigned nbin = data->get_nbin();
