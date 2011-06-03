@@ -96,7 +96,8 @@ string Pulsar::ZapInterpreter::median (const string& args) try
   Reference::To<TextInterface::Parser> interface = zap_median->get_interface();
 
   string retval;
-  for (unsigned icmd=0; icmd < arguments.size(); icmd++) {
+  for (unsigned icmd=0; icmd < arguments.size(); icmd++)
+  {
     if (icmd)
       retval += " ";
     retval += interface->process (arguments[icmd]);
