@@ -133,9 +133,6 @@ void Tempo2::Generator::set_segment_length (long double days)
 //! Return a new, copy constructed instance of self
 Pulsar::Predictor* Tempo2::Generator::generate () const
 {
-  if (Predictor::verbose)
-    debugFlag = 1;
-
   Tempo2::Predictor* pred = new Tempo2::Predictor;
 
   if (!parameters->psr)
@@ -146,15 +143,6 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
   psr.fitMode = 0;
 
   work_around_tempo2_tzr_bug (psr);
-
-
-
-
-
-
-
-
-
 
   ChebyModelSet* cms = &pred->predictor.modelset.cheby;
   pred->predictor.kind = Cheby;
