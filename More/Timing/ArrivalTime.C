@@ -7,6 +7,7 @@
 
 #include "Pulsar/ArrivalTime.h"
 #include "Pulsar/ProfileStandardShift.h"
+#include "Pulsar/PolnProfileShiftEstimator.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -40,7 +41,7 @@ Pulsar::ArrivalTime::~ArrivalTime ()
 //! Prepare the data for use
 void Pulsar::ArrivalTime::preprocess (Archive* archive)
 {
-  archive->pscrunch ();
+  shift_estimator->preprocess (archive);
 }
 
 //! Set the observation from which the arrival times will be derived
@@ -60,9 +61,6 @@ void Pulsar::ArrivalTime::set_standard (const Archive* archive)
 void Pulsar::ArrivalTime::set_shift_estimator (ShiftEstimator* shift)
 {
   shift_estimator = shift;
-
-  profile_shift = dynamic_cast<ProfileShiftEstimator*> (shift);
-
   standard_update();
 }
 
@@ -138,10 +136,6 @@ void Pulsar::ArrivalTime::get_toas (std::vector<Tempo::toa>& toas)
 void Pulsar::ArrivalTime::get_toas (unsigned isub,
 				    std::vector<Tempo::toa>& toas)
 {
-  if (!profile_shift)
-    throw Error (InvalidState, "Pulsar::ArrivalTime::get_toas",
-		 "shift estimator is not a profile shift estimator");
-
   ProfileStandardShift* shift = 0;
 
   if (standard && standard->get_nchan() > 1)
@@ -165,19 +159,46 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub,
     
     try
     {
-      profile_shift->set_observation (profile);
-      Estimate<double> shift = profile_shift->get_shift ();
+      setup (subint, ichan);
+      Estimate<double> shift = shift_estimator->get_shift ();
       toas.push_back( get_toa (shift, subint, ichan) );
     }
     catch (Error& error)
     {
-      if (Archive::verbose > 3)
+      if (Archive::verbose > 2)
 	cerr << "Pulsar::Integration::toas error" << error << endl;
+
       else if (Archive::verbose)
 	cerr << error.get_message() << endl;
+
       continue;
     }
   }
+}
+
+
+void Pulsar::ArrivalTime::setup (const Integration* subint, unsigned ichan)
+{
+  Reference::To<ProfileShiftEstimator> profile_shift;
+  profile_shift = dynamic_cast<ProfileShiftEstimator*>(shift_estimator.get());
+
+  if (profile_shift)
+  {
+    profile_shift->set_observation( subint->get_Profile (0, ichan) );
+    return;
+  }
+
+  Reference::To<PolnProfileShiftEstimator> poln_shift;
+  poln_shift = dynamic_cast<PolnProfileShiftEstimator*>(shift_estimator.get());
+
+  if (poln_shift)
+  {
+    poln_shift->set_observation( subint->new_PolnProfile (ichan) );
+    return;
+  }
+
+  throw Error (InvalidState, "Pulsar::ArrivalTime::setup",
+	       "shift estimator is not understood");
 }
 
 void Pulsar::ArrivalTime::dress_toas (unsigned isub,
