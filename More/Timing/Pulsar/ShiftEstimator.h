@@ -21,6 +21,8 @@
 
 namespace Pulsar {
 
+  class Archive;
+
   //! Algorithms that estimate pulse phase shifts
   class ShiftEstimator : public Algorithm
   {
@@ -38,11 +40,23 @@ namespace Pulsar {
     //! Return a copy constructed instance of self
     virtual ShiftEstimator* clone () const = 0;
 
+    //! Prepare the data for use
+    virtual void preprocess (Archive*);
+
     //! Construct a new ShiftEstimator from a string
     static ShiftEstimator* factory (const std::string& name_and_parse);
 
   };
 
+  //! Convenience interface used to add ShiftEstimator children to factory
+  template<class T>
+  class EmptyInterface : public TextInterface::To<T>
+  {
+    std::string name;
+  public:
+    EmptyInterface (const std::string& _name) { name = _name; }
+    std::string get_interface_name () const { return name; }
+  };
 }
 
 

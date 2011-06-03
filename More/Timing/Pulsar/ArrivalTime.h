@@ -117,9 +117,8 @@ namespace Pulsar {
 
   private:
 
-    Reference::To<ProfileShiftEstimator> profile_shift;
-
     void standard_update ();
+    void setup (const Integration* subint, unsigned ichan);
 
   };
 
