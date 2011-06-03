@@ -303,9 +303,6 @@ void psrmodel::process (Pulsar::Archive* data)
   data->convert_state(Signal::Stokes);
   data->remove_baseline();
 
-  if (data->has_model())
-    data->centre();
-
   Reference::To<PolnProfile> p = data->get_Integration(0)->new_PolnProfile(0);
   rvmfit->set_observation (p);
 
