@@ -164,10 +164,11 @@ void usage ()
     "                   PGS = Fourier phase gradient \n"
     "                   GIS = Gaussian interpolation \n"
     "                   PIS = Parabolic interpolation \n"
-    "                   ZPF = Zero pad interpolation \n"
+    "                   ZPS = Zero pad interpolation \n"
     "                   SIS = Sinc interpolation of cross-corration function\n"
     "                   FDM = Fourier domain with Markov chain Monte Carlo \n"
     "                   COF = Centre of Flux \n"
+    "                   RVM = Rotating Vector Model magnetic meridian \n"
     "\n"
     "  -m filename      Load a component model as output by paas \n"
     "\n"
@@ -283,31 +284,7 @@ int main (int argc, char** argv) try
 
     case 'A':
     {
-      ShiftEstimator* shift = 0;
-
-      if (strcasecmp (optarg, "PGS") == 0)
-        shift = new PhaseGradShift;
-
-      else if (strcasecmp (optarg, "GIS") == 0)
-        shift = new GaussianShift;
-
-      else if (strcasecmp (optarg, "PIS") == 0)
-        shift = new ParIntShift;
-
-      else if (strcasecmp (optarg, "ZPS") == 0)
-        shift = new ZeroPadShift;
-
-      else if (strcasecmp (optarg, "SIS") == 0)
-        shift = new SincInterpShift;
-
-      else if (strcasecmp (optarg, "FDM") == 0)
-        shift = new FourierDomainFit;
-
-      else if (strcasecmp (optarg, "COF") == 0)
-        shift = new FluxCentroid;
-
-      arrival->set_shift_estimator( shift );
-
+      arrival->set_shift_estimator( ShiftEstimator::factory( optarg ) );
       break;
     }
 
@@ -585,7 +562,14 @@ int main (int argc, char** argv) try
 
     toas.resize (0);
 
+    if (verbose)
+      cerr << "pat: calling ArrivalTime::set_observation" << endl;
+
     arrival->set_observation (arch);
+
+    if (verbose)
+      cerr << "pat: calling ArrivalTime::get_toas" << endl;
+
     arrival->get_toas (toas);
 
     if (verbose)
