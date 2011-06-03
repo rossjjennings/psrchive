@@ -32,7 +32,9 @@ Estimate<double> RotatingVectorModelShift::get_shift () const try
   rvmfit->solve();
 
   MEAL::RotatingVectorModel* RVM = rvmfit->get_model()->get_rvm();
-  return RVM->magnetic_meridian->get_Estimate (0);
+
+  // divide by 2pi because ArrivalTime expect answer in dimensionless turns
+  return RVM->magnetic_meridian->get_Estimate (0) * 0.5 / M_PI;
 }
  catch (Error& error)
    {
@@ -47,7 +49,8 @@ void RotatingVectorModelShift::preprocess (Archive* archive) try
   xform.set_measure( archive->get_rotation_measure() );
   xform.execute( archive );
 
-  archive->convert_state(Signal::Stokes);
+  archive->convert_state (Signal::Stokes);
+  archive->remove_baseline ();
 }
  catch (Error& error)
    {
