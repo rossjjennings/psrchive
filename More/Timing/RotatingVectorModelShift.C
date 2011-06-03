@@ -11,7 +11,7 @@
 
 #include "MEAL/RotatingVectorModel.h"
 #include "MEAL/ComplexRVM.h"
-#include "Meal/ScalarParameter.h"
+#include "MEAL/ScalarParameter.h"
 
 using namespace Pulsar;
 using namespace std;
