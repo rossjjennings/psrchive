@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/ShiftEstimator.h"
+#include "Pulsar/Archive.h"
 
 #include "Pulsar/FourierDomainFit.h"
 #include "Pulsar/GaussianShift.h"
@@ -13,6 +14,8 @@
 #include "Pulsar/PhaseGradShift.h"
 #include "Pulsar/SincInterpShift.h"
 #include "Pulsar/ZeroPadShift.h"
+#include "Pulsar/FluxCentroid.h"
+#include "Pulsar/RotatingVectorModelShift.h"
 
 bool Pulsar::ShiftEstimator::verbose = false;
 
@@ -28,8 +31,16 @@ Pulsar::ShiftEstimator::factory (const std::string& name_parse)
   instances.push_back( new PhaseGradShift );
   instances.push_back( new SincInterpShift );
   instances.push_back( new ZeroPadShift );
+  instances.push_back( new FluxCentroid );
+  instances.push_back( new RotatingVectorModelShift );
 
   // instances.push_back( new  );
 
   return TextInterface::factory<ShiftEstimator> (instances, name_parse);
+}
+
+/*! Most estimators work with total intensity */
+void Pulsar::ShiftEstimator::preprocess (Archive* archive)
+{
+  archive->pscrunch ();
 }
