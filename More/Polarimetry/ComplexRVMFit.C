@@ -56,6 +56,8 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 		 "data are not Stokes parameters");
 
   data = _data;
+  data_x.clear();
+  data_y.clear();
 
   if (model && model->get_nstate())
     model = 0;
@@ -137,6 +139,8 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
     }
   }
 
+  assert( count == model->get_nstate() );
+
   if (verbose)
     cerr << "Pulsar::ComplexRVMFit::set_observation"
       " peak phase=" << peak_phase*180/M_PI << " deg;"
@@ -188,8 +192,6 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
   }
 
   state.signal.connect (model, &MEAL::ComplexRVM::set_state);
-  
-  assert( count == model->get_nstate() );
 
   cerr <<"Pulsar::ComplexRVMFit::set_observation "<< count <<" bins"<< endl;
 }
