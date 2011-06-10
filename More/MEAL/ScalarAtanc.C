@@ -19,7 +19,10 @@ double atanc (double x, double* derivative)
   {
     double result = atan (z) / z;
     if (derivative)
+    {
       *derivative = 1.0 / (z*(1+z*z)) - result / z;
+      *derivative *= M_PI * 0.5;  // dz/dx
+    }
 
     return result;
   }
@@ -54,6 +57,9 @@ double atanc (double x, double* derivative)
     N += 2;
     sign *= -1.0;
   }
+
+  if (derivative)
+    *derivative *= M_PI * 0.5;  // dz/dx
 
   return 1 + result;
 }

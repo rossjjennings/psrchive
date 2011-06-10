@@ -22,7 +22,7 @@ int main (int argc, char** argv)
 
     double z = x * M_PI * 0.5;
     double y2 = atan (z) / z;
-    double d2 = 1.0 / (z*(1+z*z)) - y2 / z;
+    double d2 = 0.5*M_PI * (1.0 / (z*(1+z*z)) - y2 / z);
 
     cerr << " y1=" << y1 << " d1=" << d1
 	 << " y2=" << y2 << " d2=" << d2 << endl;
