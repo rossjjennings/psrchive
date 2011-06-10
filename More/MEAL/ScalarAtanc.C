@@ -11,18 +11,22 @@
 using namespace std;
 
 // compute atan(z)/z, where z = pi*x/2, using the Mclaurin series of atan(z)
-double atanc (double x, double* derivative)
+double atanc (double x, double* derivative, double* datancc)
 {
   double z = x * M_PI * 0.5;
 
   if (fabs(z) > 0.5)
   {
     double result = atan (z) / z;
+
     if (derivative)
     {
       *derivative = 1.0 / (z*(1+z*z)) - result / z;
       *derivative *= M_PI * 0.5;  // dz/dx
     }
+
+    if (datancc)
+      *datancc = 1.0 / (z*z*(1+z*z)) - result / (z*z);
 
     return result;
   }
@@ -33,6 +37,9 @@ double atanc (double x, double* derivative)
 
   if (derivative)
     *derivative = 0.0;
+
+  if (datancc)
+    *datancc = -2.0/3.0;
 
   double powz_n = z;
 
@@ -52,10 +59,14 @@ double atanc (double x, double* derivative)
 
     result += sign * powz_n / (N+1);
 
-    powz_n *= z;
-
     N += 2;
     sign *= -1.0;
+
+    if (datancc)
+      *datancc += sign * powz_n * N / (N+1);
+
+    powz_n *= z;
+
   }
 
   if (derivative)
