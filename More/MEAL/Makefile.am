@@ -21,6 +21,7 @@ nobase_include_HEADERS = \
         MEAL/Complex2Constant.h \
 	MEAL/Complex.h \
 	MEAL/ComplexCartesian.h \
+	MEAL/ComplexCorrelation.h \
 	MEAL/ComplexRVM.h \
         MEAL/Complex2.h \
         MEAL/Complex2Math.h \
@@ -135,6 +136,7 @@ libMEAL_la_SOURCES = \
         Coherency.C \
 	Complex.C \
 	ComplexCartesian.C \
+	ComplexCorrelation.C \
 	ComplexRVM.C \
         Complex2.C \
         Complex2Constant.C \
