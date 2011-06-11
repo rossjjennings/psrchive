@@ -5,13 +5,13 @@
  *
  ***************************************************************************/
 
-#include "MEAL/ComplexCartesian.h"
+#include "MEAL/ComplexCorrelation.h"
 #include "MEAL/Parameters.h"
 #include "MEAL/ScalarAtanc.h"
 
 using namespace std;
 
-MEAL::ComplexCartesian::ComplexCartesian ()
+MEAL::ComplexCorrelation::ComplexCorrelation ()
 {
   Parameters* params = new Parameters (this, 2);
   params->set_name (0, "real");
@@ -19,7 +19,7 @@ MEAL::ComplexCartesian::ComplexCartesian ()
 }
 
 //! Calculate the Jones matrix and its gradient
-void MEAL::ComplexCartesian::calculate (Result& result,
+void MEAL::ComplexCorrelation::calculate (Result& result,
 					vector<Result>* grad)
 {
   std::complex<double> z ( get_param(0), get_param(1) );
@@ -31,7 +31,7 @@ void MEAL::ComplexCartesian::calculate (Result& result,
   result = z * atanc_z;
 
   if (verbose)
-    cerr << "MEAL::ComplexCartesian::calculate z=" << result << endl;
+    cerr << "MEAL::ComplexCorrelation::calculate z=" << result << endl;
 
   if (grad)
   {
