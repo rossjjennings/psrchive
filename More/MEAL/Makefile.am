@@ -108,6 +108,8 @@ nobase_include_HEADERS = \
 	MEAL/ScalarVector.h \
         MEAL/ScaledVonMisesDeriv.h \
         MEAL/ScaledVonMises.h \
+	MEAL/Spinor.h \
+	MEAL/SpinorJones.h \
 	MEAL/Steps.h \
 	MEAL/StokesCovariance.h \
 	MEAL/StokesError.h \
@@ -208,6 +210,8 @@ libMEAL_la_SOURCES = \
 	ScalarVector.C \
         ScaledVonMises.C \
         ScaledVonMisesDeriv.C \
+	Spinor.C \
+	SpinorJones.C \
 	Steps.C \
 	StokesCovariance.C \
 	StokesError.C \
@@ -250,11 +254,8 @@ test_StokesCovariance_SOURCES	= test_StokesCovariance.C
 test_Function_load_SOURCES	= test_Function_load.C
 test_Vectorize_SOURCES		= test_Vectorize.C
 test_UnitTangent_SOURCES	= test_UnitTangent.C
-<<<<<<< HEAD
-=======
 test_ScalarAtanc_SOURCES	= test_ScalarAtanc.C
 test_ComplexCorrelation_SOURCES = test_ComplexCorrelation.C
->>>>>>> ComplexCorrelation tested
 
 ##############################################################################
 #
