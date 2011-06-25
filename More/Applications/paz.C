@@ -602,7 +602,13 @@ void paz::process (Pulsar::Archive* arch)
   {
     vector<float> mask (nchan, 1.0);
     for (unsigned i = 0; i < chans_to_zero.size (); i++)
+    {
+      if (chans_to_zero[i] >= nchan || chans_to_zero[i] < 0)
+        throw Error (InvalidRange, "paz::process",
+            "channel %d is out of range (nchan=%d)",
+           chans_to_zero[i], nchan); 
       mask[chans_to_zero[i]] = 0.0;
+    }
 
     for (unsigned i = 0; i < freqs_to_zero.size (); i++)
     {
