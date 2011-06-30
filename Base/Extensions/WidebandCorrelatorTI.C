@@ -25,5 +25,6 @@ WidebandCorrelator::Interface::Interface( WidebandCorrelator *s_instance )
        "nrcvr", "Number of receiver channels" );
 
   add( &WidebandCorrelator::get_tcycle,
+       &WidebandCorrelator::set_tcycle,
        "tcycle", "Correlator cycle time" );
 }
