@@ -32,7 +32,8 @@ namespace Pulsar {
     Estimate<double> get_shift () const;
 
     //! Return a text interface that can be used to configure this instance
-    TextInterface::Parser* get_interface () { return 0; }
+    TextInterface::Parser* get_interface ()
+    { return new EmptyInterface<FluxCentroid> ("COF"); }
 
     //! Return a copy constructed instance of self
     FluxCentroid* clone () const { return new FluxCentroid(*this); }

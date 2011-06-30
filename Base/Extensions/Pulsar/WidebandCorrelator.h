@@ -66,6 +66,7 @@ namespace Pulsar {
 
     //! Get the tcycle
     double get_tcycle() const { return tcycle; }
+    void set_tcycle(const double _tcycle) { tcycle = _tcycle; }
     
     //! Get the number of receiver channels
     int get_nrcvr() const { return nrcvr; }

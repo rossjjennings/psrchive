@@ -812,6 +812,12 @@ void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
   unsigned nbin = get_nbin();
   L.resize (nbin);
 
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfile::get_linear nbin=" << nbin 
+	 << " cutoff=" << threshold*sigma << endl;
+
+  unsigned kept = 0;
+
   for (unsigned ibin=0; ibin<nbin; ibin++)
   {
     if (!threshold || linear.get_amps()[ibin] > threshold*sigma)
@@ -820,11 +826,15 @@ void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
       Estimate<double> U (u[ibin], var_u);
 
       L[ibin] = complex< Estimate<double> > (Q, U);
+
+      kept ++;
     }
     else
       L[ibin] = 0.0;
   }
 
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfile::get_linear kept=" << kept << endl;
 }
 
 void Pulsar::PolnProfile::get_orientation (vector< Estimate<double> >& posang,

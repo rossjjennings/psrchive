@@ -12,7 +12,9 @@ Pulsar::ObsExtension::Interface::Interface (ObsExtension *s_instance)
   if (s_instance)
     set_instance (s_instance);
 
-  add( &ObsExtension::get_observer, "observer", "Observer name(s)" );
+  add( &ObsExtension::get_observer,
+       &ObsExtension::set_observer,
+      "observer", "Observer name(s)" );
 
   add( &ObsExtension::get_project_ID,
        &ObsExtension::set_project_ID,
