@@ -55,6 +55,7 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
 
   add( &Statistics::get_2bit_dist,
        "d2bit", "2-bit distortion" );
+
+  add( &Statistics::get_weighted_frequency,
+       "wtfreq", "Weighted frequency" );
 }
-
-
