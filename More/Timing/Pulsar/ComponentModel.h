@@ -57,6 +57,9 @@ namespace Pulsar
     void load (const char *fname);
     void unload (const char *fname) const;
 
+    //! All heights will be treated as log(height)
+    void set_log_height (bool flag=true);
+
     // Manipulation
     /*! \param centre the centre of the component in turns of pulse phase
      *  \param concentration the concentration of the component equal 1 / variance in radians
@@ -71,7 +74,11 @@ namespace Pulsar
 
     unsigned get_ncomponents() const;
 
+    //! Roughtly align the phases and heights of the components to match the Profile
     void align (const Profile *profile);
+
+    //! Fix the relative phases of the components
+    void fix_relative_phases ();
 
     // Fitting
 
@@ -107,6 +114,10 @@ namespace Pulsar
 
     bool fit_derivative;
     float threshold;
+
+    bool log_height;
+    float auto_clean_height_ratio;
+    float auto_clean_concentration_ratio;
 
     void build () const;
     void check (const char* method, unsigned icomponent) const;
