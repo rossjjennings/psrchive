@@ -56,6 +56,9 @@ namespace Pulsar {
     //! Set the algorithm used to estimate the phase shift
     void set_shift_estimator (ShiftEstimator*);
 
+    //! Get the algorithm used to estimate the phase shift
+    ShiftEstimator* get_shift_estimator () const;
+
     //! Set the format of the output time-of-arrival estimates
     void set_format (Tempo::toa::Format);
 

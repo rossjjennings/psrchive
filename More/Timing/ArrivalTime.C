@@ -64,6 +64,11 @@ void Pulsar::ArrivalTime::set_shift_estimator (ShiftEstimator* shift)
   standard_update();
 }
 
+Pulsar::ShiftEstimator* Pulsar::ArrivalTime::get_shift_estimator () const
+{
+  return shift_estimator;
+}
+
 void Pulsar::ArrivalTime::standard_update()
 {
   if (!standard)
