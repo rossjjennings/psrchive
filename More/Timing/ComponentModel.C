@@ -34,6 +34,10 @@ using namespace std;
 void Pulsar::ComponentModel::init ()
 {
   fit_derivative = false;
+  log_height = false;
+  auto_clean_height_ratio = 0.0;
+  auto_clean_concentration_ratio = 0.0;
+
   threshold = 1e-3;
 }
 
@@ -48,17 +52,31 @@ Pulsar::ComponentModel::ComponentModel (const std::string& filename)
   load (filename.c_str());
 }
 
+void Pulsar::ComponentModel::fix_relative_phases ()
+{
+  if (phase)
+    return;
+
+  phase = new ScalarParameter (0.0);
+  phase->set_value_name ("phase");
+}
+
+void Pulsar::ComponentModel::set_log_height (bool flag)
+{
+    if (components.size() != 0)
+	throw Error (InvalidState, "Pulsar::ComponentModel::set_log_height",
+		     "cannot change interpretation of height after components have been added");
+
+    log_height = flag;
+}
+
 //! Return the shift estimate
 Estimate<double> Pulsar::ComponentModel::get_shift () const try
 {
   if (verbose)
     cerr << "Pulsar::ComponentModel::get_shift" << endl;
 
-  if (!phase)
-  {
-    phase = new ScalarParameter (0.0);
-    phase->set_value_name ("phase");
-  }
+  const_cast<ComponentModel*>(this)->fix_relative_phases ();
 
   if (backup.size() == components.size())
   {
@@ -118,6 +136,11 @@ void Pulsar::ComponentModel::load (const char *fname)
 	  allwhite = false;
       if (allwhite) // empty line
 	comments[iline] = line;
+      else if (line == string("log height\n"))
+      {
+	  cerr << "Pulsar::ComponentModel::load logarithm of height" << endl;
+	  set_log_height (true);
+      }
       else
       {
 	if (line[len-1]=='\n')
@@ -133,7 +156,7 @@ void Pulsar::ComponentModel::load (const char *fname)
 	  throw Error (InvalidState, "Pulsar::ComponentModel::load", 
 		       "Could not parse file");
 
-	components.push_back( new ScaledVonMises );
+	components.push_back( new ScaledVonMises (log_height) );
 	components[components.size()-1]->set_centre(centre * 2*M_PI);
 	components[components.size()-1]->set_concentration(concentration);
 	components[components.size()-1]->set_height(height);
@@ -152,6 +175,9 @@ void Pulsar::ComponentModel::unload (const char *fname) const
     throw Error (FailedSys, "Pulsar::ComponentModel::unload",
 		 "fopen (%s)", fname);
   
+  if (log_height)
+      fprintf (f, "log height\n");
+
   unsigned iline, icomp = 0;
   bool done=false;
   map<unsigned, string>::const_iterator comment_it;
@@ -181,7 +207,7 @@ void Pulsar::ComponentModel::add_component (double centre,
 					    double height,
 					    const char *name)
 {
-  components.push_back( new ScaledVonMises );
+  components.push_back( new ScaledVonMises (log_height) );
   components[components.size()-1]->set_centre(centre * 2*M_PI);
   components[components.size()-1]->set_concentration(concentration);
   components[components.size()-1]->set_height(height);
@@ -225,22 +251,22 @@ void Pulsar::ComponentModel::align (const Profile *profile)
   Estimate<double> shift = profile->shift (modelprof);
 
   if (verbose)
-    cerr << "Pulsar::ComponentModel::align shift=" << shift << endl;
+      cerr << "Pulsar::ComponentModel::align shift=" << shift << endl;
 
-  if (phase)
-  {
-    float normalization = profile->sum() / modelprof.sum();
+  float normalization = profile->sum() / modelprof.sum();
     
-    if (verbose)
+  if (verbose)
       cerr << "Pulsar::ComponentModel::align normalization="
 	   << normalization << endl;
 
-    for (unsigned icomp=0; icomp < components.size(); icomp++)
-    {
+  for (unsigned icomp=0; icomp < components.size(); icomp++)
+  {
       Estimate<double> height = components[icomp]->get_height();
       components[icomp]->set_height ( height * normalization );
-    }
+  }
 
+  if (phase)
+  {
     phase->set_value (phase->get_value() + shift.get_value() * 2*M_PI);
     return;
   }
@@ -344,12 +370,12 @@ void Pulsar::ComponentModel::build () const
     for (unsigned icomp=0; icomp < components.size(); icomp++)
     {
       if (sum->get_param_name(icomp*3) != "centre")
-	throw Error (InvalidState, "Pulsar::ComponentModel::fit",
+	throw Error (InvalidState, "Pulsar::ComponentModel::build",
 		     "iparam=%u name='%s'", icomp*3,
 		     sum->get_param_name(icomp*3).c_str());
 
       if (sum->get_param_name(icomp*3+1) != "concentration")
-	throw Error (InvalidState, "Pulsar::ComponentModel::fit",
+	throw Error (InvalidState, "Pulsar::ComponentModel::build",
 		     "iparam=%u name='%s'", icomp*3,
 		     sum->get_param_name(icomp*3).c_str());
 
@@ -368,7 +394,7 @@ void Pulsar::ComponentModel::build () const
 }
 
 
-void Pulsar::ComponentModel::fit (const Profile *profile)
+void Pulsar::ComponentModel::fit (const Profile *profile) try
 {
   build ();
 
@@ -461,9 +487,79 @@ void Pulsar::ComponentModel::fit (const Profile *profile)
     float nchisq = fit.iter (xval, yval, *model);
 
     if (verbose)
+    {
       cerr << "     " << result << " = " << nchisq << endl;
-    
-    if (nchisq < chisq)
+
+      for (unsigned i=0; i < components.size(); i++)
+	  cerr << "\t" "height[" << i << "]=" << components[i]->get_height() << endl;
+    }
+
+    bool component_removed = false;
+
+    if (auto_clean_height_ratio != 0.0)
+    {
+	cerr << "auto clean height ratio = " << auto_clean_height_ratio << endl;
+
+	float max_height = 0.0;
+	for (unsigned i=0; i < components.size(); i++)
+	    if (components[i]->get_height() > max_height)
+		max_height = components[i]->get_height().val;
+	
+	unsigned i=0; 
+	while (i < components.size())
+	{
+	    float height_ratio = components[i]->get_height().val / max_height;
+
+	    if (height_ratio < auto_clean_height_ratio)
+	    {
+		cerr << "removing component " << i 
+		     << " height=" << components[i]->get_height();
+
+		components.erase( components.begin() + i );
+		component_removed = true;
+	    }
+	    else
+		i++;
+	}
+    }
+
+    if (auto_clean_concentration_ratio != 0.0)
+    {
+	cerr << "auto clean factor = " << auto_clean_concentration_ratio << endl;
+
+	float min_concentration = components[0]->get_concentration().val;
+	for (unsigned i=1; i < components.size(); i++)
+	    if (components[i]->get_concentration() < min_concentration)
+		min_concentration = components[i]->get_concentration().val;
+	
+	unsigned i=0; 
+	while (i < components.size())
+	{
+	    float concentration_ratio = components[i]->get_concentration().val / min_concentration;
+
+	    if (concentration_ratio > auto_clean_concentration_ratio)
+	    {
+		cerr << "removing component " << i 
+		     << " concentration=" << components[i]->get_concentration();
+
+		components.erase( components.begin() + i );
+		component_removed = true;
+	    }
+	    else
+		i++;
+	}
+    }
+
+    if (component_removed)
+    {
+	cerr << "FIT INIT" << endl;
+	model = 0;
+	build ();
+	chisq = fit.init (xval, yval, *model);
+	cerr << "FIT INIT OK" << endl;
+    }
+
+    else if (nchisq < chisq)
     {
       float diffchisq = chisq - nchisq;
       chisq = nchisq;
@@ -527,6 +623,18 @@ void Pulsar::ComponentModel::fit (const Profile *profile)
       components[icomp]->set_height(derivative[icomp]->get_height());
     }
   }
+}
+catch (Error& error)
+{
+    cerr << "Pulsar::ComponentModel::fit exception caught: " << error << endl;
+
+    for (unsigned icomp=0; icomp < components.size(); icomp++)
+	cerr << "\t" << icomp
+	     << " centre=" << components[icomp]->get_centre() 
+	     << " concentration=" << components[icomp]->get_concentration ()
+	     << " height=" << components[icomp]->get_height() << endl;
+
+    throw error += "Pulsar::ComponentModel::fit";
 }
 
 void Pulsar::ComponentModel::evaluate (float *vals,
