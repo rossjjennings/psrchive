@@ -1,12 +1,13 @@
 #! /bin/csh
 
-if ( "$1" == "" ) then
-  echo 'USAGE: upload.csh <USER>'
-  echo 'where <USER> is your sourceforge user name'
+set server = `git config --get remote.origin.url`
+
+if ( $server =~ git://* ) then
+  echo 'ERROR: this command can be run only by a developer'
   exit -1
 endif
 
-set SFUSER = $1
+set SFUSER = `echo $server | awk -F// '{print $2}' | awk -F@ '{print $1}'`
 set SFPATH = ${SFUSER},psrchive@web.sourceforge.net:htdocs/classes
 
 set SFHTML = "Util MEAL psrchive"
