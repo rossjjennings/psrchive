@@ -58,6 +58,7 @@ void usage ()
     "  -i            Interactively select components \n"
     "  -C            Centre profile using ephemeris\n"
     "  -p            Rotate profile to place peak at bin 0\n"
+    "  -P            Fix the relative phase of the components as in pat \n"
     "  -R phase      Rotate profile by specified number of turns\n"
     "  -z ph1,ph2    Zoom in on pulse phase region \n"
     "  -a            After loading a model, rotate it to align to profile\n"
@@ -101,7 +102,7 @@ int main (int argc, char** argv) try
 
   float xmin=0.0, xmax=1.0;
 
-  const char* args = "hb:r:w:c:fF:it:d:Dlj:Ws:CpR:az:";
+  const char* args = "hb:r:w:c:fF:it:d:Dlj:Ws:CpR:az:PV";
   int c;
 
   while ((c = getopt(argc, argv, args)) != -1)
@@ -169,6 +170,10 @@ int main (int argc, char** argv) try
       rotate_peak = true;
       break;
 
+    case 'P':
+      model.fix_relative_phases();
+      break;
+
     case 'R':
       rotate_amount = atof(optarg);
       break;
@@ -180,6 +185,10 @@ int main (int argc, char** argv) try
     case 'j':
       details_filename = optarg;
       break;
+
+	case 'V':
+	    ComponentModel::verbose = true;
+	    break;
 
     case 'z':
     {
@@ -230,7 +239,10 @@ int main (int argc, char** argv) try
     
     // align to profile first if asked
     if (align)
+    {
+      cerr << "paas: roughly aligning model to data" << endl;
       model.align(archive->get_Integration(0)->get_Profile(0,0));
+    }
   }
 
   // add any new components specified
