@@ -907,6 +907,9 @@ namespace TextInterface {
     //! Process a command
     virtual std::string process (const std::string& command);
     
+    //! Process a vector of commands
+    virtual std::string process (const std::vector<std::string>& commands);
+
     //! Return the list of available values
     virtual std::string help (bool show_default_values = false,
 			      bool show_header = false,

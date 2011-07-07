@@ -63,6 +63,15 @@ string TextInterface::Parser::process (const string& command)
   return "";
 }
 
+string TextInterface::Parser::process (const vector<string>& commands)
+{
+  string result;
+  for (unsigned i=0; i < commands.size(); i++)
+    result += process (commands[i]) + "\n";
+
+  return result;
+}
+
 string TextInterface::Parser::help (bool default_value,
 				    bool print_header,
 				    const char* indent)
