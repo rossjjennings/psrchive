@@ -28,10 +28,8 @@
 #include <Pulsar/FITSSUBHdrExtension.h>
 #include <Pulsar/CalInfoExtension.h>
 #include <Pulsar/TapeInfo.h>
-
 #include <Pulsar/AuxColdPlasma.h>
 
-//#include <Pulsar/WeightedFrequency.h>
 
 
 
@@ -310,28 +308,6 @@ string get_pol_c( Reference::To< Archive > archive )
 string get_freq( Reference::To< Archive > archive )
 {
   return tostring( archive->get_centre_frequency(), 3, ios::fixed );
-}
-
-string get_wt_freq( Reference::To< Archive > archive )
-{
-  //XXX: will be implemented very soon - just fixing the build.
-
-  /*const unsigned nsub  = archive->get_nsubint();
-  const unsigned nchan = archive->get_nchan();
-  double weighted_frequency_sum = 0.0;
-
-  // Iterate over every channel and sub-integration to calculate the centre
-  // frequency weighted value.
-  for (unsigned ichan = 0; ichan < nchan; ++ichan) {
-    weighted_frequency_sum += archive->weighted_frequency(ichan,0,nsub);
-  }
-
-  const double weighted_frequency =
-    weighted_frequency_sum / static_cast<double>(nchan);
-
-  return tostring( weighted_frequency, 3, ios::fixed );*/
-
-  return "";
 }
 
 string get_profile_centre_frequency( Reference::To< Archive > archive )
@@ -1689,7 +1665,6 @@ void PrintExtdHlp( void )
     "dmc                             Dispersion corrected (boolean) \n"
     "dm_aux_c                        Auxiliary dispersion corrected (boolean) \n"
     "dm_model                        Dispersion model name \n"
-    "wt_freq                         Centre frequency weighted value \n"
     "freq_phs                        Pulse phase frequency \n"
     "freq_pa                         Position angle frequency \n"
     "length                          The full duration of the observation (s) \n"
@@ -1943,7 +1918,6 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "freq" ) return get_freq( archive );
     else if( command == "freq_pa" ) return get_freq_pa( archive );
     else if( command == "freq_phs" ) return get_freq_phs( archive );
-    else if( command == "wt_freq" ) return get_wt_freq( archive );
     else if( command == "bw" ) return get_bw( archive );
     else if( command == "intmjd" ) return get_intmjd( archive );
     else if( command == "fracmjd" ) return get_fracmjd( archive );
