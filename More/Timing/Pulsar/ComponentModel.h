@@ -48,7 +48,7 @@ namespace Pulsar
     Estimate<double> get_shift () const;
 
     //! Return a text interface that can be used to configure this instance
-    TextInterface::Parser* get_interface () { return 0; }
+    TextInterface::Parser* get_interface ();
 
     //! Return a copy constructed instance of self
     ComponentModel* clone () const { return new ComponentModel(*this); }
@@ -79,6 +79,14 @@ namespace Pulsar
 
     //! Fix the relative phases of the components
     void fix_relative_phases ();
+
+    //! Remove components with small heights
+    void set_zap_height_ratio (float r) { zap_height_ratio = r; }
+    float get_zap_height_ratio () const { return zap_height_ratio; }
+
+    //! Remove components with large concentrations (narrow widths)
+    void set_zap_concentration_ratio (float r) { zap_concentration_ratio = r; }
+    float get_zap_concentration_ratio () const { return zap_concentration_ratio; }
 
     // Fitting
 
@@ -116,8 +124,8 @@ namespace Pulsar
     float threshold;
 
     bool log_height;
-    float auto_clean_height_ratio;
-    float auto_clean_concentration_ratio;
+    float zap_height_ratio;
+    float zap_concentration_ratio;
 
     void build () const;
     void check (const char* method, unsigned icomponent) const;

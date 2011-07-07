@@ -35,8 +35,8 @@ void Pulsar::ComponentModel::init ()
 {
   fit_derivative = false;
   log_height = false;
-  auto_clean_height_ratio = 0.0;
-  auto_clean_concentration_ratio = 0.0;
+  zap_height_ratio = 0.0;
+  zap_concentration_ratio = 0.0;
 
   threshold = 1e-3;
 }
@@ -496,60 +496,60 @@ void Pulsar::ComponentModel::fit (const Profile *profile) try
 
     bool component_removed = false;
 
-    if (auto_clean_height_ratio != 0.0)
+    if (zap_height_ratio != 0.0)
     {
-	cerr << "auto clean height ratio = " << auto_clean_height_ratio << endl;
-
-	float max_height = 0.0;
-	for (unsigned i=0; i < components.size(); i++)
-	    if (components[i]->get_height() > max_height)
-		max_height = components[i]->get_height().val;
+      cerr << "auto clean height ratio = " << zap_height_ratio << endl;
+      
+      float max_height = 0.0;
+      for (unsigned i=0; i < components.size(); i++)
+	if (components[i]->get_height() > max_height)
+	  max_height = components[i]->get_height().val;
+      
+      unsigned i=0; 
+      while (i < components.size())
+      {
+	float height_ratio = components[i]->get_height().val / max_height;
 	
-	unsigned i=0; 
-	while (i < components.size())
-	{
-	    float height_ratio = components[i]->get_height().val / max_height;
-
-	    if (height_ratio < auto_clean_height_ratio)
-	    {
-		cerr << "removing component " << i 
-		     << " height=" << components[i]->get_height();
-
-		components.erase( components.begin() + i );
-		component_removed = true;
-	    }
-	    else
-		i++;
+	if (height_ratio < zap_height_ratio)
+        {
+	  cerr << "removing component " << i 
+	       << " height=" << components[i]->get_height();
+	  
+	  components.erase( components.begin() + i );
+	  component_removed = true;
 	}
+	else
+	  i++;
+      }
     }
-
-    if (auto_clean_concentration_ratio != 0.0)
+    
+    if (zap_concentration_ratio != 0.0)
     {
-	cerr << "auto clean factor = " << auto_clean_concentration_ratio << endl;
-
-	float min_concentration = components[0]->get_concentration().val;
-	for (unsigned i=1; i < components.size(); i++)
-	    if (components[i]->get_concentration() < min_concentration)
-		min_concentration = components[i]->get_concentration().val;
+      cerr << "auto clean factor = " << zap_concentration_ratio << endl;
+      
+      float min_concentration = components[0]->get_concentration().val;
+      for (unsigned i=1; i < components.size(); i++)
+	if (components[i]->get_concentration() < min_concentration)
+	  min_concentration = components[i]->get_concentration().val;
+      
+      unsigned i=0; 
+      while (i < components.size())
+      {
+	float ratio = components[i]->get_concentration().val / min_concentration;
 	
-	unsigned i=0; 
-	while (i < components.size())
-	{
-	    float concentration_ratio = components[i]->get_concentration().val / min_concentration;
-
-	    if (concentration_ratio > auto_clean_concentration_ratio)
-	    {
-		cerr << "removing component " << i 
-		     << " concentration=" << components[i]->get_concentration();
-
-		components.erase( components.begin() + i );
-		component_removed = true;
-	    }
-	    else
-		i++;
-	}
+	if (ratio > zap_concentration_ratio)
+	  {
+	    cerr << "removing component " << i 
+		 << " concentration=" << components[i]->get_concentration();
+	    
+	    components.erase( components.begin() + i );
+	    component_removed = true;
+	  }
+	else
+	  i++;
+      }
     }
-
+    
     if (component_removed)
     {
 	cerr << "FIT INIT" << endl;
@@ -670,4 +670,32 @@ void Pulsar::ComponentModel::clear()
   component_names.clear();
   comments.clear();
   model = 0;
+}
+
+using Pulsar::ComponentModel;
+
+// Text interface to the ComponentModel class
+class Interface : public TextInterface::To<ComponentModel>
+{
+public:
+  Interface (ComponentModel* = 0);
+};
+
+Interface::Interface (ComponentModel* instance)
+{
+  if (instance)
+    set_instance (instance);
+
+  add( &ComponentModel::get_zap_height_ratio,
+       &ComponentModel::set_zap_height_ratio,
+       "zhr", "Zap height ratio - remove small components");
+
+  add( &ComponentModel::get_zap_concentration_ratio,
+       &ComponentModel::set_zap_concentration_ratio,
+       "zcr", "Zap concentration ratio - remove narrow components");
+}
+
+TextInterface::Parser* ComponentModel::get_interface ()
+{
+  return new Interface(this);
 }
