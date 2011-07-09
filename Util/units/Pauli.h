@@ -26,6 +26,8 @@ namespace Pauli {
   //! The basis through which Stokes parameters are converted to Jones matrices
   Basis<double>& basis();
 
+  //! Get the specified basis matrix
+  Jones<double> matrix (unsigned i);
 }
 
 

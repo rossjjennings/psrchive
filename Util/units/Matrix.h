@@ -16,6 +16,7 @@
 
 #include "Vector.h"
 #include "Error.h"
+#include "complex_promote.h"
 
 //! Matrix is a column vector of row vectors
 template <unsigned Rows, unsigned Columns, typename T> 
@@ -240,14 +241,31 @@ const Matrix< Columns, Rows,T> herm (const Matrix<Rows, Columns,T>& m)
 
 //! Vector direct (outer) product 
 template<unsigned Rows, unsigned Columns, typename T, typename U>
-const Matrix<Rows,Columns,T> outer (const Vector<Rows,T>& a,
-				    const Vector<Columns,U>& b)
+const Matrix<Rows,Columns,typename PromoteTraits<T,U>::promote_type> 
+outer (const Vector<Rows,T>& a, const Vector<Columns,U>& b)
 {
-  Matrix<Rows, Columns, T> result;
+  Matrix<Rows, Columns, typename PromoteTraits<T,U>::promote_type> result;
 
   for (unsigned i=0; i<Rows; i++)
     for (unsigned j=0; j<Columns; j++)
       result[i][j] = a[i] * b[j];
+
+  return result;
+}
+
+//! Matrix direct (Kronecker) product 
+template<unsigned Ar, unsigned Ac, typename At,
+	 unsigned Br, unsigned Bc, typename Bt>
+const Matrix<Ar*Br,Ac*Bc,typename PromoteTraits<At,Bt>::promote_type> 
+direct (const Matrix<Ar,Ac,At>& a, const Matrix<Br,Bc,Bt>& b)
+{
+  Matrix<Ar*Br,Ac*Bc, typename PromoteTraits<At,Bt>::promote_type> result;
+
+  for (unsigned ar=0; ar<Ar; ar++)
+    for (unsigned ac=0; ac<Ac; ac++)
+      for (unsigned br=0; br<Br; br++)
+	for (unsigned bc=0; bc<Bc; bc++)
+	  result[ar*Br+br][ac*Bc+bc] = a[ar][ac] * b[br][bc];
 
   return result;
 }

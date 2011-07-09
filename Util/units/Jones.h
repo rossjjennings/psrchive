@@ -64,6 +64,12 @@ public:
       j10=std::complex<T>(s.j10.real(), s.j10.imag()); 
       j11=std::complex<T>(s.j11.real(), s.j11.imag()); return *this; }
 
+  typedef Matrix< 2, 2, std::complex<T> > equiv;
+
+  //! Cast to Matrix
+  operator equiv () const
+  { equiv M; M[0][0]=j00; M[0][1]=j01; M[1][0]=j10; M[1][1]=j11; return M; }
+
   //! Add another Jones<T> instance to this one
   Jones& operator += (const Jones& s)
     { j00+=s.j00; j01+=s.j01; j10+=s.j10; j11+=s.j11; return *this; }
