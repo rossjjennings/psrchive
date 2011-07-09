@@ -47,7 +47,7 @@
 #include "strutil.h"
 
 #if HAVE_PGPLOT
-#include "Pulsar/SystemCalibratorPlotter.h"
+#include "Pulsar/ReceptionCalibratorPlotter.h"
 #include "Pulsar/StokesSpherical.h"
 #include <cpgplot.h>
 #endif
@@ -131,6 +131,9 @@ SystemCalibrator* measurement_equation_modeling (const char* binname,
 
 // Construct a calibrator model for MTM mode
 SystemCalibrator* matrix_template_matching (const char* stdname);
+
+// Plot the various components of the model
+void plot_state (SystemCalibrator* model, const std::string& state);
 
 Reference::To<Calibration::StandardPrepare> prepare;
 
@@ -481,6 +484,7 @@ static bool plot_guess = false;
 static bool plot_residual = false;
 static bool plot_total = false;
 static bool plot_result = false;
+static bool publication_plots = false;
 
 void enable_diagnostic (const string& name)
 {
@@ -546,7 +550,6 @@ int actual_main (int argc, char *argv[]) try
 
   bool unload_each_calibrated = true;
   bool must_have_cals = true;
-  bool publication_plots = false;
 
   int gotc = 0;
 
@@ -1062,32 +1065,7 @@ int actual_main (int argc, char *argv[]) try
   try {
 
     if (plot_guess)
-    {
-      cpgbeg (0, "guess_response.ps/CPS", 0, 0);
-      cpgask(1);
-      cpgsvp (.1,.9, .1,.9);
-      
-      cerr << "pcm: plotting initial guess of instrumental response" << endl;
-      plotter.plot (model);
-      
-      cpgend();
-      
-      cpgbeg (0, "guess_cal.ps/CPS", 0, 0);
-      cpgsvp (0.1,.9, 0.1,.9);
-      
-      cerr << "pcm: plotting initial guess of CAL" << endl;
-      plotter.plotcal();
-      
-      cpgend();
-      
-      cpgbeg (0, "guess_psr.ps/CPS", 0, 0);
-      cpgsvp (0.1,.9, 0.1,.9);
-      
-      cerr << "pcm: plotting guess pulsar states" << endl;
-      plot_pulsar (plotter, *model);
-      
-      cpgend ();
-    }
+      plot_state (model, "guess");
     
     if (plot_total && total)
     {
@@ -1140,29 +1118,7 @@ int actual_main (int argc, char *argv[]) try
 
   if (plot_result)
   {
-    cpgbeg (0, "result_response.ps/CPS", 0, 0);
-    cpgsvp (0.1,.9, 0.1,.9);
-
-    cerr << "pcm: plotting best-fit receiver" << endl;
-    plotter.plot (model);
-
-    cpgend ();
-
-    cpgbeg (0, "result_cal.ps/CPS", 0, 0);
-    cpgsvp (0.1,.9, 0.1,.9);
-
-    cerr << "pcm: plotting best-fit CAL" << endl;
-    plotter.plotcal();
-
-    cpgend ();
-
-    cpgbeg (0, "result_psr.ps/CPS", 0, 0);
-    cpgsvp (0.1,.9, 0.1,.9);
-
-    cerr << "pcm: plotting model pulsar states" << endl;
-    plot_pulsar (plotter, *model);
-      
-    cpgend ();
+    plot_state (model, "result");
 
     if (get_time_variation())
     {
@@ -1411,3 +1367,82 @@ SystemCalibrator* matrix_template_matching (const char* stdname)
   return model;
 }
 
+#if HAVE_PGPLOT
+
+void plot_state (SystemCalibrator* model, const std::string& state) try
+{
+  using namespace Pulsar;
+
+  SystemCalibratorPlotter plotter (model);
+  plotter.use_colour = !publication_plots;
+
+  //
+  // if the SystemCalibrator is a ReceptionCalibrator (MEM mode)
+  // and one or more flux calibrators has been included in the fit,
+  // then plot the flux calibrator information as well
+  //
+  Reference::To<ReceptionCalibratorPlotter> rplotter = 0;
+  ReceptionCalibrator* rmodel = dynamic_cast<ReceptionCalibrator*> (model);
+  if (rmodel && rmodel->has_fluxcal())
+  {
+    rplotter = new ReceptionCalibratorPlotter (rmodel);
+    rplotter->use_colour = !publication_plots;
+  }
+
+  //
+  //
+  //
+
+  cpgbeg (0, (state + "_response.ps/CPS").c_str(), 0, 0);
+  cpgsvp (.1,.9, .1,.9);
+      
+  cerr << "pcm: plotting " + state + " of instrumental response" << endl;
+  plotter.plot (model);
+      
+  cpgend();
+
+  //
+  //
+  //
+
+  cpgbeg (0, (state + "_cal.ps/CPS").c_str(), 0, 0);
+  cpgsvp (0.1,.9, 0.1,.9);
+      
+  cerr << "pcm: plotting " + state + " of CAL" << endl;
+  plotter.plot_cal();
+      
+  cpgend();
+ 
+  //
+  //
+  //
+
+  if (rplotter)
+  {
+    cpgbeg (0, (state + "_fluxcal.ps/CPS").c_str(), 0, 0);
+    cpgsvp (0.1,.9, 0.1,.9);
+      
+    cerr << "pcm: plotting " + state + " of flux calibrator" << endl;
+    rplotter->plot_fluxcal();
+      
+    cpgend();
+  }
+ 
+  //
+  //
+  //
+
+  cpgbeg (0, (state + "_psr.ps/CPS").c_str(), 0, 0);
+  cpgsvp (0.1,.9, 0.1,.9);
+      
+  cerr << "pcm: plotting " + state + " pulsar states" << endl;
+  plot_pulsar (plotter, *model);
+      
+  cpgend ();
+}
+ catch (Error& error)
+  {
+    cerr << "pcm: error while producing plots ignored" << endl;
+  }
+
+#endif // HAVE_PGPLOT
