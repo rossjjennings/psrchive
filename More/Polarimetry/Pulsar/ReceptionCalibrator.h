@@ -94,6 +94,9 @@ namespace Pulsar
     //! Add the ReferenceCalibrator observation to the set of constraints
     void add_calibrator (const ReferenceCalibrator* polncal);
     
+    //! Return true if any flux calibrator observations are available
+    bool has_fluxcal () const;
+
     //! Set the first guess to a previous solution
     void set_previous (const Archive* data);
 

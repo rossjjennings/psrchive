@@ -416,6 +416,10 @@ void Pulsar::ReceptionCalibrator::prepare_calibrator_estimate
   }
 }
 
+bool Pulsar::ReceptionCalibrator::has_fluxcal () const
+{
+  return flux_calibrator_estimate.source.size();
+}
 
 void Pulsar::ReceptionCalibrator::submit_calibrator_data 
 (
