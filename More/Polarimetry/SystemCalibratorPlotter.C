@@ -124,15 +124,15 @@ void Pulsar::SystemCalibratorPlotter::plot_constraints (unsigned ichan,
 
 
 //! PGPLOT the calibrator model parameters as a function of frequency
-void Pulsar::SystemCalibratorPlotter::plotcal ()
+void Pulsar::SystemCalibratorPlotter::plot_cal ()
 {
   if (!calibrator)
     throw Error (InvalidState,
-		 "Pulsar::SystemCalibratorPlotter::plotcal",
+		 "Pulsar::SystemCalibratorPlotter::plot_cal",
                  "SystemCalibrator not set");
 
   if (verbose)
-    cerr << "Pulsar::SystemCalibratorPlotter::plotcal call plot" << endl;
+    cerr << "Pulsar::SystemCalibratorPlotter::plot_cal call plot" << endl;
 
   Reference::To<SourceInfo> info 
     = new SourceInfo( &(calibrator->calibrator_estimate) );
