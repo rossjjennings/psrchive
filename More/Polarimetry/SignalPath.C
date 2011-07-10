@@ -1078,9 +1078,10 @@ Calibration::SignalPath::FluxCal::FluxCal (SignalPath* parent)
   // to the flux calibrator
   //
 
-  throw Error (InvalidState,
-	       "Calibration::SignalPath::build_fluxcal",
-	       "Backend/Feed parameterization required to model fluxcal");
+  if (!physical)
+    throw Error (InvalidState,
+	         "Calibration::SignalPath::build_fluxcal",
+	         "Backend/Feed parameterization required to model fluxcal");
 
   composite = parent;
 
