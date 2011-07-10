@@ -23,7 +23,7 @@ Pulsar::VariationInfo::VariationInfo (const SystemCalibrator* cal, Which w)
 const MEAL::Scalar* Pulsar::VariationInfo::get_Scalar (unsigned ichan) const
 try
 {
-  const Calibration::StandardModel* model = calibrator->get_model( ichan );
+  const Calibration::SignalPath* model = calibrator->get_model( ichan );
 
   if (!model->get_valid())
     return 0;

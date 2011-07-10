@@ -141,7 +141,7 @@ namespace Pulsar
     //! Set the initial guesses and update the reference epoch
     void initialize ();
 
-    //! Initialize the StandardModel of the specified channel
+    //! Initialize the SignalPath of the specified channel
     void init_model (unsigned ichan);
 
     //! Check that the model is ready to receive additional constraints

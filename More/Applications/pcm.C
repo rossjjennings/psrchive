@@ -757,7 +757,7 @@ int actual_main (int argc, char *argv[]) try
         Calibration::ReceptionModel::verbose = true;
 
       if (level > 2)
-	Calibration::StandardModel::verbose = true;
+	Calibration::SignalPath::verbose = true;
 
       Pulsar::Calibrator::verbose = level;
       Pulsar::Archive::set_verbosity (level);
