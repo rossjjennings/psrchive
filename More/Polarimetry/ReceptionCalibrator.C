@@ -405,14 +405,14 @@ void Pulsar::ReceptionCalibrator::prepare_calibrator_estimate
       }
 
       // Flux Calibrator observations are made through a different backend
-      model[ichan]->add_fluxcal_backend();
+      model[ichan]->get_fluxcal()->add_backend();
     }
   }
   else
   {
     // each flux calibrator observation is made through a different backend
     for (unsigned ichan=0; ichan<get_nchan(); ichan++)
-      model[ichan]->add_fluxcal_backend();
+      model[ichan]->get_fluxcal()->add_backend();
   }
 }
 
@@ -441,7 +441,7 @@ void Pulsar::ReceptionCalibrator::submit_calibrator_data
 
   measurements.push_back (fstate);
   measurements.set_transformation_index
-    ( model[data.ichan]->get_fluxcal_path() );
+    ( model[data.ichan]->get_fluxcal()->get_path_index() );
 
   model[data.ichan]->get_equation()->add_data (measurements);
 }
