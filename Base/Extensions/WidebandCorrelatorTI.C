@@ -22,6 +22,7 @@ WidebandCorrelator::Interface::Interface( WidebandCorrelator *s_instance )
        "config", "Configuration filename" );
 
   add( &WidebandCorrelator::get_nrcvr,
+       &WidebandCorrelator::set_nrcvr,
        "nrcvr", "Number of receiver channels" );
 
   add( &WidebandCorrelator::get_tcycle,
