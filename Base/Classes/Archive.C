@@ -216,6 +216,8 @@ void Pulsar::Archive::add_extension (Extension* ext)
 	   << ext->get_extension_name() << endl;
     extension.push_back(ext);
   }
+
+  text_interface = NULL;
 }
 
 /* Unless a Receiver Extension is present, this method assumes that the
