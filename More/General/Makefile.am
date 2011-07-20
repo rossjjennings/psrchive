@@ -68,6 +68,7 @@ nobase_include_HEADERS = \
 	Pulsar/PhaseWeightShift.h \
 	Pulsar/PhaseWeightSmooth.h \
         Pulsar/PhaseWeight.h \
+	Pulsar/ProfileCovariance.h \
 	Pulsar/ProfileInterpreter.h \
 	Pulsar/ProfilePCA.h \
 	Pulsar/ProfileShiftFit.h \
@@ -252,7 +253,8 @@ libGeneral_la_SOURCES = \
 #
 if HAVE_GSL
 
-libGeneral_la_SOURCES += WaveletSmooth.C WaveletTransform.C AdaptiveSmooth.C
+libGeneral_la_SOURCES += WaveletSmooth.C WaveletTransform.C AdaptiveSmooth.C TimeDomainCovariance.C
+nobase_include_HEADERS += Pulsar/TimeDomainCovariance.h
 
 if HAVE_CFITSIO
 
