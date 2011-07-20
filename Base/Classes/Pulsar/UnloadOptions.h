@@ -42,6 +42,9 @@ namespace Pulsar {
     void set_directory (const std::string&);
     std::string get_directory () const { return directory; }
 
+    //! Return true if one or more unload options have been set
+    bool get_unload_setup () const;
+
     //! Add options to the menu
     virtual void add_options (CommandLine::Menu&);
 
@@ -55,9 +58,6 @@ namespace Pulsar {
 
     //! The application produces and output for each input
     bool output_each;
-
-    //! Unload
-    bool unload;
 
     //! Overwrite files
     bool overwrite;
