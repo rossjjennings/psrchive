@@ -20,6 +20,7 @@ nobase_include_HEADERS = \
         Pulsar/Container.h \
 	Pulsar/Correction.h \
 	Pulsar/DataExtension.h \
+	Pulsar/Editor.h \
         Pulsar/ExampleArchive.h \
 	Pulsar/FITSAlias.h \
 	Pulsar/FourthMoments.h \
@@ -65,6 +66,7 @@ libClasses_la_SOURCES = \
 	CalibratorType.C \
 	Check.C \
         Config.C \
+	Editor.C \
         ExampleArchive.C \
 	FITSAlias.C \
 	FourthMoments.C \
