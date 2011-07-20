@@ -18,19 +18,15 @@ MEAL::ScaledVonMises::init()
   height.set_value_name("height");
   centre.set_value_name("centre"); 
   concentration.set_value_name("concentration");
-  
 
- 
- 
   ScalarConstant *minus_one = new ScalarConstant(-1.0);
-  ScalarMath result = exp ((cos(ScalarMath(x)-centre)+*minus_one)*concentration) 
-    * height;
-//     * height;
-//  ScalarMath result(*new ScalarConstant(-1.0));
-//   ScalarMath result = exp (ScalarMath(concentration)
-// 			 *(ScalarMath(*new ScalarConstant(-1.0))
-// 				+cos(ScalarMath(x)-ScalarMath(centre))))
-//     * height;
+  ScalarMath result = exp ((cos(ScalarMath(x)-centre)+*minus_one)*concentration);
+
+  if (log_height)
+      result *= exp( height );
+  else
+      result *= height;
+
   expression = result.get_expression();
 
   copy_parameter_policy  (expression);
@@ -38,12 +34,16 @@ MEAL::ScaledVonMises::init()
   copy_univariate_policy (x);
 }
 
-MEAL::ScaledVonMises::ScaledVonMises () 
-{ init();}
+MEAL::ScaledVonMises::ScaledVonMises (bool _log_height) 
+{
+    log_height = _log_height;
+    init ();
+}
 
 //! Copy constructor
 MEAL::ScaledVonMises::ScaledVonMises (const ScaledVonMises& copy)
 {
+  log_height = copy.log_height;
   init ();
   operator = (copy);
 }
@@ -52,6 +52,12 @@ MEAL::ScaledVonMises::ScaledVonMises (const ScaledVonMises& copy)
 MEAL::ScaledVonMises&
 MEAL::ScaledVonMises::operator = (const ScaledVonMises& copy)
 {
+  if (copy.log_height != this->log_height)
+  {
+      log_height = copy.log_height;
+      init ();
+  }
+
   Univariate<Scalar>::operator = (copy);
   return *this;
 }
@@ -85,13 +91,19 @@ Estimate<double> MEAL::ScaledVonMises::get_concentration () const
 //! Set the height
 void MEAL::ScaledVonMises::set_height (const Estimate<double>& height_)
 {
-  height.set_value (height_);
+    if (log_height)
+	height.set_value (log(height_));
+    else
+	height.set_value (height_);
 }
 
 //! Get the height
  Estimate<double> MEAL::ScaledVonMises::get_height () const
 {
-  return height.get_value();
+    if (log_height)
+	return exp(height.get_value());
+    else
+	return height.get_value();
 }
 
 

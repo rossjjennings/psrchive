@@ -148,6 +148,8 @@ void usage ()
     "Fitting options:\n"
     "  -a stdfiles      Automatically select standard from specified group\n"
     "  -D               Denoise standard \n"
+    "  -e cfg1[,cfgN]   Estimator configuration option[s] \n"
+    "  -E cfg           Estimator configuration options in 'cfg' text file \n"
     "  -g datafile      Gaussian model fitting \n"
     "  -s stdfile       Location of standard profile \n"
     "  -S period        Zap harmonics due to periodic spikes in profile \n"
@@ -244,13 +246,17 @@ int main (int argc, char** argv) try
 
   float chisq_max = 2.0;
 
+  // Shift estimator configuration options
+  vector<string> estimator_config;
+
+
 #if HAVE_PGPLOT
 #define PLOT_ARGS "t::"
 #else
 #define PLOT_ARGS
 #endif
 
-  const char* args = "a:A:bcC:Ddf:Fg:hiK:m:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
+  const char* args = "a:A:bcC:Dde:E:f:Fg:hiK:m:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
 
   int gotc = 0;
 
@@ -307,6 +313,14 @@ int main (int argc, char** argv) try
 
     case 'd':
       skip_bad = true;
+      break;
+
+    case 'e':
+      separate (optarg, estimator_config, ",");
+      break;
+      
+    case 'E':
+      loadlines (optarg, estimator_config);
       break;
 
     case 'F':
@@ -498,6 +512,18 @@ int main (int argc, char** argv) try
       if (!plot_difference)
 #endif
           cout << "FORMAT 1" << endl;
+
+
+  if (estimator_config.size())
+  {
+    if (verbose)
+      cerr << "pat: parsing shift estimator configuration options" << endl;
+
+    Reference::To<TextInterface::Parser> parser;
+    parser = arrival->get_shift_estimator()->get_interface();
+
+    parser->process (estimator_config);
+  }
 
   for (unsigned i = 0; i < archives.size(); i++) try {
 

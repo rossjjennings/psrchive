@@ -825,7 +825,7 @@ void Pulsar::SystemCalibrator::create_model ()
     if (verbose > 2)
       cerr << "Pulsar::SystemCalibrator::create_model ichan=" << ichan << endl;
 
-    model[ichan] = new Calibration::StandardModel (type);
+    model[ichan] = new Calibration::SignalPath (type);
 
     if (basis)
       model[ichan]->set_basis (basis);
@@ -871,8 +871,8 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
   }
 }
 
-//! Return the StandardModel for the specified channel
-const Calibration::StandardModel*
+//! Return the SignalPath for the specified channel
+const Calibration::SignalPath*
 Pulsar::SystemCalibrator::get_model (unsigned ichan) const
 {
   check_ichan ("get_model", ichan);
@@ -993,7 +993,7 @@ void Pulsar::SystemCalibrator::solve ()
       continue;
     }
 
-    queue.submit( model[ichan].get(), &StandardModel::solve );
+    queue.submit( model[ichan].get(), &SignalPath::solve );
   }
 
   queue.wait ();
@@ -1139,7 +1139,7 @@ void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
 	   << " chisq/nfree=" << reduced_chisq << endl;
 
       model[ichan]->get_equation()->copy_fit( equation );      
-      queue.submit( model[ichan].get(), &StandardModel::solve );
+      queue.submit( model[ichan].get(), &SignalPath::solve );
 
       return;
     }
@@ -1147,7 +1147,7 @@ void Pulsar::SystemCalibrator::resolve (unsigned ichan) try
 
   if (get_solver(ichan)->get_singular())
   {
-    queue.submit( model[ichan].get(), &StandardModel::solve );
+    queue.submit( model[ichan].get(), &SignalPath::solve );
   }
   else
     cerr << "could not find a suitable solution to copy for retry" << endl;
@@ -1330,11 +1330,14 @@ Pulsar::SystemCalibrator::get_transformation (const Archive* data,
     break;
 
   case Signal::FluxCalOn:
+  {
     if (verbose > 2)
       cerr << "Pulsar::SystemCalibrator::get_transformation FluxCal" << endl;
-    equation->set_transformation_index (model[ichan]->get_fluxcal_path());
+    unsigned index = model[ichan]->get_fluxcal()->get_path_index();
+    equation->set_transformation_index ( index );
     signal_path = equation->get_transformation ();
     break;
+  }
 
   default:
     throw Error (InvalidParam, "Pulsar::SystemCalibrator::get_transformation",

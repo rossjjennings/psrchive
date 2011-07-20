@@ -20,6 +20,7 @@
 namespace Pulsar {
 
   class Archive;
+  class Integration;
   class Profile;
   class ProfileStats;
   class PhaseWeight;
@@ -77,6 +78,9 @@ namespace Pulsar {
     //! Get the Profile statistics interface
     ProfileStats* get_stats ();
 
+    //! Get the weighted frequency from the Pulsar::Archive
+    double get_weighted_frequency () const;
+
     //! Text interface to statistics
     class Interface;
 
@@ -95,6 +99,9 @@ namespace Pulsar {
 
     const Profile* get_Profile () const;
     mutable Reference::To<const Profile> profile;
+
+    const Integration* get_Integration () const;
+    mutable Reference::To<const Integration> integration;
 
   };
 }

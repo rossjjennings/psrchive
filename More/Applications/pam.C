@@ -161,10 +161,9 @@ void usage()
     "  --binlngperi     Convert to binary longitude periastron order \n"
     "  --binlngasc      Convert to binary longitude asc node order \n"
     "\n"
-    "The following options take floating point arguments but --RR doesn't \n"
+    "The following options take floating point arguments \n"
     "  -d DM            Alter the header dispersion measure \n"
     "  -R RM            Correct for ISM faraday rotation \n"
-    "  --RR             Dedefaraday (i.e. undo -R option) \n"
     "  --RM RM          Install a new RM but don't defaraday \n"
     "  --aux_rm RMi    Correct absolute auxiliary Faraday rotation \n"
     "  -s               Smear with this duty cycle \n"
@@ -226,7 +225,6 @@ int main (int argc, char *argv[]) try {
     bool scattered_power_correction = false;
 
     bool defaraday = false;
-    bool dedefaraday = false;
 
     bool newrm = false;
     double rm = 0.0;
@@ -683,11 +681,6 @@ int main (int argc, char *argv[]) try {
       case NAME: name = optarg; break;
 
       case DD: dededisperse = true; break;
-	  
-      case RR:
-        dedefaraday = true;
-        command += " --RR ";
-        break;
 
       case RM:
         aux_rm = fromstring<double>(optarg);
@@ -948,12 +941,6 @@ int main (int argc, char *argv[]) try {
       if (dededisperse)
       {
 	Pulsar::Dispersion correction;
-	correction.revert (arch);
-      }
-
-      if (dedefaraday)
-      {
-	Pulsar::FaradayRotation correction;
 	correction.revert (arch);
       }
 

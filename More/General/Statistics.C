@@ -16,6 +16,7 @@
 #include "Pulsar/NoiseStatistics.h"
 #include "Pulsar/SquareWave.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Integration.h"
 
 using namespace std;
 
@@ -42,6 +43,12 @@ void Pulsar::Statistics::set_Archive (const Archive* data)
 const Pulsar::Archive* Pulsar::Statistics::get_Archive () const
 {
   return archive;
+}
+
+const Pulsar::Integration* Pulsar::Statistics::get_Integration () const
+{
+  integration = Pulsar::get_Integration (archive, isubint);
+  return integration;
 }
 
 const Pulsar::Profile* Pulsar::Statistics::get_Profile () const
@@ -156,6 +163,13 @@ Pulsar::ProfileStats* Pulsar::Statistics::get_stats ()
 {
   setup_stats ();
   return stats;
+}
+
+//! Get the weighted frequency of the Pulsar::Archive
+double Pulsar::Statistics::get_weighted_frequency () const
+{
+  integration = Pulsar::get_Integration (archive, 0);
+  return integration->weighted_frequency (0, archive->get_nchan());
 }
 
 void Pulsar::Statistics::setup_stats ()

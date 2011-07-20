@@ -27,7 +27,7 @@ namespace MEAL {
 
   public:
 
-    ScaledVonMises ();
+    ScaledVonMises (bool log_height = false);
     ScaledVonMises (const ScaledVonMises& copy);
     ScaledVonMises & operator = (const ScaledVonMises& copy);
 
@@ -64,6 +64,10 @@ namespace MEAL {
     ScalarParameter height;
     ScalarParameter centre;
     ScalarParameter concentration;
+
+    //! When set, the height attribute is interpreted as log(height) [ensures that height > 0]
+    bool log_height;
+
     void init ();
     Reference::To<Scalar> expression;
     void calculate (double&, std::vector<double>*) {}

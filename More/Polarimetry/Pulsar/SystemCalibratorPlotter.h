@@ -26,7 +26,7 @@ namespace Pulsar
 {
   class SystemCalibrator;
 
-  //! Pulsar::SystemCalibrator plotter
+  //! Plots the various components of a SystemCalibrator
   class SystemCalibratorPlotter : public CalibratorPlotter
   {
     
@@ -37,7 +37,7 @@ namespace Pulsar
     ~SystemCalibratorPlotter ();
 
     //! Plot the calibrator as a function of frequency
-    void plotcal ();
+    void plot_cal ();
 
     //! Plot the Stokes parameters versus parallactic angle
     void plot_cal_constraints (unsigned ichan);

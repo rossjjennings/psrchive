@@ -216,7 +216,7 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
     if (fixed_phase)
       mtm[ichan]->remove_phase ();
 
-    // the equation transformation will be managed by the StandardModel class
+    // the equation transformation will be managed by the SignalPath class
     mtm[ichan]->manage_equation_transformation = false;
 
     mtm[ichan]->set_normalize_by_invariant (normalize_by_invariant);
@@ -263,7 +263,7 @@ void Pulsar::PulsarCalibrator::init_model (unsigned ichan)
     throw Error (InvalidParam, "Pulsar::PulsarCalibrator::init_model",
 		 "ichan=%u >= model.size()=%u", ichan, model.size());
 
-  // share the measurement equations between PolnProfileFit and StandardModel
+  // share the measurement equations between PolnProfileFit and SignalPath
   if (mtm[ichan])
     model[ichan]->set_equation( mtm[ichan]->get_equation() );
   else
