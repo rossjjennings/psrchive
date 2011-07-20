@@ -75,6 +75,7 @@ libExtensions_la_SOURCES = \
 	dspReductionTI.C \
 	Effelsberg.C \
         ExampleExtension.C \
+  Extension_factory.C \
         FeedExtension.C \
         FITSHdrExtension.C \
 	FITSHdrExtensionTI.C \
