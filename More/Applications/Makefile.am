@@ -67,10 +67,13 @@ psrcull_SOURCES = psrcull.C
 #
 if HAVE_GSL
 
-bin_PROGRAMS += psrsmooth
+bin_PROGRAMS += psrsmooth psrpca
 
 psrsmooth_SOURCES = psrsmooth.C
 psrsmooth_LDADD = $(LDADD) @GSL_LIBS@
+
+psrpca_SOURCES = psrpca.C
+psrpca_LDADD = $(LDADD) @GSL_LIBS@
 
 endif
 
