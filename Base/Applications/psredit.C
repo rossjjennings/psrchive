@@ -8,6 +8,7 @@
 #include "Pulsar/Application.h"
 #include "Pulsar/UnloadOptions.h"
 
+#include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/Check.h"
 #include "Pulsar/Profile.h"
 
@@ -33,7 +34,11 @@ public:
   //! Process the given archive
   void process (Pulsar::Archive*);
 
+  //! Add a comma-separated list of commands to execute
   void add_commands (const std::string& str) { separate (str, commands, ","); }
+
+  //! Add a comma-separated list of extensions to install
+  void add_extensions (const std::string& str) { separate (str, extensions, ","); }
 
   void set_quiet () { Application::set_quiet(); output_filename = false; }
 
@@ -46,6 +51,9 @@ protected:
 
   //! commands to be executed
   vector<string> commands;
+
+  //! extensions to be added
+  vector<string> extensions;
 
   //! prefix parameter value queries with parameter name=
   bool prefix_name;
@@ -94,6 +102,9 @@ void psredit::add_options (CommandLine::Menu& menu)
   arg = menu.add (this, &psredit::add_commands, 'c', "command[s]");
   arg->set_help ("one or more commands, separated by commas");
 
+  arg = menu.add (this, &psredit::add_extensions, 'a', "extension[s]");
+  arg->set_help ("one or more extensions to be added, separated by commas");
+
   arg = menu.add (this, &psredit::detailed_help, 'H');
   arg->set_help ("more detailed help");
 
@@ -139,6 +150,9 @@ void psredit::detailed_help ()
 //
 bool psredit::must_save ()
 {
+  if (extensions.size() > 0)
+    return true;
+
   for (unsigned j = 0; j < commands.size(); j++)
     if (commands[j].find('=') != string::npos)
       return true;
@@ -154,6 +168,14 @@ bool psredit::must_save ()
 //
 void psredit::process (Pulsar::Archive* archive)
 {
+  for (unsigned i = 0; i < extensions.size(); i++)
+  {
+    if (verbose)
+      cerr << "psredit: adding extension '" << extensions[i] << "'" << endl;
+
+    archive->add_extension( Pulsar::Archive::Extension::factory( extensions[i] ) );
+  }
+
   Reference::To<TextInterface::Parser> interface = archive->get_interface();
 
   if (commands.size() == 0)
