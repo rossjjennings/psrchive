@@ -52,7 +52,7 @@ Pulsar::ITRFExtension::~ITRFExtension ()
 
 // Text interface to a ITRFExtension
 class Pulsar::ITRFExtension::Interface
-  : public TextInterface::To<ITRFExtension>
+  : public Extension::Interface<ITRFExtension>
 {
 public:
   Interface( ITRFExtension *s_instance = NULL )
@@ -61,15 +61,15 @@ public:
       set_instance( s_instance );
 
     add( &ITRFExtension::get_ant_x,
-        &ITRFExtension::set_ant_x,
+         &ITRFExtension::set_ant_x,
         "ant_x", "ITRF X coordinate." );
 
     add( &ITRFExtension::get_ant_y,
-        &ITRFExtension::set_ant_y,
-        "ant_y", "ITRF Y coordinate." );
+         &ITRFExtension::set_ant_y,
+         "ant_y", "ITRF Y coordinate." );
 
     add( &ITRFExtension::get_ant_z,
-        &ITRFExtension::set_ant_z,
+         &ITRFExtension::set_ant_z,
         "ant_z", "ITRF Z coordinate." );
   }
 };

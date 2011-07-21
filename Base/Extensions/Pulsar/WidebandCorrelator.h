@@ -70,6 +70,7 @@ namespace Pulsar {
     
     //! Get the number of receiver channels
     int get_nrcvr() const { return nrcvr; }
+    void set_nrcvr(int _nrcvr) { nrcvr = _nrcvr; }
     
     //! Name of the configuration file used (if any)
     std::string configfile;

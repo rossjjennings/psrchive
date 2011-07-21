@@ -14,7 +14,6 @@ using namespace std;
 
 Pulsar::UnloadOptions::UnloadOptions ()
 {
-  unload = false;
   overwrite = false;
   output_each = true;
 }
@@ -68,6 +67,11 @@ void Pulsar::UnloadOptions::add_options (CommandLine::Menu& menu)
   arg->set_help ("write files to a new directory");
 }
 
+bool Pulsar::UnloadOptions::get_unload_setup () const
+{
+  return overwrite || !extension.empty() || !directory.empty();
+}
+
 void Pulsar::UnloadOptions::setup ()
 {
 #ifdef _DEBUG
@@ -81,10 +85,7 @@ void Pulsar::UnloadOptions::setup ()
     throw Error (InvalidState, "Pulsar::UnloadOptions::setup",
 		 "cannot use -m option with -e and/or -O option");
 
-  if (overwrite || !extension.empty() || !directory.empty())
-    unload = true;
-
-  else if (application->must_save())
+  if (!get_unload_setup() && application->must_save())
     throw Error (InvalidState, "Pulsar::UnloadOptions::setup",
 		 "please specify either the -m option"
 		 " or the -e and/or -O option");
@@ -93,7 +94,7 @@ void Pulsar::UnloadOptions::setup ()
 //! Unload the archive
 void Pulsar::UnloadOptions::finish (Archive* archive)
 {
-  if (!unload)
+  if (!get_unload_setup())
     return;
 
   if (overwrite)

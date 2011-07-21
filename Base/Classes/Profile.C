@@ -290,17 +290,15 @@ void Pulsar::Profile::diff (const Profile* that)
 vector<float> Pulsar::Profile::get_weighted_amps () const
 {
   vector<float> wamps;
-  
+
   unsigned nbin = get_nbin();
+  wamps.resize(nbin);
+
   const float* amps = get_amps();
 
-  if (weight == 0.0)
-    for (unsigned i = 0; i < nbin; i++)
-      wamps.push_back(0.0);
-  else
-    for (unsigned i = 0; i < nbin; i++)
-      wamps.push_back(amps[i]);
-  
+  for (unsigned i = 0; i < nbin; i++)
+    wamps[i] = amps[i] * weight;
+
   return wamps;
 }
 

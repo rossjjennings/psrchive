@@ -592,7 +592,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   dfault = "0.0";
   psrfits_read_key( fptr, "BPA", &tempstr, dfault, verbose > 2 );
   if( tempstr == "*" )
-    hdr_ext->set_bpa( std::numeric_limits<double>::quiet_NaN() );
+    hdr_ext->set_bpa( 0 );
   else
     hdr_ext->set_bpa( fromstring<double>(tempstr) );
     
@@ -604,7 +604,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   dfault = "0.0";
   psrfits_read_key( fptr, "BMAJ", &tempstr, dfault, verbose > 2 );
   if( tempstr == "*" )
-    hdr_ext->set_bmaj( std::numeric_limits<double>::quiet_NaN() );
+    hdr_ext->set_bpa( 0 );
   else
     hdr_ext->set_bmaj( fromstring<double>(tempstr) );
     
@@ -616,7 +616,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   dfault = "0.0";
   psrfits_read_key( fptr, "BMIN", &tempstr, dfault, verbose > 2 );
   if( tempstr == "*" )
-    hdr_ext->set_bmin( std::numeric_limits<double>::quiet_NaN() );
+    hdr_ext->set_bpa( 0 );
   else
     hdr_ext->set_bmin( fromstring<double>(tempstr) );
 
