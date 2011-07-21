@@ -96,7 +96,7 @@ protected:
   vector<hbin>   pdata;
   vector<hbin>   ndata;
 
-  int   scan_pulses(Reference::To<Pulsar::Archive> arch, vector<pulse>& data, 
+  int scan_pulses(Reference::To<Pulsar::Archive> arch, vector<pulse>& data, 
 		  int method, float cphs, float dcyc);
 
   //! Finds the mean flux from the data vector. Any flux greater than <factor> times the mean is considered a giant and is copied to the giants array.
@@ -297,6 +297,7 @@ void psrspa::finalize ()
 
 void psrspa::choose_phase ( float _cphs )
 {
+  cphs = _cphs;
   if ( cphs > 0.0 && cphs < 1.0 )
   {
     method = 2;
@@ -362,6 +363,7 @@ int psrspa::scan_pulses(Reference::To<Pulsar::Archive> arch, vector<pulse>& data
   
   newentry.file = arch->get_filename();
 
+  // mean, variance and variance of the mean
   double nm, nv, vm;
   
   int nbin = arch->get_nbin();
@@ -373,7 +375,7 @@ int psrspa::scan_pulses(Reference::To<Pulsar::Archive> arch, vector<pulse>& data
     newentry.intg = i;
     
     prof = arch->get_Profile(i, 0, 0);
-    
+     
     prof->stats(prof->find_min_phase(), &nm, &nv, &vm);
     newentry.err = sqrt(nv);
 
