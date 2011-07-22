@@ -7,6 +7,7 @@
 
 #include "Pulsar/TimeDomainCovariance.h"
 #include "Warning.h"
+#include <algorithm>
 
 using namespace std;
 using namespace Pulsar;
