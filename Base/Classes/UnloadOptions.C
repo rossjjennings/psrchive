@@ -94,7 +94,7 @@ void Pulsar::UnloadOptions::setup ()
 //! Unload the archive
 void Pulsar::UnloadOptions::finish (Archive* archive)
 {
-  if (!get_unload_setup())
+  if (!(output_each && get_unload_setup()))
     return;
 
   if (overwrite)
