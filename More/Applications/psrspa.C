@@ -11,6 +11,7 @@
 #include "Pulsar/Application.h"
 #include "Pulsar/StandardOptions.h"
 #include "Pulsar/PlotOptions.h"
+#include "Pulsar/ProfileWeightFunction.h"
 
 #include "MEAL/LevenbergMarquardt.h"
 #include "MEAL/Gaussian.h"
@@ -19,10 +20,12 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/PhaseWeight.h"
 
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <assert.h>
 
 #include <fstream>
 #include <iostream>
@@ -113,6 +116,12 @@ protected:
 
   void choose_phase ( float );
 
+  //! The algorithm used to find pulses
+  Reference::To<Pulsar::ProfileWeightFunction> finder;
+  //! Set and configure the algorithm used to find pulses
+  void set_finder (const std::string& name);
+  //! Use the finder to list pulse information
+  void matched_finder (const Archive*);
 };
 
 psrspa::psrspa ()
@@ -138,9 +147,58 @@ void psrspa::process ( Archive* arch )
   arch->pscrunch();
   arch->remove_baseline(); // Remove the baseline level
 
+  if (finder)
+  {
+    matched_finder (arch);
+    return;
+  }
+
   scan_pulses(arch, pulses, method, cphs, dcyc);
   if (shownoise)
     scan_pulses(arch, noise, 2, arch->find_min_phase(dcyc), dcyc);
+}
+
+void psrspa::matched_finder ( const Archive* arch )
+{
+  Reference::To<Profile> profile = arch->get_Profile(0,0,0)->clone();
+  
+  while (profile->get_nbin() > 256)
+  {
+    finder->set_Profile( profile );  // might finder optimize on &profile?
+
+    PhaseWeight weight;
+    finder->get_weight( &weight );
+
+    const unsigned nbin = weight.get_nbin();
+
+    assert (nbin == profile->get_nbin());
+
+    for (unsigned i=0; i < nbin; i++)
+    {
+      if (weight[i])
+      {
+	// start of an on-pulse region ... sum up the flux in this region
+	unsigned istart = i;
+	double flux = 0;
+	while (weight[i] && i < nbin)
+	{
+	  flux += profile->get_amps()[i];
+	  i++;
+	}
+	unsigned iend = i-1;
+
+	// mid-point of region defines phase
+	double phase = 0.5*(istart + iend);
+
+	// end-points of region define width
+	double width = iend - istart;
+
+	cout << "phase=" << phase << " flux=" << flux << " width=" << width
+	     << endl;
+      }
+
+    }
+  }
 }
 
 void psrspa::finalize ()
@@ -295,6 +353,11 @@ void psrspa::finalize ()
   fflush(stdout);
 }
 
+void psrspa::set_finder (const std::string& name)
+{
+  finder = ProfileWeightFunction::factory (name);
+}
+
 void psrspa::choose_phase ( float _cphs )
 {
   cphs = _cphs;
@@ -346,6 +409,9 @@ void psrspa::add_options ( CommandLine::Menu& menu )
 
   arg = menu.add ( shownoise, 's' );
   arg->set_help ( "Show the best-fit model for the background noise" );
+
+  arg = menu.add ( this, &psrspa::set_finder, "use");
+  arg->set_help ( "Set/configure the algorithm used to find pulses" );    
 }
 
 //////////////////////////////////////////////////////////////////////////////
