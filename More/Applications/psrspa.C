@@ -122,6 +122,7 @@ protected:
   void set_finder (const std::string& name);
   //! Use the finder to list pulse information
   void matched_finder (const Archive*);
+  void matched_report (const PhaseWeight& weight, const Profile& profile);
 };
 
 psrspa::psrspa ()
@@ -169,35 +170,47 @@ void psrspa::matched_finder ( const Archive* arch )
     PhaseWeight weight;
     finder->get_weight( &weight );
 
-    const unsigned nbin = weight.get_nbin();
+    matched_report (weight, *profile);
 
-    assert (nbin == profile->get_nbin());
+    profile->bscrunch (2);
+  }
+}
 
-    for (unsigned i=0; i < nbin; i++)
+void psrspa::matched_report (const PhaseWeight& weight, const Profile& profile)
+{
+  const unsigned nbin = weight.get_nbin();
+  assert (nbin == profile.get_nbin());
+
+  unsigned ibin = 0;
+
+  while (ibin < nbin)
+  {
+    // find the first on-pulse phase bin
+    while (ibin < nbin && !weight[ibin]) ibin++;
+
+    if (ibin == nbin)
+      break;
+
+    // start of an on-pulse region ... sum up the flux in this region
+    unsigned istart = ibin;
+    double flux = 0;
+    while (weight[ibin] && ibin < nbin)
     {
-      if (weight[i])
-      {
-	// start of an on-pulse region ... sum up the flux in this region
-	unsigned istart = i;
-	double flux = 0;
-	while (weight[i] && i < nbin)
-	{
-	  flux += profile->get_amps()[i];
-	  i++;
-	}
-	unsigned iend = i-1;
-
-	// mid-point of region defines phase
-	double phase = 0.5*(istart + iend);
-
-	// end-points of region define width
-	double width = iend - istart;
-
-	cout << "phase=" << phase << " flux=" << flux << " width=" << width
-	     << endl;
-      }
-
+      flux += profile.get_amps()[ibin];
+      ibin++;
     }
+
+    unsigned iend = ibin-1;
+
+    // mid-point of region defines phase
+    double phase = 0.5*(istart + iend);
+
+    // end-points of region define width
+    double width = iend - istart;
+
+    cout << "nbin=" << nbin << " phase=" << phase << " -> " << phase/nbin
+         << " flux=" << flux << " width=" << width << " -> " << width/nbin
+         << endl;
   }
 }
 
