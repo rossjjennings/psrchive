@@ -13,6 +13,7 @@
 #include "Pulsar/Application.h"
 #include "Pulsar/StandardOptions.h"
 #include "Pulsar/PlotOptions.h"
+#include "Pulsar/ProfileWeightFunction.h"
 
 #include "MEAL/LevenbergMarquardt.h"
 #include "MEAL/Gaussian.h"
@@ -23,10 +24,12 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/ProfileStats.h"
+#include "Pulsar/PhaseWeight.h"
 
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <assert.h>
 
 #include <fstream>
 #include <iostream>
@@ -192,6 +195,14 @@ protected:
 
   //! Handle output
   void write_histograms ();
+
+  //! The algorithm used to find pulses
+  Reference::To<Pulsar::ProfileWeightFunction> finder;
+  //! Set and configure the algorithm used to find pulses
+  void set_finder (const std::string& name);
+  //! Use the finder to list pulse information
+  void matched_finder (const Archive*);
+  void matched_report (const PhaseWeight& weight, const Profile& profile);
 };
 
 
@@ -264,11 +275,72 @@ void psrspa::process ( Archive* arch )
   //this has to precede create_histograms as the latter can modify the archives (bscrunch them). This can be easily fixed by cloning the archive, if that would prove necessary
   if ( perform_scan )
     scan_pulses(arch, pulses, method, cphs, dcyc);
+  if (finder)
+  {
+    matched_finder (arch);
+    return;
+  }
+
   if (shownoise)
     scan_pulses(arch, noise, 2, arch->find_min_phase(dcyc), dcyc);
   if ( create_flux || create_polar_degree || create_polar_angle || find_max_amp_in_range )
   {
     create_histograms ( arch );
+  }
+}
+
+void psrspa::matched_finder ( const Archive* arch )
+{
+  Reference::To<Profile> profile = arch->get_Profile(0,0,0)->clone();
+  
+  while (profile->get_nbin() > 256)
+  {
+    finder->set_Profile( profile );  // might finder optimize on &profile?
+
+    PhaseWeight weight;
+    finder->get_weight( &weight );
+
+    matched_report (weight, *profile);
+
+    profile->bscrunch (2);
+  }
+}
+
+void psrspa::matched_report (const PhaseWeight& weight, const Profile& profile)
+{
+  const unsigned nbin = weight.get_nbin();
+  assert (nbin == profile.get_nbin());
+
+  unsigned ibin = 0;
+
+  while (ibin < nbin)
+  {
+    // find the first on-pulse phase bin
+    while (ibin < nbin && !weight[ibin]) ibin++;
+
+    if (ibin == nbin)
+      break;
+
+    // start of an on-pulse region ... sum up the flux in this region
+    unsigned istart = ibin;
+    double flux = 0;
+    while (weight[ibin] && ibin < nbin)
+    {
+      flux += profile.get_amps()[ibin];
+      ibin++;
+    }
+
+    unsigned iend = ibin-1;
+
+    // mid-point of region defines phase
+    double phase = 0.5*(istart + iend);
+
+    // end-points of region define width
+    double width = iend - istart;
+
+    cout << "nbin=" << nbin << " phase=" << phase << " -> " << phase/nbin
+         << " flux=" << flux << " width=" << width << " -> " << width/nbin
+         << endl;
   }
 }
 
@@ -455,6 +527,11 @@ void psrspa::traditional_spa ()
     cerr << "psrspa::traditional_spa finished" << endl;
 }
 
+void psrspa::set_finder (const std::string& name)
+{
+  finder = ProfileWeightFunction::factory (name);
+}
+
 void psrspa::choose_phase ( float _cphs )
 {
   cphs = _cphs;
@@ -502,6 +579,10 @@ void psrspa::add_options ( CommandLine::Menu& menu )
 
   menu.add ( "" );
   menu.add ( "Scan pulses and find giants - options:" );
+
+  arg = menu.add ( this, &psrspa::set_finder, "use");
+  arg->set_help ( "Set/configure the algorithm used to find pulses" );    
+  arg->set_long_help ( "This is a different implementation of the pulse searching" );
 
   arg = menu.add ( perform_scan, "rs" );
   arg->set_help ( "perform the scan for pulses, as in spa" );
@@ -1062,13 +1143,13 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
       {
 	if ( irange%2 == 0)
 	{
-	  bin_min = unsigned( floor ( phase_range[irange] * float(nbin) + 0.5 ) );
+	  bin_min = unsigned( floor ( phase_range[irange] * float(nbin / current_bscrunch ) + 0.5 ) );
 	  if ( verbose ) 
 	    cerr << "psrspa::create_histograms set minimal bin to " << bin_min << endl;
 	}
 	else
 	{
-	  bin_max = unsigned( floor ( phase_range[irange] * float(nbin) + 0.5 ) );
+	  bin_max = unsigned( floor ( phase_range[irange] * float(nbin / current_bscrunch ) + 0.5 ) );
 	  if ( bin_max == nbin )
 	    bin_max = nbin - 1 ;
 	  if ( verbose ) 

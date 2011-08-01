@@ -24,6 +24,7 @@ Management/psrchive_install.h
 Management/release.csh
 More/Applications/calavg
 More/Applications/example
+More/Applications/fix_single
 More/Applications/fluxcal
 More/Applications/mtm
 More/Applications/paas

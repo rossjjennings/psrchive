@@ -15,6 +15,7 @@
 
 #include "Pulsar/TimeAppend.h"
 
+#include "string.h"
 #include "strutil.h"
 #include "stringtok.h"
 
