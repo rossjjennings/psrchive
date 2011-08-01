@@ -2530,7 +2530,7 @@ void printResults(const Archive * archive) {
 
 		printf("BC MJD = %.6f\n", barycentricMjd.in_days());
 
-		printf("BC Period (ms) = %3.10g  TC Period (ms) =  %3.10g  DM = %3.3g\n",
+		printf("BC Period (ms) = %3.10g  TC Period (ms) =  %3.10g  DM = %9.4f\n",
 						bcPeriod_s * MILLISEC,	getPeriod(archive) * MILLISEC, getDM(archive));
 
 		printf("Best BC Period (ms) = %3.10g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n",
@@ -2541,7 +2541,7 @@ void printResults(const Archive * archive) {
 						(dopplerFactor * bestPeriod_bc_us / MILLISEC) - (getPeriod(archive) * MILLISEC),
 						periodError_ms);
 
-		printf("Best DM = %3.3g  Correction = %3.3g  Error = %3.3g\n",
+		printf("Best DM = %9.4f  Correction = %.4g  Error = %.4g\n",
 	        	bestDM, bestDM-refDM, dmError);
 
 		printf("Best BC Frequency (Hz) = %3.10g  Error (Hz) = %3.10g\n",
