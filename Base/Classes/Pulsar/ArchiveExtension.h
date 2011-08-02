@@ -57,7 +57,8 @@ namespace Pulsar
     template<typename T>
       class Interface : public TextInterface::To<T>
     {
-         std::string get_interface_name() const { return this->instance->get_short_name(); }
+      std::string get_interface_name() const
+      { return this->instance->get_short_name(); }
     };
 
   protected:
