@@ -17,6 +17,7 @@
 #include "Pulsar/FluxCalibratorExtension.h"
 
 #include "Pulsar/Feed.h"
+#include "Pulsar/BackendFeed.h"
 
 #include "Pulsar/CalibratorPlotter.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -75,6 +76,7 @@ void usage ()
     " -F           print fluxcal parameters (S_sys, S_cal)\n"
     " -j           print Jones matrix elements of calibrator solution \n"
     " -m           print Mueller matrix elements of calibrator solution \n"
+    " -R           print Jones/Mueller matrix elements of only the frontend \n"
        << endl;
 }
 
@@ -123,6 +125,7 @@ int main (int argc, char** argv)
   bool print_jones = false;
   bool print_mueller = false;
   bool print_fluxcal = false;
+  bool frontend_only = false;
 
   // Controls how the mean(s) is/are displayed.
   // False:
@@ -149,7 +152,7 @@ int main (int argc, char** argv)
   bool verbose = false;
   char c;
 
-  while ((c = getopt(argc, argv, "2:a:c:CD:dfFhjM:mn:oPpr:S:stuqvV")) != -1)
+  while ((c = getopt(argc, argv, "2:a:c:CD:dfFhjM:mn:oPpRr:S:stuqvV")) != -1)
   {
     switch (c)
     {
@@ -280,6 +283,10 @@ int main (int argc, char** argv)
 
     case 'p':
       single_axis = false;
+      break;
+
+    case 'R':
+      frontend_only = true;
       break;
 
     case 'r':
@@ -460,15 +467,25 @@ int main (int argc, char** argv)
 	  if (!calibrator->get_transformation_valid (ichan))
 	    continue;
 
-	  Jones<double> xform;
-	  xform = calibrator->get_transformation(ichan)->evaluate();
+	  const MEAL::Complex2* xform = calibrator->get_transformation(ichan);
+
+	  if (frontend_only)
+	  {
+	    const Calibration::BackendFeed* instrument
+	      = dynamic_cast<const Calibration::BackendFeed*> (xform);
+
+	    if (instrument)
+	      xform = instrument->get_frontend();
+	  }
+
+	  Jones<double> J = xform->evaluate();
 
 	  if (print_jones)
 	  {
 	    cout << ichan;
 	    for (unsigned i=0; i<2; i++)
 	      for (unsigned j=0; j<2; j++)
-		cout << " " << xform(i,j).real() << " " << xform(i,j).imag();
+		cout << " " << J(i,j).real() << " " << J(i,j).imag();
 
 	    cout << endl;
 	  }
@@ -476,7 +493,7 @@ int main (int argc, char** argv)
 	  if (print_mueller)
 	  {
 	    cout << ichan;
-	    Matrix<4,4,double> M = Mueller (xform);
+	    Matrix<4,4,double> M = Mueller (J);
 	    for (unsigned i=0; i<4; i++)
 	      for (unsigned j=0; j<4; j++)
 		cout << " " << M[i][j];
