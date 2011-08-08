@@ -202,6 +202,16 @@ void matrix_identity (Matrix<RC, RC, T>& m)
 	m[i][j] = 0;
 }
 
+//! Returns the trace
+template<unsigned Square, typename T>
+T trace (const Matrix<Square,Square,T>& M)
+{
+  T result (0);
+  for (unsigned i=0; i<Square; i++)
+    result += M[i][i];
+  return result;
+}
+
 template <unsigned RC, typename T>
 const Matrix<RC, RC, T> inv (const Matrix<RC, RC, T>& m)
 {
