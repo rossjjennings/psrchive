@@ -69,13 +69,19 @@ psrcull_SOURCES = psrcull.C
 #
 if HAVE_GSL
 
-bin_PROGRAMS += psrsmooth psrpca
+bin_PROGRAMS += psrsmooth psrpca psrspa
 
 psrsmooth_SOURCES = psrsmooth.C
 psrsmooth_LDADD = $(LDADD) @GSL_LIBS@
 
 psrpca_SOURCES = psrpca.C
 psrpca_LDADD = $(LDADD) @GSL_LIBS@
+
+if HAVE_PGPLOT
+bin_PROGRAMS += psrspa
+psrspa_SOURCES = psrspa.C
+psrspa_LDADD = $(LDADD) @GSL_LIBS@ @PGPLOT_LIBS@
+endif
 
 endif
 
@@ -86,13 +92,10 @@ endif
 if HAVE_PGPLOT
 
 bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi psrzap pav \
-	psrsp psrtrash spa psrspa
+	psrsp psrtrash spa
 
 pdmp_SOURCES = pdmp.C
 pdmp_LDADD = $(LDADD) @PGPLOT_LIBS@ @PSRXML_LIBS@
-
-psrspa_SOURCES = psrspa.C
-psrspa_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 psrplot_SOURCES = psrplot.C
 psrplot_LDADD = $(LDADD) @PGPLOT_LIBS@
