@@ -16,13 +16,13 @@
 
 #include "MEAL/Real4.h"
 #include "MEAL/Complex2.h"
-#include "MEAL/Composite.h"
+#include "MEAL/Convert.h"
 
 namespace MEAL {
 
   //! Converts a Jones matrix into a Mueller matrix
 
-  class JonesMueller : public MEAL::Real4
+  class JonesMueller : public Convert<Complex2,Real4>
   {
 
   public:
@@ -30,14 +30,13 @@ namespace MEAL {
     //! Default constructor
     JonesMueller (Complex2* = 0);
 
-    //! Destructor
-    ~JonesMueller () { }
-
     //! Set the transformation, \f$ J \f$
-    virtual void set_transformation (Complex2* transformation);
+    virtual void set_transformation (Complex2* transformation)
+    { set_model (transformation); }
 
     //! Get the transformation, \f$ J \f$
-    virtual Complex2* get_transformation () { return transformation; }
+    virtual Complex2* get_transformation ()
+    { return get_model (); }
 
     std::string get_name () const;
 
@@ -46,12 +45,6 @@ namespace MEAL {
     //! Calculate the Mueller matrix and its gradient
     virtual void calculate (Matrix<4,4,double>& result,
 			    std::vector<Matrix<4,4,double> >*);
-
-    //! The transformation, \f$ J \f$
-    Project<Complex2> transformation;
-
-    //! Composite parameter policy
-    Composite composite;
 
   };
 
