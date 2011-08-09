@@ -30,6 +30,7 @@ nobase_include_HEADERS = \
         MEAL/Composite.h \
         MEAL/CongruenceTransformation.h \
         MEAL/Constant.h \
+	MEAL/Convert.h \
 	MEAL/CrossCoherency.h \
         MEAL/CyclicParameter.h \
 	MEAL/Depolarizer.h \
@@ -48,8 +49,9 @@ nobase_include_HEADERS = \
         MEAL/GroupRule.h \
         MEAL/Invariant.h \
         MEAL/InverseRule.h \
-	MEAL/JonesMueller.h \
 	MEAL/JonesCloude.h \
+	MEAL/JonesMueller.h \
+	MEAL/JonesSpinor.h \
 	MEAL/LeastSquares.h \
         MEAL/LevenbergMarquardt.h \
         MEAL/Mean.h \
@@ -108,6 +110,7 @@ nobase_include_HEADERS = \
 	MEAL/ScalarVector.h \
         MEAL/ScaledVonMisesDeriv.h \
         MEAL/ScaledVonMises.h \
+	MEAL/SingularCoherency.h 
 	MEAL/Spinor.h \
 	MEAL/SpinorJones.h \
 	MEAL/Steps.h \
@@ -161,8 +164,9 @@ libMEAL_la_SOURCES = \
         Gaussian.C \
 	GimbalLockMonitor.C \
         Invariant.C \
-	JonesMueller.C \
 	JonesCloude.C \
+	JonesMueller.C \
+	JonesSpinor.C \
 	LeastSquares.C \
 	ModeCoherency.C \
 	MuellerTransformation.C \
@@ -210,6 +214,7 @@ libMEAL_la_SOURCES = \
 	ScalarVector.C \
         ScaledVonMises.C \
         ScaledVonMisesDeriv.C \
+	SingularCoherency.C \
 	Spinor.C \
 	SpinorJones.C \
 	Steps.C \
@@ -226,13 +231,14 @@ bin_PROGRAMS = lmfit
 
 lmfit_SOURCES = lmfit.C
 
-TESTS = \
+TESTS =									 \
 	test_copy test_Axis test_Projection test_Composite test_get_imap \
-	test_BasisRule test_Scalar test_Complex2Product                  \
-	test_Polar test_Rotation                                         \
-	test_Invariant test_CyclicParameter test_Univariate              \
-	test_StokesError test_StokesCovariance test_Vectorize \
-	test_UnitTangent test_ScalarAtanc test_ComplexCorrelation
+	test_BasisRule test_Scalar test_Complex2Product			 \
+	test_Polar test_Rotation					 \
+	test_Invariant test_CyclicParameter test_Univariate		 \
+	test_StokesError test_StokesCovariance test_Vectorize		 \
+	test_UnitTangent test_ScalarAtanc test_ComplexCorrelation	 \
+	test_Spinor
 
 check_PROGRAMS = $(TESTS) test_Function_load 
 
@@ -256,6 +262,7 @@ test_Vectorize_SOURCES		= test_Vectorize.C
 test_UnitTangent_SOURCES	= test_UnitTangent.C
 test_ScalarAtanc_SOURCES	= test_ScalarAtanc.C
 test_ComplexCorrelation_SOURCES = test_ComplexCorrelation.C
+test_Spinor_SOURCES		= test_Spinor.C
 
 ##############################################################################
 #
