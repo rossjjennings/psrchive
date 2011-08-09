@@ -75,9 +75,16 @@ void MEAL::SingularCoherency::calculate (Jones<double>& result,
 //! Set the Stokes parameters of the model
 void MEAL::SingularCoherency::set_stokes (const Stokes<double>& stokes)
 {
-  for (unsigned i=0; i<3; i++)
-    set_param (i, stokes[i+1]);
+  set_vector( stokes.get_vector() );
 }
+
+void MEAL::SingularCoherency::set_vector (const Vector<3,double>& v)
+{
+  for (unsigned i=0; i<3; i++)
+    set_param (i, v[i]);
+}
+
+
 
 //! Set the Stokes parameters of the model
 void MEAL::SingularCoherency::set_stokes (const Stokes<Estimate<double> >& s)

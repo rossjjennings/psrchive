@@ -24,7 +24,8 @@ namespace MEAL {
    <li> Stokes V
    </ol>
   */
-  class SingularCoherency : public Coherency {
+  class SingularCoherency : public Coherency
+  {
 
   public:
 
@@ -39,6 +40,9 @@ namespace MEAL {
 
     //! Get the Stokes parameters and their estimated errors
     virtual Stokes< Estimate<double> > get_stokes () const;
+
+    //! Set the Stokes polarization vector
+    virtual void set_vector (const Vector<3,double>&);
 
     // ///////////////////////////////////////////////////////////////////
     //
