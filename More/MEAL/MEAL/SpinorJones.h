@@ -30,8 +30,8 @@ namespace MEAL {
     //! Default constructor
     SpinorJones ();
 
-    //! Destructor
-    ~SpinorJones () { }
+    //! Set spinor A == spinor B
+    virtual void set_spinor (Spinor*);
 
     //! Set spinor A
     virtual void set_spinorA (Spinor*);
