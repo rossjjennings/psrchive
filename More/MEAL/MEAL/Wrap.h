@@ -38,7 +38,7 @@ namespace MEAL {
 
   protected:
 
-    //! Calculate the complex value and its gradient
+    //! The calculate method should never be called
     void calculate (Result& result, std::vector<Result>*)
     {
       throw Error (InvalidState, 
