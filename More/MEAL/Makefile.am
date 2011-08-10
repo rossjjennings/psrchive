@@ -85,14 +85,15 @@ nobase_include_HEADERS = \
         MEAL/Rotation.h \
 	MEAL/Rotation1.h \
         MEAL/RuleMath.h \
+        MEAL/Scalar.h \
         MEAL/ScalarAbsolute.h \
         MEAL/ScalarArgument.h \
+	MEAL/ScalarAtanc.h \
         MEAL/ScalarBesselI0.h \
         MEAL/ScalarConstant.h \
         MEAL/ScalarCosine.h \
 	MEAL/ScalarErrorFunction.h \
         MEAL/ScalarExponential.h \
-        MEAL/Scalar.h \
         MEAL/ScalarHypCosine.h \
         MEAL/ScalarHypSine.h \
         MEAL/ScalarHypTangent.h \
@@ -190,9 +191,10 @@ libMEAL_la_SOURCES = \
         RotatingVectorModel.C \
         Rotation.C \
 	Rotation1.C \
+        Scalar.C \
         ScalarAbsolute.C \
         ScalarArgument.C \
-        Scalar.C \
+	ScalarAtanc.C \
         ScalarConstant.C \
         ScalarCosine.C \
 	ScalarErrorFunction.C \
