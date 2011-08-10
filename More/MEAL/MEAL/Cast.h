@@ -65,6 +65,10 @@ namespace MEAL {
   To* cast (From* from)
   { return new Cast<To, From> (from); }
 
+  template<class To, class From>
+  To* cast (Reference::To<From>& from)
+  { return new Cast<To, From> (from.get()); }
+
 }
 
 #endif
