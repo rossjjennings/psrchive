@@ -52,13 +52,16 @@ void MEAL::SingularCoherency::calculate (Jones<double>& result,
 
   for (unsigned i=0; i<3; i++)
   {
-    double dI_dSi = -p[i];
+    double dI_dSi = p[i];
     if (stokes[0] != 0)
       dI_dSi /= stokes[0];
 
     Stokes<double> dS_dSi;
     dS_dSi[0] = dI_dSi;
-    dS_dSi[i] = 1.0;
+    dS_dSi[i+1] = 1.0;
+
+    if (verbose)
+      cerr << "dS_dS" << i << "=" << dS_dSi << endl;
 
     (*grad)[i] = convert (dS_dSi);
   }
