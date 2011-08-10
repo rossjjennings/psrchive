@@ -29,7 +29,7 @@ public:
     : j00(scalar), j01(0.0), j10(0.0), j11(scalar) { }
 
   //! Construct from a castable type
-  template<typename U> Jones (const U& scalar)
+  template<typename U> explicit Jones (const U& scalar)
     : j00(scalar), j01(0.0), j10(0.0), j11(scalar) { }
 
   //! Construct from std::complex<T>
