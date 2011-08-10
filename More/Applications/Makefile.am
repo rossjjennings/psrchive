@@ -10,7 +10,7 @@ EXTRA_DIST = psrhelp
 
 bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
-	psrover psrcull calavg pcmavg fix_single
+	psrover psrcull calavg pcmavg fix_single psrsplit
 
 pam_SOURCES = pam.C
 
@@ -24,6 +24,8 @@ calavg_SOURCES = calavg.C
 pcmavg_SOURCES = pcmavg.C
 
 fix_single_SOURCES = fix_single.C
+
+psrsplit_SOURCES = psrsplit.C
 
 psradd_SOURCES = psradd.C
 
