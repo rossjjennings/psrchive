@@ -54,5 +54,5 @@ Pulsar::BrittonInfo::get_param_feed (unsigned ichan, unsigned iclass,
 
     Therefore, the result is multiplied by two.
   */
-  return xform->get_Estimate (3 + iclass*2 + iparam) * 2 * 180.0 / M_PI;
+  return xform->get_Estimate (3 + iclass*2 + iparam) * (2 * 180.0 / M_PI);
 }
