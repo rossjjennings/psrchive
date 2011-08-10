@@ -11,23 +11,27 @@
 #ifndef __MEAL_CrossCoherency_H
 #define __MEAL_CrossCoherency_H
 
-#include "MEAL/Coherency.h"
-#include "MEAL/Composite.h"
+#include "MEAL/SingularCoherency.h"
+#include "MEAL/Wrap.h"
 
 namespace MEAL {
 
-  class OrthogonalModes;
-  class UnitTangent;
-  class Scalar;
+  class JonesSpinor;
+  class ComplexCorrelation;
 
-  //! Partial coherence of orthogonally polarized modes
-  class CrossCoherency : public Coherency
+  //! Partial coherence of 100% polarized modes
+
+  /*! The modes are converted into spinor representation, such that
+    the cross coherency is completely described by a single complex
+    correlation coefficient. */
+
+  class CrossCoherency : public Wrap<Coherency>
   {
 
   public:
 
     //! Default constructor
-    CrossCoherency (OrthogonalModes*);
+    CrossCoherency ();
 
     //! Copy constructor
     CrossCoherency (const CrossCoherency& copy);
@@ -38,25 +42,22 @@ namespace MEAL {
     //! Destructor
     ~CrossCoherency ();
 
+    void set_modeA (SingularCoherency*);
+    void set_modeB (SingularCoherency*);
+
     //! Return the name of the class
     std::string get_name () const;
 
   protected:
 
-    //! The orthogonal modes
-    Project<OrthogonalModes> modes;
+    //! The complex correlation coefficient
+    Reference::To<ComplexCorrelation> correlation;
 
-    //! The axis that defines the modes
-    Project<UnitTangent> axis;
+    //! The spinor representation of mode A
+    Reference::To<JonesSpinor> modeA;
 
-    //! The quasi-Stokes parameters in the natural basis
-    Project<Scalar> stokes[4];
-
-    //! Calculate the Jones matrix and its gradient
-    void calculate (Jones<double>& result, std::vector<Jones<double> >*);
-
-    //! Composite parameter policy
-    Composite composite;
+    //! The spinor representation of mode B
+    Reference::To<JonesSpinor> modeB;
 
     //! Works for the constructors
     void init ();
