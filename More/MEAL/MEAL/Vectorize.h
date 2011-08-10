@@ -12,13 +12,14 @@
 #define __Vectorize_H
 
 #include "MEAL/ScalarVector.h"
+#include "MEAL/Convert.h"
 #include "Error.h"
 
 namespace MEAL {
 
   //! Converts a higher dimensional function into a ScalarVector
   template<class T>
-  class Vectorize : public ScalarVector
+  class Vectorize : public Convert<T,ScalarVector>
   {
   public:
 
@@ -29,15 +30,12 @@ namespace MEAL {
 
     //! Return the name of the class
     std::string get_name () const
-    { return "Vectorize<" + function->get_name() + ">"; }
+    { return "Vectorize<" + this->get_model()->get_name() + ">"; }
 
     //! Return the dimension of the vector
     unsigned size () const;
 
   private:
-
-    //! The function to be vectorized
-    Reference::To<T> function;
 
     //! Evaluate the function and decompose it
     void calculate (double& result, std::vector<double>* gradient);
@@ -49,10 +47,9 @@ namespace MEAL {
 }
 
 template<class T>
-MEAL::Vectorize<T>::Vectorize (T* _function)
+MEAL::Vectorize<T>::Vectorize (T* function)
 {
-  function = _function;
-  copy_parameter_policy (function);
+  set_model (function);
 }
 
 //! This recursive template completely unrolls multi-dimensional objects
@@ -85,6 +82,8 @@ template<class T>
 void MEAL::Vectorize<T>::calculate (double& result,
 				    std::vector<double>* gradient)
 {
+  unsigned index = this->get_index();
+
   if (index >= size())
     throw Error (InvalidState,
 		 "MEAL::Vectorize<" + std::string(T::Name) + ">::calculate",
@@ -99,12 +98,12 @@ void MEAL::Vectorize<T>::calculate (double& result,
   if (this->get_verbose())
     std::cerr << get_name() + "::calculate call evaluate" << std::endl;
 
-  m_result = function->evaluate (m_gradptr);
+  m_result = this->get_model()->evaluate (m_gradptr);
 
   ScalarMapping<Result> map;
 
   if (this->get_verbose())
-    std::cerr << get_name() + "::calculate index=" << index << std::endl;
+    std::cerr << get_name() + "::calculate index=" << this->get_index() << std::endl;
 
   result = map.element( m_result, index );
 
