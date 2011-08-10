@@ -21,6 +21,12 @@ std::string MEAL::SpinorJones::get_name () const
   return "SpinorJones";
 }
 
+void MEAL::SpinorJones::set_spinor (Spinor* S)
+{
+  set_spinor( spinorA, S );
+  set_spinor( spinorB, S );
+}
+
 void MEAL::SpinorJones::set_spinorA (Spinor* A)
 {
   set_spinor( spinorA, A );
@@ -73,17 +79,25 @@ Jones<double> outer (Vector<2, complex<double> >& A,
 void MEAL::SpinorJones::calculate (Jones<double>& result,
 				   std::vector< Jones<double> >* grad)
 {
-  std::vector< Vector<2, complex<double> > > Agrad;
-  std::vector< Vector<2, complex<double> > >* Agrad_ptr = &Agrad;
+  // Spinor::Result is a complex-valued 2-vector
 
-  std::vector< Vector<2, complex<double> > > Bgrad;
-  std::vector< Vector<2, complex<double> > >* Bgrad_ptr = &Bgrad;
+  std::vector<Spinor::Result> Agrad;
+  std::vector<Spinor::Result>* Agrad_ptr = &Agrad;
+
+  std::vector<Spinor::Result> Bgrad;
+  std::vector<Spinor::Result>* Bgrad_ptr = &Bgrad;
   
   if (!grad)
     Agrad_ptr = Bgrad_ptr = NULL;
 
-  Vector<2,complex<double> > Aresult = spinorA->evaluate (Agrad_ptr);
-  Vector<2,complex<double> > Bresult = spinorB->evaluate (Bgrad_ptr);
+  Spinor::Result Aresult = spinorA->evaluate (Agrad_ptr);
+  Spinor::Result Bresult = spinorB->evaluate (Bgrad_ptr);
+
+  if (verbose)
+  {
+    cerr << "spinor A=" << Aresult << endl;
+    cerr << "spinor B=" << Bresult << endl;
+  }
 
   result = outer( Aresult, Bresult );
 
@@ -100,7 +114,10 @@ void MEAL::SpinorJones::calculate (Jones<double>& result,
   // compute the partial derivatives wrt spinorA parameters
   temp.resize( Agrad.size() );
   for (unsigned igrad = 0; igrad<Agrad.size(); igrad++)
+  {
     temp[igrad] = outer( Agrad[igrad], Bresult );
+    // cerr << "spinor A grad[" << igrad << "]=" << temp[igrad] << endl;
+  }
 
   // map the spinorA parameter gradient elements
   ProjectGradient (spinorA, temp, *grad);
@@ -108,7 +125,10 @@ void MEAL::SpinorJones::calculate (Jones<double>& result,
   // compute the partial derivatives wrt spinorB parameters
   temp.resize( Bgrad.size() );
   for (unsigned igrad = 0; igrad<Bgrad.size(); igrad++)
+  {
     temp[igrad] = outer( Aresult, Bgrad[igrad] );
+    // cerr << "spinor B grad[" << igrad << "]=" << temp[igrad] << endl;
+  }
 
   // map the spinorB parameter gradient elements
   ProjectGradient (spinorB, temp, *grad);
