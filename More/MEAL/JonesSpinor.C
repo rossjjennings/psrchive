@@ -41,9 +41,7 @@ MEAL::Spinor::Result spinor (const Jones<double>& J,
 
   double norm = sqrt( J(pole,pole).real() );
   result[pole] = 0.5 * dJ(pole,pole)/norm;
-
-  result[!pole] = dJ(!pole,pole)/norm 
-    - 0.5 * dJ(pole,pole) * J(!pole,pole) / (norm * J(pole,pole).real() );
+  result[!pole] = dJ(!pole,pole)/norm - J(!pole,pole)*result[pole]/(norm*norm);
 
   return result;
 }
@@ -55,6 +53,11 @@ unsigned get_pole (const Jones<double>& J)
   else
     return 1;
 }
+
+
+// defined in SpinorJones.C
+Jones<double> outer (Vector<2, complex<double> >& A,
+		     Vector<2, complex<double> >& B);
 
 //! Calculate the Mueller matrix and its gradient
 void MEAL::JonesSpinor::calculate (Spinor::Result& result,
@@ -71,7 +74,14 @@ void MEAL::JonesSpinor::calculate (Spinor::Result& result,
   if (pole == POLE_UNSET)
     pole = get_pole (jones_result);
 
+  if (verbose)
+    cerr << "MEAL::JonesSpinor::calculate pole=" << pole << endl;
+
   result = spinor( jones_result, pole );
+
+  if (verbose)
+    cerr << "J=  " << jones_result << endl
+	 << "S*S=" << outer(result,result) << endl;
 
   if (!grad)
     return;
@@ -79,7 +89,34 @@ void MEAL::JonesSpinor::calculate (Spinor::Result& result,
   assert( grad->size() == jones_grad.size() );
 
   for (unsigned i=0; i<grad->size(); i++)
+  {
     (*grad)[i] = spinor( jones_result, jones_grad[i], pole );
+    
+    if (!verbose)
+      continue;
+
+    cerr << "spinor gradient[" << i << "]=" << (*grad)[i] << endl;
+
+    if (i==0)
+    {
+      // dSpinor_dQ = (P+Q, -U-iV) / 2P*sqrt(P+Q)
+      Spinor::Result dSpinor_dQ;
+      dSpinor_dQ[pole]  = jones_result(pole,pole);
+      dSpinor_dQ[!pole] = -jones_result(!pole,pole);
+
+      double P = trace(jones_result).real();
+      dSpinor_dQ /= 2*P*result[pole];
+
+      cerr << "expected gradient=" << dSpinor_dQ << endl;
+
+      cerr << "Egrad[0]=" 
+	   << outer(result,dSpinor_dQ) + outer(dSpinor_dQ,result) << endl;
+    }
+
+    cerr << "Jgrad[" << i << "]=" << jones_grad[i] << endl;
+    cerr << "Sgrad[" << i << "]=" 
+	 << outer(result,(*grad)[i]) + outer((*grad)[i],result) << endl;
+  }
 
 }
 
