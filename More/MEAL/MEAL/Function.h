@@ -116,7 +116,7 @@ namespace MEAL {
 
     //! Return the number of parameters
     unsigned get_nparam () const
-    { return parameter_policy->get_nparam (); }
+    { if (parameter_policy) return parameter_policy->get_nparam (); return 0; }
 
     //! Return the name of the specified parameter
     std::string get_param_name (unsigned index) const
@@ -186,6 +186,9 @@ namespace MEAL {
     //! Provide access to the parameter_policy attribute
     const ParameterPolicy* get_parameter_policy () const
     { return parameter_policy; }
+
+    //! Some wrappers may not have a parameter policy
+    bool has_parameter_policy () const { return parameter_policy; }
 
     //! Prints the values of model parameters and fit flags to a string
     virtual void print_parameters (std::string& text,

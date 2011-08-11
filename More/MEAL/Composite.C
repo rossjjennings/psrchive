@@ -196,10 +196,18 @@ void MEAL::Composite::map (Projection* modelmap)
 
 }
 
+template<typename T>
+const T* get (const MEAL::Function* model)
+{
+  if (model->has_parameter_policy())
+    return dynamic_cast<const T*>(model->get_parameter_policy());
+  return 0;
+}
 
 
 //! Map the Function indeces
 void MEAL::Composite::add_component (Function* model, vector<unsigned>& imap)
+try
 {
   if (!model)
     return;
@@ -209,19 +217,14 @@ void MEAL::Composite::add_component (Function* model, vector<unsigned>& imap)
 
   component_shares_this = false;
 
-  const Constant* constant = 0;
-  constant = dynamic_cast<const Constant*>(model->get_parameter_policy());
-
-  if (constant)
+  if (get<Constant>(model))
   {
     if (Function::very_verbose)
       cerr << class_name() + "add_component Constant" << endl;
     return;
   }
 
-  const Composite* meta = 0;
-  meta = dynamic_cast<const Composite*>(model->get_parameter_policy());
-
+  const Composite* meta = get<Composite>(model);
   if (meta)
   {
     if (meta == this)
@@ -276,10 +279,18 @@ void MEAL::Composite::add_component (Function* model, vector<unsigned>& imap)
       cerr << class_name() + "add_component add new Function" << endl;
 
     // add the new model
-    nparameters += model->get_nparam();
+    nparameters += nparam;
     models.push_back (model);
   }
+
+  if (Function::very_verbose)
+    cerr << class_name() + "add_component exiting" << endl;
 }
+ catch (Error& error)
+   {
+     error << "while adding " << model->get_name();
+     throw error += class_name() + "add_component";
+   }
 
 void MEAL::Composite::unmap (Projection* modelmap)
 {
@@ -322,10 +333,7 @@ void MEAL::Composite::remove_component (Function* model)
   if (Function::very_verbose)
     cerr << class_name() + "remove_component" << endl;
 
-  const Constant* constant = 0;
-  constant = dynamic_cast<const Constant*>(model->get_parameter_policy());
-
-  if (constant)
+  if (get<Constant>(model))
   {
     if (Function::very_verbose)
       cerr << class_name() + "remove_component no need to remove Constant"
@@ -333,9 +341,7 @@ void MEAL::Composite::remove_component (Function* model)
     return;
   }
 
-  const Composite* meta = 0;
-  meta = dynamic_cast<const Composite*>(model->get_parameter_policy());
-
+  const Composite* meta = get<Composite>(model);
   if (meta)
   {
     if (Function::very_verbose)
@@ -509,7 +515,7 @@ MEAL::Function* MEAL::Composite::get_Function (unsigned& index)
 
 
 //! Check the the reference to the specified model is still valid
-void MEAL::Composite::reference_check (unsigned i, char* method) const
+void MEAL::Composite::reference_check (unsigned i, const char* method) const
 {
   if (!models[i])
     throw Error (InvalidState, class_name() + method, 
@@ -557,18 +563,13 @@ void MEAL::Composite::get_imap (const Function* model,
   if (!model)
     return;
 
-  const Constant* constant = 0;
-  constant = dynamic_cast<const Constant*>(model->get_parameter_policy());
-
-  if (constant)
+  if (get<Constant>(model))
     return;
 
   if (remap_needed)
     const_cast<Composite*>(this)->remap ();
 
-  const Composite* meta = 0;
-  meta = dynamic_cast<const Composite*>(model->get_parameter_policy());
-
+  const Composite* meta = get<Composite> (model);
   if (meta)
   {
     unsigned nmodel = meta->get_nmodel();
@@ -607,9 +608,7 @@ void MEAL::get_imap (const Function* composite,
 		     const Function* component,
 		     std::vector<unsigned>& imap)
 {
-  const Composite* policy = 0;
-  policy = dynamic_cast<const Composite*>(composite->get_parameter_policy());
-
+  const Composite* policy = get<Composite>(composite);
   if (!policy)
     throw Error (InvalidParam, "MEAL::get_imap",
 		 composite->get_name() + " is not a Composite");
