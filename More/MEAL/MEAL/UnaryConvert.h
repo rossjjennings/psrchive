@@ -42,7 +42,7 @@ namespace MEAL {
       std::vector<typename From::Result> from_grad;
       typename From::Result from_result;
 
-      from_result = model->evaluate( (grad) ? &from_grad : 0 );
+      from_result = this->get_model()->evaluate( (grad) ? &from_grad : 0 );
       result = method (from_result);
       if (!grad)
 	return;
@@ -50,9 +50,6 @@ namespace MEAL {
       for (unsigned i=0; i<this->get_nparam(); i++)
 	(*grad)[i] = method (from_grad[i]);
     }
-
-    //! The function to be converted
-    Reference::To<From> model;
 
     //! The Unary function used to complete the conversion
     Method method;
