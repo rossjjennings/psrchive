@@ -204,6 +204,21 @@ const T* get (const MEAL::Function* model)
   return 0;
 }
 
+MEAL::Function* unwrap (MEAL::Function* model)
+{
+  if (!model)
+    return 0;
+
+  if (!model->has_parameter_policy())
+    return model;
+
+  MEAL::Function* context = model->get_parameter_policy()->get_context();
+
+  if (!context)
+    return model;
+
+  return context;
+}
 
 //! Map the Function indeces
 void MEAL::Composite::add_component (Function* model, vector<unsigned>& imap)
@@ -254,6 +269,8 @@ try
 
     unsigned iparam = 0;
     unsigned imodel = 0;
+
+    model = unwrap (model);
 
     for(; imodel < models.size(); imodel++)
     {
