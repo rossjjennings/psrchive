@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/psrchive.h"
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/StandardCandles.h"
@@ -79,7 +80,7 @@ void unload (Pulsar::FluxCalibrator* fluxcal) try {
 	 << endl;
 
   string newname = fluxcal->get_filenames ();
-  char* whitespace = " ,\t\n";
+  const char* whitespace = " ,\t\n";
   newname = replace_extension( stringtok (newname, whitespace), output_ext );
 
   if (!unload_path.empty())
