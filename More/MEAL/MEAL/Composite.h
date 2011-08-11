@@ -171,7 +171,7 @@ namespace MEAL {
     Function* get_Function (unsigned& index);
 
     //! Check the the reference to the specified model is still valid
-    void reference_check (unsigned imodel, char* method) const;
+    void reference_check (unsigned imodel, const char* method) const;
 
   };
 
