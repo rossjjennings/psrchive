@@ -20,9 +20,16 @@ using namespace std;
 
 void MEAL::CrossCoherency::init ()
 {
-  correlation = new ComplexCorrelation;
-  modeA = new JonesSpinor;
-  modeB = new JonesSpinor;
+  if (!correlation)
+    correlation = new ComplexCorrelation;
+
+  if (!modeA)
+    modeA = new JonesSpinor;
+  modeA->set_model (new SingularCoherency);
+
+  if (!modeB)
+    modeB = new JonesSpinor;
+  modeB->set_model (new SingularCoherency);
 
   SpinorJones* cross = new SpinorJones;
   cross->set_spinorA( modeA );
@@ -37,12 +44,12 @@ void MEAL::CrossCoherency::init ()
 
 MEAL::CrossCoherency::CrossCoherency ()
 {
-  init ();
 }
 
 //! Copy constructor
 MEAL::CrossCoherency::CrossCoherency (const CrossCoherency& copy)
 {
+  correlation = copy.correlation->clone();
   init ();
   operator = (copy);
 }
@@ -62,6 +69,28 @@ MEAL::CrossCoherency::operator = (const CrossCoherency& that)
 //! Destructor
 MEAL::CrossCoherency::~CrossCoherency ()
 {
+}
+
+void MEAL::CrossCoherency::set_modeA (SingularCoherency* A)
+{
+  if (!modeA)
+    init ();
+
+  modeA->set_model (A);
+}
+
+void MEAL::CrossCoherency::set_modeB (SingularCoherency* B)
+{
+  if (!modeB)
+    init ();
+
+  modeB->set_model (B);
+}
+
+void MEAL::CrossCoherency::set_correlation (Complex* c)
+{
+  correlation = c;
+  init ();
 }
 
 //! Return the name of the class
