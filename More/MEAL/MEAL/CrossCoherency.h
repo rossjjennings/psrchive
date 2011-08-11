@@ -17,7 +17,7 @@
 namespace MEAL {
 
   class JonesSpinor;
-  class ComplexCorrelation;
+  class Complex;
 
   //! Partial coherence of 100% polarized modes
 
@@ -44,6 +44,7 @@ namespace MEAL {
 
     void set_modeA (SingularCoherency*);
     void set_modeB (SingularCoherency*);
+    void set_correlation (Complex*);
 
     //! Return the name of the class
     std::string get_name () const;
@@ -51,7 +52,7 @@ namespace MEAL {
   protected:
 
     //! The complex correlation coefficient
-    Reference::To<ComplexCorrelation> correlation;
+    Reference::To<Complex> correlation;
 
     //! The spinor representation of mode A
     Reference::To<JonesSpinor> modeA;
