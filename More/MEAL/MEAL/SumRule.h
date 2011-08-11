@@ -65,7 +65,7 @@ namespace MEAL {
     Reference::To< SumRule<T> > result = new SumRule<T>;
     result->add_model (A);
     result->add_model (B);
-    return result;
+    return result.release();
   }
 
   template<class T>
