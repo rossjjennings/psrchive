@@ -235,7 +235,7 @@ TESTS =									 \
 	test_Invariant test_CyclicParameter test_Univariate		 \
 	test_StokesError test_StokesCovariance test_Vectorize		 \
 	test_UnitTangent test_ScalarAtanc test_ComplexCorrelation	 \
-	test_Spinor
+	test_Spinor test_CrossCoherency
 
 check_PROGRAMS = $(TESTS) test_Function_load 
 
@@ -260,6 +260,7 @@ test_UnitTangent_SOURCES	= test_UnitTangent.C
 test_ScalarAtanc_SOURCES	= test_ScalarAtanc.C
 test_ComplexCorrelation_SOURCES = test_ComplexCorrelation.C
 test_Spinor_SOURCES		= test_Spinor.C
+test_CrossCoherency_SOURCES	= test_CrossCoherency.C
 
 ##############################################################################
 #
