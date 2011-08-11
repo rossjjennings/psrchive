@@ -66,7 +66,7 @@ namespace MEAL {
     Reference::To< ProductRule<T> > result = new ProductRule<T>;
     result->add_model (A);
     result->add_model (B);
-    return result;
+    return result.release();
   }
 
   template<class T>
