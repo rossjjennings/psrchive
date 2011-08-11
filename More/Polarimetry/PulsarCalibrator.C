@@ -31,7 +31,6 @@
 #include "Pulsar/Pulsar.h"
 
 #include "MEAL/Complex2Math.h"
-#include "MEAL/Complex2Value.h"
 #include "MEAL/GimbalLockMonitor.h"
 
 #include "toa.h"

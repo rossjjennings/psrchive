@@ -25,7 +25,6 @@ nobase_include_HEADERS = \
 	MEAL/ComplexRVM.h \
         MEAL/Complex2.h \
         MEAL/Complex2Math.h \
-        MEAL/Complex2Value.h \
 	MEAL/Complex4.h \
         MEAL/Composite.h \
         MEAL/CongruenceTransformation.h \
@@ -80,7 +79,6 @@ nobase_include_HEADERS = \
 	MEAL/Projection.h \
 	MEAL/RandomPolar.h \
 	MEAL/Real4.h \
-	MEAL/Real4Value.h \
         MEAL/RotatingVectorModel.h \
         MEAL/Rotation.h \
 	MEAL/Rotation1.h \
@@ -107,11 +105,10 @@ nobase_include_HEADERS = \
         MEAL/ScalarRoot.h \
         MEAL/ScalarSine.h \
         MEAL/ScalarTangent.h \
-        MEAL/ScalarValue.h \
 	MEAL/ScalarVector.h \
         MEAL/ScaledVonMisesDeriv.h \
         MEAL/ScaledVonMises.h \
-	MEAL/SingularCoherency.h 
+	MEAL/SingularCoherency.h \
 	MEAL/Spinor.h \
 	MEAL/SpinorJones.h \
 	MEAL/Steps.h \
@@ -126,6 +123,7 @@ nobase_include_HEADERS = \
 	MEAL/UnitTangent.h \
         MEAL/Univariate.h \
         MEAL/UnivariatePolicy.h \
+	MEAL/Value.h \
 	MEAL/Vectorize.h \
         MEAL/VectorRule.h \
         MEAL/VelocityModel.h \
@@ -147,7 +145,6 @@ libMEAL_la_SOURCES = \
         Complex2.C \
         Complex2Constant.C \
         Complex2Math.C \
-        Complex2Value.C \
 	Complex4.C \
         Composite.C \
         CongruenceTransformation.C \
@@ -187,7 +184,6 @@ libMEAL_la_SOURCES = \
         Projection.C \
 	RandomPolar.C \
 	Real4.C \
-	Real4Value.C \
         RotatingVectorModel.C \
         Rotation.C \
 	Rotation1.C \
@@ -212,7 +208,6 @@ libMEAL_la_SOURCES = \
         ScalarRoot.C \
         ScalarSine.C \
         ScalarTangent.C \
-        ScalarValue.C \
 	ScalarVector.C \
         ScaledVonMises.C \
         ScaledVonMisesDeriv.C \

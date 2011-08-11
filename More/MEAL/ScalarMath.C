@@ -7,7 +7,7 @@
 
 #include "MEAL/ScalarMath.h"
 #include "MEAL/ScalarParameter.h"
-#include "MEAL/ScalarValue.h"
+#include "MEAL/Value.h"
 
 #include "MEAL/ScalarRoot.h"
 #include "MEAL/ScalarSine.h"
@@ -40,7 +40,7 @@ MEAL::ScalarMath::ScalarMath (const Estimate<double>& value)
     
 MEAL::ScalarMath::ScalarMath (double value)
 {
-  expression = new ScalarValue (value);
+  expression = new Value<Scalar> (value);
 }
 
 MEAL::ScalarMath::ScalarMath (const ScalarMath& s)

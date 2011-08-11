@@ -18,7 +18,7 @@
 
 #include "Pulsar/MeanJones.h"
 
-#include "MEAL/Complex2Value.h"
+#include "MEAL/Value.h"
 #include "Pauli.h"
 
 using namespace std;
@@ -391,7 +391,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 
     result->add_model( correction );
     if (precalibrator) 
-      result->add_model( new MEAL::Complex2Value(response) );
+      result->add_model( new MEAL::Value<MEAL::Complex2>(response) );
 
     transformation[ichan] = result;
 

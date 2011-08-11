@@ -30,7 +30,6 @@
 
 #include "MEAL/PhysicalCoherency.h"
 #include "MEAL/Complex2Constant.h"
-#include "MEAL/Complex2Value.h"
 #include "MEAL/ProductRule.h"
 #include "MEAL/Gain.h"
 
