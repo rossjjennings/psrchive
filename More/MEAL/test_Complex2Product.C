@@ -4,10 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/ProductRule.h"
-#include "MEAL/Complex2Value.h"
 #include "MEAL/Rotation1.h"
 #include "MEAL/Boost1.h"
+#include "MEAL/Value.h"
 
 using namespace std;
 
@@ -122,8 +123,8 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  cerr << "Construct MEAL::Complex2Value" << endl;
-  Test< MEAL::Complex2Value > Cvalue;
+  cerr << "Construct MEAL::Value<Complex2>" << endl;
+  Test< MEAL::Value<MEAL::Complex2> > Cvalue;
 
   meta *= &Cvalue;
 
