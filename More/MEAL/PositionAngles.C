@@ -7,12 +7,12 @@
 #include "MEAL/PositionAngles.h"
 #include "MEAL/ScalarMath.h"
 #include "MEAL/ScalarParameter.h"
-#include "MEAL/ScalarValue.h"
+#include "MEAL/Value.h"
 
 void MEAL::PositionAngles::init ()
 {
   rotation_measure = new ScalarParameter;
-  frequency = new ScalarValue;
+  frequency = new Value<Scalar>;
 
   // speed of light in Mm/s
   double speed_of_light = 299.792458;
