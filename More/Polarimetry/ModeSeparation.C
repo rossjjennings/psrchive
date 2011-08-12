@@ -7,7 +7,9 @@
 
 #include "Pulsar/ModeSeparation.h"
 
-#include "MEAL/OrthogonalModes.h"
+#include "MEAL/ComplexCorrelation.h"
+#include "MEAL/SingularCoherency.h"
+
 #include "MEAL/JonesMueller.h"
 
 #include "MEAL/ProductRule.h"
@@ -32,27 +34,72 @@ bool Pulsar::ModeSeparation::verbose = true;
 Complex2* product (Scalar* a, Complex2* A)
 {
   ProductRule<Complex2>* product = new ProductRule<Complex2>;
-  product->add_model( cast<Complex2>( exp(*a).get_expression() ) );
+  product->add_model( cast<Complex2>( a ) ); //exp(*a).get_expression() ) );
   product->add_model( A );
   return product;
 }
 
+//! ScalarMapping specialization for an upper diagonal matrix
+template<unsigned N, class T, class M=Matrix<N,N,T> >
+struct UpperDiagonalMatrix
+{
+  typedef DatumTraits< typename DatumTraits<M>::element_type > SubTraits;
+
+  static inline unsigned ndim ()
+  {
+    return (N*(N+1)/2) * SubTraits::ndim();
+  }
+
+  static inline double element (const M& t, unsigned idim)
+  { 
+    unsigned index = idim / SubTraits::ndim();
+    unsigned sub_index = idim % SubTraits::ndim();
+
+    unsigned irow=0; 
+    while (index >= N-irow && irow < N)
+    {
+      index -= (N-irow);
+      irow ++;
+    }
+    unsigned icol=irow+index;
+
+    return SubTraits::element( t[irow][icol], sub_index );
+  }
+};
+
 void Pulsar::ModeSeparation::init ()
 {
-  OrthogonalModes* modes = new OrthogonalModes;
+  cross = new CrossCoherency;
+  cross->set_correlation( correlation = new ComplexCorrelation );
 
-  mode_A = modes->get_modeA();
-  dof_A = new ScalarParameter;
+  SingularCoherency* A = new SingularCoherency;
+  cross->set_modeA(A);
+  mode_A = A;
+  dof_A = new ScalarParameter (1.0);
 
-  mode_B = modes->get_modeB();
-  dof_B = new ScalarParameter;
+  SingularCoherency* B = new SingularCoherency;
+  cross->set_modeB(B);
+  mode_B = B;
+  dof_B = new ScalarParameter (1.0);
 
-  mode_C = new Coherency;
-  dof_C = new ScalarParameter;
+  cerr << "Pulsar::ModeSeparation::init CrossCoherency::nparam="
+       << cross->get_nparam() << endl;
+
+  SumRule<Coherency>* C_sum = new SumRule<Coherency>;
+  C_sum->add_model (A);
+  C_sum->add_model (B);
+  C_sum->add_model (cross);
+
+  cerr << "Pulsar::ModeSeparation::init SumRule<Coherency>::nparam="
+       << C_sum->get_nparam() << endl;
+
+  mode_C = C_sum;
+  dof_C = new ScalarParameter (1.0);
 
   SumRule<Complex2>* mean_sum = new SumRule<Complex2>;
 
-  mean_sum->add_model( modes );
+  mean_sum->add_model( mode_A );
+  mean_sum->add_model( mode_B );
   mean_sum->add_model( mode_C );
 
   mean = mean_sum;
@@ -64,13 +111,14 @@ void Pulsar::ModeSeparation::init ()
   // disjoint B
   cov_sum->add_model( new JonesMueller( product(dof_B,mode_B) ) );
   // superposition
-  cov_sum->add_model( new JonesMueller( product(dof_C,mean_sum) ) );
+  cov_sum->add_model( new JonesMueller( product(dof_C,mode_C) ) );
 
   covariance = cov_sum;
 
   Union* join = new Union;
   join->push_back( vectorize(mean_sum) );
-  join->push_back( vectorize(cov_sum) );
+  join->push_back( new Vectorize<Real4,
+		   UpperDiagonalMatrix<4,double> >(cov_sum) );
 
   space = join;
 }
@@ -86,13 +134,62 @@ Pulsar::ModeSeparation::ModeSeparation ()
 void Pulsar::ModeSeparation::set_mean (const Stokes<double>& stokes)
 {
   obs_mean = convert(stokes);
-  mode_A->set_stokes(stokes);
+
+  Vector<3,double> p = stokes.get_vector();
+  double I = stokes.get_scalar();
+  double P = norm(p);
+
+  Stokes<double> A (I+P, (I+P)*p/P);
+  A *= 0.5;
+  mode_A->set_stokes(A);
+
+  cerr << "MODE A=" << mode_A->evaluate() << endl;
+
+  Stokes<double> B (I-P, -(I-P)*p/P);
+  B *= 0.5;
+  mode_B->set_stokes(B);
+
+  cerr << "MODE B=" << mode_B->evaluate() << endl;
+
+  cerr << "MODE C=" << mode_C->evaluate() << endl;
+
+  cerr << "CROSS=" << cross->evaluate() << endl;
+
+  cerr << "CORRELATION=" << correlation->evaluate() << endl;
+
+  cerr << "Pulsar::ModeSeparation::set_mean S=" << stokes
+       << "\n A=" << A
+       << "\n B=" << B
+       << "\n A+B=" << A+B << endl;
 }
 
 //! Set the covariances of the Stokes parameters
 void Pulsar::ModeSeparation::set_covariance (const Matrix<4,4,double>& covar)
 {
   obs_covariance = covar;
+
+  cerr << "Pulsar::ModeSeparation::set_covariance C=\n" << covar << endl;
+
+  Jones<double> sum = mode_C->evaluate();
+
+  cerr << "SUM=" << sum << endl;
+
+  double normS = norm(sum);
+  cerr << "Frobenius norm=" << normS << endl;
+
+  double var_I = covar[0][0];
+  cerr << "var_I=" << var_I << endl;
+
+  double scale = 1.0 / sqrt(0.5 * normS / var_I);
+
+  cerr << "scale=" << scale << endl;
+
+  dof_A->set_value(0.01*scale);
+  dof_B->set_value(0.01*scale);
+  dof_C->set_value(scale);
+
+  cerr << "guess covariance=\n" << covariance->evaluate() << endl;
+
 }
 
 // ///////////////////////////////////////////////////////////////////////////
@@ -154,7 +251,7 @@ void Pulsar::ModeSeparation::solve ()
 
   const unsigned ndim = space->size();
 
-  if (ndim != 24)
+  if (ndim != 18)
     throw Error (InvalidState, "Pulsar::ModeSeparation::solve",
 		 "unexpected problem dimension ndim=%u", ndim);
 
@@ -170,19 +267,19 @@ void Pulsar::ModeSeparation::solve ()
     y[idim] = jmap.element (obs_mean, i);
 
     if (verbose)
-      cerr << "ScalarMapping Jones idim=" << idim << " x=" << x[idim] << endl;
+      cerr << "ScalarMapping Jones i=" << i << " idim=" << x[idim] << endl;
 
     idim ++;
   }
 
-  ScalarMapping< Matrix<4,4,double> > Mmap;
+  UpperDiagonalMatrix<4,double> Mmap;
   for (unsigned i=0; i<Mmap.ndim(); i++)
   {
     x[idim] = idim;
     y[idim] = Mmap.element (obs_covariance, i);
 
     if (verbose)
-      cerr << "ScalarMapping Mueller idim=" << idim << " x=" << x[idim] << endl;
+      cerr << "ScalarMapping Mueller i=" << i << " idim=" << x[idim] << endl;
 
     idim ++;
   }
@@ -192,7 +289,7 @@ void Pulsar::ModeSeparation::solve ()
   float best_chisq = 0.0;
   unsigned iterations = 0;
   unsigned maximum_iterations = 200;
-  float convergence_chisq = 1e-3;
+  float convergence_chisq = 1e-6;
   unsigned nfree = 1;
 
   if (verbose)
@@ -219,6 +316,8 @@ void Pulsar::ModeSeparation::solve ()
   unsigned stick_to_steepest_decent = 0;
   unsigned patience = 5;
 
+  cerr << "initial covariance=\n" << covariance->evaluate() << endl;
+
   for (iterations = 0; iterations < maximum_iterations; iterations++) try
   {
     float chisq = fit.iter (x, y, *space);
@@ -228,6 +327,15 @@ void Pulsar::ModeSeparation::solve ()
 
     if (debug)
       cerr << "ITERATION: " << iterations << endl;
+
+    cerr << "A=" << mode_A->evaluate() << endl;
+    cerr << "dofA=" << dof_A->evaluate() << endl;
+
+    cerr << "B=" << mode_B->evaluate() << endl;
+    cerr << "dofB=" << dof_B->evaluate() << endl;
+
+    cerr << "C=" << mode_C->evaluate() << endl;
+    cerr << "dofC=" << dof_C->evaluate() << endl;
 
     if (convergence_chisq)
     {
