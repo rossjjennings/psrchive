@@ -30,10 +30,8 @@ namespace MEAL {
 
     //! Destructor
     ~FunctionPolicy ();
-
-  protected:
-
-    //! Return the context to derived classes
+    
+    //! Return the Function for whom this policy operates
     Function* get_context () const { return context; }
 
   private:
