@@ -31,6 +31,11 @@ int main (int argc, char** argv) try
   profile = archive->get_Integration(0)->new_PolnProfile(0);
   stats.set_profile (profile);
 
+  PolnProfile modeA;
+  PolnProfile modeB;
+
+  stats.separate (modeA, modeB);
+
   PolnProfile p1;
   PolnProfile p2;
   PolnProfile p3;

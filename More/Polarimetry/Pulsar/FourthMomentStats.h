@@ -36,6 +36,9 @@ namespace Pulsar {
     //! Get the eigen polarization profiles
     void eigen (PolnProfile&, PolnProfile&, PolnProfile&);
 
+    //! Get the mode-separated profiles
+    void separate (PolnProfile& modeA, PolnProfile& modeB);
+
   protected:
 
     Reference::To<const StokesCovariance> covariance;
