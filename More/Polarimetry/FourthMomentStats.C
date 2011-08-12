@@ -8,6 +8,7 @@
 #include "Pulsar/FourthMomentStats.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/StokesCovariance.h"
+#include "Pulsar/ModeSeparation.h"
 
 #include "Pauli.h"
 #include "Jacobi.h"
@@ -164,5 +165,56 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile& v1,
     //v[0]->set_Stokes (ibin, Stokes<double>(Ivar, peigen[imax]*pvar[imax]));
 
 
+  }
+}
+
+
+
+
+
+
+
+void Pulsar::FourthMomentStats::separate (PolnProfile& modeA,
+					  PolnProfile& modeB)
+{
+  if (!covariance)
+    throw Error (InvalidState, "Pulsar::FourthMomentStats::separate",
+		 "covariance not set");
+
+  PhaseWeight* baseline = stats->get_baseline ();
+  Reference::To<StokesCovariance> clone = covariance->clone();
+  for (unsigned imoment=0; imoment < StokesCovariance::nmoment; imoment++)
+  {
+    baseline->set_Profile( clone->get_Profile(imoment) );
+    clone->get_Profile(imoment)->offset( -baseline->get_avg() );
+  }
+
+  covariance = clone;
+
+  const unsigned nbin = profile->get_nbin();
+
+  modeA.resize( nbin );
+  modeB.resize( nbin );
+
+  ModeSeparation modes;
+
+  for (unsigned ibin=0; ibin < nbin; ibin++)
+  {
+    Stokes<double> stokes = profile->get_Stokes(ibin);
+    if (stokes[0] <= 0.05) //stokes.abs_vect())
+      continue;
+
+    cerr << "Pulsar::FourthMomentStats::separate ibin=" << ibin << endl;
+
+    modes.set_mean ( stokes );
+    modes.set_covariance ( covariance->get_covariance (ibin) );
+
+    modes.solve ();
+
+    cerr << "modeA=" << coherency(modes.get_modeA()->evaluate()) << endl;
+    cerr << "modeB=" << coherency(modes.get_modeB()->evaluate()) << endl;
+    cerr << "modeC=" << coherency(modes.get_modeC()->evaluate()) << endl;
+    cerr << "correlation=" << modes.get_correlation()->evaluate() << endl;
+    cerr << "mean=" << coherency(modes.get_mean()->evaluate()) << endl;
   }
 }
