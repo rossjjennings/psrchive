@@ -19,10 +19,10 @@ int main () try
 
   modes.solve ();
 
-  cerr << "modeA=" << modes.get_modeA()->get_stokes() << endl;
-  cerr << "modeB=" << modes.get_modeB()->get_stokes() << endl;
-  cerr << "modeC=" << modes.get_modeC()->get_stokes() << endl;
-
+  cerr << "modeA=" << coherency(modes.get_modeA()->evaluate()) << endl;
+  cerr << "modeB=" << coherency(modes.get_modeB()->evaluate()) << endl;
+  cerr << "modeC=" << coherency(modes.get_modeC()->evaluate()) << endl;
+  cerr << "correlation=" << modes.get_correlation()->evaluate() << endl;
   cerr << "mean=" << coherency(modes.get_mean()->evaluate()) << endl;
 
   cerr << endl;
