@@ -15,7 +15,8 @@
 #define __Pulsar_ModeSeparation_H
 
 #include "MEAL/Real4.h"
-#include "MEAL/Coherency.h"
+#include "MEAL/CrossCoherency.h"
+#include "MEAL/ComplexCorrelation.h"
 #include "MEAL/ScalarVector.h"
 #include "MEAL/ScalarParameter.h"
 
@@ -43,7 +44,7 @@ namespace Pulsar {
     MEAL::Coherency* get_modeA () { return mode_A; }
     MEAL::Coherency* get_modeB () { return mode_B; }
     MEAL::Coherency* get_modeC () { return mode_C; }
-
+    MEAL::Complex* get_correlation () { return correlation; }
     MEAL::Complex2* get_mean () { return mean; }
     MEAL::Real4* get_covariance () { return covariance; }
 
@@ -70,6 +71,9 @@ namespace Pulsar {
     Reference::To<MEAL::ScalarParameter> dof_B;
 
     //! Mode C (cross-coherency)
+    Reference::To<MEAL::CrossCoherency> cross;
+    Reference::To<MEAL::ComplexCorrelation> correlation;
+
     Reference::To<MEAL::Coherency> mode_C;
     Reference::To<MEAL::ScalarParameter> dof_C;
 
