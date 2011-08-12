@@ -15,10 +15,12 @@
 #include "MEAL/Convert.h"
 #include "Error.h"
 
+template<class T> struct ScalarMapping;
+
 namespace MEAL {
 
   //! Converts a higher dimensional function into a ScalarVector
-  template<class T>
+  template<class T, class Map = ScalarMapping<typename T::Result> >
   class Vectorize : public Convert<T,ScalarVector>
   {
   public:
@@ -40,17 +42,14 @@ namespace MEAL {
     //! Evaluate the function and decompose it
     void calculate (double& result, std::vector<double>* gradient);
 
+    //! The order of scalar elements in T
+    Map map;
   };
 
   template<class T>
   Vectorize<T>* vectorize (T* function) { return new Vectorize<T>(function); }
 }
 
-template<class T>
-MEAL::Vectorize<T>::Vectorize (T* function)
-{
-  set_model (function);
-}
 
 //! This recursive template completely unrolls multi-dimensional objects
 template<class T> struct ScalarMapping
@@ -78,9 +77,15 @@ struct ScalarMapping<double>
   static inline double element (const double& x, unsigned idim) { return x; }
 };
 
-template<class T>
-void MEAL::Vectorize<T>::calculate (double& result,
-				    std::vector<double>* gradient)
+template<class T, class M>
+MEAL::Vectorize<T,M>::Vectorize (T* function)
+{
+  set_model (function);
+}
+
+template<class T, class M>
+void MEAL::Vectorize<T,M>::calculate (double& result,
+				      std::vector<double>* gradient)
 {
   unsigned index = this->get_index();
 
@@ -100,7 +105,7 @@ void MEAL::Vectorize<T>::calculate (double& result,
 
   m_result = this->get_model()->evaluate (m_gradptr);
 
-  ScalarMapping<Result> map;
+  //ScalarMapping<Result> map;
 
   if (this->get_verbose())
     std::cerr << get_name() + "::calculate index=" << this->get_index() << std::endl;
@@ -122,10 +127,10 @@ void MEAL::Vectorize<T>::calculate (double& result,
 }
 
 //! Return the dimension of the vector
-template<class T>
-unsigned MEAL::Vectorize<T>::size () const
+template<class T, class M>
+unsigned MEAL::Vectorize<T,M>::size () const
 {
-  return ScalarMapping<Result>::ndim();
+  return map.ndim(); // ScalarMapping<Result>::ndim();
 }
 
 #endif
