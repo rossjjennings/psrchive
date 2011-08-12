@@ -24,12 +24,16 @@ void MEAL::CrossCoherency::init ()
     correlation = new ComplexCorrelation;
 
   if (!modeA)
+  {
     modeA = new JonesSpinor;
-  modeA->set_model (new SingularCoherency);
+    modeA->set_model (new SingularCoherency);
+  }
 
   if (!modeB)
+  {
     modeB = new JonesSpinor;
-  modeB->set_model (new SingularCoherency);
+    modeB->set_model (new SingularCoherency);
+  }
 
   SpinorJones* cross = new SpinorJones;
   cross->set_spinorA( modeA );
