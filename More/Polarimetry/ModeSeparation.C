@@ -130,11 +130,45 @@ Pulsar::ModeSeparation::ModeSeparation ()
   cerr << "Pulsar::ModeSeparation parameters=" << space->get_nparam() << endl;
 }
 
-//! Set the mean Stokes parameters
-void Pulsar::ModeSeparation::set_mean (const Stokes<double>& stokes)
+template<typename T, typename U, template<typename> class C>
+C<T> get_value (const C< Estimate<T,U> >& in)
 {
-  obs_mean = convert(stokes);
+  typedef DatumTraits< C<T> > To;
+  typedef DatumTraits< C< Estimate<T,U> > > From;
 
+  C<T> out;
+
+  for (unsigned idim=0; idim < To::ndim(); idim++)
+    To::element(out, idim) = get_value( From::element(in, idim) );
+
+  return out;
+}
+
+template<unsigned N, typename T, typename U>
+Vector<N,T> get_value (const Vector< N, Estimate<T,U> >& in)
+{
+  typedef DatumTraits< Vector< N,T > > To;
+  typedef DatumTraits< Vector< N,Estimate<T,U> > > From;
+
+  Vector<N,T> out;
+
+  for (unsigned idim=0; idim < To::ndim(); idim++)
+    To::element(out, idim) = get_value( From::element(in, idim) );
+}
+
+template<typename T, typename U>
+double get_value (const Estimate<T,U>& in)
+{
+  return in.get_value();
+}
+
+//! Set the mean Stokes parameters
+void Pulsar::ModeSeparation::set_mean (const Stokes<Estimate<double> >& S)
+{
+  obs_mean = convert(S);
+
+  Stokes<double> stokes = get_value(S);
+  
   Vector<3,double> p = stokes.get_vector();
   double I = stokes.get_scalar();
   double P = norm(p);
@@ -164,7 +198,8 @@ void Pulsar::ModeSeparation::set_mean (const Stokes<double>& stokes)
 }
 
 //! Set the covariances of the Stokes parameters
-void Pulsar::ModeSeparation::set_covariance (const Matrix<4,4,double>& covar)
+void Pulsar::ModeSeparation::set_covariance 
+ (const Matrix< 4,4,Estimate<double> >& covar)
 {
   obs_covariance = covar;
 
@@ -177,7 +212,7 @@ void Pulsar::ModeSeparation::set_covariance (const Matrix<4,4,double>& covar)
   double normS = norm(sum);
   cerr << "Frobenius norm=" << normS << endl;
 
-  double var_I = covar[0][0];
+  double var_I = covar[0][0].get_value();
   cerr << "var_I=" << var_I << endl;
 
   double scale = 1.0 / sqrt(0.5 * normS / var_I);
@@ -200,27 +235,6 @@ void Pulsar::ModeSeparation::set_covariance (const Matrix<4,4,double>& covar)
 
 namespace MEAL
 {
-  template<>
-  class WeightingScheme<double>
-  {
-  public:
-    
-    WeightingScheme (double) {}
-
-    double difference (double estimate, double model)
-    { return estimate - model; }
-    
-    double norm (double x) const
-    { return x*x; }
-    
-    double get_weighted_conjugate (double data) const
-    { return data; }
-    
-    double get_weighted_norm (double data) const
-    { return norm(data); }
-    
-  };
-
   template<>
   class AbscissaTraits<unsigned>
   {
@@ -256,11 +270,11 @@ void Pulsar::ModeSeparation::solve ()
 		 "unexpected problem dimension ndim=%u", ndim);
 
   vector<unsigned> x (ndim);
-  vector<double> y (ndim);
+  vector< Estimate<double> > y (ndim);
 
   unsigned idim = 0;
 
-  ScalarMapping< Jones<double> > jmap;
+  ScalarMapping< Jones< Estimate<double> >, Estimate<double> > jmap;
   for (unsigned i=0; i<jmap.ndim(); i++)
   {
     x[idim] = idim;
@@ -272,7 +286,7 @@ void Pulsar::ModeSeparation::solve ()
     idim ++;
   }
 
-  UpperDiagonalMatrix<4,double> Mmap;
+  UpperDiagonalMatrix<4,Estimate<double> > Mmap;
   for (unsigned i=0; i<Mmap.ndim(); i++)
   {
     x[idim] = idim;

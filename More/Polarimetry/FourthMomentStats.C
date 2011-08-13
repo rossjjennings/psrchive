@@ -186,6 +186,7 @@ void Pulsar::FourthMomentStats::separate (PolnProfile& modeA,
   for (unsigned imoment=0; imoment < StokesCovariance::nmoment; imoment++)
   {
     baseline->set_Profile( clone->get_Profile(imoment) );
+    cerr << "covar[" << imoment << "]=" << baseline->get_avg() << endl;
     clone->get_Profile(imoment)->offset( -baseline->get_avg() );
   }
 
@@ -198,13 +199,16 @@ void Pulsar::FourthMomentStats::separate (PolnProfile& modeA,
 
   ModeSeparation modes;
 
+  float threshold = 3.0;
+
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
-    Stokes<double> stokes = profile->get_Stokes(ibin);
-    if (stokes[0] <= 0.05) //stokes.abs_vect())
+    Stokes< Estimate<double> > stokes = get_stokes(ibin);
+    if (stokes[0].get_value() < threshold * stokes[0].get_error())
       continue;
 
-    cerr << "Pulsar::FourthMomentStats::separate ibin=" << ibin << endl;
+    cerr << "Pulsar::FourthMomentStats::separate ibin=" << ibin 
+	 << " stokes=" << stokes << endl;
 
     modes.set_mean ( stokes );
     modes.set_covariance ( covariance->get_covariance (ibin) );
