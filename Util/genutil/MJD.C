@@ -311,8 +311,7 @@ int operator != (const MJD &m1, const MJD &m2) {
 
 int MJD::print (FILE *stream)
 {
-  fprintf(stream, printall().c_str());
-  return 0;
+  return fputs( printall().c_str(), stream );
 }
 
 int MJD::println (FILE *stream)
