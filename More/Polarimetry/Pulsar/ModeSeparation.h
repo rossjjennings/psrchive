@@ -32,11 +32,11 @@ namespace Pulsar {
     //! Default constructor
     ModeSeparation ();
 
-    //! Set the mean Stokes parameters
-    void set_mean (const Stokes<double>&);
+    //! Set the estimated mean Stokes parameters
+    void set_mean (const Stokes< Estimate<double> >&);
 
-    //! Set the covariances of the Stokes parameters
-    void set_covariance (const Matrix<4,4,double>&);
+    //! Set the estimated covariance matrix of the Stokes parameters
+    void set_covariance (const Matrix<4,4,Estimate<double> >&);
 
     //! Solve the equation
     void solve ();
@@ -51,10 +51,10 @@ namespace Pulsar {
   protected:
 
     //! Mean coherency matrix
-    Jones<double> obs_mean;
+    Jones< Estimate<double> > obs_mean;
     
     //! Mean covariance matrix
-    Matrix<4,4,double> obs_covariance;
+    Matrix< 4,4,Estimate<double> > obs_covariance;
 
     //! Covariance of the mode sum
     Reference::To<MEAL::Real4> covariance;
