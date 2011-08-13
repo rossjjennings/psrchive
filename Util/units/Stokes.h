@@ -123,4 +123,7 @@ Estimate<T> invariant ( const Stokes< Estimate<T> >& stokes )
   return result;
 }
 
+template<typename T> struct DatumTraits< Stokes<T> > 
+  : public DatumTraits< Vector<4,T> > {};
+
 #endif
