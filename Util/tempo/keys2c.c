@@ -67,8 +67,8 @@ main(int argc, char** argv)
   
   nelem = i;
   
-  fprintf(fouth, msg1);
-  fprintf(foutc, msg1);
+  fputs (msg1, fouth);
+  fputs (msg1, foutc);
   
   fprintf (fouth,
 	   "#ifndef EPHIO_H\n#define EPHIO_H\n\n"
