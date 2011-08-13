@@ -15,7 +15,7 @@
 #include "MEAL/Convert.h"
 #include "Error.h"
 
-template<class T> struct ScalarMapping;
+template<class Container, class Element = double> struct ScalarMapping;
 
 namespace MEAL {
 
@@ -52,7 +52,7 @@ namespace MEAL {
 
 
 //! This recursive template completely unrolls multi-dimensional objects
-template<class T> struct ScalarMapping
+template<class T, class Element> struct ScalarMapping
 {
   typedef DatumTraits< typename DatumTraits<T>::element_type > SubTraits;
 
@@ -61,7 +61,7 @@ template<class T> struct ScalarMapping
     return DatumTraits<T>::ndim() * SubTraits::ndim();
   }
 
-  static inline double element (const T& t, unsigned idim)
+  static inline Element element (const T& t, unsigned idim)
   { 
     const unsigned index = idim / SubTraits::ndim();
     const unsigned sub_index = idim % SubTraits::ndim();
