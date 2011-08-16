@@ -7,6 +7,7 @@
 
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/CalibratorType.h"
+#include "templates.h"
 
 //! Default constructor
 Pulsar::FluxCalibratorExtension::FluxCalibratorExtension ()
@@ -52,11 +53,17 @@ void Pulsar::FluxCalibratorExtension::set_nchan (unsigned nchan)
   S_sys.resize( nchan );
 }
 
-
 //! Get the number of frequency channels
 unsigned int Pulsar::FluxCalibratorExtension::get_nchan( void ) const
 {
 	return S_cal.size();
+}
+
+void Pulsar::FluxCalibratorExtension::remove_chan (unsigned first, unsigned last)
+{
+  CalibratorExtension::remove_chan (first, last);
+  remove (S_cal, first, last);
+  remove (S_sys, first, last);
 }
 
 //! Set the number of frequency channels

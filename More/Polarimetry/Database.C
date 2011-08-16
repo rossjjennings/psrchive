@@ -925,9 +925,77 @@ catch (Error& error)
   throw error += "Pulsar::Database::criterion Calibrator::Type";
 }
 
+template<class Container>
+double get_centre_frequency (const Container* container, unsigned ichan)
+{
+  return container->get_centre_frequency (ichan);
+}
 
+double get_centre_frequency (const Pulsar::Archive* archive, unsigned ichan)
+{
+  return archive->get_Integration(0)->get_centre_frequency (ichan);
+}
 
+template<class Container, class TagAlong>
+void remove_channels (const Pulsar::Archive* arch, 
+                      Container* super, TagAlong* other = 0)
+{
+  Pulsar::ChannelSubsetMatch chan_match;
 
+  if (Calibrator::verbose > 2)
+    cerr << "Pulsar::Database::generatePolnCalibrator " 
+	 << "BW mismatch, trying channel truncation... " << endl;
+
+  unsigned nremoved = 0;
+
+  // Loop over polcal channels
+  for (unsigned ichan=0; ichan<super->get_nchan(); ichan++)
+  {
+    DEBUG("remove_channels ichan=" << ichan << " nchan=" << super->get_nchan());
+
+    double freq = get_centre_frequency (super, ichan);
+
+    // Try to match them to archive channels
+    try
+    {
+      chan_match.match_channel (arch->get_Integration(0), freq);
+    }
+    catch (...)
+    {
+      DEBUG("no match for " << ichan << " of " << super->get_nchan());
+      // If no match, delete it
+      super->remove_chan(ichan,ichan);
+      if (other)
+        other->remove_chan(ichan,ichan);
+      ichan--;
+      nremoved++;
+    }
+  }
+
+  if (Calibrator::verbose > 2) 
+    cerr << "Pulsar::Database::generatePolnCalibrator removed " 
+	 << nremoved << " channels." << endl;
+}
+
+//! Removes channels from calarch if necessary
+void match_channels (Pulsar::Archive* calarch, const Pulsar::Archive* arch)
+{
+  if ( calarch->get_bandwidth() == arch->get_bandwidth()
+       || calarch->get_nchan() <= arch->get_nchan()
+       || arch->get_nchan() == 0 )
+    return;
+
+  CalibratorStokes* calstokes = calarch->get<CalibratorStokes>();
+  CalibratorExtension* ext = calarch->get<CalibratorExtension>();
+  if (ext)
+    remove_channels (arch, ext, calstokes);
+
+  if (calarch->get_nsubint())
+    remove_channels (arch, calarch, (Pulsar::Archive*) 0);
+  
+  calarch->set_centre_frequency( arch->get_centre_frequency() );
+  calarch->set_bandwidth( arch->get_bandwidth() );
+}
 
 
 /*! This routine is given a pointer to a Pulsar::Archive. It scans the
@@ -941,6 +1009,7 @@ Pulsar::Database::generateFluxCalibrator (Archive* arch, bool allow_raw) try {
 
   Entry match = best_match (criterion(arch, new CalibratorTypes::Flux));
   Reference::To<Archive> archive = Archive::load( get_filename(match) );
+  match_channels(archive,arch);
   return new FluxCalibrator (archive);
 
 }
@@ -991,77 +1060,7 @@ Pulsar::Database::rawFluxCalibrator (Pulsar::Archive* arch)
   return fluxcal.release();
 }
 
-template<class Container>
-double get_centre_frequency (const Container* container, unsigned ichan)
-{
-  return container->get_centre_frequency (ichan);
-}
 
-double get_centre_frequency (const Pulsar::Archive* archive, unsigned ichan)
-{
-  return archive->get_Integration(0)->get_centre_frequency (ichan);
-}
-
-template<class Container, class TagAlong>
-void remove_channels (const Pulsar::Archive* arch, 
-                      Container* super, TagAlong* other = 0)
-{
-  Pulsar::ChannelSubsetMatch chan_match;
-
-  if (Calibrator::verbose > 2)
-    cerr << "Pulsar::Database::generatePolnCalibrator " 
-	 << "BW mismatch, trying channel truncation... " << endl;
-
-  unsigned nremoved = 0;
-
-  // Loop over polcal channels
-  for (unsigned ichan=0; ichan<super->get_nchan(); ichan++)
-  {
-    DEBUG("remove_channels ichan=" << ichan);
-
-    double freq = get_centre_frequency (super, ichan);
-
-    // Try to match them to archive channels
-    try
-    {
-      chan_match.match_channel (arch->get_Integration(0), freq);
-    }
-    catch (...)
-    {
-      DEBUG("no match for " << ichan << " of " << super->get_nchan());
-      // If no match, delete it
-      super->remove_chan(ichan,ichan);
-      if (other)
-        other->remove_chan(ichan,ichan);
-      ichan--;
-      nremoved++;
-    }
-  }
-
-  if (Calibrator::verbose > 2) 
-    cerr << "Pulsar::Database::generatePolnCalibrator removed " 
-	 << nremoved << " channels." << endl;
-}
-
-//! Removes channels from calarch if necessary
-void match_channels (Pulsar::Archive* calarch, const Pulsar::Archive* arch)
-{
-  if ( calarch->get_bandwidth() == arch->get_bandwidth()
-       || calarch->get_nchan() <= arch->get_nchan()
-       || arch->get_nchan() == 0 )
-    return;
-
-  CalibratorStokes* calstokes = calarch->get<CalibratorStokes>();
-  CalibratorExtension* ext = calarch->get<CalibratorExtension>();
-  if (ext)
-    remove_channels (arch, ext, calstokes);
-
-  if (calarch->get_nsubint())
-    remove_channels (arch, calarch, (Pulsar::Archive*) 0);
-  
-  calarch->set_centre_frequency( arch->get_centre_frequency() );
-  calarch->set_bandwidth( arch->get_bandwidth() );
-}
 
 /*! This routine is given a pointer to a Pulsar::Archive. It scans the
   database for all PolnCal observations from the same part of sky that

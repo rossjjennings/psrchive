@@ -68,6 +68,9 @@ namespace Pulsar
     //! Get the number of frequency channels
     unsigned int get_nchan( void ) const;
 
+    //! Remove the inclusive range of channels
+    void remove_chan (unsigned first, unsigned last);
+
     //! Set the number of receptors
     void set_nreceptor (unsigned nreceptor);
 
