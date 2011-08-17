@@ -123,13 +123,13 @@ class Angle
   Angle & operator-= (const double & d);
   Angle & operator*= (const double & d);
   Angle & operator/= (const double & d);
-  const friend Angle operator + (const Angle &, const Angle &);
-  const friend Angle operator - (const Angle &, const Angle &);
-  const friend Angle operator + (const Angle &, double);
-  const friend Angle operator - (const Angle &, double);
-  const friend Angle operator / (const Angle &, double);
-  const friend Angle operator * (const Angle &, double);
-  const friend Angle operator - (const Angle &);
+  friend const Angle operator + (const Angle &, const Angle &);
+  friend const Angle operator - (const Angle &, const Angle &);
+  friend const Angle operator + (const Angle &, double);
+  friend const Angle operator - (const Angle &, double);
+  friend const Angle operator / (const Angle &, double);
+  friend const Angle operator * (const Angle &, double);
+  friend const Angle operator - (const Angle &);
 
   friend double operator * (const Angle &, const Angle &);
 
