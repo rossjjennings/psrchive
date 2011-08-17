@@ -148,6 +148,8 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/Integration.h"
 %include "Pulsar/ProfileAmps.h"
 %include "Pulsar/Profile.h"
+%include "Angle.h"
+%include "sky_coord.h"
 
 // Python-specific extensions to the classes:
 
