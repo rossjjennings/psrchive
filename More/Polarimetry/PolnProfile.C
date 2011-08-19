@@ -797,8 +797,10 @@ void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
 
   // Determine baseline weights from I profile.
   Reference::To<PhaseWeight> base = get_baseline();
-  double sigma = base->get_variance().get_value();
-  sigma = sqrt(sigma);
+
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfile::get_linear sigma_I="
+	 << sqrt( base->get_variance().get_value() ) << endl;
 
   // Apply I baseline to determine Q, U variance.
   base->set_Profile(get_Profile(1));
@@ -806,27 +808,47 @@ void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
   base->set_Profile(get_Profile(2));
   double var_u = base->get_variance().get_value();
 
+  /*
+    L = sqrt(Q^2 + U^2)
+    var{L} = (Q^2 var{Q} + U^2 var{U}) / L^2
+    
+    To avoid the division by zero where L==0, you could turn
+
+    L < threshold * sigma_L
+	
+    into
+
+    L*L < threshold * sigma_L * L
+
+    where sigma_L = sqrt(var{L})
+
+    However, sigma_L*L goes to zero where L==0 ...
+
+    If it is assumed that var{Q} ~= var{U}, then var{L} = var{Q or U} ...
+    Therefore, take the mean: var{L}=(var{Q}+var{U})/2
+  */
+  double sigma_L = sqrt( (var_q+var_u) / 2.0 );
+
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfile::get_linear sigma_L=" << sigma_L << endl;
+
   const float *q = get_Profile(1)->get_amps(); 
   const float *u = get_Profile(2)->get_amps(); 
 
   unsigned nbin = get_nbin();
   L.resize (nbin);
 
-  if (Profile::verbose)
-    cerr << "Pulsar::PolnProfile::get_linear nbin=" << nbin 
-	 << " cutoff=" << threshold*sigma << endl;
-
   unsigned kept = 0;
 
   for (unsigned ibin=0; ibin<nbin; ibin++)
   {
-    if (!threshold || linear.get_amps()[ibin] > threshold*sigma)
+    if ( !threshold || (linear.get_amps()[ibin] > threshold * sigma_L) )
     {
       Estimate<double> Q (q[ibin], var_q);
       Estimate<double> U (u[ibin], var_u);
-
+    
       L[ibin] = complex< Estimate<double> > (Q, U);
-
+      
       kept ++;
     }
     else
