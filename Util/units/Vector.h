@@ -217,7 +217,7 @@ template<unsigned N, typename T> struct DatumTraits< Vector<N,T> >
   static inline unsigned ndim () { return N; }
   static inline T& element (Vector<N,T>& t, unsigned i) 
   { return t[i]; }
-  static inline const T& element (const Vector<N,T>& t, unsigned i)
+  static inline const T element (const Vector<N,T>& t, unsigned i)
   { return t[i]; }
 };
 
