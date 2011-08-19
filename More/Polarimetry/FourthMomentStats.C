@@ -170,9 +170,56 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile& v1,
 
 
 
+//! Get the Stokes parameters of the specified phase bin
+Matrix< 4,4,Estimate<double> >
+Pulsar::FourthMomentStats::get_covariance (unsigned ibin) const try
+{
+  Matrix< 4,4,Estimate<double> > result = covariance->get_covariance (ibin);
+
+  unsigned imoment = 0;
+  for (unsigned ipol=0; ipol < 4; ipol++)
+    for (unsigned jpol=ipol; jpol < 4; jpol++)
+    {
+      double var = get_moment_variance(imoment).get_value(); imoment ++;
+
+      result[ipol][jpol].set_variance( var );
+      result[jpol][ipol].set_variance( var );
+    }
+
+  return result;
+}
+ catch (Error& error)
+   {
+     throw error += "Pulsar::FourthMomentStats::get_covariance";
+   }
 
 
+Estimate<double>
+Pulsar::FourthMomentStats::get_moment_variance (unsigned imom) const try
+{
+  if (imom >= StokesCovariance::nmoment)
+    throw Error (InvalidParam,
+		 "Pulsar::FourthMomentStats::get_moment_variance",
+		 "imoment=%u >= nmoment=%u",
+		 imom, StokesCovariance::nmoment);
 
+  moment_variance.resize( StokesCovariance::nmoment );
+
+  if (moment_variance[imom].get_value() == 0)
+  {
+    stats->set_profile( covariance->get_Profile(imom) );
+    moment_variance[imom] = stats->get_baseline_variance();
+#ifdef _DEBUG
+    cerr << "Pulsar::FourthMomentStats::get_moment_variance imom="
+         << imom << " var=" << moment_variance[imom] << endl;
+#endif
+  }
+  return moment_variance[imom];
+}
+ catch (Error& error)
+   {
+     throw error += "Pulsar::FourthMomentStats::get_moment_variance";
+   }
 
 void Pulsar::FourthMomentStats::separate (PolnProfile& modeA,
 					  PolnProfile& modeB)
@@ -199,7 +246,7 @@ void Pulsar::FourthMomentStats::separate (PolnProfile& modeA,
 
   ModeSeparation modes;
 
-  float threshold = 3.0;
+  float threshold = 10.0;
 
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
@@ -207,11 +254,11 @@ void Pulsar::FourthMomentStats::separate (PolnProfile& modeA,
     if (stokes[0].get_value() < threshold * stokes[0].get_error())
       continue;
 
-    cerr << "Pulsar::FourthMomentStats::separate ibin=" << ibin 
-	 << " stokes=" << stokes << endl;
+    cerr << "Pulsar::FourthMomentStats::separate ibin=" << ibin << endl
+	 << "stokes=" << stokes << endl;
 
     modes.set_mean ( stokes );
-    modes.set_covariance ( covariance->get_covariance (ibin) );
+    modes.set_covariance ( get_covariance (ibin) );
 
     modes.solve ();
 
