@@ -26,7 +26,11 @@ MEAL::Spinor::Result spinor (const Jones<double>& J, unsigned pole)
 {
   MEAL::Spinor::Result result;
 
-  double norm = sqrt( J(pole,pole).real() );
+  double mode = J(pole,pole).real();
+  if (mode <= 0.0)
+    return result;
+
+  double norm = sqrt( mode );
   result[pole] = norm;
   result[!pole] = J(!pole,pole)/norm;
 
@@ -39,7 +43,11 @@ MEAL::Spinor::Result spinor (const Jones<double>& J,
 {
   MEAL::Spinor::Result result;
 
-  double norm = sqrt( J(pole,pole).real() );
+  double mode = J(pole,pole).real();
+  if (mode <= 0.0)
+    return result;
+
+  double norm = sqrt( mode );
   result[pole] = 0.5 * dJ(pole,pole)/norm;
   result[!pole] = dJ(!pole,pole)/norm - J(!pole,pole)*result[pole]/(norm*norm);
 
