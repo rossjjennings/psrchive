@@ -29,7 +29,7 @@
 using namespace MEAL;
 using namespace std;
 
-bool Pulsar::ModeSeparation::verbose = true;
+bool Pulsar::ModeSeparation::verbose = false;
 
 Complex2* product (Scalar* a, Complex2* A)
 {
@@ -41,20 +41,16 @@ Complex2* product (Scalar* a, Complex2* A)
 
 //! ScalarMapping specialization for an upper diagonal matrix
 template<unsigned N, class T, class M=Matrix<N,N,T> >
-struct UpperDiagonalMatrix
+struct SymmetricMatrix
 {
-  typedef DatumTraits< typename DatumTraits<M>::element_type > SubTraits;
-
   static inline unsigned ndim ()
   {
-    return (N*(N+1)/2) * SubTraits::ndim();
+    return (N*(N+1)/2);
   }
 
-  static inline double element (const M& t, unsigned idim)
+  static inline T element (const M& t, unsigned idim)
   { 
-    unsigned index = idim / SubTraits::ndim();
-    unsigned sub_index = idim % SubTraits::ndim();
-
+    unsigned index = idim;
     unsigned irow=0; 
     while (index >= N-irow && irow < N)
     {
@@ -63,7 +59,28 @@ struct UpperDiagonalMatrix
     }
     unsigned icol=irow+index;
 
-    return SubTraits::element( t[irow][icol], sub_index );
+    /*
+      cerr << "idim=" << idim << " irow=" << irow << " icol=" << icol << endl;
+      cerr << "element=" << t[irow][icol] << endl;
+    */
+
+    return t[irow][icol];
+  }
+};
+
+//! ScalarMapping specialization converts coherency matrix to Stokes parameters
+template<class T>
+struct StokesMapping
+{
+  static inline unsigned ndim ()
+  {
+    return 4;
+  }
+
+  static inline T element (const Jones<T>& rho, unsigned idim)
+  {
+    Stokes<T> stokes = coherency (rho);
+    return stokes[idim];
   }
 };
 
@@ -116,9 +133,8 @@ void Pulsar::ModeSeparation::init ()
   covariance = cov_sum;
 
   Union* join = new Union;
-  join->push_back( vectorize(mean_sum) );
-  join->push_back( new Vectorize<Real4,
-		   UpperDiagonalMatrix<4,double> >(cov_sum) );
+  join->push_back( new Vectorize<Complex2,StokesMapping<double> > (mean_sum) );
+  join->push_back( new Vectorize<Real4,SymmetricMatrix<4,double> >(cov_sum) );
 
   space = join;
 }
@@ -165,7 +181,7 @@ double get_value (const Estimate<T,U>& in)
 //! Set the mean Stokes parameters
 void Pulsar::ModeSeparation::set_mean (const Stokes<Estimate<double> >& S)
 {
-  obs_mean = convert(S);
+  obs_mean = S;
 
   Stokes<double> stokes = get_value(S);
   
@@ -265,7 +281,7 @@ void Pulsar::ModeSeparation::solve ()
 
   const unsigned ndim = space->size();
 
-  if (ndim != 18)
+  if (ndim != 14)
     throw Error (InvalidState, "Pulsar::ModeSeparation::solve",
 		 "unexpected problem dimension ndim=%u", ndim);
 
@@ -274,26 +290,27 @@ void Pulsar::ModeSeparation::solve ()
 
   unsigned idim = 0;
 
-  ScalarMapping< Jones< Estimate<double> >, Estimate<double> > jmap;
-  for (unsigned i=0; i<jmap.ndim(); i++)
+  for (unsigned i=0; i<4; i++)
   {
     x[idim] = idim;
-    y[idim] = jmap.element (obs_mean, i);
+    y[idim] = obs_mean[i];
 
     if (verbose)
-      cerr << "ScalarMapping Jones i=" << i << " idim=" << x[idim] << endl;
+      cerr << "ScalarMapping Jones i=" << i << " idim=" << x[idim] 
+	   << " value=" << y[idim] << endl;
 
     idim ++;
   }
 
-  UpperDiagonalMatrix<4,Estimate<double> > Mmap;
+  SymmetricMatrix<4,Estimate<double> > Mmap;
   for (unsigned i=0; i<Mmap.ndim(); i++)
   {
     x[idim] = idim;
     y[idim] = Mmap.element (obs_covariance, i);
 
     if (verbose)
-      cerr << "ScalarMapping Mueller i=" << i << " idim=" << x[idim] << endl;
+      cerr << "ScalarMapping Mueller i=" << i << " idim=" << x[idim]
+	   << " value=" << y[idim] << endl;
 
     idim ++;
   }
@@ -303,7 +320,7 @@ void Pulsar::ModeSeparation::solve ()
   float best_chisq = 0.0;
   unsigned iterations = 0;
   unsigned maximum_iterations = 200;
-  float convergence_chisq = 1e-6;
+  float convergence_chisq = 0; // 1e-6;
   unsigned nfree = 1;
 
   if (verbose)
