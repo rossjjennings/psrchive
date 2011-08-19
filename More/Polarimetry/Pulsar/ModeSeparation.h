@@ -50,8 +50,8 @@ namespace Pulsar {
 
   protected:
 
-    //! Mean coherency matrix
-    Jones< Estimate<double> > obs_mean;
+    //! Mean Stokes parameters
+    Stokes< Estimate<double> > obs_mean;
     
     //! Mean covariance matrix
     Matrix< 4,4,Estimate<double> > obs_covariance;
