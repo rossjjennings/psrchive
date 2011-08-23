@@ -155,7 +155,6 @@ void fix_single::process (Archive* archive)
   }
   catch (Error& error)
   {
-    cout << "blah 2" << endl;
     cerr << "fix_single::process Problem occured with " << archive->get_filename() << endl;
     cerr << error << endl;
     buffer_filled = false;
