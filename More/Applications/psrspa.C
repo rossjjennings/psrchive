@@ -70,18 +70,12 @@ public:
   typedef struct pulse
   {
     string file;           // filename
-    int    intg;           // integration number
-    float  flx;            // pulse flux
-    float  phs;            // phase
-    float  err;            // error in flux
+    unsigned intg;           // integration number
+    double flx;            // pulse flux
+    double phs;            // phase
+    double width;            // width of the pulse
+    unsigned bscrunch_factor;		//widht of one bin
   } pulse;
-
-  typedef struct hbin
-  {
-    float x;
-    float y;
-    float e;
-  } hbin;
 
   typedef struct identifier
   {
@@ -95,13 +89,6 @@ public:
     double b_sigma; 
   } identifier;
 
-  //////////////////////////////////////////////////////////////////////////////
-  // FUNCTION PROTOTYPES
-
-  //! Find and store the flux and phase of each pulse in the file to the data vector.
-
-  // END FUNCTION PROTOTYPES
-  //////////////////////////////////////////////////////////////////////////////
 protected:
   //! add program options:
   void add_options ( CommandLine::Menu& );
@@ -117,15 +104,7 @@ protected:
   float dcyc;
   float norm;
 
-  bool perform_scan;
-  bool perform_find_giants;
-
   vector<pulse>  pulses;
-  vector<pulse>  noise;
-  vector<pulse>  pgiants;
-  vector<pulse>  ngiants;
-  vector<hbin>   pdata;
-  vector<hbin>   ndata;
 
   //! phase resolved histograms
   unsigned hist_count;
@@ -155,21 +134,6 @@ protected:
 
   bool not_initialised; 
 
-  int scan_pulses(Reference::To<Pulsar::Archive> arch, vector<pulse>& data, 
-		  int method, float cphs, float dcyc);
-
-  //! Finds the mean flux from the data vector. Any flux greater than <factor> times the mean is considered a giant and is copied to the giants array.
-  float find_giants(vector<pulse>& data, vector<pulse>& giants, 
-		  float factor,  float norm, float offs);
-
-  void  prob_hist(vector<pulse>& data, vector<hbin>& hist, unsigned nbin,
-		  float min = -99.0, float max = 99.0);
-
-  void  fit_gauss(vector<hbin>& data, MEAL::Gaussian& gm);
-
-  //! Displays info about giant pulses on screen
-  void  display_giants(vector<pulse>& giants);
-
   void choose_phase ( float );
   void choose_range ( string );
   void choose_bscrunch ( unsigned );
@@ -195,6 +159,7 @@ protected:
 
   //! Handle output
   void write_histograms ();
+  void write_pulses ();
 
   //! The algorithm used to find pulses
   Reference::To<Pulsar::ProfileWeightFunction> finder;
@@ -202,7 +167,7 @@ protected:
   void set_finder (const std::string& name);
   //! Use the finder to list pulse information
   void matched_finder (const Archive*);
-  void matched_report (const PhaseWeight& weight, const Profile& profile);
+  void matched_report (string name, unsigned isub, const PhaseWeight& weight, const Profile& profile);
 };
 
 
@@ -211,17 +176,7 @@ psrspa::psrspa ()
 	: Application ( "psrspa", "Single Pulse Analysis" )
 {
   add ( new StandardOptions );
-  //add ( new PlotOptions );
-
-  gaussian   = false;
-  factor     = 5.0;
-  log        = false;
-  shownoise  = false;
-  method     = 0;
   polar_degree_bins = polar_angle_bins = flux_pr_bins = bins = 30;
-  cphs       = 0.0;
-  dcyc       = 0.0;
-  norm       = 0.0;
   nbin = 0;
 
   create_flux = false;
@@ -238,9 +193,6 @@ psrspa::psrspa ()
   
   not_initialised = true;
 
-  perform_scan = false;
-  perform_find_giants = false;
-
   prefix = "psrspa";
   ext = "dat";
   path = "./";
@@ -253,10 +205,8 @@ void psrspa::setup ()
 {
   if ( bins != 30 )
     polar_degree_bins = polar_angle_bins = flux_pr_bins = bins ;
-  if ( perform_find_giants || gaussian )
-    perform_scan = true;
-  if ( ! perform_scan && ! perform_find_giants && ! create_flux && ! create_polar_degree && ! create_polar_angle && ! find_max_amp_in_range )
-    throw Error ( InvalidState, "psrspa::setup", "at least one of -rs, -rg, -hf, -hd, -ha or -fm needs to be used" );
+  if ( ! finder &&  ! create_flux && ! create_polar_degree && ! create_polar_angle && ! find_max_amp_in_range )
+    throw Error ( InvalidState, "psrspa::setup", "at least one of -a, -hf, -hd, -ha or -fm needs to be used" );
 }
 
 void psrspa::process ( Archive* arch )
@@ -269,20 +219,20 @@ void psrspa::process ( Archive* arch )
     initialise_histograms ();
   arch->fscrunch();        // remove frequency and polarisation resolution
   if ( !create_polar_degree && !create_polar_angle )
+  {
+    if ( verbose )
+      cerr << "psrspa::process polarisation histograms not requested, removing polarisation resolution" << endl;
     arch->pscrunch();
+  }
   arch->remove_baseline(); // Remove the baseline level
 
   //this has to precede create_histograms as the latter can modify the archives (bscrunch them). This can be easily fixed by cloning the archive, if that would prove necessary
-  if ( perform_scan )
-    scan_pulses(arch, pulses, method, cphs, dcyc);
   if (finder)
   {
     matched_finder (arch);
     return;
   }
 
-  if (shownoise)
-    scan_pulses(arch, noise, 2, arch->find_min_phase(dcyc), dcyc);
   if ( create_flux || create_polar_degree || create_polar_angle || find_max_amp_in_range )
   {
     create_histograms ( arch );
@@ -291,40 +241,45 @@ void psrspa::process ( Archive* arch )
 
 void psrspa::matched_finder ( const Archive* arch )
 {
-  Reference::To<Profile> profile = arch->get_Profile(0,0,0)->clone();
-  
-  while (profile->get_nbin() > 256)
+  string name = arch->get_filename ();
+  for ( unsigned isub = 0; isub < arch->get_nsubint(); isub++ )
   {
-    finder->set_Profile( profile );  // might finder optimize on &profile?
+    Reference::To<Profile> profile = arch->get_Profile(isub,0,0)->clone();
 
-    PhaseWeight weight;
-    finder->get_weight( &weight );
+    while (profile->get_nbin() > 256)
+    {
+      finder->set_Profile( profile );  // might finder optimize on &profile?
 
-    matched_report (weight, *profile);
+      PhaseWeight weight;
+      finder->get_weight( &weight );
 
-    profile->bscrunch (2);
+      matched_report (name, isub, weight, *profile);
+
+      profile->bscrunch (2);
+    }
   }
 }
 
-void psrspa::matched_report (const PhaseWeight& weight, const Profile& profile)
+void psrspa::matched_report (string name, unsigned isub, const PhaseWeight& weight, const Profile& profile)
 {
-  const unsigned nbin = weight.get_nbin();
-  assert (nbin == profile.get_nbin());
+  pulse newentry;
+  const unsigned _nbin = weight.get_nbin();
+  assert (_nbin == profile.get_nbin());
 
   unsigned ibin = 0;
 
-  while (ibin < nbin)
+  while (ibin < _nbin)
   {
     // find the first on-pulse phase bin
-    while (ibin < nbin && !weight[ibin]) ibin++;
+    while (ibin < _nbin && !weight[ibin]) ibin++;
 
-    if (ibin == nbin)
+    if (ibin == _nbin)
       break;
 
     // start of an on-pulse region ... sum up the flux in this region
     unsigned istart = ibin;
     double flux = 0;
-    while (weight[ibin] && ibin < nbin)
+    while (weight[ibin] && ibin < _nbin)
     {
       flux += profile.get_amps()[ibin];
       ibin++;
@@ -338,193 +293,22 @@ void psrspa::matched_report (const PhaseWeight& weight, const Profile& profile)
     // end-points of region define width
     double width = iend - istart;
 
-    cout << "nbin=" << nbin << " phase=" << phase << " -> " << phase/nbin
-         << " flux=" << flux << " width=" << width << " -> " << width/nbin
-         << endl;
+    newentry.file = name; 
+    newentry.intg = isub;
+    newentry.flx = flux;
+    newentry.phs = phase;
+    newentry.width = width;
+    newentry.bscrunch_factor = nbin / _nbin ;
+    pulses.push_back ( newentry );
   }
 }
 
 void psrspa::finalize ()
 {
-  if ( perform_scan || perform_find_giants )
-    traditional_spa ();
   if ( create_flux || create_polar_degree || create_polar_angle || find_max_amp_in_range )
     write_histograms ();
-}
-
-void psrspa::traditional_spa ()
-{
-  if ( verbose )
-    cerr << "psrspa::traditional_spa entered" << endl;
-  float offset = 2.0;
-
-  if (shownoise) {
-    offset = noise[0].flx;
-    for (unsigned i = 1; i < noise.size(); i++)
-      if (noise[i].flx < offset) offset = noise[i].flx;
-    offset = fabs(offset);
-    offset /= norm;
-  }
-
-  float threshold = find_giants(pulses, pgiants, factor, norm, offset);
-  cout << "Detection threshold is roughly " << threshold << endl;
-
-  display_giants(pgiants);
-
-  prob_hist(pulses, pdata, bins);
-
-
-  if ( verbose )
-    cerr << "psrspa::traditional_spa calculating submin and submax " << endl;
-
-  float submin = pdata[0].x;
-  float submax = pdata[0].x;
-  for (unsigned i = 1; i < pdata.size(); i++) {
-    if (pdata[i].x > submax) submax = pdata[i].x;
-    if (pdata[i].x < submin) submin = pdata[i].x;
-  }
-
-  if (shownoise) {
-    if ( verbose )
-      cerr << "psrspa::traditional_spa executing code for the background noise calculations" << endl;
-    find_giants(noise, ngiants, factor, norm, offset);
-    prob_hist(noise, ndata, bins, submin, submax);
-  }
-
-  unsigned useful = 0;
-  if (log) {
-    if ( verbose )
-      cerr << "psrspa::traditional_spa finding data suitable for a logarithmic plot" << endl;
-    vector<hbin>::iterator it = pdata.begin();
-    while (it != pdata.end()) {
-      if (pdata[useful].x < 0) {
-	pdata.erase(it);
-	continue;
-      }
-      else {
-	pdata[useful].x = logf(pdata[useful].x);
-	it++;
-	useful++;
-      }
-    }
-    threshold = logf(threshold);
-  }
-
-  if ( verbose )
-    cerr << "psrspa::traditional_spa searching for extremes in the data" << endl;
-  float xmin, xmax, ymin, ymax;
-
-  xmin = xmax = pdata[0].x;
-  ymin = ymax = pdata[0].y;
-
-  // Find the extremes of the data set
-
-  for (unsigned i = 1; i < pdata.size(); i++) {
-    if (pdata[i].x > xmax) xmax = pdata[i].x;
-    if (pdata[i].x < xmin) xmin = pdata[i].x;
-    if (pdata[i].y > ymax) ymax = pdata[i].y;
-    if (pdata[i].y < ymin) ymin = pdata[i].y;
-  }
-
-
-  // Plot pulse intensity probability distribution
-  if ( verbose )
-    cerr << "psrspa::traditional_spa plotting pulse intensity probability distribution" << endl;
-  cpgopen("?");
-  cpgsvp(0.1,0.9,0.15,0.9);
-  cpgsci(7);
-  cpgsch(1.3);
-
-  cpgswin(xmin-(xmin/100.0), xmax+(xmax/100.0),
-		  logf(ymin-(ymin/2.0)), logf(ymax+(ymax/2.0)));
-
-  cpgbox("BCNST", 0.0, 0, "BCNST", 0.0, 0);
-  cpgsci(8);
-  if (log)
-    cpglab("Log (Normalised Pulse Flux)", "Log (P(I))", "");
-  else 
-    cpglab("Normalised Pulse Flux", "Log (P(I))", "");
-  cpgsci(5);
-
-
-  // Plot the pulse detection threshold
-  if ( verbose )
-    cerr << "psrspa::traditional_spa plotting the pulse detection threshold" << endl;
-  cpgsls(3);
-  cpgsci(3);
-  cpgmove(threshold, logf(ymin-(ymin/2.0)));
-  cpgdraw(threshold, logf(ymax+(ymax/2.0)));
-  cpgsls(1);
-
-  // Plot points and associated error bars
-
-  if ( verbose )
-    cerr << "psrspa::traditional_spa plotting points" << endl;
-  for (unsigned i = 0; i < pdata.size(); i++) {
-    cpgpt1(pdata[i].x, logf(pdata[i].y), 4);
-    cpgerr1(6, pdata[i].x, logf(pdata[i].y), pdata[i].e/pdata[i].y, 1.0);
-  }
-
-  if (gaussian) {
-    if ( verbose )
-      cerr << "psrspa::traditional_spa fitting Gaussian model to the probability distribution" << endl;
-    MEAL::Gaussian gm1;
-
-    fit_gauss(pdata, gm1);
-
-    gm1.set_abscissa(xmin);
-    cpgmove(xmin,logf(gm1.evaluate()));
-
-    cpgsci(2);
-    cpgsls(2); 
-
-    float xval = 0.0;
-
-    for (unsigned i = 1; i < 1000; i++) {
-      xval = xmin+((xmax-xmin)/1000.0*i);
-      gm1.set_abscissa(xval);
-      cpgdraw(xval,logf(gm1.evaluate()));
-    }
-
-    if (shownoise) {
-
-      MEAL::Gaussian ngm;
-
-      fit_gauss(ndata, ngm);
-
-      ngm.set_abscissa(xmin);
-      cpgmove(xmin,logf(ngm.evaluate()));
-
-      cpgsci(5);
-      cpgsls(4); 
-
-      for (unsigned i = 1; i < 1000; i++) {
-	xval = xmin + ((xmax-xmin)/250.0*i);
-	ngm.set_abscissa(xval);
-	if (log)
-	  cpgdraw(logf(xval),logf(ngm.evaluate()));
-	else
-	  cpgdraw(xval,logf(ngm.evaluate()));
-      }
-    }
-  }
-
-  cpgclos();
-
-  // Free any used memory
-  if ( verbose )
-    cerr << "psrspa::traditional_spa freeing up memory" << endl;
-  pulses.clear();
-  noise.clear();
-  pgiants.clear();
-  ngiants.clear();
-  pdata.clear();
-  ndata.clear();
-
-  fflush(stdout);
-
-  if ( verbose )
-    cerr << "psrspa::traditional_spa finished" << endl;
+  if ( finder )
+    write_pulses ();
 }
 
 void psrspa::set_finder (const std::string& name)
@@ -580,37 +364,17 @@ void psrspa::add_options ( CommandLine::Menu& menu )
   menu.add ( "" );
   menu.add ( "Scan pulses and find giants - options:" );
 
-  arg = menu.add ( this, &psrspa::set_finder, "use");
-  arg->set_help ( "Set/configure the algorithm used to find pulses" );    
-  arg->set_long_help ( "This is a different implementation of the pulse searching" );
-
-  arg = menu.add ( perform_scan, "rs" );
-  arg->set_help ( "perform the scan for pulses, as in spa" );
-
-  arg = menu.add ( perform_find_giants, "rg" );
-  arg->set_help ( "perform the search for giants, as in spa"
-	       "\t\t\t (this implies -rs)" );
-
-  arg = menu.add ( factor, 'g', "factor" );
-  arg->set_help ( "Show giant pulses with flux = <factor>*(norm flux)" );
-
-  arg = menu.add ( this, &psrspa::choose_phase, 'p', "phase" );
-  arg->set_help ( "Use peak flux, calculated at phase = <phase>\n"
-	       "\t\t\t (enter 0.0 to use the overall peak flux)" );
-
-  arg = menu.add ( dcyc, 'w', "width" );
-  arg->set_help ( "Use flux summed over the given phase width\n"
-		  "\t\t\t (only with the -p flag)" );
-
-  arg = menu.add ( norm, 'n', "norm" );
-  arg->set_help ( "Force the use of a specific normalisation factor" );
-
-  arg = menu.add ( gaussian, 'G' );
-  arg->set_help ( "Fit a Gaussian model to the probability distribution"
-		  "\t\t\t (this implies -rs)");
-
-  arg = menu.add ( shownoise, 's' );
-  arg->set_help ( "Show the best-fit model for the background noise" );
+  arg = menu.add ( this, &psrspa::set_finder, 'a',"algorithm");
+  arg->set_help ( "Set the algorithm used to find pulses" );    
+  arg->set_long_help ( "\t\tThis is a different implementation of the pulse searching\n"
+		 "\t\tAvailable algorithms (name):\n"
+		"\t\t - OnPulseThreshold (above)\n" 
+		"\t\t - PeakConsecutive (consecutive)\n"
+		"\t\t - PeakCumulative (cumulative)\n" 
+		"\t\t - ProfileWeightStatic (set)\n" 
+		"\t\t - ExponentialBaseline (exponential)\n"
+		"\t\t - GaussianBaseline (normal)\n"
+		"\t\t - BaselineWindow (minimum)\n" );
 
   menu.add ( "" );
   menu.add ( "Phased resolved histograms" );
@@ -653,324 +417,11 @@ void psrspa::add_options ( CommandLine::Menu& menu )
   arg = menu.add ( ext, 'e', "extension" );
   arg->set_help ( "Write files with this extension" );
   
-  arg = menu.add ( path, 'u', "path" );
+  arg = menu.add ( path, 'O', "path" );
   arg->set_help ( "Write files in this location" ); 
 
   arg = menu.add ( binary_output, "bo" );
-  arg->set_help ( "write the output in binary format" );
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// FUNCTION DEFINITIONS
-
-int psrspa::scan_pulses(Reference::To<Pulsar::Archive> arch, vector<pulse>& data, 
-		int method, float cphs, float dcyc)
-{
-  if ( verbose )
-    cerr << "psrspa::scan_pulses entered" << endl;
-  /* Find and store the flux and phase of each pulse in the file
-     to the data vector. */
-  
-  pulse newentry;
-
-  Reference::To<Pulsar::Profile> prof;
-  
-  newentry.file = arch->get_filename();
-
-  // mean, variance and variance of the mean
-  double nm, nv, vm;
-  
-  int bwid = int(float(nbin) * dcyc);
-  int cbin = 0;
-
-  for (unsigned i = 0; i < arch->get_nsubint(); i++) {
-    if ( verbose )
-      cerr << "psrspa::scan_pulses scanning subint " << i << " of " << newentry.file << endl;
-
-    newentry.intg = i;
-    
-    prof = arch->get_Profile(i, 0, 0);
-     
-    prof->stats(prof->find_min_phase(), &nm, &nv, &vm);
-    newentry.err = sqrt(nv);
-
-    switch (method) {
-      
-    case 0: // Method of total flux
-     if ( verbose )
-       cerr << "psrspa::scan_pulses using the method of the total flux" << endl;
-
-      newentry.flx = prof->sum();
-      newentry.phs = prof->find_max_phase();
-      break;
-      
-    case 1: // Method of maximum amplitude
-     if ( verbose )
-       cerr << "psrspa::scan_pulses using the method of the maximum amplitude" << endl;
-
-      if (dcyc == 0.0) {
-	newentry.flx = prof->max();
-	newentry.phs  = prof->find_max_phase();
-      }
-      else {
-	cbin = int(prof->find_max_phase(dcyc) * float(nbin));
-	newentry.flx = prof->sum(cbin - bwid/2, cbin + bwid/2);
-	newentry.phs  = prof->find_max_phase(dcyc);
-      }
-      break;
-
-    case 2: // User-defined phase centre
-     if ( verbose )
-       cerr << "psrspa::scan_pulses using the user-definied phase centre" << endl;
-      
-      cbin = int(float(nbin) * cphs);
-
-      if (dcyc == 0.0) {
-	newentry.flx = (prof->get_amps())[cbin];
-	newentry.phs = cphs;
-      }
-      else {
-	newentry.flx = prof->sum(cbin - bwid/2, cbin + bwid/2);
-	newentry.phs = cphs;
-      }
-      
-      break;
-      
-    default:
-      cerr << "psrspa::scan_pulses No phase selection method chosen!" << endl;
-    }
-    
-    data.push_back(newentry);
-  }
-  
-  if ( verbose )
-    cerr << "psrspa::scan_pulses finished with " << data.size () << " pulses found" << endl;
-  if ( data.size () == 0 )
-    throw Error ( InvalidState, "psrspa::scan_pulses", "Found no pulses! exiting");
-  return data.size();
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-float psrspa::find_giants(vector<pulse>& data, vector<pulse>& giants, 
-		  float factor, float norm, float offs)
-{
-  if ( verbose )
-    cerr << "psrspa::find_giants entered" << endl;
-  /* Finds the mean flux from the data vector. Any flux greater than
-     <factor> times the mean is considered a giant and is copied to
-     the giants array. */
-  
-  float mean1 = 0.0;
-  float mean2 = 0.0;
-  float thres = 0.0;
-
-  // First, calculate mean flux:
-  
-  for (unsigned i = 0; i < data.size(); i++)
-    mean1 += data[i].flx;  
-
-  mean1 /= data.size();
-
-  // Then, normalise the flux values (put in form (flux/norm)) 
-  // and find the new mean.
-
-  for (unsigned i = 0; i < data.size(); i++)
-    {
-      if (norm > 0.0) {
-	data[i].flx /= norm;
-	data[i].flx += offs;
-      }
-      else {
-	data[i].flx /= mean1;
-	data[i].flx += offs;
-      }
-      mean2 += data[i].flx;
-    }
-  
-  mean2 /= data.size();
-  
-  // Finally, find the giants and push onto the new vector
-  
-  giants.clear();
-  
-  for (unsigned i = 0; i < data.size(); i++) {
-    if (data[i].flx > factor)
-      giants.push_back(data[i]);
-
-    thres += (data[i].flx - mean2) * (data[i].flx - mean2);
-  }
-  
-  // Call the detection threshold the standard deviation of the
-  // fluxes, added to the mean flux. I suppose this assumes most of
-  // the pulses are noise-dominated so that the mean represents
-  // background emission...
-
-  thres = sqrt(thres/data.size());
-  thres += mean2;
-
-  if ( verbose )
-    cerr << "psrspa::find_giants finished" << endl;
-  return thres;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void psrspa::prob_hist(vector<pulse>& data, vector<hbin>& hist, unsigned hist_nbin,
-	       float min, float max)
-{
-  if ( verbose )
-    cerr << "psrspa::prob_hist entered" << endl;
-  hist.clear();
-
-  if (min == -99.0 && max == 99.0) {
-    max = data[0].flx;
-    min = data[0].flx;
-    
-    for(unsigned i = 0; i < data.size(); i++) {
-      if (data[i].flx < min) min = data[i].flx;
-      if (data[i].flx > max) max = data[i].flx;
-    }
-  }
-
-  if ( min == max )
-  {
-    warn << "WARNING psrspa::prob_hist minimal and maximal value in the data are equal; probalby due to too few pulses found ( found " << data.size () << " pulses)\n The range of histogram is being artificially adjusted..." << endl;
-    min = 0.9 * min;
-    max = 1.1 * max; 
-  }
-  
-  float bwid = (max - min) / float(hist_nbin);
-  float a = min, b = min + bwid;
-
-  hbin newbin;
-
-  for(unsigned i = 0; i < hist_nbin; i++) {
-
-    newbin.y = 0;
-    
-    for(unsigned j = 0; j < data.size(); j++)
-      if ((data[j].flx > a) && (data[j].flx < b)) newbin.y++;
-    
-    if (newbin.y > 0) {
-      newbin.e = sqrt(newbin.y); // set error due to counting statistics
-      newbin.x = a + bwid/2.0;
-      hist.push_back(newbin);
-    }
-    
-    a += bwid;
-    b += bwid;
-  }
-  
-  // Convert to a discrete probability distribution
-  for (unsigned i = 0; i < hist.size(); i++) {
-    hist[i].y /= data.size();
-    hist[i].e /= data.size();
-  }
-  if ( verbose )
-    cerr << "psrspa::prob_hist finished" << endl;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void psrspa::fit_gauss(vector<hbin>& data, MEAL::Gaussian& gm)
-{
-
-  // Instantiate all the machinery required for curve fitting
-
-  float cutoff = 0.001;
-  float chisq  = 1.0;
-  float nchisq = 1.0;
-
-  unsigned iter = 1;
-
-  unsigned not_improving = 0;
-
-  MEAL::Axis<double> argument;
-
-  vector< MEAL::Axis<double>::Value > data_x;   // x-ordinate of data
-  vector< Estimate<double> > data_y; // y-ordinate of data with error
-
-  MEAL::LevenbergMarquardt<double> fit;
-  
-  double xmin, xmax, ymin, ymax;
-
-  xmin = xmax = data[0].x;
-  ymin = ymax = data[0].y;
-
-  // Find the extremes of the data set
-
-  for (unsigned i = 1; i < data.size(); i++) {
-    if (data[i].x > xmax) xmax = data[i].x;
-    if (data[i].x < xmin) xmin = data[i].x;
-    if (data[i].y > ymax) ymax = data[i].y;
-    if (data[i].y < ymin) ymin = data[i].y;
-  }
-
-  // Fit a Gaussian function to the distribution
-  
-  gm.set_centre((xmax + xmin)/2.0);
-  gm.set_width(xmax - xmin);
-  gm.set_height(ymax);
-  
-  gm.set_argument (0, &argument);
-  
-  for (unsigned i = 0; i < data.size(); i++) {
-    data_x.push_back ( argument.get_Value(data[i].x) );
-    data_y.push_back( Estimate<double>(data[i].y, data[i].e) );
-  }
-  
-  chisq = fit.init (data_x, data_y, gm);
-  
-  iter = 1;
-  not_improving = 0;
-  while (not_improving < 25) {
-    nchisq = fit.iter (data_x, data_y, gm);
-    
-    if (nchisq < chisq) {
-      float diffchisq = chisq - nchisq;
-      chisq = nchisq;
-      not_improving = 0;
-      if (diffchisq/chisq < cutoff && diffchisq > 0) {
-	break;
-      }
-    }
-    else
-      not_improving ++;
-    
-    iter ++;
-  }
-  
-  cerr << "Fitted Gaussian has Chi-Squared = " << nchisq << endl;
-  
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-void psrspa::display_giants(vector<pulse>& giants)
-{
-  if ( verbose )
-    cerr << "psrspa::display_giants entered" << endl;
-  /* Displays info about giant pulses on screen */
-  
-  cout << "---------------------------------------------------------------" 
-       << endl;
-  cout << "Integration   Flux          Phase     Filename" 
-       << endl;
-  cout << "  Number" << endl;
-  cout << "---------------------------------------------------------------" 
-       << endl;
-  
-  for(unsigned i = 0; i < giants.size(); i++)
-    cout << setw(11) << giants[i].intg << setw(10) 
-	 << giants[i].flx << setw(11) << giants[i].phs 
-	 << "      " << giants[i].file << endl;
-
-  cout << endl;
-  
-  if ( verbose )
-    cerr << "psrspa::display_giants finished" << endl;
-  return;
+  arg->set_help ( "write the phase resolved histograms in binary format" );
 }
 
 void psrspa::initialise_histograms ()
@@ -1284,6 +735,20 @@ void psrspa::write_histograms ()
     out_stream.close ();
   }
 } // write_histograms
+
+void psrspa::write_pulses ()
+{
+  stringstream ss;
+
+  ss << path+"/"+prefix+"_pulses."+ext;
+  ofstream out_stream;
+
+  out_stream.open ( ss.str().c_str(), ios::out | ios::trunc );
+  for ( unsigned ipulse = 0; ipulse < pulses.size() ; ipulse ++ )
+    out_stream << pulses[ipulse].file << " " << pulses[ipulse].intg << " " << pulses[ipulse].flx << " " << pulses[ipulse].phs << " " << pulses[ipulse].width << " " << pulses[ipulse].bscrunch_factor << endl;
+  out_stream.close ();
+
+}
 
 void psrspa::choose_bscrunch ( unsigned _max_bscrunch )
 {

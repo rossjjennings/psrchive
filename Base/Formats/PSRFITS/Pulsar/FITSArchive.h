@@ -259,7 +259,7 @@ namespace Pulsar
     void interpret_pol_type ( );
 
     //! Delete the HDU with the specified name
-    void delete_hdu (fitsfile* fptr, char* hdu_name) const;
+    void delete_hdu (fitsfile* fptr, const char* hdu_name) const;
 
     // //////////////////////////////////////////////////////////////////////
 

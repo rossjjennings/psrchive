@@ -668,7 +668,8 @@ int main (int argc, char *argv[]) try
         // into a new HybridCalibrator
         Reference::To<Pulsar::HybridCalibrator> hybrid_cal;
         hybrid_cal = new Pulsar::HybridCalibrator;
-        hybrid_cal->set_reference_input(flux_cal->get_CalibratorStokes());
+        hybrid_cal->set_reference_input(flux_cal->get_CalibratorStokes(),
+            flux_cal->get_filenames());
         hybrid_cal->set_reference_observation(
             static_cast<Pulsar::ReferenceCalibrator*>(pcal_engine.get()));
 

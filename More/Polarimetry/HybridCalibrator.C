@@ -50,9 +50,16 @@ MJD Pulsar::HybridCalibrator::get_epoch () const
 
 //! Set the Stokes parameters of the reference signal
 void
-Pulsar::HybridCalibrator::set_reference_input (const CalibratorStokes* input)
+Pulsar::HybridCalibrator::set_reference_input (const CalibratorStokes* input,
+    std::string filename)
 {
   reference_input = input;
+
+  if (!filename.empty())
+  {
+    filenames.resize(2);
+    filenames[0] = filename;
+  }
 }
 
 //! Set the ReferenceCalibrator data from which to derive a SingleAxis model

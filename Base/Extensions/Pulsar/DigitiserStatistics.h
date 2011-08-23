@@ -83,13 +83,17 @@ namespace Pulsar
     ///////////////////////////////////////////////////////////////
     // The information container
 
-    class row
+    class row : public Reference::Able
     {
 
     public:
 
       row () { init(); }
       ~row ();
+
+      float get_atten (unsigned index) const { return atten.at(index); }
+      void set_atten (unsigned index, float value) { atten.at(index) = value; }
+      unsigned get_natten () const { return atten.size(); }
 
       int index;
 
@@ -106,6 +110,9 @@ namespace Pulsar
 
     DigitiserStatistics::row& get_row (unsigned i);
     DigitiserStatistics::row& get_last ();
+
+    DigitiserStatistics::row* get_row_ptr (unsigned i) { return &rows.at(i); }
+    unsigned get_nrow () const { return rows.size(); }
 
     void push_blank_row ();
 

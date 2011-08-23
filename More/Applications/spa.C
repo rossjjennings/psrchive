@@ -37,6 +37,8 @@
 
 using namespace std;
 
+static Warning warn;
+
 typedef struct pulse
 {
   string file;           // filename
@@ -518,7 +520,14 @@ void prob_hist(vector<pulse>& data, vector<hbin>& hist, unsigned nbin,
       if (data[i].flx > max) max = data[i].flx;
     }
   }
-  
+
+  if ( min == max )
+  {
+    warn << "WARNING spa::prob_hist minimal and maximal value in the data are equal; probalby due to too few pulses found ( found " << data.size () << " pulses)\n The range of histogram is being artificially adjusted..." << endl;
+    min = 0.9 * min;
+    max = 1.1 * max; 
+  }
+
   float bwid = (max - min) / float(nbin);
   float a = min, b = min + bwid;
 

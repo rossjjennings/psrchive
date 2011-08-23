@@ -91,6 +91,23 @@ void Pulsar::DigitiserStatistics::resize (unsigned nsubint, unsigned npol,
   rows.resize(nsubint);
 }
 
+class RowInterface
+  : public TextInterface::To<Pulsar::DigitiserStatistics::row>
+{
+public:
+  RowInterface( Pulsar::DigitiserStatistics::row *s_instance = NULL )
+  {
+    if( s_instance )
+      set_instance( s_instance );
+
+    VGenerator<float> generator;
+    add_value( generator( "atten", "Attenuator setting",
+			  &Pulsar::DigitiserStatistics::row::get_atten,
+			  &Pulsar::DigitiserStatistics::row::set_atten,
+			  &Pulsar::DigitiserStatistics::row::get_natten ) );
+  }
+};
+
 class Pulsar::DigitiserStatistics::Interface
   : public TextInterface::To<DigitiserStatistics>
 {
@@ -111,6 +128,10 @@ public:
 
     add( &DigitiserStatistics::get_diglev,
 	 "diglev", "Digitiser level-setting mode (AUTO, FIX)" );
+
+    import( "int", RowInterface(),
+	    &DigitiserStatistics::get_row_ptr,
+	    &DigitiserStatistics::get_nrow );
   }
 };
 
