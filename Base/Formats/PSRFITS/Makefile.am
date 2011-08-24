@@ -28,6 +28,7 @@ libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	unload_Integration.C load_Integration.C \
 	unload_Predictor.C load_Predictor.C \
 	unload_Parameters.C load_Parameters.C \
+	load_SpectralKurtosis.C \
 	unload_polyco.C load_polyco.C \
 	unload_text.h load_text.h \
 	delete_hdu.C update_history.C \

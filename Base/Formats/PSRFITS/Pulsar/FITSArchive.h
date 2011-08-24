@@ -37,6 +37,7 @@ namespace Pulsar
   class FITSSUBHdrExtension;
   class ProfileColumn;
   class CoherentDedispersion;
+  class SpectralKurtosis;
 
   class Pointing;
   class AuxColdPlasmaMeasures;
@@ -254,6 +255,7 @@ namespace Pulsar
 
     void load_Pointing (fitsfile* fptr, int row, Integration*);
     void load_Plasma (fitsfile* fptr, int row, Integration*);
+    void load_SpectralKurtosis (fitsfile* fptr, int row, Integration*);
 
     void interpret_scale ( );
     void interpret_pol_type ( );

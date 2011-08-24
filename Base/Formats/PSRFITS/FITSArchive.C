@@ -30,6 +30,7 @@
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/CoherentDedispersion.h"
+#include "Pulsar/SpectralKurtosis.h"
 
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Telescope.h"

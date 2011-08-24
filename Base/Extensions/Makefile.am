@@ -43,6 +43,7 @@ nobase_include_HEADERS = \
 	Pulsar/Receiver_Field.h \
         Pulsar/Receiver_Linear.h \
         Pulsar/Receiver_Native.h \
+        Pulsar/SpectralKurtosis.h \
         Pulsar/TapeInfo.h \
         Pulsar/Telescope.h \
         Pulsar/Telescopes.h \
@@ -103,6 +104,8 @@ libExtensions_la_SOURCES = \
         Receiver_Linear.C \
         Receiver_Native.C \
 	Receiver_load.C \
+        SpectralKurtosis.C \
+        SpectralKurtosisTI.C \
         TapeInfo.C \
         Telescope.C \
         Telescopes.C \
