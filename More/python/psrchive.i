@@ -182,7 +182,6 @@ void pointer_tracker_remove(Reference::Able *ptr) {
         arr = (PyArrayObject *)                                         \
             PyArray_SimpleNewFromData(1, &n, PyArray_FLOAT, (char *)ptr);
         if (arr == NULL) return NULL;
-        arr->flags |= OWN_DATA;
         PyArray_INCREF(arr);
         return (PyObject *)arr;
     }
