@@ -11,6 +11,11 @@
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/Pointing.h"
+
+#include "Pulsar/Parameters.h"
+#include "load_factory.h"
+
+#include "Pulsar/Dispersion.h"
 %}
 
 // Language independent exception handler
@@ -289,6 +294,21 @@ void pointer_tracker_remove(Reference::Able *ptr) {
     std::string __str__()
     {
         return "PSRCHIVE Archive object: " + self->get_filename();
+    }
+
+    // Allow timing model to be updated via eph filename
+    void set_ephemeris(std::string eph_file)
+    {
+        Pulsar::Parameters *new_eph;
+        new_eph = factory<Pulsar::Parameters> (eph_file);
+        self->set_ephemeris(new_eph);
+        // TODO: update DM.. 
+    }
+
+    void dededisperse()
+    {
+        Pulsar::Dispersion correction;
+        correction.revert(self);
     }
 
     // Return a copy of all the data as a numpy array
