@@ -574,6 +574,7 @@ int main(int argc, char *argv[]) {
         zap = zap_list[i];
         apply_zap_range(orig_arch, &zap);
       }
+      cout << "Unloading '" << output_filename << "'..." << endl;
       orig_arch->unload(output_filename);
       click = 0;
       continue;
