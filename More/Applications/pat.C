@@ -294,9 +294,11 @@ int main (int argc, char** argv) try
       break;
     }
 
+#if HAVE_PGPLOT
     case 'b':
       output_plot_difference = true;
       break;
+#endif
 
     case 'c':
       choose_maximum_harmonic = true;
