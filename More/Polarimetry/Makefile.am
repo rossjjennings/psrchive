@@ -142,7 +142,6 @@ libPolarimetry_la_SOURCES = \
 	ProjectionCorrection.C \
         PulsarCalibrator.C \
         ReceptionCalibrator.C \
-	ReceptionCalibratorPlotter.C \
         ReceptionModel.C \
 	ReceptionModelReport.C \
 	ReceptionModelSolver.C \
@@ -190,6 +189,7 @@ if HAVE_PGPLOT
 
 libPolarimetry_la_SOURCES += \
 	CalibratorPlotter.C \
+	ReceptionCalibratorPlotter.C \
 	SystemCalibratorPlotter.C \
 	ReceptionModelPlotter.C
 
