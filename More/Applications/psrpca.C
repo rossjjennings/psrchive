@@ -326,8 +326,6 @@ void psrpca::finalize ()
     }
   }
 
-  t_cov->finalize ();
-
   covariance = gsl_matrix_alloc ( (int) nbin, (int) nbin );
   t_cov->get_covariance_matrix_gsl ( covariance );
 
