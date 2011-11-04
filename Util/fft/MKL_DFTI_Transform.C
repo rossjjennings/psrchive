@@ -20,6 +20,8 @@ http://www.intel.com/support/performancetools/libraries/mkl/sb/cs-017177.htm
 
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
+#include <inttypes.h>
 
 //#define _DEBUG 1
 

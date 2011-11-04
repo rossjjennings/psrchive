@@ -409,6 +409,7 @@ vector<float> bestSNRtime;
 vector<float> bestSNRtimefreq;
 
 Reference::To<Profile> bestProfile;
+Reference::To<Archive> bestArchive;
 
 // Errors
 double periodError_ms;
@@ -448,6 +449,9 @@ string standardProfileFilename = "";
 bool useStandardProfile = false;
 bool useOwnStandardProfile = false;
 bool thumbnail = false;
+
+// Unload a full-sum profile using best params
+bool unload_sum = false;
 
 // Set to true when the -k option is specified.
 // When onlyDisplayDmPlot is true, only the DM vs period plot will be
@@ -781,6 +785,11 @@ void parseParameters(int argc, char **argv, double &periodOffset_us,
 
 			useStandardProfile = true;
 		}
+
+    // Unload a full-sum copy
+    else if (strcmp(argv[i], "-u") == 0) {
+      unload_sum = true;
+    }
 
 		// force - Don't prompt the user about anything
 		else if (strcmp(argv[i], "-f") == 0 || strcasecmp(argv[i], "--force") == 0) {
@@ -1564,6 +1573,7 @@ void solve_and_plot (Archive* archive,
 					bestFreq = 1/(bestPeriod_bc_us/(double)MICROSEC);
 					freqError = fabs((periodStep_us/(double)MICROSEC)/pow((bestPeriod_bc_us/(double)MICROSEC), 2));
 					periodLoopCopy->remove_baseline();
+          bestArchive = periodLoopCopy->clone();
 					bestProfile = periodLoopCopy->get_Profile(FIRST_SUBINT, FIRST_POL, FIRST_CHAN);
 
 					// get the width of the pulse
@@ -1687,6 +1697,10 @@ void solve_and_plot (Archive* archive,
 		printf("minx = %3.10g, maxx = %3.10g, miny = %3.10g, maxy = %3.10g, rows = %d, cols = %d\n", minP, maxP, minDM, maxDM, dmBins, periodBins);
 		cout << "number of S/Ns = " << SNRs.size() << endl;
 	}
+
+  // Unload a full-sum profile
+  if (unload_sum)
+    bestArchive->unload("pdmp.sum");
 
   drawBestValuesCrossHair( archive,
       periodOffset_us, periodStep_us, periodHalfRange_us,

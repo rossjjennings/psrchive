@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2008 by Willem van Straten
+ *   Copyright (C) 2003-2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -94,7 +94,7 @@ int main (int argc, char** argv)
   bool CAL[2][2] = { { false, false }, { false, false } };
   bool SYS[2][2] = { { false, false }, { false, false } };
 
-  const unsigned Stokes = 0;
+  const unsigned IQUV = 0;
   const unsigned Ip = 1;
 
   // treat all of the Archives as one FluxCalibrator observation set
@@ -124,6 +124,7 @@ int main (int argc, char** argv)
 
   bool print_jones = false;
   bool print_mueller = false;
+  bool print_calibrator_stokes = false;
   bool print_fluxcal = false;
   bool frontend_only = false;
 
@@ -152,7 +153,7 @@ int main (int argc, char** argv)
   bool verbose = false;
   char c;
 
-  while ((c = getopt(argc, argv, "2:a:c:CD:dfFhjM:mn:oPpRr:S:stuqvV")) != -1)
+  while ((c = getopt(argc, argv, "2:a:bc:CD:dfFhjM:mn:oPpRr:S:stuqvV")) != -1)
   {
     switch (c)
     {
@@ -174,6 +175,10 @@ int main (int argc, char** argv)
 
     case 'a':
       archive_class = optarg;
+      break;
+
+    case 'b':
+      print_calibrator_stokes = true;
       break;
 
     case 'c':
@@ -251,7 +256,7 @@ int main (int argc, char** argv)
       switch (optarg[1])
       {
       case 's':
-	what = Stokes; break;
+	what = IQUV; break;
       case 'p':
 	what = Ip; break;
       default:
@@ -358,8 +363,8 @@ int main (int argc, char** argv)
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  if (!(print_jones || print_mueller || print_fluxcal 
-        || unload_derived_calibrator))
+  if (!(print_jones || print_mueller || print_fluxcal
+	|| print_calibrator_stokes || unload_derived_calibrator))
   {
     cpgbeg (0, device.c_str(), 0, 0);
     cpgask(1);
@@ -504,6 +509,53 @@ int main (int argc, char** argv)
 	continue;
       }
 
+      if (print_calibrator_stokes)
+      {
+        calibrator_stokes = input->get<Pulsar::CalibratorStokes>();
+
+	if (!calibrator_stokes)
+	{
+	  cerr << "pacv: Archive does not contain CalibratorStokes extension"
+	       << endl;
+	  continue;
+	}
+
+	Reference::To<Pulsar::CalibratorExtension> ext;
+	ext = input->get<Pulsar::CalibratorExtension>();
+
+	if (ext->get_nchan() != calibrator_stokes->get_nchan())
+	{
+	  cerr << "pacv: Calibrator nchan=" << ext->get_nchan()
+	       << " != CalibratorStokes nchan="
+	       << calibrator_stokes->get_nchan()
+	       << " (frequency column disabled)" << endl;
+
+	  ext = 0;
+	}
+
+	for (unsigned ichan=0; ichan<calibrator_stokes->get_nchan(); ichan++)
+	{
+	  if (!calibrator_stokes->get_valid (ichan))
+	    continue;
+
+	  Stokes< Estimate<double> > stokes
+	    = calibrator_stokes->get_stokes (ichan);
+
+	  cout << ichan;
+
+	  if (ext)
+	    cout << " " << ext->get_centre_frequency(ichan);
+
+	  for (unsigned i=1; i<4; i++)
+	    cout << " " << stokes[i].get_value()
+		 << " " << stokes[i].get_error();
+
+	  cout << endl;
+	}
+
+	continue;
+      }
+
       if (plot_calibrator_solution)
       {
 	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
@@ -519,6 +571,13 @@ int main (int argc, char** argv)
       if (plot_calibrator_stokes)
       {
         calibrator_stokes = input->get<Pulsar::CalibratorStokes>();
+
+	if (!calibrator_stokes)
+	{
+	  cerr << "pacv: Archive does not contain CalibratorStokes extension"
+	       << endl;
+	  continue;
+	}
 
 	cerr << "pacv: Plotting CalibratorStokes" << endl;
 
@@ -585,7 +644,7 @@ int main (int argc, char** argv)
 
     for (unsigned ical=0; ical < 2; ical++)
     {
-      if (CAL[Stokes][ical])
+      if (CAL[IQUV][ical])
       {
 	cerr << "pacv: Plotting " << cal << " CAL Stokes parameters" << endl;
 	cpgpage ();
@@ -602,7 +661,7 @@ int main (int argc, char** argv)
 	archplot.set_plot_Ip (false);
       }
       
-      if (SYS[Stokes][ical])
+      if (SYS[IQUV][ical])
       {
 	cerr << "pacv: Plotting " << cal << " SYS Stokes parameters"
 	     << endl;

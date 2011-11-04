@@ -299,7 +299,7 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
 	  flags = auxinfo.substr(auxinfo.find(" "));
 
   sprintf(outstring, "%s %8.3f %s %7.3f ", fname.c_str(), frequency,
-          arrival.printdays(13).c_str(), error);
+          arrival.printdays(15).c_str(), error);
 
   if (phase_info) {
       sprintf(outstring, "%s @", outstring);
