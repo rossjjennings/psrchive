@@ -153,7 +153,7 @@ void paz::add_options (CommandLine::Menu& menu)
   arg->set_help ("Zero weight chans listed in this kill file");
 
   arg = menu.add (this, &paz::range_bins_to_zap, 'B', "\"a b\"");
-  arg->set_help ("Zap these pulse phase bins");
+  arg->set_help ("Zap pulse phase bins between a and b inclusive");
 
   arg = menu.add (this, &paz::add_chans_to_zero, 'z', "\"a b c ...\"");
   arg->set_help ("Zero weight these particular channels");
