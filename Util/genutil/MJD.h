@@ -26,6 +26,7 @@
 #include <mpi.h>
 #endif
 
+//! Class for representing modified Julian dates with high precision.
 class MJD {
 
  private:

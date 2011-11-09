@@ -5,143 +5,169 @@
  *
  ***************************************************************************/
 
+#include "Pulsar/Application.h"
 #include "Pulsar/Archive.h"
-#include "strutil.h"
-#include "dirutil.h"
-#include "Error.h"
-
-#include <iostream>
-#include <unistd.h>
+#include "Pulsar/Editor.h"
+#include "Pulsar/UnloadOptions.h"
 
 using namespace std;
+using Pulsar::Editor;
 
-void usage() {
+//
+//! Converts between file formats
+//
+class psrconv : public Pulsar::Application
+{
+public:
 
-  cout << 
-    "A simple program to convert between pulsar archive formats \n"
-    "Usage: psrconv (options) <filenames> \n"
-    "Where the options are as follows: \n"
-    "     -o fmt The output format [default PSRFITS] \n"
-    "     -h     This help message \n"
-    "     -q     Quiet mode \n"
-    "     -v     Verbose mode \n"
-    "     -V     Very verbose mode \n"
-    "\n"
-    "Available output formats:" << endl;
+  //! Implements the unload behaviour required for this application
+  class Unload;
 
-  Pulsar::Archive::agent_list ();
+  //! Default constructor
+  psrconv ();
 
-}
+  //! Process the given archive
+  void process (Pulsar::Archive*);
+
+protected:
+
+  //! Add command line options
+  void add_options (CommandLine::Menu&);
+
+  //! Archive editor
+  Editor editor;
+
+  //! The unloader
+  Unload* unload;
+};
 
 int main (int argc, char** argv)
 {
-  string output_format = "PSRFITS";
-  string unload_cal_ext = ".cf";
-  string unload_psr_ext = ".rf";
+  psrconv program;
+  return program.main (argc, argv);
+}
 
-  char* metafile = 0;
+//
+//! Implements the unload behaviour for psrconv
+//
+/*!  The call to UnloadOptions::setup is disabled because, if no
+  output method is specified, a default output file extension will be
+  determined from the archive type.  Furthermore, psrconv breaks the
+  model in which the process method performs an inplace operation and,
+  upon completion, UnloadOption::finish writes the archive that was
+  passed as an argument.
+*/
+class psrconv::Unload : public Pulsar::UnloadOptions
+{ 
 
-  bool verbose = false;
-  bool quiet = false;
+public:
 
-  int gotc = 0;
-  while ((gotc = getopt(argc, argv, "hM:o:qVv")) != -1)
-  {
-    switch (gotc)
-    {
-    case 'o':
-      output_format = optarg;
-      break;
+  //! Disable the call to setup 
+  void setup () {}
 
-    case 'h':
-      usage();
-      return 0;
+  //! Disable the call to finish
+  void finish (Pulsar::Archive* archive) {}
 
-    case 'M':
-      metafile = optarg;
-      break;
+  //! Unload with the default extension
+  void unload (Pulsar::Archive* archive);
+};
 
-    case 'V':
-      Pulsar::Archive::set_verbosity (3);
-      verbose = true;
-      break;
 
-    case 'v':
-      Pulsar::Archive::set_verbosity (2);
-      verbose = true;
-      break;
+#if 0
+    "Available output formats:" << endl;
 
-    case 'q':
-      Pulsar::Archive::set_verbosity (0);
-      quiet = true;
-      break;
-    }
-  }
+  Pulsar::Archive::agent_list ();
+#endif
 
-  vector <string> filenames;
+static string output_format = "PSRFITS";
+static string unload_cal_ext = ".cf";
+static string unload_psr_ext = ".rf";
 
-  if (metafile)
-    stringfload (&filenames, metafile);
-  else
-    for (int ai=optind; ai<argc; ai++)
-      dirglob (&filenames, argv[ai]);
+psrconv::psrconv ()
+  : Application ("psrconv", "converts between file formats")
+{
+  unload = new Unload;
+  add( unload );
+}
 
-  if (filenames.size() == 0)
-  {
-    usage ();
-    return 0;
-  }
-  
-  Reference::To<Pulsar::Archive> input;
-  Reference::To<Pulsar::Archive> output;
+void psrconv::add_options (CommandLine::Menu& menu)
+{
+  CommandLine::Argument* arg;
 
+  // blank line in help
+  menu.add ("");
+
+  arg = menu.add (output_format, 'o', "format");
+  arg->set_help ("name of the output file format");
+
+  arg = menu.add (&editor, &Editor::add_commands, 'c', "command[s]");
+  arg->set_help ("one or more edit commands, separated by commas");
+
+  arg = menu.add (&editor, &Editor::add_extensions, 'a', "extension[s]");
+  arg->set_help ("one or more extensions to be added, separated by commas");
+}
+
+//
+//
+//
+void psrconv::process (Pulsar::Archive* archive)
+{
   // ensure that the selected output format can be written
+  Reference::To<Pulsar::Archive> output;
   output = Pulsar::Archive::new_Archive (output_format);  
   if (!output->can_unload())
+    throw Error (InvalidParam, "psrconv",
+		 output_format + " unload method not implemented");
+
+  if (verbose)
+    cerr << "Converting " << archive->get_filename() << endl;
+
+  output-> copy (*archive);
+
+  if (verbose)
+    cerr << "Conversion complete" << endl;
+    
+  if (editor.will_modify())
+    editor.process (output);
+
+  if (verbose)
   {
-    cerr << "psrconv: " << output_format << " unload method not implemented"
-	 << endl;
-    return -1;
+    cerr << "Source: " << output -> get_source() << endl;
+    cerr << "Frequency: " << output -> get_centre_frequency() << endl;
+    cerr << "Bandwidth: " << output -> get_bandwidth() << endl;
+    cerr << "# of subints: " << output -> get_nsubint() << endl;
+    cerr << "# of polns: " << output -> get_npol() << endl;
+    cerr << "# of channels: " << output -> get_nchan() << endl;
+    cerr << "# of bins: " << output -> get_nbin() << endl;
   }
 
-  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try
+  unload->unload (output);
+}
+
+
+
+//! Unload the archive
+void psrconv::Unload::unload (Pulsar::Archive* archive)
+{
+  bool unload_setup = get_unload_setup();
+
+  if (!unload_setup)
   {
-    if (!quiet)
-      cerr << "Loading " << filenames[ifile] << endl;
-
-    input = Pulsar::Archive::load(filenames[ifile]);
-    
-    output = Pulsar::Archive::new_Archive (output_format);
-    output-> copy (*input);
-
-    if (!quiet)
-      cerr << "Conversion complete" << endl;
-    
-    if (verbose)
-    {
-      cerr << "Source: " << output -> get_source() << endl;
-      cerr << "Frequency: " << output -> get_centre_frequency() << endl;
-      cerr << "Bandwidth: " << output -> get_bandwidth() << endl;
-      cerr << "# of subints: " << output -> get_nsubint() << endl;
-      cerr << "# of polns: " << output -> get_npol() << endl;
-      cerr << "# of channels: " << output -> get_nchan() << endl;
-      cerr << "# of bins: " << output -> get_nbin() << endl;
-    }
-
-    string ext = unload_psr_ext;
-    if (input->type_is_cal())
-      ext = unload_cal_ext;
-
-    string newname = replace_extension( input->get_filename(), ext );
-
-    if (!quiet)
-      cerr << "Unloading " << newname << endl;
-
-    output->unload (newname);
-
+    // use the default output filename extension
+    if (archive->type_is_cal())
+      set_extension( unload_cal_ext );
+    else
+      set_extension( unload_psr_ext );
   }
-  catch (Error& error)
+
+  UnloadOptions::finish (archive);
+
+  if (!unload_setup)
   {
-    cerr << error << endl;
+    /*
+      reset the extension to an empty string so that get_unload_setup
+      will correctly return true the next time around.
+    */
+    set_extension( string() );
   }
 }

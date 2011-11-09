@@ -43,7 +43,8 @@ namespace Pulsar {
     MJD get_epoch () const;
 
     //! Set the Stokes parameters of the reference signal
-    void set_reference_input (const CalibratorStokes* reference);
+    void set_reference_input (const CalibratorStokes* reference, 
+        std::string filename = "");
 
     //! Set the ReferenceCalibrator data from which to derive a SingleAxis
     void set_reference_observation (ReferenceCalibrator* observation);

@@ -81,7 +81,18 @@ Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
 
 void Tempo::toa::set_telescope (const std::string& telcode)
 {
-  telescope = Tempo::code( telcode );
+  if (telcode.length() == 1)
+  {
+    telescope = telcode[0];
+  }
+  else try
+  {
+    telescope = Tempo::code( telcode );
+  }
+  catch (Error& error)
+  {
+    warning << "Tempo::toa::set_telescope " << error.get_message() << endl;
+  }
 
   if (verbose)
     cerr << "Tempo::toa::set_telescope name=" << telcode
@@ -288,7 +299,7 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
 	  flags = auxinfo.substr(auxinfo.find(" "));
 
   sprintf(outstring, "%s %8.3f %s %7.3f ", fname.c_str(), frequency,
-          arrival.printdays(13).c_str(), error);
+          arrival.printdays(15).c_str(), error);
 
   if (phase_info) {
       sprintf(outstring, "%s @", outstring);

@@ -10,7 +10,7 @@ EXTRA_DIST = psrhelp
 
 bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
-	psrover psrcull
+	psrover psrcull calavg pcmavg fix_single psrsplit
 
 pam_SOURCES = pam.C
 
@@ -18,6 +18,14 @@ pat_SOURCES = pat.C
 pat_LDADD = $(LDADD) @PTHREAD_LIBS@
 
 paz_SOURCES = paz.C zap_periodic_spikes.C
+
+calavg_SOURCES = calavg.C
+
+pcmavg_SOURCES = pcmavg.C
+
+fix_single_SOURCES = fix_single.C
+
+psrsplit_SOURCES = psrsplit.C
 
 psradd_SOURCES = psradd.C
 
@@ -63,10 +71,19 @@ psrcull_SOURCES = psrcull.C
 #
 if HAVE_GSL
 
-bin_PROGRAMS += psrsmooth
+bin_PROGRAMS += psrsmooth psrpca psrspa
 
 psrsmooth_SOURCES = psrsmooth.C
 psrsmooth_LDADD = $(LDADD) @GSL_LIBS@
+
+psrpca_SOURCES = psrpca.C
+psrpca_LDADD = $(LDADD) @GSL_LIBS@
+
+if HAVE_PGPLOT
+bin_PROGRAMS += psrspa
+psrspa_SOURCES = psrspa.C
+psrspa_LDADD = $(LDADD) @GSL_LIBS@ @PGPLOT_LIBS@
+endif
 
 endif
 
@@ -77,7 +94,7 @@ endif
 if HAVE_PGPLOT
 
 bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi psrzap pav \
-	psrsp psrtrash 
+	psrsp psrtrash spa
 
 pdmp_SOURCES = pdmp.C
 pdmp_LDADD = $(LDADD) @PGPLOT_LIBS@ @PSRXML_LIBS@
@@ -90,6 +107,9 @@ paas_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 pas_SOURCES = pas.C
 pas_LDADD = $(LDADD) @PGPLOT_LIBS@
+
+spa_SOURCES = spa.C
+spa_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 psrdiff_SOURCES = psrdiff.C
 psrdiff_LDADD = $(LDADD) @PGPLOT_LIBS@

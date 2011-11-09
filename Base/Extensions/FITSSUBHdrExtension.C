@@ -24,7 +24,7 @@ FITSSUBHdrExtension::FITSSUBHdrExtension ()
   tsamp = -1;
   nbits = -1;
   nch_strt = -1;
-  nsblk = -1;
+  nsblk = 1;
   nrows = -1;
   zero_off = 0.0;
   signint = 0;

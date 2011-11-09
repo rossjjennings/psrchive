@@ -53,6 +53,8 @@ string Tempo::stderr_filename = "stderr.txt";
 // file to which tempo stdout will be redirected
 string Tempo::stdout_filename = "stdout.txt";
 
+Warning Tempo::warning;
+
 // //////////////////////////////////////////////////////////////////////
 // static storage of the tempo system call.
 // can be set with Tempo::set_system 
@@ -115,11 +117,11 @@ void Tempo::set_directory (const string& dir)
 
 string Tempo::get_directory ()
 {
-  char* unknown = "unknown";
+  const char* unknown = "unknown";
 
   if (!directory.length())
   {
-    char* userid = getenv ("USER");
+    const char* userid = getenv ("USER");
     if (!userid)
       userid = unknown;
 

@@ -65,12 +65,6 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
   temp = ext->get_tracking_angle().getDegrees();
   fits_update_key (fptr, TFLOAT, "FA_REQ", &temp, comment, &status);
 
-  temp = ext->get_atten_a();
-  fits_update_key (fptr, TFLOAT, "ATTEN_A", &temp, comment, &status);
-
-  temp = ext->get_atten_b();
-  fits_update_key (fptr, TFLOAT, "ATTEN_B", &temp, comment, &status);
-
   delete [] tempstr;
 
   if (status)

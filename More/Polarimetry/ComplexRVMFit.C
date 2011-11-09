@@ -42,6 +42,12 @@ float Pulsar::ComplexRVMFit::get_threshold () const
   return threshold;
 }
 
+template<class T>
+bool notset (T& model)
+{
+  return model->get_infit(0) && model->get_param(0) == 0.0;
+}
+
 //! Set the data to which model will be fit
 void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 {
@@ -50,11 +56,18 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 		 "data are not Stokes parameters");
 
   data = _data;
+  data_x.clear();
+  data_y.clear();
 
-  if (model->get_nstate())
+  if (model && model->get_nstate())
     model = 0;
 
   std::vector< std::complex< Estimate<double> > > linear;
+
+  if (verbose)
+    cerr << "Pulsar::ComplexRVMFit::set_observation"
+      " threshold=" << threshold << endl;
+
   data->get_linear (linear, threshold);
 
   const unsigned nbin = data->get_nbin();
@@ -126,6 +139,8 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
     }
   }
 
+  assert( count == model->get_nstate() );
+
   if (verbose)
     cerr << "Pulsar::ComplexRVMFit::set_observation"
       " peak phase=" << peak_phase*180/M_PI << " deg;"
@@ -134,7 +149,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
   
   MEAL::RotatingVectorModel* RVM = get_model()->get_rvm();
 
-  if (RVM->reference_position_angle->get_param(0) == 0)
+  if (notset( RVM->reference_position_angle ))
   {
     cerr << "Pulsar::ComplexRVMFit::set_observation using"
       " psi0=" << peak_pa*180/M_PI << endl;
@@ -142,7 +157,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
     RVM->reference_position_angle->set_param (0, peak_pa);
   }
 
-  if (RVM->magnetic_meridian->get_param(0) == 0)
+  if (notset( RVM->magnetic_meridian ))
   {
     cerr << "Pulsar::ComplexRVMFit::set_observation using"
       " phi0=" << peak_phase*180/M_PI << endl;
@@ -150,8 +165,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
     RVM->magnetic_meridian->set_param (0, peak_phase);
   }
 
-  if (RVM->line_of_sight->get_param(0) == 0 &&
-      RVM->magnetic_axis->get_param(0) == 0)
+  if (notset( RVM->line_of_sight ) && notset( RVM->magnetic_axis ))
   {
     cerr << "Pulsar::ComplexRVMFit::set_observation using"
       " delpsi_delphi=" << delpsi_delphi << endl;
@@ -178,8 +192,6 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
   }
 
   state.signal.connect (model, &MEAL::ComplexRVM::set_state);
-  
-  assert( count == model->get_nstate() );
 
   cerr <<"Pulsar::ComplexRVMFit::set_observation "<< count <<" bins"<< endl;
 }
@@ -386,28 +398,55 @@ void Pulsar::ComplexRVMFit::check_parameters ()
   RVM->reference_position_angle->set_param (0, PA0);
 }
 
-#if 0
-  double chisq2 = 0;
-  double deg=180/M_PI;
+void Pulsar::ComplexRVMFit::get_residuals 
+( vector<double>& phases,
+  vector< std::complex< Estimate<double> > >& residuals)
+{
+  MEAL::ComplexRVM* cRVM = get_model();
 
-  for (unsigned i=0; i < data_x.size(); i++)
+  unsigned ndat = data_x.size();
+
+  phases.resize (ndat);
+  residuals.resize (ndat);
+
+  for (unsigned i=0; i < ndat; i++)
   {
     data_x[i].apply();
     std::complex<double> model = cRVM->evaluate();
-    double gain = cRVM->get_linear(i).get_value();
-
-    cerr << i << " data=" << data_y[i] << " arg=" << arg(data_y[i])*deg/2
-	 << " model=" << model << " PA=" << RVM->evaluate()*deg 
-	 << " Q=" << gain*cos(2*RVM->evaluate())
-	 << " U=" << gain*sin(2*RVM->evaluate()) << endl;
-
-    data_y[i] -= model;
-
-    chisq2 += ::chisq(data_y[i].real()) + ::chisq(data_y[i].imag());
+    phases[i] = cRVM->get_phase(i);
+    residuals[i] = data_y[i];
+    residuals[i] -= model;
   }
+}
 
-  cerr << "CHISQ=" << chisq2 << endl;
-#endif
+void Pulsar::ComplexRVMFit::get_psi_residuals 
+( vector<double>& phases,
+  vector< Estimate<double> > & residuals)
+{
+  MEAL::ComplexRVM* cRVM = get_model();
+
+  unsigned ndat = data_x.size();
+
+  phases.resize (ndat);
+  residuals.resize (ndat);
+
+  for (unsigned i=0; i < ndat; i++)
+  {
+    data_x[i].apply();
+    std::complex<double> model = cRVM->evaluate();
+    phases[i] = cRVM->get_phase(i);
+
+    residuals[i] = 0.5 * atan2( data_y[i].imag(), data_y[i].real() );
+    residuals[i] -= 0.5 * atan2( model.imag(), model.real() );
+
+    if (residuals[i].val > M_PI/2)
+      residuals[i].val -= M_PI;
+    else if (residuals[i].val < -M_PI/2)
+      residuals[i].val += M_PI;
+  }
+}
+
+
 
 void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
 {

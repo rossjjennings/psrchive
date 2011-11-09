@@ -48,9 +48,8 @@ namespace Pulsar {
     //! The maximum harmonic to include in the analysis
     unsigned max_harmonic;
 
-    //! Partial derivative of Z with respect to b_k in mth harmonic (beta=0)
-    /*! See Equation (24) of 1 November 2010 companion to van Straten (2006) */
-    std::complex<double> delZ_delb (unsigned k, unsigned m) const;
+    //! Partial derivative of S_m with respect to b_k (beta=0)
+    std::complex<double> delS_delb (unsigned k, unsigned m) const;
 
     //! Magnitude squared of S0 in mth harmonic
     double S0sq (unsigned m) const;

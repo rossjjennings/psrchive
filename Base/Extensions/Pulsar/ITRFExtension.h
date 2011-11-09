@@ -53,6 +53,11 @@ namespace Pulsar {
     double get_ant_y() const { return ant_y; }
     double get_ant_z() const { return ant_z; }
 
+    // set methods
+    void set_ant_x(const double _ant_x) { ant_x = _ant_x; }
+    void set_ant_y(const double _ant_y) { ant_y = _ant_y; }
+    void set_ant_z(const double _ant_z) { ant_z = _ant_z; }
+
     //! Get geocentric latitude and longitude in radians, and radius in metres
     void get_sph (double& lat, double& lon, double& rad);
 

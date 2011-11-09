@@ -344,8 +344,8 @@ namespace CommandLine {
     }
 
     //! Add an Attribute with only a single letter name
-    template<class C, typename T>
-    Argument* add (C* ptr, void (C::*method)(T), char name, 
+    template<class C, class B, typename T>
+    Argument* add (C* ptr, void (B::*method)(T), char name, 
 		   const char* type = 0)
     {
       return add_attribute (ptr, method,
@@ -354,8 +354,8 @@ namespace CommandLine {
     }
 
     //! Add an Attribute with only a long string name
-    template<class C, typename T>
-    Argument* add (C* ptr, void (C::*method)(T), const std::string& name, 
+    template<class C, class B, typename T>
+    Argument* add (C* ptr, void (B::*method)(T), const std::string& name, 
 		   const char* type = 0)
     {
       return add_attribute (ptr, method,
@@ -381,29 +381,29 @@ namespace CommandLine {
     }
 
     //! Add an Action with only a single letter name
-    template<class C>
-    Argument* add (C* ptr, void (C::*method)(), char name)
+    template<class C, class B>
+    Argument* add (C* ptr, void (B::*method)(), char name)
     {
       return add_action (ptr, method, name, &Argument::set_short_name);
     }
 
     //! Add an Action with only a long string name
-    template<class C>
-    Argument* add (C* ptr, void (C::*method)(), const std::string& name)
+    template<class C, class B>
+    Argument* add (C* ptr, void (B::*method)(), const std::string& name)
     {
       return add_action (ptr, method, name, &Argument::set_long_name);
     }
 
     //! Add an UnaryAction with only a single letter name
-    template<class C, class T>
-    Argument* add (C* ptr, void (C::*method)(T), char name, T arg)
+    template<class C, class B, class T>
+    Argument* add (C* ptr, void (B::*method)(T), char name, T arg)
     {
       return add_action (ptr, method, name, &Argument::set_short_name, arg);
     }
 
     //! Add an UnaryAction with only a long string name
-    template<class C, class T>
-    Argument* add (C* ptr, void (C::*method)(), const std::string& name, T arg)
+    template<class C, class B, class T>
+    Argument* add (C* ptr, void (B::*method)(), const std::string& name, T arg)
     {
       return add_action (ptr, method, name, &Argument::set_long_name, arg);
     }

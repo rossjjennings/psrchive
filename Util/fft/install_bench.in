@@ -12,6 +12,9 @@ set datarootdir=@datarootdir@
 set max_nthread = 1
 set ncache = 1
 
+# ensure that IPP library does not use multiple cores for single FFT
+setenv OMP_NUM_THREADS 1
+
 if ( -f /proc/cpuinfo ) then
 
   set noglob
@@ -28,9 +31,9 @@ if ( -f /proc/cpuinfo ) then
     set max_nthread = 8
     set ncache = 4
   else if ( $chips == X7560 ) then
-    echo Knights Ferry Level 3 cache shared by 4 cores
+    echo Knights Ferry Level 3 cache shared by 8 cores
     set max_nthread = 32
-    set ncache = 8
+    set ncache = 4
   else
     set max_nthread = `cat /proc/cpuinfo | grep processor | wc -l`
     set ncache = $max_nthread
@@ -58,7 +61,8 @@ foreach lib ( $* )
 
     echo Threads: $nthread Cache: $use_cache
 
-    @srcdir@/fft_bench --library=$lib --nthread=$nthread --cache=$use_cache
+    @srcdir@/fft_bench --library=$lib --nthread=$nthread --cache=$use_cache --ncore=$max_nthread
+
     mv fft_bench.out @datadir@/fft_bench_${lib}_${nthread}.dat
 
     @ nthread = $nthread * 2

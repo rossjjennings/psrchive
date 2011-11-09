@@ -139,7 +139,7 @@ namespace Pulsar {
     //! The baseline region
     PhaseWeight baseline;
 
-    //! Initialize the StandardModel of the specified channel
+    //! Initialize the SignalPath of the specified channel
     void init_model (unsigned ichan);
 
     //! Solve the measurement equation for the given channel

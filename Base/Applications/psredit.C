@@ -8,6 +8,8 @@
 #include "Pulsar/Application.h"
 #include "Pulsar/UnloadOptions.h"
 
+#include "Pulsar/Editor.h"
+#include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/Check.h"
 #include "Pulsar/Profile.h"
 
@@ -18,6 +20,7 @@
 #include <unistd.h>
 
 using namespace std;
+using Pulsar::Editor;
 
 //! Pulsar Archive Editing application
 class psredit: public Pulsar::Application
@@ -33,9 +36,11 @@ public:
   //! Process the given archive
   void process (Pulsar::Archive*);
 
-  void add_commands (const std::string& str) { separate (str, commands, ","); }
-
-  void set_quiet () { Application::set_quiet(); output_filename = false; }
+  void set_quiet ()
+  {
+    Application::set_quiet();
+    editor.output_filename = false;
+  }
 
   void detailed_help ();
 
@@ -44,14 +49,8 @@ protected:
   //! Add command line options
   void add_options (CommandLine::Menu&);
 
-  //! commands to be executed
-  vector<string> commands;
-
-  //! prefix parameter value queries with parameter name=
-  bool prefix_name;
-
-  // print the name of each file processed
-  bool output_filename;
+  //! The editor
+  Pulsar::Editor editor;
 };
 
 int main (int argc, char** argv)
@@ -78,9 +77,6 @@ psredit::psredit ()
   Pulsar::Archive::Check::disable ("Dedispersed");
   Pulsar::Archive::Check::disable ("DeFaradayed");
 
-  prefix_name = true;
-  output_filename = true;
-
   add( new Pulsar::UnloadOptions );
 }
 
@@ -91,13 +87,16 @@ void psredit::add_options (CommandLine::Menu& menu)
   // blank line in help
   menu.add ("");
 
-  arg = menu.add (this, &psredit::add_commands, 'c', "command[s]");
+  arg = menu.add (&editor, &Editor::add_commands, 'c', "command[s]");
   arg->set_help ("one or more commands, separated by commas");
+
+  arg = menu.add (&editor, &Editor::add_extensions, 'a', "extension[s]");
+  arg->set_help ("one or more extensions to be added, separated by commas");
 
   arg = menu.add (this, &psredit::detailed_help, 'H');
   arg->set_help ("more detailed help");
 
-  arg = menu.add (prefix_name, 'Q');
+  arg = menu.add (editor.prefix_name, 'Q');
   arg->set_help ("do not prefix output with 'keyword='");
 }
 
@@ -139,9 +138,8 @@ void psredit::detailed_help ()
 //
 bool psredit::must_save ()
 {
-  for (unsigned j = 0; j < commands.size(); j++)
-    if (commands[j].find('=') != string::npos)
-      return true;
+  if (editor.will_modify())
+    return true;
 
   // load files quickly (no data)
   Pulsar::Profile::no_amps = true;
@@ -154,28 +152,5 @@ bool psredit::must_save ()
 //
 void psredit::process (Pulsar::Archive* archive)
 {
-  Reference::To<TextInterface::Parser> interface = archive->get_interface();
-
-  if (commands.size() == 0)
-  {
-    cout << interface->help (true) << endl;;
-    return;
-  }
-
-  // so that a space precedes each parameter processed
-  interface->set_indentation (" ");
-  interface->set_prefix_name (prefix_name);
-
-  if (output_filename)
-    cout << archive->get_filename();
-
-  for (unsigned j = 0; j < commands.size(); j++)
-  {
-    if (verbose)
-      cerr << "psredit: processing command '" << commands[j] << "'" << endl;
-
-    cout << interface->process (commands[j]);
-  }
-
-  cout << endl;
+  cout << editor.process (archive) << endl;
 }

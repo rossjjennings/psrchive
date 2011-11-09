@@ -19,6 +19,7 @@
 #include "polyco.h"
 #include "toa.h"
 #include "Observatory.h"
+#include "Warning.h"
 
 #include <vector>
 
@@ -82,6 +83,9 @@ namespace Tempo
 
   // file to which tempo ephemeris files are written
   extern std::string ephem_filename;
+
+  // used to process warning messages
+  extern Warning warning;
 
   //! Run tempo using the given arguments and input
   /*! tempo is run with a working directory given by

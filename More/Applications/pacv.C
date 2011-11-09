@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2008 by Willem van Straten
+ *   Copyright (C) 2003-2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -17,6 +17,7 @@
 #include "Pulsar/FluxCalibratorExtension.h"
 
 #include "Pulsar/Feed.h"
+#include "Pulsar/BackendFeed.h"
 
 #include "Pulsar/CalibratorPlotter.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -75,6 +76,7 @@ void usage ()
     " -F           print fluxcal parameters (S_sys, S_cal)\n"
     " -j           print Jones matrix elements of calibrator solution \n"
     " -m           print Mueller matrix elements of calibrator solution \n"
+    " -R           print Jones/Mueller matrix elements of only the frontend \n"
        << endl;
 }
 
@@ -92,7 +94,7 @@ int main (int argc, char** argv)
   bool CAL[2][2] = { { false, false }, { false, false } };
   bool SYS[2][2] = { { false, false }, { false, false } };
 
-  const unsigned Stokes = 0;
+  const unsigned IQUV = 0;
   const unsigned Ip = 1;
 
   // treat all of the Archives as one FluxCalibrator observation set
@@ -122,7 +124,9 @@ int main (int argc, char** argv)
 
   bool print_jones = false;
   bool print_mueller = false;
+  bool print_calibrator_stokes = false;
   bool print_fluxcal = false;
+  bool frontend_only = false;
 
   // Controls how the mean(s) is/are displayed.
   // False:
@@ -143,13 +147,13 @@ int main (int argc, char** argv)
   // Hybrid transformation
   Reference::To<Pulsar::HybridCalibrator> hybrid;
 
-  string device = "/NULL";
+  string device = "?";
 
   // verbosity flag
   bool verbose = false;
   char c;
 
-  while ((c = getopt(argc, argv, "2:a:c:CD:dfFhjM:mn:oPpr:S:stuqvV")) != -1)
+  while ((c = getopt(argc, argv, "2:a:bc:CD:dfFhjM:mn:oPpRr:S:stuqvV")) != -1)
   {
     switch (c)
     {
@@ -171,6 +175,10 @@ int main (int argc, char** argv)
 
     case 'a':
       archive_class = optarg;
+      break;
+
+    case 'b':
+      print_calibrator_stokes = true;
       break;
 
     case 'c':
@@ -248,7 +256,7 @@ int main (int argc, char** argv)
       switch (optarg[1])
       {
       case 's':
-	what = Stokes; break;
+	what = IQUV; break;
       case 'p':
 	what = Ip; break;
       default:
@@ -280,6 +288,10 @@ int main (int argc, char** argv)
 
     case 'p':
       single_axis = false;
+      break;
+
+    case 'R':
+      frontend_only = true;
       break;
 
     case 'r':
@@ -351,8 +363,8 @@ int main (int argc, char** argv)
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  if (!(print_jones || print_mueller || print_fluxcal 
-        || unload_derived_calibrator))
+  if (!(print_jones || print_mueller || print_fluxcal
+	|| print_calibrator_stokes || unload_derived_calibrator))
   {
     cpgbeg (0, device.c_str(), 0, 0);
     cpgask(1);
@@ -460,15 +472,25 @@ int main (int argc, char** argv)
 	  if (!calibrator->get_transformation_valid (ichan))
 	    continue;
 
-	  Jones<double> xform;
-	  xform = calibrator->get_transformation(ichan)->evaluate();
+	  const MEAL::Complex2* xform = calibrator->get_transformation(ichan);
+
+	  if (frontend_only)
+	  {
+	    const Calibration::BackendFeed* instrument
+	      = dynamic_cast<const Calibration::BackendFeed*> (xform);
+
+	    if (instrument)
+	      xform = instrument->get_frontend();
+	  }
+
+	  Jones<double> J = xform->evaluate();
 
 	  if (print_jones)
 	  {
 	    cout << ichan;
 	    for (unsigned i=0; i<2; i++)
 	      for (unsigned j=0; j<2; j++)
-		cout << " " << xform(i,j).real() << " " << xform(i,j).imag();
+		cout << " " << J(i,j).real() << " " << J(i,j).imag();
 
 	    cout << endl;
 	  }
@@ -476,7 +498,7 @@ int main (int argc, char** argv)
 	  if (print_mueller)
 	  {
 	    cout << ichan;
-	    Matrix<4,4,double> M = Mueller (xform);
+	    Matrix<4,4,double> M = Mueller (J);
 	    for (unsigned i=0; i<4; i++)
 	      for (unsigned j=0; j<4; j++)
 		cout << " " << M[i][j];
@@ -484,6 +506,53 @@ int main (int argc, char** argv)
 	    cout << endl;
 	  }
 	}
+	continue;
+      }
+
+      if (print_calibrator_stokes)
+      {
+        calibrator_stokes = input->get<Pulsar::CalibratorStokes>();
+
+	if (!calibrator_stokes)
+	{
+	  cerr << "pacv: Archive does not contain CalibratorStokes extension"
+	       << endl;
+	  continue;
+	}
+
+	Reference::To<Pulsar::CalibratorExtension> ext;
+	ext = input->get<Pulsar::CalibratorExtension>();
+
+	if (ext->get_nchan() != calibrator_stokes->get_nchan())
+	{
+	  cerr << "pacv: Calibrator nchan=" << ext->get_nchan()
+	       << " != CalibratorStokes nchan="
+	       << calibrator_stokes->get_nchan()
+	       << " (frequency column disabled)" << endl;
+
+	  ext = 0;
+	}
+
+	for (unsigned ichan=0; ichan<calibrator_stokes->get_nchan(); ichan++)
+	{
+	  if (!calibrator_stokes->get_valid (ichan))
+	    continue;
+
+	  Stokes< Estimate<double> > stokes
+	    = calibrator_stokes->get_stokes (ichan);
+
+	  cout << ichan;
+
+	  if (ext)
+	    cout << " " << ext->get_centre_frequency(ichan);
+
+	  for (unsigned i=1; i<4; i++)
+	    cout << " " << stokes[i].get_value()
+		 << " " << stokes[i].get_error();
+
+	  cout << endl;
+	}
+
 	continue;
       }
 
@@ -502,6 +571,13 @@ int main (int argc, char** argv)
       if (plot_calibrator_stokes)
       {
         calibrator_stokes = input->get<Pulsar::CalibratorStokes>();
+
+	if (!calibrator_stokes)
+	{
+	  cerr << "pacv: Archive does not contain CalibratorStokes extension"
+	       << endl;
+	  continue;
+	}
 
 	cerr << "pacv: Plotting CalibratorStokes" << endl;
 
@@ -568,7 +644,7 @@ int main (int argc, char** argv)
 
     for (unsigned ical=0; ical < 2; ical++)
     {
-      if (CAL[Stokes][ical])
+      if (CAL[IQUV][ical])
       {
 	cerr << "pacv: Plotting " << cal << " CAL Stokes parameters" << endl;
 	cpgpage ();
@@ -585,7 +661,7 @@ int main (int argc, char** argv)
 	archplot.set_plot_Ip (false);
       }
       
-      if (SYS[Stokes][ical])
+      if (SYS[IQUV][ical])
       {
 	cerr << "pacv: Plotting " << cal << " SYS Stokes parameters"
 	     << endl;

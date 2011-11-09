@@ -17,7 +17,7 @@
 #include "Pulsar/PolnCalibrator.h"
 
 #include "Pulsar/ReceptionModelSolver.h"
-#include "Pulsar/StandardModel.h"
+#include "Pulsar/SignalPath.h"
 
 #include "Pulsar/CoherencyMeasurementSet.h"
 #include "Pulsar/MeanCoherency.h"
@@ -221,8 +221,8 @@ namespace Pulsar
     //! Return the CalibratorStokesExtension
     virtual CalibratorStokes* get_CalibratorStokes () const;
 
-    //! Return the StandardModel for the specified channel
-    virtual const Calibration::StandardModel* get_model (unsigned ichan) const;
+    //! Return the SignalPath for the specified channel
+    virtual const Calibration::SignalPath* get_model (unsigned ichan) const;
 
     //! Solution unloading policy
     class Unloader;
@@ -242,7 +242,7 @@ namespace Pulsar
     void create_model ();
 
     //! The standard calibration model as a function of frequency
-    Reference::Vector<Calibration::StandardModel> model;
+    Reference::Vector<Calibration::SignalPath> model;
 
     //! Meausrement equation configuration options
     std::vector<std::string> equation_configuration;
@@ -268,7 +268,7 @@ namespace Pulsar
     //! Transformation cloned for each calibrator observation
     Reference::To< const MEAL::Complex2 > foreach_calibrator;
 
-    //! Initialize the StandardModel of the specified channel
+    //! Initialize the SignalPath of the specified channel
     virtual void init_model (unsigned ichan);
 
     //! Initialize a SourceEstimate instance

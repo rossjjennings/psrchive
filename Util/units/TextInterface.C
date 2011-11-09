@@ -63,7 +63,18 @@ string TextInterface::Parser::process (const string& command)
   return "";
 }
 
-string TextInterface::Parser::help (bool default_value)
+string TextInterface::Parser::process (const vector<string>& commands)
+{
+  string result;
+  for (unsigned i=0; i < commands.size(); i++)
+    result += process (commands[i]) + "\n";
+
+  return result;
+}
+
+string TextInterface::Parser::help (bool default_value,
+				    bool print_header,
+				    const char* indent)
 {
   unsigned i = 0;
 
@@ -93,17 +104,30 @@ string TextInterface::Parser::help (bool default_value)
   // repeat the dash an appropriate number of times
   string sep (max_namelen + max_descriptionlen + value_label.length(), '-');
 
+  string help_str;
+
   // make a nice header
-  string help_str =
-    pad(max_namelen, name_label) + 
-    pad(max_descriptionlen, description_label) + value_label + "\n" +
-    sep + "\n";
+  if (print_header)
+  {
+    if (indent)
+      help_str += indent;
+
+    help_str +=
+      pad(max_namelen, name_label) + 
+      pad(max_descriptionlen, description_label) + value_label + "\n" +
+      sep + "\n";
+  }
 
   for (i=0; i<get_nvalue(); i++)
+  {
+    if (indent)
+      help_str += indent;
+
     help_str += 
       pad(max_namelen, get_name(i)) + 
       pad(max_descriptionlen, get_description(i)) +
       ((default_value) ? (get_value(get_name(i)) + "\n") : "\n");
+  }
 
   return help_str;
 }

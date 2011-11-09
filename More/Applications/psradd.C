@@ -116,6 +116,8 @@ private:
 
   // tscrunch+unload when certain limiting conditions are met
   bool auto_add;
+  // enable use of the conditioned unloading without tscrunching
+  bool auto_add_tscrunch;
 
   // reset the total to the current archive
   bool reset_total;
@@ -150,6 +152,7 @@ psradd::psradd () : Pulsar::Application ("psradd",
   log_results = false;
 
   auto_add = false; 
+  auto_add_tscrunch = true;
 
   reset_total = true;
 }
@@ -281,6 +284,9 @@ void psradd::add_options (CommandLine::Menu& menu)
   arg = menu.add (max_signal_to_noise, 'S', "s/n");
   arg->set_help ("... signal-to-noise ratio exceeds 's/n'");
   arg->set_notification (auto_add);
+
+  arg = menu.add (auto_add_tscrunch, "autoT");
+  arg->set_help ("Disable tscrunch before unloading");
 
   menu.add ("\n" "Note: AUTO ADD options are incompatible with -o and -T");
 }
@@ -443,7 +449,7 @@ void psradd::finalize ()
   if (reset_total)
     return;
 
-  if (auto_add)
+  if (auto_add && auto_add_tscrunch)
   {      
     if (verbose) cerr << "psradd: Auto add - tscrunching last " 
 		      << total->integration_length()
@@ -492,11 +498,14 @@ void psradd::set_total (Pulsar::Archive* archive)
 {
   if (total)
   {
-    if (verbose)
-      cerr << "psradd: Auto add - tscrunch and unload " 
-	   << total->integration_length() << " s archive" << endl;
+    if (auto_add_tscrunch)
+    {
+      if (verbose)
+	cerr << "psradd: Auto add - tscrunch and unload " 
+		<< total->integration_length() << " s archive" << endl;
 
-    total->tscrunch();
+      total->tscrunch();
+    }
 
     if (very_verbose)
       cerr << "psradd: after tscrunch, instance count = " 

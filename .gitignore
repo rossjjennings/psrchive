@@ -1,5 +1,5 @@
 *.swp
-
+*~
 *.o
 *.lo
 *.la
@@ -22,7 +22,9 @@ Management/psrchive_config
 Management/psrchive_info
 Management/psrchive_install.h
 Management/release.csh
+More/Applications/calavg
 More/Applications/example
+More/Applications/fix_single
 More/Applications/fluxcal
 More/Applications/mtm
 More/Applications/paas
@@ -35,6 +37,7 @@ More/Applications/pav
 More/Applications/paz
 More/Applications/pazi
 More/Applications/pcm
+More/Applications/pcmavg
 More/Applications/pdmp
 More/Applications/pdv
 More/Applications/psradd
@@ -43,10 +46,13 @@ More/Applications/psrdiff
 More/Applications/psrflux
 More/Applications/psrmodel
 More/Applications/psrover
+More/Applications/psrpca
 More/Applications/psrplot
 More/Applications/psrsh
 More/Applications/psrsmooth
 More/Applications/psrsp
+More/Applications/psrspa
+More/Applications/psrsplit
 More/Applications/psrstability
 More/Applications/psrstat
 More/Applications/psrtrash
@@ -54,10 +60,13 @@ More/Applications/psrwt
 More/Applications/psrzap
 More/Applications/rmfit
 More/Applications/sesdiv
+More/Applications/spa
 More/MEAL/lmfit
 More/Polarimetry/pafit
 More/Polarimetry/rmrot
 More/Polarimetry/simpol
+More/psrgui/moc_*.C
+More/psrgui/psrgui
 More/python/psrchive.py
 More/python/psrchive_wrap.cxx
 Util/fft/fft_speed
@@ -76,6 +85,7 @@ Util/tempo/keys2c
 Util/tempo/keys2fort
 Util/units/PromoteTraits.h
 Util/units/generate_PromoteTraits
+Util/qtutil/moc_*.C
 aclocal.m4
 autom4te.cache/
 config.h
@@ -110,3 +120,4 @@ update.log
 conf.cmd
 build
 diff
+web/

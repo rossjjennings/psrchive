@@ -54,7 +54,7 @@ public:
   void add_subints_to_mow (const std::string& arg);
 
   vector<unsigned> bins_to_zap;
-  void add_bins_to_zap (const std::string& arg);
+  void range_bins_to_zap (const std::string& arg);
 
   vector<unsigned> chans_to_zero;
   void add_chans_to_zero (const std::string& arg);
@@ -152,8 +152,8 @@ void paz::add_options (CommandLine::Menu& menu)
   arg = menu.add (killfile, 'k', "filename");
   arg->set_help ("Zero weight chans listed in this kill file");
 
-  arg = menu.add (this, &paz::add_bins_to_zap, 'B', "\"a b c ...\"");
-  arg->set_help ("Zap these pulse phase bins");
+  arg = menu.add (this, &paz::range_bins_to_zap, 'B', "\"a b\"");
+  arg->set_help ("Zap pulse phase bins between a and b inclusive");
 
   arg = menu.add (this, &paz::add_chans_to_zero, 'z', "\"a b c ...\"");
   arg->set_help ("Zero weight these particular channels");
@@ -267,9 +267,9 @@ void paz::add_subints_to_mow (const std::string& arg)
   parse_array (subints_to_mow, arg);
 }
 
-void paz::add_bins_to_zap (const std::string& arg)
+void paz::range_bins_to_zap (const std::string& arg)
 {
-  parse_array (bins_to_zap, arg);
+  parse_range (bins_to_zap, arg);
 }
 
 
@@ -423,6 +423,10 @@ void zap_periodic_spikes (Pulsar::Profile * profile,
 void binzap (Pulsar::Archive * arch, Pulsar::Integration * integ, int subint,
 	     int lower_bin, int upper_bin, int lower_range, int upper_range);
 
+
+void zap_bin_in_archive(Pulsar::Archive* archive, const unsigned bin);
+
+void zap_bin_in_profile(Pulsar::Profile *profile, const unsigned bin);
 
 const char* periodic_zap_warning =
   "Warning! Periodic spike zapping on frequency-scrunched dedispersed data\n"
@@ -592,17 +596,21 @@ void paz::process (Pulsar::Archive* arch)
 
   if (bins_to_zap.size ())
   {
-    for (unsigned i = 0; i + 5 <= bins_to_zap.size (); i += 5)
-      binzap (arch, arch->get_Integration (bins_to_zap[i]), bins_to_zap[i],
-	      bins_to_zap[i + 1], bins_to_zap[i + 2], bins_to_zap[i + 3],
-	      bins_to_zap[i + 4]);
+    for (unsigned i = 0; i < bins_to_zap.size(); ++i)
+      zap_bin_in_archive(arch, bins_to_zap[i]);
   }
 
   if (zero_channels)
   {
     vector<float> mask (nchan, 1.0);
     for (unsigned i = 0; i < chans_to_zero.size (); i++)
+    {
+      if (chans_to_zero[i] >= nchan || chans_to_zero[i] < 0)
+        throw Error (InvalidRange, "paz::process",
+            "channel %d is out of range (nchan=%d)",
+           chans_to_zero[i], nchan); 
       mask[chans_to_zero[i]] = 0.0;
+    }
 
     for (unsigned i = 0; i < freqs_to_zero.size (); i++)
     {
@@ -717,48 +725,23 @@ void paz::process (Pulsar::Archive* arch)
   }
 }
 
-void
-binzap (Pulsar::Archive * arch, Pulsar::Integration * integ, int subint,
-	int lower_range, int upper_range, int lower_bin, int upper_bin)
+/**
+ * Zaps (assigns the mean) to a single bin across each profile in the archive.
+ */
+void zap_bin_in_archive(Pulsar::Archive* archive, const unsigned bin)
 {
-  BoxMuller gasdev;
-  float mean;
-  float deviation;
-  float *this_int;
+  for (unsigned isub = 0; isub < archive->get_nsubint(); ++isub)
+    for (unsigned ipol = 0; ipol < archive->get_npol(); ++ipol)
+      for (unsigned ichan = 0; ichan < archive->get_nchan(); ++ichan)
+        zap_bin_in_profile(archive->get_Profile(isub, ipol, ichan), bin);
+}
 
-  for (unsigned i = 0; i < arch->get_npol (); i++) {
-    int j;
-    for (unsigned k = 0; k < arch->get_nchan (); k++) {
-      this_int = integ->get_Profile (i, k)->get_amps ();
-      mean = 0;
-      deviation = 0;
-
-      // calculate mean across the bins, excluding bins to be zapped
-
-      for (j = lower_range; j < lower_bin; j++)
-	mean += this_int[j];
-
-      for (j = upper_bin; j < upper_range; j++)
-	mean += this_int[j];
-
-      mean = mean / ((upper_range - lower_range) - (upper_bin - lower_bin));
-
-      for (j = lower_range; j < lower_bin; j++)
-	deviation += (this_int[j] - mean) * (this_int[j] - mean);
-
-      for (j = upper_bin; j < upper_range; j++)
-	deviation += (this_int[j] - mean) * (this_int[j] - mean);
-
-      deviation =
-	deviation / ((upper_range - lower_range) -
-		     (upper_bin - lower_bin - 1));
-      deviation = sqrt (deviation);
-
-      // assign a new value based on the mean, random Gaussian number
-      // and variance to the bins being zapped
-
-      for (j = lower_bin; j < upper_bin; j++)
-	this_int[j] = mean + (gasdev () * deviation);
-    }
-  }
+/**
+ * Zaps (zero-values) the input bin in the input profile.
+ */
+void zap_bin_in_profile(Pulsar::Profile *profile, const unsigned bin)
+{
+  // Take the mean from the centre of the profile.
+  const float mean = profile->mean(0.5);
+  profile->get_amps()[bin] = mean;
 }

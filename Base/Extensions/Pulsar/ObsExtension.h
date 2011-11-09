@@ -58,6 +58,8 @@ namespace Pulsar {
 
     // get methods
     std::string get_observer() const { return observer; }
+    void set_observer(const std::string& _observer) { observer = _observer; }
+
     std::string get_affiliate() const { return affiliation; }
 
     std::string get_project_ID() const { return project_ID; }

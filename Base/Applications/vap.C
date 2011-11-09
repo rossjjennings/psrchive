@@ -28,10 +28,8 @@
 #include <Pulsar/FITSSUBHdrExtension.h>
 #include <Pulsar/CalInfoExtension.h>
 #include <Pulsar/TapeInfo.h>
-
 #include <Pulsar/AuxColdPlasma.h>
 
-//#include <Pulsar/WeightedFrequency.h>
 
 
 
@@ -81,9 +79,6 @@ bool verbose = false;
 bool show_extensions = false;
 bool hide_headers = false;
 vector< string > commands;
-vector< vector< string > > results;
-vector< string > current_row;
-bool new_new_vap = false;
 string meta_filename = "";
 
 bool neat_table = false;
@@ -313,28 +308,6 @@ string get_pol_c( Reference::To< Archive > archive )
 string get_freq( Reference::To< Archive > archive )
 {
   return tostring( archive->get_centre_frequency(), 3, ios::fixed );
-}
-
-string get_wt_freq( Reference::To< Archive > archive )
-{
-  //XXX: will be implemented very soon - just fixing the build.
-
-  /*const unsigned nsub  = archive->get_nsubint();
-  const unsigned nchan = archive->get_nchan();
-  double weighted_frequency_sum = 0.0;
-
-  // Iterate over every channel and sub-integration to calculate the centre
-  // frequency weighted value.
-  for (unsigned ichan = 0; ichan < nchan; ++ichan) {
-    weighted_frequency_sum += archive->weighted_frequency(ichan,0,nsub);
-  }
-
-  const double weighted_frequency =
-    weighted_frequency_sum / static_cast<double>(nchan);
-
-  return tostring( weighted_frequency, 3, ios::fixed );*/
-
-  return "";
 }
 
 string get_profile_centre_frequency( Reference::To< Archive > archive )
@@ -1273,9 +1246,29 @@ string get_MJD_feed( Reference::To<Archive> archive )
 // DIGITISER STATISTICS FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ * The values of ATTEN_A and ATTEN_B are derived from either:
+ *  - the main header (for earlier versions of psfits), or
+ *  - the DIG_STAT table
+ *
+ * Return the values from the main header if they are non-zero. Otherwise,
+ * return the values from the DIG_STAT table.
+ */
 string get_dig_atten( Reference::To<Archive> archive )
 {
   ostringstream result;
+  Reference::To<Receiver> receiver_ext = archive->get<Receiver>();
+
+  if (receiver_ext) {
+    const float atten_a = receiver_ext->get_atten_a();
+    const float atten_b = receiver_ext->get_atten_b();
+
+    if (atten_a != 0.0 || atten_b != 0.0) {
+      result << atten_a << "," << atten_b;
+      return result.str();
+    }
+  }
+
   Reference::To<DigitiserStatistics> ext = archive->get<DigitiserStatistics>();
 
   if( !ext )
@@ -1672,7 +1665,6 @@ void PrintExtdHlp( void )
     "dmc                             Dispersion corrected (boolean) \n"
     "dm_aux_c                        Auxiliary dispersion corrected (boolean) \n"
     "dm_model                        Dispersion model name \n"
-    "wt_freq                         Centre frequency weighted value \n"
     "freq_phs                        Pulse phase frequency \n"
     "freq_pa                         Position angle frequency \n"
     "length                          The full duration of the observation (s) \n"
@@ -1926,7 +1918,6 @@ string FetchValue( Reference::To< Archive > archive, string command )
     else if( command == "freq" ) return get_freq( archive );
     else if( command == "freq_pa" ) return get_freq_pa( archive );
     else if( command == "freq_phs" ) return get_freq_phs( archive );
-    else if( command == "wt_freq" ) return get_wt_freq( archive );
     else if( command == "bw" ) return get_bw( archive );
     else if( command == "intmjd" ) return get_intmjd( archive );
     else if( command == "fracmjd" ) return get_fracmjd( archive );

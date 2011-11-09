@@ -50,6 +50,17 @@ namespace Pulsar
 		    unsigned npol  = 0,
 		    unsigned nchan = 0,
 		    unsigned nbin  = 0) {}
+
+    //! Derived type factory
+    static Extension* factory (const std::string& name);
+
+    template<typename T>
+      class Interface : public TextInterface::To<T>
+    {
+      std::string get_interface_name() const
+      { return this->instance->get_short_name(); }
+    };
+
   protected:
     
     //! Extension name - useful when debugging

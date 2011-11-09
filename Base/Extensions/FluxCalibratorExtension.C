@@ -7,6 +7,7 @@
 
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/CalibratorType.h"
+#include "templates.h"
 
 //! Default constructor
 Pulsar::FluxCalibratorExtension::FluxCalibratorExtension ()
@@ -52,11 +53,17 @@ void Pulsar::FluxCalibratorExtension::set_nchan (unsigned nchan)
   S_sys.resize( nchan );
 }
 
-
 //! Get the number of frequency channels
 unsigned int Pulsar::FluxCalibratorExtension::get_nchan( void ) const
 {
 	return S_cal.size();
+}
+
+void Pulsar::FluxCalibratorExtension::remove_chan (unsigned first, unsigned last)
+{
+  CalibratorExtension::remove_chan (first, last);
+  remove (S_cal, first, last);
+  remove (S_sys, first, last);
 }
 
 //! Set the number of frequency channels
@@ -95,6 +102,12 @@ FluxCalibratorExtension::get_S_sys (unsigned ichan, unsigned ireceptor) const
   return S_sys[ichan][ireceptor];
 }
 
+std::vector< std::vector< Estimate<double> > >
+FluxCalibratorExtension::get_S_sys () const
+{
+  return S_sys;
+}
+
 void FluxCalibratorExtension::set_S_cal (unsigned ichan, unsigned ireceptor,
 					 const Estimate<double>& _S_cal)
 {
@@ -109,10 +122,14 @@ FluxCalibratorExtension::get_S_cal (unsigned ichan, unsigned ireceptor) const
   return S_cal[ichan][ireceptor];
 }
 
+std::vector< std::vector< Estimate<double> > >
+FluxCalibratorExtension::get_S_cal () const
+{
+  return S_cal;
+}
+
 TextInterface::Parser* FluxCalibratorExtension::get_interface()
 {
   return new Interface( this );
 }
-
-
 

@@ -42,6 +42,7 @@ include_HEADERS = \
         Plugin.h \
         RealTimer.h \
         RegularExpression.h \
+	RobustStats.h \
         sky_coord.h \
 	StraightLine.h \
         strutil.h \

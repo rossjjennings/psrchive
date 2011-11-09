@@ -92,7 +92,7 @@ AC_DEFUN([SWIN_PACKAGE_FIND],
   TEST_PACKAGES=`echo $TEST_INCS $TEST_LIBS $LD_LIBRARY_PATH $PACKAGES | sed -e 's/:/ /g'`
 
   if test x"$TEST_PACKAGES" != x; then
-    for cf_file in `find $TEST_PACKAGES -name "[$2]" 2> /dev/null`; do
+    for cf_file in `find -L $TEST_PACKAGES -name "[$2]" 2> /dev/null`; do
       cf_path=`dirname $cf_file`
       swin_[$1]_found="$swin_[$1]_found $cf_path"
     done

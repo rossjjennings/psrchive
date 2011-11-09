@@ -53,6 +53,7 @@ nobase_include_HEADERS = \
 	Pulsar/ProjectionCorrection.h \
         Pulsar/PulsarCalibrator.h \
         Pulsar/ReceptionCalibrator.h \
+	Pulsar/ReceptionCalibratorPlotter.h \
         Pulsar/ReceptionModelAxisPlotter.h \
         Pulsar/ReceptionModel.h \
         Pulsar/ReceptionModelPlotter.h \
@@ -62,6 +63,7 @@ nobase_include_HEADERS = \
 	Pulsar/ReceptionModelSolveMEAL.h \
         Pulsar/ReferenceCalibrator.h \
         Pulsar/ReflectStokes.h \
+        Pulsar/SignalPath.h \
         Pulsar/Simulation.h \
         Pulsar/SingleAxisCalibrator.h \
         Pulsar/SingleAxis.h \
@@ -70,7 +72,6 @@ nobase_include_HEADERS = \
 	Pulsar/SolverInfo.h \
 	Pulsar/SourceInfo.h \
 	Pulsar/StandardData.h \
-        Pulsar/StandardModel.h \
 	Pulsar/StandardPrepare.h \
 	Pulsar/StandardSpectra.h \
 	Pulsar/StepsInfo.h \
@@ -147,6 +148,7 @@ libPolarimetry_la_SOURCES = \
 	ReceptionModelSolveMEAL.C \
         ReferenceCalibrator.C \
         ReflectStokes.C \
+        SignalPath.C \
         Simulation.C \
         SingleAxis.C \
         SingleAxisCalibrator.C \
@@ -155,7 +157,6 @@ libPolarimetry_la_SOURCES = \
 	SolverInfo.C \
         SourceInfo.C \
 	StandardData.C \
-        StandardModel.C \
 	StandardPrepare.C \
 	StandardSpectra.C \
 	StepsInfo.C \
@@ -188,6 +189,7 @@ if HAVE_PGPLOT
 
 libPolarimetry_la_SOURCES += \
 	CalibratorPlotter.C \
+	ReceptionCalibratorPlotter.C \
 	SystemCalibratorPlotter.C \
 	ReceptionModelPlotter.C
 

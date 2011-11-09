@@ -29,6 +29,8 @@
 
 #include "pairutil.h"
 
+#include <fstream>
+
 using namespace Pulsar;
 using namespace std;
 
@@ -52,6 +54,9 @@ public:
   //! Process the given archive
   void process (Pulsar::Archive*);
 
+  //! Output the post-fit residuals to file
+  void output_residuals ();
+
 protected:
 
   //! Add command line options
@@ -61,7 +66,7 @@ protected:
   { ComplexRVMFit::verbose = true; Application::set_very_verbose(); }
 
   // complex rotating vector model
-  Reference::To<ComplexRVMFit> rvm;
+  Reference::To<ComplexRVMFit> rvmfit;
 
   // perform a global search over first guesses in alpha and zeta
   string global_search;
@@ -69,7 +74,12 @@ protected:
   unsigned nzeta;
 
   // perform a rotating vector model fit
-  bool rvm_fit;
+  bool fit_rvm;
+
+  // output the post-fit Stokes Q and U residuals
+  bool output_QU_residuals;
+  // output the post-fit position angle residuals
+  bool output_psi_residuals;
 
 #if HAVE_PGPLOT
 
@@ -108,8 +118,11 @@ psrmodel::psrmodel () :
   plot_result = false;
 #endif
 
-  rvm = new ComplexRVMFit;
-  rvm_fit = true;
+  rvmfit = new ComplexRVMFit;
+  fit_rvm = true;
+
+  output_QU_residuals = false;
+  output_psi_residuals = false;
 
   nalpha = nzeta = 0;
 }
@@ -130,8 +143,8 @@ range range_deg_to_rad (const std::string& arg)
 
 void psrmodel::add_options (CommandLine::Menu& menu)
 {
-  MEAL::RotatingVectorModel* RVM = rvm->get_model()->get_rvm();
-  rvm_fit = true;
+  MEAL::RotatingVectorModel* RVM = rvmfit->get_model()->get_rvm();
+  fit_rvm = true;
 
   CommandLine::Argument* arg;
 
@@ -143,9 +156,9 @@ void psrmodel::add_options (CommandLine::Menu& menu)
   arg->set_help ("plot the resulting model with data");
 #endif
 
-  arg = menu.add (rvm.get(), &ComplexRVMFit::set_threshold, 't', "sigma");
+  arg = menu.add (rvmfit.get(), &ComplexRVMFit::set_threshold, 't', "sigma");
   arg->set_help ("cutoff threshold when selecting bins "
-		 "[default " + tostring(rvm->get_threshold()) + "]");
+		 "[default " + tostring(rvmfit->get_threshold()) + "]");
 
   arg = menu.add (this, &psrmodel::add_opm, 'o', "deg0:deg1");
   arg->set_help ("window over which an orthogonal mode dominates");
@@ -196,17 +209,26 @@ void psrmodel::add_options (CommandLine::Menu& menu)
   arg = menu.add (this, &psrmodel::map_chisq, 'x');
   arg->set_help ("output map to stdout: alpha, zeta/beta, chi^2");
 
-  arg = menu.add (rvm.get(), &ComplexRVMFit::set_range_alpha,
+  arg = menu.add (rvmfit.get(), &ComplexRVMFit::set_range_alpha,
 		  range_deg_to_rad, "alpha", "deg0:deg1");
   arg->set_help ("range of alpha on x-axis of grid");
 
-  arg = menu.add (rvm.get(), &ComplexRVMFit::set_range_beta,
+  arg = menu.add (rvmfit.get(), &ComplexRVMFit::set_range_beta,
 		  range_deg_to_rad, "beta", "deg0:deg1");
   arg->set_help ("range of beta on y-axis of grid");
 
-  arg = menu.add (rvm.get(), &ComplexRVMFit::set_range_zeta,
+  arg = menu.add (rvmfit.get(), &ComplexRVMFit::set_range_zeta,
 		  range_deg_to_rad, "zeta", "deg0:deg1");
   arg->set_help ("range of zeta on y-axis of grid");
+
+
+  menu.add ("\n" "residual output options:");
+
+  arg = menu.add (output_QU_residuals, "resid");
+  arg->set_help ("output post-fit Stokes Q and U residuals");
+
+  arg = menu.add (output_psi_residuals, "psi-resid");
+  arg->set_help ("output post-fit position angle residuals");
 
 }
 
@@ -214,7 +236,7 @@ void psrmodel::add_options (CommandLine::Menu& menu)
 
 void psrmodel::map_chisq()
 {
-  rvm->set_chisq_map (true);
+  rvmfit->set_chisq_map (true);
 }
 
 
@@ -223,12 +245,12 @@ void psrmodel::add_opm (const std::string& arg)
   range opm = range_deg_to_rad (arg);
   cerr << "psrmodel: OPM at " << opm << " degrees" << endl;
 
-  rvm->add_opm( opm );
+  rvmfit->add_opm( opm );
 }
 
 void psrmodel::setup ()
 {
-  if (!rvm_fit)
+  if (!fit_rvm)
     throw Error (InvalidState, "psrmodel",
 		 "please use -r (can only do RVM fit for now)");
 
@@ -252,6 +274,19 @@ void psrmodel::setup ()
   }
 }
 
+static const double deg = 180/M_PI;
+
+template<class T>
+string state (T& model)
+{
+  ostringstream os;
+
+  os << ((model->get_infit(0))? "[fit]":"[fix]")
+     << " = " << deg*model->get_param(0);
+
+  return os.str();
+}
+
 void psrmodel::process (Pulsar::Archive* data)
 {
   if (verbose)
@@ -268,36 +303,32 @@ void psrmodel::process (Pulsar::Archive* data)
   data->convert_state(Signal::Stokes);
   data->remove_baseline();
 
-  if (data->has_model())
-    data->centre();
-
   Reference::To<PolnProfile> p = data->get_Integration(0)->new_PolnProfile(0);
-  rvm->set_observation (p);
+  rvmfit->set_observation (p);
 
-  MEAL::RotatingVectorModel* RVM = rvm->get_model()->get_rvm();
-  double deg = 180/M_PI;
+  MEAL::RotatingVectorModel* RVM = rvmfit->get_model()->get_rvm();
 
   if (nalpha && nzeta)
   {
     cerr << "psrmodel: performing search of chi^2 map" << endl;
 
-    rvm->global_search (nalpha, nzeta);
+    rvmfit->global_search (nalpha, nzeta);
   }
   else
   {
     cerr << "psrmodel: solving with initial guess: \n"
-      "psi_0=" << deg*RVM->reference_position_angle->get_param(0) << " deg\n"
-      "zeta =" << deg*RVM->line_of_sight->get_param(0) << " deg\n"
-      "alpha=" << deg*RVM->magnetic_axis->get_param(0) << " deg\n"
-      "phi_0=" << deg*RVM->magnetic_meridian->get_param(0) << " deg"
+      "psi_0 " << state(RVM->reference_position_angle) << " deg\n"
+      "zeta  " << state(RVM->line_of_sight) << " deg\n"
+      "alpha " << state(RVM->magnetic_axis) << " deg\n"
+      "phi_0 " << state(RVM->magnetic_meridian) << " deg"
 	 << endl;
 
-    rvm->solve();
+    rvmfit->solve();
   }
 
   cerr << endl
-       << "chisq=" << rvm->get_chisq() << "/nfree=" << rvm->get_nfree()
-       << " = " << rvm->get_chisq()/ rvm->get_nfree() 
+       << "chisq=" << rvmfit->get_chisq() << "/nfree=" << rvmfit->get_nfree()
+       << " = " << rvmfit->get_chisq()/ rvmfit->get_nfree() 
        << endl;
 
   cerr <<
@@ -307,6 +338,8 @@ void psrmodel::process (Pulsar::Archive* data)
     "phi_0=" << deg*RVM->magnetic_meridian->get_value() << " deg"
 	     << endl;
 
+  output_residuals();
+
 #if HAVE_PGPLOT
   if (plot_result)
   {
@@ -314,7 +347,7 @@ void psrmodel::process (Pulsar::Archive* data)
 
     AnglePlot* pa = plotter.get_orientation();
 
-    pa->set_threshold( rvm->get_threshold() );
+    pa->set_threshold( rvmfit->get_threshold() );
     pa->model.set (RVM, &MEAL::RotatingVectorModel::compute);
     pa->get_frame()->get_y_scale()->set_range_norm (0, 1.5);
 
@@ -323,4 +356,54 @@ void psrmodel::process (Pulsar::Archive* data)
   }
 #endif
 
+}
+
+
+void psrmodel::output_residuals ()
+{
+  if (output_QU_residuals)
+  {
+    string filename = "psrmodel_QU_residuals.txt";
+    ofstream out (filename.c_str());
+    if (!out)
+      throw Error (FailedSys, "psrmodel", "could not open " + filename);
+    else
+      cerr << "\n" "post-fit Stokes Q and U residuals in " << filename << endl;
+
+    vector<double> phases;
+    vector< complex< Estimate<double> > > residuals;
+
+    rvmfit->get_residuals (phases, residuals);
+
+    for (unsigned i=0; i < residuals.size(); i++)
+    {
+      out << phases[i] << " " 
+	  << residuals[i].real().get_value() << " "
+	  << residuals[i].real().get_error() << " "
+	  << residuals[i].imag().get_value() << " "
+	  << residuals[i].imag().get_error() << endl;
+    }
+  }
+
+  if (output_psi_residuals)
+  {
+    string filename = "psrmodel_psi_residuals.txt";
+    ofstream out (filename.c_str());
+    if (!out)
+      throw Error (FailedSys, "psrmodel", "could not open " + filename);
+    else
+      cerr << "\n" "post-fit position angle residuals in " << filename << endl;
+
+    vector<double> phases;
+    vector< Estimate<double> > residuals;
+
+    rvmfit->get_psi_residuals (phases, residuals);
+
+    for (unsigned i=0; i < residuals.size(); i++)
+    {
+      out << phases[i] << " "
+	   << residuals[i].get_value() << " "
+	   << residuals[i].get_error() << endl;
+    }
+  }
 }
