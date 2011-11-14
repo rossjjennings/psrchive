@@ -12,7 +12,7 @@
 std::string
 stringprintf (const char *fmt ...)
 {
-  static char buf[1024];
+  char buf[1024];
   va_list args;
 
   va_start(args, fmt);
@@ -21,3 +21,4 @@ stringprintf (const char *fmt ...)
 
   return std::string(buf);
 }
+
