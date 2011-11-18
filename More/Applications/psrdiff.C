@@ -357,7 +357,8 @@ void diff_two (const std::string& fileA, const std::string& fileB)
   std::string reason;
   if (!A->mixable(B,reason))
   {
-    cout << "files differ " << reason << endl;
+    cout << "files differ as follows:" << reason << endl;
+    return;
   }
 
   if (verbose)
