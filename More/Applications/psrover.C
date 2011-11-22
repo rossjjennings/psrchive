@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009,2010 by Stefan Oslowski,Jonathan Khoo
+ *   Copyright (C) 2009,2010,2011 by Stefan Oslowski,Jonathan Khoo
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -340,7 +340,7 @@ void psrover::process (Pulsar::Archive* archive)
 	    if (!data_reset)
 	    {
 	      if  (verbose && ibin == 0)
-		cerr << "Resetting data when adding gaussian" << endl;
+		cerr << "psrover::process Resetting data when adding gaussian" << endl;
 	      *data = 0.0;
 	      if (ibin == nbin-1)
 		data_reset = true;
@@ -368,7 +368,7 @@ void psrover::process (Pulsar::Archive* archive)
 	  if (!data_reset && !use_mises)
 	  {
 	    if (verbose && ibin==0)
-	      cerr << "Resetting data when adding noise" << endl;
+	      cerr << "psrover::process Resetting data when adding noise" << endl;
 	    *data = 0.0;
 	    if (ibin == nbin-1)
 	      data_reset = true;
@@ -390,7 +390,7 @@ void psrover::process (Pulsar::Archive* archive)
 	  if (!data_reset)
 	  {
 	    if (verbose && ibin == 0)
-	      cerr << "Resetting data when adding delta function" << endl;
+	      cerr << "psrover::process Resetting data when adding delta function" << endl;
 	    *data = 0.0;
 	    if (ibin == nbin - 1)
 	      data_reset = true;
@@ -410,13 +410,13 @@ void psrover::process (Pulsar::Archive* archive)
   if (got_ascii_file)
   {
     if (verbose)
-      cerr << "adding the values from the ascii file to the profile" << endl;
+      cerr << "psrover::process adding the values from the ascii file to the profile" << endl;
     for (unsigned ibin = 0; ibin < nbin; ++ibin)
     {
       if (!data_reset && !use_mises)
       {
 	if (verbose && ibin == 0)
-	  cerr << "Resetting data when adding ascii values" << endl;
+	  cerr << "psrover::process Resetting data when adding ascii values" << endl;
 	*data = 0.0;
 	if (ibin == nbin - 1)
 	  data_reset = true;
