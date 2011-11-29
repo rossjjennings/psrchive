@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009,2010 by Stefan Oslowski,Jonathan Khoo
+ *   Copyright (C) 2009,2010,2011 by Stefan Oslowski,Jonathan Khoo
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -96,6 +96,7 @@ class psrover : public Pulsar::Application
   bool got_bins;
   bool got_ascii_file;
   bool got_nbins;
+  bool data_reset;
 
   bool draw_amplitude;
   bool use_mises;
@@ -109,7 +110,7 @@ psrover::psrover()
 
   seed = 0;
 
-  use_mises = draw_amplitude = got_nbins = got_ascii_file = got_noises = got_fwhms = got_bins = false;
+  data_reset = use_mises = draw_amplitude = got_nbins = got_ascii_file = got_noises = got_fwhms = got_bins = false;
 
   output_filename = "temp_archive.ar";
 }
@@ -130,7 +131,6 @@ void psrover::add_options ( CommandLine::Menu& menu)
 
   arg = menu.add(use_mises, "vM", "use van Mises distribution");
   arg->set_help("Force psrover to use van Mises distribution, instead of gaussian function");
-  arg->set_long_help("At the moment van Mises can produce sllightly wrong results, e.g. wrong height or wrong centering");
 
   arg = menu.add(draw_amplitude, "fr", "random amplitude");
   arg->set_long_help("draw normally distributed amplitude in range [-amp, amp], where amp is defined with -f");
@@ -149,7 +149,7 @@ void psrover::add_options ( CommandLine::Menu& menu)
   arg->set_help ("ascii file with desired underlying profile");
   arg->set_long_help ("if given, it will overwrite the data from archive");
 
-  arg = menu.add(this, &psrover::set_ascii_file,'n',"number of bins");
+  arg = menu.add(this, &psrover::set_nbins,'n',"number of bins");
   arg->set_help ("the number of bins in the requested profile");
   arg->set_long_help("This will be overriden by the ascii file or archive, if any given");
 
@@ -224,7 +224,7 @@ void psrover::setup ()
 {
   if (got_ascii_file) {
     if (verbose)
-      cerr << "psrover::setup reading the ascii file" << endl;
+      cerr << "psrover::setup reading the ascii file " << endl;
     ifstream in_file(ascii_filename.c_str());
     if (in_file.is_open()) {
       while (!in_file.eof()) {
@@ -235,6 +235,7 @@ void psrover::setup ()
       }
       in_file.close();
     } 
+    nbin --;
   } //got_ascii_file
   else {
     if (verbose)
@@ -244,7 +245,7 @@ void psrover::setup ()
        cerr << "psrover::setup no nbins provided, defaulting to 1024" << endl;
       nbin = 1024;
     }
-    for (int i = 0 ; i < nbin ; i++) {
+    for (unsigned i = 0 ; i < nbin ; i++) {
       profile_values.push_back(0.0);
     }
   } // didn't get ascii file
@@ -252,13 +253,15 @@ void psrover::setup ()
   //set the seed
   if (seed == 0)
   {
-    cout << "seed from time " << endl;
+    if (verbose)
+      cerr << "seed from time " << endl;
     seconds = time(NULL);
     gasdev = BoxMuller(seconds);
   }
   else
   {
-    cout << "seed from command line " << seed << endl;
+    if (verbose)
+      cerr << "seed from command line " << seed << endl;
     gasdev = BoxMuller(seed);
   }
 
@@ -290,62 +293,154 @@ void psrover::process (Pulsar::Archive* archive)
 {
   nbin = archive-> get_nbin();
 
-  if (verbose)
-    cerr << "psrover::process assigning data from " << archive->get_filename() << endl;
+  /*if ( ! got_ascii_file )
+  {*/
+    if (verbose)
+      cerr << "psrover::process getting the amps from " << archive->get_filename() << endl;
 
-  float* data = archive->get_Integration(0)->get_Profile(0, 0)->get_amps();
+    float* data = new float[nbin];
+    data = archive->get_Integration(0)->get_Profile(0, 0)->get_amps();
+  /*}
+  else 
+  {
+    float *data  = new float[nbin];
+    for ( unsigned i_bin  ; i_bin < nbin; i_bin++ )
+      data[i_bin] = 
+  }*/
 
   if (!noise_to_add.empty()) {
-    for (int jcomp = 0; jcomp < fwhms.size(); jcomp++ ) {
-      if (fwhms[jcomp] > 0 && bins[jcomp] > 0) {
+    for (unsigned jcomp = 0; jcomp < fwhms.size(); jcomp++ ) {
+      if (fwhms[jcomp] >= 0 && bins[jcomp] >= 0) {
 	if (draw_amplitude)
 	{
 	  tmp_rand = gasdev();
 	  amplitude = tmp_rand * noise_to_add[jcomp];
-	  cout << "check " << tmp_rand << " " << noise_to_add[jcomp] << " " << amplitude << endl;
 	}
 	else
 	  amplitude = noise_to_add[jcomp];
 	if (!save_added_gauss_filename.empty())
 	  outfile2 << amplitude << endl;
 	if (use_mises) {
-	  cout << "Adding a von Mises component:" << endl;
-	  cout << "maximum: " << noise_to_add[jcomp] << " peak at the bin: " << bins[jcomp] << " fwhm: " << fwhms[jcomp] << endl;
+	  if (verbose)
+	  { 
+	    cerr << "Adding a von Mises component:" << endl;
+	    cerr << "maximum: " << noise_to_add[jcomp] << " peak at the bin: " << bins[jcomp] << " fwhm: " << fwhms[jcomp] << endl;
+	  }
 	  model.add_component(bins[jcomp]/nbin, 1.0/fwhms[jcomp]/fwhms[jcomp] * 2.35482 * 2.35482 * nbin * nbin / 4 / M_PI / M_PI, amplitude, "");
 	}
 	else 
 	{
-	  cout << "Adding a gaussian:" << endl;
-	  cout << "maximum: " << amplitude << " peak at the bin: " << bins[jcomp] << " fwhm: " << fwhms[jcomp] << endl;
+	  if (verbose)
+	  {
+	    cerr << "Adding a gaussian:" << endl;
+	    cerr << "maximum: " << amplitude << " peak at the bin: " << bins[jcomp] << " fwhm: " << fwhms[jcomp] << endl;
+	  }
 	  for (unsigned ibin = 0; ibin < nbin; ++ibin) {
 	    // resolve the gaussian with sub_bin resolution:
-	    *data = 0.0;
-	    for (int ksubbin = 0; ksubbin < sub_bin; ksubbin++ ) {
-	      if (got_ascii_file)
+	    if (!data_reset)
+	    {
+	      if  (verbose && ibin == 0)
+		cerr << "psrover::process Resetting data when adding gaussian" << endl;
+	      *data = 0.0;
+	      if (ibin == nbin-1)
+		data_reset = true;
+	    }
+	    for (unsigned ksubbin = 0; ksubbin < sub_bin; ksubbin++ ) {
 	      current_bin = (float)((signed)ibin) + 1.0 / sub_bin * (float)ksubbin;
-	      *data += amplitude / sub_bin * exp( -pow((signed)ibin-bins[jcomp],2) / 2 / pow(fwhms[jcomp] / 2.35482, 2)) ;
+	      *data += amplitude / sub_bin * exp( -pow((signed)current_bin - bins[jcomp],2) / 2 / pow(fwhms[jcomp] / 2.35482, 2)) ;
 	      //wrap the gaussian around
-	      *data += amplitude / sub_bin * exp( -pow((signed)(ibin-1024)-bins[jcomp],2) / 2 / pow(fwhms[jcomp] / 2.35482, 2)) ;
+	      *data += amplitude / sub_bin * exp( -pow((signed)(current_bin - 1024)-bins[jcomp],2) / 2 / pow(fwhms[jcomp] / 2.35482, 2)) ;
 	    }
 	    ++data;
 	  }
 	}
+	if (use_mises)
+	  model.evaluate(data, archive->get_nbin());
+	else
+	{
+	  data -= nbin;
+	} 
+      }
+      else if (fwhms[jcomp] < 0 && bins[jcomp] < 0)
+      {
+	for (unsigned ibin = 0; ibin < nbin; ++ibin)
+	{
+	  if (!data_reset && !use_mises)
+	  {
+	    if (verbose && ibin==0)
+	      cerr << "psrover::process Resetting data when adding noise" << endl;
+	    *data = 0.0;
+	    if (ibin == nbin-1)
+	      data_reset = true;
+	  }
+	  if (verbose && ibin == 0)
+	    cerr << "Adding " << noise_to_add[jcomp] << " noise to each bin" << endl;
+	  tmp_rand = gasdev();
+	  *data += tmp_rand * (float)noise_to_add[jcomp];
+	  if (!save_added_noise_filename.empty())
+	    outfile1 << ibin << " " << tmp_rand * (float)noise_to_add[jcomp] << endl;
+	  ++data;
+	}
+	data -= nbin;
+      }
+      else if (fwhms[jcomp] < 0 && bins[jcomp] >= 0)
+      {
+	for (unsigned ibin = 0; ibin < nbin; ++ibin)
+	{
+	  if (!data_reset)
+	  {
+	    if (verbose && ibin == 0)
+	      cerr << "psrover::process Resetting data when adding delta function" << endl;
+	    *data = 0.0;
+	    if (ibin == nbin - 1)
+	      data_reset = true;
+	  }
+	  if (ibin == (unsigned)bins[jcomp])
+	  {
+	    if (verbose)
+	      cerr << " Adding " << noise_to_add[jcomp] << " to " << ibin << "-th bin" << endl;
+	    *data += noise_to_add[jcomp];
+	  }
+	  ++data;
+	}
+	data -= nbin;
       }
     }
-    if (use_mises)
-      model.evaluate(data, archive->get_nbin());
-    else
-      data -= nbin;
+  }
+  if (got_ascii_file)
+  {
+    if (verbose)
+      cerr << "psrover::process adding the values from the ascii file to the profile" << endl;
+    for (unsigned ibin = 0; ibin < nbin; ++ibin)
+    {
+      if (!data_reset && !use_mises)
+      {
+	if (verbose && ibin == 0)
+	  cerr << "psrover::process Resetting data when adding ascii values" << endl;
+	*data = 0.0;
+	if (ibin == nbin - 1)
+	  data_reset = true;
+      }
+      *data += profile_values[ibin];
+      ++data;
+    }
+    data -= nbin;
+  }
 
-    for (unsigned i = 0; i < nbin; ++i) {
+
+/*    for (unsigned i = 0; i < nbin; ++i) {
       if (got_ascii_file)
+      {
+	if (verbose)
+	  cerr << "adding " << profile_values[i] << " to the " << i << "-th bin" << endl;
 	*data += profile_values[i];
+      }
 
       for (int j = 0; j < fwhms.size(); j++ ) {
 	if (bins[j] < 0 && fwhms[j] < 0) {
 	  //generate random number and use it as a multiplicand with the noise input
 	  if (i == 0 ) 
-	    cout << "Adding " << noise_to_add[j] << " noise to each bin" << endl;
+	    cout << "Adding " << noise_to_add[j] << " noise to each bin " << endl;
 	  tmp_rand = gasdev();
 	  *data += tmp_rand * (float)noise_to_add[j];
 	  if (!save_added_noise_filename.empty())
@@ -359,11 +454,13 @@ void psrover::process (Pulsar::Archive* archive)
     }
 
   } else {
+    if (verbose)
+      cerr << "setting the amps to values from the ascii profile" << endl;
     for (unsigned i = 0; i < nbin; ++i) {
       *data = profile_values[i];
       ++data;
     }
-  }
+  }*/
 
   if (!save_profile_ascii.empty())
   {
@@ -373,7 +470,6 @@ void psrover::process (Pulsar::Archive* archive)
     for (unsigned i = 0 ; i < nbin; i++ )
     {
       outfile3 <<  amps[i] << endl;
-      printf("%.6f\n", amps[i]);
     }
   }
 
