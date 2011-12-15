@@ -34,6 +34,8 @@ namespace Pulsar {
 
     bool must_match;
 
+    bool ignore_phase;
+
   protected:
 
     //! Return true if there is a benign reason to stop

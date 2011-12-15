@@ -48,6 +48,9 @@ public:
   //! Disable various sanity checks
   void force ();
 
+  //! Disable phase alignment
+  void ignore_phase ();
+
 protected:
 
   //! Add command line options
@@ -258,6 +261,9 @@ void psradd::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (required_archive_length, 'Z', "time");
   arg->set_help ("Only add archives that are time (+/- 0.5) seconds long");
+  
+  arg = menu.add (this, &psradd::ignore_phase, "ip");
+  arg->set_help ("Do not apply model, ignore phase alignment");
 
   menu.add ("\n" "AUTO ADD: tscrunch and unload when ...");
 
@@ -359,6 +365,11 @@ void psradd::force ()
   time.must_match = false;
 
   frequency.must_match = false;
+}
+
+void psradd::ignore_phase ()
+{
+  time.ignore_phase = true;
 }
 
 //! Process the given archive
