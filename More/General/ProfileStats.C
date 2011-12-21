@@ -35,6 +35,8 @@ Pulsar::ProfileStats::~ProfileStats()
 //! Set the Profile from which statistics will be derived
 void Pulsar::ProfileStats::set_profile (const Profile* _profile)
 {
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::set_profile this=" << this << " profile=" << _profile << endl;
   profile = _profile;
   built = false;
 }
@@ -239,7 +241,11 @@ void Pulsar::ProfileStats::build () const try
   baseline_variance = 0.0;
 
   if (!profile)
+  {
+    if (Profile::verbose)
+      cerr << "Pulsar::ProfileStats::build this=" << this << " Profile not set" << endl;
     return;
+  }
 
   if (regions_set)
   {
