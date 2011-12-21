@@ -21,19 +21,19 @@ Pulsar::PolnProfileStats::Interface::Interface (PolnProfileStats* instance)
     set_instance (instance);
 
   add( &PolnProfileStats::get_total_intensity,
-       "sum_I", "Total flux in on-pulse phase bins" );
+       "sumI", "Total flux in on-pulse phase bins" );
 
   add( &PolnProfileStats::get_total_polarized,
-       "sum_p", "Total polarized flux of on-pulse phase bins" );
+       "sumP", "Total polarized flux of on-pulse phase bins" );
 
   add( &PolnProfileStats::get_total_linear,
-       "sum_L", "Total linearly polarized flux of on-pulse phase bins" );
+       "sumL", "Total linearly polarized flux of on-pulse phase bins" );
 
   add( &PolnProfileStats::get_total_circular,
-       "sum_V", "Total Stokes V of on-pulse phase bins" );
+       "sumV", "Total Stokes V of on-pulse phase bins" );
 
   add( &PolnProfileStats::get_total_abs_circular,
-       "sum_C", "Total circularly polarized flux of on-pulse phase bins" );
+       "sumC", "Total circularly polarized flux of on-pulse phase bins" );
 
 }
 
