@@ -39,6 +39,9 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
       " call Statistics::get_stats" << endl;
 
     insert ( instance->get_stats()->get_interface() );
+
+    for (unsigned i=0; i < instance->plugins.size(); i++)
+      insert ( instance->plugins[i]->get_interface() );
   }
 
   add( &Statistics::get_effective_duty_cycle,

@@ -53,7 +53,7 @@ const Pulsar::Integration* Pulsar::Statistics::get_Integration () const
 
 const Pulsar::Profile* Pulsar::Statistics::get_Profile () const
 {
-  profile = Pulsar::get_Profile (archive, isubint, ipol, ichan);
+  profile = Pulsar::get_Profile (get_Integration(), ipol, ichan);
   return profile;
 }
 
@@ -178,4 +178,13 @@ void Pulsar::Statistics::setup_stats ()
     stats = new ProfileStats;
 
   stats->set_profile( get_Profile() );
+
+  for (unsigned i=0; i<plugins.size(); i++)
+    plugins[i]->setup (this);
 }
+
+void Pulsar::Statistics::add_plugin (Plugin* plugin)
+{
+  plugins.push_back(plugin);
+}
+

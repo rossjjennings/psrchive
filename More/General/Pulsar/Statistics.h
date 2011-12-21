@@ -87,6 +87,12 @@ namespace Pulsar {
     //! Get the text interface to this
     TextInterface::Parser* get_interface ();
 
+    //! Pure virtual base class of statistics plugins
+    class Plugin;
+
+    //! Add a plugin
+    void add_plugin (Plugin*);
+
   protected:
 
     Reference::To<const Archive, false> archive;
@@ -103,7 +109,20 @@ namespace Pulsar {
     const Integration* get_Integration () const;
     mutable Reference::To<const Integration> integration;
 
+    mutable std::vector< Reference::To<Plugin> > plugins;
+    
   };
+
+  class Statistics::Plugin : public Reference::Able
+  {
+  public:
+    virtual void setup (Statistics*) = 0;
+    virtual TextInterface::Parser* get_interface () = 0;
+
+    const Integration* get_Integration (Statistics* stats)
+    { return stats->get_Integration(); }
+  };
+
 }
 
 // standard interface constructor defined in More/General/standard_interface.C
