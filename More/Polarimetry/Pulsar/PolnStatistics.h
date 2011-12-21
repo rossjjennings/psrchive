@@ -38,8 +38,6 @@ namespace Pulsar
   protected:
 
     mutable Reference::To<PolnProfileStats> stats;
-
-    const PolnProfile* get_Profile () const;
     mutable Reference::To<const PolnProfile> profile;
   };
 }
