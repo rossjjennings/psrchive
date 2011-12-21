@@ -100,6 +100,7 @@ namespace Pulsar {
     Index ichan;
     Index ipol;
 
+    bool stats_setup;
     void setup_stats ();
     mutable Reference::To<ProfileStats> stats;
 
