@@ -184,6 +184,9 @@ namespace Pulsar
     //! Prepare to export the solution
     void export_prepare () const;
 
+    //! Set fit flags and initial values of the calibrator Stokes parameters
+    void setup_calibrators ();
+
     //! Ensure that selected phase bins are represented in on-pulse mask
     void ensure_consistent_onpulse ();
    };
