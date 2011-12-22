@@ -544,7 +544,8 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
     const Integration* integration = cal->get_Integration (isub);
 
     MJD epoch = integration->get_epoch();
-    add_epoch( epoch );
+
+    // add_epoch( epoch );
 
     ReferenceCalibrator::get_levels (integration, nchan, cal_hi, cal_lo);
 
