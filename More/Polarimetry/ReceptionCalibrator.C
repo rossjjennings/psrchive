@@ -57,6 +57,8 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type* _type)
 
   output_report = false;
 
+  integrate_flux_calibrators = false;
+
   unique = 0;
 
   nthread = 1;
@@ -208,7 +210,32 @@ void Pulsar::ReceptionCalibrator::init_model (unsigned ichan)
     model[ichan] -> fix_orientation ();
 }
 
+void Pulsar::ReceptionCalibrator::load_calibrators ()
+{
+  if (verbose > 2)
+    cerr << "Pulsar::ReceptionCalibrator::load_calibrators" << endl;
 
+  SystemCalibrator::load_calibrators ();
+
+  if (integrated_flux_calibrator.size() != get_nchan())
+  {
+    cerr << "Pulsar::ReceptionCalibrator::load_calibrators"
+      " no integrated flux calibrator" << endl;
+    return;
+  }
+
+  const unsigned nchan = get_nchan();
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+  {
+    Calibration::CoherencyMeasurementSet measurements;
+    measurements.set_identifier( "integrated flux calibrator" );
+
+    Stokes< Estimate<double> > data = integrated_flux_calibrator[ichan];
+    submit_flux_calibrator_data (measurements, ichan, data);
+  }
+
+  integrated_flux_calibrator.clear();
+}
 
 
 //! Add the specified pulse phase bin to the set of state constraints
@@ -370,7 +397,7 @@ void Pulsar::ReceptionCalibrator::prepare_calibrator_estimate
       model[ichan]->get_fluxcal()->add_backend();
     }
   }
-  else
+  else if (!integrate_flux_calibrators)
   {
     // each flux calibrator observation is made through a different backend
     for (unsigned ichan=0; ichan<get_nchan(); ichan++)
@@ -460,17 +487,33 @@ void Pulsar::ReceptionCalibrator::submit_calibrator_data
     return;
   }
 
-  // add the flux calibrator
+  if (integrate_flux_calibrators)
+  {
+    integrated_flux_calibrator.resize( get_nchan() );
+    integrated_flux_calibrator[data.ichan] += data.baseline;
+  }
+  else
+    submit_flux_calibrator_data (measurements, data.ichan, data.baseline);
+}
+
+void Pulsar::ReceptionCalibrator::submit_flux_calibrator_data 
+(
+ Calibration::CoherencyMeasurementSet& measurements,
+ unsigned ichan, const Stokes< Estimate<double> >& data
+ )
+{
+  // add the flux calibrator data to the model constraints
+
   Calibration::CoherencyMeasurement fstate 
     (flux_calibrator_estimate.input_index);
   
-  fstate.set_stokes( data.baseline );
+  fstate.set_stokes( data );
 
   measurements.push_back (fstate);
   measurements.set_transformation_index
-    ( model[data.ichan]->get_fluxcal()->get_path_index() );
+    ( model[ichan]->get_fluxcal()->get_path_index() );
 
-  model[data.ichan]->get_equation()->add_data (measurements);
+  model[ichan]->get_equation()->add_data (measurements);
 }
 
 
@@ -567,7 +610,7 @@ void Pulsar::ReceptionCalibrator::initialize ()
   SystemCalibrator::solve_prepare ();
 
   flux_calibrator_estimate.update_source();
- 
+
   for (unsigned istate=0; istate<pulsar.size(); istate++)
     pulsar[istate].update_source ();
 

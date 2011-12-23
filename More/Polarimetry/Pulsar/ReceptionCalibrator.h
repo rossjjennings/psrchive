@@ -67,6 +67,9 @@ namespace Pulsar
     //! Produce reports of reduced chisq for each state in each channel
     bool output_report;
 
+    //! Integrate all flux calibrator observations into one estimate
+    bool integrate_flux_calibrators;
+
     //! Reflections performed on the calibrator data immediately after loading
     ReflectStokes reflections;
 
@@ -122,7 +125,10 @@ namespace Pulsar
 
     //! Uncalibrated estimate of pulsar polarization as a function of phase
     std::vector<SourceEstimate> pulsar;
-    
+
+    //! Integrated mean Stokes parameters of all flux calibrator observations
+    std::vector< Stokes< MeanEstimate<double> > > integrated_flux_calibrator;
+
     //! The epochs of all loaded calibrators
     std::vector<MJD> calibrator_epochs;
 
@@ -169,8 +175,15 @@ namespace Pulsar
     void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
 				 const SourceObservation&);
 
+    void submit_flux_calibrator_data (Calibration::CoherencyMeasurementSet&,
+				      unsigned ichan, 
+				      const Stokes< Estimate<double> >& data);
+
     void integrate_calibrator_data (const Jones< Estimate<double> >&,
 				    const SourceObservation&);
+
+    //! Handle any integrated flux calibrator data
+    void load_calibrators ();
 
     //! Ensure that the pulsar observation can be added to the data set
     void match (const Archive*);
