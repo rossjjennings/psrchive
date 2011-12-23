@@ -490,11 +490,18 @@ void Pulsar::ReceptionCalibrator::submit_calibrator_data
 
   if (integrate_flux_calibrators)
   {
+    unsigned index = model[data.ichan]->get_fluxcal()->get_path_index();
+    measurements.set_transformation_index (index);
+
+    SystemCalibrator::submit_calibrator_data (measurements, data);
+
     integrated_flux_calibrator.resize( get_nchan() );
     integrated_flux_calibrator[data.ichan] += data.baseline;
   }
   else
+  {
     submit_flux_calibrator_data (measurements, data.ichan, data.baseline);
+  }
 }
 
 void Pulsar::ReceptionCalibrator::submit_flux_calibrator_data 
@@ -505,14 +512,15 @@ void Pulsar::ReceptionCalibrator::submit_flux_calibrator_data
 {
   // add the flux calibrator data to the model constraints
 
-  Calibration::CoherencyMeasurement fstate 
+  Calibration::CoherencyMeasurement state 
     (flux_calibrator_estimate.input_index);
   
-  fstate.set_stokes( data );
+  state.set_stokes( data );
 
-  measurements.push_back (fstate);
-  measurements.set_transformation_index
-    ( model[ichan]->get_fluxcal()->get_path_index() );
+  measurements.push_back (state);
+
+  unsigned index = model[ichan]->get_fluxcal()->get_path_index();
+  measurements.set_transformation_index (index);
 
   model[ichan]->get_equation()->add_data (measurements);
 }
