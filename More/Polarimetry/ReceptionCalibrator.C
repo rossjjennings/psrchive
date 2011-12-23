@@ -219,8 +219,9 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
 
   if (integrated_flux_calibrator.size() != get_nchan())
   {
-    cerr << "Pulsar::ReceptionCalibrator::load_calibrators"
-      " no integrated flux calibrator" << endl;
+    if (verbose > 2)
+      cerr << "Pulsar::ReceptionCalibrator::load_calibrators"
+	" no integrated flux calibrator" << endl;
     return;
   }
 
