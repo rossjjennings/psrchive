@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2003-2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -334,6 +334,9 @@ Reference::To<Pulsar::Profile> phase_std;
 // names of the calibrator files
 vector<string> calibrator_filenames;
 
+// integrate multiple FluxCalOn observations into one model constraint
+bool integrate_flux_calibrators = false;
+
 bool measure_cal_V = true;
 bool measure_cal_Q = true;
 
@@ -554,7 +557,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args
-    = "1A:a:B:b:C:c:D:d:E:e:F:gHhI:j:J:L:l:M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:y";
+    = "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:j:J:L:l:M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:y";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -610,6 +613,10 @@ int actual_main (int argc, char *argv[]) try
 
     case 'F':
       fluxcal_days = atof (optarg);
+      break;
+
+    case 'f':
+      integrate_flux_calibrators = true;
       break;
 
     case 'g':
@@ -1286,6 +1293,12 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
   // add the specified phase bins
   for (unsigned ibin=0; ibin<phase_bins.size(); ibin++)
     model->add_state (phase_bins[ibin]);
+
+  if (integrate_flux_calibrators)
+    cerr << "pcm: will integrate multiple flux calibrator observations"
+      " into one constraint" << endl;
+
+  model->integrate_flux_calibrators = integrate_flux_calibrators;
 
   cerr << "pcm: set calibrators" << endl;
   model->set_calibrators (calibrator_filenames);
