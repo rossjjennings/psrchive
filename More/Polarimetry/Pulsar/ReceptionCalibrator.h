@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2003 - 2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -67,8 +67,8 @@ namespace Pulsar
     //! Produce reports of reduced chisq for each state in each channel
     bool output_report;
 
-    //! Integrate all flux calibrator observations into one estimate
-    bool integrate_flux_calibrators;
+    //! Each flux calibrator observation may have unique values of I, Q & U
+    bool multiple_flux_calibrators;
 
     //! Reflections performed on the calibrator data immediately after loading
     ReflectStokes reflections;
@@ -121,13 +121,10 @@ namespace Pulsar
     MEAL::Axis< unsigned > unique_axis;
 
     //! Uncalibrated estimate of calibrator polarization
-    SourceEstimate flux_calibrator_estimate;
+    std::vector<SourceEstimate> flux_calibrator_estimate;
 
     //! Uncalibrated estimate of pulsar polarization as a function of phase
-    std::vector<SourceEstimate> pulsar;
-
-    //! Integrated mean Stokes parameters of all flux calibrator observations
-    std::vector< Stokes< MeanEstimate<double> > > integrated_flux_calibrator;
+    std::vector< std::vector<SourceEstimate> > pulsar;
 
     //! The epochs of all loaded calibrators
     std::vector<MJD> calibrator_epochs;
@@ -156,15 +153,13 @@ namespace Pulsar
     //! Initialization performed using the first observation added
     void initial_observation (const Archive* data);
 
-    void valid_mask (const SourceEstimate& src);
+    void valid_mask (const std::vector<SourceEstimate>&);
 
     //! Add Integration data to the CoherencyMeasurement vector
     /*! Data is taken from the specified frequency channel and phase bin.
       \retval bins the vector to which a new measurement will be appended
       \param estimate contains the bin number and a running mean estimate
       \param ichan the frequency channel
-      \param data the Integration data
-      \param variance the variance to be assigned to the measurement. 
     */
     void add_data (std::vector<Calibration::CoherencyMeasurement>& bins,
 		   SourceEstimate& estimate, unsigned ichan);
