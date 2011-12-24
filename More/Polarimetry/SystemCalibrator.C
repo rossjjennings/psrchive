@@ -143,7 +143,10 @@ unsigned Pulsar::SystemCalibrator::get_nstate () const
 //! Return true if the state index is a pulsar
 unsigned Pulsar::SystemCalibrator::get_state_is_pulsar (unsigned istate) const
 {
-  return istate != calibrator_estimate.input_index;
+  if (!calibrator_estimate.size())
+    return true;
+
+  return istate != calibrator_estimate[0].input_index;
 }
 
 //! Get the number of pulsar polarization states in the model
@@ -590,7 +593,7 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
 
         // convert to CoherencyMeasurement format
         Calibration::CoherencyMeasurement 
-	  state (calibrator_estimate.input_index);
+	  state (calibrator_estimate[ichan].input_index);
 
 	state.set_stokes( data.observation );
         measurements.push_back( state );
@@ -621,21 +624,21 @@ catch (Error& error)
     "Pulsar::SystemCalibrator::add_calibrator (ReferenceCalibrator*)";
 }
 
-void Pulsar::SystemCalibrator::init_estimate (SourceEstimate& estimate)
+void Pulsar::SystemCalibrator::init_estimates
+( std::vector<SourceEstimate>& estimate, unsigned ibin )
 {
   unsigned nchan = get_nchan ();
   unsigned nbin = get_calibrator()->get_nbin ();
 
-  if (estimate.phase_bin >= nbin)
+  if (ibin >= nbin)
     throw Error (InvalidRange, "Pulsar::SystemCalibrator::init_estimate",
-		 "phase bin=%d >= nbin=%d", estimate.phase_bin, nbin);
+		 "phase bin=%d >= nbin=%d", ibin, nbin);
 
   if (verbose > 2)
     cerr << "Pulsar::SystemCalibrator::init_estimate"
             " nchan=" << nchan << " nbin=" << nbin << endl;
 
-  estimate.source.resize (nchan);
-  estimate.source_guess.resize (nchan);
+  estimate.resize (nchan);
 
   bool first_channel = true;
 
@@ -648,25 +651,21 @@ void Pulsar::SystemCalibrator::init_estimate (SourceEstimate& estimate)
 
 #if 0
     if (physical_coherency)
-      estimate.source[ichan] = new MEAL::PhysicalCoherency;
+      estimate[ichan].source = new MEAL::PhysicalCoherency;
     else
 #endif
-      estimate.source[ichan] = new MEAL::Coherency;
+      estimate[ichan].source = new MEAL::Coherency;
 
-    string prefix = "psr_" + tostring(estimate.phase_bin) + "_";
-    estimate.source[ichan]->set_param_name_prefix( prefix );
+    string prefix = "psr_" + tostring(estimate[ichan].phase_bin) + "_";
+    estimate[ichan].source->set_param_name_prefix( prefix );
 
     unsigned nsource = model[ichan]->get_equation()->get_num_input();
 
-    if (first_channel)
-      estimate.input_index = nsource;
+    estimate[ichan].input_index = nsource;
 
-    else if (estimate.input_index != nsource)
-      throw Error (InvalidState, "Pulsar::SystemCalibrator::init_estimate",
-		   "isource=%d != nsource=%d (ichan=%d)",
-		   estimate.input_index, nsource, ichan);
+    estimate[ichan].phase_bin = ibin;
 
-    model[ichan]->get_equation()->add_input( estimate.source[ichan] );
+    model[ichan]->get_equation()->add_input( estimate[ichan].source );
 
     first_channel = false;
   }
@@ -677,7 +676,7 @@ void Pulsar::SystemCalibrator::prepare_calibrator_estimate ( Signal::Source s )
   if (verbose > 2)
     cerr << "Pulsar::SystemCalibrator::prepare_calibrator_estimate" << endl;
 
-  if (calibrator_estimate.source.size() == 0)
+  if (calibrator_estimate.size() == 0)
     create_calibrator_estimate();
 }
 
@@ -687,7 +686,7 @@ void Pulsar::SystemCalibrator::create_calibrator_estimate ()
     cerr << "Pulsar::SystemCalibrator::create_calibrator_estimate" << endl;
 
   // add the calibrator states to the equations
-  init_estimate (calibrator_estimate);
+  init_estimates (calibrator_estimate);
 
   // set the initial guess and fit flags
   Stokes<double> cal_state (1,0,.5,0);
@@ -700,12 +699,12 @@ void Pulsar::SystemCalibrator::create_calibrator_estimate ()
   unsigned nchan = get_nchan ();
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
-    if (calibrator_estimate.source[ichan])
+    if (calibrator_estimate[ichan].source)
     {   
-      calibrator_estimate.source[ichan]->set_stokes( cal_state );
-      calibrator_estimate.source[ichan]->set_infit( 0, false );
+      calibrator_estimate[ichan].source->set_stokes( cal_state );
+      calibrator_estimate[ichan].source->set_infit( 0, false );
 
-      calibrator_estimate.source[ichan]->set_param_name_prefix( "cal_" );
+      calibrator_estimate[ichan].source->set_param_name_prefix( "cal_" );
     }
 }
 
@@ -741,9 +740,7 @@ void Pulsar::SystemCalibrator::integrate_calibrator_data
 {
   Stokes< Estimate<double> > result = transform( data.observation, correct );
 
-  assert( data.ichan < calibrator_estimate.source_guess.size() );
-
-  calibrator_estimate.source_guess[data.ichan].integrate (result);
+  calibrator_estimate.at(data.ichan).source_guess.integrate (result);
 }
 
 
@@ -758,11 +755,11 @@ Pulsar::SystemCalibrator::get_CalibratorStokes () const
 
   unsigned nchan = get_nchan ();
 
-  if (nchan != calibrator_estimate.source.size())
+  if (nchan != calibrator_estimate.size())
     throw Error (InvalidState,
 		 "Pulsar::SystemCalibrator::get_CalibratorStokes",
 		 "Calibrator Stokes nchan=%d != Transformation nchan=%d",
-		 calibrator_estimate.source.size(), nchan);
+		 calibrator_estimate.size(), nchan);
 
   Reference::To<CalibratorStokes> ext = new CalibratorStokes;
     
@@ -776,7 +773,7 @@ Pulsar::SystemCalibrator::get_CalibratorStokes () const
     if (!valid)
       continue;
     
-    ext->set_stokes (ichan, calibrator_estimate.source[ichan]->get_stokes());
+    ext->set_stokes (ichan, calibrator_estimate[ichan].source->get_stokes());
   }
   catch (Error& error)
   {
@@ -918,7 +915,8 @@ void Pulsar::SystemCalibrator::solve_prepare ()
     return;
 
   if (set_initial_guess)
-    calibrator_estimate.update_source();
+    for (unsigned ichan=0; ichan<calibrator_estimate.size(); ichan++)
+      calibrator_estimate[ichan].update_source();
 
   MJD epoch = get_epoch();
 
@@ -938,10 +936,10 @@ void Pulsar::SystemCalibrator::solve_prepare ()
     if (!model[ichan]->get_valid())
       continue;
 
-    if (ichan < calibrator_estimate.source.size())
+    if (ichan < calibrator_estimate.size())
     {
       // sanity check
-      Estimate<double> I = calibrator_estimate.source[ichan]->get_stokes()[0];
+      Estimate<double> I = calibrator_estimate[ichan].source->get_stokes()[0];
       if (fabs(I.get_value()-1.0) > I.get_error() && verbose)
 	cerr << "Pulsar::SystemCalibrator::solve_prepare warning"
 	  " ichan=" << ichan << " reference flux=" << I << " != 1" << endl;
@@ -1372,7 +1370,7 @@ Pulsar::SystemCalibrator::new_solution (const string& class_name) const try
   output->set_ephemeris (0);
   output->set_model (0);
 
-  if (calibrator_estimate.source.size())
+  if (calibrator_estimate.size())
   {
     Reference::To<CalibratorStokes> stokes = get_CalibratorStokes();
     output -> add_extension (stokes);

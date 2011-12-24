@@ -40,13 +40,13 @@ namespace Pulsar
     void update_source();
 
     //! Model of Stokes parameters as a function of frequency
-    Reference::Vector<MEAL::Coherency> source;
+    Reference::To<MEAL::Coherency> source;
 
     //! Best guess of Stokes parameters
-    std::vector< Calibration::MeanCoherency > source_guess;
+    Calibration::MeanCoherency source_guess;
 
     //! Validity flags for each Coherency
-    std::vector< bool > valid;
+    bool valid;
 
     //! Phase bin from which pulsar polarization is derived
     unsigned phase_bin;
@@ -271,8 +271,9 @@ namespace Pulsar
     //! Initialize the SignalPath of the specified channel
     virtual void init_model (unsigned ichan);
 
-    //! Initialize a SourceEstimate instance
-    virtual void init_estimate (SourceEstimate&);
+    //! Initialize a vector of SourceEstimate instances
+    virtual void init_estimates ( std::vector<SourceEstimate>&,
+				  unsigned ibin = 0 );
 
     //! Prepare any calibrator estimates
     virtual void prepare_calibrator_estimate (Signal::Source);
@@ -303,7 +304,7 @@ namespace Pulsar
     std::vector<std::string> calibrator_filenames;
 
     //! Uncalibrated estimate of calibrator polarization
-    SourceEstimate calibrator_estimate;
+    std::vector<SourceEstimate> calibrator_estimate;
     
     //! Epoch of the first observation
     MJD start_epoch;

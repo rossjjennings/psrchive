@@ -27,7 +27,7 @@ namespace Pulsar {
   public:
 
     //! Constructor
-    SourceInfo (const SourceEstimate* source);
+    SourceInfo (const std::vector<SourceEstimate>& source);
     
     //! Return the title
     std::string get_title () const;
@@ -57,7 +57,7 @@ namespace Pulsar {
   protected:
     
     //! The SourceEstimate to be plotted
-    Reference::To<const SourceEstimate> source;
+    const std::vector<SourceEstimate>& source;
 
     //! Plot all Stokes parameters in one panel
     bool together;
