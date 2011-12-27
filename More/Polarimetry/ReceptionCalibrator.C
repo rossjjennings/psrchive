@@ -94,8 +94,8 @@ void Pulsar::ReceptionCalibrator::ensure_consistent_onpulse ()
 
   ProfileStats* stats = standard_data->get_poln_stats()->get_stats();
 
-  for (unsigned istate=0; istate < pulsar.size(); istate++)
-    stats->set_onpulse (pulsar[0][istate].phase_bin, true);
+  for (unsigned istate=0; istate < phase_bins.size(); istate++)
+    stats->set_onpulse (phase_bins[istate], true);
 }
 
 const Pulsar::PhaseWeight* Pulsar::ReceptionCalibrator::get_baseline () const
@@ -187,9 +187,11 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     load_calibrators ();
   }
 
+  assert( pulsar.size() == phase_bins.size() );
+
   // initialize any previously added states
   for (unsigned istate=0; istate<pulsar.size(); istate++)
-    init_estimates ( pulsar[istate] );
+    init_estimates ( pulsar[istate], phase_bins[istate] );
 
   add_epoch( data->start_time () );
 }
@@ -236,13 +238,15 @@ void Pulsar::ReceptionCalibrator::add_state (unsigned phase_bin)
     cerr << "Pulsar::ReceptionCalibrator::add_state phase bin=" 
 	 << phase_bin << endl;
 
-  for (unsigned istate=0; istate<pulsar.size(); istate++)
-    if (pulsar[istate][0].phase_bin == phase_bin)
+  for (unsigned istate=0; istate<phase_bins.size(); istate++)
+    if (phase_bins[istate] == phase_bin)
     {
       cerr << "Pulsar::ReceptionCalibrator::add_state phase bin=" << phase_bin
 	   << " already in use" << endl;
       return;
     }
+
+  phase_bins.push_back (phase_bin);
 
   pulsar.resize( pulsar.size() + 1 );
 
@@ -303,6 +307,8 @@ void Pulsar::ReceptionCalibrator::add_pulsar
   for (unsigned istate=0; istate < pulsar.size(); istate++)
     add_data (measurements, pulsar.at(istate).at(ichan), ichan);
 
+  DEBUG("Pulsar::ReceptionCalibrator::add_pulsar ADD DATA ichan=" << ichan);
+
   model[ichan]->get_equation()->add_data (measurements);
 }
 
@@ -352,12 +358,48 @@ Pulsar::ReceptionCalibrator::add_data
   }
 }
 
+void add_if_needed (Pulsar::SourceEstimate& estimate,
+		    Calibration::SignalPath* model)
+{
+  if (!model->get_valid())
+    return;
+
+  assert ( estimate.add_data_attempts >= estimate.add_data_failures );
+
+  unsigned success = estimate.add_data_attempts - estimate.add_data_failures;
+
+  unsigned to_push = success - estimate.multiples.size();
+
+  assert ( to_push < 2 );
+
+  if (!to_push)
+    return;
+
+  Pulsar::SourceEstimate::Multiple multiple;
+  multiple.source = estimate.source;
+  multiple.input_index = estimate.input_index;
+
+  estimate.multiples.push_back( multiple );
+
+  estimate.create_source (model->get_equation());
+}
+
+void init_flux (Pulsar::SourceEstimate& estimate)
+{
+  if (!estimate.source)
+    return;
+
+  // set the initial guess
+  Stokes<double> flux_cal_state (1,0,0,0);
+  
+  estimate.source->set_stokes ( flux_cal_state );
+  estimate.source->set_param_name_prefix( "flux_" );
+}
 
 void Pulsar::ReceptionCalibrator::prepare_calibrator_estimate
 (Signal::Source source)
 {
-  if (calibrator_estimate.size() == 0)
-    create_calibrator_estimate();
+  SystemCalibrator::prepare_calibrator_estimate (source);
 
   if (source != Signal::FluxCalOn)
     return;
@@ -369,12 +411,9 @@ void Pulsar::ReceptionCalibrator::prepare_calibrator_estimate
     // add the flux calibrator states to the equations
     init_estimates (flux_calibrator_estimate);
 
-    // set the initial guess
-    Stokes<double> flux_cal_state (1,0,0,0);
-
     for (unsigned ichan=0; ichan<get_nchan(); ichan++)
     {  
-      flux_calibrator_estimate[ichan].source->set_stokes ( flux_cal_state );
+      init_flux (flux_calibrator_estimate[ichan]);
 
       // Flux Calibrator observations are made through a different backend
       model[ichan]->get_fluxcal()->add_backend();
@@ -382,6 +421,15 @@ void Pulsar::ReceptionCalibrator::prepare_calibrator_estimate
   }
   else
   {
+    if (multiple_flux_calibrators)
+    {
+      for (unsigned ichan=0; ichan<get_nchan(); ichan++)
+      {
+	add_if_needed (flux_calibrator_estimate[ichan], model[ichan]);
+	init_flux (flux_calibrator_estimate[ichan]);
+      }
+    }
+
     // each flux calibrator observation is made through a different backend
     for (unsigned ichan=0; ichan<get_nchan(); ichan++)
       model[ichan]->get_fluxcal()->add_backend();
@@ -390,64 +438,71 @@ void Pulsar::ReceptionCalibrator::prepare_calibrator_estimate
 
 void Pulsar::ReceptionCalibrator::setup_calibrators ()
 {
+  for (unsigned ichan=0; ichan<calibrator_estimate.size(); ichan++)
+    setup_poln_calibrator (calibrator_estimate[ichan]);
+
+  for (unsigned ichan=0; ichan<flux_calibrator_estimate.size(); ichan++)
+    setup_flux_calibrator (flux_calibrator_estimate[ichan]);
+}
+
+
+/*
+  For each of Stokes Q, U & V
+  If the calibrator polarization vector component is not a free parameter,
+  then it should be fixed to a specified value
+*/
+
+void set_fixed_QUV ( Pulsar::SourceEstimate& cal, double value )
+{
+  for (unsigned ipol=1; ipol < 4; ipol++)
+    if (!cal.source->get_infit (ipol))
+      cal.source->set_Estimate (ipol, 0.0);
+}
+
+void Pulsar::ReceptionCalibrator::setup_poln_calibrator (SourceEstimate& est)
+{
   Signal::Basis basis = get_calibrator()->get_basis ();
 
-  for (unsigned ichan=0; ichan<calibrator_estimate.size(); ichan++)
-  {   
-    for (unsigned istokes=0; istokes<4; istokes++)
-      calibrator_estimate[ichan].source->set_infit (istokes, false);
+  for (unsigned istokes=0; istokes<4; istokes++)
+    est.source->set_infit (istokes, false);
 
-    // calibrator flux is unity by definition
-    calibrator_estimate[ichan].source->set_Estimate (0, 1.0);
+  // calibrator flux is unity by definition
+  est.source->set_Estimate (0, 1.0);
     
-    if (basis == Signal::Linear)
-    {
-      // degree of polarization (Stokes U) may vary
-      calibrator_estimate[ichan].source->set_infit (2, true);
-      
-      if (measure_cal_Q)
-	calibrator_estimate[ichan].source->set_infit (1, true);
-    }
-    else
-    {
-      // degree of polarization (Stokes Q) may vary
-      calibrator_estimate[ichan].source->set_infit (1, true);
-    }
+  if (basis == Signal::Linear)
+  {
+    // degree of polarization (Stokes U) may vary
+    est.source->set_infit (2, true);
+    
+    if (measure_cal_Q)
+      est.source->set_infit (1, true);
+  }
+  else
+  {
+    // degree of polarization (Stokes Q) may vary
+    est.source->set_infit (1, true);
   }
   
-  for (unsigned ichan=0; ichan<flux_calibrator_estimate.size(); ichan++)
-  {  
-    if (basis == Signal::Circular)
-    {
-      // Stokes V of Hydra may not vary
-      flux_calibrator_estimate[ichan].source->set_infit (3, false);
-    }
-    else if (measure_cal_V)
-    {
-      // Stokes V of Hydra may not vary
-      flux_calibrator_estimate[ichan].source->set_infit (3, false);
-      
-      // Stokes V of the calibrator may vary!
-      calibrator_estimate[ichan].source->set_infit (3, true);
-    }
-  }
-
-  /*
-    For each of Stokes Q, U & V
-    If the calibrator polarization vector component is not a free parameter,
-    then it should be fixed to zero.
-  */
-
-  for (unsigned ipol=1; ipol < 4; ipol++)
+  if (measure_cal_V && has_fluxcal())
   {
-    for (unsigned ichan=0; ichan<calibrator_estimate.size(); ichan++)
-      if (!calibrator_estimate[ichan].source->get_infit (ipol))
-	calibrator_estimate[ichan].source->set_Estimate (ipol, 0.0);
-
-    for (unsigned ichan=0; ichan<flux_calibrator_estimate.size(); ichan++)
-      if (!flux_calibrator_estimate[ichan].source->get_infit (ipol))
-	flux_calibrator_estimate[ichan].source->set_Estimate (ipol, 0.0);
+    // Stokes V of the calibrator may vary
+    est.source->set_infit (3, true);
   }
+
+  set_fixed_QUV (est, 0.0);
+}
+
+void Pulsar::ReceptionCalibrator::setup_flux_calibrator (SourceEstimate& est)
+{
+  Signal::Basis basis = get_calibrator()->get_basis ();
+
+  if (basis == Signal::Circular || measure_cal_V)
+  {
+    // Stokes V of Hydra may not vary
+    est.source->set_infit (3, false);
+  }
+
+  set_fixed_QUV (est, 0.0);
 }
 
 bool Pulsar::ReceptionCalibrator::has_fluxcal () const
@@ -467,22 +522,7 @@ void Pulsar::ReceptionCalibrator::submit_calibrator_data
     return;
   }
 
-  if (multiple_flux_calibrators)
-  {
-
-    /* ADD A STATE to the model */
-
-    unsigned index = model[data.ichan]->get_fluxcal()->get_path_index();
-    measurements.set_transformation_index (index);
-
-    SystemCalibrator::submit_calibrator_data (measurements, data);
-
-    // integrated_flux_calibrator.resize( get_nchan() );
-    // integrated_flux_calibrator[data.ichan] += data.baseline;
-  }
-
   submit_flux_calibrator_data (measurements, data.ichan, data.baseline);
-
 }
 
 void Pulsar::ReceptionCalibrator::submit_flux_calibrator_data 
@@ -502,6 +542,8 @@ void Pulsar::ReceptionCalibrator::submit_flux_calibrator_data
 
   unsigned index = model[ichan]->get_fluxcal()->get_path_index();
   measurements.set_transformation_index (index);
+
+  DEBUG ("ReceptionCalibrator::submit_flux_calibrator_data ichan=" << ichan);
 
   model[ichan]->get_equation()->add_data (measurements);
 }
@@ -523,6 +565,12 @@ void Pulsar::ReceptionCalibrator::integrate_calibrator_data
   {
     Stokes< Estimate<double> > result = transform( data.baseline, use );
     flux_calibrator_estimate.at(data.ichan).source_guess.integrate (result);
+
+    if (multiple_flux_calibrators)
+    {
+      flux_calibrator_estimate[data.ichan].update_source ();
+      setup_flux_calibrator (flux_calibrator_estimate[data.ichan]);
+    }
   }
 
   SystemCalibrator::integrate_calibrator_data (use, data);
@@ -598,13 +646,13 @@ void Pulsar::ReceptionCalibrator::initialize ()
  
   SystemCalibrator::solve_prepare ();
 
-  for (unsigned ichan=0; ichan<model.size(); ichan++)
-  {
-    flux_calibrator_estimate[ichan].update_source();
+  if (!multiple_flux_calibrators)
+    for (unsigned ichan=0; ichan<flux_calibrator_estimate.size(); ichan++)
+      flux_calibrator_estimate[ichan].update_source();
 
-    for (unsigned istate=0; istate<pulsar.size(); istate++)
+  for (unsigned istate=0; istate<pulsar.size(); istate++)
+    for (unsigned ichan=0; ichan<pulsar[istate].size(); ichan++)
       pulsar[istate][ichan].update_source ();
-  }
 
   /*
     The various calls to update_source can incorrectly reset values
@@ -635,50 +683,13 @@ void Pulsar::ReceptionCalibrator::valid_mask
 {
   if (src.size () != model.size())
     throw Error (InvalidParam, "Pulsar::ReceptionCalibrator::valid_mask",
-                 "Pulsar::SourceEstimate::valid.size=%d != model.size=%d",
+                 "src.size=%d != model.size=%d",
                  src.size (), model.size());
 
   for (unsigned ichan=0; ichan < model.size(); ichan++)
     model[ichan]->set_valid( model[ichan]->get_valid() && src[ichan].valid );
 }
 
-//! Construct with the specified bin from Archive
-Pulsar::SourceEstimate::SourceEstimate (unsigned ibin)
-{
-  phase_bin = ibin;
-  input_index = 0;
-  add_data_attempts = 0;
-  add_data_failures = 0;
-}
-
-/*! Update the best guess of each unknown input state */
-void Pulsar::SourceEstimate::update_source ()
-{
-  if (add_data_attempts && add_data_failures)
-  {
-    cerr << "Failed to add data " << add_data_failures << " out of "
-	 << add_data_attempts << " times";
-
-    if (input_index)
-      cerr << " for phase bin " << phase_bin;
-
-    cerr << endl;
-  }
-
-  valid = true;
-
-  try 
-  {
-    source_guess.update( source );
-  }
-  catch (Error& error)
-  {
-    if (Calibrator::verbose > 2)
-      cerr << "Pulsar::SourceEstimate::update_source error "
-	   << error << endl;
-    valid = false;
-  }
-}
 
 void Pulsar::ReceptionCalibrator::solve_prepare ()
 {
