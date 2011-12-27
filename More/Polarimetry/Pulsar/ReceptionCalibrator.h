@@ -125,6 +125,7 @@ namespace Pulsar
 
     //! Uncalibrated estimate of pulsar polarization as a function of phase
     std::vector< std::vector<SourceEstimate> > pulsar;
+    std::vector< unsigned > phase_bins;
 
     //! The epochs of all loaded calibrators
     std::vector<MJD> calibrator_epochs;
@@ -167,6 +168,7 @@ namespace Pulsar
     //! Prepare the calibrator estimate
     void prepare_calibrator_estimate (Signal::Source);
 
+
     void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
 				 const SourceObservation&);
 
@@ -194,6 +196,8 @@ namespace Pulsar
 
     //! Set fit flags and initial values of the calibrator Stokes parameters
     void setup_calibrators ();
+    void setup_poln_calibrator (SourceEstimate&);
+    void setup_flux_calibrator (SourceEstimate&);
 
     //! Ensure that selected phase bins are represented in on-pulse mask
     void ensure_consistent_onpulse ();
