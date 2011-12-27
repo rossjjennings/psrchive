@@ -624,6 +624,7 @@ catch (Error& error)
     "Pulsar::SystemCalibrator::add_calibrator (ReferenceCalibrator*)";
 }
 
+
 void Pulsar::SystemCalibrator::init_estimates
 ( std::vector<SourceEstimate>& estimate, unsigned ibin )
 {
@@ -640,8 +641,6 @@ void Pulsar::SystemCalibrator::init_estimates
 
   estimate.resize (nchan);
 
-  bool first_channel = true;
-
   check_ichan ("init_estimate", nchan - 1);
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
@@ -649,25 +648,15 @@ void Pulsar::SystemCalibrator::init_estimates
     if (!model[ichan]->get_valid())
       continue;
 
-#if 0
-    if (physical_coherency)
-      estimate[ichan].source = new MEAL::PhysicalCoherency;
-    else
-#endif
-      estimate[ichan].source = new MEAL::Coherency;
-
-    string prefix = "psr_" + tostring(estimate[ichan].phase_bin) + "_";
-    estimate[ichan].source->set_param_name_prefix( prefix );
-
-    unsigned nsource = model[ichan]->get_equation()->get_num_input();
-
-    estimate[ichan].input_index = nsource;
-
+    estimate[ichan].create_source( model[ichan]->get_equation() );
     estimate[ichan].phase_bin = ibin;
 
-    model[ichan]->get_equation()->add_input( estimate[ichan].source );
+    string name_prefix = "psr";
+    if (ibin >= 0)
+      name_prefix += "_" + tostring(ibin);
+    name_prefix += "_";
 
-    first_channel = false;
+    estimate[ichan].source->set_param_name_prefix( name_prefix );
   }
 }
 
@@ -728,6 +717,8 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
 
   measurements.set_transformation_index
     ( model[data.ichan]->get_polncal_path() );
+
+  DEBUG("SystemCalibrator::submit_calibrator_data ichan=" << data.ichan);
 
   model[data.ichan]->get_equation()->add_data (measurements);
 }
@@ -930,6 +921,7 @@ void Pulsar::SystemCalibrator::solve_prepare ()
       if (verbose)
 	cerr << "Pulsar::SystemCalibrator::solve_prepare warning"
 	  " ichan=" << ichan << " has no data" << endl;
+
       model[ichan]->set_valid( false, "no data" );
     }
 

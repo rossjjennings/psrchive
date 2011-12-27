@@ -20,71 +20,12 @@
 #include "Pulsar/SignalPath.h"
 
 #include "Pulsar/CoherencyMeasurementSet.h"
-#include "Pulsar/MeanCoherency.h"
-
-#include "MEAL/Coherency.h"
+#include "Pulsar/SourceEstimate.h"
 
 #include "BatchQueue.h"
-#include "Types.h"
 
 namespace Pulsar
 {
-  class SourceEstimate : public Reference::Able
-  {
-  public:
-
-    //! Construct with the specified bin from Archive
-    SourceEstimate (unsigned ibin = 0);
-
-    //! Update each source with the mean
-    void update_source();
-
-    //! Model of Stokes parameters as a function of frequency
-    Reference::To<MEAL::Coherency> source;
-
-    //! Best guess of Stokes parameters
-    Calibration::MeanCoherency source_guess;
-
-    //! Validity flags for each Coherency
-    bool valid;
-
-    //! Phase bin from which pulsar polarization is derived
-    unsigned phase_bin;
-
-    //! The index of the source in the model
-    unsigned input_index;
-
-    //! Count attempts to add data for this state
-    unsigned add_data_attempts;
-
-    //! Count failures to add data for this state
-    unsigned add_data_failures;
-
-    unsigned get_input_index() const { return input_index; }
-
-  };
-
-  class SourceObservation
-  {
-  public:
-
-    //! Source code
-    Signal::Source source; 
-
-    //! Epoch of the observation
-    MJD epoch;
-
-    //! Frequency channel
-    unsigned ichan;
-
-    //! The observed Stokes parameters
-    Stokes< Estimate<double> > observation;
-
-    //! The baseline
-    Stokes< Estimate<double> > baseline;
-
-  };
-
   class ReferenceCalibrator;
   class CalibratorStokes;
 
