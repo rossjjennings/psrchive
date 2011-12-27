@@ -334,8 +334,8 @@ Reference::To<Pulsar::Profile> phase_std;
 // names of the calibrator files
 vector<string> calibrator_filenames;
 
-// integrate multiple FluxCalOn observations into one model constraint
-bool integrate_flux_calibrators = false;
+// Each flux calibrator observation may have unique values of I, Q & U
+bool multiple_flux_calibrators = false;
 
 bool measure_cal_V = true;
 bool measure_cal_Q = true;
@@ -616,7 +616,7 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'f':
-      integrate_flux_calibrators = true;
+      multiple_flux_calibrators = true;
       break;
 
     case 'g':
@@ -1294,11 +1294,12 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
   for (unsigned ibin=0; ibin<phase_bins.size(); ibin++)
     model->add_state (phase_bins[ibin]);
 
-  if (integrate_flux_calibrators)
-    cerr << "pcm: will integrate multiple flux calibrator observations"
-      " into one constraint" << endl;
+  if (multiple_flux_calibrators)
+    cerr <<
+      "pcm: each flux calibrator observation "
+      "will be independently modeled" << endl;
 
-  model->integrate_flux_calibrators = integrate_flux_calibrators;
+  model->multiple_flux_calibrators = multiple_flux_calibrators;
 
   cerr << "pcm: set calibrators" << endl;
   model->set_calibrators (calibrator_filenames);
