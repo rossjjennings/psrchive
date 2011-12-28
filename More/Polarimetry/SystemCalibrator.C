@@ -588,6 +588,8 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
       {
 	Calibration::CoherencyMeasurementSet measurements;
 
+        calibrator_estimate[ichan].add_data_attempts ++;
+
 	measurements.set_identifier( identifier );
 	measurements.add_coordinate( model[ichan]->time.new_Value(epoch) );
 
@@ -604,6 +606,9 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
       {
         cerr << "Pulsar::SystemCalibrator::add_calibrator ichan="
              << ichan << " error\n" << error << endl;
+
+        calibrator_estimate[ichan].add_data_failures ++;
+
 	continue;
       }
 
