@@ -223,8 +223,20 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
   const unsigned nchan = get_nchan();
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
-    cerr << "Pulsar::ReceptionCalibrator::load_calibrators CHECK FLUX CAL!" 
-	 << endl;
+    if (flux_calibrator_estimate.at(ichan).is_constrained())
+      continue;
+
+    cerr << "ichan=" << ichan << " top flux calibrator is not constrained" << endl;
+
+    if (flux_calibrator_estimate[ichan].multiples.size() == 0)
+      model[ichan]->set_valid (false, "no flux cal data");
+
+    unsigned index = flux_calibrator_estimate[ichan].input_index;
+
+    assert (index == model[ichan]->get_equation()->get_num_input() - 1);
+
+    // the last attempt to add more than one flux calibrator constraint failed
+    model[ichan]->get_equation()->erase_input( index );
   }
 }
 
@@ -369,6 +381,13 @@ void add_if_needed (Pulsar::SourceEstimate& estimate,
   unsigned success = estimate.add_data_attempts - estimate.add_data_failures;
 
   unsigned to_push = success - estimate.multiples.size();
+
+#if _DEBUG
+  cerr << "add_if_needed: attempts=" << estimate.add_data_attempts
+       << " failures=" << estimate.add_data_failures 
+       << " multiples=" << estimate.multiples.size() 
+       << " to push=" << to_push << endl;
+#endif
 
   assert ( to_push < 2 );
 
@@ -529,13 +548,15 @@ void Pulsar::ReceptionCalibrator::submit_flux_calibrator_data
 (
  Calibration::CoherencyMeasurementSet& measurements,
  unsigned ichan, const Stokes< Estimate<double> >& data
- )
+ ) try
 {
   // add the flux calibrator data to the model constraints
 
   Calibration::CoherencyMeasurement state 
     (flux_calibrator_estimate[ichan].input_index);
-  
+
+  flux_calibrator_estimate[ichan].add_data_attempts ++;
+
   state.set_stokes( data );
 
   measurements.push_back (state);
@@ -547,7 +568,13 @@ void Pulsar::ReceptionCalibrator::submit_flux_calibrator_data
 
   model[ichan]->get_equation()->add_data (measurements);
 }
+catch (Error& error)
+{
+  cerr << "Pulsar::ReceptionCalibrator::submit_flux_calibrator_data ichan="
+       << ichan << " error\n" << error << endl;
 
+  flux_calibrator_estimate[ichan].add_data_failures ++;
+}
 
 void Pulsar::ReceptionCalibrator::integrate_calibrator_data
 (
