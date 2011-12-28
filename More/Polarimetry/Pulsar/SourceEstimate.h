@@ -59,6 +59,9 @@ namespace Pulsar
 
     unsigned get_input_index() const { return input_index; }
 
+    //! Return true if the last/top source estimate has data to constrain it
+    bool is_constrained () const;
+
     //! Somewhat kludgey storage of multiple source states
     class Multiple
     {

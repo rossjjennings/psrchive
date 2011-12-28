@@ -31,6 +31,12 @@ void Pulsar::SourceEstimate::create_source (ReceptionModel* equation)
   equation->add_input( source );
 }
 
+
+bool Pulsar::SourceEstimate::is_constrained () const
+{
+  return add_data_attempts - add_data_failures > multiples.size();
+}
+
 /*! Update the best guess of each unknown input state */
 void Pulsar::SourceEstimate::update_source ()
 {
