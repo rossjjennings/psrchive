@@ -18,6 +18,25 @@ using namespace std;
 
 bool TextInterface::label_elements = false;
 
+void TextInterface::Parser::set_delimiter (const std::string& text)
+{
+  delimiter = text;
+
+  size_t found = 0;
+
+#ifdef _DEBUG
+  cerr << "TextInterface::Parser::set_delimiter text='" << text << "'" << endl;
+#endif
+
+  // transform backslash-n into newline
+  while ((found = delimiter.find( "\\n" )) != string::npos)
+    delimiter.replace ( found, 2, 1, '\n' );
+
+  // transform backslash-t into tab
+  while ((found = delimiter.find( "\\t" )) != string::npos)
+    delimiter.replace ( found, 2, 1, '\t' );
+}
+
 string TextInterface::Parser::process (const string& command)
 {
 #ifdef _DEBUG
@@ -142,6 +161,12 @@ static bool alphabetical_lt (const Reference::To<TextInterface::Value>& v1,
 //! Add a new value interface
 void TextInterface::Parser::add_value (Value* value)
 {
+#ifdef _DEBUG
+  cerr << "TextInterface::Parser::add_value this=" << this << " name="
+       << value->get_name() << endl;
+#endif
+
+  value->set_parent (this);
   values.push_back (value);
 
   if (alphabetical)
@@ -170,6 +195,7 @@ TextInterface::Parser::Parser ()
   alphabetical = false;
   import_filter = false;
   prefix_name = true;
+  delimiter = ",";
 }
 
 //! Get the value of the value
