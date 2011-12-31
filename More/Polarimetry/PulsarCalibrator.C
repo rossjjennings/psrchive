@@ -640,10 +640,13 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
     }
   }
 
-  if (!solution[ichan])
-    solution[ichan] = new Calibration::MeanInstrument;
+  if ( dynamic_cast<Instrument*>( transformation[ichan].ptr() ) )
+  {
+    if (!solution[ichan])
+      solution[ichan] = new Calibration::MeanInstrument;
 
-  solution[ichan]->integrate( transformation[ichan] );
+    solution[ichan]->integrate( transformation[ichan] );
+  }
 }
 
 void Pulsar::PulsarCalibrator::update_solution ()
