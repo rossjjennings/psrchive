@@ -1294,7 +1294,10 @@ void Pulsar::SystemCalibrator::precalibrate (Archive* data)
     return;
   }
 
-  receiver->set_projection_corrected (projection_corrected);
+  // do not set corrected flag to false if already true
+  if ( projection_corrected )
+    receiver->set_projection_corrected (true);
+
   receiver->set_basis_corrected (true);
 }
 
