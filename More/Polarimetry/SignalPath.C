@@ -58,7 +58,7 @@ void Calibration::SignalPath::set_valid (bool f, const char* reason)
 {
   valid = f;
 
-  if (!valid && reason)
+  if (!valid && reason && verbose)
     cerr << "Calibration::SignalPath::set_valid reason: " << reason << endl;
 }
 
