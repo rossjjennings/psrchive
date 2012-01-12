@@ -363,7 +363,7 @@ namespace TextInterface {
   class HasAProxy : public Attribute<C> {
 
   public:
-    
+
     //! Construct from a pointer to member attribute interface
     HasAProxy (const std::string& pre, const Attribute<M>* pa, Get g)
       { prefix = pre; attribute = pa->clone(); get = g; }
@@ -378,7 +378,12 @@ namespace TextInterface {
 
     //! Get the name of the attribute
     std::string get_name () const
-      { return prefix + ":" + attribute->get_name(); }
+      { 
+	if (prefix.length())
+	  return prefix + ":" + attribute->get_name();
+	else
+	  return attribute->get_name();
+      }
 
     //! Get the description of the attribute
     std::string get_description () const
@@ -1077,6 +1082,11 @@ namespace TextInterface {
     template<class M, class G> 
       void import ( const std::string& name, const To<M>& member, G get )
       { import (name, &member, get); }
+
+    //! Import the attribute interfaces from a member text interface
+    template<class M, class G> 
+      void import ( const To<M>& member, G get )
+    { import (std::string(), &member, get); }
 
     template<class E, class G, class S>
       void import ( const std::string& name, const To<E>& element, G g, S size)

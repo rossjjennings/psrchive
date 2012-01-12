@@ -18,6 +18,8 @@ using namespace std;
 
 bool TextInterface::label_elements = false;
 
+// #define _DEBUG
+
 void TextInterface::Parser::set_delimiter (const std::string& text)
 {
   delimiter = text;
@@ -360,26 +362,30 @@ bool TextInterface::NestedValue::matches (const string& name,
 
   string::size_type length = prefix.length();
 
-  if ( name[length] != ':' )
+  if (length)
   {
+    if ( name[length] != ':' )
+    {
 #ifdef _DEBUG
-    cerr << " false" << endl;
+      cerr << " false" << endl;
 #endif
-    return false;
+      return false;
+    }
+
+    if ( strncmp (name.c_str(), prefix.c_str(), length) != 0 )
+    {
+#ifdef _DEBUG
+      cerr << " false" << endl;
+#endif
+      return false;
+    }
+
+    length ++;
   }
 
-  if ( strncmp (name.c_str(), prefix.c_str(), length) != 0 )
-  {
-#ifdef _DEBUG
-    cerr << " false" << endl;
-#endif
-    return false;
-  }
-
-  string remainder = name.substr (length+1);
+  string remainder = name.substr (length);
 
 #ifdef _DEBUG
-  cerr << " maybe" << endl;
   cerr << "TextInterface::NestedValue::matches nested name="
        << value->get_name() << " remain=" << remainder << endl;
 #endif
