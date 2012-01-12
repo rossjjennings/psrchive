@@ -999,6 +999,25 @@ int actual_main (int argc, char *argv[]) try
       phase_std = temp->get_Profile (0,0,0);	
     }
 
+#if 0
+
+    MIGHT WANT TO MAKE PCM AUTO-ALIGN WHEN THE EPHEMERIS IS NO GOOD
+
+  if (phase_align)
+  {
+    Reference::To<Pulsar::Archive> standard;
+    standard = total->total();
+    Pulsar::Profile* std = standard->get_Profile(0,0,0);
+    
+    Reference::To<Pulsar::Archive> observation;
+    observation = archive->total();
+    Pulsar::Profile* obs = observation->get_Profile(0,0,0);
+    
+    archive->rotate_phase( obs->shift(std).get_value() );
+  }
+
+#endif
+
     cerr << "pcm: adding observation" << endl;
     model->preprocess( archive );
     model->add_observation( archive );
