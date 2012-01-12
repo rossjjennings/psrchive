@@ -55,6 +55,11 @@ void Calibration::MeasurementEquation::set_input_index (unsigned index)
   inputs.set_index( index );
 }
 
+void Calibration::MeasurementEquation::erase_input (unsigned index)
+{
+  inputs.erase( index );
+}
+
 MEAL::Transformation<MEAL::Complex2>*
 Calibration::MeasurementEquation::new_transformation (Complex2* xform)
 {

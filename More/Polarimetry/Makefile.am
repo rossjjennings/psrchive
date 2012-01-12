@@ -72,6 +72,7 @@ nobase_include_HEADERS = \
         Pulsar/SingleAxisPolynomial.h \
         Pulsar/SingleAxisSolver.h \
 	Pulsar/SolverInfo.h \
+	Pulsar/SourceEstimate.h \
 	Pulsar/SourceInfo.h \
 	Pulsar/StandardData.h \
 	Pulsar/StandardPrepare.h \
@@ -159,6 +160,7 @@ libPolarimetry_la_SOURCES = \
         SingleAxisPolynomial.C \
         SingleAxisSolver.C \
 	SolverInfo.C \
+	SourceEstimate.C \
         SourceInfo.C \
 	StandardData.C \
 	StandardPrepare.C \

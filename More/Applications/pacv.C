@@ -706,6 +706,7 @@ int main (int argc, char** argv)
 	cerr << "pacv: Calibrating Archive" << endl;
       
       calibrator -> calibrate (input);
+      cal = "calibrated";
 
       if (plot_derived_calibrator)
       {

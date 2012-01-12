@@ -98,6 +98,10 @@ void psredit::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (editor.prefix_name, 'Q');
   arg->set_help ("do not prefix output with 'keyword='");
+
+  arg = menu.add (editor.delimiter, 'd', "delim");
+  arg->set_help ("separate elements of a container using delimiter");
+
 }
 
 const char* long_help = 
