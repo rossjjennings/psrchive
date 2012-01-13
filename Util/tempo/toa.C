@@ -301,11 +301,12 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
   sprintf(outstring, "%s %8.3f %s %7.3f ", fname.c_str(), frequency,
           arrival.printdays(15).c_str(), error);
 
-  if (phase_info) {
-      sprintf(outstring, "%s @", outstring);
-  } else {
-      sprintf(outstring, "%s %c", outstring, telescope);
-      sprintf(outstring, "%s %s", outstring, flags.c_str());
+  if (phase_info)
+    strcat (outstring, " @");
+  else
+  {
+    string temp = stringprintf (" %c ", telescope) + flags;
+    strcat (outstring, temp.c_str());
   }
 
   return 0;
