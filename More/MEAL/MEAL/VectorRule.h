@@ -47,6 +47,9 @@ namespace MEAL {
     //! Assign the current element of the array
     void assign (T* model);
 
+    //! Erase an element from the array
+    void erase (unsigned index);
+
     //! Get the current element of the array
     T* get_current ();
 
@@ -161,6 +164,26 @@ void MEAL::VectorRule<T>::assign (T* x)
     std::cerr << get_name() + "assign map new" << std::endl;
 
   composite->map (model[model_index]);
+}
+
+template<class T>
+void MEAL::VectorRule<T>::erase (unsigned index)
+{
+  if (T::very_verbose)
+    std::cerr << get_name() + "erase" << std::endl;
+
+  if (!model[index])
+    return;
+
+  if (T::very_verbose)
+    std::cerr << get_name() + "erase unmap" << std::endl;
+
+  composite->unmap (model[index]);
+
+  if (T::very_verbose)
+    std::cerr << get_name() + "erase vector::erase" << std::endl;
+
+  model.erase( model.begin() + index );
 }
 
 template<class T>

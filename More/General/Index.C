@@ -25,18 +25,35 @@ Pulsar::get_Profile (const Archive* data,
   if (!data)
     throw Error (InvalidParam, "Pulsar::get_Profile", "no Archive");
 
+  try
+  {
+    Reference::To<const Integration> integration;
+    integration = get_Integration( data, subint );
+
+    return get_Profile (integration, pol, chan);
+  }
+  catch (Error& error)
+  {
+    throw error += "Pulsar::get_Profile (Archive, Index subint, pol, chan)";
+  }
+}
+
+const Pulsar::Profile* 
+Pulsar::get_Profile (const Integration* data, Index pol, Index chan)
+{
+  if (!data)
+    throw Error (InvalidParam, "Pulsar::get_Profile", "no Integration");
+
   try {
 
     if (Archive::verbose > 2) cerr << "Pulsar::get_Profile "
-      "(" << subint << "," << pol << "," << chan << ")" << endl;
+      "(" << pol << "," << chan << ")" << endl;
 
     bool pscrunched = data->get_npol() == 1
       || data->get_state () == Signal::Stokes
       || data->get_state () == Signal::Intensity;
 
-    Reference::To<const Integration> integration;
-    integration = get_Integration( data, subint );
-
+    Reference::To<const Integration> integration = data;
     Reference::To<Integration> integration_clone;
     
     if (chan.get_integrate() && integration->get_nchan() > 1)
@@ -83,7 +100,7 @@ Pulsar::get_Profile (const Archive* data,
   }
   catch (Error& error)
   {
-    throw error += "Pulsar::get_Profile (Index)";
+    throw error += "Pulsar::get_Profile (Integration, Index pol, chan)";
   }
 }
 
@@ -141,6 +158,27 @@ Pulsar::get_Stokes (const Archive* data, Index subint, Index chan)
     Reference::To<const Integration> integration;
     integration = get_Integration( data, subint );
 
+    return get_Stokes (integration, chan);
+  }
+  catch (Error& error)
+  {
+    throw error += "Pulsar::get_Stokes (Archive, Index subint, chan)";
+  }
+}
+
+//! Return a newly constructed PolnProfile with state == Stokes
+const Pulsar::PolnProfile* 
+Pulsar::get_Stokes (const Integration* data, Index chan)
+{
+  if (!data)
+    throw Error (InvalidParam, "Pulsar::get_Stokes (Index)", "no Integration");
+
+  try
+  {
+    if (Archive::verbose > 2) cerr << "Pulsar::get_Stokes "
+      "(" << chan << ")" << endl;
+
+    Reference::To<const Integration> integration = data;
     Reference::To<Integration> integration_clone;
     
     if (chan.get_integrate() && integration->get_nchan() > 1)
@@ -173,7 +211,7 @@ Pulsar::get_Stokes (const Archive* data, Index subint, Index chan)
   }
   catch (Error& error)
   {
-    throw error += "Pulsar::get_Stokes (Index)";
+    throw error += "Pulsar::get_Stokes (Integration, Index chan)";
   }
 }
 

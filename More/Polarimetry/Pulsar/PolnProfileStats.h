@@ -50,9 +50,12 @@ namespace Pulsar {
     //! Set the on-pulse and baseline regions
     void get_regions (PhaseWeight& pulse, PhaseWeight& base) const;
 
-     //! Get the ProfileStats estimator
+    //! Get the ProfileStats estimator
     ProfileStats* get_stats () { return stats; }
     const ProfileStats* get_stats () const { return stats; }
+
+    //! Set the ProfileStats estimator
+    void set_stats (ProfileStats* s) { stats = s; }
 
     //! Get the Stokes parameters for the specified phase bin
     Stokes< Estimate<double> > get_stokes (unsigned ibin) const;
@@ -77,6 +80,12 @@ namespace Pulsar {
 
     //! Returns the variance of the baseline for the specified polarization
     Estimate<double> get_baseline_variance (unsigned ipol) const;
+
+    //! Return a text interface that can be used to configure this instance
+    TextInterface::Parser* get_interface ();
+
+    //! Text interface to methods
+    class Interface;
 
   protected:
 

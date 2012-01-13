@@ -54,6 +54,9 @@ namespace Calibration {
     //! Set the input index, \f$ j \f$
     void set_input_index (unsigned index);
 
+    //! Remove the specified input from the model
+    virtual void erase_input (unsigned index);
+
     //! Set the transformation,\f$J_i\f$,where \f$i\f$=get_transformation_index
     virtual void set_transformation (Complex2* xform);
 
@@ -97,11 +100,6 @@ namespace Calibration {
 
     //! The transformations, \f$ J_i \f$ and \f$ M_k \f$
     MEAL::VectorRule< MEAL::Transformation<MEAL::Complex2> > xforms;
-
-  private:
-
-    MEAL::Project<Complex2> inputs_map;
-    MEAL::Project<Complex2> xforms_map;
 
   };
 

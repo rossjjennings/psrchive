@@ -35,7 +35,12 @@ Pulsar::SystemCalibratorPlotter::~SystemCalibratorPlotter ()
 
 void Pulsar::SystemCalibratorPlotter::plot_cal_constraints (unsigned chan)
 {
-  plot_constraints (chan, calibrator->calibrator_estimate.input_index);
+  if (calibrator->calibrator_estimate.size() == 0)
+    throw Error (InvalidState,
+		 "Pulsar::SystemCalibratorPlotter::plot_cal_constraints",
+		 "no calibrator data");
+
+  plot_constraints (chan, calibrator->calibrator_estimate[0].input_index);
 }
 
 void Pulsar::SystemCalibratorPlotter::plot_psr_constraints (unsigned chan,
@@ -135,7 +140,7 @@ void Pulsar::SystemCalibratorPlotter::plot_cal ()
     cerr << "Pulsar::SystemCalibratorPlotter::plot_cal call plot" << endl;
 
   Reference::To<SourceInfo> info 
-    = new SourceInfo( &(calibrator->calibrator_estimate) );
+    = new SourceInfo( calibrator->calibrator_estimate );
 
   info->set_together (true);
   info->set_label ("CAL Stokes");

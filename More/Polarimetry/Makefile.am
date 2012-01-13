@@ -48,7 +48,9 @@ nobase_include_HEADERS = \
         Pulsar/PolnProfileFit.h \
         Pulsar/PolnProfileFitAnalysis.h \
         Pulsar/PolnProfileStats.h \
+        Pulsar/PolnProfileStatsInterface.h \
 	Pulsar/PolnSpectrumStats.h \
+	Pulsar/PolnStatistics.h \
 	Pulsar/PolynomialInfo.h \
 	Pulsar/ProjectionCorrection.h \
         Pulsar/PulsarCalibrator.h \
@@ -70,6 +72,7 @@ nobase_include_HEADERS = \
         Pulsar/SingleAxisPolynomial.h \
         Pulsar/SingleAxisSolver.h \
 	Pulsar/SolverInfo.h \
+	Pulsar/SourceEstimate.h \
 	Pulsar/SourceInfo.h \
 	Pulsar/StandardData.h \
 	Pulsar/StandardPrepare.h \
@@ -137,7 +140,9 @@ libPolarimetry_la_SOURCES = \
         PolnProfileFit.C \
         PolnProfileFitAnalysis.C \
         PolnProfileStats.C \
+        PolnProfileStatsInterface.C \
 	PolnSpectrumStats.C \
+	PolnStatistics.C \
 	PolynomialInfo.C \
 	ProjectionCorrection.C \
         PulsarCalibrator.C \
@@ -155,6 +160,7 @@ libPolarimetry_la_SOURCES = \
         SingleAxisPolynomial.C \
         SingleAxisSolver.C \
 	SolverInfo.C \
+	SourceEstimate.C \
         SourceInfo.C \
 	StandardData.C \
 	StandardPrepare.C \
