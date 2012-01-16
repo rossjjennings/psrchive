@@ -19,7 +19,7 @@
 
 #include <iostream>
 #include <math.h>
-
+#include <limits>
 
 // forward declarations
 template <typename T, typename U=T> class MeanEstimate;
