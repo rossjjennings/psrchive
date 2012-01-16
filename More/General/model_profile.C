@@ -188,11 +188,10 @@ int Pulsar::model_profile (int npts, int narrays,
 
   *scale = s1/s2;
   *chisq = 0;
-  float fft_prf_amp, fft_std_amp;
   for(i=0; i<narrays; ++i){
     for(int j=1; j<npt2; ++j){
-      fft_prf_amp = sqrt( SQR(fft_prf[i][2*j]) + SQR(fft_prf[i][2*j+1]) );
-      fft_std_amp = sqrt( SQR(fft_std[i][2*j]) + SQR(fft_std[i][2*j+1]) );
+      const double fft_prf_amp = sqrt( SQR(fft_prf[i][2*j]) + SQR(fft_prf[i][2*j+1]) );
+      const double fft_std_amp = sqrt( SQR(fft_std[i][2*j]) + SQR(fft_std[i][2*j+1]) );
       *chisq += fft_prf_amp*fft_prf_amp - 
 	2**scale*fft_prf_amp*fft_std_amp*cos(xcorr_phases[i][j]-j*tau)+
 	*scale**scale*fft_std_amp*fft_std_amp;

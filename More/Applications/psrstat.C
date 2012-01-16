@@ -65,6 +65,9 @@ protected:
   //! Precede each value queried with name=
   bool prefix_name;
 
+  //! Optionally set the delimiter used to separate elements of a container
+  string delimiter;
+
   //! Job to be performed on each leaf index
   void print ();
 
@@ -122,6 +125,9 @@ void psrstat::add_options (CommandLine::Menu& menu)
   arg = menu.add (prefix_name, 'Q');
   arg->set_help ("do not prefix output with 'keyword='");
 
+  arg = menu.add (delimiter, 'd', "delim");
+  arg->set_help ("separate elements of a container using delimiter");
+
   menu.set_help_footer
     ("\n"
      "Multiple expressions and/or index ranges may be specified by using \n"
@@ -138,7 +144,10 @@ void psrstat::process (Pulsar::Archive* _archive)
 
   interface = standard_interface( archive );
   interface->set_prefix_name (prefix_name);
-    
+
+  if (delimiter.length())
+    interface->set_delimiter (delimiter);
+
   if (expressions.size() == 0)
   {
     cout << interface->help (true) << endl;;

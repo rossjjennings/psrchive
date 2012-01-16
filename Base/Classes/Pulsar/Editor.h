@@ -37,11 +37,14 @@ namespace Pulsar {
     //! Edit the Archive according to the current state
     std::string process (Archive*);
 
-    //! prefix parameter value queries with parameter name=
+    //! Prefix parameter value queries with parameter name=
     bool prefix_name;
 
-    // print the name of each file processed
+    //! Print the name of each file processed
     bool output_filename;
+
+    //! Optionally set the delimiter used to separate elements of a container
+    std::string delimiter;
 
   protected:
 

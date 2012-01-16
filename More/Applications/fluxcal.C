@@ -66,9 +66,21 @@ static bool verbose = false;
 
 void unload (Pulsar::FluxCalibrator* fluxcal) try {
 
+  if (!fluxcal->complete()) 
+  {
+    cerr << "fluxcal: unload called on incomplete data set, skipping" << endl;
+    return;
+  }
+
   Reference::To<Pulsar::Archive> archive;
   cerr << "fluxcal: creating " << archive_class << " Archive" << endl;
   archive = fluxcal->new_solution (archive_class);
+
+  if (fluxcal->meanTsys() == 0.0)
+  {
+    cerr << "fluxcal: unload called with mean Tsys==0, skipping" << endl;
+    return;
+  }
 
   if (verbose)
     cerr << endl

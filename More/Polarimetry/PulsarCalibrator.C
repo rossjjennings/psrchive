@@ -572,11 +572,11 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
       cerr << "Pulsar::PulsarCalibrator::solve1 chisq=" << chisq 
 	   << "/nfree=" << nfree << " = " << reduced_chisq[ichan] << endl;
 
-    if (reduced_chisq[ichan] < 2.0)
+    if (retry_chisq == 0 || reduced_chisq[ichan] < retry_chisq)
       break;
 
     cerr << "Pulsar::PulsarCalibrator::solve1 ichan=" << ichan
-	 << " invalid reduced chisq=" << reduced_chisq[ichan] << endl;
+	 << " retry reduced chisq=" << reduced_chisq[ichan] << endl;
 
     // try again with a fresh start
     transformation[ichan] = 0;
@@ -640,10 +640,13 @@ void Pulsar::PulsarCalibrator::solve1 (const Integration* data, unsigned ichan)
     }
   }
 
-  if (!solution[ichan])
-    solution[ichan] = new Calibration::MeanInstrument;
+  if ( dynamic_cast<Instrument*>( transformation[ichan].ptr() ) )
+  {
+    if (!solution[ichan])
+      solution[ichan] = new Calibration::MeanInstrument;
 
-  solution[ichan]->integrate( transformation[ichan] );
+    solution[ichan]->integrate( transformation[ichan] );
+  }
 }
 
 void Pulsar::PulsarCalibrator::update_solution ()

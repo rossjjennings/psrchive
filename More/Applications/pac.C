@@ -30,6 +30,7 @@
 #include "Pulsar/FrontendCorrection.h"
 #include "Pulsar/ProjectionCorrection.h"
 #include "Pulsar/ReflectStokes.h"
+#include "Pulsar/BackendFeed.h"
 
 #include "Pulsar/ProcHistory.h"
 #include "Pulsar/Feed.h"
@@ -44,7 +45,7 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbCcDd:Ee:fFGhiIJ:j:k:lM:m:n:O:op:Pqr:sSt:Tu:UvVwW:xyZ";
+const char* args = "A:aBbCcDd:Ee:fFGhiIJ:j:k:lLM:m:n:O:op:PqRr:sSt:Tu:UvVwW:xyZ";
 
 void usage ()
 {
@@ -68,6 +69,7 @@ void usage ()
     "Calibrator options: \n"
     "  -A filename    Use the calibrator in filename, as output by pcm/pacv \n"
     "  -P             Calibrate polarisations only \n"
+    "  -R             Calibrate the receiver (feed) only \n"
     "  -r filename    Use the specified receiver parameters file \n"
     "  -S             Use the complete Reception model \n"
     "  -s             Use the Polar Model \n"
@@ -88,6 +90,7 @@ void usage ()
     "  -b             Do not try to match bandwidths\n"
     "  -o             Allow opposite sidebands\n"
     "  -a             Per-channel matching\n"
+    "  -L             Print verbose matching information \n"
     "\n"
     "Expert options: \n"
     "  -f             Override flux calibration flag\n"
@@ -105,6 +108,9 @@ void usage ()
     "See "PSRCHIVE_HTTP"/manuals/pac for more details\n"
        << endl;
 }
+
+// cut down the calibrator solution to only the feed
+void keep_only_feed( Pulsar::PolnCalibrator* );
 
 int main (int argc, char *argv[]) try
 {    
@@ -153,7 +159,11 @@ int main (int argc, char *argv[]) try
   string unload_path;
   string unload_ext = "calib";
 
+  // filename from which calibrator solution to be applied will be loaded
   string model_file;
+  // strip down the above-named calibrator solution to keep only the feed
+  bool apply_only_feed = false;
+
   vector<string> exts;
 
   string pcal_file;
@@ -354,6 +364,11 @@ int main (int argc, char *argv[]) try
       command += " -P";
       break;
 
+    case 'R':
+      apply_only_feed = true;
+      command += " -R";
+      break;
+
     case 'r':
       feed = new Calibration::Feed;
       feed -> load (optarg);
@@ -501,6 +516,10 @@ int main (int argc, char *argv[]) try
 
     model_arch = Pulsar::Archive::load(model_file);
     model_calibrator = new Pulsar::PolnCalibrator(model_arch);
+
+    if (apply_only_feed)
+      keep_only_feed (model_calibrator);
+
     pcal_type = model_calibrator->get_type();
   }
   catch (Error& error)
@@ -831,4 +850,28 @@ int main (int argc, char *argv[]) try
 
 
 
+using Calibration::BackendFeed;
 
+void keep_only_feed( Pulsar::PolnCalibrator* cal )
+{
+  const unsigned nchan = cal->get_nchan();
+
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+  {
+    if (!cal->get_transformation_valid(ichan))
+      continue;
+
+    MEAL::Complex2* xform = cal->get_transformation(ichan);
+
+    BackendFeed* feed = dynamic_cast<BackendFeed*> (xform);
+
+    if (!feed)
+      throw Error (InvalidState, "keep_only_feed",
+		   "PolnCalibrator at ichan=%u is not a "
+		   "BackendFeed transformation", ichan);
+
+    feed->set_gain( 1.0 );
+    feed->set_diff_gain( 0.0 );
+    feed->set_diff_phase( 0.0 );
+  }
+}

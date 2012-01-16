@@ -20,71 +20,12 @@
 #include "Pulsar/SignalPath.h"
 
 #include "Pulsar/CoherencyMeasurementSet.h"
-#include "Pulsar/MeanCoherency.h"
-
-#include "MEAL/Coherency.h"
+#include "Pulsar/SourceEstimate.h"
 
 #include "BatchQueue.h"
-#include "Types.h"
 
 namespace Pulsar
 {
-  class SourceEstimate : public Reference::Able
-  {
-  public:
-
-    //! Construct with the specified bin from Archive
-    SourceEstimate (unsigned ibin = 0);
-
-    //! Update each source with the mean
-    void update_source();
-
-    //! Model of Stokes parameters as a function of frequency
-    Reference::Vector<MEAL::Coherency> source;
-
-    //! Best guess of Stokes parameters
-    std::vector< Calibration::MeanCoherency > source_guess;
-
-    //! Validity flags for each Coherency
-    std::vector< bool > valid;
-
-    //! Phase bin from which pulsar polarization is derived
-    unsigned phase_bin;
-
-    //! The index of the source in the model
-    unsigned input_index;
-
-    //! Count attempts to add data for this state
-    unsigned add_data_attempts;
-
-    //! Count failures to add data for this state
-    unsigned add_data_failures;
-
-    unsigned get_input_index() const { return input_index; }
-
-  };
-
-  class SourceObservation
-  {
-  public:
-
-    //! Source code
-    Signal::Source source; 
-
-    //! Epoch of the observation
-    MJD epoch;
-
-    //! Frequency channel
-    unsigned ichan;
-
-    //! The observed Stokes parameters
-    Stokes< Estimate<double> > observation;
-
-    //! The baseline
-    Stokes< Estimate<double> > baseline;
-
-  };
-
   class ReferenceCalibrator;
   class CalibratorStokes;
 
@@ -271,8 +212,9 @@ namespace Pulsar
     //! Initialize the SignalPath of the specified channel
     virtual void init_model (unsigned ichan);
 
-    //! Initialize a SourceEstimate instance
-    virtual void init_estimate (SourceEstimate&);
+    //! Initialize a vector of SourceEstimate instances
+    virtual void init_estimates ( std::vector<SourceEstimate>&,
+				  unsigned ibin = 0 );
 
     //! Prepare any calibrator estimates
     virtual void prepare_calibrator_estimate (Signal::Source);
@@ -303,7 +245,7 @@ namespace Pulsar
     std::vector<std::string> calibrator_filenames;
 
     //! Uncalibrated estimate of calibrator polarization
-    SourceEstimate calibrator_estimate;
+    std::vector<SourceEstimate> calibrator_estimate;
     
     //! Epoch of the first observation
     MJD start_epoch;

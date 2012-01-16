@@ -117,6 +117,8 @@ protected:
   unsigned polar_angle_bins;
   unsigned flux_pr_bins;
 
+  bool dynamic_histogram;
+
   //! maximal amplitude (and the corresponding bin) in given range:
   vector < identifier > max_amp_info;
 
@@ -147,6 +149,8 @@ protected:
   void initialise_histograms () ;
   //! Create phase resolved histograms
   void create_histograms ( Reference::To<Archive> );
+  //! Dynamic range of histograms:
+  gsl_histogram* update_histogram_range ( gsl_histogram*, float );
 
   //! convenience function to perform all of the "traditional" functions of spa
   void traditional_spa ();
@@ -184,6 +188,10 @@ psrspa::psrspa ()
   create_polar_angle = false;
 
   hist_count = 0;
+
+  dynamic_histogram = false;
+
+  log = false;
 
   find_max_amp_in_range = false;
   perform_bscrunch_loop = false;
@@ -360,6 +368,9 @@ void psrspa::add_options ( CommandLine::Menu& menu )
 
   arg = menu.add ( bins, 'b', "bins" );
   arg->set_help ( "Set the number of all bins" );
+
+  arg = menu.add ( dynamic_histogram, 'd' );
+  arg->set_help ( "Allow dynamic setting of range of histograms" );
 
   menu.add ( "" );
   menu.add ( "Scan pulses and find giants - options:" );
@@ -612,28 +623,55 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
 	    {
 	      int result = gsl_histogram_increment ( h_polar_angle_vec[curr_hist], aux_vec_d[ibin].get_value () / 180.0 * M_PI );
 	      if ( result == GSL_EDOM )
-		warn << "WARNING psrspa::create_histograms polarisation angle the histogram range for the bin " << ibin << " in the subint " << isub << " of archive " << archive->get_filename () << endl;
+	      {
+		if ( dynamic_histogram )
+		{
+		  gsl_histogram *temp_hist = gsl_histogram_clone ( h_polar_angle_vec[curr_hist] );
+		  h_flux_pr_vec[curr_hist] = update_histogram_range ( temp_hist, aux_vec_d[ibin].get_value () / 180.0 * M_PI );
+		}
+		else {
+		  warn << "WARNING psrspa::create_histograms polarisation angle the histogram range for the bin " << ibin << " in the subint " << isub << " of archive " << archive->get_filename () << endl;
+		}
+	      }
 	    }
 	    if ( create_polar_degree && current_bscrunch == 1 )
 	    {
 	      // if P_amps[ibin] or T_amps[ibin] < 3 sigma, set polar degree to zero
 	      int result = gsl_histogram_increment ( h_polar_degree_vec[curr_hist], ( fabs ( P_amps[ibin] ) < 3.0 * b_sigma || fabs ( T_amps[ibin] ) < 3.0 * b_sigma ) ? 0.0 : P_amps[ibin] / T_amps[ibin] );
 	      if ( result == GSL_EDOM )
+	      {
+		if ( dynamic_histogram )
+		{
+		  gsl_histogram *temp_hist = gsl_histogram_clone ( h_polar_degree_vec[curr_hist] );
+		  h_flux_pr_vec[curr_hist] = update_histogram_range ( temp_hist, ( fabs ( P_amps[ibin] ) < 3.0 * b_sigma || fabs ( T_amps[ibin] ) < 3.0 * b_sigma ) ? 0.0 : P_amps[ibin] / T_amps[ibin] );
+		}
+		else {
 		warn << "WARNING psrspa::create_histograms polarisation degree outside the histogram range for the bin " << ibin << " in the subint " << isub << " of archive " << archive->get_filename () << endl;
+		}
+	      }
 	    }
 	    if ( create_flux && current_bscrunch == 1 )
 	    {
-	      int result;
-	      if ( log && T_amps[curr_hist] > 0.0 )
+	      int result = 0;
+	      if ( log && T_amps[ibin] > 0.0 )
 	      {
-		result = gsl_histogram_increment ( h_flux_pr_vec[curr_hist], logf ( T_amps[ibin] ) );
+		result = gsl_histogram_increment ( h_flux_pr_vec[curr_hist], log10f ( T_amps[ibin] ) );
 	      }
-	      else
+	      else if ( !log )
 	      {
 		result = gsl_histogram_increment ( h_flux_pr_vec[curr_hist], T_amps[ibin] );
 	      }
 	      if ( result == GSL_EDOM )
-		warn << "WARNING psrspa::create_histograms phase resolved flux outside the histogram range for the bin " << ibin << " in the subint " << isub << " of archive " << archive->get_filename () << " flux = " << T_amps[ibin] << endl;
+	      {
+		if ( dynamic_histogram )
+		{
+		  gsl_histogram *temp_hist = gsl_histogram_clone ( h_flux_pr_vec[curr_hist] );
+		  h_flux_pr_vec[curr_hist] = update_histogram_range ( temp_hist, log ? log10f ( T_amps[ibin] ) : T_amps[ibin] );
+		}
+		else {
+		  warn << "WARNING psrspa::create_histograms phase resolved flux outside the histogram range for the bin " << ibin << " in the subint " << isub << " of archive " << archive->get_filename () << " flux = " << T_amps[ibin] << endl;
+		}
+	      }
 	    }
 	    // increment the histogram id
 	    curr_hist ++;
@@ -760,4 +798,42 @@ void psrspa::choose_bscrunch ( unsigned _max_bscrunch )
     _max_bscrunch /= 2;
   }
   perform_bscrunch_loop = true;
+}
+
+gsl_histogram* psrspa::update_histogram_range( gsl_histogram* hist_in, float value )
+{
+  size_t bins_in = hist_in->n;
+  size_t offset;
+  double min_in = hist_in->range[0];
+  double max_in = hist_in->range[bins_in];
+  double min_out, max_out;
+  min_out = min_in;
+  max_out = max_in;
+
+  double step_in = hist_in->range[1] - hist_in->range[0];
+
+  size_t add_bins ;
+  if ( value > max_in )
+  {
+    //need to extended on the max side
+    add_bins = (size_t) ceil( ( value - max_in ) / (double)step_in );
+    max_out += ( (double) ( add_bins + 1 ) ) * step_in;
+    offset = 0;
+  }
+  else
+  {
+    //need to extended on the min side
+    add_bins = (size_t) ceil( ( min_in - value ) / (double)step_in );
+    min_out -= ( (double) ( add_bins + 1 ) ) * step_in;
+    offset = add_bins + 1;
+  }
+
+  gsl_histogram *hist_out = gsl_histogram_alloc ( bins_in + add_bins + 1 ); // +1 to be on the safe side
+  gsl_histogram_set_ranges_uniform ( hist_out, min_out, max_out );
+
+  memcpy ( hist_out->bin + offset, hist_in->bin, bins_in * sizeof(double) );
+
+  gsl_histogram_increment ( hist_out, value );
+
+  return hist_out;
 }

@@ -90,6 +90,7 @@ protected:
   bool save_evecs;
   bool save_evals;
   bool save_covariance_matrix;
+  bool save_decomps;
 
   //! Fit control
   bool apply_shift;
@@ -137,7 +138,7 @@ psrpca::psrpca ()
 
   t_cov = new TimeDomainCovariance;
   covariance = NULL;
-  save_diffs = save_evecs = save_evals = save_covariance_matrix = true;
+  save_diffs = save_evecs = save_evals = save_covariance_matrix = save_decomps = true;
   prefix = "psrpca";
 
   prof_to_std = apply_shift = apply_offset = apply_scale = true ;
@@ -161,8 +162,9 @@ void psrpca::setup ()
     arrival->set_standard ( std_archive );
   } catch (Error& error)
   {
-    cerr << "psrpca::setup setting standard failed" << endl;
     cerr << error << endl;
+    cerr << "psrpca::setup setting standard failed" << endl;
+    exit ( -1 );
   }
 }
 
@@ -195,7 +197,7 @@ void psrpca::add_options ( CommandLine::Menu& menu )
   arg->set_help ( "Apply scaling, offset and shift to standard instead of profile");
 
   menu.add ("");
-  menu.add ("Regression and Predctor Options");
+  menu.add ("Regression and Predictor Options");
 
   arg = menu.add (residuals_file, 'r', "residuals");
   arg->set_help ("File with residuals");
@@ -204,13 +206,13 @@ void psrpca::add_options ( CommandLine::Menu& menu )
 		  "When used, corrected residuals are output in a file prefix_residuals \n"
 		  "The format of the output is: {sat} {input residual} {output residual} {input error}\n"
 		  "Note that the output units are us\n");
-  arg = menu.add (consecutive_points, 'c', "consecutive_poits");
-  arg->set_help ("Choose the number of consecutive points above treshold used during determination of significant eigenvectors");
+  arg = menu.add (consecutive_points, 'c', "consecutive_points");
+  arg->set_help ("Choose the number of consecutive points above threshold used during determination of significant eigenvectors");
   arg = menu.add (threshold_sigma,'t',"threshold_sigma");
   arg->set_help ("Choose the threshold in the units of standard deviation");
 
   menu.add ("");
-  menu.add ("Output otpions:");
+  menu.add ("Output options:");
 
   arg = menu.add (save_diffs, "sd");
   arg->set_help ("Don't save the difference profiles");
@@ -223,6 +225,9 @@ void psrpca::add_options ( CommandLine::Menu& menu )
 
   arg = menu.add (save_covariance_matrix, "sc");
   arg->set_help ("Don't save the covariance matrix");
+
+  arg = menu.add (save_decomps, "sD");
+  arg->set_help ("Don't save the decompositions");
 
   arg = menu.add (prefix, 'p', "prefix");
   arg->set_help ("Set prefix for all the output files");
@@ -326,16 +331,17 @@ void psrpca::finalize ()
     }
   }
 
-  t_cov->finalize ();
-
   covariance = gsl_matrix_alloc ( (int) nbin, (int) nbin );
   t_cov->get_covariance_matrix_gsl ( covariance );
 
   // write the covariance matrix and difference profiles
   FILE *out;
-  out = fopen ( (prefix+"_covariance.dat").c_str(), "w" );
-  gsl_matrix_fprintf(out, covariance, "%g");
-  fclose ( out );
+  if ( save_covariance_matrix )
+  {
+    out = fopen ( (prefix+"_covariance.dat").c_str(), "w" );
+    gsl_matrix_fprintf(out, covariance, "%g");
+    fclose ( out );
+  } // save covariance matrix
 
   if ( save_diffs ) 
     total->unload ( prefix+"_diffs.ar" );
@@ -371,15 +377,24 @@ void psrpca::finalize ()
     evecs_archive->unload ( prefix+"_evecs.ar" );
   } // save evectors
 
+  if ( save_evals )
+  {
+    out = fopen ( (prefix+"_evals.dat").c_str(), "w" );
+    gsl_vector_fprintf ( out, eval, "%g" );
+    fclose ( out );
+  } // save_evals
+
   // decompose profiles onto eigenvectors
-  //gsl_matrix *decompositions = gsl_matrix_alloc ( total_count, (unsigned)nbin );
   gsl_matrix *decompositions = gsl_matrix_alloc ( (unsigned)nbin, total_count );
 
   gsl_blas_dgemm ( CblasTrans, CblasNoTrans, 1.0, evec, profiles, 0.0, decompositions );
 
-  out = fopen ( (prefix + "_decomposition.dat").c_str(), "w" );
-  gsl_matrix_fprintf ( out, decompositions, "%g");
-  fclose ( out );
+  if ( save_decomps )
+  {
+    out = fopen ( (prefix + "_decomposition.dat").c_str(), "w" );
+    gsl_matrix_fprintf ( out, decompositions, "%g");
+    fclose ( out );
+  } // save decompositions
 
   if ( !residuals_file.empty() )
   {
@@ -424,7 +439,7 @@ void psrpca::finalize ()
     }
 
     // multiple regression
-    gsl_vector *res_decomp_covar = gsl_vector_alloc((unsigned)nbin); // covariance between residuals and decomposotion coefficients
+    gsl_vector *res_decomp_covar = gsl_vector_alloc((unsigned)nbin); // covariance between residuals and decomposition coefficients
 
     gsl_vector *res_decomp_corel = gsl_vector_alloc((unsigned)nbin); // this one is used to determine how many eigenvectors to use
 

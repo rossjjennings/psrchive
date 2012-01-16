@@ -42,6 +42,10 @@ void usage ()
        << endl;
 }
 
+static bool verbose = false;
+
+void diff_two (const std::string& fileA, const std::string& fileB);
+
 int main (int argc, char** argv) try
 {
   Pulsar::Profile::default_duty_cycle = 0.10;
@@ -55,8 +59,6 @@ int main (int argc, char** argv) try
   // write the difference to stdout
   bool plot = false;
   float plot_when = 0;
-
-  bool verbose = false;
 
   char c;
   while ((c = getopt(argc, argv, "c:dhM:qs:vV")) != -1) 
@@ -108,12 +110,18 @@ int main (int argc, char** argv) try
 
   if (filenames.empty())
   {
-    cerr << "psrdiff: please specify filename[s]" << endl;
+    cerr << "psrdiff: please specify filenames of files to be diffed" << endl;
     return -1;
-  } 
+  }
 
   if (!std_filename)
   {
+    if (filenames.size() == 2)
+    {
+      diff_two (filenames[0], filenames[1]);
+      return 0;
+    }
+
     cerr << "psrdiff: please specify standard (-s std.ar)" << endl;
     return -1;
   } 
@@ -341,3 +349,37 @@ catch (Error& error)
   return -1;
 }
 
+void diff_two (const std::string& fileA, const std::string& fileB)
+{
+  Reference::To<Pulsar::Archive> A = Pulsar::Archive::load (fileA);
+  Reference::To<Pulsar::Archive> B = Pulsar::Archive::load (fileB);
+
+  std::string reason;
+  if (!A->mixable(B,reason))
+  {
+    cout << "files differ as follows:" << reason << endl;
+    return;
+  }
+
+  if (verbose)
+    cerr << "psrdiff: subtracting " << fileB << " from " << fileA << endl;
+
+  unsigned nsub = A->get_nsubint();
+  unsigned nchan = A->get_nchan();
+  unsigned npol = A->get_npol();
+  
+  for (unsigned isub=0; isub < nsub; isub++)    
+    for (unsigned ipol=0; ipol < npol; ipol++)
+      for (unsigned ichan=0; ichan < nchan; ichan++)
+      {
+	Pulsar::Profile* profileA = A->get_Profile (isub, ipol, ichan);
+	Pulsar::Profile* profileB = B->get_Profile (isub, ipol, ichan);
+
+	profileA->diff(profileB);
+      }
+
+  std::string output_filename = "psrdiff.out";
+
+  cerr << "psrdiff: unloading " << output_filename << endl;
+  A->unload (output_filename);
+}

@@ -78,6 +78,9 @@ string Pulsar::Editor::process (Archive* archive)
   interface->set_indentation (" ");
   interface->set_prefix_name (prefix_name);
 
+  if (delimiter.length())
+    interface->set_delimiter (delimiter);
+
   string result;
 
   if (output_filename)

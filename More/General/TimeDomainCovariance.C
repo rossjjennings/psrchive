@@ -141,6 +141,7 @@ void TimeDomainCovariance::finalize ()
     gsl_matrix_scale ( covariance_gsl, 1.0 / wt_sum );
   else 
     cerr << "WARNING: Pulsar::TimeDomainCovariance::finalize covariance matrix already finalized" << endl;
+  finalized = true;
 }
 
 void TimeDomainCovariance::choose_bins ( unsigned val_1, unsigned val_2 )

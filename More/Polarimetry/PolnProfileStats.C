@@ -270,3 +270,12 @@ catch (Error& error)
   throw error += "Pulsar::PolnProfileStats::build";
 }
 
+#include "Pulsar/PolnProfileStatsInterface.h"
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::PolnProfileStats::get_interface ()
+{
+  return new Interface (this);
+}
+
+
