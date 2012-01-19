@@ -39,7 +39,7 @@ public:
   void set_quiet ()
   {
     Application::set_quiet();
-    editor.output_filename = false;
+    editor.output_identifier = false;
   }
 
   void detailed_help ();
