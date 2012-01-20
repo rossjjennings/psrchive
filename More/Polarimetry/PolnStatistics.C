@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/PolnStatistics.h"
-#include "Pulsar/PolnProfileStats.h"
+#include "Pulsar/PolnProfileStatsInterface.h"
 #include "Pulsar/PolnProfile.h"
 
 #include "Pulsar/Integration.h"
@@ -16,27 +16,46 @@ using namespace std;
 Pulsar::PolnStatistics::PolnStatistics () {}
 Pulsar::PolnStatistics::~PolnStatistics () {}
 
-//! Get the text interface to this
-TextInterface::Parser* Pulsar::PolnStatistics::get_interface ()
-{
-  if (!stats)
-    throw Error (InvalidState, "Pulsar::PolnStatistics::get_interface",
-		 "PolnProfileStats not constructed");
-
-  return stats->get_interface();
-}
-
-void Pulsar::PolnStatistics::setup (Statistics* st)
+Pulsar::PolnProfileStats* Pulsar::PolnStatistics::get_stats () try
 {
   if (!stats)
   {
     stats = new PolnProfileStats;
-    stats -> set_stats (st->get_stats());
+    stats -> set_stats (parent->get_stats());
   }
 
-  profile = Pulsar::get_Stokes (get_Integration(st), st->get_chan());
+  return stats;
+}
+ catch (Error& error)
+   {
+     throw error += "Pulsar::PolnStatistics::get_stats";
+   }
 
-  PhaseWeight* baseline = stats->get_stats()->get_baseline();
+// this interface wrapper simply postpones the call to get_stats
+class Interface : public TextInterface::To<Pulsar::PolnStatistics>
+{
+public:
+  Interface (Pulsar::PolnStatistics* instance)
+  {
+    if (instance)
+      set_instance( instance );
+
+    import ( Pulsar::PolnProfileStats::Interface(), 
+	     &Pulsar::PolnStatistics::get_stats );
+  }
+};
+
+//! Get the text interface to this
+TextInterface::Parser* Pulsar::PolnStatistics::get_interface ()
+{
+  return new Interface (this);
+}
+
+void Pulsar::PolnStatistics::setup () try
+{
+  profile = Pulsar::get_Stokes (get_Integration(), parent->get_chan());
+
+  PhaseWeight* baseline = get_stats()->get_stats()->get_baseline();
 
   Reference::To<PolnProfile> p = profile->clone();
   for (unsigned i=0; i<4; i++)
@@ -47,6 +66,9 @@ void Pulsar::PolnStatistics::setup (Statistics* st)
   }
   profile = p;
 
-  stats->set_profile( profile );
+  get_stats()->set_profile( profile );
 }
-
+ catch (Error& error)
+   {
+     throw error += "Pulsar::PolnStatistics::setup";
+   }
