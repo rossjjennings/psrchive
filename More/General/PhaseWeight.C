@@ -244,16 +244,11 @@ void Pulsar::PhaseWeight::set_Profile (const Profile* _profile)
 //! Get the weighted total of the Profile amplitudes
 double Pulsar::PhaseWeight::get_weighted_sum () const
 {
-  if (!profile)
-    throw Error (InvalidState, "Pulsar::PhaseWeight::get_weighted_sum",
-		 "Profile not set");
+  check_Profile ("get_weighted_sum");
 
   unsigned nbin = profile->get_nbin();
 
-  if (nbin != weight.size())
-    throw Error (InvalidState, "Pulsar::PhaseWeight::stats",
-		 "weight size=%d != profile nbin=%d",
-		 weight.size(), nbin);
+  check_weight (nbin, "get_weighted_sum");
 
   const float* amps = profile->get_amps();
 
@@ -265,12 +260,16 @@ double Pulsar::PhaseWeight::get_weighted_sum () const
 }
 
 //! Get the weighted mean of the Profile
-Estimate<double> Pulsar::PhaseWeight::get_mean () const
+Estimate<double> Pulsar::PhaseWeight::get_mean () const try
 {
   if (!built)
     const_cast<PhaseWeight*>(this)->build();
   return mean;
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::PhaseWeight::get_mean";
+   }
 
 float Pulsar::PhaseWeight::get_avg () const
 {
@@ -278,12 +277,16 @@ float Pulsar::PhaseWeight::get_avg () const
 }
 
 //! Get the weighted variance of the Profile
-Estimate<double> Pulsar::PhaseWeight::get_variance () const
+Estimate<double> Pulsar::PhaseWeight::get_variance () const try
 {
   if (!built)
     const_cast<PhaseWeight*>(this)->build();
   return variance;
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::PhaseWeight::get_variance";
+   }
 
 float Pulsar::PhaseWeight::get_rms () const
 {
@@ -307,7 +310,7 @@ Pulsar::PhaseWeight::check_weight (unsigned nbin, const char* method) const
 		 weight.size(), nbin);
 }
 
-void Pulsar::PhaseWeight::build ()
+void Pulsar::PhaseWeight::build () try
 {
   check_Profile ("build");
 
@@ -319,6 +322,10 @@ void Pulsar::PhaseWeight::build ()
 
   built = true;
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::PhaseWeight::build";
+   }
 
 //! Weigh the Profile amplitudes by the weights
 void Pulsar::PhaseWeight::weight_Profile (Profile* data) const
