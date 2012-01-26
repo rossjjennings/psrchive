@@ -38,7 +38,7 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
   if (instance)
   {
     if (Archive::verbose > 2) cerr << "Pulsar::Statistics::Interface::ctor"
-      " call Statistics::get_stats" << endl;
+      " insert " << instance->plugins.size() << " plugins" << endl;
 
     for (unsigned i=0; i < instance->plugins.size(); i++)
       insert ( instance->plugins[i]->get_interface() );

@@ -30,10 +30,13 @@ namespace Pulsar
     ~PolnStatistics ();
 
     //! Synchronize to the current state of the Statistic class
-    void setup (Statistics*);
+    void setup ();
 
     //! Return a text interface
     TextInterface::Parser* get_interface ();
+
+    //! Return pointer to polarization profile statistics instance
+    PolnProfileStats* get_stats ();
 
   protected:
 

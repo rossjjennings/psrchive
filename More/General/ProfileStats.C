@@ -114,7 +114,8 @@ void Pulsar::ProfileStats::get_regions (PhaseWeight& on,
 }
 
 //! Returns the total flux of the on-pulse phase bins
-Estimate<double> Pulsar::ProfileStats::get_total (bool subtract_baseline) const
+Estimate<double>
+Pulsar::ProfileStats::get_total (bool subtract_baseline) const try
 {
   if (!built)
     build ();
@@ -141,6 +142,10 @@ Estimate<double> Pulsar::ProfileStats::get_total (bool subtract_baseline) const
 
   return Estimate<double> (total - offmean * navg, variance * navg);
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::ProfileStats::get_total";
+   }
 
 unsigned Pulsar::ProfileStats::get_onpulse_nbin () const
 {
@@ -243,7 +248,8 @@ void Pulsar::ProfileStats::build () const try
   if (!profile)
   {
     if (Profile::verbose)
-      cerr << "Pulsar::ProfileStats::build this=" << this << " Profile not set" << endl;
+      cerr << "Pulsar::ProfileStats::build this=" << this
+	   << " Profile not set" << endl;
     return;
   }
 

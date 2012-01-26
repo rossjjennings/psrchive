@@ -195,7 +195,7 @@ void Pulsar::Statistics::setup_stats ()
   stats_setup = true;
 
   for (unsigned i=0; i<plugins.size(); i++)
-    plugins[i]->setup (this);
+    plugins[i]->setup ();
 
   if (Profile::verbose)
     cerr << "Pulsar::Statistics::setup_stats done" << endl;
@@ -203,6 +203,7 @@ void Pulsar::Statistics::setup_stats ()
 
 void Pulsar::Statistics::add_plugin (Plugin* plugin)
 {
+  plugin->parent = this;
   plugins.push_back(plugin);
   stats_setup = false;
 }

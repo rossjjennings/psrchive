@@ -43,3 +43,12 @@ void separate (string s, vector<string>& commands, const string& delimiters)
     
   }
 }
+
+void standard_separation (vector<string>& list, const string& str)
+{
+  if (str.find (';') != string::npos)
+    separate (str, list, ";");
+  else
+    separate (str, list, ",");
+}
+

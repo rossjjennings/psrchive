@@ -117,11 +117,15 @@ namespace Pulsar {
   class Statistics::Plugin : public Reference::Able
   {
   public:
-    virtual void setup (Statistics*) = 0;
+    virtual void setup () = 0;
     virtual TextInterface::Parser* get_interface () = 0;
 
-    const Integration* get_Integration (Statistics* stats)
-    { return stats->get_Integration(); }
+    const Integration* get_Integration ()
+    { return parent->get_Integration(); }
+
+  protected:
+    friend class Statistics;
+    Reference::To<Statistics, false> parent;
   };
 
 }
