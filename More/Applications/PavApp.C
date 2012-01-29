@@ -501,7 +501,10 @@ void PavApp::PavSpecificOptions( void )
   }
 
   // BandpassTable plot config
-  SetPlotOptions<BandpassPlot>( "above:c=$name $file Freq: $freq MHz" );
+  if (!publn)
+  {
+    SetPlotOptions<BandpassPlot>( "above:c=$name $file Freq: $freq MHz" );
+  }
 
   // if we want to plot error bars
 
