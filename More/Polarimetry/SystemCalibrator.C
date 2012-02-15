@@ -277,7 +277,7 @@ void Pulsar::SystemCalibrator::prepare (const Archive* data) try
 
   has_pulsar = true;
 
-  load_calibrators ();
+  SystemCalibrator::load_calibrators ();
 }
 catch (Error& error)
 {
