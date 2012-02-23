@@ -16,6 +16,7 @@
 namespace Pulsar
 {
 
+  //! Stores digitizer statistics
   class DigitiserStatistics : public Pulsar::Archive::Extension
   {
 
