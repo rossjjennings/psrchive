@@ -9,7 +9,7 @@ using namespace std;
 
 //! Default constructor
 Pulsar::dspReduction::dspReduction ()
-  : Backend ("dspReduction")
+  : Extension ("dspReduction")
 {
   total_samples = 0;
   block_size = 0;
@@ -32,7 +32,7 @@ Pulsar::dspReduction::dspReduction ()
 
 //! Copy constructor
 Pulsar::dspReduction::dspReduction (const dspReduction& extension)
-  : Backend ("dspReduction")
+  : Extension ("dspReduction")
 {
   if (Archive::verbose == 3)
     cerr << "Pulsar::dspReduction copy constructor" << endl; 
@@ -52,8 +52,6 @@ Pulsar::dspReduction* Pulsar::dspReduction::clone () const
 const Pulsar::dspReduction&
 Pulsar::dspReduction::operator= (const dspReduction& dsp)
 {
-  Backend::operator=(dsp);
-
   total_samples = dsp.total_samples;
   block_size = dsp.block_size;
   overlap = dsp.overlap;

@@ -346,7 +346,6 @@ void Pulsar::BasebandArchive::set_reduction ()
   reduction->set_freq_res ( bhdr.f_resolution );
   reduction->set_time_res ( bhdr.t_resolution );
 
-  reduction->set_name ( hdr.machine_id );
   reduction->set_software ( hdr.software );
 }
 
