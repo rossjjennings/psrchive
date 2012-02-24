@@ -52,25 +52,16 @@ namespace Pulsar {
     // Report to cerr on the status of the Registry (and plugins)
     static void report ();
 
-    // Print the list of agents to the FILE I/O stream
+    // Return a string containing the list of plugins formatted for output
     static std::string get_list ();
-    
+
     // Get a list of name,description pairs from the registry
-    static void get_list( std::vector<std::pair<std::string,std::string> > &details );
+    static void get_list( std::vector<std::pair<std::string,std::string> >& );
 
   protected:
 
-    // Agents registered for creating derived classes in Archive::load
-    static Registry::List<Agent> registry;
-      
-    // Declare friends with Registry::Entry<Agent> so it can access registry
-    friend class Registry::Entry<Agent>;
-
     // The path from which plugin code will be loaded
     static std::string plugin_path;
-
-    // Declare friends with Archive so Archive::load can access registry
-    friend class Archive;
 
     // Flag that plugin_load has been called
     static bool loaded;

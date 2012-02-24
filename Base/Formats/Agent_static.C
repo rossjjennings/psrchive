@@ -14,7 +14,7 @@
 using namespace Pulsar;
 using namespace std;
 
-Registry::List<Archive::Agent> Archive::Agent::registry;
+// Registry::List<Archive::Agent> Archive::Agent::registry;
 
 #include "Pulsar/TimerArchive.h"
 
@@ -100,3 +100,20 @@ Pulsar::Option<string> Pulsar::Archive::unload_class
  "If the file format used to load the data does not implement an unload \n"
  "method, then the data will be converted to the name file format."
 );
+
+
+bool Pulsar::Archive::Agent::init () try
+{
+  verify_revisions ();
+  return true;
+}
+catch (Error& error)
+{
+  cerr << "Pulsar::Archive::Agent::init" << error << endl;
+  return false;
+}
+catch (...)
+{
+  cerr << "Pulsar::Archive::Agent::init Unknown exception" << endl;
+  return false;
+}
