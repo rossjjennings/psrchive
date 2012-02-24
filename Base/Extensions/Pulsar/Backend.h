@@ -93,7 +93,7 @@ namespace Pulsar {
     //! The name of the backend
     std::string name;
 
-    //! The bandend hand
+    //! The backend handedness
     Signal::Hand hand;
 
     //! The backend argument
