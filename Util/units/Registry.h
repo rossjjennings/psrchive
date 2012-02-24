@@ -40,13 +40,15 @@ namespace Registry {
     //! Adds this instance to the Parent::Registry::List<Parent>
     void register_child (Parent* _instance) 
     {
+      List<Parent>& registry = List<Parent>::get_registry();
+
       if (List<Parent>::verbose)
         std::cerr << "Registry::Entry<Parent>::register_child"
-	  " instance=" << _instance << " registry=" << &Parent::registry <<
-	  " registry.size=" << Parent::registry.size() + 1 << std::endl;
+	  " instance=" << _instance << " registry=" << &registry <<
+	  " size=" << registry.size() + 1 << std::endl;
 
       instance = _instance;
-      Parent::registry.add (this);
+      registry.add (this);
     }
 
     //! Destructor deletes instance of Parent
@@ -92,6 +94,10 @@ namespace Registry {
     //! verbosity flag used for debugging
     static bool verbose;
 
+    //! provide access to the single registry instance
+    static List& get_registry()
+    { if (!registry) registry = new List; return *registry; }
+
   protected:
 
     //! Add an entry to the registry
@@ -99,6 +105,9 @@ namespace Registry {
 
     //! The vector of registry entries
     std::vector< Entry<Parent>* > entries;
+
+    //! The single registry instance for the Parent class
+    static List* registry;
   };
 
   template<class Parent>
@@ -162,5 +171,8 @@ unsigned Registry::List<Parent>::Instances<Child>::instances = 0;
 
 template<class Parent>
 bool Registry::List<Parent>::verbose = false;
+
+template<class Parent>
+Registry::List<Parent>* Registry::List<Parent>::registry = 0;
 
 #endif
