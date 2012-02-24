@@ -25,6 +25,8 @@ using std::vector;
 
 namespace Pulsar
 {
+
+  //! Stores digitizer histograms
   class DigitiserCounts : public Archive::Extension
   {
   public:
