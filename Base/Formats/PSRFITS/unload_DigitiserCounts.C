@@ -43,8 +43,18 @@ void CompressCounts( const vector<long> &data, vector<int> &target_data, float &
 
   // determine the scale and offset
   float range = max - min;
-  scale = range / 65534.0f;
-  offset = min - ( -32768.0f * scale );
+  if (max==0 && min==0)
+  {
+    scale = 1.0;
+    offset = 0.0;
+  }
+  else {
+    if (range==0)
+      scale = max / 65534.0f;
+    else
+      scale = range / 65534.0f;
+    offset = min - ( -32768.0f * scale );
+  }
 
   // adjust the target data
   target_data.resize( data.size() );
