@@ -39,7 +39,7 @@ void CompressCounts( const vector<long> &data, vector<int> &target_data, float &
 {
   // get the range of vlues
   long min, max;
-  cyclic_minmax( data, 0, data.size()-1, min, max );
+  minmax( data, min, max );
 
   // determine the scale and offset
   float range = max - min;
@@ -158,11 +158,16 @@ void UnloadCountsKeys( fitsfile *fptr, const DigitiserCounts *ext )
  * @param const_ext      The DigitiserCounts extension to unload
  **/
 
-void Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserCounts* const_ext )
+void Pulsar::FITSArchive::unload (fitsfile* fptr, 
+    const DigitiserCounts* const_ext ) try
 {
   psrfits_move_hdu( fptr, "DIG_CNTS" );
 
   UnloadCountsKeys( fptr, const_ext );
 
   UnloadCountsTable( fptr, const_ext );
+}
+catch (Error &error)
+{
+  throw error += "FITSArchive::unload(DigitiserCounts)";
 }
