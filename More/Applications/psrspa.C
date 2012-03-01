@@ -94,10 +94,10 @@ protected:
   void add_options ( CommandLine::Menu& );
 
   unsigned nbin;
-  bool  gaussian;
+  bool  gaussian;// TODO what's that for?
   float factor;
   bool  log;
-  bool  shownoise;
+  bool  shownoise;// TODO what's that for?
   int   method;
   unsigned bins;
   float cphs;
@@ -135,6 +135,8 @@ protected:
   unsigned current_bscrunch;
 
   bool not_initialised; 
+
+  float mean_to_recover;
 
   void choose_phase ( float );
   void choose_range ( string );
@@ -207,6 +209,7 @@ psrspa::psrspa ()
   binary_output = false;
 
   b_sigma = -1.0;
+  mean_to_recover = 0.0;
 }
 
 void psrspa::setup ()
@@ -371,6 +374,9 @@ void psrspa::add_options ( CommandLine::Menu& menu )
 
   arg = menu.add ( dynamic_histogram, 'd' );
   arg->set_help ( "Allow dynamic setting of range of histograms" );
+
+  arg = menu.add ( mean_to_recover, 'm', "mean" );
+  arg->set_help ( "Flux offset" );
 
   menu.add ( "" );
   menu.add ( "Scan pulses and find giants - options:" );
@@ -653,13 +659,13 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
 	    if ( create_flux && current_bscrunch == 1 )
 	    {
 	      int result = 0;
-	      if ( log && T_amps[ibin] > 0.0 )
+	      if ( log && T_amps[ibin] + mean_to_recover > 0.0 )
 	      {
-		result = gsl_histogram_increment ( h_flux_pr_vec[curr_hist], log10f ( T_amps[ibin] ) );
+		result = gsl_histogram_increment ( h_flux_pr_vec[curr_hist], log10f ( T_amps[ibin] + mean_to_recover ) );
 	      }
 	      else if ( !log )
 	      {
-		result = gsl_histogram_increment ( h_flux_pr_vec[curr_hist], T_amps[ibin] );
+		result = gsl_histogram_increment ( h_flux_pr_vec[curr_hist], T_amps[ibin] + mean_to_recover );
 	      }
 	      if ( result == GSL_EDOM )
 	      {
