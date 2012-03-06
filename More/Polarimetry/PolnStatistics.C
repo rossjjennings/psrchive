@@ -19,10 +19,18 @@ Pulsar::PolnStatistics::~PolnStatistics () {}
 Pulsar::PolnProfileStats* Pulsar::PolnStatistics::get_stats () try
 {
   if (!stats)
-  {
     stats = new PolnProfileStats;
-    stats -> set_stats (parent->get_stats());
-  }
+
+  /*
+    Use the same on-pulse and baseline estimators as used by the 
+    parent Statistics class.
+  */
+  
+  ProfileStats* into = stats->get_stats();
+  ProfileStats* from = parent->get_stats();
+
+  into->set_onpulse_estimator( from->get_onpulse_estimator() );
+  into->set_baseline_estimator( from->get_baseline_estimator() );
 
   return stats;
 }
@@ -53,6 +61,8 @@ TextInterface::Parser* Pulsar::PolnStatistics::get_interface ()
 
 void Pulsar::PolnStatistics::setup () try
 {
+  // cerr << "Pulsar::PolnStatistics::setup this=" << this << endl;
+
   profile = Pulsar::get_Stokes (get_Integration(), parent->get_chan());
 
   PhaseWeight* baseline = parent->get_stats()->get_baseline();
