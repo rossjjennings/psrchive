@@ -144,7 +144,7 @@ void PavApp::PrintUsage( void )
 {
   cout << "Preprocessing options:" << endl;
   cout << " -b scr    Bscrunch scr phase bins together" << endl;
-  cout << " -C        Centre the profiles on phase zero" << endl;
+  cout << " -C        Centre the pulse peak at phase 0.5" << endl;
   cout << " -d        Dedisperse all channels" << endl;
   cout << " -r phase  Rotate all profiles by phase (in turns)" << endl;
   cout << " -f scr    Fscrunch scr frequency channels together" << endl;
