@@ -1114,35 +1114,24 @@ int PavApp::run( int argc, char *argv[] )
 
       if( centre_profile )
       {
-        Functor< std::pair<int,int> (const Profile*) > old_strat = Profile::peak_edges_strategy;
-        Functor< std::pair<int,int> (const Profile*) > consecutive_functor;
-
-        if (!consecutive_functor)
-          consecutive_functor.set( new PeakConsecutive, &RiseFall::get_rise_fall );
-
-        Profile::peak_edges_strategy = consecutive_functor;
-
-        Reference::To<Archive> copy = plots[i].archive->clone();
+        Reference::To<Archive> copy = plots[i].archive->total();
         copy->dedisperse();
 
-        int nbin = copy->get_nbin();
+        PeakConsecutive peak;
+	peak.set_Profile( copy->get_Profile(0,0,0) );
 
         int p1, p2;
-        copy->find_peak_edges( p1, p2 );
+	peak.get_indeces( p1, p2 );
+
+        int nbin = copy->get_nbin();
+	if (p1 > p2)
+	  p2 += nbin;
 
         float first = float(p1) / float(nbin);
         float second = float(p2) / float(nbin);
-        float centre = first + (second - first) / 2.0;
+        float centre = (second + first) / 2.0;
 
-        if( centre > 0.5 )
-        {
-          float rot = (centre - 0.5);
-          plots[i].archive->rotate_phase( rot );
-        }
-        else
-          plots[i].archive->rotate_phase( .5 - centre );
-
-        Profile::peak_edges_strategy = old_strat;
+	plots[i].archive->rotate_phase( centre-0.5 );
       }
 
 
