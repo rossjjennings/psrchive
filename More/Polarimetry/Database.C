@@ -46,6 +46,7 @@ using namespace std;
 using namespace Pulsar;
 
 bool Pulsar::Database::cache_last_cal = true;
+bool Pulsar::Database::match_verbose = false;
 
 /*! By default, the long time scale is set to four weeks. */
 Pulsar::Option<double> 
@@ -471,14 +472,15 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const try
     }
   }
 
-  if (Calibrator::verbose > 1)
-    cerr << "Pulsar::Database::Criterion::match found" << endl;
+  if (Calibrator::verbose > 1 || match_verbose)
+    cerr << "Pulsar::Database::Criterion::match found \n\n"
+	 << match_report << endl;
   
   return true;
 }
 catch (bool f)
 {
-  if (Calibrator::verbose > 1)
+  if (Calibrator::verbose > 1 || match_verbose)
     cerr << "Pulsar::Database::Criterion::match not found \n\n"
 	 << match_report << endl;
   return f;

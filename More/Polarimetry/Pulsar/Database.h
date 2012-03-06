@@ -40,6 +40,9 @@ namespace Pulsar {
     //! Cache the last calibrator?
     static bool cache_last_cal;
 
+    //! Print verbose matching information
+    static bool match_verbose;
+
     //! Time scale over which calibrator flux and cross-coupling remain stable
     static Option<double> long_time_scale;
 
