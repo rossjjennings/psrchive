@@ -36,7 +36,9 @@ Pulsar::ProfileStats::~ProfileStats()
 void Pulsar::ProfileStats::set_profile (const Profile* _profile)
 {
   if (Profile::verbose)
-    cerr << "Pulsar::ProfileStats::set_profile this=" << this << " profile=" << _profile << endl;
+    cerr << "Pulsar::ProfileStats::set_profile this=" << this
+	 << " profile=" << _profile << endl;
+
   profile = _profile;
   built = false;
 }
@@ -46,6 +48,9 @@ void Pulsar::ProfileStats::set_profile (const Profile* _profile)
   set_profile will have the same phase as set_profile */
 void Pulsar::ProfileStats::select_profile (const Profile* set_profile) try
 {
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::select_profile this=" << this << endl;
+
   regions_set = false;
 
   if (set_profile)
@@ -71,8 +76,13 @@ void Pulsar::ProfileStats::deselect_onpulse (const Profile* prof, float thresh)
 //! The algorithm used to find the on-pulse phase bins
 void Pulsar::ProfileStats::set_onpulse_estimator (ProfileWeightFunction* est)
 {
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::set_onpulse_estimator this=" << this
+	 << " est=" << est << endl;
+
   onpulse_estimator = est;
   built = false;
+  regions_set = false;
 }
 
 //! The algorithm used to find the off-pulse phase bins
@@ -80,6 +90,7 @@ void Pulsar::ProfileStats::set_baseline_estimator (ProfileWeightFunction* est)
 {
   baseline_estimator = est;
   built = false;
+  regions_set = false;
 }
 
 Pulsar::ProfileWeightFunction*
@@ -100,6 +111,9 @@ void Pulsar::ProfileStats::set_regions (const PhaseWeight& on,
 {
   onpulse = on;
   baseline = off;
+
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::set_regions true" << endl;
 
   regions_set = true;
   built = false;
@@ -166,6 +180,7 @@ bool Pulsar::ProfileStats::get_onpulse (unsigned ibin) const try
 {
   if (!built)
     build ();
+
   return onpulse[ibin];
 }
  catch (Error& error)
@@ -216,6 +231,7 @@ Pulsar::PhaseWeight* Pulsar::ProfileStats::get_onpulse () try
 {
   if (!built)
     build ();
+
   return &onpulse;
 }
  catch (Error& error)
@@ -264,6 +280,10 @@ void Pulsar::ProfileStats::build () const try
     built = true;
     return;
   }
+
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::build computing on-pulse and baseline"
+	 << endl;
 
   onpulse_estimator->set_Profile (profile);
   onpulse_estimator->get_weight (&onpulse);
