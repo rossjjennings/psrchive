@@ -336,6 +336,10 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq )
 
 void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
 {
+  // If the archive contains no sub-integrations, then do nothing
+  if (! archive->get_nsubint())
+    return;
+
   Reference::To<Integration> integ = archive->get_Integration(0);
 
   // Display the SNR of the fully scrunched archive.
