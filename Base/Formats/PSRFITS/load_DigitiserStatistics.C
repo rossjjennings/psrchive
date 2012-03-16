@@ -122,7 +122,8 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr) try
 
   load_dig_stats_rows( fptr, dstats );
 
-  add_extension (dstats);
+  if (dstats->rows.size() > 0)
+    add_extension (dstats);
 
   if (verbose > 2)
     cerr << "FITSArchive::load_digistat exiting" << endl;
