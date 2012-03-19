@@ -49,9 +49,12 @@ Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
 
   channel = in_toa.channel;
   subint = in_toa.subint;
+
   frequency = in_toa.frequency;
   arrival = in_toa.arrival;
   error = in_toa.error; 
+  reduced_chisq = in_toa.reduced_chisq;
+
   telescope = in_toa.telescope;
   phs = in_toa.phs;
   dmc = in_toa.dmc;
@@ -729,6 +732,8 @@ void Tempo::toa::init()
   frequency       = 0.0;
   arrival         = MJD (0.0,0.0,0.0);
   error           = 0.0;
+  reduced_chisq   = 0.0;
+
   telescope       = '0';
   phs             = 0.0;
   dmc             = 0.0;

@@ -131,6 +131,9 @@ namespace Pulsar
     //! Get the phase offset between the standard and the observation
     Estimate<double> get_phase () const;
 
+    //! Get the statistical goodness of fit
+    double get_reduced_chisq () const;
+
     //! Set the phase offset between the observation and the standard
     void set_phase (const Estimate<double>& phase);
 
@@ -198,9 +201,6 @@ namespace Pulsar
 
     //! The template from which measurement sets are constructed
     Calibration::CoherencyMeasurementSet measurement_set;
-
-    //! The reduced chi-squared after fitting
-    double reduced_chisq;
 
     //! The fit debug flag
     bool fit_debug;

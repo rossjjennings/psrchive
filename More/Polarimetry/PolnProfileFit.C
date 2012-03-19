@@ -61,7 +61,6 @@ Pulsar::PolnProfileFit::operator = (const PolnProfileFit& fit)
 
   standard_data = fit.standard_data;
 
-  reduced_chisq = fit.reduced_chisq;
   fit_debug = fit.fit_debug;
   standard_variance = fit.standard_variance;
   regions_set = fit.regions_set;
@@ -468,6 +467,12 @@ void Pulsar::PolnProfileFit::solve () try
 }
 catch (Error& error) {
   throw error += "Pulsar::PolnProfileFit::solve";
+}
+
+double Pulsar::PolnProfileFit::get_reduced_chisq () const
+{
+  Calibration::ReceptionModel::Solver* solver = equation->get_solver();
+  return solver->get_chisq() / solver->get_nfree();
 }
 
 //! Get the measurement equation used to model the fit

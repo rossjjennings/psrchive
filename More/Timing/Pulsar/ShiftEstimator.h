@@ -34,6 +34,9 @@ namespace Pulsar {
     //! Return the shift estimate
     virtual Estimate<double> get_shift () const = 0;
 
+    //! Return the statistical goodness of fit
+    virtual double get_reduced_chisq () const { return 0; }
+
     //! Return a text interface that can be used to configure this instance
     virtual TextInterface::Parser* get_interface () = 0;
 

@@ -30,7 +30,7 @@ namespace Tempo {
   //
   // //////////////////////////////////////////////////////////////////////////
 
-	//! Describes a pulse Time of Arrival (TOA)
+  //! Describes a pulse Time of Arrival (TOA)
   class toa
   {
     
@@ -38,8 +38,9 @@ namespace Tempo {
     
     static const float UNSET;
     
-		//! TOA output format
-    enum Format { 
+    //! TOA output format
+    enum Format
+    { 
       Unspecified,
       Comment, 
       Princeton, 
@@ -50,7 +51,8 @@ namespace Tempo {
       Tempo2
     };
     
-    enum State { 
+    enum State
+    { 
       Undefined = -2,  // point will never be plotted or used
       Deleted = -1,    // point will not be plotted unless an undelete happens
       Hidden = 0,      // point is temporarily outside of viewing region
@@ -68,6 +70,8 @@ namespace Tempo {
     double frequency;      // Observing frequency (MHz)
     MJD    arrival;        // TOA
     float  error;          // TOA uncertainty in microseconds
+    float  reduced_chisq;  // The reduced chisq of the TOA estimator
+
     char   telescope;      // Observatory (one-character code)
     unsigned channel;      // Corresponding channel
     unsigned subint;       // Corresponding subint
@@ -137,9 +141,12 @@ namespace Tempo {
     void set_dur       (float d)     { dur = d; };
     void set_dm        (float d)     { dm = d; };
     void set_state     (State st)    { state = st; };
+
     void set_frequency (double freq) { frequency = freq; };
     void set_arrival   (MJD arrived) { arrival = arrived; };
     void set_error     (float err)   { error = err; };
+    void set_reduced_chisq (float x) { reduced_chisq = x; }
+
     void set_telescope (const std::string& telcode);
     void set_auxilliary_text (const std::string& text) { auxinfo = text; };
     void set_channel   (unsigned chan)   { channel = chan; };
@@ -154,9 +161,12 @@ namespace Tempo {
     float  get_dur       () const { return dur; };
     float  get_dm        () const { return dm; };
     State  get_state     () const { return state; };
+
     double get_frequency () const { return frequency; };
     MJD    get_arrival   () const { return arrival; };
     float  get_error     () const { return error; };
+    float  get_reduced_chisq () const { return reduced_chisq; }
+
     char   get_telescope () const { return telescope; };
     std::string get_auxilliary_text () const { return auxinfo; };
     double get_phase_shift () const { return phase_shift; };
@@ -195,7 +205,7 @@ namespace Tempo {
 
 	// -----------
 
-	int    Tempo2_unload     (FILE* outstream) const;
+    int    Tempo2_unload     (FILE* outstream) const;
     int    Tempo2_unload     (char* outstring) const;
 
     int    Tempo_unload      (FILE* outstream) const;
