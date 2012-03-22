@@ -130,7 +130,7 @@ string Tempo::get_directory ()
 
   if (makedir (directory.c_str()) < 0)
   {
-    if (verbose)
+    //if (verbose)
       cerr << "Tempo::get_directory failure creating '" << directory 
 	   << "'" << endl;
 
@@ -298,6 +298,9 @@ void Tempo::tempo (const string& arguments, const string& input)
   if (!system(NULL))
     throw Error (InvalidState, "Tempo::tempo",
                  "shell not available; insufficient resources");
+ 
+  // if our calling process already has locked the tempo dir
+  bool had_lock = have_lock; 
 
   while (retries)
   {    
@@ -305,11 +308,19 @@ void Tempo::tempo (const string& arguments, const string& input)
       throw Error (FailedSys, "Tempo::tempo",
 		   "failed chdir(" + get_directory() + ")");
 
-    lock ();
+    if (! had_lock)
+    {
+      cerr << "Tempo::tempo lock()" << endl;
+      lock ();
+    }
 
     int err = system (runtempo.c_str());
 
-    unlock ();
+    if (! had_lock)
+    {
+      cerr << "Tempo::tempo unlock()" << endl;
+      unlock ();
+    }
 
     if (chdir (cwd) != 0)
       throw Error (FailedSys, "Tempo::tempo", "failed chdir(%s)", cwd);

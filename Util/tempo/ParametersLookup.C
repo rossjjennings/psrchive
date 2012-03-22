@@ -108,36 +108,53 @@ Pulsar::Parameters::Lookup::operator() (const string& name) const try
     cerr << "Pulsar::Parameters::Lookup:: Creating ephemeris by " << catalogue 
 	 << " -e " << psr_name <<endl;
 
+  // lock the tempo directory
+  Tempo::lock ();
+
   // start with a clean working directory
-  removedir (Tempo::get_directory().c_str());
+  Tempo::clean ();
 
   char cwd[FILENAME_MAX];
 
   if (getcwd (cwd, FILENAME_MAX) == NULL)
+  {
+    Tempo::unlock ();
     throw Error (FailedSys, "Pulsar::Parameters::Lookup", "failed getcwd");
+  }
 
   // note that Tempo::get_directory creates the directory if it doesn't exist
   if (chdir (Tempo::get_directory().c_str()) != 0)
+  {
+    Tempo::unlock ();
     throw Error (FailedSys, "Pulsar::Parameters::Lookup",
 		 "failed chdir(" + Tempo::get_directory() + ")");
-
+  }
 
   int retval = system(command.c_str());
 
   if (chdir (cwd) != 0)
+  {
+    Tempo::unlock ();
     throw Error (FailedSys, "Pulsar::Parameters::Lookup::operator()",
 	"failed chdir(%s)", cwd);
+  }
 
   if (retval != 0)
+  {
+    Tempo::unlock ();
     throw Error (FailedSys, "Pulsar::Parameters::Lookup::operator()"
 	"system (" + command + ")");
+  }
 
   vector<string> filenames;
   dirglob (&filenames, Tempo::get_directory() + "/*.eph");
 
   if (filenames.size() != 1)
+  {
+    Tempo::unlock ();
     throw Error (InvalidState, "Pulsar::Parameters::Lookup::operator()",
 		 "%s created %d files", catalogue.c_str(), filenames.size());
+  }
 
   string filename = filenames[0];
 
@@ -145,8 +162,13 @@ Pulsar::Parameters::Lookup::operator() (const string& name) const try
   {
     if (verbose)
       cerr << "Pulsar::Parameters::Lookup using '" + filename + "'" << endl;
-    return factory<Pulsar::Parameters> (filename);
+
+    Pulsar::Parameters * params = factory<Pulsar::Parameters> (filename);
+    Tempo::unlock();
+    return params;
   }
+
+  Tempo::unlock();
 
   throw Error (InvalidParam, "Pulsar::Parameters::Lookup::operator()",
                "Cannot find "+ filename +" after call to "+ catalogue); 
