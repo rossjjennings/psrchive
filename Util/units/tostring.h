@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004-2010 by Willem van Straten
+ *   Copyright (C) 2004-2012 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -13,11 +13,11 @@
 #ifndef __TOSTRING_H
 #define __TOSTRING_H
 
-#include "Error.h"
-
 #include <string>
 #include <sstream>
 #include <limits>
+#include <typeinfo>
+
 
 /* the following global variables are not nested-call or multi-thread
    safe and should be used only when it is extremely difficult to pass
@@ -28,6 +28,11 @@ extern std::ios_base::fmtflags tostring_setf;
 extern std::ios_base::fmtflags tostring_unsetf; 
 
 #define FMTFLAGS_ZERO std::ios_base::fmtflags(0)
+
+
+// works around the circular dependence between Error and tostring
+void raise (const char* name, const std::string& exception);
+
 
 template<class T>
 std::string tostring (const T& input,
@@ -55,11 +60,8 @@ std::string tostring (const T& input,
   ost << input;
 
   if (ost.fail())
-  {
-    Error error (InvalidState, "tostring");
-    error << "failed to convert " << input << " to string:";
-    throw error;
-  }
+    raise ("tostring", 
+	   "failed to convert "+ std::string(typeid(T).name()) +" to string");
 
   return ost.str();
 }
@@ -76,19 +78,18 @@ T fromstring (const std::string& input)
   ist >> retval;
 
   if (ist.fail())
-    throw Error (InvalidState, "fromstring", "failed to parse '"+ input +"'");
+    raise ("fromstring", "failed to parse '"+ input +"'");
 
   return retval;
 }
 
-// string class specializations
-template<>
-inline std::string tostring (const std::string& input, unsigned,
-			     std::ios_base::fmtflags, std::ios_base::fmtflags)
+// string class specialization
+inline std::string tostring (const std::string& input)
 {
   return input;
 }
 
+// string class specialization
 template<>
 inline std::string fromstring<std::string> (const std::string& input)
 {
@@ -100,6 +101,8 @@ inline std::string tostring (const char* input)
 {
   return input;
 }
+
+#include "Error.h"
 
 /*
   If you've already written a function that converts string to Type,
