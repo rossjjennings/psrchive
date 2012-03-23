@@ -131,7 +131,7 @@ namespace Registry {
     Enter () 
     { 
       if (Instances<Child>::get_instances() == 0)
-	register_child (new Child);
+	this->register_child (new Child);
       Instances<Child>::add_instance();
     }
 
@@ -152,7 +152,7 @@ namespace Registry {
     { 
       argument = arg;
       if (Instances<Child>::get_instances() == 0)
-	register_child( new Child(arg) );
+	this->register_child( new Child(arg) );
       Instances<Child>::add_instance();
     }
   protected:
