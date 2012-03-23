@@ -15,6 +15,7 @@
 #define __ReferenceHeapTracked_h
 
 #include <vector>
+#include <stdlib.h>
 
 namespace Reference {
 
