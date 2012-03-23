@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "MEAL/ScalarMath.h"
 #include "MEAL/ScalarParameter.h"
 #include "MEAL/ScalarValue.h"
@@ -26,7 +27,9 @@
 #include "MEAL/SumRule.h"
 #include "MEAL/NegationRule.h"
 #include "MEAL/ProductRule.h"
-#include "MEAL/InverseRule.h"
+
+inline double inv (double x) { return 1.0/x; }
+
 #include "MEAL/RuleMath.h"
 
 MEAL::ScalarMath::ScalarMath (const Estimate<double>& value)
@@ -86,9 +89,6 @@ MEAL::ScalarMath::operator /= (const ScalarMath& b)
 {
   return operator = (*this / b);
 }
-
-
-inline double inv (double x) { return 1.0/x; }
 
 const MEAL::ScalarMath
 MEAL::operator + (const ScalarMath& a, const ScalarMath& b)

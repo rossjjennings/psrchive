@@ -47,7 +47,7 @@ namespace Pulsar {
 template<class C>
 void Pulsar::Integrate<C>::EvenlySpaced::initialize (Integrate*, C* container)
 {
-  input_size = get_size (container);
+  input_size = this->get_size (container);
   this->divide (input_size, output_ndivide, output_nintegrate);
 }
 

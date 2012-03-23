@@ -37,7 +37,7 @@ namespace MEAL
 	grad->resize (this->get_context()->get_nparam());
 
       Result r; 
-      calculate (r, grad);
+      this->calculate (r, grad);
 
       this->get_context()->set_evaluation_changed (false);
       return r;
