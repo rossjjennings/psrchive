@@ -46,19 +46,22 @@ namespace Pulsar {
   std::ostream& operator << (std::ostream& os, const Index&);
   std::istream& operator >> (std::istream& is, Index&);
 
-  class Profile;
   class Archive;
+  class Integration;
+
+  //! Return the requested profile, cloning and integrating when needed
+  const Integration*
+  get_Integration (const Archive* data, Index subint);
+
+  class Profile;
 
   //! Return the requested profile, cloning and integrating when needed
   const Profile*
   get_Profile (const Archive* data,
 	       Index subint, Index pol, Index chan);
 
-  class Integration;
-
-  //! Return the requested profile, cloning and integrating when needed
-  const Integration*
-  get_Integration (const Archive* data, Index subint);
+  const Profile*
+  get_Profile (const Integration* data, Index pol, Index chan);
 
   class PolnProfile;
 
@@ -67,6 +70,8 @@ namespace Pulsar {
   const PolnProfile* 
   get_Stokes (const Archive* data, Index subint, Index chan);
 
+  const PolnProfile*
+  get_Stokes (const Integration* data, Index chan);
 }
 
 #endif

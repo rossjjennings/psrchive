@@ -75,7 +75,10 @@ void Pulsar::MatrixTemplateMatching::get_toas (unsigned isub,
 
     Estimate<double> shift = engine->get_mtm(ichan) -> get_phase();
 
-    toas.push_back( get_toa (shift, integration, ichan) );
+    Tempo::toa TOA = get_toa (shift, integration, ichan);
+    TOA.set_reduced_chisq( engine->get_mtm(ichan)->get_reduced_chisq () );
+
+    toas.push_back( TOA );
   }
 
 #if 0

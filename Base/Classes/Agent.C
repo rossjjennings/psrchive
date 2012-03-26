@@ -27,6 +27,8 @@ void Pulsar::Archive::Agent::report ()
 {
   cerr << endl;
 
+  Registry::List<Agent>& registry = Registry::List<Agent>::get_registry();
+
   if (verbose == 3)
     cerr << "Archive::Agent::report registry=" << &registry << endl;
 
@@ -46,6 +48,8 @@ void Pulsar::Archive::Agent::report ()
 
 string Pulsar::Archive::Agent::get_list ()
 {
+  Registry::List<Agent>& registry = Registry::List<Agent>::get_registry();
+
   unsigned maxlen = 0;
   unsigned agent = 0;
 
@@ -67,12 +71,10 @@ string Pulsar::Archive::Agent::get_list ()
   return out;
 }
 
-// Added by DS
-// A get_list function shouldn't be returning a string ready for output.
-// How its used/output should be up to the caller
-
 void Pulsar::Archive::Agent::get_list( vector<pair<string,string> > &details )
 {
+  Registry::List<Agent>& registry = Registry::List<Agent>::get_registry();
+
   details.resize( registry.size() );
 
   for( unsigned agent = 0; agent < registry.size(); agent ++ )
@@ -85,6 +87,8 @@ void Pulsar::Archive::Agent::get_list( vector<pair<string,string> > &details )
 // reports on the status of the plugins
 void Pulsar::Archive::Agent::verify_revisions ()
 {
+  Registry::List<Agent>& registry = Registry::List<Agent>::get_registry();
+
   unsigned agent = 0;
 
   while (agent < registry.size())
@@ -101,30 +105,4 @@ void Pulsar::Archive::Agent::verify_revisions ()
     else
       agent ++;
 }
-
-bool Pulsar::Archive::Agent::init () try {
-
-#if 0
-
-  cerr << "Pulsar::Archive::Agent::init <dynamic>" << endl;
-  plugin_load ();
-
-#endif
-
-  verify_revisions ();
-
-  return true;
-
-}
-catch (Error& error)
-{
-  cerr << "Pulsar::Archive::Agent::init" << error << endl;
-  return false;
-}
-catch (...)
-{
-  cerr << "Pulsar::Archive::Agent::init Unknown exception" << endl;
-  return false;
-}
-
 

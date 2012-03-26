@@ -35,6 +35,10 @@ Pulsar::ProfileStats::~ProfileStats()
 //! Set the Profile from which statistics will be derived
 void Pulsar::ProfileStats::set_profile (const Profile* _profile)
 {
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::set_profile this=" << this
+	 << " profile=" << _profile << endl;
+
   profile = _profile;
   built = false;
 }
@@ -44,6 +48,9 @@ void Pulsar::ProfileStats::set_profile (const Profile* _profile)
   set_profile will have the same phase as set_profile */
 void Pulsar::ProfileStats::select_profile (const Profile* set_profile) try
 {
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::select_profile this=" << this << endl;
+
   regions_set = false;
 
   if (set_profile)
@@ -69,8 +76,13 @@ void Pulsar::ProfileStats::deselect_onpulse (const Profile* prof, float thresh)
 //! The algorithm used to find the on-pulse phase bins
 void Pulsar::ProfileStats::set_onpulse_estimator (ProfileWeightFunction* est)
 {
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::set_onpulse_estimator this=" << this
+	 << " est=" << est << endl;
+
   onpulse_estimator = est;
   built = false;
+  regions_set = false;
 }
 
 //! The algorithm used to find the off-pulse phase bins
@@ -78,6 +90,7 @@ void Pulsar::ProfileStats::set_baseline_estimator (ProfileWeightFunction* est)
 {
   baseline_estimator = est;
   built = false;
+  regions_set = false;
 }
 
 Pulsar::ProfileWeightFunction*
@@ -99,6 +112,9 @@ void Pulsar::ProfileStats::set_regions (const PhaseWeight& on,
   onpulse = on;
   baseline = off;
 
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::set_regions true" << endl;
+
   regions_set = true;
   built = false;
 }
@@ -112,7 +128,8 @@ void Pulsar::ProfileStats::get_regions (PhaseWeight& on,
 }
 
 //! Returns the total flux of the on-pulse phase bins
-Estimate<double> Pulsar::ProfileStats::get_total (bool subtract_baseline) const
+Estimate<double>
+Pulsar::ProfileStats::get_total (bool subtract_baseline) const try
 {
   if (!built)
     build ();
@@ -139,6 +156,10 @@ Estimate<double> Pulsar::ProfileStats::get_total (bool subtract_baseline) const
 
   return Estimate<double> (total - offmean * navg, variance * navg);
 }
+ catch (Error& error)
+   {
+     throw error += "Pulsar::ProfileStats::get_total";
+   }
 
 unsigned Pulsar::ProfileStats::get_onpulse_nbin () const
 {
@@ -159,6 +180,7 @@ bool Pulsar::ProfileStats::get_onpulse (unsigned ibin) const try
 {
   if (!built)
     build ();
+
   return onpulse[ibin];
 }
  catch (Error& error)
@@ -209,6 +231,7 @@ Pulsar::PhaseWeight* Pulsar::ProfileStats::get_onpulse () try
 {
   if (!built)
     build ();
+
   return &onpulse;
 }
  catch (Error& error)
@@ -239,7 +262,12 @@ void Pulsar::ProfileStats::build () const try
   baseline_variance = 0.0;
 
   if (!profile)
+  {
+    if (Profile::verbose)
+      cerr << "Pulsar::ProfileStats::build this=" << this
+	   << " Profile not set" << endl;
     return;
+  }
 
   if (regions_set)
   {
@@ -252,6 +280,10 @@ void Pulsar::ProfileStats::build () const try
     built = true;
     return;
   }
+
+  if (Profile::verbose)
+    cerr << "Pulsar::ProfileStats::build computing on-pulse and baseline"
+	 << endl;
 
   onpulse_estimator->set_Profile (profile);
   onpulse_estimator->get_weight (&onpulse);

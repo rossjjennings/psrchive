@@ -11,9 +11,9 @@
 #include <string.h>
 
 //! Constructor
-Pulsar::SourceInfo::SourceInfo (const SourceEstimate* estimate)
+Pulsar::SourceInfo::SourceInfo (const std::vector<SourceEstimate>& estimate)
+  : source (estimate)
 {
-  source = estimate;
   together = false;
   title = "Stokes Parameters";
 }
@@ -77,13 +77,10 @@ Estimate<float>
 Pulsar::SourceInfo::get_param (unsigned ichan, unsigned iclass,
 			       unsigned iparam) const
 {
-  if (!source)
+  if (!source.size())
     return 0.0;
 
-  if (!source->valid.size() || !source->source.size())
-    return 0.0;
-
-  if (!source->valid[ichan])
+  if (!source[ichan].valid || !source[ichan].source)
     return 0.0;
 
   unsigned index = 0;
@@ -93,5 +90,5 @@ Pulsar::SourceInfo::get_param (unsigned ichan, unsigned iclass,
   else
     index = iclass;
 
-  return source->source[ichan]->get_Estimate(index);
+  return source[ichan].source->get_Estimate(index);
 }

@@ -31,24 +31,24 @@ using Pulsar::FITSArchive;
 #include "Pulsar/ProfileStats.h"
 #include "Pulsar/FourierSNR.h"
 
-#include <Pulsar/ProcHistory.h>
-#include <Pulsar/DigitiserStatistics.h>
-#include <Pulsar/Integration.h>
-#include <Pulsar/Pointing.h>
-#include <Pulsar/WidebandCorrelator.h>
-#include <Pulsar/AuxColdPlasmaMeasures.h>
+#include "Pulsar/ProcHistory.h"
+#include "Pulsar/DigitiserStatistics.h"
+#include "Pulsar/Integration.h"
+#include "Pulsar/Pointing.h"
+#include "Pulsar/WidebandCorrelator.h"
+#include "Pulsar/AuxColdPlasmaMeasures.h"
 
-#include <table_stream.h>
-#include <algorithm>
-#include <functional>
-#include <strutil.h>
-
+#include "table_stream.h"
 #include "strutil.h"
 #include "dirutil.h"
-#include <tostring.h>
+#include "tostring.h"
 
+#include <algorithm>
+#include <functional>
 #include <iostream>
 #include <vector>
+
+#include <unistd.h>
 
 
 const char TEXT_HEADERS_KEY     = 'A';

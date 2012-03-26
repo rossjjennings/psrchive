@@ -94,14 +94,18 @@ void EstimatePlotter::separate_viewports (bool scaled, bool vertical)
     float& ymax = data_ymax[index];
 
     if (scaled)
-      if (vertical) {
+    {
+      if (vertical)
+      {
 	xmin = x_min;
 	xmax = y_max;
       }
-      else {
+      else
+      {
 	ymin = y_min;
 	ymax = y_max;
       }
+    }
 
     for (unsigned idim=0; idim < ndim; idim++)
     {
@@ -114,24 +118,29 @@ void EstimatePlotter::separate_viewports (bool scaled, bool vertical)
 	 // << " ymin=" << ymin << " ymax=" << ymax << endl;
 
     if (scaled)
+    {
       if (vertical)
 	yrange = false;
       else
 	xrange = false;
-
+    }
   }
 
   if (scaled)
+  {
     if (vertical)
-      for (index=0; index<xval.size(); index++) {
+      for (index=0; index<xval.size(); index++)
+      {
 	data_xmin[index] = x_min;
 	data_xmax[index] = x_max;
       }
     else
-      for (index=0; index<xval.size(); index++) {
+      for (index=0; index<xval.size(); index++)
+      {
 	data_ymin[index] = y_min;
 	data_ymax[index] = y_max;
       }
+  }
 
   // query the current size of the viewport in normalized device coordinates
   cpgqvp (0, &vp_x1, &vp_x2, &vp_y1, &vp_y2);
@@ -325,21 +334,23 @@ void EstimatePlotter::minmax (bool& xrange, float& xmin, float& xmax,
   assert (y.size() == npt);
   assert (ye.size() == npt);
 
-  for (unsigned ipt=0; ipt<npt; ipt++) {
-
+  for (unsigned ipt=0; ipt<npt; ipt++)
+  {
     if (minimum_error >= 0.0 && ye[ipt] <= minimum_error)
       continue;
 
     if (maximum_error >= 0.0 && ye[ipt] >= maximum_error)
       continue;
 
-    if (!yrange) {
+    if (!yrange)
+    {
       ymin = y[ipt] - ye[ipt];
       ymax = y[ipt] + ye[ipt];
       yrange = true;
     }
 
-    if (!xrange) {
+    if (!xrange)
+    {
       xmin = x[ipt];
       xmax = x[ipt];
       xrange = true;

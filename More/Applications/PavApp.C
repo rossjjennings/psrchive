@@ -144,7 +144,7 @@ void PavApp::PrintUsage( void )
 {
   cout << "Preprocessing options:" << endl;
   cout << " -b scr    Bscrunch scr phase bins together" << endl;
-  cout << " -C        Centre the profiles on phase zero" << endl;
+  cout << " -C        Centre the pulse peak at phase 0.5" << endl;
   cout << " -d        Dedisperse all channels" << endl;
   cout << " -r phase  Rotate all profiles by phase (in turns)" << endl;
   cout << " -f scr    Fscrunch scr frequency channels together" << endl;
@@ -336,6 +336,10 @@ void PavApp::SetFreqZoom( double min_freq, double max_freq )
 
 void PavApp::PavSpecificLabels( Pulsar::Archive* archive)
 {
+  // If the archive contains no sub-integrations, then do nothing
+  if (! archive->get_nsubint())
+    return;
+
   Reference::To<Integration> integ = archive->get_Integration(0);
 
   // Display the SNR of the fully scrunched archive.
@@ -501,7 +505,10 @@ void PavApp::PavSpecificOptions( void )
   }
 
   // BandpassTable plot config
-  SetPlotOptions<BandpassPlot>( "above:c=$name $file Freq: $freq MHz" );
+  if (!publn)
+  {
+    SetPlotOptions<BandpassPlot>( "above:c=$name $file Freq: $freq MHz" );
+  }
 
   // if we want to plot error bars
 
@@ -1111,35 +1118,24 @@ int PavApp::run( int argc, char *argv[] )
 
       if( centre_profile )
       {
-        Functor< std::pair<int,int> (const Profile*) > old_strat = Profile::peak_edges_strategy;
-        Functor< std::pair<int,int> (const Profile*) > consecutive_functor;
-
-        if (!consecutive_functor)
-          consecutive_functor.set( new PeakConsecutive, &RiseFall::get_rise_fall );
-
-        Profile::peak_edges_strategy = consecutive_functor;
-
-        Reference::To<Archive> copy = plots[i].archive->clone();
+        Reference::To<Archive> copy = plots[i].archive->total();
         copy->dedisperse();
 
-        int nbin = copy->get_nbin();
+        PeakConsecutive peak;
+	peak.set_Profile( copy->get_Profile(0,0,0) );
 
         int p1, p2;
-        copy->find_peak_edges( p1, p2 );
+	peak.get_indeces( p1, p2 );
+
+        int nbin = copy->get_nbin();
+	if (p1 > p2)
+	  p2 += nbin;
 
         float first = float(p1) / float(nbin);
         float second = float(p2) / float(nbin);
-        float centre = first + (second - first) / 2.0;
+        float centre = (second + first) / 2.0;
 
-        if( centre > 0.5 )
-        {
-          float rot = (centre - 0.5);
-          plots[i].archive->rotate_phase( rot );
-        }
-        else
-          plots[i].archive->rotate_phase( .5 - centre );
-
-        Profile::peak_edges_strategy = old_strat;
+	plots[i].archive->rotate_phase( centre-0.5 );
       }
 
 

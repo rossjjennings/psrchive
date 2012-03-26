@@ -166,7 +166,11 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub,
     {
       setup (subint, ichan);
       Estimate<double> shift = shift_estimator->get_shift ();
-      toas.push_back( get_toa (shift, subint, ichan) );
+
+      Tempo::toa arrival_time = get_toa (shift, subint, ichan);
+      arrival_time.set_reduced_chisq( shift_estimator->get_reduced_chisq () );
+
+      toas.push_back( arrival_time );
     }
     catch (Error& error)
     {
@@ -224,7 +228,7 @@ void Pulsar::ArrivalTime::dress_toas (unsigned isub,
     toa_chan = toas[i].get_channel();
 
     if (format == Tempo::toa::Tempo2)
-      aux_txt = get_tempo2_aux_txt ();
+      aux_txt = get_tempo2_aux_txt (toas[i]);
 
     string txt = toas[i].get_auxilliary_text ();
     if (txt.length())
@@ -430,7 +434,8 @@ string get_be_delay (const Archive* archive)
     return tostring ( ext->get_delay(), 14 );
 }
 
-std::string Pulsar::ArrivalTime::get_value (const std::string& key) try
+std::string Pulsar::ArrivalTime::get_value (const std::string& key,
+                                            const Tempo::toa& toa) try
 {
   if(key == "parang") return get_parang( observation );
   else if(key == "tsub") return get_tsub( observation );
@@ -442,7 +447,8 @@ std::string Pulsar::ArrivalTime::get_value (const std::string& key) try
   else if(key == "be_delay") return get_be_delay( observation );
   else if(key == "subint") return tostring(toa_subint);
   else if(key == "chan") return tostring(toa_chan);
-  
+  else if(key == "gof") return tostring( toa.get_reduced_chisq() );
+
   else
   {
     Reference::To<TextInterface::Parser> interface;

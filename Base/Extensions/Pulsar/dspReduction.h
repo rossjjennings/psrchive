@@ -14,7 +14,7 @@
 #ifndef __dspReduction_h
 #define __dspReduction_h
 
-#include "Pulsar/Backend.h"
+#include "Pulsar/ArchiveExtension.h"
 
 namespace Pulsar {
 
@@ -22,7 +22,7 @@ namespace Pulsar {
   /*! This class stores backend information specific to the baseband
     recording and processing system implemented by dspsr.
    */
-  class dspReduction : public Pulsar::Backend {
+  class dspReduction : public Archive::Extension {
 
   public:
     

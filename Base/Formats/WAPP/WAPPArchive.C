@@ -505,27 +505,29 @@ Pulsar::WAPPArchive::load_Integration (const char* filename, unsigned subint)
   float *dptr;
 #if 1 
   double power;
-  for (unsigned ibin=0; ibin<nbin; ibin++) {
-    for (unsigned ipol=0; ipol<npol; ipol++) {
-      dptr = &data[ibin*nchan*npol + ipol*nchan];
-      // The total power correction here is only valid for
-      // 3-level sampling.  Also, I don't know where the 0.18...
-      // comes from, but it just acts as a overall gain so doesn't
-      // really matter.  We'll use the psrchive ierf rather than
-      // doubling code.
-      if (hdr->level==1) { // 3-level case
-        //power = inv_cerf(dptr[0]); /* old vanvleck.c version */
-        power = ierf(1.0-dptr[0]);
-        power = 0.1872721836 / (power * power);
-        vanvleck3lev(dptr,nchan);
-      } else if (hdr->level==2) { // 9-level case
-        power = dptr[0];  /* XXX not quite right */
-        vanvleck9lev(dptr,nchan);
-      } else
-        throw Error (InvalidState, "Pulsar::WAPPArchive::load_Integration",
-            "Unrecognized hdr->level=%d", hdr->level);
-      for (unsigned ichan=0; ichan<nchan; ichan++) {
-        dptr[ichan] *= power;
+  if (raw_data_is_lags) {
+    for (unsigned ibin=0; ibin<nbin; ibin++) {
+      for (unsigned ipol=0; ipol<npol; ipol++) {
+        dptr = &data[ibin*nchan*npol + ipol*nchan];
+        // The total power correction here is only valid for
+        // 3-level sampling.  Also, I don't know where the 0.18...
+        // comes from, but it just acts as a overall gain so doesn't
+        // really matter.  We'll use the psrchive ierf rather than
+        // doubling code.
+        if (hdr->level==1) { // 3-level case
+          //power = inv_cerf(dptr[0]); /* old vanvleck.c version */
+          power = ierf(1.0-dptr[0]);
+          power = 0.1872721836 / (power * power);
+          vanvleck3lev(dptr,nchan);
+        } else if (hdr->level==2) { // 9-level case
+          power = dptr[0];  /* XXX not quite right */
+          vanvleck9lev(dptr,nchan);
+        } else
+          throw Error (InvalidState, "Pulsar::WAPPArchive::load_Integration",
+              "Unrecognized hdr->level=%d", hdr->level);
+        for (unsigned ichan=0; ichan<nchan; ichan++) {
+          dptr[ichan] *= power;
+        }
       }
     }
   }

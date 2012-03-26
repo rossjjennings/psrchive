@@ -18,6 +18,27 @@ using namespace std;
 
 bool TextInterface::label_elements = false;
 
+// #define _DEBUG
+
+void TextInterface::Parser::set_delimiter (const std::string& text)
+{
+  delimiter = text;
+
+  size_t found = 0;
+
+#ifdef _DEBUG
+  cerr << "TextInterface::Parser::set_delimiter text='" << text << "'" << endl;
+#endif
+
+  // transform backslash-n into newline
+  while ((found = delimiter.find( "\\n" )) != string::npos)
+    delimiter.replace ( found, 2, 1, '\n' );
+
+  // transform backslash-t into tab
+  while ((found = delimiter.find( "\\t" )) != string::npos)
+    delimiter.replace ( found, 2, 1, '\t' );
+}
+
 string TextInterface::Parser::process (const string& command)
 {
 #ifdef _DEBUG
@@ -142,6 +163,12 @@ static bool alphabetical_lt (const Reference::To<TextInterface::Value>& v1,
 //! Add a new value interface
 void TextInterface::Parser::add_value (Value* value)
 {
+#ifdef _DEBUG
+  cerr << "TextInterface::Parser::add_value this=" << this << " name="
+       << value->get_name() << endl;
+#endif
+
+  value->set_parent (this);
   values.push_back (value);
 
   if (alphabetical)
@@ -170,6 +197,7 @@ TextInterface::Parser::Parser ()
   alphabetical = false;
   import_filter = false;
   prefix_name = true;
+  delimiter = ",";
 }
 
 //! Get the value of the value
@@ -334,26 +362,30 @@ bool TextInterface::NestedValue::matches (const string& name,
 
   string::size_type length = prefix.length();
 
-  if ( name[length] != ':' )
+  if (length)
   {
+    if ( name[length] != ':' )
+    {
 #ifdef _DEBUG
-    cerr << " false" << endl;
+      cerr << " false" << endl;
 #endif
-    return false;
+      return false;
+    }
+
+    if ( strncmp (name.c_str(), prefix.c_str(), length) != 0 )
+    {
+#ifdef _DEBUG
+      cerr << " false" << endl;
+#endif
+      return false;
+    }
+
+    length ++;
   }
 
-  if ( strncmp (name.c_str(), prefix.c_str(), length) != 0 )
-  {
-#ifdef _DEBUG
-    cerr << " false" << endl;
-#endif
-    return false;
-  }
-
-  string remainder = name.substr (length+1);
+  string remainder = name.substr (length);
 
 #ifdef _DEBUG
-  cerr << " maybe" << endl;
   cerr << "TextInterface::NestedValue::matches nested name="
        << value->get_name() << " remain=" << remainder << endl;
 #endif

@@ -410,7 +410,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
       transformation_built = false;
   }
 
-  if (!built || !transformation_built)
+  if (!transformation_built)
   {
     if (verbose > 2)
       cerr << "Pulsar::PolnCalibrator::build setup transformation" << endl;

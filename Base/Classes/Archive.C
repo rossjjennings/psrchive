@@ -104,13 +104,15 @@ Pulsar::Archive::operator = (const Archive& a)
 //! Return a null-constructed instance of the derived class
 Pulsar::Archive* Pulsar::Archive::new_Archive (const string& class_name)
 {
-  if (Agent::registry.size() == 0)
+  Registry::List<Agent>& registry = Registry::List<Agent>::get_registry();
+
+  if (registry.size() == 0)
     throw Error (InvalidState, "Pulsar::Archive::new_Archive",
                  "no Agents loaded");
 
-  for (unsigned agent=0; agent<Agent::registry.size(); agent++)
-    if (lowercase(Agent::registry[agent]->get_name()) == lowercase(class_name))
-      return Agent::registry[agent]->new_Archive();
+  for (unsigned agent=0; agent<registry.size(); agent++)
+    if (lowercase(registry[agent]->get_name()) == lowercase(class_name))
+      return registry[agent]->new_Archive();
 
   throw Error (InvalidParam, "Pulsar::Archive::new_Archive",
                "no Agent named '" + class_name + "'");

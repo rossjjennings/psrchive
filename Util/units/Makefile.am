@@ -40,6 +40,7 @@ include_HEADERS = \
         Stokes.h \
         stringtok.h \
         substitute.h \
+	TextEditor.h \
 	TextIndex.h \
         TextInterface.h \
 	TextInterfaceName.h \

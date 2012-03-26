@@ -78,6 +78,9 @@ namespace Pulsar {
     //! Print all the fluxcal info
     void print(std::ostream& os=std::cout);
 
+    //! Check whether both on and off are present
+    bool complete () const { return (have_on && have_off); }
+
   protected:
 
     friend class FluxCalibratorExtension;

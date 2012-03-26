@@ -24,8 +24,7 @@ using namespace std;
 //! Default constructor
 Pulsar::Statistics::Statistics (const Archive* data)
 {
-  if (data)
-    set_Archive (data);
+  set_Archive (data);
 }
 
 //! Get the text interface to this
@@ -38,6 +37,7 @@ TextInterface::Parser* Pulsar::Statistics::get_interface ()
 void Pulsar::Statistics::set_Archive (const Archive* data)
 {
   archive = data;
+  stats_setup = false;
 }
 
 const Pulsar::Archive* Pulsar::Statistics::get_Archive () const
@@ -53,7 +53,7 @@ const Pulsar::Integration* Pulsar::Statistics::get_Integration () const
 
 const Pulsar::Profile* Pulsar::Statistics::get_Profile () const
 {
-  profile = Pulsar::get_Profile (archive, isubint, ipol, ichan);
+  profile = Pulsar::get_Profile (get_Integration(), ipol, ichan);
   return profile;
 }
 
@@ -61,7 +61,7 @@ const Pulsar::Profile* Pulsar::Statistics::get_Profile () const
 void Pulsar::Statistics::set_subint (Index _isubint)
 {
   isubint = _isubint;
-  setup_stats ();
+  stats_setup = false;
 }
 
 Pulsar::Index Pulsar::Statistics::get_subint () const
@@ -73,7 +73,7 @@ Pulsar::Index Pulsar::Statistics::get_subint () const
 void Pulsar::Statistics::set_chan (Index _ichan)
 {
   ichan = _ichan;
-  setup_stats ();
+  stats_setup = false;
 }
 
 Pulsar::Index Pulsar::Statistics::get_chan () const
@@ -85,7 +85,7 @@ Pulsar::Index Pulsar::Statistics::get_chan () const
 void Pulsar::Statistics::set_pol (Index _ipol)
 {
   ipol = _ipol;
-  setup_stats ();
+  stats_setup = false;
 }
 
 Pulsar::Index Pulsar::Statistics::get_pol () const
@@ -175,7 +175,36 @@ double Pulsar::Statistics::get_weighted_frequency () const
 void Pulsar::Statistics::setup_stats ()
 {
   if (!stats)
+  {
     stats = new ProfileStats;
+    stats_setup = false;
+  }
+
+  if (stats_setup)
+    return;
+
+  if (Profile::verbose)
+    cerr << "Pulsar::Statistics::setup_stats stats=" << stats.ptr() << endl;
 
   stats->set_profile( get_Profile() );
+
+  if (Profile::verbose)
+    cerr << "Pulsar::Statistics::setup_stats profile=" << profile.ptr() << endl;
+
+  // avoid recursion (Plugin::setup might call a function that calls setup_stats)
+  stats_setup = true;
+
+  for (unsigned i=0; i<plugins.size(); i++)
+    plugins[i]->setup ();
+
+  if (Profile::verbose)
+    cerr << "Pulsar::Statistics::setup_stats done" << endl;
 }
+
+void Pulsar::Statistics::add_plugin (Plugin* plugin)
+{
+  plugin->parent = this;
+  plugins.push_back(plugin);
+  stats_setup = false;
+}
+

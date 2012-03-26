@@ -87,7 +87,7 @@ namespace MEAL {
 	gradient_is_cached = true;
       }
 
-      calculate (cached_result, grad_ptr);
+      this->calculate (cached_result, grad_ptr);
 
       this->get_context()->set_evaluation_changed (false);
     }

@@ -144,6 +144,7 @@ void usage ()
     "  -F               Frequency scrunch before fitting \n"
     "  -T               Time scrunch before fitting \n"
     "  -d               Discard profiles with zero weight\n"
+    "  -x               Disable default preprocessing \n"
     "\n"
     "Fitting options:\n"
     "  -a stdfiles      Automatically select standard from specified group\n"
@@ -214,6 +215,8 @@ int main (int argc, char** argv) try
 
   bool fscrunch = false;
   bool tscrunch = false;
+  bool preprocess = true;
+
   bool skip_bad = false;
   bool phase_info = false;
   bool tempo2_output = false;
@@ -244,11 +247,8 @@ int main (int argc, char** argv) try
   Reference::To<Archive> stdarch;
   Reference::To<Profile> prof;
 
-  float chisq_max = 2.0;
-
   // Shift estimator configuration options
   vector<string> estimator_config;
-
 
 #if HAVE_PGPLOT
 #define PLOT_ARGS "t::"
@@ -432,11 +432,7 @@ int main (int argc, char** argv) try
       break;
 
     case 'x':
-      chisq_max = atof(optarg);
-      if (chisq_max == 0.0)
-        cerr << "pat: disabling reduced chisq cutoff" << endl;
-      else
-        cerr << "pat: omitting TOAs with reduced chisq > " << chisq_max << endl;
+      preprocess = false;
       break;
 
     case 'z':
@@ -498,7 +494,9 @@ int main (int argc, char** argv) try
     if (sinc)
       Pulsar::foreach (stdarch, sinc);
     
-    arrival->preprocess( stdarch );
+    if (preprocess)
+      arrival->preprocess( stdarch );
+
     arrival->set_standard( stdarch );
   }
   catch (Error& error)
@@ -552,7 +550,8 @@ int main (int argc, char** argv) try
 	stdarch->fscrunch(stdarch->get_nchan() / arch->get_nchan());
     }
 
-    arrival->preprocess (arch);
+    if (preprocess)
+      arrival->preprocess (arch);
 
     /* If multiple standard profiles given must now choose and load 
        the one closest in frequency */

@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/StatisticsInterface.h"
+#include "Pulsar/PolnStatistics.h"
 #include "Pulsar/Archive.h"
 #include "substitute.h"
 #include "evaluate.h"
@@ -18,8 +19,13 @@ TextInterface::Parser* standard_interface (Archive* archive)
 
   interface->set_indentation (" ");
 
-  interface->insert( new Statistics::Interface( new Statistics(archive) ) );
+  Statistics* stats = new Statistics(archive);
+  if (archive->get_npol() == 4)
+    stats->add_plugin ( new PolnStatistics );
 
+  interface->insert( new Statistics::Interface( stats ) );
+
+    
   return interface.release();
 }
 

@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <assert.h>
+#include <string.h>
 
 //! For each element of container C, call method M
 template<typename C, typename M>

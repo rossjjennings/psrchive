@@ -58,7 +58,7 @@ void Calibration::SignalPath::set_valid (bool f, const char* reason)
 {
   valid = f;
 
-  if (!valid && reason)
+  if (!valid && reason && verbose)
     cerr << "Calibration::SignalPath::set_valid reason: " << reason << endl;
 }
 
@@ -846,6 +846,10 @@ catch (Error& error)
 void Calibration::SignalPath::disengage_time_variations (const MJD& epoch) 
 try
 {
+#ifdef _DEBUG
+  cerr << "DISENGAGE epoch=" << epoch.printdays(16) << endl;
+#endif
+
   /*
   If the Instrument class ellipticities are set equal to one
   independent parameter via a ChainRule, then it will look as though
@@ -898,7 +902,7 @@ try
   if (diff_gain)
   {
 #ifdef _DEBUG
-    cerr << "disengage diff_gain" << endl;
+    cerr << "disengage diff_gain value=" << diff_gain->estimate() << endl;
 #endif
     physical->set_diff_gain( zero );
     physical->set_diff_gain( diff_gain->estimate() );
@@ -907,7 +911,7 @@ try
   if (diff_phase)
   {
 #ifdef _DEBUG
-    cerr << "disengage diff_phase" << endl;
+    cerr << "disengage diff_phase value=" << diff_phase->estimate() << endl;
 #endif
     physical->set_diff_phase( zero );
     physical->set_diff_phase( diff_phase->estimate() );

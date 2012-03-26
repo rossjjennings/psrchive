@@ -39,10 +39,11 @@ void Pulsar::ReceptionCalibratorPlotter::plot_fluxcal ()
                  "ReceptionCalibrator not set");
 
   if (verbose)
-    cerr << "Pulsar::ReceptionCalibratorPlotter::plot_fluxcal call plot" << endl;
+    cerr << "Pulsar::ReceptionCalibratorPlotter::plot_fluxcal call plot"
+	 << endl;
 
   Reference::To<SourceInfo> info 
-    = new SourceInfo( &(calibrator->flux_calibrator_estimate) );
+    = new SourceInfo( calibrator->flux_calibrator_estimate );
 
   info->set_together (true);
   info->set_label ("FluxCal Stokes");

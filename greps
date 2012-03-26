@@ -10,13 +10,16 @@ if ( "$1" == "-h" || "$1" == "--help" || "$1" == "" ) then
   exit
 endif
 
-ack --version >& /dev/null
-set ACK_AVAILBLE=$?
-
-if ( "$ACK_AVAILBLE" == "0" ) then
-  set GREP_COMMAND=ack
+ack-grep --help >& /dev/null
+if ( "$?" == "0" ) then
+  set GREP_COMMAND=ack-grep
 else
-  set GREP_COMMAND=grep
+  ack --help >& /dev/null
+  if ( "$?" == "0" ) then
+    set GREP_COMMAND=ack
+  else
+    set GREP_COMMAND=grep
+  endif
 endif
 
 $GREP_COMMAND $* `find Util Base More -name "*.[hcC]"`

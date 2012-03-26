@@ -48,7 +48,7 @@ template<class C>
 void Pulsar::Integrate<C>::EvenlyWeighted::initialize (Integrate*, 
 						       C* container)
 {
-  unsigned container_size = get_size( container );
+  unsigned container_size = this->get_size( container );
 
   unsigned good_elements = 0;
 

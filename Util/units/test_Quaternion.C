@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "MatrixTest.h"
+
 #include "Quaternion.h"
 
 using namespace std;
@@ -14,6 +14,9 @@ float norm (float x)
 {
   return x*x;
 }
+
+#include "MatrixTest.h"
+
 
 int main () 
 {

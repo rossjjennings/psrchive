@@ -28,7 +28,7 @@ namespace MEAL {
     typedef typename T::Result Result;
 
     //! Add the model to the sum
-    void operator += (T* model) { add_model (model); }
+    void operator += (T* model) { this->add_model (model); }
 
     // ///////////////////////////////////////////////////////////////////
     //

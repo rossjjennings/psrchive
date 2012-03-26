@@ -17,6 +17,9 @@ public:
   virtual bool match (char num) = 0;
 
   static A* factory (char num) {
+
+    Registry::List<A>& registry = Registry::List<A>::get_registry();
+
     for (unsigned ichild=0; ichild<get_nchild(); ichild++)
       if (registry[ichild]->match (num))
 	return registry.create(ichild);
@@ -25,15 +28,9 @@ public:
     return 0;
   }
 
-  static unsigned get_nchild () { return registry.size(); }
-
-protected:
-  friend class Registry::Entry<A>;
-  static Registry::List<A> registry;
-  
+  static unsigned get_nchild ()
+  { return Registry::List<A>::get_registry().size(); }
 };
-
-Registry::List<A> A::registry;
 
 // correct way: B has a static Registry::List<A>::Enter<B> entry;
 class B : public A {

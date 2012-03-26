@@ -78,7 +78,7 @@ namespace Pulsar {
     void get_toas (std::vector<Tempo::toa>&);
 
     //! Get auxilliary information
-    std::string get_value (const std::string& key);
+    std::string get_value (const std::string& key, const Tempo::toa&);
 
   protected:
 
@@ -107,7 +107,7 @@ namespace Pulsar {
       Perhaps Tempo::toa::Format should be a base class, such that
       each child of the class does its own formatting
     */
-    std::string get_tempo2_aux_txt ();
+    std::string get_tempo2_aux_txt (const Tempo::toa&);
 
     //! get the arrival times for the specified sub-integration
     virtual void get_toas (unsigned subint, std::vector<Tempo::toa>& toas);

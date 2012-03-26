@@ -18,7 +18,6 @@ int main (int argc, char** argv)
 {
   bool aastex = false;
   bool nature = false;
-  bool verbose = false;
 
   int c;
   float efac = 0.0;
@@ -52,7 +51,6 @@ int main (int argc, char** argv)
       break;
 
     case 'v':
-      verbose = true;
       psrephem::verbose = true;
       break;
     }

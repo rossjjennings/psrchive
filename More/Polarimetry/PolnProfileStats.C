@@ -54,6 +54,11 @@ void Pulsar::PolnProfileStats::set_profile (const PolnProfile* _profile) try
   set_profile will have the same phase as set_profile */
 void Pulsar::PolnProfileStats::select_profile (const PolnProfile* _profile) try
 {
+#ifdef _DEBUG
+  cerr << "Pulsar::PolnProfileStats::select_profile this=" << this
+       << " PolnProfile*=" << _profile << endl;
+#endif
+
   profile = _profile;
   regions_set = false;
   build ();
@@ -67,6 +72,11 @@ void Pulsar::PolnProfileStats::select_profile (const PolnProfile* _profile) try
 
 void Pulsar::PolnProfileStats::select_profile (const Profile* total) try
 {
+#ifdef _DEBUG
+  cerr << "Pulsar::PolnProfileStats::select_profile this=" << this
+       << " Profile*=" << total << endl;
+#endif
+
   profile = 0;
   stats->select_profile( total );
   regions_set = true;
@@ -244,6 +254,12 @@ void Pulsar::PolnProfileStats::build () try
 
   if (!regions_set)
   {
+#ifdef _DEBUG
+    cerr << "Pulsar::PolnProfileStats::build this=" << this << 
+      " call ProfileStats::select_profile"
+      " ProfileStats*=" << stats.ptr() << endl;
+#endif
+
     stats->select_profile( profile->get_Profile(0) );
 
     if (avoid_zero_determinant)
@@ -269,4 +285,13 @@ catch (Error& error)
 {
   throw error += "Pulsar::PolnProfileStats::build";
 }
+
+#include "Pulsar/PolnProfileStatsInterface.h"
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::PolnProfileStats::get_interface ()
+{
+  return new Interface (this);
+}
+
 

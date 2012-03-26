@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2009 by Willem van Straten
+ *   Copyright (C) 2003-2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -334,6 +334,9 @@ Reference::To<Pulsar::Profile> phase_std;
 // names of the calibrator files
 vector<string> calibrator_filenames;
 
+// Each flux calibrator observation may have unique values of I, Q & U
+bool multiple_flux_calibrators = false;
+
 bool measure_cal_V = true;
 bool measure_cal_Q = true;
 
@@ -528,7 +531,7 @@ int actual_main (int argc, char *argv[]) try
   char* calfile = NULL;
 
   // name of file containing a Calibration Database
-  char* dbfile = NULL;
+  vector<string> cal_dbase_filenames;
 
   // name of file containing the calibrated standard
   char* stdfile = NULL;
@@ -554,7 +557,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args
-    = "1A:a:B:b:C:c:D:d:E:e:F:gHhI:j:J:L:l:M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:y";
+    = "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:j:J:L:l:M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:y";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -593,7 +596,7 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'd':
-      dbfile = optarg;
+      cal_dbase_filenames.push_back (optarg);
       break;
 
     case 'D':
@@ -610,6 +613,10 @@ int actual_main (int argc, char *argv[]) try
 
     case 'F':
       fluxcal_days = atof (optarg);
+      break;
+
+    case 'f':
+      multiple_flux_calibrators = true;
       break;
 
     case 'g':
@@ -804,7 +811,7 @@ int actual_main (int argc, char *argv[]) try
 
   Reference::To<Pulsar::Archive> archive;
 
-  if (dbfile)
+  if (cal_dbase_filenames.size()) try
   {
     archive = Pulsar::Archive::load( filenames.back() );
     MJD end = archive->end_time();
@@ -814,12 +821,18 @@ int actual_main (int argc, char *argv[]) try
 
     MJD mid = 0.5 * (end + start);
 
-    cerr << "pcm: constructing Calibration::Database from\n" 
-            "\t" << dbfile << endl;
+    Reference::To<Pulsar::Database> database;
 
-    Pulsar::Database database (dbfile);
+    for (unsigned i=0; i<cal_dbase_filenames.size(); i++)
+    {
+      cout << "pcm: loading database from " << cal_dbase_filenames[i] << endl;
+      if (i==0)
+	database = new Pulsar::Database (cal_dbase_filenames[i]);
+      else
+	database->load (cal_dbase_filenames[i]);
+    }
 
-    cerr << "pcm: database constructed with " << database.size() 
+    cerr << "pcm: database constructed with " << database->size() 
          << " entries" << endl;
 
     char buffer[256];
@@ -831,19 +844,19 @@ int actual_main (int argc, char *argv[]) try
          << mid.datestr (buffer, 256, "%Y-%m-%d-%H:%M:00") << endl;
 
     Pulsar::Database::Criterion criterion;
-    criterion = database.criterion (archive, Signal::PolnCal);
+    criterion = database->criterion (archive, Signal::PolnCal);
     criterion.entry.time = mid;
     criterion.minutes_apart = polncal_hours * 60.0;
 
     vector<Pulsar::Database::Entry> oncals;
-    database.all_matching (criterion, oncals);
+    database->all_matching (criterion, oncals);
 
     unsigned poln_cals = oncals.size();
 
     if (poln_cals == 0)
     {
       cerr << "pcm: no PolnCal observations found; closest match was \n\n"
-           << database.get_closest_match_report () << endl;
+           << database->get_closest_match_report () << endl;
 
       if (must_have_cals && !calfile)
       {
@@ -859,18 +872,23 @@ int actual_main (int argc, char *argv[]) try
     criterion.check_coordinates = false;
     criterion.minutes_apart = fluxcal_days * 24.0 * 60.0;
 
-    database.all_matching (criterion, oncals);
+    database->all_matching (criterion, oncals);
 
     if (oncals.size() == poln_cals)
       cerr << "pcm: no FluxCalOn observations found; closest match was \n\n"
-           << database.get_closest_match_report () << endl;
+           << database->get_closest_match_report () << endl;
 
     for (unsigned i = 0; i < oncals.size(); i++)
     {
-      string filename = database.get_filename( oncals[i] );
+      string filename = database->get_filename( oncals[i] );
       cerr << "pcm: adding " << oncals[i].filename << endl;
       calibrator_filenames.push_back (filename);
     }
+  }
+  catch (Error& error)
+  {
+    cerr << "pcm: error loading CAL database" << error << endl;
+    return -1;
   }
 
   if (!prepare)
@@ -998,6 +1016,25 @@ int actual_main (int argc, char *argv[]) try
       Reference::To<Archive> temp = archive->total();
       phase_std = temp->get_Profile (0,0,0);	
     }
+
+#if 0
+
+    MIGHT WANT TO MAKE PCM AUTO-ALIGN WHEN THE EPHEMERIS IS NO GOOD
+
+  if (phase_align)
+  {
+    Reference::To<Pulsar::Archive> standard;
+    standard = total->total();
+    Pulsar::Profile* std = standard->get_Profile(0,0,0);
+    
+    Reference::To<Pulsar::Archive> observation;
+    observation = archive->total();
+    Pulsar::Profile* obs = observation->get_Profile(0,0,0);
+    
+    archive->rotate_phase( obs->shift(std).get_value() );
+  }
+
+#endif
 
     cerr << "pcm: adding observation" << endl;
     model->preprocess( archive );
@@ -1275,6 +1312,13 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
   // add the specified phase bins
   for (unsigned ibin=0; ibin<phase_bins.size(); ibin++)
     model->add_state (phase_bins[ibin]);
+
+  if (multiple_flux_calibrators)
+    cerr <<
+      "pcm: each flux calibrator observation "
+      "will be independently modeled" << endl;
+
+  model->multiple_flux_calibrators = multiple_flux_calibrators;
 
   cerr << "pcm: set calibrators" << endl;
   model->set_calibrators (calibrator_filenames);

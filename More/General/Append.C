@@ -34,6 +34,7 @@ Pulsar::Option<bool> default_must_match
 Pulsar::Append::Append ()
 {
   must_match = default_must_match;
+  ignore_phase = false;
 }
 
 
@@ -150,7 +151,7 @@ void Pulsar::Append::append (Archive* into, const Archive* from)
 	"archives have different phase models" << endl;
   }
 
-  if (aligned && equal_ephemerides && equal_models)
+  if (aligned && equal_ephemerides && equal_models || ignore_phase)
   {
     if (Archive::verbose > 2)
       cerr << "Pulsar::Append::append "

@@ -32,11 +32,15 @@
 
 namespace TextInterface {
 
+  class Parser;
+
   //! Text interface to a value of undefined type
   class Value : public Reference::Able
   {
   public:
     
+    Value () { parent = 0; }
+
     //! Get the name of the value
     virtual std::string get_name () const = 0;
 
@@ -60,6 +64,12 @@ namespace TextInterface {
 #endif
       return name == get_name();
     }
+
+    virtual void set_parent (Parser* p) { parent = p; }
+
+  protected:
+
+    Parser* parent;
   };
 
   //! Proxy enables value interfaces to be imported with a name
@@ -94,6 +104,9 @@ namespace TextInterface {
     static bool matches (const std::string& name,
 			 const std::string& prefix,
 			 const Value* value);
+
+    void set_parent (Parser* p)
+    { Value::set_parent(p); value->set_parent(p); }
 
   protected:
 
@@ -334,6 +347,9 @@ namespace TextInterface {
     bool matches (const std::string& name) const
       { return attribute->matches (name); }
 
+    void set_parent (Parser* p)
+    { Value::set_parent(p); attribute->set_parent(p); }
+
   protected:
 
     //! The parent attribute interface
@@ -347,7 +363,7 @@ namespace TextInterface {
   class HasAProxy : public Attribute<C> {
 
   public:
-    
+
     //! Construct from a pointer to member attribute interface
     HasAProxy (const std::string& pre, const Attribute<M>* pa, Get g)
       { prefix = pre; attribute = pa->clone(); get = g; }
@@ -362,7 +378,12 @@ namespace TextInterface {
 
     //! Get the name of the attribute
     std::string get_name () const
-      { return prefix + ":" + attribute->get_name(); }
+      { 
+	if (prefix.length())
+	  return prefix + ":" + attribute->get_name();
+	else
+	  return attribute->get_name();
+      }
 
     //! Get the description of the attribute
     std::string get_description () const
@@ -387,6 +408,9 @@ namespace TextInterface {
     //! Return true if the name argument matches
     bool matches (const std::string& name) const
       { return NestedValue::matches (name, prefix, attribute); }
+
+    void set_parent (Parser* p)
+    { Value::set_parent(p); attribute->set_parent(p); }
 
   protected:
 
@@ -447,6 +471,9 @@ namespace TextInterface {
 
     //! Return true if the name argument matches
     bool matches (const std::string& name) const;
+
+    void set_parent (Parser* p)
+    { Value::set_parent(p); attribute->set_parent(p); }
 
   protected:
 
@@ -514,6 +541,9 @@ namespace TextInterface {
 
     //! Return true if the name argument matches
     bool matches (const std::string& name) const;
+
+    void set_parent (Parser* p)
+    { Value::set_parent(p); attribute->set_parent(p); }
 
   protected:
 
@@ -922,6 +952,10 @@ namespace TextInterface {
     void set_indentation (const std::string& indent) { indentation = indent; }
     std::string get_indentation () const { return indentation; }
 
+    //! Set the delimiter used to separate the elements of a container
+    void set_delimiter (const std::string&);
+    std::string get_delimiter () const { return delimiter; }
+
     //! Prefix output with "name="
     void set_prefix_name (bool flag) { prefix_name = flag; }
 
@@ -941,6 +975,9 @@ namespace TextInterface {
 
     //! The indentation that precedes the output of a call to process
     std::string indentation;
+
+    //! The delimiter used to separate the elements of a container
+    std::string delimiter;
 
     //! Maintain alphabetical order of parameter names
     bool alphabetical;
@@ -1046,6 +1083,11 @@ namespace TextInterface {
       void import ( const std::string& name, const To<M>& member, G get )
       { import (name, &member, get); }
 
+    //! Import the attribute interfaces from a member text interface
+    template<class M, class G> 
+      void import ( const To<M>& member, G get )
+    { import (std::string(), &member, get); }
+
     template<class E, class G, class S>
       void import ( const std::string& name, const To<E>& element, G g, S size)
       { import (name, &element, g, size); }
@@ -1145,12 +1187,18 @@ TextInterface::VectorOfProxy<V,E,G,S>::get_value (const V* ptr) const
   parse_indeces (ind, range, (ptr->*size)());
   std::string result;
 
+  if (!this->parent)
+    throw Error (InvalidState, "VectorOfProxy["+prefix+"]", "no parent");
+
   for (unsigned i=0; i<ind.size(); i++)
   {
+    // place a delimiter between elements
     if (i)
-      result += ",";  // place a comma between elements
+      result += this->parent->get_delimiter();
+
+    // label the elements
     if (label_elements && ind.size() > 1)
-      result += tostring(ind[i]) + ")";  // label the elements
+      result += tostring(ind[i]) + ")";
 
     E* element = (const_cast<V*>(ptr)->*get)(ind[i]);
 #ifdef _DEBUG
@@ -1206,11 +1254,14 @@ TextInterface::MapOfProxy<M,K,E,G>::get_value (const M* ptr) const
   get_indeces (ind, range);
   std::string result;
 
+  if (!this->parent)
+    throw Error (InvalidState, "MapOfProxy["+prefix+"]", "no parent");
+
   for (unsigned i=0; i<ind.size(); i++)
   {
-    // place a comma between elements
+    // place a delimiter between elements
     if (i)
-      result += ",";
+      result += this->parent->get_delimiter();
 
     // label the elements
     if (label_elements && ind.size() > 1)
@@ -1307,10 +1358,15 @@ std::string TextInterface::ElementGet<C,G,S>::get_value (const C* ptr) const
   parse_indeces (ind, range, (ptr->*(size))());
   std::string result;
 
+  if (!this->parent)
+    throw Error (InvalidState, "ElementGet["+name+"]", "no parent");
+
   for (unsigned i=0; i<ind.size(); i++)
   {
+    // place a delimiter between elements
     if (i)
-      result += ",";  // place a comma between elements
+      result += this->parent->get_delimiter();
+
     if (label_elements && ind.size() > 1)
       result += tostring(ind[i]) + ")";  // label the elements
 
@@ -1335,6 +1391,10 @@ template<typename T, typename C>
 T* TextInterface::factory (C& ptrs, std::string name_parse)
 {
   std::string name = stringtok (name_parse, ":");
+
+#ifdef _DEBUG
+  std::cerr << "TextInterface::factory name=" << name << std::endl;
+#endif
 
   Reference::To<T> result;
 
@@ -1369,13 +1429,16 @@ T* TextInterface::factory (C& ptrs, std::string name_parse)
     throw Error (InvalidState, std::string(),
 		 "no instance named '" + name + "'");
 
+#ifdef _DEBUG
+  std::cerr << "TextInterface::factory options=" << name_parse << std::endl;
+#endif
+
   Reference::To<TextInterface::Parser> interface = result->get_interface();
 
-  while (!name_parse.empty())
-  {
-    std::string option = stringtok (name_parse, ",");
-    interface->process (option);
-  }
+  std::vector<std::string> options;
+  standard_separation (options, name_parse);
+  for (unsigned i=0; i<options.size(); i++)
+    interface->process (options[i]);
 
   return result.release();
 }

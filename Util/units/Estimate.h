@@ -19,7 +19,7 @@
 
 #include <iostream>
 #include <math.h>
-
+#include <limits>
 
 // forward declarations
 template <typename T, typename U=T> class MeanEstimate;
@@ -208,6 +208,12 @@ class PromoteTraits< V, Estimate<T,U> >
 
 #endif
 
+namespace std
+{
+  template <class T, class U>
+  struct numeric_limits< Estimate<T,U> >
+    : public numeric_limits<T> { };
+}
 
 //! Useful for quickly printing the values
 template<typename T, typename U>

@@ -33,12 +33,15 @@ Pulsar::Statistics::Interface::Interface (Statistics* instance)
        &Statistics::set_pol,
        "pol", "Polarization index" );
 
+  import( ProfileStats::Interface(), &Statistics::get_stats );
+
   if (instance)
   {
     if (Archive::verbose > 2) cerr << "Pulsar::Statistics::Interface::ctor"
-      " call Statistics::get_stats" << endl;
+      " insert " << instance->plugins.size() << " plugins" << endl;
 
-    insert ( instance->get_stats()->get_interface() );
+    for (unsigned i=0; i < instance->plugins.size(); i++)
+      insert ( instance->plugins[i]->get_interface() );
   }
 
   add( &Statistics::get_effective_duty_cycle,

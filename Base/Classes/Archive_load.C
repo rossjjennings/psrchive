@@ -35,30 +35,32 @@ Pulsar::Archive* Pulsar::Archive::load (const string& filename)
   if (!fptr) throw Error (FailedSys, "Pulsar::Archive::load",
 			  "cannot open '%s'", use_filename.c_str());
   fclose (fptr);
+
+  Registry::List<Agent>& registry = Registry::List<Agent>::get_registry();
   
-  if (Agent::registry.size() == 0)
+  if (registry.size() == 0)
     throw Error (InvalidState, "Pulsar::Archive::load", "no Agents loaded");
 
   // see if any of the derived classes recognize the file
   Reference::To<Archive> archive;
 
   if (verbose == 3)
-    cerr << "Pulsar::Archive::load with " << Agent::registry.size() 
+    cerr << "Pulsar::Archive::load with " << registry.size() 
          << " Agents" << endl;
 
-  for (unsigned agent=0; agent<Agent::registry.size(); agent++) try {
+  for (unsigned agent=0; agent<registry.size(); agent++) try {
 
     if (verbose == 3)
       cerr << "Pulsar::Archive::load testing "
-           << Agent::registry[agent]->get_name() << endl;
+           << registry[agent]->get_name() << endl;
 
-    if (Agent::registry[agent]->advocate (use_filename.c_str())) {
+    if (registry[agent]->advocate (use_filename.c_str())) {
 
       if (verbose == 3)
         cerr << "Pulsar::Archive::load using " 
-	     << Agent::registry[agent]->get_name() << endl;
+	     << registry[agent]->get_name() << endl;
 
-      archive = Agent::registry[agent]->new_Archive();
+      archive = registry[agent]->new_Archive();
       
       archive -> __load_filename = use_filename;
       archive -> load_header (use_filename.c_str());

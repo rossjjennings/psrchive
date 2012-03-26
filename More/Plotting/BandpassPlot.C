@@ -26,8 +26,7 @@ Pulsar::BandpassPlot::~BandpassPlot() {}
 
 void Pulsar::BandpassPlot::prepare(const Archive* archive)
 {
-    Reference::To<Archive> copy = archive->clone();
-    Reference::To<Passband> passband = copy->get<Passband>();
+    Reference::To<const Passband> passband = archive->get<Passband>();
 
     if (!passband)
         throw Error(InvalidState, "Pulsar::BandpassPlot::prepare",

@@ -19,7 +19,7 @@ using namespace Pulsar;
 using namespace std;
 
 
-std::string Pulsar::ArrivalTime::get_tempo2_aux_txt ()
+std::string Pulsar::ArrivalTime::get_tempo2_aux_txt (const Tempo::toa& toa)
 {
   string args;
 
@@ -47,7 +47,7 @@ std::string Pulsar::ArrivalTime::get_tempo2_aux_txt ()
 
   for (unsigned i = 0; i < attributes.size(); i++)
   {
-    string value = get_value (attributes[i]);
+    string value = get_value (attributes[i], toa);
     args += " -" + attributes[i] + " " + value;
   }
 
