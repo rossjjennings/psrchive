@@ -79,19 +79,24 @@ void Pulsar::PowerSpectra::prepare (const Archive* data)
       unsigned nchan = data->get_nchan();
       for (unsigned ichan=0; ichan < nchan; ichan++)
       {
-	if (spectra[iprof][ichan] <= 0)
-	  throw Error (InvalidState, "Pulsar::PowerSpectra::prepare",
-		       "cannot plot -ve flux on log scale");
-	spectra[iprof][ichan] = log_base * log( spectra[iprof][ichan] );
+        if (spectra[iprof][ichan] <= 0)
+          spectra[iprof][ichan] = -FLT_MAX;
+        else
+          spectra[iprof][ichan] = log_base * log( spectra[iprof][ichan] );
       }
     }
 
     for (unsigned ichan=i_min; ichan < i_max; ichan++)
-      if (spectra[iprof][ichan] != 0)
+      if (spectra[iprof][ichan] != 0 && spectra[iprof][ichan] != -FLT_MAX)
       {
-	min = std::min( min, spectra[iprof][ichan] );
-	max = std::max( max, spectra[iprof][ichan] );
+        min = std::min( min, spectra[iprof][ichan] );
+        max = std::max( max, spectra[iprof][ichan] );
       }
+
+    for (unsigned ichan=i_min; ichan < i_max; ichan++)
+      if (spectra[iprof][ichan] == -FLT_MAX)
+        spectra[iprof][ichan] = min;
+
   }
 
   if (verbose)
