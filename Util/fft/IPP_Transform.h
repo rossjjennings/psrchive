@@ -10,6 +10,7 @@
 #define _IPP_Transform_h_
 
 #include "FTransformAgent.h"
+#include "ThreadIPPMemory.h"
 #include <ipps.h>
 
 namespace FTransform {
@@ -32,8 +33,10 @@ namespace FTransform {
 
     protected:
     
-      Ipp8u* pBuffer;
+      Ipp8u* get_buffer ();
       void* Spec;
+      size_t workBufferSize;
+      ThreadIPPMemory * threads;
 
     };
 

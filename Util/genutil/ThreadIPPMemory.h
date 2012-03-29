@@ -9,14 +9,6 @@
 #ifndef __ThreadIPPMemory_h
 #define __ThreadIPPMemory_h
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#ifdef HAVE_PTHREAD
-#include <pthread.h>
-#endif
-
 #include <ippcore.h>
 
 #include "ThreadMemory.h"

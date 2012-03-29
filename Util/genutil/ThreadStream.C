@@ -18,7 +18,6 @@ void destructor (void* value)
   delete stream;
 }
 
-
 ThreadStream::ThreadStream ()
 {
   pthread_key_create (&key, &destructor);
@@ -39,7 +38,6 @@ ostream& ThreadStream::get ()
 
   return *value;
 }
-
 
 void ThreadStream::set (std::ostream* stream)
 {

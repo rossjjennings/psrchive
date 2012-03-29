@@ -38,8 +38,14 @@ public:
   //! Interface to ostream
   std::ostream& get ();
 
+  //! Interface to raw void*
+  void * get_raw ();
+
   //! Set the ostream for the current thread
   void set (std::ostream*);
+
+  //! Set the raw void* for the current thread
+  void set (void *);
 
 private:
 

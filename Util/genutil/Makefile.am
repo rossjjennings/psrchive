@@ -49,6 +49,7 @@ include_HEADERS = \
         templates.h \
 	TemporaryFile.h \
 	ThreadContext.h \
+  ThreadMemory.h \
 	ThreadStream.h \
         Types.h \
         typeutil.h \
@@ -115,6 +116,7 @@ libgenutil_la_SOURCES = \
         strutil.C \
 	TemporaryFile.C \
 	ThreadContext.C \
+	ThreadMemory.C \
 	ThreadStream.C \
 	time_string.C \
         Types.C \
@@ -132,6 +134,12 @@ endif
 if HAVE_GSL
 include_HEADERS += PolynomialFit.h Interpolation.h dwt_undec.h SplineFit.h
 libgenutil_la_SOURCES += PolynomialFit.C Interpolation.C dwt_undec.c SplineFit.C
+endif
+
+if HAVE_IPP
+include_HEADERS += ThreadIPPMemory.h
+libgenutil_la_SOURCES += ThreadIPPMemory.C
+AM_CXXFLAGS = @IPP_CFLAGS@
 endif
 
 libgenutil_la_LIBADD = @READLINE_LIBS@ @GSL_LIBS@
