@@ -151,6 +151,8 @@ namespace Pulsar
     double get_offs_sub( unsigned int isub ) const;
 
   protected:
+
+    class SKLoader;
     
     friend class Archive::Advocate<FITSArchive>;
     
@@ -274,6 +276,9 @@ namespace Pulsar
     //! Delete Pointing related columns, if not needed
     void clean_Pointing_columns (fitsfile*) const;
 
+    //! Unload Spectral Kurtosis Integration data to the SPECKURT HDU 
+    void unload_sk_integrations (fitsfile*) const;
+
   private:
 
     // Correct the reference epoch in WBC data taken during commissioning
@@ -310,6 +315,12 @@ namespace Pulsar
 
     // Set all attributes to default values
     void init ();
+
+    // Pointer to file used for reading (only)
+    fitsfile* read_fptr;
+
+    // Name of file used for reading 
+    std::string read_filename;
   };
 
 }

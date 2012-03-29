@@ -34,12 +34,18 @@ using namespace std;
 /*! This function assumes that the Integration will have the global
   attributes of the file. */
 Pulsar::Integration* 
-Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
+Pulsar::FITSArchive::load_Integration (const char * filename, unsigned isubint)
 try {
 
-  if (!filename)
+  if (!read_fptr)
     throw Error (InvalidParam, "FITSArchive::load_Integration",
-		 "filename unspecified");
+		 "read_fptr not set");
+
+  if (read_filename.compare(filename))
+  {
+    throw Error (InvalidParam, "FITSArchive::load_Integration",
+      "filename not matching read_filename");
+  }
 
   if (search_mode)
     throw Error (InvalidParam, "FITSArchive::load_Integration",
@@ -63,6 +69,8 @@ try {
   
   // Open the file
 
+#if 0
+
   fitsfile* fptr = 0;
   
   if (verbose > 2)
@@ -74,11 +82,12 @@ try {
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Integration", 
 		     "fits_open_file(%s)", filename);
+#endif
   
 
   // Move to the SUBINT Header Data Unit
   
-  fits_movnam_hdu (fptr, BINARY_TBL, "SUBINT", 0, &status);
+  fits_movnam_hdu (read_fptr, BINARY_TBL, "SUBINT", 0, &status);
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Integration", 
 		     "fits_movnam_hdu SUBINT");
@@ -87,7 +96,7 @@ try {
   // Load the convention for the epoch definition
   string epoch_def;
   string default_def = "STT_MJD";
-  psrfits_read_key (fptr, "EPOCHS", &epoch_def,
+  psrfits_read_key (read_fptr, "EPOCHS", &epoch_def,
 		    default_def, verbose > 2);
 
   if (verbose > 2)
@@ -108,11 +117,11 @@ try {
   if (get<Pulsar::IntegrationOrder>())
   {
     colnum = 0;
-    fits_get_colnum (fptr, CASEINSEN, "INDEXVAL", &colnum, &status);
+    fits_get_colnum (read_fptr, CASEINSEN, "INDEXVAL", &colnum, &status);
     
     double value = 0.0;
 
-    fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
+    fits_read_col (read_fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		   &value, &initflag, &status);
     
     if (status != 0)
@@ -134,11 +143,11 @@ try {
   // Set the duration of the integration
   
   colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "TSUBINT", &colnum, &status);
+  fits_get_colnum (read_fptr, CASEINSEN, "TSUBINT", &colnum, &status);
   
   double duration = 0.0;
   
-  fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
+  fits_read_col (read_fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &duration, &initflag, &status);
   
   integ->set_duration (duration);
@@ -148,10 +157,10 @@ try {
   initflag = 0;
   colnum = 0;
   
-  fits_get_colnum (fptr, CASEINSEN, "OFFS_SUB", &colnum, &status);
+  fits_get_colnum (read_fptr, CASEINSEN, "OFFS_SUB", &colnum, &status);
   
   double time = 0.0;
-  fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
+  fits_read_col (read_fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &time, &initflag, &status);
   
   if (status != 0)
@@ -269,8 +278,8 @@ try {
 
     double period = 0.0;
     status = 0;
-    fits_get_colnum (fptr, CASEINSEN, "PERIOD", &colnum, &status);
-    fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
+    fits_get_colnum (read_fptr, CASEINSEN, "PERIOD", &colnum, &status);
+    fits_read_col (read_fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
                    &period, &initflag, &status);
 
     if (status == 0 && period > 0.0)
@@ -289,9 +298,9 @@ try {
 
   // Load other useful info
 
-  load_Pointing (fptr,row,integ);
-  load_Plasma (fptr,row,integ);
-  load_SpectralKurtosis (fptr,row,integ);
+  load_Pointing (read_fptr,row,integ);
+  load_Plasma (read_fptr,row,integ);
+  load_SpectralKurtosis (read_fptr,row,integ);
 
   // Set up the data vector, only Pulsar::Archive base class is friend
 
@@ -317,9 +326,9 @@ try {
   vector < float >  chan_freqs(get_nchan());
   
   colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
+  fits_get_colnum (read_fptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
   
-  fits_read_col (fptr, TFLOAT, colnum, row, counter, get_nchan(),
+  fits_read_col (read_fptr, TFLOAT, colnum, row, counter, get_nchan(),
 		 &nullfloat, &(chan_freqs[0]), &initflag, &status);
 
   if (status != 0)
@@ -364,10 +373,10 @@ try {
   vector < float >  weights(get_nchan());
   
   colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DAT_WTS", &colnum, &status);
+  fits_get_colnum (read_fptr, CASEINSEN, "DAT_WTS", &colnum, &status);
   
   for (unsigned b = 0; b < get_nchan(); b++) {
-    fits_read_col (fptr, TFLOAT, colnum, row, counter, 1, &nullfloat, 
+    fits_read_col (read_fptr, TFLOAT, colnum, row, counter, 1, &nullfloat, 
 		   &weights[b], &initflag, &status);
     counter ++;
   }
@@ -392,7 +401,7 @@ try {
     vector<Profile*> profiles;
 
     setup_profiles_dat (integ, profiles);
-    setup_dat (fptr, load_dat_io);
+    setup_dat (read_fptr, load_dat_io);
 
     if (verbose > 2)
       cerr << "FITSArchive::load_Integration dat_io=" << load_dat_io.ptr()
@@ -410,7 +419,7 @@ try {
     if (naux_profile)
     {
       setup_profiles<MoreProfiles> (integ, profiles);
-      setup_aux (fptr, load_aux_io, naux_profile);
+      setup_aux (read_fptr, load_aux_io, naux_profile);
       load_aux_io->load (isubint + 1, profiles);
     }
   }
@@ -419,8 +428,8 @@ try {
     cerr << "Pulsar::FITSArchive::load_Integration load complete" << endl;  
   
   // Finished with the file for now
-  
-  fits_close_file (fptr, &status);
+  // we no longer close the file after reading an integration
+  // fits_close_file (read_fptr, &status);
 
   return integ.release();
 }

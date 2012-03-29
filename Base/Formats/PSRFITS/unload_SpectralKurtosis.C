@@ -6,120 +6,100 @@
  ***************************************************************************/
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/SpectralKurtosis.h"
+
 #include "FITSError.h"
+#include "psrfitsio.h"
 
 using namespace std;
 
-/*!
-  \pre The current HDU is the SUBINT HDU
-*/
-void Pulsar::FITSArchive::unload (fitsfile* fptr, const SpectralKurtosis* ext, int row)
+void Pulsar::FITSArchive::unload_sk_integrations (fitsfile* ffptr) const
 {
   int status = 0;
+  char* comment = 0;
 
-  if (verbose == 3)
-    cerr << "FITSArchive::unload_SpectralKurtosis entered" << endl;
-  
-  int colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "LST_SUB", &colnum, &status);
-  
-  double tempdouble = ext->get_local_sidereal_time ();
-  fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
-  
+  // Move to the SPECKURT Binary Table
+  fits_movnam_hdu (ffptr, BINARY_TBL, "SPECKURT", 0, &status);
   if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_SpectralKurtosis", 
-                     "fits_write_col LST_SUB");
+    throw FITSError (status, "FITSArchive::unload_sk_integrations", 
+                     "fits_movnam_hdu SPECKURT");
 
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "RA_SUB", &colnum, &status);
-  
-  tempdouble = ext->get_right_ascension().getDegrees();
-  fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_SpectralKurtosis", 
-                     "fits_write_col RA_SUB");
+  // ensure npol, nchan, m and nsigma match for all integrations
+  const SpectralKurtosis* ske = get_Integration (0)->get<SpectralKurtosis>();
 
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DEC_SUB", &colnum, &status);
-  
-  tempdouble = ext->get_declination().getDegrees();
-  fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_SpectralKurtosis", 
-                     "fits_write_col DEC_SUB");
+  unsigned sk_npol  = ske->get_npol();
+  unsigned sk_nchan = ske->get_nchan();
+  unsigned sk_m = ske->get_M();
+  unsigned sk_nsigma = ske->get_excision_threshold();
 
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "GLON_SUB", &colnum, &status);
-  
-  tempdouble = ext->get_galactic_longitude().getDegrees();
-  fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_SpectralKurtosis", 
-                     "fits_write_col GLON_SUB");
+  for (unsigned i = 1; i < nsubint; i++) 
+  {
+    ske = get_Integration (i)->get<SpectralKurtosis>();
+    if (sk_npol != ske->get_npol())
+      throw FITSError (status, "FITSArchive::unload_sk_integrations",
+                        "sk_npol mismatch for SPECKURT");
 
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "GLAT_SUB", &colnum, &status);
-  
-  tempdouble = ext->get_galactic_latitude().getDegrees();
-  fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_SpectralKurtosis", 
-                     "fits_write_col GLAT_SUB");
+    if (sk_nchan != ske->get_nchan())
+      throw FITSError (status, "FITSArchive::unload_sk_integrations",
+                        "sk_nchan mismatch for SPECKURT");
 
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "FD_ANG", &colnum, &status);
-  
-  float tempfloat = ext->get_feed_angle().getDegrees();
-  fits_write_col (fptr, TFLOAT, colnum, row, 1, 1, &tempfloat, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_SpectralKurtosis", 
-                     "fits_write_col FD_ANG");
+    if (sk_m != ske->get_M())
+      throw FITSError (status, "FITSArchive::unload_sk_integrations",
+                        "sk_m mismatch for SPECKURT");
 
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "POS_ANG", &colnum, &status);
-  
-  tempfloat = ext->get_position_angle().getDegrees();
-  fits_write_col (fptr, TFLOAT, colnum, row, 1, 1, &tempfloat, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_SpectralKurtosis", 
-                     "fits_write_col POS_ANG");
+    if (sk_nsigma != ske->get_excision_threshold ())
+      throw FITSError (status, "FITSArchive::unload_sk_integrations",
+                        "sk_nsigma mismatch for SPECKURT");
+  }
 
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "PAR_ANG", &colnum, &status);
+  // write the common parameters to file
+  psrfits_update_key (ffptr, "NCPAR", sk_npol);
+  psrfits_update_key (ffptr, "NCHAN", sk_nchan);
+  psrfits_update_key (ffptr, "SK_INT", sk_m);
+  psrfits_update_key (ffptr, "SK_EXCIS", sk_nsigma);
   
-  tempfloat = ext->get_parallactic_angle().getDegrees();
-  fits_write_col (fptr, TFLOAT, colnum, row, 1, 1, &tempfloat, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_SpectralKurtosis", 
-                     "fits_write_col PAR_ANG");
+  // Insert nsubint rows
+  if (verbose > 2)
+    cerr << "FITSArchive::unload_sk_integrations nsubint=" << nsubint << endl;
 
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "TEL_AZ", &colnum, &status);
-  
-  tempfloat = ext->get_telescope_azimuth().getDegrees();
-  fits_write_col (fptr, TFLOAT, colnum, row, 1, 1, &tempfloat, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_SpectralKurtosis", 
-                     "fits_write_col TEL_AZ");
+  psrfits_set_rows (ffptr, nsubint);
 
-  colnum = 0;
-  fits_get_colnum (fptr, CASEINSEN, "TEL_ZEN", &colnum, &status);
-  
-  tempfloat = ext->get_telescope_zenith().getDegrees();
-  fits_write_col (fptr, TFLOAT, colnum, row, 1, 1, &tempfloat, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_SpectralKurtosis", 
-                     "fits_write_col TEL_ZEN");
+  // write each SK integation to file
+  unsigned row = 0;
 
-  if (verbose == 3)
-    cerr << "FITSArchive::unload_SpectralKurtosis exiting" << endl;
+  long dimension = sk_nchan * sk_npol;
+  vector<float> fil_sum (dimension);
+  vector<unsigned> fil_hits (dimension);
+  vector<float> unfil_sum (dimension);
+  int64_t unfil_hits;
+
+  vector<unsigned> dimensions (2);
+  dimensions[0] = sk_npol;
+  dimensions[1] = sk_nchan;
+
+  for (unsigned i = 0; i < nsubint; i++)
+  {
+    ske = get_Integration (i)->get<SpectralKurtosis>();
+    row = i + 1;
+  
+    // pack the vectors in the requried format
+    for (unsigned ichan = 0; ichan < nchan; ichan++)
+    { 
+      for (int ipol= 0; ipol < npol; ipol++)
+      {
+        fil_sum[ipol*nchan + ichan] = ske->get_filtered_sum (ichan, ipol);
+        fil_hits[ipol*nchan + ichan] = (unsigned) ske->get_filtered_hits (ichan, ipol);
+        unfil_sum[ipol*nchan + ichan] = ske->get_unfiltered_sum (ichan, ipol);
+      }
+    }
+    unfil_hits = ske->get_unfiltered_hits ();
+
+    psrfits_write_col (ffptr, "FIL_SUM", row, fil_sum, dimensions);
+    psrfits_write_col (ffptr, "FIL_HIT", row, fil_hits, dimensions);
+    psrfits_write_col (ffptr, "UNFIL_SUM", row, unfil_sum, dimensions);
+    psrfits_write_col (ffptr, "UNFIL_HIT", row, unfil_hits);
+  }
+
+  if (verbose > 2)
+    cerr << "FITSArchive::unload_sk_integrations exit" << endl;
 }
+

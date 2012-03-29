@@ -49,8 +49,18 @@ namespace Pulsar {
           Interface( SpectralKurtosis *s_instance = NULL );
     };
 
+    // Abstract loader for SpectralKurtosis extension
+    class Loader : public Reference::Able 
+    {
+      public:
+        virtual void load (SpectralKurtosis * s) = 0;
+    };
+
     //! Addition operator
     const SpectralKurtosis& operator += (const SpectralKurtosis& extension);
+
+    //! Set the loader used for this integration
+    void set_loader (SpectralKurtosis::Loader *);
 
     //! Resize the extension
     void resize (unsigned npol, unsigned nchan);
@@ -60,6 +70,11 @@ namespace Pulsar {
 
     //! Update information based on the provided Integration
     void update (const Integration* subint);
+
+    //! Get the number of polarizations
+    unsigned get_npol() const { return npol; }
+    //! Get the number of channels
+    unsigned get_nchan() const { return nchan; }
 
     //! Set the base integration factor used to calculate the SK statistic
     void set_M (unsigned _M);
@@ -72,26 +87,29 @@ namespace Pulsar {
     unsigned get_excision_threshold () const;
 
     //! Get the filtered sum of the specified channel and polarization 
-    float get_filtered_sum (unsigned ichan, unsigned ipol);
+    float get_filtered_sum (unsigned ichan, unsigned ipol) const;
     //! Set the filtered sum of the specified channel and polarization 
     void set_filtered_sum (unsigned ichan, unsigned ipol, float sum);
 
     //! Get the filtered hits of the specified channel and polarization 
-    uint64_t get_filtered_hits (unsigned ichan, unsigned ipol);
+    uint64_t get_filtered_hits (unsigned ichan, unsigned ipol) const;
     //! Set the filtered hits of the specified channel and polarization 
     void set_filtered_hits (unsigned ichan, unsigned ipol, uint64_t hits);
 
     //! Get the unfiltered sum of the specified channel and polarization 
-    float get_unfiltered_sum (unsigned ichan, unsigned ipol);
+    float get_unfiltered_sum (unsigned ichan, unsigned ipol) const;
     //! Set the unfiltered sum of the specified channel and polarization 
     void set_unfiltered_sum (unsigned ichan, unsigned ipol, float sum);
 
     // Get the unfiltered hits, common to all channels and polarizations
-    uint64_t get_unfiltered_hits ();
+    uint64_t get_unfiltered_hits () const;
     // Set the unfiltered hits, common to all channels and polarizations
     void set_unfiltered_hits (uint64_t hits);
 
   protected:
+
+    //! loads the SK data from file
+    Reference::To<SpectralKurtosis::Loader> loader;
 
     //! number of polarizations 
     unsigned npol;
@@ -116,6 +134,9 @@ namespace Pulsar {
 
     //! Hits on unfiltered SK statistic, same for each channel/pol
     uint64_t unfiltered_hits;
+
+    //! Load the integration data from file
+    void get_data ();
 
     //! Ensure that ichan < nchan and ipol < npol
     void range_check (unsigned ichan, unsigned ipol, const char* method) const;

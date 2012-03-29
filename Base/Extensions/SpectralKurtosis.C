@@ -11,6 +11,11 @@ using namespace std;
 
 Pulsar::SpectralKurtosis::SpectralKurtosis () : Extension ("SpectralKurtosis")
 {
+  M = 0;
+  nsigma = 0;
+  nchan = 0;
+  npol = 0;
+  loader = 0;
 }
 
 Pulsar::SpectralKurtosis::SpectralKurtosis (const SpectralKurtosis& extension)
@@ -87,8 +92,9 @@ unsigned Pulsar::SpectralKurtosis::get_excision_threshold () const
   return nsigma;
 }
 
-float Pulsar::SpectralKurtosis::get_filtered_sum (unsigned ichan, unsigned ipol)
+float Pulsar::SpectralKurtosis::get_filtered_sum (unsigned ichan, unsigned ipol) const
 {
+  const_cast<SpectralKurtosis *>(this)->get_data();
   range_check (ichan, ipol, "SpectralKurtosis::get_filtered_sum");
   return filtered_sum [nchan*ipol + ichan];
 }
@@ -99,8 +105,9 @@ void Pulsar::SpectralKurtosis::set_filtered_sum (unsigned ichan, unsigned ipol, 
   filtered_sum [nchan*ipol + ichan] = sum;
 }
 
-uint64_t Pulsar::SpectralKurtosis::get_filtered_hits (unsigned ichan, unsigned ipol)
+uint64_t Pulsar::SpectralKurtosis::get_filtered_hits (unsigned ichan, unsigned ipol) const
 {
+  const_cast<SpectralKurtosis *>(this)->get_data();
   range_check (ichan, ipol, "SpectralKurtosis::get_filtered_hits");
   return filtered_hits [nchan*ipol + ichan];
 }
@@ -111,8 +118,9 @@ void Pulsar::SpectralKurtosis::set_filtered_hits (unsigned ichan, unsigned ipol,
   filtered_hits [nchan*ipol + ichan] = hits;
 }
 
-float Pulsar::SpectralKurtosis::get_unfiltered_sum (unsigned ichan, unsigned ipol)
+float Pulsar::SpectralKurtosis::get_unfiltered_sum (unsigned ichan, unsigned ipol) const
 {
+  const_cast<SpectralKurtosis *>(this)->get_data();
   range_check (ichan, ipol, "SpectralKurtosis::get_unfiltered_sum");
   return unfiltered_sum [nchan*ipol + ichan];
 }
@@ -123,8 +131,9 @@ void Pulsar::SpectralKurtosis::set_unfiltered_sum (unsigned ichan, unsigned ipol
   unfiltered_sum [nchan*ipol + ichan] = sum;
 }
 
-uint64_t Pulsar::SpectralKurtosis::get_unfiltered_hits ()
+uint64_t Pulsar::SpectralKurtosis::get_unfiltered_hits () const
 {
+  const_cast<SpectralKurtosis *>(this)->get_data();
   return unfiltered_hits;
 }
 
@@ -140,6 +149,11 @@ void Pulsar::SpectralKurtosis::range_check (unsigned ichan, unsigned ipol,
     throw Error (InvalidRange, method, "ichan=%d >= nchan=%d", ichan, nchan);
   if (ipol >= npol)
     throw Error (InvalidRange, method, "ipol=%d >= npol=%d", ipol, npol);
+}
+
+void Pulsar::SpectralKurtosis::set_loader (SpectralKurtosis::Loader * _loader)
+{
+  loader = _loader;
 }
 
 /*! Resize internal storage for npol and nchan */  
@@ -186,9 +200,24 @@ void Pulsar::SpectralKurtosis::update (const Integration* subint)
   M = useful->M;
   nsigma = useful->nsigma;
   resize(useful->npol, useful->nchan);
+  return;
 }
 
-//! Return a text interfaces that can be used to access this instance
+/*! Load the SK data from file via the loader, but only do this once */
+void Pulsar::SpectralKurtosis::get_data ()
+{
+  if (loader)
+  {
+    if (Integration::verbose)
+      cerr << "Pulsar::SpectralKurtosis::get_data" << endl;
+    loader->load (this);
+  }
+  loader = 0;
+  return;
+}
+
+
+/*! Return a text interfaces that can be used to access this instance */
 TextInterface::Parser* Pulsar::SpectralKurtosis::get_interface()
 {
   return new Interface( this );
