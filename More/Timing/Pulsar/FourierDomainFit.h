@@ -24,16 +24,33 @@ namespace Pulsar {
 
   public:
 
+    FourierDomainFit ();
+
     //! Return the shift estimate
     Estimate<double> get_shift () const;
 
+    //! Return the statistical goodness-of-fit
+    double get_reduced_chisq () const;
+
     //! Return a text interface that can be used to configure this instance
-    TextInterface::Parser* get_interface ()
-    { return new EmptyInterface<FourierDomainFit> ("FDM"); }
+    TextInterface::Parser* get_interface ();
 
     //! Return a copy constructed instance of self
     FourierDomainFit* clone () const { return new FourierDomainFit(*this); }
 
+    //! Use Markov Chain Monte Carlo method to determine TOA uncertainty
+    void set_mcmc (bool flag = true) { use_mcmc = flag; }
+    bool get_mcmc () const { return use_mcmc; }
+
+  protected:
+
+    class Interface;
+
+    //! Use Markov Chain Monte Carlo method to determine TOA uncertainty
+    bool use_mcmc;
+
+    //! Reduced chisq of last call to get_shift
+    mutable double reduced_chisq;
   };
 
 }
