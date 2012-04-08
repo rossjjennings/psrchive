@@ -12,9 +12,13 @@
 
 void Pulsar::RemoveBaseline::Total::transform (Archive* archive)
 {
+  const unsigned nsub = archive->get_nsubint();
+
+  if (nsub == 0)
+    return;
+
   Reference::To<PhaseWeight> baseline = archive->baseline();
 
-  const unsigned nsub = archive->get_nsubint();
   for (unsigned isub=0; isub < nsub; isub++)
     archive->get_Integration(isub) -> remove_baseline (baseline);
 };
