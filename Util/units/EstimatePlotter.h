@@ -63,6 +63,11 @@ class EstimatePlotter {
   //! Set the world coordinates of the viewport with some buffer space
   void set_world (float x1, float x2, float y1, float y2);
 
+  //! Get the minimum x value in plot
+  float get_x_min () const { return x_min; }
+  //! Get the maximum x value in plot
+  float get_x_max () const { return x_max; }
+
   //! Get the minimum y value in plot
   float get_y_min () const { return y_min; }
   //! Get the maximum y value in plot
