@@ -16,6 +16,12 @@ Pulsar::CalibratorStokesInfo::CalibratorStokesInfo (const CalibratorStokes* cs)
   together = false;
 }
 
+//! Return the number of frequency channels
+unsigned Pulsar::CalibratorStokesInfo::get_nchan () const
+{
+  return calibrator_stokes->get_nchan();
+}
+
 std::string Pulsar::CalibratorStokesInfo::get_title () const
 {
   return "Reference Source Stokes Parameters";

@@ -38,6 +38,11 @@ std::string Pulsar::SourceInfo::get_title () const
   return title;
 }
 
+unsigned Pulsar::SourceInfo::get_nchan () const
+{
+  return source.size();
+}
+
 //! Return the number of parameter classes
 unsigned Pulsar::SourceInfo::get_nclass () const
 {

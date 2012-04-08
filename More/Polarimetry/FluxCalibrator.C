@@ -572,6 +572,12 @@ string Pulsar::FluxCalibrator::Info::get_title () const
   return "System and Noise Source Equivalent Flux Densities";
 }
 
+//! Return the number of frequency channels
+unsigned Pulsar::FluxCalibrator::Info::get_nchan () const
+{
+  return instance->get_nchan();
+}
+
 //! Return the name of the specified class
 std::string Pulsar::FluxCalibrator::Info::get_name (unsigned iclass) const
 {

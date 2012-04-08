@@ -37,6 +37,9 @@ namespace Pulsar {
     //! Construct with which function to plot
     VariationInfo (const SystemCalibrator* calibrator, Which which);
     
+    //! Return the number of frequency channels
+    unsigned get_nchan () const;
+
     //! Return the name of the specified class
     std::string get_name (unsigned iclass) const;
     

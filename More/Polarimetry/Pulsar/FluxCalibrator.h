@@ -142,6 +142,9 @@ namespace Pulsar {
     //! Return the title
     std::string get_title () const;
 
+    //! Return the number of frequency channels
+    unsigned get_nchan () const;
+
     //! Return the number of parameter classes
     unsigned get_nclass () const { return 2; }
     

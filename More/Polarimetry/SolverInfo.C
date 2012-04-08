@@ -19,6 +19,12 @@ std::string Pulsar::SolverInfo::get_title () const
   return "Goodness of Fit (Reduced \\gx\\u2\\d)";
 }
 
+//! Return the number of frequency channels
+unsigned Pulsar::SolverInfo::get_nchan () const
+{
+  return poln_calibrator->get_nchan();
+}
+
 //! Return the number of parameter classes
 unsigned Pulsar::SolverInfo::get_nclass () const
 {

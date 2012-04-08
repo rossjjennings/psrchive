@@ -78,46 +78,8 @@ namespace Pulsar {
     //! Return a const reference to the calibrator archive
     const Archive* get_Archive () const;
 
-    //! Communicates Calibrator parameters to plotting routines
-    class Info : public Reference::Able {
-
-    public:
-
-      //! Destructor
-      virtual ~Info () {}
-
-      //! Return the title to print above the plot
-      virtual std::string get_title() const = 0;
-
-      //! Return the number of parameter classes
-      virtual unsigned get_nclass () const = 0;
-
-      //! Return the name of the specified class
-      virtual std::string get_name (unsigned iclass) const = 0;
-
-      //! Return the number of parameters in the specified class
-      virtual unsigned get_nparam (unsigned iclass) const = 0;
-
-      //! Return the estimate of the specified parameter
-      virtual Estimate<float> get_param (unsigned ichan, unsigned iclass,
-					 unsigned iparam) const = 0;
-
-      /** @name Optional Graphing Features
-       *  These optional attributes make the graph look nice
-       */
-      //@{
-
-      //! Return the colour index
-      virtual int get_colour_index (unsigned iclass, unsigned iparam) const
-      { return iparam + 1; }
-
-      //! Return the graph marker
-      virtual int get_graph_marker (unsigned iclass, unsigned iparam) const
-      { return -1; }
-
-      //@}
-
-    };
+    //! Returns information about the calibrator using a generic interface
+    class Info;
 
     //! Return the Calibrator::Info information
     /*! By default, derived classes need not necessarily define Info */
@@ -155,6 +117,58 @@ namespace Pulsar {
     Reference::To<const Archive> calibrator;
 
   };
+
+
+  /*!
+    The Calibrator::Info class is used primarily by CalibratorPlotter
+    and CalibratorParameter plotting classes.
+   */
+  class Calibrator::Info : public Reference::Able
+  {
+
+  public:
+
+    //! Destructor
+    virtual ~Info () {}
+
+    //! Return the title to print above the plot
+    virtual std::string get_title() const = 0;
+
+    //! Return the number of frequency channels
+    virtual unsigned get_nchan () const = 0;
+
+    //! Return the number of parameter classes
+    virtual unsigned get_nclass () const = 0;
+
+    //! Return the name of the specified class
+    virtual std::string get_name (unsigned iclass) const = 0;
+
+    //! Return the number of parameters in the specified class
+    virtual unsigned get_nparam (unsigned iclass) const = 0;
+
+    //! Return the estimate of the specified parameter
+    virtual Estimate<float> get_param (unsigned ichan, unsigned iclass,
+				       unsigned iparam) const = 0;
+
+    /** @name Optional Graphing Features
+     *  These optional attributes make the graph look nice
+     */
+    //@{
+    
+    //! Return the colour index
+    virtual int get_colour_index (unsigned iclass, unsigned iparam) const
+    { return iparam + 1; }
+    
+    //! Return the graph marker
+    virtual int get_graph_marker (unsigned iclass, unsigned iparam) const
+    { return -1; }
+    
+    //@}
+    
+  };
+
+
+
 
 }
 

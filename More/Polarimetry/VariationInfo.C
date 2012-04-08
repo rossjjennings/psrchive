@@ -45,7 +45,13 @@ catch (Error& error)
   return 0;
 }
 
-  
+//! Return the number of frequency channels
+unsigned Pulsar::VariationInfo::get_nchan () const
+{
+  return calibrator->get_nchan();
+}
+
+ 
 //! Return the name of the specified class
 string Pulsar::VariationInfo::get_name (unsigned iclass) const
 {
