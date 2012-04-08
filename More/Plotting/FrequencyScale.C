@@ -9,6 +9,9 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
+#include <iostream>
+using namespace std;
+
 Pulsar::FrequencyScale::FrequencyScale ()
 {
   reverse = false;
@@ -22,7 +25,8 @@ void Pulsar::FrequencyScale::init (const Archive* data)
   if (reverse)
     set_world (std::pair<float,float>(freq+0.5*bw, freq-0.5*bw));
 
-  set_minmax (freq - 0.5*bw, freq + 0.5*bw);
+  if (!get_minmaxset())
+    set_minmax (freq - 0.5*bw, freq + 0.5*bw);
 }
 
 void Pulsar::FrequencyScale::get_indeces (const Archive* data, 
