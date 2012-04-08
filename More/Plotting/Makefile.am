@@ -21,13 +21,17 @@ nobase_include_HEADERS =					       \
 	Pulsar/PhaseVsPlot.h Pulsar/PhaseVsTime.h		       \
 	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyPlus.h	       \
 	Pulsar/PhaseVsHist.h Pulsar/PhaseVsHistPlus.h		       \
+	Pulsar/MultiFrequency.h					       \
 	Pulsar/MultiPlot.h Pulsar/MultiPhase.h			       \
 	Pulsar/MultiData.h Pulsar/MultiDataSimple.h		       \
 	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h	       \
 	Pulsar/StokesCylindricalPlus.h				       \
 	Pulsar/FluctPlot.h Pulsar/StokesFluctPlot.h		       \
 	Pulsar/Poincare.h Pulsar/ProfileVectorPlotter.h		       \
-	Pulsar/TwoBitPlot.h Pulsar/CalibratorSpectrum.h		       \
+	Pulsar/TwoBitPlot.h					       \
+	Pulsar/CalibratorInfo.h					       \
+	Pulsar/CalibratorSpectrum.h				       \
+	Pulsar/CalibratorParameter.h				       \
 	Pulsar/LinePhasePlot.h					       \
 	Pulsar/DynamicSpectrumPlot.h				       \
 	Pulsar/DynamicSNSpectrumPlot.h				       \
@@ -69,8 +73,9 @@ libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
 	PhaseVsHist.C PhaseVsHistTI.C \
 	MultiData.C \
 	MultiDataSimple.C \
+	MultiFrequency.C \
 	MultiPlot.C \
-	MultiPhase.C MultiPhaseTI.C\
+	MultiPhase.C \
 	StokesCylindrical.C StokesCylindricalTI.C \
 	StokesCylindricalPlus.C StokesCylindricalPlusTI.C \
 	StokesSpherical.C StokesSphericalTI.C \
@@ -87,7 +92,9 @@ libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
 	DynamicBaselineSpectrumPlot.C DynamicBaselineSpectrumPlotTI.C \
 	DynamicCalSpectrumPlot.C DynamicCalSpectrumPlotTI.C \
 	DynamicWeightSpectrumPlot.C DynamicWeightSpectrumPlotTI.C \
+	CalibratorInfo.C \
 	CalibratorSpectrum.C CalibratorSpectrumTI.C \
+	CalibratorParameter.C \
 	FreqVsSNRPlot.C FreqVsSNRPlotTI.C \
 	BandpassPlot.C BandpassPlotTI.C \
 	ChannelWeightsPlot.C ChannelWeightsPlotTI.C \
