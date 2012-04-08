@@ -47,6 +47,9 @@ namespace Pulsar {
     //! Set the minimum and maximum value in the data
     void set_minmax (float min, float max);
 
+    //! Return true when minimum and maximum value have been set
+    bool get_minmaxset () const { return minmaxvalset; }
+
     //! Get the minimum and maximum value in the data
     void get_minmax (float& min, float& max) const;
 
@@ -103,6 +106,7 @@ namespace Pulsar {
 
     float minval;
     float maxval;
+    bool minmaxvalset;
 
   };
 

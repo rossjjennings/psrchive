@@ -24,6 +24,7 @@ Pulsar::PlotScale::PlotScale () :
   buf_norm = 0.0;
   minval = 0.0;
   maxval = 1.0;
+  minmaxvalset = false;
 }
 
 void Pulsar::PlotScale::init (const Archive*)
@@ -35,6 +36,7 @@ void Pulsar::PlotScale::include (PlotScale* other)
 {
   minval = std::min (minval, other->minval);
   maxval = std::max (maxval, other->maxval);
+  minmaxvalset &= other->minmaxvalset;
 }
 
 //! Set the minimum and maximum value in the data
@@ -42,6 +44,7 @@ void Pulsar::PlotScale::set_minmax (float min, float max)
 {
   minval = min;
   maxval = max;
+  minmaxvalset = true;
 }
 
 //! Get the minimum and maximum value in the data
