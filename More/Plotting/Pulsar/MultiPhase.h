@@ -34,8 +34,7 @@ namespace Pulsar {
     };
 
     //! Get the text interface to the configuration attributes
-    TextInterface::Parser* get_interface ()
-    { return new Interface (this); }
+    TextInterface::Parser* get_interface ();
 
     //! Get the scale
     PhaseScale* get_scale ();
