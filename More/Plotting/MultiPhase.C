@@ -7,8 +7,6 @@
 
 #include "Pulsar/MultiPhase.h"
 
-using namespace std;
-
 Pulsar::MultiPhase::MultiPhase ()
 {
   frames.set_shared_x_scale (new PhaseScale);
@@ -22,7 +20,20 @@ Pulsar::PhaseScale* Pulsar::MultiPhase::get_scale ()
     throw Error (InvalidState, "Pulsar::MultiPhase::get_scale",
 		 "x scale is not a PhaseScale");
   
-  if (verbose)
-    cerr << "Pulsar::MultiPhase::get_scale" << endl;
   return scale;
+}
+
+// Text interface to the MultiPhase class
+Pulsar::MultiPhase::Interface::Interface (MultiPhase* instance)
+{
+  if (instance)
+    set_instance (instance);
+  
+  import( "x", PhaseScale::Interface(), &MultiPhase::get_scale );
+}
+
+//! Get the text interface to the configuration attributes
+TextInterface::Parser* Pulsar::MultiPhase::get_interface ()
+{
+  return new Interface (this);
 }
