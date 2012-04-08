@@ -45,7 +45,7 @@ Pulsar::InstrumentInfo::InstrumentInfo (const PolnCalibrator* calibrator) :
 
   if (instrument->get_orientation(0).var == 0)
   {
-    cerr << "Pulsar::InstrumentInfo orientation[0] set to zero" << endl;
+    // cerr << "Pulsar::InstrumentInfo orientation[0] set to zero" << endl;
     fixed_orientation = true;
   }
 }
