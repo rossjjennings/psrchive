@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '4.10            '   / Header version 
+HDRVER  = '5.0             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -263,7 +263,7 @@ TTYPE#  = BW                   / Bandwidth of input channel
 TFORM#  = 1E                   / Float
 TUNIT#  = MHz                  / Units of field
 TTYPE#  = OUT_NCHAN            / Number of output frequency channels
-TFORM#  = 1J                   / Integer
+TFORM#  = 1I                   / Integer
 TTYPE#  = OUT_FREQ             / Center frequency of each output channel
 TFORM#  = 1E                   / OUT_NCHAN floats
 TUNIT#  = MHz                  / Units of field
@@ -271,11 +271,11 @@ TTYPE#  = OUT_BW               / Bandwidth of each output channel
 TFORM#  = 1E                   / OUT_NCHAN floats or one float for all
 TUNIT#  = MHz                  / Units of field
 TTYPE#  = NCHIRP               / Number of complex samples in FFT or FIR filter
-TFORM#  = 1J                   / OUT_NCHAN integers or one integer for all
+TFORM#  = 1I                   / OUT_NCHAN integers or one integer for all
 TTYPE#  = NCYC_POS             / Number of complex samples discarded from start
-TFORM#  = 1J                   / OUT_NCHAN integers or one integer for all
+TFORM#  = 1I                   / OUT_NCHAN integers or one integer for all
 TTYPE#  = NCYC_NEG             / Number of complex samples discarded from end
-TFORM#  = 1J                   / OUT_NCHAN integers or one integer for all
+TFORM#  = 1I                   / OUT_NCHAN integers or one integer for all
 END
 #
 ###############################################################################
@@ -510,7 +510,7 @@ TTYPE#  = DAT_WTS              / Weights for each channel
 TFORM#  = E                    / NCHAN floats
 TTYPE#  = DAT_OFFS             / Data offset for each channel
 TFORM#  = E                    / NCHAN*NPOL floats
-TTYPE#  = DAT_SCL              / Data scale factor for each channel
+TTYPE#  = DAT_SCL              / Data scale factor (outval=dataval*scl + offs)
 TFORM#  = E                    / NCHAN*NPOL floats
 TTYPE#  = DATA                 / Subint data table
 TDIM#   = (*,*,*)              / Dimensions (NBIN,NCHAN,NPOL/NCHAN,NPOL,NSBLK)
