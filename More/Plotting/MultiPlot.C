@@ -92,9 +92,19 @@ void Pulsar::MultiPlot::set_viewport (PlotFrame* frame,
   std::pair<float,float> xvp = frames.get_x_edge()->get_viewport();
   std::pair<float,float> yvp = frames.get_y_edge()->get_viewport();
 
+#if _DEBUG
+  cerr << "Pulsar::MultiPlot::set_viewport total"
+    " x=" << xvp << " y=" << yvp << endl;
+#endif
+
   // get the fraction allocated to this sub-plot
   sub_xvp = frame->get_x_scale(true)->get_viewport();
   sub_yvp = frame->get_y_scale(true)->get_viewport();
+
+#if _DEBUG
+  cerr << "Pulsar::MultiPlot::set_viewport sub"
+    " x=" << sub_xvp << " y=" << sub_yvp << endl;
+#endif
 
   // calculate the total viewport allocated to this sub-plot
   stretch (sub_xvp, xvp);
