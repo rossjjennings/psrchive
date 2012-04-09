@@ -10,6 +10,7 @@
 
 #include "Pulsar/ChannelZapMedian.h"
 #include "Pulsar/LawnMower.h"
+#include "Pulsar/RobustMower.h"
 
 #include "Pulsar/Profile.h"
 
@@ -111,10 +112,16 @@ catch (Error& error) {
 
 string Pulsar::ZapInterpreter::mow (const string& args) try
 { 
+  if (args == "robust")
+  {
+    mower = new RobustMower;
+    return response (Good);
+  }
+
   vector<string> arguments = setup (args);
 
-  if (!lawn_mower)
-    lawn_mower = new LawnMower;
+  if (!mower)
+    mower = new LawnMower;
 
   if (!arguments.size())
   {
@@ -122,13 +129,13 @@ string Pulsar::ZapInterpreter::mow (const string& args) try
     for (unsigned isub = 0; isub < data->get_nsubint(); isub++)
     {
       cerr << "mowing subint " << isub << endl;
-      lawn_mower->transform( data->get_Integration( isub ) );
+      mower->transform( data->get_Integration( isub ) );
     }
     return response (Good);
   }
 
   //! Zap median interface
-  Reference::To<TextInterface::Parser> interface = lawn_mower->get_interface();
+  Reference::To<TextInterface::Parser> interface = mower->get_interface();
 
   string retval;
   for (unsigned icmd=0; icmd < arguments.size(); icmd++) {
@@ -143,6 +150,7 @@ catch (Error& error)
 {
   return response (Fail, error.get_message());
 }
+
 
 string Pulsar::ZapInterpreter::empty ()
 {
@@ -293,7 +301,7 @@ try {
   unsigned isub,  nsub = archive->get_nsubint();
   unsigned ichan, nchan = archive->get_nchan();
   for( isub=0; isub<nsub;isub++){
-	  int nbins=archive->get_Profile(isub,0,0)->get_nbin();
+	  unsigned nbins=archive->get_Profile(isub,0,0)->get_nbin();
 	  float* mean=(float*)calloc(nbins,sizeof(float));
 	  for( ichan=0; ichan < nchan;ichan++){
 		  float* profile = archive->get_Profile(isub,0,ichan)->get_amps();

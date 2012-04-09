@@ -19,7 +19,7 @@
 namespace Pulsar {
 
   class ChannelZapMedian;
-  class LawnMower;
+  class Mower;
 
   class ZapInterpreter : public Interpreter::Extension {
 
@@ -59,9 +59,8 @@ namespace Pulsar {
     //! Zap median algorithm
     Reference::To<ChannelZapMedian> zap_median;
 
-    //! Lawn mowing algorithm
-    Reference::To<LawnMower> lawn_mower;
-
+    //! Mowing algorithm
+    Reference::To<Mower> mower;
   };
 
 }
