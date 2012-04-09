@@ -52,15 +52,8 @@ Pulsar::LawnMower::LawnMower ()
   mower = new OnPulseThreshold;
 
   mower -> set_baseline_estimator( baseline );
-  mower -> set_threshold( 4.0 );
+  mower -> set_threshold( cutoff_threshold );
   mower -> set_allow_negative( true );
-
-  // risk smoothing out 2% duty cycle profiles
-  median_smoothing_turns = 0.02;
-
-  broadband = true;
-
-  srand48 (time(0));
 }
 
 Pulsar::LawnMower::~LawnMower ()
@@ -80,224 +73,28 @@ Pulsar::BaselineEstimator* Pulsar::LawnMower::get_baseline_estimator () const
 void Pulsar::LawnMower::set_threshold (float sigma)
 {
   mower->set_threshold( sigma );
+  Mower::set_threshold( sigma );
 }
 
-float Pulsar::LawnMower::get_threshold () const
+void Pulsar::LawnMower::compute (PhaseWeight* mask,
+				 const Profile* profile)
 {
-  return mower->get_threshold();
-}
+  const unsigned nbin = profile->get_nbin();
 
-void Pulsar::LawnMower::set_median_smoothing (float turns)
-{
-  median_smoothing_turns = turns;
-}
-
-float Pulsar::LawnMower::get_median_smoothing () const
-{
-  return median_smoothing_turns;
-}
-
-void Pulsar::LawnMower::set_broadband (bool flag)
-{
-  broadband = flag;
-}
-
-void Pulsar::LawnMower::set_prune (const PhaseWeight* prune_mask)
-{
-  prune = prune_mask;
-}
-
-const Pulsar::PhaseWeight* Pulsar::LawnMower::get_prune () const
-{
-  return prune;
-}
-
-//! One or more preconditions can be added
-void Pulsar::LawnMower::add_precondition
-( Functor< bool(Profile*,PhaseWeight*) > f )
-{
-  precondition.push_back( f );
-}
-
-bool Pulsar::LawnMower::build_mask (Profile* profile)
-{
-  assert (profile != 0);
-
-  unsigned nbin = profile->get_nbin();
   include->resize (nbin);
   include->set_all (1.0);
 
-  if (median_smoothing_turns)
-  {
-#ifndef _DEBUG
-    if (Profile::verbose)
-#endif
-      cerr << "Pulsar::LawnMower::build_mask median smoothing" << endl;
-    
-    Reference::To<Profile> smoothed = new Profile( *profile );
-    SmoothMedian median;
-    median.set_turns( median_smoothing_turns );
-    median( smoothed );
-
-    Reference::To<Profile> difference = new Profile( *profile );
-    difference->diff (smoothed);
-
-    /*
-      The difference between the profile and its median smoothed
-      difference can contain a large number of zeros (where the profile
-      happens to equal the median).  These zeros cause the variance to
-      be underestimated, which can mess up the IterativeBaseline
-      algorithm; therefore, they should be excluded from consideration.
-    */
-    for (unsigned ibin=0; ibin<nbin; ibin++)
-      if (difference->get_amps()[ibin] == 0.0)
-	(*include)[ibin] = 0;
-    
-    mower->set_Profile( difference );
-  }
-
-  else
-    mower->set_Profile( profile );
-
-  if (!mowed)
-    mowed = new PhaseWeight;
-
-#ifndef _DEBUG
-  if (Profile::verbose)
-#endif
-    cerr << "Pulsar::LawnMower::build_mask computing zap mask" << endl;
-  
-  mower->get_weight( mowed );
-
-  unsigned total_mowed = 0;
+  /*
+    The difference between the profile and its median smoothed
+    difference can contain a large number of zeros (where the profile
+    happens to equal the median).  These zeros cause the variance to
+    be underestimated, which can mess up the IterativeBaseline
+    algorithm; therefore, they should be excluded from consideration.
+  */
   for (unsigned ibin=0; ibin<nbin; ibin++)
-    if ( (*mowed)[ibin] )
-      total_mowed ++;
-
-  if (!total_mowed)
-    return false;
-
-  for (unsigned i=0; i<precondition.size(); i++)
-    if (!precondition[i]( profile, mowed ))
-      return false;
-
-  return true;
-}
-
-void Pulsar::LawnMower::transform (Integration* subint)
-{
-#ifndef _DEBUG
-  if (Profile::verbose)
-#endif
-    cerr << "Pulsar::LawnMower::transform" << endl;
-
-  Reference::To<Integration> total = subint->clone();
-  total->expert()->pscrunch();
-
-  if (broadband)
-  {
-    FrequencyIntegrate integrate;
-    integrate.set_dedisperse( false );
-
-    integrate (total);
-
-    if (!build_mask( total->get_Profile(0,0) ) && !prune)
-      return;
-  }
-
-  GaussianBaseline baseline;
-  SmoothMedian median;
-  median.set_turns( median_smoothing_turns );
-
-  for (unsigned ichan=0; ichan < subint->get_nchan(); ichan++) try
-  {
-#ifdef _DEBUG
-    cerr << "ichan=" << ichan << "/" << subint->get_nchan() << endl;
-#endif
-
-    if (subint->get_weight(ichan) == 0)
-      continue;
-
-    if (!broadband && !build_mask( total->get_Profile (0,ichan) ) && !prune)
-      continue;
-
-    Reference::To<PhaseWeight> base = 
-      baseline( subint->get_Profile (0,ichan) );
-
-    for (unsigned ipol=0; ipol < subint->get_npol(); ipol++)
-    {
-      Reference::To<Profile> profile = subint->get_Profile (ipol, ichan);
-
-      base->set_Profile( profile );
-      double rms = sqrt( base->get_variance().get_value() );
-
-      Reference::To<Profile> smoothed = new Profile( *profile );
-      median( smoothed );
-
-#ifdef _DEBUG
-      cerr << ipol << " " << ichan << " rms=" << rms << endl;
-#endif
-
-      float* amps = profile->get_amps();
-      float* smamps = smoothed->get_amps();
-
-      unsigned nbin = subint->get_nbin ();
-
-      // 2.5 sigma should get most valid baseline samples
-      for (unsigned i=0; i<nbin; i++)
-      {
-	if( (prune && (*prune)[i]) || (!prune && (*mowed)[i]) )
-	{
-	  unsigned count = 0;
-	  unsigned ibin = 0;
-	  float diff = 0;
-
-	  do
-	  {
-	    ibin = lrand48() % nbin;
-	    count ++;
-
-	    if (count == 4*nbin)
-	      throw Error (InvalidState, "Pulsar::LawnMower::transform",
-			   "no baseline points available for replacement");
-
-	    diff = amps[ibin] - smamps[ibin];
-	  }
-	  while ( (*mowed)[ibin] || (prune && (*prune)[ibin]) 
-		  || fabs(diff) > rms * 2.5 );
-
-	  amps[i] = smamps[i] + diff;
-	}
-      }
-    }
-  }
-  catch (Error& error)
-  {
-    if (Integration::verbose)
-      cerr << "Pulsar::LawnMower::transform failed on ichan=" << ichan
-	   << " " << error.get_message() << endl;
-    subint->set_weight (ichan, 0.0);
-  }
-  
-}
-
-
-//! Get the text interface to the configuration attributes
-TextInterface::Parser* Pulsar::LawnMower::get_interface ()
-{
-  return new Interface (this);
-}
-
-Pulsar::LawnMower::Interface::Interface (LawnMower* instance)
-{
-  if (instance)
-    set_instance (instance);
-
-  add( &LawnMower::get_median_smoothing,
-       &LawnMower::set_median_smoothing,
-       "window", "Median smoothing window in turns" );
-
-  add( &LawnMower::get_threshold,
-       &LawnMower::set_threshold,
-       "cutoff", "Cutoff threshold" );
+    if (profile->get_amps()[ibin] == 0.0)
+      (*include)[ibin] = 0;
+    
+  mower->set_Profile( profile );
+  mower->get_weight( mask );
 }

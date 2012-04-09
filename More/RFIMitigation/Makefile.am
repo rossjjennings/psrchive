@@ -1,9 +1,9 @@
 
 noinst_LTLIBRARIES = libRFIMitigation.la
 
-nobase_include_HEADERS = Pulsar/LawnMower.h
+nobase_include_HEADERS = Pulsar/Mower.h Pulsar/LawnMower.h Pulsar/RobustMower.h
 
-libRFIMitigation_la_SOURCES = LawnMower.C
+libRFIMitigation_la_SOURCES = Mower.C LawnMower.C RobustMower.C
 
 #############################################################################
 #
