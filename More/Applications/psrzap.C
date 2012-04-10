@@ -162,6 +162,7 @@ void usage() {
     << "Command line options:" << endl
     << "  -h     Show this help screen" << endl
     << "  -v     Verbose mode" << endl
+    << "  -E exp Mathematical expression to evaluate for each pixel" << endl
     << "  -e ext Extension for output file (default: " << output_ext 
       << ")" << endl
     << endl
