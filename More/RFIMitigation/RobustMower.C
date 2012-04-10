@@ -9,6 +9,8 @@
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 
+#include <algorithm>
+
 void Pulsar::RobustMower::compute (PhaseWeight* mask,
 				   const Profile* difference)
 {
