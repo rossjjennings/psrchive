@@ -28,7 +28,7 @@ Pulsar::Mower::Mower ()
   median_smoothing_turns = 0.02;
 
   // cutoff threshold
-  cutoff_threshold = 3.0;
+  cutoff_threshold = 4.0;
 
   broadband = true;
 
