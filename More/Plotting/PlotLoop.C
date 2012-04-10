@@ -147,7 +147,8 @@ void Pulsar::PlotLoop::plot( std::stack< Reference::To<TextIndex> >& indeces )
       {
 	PlotLabel* label = plots[iplot]->get_attributes()->get_label_above();
 	current[iplot] = label->get_centre();
-	label->set_centre( current[iplot] + " " + index_command );
+	if (current[iplot] != "unset")
+	  label->set_centre( current[iplot] + " " + index_command );
       }
 
       //
