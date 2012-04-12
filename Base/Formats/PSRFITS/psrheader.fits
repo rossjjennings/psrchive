@@ -263,7 +263,7 @@ TTYPE#  = BW                   / Bandwidth of input channel
 TFORM#  = 1E                   / Float
 TUNIT#  = MHz                  / Units of field
 TTYPE#  = OUT_NCHAN            / Number of output frequency channels
-TFORM#  = 1I                   / Integer
+TFORM#  = 1J                   / Integer
 TTYPE#  = OUT_FREQ             / Center frequency of each output channel
 TFORM#  = 1E                   / OUT_NCHAN floats
 TUNIT#  = MHz                  / Units of field
@@ -271,11 +271,11 @@ TTYPE#  = OUT_BW               / Bandwidth of each output channel
 TFORM#  = 1E                   / OUT_NCHAN floats or one float for all
 TUNIT#  = MHz                  / Units of field
 TTYPE#  = NCHIRP               / Number of complex samples in FFT or FIR filter
-TFORM#  = 1I                   / OUT_NCHAN integers or one integer for all
+TFORM#  = 1J                   / OUT_NCHAN integers or one integer for all
 TTYPE#  = NCYC_POS             / Number of complex samples discarded from start
-TFORM#  = 1I                   / OUT_NCHAN integers or one integer for all
+TFORM#  = 1J                   / OUT_NCHAN integers or one integer for all
 TTYPE#  = NCYC_NEG             / Number of complex samples discarded from end
-TFORM#  = 1I                   / OUT_NCHAN integers or one integer for all
+TFORM#  = 1J                   / OUT_NCHAN integers or one integer for all
 END
 #
 ###############################################################################
