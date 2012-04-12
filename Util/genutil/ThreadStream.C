@@ -12,7 +12,7 @@
 
 using namespace std;
 
-void destructor (void* value)
+static void destructor (void* value)
 {
   ostream* stream = reinterpret_cast<ostream*> (value);
   delete stream;
