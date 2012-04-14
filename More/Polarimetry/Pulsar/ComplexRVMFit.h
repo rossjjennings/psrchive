@@ -45,10 +45,24 @@ namespace Pulsar
 
     //! Add a range of pulse phase containing an orthogonally polarized mode
     /*! Must be called before set_observation */
-    void add_opm (range radians);
+    void add_opm (const range& radians);
 
     //! Return true if pulse phase falls within an OPM range
     bool is_opm (double phase_in_radians) const;
+
+    //! Add a range of pulse phase to be included as constraints
+    /*! Must be called before set_observation */
+    void add_include (const range& radians);
+
+    //! Return true if pulse phase falls within an included range
+    bool is_included (double phase_in_radians) const;
+
+    //! Add a range of pulse phase to be excluded from constraints
+    /*! Must be called before set_observation */
+    void add_exclude (const range& radians);
+
+    //! Return true if pulse phase falls within an excluded range
+    bool is_excluded (double phase_in_radians) const;
 
     //! Set the data to which model will be fit
     void set_observation (const PolnProfile*);
@@ -91,7 +105,13 @@ namespace Pulsar
 
     Reference::To<const PolnProfile> data;
     Reference::To<MEAL::ComplexRVM> model;
+
     float threshold;
+
+    // ranges of pulse longitude to include in model
+    std::vector<range> range_include;
+    // ranges of pulse longitude to exclude from model
+    std::vector<range> range_exclude;
 
     MEAL::Axis<unsigned> state;
     std::vector< MEAL::Axis<unsigned>::Value > data_x;
