@@ -15,6 +15,7 @@
 #define __RotatingVectorModel_H
 
 #include "MEAL/Scalar.h"
+#include "MEAL/SumRule.h"
 #include "MEAL/Univariate.h"
 
 namespace MEAL {
@@ -40,10 +41,24 @@ namespace MEAL {
     //! Destructor
     ~RotatingVectorModel ();
 
+    //! psi0: position angle at magnetic meridian
+    /*! effectively rotation of pulsar about the line of sight */
     Reference::To<ScalarParameter> reference_position_angle;
+
+    //! zeta: colatitude of line of sight with respect to spin axis
     Reference::To<ScalarParameter> line_of_sight;
+
+    //! alpha: colatitude of magnetic axis with respect to spin axis
     Reference::To<ScalarParameter> magnetic_axis;
+
+    //! phi0: longitude of the magnetic merdian
     Reference::To<ScalarParameter> magnetic_meridian;
+
+    //! beta: colatitude of line of sight with respect to magnetic axis
+    Reference::To<ScalarParameter> impact;
+
+    //! Switch to using impact as a free parameter
+    void use_impact (bool);
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -72,6 +87,9 @@ namespace MEAL {
 
     // the answer
     Reference::To<Scalar> expression;
+
+    // the sum rule used to switch between zeta and beta
+    Reference::To< SumRule<Scalar> > zeta_sum;
 
   };
 

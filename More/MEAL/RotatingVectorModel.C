@@ -25,6 +25,9 @@ void MEAL::RotatingVectorModel::init ()
   line_of_sight = new ScalarParameter;
   line_of_sight->set_value_name ("zeta");
 
+  zeta_sum = new SumRule<Scalar>;
+  zeta_sum->add_model( line_of_sight );
+
   magnetic_axis = new ScalarParameter;
   magnetic_axis->set_value_name ("alpha");
 
@@ -42,8 +45,8 @@ void MEAL::RotatingVectorModel::init ()
 
   ScalarMath y = sin(*magnetic_axis) * sin(longitude);
 
-  ScalarMath x = sin(*magnetic_axis) * cos(*line_of_sight) * cos(longitude)
-    - cos(*magnetic_axis) * sin(*line_of_sight);
+  ScalarMath x = sin(*magnetic_axis) * cos(*zeta_sum) * cos(longitude)
+    - cos(*magnetic_axis) * sin(*zeta_sum);
 
   ScalarMath result = atan(y/x) + *reference_position_angle;
 
@@ -65,16 +68,53 @@ void MEAL::RotatingVectorModel::init ()
   east = E.get_expression ();
 }
 
+//! Switch to using impact as a free parameter
+void MEAL::RotatingVectorModel::use_impact (bool flag)
+{
+  if (flag)
+  {
+    if (impact)
+      return;
+
+    Estimate<double> beta 
+      = line_of_sight->get_value() - magnetic_axis->get_value();
+
+    impact = line_of_sight;
+    impact->set_value( beta );
+    impact->set_value_name( "beta" );
+
+    line_of_sight = 0;
+
+    zeta_sum->add_model( magnetic_axis );
+  }
+  else
+  {
+    if (!impact)
+      return;
+
+    Estimate<double> zeta 
+      = impact->get_value() + magnetic_axis->get_value();
+
+    line_of_sight = impact;
+    line_of_sight->set_value( zeta );
+    line_of_sight->set_value_name( "zeta" );
+
+    impact = 0;
+
+    zeta_sum->remove_model( magnetic_axis );
+  }  
+}
+
 MEAL::RotatingVectorModel::RotatingVectorModel ()
 {
   init ();
 }
 
 //! Copy constructor
-MEAL::RotatingVectorModel::RotatingVectorModel (const RotatingVectorModel& copy)
+MEAL::RotatingVectorModel::RotatingVectorModel (const RotatingVectorModel& rvm)
 {
   init ();
-  operator = (copy);
+  operator = (rvm);
 }
 
 //! Assignment operator

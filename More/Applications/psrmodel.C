@@ -201,6 +201,11 @@ void psrmodel::add_options (CommandLine::Menu& menu)
 		  &MEAL::ScalarParameter::set_fit, 'P', false);
   arg->set_help ("hold psi0 constant");
 
+  menu.add ("");
+  arg = menu.add (RVM, &MEAL::RotatingVectorModel::use_impact,
+		  "use_beta", true);
+  arg->set_help ("vary beta (not zeta) as a free model parameter");
+
   menu.add ("\n" "chi^2 map options:");
 
   arg = menu.add (global_search, 's', "NxM");
@@ -317,8 +322,14 @@ void psrmodel::process (Pulsar::Archive* data)
   else
   {
     cerr << "psrmodel: solving with initial guess: \n"
-      "psi_0 " << state(RVM->reference_position_angle) << " deg\n"
-      "zeta  " << state(RVM->line_of_sight) << " deg\n"
+      "psi_0 " << state(RVM->reference_position_angle) << " deg\n";
+
+    if (RVM->impact)
+      cerr << "beta  " << state(RVM->impact) << " deg\n";
+    else
+      cerr << "zeta  " << state(RVM->line_of_sight) << " deg\n";
+
+    cerr <<
       "alpha " << state(RVM->magnetic_axis) << " deg\n"
       "phi_0 " << state(RVM->magnetic_meridian) << " deg"
 	 << endl;
@@ -332,8 +343,14 @@ void psrmodel::process (Pulsar::Archive* data)
        << endl;
 
   cerr <<
-    "psi_0=" << deg*RVM->reference_position_angle->get_value() << " deg\n"
-    "zeta =" << deg*RVM->line_of_sight->get_value() << " deg\n"
+    "psi_0=" << deg*RVM->reference_position_angle->get_value() << " deg\n";
+
+  if (RVM->impact)
+    cerr << "beta =" << deg*RVM->impact->get_value() << " deg\n";
+  else
+    cerr << "zeta =" << deg*RVM->line_of_sight->get_value() << " deg\n";
+
+  cerr <<
     "alpha=" << deg*RVM->magnetic_axis->get_value() << " deg\n"
     "phi_0=" << deg*RVM->magnetic_meridian->get_value() << " deg"
 	     << endl;

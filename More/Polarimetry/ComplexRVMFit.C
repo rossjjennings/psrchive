@@ -43,9 +43,9 @@ float Pulsar::ComplexRVMFit::get_threshold () const
 }
 
 template<class T>
-bool notset (T& model)
+bool notset (Reference::To<T>& model)
 {
-  return model->get_infit(0) && model->get_param(0) == 0.0;
+  return !model || (model->get_infit(0) && model->get_param(0) == 0.0);
 }
 
 //! Set the data to which model will be fit
@@ -165,7 +165,8 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
     RVM->magnetic_meridian->set_param (0, peak_phase);
   }
 
-  if (notset( RVM->line_of_sight ) && notset( RVM->magnetic_axis ))
+  if ((notset( RVM->line_of_sight ) || notset( RVM->impact ))
+      && notset( RVM->magnetic_axis ))
   {
     cerr << "Pulsar::ComplexRVMFit::set_observation using"
       " delpsi_delphi=" << delpsi_delphi << endl;
@@ -185,10 +186,12 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
       cerr << "Pulsar::ComplexRVMFit::set_observation"
 	" alpha=" << alpha << " beta=" << beta << endl;
 
-    double zeta = alpha + beta;
-
     RVM->magnetic_axis->set_param (0, alpha);
-    RVM->line_of_sight->set_param (0, zeta);
+
+    if (RVM->impact)
+      RVM->impact->set_param (0, beta);
+    else
+      RVM->line_of_sight->set_param (0, alpha+beta);
   }
 
   state.signal.connect (model, &MEAL::ComplexRVM::set_state);
@@ -339,9 +342,14 @@ void Pulsar::ComplexRVMFit::check_parameters ()
       negative_count ++;
   }
 
-  double PA0 = RVM->reference_position_angle->get_param(0);
-  double zeta = RVM->line_of_sight->get_param(0);
   double alpha = RVM->magnetic_axis->get_param(0);
+  double zeta = 0.0;
+  if (RVM->impact)
+    zeta = RVM->impact->get_param(0) + alpha;
+  else
+    zeta = RVM->line_of_sight->get_param(0);
+
+  double PA0 = RVM->reference_position_angle->get_param(0);
   double phi0 = RVM->magnetic_meridian->get_param(0);
 
   if (verbose)
@@ -393,7 +401,10 @@ void Pulsar::ComplexRVMFit::check_parameters ()
   phi0 = twopi (phi0);
 
   RVM->magnetic_axis->set_param(0, alpha);
-  RVM->line_of_sight->set_param(0, zeta);
+  if (RVM->impact)
+    RVM->impact->set_param(0, zeta - alpha);
+  else
+    RVM->line_of_sight->set_param(0, zeta);
   RVM->magnetic_meridian->set_param(0, phi0);
   RVM->reference_position_angle->set_param (0, PA0);
 }
@@ -466,6 +477,8 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
   if (map_beta)
     range_zeta = range_beta;
 
+  RVM->use_impact (map_beta);
+
   double step_alpha = M_PI/nalpha;
   double step_zeta = M_PI/nzeta;
 
@@ -503,7 +516,10 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
   if (chisq_map)
   {
     RVM->magnetic_axis->set_infit (0, false);
-    RVM->line_of_sight->set_infit (0, false);
+    if (RVM->impact)
+      RVM->impact->set_infit (0, false);
+    else
+      RVM->line_of_sight->set_infit (0, false);
     chisq_surface.resize (nalpha * nzeta);
   }
 
@@ -518,7 +534,7 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
       RVM->magnetic_axis->set_value (alpha);
 
       if (map_beta)
-	RVM->line_of_sight->set_value (alpha + zeta);
+	RVM->impact->set_value (zeta);
       else
 	RVM->line_of_sight->set_value (zeta);
 
@@ -588,7 +604,7 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
   RVM->magnetic_axis->set_value (best_alpha);
 
   if (map_beta)
-    RVM->line_of_sight->set_value (best_alpha + best_zeta);
+    RVM->impact->set_value (best_zeta);
   else
     RVM->line_of_sight->set_value (best_zeta);
 
