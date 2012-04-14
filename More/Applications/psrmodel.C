@@ -42,6 +42,12 @@ public:
   //! Default constructor
   psrmodel ();
 
+  //! Add a range of pulse longitude to include in fit
+  void add_include (const std::string& arg);
+
+  //! Add a range of pulse longitude to exclude from fit
+  void add_exclude (const std::string& arg);
+
   //! Add an orthogonally polarized mode
   void add_opm (const std::string& arg);
 
@@ -160,8 +166,15 @@ void psrmodel::add_options (CommandLine::Menu& menu)
   arg->set_help ("cutoff threshold when selecting bins "
 		 "[default " + tostring(rvmfit->get_threshold()) + "]");
 
+  arg = menu.add (this, &psrmodel::add_exclude, "exclude", "deg0:deg1");
+  arg->set_help ("add a range of pulse longitude to exclude from fit");
+
+  arg = menu.add (this, &psrmodel::add_include, "include", "deg0:deg1");
+  arg->set_help ("add a range of pulse longitude to include in fit");
+
   arg = menu.add (this, &psrmodel::add_opm, 'o', "deg0:deg1");
-  arg->set_help ("window over which an orthogonal mode dominates");
+  arg->set_long_name ("opm");
+  arg->set_help ("add a range over which an orthogonal mode dominates");
 
   menu.add ("");
 
@@ -245,10 +258,26 @@ void psrmodel::map_chisq()
 }
 
 
+void psrmodel::add_include (const std::string& arg)
+{
+  range incl = range_deg_to_rad (arg);
+  cerr << "psrmodel: include " << arg << " degrees" << endl;
+
+  rvmfit->add_include( incl );
+}
+
+void psrmodel::add_exclude (const std::string& arg)
+{
+  range excl = range_deg_to_rad (arg);
+  cerr << "psrmodel: exclude " << arg << " degrees" << endl;
+
+  rvmfit->add_exclude( excl);
+}
+
 void psrmodel::add_opm (const std::string& arg)
 {
   range opm = range_deg_to_rad (arg);
-  cerr << "psrmodel: OPM at " << opm << " degrees" << endl;
+  cerr << "psrmodel: OPM at " << arg << " degrees" << endl;
 
   rvmfit->add_opm( opm );
 }

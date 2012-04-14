@@ -82,12 +82,14 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
-    if (linear[ibin].real().get_variance() > 0)
+    double phase = (ibin + 0.5)*2*M_PI / nbin;
+
+    if (is_included(phase) ||
+	(!is_excluded(phase) && linear[ibin].real().get_variance() > 0))
     {
       data_x.push_back ( state.get_Value(count) );
       data_y.push_back ( linear[ibin] );
       
-      double phase = (ibin + 0.5)*2*M_PI / nbin;
       double L = sqrt( norm(linear[ibin]).val );
 
       if (is_opm(phase))
@@ -199,12 +201,12 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
   cerr <<"Pulsar::ComplexRVMFit::set_observation "<< count <<" bins"<< endl;
 }
 
-void Pulsar::ComplexRVMFit::add_opm (range r)
+void add_radian_range (std::vector<range>& data, range r)
 {
   if (r.first > r.second)
     r.second += 2*M_PI;
 
-  opm.push_back (r);
+  data.push_back (r);
 }
 
 bool between (const range& r, double p)
@@ -212,12 +214,42 @@ bool between (const range& r, double p)
   return p > r.first && p < r.second;
 }
 
-bool Pulsar::ComplexRVMFit::is_opm (double phase) const
+bool is_radian_range (const std::vector<range>& data, double phase)
 {
-  for (unsigned i=0; i<opm.size(); i++)
-    if (between(opm[i],phase) || between(opm[i],phase+2*M_PI))
+  for (unsigned i=0; i<data.size(); i++)
+    if (between(data[i],phase) || between(data[i],phase+2*M_PI))
       return true;
   return false;
+}
+
+void Pulsar::ComplexRVMFit::add_opm (const range& r)
+{
+  add_radian_range (opm, r);
+}
+
+bool Pulsar::ComplexRVMFit::is_opm (double phase) const
+{
+  return is_radian_range (opm, phase);
+}
+
+void Pulsar::ComplexRVMFit::add_include (const range& r)
+{
+  add_radian_range (range_include, r);
+}
+
+bool Pulsar::ComplexRVMFit::is_included (double phase) const
+{
+  return is_radian_range (range_include, phase);
+}
+
+void Pulsar::ComplexRVMFit::add_exclude (const range& r)
+{
+  add_radian_range (range_exclude, r);
+}
+
+bool Pulsar::ComplexRVMFit::is_excluded (double phase) const
+{
+  return is_radian_range (range_exclude, phase);
 }
 
 //! Get the data to which model will be fit
