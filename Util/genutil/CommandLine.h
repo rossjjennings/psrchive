@@ -403,7 +403,7 @@ namespace CommandLine {
 
     //! Add an UnaryAction with only a long string name
     template<class C, class B, class T>
-    Argument* add (C* ptr, void (B::*method)(), const std::string& name, T arg)
+    Argument* add (C* ptr, void (B::*method)(T), const std::string& name, T arg)
     {
       return add_action (ptr, method, name, &Argument::set_long_name, arg);
     }
