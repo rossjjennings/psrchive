@@ -51,6 +51,9 @@ namespace MEAL {
     //! Add an element to the result
     void add_model (T* model);
 
+    //! Remove an element from the result
+    void remove_model (T* model);
+
     // ///////////////////////////////////////////////////////////////////
     //
     // Function implementation
@@ -180,6 +183,20 @@ void MEAL::GroupRule<T>::add_model (T* x)
 }
 
 template<class T>
+void MEAL::GroupRule<T>::remove_model (T* x)
+{
+  for (unsigned i=0; i < model.size(); i++)
+    if (model[i] == x)
+    {
+      composite.unmap (model[i]);
+      model.erase( model.begin() + i );
+      return;
+    }
+
+  throw Error (InvalidState, class_name() + "remove_model", "model not found");
+}
+
+template<class T>
 void MEAL::GroupRule<T>::initialize ()
 {
   result = get_identity();
@@ -264,7 +281,7 @@ void MEAL::GroupRule<T>::calculate (Result& retval,
     if (grad)
     {
       if (model[imodel]->get_nparam() != comp_gradient.size())
-	throw Error (InvalidState, (class_name() + "calculate").c_str(),
+	throw Error (InvalidState, class_name() + "calculate",
 		     "model[%d]=%s.get_nparam=%d != gradient.size=%d",
 		     imodel, model[imodel]->get_name().c_str(),
 		     model[imodel]->get_nparam(), comp_gradient.size());
