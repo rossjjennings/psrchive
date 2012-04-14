@@ -7,11 +7,15 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
   AC_ARG_WITH([psrchive-dir],
               AC_HELP_STRING([--with-psrchive-dir=DIR],
                              [PSRCHIVE is installed in DIR]))
+  AC_ARG_WITH([psrchive],
+              AC_HELP_STRING([--with-psrchive=PATH],
+                             ['psrchive' program to use]))
+
 
   PSRCHIVE_CFLAGS=""
   PSRCHIVE_LIBS=""
 
-  if test x"$with_psrchive_dir" = xno; then
+  if test x"$with_psrchive_dir" = xno -o x"$with_psrchive" = xno; then
     # user disabled psrchive. Leave cache alone.
     have_psrchive="User disabled PSRCHIVE."
   else
@@ -21,10 +25,16 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
       with_psrchive_dir=
     fi
 
+    if test x"$with_psrchive" != x; then
+      psrchive_cmd=$with_psrchive
+    else
+      psrchive_cmd="psrchive"
+    fi
+
     if test x"$with_psrchive_dir" != x; then
       psrchive_config=$with_psrchive_dir/bin/psrchive
     else
-      AC_PATH_PROG(psrchive_config, psrchive, no)
+      AC_PATH_PROG(psrchive_config, $psrchive_cmd, no)
     fi
 
     have_psrchive="not found"

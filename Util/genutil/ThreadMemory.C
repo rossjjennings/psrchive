@@ -12,7 +12,7 @@
 
 using namespace std;
 
-void destructor (void* memory)
+static void destructor (void* memory)
 {
   if (memory)
     free (memory);
