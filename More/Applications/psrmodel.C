@@ -394,7 +394,7 @@ void psrmodel::process (Pulsar::Archive* data)
     AnglePlot* pa = plotter.get_orientation();
 
     pa->set_threshold( rvmfit->get_threshold() );
-    pa->model.set (RVM, &MEAL::RotatingVectorModel::compute);
+    pa->model.set (rvmfit.get(), &ComplexRVMFit::evaluate);
     pa->get_frame()->get_y_scale()->set_range_norm (0, 1.5);
 
     plotter.get_scale()->set_units( PhaseScale::Degrees );

@@ -441,6 +441,12 @@ void Pulsar::ComplexRVMFit::check_parameters ()
   RVM->reference_position_angle->set_param (0, PA0);
 }
 
+double Pulsar::ComplexRVMFit::evaluate (double rad)
+{
+  double offset = (is_opm(rad)) ? M_PI/2 : 0;
+  return get_model()->get_rvm()->compute(rad) + offset;
+}
+
 void Pulsar::ComplexRVMFit::get_residuals 
 ( vector<double>& phases,
   vector< std::complex< Estimate<double> > >& residuals)

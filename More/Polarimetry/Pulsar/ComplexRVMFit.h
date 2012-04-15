@@ -88,6 +88,9 @@ namespace Pulsar
 
     void global_search (unsigned nalpha, unsigned nzeta);
 
+    //! Evaluate the model at the specified pulse longitude (in radians)
+    double evaluate (double phi_radians);
+
     float get_chisq () const { return chisq; }
     unsigned get_nfree () const { return nfree; }
 
