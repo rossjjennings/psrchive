@@ -68,6 +68,9 @@ psrsh::psrsh ()
   version = "$Id: psrsh.C,v 1.23 2011/01/12 04:13:18 straten Exp $";
 
   load_files = true;
+  
+  // by default, print/parse angles in degrees
+  Angle::default_type = Angle::Degrees;
 
   add( new Pulsar::UnloadOptions );
 
