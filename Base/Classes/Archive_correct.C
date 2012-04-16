@@ -12,6 +12,10 @@ using namespace std;
 
 void Pulsar::Archive::correct ()
 {
+  if (verbose == 3)
+    cerr << "Pulsar::Archive::correct " << Check::registry.size()
+      << " entries" << endl;
+
   for (unsigned check=0; check<Check::registry.size(); check++) {
 
     if (verbose == 3)
