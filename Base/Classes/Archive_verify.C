@@ -12,6 +12,7 @@ using namespace std;
 
 void Pulsar::Archive::verify () const try
 {
+  Check::ensure_linkage();
   Registry::List<Check>& check_registry = Registry::List<Check>::get_registry();
 
   for (unsigned check=0; check<check_registry.size(); check++)

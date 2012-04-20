@@ -13,6 +13,7 @@ using namespace std;
 
 void Pulsar::Archive::correct ()
 {
+  Check::ensure_linkage();
   Registry::List<Check>& check_registry = Registry::List<Check>::get_registry();
 
   if (verbose == 3)

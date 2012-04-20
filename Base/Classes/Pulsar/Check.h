@@ -31,6 +31,10 @@ namespace Pulsar {
     // Disable the named check
     static void disable (const std::string& name);
 
+    // Stupid hack to make sure the Check registry gets
+    // linked in.
+    static void ensure_linkage ();
+
   protected:
 
   };
