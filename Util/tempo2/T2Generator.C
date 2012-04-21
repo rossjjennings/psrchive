@@ -188,7 +188,7 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
 
   string predfile = "t2pred.dat";
 
-  pred->load( predfile );
+  pred->load_file( predfile );
 
   if (print_time)
   {

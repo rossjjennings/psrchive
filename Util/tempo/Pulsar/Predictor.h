@@ -89,6 +89,11 @@ namespace Pulsar {
     //! Unload to an open stream
     virtual void unload (FILE*) const = 0;
 
+    //! Load from the specified file
+    virtual void load_file (const std::string& filename);
+    //! Unload to the specified file
+    virtual void unload_file (const std::string& filename) const;
+
     //! Factory helper creates a vector of pointers to derived class instances
     static void children (std::vector< Reference::To<Predictor> >&);
 
