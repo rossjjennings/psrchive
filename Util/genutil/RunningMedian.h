@@ -13,7 +13,6 @@
 
 #include <set>         // defines multiset
 #include <functional>  // defines less<>
-#include <assert.h>
 
 //#define _DEBUG
 //#include <iostream>
@@ -108,9 +107,6 @@ public:
 
     while (lowerHalf.size() > nth)
       upperHalf.insert( popLastElement( lowerHalf ));
-
-    assert (upperHalf.size() == nth+1);
-    assert (lowerHalf.size() == nth);
 
     return *upperHalf.begin();
   }
