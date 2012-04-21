@@ -23,7 +23,7 @@ AC_DEFUN([SWIN_LIB_TEMPO2],
   AC_MSG_CHECKING([for TEMPO2 Predictor library])
 
   TEMPO2_CFLAGS="-I$TEMPO2/include"
-  TEMPO2_LIBS="-L$TEMPO2/lib -ltempo2pred -ltempo2 -lsofa"
+  TEMPO2_LIBS="-L$TEMPO2/lib -ltempo2pred"
 
   ac_save_CXXFLAGS="$CXXFLAGS"
   ac_save_LIBS="$LIBS"
@@ -33,17 +33,11 @@ AC_DEFUN([SWIN_LIB_TEMPO2],
   LIBS="$ac_save_LIBS $TEMPO2_LIBS"
   CXXFLAGS="$ac_save_CXXFLAGS $TEMPO2_CFLAGS"
 
-  AC_TRY_LINK([#include "tempo2pred.h"
-               #include "tempo2.h"],
+  AC_TRY_LINK([#include "tempo2pred.h"],
               [T2Predictor p; T2Predictor_Read (&p, 0); destroyOne(0);],
               have_tempo2=yes, have_tempo2=no)
 
   AC_MSG_RESULT($have_tempo2)
-
-  if test x"$have_tempo2" = xyes; then
-    AC_TRY_LINK([#include "tempo2.h"],[preProcessSimple(0);],
-       [AC_DEFINE([HAVE_TEMPO2_SIMPLE], [1], [preProcessSimple defined])],[])
-  fi
 
   LIBS="$ac_save_LIBS"
   CXXFLAGS="$ac_save_CXXFLAGS"
