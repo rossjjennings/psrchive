@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/RunningMedian.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/10/26 12:02:32 $
-   $Author: straten $ */
+/* Util/genutil/RunningMedian.h */
 
 #ifndef __RunningMedian_h
 #define __RunningMedian_h
@@ -17,6 +14,7 @@
 #include <set>         // defines multiset
 #include <functional>  // defines less<>
 #include <assert.h>
+
 //#define _DEBUG
 //#include <iostream>
 
