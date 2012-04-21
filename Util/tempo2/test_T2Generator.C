@@ -7,11 +7,12 @@
 
 #include "T2Generator.h"
 #include "T2Predictor.h"
-#include "T2Parameters.h"
+#include "Pulsar/TextParameters.h"
 #include "Error.h"
 #include "load_factory.h"
 
 using namespace std;
+using Pulsar::TextParameters;
 
 int main (int argc, char** argv) try {
 
@@ -22,7 +23,8 @@ int main (int argc, char** argv) try {
 
   cerr << "Reading T2 parameters from " << argv[1] << endl;
 
-  Tempo2::Parameters* parameters = load<Tempo2::Parameters>( argv[1] );
+  Pulsar::Parameters* parameters = new TextParameters;
+  parameters -> load ( argv[1] );
 
   cerr << "Loaded" << endl;
 
