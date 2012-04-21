@@ -49,6 +49,7 @@ include_HEADERS = \
 	StraightLine.h \
         strutil.h \
         templates.h \
+	TemporaryDirectory.h \
 	TemporaryFile.h \
 	ThreadContext.h \
 	ThreadMemory.h \
@@ -117,6 +118,7 @@ libgenutil_la_SOURCES = \
         stringload.C \
         stringprintf.C \
         strutil.C \
+	TemporaryDirectory.C \
 	TemporaryFile.C \
 	ThreadContext.C \
 	ThreadMemory.C \
