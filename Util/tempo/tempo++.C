@@ -10,7 +10,7 @@
 #endif
 
 #include "tempo++.h"
-
+#include "SystemCall.h"
 #include "Error.h"
 #include "dirutil.h"
 #include "strutil.h"
@@ -18,14 +18,6 @@
 
 #include <fstream>
 #include <stdio.h>
-#include <string.h>
-
-
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#else
-#include <wait.h>
-#endif
 
 using namespace std;
 
@@ -167,39 +159,8 @@ void Tempo::tempo (const string& arguments, const string& input)
   if (verbose)
     cerr << "Tempo::tempo system (" << runtempo << ")" << endl;
 
-  int retries = 3;
-  string errstr;
-
-  if (!system(NULL))
-    throw Error (InvalidState, "Tempo::tempo",
-                 "shell not available; insufficient resources");
- 
-  while (retries)
-  {    
-    int err = system (runtempo.c_str());
-
-    if (!err)
-      return;
-
-    // else an error occured
-    if (err < 0)
-      errstr = strerror (err);
-    else if (WIFSIGNALED(err))
-      errstr = stringprintf ("\n\tTempo terminated by signal %s", 
-			     strsignal(WTERMSIG(err)));
-    else if (WIFEXITED(err))
-      errstr = stringprintf ("\n\tTempo returned error code %i",
-			     WEXITSTATUS(err));
-    else
-      errstr = "\n\tTempo failed for an unknown reason";
-
-    fsleep (5e-4);
-    retries --; 
-  }
-
-  // the above loop finished without a successful return
-  throw Error (FailedCall, "Tempo::tempo", "system (\"" + runtempo + "\")"
-	       " failed: " + errstr);
+  SystemCall shell;
+  shell.run( runtempo );
 }
 
 //! Convert a telescope name to a code
