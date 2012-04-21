@@ -151,7 +151,7 @@ DirectoryLock::Push::~Push ()
 {
   lock.unlock();
 
-  if (chdir (lock.get_directory().c_str()) != 0)
+  if (chdir (current.c_str()) != 0)
     throw Error (FailedSys, "DirectoryPush ctor",
-		 "failed chdir(" + lock.get_directory() + ")");
+		 "failed chdir(" + current + ")");
 }
