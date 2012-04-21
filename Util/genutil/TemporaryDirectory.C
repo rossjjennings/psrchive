@@ -5,7 +5,12 @@
  *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "TemporaryDirectory.h"
+#include "ThreadContext.h"
 #include "dirutil.h"
 #include "Error.h"
 
@@ -16,9 +21,30 @@
 #include <iostream>
 using namespace std;
 
+#if HAVE_PTHREAD
+static ThreadContext* context = new ThreadContext;
+#else
+static ThreadContext* context = 0;
+#endif
+
 TemporaryDirectory::TemporaryDirectory (const std::string& basename)
 {
-  string root = "/tmp/" + basename;
+  base = basename;
+}
+
+const string& TemporaryDirectory::get_directory () const
+{
+  ThreadContext::Lock lock (context);
+
+  if (path.length() == 0)
+    build ();
+
+  return path;
+}
+
+void TemporaryDirectory::build () const
+{
+  string root = "/tmp/" + base;
 
   const char* unknown = "unknown";
   const char* userid = getenv ("USER");
@@ -29,7 +55,7 @@ TemporaryDirectory::TemporaryDirectory (const std::string& basename)
 
   if (makedir (path.c_str()) < 0)
   {
-    cerr << "TemporaryDirectory: failure creating '" << path << "'" << endl;
+    cerr << "TemporaryDirectory: failed to create '" << path << "'" << endl;
 
     char* home = getenv ("HOME");
 
@@ -38,7 +64,7 @@ TemporaryDirectory::TemporaryDirectory (const std::string& basename)
     else
       path = ".";
 
-    path += "/" + basename + ".tmp";
+    path += "/" + base + ".tmp";
 
     if (makedir (path.c_str()) < 0)
       throw Error (InvalidState, "TemporaryDirectory",

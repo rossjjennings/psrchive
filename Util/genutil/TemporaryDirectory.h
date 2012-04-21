@@ -23,12 +23,17 @@ class TemporaryDirectory
   TemporaryDirectory (const std::string& basename);
 
   //! Return the temporary directory name
-  const std::string& get_path () { return path; }
+  const std::string& get_directory () const;
 
  private:
 
   //! The name of the temporary directory
-  std::string path;
+  mutable std::string path;
+  
+  //! The basename for the temporary directory
+  std::string base;
+
+  void build () const;
 };
 
 #endif
