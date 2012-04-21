@@ -48,6 +48,7 @@ include_HEADERS = \
         sky_coord.h \
 	StraightLine.h \
         strutil.h \
+	SystemCall.h \
         templates.h \
 	TemporaryDirectory.h \
 	TemporaryFile.h \
@@ -118,6 +119,7 @@ libgenutil_la_SOURCES = \
         stringload.C \
         stringprintf.C \
         strutil.C \
+	SystemCall.C \
 	TemporaryDirectory.C \
 	TemporaryFile.C \
 	ThreadContext.C \
