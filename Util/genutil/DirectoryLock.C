@@ -5,6 +5,10 @@
  *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "DirectoryLock.h"
 #include "Error.h"
 
@@ -25,6 +29,12 @@ DirectoryLock::DirectoryLock (const char* path)
 
   lock_fd = -1;
   have_lock = false;
+
+#if HAVE_PTHREAD
+  context = new ThreadContext;
+#else
+  context = 0;
+#endif
 }
 
 // set the directory in which system calls will be made
@@ -49,6 +59,9 @@ std::string DirectoryLock::get_lockfile () const
 // lock the working directory
 void DirectoryLock::lock ()
 {
+  if (context)
+    context->lock();
+
   if (have_lock)
     return;
 
@@ -70,6 +83,9 @@ void DirectoryLock::lock ()
 // unlock the working directory
 void DirectoryLock::unlock ()
 {
+  if (context)
+    context->unlock();
+
   if (!have_lock)
     return;
 
@@ -113,7 +129,7 @@ void DirectoryLock::open_lockfile ()
 }
 
   //! Constructor locks the target working directory and changes to it
-DirectoryPush::DirectoryPush (DirectoryLock& _lock)
+DirectoryLock::Push::Push (DirectoryLock& _lock)
   : lock(_lock)
 {
   lock.lock();
@@ -131,7 +147,7 @@ DirectoryPush::DirectoryPush (DirectoryLock& _lock)
 }
 
 //! Unlocks the target working directory and restores 
-DirectoryPush::~DirectoryPush ()
+DirectoryLock::Push::~Push ()
 {
   lock.unlock();
 

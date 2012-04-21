@@ -11,6 +11,7 @@
 #ifndef __DirectoryLock_h
 #define __DirectoryLock_h
 
+#include "ThreadContext.h"
 #include <string>
 
 //! Working directory in which only one process may operate at one time
@@ -37,6 +38,9 @@ class DirectoryLock
   // clean the working directory
   void clean ();
 
+  //! Implements RAII for DirectoryLock and current working directory
+  class Push;
+
 protected:
 
   std::string path;
@@ -46,12 +50,12 @@ private:
 
   int lock_fd;
   bool have_lock;
+  ThreadContext* context;
 
   void open_lockfile ();
 
 };
 
-//! RAII for DirectoryLock and current working directory
 /*! 
   On construction, this class
   1) saves the name of the current working directory
@@ -63,22 +67,22 @@ private:
   B) changes the current working directory to the saved working directory
 */
 
-class DirectoryPush
+class DirectoryLock::Push
 {
   std::string current;
   DirectoryLock& lock;
 
   // disable copy constructor and assignment operator
-  DirectoryPush (const DirectoryPush&);
-  const DirectoryPush& operator= (const DirectoryPush&);
+  Push (const Push&);
+  const Push& operator= (const Push&);
 
 public:
 
   //! Constructor locks the target working directory and changes to it
-  DirectoryPush (DirectoryLock& lock);
+  Push (DirectoryLock& lock);
 
   //! Unlocks the target working directory and restores 
-  ~DirectoryPush ();
+  ~Push ();
   
 };
 
