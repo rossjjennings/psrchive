@@ -6,6 +6,8 @@
  ***************************************************************************/
 
 #include "Predict.h"
+#include "TemporaryDirectory.h"
+#include "DirectoryLock.h"
 
 #include "Pulsar/TextParameters.h"
 #include "psrephem.h"
@@ -208,7 +210,7 @@ void Tempo::Predict::write_tzin () const
     throw Error (InvalidState, "Tempo::Predict::write_tzin",
 		 "psrname is empty");
 
-  string tzin = get_directory() + "/tz.in";
+  string tzin = "tz.in";
 
   if (Tempo::verbose)
     cerr << "Tempo::Predict::write_tzin to " << tzin << endl;
@@ -246,6 +248,9 @@ Pulsar::Predictor* Tempo::Predict::generate () const
   return result.release();
 }
 
+static TemporaryDirectory directory ("tempo");
+static DirectoryLock lock;
+
 polyco Tempo::Predict::generate_work () const
 {
   if (cached && cached->start_time() < m1 && cached->end_time() > m2  )
@@ -266,6 +271,10 @@ polyco Tempo::Predict::generate_work () const
     to_tempo_m2 += half_day;
   }
 
+
+  lock.set_directory( directory.get_directory() );
+  DirectoryLock::Push raii (lock);
+
   unsigned retries = 5;
   
   for (unsigned trial=0; trial < retries; trial++)
@@ -275,13 +284,11 @@ polyco Tempo::Predict::generate_work () const
        either end)...  so: increase the range until TEMPO gets it right
        and satisfies the requirements of an otherwise frustrated end-user */
 
-    lock ();
-
-    clean ();
+    lock.clean ();
 
     write_tzin();
 
-    string ephname = get_directory() + "/" + ephem_filename;
+    string ephname = ephem_filename;
 
     if (Tempo::verbose)
       cerr << "Tempo::predict writing " << ephname << endl;
@@ -301,7 +308,7 @@ polyco Tempo::Predict::generate_work () const
 
     tempo (arguments, input);
 
-    string stderr_name = get_directory() + "/" + stderr_filename;
+    string stderr_name = stderr_filename;
 
     bool error = false;
 
@@ -322,12 +329,9 @@ polyco Tempo::Predict::generate_work () const
     }
 
     if (error)
-    {
-      unlock ();
       throw Error (FailedSys, "Tempo::predict", "TEMPO Warnings detected");
-    }
 
-    string polyco_dat = get_directory() + "/polyco.dat";
+    string polyco_dat = "polyco.dat";
 
     if (Tempo::verbose)
     {
@@ -342,8 +346,6 @@ polyco Tempo::Predict::generate_work () const
     if (cached->load(polyco_dat) < 1)
       throw Error (FailedSys, "Tempo::predict",
 		   "failed polyco::load(" + polyco_dat + ")");
-
-    unlock ();
 
     if (verbose)
       cerr << "Tempo::predict scanned " << cached->pollys.size() 

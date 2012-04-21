@@ -10,6 +10,8 @@
 #endif
 
 #include "Pulsar/ParametersLookup.h"
+#include "TemporaryDirectory.h"
+#include "DirectoryLock.h"
 #include "load_factory.h"
 #include "tempo++.h"
 #include "dirutil.h"
@@ -54,6 +56,9 @@ void Pulsar::Parameters::Lookup::add_path (const string& p)
 {
   path.push_back (p);
 }
+
+static TemporaryDirectory directory ("psrcat");
+static DirectoryLock lock;
 
 Pulsar::Parameters* 
 Pulsar::Parameters::Lookup::operator() (const string& name) const try
@@ -109,53 +114,24 @@ Pulsar::Parameters::Lookup::operator() (const string& name) const try
     cerr << "Pulsar::Parameters::Lookup:: Creating ephemeris by " << catalogue 
 	 << " -e " << psr_name <<endl;
 
-  // lock the tempo directory
-  Tempo::lock ();
+  lock.set_directory( directory.get_directory() );
+  DirectoryLock::Push raii (lock);
 
   // start with a clean working directory
-  Tempo::clean ();
-
-  char cwd[FILENAME_MAX];
-
-  if (getcwd (cwd, FILENAME_MAX) == NULL)
-  {
-    Tempo::unlock ();
-    throw Error (FailedSys, "Pulsar::Parameters::Lookup", "failed getcwd");
-  }
-
-  // note that Tempo::get_directory creates the directory if it doesn't exist
-  if (chdir (Tempo::get_directory().c_str()) != 0)
-  {
-    Tempo::unlock ();
-    throw Error (FailedSys, "Pulsar::Parameters::Lookup",
-		 "failed chdir(" + Tempo::get_directory() + ")");
-  }
+  lock.clean ();
 
   int retval = system(command.c_str());
 
-  if (chdir (cwd) != 0)
-  {
-    Tempo::unlock ();
-    throw Error (FailedSys, "Pulsar::Parameters::Lookup::operator()",
-	"failed chdir(%s)", cwd);
-  }
-
   if (retval != 0)
-  {
-    Tempo::unlock ();
     throw Error (FailedSys, "Pulsar::Parameters::Lookup::operator()"
 	"system (" + command + ")");
-  }
 
   vector<string> filenames;
-  dirglob (&filenames, Tempo::get_directory() + "/*.eph");
+  dirglob (&filenames, "*.eph");
 
   if (filenames.size() != 1)
-  {
-    Tempo::unlock ();
     throw Error (InvalidState, "Pulsar::Parameters::Lookup::operator()",
 		 "%s created %d files", catalogue.c_str(), filenames.size());
-  }
 
   string filename = filenames[0];
 
@@ -165,11 +141,8 @@ Pulsar::Parameters::Lookup::operator() (const string& name) const try
       cerr << "Pulsar::Parameters::Lookup using '" + filename + "'" << endl;
 
     Pulsar::Parameters * params = factory<Pulsar::Parameters> (filename);
-    Tempo::unlock();
     return params;
   }
-
-  Tempo::unlock();
 
   throw Error (InvalidParam, "Pulsar::Parameters::Lookup::operator()",
                "Cannot find "+ filename +" after call to "+ catalogue); 

@@ -125,6 +125,7 @@ namespace Tempo {
     //! Cached polynomial
     Reference::To<polyco> cached;
 
+
   };
 
 }

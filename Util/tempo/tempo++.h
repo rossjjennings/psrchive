@@ -43,20 +43,7 @@ namespace Tempo
   // get the system call used to run tempo
   std::string get_system ();
 
-  // set the directory in which tempo system calls will be made
-  void   set_directory (const std::string& directory);
-  // get the directory in which tempo system calls will be made
-  std::string get_directory ();
 
-  // get the name of the file used to lock the tempo directory
-  std::string get_lockfile ();
-
-  // lock the tempo working directory
-  void lock ();
-  // unlock the tempo working directory
-  void unlock ();
-  // clean the tempo working directory
-  void clean ();
 
   // convenience overloads
   void   set_system (const std::string& system_call);
