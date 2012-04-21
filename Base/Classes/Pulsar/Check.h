@@ -31,16 +31,11 @@ namespace Pulsar {
     // Disable the named check
     static void disable (const std::string& name);
 
+    // Stupid hack to make sure the Check registry gets
+    // linked in.
+    static void ensure_linkage ();
+
   protected:
-
-    // Checks registered for use in Archive::load and Archive::unload
-    static Registry::List<Check> registry;
-      
-    // Declare friends with Registry::Entry<Check> so it can access registry
-    friend class Registry::Entry<Check>;
-
-    // Declare friends with Archive so load and unload can access registry
-    friend class Archive;
 
   };
 

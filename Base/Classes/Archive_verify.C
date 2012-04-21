@@ -12,14 +12,17 @@ using namespace std;
 
 void Pulsar::Archive::verify () const try
 {
-  for (unsigned check=0; check<Check::registry.size(); check++)
+  Check::ensure_linkage();
+  Registry::List<Check>& check_registry = Registry::List<Check>::get_registry();
+
+  for (unsigned check=0; check<check_registry.size(); check++)
   {
     if (verbose == 3)
       cerr << "Pulsar::Archive::verify testing "
-           << Check::registry[check]->get_name() << endl;
+           << check_registry[check]->get_name() << endl;
 
     Verification* verification = 0;
-    verification = dynamic_cast<Verification*>(Check::registry[check]);
+    verification = dynamic_cast<Verification*>(check_registry[check]);
 
     if (!verification)
       continue;

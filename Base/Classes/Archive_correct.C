@@ -7,18 +7,26 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Correction.h"
+#include "Registry.h"
 
 using namespace std;
 
 void Pulsar::Archive::correct ()
 {
-  for (unsigned check=0; check<Check::registry.size(); check++) {
+  Check::ensure_linkage();
+  Registry::List<Check>& check_registry = Registry::List<Check>::get_registry();
+
+  if (verbose == 3)
+    cerr << "Pulsar::Archive::correct " << check_registry.size()
+      << " entries" << endl;
+
+  for (unsigned check=0; check<check_registry.size(); check++) {
 
     if (verbose == 3)
       cerr << "Pulsar::Archive::correct testing "
-           << Check::registry[check]->get_name() << endl;
+           << check_registry[check]->get_name() << endl;
 
-    Correction* correction = dynamic_cast<Correction*>(Check::registry[check]);
+    Correction* correction = dynamic_cast<Correction*>(check_registry[check]);
 
     if (!correction)
       continue;

@@ -70,6 +70,9 @@ void Pulsar::CalSource::apply (Archive* archive)
   if (!loaded)
     load ();
 
+  if (Archive::verbose == 3)
+    cerr << "Pulsar::CalSource::apply" << endl;
+
   if (archive->get_type() != Signal::PolnCal )
     return;
 
@@ -90,6 +93,10 @@ void Pulsar::CalSource::apply (Archive* archive)
 	   << " is Signal::FluxCalOff" << endl;
     return;
   }
+
+  if (Archive::verbose == 3)
+    cerr << "Pulsar::CalSource::apply source " << archive->get_source()
+      << " not found" << endl;
 }
 
 
