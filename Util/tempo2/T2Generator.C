@@ -15,9 +15,9 @@
 #include "TemporaryDirectory.h"
 #include "DirectoryLock.h"
 #include "SystemCall.h"
-
-#include "Error.h"
 #include "RealTimer.h"
+#include "Error.h"
+
 #include "file_cast.h"
 #include "strutil.h"
 #include "lazy.h"
@@ -142,14 +142,14 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
   long double use_epoch1 = epoch1;
   long double use_epoch2 = epoch2;
 
-  if (epoch1 == epoch2)
+  if ( (epoch2 - epoch1) < segment_length )
   {
-    use_epoch1 -= 0.4 * segment_length;
-    use_epoch2 += 0.4 * segment_length;
+    use_epoch1 -= 0.5 * segment_length;
+    use_epoch2 += 0.5 * segment_length;
   }
 
   if (Predictor::verbose)
-    cerr << "Tempo2::Generator::generate call ChebyModelSet_Construct\n" 
+    cerr << "Tempo2::Generator::generate call tempo2\n" 
       " sitename=" << sitename <<
       " epoch1=" << use_epoch1 << " epoch2=" << use_epoch2 << "\n"
       " segment_length=" << segment_length <<
@@ -163,8 +163,6 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
   lock.clean ();
 
   RealTimer timer;
-  if (print_time)
-    timer.start ();
 
   string parfile = "pular.par";
   parameters->unload (parfile);
@@ -174,17 +172,21 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
   double seconds_in_day = 24.0 * 60.0 * 60.0;
 
   string arguments = sitename 
-    + " " + tostring(use_epoch1,10) + " " + tostring(use_epoch2,10)
+    + " " + tostring(use_epoch1,15) + " " + tostring(use_epoch2,15)
     + " " + tostring(freq1) + " " + tostring(freq2)
     + " " + tostring(ntimecoeff) + " " + tostring(nfreqcoeff)
     + " " + tostring(segment_length * seconds_in_day);
 
   string redirect = " > stdout.txt 2> stderr.txt";
 
-  // cerr << "RUN: " << tempo + arguments + redirect << endl;
+  string system_call = tempo + "\"" + arguments + "\"" + redirect;
+
+  if (Predictor::verbose)
+    cerr << "Tempo2::Generator::generate system call \n"
+	 << system_call << endl;
 
   SystemCall shell;
-  shell.run( tempo + "\"" + arguments + "\"" + redirect );
+  shell.run( system_call );
 
   string predfile = "t2pred.dat";
 
