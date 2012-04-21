@@ -10,6 +10,8 @@
 
 #include "tempo2pred_int.h"
 #include "inverse_phase.h"
+
+#include "FilePtr.h"
 #include "Error.h"
 
 //#include <vector>
@@ -250,10 +252,18 @@ void Tempo2::Predictor::load (FILE* fptr)
          << observing_frequency << endl;
 }
 
+void Tempo2::Predictor::load (const std::string& filename)
+{
+  FilePtr fptr ( filename, "r" );
+  load (fptr);
+}
+
+
 void Tempo2::Predictor::unload (FILE* fptr) const
 {
   T2Predictor_FWrite (&predictor, fptr);
 }
+
 
 //
 // The rest of this code implements an interface to the inverse_phase

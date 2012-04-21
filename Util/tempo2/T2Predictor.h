@@ -97,6 +97,7 @@ namespace Tempo2 {
     Phase dispersion (const MJD &t, long double MHz) const;
 
     //! Load from an open stream
+    void load (const std::string& filename);
     void load (FILE*);
 
     //! Unload to an open stream

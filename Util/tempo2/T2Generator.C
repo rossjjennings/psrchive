@@ -9,7 +9,12 @@
 
 #include "T2Generator.h"
 #include "T2Predictor.h"
-#include "T2Parameters.h"
+
+#include "Pulsar/Parameters.h"
+
+#include "TemporaryDirectory.h"
+#include "DirectoryLock.h"
+#include "SystemCall.h"
 
 #include "Error.h"
 #include "RealTimer.h"
@@ -58,7 +63,7 @@ std::vector<std::string>& Tempo2::Generator::get_keywords ()
   return keywords;
 }
 
-Tempo2::Generator::Generator (const Parameters* parameters)
+Tempo2::Generator::Generator (const Pulsar::Parameters* parameters)
 {
   epoch1 = epoch2 = 0;
   freq1 = freq2 = 0;
@@ -83,13 +88,9 @@ Tempo2::Generator::~Generator ()
 }
 
 //! Set the parameters used to generate the predictor
-void Tempo2::Generator::set_parameters (const Pulsar::Parameters* p) try
+void Tempo2::Generator::set_parameters (const Pulsar::Parameters* p)
 {
-  parameters = dynamic_file_cast<const Tempo2::Parameters> (p);
-}
-catch (Error& error)
-{
-  throw error += "Tempo2::Generator::set_parameters (Pulsar::Parameters*)";
+  parameters = p;
 }
 
 //! Set the range of epochs over which to generate
@@ -130,22 +131,13 @@ void Tempo2::Generator::set_segment_length (long double days)
   segment_length = days;
 }
 
+static TemporaryDirectory directory ("tempo2");
+static DirectoryLock lock;
+
 //! Return a new, copy constructed instance of self
 Pulsar::Predictor* Tempo2::Generator::generate () const
 {
-  Tempo2::Predictor* pred = new Tempo2::Predictor;
-
-  if (!parameters->psr)
-    throw Error (InvalidState, "Tempo2::Generator::generate",
-		 "Tempo2::Parameters not properly initialized");
-
-  pulsar psr = *(parameters->psr);
-  psr.fitMode = 0;
-
-  work_around_tempo2_tzr_bug (psr);
-
-  ChebyModelSet* cms = &pred->predictor.modelset.cheby;
-  pred->predictor.kind = Cheby;
+  Reference::To<Tempo2::Predictor> pred = new Tempo2::Predictor;
 
   long double use_epoch1 = epoch1;
   long double use_epoch2 = epoch2;
@@ -165,21 +157,38 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
       " coeffs: ntime=" << ntimecoeff << " nfreq=" << nfreqcoeff
 	 << endl;
 
+  lock.set_directory( directory.get_directory() );
+  DirectoryLock::Push raii (lock);
+
+  lock.clean ();
+
   RealTimer timer;
   if (print_time)
     timer.start ();
 
-  ChebyModelSet_Construct( cms, &psr, sitename.c_str(), use_epoch1, use_epoch2,
-			   segment_length, segment_length*0.1, 
-			   freq1, freq2, ntimecoeff, nfreqcoeff );
+  string parfile = "pular.par";
+  parameters->unload (parfile);
 
-  if (Predictor::verbose)
-    cerr << "Tempo2::Generator::generate ChebyModelSet_Construct nsegment=" 
-         << cms->nsegments << endl;
+  string tempo = "tempo2 -f " + parfile + " -pred ";
 
-  long double rms, mav;
-  ChebyModelSet_Test( cms, &psr, ntimecoeff*5*cms->nsegments, 
-		      nfreqcoeff*5*cms->nsegments, &rms, &mav );
+  double seconds_in_day = 24.0 * 60.0 * 60.0;
+
+  string arguments = sitename 
+    + " " + tostring(use_epoch1,10) + " " + tostring(use_epoch2,10)
+    + " " + tostring(freq1) + " " + tostring(freq2)
+    + " " + tostring(ntimecoeff) + " " + tostring(nfreqcoeff)
+    + " " + tostring(segment_length * seconds_in_day);
+
+  string redirect = " > stdout.txt 2> stderr.txt";
+
+  // cerr << "RUN: " << tempo + arguments + redirect << endl;
+
+  SystemCall shell;
+  shell.run( tempo + "\"" + arguments + "\"" + redirect );
+
+  string predfile = "t2pred.dat";
+
+  pred->load( predfile );
 
   if (print_time)
   {
@@ -187,14 +196,11 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
     cerr << "Tempo2::Generator::generate construction took " << timer << endl;
   }
 
-  if (Predictor::verbose)
-    printf("RMS error = %.3Lg s MAV= %.3Lg s\n", 
-	   rms/psr.param[param_f].val[0], mav/psr.param[param_f].val[0]);
-
   pred->set_observing_frequency (0.5L * (freq1 + freq2));
 
-  return pred;
+  return pred.release();
 }
+
 
 template<typename T> 
 void Tempo2::Generator::work_around_tempo2_tzr_bug (T& psr) const

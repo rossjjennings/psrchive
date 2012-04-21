@@ -19,7 +19,6 @@
 namespace Tempo2 {
 
   class Predictor;
-  class Parameters;
 
   //! Generates a Tempo2::Predictor
   class Generator : public Pulsar::Generator {
@@ -30,7 +29,7 @@ namespace Tempo2 {
     static bool print_time;
 
     //! Default constructor
-    Generator (const Parameters* parameters = 0);
+    Generator (const Pulsar::Parameters* parameters = 0);
 
     //! Destructor
     ~Generator ();
@@ -71,7 +70,7 @@ namespace Tempo2 {
   private:
 
     //! The parameters used to generate the predictor
-    Reference::To<const Parameters> parameters;
+    Reference::To<const Pulsar::Parameters> parameters;
 
     long double epoch1, epoch2;
     long double freq1, freq2;
