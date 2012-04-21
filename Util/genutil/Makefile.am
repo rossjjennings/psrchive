@@ -43,13 +43,14 @@ include_HEADERS = \
         RealTimer.h \
         RegularExpression.h \
 	RobustStats.h \
+	RunningMedian.h \
         sky_coord.h \
 	StraightLine.h \
         strutil.h \
         templates.h \
 	TemporaryFile.h \
 	ThreadContext.h \
-  ThreadMemory.h \
+	ThreadMemory.h \
 	ThreadStream.h \
         Types.h \
         typeutil.h \
@@ -152,7 +153,7 @@ TESTS = test_evaluate test_coord test_Cartesian test_MJD test_ja98	\
 	test_endian test_sum test_NormalDistribution			\
 	test_TemporaryFile test_moment2 test_MJD_ostream test_sky_coord	\
 	test_exponential test_StraightLine test_ThreadStream		\
-	test_Horizon test_LogFile test_Warning
+	test_Horizon test_LogFile test_Warning test_RunningMedian
 
 if HAVE_GSL
 TESTS += test_SplineFit
@@ -185,6 +186,7 @@ test_Horizon_SOURCES		= test_Horizon.C
 test_VirtualMemory_SOURCES	= test_VirtualMemory.C
 test_LogFile_SOURCES		= test_LogFile.C
 test_Warning_SOURCES		= test_Warning.C
+test_RunningMedian_SOURCES	= test_RunningMedian.C
 
 #############################################################################
 #
