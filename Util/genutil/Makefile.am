@@ -14,6 +14,7 @@ include_HEADERS = \
 	coord.h \
         coord_parse.h \
 	Directional.h \
+	DirectoryLock.h \
         dirutil.h \
 	evaluate.h \
 	ExponentialDistribution.h \
@@ -76,6 +77,7 @@ libgenutil_la_SOURCES = \
         coord_parse.c \
 	copy.C \
 	Directional.C \
+	DirectoryLock.C \
         dirglob.C \
 	dirglobtree.C \
         dirutil.c \
