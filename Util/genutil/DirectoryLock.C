@@ -8,6 +8,9 @@
 #include "DirectoryLock.h"
 #include "Error.h"
 
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/param.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -107,4 +110,32 @@ void DirectoryLock::open_lockfile ()
   if (lock_fd < 0)
     throw Error (FailedSys, "DirectoryLock::open_lockfile",
 		 "failed open(%s)", fname);
+}
+
+  //! Constructor locks the target working directory and changes to it
+DirectoryPush::DirectoryPush (DirectoryLock& _lock)
+  : lock(_lock)
+{
+  lock.lock();
+
+  char cwd[MAXPATHLEN];
+
+  if (getcwd (cwd, MAXPATHLEN) == NULL)
+    throw Error (FailedSys, "DirectoryPush ctor", "failed getcwd");
+
+  current = cwd;
+
+  if (chdir (lock.get_directory().c_str()) != 0)
+    throw Error (FailedSys, "DirectoryPush ctor",
+		 "failed chdir(" + lock.get_directory() + ")");
+}
+
+//! Unlocks the target working directory and restores 
+DirectoryPush::~DirectoryPush ()
+{
+  lock.unlock();
+
+  if (chdir (lock.get_directory().c_str()) != 0)
+    throw Error (FailedSys, "DirectoryPush ctor",
+		 "failed chdir(" + lock.get_directory() + ")");
 }

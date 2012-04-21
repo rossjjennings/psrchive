@@ -51,5 +51,36 @@ private:
 
 };
 
+//! RAII for DirectoryLock and current working directory
+/*! 
+  On construction, this class
+  1) saves the name of the current working directory
+  2) locks the target working directory; and
+  3) changes the current working directory to the target working directory
+
+  On destruction, this class
+  A) unlocks the target working directory; and
+  B) changes the current working directory to the saved working directory
+*/
+
+class DirectoryPush
+{
+  std::string current;
+  DirectoryLock& lock;
+
+  // disable copy constructor and assignment operator
+  DirectoryPush (const DirectoryPush&);
+  const DirectoryPush& operator= (const DirectoryPush&);
+
+public:
+
+  //! Constructor locks the target working directory and changes to it
+  DirectoryPush (DirectoryLock& lock);
+
+  //! Unlocks the target working directory and restores 
+  ~DirectoryPush ();
+  
+};
+
 #endif
 
