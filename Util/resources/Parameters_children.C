@@ -12,10 +12,6 @@
 #include "Pulsar/TextParameters.h"
 #include "psrephem.h"
 
-#ifdef HAVE_TEMPO2
-#include "T2Parameters.h"
-#endif
-
 using namespace std;
 
 void Pulsar::Parameters::children (vector< Reference::To<Parameters> >& child)
@@ -24,8 +20,5 @@ void Pulsar::Parameters::children (vector< Reference::To<Parameters> >& child)
 
   child.push_back (new Pulsar::TextParameters);
   child.push_back (new Legacy::psrephem);
-
-#ifdef HAVE_TEMPO2
-  child.push_back (new Tempo2::Parameters);
-#endif
 }
+
