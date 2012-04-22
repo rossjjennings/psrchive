@@ -862,7 +862,15 @@ void polyco::keep (const std::vector<MJD>& epochs)
     pollys[i].keep = false;
 
   for (i=0; i<epochs.size(); i++)
-    nearest( epochs[i] )->keep = true;
+  {
+    int ipolly = i_nearest( epochs[i] );
+
+    // if not found, then don't worry about it
+    if (ipolly < 0)
+      continue;
+
+    pollys[ipolly].keep = true;
+  }
 
   unsigned orig_npoly = pollys.size();
 
