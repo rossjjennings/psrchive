@@ -620,10 +620,15 @@ int main (int argc, char** argv) try
 	unsigned ichan = toas[i].get_channel();
 	Integration* subint = arch->get_Integration(isub);
 	double P = subint->get_folding_period();
+	MJD epoch = subint->get_epoch();
 
 	cout << arch->get_filename() << " " << isub << " " << ichan << " "
 	     << toas[i].get_phase_shift () << " "
-	     << toas[i].get_error()*1e-6 / P << endl;
+	     << toas[i].get_error()*1e-6 / P 
+	     << " <-turns::microsec-> "
+	     << epoch.printdays(20)
+	     << toas[i].get_phase_shift () * P * 1e6 << " "
+	     << toas[i].get_error() << endl;
       }
     }
     else
