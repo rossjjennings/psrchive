@@ -626,7 +626,7 @@ int main (int argc, char** argv) try
 	     << toas[i].get_phase_shift () << " "
 	     << toas[i].get_error()*1e-6 / P 
 	     << " <-turns::microsec-> "
-	     << epoch.printdays(20)
+	     << epoch.printdays(20) << " "
 	     << toas[i].get_phase_shift () * P * 1e6 << " "
 	     << toas[i].get_error() << endl;
       }
