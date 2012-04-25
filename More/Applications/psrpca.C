@@ -308,7 +308,9 @@ void psrpca::finalize ()
       double* damps;
       damps = new double [ (unsigned)nbin ];
       transform( prof->get_amps(), prof->get_amps() + (unsigned)nbin, damps, CastToDouble() );
-      gsl_matrix_set_col ( profiles, i_subint, &gsl_vector_const_view_array( const_cast<double*> (damps), (unsigned)nbin ).vector );
+
+      gsl_vector_const_view view = gsl_vector_const_view_array( damps, nbin );
+      gsl_matrix_set_col ( profiles, i_subint, &view.vector );
       t_cov->add_Profile ( prof, snr );
     }
     else
@@ -325,7 +327,10 @@ void psrpca::finalize ()
       double* damps;
       damps = new double [ (unsigned)nbin ];
       transform( diff->get_amps(), diff->get_amps() + (unsigned)nbin, damps, CastToDouble() );
-      gsl_matrix_set_col ( profiles, i_subint, &gsl_vector_const_view_array( const_cast<double*> (damps), (unsigned)nbin ).vector );
+
+      gsl_vector_const_view view = gsl_vector_const_view_array( damps, nbin );
+      gsl_matrix_set_col ( profiles, i_subint, &view.vector );
+
       t_cov->add_Profile ( diff, snr );
       prof->set_amps ( diff->get_amps() );
     }
@@ -371,7 +376,9 @@ void psrpca::finalize ()
 
     for (unsigned i_evec = 0; i_evec < (unsigned)nbin; i_evec++ )
     {
-      gsl_vector_memcpy ( evec_copy, &gsl_matrix_column( evec, i_evec).vector );
+      gsl_vector_view view = gsl_matrix_column(evec, i_evec);
+
+      gsl_vector_memcpy ( evec_copy, &view.vector );
       evecs_archive->get_Profile ( i_evec, 0, 0 ) -> set_amps ( evec_copy->data );
     }
     evecs_archive->unload ( prefix+"_evecs.ar" );
@@ -445,8 +452,6 @@ void psrpca::finalize ()
 
     gsl_vector *mean_vector= gsl_vector_alloc ((unsigned)nbin); // vector of means of the projections
     gsl_matrix *proj_covariance = gsl_matrix_alloc((unsigned)nbin, (unsigned)nbin); // covariance of projections
-    gsl_matrix *proj_covariance_org = gsl_matrix_alloc((unsigned)nbin, (unsigned)nbin); // copy of the above
-    gsl_matrix *inverse = gsl_matrix_alloc((unsigned)nbin, (unsigned)nbin); // inverse of the above
 
     // calculate res_decomp_ covar and corel
     gsl_vector_view tmp_v1, tmp_v2;
@@ -488,7 +493,6 @@ void psrpca::finalize ()
     }
 
     // invert the D matrix
-    int result;
     int signum = 0;
     double beta_zero;
     gsl_matrix_view proj_covariance_used = gsl_matrix_submatrix(proj_covariance, 0, 0, last_eigen, last_eigen);
