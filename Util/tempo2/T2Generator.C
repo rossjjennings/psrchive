@@ -167,7 +167,7 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
   string parfile = "pular.par";
   parameters->unload (parfile);
 
-  string tempo = "tempo2 -f " + parfile + " -pred ";
+  string tempo = "tempo2 -npsr 1 -f " + parfile + " -pred ";
 
   double seconds_in_day = 24.0 * 60.0 * 60.0;
 

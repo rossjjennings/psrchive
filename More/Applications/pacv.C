@@ -77,6 +77,7 @@ void usage ()
     " -j           print Jones matrix elements of calibrator solution \n"
     " -m           print Mueller matrix elements of calibrator solution \n"
     " -R           print Jones/Mueller matrix elements of only the frontend \n"
+    " -b           print calibrator Stokes parameters\n"
        << endl;
 }
 
