@@ -55,6 +55,9 @@ namespace Pulsar
     //! Allow the CAL Stokes Q to vary
     bool measure_cal_Q;
 
+    //! Assume that the receptor ellipticities are equal
+    bool equal_ellipticities;
+
     //! Enforce that Stokes I > |p|, where p=(Q,U,V)
     bool physical_coherency;
 

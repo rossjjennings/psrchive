@@ -105,7 +105,7 @@ namespace Calibration
     void update ();
 
     //! Work around the fact that no reference calibrators are available
-    void no_reference_calibrators ();
+    void no_reference_calibrators (bool fit_gain);
 
     //! Attempt to reduce the number of degrees of freedom in the model
     bool reduce_nfree ();

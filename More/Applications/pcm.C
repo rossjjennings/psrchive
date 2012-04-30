@@ -339,6 +339,7 @@ bool multiple_flux_calibrators = false;
 
 bool measure_cal_V = true;
 bool measure_cal_Q = true;
+bool equal_ellipticities = false;
 
 bool normalize_by_invariant = false;
 bool independent_gains = false;
@@ -557,7 +558,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args
-    = "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:j:J:L:l:M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:y";
+    = "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:j:J:kL:l:M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:y";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -637,6 +638,10 @@ int actual_main (int argc, char *argv[]) try
 
     case 'J':
       loadlines (optarg, jobs);
+      break;
+
+    case 'k':
+      equal_ellipticities = true;
       break;
 
     case 'L':
@@ -1277,7 +1282,8 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
   model->output_report = output_report;
 
   if (measure_cal_V)
-    cerr << "pcm: allowing CAL Stokes V to vary" << endl;
+    cerr << "pcm: if available, will use fluxcal data to constrain"
+      " CAL Stokes V" << endl;
   else
     cerr << "pcm: assuming that CAL Stokes V = 0" << endl;
 
@@ -1289,6 +1295,11 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
     cerr << "pcm: assuming that CAL Stokes Q = 0" << endl;
 
   model->measure_cal_Q = measure_cal_Q;
+
+  if (equal_ellipticities)
+    cerr << "pcm: assuming that the receptor ellipticities are equal" << endl;
+
+  model->equal_ellipticities = equal_ellipticities;
 
   if (normalize_by_invariant)
     cerr << "pcm: normalizing Stokes parameters by invariant" << endl;

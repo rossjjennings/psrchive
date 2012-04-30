@@ -48,6 +48,7 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type* _type)
 
   measure_cal_V = true;
   measure_cal_Q = false;
+  equal_ellipticities = false;
 
   normalize_by_invariant = false;
   independent_gains = false;
@@ -645,8 +646,11 @@ void Pulsar::ReceptionCalibrator::initialize ()
 	 << endl;
 
     for (unsigned ichan=0; ichan<model.size(); ichan++)
-      model[ichan]->no_reference_calibrators ();
+      model[ichan]->no_reference_calibrators (false);
   }
+  else if (equal_ellipticities)
+    for (unsigned ichan=0; ichan<model.size(); ichan++)
+      model[ichan]->no_reference_calibrators (true);
 
   /*
     Time variations are disengaged at the end of the call to solve.

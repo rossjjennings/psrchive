@@ -390,7 +390,7 @@ void Calibration::SignalPath::check_constraints ()
   */
 }
 
-void Calibration::SignalPath::no_reference_calibrators ()
+void Calibration::SignalPath::no_reference_calibrators (bool fit_gain)
 {
   /*
     ReferenceCalibrator observations are used to constrain the boost
@@ -402,7 +402,7 @@ void Calibration::SignalPath::no_reference_calibrators ()
   MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
   if (polar)
   {
-    polar->set_infit (0, false); // gain
+    polar->set_infit (0, fit_gain);
     polar->set_infit (3, false); // boost along V
     return;
   }
@@ -414,7 +414,7 @@ void Calibration::SignalPath::no_reference_calibrators ()
   Britton2000* bri00 = dynamic_cast<Britton2000*>( response.get() );
   if (bri00)
   {
-    bri00->set_infit (0, false); // gain
+    bri00->set_infit (0, fit_gain);
     bri00->equal_ellipticities();
     return;
   }
@@ -422,7 +422,7 @@ void Calibration::SignalPath::no_reference_calibrators ()
   Instrument* van04 = dynamic_cast<Instrument*>( response.get() );
   if (van04)
   {
-    van04->set_infit (0, false); // gain
+    van04->set_infit (0, fit_gain);
     van04->equal_ellipticities();
     return;
   }
