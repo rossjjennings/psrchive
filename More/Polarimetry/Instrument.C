@@ -86,6 +86,14 @@ Estimate<double> Calibration::Instrument::get_ellipticity (unsigned ir) const
     return feed->get_ellipticity (ir);
 }
 
+unsigned Calibration::Instrument::get_ellipticity_index (unsigned ir) const
+{
+  if (ellipticities)
+    return 7;
+  else
+    return 3 + ir * 2;
+}
+
 //! Set the orientation
 void Calibration::Instrument::set_orientation (unsigned ir,
 					       const Estimate<double>& theta)
@@ -121,9 +129,17 @@ void Calibration::Instrument::independent_ellipticities ()
   if (!ellipticities)
     return;
 
+  Estimate<double> ell = ellipticities->get_Estimate(0);
+
   ellipticities = 0;
   feed_chain->set_constraint (0, ellipticities.ptr());
   feed_chain->set_constraint (2, ellipticities.ptr());
+
+  feed->set_ellipticity (0, ell);
+  feed->set_ellipticity (1, ell);
+
+  feed->set_infit (0, true);
+  feed->set_infit (2, true);
 }
 
 void Calibration::Instrument::equal_orientations ()
