@@ -850,16 +850,6 @@ try
   cerr << "DISENGAGE epoch=" << epoch.printdays(16) << endl;
 #endif
 
-  /*
-  If the Instrument class ellipticities are set equal to one
-  independent parameter via a ChainRule, then it will look as though
-  the model has eight parameters (instead of seven), which messes up
-  the creation of the PolnCalibrator extension.
-  */
-  Instrument* van04 = dynamic_cast<Instrument*>( response.get() );
-  if (van04)
-    van04->independent_ellipticities();
-
   if (!time_variations_engaged)
     return;
 
@@ -1000,10 +990,18 @@ void Calibration::SignalPath::get_covariance( vector<double>& covar,
   if (diff_phase)
     MEAL::get_imap( get_equation(), diff_phase, diff_phase_imap );
 
-  BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
-  vector< unsigned > frontend_imap;
-  if (physical)
-    MEAL::get_imap( get_equation(), physical->get_frontend(), frontend_imap );
+  /*
+    If the Instrument class ellipticities are set equal to a single
+    independent parameter via a ChainRule, then this will need fixing.
+  */
+  vector<unsigned> ell_imap;
+
+  Instrument* van04 = dynamic_cast<Instrument*>( response.get() );
+  if (van04 && van04->has_equal_ellipticities())
+  {
+    MEAL::get_imap( get_equation(), van04->get_ellipticities(), ell_imap );
+    van04->independent_ellipticities();
+  }
 
   disengage_time_variations( epoch );
 
@@ -1023,11 +1021,11 @@ void Calibration::SignalPath::get_covariance( vector<double>& covar,
   if (diff_phase)
     compute_covariance( imap[2], Ctotal, diff_phase_imap, diff_phase );
 
-  if (physical)
+  if (van04 && ell_imap.size() == 1)
   {
-    unsigned ifeed = 3;
-    for (unsigned i=0; i<frontend_imap.size(); i++)
-      imap[ifeed+i] = frontend_imap[i];
+    // map the single free paramater onto the two constrained ellipticities
+    imap[ van04->get_ellipticity_index(0) ] = ell_imap[0];
+    imap[ van04->get_ellipticity_index(1) ] = ell_imap[0];
   }
 
   unsigned nparam = xform->get_nparam();
@@ -1045,16 +1043,6 @@ void Calibration::SignalPath::get_covariance( vector<double>& covar,
     {
       assert( count < ncovar );
       covar[count] = Ctotal[imap[i]][imap[j]];
-
-      if (i > 0 && i == j && physical)
-      {
-	// ensure that variances are sensible
-	if (covar[count] > 0.5)
-	  throw Error( InvalidState, 
-		       "Calibration::SignalPath::get_covariance",
-		       "invalid %s variance=%lf",
-		       physical->get_param_name(i).c_str(), covar[count] );
-      }
       count ++;
     }
   }
