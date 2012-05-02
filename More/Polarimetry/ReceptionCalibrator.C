@@ -503,7 +503,7 @@ void Pulsar::ReceptionCalibrator::setup_poln_calibrator (SourceEstimate& est)
     est.source->set_infit (1, true);
   }
   
-  if (measure_cal_V && has_fluxcal())
+  if (measure_cal_V && (equal_ellipticities || has_fluxcal()))
   {
     // Stokes V of the calibrator may vary
     est.source->set_infit (3, true);
