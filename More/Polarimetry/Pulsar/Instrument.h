@@ -44,7 +44,15 @@ namespace Calibration {
 
     //! Model the ellipticities of both receptors using the same value
     void equal_ellipticities ();
+
+    //! Model the ellipticities of the receptors using independent values
     void independent_ellipticities ();
+
+    //! Return the single model parameter that constrains both ellipticities
+    MEAL::ScalarParameter* get_ellipticities () { return ellipticities; }
+
+    //! Return true if both ellipticities are constrained by a single parameter
+    bool has_equal_ellipticities () const { return ellipticities; }
 
     //! Model the orientations of both receptors using the same value
     void equal_orientations ();
@@ -63,6 +71,9 @@ namespace Calibration {
 
     //! Get the ellipticity, \f$\chi\f$, of the specified receptor in radians
     Estimate<double> get_ellipticity (unsigned ireceptor) const;
+
+    //! Get the index of the ellipticity parameter for the specified receptor
+    unsigned get_ellipticity_index (unsigned receptor) const;
 
     //! Set the orientation, \f$\theta\f$, of the specified receptor in radians
     void set_orientation (unsigned ireceptor, const Estimate<double>& theta);
