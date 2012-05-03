@@ -337,6 +337,9 @@ void Calibration::SignalPath::fix_orientation ()
 
 void Calibration::SignalPath::update () try
 {
+  if (!built)
+    return;
+
   MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
   if (polar)
     polar_estimate.update (polar);
@@ -1072,7 +1075,7 @@ Calibration::SignalPath::FluxCal::FluxCal (SignalPath* parent)
 
   if (!physical)
     throw Error (InvalidState,
-	         "Calibration::SignalPath::build_fluxcal",
+	         "Calibration::SignalPath::FluxCal ctor",
 	         "Backend/Feed parameterization required to model fluxcal");
 
   composite = parent;
