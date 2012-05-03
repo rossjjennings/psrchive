@@ -277,7 +277,7 @@ void Pulsar::SystemCalibrator::prepare (const Archive* data) try
 
   has_pulsar = true;
 
-  SystemCalibrator::load_calibrators ();
+  load_calibrators ();
 }
 catch (Error& error)
 {
@@ -419,14 +419,14 @@ void Pulsar::SystemCalibrator::load_calibrators ()
 
   cerr << "Setting " << nchan << " channel receiver" << endl;
 
-  try
+  for (unsigned ichan=0; ichan<nchan; ichan++) try
   {
-    for (unsigned ichan=0; ichan<nchan; ichan++)
+    if (model[ichan]->get_valid())
       model[ichan]->update ();
   }
   catch (Error& error)
   {
-    throw error += "Pulsar::SystemCalibrator::load_calibrators";
+    model[ichan]->set_valid( false, "update failed" );
   }
 
   if (previous && previous->get_nchan() == nchan)
