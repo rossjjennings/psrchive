@@ -517,6 +517,28 @@ void enable_diagnostic (const string& name)
   }
 }
 
+// names of files containing a Calibration Database
+vector<string> cal_dbase_filenames;
+
+// names of files containing data
+vector <string> filenames;
+
+// name of file containing the calibrated template
+char* template_filename = NULL;
+
+// hours from mid-time within which PolnCal observations will be selected
+float polncal_hours = 12.0;
+
+// days from mid-time within which FluxCalOn observations will be selected
+float fluxcal_days = 7.0;
+
+bool must_have_cals = true;
+
+// name of file containing list of calibrator Archive filenames
+char* calfile = NULL;
+
+void load_calibrator_database ();
+
 int actual_main (int argc, char *argv[]) try
 {
   unloader.set_program ( "pcm" );
@@ -528,15 +550,6 @@ int actual_main (int argc, char *argv[]) try
   // name of file containing list of Archive filenames
   char* metafile = NULL;
 
-  // name of file containing list of calibrator Archive filenames
-  char* calfile = NULL;
-
-  // name of file containing a Calibration Database
-  vector<string> cal_dbase_filenames;
-
-  // name of file containing the calibrated standard
-  char* stdfile = NULL;
-
   // name of file from which phase bins will be chosen
   char* binfile = NULL;
 
@@ -546,14 +559,7 @@ int actual_main (int argc, char *argv[]) try
   // name of file containing MEAL::Function text interface commands
   vector<string> equation_configuration;
 
-  // hours from mid-time within which PolnCal observations will be selected
-  float polncal_hours = 12.0;
-
-  // days from mid-time within which FluxCalOn observations will be selected
-  float fluxcal_days = 7.0;
-
   bool unload_each_calibrated = true;
-  bool must_have_cals = true;
 
   int gotc = 0;
 
@@ -714,7 +720,7 @@ int actual_main (int argc, char *argv[]) try
 
     case 'S':
       alignment_threshold = 0.0;
-      stdfile = optarg;
+      template_filename = optarg;
       break;
 
     case 't':
@@ -785,7 +791,7 @@ int actual_main (int argc, char *argv[]) try
     }
   }
 
-  if (!stdfile && phmin == phmax && !binfile)
+  if (!template_filename && phmin == phmax && !binfile)
   {
     cerr << "pcm: In mode A, at least one of the following options"
       " must be specified:\n"
@@ -794,8 +800,6 @@ int actual_main (int argc, char *argv[]) try
 	 << endl;
     return -1;
   }
-
-  vector <string> filenames;
 
   if (metafile)
     stringfload (&filenames, metafile);
@@ -814,87 +818,7 @@ int actual_main (int argc, char *argv[]) try
   if (calfile)
     stringfload (&calibrator_filenames, calfile);
 
-  Reference::To<Pulsar::Archive> archive;
-
-  if (cal_dbase_filenames.size()) try
-  {
-    archive = Pulsar::Archive::load( filenames.back() );
-    MJD end = archive->end_time();
-
-    archive = Pulsar::Archive::load( filenames.front() );
-    MJD start = archive->start_time();
-
-    MJD mid = 0.5 * (end + start);
-
-    Reference::To<Pulsar::Database> database;
-
-    for (unsigned i=0; i<cal_dbase_filenames.size(); i++)
-    {
-      cout << "pcm: loading database from " << cal_dbase_filenames[i] << endl;
-      if (i==0)
-	database = new Pulsar::Database (cal_dbase_filenames[i]);
-      else
-	database->load (cal_dbase_filenames[i]);
-    }
-
-    cerr << "pcm: database constructed with " << database->size() 
-         << " entries" << endl;
-
-    char buffer[256];
-
-    cerr << "pcm: searching for reference source observations"
-      " within " << polncal_hours << " hours of midtime" << endl;
-
-    cerr << "pcm: midtime = "
-         << mid.datestr (buffer, 256, "%Y-%m-%d-%H:%M:00") << endl;
-
-    Pulsar::Database::Criterion criterion;
-    criterion = database->criterion (archive, Signal::PolnCal);
-    criterion.entry.time = mid;
-    criterion.minutes_apart = polncal_hours * 60.0;
-
-    vector<Pulsar::Database::Entry> oncals;
-    database->all_matching (criterion, oncals);
-
-    unsigned poln_cals = oncals.size();
-
-    if (poln_cals == 0)
-    {
-      cerr << "pcm: no PolnCal observations found; closest match was \n\n"
-           << database->get_closest_match_report () << endl;
-
-      if (must_have_cals && !calfile)
-      {
-        cerr << "pcm: cannot continue" << endl;
-        return -1;
-      }
-    }
-
-    cerr << "pcm: searching for flux calibrator observations"
-      " within " << fluxcal_days << " days of midtime" << endl;
-
-    criterion.entry.obsType = Signal::FluxCalOn;
-    criterion.check_coordinates = false;
-    criterion.minutes_apart = fluxcal_days * 24.0 * 60.0;
-
-    database->all_matching (criterion, oncals);
-
-    if (oncals.size() == poln_cals)
-      cerr << "pcm: no FluxCalOn observations found; closest match was \n\n"
-           << database->get_closest_match_report () << endl;
-
-    for (unsigned i = 0; i < oncals.size(); i++)
-    {
-      string filename = database->get_filename( oncals[i] );
-      cerr << "pcm: adding " << oncals[i].filename << endl;
-      calibrator_filenames.push_back (filename);
-    }
-  }
-  catch (Error& error)
-  {
-    cerr << "pcm: error loading CAL database" << error << endl;
-    return -1;
-  }
+  load_calibrator_database();
 
   if (!prepare)
   {
@@ -905,8 +829,8 @@ int actual_main (int argc, char *argv[]) try
   }
 
   Reference::To<Pulsar::SystemCalibrator> model;
-
   Reference::To<Pulsar::Archive> total;
+  Reference::To<Pulsar::Archive> archive;
 
   cerr << "pcm: loading archives" << endl;
   
@@ -926,8 +850,8 @@ int actual_main (int argc, char *argv[]) try
     {
       cerr << "pcm: creating model" << endl;
 
-      if (stdfile)
-	model = matrix_template_matching (stdfile);
+      if (template_filename)
+	model = matrix_template_matching (template_filename);
       else
 	model = measurement_equation_modeling (binfile, archive->get_nbin());
 
@@ -1421,6 +1345,115 @@ SystemCalibrator* matrix_template_matching (const char* stdname)
 
   return model;
 }
+
+/* **********************************************************************
+
+   FIND APPROPRIATE CALIBRATOR OBSERVATIONS IN THE DATABASE
+
+   ********************************************************************** */
+
+void load_calibrator_database () try
+{
+  if (!cal_dbase_filenames.size())
+    return;
+    
+  Reference::To<Pulsar::Archive> archive;
+
+  archive = Pulsar::Archive::load( filenames.back() );
+  MJD end = archive->end_time();
+
+  archive = Pulsar::Archive::load( filenames.front() );
+  MJD start = archive->start_time();
+
+  MJD mid = 0.5 * (end + start);
+
+  Reference::To<Pulsar::Database> database;
+
+  for (unsigned i=0; i<cal_dbase_filenames.size(); i++)
+  {
+    cout << "pcm: loading database from " << cal_dbase_filenames[i] << endl;
+    if (!database)
+      database = new Pulsar::Database (cal_dbase_filenames[i]);
+    else
+      database->load (cal_dbase_filenames[i]);
+  }
+
+  cerr << "pcm: database constructed with " << database->size() 
+       << " entries" << endl;
+
+  char buffer[256];
+
+  cerr << "pcm: searching for reference source observations"
+    " within " << polncal_hours << " hours of midtime" << endl;
+
+  cerr << "pcm: midtime = "
+       << mid.datestr (buffer, 256, "%Y-%m-%d-%H:%M:00") << endl;
+  
+  Pulsar::Database::Criterion criterion;
+  criterion = database->criterion (archive, Signal::PolnCal);
+  criterion.entry.time = mid;
+  criterion.minutes_apart = polncal_hours * 60.0;
+  
+  vector<Pulsar::Database::Entry> oncals;
+  database->all_matching (criterion, oncals);
+  
+  unsigned poln_cals = oncals.size();
+  
+  if (poln_cals == 0)
+  {
+    cerr << "pcm: no PolnCal observations found; closest match was \n\n"
+	 << database->get_closest_match_report () << endl;
+    
+    if (must_have_cals && !calfile)
+    {
+      cerr << "pcm: cannot continue" << endl;
+      exit (-1);
+    }
+  }
+
+  if (template_filename)
+    cerr << "pcm: no need for flux calibrator observations" << endl;
+  else
+  {
+    cerr << "pcm: searching for flux calibrator observations"
+      " within " << fluxcal_days << " days of midtime" << endl;
+
+    criterion.entry.obsType = Signal::FluxCalOn;
+    criterion.check_coordinates = false;
+    criterion.minutes_apart = fluxcal_days * 24.0 * 60.0;
+    
+    database->all_matching (criterion, oncals);
+  
+    if (oncals.size() == poln_cals)
+      cerr << "pcm: no FluxCalOn observations found; closest match was \n\n"
+	   << database->get_closest_match_report () << endl;
+  }
+
+  for (unsigned i = 0; i < oncals.size(); i++)
+  {
+    string filename = database->get_filename( oncals[i] );
+    cerr << "pcm: adding " << oncals[i].filename << endl;
+    calibrator_filenames.push_back (filename);
+  }
+}
+catch (Error& error)
+{
+  cerr << "pcm: error loading CAL database" << error << endl;
+  exit (-1);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #if HAVE_PGPLOT
 
