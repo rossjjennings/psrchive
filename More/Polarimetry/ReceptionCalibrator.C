@@ -421,10 +421,15 @@ void Pulsar::ReceptionCalibrator::prepare_calibrator_estimate
 {
   SystemCalibrator::prepare_calibrator_estimate (source);
 
+  if (verbose > 2)
+    cerr << "Pulsar::ReceptionCalibrator::prepare_calibrator_estimate" << endl;
+
   if (source != Signal::FluxCalOn)
     return;
 
-  cerr << "Pulsar::ReceptionCalibrator::add_calibrator FluxCalOn" << endl;
+  if (verbose > 2)
+    cerr << "Pulsar::ReceptionCalibrator::prepare_calibrator_estimate"
+      " FluxCalOn nchan=" << get_nchan() << endl;
 
   if (flux_calibrator_estimate.size() == 0)
   { 
@@ -678,8 +683,15 @@ void Pulsar::ReceptionCalibrator::initialize ()
   SystemCalibrator::solve_prepare ();
 
   if (!multiple_flux_calibrators)
-    for (unsigned ichan=0; ichan<flux_calibrator_estimate.size(); ichan++)
-      flux_calibrator_estimate[ichan].update_source();
+    for (unsigned ichan=0; ichan<flux_calibrator_estimate.size(); ichan++) try
+    {
+      if (flux_calibrator_estimate.at(ichan).is_constrained())
+	flux_calibrator_estimate[ichan].update_source();
+    }
+    catch (Error& error)
+    {
+      model[ichan]->set_valid (false, "Flux calibrator estimate update failed");
+    }
 
   for (unsigned istate=0; istate<pulsar.size(); istate++)
     for (unsigned ichan=0; ichan<pulsar[istate].size(); ichan++)
