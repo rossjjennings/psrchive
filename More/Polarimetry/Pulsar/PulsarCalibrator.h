@@ -161,6 +161,9 @@ namespace Pulsar {
     virtual void add_pulsar (Calibration::CoherencyMeasurementSet&,
 			     const Integration*, unsigned ichan);
 
+    //! Add the ReferenceCalibrator observation to the set of constraints
+    virtual void add_calibrator (const ReferenceCalibrator*);
+
   private:
 
     // used to communicate between solve and add_observation
