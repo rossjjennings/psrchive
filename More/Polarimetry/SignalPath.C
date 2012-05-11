@@ -1095,7 +1095,7 @@ void Calibration::SignalPath::FluxCal::add_backend ()
   Reference::To< MEAL::ProductRule<MEAL::Complex2> > fcal_path;
   fcal_path = new MEAL::ProductRule<MEAL::Complex2>;
 
-  Reference::To<Backend> path = new Backend;;
+  Reference::To<Backend> path = new Backend;
 
   if (backend)
   {
@@ -1128,7 +1128,7 @@ void SignalPath::FluxCal::integrate (const Calibration::SingleAxis* sa)
 {
   if (!backends.size())
     throw Error (InvalidState, 
-		 "Calibration::SignalPath::FluxCal::get_path_index",
+		 "Calibration::SignalPath::FluxCal::integrate",
 		 "no flux calibration backend added to signal path");
 
   return backends.back()->estimate.integrate (sa);
