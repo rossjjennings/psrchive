@@ -734,7 +734,9 @@ void Pulsar::SystemCalibrator::integrate_calibrator_data
  const SourceObservation& data
  )
 {
-  Stokes< Estimate<double> > result = transform( data.observation, correct );
+  Jones< Estimate<double> > apply = invert_basis * correct;
+
+  Stokes< Estimate<double> > result = transform( data.observation, apply );
 
   calibrator_estimate.at(data.ichan).source_guess.integrate (result);
 }
@@ -799,6 +801,8 @@ void Pulsar::SystemCalibrator::create_model ()
     {
       BasisCorrection basis_correction;
       basis = new MEAL::Complex2Constant( basis_correction(receiver) );
+
+      invert_basis = inv( basis->evaluate() );
 
       if (verbose)
 	cerr << "Pulsar::SystemCalibrator::create_model basis corrections:\n"
