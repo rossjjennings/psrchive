@@ -1377,7 +1377,26 @@ Pulsar::SystemCalibrator::new_solution (const string& class_name) const try
   }
 
   if (receiver)
-    output -> add_extension (receiver->clone());
+  {
+    Pulsar::Receiver* rcvr = receiver->clone();
+
+    /*
+      WvS - 14 May 2012
+
+      For the PulsarCalibrator (METM) class, the "calibrator" will be
+      the well-calibrated pulsar template, which will have had the
+      following corrections performed on it.  However, it doesn't make
+      sense to store a calibrator solution with these flags set.  In
+      fact, before today, the PolnCalibrator would add an incorrectly
+      computed basis transformation if the basis_corrected flag was
+      set in the calibrator archive, leading to bug #3526460.
+    */
+    
+    rcvr->set_basis_corrected( false );
+    rcvr->set_projection_corrected( false );
+
+    output -> add_extension (rcvr);
+  }
 
   return output.release();
 }
