@@ -593,17 +593,37 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
            << feed_xform << endl;
   }
 
+#define CORRECT_BASIS 0
+#if CORRECT_BASIS
+
+  /*
+    WvS - 14 May 2012
+
+    It is confusing for the PolnCalibrator class to correct only the
+    basis component of the frontend transformation based on the
+    receiver extension obtained from the calibrator archive while the
+    projection component of the frontend is computed based on the
+    receiver extension obtained from the pulsar archive.
+
+    In fact, before today, if the basis_projection_corrected flag was
+    set to true in the calibrator archive, the PolnCalibrator class
+    would add an incorrectly computed basis transformation, leading to
+    bug #3526460.
+  */
+
   Jones<double> rcvr_xform = 1.0;
 
-  // if known, add the receiver transformation
+  // if known, add the receiver basis transformation
   if (receiver)
   {
     BasisCorrection basis_correction;
     rcvr_xform = basis_correction (receiver);
     if (verbose > 2)
-      cerr << "Pulsar::PolnCalibrator::build known receiver:\n"
+      cerr << "Pulsar::PolnCalibrator::build known receiver basis:\n"
            << rcvr_xform << endl;
   }
+
+#endif
 
   for (ichan=0; ichan < nchan; ichan++)
   {
@@ -616,8 +636,10 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
     // add the known feed transformation
     response[ichan] *= feed_xform;
 
+#if CORRECT_BASIS
     // add the known receiver transformation
     response[ichan] *= rcvr_xform;
+#endif
 
     // invert: the response must undo the effect of the instrument
     response[ichan] = inv (response[ichan]);
@@ -683,6 +705,7 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try
     arch->transform (response);
     arch->set_poln_calibrated (true);
 
+#if CORRECT_BASIS
     if (receiver)
     {
       Receiver* rcvr = arch->get<Receiver>();
@@ -692,6 +715,8 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try
       
       rcvr->set_basis_corrected (true);
     }
+#endif
+
   }
   else if (arch->get_npol() == 1)
   {
