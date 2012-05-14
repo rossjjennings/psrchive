@@ -12,6 +12,7 @@
 #include "Pulsar/PolnProfileStats.h"
 
 #include "Pulsar/FrontendCorrection.h"
+#include "Pulsar/ReferenceCalibrator.h"
 
 #include "Pulsar/ArchiveMatch.h"
 #include "Pulsar/Archive.h"
@@ -405,6 +406,24 @@ try
 catch (Error& error)
 {
   throw error += "Pulsar::PulsarCalibrator::add_pulsar";
+}
+
+void Pulsar::PulsarCalibrator::add_calibrator (const ReferenceCalibrator* p)
+{
+  if (verbose > 2)
+    cerr << "Pulsar::PulsarCalibrator::add_calibrator" << endl;
+
+  const Archive* cal = p->get_Archive();
+
+  if ( cal->get_type() != Signal::PolnCal )
+  {
+    if (verbose)
+      cerr << "Pulsar::PulsarCalibrator::add_calibrator ignoring "
+	   << Source2string(cal->get_type()) << " observation";
+    return;
+  }
+
+  SystemCalibrator::add_calibrator (p);
 }
 
 //! Return the transformation to be used for precalibration

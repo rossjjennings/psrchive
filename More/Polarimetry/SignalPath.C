@@ -337,6 +337,9 @@ void Calibration::SignalPath::fix_orientation ()
 
 void Calibration::SignalPath::update () try
 {
+  if (!built)
+    return;
+
   MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
   if (polar)
     polar_estimate.update (polar);
@@ -1072,7 +1075,7 @@ Calibration::SignalPath::FluxCal::FluxCal (SignalPath* parent)
 
   if (!physical)
     throw Error (InvalidState,
-	         "Calibration::SignalPath::build_fluxcal",
+	         "Calibration::SignalPath::FluxCal ctor",
 	         "Backend/Feed parameterization required to model fluxcal");
 
   composite = parent;
@@ -1092,7 +1095,7 @@ void Calibration::SignalPath::FluxCal::add_backend ()
   Reference::To< MEAL::ProductRule<MEAL::Complex2> > fcal_path;
   fcal_path = new MEAL::ProductRule<MEAL::Complex2>;
 
-  Reference::To<Backend> path = new Backend;;
+  Reference::To<Backend> path = new Backend;
 
   if (backend)
   {
@@ -1125,7 +1128,7 @@ void SignalPath::FluxCal::integrate (const Calibration::SingleAxis* sa)
 {
   if (!backends.size())
     throw Error (InvalidState, 
-		 "Calibration::SignalPath::FluxCal::get_path_index",
+		 "Calibration::SignalPath::FluxCal::integrate",
 		 "no flux calibration backend added to signal path");
 
   return backends.back()->estimate.integrate (sa);
