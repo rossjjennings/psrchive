@@ -1702,13 +1702,15 @@ void solve_and_plot (Archive* archive,
 	    {
 	      double dm = minDM + idm * dmStep;
 
-	      for (int ip=0; ip < periodBins+1; ip++)
+	      for (int ip=0; ip < periodBins; ip++)
 	      {
 		double period = minx + ip * periodStep_us;
 
 		out << period << " " << dm << " " << SNRs[count] << endl;
 		count ++;
 	      }
+
+	      out << endl;
 	    }
 	  }
 
