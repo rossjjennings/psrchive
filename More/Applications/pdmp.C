@@ -80,6 +80,7 @@ void draw_colour_map (float *plotarray, int rows, int cols, double minx,
 void draw_colour_map_only(const int rows, const int columns, const double minx,
     const double maxx, const double miny, const double maxy, const float* trf);
 
+bool output_PDM_SNR = false;
 
 void plotPdotCurve(float* data, float xmin, float xmax, int npts);
 
@@ -759,6 +760,13 @@ void parseParameters(int argc, char **argv, double &periodOffset_us,
 		else if (strcmp(argv[i], "-o") == 0) {
 		  useOwnStandardProfile = true;
 		  cout << "Using self-generated Standard for SNR calculations "<< endl;
+		}
+
+		// output a text file with the delta-P/delta-DM S/N map
+		else if (strcmp(argv[i], "-output-pdm-s/n") == 0)
+		{
+		  output_PDM_SNR = true;
+		  cout << "will output delta-P/delta-DM S/N map" << endl;
 		}
 
 		else if (strcmp(argv[i], "-t") == 0) {
@@ -1669,17 +1677,44 @@ void solve_and_plot (Archive* archive,
 	// Plot the deltaPeriod vs. DM vs. SNR plot
 	// and the pulse profile plot
 
-	if (dmBins > 0) {
-    const double minx = periodOffset_us - periodHalfRange_us;
-    const double maxx = periodOffset_us + periodHalfRange_us;
+	if (dmBins > 0)
+	{
+	  const double minx = periodOffset_us - periodHalfRange_us;
+	  const double maxx = periodOffset_us + periodHalfRange_us;
 
-    if (onlyDisplayDmPlot) {
-      draw_colour_map_only(dmBins, periodBins + 1, minx, maxx, minDM, maxDM, trf);
-    } else {
-      draw_colour_map(&SNRs[0], dmBins, periodBins+1, minx, maxx,
-          "delta Period (us)", minDM, maxDM, "DM", "", trf, 5);
-    }
-  }
+	  if (onlyDisplayDmPlot)
+	    draw_colour_map_only (dmBins, periodBins + 1,
+				  minx, maxx, minDM, maxDM, trf);
+	  else
+	    draw_colour_map(&SNRs[0], dmBins, periodBins+1,
+			    minx, maxx, "delta Period (us)", 
+			    minDM, maxDM, "DM", "", trf, 5);
+
+	  if (output_PDM_SNR)
+	  {
+	    std::ofstream out ("pdmp_snr.dat");
+	    if (!out)
+	      throw Error (FailedSys, "pdmp", "Could not open pdmp_snr.dat");
+	    
+	    unsigned count = 0;
+
+	    for (int idm=0; idm < dmBins; idm++)
+	    {
+	      double dm = minDM + idm * dmStep;
+
+	      for (int ip=0; ip < periodBins; ip++)
+	      {
+		double period = minx + ip * periodStep_us;
+
+		out << period << " " << dm << " " << SNRs[count] << endl;
+		count ++;
+	      }
+
+	      out << endl;
+	    }
+	  }
+
+	}
 
 	if (pdotBins > 0){
 
