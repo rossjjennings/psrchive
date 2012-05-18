@@ -99,7 +99,11 @@ bool Pulsar::BasisCorrection::required (const Archive* archive) const
   const Receiver* receiver = archive->get<Receiver>();
 
   if (!receiver || receiver->get_basis_corrected())
+  {
+    if (Archive::verbose > 2)
+      cerr << "Pulsar::BasisCorrection::required basis corrected" << endl;
     return false;
+  }
 
   bool required = 
     receiver->get_orientation() != 0 ||
