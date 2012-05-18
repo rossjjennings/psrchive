@@ -22,7 +22,8 @@ namespace Pulsar {
 
   class Database;
   class PolnCalibrator;
-  
+  class FluxCalibrator;
+
   class CalInterpreter : public Interpreter::Extension {
 
   public:
@@ -35,6 +36,9 @@ namespace Pulsar {
 
     // calibrate the current top of the stack using the current state
     std::string cal (const std::string& args);
+
+    // flux calibrate the current top of the stack using the current state
+    std::string fluxcal (const std::string& args);
 
     //! cal command interface
     std::string type (const std::string& args);
@@ -55,6 +59,9 @@ namespace Pulsar {
 
     //! Calibrator to be applied
     Reference::To<PolnCalibrator> calibrator;
+
+    //! Flux calibrator to be applied
+    Reference::To<FluxCalibrator> flux_calibrator;
 
     //! The transformation to be applied
     Reference::To<MEAL::Complex2> transformation;

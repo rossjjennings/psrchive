@@ -10,7 +10,10 @@
 
 #include "Pulsar/Database.h"
 #include "Pulsar/PolnCalibrator.h"
+
 #include "Pulsar/FluxCalibrator.h"
+#include "Pulsar/FluxCalibratorExtension.h"
+
 #include "Pulsar/IonosphereCalibrator.h"
 #include "Pulsar/FrontendCorrection.h"
 
@@ -40,6 +43,11 @@ Pulsar::CalInterpreter::CalInterpreter ()
   add_command 
     ( &CalInterpreter::frontend,
       "frontend", "frontend (basis and projection) correction" );
+
+  add_command 
+    ( &CalInterpreter::fluxcal,
+      "flux", "perform flux calibration using the current setting" );
+
 }
 
 Pulsar::CalInterpreter::~CalInterpreter ()
@@ -79,8 +87,12 @@ string Pulsar::CalInterpreter::load (const string& args)
   try {
     // try to load the file as a single calibrator
     Reference::To<Archive> archive = Archive::load( filename );
-    calibrator = new PolnCalibrator (archive);
-    database = 0;
+
+    if ( archive->get<FluxCalibratorExtension>() )
+      flux_calibrator = new FluxCalibrator (archive);
+    else 
+      calibrator = new PolnCalibrator (archive);
+
     return response (Good);
   }
   catch (Error& error) {
@@ -101,8 +113,8 @@ string Pulsar::CalInterpreter::load (const string& args)
 
 }
 
-string Pulsar::CalInterpreter::cal (const string& arg) try {
-
+string Pulsar::CalInterpreter::cal (const string& arg) try
+{
   Reference::To<PolnCalibrator> use_cal;
 
   if (!calibrator && !database && !transformation)
@@ -124,7 +136,27 @@ string Pulsar::CalInterpreter::cal (const string& arg) try {
   }
 
   return response (Good);
+}
+catch (Error& error)
+{
+  return response (Fail, error.get_message());
+}
 
+string Pulsar::CalInterpreter::fluxcal (const string& arg) try
+{
+  Reference::To<FluxCalibrator> use_cal;
+
+  if (!flux_calibrator && !database)
+    return response( Fail, "no database or flux calibrator loaded");
+
+  if (flux_calibrator)
+    use_cal = flux_calibrator;
+  else
+    use_cal = database -> generateFluxCalibrator( get() );
+    
+  use_cal->calibrate( get() );
+
+  return response (Good);
 }
 catch (Error& error)
 {
