@@ -433,13 +433,21 @@ string Pulsar::Interpreter::unload (const string& args) try
 {
   vector<string> arguments = setup (args);
   
-  if (arguments.size() > 2)
+  if (arguments.size() > 3)
     return response (Fail, "invalid number of arguments");
 
   string mapname;
   string filename;
+  string unloadname;
+  string third_arg;
 
-  if (arguments.size() == 2) {
+  if (arguments.size() == 3)
+  {
+    mapname = arguments[0];
+    filename = arguments[1];
+    third_arg = arguments[2]; 
+  }
+  else if (arguments.size() == 2) {
     mapname = arguments[0];
     filename = arguments[1];
   }
@@ -448,15 +456,72 @@ string Pulsar::Interpreter::unload (const string& args) try
   else
     filename = get()->get_filename();
 
-  if ( filename.substr(0,4) == "ext=" )
-    filename = replace_extension( get()->get_filename(), filename.substr(4) );
-  
-  if ( mapname.length() )
-    getmap( mapname )->unload( filename );
-  else
-    get()->unload( filename );
+  if ( arguments.size() == 3 )
+  {
+    // In this case we must have a named archive and both ext and dir provided
+    if ( filename.substr(0,4) == "ext=" )
+      unloadname = replace_extension( get()->get_filename(), filename.substr(4) );
+    else if ( third_arg.substr(0,4) == "ext=" )
+      unloadname = replace_extension( get()->get_filename(), third_arg.substr(4) );
+    else
+      return response (Fail, "Invalid arguments - when three arguments are provided one of them has to be ext" );
 
-  return response (Good, "data written to " + filename);
+    if ( filename.substr(0,4) == "dir=" )
+      unloadname = filename.substr(4) + "/" + basename(unloadname);
+    else if ( third_arg.substr(0,4) == "dir=" )
+      unloadname = third_arg.substr(4) + "/" + basename(unloadname);
+
+    getmap( mapname )->unload( unloadname );
+    return response (Good, "data written to " + unloadname );
+  }
+  else if ( arguments.size() == 2 )
+  {
+    // In this case we can have either: both ext and dir provided; or a named archive and one of dir or ext; or a named archive and a filename
+    if ( (filename.substr(0,4) == "ext=" || mapname.substr(0,4) == "ext=") && (filename.substr(0,4) == "dir=" || mapname.substr(0,4) == "dir=") )
+    {
+      if ( filename.substr(0,4) == "ext=" )
+	unloadname = replace_extension( get()->get_filename(), filename.substr(4) );
+      else if ( mapname.substr(0,4) == "ext=" )
+	unloadname = replace_extension( get()->get_filename(), mapname.substr(4) );
+      if ( filename.substr(0,4) == "dir=" )
+	unloadname = filename.substr(4) + "/" + basename(unloadname);
+      else if ( mapname.substr(0,4) == "dir=" )
+	unloadname = mapname.substr(4) + "/" + basename(unloadname);
+
+      get()->unload( unloadname );
+      return response (Good, "data written to " + unloadname );
+    }
+    else  if ( filename.substr(0,4) == "ext=" )
+    {
+      unloadname = replace_extension( get()->get_filename(), filename.substr(4) );
+      getmap( mapname )->unload( unloadname );
+      return response (Good, "data written to " + unloadname );
+    }
+    else if ( filename.substr(0,4) == "dir=" )
+    {
+      unloadname = filename.substr(4) + "/" + basename( get()->get_filename() );
+      getmap( mapname )->unload( unloadname );
+      return response (Good, "data written to " + unloadname );
+    }
+    else
+    {
+      // we got a mapname and a filename
+      getmap( mapname )->unload( filename );
+      return response (Good, "data written to " + filename );
+    }
+  }
+  else
+  {
+    if ( filename.substr(0,4) == "ext=" )
+      unloadname = replace_extension( get()->get_filename(), filename.substr(4) );
+    else if ( filename.substr(0,4) == "dir=" )
+      unloadname = filename.substr(4) + "/" + basename( get()->get_filename() );
+    else
+      unloadname = filename;
+    
+    get()->unload( unloadname );
+    return response (Good, "data written to " + unloadname );
+  }
 }
 catch (Error& error)
 {
