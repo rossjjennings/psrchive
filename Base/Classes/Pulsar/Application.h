@@ -78,10 +78,17 @@ namespace Pulsar {
     virtual void run ();
 
     //! Load file
-    Archive * load (const std::string& filename);
+    Archive* load (const std::string& filename);
 
     //! Data analysis tasks implemented by most derived classes
     virtual void process (Archive*) = 0;
+
+    //! Return pointer to new result constructed by process method
+    /*! 
+      The result method was added to enable out-of-place process
+      methods without changing the interface of the base class.
+    */
+    virtual Archive* result () { return 0; }
 
     //! Any final work after main loop finishes
     virtual void finalize ();
@@ -137,6 +144,13 @@ namespace Pulsar {
 
     //! Additional per-Archive processing tasks
     virtual void process (Archive*);
+
+    //! Return pointer to new result constructed by process method
+    /*! 
+      The result method was added to enable out-of-place process
+      methods without changing the interface of the base class.
+    */
+    virtual Archive* result () { return 0; }
 
     //! Additional per-Archive finishing tasks (e.g., unload)
     virtual void finish (Archive*);

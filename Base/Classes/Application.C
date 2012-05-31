@@ -163,6 +163,9 @@ Pulsar::Archive * Pulsar::Application::load (const string& filename)
     if (very_verbose)
       cerr << "Pulsar::Application::main feature "<< i <<" process" << endl;
     options[i]->process (archive);
+
+    if (options[i]->result())
+      archive = options[i]->result();
   }
   return archive.release();
 }
@@ -176,7 +179,11 @@ void Pulsar::Application::run ()
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
   {
     Reference::To<Archive> archive = load (filenames[ifile]);
+
     process (archive);
+
+    if (result())
+      archive = result();
 
     if (update_history)
     {
