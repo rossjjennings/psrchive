@@ -63,6 +63,8 @@ void Pulsar::StandardOptions::process (Archive* archive)
 
   interpreter->set (archive);
   interpreter->script (jobs);
+
+  the_result = interpreter->get();
 }
 
 //! Provide access to the interpreter

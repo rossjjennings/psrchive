@@ -28,8 +28,11 @@ namespace Pulsar {
     //! Default constructor
     StandardOptions ();
 
-    //! Preprocessing tasks implemented by partially derived classes
-    virtual void process (Archive*);
+    //! Preprocess the archive using the standard_shell interpreter
+    void process (Archive*);
+
+    //! Return the top of the interpreter stack
+    Archive* result () { return the_result; }
 
     //! Add to the jobs
     void add_job (const std::string& job);
@@ -57,6 +60,8 @@ namespace Pulsar {
     // standard interpreter
     Reference::To<Interpreter> interpreter;
 
+    // Top of the interpreter stack after executing script
+    Reference::To<Archive> the_result;
 
   };
 
