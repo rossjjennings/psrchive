@@ -51,6 +51,8 @@ void Pulsar::StandardOptions::process (Archive* archive)
   if (jobs.size() == 0)
     jobs = default_jobs;
 
+  the_result = 0;
+
   if (jobs.size() == 0)
     return;
 
@@ -65,6 +67,12 @@ void Pulsar::StandardOptions::process (Archive* archive)
   interpreter->script (jobs);
 
   the_result = interpreter->get();
+}
+
+//! Return the top of the interpreter stack
+Pulsar::Archive* Pulsar::StandardOptions::result ()
+{
+  return the_result.ptr();
 }
 
 //! Provide access to the interpreter

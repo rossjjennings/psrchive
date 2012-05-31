@@ -32,7 +32,7 @@ namespace Pulsar {
     void process (Archive*);
 
     //! Return the top of the interpreter stack
-    Archive* result () { return the_result; }
+    Archive* result ();
 
     //! Add to the jobs
     void add_job (const std::string& job);
