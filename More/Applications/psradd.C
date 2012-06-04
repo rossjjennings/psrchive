@@ -80,6 +80,9 @@ protected:
   //! check the gap between the start and end of total
   void check_interval_within ();
 
+  //! check any user-supplied conditions on the current total
+  void check_conditions ();
+
   // the accumulated total
   Reference::To<Pulsar::Archive> total;
 
@@ -114,6 +117,12 @@ protected:
 
   // Unload options
   Reference::To<Pulsar::UnloadOptions> unload;
+
+  //! The interpreter used to parse auto add conditions
+  Reference::To<Pulsar::Interpreter> interpreter;
+
+  //! Auto add conditions
+  vector<string> conditions;
 
 private:
 
@@ -291,6 +300,10 @@ void psradd::add_options (CommandLine::Menu& menu)
   arg->set_help ("... signal-to-noise ratio exceeds 's/n'");
   arg->set_notification (auto_add);
 
+  arg = menu.add (conditions, "exp", "condition");
+  arg->set_help ("... \"condition\" is true");
+  arg->set_notification (auto_add);
+
   arg = menu.add (auto_add_tscrunch, "autoT");
   arg->set_help ("Disable tscrunch before unloading");
 
@@ -429,6 +442,9 @@ void psradd::process (Pulsar::Archive* archive)
 
     if (cal_phase_diff)
       check_cal_phase_diff (archive);
+
+    if (conditions.size())
+      check_conditions ();
   }
 
   if (reset_total)
@@ -786,6 +802,28 @@ void psradd::check_interval_within ()
       cerr << "psradd: gap=" << gap << " greater than interval within="
 	   << max_interval_within << endl;
     reset_total = true;
+  }
+}
+
+// ///////////////////////////////////////////////////////////////
+//
+// auto_add -exp
+//
+void psradd::check_conditions ()
+{
+  if (!interpreter)
+    interpreter = standard_shell();
+
+  interpreter->set( total );
+
+  for (unsigned i=0; i<conditions.size(); i++)
+  {
+    if ( interpreter->evaluate( conditions[i] ) )
+    {
+      if (verbose)
+	cerr << "psradd: condition=\"" << conditions[i] << "\" met" << endl;
+      reset_total = true;
+    }
   }
 }
 
