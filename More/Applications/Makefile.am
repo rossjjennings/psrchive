@@ -15,7 +15,7 @@ bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 pam_SOURCES = pam.C
 
 pat_SOURCES = pat.C
-pat_LDADD = $(LDADD) @PTHREAD_LIBS@
+pat_LDADD = $(LDADD) @PGPLOT_LIBS@ @PTHREAD_LIBS@
 
 paz_SOURCES = paz.C zap_periodic_spikes.C
 
