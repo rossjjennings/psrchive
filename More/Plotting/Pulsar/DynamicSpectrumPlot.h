@@ -50,7 +50,10 @@ namespace Pulsar {
 
     //! srange is the subint range
     std::pair<int,int> get_srange() const { return srange; }
-    void set_srange( const std::pair<int,int> &s_srange ) { srange = s_srange; }
+    void set_srange( const std::pair<int,int> &s_srange ) { 
+      srange_set = true;
+      srange = s_srange; 
+    }
     void set_srange( int fsub, int lsub ) { 
       set_srange(std::pair<int,int>(fsub,lsub)); 
     }
@@ -72,6 +75,7 @@ namespace Pulsar {
 
     pgplot::ColourMap colour_map;
 
+    bool srange_set;
     std::pair<int,int> srange;
     std::pair<int,int> crange;
     int pol;

@@ -5,7 +5,7 @@
 mkdir -p @prefix@/src
 cd @prefix@/src
 
-set fftw="fftw-3.2.1"
+set fftw="fftw-3.2.2"
 
 if ( ! -f ${fftw}.tar.gz ) then
   @download@ http://www.fftw.org/${fftw}.tar.gz 

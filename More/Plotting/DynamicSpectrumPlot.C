@@ -37,6 +37,7 @@ Pulsar::DynamicSpectrumPlot::DynamicSpectrumPlot ()
 
   method = 0;
 
+  srange_set = false;
   srange.first = -1;
   srange.second = -1;
 
@@ -62,10 +63,11 @@ void Pulsar::DynamicSpectrumPlot::prepare (const Archive* data)
   // Figure out subint range
   // TODO make this axis be time...
   // TODO also, move this to draw()?
-  if (srange.first<0) {
+  if ( (srange.first<0) || (srange_set==false) ) {
     srange.first = 0;
   }
-  if (srange.second>((int)data->get_nsubint()-1) || srange.second<0) {
+  if ( (srange.second>((int)data->get_nsubint()-1) || srange.second<0) 
+      || (srange_set==false) ) {
     srange.second = data->get_nsubint() - 1;
   }
   get_frame()->get_x_scale()->set_minmax(srange.first, srange.second+1);
