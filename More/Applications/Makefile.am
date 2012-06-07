@@ -10,7 +10,7 @@ EXTRA_DIST = psrhelp
 
 bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
-	psrover psrcull calavg pcmavg fix_single psrsplit
+	psrover psrcull calavg pcmavg fix_single psrsplit distortion
 
 pam_SOURCES = pam.C
 
@@ -60,6 +60,7 @@ rmfit_SOURCES = rmfit.C width.C
 rmfit_LDADD = njkk08/libnjkk08.la $(LDADD) @PGPLOT_LIBS@
 
 mtm_SOURCES = mtm.C
+distortion_SOURCES = distortion.C
 
 sesdiv_SOURCES = sesdiv.C
 
