@@ -41,16 +41,17 @@ Pulsar::Option<Pulsar::Predictor::Policy>
 policy_config_wrapper 
 (
  Pulsar::Predictor::get_policy(), 
- "Predictor::policy", Pulsar::Predictor::Input,
+ "Predictor::policy", Pulsar::Predictor::Ephemeris,
 
  "Policy for generating new predictors",
 
  "The type of predictor constructed when generating a new \n"
  "pulse phase prediction model (in Archive::update_model). \n"
- "There are currently two policies for choosing the type of \n"
+ "There are currently three policies for choosing the type of \n"
  "the new predictor: \n"
  "\n"
  " 'input'   - same as the currently installed predictor \n"
+ " 'ephem'   - based on the input parameter file \n"
  " 'default' - determined by Predictor::default"
 );
 
