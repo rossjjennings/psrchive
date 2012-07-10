@@ -245,7 +245,8 @@ void Pulsar::Interpreter::init()
       "  string something  thing to be fixed \n"
       "things that can be fixed: \n"
       "  'fluxcal'         fix the Archive::Type (FluxCalOn or Off) \n"
-      "  'receiver'        fix the receiver information \n" );
+      "  'receiver'        fix the receiver information \n"
+      "  'epoch <seconds>  fix the epoch of each subint\n" );
 
   add_command 
     ( &Interpreter::scattered_power_correct,
@@ -1184,7 +1185,8 @@ catch (Error& error)
 //
 string Pulsar::Interpreter::fix (const string& args) try
 {
-  string what = setup<string>(args);
+  vector<string> arguments = setup (args);
+  string what = arguments[0];
 
   if (what == "fluxcal")
   {
@@ -1195,6 +1197,21 @@ string Pulsar::Interpreter::fix (const string& args) try
   if (what == "receiver" || what == "rcvr")
   {
     set_receiver.apply (get());
+    return response (Good);
+  }
+
+  if (what == "epoch" && arguments.size() == 2)
+  {
+    Archive* archive = get();
+    unsigned nsub = archive->get_nsubint();
+    double seconds = fromstring<double> (arguments[1]);
+    for (unsigned isub=0; isub < nsub; isub++)
+    {
+      Integration* subint = archive->get_Integration(isub);
+      MJD epoch = subint->get_epoch();
+      epoch += seconds;
+      subint->set_epoch( epoch );
+    }
     return response (Good);
   }
 
