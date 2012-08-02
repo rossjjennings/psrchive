@@ -49,6 +49,7 @@ Calibration::SignalPath::SignalPath (Pulsar::Calibrator::Type* _type)
   built = false;
 
   time_variations_engaged = true;
+  step_after_cal = false;
   constant_pulsar_gain = false;
 
   time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
@@ -391,6 +392,14 @@ void Calibration::SignalPath::check_constraints ()
   that the noise diode has zero circular polarization.
 
   */
+
+  // Fix final step problem if neccesary
+  if (gain)
+    fix_last_step(gain);
+  if (diff_gain)
+    fix_last_step(diff_gain);
+  if (diff_phase)
+    fix_last_step(diff_phase);
 }
 
 void Calibration::SignalPath::no_reference_calibrators (bool fit_gain)
@@ -730,7 +739,10 @@ void Calibration::SignalPath::set_min_step (Scalar* function, double step)
     cerr << "Calibration::SignalPath::set_min_step set step[0]="
          << step << endl;
 #endif
-    steps->set_step( 0, step );
+    if (step_after_cal)
+      steps->add_step( step);
+    else
+      steps->set_step( 0, step );
   }
 }
 
@@ -759,7 +771,10 @@ void Calibration::SignalPath::add_calibrator_epoch (const MJD& epoch)
 
   MJD half_minute (0.0, 30.0, 0.0);
 
-  time.set_value( epoch-half_minute );
+  if (step_after_cal)
+    time.set_value( epoch+half_minute );
+  else
+    time.set_value( epoch-half_minute );
 
   if (gain)
     add_step( gain, convert.get_value() );
@@ -783,7 +798,31 @@ void Calibration::SignalPath::add_step (Scalar* function, double step)
   }
 }
 
+void Calibration::SignalPath::set_step_after_cal (bool _after)
+{
+  step_after_cal = _after;
+}
 
+void Calibration::SignalPath::fix_last_step (Scalar* function)
+{
+  Steps* steps = dynamic_cast<Steps*> (function);
+  if (steps && step_after_cal) 
+  {
+    int nstep = steps->get_nstep();
+    if (nstep > 0)
+    {
+      time.set_value ( max_epoch );
+
+      if (convert.get_value() < steps->get_step(nstep-1))
+      {
+#ifdef _DEBUG
+        cerr << "fix_last_step: removing step " << nstep-1 << endl;
+#endif
+        steps->remove_step(nstep-1);
+      }
+    }
+  }
+}
 
 void Calibration::SignalPath::engage_time_variations () try
 {

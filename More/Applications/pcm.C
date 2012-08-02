@@ -87,13 +87,16 @@ void usage ()
     "  -t nproc   solve using nproc threads \n"
     "\n"
     "  -U PAR     model PAR with a unique value for each CAL \n"
-    "  -u PAR     model PAR with a step at each CAL \n"
+    "  -u PAR[:W] model PAR with a step at each CAL \n"
     "  -o PAR:N   model PAR as N degree polyomial \n"
     "             where PAR is one of \n"
     "               g = absolute gain \n"
     "               b = differential gain \n"
     "               r = differential phase \n"
     "               a = all of the above \n"
+    "             and where W can be one of \n"
+    "               A = cals are observed after pulsars \n"
+    "               B = cals are observed before pulsars (default) \n"
     "\n"
     "  -B choose  set the phase bin selection policy: int, pol, orth, inv \n"
     "             separate multiple policies with commas \n"
@@ -343,6 +346,7 @@ bool equal_ellipticities = false;
 
 bool normalize_by_invariant = false;
 bool independent_gains = false;
+bool step_after_cal = false;
 
 bool physical_coherency = false;
 
@@ -736,6 +740,15 @@ int actual_main (int argc, char *argv[]) try
     case 'u':
       cerr << "pcm: using a multiple-step function to model ";
       set_time_variation( optarg[0], new MEAL::Steps );
+      cerr << "pcm: assuming cals are observed ";
+      if (optarg[1]==':')
+      {
+        if (optarg[2]=='A')
+        {
+          step_after_cal = true;
+        }
+      }
+      cerr << (step_after_cal ? "after" : "before") << " pulsars" << endl;
       break;
 
     case 'U':
@@ -1231,6 +1244,8 @@ SystemCalibrator* measurement_equation_modeling (const char* binfile,
     cerr << "pcm: not normalizing Stokes parameters" << endl;
 
   model->set_normalize_by_invariant( normalize_by_invariant );
+
+  model->set_step_after_cal( step_after_cal );
 
   if (independent_gains)
     cerr << "pcm: each observation has a unique gain" << endl;
