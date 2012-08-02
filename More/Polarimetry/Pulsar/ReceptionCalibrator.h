@@ -109,6 +109,9 @@ namespace Pulsar
     //! Normalize each Stokes vector by the mean on-pulse invariant 
     void set_normalize_by_invariant (bool set = true);
 
+    //! Apply time steps afer cals
+    void set_step_after_cal (bool _after = true);
+
     //! Solve equation for each frequency
     void solve ();
     
@@ -144,6 +147,9 @@ namespace Pulsar
 
     //! Normalize the Stokes parameters by the invariant interval
     bool normalize_by_invariant;
+
+    //! Apply time step after rather than before cals
+    bool step_after_cal;
 
     //! Set the initial guesses and update the reference epoch
     void initialize ();
