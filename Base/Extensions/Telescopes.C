@@ -11,8 +11,10 @@
 #include "tempo++.h"
 #include "coord.h"
 
-void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a) try
+void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
 {
+  std::string emsg;
+
   switch ( Tempo::code( a->get_telescope() ) )
   {
 
@@ -51,17 +53,23 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a) try
     Telescopes::Effelsberg(t);
     break;
     
-  default: // Unknown code, throw error
-    throw Error (InvalidParam, "Pulsar::Telescopes::set_telescope_info",
-		 "Unrecognized telescope code (%s)",
-		 a->get_telescope().c_str());
+  default: 
+    // Unknown code, throw error after calling Telecope::set_coordinates
+    emsg = "Unrecognized telescope code (" + a->get_telescope() + ")";
+    break;
   }
 
-  t->set_coordinates();
-}
-catch (Error& error)
-{
-  throw error += "Pulsar::Telescopes::set_telescope_info";
+  try
+    {
+      t->set_coordinates();
+    }
+  catch (Error& error)
+    {
+      throw error += "Pulsar::Telescopes::set_telescope_info";
+    }
+
+  if (!emsg.empty())
+    throw Error (InvalidParam, "Pulsar::Telescopes::set_telescope_info", emsg);
 }
 
 // Info for each telescope below.  Maybe the coordinate setting

@@ -53,6 +53,8 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type* _type)
   normalize_by_invariant = false;
   independent_gains = false;
 
+  step_after_cal = false;
+
   check_pointing = false;
   physical_coherency = false;
 
@@ -115,6 +117,11 @@ void Pulsar::ReceptionCalibrator::set_normalize_by_invariant (bool set)
   normalize_by_invariant = set;
   if (standard_data)
     standard_data->set_normalize (normalize_by_invariant);
+}
+
+void Pulsar::ReceptionCalibrator::set_step_after_cal (bool _after)
+{
+  step_after_cal = _after;
 }
 
 /*!
@@ -206,6 +213,9 @@ void Pulsar::ReceptionCalibrator::init_model (unsigned ichan)
 
   if (normalize_by_invariant)
     model[ichan] -> set_constant_pulsar_gain ();
+
+  if (step_after_cal)
+    model[ichan] -> set_step_after_cal();
 
   if (measure_cal_Q)
     model[ichan] -> fix_orientation ();

@@ -168,6 +168,9 @@ namespace Calibration
     //! Activate time varations
     void engage_time_variations ();
 
+    //! Set whether steps occur before or after cals
+    void set_step_after_cal (bool _after = true);
+
     void set_valid (bool f, const char* reason = 0);
     bool get_valid () const { return valid; }
 
@@ -241,7 +244,11 @@ namespace Calibration
     //! Add a step if Scalar is a Steps
     void add_step (MEAL::Scalar* function, double step);
 
+    //! Remove the last step if there is no data there
+    void fix_last_step (MEAL::Scalar* function);
+
     bool time_variations_engaged;
+    bool step_after_cal;
     bool constant_pulsar_gain;
 
     // ////////////////////////////////////////////////////////////////////
