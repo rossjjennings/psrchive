@@ -1070,7 +1070,7 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename)
 // work out the pdots!
 
 double accn2pdot = getPeriod(archive) / 3e8;
-pdotOffset = accn2pdot*accnOffset;
+pdotOffset = -accn2pdot*accnOffset;
 pdotStep = accn2pdot*accnStep;
 pdotHalfRange = accn2pdot*accnHalfRange;
 
@@ -2652,7 +2652,7 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 	file = fopen("pdmp.per", "at");
 
 	if (file != NULL) {
-		fprintf(file, " %3.6f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%3.3f\t%3.2f\t%s %d %d %d\n",
+		fprintf(file, " %3.6f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%3.3f\t%3.2f\t%s %d %d %d\t%3.3f\n",
 		barycentricMjd.in_days(),
 		bestPeriod_bc_us/MILLISEC,
 		periodError_ms,
@@ -2660,7 +2660,7 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 		dmError,
 		bestPulseWidth * tbin_ms,
 		bestSNR,
-			archive->get_filename().c_str(),tScint,fScint,tfScint);
+			archive->get_filename().c_str(),tScint,fScint,tfScint,-3e8*bestPdot/(bestPeriod_bc_us/1e6));
 	} else {
 		cerr << "pdmp: Failed to open file pdmp.per for writing results\n";
 	}
@@ -2683,8 +2683,10 @@ void plotPdotCurve(float* data, float xmin, float xmax, int npts){
 	cpgbox("BCINTS", 0.0, 5, "BCINTS", 5, 5);
 
 	float xstep=(xmax-xmin)/npts;
+	// Go backwards through the array because it is ordered by pdot
+	// not by accn! (we are plotting accn)
 	for (int i=0; i < npts; i++){
-		cpgpt1(i*xstep+xmin, data[i], 0);
+		cpgpt1((npts-1-i)*xstep+xmin, data[i], 0);
 	}
 
         cpglab("Accn","SNR","");
