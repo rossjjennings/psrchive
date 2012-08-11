@@ -314,6 +314,10 @@ vector<string> Pulsar::Interpreter::setup (const string& text)
   vector<string> arguments;
   separate (text, arguments);
 
+  if (has())
+    for (unsigned i=0; i<arguments.size(); i++)
+      arguments[i] = ::evaluate( substitute (arguments[i], get_interface()) );
+
   return arguments;
 }
 
@@ -382,6 +386,11 @@ Pulsar::Archive* Pulsar::Interpreter::get ()
 		 "no archive in stack");
 
   return theStack.top();
+}
+
+bool Pulsar::Interpreter::has () const
+{
+  return !theStack.empty() && theStack.top();
 }
 
 void Pulsar::Interpreter::setmap (const string& name, Archive* data)
@@ -691,10 +700,8 @@ string Pulsar::Interpreter::extract (const string& args) try
     parse the (remaining) options as though they were indeces
   */
   for (unsigned i = range; i < arguments.size(); i++)
-  {
-    string range = ::evaluate( ::substitute (arguments[i], get_interface()) );
-    TextInterface::parse_indeces (indeces, range, archive->get_nsubint());
-  }
+    TextInterface::parse_indeces (indeces, arguments[i],
+				  archive->get_nsubint());
 
   /*
     extract the sub-integrations
