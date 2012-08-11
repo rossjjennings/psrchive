@@ -23,6 +23,7 @@ Management/psrchive_info
 Management/psrchive_install.h
 Management/release.csh
 More/Applications/calavg
+More/Applications/distortion
 More/Applications/example
 More/Applications/fix_single
 More/Applications/fluxcal
