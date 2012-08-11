@@ -222,13 +222,16 @@ WRAPPER_FUNCTION_1_ARG(acos)
 WRAPPER_FUNCTION_1_ARG(asin)
 WRAPPER_FUNCTION_1_ARG(atan)
 WRAPPER_FUNCTION_2_ARGS(atan2)
+WRAPPER_FUNCTION_1_ARG(ceil)
 WRAPPER_FUNCTION_1_ARG(cos)
 WRAPPER_FUNCTION_1_ARG(cosh)
 WRAPPER_FUNCTION_1_ARG(exp)
 WRAPPER_FUNCTION_1_ARG(fabs)
+WRAPPER_FUNCTION_1_ARG(floor)
 WRAPPER_FUNCTION_2_ARGS(fmod)
 WRAPPER_FUNCTION_1_ARG(log)
 WRAPPER_FUNCTION_1_ARG(log10)
+WRAPPER_FUNCTION_1_ARG(round)
 WRAPPER_FUNCTION_1_ARG(sin)
 WRAPPER_FUNCTION_1_ARG(sinh)
 WRAPPER_FUNCTION_1_ARG(sqrt)
@@ -240,7 +243,7 @@ WRAPPER_FUNCTION_1_ARG(tanh)
 #define TABLE_ENTRY(FUN) {#FUN, FUN##Wrapper}
 
 /* remember to fix this when you add more functions to the table */
-#define N_FUNCTIONS 16
+#define N_FUNCTIONS 19
 
 /* define the function table -- must be in sorted order! */
 struct {
@@ -251,13 +254,16 @@ struct {
   TABLE_ENTRY(asin),
   TABLE_ENTRY(atan),
   TABLE_ENTRY(atan2),
+  TABLE_ENTRY(ceil),
   TABLE_ENTRY(cos),
   TABLE_ENTRY(cosh),
   TABLE_ENTRY(exp),
   TABLE_ENTRY(fabs),
+  TABLE_ENTRY(floor),
   TABLE_ENTRY(fmod),
   TABLE_ENTRY(log),
   TABLE_ENTRY(log10),
+  TABLE_ENTRY(round),
   TABLE_ENTRY(sin),
   TABLE_ENTRY(sinh),
   TABLE_ENTRY(sqrt),
