@@ -72,6 +72,9 @@ namespace Pulsar {
     //! get the current Archive
     Archive* get ();
 
+    //! return true if there is a current Archive
+    bool has () const;
+
     //! set the named Archive
     void setmap (const std::string& name, Archive* data);
 
