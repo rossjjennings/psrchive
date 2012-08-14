@@ -127,12 +127,27 @@ namespace Pulsar
     range range_beta;
     range range_zeta;
 
+    // length of the first guess ellipse along the sin(alpha) axis
+    float guess_alpha;
+    // length of the first guess ellipse along the sin(beta) axis
+    float guess_beta;
+
+  private:
+
+    // used by set_observation method to find the maximum in delpsi/delphi
+    void find_delpsi_delphi_max ();
+
+    std::vector< std::complex< Estimate<double> > > linear;
+    double delpsi_delphi;
+
     float peak_phase;
     float peak_pa;
 
     float chisq;
     unsigned nfree;
     bool chisq_map;
+
+    double max_L;
   };
 }
 

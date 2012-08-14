@@ -8,6 +8,8 @@
 #include "Pulsar/ComplexRVMFit.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/PhaseWeight.h"
+#include "Pulsar/SmoothMedian.h"
+#include "Pulsar/SmoothMean.h"
 
 #include "MEAL/ComplexRVM.h"
 #include "MEAL/RotatingVectorModel.h"
@@ -28,6 +30,10 @@ Pulsar::ComplexRVMFit::ComplexRVMFit()
   chisq_map = false;
 
   range_alpha = range_beta = range_zeta = range (0,0);
+
+  // favour impact angle smaller than colatitude of magnetic axis
+  guess_alpha = 0.5;
+  guess_beta = 0.25;
 }
 
 //! Set the threshold below which data are ignored
@@ -62,23 +68,19 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
   if (model && model->get_nstate())
     model = 0;
 
-  std::vector< std::complex< Estimate<double> > > linear;
+  const unsigned nbin = data->get_nbin();
+  int max_bin = data->get_Profile(0)->find_max_bin();
+  peak_phase = (max_bin+ 0.5)*2*M_PI / nbin;
 
   if (verbose)
     cerr << "Pulsar::ComplexRVMFit::set_observation"
       " threshold=" << threshold << endl;
 
   data->get_linear (linear, threshold);
-
-  const unsigned nbin = data->get_nbin();
-
-  int max_bin = data->get_Profile(0)->find_max_bin();
-  peak_phase = (max_bin+ 0.5)*2*M_PI / nbin;
+  find_delpsi_delphi_max();
 
   unsigned count = 0;
-
-  double max_sin = 0;
-  double delpsi_delphi = 0;
+  max_L = 0;
 
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
@@ -91,6 +93,9 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
       data_y.push_back ( linear[ibin] );
       
       double L = sqrt( norm(linear[ibin]).val );
+
+      if ( L > max_L )
+	max_L = L;
 
       if (is_opm(phase))
       {
@@ -105,37 +110,6 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
              << " L=" << L << endl;
 
       get_model()->add_state (phase, L);
-
-      if (data_y.size() > 1)
-      {
-	/*
-
-	Find the maximum slope in dpsi/dphi
-
-	This defines both phi0 and psi0 and will be used to pick the
-	first guess of alpha and zeta
-
-	*/
-
-	std::complex< Estimate<double> > c0 ( data_y[ data_y.size()-2 ] );
-	std::complex< Estimate<double> > c1 ( data_y[ data_y.size()-1 ] );
-
-	// sin of the angle between the vectors, weighted by their amplitude
-	Estimate<double> s = c0.real()*c1.imag() - c0.imag()*c1.real();
-
-	if ( fabs(s.val) > max_sin )
-	{
-	  max_sin = fabs(s.val);
-
-	  double phi_per_bin = 2*M_PI / nbin;
-
-	  Estimate<double> c = c0.real()*c1.real() + c0.imag()*c1.imag();
-
-	  delpsi_delphi = 0.5 * atan2(s.val,c.val) / phi_per_bin;
-	  peak_pa = 0.5 * atan2(c0.imag().val, c0.real().val);
-	  peak_phase = (ibin - 0.5) * phi_per_bin;
-	}
-      }
 
       count ++;
     }
@@ -177,12 +151,26 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 
     Choose a reasonable first guess for alpha and zeta
       
-    Use Equation 5 of Everett & Weisberg (2001) and alpha = (pi + beta) / 2
+    Use Equation 5 of Everett & Weisberg (2001) and choose
+    a solution on the ellipse defined by
+
+    (sin(beta)/guess_beta)^2 + (sin(alpha)/guess_alpha)^2 = 1
+
+    guess_beta and guess_alpha are the lengths of the ellipse axes
 
     */
 
-    double alpha = acos (1/(2*delpsi_delphi));
-    double beta = 2 * alpha - M_PI;
+    double scale_beta = guess_beta * delpsi_delphi;
+    double numerator = guess_alpha*guess_alpha + scale_beta*scale_beta;
+    double sinsq_beta = guess_alpha * guess_beta / numerator;
+    
+    // cerr << "sinsq_beta=" << sinsq_beta << endl;
+
+    double beta = asin( sqrt(sinsq_beta) );
+    double alpha = abs(delpsi_delphi) * beta;
+
+    if (delpsi_delphi > 0)
+      beta *= -1;
 
     if (verbose)
       cerr << "Pulsar::ComplexRVMFit::set_observation"
@@ -200,6 +188,64 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 
   cerr <<"Pulsar::ComplexRVMFit::set_observation "<< count <<" bins"<< endl;
 }
+
+
+void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
+{
+  // the maximum number of lags to be tested
+  unsigned nlag = 1;
+  unsigned nbin = linear.size();
+
+  delpsi_delphi = 0;
+
+  Profile real (nbin);
+  float* re = real.get_amps();
+  Profile imag (nbin);
+  float* im = imag.get_amps();
+
+  SmoothMean smooth;
+  smooth.set_turns (0.05);
+
+  for (unsigned ilag=1; ilag <= nlag; ilag++)
+  {
+    std::complex< Estimate<double> > cross;
+
+    for (unsigned ibin=0; ibin < nbin; ibin++)
+    {
+      cross = std::conj(linear[ibin]) * linear[ (ibin+ilag) % nbin ];
+      re[ibin] = cross.real().get_value();
+      im[ibin] = cross.imag().get_value();
+
+#if _DEBUG
+      cerr << "imag: " << ibin << " " << im[ibin] << endl;
+#endif
+    }
+
+    smooth (&real);
+    smooth (&imag);
+
+#if _DEBUG
+    for (unsigned ibin=0; ibin < nbin; ibin++)
+      cerr << "smimag: " << ibin << " " << im[ibin] << endl;
+#endif
+
+    Profile absimag (imag);
+    absimag.absolute();
+    int max_bin = absimag.find_max_bin();
+
+    cerr << "imax=" << max_bin << endl;
+
+    double phi_per_bin = 2*M_PI / nbin;
+
+    peak_phase = (max_bin + 0.5) * phi_per_bin;
+    delpsi_delphi = 0.5 * atan2(im[max_bin],re[max_bin]) / phi_per_bin;
+
+    std::complex< Estimate<double> > L0 = linear[max_bin];
+    peak_pa = 0.5 * atan2(L0.imag().get_value(), L0.real().get_value());
+
+  }
+}
+
 
 void add_radian_range (std::vector<range>& data, range r)
 {
@@ -286,9 +332,16 @@ void Pulsar::ComplexRVMFit::solve ()
   MEAL::LevenbergMarquardt< complex<double> > fit;
   fit.verbose = MEAL::Function::verbose;
 
+  double renorm = 1/max_L;
+
+  for (unsigned i=0; i < data_y.size(); i++)
+    data_y[i] *= renorm;
+
+  model->renormalize( renorm );
+
   chisq = fit.init (data_x, data_y, *model);
 
-  if (verbose)
+  // if (verbose)
     cerr << "Pulsar::ComplexRVMFit::solve initial chisq = " << chisq << endl;
 
   float close = 1e-3;
@@ -323,11 +376,14 @@ void Pulsar::ComplexRVMFit::solve ()
     iter ++;
   }
 
+ // if (verbose)
+    cerr << "Pulsar::ComplexRVMFit::solve iterations = " << iter << endl;
+
   check_parameters ();
 
   if (chisq_map)
     return;
-
+  
   std::vector<std::vector<double> > covariance;
   fit.result (*model, covariance);
 
