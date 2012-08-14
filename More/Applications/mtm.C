@@ -18,7 +18,7 @@
 #include "Error.h"
 #include "dirutil.h"
 
-#include <iostream>
+#include <fstream>
 #include <iomanip>
 
 #include <getopt.h>
@@ -56,6 +56,10 @@ static bool boost_analysis = false;
 static string source;
 static double folding_period = 0.0;
 
+static vector< string > names;
+static vector< sky_coord > coordinates;
+static vector< Vector<3,double> > susceptibility;
+
 void mtm_analysis (PolnProfileFit::Analysis& analysis,
 		   PolnProfileFit& fit,
 		   const std::string& name)
@@ -76,10 +80,13 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
 
   if (tabular)
   {
+    cout.setf(ios::fixed);
+    cout << setprecision(2);
+
     cout << source 
-	 << " & " << latex( analysis.get_relative_conditional_error() )
-	 << " & " << latex( analysis.get_multiple_correlation() )
-	 << " & " << latex( analysis.get_relative_error() );
+	 << " & " << analysis.get_relative_conditional_error().get_value()
+	 << " & " << analysis.get_multiple_correlation().get_value()
+	 << " & " << analysis.get_relative_error().get_value();
   }
   else
   {
@@ -119,7 +126,7 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
     cerr << "S_error=" << S_error << endl;
 
   if (tabular)
-    cout << " & " << latex( S_error/I_error );
+    cout << " & " << ( S_error/I_error ).get_value();
   else
     cout << "\nLorentz Invariant TOA: "
       "\n Invariant relative error = " << S_error/I_error << endl << endl;
@@ -128,6 +135,10 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
   {
     Pulsar::BoostShiftAnalysis boost;
     boost.set_profile (fit.get_standard());
+
+    susceptibility.push_back( boost.dotvarphi() );
+    names.push_back( name );
+
     double delshift = boost.delvarphi_delbeta ();
 
     // a 1% gain error
@@ -137,8 +148,14 @@ void mtm_analysis (PolnProfileFit::Analysis& analysis,
     double ns = 1e9;
 
     if (tabular)
-      cout << " & " << setprecision(2) << delshift << setprecision(4)
+    {
+      cout.unsetf(ios::floatfield);
+      cout << " & " << setprecision(2) << delshift;
+
+      cout.setf(ios::fixed);
+      cout << setprecision(0)
 	   << " & " << folding_period * delshift * ns * boost0;
+    }
     else
       cout << "BOOST factor=" << delshift
 	   << " or " << folding_period * delshift * ns * boost0
@@ -278,6 +295,8 @@ int main (int argc, char *argv[])
 
     source = arch->get_source();
 
+    coordinates.push_back( arch->get_coordinates() );
+
     if (verbose)
       cerr << "mtm: creating new PolnProfile" << endl;
 
@@ -325,6 +344,31 @@ int main (int argc, char *argv[])
       "\\end{table*} \n"
 	 << endl;
   }
+
+  if (susceptibility.size() > 1 && susceptibility.size() == coordinates.size())
+  {
+    ofstream out ( "susceptibility_correlation.txt" );
+
+    for (unsigned i=0; i<susceptibility.size(); i++)
+    {
+      Vector<3,double> A = susceptibility[i];
+      double Anorm = sqrt(A*A);
+      sky_coord Acoord = coordinates[i];
+
+      for (unsigned j=i+1; j<susceptibility.size(); j++)
+      {
+	Vector<3,double> B = susceptibility[j];
+	double Bnorm = sqrt(B*B);
+	sky_coord Bcoord = coordinates[j];
+
+	out << names[i] << " " << names[j] << " "
+	    << Anorm << " " << Bnorm << " "
+	    << Acoord.angularSeparation(Bcoord).getDegrees() << " "
+	    << A*B/(Anorm*Bnorm) << endl;
+      }
+    }
+  }
+
   return 0;
 
 }
