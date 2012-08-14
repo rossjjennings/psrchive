@@ -42,6 +42,10 @@ namespace Pulsar {
     void set_between_panels (float x) { between_panels = x; }
     float get_between_panels () const { return between_panels; }
 
+    void set_panels (const std::string& x) { panels = x; }
+    std::string get_panels () const { return panels; }
+
+
   protected:
 
     //! Separate panels for each class of calibrator parameters
@@ -49,6 +53,9 @@ namespace Pulsar {
 
     //! spacing between plot panels
     float between_panels;
+
+    //! panels to be plotted
+    std::string panels;
   };
 
 }

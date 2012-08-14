@@ -27,6 +27,14 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
 
   unsigned nclass = info->get_nclass();
 
+  vector<unsigned> classes;
+
+  if (!panels.empty())
+  {
+    TextInterface::parse_indeces (classes, panels, nclass);
+    nclass = classes.size();
+  }
+    
   // fraction of viewport reserved for total space between panels
   float yspace = 0;
   // fraction of viewport for space between each panel
@@ -44,12 +52,17 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
 
   for (unsigned iclass=0; iclass < nclass; iclass++)
   {
+    unsigned jclass = iclass;
+
+    if (classes.size())
+      jclass = classes[iclass];
+
     Reference::To<CalibratorParameter> plot = new CalibratorParameter;
 
-    string name = "panel" + tostring(iclass);
+    string name = "panel" + tostring(jclass);
     manage (name, plot);
 
-    plot->set_class (iclass);
+    plot->set_class (jclass);
     plot->prepare (info, data);
 
     plot->get_frame()->set_viewport (0,1, ybottom, ybottom+yheight);
@@ -87,4 +100,8 @@ Pulsar::CalibratorInfo::Interface::Interface (CalibratorInfo* instance)
   add( &CalibratorInfo::get_between_panels,
        &CalibratorInfo::set_between_panels,
        "space", "Fraction of viewport for space between panels" );
+
+  add( &CalibratorInfo::get_panels,
+       &CalibratorInfo::set_panels,
+       "panels", "Panels to be plotted" );
 }
