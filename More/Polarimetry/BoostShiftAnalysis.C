@@ -15,7 +15,7 @@
 
 using namespace std;
 
-bool Pulsar::BoostShiftAnalysis::verbose = true;
+bool Pulsar::BoostShiftAnalysis::verbose = false;
 
 void Pulsar::BoostShiftAnalysis::set_profile (const PolnProfile* profile)
 {
@@ -98,6 +98,14 @@ double Pulsar::BoostShiftAnalysis::delvarphi_delb (unsigned k) const
   }
 
   return numerator / (2*M_PI*denominator);
+}
+
+Vector<3,double> Pulsar::BoostShiftAnalysis::dotvarphi () const
+{
+  Vector<3,double> result;
+  for (unsigned k=0; k<3; k++)
+    result[k] = delvarphi_delb (k+1);
+  return result;
 }
 
 double Pulsar::BoostShiftAnalysis::delvarphi_delbeta () const

@@ -36,6 +36,9 @@ namespace Pulsar {
     /*! Equation (26) of 1 November 2010 companion to van Straten (2006) */
     double delvarphi_delb (unsigned k) const;
 
+    //! Three-vector of partial derivatives of varphi with respect to b_k
+    Vector<3,double> dotvarphi () const;
+
     //! Partial derivative of varphi with respect to beta
     /*! Equation (27) of 1 November 2010 companion to van Straten (2006) */
     double delvarphi_delbeta () const;
