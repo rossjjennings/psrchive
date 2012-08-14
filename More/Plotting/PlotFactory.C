@@ -24,6 +24,7 @@
 #include "Pulsar/TwoBitPlot.h"
 #include "Pulsar/Poincare.h"
 #include "Pulsar/CalibratorInfo.h"
+#include "Pulsar/CalibratorParameter.h"
 #include "Pulsar/CalibratorSpectrum.h"
 #include "Pulsar/LinePhasePlot.h"
 #include "Pulsar/DynamicSNSpectrumPlot.h"
@@ -97,6 +98,9 @@ Pulsar::PlotFactory::PlotFactory ()
 
   add ( new PlotFactory::Advocate<CalibratorInfo>
 	('M', "calm", "Calibrator model information") );
+
+  add ( new PlotFactory::Advocate<CalibratorParameter>
+	('p', "calp", "Calibrator parameter") );
 
   add ( new PlotFactory::Advocate<LinePhasePlot>
         ('R', "line", "Line phase subints" ) );
