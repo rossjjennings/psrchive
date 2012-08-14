@@ -331,10 +331,6 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
   // the correction to supplement the PolnCalibrator
   Reference::To<Calibration::SingleAxis> correction;
 
-  // the SingleAxis interpretation of reference signal
-  Calibration::SingleAxis pre_single_axis;
-
-
   for (unsigned ichan=0; ichan<target_nchan; ++ichan) try
   {
     if (verbose > 2)
