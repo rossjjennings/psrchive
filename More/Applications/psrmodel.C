@@ -363,6 +363,26 @@ void psrmodel::process (Pulsar::Archive* data)
       "phi_0 " << state(RVM->magnetic_meridian) << " deg"
 	 << endl;
 
+#if HAVE_PGPLOT && _DEBUG
+  if (plot_result)
+  {
+    cerr << "Plotting initial guess" << endl;
+    StokesCylindrical plotter;
+
+    AnglePlot* pa = plotter.get_orientation();
+
+    pa->set_threshold( rvmfit->get_threshold() );
+    pa->model.set (rvmfit.get(), &ComplexRVMFit::evaluate);
+    pa->get_frame()->get_y_scale()->set_range_norm (0, 1.5);
+
+    plotter.get_scale()->set_units( PhaseScale::Degrees );
+    plotter.plot( data );
+
+    cerr << "Hit <ENTER> to continue" << endl;
+    getchar();
+  }
+#endif
+
     rvmfit->solve();
   }
 
