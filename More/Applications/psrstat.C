@@ -86,9 +86,6 @@ psrstat::psrstat ()
   has_manual = true;
   version = "$Id: psrstat.C,v 1.8 2010/05/31 22:25:33 straten Exp $";
 
-  // print/parse in degrees
-  Angle::default_type = Angle::Degrees;
-
   // suppress warnings by default
   Archive::set_verbosity (0);
 

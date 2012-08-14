@@ -105,9 +105,6 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
   has_manual = true;
   version = "$Id: psrplot.C,v 1.35 2010/09/19 08:30:00 straten Exp $";
 
-  // print angles in degrees
-  Angle::default_type = Angle::Degrees;
-
   // Allow plot classes to preprocess data before plotting
   preprocess = true;
 
