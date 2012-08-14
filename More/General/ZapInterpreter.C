@@ -161,7 +161,6 @@ void parse_indeces (vector<unsigned>& indeces,
 		    const vector<string>& arguments,
 		    unsigned limit)
 {
-  // note that the first argument is the command name
   for (unsigned i=0; i<arguments.size(); i++)
     TextInterface::parse_indeces (indeces, "[" + arguments[i] + "]", limit);
 }
