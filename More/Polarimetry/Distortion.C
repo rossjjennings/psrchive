@@ -25,7 +25,7 @@ using Calibration::BackendFeed;
 
 bool verbose = false;
 
-void feed_only (MEAL::Complex2* xform)
+void feed_only (MEAL::Complex2* xform, double diff_gain = 0.0)
 {
   BackendFeed* feed = dynamic_cast<BackendFeed*> (xform);
 
@@ -34,7 +34,7 @@ void feed_only (MEAL::Complex2* xform)
 		 "transformation is not a BackendFeed");
 
   feed->set_gain( 1.0 );
-  feed->set_diff_gain( 0.0 );
+  feed->set_diff_gain( diff_gain );
   feed->set_diff_phase( 0.0 );
 }
 
@@ -68,47 +68,56 @@ void Pulsar::Distortion::set_calibrator (Archive* archive)
   /* The following line provides a basis-independent representation of a
      reference source that illuminates both receptors equally and in phase. */
   Quaternion<double,Hermitian> ideal (1,0,1,0);
-  Stokes< Estimate<double> > input_stokes = standard (ideal);
+  Stokes< Estimate<double> > input_stokes = ::standard (ideal);
 
   const unsigned nchan = archive->get_nchan();
 
   for (unsigned ichan=0; ichan<nchan; ++ichan) try
   {
-    if (!precalibrator->get_transformation_valid(ichan))
-      continue;
+    double b1=0, b2=0, b3=0;
 
-    if (verbose > 2)
-      cerr << "Pulsar::Distortion::set_calibrator ichan=" << ichan << endl;
+    if (precalibrator->get_transformation_valid(ichan))
+    {
+      if (verbose > 2)
+	cerr << "Pulsar::Distortion::set_calibrator ichan=" << ichan << endl;
 
-    MEAL::Complex2* xform = precalibrator->get_transformation(ichan);
-    feed_only (xform);
+      MEAL::Complex2* xform = precalibrator->get_transformation(ichan);
+      feed_only (xform);
 
-    // get the Stokes parameters of the reference source observation
-    Stokes< Estimate<double> > output_stokes;
-    output_stokes = reference_input->get_stokes (ichan);
+      // get the Stokes parameters of the reference source observation
+      Stokes< Estimate<double> > output_stokes;
+      output_stokes = reference_input->get_stokes (ichan);
 
-    // get the precalibrator transformation
-    Jones<double> response = xform->evaluate();
-    if (verbose > 2)
-      cerr << "HybridCalibrator response=" << response << endl;
+      // get the precalibrator transformation
+      Jones<double> response = xform->evaluate();
+      if (verbose > 2)
+	cerr << "HybridCalibrator response=" << response << endl;
 
-    //cerr << "A=" << output_stokes << endl;
+      //cerr << "A=" << output_stokes << endl;
+      
+      // pass the reference Stokes parameters through the instrument
+      output_stokes = transform (output_stokes, response*basis);
+      
+      //cerr << "B=" << output_stokes << endl;
+      
+      solver->set_input (input_stokes);
+      solver->set_output (output_stokes);
+      solver->solve (solution);
+      
+      b1 = solution->get_diff_gain().get_value();
+      b2 = xform->get_param (3);
+      b3 = xform->get_param (4);
 
-    // pass the reference Stokes parameters through the instrument
-    output_stokes = transform (output_stokes, response*basis);
-
-    //cerr << "B=" << output_stokes << endl;
-
-    solver->set_input (input_stokes);
-    solver->set_output (output_stokes);
-    solver->solve (solution);
+      // set up for distorting the standard, if necessary
+      feed_only (xform, b1);
+    }
 
     double freq = extension->get_centre_frequency (ichan);
 
     cout << extension->get_epoch() << " " << ichan << " " << freq
-	 << " " << solution->get_diff_gain().get_value() 
-	 << " " << xform->get_param (3) //<< " " << xform->get_param_name (3)
-	 << " " << xform->get_param (4) //<< " " << xform->get_param_name (4)
+	 << " " << b1
+	 << " " << b2
+	 << " " << b3
 	 << endl;
   }
   catch (Error& error)
@@ -117,5 +126,22 @@ void Pulsar::Distortion::set_calibrator (Archive* archive)
 
   cout << endl;
 
+  if (standard)
+  {
+    Reference::To<Archive> copy = standard->clone();
+    precalibrator->calibrate (copy);
+
+    for (unsigned isubint=0; isubint < copy->get_nsubint(); isubint++)
+      copy->get_Integration(isubint)->set_epoch( extension->get_epoch() );
+
+    string new_filename = archive->get_filename() + ".dar";
+    copy->unload (new_filename);
+  }
+}
+
+
+void Pulsar::Distortion::set_standard (Archive* archive)
+{
+  standard = archive;
 }
 
