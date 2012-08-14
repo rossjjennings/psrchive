@@ -61,6 +61,9 @@ namespace MEAL {
     //! Get the linear polarization of the ith state
     Estimate<double> get_linear (unsigned i) const;
 
+    //! Correct gain of each state to account for amplitude of complex phase
+    void renormalize (double renorm);
+
     // ///////////////////////////////////////////////////////////////////
     //
     // Function implementation

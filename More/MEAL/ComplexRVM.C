@@ -145,8 +145,27 @@ Estimate<double> MEAL::ComplexRVM::get_linear (unsigned i) const
   return state[i].gain->get_gain();
 }
 
-void temp ()
+void MEAL::ComplexRVM::renormalize (double renorm)
 {
+  // MEAL::Function::verbose = true;
+
+  for (unsigned i=0; i<state.size(); i++)
+  {
+    double L = get_linear(i).get_value();
+
+    set_state(i);
+    complex<double> result = evaluate ();
+
+    // cerr << "L=" << L << " abs=" << std::abs(result);
+
+    double new_L = renorm * L * L / abs(result);
+
+    set_linear( i, new_L );
+
+    result = evaluate ();
+
+    // cerr << " : new L=" << new_L << " abs=" << abs(result) << endl;
+  }
 }
 
 void MEAL::ComplexRVM::check (unsigned i, const char* method) const
