@@ -17,14 +17,16 @@ void MEAL::RotatingVectorModel::init ()
   if (verbose)
     cerr << "MEAL::RotatingVectorModel::init" << endl;
 
-  ScalarArgument* argument = new ScalarArgument; 
-
   reference_position_angle = new ScalarParameter;
   reference_position_angle->set_value_name ("PA_0");
 
   line_of_sight = new ScalarParameter;
   line_of_sight->set_value_name ("zeta");
 
+  /*
+    SumRule is used to optionally add alpha to zeta, turning this
+    parameter into beta (see use_impact method).
+  */
   zeta_sum = new SumRule<Scalar>;
   zeta_sum->add_model( line_of_sight );
 
@@ -34,6 +36,8 @@ void MEAL::RotatingVectorModel::init ()
   magnetic_meridian = new ScalarParameter;
   magnetic_meridian->set_value_name ("phi_0");
 
+  // the argument to this function is pulse phase, phi
+  ScalarArgument* argument = new ScalarArgument; 
   ScalarMath longitude = *argument - *magnetic_meridian;
 
   /*
