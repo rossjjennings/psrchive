@@ -15,6 +15,9 @@ using namespace Pulsar;
 
 TextInterface::Parser* standard_interface (Archive* archive)
 {
+  // print/parse in degrees
+  Angle::default_type = Angle::Degrees;
+
   Reference::To<TextInterface::Parser> interface = archive->get_interface();
 
   interface->set_indentation (" ");
