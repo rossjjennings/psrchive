@@ -62,6 +62,7 @@ void Pulsar::ProfilePlot::draw_transitions (const Profile* profile)
 
   float hip[3] = { mean_hi, mean_hi-sigma_hi, mean_hi+sigma_hi };
   float lop[3] = { mean_lo, mean_lo-sigma_lo, mean_lo+sigma_lo };
+  int line_style[3] = { 1, 2, 2 };
 
   int colour=0, line=0;
 
@@ -88,7 +89,6 @@ void Pulsar::ProfilePlot::draw_transitions (const Profile* profile)
 
   for( int xoff = int(sx)-1; xoff < int(ex)+1; xoff ++ )
   {
-    cpgsls(1);
     for (int i=0; i<3; i++)
     {
       float yp[2];
@@ -96,19 +96,19 @@ void Pulsar::ProfilePlot::draw_transitions (const Profile* profile)
       yp[!st_low] = lop[i];
 
       cpgsci (cp[0]);
+      cpgsls (line_style[i]);
       cpgmove (xp[1]+space-1.0 + xoff,yp[0]);
       cpgdraw (xp[0]-space + xoff,yp[0]);
 
       cpgsci (cp[1]);
+      cpgsls (line_style[i]);
       cpgmove (xp[0]+space + xoff,yp[1]);
       cpgdraw (xp[1]-space + xoff,yp[1]);
 
       cpgsci (cp[0]);
+      cpgsls (line_style[i]);
       cpgmove (xp[1]+space + xoff,yp[0]);
       cpgdraw (xp[0]-space+1.0 + xoff,yp[0]);
-
-      // draw the error bars dotted
-      cpgsls(2);
     }
   }
 
