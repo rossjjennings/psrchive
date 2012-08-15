@@ -69,9 +69,6 @@ psrsh::psrsh ()
 
   load_files = true;
   
-  // by default, print/parse angles in degrees
-  Angle::default_type = Angle::Degrees;
-
   add( new Pulsar::UnloadOptions );
 
   interpreter = standard_shell();
