@@ -18,6 +18,9 @@
 
 #include "templates.h"
 
+#define _DEBUG 1
+#include "debug.h"
+
 #include <assert.h>
 
 using namespace std;
@@ -34,18 +37,27 @@ Pulsar::ComplexRVMFit::ComplexRVMFit()
   // favour impact angle smaller than colatitude of magnetic axis
   guess_alpha = 0.5;
   guess_beta = 0.25;
+  guess_smooth = 3;
 }
 
-//! Set the threshold below which data are ignored
 void Pulsar::ComplexRVMFit::set_threshold (float sigma)
 {
   threshold = sigma;
 }
 
-//! Get the threshold below which data are ignored
 float Pulsar::ComplexRVMFit::get_threshold () const
 {
   return threshold;
+}
+
+void Pulsar::ComplexRVMFit::set_guess_smooth (unsigned phase_bins)
+{
+  guess_smooth = phase_bins;
+}
+
+unsigned Pulsar::ComplexRVMFit::get_guess_smooth () const
+{
+  return guess_smooth;
 }
 
 template<class T>
@@ -68,10 +80,6 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
   if (model && model->get_nstate())
     model = 0;
 
-  const unsigned nbin = data->get_nbin();
-  int max_bin = data->get_Profile(0)->find_max_bin();
-  peak_phase = (max_bin+ 0.5)*2*M_PI / nbin;
-
   if (verbose)
     cerr << "Pulsar::ComplexRVMFit::set_observation"
       " threshold=" << threshold << endl;
@@ -82,6 +90,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
   unsigned count = 0;
   max_L = 0;
 
+  const unsigned nbin = data->get_nbin();
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
     double phase = (ibin + 0.5)*2*M_PI / nbin;
@@ -193,59 +202,88 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
 {
   // the maximum number of lags to be tested
-  unsigned nlag = 1;
+  unsigned nlag = 5;
   unsigned nbin = linear.size();
 
   delpsi_delphi = 0;
 
+  // the Profile class initializes the amps array = zero
   Profile real (nbin);
   float* re = real.get_amps();
   Profile imag (nbin);
   float* im = imag.get_amps();
 
   SmoothMean smooth;
-  smooth.set_turns (0.05);
+  if (guess_smooth)
+    smooth.set_bins( guess_smooth );
 
-  for (unsigned ilag=1; ilag <= nlag; ilag++)
+  for (unsigned ilag=1; ilag <= guess_smooth; ilag++)
   {
     std::complex< Estimate<double> > cross;
 
+    unsigned ilag2 = ilag/2;
+    weight += ilag;
+
     for (unsigned ibin=0; ibin < nbin; ibin++)
     {
+      unsigned mid = (ibin+ilag2) % nbin;
+
       cross = std::conj(linear[ibin]) * linear[ (ibin+ilag) % nbin ];
-      re[ibin] = cross.real().get_value();
-      im[ibin] = cross.imag().get_value();
 
-#if _DEBUG
-      cerr << "imag: " << ibin << " " << im[ibin] << endl;
-#endif
+      double Re = cross.real().get_value();
+      double Im = cross.imag().get_value();
+
+      re[mid] += Re;
+      im[mid] += Im;
+
+      if (Re == 0.0 && Im == 0.0)
+	re[mid] = im[mid] = 0.0;
     }
+  }
 
+#if 0
+  if (guess_smooth)
+  {
     smooth (&real);
     smooth (&imag);
-
-#if _DEBUG
-    for (unsigned ibin=0; ibin < nbin; ibin++)
-      cerr << "smimag: " << ibin << " " << im[ibin] << endl;
+  }
 #endif
 
-    Profile absimag (imag);
-    absimag.absolute();
-    int max_bin = absimag.find_max_bin();
+#if _DEBUG
+  for (unsigned ibin=0; ibin < nbin; ibin++)
+    cerr << "smimag: " << ibin << " " << im[ibin] << endl;
+#endif
 
-    cerr << "imax=" << max_bin << endl;
+  int max_bin = -1;
+  double max_angle = 0.0;
 
-    double phi_per_bin = 2*M_PI / nbin;
-
-    peak_phase = (max_bin + 0.5) * phi_per_bin;
-    delpsi_delphi = 0.5 * atan2(im[max_bin],re[max_bin]) / phi_per_bin;
-
-    std::complex< Estimate<double> > L0 = linear[max_bin];
-    peak_pa = 0.5 * atan2(L0.imag().get_value(), L0.real().get_value());
-
+  for (unsigned ibin=0; ibin < nbin; ibin++)
+  {
+    double phase = (ibin + 0.5)*2*M_PI / nbin;
+    double angle = atan2 (im[ibin], re[ibin]);
+    
+#if _DEBUG
+    cerr << "angle: " << phase*180/M_PI << " " << angle
+	 << " " << im[ibin] << " " << re[ibin] << endl;
+#endif
+    
+    if ( (max_bin < 0 || angle > max_angle) &&
+	 (is_included(phase) || !is_excluded(phase)) )
+      {
+	max_bin = ibin;
+	max_angle = angle;
+      }
   }
+  
+  double phi_per_bin = 2*M_PI / nbin;
+  
+  peak_phase = (max_bin + 0.5) * phi_per_bin;
+  delpsi_delphi = 0.5 * atan2(im[max_bin],re[max_bin]) / phi_per_bin;
+  
+  std::complex< Estimate<double> > L0 = linear[max_bin];
+  peak_pa = 0.5 * atan2(L0.imag().get_value(), L0.real().get_value());
 }
-
+				      
 
 void add_radian_range (std::vector<range>& data, range r)
 {

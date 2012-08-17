@@ -74,6 +74,11 @@ namespace Pulsar
     //! Get the threshold below which data are ignored
     float get_threshold () const;
     
+    //! Set the smoothing window used to stabilize first guess
+    void set_guess_smooth (unsigned phase_bins);
+    //! Get the smoothing window used to stabilize first guess
+    unsigned get_guess_smooth () const;
+    
     //! Get the model to be fit to the data
     MEAL::ComplexRVM* get_model ();
 
@@ -131,6 +136,9 @@ namespace Pulsar
     float guess_alpha;
     // length of the first guess ellipse along the sin(beta) axis
     float guess_beta;
+
+    // number of phase bins in smoothing window used to stabilize first guess
+    unsigned guess_smooth;
 
   private:
 
