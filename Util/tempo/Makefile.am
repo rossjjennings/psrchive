@@ -22,12 +22,13 @@ libtempo_la_SOURCES = keys.dat ephio_c.c ephio.f \
 
 nodist_libtempo_la_SOURCES = ephio_def.c
 
-bin_PROGRAMS = keys2c keys2fort ephepo ephtex ephorb fdot
+bin_PROGRAMS = keys2c keys2fort ephepo ephtex ephorb fdot aopx
 
 ephepo_SOURCES = ephepo.C
 ephtex_SOURCES = ephtex.C
 ephorb_SOURCES = ephorb.C
 fdot_SOURCES = fdot.C
+aopx_SOURCES = aopx.C
 
 check_PROGRAMS = test_ephio test_polyco_io test_Phase \
 	test_get_configuration test_psrephem test_obsys $(TESTS)
