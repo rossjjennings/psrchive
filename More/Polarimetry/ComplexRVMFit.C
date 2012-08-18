@@ -10,6 +10,7 @@
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/SmoothMedian.h"
 #include "Pulsar/SmoothMean.h"
+#include "Pulsar/MaskSmooth.h"
 
 #include "MEAL/ComplexRVM.h"
 #include "MEAL/RotatingVectorModel.h"
@@ -201,9 +202,7 @@ void Pulsar::ComplexRVMFit::set_observation (const PolnProfile* _data)
 
 void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
 {
-  // the maximum number of lags to be tested
-  unsigned nlag = 5;
-  unsigned nbin = linear.size();
+  const unsigned nbin = linear.size();
 
   delpsi_delphi = 0;
 
@@ -213,41 +212,48 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
   Profile imag (nbin);
   float* im = imag.get_amps();
 
-  SmoothMean smooth;
-  if (guess_smooth)
-    smooth.set_bins( guess_smooth );
+  std::complex< Estimate<double> > cross;
 
-  for (unsigned ilag=1; ilag <= guess_smooth; ilag++)
+  for (unsigned ibin=0; ibin < nbin; ibin++)
   {
-    std::complex< Estimate<double> > cross;
+    cross = std::conj(linear[ibin]) * linear[ (ibin+1) % nbin ];
+    
+    re[ibin] = cross.real().get_value();
+    im[ibin] = cross.imag().get_value();
+  }
 
-    unsigned ilag2 = ilag/2;
-    weight += ilag;
+  PhaseWeight mask (nbin, 1.0);
+  for (unsigned ibin=0; ibin < nbin; ibin++)
+  {
+    if ( linear[ibin].real().get_error() == 0.0 )
+      mask[ibin] = 0.0;
 
-    for (unsigned ibin=0; ibin < nbin; ibin++)
+    double phase = (ibin + 0.5)*2*M_PI / nbin;
+    if (is_excluded(phase) && !is_included(phase))
+      mask[ibin] = 0.0;
+
+    cerr << "init mask " << ibin << " " << mask[ibin] << endl;
+  }
+
+  
+  if (guess_smooth)
+  {
     {
-      unsigned mid = (ibin+ilag2) % nbin;
+      SmoothMean smooth;
+      smooth.set_bins (guess_smooth);
+      
+      smooth (&real);
+      smooth (&imag);
+    }
 
-      cross = std::conj(linear[ibin]) * linear[ (ibin+ilag) % nbin ];
+    {
+      MaskSmooth smooth;
+      smooth.set_bins (guess_smooth);
+      smooth.set_masked_bins (1);
 
-      double Re = cross.real().get_value();
-      double Im = cross.imag().get_value();
-
-      re[mid] += Re;
-      im[mid] += Im;
-
-      if (Re == 0.0 && Im == 0.0)
-	re[mid] = im[mid] = 0.0;
+      smooth (&mask);
     }
   }
-
-#if 0
-  if (guess_smooth)
-  {
-    smooth (&real);
-    smooth (&imag);
-  }
-#endif
 
 #if _DEBUG
   for (unsigned ibin=0; ibin < nbin; ibin++)
@@ -259,16 +265,15 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
 
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
-    double phase = (ibin + 0.5)*2*M_PI / nbin;
+
     double angle = atan2 (im[ibin], re[ibin]);
     
 #if _DEBUG
-    cerr << "angle: " << phase*180/M_PI << " " << angle
-	 << " " << im[ibin] << " " << re[ibin] << endl;
+    cerr << "angle: " << ibin << " " << angle
+	 << " " << im[ibin] << " " << re[ibin] << " " << mask[ibin] << endl;
 #endif
     
-    if ( (max_bin < 0 || angle > max_angle) &&
-	 (is_included(phase) || !is_excluded(phase)) )
+    if ( (max_bin < 0 || angle > max_angle) && mask[ibin] > 0 )
       {
 	max_bin = ibin;
 	max_angle = angle;
