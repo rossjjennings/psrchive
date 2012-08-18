@@ -166,6 +166,11 @@ void psrmodel::add_options (CommandLine::Menu& menu)
   arg->set_help ("cutoff threshold when selecting bins "
 		 "[default " + tostring(rvmfit->get_threshold()) + "]");
 
+  arg = menu.add (rvmfit.get(), &ComplexRVMFit::set_guess_smooth,
+		  "smooth", "bins");
+  arg->set_help ("smoothing factor used to stabilize first guess "
+		 "[default " + tostring(rvmfit->get_guess_smooth()) + "]");
+
   arg = menu.add (this, &psrmodel::add_exclude, "exclude", "deg0:deg1");
   arg->set_help ("add a range of pulse longitude to exclude from fit");
 
