@@ -16,7 +16,6 @@ nobase_include_HEADERS = \
         Pulsar/ArchiveSort.h \
 	Pulsar/ArchiveTemplates.h \
         Pulsar/BaselineEstimator.h \
-	Pulsar/BaselineInterpreter.h \
         Pulsar/BaselineWindow.h \
         Pulsar/ChannelSubsetMatch.h \
         Pulsar/ChannelWeight.h \
@@ -146,7 +145,6 @@ libGeneral_la_SOURCES = \
         Archive_update_model.C \
 	Archive_weighted_frequency.C \
 	BaselineEstimator.C \
-	BaselineInterpreter.C \
         BaselineWindow.C \
         ChannelSubsetMatch.C \
         ChannelZapMedian.C \
