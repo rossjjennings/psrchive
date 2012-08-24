@@ -24,6 +24,7 @@ const double c    = 2.99792458e5;   // km/s
 const double day  = 24.0 * 3600.0;  // seconds
 const double year = 365.2422 * day; // seconds
 const double mas  = M_PI/(60.0*60.0*180.0*1000.0);  // radians
+const double deg  = M_PI/180;       // radians
 const double parsec = 3.085678e13;  // km
 
 // I.H. Stairs et al. 1998, ApJ 505:352-357 use T_sol = G * M_sol / c^3
@@ -287,6 +288,60 @@ int psrephem::pm_x_dot (double& xdot, double& xdot_err) const
 
 // ////////////////////////////////////////////////////////////////////////
 //
+// returns the upper limit on i given by proper motion, x, and xdot
+//
+// ////////////////////////////////////////////////////////////////////////
+int psrephem::imax_pm_xdot (double& imax, double& imax_err) const
+{
+  double pm, pmerr;
+  if (this->pm (pm, pmerr) < 0)
+    return -1;
+
+  if (parmStatus[EPH_A1] < 1 || parmStatus[EPH_XDOT] < 1)
+    return -1;
+
+  double xdot = value_double [EPH_XDOT];
+  double x = value_double [EPH_A1];
+
+  cerr << "x=" << x << " xdot=" << xdot << " pm=" << pm << endl;
+
+  double tani = pm*mas/year * x/xdot;
+
+  imax = atan(tani);
+  imax_err = -1;
+  return 0;
+}
+
+// ////////////////////////////////////////////////////////////////////////
+//
+// returns the upper limit on i given by proper motion and omdot
+//
+// ////////////////////////////////////////////////////////////////////////
+int psrephem::imax_pm_omdot (double& imax, double& imax_err) const
+{
+  double pm, pmerr;
+  if (this->pm (pm, pmerr) < 0)
+    return -1;
+
+  if (parmStatus[EPH_OMDOT] < 1)
+    return -1;
+
+  double omdot = value_double [EPH_OMDOT];
+
+  //cerr << "omdot=" << omdot*deg/year << endl;
+  //cerr << "pm=" << pm*mas/year << endl;
+
+  double sini = (pm*mas) / (omdot*deg);
+
+  //cerr << "sin(i)=" << sini << endl;
+
+  imax = asin(sini);
+  imax_err = -1;
+  return 0;
+}
+
+// ////////////////////////////////////////////////////////////////////////
+//
 // returns the proper motion contribution to omdot in degrees per year
 //
 // ////////////////////////////////////////////////////////////////////////
@@ -382,6 +437,20 @@ int psrephem::P_ddot (double& p_ddot, double& p_ddot_err) const
   return 0;
 }
 
+int psrephem::characteristic_age (double& age, double age_err)
+{
+  double p_dot, p_dot_err;
+  if (P_dot (p_dot, p_dot_err) < 0)
+    return -1;
+    
+  double p, p_err;
+  if (P (p, p_err) < 0)
+    return -1;
+
+  age = 0.5 * p / p_dot / (year * 1e9);
+  age_err = age * sqrt(sqr(p_err/p)+sqr(p_dot_err/p));
+}
+
 // ////////////////////////////////////////////////////////////////////////
 //
 //
@@ -409,6 +478,60 @@ int psrephem::quadratic_Doppler (double& beta, double& beta_err) const
 
   return 0;
 }
+
+// ////////////////////////////////////////////////////////////////////////
+//
+// returns the spin period derivative, corrected for quadraditic Doppler
+//
+// ////////////////////////////////////////////////////////////////////////
+int psrephem::corrected_P_dot (double& p_dot_int, double& p_dot_int_err) const
+{
+  double beta, beta_err;
+  if (quadratic_Doppler (beta, beta_err) < 0)
+    return -1;
+
+  double p, p_err;
+  if (P (p, p_err) < 0)
+    return -1;
+
+  double p_dot, p_dot_err;
+  if (P_dot (p_dot, p_dot_err) < 0)
+    return -1;
+
+  p_dot_int = p_dot - p * beta;
+  p_dot_int_err = p_dot_err + p * beta * sqrt(sqr(p_err/p)+sqr(beta_err/beta));
+
+  return 0;
+}
+
+// ////////////////////////////////////////////////////////////////////////
+//
+// returns the spin period derivative, corrected for quadraditic Doppler
+//
+// ////////////////////////////////////////////////////////////////////////
+int psrephem::pdot_distance (double& dist, double& dist_err) const
+{
+  double p, p_err;
+  if (P (p, p_err) < 0)
+    return -1;
+
+  double p_dot, p_dot_err;
+  if (P_dot (p_dot, p_dot_err) < 0)
+    return -1;
+
+  double beta = p_dot / p;
+
+  double mu, mu_err;
+  if (pm (mu, mu_err) < 0)
+    return -1;
+
+  // distance in parsec
+  dist = beta * c / (sqr(mu * mas/year) * parsec);
+  dist_err = -1;
+
+  return 0;
+}
+
 
 // ////////////////////////////////////////////////////////////////////////
 //
