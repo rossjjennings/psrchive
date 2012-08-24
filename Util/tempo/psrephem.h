@@ -157,6 +157,12 @@ class psrephem : public Pulsar::Parameters
   // returns the proper motion contribution to omdot in degrees per year
   int pm_omega_dot (double& omdot, double& omdot_err) const;
 
+  // returns the limit on i derived from proper motion and xdot
+  int imax_pm_xdot (double& imax, double& imax_err) const;
+
+  // returns the limit on i derived from proper motion and omdot
+  int imax_pm_omdot (double& imax, double& imax_err) const;
+
   // returns the orbital period in seconds
   int P (double& p, double& p_err) const;
   // returns the orbital period derivative
@@ -164,12 +170,19 @@ class psrephem : public Pulsar::Parameters
   // returns the second orbital period derivative in seconds^-1
   int P_ddot (double& pddot, double& pddot_err) const;
 
+  // returns the characteristic age in Gyr
+  int characteristic_age (double& age, double age_err);
+
   // stability parameter of antt94
   int Delta_t (double& delta_t) const;
 
   // returns the transverse quadratic Doppler shift due to the apparent
   // acceleration along the line of sight that arises from proper motion
   int quadratic_Doppler (double& beta, double& beta_err) const;
+
+  int corrected_P_dot (double& p_dot_int, double& p_dot_int_err) const;
+
+  int pdot_distance (double& dist, double& dist_err) const;
 
   int cubic_Doppler (double& gamma, double& gamma_err,
 		     double pmrv, double pmrv_err) const;
@@ -213,6 +226,7 @@ class psrephem : public Pulsar::Parameters
 
   // returns a block of LaTeX formatted text suitable for use in tables
   std::string tex () const;
+
   // returns the LaTeX formatted pulsar name
   std::string tex_name () const;
   // returns the a LaTeX formatted string for the parameter at ephind
