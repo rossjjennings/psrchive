@@ -28,20 +28,39 @@ namespace Pulsar {
     //! Default constructor
     MaskSmooth ();
 
-    //! Set the smoothing window fraction
-    void set_window (double);
-    //! Get the smoothing window fraction
-    double get_window () const;
+    //! Return a copy constructed instance of self
+    MaskSmooth* clone () const;
+
+    //! Set the smoothing window fraction in turns
+    void set_turns (double);
+    //! Get the smoothing window fraction in turns
+    double get_turns () const;
 
     //! Set the fraction of masked neighbours required
-    void set_masked (double);
+    void set_masked_fraction (double);
     //! Get the fraction of masked neighbours required
-    double get_masked () const;
+    double get_masked_fraction () const;
+
+    //! Set the width of the smoothing window in phase bins
+    void set_bins (unsigned);
+    //! Get the width of the smoothing window in phase bins
+    unsigned get_bins () const;
+
+    //! Set the number of masked neighbours required
+    void set_masked_bins (unsigned);
+    //! Get the number of masked neighbours required
+    unsigned get_masked_bins () const;
+
 
   protected:
 
-    double window;
-    double masked;
+    double turns;
+    double masked_fraction;
+
+    unsigned bins;
+    unsigned masked_bins;
+
+    float mask_value;
 
     void calculate (PhaseWeight*);
 
