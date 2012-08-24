@@ -27,6 +27,16 @@ void Pulsar::ProfileWeightFunction::get_weight (PhaseWeight* weight)
   weight->set_Profile( profile );
 }
 
+Pulsar::PhaseWeight* 
+Pulsar::ProfileWeightFunction::operate (const Profile* _profile)
+{
+  Reference::To<PhaseWeight> _weight = new PhaseWeight;
+  set_Profile( _profile );
+  get_weight( _weight );
+
+  return _weight.release();
+}
+
 // on-pulse estimators
 #include "Pulsar/OnPulseThreshold.h"
 #include "Pulsar/PeakConsecutive.h"

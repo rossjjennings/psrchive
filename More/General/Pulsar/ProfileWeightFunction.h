@@ -37,6 +37,9 @@ namespace Pulsar {
     //! Returns a PhaseWeight with the Profile attribute set
     virtual void get_weight (PhaseWeight* weight);
 
+    //! Convenience interface
+    virtual PhaseWeight* operate (const Profile*);
+
     //! Construct a new ProfileWeightFunction from a string
     static ProfileWeightFunction* factory (const std::string& name_and_parse);
 
