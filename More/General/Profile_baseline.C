@@ -6,7 +6,23 @@
  ***************************************************************************/
 
 #include "Pulsar/Profile.h"
-#include "Pulsar/BaselineInterpreter.h"
+#include "Pulsar/BaselineWindow.h"
+
+template<typename T>
+std::ostream& operator<< (std::ostream& ostr,
+			  const Reference::To<T>& e)
+{
+  return TextInterface::insertion (ostr, e.get());
+}
+template<typename T>
+std::istream& operator>> (std::istream& istr,
+			  Reference::To<T>& e)
+{
+  T* tmp = 0;
+  std::istream& ret = TextInterface::extraction (istr, tmp);
+  e = tmp;
+  return ret;
+}
 
 /*!  
   The BaselineInterpreter class sets the baseline_strategy
@@ -16,8 +32,7 @@
 */
 Pulsar::Option<Pulsar::Profile::Mask> Pulsar::Profile::baseline_strategy
 (
- new Pulsar::BaselineInterpreter (Pulsar::Profile::baseline_strategy),
- "Profile::baseline", "minimum",
+ "Profile::baseline", new Pulsar::BaselineWindow,
 
  "Baseline estimation algorithm",
 
@@ -29,7 +44,13 @@ Pulsar::Option<Pulsar::Profile::Mask> Pulsar::Profile::baseline_strategy
 //! Return a PhaseWeight mask with the baseline phase bins enabled
 Pulsar::PhaseWeight* Pulsar::Profile::baseline () const try
 {
-  return baseline_strategy.get_value() (this);
+  /*
+    In a multi-threaded application, each Profile instance must
+    manage its own copy of this resource
+  */
+
+  Mask mask = baseline_strategy.get_value()->clone();
+  return mask->operate (this);
 }
 catch (Error& error)
 {
