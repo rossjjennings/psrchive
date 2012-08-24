@@ -24,6 +24,7 @@
 namespace Pulsar {
 
   class PhaseWeight;
+  class ProfileWeightFunction;
 
   //! Any quantity recorded as a function of pulse phase
   /*! The Pulsar::Profile class implements a useful, yet minimal, set
@@ -61,19 +62,22 @@ namespace Pulsar {
     Profile (unsigned nbin = 0);
 
     //! copy constructor
-    Profile (const Profile& profile) { init(); operator = (profile); }
+    Profile (const Profile& profile) { init(); copy (&profile); }
 
     //! copy constructor
-    Profile (const Profile* profile) { init(); operator = (*profile); }
+    Profile (const Profile* profile) { init(); copy (profile); }
 
     //! returns a pointer to a new copy of self
     virtual Profile* clone () const;
 
-    //! Resize the data area
+    //! resize the data area
     virtual void resize (unsigned nbin);
 
-    //! sets profile equal to another profile
+    //! assignment operator
     const Profile& operator = (const Profile& profile);
+
+    //! does the work for copy constructor and assignment operator
+    void copy (const Profile*);
 
     //! set this to the weighted average of this and that
     void average (const Profile* that);
@@ -158,7 +162,7 @@ namespace Pulsar {
     //! Find the bin numbers at which the cumulative power crosses thresholds
     void find_peak_edges (int& rise, int& fall) const;
     
-    typedef Functor< PhaseWeight* (const Profile*) > Mask;
+    typedef Reference::To<ProfileWeightFunction> Mask;
     //! The default implementation of the baseline finding algorithm
     static Option<Mask> baseline_strategy;
 
