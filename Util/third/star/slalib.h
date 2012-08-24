@@ -40,11 +40,18 @@ double slaEpj ( double date );
 
 void slaEqgal ( double dr, double dd, double *dl, double *db );
 
+void slaGaleq ( double dl, double db, double *dr, double *dd );
+
+void slaEqecl ( double raj, double decj, double mjd,
+                double *elong, double *elat );
+
+void slaEcleq ( double elong, double elat, double mjd,
+                double *raj, double *decj );
+
 void slaEvp ( double date, double deqx,
               double dvb[3], double dpb[3],
               double dvh[3], double dph[3] );
 
-void slaGaleq ( double dl, double db, double *dr, double *dd );
 
 double slaGmst ( double ut1 );
 

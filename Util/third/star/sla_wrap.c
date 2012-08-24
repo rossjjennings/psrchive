@@ -90,6 +90,17 @@ double slaDvdv (double va[3], double vb[3])
 
 /* *********************************************************************** */
 
+#define SLA_ecleq F77_FUNC_(sla_ecleq,slaEcleq)
+
+void SLA_ecleq (double *, double *, double *, double *, double *);
+
+void slaEcleq (double dl, double db, double mjd, double *dr, double *dd)
+{
+  SLA_ecleq (&dl, &db, &mjd, dr, dd);
+}
+
+/* *********************************************************************** */
+
 #define SLA_epj F77_FUNC_(sla_epj,slaEpj)
 
 double SLA_epj (double* mjd);
@@ -97,6 +108,17 @@ double SLA_epj (double* mjd);
 double slaEpj (double date)
 {
   return SLA_epj (&date);
+}
+
+/* *********************************************************************** */
+
+#define SLA_eqecl F77_FUNC_(sla_eqecl,slaEqecl)
+
+void SLA_eqecl (double *, double *, double *, double *, double *);
+
+void slaEqecl (double dr, double dd, double mjd, double *dl, double *db)
+{
+  SLA_eqecl (&dr, &dd, &mjd, dl, db);
 }
 
 /* *********************************************************************** */
