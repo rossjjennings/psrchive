@@ -10,6 +10,12 @@
 
 using namespace std;
 
+void Pulsar::PhaseWeightModifier::operator () (PhaseWeight* _weight)
+{
+  set_weight (_weight);
+  get_weight (_weight);
+}
+
 //! Set the PhaseWeight from which the PhaseWeight will be derived
 void Pulsar::PhaseWeightModifier::set_weight (const PhaseWeight* _weight)
 {

@@ -31,6 +31,9 @@ namespace Pulsar {
     //! Returns a PhaseWeight 
     virtual void get_weight (PhaseWeight* weight);
 
+    //! Inplace operator
+    void operator () (PhaseWeight*);
+
     //! Return a text interface that can be used to configure this instance
     TextInterface::Parser* get_interface ();
 
