@@ -104,11 +104,22 @@ string tex_double (double val, double err)
   string retval = tostring (value);
 
   string::size_type exp = retval.find('e');
-  string exponent;
 
-  if (exp != string::npos) {
-    retval = retval.substr(0,exp);
+  string mantissa;
+  string exponent;
+  
+  if (exp != string::npos) try
+  {
+    mantissa = retval.substr(0,exp);
     exponent = "$\\times 10^{" + retval.substr(exp+1) + "}$";
+    retval = mantissa;
+  }
+  catch (std::exception& error)
+  {
+    cerr << "tex_double: error in use of string::substr\n\t" << error.what()
+	 << endl;
+
+    throw;
   }
 
   return retval + "(" + tostring(error) + ")" + exponent;
@@ -240,9 +251,9 @@ const char* psrephem::tex_descriptor (int ephind)
   case EPH_SINI:   return "$\\sin(i)$";
   case EPH_KIN:    return "Orbital inclination, $i$ (\\degr)";
   case EPH_KOM:    return "Longitude of ascension, $\\Omega$ (\\degr)";
-  case EPH_PBDOT:  return "$\\dot P_{\\rm b} (10^{-12})$"; 
+  case EPH_PBDOT:  return "$\\dot P_{\\rm b}$ ($10^{-12}$)"; 
   case EPH_OMDOT:  return "$\\dot \\omega$ (\\degr yr$^{-1}$)";
-  case EPH_XDOT:   return "$\\dot x (10^{-12})$"; 
+  case EPH_XDOT:   return "$\\dot x$ ($10^{-15}$)"; 
   case EPH_M2:     return "Companion mass, m$_2$ (M$_{\\odot})$";
   default:
     return "psrephem::tex_descriptor - no match";
@@ -259,6 +270,8 @@ string psrephem::tex () const
 
   return tex (vals, true);
 }
+
+string not_yet_loopified (psrephem& val, bool dots);
 
 string psrephem::tex (vector<psrephem>& vals, bool dots)
 {
@@ -350,7 +363,7 @@ string psrephem::tex (vector<psrephem>& vals, bool dots)
   retval += nl;
 
   // celestial position angle
-  retval += "Celestial position angle, $\\phi_\\mu (\\degr)$";
+  retval += "Celestial position angle, $\\phi_\\mu$ (\\degr)";
   for (ip=0; ip<vals.size(); ip++) {
     double ph, ph_err;
     vals[ip].phi (ph, ph_err);
@@ -413,7 +426,7 @@ string psrephem::tex (vector<psrephem>& vals, bool dots)
 
     retval += nl + tex_descriptor(EPH_XDOT);
     for (ip=0; ip<vals.size(); ip++)
-      retval += bw + vals[ip].tex_val (EPH_XDOT);
+      retval += bw + vals[ip].tex_val (EPH_XDOT, 1e15);
 
     retval += nl + tex_descriptor(EPH_OMDOT);
     for (ip=0; ip<vals.size(); ip++)
@@ -443,46 +456,56 @@ string psrephem::tex (vector<psrephem>& vals, bool dots)
   retval += nl;
 
   retval += "Intrinsic period derivative, $\\dot P_{\\rm int}$ (10$^{-20}$)";
-  for (ip=0; ip<vals.size(); ip++) {
-    double beta, beta_err;
-    vals[ip].quadratic_Doppler (beta, beta_err);
-    double p, p_err;
-    vals[ip].P (p, p_err);
-    double p_dot, p_dot_err;
-    vals[ip].P_dot (p_dot, p_dot_err);
-
-    double p_dot_int = p_dot - p * beta;
-    double p_dot_int_err = p_dot_err 
-      + p * beta * sqrt(sqr(p_err/p)+sqr(beta_err/beta));
-
+  for (ip=0; ip<vals.size(); ip++)
+  {
+    double p_dot_int, p_dot_int_err;
+    vals[ip].corrected_P_dot (p_dot_int, p_dot_int_err);
     retval += bw + tex_double (p_dot_int*1e20, p_dot_int_err*1e20);
   }
   retval += nl;
 
+  retval += "$\\dot P$ Distance";
+  for (ip=0; ip<vals.size(); ip++)
+  {
+    double dist, dist_err;
+    vals[ip].pdot_distance (dist, dist_err);
+    retval += bw + tex_double (dist, dist_err);
+  }
+  retval += nl;
+
   retval += "Characteristic age, $\\tau_c$ (Gyr)";
-  for (ip=0; ip<vals.size(); ip++) {
-    double beta, beta_err;
-    vals[ip].quadratic_Doppler (beta, beta_err);
-    double p, p_err;
-    vals[ip].P (p, p_err);
-    double p_dot, p_dot_err;
-    vals[ip].P_dot (p_dot, p_dot_err);
-
-    double p_dot_int = p_dot - p * beta;
-    double p_dot_int_err = p_dot_err 
-      + p * beta * sqrt(sqr(p_err/p)+sqr(beta_err/beta));
-
-    double char_age = 0.5 * p / p_dot_int / (86400.0e9 * 365.25);
-    double char_age_err = char_age
-      * sqrt(sqr(p_err/p)+sqr(p_dot_int_err/p_dot_int));
-    
+  for (ip=0; ip<vals.size(); ip++)
+  {
+    double char_age, char_age_err;
+    vals[ip].characteristic_age (char_age, char_age_err);
     retval += bw + tex_double (char_age, char_age_err);
   }
   retval += nl;
 
-#if FIXED
-  double pb = value_double [EPH_PB];
-  double pb_err = error_double [EPH_PB];
+  if (vals.size() == 1)
+    retval += not_yet_loopified (vals[0], dots);
+
+
+  return retval;
+}
+
+string not_yet_loopified (psrephem& val, bool dots)
+{
+  string bw;
+  if (dots)
+    bw = " \t \\dotfill & ";
+  else
+    bw = " & ";
+
+  string nl = " \\\\\n";
+
+  string retval;
+
+  double beta, beta_err;
+  val.quadratic_Doppler (beta, beta_err);
+
+  double pb = val.value_double [EPH_PB];
+  double pb_err = val.error_double [EPH_PB];
 
   double SPb_dot = beta * (pb * 86400.0);
   double SPb_dot_err = SPb_dot * sqrt (sqr(beta_err/beta) + sqr(pb_err/pb));
@@ -491,28 +514,32 @@ string psrephem::tex (vector<psrephem>& vals, bool dots)
     + bw + tex_double (SPb_dot*1e12, SPb_dot_err*1e12) + nl;
 
   double GRPb_dot;
-  if (GR_Pb_dot (GRPb_dot) < 0)
+  if (val.GR_Pb_dot (GRPb_dot) < 0)
     cerr << "******* Error GR_Pb_dot!" << endl;
   GRPb_dot *= 1e12;
   retval += "$\\dot P_{\\rm b}^{\\rm GR} (10^{-12})$" + bw
     + tex_double (GRPb_dot, 0) + nl;
 
   double GRx_dot;
-  if (GR_x_dot (GRx_dot) < 0)
+  if (val.GR_x_dot (GRx_dot) < 0)
     cerr << "******* Error GR_x_dot!" << endl;
   GRx_dot *= 1e20;
   retval += "$\\dot x^{\\rm GR} (10^{-20})$" + bw
     + tex_double (GRx_dot, 0) + nl;
 
   double GRw_dot;
-  if (GR_omega_dot (GRw_dot) < 0)
+  if (val.GR_omega_dot (GRw_dot) < 0)
     cerr << "******* Error GR_w_dot!" << endl;
   // GRw_dot *= 1e12 * 180/M_PI;
-  retval += "$\\dot \\omega^{\\rm GR} (\\degr yr^{-1})$" + bw
+  retval += "$\\dot \\omega^{\\rm GR}$ (\\degr yr$^{-1}$)" + bw
     + tex_double (GRw_dot, 0) + nl;
 
+  return retval;
+}
+
+#if 0
   double gamma;
-  if (GR_gamma (gamma) < 0)
+  if (val.GR_gamma (gamma) < 0)
     cerr << "******* Error GR_w_dot!" << endl;
   cout << "GAMMA: " << gamma << endl;
 
@@ -529,6 +556,3 @@ string psrephem::tex (vector<psrephem>& vals, bool dots)
   printf("\\\\\n");
 
 #endif
-
-  return retval;
-}
