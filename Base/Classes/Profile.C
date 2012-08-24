@@ -107,29 +107,32 @@ void Pulsar::Profile::resize (unsigned new_nbin)
 */
 const Pulsar::Profile& Pulsar::Profile::operator = (const Profile& input)
 {
-  if (this == &input)
-    return *this;
-
-  try
-  {
-    resize( input.get_nbin() );
-    set_amps( input.get_amps() );
-
-    set_weight ( input.get_weight() );
-    set_centre_frequency ( input.get_centre_frequency() );
-
-    // copy the extensions
-    extension.resize (0);
-    for (unsigned iext=0; iext < input.get_nextension(); iext++)
-      add_extension( input.get_extension(iext)->clone() );
-  }
-  catch (Error& error)
-  {
-    throw error += "Pulsar::Profile::operator =";
-  }
-
+  copy (&input);
   return *this;
 }
+
+void Pulsar::Profile::copy (const Profile* that) try
+{
+  if (this == that)
+    return;
+
+  resize( that->get_nbin() );
+  set_amps( that->get_amps() );
+
+  set_weight ( that->get_weight() );
+  set_centre_frequency ( that->get_centre_frequency() );
+  
+  // copy the extensions
+  extension.resize (0);
+  for (unsigned iext=0; iext < that->get_nextension(); iext++)
+    add_extension( that->get_extension(iext)->clone() );
+
+}
+catch (Error& error)
+{
+  throw error += "Pulsar::Profile::copy";
+}
+
 
 //! set the weight of the profile
 void Pulsar::Profile::set_weight (float w)
