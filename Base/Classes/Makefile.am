@@ -90,10 +90,9 @@ libClasses_la_SOURCES = \
 
 TESTS = test_Config
 
-check_PROGRAMS = $(TESTS) test_IntegrationManagerExpert
+check_PROGRAMS = $(TESTS)
 
 test_Config_SOURCES = test_Config.C
-test_IntegrationManagerExpert_SOURCES = test_IntegrationManagerExpert.C
 
 #############################################################################
 #
