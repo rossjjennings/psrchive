@@ -10,8 +10,16 @@ if ( ! -f $tarfile ) then
   exit
 endif
 
-# determine the SourceForge user name from CVS/Root
-set SFUSER = `awk -F@ '{print $1}' @abs_top_srcdir@/CVS/Root`
+# determine the SourceForge user name from the Git configuration
+
+set server = `git config --get remote.origin.url`
+
+if ( $server =~ git://* ) then
+  echo 'ERROR: this command can be run only by a developer'
+  exit -1
+endif
+
+set SFUSER = `echo $server | awk -F// '{print $2}' | awk -F@ '{print $1}'`
 
 # the sourceforge file release system details
 set frslogin = ${SFUSER},psrchive@frs.sourceforge.net
