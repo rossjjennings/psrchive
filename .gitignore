@@ -75,6 +75,7 @@ Util/fft/install_bench
 Util/genutil/getMJD
 Util/pgutil/psrlst
 Util/resources/getHorizon
+Util/tempo/aopx
 Util/tempo/ephepo
 Util/tempo/ephio.h
 Util/tempo/ephio_def.c
