@@ -392,9 +392,9 @@ void psrpca::finalize ()
   } // save_evals
 
   // decompose profiles onto eigenvectors
-  gsl_matrix *decompositions = gsl_matrix_alloc ( (unsigned)nbin, total_count );
+  gsl_matrix *decompositions = gsl_matrix_alloc ( total_count, (unsigned)nbin );
 
-  gsl_blas_dgemm ( CblasTrans, CblasNoTrans, 1.0, evec, profiles, 0.0, decompositions );
+  gsl_blas_dgemm ( CblasTrans, CblasNoTrans, 1.0, profiles, evec, 0.0, decompositions );
 
   if ( save_decomps )
   {
@@ -446,27 +446,33 @@ void psrpca::finalize ()
     }
 
     // multiple regression
-    gsl_vector *res_decomp_covar = gsl_vector_alloc((unsigned)nbin); // covariance between residuals and decomposition coefficients
-
+    // variables:
+    gsl_vector *res_decomp_covar = gsl_vector_alloc((unsigned)nbin); // covariance between residuals and decomposition coefficients, used for calculating the predictor 
     gsl_vector *res_decomp_corel = gsl_vector_alloc((unsigned)nbin); // this one is used to determine how many eigenvectors to use
-
-    gsl_vector *mean_vector= gsl_vector_alloc ((unsigned)nbin); // vector of means of the projections
     gsl_matrix *proj_covariance = gsl_matrix_alloc((unsigned)nbin, (unsigned)nbin); // covariance of projections
+    gsl_vector *mean_calc_vector = gsl_vector_alloc ( total_count ); // auxillary vector used for generating the proj_covar
+    gsl_vector *decompositions_means = gsl_vector_alloc( nbin ); // vector of means of the projections
+    gsl_vector *proj_sd_vector = gsl_vector_alloc ( nbin ); // used for res_decomp_corel
+    gsl_vector_set_all( mean_calc_vector, 1.0/total_count );
 
-    // calculate res_decomp_ covar and corel
-    gsl_vector_view tmp_v1, tmp_v2;
-    for (unsigned i=0; i<nbin; i++)
-    {
-      tmp_v1 = gsl_matrix_row(decompositions, i);
-      for (unsigned j=0; j<nbin; j++)
-      {
-	tmp_v2 = gsl_matrix_row(decompositions, j);
-	gsl_matrix_set( proj_covariance, i, j, gsl_stats_covariance( (&tmp_v1.vector)->data, 1, (&tmp_v2.vector)->data, 1, (&tmp_v1.vector)->size) );
-	gsl_matrix_set( proj_covariance, j, i, gsl_matrix_get( proj_covariance, i, j));
-      }
-      gsl_vector_set(res_decomp_covar, i, gsl_stats_covariance (residuals->data, 1, (&tmp_v1.vector)->data, 1, (&tmp_v1.vector)->size) );
-      gsl_vector_set(res_decomp_corel, i, gsl_vector_get(res_decomp_covar, i) / gsl_stats_sd(residuals->data, 1, residuals->size) / gsl_stats_sd( (&tmp_v1.vector)->data, 1, (&tmp_v1.vector)->size) );
-      gsl_vector_set( mean_vector, i, gsl_stats_mean( (&tmp_v1.vector)->data, 1, (&tmp_v1.vector)->size ) );
+    // generate the mean projection coefficients
+    gsl_blas_dgemv( CblasTrans, 1.0, decompositions, mean_calc_vector, 0.0, decompositions_means );
+
+    // subtract the mean from decompositions
+    gsl_vector_view tmp_v1;
+    for (unsigned i_col = 0; i_col < nbin; i_col++) {
+      tmp_v1 = gsl_matrix_column( decompositions, i_col );
+      gsl_vector_set( proj_sd_vector, i_col, gsl_stats_sd( (&tmp_v1.vector)->data, 1, total_count ) );
+      gsl_vector_add_constant( &tmp_v1.vector, -decompositions_means->data[i_col] );
+    }
+    gsl_blas_dgemm( CblasTrans, CblasNoTrans, 1.0, decompositions, decompositions, 0.0, proj_covariance );
+    gsl_matrix_scale( proj_covariance, 1.0/total_count );
+    // calculate res_decomp_covar and res_decomp_corel:
+    gsl_blas_dgemv( CblasTrans, 1.0, decompositions, residuals, 0.0, res_decomp_covar );
+    gsl_vector_scale( res_decomp_covar, 1.0/total_count);
+    double residual_sd = gsl_stats_sd( residuals->data, 1, residuals->size );
+    for (unsigned i_el = 0; i_el < nbin; i_el++) {
+      gsl_vector_set( res_decomp_corel, i_el, gsl_vector_get( res_decomp_covar, i_el ) / residual_sd / gsl_vector_get( proj_sd_vector, i_el ));
     }
 
     // determine the number of significant eigenvectors
@@ -502,7 +508,7 @@ void psrpca::finalize ()
     gsl_linalg_LU_invert ( &proj_covariance_used.matrix, p_used, inverse_used);
 
     gsl_vector_view res_decomp_covar_used = gsl_vector_subvector (res_decomp_covar, 0, last_eigen);
-    gsl_vector_view mean_vector_used = gsl_vector_subvector (mean_vector, 0, last_eigen);
+    gsl_vector_view mean_vector_used = gsl_vector_subvector (decompositions_means, 0, last_eigen);
     // the beta_vector 
     gsl_vector *beta_vector_used = gsl_vector_alloc (last_eigen);
     gsl_blas_dgemv( CblasNoTrans, 1.0, inverse_used, &res_decomp_covar_used.vector, 0.0, beta_vector_used);
@@ -512,7 +518,6 @@ void psrpca::finalize ()
 
     beta_zero = gsl_stats_mean ( residuals->data, 1, residuals->size ) - beta_zero_used ;
     double multiple_correlation_coeff_used;
-    tmp_v1 = gsl_matrix_row(decompositions, 0);
     gsl_blas_ddot( &res_decomp_covar_used.vector, beta_vector_used, &multiple_correlation_coeff_used );
     logFile << "Multiple correlation coefficient = " <<  sqrt( multiple_correlation_coeff_used / gsl_stats_variance(residuals->data, 1, total_count ) ) << endl;
 
@@ -532,7 +537,7 @@ void psrpca::finalize ()
 	double correction = 0.0;
 	for (unsigned ieigen = 0 ; ieigen < last_eigen; ieigen++)
 	{
-	  correction += gsl_vector_get(beta_vector_used, ieigen) * gsl_matrix_get(decompositions, ieigen, ires);
+	  correction += gsl_vector_get(beta_vector_used, ieigen) * (gsl_matrix_get(decompositions, ires, ieigen) + gsl_vector_get( decompositions_means, ieigen ));
 	}
 	correction -= beta_zero_used;
 	gsl_vector_set(residuals_corr, ires, gsl_vector_get(residuals, ires) - correction);
