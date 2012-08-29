@@ -307,14 +307,14 @@ string Pulsar::Interpreter::get_report (const string& args)
   Eventually, the Interpreter class might filter special arguments
   out of the list before passing the remainder along to the method.
 */
-vector<string> Pulsar::Interpreter::setup (const string& text)
+vector<string> Pulsar::Interpreter::setup (const string& text, bool expand)
 {
   status = Undefined;
 
   vector<string> arguments;
   separate (text, arguments);
 
-  if (has())
+  if (expand && has())
     for (unsigned i=0; i<arguments.size(); i++)
       arguments[i] = ::evaluate( substitute (arguments[i], get_interface()) );
 
