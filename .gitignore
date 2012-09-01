@@ -7,6 +7,7 @@
 *.libs
 Makefile.in
 Makefile
+linux_64
 
 Base/Applications/psrconv
 Base/Applications/psredit
