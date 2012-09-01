@@ -226,6 +226,9 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
   if (verbose > 2)
     cerr << "Pulsar::ReceptionCalibrator::load_calibrators" << endl;
 
+  if (calibrator_filenames.size() == 0)
+    return;
+
   SystemCalibrator::load_calibrators ();
 
   if (!flux_calibrator_estimate.size())
@@ -235,6 +238,9 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
     if (flux_calibrator_estimate.at(ichan).is_constrained())
+      continue;
+
+    if (!model[ichan]->get_valid())
       continue;
 
     cerr << "ichan=" << ichan << " top flux calibrator is not constrained" << endl;
