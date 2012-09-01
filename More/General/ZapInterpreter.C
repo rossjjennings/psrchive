@@ -81,8 +81,9 @@ Pulsar::ZapInterpreter::~ZapInterpreter ()
 }
 
 string Pulsar::ZapInterpreter::median (const string& args) try
-{ 
-  vector<string> arguments = setup (args);
+{
+  bool expand = false;
+  vector<string> arguments = setup (args, expand);
 
   if (!zap_median)
     zap_median = new ChannelZapMedian;

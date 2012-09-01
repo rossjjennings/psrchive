@@ -32,8 +32,8 @@ namespace Pulsar {
     Archive* getmap (const std::string& name)
     { return interpreter->getmap(name); }
 
-    std::vector<std::string> setup (const std::string& text)
-    { return interpreter->setup (text); }
+    std::vector<std::string> setup (const std::string& text, bool expand = true)
+    { return interpreter->setup (text, expand); }
 
     //! Parses arguments as a single instance of T
     template<typename T> T setup (const std::string& args)

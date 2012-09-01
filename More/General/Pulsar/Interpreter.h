@@ -233,7 +233,7 @@ namespace Pulsar {
     std::string unload_path;
 
     //! All methods should call this method to parse the arguments
-    std::vector<std::string> setup (const std::string& args);
+    std::vector<std::string> setup (const std::string& args, bool expand = true);
 
     //! All methods should return via the response methods
     std::string response (Status status, const std::string& text = "");
