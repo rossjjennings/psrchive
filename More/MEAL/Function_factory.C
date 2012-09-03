@@ -10,8 +10,6 @@
 
 using namespace MEAL;
 
-Registry::List<Agent> Agent::registry;
-
 #include "MEAL/Polynomial.h"
 static Registry::List<Agent>::Enter< Advocate<Polynomial> >
 polynomial;
@@ -41,19 +39,21 @@ using namespace std;
 //! Construct a new model instance from a string
 MEAL::Function* MEAL::Function::factory (const std::string& text)
 {
-  for (unsigned agent=0; agent<Agent::registry.size(); agent++)
+  Registry::List<Agent>& registry = Registry::List<Agent>::get_registry();
+
+  for (unsigned agent=0; agent<registry.size(); agent++)
   {
-    if (Agent::registry[agent]->get_name () == text)
+    if (registry[agent]->get_name () == text)
     {
       if (verbose)
         cerr << "MEAL::Function::factory using " 
-	     << Agent::registry[agent]->get_name() << endl;
+	     << registry[agent]->get_name() << endl;
 
-      return Agent::registry[agent]->new_Function(); 
+      return registry[agent]->new_Function(); 
     }
   }
 
   throw Error (InvalidParam, "MEAL::Function::factory",
 	       "no match for '%s' in %d agents", text.c_str(),
-	       Agent::registry.size());
+	       registry.size());
 }

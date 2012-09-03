@@ -37,12 +37,6 @@ namespace MEAL {
 
   protected:
 
-    //! Agents registered for creating derived classes in Function::load
-    static Registry::List<Agent> registry;
-      
-    //! Declare friends with Registry::Entry<Agent> so it can access registry
-    friend class Registry::Entry<Agent>;
-
     //! Declare friends with Function so Function::load can access registry
     friend class Function;
 
