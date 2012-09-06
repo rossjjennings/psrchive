@@ -141,6 +141,9 @@ namespace Pulsar {
     //! poln scrunch an archive in the stack
     std::string pscrunch (const std::string& args);
     
+    //! convert the state of the data
+    std::string state (const std::string& args);
+
     //! form the Stokes invariant interval profile
     std::string invint (const std::string& args);
 

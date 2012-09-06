@@ -192,6 +192,11 @@ void Pulsar::Interpreter::init()
       "  unsigned factor   folding factor \n" );
 
   add_command 
+    ( &Interpreter::state,
+      "state", "convert between data states",
+      "usage: state <new_state> \n" );
+  
+  add_command 
     ( &Interpreter::invint, 'I',
       "invint", "form the Stokes invariant interval profile",
       "usage: invint \n" );
@@ -975,6 +980,24 @@ string Pulsar::Interpreter::invint (const string& args) try
 catch (Error& error) {
   return response (Fail, error.get_message());
 }
+
+
+// //////////////////////////////////////////////////////////////////////
+//
+// invint
+//
+string Pulsar::Interpreter::state (const string& args) try
+{
+  Signal::State state = setup<Signal::State> (args);
+
+  get() -> convert_state (state);
+
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
 
 void centre_of_flux (Pulsar::Archive* archive)
 {
