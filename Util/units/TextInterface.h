@@ -1165,15 +1165,6 @@ namespace TextInterface {
   bool match (const std::string& name, const std::string& text,
 	      std::string* range, std::string* remainder = 0);
 
-  template<typename Type, typename Container>
-  Type* factory ( Container& ptrs, std::string name_parse);
-
-  template<typename T>
-  std::ostream& insertion (std::ostream& ostr, T* e);
-  
-  template<typename T>
-  std::istream& extraction (std::istream& istr, T* &e);
-
   //! Label elements in ElementGetSet<C,E>::get_value
   extern bool label_elements;
 
@@ -1387,103 +1378,6 @@ void TextInterface::ElementGetSet<C,T,G,S,Z>::set_value (C* ptr,
     (ptr->*set)(ind[i], fromstring<T>(v));
 }
 
-template<typename T, typename C>
-T* TextInterface::factory (C& ptrs, std::string name_parse)
-{
-  std::string name = stringtok (name_parse, ":");
 
-#ifdef _DEBUG
-  std::cerr << "TextInterface::factory name=" << name << std::endl;
-#endif
-
-  Reference::To<T> result;
-
-  if (name == "help")
-    std::cerr <<
-      "\n\n"
-      "Options:"
-      "\n\n";
-
-  for (typename C::iterator ptr=ptrs.begin(); ptr != ptrs.end(); ptr++)
-  {
-    Reference::To<TextInterface::Parser> interface = (*ptr)->get_interface();
-    if (interface->get_interface_name() == name)
-    {
-      result = (*ptr)->clone ();
-      break;
-    }
-    else if (name == "help")
-    {
-      std::cerr << interface->get_interface_name() << std::endl
-		<< interface->help (true, false, "   ") << std::endl;
-    }
-  }
-
-  if (name == "help")
-  {
-    std::cerr << std::endl;
-    exit (0);
-  }
-
-  if (!result)
-    throw Error (InvalidState, std::string(),
-		 "no instance named '" + name + "'");
-
-#ifdef _DEBUG
-  std::cerr << "TextInterface::factory options=" << name_parse << std::endl;
-#endif
-
-  Reference::To<TextInterface::Parser> interface = result->get_interface();
-
-  std::vector<std::string> options;
-  standard_separation (options, name_parse);
-  for (unsigned i=0; i<options.size(); i++)
-    interface->process (options[i]);
-
-  return result.release();
-}
-
-template<typename T>
-std::ostream& TextInterface::insertion (std::ostream& ostr, T* e) try
-{
-  Reference::To<TextInterface::Parser> interface = e->get_interface();
-
-  ostr << interface->get_interface_name ();
-
-  if (interface->get_nvalue() == 0)
-    return ostr;
-
-  ostr << ":";
-
-  for (unsigned i=0; i<interface->get_nvalue(); i++)
-  {
-    if (i > 0)
-      ostr << ",";
-
-    ostr << interface->get_name(i) << "=" << interface->get_value(i);
-  }
-
-  return ostr;
-}
-catch (Error& error)
-{
-  ostr.setstate (std::ios::failbit);
-  return ostr;
-}
-
-template<typename T>
-std::istream& TextInterface::extraction (std::istream& istr, T* &e) try
-{
-  std::string parse;
-  istr >> parse;
-
-  e = T::factory (parse);
-  return istr;
-}
-catch (Error& error)
-{
-  istr.setstate (std::ios::failbit);
-  return istr;
-}
 
 #endif
