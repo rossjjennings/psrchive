@@ -33,7 +33,7 @@ namespace Pulsar {
     void set_smooth (Smooth*);
 
     //! Get the smoothing function
-    Smooth* get_smooth ();
+    Smooth* get_smooth () const;
 
     //! Set to find the minimum mean
     void set_find_minimum ();
