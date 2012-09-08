@@ -21,6 +21,8 @@ include_HEADERS = \
 	FilePtr.h \
         Functor.h \
         HeapTracked.h \
+	interface_factory.h \
+	interface_stream.h \
         Jacobi.h \
         Jones.h \
 	lazy.h \
