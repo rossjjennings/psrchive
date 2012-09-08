@@ -61,22 +61,12 @@ static Pulsar::Option<std::string> default_smooth
 );
 
 //! Get the smoothing function
-Pulsar::Smooth* Pulsar::BaselineWindow::get_smooth ()
+Pulsar::Smooth* Pulsar::BaselineWindow::get_smooth () const
 {
   if (!smooth)
   {
-    string smooth_name = default_smooth;
-
-    if (smooth_name == "median")
-      smooth = new Pulsar::SmoothMedian;
-
-    else if (smooth_name == "mean")
-      smooth = new Pulsar::SmoothMean;
-
-    else
-      throw Error (InvalidState, 
-		   "Pulsar::BaslineWindow::get_smooth",
-		   "no smoothing function named '" + smooth_name + "'");
+    BaselineWindow* non_const = const_cast<BaselineWindow*>(this);
+    non_const->smooth = Smooth::factory (default_smooth);
   }
 
   return smooth;
@@ -212,6 +202,19 @@ catch (Error& error)
   throw error += "Pulsar::BaselineWindow::find_phase";
 }
 
+
+
+#include "interface_stream.h"
+
+std::ostream& operator<< (std::ostream& ostr, Pulsar::Smooth* e)
+{
+  return interface_insertion (ostr, e);
+}
+std::istream& operator>> (std::istream& istr, Pulsar::Smooth* &e)
+{
+  return interface_extraction (istr, e);
+}
+
 class Pulsar::BaselineWindow::Interface 
   : public TextInterface::To<BaselineWindow>
 {
@@ -221,7 +224,9 @@ public:
     if (instance)
       set_instance (instance);
 
-    // set the smoothing function someday
+    add( &BaselineWindow::get_smooth,
+	 &BaselineWindow::set_smooth,
+	 "smooth", "smoothing algorithm" );
   }
 
   std::string get_interface_name () const { return "minimum"; }
