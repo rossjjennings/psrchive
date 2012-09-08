@@ -23,12 +23,14 @@ Pulsar::Smooth::~Smooth ()
 
 void Pulsar::Smooth::set_turns (float _turns)
 {
-  if (_turns <= 0 || _turns >= 1.0)
+  if (_turns < 0 || _turns >= 1.0)
     throw Error (InvalidParam, "Pulsar::Smooth::set_turns",
 		 "invalid turns = %f", _turns);
 
   last_turns = turns = _turns;
-  bins = 0;
+
+  if (turns != 0.0)
+    bins = 0;
 }
 
 float Pulsar::Smooth::get_turns () const
@@ -44,12 +46,14 @@ float Pulsar::Smooth::get_last_turns () const
 //! Set the number of phase bins in the bins used to smooth
 void Pulsar::Smooth::set_bins (float _bins)
 {
-  if (_bins <= 1 )
+  if (_bins < 0 )
     throw Error (InvalidParam, "Pulsar::Smooth::set_bins",
 		 "invalid bins = %f", _bins);
 
   last_bins = bins = _bins;
-  turns = 0;
+
+  if (bins != 0)
+    turns = 0;
 }
 
 //! Get the number of phase bins in the bins used to smooth
@@ -79,3 +83,39 @@ float Pulsar::Smooth::get_turns (const Profile* profile)
     return last_turns = bins / float( profile->get_nbin() );
 }
  
+
+Pulsar::Smooth::Interface::Interface (Smooth* instance)
+{
+  if (instance)
+    set_instance (instance);
+
+  add( &Smooth::get_turns,
+       &Smooth::set_turns,
+       "turns", "smoothing window size in turns" );
+
+  add( &Smooth::get_bins,
+       &Smooth::set_bins,
+       "bins", "smoothing window size in bins" );
+}
+
+//
+// the following could probably be moved it's own compilation unit
+//
+
+#include "interface_factory.h"
+
+#include "Pulsar/SmoothMean.h"
+#include "Pulsar/SmoothMedian.h"
+#include "Pulsar/SmoothSinc.h"
+
+Pulsar::Smooth* Pulsar::Smooth::factory (const std::string& name_parse)
+{
+  std::vector< Reference::To<Smooth> > instances;
+
+  instances.push_back( new SmoothMean );
+  instances.push_back( new SmoothMedian );
+  instances.push_back( new SmoothSinc );
+
+  return TextInterface::factory<Smooth> (instances, name_parse);
+}
+
