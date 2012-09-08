@@ -11,7 +11,7 @@
 #ifndef __interface_factory_h
 #define __interface_factory_h
 
-#define _DEBUG 1
+// #define _DEBUG 1
 
 namespace TextInterface
 {
@@ -77,14 +77,11 @@ namespace TextInterface
     std::cerr << "TextInterface::factory options=" << name_parse << std::endl;
 #endif
 
-    std::cerr << "begin='" << *(name_parse.begin()) << "'"
-	      << " end='" << *(name_parse.end()-1) << "'" << std::endl;
-
-    if (*(name_parse.begin()) == '{' && 
-	*(name_parse.end()-1) == '}')
+    while (*(name_parse.begin()) == '(' && 
+	   *(name_parse.end()-1) == ')')
     {
 #ifdef _DEBUG
-      std::cerr << "TextInterface::factory removing {} brackets" << std::endl;
+      std::cerr << "TextInterface::factory removing () brackets" << std::endl;
 #endif
       name_parse.erase (name_parse.begin());
       name_parse.erase (name_parse.end()-1);
