@@ -37,6 +37,12 @@ Pulsar::ProfileWeightFunction::operate (const Profile* _profile)
   return _weight.release();
 }
 
+//
+// the following should probably be moved it's own compilation unit
+//
+
+#include "interface_factory.h"
+
 // on-pulse estimators
 #include "Pulsar/OnPulseThreshold.h"
 #include "Pulsar/PeakConsecutive.h"

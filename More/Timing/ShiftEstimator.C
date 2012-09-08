@@ -8,6 +8,8 @@
 #include "Pulsar/ShiftEstimator.h"
 #include "Pulsar/Archive.h"
 
+#include "interface_factory.h"
+
 #include "Pulsar/FourierDomainFit.h"
 #include "Pulsar/GaussianShift.h"
 #include "Pulsar/ParIntShift.h"

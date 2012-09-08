@@ -1,6 +1,7 @@
 
 #include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/ITRFExtension.h"
+#include "interface_factory.h"
 
 Pulsar::Archive::Extension* 
 Pulsar::Archive::Extension::factory (const std::string& name_parse)
