@@ -7,22 +7,7 @@
 
 #include "Pulsar/Profile.h"
 #include "Pulsar/BaselineWindow.h"
-
-template<typename T>
-std::ostream& operator<< (std::ostream& ostr,
-			  const Reference::To<T>& e)
-{
-  return TextInterface::insertion (ostr, e.get());
-}
-template<typename T>
-std::istream& operator>> (std::istream& istr,
-			  Reference::To<T>& e)
-{
-  T* tmp = 0;
-  std::istream& ret = TextInterface::extraction (istr, tmp);
-  e = tmp;
-  return ret;
-}
+#include "interface_stream.h"
 
 /*!  
   The BaselineInterpreter class sets the baseline_strategy

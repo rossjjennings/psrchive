@@ -9,19 +9,22 @@
 #include "Pulsar/PhaseWeightInterface.h"
 
 #include "Pulsar/ProfileWeightFunction.h"
+#include "interface_stream.h"
 
 using namespace std;
+
 
 std::ostream& operator<< (std::ostream& ostr,
 			  Pulsar::ProfileWeightFunction* e)
 {
-  return TextInterface::insertion (ostr, e);
+  return interface_insertion (ostr, e);
 }
 std::istream& operator>> (std::istream& istr,
 			  Pulsar::ProfileWeightFunction* &e)
 {
-  return TextInterface::extraction (istr, e);
+  return interface_extraction (istr, e);
 }
+
 
 Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance)
 {
