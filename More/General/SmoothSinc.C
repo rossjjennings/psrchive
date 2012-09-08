@@ -46,3 +46,28 @@ void Pulsar::SmoothSinc::transform (Profile* profile)
     amps[ibin] = c_input[ibin].real() / nbin;
 
 }
+
+//
+//
+//
+
+Pulsar::SmoothSinc* Pulsar::SmoothSinc::clone () const
+{
+  return new SmoothSinc (*this);
+}
+
+class Pulsar::SmoothSinc::Interface : public Smooth::Interface
+{
+public:
+  Interface (SmoothSinc* instance) : Smooth::Interface (instance)
+  {
+  }
+
+  std::string get_interface_name () const { return "sinc"; }
+};
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::SmoothSinc::get_interface ()
+{
+  return new Interface (this);
+}

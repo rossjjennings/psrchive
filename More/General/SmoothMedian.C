@@ -58,3 +58,28 @@ void Pulsar::SmoothMedian::transform (Profile* profile)
 
   profile->set_amps(result);
 }
+
+//
+//
+//
+
+Pulsar::SmoothMedian* Pulsar::SmoothMedian::clone () const
+{
+  return new SmoothMedian (*this);
+}
+
+class Pulsar::SmoothMedian::Interface : public Smooth::Interface
+{
+public:
+  Interface (SmoothMedian* instance) : Smooth::Interface (instance)
+  {
+  }
+
+  std::string get_interface_name () const { return "med"; }
+};
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::SmoothMedian::get_interface ()
+{
+  return new Interface (this);
+}

@@ -53,3 +53,28 @@ void Pulsar::SmoothMean::transform (Profile* profile)
 
   profile->set_amps( result );
 }
+
+//
+//
+//
+
+Pulsar::SmoothMean* Pulsar::SmoothMean::clone () const
+{
+  return new SmoothMean (*this);
+}
+
+class Pulsar::SmoothMean::Interface : public Smooth::Interface
+{
+public:
+  Interface (SmoothMean* instance) : Smooth::Interface (instance)
+  {
+  }
+
+  std::string get_interface_name () const { return "mean"; }
+};
+
+//! Return a text interface that can be used to configure this instance
+TextInterface::Parser* Pulsar::SmoothMean::get_interface ()
+{
+  return new Interface (this);
+}

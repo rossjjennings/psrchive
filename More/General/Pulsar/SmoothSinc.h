@@ -27,6 +27,15 @@ namespace Pulsar {
 
   public:
 
+    //! Return a copy constructed instance of self
+    SmoothSinc* clone () const;
+
+    //! Return a text-based interface to class properties
+    TextInterface::Parser* get_interface ();
+
+    //! Text-based interface to class properties
+    class Interface;
+
     void transform (Profile*);
 
   };
