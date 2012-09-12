@@ -273,6 +273,7 @@ public:
 
   MJD get_reftime() const { return t0; }
   Phase get_refphase() const { return p0; }
+  bool is_valid_phase(Phase p) const { return ((p-pstart).in_turns() > 0) && ((pend-p).in_turns() > 0); }
   long double get_reffrequency() const { return f0; }
 
   Phase phase (const MJD&) const;
@@ -287,6 +288,8 @@ protected:
 
   MJD t0;
   Phase p0;
+  Phase pstart;
+  Phase pend;
   long double f0;
   
 };
@@ -302,6 +305,8 @@ void cheby_interface::construct (ChebyModel* _model, long double _obs_freq)
   long double tmid = 0.5 * (model->mjd_start + model->mjd_end);
   t0 = to_MJD( tmid );
   p0 = to_Phase( ChebyModel_GetPhase (model, tmid, obs_freq) );
+  pstart = to_Phase( ChebyModel_GetPhase (model, model->mjd_start, obs_freq) );
+  pend = to_Phase( ChebyModel_GetPhase (model, model->mjd_end, obs_freq) );
   f0 = ChebyModel_GetFrequency (model, tmid, obs_freq);
   // cerr << "t0=" << t0 << " p0=" << p0 << " f0=" << f0 << endl;
 }
@@ -331,6 +336,7 @@ MJD Tempo2::Predictor::iphase (const Phase& phase, const MJD* guess) const
 
   float min_dist = 0;
   int imin = -1;
+  bool notset=true;
   unsigned icheby = 0;
 
   if (verbose)
@@ -345,12 +351,14 @@ MJD Tempo2::Predictor::iphase (const Phase& phase, const MJD* guess) const
     chebys[icheby].construct( predictor.modelset.cheby.segments + icheby,
 			      observing_frequency );
 
-    float dist = fabs ( (chebys[icheby].get_refphase() - phase).in_turns() );
-
-    if (icheby == 0 || dist < min_dist)
-    {
-      imin = icheby;
-      min_dist = dist;
+    if(chebys[icheby].is_valid_phase(phase)){
+	    float dist = fabs ( (chebys[icheby].get_refphase() - phase).in_turns() );
+	    if (notset || dist < min_dist)
+	    {
+		    imin = icheby;
+		    min_dist = dist;
+		    notset=false;
+	    }
     }
   }
 
