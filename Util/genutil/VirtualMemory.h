@@ -34,7 +34,7 @@ class VirtualMemory : public TemporaryFile
   //! Create a new array
   template<typename T>
   T* create (unsigned elements)
-  { return static_cast<T*>( mmap (elements * sizeof(T)) ); }
+  { return reinterpret_cast<T*>( mmap (elements * sizeof(T)) ); }
 
   //! Destroy an existing array
   void destroy (void* pointer)
