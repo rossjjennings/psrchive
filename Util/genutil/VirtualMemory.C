@@ -91,7 +91,7 @@ void* VirtualMemory::mmap (uint64_t size)
 //! Free the memory to which the char* points
 void VirtualMemory::munmap (void* ptr)
 {
-  Block block = find_allocated( static_cast<char*>(ptr) );
+  Block block = find_allocated( reinterpret_cast<char*>(ptr) );
 
   add_available (block->first, block->second);
 
@@ -171,23 +171,26 @@ VirtualMemory::Block VirtualMemory::extend (uint64_t size)
 {
   const uint64_t MB = 1024 * 1024;
   const uint64_t maximum_increment = 1024*MB; // 1GB
+
   uint64_t current = swap_space;
+
+  int page_size = getpagesize();
 
   do
   {
     if (swap_space == 0)
-      swap_space = getpagesize();
+      swap_space = page_size;
     else if (swap_space < maximum_increment)
       swap_space *= 2;
     else
-	  swap_space += maximum_increment;
+      swap_space += maximum_increment;
   }
   while (swap_space-current < size);
 
   /*
     Stretch the file size to swap_space
   */
-  off_t result = lseek( get_fd(), swap_space-1, SEEK_SET );
+  off_t result = lseek( get_fd(), swap_space-page_size, SEEK_SET );
 
   if (result == (off_t)-1)
   {
@@ -197,13 +200,15 @@ VirtualMemory::Block VirtualMemory::extend (uint64_t size)
   }
 
   /*
-    Write a null character at the end of the file
+    Write an empty page at the end of the file
   */
-  result = write( get_fd(), "", 1 );
-  if (result != 1)
+  char temp [page_size];
+  result = write( get_fd(), temp, page_size );
+  if (result != page_size)
   {
-    cerr << "VirtualMemory::extend could not write to swap file at " 
-	     << swap_space << " - " << strerror (errno) << endl;
+    cerr << "VirtualMemory::extend"
+      " could not write " << page_size << " bytes at end of swap file"
+      " (" << swap_space << " bytes) - " << strerror (errno) << endl;
     exit (-1);
   }
 
@@ -224,7 +229,7 @@ VirtualMemory::Block VirtualMemory::extend (uint64_t size)
     exit (-1);
   }
 
-  return add_available( static_cast<char*>(ptr), swap_space-current );
+  return add_available( reinterpret_cast<char*>(ptr), swap_space-current );
 }
 
 #if 0
