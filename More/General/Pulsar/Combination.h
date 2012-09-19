@@ -18,7 +18,7 @@
 
 namespace Pulsar {
 
-  //! Transformations that modify data in the Container
+  //! Binary transformations that combine data from another Container
   template<class Container> class Combination
     : public Transformation<Container>
   {

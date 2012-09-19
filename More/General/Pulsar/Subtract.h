@@ -19,8 +19,9 @@
 
 namespace Pulsar {
 
-  //! Profile smoothing algorithms
-  class Subtract : public Combination<Profile> {
+  //! Computes the difference between two profiles
+  class Subtract : public Combination<Profile>
+  {
 
   public:
 
