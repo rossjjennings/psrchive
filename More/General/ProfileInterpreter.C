@@ -156,8 +156,17 @@ catch (Error& error) {
 
 string Pulsar::ProfileInterpreter::convolve (const string& args) try
 {
-  string name = setup<string> (args);
-  foreach (get(), getmap(name), new Convolve);
+  if (args.empty())
+  {
+    // if no archive name is specified, then auto-convolve
+    foreach (get(), get(), new Convolve);
+  }
+  else
+  {
+    string name = setup<string> (args);
+    foreach (get(), getmap(name), new Convolve);
+  }
+
   return response (Good);
 }
 catch (Error& error) {
@@ -166,8 +175,17 @@ catch (Error& error) {
 
 string Pulsar::ProfileInterpreter::correlate (const string& args) try
 {
-  string name = setup<string> (args);
-  foreach (get(), getmap(name), new Correlate);
+  if (args.empty())
+  {
+    // if no archive name is specified, then auto-correlate
+    foreach (get(), get(), new Correlate);
+  }
+  else
+  {
+    string name = setup<string> (args);
+    foreach (get(), getmap(name), new Correlate);
+  }
+
   return response (Good);
 }
 catch (Error& error) {
