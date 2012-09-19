@@ -22,8 +22,14 @@ namespace Pulsar {
 
   public:
 
+    //! By default, call Profile::correlate_normalized
+    Correlate () { normalize = true; }
+
     void transform (Profile*);
 
+  protected:
+
+    bool normalize;
   }; 
 
 }

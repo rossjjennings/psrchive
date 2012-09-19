@@ -10,5 +10,8 @@
 
 void Pulsar::Correlate::transform (Profile* profile)
 {
-  profile->correlate( get_operand() );
+  if (normalize)
+    profile->correlate_normalized( get_operand() );
+  else
+    profile->correlate( get_operand() );
 }
