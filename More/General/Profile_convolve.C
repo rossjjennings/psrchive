@@ -23,21 +23,21 @@ void Pulsar::Profile::correlate (const Profile* profile)
 
 void Pulsar::Profile::correlate_normalized (const Profile* profile)
 {
-  Reference::To<Pulsar::Profile> temp1, temp2;
-  temp1 = this->clone();
-  temp2 = profile->clone();
-  //remove the baseline and subtract the mean
-  double mean = -1.0, variance2=-1.0, variance1 =-1.0, varmean = -1.0;
-  temp1->stats (&mean, &variance1, &varmean,0,(int)temp1->get_nbin());
-  *temp1 -= mean;
+  /*
+    Note that the mean and variance are computed over all phase bins,
+    not only the off-pulse region.
+  */
+  double mean = -1.0, var1=-1.0, var2 =-1.0, varmean = -1.0;
+  this->stats (&mean, &var1, &varmean, 0, this->get_nbin());
+  this->offset (-mean);
 
-  temp2->stats (&mean, &variance2, &varmean,0,(int)temp2->get_nbin());
-  *temp2 -= mean;
+  Reference::To<Pulsar::Profile> temp = profile->clone();
 
-  temp1->correlate( temp2);
-  *temp1 *= 1.0 / sqrt(variance2) / sqrt(variance1) / (float)temp1->get_nbin();
+  temp->stats (&mean, &var2, &varmean, 0, temp->get_nbin());
+  temp->offset (-mean);
 
-  this->set_amps(temp1->get_amps());
+  this->correlate (temp);
+  this->scale (1.0 / sqrt(var1) / sqrt(var2) / this->get_nbin());
 }
 
 void Pulsar::Profile::convolve (const Profile* profile, int dir)
