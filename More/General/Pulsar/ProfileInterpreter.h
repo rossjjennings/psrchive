@@ -48,8 +48,14 @@ namespace Pulsar {
     //! Form the low-pass filtered profile
     std::string sinc (const std::string& args);
 
-    //! Subtract profiles from the named archive
+    //! Subtract the named archive from the current
     std::string subtract (const std::string& args);
+
+    //! Convolve the named archive with the current
+    std::string convolve (const std::string& args);
+
+    //! Correlate the named archive with the current
+    std::string correlate (const std::string& args);
 
     //! No empty arguments
     std::string empty ();

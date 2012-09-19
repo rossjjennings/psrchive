@@ -13,7 +13,10 @@
 #include "Pulsar/SmoothMean.h"
 #include "Pulsar/SmoothMedian.h"
 #include "Pulsar/SmoothSinc.h"
+
 #include "Pulsar/Subtract.h"
+#include "Pulsar/Convolve.h"
+#include "Pulsar/Correlate.h"
 
 using namespace std;
 
@@ -60,8 +63,19 @@ Pulsar::ProfileInterpreter::ProfileInterpreter ()
 
   add_command 
     ( &ProfileInterpreter::subtract,
-      "subtract", "subtract profiles from the named archive",
+      "subtract", "subtract the named archive from the current",
       "usage: subtract <name>\n" );
+
+  add_command
+    ( &ProfileInterpreter::convolve,
+      "convolve", "convolve the named archive with the current",
+      "usage: convolve <name>\n" );
+
+  add_command
+    ( &ProfileInterpreter::correlate,
+      "correlate", "correlate the named archive with the current",
+      "usage: correlate <name>\n" );
+
 }
 
 Pulsar::ProfileInterpreter::~ProfileInterpreter ()
@@ -140,6 +154,25 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
+string Pulsar::ProfileInterpreter::convolve (const string& args) try
+{
+  string name = setup<string> (args);
+  foreach (get(), getmap(name), new Convolve);
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::ProfileInterpreter::correlate (const string& args) try
+{
+  string name = setup<string> (args);
+  foreach (get(), getmap(name), new Correlate);
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
 
 string Pulsar::ProfileInterpreter::empty ()
 {
