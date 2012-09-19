@@ -26,6 +26,8 @@ nobase_include_HEADERS = \
 	Pulsar/CommonOptions.h \
 	Pulsar/Contemporaneity.h \
 	Pulsar/ConvertIsolated.h \
+	Pulsar/Convolve.h \
+	Pulsar/Correlate.h \
 	Pulsar/Differentiate.h \
 	Pulsar/DisperseWeight.h \
         Pulsar/DispersionDelay.h \
@@ -152,6 +154,8 @@ libGeneral_la_SOURCES = \
 	CommonOptions.C \
 	ConvertIsolated.C \
 	Contemporaneity.C \
+	Convolve.C \
+	Correlate.C \
 	Differentiate.C \
 	DisperseWeight.C \
         Dispersion.C \
