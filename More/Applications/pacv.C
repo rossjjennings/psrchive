@@ -27,6 +27,7 @@
 #include "Pulsar/SolverInfo.h"
 
 #include "Pulsar/Profile.h"
+#include "Pulsar/PolnProfile.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
 
@@ -40,6 +41,7 @@
 #include <unistd.h>
 
 using namespace std;
+using namespace Pulsar;
 
 void usage ()
 {
@@ -70,6 +72,7 @@ void usage ()
     " -S pcm.out   combine each calibrator with the pcm solution \n"
     "\n"
     " -u           unload the derived calibrator \n"
+    " -g           unload gain-calibrated calibrator observation \n"
     " -a archive   set the output archive class name\n"
     "\n"
     " -o           print mean and RMS on a single line\n"
@@ -80,6 +83,29 @@ void usage ()
     " -b           print calibrator Stokes parameters\n"
        << endl;
 }
+
+
+// treat all of the Archives as one FluxCalibrator observation set
+Reference::To<FluxCalibrator> fluxcal;
+
+// vector of bad channels
+vector<unsigned> zapchan;
+
+bool print_jones = false;
+bool print_mueller = false;
+bool print_calibrator_stokes = false;
+bool print_fluxcal = false;
+bool frontend_only = false;
+bool plot_calibrator_stokes = false;
+
+Reference::To<PolnCalibrator> calibrator;
+
+Reference::To<CalibratorStokes> calibrator_stokes;
+  
+CalibratorPlotter plotter;
+
+// called when the input archive has type == Signal::Calibrator
+void handle_calibrator (Archive*);
 
 int main (int argc, char** argv) 
 {
@@ -98,36 +124,25 @@ int main (int argc, char** argv)
   const unsigned IQUV = 0;
   const unsigned Ip = 1;
 
-  // treat all of the Archives as one FluxCalibrator observation set
-  Reference::To<Pulsar::FluxCalibrator> fluxcal;
-
   // filename of filenames
   char* metafile = NULL;
 
   // class name of the special calibrator solution archives to be produced
   string archive_class = "PSRFITS";
 
-  // vector of bad channels
-  vector<unsigned> zapchan;
-
   // produce publication quality plots
   bool publication = false;
 
+  bool disable_plotting = false;
   bool plot_derived_calibrator = false;
   bool unload_derived_calibrator = false;
+  bool unload_gain_calibrated = false;
 
   bool plot_calibrator_solution = true;
-  bool plot_calibrator_stokes = false;
   bool plot_calibrator_solver = false;
 
   bool plot_specified = false;
   bool print_titles = true;
-
-  bool print_jones = false;
-  bool print_mueller = false;
-  bool print_calibrator_stokes = false;
-  bool print_fluxcal = false;
-  bool frontend_only = false;
 
   // Controls how the mean(s) is/are displayed.
   // False:
@@ -146,7 +161,7 @@ int main (int argc, char** argv)
   Calibration::Feed* feed = 0;
 
   // Hybrid transformation
-  Reference::To<Pulsar::HybridCalibrator> hybrid;
+  Reference::To<HybridCalibrator> hybrid;
 
   string device = "?";
 
@@ -154,7 +169,7 @@ int main (int argc, char** argv)
   bool verbose = false;
   char c;
 
-  while ((c = getopt(argc, argv, "2:a:bc:CD:dfFhjM:mn:oPpRr:S:stuqvV")) != -1)
+  while ((c = getopt(argc, argv, "2:a:bc:CD:dfFghjM:mn:oPpRr:S:stuqvV")) != -1)
   {
     switch (c)
     {
@@ -180,6 +195,7 @@ int main (int argc, char** argv)
 
     case 'b':
       print_calibrator_stokes = true;
+      disable_plotting = true;
       break;
 
     case 'c':
@@ -217,15 +233,22 @@ int main (int argc, char** argv)
       break;
 
     case 'f':
-      fluxcal = new Pulsar::FluxCalibrator;
+      fluxcal = new FluxCalibrator;
       break;
 
     case 'F':
       print_fluxcal = true;
+      disable_plotting = true;
+      break;
+
+    case 'g':
+      unload_gain_calibrated = true;
+      disable_plotting = true;
       break;
 
     case 'j':
       print_jones = true;
+      disable_plotting = true;
       break;
 
     case 'M':
@@ -234,6 +257,7 @@ int main (int argc, char** argv)
 
     case 'm':
       print_mueller = true;
+      disable_plotting = true;
       break;
 
     case 'N':
@@ -312,8 +336,8 @@ int main (int argc, char** argv)
 
     case 'S':
     {
-      Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(optarg);
-      hybrid = new Pulsar::HybridCalibrator (data);
+      Reference::To<Archive> data = Archive::load(optarg);
+      hybrid = new HybridCalibrator (data);
       break;
     }
 
@@ -332,24 +356,24 @@ int main (int argc, char** argv)
       break;
 
     case 'V':
-      Pulsar::Archive::set_verbosity (3);
-      Pulsar::CalibratorPlotter::verbose = true;
-      Pulsar::Calibrator::verbose = 3;
+      Archive::set_verbosity (3);
+      CalibratorPlotter::verbose = true;
+      Calibrator::verbose = 3;
       verbose = true;
       break;
     case 'v':
-      Pulsar::Archive::set_verbosity (2);
-      Pulsar::Calibrator::verbose = 2;
+      Archive::set_verbosity (2);
+      Calibrator::verbose = 2;
       verbose = true;
       break;
     case 'q':
-      Pulsar::Archive::set_verbosity (0);
+      Archive::set_verbosity (0);
       break;
 
     } 
   }
 
-  if (!plot_specified && !unload_derived_calibrator)
+  if (!plot_specified && !disable_plotting)
     plot_derived_calibrator = true;
 
   if (!metafile && optind >= argc) {
@@ -364,8 +388,7 @@ int main (int argc, char** argv)
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  if (!(print_jones || print_mueller || print_fluxcal
-	|| print_calibrator_stokes || unload_derived_calibrator))
+  if (!disable_plotting)
   {
     cpgbeg (0, device.c_str(), 0, 0);
     cpgask(1);
@@ -373,16 +396,10 @@ int main (int argc, char** argv)
   }
 
   // the input calibrator archive
-  Reference::To<Pulsar::Archive> input;
+  Reference::To<Archive> input;
   // the output calibrator archive
-  Reference::To<Pulsar::Archive> output;
+  Reference::To<Archive> output;
  
-  Reference::To<Pulsar::PolnCalibrator> calibrator;
-
-  Reference::To<Pulsar::CalibratorStokes> calibrator_stokes;
-  
-  Pulsar::CalibratorPlotter plotter;
-
   plotter.set_display_mean_single_line(print_means_on_single_line);
 
   if (publication)
@@ -394,14 +411,14 @@ int main (int argc, char** argv)
     cpgscf (2);
   }
 
-  Pulsar::CalibratorSpectrum archplot;
+  CalibratorSpectrum archplot;
 
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
   {
     if (verbose)
       cerr << "pacv: Loading " << filenames[ifile] << endl;
 
-    input = Pulsar::Archive::load( filenames[ifile] );
+    input = Archive::load( filenames[ifile] );
 
     plotter.print_titles = print_titles;
     plotter.title = filenames[ifile];
@@ -411,201 +428,7 @@ int main (int argc, char** argv)
       cerr << "pacv: " << filenames[ifile] << " is a processed Calibrator"
            << endl;
 
-      if (input->get<Pulsar::FluxCalibratorExtension>())
-      {
-
-        cerr << "pacv: constructing FluxCalibrator from Extension" << endl;
-        fluxcal = new Pulsar::FluxCalibrator (input);
-
-	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
-	  fluxcal->set_invalid (zapchan[ichan]);
-
-        if (print_fluxcal) {
-
-          // Note, printing disables fluxcal plotting
-          fluxcal->print();
-
-        } else {
-
-          if (plot_calibrator_stokes) {
-
-            calibrator_stokes = fluxcal->get_CalibratorStokes();
-
-            for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
-              calibrator_stokes->set_valid (zapchan[ichan], false);
-
-            cerr << "pacv: Plotting fluxcal-derived CalibratorStokes" << endl;
-            cpgpage ();
-            plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
-                          fluxcal->get_nchan(),
-                          fluxcal->get_Archive()->get_centre_frequency(),
-                          fluxcal->get_Archive()->get_bandwidth() );
-
-            calibrator_stokes = 0;
-              
-          } else {
-
-            cerr << "pacv: Plotting FluxCalibrator" << endl;
-            cpgpage ();
-
-            plotter.plot (fluxcal);
-
-          }
-
-        }
-
-        // disable attempt to plot again after end of main loop
-        fluxcal = 0;
-
-        continue;
-      }
-
-      calibrator = new Pulsar::PolnCalibrator (input);
-
-      cerr << "pacv: Archive Calibrator with nchan=" 
-	   << calibrator->get_nchan() << endl;
-
-      if (print_jones || print_mueller)
-      {
-	cerr << "pacv: Printing Jones matrix elements" << endl;
-	for (unsigned ichan=0; ichan<calibrator->get_nchan(); ichan++)
-	{
-	  if (!calibrator->get_transformation_valid (ichan))
-	    continue;
-
-	  const MEAL::Complex2* xform = calibrator->get_transformation(ichan);
-
-	  if (frontend_only)
-	  {
-	    const Calibration::BackendFeed* instrument
-	      = dynamic_cast<const Calibration::BackendFeed*> (xform);
-
-	    if (instrument)
-	      xform = instrument->get_frontend();
-	  }
-
-	  Jones<double> J = xform->evaluate();
-
-	  if (print_jones)
-	  {
-	    cout << ichan;
-	    for (unsigned i=0; i<2; i++)
-	      for (unsigned j=0; j<2; j++)
-		cout << " " << J(i,j).real() << " " << J(i,j).imag();
-
-	    cout << endl;
-	  }
-
-	  if (print_mueller)
-	  {
-	    cout << ichan;
-	    Matrix<4,4,double> M = Mueller (J);
-	    for (unsigned i=0; i<4; i++)
-	      for (unsigned j=0; j<4; j++)
-		cout << " " << M[i][j];
-
-	    cout << endl;
-	  }
-	}
-	continue;
-      }
-
-      if (print_calibrator_stokes)
-      {
-        calibrator_stokes = input->get<Pulsar::CalibratorStokes>();
-
-	if (!calibrator_stokes)
-	{
-	  cerr << "pacv: Archive does not contain CalibratorStokes extension"
-	       << endl;
-	  continue;
-	}
-
-	Reference::To<Pulsar::CalibratorExtension> ext;
-	ext = input->get<Pulsar::CalibratorExtension>();
-
-	if (ext->get_nchan() != calibrator_stokes->get_nchan())
-	{
-	  cerr << "pacv: Calibrator nchan=" << ext->get_nchan()
-	       << " != CalibratorStokes nchan="
-	       << calibrator_stokes->get_nchan()
-	       << " (frequency column disabled)" << endl;
-
-	  ext = 0;
-	}
-
-	for (unsigned ichan=0; ichan<calibrator_stokes->get_nchan(); ichan++)
-	{
-	  if (!calibrator_stokes->get_valid (ichan))
-	    continue;
-
-	  Stokes< Estimate<double> > stokes
-	    = calibrator_stokes->get_stokes (ichan);
-
-	  cout << ichan;
-
-	  if (ext)
-	    cout << " " << ext->get_centre_frequency(ichan);
-
-	  for (unsigned i=1; i<4; i++)
-	    cout << " " << stokes[i].get_value()
-		 << " " << stokes[i].get_error();
-
-	  cout << endl;
-	}
-
-	continue;
-      }
-
-      if (plot_calibrator_solution)
-      {
-	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
-	  calibrator->set_transformation_invalid (zapchan[ichan]);
-	
-	if (verbose)
-	  cerr << "pacv: Plotting PolnCalibrator" << endl;
-	
-	cpgpage ();
-	plotter.plot (calibrator);
-      }
-
-      if (plot_calibrator_stokes)
-      {
-        calibrator_stokes = input->get<Pulsar::CalibratorStokes>();
-
-	if (!calibrator_stokes)
-	{
-	  cerr << "pacv: Archive does not contain CalibratorStokes extension"
-	       << endl;
-	  continue;
-	}
-
-	cerr << "pacv: Plotting CalibratorStokes" << endl;
-
-	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
-	  calibrator_stokes->set_valid (zapchan[ichan], false);
-
-	cpgpage ();
-	plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
-		      calibrator->get_nchan(),
-		      calibrator->get_Archive()->get_centre_frequency(),
-		      calibrator->get_Archive()->get_bandwidth() );
-      }
-
-      if (plot_calibrator_solver)
-      {
-	cerr << "pacv: Plotting SystemCalibrator solver" << endl;
-
-	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
-	  calibrator->get_solver(zapchan[ichan])->set_solved(false);
-
-	cpgpage ();
-	plotter.plot( new Pulsar::SolverInfo (calibrator),
-		      calibrator->get_nchan(),
-		      calibrator->get_Archive()->get_centre_frequency(),
-		      calibrator->get_Archive()->get_bandwidth() );
-      }
-
+      handle_calibrator (input);
       continue;
     }
 
@@ -639,6 +462,42 @@ int main (int argc, char** argv)
       continue;
     }
 
+    if (unload_gain_calibrated)
+    {
+      cerr << "pacv: Calibrating gain" << endl;
+      calibrator = new SingleAxisCalibrator (input);
+
+      for (unsigned isub=0; isub < input->get_nsubint(); isub++)
+      {
+	Reference::To<Integration> subint = input->get_Integration (isub);
+
+	for (unsigned ichan=0; ichan < input->get_nchan(); ichan++)
+	{
+	  if (!calibrator->get_transformation_valid(ichan))
+	  {
+	    subint->set_weight(ichan,0.0);
+	    continue;
+	  }
+
+	  MEAL::Complex2* xform = calibrator->get_transformation(ichan);
+
+	  // gain is the first parameter
+	  double gain = xform->get_param(0);
+
+	  // cerr << "gain[" << ichan << "]=" << gain << endl;
+
+	  Reference::To<PolnProfile> prof = subint->new_PolnProfile (ichan);
+
+	  prof->scale (1.0/(gain*gain));
+	}
+      }
+
+      string newname = input->get_filename();
+      newname = replace_extension( newname, "gcal" );
+      cerr << "pacv: Unloading " << newname << endl;
+      input->unload (newname);
+    }
+  
     input->convert_state (Signal::Stokes);
 
     string cal = "uncalibrated";
@@ -693,15 +552,15 @@ int main (int argc, char** argv)
       if (hybrid)
       {
 	hybrid -> set_reference_observation 
-	  ( new Pulsar::SingleAxisCalibrator (input) );
+	  ( new SingleAxisCalibrator (input) );
 	calibrator = hybrid;
       }
       else if (dop_calibrator)
-	calibrator = new Pulsar::DoPCalibrator (input);
+	calibrator = new DoPCalibrator (input);
       else if (single_axis)
-	calibrator = new Pulsar::SingleAxisCalibrator (input);
+	calibrator = new SingleAxisCalibrator (input);
       else
-	calibrator = new Pulsar::PolarCalibrator (input);
+	calibrator = new PolarCalibrator (input);
       
       if (verbose)
 	cerr << "pacv: Calibrating Archive" << endl;
@@ -758,4 +617,153 @@ int main (int argc, char** argv)
   cpgend();
 
   return 0;
+}
+
+
+
+void handle_calibrator (Archive* input)
+{
+  if (input->get<FluxCalibratorExtension>())
+  {
+    cerr << "pacv: constructing FluxCalibrator from Extension" << endl;
+    fluxcal = new FluxCalibrator (input);
+
+    for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
+      fluxcal->set_invalid (zapchan[ichan]);
+
+    if (print_fluxcal)
+    {
+      // Note, printing disables fluxcal plotting
+      fluxcal->print();
+    }
+    else
+    {
+      if (plot_calibrator_stokes)
+      {
+	calibrator_stokes = fluxcal->get_CalibratorStokes();
+
+	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
+	  calibrator_stokes->set_valid (zapchan[ichan], false);
+
+	cerr << "pacv: Plotting fluxcal-derived CalibratorStokes" << endl;
+	cpgpage ();
+	plotter.plot( new CalibratorStokesInfo (calibrator_stokes),
+		      fluxcal->get_nchan(),
+		      fluxcal->get_Archive()->get_centre_frequency(),
+		      fluxcal->get_Archive()->get_bandwidth() );
+
+	calibrator_stokes = 0;       
+      }
+      else
+      {
+	cerr << "pacv: Plotting FluxCalibrator" << endl;
+	cpgpage ();
+
+	plotter.plot (fluxcal);
+
+      } // end else if (not plot_calibrator_stokes)
+
+    } // end else if (not print_fluxcal)
+
+    // disable attempt to plot again after end of main loop
+    fluxcal = 0;
+
+    return;
+
+  } // end if (archive has a flux calibrator extension)
+
+  calibrator = new PolnCalibrator (input);
+
+  cerr << "pacv: Archive Calibrator with nchan=" 
+       << calibrator->get_nchan() << endl;
+
+  if (print_jones || print_mueller)
+  {
+    cerr << "pacv: Printing Jones matrix elements" << endl;
+    for (unsigned ichan=0; ichan<calibrator->get_nchan(); ichan++)
+    {
+      if (!calibrator->get_transformation_valid (ichan))
+	continue;
+
+      const MEAL::Complex2* xform = calibrator->get_transformation(ichan);
+      
+      if (frontend_only)
+      {
+	const Calibration::BackendFeed* instrument
+	  = dynamic_cast<const Calibration::BackendFeed*> (xform);
+
+	if (instrument)
+	  xform = instrument->get_frontend();
+      }
+
+      Jones<double> J = xform->evaluate();
+
+      if (print_jones)
+      {
+	cout << ichan;
+	for (unsigned i=0; i<2; i++)
+	  for (unsigned j=0; j<2; j++)
+	    cout << " " << J(i,j).real() << " " << J(i,j).imag();
+	
+	cout << endl;
+      }
+
+      if (print_mueller)
+      {
+	cout << ichan;
+	Matrix<4,4,double> M = Mueller (J);
+	for (unsigned i=0; i<4; i++)
+	  for (unsigned j=0; j<4; j++)
+	    cout << " " << M[i][j];
+	
+	cout << endl;
+      }
+    }
+    return;
+  }
+
+  if (print_calibrator_stokes)
+  {
+    calibrator_stokes = input->get<CalibratorStokes>();
+
+    if (!calibrator_stokes)
+    {
+      cerr << "pacv: Archive does not contain CalibratorStokes extension"
+	   << endl;
+      return;
+    }
+
+    Reference::To<CalibratorExtension> ext;
+    ext = input->get<CalibratorExtension>();
+
+    if (ext->get_nchan() != calibrator_stokes->get_nchan())
+    {
+      cerr << "pacv: Calibrator nchan=" << ext->get_nchan()
+	   << " != CalibratorStokes nchan="
+	   << calibrator_stokes->get_nchan()
+	   << " (frequency column disabled)" << endl;
+      
+      ext = 0;
+    }
+
+    for (unsigned ichan=0; ichan<calibrator_stokes->get_nchan(); ichan++)
+    {
+      if (!calibrator_stokes->get_valid (ichan))
+	continue;
+
+      Stokes< Estimate<double> > stokes
+	= calibrator_stokes->get_stokes (ichan);
+
+      cout << ichan;
+      
+      if (ext)
+	cout << " " << ext->get_centre_frequency(ichan);
+      
+      for (unsigned i=1; i<4; i++)
+	cout << " " << stokes[i].get_value()
+	     << " " << stokes[i].get_error();
+
+      cout << endl;
+    }
+  }
 }
