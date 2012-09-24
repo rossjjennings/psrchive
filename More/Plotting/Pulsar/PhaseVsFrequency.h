@@ -16,6 +16,7 @@
 
 #include "Pulsar/PhaseVsPlot.h"
 #include "Pulsar/Index.h"
+#include "Pulsar/Integration.h"
 
 namespace Pulsar {
 
@@ -53,10 +54,15 @@ namespace Pulsar {
     void set_pol (const Index& _ipol) { ipol = _ipol; }
     Index get_pol () const { return ipol; }
 
+    //! Prepare for plotting
+    void prepare (const Archive *data);
+
   protected:
 
     Index isubint;
     Index ipol;
+
+    Reference::To<const Integration> subint;
 
   };
 
