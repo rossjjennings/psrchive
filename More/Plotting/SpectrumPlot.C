@@ -8,6 +8,7 @@
 #include "Pulsar/SpectrumPlot.h"
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProfileStats.h"
 
@@ -37,10 +38,13 @@ void Pulsar::SpectrumPlot::get_spectra (const Archive* data)
     parser = stats->get_interface ();
   }
 
+  Reference::To<const Integration> subint;
+  subint = get_Integration (data, isubint);
+
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
     Reference::To<const Profile> profile;
-    profile = get_Profile (data, isubint, ipol, ichan);
+    profile = get_Profile (subint, ipol, ichan);
     if (profile -> get_weight() == 0.0)
       spectra[0][ichan] = 0.0;
     else if (stats)

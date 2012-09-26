@@ -32,8 +32,14 @@ unsigned Pulsar::PhaseVsFrequency::get_nrow (const Archive* data)
   return data->get_nchan();
 }
 
+void Pulsar::PhaseVsFrequency::prepare (const Archive *data)
+{
+  PhaseVsPlot::prepare (data);
+  subint = Pulsar::get_Integration (data, isubint);
+}
+
 const Pulsar::Profile*
 Pulsar::PhaseVsFrequency::get_Profile (const Archive* data, unsigned ichan)
 {
-  return Pulsar::get_Profile (data, isubint, ipol, ichan);
+  return Pulsar::get_Profile (subint, ipol, ichan);
 }

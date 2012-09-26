@@ -153,7 +153,7 @@ void Pulsar::DynamicSpectrum::unload(const std::string& filename)
   fprintf(fout, "# isub ichan time(min) freq(MHz) flux flux_err\n");
   for (int isub=0; isub<nsub; isub++) {
     for (int ichan=0; ichan<nchan; ichan++) {
-      fprintf(fout, "%4d %4d %8.2f %8.2f %+.6e %+.6e\n", isub, ichan,
+      fprintf(fout, "%4d %4d %10.4f %12.6f %+.6e %+.6e\n", isub, ichan,
           get_rel_epoch(isub).in_minutes(),
           get_freq(ichan),
           ds_data[idx(ichan,isub)],
