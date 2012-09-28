@@ -74,6 +74,7 @@ const char PHASE_KEY            = 'r';
 const char PER_SUBINT_KEY       = 'S';
 const char TSCRUNCH_KEY         = 'T';
 const char TEXT_KEY             = 't';
+const char PAY_ATTN_TO_WEIGHTS  = 'w';
 const char STOKES_FRACPOL_KEY   = 'x';
 const char STOKES_POSANG_KEY    = 'Z';
 
@@ -113,6 +114,7 @@ bool keep_baseline = false;
 bool show_pol_frac = false;
 bool show_pa = false;
 bool show_min_max = false;
+bool pay_attention_to_weights = false;
 
 string header_marker = "";
 
@@ -169,6 +171,7 @@ void Usage( void )
   "   -" << PER_SUBINT_KEY <<     " params   Print out per subint data \n"
   "   -" << HISTORY_KEY <<        " params   Print out the history table for the archive \n"
   "   -" << MINMAX_KEY <<         "          Print out the min and max bin value for each subint \n"
+  "   -" << PAY_ATTN_TO_WEIGHTS <<"          Do not print anything when data weight = zero \n"
   " \n"
   "   For more detailed list of options use \"pdv -h param\", ie \"pdv -h S\" \n"
   "   for a full list of parameters that can be used with -S \n"
@@ -297,24 +300,24 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 
   int fchan = 0, lchan = nchn - 1;
   if( ichan != -1 && ichan <= lchan && ichan >= fchan)
-  {
-    fchan = ichan;
-    lchan = ichan;
-  }
+    {
+      fchan = ichan;
+      lchan = ichan;
+    }
 
   int fbin = 0, lbin = archive->get_nbin() - 1;
   if( ibin <= lbin && ibin >= fbin )
-  {
-    fbin = ibin;
-    lbin = ibin;
-  }
+    {
+      fbin = ibin;
+      lbin = ibin;
+    }
 
   int fsub = 0, lsub = archive->get_nsubint() - 1;
   if( isub <= lsub && isub >= fsub )
-  {
-    fsub = isub;
-    lsub = isub;
-  }
+    {
+      fsub = isub;
+      lsub = isub;
+    }
 
   tostring_setf = ios::fixed;
 
@@ -322,72 +325,78 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
   {
     if( nsub > 0 )
     {
-	  if( show_min_max )
-		MinMaxHeader( archive );
-	  else
-        Header( archive );
+      if( show_min_max )
+	MinMaxHeader( archive );
+      else
+	Header( archive );
 
       for (int s = fsub; s <= lsub; s++)
       {
-        Integration* intg = archive->get_Integration(s);
+	Integration* intg = archive->get_Integration(s);
 
-		if( show_min_max )
-		{
-		  struct min_max_data mmData;
-		  subint_min_max(intg, &mmData);
+	if( show_min_max )
+	{
+	  struct min_max_data mmData;
+	  subint_min_max(intg, &mmData);
 
-		  printf("%3d     %3d %4d %4d %8.2f      %3d %4d %4d %8.2f\n", s, mmData.max_pol, mmData.max_chan, mmData.max_bin, mmData.max, mmData.min_pol, mmData.min_chan, mmData.min_bin, mmData.min);
+	  printf("%3d     %3d %4d %4d %8.2f      %3d %4d %4d %8.2f\n", s, mmData.max_pol, mmData.max_chan, mmData.max_bin, mmData.max, mmData.min_pol, mmData.min_chan, mmData.min_bin, mmData.min);
 
-		  //cout << s << "\t" << mmData.max_pol << "\t" << mmData.max_chan << "\t" << mmData.max_bin << "\t" << mmData.max << "\t\t" << mmData.min_pol << "\t" << mmData.min_chan << "\t" << mmData.min_bin << "\t" << mmData.min << endl;
+	  //cout << s << "\t" << mmData.max_pol << "\t" << mmData.max_chan << "\t" << mmData.max_bin << "\t" << mmData.max << "\t\t" << mmData.min_pol << "\t" << mmData.min_chan << "\t" << mmData.min_bin << "\t" << mmData.min << endl;
+	}
+	else
+	{
+	  for (int c = fchan; c <= lchan; c++)
+	  {
+	    if (pay_attention_to_weights && intg->get_weight(c) == 0)
+	    {
+	      cout << "subint=" << s << " chan=" << c << " zapped" << endl;
+	      continue;
+	    }
+
+	    vector< Estimate<double> > PAs;
+	    if( show_pa )
+	    {
+	      Reference::To<Pulsar::PolnProfile> profile;
+	      profile = intg->new_PolnProfile(c);
+	      profile->get_orientation (PAs, pa_threshold);
+	    }
+
+	    if( per_channel_headers )
+	    {
+	      IntegrationHeader( intg );
+	      cout << " Freq: " << tostring<double>( intg->get_centre_frequency( c ) );
+	      cout << " BW: " << intg->get_bandwidth() / nchn;
+	      cout << endl;
+	    }
+
+	    for (int b = fbin; b <= lbin; b++)
+	    {
+	      cout << s << " " << c << " " << b;
+	      for(int ipol=0; ipol<npol; ipol++)
+	      {
+		Profile *p = intg->get_Profile( ipol, c );
+		cout << " " << p->get_amps()[b];
+	      }
+	      if( show_pol_frac ||  show_pa )
+	      {
+		float stokesI = intg->get_Profile(0,c)->get_amps()[b];
+		float stokesQ = intg->get_Profile(1,c)->get_amps()[b];
+		float stokesU = intg->get_Profile(2,c)->get_amps()[b];
+		float stokesV = intg->get_Profile(3,c)->get_amps()[b];
+
+
+		float frac_pol  = sqrt(stokesQ*stokesQ + stokesU*stokesU + stokesV*stokesV)/stokesI;
+
+		if( show_pol_frac )  cout << " " << frac_pol;
+		if( show_pa ) {
+		  cout << " " << PAs[b].get_value();
+		  cout << " " << sqrt(PAs[b].get_variance());
 		}
-		else
-		{
-          for (int c = fchan; c <= lchan; c++)
-          {
-            vector< Estimate<double> > PAs;
-			if( show_pa )
-			{
-			  Reference::To<Pulsar::PolnProfile> profile;
-			  profile = intg->new_PolnProfile(c);
-			  profile->get_orientation (PAs, pa_threshold);
-			}
-
-            if( per_channel_headers )
-			{
-			  IntegrationHeader( intg );
-			  cout << " Freq: " << tostring<double>( intg->get_centre_frequency( c ) );
-			  cout << " BW: " << intg->get_bandwidth() / nchn;
-			  cout << endl;
-			}
-
-		    for (int b = fbin; b <= lbin; b++)
-			{
-			  cout << s << " " << c << " " << b;
-			  for(int ipol=0; ipol<npol; ipol++)
-			  {
-			    Profile *p = intg->get_Profile( ipol, c );
-          cout << " " << p->get_amps()[b];
-			  }
-			  if( show_pol_frac ||  show_pa )
-			  {
-				float stokesI = intg->get_Profile(0,c)->get_amps()[b];
-				float stokesQ = intg->get_Profile(1,c)->get_amps()[b];
-				float stokesU = intg->get_Profile(2,c)->get_amps()[b];
-				float stokesV = intg->get_Profile(3,c)->get_amps()[b];
-
-
-				float frac_pol  = sqrt(stokesQ*stokesQ + stokesU*stokesU + stokesV*stokesV)/stokesI;
-
-				if( show_pol_frac )  cout << " " << frac_pol;
-				if( show_pa ) {
-				  cout << " " << PAs[b].get_value();
-				  cout << " " << sqrt(PAs[b].get_variance());
-				}
-			  }
-			  cout << endl;
-			}
-		  }
-        }
+	      }
+	      cout << endl;
+	    }
+	  }
+	}
       }
     }
   }
@@ -1124,6 +1133,7 @@ int main( int argc, char *argv[] ) try
   args += MINMAX_KEY;
   args += HDR_MARKER_KEY;
   args += PA_THRESHOLD_KEY; args += ":";
+  args += PAY_ATTN_TO_WEIGHTS;
 
   vector<string> history_params;
   vector<string> subint_params;
@@ -1226,6 +1236,11 @@ int main( int argc, char *argv[] ) try
     case HDR_MARKER_KEY:
       header_marker = "# ";
       break;
+
+    case PAY_ATTN_TO_WEIGHTS:
+      pay_attention_to_weights = true;
+      break;
+
     default:
       cerr << "Unknown option " << char(i) << endl;
       break;
