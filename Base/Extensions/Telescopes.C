@@ -37,6 +37,10 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
     Telescopes::Parkes(t);
     break;
 
+  case '8':
+    Telescopes::Jodrell(t);
+    break;
+
   case 'a':
     Telescopes::GB140(t);
     break;
@@ -141,3 +145,10 @@ void Pulsar::Telescopes::Parkes(Telescope *t)
   t->set_focus (Telescope::PrimeFocus);
 }
 
+void Pulsar::Telescopes::Jodrell(Telescope *t)
+{
+  t->set_name ("Jodrell");
+  t->set_mount (Telescope::Horizon);
+  t->set_primary (Telescope::Parabolic);
+  t->set_focus (Telescope::PrimeFocus);
+}
