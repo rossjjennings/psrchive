@@ -51,6 +51,6 @@ Pulsar::FluxPlot::Interface::Interface (FluxPlot* instance)
        "hist", "Plot histogram style" );
   
   add( &FluxPlot::get_crop,
-	&FluxPlot::set_crop,
-	"crop", "Crop max[min] fraction" );
+       &FluxPlot::set_crop,
+       "crop", "Crop max[min] fraction" );
 }

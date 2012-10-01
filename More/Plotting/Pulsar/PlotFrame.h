@@ -105,7 +105,7 @@ namespace Pulsar {
 
     Reference::To<PlotLabel> below;
 
-    bool  transpose;
+    bool transpose;
     
     bool draw_box;
 
