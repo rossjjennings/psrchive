@@ -146,6 +146,8 @@ void Pulsar::FluxPlot::draw (const Archive* data)
     cerr << "Pulsar::FluxPlot::draw ProfileVectorPlotter::draw ("
 	 << range.first << ", " << range.second << ")" << endl;
 
+  plotter.transpose = get_frame()->get_transpose();
+
   plotter.draw ( range.first, range.second );
 
   cpgsci (1);

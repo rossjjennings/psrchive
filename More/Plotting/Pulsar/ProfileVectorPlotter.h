@@ -56,6 +56,8 @@ namespace Pulsar {
     //! Plot histogram style
     bool plot_histogram;
 
+    //! Transpose the x and y axes
+    bool transpose;
   };
 
 }

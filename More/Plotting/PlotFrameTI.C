@@ -31,6 +31,10 @@ Pulsar::PlotFrame::Interface::Interface (PlotFrame* instance)
   import ( "y", PlotAxis::Interface(),
 	   (PlotAxis* (PlotFrame::*)(void)) &PlotFrame::get_y_axis );
 
+  add( &PlotFrame::get_transpose,
+       &PlotFrame::set_transpose,
+       "transpose", "Transpose the x and y axes (experimental)" );
+
   import ( PlotAttributes::Interface() );
 
   import ( "below", PlotLabel::Interface(), &PlotFrame::get_label_below );

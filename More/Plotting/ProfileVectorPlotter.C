@@ -13,18 +13,10 @@
 
 using namespace std;
 
-
-double mod( double dividend, double quotient )
-{
-  return dividend - double(int(dividend/quotient));
-}
-
-
-
-
 Pulsar::ProfileVectorPlotter::ProfileVectorPlotter ()
 {
   plot_histogram = false;
+  transpose = false;
 }
 
 void Pulsar::ProfileVectorPlotter::minmax (PlotFrame* frame) const
@@ -43,7 +35,8 @@ void Pulsar::ProfileVectorPlotter::minmax (PlotFrame* frame) const
   float min = profiles[0]->min(i_min, i_max);
   float max = profiles[0]->max(i_min, i_max);
 
-  for (unsigned iprof=1; iprof < profiles.size(); iprof++) {
+  for (unsigned iprof=1; iprof < profiles.size(); iprof++)
+  {
     min = std::min( min, profiles[iprof]->min(i_min, i_max) );
     max = std::max( max, profiles[iprof]->max(i_min, i_max) );
   }
@@ -53,8 +46,8 @@ void Pulsar::ProfileVectorPlotter::minmax (PlotFrame* frame) const
 
 void Pulsar::ProfileVectorPlotter::draw ( float sx, float ex )
 {
-  for (unsigned iprof=0; iprof < profiles.size(); iprof++) {
-
+  for (unsigned iprof=0; iprof < profiles.size(); iprof++)
+  {
     if (plot_sci.size() == profiles.size())
       cpgsci (plot_sci[iprof]);
     else
@@ -79,7 +72,8 @@ void Pulsar::ProfileVectorPlotter::draw( const Profile* profile,
   const float* amps =  profile->get_amps();
   unsigned nbin = profile->get_nbin();
 
-  if (ordinates.size() != nbin) {
+  if (ordinates.size() != nbin)
+  {
     ordinates.resize (nbin);
     for (unsigned i=0; i<nbin; i++)
       ordinates[i] = (double(i)+0.5) / double(nbin);
@@ -128,7 +122,8 @@ void Pulsar::ProfileVectorPlotter::draw( const Profile* profile,
 
     index ++;
 
-    if (index == nbin) {
+    if (index == nbin)
+    {
       index = 0;
       xoff += span;
     }
@@ -136,6 +131,8 @@ void Pulsar::ProfileVectorPlotter::draw( const Profile* profile,
 
   if (plot_histogram)
     cpgbin (total_pts, xs, ys, true);
+  else if (transpose)
+    cpgline (total_pts, ys, xs );
   else
     cpgline (total_pts, xs, ys );
 }
