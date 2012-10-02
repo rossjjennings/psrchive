@@ -100,6 +100,11 @@ protected:
   // configures the plotting device
   Pulsar::PlotOptions plot;
 
+  void set_plot_options(const std::string& arg);
+
+  // Extra config options for the profile plot
+  vector<string> plot_config;
+
 #endif
 };
 
@@ -160,6 +165,9 @@ void psrmodel::add_options (CommandLine::Menu& menu)
 #if HAVE_PGPLOT
   arg = menu.add (this, &psrmodel::set_plot_result, 'd');
   arg->set_help ("plot the resulting model with data");
+
+  arg = menu.add (this, &psrmodel::set_plot_options, 'c', "cfg[s]");
+  arg->set_help ("set additional plot options");
 #endif
 
   arg = menu.add (rvmfit.get(), &ComplexRVMFit::set_threshold, 't', "sigma");
@@ -287,6 +295,16 @@ void psrmodel::add_opm (const std::string& arg)
   rvmfit->add_opm( opm );
 }
 
+#if HAVE_PGPLOT
+void psrmodel::set_plot_options (const std::string& arg)
+{
+  vector<string> opts;
+  separate(arg, opts, ",");
+  for (unsigned i=0; i<opts.size(); i++)
+    plot_config.push_back(opts[i]);
+}
+#endif
+
 void psrmodel::setup ()
 {
   if (!fit_rvm)
@@ -381,6 +399,8 @@ void psrmodel::process (Pulsar::Archive* data)
     pa->get_frame()->get_y_scale()->set_range_norm (0, 1.5);
 
     plotter.get_scale()->set_units( PhaseScale::Degrees );
+    for (unsigned i=0; i<plot_config.size(); i++)
+      plotter.configure(plot_config[i]);
     plotter.plot( data );
 
     cerr << "Hit <ENTER> to continue" << endl;
@@ -423,6 +443,8 @@ void psrmodel::process (Pulsar::Archive* data)
     pa->get_frame()->get_y_scale()->set_range_norm (0, 1.5);
 
     plotter.get_scale()->set_units( PhaseScale::Degrees );
+    for (unsigned i=0; i<plot_config.size(); i++)
+      plotter.configure(plot_config[i]);
     plotter.plot( data );
   }
 #endif
