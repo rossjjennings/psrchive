@@ -16,6 +16,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/FaradayRotation.h"
+#include "Pulsar/Interpreter.h"
 
 #if HAVE_PGPLOT
 #include "Pulsar/PlotOptions.h"
@@ -123,7 +124,9 @@ psrmodel::psrmodel () :
   has_manual = false;
   version = "$Id: psrmodel.C,v 1.13 2010/05/28 21:56:32 straten Exp $";
 
-  add( new Pulsar::StandardOptions );
+  Pulsar::StandardOptions* preprocessor = new Pulsar::StandardOptions;
+  preprocessor->get_interpreter()->allow_infinite_frequency = true;
+  add( preprocessor );
 #if HAVE_PGPLOT
   add( &plot );
   plot_result = false;
