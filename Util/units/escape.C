@@ -31,6 +31,10 @@ string escape (string s)
 	  s[end] = '\r';
 	  break;
 
+        case '\\':
+          end+=1;
+          break;
+
 	}
 
     }
