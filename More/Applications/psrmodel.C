@@ -106,6 +106,9 @@ protected:
   // Extra config options for the profile plot
   vector<string> plot_config;
 
+  // Put best-fit params on plot
+  bool label_plot;
+
 #endif
 };
 
@@ -130,6 +133,7 @@ psrmodel::psrmodel () :
 #if HAVE_PGPLOT
   add( &plot );
   plot_result = false;
+  label_plot = false;
 #endif
 
   rvmfit = new ComplexRVMFit;
@@ -168,6 +172,9 @@ void psrmodel::add_options (CommandLine::Menu& menu)
 #if HAVE_PGPLOT
   arg = menu.add (this, &psrmodel::set_plot_result, 'd');
   arg->set_help ("plot the resulting model with data");
+
+  arg = menu.add (label_plot, 'l');
+  arg->set_help ("label plot with best-fit parameter values");
 
   arg = menu.add (this, &psrmodel::set_plot_options, 'c', "cfg[s]");
   arg->set_help ("set additional plot options");
@@ -448,7 +455,26 @@ void psrmodel::process (Pulsar::Archive* data)
     plotter.get_scale()->set_units( PhaseScale::Degrees );
     for (unsigned i=0; i<plot_config.size(); i++)
       plotter.configure(plot_config[i]);
+
+    if (label_plot) 
+    {
+      StokesPlot* flux = plotter.get_flux();
+      char label[256];
+      sprintf(label, 
+          "\\\\ga=%.1f\n\\\\g%c=%.1f\n\\\\gf=%.1f\n\\\\gq=%.1f", 
+          deg*RVM->magnetic_axis->get_value().get_value(),
+          RVM->impact ? 'b' : 'z', 
+          RVM->impact ? 
+            deg*RVM->impact->get_value().get_value() :
+            deg*RVM->line_of_sight->get_value().get_value(),
+          deg*RVM->magnetic_meridian->get_value().get_value(),
+          deg*RVM->reference_position_angle->get_value().get_value());
+      //plotter.configure(label);
+      flux->get_frame()->get_label_below()->set_right(label);
+    }
+
     plotter.plot( data );
+
   }
 #endif
 
