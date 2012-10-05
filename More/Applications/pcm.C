@@ -75,6 +75,7 @@ void usage ()
     "  -l solver  solver: MEAL [default] of GSL \n"
     "  -I impure  load impurity transformation from file \n"
     "  -y         always trust the Pointing::feed_angle attribute \n"
+    "  -Z         ignore the sky coordinates of PolnCal observations \n"
     "\n"
     "  -C meta    filename with list of calibrator files \n"
     "  -d dbase   filename of Calibration Database \n"
@@ -214,11 +215,12 @@ void range_select (Pulsar::ReceptionCalibrator& model,
 
   unsigned last_bin = unsigned (phmax * nbin);
 
-  for (float bin = phmin; bin<=phmax; bin += increment) {
-
+  for (float bin = phmin; bin<=phmax; bin += increment)
+  {
     unsigned ibin = unsigned (bin * nbin) % nbin;
 
-    if (ibin != last_bin)  {
+    if (ibin != last_bin)
+    {
       cerr << "pcm: adding phase bin " << ibin << endl;
       model.add_state (ibin%nbin);
       last_bin = ibin;
@@ -536,6 +538,9 @@ float polncal_hours = 12.0;
 // days from mid-time within which FluxCalOn observations will be selected
 float fluxcal_days = 7.0;
 
+// look for PolnCal observations with nearby sky coordinates
+bool check_coordinates = true;
+
 bool must_have_cals = true;
 
 // name of file containing list of calibrator Archive filenames
@@ -567,8 +572,9 @@ int actual_main (int argc, char *argv[]) try
 
   int gotc = 0;
 
-  const char* args
-    = "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:j:J:kL:l:M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:y";
+  const char* args =
+    "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:j:J:kL:l:"
+    "M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:yzZ";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -798,6 +804,11 @@ int actual_main (int argc, char *argv[]) try
 
     case 'z':
       fixed_phase = true;
+      break;
+
+    case 'Z':
+      check_coordinates = false;
+      break;
 
     default:
       cout << "Unrecognised option" << endl;
@@ -1407,6 +1418,7 @@ void load_calibrator_database () try
   Pulsar::Database::Criterion criterion;
   criterion = database->criterion (archive, Signal::PolnCal);
   criterion.entry.time = mid;
+  criterion.check_coordinates = check_coordinates;
   criterion.minutes_apart = polncal_hours * 60.0;
   
   vector<Pulsar::Database::Entry> oncals;
