@@ -29,11 +29,16 @@ void usage ()
     "\n"
     "Usage: sesdiv [options] \n"
     "Where the options are as follows \n"
-    " -h       this help page \n"
-    " -T hours time between sessions \n"
-    " -S secs  seconds between sessions \n"
-    " -v       verbose output \n"
-    " -V       very verbose output \n"
+    " -h                     this help page \n"
+    "\n"
+    " -b name:freq1-freq2    add a band designation \n"
+    "                        sessions for a given frequency range will \n"
+    "                        be placed in name/*.session \n"
+    "\n"
+    " -T hours               time between sessions \n"
+    " -S secs                seconds between sessions \n"
+    " -v                     verbose output \n"
+    " -V                     very verbose output \n"
        << endl;
 }
 
