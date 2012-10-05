@@ -23,7 +23,7 @@ int main ()
 
     Stokes<double> diff = output2 - output1;
 
-    if (norm(diff)/norm(output1) > 1e-15) {
+    if (norm(diff)/norm(output1) > 1e-14) {
       cerr << "Error: out1=" << output1 << endl
 	   << "    != out2=" << output2 << endl;
       return -1;
