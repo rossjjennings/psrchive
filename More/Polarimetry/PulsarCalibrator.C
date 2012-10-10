@@ -59,6 +59,7 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type* model)
 
   solve_each = false;
   fixed_phase = false;
+  shared_phase = false;
 }
 
 //! Constructor
@@ -93,6 +94,11 @@ void Pulsar::PulsarCalibrator::set_normalize_by_invariant (bool flag)
 void Pulsar::PulsarCalibrator::set_fixed_phase (bool flag)
 {
   fixed_phase = flag;
+}
+
+void Pulsar::PulsarCalibrator::share_phase ()
+{
+  shared_phase = true;
 }
 
 void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
@@ -216,6 +222,9 @@ void Pulsar::PulsarCalibrator::build (unsigned nchan) try
 
     if (fixed_phase)
       mtm[ichan]->remove_phase ();
+
+    if (shared_phase)
+      mtm[ichan]->share_phase ();
 
     // the equation transformation will be managed by the SignalPath class
     mtm[ichan]->manage_equation_transformation = false;
