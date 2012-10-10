@@ -5,6 +5,8 @@
  *
  ***************************************************************************/
 
+#include "Pulsar/Config.h"
+
 #include "Pulsar/Dispersion.h"
 
 #include "Pulsar/Integration.h"
@@ -14,12 +16,26 @@
 #include "Pulsar/AuxColdPlasmaMeasures.h"
 #include "Pulsar/AuxColdPlasma.h"
 
+#include "Pulsar/IntegrationBarycentre.h"
+
 using namespace std;
+
+Pulsar::Option<bool> Pulsar::Dispersion::barycentric_correction
+(
+ "Dispersion::barycentric_correction", false,
+
+ "Dedisperse using barycentric freqs [boolean]",
+
+ "If true, interchannel dispersion delays are calculated and corrected\n"
+ "using barycentric radio frequency values.  The historical psrchive\n"
+ "behavior was to use topocentric frequencies."
+);
 
 Pulsar::Dispersion::Dispersion ()
 {
   name = "Dispersion";
   val = "DM";
+  earth_doppler = 1.0;
 }
 
 double Pulsar::Dispersion::get_correction_measure (const Integration* data)
@@ -80,6 +96,11 @@ void Pulsar::Dispersion::revert (Archive* arch)
 void Pulsar::Dispersion::apply (Integration* data, unsigned ichan) try
 {
   folding_period = data->get_folding_period();
+  if (barycentric_correction)
+  {
+    bary.set_Integration(data);
+    earth_doppler = bary.get_Doppler();
+  }
 
   for (unsigned ipol=0; ipol < data->get_npol(); ipol++)
     data->get_Profile(ipol,ichan) -> rotate_phase( get_shift() );
@@ -108,5 +129,5 @@ double Pulsar::Dispersion::get_shift () const
     cerr << "Pulsar::Dispersion::get_shift delay=" << shift 
 	 << " period=" << folding_period << endl;
 
-  return shift / folding_period;
+  return shift / earth_doppler / folding_period;
 }

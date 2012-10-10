@@ -15,8 +15,10 @@
 #define __Pulsar_Dispersion_h
 
 #include "Pulsar/ColdPlasma.h"
+#include "Pulsar/Config.h"
 #include "Pulsar/DispersionDelay.h"
 #include "Pulsar/Dedisperse.h"
+#include "Pulsar/IntegrationBarycentre.h"
 
 namespace Pulsar {
 
@@ -77,6 +79,10 @@ namespace Pulsar {
   protected:
 
     double folding_period;
+
+    static Option<bool> barycentric_correction;
+    IntegrationBarycentre bary;
+    double earth_doppler;
 
   };
 
