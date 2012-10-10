@@ -48,6 +48,7 @@ nobase_include_HEADERS = \
         Pulsar/GaussianBaseline.h \
 	Pulsar/Index.h \
 	Pulsar/Integrate.h \
+	Pulsar/IntegrationBarycentre.h \
 	Pulsar/InstallInterpreter.h \
         Pulsar/IntegrationWeight.h \
         Pulsar/Interpreter.h \
@@ -185,6 +186,7 @@ libGeneral_la_SOURCES = \
         Integration_total.C \
         Integration_transform.C \
         Integration_weighted_frequency.C \
+	IntegrationBarycentre.C \
 	IntegrationWeight.C \
 	Interpreter.C \
         IterativeBaseline.C \
