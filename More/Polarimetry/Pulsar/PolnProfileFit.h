@@ -137,10 +137,11 @@ namespace Pulsar
     //! Set the phase offset between the observation and the standard
     void set_phase (const Estimate<double>& phase);
 
-    //! Lock the phases?
-    bool phase_lock;
     //! Lock pulse phase; i.e., do not allow pulse phase to vary in fit
     void set_phase_lock (bool locked);
+
+    //! Share a single phase shift between all input observations
+    void share_phase ();
 
     //! Remove pulse phase from model (may be more efficient, but irreversible)
     void remove_phase ();
@@ -171,6 +172,12 @@ namespace Pulsar
 
     //! The number of harmonics in the fit
     unsigned n_harmonic;
+
+    //! Share a single phase shift between all input observations
+    bool sharing_phase;
+
+    //! Lock the phase to the initial estimate
+    bool phase_lock;
 
     //! The standard to which observations will be fit
     Reference::To<const PolnProfile> standard;

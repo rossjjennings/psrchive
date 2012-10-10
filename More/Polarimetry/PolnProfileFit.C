@@ -102,6 +102,7 @@ void Pulsar::PolnProfileFit::init ()
   manage_equation_transformation = true;
   fit_debug = false;
   phase_lock = false;
+  sharing_phase = false;
 }
 
 void Pulsar::PolnProfileFit::set_plan (FTransform::Plan* p)
@@ -302,6 +303,20 @@ void Pulsar::PolnProfileFit::remove_phase ()
   delete phases;
 }
 
+void Pulsar::PolnProfileFit::share_phase ()
+{
+  if (!phases)
+    throw Error (InvalidState, "Pulsar::PolnProfileFit::share_phase",
+		 "cannot call share_phase after remove_phase has been called");
+
+  if (phases->get_ngradient() > 1)
+    throw Error( InvalidState, "Pulsar::PolnProfileFit::share_phase",
+		 "cannot call share_phase when ngradient=%u > 1",
+		 phases->get_ngradient() );
+
+  sharing_phase = true;
+}
+
 //! Fit the specified observation to the standard
 void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 {
@@ -381,9 +396,14 @@ try
 
   if (phases)
   {
-    phases->add_gradient();
+    if (!sharing_phase || phases->get_ngradient() == 0)
+      phases->add_gradient();
+
     index = phases->get_igradient();
+
     phases->set_infit(index, !phase_lock);
+
+    // TO-DO: when sharing phase, keep the best phase_guess
     phases->set_param (index, phase_guess);
   }
 
