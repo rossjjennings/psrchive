@@ -47,6 +47,9 @@ namespace Pulsar {
     //! When set, pulse phase is removed from the model
     void set_fixed_phase (bool flag = true);
 
+    //! Share a single phase estimate between all observations
+    void share_phase ();
+
     //! Get the number of frequency channels
     unsigned get_nchan () const;
 
@@ -120,6 +123,9 @@ namespace Pulsar {
 
     //! Flag set when phase should be held fixed
     bool fixed_phase;
+
+    //! Share a single phase estimate between multiple observations
+    bool shared_phase;
 
     //! The maximum number of harmonics to include in the fit
     unsigned maximum_harmonic;
