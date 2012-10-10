@@ -174,7 +174,7 @@ namespace Pulsar
     unsigned n_harmonic;
 
     //! Share a single phase shift between all input observations
-    bool sharing_phase;
+    bool shared_phase;
 
     //! Lock the phase to the initial estimate
     bool phase_lock;

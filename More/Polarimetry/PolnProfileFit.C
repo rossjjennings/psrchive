@@ -102,7 +102,7 @@ void Pulsar::PolnProfileFit::init ()
   manage_equation_transformation = true;
   fit_debug = false;
   phase_lock = false;
-  sharing_phase = false;
+  shared_phase = false;
 }
 
 void Pulsar::PolnProfileFit::set_plan (FTransform::Plan* p)
@@ -314,7 +314,7 @@ void Pulsar::PolnProfileFit::share_phase ()
 		 "cannot call share_phase when ngradient=%u > 1",
 		 phases->get_ngradient() );
 
-  sharing_phase = true;
+  shared_phase = true;
 }
 
 //! Fit the specified observation to the standard
@@ -396,7 +396,7 @@ try
 
   if (phases)
   {
-    if (!sharing_phase || phases->get_ngradient() == 0)
+    if (!shared_phase || phases->get_ngradient() == 0)
       phases->add_gradient();
 
     index = phases->get_igradient();
