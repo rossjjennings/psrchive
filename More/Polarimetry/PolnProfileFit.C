@@ -358,7 +358,6 @@ void Pulsar::PolnProfileFit::set_measurement_set
 }
 
 void Pulsar::PolnProfileFit::add_observation( const PolnProfile* observation )
-try
 {
   if (!standard)
     throw Error (InvalidState, "Pulsar::PolnProfileFit::add_observation",
@@ -393,77 +392,86 @@ try
     cerr << "Pulsar::PolnProfileFit::add_observation add gradient" << endl;
 
   unsigned index = 0;
+  bool gradient_added = false;
 
   if (phases)
   {
     if (!shared_phase || phases->get_ngradient() == 0)
+    {
       phases->add_gradient();
+      gradient_added = true;
+    }
 
     index = phases->get_igradient();
 
-    phases->set_infit(index, !phase_lock);
+    phases->set_infit (index, !phase_lock);
 
-    // TO-DO: when sharing phase, keep the best phase_guess
+    // TO-DO: when sharing phase, retain only the best phase_guess
     phases->set_param (index, phase_guess);
   }
 
-  unsigned nbin_std = standard->get_nbin();
-  unsigned nbin_obs = observation->get_nbin();
-
-  /* 
-     If the standard (template) and observed profiles have different
-     numbers of bins, account for the offset between the centres of
-     bin 0 of each profile.
-
-     This will likely cause trouble if phases have been removed from
-     the model.
-
-     A potential fix: multiply the observation by the required phase
-     gradient.
-  */
-  if (phases && nbin_std != nbin_obs)
-    phases->set_offset (index, 0.5/nbin_std - 0.5/nbin_obs);
-
-  // initialize the measurement sets
-  for (unsigned ibin=1; ibin<n_harmonic; ibin++)
+  try
   {
+    unsigned nbin_std = standard->get_nbin();
+    unsigned nbin_obs = observation->get_nbin();
 
-    Stokes< complex<double> > val;
-    Stokes< complex<double> > var;
-    valvar( standard_data->get_stokes(ibin), val, var );
+    /* 
+       If the standard (template) and observed profiles have different
+       numbers of bins, account for the offset between the centres of
+       bin 0 of each profile.
+       
+       This will likely cause trouble if phases have been removed from
+       the model.
+       
+       A potential fix: multiply the observation by the required phase
+       gradient.
+    */
+    if (phases && nbin_std != nbin_obs)
+      phases->set_offset (index, 0.5/nbin_std - 0.5/nbin_obs);
+    
+    // initialize the measurement sets
+    for (unsigned ibin=1; ibin<n_harmonic; ibin++)
+    {
 
-    Calibration::TemplateUncertainty* error = uncertainty[ibin-1]->clone();
-    error -> set_variance (var);
-
+      Stokes< complex<double> > val;
+      Stokes< complex<double> > var;
+      valvar( standard_data->get_stokes(ibin), val, var );
+      
+      Calibration::TemplateUncertainty* error = uncertainty[ibin-1]->clone();
+      error -> set_variance (var);
+      
 #ifdef _DEBUG
-    if (error->get_transformation() != transformation)
-      {
-	cerr << "error.xform=" << error->get_transformation() << " != "
-	     << transformation.get() << endl;
-      }
-    else
-      cerr << "clone ok!" << endl;
+      if (error->get_transformation() != transformation)
+	{
+	  cerr << "error.xform=" << error->get_transformation() << " != "
+	       << transformation.get() << endl;
+	}
+      else
+	cerr << "clone ok!" << endl;
 #endif
+      
+      Calibration::CoherencyMeasurement measurement (ibin-1);
+      measurement.set_stokes (val, error);
+      
+      double phase_shift = -2.0 * M_PI * double(ibin);
 
-    Calibration::CoherencyMeasurement measurement (ibin-1);
-    measurement.set_stokes (val, error);
+      Calibration::CoherencyMeasurementSet measurements (measurement_set);
 
-    double phase_shift = -2.0 * M_PI * double(ibin);
-
-    Calibration::CoherencyMeasurementSet measurements (measurement_set);
-
-    measurements.add_coordinate ( phase_axis.new_Value(phase_shift) );
-    measurements.add_coordinate ( index_axis.new_Value(index) );
-
-    measurements.push_back ( measurement );
- 
-    equation->add_data( measurements );
+      measurements.add_coordinate ( phase_axis.new_Value(phase_shift) );
+      measurements.add_coordinate ( index_axis.new_Value(index) );
+      
+      measurements.push_back ( measurement );
+      
+      equation->add_data( measurements );
+    }
   }
+  catch (Error& error)
+  {
+    if (gradient_added)
+      phases->remove_gradient();
 
-}
-catch (Error& error)
-{
-  throw error += "Pulsar::PolnProfileFit::add_observation";
+    throw error += "Pulsar::PolnProfileFit::add_observation";
+  }
 }
 
 
