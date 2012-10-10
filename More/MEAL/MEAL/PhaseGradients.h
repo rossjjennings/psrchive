@@ -55,6 +55,9 @@ namespace MEAL {
     //! Add another gradient to the set
     void add_gradient ();
 
+    //! Remove the last gradient from the set
+    void remove_gradient ();
+
     //! Set the number of gradients
     void resize (unsigned ngradient);
 
