@@ -102,17 +102,17 @@ class MJD {
   MJD & operator -= (const double &);
   MJD & operator *= (const double &);
   MJD & operator /= (const double &);
-  const friend MJD operator + (const MJD &, const MJD &);
-  const friend MJD operator - (const MJD &, const MJD &);
-  const friend MJD operator + (const MJD &, double);  // Add seconds to an MJD
-  const friend MJD operator - (const MJD &, double);  // Take seconds from MJD
-  const friend MJD operator * (const MJD &, double);  
-  const friend MJD operator * (double a, const MJD& m)
+  friend const MJD operator + (const MJD &, const MJD &);
+  friend const MJD operator - (const MJD &, const MJD &);
+  friend const MJD operator + (const MJD &, double);  // Add seconds to an MJD
+  friend const MJD operator - (const MJD &, double);  // Take seconds from MJD
+  friend const MJD operator * (const MJD &, double);  
+  friend const MJD operator * (double a, const MJD& m)
     { return m * a; }
-  const friend MJD operator / (const MJD &, double);  
+  friend const MJD operator / (const MJD &, double);  
 
   // return the -ve of m
-  const friend MJD operator - (MJD m);
+  friend const MJD operator - (MJD m);
 
   friend int operator > (const MJD &, const MJD &);
   friend int operator < (const MJD &, const MJD &);

@@ -124,6 +124,7 @@ void usage ()
     "  -H         allow software to choose the number of harmonics \n"
     "  -n nbin    set the number of harmonics to use as input states \n"
     "  -1         solve independently for each observation \n"
+    "  -z         share a single phase shift estimate b/w all observations \n"
     "\n"
     "See "PSRCHIVE_HTTP"/manuals/pcm for more details\n"
        << endl;
@@ -327,8 +328,8 @@ bool choose_maximum_harmonic = false;
 // Mode B: Solve the measurement equation for each observation
 bool solve_each = false;
 
-// Mode B: Do not allow pulse phase to vary as a free parameter
-bool fixed_phase = false;
+// Mode B: Share a single phase estimate between all observations
+bool shared_phase = false;
 
 // significance of phase shift required to fail test
 float alignment_threshold = 4.0; // sigma
@@ -803,7 +804,7 @@ int actual_main (int argc, char *argv[]) try
     }
 
     case 'z':
-      fixed_phase = true;
+      shared_phase = true;
       break;
 
     case 'Z':
@@ -1323,7 +1324,8 @@ SystemCalibrator* matrix_template_matching (const char* stdname)
 {
   PulsarCalibrator* model = new PulsarCalibrator (model_type);
 
-  model->set_fixed_phase (fixed_phase);
+  if (shared_phase)
+    model->share_phase ();
 
   if (maxbins_set)
     model->set_maximum_harmonic (maxbins);

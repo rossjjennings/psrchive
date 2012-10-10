@@ -183,6 +183,10 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       float trf[6] = { xoff + x_min - 0.5*x_res, x_res, 0.0,
                        y_min - 0.5*y_res,        0.0, y_res };
 
+      if (get_frame()->get_transpose())
+	for (unsigned i=0; i<3; i++)
+	  std::swap (trf[i], trf[i+3]);
+
       cpgimag(&plotarray[0], nbin, nrow, 1, nbin, 1, nrow, min, max, trf);
     }
 
@@ -257,10 +261,18 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     min *= nrow;
     max *= nrow;
 
-    cpgswin (x_min, x_max, min, max);
-
-    cpgbox (" ", 0.0, 0, "CMIST", 0.0, 0);
-    cpgmtxt("R", 2.6, 0.5, 0.5, "Index");
+    if (get_frame()->get_transpose())
+    {
+      cpgswin (min, max, x_min, x_max);
+      cpgbox ("CMIST", 0.0, 0, " ", 0.0, 0);
+      cpgmtxt("T", 2.6, 0.5, 0.5, "Index");
+    }
+    else
+    {
+      cpgswin (x_min, x_max, min, max);
+      cpgbox (" ", 0.0, 0, "CMIST", 0.0, 0);
+      cpgmtxt("R", 2.6, 0.5, 0.5, "Index");
+    }
   }
   else
   {

@@ -109,6 +109,12 @@ void MEAL::PhaseGradients::add_gradient ()
   resize ( get_ngradient() + 1 );
 }
 
+//! Add another gradient to the set
+void MEAL::PhaseGradients::remove_gradient ()
+{
+  resize ( get_ngradient() - 1 );
+}
+
 //! Get the number of gradients
 unsigned MEAL::PhaseGradients::get_ngradient () const
 {

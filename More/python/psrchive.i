@@ -121,12 +121,6 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 }
 %typemap(out) Estimate<float> = Estimate<double>;
 
-// Return psrchive's MJD class as a Python double.
-// NOTE this loses precision so may not be appropriate for all cases.
-%typemap(out) MJD {
-    $result = PyFloat_FromDouble($1.in_days());
-}
-
 // Convert various enums to/from string
 %define %map_enum(TYPE)
 %typemap(out) Signal:: ## TYPE {
@@ -155,8 +149,24 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/Profile.h"
 %include "Angle.h"
 %include "sky_coord.h"
+%include "MJD.h"
 
 // Python-specific extensions to the classes:
+
+%extend MJD
+{
+    // SWIG doesn't like the way the operators are currently defined
+    // in the MJD class.  We could change MJD definition but will
+    // try this for now.
+    MJD operator + (const MJD & right) { return operator + (*self,right); }
+    MJD operator - (const MJD & right) { return operator - (*self,right); }
+
+    std::string __str__()
+    {
+        return "PSRCHIVE MJD: " + self->printall();
+    }
+
+}
 
 %extend Pulsar::Profile
 {
