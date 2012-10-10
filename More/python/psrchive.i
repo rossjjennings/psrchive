@@ -161,6 +161,11 @@ void pointer_tracker_remove(Reference::Able *ptr) {
     MJD operator + (const MJD & right) { return operator + (*self,right); }
     MJD operator - (const MJD & right) { return operator - (*self,right); }
 
+    std::string __str__()
+    {
+        return "PSRCHIVE MJD: " + self->printall();
+    }
+
 }
 
 %extend Pulsar::Profile
