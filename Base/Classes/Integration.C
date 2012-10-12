@@ -360,6 +360,27 @@ void Pulsar::Integration::set_weight (unsigned ichan, float weight)
     profiles[ipol][ichan]->set_weight (weight);
 }
 
+//! Get the telescope name
+std::string Pulsar::Integration::get_telescope() const
+try {
+  if (orphaned)
+    return orphaned->get_telescope ();
+  return parent->get_telescope ();
+}
+catch (Error& error) {
+  throw error += "Pulsar::Integration::get_telescope";
+}
+
+//! Get the source coordinates
+sky_coord Pulsar::Integration::get_coordinates() const
+try {
+  if (orphaned)
+    return orphaned->get_coordinates ();
+  return parent->get_coordinates ();
+}
+catch (Error& error) {
+  throw error += "Pulsar::Integration::get_coordinates";
+}
 
 //! Get the centre frequency (in MHz)
 double Pulsar::Integration::get_centre_frequency() const

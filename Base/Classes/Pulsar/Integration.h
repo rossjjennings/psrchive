@@ -27,6 +27,7 @@
 #include "Types.h"
 #include "Estimate.h"
 #include "Jones.h"
+#include "sky_coord.h"
 
 #include <vector>
 
@@ -227,6 +228,12 @@ namespace Pulsar {
      *  possible to set these attributes through the Integration base
      *  class interface. */
     //@{
+
+    //! Get the telescope name
+    std::string get_telescope() const;
+
+    //! Get the source coordinates
+    sky_coord get_coordinates() const;
 
     //! Get the centre frequency (in MHz)
     double get_centre_frequency() const;

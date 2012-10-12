@@ -8,10 +8,15 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationMeta.h"
 #include "Pulsar/AuxColdPlasma.h"
+#include "sky_coord.h"
 
 //! Construct from the parent Archive instance
 Pulsar::Integration::Meta::Meta (const Archive* parent)
 {
+
+  set_telescope( parent->get_telescope() );
+  set_coordinates( parent->get_coordinates() );
+
   set_centre_frequency( parent->get_centre_frequency() );
   set_bandwidth( parent->get_bandwidth() );
   set_dispersion_measure( parent->get_dispersion_measure() );
@@ -34,6 +39,26 @@ Pulsar::Integration::Meta::Meta (const Archive* parent)
 
   set_state( parent->get_state() );
   set_basis( parent->get_basis() );
+}
+
+std::string Pulsar::Integration::Meta::get_telescope() const
+{
+  return telescope;
+}
+
+void Pulsar::Integration::Meta::set_telescope(std::string name)
+{
+  telescope = name;
+}
+
+sky_coord Pulsar::Integration::Meta::get_coordinates() const
+{
+  return coordinates;
+}
+
+void Pulsar::Integration::Meta::set_coordinates(const sky_coord &c)
+{
+  coordinates = c;
 }
 
 //! Get the centre frequency (in MHz)

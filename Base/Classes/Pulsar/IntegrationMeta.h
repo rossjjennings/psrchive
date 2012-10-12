@@ -15,6 +15,7 @@
 #define __Pulsar_Integration_Meta_h
 
 #include "Pulsar/Integration.h"
+#include "sky_coord.h"
 
 namespace Pulsar {
 
@@ -27,6 +28,14 @@ namespace Pulsar {
 
     //! Construct from the parent Archive instance
     Meta (const Archive*);
+
+    //! Name of the telescope
+    std::string get_telescope () const;
+    void set_telescope (std::string);
+
+    //! Source coordinates
+    sky_coord get_coordinates () const;
+    void set_coordinates (const sky_coord &);
 
     //! Get the centre frequency (in MHz)
     double get_centre_frequency() const;
@@ -84,6 +93,9 @@ namespace Pulsar {
 
     bool auxiliary_dispersion_corrected;
     bool auxiliary_birefringence_corrected;
+
+    std::string telescope;
+    sky_coord coordinates;
 
   };
 
