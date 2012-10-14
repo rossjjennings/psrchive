@@ -10,6 +10,7 @@
 #include "stringtok.h"
 
 #include <fstream>
+#include <sstream>
 
 #include <math.h>
 #include <string.h>
@@ -170,12 +171,17 @@ void load_observatories ()
     if (!line.length())
       continue;
 
-    double x, y, z;
-    char name[32], code[32];
+    istringstream istr (line);
 
-    if (sscanf (line.c_str(), "%lf %lf %lf %s %s", &x,&y,&z, name, code) != 5)
+    double x, y, z;
+    istr >> x >> y >> z;
+
+    string name, code;
+    istr >> name >> code;
+
+    if (istr.fail())
       throw Error (InvalidParam, "Tempo::observatories",
-		   "failed to parse '%s'", line.c_str());
+		   "failed to parse '" + line + "'");
 
     Reference::To<Tempo2::Observatory> observatory = new Tempo2::Observatory;
 
