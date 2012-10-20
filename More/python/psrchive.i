@@ -16,6 +16,7 @@
 #include "load_factory.h"
 
 #include "Pulsar/Dispersion.h"
+#include "Pulsar/IntegrationBarycentre.h"
 %}
 
 // Language independent exception handler
@@ -215,6 +216,13 @@ void pointer_tracker_remove(Reference::Able *ptr) {
         Pulsar::Pointing *p = self->get<Pulsar::Pointing>();
         if (p==NULL) return 0.0;
         return p->get_telescope_azimuth().getDegrees();
+    }
+
+    // Interface to Barycentre
+    double get_doppler_factor() {
+        Pulsar::IntegrationBarycentre bary;
+        bary.set_Integration(self);
+        return bary.get_Doppler();
     }
 
     // Return baseline_stats as numpy arrays
