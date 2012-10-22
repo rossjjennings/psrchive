@@ -10,59 +10,71 @@
 #include <iostream>
 using namespace std;
 
+void test_separate( const string& input,
+		    const vector<string>& expected,
+		    const string& delimiters = string() )
+{
+  vector<string> result;
+
+  if (delimiters.size())
+    separate (input, result, delimiters);
+  else
+    separate (input, result);
+
+  if (result.size() != expected.size())
+  {
+    cerr << "FAIL: separate(" << input << ") yields " << result.size()
+	 << " elements - expected " << expected.size() << endl;
+    exit (-1);
+  }
+
+  for (unsigned i=0; i < result.size(); i++)
+    if (result[i] != expected[i])
+    {
+      cerr << "FAIL: separate result[" << i << "]=" << result[i]
+	   << " != expected=" << expected[i] << endl;
+      exit (-1);
+    }
+}
+
 int main ()
 {
-  cerr << "testing separate; this should finish almost instantly" << endl;
+  cerr << "testing string separation ... should finish immediately" << endl;
 
-  vector<string> test1;
-  separate ("one=1, two,three, four=(4,5)", test1, ", ");
+  {
+    string input = "one=1, two,three, four=(4,5)";
+    string delim = " ,";
 
-  if (test1.size() != 4) {
-    cerr << "separate yields vector with only "
-	 << test1.size() << " elements" << endl;
-    return -1;
+    vector<string> expect (4);
+    expect[0] = "one=1";
+    expect[1] = "two";
+    expect[2] = "three";
+    expect[3] = "four=(4,5)";
+
+    test_separate (input, expect, delim);
   }
 
-  if (test1[0] != "one=1") {
-    cerr << "separate fail test1[0]=" << test1[0] << endl;
-    return -1;
+
+  {
+    string input = "one \"two, three and four\"";
+    vector<string> expect (2);
+    expect[0] = "one";
+    expect[1] = "\"two, three and four\"";
+
+    test_separate (input, expect);
   }
 
-  if (test1[1] != "two") {
-    cerr << "separate fail test1[1]=" << test1[1] << endl;
-    return -1;
+  {
+    string input = "1,2 3,4";
+    vector<string> expect (2);
+    expect[0] = "1,2";
+    expect[1] = "3,4";
+
+    test_separate (input, expect);
   }
 
-  if (test1[2] != "three") {
-    cerr << "separate fail test1[2]=" << test1[2] << endl;
-    return -1;
-  }
-
-  if (test1[3] != "four=(4,5)") {
-    cerr << "separate fail test1[3]=" << test1[3] << endl;
-    return -1;
-  }
-
-  vector<string> test2;
-  separate ("one \"two, three and four\"", test2);
-
-  if (test2.size() != 2) {
-    cerr << "separate yields vector with only "
-	 << test2.size() << " elements" << endl;
-    return -1;
-  }
-
-  if (test2[0] != "one") {
-    cerr << "separate fail test2[0]=" << test2[0] << endl;
-    return -1;
-  }
-
-  if (test2[1] != "\"two, three and four\"") {
-    cerr << "separate fail test2[1]=" << test2[1] << endl;
-    return -1;
-  }
-
-  cerr << "separate function passes all tests" << endl;
+  cerr << "PASS: all tests passed" << endl;
 
   return 0;
 }
+
