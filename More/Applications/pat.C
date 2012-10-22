@@ -9,6 +9,8 @@
 #include <config.h>
 #endif
 
+#include "Pulsar/Interpreter.h"
+
 #include "Pulsar/ArrivalTime.h"
 #include "Pulsar/MatrixTemplateMatching.h"
 
@@ -143,6 +145,8 @@ void usage ()
     "Preprocessing options:\n"
     "  -F               Frequency scrunch before fitting \n"
     "  -T               Time scrunch before fitting \n"
+    "  -j job1[,jobN]   Preprocessing job[s] \n"
+    "  -J jobs          Multiple preprocessing jobs in 'jobs' file \n"
     "  -d               Discard profiles with zero weight\n"
     "  -x               Disable default preprocessing \n"
     "\n"
@@ -216,6 +220,7 @@ int main (int argc, char** argv) try
   bool fscrunch = false;
   bool tscrunch = false;
   bool preprocess = true;
+  vector<string> jobs;
 
   bool skip_bad = false;
   bool phase_info = false;
@@ -256,7 +261,7 @@ int main (int argc, char** argv) try
 #define PLOT_ARGS
 #endif
 
-  const char* args = "a:A:bcC:Dde:E:f:Fg:hiK:m:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
+  const char* args = "a:A:bcC:Dde:E:f:Fg:hij:J:K:m:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
 
   int gotc = 0;
 
@@ -350,6 +355,14 @@ int main (int argc, char** argv) try
     case 'i':
       cout << "$Id: pat.C,v 1.106 2011/02/23 20:53:38 straten Exp $" << endl;
       return 0;
+
+    case 'j':
+      separate (optarg, jobs, ",");
+      break;
+
+    case 'J':
+      loadlines (optarg, jobs);
+      break;
 
     case 'K':
       plot_device = optarg;
@@ -525,6 +538,8 @@ int main (int argc, char** argv) try
     parser->process (estimator_config);
   }
 
+  Pulsar::Interpreter* preprocessor = standard_shell();
+
   for (unsigned i = 0; i < archives.size(); i++) try {
 
     if (verbose)
@@ -535,6 +550,15 @@ int main (int argc, char** argv) try
     {
       loadGaussian(gaussFile, stdarch, arch);
       arrival->set_standard (stdarch);
+    }
+
+    // Preprocessor jobs
+    if (jobs.size())
+    {
+      if (verbose)
+        cerr << "pat: preprocessing " << archives[i] << endl;
+      preprocessor->set (arch);
+      preprocessor->script (jobs);
     }
 
     if (fscrunch)
