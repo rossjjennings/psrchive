@@ -20,6 +20,16 @@ bool part_of_numeric_range (const string& s, string::size_type pos)
     return false;
 
   const string whitespaces (" \t\f\v\n\r");
+
+  /*
+    the primary intent of this function is to ignore commas that are
+    part of a numeric range (e.g. "3,4,7-8" ... if the delimiting
+    character is whitespace, then there is no need for this check
+  */
+
+  if (whitespaces.find( s[pos] ) != string::npos)
+    return false;
+
   string::size_type next = s.find_first_not_of (whitespaces, pos+1);
 	
   if (next == string::npos || !isnumeric(s[next]))
