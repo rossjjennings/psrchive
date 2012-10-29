@@ -2155,7 +2155,7 @@ do_display(vector<double> freqs,
   
   cpgsch(1.0);
   cpgscf (2);
-  cpgbox("BCITS", 0.0, 0, "BCINTS", 0.0, 0);    
+  cpgbox("BCTS", 0.0, 0, "BCNTS", 0.0, 0);    
   cpgmtxt("L",4.0,.5,.5,"Position Angle (deg)");
 
   
@@ -2266,12 +2266,12 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
 
 
     stringstream RM_strm,RM_err_strm;
-    RM_strm << plotRM;
-    RM_err_strm << plotRM_err;
+    RM_strm <<setprecision(3)<< plotRM;
+    RM_err_strm <<setprecision(3)<< plotRM_err;
   
     string RM_label="RM=";
-    string radpm2=" rad/m^2";
-    string plusminus="+/-";
+    string radpm2=" rad m\\u-2\\d";
+    string plusminus=" \\(2233) ";
     string psrstr="PSR ";
     
     string RM_str=RM_label+RM_strm.str()+plusminus+RM_err_strm.str()+radpm2;
@@ -2280,7 +2280,7 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
     const char* RM_char=RM_str.c_str();
     const char* jname_char=jname_str.c_str();
 
-    cerr << " RM(char) = " << RM_char <<endl;
+//    cerr << " RM(char) = " << RM_char <<endl;
 
     cpgsci(3);
     cpgsls(1);
@@ -2288,7 +2288,7 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
     cpgline(plotf.size(),&plotf.front(),&plotpa.front());
     cpgsci(8);
     cpgsch(0.85);
-    cpgmtxt("B",-0.8,0.02,0.0,RM_char);
+    cpgmtxt("t",0.6,1.0,1.0,RM_char);
 
     cpgsci(1);
     cpgsls(1);
