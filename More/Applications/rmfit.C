@@ -1550,7 +1550,7 @@ pa_plot( int rise_bin, int fall_bin,
         lchan_vec.push_back(sqrt(qchan[j]*qchan[j]+uchan[j]*uchan[j]));
     L.set_amps(lchan_vec);
     
-    float lmean = L.mean(L.find_min_phase());
+    // float lmean = L.mean(L.find_min_phase());
     
     L -= L.mean(L.find_min_phase());
     float* lchan = L.get_amps();
@@ -1992,9 +1992,9 @@ vector<double> LoverIerr;
 for(unsigned m=0; m<goodfreqs.size(); m++)
 {
  VoverI.push_back(goodv[m]/goodi[m]);
- VoverIerr.push_back(  sqrt(  pow(goodvrms[m],2)/pow(goodi[m],2) + pow(goodv[m],2)/pow(goodi[m],4)*pow(goodirms[m],2)  )   );
+ VoverIerr.push_back(  sqrt(  pow(goodvrms[m],2.0)/pow(goodi[m],2.0) + pow(goodv[m],2.0)/pow(goodi[m],4.0)*pow(goodirms[m],2.0)  )   );
  LoverI.push_back(goodl[m]/goodi[m]);
- LoverIerr.push_back(  sqrt(  pow(goodlrms[m],2)/pow(goodi[m],2) + pow(goodl[m],2)/pow(goodi[m],4)*pow(goodirms[m],2)  )   );
+ LoverIerr.push_back(  sqrt(  pow(goodlrms[m],2.0)/pow(goodi[m],2.0) + pow(goodl[m],2.0)/pow(goodi[m],4.0)*pow(goodirms[m],2.0)  )   );
 }
 
 
@@ -2183,7 +2183,8 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
 {
   int good_nchan = good_chans.size();
 
-  double a = 0.0, b = 0.0, siga = 0.0, sigb = 0.0, chi2 = 0.0, prob = 0.0;
+  double a = 0.0, b = 0.0;
+//, siga = 0.0, sigb = 0.0, chi2 = 0.0, prob = 0.0;
   
 //  cerr << "Fitting..." << endl;    
 //  lin_chi2_fit(freqs,pa,pa_stddev,true,a,b,siga,sigb,chi2,prob);
@@ -2316,7 +2317,7 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
 
     }
     
-    float dataht = fabs(maxval-minval);
+    // float dataht = fabs(maxval-minval);
     float dataerrht = fabs(maxerrval-minerrval);
 
    
@@ -2360,7 +2361,7 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
     
     resids_stddev = sqrt(resids_stddev);
     
-    float histbinwidth = 3.5*resids_stddev/pow(float(pa_resids.size()),0.333);
+    float histbinwidth = 3.5*resids_stddev/pow(double(pa_resids.size()),0.333);
     
     //---------------------------//
     
@@ -2404,7 +2405,7 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
 
     if(histbins<2)
     { 
-       histbinwidth = 3.5*resids_stddev/pow(float(pa_resids.size()),0.333);
+       histbinwidth = 3.5*resids_stddev/pow(double(pa_resids.size()),0.333);
        histbins = ceil((maxval-minval)/histbinwidth);
     }
 
