@@ -215,27 +215,33 @@ void parse_pairs (vector< pair<T,U> >& pairs,
 		  T limit_first, const string& name_first,
 		  U limit_second, const string& name_second)
 {
+  // cerr << "parse_pairs: " << arguments.size() << " arguments" << endl;
+
   pairs.resize( arguments.size() );
 
-  for (unsigned i=0; i<pairs.size(); i++) {
+  for (unsigned i=0; i<pairs.size(); i++)
+  {
+    // cerr << "parse_pairs: arg[" << i << "]=" << arguments[i] << endl;
 
     pairs[i] = fromstring< pair<T,U> > ( "(" + arguments[i] + ")" );
     
-    if (pairs[i].first >= limit_first) {
+    if (pairs[i].first >= limit_first)
+    {
       Error error (InvalidParam, "parse_pairs");
       error << "i" << name_first << "=" << pairs[i].first 
 	    << " >= n" << name_first << "=" << limit_first;
       throw error;
     }
 
-    if (pairs[i].second >= limit_second) {
+    if (pairs[i].second >= limit_second)
+    {
       Error error (InvalidParam, "parse_pairs");
       error << "i" << name_second << "=" << pairs[i].second
 	    << " >= n" << name_second << "=" << limit_second;
       throw error;
     }
 
-    cerr << pairs[i] << endl;
+    // cerr << pairs[i] << endl;
   }
 }
 
