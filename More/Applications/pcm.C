@@ -798,6 +798,9 @@ int actual_main (int argc, char *argv[]) try
 	Calibration::SignalPath::verbose = true;
 
       Pulsar::Calibrator::verbose = level;
+
+      level --; if (level < 0) level = 0;
+
       Pulsar::Archive::set_verbosity (level);
 
       break;
