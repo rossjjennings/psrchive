@@ -45,7 +45,7 @@
 using namespace std;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbCcDd:Ee:fFGhiIJ:j:k:lLM:m:n:O:op:PqRr:sSt:Tu:UvVwW:xyZ";
+const char* args = "A:aBbCcDd:Ee:fFGhiIJ:j:k:lLM:m:n:O:op:PqRr:sSt:Tu:UvVwWxyZ";
 
 void usage ()
 {
@@ -62,7 +62,7 @@ void usage ()
     "  -u ext         Add to file extensions recognized in search \n"
     "                 (defaults: .cf .pcal .fcal .pfit) \n"
     "  -w             Write a new database summary file \n"
-    "  -W meta        Create database using calibrators listed in meta \n"
+    "  -W             Create database from calibrators listed in metafiles \n"
     "  -k filename    Output database to filename \n"
     "  -l             Cache last calibrator\n"
     "\n"
@@ -134,8 +134,8 @@ int main (int argc, char *argv[]) try
   // name of the file containing the list of Archive filenames
   char* metafile = NULL;
 
-  // name of the file containing the list of calibrator Archive filenames
-  char* cals_metafile = NULL;
+  // treat all files as metafiles containing lists of calibrator filenames
+  bool cals_metafile = false;
 
   // known feed transformation
   Calibration::Feed* feed = 0;
@@ -434,7 +434,7 @@ int main (int argc, char *argv[]) try
 
     case 'W':
       write_database_file = true;
-      cals_metafile = optarg;
+      cals_metafile = true;
       command += " -W";
       break;
 
@@ -491,9 +491,9 @@ int main (int argc, char *argv[]) try
 
   if (filenames.empty())
   {
-    if (!write_database_file)
+    if (!write_database_file || cals_metafile)
     {
-      cout << "pac: No Archives were specified. Exiting" << endl;
+      cout << "pac: No filenames specified. Exiting" << endl;
       exit(-1);
     }
   } 
@@ -505,7 +505,7 @@ int main (int argc, char *argv[]) try
   Reference::To<Pulsar::PolnCalibrator> model_calibrator;
 
   // the database from which calibrators will be selected
-  Pulsar::Database* dbase = 0;
+  Reference::To<Pulsar::Database> dbase;
   
   if ( !model_file.empty() ) try
   {
@@ -561,12 +561,31 @@ int main (int argc, char *argv[]) try
     
     if (cals_metafile)
     {
-      dbase = new Pulsar::Database (cals_are_here, cals_metafile);
+      Reference::To<Pulsar::Database> temp;
+
+      for (unsigned i=0; i < filenames.size(); i++)
+      {
+        cout << "pac: Loading calibrator filenames from metafile=" 
+             << filenames[i] << endl;
+
+        temp = new Pulsar::Database (cals_are_here, filenames[i]);
+
+        if (temp->size() <= 0)
+        {
+          cerr << "pac: No calibrators found in " << cals_are_here
+               << " listed in " << filenames[i] << endl;
+          continue;
+        }
+
+        if (!dbase)
+          dbase = temp;
+        else
+          dbase -> merge (temp);
+      }
 
       if (dbase->size() <= 0)
       {
-	cerr << "pac: No calibrators found in " << cals_are_here
-	     << " listed in " << cals_metafile << endl;
+	cerr << "pac: No calibrators found in the provided metafiles" << endl;
 	return -1;
       }    
     }
@@ -599,6 +618,10 @@ int main (int argc, char *argv[]) try
       
       dbase -> unload (database_filename);
     }
+
+    // all of the supplied filenames are treated as metafiles
+    if (cals_metafile)
+      return 0;
   }
   catch (Error& error)
   {
@@ -606,8 +629,6 @@ int main (int argc, char *argv[]) try
     return -1;
   }
 
-
-    
   if (feed)
     dbase -> set_feed (feed);
 
