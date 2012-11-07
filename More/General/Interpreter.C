@@ -12,6 +12,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+#include "Pulsar/Pointing.h"
+
 #include "Pulsar/Config.h"
 #include "Pulsar/Statistics.h"
 
@@ -251,7 +253,8 @@ void Pulsar::Interpreter::init()
       "things that can be fixed: \n"
       "  'fluxcal'         fix the Archive::Type (FluxCalOn or Off) \n"
       "  'receiver'        fix the receiver information \n"
-      "  'epoch <seconds>  fix the epoch of each subint\n" );
+      "  'epoch <seconds>  fix the epoch of each subint\n" 
+      "  'pointing'        fix the Pointing extension info\n" );
 
   add_command 
     ( &Interpreter::scattered_power_correct,
@@ -1243,6 +1246,21 @@ string Pulsar::Interpreter::fix (const string& args) try
       MJD epoch = subint->get_epoch();
       epoch += seconds;
       subint->set_epoch( epoch );
+    }
+    return response (Good);
+  }
+
+  if (what == "pointing")
+  {
+    Archive* archive = get();
+    unsigned nsub = archive->get_nsubint();
+    for (unsigned isub=0; isub < nsub; isub++)
+    {
+      Integration* subint = archive->get_Integration(isub);
+      Pointing* point = subint->getadd<Pointing>();
+      point->set_right_ascension(archive->get_coordinates().ra());
+      point->set_declination(archive->get_coordinates().dec());
+      point->update(subint,archive);
     }
     return response (Good);
   }
