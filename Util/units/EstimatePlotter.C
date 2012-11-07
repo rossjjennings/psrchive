@@ -22,6 +22,8 @@ EstimatePlotter::EstimatePlotter ()
   xrange_min = x_min = y_min = 0.0;
   xrange_max = x_max = y_max = 1.0;
 
+  i_min = i_max = 0;
+
   minimum_error = maximum_error = -1.0;
 
   graph_marker = -1;
@@ -322,6 +324,12 @@ unsigned EstimatePlotter::plot (unsigned index)
   return plotted;
 }
 
+//! Set the range of indeces to be considered on next call to minmax
+void EstimatePlotter::set_minmax_range (unsigned imin, unsigned imax)
+{
+  i_min = imin;
+  i_max = imax;
+}
 
 void EstimatePlotter::minmax (bool& xrange, float& xmin, float& xmax,
 			      bool& yrange, float& ymin, float& ymax,
@@ -334,7 +342,16 @@ void EstimatePlotter::minmax (bool& xrange, float& xmin, float& xmax,
   assert (y.size() == npt);
   assert (ye.size() == npt);
 
-  for (unsigned ipt=0; ipt<npt; ipt++)
+  unsigned i_start = 0;
+  unsigned i_end = npt;
+
+  if (i_max > 0)
+  {
+    i_start = i_min;
+    i_end = i_max;
+  }
+
+  for (unsigned ipt=i_start; ipt<i_end; ipt++)
   {
     if (minimum_error >= 0.0 && ye[ipt] <= minimum_error)
       continue;
