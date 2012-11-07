@@ -91,7 +91,7 @@ void unload (Pulsar::FluxCalibrator* fluxcal) try {
 	 << endl;
 
   string newname = fluxcal->get_filenames ();
-  char* whitespace = " ,\t\n";
+  const char* whitespace = " ,\t\n";
   newname = replace_extension( stringtok (newname, whitespace), output_ext );
 
   if (!unload_path.empty())

@@ -307,7 +307,7 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   Jones<double> projection = correction (isub);
 
   if (report_projection)
-    cerr << correction.get_summary () << endl;
+    cerr << correction.get_summary ();
 
   // correct ionospheric Faraday rotation
   Reference::To<Faraday> faraday;

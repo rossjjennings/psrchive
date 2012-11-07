@@ -589,20 +589,23 @@ void Pulsar::Database::construct (const vector<string>& filenames)
   
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try
   {
-    if (Calibrator::verbose > 2)
+    if (filenames[ifile] == "filename")
+      continue;
+
+    if (Calibrator::verbose > 1)
       cerr << "Pulsar::Database loading "
 	   << filenames[ifile] << endl;
     
     newArch = Archive::load(filenames[ifile]);
     
-    if (Calibrator::verbose > 2)
+    if (Calibrator::verbose > 1)
       cerr << "Pulsar::Database create new Entry" << endl;
     
     add (newArch);
   }
   catch (Error& error)
   {
-    cerr << "Pulsar::Database error" << error.get_message() << endl;
+    cerr << "Pulsar::Database error " << error.get_message() << endl;
   }
 
   if (Calibrator::verbose > 2)
@@ -665,6 +668,7 @@ void Pulsar::Database::load (const string& dbase_filename)
       cerr << "Pulsar::Database::load '"<< temp << "'" << endl;
 
     entry.load (temp);
+    shorten_filename (entry);
     add (entry);
   }
   catch (Error& error)
@@ -676,6 +680,12 @@ void Pulsar::Database::load (const string& dbase_filename)
     cerr << "Pulsar::Database::load " << entries.size() << " entries" <<endl;
 
   fclose (fptr);
+}
+
+void Pulsar::Database::merge (const Database* other)
+{
+  for (unsigned ie=0; ie < other->entries.size(); ie++)
+    add (other->entries[ie]);
 }
 
 //! Unloads entire database to file
@@ -707,6 +717,7 @@ void Pulsar::Database::add (const Pulsar::Archive* archive)
   try
   {
     Entry entry (*archive);
+    shorten_filename (entry);
     add (entry);
   }
   catch (Error& error)
@@ -715,14 +726,18 @@ void Pulsar::Database::add (const Pulsar::Archive* archive)
   }
 }
 
-
-//! Add the given Archive to the database
-void Pulsar::Database::add (Pulsar::Database::Entry& entry) try
+void Pulsar::Database::shorten_filename (Entry& entry)
 {
-  // strip the base path name off of the entry filename
+  if (path.empty())
+    return;
+
   if (entry.filename.substr(0, path.length()) == path)
     entry.filename.erase (0, path.length()+1);
-  
+}
+
+//! Add the given Archive to the database
+void Pulsar::Database::add (const Entry& entry) try
+{
   if (entry.time == 0.0)
     throw Error (InvalidParam, "Pulsar::Database::add Entry",
 		 entry.filename + " has epoch = 0 (MJD)");
