@@ -4,6 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include <math.h>
+
 #include <vector>
 #include <algorithm>
 
