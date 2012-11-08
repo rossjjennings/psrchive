@@ -1,12 +1,15 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2012 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/CalibratorInfo.h"
-#include "Pulsar/Profile.h"
+
+#include "Pulsar/CalibratorStokesInfo.h"
+#include "Pulsar/SolverInfo.h"
+#include "Pulsar/Archive.h"
 
 using namespace std;
 
@@ -14,6 +17,9 @@ Pulsar::CalibratorInfo::CalibratorInfo ()
 {
   // reserve 5% of the viewport height for space between panels
   between_panels = 0.05;
+
+  calibrator_stokes = false;
+  reduced_chisq = false;
 }
 
 void Pulsar::CalibratorInfo::prepare (const Archive* data)
@@ -21,7 +27,16 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
   if (verbose)
     cerr << "Pulsar::CalibratorInfo::prepare" << endl;
 
-  Calibrator::Info* info = CalibratorParameter::get_Info (data);
+  Calibrator::Info* info = 0;
+
+  if (calibrator_stokes)
+    info = new CalibratorStokesInfo (data->get<CalibratorStokes>());
+  
+  else if (reduced_chisq)
+    info = new SolverInfo (new PolnCalibrator(data));
+
+  else
+    info = CalibratorParameter::get_Info (data);
 
   get_frame()->get_label_above()->set_centre("$file\n"+info->get_title());
 
@@ -62,6 +77,7 @@ void Pulsar::CalibratorInfo::prepare (const Archive* data)
     string name = "panel" + tostring(jclass);
     manage (name, plot);
 
+    plot->set_managed (true);
     plot->set_class (jclass);
     plot->prepare (info, data);
 
@@ -104,4 +120,12 @@ Pulsar::CalibratorInfo::Interface::Interface (CalibratorInfo* instance)
   add( &CalibratorInfo::get_panels,
        &CalibratorInfo::set_panels,
        "panels", "Panels to be plotted" );
+
+  add( &CalibratorInfo::get_calibrator_stokes,
+       &CalibratorInfo::set_calibrator_stokes,
+       "cal", "Plot the calibrator Stokes parameters" );
+
+  add( &CalibratorInfo::get_reduced_chisq,
+       &CalibratorInfo::set_reduced_chisq,
+       "gof", "Plot the model goodness-of-fit" );
 }
