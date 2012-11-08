@@ -7,6 +7,7 @@
 
 #include "Pulsar/CalibratorInfo.h"
 
+#include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/CalibratorStokesInfo.h"
 #include "Pulsar/SolverInfo.h"
 #include "Pulsar/Archive.h"
