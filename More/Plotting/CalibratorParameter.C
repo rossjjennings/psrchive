@@ -61,12 +61,14 @@ Pulsar::CalibratorParameter::CalibratorParameter ()
   plotter.set_minimum_error (0.0);
 
   iclass = 0;
+  managed = false;
 }
 
 
 void Pulsar::CalibratorParameter::prepare (const Archive* data)
 {
-  prepare ( get_Info(data), data );
+  if (!managed)
+    prepare ( get_Info(data), data );
 }
 
 void Pulsar::CalibratorParameter::prepare (const Calibrator::Info* _info,
