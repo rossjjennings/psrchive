@@ -35,6 +35,9 @@ namespace Pulsar {
     //! Get the default label for the y axis
     std::string get_ylabel (const Archive*);
 
+    //! Data are managed externally (do not prepare)
+    void set_managed (bool flag=true) { managed = flag; }
+
     //! Prepare to plot
     void prepare (const Archive*);
 
@@ -64,6 +67,9 @@ namespace Pulsar {
 
     // The index of the class of parameters to be plotted
     unsigned iclass;
+
+    // Flag set to true when data are managed externally (disables prepare)
+    bool managed;
   };
 
 }
