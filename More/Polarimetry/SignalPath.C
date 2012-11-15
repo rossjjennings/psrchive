@@ -22,6 +22,7 @@
 #include "MEAL/JonesMueller.h"
 
 #include <iostream>
+#include <algorithm>
 #include <assert.h>
 
 using namespace std;
@@ -1005,14 +1006,15 @@ void Calibration::SignalPath::compute_covariance
   }
 }
 
-// erease elements is 'from' that are also found in 'rem'
+// set B to the set-theoretic difference of B and A
+// also known as the relative complement of A in B
 template<typename C1, typename C2>
-void set_difference (C1& result, const C2& remove)
+void set_difference (C1& B, const C2& A)
 {
-  typename C1::iterator newlast = result.end();
-  for (typename C2::const_iterator it=remove.begin(); it != remove.end(); it++)
-    newlast = std::remove (result.begin(), newlast, *it);
-  result.erase (newlast, result.end());
+  typename C1::iterator newlast = B.end();
+  for (typename C2::const_iterator it=A.begin(); it != A.end(); it++)
+    newlast = std::remove (B.begin(), newlast, *it);
+  B.erase (newlast, B.end());
 }
 
 void Calibration::SignalPath::get_covariance( vector<double>& covar,
