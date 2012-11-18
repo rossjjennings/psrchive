@@ -8,7 +8,10 @@
 #include "Pulsar/FluxCalManager.h"
 #include "Pulsar/BackendFeed.h"
 #include "Pulsar/SingleAxis.h"
+#include "Pulsar/CoherencyMeasurementSet.h"
+
 #include "Pauli.h"
+
 
 using namespace std;
 using Calibration::FluxCalManager;
@@ -17,6 +20,11 @@ using Calibration::FluxCalManager;
 
 Calibration::FluxCalManager::FluxCalManager (SignalPath* path)
 {
+  cerr << "Calibration::FluxCalManager ctor" << endl;
+
+  multiple_source_states = false;
+  subtract_off_from_on = false;
+
   MEAL::Complex2* response = path->get_transformation();
 
   BackendFeed* physical = dynamic_cast<BackendFeed*>( response );
@@ -42,6 +50,11 @@ Calibration::FluxCalManager::FluxCalManager (SignalPath* path)
 
   if (path->has_basis())
     frontend->add_model( path->get_basis() );
+}
+
+bool Calibration::FluxCalManager::is_constrained () const
+{
+  return observations.size();
 }
 
 void Calibration::FluxCalManager::add_observation (Signal::Source source_type)
@@ -143,48 +156,59 @@ void FluxCalManager::integrate (const Jones< Estimate<double> >& correct,
   observations.back()->on->source->estimate.integrate (result);
 }
 
+
+void FluxCalManager::submit (CoherencyMeasurementSet& measurements,
+			     const Stokes< Estimate<double> >& data)
+{
+  if (observations.size() == 0)
+    throw Error (InvalidState, "Calibration::FluxCalManager::submit",
+		 "no flux calibration source/backend added to model");
+
+  FluxCalPair* current = observations.back();
+
+  // TODO: on or off?
+  FluxCalObservation* obs = current->on;
+
+  obs->source->add_data_attempts ++;
+
+  try
+  {
+    Calibration::CoherencyMeasurement state (obs->source->input_index);
+
+    state.set_stokes( data );
+    
+    measurements.push_back (state);
+    
+    unsigned index = obs->backend->get_path_index();
+    measurements.set_transformation_index (index);
+    
+    DEBUG ("FluxCalManager::submit ichan=" << ichan);
+    
+    composite->get_equation()->add_data (measurements);
+  }
+  catch (Error& error)
+    {
+      obs->source->add_data_failures ++;
+      throw error += "Calibration::FluxCalManager::submit";
+    }
+}
+
 void Calibration::FluxCalManager::update ()
 {
   for (unsigned i=0; i < observations.size(); i++)
     observations[i]->update ();
 }
 
-
-
-#if 0
-
-TODO
-
-void Calibration::FluxCalManager::submit_data 
-(
- Calibration::CoherencyMeasurementSet& measurements,
- const Stokes< Estimate<double> >& data
- ) try
+void Calibration::FluxCalPair::update ()
 {
-  // add the flux calibrator data to the model constraints
-
-  Calibration::CoherencyMeasurement state 
-    (flux_calibrator_estimate[ichan].input_index);
-
-  flux_calibrator_estimate[ichan].add_data_attempts ++;
-
-  state.set_stokes( data );
-
-  measurements.push_back (state);
-
-  unsigned index = model[ichan]->get_fluxcal()->get_path_index();
-  measurements.set_transformation_index (index);
-
-  DEBUG ("ReceptionCalibrator::submit_flux_calibrator_data ichan=" << ichan);
-
-  model[ichan]->get_equation()->add_data (measurements);
-}
-catch (Error& error)
-{
-  cerr << "Pulsar::ReceptionCalibrator::submit_flux_calibrator_data ichan="
-       << ichan << " error\n" << error << endl;
-
-  flux_calibrator_estimate[ichan].add_data_failures ++;
+  if (on)
+    on->update();
+  if (off)
+    off->update();
 }
 
-#endif
+void Calibration::FluxCalObservation::update ()
+{
+  backend->update();
+  source->update();
+}
