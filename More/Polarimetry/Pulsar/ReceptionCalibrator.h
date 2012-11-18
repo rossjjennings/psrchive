@@ -184,6 +184,10 @@ namespace Pulsar
     void integrate_calibrator_data (const Jones< Estimate<double> >&,
 				    const Calibration::SourceObservation&);
 
+    void integrate_calibrator_solution (Signal::Source source,
+					unsigned ichan,
+					const MEAL::Complex2*);
+
     //! Handle any integrated flux calibrator data
     void load_calibrators ();
 

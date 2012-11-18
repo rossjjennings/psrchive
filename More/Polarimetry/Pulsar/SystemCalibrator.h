@@ -228,6 +228,10 @@ namespace Pulsar
     virtual void integrate_calibrator_data (const Jones< Estimate<double> >&,
 					    const Calibration::SourceObservation&);
 
+    virtual void integrate_calibrator_solution (Signal::Source source,
+						unsigned ichan,
+						const MEAL::Complex2*);
+
     //! Load any postponed calibrators and those set by set_calibrators
     virtual void load_calibrators ();
 

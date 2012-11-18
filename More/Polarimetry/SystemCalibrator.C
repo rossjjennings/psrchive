@@ -651,7 +651,7 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
       integrate_calibrator_data( p->get_response(ichan), data );
 
       if (p->get_nchan() == nchan && p->get_transformation_valid (ichan))
-	integrate_calibrator_solution( p->get_Archive()->get_type(),
+	integrate_calibrator_solution( p->get_Archive()->get_type(), ichan,
 				       p->get_transformation(ichan) );
     }
   }
@@ -771,20 +771,18 @@ void Pulsar::SystemCalibrator::integrate_calibrator_data
 
   Stokes< Estimate<double> > result = transform( data.observation, apply );
 
-  calibrator_estimate.at(data.ichan).source_guess.integrate (result);
+  calibrator_estimate.at(data.ichan).estimate.integrate (result);
 }
 
 void Pulsar::SystemCalibrator::integrate_calibrator_solution
 ( 
- Signal::Source source_type,
+ Signal::Source source, unsigned ichan,
  const MEAL::Complex2* transformation
 )
 {
-  // HOW ichan ??
-
-  if (source_type = Signal::PolnCal)
-    modelp->get_Archive()->get_type(),
-				       p->get_transformation(ichan) );
+  if (source == Signal::PolnCal)
+    model[ichan]->integrate_calibrator (transformation);
+}
 
 Pulsar::CalibratorStokes*
 Pulsar::SystemCalibrator::get_CalibratorStokes () const
@@ -962,7 +960,7 @@ void Pulsar::SystemCalibrator::solve_prepare ()
 
   if (set_initial_guess)
     for (unsigned ichan=0; ichan<calibrator_estimate.size(); ichan++)
-      calibrator_estimate[ichan].update_source();
+      calibrator_estimate[ichan].update ();
 
   MJD epoch = get_epoch();
 
@@ -1378,15 +1376,24 @@ Pulsar::SystemCalibrator::get_transformation (const Archive* data,
     signal_path = equation->get_transformation ();
     break;
 
+#if 0
+
+    Should SystemCalibrator know nothing about FluxCalOn/Off ??
   case Signal::FluxCalOn:
   {
     if (verbose > 2)
       cerr << "Pulsar::SystemCalibrator::get_transformation FluxCal" << endl;
-    unsigned index = model[ichan]->get_fluxcal()->get_path_index();
+
+    // TODO: adjust the path index according to epoch?
+
+    unsigned index = fluxcal[ichan]->get_path_index();
+
     equation->set_transformation_index ( index );
     signal_path = equation->get_transformation ();
     break;
   }
+
+#endif
 
   default:
     throw Error (InvalidParam, "Pulsar::SystemCalibrator::get_transformation",

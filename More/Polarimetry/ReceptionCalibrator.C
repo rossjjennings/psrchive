@@ -539,6 +539,23 @@ void ReceptionCalibrator::integrate_calibrator_data
   SystemCalibrator::integrate_calibrator_data (use, data);
 }
 
+void ReceptionCalibrator::integrate_calibrator_solution
+(
+ Signal::Source source,
+ unsigned ichan,
+ const MEAL::Complex2* xform
+)
+{
+  if (source == Signal::FluxCalOn || source == Signal::FluxCalOff)
+  {
+    if (fluxcal[ichan])
+      fluxcal[ichan]->integrate (source, xform);
+  }
+  else
+    SystemCalibrator::integrate_calibrator_solution (source, ichan, xform);
+}
+
+
 //! Add the ReferenceCalibrator observation to the set of constraints
 void 
 ReceptionCalibrator::add_calibrator (const ReferenceCalibrator* p) try 
