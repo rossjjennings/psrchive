@@ -38,7 +38,7 @@ bool Pulsar::SourceEstimate::is_constrained () const
 }
 
 /*! Update the best guess of each unknown input state */
-void Pulsar::SourceEstimate::update_source ()
+void Pulsar::SourceEstimate::update ()
 {
   if (add_data_attempts && add_data_failures)
   {
