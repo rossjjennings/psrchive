@@ -11,7 +11,8 @@
 #include <string.h>
 
 //! Constructor
-Pulsar::SourceInfo::SourceInfo (const std::vector<SourceEstimate>& estimate)
+Pulsar::SourceInfo::SourceInfo 
+(const std::vector<Calibration::SourceEstimate>& estimate)
   : source (estimate)
 {
   together = false;
