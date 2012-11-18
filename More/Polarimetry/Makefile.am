@@ -3,6 +3,7 @@ noinst_LTLIBRARIES = libPolarimetry.la
 
 nobase_include_HEADERS = \
 	Pulsar/BackendCorrection.h \
+	Pulsar/BackendEstimate.h \
 	Pulsar/BackendFeed.h \
 	Pulsar/BackendFeedInfo.h \
 	Pulsar/BasisCorrection.h \
@@ -26,6 +27,7 @@ nobase_include_HEADERS = \
         Pulsar/Feed.h \
         Pulsar/FluxCalibratorData.h \
         Pulsar/FluxCalibrator.h \
+	Pulsar/FluxCalManager.h \
 	Pulsar/FrontendCorrection.h \
         Pulsar/HybridCalibrator.h \
         Pulsar/Instrument.h \
@@ -89,6 +91,7 @@ nobase_include_HEADERS = \
 
 libPolarimetry_la_SOURCES = \
 	BackendCorrection.C \
+	BackendEstimate.C \
 	BackendFeed.C \
 	BackendFeedInfo.C \
 	BasisCorrection.C \
@@ -115,6 +118,7 @@ libPolarimetry_la_SOURCES = \
         FluxCalibrator.C \
         FluxCalibratorData.C \
 	FluxCalibratorExt.C \
+	FluxCalManager.C \
 	FrontendCorrection.C \
         HybridCalibrator.C \
         Instrument.C \
