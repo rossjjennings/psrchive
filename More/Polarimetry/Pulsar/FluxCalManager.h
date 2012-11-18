@@ -84,6 +84,7 @@ namespace Calibration
     bool is_constrained () const;
 
     bool multiple_source_states;
+    bool subtract_off_from_on;
 
   protected:
 
