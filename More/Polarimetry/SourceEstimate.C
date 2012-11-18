@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 - 2011 by Willem van Straten
+ *   Copyright (C) 2003 - 2012 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -12,7 +12,7 @@
 using namespace std;
 
 //! Construct with the specified bin from Archive
-Pulsar::SourceEstimate::SourceEstimate (int ibin)
+Calibration::SourceEstimate::SourceEstimate (int ibin)
 {
   phase_bin = ibin;
   input_index = 0;
@@ -22,7 +22,7 @@ Pulsar::SourceEstimate::SourceEstimate (int ibin)
 
 using Calibration::ReceptionModel;
 
-void Pulsar::SourceEstimate::create_source (ReceptionModel* equation)
+void Calibration::SourceEstimate::create_source (ReceptionModel* equation)
 {
   source = new MEAL::Coherency;
 
@@ -32,13 +32,13 @@ void Pulsar::SourceEstimate::create_source (ReceptionModel* equation)
 }
 
 
-bool Pulsar::SourceEstimate::is_constrained () const
+bool Calibration::SourceEstimate::is_constrained () const
 {
-  return add_data_attempts - add_data_failures > multiples.size();
+  return add_data_attempts > add_data_failures;
 }
 
 /*! Update the best guess of each unknown input state */
-void Pulsar::SourceEstimate::update ()
+void Calibration::SourceEstimate::update ()
 {
   if (add_data_attempts && add_data_failures)
   {
@@ -55,12 +55,12 @@ void Pulsar::SourceEstimate::update ()
 
   try 
   {
-    source_guess.update( source );
+    estimate.update( source );
   }
   catch (Error& error)
   {
-    if (Calibrator::verbose > 2)
-      cerr << "Pulsar::SourceEstimate::update_source error "
+    if (Pulsar::Calibrator::verbose > 2)
+      cerr << "Calibration::SourceEstimate::update_source error "
 	   << error << endl;
     valid = false;
   }
