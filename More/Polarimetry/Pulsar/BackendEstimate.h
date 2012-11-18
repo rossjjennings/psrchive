@@ -32,6 +32,9 @@ namespace Calibration
 
     //! Update the transformation with the current estimate, if possible
     void update ();
+
+    //! Return the path index
+    unsigned get_path_index() const { return path_index; }
   };
 }
 
