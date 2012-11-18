@@ -125,7 +125,7 @@ namespace Calibration
     unsigned get_pulsar_path () const { return Pulsar_path; }
 
     //! Integrate a calibrator solution
-    void integrate_calibrator (const MEAL::Complex2* xform, bool fluxcal);
+    void integrate_calibrator (const MEAL::Complex2* xform);
 
     //! Get the measurement equation
     Calibration::ReceptionModel* get_equation ();

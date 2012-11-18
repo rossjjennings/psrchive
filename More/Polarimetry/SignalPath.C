@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005-2009 by Willem van Straten
+ *   Copyright (C) 2005-2012 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -270,15 +270,6 @@ void Calibration::SignalPath::build ()
   built = true;
 }
 
-
-Calibration::SignalPath::FluxCal* Calibration::SignalPath::get_fluxcal ()
-{
-  if (!fluxcal)
-    fluxcal = new FluxCal (this);
-
-  return fluxcal;
-}
-
 void
 Calibration::SignalPath::set_foreach_calibrator (const MEAL::Complex2* x)
 {
@@ -341,9 +332,6 @@ void Calibration::SignalPath::update () try
   MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>( response.get() );
   if (polar)
     polar_estimate.update (polar);
-
-  if (fluxcal)
-    fluxcal->update ();
 
   BackendFeed* physical = dynamic_cast<BackendFeed*>( response.get() );
   if (!physical)
@@ -532,8 +520,7 @@ Calibration::SignalPath::integrate_parameter (MEAL::Scalar* function,
 }
 
 void 
-Calibration::SignalPath::integrate_calibrator (const MEAL::Complex2* xform,
-					       bool flux_calibrator)
+Calibration::SignalPath::integrate_calibrator (const MEAL::Complex2* xform)
 {
   const MEAL::Polar* polar_solution;
   polar_solution = dynamic_cast<const MEAL::Polar*>( xform );
@@ -551,21 +538,16 @@ Calibration::SignalPath::integrate_calibrator (const MEAL::Complex2* xform,
   if (!sa)
     return;
 
-  if (flux_calibrator)
-    get_fluxcal()->integrate( sa );
-  else
-  {
-    backend_estimate.integrate( sa );
-
-    if (gain)
-      integrate_parameter( gain, sa->get_gain().get_value() );
+  backend_estimate.integrate( sa );
+  
+  if (gain)
+    integrate_parameter( gain, sa->get_gain().get_value() );
       
-    if (diff_gain)
-      integrate_parameter( diff_gain, sa->get_diff_gain().get_value() );
+  if (diff_gain)
+    integrate_parameter( diff_gain, sa->get_diff_gain().get_value() );
       
-    if (diff_phase)
-      integrate_parameter( diff_phase, sa->get_diff_phase().get_value() );
-  }
+  if (diff_phase)
+    integrate_parameter( diff_phase, sa->get_diff_phase().get_value() );
 }
 
 void Calibration::SignalPath::set_gain (Univariate<Scalar>* function)
@@ -1121,88 +1103,3 @@ void Calibration::SignalPath::get_covariance( vector<double>& covar,
 		 "count=%u != ncovar=%u", count, ncovar );
   
 }
-
-
-//
-//
-//
-
-Calibration::SignalPath::FluxCal::FluxCal (SignalPath* parent)
-{
-  Complex2* response = parent->response;
-
-  BackendFeed* physical = dynamic_cast<BackendFeed*>( response );
-
-  //
-  // It must be possible to extract the frontend, so that the temporal
-  // variations applied to pulsar and reference source are not applied
-  // to the flux calibrator
-  //
-
-  if (!physical)
-    throw Error (InvalidState,
-	         "Calibration::SignalPath::FluxCal ctor",
-	         "Backend/Feed parameterization required to model fluxcal");
-
-  composite = parent;
-
-  backend = new Calibration::SingleAxis;
-
-  frontend = new MEAL::ProductRule<MEAL::Complex2>;
-
-  frontend->add_model( physical->get_frontend() );
-
-  if (parent->basis)
-    frontend->add_model( parent->basis );
-}
-
-void Calibration::SignalPath::FluxCal::add_backend ()
-{
-  Reference::To< MEAL::ProductRule<MEAL::Complex2> > fcal_path;
-  fcal_path = new MEAL::ProductRule<MEAL::Complex2>;
-
-  Reference::To<Backend> path = new Backend;
-
-  if (backend)
-  {
-    path->transformation = backend->clone();
-    fcal_path->add_model( path->transformation );
-  }
-
-  fcal_path->add_model ( frontend );
-
-  composite->add_transformation ( fcal_path );
-
-  path->path_index = composite->equation->get_transformation_index ();
-
-  backends.push_back( path );
-}
-
-//! Get the index for the signal path experienced by the flux calibrator
-unsigned Calibration::SignalPath::FluxCal::get_path_index () const
-{
-  if (!backends.size())
-    throw Error (InvalidState, 
-		 "Calibration::SignalPath::FluxCal::get_path_index",
-		 "no flux calibration backend added to signal path");
-
-  return backends.back()->path_index;
-}
-
-//! Integrate an estimate of the backend
-void SignalPath::FluxCal::integrate (const Calibration::SingleAxis* sa)
-{
-  if (!backends.size())
-    throw Error (InvalidState, 
-		 "Calibration::SignalPath::FluxCal::integrate",
-		 "no flux calibration backend added to signal path");
-
-  return backends.back()->estimate.integrate (sa);
-}
-
-void SignalPath::FluxCal::update ()
-{
-  for (unsigned i=0; i < backends.size(); i++)
-    backends[i]->update ();
-}
-
