@@ -69,7 +69,7 @@ namespace Calibration
     void add_observation (Signal::Source type);
 
     //! Integrate an estimate of the backend
-    void integrate (const SingleAxis*);
+    void integrate (Signal::Source type, const MEAL::Complex2*);
 
     //! Integrate an estimate of the source
     void integrate (const Jones< Estimate<double> >& correct,

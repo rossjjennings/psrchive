@@ -116,14 +116,19 @@ void Calibration::FluxCalManager::add_source (FluxCalObservation* obs)
 }
 
 //! Integrate an estimate of the backend
-void FluxCalManager::integrate (const Calibration::SingleAxis* sa)
+void FluxCalManager::integrate (Signal::Source type,
+				const MEAL::Complex2* xform)
 {
   if (!observations.size())
     throw Error (InvalidState, 
 		 "Calibration::FluxCalManager::integrate",
 		 "no flux calibration backend added to signal path");
 
-  observations.back()->on->backend->estimate.integrate (sa);
+  const Calibration::SingleAxis* single
+    = dynamic_cast<const Calibration::SingleAxis*> (xform);
+
+  if (single)
+    observations.back()->on->backend->estimate.integrate (single);
 }
 
 void FluxCalManager::integrate (const Jones< Estimate<double> >& correct,
