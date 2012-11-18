@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2003 - 2011 by Willem van Straten
+ *   Copyright (C) 2003 - 2012 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -17,6 +17,7 @@
 #include "Pulsar/SystemCalibrator.h"
 #include "Pulsar/ReflectStokes.h"
 
+#include "Pulsar/FluxCalManager.h"
 #include "Pulsar/StandardData.h"
 
 #include "MEAL/VectorRule.h"
@@ -126,11 +127,10 @@ namespace Pulsar
     //! The unique transformation "axis"
     MEAL::Axis< unsigned > unique_axis;
 
-    //! Uncalibrated estimate of calibrator polarization
-    std::vector<SourceEstimate> flux_calibrator_estimate;
+    std::vector< Reference::To<Calibration::FluxCalManager> > fluxcal;
 
     //! Uncalibrated estimate of pulsar polarization as a function of phase
-    std::vector< std::vector<SourceEstimate> > pulsar;
+    std::vector< std::vector<Calibration::SourceEstimate> > pulsar;
     std::vector< unsigned > phase_bins;
 
     //! The epochs of all loaded calibrators
@@ -163,7 +163,7 @@ namespace Pulsar
     //! Initialization performed using the first observation added
     void initial_observation (const Archive* data);
 
-    void valid_mask (const std::vector<SourceEstimate>&);
+    void valid_mask (const std::vector<Calibration::SourceEstimate>&);
 
     //! Add Integration data to the CoherencyMeasurement vector
     /*! Data is taken from the specified frequency channel and phase bin.
@@ -172,21 +172,17 @@ namespace Pulsar
       \param ichan the frequency channel
     */
     void add_data (std::vector<Calibration::CoherencyMeasurement>& bins,
-		   SourceEstimate& estimate, unsigned ichan);
+		   Calibration::SourceEstimate& estimate, unsigned ichan);
 
     //! Prepare the calibrator estimate
     void prepare_calibrator_estimate (Signal::Source);
 
 
     void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
-				 const SourceObservation&);
-
-    void submit_flux_calibrator_data (Calibration::CoherencyMeasurementSet&,
-				      unsigned ichan, 
-				      const Stokes< Estimate<double> >& data);
+				 const Calibration::SourceObservation&);
 
     void integrate_calibrator_data (const Jones< Estimate<double> >&,
-				    const SourceObservation&);
+				    const Calibration::SourceObservation&);
 
     //! Handle any integrated flux calibrator data
     void load_calibrators ();
@@ -205,8 +201,8 @@ namespace Pulsar
 
     //! Set fit flags and initial values of the calibrator Stokes parameters
     void setup_calibrators ();
-    void setup_poln_calibrator (SourceEstimate&);
-    void setup_flux_calibrator (SourceEstimate&);
+    void setup_poln_calibrator (Calibration::SourceEstimate&);
+    void setup_flux_calibrator (Calibration::FluxCalManager*);
 
     //! Ensure that selected phase bins are represented in on-pulse mask
     void ensure_consistent_onpulse ();
