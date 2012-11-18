@@ -213,7 +213,7 @@ namespace Pulsar
     virtual void init_model (unsigned ichan);
 
     //! Initialize a vector of SourceEstimate instances
-    virtual void init_estimates ( std::vector<SourceEstimate>&,
+    virtual void init_estimates ( std::vector<Calibration::SourceEstimate>&,
 				  unsigned ibin = 0 );
 
     //! Prepare any calibrator estimates
@@ -223,10 +223,10 @@ namespace Pulsar
     virtual void create_calibrator_estimate ();
 
     virtual void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
-					 const SourceObservation&);
+					 const Calibration::SourceObservation&);
 
     virtual void integrate_calibrator_data (const Jones< Estimate<double> >&,
-					    const SourceObservation&);
+					    const Calibration::SourceObservation&);
 
     //! Load any postponed calibrators and those set by set_calibrators
     virtual void load_calibrators ();
@@ -245,7 +245,7 @@ namespace Pulsar
     std::vector<std::string> calibrator_filenames;
 
     //! Uncalibrated estimate of calibrator polarization
-    std::vector<SourceEstimate> calibrator_estimate;
+    std::vector<Calibration::SourceEstimate> calibrator_estimate;
     
     //! Epoch of the first observation
     MJD start_epoch;

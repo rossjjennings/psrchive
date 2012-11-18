@@ -651,11 +651,8 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
       integrate_calibrator_data( p->get_response(ichan), data );
 
       if (p->get_nchan() == nchan && p->get_transformation_valid (ichan))
-      {
-	Signal::Source source = p->get_Archive()->get_type();
-	model[ichan]->integrate_calibrator (p->get_transformation(ichan), 
-					    source == Signal::FluxCalOn);
-      }
+	integrate_calibrator_solution( p->get_Archive()->get_type(),
+				       p->get_transformation(ichan) );
     }
   }
 }
@@ -750,18 +747,18 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
 
   check_ichan ("subit_calibrator_data", data.ichan);
 
-  if (!epoch_added[data.ichan])
-  {
-    model[data.ichan]->add_calibrator_epoch (data.epoch);
-    epoch_added[data.ichan] = true;
-  }
-
   measurements.set_transformation_index
     ( model[data.ichan]->get_polncal_path() );
 
   DEBUG("SystemCalibrator::submit_calibrator_data ichan=" << data.ichan);
 
   model[data.ichan]->get_equation()->add_data (measurements);
+
+  if (!epoch_added[data.ichan])
+  {
+    model[data.ichan]->add_calibrator_epoch (data.epoch);
+    epoch_added[data.ichan] = true;
+  }
 }
 
 void Pulsar::SystemCalibrator::integrate_calibrator_data
@@ -777,6 +774,17 @@ void Pulsar::SystemCalibrator::integrate_calibrator_data
   calibrator_estimate.at(data.ichan).source_guess.integrate (result);
 }
 
+void Pulsar::SystemCalibrator::integrate_calibrator_solution
+( 
+ Signal::Source source_type,
+ const MEAL::Complex2* transformation
+)
+{
+  // HOW ichan ??
+
+  if (source_type = Signal::PolnCal)
+    modelp->get_Archive()->get_type(),
+				       p->get_transformation(ichan) );
 
 Pulsar::CalibratorStokes*
 Pulsar::SystemCalibrator::get_CalibratorStokes () const
