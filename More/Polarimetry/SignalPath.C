@@ -71,13 +71,9 @@ void Calibration::SignalPath::set_impurity (MEAL::Real4* x)
 
 void Calibration::SignalPath::set_basis (MEAL::Complex2* x)
 {
-  if (fluxcal)
+  if (response)
     throw Error (InvalidState, "Calibration::SignalPath::set_basis"
-		 "cannot set basis after flux calibrator path is constructed");
-
-  if (instrument && basis)
-    throw Error (InvalidState, "Calibration::SignalPath::set_basis"
-		 "cannot set basis after instrument is constructed");
+		 "cannot set basis after reponse is constructed");
   
   basis = x;
 
@@ -1210,10 +1206,3 @@ void SignalPath::FluxCal::update ()
     backends[i]->update ();
 }
 
-
-void SignalPath::Backend::update ()
-{
-  SingleAxis* backend = dynamic_cast<SingleAxis*>( transformation.get() );
-  if (backend)
-    estimate.update (backend);
-}
