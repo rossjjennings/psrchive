@@ -25,6 +25,7 @@ nobase_include_HEADERS = \
         Pulsar/Faraday.h \
         Pulsar/FaradayRotation.h \
         Pulsar/Feed.h \
+	Pulsar/FitGoodnessReport.h \
         Pulsar/FluxCalibratorData.h \
         Pulsar/FluxCalibrator.h \
 	Pulsar/FluxCalManager.h \
@@ -41,6 +42,7 @@ nobase_include_HEADERS = \
         Pulsar/MeanPolar.h \
         Pulsar/MeanSingleAxis.h \
         Pulsar/MeasurementEquation.h \
+	Pulsar/ModelParametersReport.h \
         Pulsar/ObservationUncertainty.h \
         Pulsar/OffPulseCalibrator.h \
         Pulsar/Parallactic.h \
@@ -115,6 +117,7 @@ libPolarimetry_la_SOURCES = \
         FaradayRotation.C \
         Feed.C \
         Feed_load.C \
+	FitGoodnessReport.C \
         FluxCalibrator.C \
         FluxCalibratorData.C \
 	FluxCalibratorExt.C \
@@ -124,6 +127,7 @@ libPolarimetry_la_SOURCES = \
         Instrument.C \
         InstrumentInfo.C \
         Integration_defaraday.C \
+	InputDataReport.C \
         IonosphereCalibrator.C \
         IRIonosphere.C \
         MeanCoherency.C \
@@ -133,6 +137,7 @@ libPolarimetry_la_SOURCES = \
         MeanPolar.C \
         MeanSingleAxis.C \
         MeasurementEquation.C \
+	ModelParametersReport.C \
         ObservationUncertainty.C \
         OffPulseCalibrator.C \
         Parallactic.C \
