@@ -21,6 +21,9 @@
 #include "Pulsar/PolarCalibrator.h"
 #include "Pulsar/InstrumentInfo.h"
 
+#include "Pulsar/ModelParametersReport.h"
+#include "Pulsar/InputDataReport.h"
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Receiver.h"
@@ -57,6 +60,7 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
 
   report_projection = false;
   report_initial_state = false;
+  report_input_data = false;
 
   if (archive)
     set_calibrator (archive);
@@ -745,7 +749,17 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
     cerr << "Pulsar::SystemCalibrator::submit_calibrator_data ichan="
 	 << data.ichan << endl;
 
-  check_ichan ("subit_calibrator_data", data.ichan);
+  check_ichan ("submit_calibrator_data", data.ichan);
+
+  if (!epoch_added[data.ichan])
+  {
+    /*
+      SignalPath::add_calibrator_epoch calls add_polncal_backend,
+      which constructs the signal path for the reference source.
+    */
+    model[data.ichan]->add_calibrator_epoch (data.epoch);
+    epoch_added[data.ichan] = true;
+  }
 
   measurements.set_transformation_index
     ( model[data.ichan]->get_polncal_path() );
@@ -753,12 +767,6 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
   DEBUG("SystemCalibrator::submit_calibrator_data ichan=" << data.ichan);
 
   model[data.ichan]->get_equation()->add_data (measurements);
-
-  if (!epoch_added[data.ichan])
-  {
-    model[data.ichan]->add_calibrator_epoch (data.epoch);
-    epoch_added[data.ichan] = true;
-  }
 }
 
 void Pulsar::SystemCalibrator::integrate_calibrator_data
@@ -906,10 +914,18 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
   if (solver)
     model[ichan]->set_solver( solver->clone() );
 
+  Calibration::ReceptionModel* equation = model[ichan]->get_equation();
+
   if (report_initial_state)
   {
     string filename = "prefit_model_" + tostring(ichan) + ".txt";
-    get_solver(ichan)->set_prefit_report (filename);
+    equation->add_prefit_report ( new Calibration::ModelParametersReport(filename) );
+  }
+
+  if (report_input_data)
+  {
+    string filename = "input_data_" + tostring(ichan) + ".txt";
+    equation->add_prefit_report ( new Calibration::InputDataReport(filename) );
   }
 }
 
@@ -1480,6 +1496,11 @@ void Pulsar::SystemCalibrator::set_report_projection (bool flag)
 void Pulsar::SystemCalibrator::set_report_initial_state (bool flag)
 {
   report_initial_state = flag;
+}
+
+void Pulsar::SystemCalibrator::set_report_input_data (bool flag)
+{
+  report_input_data = flag;
 }
 
 void Pulsar::SystemCalibrator::check_ichan (const char* name, unsigned ichan)
