@@ -31,6 +31,7 @@ nobase_include_HEADERS = \
 	Pulsar/FluxCalManager.h \
 	Pulsar/FrontendCorrection.h \
         Pulsar/HybridCalibrator.h \
+	Pulsar/InputDataReport.h \
         Pulsar/Instrument.h \
 	Pulsar/InstrumentInfo.h \
         Pulsar/IonosphereCalibrator.h \
