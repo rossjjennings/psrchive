@@ -490,6 +490,7 @@ Pulsar::Archive* load (const std::string& filename)
 
 static bool output_report = false;
 static bool prefit_report = false;
+static bool input_data = false;
 
 static bool plot_guess = false;
 static bool plot_residual = false;
@@ -501,6 +502,9 @@ void enable_diagnostic (const string& name)
 {
   if (name == "prefit")
     prefit_report = true;
+
+  else if (name == "input")
+    input_data = true;
 
   else if (name == "report")
     output_report = true;
@@ -887,6 +891,7 @@ int actual_main (int argc, char *argv[]) try
       model->set_report_projection (true);
 
       model->set_report_initial_state (prefit_report);
+      model->set_report_input_data (input_data);
 
       if (impurity)
 	model->set_impurity( impurity );
