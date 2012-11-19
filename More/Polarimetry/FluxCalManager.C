@@ -12,7 +12,6 @@
 
 #include "Pauli.h"
 
-
 using namespace std;
 using Calibration::FluxCalManager;
 
@@ -20,8 +19,6 @@ using Calibration::FluxCalManager;
 
 Calibration::FluxCalManager::FluxCalManager (SignalPath* path)
 {
-  cerr << "Calibration::FluxCalManager ctor" << endl;
-
   multiple_source_states = false;
   subtract_off_from_on = false;
 
@@ -126,6 +123,8 @@ void Calibration::FluxCalManager::add_source (FluxCalObservation* obs)
   else
     // TODO: on or off?
     source = observations[0]->on->source;
+
+  obs->source = source;
 }
 
 //! Integrate an estimate of the backend
