@@ -58,6 +58,20 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
+    // Report on the model
+    //
+    // ///////////////////////////////////////////////////////////////////
+
+    class Report;
+
+    //! Add a report to be executed before solving the measurement equation
+    void add_prefit_report (Report*);
+
+    //! Add a report to be executed after solving the measurement equation
+    void add_postfit_report (Report*);
+
+    // ///////////////////////////////////////////////////////////////////
+    //
     // Fit the model
     //
     // ///////////////////////////////////////////////////////////////////
@@ -96,6 +110,12 @@ namespace Calibration {
 
     //! The algorithm used to solve the measurement equation
     Reference::To<Solver> solver;
+
+    //! Reports to run before solving
+    std::vector< Reference::To<Report> > prefit_reports;
+
+    //! Reports to run after solving
+    std::vector< Reference::To<Report> > postfit_reports;
 
  private:
 
