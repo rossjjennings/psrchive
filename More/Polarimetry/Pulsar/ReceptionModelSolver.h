@@ -41,9 +41,6 @@ namespace Calibration
     //! Add an acceptance condition
     void add_acceptance_condition( Functor< bool(ReceptionModel*) > );
 
-    //! Set the filename to which a pre-fit report will be written
-    void set_prefit_report (const std::string& filename);
-
     //! Solve the measurement equations by least squares minimization
     virtual void solve ();
 
@@ -82,7 +79,8 @@ namespace Calibration
     //! Flags set true if state has been observed
     std::vector<bool> state_observed;
 
-    std::ofstream report;
+    //! Flags set true if path has been observed
+    std::vector<bool> path_observed;
   };
 
 }
