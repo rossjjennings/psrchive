@@ -140,6 +140,9 @@ namespace Pulsar
     //! Report on the initial state of the model before fitting
     virtual void set_report_initial_state (bool flag = true);
 
+    //! Report on the data included as constraints before fitting
+    virtual void set_report_input_data (bool flag = true);
+
     //! Solve equation for each frequency
     virtual void solve ();
     
@@ -271,6 +274,9 @@ namespace Pulsar
 
     //! Report the initial state of model before fitting
     bool report_initial_state;
+
+    //! Report on the data included as constraints
+    bool report_input_data;
 
     //! Prepare the measurement equations for fitting
     virtual void solve_prepare ();
