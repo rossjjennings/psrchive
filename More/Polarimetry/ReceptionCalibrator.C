@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003-2008 by Willem van Straten
+ *   Copyright (C) 2003-2012 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -24,6 +24,9 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/PolnProfile.h"
+
+// TODO: Report::factory that constructs by name
+#include "Pulsar/FitGoodnessReport.h"
 
 #include "MEAL/PhysicalCoherency.h"
 #include "MEAL/Complex2Constant.h"
@@ -475,7 +478,7 @@ void ReceptionCalibrator::setup_poln_calibrator (Calibration::SourceEstimate& es
   
   if (measure_cal_V && (equal_ellipticities || has_fluxcal()))
   {
-    // Stokes V of the calibrator may vary
+    cerr << "Stokes V of the calibrator may vary" << endl;
     est.source->set_infit (3, true);
   }
 
@@ -687,11 +690,8 @@ void ReceptionCalibrator::solve_prepare ()
   for (unsigned ichan=0; ichan < model.size(); ichan++)
     if (output_report && model[ichan]->get_valid())
     {
-      string report_name = "pcm_report_" + tostring(ichan) + ".txt";
-      model[ichan]->get_equation()->get_solver()->add_acceptance_condition
-	( Functor< bool(Calibration::ReceptionModel*) >
-	  ( new Calibration::ReceptionModelReport (report_name),
-	    &Calibration::ReceptionModelReport::report ) );
+      string name = "fit_goodness_" + tostring(ichan) + ".txt";
+      model[ichan]->get_equation()->add_postfit_report( new Calibration::FitGoodnessReport (name) );
     }
 }
 
