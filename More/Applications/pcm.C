@@ -384,6 +384,16 @@ bool get_time_variation ()
   return gain_variation || diff_gain_variation || diff_phase_variation;
 }
 
+string get_string (char code)
+{
+  switch (code) {
+  case 'g': return "gain";
+  case 'b': return "diffgain";
+  case 'r': return "diffphase";
+  default: return "all";
+  }
+}
+
 void set_time_variation (char code, MEAL::Univariate<MEAL::Scalar>* function)
 {
   switch (code) {
@@ -749,8 +759,11 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'u':
+    {
       cerr << "pcm: using a multiple-step function to model ";
-      set_time_variation( optarg[0], new MEAL::Steps );
+      MEAL::Steps* steps = new MEAL::Steps;
+      steps->set_param_name_prefix ( get_string(optarg[0]) );
+      set_time_variation( optarg[0], steps );
       cerr << "pcm: assuming cals are observed ";
       if (optarg[1]==':')
       {
@@ -761,6 +774,7 @@ int actual_main (int argc, char *argv[]) try
       }
       cerr << (step_after_cal ? "after" : "before") << " pulsars" << endl;
       break;
+    }
 
     case 'U':
       cerr << "pcm: for each calibrator, a unique value of ";
