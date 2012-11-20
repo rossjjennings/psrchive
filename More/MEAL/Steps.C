@@ -29,6 +29,7 @@ MEAL::Steps& MEAL::Steps::operator = (const Steps& copy)
   parameters = copy.parameters;
   step = copy.step;
   current_step = copy.current_step;
+  param_name_prefix = copy.param_name_prefix;
 
   return *this;
 }
@@ -45,6 +46,12 @@ string MEAL::Steps::get_name () const
   return "Steps";
 }
 
+//! Set the prefix of each parameter name
+void MEAL::Steps::set_param_name_prefix (const std::string& prefix)
+{
+  param_name_prefix = prefix;
+}
+
 //! Add a step at the given point on the abscissa
 /*! This method will insert the step so that they remain sorted in
   order of increasing abscissa */
@@ -55,6 +62,11 @@ void MEAL::Steps::add_step (double x)
 
   step.resize( size + 1 );
   parameters.resize( size + 1 );
+
+  string name = "step" + tostring(size);
+  if ( ! param_name_prefix.empty() )
+    name = param_name_prefix + "_" + name;
+  parameters.set_name (size, name);
 
   // A) find the first step greater than the new step ...
   unsigned i=0;
@@ -70,8 +82,9 @@ void MEAL::Steps::add_step (double x)
   parameters.set_param(i, 0.0);
   current_step = i;
 
-  // c) and shift the remaining values to the right.
-  for (i++; i < size+1; i++) {
+  // C) and shift the remaining values to the right.
+  for (i++; i < size+1; i++)
+  {
     std::swap (temp_step, step[i]);
     parameters.swap_param(i, temp_parameter);
   }
@@ -116,7 +129,8 @@ void MEAL::Steps::set_abscissa (double value)
     cerr << "MEAL::Steps::set_abscissa value=" << value 
 	 << " nstep=" << nstep << endl;
 
-  while (istep >= 0) {
+  while (istep >= 0)
+  {
     if (step[istep] < value)
       break;
     istep --;
@@ -153,7 +167,8 @@ void MEAL::Steps::calculate (double& result, std::vector<double>* grad)
 
   result = parameters.get_param (current_step);
 
-  if (grad) {
+  if (grad)
+  {
     // set all elements of the gradient equal to zero ...
     grad->resize (get_nparam());
     for (unsigned ig=0; ig<get_nparam(); ig++)
@@ -162,10 +177,12 @@ void MEAL::Steps::calculate (double& result, std::vector<double>* grad)
     (*grad)[current_step] = 1.0;
   }
 
-  if (verbose) {
+  if (verbose)
+  {
     cerr << "MEAL::Steps::calculate result\n"
 	 "   " << result << endl;
-    if (grad) {
+    if (grad)
+    {
       cerr << "MEAL::Steps::calculate gradient" << endl;
       for (unsigned i=0; i<grad->size(); i++)
 	cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
