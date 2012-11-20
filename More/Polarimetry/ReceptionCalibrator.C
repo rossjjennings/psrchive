@@ -503,6 +503,12 @@ bool ReceptionCalibrator::has_fluxcal () const
   return fluxcal.size() != 0;
 }
 
+const Calibration::FluxCalManager*
+ReceptionCalibrator::get_fluxcal (unsigned ichan) const
+{
+  return fluxcal.at(ichan);
+}
+
 void ReceptionCalibrator::submit_calibrator_data 
 (
  Calibration::CoherencyMeasurementSet& measurements,

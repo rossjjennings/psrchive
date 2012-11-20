@@ -104,6 +104,9 @@ namespace Pulsar
     //! Return true if any flux calibrator observations are available
     bool has_fluxcal () const;
 
+    //! Return the flux calibration manager for the specified frequency channel
+    const Calibration::FluxCalManager* get_fluxcal (unsigned ichan) const;
+
     //! Set the first guess to a previous solution
     void set_previous (const Archive* data);
 
