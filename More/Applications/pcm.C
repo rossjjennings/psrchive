@@ -1396,6 +1396,36 @@ SystemCalibrator* matrix_template_matching (const char* stdname)
   return model;
 }
 
+static MJD start_time;
+static MJD end_time;
+
+void get_span ()
+{
+  Pulsar::Profile::load_amps = false;
+
+  static bool loaded = false;
+
+  for (unsigned ifile=0; ifile < filenames.size(); ifile++)
+  {
+    Reference::To<Pulsar::Archive> archive;
+    archive = Pulsar::Archive::load( filenames[ifile] );
+    MJD start = archive->start_time();
+    MJD end = archive->end_time();
+
+    if (!loaded || start < start_time)
+      start_time = start;
+    if (!loaded || end > end_time)
+      end_time = end;
+
+    loaded = true;
+  }
+
+  cerr << "pcm: data span " << (end_time - start_time).in_hours()
+       << " hours" << endl;
+
+  Pulsar::Profile::load_amps = true;
+}
+
 /* **********************************************************************
 
    FIND APPROPRIATE CALIBRATOR OBSERVATIONS IN THE DATABASE
@@ -1408,12 +1438,9 @@ void load_calibrator_database () try
     return;
     
   Reference::To<Pulsar::Archive> archive;
-
-  archive = Pulsar::Archive::load( filenames.back() );
-  MJD end = archive->end_time();
-
   archive = Pulsar::Archive::load( filenames.front() );
-  MJD start = archive->start_time();
+
+  get_span ();
 
   MJD mid = 0.5 * (end + start);
 
