@@ -420,6 +420,36 @@ void set_time_variation (char code, MEAL::Univariate<MEAL::Scalar>* function)
 	       "unrecognized PAR code = %c", code);
 }
 
+std::vector<MJD> gain_steps;
+std::vector<MJD> diff_gain_steps;
+std::vector<MJD> diff_phase_steps;
+
+void add_step (char code, const MJD& mjd)
+{
+  switch (code) {
+  case 'g':
+    cerr << "gain" << endl;
+    gain_steps.push_back (mjd);
+    return;
+  case 'b':
+    cerr << "differential gain" << endl;
+    diff_gain_steps.push_back (mjd);;
+    return;
+  case 'r':
+    cerr << "differential phase" << endl;
+    diff_phase_steps.push_back (mjd);;
+    return;
+  case 'a':
+    cerr << "all backend parameters" << endl;
+    gain_steps.push_back (mjd);;
+    diff_gain_steps.push_back (mjd);;
+    diff_phase_steps.push_back (mjd);;
+    return;
+  }
+  throw Error (InvalidParam, "set_time_variation",
+	       "unrecognized PAR code = %c", code);
+}
+
 
 bool gain_foreach_calibrator = false;
 bool diff_gain_foreach_calibrator = false;
@@ -588,7 +618,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args =
-    "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:j:J:kL:l:"
+    "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:i:j:J:kL:l:"
     "M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:yzZ";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
@@ -662,6 +692,29 @@ int actual_main (int argc, char *argv[]) try
     case 'I':
       impurity = MEAL::Function::load<MEAL::Real4> (optarg);
       break;
+
+    case 'i':
+    {
+      char code;
+      char dummy;
+      double mjd;
+
+      istringstream is (optarg);
+      is >> code >> dummy >> mjd;
+
+      if (is.bad())
+      {
+	cerr << "pcm: error parsing '" << optarg << "' as PAR:MJD" << endl;
+	return -1;
+      }
+
+      MJD epoch (mjd);
+
+      cerr << "pcm: inserting a step in ";
+      add_step( code, epoch );
+      cerr << " at MJD=" << epoch << endl;
+      break;
+    }
 
     case 'j':
       separate (optarg, jobs, ",");
@@ -929,6 +982,15 @@ int actual_main (int argc, char *argv[]) try
 
 	model->set_foreach_calibrator (foreach);
       }
+
+      for (unsigned i=0; i < gain_steps.size(); i++)
+	model->add_gain_step (gain_steps[i]);
+
+      for (unsigned i=0; i < diff_gain_steps.size(); i++)
+	model->add_diff_gain_step (diff_gain_steps[i]);
+
+      for (unsigned i=0; i < diff_phase_steps.size(); i++)
+	model->add_diff_phase_step (diff_phase_steps[i]);
 
       if (least_squares)
 	model->set_solver( new_solver(least_squares) );

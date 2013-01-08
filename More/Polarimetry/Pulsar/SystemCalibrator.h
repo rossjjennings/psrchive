@@ -92,6 +92,15 @@ namespace Pulsar
     //! Set the time variation of differential phase
     virtual void set_diff_phase( MEAL::Univariate<MEAL::Scalar>* );
 
+    //! Add a step to the gain variations
+    virtual void add_gain_step (const MJD&);
+
+    //! Add a step to the differential gain variations
+    virtual void add_diff_gain_step (const MJD&);
+
+    //! Add a step to the differential phase variations
+    virtual void add_diff_phase_step (const MJD&);
+
     //! Set the transformation to be cloned for each calibrator
     virtual void set_foreach_calibrator( const MEAL::Complex2* );
 
@@ -208,6 +217,10 @@ namespace Pulsar
 
     //! Time variation of differential phase
     Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
+
+    std::vector<MJD> gain_steps;
+    std::vector<MJD> diff_gain_steps;
+    std::vector<MJD> diff_phase_steps;
 
     //! Transformation cloned for each calibrator observation
     Reference::To< const MEAL::Complex2 > foreach_calibrator;

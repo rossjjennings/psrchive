@@ -650,6 +650,49 @@ const MEAL::Scalar* Calibration::SignalPath::get_diff_phase () const
   return diff_phase;
 }
 
+//! Add a step to the gain variations
+void Calibration::SignalPath::add_gain_step (const MJD& mjd)
+{
+  if (!gain)
+    gain = new Steps;
+
+  add_step (gain, mjd);
+}
+
+//! Add a step to the differential gain variations
+void Calibration::SignalPath::add_diff_gain_step (const MJD& mjd)
+{
+  if (!diff_gain)
+    diff_gain = new Steps;
+
+  add_step (diff_gain, mjd);
+}
+
+//! Add a step to the differential phase variations
+void Calibration::SignalPath::add_diff_phase_step (const MJD& mjd)
+{
+  if (!diff_phase)
+    diff_phase = new Steps;
+
+  add_step (diff_phase, mjd);
+}
+
+void Calibration::SignalPath::add_step (Scalar* function, const MJD& mjd)
+{
+  Steps* steps = dynamic_cast<Steps*> (function);
+  if (!steps)
+    throw Error (InvalidState, "Calibration::SignalPath::add_step",
+		 "function is not a Steps");
+
+  MJD zero;
+  if (convert.get_reference_epoch() == zero)
+    convert.set_reference_epoch ( mjd );
+
+  time.set_value (mjd);
+  double step = convert.get_value();
+
+  steps->add_step (step);
+}
 
 void Calibration::SignalPath::offset_steps (Scalar* function, double offset)
 {

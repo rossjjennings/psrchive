@@ -91,6 +91,15 @@ namespace Calibration
     //! Add a step if any of the above functions require it
     void add_calibrator_epoch (const MJD&);
 
+    //! Add a step to the gain variations
+    void add_gain_step (const MJD&);
+
+    //! Add a step to the differential gain variations
+    void add_diff_gain_step (const MJD&);
+
+    //! Add a step to the differential phase variations
+    void add_diff_phase_step (const MJD&);
+
     //! Record the epochs of observations
     void add_observation_epoch (const MJD&);
 
@@ -238,6 +247,9 @@ namespace Calibration
 
     //! Add a step if Scalar is a Steps
     void add_step (MEAL::Scalar* function, double step);
+
+    //! Insert a step into the Scalar, which must be a Steps
+    void add_step (MEAL::Scalar* function, const MJD& mjd);
 
     //! Remove the last step if there is no data there
     void fix_last_step (MEAL::Scalar* function);

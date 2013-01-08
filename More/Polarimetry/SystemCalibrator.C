@@ -219,6 +219,21 @@ void Pulsar::SystemCalibrator::set_diff_phase( Univariate<Scalar>* f )
   diff_phase_variation = f;
 }
 
+void Pulsar::SystemCalibrator::add_gain_step (const MJD& mjd)
+{
+  gain_steps.push_back (mjd);
+}
+
+void Pulsar::SystemCalibrator::add_diff_gain_step (const MJD& mjd)
+{
+  diff_gain_steps.push_back (mjd);
+}
+
+void Pulsar::SystemCalibrator::add_diff_phase_step (const MJD& mjd)
+{
+  diff_phase_steps.push_back (mjd);
+}
+
 void Pulsar::SystemCalibrator::preprocess (Archive* data)
 {
   if (data->get_type() == Signal::Pulsar)
@@ -910,7 +925,16 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
   
   if (diff_phase_variation)
     model[ichan]->set_diff_phase( diff_phase_variation->clone() );
-  
+
+  for (unsigned i=0; i < gain_steps.size(); i++)
+    model[ichan]->add_gain_step (gain_steps[i]);
+
+  for (unsigned i=0; i < diff_gain_steps.size(); i++)
+    model[ichan]->add_diff_gain_step (diff_gain_steps[i]);
+
+  for (unsigned i=0; i < diff_phase_steps.size(); i++)
+    model[ichan]->add_diff_phase_step (diff_phase_steps[i]);
+
   if (solver)
     model[ichan]->set_solver( solver->clone() );
 
