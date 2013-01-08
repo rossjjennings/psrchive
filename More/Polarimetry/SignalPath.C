@@ -654,7 +654,7 @@ const MEAL::Scalar* Calibration::SignalPath::get_diff_phase () const
 void Calibration::SignalPath::add_gain_step (const MJD& mjd)
 {
   if (!gain)
-    gain = new Steps;
+    set_gain( new Steps );
 
   add_step (gain, mjd);
 }
@@ -663,7 +663,7 @@ void Calibration::SignalPath::add_gain_step (const MJD& mjd)
 void Calibration::SignalPath::add_diff_gain_step (const MJD& mjd)
 {
   if (!diff_gain)
-    diff_gain = new Steps;
+    set_diff_gain( new Steps );
 
   add_step (diff_gain, mjd);
 }
@@ -672,7 +672,7 @@ void Calibration::SignalPath::add_diff_gain_step (const MJD& mjd)
 void Calibration::SignalPath::add_diff_phase_step (const MJD& mjd)
 {
   if (!diff_phase)
-    diff_phase = new Steps;
+    set_diff_phase( new Steps );
 
   add_step (diff_phase, mjd);
 }
