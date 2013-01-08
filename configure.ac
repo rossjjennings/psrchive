@@ -246,7 +246,7 @@ SWIN_FUNC_GETOPT_LONG
 #
 #
 
-AM_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
 		config/Makefile
 		Util/Makefile
