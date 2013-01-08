@@ -1401,7 +1401,7 @@ static MJD end_time;
 
 void get_span ()
 {
-  Pulsar::Profile::load_amps = false;
+  Pulsar::Profile::no_amps = true;
 
   static bool loaded = false;
 
@@ -1420,10 +1420,18 @@ void get_span ()
     loaded = true;
   }
 
-  cerr << "pcm: data span " << (end_time - start_time).in_hours()
-       << " hours" << endl;
+  double span = (end_time - start_time).in_days();
+  string unit = "days";
 
-  Pulsar::Profile::load_amps = true;
+  if (span < 1)
+  {
+    span += 24;
+    unit = "hours";
+  }
+
+  cerr << "pcm: data span " << span << " " << unit << endl;
+
+  Pulsar::Profile::no_amps = false;
 }
 
 /* **********************************************************************
@@ -1442,7 +1450,9 @@ void load_calibrator_database () try
 
   get_span ();
 
-  MJD mid = 0.5 * (end + start);
+  MJD mid = 0.5 * (end_time + start_time);
+  double span_hours = (end_time - start_time).in_days() * 24.0;
+  double search_hours = 0.5*span_hours + polncal_hours;
 
   Reference::To<Pulsar::Database> database;
 
@@ -1461,7 +1471,7 @@ void load_calibrator_database () try
   char buffer[256];
 
   cerr << "pcm: searching for reference source observations"
-    " within " << polncal_hours << " hours of midtime" << endl;
+    " within " << search_hours << " hours of midtime" << endl;
 
   cerr << "pcm: midtime = "
        << mid.datestr (buffer, 256, "%Y-%m-%d-%H:%M:00") << endl;
@@ -1470,7 +1480,7 @@ void load_calibrator_database () try
   criterion = database->criterion (archive, Signal::PolnCal);
   criterion.entry.time = mid;
   criterion.check_coordinates = check_coordinates;
-  criterion.minutes_apart = polncal_hours * 60.0;
+  criterion.minutes_apart = search_hours * 60.0;
   
   vector<Pulsar::Database::Entry> oncals;
   database->all_matching (criterion, oncals);
@@ -1493,12 +1503,15 @@ void load_calibrator_database () try
     cerr << "pcm: no need for flux calibrator observations" << endl;
   else
   {
+    double span_days = (end_time - start_time).in_days();
+    double search_days = 0.5*span_days + fluxcal_days;
+
     cerr << "pcm: searching for flux calibrator observations"
-      " within " << fluxcal_days << " days of midtime" << endl;
+      " within " << search_days << " days of midtime" << endl;
 
     criterion.entry.obsType = Signal::FluxCalOn;
     criterion.check_coordinates = false;
-    criterion.minutes_apart = fluxcal_days * 24.0 * 60.0;
+    criterion.minutes_apart = search_days * 24.0 * 60.0;
     
     database->all_matching (criterion, oncals);
   
