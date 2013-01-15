@@ -126,7 +126,7 @@ void usage ()
     "  -1         solve independently for each observation \n"
     "  -z         share a single phase shift estimate b/w all observations \n"
     "\n"
-    "See "PSRCHIVE_HTTP"/manuals/pcm for more details\n"
+    "See " PSRCHIVE_HTTP "/manuals/pcm for more details\n"
        << endl;
 }
 
