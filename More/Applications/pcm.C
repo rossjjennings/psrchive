@@ -798,6 +798,9 @@ int actual_main (int argc, char *argv[]) try
 	Calibration::SignalPath::verbose = true;
 
       Pulsar::Calibrator::verbose = level;
+
+      level --; if (level < 0) level = 0;
+
       Pulsar::Archive::set_verbosity (level);
 
       break;
@@ -1113,7 +1116,7 @@ int actual_main (int argc, char *argv[]) try
 
     if (get_time_variation())
     {
-      cpgbeg (0, "variations.ps/PS", 0, 0);
+      cpgbeg (0, "result_variations.ps/PS", 0, 0);
       cpgsvp (0.1,.9, 0.1,.9);
 
       unsigned panels = plotter.npanel;

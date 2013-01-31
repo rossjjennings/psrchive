@@ -22,6 +22,7 @@
 #include "MEAL/JonesMueller.h"
 
 #include <iostream>
+#include <algorithm>
 #include <assert.h>
 
 using namespace std;
@@ -1005,12 +1006,21 @@ void Calibration::SignalPath::compute_covariance
   }
 }
 
+// set B to the set-theoretic difference of B and A
+// also known as the relative complement of A in B
+template<typename C1, typename C2>
+void set_difference (C1& B, const C2& A)
+{
+  typename C1::iterator newlast = B.end();
+  for (typename C2::const_iterator it=A.begin(); it != A.end(); it++)
+    newlast = std::remove (B.begin(), newlast, *it);
+  B.erase (newlast, B.end());
+}
+
 void Calibration::SignalPath::get_covariance( vector<double>& covar,
-						 const MJD& epoch )
+					      const MJD& epoch )
 {
   vector< vector<double> > Ctotal;
-  vector< unsigned > imap;
-
   get_equation()->get_solver()->get_covariance (Ctotal);
 
   if (Ctotal.size() != get_equation()->get_nparam())
@@ -1018,19 +1028,34 @@ void Calibration::SignalPath::get_covariance( vector<double>& covar,
 		 "covariance matrix size=%u != nparam=%u",
 		 Ctotal.size(), get_equation()->get_nparam() );
 
+  MEAL::Complex2* xform = get_transformation();
+
+  // extract the indeces of the transformation within the measurement equation
+  vector< unsigned > imap;
+  MEAL::get_imap( get_equation(), xform, imap );
+
   vector< unsigned > gain_imap;
   if (gain)
+  {
     MEAL::get_imap( get_equation(), gain, gain_imap );
+    set_difference (imap, gain_imap);
+  }
   else if (pcal_gain)
     MEAL::get_imap( get_equation(), pcal_gain, gain_imap );
 
   vector< unsigned > diff_gain_imap;
   if (diff_gain)
+  {
     MEAL::get_imap( get_equation(), diff_gain, diff_gain_imap );
+    set_difference (imap, diff_gain_imap);
+  }
 
   vector< unsigned > diff_phase_imap;
   if (diff_phase)
+  {
     MEAL::get_imap( get_equation(), diff_phase, diff_phase_imap );
+    set_difference (imap, diff_phase_imap);
+  }
 
   /*
     If the Instrument class ellipticities are set equal to a single
@@ -1042,15 +1067,13 @@ void Calibration::SignalPath::get_covariance( vector<double>& covar,
   if (van04 && van04->has_equal_ellipticities())
   {
     MEAL::get_imap( get_equation(), van04->get_ellipticities(), ell_imap );
+    set_difference (imap, ell_imap);
     van04->independent_ellipticities();
   }
 
-  disengage_time_variations( epoch );
+  disengage_time_variations (epoch);
 
-  MEAL::Complex2* xform = get_transformation();
-
-  // extract the indeces of the transformation within the model
-  MEAL::get_imap( get_equation(), xform, imap );
+  assert (xform->get_nparam() == imap.size());
 
   if (gain)
     compute_covariance( imap[0], Ctotal, gain_imap, gain );
@@ -1080,7 +1103,15 @@ void Calibration::SignalPath::get_covariance( vector<double>& covar,
   {
 #ifdef _DEBUG
     cerr << i << ":" << imap[i] << " " << xform->get_param_name(i) << endl;
+
+    if ( !xform->get_infit(i) && Ctotal[imap[i]][imap[i]] != 0 )
+      {
+	cerr << i << ":" << imap[i] << " " << xform->get_param_name(i)
+	     << " fit=" << xform->get_infit(i) << " var="
+	     << Ctotal[imap[i]][imap[i]] << endl;
+      }
 #endif
+
     for (unsigned j=i; j<nparam; j++)
     {
       assert( count < ncovar );

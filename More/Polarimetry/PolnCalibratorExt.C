@@ -67,6 +67,7 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
     cerr << "Pulsar::PolnCalibratorExtension (PolnCalibrator*)" << endl;
 
   CalibratorExtension::build (calibrator);
+
   has_covariance = calibrator->has_covariance ();
   has_solver = calibrator->has_solver ();
 
@@ -81,23 +82,7 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
 
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
-    if ( calibrator->get_transformation_valid(ichan) )
-    {
-      copy( get_transformation(ichan), 
-	    calibrator->get_transformation(ichan) );
-
-      set_valid (ichan, true);
-
-      if (Calibrator::verbose > 2 && first)
-      {
-	const MEAL::Function* f = calibrator->get_transformation(ichan);
-	for (unsigned i=0; i<f->get_nparam(); i++)
-	  cerr << "Pulsar::PolnCalibratorExtension name[" << i << "]=" 
-	       << f->get_param_name(i) << endl;
-      }
-      first = false;
-    }
-    else
+    if ( ! calibrator->get_transformation_valid(ichan) )
     {
       if (Calibrator::verbose > 2)
 	cerr << "Pulsar::PolnCalibratorExtension ichan=" << ichan 
@@ -106,6 +91,21 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
       set_valid (ichan, false);
       continue;
     }
+
+    copy( get_transformation(ichan), 
+	  calibrator->get_transformation(ichan) );
+    
+    set_valid (ichan, true);
+
+    if (Calibrator::verbose > 2 && first)
+    {
+      const MEAL::Function* f = calibrator->get_transformation(ichan);
+      for (unsigned i=0; i<f->get_nparam(); i++)
+	cerr << "Pulsar::PolnCalibratorExtension name[" << i << "]=" 
+	     << f->get_param_name(i) << endl;
+    }
+
+    first = false;
     
     if ( has_covariance )
     {

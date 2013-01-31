@@ -41,6 +41,8 @@
 #include <string>
 #include <cmath>
 
+#include <sys/stat.h>
+
 using namespace std;
 using TextInterface::parse_indeces;
 
@@ -49,6 +51,8 @@ using TextInterface::parse_indeces;
 #include "njkk08/KaraFit.h"
 
 bool verbose = false;
+
+ifstream fin("QUVflux.out");
 
 void cpg_next ();
 
@@ -79,7 +83,7 @@ pa_plot( int rise_bin, int fall_bin,
 	 bool display,
 	 vector<double>& pa, vector<double>& pa_stddev,
 	 vector<double>& freqs, const vector<int>& goodchans,
-	 float nsigma);
+	 float nsigma,const bool sbin);
 
 void
 do_display(vector<double> freqs,
@@ -123,17 +127,17 @@ void usage ()
     "  -r                Refine the RM using two halves of band \n"
     "\n"
     "Preprocessing options: \n"
-    "  -b +/-range       Include/exclude phase bins; e.g. range=I,J:K and/or M-N \n"
-    "  -B factor         Scrunch in phase bins \n"
-    "  -F factor         Scrunch in frequency \n"
+    "  -b [+/-][range]   Include/exclude phase bins \n"
+    "  -B [factor]       Scrunch in phase bins \n"
+    "  -F [factor]       Scrunch in frequency \n"
     "  -R RM             Set the input rotation measure \n"
     "  -z \"z1 z2 z3...\"  Zap these channels\n"
     "\n"
     "Plotting options: \n"
     "  -D                Display results \n"
     "  -K dev            Specify pgplot device\n"
-    "  -p x1,x2          Fit for every phase bin in window \n"
-    "  -w x1,x2          Average over phase window \n"
+    "  -p [x1,x2]        Fit for every phase bin in window \n"
+    "  -w [x1,x2]        Average over phase window \n"
     "  -Y                Produce a postscript plot of V against frequency\n"
     "\n"
     "Standard options:\n"
@@ -143,6 +147,8 @@ void usage ()
     "  -L                Log results in source.log \n"
        << endl;
 }
+
+
 
 static bool auto_maxmthd = false;
 static float auto_maxrm_dm = 0.0;
@@ -397,6 +403,12 @@ int main (int argc, char** argv)
 
     case 'Y':
       plotv = true;
+      if (fin)
+      {
+	 fin.close();
+	 system("rm -f QUVflux.out");
+      }
+      
       break;
 
     case 'z': 
@@ -412,6 +424,7 @@ int main (int argc, char** argv)
       cout << "Unrecognised option" << endl;
     }
   }
+
 
   // Parse the list of archives
 
@@ -765,11 +778,6 @@ void rmresult (Pulsar::Archive* archive,
   archive->remove_baseline();
   archive->centre_max_bin();
 
-  cerr << "\n"
-    "rmresult: selected phase bins, P.A. values, and P.A. errors "
-    "in delta_pa.txt"
-       << endl;
-
 #if HAVE_PGPLOT
 
   string dev = archive->get_source () + ".ps/cps";
@@ -803,8 +811,11 @@ void rmresult (Pulsar::Archive* archive,
   plot.get_flux()->get_frame()->get_label_below()->set_right ("$freq MHz");
 
   // plot -90 to 180 in the PA plot
+  plot.get_orientation()->set_span (180.0);
   plot.get_orientation()->get_frame()->get_y_scale()->set_range_norm (0, 1.5);
-  plot.get_orientation()->set_marker( Pulsar::AnglePlot::ErrorTick );
+
+  plot.get_orientation()->set_marker( (Pulsar::AnglePlot::Marker)
+				      ( Pulsar::AnglePlot::ErrorTick ) );
 
   plot.plot (archive);
 
@@ -1457,17 +1468,15 @@ do_singlebin(Reference::To<Pulsar::Archive> data,
 {
   int nbin = data->get_nbin();
 
-
-
   int bin1 = int(x1 * nbin);
   int bin2 = int(x2 * nbin);
 
+  cerr <<bin1 << "       " << x1 <<endl;
 
   for(int ibin=bin1; ibin < bin2+1; ibin++)
-  {
-  	pa_plot( ibin, ibin+1, data, display,
-	 	  pa, pa_stddev, freqs, goodchans, nsigma);
-  }  
+  	pa_plot(ibin, ibin+1, data, display,
+	 	  pa, pa_stddev, freqs, goodchans, nsigma,1);
+  
 }
 
 
@@ -1486,7 +1495,7 @@ do_window(Reference::To<Pulsar::Archive> data,
   int bin2 = int(x2 * nbin);
 
   pa_plot( bin1, bin2, data, display,
-	   pa, pa_stddev, freqs, goodchans, nsigma);
+	   pa, pa_stddev, freqs, goodchans, nsigma,0);
 }
 
 
@@ -1502,7 +1511,7 @@ pa_plot( int rise_bin, int fall_bin,
 	 bool display,
 	 vector<double>& pa, vector<double>& pa_stddev,
 	 vector<double>& freqs, const vector<int>& goodchans,
-	 float nsigma)
+	 float nsigma, const bool sbin)
 {
   int nbin = data->get_nbin();
   int good_nchan = goodchans.size();
@@ -1524,8 +1533,7 @@ pa_plot( int rise_bin, int fall_bin,
   goodl.clear();
   goodlrms.clear();
 
-  static int iplot = -1;
-  iplot++;
+  static int iplot = 0;
 
   for (int i = 0; i < good_nchan; i++) { // channel loop (begin)	  
 
@@ -1542,8 +1550,11 @@ pa_plot( int rise_bin, int fall_bin,
         lchan_vec.push_back(sqrt(qchan[j]*qchan[j]+uchan[j]*uchan[j]));
     L.set_amps(lchan_vec);
     
+    // float lmean = L.mean(L.find_min_phase());
+    
     L -= L.mean(L.find_min_phase());
     float* lchan = L.get_amps();
+
 
     
     double lmin_avg = 0.;
@@ -1562,7 +1573,6 @@ pa_plot( int rise_bin, int fall_bin,
     
     I.stats(I.find_min_phase(),&imin_avg,&imin_var);
     float irms = sqrt(imin_var);
-
 
 
 
@@ -1590,6 +1600,7 @@ pa_plot( int rise_bin, int fall_bin,
 	  
 	  tot_i += ichan[ibin];
 
+
 	  good_nbins++;
 
 	}
@@ -1602,6 +1613,7 @@ pa_plot( int rise_bin, int fall_bin,
 	float snr = lchan[ibin]/lrms;
 
 	if(snr > lthresh){      
+
 
 	  tot_q += qchan[ibin];
 	  tot_u += uchan[ibin];
@@ -1621,6 +1633,7 @@ pa_plot( int rise_bin, int fall_bin,
 
 	if(snr > lthresh){      
 
+
 	  tot_q += qchan[ibin];
 	  tot_u += uchan[ibin];
           tot_v += vchan[ibin];
@@ -1635,6 +1648,7 @@ pa_plot( int rise_bin, int fall_bin,
 
     }
 
+
     float mult  = sqrt(float(good_nbins));
     float vrms = mult * sqrt( variance(vchan,vchan+nbin) );
     float qrms = mult * sqrt( variance(qchan,qchan+nbin) );
@@ -1647,9 +1661,26 @@ pa_plot( int rise_bin, int fall_bin,
 
 
   
+/*    
+    if(i==10)
+      for (int j = 0; j < nbin; j++)
+      { 
+    	  float lin = sqrt(qchan[j]*qchan[j]+uchan[j]*uchan[j]);
 
+	  if(lin/irms >= 0.5*M_PI) // unbiasing
+        	lin=sqrt(pow(lin/irms,2.0)-1.0)*irms;
+	  else
+        	lin=0.0;
+
+
+	  cout <<setw(15)<< lin <<setw(15)<<lchan[j]<<endl;
+
+
+      }
+*/
 
     tot_l = sqrt(tot_q*tot_q+tot_u*tot_u);
+
 
     goodl.push_back(tot_l);
     goodlrms.push_back(lrms);
@@ -1659,7 +1690,6 @@ pa_plot( int rise_bin, int fall_bin,
     else
           tot_l=0.0;
 	  
-
 
 	
     goodfreqs.push_back(freqs[i]);
@@ -1962,9 +1992,9 @@ vector<double> LoverIerr;
 for(unsigned m=0; m<goodfreqs.size(); m++)
 {
  VoverI.push_back(goodv[m]/goodi[m]);
- VoverIerr.push_back(  sqrt(  pow(goodvrms[m],2)/pow(goodi[m],2) + pow(goodv[m],2)/pow(goodi[m],4)*pow(goodirms[m],2)  )   );
+ VoverIerr.push_back(  sqrt(  pow(goodvrms[m],2.0)/pow(goodi[m],2.0) + pow(goodv[m],2.0)/pow(goodi[m],4.0)*pow(goodirms[m],2.0)  )   );
  LoverI.push_back(goodl[m]/goodi[m]);
- LoverIerr.push_back(  sqrt(  pow(goodlrms[m],2)/pow(goodi[m],2) + pow(goodl[m],2)/pow(goodi[m],4)*pow(goodirms[m],2)  )   );
+ LoverIerr.push_back(  sqrt(  pow(goodlrms[m],2.0)/pow(goodi[m],2.0) + pow(goodl[m],2.0)/pow(goodi[m],4.0)*pow(goodirms[m],2.0)  )   );
 }
 
 
@@ -2035,8 +2065,11 @@ delta_Lerr.push_back(fabs(Lslopeerr*(goodfreqs[goodfreqs.size()-1]-goodfreqs[0])
      float vfit_y[2];
 
      ofstream Vflux;
-     Vflux.open("QUVflux.out");
-
+     if(sbin)
+	  Vflux.open("QUVflux.out",ios::app);
+     else
+          Vflux.open("QUVflux.out");
+     
      for (unsigned k = 0; k < goodfreqs.size(); k++)
      {
        cpgpt1(goodfreqs[k], VoverI[k], 3);
@@ -2052,13 +2085,16 @@ delta_Lerr.push_back(fabs(Lslopeerr*(goodfreqs[goodfreqs.size()-1]-goodfreqs[0])
        cpgsci(1);
        cpgsls(1);
 
-      cerr << "V0 = " << V0 << "   Vslope = " << Vslope <<endl;
+//      cerr << "V0 = " << V0 << "   Vslope = " << Vslope <<endl;
 
-       Vflux << setw(10) << goodfreqs[k] 
-             << "  " << setw(10) << goodi[k] <<"  " << setw(10) << goodirms[k]
-             << "  " << setw(10) << goodq[k] <<"  " << setw(10) << goodqrms[k]
-             << "  " << setw(10) << goodu[k] <<"  " << setw(10) << goodurms[k]
-             << "  " << setw(10) << goodv[k] <<"  " << setw(10) << goodvrms[k] <<endl;
+       Vflux << setw(10) << float(rise_bin+iplot)/float(nbin) << setw(10) << goodfreqs[k] 
+             << "  " << setw(13) << goodi[k] <<"  " << setw(13) << goodirms[k]
+             << "  " << setw(13) << goodq[k] <<"  " << setw(13) << goodqrms[k]
+             << "  " << setw(13) << goodu[k] <<"  " << setw(13) << goodurms[k]
+             << "  " << setw(13) << goodv[k] <<"  " << setw(13) << goodvrms[k] 
+             << " * "<< setw(13) << goodl[k] <<"  " << setw(13) << goodlrms[k]
+             << " * "<< setw(13) << goodpa[k]<<"  " << setw(13) << goodpa_stddev[k]
+	     <<endl;
      }
   
      Vflux.close();
@@ -2067,6 +2103,7 @@ delta_Lerr.push_back(fabs(Lslopeerr*(goodfreqs[goodfreqs.size()-1]-goodfreqs[0])
 
   }
 
+  iplot++;
 #endif
 
 }
@@ -2095,11 +2132,10 @@ do_display(vector<double> freqs,
   
   cpg_next ();
 
-
-  cpgpap(8.0,1.5);
+  cpgpap(6.0,1.333);
   cpgsvp(0.15, 0.95, 0.58, 0.95);
   
-  double flo = freqs[0];
+  double flo = freqs.front();
   double fhi = freqs.back();
 
   if( flo > fhi )
@@ -2119,7 +2155,7 @@ do_display(vector<double> freqs,
   
   cpgsch(1.0);
   cpgscf (2);
-  cpgbox("BCITS", 0.0, 0, "BCINTS", 0.0, 0);    
+  cpgbox("BCTS", 0.0, 0, "BCNTS", 0.0, 0);    
   cpgmtxt("L",4.0,.5,.5,"Position Angle (deg)");
 
   
@@ -2130,7 +2166,7 @@ do_display(vector<double> freqs,
   for (unsigned k = 0; k < freqs.size(); k++) {
     if( verbose )
       fprintf(stderr,"Plotting %f %f\n",freqs[k],pa[k]);
-    cpgpt1(freqs[k], pa[k], 0);
+    cpgpt1(freqs[k], pa[k], 828);
     cpgerr1(6, freqs[k], pa[k], pa_stddev[k], 1.0);
   }
   cpgsci(1);
@@ -2147,11 +2183,12 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
 {
   int good_nchan = good_chans.size();
 
-  double a = 0.0, b = 0.0, siga = 0.0, sigb = 0.0, chi2 = 0.0, prob = 0.0;
+  double a = 0.0, b = 0.0;
+//, siga = 0.0, sigb = 0.0, chi2 = 0.0, prob = 0.0;
   
-  cerr << "Fitting..." << endl;    
-  lin_chi2_fit(freqs,pa,pa_stddev,true,a,b,siga,sigb,chi2,prob);
-  cerr << "Fit Complete." << endl;
+//  cerr << "Fitting..." << endl;    
+//  lin_chi2_fit(freqs,pa,pa_stddev,true,a,b,siga,sigb,chi2,prob);
+//  cerr << "Fit Complete." << endl;
 
 
 
@@ -2171,8 +2208,8 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
     float dumdum = 0.;
 
     unsigned fsize = goodfreqs.size();
-    float fbegin = goodfreqs[0];
-    float fend = goodfreqs[fsize-1];
+    float fbegin = goodfreqs.front();
+    float fend = goodfreqs.back();
 
     float plotf_step = (fend-fbegin)/float(fsize-1);
     
@@ -2180,6 +2217,8 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
     float ppa = plotpa0;
 
     const double c0 = Pulsar::speed_of_light * 1e-6;
+
+    float rchi2 = 0.0;
 
     for (unsigned i=0; i<fsize; i++)
     {
@@ -2205,9 +2244,13 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
 
       float BayesMeasure = -resid*resid/(2.0*pa_stddev[i]*pa_stddev[i]);
       
-      
       pa_BayesMeasures.push_back(BayesMeasure);
 
+// ------- red-chi2 ------//
+
+      rchi2 += 1.0/(float(fsize-2))*(resid*resid/(pa_stddev[i]*pa_stddev[i]));
+
+//-----------------------//
 
 
       pf += plotf_step;
@@ -2216,14 +2259,20 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
 
     }
     
+    cerr << "Reduced chi-squared = " << rchi2 <<endl;
+    
+    stringstream rchi2_strm;
+    rchi2_strm << setprecision(3) << rchi2;
+    string rchi2_str = "\\fi\\gx\\fr\\dr\\u\\b\\u2\\d = " + rchi2_strm.str();
+
 
     stringstream RM_strm,RM_err_strm;
-    RM_strm << plotRM;
-    RM_err_strm << plotRM_err;
+    RM_strm <<setprecision(3)<< plotRM;
+    RM_err_strm <<setprecision(3)<< plotRM_err;
   
     string RM_label="RM=";
-    string radpm2=" rad/m^2";
-    string plusminus="+/-";
+    string radpm2=" rad m\\u-2\\d";
+    string plusminus=" \\(2233) ";
     string psrstr="PSR ";
     
     string RM_str=RM_label+RM_strm.str()+plusminus+RM_err_strm.str()+radpm2;
@@ -2232,7 +2281,7 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
     const char* RM_char=RM_str.c_str();
     const char* jname_char=jname_str.c_str();
 
-    cerr << " RM(char) = " << RM_char <<endl;
+//    cerr << " RM(char) = " << RM_char <<endl;
 
     cpgsci(3);
     cpgsls(1);
@@ -2240,7 +2289,7 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
     cpgline(plotf.size(),&plotf.front(),&plotpa.front());
     cpgsci(8);
     cpgsch(0.85);
-    cpgmtxt("B",-0.8,0.02,0.0,RM_char);
+    cpgmtxt("t",0.6,1.0,1.0,RM_char);
 
     cpgsci(1);
     cpgsls(1);
@@ -2268,31 +2317,29 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
 
     }
     
-    float dataht = fabs(maxval-minval);
+    // float dataht = fabs(maxval-minval);
     float dataerrht = fabs(maxerrval-minerrval);
 
    
     float toperrmargin = maxerrval + 0.2*dataerrht;    
     float bottomerrmargin = minerrval - 0.2*dataerrht;    
 
-    cpgswin (fend - 0.05*fabs(fbegin-fend), fbegin + 0.05*fabs(fbegin-fend), bottomerrmargin, toperrmargin);
-
+    cpgswin (fbegin - 0.05*(fend-fbegin), fend + 0.05*(fend-fbegin), bottomerrmargin, toperrmargin);
 
     cpgbox("bcnst",0.0,0,"bcnvst",0.0,0);
     cpgmtxt("L",4.0,.5,.5,"Residual (deg)");
     cpglab("Frequency (MHz)", "", " ");
      
 
-    float residuals_array[freqs.size()];
+    float residuals_array[goodfreqs.size()];
 
     std::copy(pa_resids.begin(), pa_resids.end(),residuals_array);
 
     cpgsci(7);
-    for (unsigned k = 0; k < freqs.size(); k++) {
+    for (unsigned k = 0; k < goodfreqs.size(); k++) {
     
-      cpgpt1(freqs[k], pa_resids[k], 1);
-      cpgerr1(6, freqs[k], pa_resids[k], pa_stddev[k], 1.0);
-    
+      cpgpt1(goodfreqs[k], pa_resids[k], 828);
+      cpgerr1(6, goodfreqs[k], pa_resids[k], pa_stddev[k], 1.0);
     }
 
     cpgsci(1);
@@ -2303,32 +2350,127 @@ fitstuff(vector<double> freqs,vector<double> pa,vector<double> pa_stddev,
 
     cpgsvp(x1,x2,y1-0.6*winht,y1-0.25*winht);
 
-    
-    
-    unsigned histbins = 20;
-    float num[histbins];
-    
-    for (unsigned k=0; k<histbins; k++)
-         num[k] = 0;
-    
+    //-------- Scott's rule-------//
+    float resids_mean = 0.0;
     for (unsigned k=0; k<pa_resids.size(); k++)
+    	resids_mean += pa_resids[k]/float(pa_resids.size()); 
+    
+    float resids_stddev = 0.0;
+    for (unsigned k=0; k<pa_resids.size(); k++)
+    	resids_stddev += (pa_resids[k]-resids_mean)*(pa_resids[k]-resids_mean)/float(pa_resids.size()); 
+    
+    resids_stddev = sqrt(resids_stddev);
+    
+    float histbinwidth = 3.5*resids_stddev/pow(double(pa_resids.size()),0.333);
+    
+    //---------------------------//
+    
+
+    //-------- Binwidth optimisation-------//
+    float costmin = 1e10;
+    float hbw = 0.1;
+    unsigned histbins = floor((maxval-minval)/hbw);
+
+    for(unsigned icount=0; icount<50; icount++)
     {
-         int ibin = int((pa_resids[k]-minval)/dataht*histbins);
-         if(ibin>=0 && unsigned(ibin)<histbins) num[ibin]++;
+       float temphist[histbins];
+       for(unsigned ibin=0; ibin<histbins; ibin++)
+    	   for (unsigned k=0; k<pa_resids.size(); k++)
+		   if( pa_resids[k]>=minval+ibin*hbw && pa_resids[k]< minval+(ibin+1)*hbw )
+		   	   temphist[ibin]++;
+
+       float temphist_mean = 0.0;
+       for (unsigned ibin=0; ibin<histbins; ibin++)
+    	   temphist_mean += temphist[ibin]/float(histbins); 
+       
+       float temphist_stddev = 0.0;
+       for (unsigned ibin=0; ibin<histbins; ibin++)
+    	   temphist_stddev += (temphist[ibin]-temphist_mean)*(temphist[ibin]-temphist_mean)/float(histbins); 
+       
+       float cost = (2.0*temphist_mean-temphist_stddev)/(hbw*hbw);
+    
+       if(cost < costmin)
+       { 
+         costmin = cost;
+         histbinwidth = hbw;
+       }
+
+       hbw += 0.1;
+    
     }
     
-    int nummax = 0;
-    for (unsigned k=0; k<histbins; k++)
-          nummax = int( max( double(nummax),double(num[k]) ) );
+    //---------------------------//
+
+    histbins = floor((maxval-minval)/histbinwidth);
+
+    if(histbins<2)
+    { 
+       histbinwidth = 3.5*resids_stddev/pow(double(pa_resids.size()),0.333);
+       histbins = ceil((maxval-minval)/histbinwidth);
+    }
+
+    if(histbins>20)
+    { 
+      histbins = 20;
+      histbinwidth = (maxval-minval)/float(histbins);      
+    }
+    
+
+    float histnum[histbins];
+    float binvalue[histbins];
+    for(unsigned ibin=0; ibin<histbins; ibin++)
+    {
+        histnum[ibin] = 0.0;
+        binvalue[ibin] = minval+ibin*histbinwidth;
+    	for (unsigned k=0; k<pa_resids.size(); k++)
+		if( pa_resids[k]>=minval+ibin*histbinwidth && pa_resids[k]< minval+(ibin+1)*histbinwidth )
+		   	histnum[ibin]+=1.0;
+    }
+
+
+    float binX[2*histbins+2];
+    float binY[2*histbins+2];
+
+    unsigned ib = 0;
+    binX[ib] = binvalue[0]-0.5*histbinwidth;
+    binY[ib] = 0.0;
+
+    for(unsigned ii=0; ii<histbins; ii++)
+    {
+        binX[ib] = binvalue[ii]-0.5*histbinwidth;
+        binY[ib++] = histnum[ii];
+        binX[ib] = binvalue[ii]+0.5*histbinwidth;
+        binY[ib++] = histnum[ii];
+    }
+    binX[ib] = binvalue[histbins-1]+0.5*histbinwidth;
+    binY[ib++] = 0.0;
+    binX[ib] = binvalue[0]-0.5*histbinwidth;
+    binY[ib] = 0.0;
+
+        
+    int nummax = -1e8;
+    for (unsigned ibin=0; ibin<histbins; ibin++)
+          if(histnum[ibin]>nummax) nummax = histnum[ibin];
       
-    cpgswin (minval-1.0,maxval+1.0,0.0,ceil(1.01*nummax));
+
+    float ymargin = float(nummax)/5.0;
+      
+    
+      
+    cpgswin (minval-2*histbinwidth,maxval+2*histbinwidth,0.0,float(nummax)+ymargin);
 
     cpgbox("bcsnt",0.0,0,"bcnvst",0.0,0);
     cpgmtxt("L",4.0,.5,.5,"N");
     cpglab("Residual (deg)", "", " ");
    
-      
-    cpghist(pa_resids.size(),residuals_array,minval-1.0,maxval+1.0,histbins,3);
+    int nvert = 2*histbins+2;
+    cpgpoly(nvert,binX,binY);	
+//    cpgbin(histbins,binvalue,histnum,1);      
+//    cpghist(pa_resids.size(),residuals_array,minval,maxval,histbins,3);
+
+    cpgsch(0.9);
+    cpgmtxt("t",0.6,1.0,1.0,rchi2_str.c_str());
+    cpgsch(1.0);
 
     cpgsci(1);
 

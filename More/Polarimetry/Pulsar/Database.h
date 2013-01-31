@@ -81,7 +81,10 @@ namespace Pulsar {
     
     //! Destructor.
     ~Database ();
-    
+
+    //! Merge with another database
+    void merge (const Database*);
+
     //! Construct from the list of filenames
     void construct (const std::vector<std::string>& filenames);
 
@@ -277,7 +280,10 @@ namespace Pulsar {
     std::string get_filename (const Entry&) const;
     
     //! Add the given entry to the database
-    void add (Pulsar::Database::Entry& entry);
+    void add (const Entry& entry);
+
+    //! Remove the preceding path from the Entry filename, if applicable
+    void shorten_filename (Entry& entry);
 
     //! Get the closest match report
     std::string get_closest_match_report () const;

@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
@@ -26,7 +27,7 @@ void Pulsar::TimerProfile_load (FILE* fptr, Profile* profile,
   int   poln;	         /* 0=I, 1=LL, 2=RR, 3=LR, 4=RL, 5=Q, 6=U, 7=V */
   int   nbin;
 
-  if (TimerIntegration::verbose)
+  if (Profile::verbose)
     cerr << "Pulsar::TimerProfile_load start offset=" << ftell(fptr) << "\r";
 
   //Read in the centre frequency
@@ -43,7 +44,7 @@ void Pulsar::TimerProfile_load (FILE* fptr, Profile* profile,
     throw Error (FailedSys, "TimerProfile_load", "fread wt");
  
   if (big_endian) {
-    if (Integration::verbose) 
+    if (Profile::verbose) 
       cerr << "TimerProfile_load big endian\n";
     fromBigEndian(&centrefreq,sizeof(centrefreq));
     fromBigEndian(&nbin,sizeof(nbin));
@@ -51,7 +52,7 @@ void Pulsar::TimerProfile_load (FILE* fptr, Profile* profile,
     fromBigEndian(&wt,sizeof(wt));
   }
   else {
-    if (Integration::verbose)
+    if (Profile::verbose)
       cerr << "TimerProfile_load little endian\n";
     fromLittleEndian(&centrefreq,sizeof(centrefreq));
     fromLittleEndian(&nbin,sizeof(nbin));
@@ -64,7 +65,7 @@ void Pulsar::TimerProfile_load (FILE* fptr, Profile* profile,
 		 "from file nbin=%d != Profile::nbin=%d", 
                  nbin, profile->get_nbin());
 
-  if (Integration::verbose)
+  if (Profile::verbose)
     cerr << "Pulsar::TimerProfile_load nbin=" << nbin << " poln=" << poln
          << "wt=" << wt << " cfreq=" << centrefreq << "\r";
 
@@ -74,7 +75,7 @@ void Pulsar::TimerProfile_load (FILE* fptr, Profile* profile,
   else if (fcompread (nbin,profile->get_amps(),fptr,big_endian)!=0)
     throw Error (FailedCall, "TimerProfile_load", "fcompread data");
 
-  if (TimerIntegration::verbose)
+  if (Profile::verbose)
     cerr << "Pulsar::TimerProfile_load end offset=" << ftell(fptr) << "\r";
 
   profile -> set_weight (wt);

@@ -61,12 +61,14 @@ Pulsar::CalibratorParameter::CalibratorParameter ()
   plotter.set_minimum_error (0.0);
 
   iclass = 0;
+  managed = false;
 }
 
 
 void Pulsar::CalibratorParameter::prepare (const Archive* data)
 {
-  prepare ( get_Info(data), data );
+  if (!managed)
+    prepare ( get_Info(data), data );
 }
 
 void Pulsar::CalibratorParameter::prepare (const Calibrator::Info* _info,
@@ -80,7 +82,23 @@ void Pulsar::CalibratorParameter::prepare (const Calibrator::Info* _info,
   unsigned nchan = info->get_nchan();
 
   plotter.clear ();
-  plotter.set_xrange (cfreq-0.5*bw, cfreq+0.5*bw);
+
+  double freq0 = cfreq-0.5*bw;
+  double freq1 = cfreq+0.5*bw;
+
+  /*
+    compute the minimum and maximum ordinate values using only the
+    data that will be plotted (as defined by the current x_scale)
+  */
+
+  unsigned i_min, i_max;
+  get_frame()->get_x_scale()->set_minmax (freq0, freq1);
+  get_frame()->get_x_scale()->get_indeces (nchan, i_min, i_max);
+
+  plotter.set_xrange (freq0, freq1);
+  plotter.set_minmax_range (i_min, i_max);
+
+  /*   */
 
   unsigned nparam = info->get_nparam (iclass);
 

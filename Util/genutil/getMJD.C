@@ -4,35 +4,49 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include <unistd.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
 #include "MJD.h"
 
+#include <iostream>
+using namespace std;
+
 int main (int argc, char* argv[]) 
 {
+  const char* format = "%Y-%m-%d-%H:%M:%S";
+
   MJD  mjd;
   char printhere[40];
   bool verbose = false;
   bool mjdgiven = false;
 
   int c;
-  while ((c = getopt(argc, argv, "hm:v")) != -1) {
-    switch (c)  {
+  while ((c = getopt(argc, argv, "hm:v")) != -1)
+  {
+    switch (c)
+    {
     case 'h':
-      fprintf (stderr, "getMJD [date]\n");
-      fprintf (stderr, "WHERE: date is a UTC of the form yyyy-ddd-hh:mm:ss\n");
-      fprintf (stderr, "       date is optional. [default: now]\n");
-      fprintf (stderr, "ALSO:  getMJD -m mjd\n");
-      fprintf (stderr, "       prints the date of given MJD\n");
+      cerr <<
+	"getMJD [date]\n"
+	"WHERE: date is a UTC of the form yyyy-ddd-hh:mm:ss \n"
+	"       date is optional. [default: now] \n"
+	"ALSO:  getMJD -m mjd [-f format] \n"
+	"       prints the date of given MJD. \n"
+	"       format is an optional strftime format string \n"
+	   << endl;
       return 0;
+
+    case 'f':
+      format = optarg;
+      break;
 
     case 'm':
       if (verbose)
-	fprintf (stderr, "getMJD: parse MJD from '%s'\n", optarg);
+	cerr << "getMJD: parse MJD from '" << optarg << "'" << endl;
       mjd.Construct (optarg);
       mjdgiven = true;
       break;
@@ -43,45 +57,51 @@ int main (int argc, char* argv[])
     }
   }
 
-  if (mjdgiven) {
+  if (mjdgiven)
+  {
     struct tm date;
     double fracsec;
     mjd.gregorian (&date, &fracsec);
-    fprintf (stderr, "Date for MJD given: %s\n", asctime(&date));
+    cerr << "Date for MJD given: " << asctime(&date) << endl;
+    cout << mjd.datestr(format) << endl;
     return 0;
   }
 
-  if (optind < argc) {
+  if (optind < argc)
+  {
     if (verbose)
-      fprintf (stderr, "Converting '%s' to UTC and using as date",
-	       argv[optind]);
+      cerr << "Converting '" << argv[optind] << "' to UTC and using as date"
+	   << endl;
 
     utc_t utcdate;
-    if (str2utc (&utcdate, argv[optind]) < 0) {
-      fprintf (stderr, "Error converting '%s' to UTC.\n", argv[optind]);
+    if (str2utc (&utcdate, argv[optind]) < 0)
+      {
+      cerr << "Error converting '" << argv[optind] << "' to UTC." << endl;
       return -1;
     }
-    fprintf (stderr, "Using UTC parsed: %s\n",
-	       utc2str (printhere, utcdate, "yyyy-ddd-hh:mm:ss"));
+
+    cerr << "Using UTC parsed: "
+	 << utc2str (printhere, utcdate, "yyyy-ddd-hh:mm:ss") << endl;
+
     mjd = MJD (utcdate);
   }
-  else {
+  else
+  {
     time_t temp = time(NULL);
     struct tm date = *gmtime(&temp);
-    fprintf (stderr, "Using today's date: %s\n", asctime(&date));
+    cerr << "Using today's date: " << asctime(&date) << endl;
     mjd = MJD (date);
   }
 
-  printf ("%11.5f\n", mjd.in_days());
+  cout << mjd.printdays(5) << endl;
 
-  if (verbose) {
+  if (verbose)
+  {
     utc_t  stuffback;
     mjd.UTC (&stuffback);
-    printf ("utc from MJD: %s\n", 
-	    utc2str (printhere, stuffback, "yyyy-ddd-hh:mm:ss"));
+    cerr << "utc from MJD: "
+	 << utc2str (printhere, stuffback, "yyyy-ddd-hh:mm:ss") << endl;
   }
-
-  // cerr << mjd.printdays(15);
 
   return 0;
 }

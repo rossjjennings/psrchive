@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008 - 2012 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -11,6 +11,9 @@
 #include "Pulsar/BackendCorrection.h"
 #include "Pulsar/BasisCorrection.h"
 #include "Pulsar/ProjectionCorrection.h"
+
+#include "Pulsar/Faraday.h"
+#include "Pulsar/AuxColdPlasmaMeasures.h"
 
 #include "Pulsar/CalibratorTypes.h"
 #include "Pulsar/PolnCalibratorExtension.h"
@@ -304,7 +307,27 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   Jones<double> projection = correction (isub);
 
   if (report_projection)
-    cerr << correction.get_summary () << endl;
+    cerr << correction.get_summary ();
+
+  // correct ionospheric Faraday rotation
+  Reference::To<Faraday> faraday;
+  if (! integration->get_auxiliary_birefringence_corrected ())
+  {
+    const AuxColdPlasmaMeasures* aux
+      = integration->get<AuxColdPlasmaMeasures> ();
+
+    if (aux && aux->get_rotation_measure() != 0.0)
+    {
+      cerr << " using Auxiliary::rotation_measure " 
+	   << aux->get_rotation_measure () << endl;
+
+      faraday = new Faraday;
+      faraday->set_rotation_measure( aux->get_rotation_measure () );
+
+      // correct ionospheric Faraday rotation wrt infinite frequency
+      faraday->set_reference_wavelength( 0.0 );
+    }
+  }
 
   // an identifier for this set of data
   string identifier = data->get_filename() + " " + tostring(isub);
@@ -332,8 +355,15 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
     // epoch abscissa
     Argument::Value* time = model[mchan]->time.new_Value( epoch );
     
+    Jones<double> known = projection;
+    if (faraday)
+    {
+      faraday->set_frequency( integration->get_centre_frequency(ichan) );
+      known *= faraday->evaluate();
+    }
+
     // projection transformation
-    Argument::Value* xform = model[mchan]->projection.new_Value( projection );
+    Argument::Value* xform = model[mchan]->projection.new_Value( known );
     
     // pulsar signal path
     unsigned path = model[mchan]->get_pulsar_path();

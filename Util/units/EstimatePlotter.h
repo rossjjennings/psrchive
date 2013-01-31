@@ -95,6 +95,9 @@ class EstimatePlotter {
   //! Plot the current data set in one window
   unsigned plot ();
 
+  //! Set the range of indeces to be considered on next call to minmax
+  void set_minmax_range (unsigned i_min, unsigned i_max);
+
   void minmax (bool& xrange_set, float& xmin, float& xmax,
 	       bool& yrange_set, float& ymin, float& ymax,
 	       const std::vector<float>& x,
@@ -117,6 +120,9 @@ class EstimatePlotter {
 
   //! total Y range
   float y_min, y_max;
+
+  //! range of indeces to be added on next call to add_plot
+  unsigned i_min, i_max;
 
   //! range set
   bool xrange_set;
@@ -179,13 +185,14 @@ void EstimatePlotter::add_plot (const std::vector< Estimate<T> >& data)
 
   MeanEstimate<T> mean;
 
-  for (ipt=0; ipt<npt; ipt++) {
-
+  for (ipt=0; ipt<npt; ipt++)
+  {
     x[ipt] = xrange_min + xscale * double(ipt);
 
     if (!std::isfinite( data[ipt].val ))
       ye[ipt] = 0;
-    else {
+    else 
+    {
       y[ipt] = data[ipt].val;
       ye[ipt] = sqrt (data[ipt].var);
 
@@ -196,9 +203,12 @@ void EstimatePlotter::add_plot (const std::vector< Estimate<T> >& data)
   }
 
   // useful at times, excessive at others ...
-  if (report_mean) {
+  if (report_mean)
+  {
     std::cerr << "Mean = " << mean << std::endl;
-  } else if (report_mean_on_single_line) {
+  }
+  else if (report_mean_on_single_line)
+  {
     std::cout << mean.get_Estimate().get_value() << " ";
     std::cout << mean.get_Estimate().get_error() << " ";
   }
