@@ -586,7 +586,8 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
       damps = new double [ (unsigned)nbin ];
 
       transform( prof->get_amps(), prof->get_amps() + ( (unsigned)nbin), damps, CastToDouble() );
-      gsl_matrix_set_col ( profiles, i_subint, &gsl_vector_const_view_array( const_cast<double*> (damps), (unsigned)nbin ).vector );
+      gsl_vector_const_view view = gsl_vector_const_view_array( damps, (unsigned)nbin );
+      gsl_matrix_set_col ( profiles, i_subint, &view.vector );
 
       t_cov->add_Profile ( prof, snr );
     }
