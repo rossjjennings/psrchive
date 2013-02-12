@@ -8,7 +8,7 @@
 #include "Pulsar/MaskSmooth.h"
 #include "Pulsar/PhaseWeight.h"
 
-#define _DEBUG 1
+//#define _DEBUG 1
 
 using namespace std;
 

@@ -19,7 +19,7 @@
 
 #include "templates.h"
 
-#define _DEBUG 1
+//#define _DEBUG 1
 #include "debug.h"
 
 #include <assert.h>
@@ -232,7 +232,9 @@ void Pulsar::ComplexRVMFit::find_delpsi_delphi_max ()
     if (is_excluded(phase) && !is_included(phase))
       mask[ibin] = 0.0;
 
+#if _DEBUG
     cerr << "init mask " << ibin << " " << mask[ibin] << endl;
+#endif
   }
 
   
