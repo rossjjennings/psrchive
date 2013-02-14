@@ -468,7 +468,10 @@ void psrmodel::process (Pulsar::Archive* data)
       StokesPlot* flux = plotter.get_flux();
       char label[256];
       sprintf(label, 
-          "\\\\ga=%.1f\n\\\\g%c=%.1f\n\\\\gf=%.1f\n\\\\gq=%.1f", 
+          "\\\\ga=%.1f\xB0\n"
+          "\\\\g%c=%.1f\xB0\n"
+          "\\\\gf=%.1f\xB0\n"
+          "\\\\gq=%.1f\xB0", 
           deg*RVM->magnetic_axis->get_value().get_value(),
           RVM->impact ? 'b' : 'z', 
           RVM->impact ? 
