@@ -421,6 +421,9 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
   // 
   // We also calculate how much we need to correct each profile
   // to get it dedispersed to the middle of the subband
+  //
+  // Also calculate a correction for the 'integer time sample
+  // dedispersion' error.
   int chan_per_subband = pfd.numchan/pfd.nsub;
   double f0 = pfd.lofreq - 0.5*pfd.chan_wid 
     + 0.5*(double)chan_per_subband*pfd.chan_wid;
@@ -431,9 +434,25 @@ Pulsar::PRESTOArchive::load_Integration (const char* filename, unsigned subint)
     double f_mid = f0 + (double)ichan * chan_per_subband * pfd.chan_wid;
     double f_high_chan = f_mid + (double)(chan_per_subband-1)*pfd.chan_wid/2.0;
     integration->set_centre_frequency(ichan, f_mid);
+    double dm_eff = get_dispersion_measure() / (1.0 + pfd.avgvoverc);
     dm_phase_shift[ichan] = 
-      Pulsar::dispersion_delay(get_dispersion_measure(),f_mid,f_high_chan) / 
+      Pulsar::dispersion_delay(dm_eff,f_mid,f_high_chan) / 
       integration->get_folding_period();
+
+    double integer_dd_error = 0.0; // In seconds
+    for (unsigned isubchan=0; isubchan<chan_per_subband; isubchan++) {
+      double fdelt = 0.5*(double)is_spigot()*pfd.chan_wid;
+      double fsub = f_high_chan - (double)isubchan*pfd.chan_wid;
+      double subshift = Pulsar::dispersion_delay(dm_eff,
+          fsub - fdelt, f_high_chan - fdelt);
+      double subshift_samp = subshift / pfd.dt;
+      double subshift_error = (subshift_samp - round(subshift_samp)) * pfd.dt;
+      integer_dd_error += subshift_error / (double)chan_per_subband;
+    }
+    dm_phase_shift[ichan] -= integer_dd_error / 
+      integration->get_folding_period();
+    //cerr << "freq " << f_mid << " int_dd_err " << integer_dd_error*1e6 << endl;
+
   }
 
   // If the "no_amps" flag is set, the actual data is not called for, 
