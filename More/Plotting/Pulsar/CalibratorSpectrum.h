@@ -58,6 +58,10 @@ namespace Pulsar {
     void set_plot_low (bool flag = true) { plot_low = flag; }
     bool get_plot_low () const { return plot_low; }
 
+    //! Normalize the Stokes paramters by the invariance
+    void set_norm_inv (bool flag = true) { norm_inv = flag; }
+    bool get_norm_inv () const { return norm_inv; }
+
     //! Prepare to plot
     void prepare (const Archive*);
 
@@ -70,6 +74,7 @@ namespace Pulsar {
     bool plot_total;
     bool plot_low;
     bool plot_Ip;
+    bool norm_inv;
 
     EstimatePlotter plotter;
 

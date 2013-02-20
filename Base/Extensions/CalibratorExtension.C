@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/CalibratorExtensionInterface.h"
+#include "Pulsar/CalibratorTypeInterface.h"
 #include "Pulsar/Calibrator.h"
 #include "templates.h"
 
@@ -121,6 +122,8 @@ CalibratorExtension::Interface::Interface (CalibratorExtension *s_instance)
 {
   if( s_instance )
     set_instance( s_instance );
+
+  import( Calibrator::Type::Interface(), &CalibratorExtension::get_type );
 
   // read-only: requires resize
   add( &CalibratorExtension::get_nchan,

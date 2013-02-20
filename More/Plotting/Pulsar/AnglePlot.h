@@ -72,6 +72,14 @@ namespace Pulsar {
     void set_span (float t) { span = t; }
     float get_span () const { return span; }
 
+    //! Add a horizontal line at given y-value
+    void add_hline(float yval) { hlines.push_back(yval); }
+    float get_hline() const { return hlines.size(); }
+
+    //! Add a vertical line at given x-value
+    void add_vline(float xval) { vlines.push_back(xval); }
+    float get_vline() const { return vlines.size(); }
+
     Functor< float(float) > model;
 
   protected:
@@ -87,6 +95,12 @@ namespace Pulsar {
     
     //! The angles
     std::vector< Estimate<double> > angles;
+
+    //! Allow plot to be annotated with horizontal lines
+    std::vector<float> hlines;
+
+    //! Allow plot to be annotated with vertical lines
+    std::vector<float> vlines;
 
     Index ichan;
     Index isubint;

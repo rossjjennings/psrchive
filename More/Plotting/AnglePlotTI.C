@@ -35,5 +35,20 @@ Pulsar::AnglePlot::Interface::Interface (AnglePlot* instance)
   add( &AnglePlot::get_span,
        &AnglePlot::set_span,
        "span", "Span of angles in plot (degrees)" );
+
+  // The following two are not entirely in keeping with
+  // the usual interface conventions.   The "set" methods
+  // add a line to a list of lines to be plotted, and the
+  // "get" methods return the number of lines in the list.
+  // This does not seem to cause major problems but could 
+  // be cleaned up at some point.
+
+  add( &AnglePlot::get_hline,
+       &AnglePlot::add_hline,
+       "hline", "Y-values at which to plot horizontal lines" );
+  
+  add( &AnglePlot::get_vline,
+       &AnglePlot::add_vline,
+       "vline", "X-values at which to plot vertical lines" );
   
 }

@@ -197,6 +197,38 @@ void Pulsar::AnglePlot::draw (const Archive *data)
     }
   }
 
+  float line_x[2], line_y[2];
+  int old_ls=1;
+  cpgqls(&old_ls);
+  cpgsls(2);
+
+  if (hlines.size()) 
+  {
+    for (int iline=0; iline<hlines.size(); iline++) 
+    {
+      line_x[0] = x_range.first * x_scale;
+      line_x[1] = x_range.second * x_scale;
+      line_y[0] = line_y[1] = hlines[iline];
+      //cerr << "hline " << "x0=" << line_x[0] << " x1=" << line_x[1]
+      //  << " y=" << line_y[0] << endl;
+      cpgline(2, line_x, line_y);
+    }
+  }
+
+  if (vlines.size()) 
+  {
+    for (int iline=0; iline<vlines.size(); iline++) 
+    {
+      line_y[0] = (y_range_start-1)*180.0;
+      line_y[1] = y_range_end*180.0;
+      line_x[0] = line_x[1] = vlines[iline];
+      //cerr << "vline " << "y0=" << line_y[0] << " y1=" << line_y[1]
+      //  << " x=" << line_x[0] << endl;
+      cpgline(2, line_x, line_y);
+    }
+  }
+  cpgsls(old_ls);
+
   cpgsch( old_ch );
 }
 

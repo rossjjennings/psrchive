@@ -109,6 +109,9 @@ protected:
   // Put best-fit params on plot
   bool label_plot;
 
+  // Put angle lines on plot
+  bool plot_pa_lines;
+
 #endif
 };
 
@@ -134,6 +137,7 @@ psrmodel::psrmodel () :
   add( &plot );
   plot_result = false;
   label_plot = false;
+  plot_pa_lines = false;
 #endif
 
   rvmfit = new ComplexRVMFit;
@@ -175,6 +179,9 @@ void psrmodel::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (label_plot, 'l');
   arg->set_help ("label plot with best-fit parameter values");
+
+  arg = menu.add (plot_pa_lines, 'L');
+  arg->set_help ("plot lines at best-fit phi0 and psi0 angles");
 
   arg = menu.add (this, &psrmodel::set_plot_options, 'c', "cfg[s]");
   arg->set_help ("set additional plot options");
@@ -461,7 +468,10 @@ void psrmodel::process (Pulsar::Archive* data)
       StokesPlot* flux = plotter.get_flux();
       char label[256];
       sprintf(label, 
-          "\\\\ga=%.1f\n\\\\g%c=%.1f\n\\\\gf=%.1f\n\\\\gq=%.1f", 
+          "\\\\ga=%.1f\xB0\n"
+          "\\\\g%c=%.1f\xB0\n"
+          "\\\\gf=%.1f\xB0\n"
+          "\\\\gq=%.1f\xB0", 
           deg*RVM->magnetic_axis->get_value().get_value(),
           RVM->impact ? 'b' : 'z', 
           RVM->impact ? 
@@ -471,6 +481,12 @@ void psrmodel::process (Pulsar::Archive* data)
           deg*RVM->reference_position_angle->get_value().get_value());
       //plotter.configure(label);
       flux->get_frame()->get_label_below()->set_right(label);
+    }
+
+    if (plot_pa_lines)
+    {
+      pa->add_hline(deg*RVM->reference_position_angle->get_value().get_value());
+      pa->add_vline(deg*RVM->magnetic_meridian->get_value().get_value());
     }
 
     plotter.plot( data );

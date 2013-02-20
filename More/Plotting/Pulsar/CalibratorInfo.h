@@ -45,6 +45,11 @@ namespace Pulsar {
     void set_panels (const std::string& x) { panels = x; }
     std::string get_panels () const { return panels; }
 
+    void set_calibrator_stokes (bool x) { calibrator_stokes = x; }
+    bool get_calibrator_stokes () const { return calibrator_stokes; }
+
+    void set_reduced_chisq (bool x) { reduced_chisq = x; }
+    bool get_reduced_chisq () const { return reduced_chisq; }
 
   protected:
 
@@ -56,6 +61,12 @@ namespace Pulsar {
 
     //! panels to be plotted
     std::string panels;
+
+    //! plot the calibrator Stokes parameters
+    bool calibrator_stokes;
+
+    //! plot the goodness-of-fit statistic
+    bool reduced_chisq;
   };
 
 }

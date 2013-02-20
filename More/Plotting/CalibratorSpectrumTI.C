@@ -27,4 +27,8 @@ Pulsar::CalibratorSpectrum::Interface::Interface (CalibratorSpectrum* instance)
   add( &CalibratorSpectrum::get_plot_low,
        &CalibratorSpectrum::set_plot_low,
        "off", "Plot off-pulse flux" );
+
+  add( &CalibratorSpectrum::get_norm_inv,
+       &CalibratorSpectrum::set_norm_inv,
+       "norm", "Normalize Stokes parameters by invariant" );
 }

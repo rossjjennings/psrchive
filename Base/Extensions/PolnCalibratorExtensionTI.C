@@ -16,10 +16,6 @@ Pulsar::PolnCalibratorExtension::Interface::Interface
   if (s_instance)
     set_instance (s_instance);
 
-  // read-only: requires resize
-  add( &PolnCalibratorExtension::get_nparam,
-       "nparam", "Number of calibration parameters" );
-
   import ( CalibratorExtension::Interface() );
 
   import( "eqn", Transformation::Interface(),
@@ -62,5 +58,5 @@ Pulsar::PolnCalibratorExtension::Transformation::Interface::Interface ()
 
    add( &Transformation::get_nfree,
 	&Transformation::set_nfree,
-	"nfree", "Number of free parameters" );
+	"nfree", "Number of degrees of freedom" );
 }
