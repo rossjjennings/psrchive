@@ -15,6 +15,7 @@
 #define __Pulsar_SimplePlot_h
 
 #include "Pulsar/FramedPlot.h"
+#include "Pulsar/PlotAnnotation.h"
 
 namespace Pulsar {
 
@@ -50,6 +51,18 @@ namespace Pulsar {
 
     //! Derived classes must draw in the current viewport
     virtual void draw (const Archive*) = 0;
+
+    //! Add an annotation
+    void add_annotation(PlotAnnotation *a) 
+    { 
+      annotations.push_back(a); 
+      a->parent = this;
+    }
+
+  protected:
+
+    //! Annotations to add to the plot
+    std::vector< Reference::To<PlotAnnotation> > annotations;
 
   };
 
