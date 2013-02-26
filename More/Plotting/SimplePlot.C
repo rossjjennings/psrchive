@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/SimplePlot.h"
+#include "Pulsar/PlotAnnotation.h"
 
 using namespace std;
 
@@ -24,6 +25,14 @@ void Pulsar::SimplePlot::plot (const Archive* data)
   get_frame()->focus (data);
 
   draw (data);
+
+  for (unsigned i=0; i<annotations.size(); i++) 
+  {
+    if (verbose)
+      cerr << "Pulsar::SimplePlot::plot draw annotation " 
+        << i << "/" << annotations.size() << endl;
+    annotations[i]->draw(data);
+  }
 
   if (verbose)
     cerr << "Pulsar::SimplePlot::plot draw axes" << endl;

@@ -41,6 +41,7 @@ psrover_SOURCES = psrover.C
 psrstat_SOURCES = psrstat.C
 
 psrmodel_SOURCES = psrmodel.C
+psrmodel_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 psrwt_SOURCES = psrwt.C
 
@@ -78,7 +79,7 @@ psrsmooth_SOURCES = psrsmooth.C
 psrsmooth_LDADD = $(LDADD) @GSL_LIBS@
 
 psrpca_SOURCES = psrpca.C
-psrpca_LDADD = $(LDADD) @GSL_LIBS@
+psrpca_LDADD = $(LDADD) @GSL_LIBS@ @CULA_LIBS@
 
 if HAVE_PGPLOT
 bin_PROGRAMS += psrspa
@@ -144,5 +145,5 @@ LDADD = $(top_builddir)/More/libpsrmore.la \
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @GSL_CFLAGS@ @PSRXML_CFLAGS@
+AM_CPPFLAGS += @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @GSL_CFLAGS@ @PSRXML_CFLAGS@ @CULA_CFLAGS@
 
