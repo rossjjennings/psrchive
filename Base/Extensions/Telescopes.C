@@ -57,6 +57,10 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
     Telescopes::Effelsberg(t);
     break;
     
+  case 'i':
+    Telescopes::WSRT(t);
+    break;
+
   default: 
     // Unknown code, throw error after calling Telecope::set_coordinates
     emsg = "Unrecognized telescope code (" + a->get_telescope() + ")";
@@ -151,4 +155,12 @@ void Pulsar::Telescopes::Jodrell(Telescope *t)
   t->set_mount (Telescope::Horizon);
   t->set_primary (Telescope::Parabolic);
   t->set_focus (Telescope::PrimeFocus);
+}
+
+void Pulsar::Telescopes::WSRT(Telescope *t)
+{
+  t->set_name("WSRT");
+  t->set_mount(Telescope::Equatorial);
+  t->set_primary(Telescope::Parabolic);
+  t->set_focus(Telescope::PrimeFocus);
 }
