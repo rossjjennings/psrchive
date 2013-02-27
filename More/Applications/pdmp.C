@@ -1070,7 +1070,7 @@ void process (Archive* archive, double minwidthsecs, string & bestfilename)
 // work out the pdots!
 
 double accn2pdot = getPeriod(archive) / 3e8;
-pdotOffset = -accn2pdot*accnOffset;
+pdotOffset = accn2pdot*accnOffset;
 pdotStep = accn2pdot*accnStep;
 pdotHalfRange = accn2pdot*accnHalfRange;
 
@@ -1718,8 +1718,8 @@ void solve_and_plot (Archive* archive,
 	if (pdotBins > 0){
 
 		goToSNRdmViewPort();
-		double pdot2acc = -3e8/(bestPeriod_bc_us/1e6);
-		plotPdotCurve(&pdotSNRs[0], maxPd * pdot2acc, minPd* pdot2acc, pdotBins);
+		double pdot2acc = 3e8/(bestPeriod_bc_us/1e6);
+		plotPdotCurve(&pdotSNRs[0], minPd * pdot2acc, maxPd* pdot2acc, pdotBins);
 	}
 
 	plotProfile (bestProfile, total_plot, flui);
@@ -2602,7 +2602,7 @@ void printResults(const Archive * archive) {
 	        	bestPdot);
 
 		printf("Best Accn = %3.10g m/s\n",
-	        	-3e8*bestPdot/(bestPeriod_bc_us/1e6));
+	        	3e8*bestPdot/(bestPeriod_bc_us/1e6));
 	}
 
 }
@@ -2659,7 +2659,7 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 		dmError,
 		bestPulseWidth * tbin_ms,
 		bestSNR,
-			archive->get_filename().c_str(),tScint,fScint,tfScint,-3e8*bestPdot/(bestPeriod_bc_us/1e6));
+			archive->get_filename().c_str(),tScint,fScint,tfScint,3e8*bestPdot/(bestPeriod_bc_us/1e6));
 	} else {
 		cerr << "pdmp: Failed to open file pdmp.per for writing results\n";
 	}
@@ -2685,7 +2685,8 @@ void plotPdotCurve(float* data, float xmin, float xmax, int npts){
 	// Go backwards through the array because it is ordered by pdot
 	// not by accn! (we are plotting accn)
 	for (int i=0; i < npts; i++){
-	  cpgpt1((npts-i)*xstep+xmin, data[i], 0);
+	  //cpgpt1((npts-i)*xstep+xmin, data[i], 0);
+	  cpgpt1(i*xstep+xmin, data[i], 0);
 	}
 
         cpglab("Accn","SNR","");
@@ -2986,7 +2987,7 @@ void drawBestFitPhaseTime(const Archive * archive)
         archive->start_time()).in_seconds() -tspan_s/2.0 + subtime/2.0;
 
     double phase = 0.5 + (bcPeriod_correction / bcPeriod_s) *
-      (elasped_time / bcPeriod_s) - 0.5*(bestPdot * elasped_time * elasped_time ) / (bcPeriod_s*bcPeriod_s);
+      (elasped_time / bcPeriod_s) + 0.5*(bestPdot * elasped_time * elasped_time ) / (bcPeriod_s*bcPeriod_s);
 
     // modify the plotted x value so it lies between 0 and 1
     if (phase < 0.0) {
