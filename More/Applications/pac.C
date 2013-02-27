@@ -105,7 +105,7 @@ void usage ()
     "  -n [q|u|v]     Flip the sign of Stokes Q, U, or V \n"
     "  -O path        Path to which output files are written \n"
     "\n"
-    "See "PSRCHIVE_HTTP"/manuals/pac for more details\n"
+    "See " PSRCHIVE_HTTP "/manuals/pac for more details\n"
        << endl;
 }
 

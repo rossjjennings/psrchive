@@ -23,6 +23,7 @@ Pulsar::CalibratorSpectrum::CalibratorSpectrum ()
   plot_total = false;
   plot_low = false;
   plot_Ip = false;
+  norm_inv = false;
 
   get_frame()->get_y_scale()->set_buf_norm(0.05);
   get_frame()->get_x_scale()->set_buf_norm(0.05);
@@ -84,7 +85,22 @@ void Pulsar::CalibratorSpectrum::prepare (const Archive* data)
       for (ipt=0; ipt<npt; ipt++)
 	hi[ipol][ipt] = lo[ipol][ipt];
 
-  if (plot_Ip)
+  if (norm_inv)
+  {
+    for (ipt=0; ipt<npt; ipt++)
+    {
+      Stokes< Estimate<double> > stokes;
+      for (ipol=0; ipol<npol; ipol++)
+	stokes[ipol] = hi[ipol][ipt];
+
+      Estimate<double> inv = sqrt( invariant(stokes) );
+
+      for (ipol=0; ipol<npol; ipol++)
+	hi[ipol][ipt] /= inv;
+    }
+  }
+
+  else if (plot_Ip)
   {
     for (ipt=0; ipt<npt; ipt++)
       if (hi[0][ipt].get_variance() != 0)

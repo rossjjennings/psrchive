@@ -50,6 +50,9 @@ namespace Pulsar
       return dynamic_cast<const T*> (this) != 0;
     }
 
+    //! Text interface to calibrator type
+    class Interface;
+
   };
 }
 

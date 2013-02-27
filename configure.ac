@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([PSRCHIVE],[2012-09+],[psrchive-developers@lists.sourceforge.net])
+AC_INIT([PSRCHIVE],[2012-12+],[psrchive-developers@lists.sourceforge.net])
 
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_SRCDIR([Util/Makefile.am])
@@ -169,6 +169,7 @@ FFT_CFLAGS="$FFTW_CFLAGS $MKL_CFLAGS $IPP_CFLAGS"
 # Checks for optional libraries
 #
 SWIN_LIB_CFITSIO
+SWIN_LIB_CULA
 SWIN_LIB_PUMA
 SWIN_LIB_TEMPO2
 SWIN_LIB_MPI
@@ -246,7 +247,7 @@ SWIN_FUNC_GETOPT_LONG
 #
 #
 
-AM_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
 		config/Makefile
 		Util/Makefile

@@ -21,6 +21,8 @@
 #if HAVE_PGPLOT
 #include "Pulsar/PlotOptions.h"
 #include "Pulsar/StokesCylindrical.h"
+#include "Pulsar/PlotAnnotation.h"
+#include <cpgplot.h>
 #endif
 
 #include "Pulsar/ComplexRVMFit.h"
@@ -70,7 +72,11 @@ protected:
   void add_options (CommandLine::Menu&);
 
   void set_very_verbose () 
-  { ComplexRVMFit::verbose = true; Application::set_very_verbose(); }
+  { 
+    ComplexRVMFit::verbose = true; 
+    Application::set_very_verbose(); 
+    Plot::verbose=true; 
+  }
 
   // complex rotating vector model
   Reference::To<ComplexRVMFit> rvmfit;
@@ -109,8 +115,67 @@ protected:
   // Put best-fit params on plot
   bool label_plot;
 
+  // Put angle lines on plot
+  bool plot_pa_lines;
+
+  // Proper motion direction and error in val,err format
+  string proper_motion;
+
 #endif
 };
+
+#if HAVE_PGPLOT
+// Following classes are for various plot annotation
+class err1: public Pulsar::PlotAnnotation
+{
+  public:
+    err1(float _x, float _y, float _yerr) { x=_x; y=_y; yerr=_yerr; }
+    float x;
+    float y;
+    float yerr;
+    void draw(const Archive *data)
+    {
+      cpgsci(2);
+      cpgsls(1);
+      cpgerr1(6,x,y,yerr,1.0);
+    }
+};
+
+class line: public Pulsar::PlotAnnotation
+{
+  public:
+    enum linetype
+    {
+      Vertical,
+      Horizontal
+    };
+    line(linetype _t, float _v, int _ls=1, int _ci=1) 
+      { type=_t; val=_v; ls=_ls; ci=_ci; }
+    float val;
+    int ls;
+    int ci;
+    linetype type;
+    void draw(const Archive *data)
+    {
+      int oldls, oldci;
+      cpgqls(&oldls);
+      cpgqci(&oldci);
+
+      cpgsls(ls);
+      cpgsci(ci);
+
+      float x[2], y[2];
+      cpgqwin(&x[0], &x[1], &y[0], &y[1]);
+
+      if (type==Vertical) { x[0]=x[1]=val; }
+      else if (type==Horizontal) { y[0]=y[1]=val; }
+      cpgline(2, x, y);
+
+      cpgsls(oldls);
+      cpgsci(oldci);
+    }
+};
+#endif
 
 int main (int argc, char** argv)
 {
@@ -134,6 +199,7 @@ psrmodel::psrmodel () :
   add( &plot );
   plot_result = false;
   label_plot = false;
+  plot_pa_lines = false;
 #endif
 
   rvmfit = new ComplexRVMFit;
@@ -175,6 +241,12 @@ void psrmodel::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (label_plot, 'l');
   arg->set_help ("label plot with best-fit parameter values");
+
+  arg = menu.add (plot_pa_lines, 'L');
+  arg->set_help ("plot lines at best-fit phi0 and psi0 angles");
+
+  arg = menu.add (proper_motion, "pm", "val+-err");
+  arg->set_help("label PA plot with proper motion direction");
 
   arg = menu.add (this, &psrmodel::set_plot_options, 'c', "cfg[s]");
   arg->set_help ("set additional plot options");
@@ -461,7 +533,10 @@ void psrmodel::process (Pulsar::Archive* data)
       StokesPlot* flux = plotter.get_flux();
       char label[256];
       sprintf(label, 
-          "\\\\ga=%.1f\n\\\\g%c=%.1f\n\\\\gf=%.1f\n\\\\gq=%.1f", 
+          "\\\\ga=%.1f\xB0\n"
+          "\\\\g%c=%.1f\xB0\n"
+          "\\\\gf=%.1f\xB0\n"
+          "\\\\gq=%.1f\xB0", 
           deg*RVM->magnetic_axis->get_value().get_value(),
           RVM->impact ? 'b' : 'z', 
           RVM->impact ? 
@@ -469,8 +544,23 @@ void psrmodel::process (Pulsar::Archive* data)
             deg*RVM->line_of_sight->get_value().get_value(),
           deg*RVM->magnetic_meridian->get_value().get_value(),
           deg*RVM->reference_position_angle->get_value().get_value());
-      //plotter.configure(label);
       flux->get_frame()->get_label_below()->set_right(label);
+    }
+
+    if (plot_pa_lines)
+    {
+      pa->add_annotation(new line(line::Horizontal,
+            deg*RVM->reference_position_angle->get_value().get_value(),2,1));
+      pa->add_annotation(new line(line::Vertical,
+            deg*RVM->magnetic_meridian->get_value().get_value(),2,1));
+    }
+
+    if (proper_motion.length()) 
+    {
+      Estimate<float> pm;
+      pm = fromstring< Estimate<float> >(proper_motion);
+      pa->add_annotation(new line(line::Horizontal,pm.get_value(),1,2));
+      pa->add_annotation(new err1(180.0,pm.get_value(),pm.get_error()));
     }
 
     plotter.plot( data );

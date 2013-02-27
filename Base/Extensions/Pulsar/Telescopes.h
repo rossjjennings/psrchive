@@ -47,6 +47,8 @@ namespace Pulsar {
     //! Initialize the Telescope Extension with Mt Pleasant 26m info
     void MtPleasant26 (Telescope *t);
 
+    //! Initialize the Telescope Extension with WSRT info
+    void WSRT (Telescope* t);
   } 
 
 }

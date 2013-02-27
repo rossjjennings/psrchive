@@ -82,7 +82,7 @@ void usage()
     "  print paz command:         'p'\n"
     "\n"
     
-    "See "PSRCHIVE_HTTP"/manuals/pazi for more details\n" << endl;
+    "See " PSRCHIVE_HTTP "/manuals/pazi for more details\n" << endl;
 }
 
 enum PlotType

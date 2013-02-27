@@ -194,7 +194,7 @@ void usage ()
     "  -K               Specify plot device\n"
     "  -t               Plot template, profile and difference \n"
     "\n"
-    "See "PSRCHIVE_HTTP"/manuals/pat for more details\n"
+    "See " PSRCHIVE_HTTP "/manuals/pat for more details\n"
        << endl;
 }
 

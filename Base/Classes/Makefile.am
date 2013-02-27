@@ -14,6 +14,7 @@ nobase_include_HEADERS = \
         Pulsar/BasicIntegration.h \
 	Pulsar/Calibrator.h \
 	Pulsar/CalibratorType.h \
+	Pulsar/CalibratorTypeInterface.h \
 	Pulsar/CalibratorTypes.h \
 	Pulsar/Check.h \
         Pulsar/Config.h \
@@ -64,6 +65,7 @@ libClasses_la_SOURCES = \
         BasicIntegration.C \
 	Calibrator.C \
 	CalibratorType.C \
+	CalibratorTypeInterface.C \
 	Check.C \
         Config.C \
 	Editor.C \

@@ -58,7 +58,7 @@ void usage ()
     "and the maximum interval between archives in the same\n"
     "flux calibrator set is " << interval/60 << " minutes.\n"
     "\n"
-    "See "PSRCHIVE_HTTP"/manuals/fluxcal for more details\n"
+    "See " PSRCHIVE_HTTP "/manuals/fluxcal for more details\n"
        << endl;
 }
 

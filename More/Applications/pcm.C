@@ -126,7 +126,7 @@ void usage ()
     "  -1         solve independently for each observation \n"
     "  -z         share a single phase shift estimate b/w all observations \n"
     "\n"
-    "See "PSRCHIVE_HTTP"/manuals/pcm for more details\n"
+    "See " PSRCHIVE_HTTP "/manuals/pcm for more details\n"
        << endl;
 }
 
@@ -1116,7 +1116,7 @@ int actual_main (int argc, char *argv[]) try
 
     if (get_time_variation())
     {
-      cpgbeg (0, "variations.ps/PS", 0, 0);
+      cpgbeg (0, "result_variations.ps/PS", 0, 0);
       cpgsvp (0.1,.9, 0.1,.9);
 
       unsigned panels = plotter.npanel;
