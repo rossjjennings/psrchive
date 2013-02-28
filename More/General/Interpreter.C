@@ -1025,6 +1025,11 @@ string Pulsar::Interpreter::centre (const string& args) try
     centre_of_flux( get() );
   else if (arguments.size() == 1 && arguments[0] == "max")
     get()->centre_max_bin();
+  else if (arguments.size() == 1)
+  {
+    try { double phase = fromstring<double>(arguments[0]); get()->centre(phase); }
+    catch (Error&) { return response (Fail, "failed to parse '"+args+"' as phase"); }
+  }
   else if (arguments.size() == 0)
     get()->centre();
   else
