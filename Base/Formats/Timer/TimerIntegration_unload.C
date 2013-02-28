@@ -80,8 +80,8 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
   {
     for (unsigned ichan=0; ichan<nchan; ichan++) try
     {
-      if (verbose) cerr << "TimerIntegration::unload ipol=" << ipol 
-                        << "\t ichan=" << ichan << endl;
+      if (Profile::verbose) cerr << "TimerIntegration::unload ipol=" << ipol 
+                                 << "\t ichan=" << ichan << endl;
 	
       TimerProfile_unload (fptr, profiles[ipol][ichan], ipol);
     }

@@ -226,6 +226,8 @@ void Pulsar::SystemCalibrator::preprocess (Archive* data)
 	cerr << "Pulsar::SystemCalibrator::preprocess correct backend" << endl;
       correct_backend (data);
     }
+    else if (verbose)
+      cerr << "Pulsar::SystemCalibrator::preprocess backend correction not required" << endl;
   }
 }
 
@@ -306,8 +308,12 @@ Pulsar::SystemCalibrator::add_pulsar (const Archive* data, unsigned isub) try
   correction.set_archive (data);
   Jones<double> projection = correction (isub);
 
-  if (report_projection)
+  if (report_projection || verbose)
     cerr << correction.get_summary ();
+
+  if (verbose)
+    cerr << "Pulsar::SystemCalibrator::add_pulsar isub=" << isub
+         << "\n\t projection=" << projection << endl;
 
   // correct ionospheric Faraday rotation
   Reference::To<Faraday> faraday;
@@ -840,6 +846,8 @@ void Pulsar::SystemCalibrator::create_model ()
 	     << "Pulsar::SystemCalibrator::create_model receiver=\n  " 
 	     << basis->evaluate() << endl;
     }
+    else if (verbose)
+      cerr << "Pulsar::SystemCalibrator::create_model basis correction not required" << endl;
   }
 
   unsigned nchan = get_nchan ();
