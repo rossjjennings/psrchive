@@ -51,6 +51,10 @@ void Pulsar::TimerArchive::unpack_extensions () try
   {
     Backend* ben = getadd<Backend>();
     ben->set_name (hdr.machine_id);
+
+    ben->set_corrected (hdr.corrected & BE_PHS_CORRECTED);
+    ben->set_downconversion_corrected (hdr.corrected & BE_DCC_CORRECTED);
+
     backend = ben;
   }
 
@@ -65,7 +69,7 @@ catch (Error& error)
   throw error += "Pulsar::TimerArchive::unpack_extensions";
 }
 
-void Pulsar::TimerArchive::pack_extensions () const
+void Pulsar::TimerArchive::pack_extensions ()
 {
   if (verbose == 3)
     cerr << "Pulsar::TimerArchive::pack_extensions" << endl;
@@ -74,13 +78,13 @@ void Pulsar::TimerArchive::pack_extensions () const
 
   const Receiver* receiver = get<Receiver>();
   if (receiver)
-    const_cast<TimerArchive*>(this)->pack (receiver);
+    pack (receiver);
   else if (verbose == 3)
     cerr << "Pulsar::TimerArchive::pack_extensions no Receiver" << endl;
 
   const TapeInfo* tape = get<TapeInfo>();
   if (tape)
-    const_cast<TimerArchive*>(this)->pack (tape);
+    pack (tape);
   else if (verbose == 3)
     cerr << "Pulsar::TimerArchive::pack_extensions no TapeInfo" << endl;
 
@@ -88,8 +92,8 @@ void Pulsar::TimerArchive::pack_extensions () const
 
   const Backend* backend = get<Backend>();
 
-  if (backend) {
-
+  if (backend)
+  {
     string name = backend->get_name();
     
     if( name.length()+1 > MACHINE_ID_STRLEN )
@@ -98,9 +102,9 @@ void Pulsar::TimerArchive::pack_extensions () const
 		   name.c_str(), name.length()+1, MACHINE_ID_STRLEN);
 
     strcpy (header->machine_id, name.c_str());
-
+    set_corrected (BE_PHS_CORRECTED, backend->get_corrected());
+    set_corrected (BE_DCC_CORRECTED, backend->get_downconversion_corrected());
   }
-
 }
 
 void Pulsar::TimerArchive::unpack (TapeInfo* tape)
