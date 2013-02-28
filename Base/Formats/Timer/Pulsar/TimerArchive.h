@@ -253,7 +253,7 @@ namespace Pulsar {
     void unpack_extensions ();
 
     //! Pack the Receiver and Telescope Extension classes (before unloading)
-    void pack_extensions () const;
+    void pack_extensions ();
 
     //! Unpack the Receiver extension
     void unpack (Receiver* receiver);
