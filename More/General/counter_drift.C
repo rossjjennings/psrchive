@@ -30,6 +30,7 @@ Pulsar::counter_drift(Archive* archive,
   // nu(t)  = 1/P(t)
   // dnu/dt = -1/P(t)^2 * P1
   // nu1    = dnu/dt(0) = -P1/(P0 + delta_P)^2
+
   double nu0      = 1.0 / centre_period;
   double delta_nu = -nu0 + 1.0/(centre_period + delta_P);
   double nu1      = -trial_pdot / SQR(centre_period + delta_P);
@@ -53,12 +54,13 @@ Pulsar::counter_frequency_drift(Archive* archive,
   double nu1      = trial_nu1;
 
   for (unsigned i=0;i<archive->get_nsubint();i++){
-    double subint_offset_seconds = (reference_time - archive->get_Integration(i)->get_epoch()).in_seconds();    
+	 // I changed time to go in the conventional direction, i.e. forwards M.Keith 2013
+    double subint_offset_seconds = (archive->get_Integration(i)->get_epoch() - reference_time).in_seconds();    
     // Number of pulses = integral of nu(t) dt
     //                  = (nu0 + delta_nu)*T + nu1*T*T/2
     // Extra pulses     = delta_nu*T + nu1*T*T/2
-    double extra_phase  = delta_nu * subint_offset_seconds + nu1 * SQR(subint_offset_seconds)/2;
-    archive->get_Integration(i)->expert()->rotate_phase( extra_phase );
+    double extra_phase  = delta_nu * subint_offset_seconds + nu1 * SQR(subint_offset_seconds)/2.0;
+    archive->get_Integration(i)->expert()->rotate_phase( -extra_phase ); // rotate profile backewards M.Keith 2013
   }
 
 }

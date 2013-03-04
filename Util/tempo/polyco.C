@@ -207,7 +207,7 @@ int polynomial::load (string* instr)
   int64_t turns;
   double fracturns;
 
-  sscanf (refphstr.c_str(), "%"PRIi64" %lf\n", &turns, &fracturns);
+  sscanf (refphstr.c_str(), "%" PRIi64 " %lf\n", &turns, &fracturns);
   if (polyco::verbose)
     cerr << "polynomial::load scanned phase=" << turns
 	 << "+" << fracturns << endl;

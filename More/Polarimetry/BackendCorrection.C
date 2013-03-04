@@ -16,12 +16,25 @@ using namespace std;
 
 bool must_correct_lsb (const Pulsar::Backend* be, const Pulsar::Archive* ar)
 {
-  return !be->get_downconversion_corrected() && ar->get_bandwidth() < 0;
+  bool corrected = be->get_downconversion_corrected();
+  bool result = !corrected && ar->get_bandwidth() < 0;
+
+  if (Pulsar::Archive::verbose > 1)
+    cerr << "must_correct_lsb: downconversion_corrected=" << corrected
+         << " bw=" << ar->get_bandwidth() << " result=" << result << endl;
+
+  return result;
 }
 
 bool must_correct_phase (const Pulsar::Backend* be)
 {
-  return !be->get_corrected() && be->get_argument() == Signal::Conjugate;
+  bool result = !be->get_corrected() && be->get_argument() == Signal::Conjugate;
+
+  if (Pulsar::Archive::verbose > 1)
+    cerr << "must_correct_phase: corrected=" << be->get_corrected()
+         << " argument=" << be->get_argument() << " result=" << result << endl;
+
+  return result;
 }
 
 bool Pulsar::BackendCorrection::required (const Archive* arch) const

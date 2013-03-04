@@ -89,7 +89,7 @@ void Pulsar::Application::parse (int argc, char** argv)
      "where options are:");
 
   if (has_manual) menu.set_help_footer
-    ("\n" "See "PSRCHIVE_HTTP"/manuals/" + name + " for more details \n");
+    ("\n" "See " PSRCHIVE_HTTP "/manuals/" + name + " for more details \n");
 
   menu.set_version (version);
 

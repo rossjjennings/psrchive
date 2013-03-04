@@ -4,11 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
+
+using namespace std;
 
 //! Returns a pointer to a new PolnProfile instance specified by ichan
 Pulsar::PolnProfile* Pulsar::Integration::new_PolnProfile (unsigned ichan)
@@ -20,7 +22,7 @@ Pulsar::PolnProfile* Pulsar::Integration::new_PolnProfile (unsigned ichan)
 const Pulsar::PolnProfile*
 Pulsar::Integration::new_PolnProfile (unsigned ichan) const
 {
-  if (verbose)
+  if (Profile::verbose)
     cerr << "Pulsar::Integration::new_PolnProfile" << endl;
 
   if (get_npol() != 4)

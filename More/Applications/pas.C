@@ -56,7 +56,7 @@ void usage ()
     "This program works via keyboard interaction. To set baseline zero\n"
     "you type '0' to set the start point, move the cursor and type '0'\n"
     "again to accept the region\n\n"
-    "See "PSRCHIVE_HTTP"/manuals/pas for more details\n"
+    "See " PSRCHIVE_HTTP "/manuals/pas for more details\n"
        << endl;
 }
 
