@@ -129,13 +129,15 @@ protected:
 class err1: public Pulsar::PlotAnnotation
 {
   public:
-    err1(float _x, float _y, float _yerr) { x=_x; y=_y; yerr=_yerr; }
+    err1(float _x, float _y, float _yerr, int _ci=2) 
+      { x=_x; y=_y; yerr=_yerr; ci=_ci; }
     float x;
     float y;
     float yerr;
+    int ci;
     void draw(const Archive *data)
     {
-      cpgsci(2);
+      cpgsci(ci);
       cpgsls(1);
       cpgerr1(6,x,y,yerr,1.0);
     }
@@ -245,8 +247,8 @@ void psrmodel::add_options (CommandLine::Menu& menu)
   arg = menu.add (plot_pa_lines, 'L');
   arg->set_help ("plot lines at best-fit phi0 and psi0 angles");
 
-  arg = menu.add (proper_motion, "pm", "val+-err");
-  arg->set_help("label PA plot with proper motion direction");
+  arg = menu.add (proper_motion, "pm", "val+-err[:ci]");
+  arg->set_help("label PA plot with proper motion direction (ci = pgplot color index)");
 
   arg = menu.add (this, &psrmodel::set_plot_options, 'c', "cfg[s]");
   arg->set_help ("set additional plot options");
@@ -557,10 +559,13 @@ void psrmodel::process (Pulsar::Archive* data)
 
     if (proper_motion.length()) 
     {
+      int ii, pm_ci = 2;
+      if ((ii=proper_motion.find(':')) != string::npos) 
+        pm_ci = fromstring<int>(proper_motion.substr(ii+1));
       Estimate<float> pm;
-      pm = fromstring< Estimate<float> >(proper_motion);
-      pa->add_annotation(new line(line::Horizontal,pm.get_value(),1,2));
-      pa->add_annotation(new err1(180.0,pm.get_value(),pm.get_error()));
+      pm = fromstring< Estimate<float> >(proper_motion.substr(0,ii));
+      pa->add_annotation(new line(line::Horizontal,pm.get_value(),1,pm_ci));
+      pa->add_annotation(new err1(180.0,pm.get_value(),pm.get_error(),pm_ci));
     }
 
     plotter.plot( data );
