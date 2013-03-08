@@ -69,6 +69,8 @@
 #define PARA_CORRECTED    0x0004  /* parallactic angle */
 #define FEED_CORRECTED    0x0008  /* feed angle */
 #define DEDISPERSED       0x0010  /* dispersion delays removed */
+#define BE_PHS_CORRECTED  0x0020  /* backend phase convention corrected */
+#define BE_DCC_CORRECTED  0x0040  /* backend downconversion convention corrected */
 
 #define NINT_CORRECTED    0x1000  /* nint bug corrected */
 #define S2ROS_CORRECTED   0x2000  /* S2 ROS time offset corrected */

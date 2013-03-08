@@ -78,7 +78,7 @@ namespace Pulsar {
     //! Ensure that ichan <= get_nchan
     void range_check (unsigned ichan, const char* method) const;
 
-    friend class Interface;
+    friend class CalibratorStokes::Interface;
 
     // Internal convenience interface to the Stokes polarization vector data
     class PolnVector;

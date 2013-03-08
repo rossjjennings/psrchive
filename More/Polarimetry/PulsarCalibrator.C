@@ -133,10 +133,11 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
   if (correct.required(data))
   {
     if (verbose)
-      cerr << "Pulsar::PulsarCalibrator::set_standard correcting instrument" 
-	   << endl;
+      cerr << "Pulsar::PulsarCalibrator::set_standard correcting frontend" << endl;
     correct.calibrate( standard );
   }
+  else if (verbose)
+    cerr << "Pulsar::PulsarCalibrator::set_standard frontend correction not required" << endl;
 
   /*
     Select the on-pulse and baseline regions

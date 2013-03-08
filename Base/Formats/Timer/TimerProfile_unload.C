@@ -43,7 +43,7 @@ void Pulsar::TimerProfile_unload (FILE* fptr, const Profile* profile, int poln)
   toBigEndian(&poln, sizeof(poln));
   toBigEndian(&wt,   sizeof(wt));
 
-  if (TimerIntegration::verbose)
+  if (Profile::verbose)
     cerr << "Pulsar::TimerProfile_unload start offset=" << ftell(fptr) << "\r";
 
   //Write out the values
@@ -58,15 +58,14 @@ void Pulsar::TimerProfile_unload (FILE* fptr, const Profile* profile, int poln)
 
   fromBigEndian(&nbin, sizeof(nbin));
 
-  if (TimerIntegration::verbose)
+  if (Profile::verbose)
     cerr << "Pulsar::TimerProfile_unload fcompwrite data nbin=" << nbin << "\r";
 
   // Compress the data and write out as 2byte integers
   if (fcompwrite (nbin,profile->get_amps(),fptr) != 0)
     throw Error (FailedCall, "TimerProfile_unload", "fcompwrite data");
 
-  if (TimerIntegration::verbose)
+  if (Profile::verbose)
     cerr << "Pulsar::TimerProfile_unload end offset=" << ftell(fptr) << "\r";
-
 }
 
