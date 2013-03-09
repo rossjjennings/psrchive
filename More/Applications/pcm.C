@@ -89,6 +89,7 @@ void usage ()
     "\n"
     "  -U PAR     model PAR with a unique value for each CAL \n"
     "  -u PAR[:W] model PAR with a step at each CAL \n"
+    "  -i PAR:MJD model PAR with a step at the given epoch (MJD) \n"
     "  -o PAR:N   model PAR as N degree polyomial \n"
     "             where PAR is one of \n"
     "               g = absolute gain \n"
