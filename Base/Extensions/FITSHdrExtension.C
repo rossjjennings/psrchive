@@ -14,6 +14,9 @@ using namespace std;
 
 #define unset "UNSET"
 
+//! Special DM value to indicate none was set
+double Pulsar::FITSHdrExtension::unset_dm = -1.0;
+
 //! Default constructor
 Pulsar::FITSHdrExtension::FITSHdrExtension ()
   : Extension ("FITSHdrExtension")
@@ -32,12 +35,14 @@ Pulsar::FITSHdrExtension::FITSHdrExtension ()
   obsfreq = 0.0;
   obsbw   = 0.0;
   obsnchan = 0;
+  chan_dm = unset_dm;
 
   obs_mode = unset;
   ra = dec = unset;
   stt_crd1 = stt_crd2 = stp_crd1 = stp_crd2 = unset;
 
   bpa = bmaj = bmin = 0.0;
+
 
   ibeam = "";
   pnt_id = "";

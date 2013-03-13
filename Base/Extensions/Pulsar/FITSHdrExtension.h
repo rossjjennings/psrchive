@@ -180,6 +180,10 @@ namespace Pulsar
     //! Get the observed number of channels
     int get_obsnchan() const;
 
+    //! online DM
+    double get_chan_dm() const { return chan_dm; }
+    void set_chan_dm (double _chan_dm) { chan_dm = _chan_dm; }
+
     //////////////////////////////////////////////////////////////////////
 
     //! Pulsar FITS header version information
@@ -216,6 +220,12 @@ namespace Pulsar
 
     //! Observed number of channels
     int obsnchan;
+
+    //! DM used for online dedispersion
+    double chan_dm;
+
+    //! Special value for no DM set
+    static double unset_dm;
 
     //! Observation Mode
     std::string obs_mode;

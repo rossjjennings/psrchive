@@ -27,6 +27,8 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const FITSHdrExtension* ext)
   psrfits_update_key (fptr, "OBSFREQ", ext->obsfreq);
   psrfits_update_key (fptr, "OBSBW", ext->obsbw);
   psrfits_update_key (fptr, "OBSNCHAN", ext->obsnchan);
+  if (ext->chan_dm != FITSHdrExtension::unset_dm) 
+    psrfits_update_key (fptr, "CHAN_DM", ext->chan_dm);
   psrfits_update_key (fptr, "COORD_MD", ext->coordmode);
   psrfits_update_key (fptr, "PNT_ID", ext->pnt_id);
   psrfits_update_key (fptr, "EQUINOX", ext->equinox);
