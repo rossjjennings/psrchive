@@ -208,7 +208,7 @@ void Pulsar::TimerIntegration::load_old (FILE* fptr, bool big_endian)
     N_FromLittleEndian (npts, packed);
   }
 
-  if (verbose) 
+  if (Profile::verbose) 
     fprintf (stderr, "TimerIntegration::load scale:%f offset:%f\n",
 		 scale, offset);
 

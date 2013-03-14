@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/ReceptionModel.h"
+#include "Pulsar/ReceptionModelReport.h"
 #include "Pulsar/CoherencyMeasurementSet.h"
 #include "Pulsar/ReceptionModelSolveMEAL.h"
 
@@ -55,10 +56,30 @@ Calibration::ReceptionModel::get_solver () const
   return solver;
 }
 
+//! Add a report to be executed before solving the measurement equation
+void Calibration::ReceptionModel::add_prefit_report (Report* report)
+{
+  report->set_model(this);
+  prefit_reports.push_back (report);
+}
+
+//! Add a report to be executed after solving the measurement equation
+void Calibration::ReceptionModel::add_postfit_report (Report* report)
+{
+  report->set_model(this);
+  postfit_reports.push_back (report);
+}
+
 //! Solve the measurement equation using the current algorithm
 void Calibration::ReceptionModel::solve ()
 {
+  for (unsigned i=0; i<prefit_reports.size(); i++)
+    prefit_reports[i]->report();
+
   solver->solve();
+
+  for (unsigned i=0; i<postfit_reports.size(); i++)
+    postfit_reports[i]->report();
 }
 
 //! Return true when solved

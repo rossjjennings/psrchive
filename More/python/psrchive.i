@@ -12,6 +12,7 @@
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/Pointing.h"
+#include "Pulsar/Receiver.h"
 
 #include "Pulsar/Parameters.h"
 #include "load_factory.h"
@@ -318,6 +319,14 @@ void pointer_tracker_remove(Reference::Able *ptr) {
     std::string __str__()
     {
         return "PSRCHIVE Archive object: " + self->get_filename();
+    }
+
+    // Get recvr name
+    std::string get_receiver_name()
+    {
+        Pulsar::Receiver *r = self->get<Pulsar::Receiver>();
+        if (r==NULL) { return "none"; }
+        return r->get_name();
     }
 
     // Allow timing model to be updated via eph filename

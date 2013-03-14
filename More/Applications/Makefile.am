@@ -41,6 +41,7 @@ psrover_SOURCES = psrover.C
 psrstat_SOURCES = psrstat.C
 
 psrmodel_SOURCES = psrmodel.C
+psrmodel_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 psrwt_SOURCES = psrwt.C
 

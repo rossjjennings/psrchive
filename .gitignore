@@ -8,6 +8,7 @@
 Makefile.in
 Makefile
 linux_64
+config/test-driver
 
 Base/Applications/psrconv
 Base/Applications/psredit

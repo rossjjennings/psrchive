@@ -381,6 +381,15 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     hdr_ext->set_obsnchan( obsnchan );
   }
 
+  // Read the online DM value
+  {
+    double chan_dm;
+
+    psrfits_read_key (fptr, "CHAN_DM", &chan_dm, FITSHdrExtension::unset_dm, 
+        verbose > 2);
+    hdr_ext->set_chan_dm( chan_dm );
+  }
+
   // Read the name of the source
 
   if (verbose > 2)

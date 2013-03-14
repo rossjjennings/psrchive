@@ -56,7 +56,7 @@ catch (Error& error) {
 
 void Pulsar::TimerArchive::unload (FILE* fptr) const
 {
-  pack_extensions ();
+  const_cast<TimerArchive*>(this)->pack_extensions ();
 
   hdr_unload (fptr);
 

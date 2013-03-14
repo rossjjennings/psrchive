@@ -190,7 +190,7 @@ void usage()
     "  --update_dm      Replace header DM with current value from input ephemeris\n"
 
     "\n"
-    "See "PSRCHIVE_HTTP"/manuals/pam for more details\n"
+    "See " PSRCHIVE_HTTP "/manuals/pam for more details\n"
        << endl;
 
   return;

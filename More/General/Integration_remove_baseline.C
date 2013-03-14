@@ -48,14 +48,14 @@ void Pulsar::Integration::remove_baseline (const PhaseWeight* baseline) try
 
   for (unsigned ichan=0; ichan<get_nchan(); ichan++)
   {
-    if (verbose)
+    if (Profile::verbose)
       cerr << "Pulsar::Integration::remove_baseline ichan=" << ichan << endl;
 
     shift.get_weight (ichan, &shifted_baseline);
 
     for (unsigned ipol=0; ipol<get_npol(); ipol++)
     {
-      if (verbose)
+      if (Profile::verbose)
 	cerr << "Pulsar::Integration::remove_baseline ipol=" << ipol << endl;
 
       Profile* profile = get_Profile(ipol,ichan);

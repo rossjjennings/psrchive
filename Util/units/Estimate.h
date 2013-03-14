@@ -238,10 +238,10 @@ std::istream& operator >> (std::istream& is, Estimate<T,U>& estimate)
   char open_brace;
   is >> open_brace;
 
+  bool bracketed=true;
   if (open_brace != '(') {
     is.unget ();
-    is.setstate (std::ios::failbit);
-    return is;
+    bracketed=false;
   }
 
   double value;
@@ -255,8 +255,11 @@ std::istream& operator >> (std::istream& is, Estimate<T,U>& estimate)
   double error;
   is >> error;
 
-  if (!expect(is, ')'))
-    return is;
+  if (bracketed) 
+  {
+    if (!expect(is, ')'))
+      return is;
+  }
 
   estimate.set_value (value);
   estimate.set_error (error);

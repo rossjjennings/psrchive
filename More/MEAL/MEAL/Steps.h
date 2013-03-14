@@ -41,6 +41,9 @@ namespace MEAL {
     //! Clone operator
     Steps* clone () const;
 
+    //! Set the prefix of each parameter name
+    void set_param_name_prefix (const std::string&);
+
     //! Add a step at the given point on the abscissa
     void add_step (double x);
 
@@ -86,6 +89,9 @@ namespace MEAL {
 
     //! The current step
     int current_step;
+
+    //! Prefix to parameter names
+    std::string param_name_prefix;
 
   };
 

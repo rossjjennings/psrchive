@@ -10,16 +10,11 @@
 #include "Pulsar/CoherencyMeasurementSet.h"
 
 #include <fstream>
+#include <assert.h>
 
 using namespace std;
 
 bool Calibration::ReceptionModel::Solver::report_chisq = false;
-
-void Calibration::ReceptionModel::Solver::set_prefit_report
-(const std::string& filename)
-{
-  prefit_report_filename = filename;
-}
 
 /*! Count the number of parameters that are to be fit, set nparam_infit */
 void Calibration::ReceptionModel::Solver::count_infit () try
@@ -27,24 +22,11 @@ void Calibration::ReceptionModel::Solver::count_infit () try
   if (verbose)
     cerr << "Calibration::ReceptionModel::Solver::count_infit" << endl;
 
-  if (report)
-    report << equation->get_nparam()
-	   << " model parameters [index:free name=value]" << endl << endl;
-
   nparam_infit = 0;
 
   for (unsigned iparm=0; iparm < equation->get_nparam(); iparm++)
-  {
-    if (report)
-      report << iparm << ":" << equation->get_infit(iparm) << " "
-	     << equation->get_param_name(iparm)
-	     << "=" << equation->get_param(iparm) << endl;
     if (equation->get_infit(iparm))
       nparam_infit ++;
-  }
-
-  if (report)
-    report << nparam_infit << " free parameters" << endl;
 }
 catch (Error& error)
 {
@@ -57,6 +39,10 @@ void Calibration::ReceptionModel::Solver::count_constraint () try
   if (verbose)
     cerr << "Calibration::ReceptionModel::Solver::count_constraint" << endl;
 
+  path_observed.resize (equation->get_num_transformation());
+  for (unsigned i=0; i<path_observed.size(); i++)
+    path_observed[i] = false;
+
   state_observed.resize (equation->get_num_input());
   for (unsigned i=0; i<state_observed.size(); i++)
     state_observed[i] = false;
@@ -65,6 +51,16 @@ void Calibration::ReceptionModel::Solver::count_constraint () try
 
   for (unsigned idat=0; idat < equation->data.size(); idat++)
   {
+    unsigned path_index = equation->data[idat].get_transformation_index();
+
+    if (path_index >= equation->get_num_transformation())
+      throw Error (InvalidRange,
+		   "Calibration::ReceptionModel::Solver::count_constraint",
+		   "ipath=%u >= npath=%u",
+		   path_index, equation->get_num_transformation());
+    
+    path_observed[path_index] = true;
+
     // ensure that each source_index is valid and flag the input states
     // that have at least one measurement to constrain them
     for (unsigned isource=0; isource < equation->data[idat].size(); isource++)
@@ -88,9 +84,6 @@ void Calibration::ReceptionModel::Solver::count_constraint () try
     throw Error (InvalidState,
 		 "Calibration::ReceptionModel::Solver::count_constraint",
 		 "ndata=%u <= nfree=%u", ndat_constraint, nparam_infit);
-
-  if (report)
-    cerr << endl << ndat_constraint << " independent data" << endl << endl;
 }
 catch (Error& error)
 {
@@ -102,27 +95,45 @@ void Calibration::ReceptionModel::Solver::check_constraints () try
   if (verbose)
     cerr << "Calibration::ReceptionModel::Solver::check_constraints" << endl;
 
-  // check that all inputs with unknown parameters have a CoherencyMeasurement
+  assert( path_observed.size() == equation->get_num_transformation() );
+
+  // check that all paths with unknown parameters have a CoherencyMeasurement
   for (unsigned ipath=0; ipath < equation->get_num_transformation(); ipath++)
   {
-    for (unsigned isource=0; isource < equation->get_num_input(); isource++)
-    {
-      bool need_source = false;
+    bool need_path = false;
 
-      equation->set_input_index (isource);
-      const MEAL::Function* state = equation->get_input ();
+    equation->set_transformation_index (ipath);
+    const MEAL::Function* path = equation->get_transformation ();
       
-      for (unsigned iparam=0; iparam < state->get_nparam(); iparam++)
-	if( state->get_infit(iparam) )
-	  need_source = true;
+    for (unsigned iparam=0; iparam < path->get_nparam(); iparam++)
+      if( path->get_infit(iparam) )
+	need_path = true;
       
-      if (need_source && !state_observed[isource])
-	throw Error (InvalidRange,
-		     "Calibration::ReceptionModel::Solver::check_constraints",
-		     "input source %u with free parameter(s) not observed",
-		     isource);
+    if (need_path && !path_observed[ipath])
+      throw Error (InvalidRange,
+		   "Calibration::ReceptionModel::Solver::check_constraints",
+		   "input path %u with free parameter(s) not observed",
+		   ipath);
+  }
 
-    }
+  assert( state_observed.size() == equation->get_num_input() );
+
+  for (unsigned isource=0; isource < equation->get_num_input(); isource++)
+  {
+    bool need_source = false;
+
+    equation->set_input_index (isource);
+    const MEAL::Function* state = equation->get_input ();
+      
+    for (unsigned iparam=0; iparam < state->get_nparam(); iparam++)
+      if( state->get_infit(iparam) )
+	need_source = true;
+      
+    if (need_source && !state_observed[isource])
+      throw Error (InvalidRange,
+		   "Calibration::ReceptionModel::Solver::check_constraints",
+		   "input source %u with free parameter(s) not observed",
+		   isource);
   }
 }
 catch (Error& error)
@@ -134,14 +145,8 @@ catch (Error& error)
     minimization in order to find the best fit to the observations. */
 void Calibration::ReceptionModel::Solver::solve () try
 {
-  if (!prefit_report_filename.empty())
-    report.open( prefit_report_filename.c_str() );
-
   count_infit ();
   count_constraint ();
-
-  if (report)
-    report.close();
 
   nfree = ndat_constraint - nparam_infit;
 
@@ -248,7 +253,7 @@ void Calibration::ReceptionModel::Solver::add_convergence_condition
   convergence_condition.push_back( condition );
 }
 
-//! Add a report
+//! Add an acceptance condition
 void Calibration::ReceptionModel::Solver::add_acceptance_condition
 ( Functor< bool(ReceptionModel*) > condition )
 {
