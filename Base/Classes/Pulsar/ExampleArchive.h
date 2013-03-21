@@ -55,9 +55,9 @@ namespace Pulsar {
     //! Load the Example header information from filename
     virtual void load_header (const char* filename);
 
-    //! Load the specified Integration from filename, returning new instance
+    //! Load a single Integration from filename, returning new instance
     virtual Integration*
-    load_Integration (const char* filename, unsigned subint);
+    load_Integration (const char* filename, unsigned index);
 
     //! The unload_file method is not implemented
     bool can_unload () const { return false; }
