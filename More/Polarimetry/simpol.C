@@ -38,6 +38,7 @@ void usage ()
     " -d space    spacing between digitizer levels \n"
     " -n Msamp    simulate Msamp mega samples \n"
     " -l factor   simulate non-linearity \n"
+    " -f gain     simulate digitizer sign-bit feedback \n"
     " -s i,q,u,v  specify the Stokes parameters of the input signal \n"
     " -p rad      apply differential phase (in radians) to input \n"
        << endl;
@@ -62,6 +63,19 @@ void transform (Jones<double>& jones, double* ex, double* ey)
 void nonlinear (double& value, double factor)
 {
   value = asinh (factor * value) / factor;
+}
+
+double sign (double x)
+{
+  if (x > 0)
+    return 1.0;
+  else
+    return -1.0;
+}
+
+void feedback_sign (double& value, double gain)
+{
+  value += gain * sign(value);
 }
 
 void digitize (double& volts, double scale, double max, double rescale)
@@ -90,10 +104,11 @@ int main (int argc, char** argv)
   double phase = 0;
 
   double non_linearity = 0.0;
+  double adc_feedback = 0.0;
 
   bool verbose = false;
   int c;
-  while ((c = getopt(argc, argv, "hb:d:l:n:p:s:")) != -1) {
+  while ((c = getopt(argc, argv, "hb:d:f:l:n:p:s:")) != -1) {
     switch (c)  {
 
     case 'h':
@@ -106,6 +121,11 @@ int main (int argc, char** argv)
 
     case 'd':
       digitizer_spacing = atof (optarg);
+      break;
+
+    case 'f':
+      adc_feedback = atof (optarg);
+      cerr << "simpol: digitizer feedback gain=" << adc_feedback << endl;
       break;
 
     case 's': {
@@ -255,6 +275,14 @@ int main (int argc, char** argv)
       nonlinear (e_y[0], non_linearity);
       nonlinear (e_x[1], non_linearity);
       nonlinear (e_y[1], non_linearity);
+    }
+
+    if (adc_feedback)
+    {
+      feedback_sign (e_x[0], adc_feedback);
+      feedback_sign (e_y[0], adc_feedback);
+      feedback_sign (e_x[1], adc_feedback);
+      feedback_sign (e_y[1], adc_feedback);
     }
 
     if (nbit)
