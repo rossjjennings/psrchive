@@ -42,8 +42,11 @@ void Pulsar::ReceptionCalibratorPlotter::plot_fluxcal ()
     cerr << "Pulsar::ReceptionCalibratorPlotter::plot_fluxcal call plot"
 	 << endl;
 
-  Reference::To<SourceInfo> info 
-    = new SourceInfo( calibrator->flux_calibrator_estimate );
+  Reference::To<SourceInfo> info;
+
+  // TODO: loop over all of the calibrator estimates (on and off)
+
+  // = new SourceInfo( calibrator->flux_calibrator_estimate );
 
   info->set_together (true);
   info->set_label ("FluxCal Stokes");

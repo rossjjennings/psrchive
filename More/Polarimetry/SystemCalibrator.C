@@ -21,6 +21,9 @@
 #include "Pulsar/PolarCalibrator.h"
 #include "Pulsar/InstrumentInfo.h"
 
+#include "Pulsar/ModelParametersReport.h"
+#include "Pulsar/InputDataReport.h"
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Receiver.h"
@@ -57,6 +60,7 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
 
   report_projection = false;
   report_initial_state = false;
+  report_input_data = false;
 
   if (archive)
     set_calibrator (archive);
@@ -213,6 +217,21 @@ void Pulsar::SystemCalibrator::set_diff_gain( Univariate<Scalar>* f )
 void Pulsar::SystemCalibrator::set_diff_phase( Univariate<Scalar>* f )
 {
   diff_phase_variation = f;
+}
+
+void Pulsar::SystemCalibrator::add_gain_step (const MJD& mjd)
+{
+  gain_steps.push_back (mjd);
+}
+
+void Pulsar::SystemCalibrator::add_diff_gain_step (const MJD& mjd)
+{
+  diff_gain_steps.push_back (mjd);
+}
+
+void Pulsar::SystemCalibrator::add_diff_phase_step (const MJD& mjd)
+{
+  diff_phase_steps.push_back (mjd);
 }
 
 void Pulsar::SystemCalibrator::preprocess (Archive* data)
@@ -651,11 +670,8 @@ Pulsar::SystemCalibrator::add_calibrator (const ReferenceCalibrator* p) try
       integrate_calibrator_data( p->get_response(ichan), data );
 
       if (p->get_nchan() == nchan && p->get_transformation_valid (ichan))
-      {
-	Signal::Source source = p->get_Archive()->get_type();
-	model[ichan]->integrate_calibrator (p->get_transformation(ichan), 
-					    source == Signal::FluxCalOn);
-      }
+	integrate_calibrator_solution( p->get_Archive()->get_type(), ichan,
+				       p->get_transformation(ichan) );
     }
   }
 }
@@ -748,10 +764,14 @@ void Pulsar::SystemCalibrator::submit_calibrator_data
     cerr << "Pulsar::SystemCalibrator::submit_calibrator_data ichan="
 	 << data.ichan << endl;
 
-  check_ichan ("subit_calibrator_data", data.ichan);
+  check_ichan ("submit_calibrator_data", data.ichan);
 
   if (!epoch_added[data.ichan])
   {
+    /*
+      SignalPath::add_calibrator_epoch calls add_polncal_backend,
+      which constructs the signal path for the reference source.
+    */
     model[data.ichan]->add_calibrator_epoch (data.epoch);
     epoch_added[data.ichan] = true;
   }
@@ -774,9 +794,18 @@ void Pulsar::SystemCalibrator::integrate_calibrator_data
 
   Stokes< Estimate<double> > result = transform( data.observation, apply );
 
-  calibrator_estimate.at(data.ichan).source_guess.integrate (result);
+  calibrator_estimate.at(data.ichan).estimate.integrate (result);
 }
 
+void Pulsar::SystemCalibrator::integrate_calibrator_solution
+( 
+ Signal::Source source, unsigned ichan,
+ const MEAL::Complex2* transformation
+)
+{
+  if (source == Signal::PolnCal)
+    model[ichan]->integrate_calibrator (transformation);
+}
 
 Pulsar::CalibratorStokes*
 Pulsar::SystemCalibrator::get_CalibratorStokes () const
@@ -896,14 +925,31 @@ void Pulsar::SystemCalibrator::init_model (unsigned ichan)
   
   if (diff_phase_variation)
     model[ichan]->set_diff_phase( diff_phase_variation->clone() );
-  
+
+  for (unsigned i=0; i < gain_steps.size(); i++)
+    model[ichan]->add_gain_step (gain_steps[i]);
+
+  for (unsigned i=0; i < diff_gain_steps.size(); i++)
+    model[ichan]->add_diff_gain_step (diff_gain_steps[i]);
+
+  for (unsigned i=0; i < diff_phase_steps.size(); i++)
+    model[ichan]->add_diff_phase_step (diff_phase_steps[i]);
+
   if (solver)
     model[ichan]->set_solver( solver->clone() );
+
+  Calibration::ReceptionModel* equation = model[ichan]->get_equation();
 
   if (report_initial_state)
   {
     string filename = "prefit_model_" + tostring(ichan) + ".txt";
-    get_solver(ichan)->set_prefit_report (filename);
+    equation->add_prefit_report ( new Calibration::ModelParametersReport(filename) );
+  }
+
+  if (report_input_data)
+  {
+    string filename = "input_data_" + tostring(ichan) + ".txt";
+    equation->add_prefit_report ( new Calibration::InputDataReport(filename) );
   }
 }
 
@@ -954,7 +1000,7 @@ void Pulsar::SystemCalibrator::solve_prepare ()
 
   if (set_initial_guess)
     for (unsigned ichan=0; ichan<calibrator_estimate.size(); ichan++)
-      calibrator_estimate[ichan].update_source();
+      calibrator_estimate[ichan].update ();
 
   MJD epoch = get_epoch();
 
@@ -1370,15 +1416,24 @@ Pulsar::SystemCalibrator::get_transformation (const Archive* data,
     signal_path = equation->get_transformation ();
     break;
 
+#if 0
+
+    Should SystemCalibrator know nothing about FluxCalOn/Off ??
   case Signal::FluxCalOn:
   {
     if (verbose > 2)
       cerr << "Pulsar::SystemCalibrator::get_transformation FluxCal" << endl;
-    unsigned index = model[ichan]->get_fluxcal()->get_path_index();
+
+    // TODO: adjust the path index according to epoch?
+
+    unsigned index = fluxcal[ichan]->get_path_index();
+
     equation->set_transformation_index ( index );
     signal_path = equation->get_transformation ();
     break;
   }
+
+#endif
 
   default:
     throw Error (InvalidParam, "Pulsar::SystemCalibrator::get_transformation",
@@ -1465,6 +1520,11 @@ void Pulsar::SystemCalibrator::set_report_projection (bool flag)
 void Pulsar::SystemCalibrator::set_report_initial_state (bool flag)
 {
   report_initial_state = flag;
+}
+
+void Pulsar::SystemCalibrator::set_report_input_data (bool flag)
+{
+  report_input_data = flag;
 }
 
 void Pulsar::SystemCalibrator::check_ichan (const char* name, unsigned ichan)

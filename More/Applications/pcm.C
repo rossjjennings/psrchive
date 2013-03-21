@@ -89,6 +89,7 @@ void usage ()
     "\n"
     "  -U PAR     model PAR with a unique value for each CAL \n"
     "  -u PAR[:W] model PAR with a step at each CAL \n"
+    "  -i PAR:MJD model PAR with a step at the given epoch (MJD) \n"
     "  -o PAR:N   model PAR as N degree polyomial \n"
     "             where PAR is one of \n"
     "               g = absolute gain \n"
@@ -384,6 +385,16 @@ bool get_time_variation ()
   return gain_variation || diff_gain_variation || diff_phase_variation;
 }
 
+string get_string (char code)
+{
+  switch (code) {
+  case 'g': return "gain";
+  case 'b': return "diffgain";
+  case 'r': return "diffphase";
+  default: return "all";
+  }
+}
+
 void set_time_variation (char code, MEAL::Univariate<MEAL::Scalar>* function)
 {
   switch (code) {
@@ -404,6 +415,36 @@ void set_time_variation (char code, MEAL::Univariate<MEAL::Scalar>* function)
     gain_variation = function;
     diff_gain_variation = function;
     diff_phase_variation = function;
+    return;
+  }
+  throw Error (InvalidParam, "set_time_variation",
+	       "unrecognized PAR code = %c", code);
+}
+
+std::vector<MJD> gain_steps;
+std::vector<MJD> diff_gain_steps;
+std::vector<MJD> diff_phase_steps;
+
+void add_step (char code, const MJD& mjd)
+{
+  switch (code) {
+  case 'g':
+    cerr << "gain" << endl;
+    gain_steps.push_back (mjd);
+    return;
+  case 'b':
+    cerr << "differential gain" << endl;
+    diff_gain_steps.push_back (mjd);;
+    return;
+  case 'r':
+    cerr << "differential phase" << endl;
+    diff_phase_steps.push_back (mjd);;
+    return;
+  case 'a':
+    cerr << "all backend parameters" << endl;
+    gain_steps.push_back (mjd);;
+    diff_gain_steps.push_back (mjd);;
+    diff_phase_steps.push_back (mjd);;
     return;
   }
   throw Error (InvalidParam, "set_time_variation",
@@ -490,6 +531,7 @@ Pulsar::Archive* load (const std::string& filename)
 
 static bool output_report = false;
 static bool prefit_report = false;
+static bool input_data = false;
 
 static bool plot_guess = false;
 static bool plot_residual = false;
@@ -501,6 +543,9 @@ void enable_diagnostic (const string& name)
 {
   if (name == "prefit")
     prefit_report = true;
+
+  else if (name == "input")
+    input_data = true;
 
   else if (name == "report")
     output_report = true;
@@ -574,7 +619,7 @@ int actual_main (int argc, char *argv[]) try
   int gotc = 0;
 
   const char* args =
-    "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:j:J:kL:l:"
+    "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:i:j:J:kL:l:"
     "M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:yzZ";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
@@ -648,6 +693,29 @@ int actual_main (int argc, char *argv[]) try
     case 'I':
       impurity = MEAL::Function::load<MEAL::Real4> (optarg);
       break;
+
+    case 'i':
+    {
+      char code;
+      char dummy;
+      double mjd;
+
+      istringstream is (optarg);
+      is >> code >> dummy >> mjd;
+
+      if (is.bad())
+      {
+	cerr << "pcm: error parsing '" << optarg << "' as PAR:MJD" << endl;
+	return -1;
+      }
+
+      MJD epoch (mjd);
+
+      cerr << "pcm: inserting a step in ";
+      add_step( code, epoch );
+      cerr << " at MJD=" << epoch << endl;
+      break;
+    }
 
     case 'j':
       separate (optarg, jobs, ",");
@@ -745,8 +813,11 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'u':
+    {
       cerr << "pcm: using a multiple-step function to model ";
-      set_time_variation( optarg[0], new MEAL::Steps );
+      MEAL::Steps* steps = new MEAL::Steps;
+      steps->set_param_name_prefix ( get_string(optarg[0]) );
+      set_time_variation( optarg[0], steps );
       cerr << "pcm: assuming cals are observed ";
       if (optarg[1]==':')
       {
@@ -757,6 +828,7 @@ int actual_main (int argc, char *argv[]) try
       }
       cerr << (step_after_cal ? "after" : "before") << " pulsars" << endl;
       break;
+    }
 
     case 'U':
       cerr << "pcm: for each calibrator, a unique value of ";
@@ -887,6 +959,7 @@ int actual_main (int argc, char *argv[]) try
       model->set_report_projection (true);
 
       model->set_report_initial_state (prefit_report);
+      model->set_report_input_data (input_data);
 
       if (impurity)
 	model->set_impurity( impurity );
@@ -910,6 +983,15 @@ int actual_main (int argc, char *argv[]) try
 
 	model->set_foreach_calibrator (foreach);
       }
+
+      for (unsigned i=0; i < gain_steps.size(); i++)
+	model->add_gain_step (gain_steps[i]);
+
+      for (unsigned i=0; i < diff_gain_steps.size(); i++)
+	model->add_diff_gain_step (diff_gain_steps[i]);
+
+      for (unsigned i=0; i < diff_phase_steps.size(); i++)
+	model->add_diff_phase_step (diff_phase_steps[i]);
 
       if (least_squares)
 	model->set_solver( new_solver(least_squares) );
@@ -1377,6 +1459,44 @@ SystemCalibrator* matrix_template_matching (const char* stdname)
   return model;
 }
 
+static MJD start_time;
+static MJD end_time;
+
+void get_span ()
+{
+  Pulsar::Profile::no_amps = true;
+
+  static bool loaded = false;
+
+  for (unsigned ifile=0; ifile < filenames.size(); ifile++)
+  {
+    Reference::To<Pulsar::Archive> archive;
+    archive = Pulsar::Archive::load( filenames[ifile] );
+    MJD start = archive->start_time();
+    MJD end = archive->end_time();
+
+    if (!loaded || start < start_time)
+      start_time = start;
+    if (!loaded || end > end_time)
+      end_time = end;
+
+    loaded = true;
+  }
+
+  double span = (end_time - start_time).in_days();
+  string unit = "days";
+
+  if (span < 1)
+  {
+    span += 24;
+    unit = "hours";
+  }
+
+  cerr << "pcm: data span " << span << " " << unit << endl;
+
+  Pulsar::Profile::no_amps = false;
+}
+
 /* **********************************************************************
 
    FIND APPROPRIATE CALIBRATOR OBSERVATIONS IN THE DATABASE
@@ -1389,14 +1509,13 @@ void load_calibrator_database () try
     return;
     
   Reference::To<Pulsar::Archive> archive;
-
-  archive = Pulsar::Archive::load( filenames.back() );
-  MJD end = archive->end_time();
-
   archive = Pulsar::Archive::load( filenames.front() );
-  MJD start = archive->start_time();
 
-  MJD mid = 0.5 * (end + start);
+  get_span ();
+
+  MJD mid = 0.5 * (end_time + start_time);
+  double span_hours = (end_time - start_time).in_days() * 24.0;
+  double search_hours = 0.5*span_hours + polncal_hours;
 
   Reference::To<Pulsar::Database> database;
 
@@ -1415,7 +1534,7 @@ void load_calibrator_database () try
   char buffer[256];
 
   cerr << "pcm: searching for reference source observations"
-    " within " << polncal_hours << " hours of midtime" << endl;
+    " within " << search_hours << " hours of midtime" << endl;
 
   cerr << "pcm: midtime = "
        << mid.datestr (buffer, 256, "%Y-%m-%d-%H:%M:00") << endl;
@@ -1424,7 +1543,7 @@ void load_calibrator_database () try
   criterion = database->criterion (archive, Signal::PolnCal);
   criterion.entry.time = mid;
   criterion.check_coordinates = check_coordinates;
-  criterion.minutes_apart = polncal_hours * 60.0;
+  criterion.minutes_apart = search_hours * 60.0;
   
   vector<Pulsar::Database::Entry> oncals;
   database->all_matching (criterion, oncals);
@@ -1447,12 +1566,15 @@ void load_calibrator_database () try
     cerr << "pcm: no need for flux calibrator observations" << endl;
   else
   {
+    double span_days = (end_time - start_time).in_days();
+    double search_days = 0.5*span_days + fluxcal_days;
+
     cerr << "pcm: searching for flux calibrator observations"
-      " within " << fluxcal_days << " days of midtime" << endl;
+      " within " << search_days << " days of midtime" << endl;
 
     criterion.entry.obsType = Signal::FluxCalOn;
     criterion.check_coordinates = false;
-    criterion.minutes_apart = fluxcal_days * 24.0 * 60.0;
+    criterion.minutes_apart = search_days * 24.0 * 60.0;
     
     database->all_matching (criterion, oncals);
   

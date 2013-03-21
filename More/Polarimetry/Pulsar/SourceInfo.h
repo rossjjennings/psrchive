@@ -15,10 +15,9 @@
 #define __Pulsar_SourceInfo_H
 
 #include "Pulsar/Calibrator.h"
+#include "Pulsar/SourceEstimate.h"
 
 namespace Pulsar {
-
-  class SourceEstimate;
 
   //! Communicates Calibrator Stokes parameters
   class SourceInfo : public Calibrator::Info
@@ -27,7 +26,7 @@ namespace Pulsar {
   public:
 
     //! Constructor
-    SourceInfo (const std::vector<SourceEstimate>& source);
+    SourceInfo (const std::vector<Calibration::SourceEstimate>& source);
     
     //! Return the title
     std::string get_title () const;
@@ -60,7 +59,7 @@ namespace Pulsar {
   protected:
     
     //! The SourceEstimate to be plotted
-    const std::vector<SourceEstimate>& source;
+    const std::vector<Calibration::SourceEstimate>& source;
 
     //! Plot all Stokes parameters in one panel
     bool together;

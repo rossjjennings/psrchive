@@ -1,43 +1,56 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2012 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModelReport.h,v $
-   $Revision: 1.1 $
-   $Date: 2007/11/05 00:26:17 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/ReceptionModelReport.h
 
-#ifndef __Calibration_ReceptionModelReport_H
-#define __Calibration_ReceptionModelReport_H
+#ifndef __ReceptionModelReport_H
+#define __ReceptionModelReport_H
 
-#include "Reference.h"
+#include "Pulsar/ReceptionModel.h"
 
-namespace Calibration {
-
-  class ReceptionModel;
-
-  class ReceptionModelReport : public Reference::Able
+namespace Calibration
+{
+  //! Solve the measurement equation by non-linear least squares minimization
+  class ReceptionModel::Report : public Reference::Able
   {
 
   public:
 
-    //! Default constructor
-    ReceptionModelReport (const std::string& filename);
+    //! Return a new, copy-constructed clone of self
+    virtual Report* clone () const = 0;
 
-    //! Write a report on the specified model
-    bool report (ReceptionModel* model);
+    //! Write the report
+    virtual void report (std::ostream&) = 0;
+
+    //! Construct with filename
+    Report (const std::string& name) { filename = name; }
+
+    //! Set the measurement equation on which to report
+    void set_model (ReceptionModel* _model) { model = _model; }
+
+    //! Set the name of the file to which the report will be written
+    void set_filename (const std::string& _name) { filename = _name; }
+    const std::string& get_filename () const { return filename; }
+
+    //! Write the report
+    void report ();
 
   protected:
 
-    //! The name of the file to which text format data will be written
-    std::string output_filename;
+    //! Filename to which the report will be written
+    std::string filename;
+
+    //! The measurement equation to be solved
+    Reference::To<ReceptionModel, false> model;
 
   };
 
 }
 
 #endif
+

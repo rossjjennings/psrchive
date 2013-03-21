@@ -92,6 +92,15 @@ namespace Pulsar
     //! Set the time variation of differential phase
     virtual void set_diff_phase( MEAL::Univariate<MEAL::Scalar>* );
 
+    //! Add a step to the gain variations
+    virtual void add_gain_step (const MJD&);
+
+    //! Add a step to the differential gain variations
+    virtual void add_diff_gain_step (const MJD&);
+
+    //! Add a step to the differential phase variations
+    virtual void add_diff_phase_step (const MJD&);
+
     //! Set the transformation to be cloned for each calibrator
     virtual void set_foreach_calibrator( const MEAL::Complex2* );
 
@@ -139,6 +148,9 @@ namespace Pulsar
 
     //! Report on the initial state of the model before fitting
     virtual void set_report_initial_state (bool flag = true);
+
+    //! Report on the data included as constraints before fitting
+    virtual void set_report_input_data (bool flag = true);
 
     //! Solve equation for each frequency
     virtual void solve ();
@@ -206,6 +218,10 @@ namespace Pulsar
     //! Time variation of differential phase
     Reference::To< MEAL::Univariate<MEAL::Scalar> > diff_phase_variation;
 
+    std::vector<MJD> gain_steps;
+    std::vector<MJD> diff_gain_steps;
+    std::vector<MJD> diff_phase_steps;
+
     //! Transformation cloned for each calibrator observation
     Reference::To< const MEAL::Complex2 > foreach_calibrator;
 
@@ -213,7 +229,7 @@ namespace Pulsar
     virtual void init_model (unsigned ichan);
 
     //! Initialize a vector of SourceEstimate instances
-    virtual void init_estimates ( std::vector<SourceEstimate>&,
+    virtual void init_estimates ( std::vector<Calibration::SourceEstimate>&,
 				  unsigned ibin = 0 );
 
     //! Prepare any calibrator estimates
@@ -223,10 +239,14 @@ namespace Pulsar
     virtual void create_calibrator_estimate ();
 
     virtual void submit_calibrator_data (Calibration::CoherencyMeasurementSet&,
-					 const SourceObservation&);
+					 const Calibration::SourceObservation&);
 
     virtual void integrate_calibrator_data (const Jones< Estimate<double> >&,
-					    const SourceObservation&);
+					    const Calibration::SourceObservation&);
+
+    virtual void integrate_calibrator_solution (Signal::Source source,
+						unsigned ichan,
+						const MEAL::Complex2*);
 
     //! Load any postponed calibrators and those set by set_calibrators
     virtual void load_calibrators ();
@@ -245,7 +265,7 @@ namespace Pulsar
     std::vector<std::string> calibrator_filenames;
 
     //! Uncalibrated estimate of calibrator polarization
-    std::vector<SourceEstimate> calibrator_estimate;
+    std::vector<Calibration::SourceEstimate> calibrator_estimate;
     
     //! Epoch of the first observation
     MJD start_epoch;
@@ -267,6 +287,9 @@ namespace Pulsar
 
     //! Report the initial state of model before fitting
     bool report_initial_state;
+
+    //! Report on the data included as constraints
+    bool report_input_data;
 
     //! Prepare the measurement equations for fitting
     virtual void solve_prepare ();

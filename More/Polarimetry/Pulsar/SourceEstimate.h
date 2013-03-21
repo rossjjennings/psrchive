@@ -1,15 +1,13 @@
 //-*-C++-*-
+
 /***************************************************************************
  *
- *   Copyright (C) 2003 - 2011 by Willem van Straten
+ *   Copyright (C) 2003 - 2012 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SourceEstimate.h,v $
-   $Revision: 1.27 $
-   $Date: 2009/10/02 03:38:29 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/SourceEstimate.h
 
 #ifndef __Pulsar_SourceEstimate_H
 #define __Pulsar_SourceEstimate_H
@@ -21,8 +19,9 @@
 #include "Types.h"
 #include "MJD.h"
 
-namespace Pulsar
+namespace Calibration
 {
+  //! Manages a single source and its current best estimate (first guess)
   class SourceEstimate : public Reference::Able
   {
   public:
@@ -31,16 +30,16 @@ namespace Pulsar
     SourceEstimate (int ibin = -1);
 
     //! Create the source and add it to the measurement equation
-    void create_source (Calibration::ReceptionModel* equation);
+    void create_source (ReceptionModel* equation);
 
-    //! Update source with the mean
-    void update_source();
+    //! Update source with the estimate
+    void update ();
 
     //! Model of Stokes parameters as a function of frequency
     Reference::To<MEAL::Coherency> source;
 
-    //! Best guess of Stokes parameters
-    Calibration::MeanCoherency source_guess;
+    //! Best estimate (first guess) of Stokes parameters
+    MeanCoherency estimate;
 
     //! Validity flag for this estimate
     bool valid;
@@ -61,16 +60,6 @@ namespace Pulsar
 
     //! Return true if the last/top source estimate has data to constrain it
     bool is_constrained () const;
-
-    //! Somewhat kludgey storage of multiple source states
-    class Multiple
-    {
-    public:
-      Reference::To<MEAL::Coherency> source;
-      unsigned input_index;
-    };
-
-    std::vector<Multiple> multiples;
   };
 
   class SourceObservation

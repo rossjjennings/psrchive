@@ -54,6 +54,10 @@ namespace Calibration
     //! Set the transformation to the receptor basis
     void set_basis (MEAL::Complex2*);
 
+    bool has_basis () const { return basis; }
+    MEAL::Complex2* get_basis () { return basis; }
+    const MEAL::Complex2* get_basis () const { return basis; }
+
     //! Set true when the pulsar Stokes parameters have been normalized
     void set_constant_pulsar_gain (bool = true);
 
@@ -62,14 +66,6 @@ namespace Calibration
 
     //! Manages the reference source (noise diode) signal path
     class PolnCalPath;
-
-    //! Manages the flux calibrator signal path
-    class FluxCal;
-
-    //! Manages a backend transformation and its best first estimate
-    class Backend;
-
-    FluxCal* get_fluxcal ();
 
     //! Set the transformation to be cloned for each calibrator
     void set_foreach_calibrator (const MEAL::Complex2*);
@@ -94,6 +90,15 @@ namespace Calibration
 
     //! Add a step if any of the above functions require it
     void add_calibrator_epoch (const MJD&);
+
+    //! Add a step to the gain variations
+    void add_gain_step (const MJD&);
+
+    //! Add a step to the differential gain variations
+    void add_diff_gain_step (const MJD&);
+
+    //! Add a step to the differential phase variations
+    void add_diff_phase_step (const MJD&);
 
     //! Record the epochs of observations
     void add_observation_epoch (const MJD&);
@@ -129,7 +134,7 @@ namespace Calibration
     unsigned get_pulsar_path () const { return Pulsar_path; }
 
     //! Integrate a calibrator solution
-    void integrate_calibrator (const MEAL::Complex2* xform, bool fluxcal);
+    void integrate_calibrator (const MEAL::Complex2* xform);
 
     //! Get the measurement equation
     Calibration::ReceptionModel* get_equation ();
@@ -149,6 +154,9 @@ namespace Calibration
 
     //! Get the instrumental transformation
     MEAL::Complex2* get_transformation ();
+
+    //! Add a transformation to the ReceptionModel
+    void add_transformation (MEAL::Complex2*);
 
     //! Get the full signal path experienced by the pulsar
     const MEAL::Complex2* get_pulsar_transformation () const;
@@ -222,10 +230,6 @@ namespace Calibration
     Reference::To< MEAL::Scalar > diff_gain;
     Reference::To< MEAL::Scalar > diff_phase;
 
-    //! The flux calibrator signal path manager
-    Reference::To<FluxCal> fluxcal;
-    void build_fluxcal ();
-
     void integrate_parameter (MEAL::Scalar* function, double value);
 
     void update_parameter (MEAL::Scalar* function, double value);
@@ -244,6 +248,9 @@ namespace Calibration
     //! Add a step if Scalar is a Steps
     void add_step (MEAL::Scalar* function, double step);
 
+    //! Insert a step into the Scalar, which must be a Steps
+    void add_step (MEAL::Scalar* function, const MJD& mjd);
+
     //! Remove the last step if there is no data there
     void fix_last_step (MEAL::Scalar* function);
 
@@ -261,9 +268,6 @@ namespace Calibration
 
     MJD min_epoch, max_epoch;
 
-    //! Add a transformation to the ReceptionModel
-    void add_transformation (MEAL::Complex2*);
-
   private:
 
     //! Parameterization of the instrument
@@ -280,72 +284,6 @@ namespace Calibration
 
   };
   
-
-  class SignalPath::Backend : public Reference::Able
-  {
-  public:
-
-    //! The backend transformation
-    Reference::To< MEAL::Complex2 > transformation;
-
-    //! The best estimate of the backend transformation
-    MeanSingleAxis estimate;
-
-    //! The signal path in which this backend is a component
-    unsigned path_index;
-
-    //! Update the transformation with the current estimate, if possible
-    void update ();
-
-  };
-
-
-  //! The signal path experienced by the flux calibrator
-
-  /*! Whereas pulsar and reference source (noise diode) are assumed to
-    be observed around the same time, the flux calibrator observation
-    may be observed at a different time; therefore, for each flux
-    calibrator observation, a unique backend transformation instance
-    is created that is disengaged from any temporal variations. */
-
-  class SignalPath::FluxCal : public Reference::Able
-  {
-  public:
-
-    //! Default constructor
-    FluxCal (SignalPath* composite);
-
-    //! Set the backend transformation to be cloned for each flux calibrator
-    void set_backend (const MEAL::Complex2*);
-
-    //! Add a new signal path for the flux calibrator observations
-    void add_backend ();
-
-    //! Get the index for the signal path experienced by the flux calibrator
-    unsigned get_path_index () const;
-
-    //! Integrate an estimate of the backend
-    void integrate (const Calibration::SingleAxis*);
-
-    //! Update all backend models with current best estimate
-    void update ();
-
-  protected:
-
-    friend class SignalPath;
-
-    //! Unique backend for each flux calibrator observation
-    std::vector< Reference::To<Backend> > backends;
-
-    //! The backend transformation to be cloned for each flux calibrator
-    Reference::To<MEAL::Complex2> backend;
-
-    //! The frontend component of the instrument
-    Reference::To< MEAL::ProductRule<MEAL::Complex2> > frontend;
-    
-    //! The SignalPath in which this class is a component
-    Reference::To<SignalPath> composite;
-  };
 
 
 
