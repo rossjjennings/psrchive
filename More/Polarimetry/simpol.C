@@ -11,12 +11,6 @@
 
 */
 
-#include <iostream>
-#include <stdio.h>
-#include <unistd.h>
-
-using namespace std;
-
 #include "JenetAnderson98.h"
 #include "Stokes.h"
 #include "Jones.h"
@@ -24,7 +18,14 @@ using namespace std;
 
 #include "NormalDistribution.h"
 #include "BoxMuller.h"
+
+#include <iostream>
+#include <stdio.h>
+#include <unistd.h>
+#include <time.h>
 #include <inttypes.h>
+
+using namespace std;
 
 void usage ()
 {
@@ -254,7 +255,7 @@ int main (int argc, char** argv)
   double e_x [2];
   double e_y [2];
 
-  BoxMuller gasdev (-1);
+  BoxMuller gasdev (time(NULL));
 
   Vector<4, double> tot;
   Matrix<4,4, double> totsq;
