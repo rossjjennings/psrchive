@@ -3,7 +3,7 @@ noinst_LTLIBRARIES = libFormats.la
 
 libFormats_la_SOURCES = Agent_static.C
 
-SUBDIRS = Timer EPN ASCII BPP WAPP PRESTO
+SUBDIRS = Timer EPN ASCII BPP WAPP PRESTO UVM
 
 libFormats_la_LIBADD = Timer/libtimer.la EPN/libepn.la ASCII/libascii.la \
        BPP/libbpp.la WAPP/libwapp.la PRESTO/libpresto.la
