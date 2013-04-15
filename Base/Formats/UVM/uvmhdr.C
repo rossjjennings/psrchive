@@ -7,8 +7,13 @@
 
 #include "uvmio.h"
 
+#include <stdio.h>
 #include <iostream>
+#include <fstream>
+
 using namespace std;
+
+void output (ostream& os, uvm_header& header, uvm_data& data);
 
 int main (int argc, char** argv)
 {
@@ -30,57 +35,137 @@ int main (int argc, char** argv)
       return -1;
     }
 
-  cout << "version=" << header.aver << endl;
+  char buffer[80];
+
+  uvm_get_source (&header, buffer);
+  cout << "source=" << buffer << endl;
+
+  uvm_get_observatory (&header, buffer);
+  cout << "observatory=" << buffer << endl;
+
+  uvm_get_windows (&header, buffer);
+  cout << "windows=" << buffer << endl;
+
+  cout << "date (dddyy)=" << header.date << endl;
+  cout << "start time=" << header.startime 
+       << " seconds after AST midnight" << endl << endl;
+
+  cout << "scan record number=" << header.arecnum << endl;
+  cout << "scan number (dddynnn)=" << header.nscan << endl;
+  cout << "scan rec=" << header.anrecscn << endl;
+  cout << "scan end=" << header.aendscan << endl << endl;
+
+  cout << "frequency=" << header.obfreq << " MHz" << endl;
+  cout << "bandwidth=" << header.abandwd << " MHz" << endl;
+  cout << "clock rate=" << header.aclkrat << " MHz" << endl << endl;
+
+  cout << "polarization addition=" << header.apoladd << endl;
+  cout << "subcorrelators used=" << header.anumsbc << endl;
+  cout << "correlator dump time =" << header.admptim << " mus" << endl;
+  cout << "number of acf/ccf lags=" << header.alensbc << endl;
+  cout << "number of samples per period=" << header.apbins << endl;
+  cout << "number of pulses or averages=" << header.nseq << endl;
+  cout << "number of windows=" << header.nwins << endl;
+
+  for (int i=0; i<header.nwins; i++)
+    cout << "\tsamples in window[" << i << "]=" << header.nwbins[i] << endl;
+
+  cout << "admplen (=anumsbc X alensbc)=" << header.admplen << endl;
+  cout << "admpsrd=" << header.admplen << endl;
+
+  cout << endl;
+
+  cout << "Folding period=" << header.period << " s" << endl;
+  cout << "Dispersion measure=" << header.adm << endl;
+  cout << "Rotation measure=" << header.arm << endl;
+
+  cout << "R.A.=" << header.apos1st << " rad" << endl;
+  cout << "Dec.=" << header.apos2st << " rad" << endl;
+
+  int scan = 1;
+  while (scan)
+  {
+    uvm_data data;
+  
+    if (uvm_getdata (program, &data) < 0)
+      {
+	cerr << "ERROR calling uvm_getdata" << endl;
+	return -1;
+      }
+
+    char scanfilename [80];
+    sprintf (scanfilename, "scan%04d", scan);
+
+    ofstream os (scanfilename);
+
+    output (os, header, data);
+    
+    scan++;
+  }
 
   return 0;
 }
 
+void output (ostream& os, uvm_header& header, uvm_data& data)
+{
+  if (header.nwins == 0)
+    {
+      for (int ibin=0; ibin < header.apbins; ibin++)
+	{
+	  os << ibin;
+	  for (int ipol=0; ipol < header.anumsbc; ipol++)
+	    os << " " << data.data[ipol][ibin];
+	  os << endl;
+	}
+    }
+  else
+    {
+      int jbin=header.nwbins[0];
+      for (int iwin=1; iwin<header.nwins; iwin++)
+	for (int ibin=0; ibin < header.nwbins[iwin]; ibin++)
+	  {
+	    os << " WIN=" << iwin << " " << ibin;
+	    for (int ipol=0; ipol < header.anumsbc; ipol++)
+	      os << " " << data.data[ipol][jbin];
+	    
+	    os << endl;
+	    jbin ++;
+	  }
+    }
+}
+
 #if 0
 
-c	line 1:	aver	 a3	version, telescope program
-c		date	 i5	date (dddyy)
-c		startime i5	time, seconds from AST midnight
-c		source	 a9	pulsar or source name
-c		arecnum	 i4,1x	record number in scan (i.e. freq. chans)
-c		nscan	 i7	scan number (dddynnn)
-c		aendscan i5	
-c		abandwd	 e9.2	bandwidth in MHz
-c		aposcrd	 i2	
-c		apos1st	 f9.5	R.A. in radians
-c		apos2st	 f9.5	Decl in radians
+
+c		samint	 f9.7	interval between samples in seconds (average)
+c				   sampled fraction of period in SP program
+c	line4:	scaleI	 f9.5	scale to convert IQUV to micro Janskys
+c		sigmaI	 f9.5	standard deviation of offpulse baseline in I
+c		scantime f13.1	scan time in microseconds ( =#periods*period)
+
+
+
+
 c		aazst	 f9.5	azimuth (rad) at start of scan
 c		sver	 a3	"Stokes" analysis program version
 c	line2:	za	 f9.5	zenith angle (rad) at start of scan
 c		azaend	 f9.5	zenith angle (rad) current or at end of scan
-c		aclkrat	 f9.5	clock rate in MHz
-c		admptim	 i7	correlator dump time (microseconds)
+
 c		admplen	 i7	=anumsbc X alensbc
 c		admpsrd	 i7	
 c		ainttim	 i7	
 c		aextst	 i7	ext. start flag in avrg prgm; int period in SP
-c		obfreq	 f12.5	observing frequency in MHz
-c		apoladd	 i2	polarization addition flag = 0 for polarimetry
-c		anumsbc	 i2	# subcorrelators used = 4 for polarimetry
-c	line3:	alensbc	 i5	number of acf/ccf lags=number of freq. chans.
-c		apbins	 i5	number of samples per period
-c				   or sampled fraction
-c		period	 f18.15	period, I6 accuracy in SP, full acc in aver prgm
-c		adm	 f9.2	dispersion measure in pc/cm^3
-c		arm	 f9.2	rotation measure in rad-m^2
-c		samint	 f9.7	interval between samples in seconds (average)
-c				   sampled fraction of period in SP program
+
+
+
+
 c		admptot	 i7	
 c		abtwscn	 e11.4,1x
-c	line4:	scaleI	 f9.5	scale to convert IQUV to micro Janskys
-c		sigmaI	 f9.5	standard deviation of offpulse baseline in I
-c		nwins	 i3	0 for average program; # windows in SP program
 c		nwbins	 5i3	number of samples in each window
 c		baseval  e12.4	baseline value removed
 c		wndows	 a5	function of windowns as above (i.e., "I", for
 c				   interpulse; "P" for pulse; and "N" for noise)
 c		anrecscn i2	
-c		scantime f13.1	scan time in microseconds ( =#periods*period)
-c		nseq	 i6,1x	integer count of pulses or averages
 c		controlword o5	octal word giving settings in analysis program
 
 #endif
