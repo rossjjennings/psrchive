@@ -71,6 +71,21 @@ int uvm_getheader ( const char* filename,
 }
 
 
+int uvm_getdata ( int program, uvm_data* data )
+{
+
+  int convert = 0;  /* don't compute L and P.A. */
+  int istat = 0;
+  F77_getdata ( &program, &convert, &istat);
+
+  if (istat != 0)
+    return -1;
+
+  *data = F77_data;
+
+  return 0;
+}
+
 #if 0
 
 int crwuvm ( const char* filename, int readwri, int recno, int padout,
