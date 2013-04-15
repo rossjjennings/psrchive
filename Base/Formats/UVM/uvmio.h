@@ -20,6 +20,8 @@
 #ifndef __UVMIO_H
 #define __UVMIO_H
 
+#include "f77util.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -78,9 +80,31 @@ extern "C" {
 
   } uvm_header;
 
+  /* return the null-terminated string for char aver[3] */
+  inline void uvm_get_version (const uvm_header* hdr, char* txt)
+  { f2cstr(hdr->aver, txt, 3); }
+
+  /* return the null-terminated string for char source[9] */
+  inline void uvm_get_source (const uvm_header* hdr, char* txt)
+  { f2cstr(hdr->source, txt, 9); }
+
+  /* return the null-terminated string for char wndows[5] */
+  inline void uvm_get_windows (const uvm_header* hdr, char* txt)
+  { f2cstr(hdr->wndows, txt, 5); }
+
+  /* return the null-terminated string for char sver[3] */
+  inline void uvm_get_software_version (const uvm_header* hdr, char* txt)
+  { f2cstr(hdr->sver, txt, 3); }
+
+  /* return the null-terminated string for char obsvtry[11] */
+  inline void uvm_get_observatory (const uvm_header* hdr, char* txt)
+  { f2cstr(hdr->obsvtry, txt, 11); }
+
+
   /* Maximum number of phase bins: parameter (apbinsmax=2048)) */
   #define UVM_MAXBIN 2048
   #define UVM_NPOL 4
+
   /* Data block: common/iquv/ */
   typedef struct
   {
