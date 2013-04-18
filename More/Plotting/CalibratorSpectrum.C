@@ -119,6 +119,8 @@ void Pulsar::CalibratorSpectrum::prepare (const Archive* data)
   for (ipol=0; ipol<npol; ipol++)
     plotter.add_plot (hi[ipol]);
 
+  get_frame()->get_x_scale()->set_minmax (plotter.get_x_min(), 
+					  plotter.get_x_max());
   get_frame()->get_y_scale()->set_minmax (plotter.get_y_min(), 
 					  plotter.get_y_max());
 }
