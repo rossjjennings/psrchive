@@ -1,7 +1,25 @@
-#! /bin/csh -f
+#!/bin/csh
+
+set root = "git.code.sf.net/p/psrchive/code"
+
+set server = `git config --get remote.origin.url`
+
+if ( "$server" =~ "git://*" ) then
+
+  echo Moving to $root
+  git config remote.origin.url git://$root
+
+else
+
+  set SFUSER = `echo $server | awk -F// '{print $2}' | awk -F@ '{print $1}'`
+  echo Moving $SFUSER to $root
+  git config remote.origin.url ssh://$SFUSER@$root
+
+endif
 
 echo "Running update ..."
 
 git pull origin master |& tee update.log
 
 date >> update.log
+

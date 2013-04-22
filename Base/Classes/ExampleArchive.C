@@ -131,15 +131,20 @@ void Pulsar::ExampleArchive::load_header (const char* filename)
   set_poln_calibrated(false);
 }
 
-Pulsar::Integration*
-Pulsar::ExampleArchive::load_Integration (const char* filename, unsigned subint)
-{
-  // load all BasicIntegration attributes and data from filename.
-  // This functions needs to read information and data values
-  // for all channels/pols of a single subintegration in
-  // the file.  We can assume that load_header has already been run
-  // on this file, so nbin, nchan, npol, etc info is valid.
+/*!
+  Loads all BasicIntegration attributes and data for a single sub-integration.
 
+  @param filename the name of the file from which to load the data
+  @index the index of the sub-integration (starting from zero)
+
+  @pre load_header has already been run on this file, so nbin, nchan, npol, etc are valid.
+
+  This method reads all data and metadata for all frequency channels and polarisations of a single sub-integration.
+
+*/
+Pulsar::Integration*
+Pulsar::ExampleArchive::load_Integration (const char* filename, unsigned index)
+{
   // Data structure containing subint info/data that we will return.
   Pulsar::BasicIntegration* integration = new BasicIntegration;
 

@@ -20,7 +20,6 @@
 namespace Pulsar {
 
   class Archive;
-  class ArchiveTI;
 
   //! Stores three labels: left, centre, and right
   class PlotLabel : public Reference::Able {
