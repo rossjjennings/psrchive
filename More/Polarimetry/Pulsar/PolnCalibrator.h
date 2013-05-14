@@ -169,6 +169,12 @@ namespace Pulsar {
     //! Temporary storage space of solver statistics
     mutable Reference::Vector<MEAL::LeastSquares> tmp_solver;
 
+    //! Temporary storage of bad channel flags
+    std::vector<bool> bad;
+    unsigned bad_count;
+
+    void build_response();
+    void patch_response();
   };
 
   //! Create a new transformation instance described by the extension
