@@ -513,7 +513,7 @@ TFORM#  = E                    / NCHAN*NPOL floats
 TTYPE#  = DAT_SCL              / Data scale factor (outval=dataval*scl + offs)
 TFORM#  = E                    / NCHAN*NPOL floats
 TTYPE#  = DATA                 / Subint data table
-TDIM#   = (*,*,*)              / (NBIN,NCHAN,NPOL) or (NCHAN,NPOL,NSBLK*NBIN/8)
+TDIM#   = (*,*,*)              / (NBIN,NCHAN,NPOL) or (NCHAN,NPOL,NSBLK*NBITS/8)
 TFORM#  = I                    / I (Fold) or B (1-8 bit) Search
 TUNIT#  = Jy                   / Units of subint data
 END
