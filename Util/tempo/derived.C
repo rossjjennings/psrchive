@@ -138,14 +138,24 @@ int psrephem::mass_function (double& mf, double& mf_err) const
 //
 int psrephem::sini (double& si, double& si_err) const
 {
-  if (parmStatus[EPH_KIN] > 0) {
+  if (parmStatus[EPH_KIN] > 0)
+  {
     double i = value_double [EPH_KIN] * M_PI/180.0;
     si     = sin(i);
     si_err = cos(i) * error_double [EPH_KIN] * M_PI/180.0;
   }
-  else if (parmStatus[EPH_SINI] > 0) {
+  else if (parmStatus[EPH_SINI] > 0)
+  {
     si     = value_double [EPH_SINI];
     si_err = error_double [EPH_SINI];
+  }
+  else if (parmStatus[EPH_STIG] > 0)
+  {
+    double stig = value_double [EPH_STIG];
+    double norm = 1.0 + stig*stig;
+    si = 2.0 * stig / norm;
+    double dsi_dstig = 2.0 * ( 1.0 - stig*stig ) / ( norm * norm );
+    si_err = error_double [EPH_STIG] * fabs(dsi_dstig);
   }
   else
     return -1;
@@ -203,21 +213,34 @@ int psrephem::m2 (double& m2, double m1) const
 // ////////////////////////////////////////////////////////////////////////
 int psrephem::pm (double& pm, double& pm_err) const
 {
-  if (parmStatus[EPH_PMRA] < 1 || parmStatus[EPH_PMDEC] < 1)
+  double covar = 0;
+  double mu1, mu1_err, mu2, mu2_err;
+
+  if (parmStatus[EPH_PMRA] > 0 && parmStatus[EPH_PMDEC] > 0)
+  {
+    mu1 = value_double [EPH_PMRA];
+    mu1_err = error_double [EPH_PMRA];
+
+    mu2 = value_double [EPH_PMDEC];
+    mu2_err = error_double [EPH_PMDEC];
+  }
+  else if (parmStatus[EPH_PMELONG] > 0 && parmStatus[EPH_PMELAT] > 0)
+  {
+    mu1 = value_double [EPH_PMELONG];
+    mu1_err = error_double [EPH_PMELONG];
+
+    mu2 = value_double [EPH_PMELAT];
+    mu2_err = error_double [EPH_PMELAT];
+  }
+  else
     return -1;
 
-  double covar = 0.0;   // covariance b/w mu_alpha and mu_delta
+  pm = sqrt (sqr(mu1) + sqr(mu2));
+  pm_err = sqrt ( sqr(mu1*mu1_err) + sqr(mu2*mu2_err)
+		    + 2.0 * covar * mu1 * mu2 ) / pm;
 
-  double mu_alpha = value_double [EPH_PMRA];
-  double mu_aerr  = error_double [EPH_PMRA];
+  cerr << "psrephem::pm pm=" << pm << " error=" << pm_err << endl;
 
-  double mu_delta = value_double [EPH_PMDEC];
-  double mu_derr  = error_double [EPH_PMDEC];
-
-  pm = sqrt (sqr(mu_alpha) + sqr(mu_delta));
-
-  pm_err = sqrt ( sqr(mu_alpha*mu_aerr) + sqr(mu_delta*mu_derr)
-		  + 2.0 * covar * mu_alpha * mu_delta ) / pm;
   return 0;
 }
 
@@ -449,10 +472,35 @@ int psrephem::characteristic_age (double& age, double age_err)
 
   age = 0.5 * p / p_dot / (year * 1e9);
   age_err = age * sqrt(sqr(p_err/p)+sqr(p_dot_err/p));
+
+  return 0;
 }
 
 // ////////////////////////////////////////////////////////////////////////
 //
+// returns the spin period derivative, corrected for quadraditic Doppler
+//
+// ////////////////////////////////////////////////////////////////////////
+
+int psrephem::corrected_characteristic_age (double& age, double& age_err) const
+{
+  double p_dot, p_dot_err;
+  if (corrected_P_dot (p_dot, p_dot_err) < 0)
+    return -1;
+    
+  double p, p_err;
+  if (P (p, p_err) < 0)
+    return -1;
+
+  age = 0.5 * p / p_dot / (year * 1e9);
+  age_err = age * sqrt(sqr(p_err/p)+sqr(p_dot_err/p));
+
+  return 0;
+}
+
+// ////////////////////////////////////////////////////////////////////////
+//
+// The Shklovskii effect
 //
 // ////////////////////////////////////////////////////////////////////////
 int psrephem::quadratic_Doppler (double& beta, double& beta_err) const
@@ -475,6 +523,9 @@ int psrephem::quadratic_Doppler (double& beta, double& beta_err) const
 
   beta = sqr(mu_radsec) * dist / c;
   beta_err = beta * sqrt (sqr(2.0*mu_err/mu) + sqr(dist_err/dist));
+
+  cerr << "psrephem::quadratic_Doppler"
+    " beta=" << beta << " err=" << beta_err << endl;
 
   return 0;
 }
@@ -506,7 +557,7 @@ int psrephem::corrected_P_dot (double& p_dot_int, double& p_dot_int_err) const
 
 // ////////////////////////////////////////////////////////////////////////
 //
-// returns the spin period derivative, corrected for quadraditic Doppler
+// returns the upper limit on distance, given mu, P and Pdot
 //
 // ////////////////////////////////////////////////////////////////////////
 int psrephem::pdot_distance (double& dist, double& dist_err) const
@@ -532,6 +583,35 @@ int psrephem::pdot_distance (double& dist, double& dist_err) const
   return 0;
 }
 
+
+// ////////////////////////////////////////////////////////////////////////
+//
+// returns the upper limit on mu, given px, P and Pdot
+//
+// ////////////////////////////////////////////////////////////////////////
+int psrephem::pdot_mu (double& mu, double& mu_err) const
+{
+  if (parmStatus[EPH_PX] < 1)
+    return -1;
+
+  double p, p_err;
+  if (P (p, p_err) < 0)
+    return -1;
+
+  double p_dot, p_dot_err;
+  if (P_dot (p_dot, p_dot_err) < 0)
+    return -1;
+
+  double beta = p_dot / p;
+
+  double px = value_double [EPH_PX];
+  double px_err = error_double [EPH_PX];
+
+  mu = sqrt( beta * c * (mas/au) * px ) / (mas/year);
+  mu_err = fabs(mu/px) * px_err;
+
+  return 0;
+}
 
 // ////////////////////////////////////////////////////////////////////////
 //
