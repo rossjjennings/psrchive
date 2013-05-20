@@ -7,6 +7,7 @@
 
 #include "Pulsar/ReceptionCalibratorPlotter.h"
 #include "Pulsar/ReceptionCalibrator.h"
+#include "Pulsar/FluxCalManagerInfo.h"
 #include "Pulsar/Archive.h"
 
 #include "Pulsar/SourceInfo.h"
@@ -42,14 +43,8 @@ void Pulsar::ReceptionCalibratorPlotter::plot_fluxcal ()
     cerr << "Pulsar::ReceptionCalibratorPlotter::plot_fluxcal call plot"
 	 << endl;
 
-  Reference::To<SourceInfo> info;
-
-  // TODO: loop over all of the calibrator estimates (on and off)
-
-  // = new SourceInfo( calibrator->flux_calibrator_estimate );
-
-  info->set_together (true);
-  info->set_label ("FluxCal Stokes");
+  Reference::To<FluxCalManagerInfo> info
+    = new FluxCalManagerInfo( calibrator );
 
   plot( info, calibrator->get_nchan(),
 	calibrator->get_Archive()->get_centre_frequency(),
