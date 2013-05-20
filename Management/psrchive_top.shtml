@@ -42,6 +42,9 @@
 
 <TABLE CELLPADDING=5>
 <TR valign=top>
+
+<TD><a href="http://psrchive.sourceforge.net/qa">Ask a Question</a></TD>
+
 <TD>Search <!--#echo encoding="none" var="project_fancy" -->:</TD>
 
 <TD>

@@ -174,6 +174,7 @@ void usage() {
 #define CMD_QUIT 'q'
 #define CMD_HELP 'h'
 #define CMD_SAVE 's'
+#define CMD_SAVE_QUIT 'Q'
 #define CMD_PRINT 'P'
 #define CMD_FREQMODE 'f'
 #define CMD_TIMEMODE 't'
@@ -212,6 +213,7 @@ void usage_interactive() {
      << output_ext << endl
     << "  " << CMD_PRINT    << "  Print equivalent paz command" << endl
     << "  " << CMD_PSRSH    << "  Generate PSRSH script" << endl
+    << "  " << CMD_SAVE_QUIT << "  Save file then exit" << endl
     << "  " << CMD_QUIT     << "  Exit program" << endl
     << endl;
 }
@@ -569,7 +571,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* Save file */
-    if (ch==CMD_SAVE) {
+    if (ch==CMD_SAVE || ch==CMD_SAVE_QUIT) {
       /* Apply zaps to original file */
       for (unsigned i=0; i<zap_list.size(); i++) {
         zap = zap_list[i];
@@ -578,6 +580,7 @@ int main(int argc, char *argv[]) {
       cout << "Unloading '" << output_filename << "'..." << endl;
       orig_arch->unload(output_filename);
       click = 0;
+      if (ch==CMD_SAVE_QUIT) { ch=CMD_QUIT; }
       continue;
     }
 

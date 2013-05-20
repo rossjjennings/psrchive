@@ -14,6 +14,14 @@ bool isnumeric (char c)
   return isdigit(c) || c=='.' || c=='-';
 }
 
+bool braced (const std::string& txt)
+{
+  char first = *(txt.begin());
+  char last = *(txt.end()-1);
+
+  return (first == '(' && last == ')') || (first == '{' && last == '}');
+}
+
 bool part_of_numeric_range (const string& s, string::size_type pos)
 {
   if (pos == 0 || pos+1 == s.length())
