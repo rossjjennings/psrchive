@@ -155,7 +155,7 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
     {
       stats->set_chan( ichan );
       string value = process( parser, expression );
-      spectrum[ichan] = fromstring<float>( value );
+      spectrum[ichan] = fromstring<double>( value );
     }
     else
     {
