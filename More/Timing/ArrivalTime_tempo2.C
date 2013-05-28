@@ -14,6 +14,7 @@
 #include "Pulsar/Pointing.h"
 #include "Pulsar/WidebandCorrelator.h"
 #include "Pulsar/FITSHdrExtension.h"
+#include "Pulsar/ProcHistory.h"
 
 using namespace Pulsar;
 using namespace std;
@@ -24,6 +25,12 @@ std::string Pulsar::ArrivalTime::get_tempo2_aux_txt (const Tempo::toa& toa)
   string args;
 
   args = observation->get_filename();
+
+  // check for special "IPTA" flag.  We will still allow for processing
+  // any additional flags even though some of these will be duplicates of
+  // the IPTA stuff.
+  if (format_flags.find("IPTA")!=string::npos)
+    args += get_ipta_aux_txt(toa);
 
   if (format_flags.find("i")!=string::npos)
   {
@@ -64,4 +71,55 @@ std::string Pulsar::ArrivalTime::get_tempo2_aux_txt (const Tempo::toa& toa)
   }
 
   return args;
+}
+
+std::string Pulsar::ArrivalTime::get_ipta_aux_txt (const Tempo::toa& toa)
+{
+  string args;
+
+  // -fe frontend
+  const Receiver *r = observation->get<Receiver>();
+  if (r) 
+    args += " -fe " + r->get_name();
+
+  // -be backend
+  const Backend *b = observation->get<Backend>();
+  if (b)
+    args += " -be " + b->get_name();
+
+  // -B band descriptor : don't think there is a standard..
+
+  // -bw bandwidth(MHz)
+  // Doesn't really account for possible different zapping applied to each chan
+  args += " -bw " + tostring(
+      observation->get_bandwidth() / (double)observation->get_nchan(), 4);
+
+  const Integration *subint = observation->get_Integration(toa.get_subint());
+
+  args += " -tobs " + tostring(subint->get_duration(), 5);
+
+  // -pta PTA : Could choose based on telescope...
+  
+  // -proc processing version id : Can't get from the file
+
+  // -tmplt template profile name
+  args += " -tmplt " + standard->get_filename();
+
+  // -gof reduced chi2 of template fit
+  if (toa.get_reduced_chisq() != 0)
+    args += " -gof " + tostring(toa.get_reduced_chisq(),3);
+
+  // -nbin number of bins in profile
+  args += " -nbin " + tostring(observation->get_nbin());
+
+  // -nch number of pre-dedispersion channels in BW
+  const ProcHistory *h = observation->get<ProcHistory>();
+  if (h)
+    args += " -nch " + tostring(
+        h->get_row(0)->get_nchan() / observation->get_nchan());
+
+  // -f frontend_backend : is this really needed?
+
+  return args;
+
 }

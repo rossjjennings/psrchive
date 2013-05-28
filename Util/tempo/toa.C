@@ -9,6 +9,11 @@
 #include "polyco.h"
 #include "tempo++.h"
 
+#include "config.h"
+#if HAVE_TEMPO2
+#include "T2Observatory.h"
+#endif
+
 #include "strutil.h"
 #include "Error.h"
 
@@ -308,7 +313,23 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
     strcat (outstring, " @");
   else
   {
-    string temp = stringprintf (" %c ", telescope) + flags;
+#if HAVE_TEMPO2
+    // Try to get tempo2-style observatory code
+    string temp;
+    try 
+    {
+      temp = " " + Tempo2::observatory(string(1,telescope))->get_old_code() 
+        + " ";
+    }
+    catch (Error& error)
+    {
+      temp = stringprintf(" %c ", telescope);
+    }
+#else
+    // If no tempo2, fall back on single-char code
+    string temp = stringprintf (" %c ", telescope);
+#endif
+    temp += flags;
     strcat (outstring, temp.c_str());
   }
 

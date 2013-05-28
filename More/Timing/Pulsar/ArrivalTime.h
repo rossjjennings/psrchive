@@ -109,6 +109,9 @@ namespace Pulsar {
     */
     std::string get_tempo2_aux_txt (const Tempo::toa&);
 
+    /* Return the IPTA-specific tempo2 flags */
+    std::string get_ipta_aux_txt (const Tempo::toa&);
+
     //! get the arrival times for the specified sub-integration
     virtual void get_toas (unsigned subint, std::vector<Tempo::toa>& toas);
 

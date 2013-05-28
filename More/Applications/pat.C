@@ -184,6 +184,7 @@ void usage ()
     "                   Available formats: parkes tempo2, itoa, princeton \n"
     "                   For tempo2, <flags> include i = display instrument \n"
     "                                               r = display receiver   \n"
+    "                                            IPTA = all IPTA-format flags\n"
     "  -C \"<options>\"   Select vap-like options to be displayed on output \n"
     "  -C \"<subint> <chan>\" Print subint and/or channel                    \n"
     "  -r               Print reference phase and dt \n"
