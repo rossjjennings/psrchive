@@ -7,6 +7,7 @@
 #include "Pulsar/IntegrationManager.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/ProfileAmps.h"
 #include "Pulsar/Profile.h"
 
@@ -224,6 +225,11 @@ void pointer_tracker_remove(Reference::Able *ptr) {
         Pulsar::IntegrationBarycentre bary;
         bary.set_Integration(self);
         return bary.get_Doppler();
+    }
+
+    // rotate is protected.. kinda annoying
+    void rotate_time(double time) {
+        self->expert()->rotate(time);
     }
 
     // Return baseline_stats as numpy arrays

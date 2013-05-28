@@ -29,6 +29,7 @@ nobase_include_HEADERS = \
         Pulsar/FluxCalibratorData.h \
         Pulsar/FluxCalibrator.h \
 	Pulsar/FluxCalManager.h \
+	Pulsar/FluxCalManagerInfo.h \
 	Pulsar/FrontendCorrection.h \
         Pulsar/HybridCalibrator.h \
 	Pulsar/InputDataReport.h \
@@ -123,6 +124,7 @@ libPolarimetry_la_SOURCES = \
         FluxCalibratorData.C \
 	FluxCalibratorExt.C \
 	FluxCalManager.C \
+	FluxCalManagerInfo.C \
 	FrontendCorrection.C \
         HybridCalibrator.C \
         Instrument.C \

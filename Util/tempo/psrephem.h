@@ -181,8 +181,10 @@ class psrephem : public Pulsar::Parameters
   int quadratic_Doppler (double& beta, double& beta_err) const;
 
   int corrected_P_dot (double& p_dot_int, double& p_dot_int_err) const;
+  int corrected_characteristic_age (double& age, double& age_err) const;
 
   int pdot_distance (double& dist, double& dist_err) const;
+  int pdot_mu (double& mu, double& mu_err) const;
 
   int cubic_Doppler (double& gamma, double& gamma_err,
 		     double pmrv, double pmrv_err) const;

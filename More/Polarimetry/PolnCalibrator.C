@@ -381,60 +381,16 @@ void interpolate( std::vector< Jones<T> >& to,
   }
 }
 
-
-void Pulsar::PolnCalibrator::build (unsigned nchan) try
+void Pulsar::PolnCalibrator::build_response ()
 {
-  if (verbose > 2)
-    cerr << "Pulsar::PolnCalibrator::build transformation size="
-	 << transformation.size() << " nchan=" << nchan << endl;
-
-  bool transformation_built = transformation.size() > 0;
-
-  unsigned maximum_nchan = get_maximum_nchan ();
-
-  /*
-    If the derived class can shrink the transformation array, then
-    it may be necessary to rebuild the transformation array to match
-    the number of frequency channels in the observation
-  */
-
-  if (maximum_nchan)
-  {
-    /*
-      target: the number of channels in the observation, up to the 
-      maximum number of channels supported by the derived class.
-    */
-    unsigned target_nchan = std::min (nchan, maximum_nchan);
-
-    if (transformation.size() != target_nchan)
-      transformation_built = false;
-  }
-
-  if (!transformation_built)
-  {
-    if (verbose > 2)
-      cerr << "Pulsar::PolnCalibrator::build setup transformation" << endl;
-
-    observation_nchan = nchan;
-    setup_transformation();
-  }
-
-  if (!nchan)
-    nchan = transformation.size();
-
-  if (verbose > 2)
-    cerr << "Pulsar::PolnCalibrator::build nchan=" << nchan 
-	 << " transformation.size=" << transformation.size() << endl;
-
   response.resize( transformation.size() );
+  bad.resize ( transformation.size() );
+  bad_count = 0;
 
-  vector<bool> bad ( transformation.size(), false );
-  unsigned bad_count = 0;
-
-  unsigned ichan=0;
-
-  for (ichan=0; ichan < response.size(); ichan++)
+  for (unsigned ichan=0; ichan < response.size(); ichan++)
   {
+    bad[ichan] = false;
+
     if (transformation[ichan])
     {
       // sanity check of model parameters
@@ -483,6 +439,99 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
       bad_count ++;
     }
   }
+}
+
+void Pulsar::PolnCalibrator::patch_response ()
+{
+  unsigned nchan = response.size();
+
+  for (unsigned ichan = 0; ichan < nchan; ichan++)
+  {
+    if (!bad[ichan])
+      continue;
+
+    unsigned ifind;
+	
+    if (verbose > 2)
+      cerr << "Pulsar::PolnCalibrator::patch_response ichan="
+	   << ichan << endl;
+      
+    // find preceding good
+    for (ifind=nchan+ichan-1; ifind > ichan; ifind--)
+      if (!bad[ifind%nchan])
+	break;
+    
+    if (ifind == ichan)
+      throw Error (InvalidState, "Pulsar::PolnCalibrator::patch_response",
+		   "no good data preceding ichan=%u", ichan);
+      
+    Jones<float> left = response[ifind%nchan];
+      
+    // find next good
+    for (ifind=ichan+1; ifind < nchan+ichan; ifind++)
+      if (!bad[ifind%nchan])
+	break;
+      
+    if (ifind == nchan+ichan)
+      throw Error (InvalidState, "Pulsar::PolnCalibrator::patch_response",
+		   "no good data following ichan=%u", ichan);
+    
+    Jones<float> right = response[ifind%nchan];
+      
+    // TO-DO: It is probably more accurate to first form Mueller
+    // matrices and average these as a function of frequency, in order
+    // to describe any instrumental bandwidth depolarization.
+    
+    response[ichan] = float(0.5) * (left + right);
+  }
+}
+
+
+void Pulsar::PolnCalibrator::build (unsigned nchan) try
+{
+  if (verbose > 2)
+    cerr << "Pulsar::PolnCalibrator::build transformation size="
+	 << transformation.size() << " nchan=" << nchan << endl;
+
+  bool transformation_built = transformation.size() > 0;
+
+  unsigned maximum_nchan = get_maximum_nchan ();
+
+  /*
+    If the derived class can shrink the transformation array, then
+    it may be necessary to rebuild the transformation array to match
+    the number of frequency channels in the observation
+  */
+
+  if (maximum_nchan)
+  {
+    /*
+      target: the number of channels in the observation, up to the 
+      maximum number of channels supported by the derived class.
+    */
+    unsigned target_nchan = std::min (nchan, maximum_nchan);
+
+    if (transformation.size() != target_nchan)
+      transformation_built = false;
+  }
+
+  if (!transformation_built)
+  {
+    if (verbose > 2)
+      cerr << "Pulsar::PolnCalibrator::build setup transformation" << endl;
+
+    observation_nchan = nchan;
+    setup_transformation();
+  }
+
+  if (!nchan)
+    nchan = transformation.size();
+
+  if (verbose > 2)
+    cerr << "Pulsar::PolnCalibrator::build nchan=" << nchan 
+	 << " transformation.size=" << transformation.size() << endl;
+
+  build_response ();
 
   /* If there are bad channels and the solution must be interpolated to
      a higher number of frequency channels, then the solution must be 
@@ -511,45 +560,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
       cerr << "Pulsar::PolnCalibrator::build patch up"
 	" before interpolation in Fourier domain" << endl;
 
-    for (ichan = 0; ichan < response.size(); ichan++)
-    {
-      if (!bad[ichan])
-	continue;
-
-      unsigned ifind;
-	
-      if (verbose > 2)
-	cerr << "Pulsar::PolnCalibrator::build interpolating ichan="
-	     << ichan << endl;
-      
-      // find preceding good
-      for (ifind=response.size()+ichan-1; ifind > ichan; ifind--)
-	if (!bad[ifind%response.size()])
-	  break;
-      
-      if (ifind == ichan)
-	throw Error (InvalidState, "Pulsar::PolnCalibrator::build",
-		     "no good data");
-      
-      Jones<float> left = response[ifind%response.size()];
-      
-      // find next good
-      for (ifind=ichan+1; ifind < nchan+ichan; ifind++)
-	if (!bad[ifind%response.size()])
-	  break;
-      
-      if (ifind == ichan)
-	throw Error (InvalidState, "Pulsar::PolnCalibrator::build",
-		     "no good data");
-      
-      Jones<float> right = response[ifind%response.size()];
-      
-      // TO-DO: It is probably more accurate to first form Mueller
-      // matrices and average these as a function of frequency, in order
-      // to describe any instrumental bandwidth depolarization.
-
-      response[ichan] = float(0.5) * (left + right);
-    }
+    patch_response ();
   }
 
   if (nchan < response.size())
@@ -625,7 +636,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try
 
 #endif
 
-  for (ichan=0; ichan < nchan; ichan++)
+  for (unsigned ichan=0; ichan < nchan; ichan++)
   {
     if (!get_valid(ichan))
     {
