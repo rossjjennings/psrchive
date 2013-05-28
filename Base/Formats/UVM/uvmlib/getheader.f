@@ -34,6 +34,10 @@ c  Check current data
       if(file(1:1).eq."S".and.file(8:8).le."9"
      .           .and.file(8:8).ge."0") then
         prgm=1260
+        call sgiprepfd
+        open(unit=41,file=infile,status='old')
+        call sgigetfd(fd)
+        print*, 'fd is ',fd
         call findscn(newscan,convert,istat)
         write(*,'("Program:",i5)') prgm
         if(istat.ne.0) go to 99

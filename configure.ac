@@ -280,6 +280,8 @@ AC_CONFIG_FILES([
                 Base/Formats/WAPP/Makefile
                 Base/Formats/PRESTO/Makefile
                 Base/Formats/ASP/Makefile
+		Base/Formats/UVM/Makefile
+		Base/Formats/UVM/uvmlib/Makefile
 		Base/Applications/Makefile
 		More/Makefile
 		More/General/Makefile

@@ -8,9 +8,10 @@
 noinst_LTLIBRARIES = libuvm.la
 
 libuvm_la_SOURCES = \
-P110readdata.f  P467readhdr.f   findscn.f       juldate.f       sgi_inithack.c \
-P110readhdr.f   SPULreaddata.f  getdata.f       readbytes.c     skipbytes.c \
-P467readdata.f  SPULreadhdr.f   getheader.f     readscn.f       writescn.f
+P110readdata.f  SPULreaddata.f  getheader.f     sgi_inithack.c \
+P110readhdr.f   SPULreadhdr.f   juldate.f       skipbytes.c \
+P467readdata.f  findscn.f       readbytes.c     writescn.f \
+P467readhdr.f   getdata.f       readscn.f       yearday.f
 
 #############################################################################
 #
