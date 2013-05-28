@@ -20,6 +20,8 @@
 
 #include "Pulsar/Dispersion.h"
 #include "Pulsar/IntegrationBarycentre.h"
+
+#include "Pulsar/Interpreter.h"
 %}
 
 // Language independent exception handler
@@ -351,6 +353,15 @@ void pointer_tracker_remove(Reference::Able *ptr) {
     {
         Pulsar::Dispersion correction;
         correction.revert(self);
+    }
+
+    // Interface with the internal command interpreter
+    std::string execute(std::string command)
+    {
+        static Pulsar::Interpreter *psrsh = NULL;
+        if (!psrsh) psrsh = standard_shell();
+        psrsh->set(self);
+        return psrsh->parse(command);
     }
 
     // Return a copy of all the data as a numpy array
