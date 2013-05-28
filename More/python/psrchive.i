@@ -13,6 +13,7 @@
 
 #include "Pulsar/Pointing.h"
 #include "Pulsar/Receiver.h"
+#include "Pulsar/Backend.h"
 
 #include "Pulsar/Parameters.h"
 #include "load_factory.h"
@@ -325,6 +326,14 @@ void pointer_tracker_remove(Reference::Able *ptr) {
     std::string get_receiver_name()
     {
         Pulsar::Receiver *r = self->get<Pulsar::Receiver>();
+        if (r==NULL) { return "none"; }
+        return r->get_name();
+    }
+
+    // Get backend name
+    std::string get_backend_name()
+    {
+        Pulsar::Backend *r = self->get<Pulsar::Backend>();
         if (r==NULL) { return "none"; }
         return r->get_name();
     }
