@@ -8,6 +8,8 @@
 #include "Pulsar/FluxCalManagerInfo.h"
 #include "Pulsar/FluxCalManager.h"
 
+#include <cstring>
+
 using Calibration::FluxCalManager;
 
 //! Constructor
