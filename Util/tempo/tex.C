@@ -473,11 +473,29 @@ string psrephem::tex (vector<psrephem>& vals, bool dots)
   }
   retval += nl;
 
+  retval += "$\\dot P$ Proper Motion";
+  for (ip=0; ip<vals.size(); ip++)
+  {
+    double mu, mu_err;
+    vals[ip].pdot_mu (mu, mu_err);
+    retval += bw + tex_double (mu, mu_err);
+  }
+  retval += nl;
+
   retval += "Characteristic age, $\\tau_c$ (Gyr)";
   for (ip=0; ip<vals.size(); ip++)
   {
     double char_age, char_age_err;
     vals[ip].characteristic_age (char_age, char_age_err);
+    retval += bw + tex_double (char_age, char_age_err);
+  }
+  retval += nl;
+
+  retval += "Intrinsic characteristic age, $\\tau_c$ (Gyr)";
+  for (ip=0; ip<vals.size(); ip++)
+  {
+    double char_age, char_age_err;
+    vals[ip].corrected_characteristic_age (char_age, char_age_err);
     retval += bw + tex_double (char_age, char_age_err);
   }
   retval += nl;
@@ -509,6 +527,8 @@ string not_yet_loopified (psrephem& val, bool dots)
 
   double SPb_dot = beta * (pb * 86400.0);
   double SPb_dot_err = SPb_dot * sqrt (sqr(beta_err/beta) + sqr(pb_err/pb));
+
+  cerr << "psrephem::tex induced Pb_dot=" << SPb_dot << " err=" << SPb_dot_err << endl;
 
   retval += "Induced $\\dot P_{\\rm b} (10^{-12})$"
     + bw + tex_double (SPb_dot*1e12, SPb_dot_err*1e12) + nl;

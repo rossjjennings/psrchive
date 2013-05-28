@@ -8,6 +8,8 @@
 #include "Pulsar/FluxCalManagerInfo.h"
 #include "Pulsar/FluxCalManager.h"
 
+#include <cstring>
+
 using Calibration::FluxCalManager;
 
 //! Constructor
@@ -53,7 +55,7 @@ unsigned Pulsar::FluxCalManagerInfo::get_nclass () const
 //! Return the name of the specified class
 std::string Pulsar::FluxCalManagerInfo::get_name (unsigned iclass) const
 {
-  const char *label = "\\fiC\\fr\\dk\\u (\%\\fiC\\fr\\d0\\u)";
+  char *label = "\\fiC\\fr\\dk\\u (\%\\fiC\\fr\\d0\\u)";
 
   if (iclass % 2 == 0)
   {

@@ -67,7 +67,9 @@ FA 1 1
 PMDEC 1 1     # Proper motion in DEC (mas/yr)
 PMRA 1 1      # Proper motion in RA  (mas/yr)
 PMLAMBDA 1 1  # Proper motion in ecliptic longitude (mas/yr)
+PMELONG 1 1
 PMBETA 1 1    # Proper motion in ecliptic latitude (mas/yr)
+PMELAT 1 1
 PMRV 1 1      # Radial 'proper motion' (mas/yr)
 POSEPOCH 4 0  # Epoch of position determination (MJD)
 PX 1 1        # Parallax (mas)
@@ -149,6 +151,8 @@ MTOT 1 1      # Total system mass (solar masses)
 M2 1 1        # Companion mass (solar masses)
 M2_2 1 1      #   
 M2_3 1 1      # 
+STIG 1 1      # Orthometric ratio (Freire & Wex 2010)
+H3 1 1        # Orthometric amplitude (Freire & Wex 2010)
 DTHETA 1 1    # Relativistic deformation of the orbit (-6)
 XDOT 1 1      # Rate of change of projected semi-major axis (-12)
 EDOT 1 1      # Rate of change of eccentricity (-12)

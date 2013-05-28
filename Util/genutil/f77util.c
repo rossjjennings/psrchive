@@ -15,7 +15,9 @@ void f2cstr (const char* f_str, char* c_str, unsigned length)
   unsigned i = length-1;
   
   strncpy (c_str, f_str, length);
-  
+
+  c_str[length] = '\0';
+
   while (f_str[i] == ' ') {
     c_str[i] = '\0';
     if (i == 0)

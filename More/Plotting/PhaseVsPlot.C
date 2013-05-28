@@ -160,15 +160,15 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       min = -max;
   }
 
+  pair<float,float> range = get_scale()->get_range_norm();
+  
+  int range_start = int(floor(range.first));
+  int range_end = int(ceil(range.second));
+
   if (style == "image")
   {
     get_z_scale()->set_minmax (min, max);
     get_z_scale()->get_range (min, max);
-
-    pair<float,float> range = get_scale()->get_range_norm();
-
-    int range_start = int(floor(range.first));
-    int range_end = int(ceil(range.second));
 
     for( int range = range_start; range < range_end; range ++ )
     {
@@ -196,7 +196,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     if( line_colour != -1 )
       cpgsci( line_colour );
 
-    get_z_scale()->set_minmax (0, max);
+    get_z_scale()->set_minmax (min, max);
     get_z_scale()->get_range (min, max);
 
     vector<float> xaxis;
@@ -223,8 +223,10 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       }
     }
 
-    for( int xoff = int(x_min)-1; xoff < int( x_max )+1; xoff ++ )
+    for( int range = range_start; range < range_end; range ++ )
     {
+      float xoff = float(range) * get_scale()->get_scale(data);
+
       for( unsigned b = 0; b < nbin; b ++ )
         xaxis_adjusted[b] = xaxis[b] + xoff;
 
@@ -273,10 +275,6 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       cpgbox (" ", 0.0, 0, "CMIST", 0.0, 0);
       cpgmtxt("R", 2.6, 0.5, 0.5, "Index");
     }
-  }
-  else
-  {
-    cpgbox( " ", 0.0, 0, "C", 0.0, 0 );
   }
 
 }

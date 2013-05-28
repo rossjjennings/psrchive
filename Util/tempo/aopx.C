@@ -51,7 +51,7 @@ const double c      = 3.0e5;    // km/s
 const double parsec = 3.086e13; // km
 const double year   = 365.25 * 24 * 3600; // seconds
 
-int main (int argc, char ** argv)
+int main (int argc, char ** argv) try
 {
   bool verbose = false;
   bool special = false;
@@ -120,18 +120,33 @@ int main (int argc, char ** argv)
   MJD now (time(NULL));
   double mjd = now.in_days();
 
-  double right_ascension = eph.jra() * 2*M_PI;
-  double declination = eph.jdec() * 2*M_PI;
-
+  double right_ascension = 0, declination = 0;
   double ecliptic_long = 0, ecliptic_lat = 0;
-  slaEqecl (right_ascension, declination, mjd,
-	    &ecliptic_long, &ecliptic_lat);
 
-  if (elat != -999)
-    ecliptic_lat = elat;
+  if (eph.parmStatus[EPH_RAJ] != 0)
+  {
+    right_ascension = eph.jra() * 2*M_PI;
+    declination = eph.jdec() * 2*M_PI;
 
-  slaEcleq (ecliptic_long, ecliptic_lat, mjd,
-	    &right_ascension, &declination);
+    slaEqecl (right_ascension, declination, mjd,
+	      &ecliptic_long, &ecliptic_lat);
+
+    if (elat != -999)
+      ecliptic_lat = elat;
+  }
+  else if (eph.parmStatus[EPH_ELONG] != 0)
+  {
+    ecliptic_long = eph.value_double[EPH_ELONG] * M_PI/180;
+    ecliptic_lat = eph.value_double[EPH_ELAT] * M_PI/180;
+    
+    if (elat != -999)
+      ecliptic_lat = elat;
+
+    slaEcleq (ecliptic_long, ecliptic_lat, mjd,
+	      &right_ascension, &declination);
+  }
+  else
+    throw Error (InvalidParam, "aopx", "position unknown");
 
   double px_mas = eph.value_double[EPH_PX];
   cerr << "PX=" << px_mas << " mas" << endl;
@@ -302,3 +317,8 @@ int main (int argc, char ** argv)
 
   return 0;
 }
+catch (Error& error)
+  {
+    cerr << error << endl;
+    return -1;
+  }
