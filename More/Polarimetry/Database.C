@@ -992,6 +992,12 @@ void remove_channels (const Pulsar::Archive* arch,
   if (Calibrator::verbose > 2) 
     cerr << "Pulsar::Database::generatePolnCalibrator removed " 
 	 << nremoved << " channels." << endl;
+
+  // Test that the final numbers of channels match up
+  if (super->get_nchan() != arch->get_nchan())
+    throw Error (InvalidState, "remove_channels",
+        "Channels could not be made to match up (final nsuper=%d, narch=%d)",
+        super->get_nchan(), arch->get_nchan());
 }
 
 //! Removes channels from calarch if necessary
