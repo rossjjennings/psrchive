@@ -92,7 +92,7 @@ std::string Pulsar::ArrivalTime::get_ipta_aux_txt (const Tempo::toa& toa)
   // -bw bandwidth(MHz)
   // Doesn't really account for possible different zapping applied to each chan
   args += " -bw " + tostring(
-      observation->get_bandwidth() / (double)observation->get_nchan(), 4);
+      fabs(observation->get_bandwidth()) / (double)observation->get_nchan(), 4);
 
   const Integration *subint = observation->get_Integration(toa.get_subint());
 
