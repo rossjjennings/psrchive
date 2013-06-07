@@ -48,6 +48,7 @@ using namespace Pulsar;
 bool Pulsar::Database::cache_last_cal = true;
 bool Pulsar::Database::match_verbose = false;
 
+
 /*! By default, the long time scale is set to four weeks. */
 Pulsar::Option<double> 
 Pulsar::Database::long_time_scale
@@ -60,6 +61,7 @@ Pulsar::Database::long_time_scale
  "and the epoch of the flux calibrator and/or reception calibrator used to \n"
  "calibrate it.  By default, the long time scale is set to four weeks."
 );
+
 
 /*! By default, the short time scale is set to two hours. */
 Pulsar::Option<double> 
@@ -74,6 +76,7 @@ Pulsar::Database::short_time_scale
  "By default, the long time scale is set to two hours."
 );
 
+
 /*! By default, the maximum angular separation is 5 degrees */
 Pulsar::Option<double> 
 Pulsar::Database::max_angular_separation 
@@ -82,8 +85,34 @@ Pulsar::Database::max_angular_separation
 
  "Maximum distance to poln calibrator [degrees]",
 
- "The maximum separation between the sky coordinates of an observations \n"
- "and those of the reference calibrator used to calibrate it."
+ "The maximum separation between the sky coordinates of an observation \n"
+ "and that of the reference calibrator used to calibrate it."
+);
+
+
+/*! By default, the maximum centre frequency difference is 1 Hz */
+Pulsar::Option<double> 
+Pulsar::Database::max_centre_frequency_difference
+(
+ "Database::max_centre_frequency_difference", 1.0,
+
+ "Maximum difference in centre frequency of calibrator [Hz]",
+
+ "The maximum difference between the centre frequency of an observation \n"
+ "and that of the reference calibrator used to calibrate it."
+);
+
+
+/*! By default, the maximum bandwidth difference is 1 Hz */
+Pulsar::Option<double> 
+Pulsar::Database::max_bandwidth_difference
+(
+ "Database::max_bandwidth_difference", 1.0,
+
+ "Maximum difference in bandwidth of calibrator [Hz]",
+
+ "The maximum difference between the bandwidth of an observation \n"
+ "and that of the reference calibrator used to calibrate it."
 );
 
 
@@ -357,10 +386,14 @@ void Pulsar::Database::Criterion::no_data ()
 
 bool freq_close (double f1, double f2)
 {
-  double diff = fabs(f1 - f2);
-  if (diff)
-    diff /= f1 + f2;
-  return diff < 1e-12;
+  // bandwidth is in MHz; maximum difference is in Hz
+  return fabs(f1 - f2)*1e6 < Pulsar::Database::max_centre_frequency_difference;
+}
+
+bool bandwidth_close (double f1, double f2)
+{
+  // bandwidth is in MHz; maximum difference is in Hz
+  return fabs(f1 - f2)*1e6 < Pulsar::Database::max_bandwidth_difference;
 }
 
 bool Pulsar::Database::Criterion::compare_times (const MJD& want,
@@ -435,7 +468,7 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const try
     compare( "frequency", entry.frequency, have.frequency, &freq_close );
 
   if (check_bandwidth)
-    compare( "bandwidth", entry.bandwidth, have.bandwidth);
+    compare( "bandwidth", entry.bandwidth, have.bandwidth, &bandwidth_close );
 
   if (check_time)
   {
