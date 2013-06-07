@@ -49,8 +49,14 @@ namespace Pulsar {
     //! Time scale over which differential gain and phase remain stable
     static Option<double> short_time_scale;
 
-    //! The maximum angular separation between calibrator and pulsar
+    //! Maximum angular separation between calibrator and pulsar
     static Option<double> max_angular_separation;
+
+    //! Maximum difference between calibrator and pulsar centre frequencies
+    static Option<double> max_centre_frequency_difference;
+
+    //! Maximum difference between calibrator and pulsar bandwidths
+    static Option<double> max_bandwidth_difference;
 
     //! Pass this to the criterion methods to retrieve any or all matches
     static const Pulsar::Archive* any;
