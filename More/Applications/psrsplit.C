@@ -39,6 +39,8 @@ protected:
   unsigned nchannel;
 
   bool resize_extensions;
+  // deal correctly with frequency-only splitting
+  bool useall_subints;
 };
 
 int main (int argc, char** argv)
@@ -78,6 +80,8 @@ void psrsplit::setup ()
   if (nsubint == 0 && nchannel == 0)
     throw Error (InvalidState, "psrsplit::setup",
 		 "please specify number of sub-integrations per output file");
+  if (nsubint == 0)
+    useall_subints = true;
 }
 
 string get_extension (const std::string& filename)
@@ -93,7 +97,6 @@ void psrsplit::process (Pulsar::Archive* archive)
 {
   unsigned nsub = archive->get_nsubint();
   unsigned nchan = archive->get_nchan();
-  unsigned npol = archive->get_npol();
   if ( nsubint > nsub )
     throw Error (InvalidState, "psrsplit::process",
 		    "More sub-integrations per output file requested than available in "+archive->get_filename());
@@ -101,6 +104,13 @@ void psrsplit::process (Pulsar::Archive* archive)
   if ( nchannel > nchan )
     throw Error (InvalidState, "psrsplit::process",
 		    "More channels per output file requested than available in "+archive->get_filename());
+
+  // if no desired number of subints was specified
+  // (i.e., splitting in frequency dimension only), use all subints
+  if ( useall_subints )
+  {
+    nsubint = nsub;
+  }
 
   unsigned isplit = 0;
   unsigned ichansplit = 0;
