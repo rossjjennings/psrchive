@@ -4,7 +4,7 @@ SUBDIRS = uvmlib
 noinst_LTLIBRARIES = libuvm.la
 
 libuvm_la_LIBADD = uvmlib/libuvm.la
-libuvm_la_SOURCES = uvmio.c
+libuvm_la_SOURCES = uvmio.c uvmio.h
 
 bin_PROGRAMS = uvmhdr
 
