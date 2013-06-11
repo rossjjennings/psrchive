@@ -155,7 +155,7 @@ const Stokes<T> real_coherency (const Quaternion<std::complex<T>,Hermitian>& q)
   Quaternion<T,Hermitian> imaginary (imag(q));
   T nr = norm(realpart);
   T ni = norm(imaginary);
-  if (ni > 1e-5 * nr)
+  if (ni > 1e8*std::numeric_limits<T>::epsilon() && ni*1e5 > nr)
 #if THROW
     throw Error (InvalidParam,
 		 "Stokes<T> coherency (Quaternion<complex<T>,Hermitian>)",
