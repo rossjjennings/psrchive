@@ -14,7 +14,10 @@ endif
 
 gunzip -c pgplot5.2.tar.gz | tar xvf -
 
-cd pgplot/sys_linux
+cd pgplot/drivers
+patch < @abs_srcdir@/pndriv.patch
+
+cd ../sys_linux
 
 # make a gfortran configuration
 cp g77_gcc_aout.conf psrchive.conf
