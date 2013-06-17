@@ -12,7 +12,7 @@ endif
 gunzip -c psrcat_pkg.tar.gz | tar xvf -
 cd psrcat_tar
 
-source makeit
+csh makeit
 
 mkdir -p @prefix@/bin
 mv psrcat @prefix@/bin
