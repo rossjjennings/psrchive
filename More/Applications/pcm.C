@@ -1468,7 +1468,7 @@ void get_span ()
 
   static bool loaded = false;
 
-  for (unsigned ifile=0; ifile < filenames.size(); ifile++)
+  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try
   {
     Reference::To<Pulsar::Archive> archive;
     archive = Pulsar::Archive::load( filenames[ifile] );
@@ -1481,6 +1481,14 @@ void get_span ()
       end_time = end;
 
     loaded = true;
+  }
+  catch (Error& error)
+  {
+    cerr << "pcm: get_span() error while handling " << filenames[ifile]
+         << endl << "\t" << error.get_message() << endl;
+
+    filenames.erase( filenames.begin() + ifile );
+    ifile --;
   }
 
   double span = (end_time - start_time).in_days();
