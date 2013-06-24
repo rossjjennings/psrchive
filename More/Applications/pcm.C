@@ -5,11 +5,6 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.117 $
-   $Date: 2011/02/17 13:07:23 $
-   $Author: straten $ */
-
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -115,6 +110,7 @@ void usage ()
     "\n"
     "  -q         assume that CAL Stokes Q = 0 (linear feeds only)\n"
     "  -v         assume that CAL Stokes V = 0 (linear feeds only)\n"
+    "  -k         assume that the receptors have equal ellipticities \n"
     "\n"
     "  -F days    use flux calibrators within days of pulsar data mid-time\n"
     "  -L hours   use reference sources within hours of pulsar data mid-time\n"
