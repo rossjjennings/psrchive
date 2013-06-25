@@ -49,6 +49,9 @@ namespace Pulsar {
     //! zap the specified fraction of the band at the edges
     std::string edge (const std::string& args);
 
+    //! zap the specified ranges of frequencies
+    std::string freq (const std::string& args);
+
     std::string zerodm (const std::string& args);
 
     //! no empty commands
