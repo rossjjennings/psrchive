@@ -1,0 +1,17 @@
+--- makemake.orig	2013-07-02 11:20:02.848458671 -0400
++++ makemake	2013-07-02 11:21:14.910707415 -0400
+@@ -1042,12 +1042,13 @@
+ pgbind: $(SRC)/cpg/pgbind.c
+ 	$(CCOMPL) $(CFLAGC) $(SRC)/cpg/pgbind.c -o pgbind
+ 
+-libcpgplot.a cpgplot.h: $(PG_SOURCE) pgbind 
++libcpgplot.a libcpgplot.so cpgplot.h: $(PG_SOURCE) pgbind 
+ 	./pgbind $(PGBIND_FLAGS) -h -w $(PG_SOURCE)
+ 	$(CCOMPL) -c $(CFLAGC) cpg*.c
+ 	rm -f cpg*.c
+ 	ar ru libcpgplot.a cpg*.o
+ 	$(RANLIB) libcpgplot.a
++	$(CCOMPL) -shared -o libcpgplot.so cpg*.o
+ 	rm -f cpg*.o
+ 
+ cpgdemo: cpgplot.h $(SRC)/cpg/cpgdemo.c libcpgplot.a

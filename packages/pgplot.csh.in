@@ -17,10 +17,17 @@ gunzip -c pgplot5.2.tar.gz | tar xvf -
 cd pgplot/drivers
 patch < @abs_srcdir@/pndriv.patch
 
-cd ../sys_linux
-
 # make a gfortran configuration
-cp g77_gcc_aout.conf psrchive.conf
+# Apply patch to generate libcpgplot.so if --enable-shared is in use.
+if ( @enable_shared@ == yes ) then
+  cd ..
+  patch < @abs_srcdir@/makemake.sharedcpg.patch
+  cd sys_linux
+  cp g77_gcc.conf psrchive.conf
+else
+  cd ../sys_linux
+  cp g77_gcc_aout.conf psrchive.conf
+endif
 perl -pi -e "s/g77/@F77@/" psrchive.conf 
 
 # remove the -u option from FFLAGC
