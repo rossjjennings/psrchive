@@ -53,6 +53,7 @@ AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 # Create static libraries by default
 AC_DISABLE_SHARED
+AC_SUBST(enable_shared)
 
 # Ensure that SIGPROC find does not over-ride the standard
 SWIN_PROG_FIND
