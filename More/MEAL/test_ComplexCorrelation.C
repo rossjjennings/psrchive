@@ -77,6 +77,16 @@ void runtest ()
   // ComplexCorrelation doesn't handle |c|^2 > 0.9 very well
   while (norm(target) >= 0.9);
 
+  // the random unit coefficient to which to fit
+  std::complex<double> guess;
+  do 
+  {
+    random_value (guess, 1.0);
+  }
+  // ComplexCorrelation doesn't handle |c|^2 > 0.9 very well
+  while (norm(guess) >= 0.9);
+
+  unit.set (guess);
 
   // the "data" for the unit coefficient
   const unsigned ndim = 2;
