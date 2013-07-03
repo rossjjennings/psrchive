@@ -1,15 +1,12 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2010 by Willem van Straten
+ *   Copyright (C) 2010 - 2013 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ComplexCorrelation.h,v $
-   $Revision: 1.1 $
-   $Date: 2010/05/24 06:33:56 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/ComplexCorrelation.h
 
 #ifndef __MEAL_ComplexCorrelation_H
 #define __MEAL_ComplexCorrelation_H
@@ -18,7 +15,6 @@
 
 namespace MEAL
 {
-
   //! A correlation coefficient on the unit disk in the complex plane
   class ComplexCorrelation : public Complex
   {
@@ -43,6 +39,10 @@ namespace MEAL
     //! Get the imaginary part
     Estimate<double> get_imag () const
     { return this->get_Estimate (1); }
+
+    //! Set the complex value
+    void set (std::complex<double>& c)
+    { set_real(c.real()); set_imag(c.imag()); }
 
     // ///////////////////////////////////////////////////////////////////
     //
