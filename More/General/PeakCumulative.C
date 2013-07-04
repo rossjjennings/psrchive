@@ -177,20 +177,6 @@ void Pulsar::PeakCumulative::build ()
       if (cumu[ibin] < rise_threshold) 
 	irise[itry] = ibin;
 
-    //    cpgeras();
-    //cpgsci(1);
-    //cpgswin(0.0,(float)nbin,cumu[0],cumu[nbin-1]);
-    //cpgmove(0.0,cumu[0]);
-    //for (ibin=0;ibin<nbin;ibin++){
-    //  cpgdraw((float)ibin,cumu[ibin]);
-    //}
-    //cpgsci(2);
-    //cpgmove(0.0,rise_threshold);
-    //cpgdraw((float)nbin-1,rise_threshold);
-    //cpgsci(2);
-    //cpgmove(0.0,fall_threshold);
-    //cpgdraw((float)nbin-1,fall_threshold);
-
     // find where cumulative sum falls below max_threshold for the first time.
     ifall[itry] = nbin-1;
     for (ibin=stop-1; ibin>=start; ibin--)

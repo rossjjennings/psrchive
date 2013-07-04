@@ -40,7 +40,7 @@ void Pulsar::DeltaRM::set_data (Archive* archive)
   data->defaraday();
 }
 
-#if HAVE_PGPLOT
+#if FIX_PGPLOT
 
 #include "Pulsar/StokesCylindrical.h"
 #include <cpgplot.h>
@@ -93,7 +93,11 @@ void Pulsar::DeltaRM::refine ()
 
   fscr.transform (clone);
 
-#if HAVE_PGPLOT
+#if FIX_PGPLOT
+
+  /* Following the creation of libpsrplot, plotting functionality will
+     likely have to be added as a plugin; e.g. in the main() of the
+     executable that uses this class */
 
   cerr << "Pulsar::DeltaRM::refine plotting half-band integrated profiles"
        << endl;
