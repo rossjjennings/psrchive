@@ -18,11 +18,6 @@ if HAVE_TEMPO2
   libpsrutil_la_LIBADD += tempo2/libtempo_2.la
 endif
 
-if HAVE_PGPLOT
-  SUBDIRS += pgutil
-  libpsrutil_la_LIBADD += pgutil/libpgutil.la
-endif
-
 if HAVE_QT
   SUBDIRS += qtutil
   libpsrutil_la_LIBADD += qtutil/libqtutil.la

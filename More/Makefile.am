@@ -31,7 +31,6 @@ endif
 
 if HAVE_PGPLOT
 SUBDIRS += Plotting
-libpsrmore_la_LIBADD += Plotting/libPlotting.la
 endif
 
 SUBDIRS += . Applications

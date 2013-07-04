@@ -197,10 +197,6 @@ libMEAL_la_SOURCES = \
         UnivariatePolicy.C \
         VelocityModel.C 
 
-bin_PROGRAMS = lmfit
-
-lmfit_SOURCES = lmfit.C
-
 TESTS = \
 	test_copy test_Axis test_Projection test_Composite test_get_imap \
 	test_BasisRule test_Scalar test_Complex2Product                  \
@@ -249,9 +245,8 @@ doc: MEAL.pdf
 #############################################################################
 #
 
-LDADD = libMEAL.la $(top_builddir)/Util/units/libunits.la @PGPLOT_LIBS@
+LDADD = libMEAL.la $(top_builddir)/Util/units/libunits.la
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @PGPLOT_CFLAGS@
 

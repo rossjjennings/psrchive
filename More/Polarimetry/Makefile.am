@@ -10,7 +10,6 @@ nobase_include_HEADERS = \
 	Pulsar/BoostShiftAnalysis.h \
 	Pulsar/Britton2000.h \
 	Pulsar/BrittonInfo.h \
-        Pulsar/CalibratorPlotter.h \
         Pulsar/CalibratorStokesInfo.h \
 	Pulsar/CalInterpreter.h \
         Pulsar/CoherencyMeasurement.h \
@@ -62,10 +61,7 @@ nobase_include_HEADERS = \
 	Pulsar/ProjectionCorrection.h \
         Pulsar/PulsarCalibrator.h \
         Pulsar/ReceptionCalibrator.h \
-	Pulsar/ReceptionCalibratorPlotter.h \
-        Pulsar/ReceptionModelAxisPlotter.h \
         Pulsar/ReceptionModel.h \
-        Pulsar/ReceptionModelPlotter.h \
 	Pulsar/ReceptionModelReport.h \
 	Pulsar/ReceptionModelSolver.h \
 	Pulsar/ReceptionModelSolveGSL.h \
@@ -87,7 +83,6 @@ nobase_include_HEADERS = \
 	Pulsar/StepsInfo.h \
 	Pulsar/StokesCovariance.h \
         Pulsar/SystemCalibrator.h \
-	Pulsar/SystemCalibratorPlotter.h \
 	Pulsar/SystemCalibratorUnloader.h \
         Pulsar/TemplateUncertainty.h \
         Pulsar/TotalCovariance.h \
@@ -201,25 +196,6 @@ rmrot_SOURCES = rmrot.C
 simpol_SOURCES = simpol.C
 
 
-##############################################################################
-#
-# PGPLOT-specific code
-#
-if HAVE_PGPLOT
-
-libPolarimetry_la_SOURCES += \
-	CalibratorPlotter.C \
-	ReceptionCalibratorPlotter.C \
-	SystemCalibratorPlotter.C \
-	ReceptionModelPlotter.C
-
-bin_PROGRAMS += pafit
-
-pafit_SOURCES		= pafit.C 
-pafit_LDADD		= $(LDADD) @PGPLOT_LIBS@
-
-endif
-
 # ######################################################################
 #
 # test programs
@@ -250,8 +226,6 @@ test_IRIonosphere_SOURCES	= test_IRIonosphere.C
 #############################################################################
 #
 
-INCLUDES = -I$(top_srcdir)/More/Plotting
-
 LDADD = libPolarimetry.la \
 	$(top_builddir)/More/MEAL/libMEAL.la \
 	$(top_builddir)/Base/libpsrbase.la \
@@ -259,5 +233,5 @@ LDADD = libPolarimetry.la \
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @PGPLOT_CFLAGS@ @GSL_CFLAGS@
+AM_CPPFLAGS += @GSL_CFLAGS@
 

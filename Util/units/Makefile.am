@@ -14,7 +14,6 @@ include_HEADERS = \
         Error.h \
 	escape.h \
         Estimate.h \
-        EstimatePlotter.h \
         EstimateStats.h \
 	Factory.h \
 	file_cast.h \
@@ -132,15 +131,6 @@ many_calls_SOURCES		= many_calls.C
 
 benchmark_tostring_SOURCES	= benchmark_tostring.C
 
-#############################################################################
-#
-# PGPLOT specific code
-#
-if HAVE_PGPLOT
-
-libunits_la_SOURCES += EstimatePlotter.C
-
-endif
 
 # ######################################################################
 #
@@ -167,6 +157,3 @@ generate_PromoteTraits_LDADD	=
 LDADD = libunits.la
 
 include $(top_srcdir)/config/Makefile.include
-
-AM_CPPFLAGS += @PGPLOT_CFLAGS@
-

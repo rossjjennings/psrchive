@@ -135,11 +135,6 @@ libgenutil_la_SOURCES = \
 	table_stream.C \
 	Warning.C
 
-if HAVE_PGPLOT
-include_HEADERS += JenetAnderson98Plot.h
-libgenutil_la_SOURCES += JenetAnderson98Plot.C
-endif
-
 if HAVE_GSL
 include_HEADERS += PolynomialFit.h Interpolation.h dwt_undec.h SplineFit.h
 libgenutil_la_SOURCES += PolynomialFit.C Interpolation.C dwt_undec.c SplineFit.C
@@ -205,5 +200,5 @@ LDADD = libgenutil.la \
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @PGPLOT_CFLAGS@ @GSL_CFLAGS@
+AM_CPPFLAGS += @GSL_CFLAGS@
 

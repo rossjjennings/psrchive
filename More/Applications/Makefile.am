@@ -15,7 +15,7 @@ bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 pam_SOURCES = pam.C
 
 pat_SOURCES = pat.C
-pat_LDADD = $(LDADD) @PGPLOT_LIBS@ @PTHREAD_LIBS@
+pat_LDADD = $(LDPLOT) @PTHREAD_LIBS@
 
 paz_SOURCES = paz.C zap_periodic_spikes.C
 
@@ -41,7 +41,7 @@ psrover_SOURCES = psrover.C
 psrstat_SOURCES = psrstat.C
 
 psrmodel_SOURCES = psrmodel.C
-psrmodel_LDADD = $(LDADD) @PGPLOT_LIBS@
+psrmodel_LDADD = $(LDPLOT)
 
 psrwt_SOURCES = psrwt.C
 
@@ -51,14 +51,14 @@ pac_SOURCES = pac.C
 
 # Note that pcm uses PGPLOT only if it is available
 pcm_SOURCES = pcm.C
-pcm_LDADD = $(LDADD) @PGPLOT_LIBS@ @PTHREAD_LIBS@
+pcm_LDADD = $(LDPLOT) @PTHREAD_LIBS@
 
 pdv_SOURCES = pdv.C width.C
 
 # Note that rmfit uses PGPLOT only if it is available
 rmfit_SOURCES = rmfit.C width.C
 
-rmfit_LDADD = njkk08/libnjkk08.la $(LDADD) @PGPLOT_LIBS@
+rmfit_LDADD = njkk08/libnjkk08.la $(LDPLOT)
 
 mtm_SOURCES = mtm.C
 distortion_SOURCES = distortion.C
@@ -96,43 +96,55 @@ endif
 if HAVE_PGPLOT
 
 bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi psrzap pav \
-	psrsp psrtrash spa
+	psrsp psrtrash spa lmfit pafit
+
+lmfit_SOURCES = lmfit.C
+lmfit_LDADD = $(LDPLOT)
+
+pafit_SOURCES = pafit.C 
+pafit_LDADD = $(LDPLOT)
 
 pdmp_SOURCES = pdmp.C
-pdmp_LDADD = $(LDADD) @PGPLOT_LIBS@ @PSRXML_LIBS@
+pdmp_LDADD = $(LDPLOT) @PSRXML_LIBS@
 
 psrplot_SOURCES = psrplot.C
-psrplot_LDADD = $(LDADD) @PGPLOT_LIBS@
+psrplot_LDADD = $(LDPLOT)
 
 paas_SOURCES = paas.C
-paas_LDADD = $(LDADD) @PGPLOT_LIBS@
+paas_LDADD = $(LDPLOT)
 
 pas_SOURCES = pas.C
-pas_LDADD = $(LDADD) @PGPLOT_LIBS@
+pas_LDADD = $(LDPLOT)
 
 spa_SOURCES = spa.C
-spa_LDADD = $(LDADD) @PGPLOT_LIBS@
+spa_LDADD = $(LDPLOT)
 
 psrdiff_SOURCES = psrdiff.C
-psrdiff_LDADD = $(LDADD) @PGPLOT_LIBS@
+psrdiff_LDADD = $(LDPLOT)
 
 pacv_SOURCES = pacv.C
-pacv_LDADD = $(LDADD) @PGPLOT_LIBS@
+pacv_LDADD = $(LDPLOT)
 
 pazi_SOURCES = pazi.C
-pazi_LDADD = $(LDADD) @PGPLOT_LIBS@
+pazi_LDADD = $(LDPLOT)
 
 psrzap_SOURCES = psrzap.C
-psrzap_LDADD = $(LDADD) @PGPLOT_LIBS@
+psrzap_LDADD = $(LDPLOT)
 
 pav_SOURCES = pav.C PavApp.C PavApp.h
-pav_LDADD = $(LDADD) @PGPLOT_LIBS@
+pav_LDADD = $(LDPLOT)
 
 psrsp_SOURCES = psrsp.C
-psrsp_LDADD = $(LDADD) @PGPLOT_LIBS@
+psrsp_LDADD = $(LDPLOT)
 
 psrtrash_SOURCES = psrtrash.C
-psrtrash_LDADD = $(LDADD) @PGPLOT_LIBS@
+psrtrash_LDADD = $(LDPLOT)
+
+LDPLOT = $(LDADD) $(top_builddir)/More/Plotting/libpsrplot.la @PGPLOT_LIBS@
+
+else
+
+LDPLOT = $(LDADD)
 
 endif
 
@@ -142,6 +154,8 @@ endif
 LDADD = $(top_builddir)/More/libpsrmore.la \
 	$(top_builddir)/Base/libpsrbase.la \
         $(top_builddir)/Util/libpsrutil.la
+
+
 
 include $(top_srcdir)/config/Makefile.include
 

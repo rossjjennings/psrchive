@@ -1,5 +1,5 @@
 
-noinst_LTLIBRARIES = libPlotting.la
+lib_LTLIBRARIES = libpsrplot.la
 
 ##############################################################################
 #
@@ -7,7 +7,11 @@ noinst_LTLIBRARIES = libPlotting.la
 #
 if HAVE_PGPLOT
 
-nobase_include_HEADERS =					       \
+SUBDIRS = pgutil .
+libpsrplot_la_LIBADD = pgutil/libpgutil.la
+
+nobase_include_HEADERS = \
+	JenetAnderson98Plot.h \
 	Pulsar/Plot.h Pulsar/PlotFactory.h			       \
 	Pulsar/PlotLoop.h					       \
 	Pulsar/PlotEdge.h					       \
@@ -46,9 +50,16 @@ nobase_include_HEADERS =					       \
 	Pulsar/DigitiserStatsPlot.h				       \
 	Pulsar/DigitiserCountsPlot.h				       \
 	Pulsar/InfoLabel.h Pulsar/PlotOptions.h                        \
-	Pulsar/PlotAnnotation.h
+	Pulsar/PlotAnnotation.h \
+        Pulsar/CalibratorPlotter.h \
+	Pulsar/ReceptionCalibratorPlotter.h \
+        Pulsar/ReceptionModelPlotter.h \
+	Pulsar/SystemCalibratorPlotter.h \
+        Pulsar/ReceptionModelAxisPlotter.h
 
-libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
+
+libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
+	Plot.C PlotFactory.C FramedPlot.C \
 	PlotLoop.C \
 	PlotEdgeTI.C \
 	PlotScale.C PlotScaleTI.C \
@@ -102,7 +113,11 @@ libPlotting_la_SOURCES = Plot.C PlotFactory.C FramedPlot.C \
 	BandpassChannelWeightPlot.C BandpassChannelWeightPlotTI.C \
 	DigitiserStatsPlot.C DigitiserStatsPlotTI.C \
 	DigitiserCountsPlot.C DigitiserCountsPlotTI.C \
-	CalPhVFreqPlot.C CalPhVFreqPlotTI.C PlotOptions.C
+	CalPhVFreqPlot.C CalPhVFreqPlotTI.C PlotOptions.C \
+	CalibratorPlotter.C \
+	ReceptionCalibratorPlotter.C \
+	SystemCalibratorPlotter.C \
+	ReceptionModelPlotter.C
 
 endif
 
