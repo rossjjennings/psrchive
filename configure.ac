@@ -260,7 +260,6 @@ AC_CONFIG_FILES([
 		Util/fft/Makefile
 		Util/fft/install_bench
 		Util/genutil/Makefile
-		Util/pgutil/Makefile
 		Util/qtutil/Makefile
 		Util/fitsutil/Makefile
 		Util/tempo/Makefile
@@ -287,6 +286,7 @@ AC_CONFIG_FILES([
 		More/Makefile
 		More/General/Makefile
 		More/Plotting/Makefile
+		More/Plotting/pgutil/Makefile
 		More/MEAL/Makefile
 		More/Timing/Makefile
 		More/Polarimetry/Makefile
