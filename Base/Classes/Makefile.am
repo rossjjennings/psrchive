@@ -91,13 +91,9 @@ libClasses_la_SOURCES = \
 	UnloadOptions.C
 
 TESTS = test_Config
-<<<<<<< HEAD
 
 check_PROGRAMS = $(TESTS)
 
-=======
-check_PROGRAMS = $(TESTS)
->>>>>>> b2aadb7de7de455726c217332ea8b1ae2c93adae
 test_Config_SOURCES = test_Config.C
 
 #############################################################################
