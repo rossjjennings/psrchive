@@ -27,7 +27,7 @@ namespace MEAL {
     Cast (From* _from)
     {
       from = _from;  
-      copy_parameter_policy  (from);
+      this->copy_parameter_policy  (from);
     }
 
     std::string get_name () const

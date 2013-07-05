@@ -80,7 +80,7 @@ struct ScalarMapping<double>
 template<class T, class M>
 MEAL::Vectorize<T,M>::Vectorize (T* function)
 {
-  set_model (function);
+  this->set_model (function);
 }
 
 template<class T, class M>
