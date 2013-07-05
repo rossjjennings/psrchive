@@ -1,7 +1,11 @@
 #!/bin/csh
 
-set resoff=`simpol -s 0.98,0,0,0 -n 1 $argv |& grep mean`
-set reson=`simpol -s 1.02,0,0.04,0 -n 1 $argv |& grep mean`
+set Msamp=1024
+
+echo Simulating $Msamp Msamples ...
+
+set resoff=`simpol -s 0.98,0,0,0 -n $Msamp $argv |& grep mean`
+set reson=`simpol -s 1.02,0,0.04,0 -n $Msamp $argv |& grep mean`
 
 set IUoff=`echo $resoff | sed -e 's|(|,|g' | awk -F, '{print $2, $4}'`
 set IUon=`echo $reson | sed -e 's|(|,|g' | awk -F, '{print $2, $4}'`
