@@ -66,7 +66,7 @@ while test $# -gt 0; do
         ;;
 
     --pgplot-libs)
-        echo @PGPLOT_CFLAGS@ @PGPLOT_LIBS@
+        echo -L@libdir@ -lpsrplot @PGPLOT_CFLAGS@ @PGPLOT_LIBS@
         ;;
 
     --qt-libs)
