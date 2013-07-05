@@ -45,6 +45,7 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
 
       PSRCHIVE_CFLAGS=`$psrchive_config --cflags`
       PSRCHIVE_LIBS=`$psrchive_config --libs`
+      PSRPLOT_LIBS=`$psrchive_config --pgplot-libs`
 
       ac_save_CPPFLAGS="$CPPFLAGS"
       ac_save_LIBS="$LIBS"
@@ -84,6 +85,7 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
     [$2]
   fi
 
+  AC_SUBST(PSRPLOT_LIBS)
   AC_SUBST(PSRCHIVE_LIBS)
   AC_SUBST(PSRCHIVE_CFLAGS)
   AM_CONDITIONAL(HAVE_PSRCHIVE,[test "$have_psrchive" = "yes"])
