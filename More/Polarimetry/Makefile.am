@@ -207,10 +207,9 @@ simpol_SOURCES = simpol.C
 
 TESTS = test_copy test_Feed test_SingleAxis test_TotalCovariance \
 	test_Parallactic test_ReceptionComposite test_ReceptionEvaluate \
-	test_ReceptionModel test_Instrument test_ModeSeparation \
-	test_hand_xyph
+	test_ReceptionModel test_Instrument test_hand_xyph
 
-check_PROGRAMS = $(TESTS) test_IRIonosphere
+check_PROGRAMS = $(TESTS) test_IRIonosphere test_ModeSeparation
 
 test_ReceptionComposite_SOURCES	= test_ReceptionComposite.C
 test_ReceptionEvaluate_SOURCES	= test_ReceptionEvaluate.C
