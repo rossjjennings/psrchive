@@ -14,7 +14,7 @@ endif
 gunzip -c ${fftw}.tar.gz | tar xvf -
 cd $fftw
 
-./configure --enable-float --enable-sse --disable-dependency-tracking --prefix=@prefix@
+./configure --enable-shared --enable-float --enable-sse --disable-dependency-tracking --prefix=@prefix@
 
 make clean
 make
