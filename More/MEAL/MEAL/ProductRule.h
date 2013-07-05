@@ -60,6 +60,26 @@ namespace MEAL {
 
   };
   
+  template<class T>
+  ProductRule<T>* product (T* A, T* B)
+  {
+    Reference::To< ProductRule<T> > result = new ProductRule<T>;
+    result->add_model (A);
+    result->add_model (B);
+    return result.release();
+  }
+
+  template<class T>
+  ProductRule<T>* product (Reference::To<T>& A, T* B)
+  { return product (A.get(), B); }
+
+  template<class T>
+  ProductRule<T>* product (T* A, Reference::To<T>& B)
+  { return product (A, B.get()); }
+
+  template<class T>
+  ProductRule<T>* product (Reference::To<T>& A, Reference::To<T>* B)
+  { return product (A.get(), B.get()); }
 }
 
 

@@ -14,6 +14,8 @@
 #ifndef __Vector_H
 #define __Vector_H
 
+#include "Traits.h"
+
 #include <iostream>
 #include <complex>
 
@@ -207,6 +209,17 @@ Vector<N, std::complex<T> > conj (const Vector< N, std::complex<T> >& input)
   return result;
 }
 
+//! Maps the structure of Vector to other template methods
+template<unsigned N, typename T> struct DatumTraits< Vector<N,T> >
+{
+  typedef T element_type;
+
+  static inline unsigned ndim () { return N; }
+  static inline T& element (Vector<N,T>& t, unsigned i) 
+  { return t[i]; }
+  static inline const T element (const Vector<N,T>& t, unsigned i)
+  { return t[i]; }
+};
 
 //! Useful for quickly printing the components
 template<unsigned N, typename T>

@@ -96,7 +96,7 @@ endif
 if HAVE_PGPLOT
 
 bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi psrzap pav \
-	psrsp psrtrash spa lmfit pafit
+	psrsp psrtrash spa lmfit pafit psr4th
 
 lmfit_SOURCES = lmfit.C
 lmfit_LDADD = $(LDPLOT)
@@ -139,6 +139,9 @@ psrsp_LDADD = $(LDPLOT)
 
 psrtrash_SOURCES = psrtrash.C
 psrtrash_LDADD = $(LDPLOT)
+
+psr4th_SOURCES = psr4th.C
+psr4th_LDADD = $(LDPLOT)
 
 LDPLOT = $(top_builddir)/More/Plotting/libpsrplot.la $(LDADD) @PGPLOT_LIBS@
 

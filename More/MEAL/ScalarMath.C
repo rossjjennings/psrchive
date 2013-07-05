@@ -7,7 +7,7 @@
 
 #include "MEAL/ScalarMath.h"
 #include "MEAL/ScalarParameter.h"
-#include "MEAL/ScalarValue.h"
+#include "MEAL/Value.h"
 
 #include "MEAL/ScalarRoot.h"
 #include "MEAL/ScalarSine.h"
@@ -16,6 +16,7 @@
 #include "MEAL/ScalarHypSine.h"
 #include "MEAL/ScalarHypCosine.h"
 #include "MEAL/ScalarHypTangent.h"
+#include "MEAL/ScalarErrorFunction.h"
 #include "MEAL/ScalarExponential.h"
 #include "MEAL/ScalarLogarithm.h"
 #include "MEAL/ScalarAbsolute.h"
@@ -39,7 +40,7 @@ MEAL::ScalarMath::ScalarMath (const Estimate<double>& value)
     
 MEAL::ScalarMath::ScalarMath (double value)
 {
-  expression = new ScalarValue (value);
+  expression = new Value<Scalar> (value);
 }
 
 MEAL::ScalarMath::ScalarMath (const ScalarMath& s)
@@ -93,31 +94,31 @@ MEAL::ScalarMath::operator /= (const ScalarMath& b)
 const MEAL::ScalarMath
 MEAL::operator + (const ScalarMath& a, const ScalarMath& b)
 {
-  return *Sum<Scalar> (a.expression, b.expression);
+  return *Sum<Scalar> (a.get_expression(), b.get_expression());
 }
 
 const MEAL::ScalarMath
 MEAL::operator - (const ScalarMath& a, const ScalarMath& b)
 {
-  return *Difference<Scalar> (a.expression, b.expression);
+  return *Difference<Scalar> (a.get_expression(), b.get_expression());
 }
 
 const MEAL::ScalarMath
 MEAL::operator * (const ScalarMath& a, const ScalarMath& b)
 {
-  return *Product<Scalar> (a.expression, b.expression);
+  return *Product<Scalar> (a.get_expression(), b.get_expression());
 }
 
 const MEAL::ScalarMath
 MEAL::operator / (const ScalarMath& a, const ScalarMath& b)
 {
-  return *Quotient<Scalar> (a.expression, b.expression);
+  return *Quotient<Scalar> (a.get_expression(), b.get_expression());
 }
 
 const MEAL::ScalarMath
 MEAL::operator - (const ScalarMath& a)
 {
-  return *Negation<Scalar> (a.expression);
+  return *Negation<Scalar> (a.get_expression());
 }
 
 const MEAL::ScalarMath
@@ -150,7 +151,7 @@ const MEAL::ScalarMath
 MEAL::sqrt (const ScalarMath& x)
 {
   ScalarRoot* result = new ScalarRoot;
-  result->set_model( x.expression );
+  result->set_model( x.get_expression() );
   return *result;
 }
 
@@ -159,7 +160,7 @@ const MEAL::ScalarMath
 MEAL::sin (const ScalarMath& x)
 {
   ScalarSine* result = new ScalarSine;
-  result->set_model( x.expression );
+  result->set_model( x.get_expression() );
   return *result;
 }
 
@@ -167,7 +168,7 @@ const MEAL::ScalarMath
 MEAL::cos (const ScalarMath& x)
 {
   ScalarCosine* result = new ScalarCosine;
-  result->set_model( x.expression );
+  result->set_model( x.get_expression() );
   return *result;
 }
 
@@ -175,7 +176,7 @@ const MEAL::ScalarMath
 MEAL::tan (const ScalarMath& x)
 {
   ScalarTangent* result = new ScalarTangent;
-  result->set_model( x.expression );
+  result->set_model( x.get_expression() );
   return *result;
 }
 
@@ -183,7 +184,7 @@ const MEAL::ScalarMath
 MEAL::sinh (const ScalarMath& x)
 {
   ScalarHypSine* result = new ScalarHypSine;
-  result->set_model( x.expression );
+  result->set_model( x.get_expression() );
   return *result;
 }
 
@@ -191,7 +192,7 @@ const MEAL::ScalarMath
 MEAL::cosh (const ScalarMath& x)
 {
   ScalarHypCosine* result = new ScalarHypCosine;
-  result->set_model( x.expression );
+  result->set_model( x.get_expression() );
   return *result;
 }
 
@@ -199,7 +200,7 @@ const MEAL::ScalarMath
 MEAL::tanh (const ScalarMath& x)
 {
   ScalarHypTangent* result = new ScalarHypTangent;
-  result->set_model( x.expression );
+  result->set_model( x.get_expression() );
   return *result;
 }
 
@@ -207,7 +208,15 @@ const MEAL::ScalarMath
 MEAL::abs (const ScalarMath& x)
 {
   ScalarAbsolute* result = new ScalarAbsolute;
-  result->set_model( x.expression );
+  result->set_model( x.get_expression() );
+  return *result;
+}
+
+const MEAL::ScalarMath
+MEAL::erf (const ScalarMath& x)
+{
+  ScalarErrorFunction* result = new ScalarErrorFunction;
+  result->set_model( x.get_expression() );
   return *result;
 }
 
@@ -215,7 +224,7 @@ const MEAL::ScalarMath
 MEAL::exp (const ScalarMath& x)
 {
   ScalarExponential* result = new ScalarExponential;
-  result->set_model( x.expression );
+  result->set_model( x.get_expression() );
   return *result;
 }
 
@@ -223,7 +232,7 @@ const MEAL::ScalarMath
 MEAL::log (const ScalarMath& x)
 {
   ScalarLogarithm* result = new ScalarLogarithm;
-  result->set_model( x.expression );
+  result->set_model( x.get_expression() );
   return *result;
 }
 
@@ -231,7 +240,7 @@ const MEAL::ScalarMath
 MEAL::atanh (const ScalarMath& x)
 {
   UnaryScalar* result = new ScalarInverseHypTangent;
-  result->set_model( x.expression );
+  result->set_model( x.get_expression() );
   return *result;
 }
 
@@ -239,15 +248,15 @@ const MEAL::ScalarMath
 MEAL::atan (const ScalarMath& x)
 {
   UnaryScalar* result = new ScalarInverseTangent;
-  result->set_model( x.expression );
+  result->set_model( x.get_expression() );
   return *result;
 }
 const MEAL::ScalarMath
 MEAL::atan2 (const ScalarMath& y, const ScalarMath& x)
 {
   BinaryScalar* result = new ScalarInverseTangent2;
-  result->set_arg1( y.expression );
-  result->set_arg2( x.expression );
+  result->set_arg1( y.get_expression() );
+  result->set_arg2( x.get_expression() );
   return *result;
 }
 
@@ -255,8 +264,8 @@ const MEAL::ScalarMath
 MEAL::pow (const ScalarMath& x, const ScalarMath& y)
 {
   BinaryScalar* result = new ScalarPower;
-  result->set_arg1( x.expression );
-  result->set_arg2( y.expression );
+  result->set_arg1( x.get_expression() );
+  result->set_arg2( y.get_expression() );
   return *result;
 }
 

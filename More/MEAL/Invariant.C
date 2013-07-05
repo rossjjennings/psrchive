@@ -13,7 +13,7 @@ void MEAL::Invariant::init ()
 
   result = input.invariant();
 
-  bias = Estimate<double>();
+  bias = ScalarMath (Estimate<double>());
 }
 
 MEAL::Invariant::Invariant ()

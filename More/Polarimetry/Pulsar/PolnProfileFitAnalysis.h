@@ -19,8 +19,6 @@
 #include "MEAL/StokesCovariance.h"
 
 #include "MEAL/MuellerTransformation.h"
-#include "MEAL/Complex2Value.h"
-#include "MEAL/Real4Value.h"
 
 #include <vector>
 

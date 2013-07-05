@@ -29,6 +29,7 @@ nobase_include_HEADERS = \
         Pulsar/FluxCalibrator.h \
 	Pulsar/FluxCalManager.h \
 	Pulsar/FluxCalManagerInfo.h \
+	Pulsar/FourthMomentStats.h \
 	Pulsar/FrontendCorrection.h \
         Pulsar/HybridCalibrator.h \
 	Pulsar/InputDataReport.h \
@@ -44,6 +45,7 @@ nobase_include_HEADERS = \
         Pulsar/MeanSingleAxis.h \
         Pulsar/MeasurementEquation.h \
 	Pulsar/ModelParametersReport.h \
+	Pulsar/ModeSeparation.h \
         Pulsar/ObservationUncertainty.h \
         Pulsar/OffPulseCalibrator.h \
         Pulsar/Parallactic.h \
@@ -120,6 +122,7 @@ libPolarimetry_la_SOURCES = \
 	FluxCalibratorExt.C \
 	FluxCalManager.C \
 	FluxCalManagerInfo.C \
+	FourthMomentStats.C \
 	FrontendCorrection.C \
         HybridCalibrator.C \
         Instrument.C \
@@ -136,6 +139,7 @@ libPolarimetry_la_SOURCES = \
         MeanSingleAxis.C \
         MeasurementEquation.C \
 	ModelParametersReport.C \
+	ModeSeparation.C \
         ObservationUncertainty.C \
         OffPulseCalibrator.C \
         Parallactic.C \
@@ -203,8 +207,8 @@ simpol_SOURCES = simpol.C
 
 TESTS = test_copy test_Feed test_SingleAxis test_TotalCovariance \
 	test_Parallactic test_ReceptionComposite test_ReceptionEvaluate \
-	test_ReceptionModel test_Instrument \
-	test_hand_xyph 
+	test_ReceptionModel test_Instrument test_ModeSeparation \
+	test_hand_xyph
 
 check_PROGRAMS = $(TESTS) test_IRIonosphere
 
@@ -214,11 +218,12 @@ test_ReceptionEvaluate_SOURCES	= test_ReceptionEvaluate.C
 test_Feed_SOURCES		= test_Feed.C
 test_Parallactic_SOURCES	= test_Parallactic.C
 test_SingleAxis_SOURCES		= test_SingleAxis.C
-test_TotalCovariance_SOURCES	= test_TotalCovariance.C
 test_Instrument_SOURCES		= test_Instrument.C
 test_hand_xyph_SOURCES		= test_hand_xyph.C
 
 test_ReceptionModel_SOURCES	= test_ReceptionModel.C
+test_TotalCovariance_SOURCES	= test_TotalCovariance.C
+test_ModeSeparation_SOURCES	= test_ModeSeparation.C
 
 test_copy_SOURCES		= test_copy.C
 test_IRIonosphere_SOURCES	= test_IRIonosphere.C

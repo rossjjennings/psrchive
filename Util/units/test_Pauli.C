@@ -131,8 +131,7 @@ int main ()
   //
   // test Hermitian transformations
   //
-  Quaternion<double,Hermitian> B_1 (0, 1, 0, 0);
-  Jones<double> JB_1 = convert (B_1);
+  Jones<double> JB_1 = Pauli::matrix(1);
   cerr << "B_1=" << JB_1 << endl;
   if (JB_1 != sigma_1)
   {
@@ -140,8 +139,7 @@ int main ()
     return -1;
   }
 
-  Quaternion<double,Hermitian> B_2 (0, 0, 1, 0);
-  Jones<double> JB_2 = convert (B_2);
+  Jones<double> JB_2 = Pauli::matrix(2);
   cerr << "B_2=" << JB_2 << endl;
   if (JB_2 != sigma_2)
   {
@@ -149,8 +147,7 @@ int main ()
     return -1;
   }
 
-  Quaternion<double,Hermitian> B_3 (0, 0, 0, 1);
-  Jones<double> JB_3 = convert (B_3);
+  Jones<double> JB_3 = Pauli::matrix(3);
   cerr << "B_3=" << JB_3 << endl;
   if (JB_3 != sigma_3)
   {

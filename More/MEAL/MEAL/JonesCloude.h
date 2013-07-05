@@ -16,12 +16,12 @@
 
 #include "MEAL/Complex4.h"
 #include "MEAL/Complex2.h"
-#include "MEAL/Composite.h"
+#include "MEAL/Convert.h"
 
 namespace MEAL {
 
   //! Converts a Jones matrix into a Cloude target coherency matrix
-  class JonesCloude : public MEAL::Complex4
+  class JonesCloude : public Convert<Complex2,Complex4>
   {
 
   public:
@@ -29,14 +29,11 @@ namespace MEAL {
     //! Default constructor
     JonesCloude (Complex2* = 0);
 
-    //! Destructor
-    ~JonesCloude () { }
-
     //! Set the transformation, \f$ J \f$
-    virtual void set_transformation (Complex2*);
+    virtual void set_transformation (Complex2* model) { set_model(model); }
 
     //! Get the transformation, \f$ J \f$
-    virtual Complex2* get_transformation () { return transformation; }
+    virtual Complex2* get_transformation () { return get_model(); }
 
     std::string get_name () const;
 
@@ -44,13 +41,6 @@ namespace MEAL {
 
     //! Calculate the Cloude matrix and its gradient
     virtual void calculate (Result& result, std::vector<Result>*);
-
-    //! The transformation, \f$ J \f$
-    Project<Complex2> transformation;
-
-    //! Composite parameter policy
-    Composite composite;
-
   };
 
 }

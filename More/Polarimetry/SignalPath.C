@@ -18,7 +18,7 @@
 #include "MEAL/Polynomial.h"
 #include "MEAL/Gain.h"
 #include "MEAL/Steps.h"
-#include "MEAL/Complex2Value.h"
+#include "MEAL/Value.h"
 #include "MEAL/JonesMueller.h"
 
 #include <iostream>
@@ -233,9 +233,8 @@ void Calibration::SignalPath::build ()
   //
   // the known transformation from the sky to the receptors
   //
-  MEAL::Complex2Value* sky_to_receptors = new MEAL::Complex2Value;
-  projection.signal.connect (sky_to_receptors,
-			     &MEAL::Complex2Value::set_value);
+  MEAL::Value<MEAL::Complex2>* sky = new MEAL::Value<MEAL::Complex2>;
+  projection.signal.connect (sky, &MEAL::Value<MEAL::Complex2>::set_value);
 
   // new MEAL::EvaluationTracer<MEAL::Complex2>( known );
 
@@ -247,7 +246,7 @@ void Calibration::SignalPath::build ()
   pulsar_path = new MEAL::ProductRule<MEAL::Complex2>;
 
   *pulsar_path *= instrument;
-  *pulsar_path *= sky_to_receptors;
+  *pulsar_path *= sky;
 
   if (!equation)
   {

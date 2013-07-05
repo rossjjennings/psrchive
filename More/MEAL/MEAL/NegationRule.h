@@ -49,6 +49,14 @@ namespace MEAL {
 
   };
 
+  //! Returns a new negation of the model
+  template<class T>
+  NegationRule<T>* negation (T* model)
+  {
+    NegationRule<T>* result = new NegationRule<T>;
+    result->set_model (model);
+    return result;
+  }
 }
 
 template<class T>

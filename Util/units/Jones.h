@@ -28,6 +28,10 @@ public:
   Jones (T scalar = 0.0)
     : j00(scalar), j01(0.0), j10(0.0), j11(scalar) { }
 
+  //! Construct from a castable type
+  template<typename U> explicit Jones (const U& scalar)
+    : j00(scalar), j01(0.0), j10(0.0), j11(scalar) { }
+
   //! Construct from std::complex<T>
   Jones (std::complex<T> j00_, std::complex<T> j01_,
 	 std::complex<T> j10_, std::complex<T> j11_)
@@ -63,6 +67,12 @@ public:
       j01=std::complex<T>(s.j01.real(), s.j01.imag());
       j10=std::complex<T>(s.j10.real(), s.j10.imag()); 
       j11=std::complex<T>(s.j11.real(), s.j11.imag()); return *this; }
+
+  typedef Matrix< 2, 2, std::complex<T> > equiv;
+
+  //! Cast to Matrix
+  operator equiv () const
+  { equiv M; M[0][0]=j00; M[0][1]=j01; M[1][0]=j10; M[1][1]=j11; return M; }
 
   //! Add another Jones<T> instance to this one
   Jones& operator += (const Jones& s)
@@ -193,6 +203,8 @@ const Jones<T>& Jones<T>::identity ()
 template<typename T> struct DatumTraits< Jones<T> >
 {
   ElementTraits< std::complex<T> > element_traits;
+  typedef std::complex<T> element_type;
+
   static inline unsigned ndim () { return 4; }
   static inline std::complex<T>& element (Jones<T>& t, unsigned i) 
   { return t[i]; }

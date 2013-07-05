@@ -50,5 +50,7 @@ namespace MEAL {
 
 }
 
+// returns atan(x*pi/2)/(x*pi/2)
+double atanc (double x, double* derivative = 0, double* datancc = 0);
 
 #endif

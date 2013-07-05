@@ -7,8 +7,9 @@
 
 #include "MEAL/JonesMueller.h"
 #include "Pauli.h"
+#include <assert.h>
 
-MEAL::JonesMueller::JonesMueller (Complex2* xform) : composite (this)
+MEAL::JonesMueller::JonesMueller (Complex2* xform)
 {
   if (xform)
     set_transformation (xform);
@@ -17,39 +18,11 @@ MEAL::JonesMueller::JonesMueller (Complex2* xform) : composite (this)
 std::string MEAL::JonesMueller::get_name () const
 {
   std::string name = "JonesMueller";
-  if (transformation)
-    name += "[" + transformation->get_name() + "]";
+  if (has_model())
+    name += "[" + get_model()->get_name() + "]";
   return name;
 }
 
-
-/*! Complex2his method unmaps the old transformation before mapping xform */
-void MEAL::JonesMueller::set_transformation (Complex2* _transformation) try
-{
-  if (!_transformation)
-    return;
-
-  if (transformation)
-  {
-    if (Complex2::verbose)
-      std::cerr << "MEAL::JonesMueller::set_transformation unmap old"
-		<< std::endl;
-
-    composite.unmap (transformation);
-  }
-
-  transformation = _transformation;
-
-  if (Complex2::verbose)
-    std::cerr << "MEAL::JonesMueller::set_transformation map new" 
-	      << std::endl;
-
-  composite.map (transformation);
-}
-catch (Error& error)
-{
-  throw error += "MEAL::JonesMueller::set_transformation";
-}
 
 //! Calculate the Mueller matrix and its gradient
 void MEAL::JonesMueller::calculate (Matrix<4,4,double>& result,
@@ -61,12 +34,14 @@ void MEAL::JonesMueller::calculate (Matrix<4,4,double>& result,
   if (grad)
     jones_grad_ptr = &jones_grad;
 
-  Jones<double> jones_result = transformation->evaluate (jones_grad_ptr);
+  Jones<double> jones_result = get_model()->evaluate (jones_grad_ptr);
 
   result = Mueller( jones_result );
 
   if (!grad)
     return;
+
+  assert( grad->size() == jones_grad.size() );
 
   for (unsigned i=0; i<grad->size(); i++)
     (*grad)[i] = Mueller( jones_result, jones_grad[i] );

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009 by Willem van Straten
+ *   Copyright (C) 2009 - 2011 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,6 +8,7 @@
 #include "Pulsar/RemoveBaseline.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/MoreProfiles.h"
 #include "Pulsar/PhaseWeight.h"
 
 void Pulsar::RemoveBaseline::Total::transform (Archive* archive)
@@ -51,7 +52,20 @@ void Pulsar::RemoveBaseline::Each::transform (Archive* archive)
 	Profile* p = subint->get_Profile(ipol, ichan);
 	baseline->set_Profile (p);
 	p->offset (-baseline->get_mean().val);
-      }
-    }
-  }
+
+	MoreProfiles* more = p->get<MoreProfiles>();
+
+	if (!more)
+	  continue;
+
+	unsigned nmore = more->get_size();
+	for (unsigned imore=0; imore < nmore; imore++)
+	{
+	  p = more->get_Profile (imore);
+	  baseline->set_Profile (p);
+	  p->offset (-baseline->get_mean().val);
+	}
+      } // for each poln
+    } // for each chan
+  } // for each subint
 };

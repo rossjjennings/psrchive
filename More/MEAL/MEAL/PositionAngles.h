@@ -15,11 +15,11 @@
 #define __PositionAngles_H
 
 #include "MEAL/Scalar.h"
+#include "MEAL/Value.h"
 #include "MEAL/VectorRule.h"
 
 namespace MEAL {
 
-  class ScalarValue;
   class ScalarParameter;
 
   //! Function returns position angle(s) as a function of frequency
@@ -91,7 +91,7 @@ namespace MEAL {
     ScalarParameter* rotation_measure;
 
     //! The frequency
-    ScalarValue* frequency;
+    Value<Scalar>* frequency;
 
     //! The change in position angle
     Reference::To<Scalar> delta_pa;

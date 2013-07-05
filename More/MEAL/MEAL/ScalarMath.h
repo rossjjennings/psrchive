@@ -18,7 +18,56 @@
 
 namespace MEAL {
 
-  class ScalarMath;
+  //! Convenience interface to building expressions from elements
+  class ScalarMath {
+
+  public:
+
+    //! Default construct from a scalar value
+    ScalarMath (double value = 0.0);
+
+    //! Construct from a scalar value
+    explicit ScalarMath (const Estimate<double>& value);
+
+    //! Copy constructor
+    ScalarMath (const ScalarMath& s);
+
+    //! Construct from a Reference::To<Scalar>
+    ScalarMath (const Reference::To<Scalar>& s);
+
+    //! Construct from a pointer to Scalar
+    ScalarMath (Scalar& s);
+
+    //! Assignment operator
+    const ScalarMath operator = (const ScalarMath& s);
+
+    //! Addition operator
+    const ScalarMath operator += (const ScalarMath& b);
+
+    //! Subtraction operator
+    const ScalarMath operator -= (const ScalarMath& b);
+    
+    //! Multiplication operator
+    const ScalarMath operator *= (const ScalarMath& b);
+    
+    //! Division operator
+    const ScalarMath operator /= (const ScalarMath& b);
+
+    //! Evaluate the expression
+    double evaluate () const;
+
+    //! Evaluate the expression and its estimated error
+    Estimate<double> get_Estimate () const;
+
+    //! Access the expression
+    Scalar* get_expression () const { return expression; }
+
+  protected:
+
+    //! The expression
+    Reference::To<Scalar> expression;
+
+  };
 
   //! Negation operator
   const ScalarMath operator - (const ScalarMath& b);
@@ -83,6 +132,9 @@ namespace MEAL {
   //! Return a ScalarMath instance representing tanh(x)
   const ScalarMath tanh (const ScalarMath& x);
 
+  //! Return a ScalarMath instance representing erf(x)
+  const ScalarMath erf (const ScalarMath& x);
+
   //! Return a ScalarMath instance representing exp(x)
   const ScalarMath exp (const ScalarMath& x);
 
@@ -97,89 +149,6 @@ namespace MEAL {
 
   //! Return a ScalarMath instance representing tan(y/x)
   const ScalarMath atan2 (const ScalarMath& y, const ScalarMath& x);
-
-  //! Convenience interface to building expressions from elements
-  class ScalarMath {
-
-  public:
-
-    //! Default construct from a scalar value
-    ScalarMath (double value = 0.0);
-
-    //! Construct from a scalar value
-    ScalarMath (const Estimate<double>& value);
-
-    //! Copy constructor
-    ScalarMath (const ScalarMath& s);
-
-    //! Construct from a Reference::To<Scalar>
-    ScalarMath (const Reference::To<Scalar>& s);
-
-    //! Construct from a pointer to Scalar
-    ScalarMath (Scalar& s);
-
-    //! Assignment operator
-    const ScalarMath operator = (const ScalarMath& s);
-
-    //! Addition operator
-    const ScalarMath operator += (const ScalarMath& b);
-
-    //! Subtraction operator
-    const ScalarMath operator -= (const ScalarMath& b);
-    
-    //! Multiplication operator
-    const ScalarMath operator *= (const ScalarMath& b);
-    
-    //! Division operator
-    const ScalarMath operator /= (const ScalarMath& b);
-
-    friend const ScalarMath operator - (const ScalarMath& b);
-    friend const ScalarMath operator + (const ScalarMath& b);
-    friend const ScalarMath operator + (const ScalarMath& a,
-					const ScalarMath& b);
-    friend const ScalarMath operator - (const ScalarMath& a,
-					const ScalarMath& b);
-    friend const ScalarMath operator * (const ScalarMath& a,
-					const ScalarMath& b);
-    friend const ScalarMath operator / (const ScalarMath& a,
-					const ScalarMath& b);
-    friend bool operator == (const ScalarMath& a, const ScalarMath& b);
-    friend bool operator != (const ScalarMath& a, const ScalarMath& b);
-    friend bool operator < (const ScalarMath& a, const ScalarMath& b);
-    friend bool operator > (const ScalarMath& a, const ScalarMath& b);
-    friend bool operator <= (const ScalarMath&, const ScalarMath&);
-    friend bool operator >= (const ScalarMath&, const ScalarMath&);
-    friend const ScalarMath pow (const ScalarMath& x, const ScalarMath& y);
-    friend const ScalarMath sqrt (const ScalarMath& x);
-    friend const ScalarMath abs (const ScalarMath& x);
-    friend const ScalarMath sin (const ScalarMath& x);
-    friend const ScalarMath cos (const ScalarMath& x);
-    friend const ScalarMath tan (const ScalarMath& x);
-    friend const ScalarMath sinh (const ScalarMath& x);
-    friend const ScalarMath cosh (const ScalarMath& x);
-    friend const ScalarMath tanh (const ScalarMath& x);
-    friend const ScalarMath exp (const ScalarMath& x);
-    friend const ScalarMath log (const ScalarMath& x);
-    friend const ScalarMath atanh (const ScalarMath& x);
-    friend const ScalarMath atan (const ScalarMath& x);
-    friend const ScalarMath atan2 (const ScalarMath& y, const ScalarMath& x);
-
-    //! Evaluate the expression
-    double evaluate () const;
-
-    //! Evaluate the expression and its estimated error
-    Estimate<double> get_Estimate () const;
-
-    //! Access the expression
-    Scalar* get_expression () { return expression; }
-
-  protected:
-
-    //! The expression
-    Reference::To<Scalar> expression;
-
-  };
-
 
 }
 

@@ -92,6 +92,7 @@ MEAL::Function* MEAL::Function::clone () const
 void MEAL::Function::copy_parameter_policy (const Function* function)
 {
   parameter_policy = function->parameter_policy;
+  changed.send (Function::ParameterCount);
 }
 
 void MEAL::Function::set_parameter_policy (ParameterPolicy* policy)

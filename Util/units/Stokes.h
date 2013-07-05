@@ -31,7 +31,7 @@ class Stokes : public Vector<4,T>
   //! Construct from a 4-vector
   template<typename U>
   Stokes (const Vector<4,U>& v)
-    : Vector<4,T> (v[0], v[1], v[2], v[3]) {}
+    : Vector<4,T> (T(v[0]), T(v[1]), T(v[2]), T(v[3])) {}
 
   //! Construct from a scalar and 3-vector
   template<typename U>
@@ -122,5 +122,8 @@ Estimate<T> invariant ( const Stokes< Estimate<T> >& stokes )
 
   return result;
 }
+
+template<typename T> struct DatumTraits< Stokes<T> > 
+  : public DatumTraits< Vector<4,T> > {};
 
 #endif

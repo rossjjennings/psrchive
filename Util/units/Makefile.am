@@ -11,6 +11,7 @@ include_HEADERS = \
         Configuration.h \
         Conventions.h \
 	debug.h \
+	Dirac.h \
         Error.h \
 	escape.h \
         Estimate.h \
@@ -54,6 +55,7 @@ libunits_la_SOURCES = \
 	Alias.C \
         Configuration.C \
         Conventions.C \
+	Dirac.C \
         Error.C \
 	Estimate.C \
 	escape.C \
@@ -88,7 +90,7 @@ TESTS = test_Alias test_tostring test_Conventions		    \
         test_TextInterface test_parse_indeces test_TextIndex	    \
 	test_Vector test_Matrix test_Jacobi test_eigen		    \
 	test_Jones test_Quaternion test_Pauli			    \
-	test_ModifyRestore
+	test_ModifyRestore test_Dirac
 
 check_PROGRAMS = $(TESTS) many_references many_calls benchmark_tostring
 
@@ -111,10 +113,11 @@ test_Vector_SOURCES		= test_Vector.C
 test_Matrix_SOURCES		= test_Matrix.C
 test_Jacobi_SOURCES		= test_Jacobi.C
 test_eigen_SOURCES		= test_eigen.C
+
 test_Jones_SOURCES		= test_Jones.C
 test_Quaternion_SOURCES		= test_Quaternion.C
 test_Pauli_SOURCES		= test_Pauli.C
-
+test_Dirac_SOURCES		= test_Dirac.C
 test_Basis_SOURCES		= test_Basis.C
 test_Stokes_SOURCES		= test_Stokes.C
 

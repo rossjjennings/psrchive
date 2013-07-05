@@ -12,21 +12,25 @@ nobase_include_HEADERS = \
         MEAL/BinaryScalar.h \
         MEAL/Boost.h \
 	MEAL/Boost1.h \
+	MEAL/BoostUnion.h \
         MEAL/Cached.h \
         MEAL/CalculatePolicy.h \
+	MEAL/Cast.h \
         MEAL/ChainRule.h \
         MEAL/Coherency.h \
         MEAL/Complex2Constant.h \
 	MEAL/Complex.h \
 	MEAL/ComplexCartesian.h \
+	MEAL/ComplexCorrelation.h \
 	MEAL/ComplexRVM.h \
         MEAL/Complex2.h \
         MEAL/Complex2Math.h \
-        MEAL/Complex2Value.h \
 	MEAL/Complex4.h \
         MEAL/Composite.h \
         MEAL/CongruenceTransformation.h \
         MEAL/Constant.h \
+	MEAL/Convert.h \
+	MEAL/CrossCoherency.h \
         MEAL/CyclicParameter.h \
 	MEAL/Depolarizer.h \
 	MEAL/Evaluable.h \
@@ -44,11 +48,13 @@ nobase_include_HEADERS = \
         MEAL/GroupRule.h \
         MEAL/Invariant.h \
         MEAL/InverseRule.h \
-	MEAL/JonesMueller.h \
 	MEAL/JonesCloude.h \
+	MEAL/JonesMueller.h \
+	MEAL/JonesSpinor.h \
 	MEAL/LeastSquares.h \
         MEAL/LevenbergMarquardt.h \
         MEAL/Mean.h \
+	MEAL/ModeCoherency.h \
 	MEAL/MuellerTransformation.h \
         MEAL/NegationRule.h \
         MEAL/NoParameters.h \
@@ -56,6 +62,7 @@ nobase_include_HEADERS = \
         MEAL/NotCached.h \
 	MEAL/Null.h \
         MEAL/OneParameter.h \
+	MEAL/OrthogonalModes.h \
         MEAL/ParameterPolicy.h \
 	MEAL/ParameterTracer.h \
         MEAL/Parameters.h \
@@ -72,18 +79,19 @@ nobase_include_HEADERS = \
 	MEAL/Projection.h \
 	MEAL/RandomPolar.h \
 	MEAL/Real4.h \
-	MEAL/Real4Value.h \
         MEAL/RotatingVectorModel.h \
         MEAL/Rotation.h \
 	MEAL/Rotation1.h \
         MEAL/RuleMath.h \
+        MEAL/Scalar.h \
         MEAL/ScalarAbsolute.h \
         MEAL/ScalarArgument.h \
+	MEAL/ScalarAtanc.h \
         MEAL/ScalarBesselI0.h \
         MEAL/ScalarConstant.h \
         MEAL/ScalarCosine.h \
+	MEAL/ScalarErrorFunction.h \
         MEAL/ScalarExponential.h \
-        MEAL/Scalar.h \
         MEAL/ScalarHypCosine.h \
         MEAL/ScalarHypSine.h \
         MEAL/ScalarHypTangent.h \
@@ -97,9 +105,12 @@ nobase_include_HEADERS = \
         MEAL/ScalarRoot.h \
         MEAL/ScalarSine.h \
         MEAL/ScalarTangent.h \
-        MEAL/ScalarValue.h \
+	MEAL/ScalarVector.h \
         MEAL/ScaledVonMisesDeriv.h \
         MEAL/ScaledVonMises.h \
+	MEAL/SingularCoherency.h \
+	MEAL/Spinor.h \
+	MEAL/SpinorJones.h \
 	MEAL/Steps.h \
 	MEAL/StokesCovariance.h \
 	MEAL/StokesError.h \
@@ -108,11 +119,16 @@ nobase_include_HEADERS = \
 	MEAL/Transformation.h \
         MEAL/UnaryRule.h \
         MEAL/UnaryScalar.h \
+	MEAL/Union.h \
+	MEAL/UnitTangent.h \
         MEAL/Univariate.h \
         MEAL/UnivariatePolicy.h \
+	MEAL/Value.h \
+	MEAL/Vectorize.h \
         MEAL/VectorRule.h \
         MEAL/VelocityModel.h \
-        MEAL/VonMises.h
+        MEAL/VonMises.h \
+	MEAL/Wrap.h
 
 libMEAL_la_SOURCES = \
         Argument.C \
@@ -120,17 +136,19 @@ libMEAL_la_SOURCES = \
         BinaryScalar.C \
         Boost.C \
 	Boost1.C \
+	BoostUnion.C \
         Coherency.C \
 	Complex.C \
 	ComplexCartesian.C \
+	ComplexCorrelation.C \
 	ComplexRVM.C \
         Complex2.C \
         Complex2Constant.C \
         Complex2Math.C \
-        Complex2Value.C \
 	Complex4.C \
         Composite.C \
         CongruenceTransformation.C \
+	CrossCoherency.C \
         CyclicParameter.C \
 	Depolarizer.C \
         ForwardChanged.C \
@@ -144,13 +162,16 @@ libMEAL_la_SOURCES = \
         Gaussian.C \
 	GimbalLockMonitor.C \
         Invariant.C \
-	JonesMueller.C \
 	JonesCloude.C \
+	JonesMueller.C \
+	JonesSpinor.C \
 	LeastSquares.C \
+	ModeCoherency.C \
 	MuellerTransformation.C \
         NormalizeStokes.C \
 	Null.C \
         OneParameter.C \
+	OrthogonalModes.C \
         ParameterPolicy.C \
 	ParameterTracer.C \
         Parameters.C \
@@ -163,15 +184,16 @@ libMEAL_la_SOURCES = \
         Projection.C \
 	RandomPolar.C \
 	Real4.C \
-	Real4Value.C \
         RotatingVectorModel.C \
         Rotation.C \
 	Rotation1.C \
+        Scalar.C \
         ScalarAbsolute.C \
         ScalarArgument.C \
-        Scalar.C \
+	ScalarAtanc.C \
         ScalarConstant.C \
         ScalarCosine.C \
+	ScalarErrorFunction.C \
         ScalarExponential.C \
         ScalarHypCosine.C \
         ScalarHypSine.C \
@@ -186,23 +208,30 @@ libMEAL_la_SOURCES = \
         ScalarRoot.C \
         ScalarSine.C \
         ScalarTangent.C \
-        ScalarValue.C \
+	ScalarVector.C \
         ScaledVonMises.C \
         ScaledVonMisesDeriv.C \
+	SingularCoherency.C \
+	Spinor.C \
+	SpinorJones.C \
 	Steps.C \
 	StokesCovariance.C \
 	StokesError.C \
         Tracer.C \
         UnaryScalar.C \
+	Union.C \
+	UnitTangent.C \
         UnivariatePolicy.C \
         VelocityModel.C 
 
 TESTS = \
 	test_copy test_Axis test_Projection test_Composite test_get_imap \
-	test_BasisRule test_Scalar test_Complex2Product                  \
-	test_Polar test_Rotation                                         \
-	test_Invariant test_CyclicParameter test_Univariate              \
-	test_StokesError test_StokesCovariance
+	test_BasisRule test_Scalar test_Complex2Product			 \
+	test_Polar test_Rotation					 \
+	test_Invariant test_CyclicParameter test_Univariate		 \
+	test_StokesError test_StokesCovariance test_Vectorize		 \
+	test_UnitTangent test_ScalarAtanc test_ComplexCorrelation	 \
+	test_Spinor test_CrossCoherency test_JonesMueller
 
 check_PROGRAMS = $(TESTS) test_Function_load 
 
@@ -222,6 +251,13 @@ test_Invariant_SOURCES		= test_Invariant.C
 test_StokesError_SOURCES	= test_StokesError.C 
 test_StokesCovariance_SOURCES	= test_StokesCovariance.C 
 test_Function_load_SOURCES	= test_Function_load.C
+test_Vectorize_SOURCES		= test_Vectorize.C
+test_UnitTangent_SOURCES	= test_UnitTangent.C
+test_ScalarAtanc_SOURCES	= test_ScalarAtanc.C
+test_ComplexCorrelation_SOURCES = test_ComplexCorrelation.C
+test_Spinor_SOURCES		= test_Spinor.C
+test_CrossCoherency_SOURCES	= test_CrossCoherency.C
+test_JonesMueller_SOURCES	= test_JonesMueller.C
 
 ##############################################################################
 #

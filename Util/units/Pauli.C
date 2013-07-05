@@ -19,3 +19,10 @@ Basis<double>& Pauli::basis()
 
   return *basis;
 }
+
+Jones<double> Pauli::matrix (unsigned i)
+{
+  Quaternion<double,Hermitian> q;
+  q[i] = 1;
+  return convert (q);
+}

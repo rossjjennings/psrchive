@@ -66,7 +66,8 @@ double PolynomialFit::evaluate(double x_in)
   double result = 0.0, yy=1.0;
   x_in -= x_avg; // Get x offset
 
-  for (unsigned i=0; i<=ndeg; i++) {
+  for (int i=0; i<=ndeg; i++)
+  {
     result += coeffs[i].get_value() * yy;
     yy *= x_in;
   }
@@ -87,7 +88,8 @@ double PolynomialFit::evaluate_deriv(double x_in)
   double result=0.0, yy=1.0;
   x_in -= x_avg;
 
-  for (unsigned i=1; i<=ndeg; i++) {
+  for (int i=1; i<=ndeg; i++)
+  {
     result += coeffs[i].get_value() * (double)i * yy;
     yy *= x_avg;
   }
@@ -118,7 +120,8 @@ double PolynomialFit::evaluate_moment(double x0, double x1, int n)
   x1 -= x_avg;
   double xx0=pow(x0,n+1), xx1=pow(x1,n+1);
   double result = 0.0;
-  for (unsigned i=0; i<=ndeg; i++) {
+  for (int i=0; i<=ndeg; i++)
+  {
     // This may get numerically bad for very high order polynomials.
     result += coeffs[i].get_value() * (xx1 - xx0) / (double)(i+n+1);
     xx0 *= x0;

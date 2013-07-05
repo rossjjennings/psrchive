@@ -59,6 +59,26 @@ namespace MEAL {
 
   };
   
+  template<class T>
+  SumRule<T>* sum (T* A, T* B)
+  {
+    Reference::To< SumRule<T> > result = new SumRule<T>;
+    result->add_model (A);
+    result->add_model (B);
+    return result.release();
+  }
+
+  template<class T>
+  SumRule<T>* sum (Reference::To<T>& A, T* B)
+  { return sum (A.get(), B); }
+
+  template<class T>
+  SumRule<T>* sum (T* A, Reference::To<T>& B)
+  { return sum (A, B.get()); }
+
+  template<class T>
+  SumRule<T>* sum (Reference::To<T>& A, Reference::To<T>* B)
+  { return sum (A.get(), B.get()); }
 }
 
 

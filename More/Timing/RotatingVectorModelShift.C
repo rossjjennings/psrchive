@@ -34,7 +34,7 @@ Estimate<double> RotatingVectorModelShift::get_shift () const try
   MEAL::RotatingVectorModel* RVM = rvmfit->get_model()->get_rvm();
 
   // divide by 2pi because ArrivalTime expect answer in dimensionless turns
-  return RVM->magnetic_meridian->get_Estimate (0) * 0.5 / M_PI;
+  return RVM->magnetic_meridian->get_Estimate (0) * (0.5 / M_PI);
 }
  catch (Error& error)
    {
