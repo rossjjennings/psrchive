@@ -21,7 +21,8 @@ nodist_rhythm_SOURCES = $(CLEANFILES)
 
 INCLUDES = -I$(top_builddir)/local_include @QTDRIV_CFLAGS@
 
-LDADD = $(top_builddir)/More/libpsrmore.la \
+LDADD = $(top_builddir)/More/Plotting/libpsrplot.la \
+	$(top_builddir)/More/libpsrmore.la \
         $(top_builddir)/Base/libpsrbase.la \
         $(top_builddir)/Util/libpsrutil.la @QTDRIV_LIBS@
 

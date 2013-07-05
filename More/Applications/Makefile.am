@@ -140,7 +140,7 @@ psrsp_LDADD = $(LDPLOT)
 psrtrash_SOURCES = psrtrash.C
 psrtrash_LDADD = $(LDPLOT)
 
-LDPLOT = $(LDADD) $(top_builddir)/More/Plotting/libpsrplot.la @PGPLOT_LIBS@
+LDPLOT = $(top_builddir)/More/Plotting/libpsrplot.la $(LDADD) @PGPLOT_LIBS@
 
 else
 
@@ -154,8 +154,6 @@ endif
 LDADD = $(top_builddir)/More/libpsrmore.la \
 	$(top_builddir)/Base/libpsrbase.la \
         $(top_builddir)/Util/libpsrutil.la
-
-
 
 include $(top_srcdir)/config/Makefile.include
 

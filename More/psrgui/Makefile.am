@@ -28,6 +28,7 @@ psrgui_SOURCES = psrgui.C
 INCLUDES = -I$(top_builddir)/local_include
 
 LDADD = libpsrgui.la \
+	$(top_builddir)/More/Plotting/libpsrplot.la \
         $(top_builddir)/More/libpsrmore.la \
         $(top_builddir)/Base/libpsrbase.la \
         $(top_builddir)/Util/libpsrutil.la \
