@@ -60,6 +60,12 @@ template<> struct FITS_traits<long> {
 };
 
 //! Template specialization for long
+template<> struct FITS_traits<long long> {
+  static inline int datatype() { return TLONGLONG; }
+  static inline long null () { return -1; }
+};
+
+//! Template specialization for long
 template<> struct FITS_traits<unsigned> {
   static inline int datatype() { return TUINT; }
   static inline long null () { return 0; }
