@@ -102,20 +102,23 @@ float Pulsar::SpectralKurtosis::get_filtered_sum (unsigned ichan, unsigned ipol)
 void Pulsar::SpectralKurtosis::set_filtered_sum (unsigned ichan, unsigned ipol, float sum)
 {
   range_check (ichan, ipol, "SpectralKurtosis::set_filtered_sum");
+
+  filtered_sum.resize (nchan * npol);
   filtered_sum [nchan*ipol + ichan] = sum;
 }
 
-uint64_t Pulsar::SpectralKurtosis::get_filtered_hits (unsigned ichan, unsigned ipol) const
+uint64_t Pulsar::SpectralKurtosis::get_filtered_hits (unsigned ichan) const
 {
   const_cast<SpectralKurtosis *>(this)->get_data();
-  range_check (ichan, ipol, "SpectralKurtosis::get_filtered_hits");
-  return filtered_hits [nchan*ipol + ichan];
+  range_check (ichan, 0, "SpectralKurtosis::get_filtered_hits");
+  return filtered_hits [ichan];
 }
 
-void Pulsar::SpectralKurtosis::set_filtered_hits (unsigned ichan, unsigned ipol, uint64_t hits)
+void Pulsar::SpectralKurtosis::set_filtered_hits (unsigned ichan, uint64_t hits)
 {
-  range_check (ichan, ipol, "SpectralKurtosis::set_filtered_hits");
-  filtered_hits [nchan*ipol + ichan] = hits;
+  range_check (ichan, 0, "SpectralKurtosis::set_filtered_hits");
+  filtered_hits.resize (nchan);
+  filtered_hits [ichan] = hits;
 }
 
 float Pulsar::SpectralKurtosis::get_unfiltered_sum (unsigned ichan, unsigned ipol) const
@@ -128,6 +131,7 @@ float Pulsar::SpectralKurtosis::get_unfiltered_sum (unsigned ichan, unsigned ipo
 void Pulsar::SpectralKurtosis::set_unfiltered_sum (unsigned ichan, unsigned ipol, float sum)
 {
   range_check (ichan, ipol, "SpectralKurtosis::set_unfiltered_sum");
+  unfiltered_sum.resize (nchan * npol);
   unfiltered_sum [nchan*ipol + ichan] = sum;
 }
 
