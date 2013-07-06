@@ -70,7 +70,7 @@ void Pulsar::FITSArchive::SKLoader::load (SpectralKurtosis * sk)
   unsigned int npol = (unsigned) ncpar;
 
   // Get NCHAN [nchan]
-  int nchan = 0;
+  unsigned nchan = 0;
   psrfits_read_key (fptr, "NCHAN", &nchan);
 
   // Allocate internal storage
@@ -98,7 +98,7 @@ void Pulsar::FITSArchive::SKLoader::load (SpectralKurtosis * sk)
   vector<float> fil_sum (dimension);
   psrfits_read_col (fptr, "FIL_SUM", fil_sum, row);
 
-  vector<unsigned> fil_hits (dimension);
+  vector<unsigned> fil_hits (nchan);
   psrfits_read_col (fptr, "FIL_HIT", fil_hits, row);
 
   vector<float> unfil_sum (dimension);
@@ -113,10 +113,11 @@ void Pulsar::FITSArchive::SKLoader::load (SpectralKurtosis * sk)
   unsigned count = 0;
   for (unsigned ichan = 0; ichan < nchan; ichan++)
   {
+    sk->set_filtered_hits (ichan, fil_hits[ichan]);
+
     for (int ipol= 0; ipol < npol; ipol++)
     {
       sk->set_filtered_sum (ichan, ipol, fil_sum[ipol*nchan + ichan]);
-      sk->set_filtered_hits (ichan, ipol, fil_hits[ipol*nchan + ichan]);
       sk->set_unfiltered_sum (ichan, ipol, unfil_sum[ipol*nchan + ichan]);
       count++;
     }

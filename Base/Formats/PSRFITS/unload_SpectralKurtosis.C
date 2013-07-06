@@ -68,13 +68,16 @@ void Pulsar::FITSArchive::unload_sk_integrations (fitsfile* ffptr) const
 
   long dimension = sk_nchan * sk_npol;
   vector<float> fil_sum (dimension);
-  vector<unsigned> fil_hits (dimension);
+  vector<unsigned> fil_hits (sk_nchan);
   vector<float> unfil_sum (dimension);
   int64_t unfil_hits;
 
   vector<unsigned> dimensions (2);
   dimensions[0] = sk_npol;
   dimensions[1] = sk_nchan;
+
+  vector<unsigned> hitsdim (1);
+  dimensions[0] = sk_nchan;
 
   for (unsigned i = 0; i < nsubint; i++)
   {
@@ -84,17 +87,19 @@ void Pulsar::FITSArchive::unload_sk_integrations (fitsfile* ffptr) const
     // pack the vectors in the requried format
     for (unsigned ichan = 0; ichan < nchan; ichan++)
     { 
+      fil_hits[ichan] = (unsigned) ske->get_filtered_hits (ichan);
+
       for (int ipol= 0; ipol < npol; ipol++)
       {
         fil_sum[ipol*nchan + ichan] = ske->get_filtered_sum (ichan, ipol);
-        fil_hits[ipol*nchan + ichan] = (unsigned) ske->get_filtered_hits (ichan, ipol);
+
         unfil_sum[ipol*nchan + ichan] = ske->get_unfiltered_sum (ichan, ipol);
       }
     }
     unfil_hits = ske->get_unfiltered_hits ();
 
     psrfits_write_col (ffptr, "FIL_SUM", row, fil_sum, dimensions);
-    psrfits_write_col (ffptr, "FIL_HIT", row, fil_hits, dimensions);
+    psrfits_write_col (ffptr, "FIL_HIT", row, fil_hits, hitsdim);
     psrfits_write_col (ffptr, "UNFIL_SUM", row, unfil_sum, dimensions);
     psrfits_write_col (ffptr, "UNFIL_HIT", row, unfil_hits);
   }
