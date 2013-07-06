@@ -5,7 +5,7 @@
 mkdir -p @prefix@/src
 cd @prefix@/src
 
-set cfitsio=cfitsio3310
+set cfitsio=cfitsio3350
 
 if ( ! -f ${cfitsio}.tar.gz ) then
   @download@ ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/${cfitsio}.tar.gz
@@ -18,5 +18,6 @@ cd cfitsio
 
 make clean
 make
+make shared
 make install
 
