@@ -1,13 +1,14 @@
 %module psrchive
+
 %{
 #define SWIG_FILE_WITH_INIT
 #include "numpy/noprefix.h"
 
 #include "Reference.h"
 #include "Pulsar/IntegrationManager.h"
+#include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
-#include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/ProfileAmps.h"
 #include "Pulsar/Profile.h"
 
@@ -233,6 +234,10 @@ void pointer_tracker_remove(Reference::Able *ptr) {
     // rotate is protected.. kinda annoying
     void rotate_time(double time) {
         self->expert()->rotate(time);
+    }
+
+    void combine(Pulsar::Integration* subint) {
+      self->expert()->combine(subint);
     }
 
     // Return baseline_stats as numpy arrays
