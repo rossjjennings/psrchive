@@ -71,8 +71,13 @@ namespace Pulsar {
     //! Update information based on the provided Integration
     void update (const Integration* subint);
 
+    //! Set the number of polarizations
+    void set_npol (unsigned n) { npol = n; }
     //! Get the number of polarizations
     unsigned get_npol() const { return npol; }
+
+    //! Set the number of channels
+    void set_nchan (unsigned n) { nchan = n; }
     //! Get the number of channels
     unsigned get_nchan() const { return nchan; }
 
@@ -92,9 +97,9 @@ namespace Pulsar {
     void set_filtered_sum (unsigned ichan, unsigned ipol, float sum);
 
     //! Get the filtered hits of the specified channel and polarization 
-    uint64_t get_filtered_hits (unsigned ichan, unsigned ipol) const;
+    uint64_t get_filtered_hits (unsigned ichan) const;
     //! Set the filtered hits of the specified channel and polarization 
-    void set_filtered_hits (unsigned ichan, unsigned ipol, uint64_t hits);
+    void set_filtered_hits (unsigned ichan, uint64_t hits);
 
     //! Get the unfiltered sum of the specified channel and polarization 
     float get_unfiltered_sum (unsigned ichan, unsigned ipol) const;
