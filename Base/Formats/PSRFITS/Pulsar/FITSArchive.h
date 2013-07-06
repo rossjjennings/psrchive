@@ -37,6 +37,7 @@ namespace Pulsar
   class FITSSUBHdrExtension;
   class ProfileColumn;
   class CoherentDedispersion;
+  class SpectralKurtosis;
 
   class Pointing;
   class AuxColdPlasmaMeasures;
@@ -150,6 +151,8 @@ namespace Pulsar
     double get_offs_sub( unsigned int isub ) const;
 
   protected:
+
+    class SKLoader;
     
     friend class Archive::Advocate<FITSArchive>;
     
@@ -254,6 +257,7 @@ namespace Pulsar
 
     void load_Pointing (fitsfile* fptr, int row, Integration*);
     void load_Plasma (fitsfile* fptr, int row, Integration*);
+    void load_SpectralKurtosis (fitsfile* fptr, int row, Integration*);
 
     void interpret_scale ( );
     void interpret_pol_type ( );
@@ -271,6 +275,9 @@ namespace Pulsar
 
     //! Delete Pointing related columns, if not needed
     void clean_Pointing_columns (fitsfile*) const;
+
+    //! Unload Spectral Kurtosis Integration data to the SPECKURT HDU 
+    void unload_sk_integrations (fitsfile*) const;
 
   private:
 
@@ -308,6 +315,12 @@ namespace Pulsar
 
     // Set all attributes to default values
     void init ();
+
+    // Pointer to file used for reading (only)
+    fitsfile* read_fptr;
+
+    // Name of file used for reading 
+    std::string read_filename;
   };
 
 }

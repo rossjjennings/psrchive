@@ -30,6 +30,7 @@
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/CoherentDedispersion.h"
+#include "Pulsar/SpectralKurtosis.h"
 
 #include "Pulsar/Telescopes.h"
 #include "Pulsar/Telescope.h"
@@ -65,6 +66,9 @@ void Pulsar::FITSArchive::init ()
 
   // on construction, the data have not been loaded from fits file
   loaded_from_fits = false;
+
+  read_fptr = 0;
+  read_filename.clear();
 }
 
 //
@@ -99,6 +103,16 @@ Pulsar::FITSArchive::~FITSArchive()
 {
   if (verbose > 2)
     cerr << "Pulsar::FITSArchive dtor this=" << this << endl;
+  if (read_fptr)
+  {
+    int status = 0;
+    fits_close_file (read_fptr, &status);
+  
+    if (status)
+      throw FITSError (status, "Pulsar::FITSArchive::~FITSArchive",
+         "fits_close_file");
+    read_fptr = 0;
+  }
 }
 
 //
@@ -173,17 +187,18 @@ Pulsar::FITSArchive* Pulsar::FITSArchive::clone () const
 void Pulsar::FITSArchive::load_header (const char* filename) try
 {
   int status = 0;
-  fitsfile* fptr = 0;
   
   // Open the data file  
   if (verbose > 2)
     cerr << "FITSArchive::load_header fits_open_file ("<< filename <<")"<<endl;
   
-  fits_open_file (&fptr, filename, READONLY, &status);
+  fits_open_file (&read_fptr, filename, READONLY, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_header", 
 		     "fits_open_file(%s)", filename);
+
+  read_filename.assign(filename);
 
   // These Extensions must exist in order to load
 
@@ -199,7 +214,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   string dfault;
 
   dfault = hdr_ext->hdrver;
-  psrfits_read_key (fptr, "HDRVER", &tempstr, dfault, verbose > 2);
+  psrfits_read_key (read_fptr, "HDRVER", &tempstr, dfault, verbose > 2);
   hdr_ext->hdrver = tempstr;
   psrfits_version = fromstring<float>( tempstr );
   if (sscanf (hdr_ext->hdrver.c_str(), "%d.%d", 
@@ -216,7 +231,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     cerr << "FITSArchive::load_header reading file creation date" << endl;
 
   dfault = hdr_ext->creation_date;
-  psrfits_read_key (fptr, "DATE", &tempstr, dfault, verbose > 2);
+  psrfits_read_key (read_fptr, "DATE", &tempstr, dfault, verbose > 2);
   hdr_ext->creation_date = tempstr;
 
   // Name of observer
@@ -225,7 +240,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     cerr << "FITSArchive::load_header reading observer name" << endl;
 
   dfault = obs_ext->observer;
-  psrfits_read_key (fptr, "OBSERVER", &tempstr, dfault, verbose > 2);
+  psrfits_read_key (read_fptr, "OBSERVER", &tempstr, dfault, verbose > 2);
   obs_ext->observer = tempstr;
   
   if (verbose > 2)
@@ -237,7 +252,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     cerr << "FITSArchive::load_header reading project ID" << endl;
 
   dfault = obs_ext->project_ID;
-  psrfits_read_key (fptr, "PROJID", &tempstr, dfault, verbose > 2);
+  psrfits_read_key (read_fptr, "PROJID", &tempstr, dfault, verbose > 2);
   obs_ext->project_ID = tempstr;
 
   if (verbose > 2)
@@ -249,7 +264,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     cerr << "FITSArchive::load_header reading telescope name" << endl;
 
   dfault = get_telescope();
-  psrfits_read_key (fptr, "TELESCOP", &tempstr, dfault, verbose > 2);
+  psrfits_read_key (read_fptr, "TELESCOP", &tempstr, dfault, verbose > 2);
 
   tempstr = stringtok (tempstr, " ");
   
@@ -274,25 +289,25 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
   // RA
     
-  psrfits_read_key( fptr, "RA", &tempstr, dfault, verbose > 2 );
+  psrfits_read_key( read_fptr, "RA", &tempstr, dfault, verbose > 2 );
   hdr_ext->set_ra( tempstr );
   
   // DEC
   
-  psrfits_read_key( fptr, "DEC", &tempstr, dfault, verbose > 2 );
+  psrfits_read_key( read_fptr, "DEC", &tempstr, dfault, verbose > 2 );
   hdr_ext->set_dec( tempstr );
 
   // Antenna ITRF coordinates
 
-  load_ITRFExtension (fptr);
+  load_ITRFExtension (read_fptr);
 
   // Receiver parameters
 
-  load_Receiver (fptr);
+  load_Receiver (read_fptr);
 
   // WidebandCorrelator parameters
 
-  load_WidebandCorrelator (fptr);
+  load_WidebandCorrelator (read_fptr);
 
   Backend* backend = get<Backend>();
   if (backend && strstr (backend->get_name().c_str(), "BPP"))
@@ -311,7 +326,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (verbose > 2)
     cerr << "FITSArchive::load_header reading OBS_MODE" << endl;
 
-  psrfits_read_key (fptr, "OBS_MODE", &tempstr);
+  psrfits_read_key (read_fptr, "OBS_MODE", &tempstr);
   string obs_mode = tempstr;
   
   if (verbose > 2)
@@ -358,7 +373,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     double dfault = 0.0;
     double centre_frequency;
 
-    psrfits_read_key (fptr, "OBSFREQ", &centre_frequency, dfault, verbose > 2);
+    psrfits_read_key (read_fptr, "OBSFREQ", &centre_frequency, dfault, verbose > 2);
     set_centre_frequency( centre_frequency );
     hdr_ext->set_obsfreq( centre_frequency );
   }
@@ -368,7 +383,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     double dfault = 0.0;
     double bandwidth;
 
-    psrfits_read_key (fptr, "OBSBW", &bandwidth, dfault, verbose > 2);
+    psrfits_read_key (read_fptr, "OBSBW", &bandwidth, dfault, verbose > 2);
     set_bandwidth( bandwidth );
     hdr_ext->set_obsbw( bandwidth );
   }
@@ -377,7 +392,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   {
     int obsnchan;
 
-    psrfits_read_key (fptr, "OBSNCHAN", &obsnchan, 0, verbose > 2);
+    psrfits_read_key (read_fptr, "OBSNCHAN", &obsnchan, 0, verbose > 2);
     hdr_ext->set_obsnchan( obsnchan );
   }
 
@@ -395,7 +410,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (verbose > 2)
     cerr << "FITSArchive::load_header reading source name" << endl;
 
-  psrfits_read_key (fptr, "SRC_NAME", &tempstr);
+  psrfits_read_key (read_fptr, "SRC_NAME", &tempstr);
   set_source ( tempstr );
   
   // Read where the telescope was pointing
@@ -404,7 +419,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     cerr << "FITSArchive::load_header reading coordinates" << endl;
 
   dfault = hdr_ext->coordmode;
-  psrfits_read_key (fptr, "COORD_MD", &tempstr, dfault, verbose > 2);
+  psrfits_read_key (read_fptr, "COORD_MD", &tempstr, dfault, verbose > 2);
   hdr_ext->coordmode = tempstr;
 
   if (verbose > 2)
@@ -414,7 +429,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     cerr << "FITSArchive::load_header reading equinox" << endl;
 
   dfault = "pre version 2.8";
-  psrfits_read_key (fptr, "EQUINOX", &tempstr, dfault, verbose > 2);
+  psrfits_read_key (read_fptr, "EQUINOX", &tempstr, dfault, verbose > 2);
 
   if ((tempstr == dfault) || (tempstr.empty()))
   {
@@ -474,20 +489,20 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   {
     dfault = "";
 
-    psrfits_read_key (fptr, "RA", &tempstr, dfault, verbose > 2);
+    psrfits_read_key (read_fptr, "RA", &tempstr, dfault, verbose > 2);
 
     string stt_crd1 = "";
-    psrfits_read_key (fptr, "STT_CRD1", &stt_crd1, dfault, verbose > 2);
+    psrfits_read_key (read_fptr, "STT_CRD1", &stt_crd1, dfault, verbose > 2);
     hdr_ext->set_stt_crd1(stt_crd1);
 
     // If RA exists, set the ra from the value of RA.
     // Otherwise, set the ra to the value of STT_CRD1
     const string hms = !tempstr.empty() ? tempstr : stt_crd1;
 
-    psrfits_read_key (fptr, "DEC", &tempstr, dfault, verbose > 2);
+    psrfits_read_key (read_fptr, "DEC", &tempstr, dfault, verbose > 2);
 
     string stt_crd2 = "";
-    psrfits_read_key (fptr, "STT_CRD2", &stt_crd2, dfault, verbose > 2);
+    psrfits_read_key (read_fptr, "STT_CRD2", &stt_crd2, dfault, verbose > 2);
     hdr_ext->set_stt_crd2(stt_crd2);
 
     // If DEC exists, set the dec from the value of DEC.
@@ -495,11 +510,11 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     const string dec = !tempstr.empty() ? tempstr : stt_crd2;
     coord.setHMSDMS (hms.c_str(), dec.c_str());
 
-    psrfits_read_key (fptr, "STP_CRD1", &tempstr, dfault, verbose > 2);
+    psrfits_read_key (read_fptr, "STP_CRD1", &tempstr, dfault, verbose > 2);
     if (!tempstr.empty())
       hdr_ext->set_stp_crd1(tempstr);
 
-    psrfits_read_key (fptr, "STP_CRD2", &tempstr, dfault, verbose > 2);
+    psrfits_read_key (read_fptr, "STP_CRD2", &tempstr, dfault, verbose > 2);
     if (!tempstr.empty())
       hdr_ext->set_stp_crd2(tempstr);
   }
@@ -508,8 +523,8 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     double dfault = 0.0;
     double co_ord1, co_ord2;
 
-    psrfits_read_key (fptr, "STT_CRD1", &co_ord1, dfault, verbose > 2);
-    psrfits_read_key (fptr, "STT_CRD2", &co_ord2, dfault, verbose > 2);
+    psrfits_read_key (read_fptr, "STT_CRD1", &co_ord1, dfault, verbose > 2);
+    psrfits_read_key (read_fptr, "STT_CRD2", &co_ord2, dfault, verbose > 2);
     AnglePair temp;
     temp.setDegrees(co_ord1,co_ord2);
     coord.setGalactic(temp);
@@ -521,7 +536,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   set_coordinates (coord);
   
   if (get_type() != Signal::Pulsar && get_type() != Signal::Unknown)
-    load_CalInfoExtension (fptr);
+    load_CalInfoExtension (read_fptr);
 
   // Track mode
 
@@ -529,7 +544,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     cerr << "FITSArchive::load_header reading track mode" << endl;
 
   dfault = hdr_ext->trk_mode;
-  psrfits_read_key (fptr, "TRK_MODE", &tempstr, dfault, verbose > 2);
+  psrfits_read_key (read_fptr, "TRK_MODE", &tempstr, dfault, verbose > 2);
   hdr_ext->trk_mode = tempstr;
 
   //
@@ -540,7 +555,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     cerr << "FITSArchive::load_header reading observation date" << endl;
 
   dfault = "pre version 2.8";
-  psrfits_read_key (fptr, "DATE-OBS", &tempstr, dfault, verbose > 2);
+  psrfits_read_key (read_fptr, "DATE-OBS", &tempstr, dfault, verbose > 2);
 
   if ((tempstr == dfault) || (tempstr.empty()))
   {
@@ -554,7 +569,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
       cerr << "FITSArchive::load_header reading start date" << endl;
 
     dfault = hdr_ext->stt_date;
-    psrfits_read_key (fptr, "STT_DATE", &tempstr, dfault, verbose > 2);
+    psrfits_read_key (read_fptr, "STT_DATE", &tempstr, dfault, verbose > 2);
     hdr_ext->stt_date = tempstr;
     
     // Read the start UT
@@ -563,7 +578,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
       cerr << "FITSArchive::load_header reading start UT" << endl;
     
     dfault = hdr_ext->stt_time;
-    psrfits_read_key (fptr, "STT_TIME", &tempstr, dfault, verbose > 2);
+    psrfits_read_key (read_fptr, "STT_TIME", &tempstr, dfault, verbose > 2);
     
     // strip off any fractional seconds, if present
     size_t decimal = tempstr.find('.');
@@ -599,7 +614,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     cerr << "FITSArchive::load_header reading BPA" << endl;
     
   dfault = "0.0";
-  psrfits_read_key( fptr, "BPA", &tempstr, dfault, verbose > 2 );
+  psrfits_read_key( read_fptr, "BPA", &tempstr, dfault, verbose > 2 );
   if( tempstr == "*" )
     hdr_ext->set_bpa( 0 );
   else
@@ -611,7 +626,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     cerr << "FITSArchive::load_header reading BMAJ" << endl;
     
   dfault = "0.0";
-  psrfits_read_key( fptr, "BMAJ", &tempstr, dfault, verbose > 2 );
+  psrfits_read_key( read_fptr, "BMAJ", &tempstr, dfault, verbose > 2 );
   if( tempstr == "*" )
     hdr_ext->set_bpa( 0 );
   else
@@ -623,7 +638,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     cerr << "FITSArchive::load_header reading BMIN" << endl;
     
   dfault = "0.0";
-  psrfits_read_key( fptr, "BMIN", &tempstr, dfault, verbose > 2 );
+  psrfits_read_key( read_fptr, "BMIN", &tempstr, dfault, verbose > 2 );
   if( tempstr == "*" )
     hdr_ext->set_bpa( 0 );
   else
@@ -640,9 +655,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (verbose > 2)
     cerr << "FITSArchive::load_header reading MJDs" << endl;
   
-  psrfits_read_key (fptr, "STT_IMJD", &day, (long)0, verbose > 2);
-  psrfits_read_key (fptr, "STT_SMJD", &sec, (long)0, verbose > 2);
-  psrfits_read_key (fptr, "STT_OFFS", &frac, 0.0, verbose > 2);
+  psrfits_read_key (read_fptr, "STT_IMJD", &day, (long)0, verbose > 2);
+  psrfits_read_key (read_fptr, "STT_SMJD", &sec, (long)0, verbose > 2);
+  psrfits_read_key (read_fptr, "STT_OFFS", &frac, 0.0, verbose > 2);
   
   hdr_ext->set_start_time( MJD ((int)day, (int)sec, frac) );
 
@@ -655,7 +670,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (verbose > 2)
     cerr << "FITSArchive::load_header reading start LST" << endl;
 
-  psrfits_read_key (fptr, "STT_LST", &(hdr_ext->stt_lst), 0.0, verbose > 2);
+  psrfits_read_key (read_fptr, "STT_LST", &(hdr_ext->stt_lst), 0.0, verbose > 2);
 
   // Read the IBEAM value (for multibeam data)
 
@@ -665,7 +680,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   // If the keyword does not exist, set ibeam value to a blank string
 
   dfault = "";
-  psrfits_read_key (fptr, "IBEAM", &tempstr, dfault, verbose > 2);
+  psrfits_read_key (read_fptr, "IBEAM", &tempstr, dfault, verbose > 2);
   hdr_ext->ibeam = tempstr;
 
   if (verbose > 2)
@@ -679,7 +694,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   // If PNT_ID does not exist, set pnt_id to ""
 
   string default_pnt_id_value  = "";
-  psrfits_read_key (fptr, "PNT_ID", &(hdr_ext->pnt_id), default_pnt_id_value,
+  psrfits_read_key (read_fptr, "PNT_ID", &(hdr_ext->pnt_id), default_pnt_id_value,
       verbose > 2);
 
   if (verbose > 2)
@@ -697,53 +712,55 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     cerr << "FITSArchive::load_header finished with primary HDU" << endl;
   
   // Load the processing history
-  load_ProcHistory (fptr);
+  load_ProcHistory (read_fptr);
 
   // Load the digitiser statistics
-  load_DigitiserStatistics (fptr);
+  load_DigitiserStatistics (read_fptr);
   
   // Load the digitiser counts
-  load_DigitiserCounts(fptr );
+  load_DigitiserCounts(read_fptr );
   
   // Load the original bandpass data
-  load_Passband (fptr);
+  load_Passband (read_fptr);
 
   // Load the coherent dedispersion extension
-  load_CoherentDedispersion (fptr);
+  load_CoherentDedispersion (read_fptr);
 
   // Load the flux calibrator extension
-  load_FluxCalibratorExtension (fptr);
+  load_FluxCalibratorExtension (read_fptr);
 
   // Load the calibrator stokes parameters
-  load_CalibratorStokes (fptr);
+  load_CalibratorStokes (read_fptr);
 
   // Load the calibration model description
-  load_PolnCalibratorExtension (fptr);
+  load_PolnCalibratorExtension (read_fptr);
   
   // Load the parameters from the SUBINT HDU
-  load_FITSSUBHdrExtension( fptr );
+  load_FITSSUBHdrExtension( read_fptr );
 
   // Load the pulsar parameters
   if (get_type() == Signal::Pulsar)
-    load_Parameters (fptr);
+    load_Parameters (read_fptr);
 
   // Load the pulse phase predictor
-  load_Predictor (fptr);
+  load_Predictor (read_fptr);
   hdr_model = model;
 
   if (correct_P236_reference_epoch)
     P236_reference_epoch_correction ();
 
-  load_integration_state (fptr);
+  load_integration_state (read_fptr);
 
+#if 0
   status = 0;
   
   // Finished with the file for now
-  fits_close_file (fptr, &status);
+   fits_close_file (read_fptr, &status);
   
   if (status)
     throw FITSError (status, "Pulsar::FITSArchive::load_header",
 		     "fits_close_file");
+#endif
 
   loaded_from_fits = true;
 
@@ -1108,6 +1125,7 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
   else
     delete_hdu (fptr, "FEEDPAR");
 
+
   // Unload extra subint parameters.
 
   const FITSSUBHdrExtension *sub_hdr = get<FITSSUBHdrExtension>();
@@ -1127,6 +1145,18 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
     unload_integrations (fptr);
   else
     delete_hdu (fptr, "SUBINT");
+
+  // Write the Spectral Kurtosis integrations to file
+
+  const SpectralKurtosis * ske = 0;
+  if (nsubint > 0)
+    ske = get_Integration (0)->get<SpectralKurtosis>();
+
+  if (ske)
+    unload_sk_integrations (fptr);
+  else
+    delete_hdu (fptr, "SPECKURT");
+
 
   fits_close_file (fptr, &status);
 

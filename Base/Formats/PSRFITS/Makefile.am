@@ -1,12 +1,12 @@
 
 noinst_LTLIBRARIES = libpsrfits.la
 
-include_HEADERS = Pulsar/FITSArchive.h
+include_HEADERS = Pulsar/FITSArchive.h Pulsar/FITSSKLoader.h
 
 dist_data_DATA = psrheader.fits
 
 libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
-	CalibratorExtensionIO.h FITSArchive.C \
+	CalibratorExtensionIO.h FITSArchive.C  FITSSKLoader.C \
 	ProfileColumn.C Pulsar/ProfileColumn.h \
 	unload_Plasma.C load_Plasma.C \
 	unload_FITSHdrExtension.C unload_ObsExtension.C \
@@ -28,6 +28,7 @@ libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	unload_Integration.C load_Integration.C \
 	unload_Predictor.C load_Predictor.C \
 	unload_Parameters.C load_Parameters.C \
+	unload_SpectralKurtosis.C load_SpectralKurtosis.C \
 	unload_polyco.C load_polyco.C \
 	unload_text.h load_text.h \
 	delete_hdu.C update_history.C \
