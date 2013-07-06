@@ -69,12 +69,6 @@ namespace Pulsar {
     // Initialization function calls plugin_load if dynamic linkage enabled
     static bool init ();
 
-    // Load plugins from the plugin_path
-    static void plugin_load ();
-
-    // Report to cerr on the status of the plugins
-    static void plugin_report ();
-
     // Verify that the plugin revision strings match those of the base class
     static void verify_revisions ();
 

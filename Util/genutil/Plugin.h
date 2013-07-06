@@ -28,6 +28,8 @@ namespace Registry {
     //! Null constructor
     Plugin () { }
 
+#if DSO_OK
+
     //! Load all shared object libraries in the specified directory
     Plugin (const char* path) { load (path); }
 
@@ -36,6 +38,8 @@ namespace Registry {
 
     //! Convenience interface
     void load (const std::string& path) { load (path.c_str()); }
+
+#endif
 
     //! List of successfully loaded DSOs
     std::vector<std::string> ok;

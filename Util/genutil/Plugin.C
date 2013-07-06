@@ -14,6 +14,10 @@ using namespace std;
 
 bool Registry::Plugin::verbose = false;
 
+#if 0
+
+// DYNAMICALLY LOADED SHARED OBJECT FILES ARE NO LONGER USED
+
 void Registry::Plugin::load (const char* path)
 {
   if (verbose)
@@ -50,3 +54,6 @@ void Registry::Plugin::load (const char* path)
   }
 
 }
+
+#endif
+

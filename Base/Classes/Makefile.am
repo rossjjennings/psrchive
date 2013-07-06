@@ -44,7 +44,6 @@ nobase_include_HEADERS = \
 
 libClasses_la_SOURCES = \
         Agent.C \
-        Agent_plugin.C \
         Archive.C \
         ArchiveInterface.C \
 	ArchiveMatch.C \
