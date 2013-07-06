@@ -400,7 +400,7 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   {
     double chan_dm;
 
-    psrfits_read_key (fptr, "CHAN_DM", &chan_dm, FITSHdrExtension::unset_dm, 
+    psrfits_read_key (read_fptr, "CHAN_DM", &chan_dm, FITSHdrExtension::unset_dm, 
         verbose > 2);
     hdr_ext->set_chan_dm( chan_dm );
   }
