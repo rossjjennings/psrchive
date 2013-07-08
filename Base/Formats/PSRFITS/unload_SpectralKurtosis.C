@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2011 by Andrew Jameson
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/SpectralKurtosis.h"
 
@@ -85,15 +86,15 @@ void Pulsar::FITSArchive::unload_sk_integrations (fitsfile* ffptr) const
     row = i + 1;
   
     // pack the vectors in the requried format
-    for (unsigned ichan = 0; ichan < nchan; ichan++)
+    for (unsigned ichan = 0; ichan < sk_nchan; ichan++)
     { 
       fil_hits[ichan] = (unsigned) ske->get_filtered_hits (ichan);
 
-      for (int ipol= 0; ipol < npol; ipol++)
+      for (int ipol= 0; ipol < sk_npol; ipol++)
       {
-        fil_sum[ipol*nchan + ichan] = ske->get_filtered_sum (ichan, ipol);
+        fil_sum[ipol*sk_nchan + ichan] = ske->get_filtered_sum (ichan, ipol);
 
-        unfil_sum[ipol*nchan + ichan] = ske->get_unfiltered_sum (ichan, ipol);
+        unfil_sum[ipol*sk_nchan + ichan] = ske->get_unfiltered_sum (ichan, ipol);
       }
     }
     unfil_hits = ske->get_unfiltered_hits ();
