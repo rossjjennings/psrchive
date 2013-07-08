@@ -12,6 +12,7 @@ include_HEADERS = \
         Conventions.h \
 	debug.h \
 	Dirac.h \
+	EmbeddedTextInterface.h \
         Error.h \
 	escape.h \
         Estimate.h \
