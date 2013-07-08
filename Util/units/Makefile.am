@@ -28,6 +28,7 @@ include_HEADERS = \
 	lazy.h \
         Matrix.h \
         ModifyRestore.h \
+	NestedTextInterface.h \
 	OwnStream.h \
         pad.h \
         Pauli.h \
@@ -45,7 +46,13 @@ include_HEADERS = \
 	TextEditor.h \
 	TextIndex.h \
         TextInterface.h \
+	TextInterfaceAttribute.h \
+	TextInterfaceElement.h \
+	TextInterfaceInterpreter.h \
 	TextInterfaceName.h \
+	TextInterfaceParser.h \
+	TextInterfaceProxy.h \
+	TextInterfaceTo.h \
 	TextLoop.h \
         tostring.h \
         Traits.h \

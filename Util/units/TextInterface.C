@@ -6,6 +6,8 @@
  ***************************************************************************/
 
 #include "TextInterface.h"
+#include "NestedTextInterface.h"
+#include "ModifyRestore.h"
 #include "stringtok.h"
 #include "pad.h"
 
@@ -328,12 +330,19 @@ void TextInterface::Parser::insert (const string& prefix, Parser* other)
     return;
 
   for (unsigned i=0; i < other->values.size(); i++)
+  {
+    Value* value = other->values[i];
+
+    cerr << "TextInterface::Parser::insert " << prefix + ":" + value->get_name()
+	 << endl;
+
     if ( !import_filter ||
-	 !find( prefix + ":" + other->values[i]->get_name(), false ) )
+	 !find( prefix + ":" + value->get_name(), false ) )
     {
-      other->setup( other->values[i] );
-      add_value( new NestedValue(prefix, other->values[i]) );
+      other->setup( value );
+      add_value( new NestedValue(prefix, value) );
     }
+  }
 }
 
 //! Clear all nested interfaces
@@ -351,12 +360,12 @@ void TextInterface::Parser::clean ()
 
 
 
-bool TextInterface::NestedValue::matches (const string& name,
-					  const string& prefix,
-					  const Value* value)
+bool TextInterface::matches (const string& name,
+			     const string& prefix,
+			     const Value* value)
 {
 #ifdef _DEBUG
-  cerr << "TextInterface::NestedValue::matches prefix=" << prefix 
+  cerr << "TextInterface::matches prefix=" << prefix 
        << " name=" << name;
 #endif
 
@@ -367,7 +376,7 @@ bool TextInterface::NestedValue::matches (const string& name,
     if ( name[length] != ':' )
     {
 #ifdef _DEBUG
-      cerr << " false" << endl;
+      cerr << " false (no colon)" << endl;
 #endif
       return false;
     }
@@ -375,7 +384,7 @@ bool TextInterface::NestedValue::matches (const string& name,
     if ( strncmp (name.c_str(), prefix.c_str(), length) != 0 )
     {
 #ifdef _DEBUG
-      cerr << " false" << endl;
+      cerr << " false (prefix mismatch)" << endl;
 #endif
       return false;
     }
@@ -386,14 +395,14 @@ bool TextInterface::NestedValue::matches (const string& name,
   string remainder = name.substr (length);
 
 #ifdef _DEBUG
-  cerr << "TextInterface::NestedValue::matches nested name="
+  cerr << "TextInterface::matches nested name="
        << value->get_name() << " remain=" << remainder << endl;
 #endif
 
   bool result = value->matches (remainder);
 
 #ifdef _DEBUG
-  cerr << "TextInterface::NestedValue::matches result=" << result << endl;
+  cerr << "TextInterface::matches result=" << result << endl;
 #endif
   return result;
 }
