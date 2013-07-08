@@ -56,6 +56,9 @@ namespace Pulsar {
         virtual void load (SpectralKurtosis * s) = 0;
     };
 
+    //! Short name
+    std::string get_short_name () const { return "skz"; }
+
     //! Addition operator
     const SpectralKurtosis& operator += (const SpectralKurtosis& extension);
 
@@ -74,12 +77,12 @@ namespace Pulsar {
     //! Set the number of polarizations
     void set_npol (unsigned n) { npol = n; }
     //! Get the number of polarizations
-    unsigned get_npol() const { return npol; }
+    unsigned get_npol() const { get_data(); return npol; }
 
     //! Set the number of channels
     void set_nchan (unsigned n) { nchan = n; }
     //! Get the number of channels
-    unsigned get_nchan() const { return nchan; }
+    unsigned get_nchan() const { get_data(); return nchan; }
 
     //! Set the base integration factor used to calculate the SK statistic
     void set_M (unsigned _M);
@@ -111,6 +114,14 @@ namespace Pulsar {
     // Set the unfiltered hits, common to all channels and polarizations
     void set_unfiltered_hits (uint64_t hits);
 
+    //! Set the polarization for which means will be computed
+    void set_ipol_mean (unsigned ipol) { ipol_mean = ipol; }
+    unsigned get_ipol_mean () const { return ipol_mean; }
+
+    //! Get the unfiltered mean of the specified channel
+    float get_unfiltered_mean (unsigned ichan) const;
+    float get_filtered_mean (unsigned ichan) const;
+
   protected:
 
     //! loads the SK data from file
@@ -141,11 +152,13 @@ namespace Pulsar {
     uint64_t unfiltered_hits;
 
     //! Load the integration data from file
-    void get_data ();
+    void get_data () const;
+    void load ();
 
     //! Ensure that ichan < nchan and ipol < npol
     void range_check (unsigned ichan, unsigned ipol, const char* method) const;
 
+    unsigned ipol_mean;
   };
   
 }
