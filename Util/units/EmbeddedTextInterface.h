@@ -80,12 +80,12 @@ namespace TextInterface
     mutable std::string remainder;
   };
 
-#if 0
   //! Proxy enables attribute interface of elements in a map
   /*! In this template: M is a map of key K to element E; 
     Get is the method of V that returns E* given K */
   template<class M, class K, class Get>
-  class MapOfInterfaces : public Attribute<M> {
+  class MapOfInterfaces : public Attribute<M>
+  {
 
   public:
     
@@ -137,13 +137,14 @@ namespace TextInterface
     //! Range parsed from name during matches
     mutable std::string range;
 
+    //! Remainder parsed from name during matches
+    mutable std::string remainder;
+
     //! Worker function parses keys for get_value and set_value
     void get_indeces (std::vector<K>& keys,
 		      const std::string& param) const;
 
   };
-
-#endif
 
 }
 
@@ -169,11 +170,6 @@ TextInterface::VectorOfInterfaces<V,G,S>::get_value (const V* ptr) const
       result += tostring(ind[i]) + ")";
 
     Reference::To<Parser> parser = (const_cast<V*>(ptr)->*get)(ind[i])->get_interface();
-
-#ifdef _DEBUG
-    std::cerr << "VectorOfInterfaces[" << prefix << "]::get_value (" 
-	      << ptr << ") element=" << element << std::endl;
-#endif
     result += parser->get_value (remainder);
   }
 
@@ -190,11 +186,6 @@ void TextInterface::VectorOfInterfaces<V,G,S>::set_value (V* ptr,
   for (unsigned i=0; i<ind.size(); i++)
   {
     Reference::To<Parser> parser = (ptr->*get)(ind[i])->get_interface();
-
-#ifdef _DEBUG
-    std::cerr << "VectorOfInterfaces[" << prefix << "]::set_value (" 
-	      << ptr << "," << val << ")" << std::endl;
-#endif
     parser->set_value (remainder, val);
   }
 }
@@ -208,10 +199,13 @@ template<class C,class Get,class Size>
   std::cerr << "TextInterface::VectorOfInterfaces::matches" << std::endl;
 #endif
 
-  if (!this->instance)
+  if (!match (prefix, name, &range, &remainder))
     return false;
 
-  if (!match (prefix, name, &range, &remainder))
+  if (remainder == "<name>")
+    return true;
+
+  if (!this->instance)
     return false;
 
   std::vector<unsigned> ind;
@@ -226,7 +220,6 @@ template<class C,class Get,class Size>
   return true;
 }
 
-#if 0
 
 template<class M, class K, class G> 
 std::string
@@ -249,9 +242,8 @@ TextInterface::MapOfInterfaces<M,K,G>::get_value (const M* ptr) const
     if (label_elements && ind.size() > 1)
       result += tostring(ind[i]) + ")";
 
-    E* element = (const_cast<M*>(ptr)->*get) (ind[i]);
-    if (element)
-      result += attribute->get_value (element);
+    Reference::To<Parser> parser = (const_cast<M*>(ptr)->*get)(ind[i])->get_interface();
+    result += parser->get_value (remainder);
   }
 
   return result;
@@ -265,7 +257,10 @@ void TextInterface::MapOfInterfaces<M,K,G>::set_value (M* ptr,
   get_indeces (ind, range);
 
   for (unsigned i=0; i<ind.size(); i++)
-    attribute->set_value ((ptr->*get)(ind[i]), val);
+  {
+    Reference::To<Parser> parser = (ptr->*get)(ind[i])->get_interface();
+    parser->set_value (remainder, val);
+  }
 }
 
 template<class M, class K, class G>
@@ -305,13 +300,25 @@ template<class M, class K, class G>
   std::cerr << "TextInterface::MapOfInterfaces::matches" << std::endl;
 #endif
 
-  std::string remainder;
   if (!match (prefix, name, &range, &remainder))
     return false;
 
-  return attribute->matches (remainder);
-}
+  if (remainder == "<name>")
+    return true;
 
-#endif
+  if (!this->instance)
+    return false;
+
+  std::vector<K> ind;
+  get_indeces (ind, range);
+
+  for (unsigned i=0; i<ind.size(); i++)
+  {
+    Parser* parser = (const_cast<M*>(this->instance)->*get)(ind[i])->get_interface();
+    if (! parser->found (remainder))
+      return false;
+  }
+  return true;
+}
 
 #endif
