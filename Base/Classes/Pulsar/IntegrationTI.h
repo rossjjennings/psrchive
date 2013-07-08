@@ -20,12 +20,22 @@
 namespace Pulsar {
 
   //! Provides a text interface to get and set Integration attributes
-  class IntegrationTI : public TextInterface::To<Integration> {
+  class Integration::Interface : public TextInterface::To<Integration>
+  {
 
   public:
 
-    //! Constructor
-    IntegrationTI ();
+    //! Default constructor that takes an optional instance
+    Interface ( Integration* = 0 );
+
+    //! Set the instance to which this interface interfaces
+    void set_instance (Integration*) ;
+
+    //! clone this text interface
+    TextInterface::Parser *clone();
+
+    //! Get the interface name
+    std::string get_interface_name() const { return "Integration::Interface"; }
 
   };
 

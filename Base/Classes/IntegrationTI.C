@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004-2008 by Willem van Straten
+ *   Copyright (C) 2004-2013 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -9,7 +9,9 @@
 #include "Pulsar/Pointing.h"
 #include "Pulsar/AuxColdPlasmaMeasures.h"
 
-Pulsar::IntegrationTI::IntegrationTI ()
+using namespace std;
+
+Pulsar::Integration::Interface::Interface (Integration* _instance)
 {
   add( &Integration::get_nchan, "nchan", "Number of frequency channels" );
   add( &Integration::get_npol,  "npol",  "Number of polarizations" );
@@ -42,10 +44,29 @@ Pulsar::IntegrationTI::IntegrationTI ()
 			&Integration::set_weight,
 			&Integration::get_nchan ));
 
-  import( "point", Pulsar::Pointing::Interface(),
-	  &Integration::getadd<Pointing> );
+  if (_instance)
+    set_instance( _instance );
+}
 
-  import( "aux", Pulsar::AuxColdPlasmaMeasures::Interface(),
-	  &Integration::getadd<AuxColdPlasmaMeasures> );
+//! Set the instance
+void Pulsar::Integration::Interface::set_instance (Pulsar::Integration* c)
+{
+  TextInterface::To<Integration>::set_instance (c);
+
+  clean();
+
+  for (unsigned iext=0; iext < instance->get_nextension(); iext++)
+  {
+    Integration::Extension* extension = instance->get_extension(iext);
+    insert (extension->get_short_name(), extension->get_interface());
+  }
+}
+
+TextInterface::Parser* Pulsar::Integration::Interface::clone()
+{
+  if( instance )
+    return new Interface( instance );
+  else
+    return new Interface();
 }
 
