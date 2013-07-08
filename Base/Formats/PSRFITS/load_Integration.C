@@ -300,7 +300,6 @@ try {
 
   load_Pointing (read_fptr,row,integ);
   load_Plasma (read_fptr,row,integ);
-  load_SpectralKurtosis (read_fptr,row,integ);
 
   // Set up the data vector, only Pulsar::Archive base class is friend
 
@@ -424,13 +423,12 @@ try {
     }
   }
 
+  // load any Extensions that require moving to another HDU last
+  load_SpectralKurtosis (read_fptr,row,integ);
+
   if (verbose > 2)
     cerr << "Pulsar::FITSArchive::load_Integration load complete" << endl;  
   
-  // Finished with the file for now
-  // we no longer close the file after reading an integration
-  // fits_close_file (read_fptr, &status);
-
   return integ.release();
 }
 catch (Error& error)
