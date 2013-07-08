@@ -65,6 +65,12 @@ namespace Pulsar {
     //! Destructor
     virtual ~Integration ();
 
+    //! Textual interface to Archive attributes
+    class Interface;
+
+    //! Return a text interface that can be used to access this instance
+    virtual Interface* get_interface ();
+
     //! Zero all the profiles, keeping all else the same
     void zero ();
 

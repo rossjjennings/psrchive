@@ -10,6 +10,7 @@
 #include "Pulsar/IntegrationExtension.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/IntegrationMeta.h"
+#include "Pulsar/IntegrationTI.h"
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/AuxColdPlasma.h"
@@ -140,6 +141,12 @@ Pulsar::Integration::~Integration ()
     cerr << "Pulsar::Integration dtor this=" << this << endl;
 }
 
+
+//! Return a text interface that can be used to access this instance
+Pulsar::Integration::Interface* Pulsar::Integration::get_interface ()
+{
+  return new Interface (this);
+}
 
 /*!
   By over-riding this method, inherited types may re-define the type
