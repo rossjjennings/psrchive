@@ -170,6 +170,8 @@ TextInterface::VectorOfInterfaces<V,G,S>::get_value (const V* ptr) const
       result += tostring(ind[i]) + ")";
 
     Reference::To<Parser> parser = (const_cast<V*>(ptr)->*get)(ind[i])->get_interface();
+
+    parser->set_delimiter( this->parent->get_delimiter() );
     result += parser->get_value (remainder);
   }
 
@@ -243,6 +245,7 @@ TextInterface::MapOfInterfaces<M,K,G>::get_value (const M* ptr) const
       result += tostring(ind[i]) + ")";
 
     Reference::To<Parser> parser = (const_cast<M*>(ptr)->*get)(ind[i])->get_interface();
+    parser->set_delimiter( this->parent->get_delimiter() );
     result += parser->get_value (remainder);
   }
 
