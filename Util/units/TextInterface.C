@@ -291,13 +291,13 @@ TextInterface::Parser::find (const string& name, bool throw_exception) const
 
   for (unsigned i=0; i<values.size(); i++)
   {
+    const_cast<Parser*>(this)->setup( values[i] );
     if (values[i]->matches (key))
     {
 #ifdef _DEBUG
       cerr << "TextInterface::Parser::find value[" << i << "]"
 	"=" << values[i]->get_name() << " matches" << endl;
 #endif
-      const_cast<Parser*>(this)->setup( values[i] );
       return values[i];
     }
   }
@@ -333,8 +333,10 @@ void TextInterface::Parser::insert (const string& prefix, Parser* other)
   {
     Value* value = other->values[i];
 
+#ifdef _DEBUG
     cerr << "TextInterface::Parser::insert " << prefix + ":" + value->get_name()
 	 << endl;
+#endif
 
     if ( !import_filter ||
 	 !find( prefix + ":" + value->get_name(), false ) )
