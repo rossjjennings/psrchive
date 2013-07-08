@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Config.h,v $
-   $Revision: 1.13 $
-   $Date: 2009/11/29 12:13:49 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/Config.h
 
 #ifndef __Pulsar_Config_h
 #define __Pulsar_Config_h
@@ -17,7 +14,7 @@
 // #define _DEBUG
 
 #include "Configuration.h"
-#include "TextInterface.h"
+#include "TextInterfaceInterpreter.h"
 #include "CommandParser.h"
 
 namespace Pulsar 
