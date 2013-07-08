@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004-2008 by Willem van Straten
+ *   Copyright (C) 2004-2013 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -10,6 +10,8 @@
 #include "Pulsar/IntegrationTI.h"
 
 #include "Pulsar/FITSAlias.h"
+
+using namespace std;
 
 Pulsar::Archive::Interface::Interface( Archive *c )
 {
@@ -75,10 +77,6 @@ Pulsar::Archive::Interface::Interface( Archive *c )
   add( &Archive::integration_length,
        "length", "Observation duration (s)" );
   
-  import( "int", IntegrationTI(),
-          (Integration*(Archive::*)(unsigned)) &Archive::get_Integration,
-          &Archive::get_nsubint );
-
   set_aliases( new FITSAlias );
 
   if (c)
@@ -91,6 +89,10 @@ void Pulsar::Archive::Interface::set_instance (Pulsar::Archive* c)
   TextInterface::To<Archive>::set_instance (c);
 
   clean();
+
+  if (instance->get_nsubint() > 0)
+    embed( "int", (Integration*(Archive::*)(unsigned)) &Archive::get_Integration,
+	   &Archive::get_nsubint );
 
   for (unsigned iext=0; iext < instance->get_nextension(); iext++)
   {
