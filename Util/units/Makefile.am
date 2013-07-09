@@ -12,7 +12,6 @@ include_HEADERS = \
         Conventions.h \
 	debug.h \
 	Dirac.h \
-	EmbeddedTextInterface.h \
         Error.h \
 	escape.h \
         Estimate.h \
@@ -49,6 +48,7 @@ include_HEADERS = \
         TextInterface.h \
 	TextInterfaceAttribute.h \
 	TextInterfaceElement.h \
+	TextInterfaceEmbed.h \
 	TextInterfaceInterpreter.h \
 	TextInterfaceName.h \
 	TextInterfaceParser.h \
