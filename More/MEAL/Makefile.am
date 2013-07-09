@@ -117,6 +117,7 @@ nobase_include_HEADERS = \
         MEAL/SumRule.h \
         MEAL/Tracer.h \
 	MEAL/Transformation.h \
+	MEAL/UnaryConvert.h \
         MEAL/UnaryRule.h \
         MEAL/UnaryScalar.h \
 	MEAL/Union.h \
