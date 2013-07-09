@@ -80,6 +80,12 @@ namespace TextInterface
     mutable std::string remainder;
   };
 
+  template<class C, class G, class S>
+  VectorOfInterfaces<C,G,S>* embed (const std::string& name, G g, S s)
+  {
+    return new VectorOfInterfaces<C,G,S>(name, g, s);
+  }
+
   //! Proxy enables attribute interface of elements in a map
   /*! In this template: M is a map of key K to element E; 
     Get is the method of V that returns E* given K */
