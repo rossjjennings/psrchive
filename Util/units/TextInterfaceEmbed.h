@@ -7,14 +7,13 @@
  *
  ***************************************************************************/
 
-// psrchive/psrchive/Util/units/EmbeddedTextInterface.h
+// psrchive/psrchive/Util/units/TextInterfaceEmbed.h
 
-#ifndef __EmbeddedTextInterface_h
-#define __EmbeddedTextInterface_h
+#ifndef __TextInterfaceEmbed_h
+#define __TextInterfaceEmbed_h
 
 #include "TextInterfaceAttribute.h"
 #include "separate.h"
-#include "stringtok.h"
 
 namespace TextInterface
 {
@@ -23,7 +22,8 @@ namespace TextInterface
     V that returns the element at the specified index; and Size is the
     method of V that returns the number of elements in it */
   template<class V, class Get, class Size>
-  class VectorOfInterfaces : public Attribute<V> {
+  class VectorOfInterfaces : public Attribute<V>
+  {
 
   public:
     
@@ -80,11 +80,17 @@ namespace TextInterface
     mutable std::string remainder;
   };
 
-  template<class C, class G, class S>
-  VectorOfInterfaces<C,G,S>* embed (const std::string& name, G g, S s)
+  //! Embedded interface factory for TextInterface::To<C>
+  template<class C>
+    class Embed
   {
-    return new VectorOfInterfaces<C,G,S>(name, g, s);
-  }
+  public:
+    template <class G, class S>
+    VectorOfInterfaces<C,G,S>* operator() (const std::string& name, G g, S s)
+    {
+      return new VectorOfInterfaces<C,G,S>(name, g, s);
+    }
+  };
 
   //! Proxy enables attribute interface of elements in a map
   /*! In this template: M is a map of key K to element E; 
