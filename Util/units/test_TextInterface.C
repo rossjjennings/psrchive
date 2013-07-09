@@ -4,7 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "TextInterface.h"
+
+#include "TextInterfaceInterpreter.h"
 #include "Functor.h"
 #include "Alias.h"
 
