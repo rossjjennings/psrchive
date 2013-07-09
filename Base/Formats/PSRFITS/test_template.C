@@ -36,7 +36,9 @@ int main (int argc, char** argv) try
   char* srcdir = getenv ("srcdir");
   if (srcdir)
     filename = string(srcdir) + "/";
-  
+  else
+    cerr << "test_template: $srcdir environment variable not defined" << endl;
+
   filename += "psrheader.fits";
 
   cerr << "Parsing " << filename << endl;
@@ -56,6 +58,16 @@ catch (Error& error) {
   return -1;
   
 }
+ catch (std::exception& except)
+   {
+     cerr << except.what() << endl;
+     return -1;
+   }
+ catch (...)
+   {
+     cerr << "unknown exception" << endl;
+     return -1;
+   }
 
 void check_length (const char* str, const char* name)
 {
@@ -67,18 +79,19 @@ void check_length (const char* str, const char* name)
 
 void parse_template (const char* tplate, bool verbose)
 {
-
   FILE* fptr = fopen (tplate, "r");
   if (!fptr)
     throw Error (FailedSys, "parse_template", "fopen(%s)", tplate);
 
-  char templt [FLEN_CARD];
-  char card   [FLEN_CARD];
+  cerr << "parse_template " << tplate << " opened" << endl;
+
+  char templt [FLEN_CARD*2];
+  char card   [FLEN_CARD*2];
 
   int status = 0;
   
-  while (fgets (templt, FLEN_CARD*2, fptr)) {
-
+  while (fgets (templt, FLEN_CARD*2, fptr))
+  {
     // CFITSIO User's Reference Guide
     // 11.1 Detailed Template Line Format
 
@@ -123,9 +136,6 @@ void parse_template (const char* tplate, bool verbose)
     if (status)
       throw FITSError (status, "parse_template",
 		       "fits_test_keyname (%s)", keyname);
-    
-
-
   }
   
   fclose (fptr);
