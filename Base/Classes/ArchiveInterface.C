@@ -8,8 +8,9 @@
 #include "Pulsar/ArchiveInterface.h"
 #include "Pulsar/ArchiveExtension.h"
 #include "Pulsar/IntegrationTI.h"
-
 #include "Pulsar/FITSAlias.h"
+
+#include "TextInterfaceEmbed.h"
 
 using namespace std;
 
@@ -90,9 +91,17 @@ void Pulsar::Archive::Interface::set_instance (Pulsar::Archive* c)
 
   clean();
 
+  // pointer to Archive method that returns mutable Integration*
+  // used to disambiguate const and non-const get_Integration
+  typedef Integration*(Archive::*mutable_Integration)(unsigned);
+
   if (instance->get_nsubint() > 0)
-    embed( "int", (Integration*(Archive::*)(unsigned)) &Archive::get_Integration,
-	   &Archive::get_nsubint );
+  {
+    TextInterface::Embed<Archive> embed;
+    add_value ( embed( "int", 
+			 (mutable_Integration) &Archive::get_Integration,
+			 &Archive::get_nsubint ) );
+  }
 
   for (unsigned iext=0; iext < instance->get_nextension(); iext++)
   {
