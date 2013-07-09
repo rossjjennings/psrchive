@@ -15,7 +15,6 @@
 #include "TextInterfaceAttribute.h"
 #include "TextInterfaceElement.h"
 #include "TextInterfaceProxy.h"
-#include "EmbeddedTextInterface.h"
 
 namespace TextInterface
 {
@@ -143,12 +142,6 @@ namespace TextInterface
 	  if (!import_filter || !found(name, value->get_name()))
 	    add_value(new VectorOfProxy<C,E,G,S>(name, value, g, s));
 	}
-      }
-
-    template<class G, class S>
-      void embed (const std::string& name, G g, S s)
-      {
-	add_value(new VectorOfInterfaces<C,G,S>(name, g, s));
       }
 
     //! Import the attribute interfaces from a map data text interface
