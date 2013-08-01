@@ -150,6 +150,8 @@ int main (int argc, char** argv) try
 
     case 'i':
       interactive = true;
+      break;
+
     case 'D':
       pgdev = "/xs";
       break;
