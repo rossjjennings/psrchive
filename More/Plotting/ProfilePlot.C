@@ -15,6 +15,7 @@
 Pulsar::ProfilePlot::ProfilePlot ()
 {
   plot_cal_transitions = true;
+  plotter.set_pen( get_pen() );
 }
 
 TextInterface::Parser* Pulsar::ProfilePlot::get_interface ()
