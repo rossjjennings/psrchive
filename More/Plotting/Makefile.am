@@ -55,8 +55,9 @@ nobase_include_HEADERS = \
 	Pulsar/ReceptionCalibratorPlotter.h \
         Pulsar/ReceptionModelPlotter.h \
 	Pulsar/SystemCalibratorPlotter.h \
-        Pulsar/ReceptionModelAxisPlotter.h
-
+        Pulsar/ReceptionModelAxisPlotter.h \
+	Pulsar/PlotPen.h \
+	Pulsar/HasPen.h
 
 libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
 	Plot.C PlotFactory.C FramedPlot.C \
@@ -117,7 +118,8 @@ libpsrplot_la_SOURCES = JenetAnderson98Plot.C		       \
 	CalibratorPlotter.C \
 	ReceptionCalibratorPlotter.C \
 	SystemCalibratorPlotter.C \
-	ReceptionModelPlotter.C
+	ReceptionModelPlotter.C \
+	PlotPen.C
 
 endif
 

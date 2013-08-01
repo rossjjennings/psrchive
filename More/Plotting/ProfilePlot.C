@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/ProfilePlot.h"
 
 #include "Pulsar/Archive.h"
