@@ -11,7 +11,7 @@
 #ifndef __Pulsar_PlotPen_h
 #define __Pulsar_PlotPen_h
 
-#include "ReferenceAble.h"
+#include "TextInterface.h"
 
 namespace Pulsar {
 
@@ -42,6 +42,11 @@ namespace Pulsar {
     void set_line_width (const int val) { line_width = val; }
     int get_line_width () const { return line_width; }
 
+    // Text interface to the PlotPen class
+    class Interface : public TextInterface::To<PlotPen> {
+    public:
+      Interface (PlotPen* = 0);
+    };
 
   };
 
