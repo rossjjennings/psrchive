@@ -7,6 +7,7 @@
 
 #include "Pulsar/SimplePlot.h"
 #include "Pulsar/PlotAnnotation.h"
+#include "Pulsar/HasPen.h"
 
 using namespace std;
 
@@ -23,6 +24,10 @@ void Pulsar::SimplePlot::plot (const Archive* data)
   if (verbose)
     cerr << "Pulsar::SimplePlot::plot focus" << endl;
   get_frame()->focus (data);
+
+  HasPen* has_pen = dynamic_cast<HasPen*> (this);
+  if (has_pen)
+    has_pen->get_pen()->setup();
 
   draw (data);
 
