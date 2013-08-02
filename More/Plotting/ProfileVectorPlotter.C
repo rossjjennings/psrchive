@@ -49,10 +49,7 @@ void Pulsar::ProfileVectorPlotter::draw ( float sx, float ex )
 {
   for (unsigned iprof=0; iprof < profiles.size(); iprof++)
   {
-    if (pen)
-      pen->setup ();
-
-    else
+    if (!pen)
       setup_pen (iprof);
 
     draw (profiles[iprof], sx, ex );
@@ -61,6 +58,8 @@ void Pulsar::ProfileVectorPlotter::draw ( float sx, float ex )
 
 void Pulsar::ProfileVectorPlotter::setup_pen (unsigned iprof)
 {
+  // cerr << "Pulsar::ProfileVectorPlotter::setup_pen" << endl;
+
   if (plot_sci.size() == profiles.size())
     cpgsci (plot_sci[iprof]);
   else
@@ -139,6 +138,9 @@ void Pulsar::ProfileVectorPlotter::draw( const Profile* profile,
     }
   }
 
+  if (pen)
+    pen->setup ();
+
   if (plot_histogram)
     cpgbin (total_pts, xs, ys, true);
   else if (transpose)
@@ -146,3 +148,4 @@ void Pulsar::ProfileVectorPlotter::draw( const Profile* profile,
   else
     cpgline (total_pts, xs, ys );
 }
+
