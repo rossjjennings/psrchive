@@ -397,8 +397,13 @@ Pulsar::ASPArchive::load_Integration (const char* filename, unsigned subint)
 
   // Use a middle channel as ref phase, adjust epoch
   // TODO: This will change for multi-polyco support
+  // Note: ASP instruments used a folding convention where phase 0 
+  // refers to the center of bin 0.  PSRCHIVE convention is for phase 0
+  // to be the rising edge of bin0.  So we subtract an extra half-bin
+  // from midsecs here to compensate for this. (PBD 2013/08/07)
   double refphase = midphase[nchan/2];
   midsecs -= refphase * midper[nchan/2];
+  midsecs -= (0.5/double(nbin)) * midper[nchan/2];
 
   // Move to data HDU
   if (asp_file_version==ASP_FITS_V101) {
@@ -505,17 +510,19 @@ void Pulsar::ASPArchive::load_extensions(fitsfile *f, int *status)
   Telescopes::set_telescope_info(t, this);
 
   // Backend extension
+  // Changed sign of delays 2013/08/07 to agree with PSRFITS
+  // sign convention for this value. --PBD
   Backend *b = getadd<Backend>();
   if ((get_telescope()=="1") || (get_telescope()=="a") 
       || (get_telescope()=="b")) {
     b->set_name("GASP"); 
-    b->set_delay(32.0*8.0/(128.0e6)/2.0); // 8x overlap PFB
+    b->set_delay(-32.0*8.0/(128.0e6)/2.0); // 8x overlap PFB
   } else if (get_telescope()=="3") {
     b->set_name("ASP");
-    b->set_delay(32.0*24.0/(128.0e6)/2.0); // 24x overlap PFB
+    b->set_delay(-32.0*24.0/(128.0e6)/2.0); // 24x overlap PFB
   } else if (get_telescope()=="f") {
     b->set_name("LBP");
-    b->set_delay(32.0*24.0/(128.0e6)/2.0); // 24x overlap PFB
+    b->set_delay(-32.0*24.0/(128.0e6)/2.0); // 24x overlap PFB
   } else {
     b->set_name("xASP");
   }
