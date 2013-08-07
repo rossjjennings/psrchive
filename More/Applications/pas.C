@@ -544,10 +544,10 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
   plotter.get_frame()->set_viewport (0.1, 0.9, 0.05, 0.68);
 
   if(refflag == true) {
-    cpgsci (ci_ref);
+    plotter.get_pen()->set_colour_index (ci_ref);
     plotter.plot_profile( refarch->get_Profile(0, 0, 0) );
   }
-  cpgsci (ci_std);
+  plotter.get_pen()->set_colour_index (ci_std);
   plotter.plot_profile( stdarch->get_Profile(0, 0, 0) );
 }
 

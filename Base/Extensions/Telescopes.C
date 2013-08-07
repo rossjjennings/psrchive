@@ -33,6 +33,10 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
     Telescopes::MtPleasant26(t);
     break;
 
+  case '6':
+    Telescopes::VLA(t);
+    break;
+
   case '7':
     Telescopes::Parkes(t);
     break;
@@ -163,4 +167,12 @@ void Pulsar::Telescopes::WSRT(Telescope *t)
   t->set_mount(Telescope::Equatorial);
   t->set_primary(Telescope::Parabolic);
   t->set_focus(Telescope::PrimeFocus);
+}
+
+void Pulsar::Telescopes::VLA(Telescope *t)
+{
+  t->set_name("VLA");
+  t->set_mount(Telescope::Horizon);
+  t->set_primary(Telescope::Parabolic);
+  t->set_focus(Telescope::Gregorian);
 }

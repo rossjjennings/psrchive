@@ -1,20 +1,17 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006 - 2013 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/ProfileVectorPlotter.h,v $
-   $Revision: 1.6 $
-   $Date: 2010/07/01 04:59:23 $
-   $Author: jonathan_khoo $ */
+// psrchive/More/Plotting/Pulsar/ProfileVectorPlotter.h
 
 #ifndef __Pulsar_ProfileVectorPlotter_h
 #define __Pulsar_ProfileVectorPlotter_h
 
-#include "Reference.h"
+#include "Pulsar/PlotPen.h"
 
 namespace Pulsar {
 
@@ -31,6 +28,9 @@ namespace Pulsar {
 
     //! set the y_scale min and max based on the x_scale min and max
     void minmax (PlotFrame* frame) const;
+
+    //! set the PlotPen used to draw all profiles
+    void set_pen (PlotPen* p) { pen = p; }
 
     //! draw all profiles
     void draw ( float sx, float ex );
@@ -58,6 +58,13 @@ namespace Pulsar {
 
     //! Transpose the x and y axes
     bool transpose;
+
+  private:
+
+    //! PlotPen used to draw all profiles
+    Reference::To<PlotPen> pen;
+
+    void setup_pen (unsigned);
   };
 
 }

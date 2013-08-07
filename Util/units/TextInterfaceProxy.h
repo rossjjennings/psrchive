@@ -193,7 +193,7 @@ namespace TextInterface
 
   protected:
 
-    //! The parent attribute interface
+    //! The element attribute interface
     Reference::To< Attribute<E> > attribute;
 
     //! Method of V that returns E*

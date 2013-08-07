@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/ProfileVectorPlotter.h"
 #include "Pulsar/PlotFrame.h"
 #include "Pulsar/Profile.h"
@@ -48,21 +49,29 @@ void Pulsar::ProfileVectorPlotter::draw ( float sx, float ex )
 {
   for (unsigned iprof=0; iprof < profiles.size(); iprof++)
   {
-    if (plot_sci.size() == profiles.size())
-      cpgsci (plot_sci[iprof]);
-    else
-      cpgsci (iprof+1);
-
-    if (plot_sls.size() == profiles.size())
-      cpgsls (plot_sls[iprof]);
-    else
-      cpgsls (iprof+1);
-
-    if (plot_slw.size() == profiles.size())
-      cpgslw (plot_slw[iprof]);
+    if (!pen)
+      setup_pen (iprof);
 
     draw (profiles[iprof], sx, ex );
   }
+}
+
+void Pulsar::ProfileVectorPlotter::setup_pen (unsigned iprof)
+{
+  // cerr << "Pulsar::ProfileVectorPlotter::setup_pen" << endl;
+
+  if (plot_sci.size() == profiles.size())
+    cpgsci (plot_sci[iprof]);
+  else
+    cpgsci (iprof+1);
+  
+  if (plot_sls.size() == profiles.size())
+    cpgsls (plot_sls[iprof]);
+  else
+    cpgsls (iprof+1);
+  
+  if (plot_slw.size() == profiles.size())
+    cpgslw (plot_slw[iprof]);
 }
 
 //! draw the profile in the current viewport and window
@@ -129,6 +138,9 @@ void Pulsar::ProfileVectorPlotter::draw( const Profile* profile,
     }
   }
 
+  if (pen)
+    pen->setup ();
+
   if (plot_histogram)
     cpgbin (total_pts, xs, ys, true);
   else if (transpose)
@@ -136,3 +148,4 @@ void Pulsar::ProfileVectorPlotter::draw( const Profile* profile,
   else
     cpgline (total_pts, xs, ys );
 }
+

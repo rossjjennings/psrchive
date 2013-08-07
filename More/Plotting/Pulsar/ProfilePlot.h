@@ -15,11 +15,13 @@
 #define __Pulsar_ProfilePlot_h
 
 #include "Pulsar/FluxPlot.h"
+#include "Pulsar/HasPen.h"
 
 namespace Pulsar {
 
   //! Plots a single pulse profile
-  class ProfilePlot : public FluxPlot {
+  class ProfilePlot : public FluxPlot, public HasPen
+  {
 
   public:
 

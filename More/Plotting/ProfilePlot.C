@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/ProfilePlot.h"
 
 #include "Pulsar/Archive.h"
@@ -14,6 +15,7 @@
 Pulsar::ProfilePlot::ProfilePlot ()
 {
   plot_cal_transitions = true;
+  plotter.set_pen( get_pen() );
 }
 
 TextInterface::Parser* Pulsar::ProfilePlot::get_interface ()
