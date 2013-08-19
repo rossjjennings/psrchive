@@ -31,6 +31,7 @@ namespace pgplot {
       Plasma,
       Forest,
       AlienGlow,
+      CubeHelix,
       Test
     };
 
