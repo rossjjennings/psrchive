@@ -345,6 +345,14 @@ void pointer_tracker_remove(Reference::Able *ptr) {
         return r->get_name();
     }
 
+    // Get backend delay
+    double get_backend_delay()
+    {
+        Pulsar::Backend *b = self->get<Pulsar::Backend>();
+        if (b==NULL) { return 0.0; }
+        return b->get_delay();
+    }
+
     // Allow timing model to be updated via eph filename
     void set_ephemeris(std::string eph_file)
     {
