@@ -64,6 +64,8 @@ class psrover : public Pulsar::Application
   void set_ascii_file (string);
   void set_nbins (int);
 
+  void initialise_basis ( float*, int );
+
   time_t seconds;
   long seed;
   BoxMuller gasdev;
@@ -93,7 +95,9 @@ class psrover : public Pulsar::Application
   float tmp_rand;
   float amplitude;
 
-  int nbin;
+  unsigned nbin;
+  unsigned i_pol;
+  unsigned i_chan;
 
   bool got_noises;
   bool got_fwhms;
@@ -104,6 +108,8 @@ class psrover : public Pulsar::Application
 
   bool draw_amplitude;
   bool use_mises;
+
+  bool use_input_as_base;
 };
 
 psrover::psrover()
@@ -114,7 +120,10 @@ psrover::psrover()
 
   seed = 0;
 
-  data_reset = use_mises = draw_amplitude = got_nbins = got_ascii_file = got_noises = got_fwhms = got_bins = false;
+  use_input_as_base = data_reset = use_mises = draw_amplitude = got_nbins = got_ascii_file = got_noises = got_fwhms = got_bins = false;
+
+  i_pol = 0;
+  i_chan = 0;
 
   output_filename = "temp_archive.ar";
   out_path = ".";
@@ -152,9 +161,20 @@ void psrover::add_options ( CommandLine::Menu& menu)
   arg->set_help ("Coma separated list of centre bins for gaussian peaks");
   arg->set_help ("Negative value means that the corresponding noise amplitude is for random noise");
 
+
+  menu.add("");
+  menu.add("Input / output options");
+
   arg = menu.add( this, &psrover::set_ascii_file,'a',"ascii file");
   arg->set_help ("ascii file with desired underlying profile");
   arg->set_long_help ("if given, it will overwrite the data from archive");
+
+  arg = menu.add( use_input_as_base, 'i', "Use the input archive as a basis for the new profile");
+  arg->set_help( "psrover will add the request components on top of the input archive. This is incompatible with -a");
+
+  arg = menu.add( i_pol, "pol", "Choose polarisation to be modified");
+  
+  arg = menu.add( i_chan, "chan", "Choose frequency channel to be modified");
 
   arg = menu.add( this, &psrover::set_nbins,'n',"number of bins");
   arg->set_help( "the number of bins in the requested profile");
@@ -164,7 +184,7 @@ void psrover::add_options ( CommandLine::Menu& menu)
   arg->set_help( "name of the output, defaults to temp_archive.ar");
 
   arg = menu.add( sequential_files, 'O' );
-  arg->set_help( "Use a sequence of number as the output filename" );
+  arg->set_help( "Use a sequence of numbers as the output filename" );
 
   arg = menu.add( out_path, 'u', "path" );
   arg->set_help( "Write files to this location" );
@@ -231,6 +251,11 @@ void psrover::set_ascii_file (string _file)
 void psrover::setup ()
 {
   if (got_ascii_file) {
+    if ( use_input_as_base )
+    {
+      cerr << "psrover::setup illegal combination of options. Use none or one of -a and -i" << endl;
+      exit(-1);
+    }
     if (verbose)
       cerr << "psrover::setup reading the ascii file " << endl;
     ifstream in_file(ascii_filename.c_str());
@@ -318,7 +343,13 @@ void psrover::process (Pulsar::Archive* archive)
   float* data = new float[nbin];
   for ( unsigned i_sub = 0; i_sub < archive->get_nsubint() ;i_sub ++ )
   {
-    data = archive->get_Integration(i_sub)->get_Profile(0, 0)->get_amps();
+    data = archive->get_Integration(i_sub)->get_Profile(i_pol, i_chan)->get_amps();
+
+    if ( use_input_as_base )
+    {
+      initialise_basis( data, nbin );
+      data_reset = true;
+    }
 
     if (!noise_to_add.empty()) {
       for (unsigned jcomp = 0; jcomp < fwhms.size(); jcomp++ ) {
@@ -349,7 +380,6 @@ void psrover::process (Pulsar::Archive* archive)
 	      cerr << "maximum: " << amplitude << " peak at the bin: " << bins[jcomp] << " fwhm: " << fwhms[jcomp] << endl;
 	    }
 	    for (unsigned ibin = 0; ibin < nbin; ++ibin) {
-	      // resolve the gaussian with sub_bin resolution:
 	      if (!data_reset)
 	      {
 		if  (verbose && ibin == 0)
@@ -358,6 +388,7 @@ void psrover::process (Pulsar::Archive* archive)
 		if (ibin == nbin-1)
 		  data_reset = true;
 	      }
+	      // resolve the gaussian with sub_bin resolution:
 	      for (unsigned ksubbin = 0; ksubbin < sub_bin; ksubbin++ ) {
 		current_bin = (float)((signed)ibin) + 1.0 / sub_bin * (float)ksubbin;
 		*data += amplitude / sub_bin * exp( -pow((signed)current_bin - bins[jcomp],2) / 2 / pow(fwhms[jcomp] / 2.35482, 2)) ;
@@ -444,14 +475,14 @@ void psrover::process (Pulsar::Archive* archive)
     {
       if (verbose)
 	cerr << "psrover::process printing profile to an ascii file" << endl;
-      float *amps = archive->get_Profile(0,0,0)->get_amps();
+      float *amps = archive->get_Profile(i_sub, i_pol, i_chan)->get_amps();
       for (unsigned i = 0 ; i < nbin; i++ )
       {
 	outfile3 <<  amps[i] << endl;
       }
     }
     data_reset = false;
-  }
+  } // end of loop through the sub-integrations
   if (verbose)
     cerr << "Unloading " << endl;
   if ( !sequential_files )
@@ -463,6 +494,15 @@ void psrover::process (Pulsar::Archive* archive)
     ss.str("");
   }
   file_count++;
+}
+
+void psrover::initialise_basis( float* data, int nbin )
+{
+  if ( verbose )
+    cerr << "psrover::initialise_basis entered" << endl;
+  for (unsigned i = 0; i < nbin; i++ ) {
+    profile_values.at(i) = data[i];
+  }
 }
 
 void psrover::finalize()
