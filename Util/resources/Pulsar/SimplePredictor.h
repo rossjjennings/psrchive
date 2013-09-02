@@ -33,9 +33,6 @@ namespace Pulsar {
     //! Default constructor
     SimplePredictor (const char* filename = 0);
 
-    //! Copy constructor
-    SimplePredictor (const SimplePredictor&);
-
     //! Destructor
     ~SimplePredictor ();
 

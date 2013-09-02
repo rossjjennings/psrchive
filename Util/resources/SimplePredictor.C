@@ -39,14 +39,6 @@ Pulsar::SimplePredictor::SimplePredictor (const char* filename)
   fclose (fptr);
 }
 
-Pulsar::SimplePredictor::SimplePredictor (const SimplePredictor& copy)
-{
-  coefs = copy.coefs;
-  name = copy.name;
-  coordinates = copy.coordinates;
-  dispersion_measure = copy.dispersion_measure;
-}
-
 Pulsar::SimplePredictor::~SimplePredictor ()
 {
 }
