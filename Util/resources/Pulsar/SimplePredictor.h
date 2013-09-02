@@ -87,6 +87,12 @@ namespace Pulsar {
     //! Dispersion measure
     double get_dispersion_measure () const { return dispersion_measure; }
 
+    //! Set the reference epoch
+    void set_reference_epoch (const MJD& epoch) { reference_epoch = epoch; }
+
+    //! Get the reference epoch
+    MJD get_reference_epoch () const { return reference_epoch; }
+
   private:
 
     //! Polynomial coefficients
