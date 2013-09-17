@@ -19,7 +19,7 @@ Pulsar::InstallInterpreter::InstallInterpreter ()
     ( &InstallInterpreter::parameters,
       "par", "install new pulsar parameters",
       "usage: par <file> \n"
-      "  string file  pular parameters filename \n" );
+      "  string file  pulsar parameters filename \n" );
 
   add_command 
     ( &InstallInterpreter::predictor,

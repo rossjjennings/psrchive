@@ -164,7 +164,7 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
 
   RealTimer timer;
 
-  string parfile = "pular.par";
+  string parfile = "pulsar.par";
   parameters->unload (parfile);
 
   string tempo = "tempo2 -npsr 1 -f " + parfile + " -pred ";
