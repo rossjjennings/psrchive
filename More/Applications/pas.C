@@ -345,6 +345,34 @@ int main (int argc, char** argv)
 	    if (verbose) cout << "Interpolate: done" << endl;
 	  }
 	  break;
+		case 'e':   //Set mean to zero
+	  {
+		 cpgband(2, 0, curs_x, curs_y, &x, &y, &opts);
+		 float * tmpdata=stdarch->get_Profile(0, 0, 0)->get_amps();
+		 int istart, iend;
+		 istart = int(curs_x*stdarch->get_Profile(0, 0, 0)->get_nbin());
+		 if (istart<0) istart=0;
+		 iend = int(x*stdarch->get_Profile(0, 0, 0)->get_nbin());
+		 if(unsigned(iend)>stdarch->get_Profile(0, 0, 0)->get_nbin()) 
+			iend=stdarch->get_Profile(0, 0, 0)->get_nbin();
+		 meantmp=0;
+		 for(i=unsigned(istart); i<unsigned(iend); i++) {
+			meantmp+=tmpdata[i];
+		 }
+		 meantmp/=(float)(iend-istart); 
+		 for(i=unsigned(istart); i<unsigned(iend); i++) {
+			tmpdata[i]-=meantmp;
+		 }
+		 for(i=0; i <unsigned(istart);i++) {
+			tmpdata[i]=0;
+		 }
+		 for(i=unsigned(iend); i <stdarch->get_Profile(0, 0, 0)->get_nbin();i++) {
+			tmpdata[i]=0;
+		 }
+
+		 stdarch->get_Profile(0, 0, 0)->set_amps(tmpdata);
+		 break;
+	  }
 
 	  case '0':   //Zero base line
 	    cout << "Zero baseline: start point set at:" << curs_x << endl;
@@ -469,6 +497,8 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
       cpgtext (x, y, "i:  set the range and interpolate"); 
     else if(i==8)
       cpgtext (x, y, "z:  zoom in"); 
+    else if(i==9)
+      cpgtext (x, y, "e:  set z(e)ro mean inside region, 0 val outside"); 
     else    break;
   }
   if(refflag==true) {
