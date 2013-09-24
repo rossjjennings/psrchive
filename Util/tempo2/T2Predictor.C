@@ -92,8 +92,12 @@ void Tempo2::Predictor::insert (const Pulsar::Predictor* from)
 
 void Tempo2::Predictor::keep (const std::vector<MJD>& epochs)
 {
-  if (verbose)
-    cerr << "Tempo2::Predictor::keep not implemented" << endl;
+  cerr << "Tempo2::Predictor::keep implemented" << endl;
+  vector<long double> mjds (epochs.size());
+  for (unsigned i=0; i<mjds.size(); i++)
+    mjds[i] = from_MJD (epochs[i]);
+
+  T2Predictor_Keep (&predictor, mjds.size(), &(mjds[0]));
 }
 
 string Tempo2::Predictor::get_psrname () const
