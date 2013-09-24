@@ -10,7 +10,8 @@ EXTRA_DIST = psrhelp
 
 bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
-	psrover psrcull calavg pcmavg fix_single psrsplit distortion
+	psrover psrcull calavg pcmavg fix_single psrsplit distortion \
+	drifting_subpulses
 
 pam_SOURCES = pam.C
 
@@ -62,6 +63,8 @@ rmfit_LDADD = njkk08/libnjkk08.la $(LDPLOT)
 
 mtm_SOURCES = mtm.C
 distortion_SOURCES = distortion.C
+
+drifting_subpulses_SOURCES = drifting_subpulses.C
 
 sesdiv_SOURCES = sesdiv.C
 

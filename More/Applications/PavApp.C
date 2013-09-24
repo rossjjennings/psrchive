@@ -199,7 +199,8 @@ void PavApp::PrintUsage( void )
   cout << "                  4 -> Plasma" << endl;
   cout << "                  5 -> Forest" << endl;
   cout << "                  6 -> Alien Glow" << endl;
-  cout << "                  7 -> Test" << endl;
+  cout << "                  7 -> CubeHelix" << endl;
+  cout << "                  8 -> Test" << endl;
   cout << endl;
   cout << " --plot_qu      Plot Stokes Q and Stokes U in '-S' option instead of degree of linear" << endl;
   cout << " --ld           Label phase axes in degrees" << endl;
@@ -909,11 +910,15 @@ int PavApp::run( int argc, char *argv[] )
         options.push_back("cmap:map=alien");
         break;
       case 7:
+        colour_map = pgplot::ColourMap::CubeHelix;
+        options.push_back("cmap:map=cubehelix");
+        break;
+      case 8:
         colour_map = pgplot::ColourMap::Test;
         options.push_back("cmap:map=test");
         break;
       default:
-        cerr << "Unknown colour map, use (0-7)" << endl;
+        cerr << "Unknown colour map, use (0-8)" << endl;
       };
       break;
     case BINPHLA:

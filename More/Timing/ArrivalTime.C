@@ -14,6 +14,7 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Statistics.h"
+#include "Pulsar/Backend.h"
 
 #include <strings.h>
 
@@ -146,6 +147,9 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub,
   if (standard && standard->get_nchan() > 1)
     shift = dynamic_cast<ProfileStandardShift*>( shift_estimator.get() );
 
+  // Get a time adjustment from be_delay
+  const Backend *be = observation->get<Backend>();
+
   const Integration* subint = observation->get_Integration(isub);
 
   if (Archive::verbose > 3)
@@ -169,6 +173,13 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub,
 
       Tempo::toa arrival_time = get_toa (shift, subint, ichan);
       arrival_time.set_reduced_chisq( shift_estimator->get_reduced_chisq () );
+
+      // Adjust TOA with be_delay value, if present.
+      // Positive be_delay means that the file timestamp is 
+      // early as compared to the time the signal 
+      // arrived at the samplers. So we add be_delay to the TOA here.
+      if (be)
+        arrival_time.set_arrival(arrival_time.get_arrival() + be->get_delay());
 
       toas.push_back( arrival_time );
     }

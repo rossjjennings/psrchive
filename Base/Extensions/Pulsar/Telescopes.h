@@ -49,6 +49,9 @@ namespace Pulsar {
 
     //! Initialize the Telescope Extension with WSRT info
     void WSRT (Telescope* t);
+
+    //! Initialize the Telescope Extension with VLA info
+    void VLA (Telescope* t);
   } 
 
 }
