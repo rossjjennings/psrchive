@@ -11,6 +11,9 @@
 #include "Pulsar/StandardOptions.h"
 #include "Pulsar/UnloadOptions.h"
 
+// Update to remove variable baseline MJK2013, adapted from Patrick Weltevrede:
+#include "Pulsar/RemoveVariableBaseline.h"
+
 #include "Pulsar/RFIMitigation.h"
 #include "Pulsar/ChannelZapModulation.h"
 #include "Pulsar/ChannelZapMedian.h"
@@ -133,6 +136,9 @@ bool median_zap = false;
 bool median_zap_bybin = false;
 unsigned median_zap_window = 0;
 
+//Update to remove variable baseline MJK2013, adapted from Patrick Weltevrede
+bool removeVariableBaseline = false;
+
 Pulsar::ChannelZapModulation * modulation_zapper = 0;
 
 int pol_to_delete = -1;
@@ -222,6 +228,10 @@ void paz::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (eightBinZap, '8');
   arg->set_help ("Fix ATNF WBCORR 8 bin problem (see also -p)");
+
+ //Update to remove variable baseline MJK2013, adapted from Patrick Weltevrede
+  arg = menu.add (removeVariableBaseline, 'b');
+  arg->set_help ("Remove variable baseline");
 
   menu.add
     ("\n"
@@ -722,6 +732,13 @@ void paz::process (Pulsar::Archive* arch)
       cerr << "paz: mowing subint " << subints_to_mow[isub] << endl;
       mower->transform (arch->get_Integration (subints_to_mow[isub]));
     }
+  }
+
+  //Update to remove variable baseline MJK2013, adapted from Patrick Weltevrede
+  if (removeVariableBaseline) {
+    fprintf(stderr, "Set remove_baseline_strategy.\n");
+    Pulsar::Archive::remove_baseline_strategy.set (new Pulsar::RemoveVariableBaseline, &Pulsar::RemoveVariableBaseline::transform);
+    arch->remove_baseline();
   }
 }
 
