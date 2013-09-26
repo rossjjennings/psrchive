@@ -54,8 +54,6 @@ void fitStraightLine(float* x, float* y, int N, float* m, float* c){
    my=mean(y,N);
    *m = cxy/vx;
    *c = my - (*m) * mx;
-   fprintf(stderr,"means %g %g %g %g\n",mx,my,vx,cxy);
-   fprintf(stderr,"%g %g\n",*m,*c);
 
    return;
 }
