@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesPlot.h,v $
-   $Revision: 1.12 $
-   $Date: 2010/07/01 05:04:59 $
-   $Author: jonathan_khoo $ */
+// psrchive/More/Plotting/Pulsar/StokesPlot.h
 
 #ifndef __Pulsar_StokesPlot_h
 #define __Pulsar_StokesPlot_h
@@ -18,7 +15,7 @@
 
 namespace Pulsar {
 
-  //! Plots a single pulse profile
+  //! Plots a polarization pulse profile
   class StokesPlot : public FluxPlot {
 
   public:
