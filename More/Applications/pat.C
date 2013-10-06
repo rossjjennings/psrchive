@@ -792,8 +792,6 @@ void plotDifferences(Pulsar::Archive* arch, Pulsar::Archive* stdarch,
 {
   // remove baseline for all templates (except caldelay)
   const bool cal_delay_file = arch->get_source() == "CalDelay";
-  if (!cal_delay_file)
-    stdarch->remove_baseline();
 
   // difference between template and profile
   Reference::To<Archive> profile_diff = Archive::new_Archive("PSRFITS");
@@ -820,9 +818,39 @@ void plotDifferences(Pulsar::Archive* arch, Pulsar::Archive* stdarch,
   // Split the plot window into 3 horizontal plots.
   cpgsubp(1, 3);
 
+
+  Profile stdcopy = stdarch->get_Profile(0,0,0) ;
+  float* amps = stdcopy.get_amps();
+  float mean=0;
+  for (unsigned ibin = 0 ; ibin < stdcopy.get_nbin(); ibin++){
+	 mean+=amps[ibin];
+  }
+  mean /= (float)stdcopy.get_nbin();
+
+  if (!cal_delay_file and fabs(mean) > 1e-3)
+    stdarch->remove_baseline();
   const unsigned nbin  = arch->get_nbin();
   const unsigned nsub  = arch->get_nsubint();
   const unsigned nchan = arch->get_nchan();
+  if (nbin > stdcopy.get_nbin()) {
+    if (nbin % stdcopy.get_nbin())
+      throw Error (InvalidState, "pat", 
+		   "profile nbin=%d standard nbin=%d",
+                   nbin, stdcopy.get_nbin());
+
+    unsigned nscrunch = nbin / stdcopy.get_nbin();
+    arch->bscrunch (nscrunch);
+  }
+
+  if (nbin < stdcopy.get_nbin()) {
+    if (stdcopy.get_nbin() % nbin)
+      throw Error (InvalidState, "pat", 
+		   "profile nbin=%d standard nbin=%d",
+                   nbin, stdcopy.get_nbin());
+
+    unsigned nscrunch = stdcopy.get_nbin() / nbin;
+    stdcopy.bscrunch (nscrunch);
+  }
 
   for (unsigned isub = 0; isub < nsub; ++isub) {
     for (unsigned ichan = 0; ichan < nchan; ++ichan) {

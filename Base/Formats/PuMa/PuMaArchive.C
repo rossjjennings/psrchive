@@ -5,6 +5,7 @@
 
 #include <libpuma.h>
 #include <bigendian.h>
+#include <string.h>
 
 using namespace std;
 

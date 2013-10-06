@@ -8,7 +8,7 @@
 #include "T2Predictor.h"
 #include "T2Generator.h"
 
-#include "tempo2pred_int.h"
+#include <tempo2pred_int.h>
 #include "inverse_phase.h"
 
 #include "FilePtr.h"
@@ -92,7 +92,7 @@ void Tempo2::Predictor::insert (const Pulsar::Predictor* from)
 
 void Tempo2::Predictor::keep (const std::vector<MJD>& epochs)
 {
-  cerr << "Tempo2::Predictor::keep implemented" << endl;
+  //cerr << "Tempo2::Predictor::keep implemented" << endl;
   vector<long double> mjds (epochs.size());
   for (unsigned i=0; i<mjds.size(); i++)
     mjds[i] = from_MJD (epochs[i]);
