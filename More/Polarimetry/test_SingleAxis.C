@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/SingleAxis.h"
 #include "Pulsar/SingleAxisSolver.h"
 #include "Pauli.h"
@@ -29,9 +30,6 @@ int main () try {
 
   // more complex solution
   Calibration::SingleAxisSolver solver;
-
-  // the model of the receiver
-  Calibration::SingleAxis model;
 
   // calibrator input
   Stokes<double> cal (1,0,1,0);
@@ -91,7 +89,11 @@ int main () try {
     // test two different methods
     unsigned istart = 0;
 
-    for (unsigned itest=istart; itest < 2; itest++) {
+    for (unsigned itest=istart; itest < 2; itest++)
+    {
+
+      // the model of the receiver
+      Calibration::SingleAxis model;
 
       if (itest == 0) {
 	
