@@ -1,0 +1,133 @@
+\documentclass[12pt]{article}
+\usepackage{amsfonts}
+\usepackage{bm}
+
+% bold math italic font
+\newcommand{\mbf}[1]{\mbox{\boldmath $#1$}}
+
+% symbol used for sqrt(-1)
+\newcommand{\Ci}{{\rm i}}
+
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\R}{\mathbb{R}}
+
+\newcommand{\var}{\rm Var}
+\newcommand{\trace}{\rm Tr}
+
+\newcommand{\code}[1]{{\tt{#1}}}
+
+\newcommand{\rotation}[3]{{\ensuremath{ {\bf R}^{#3}_{#1}({#2}) }}}
+
+\newcommand{\boost}[1][1]{{\ensuremath{ {\bf B}_{\bm{\hat {#1}}}(\gamma) }}}
+\newcommand{\rotat}[1][1]{{\ensuremath{ {\bf R}_{\bm{\hat {#1}}}(\phi) }}}
+
+\newcommand{\pauli}[1]{\ensuremath{ {\bm\sigma}_{\rm #1} }}
+\newcommand{\para}[1][ ]{\ensuremath{ {\Phi}_{{\rm PA}{#1}} }}
+
+\newcommand{\model}[1][ ]{\ensuremath{{\bm\rho}_j({{\bf T}_{#1}};{\mbf{a}}) }}
+\newcommand{\obs}{\ensuremath{ {\bm\rho}_{j,i} }}
+
+\begin{document}
+
+\noindent
+\large
+{\sc psrchive} Implementation Notes \\ [2mm]
+\normalsize
+Willem van Straten \\
+7 October 2013
+
+\section*{Basis-independent Ideal Feed Assumption}
+
+This document defines the equations used to derive the
+polarimetric response based on the ideal feed assumption
+(implemented by the {\tt SingleAxisSolver} class
+in {\sc psrchive}).
+%
+In the ideal feed approximation to calibration, it is assumed that the
+Jones matrix has the form
+%
+\[
+{\bf J}=\left( \begin{array}{cc}
+z_0 & 0 \\
+0 & z_1
+\end{array}\right)
+\]
+%
+where $z_0$ and $z_1$ are the complex gains applied to each receptor.
+%
+This Jones matrix may be represented using its polar decomposition,
+\[
+{\bf J} = J \; \boost \rotat
+\]
+where $J=(\det{\bf J})^{1/2}$, \boost\ is a Hermitian matrix (or boost
+transformation) and \rotat\ is a unitary matrix (or rotation
+transformation).  Note that both the boost and rotation are parameterized
+by a single unit vector, $\bm{\hat 1}$ (the {\it single axis}). 
+%
+The absolute phase of the signal is lost during detection; therefore,
+the phase of the complex-valued $J$ may be arbitrarily chosen, and $J$
+may be replaced by the real-valued gain, $G=|J|$.  The instrumental
+response is then completely described by the absolute gain $G$,
+differential gain $\gamma$, and differential phase $\phi$.
+
+The boost transformation affects only the total intensity and the
+component of the polarization vector that is parallel to $\bm{\hat 1}$,
+leaving the component of the polarized flux that is perpendicular to
+$\bm{\hat 1}$ unchanged.  Conversely, the rotation transformation
+affects only the polarized flux perpendicular to $\bm{\hat 1}$, leaving
+the component that is parallel to $\bm{\hat 1}$ and the total intensity
+unchanged.
+
+In principle, any set of input and output Stokes parameters can be
+used to measure the ideal feed parameters, so long as there is
+sufficient polarization perpendicular to $\bm{\hat 1}$ to constrain
+the differential phase.  In practise, a 100\% linearly polarized signal is
+generated using a noise diode that is coupled such that it induces an
+in-phase response with equal amplitude in each receptor; see the
+discussion of {\bf Calibrator Phase} in van Straten et al. (2010; PASA
+27, 104) for more details.
+
+\subsection*{Derivation of Solution}
+
+Let $S=[S_0,\bm{S}]$ represent the expected (or input) Stokes
+parameters of a known calibrator source and
+$S^\prime=[S_0^\prime,\bm{S}^\prime]$ represent the observed (or
+output) Stokes parameters.  It is useful to decompose both
+polarization vectors into their components parallel and perpendicular
+to the primary (single) axis; e.g.
+\[
+\bm{S_\parallel} = (\bm{S \cdot \hat 1}) \bm{\hat 1} = S_1\bm{\hat 1}
+\]
+\[
+\bm{S_\perp} = \bm{S} - \bm{S_1} = S_2\bm{\hat 2} + S_3\bm{\hat 3}
+\]
+%
+Then the cosine and sine of the angle of rotation about $\bm{\hat 1}$ between input and output
+states are given by
+%
+\[
+\bm{S_\perp \cdot S_\perp^\prime} = |\bm{S_\perp}| |\bm{S_\perp^\prime}| \cos2\phi
+\]
+\[
+(\bm{S_\perp \times S_\perp^\prime}) \bm{\cdot \hat 1} = |\bm{S_\perp}| |\bm{S_\perp^\prime}| \sin2\phi
+\]
+such that
+\begin{equation}
+\tan2\phi = { {S_2 S_3^\prime - S_3 S_2^\prime} \over S_2 S_2^\prime + S_3 S_3^\prime  }
+\end{equation}
+Transformation by $G$\boost\ results in
+\begin{eqnarray*}
+S_0^\prime = G^2 \left( S_0 \cosh2\gamma + S_1 \sinh2\gamma \right) \\
+S_1^\prime = G^2 \left( S_0 \sinh2\gamma + S_1 \cosh2\gamma \right)
+\end{eqnarray*}
+from which it is trivial to derive
+\begin{equation}
+\tanh2\gamma = { {S_0 S_1^\prime - S_1 S_0^\prime} \over S_0 S_0^\prime - S_1 S_1^\prime  }
+\end{equation}
+and
+\begin{equation}
+G^2 = { {S_0^\prime S_0^\prime - S_1^\prime S_1^\prime} \over S_0 S_0 - S_1 S_1 }
+\end{equation}
+\end{document}
+
+
