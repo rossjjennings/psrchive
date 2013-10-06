@@ -107,28 +107,20 @@ void Calibration::SingleAxisSolver::init ()
   // decompose the input unit vector
 
   Vector<3, MEAL::ScalarMath> input_vector = input.get_vector();
-  MEAL::ScalarMath input_magnitude = sqrt(input_vector * input_vector);
-
-  Vector<3, MEAL::ScalarMath> input_unit = input_vector/input_magnitude;
-
-  Vector<3, MEAL::ScalarMath> input_parallel = (input_unit * axis) * axis;
-  Vector<3, MEAL::ScalarMath> input_perp = input_unit - input_parallel;
+  Vector<3, MEAL::ScalarMath> input_parallel = (input_vector * axis) * axis;
+  Vector<3, MEAL::ScalarMath> input_perp = input_vector - input_parallel;
 
   // decompose the output unit vector
 
   Vector<3, MEAL::ScalarMath> output_vector = output.get_vector();
-  MEAL::ScalarMath output_magnitude = sqrt(output_vector * output_vector);
-
-  Vector<3, MEAL::ScalarMath> output_unit = output_vector/output_magnitude;
-
-  Vector<3, MEAL::ScalarMath> output_parallel = (output_unit * axis) * axis;
-  Vector<3, MEAL::ScalarMath> output_perp = output_unit - output_parallel;
+  Vector<3, MEAL::ScalarMath> output_parallel = (output_vector * axis) * axis;
+  Vector<3, MEAL::ScalarMath> output_perp = output_vector - output_parallel;
 
   // find the rotation
-  MEAL::ScalarMath cos_2phi = input_perp * output_perp;
-  MEAL::ScalarMath sin_2phi = cross( input_perp, output_perp ) * axis;
+  MEAL::ScalarMath A_cos_2phi = input_perp * output_perp;
+  MEAL::ScalarMath A_sin_2phi = cross( input_perp, output_perp ) * axis;
 
-  diff_phase = -0.5 * atan2 (sin_2phi, cos_2phi);
+  diff_phase = -0.5 * atan2 (A_sin_2phi, A_cos_2phi);
 
   // find the boost
   MEAL::ScalarMath input_p = input_vector * axis;
