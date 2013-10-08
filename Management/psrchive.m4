@@ -12,6 +12,7 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
                              ['psrchive' program to use]))
 
 
+  PSRCHIVE_CPPFLAGS=""
   PSRCHIVE_CFLAGS=""
   PSRCHIVE_LIBS=""
 
@@ -43,6 +44,7 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
 
     if test -x $psrchive_config; then
 
+      PSRCHIVE_CPPFLAGS=`$psrchive_config --cppflags`
       PSRCHIVE_CFLAGS=`$psrchive_config --cflags`
       PSRCHIVE_LIBS=`$psrchive_config --libs`
       PSRPLOT_LIBS=`$psrchive_config --pgplot-libs`
@@ -50,7 +52,7 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
       ac_save_CPPFLAGS="$CPPFLAGS"
       ac_save_LIBS="$LIBS"
 
-      CPPFLAGS="$PSRCHIVE_CFLAGS $CPPFLAGS"
+      CPPFLAGS="$PSRCHIVE_CPPFLAGS $CPPFLAGS"
       LIBS="$PSRCHIVE_LIBS $LIBS"
 
       AC_LANG_PUSH(C++)
@@ -59,6 +61,7 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
       AC_LANG_POP(C++)
 
       if test $have_psrchive = no; then
+	PSRCHIVE_CPPFLAGS=
         PSRCHIVE_CFLAGS=
         PSRCHIVE_LIBS=
       fi
@@ -88,6 +91,8 @@ AC_DEFUN([SWIN_LIB_PSRCHIVE],
   AC_SUBST(PSRPLOT_LIBS)
   AC_SUBST(PSRCHIVE_LIBS)
   AC_SUBST(PSRCHIVE_CFLAGS)
+  AC_SUBST(PSRCHIVE_CPPFLAGS)
+
   AM_CONDITIONAL(HAVE_PSRCHIVE,[test "$have_psrchive" = "yes"])
 
 ])
