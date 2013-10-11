@@ -65,6 +65,10 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
     Telescopes::WSRT(t);
     break;
 
+  case 's':
+    Telescopes::SHAO(t);
+    break;
+
   default: 
     // Unknown code, throw error after calling Telecope::set_coordinates
     emsg = "Unrecognized telescope code (" + a->get_telescope() + ")";
@@ -172,6 +176,14 @@ void Pulsar::Telescopes::WSRT(Telescope *t)
 void Pulsar::Telescopes::VLA(Telescope *t)
 {
   t->set_name("VLA");
+  t->set_mount(Telescope::Horizon);
+  t->set_primary(Telescope::Parabolic);
+  t->set_focus(Telescope::Gregorian);
+}
+
+void Pulsar::Telescopes::SHAO(Telescope *t)
+{
+  t->set_name("SHAO");
   t->set_mount(Telescope::Horizon);
   t->set_primary(Telescope::Parabolic);
   t->set_focus(Telescope::Gregorian);
