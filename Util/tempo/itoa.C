@@ -63,6 +63,9 @@ static int default_aliases ()
 
   add_alias ("GM", "gmrt");
 
+  add_alias ("SH", "shao");
+  add_alias ("SH", "shao65");
+
   return 1;
 }
 
