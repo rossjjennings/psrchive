@@ -139,14 +139,56 @@ bool Tempo2::Predictor::matches (const Pulsar::Predictor* other) const
 {
   const Predictor* t2p = dynamic_cast<const Predictor*>(other);
   if (!t2p)
-    return false;
+  {
+    if (verbose)
+      cerr << "Tempo2::Predictor::matches"
+              " other Predictor is not a Tempo2::Predictor" << endl; 
+    return false; 
+  } 
 
-  return 
-    get_psrname () == t2p->get_psrname() &&
-    get_sitename () == t2p->get_sitename() &&
-    get_freq_start () == t2p->get_freq_start() &&
-    get_freq_end () == t2p->get_freq_end() &&
-    get_dispersion_constant () == t2p->get_dispersion_constant();
+  if (get_psrname() != t2p->get_psrname())
+  {
+    if (verbose)
+      cerr << "Tempo2::Predictor::matches names do not match" << endl;
+    return false;
+  }
+
+  if (get_sitename() != t2p->get_sitename())
+  {
+    if (verbose)
+      cerr << "Tempo2::Predictor::matches site names do not match" << endl; 
+    return false; 
+  } 
+
+  if (get_freq_start() != t2p->get_freq_start())
+  {
+    if (verbose)
+      cerr << "Tempo2::Predictor::matches start frequencies do not match" << endl; 
+    return false; 
+  } 
+
+  if (get_freq_end() != t2p->get_freq_end())
+  {
+    if (verbose)
+      cerr << "Tempo2::Predictor::matches end frequencies do not match" << endl; 
+    return false; 
+  } 
+
+#if 0
+  /*
+    WvS - 13 Oct 2013
+    The dispersion constant is in fact not constant, but changes from epoch
+    to epoch and therefore should not be used as a matching criterion 
+  */
+  if (get_dispersion_constant() != t2p->get_dispersion_constant())
+  {
+    if (verbose)
+      cerr << "Tempo2::Predictor::matches dispersion constants do not match" << endl; 
+    return false; 
+  } 
+#endif
+
+  return true;
 }
 
 //! Set the observing frequency at which predictions will be made
