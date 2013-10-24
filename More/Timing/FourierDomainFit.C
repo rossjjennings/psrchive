@@ -14,6 +14,7 @@ Pulsar::FourierDomainFit::FourierDomainFit ()
 {
   use_mcmc = true;
   reduced_chisq = 0;
+  snr = 0.0;
 }
 
 Estimate<double> Pulsar::FourierDomainFit::get_shift () const
@@ -41,13 +42,24 @@ Estimate<double> Pulsar::FourierDomainFit::get_shift () const
   fit.compute();
 
   reduced_chisq = fit.get_reduced_chisq();
-  return fit.get_shift();
+  snr = fit.get_snr();
+
+  // Change shift range from 0->1 to -0.5->0.5
+  Estimate<double> result = fit.get_shift();
+  if (result.get_value() > 0.5) { result -= 1.0; }
+  return result;
 }
 
 //! Return the statistical goodness of fit
 double Pulsar::FourierDomainFit::get_reduced_chisq () const
 {
   return reduced_chisq;
+}
+
+//! Return the S/N ratio
+double Pulsar::FourierDomainFit::get_snr () const
+{
+  return snr;
 }
 
 //
