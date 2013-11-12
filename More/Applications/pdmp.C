@@ -2634,7 +2634,8 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 
     const MJD start = archive->get_Integration((int)floor(archive->get_nsubint()/(double)2))->get_start_time();
 
-	fprintf(file, " %s\t%3.3f\t%3.3f\t%3.2f\t%3.5f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%s\t%d\t%d\t%d\n",
+	//fprintf(file, " %s\t%3.3f\t%3.3f\t%3.2f\t%3.5f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%s\t%d\t%d\t%d\n",
+	fprintf(file, " %s %8.3f %7.3f %7.2f %12.5f %18.10f %15.10f %10.3f %10.3f %s %d %d %d\n",
 		archive->get_source().c_str(),
 		glong,
 		glat,
@@ -2651,7 +2652,7 @@ void writeResultFiles(Archive * archive, int tScint, int fScint, int tfScint) {
 	file = fopen("pdmp.per", "at");
 
 	if (file != NULL) {
-		fprintf(file, " %3.6f\t%3.10f\t%3.10f\t%3.3f\t%3.3f\t%3.3f\t%3.2f\t%s %d %d %d\t%9.6f\n",
+		fprintf(file, " %16.6f %18.10f %15.10f %10.3f %10.3f %10.3f %6.2f %s %d %d %d % 9.6f\n",
 		barycentricMjd.in_days(),
 		bestPeriod_bc_us/MILLISEC,
 		periodError_ms,
