@@ -37,6 +37,9 @@ namespace Pulsar {
     //! Return the statistical goodness of fit
     virtual double get_reduced_chisq () const { return 0; }
 
+    //! Return the profile S/N ratio
+    virtual double get_snr () const { return 0; }
+
     //! Return a text interface that can be used to configure this instance
     virtual TextInterface::Parser* get_interface () = 0;
 

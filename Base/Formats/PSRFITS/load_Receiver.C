@@ -138,12 +138,15 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   }
   else switch (hand) {
   case 1:
-    ext->set_hand ( Signal::Right ); break;
+    ext->set_hand ( Signal::Right );
+    break;
   case -1:
-    ext->set_hand ( Signal::Left ); break;
+    ext->set_hand ( Signal::Left );
+    break;
   default:
-    throw Error (InvalidParam, "FITSArchive::load_Receiver",
-		 "FD_HAND=%d", hand);
+    if (verbose == 3)
+      cerr << "FITSArchive::load_Receiver invalid FD_HAND=" << hand << endl;
+    break;
   }
 
   // Read angle of linear noise diode wrt platform zero

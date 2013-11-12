@@ -12,6 +12,7 @@ Known values for OPTION are:
 
   --prefix              installation directory
   --libs                library linking information
+  --cppflags            pre-processor flags
   --cflags              pre-processor and compiler flags
   --html                web page layout directory
   --aclocal             autoconf macro directory
@@ -53,6 +54,10 @@ while test $# -gt 0; do
 
     --help)
         usage 0
+        ;;
+
+    --cppflags)
+        echo -I@includedir@
         ;;
 
     --cflags)
