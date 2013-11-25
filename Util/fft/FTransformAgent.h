@@ -137,7 +137,7 @@ namespace FTransform {
   typename Library::Plan2* 
   PlanAgent<Library>::get_plan2 (size_t nx, size_t ny, type t)
   {
-    for (unsigned iplan=0; iplan<plans.size(); iplan++)
+    for (unsigned iplan=0; iplan<plans2.size(); iplan++)
       if (plans2[iplan]->matches (nx, ny, t))
 	return plans2[iplan];
     
