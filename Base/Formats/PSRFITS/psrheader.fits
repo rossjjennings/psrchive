@@ -437,9 +437,8 @@ PCOUNT  =                    0 / Size of special data area
 GCOUNT  =                    1 / One data group (required keyword)
 TFIELDS =                    * / Number of fields per row
 #
-NCPAR   =                    * / Number of coupling parameters
-NCOVAR  =                    * / Number of parameter covariances
-NCHAN   =                    * / Nr of channels in SK data 
+NPOL    =                    * / Number of polarizations in SK data
+NCHAN   =                    * / Number of channels in SK data 
 EXTNAME = SPECKURT             / Name of this binary table extension
 #
 TTYPE#  = SK_INT               / Samples integrated in SK statistics
@@ -447,14 +446,14 @@ TFORM#  = V                    / unsigned integer
 TTYPE#  = SK_EXCIS             / SK Excision limits 
 TFORM#  = V                    / unsigned integer
 TTYPE#  = FIL_SUM              / Filtered SK sum
-TDIM#   = (*,*)                / Data table dimensions (NCPAR*NCHAN)
-TFORM#  = E                    / NCPAR*NCHAN floats
+TDIM#   = (*,*)                / Data table dimensions (NPOL*NCHAN)
+TFORM#  = E                    / NPOL*NCHAN floats
 TTYPE#  = FIL_HIT              / Filtered SK hits
-TDIM#   = (*,*)                / Data table dimensions (NCPAR*NCHAN)
-TFORM#  = V                    / NCPAR*NCHAN unsigned integers
+TDIM#   = (*,*)                / Data table dimensions (NPOL*NCHAN)
+TFORM#  = V                    / NPOL*NCHAN unsigned integers
 TTYPE#  = UNFIL_SUM            / Unfiltered SK sum
-TDIM#   = (*,*)                / Data table dimensions (NCPAR*NCHAN)
-TFORM#  = E                    / NCPAR*NCHAN floats
+TDIM#   = (*,*)                / Data table dimensions (NPOL*NCHAN)
+TFORM#  = E                    / NPOL*NCHAN floats
 TTYPE#  = UNFIL_HIT            / Unfiltered SK hits
 TFORM#  = K                    / 64 bit signed integer
 END

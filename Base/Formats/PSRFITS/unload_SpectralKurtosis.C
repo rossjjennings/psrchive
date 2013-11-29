@@ -53,7 +53,7 @@ void Pulsar::FITSArchive::unload_sk_integrations (fitsfile* ffptr) const
   }
 
   // write the common parameters to file
-  psrfits_update_key (ffptr, "NCPAR", sk_npol);
+  psrfits_update_key (ffptr, "NPOL", sk_npol);
   psrfits_update_key (ffptr, "NCHAN", sk_nchan);
   psrfits_update_key (ffptr, "SK_INT", sk_m);
   psrfits_update_key (ffptr, "SK_EXCIS", sk_nsigma);
