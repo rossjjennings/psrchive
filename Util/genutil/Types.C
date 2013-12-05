@@ -25,6 +25,9 @@ const char* Signal::state_string (State state)
     return "Coherency Products";
   case PPQQ:
     return "Polarimetric Intensity";
+  case PP_State:
+  case QQ_State:
+    return "Single Polarization Intensity";
   case Intensity:
     return "Total Intensity";
   case NthPower:
