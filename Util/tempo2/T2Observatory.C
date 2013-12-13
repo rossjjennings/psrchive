@@ -15,6 +15,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 using namespace std;
 
@@ -83,6 +84,14 @@ static vector< Reference::To<Tempo2::Observatory> > antennae;
 
 static void load_observatories ();
 
+bool c_casecmp (string::value_type l1, string::value_type r1)
+{ return toupper(l1) == toupper(r1); }
+
+bool casecmp (const string& l, const string& r)
+{
+    return l.size() == r.size()
+        && equal(l.begin(), l.end(), r.begin(), c_casecmp);
+}
 const Tempo2::Observatory*
 Tempo2::observatory (const string& telescope_name)
 {
@@ -95,11 +104,11 @@ Tempo2::observatory (const string& telescope_name)
 	return antennae[i];
 
   for (unsigned i=0; i < antennae.size(); i++)
-    if (strcasestr( antennae[i]->get_name().c_str(), telescope_name.c_str() ))
+    if (casecmp( antennae[i]->get_name(), telescope_name ))
       return antennae[i];
 
   for (unsigned i=0; i < antennae.size(); i++)
-    if (antennae[i]->get_old_code() == telescope_name)
+    if (casecmp( antennae[i]->get_old_code(), telescope_name ))
       return antennae[i];
 
   throw Error (InvalidParam, "Tempo2::observatory",
