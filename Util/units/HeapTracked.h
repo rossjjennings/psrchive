@@ -67,11 +67,14 @@ namespace Reference {
     /*! The dynamic_cast in __is_on_heap necessitates a virtual destructor */
     virtual ~HeapTracked () { }
 
-    //! Records the addresses of instances allocated on the heap
-    void* operator new (size_t size, void* location = 0);
+    //! Records the addresses of new instances allocated on the heap
+    static void* operator new (size_t size, void* ptr = 0);
 
-    //! Checks that the instance was allocated on the heap
-    void operator delete (void* location);
+    //! Placement delete overload to match the placement new overload
+    static void operator delete (void* location, void* ptr);
+
+    //! Regular delete overload
+    static void operator delete (void* location);
 
     //! Return true if this instance is found in heap addresses
     bool __is_on_heap () const;
