@@ -18,7 +18,8 @@
 namespace Pulsar {
 
   //! Simulates a simple Gaussian with a standard RVM and zero circular
-  class SimplePolnProfile {
+  class SimplePolnProfile : public SyntheticPolnProfile
+  {
 
   public:
 
@@ -28,8 +29,13 @@ namespace Pulsar {
     //! Destructor
     ~SimplePolnProfile ();
 
-    //! The synthetic polarimetric profile generator
-    SyntheticPolnProfile generate;
+    //! Get the Rotating Vector Model used to simulate linear polarization
+    MEAL::RotatingVectorModel* get_RVM () { return &rvm; }
+
+    //! Centre the phase centre of the profile
+    void set_centre (double);
+
+  protected:
 
     //! The gaussian total intensity profile
     MEAL::Gaussian gaussian;
