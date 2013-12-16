@@ -75,7 +75,9 @@ protected:
   { 
     ComplexRVMFit::verbose = true; 
     Application::set_very_verbose(); 
-    Plot::verbose=true; 
+#if HAVE_PGPLOT
+    Plot::verbose=true;
+#endif
   }
 
   // complex rotating vector model
