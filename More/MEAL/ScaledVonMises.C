@@ -11,66 +11,37 @@
 
 #include "MEAL/ScaledVonMises.h"
 #include "MEAL/InverseRule.h"
-#include "MEAL/ScalarBesselI0.h"
 #include "MEAL/ScalarConstant.h"
 
 using namespace std;
  
-#if HAVE_GSL
+/*
+  besrat and vkappa Fortran implementations from
 
-#include <gsl_sf_bessel.h>
+  "Evaluation and Inversion of the Ratios of Modified Bessel
+  Functions, I1(x) /I0 (x) and I 1.5(x)/ I0.5(x)"
 
-double variance (double kappa)
+  Hill, Geoffrey W. (1981)
+  ACM Transactions on Mathematical Software (TOMS), vol. 7, pp. 199 - 208
+*/
+
+// defined in besrat.f
+#define F77_besrat F77_FUNC_(besrat,BESRAT)
+extern "C" float F77_besrat (float* kappa);
+
+float variance (float kappa)
 {
-  return 1 - gsl_sf_bessel_I1 (kappa) / gsl_sf_bessel_I0 (kappa);
+  return 1 - F77_besrat(&kappa);
 }
 
-// d/dx((I_1(x))/(I_0(x))) = (I_0(x)^2+I_2(x) I_0(x)-2 I_1(x)^2)/(2 I_0(x)^2)
-double dvariance_dkappa (kappa)
+// defined in vkappa.f
+#define F77_vkappa F77_FUNC_(vkappa,VKAPPA)
+extern "C" float F77_vkappa (float* kappa);
+
+float kappa (float variance)
 {
-  double I0 = gsl_sf_bessel_I0 (kappa);
-  double I1 = gsl_sf_bessel_I1 (kappa);
-  double I2 = gsl_sf_bessel_In (2,kappa);
-
-  return (2*I1*I1 - I0*I2 - I0*I0) / 2*(I0*I0);
-}
-
-#else
-
-// first order approximation to I1(k)/I0(k) from Wolfram Alpha
-double variance (double kappa)
-{
-  return 1.0 - kappa/2.0 + pow(kappa,3)/16.0 - pow(kappa,5)/96.0;
-}
-
-double dvariance_dkappa (double kappa)
-{
-  return -0.5 + pow(kappa,2)*3/16.0 - pow(kappa,4)*5/96.0;
-}
-
-#endif
-
-// Uses Newton-Raphson method to solve for kappa, given variance
-double kappa (double var)
-{
-  /* use the linear behaviour around erf(0) to get a good first guess */
-  double guess = var;
-  double dx = 0;
-  int gi = 0;
-  int gmax = 50;
-
-  if (var < 0 || var > 2)
-    throw Error (InvalidState, "kappa", "invalid variance=%f", var);
-
-  for (gi=0; gi<gmax; gi++) 
-  {
-    dx = (variance(guess) - var) / dvariance_dkappa (guess);
-    guess -= dx;
-    if (fabs (dx) <= fabs(guess)*1e-10)
-      return guess;
-  }
-  fprintf (stderr, "kappa: maximum iterations exceeded - %lf error\n", dx);
-  return guess;
+  float arg = 1 - variance;
+  return F77_vkappa(&arg);
 }
 
 void
@@ -139,9 +110,9 @@ Estimate<double> MEAL::ScaledVonMises::get_centre () const
 }
 
 //! Set the concentration
-void MEAL::ScaledVonMises::set_concentration (const Estimate<double>& concentration_)
+void MEAL::ScaledVonMises::set_concentration (const Estimate<double>& kappa)
 {
-  concentration.set_value (concentration_);
+  concentration.set_value (kappa);
 }
 
 //! Get the concentration
@@ -150,10 +121,22 @@ Estimate<double> MEAL::ScaledVonMises::get_concentration () const
   return concentration.get_value ();
 } 
 
-//! Set the width
-void MEAL::ScaledVonMises::set_width (const double width)
+//! Set the width in radiance
+void MEAL::ScaledVonMises::set_width (double width)
 {
-  concentration.set_value ( kappa(width*width) );
+  // express width in turns
+  width /= 2.0*M_PI;
+  double circular_variance = width*width;
+  double _kappa = kappa(circular_variance);
+
+#if 0
+  cerr << "MEAL::ScaledVonMises::set_width"
+    " width=" << width <<
+    " var=" << circular_variance <<
+    " kappa=" << _kappa << endl;
+#endif
+
+  concentration.set_value ( _kappa );
 }
 
 //! Get the width
