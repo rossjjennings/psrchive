@@ -59,6 +59,9 @@ namespace Pulsar {
 
     //! Get the polarimetric profile
     PolnProfile* get_PolnProfile (unsigned nbin) const;
+    
+    //! Get the polarimetric profile
+    void get_PolnProfile (PolnProfile*);
 
   protected:
 

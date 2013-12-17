@@ -76,11 +76,15 @@ void psrsim::add_options (CommandLine::Menu& menu)
   CommandLine::Argument* arg;
 
   // blank line in help
-  menu.add ("");
+  menu.add ("\n" "Interstellar medium options:");
 
+  arg = menu.add (rotation_measure, 'r');
+  arg->set_help ("rotation measure");
+
+  menu.add ("\n" "Pulse shape options:");
+  
   RotatingVectorModelOptions rvm_options;
   rvm_options.set_model (sim->get_RVM());
-  rvm_options.set_fit (true);
   rvm_options.add_options (menu);
 }
 
@@ -90,11 +94,32 @@ void psrsim::process (Pulsar::Archive* data)
   if (verbose)
     cerr << "psrsim: using " << data->get_filename() << endl;
 
-  // perform Faraday rotation
-  FaradayRotation xform;
-  xform.set_reference_wavelength( data->get_centre_frequency() );
-  xform.set_measure( rotation_measure );
-  xform.execute( data );
+  unsigned nsubint = data->get_nsubint();
+  unsigned nchan = data->get_nchan();
+  unsigned npol = data->get_npol();
+
+  if (npol != 4)
+  {
+    npol = 4;
+    data->resize( nsubint, npol, nchan );
+  }
+
+  data->set_state( Signal::Stokes);
+
+  for (unsigned isub=0; isub < nsubint; isub++)
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+      sim->get_PolnProfile(data->get_Integration(isub)->new_PolnProfile(ichan));
+
+  if (rotation_measure != 0.0)
+  {
+    // perform Faraday rotation
+    FaradayRotation xform;
+    xform.set_reference_wavelength( data->get_centre_frequency() );
+    xform.set_measure( rotation_measure );
+    xform.execute( data );
+  }
+  
+  data->unload ("psrsim.ar");
 }
 
 

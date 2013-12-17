@@ -7,6 +7,7 @@
 
 #include "Pulsar/SimplePolnProfile.h"
 #include "Pulsar/PolnProfile.h"
+
 #include "MEAL/ScalarParameter.h"
 #include "BoxMuller.h"
 
@@ -18,12 +19,11 @@ static BoxMuller gasdev (time(NULL));
 
 Pulsar::SimplePolnProfile::SimplePolnProfile ()
 {
-  // generate gaussian total intensity profiles
-  set_total_intensity (&gaussian);
+  // generate svm total intensity profiles
+  set_total_intensity (&svm);
 
-  gaussian.set_width  (0.02*M_PI);
-  gaussian.set_height (1.0);
-  gaussian.set_period (2*M_PI);
+  svm.set_width  (0.02*M_PI);
+  svm.set_height (1.0);
 
   // generate linear polarization according to RVM
   set_position_angle (&rvm);
@@ -37,8 +37,7 @@ Pulsar::SimplePolnProfile::SimplePolnProfile ()
   // set degree of polarization
   set_degree (0.4);
 
-  nbin = 256;
-  noise = 0.01;
+  set_noise_variance (0.01);
 }
 
 Pulsar::SimplePolnProfile::~SimplePolnProfile ()
@@ -48,6 +47,6 @@ Pulsar::SimplePolnProfile::~SimplePolnProfile ()
 //! Set the phase of the standard profile centre
 void Pulsar::SimplePolnProfile::set_centre (double centre)
 {
-  gaussian.set_centre (centre);
+  svm.set_centre (centre);
   rvm.magnetic_meridian->set_value (centre);
 }

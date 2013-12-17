@@ -76,11 +76,19 @@ void set_Profile (Pulsar::Profile* profile, Univariate<Scalar>* function)
   }
 }
 
+
 Pulsar::PolnProfile* 
 Pulsar::SyntheticPolnProfile::get_PolnProfile (unsigned nbin) const
 {
   Reference::To<PolnProfile> result = new PolnProfile (nbin);
   // result->convert_state (Signal::Stokes);
+  get_PolnProfile (result);
+  return result.release();
+}
+
+void Pulsar::SyntheticPolnProfile::get_PolnProfile (PolnProfile* result)
+{
+  unsigned nbin = result->get_nbin();
 
   Profile* I = result->get_Profile (0);
   Profile* Q = result->get_Profile (1);
@@ -172,6 +180,4 @@ Pulsar::SyntheticPolnProfile::get_PolnProfile (unsigned nbin) const
     }
 
   }
-
-  return result.release();
 }

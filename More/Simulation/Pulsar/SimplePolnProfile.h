@@ -13,7 +13,7 @@
 
 #include "Pulsar/SyntheticPolnProfile.h"
 #include "MEAL/RotatingVectorModel.h"
-#include "MEAL/Gaussian.h"
+#include "MEAL/ScaledVonMises.h"
 
 namespace Pulsar {
 
@@ -32,25 +32,19 @@ namespace Pulsar {
     //! Get the Rotating Vector Model used to simulate linear polarization
     MEAL::RotatingVectorModel* get_RVM () { return &rvm; }
 
+    //! Get the Scaled Von Mises function used to simulate the total intensity
+    MEAL::ScaledVonMises* get_Intensity () { return &svm; }
+
     //! Centre the phase centre of the profile
     void set_centre (double);
 
   protected:
 
     //! The gaussian total intensity profile
-    MEAL::Gaussian gaussian;
+    MEAL::ScaledVonMises svm;
 
     //! The rotating vector model used to describe the position angle
     MEAL::RotatingVectorModel rvm;
-
-    //! Number of bins in pulse profile
-    unsigned nbin;
-
-    //! Relative noise
-    float noise;
-
-    //! Phase offset of simulated observations
-    float phase;
 
   };
 
