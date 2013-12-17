@@ -46,7 +46,7 @@ void Pulsar::RotatingVectorModelOptions::add_options (CommandLine::Menu& menu)
 
   arg = menu.add (RVM->line_of_sight.get(),
 		  &MEAL::ScalarParameter::set_value,
-		  deg_to_rad, 'z', "degree");
+		  deg_to_rad, 'z', "degrees");
   arg->set_help ("zeta: colatitude of line of sight");
 
   if (_set_fit)
