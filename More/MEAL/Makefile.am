@@ -134,6 +134,8 @@ nobase_include_HEADERS = \
 libMEAL_la_SOURCES = \
         Argument.C \
         ArgumentPolicy.C \
+	besrat.f \
+	vkappa.f \
         BinaryScalar.C \
         Boost.C \
 	Boost1.C \
