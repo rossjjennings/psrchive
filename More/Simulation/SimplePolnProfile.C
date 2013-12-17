@@ -22,7 +22,7 @@ Pulsar::SimplePolnProfile::SimplePolnProfile ()
   // generate svm total intensity profiles
   set_total_intensity (&svm);
 
-  svm.set_width  (0.02*M_PI);
+  svm.set_width  (0.1*M_PI);
   svm.set_height (1.0);
 
   // generate linear polarization according to RVM
@@ -37,7 +37,7 @@ Pulsar::SimplePolnProfile::SimplePolnProfile ()
   // set degree of polarization
   set_degree (0.4);
 
-  set_noise_variance (0.01);
+  set_noise (0.01);
 }
 
 Pulsar::SimplePolnProfile::~SimplePolnProfile ()
