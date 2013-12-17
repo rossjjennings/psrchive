@@ -418,7 +418,8 @@ bool Pulsar::Database::Criterion::compare_times (const MJD& want,
   match_report += "\n\t" "difference=" + tostring(diff_minutes) + " minutes "
     "(max=" + tostring(minutes_apart) + ") ... ";
 
-  return diff_minutes < minutes_apart && diff_minutes >= 0;
+  return minutes_apart == 0
+      || (diff_minutes < minutes_apart && diff_minutes >= 0);
 }
 
 
@@ -431,7 +432,7 @@ bool Pulsar::Database::Criterion::compare_coordinates (const sky_coord& want,
   match_report += "\n\t" "difference=" + tostring(diff_degrees) + " degrees "
     "(max=" + tostring(deg_apart) + ") ... ";
 
-  return diff_degrees < deg_apart;
+  return deg_apart == 0 || diff_degrees < deg_apart;
 }
 
 std::ostream& operator<< (std::ostream& ostr, const Reference::To<const Calibrator::Type>& type)
