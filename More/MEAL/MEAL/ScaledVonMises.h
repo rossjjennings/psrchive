@@ -47,7 +47,7 @@ namespace MEAL {
     Estimate<double> get_concentration () const;
 
     //! Set the width
-    void set_width (const double width);
+    void set_width (double width);
 
     //! Get the width
     double get_width () const;
