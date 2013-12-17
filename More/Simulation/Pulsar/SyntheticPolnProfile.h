@@ -45,6 +45,9 @@ namespace Pulsar {
     //! Set the variance of the noise
     void set_noise_variance (float);
 
+    //! Set the standard deviation of the noise
+    void set_noise (float);
+
     //! Set the functional form of the position angle
     void set_position_angle (MEAL::Univariate<MEAL::Scalar>*);
 

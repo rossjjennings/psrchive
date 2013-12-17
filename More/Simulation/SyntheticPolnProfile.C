@@ -44,6 +44,11 @@ void Pulsar::SyntheticPolnProfile::set_noise_variance (float c)
   noise_variance = c;
 }
 
+void Pulsar::SyntheticPolnProfile::set_noise (float rms)
+{
+  noise_variance = rms * rms;
+}
+
 void
 Pulsar::SyntheticPolnProfile::set_position_angle (Univariate<Scalar>* f)
 {
