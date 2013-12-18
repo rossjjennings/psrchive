@@ -16,18 +16,28 @@
 
 #include "Pulsar/CalibratorType.h"
 
+// This preprocessor macro defines the contructor and clone method for klass
+#define CALIBRATOR_TYPE_INIT(klass,name) \
+  klass* clone () const { return new klass; } \
+  klass () { identities.push_back(name); }
+
+#define CALIBRATOR_TYPE(klass) \
+  klass* clone () const { return new klass; } \
+  klass () // body of constructor to follow
+
 namespace Pulsar
 {
   //! Contains the enumeration of all calibrator types
   /*! A separate namespace is used to keep the enumeration separate from
     the definition of the Calibrator::Type class */
+
   namespace CalibratorTypes
   {
     //! Flux calibrator
     class Flux : public Pulsar::Calibrator::Type
     {
     public:
-      std::string get_name () const { return "flux"; }
+      CALIBRATOR_TYPE_INIT(Flux,"flux")
       unsigned get_nparam () const { return 4; }
     };
 
@@ -35,7 +45,7 @@ namespace Pulsar
     class Corrections : public Pulsar::Calibrator::Type
     {
     public:
-      std::string get_name () const { return "corrections"; }
+      CALIBRATOR_TYPE_INIT(Corrections,"corrections")
       unsigned get_nparam () const { return 0; }
     };
     
@@ -48,7 +58,12 @@ namespace Pulsar
     class SingleAxis : public Poln
     {
     public:
-      std::string get_name () const { return "single"; }
+      CALIBRATOR_TYPE(SingleAxis)
+      {
+	identities.push_back("single");
+	identities.push_back("SingleAxis");
+      }
+
       unsigned get_nparam () const { return 3; }
     };
     
@@ -56,7 +71,11 @@ namespace Pulsar
     class van02_EqA1 : public Poln
     {
     public:
-      std::string get_name () const { return "van02eA1"; }
+      CALIBRATOR_TYPE(van02_EqA1)
+      {
+	identities.push_back("van02eA1");
+	identities.push_back("Polar");
+      }
       unsigned get_nparam () const { return 6; }
     };
     
@@ -67,27 +86,33 @@ namespace Pulsar
       bool is_a (const Type* that) const
       { return dynamic_cast<const CompleteJones*>(that) != 0; }
 
-      std::string get_name () const
-      { return "jones"; }
+      CALIBRATOR_TYPE(CompleteJones) { }
 
-      unsigned get_nparam () const
-      { return 7; }
+      unsigned get_nparam () const { return 7; }
     };
 
     //! van Straten (2004; ApJSS 152:129), equation 13
     class van04_Eq13 : public CompleteJones
     {
     public:
+      CALIBRATOR_TYPE(van04_Eq13)
+      {
+	identities.push_back("van04e13");
+	identities.push_back("Britton");
+      }
       bool is_a (const Type* that) const { return Type::is_a (that); }
-      std::string get_name () const { return "van04e13"; }
     };
 
     //! Unpublished polar decomposition
     class van09_Eq : public CompleteJones
     {
     public:
+      CALIBRATOR_TYPE(van09_Eq)
+      {
+	identities.push_back("van09");
+	identities.push_back("Hamaker");
+      }
       bool is_a (const Type* that) const { return Type::is_a (that); }
-      std::string get_name () const { return "van09"; }
     };
     
     //! Phenomenological parameterizations of Jones matrix
@@ -103,26 +128,27 @@ namespace Pulsar
     class bri00_Eq19 : public Phenomenological
     {
     public:
+      CALIBRATOR_TYPE_INIT(bri00_Eq19,"bri00e19")
       bool is_a (const Type* that) const { return Type::is_a (that); }
-      std::string get_name () const { return "bri00e19"; }
     };
     
     //! van Straten (2004; ApJSS 152:129), equation 18
     class van04_Eq18 : public Phenomenological
     {
     public:
+      CALIBRATOR_TYPE_INIT(van04_Eq18,"van04e18")
       bool is_a (const Type* that) const { return Type::is_a (that); }
-      std::string get_name () const { return "van04e18"; }
     };
 
     //! Mixes a SingleAxis and Phenomenological parameterization
     class Hybrid : public Poln
     {
     public:
+      CALIBRATOR_TYPE_INIT(Hybrid,"hybrid")
+
       bool is_a (const Type* that) const
       { return dynamic_cast<const Hybrid*>(that) != 0; }
 
-      std::string get_name () const { return "hybrid"; }
       // 7 Phenomenological + 3 SingleAxis
       unsigned get_nparam () const { return 10; }
     };
@@ -131,8 +157,8 @@ namespace Pulsar
     class ovhb04 : public Hybrid
     {
     public:
+      CALIBRATOR_TYPE_INIT(ovhb04,"ovhb04")
       bool is_a (const Type* that) const { return Type::is_a (that); }
-      std::string get_name () const { return "ovhb04"; }
     };
     
     //! Calibrate by brute force and unjustified assumptions
@@ -146,14 +172,14 @@ namespace Pulsar
     class DoP : public Nefarious
     {
     public:
-      std::string get_name () const { return "dop"; }
+      CALIBRATOR_TYPE_INIT(DoP,"dop")
     };
     
     //! Off-pulse Calibrator (P236)
     class OffPulse: public Nefarious
     {
     public:
-      std::string get_name () const { return "off"; }
+      CALIBRATOR_TYPE_INIT(OffPulse,"off")
     };
   }
 }

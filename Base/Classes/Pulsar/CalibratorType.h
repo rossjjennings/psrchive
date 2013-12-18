@@ -6,15 +6,13 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/CalibratorType.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/03/17 04:37:11 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/CalibratorType.h
 
 #ifndef __CalibratorType_H
 #define __CalibratorType_H
 
 #include "Pulsar/Calibrator.h"
+#include "Identifiable.h"
 
 namespace Pulsar
 {
@@ -24,7 +22,7 @@ namespace Pulsar
     obviate the need to recompile all Calibrator-derived code whenever
     a new type is added.
   */
-  class Calibrator::Type : public Reference::Able
+  class Calibrator::Type : public Identifiable
   {
   public:
 
@@ -35,10 +33,13 @@ namespace Pulsar
     static Type* factory (const Calibrator*);
 
     //! Return the name of the calibrator type
-    virtual std::string get_name () const = 0;
+    virtual std::string get_name () const { return get_identity(); }
 
     //! Return the number of parameters that describe the transformation
     virtual unsigned get_nparam () const = 0;
+
+    //! Return a new instance of derived type
+    virtual Type* clone () const = 0;
 
     //! Return true if that is a this
     virtual bool is_a (const Type* that) const;
