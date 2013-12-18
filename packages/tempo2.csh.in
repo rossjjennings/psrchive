@@ -22,6 +22,7 @@ if ( ! -d tempo2 ) then
 endif
 
 cd tempo2
+cvs update
 
 mkdir -p $TEMPO2
 rsync -at T2runtime/* $TEMPO2
