@@ -1,22 +1,19 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2009 by Willem van Straten
+ *   Copyright (C) 2009-2013 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/CalibratorTypes.h,v $
-   $Revision: 1.3 $
-   $Date: 2009/03/17 04:37:11 $
-   $Author: straten $ */
+// psrchive/Base/Classes/Pulsar/CalibratorTypes.h
 
 #ifndef __CalibratorTypes_H
 #define __CalibratorTypes_H
 
 #include "Pulsar/CalibratorType.h"
 
-// This preprocessor macro defines the contructor and clone method for klass
+// These preprocessor macros define the contructor and clone method for klass
 #define CALIBRATOR_TYPE_INIT(klass,name) \
   klass* clone () const { return new klass; } \
   klass () { identities.push_back(name); }
@@ -144,7 +141,7 @@ namespace Pulsar
     class Hybrid : public Poln
     {
     public:
-      CALIBRATOR_TYPE_INIT(Hybrid,"hybrid")
+      CALIBRATOR_TYPE(Hybrid) { }
 
       bool is_a (const Type* that) const
       { return dynamic_cast<const Hybrid*>(that) != 0; }
