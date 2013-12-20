@@ -1,4 +1,4 @@
-      FUNCTION BESRAT(V)                                                BES   10
+      FUNCTION BESRAT(V)                                                
 C ----------------------------------------------------------------
 C RETURNS BESRAT = A(K) FOR K = ABS(V), WHERE A(K) IS THE EXPECTED
 C MODULUS OF THE MEAN VECTOR SUM OF UNIT VECTORS SAMPLED FROM THE
