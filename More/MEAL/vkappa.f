@@ -1,4 +1,4 @@
-      FUNCTION VKAPPA(R)                                                VKA   10
+      FUNCTION VKAPPA(R)                                                
 C ----------------------------------------------------------------
 C RETURNS VKAPPA = THE MAXIMUM LIKELIHOOD ESTIMATE OF 'KAPPA', THE
 C CONCENTRATION PARAMETER OF VON MISES' DISTRIBUTION OF DIRECTIONS
