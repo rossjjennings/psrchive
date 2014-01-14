@@ -120,6 +120,27 @@ string Pulsar::CalInterpreter::load (const string& args)
 
 }
 
+class CriteriaInterface 
+  : public TextInterface::To<Pulsar::Database::Criteria>
+{
+public:
+  CriteriaInterface (Pulsar::Database::Criteria* instance)
+  {
+    if (instance)
+      set_instance (instance);
+/*
+ TO-DO: - add set/get methods to Criteria class
+        - define Criteria::Policy insertion and extraction operators
+
+    add( &Pulsar::Database::Criteria::get_policy,
+         &Pulsar::Database::Criteria::set_policy,
+         "order", "Use calibrator observed before/after pulsar" );
+*/
+  }
+};
+
+
+
 string Pulsar::CalInterpreter::criteria (const string& args) try
 {
   Database::Criteria criteria = Database::get_default_criteria ();
