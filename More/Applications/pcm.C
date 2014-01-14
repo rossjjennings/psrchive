@@ -1543,14 +1543,14 @@ void load_calibrator_database () try
   cerr << "pcm: midtime = "
        << mid.datestr (buffer, 256, "%Y-%m-%d-%H:%M:00") << endl;
   
-  Pulsar::Database::Criterion criterion;
-  criterion = database->criterion (archive, Signal::PolnCal);
-  criterion.entry.time = mid;
-  criterion.check_coordinates = check_coordinates;
-  criterion.minutes_apart = search_hours * 60.0;
+  Pulsar::Database::Criteria criteria;
+  criteria = database->criteria (archive, Signal::PolnCal);
+  criteria.entry.time = mid;
+  criteria.check_coordinates = check_coordinates;
+  criteria.minutes_apart = search_hours * 60.0;
   
   vector<Pulsar::Database::Entry> oncals;
-  database->all_matching (criterion, oncals);
+  database->all_matching (criteria, oncals);
   
   unsigned poln_cals = oncals.size();
   
@@ -1576,11 +1576,11 @@ void load_calibrator_database () try
     cerr << "pcm: searching for flux calibrator observations"
       " within " << search_days << " days of midtime" << endl;
 
-    criterion.entry.obsType = Signal::FluxCalOn;
-    criterion.check_coordinates = false;
-    criterion.minutes_apart = search_days * 24.0 * 60.0;
+    criteria.entry.obsType = Signal::FluxCalOn;
+    criteria.check_coordinates = false;
+    criteria.minutes_apart = search_days * 24.0 * 60.0;
     
-    database->all_matching (criterion, oncals);
+    database->all_matching (criteria, oncals);
   
     if (oncals.size() == poln_cals)
       cerr << "pcm: no FluxCalOn observations found; closest match was \n\n"

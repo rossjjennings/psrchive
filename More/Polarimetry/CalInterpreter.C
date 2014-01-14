@@ -37,6 +37,13 @@ Pulsar::CalInterpreter::CalInterpreter ()
       "    string filename      filename of database or calibrator" );
 
   add_command 
+    ( &CalInterpreter::criteria,
+      "criteria", "set or get calibrator match criteria",
+      "usage: criteria [key[=value]]\n"
+      "    string key           name of the criterion to set/get \n"
+      "    string value         value of the criterion" );
+
+  add_command 
     ( &CalInterpreter::cal,
       "", "calibrate the current archive using the current settings" );
 
@@ -111,6 +118,22 @@ string Pulsar::CalInterpreter::load (const string& args)
 		     "3) " + error.get_message() );
   }
 
+}
+
+string Pulsar::CalInterpreter::criteria (const string& args) try
+{
+  Database::Criteria criteria = Database::get_default_criteria ();
+
+  if (args.empty())
+    return response (Good, "type is " + caltype->get_name());
+
+  Database::set_default_criteria (criteria);
+
+  return response (Good);
+}
+catch (Error& error)
+{
+  return response (Fail, "unrecognized type '" + args + "'");
 }
 
 string Pulsar::CalInterpreter::cal (const string& arg) try

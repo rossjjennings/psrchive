@@ -46,6 +46,9 @@ namespace Pulsar {
     //! load the specifed file (database or calibrator)
     std::string load (const std::string& arg);
 
+    //! set the specified criterion
+    std::string criteria (const std::string& arg);
+
     //! perform the frontend (basis and projection) correction
     std::string frontend (const std::string& arg);
 
