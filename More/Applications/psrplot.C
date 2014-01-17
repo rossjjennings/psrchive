@@ -35,10 +35,6 @@ public:
   //! Verify setup
   void setup ();
 
-  //! Very verbose mode
-  void set_very_verbose ()
-  { Application::set_very_verbose(); Pulsar::Plot::verbose = true; }
-
   //! Process the given archive
   void process (Pulsar::Archive*);
 
@@ -66,6 +62,13 @@ public:
   // -l add loop index
   void add_loop_index (const string& name);
 
+  //! Very verbose mode
+  void set_very_verbose ()
+  { 
+    Application::set_very_verbose();
+    Pulsar::Plot::verbose = true;
+  }
+
 protected:
 
   //! Add command line options
@@ -73,6 +76,8 @@ protected:
 
   // Available plots
   PlotFactory factory;
+
+  friend class SpecificPreprocessingOptions;
 
   // Plots
   vector< Reference::To<Plot> > plots;
@@ -99,6 +104,56 @@ int main (int argc, char** argv)
   return program.main (argc, argv);
 }
 
+
+//! Extends StandardOptions to enable plot-specific pre-processing
+class SpecificPreprocessingOptions : public Pulsar::StandardOptions
+{
+public:
+
+  //! For now, works only with the psrplot class
+  SpecificPreprocessingOptions (psrplot*);
+
+  //! Extends StandardOptions::add_job
+  void add_job (const std::string& job);
+  
+  //! Extends StandardOptions::add_script
+  void add_script (const std::string& job);
+
+  //! Adds to the pre-processing options for a specific plot
+  void specific_job (std::string job);
+  
+  //! Adds to the pre-processing options for a specific plot
+  void specific_script (std::string job);
+
+private:
+
+  Reference::To<psrplot> program;
+
+};
+
+SpecificPreprocessingOptions::SpecificPreprocessingOptions (psrplot* p)
+{
+  program = p;
+  get_interpreter()->allow_infinite_frequency = true;
+}
+
+void SpecificPreprocessingOptions::add_job (const std::string& arg)
+{
+  if (arg[0] == ':')
+    specific_job (arg);
+  else
+    StandardOptions::add_job (arg);
+}
+  
+void SpecificPreprocessingOptions::add_script (const std::string& arg)
+{
+  if (arg[0] == ':')
+    specific_script (arg);
+  else
+    StandardOptions::add_script (arg);
+}
+
+
 psrplot::psrplot () : Pulsar::Application ("psrplot",
 					   "pulsar plotting program")
 {
@@ -115,11 +170,7 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
   overlay_plots = false;
 
   add( new Pulsar::PlotOptions );
-
-  Pulsar::StandardOptions* preprocessor = new Pulsar::StandardOptions;
-  preprocessor->get_interpreter()->allow_infinite_frequency = true;
-
-  add( preprocessor );
+  add( new SpecificPreprocessingOptions(this) );
 }
 
 void psrplot::add_options (CommandLine::Menu& menu)
@@ -346,5 +397,36 @@ void specific_style (string arg, vector< Reference::To<Plot> >& plots)
 
   // set them for the specified plot
   set_options (plots[index], options);
+}
+
+// get the pre-processor for the given plot
+Pulsar::StandardOptions* get_preprocessor (Plot* plot)
+{
+  Pulsar::StandardOptions* options = 0;
+
+  if (plot->has_preprocessor())
+    options = dynamic_cast<Pulsar::StandardOptions*>(plot->get_preprocessor());
+
+  if (!options)
+  {
+    options = new Pulsar::StandardOptions;
+    plot->set_preprocessor (options);
+  }
+
+  return options;
+}
+
+// load the string of pre-processor commands into one of the plots
+void SpecificPreprocessingOptions::specific_job (string arg)
+{
+  unsigned index = get_index (arg, program->plots);
+  get_preprocessor(program->plots[index])->add_job(arg);
+}
+
+// load the pre-processor script into one of the plots
+void SpecificPreprocessingOptions::specific_script (string arg)
+{
+  unsigned index = get_index (arg, program->plots);
+  get_preprocessor(program->plots[index])->add_script(arg);
 }
 
