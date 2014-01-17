@@ -345,7 +345,7 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
 #if HAVE_TEMPO2
     string code = get_tempo2_code (telescope, "Tempo::toa::Tempo2_unload");
 #else
-    string code = get_tempo1_code (telescope, "Tempo::toa::Tempo2_unload");
+    string code = string(1, get_tempo1_code (telescope, "Tempo::toa::Tempo2_unload"));
 #endif
     
     string temp = " " + code + " " + flags;
