@@ -888,7 +888,7 @@ string get_equinox( Reference::To<Archive> archive )
   if( !ext )
     return "UNDEF";
   else
-    return ext->get_equinox();
+    return tostring( ext->get_equinox() );
 }
 
 string get_trk_mode( Reference::To<Archive> archive )

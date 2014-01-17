@@ -26,7 +26,7 @@ Pulsar::FITSHdrExtension::FITSHdrExtension ()
 
   creation_date = unset;
   coordmode = unset;
-  equinox  = unset;
+  equinox  = 2000.0;
   trk_mode = unset;
   stt_date = unset;
   stt_time = unset;
@@ -159,7 +159,7 @@ std::string Pulsar::FITSHdrExtension::get_coordmode () const
   return coordmode;
 }
 
-std::string Pulsar::FITSHdrExtension::get_equinox () const
+double Pulsar::FITSHdrExtension::get_equinox () const
 {
   return equinox;
 }
