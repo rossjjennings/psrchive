@@ -89,6 +89,21 @@ void CommandLine::Menu::add (Item* i)
   item.push_back (i);
 }
 
+template<typename C, typename E>
+void find_and_erase (C& container, const E& element)
+{
+  typename C::iterator found
+    = std::find (container.begin(), container.end(), element);
+
+  if (found != container.end())
+    container.erase (found);
+}
+
+void CommandLine::Menu::remove (Item* i)
+{
+  find_and_erase (item, i);
+}
+
 //! Add a Heading with the given text
 void CommandLine::Menu::add (const std::string& text)
 {
