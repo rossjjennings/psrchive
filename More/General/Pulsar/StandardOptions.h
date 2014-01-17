@@ -35,13 +35,13 @@ namespace Pulsar {
     Archive* result ();
 
     //! Add to the jobs
-    void add_job (const std::string& job);
+    virtual void add_job (const std::string& job);
 
     //! Load a script into the jobs
-    void add_script (const std::string& job);
+    virtual void add_script (const std::string& job);
 
     //! Add to the default preprocessing jobs (ignored if jobs are set)
-    void add_default_job (const std::string& job);
+    virtual void add_default_job (const std::string& job);
 
     //! Provide access to the interpreter
     Interpreter* get_interpreter ();
