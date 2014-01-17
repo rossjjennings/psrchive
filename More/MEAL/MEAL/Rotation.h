@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Rotation.h,v $
-   $Revision: 1.10 $
-   $Date: 2008/04/30 15:32:38 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/Rotation.h
 
 #ifndef __MEAL_Rotation_H
 #define __MEAL_Rotation_H
@@ -18,8 +15,6 @@
 #include "Vector.h"
 
 namespace MEAL {
-
-  class OneParameter;
 
   //! Represents a rotation (unitary transformation) about a free axis
   /*! This class represents a rotation through angle, \f$\phi\f$,
