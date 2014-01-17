@@ -33,6 +33,7 @@ nobase_include_HEADERS = \
 	Pulsar/IntegrationMeta.h \
         Pulsar/IntegrationTI.h \
 	Pulsar/MoreProfiles.h \
+	Pulsar/Processor.h \
         Pulsar/Profile.h \
 	Pulsar/ProfileAmps.h \
 	Pulsar/ProfileAmpsExpert.h \

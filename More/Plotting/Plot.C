@@ -7,8 +7,14 @@
 
 #include "Pulsar/Plot.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/Processor.h"
 
 bool Pulsar::Plot::verbose = false;
+
+Pulsar::Plot::Plot ()
+{
+  constructor = 0;
+}
 
 //! Get the constructor
 Pulsar::Plot::Constructor* Pulsar::Plot::get_constructor ()
@@ -42,3 +48,22 @@ void Pulsar::Plot::preprocess (Archive* archive)
 {
   archive->remove_baseline();
 }
+
+//! Set the pre-processor
+void Pulsar::Plot::set_preprocessor (Processor* p)
+{
+  preprocessor = p;
+}
+
+//! Get the pre-processor
+Pulsar::Processor* Pulsar::Plot::get_preprocessor ()
+{
+  return preprocessor;
+}
+
+//! Return true if pre-processor has been set
+bool Pulsar::Plot::has_preprocessor () const
+{
+  return preprocessor;
+}
+
