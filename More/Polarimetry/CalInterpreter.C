@@ -9,7 +9,11 @@
 #include "Pulsar/CalibratorType.h"
 
 #include "Pulsar/Database.h"
+
+#include "Pulsar/ReferenceCalibrator.h"
+
 #include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/PolnCalibratorExtension.h"
 
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/FluxCalibratorExtension.h"
@@ -97,8 +101,10 @@ string Pulsar::CalInterpreter::load (const string& args)
 
     if ( archive->get<FluxCalibratorExtension>() )
       flux_calibrator = new FluxCalibrator (archive);
-    else 
+    else if ( archive->get<PolnCalibratorExtension>() )
       calibrator = new PolnCalibrator (archive);
+    else
+      calibrator = ReferenceCalibrator::factory (caltype, archive);
 
     return response (Good);
   }

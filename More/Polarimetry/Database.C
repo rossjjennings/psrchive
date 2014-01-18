@@ -8,13 +8,9 @@
 #include "Pulsar/Database.h"
 #include "Pulsar/CalibratorTypes.h"
 
-#include "Pulsar/SingleAxisCalibrator.h"
+#include "Pulsar/ReferenceCalibrator.h"
 #include "Pulsar/HybridCalibrator.h"
-#include "Pulsar/PolarCalibrator.h"
 #include "Pulsar/FluxCalibrator.h"
-
-#include "Pulsar/DoPCalibrator.h"
-#include "Pulsar/OffPulseCalibrator.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -1217,24 +1213,8 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch,
     return new Pulsar::PolnCalibrator (polcalarch);
 
   // otherwise, construct a solution
-  Reference::To<Pulsar::ReferenceCalibrator> ref_cal;
-
-  if ( type->is_a<CalibratorTypes::Hybrid>() ||
-       type->is_a<CalibratorTypes::SingleAxis>() )
-    ref_cal = new Pulsar::SingleAxisCalibrator (polcalarch);
-
-  else if ( type->is_a<CalibratorTypes::van02_EqA1>() )
-    ref_cal = new Pulsar::PolarCalibrator (polcalarch);
-
-  else if ( type->is_a<CalibratorTypes::DoP>() )
-    ref_cal = new Pulsar::DoPCalibrator (polcalarch);
-
-  else if ( type->is_a<CalibratorTypes::OffPulse>() )
-    ref_cal = new Pulsar::OffPulseCalibrator (polcalarch);
-
-  else
-    cerr << "Pulsar::Database::generatePolnCalibrator"
-      " unknown type=" << type->get_name() << endl;
+  Reference::To<ReferenceCalibrator> ref_cal;
+  ref_cal = ReferenceCalibrator::factory (type, polcalarch);
   
   if ( type->is_a<CalibratorTypes::Hybrid>() )
   {

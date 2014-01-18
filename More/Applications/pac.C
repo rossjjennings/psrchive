@@ -25,6 +25,9 @@
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/ReferenceCalibrator.h"
+#include "Pulsar/PolnCalibratorExtension.h"
+
+
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/IonosphereCalibrator.h"
 #include "Pulsar/FrontendCorrection.h"
@@ -43,6 +46,7 @@
 #include <string.h>
 
 using namespace std;
+using namespace Pulsar;
 
 // A command line tool for calibrating Pulsar::Archives
 const char* args = "A:aBbCcDd:Ee:fFGhiIJ:j:k:lLM:m:n:O:op:PqRr:sSt:Tu:UvVwWxyZ";
@@ -515,7 +519,11 @@ int main (int argc, char *argv[]) try
       cerr << "pac: Warning: -a and -A options are incompatible" << endl;
 
     model_arch = Pulsar::Archive::load(model_file);
-    model_calibrator = new Pulsar::PolnCalibrator(model_arch);
+
+    if (model_arch->get<PolnCalibratorExtension>())
+      model_calibrator = new Pulsar::PolnCalibrator(model_arch);
+    else
+      model_calibrator = ReferenceCalibrator::factory(pcal_type, model_arch);
 
     if (apply_only_feed)
       keep_only_feed (model_calibrator);
