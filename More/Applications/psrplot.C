@@ -78,6 +78,7 @@ protected:
   PlotFactory factory;
 
   friend class SpecificPreprocessingOptions;
+  Reference::To<StandardOptions> preprocessor;
 
   // Plots
   vector< Reference::To<Plot> > plots;
@@ -153,7 +154,6 @@ void SpecificPreprocessingOptions::add_script (const std::string& arg)
     StandardOptions::add_script (arg);
 }
 
-
 psrplot::psrplot () : Pulsar::Application ("psrplot",
 					   "pulsar plotting program")
 {
@@ -170,7 +170,7 @@ psrplot::psrplot () : Pulsar::Application ("psrplot",
   overlay_plots = false;
 
   add( new Pulsar::PlotOptions );
-  add( new SpecificPreprocessingOptions(this) );
+  add( preprocessor = new SpecificPreprocessingOptions(this) );
 }
 
 void psrplot::add_options (CommandLine::Menu& menu)
@@ -243,6 +243,9 @@ void specific_style (string optarg, vector< Reference::To<Plot> >& plots);
 // set the option for the specified plot
 void set_option (Pulsar::Plot* plot, const string& option);
 
+// get the preprocessor for the specified plot
+Pulsar::StandardOptions* get_preprocessor (Plot* plot);
+
 void psrplot::load_plot_options (const std::string& arg)
 {
   if (arg[0] == ':')
@@ -261,15 +264,29 @@ void psrplot::load_plot_options (const std::string& arg)
     string line = style[i];
 
     string key = stringtok (line, " \t\n");
+
     if (key == "plot")
     {
+      // the rest of the line is the new plot to add
       add_plot (line);
       current_plot = plots.back();
     }
-    else if (current_plot)
-      set_option( current_plot, style[i] );
+    else if (key == "exec")
+    {
+      // the rest of the line is the psrsh pre-processing command to run
+      if (current_plot)
+	get_preprocessor(current_plot)->add_job(line);
+      else
+	preprocessor->add_job(line);
+    }
     else
-      options.push_back( style[i] );
+    {
+      // the entire line is a plot configuration option
+      if (current_plot)
+	set_option( current_plot, style[i] );
+      else
+	options.push_back( style[i] );
+    }
   }
 }
 
