@@ -99,6 +99,7 @@ nobase_include_HEADERS = \
 	MEAL/ScalarInverseTangent.h \
         MEAL/ScalarInverseTangent2.h \
         MEAL/ScalarLogarithm.h \
+	MEAL/ScalarLogistic.h \
         MEAL/ScalarMath.h \
         MEAL/ScalarParameter.h \
         MEAL/ScalarPower.h \
@@ -205,6 +206,7 @@ libMEAL_la_SOURCES = \
         ScalarInverseTangent.C \
         ScalarInverseTangent2.C \
         ScalarLogarithm.C \
+	ScalarLogistic.C \
         ScalarMath.C \
         ScalarParameter.C \
         ScalarPower.C \
