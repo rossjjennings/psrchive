@@ -43,6 +43,7 @@ include_HEADERS = \
         Registry.h \
         separate.h \
         Stokes.h \
+	stringcase.h \
         stringtok.h \
         substitute.h \
 	TextEditor.h \
@@ -78,6 +79,7 @@ libunits_la_SOURCES = \
         Pauli.C \
         ReferenceAble.C \
         separate.C \
+	stringcase.C \
         stringtok.C \
 	test.cfg \
 	tostring.C \
