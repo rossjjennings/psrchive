@@ -49,7 +49,7 @@ using namespace std;
 using namespace Pulsar;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbCcDd:Ee:fFGhiIJ:j:k:lLM:m:n:O:op:PqRr:sSt:Tu:UvVwWxyZ";
+const char* args = "A:aBbC:cDd:Ee:fFGhiIJ:j:k:lLM:m:n:O:op:PqRr:sSt:Tu:UvVwWxyZ";
 
 void usage ()
 {
@@ -72,7 +72,8 @@ void usage ()
     "\n"
     "Calibrator options: \n"
     "  -A filename    Use the calibrator in filename, as output by pcm/pacv \n"
-    "  -P             Calibrate polarisations only \n"
+    "  -C model       Use the specified model of the calibrator solution \n"
+    "  -P             Calibrate polarisation only (not flux)\n"
     "  -R             Calibrate the receiver (feed) only \n"
     "  -r filename    Use the specified receiver parameters file \n"
     "  -S             Use the complete Reception model \n"
@@ -238,8 +239,9 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'C':
-      pcal_type = new Pulsar::CalibratorTypes::van04_Eq18;
-      command += " -C";
+      pcal_type = Pulsar::Calibrator::Type::factory(optarg);
+      command += " -C ";
+      command += optarg;
       break;
 
     case 'D':
