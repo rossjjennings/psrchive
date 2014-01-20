@@ -151,11 +151,11 @@ string Pulsar::CalInterpreter::match (const string& args) try
   Database::Criteria criteria = Database::get_default_criteria ();
 
   CriteriaInterface interface (&criteria);
-  interface.process(args);
+  string retval = interface.process(args);
 
   Database::set_default_criteria (criteria);
 
-  return response (Good);
+  return response (Good, retval);
 }
 catch (Error& error)
 {
