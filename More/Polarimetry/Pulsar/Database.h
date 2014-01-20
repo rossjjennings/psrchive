@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.24 $
-   $Date: 2010/09/23 05:40:46 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/Database.h
 
 #ifndef __Pulsar_Database_h
 #define __Pulsar_Database_h
@@ -22,6 +19,8 @@
 #include "sky_coord.h"
 #include "MJD.h"
 #include "Types.h"
+
+#include <iostream>
 
 namespace Pulsar {
 
@@ -61,12 +60,12 @@ namespace Pulsar {
     //! Pass this to the criteria methods to retrieve any or all matches
     static const Pulsar::Archive* any;
 
-    //! Supported matching policies
+    //! Calibrator matching sequence
     /*! Different level-setting strategies may dictate the policy
       for matching an observation with the right calibrator */
-    enum Policy {
+    enum Sequence {
       //! Use the nearest calibrator (default)
-      NoPolicy,
+      Any,
       //! Use only calibrators recorded before the observation
       CalibratorBefore,
       //! Use only calibrators recorded after the observation
@@ -175,8 +174,9 @@ namespace Pulsar {
       //! The parameters to match
       Entry entry;
 
-      //! The matching policy
-      Policy policy;
+      //! The sequence of matching calibrator and pulsar observations
+      void set_sequence (Sequence s) { sequence = s; }
+      Sequence get_sequence () const { return sequence; }
 
       double minutes_apart;
       double deg_apart;
@@ -226,6 +226,9 @@ namespace Pulsar {
       static Criteria closest (const Criteria& a, const Criteria& b);
 
     protected:
+
+      //! The sequence of matching calibrator and pulsar observations
+      Sequence sequence;
 
       template<typename T, typename Predicate>
       void compare (const std::string& name,
@@ -316,6 +319,9 @@ namespace Pulsar {
 
   bool operator == (const Database::Entry& a, const Database::Entry& b);
 
+  std::ostream& operator << (std::ostream& os, Database::Sequence);
+    
+  std::istream& operator >> (std::istream& is, Database::Sequence&);
 }
 
 #endif

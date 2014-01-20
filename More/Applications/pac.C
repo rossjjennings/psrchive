@@ -310,11 +310,11 @@ int main (int argc, char *argv[]) try
 
     case 'm': 
       if (optarg[0] == 'b')
-	criteria.policy = Pulsar::Database::CalibratorBefore;
+	criteria.set_sequence(Pulsar::Database::CalibratorBefore);
       else if (optarg[0] == 'a')
-	criteria.policy = Pulsar::Database::CalibratorAfter;
+	criteria.set_sequence(Pulsar::Database::CalibratorAfter);
       else {
-	cerr << "pac: unrecognized matching policy code" << endl;
+	cerr << "pac: unrecognized matching sequence code" << endl;
 	return -1;
       }
       command += " -m ";

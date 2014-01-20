@@ -348,12 +348,57 @@ bool Pulsar::operator < (const Database::Entry& a, const Database::Entry& b)
   return a.time < b.time;
 }
 
+ostream& Pulsar::operator << (ostream& os, Database::Sequence sequence)
+{
+  switch (sequence) {
+  case Database::Any:
+    return os << "any";
+  case Database::CalibratorBefore:
+    return os << "before";
+  case Database::CalibratorAfter:
+    return os << "after";
+  }
+  return os;
+}
+
+istream& Pulsar::operator >> (istream& is, Database::Sequence& sequence)
+{
+  std::streampos pos = is.tellg();
+  string unit;
+  is >> unit;
+
+  if (casecmp(unit, "any") || casecmp(unit, "none"))
+    sequence = Database::Any;
+
+  else if (casecmp(unit, "after"))
+    sequence = Database::CalibratorAfter;
+
+  else if (casecmp(unit, "before"))
+    sequence = Database::CalibratorBefore;
+
+  else 
+  {
+    // replace the text and set the fail bit
+    is.seekg (pos);
+    is.setstate (ios::failbit);
+  }
+
+  return is;
+}
+
+
+
+
+
+
+
+
 Pulsar::Database::Criteria::Criteria ()
 {
   minutes_apart = short_time_scale;
   deg_apart  = max_angular_separation;
 
-  policy = NoPolicy;
+  sequence = Any;
 
   check_receiver    = true;
   check_instrument  = true;
@@ -397,9 +442,9 @@ bool Pulsar::Database::Criteria::compare_times (const MJD& want,
 {
   diff_minutes = (have - want).in_minutes();
 
-  switch (policy)
+  switch (sequence)
   {
-  case NoPolicy:
+  case Any:
   default:
     diff_minutes = fabs( diff_minutes );
     break;
@@ -912,7 +957,7 @@ try {
     criteria.minutes_apart = long_time_scale;
     criteria.check_coordinates = false;
     criteria.check_instrument = false;
-    criteria.policy = NoPolicy;
+    criteria.set_sequence (Any);
 
   }
   else
@@ -952,7 +997,7 @@ try {
     // in principle, these solutions are indepenent of backend
     criteria.check_instrument = false;
 
-    criteria.policy = NoPolicy;
+    criteria.set_sequence(Any);
   }
   else
     criteria.minutes_apart = short_time_scale;
