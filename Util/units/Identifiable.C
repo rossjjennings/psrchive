@@ -6,12 +6,13 @@
  ***************************************************************************/
 
 #include "Identifiable.h"
+#include "stringcase.h"
 
 //! Returns true if name matches identity (or aliases)
 bool Identifiable::identify (const std::string& name)
 {
   for (unsigned i=0; i<identities.size(); i++)
-    if (identities[i] == name)
+    if (casecmp (identities[i], name))
       return true;
 
   return false;
