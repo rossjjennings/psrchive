@@ -41,9 +41,9 @@ Pulsar::CalInterpreter::CalInterpreter ()
       "    string filename      filename of database or calibrator" );
 
   add_command 
-    ( &CalInterpreter::criteria,
-      "criteria", "set or get calibrator match criteria",
-      "usage: criteria [key[=value]]\n"
+    ( &CalInterpreter::match,
+      "match", "set or get calibrator match criteria",
+      "usage: match [key[=value]]\n"
       "    string key           name of the criterion to set/get \n"
       "    string value         value of the criterion" );
 
@@ -134,25 +134,24 @@ public:
   {
     if (instance)
       set_instance (instance);
-/*
- TO-DO: - add set/get methods to Criteria class
-        - define Criteria::Policy insertion and extraction operators
 
-    add( &Pulsar::Database::Criteria::get_policy,
-         &Pulsar::Database::Criteria::set_policy,
+    add( &Pulsar::Database::Criteria::get_sequence,
+         &Pulsar::Database::Criteria::set_sequence,
          "order", "Use calibrator observed before/after pulsar" );
-*/
+
+    /* TO-DO: create set|get methods for other Criteria attributes and
+       include them here */
   }
 };
 
 
 
-string Pulsar::CalInterpreter::criteria (const string& args) try
+string Pulsar::CalInterpreter::match (const string& args) try
 {
   Database::Criteria criteria = Database::get_default_criteria ();
 
-  if (args.empty())
-    return response (Good, "type is " + caltype->get_name());
+  CriteriaInterface interface (&criteria);
+  interface.process(args);
 
   Database::set_default_criteria (criteria);
 
