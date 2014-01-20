@@ -7,7 +7,7 @@
  ***************************************************************************/
 
 #include "T2Observatory.h"
-#include "stringtok.h"
+#include "strutil.h"
 
 #include <fstream>
 #include <sstream>
@@ -15,7 +15,6 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
 
 using namespace std;
 
@@ -84,14 +83,6 @@ static vector< Reference::To<Tempo2::Observatory> > antennae;
 
 static void load_observatories ();
 
-bool c_casecmp (string::value_type l1, string::value_type r1)
-{ return toupper(l1) == toupper(r1); }
-
-bool casecmp (const string& l, const string& r)
-{
-    return l.size() == r.size()
-        && equal(l.begin(), l.end(), r.begin(), c_casecmp);
-}
 const Tempo2::Observatory*
 Tempo2::observatory (const string& telescope_name)
 {
