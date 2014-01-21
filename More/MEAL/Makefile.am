@@ -86,7 +86,6 @@ nobase_include_HEADERS = \
         MEAL/Scalar.h \
         MEAL/ScalarAbsolute.h \
         MEAL/ScalarArgument.h \
-	MEAL/ScalarAtanc.h \
         MEAL/ScalarBesselI0.h \
         MEAL/ScalarConstant.h \
         MEAL/ScalarCosine.h \
@@ -194,7 +193,6 @@ libMEAL_la_SOURCES = \
         Scalar.C \
         ScalarAbsolute.C \
         ScalarArgument.C \
-	ScalarAtanc.C \
         ScalarConstant.C \
         ScalarCosine.C \
 	ScalarErrorFunction.C \
@@ -235,7 +233,7 @@ TESTS = \
 	test_Polar test_Rotation					 \
 	test_Invariant test_CyclicParameter test_Univariate		 \
 	test_StokesError test_StokesCovariance test_Vectorize		 \
-	test_UnitTangent test_ScalarAtanc test_ComplexCorrelation	 \
+	test_UnitTangent test_ComplexCorrelation	 \
 	test_Spinor test_CrossCoherency test_JonesMueller
 
 check_PROGRAMS = $(TESTS) test_Function_load 
@@ -258,7 +256,6 @@ test_StokesCovariance_SOURCES	= test_StokesCovariance.C
 test_Function_load_SOURCES	= test_Function_load.C
 test_Vectorize_SOURCES		= test_Vectorize.C
 test_UnitTangent_SOURCES	= test_UnitTangent.C
-test_ScalarAtanc_SOURCES	= test_ScalarAtanc.C
 test_ComplexCorrelation_SOURCES = test_ComplexCorrelation.C
 test_Spinor_SOURCES		= test_Spinor.C
 test_CrossCoherency_SOURCES	= test_CrossCoherency.C
