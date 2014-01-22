@@ -120,8 +120,8 @@ void output (ostream& os, uvm_header& header, uvm_data& data)
     }
   else
     {
-      int jbin=header.nwbins[0];
-      for (int iwin=1; iwin<header.nwins; iwin++)
+      int jbin=0;
+      for (int iwin=0; iwin<header.nwins; iwin++)
 	for (int ibin=0; ibin < header.nwbins[iwin]; ibin++)
 	  {
 	    os << " WIN=" << iwin << " " << ibin;
