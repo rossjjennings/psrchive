@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/ProfileInterpreter.h"
+#include "Pulsar/FixInterpreter.h"
 #include "Pulsar/ZapInterpreter.h"
 #include "Pulsar/CalInterpreter.h"
 #include "Pulsar/InstallInterpreter.h"
@@ -28,6 +29,9 @@ Pulsar::Interpreter* standard_shell ()
 
   interpreter->import( new Pulsar::ProfileInterpreter,
 		       "profile", "profile transformations" );
+
+  interpreter->import( new Pulsar::FixInterpreter,
+		       "fix", "fix a variety of problems" );
 
   interpreter->import( new Pulsar::ZapInterpreter,
 		       "zap", "zap data using the specified method" );
