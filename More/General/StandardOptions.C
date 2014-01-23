@@ -9,6 +9,7 @@ using namespace std;
 
 #include "Pulsar/StandardOptions.h"
 #include "Pulsar/Interpreter.h"
+#include "Pulsar/Archive.h"
 
 #include "strutil.h"
 #include "separate.h"
