@@ -15,9 +15,10 @@ Pulsar::Calibrator::Type::factory (const std::string& name)
   instances.push_back( new CalibratorTypes::Flux );
   instances.push_back( new CalibratorTypes::SingleAxis );
   instances.push_back( new CalibratorTypes::van02_EqA1 );
+  instances.push_back( new CalibratorTypes::van04_Eq13 );
+  instances.push_back( new CalibratorTypes::van09_Eq );
   instances.push_back( new CalibratorTypes::bri00_Eq19 );
   instances.push_back( new CalibratorTypes::van04_Eq18 );
-  instances.push_back( new CalibratorTypes::van09_Eq );
   instances.push_back( new Pulsar::CalibratorTypes::ovhb04 );
 
   return identifiable_factory<Type> (instances, name);
