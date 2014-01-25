@@ -90,11 +90,12 @@ libClasses_la_SOURCES = \
 	ThresholdMatch.C \
 	UnloadOptions.C
 
-TESTS = test_Config
+TESTS = test_Config test_CalibratorType
 
 check_PROGRAMS = $(TESTS)
 
 test_Config_SOURCES = test_Config.C
+test_CalibratorType_SOURCES = test_CalibratorType.C
 
 #############################################################################
 #
