@@ -9,22 +9,6 @@
 #include "Pulsar/BaselineWindow.h"
 #include "interface_stream.h"
 
-
-namespace Pulsar
-{
-  std::ostream& operator<< (std::ostream& ostr,
-			    const Reference::To<ProfileWeightFunction>& e)
-  {
-    return interface_insertion (ostr, e);
-  }
-
-  std::istream& operator>> (std::istream& istr,
-			    Reference::To<ProfileWeightFunction>& e)
-  {
-    return interface_extraction (istr, e);
-  }
-}
-
 /*!  
   The BaselineInterpreter class sets the baseline_strategy
   attribute according to commands specified either in the
