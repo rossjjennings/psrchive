@@ -16,7 +16,7 @@
 // These preprocessor macros define the contructor and clone method for klass
 #define CALIBRATOR_TYPE_INIT(klass,name) \
   klass* clone () const { return new klass; } \
-  klass () { identities.push_back(name); }
+  klass () { set_identity(name); }
 
 #define CALIBRATOR_TYPE(klass) \
   klass* clone () const { return new klass; } \
@@ -57,8 +57,8 @@ namespace Pulsar
     public:
       CALIBRATOR_TYPE(SingleAxis)
       {
-	identities.push_back("single");
-	identities.push_back("SingleAxis");
+	set_identity("single");
+	add_alias("SingleAxis");
       }
 
       unsigned get_nparam () const { return 3; }
@@ -70,8 +70,8 @@ namespace Pulsar
     public:
       CALIBRATOR_TYPE(van02_EqA1)
       {
-	identities.push_back("van02eA1");
-	identities.push_back("Polar");
+	set_identity("van02eA1");
+	add_alias("Polar");
       }
       unsigned get_nparam () const { return 6; }
     };
@@ -83,7 +83,7 @@ namespace Pulsar
       bool is_a (const Type* that) const
       { return dynamic_cast<const CompleteJones*>(that) != 0; }
 
-      CALIBRATOR_TYPE(CompleteJones) { }
+      CALIBRATOR_TYPE_INIT(CompleteJones, "jones");
 
       unsigned get_nparam () const { return 7; }
     };
@@ -94,8 +94,8 @@ namespace Pulsar
     public:
       CALIBRATOR_TYPE(van04_Eq13)
       {
-	identities.push_back("van04e13");
-	identities.push_back("Britton");
+	set_identity ("van04e13");
+	add_alias ("Britton");
       }
       bool is_a (const Type* that) const { return Type::is_a (that); }
     };
@@ -106,8 +106,8 @@ namespace Pulsar
     public:
       CALIBRATOR_TYPE(van09_Eq)
       {
-	identities.push_back("van09");
-	identities.push_back("Hamaker");
+	set_identity ("van09");
+	add_alias ("Hamaker");
       }
       bool is_a (const Type* that) const { return Type::is_a (that); }
     };
@@ -141,7 +141,7 @@ namespace Pulsar
     class Hybrid : public Poln
     {
     public:
-      CALIBRATOR_TYPE(Hybrid) { }
+      CALIBRATOR_TYPE_INIT(Hybrid,"hybrid");
 
       bool is_a (const Type* that) const
       { return dynamic_cast<const Hybrid*>(that) != 0; }

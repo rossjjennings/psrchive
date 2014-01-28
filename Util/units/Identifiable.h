@@ -21,13 +21,20 @@ class Identifiable : public Reference::Able
   //! Returns true if name matches identity (or aliases)
   virtual bool identify (const std::string& name);
 
+  //! Set the identity of the object
+  virtual void set_identity (const std::string&);
+ 
   //! Returns the identity of the object
   virtual const std::string& get_identity () const;
 
- protected:
+  //! Add an alias for the object
+  virtual void add_alias (const std::string&);
+
+ private:
 
   //! Primary identity and aliases
   std::vector<std::string> identities;
+
 };
 
 #endif
