@@ -43,25 +43,14 @@ catch (Error& error)
   return ostr;
 }
 
-//
-//
-//
-
 template<class T>
-std::ostream& 
+std::ostream&
 interface_insertion (std::ostream& ostr, const Reference::To<T>& e)
 {
   return interface_insertion (ostr, e.get());
 }
 
-template<typename T>
-std::ostream& operator<< (std::ostream& ostr, const Reference::To<T>& e)
-{
-  return interface_insertion (ostr, e);
-}
-
-
-//! extraction operator creates a new object using its text interface factory
+//! extraction operator creates a new object using its text-based factory
 /*!
  */
 
@@ -83,17 +72,29 @@ catch (Error& error)
 template<typename T>
 std::istream& interface_extraction (std::istream& istr, Reference::To<T>& e)
 {
-  T* ptr;
+  T* ptr = 0;
   interface_extraction (istr, ptr);
   e = ptr;
   return istr;
 }
 
-template<typename T>
-std::istream& operator >> (std::istream& istr, Reference::To<T>& e)
-{
-  return interface_extraction (istr, e);
-}
+//
+//
+//
 
+namespace Reference
+{
+  template<typename T>
+  std::ostream& operator<< (std::ostream& ostr, const To<T>& e)
+  {
+    return interface_insertion (ostr, e);
+  }
+  
+  template<typename T>
+  std::istream& operator >> (std::istream& istr, To<T>& e)
+  {
+    return interface_extraction (istr, e);
+  }
+}
 
 #endif
