@@ -77,7 +77,7 @@ namespace MEAL {
   { return sum (A, B.get()); }
 
   template<class T>
-  SumRule<T>* sum (Reference::To<T>& A, Reference::To<T>* B)
+  SumRule<T>* sum (Reference::To<T>& A, Reference::To<T>& B)
   { return sum (A.get(), B.get()); }
 }
 
