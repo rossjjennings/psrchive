@@ -17,10 +17,7 @@
 #include "Error.h"
 
 #include <iostream>
-
-#ifdef sun
-#include <ieeefp.h>
-#endif
+#include <cmath>
 
 namespace MEAL
 {
@@ -446,7 +443,7 @@ void verify_orthogonal (const std::vector<std::vector<double > >& alpha,
 		  << "\t" << names[irow] << " = " << ival << std::endl;
       }
 
-      if (!isfinite(degen))
+      if (!std::isfinite(degen))
       {
         std::cerr << "NaN or Inf in curvature matrix" << std::endl;
         return;
