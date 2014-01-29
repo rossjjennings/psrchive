@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.17 $
-   $Date: 2009/06/12 09:10:20 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/LevenbergMarquardt.h
 
 #ifndef __Levenberg_Marquardt_h
 #define __Levenberg_Marquardt_h
@@ -449,7 +446,7 @@ void verify_orthogonal (const std::vector<std::vector<double > >& alpha,
 		  << "\t" << names[irow] << " = " << ival << std::endl;
       }
 
-      if (!finite(degen))
+      if (!isfinite(degen))
       {
         std::cerr << "NaN or Inf in curvature matrix" << std::endl;
         return;
