@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.40 $
-   $Date: 2010/06/10 04:36:58 $
-   $Author: straten $ */
+// psrchive/psrchive/Util/units/Estimate.h
 
 #ifndef __Estimate_h
 #define __Estimate_h
@@ -185,6 +182,16 @@ class Estimate
   friend const Estimate atanh (const Estimate& u)
   { T val = ::atanh (u.val); T del=1/(1-u.val*u.val);
     return Estimate (val, del*del*u.var); }
+
+  friend const int isfinite (const Estimate& u)
+  { return isfinite (u.val); }
+
+  friend const int isinf (const Estimate& u)
+  { return isinf (u.val); }
+
+  friend const int isnan (const Estimate& u)
+  { return isnan (u.val); }
+
 };
 
 
