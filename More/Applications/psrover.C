@@ -1,9 +1,11 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009,2010,2011 by Stefan Oslowski,Jonathan Khoo
+ *   Copyright (C) 2009,2010,2011,2013 by Stefan Oslowski,Jonathan Khoo
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+// TODO Unexpected behaviour when von Mises component specified before white noise
 
 #include "Pulsar/Application.h"
 #include "Pulsar/StandardOptions.h"
@@ -140,33 +142,33 @@ void psrover::add_options ( CommandLine::Menu& menu)
   menu.add("");
 
   arg = menu.add( this, &psrover::set_noise,'r',"noise amplitudes");
-  arg->set_help( "coma separated list of noise amplitudes to be added");
+  arg->set_help( "coma-separated list of noise amplitudes to be added");
 
   arg = menu.add( seed, 's',"seed");
-  arg->set_help( "set seed used for generating random numbers");
+  arg->set_help( "set the seed used for generating random numbers");
 
   arg = menu.add( use_mises, "vM", "use van Mises distribution");
-  arg->set_help( "Force psrover to use van Mises distribution, instead of gaussian function");
+  arg->set_help( "Force psrover to use van Mises distribution, instead of Gaussian function");
 
   arg = menu.add( draw_amplitude, "fr", "random amplitude");
-  arg->set_long_help( "draw normally distributed amplitude in range [-amp, amp], where amp is defined with -f");
+  arg->set_long_help( "draw normally-distributed amplitude with standard deviation specified with the -f switch");
 
-  arg = menu.add( this, &psrover::set_fwhms,'f',"fwhms");
-  arg->set_help( "coma separated list of FWHM of gaussian peaks");
+  arg = menu.add( this, &psrover::set_fwhms,'f',"FWHMs");
+  arg->set_help( "coma-separated list of FWHM for Gaussian / von Mises components");
   arg->set_long_help( "This option will require also to set the centre bins\n"
 		  "Negative value means that the corresponding noise amplitude will be the value of delta function\n"
-		  "at the corresponding bin, or gaussian noise, in case the bin is negative as well\n");
+		  "at the corresponding bin, or Gaussian noise, if the corresponding bin is negative as well\n");
 
   arg = menu.add( this, &psrover::set_bins,'b',"bins");
-  arg->set_help ("Coma separated list of centre bins for gaussian peaks");
-  arg->set_help ("Negative value means that the corresponding noise amplitude is for random noise");
+  arg->set_help ("Coma-separated list of centre bins for Gaussian / von Mises components");
+  arg->set_help ("Negative value means that the corresponding noise amplitude is the standard deviation of random noise");
 
 
   menu.add("");
   menu.add("Input / output options");
 
-  arg = menu.add( this, &psrover::set_ascii_file,'a',"ascii file");
-  arg->set_help ("ascii file with desired underlying profile");
+  arg = menu.add( this, &psrover::set_ascii_file,'a',"ASCII file");
+  arg->set_help ("ASCII file with desired underlying profile");
   arg->set_long_help ("if given, it will overwrite the data from archive");
 
   arg = menu.add( use_input_as_base, 'i', "Use the input archive as a basis for the new profile");
@@ -178,7 +180,7 @@ void psrover::add_options ( CommandLine::Menu& menu)
 
   arg = menu.add( this, &psrover::set_nbins,'n',"number of bins");
   arg->set_help( "the number of bins in the requested profile");
-  arg->set_long_help("This will be overriden by the ascii file or archive, if any given");
+  arg->set_long_help("This will be overridden by the ASCII file or archive, if any given");
 
   arg = menu.add( output_filename,'o',"output file");
   arg->set_help( "name of the output, defaults to temp_archive.ar");
@@ -191,21 +193,21 @@ void psrover::add_options ( CommandLine::Menu& menu)
 
   menu.add("");
   arg = menu.add(save_added_noise_filename, "Snoise", "filename");
-  arg->set_help("Save the noise added to each bin in ascii file");
+  arg->set_help("Save the noise added to each bin in ASCII file");
 
   arg = menu.add(save_added_gauss_filename, "Sgauss", "filename");
-  arg->set_help("Save the gaussian / von misses amplitude in ascii file");
+  arg->set_help("Save the Gaussian / von Misses amplitude in ASCII file");
 
   arg = menu.add(save_profile_ascii, "Sascii", "filename");
-  arg->set_help("Save the resulting profile in ascii file");
+  arg->set_help("Save the resulting profile in ASCII file");
 
 
   menu.add("");
 
   menu.add("For example the command:\npsrover -r 100,3,30,65,142 -f 30,-1,250,-1,-1 -b 250,-1,400,800,124 inp.ar -a inp.txt -o out.ar\n"
-		  "will take input from the ascii file inp.txt, containing one column, and top of that it will add:\n"
-		  "  - first gaussian compoonent at bin 250 with FWHM 30 and amplitude 100\n"
-		  "  - seocnd gaussian compoonent at bin 400 with FWHM 250 and amplitude 30\n"
+		  "will take input from the ASCII file inp.txt, containing one column, and top of that it will add:\n"
+		  "  - first Gaussian component at bin 250 with FWHM 30 and amplitude 100\n"
+		  "  - second Gaussian component at bin 400 with FWHM 250 and amplitude 30\n"
 		  "  - first spike at bin 800 with amplitude of 65\n"
 		  "  - second spike at bin 124 with amplitude of 142\n"
 		  "  - white noise with amplitude of 3\n"
@@ -257,7 +259,7 @@ void psrover::setup ()
       exit(-1);
     }
     if (verbose)
-      cerr << "psrover::setup reading the ascii file " << endl;
+      cerr << "psrover::setup reading the ASCII file " << endl;
     ifstream in_file(ascii_filename.c_str());
     if (in_file.is_open()) {
       while (!in_file.eof()) {
@@ -306,11 +308,11 @@ void psrover::setup ()
     outfile1.open(save_added_noise_filename.c_str());
   }
 
-  //open file for first gaussian
+  //open file for first Gaussian
   if (!save_added_gauss_filename.empty())
   {
     if (verbose)
-      cerr << "psrover::setup opening output file for the gaussian von misses amplitudes: " << save_added_gauss_filename << endl;
+      cerr << "psrover::setup opening output file for the Gaussian / von Misses amplitudes: " << save_added_gauss_filename << endl;
     outfile2.open(save_added_gauss_filename.c_str(), std::ios::app);
   }
   //open file for the ascii profile
@@ -327,7 +329,7 @@ void psrover::process (Pulsar::Archive* archive)
   // default to adding white noise
   if ( !noise_to_add.empty() && fwhms.empty() && bins.empty() )
   {
-    cerr << "No fwhm or bin provided - defaulting to white noise" << endl;
+    cerr << "No FWHM or bin provided - defaulting to white noise" << endl;
     for ( unsigned i_amp = 0; i_amp < noise_to_add.size (); i_amp++ )
     {
       fwhms.push_back( -1 );
@@ -341,12 +343,16 @@ void psrover::process (Pulsar::Archive* archive)
     cerr << "psrover::process getting the amps from " << archive->get_filename() << endl;
 
   float* data = new float[nbin];
+  float* data_vM = new float[nbin];
   for ( unsigned i_sub = 0; i_sub < archive->get_nsubint() ;i_sub ++ )
   {
     data = archive->get_Integration(i_sub)->get_Profile(i_pol, i_chan)->get_amps();
 
     if ( use_input_as_base )
     {
+      if (verbose)
+	cerr << "psrover::process using the input archive as a basis for the new profile" << endl;
+
       initialise_basis( data, nbin );
       data_reset = true;
     }
@@ -368,7 +374,7 @@ void psrover::process (Pulsar::Archive* archive)
 	    if (verbose)
 	    { 
 	      cerr << "Adding a von Mises component:" << endl;
-	      cerr << "maximum: " << noise_to_add[jcomp] << " peak at the bin: " << bins[jcomp] << " fwhm: " << fwhms[jcomp] << endl;
+	      cerr << "maximum: " << noise_to_add[jcomp] << " peak at the bin: " << bins[jcomp] << " FWHM: " << fwhms[jcomp] << endl;
 	    }
 	    model.add_component(bins[jcomp]/nbin, 1.0/fwhms[jcomp]/fwhms[jcomp] * 2.35482 * 2.35482 * nbin * nbin / 4 / M_PI / M_PI, amplitude, "");
 	  }
@@ -376,30 +382,40 @@ void psrover::process (Pulsar::Archive* archive)
 	  {
 	    if (verbose)
 	    {
-	      cerr << "Adding a gaussian:" << endl;
-	      cerr << "maximum: " << amplitude << " peak at the bin: " << bins[jcomp] << " fwhm: " << fwhms[jcomp] << endl;
+	      cerr << "Adding a Gaussian:" << endl;
+	      cerr << "maximum: " << amplitude << " peak at the bin: " << bins[jcomp] << " FWHM: " << fwhms[jcomp] << endl;
 	    }
 	    for (unsigned ibin = 0; ibin < nbin; ++ibin) {
 	      if (!data_reset)
 	      {
 		if  (verbose && ibin == 0)
-		  cerr << "psrover::process Resetting data when adding gaussian" << endl;
+		  cerr << "psrover::process Resetting data when adding Gaussian" << endl;
 		*data = 0.0;
 		if (ibin == nbin-1)
 		  data_reset = true;
 	      }
-	      // resolve the gaussian with sub_bin resolution:
+	      // resolve the Gaussian with sub_bin resolution:
 	      for (unsigned ksubbin = 0; ksubbin < sub_bin; ksubbin++ ) {
 		current_bin = (float)((signed)ibin) + 1.0 / sub_bin * (float)ksubbin;
 		*data += amplitude / sub_bin * exp( -pow((signed)current_bin - bins[jcomp],2) / 2 / pow(fwhms[jcomp] / 2.35482, 2)) ;
-		//wrap the gaussian around
+		//wrap the Gaussian around
 		*data += amplitude / sub_bin * exp( -pow((signed)(current_bin - 1024)-bins[jcomp],2) / 2 / pow(fwhms[jcomp] / 2.35482, 2)) ;
 	      }
 	      ++data;
 	    }
 	  }
 	  if (use_mises)
-	    model.evaluate(data, archive->get_nbin());
+	  {
+	    if ( !data_reset ) {
+	      model.evaluate(data, archive->get_nbin());
+	      data_reset = true;
+	    }
+	    else {
+	      model.evaluate(data_vM, archive->get_nbin());
+	      for (unsigned ibin = 0; ibin < nbin; ++ibin)
+		data[ibin] += data_vM[ibin];
+	    }
+	  }
 	  else
 	  {
 	    data -= nbin;
@@ -454,13 +470,13 @@ void psrover::process (Pulsar::Archive* archive)
     if (got_ascii_file)
     {
       if (verbose)
-	cerr << "psrover::process adding the values from the ascii file to the profile" << endl;
+	cerr << "psrover::process adding the values from the ASCII file to the profile" << endl;
       for (unsigned ibin = 0; ibin < nbin; ++ibin)
       {
 	if (!data_reset && !use_mises)
 	{
 	  if (verbose && ibin == 0)
-	    cerr << "psrover::process Resetting data when adding ascii values" << endl;
+	    cerr << "psrover::process Resetting data when adding ASCII values" << endl;
 	  *data = 0.0;
 	  if (ibin == nbin - 1)
 	    data_reset = true;
@@ -474,7 +490,7 @@ void psrover::process (Pulsar::Archive* archive)
     if (!save_profile_ascii.empty())
     {
       if (verbose)
-	cerr << "psrover::process printing profile to an ascii file" << endl;
+	cerr << "psrover::process printing profile to an ASCII file" << endl;
       float *amps = archive->get_Profile(i_sub, i_pol, i_chan)->get_amps();
       for (unsigned i = 0 ; i < nbin; i++ )
       {

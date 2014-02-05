@@ -70,13 +70,22 @@ void* Reference::HeapTracked::operator new (size_t size, void* ptr)
   return ptr;
 }
 
-void Reference::HeapTracked::operator delete (void* ptr)
+void Reference::HeapTracked::operator delete (void* location, void* ptr)
 {
 #ifdef _DEBUG
-  cerr << "Reference::HeapTracked::operator delete void*=" << ptr << endl;
+  cerr << "Reference::HeapTracked::operator placement delete void*=" << location << endl;
 #endif
 
-  ::operator delete (ptr);
+  ::operator delete (location, ptr);
+}
+
+void Reference::HeapTracked::operator delete (void* location)
+{
+#ifdef _DEBUG
+  cerr << "Reference::HeapTracked::operator delete void*=" << location << endl;
+#endif
+
+  ::operator delete (location);
 }
 
 bool Reference::HeapTracked::__is_on_heap () const

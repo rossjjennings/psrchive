@@ -16,22 +16,6 @@
 using std::vector;
 using std::string;
 
-//! Makes the string lowercase
-string lowercase(string s)
-{
-  for( unsigned i=0; i<s.size(); i++)
-    s[i] = tolower(s[i]);
-  return s;
-}
-
-//! Makes the string uppercase
-string uppercase(string s)
-{
-  for( unsigned i=0; i<s.size(); i++)
-    s[i] = toupper(s[i]);
-  return s;
-}
-
 string basename (const string& filename)
 {
   string::size_type last = filename.rfind ("/");

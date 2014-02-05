@@ -294,6 +294,7 @@ AC_CONFIG_FILES([
 		More/RFIMitigation/Makefile
 		More/Applications/Makefile
 		More/Applications/njkk08/Makefile
+		More/Simulation/Makefile
 		More/rhythm/Makefile
 		More/psrgui/Makefile
 		More/python/Makefile

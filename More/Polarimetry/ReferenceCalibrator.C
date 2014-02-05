@@ -434,3 +434,29 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
 	 << endl;
 }
 
+#include "Pulsar/SingleAxisCalibrator.h"
+#include "Pulsar/PolarCalibrator.h"
+#include "Pulsar/DoPCalibrator.h"
+#include "Pulsar/OffPulseCalibrator.h"
+#include "Pulsar/CalibratorTypes.h"
+
+Pulsar::ReferenceCalibrator* 
+Pulsar::ReferenceCalibrator::factory (const Calibrator::Type* type,
+					const Archive* archive)
+{
+  if ( type->is_a<CalibratorTypes::Hybrid>() ||
+       type->is_a<CalibratorTypes::SingleAxis>() )
+    return new Pulsar::SingleAxisCalibrator (archive);
+
+  else if ( type->is_a<CalibratorTypes::van02_EqA1>() )
+    return new Pulsar::PolarCalibrator (archive);
+
+  else if ( type->is_a<CalibratorTypes::DoP>() )
+    return new Pulsar::DoPCalibrator (archive);
+
+  else if ( type->is_a<CalibratorTypes::OffPulse>() )
+    return new Pulsar::OffPulseCalibrator (archive);
+
+  throw Error (InvalidParam, "Pulsar::ReferenceCalibrator::factory",
+	       "unknown type=" + type->get_name());
+}

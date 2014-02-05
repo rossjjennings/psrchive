@@ -9,6 +9,7 @@
 #define _Util_genutil_templates_h
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <vector>
 

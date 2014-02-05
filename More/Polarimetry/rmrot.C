@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include <iostream>
 #include <unistd.h>
 #include <stdlib.h>
@@ -21,6 +22,7 @@ void usage()
     "   -r RM      rotation measure in rad/m^2\n"
     "   -b BW      bandwidth in MHz\n"
     "   -f FREQ    centre frequency in MHz\n"
+    "   -n nchan   number of channels into which band will be divided\n"
     "\n"
     "   -q         quiet (outputs only delta P.A.)\n"
     "   -v         verbose \n"

@@ -14,6 +14,7 @@
 #ifndef __Pulsar_Application_h
 #define __Pulsar_Application_h
 
+#include "Pulsar/Processor.h"
 #include "CommandLine.h"
 #include "Functor.h"
 
@@ -132,7 +133,7 @@ namespace Pulsar {
   };
 
   //! Describes application command line options.
-  class Application::Options : public Reference::Able
+  class Application::Options : public Processor
   {
     public:
 
@@ -144,13 +145,6 @@ namespace Pulsar {
 
     //! Additional per-Archive processing tasks
     virtual void process (Archive*);
-
-    //! Return pointer to new result constructed by process method
-    /*! 
-      The result method was added to enable out-of-place process
-      methods without changing the interface of the base class.
-    */
-    virtual Archive* result () { return 0; }
 
     //! Additional per-Archive finishing tasks (e.g., unload)
     virtual void finish (Archive*);

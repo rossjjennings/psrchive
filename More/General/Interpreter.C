@@ -12,8 +12,6 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
-#include "Pulsar/Pointing.h"
-
 #include "Pulsar/Config.h"
 #include "Pulsar/Statistics.h"
 
@@ -244,17 +242,6 @@ void Pulsar::Interpreter::init()
       "rotate", "rotate each profile by the specified value",
       "usage: rotate <turns> \n"
       "  double turns      phase turns by which all data will be rotated \n" );
-
-  add_command 
-    ( &Interpreter::fix, 'f',
-      "fix", "fix something in the archive",
-      "usage: fix <something> \n"
-      "  string something  thing to be fixed \n"
-      "things that can be fixed: \n"
-      "  'fluxcal'         fix the Archive::Type (FluxCalOn or Off) \n"
-      "  'receiver'        fix the receiver information \n"
-      "  'epoch <seconds>  fix the epoch of each subint\n" 
-      "  'pointing'        fix the Pointing extension info\n" );
 
   add_command 
     ( &Interpreter::scattered_power_correct,
@@ -1215,62 +1202,6 @@ string Pulsar::Interpreter::rotate (const string& args) try
 {
   get()->rotate_phase( setup<double>(args) );
   return response (Good);
-}
-catch (Error& error)
-{
-  return response (Fail, error.get_message());
-}
-
-// //////////////////////////////////////////////////////////////////////
-//
-string Pulsar::Interpreter::fix (const string& args) try
-{
-  vector<string> arguments = setup (args);
-  string what = arguments[0];
-
-  if (what == "fluxcal")
-  {
-    fix_flux_cal.apply (get());
-    return response (Good, fix_flux_cal.get_changes());
-  }
-
-  if (what == "receiver" || what == "rcvr")
-  {
-    set_receiver.apply (get());
-    return response (Good);
-  }
-
-  if (what == "epoch" && arguments.size() == 2)
-  {
-    Archive* archive = get();
-    unsigned nsub = archive->get_nsubint();
-    double seconds = fromstring<double> (arguments[1]);
-    for (unsigned isub=0; isub < nsub; isub++)
-    {
-      Integration* subint = archive->get_Integration(isub);
-      MJD epoch = subint->get_epoch();
-      epoch += seconds;
-      subint->set_epoch( epoch );
-    }
-    return response (Good);
-  }
-
-  if (what == "pointing")
-  {
-    Archive* archive = get();
-    unsigned nsub = archive->get_nsubint();
-    for (unsigned isub=0; isub < nsub; isub++)
-    {
-      Integration* subint = archive->get_Integration(isub);
-      Pointing* point = subint->getadd<Pointing>();
-      point->set_right_ascension(archive->get_coordinates().ra());
-      point->set_declination(archive->get_coordinates().dec());
-      point->update(subint,archive);
-    }
-    return response (Good);
-  }
-
-  return response (Fail, "unrecognized fix '"+args+"'");
 }
 catch (Error& error)
 {

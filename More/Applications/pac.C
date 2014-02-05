@@ -25,6 +25,9 @@
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/ReferenceCalibrator.h"
+#include "Pulsar/PolnCalibratorExtension.h"
+
+
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/IonosphereCalibrator.h"
 #include "Pulsar/FrontendCorrection.h"
@@ -43,9 +46,10 @@
 #include <string.h>
 
 using namespace std;
+using namespace Pulsar;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbCcDd:Ee:fFGhiIJ:j:k:lLM:m:n:O:op:PqRr:sSt:Tu:UvVwWxyZ";
+const char* args = "A:aBbC:cDd:Ee:fFGhiIJ:j:k:lLM:m:n:O:op:PqRr:sSt:Tu:UvVwWxyZ";
 
 void usage ()
 {
@@ -68,7 +72,8 @@ void usage ()
     "\n"
     "Calibrator options: \n"
     "  -A filename    Use the calibrator in filename, as output by pcm/pacv \n"
-    "  -P             Calibrate polarisations only \n"
+    "  -C model       Use the specified model of the calibrator solution \n"
+    "  -P             Calibrate polarisation only (not flux)\n"
     "  -R             Calibrate the receiver (feed) only \n"
     "  -r filename    Use the specified receiver parameters file \n"
     "  -S             Use the complete Reception model \n"
@@ -147,8 +152,8 @@ int main (int argc, char *argv[]) try
   Reference::To<const Pulsar::Calibrator::Type> pcal_type;
   pcal_type = new Pulsar::CalibratorTypes::SingleAxis;
 
-  // default searching criterion
-  Pulsar::Database::Criterion criterion;
+  // default searching criteria
+  Pulsar::Database::Criteria criteria;
 
   string cals_are_here = "./";
 
@@ -234,8 +239,9 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'C':
-      pcal_type = new Pulsar::CalibratorTypes::van04_Eq18;
-      command += " -C";
+      pcal_type = Pulsar::Calibrator::Type::factory(optarg);
+      command += " -C ";
+      command += optarg;
       break;
 
     case 'D':
@@ -306,11 +312,11 @@ int main (int argc, char *argv[]) try
 
     case 'm': 
       if (optarg[0] == 'b')
-	criterion.policy = Pulsar::Database::CalibratorBefore;
+	criteria.set_sequence(Pulsar::Database::CalibratorBefore);
       else if (optarg[0] == 'a')
-	criterion.policy = Pulsar::Database::CalibratorAfter;
+	criteria.set_sequence(Pulsar::Database::CalibratorAfter);
       else {
-	cerr << "pac: unrecognized matching policy code" << endl;
+	cerr << "pac: unrecognized matching sequence code" << endl;
 	return -1;
       }
       command += " -m ";
@@ -449,29 +455,29 @@ int main (int argc, char *argv[]) try
       break;
 
     case 'b':
-      criterion.check_bandwidth = false;
+      criteria.check_bandwidth = false;
       command += " -b";
       break;
     case 'c':
-      criterion.check_coordinates = false;
+      criteria.check_coordinates = false;
       command += " -c";
       break;
     case 'T':
-      criterion.check_time = false;
+      criteria.check_time = false;
       command += " -T";
       break;
     case 'F':
-      criterion.check_frequency = false;
+      criteria.check_frequency = false;
       command += " -F";
       break;
     case 'Z':
-      criterion.check_instrument = false;
+      criteria.check_instrument = false;
       command += " -Z";
       break;
     case 'a':
-      criterion.check_frequency = false;
-      criterion.check_bandwidth = false;
-      criterion.check_frequency_array = true;
+      criteria.check_frequency = false;
+      criteria.check_bandwidth = false;
+      criteria.check_frequency_array = true;
       break;
 
     default:
@@ -479,7 +485,7 @@ int main (int argc, char *argv[]) try
     }
  
 
-  Pulsar::Database::set_default_criterion (criterion);
+  Pulsar::Database::set_default_criteria (criteria);
 
   vector <string> filenames;
 
@@ -511,11 +517,15 @@ int main (int argc, char *argv[]) try
   {
     cerr << "pac: Loading calibrator from " << model_file << endl;
 
-    if (criterion.check_frequency_array)
+    if (criteria.check_frequency_array)
       cerr << "pac: Warning: -a and -A options are incompatible" << endl;
 
     model_arch = Pulsar::Archive::load(model_file);
-    model_calibrator = new Pulsar::PolnCalibrator(model_arch);
+
+    if (model_arch->get<PolnCalibratorExtension>())
+      model_calibrator = new Pulsar::PolnCalibrator(model_arch);
+    else
+      model_calibrator = ReferenceCalibrator::factory(pcal_type, model_arch);
 
     if (apply_only_feed)
       keep_only_feed (model_calibrator);

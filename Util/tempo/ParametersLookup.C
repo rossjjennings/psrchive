@@ -58,7 +58,7 @@ void Pulsar::Parameters::Lookup::add_path (const string& p)
 }
 
 static TemporaryDirectory directory ("psrcat");
-static DirectoryLock lock;
+static DirectoryLock dir_lock;
 
 Pulsar::Parameters* 
 Pulsar::Parameters::Lookup::operator() (const string& name) const try
@@ -114,11 +114,11 @@ Pulsar::Parameters::Lookup::operator() (const string& name) const try
     cerr << "Pulsar::Parameters::Lookup:: Creating ephemeris by " << catalogue 
 	 << " -e " << psr_name <<endl;
 
-  lock.set_directory( directory.get_directory() );
-  DirectoryLock::Push raii (lock);
+  dir_lock.set_directory( directory.get_directory() );
+  DirectoryLock::Push raii (dir_lock);
 
   // start with a clean working directory
-  lock.clean ();
+  dir_lock.clean ();
 
   int retval = system(command.c_str());
 

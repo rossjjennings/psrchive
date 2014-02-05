@@ -68,23 +68,24 @@ void runtest ()
   // the engine used to find the chi-squared minimum
   MEAL::LevenbergMarquardt<double> fit;
 
+  double max = 1.0;
+  double max_norm = 0.9999;
+
   // the random unit coefficient to which to fit
   std::complex<double> target;
   do 
   {
-    random_value (target, 1.0);
+    random_value (target, max);
   }
-  // ComplexCorrelation doesn't handle |c|^2 > 0.9 very well
-  while (norm(target) >= 0.9);
+  while (norm(target) > max_norm);
 
   // the random unit coefficient to which to fit
   std::complex<double> guess;
   do 
   {
-    random_value (guess, 1.0);
+    random_value (guess, max);
   }
-  // ComplexCorrelation doesn't handle |c|^2 > 0.9 very well
-  while (norm(guess) >= 0.9);
+  while (norm(guess) > max_norm);
 
   unit.set (guess);
 
@@ -153,7 +154,11 @@ void runtest ()
   }
 
   cerr << "chisq=" << best_chisq
-       << " iterations=" << iterations << endl;
+       << " iterations=" << iterations << endl
+       << " target=" << target 
+       << " norm(target)=" << norm(target) << endl
+       << " unit=" << unit.evaluate() 
+       << " norm(unit)=" << norm(unit.evaluate()) << endl;
 
   throw Error (InvalidState, "runtest", "too many iterations");
 }

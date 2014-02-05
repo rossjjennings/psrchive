@@ -20,6 +20,7 @@
 namespace Pulsar {
 
   class Archive;
+  class Processor;
 
   //! Base class of all plotters
   class Plot : public Reference::Able {
@@ -30,7 +31,7 @@ namespace Pulsar {
     static bool verbose;
 
     //! Default constructor
-    Plot () { constructor = 0; }
+    Plot ();
 
     //! Process the Archive as needed before calling plot
     virtual void preprocess (Archive*);
@@ -62,11 +63,22 @@ namespace Pulsar {
     //! Get the constructor
     Constructor* get_constructor ();
 
+    //! Set the pre-processor
+    void set_preprocessor (Processor*);
+
+    //! Get the pre-processor
+    Processor* get_preprocessor ();
+
+    //! Return true if pre-processor has been set
+    bool has_preprocessor () const;
+
   private:
 
     // used by the configure method
     Reference::To<TextInterface::Parser> tui;
     Reference::To<TextInterface::Parser> fui;
+
+    Reference::To<Processor> preprocessor;
 
     //! The constructor for the derived type of this instance
     Constructor* constructor;

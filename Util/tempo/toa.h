@@ -72,7 +72,7 @@ namespace Tempo {
     float  error;          // TOA uncertainty in microseconds
     float  reduced_chisq;  // The reduced chisq of the TOA estimator
 
-    char   telescope;      // Observatory (one-character code)
+    std::string telescope; // Observatory code
     unsigned channel;      // Corresponding channel
     unsigned subint;       // Corresponding subint
     double phase_shift;    // Phase shift
@@ -167,7 +167,7 @@ namespace Tempo {
     float  get_error     () const { return error; };
     float  get_reduced_chisq () const { return reduced_chisq; }
 
-    char   get_telescope () const { return telescope; };
+    std::string get_telescope () const { return telescope; };
     std::string get_auxilliary_text () const { return auxinfo; };
     double get_phase_shift () const { return phase_shift; };
     unsigned get_channel     () const { return channel; };

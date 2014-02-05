@@ -10,6 +10,7 @@
 
 #include "Pulsar/Plot.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/Processor.h"
 
 #include <cpgplot.h>
 
@@ -56,10 +57,19 @@ void Pulsar::PlotLoop::set_Archive (Archive* a)
   for (unsigned iplot=0; iplot < plots.size(); iplot++)
   {
     archives[iplot] = a;
-    if (preprocess)
-    {
+
+    if (preprocess || plots[iplot]->has_preprocessor())
       archives[iplot] = a->clone();
+
+    if (preprocess)
       plots[iplot]->preprocess (archives[iplot]);
+
+    if (plots[iplot]->has_preprocessor())
+    {
+      Processor* processor = plots[iplot]->get_preprocessor();
+      processor->process (archives[iplot]);
+      if (processor->result())
+	archives[iplot] = processor->result();
     }
   }
 }

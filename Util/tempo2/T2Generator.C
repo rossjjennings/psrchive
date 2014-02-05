@@ -132,7 +132,7 @@ void Tempo2::Generator::set_segment_length (long double days)
 }
 
 static TemporaryDirectory directory ("tempo2");
-static DirectoryLock lock;
+static DirectoryLock dir_lock;
 
 //! Return a new, copy constructed instance of self
 Pulsar::Predictor* Tempo2::Generator::generate () const
@@ -157,10 +157,10 @@ Pulsar::Predictor* Tempo2::Generator::generate () const
       " coeffs: ntime=" << ntimecoeff << " nfreq=" << nfreqcoeff
 	 << endl;
 
-  lock.set_directory( directory.get_directory() );
-  DirectoryLock::Push raii (lock);
+  dir_lock.set_directory( directory.get_directory() );
+  DirectoryLock::Push raii (dir_lock);
 
-  lock.clean ();
+  dir_lock.clean ();
 
   RealTimer timer;
 

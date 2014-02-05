@@ -61,7 +61,7 @@ namespace Pulsar {
     //! Get the wavelength in metres
     double get_wavelength () const;
 
-    //! Get the dispersion delay
+    //! Get the dispersion delay in seconds
     double evaluate () const;
 
     //! enable use with the ColdPlasma template
