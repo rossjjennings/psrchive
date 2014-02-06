@@ -32,7 +32,7 @@ void setup_profiles_dat (I subint, P& profiles)
 template<class E, typename I, typename P>
 void setup_profiles (I subint, P& profiles)
 {
-  E* ext = subint->get_Profile(0,0)->Pulsar::Profile::get<E>();
+  E* ext = subint->get_Profile(0,0)->template get<E>();
   if (!ext)
     throw Error (InvalidState, "setup_profiles<Extension>",
 		 "first profile is missing required Extension");
@@ -44,7 +44,7 @@ void setup_profiles (I subint, P& profiles)
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
-    ext = subint->get_Profile(0,ichan)->Pulsar::Profile::get<E>();
+    ext = subint->get_Profile(0,ichan)->template get<E>();
     if (!ext)
       throw Error (InvalidState, "setup_profiles<Extension>",
 		   "profile[%u] is missing required Extension", ichan);

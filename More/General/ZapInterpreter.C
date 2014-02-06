@@ -6,13 +6,14 @@
  ***************************************************************************/
 
 #include "Pulsar/ZapInterpreter.h"
+
+#include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/Profile.h"
 
 #include "Pulsar/ChannelZapMedian.h"
 #include "Pulsar/LawnMower.h"
 #include "Pulsar/RobustMower.h"
-
-#include "Pulsar/Profile.h"
 
 #include "TextInterface.h"
 #include "pairutil.h"

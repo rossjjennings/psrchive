@@ -33,6 +33,10 @@ namespace Pulsar {
     //! If true, then a median filter is run on the calibrator bandpass
     static Option<bool> smooth_bandpass;
 
+    //! Factory creates instances of derived types
+    static ReferenceCalibrator* factory (const Calibrator::Type*,
+					 const Archive*);
+
     //! Construct from an single PolnCal Pulsar::Archive
     ReferenceCalibrator (const Archive* archive);
 

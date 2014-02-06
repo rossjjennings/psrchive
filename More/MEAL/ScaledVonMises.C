@@ -4,12 +4,45 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "MEAL/ScaledVonMises.h"
 #include "MEAL/InverseRule.h"
-#include "MEAL/ScalarBesselI0.h"
 #include "MEAL/ScalarConstant.h"
- 
+
 using namespace std;
+ 
+/*
+  besrat and vkappa Fortran implementations from
+
+  "Evaluation and Inversion of the Ratios of Modified Bessel
+  Functions, I1(x) /I0 (x) and I 1.5(x)/ I0.5(x)"
+
+  Hill, Geoffrey W. (1981)
+  ACM Transactions on Mathematical Software (TOMS), vol. 7, pp. 199 - 208
+*/
+
+// defined in besrat.f
+#define F77_besrat F77_FUNC_(besrat,BESRAT)
+extern "C" float F77_besrat (float* kappa);
+
+float variance (float kappa)
+{
+  return 1 - F77_besrat(&kappa);
+}
+
+// defined in vkappa.f
+#define F77_vkappa F77_FUNC_(vkappa,VKAPPA)
+extern "C" float F77_vkappa (float* kappa);
+
+float kappa (float variance)
+{
+  float arg = 1 - variance;
+  return F77_vkappa(&arg);
+}
 
 void
 MEAL::ScaledVonMises::init()
@@ -77,15 +110,41 @@ Estimate<double> MEAL::ScaledVonMises::get_centre () const
 }
 
 //! Set the concentration
-void MEAL::ScaledVonMises::set_concentration (const Estimate<double>& concentration_)
+void MEAL::ScaledVonMises::set_concentration (const Estimate<double>& kappa)
 {
-  concentration.set_value (concentration_);
+  concentration.set_value (kappa);
 }
 
 //! Get the concentration
 Estimate<double> MEAL::ScaledVonMises::get_concentration () const
 {
   return concentration.get_value ();
+} 
+
+//! Set the width in radiance
+void MEAL::ScaledVonMises::set_width (double width)
+{
+  // express width in turns
+  width /= 2.0*M_PI;
+  double circular_variance = width*width;
+  double _kappa = kappa(circular_variance);
+
+#if 0
+  cerr << "MEAL::ScaledVonMises::set_width"
+    " width=" << width <<
+    " var=" << circular_variance <<
+    " kappa=" << _kappa << endl;
+#endif
+
+  concentration.set_value ( _kappa );
+}
+
+//! Get the width
+double MEAL::ScaledVonMises::get_width () const
+{
+  double kappa = concentration.get_value().val;
+
+  return ::sqrt(variance(kappa));
 } 
 
 //! Set the height
@@ -98,7 +157,7 @@ void MEAL::ScaledVonMises::set_height (const Estimate<double>& height_)
 }
 
 //! Get the height
- Estimate<double> MEAL::ScaledVonMises::get_height () const
+Estimate<double> MEAL::ScaledVonMises::get_height () const
 {
     if (log_height)
 	return exp(height.get_value());

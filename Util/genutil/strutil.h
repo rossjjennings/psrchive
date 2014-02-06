@@ -26,12 +26,7 @@
 #include "pad.h"
 #include "tostring.h"
 #include "stringtok.h"
-
-//! Makes the string lowercase
-std::string lowercase (std::string s);
-
-//! Makes the string uppercase
-std::string uppercase (std::string s);
+#include "stringcase.h"
 
 //! Return true if every character in string is printable
 bool printable (const std::string& s);

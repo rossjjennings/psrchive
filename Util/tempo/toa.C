@@ -5,11 +5,14 @@
  *
  ***************************************************************************/
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "toa.h"
 #include "polyco.h"
 #include "tempo++.h"
 
-#include "config.h"
 #if HAVE_TEMPO2
 #include "T2Observatory.h"
 #endif
@@ -89,22 +92,7 @@ Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
 
 void Tempo::toa::set_telescope (const std::string& telcode)
 {
-  if (telcode.length() == 1)
-  {
-    telescope = telcode[0];
-  }
-  else try
-  {
-    telescope = Tempo::code( telcode );
-  }
-  catch (Error& error)
-  {
-    warning << "Tempo::toa::set_telescope " << error.get_message() << endl;
-  }
-
-  if (verbose)
-    cerr << "Tempo::toa::set_telescope name=" << telcode
-	 << " code=" << telescope << endl;
+  telescope = telcode;
 }
 
 // ////////////////////////////////////////////////////////////////////////
@@ -139,22 +127,28 @@ int Tempo::toa::Parkes_load (const char* instring)
 
 int Tempo::toa::parkes_parse (const char* instring)
 {
+  char telcode;
   int scanned = sscanf (instring, "%lf %s %f %f %c",
- 			&frequency, datestr, &phs, &error, &telescope);
+ 			&frequency, datestr, &phs, &error, &telcode);
 
-  if (state != Deleted && scanned < 5) {
+  if (state != Deleted && scanned < 5) 
+  {
     // an invalid line was not commented out
     if (verbose) cerr << "Tempo::toa::parkes_parse(char*) Error scan:"
 		      << scanned << "/5 '" << instring << "'" << endl;
     return -1;
   }
-  if (state == Deleted && scanned < 5) {
+
+  telescope = telcode;
+
+  if (state == Deleted && scanned < 5)
+  {
     // The TOA line is probably a comment
     frequency = 0.0;
     arrival.Construct("0.0");
     phs = 0.0;
     error = 0.0;
-    telescope = 'z';
+    telescope = "z";
     auxinfo += instring;
     auxinfo = auxinfo.substr(0,auxinfo.length()-1);
     format = Comment;
@@ -166,6 +160,7 @@ int Tempo::toa::parkes_parse (const char* instring)
 
     return 0;
   }
+
   if (arrival.Construct(datestr) < 0)  {
     if (verbose) cerr << "Tempo::toa::parkes_parse(char*) Error MJD parsing '" 
 		      << datestr << "'" << endl;
@@ -207,12 +202,25 @@ int Tempo::toa::Parkes_unload (char* outstring) const
   }
 }
 
+char get_tempo1_code (const std::string& telescope, const char* method)
+  try
+  {
+    return Tempo::code (telescope);
+  }
+  catch (Error& error)
+  {
+    Tempo::warning << method << " " << error.get_message() << endl;
+    return '0';
+  }
+
 int Tempo::toa::parkes_out (char* outstring) const
 {
   // output the basic line
+  char telcode = get_tempo1_code( telescope, "Tempo::toa::parkes_out"  );
+
   sprintf (datestr, "%8.7f", frequency);
   sprintf (outstring, " %8.8s  %s   %5.2f %7.2f        %1c",
- 	   datestr, arrival.printdays(13).c_str(), phs, error, telescope);
+ 	   datestr, arrival.printdays(13).c_str(), phs, error, telcode);
   return 0;
 }
 
@@ -274,10 +282,12 @@ int Tempo::toa::Princeton_unload (char* outstring) const
   // Blank line w/ spaces
   memset(outstring, ' ', 78);
   outstring[78] = '\0';
+  
+  char telcode = get_tempo1_code( telescope, "Tempo::toa::Princeton_unload"  );
 
   sprintf (outstring, "%c %13.13s %8.3f %19.19s  %7.3f               %9.5f",
-      telescope, auxinfo.c_str(), frequency, 
-      arrival.printdays(19).c_str(), error, dmc);
+	   telcode, auxinfo.c_str(), frequency, 
+	   arrival.printdays(19).c_str(), error, dmc);
   return 0;
 }
 
@@ -296,9 +306,26 @@ int Tempo::toa::Princeton_unload (FILE* outstream) const
 //
 // ////////////////////////////////////////////////////////////////////////
 
+#if HAVE_TEMPO2
+
+std::string get_tempo2_code (const std::string& telescope,
+			    const char* method)
+  try {
+    // Try to get tempo2-style observatory code
+    return Tempo2::observatory(telescope)->get_old_code();
+  }
+  catch (Error& error)
+  {
+    Tempo::warning << method << " " << error.get_message() << endl;
+
+    // fall back on tempo1 single-digit code
+    return string(1,get_tempo1_code (telescope, method));
+  }
+
+#endif
+
 int Tempo::toa::Tempo2_unload (char* outstring) const
 {
-
   // output the basic line
   string fname,flags; 
 
@@ -310,32 +337,24 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
           arrival.printdays(15).c_str(), error);
 
   if (phase_info)
+  {
     strcat (outstring, " @");
+  }
   else
   {
 #if HAVE_TEMPO2
-    // Try to get tempo2-style observatory code
-    string temp;
-    try 
-    {
-      temp = " " + Tempo2::observatory(string(1,telescope))->get_old_code() 
-        + " ";
-    }
-    catch (Error& error)
-    {
-      temp = stringprintf(" %c ", telescope);
-    }
+    string code = get_tempo2_code (telescope, "Tempo::toa::Tempo2_unload");
 #else
-    // If no tempo2, fall back on single-char code
-    string temp = stringprintf (" %c ", telescope);
+    string code = string(1, get_tempo1_code (telescope, "Tempo::toa::Tempo2_unload"));
 #endif
-    temp += flags;
+    
+    string temp = " " + code + " " + flags;
     strcat (outstring, temp.c_str());
   }
-
+  
   return 0;
 }
-
+    
 int Tempo::toa::Tempo2_unload (FILE* outstream) const
 {
   sizebuf (128 + auxinfo.length());
@@ -755,7 +774,7 @@ void Tempo::toa::init()
   error           = 0.0;
   reduced_chisq   = 0.0;
 
-  telescope       = '0';
+  telescope       = "0";
   phs             = 0.0;
   dmc             = 0.0;
   observatory [0] = '\0';

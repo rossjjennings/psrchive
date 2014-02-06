@@ -28,29 +28,30 @@ c   Find the path if any
       path=infile(1:npath)
       nfile=nstring-npath
       file=infile(npath+1:nstring)
+
+      call sgiinithack
+      call sgiprepfd
+      open(unit=41,file=infile,status='old')
+      call sgigetfd(fd)
+
 c     write(*,*) path,file
 c
 c  Check current data
       if(file(1:1).eq."S".and.file(8:8).le."9"
      .           .and.file(8:8).ge."0") then
         prgm=1260
-        call sgiprepfd
-        open(unit=41,file=infile,status='old')
-        call sgigetfd(fd)
-        print*, 'fd is ',fd
         call findscn(newscan,convert,istat)
         write(*,'("Program:",i5)') prgm
         if(istat.ne.0) go to 99
         return
 c  Check P110 program
-      else if(file(1:1).eq."H".and.file(8:8).gt."@"
-     .           .and.file(17:17).ge."u") then
+      else if(file(1:1).eq."H".and.file(8:8).ge."a"
+     .           .and.file(17:17).eq."u") then
         prgm=110
-        write(*,'("Program:",i5)') prgm
+        write(*,'("Willem Program:",i5)') prgm
         call P110readhdr(istat)
         if(istat.ne.0) go to 99
         close(41)
-        call sgiinithack
         if(npath.eq.0) then
           infile="S"//file(2:nfile)
         else
@@ -60,21 +61,19 @@ c  Check P110 program
         call sgiprepfd
         open(unit=41,file=infile,status='old')
         call sgigetfd(fd)
-        print*, 'fd is ',fd
         ival=0
         nvals=0
 c  Read first record
         call P110readdata(convert,istat)
         return
 c  Check P467 program
-      else if(file(1:1).eq."H".and.file(8:8).gt."@"
+      else if(file(1:1).eq."H".and.file(8:8).ge."a"
      .          .and.file(17:17).eq."l") then
         prgm=467
         write(*,'("Program:",i5)') prgm
         call P467readhdr(istat)
         if(istat.ne.0) go to 99
         close(41)
-        call sgiinithack
         if(npath.eq.0) then
           infile="S"//file(2:nfile)
         else
@@ -84,7 +83,6 @@ c  Check P467 program
         call sgiprepfd
         open(unit=41,file=infile,status='old')
         call sgigetfd(fd)
-        print*, 'fd is ',fd
 c  Read first record
         call P467readdata(convert,istat)
         return

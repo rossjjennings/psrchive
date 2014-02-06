@@ -173,6 +173,7 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub,
 
       Tempo::toa arrival_time = get_toa (shift, subint, ichan);
       arrival_time.set_reduced_chisq( shift_estimator->get_reduced_chisq () );
+      arrival_time.set_StoN( shift_estimator->get_snr () );
 
       // Adjust TOA with be_delay value, if present.
       // Positive be_delay means that the file timestamp is 
@@ -459,6 +460,7 @@ std::string Pulsar::ArrivalTime::get_value (const std::string& key,
   else if(key == "subint") return tostring(toa_subint);
   else if(key == "chan") return tostring(toa_chan);
   else if(key == "gof") return tostring( toa.get_reduced_chisq() );
+  else if(key == "snr") return tostring( toa.get_StoN(), 5 );
 
   else
   {

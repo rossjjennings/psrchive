@@ -7,6 +7,7 @@
 
 #include "Pulsar/ProfileInterpreter.h"
 #include "Pulsar/ArchiveTemplates.h"
+#include "Pulsar/Archive.h"
 
 #include "Pulsar/Accumulate.h"
 #include "Pulsar/Differentiate.h"

@@ -78,7 +78,7 @@ namespace MEAL {
   { return product (A, B.get()); }
 
   template<class T>
-  ProductRule<T>* product (Reference::To<T>& A, Reference::To<T>* B)
+  ProductRule<T>* product (Reference::To<T>& A, Reference::To<T>& B)
   { return product (A.get(), B.get()); }
 }
 

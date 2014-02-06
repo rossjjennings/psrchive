@@ -206,13 +206,17 @@ catch (Error& error)
 
 #include "interface_stream.h"
 
-std::ostream& operator<< (std::ostream& ostr, Pulsar::Smooth* e)
+namespace Pulsar
 {
-  return interface_insertion (ostr, e);
-}
-std::istream& operator>> (std::istream& istr, Pulsar::Smooth* &e)
-{
-  return interface_extraction (istr, e);
+  std::ostream& operator<< (std::ostream& ostr, Smooth* e)
+  {
+    return interface_insertion (ostr, e);
+  }
+
+  std::istream& operator>> (std::istream& istr, Smooth* &e)
+  {
+    return interface_extraction (istr, e);
+  }
 }
 
 class Pulsar::BaselineWindow::Interface 

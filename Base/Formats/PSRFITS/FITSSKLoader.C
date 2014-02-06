@@ -62,12 +62,9 @@ void Pulsar::FITSArchive::SKLoader::load (SpectralKurtosis * sk)
     throw FITSError (status, "FITSArchive::load_SpectralKurtosis",
                      "fits_movnam_hdu SPECKURT");
 
-  // Get NCPAR [npol]
-  int ncpar = 0;
-  psrfits_read_key (fptr, "NCPAR", &ncpar);
-  if (ncpar < 0)
-    ncpar = 0;
-  unsigned int npol = (unsigned) ncpar;
+  // Get NPOL [npol]
+  unsigned npol = 0;
+  psrfits_read_key (fptr, "NPOL", &npol);
 
   // Get NCHAN [nchan]
   unsigned nchan = 0;

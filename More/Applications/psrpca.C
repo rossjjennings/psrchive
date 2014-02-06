@@ -513,7 +513,6 @@ void psrpca::fit_data( Reference::To<Profile> std_prof )
     snr = total->get_Profile ( i_subint, full_stokes_pca ? 0 : which_pol, 0 )->snr();
 
     //calculate the scale
-    float *p_amps = prof->get_amps ();
     scale = 0.0;
 
     // fit only to Stokes I even when full_stokes_pca is true
@@ -710,6 +709,15 @@ void psrpca::solve_eigenproblem()
       delete evecs_archive->get_extension(iext);
       }*/
       evecs_archive->resize ( (unsigned)nbin, 0, 0, 0 );
+      if ( nbin > total_count )
+      {
+	long double folding_period = (long double) evecs_archive->get_Integration(0)->get_folding_period();
+	MJD ref_MJD = evecs_archive->get_Integration(total_count-1)->get_epoch();
+	for ( unsigned isub = total_count; isub < nbin; isub++ ) {
+	  //evecs_archive->set_epoch( to_MJD( from_MJD(evecs_archive->get_Integration(isub-1)->get_epoch()) + ((long double)(isub-total_count+1))*folding_period ) );
+	  evecs_archive->get_Integration( isub )->set_epoch( ref_MJD + (double) ( isub - total_count + 1 ) * folding_period );
+	}
+      }
       for (unsigned i_evec = 0; i_evec < (unsigned)nbin; i_evec++ )
       {
 	gsl_vector_view view = gsl_matrix_column(evec, i_evec);
@@ -733,7 +741,6 @@ void psrpca::solve_eigenproblem()
       cerr << "psrpca: loading the eigenvectors and values from the previous solutions in files " << load_prefix << "_evecs.ar and " << load_prefix << "_evals.dat" << endl;
     // load eigenvectors
     Reference::To<Archive> evecs_archive = Archive::load( load_prefix + "_evecs.ar" );
-    gsl_vector *evec_copy = gsl_vector_alloc ( (int)nbin );
 
     double *damps = new double [ (unsigned)nbin ];
     float *famps = new float [ (unsigned)nbin ];
@@ -741,7 +748,6 @@ void psrpca::solve_eigenproblem()
 
     for ( unsigned i_evec = 0; i_evec < (unsigned)nbin; i_evec++ )
     {
-      //evecs_archive->get_Profile( i_evec, 0, 0 ) -> set_amps( evec_copy->data );
       if ( full_stokes_pca )
       {
 	for ( unsigned i_pol = 0; i_pol < 4; i_pol++ )
@@ -945,7 +951,6 @@ void psrpca::read_and_correct_residuals()
 
       // invert the D matrix
       int signum = 0;
-      double beta_zero;
       gsl_matrix_view proj_covariance_used = gsl_matrix_submatrix(proj_covariance, 0, 0, last_eigen, last_eigen);
       gsl_matrix *inverse_used = gsl_matrix_alloc(last_eigen, last_eigen);
       gsl_permutation *p_used = gsl_permutation_alloc (last_eigen);

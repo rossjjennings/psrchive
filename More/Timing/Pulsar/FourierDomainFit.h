@@ -32,6 +32,9 @@ namespace Pulsar {
     //! Return the statistical goodness-of-fit
     double get_reduced_chisq () const;
 
+    //! Return the profile S/N ratio (relative to the standard)
+    double get_snr () const;
+
     //! Return a text interface that can be used to configure this instance
     TextInterface::Parser* get_interface ();
 
@@ -51,6 +54,10 @@ namespace Pulsar {
 
     //! Reduced chisq of last call to get_shift
     mutable double reduced_chisq;
+
+    //! S/N ratio of last profile fit
+    mutable double snr;
+
   };
 
 }

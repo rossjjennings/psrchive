@@ -329,6 +329,9 @@ namespace CommandLine {
     //! Add an item to the menu
     virtual void add (Item*);
 
+    //! Remove an item from the menu
+    virtual void remove (Item*);
+
     //! Add a Value with only a single letter name
     template<typename T>
     Argument* add (T& value, char name, const char* type = 0)

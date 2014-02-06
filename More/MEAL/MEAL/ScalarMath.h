@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarMath.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/06/11 06:39:43 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/ScalarMath.h
 
 #ifndef __ScalarMath_H
 #define __ScalarMath_H
@@ -150,15 +147,13 @@ namespace MEAL {
   //! Return a ScalarMath instance representing tan(y/x)
   const ScalarMath atan2 (const ScalarMath& y, const ScalarMath& x);
 
+  //! Useful for quickly printing the values
+  inline std::ostream&
+  operator << (std::ostream& o, const ScalarMath& sm)
+  {
+    return o << sm.get_Estimate();
+  }
 }
-
-//! Useful for quickly printing the values
-inline std::ostream&
-operator << (std::ostream& o, const MEAL::ScalarMath& sm)
-{
-  return o << sm.get_Estimate();
-}
-
 
 #endif
 

@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '5.1             '   / Header version 
+HDRVER  = '5.3             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -83,13 +83,13 @@ EXTNAME = HISTORY             / name of this binary table extension
 TTYPE#  = DATE_PRO            / Processing date and time (UTC)
 TFORM#  = 24A                 / 24-char string
 TTYPE#  = PROC_CMD            / Processing program and command
-TFORM#  = 80A                 / 80_char string
+TFORM#  = 256A                / 256-char string
 TTYPE#  = SCALE               / Units (FluxDen/RefFlux/Jansky)
 TFORM#  = 8A                  / 8-char string
 TTYPE#  = POL_TYPE            / Polarisation identifier
 TFORM#  = 8A                  / 8-char string
 TTYPE#  = NSUB                / Number of Sub-Integrations
-TFORM#  = 1I                  / Integer
+TFORM#  = 1J                  / Long integer
 TTYPE#  = NPOL                / Number of polarisations
 TFORM#  = 1I                  / Integer
 TTYPE#  = NBIN                / Nr of bins per product (0 for SEARCH mode)
@@ -103,7 +103,7 @@ TTYPE#  = CTR_FREQ            / Band centre frequency (weighted)
 TUNIT#  = MHz                 / units of field
 TFORM#  = 1D                  / Double
 TTYPE#  = NCHAN               / Number of frequency channels
-TFORM#  = 1I                  / Integer
+TFORM#  = 1J                  / Long integer
 TTYPE#  = CHAN_BW             / Channel bandwidth
 TFORM#  = 1D                  / Double
 TUNIT#  = MHz                 / units of field
@@ -130,7 +130,7 @@ TFORM#  = 32A                 / 32-char string
 TTYPE#  = CAL_MTHD            / Calibration method
 TFORM#  = 32A                 / 32-char string
 TTYPE#  = CAL_FILE            / Name of gain calibration file
-TFORM#  = 32A                 / 32-char string
+TFORM#  = 256A                / 256-char string
 TTYPE#  = RFI_MTHD            / RFI excision method
 TFORM#  = 32A                 / 32-char string
 TTYPE#  = RM_MODEL            / Auxiliary Faraday rotation model description
@@ -181,11 +181,11 @@ TFIELDS =                   13 / Number of fields per row
 #
 EXTNAME = POLYCO               / name of this binary table extension
 #
-TTYPE#  = DATE_PRO             / Processing date and time (UTC)
+TTYPE#  = DATE_PRO             / Polyco creation date and time (UTC)
 TFORM#  = 24A                  / 24-char string
 TTYPE#  = POLYVER              / Polyco version ID
 TFORM#  = 16A                  / 16-char string
-TTYPE#  = NSPAN                / Span of polyco in min
+TTYPE#  = NSPAN                / Span of polyco block in min
 TFORM#  = 1I                   / Integer
 TTYPE#  = NCOEF                / Nr of coefficients (<=15)
 TFORM#  = 1I                   / Integer
@@ -196,15 +196,15 @@ TFORM#  = 8A                   / 8-char string
 TTYPE#  = REF_FREQ             / Reference frequency for phase
 TFORM#  = 1D                   / Double
 TUNIT#  = MHz                  / Units of field
-TTYPE#  = PRED_PHS             / Predicted pulse phase at obs start
+TTYPE#  = PRED_PHS             / Predicted pulse phase at observation start
 TFORM#  = 1D                   / Double
 TTYPE#  = REF_MJD              / Reference MJD
 TFORM#  = 1D                   / Double
 TTYPE#  = REF_PHS              / Reference phase
 TFORM#  = 1D                   / Double
 TTYPE#  = REF_F0               / Zero-order pulsar frequency
-TUNIT#  = Hz                   / Units of field
 TFORM#  = 1D                   / Double
+TUNIT#  = Hz                   / Units of field
 TTYPE#  = LGFITERR             / Log_10 of polynomial fit rms error in periods
 TFORM#  = 1D                   / Double
 TTYPE#  = COEFF                / Polyco coefficients
@@ -257,25 +257,25 @@ DATANBIT=                    * / Number of quantization levels for data
 CHRPNBIT=                    * / Number of quantization levels for chirp
 NCHAN   =                    * / Number of input frequency channels
 TTYPE#  = FREQ                 / Center frequency of input channel
-TFORM#  = 1E                   / Float
+TFORM#  = 1D                   / Double
 TUNIT#  = MHz                  / Units of field
 TTYPE#  = BW                   / Bandwidth of input channel
-TFORM#  = 1E                   / Float
+TFORM#  = 1D                   / Double
 TUNIT#  = MHz                  / Units of field
 TTYPE#  = OUT_NCHAN            / Number of output frequency channels
-TFORM#  = 1J                   / Integer
+TFORM#  = 1J                   / Long integer
 TTYPE#  = OUT_FREQ             / Center frequency of each output channel
-TFORM#  = 1E                   / OUT_NCHAN floats
+TFORM#  = 1D                   / OUT_NCHAN double
 TUNIT#  = MHz                  / Units of field
 TTYPE#  = OUT_BW               / Bandwidth of each output channel
-TFORM#  = 1E                   / OUT_NCHAN floats or one float for all
+TFORM#  = 1D                   / OUT_NCHAN doubles or one double for all
 TUNIT#  = MHz                  / Units of field
 TTYPE#  = NCHIRP               / Number of complex samples in FFT or FIR filter
-TFORM#  = 1J                   / OUT_NCHAN integers or one integer for all
+TFORM#  = 1J                   / OUT_NCHAN long int or one long int for all
 TTYPE#  = NCYC_POS             / Number of complex samples discarded from start
-TFORM#  = 1J                   / OUT_NCHAN integers or one integer for all
+TFORM#  = 1J                   / OUT_NCHAN long int or one long int for all
 TTYPE#  = NCYC_NEG             / Number of complex samples discarded from end
-TFORM#  = 1J                   / OUT_NCHAN integers or one integer for all
+TFORM#  = 1J                   / OUT_NCHAN long int or one long int for all
 END
 #
 ###############################################################################
@@ -303,8 +303,8 @@ TTYPE#  = DAT_SCL              / Data scale factor: Val=Data*DAT_SCL + DAT_OFFS
 TFORM#  = E                    / BP_NPOL floats
 TTYPE#  = DATA                 / Bandpass for autocorrelations
 TDIM#   = (*,*)                / Data table dimensions = (NCH_ORIG,BP_NPOL)
-TUNIT#  = Jy                   / Bandpass amplitude units
 TFORM#  = I                    / NCH_ORIG*BP_NPOL integers
+TUNIT#  = Jy                   / Bandpass amplitude units
 END
 #
 ###############################################################################
@@ -330,7 +330,7 @@ NRCVR   =                    * / Number of polarisation channels (I)
 EPOCH   =                      / [MJD] Epoch of calibration obs
 #
 TTYPE#  = DAT_FREQ             / Centre frequency for each channel
-TFORM#  = E                    / NCHAN floats
+TFORM#  = D                    / NCHAN doubles
 TUNIT#  = MHz                  / Units of field
 TTYPE#  = DAT_WTS              / Weights for each channel
 TFORM#  = E                    / NCHAN floats
@@ -403,7 +403,7 @@ NCHAN   =                    * / Nr of channels in Feed coupling data
 EPOCH   = '                  ' / [MJD] Epoch of calibration obs
 #
 TTYPE#  = DAT_FREQ             / [MHz] Centre frequency for each channel
-TFORM#  = E                    / NCHAN floats
+TFORM#  = D                    / NCHAN doubles
 TUNIT#  = MHz                  / Units of field
 TTYPE#  = DAT_WTS              / Weights for each channel
 TFORM#  = E                    / NCHAN floats
@@ -419,7 +419,43 @@ TFORM#  = E                    / NCOVAR*NCHAN floats
 TTYPE#  = CHISQ                / Total chi-squared (objective merit function)
 TFORM#  = E                    / NCHAN floats
 TTYPE#  = NFREE                / Number of degrees of freedom
-TFORM#  = J                    / NCHAN 32-bit integers
+TFORM#  = J                    / NCHAN long (32-bit) integers
+END
+#
+###############################################################################
+#
+# Spectral Kurtosis Binary Table Extension
+#
+###############################################################################
+#
+XTENSION= BINTABLE             / ***** Spectral Kurtosis *****
+BITPIX  =                    8 / N/A
+NAXIS   =                    2 / 2-dimensional binary table
+NAXIS1  =                    * / Width of table in bytes
+NAXIS2  =                    * / Number of rows in table
+PCOUNT  =                    0 / Size of special data area
+GCOUNT  =                    1 / One data group (required keyword)
+TFIELDS =                    * / Number of fields per row
+#
+NPOL    =                    * / Number of polarizations in SK data
+NCHAN   =                    * / Number of channels in SK data 
+EXTNAME = SPECKURT             / Name of this binary table extension
+#
+TTYPE#  = SK_INT               / Samples integrated in SK statistics
+TFORM#  = V                    / unsigned integer
+TTYPE#  = SK_EXCIS             / SK Excision limits 
+TFORM#  = V                    / unsigned integer
+TTYPE#  = FIL_SUM              / Filtered SK sum
+TDIM#   = (*,*)                / Data table dimensions (NPOL*NCHAN)
+TFORM#  = E                    / NPOL*NCHAN floats
+TTYPE#  = FIL_HIT              / Filtered SK hits
+TDIM#   = (*,*)                / Data table dimensions (NPOL*NCHAN)
+TFORM#  = V                    / NPOL*NCHAN unsigned integers
+TTYPE#  = UNFIL_SUM            / Unfiltered SK sum
+TDIM#   = (*,*)                / Data table dimensions (NPOL*NCHAN)
+TFORM#  = E                    / NPOL*NCHAN floats
+TTYPE#  = UNFIL_HIT            / Unfiltered SK hits
+TFORM#  = K                    / 64 bit signed integer
 END
 #
 ###############################################################################
@@ -504,7 +540,7 @@ TTYPE#  = AUX_RM               / additional RM (ionosphere, corona, etc.)
 TFORM#  = 1D                   / Double
 TUNIT#  = RAD M-2              / units of field
 TTYPE#  = DAT_FREQ             / [MHz] Centre frequency for each channel
-TFORM#  = E                    / NCHAN floats
+TFORM#  = D                    / NCHAN doubles
 TUNIT#  = MHz                  / Units of field
 TTYPE#  = DAT_WTS              / Weights for each channel
 TFORM#  = E                    / NCHAN floats
@@ -578,41 +614,4 @@ TFORM#  = E                    / NDIGR floats
 TTYPE#  = DATA                 / Digitiser count data
 TDIM#   = (*,*)                / Data table dimensions (NPTHIST,NDIGR)         
 TFORM#  = I                    / NPTHIST*NDIGR integers
-END
-#
-###############################################################################
-#
-# Spectral Kurtosis Binary Table Extension
-#
-###############################################################################
-#
-XTENSION= BINTABLE             / ***** Spectral Kurtosis *****
-BITPIX  =                    8 / N/A
-NAXIS   =                    2 / 2-dimensional binary table
-NAXIS1  =                    * / Width of table in bytes
-NAXIS2  =                    * / Number of rows in table
-PCOUNT  =                    0 / Size of special data area
-GCOUNT  =                    1 / One data group (required keyword)
-TFIELDS =                    * / Number of fields per row
-#
-NCPAR   =                    * / Number of coupling parameters
-NCOVAR  =                    * / Number of parameter covariances
-NCHAN   =                    * / Nr of channels in SK data 
-EXTNAME = SPECKURT             / Name of this binary table extension
-#
-TTYPE#  = SK_INT               / Samples integrated in SK statistics
-TFORM#  = V                    / unsigned integer
-TTYPE#  = SK_EXCIS             / SK Excision limits 
-TFORM#  = V                    / unsigned integer
-TTYPE#  = FIL_SUM              / Filtered SK sum
-TDIM#   = (*,*)                / Data table dimensions (NCPAR*NCHAN)
-TFORM#  = E                    / NCPAR*NCHAN floats
-TTYPE#  = FIL_HIT              / Filtered SK hits
-TDIM#   = (*,*)                / Data table dimensions (NCPAR*NCHAN)
-TFORM#  = V                    / NCPAR*NCHAN unsigned integers
-TTYPE#  = UNFIL_SUM            / Unfiltered SK sum
-TDIM#   = (*,*)                / Data table dimensions (NCPAR*NCHAN)
-TFORM#  = E                    / NCPAR*NCHAN floats
-TTYPE#  = UNFIL_HIT            / Unfiltered SK hits
-TFORM#  = K                    / 64 bit signed integer
 END

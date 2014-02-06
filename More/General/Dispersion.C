@@ -123,6 +123,8 @@ double Pulsar::Dispersion::get_shift () const
     throw Error (InvalidState, "Pulsar::Dispersion::get_shift",
 		 "folding period unknown");
 
+  // corrector is of type DispersionDelay
+  // it is a member of the ColdPlasma template base class
   double shift = delta + corrector.evaluate();
 
   if (Archive::verbose > 2)

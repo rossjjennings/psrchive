@@ -72,8 +72,8 @@ namespace Pulsar
     void set_obs_mode (const std::string& txt) { obs_mode = txt; }
 
     //! Get the equinox
-    std::string get_equinox () const;
-    void set_equinox (const std::string& txt) { equinox = txt; }
+    double get_equinox () const;
+    void set_equinox (double val) { equinox = val; }
 
     //! Get tracking mode
     std::string get_trk_mode () const;
@@ -198,7 +198,7 @@ namespace Pulsar
     std::string coordmode;
 
     //! Equinox of coordinates
-    std::string equinox;
+    double equinox;
 
     //! Track mode (TRACK, SCANGC, SCANLAT)
     std::string trk_mode;

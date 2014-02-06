@@ -4,15 +4,14 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #ifndef __Pulsar_Interpreter_h
 #define __Pulsar_Interpreter_h
 
-#include "Pulsar/FixFluxCal.h"
-#include "Pulsar/SetReceiver.h"
-
 #include "CommandParser.h"
-#include "tostring.h"
+#include "TextInterface.h"
 #include "Reference.h"
+#include "tostring.h"
 
 #include <map>
 #include <stack>
@@ -174,9 +173,6 @@ namespace Pulsar {
     //! rotate each profile by the specified value
     std::string rotate (const std::string& args);
 
-    //! fix archive based on arguments
-    std::string fix (const std::string& args);
-
     //! correct for parallactic angle effects
     std::string correct_instrument (const std::string& args);
     
@@ -246,9 +242,6 @@ namespace Pulsar {
 
     //! Parses arguments as an optional single instance of T
     template<typename T> T setup (const std::string& args, T default_value);
-
-    FixFluxCal fix_flux_cal;
-    SetReceiver set_receiver;
 
     //! The current weighting scheme
     Reference::To<Weight> weight_policy;

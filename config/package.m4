@@ -38,9 +38,13 @@ AC_DEFUN([SWIN_PACKAGE_OPTIONS],
       with_[$1]_lib_dir=""
     fi
 
-    # _dir overrides include_dir and lib_dir    
-    if test x"$with_[$1]_dir" != x; then
+    # _include_dir and _lib_dir take precedence over _dir:
+    if test x"$with_[$1]_include_dir" = x &&
+       test x"$with_[$1]_dir" != x; then
       with_[$1]_include_dir=$with_[$1]_dir/include
+    fi
+    if test x"$with_[$1]_lib_dir" = x &&
+       test x"$with_[$1]_dir" != x; then
       with_[$1]_lib_dir=$with_[$1]_dir/lib
     fi
 
