@@ -26,7 +26,7 @@ using namespace std;
 */
 
 // defined in besrat.f
-#define F77_besrat F77_FUNC_(besrat,BESRAT)
+#define F77_besrat F77_FUNC(besrat,BESRAT)
 extern "C" float F77_besrat (float* kappa);
 
 float variance (float kappa)
@@ -35,7 +35,7 @@ float variance (float kappa)
 }
 
 // defined in vkappa.f
-#define F77_vkappa F77_FUNC_(vkappa,VKAPPA)
+#define F77_vkappa F77_FUNC(vkappa,VKAPPA)
 extern "C" float F77_vkappa (float* kappa);
 
 float kappa (float variance)
