@@ -280,6 +280,9 @@ Tempo::toa Pulsar::ArrivalTime::get_toa (Estimate<double>& shift,
 
   toa.set_channel (ichan);
 
+  toa.set_dur(subint->get_duration());
+  toa.set_bw(subint->get_bandwidth());
+
   // would like to see this go somewhere else
   if (format == Tempo::toa::Parkes || format == Tempo::toa::Psrclock)
     toa.set_auxilliary_text( tostring(ichan) );
@@ -461,6 +464,8 @@ std::string Pulsar::ArrivalTime::get_value (const std::string& key,
   else if(key == "chan") return tostring(toa_chan);
   else if(key == "gof") return tostring( toa.get_reduced_chisq() );
   else if(key == "snr") return tostring( toa.get_StoN(), 5 );
+  else if(key == "wt") return tostring( 
+      observation->get_Integration(toa_subint)->get_weight(toa_chan), 5);
 
   else
   {
