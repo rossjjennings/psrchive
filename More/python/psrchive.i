@@ -237,6 +237,14 @@ void pointer_tracker_remove(Reference::Able *ptr) {
         self->expert()->rotate(time);
     }
 
+    void _rotate_phase_swig(double phase) {
+        self->expert()->rotate_phase(phase);
+    }
+
+    %pythoncode %{
+def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
+%}
+
     void combine(Pulsar::Integration* subint) {
       self->expert()->combine(subint);
     }

@@ -30,9 +30,10 @@ Pulsar::FixInterpreter::FixInterpreter ()
   add_command
     ( &FixInterpreter::freq,
       "freq", "recompute the frequency of each channel",
-      "usage: freq [sideband]\n"
-      "  freq           frequency computed using standard equation \n"
-      "  freq sideband  freq[i] = freq[N-1-i] and bw = -bw \n" );
+      "usage: freq [sideband|offset <MHz>]\n"
+      "  freq               frequency computed using standard equation \n"
+      "  freq sideband      freq[i] = freq[N-1-i] and bw = -bw \n" 
+      "  freq offset <MHz>  offset all frequencies by <MHz> \n");
 
   add_command
     ( &FixInterpreter::pointing,
@@ -141,6 +142,22 @@ string Pulsar::FixInterpreter::freq (const string& args) try
 	subint->set_centre_frequency( ichan, labels[nchan-1-ichan] );
 
       archive->set_bandwidth( - archive->get_bandwidth() );
+    }
+  }
+
+  else if (arguments[0] == "offset" && arguments.size() == 2)
+  {
+    double delta_f = fromstring<double>(arguments[1]);
+
+    for (isub = 0; isub < nsub; isub++)
+    {
+      Integration* subint = archive->get_Integration (isub);
+
+      for (ichan = 0; ichan < nchan; ichan++)
+      {
+	double freq = subint->get_centre_frequency( ichan );
+	subint->set_centre_frequency( ichan, freq + delta_f );
+      }
     }
   }
 
