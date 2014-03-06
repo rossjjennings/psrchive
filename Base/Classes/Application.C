@@ -144,12 +144,6 @@ void Pulsar::Application::parse (int argc, char** argv)
     for (int i=1; i<optind; i++)
       command += argv[i] + separator;
 
-    if (command.length () > 80)
-    {
-      cerr << "WARNING: ProcHistory command string truncated to 80 characters"
-	   << endl;
-      command = command.substr (0, 80);
-    }
   }
 }
 

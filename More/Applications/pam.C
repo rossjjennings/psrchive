@@ -1131,16 +1131,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
 	
 	if (fitsext) {
-	  
-	  if (command.length() > 80) {
-	    cout << "WARNING: ProcHistory command string truncated to 80 chars" 
-		 << endl;
-	    fitsext->set_command_str(command.substr(0, 80));
-	  }
-	  else {
-	    fitsext->set_command_str(command);
-	  }
-	  
+          fitsext->set_command_str(command);
 	}
 	
 	string out_filename = arch->get_filename();
