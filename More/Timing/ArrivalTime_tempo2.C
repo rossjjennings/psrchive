@@ -87,6 +87,10 @@ std::string Pulsar::ArrivalTime::get_ipta_aux_txt (const Tempo::toa& toa)
   if (b)
     args += " -be " + b->get_name();
 
+  // -f frontend_backend
+  if (r && b) 
+    args += " -f " + r->get_name() + "_"  + b->get_name();
+  
   // -B band descriptor : don't think there is a standard..
 
   // -bw bandwidth(MHz)
@@ -118,7 +122,6 @@ std::string Pulsar::ArrivalTime::get_ipta_aux_txt (const Tempo::toa& toa)
     args += " -nch " + tostring(
         h->get_row(0)->get_nchan() / observation->get_nchan());
 
-  // -f frontend_backend : is this really needed?
 
   return args;
 
