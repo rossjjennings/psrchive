@@ -468,13 +468,16 @@ bool Pulsar::Archive::Match::get_bandwidth_match (const Archive* a,
 {
   double bw1 = a->get_bandwidth();
   double bw2 = b->get_bandwidth();
+  double frac_dbw = fabs((fabs(bw1)-fabs(bw2))/bw1);
+  bool sign_matches = (bw1*bw2) > 0.0;
 
-  if ( ( bw1 != bw2 ) && !(opposite_sideband && (bw1 == -bw2)) )
+  if ( ( frac_dbw<1e-10 ) && (opposite_sideband || sign_matches) )
+    return true;
+  else
   {
     reason += separator
       + stringprintf ("bandwidth mismatch: %lf and %lf", bw1, bw2);
     return false;
   }
-  return true;
 }
 
