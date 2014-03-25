@@ -9,7 +9,11 @@
 #include "Pulsar/CalibratorType.h"
 
 #include "Pulsar/Database.h"
+
+#include "Pulsar/ReferenceCalibrator.h"
+
 #include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/PolnCalibratorExtension.h"
 
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/FluxCalibratorExtension.h"
@@ -35,6 +39,13 @@ Pulsar::CalInterpreter::CalInterpreter ()
       "load", "load the database or calibrator",
       "usage: load <filename>\n"
       "    string filename      filename of database or calibrator" );
+
+  add_command 
+    ( &CalInterpreter::match,
+      "match", "set or get calibrator match criteria",
+      "usage: match [key[=value]]\n"
+      "    string key           name of the criterion to set/get \n"
+      "    string value         value of the criterion" );
 
   add_command 
     ( &CalInterpreter::cal,
@@ -90,8 +101,10 @@ string Pulsar::CalInterpreter::load (const string& args)
 
     if ( archive->get<FluxCalibratorExtension>() )
       flux_calibrator = new FluxCalibrator (archive);
-    else 
+    else if ( archive->get<PolnCalibratorExtension>() )
       calibrator = new PolnCalibrator (archive);
+    else
+      calibrator = ReferenceCalibrator::factory (caltype, archive);
 
     return response (Good);
   }
@@ -111,6 +124,42 @@ string Pulsar::CalInterpreter::load (const string& args)
 		     "3) " + error.get_message() );
   }
 
+}
+
+class CriteriaInterface 
+  : public TextInterface::To<Pulsar::Database::Criteria>
+{
+public:
+  CriteriaInterface (Pulsar::Database::Criteria* instance)
+  {
+    if (instance)
+      set_instance (instance);
+
+    add( &Pulsar::Database::Criteria::get_sequence,
+         &Pulsar::Database::Criteria::set_sequence,
+         "order", "Use calibrator observed before/after pulsar" );
+
+    /* TO-DO: create set|get methods for other Criteria attributes and
+       include them here */
+  }
+};
+
+
+
+string Pulsar::CalInterpreter::match (const string& args) try
+{
+  Database::Criteria criteria = Database::get_default_criteria ();
+
+  CriteriaInterface interface (&criteria);
+  string retval = interface.process(args);
+
+  Database::set_default_criteria (criteria);
+
+  return response (Good, retval);
+}
+catch (Error& error)
+{
+  return response (Fail, "unrecognized type '" + args + "'");
 }
 
 string Pulsar::CalInterpreter::cal (const string& arg) try

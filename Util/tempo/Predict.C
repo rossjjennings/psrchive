@@ -249,7 +249,7 @@ Pulsar::Predictor* Tempo::Predict::generate () const
 }
 
 static TemporaryDirectory directory ("tempo");
-static DirectoryLock lock;
+static DirectoryLock dir_lock;
 
 polyco Tempo::Predict::generate_work () const
 {
@@ -272,8 +272,8 @@ polyco Tempo::Predict::generate_work () const
   }
 
 
-  lock.set_directory( directory.get_directory() );
-  DirectoryLock::Push raii (lock);
+  dir_lock.set_directory( directory.get_directory() );
+  DirectoryLock::Push raii (dir_lock);
 
   unsigned retries = 5;
   
@@ -284,7 +284,7 @@ polyco Tempo::Predict::generate_work () const
        either end)...  so: increase the range until TEMPO gets it right
        and satisfies the requirements of an otherwise frustrated end-user */
 
-    lock.clean ();
+    dir_lock.clean ();
 
     write_tzin();
 

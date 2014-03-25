@@ -70,6 +70,7 @@ nobase_include_HEADERS = \
 	Pulsar/ReceptionModelSolveMEAL.h \
         Pulsar/ReferenceCalibrator.h \
         Pulsar/ReflectStokes.h \
+	Pulsar/RotatingVectorModelOptions.h \
         Pulsar/SignalPath.h \
         Pulsar/Simulation.h \
         Pulsar/SingleAxisCalibrator.h \
@@ -166,6 +167,7 @@ libPolarimetry_la_SOURCES = \
 	ReceptionModelSolveMEAL.C \
         ReferenceCalibrator.C \
         ReflectStokes.C \
+	RotatingVectorModelOptions.C \
         SignalPath.C \
         Simulation.C \
         SingleAxis.C \

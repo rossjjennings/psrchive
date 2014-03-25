@@ -21,6 +21,8 @@ include_HEADERS = \
 	FilePtr.h \
         Functor.h \
         HeapTracked.h \
+	identifiable_factory.h \
+	Identifiable.h \
 	interface_factory.h \
 	interface_stream.h \
         Jacobi.h \
@@ -41,6 +43,7 @@ include_HEADERS = \
         Registry.h \
         separate.h \
         Stokes.h \
+	stringcase.h \
         stringtok.h \
         substitute.h \
 	TextEditor.h \
@@ -69,12 +72,14 @@ libunits_la_SOURCES = \
 	escape.C \
 	FilePtr.C \
         HeapTracked.C \
+	Identifiable.C \
 	OwnStream.C \
         pad.C \
 	parse_indeces.C \
         Pauli.C \
         ReferenceAble.C \
         separate.C \
+	stringcase.C \
         stringtok.C \
 	test.cfg \
 	tostring.C \

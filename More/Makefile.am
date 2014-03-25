@@ -33,7 +33,7 @@ if HAVE_PGPLOT
 SUBDIRS += Plotting
 endif
 
-SUBDIRS += . Applications
+SUBDIRS += . Applications Simulation
 
 if HAVE_QTDRIV
 SUBDIRS += rhythm

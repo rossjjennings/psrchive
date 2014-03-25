@@ -7,7 +7,7 @@
  ***************************************************************************/
 
 #include "T2Observatory.h"
-#include "stringtok.h"
+#include "strutil.h"
 
 #include <fstream>
 #include <sstream>
@@ -95,11 +95,11 @@ Tempo2::observatory (const string& telescope_name)
 	return antennae[i];
 
   for (unsigned i=0; i < antennae.size(); i++)
-    if (strcasestr( antennae[i]->get_name().c_str(), telescope_name.c_str() ))
+    if (casecmp( antennae[i]->get_name(), telescope_name ))
       return antennae[i];
 
   for (unsigned i=0; i < antennae.size(); i++)
-    if (antennae[i]->get_old_code() == telescope_name)
+    if (casecmp( antennae[i]->get_old_code(), telescope_name ))
       return antennae[i];
 
   throw Error (InvalidParam, "Tempo2::observatory",

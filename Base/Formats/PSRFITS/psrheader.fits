@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '5.2             '   / Header version 
+HDRVER  = '5.3             '   / Header version 
 FITSTYPE= 'PSRFITS         '   / FITS definition for pulsar data files
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
@@ -83,7 +83,7 @@ EXTNAME = HISTORY             / name of this binary table extension
 TTYPE#  = DATE_PRO            / Processing date and time (UTC)
 TFORM#  = 24A                 / 24-char string
 TTYPE#  = PROC_CMD            / Processing program and command
-TFORM#  = 80A                 / 80_char string
+TFORM#  = 256A                / 256-char string
 TTYPE#  = SCALE               / Units (FluxDen/RefFlux/Jansky)
 TFORM#  = 8A                  / 8-char string
 TTYPE#  = POL_TYPE            / Polarisation identifier
@@ -130,7 +130,7 @@ TFORM#  = 32A                 / 32-char string
 TTYPE#  = CAL_MTHD            / Calibration method
 TFORM#  = 32A                 / 32-char string
 TTYPE#  = CAL_FILE            / Name of gain calibration file
-TFORM#  = 32A                 / 32-char string
+TFORM#  = 256A                / 256-char string
 TTYPE#  = RFI_MTHD            / RFI excision method
 TFORM#  = 32A                 / 32-char string
 TTYPE#  = RM_MODEL            / Auxiliary Faraday rotation model description
@@ -420,6 +420,42 @@ TTYPE#  = CHISQ                / Total chi-squared (objective merit function)
 TFORM#  = E                    / NCHAN floats
 TTYPE#  = NFREE                / Number of degrees of freedom
 TFORM#  = J                    / NCHAN long (32-bit) integers
+END
+#
+###############################################################################
+#
+# Spectral Kurtosis Binary Table Extension
+#
+###############################################################################
+#
+XTENSION= BINTABLE             / ***** Spectral Kurtosis *****
+BITPIX  =                    8 / N/A
+NAXIS   =                    2 / 2-dimensional binary table
+NAXIS1  =                    * / Width of table in bytes
+NAXIS2  =                    * / Number of rows in table
+PCOUNT  =                    0 / Size of special data area
+GCOUNT  =                    1 / One data group (required keyword)
+TFIELDS =                    * / Number of fields per row
+#
+NPOL    =                    * / Number of polarizations in SK data
+NCHAN   =                    * / Number of channels in SK data 
+EXTNAME = SPECKURT             / Name of this binary table extension
+#
+TTYPE#  = SK_INT               / Samples integrated in SK statistics
+TFORM#  = V                    / unsigned integer
+TTYPE#  = SK_EXCIS             / SK Excision limits 
+TFORM#  = V                    / unsigned integer
+TTYPE#  = FIL_SUM              / Filtered SK sum
+TDIM#   = (*,*)                / Data table dimensions (NPOL*NCHAN)
+TFORM#  = E                    / NPOL*NCHAN floats
+TTYPE#  = FIL_HIT              / Filtered SK hits
+TDIM#   = (*,*)                / Data table dimensions (NPOL*NCHAN)
+TFORM#  = V                    / NPOL*NCHAN unsigned integers
+TTYPE#  = UNFIL_SUM            / Unfiltered SK sum
+TDIM#   = (*,*)                / Data table dimensions (NPOL*NCHAN)
+TFORM#  = E                    / NPOL*NCHAN floats
+TTYPE#  = UNFIL_HIT            / Unfiltered SK hits
+TFORM#  = K                    / 64 bit signed integer
 END
 #
 ###############################################################################

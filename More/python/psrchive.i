@@ -154,6 +154,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/Integration.h"
 %include "Pulsar/ProfileAmps.h"
 %include "Pulsar/Profile.h"
+%include "Pulsar/Parameters.h"
 %include "Angle.h"
 %include "sky_coord.h"
 %include "MJD.h"
@@ -235,6 +236,14 @@ void pointer_tracker_remove(Reference::Able *ptr) {
     void rotate_time(double time) {
         self->expert()->rotate(time);
     }
+
+    void _rotate_phase_swig(double phase) {
+        self->expert()->rotate_phase(phase);
+    }
+
+    %pythoncode %{
+def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
+%}
 
     void combine(Pulsar::Integration* subint) {
       self->expert()->combine(subint);

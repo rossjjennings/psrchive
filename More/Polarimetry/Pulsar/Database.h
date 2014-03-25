@@ -6,10 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.24 $
-   $Date: 2010/09/23 05:40:46 $
-   $Author: straten $ */
+// psrchive/More/Polarimetry/Pulsar/Database.h
 
 #ifndef __Pulsar_Database_h
 #define __Pulsar_Database_h
@@ -22,6 +19,8 @@
 #include "sky_coord.h"
 #include "MJD.h"
 #include "Types.h"
+
+#include <iostream>
 
 namespace Pulsar {
 
@@ -58,15 +57,15 @@ namespace Pulsar {
     //! Maximum difference between calibrator and pulsar bandwidths
     static Option<double> max_bandwidth_difference;
 
-    //! Pass this to the criterion methods to retrieve any or all matches
+    //! Pass this to the criteria methods to retrieve any or all matches
     static const Pulsar::Archive* any;
 
-    //! Supported matching policies
+    //! Calibrator matching sequence
     /*! Different level-setting strategies may dictate the policy
       for matching an observation with the right calibrator */
-    enum Policy {
+    enum Sequence {
       //! Use the nearest calibrator (default)
-      NoPolicy,
+      Any,
       //! Use only calibrators recorded before the observation
       CalibratorBefore,
       //! Use only calibrators recorded after the observation
@@ -168,15 +167,16 @@ namespace Pulsar {
     };
     
     //! Describes Database matching criteria
-    class Criterion : public Reference::Able {
+    class Criteria : public Reference::Able {
       
     public:
       
       //! The parameters to match
       Entry entry;
 
-      //! The matching policy
-      Policy policy;
+      //! The sequence of matching calibrator and pulsar observations
+      void set_sequence (Sequence s) { sequence = s; }
+      Sequence get_sequence () const { return sequence; }
 
       double minutes_apart;
       double deg_apart;
@@ -191,12 +191,12 @@ namespace Pulsar {
       bool check_frequency_array;
 
       //! Default constructor
-      Criterion ();
+      Criteria ();
       
       //! Called when no observation parameters are to be matched
       void no_data ();
 
-      //! Return true if entry matches within the criterion
+      //! Return true if entry matches within the criteria
       bool match (const Entry& entry) const;
       
       /** @name match results
@@ -222,10 +222,13 @@ namespace Pulsar {
       //! Return the best of two entries
       Entry best (const Entry& a, const Entry& b) const;
 
-      //! Return the criterion that came closest to matching
-      static Criterion closest (const Criterion& a, const Criterion& b);
+      //! Return the criteria that came closest to matching
+      static Criteria closest (const Criteria& a, const Criteria& b);
 
     protected:
+
+      //! The sequence of matching calibrator and pulsar observations
+      Sequence sequence;
 
       template<typename T, typename Predicate>
       void compare (const std::string& name,
@@ -262,24 +265,24 @@ namespace Pulsar {
     };
     
     
-    //! Get the default matching criterion for all observations
-    static Criterion get_default_criterion ();
+    //! Get the default matching criteria for all observations
+    static Criteria get_default_criteria ();
 
-    //! Set the default matching criterion for all observations
-    static void set_default_criterion (const Criterion&);
+    //! Set the default matching criteria for all observations
+    static void set_default_criteria (const Criteria&);
 
-    //! Returns the best Entry that matches the given Criterion
-    Entry best_match (const Criterion&) const;
+    //! Returns the best Entry that matches the given Criteria
+    Entry best_match (const Criteria&) const;
 
-    //! Fills a vector with Entry instances that match the given Criterion
-    void all_matching (const Criterion&, std::vector<Entry>& matches) const;
+    //! Fills a vector with Entry instances that match the given Criteria
+    void all_matching (const Criteria&, std::vector<Entry>& matches) const;
     
-    //! Return the Criterion for the specified Pulsar::Archive
-    Criterion criterion (const Pulsar::Archive* arch,
+    //! Return the Criteria for the specified Pulsar::Archive
+    Criteria criteria (const Pulsar::Archive* arch,
 			 Signal::Source obsType) const;
     
-    //! Return the Criterion for the specified Pulsar::Archive
-    Criterion criterion (const Pulsar::Archive* archive,
+    //! Return the Criteria for the specified Pulsar::Archive
+    Criteria criteria (const Pulsar::Archive* archive,
 			 const Calibrator::Type* calType) const;
 
     //! Returns the full pathname of the Entry filename
@@ -308,14 +311,17 @@ namespace Pulsar {
     //! If set, this model of the feed is incorporated into all solutions
     Reference::To<MEAL::Complex2> feed;
 
-    //! The criterion that last came closest to matching
-    mutable Criterion closest_match;
+    //! The criteria that last came closest to matching
+    mutable Criteria closest_match;
   };
 
   bool operator < (const Database::Entry& a, const Database::Entry& b);
 
   bool operator == (const Database::Entry& a, const Database::Entry& b);
 
+  std::ostream& operator << (std::ostream& os, Database::Sequence);
+    
+  std::istream& operator >> (std::istream& is, Database::Sequence&);
 }
 
 #endif

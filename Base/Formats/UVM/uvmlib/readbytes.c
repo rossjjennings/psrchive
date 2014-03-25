@@ -5,15 +5,17 @@
 /* JMR -- February 1995                                                */
 /***********************************************************************/
 
-# include <stdio.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
 
-readbytes_(header,nhdr,data,ndat,fileid)
+void readbytes_(header,nhdr,data,ndat,fileid)
 
 char *header, *data;
 int *fileid, *nhdr, *ndat;
 
 {
-      int fd, nbytes, i, recl, data_length, header_length;
+      int fd, nbytes, data_length, header_length;
       fd = *fileid;
       header_length = *nhdr;
       nbytes = read(fd,header,header_length);

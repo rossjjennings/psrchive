@@ -186,7 +186,7 @@ template<class T>
 void MEAL::GroupRule<T>::remove_model (T* x)
 {
   for (unsigned i=0; i < model.size(); i++)
-    if (model[i] == x)
+    if (model[i].ptr() == x)
     {
       composite.unmap (model[i]);
       model.erase( model.begin() + i );

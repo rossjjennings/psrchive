@@ -13,18 +13,20 @@
 
 using namespace std;
 
-
-std::ostream& operator<< (std::ostream& ostr,
-			  Pulsar::ProfileWeightFunction* e)
+namespace Pulsar
 {
-  return interface_insertion (ostr, e);
-}
-std::istream& operator>> (std::istream& istr,
-			  Pulsar::ProfileWeightFunction* &e)
-{
-  return interface_extraction (istr, e);
-}
+  std::ostream& operator<< (std::ostream& ostr,
+			    ProfileWeightFunction* e)
+  {
+    return interface_insertion (ostr, e);
+  }
 
+  std::istream& operator>> (std::istream& istr,
+			    ProfileWeightFunction* &e)
+  {
+    return interface_extraction (istr, e);
+  }
+}
 
 Pulsar::ProfileStats::Interface::Interface (ProfileStats* instance)
 {

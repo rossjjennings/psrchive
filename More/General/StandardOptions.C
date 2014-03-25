@@ -9,6 +9,7 @@ using namespace std;
 
 #include "Pulsar/StandardOptions.h"
 #include "Pulsar/Interpreter.h"
+#include "Pulsar/Archive.h"
 
 #include "strutil.h"
 #include "separate.h"
@@ -59,7 +60,7 @@ void Pulsar::StandardOptions::process (Archive* archive)
   if (!interpreter)
     interpreter = standard_shell();
 
-  if (application->get_verbose())
+  if (application && application->get_verbose())
     cerr << application->get_name() << ": interpreter processing "
 	 << archive->get_filename() << endl;
 

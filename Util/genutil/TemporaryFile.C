@@ -27,7 +27,7 @@ using namespace std;
 
 #ifdef HAVE_PTHREAD
 #include <pthread.h>
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t instances_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 /*
@@ -126,7 +126,7 @@ TemporaryFile::TemporaryFile (const string& basename)
   unlinked = false;
 
 #ifdef HAVE_PTHREAD
-  pthread_mutex_lock (&mutex);
+  pthread_mutex_lock (&instances_mutex);
 #endif
 
   if (!signal_handler_installed)
@@ -135,7 +135,7 @@ TemporaryFile::TemporaryFile (const string& basename)
   get_instances()->insert (this);
 
 #ifdef HAVE_PTHREAD
-  pthread_mutex_unlock (&mutex);
+  pthread_mutex_unlock (&instances_mutex);
 #endif
 }
 
@@ -145,13 +145,13 @@ TemporaryFile::~TemporaryFile ()
   remove ();
 
 #ifdef HAVE_PTHREAD
-  pthread_mutex_lock (&mutex);
+  pthread_mutex_lock (&instances_mutex);
 #endif
 
   get_instances()->erase (this);
 
 #ifdef HAVE_PTHREAD
-  pthread_mutex_unlock (&mutex);
+  pthread_mutex_unlock (&instances_mutex);
 #endif
 }
 

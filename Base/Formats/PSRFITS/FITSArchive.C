@@ -428,23 +428,13 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   if (verbose > 2)
     cerr << "FITSArchive::load_header reading equinox" << endl;
 
-  dfault = "pre version 2.8";
-  psrfits_read_key (read_fptr, "EQUINOX", &tempstr, dfault, verbose > 2);
-
-  if ((tempstr == dfault) || (tempstr.empty()))
+  // Read the equinox of the coordinate systembandwidth of the observation
   {
-    //
-    // The file was created before the EQUINOX attribute was added,
-    // or was mistakenly created with a null equinox.
-    //
-    hdr_ext->equinox = "2000.0";
-  }
-  else
-  {
-    hdr_ext->equinox = tempstr;
+    double dfault = 2000.0;
+    double equinox;
 
-    if (verbose > 2)
-      cerr << "Got equinox: " << tempstr << endl;
+    psrfits_read_key (read_fptr, "EQUINOX", &equinox, dfault, verbose > 2);
+    hdr_ext->equinox = equinox;
   }
 
   //
@@ -463,9 +453,6 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
 
   if (hdr_ext->coordmode == "EQUAT")
     hdr_ext->coordmode = "J2000";
-
-  if (hdr_ext->equinox == "J2000")
-    hdr_ext->equinox = "2000.0";
 
   //
   // ... also, since PSRFITS definition version 2.8, "Gal" is "GAL"

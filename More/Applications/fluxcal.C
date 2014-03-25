@@ -235,14 +235,14 @@ int main (int argc, char** argv) try {
     }
 
     // get all of the fluxcal on/off observations and sort them
-    Pulsar::Database::Criterion criterion;
+    Pulsar::Database::Criteria criteria;
     vector<Pulsar::Database::Entry> entries;
 
-    criterion = database->criterion(Pulsar::Database::any, Signal::FluxCalOn);
-    database->all_matching (criterion, entries);
+    criteria = database->criteria(Pulsar::Database::any, Signal::FluxCalOn);
+    database->all_matching (criteria, entries);
 
-    criterion = database->criterion(Pulsar::Database::any, Signal::FluxCalOff);
-    database->all_matching (criterion, entries);
+    criteria = database->criteria(Pulsar::Database::any, Signal::FluxCalOff);
+    database->all_matching (criteria, entries);
 
     sort (entries.begin(), entries.end());
 

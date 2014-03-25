@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -23,10 +24,6 @@
 
 #include "dirutil.h"
 #include "strutil.h"
-
-#if 0
-#include <cpgplot.h>
-#endif
 
 #include <iostream>
 #include <unistd.h>
@@ -61,12 +58,9 @@ void usage ()
     " -F        add all frequency channels after weighting \n"
     " -P        add polarisations together \n"
     " -T        add all Integrations after weighting \n"
-    "\n"
-    "Display options:\n"
-    " -D        plot each profile \n"
-    " -d        display s/n but do not output weighted result \n"
+    " -n        normalize data by off-pulse rms\n"
     " -G        print giant-pulse search numbers \n"
-    " -o M:w    smooth profile using method, M, and window size, w \n"
+    // " -o M:w    smooth profile using method, M, and window size, w \n"
        << endl;
 }
 
@@ -82,6 +76,7 @@ int main (int argc, char** argv) try
   bool display = false;
   bool unload_result = true;
   bool normal = true;
+  bool normalize_data = false;
 
   float snr_phase = -1.0;
   float duty_cycle = 0.15;
@@ -105,7 +100,7 @@ int main (int argc, char** argv) try
   Smooth* smooth = 0;
 
   int c = 0;
-  const char* args = "b:c:DdFGhm:M:o:Pp:qrTUs:S:vVw:";
+  const char* args = "b:c:DdFGhm:M:no:Pp:qrTUs:S:vVw:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -165,6 +160,10 @@ int main (int argc, char** argv) try
 
     case 'M':
       metafile = optarg;
+      break;
+
+    case 'n':
+      normalize_data = true;
       break;
 
     case 'o': {
@@ -295,15 +294,6 @@ int main (int argc, char** argv) try
     return 0;
   }
 
-#if 0
-  if (display) {
-    cpgbeg (0, "?", 0, 0);
-    cpgask(1);
-    cpgsvp (0.1, 0.9, 0.05, 0.85);
-    cpgsch (1.0);
-  }
-#endif
-
   Reference::To<Pulsar::Archive> archive, copy;
 
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try
@@ -420,38 +410,27 @@ int main (int argc, char** argv) try
 
 	}
 
-#if 0
-	if (display) { // && snr == 0) {
-
-	  Pulsar::Plotter plotter;
-	  plotter.set_subint(isub);
-	  plotter.set_chan(ichan);
-	  cpgpage();
-
-	  if (smooth) {
-
-	    float phase = profile->find_min_phase(smooth->get_duty_cycle());
-	    cerr << "psrwt: find_min_phase=" << phase << endl;
-
-	    smooth->transform (profile);
-
-	    phase = float(profile->find_min_bin()) / profile->get_nbin();
-	    cerr << "psrwt: find_min_bin/nbin=" << phase << endl;
-
-	  }
-
-	  plotter.singleProfile(copy);
-	  cpgpage();
-	  plotter.fourier(copy);
-
-	}
-#endif
-
 	if (!normal)
 	  continue;
 	
 	if (snr_threshold && snr < snr_threshold)
 	  snr = 0.0;
+
+	if (normalize_data)
+        {
+	  Pulsar::PhaseWeight weight;
+
+	  mask.set_Profile (profile);
+	  mask.get_weight (&weight);
+	  
+	  double mean, variance;
+	  weight.stats (profile, &mean, &variance);
+
+	  double scale = 1.0/sqrt(variance);
+
+	  for (unsigned ipol=0; ipol < archive->get_npol(); ipol++)
+	    archive->get_Profile (isub,ipol,ichan)->scale (scale);
+	}
 
 	for (unsigned ipol=0; ipol < archive->get_npol(); ipol++)
 	  archive->get_Profile (isub,ipol,ichan)->set_weight(snr*snr);
@@ -482,11 +461,6 @@ int main (int argc, char** argv) try
     cerr << error << endl;
   }
  
-#if 0 
-  if (display)
-    cpgend();
-#endif
-
   return 0;
 }
 catch (Error& error)

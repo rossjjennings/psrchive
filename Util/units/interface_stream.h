@@ -14,10 +14,11 @@
 //! insertion operator outputs object state as defined by its text interface
 /*!
  */
-template<typename T>
-std::ostream& operator<< (std::ostream& ostr, const Reference::To<T>& e) try
+template<class T>
+std::ostream& interface_insertion (std::ostream& ostr, const T* e) try
 {
-  Reference::To<TextInterface::Parser> interface = e->get_interface();
+  Reference::To<TextInterface::Parser> interface 
+    = const_cast<T*>(e)->get_interface();
 
   ostr << interface->get_interface_name ();
 
@@ -42,23 +43,19 @@ catch (Error& error)
   return ostr;
 }
 
-//
-//
-//
-
 template<class T>
-std::ostream& interface_insertion (std::ostream& ostr, const T* e)
+std::ostream&
+interface_insertion (std::ostream& ostr, const Reference::To<T>& e)
 {
-  Reference::To<T> ref = const_cast<T*>(e);
-  return ostr << ref;
+  return interface_insertion (ostr, e.get());
 }
 
-
-//! extraction operator creates a new object using its text interface factory
+//! extraction operator creates a new object using its text-based factory
 /*!
  */
+
 template<typename T>
-std::istream& operator >> (std::istream& istr, Reference::To<T>& e) try
+std::istream& interface_extraction (std::istream& istr, T* &e) try
 {
   std::string parse;
   istr >> parse;
@@ -72,18 +69,32 @@ catch (Error& error)
   return istr;
 }
 
-
 template<typename T>
-std::istream& interface_extraction (std::istream& istr, T* &e)
+std::istream& interface_extraction (std::istream& istr, Reference::To<T>& e)
 {
-  Reference::To<T> ref;
-
-  istr >> ref;
-
-  if (ref)
-    e = ref.release();
-
+  T* ptr = 0;
+  interface_extraction (istr, ptr);
+  e = ptr;
   return istr;
+}
+
+//
+//
+//
+
+namespace Reference
+{
+  template<typename T>
+  std::ostream& operator<< (std::ostream& ostr, const To<T>& e)
+  {
+    return interface_insertion (ostr, e);
+  }
+  
+  template<typename T>
+  std::istream& operator >> (std::istream& istr, To<T>& e)
+  {
+    return interface_extraction (istr, e);
+  }
 }
 
 #endif
