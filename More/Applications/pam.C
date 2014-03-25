@@ -10,6 +10,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Parameters.h"
+#include "Pulsar/Config.h"
 
 // Extensions this program understands
 
@@ -177,6 +178,7 @@ void usage()
     "  -L               Set feed basis to Linear \n"
     "  -C               Set feed basis to Circular \n"
     "  -E ephfile       Install a new ephemeris and update model \n"
+    "  --ephver ver     Ephem type for -E, 'ver' should be 'tempo' or 'tempo2'\n"
     "  -B               Flip the sideband sense \n"
     "  --flip freq      Flip the band about the given frequency \n"
     "  --reverse_freqs  Reverse the ordering of the frequency channels and\n"
@@ -252,6 +254,7 @@ int main (int argc, char *argv[]) try {
     double flip_freq_mhz = 0.0;
 
     Pulsar::Parameters* new_eph = 0;
+    string ephver = "";
 
     string command = "pam";
 
@@ -310,6 +313,7 @@ int main (int argc, char *argv[]) try {
     const int FLIP = 1221;
     const int UPDATE_DM = 1222;
     const int AUX_RM = 1223;
+    const int EPHVER = 1224;
 
     while (1) {
 
@@ -340,6 +344,7 @@ int main (int argc, char *argv[]) try {
 	{"SS",         no_argument,      0,SS},
 	{"update_dm",   no_argument,      0,UPDATE_DM},
 	{"aux_rm",    required_argument,0,AUX_RM},
+        {"ephver",    required_argument,0,EPHVER},
 	{0, 0, 0, 0}
       };
 
@@ -703,6 +708,28 @@ int main (int argc, char *argv[]) try {
         aux_rm = fromstring<double>(optarg);
         command += " --aux_rm ";
         command += optarg;
+        break;
+
+      case EPHVER:
+        ephver = optarg;
+        command += " --ephver ";
+        command += ephver;
+        if (ephver == "tempo" || ephver == "polyco") 
+        {
+          Pulsar::Config::get_interface()->set_value("Predictor::policy",
+              "default");
+          Pulsar::Config::get_interface()->set_value("Predictor::default",
+              "polyco");
+        }
+        else if (ephver == "tempo2")
+        {
+          Pulsar::Config::get_interface()->set_value("Predictor::policy",
+              "default");
+          Pulsar::Config::get_interface()->set_value("Predictor::default",
+              "tempo2");
+        }
+        else
+          cerr << "pam: Unrecognized --ephver option, allowed values are 'tempo' or 'tempo2'" << endl;
         break;
 
       default:
