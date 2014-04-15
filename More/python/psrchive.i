@@ -23,7 +23,11 @@
 #include "Pulsar/IntegrationBarycentre.h"
 
 #include "Pulsar/Interpreter.h"
+
+#ifdef HAVE_CFITSIO
 #include <fitsio.h>
+#endif
+
 %}
 
 // Language independent exception handler
@@ -164,6 +168,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 
 %inline %{
 
+#ifdef HAVE_CFITSIO
 // Least I/O intensive way to grab observation time
 double get_tobs(const char* filename) {
     int status=0,colnum=0;
@@ -187,6 +192,7 @@ double get_tobs(const char* filename) {
     }
     return tobs;
 }
+#endif
 %}
 
 
