@@ -41,6 +41,7 @@ protected:
 
 
 /*!
+
   The constructor must set the name of the application and a short
   description of its purpose.  These are shown when the user types
   "example -h"
@@ -55,6 +56,7 @@ protected:
 
   This constructor also sets the default values of the attributes that
   are unique to the program.
+
 */
 
 example::example ()
@@ -66,6 +68,13 @@ example::example ()
   // default value for scale
   scale = 1.0;
 }
+
+
+/*!
+
+  Add application-specific command-line options.
+
+*/
 
 void example::add_options (CommandLine::Menu& menu)
 {
@@ -83,11 +92,13 @@ void example::add_options (CommandLine::Menu& menu)
   arg->set_help ("set the source name to 'string'");
 }
 
+
 /*!
 
-  This example simply loads every profile into memory and scales them
+  Scale every profile and optionally set the source name
 
 */
+
 void example::process (Pulsar::Archive* archive)
 {
   if (!name.empty())
@@ -106,10 +117,16 @@ void example::process (Pulsar::Archive* archive)
       }
 }
 
-static example program;
+
+/*!
+
+  The standard C/C++ main function simply calls Application::main
+
+*/
 
 int main (int argc, char** argv)
 {
+  example program;
   return program.main (argc, argv);
 }
 
