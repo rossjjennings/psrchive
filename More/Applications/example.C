@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2008 by Willem van Straten
+ *   Copyright (C) 2008 - 2014 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -9,7 +9,10 @@ using namespace std;
 
 #include "Pulsar/Application.h"
 #include "Pulsar/StandardOptions.h"
+#include "Pulsar/UnloadOptions.h"
+
 #include "Pulsar/Archive.h"
+#include "Pulsar/Profile.h"
 
 //
 //! An example of an application
@@ -26,8 +29,14 @@ public:
 
 protected:
 
+  //! Scale attribute used to rescale all of the data in the archive
+  double scale;
+
+  //! Name used to reset the name of the source
+  std::string name;
+
   //! Add command line options
-  void add_options (CommandLine::Menu&) {}
+  void add_options (CommandLine::Menu&);
 };
 
 
@@ -36,31 +45,54 @@ protected:
   description of its purpose.  These are shown when the user types
   "example -h"
 
-  This constructor also makes use of the StandardOptions class,
-  an add-on that provides standard preprocessing with the pulsar
-  command language interpreter.
+  This constructor makes use of
 
-  Other option sets include the CommonOptions class and the
-  PlottingOptions class.
+  - StandardOptions (-j -J etc.): an option set that provides standard
+  preprocessing with the pulsar command language interpreter.
+
+  - UnloadOptions (-e -m etc.): an option set that provides standard
+  options for unloading data.
+
+  This constructor also sets the default values of the attributes that
+  are unique to the program.
 */
 
 example::example ()
   : Application ("example", "example psrchive program")
 {
   add( new Pulsar::StandardOptions );
+  add( new Pulsar::UnloadOptions );
+
+  // default value for scale
+  scale = 1.0;
+}
+
+void example::add_options (CommandLine::Menu& menu)
+{
+  CommandLine::Argument* arg;
+
+  // add a blank line and a header to the output of -h
+  menu.add ("\n" "General options:");
+
+  // add an option that enables the user to set the scale with -s
+  arg = menu.add (scale, 's', "scale");
+  arg->set_help ("multiply all amplitudes by 'scale'");
+
+  // add an option that enables the user to set the source name with -name
+  arg = menu.add (scale, "name", "string");
+  arg->set_help ("set the source name to 'string'");
 }
 
 /*!
 
-  This example simply loads every profile into memory.
-
-  If you want to use the Profile class, then you will have to
-
-  #include "Pulsar/Profile.h"
+  This example simply loads every profile into memory and scales them
 
 */
 void example::process (Pulsar::Archive* archive)
 {
+  if (!name.empty())
+    archive->set_source (name);
+
   unsigned nsub = archive->get_nsubint();
   unsigned nchan = archive->get_nchan();
   unsigned npol = archive->get_npol();
@@ -68,7 +100,10 @@ void example::process (Pulsar::Archive* archive)
   for (unsigned isub=0; isub < nsub; isub++)    
     for (unsigned ipol=0; ipol < npol; ipol++)
       for (unsigned ichan=0; ichan < nchan; ichan++)
+      {
 	Pulsar::Profile* profile = archive->get_Profile (isub, ipol, ichan);
+	profile->scale(scale);
+      }
 }
 
 static example program;
