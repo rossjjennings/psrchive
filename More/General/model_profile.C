@@ -4,7 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 using namespace std;
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -48,14 +50,18 @@ int Pulsar::model_profile (int npts, int narrays,
   if (max_harmonic)
     npt2 = max_harmonic;
 
+  // work around bug #390 - part 1
+  // fccf assumes that there are at least 16 harmonics in the input
+  unsigned xcorr_size = std::max (npt2, 16);
+
   int i,j;
 
   for (i=0; i<narrays; ++i) {
 
     fft_std[i] = new float[npts+2];
     fft_prf[i] = new float[npts+2];
-    xcorr_amps[i] = new float[npt2];
-    xcorr_phases[i] = new float[npt2];
+    xcorr_amps[i] = new float[xcorr_size];
+    xcorr_phases[i] = new float[xcorr_size];
 
     assert (fft_std[i]!=0 && fft_prf[i]!=0 && 
 	    xcorr_amps[i]!=0 && xcorr_phases[i]!=0);
@@ -75,6 +81,12 @@ int Pulsar::model_profile (int npts, int narrays,
 	atan2(fft_std[i][2*j+1], fft_std[i][2*j]);
 
     }
+
+    // work around bug #390 - part 2
+    // if npt2 < 16, fill the remainder of the fccf input arrays with zeroes
+    for (; j<xcorr_size; ++j)
+      xcorr_amps[i][j] = xcorr_phases[i][j] = 0.0;
+
   }
 
   // Compute an initial estimation of the shift based on the
