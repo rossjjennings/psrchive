@@ -77,6 +77,7 @@ libunits_la_SOURCES = \
         pad.C \
 	parse_indeces.C \
         Pauli.C \
+	random.C \
         ReferenceAble.C \
         separate.C \
 	stringcase.C \
