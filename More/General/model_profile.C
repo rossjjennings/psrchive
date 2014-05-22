@@ -52,7 +52,7 @@ int Pulsar::model_profile (int npts, int narrays,
 
   // work around bug #390 - part 1
   // fccf assumes that there are at least 16 harmonics in the input
-  unsigned xcorr_size = std::max (npt2, 16);
+  unsigned xcorr_size = std::max (npt2, 32);
 
   int i,j;
 
