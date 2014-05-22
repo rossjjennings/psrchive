@@ -20,11 +20,7 @@ float norm (float x)
 
 int main () 
 {
-#if (RAND_MAX > 9000000)
-  unsigned loops = RAND_MAX/1000;
-#else
-  unsigned loops = RAND_MAX*10;
-#endif
+  unsigned loops = 1024 * 1024;
 
   MatrixTest <Quaternion<float,Unitary>,
     Quaternion<double,Unitary>, float> testu;
