@@ -814,11 +814,11 @@ void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
     
     To avoid the division by zero where L==0, you could turn
 
-    L < threshold * sigma_L
+    L > threshold * sigma_L
 	
     into
 
-    L*L < threshold * sigma_L * L
+    L*L > threshold * sigma_L * L
 
     where sigma_L = sqrt(var{L})
 
@@ -859,6 +859,7 @@ void Pulsar::PolnProfile::get_linear (vector< complex< Estimate<double> > >& L,
     cerr << "Pulsar::PolnProfile::get_linear kept=" << kept << endl;
 }
 
+//! Returns a vector of position angle estimates as a function of pulse phase
 void Pulsar::PolnProfile::get_orientation (vector< Estimate<double> >& posang,
 					   float threshold) const
 {
