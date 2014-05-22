@@ -2,6 +2,7 @@
 #include "random.h"
 
 #include <stdlib.h>
+#include <inttypes.h>
 #include <sys/time.h>
 
 #if _DEBUG
@@ -9,7 +10,7 @@
 using namespace std;
 #endif
 
-static const double random_max = uint32_t(0x01) << 32 -1;
+static const double random_max = RAND_MAX;
 
 void random_init ()
 {
