@@ -14,7 +14,7 @@
 #include "tempo++.h"
 
 #if HAVE_TEMPO2
-#include "T2Observatory.h"
+#include "../tempo2/T2Observatory.h"
 #endif
 
 #include "strutil.h"

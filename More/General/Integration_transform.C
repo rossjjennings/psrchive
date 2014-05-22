@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by Willem van Straten
+ *   Copyright (C) 2014 by Paul Demorest
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -10,9 +10,38 @@ using namespace std;
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
+namespace Pulsar {
+
+  /* Transform a full-poln profile using the PolnProfile class */
+  static void transform4(Signal::Basis basis, Signal::State state, 
+      Profile *prof0, Profile *prof1, Profile *prof2, Profile *prof3,
+      const Jones<float>& response)
+  {
+    PolnProfile poln (basis, state, 
+                      prof0, prof1,
+                      prof2, prof3);
+
+    poln.transform (response);
+  }
+
+  /* Transform a two-poln profile if the Jones matrix is diagonal */
+  static void transform2(Profile *prof0, Profile *prof1, 
+      const Jones<float>& response)
+  {
+    if (!response.is_diagonal())
+      throw Error (InvalidState, "Pulsar::Integration::transform (transform2)",
+          "2-pol transform requires diagonal Jones matrix");
+
+    // Apply the scaling to each poln
+    prof0->scale((response.j00*conj(response.j00)).real());
+    prof1->scale((response.j11*conj(response.j11)).real());
+  }
+
+}
+
 void Pulsar::Integration::transform (const Jones<float>& response)
 {
-  if (get_npol() != 4)
+  if (get_npol() != 4 && get_npol() != 2)
     throw Error (InvalidState, "Pulsar::Integration::transform",
 		 "incomplete polarization information");
 
@@ -21,11 +50,14 @@ void Pulsar::Integration::transform (const Jones<float>& response)
 
   for (unsigned ichan=0; ichan < get_nchan(); ichan++) try {
 
-    PolnProfile poln (basis, state, 
-		      profiles[0][ichan], profiles[1][ichan],
-		      profiles[2][ichan], profiles[3][ichan]);
+    if (get_npol() == 4) 
+      transform4 (basis, state, 
+                  profiles[0][ichan], profiles[1][ichan],
+                  profiles[2][ichan], profiles[3][ichan],
+                  response);
 
-    poln.transform (response);
+    else if (get_npol() == 2) 
+      transform2 (profiles[0][ichan], profiles[1][ichan], response);
 
   }
   catch (Error& error) {
@@ -38,7 +70,7 @@ void Pulsar::Integration::transform (const Jones<float>& response)
  
 void Pulsar::Integration::transform (const vector< Jones<float> >& response)
 {
-  if (get_npol() != 4)
+  if (get_npol() != 4 && get_npol() != 2)
     throw Error (InvalidState, "Pulsar::Integration::transform",
 		 "incomplete polarization information");
 
@@ -54,11 +86,14 @@ void Pulsar::Integration::transform (const vector< Jones<float> >& response)
 
   for (unsigned ichan=0; ichan < get_nchan(); ichan++) try {
 
-    PolnProfile poln (basis, state, 
-		      profiles[0][ichan], profiles[1][ichan],
-		      profiles[2][ichan], profiles[3][ichan]);
+    if (get_npol() == 4)
+      transform4 (basis, state, 
+                  profiles[0][ichan], profiles[1][ichan],
+                  profiles[2][ichan], profiles[3][ichan],
+                  response[ichan]);
 
-    poln.transform (response[ichan]);
+    else if (get_npol() == 2) 
+      transform2 (profiles[0][ichan], profiles[1][ichan], response[ichan]);
     
   }
   catch (Error& error) {

@@ -617,6 +617,9 @@ void init() {
   // Computed SNRs
   SNRs.clear();
   pdotSNRs.clear();
+
+
+
 }
 
 
@@ -1038,6 +1041,30 @@ int main (int argc, char** argv)
 
 	    // reset global variables
 	    init();
+
+		if (ifile > 0){
+		   // reset the search parameters so that automatic step sizes are re-calculated.
+		   periodOffset_us = 0;
+		   periodStep_us = -1;
+		   periodHalfRange_us = -1;
+		   pdotOffset = 0;
+		   pdotStep = -1;
+		   pdotHalfRange = -1;
+		   accnOffset = 0;
+		   accnStep = -1;
+		   accnHalfRange = -1;
+		   dmOffset = 0;
+		   dmStep = -1;
+		   dmHalfRange = -1;
+
+		   // reload the command line parameters in case any are not auto set.
+		   parseParameters(argc, argv,  periodOffset_us, periodStep_us,
+				 periodHalfRange_us,accnOffset, accnStep, accnHalfRange,
+				 dmOffset, dmStep, dmHalfRange, colour_map,
+				 minwidthsecs, bestfilename);
+		}
+
+
 
 	    process(archive, minwidthsecs, bestfilename);
 	  }

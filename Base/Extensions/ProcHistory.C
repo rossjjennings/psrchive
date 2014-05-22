@@ -63,11 +63,13 @@ Pulsar::ProcHistory::row& Pulsar::ProcHistory::get_last ()
 
 void Pulsar::ProcHistory::set_command_str (const string& str)
 {
-  if (str.length() > 80)
+  const size_t max_command_len = 256;
+  if (str.length() > max_command_len)
   {
-    cerr << "ProcHistory::set_command_str WARNING truncated to 80 chars" 
+    cerr << "ProcHistory::set_command_str WARNING truncated to "
+         << max_command_len << " chars" 
 	 << endl;
-    command_str = str.substr(0, 80);
+    command_str = str.substr(0, max_command_len);
   }
   else
     command_str = str;

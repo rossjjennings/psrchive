@@ -103,7 +103,7 @@ void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data,
 	  stats->set_Profile (prof);
 	  string text = process( parser, expression );
 	  value = fromstring<float>( text );
-	  cerr << ichan << " " << isub << " " << text << " " << value << endl;
+	  //cerr << ichan << " " << isub << " " << text << " " << value << endl;
 	}
 	else
 	{

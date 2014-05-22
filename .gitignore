@@ -9,6 +9,7 @@ Makefile.in
 Makefile
 linux_64
 config/test-driver
+.dirstamp
 
 Base/Applications/psrconv
 Base/Applications/psredit
@@ -26,13 +27,16 @@ Management/psrchive_install.h
 Management/release.csh
 More/Applications/calavg
 More/Applications/distortion
+More/Applications/drifting_subpulses
 More/Applications/example
 More/Applications/fix_single
 More/Applications/fluxcal
+More/Applications/lmfit
 More/Applications/mtm
 More/Applications/paas
 More/Applications/pac
 More/Applications/pacv
+More/Applications/pafit
 More/Applications/pam
 More/Applications/pas
 More/Applications/pat
@@ -43,6 +47,7 @@ More/Applications/pcm
 More/Applications/pcmavg
 More/Applications/pdmp
 More/Applications/pdv
+More/Applications/psr4th
 More/Applications/psradd
 More/Applications/psrcull
 More/Applications/psrdiff
@@ -65,6 +70,7 @@ More/Applications/rmfit
 More/Applications/sesdiv
 More/Applications/spa
 More/MEAL/lmfit
+More/Plotting/pgutil/psrlst
 More/Polarimetry/pafit
 More/Polarimetry/rmrot
 More/Polarimetry/simpol
@@ -72,6 +78,8 @@ More/psrgui/moc_*.C
 More/psrgui/psrgui
 More/python/psrchive.py
 More/python/psrchive_wrap.cxx
+More/Simulation/psrsim
+More/Simulation/pts
 Util/fft/fft_speed
 Util/fft/install_bench
 Util/genutil/getMJD
@@ -134,6 +142,7 @@ Base/Formats/PSRFITS/test_psrephem_fitsio
 Base/Formats/PSRFITS/test_template
 Base/Formats/Timer/baseband_header_size
 Base/Formats/Timer/timer_size
+Base/Formats/UVM/uvmhdr
 More/Applications/njkk08/test_functions
 More/MEAL/test_Axis
 More/MEAL/test_BasisRule

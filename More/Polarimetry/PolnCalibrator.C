@@ -705,7 +705,7 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try
 
   calibration_setup (arch);
 
-  if (arch->get_npol() == 4)
+  if (arch->get_npol() == 4 || arch->get_npol() == 2)
   {
     BackendCorrection correct_backend;
     correct_backend (arch);

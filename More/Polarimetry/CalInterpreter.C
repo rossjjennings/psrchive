@@ -7,12 +7,16 @@
 
 #include "Pulsar/CalInterpreter.h"
 #include "Pulsar/CalibratorType.h"
+//#include "Pulsar/CalibratorTypes.h"
+#include "Pulsar/CalibratorStokes.h"
 
 #include "Pulsar/Database.h"
 
 #include "Pulsar/ReferenceCalibrator.h"
 
 #include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/SingleAxisCalibrator.h"
+#include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 
 #include "Pulsar/FluxCalibrator.h"
@@ -37,8 +41,9 @@ Pulsar::CalInterpreter::CalInterpreter ()
   add_command
     ( &CalInterpreter::load,
       "load", "load the database or calibrator",
-      "usage: load <filename>\n"
-      "    string filename      filename of database or calibrator" );
+      "usage:\n"
+      "   load <filename>                 filename of database or calibrator\n" 
+      "   load hybrid <obs> <pcm> [flux]  load specific hybid calibrator" );
 
   add_command 
     ( &CalInterpreter::match,
@@ -81,9 +86,44 @@ catch (Error& error)
 
 string Pulsar::CalInterpreter::load (const string& args)
 {
-  string filename = setup<string>(args);
+  vector<string> arguments = setup(args);
   string dbase_error;
   string cal_error;
+
+  if (arguments[0] == "hybrid") {
+    // usage: cal load hybrid <obscal file> <pcmcal or fluxcal file>
+    try {
+
+      // load reference observation
+      Reference::To<Archive> obs_arch = Archive::load(arguments[1]);
+      Reference::To<ReferenceCalibrator> ref_cal;
+      ref_cal = new SingleAxisCalibrator(obs_arch);
+
+      // load model or fluxcal
+      Reference::To<Archive> mod_arch = Archive::load(arguments[2]);
+      if ( mod_arch->get<FluxCalibratorExtension>() ) {
+        // use SingleAxis+Flux model
+        flux_calibrator = new FluxCalibrator(mod_arch);
+        hybrid_calibrator = new HybridCalibrator;
+        hybrid_calibrator->set_reference_input(
+            flux_calibrator->get_CalibratorStokes());
+      }
+      else {
+        // use full reception model; NB const below sets reference input
+        hybrid_calibrator = new HybridCalibrator(mod_arch);
+      }
+      hybrid_calibrator->set_reference_observation(ref_cal);
+
+      return response (Good);
+
+    }
+    catch (Error& error) {
+      return response( Fail,
+          "Could not construct hybrid calibrator.\n"+error.get_message());
+    }
+  }
+        
+  string filename = arguments[0];
 
   try {
     // try to load the file as a database
@@ -166,7 +206,7 @@ string Pulsar::CalInterpreter::cal (const string& arg) try
 {
   Reference::To<PolnCalibrator> use_cal;
 
-  if (!calibrator && !database && !transformation)
+  if (!calibrator && !hybrid_calibrator && !database && !transformation)
     return response( Fail, "no database, calibrator or transformation loaded");
 
   if (transformation)
@@ -176,7 +216,11 @@ string Pulsar::CalInterpreter::cal (const string& arg) try
   }
   else
   {
-    if (calibrator)
+    if (hybrid_calibrator) {
+      std::cout << "here!" << std::endl;
+      use_cal = hybrid_calibrator;
+    }
+    else if (calibrator)
       use_cal = calibrator;
     else
       use_cal = database -> generatePolnCalibrator( get(), caltype );
