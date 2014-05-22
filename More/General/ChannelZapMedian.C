@@ -290,6 +290,8 @@ void zap (vector<bool>& mask, vector<float>& spectrum,
       if (mask[ichan])
       {
         variance -= spectrum[ichan]/total_chan;
+        variance *= total_chan/(total_chan-1);
+        total_chan--;
         zapped = true;
       }
     }
