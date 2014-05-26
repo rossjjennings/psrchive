@@ -11,7 +11,7 @@ EXTRA_DIST = psrhelp
 bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
 	psrover psrcull calavg pcmavg fix_single psrsplit distortion \
-	drifting_subpulses
+	drifting_subpulses 
 
 pam_SOURCES = pam.C
 
@@ -151,6 +151,18 @@ LDPLOT = $(top_builddir)/More/Plotting/libpsrplot.la $(LDADD) @PGPLOT_LIBS@
 else
 
 LDPLOT = $(LDADD)
+endif
+
+# ######################################################################
+#
+# HEALPix specific code
+#
+if HAVE_HEALPIX
+
+bin_PROGRAMS += psrpol
+
+psrpol_SOURCES = psrpol.C
+psrpol_LDADD = $(LDADD) @HEALPIX_LIBS@ @CFITSIO_LIBS@
 
 endif
 
@@ -163,5 +175,5 @@ LDADD = $(top_builddir)/More/libpsrmore.la \
 
 include $(top_srcdir)/config/Makefile.include
 
-AM_CPPFLAGS += @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @GSL_CFLAGS@ @PSRXML_CFLAGS@ @CULA_CFLAGS@
+AM_CPPFLAGS += @PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @GSL_CFLAGS@ @PSRXML_CFLAGS@ @CULA_CFLAGS@ @HEALPIX_CFLAGS@
 
