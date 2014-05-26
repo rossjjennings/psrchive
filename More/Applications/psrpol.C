@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2011 by Stefan Oslowski, Tim Dolley and Aidan Hotan
+ *   Copyright (C) 2014 by Stefan Oslowski
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -8,8 +8,6 @@
 /* pulsar polarisation - an application for polarisation studies that uses Hierarchical Equal Area isoLatitude Pixelization of a sphere
  * (HEALPIX) to represent the distributions of polarisation properties
  */
-
-// TODO writing more than 999 maps will fail, see finalize and piece of code inserted in there 
 
 #include "Pulsar/Application.h"
 #include "Pulsar/StandardOptions.h"
@@ -248,11 +246,7 @@ void psrpol::process ( Archive* archive )
   {
     if ( verbose )
       cerr << "psrpol::process looping through subints, currently " << isub << endl;
-    // retrieve the PolnProfile for 0th channel
-    //pprofile = archive->get_Integration ( isub )->new_PolnProfile( 0 );
-    //Q = pprofile->get_amps( 1 );
-    //U = pprofile->get_amps( 2 );
-    //V = pprofile->get_amps( 3 );
+    
     if ( !weight_by_pol_flux )
       I = archive->get_Profile( isub, 0, 0 )->get_amps ();
     profile = archive->get_Profile(isub, 1, 0 );
@@ -325,26 +319,6 @@ void psrpol::finalize ()
   for (unsigned imap = 0; imap < healpix_maps_bins.size (); ++imap )
   {
     fh.write_column( imap+1, healpix_maps[imap].Map() );
-    /*
-     * more code would be needed above, to address the sizing of colname, call to prepare_Healpix_fitsmap etc
-    // FITS supports only 999 columns
-    if ( (imap+1)%1000 == 0 )
-    {
-      warn << "psrpol::finalize more than 999 Healpix maps created, will produce additional output files" << endl;
-      fh.close ();
-      vector<string> sub_name = stringdecimate( out_name, "." );
-      out_name.clear();
-      for ( unsigned iword = 0; iword < sub_name.size() - 1; ++iword )
-      {
-       ss << sub_name[iword];
-       if ( iword != sub_name.size() - 2 )
-	 ss << ".";
-      }
-      ss << "_" << file_count << "." << sub_name[ sub_name.size() -1 ];
-      out_name = ss.str();
-      ss.str( "" );
-      fh.create( out_name );
-    }*/
   }
 
   if ( !bins_out_name.empty() )
