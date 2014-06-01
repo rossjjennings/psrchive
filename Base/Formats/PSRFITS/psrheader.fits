@@ -145,27 +145,6 @@ END
 #
 ###############################################################################
 #
-# Ephemeris Binary Table Extension
-#
-###############################################################################
-#
-XTENSION= BINTABLE             / ***** Pulsar ephemeris *****
-BITPIX  =                    8 / N/A 
-NAXIS   =                    2 / 2-dimensional binary table
-NAXIS1  =                    * / width of table in bytes
-NAXIS2  =                    * / number of rows in table
-PCOUNT  =                    0 / size of special data area
-GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    1 / Number of fields per row
-#
-EXTNAME = PSRPARAM             / Name of this binary table extension
-#
-TTYPE#  = PARAM                / Text file stored row by row
-TFORM#  = 128A                 / Allow 128 char per row
-END
-#
-###############################################################################
-#
 # Observation Description Binary Table Extension
 #
 ###############################################################################
@@ -182,6 +161,27 @@ TFIELDS =                    1 / Number of fields per row
 EXTNAME = OBSDESCR             / Name of this binary table extension
 #
 TTYPE#  = DESCR                / Text file stored row by row
+TFORM#  = 128A                 / Allow 128 char per row
+END
+#
+###############################################################################
+#
+# Ephemeris Binary Table Extension
+#
+###############################################################################
+#
+XTENSION= BINTABLE             / ***** Pulsar ephemeris *****
+BITPIX  =                    8 / N/A 
+NAXIS   =                    2 / 2-dimensional binary table
+NAXIS1  =                    * / width of table in bytes
+NAXIS2  =                    * / number of rows in table
+PCOUNT  =                    0 / size of special data area
+GCOUNT  =                    1 / one data group (required keyword)
+TFIELDS =                    1 / Number of fields per row
+#
+EXTNAME = PSRPARAM             / Name of this binary table extension
+#
+TTYPE#  = PARAM                / Text file stored row by row
 TFORM#  = 128A                 / Allow 128 char per row
 END
 #
