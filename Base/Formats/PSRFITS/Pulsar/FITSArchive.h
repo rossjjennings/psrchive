@@ -38,6 +38,7 @@ namespace Pulsar
   class ProfileColumn;
   class CoherentDedispersion;
   class SpectralKurtosis;
+  class ObsDescription;
 
   class Pointing;
   class AuxColdPlasmaMeasures;
@@ -143,9 +144,11 @@ namespace Pulsar
     //! Unload Pointing to the specified row of the subint table
     static void unload (fitsfile* fptr, const Pointing*, int row);
 
-    //! Unload Pointing to the specified row of the subint table
+    //! Unload AuxColdPlasmaMeausres to the specified row of the subint table
     static void unload (fitsfile* fptr, const AuxColdPlasmaMeasures*, int row);
 
+    //! Unload the observation description
+    static void unload (fitsfile* fptr, const ObsDescription*);
 
     //! Get the offs_sub value (only present in fits files)
     double get_offs_sub( unsigned int isub ) const;
@@ -251,6 +254,7 @@ namespace Pulsar
     void load_WidebandCorrelator (fitsfile*);
     void load_FITSSUBHdrExtension ( fitsfile * );
     void load_CoherentDedispersion (fitsfile*);
+    void load_ObsDescription (fitsfile*);
 
     void load_integration_state ( fitsfile * );
     void load_state ( fitsfile * );
