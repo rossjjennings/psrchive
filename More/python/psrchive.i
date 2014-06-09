@@ -24,6 +24,8 @@
 
 #include "Pulsar/Interpreter.h"
 
+#include "Pulsar/ProfileShiftFit.h"
+
 #ifdef HAVE_CFITSIO
 #include <fitsio.h>
 #endif
@@ -160,6 +162,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/ProfileAmps.h"
 %include "Pulsar/Profile.h"
 %include "Pulsar/Parameters.h"
+%include "Pulsar/ProfileShiftFit.h"
 %include "Angle.h"
 %include "sky_coord.h"
 %include "MJD.h"
