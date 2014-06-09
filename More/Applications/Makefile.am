@@ -11,7 +11,7 @@ EXTRA_DIST = psrhelp
 bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
 	psrover psrcull calavg pcmavg fix_single psrsplit distortion \
-	drifting_subpulses psr4th
+	drifting_subpulses dynamic_spectra psr4th
 
 pam_SOURCES = pam.C
 
@@ -65,6 +65,8 @@ mtm_SOURCES = mtm.C
 distortion_SOURCES = distortion.C
 
 drifting_subpulses_SOURCES = drifting_subpulses.C
+
+dynamic_spectra_SOURCES = dynamic_spectra.C
 
 sesdiv_SOURCES = sesdiv.C
 

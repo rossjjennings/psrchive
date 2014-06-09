@@ -230,6 +230,8 @@ void zap (vector<bool>& mask, vector<float>& spectrum,
     
   double variance = 0.0;
   unsigned total_chan = 0;
+  // number of channels when calculating variance
+  unsigned orig_total_chan = 0;
 
   unsigned nchan = spectrum.size();
 
@@ -251,7 +253,8 @@ void zap (vector<bool>& mask, vector<float>& spectrum,
     }
   }
 
-  variance /= total_chan;
+  variance /= (total_chan-1);
+  orig_total_chan = total_chan;
 
   if (Pulsar::Integration::verbose)
     cerr << "Pulsar::ChannelZapMedian::weight variance=" << variance << endl;
@@ -289,11 +292,12 @@ void zap (vector<bool>& mask, vector<float>& spectrum,
 
       if (mask[ichan])
       {
-        variance -= spectrum[ichan]/total_chan;
-        variance *= total_chan/(total_chan-1);
+        variance -= spectrum[ichan]/((double)orig_total_chan-1.);
         total_chan--;
         zapped = true;
       }
     }
+    variance *= ((double)orig_total_chan-1.)/((double)total_chan-1.);
+    orig_total_chan = total_chan;
   }
 }

@@ -13,7 +13,7 @@ using namespace std;
 
 void Pulsar::FITSArchive::load_ObsDescription (fitsfile* fptr) try
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "load_ObsDescription entered" << endl;
 
   Reference::To<ObsDescription> description = new ObsDescription;
@@ -24,6 +24,7 @@ void Pulsar::FITSArchive::load_ObsDescription (fitsfile* fptr) try
 }
 catch (Error& error)
 {
-  throw error += "FITSArchive::load_ObsDescription";
+  if (verbose >2 )
+    cerr << "FITSArchive::load_ObsDescription " << error.get_message() << endl;
 }
 
