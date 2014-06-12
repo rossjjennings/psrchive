@@ -4,7 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/DynamicSpectrumPlot.h"
+#include "Pulsar/TimeScale.h"
+#include "Pulsar/FrequencyScale.h"
+
 #include <pairutil.h>
 
 Pulsar::DynamicSpectrumPlot::Interface::Interface (
@@ -27,5 +31,8 @@ Pulsar::DynamicSpectrumPlot::Interface::Interface (
 
   import("cmap", pgplot::ColourMap::Interface(), 
       &DynamicSpectrumPlot::get_colour_map);
+
+  import ("x", TimeScale::Interface(), &DynamicSpectrumPlot::get_x_scale);
+// import ("y", FrequencyScale::Interface(), &DynamicSpectrumPlot::get_y_scale);
 
 }
