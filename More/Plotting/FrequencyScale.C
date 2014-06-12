@@ -35,7 +35,7 @@ void Pulsar::FrequencyScale::get_indeces (const Archive* data,
   PlotScale::get_indeces (data->get_nchan(), min, max);
 }
 
-std::string Pulsar::FrequencyScale::get_label ()
+std::string Pulsar::FrequencyScale::get_label () const
 {
   return "Frequency (MHz)";
 }

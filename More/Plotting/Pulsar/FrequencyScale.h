@@ -47,7 +47,7 @@ namespace Pulsar {
     void get_ordinates (const Archive*, std::vector<float>& x_axis) const;
 
     //! Get a description of the units
-    std::string get_label ();
+    std::string get_label () const;
 
     void set_reverse (bool flag=true) { reverse = flag; }
     bool get_reverse () const { return reverse; }
