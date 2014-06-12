@@ -177,7 +177,6 @@ std::istream& Pulsar::operator >> (std::istream& is, TimeScale::Units& units)
 }
 
 Pulsar::TimeScale::Interface::Interface (TimeScale* instance)
-
 {
   if (instance)
     set_instance (instance);
