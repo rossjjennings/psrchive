@@ -8,6 +8,7 @@
 #include "Pulsar/FrequencyScale.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "pairutil.h"
 
 #include <iostream>
 using namespace std;
@@ -19,6 +20,9 @@ Pulsar::FrequencyScale::FrequencyScale ()
 
 void Pulsar::FrequencyScale::init (const Archive* data)
 {
+  // PlotScale::num_indeces
+  num_indeces = data->get_nchan();
+
   double freq = data->get_centre_frequency();
   double bw = data->get_bandwidth();
 
@@ -58,7 +62,9 @@ Pulsar::FrequencyScale::Interface::Interface (FrequencyScale* instance)
   if (instance)
     set_instance (instance);
 
-  import( PlotScale::Interface() );
+  add( &PlotScale::get_index_range,
+       &PlotScale::set_index_range,
+       "chan", "Frequency channel index range" );
 
   add( &FrequencyScale::get_reverse,
        &FrequencyScale::set_reverse,

@@ -11,6 +11,7 @@
 
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Telescope.h"
+#include "pairutil.h"
 
 #include <iostream>
 using namespace std;
@@ -27,7 +28,10 @@ void Pulsar::TimeScale::init (const Archive* data)
     return;
 
   unsigned nsubint = data->get_nsubint();
- 
+
+  // PlotScale::num_indeces
+  num_indeces = nsubint;
+
   const IntegrationOrder* order = data->get<IntegrationOrder>();
   if (order)
   {
@@ -122,7 +126,6 @@ void Pulsar::TimeScale::get_indeces (const Archive* data,
 
 std::string Pulsar::TimeScale::get_label () const
 {
-  cerr << "Pulsar::TimeScale::get_label label='" << label << "'" << endl;
   return label;
 }
 
@@ -180,6 +183,10 @@ Pulsar::TimeScale::Interface::Interface (TimeScale* instance)
 {
   if (instance)
     set_instance (instance);
+
+  add( &PlotScale::get_index_range,
+       &PlotScale::set_index_range,
+       "subint", "Sub-integration index range" );
 
   add( &TimeScale::get_units,
        &TimeScale::set_units,
