@@ -44,6 +44,9 @@ namespace Pulsar {
     //! Expand as necessary to include another PlotScale
     void include (PlotScale* other);
 
+    //! Get a description of the units
+    virtual std::string get_label () const { return ""; }
+
     //! Set the minimum and maximum value in the data
     void set_minmax (float min, float max);
 
