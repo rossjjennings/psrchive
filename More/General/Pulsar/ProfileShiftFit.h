@@ -102,6 +102,9 @@ namespace Pulsar
       noise, sigma, both equal unity. */
     double get_effective_duty_cycle () const;
 
+    //! Determine, then apply a shift a scale to data profile
+    void apply_scale_and_shift(Profile *p);
+
     //! Current MCMC accept stats
     int mcmc_trials;
     int mcmc_accept;
