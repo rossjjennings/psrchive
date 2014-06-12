@@ -15,6 +15,7 @@ using namespace std;
 
 std::pair<float,float> unset_range_norm (0.0, 1.0);
 std::pair<float,float> unset_world (0.0, 0.0);
+std::pair<unsigned,unsigned> unset_indeces (0,0);
 
 Pulsar::PlotScale::PlotScale () :
   world (unset_world),
@@ -25,6 +26,7 @@ Pulsar::PlotScale::PlotScale () :
   minval = 0.0;
   maxval = 1.0;
   minmaxvalset = false;
+  num_indeces = 0;
 }
 
 void Pulsar::PlotScale::init (const Archive*)
@@ -74,6 +76,18 @@ std::pair<float,float> Pulsar::PlotScale::get_world_external () const
   return world_external;
 }
 
+//! Set the index range to be plotted
+void Pulsar::PlotScale::set_index_range (const std::pair<unsigned,unsigned>& i)
+{
+  index_range = i;
+}
+
+//! Get the index range to be plotted
+std::pair<unsigned,unsigned> Pulsar::PlotScale::get_index_range () const
+{
+  return index_range;
+}
+
 std::pair<float,float>
 Pulsar::PlotScale::viewport_to_world (const std::pair<float,float>& viewport)
 {
@@ -93,14 +107,23 @@ double Pulsar::PlotScale::viewport_to_world (double viewport)
 
 void Pulsar::PlotScale::get_range (float& min, float& max) const
 {
-  get_minmax (min, max);
-
   if (world != unset_world)
   {
     min = world.first;
     max = world.second;
+    return;
   }
 
+  get_minmax (min, max);
+
+  if (num_indeces > 1 && index_range != unset_indeces)
+  {
+    double span = max - min;
+    max = min + span * (double(index_range.second)/double(num_indeces-1));
+    min = min + span * (double(index_range.first)/double(num_indeces-1));
+    return;
+  }
+  
   if (range_norm != unset_range_norm)
     stretch (range_norm, min, max);
 
@@ -110,7 +133,6 @@ void Pulsar::PlotScale::get_range (float& min, float& max) const
     min -= space;
     max += space;
   }
-
 }
 
 //! Return min and max scaled according to zoom attributes
@@ -129,6 +151,25 @@ void Pulsar::PlotScale::get_indeces (unsigned n,
 				     unsigned& imin, unsigned& imax,
 				     bool cyclic) const
 {
+  if (num_indeces == n && index_range != unset_indeces)
+  {
+    imin = index_range.first;
+    imax = index_range.second;
+
+    if (!cyclic)
+    {
+      if (imin > n)
+	imin = n;
+
+      if (imax > n)
+	imax = n;
+
+      if (imin > imax)
+      std::swap (imin, imax);
+    }
+    return;
+  }
+ 
   float min = 0.0;
   float max = 1.0;
 

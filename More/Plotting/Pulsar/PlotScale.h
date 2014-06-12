@@ -94,6 +94,13 @@ namespace Pulsar {
     //! Get the world coordinate range printed on the axis
     std::pair<float,float> get_world_external () const;
 
+    //! Set the index range to be plotted
+    void set_index_range ( const std::pair<unsigned,unsigned>& index );
+    //! Get the index range to be plotted
+    std::pair<unsigned,unsigned> get_index_range () const;
+
+    unsigned get_num_indeces () const { return num_indeces; }
+
     std::pair<float,float> viewport_to_world (const std::pair<float,float>&);
     double viewport_to_world (const double);
 
@@ -105,8 +112,10 @@ namespace Pulsar {
 
     std::pair<float,float> world_external;
 
-    float buf_norm;
+    std::pair<unsigned, unsigned> index_range;
+    unsigned num_indeces;
 
+    float buf_norm;
     float minval;
     float maxval;
     bool minmaxvalset;
