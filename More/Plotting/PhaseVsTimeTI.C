@@ -1,11 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2006 by Willem van Straten
+ *   Copyright (C) 2006 - 2014 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PhaseVsTime.h"
 #include "Pulsar/PhaseVsPlot.h"
+#include "Pulsar/TimeScale.h"
 
 Pulsar::PhaseVsTime::Interface::Interface (PhaseVsTime* instance)
 {
@@ -20,13 +22,8 @@ Pulsar::PhaseVsTime::Interface::Interface (PhaseVsTime* instance)
        &PhaseVsTime::set_pol,
        "pol", "Polarization to plot" );
 
-  add( &PhaseVsTime::get_use_ha,
-       &PhaseVsTime::set_use_ha,
-       "use_ha", "Plot versus Hour Angle" );
+  import ( "y", TimeScale::Interface(), &PhaseVsTime::get_y_scale );
 
   // import the interface of the base class
   import( PhaseVsPlot::Interface() );
-
-
-
 }
