@@ -47,9 +47,6 @@ namespace Pulsar {
     //! Remove the baseline from each sub-integration and channel independently
     void preprocess (Archive*);
 
-    //! Set the minimum and maximum values on the y-axis
-    void prepare (const Archive* data);
-
     //! Draw in the current viewport
     void draw (const Archive*);
 
@@ -76,14 +73,12 @@ namespace Pulsar {
    
     //! Set the first and last row to plot
     void set_rows( const std::pair<unsigned,unsigned>& rows );
-    //! Get the crop value
-    std::pair<unsigned,unsigned> get_rows() const { return rows; }
+    //! Get the first and last row to plot
+    std::pair<unsigned,unsigned> get_rows() const;
 
   protected:
 
     PlotScale z_scale;
-
-    std::pair<unsigned, unsigned> rows;
 
     pgplot::ColourMap colour_map;
 
@@ -95,15 +90,6 @@ namespace Pulsar {
     
     //! The percentage of max to crop at
     float crop_value;
-
-    //! The number of rows in the plot
-    unsigned nrow;
-
-    //! The minimum and (half interval) maximum row to be plotted
-    unsigned min_row, max_row;
-
-    //! Set when set_rows is accepted
-    bool rows_set;
 
   };
 

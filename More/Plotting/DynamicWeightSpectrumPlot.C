@@ -29,14 +29,14 @@ TextInterface::Parser* Pulsar::DynamicWeightSpectrumPlot::get_interface ()
 void Pulsar::DynamicWeightSpectrumPlot::get_plot_array( const Archive *data, 
     float *array )
 {
+  std::pair<unsigned,unsigned> srange = get_subint_range (data);
+  std::pair<unsigned,unsigned> crange = get_chan_range (data);
 
-  int nsub = srange.second - srange.first + 1;
-  int nchan = crange.second - crange.first + 1;
   int ii = 0;
 
-  for( int ichan = crange.first; ichan <= crange.second; ichan++) 
+  for( int ichan = crange.first; ichan < crange.second; ichan++) 
   {
-    for( int isub = srange.first; isub <= srange.second; isub++ )
+    for( int isub = srange.first; isub < srange.second; isub++ )
     {
       Reference::To<const Profile> prof = 
         data->get_Profile ( isub, pol, ichan);

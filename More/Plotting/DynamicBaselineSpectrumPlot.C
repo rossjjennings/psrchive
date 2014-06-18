@@ -51,8 +51,9 @@ void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data,
     data_copy->dedisperse();
   }
 
-  int nsub = srange.second - srange.first + 1;
-  int nchan = crange.second - crange.first + 1;
+  std::pair<unsigned,unsigned> srange = get_subint_range (data);
+  std::pair<unsigned,unsigned> crange = get_chan_range (data);
+
   int ii = 0;
 
   // WvS - set up to use the profile statistics interpreter if needed  
@@ -87,9 +88,9 @@ void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data,
     window -> set_all (1.0);
   }
 
-  for (int ichan = crange.first; ichan <= crange.second; ichan++) 
+  for (int ichan = crange.first; ichan < crange.second; ichan++) 
   {
-    for (int isub = srange.first; isub <= srange.second; isub++ )
+    for (int isub = srange.first; isub < srange.second; isub++ )
     {
       Reference::To<const Profile> prof = 
 	data_copy->get_Profile(isub, pol, ichan);
@@ -103,7 +104,7 @@ void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data,
 	  stats->set_Profile (prof);
 	  string text = process( parser, expression );
 	  value = fromstring<float>( text );
-	  cerr << ichan << " " << isub << " " << text << " " << value << endl;
+	  //cerr << ichan << " " << isub << " " << text << " " << value << endl;
 	}
 	else
 	{

@@ -23,6 +23,13 @@
 #include "Pulsar/IntegrationBarycentre.h"
 
 #include "Pulsar/Interpreter.h"
+
+#include "Pulsar/ProfileShiftFit.h"
+
+#ifdef HAVE_CFITSIO
+#include <fitsio.h>
+#endif
+
 %}
 
 // Language independent exception handler
@@ -154,9 +161,43 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/Integration.h"
 %include "Pulsar/ProfileAmps.h"
 %include "Pulsar/Profile.h"
+%include "Pulsar/Parameters.h"
+%include "Pulsar/ProfileShiftFit.h"
 %include "Angle.h"
 %include "sky_coord.h"
 %include "MJD.h"
+
+// Some useful free functions 
+
+%inline %{
+
+#ifdef HAVE_CFITSIO
+// Least I/O intensive way to grab observation time
+double get_tobs(const char* filename) {
+    int status=0,colnum=0;
+    long numrows=0;
+    double tobs=0;
+    fitsfile* fp;
+    fits_open_file(&fp, filename, READONLY, &status);
+    fits_movnam_hdu(fp, BINARY_TBL, "SUBINT", 0, &status);
+    fits_get_colnum (fp, CASEINSEN, "TSUBINT", &colnum, &status);
+    fits_get_num_rows(fp, &numrows, &status);
+    double tsubs[numrows];
+    fits_read_col(fp, TDOUBLE, colnum, 1, 1, numrows, NULL, tsubs, NULL, &status);
+    if (status != 0) {
+        fits_close_file(fp, &status);
+        return 0.;
+    }
+    fits_close_file(fp, &status);
+
+    while (numrows >= 0) {
+        tobs += tsubs[--numrows];
+    }
+    return tobs;
+}
+#endif
+%}
+
 
 // Python-specific extensions to the classes:
 
@@ -235,6 +276,14 @@ void pointer_tracker_remove(Reference::Able *ptr) {
     void rotate_time(double time) {
         self->expert()->rotate(time);
     }
+
+    void _rotate_phase_swig(double phase) {
+        self->expert()->rotate_phase(phase);
+    }
+
+    %pythoncode %{
+def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
+%}
 
     void combine(Pulsar::Integration* subint) {
       self->expert()->combine(subint);

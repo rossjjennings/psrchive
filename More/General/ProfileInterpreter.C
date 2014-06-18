@@ -36,7 +36,12 @@ Pulsar::ProfileInterpreter::ProfileInterpreter ()
     ( &ProfileInterpreter::baseline,
       "baseline", "remove the profile baseline",
       "usage: baseline \n" );
-
+  /*
+  add_command 
+    ( &ProfileInterpreter::scale,
+      "scale", "scale profile by a mathematical expression",
+      "usage: scale <exp>\n" );
+  */
   add_command 
     ( &ProfileInterpreter::mean,
       "mean", "form the mean smoothed profile",

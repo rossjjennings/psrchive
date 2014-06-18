@@ -147,10 +147,10 @@ void psrover::add_options ( CommandLine::Menu& menu)
   arg = menu.add( seed, 's',"seed");
   arg->set_help( "set the seed used for generating random numbers");
 
-  arg = menu.add( use_mises, "vM", "use van Mises distribution");
+  arg = menu.add( use_mises, "vM");
   arg->set_help( "Force psrover to use van Mises distribution, instead of Gaussian function");
 
-  arg = menu.add( draw_amplitude, "fr", "random amplitude");
+  arg = menu.add( draw_amplitude, "fr");
   arg->set_long_help( "draw normally-distributed amplitude with standard deviation specified with the -f switch");
 
   arg = menu.add( this, &psrover::set_fwhms,'f',"FWHMs");

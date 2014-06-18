@@ -39,9 +39,6 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
   line_colour = -1;
   
   crop_value = 1.0f;
-
-  min_row = max_row = 0;
-  rows_set = false;
 }
 
 TextInterface::Parser* Pulsar::PhaseVsPlot::get_interface ()
@@ -65,38 +62,12 @@ void Pulsar::PhaseVsPlot::set_style (const string& s)
 
 void Pulsar::PhaseVsPlot::set_rows( const std::pair<unsigned,unsigned>& r )
 {
-  rows = r;
-  rows_set = true;
+  get_frame()->get_y_scale()->set_index_range (r);
 }
 
-void Pulsar::PhaseVsPlot::prepare (const Archive* data)
+std::pair<unsigned,unsigned> Pulsar::PhaseVsPlot::get_rows() const
 {
-  nrow = get_nrow (data);
-  min_row = max_row = 0;
-
-  if (!rows_set)
-    return;
-
-  if (rows.second >= nrow)
-    throw Error (InvalidParam, "Pulsar::PhaseVsPlot::prepare",
-		 "end row=%u >= nrow=%u", rows.second, nrow);
-
-  if (rows.first > rows.second)
-    throw Error (InvalidParam, "Pulsar::PhaseVsPlot::prepare",
-		 "start row=%u > end row=%u", rows.first, rows.second);
-
-  min_row = rows.first;
-  max_row = rows.second + 1;
-
-  if (verbose) {
-    cerr << "Pulsar::PhaseVsPlot::prepare row"
-      " min=" << min_row << " max=" << max_row << endl;
-  }
-
-  float y_min = float(min_row) / float(nrow);
-  float y_max = float(max_row) / float(nrow);
-
-  get_frame()->get_y_scale()->set_range_norm (y_min, y_max);
+  return const_cast<PlotFrame*>(get_frame())->get_y_scale()->get_index_range();
 }
 
 //! Derived classes must draw in the current viewport
@@ -122,14 +93,13 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   unsigned min_bin, max_bin;
   get_frame()->get_x_scale()->get_indeces (nbin, min_bin, max_bin, cyclic);
 
-  if (!rows_set)
-    get_frame()->get_y_scale()->get_indeces (nrow, min_row, max_row);
+  unsigned nrow = get_frame()->get_y_scale()->get_num_indeces ();
+
+  unsigned min_row, max_row;
+  get_frame()->get_y_scale()->get_indeces (nrow, min_row, max_row);
 
   float min = FLT_MAX;
   float max = -FLT_MAX;
-
-  unsigned eff_min_row = std::min (min_row, max_row);
-  unsigned eff_max_row = std::max (min_row, max_row);
 
   vector<float> plotarray (nbin * nrow);
   for (unsigned irow = 0; irow < nrow; irow++)
@@ -138,7 +108,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     for (unsigned ibin=0; ibin<nbin; ibin++)
       plotarray[irow*nbin + ibin] = amps[ibin];
 
-    if (irow < eff_min_row || irow >= eff_max_row)
+    if (irow < min_row || irow >= max_row)
       continue;
 
     cyclic_minmax (amps, min_bin, max_bin, min, max, true );
@@ -147,7 +117,6 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   float x_res = (x_max-x_min)/nbin;
   float y_res = (y_max-y_min)/nrow;
   
-
   /* Added by DS, we crop the data range with crop_value being a
      percentage of max. However, if min is negative and greater in 
      magnitude then the new max, then we set min to be -max in order
@@ -210,7 +179,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     vector<bool> all_zeroes;
     all_zeroes.resize( max_row );
 
-    for ( unsigned irow = eff_min_row; irow < eff_max_row; irow ++ )
+    for ( unsigned irow = min_row; irow < max_row; irow ++ )
     {
       all_zeroes[irow] = true;
       for( unsigned ibin=0; ibin < nbin; ibin ++ )
@@ -230,7 +199,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
       for( unsigned b = 0; b < nbin; b ++ )
         xaxis_adjusted[b] = xaxis[b] + xoff;
 
-      for ( unsigned irow = eff_min_row; irow < eff_max_row; irow++ )
+      for ( unsigned irow = min_row; irow < max_row; irow++ )
       {
         if (!all_zeroes[irow])
           cpgline (nbin, &xaxis_adjusted[0], &plotarray[irow*nbin]);

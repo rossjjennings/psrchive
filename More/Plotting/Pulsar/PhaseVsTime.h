@@ -15,6 +15,7 @@
 #define __Pulsar_PhaseVsTime_h
 
 #include "Pulsar/PhaseVsPlot.h"
+#include "Pulsar/TimeScale.h"
 #include "Pulsar/Index.h"
 
 namespace Pulsar {
@@ -36,17 +37,14 @@ namespace Pulsar {
       Interface (PhaseVsTime* = 0);
     };
 
-    //! Set the minimum and maximum values on the y-axis
-    void prepare (const Archive* data);
-
-    //! Get the default label for the y axis
-    std::string get_ylabel (const Archive*);
-
     //! Derived classes must provide the number of rows
     unsigned get_nrow (const Archive* data);
 
     //! Derived classes must provide the Profile for the specified row
     const Profile* get_Profile (const Archive* data, unsigned row);
+
+    //! Return pointer to y scale
+    TimeScale* get_y_scale () { return y_scale; }
 
     //! Set the frequency channel to plot
     void set_chan (const Index& _ichan) { ichan = _ichan; }
@@ -56,16 +54,11 @@ namespace Pulsar {
     void set_pol (const Index& _ipol) { ipol = _ipol; }
     Index get_pol () const { return ipol; }
 
-    //! Set use hour angle flag
-    void set_use_ha(bool flag=true) { use_hour_angle = flag; }
-    bool get_use_ha() const { return use_hour_angle; }
-
   protected:
 
-    std::string time_string;
     Index ichan;
     Index ipol;
-    bool use_hour_angle;
+    Reference::To<TimeScale> y_scale;
 
   };
 

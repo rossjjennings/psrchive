@@ -58,6 +58,11 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr) try
     cerr << "FITSArchive::load_PolnCalibratorExtension "
             "CAL_MTHD='" << cal_mthd << "'" << endl;
 
+  if (cal_mthd == "" ) {
+    // catch a few edge cases with unset CAL_MTHD header entry
+    cal_mthd = unknown;
+  }
+
   if (cal_mthd == unknown)
   {
     if (verbose == 3)

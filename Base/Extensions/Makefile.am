@@ -32,6 +32,7 @@ nobase_include_HEADERS = \
         Pulsar/ITRFExtension.h \
         Pulsar/Nancay.h \
         Pulsar/ObsExtension.h \
+	Pulsar/ObsDescription.h \
         Pulsar/Parkes.h \
         Pulsar/Passband.h \
         Pulsar/PeriastronOrder.h \
@@ -88,6 +89,7 @@ libExtensions_la_SOURCES = \
         IntegrationOrder.C \
         ITRFExtension.C \
         Nancay.C \
+	ObsDescription.C \
         ObsExtension.C \
 	ObsExtensionTI.C \
         Parkes.C \

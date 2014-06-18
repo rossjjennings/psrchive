@@ -1,12 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002-2011 by Willem van Straten
+ *   Copyright (C) 2002-2014 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Interpreter.h"
+#include "Pulsar/Archive.h"
 
 #include "Pulsar/Application.h"
 #include "Pulsar/UnloadOptions.h"
@@ -41,6 +42,12 @@ protected:
 
   //! Add command line options
   void add_options (CommandLine::Menu&);
+
+  //! The result of the process method
+  Reference::To<Pulsar::Archive> processed;
+
+  //! Return pointer to result of process method
+  Pulsar::Archive* result () { return processed; }
 
   //! The interpreter used to parse commands
   Reference::To<Pulsar::Interpreter> interpreter;
@@ -125,6 +132,7 @@ void psrsh::process (Pulsar::Archive* archive)
 {
   interpreter->set( archive );
   interpreter->script( script_lines );
+  processed = interpreter->get ();
 }
 
 void psrsh::interpreter_help (const string& cmd)

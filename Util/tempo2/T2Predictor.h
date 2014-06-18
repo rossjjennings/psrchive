@@ -17,7 +17,7 @@
 #include "Pulsar/Predictor.h"
 
 // From the TEMPO2 distribution
-#include "tempo2pred.h"
+#include <tempo2pred.h>
 
 namespace Tempo2 {
 
