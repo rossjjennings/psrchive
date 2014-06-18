@@ -114,6 +114,7 @@ namespace Pulsar {
     //! Get the Telescope zenith angle at subint centre
     Angle get_telescope_zenith () const;
 
+	 std::string get_short_name () const { return "point"; }
 
   protected:
 
