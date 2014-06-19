@@ -14,6 +14,7 @@ using namespace std;
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
+#include "Pulsar/FourthMoments.h"
 
 #include "Matrix.h"
 #include "Stokes.h"
@@ -37,9 +38,24 @@ public:
 protected:
 
   //! Array of 4x4 fourth moments - one for each pulse phase bin
-  std::vector< Matrix<4,4,double> > stokes_squared;
-  std::vector< Stokes<double> > stokes;
-  uint64_t count;
+  class result
+  {
+  public:
+    std::vector< Matrix<4,4,double> > stokes_squared;
+    std::vector< Stokes<double> > stokes;
+    uint64_t count;
+
+    //! Resize arrays and initialize to zero
+    void resize (unsigned nbin);
+
+    Matrix<4,4,double> get_covariance (unsigned ibin);
+    Stokes<double> get_mean (unsigned ibin);
+  };
+
+  //! Array of results - one for each frequency channel
+  std::vector<result> results;
+
+  Reference::To<Pulsar::Archive> output;
 
   //! Add command line options
   void add_options (CommandLine::Menu&);
@@ -106,72 +122,119 @@ void psr4th::add_options (CommandLine::Menu& menu)
 void psr4th::process (Pulsar::Archive* archive)
 {
   unsigned nsub = archive->get_nsubint();
-  unsigned npol = archive->get_npol();
   unsigned nbin = archive->get_nbin();
+  unsigned nchan = archive->get_nchan();
 
-  if (npol != 4)
-    throw Error (InvalidParam, "psr4th::process",
-		 "The input data must have npol == 4 (i.e. full poln)");
-
-  if (stokes.size() == 0)
-    {
-      // first file - resize results arrays and init to zero
-      stokes.resize (nbin);
-      stokes_squared.resize (nbin);
-
-      for (unsigned ibin=0; ibin < nbin; ibin++)
-	{
-	  stokes[ibin] = 0.0;
-	  stokes_squared[ibin] = 0.0;
-	}
-
-      count = 0;
-    }
-  else if (stokes.size() != nbin)
-    throw Error (InvalidParam, "psr4th::process",
-		 "The input data have nbin = %u; should have nbin = %u",
-		 nbin, stokes.size());
-
-  archive->fscrunch();
   archive->convert_state( Signal::Stokes );
 
-  unsigned ichan = 0;
+  if (!output)
+  {
+    string output_format = "PSRFITS";
+    output = Pulsar::Archive::new_Archive (output_format);  
+    output->copy (*archive);
+    output->resize(1);
+
+    results.resize (nchan);
+    for (unsigned ichan = 0; ichan < nchan; ichan++)
+      results[ichan].resize (nbin);
+  }
+
+  if (output->get_nchan() != nchan)
+    throw Error (InvalidParam, "psr4th::process",
+		 "archive nchan = %u != required nchan = %u",
+		 nchan, output->get_nchan());
+
+  if (output->get_nbin() != nbin)
+    throw Error (InvalidParam, "psr4th::process",
+		 "archive nbin = %u != required nbin = %u",
+		 nbin, output->get_nbin());
 
   for (unsigned isub=0; isub < nsub; isub++)
   {
-    Pulsar::Integration* subint = archive->get_Integration (isub);
-    Pulsar::PolnProfile* profile = subint->new_PolnProfile (ichan);
-
-    for (unsigned ibin=0; ibin < nbin; ibin++)
+    for (unsigned ichan=0; ichan < nchan; ichan++)
     {
-      Stokes<double> S = profile->get_Stokes (ibin);
+      Reference::To<Pulsar::Integration> subint = archive->get_Integration (isub);
+      Reference::To<Pulsar::PolnProfile> profile = subint->new_PolnProfile (ichan);
 
-      stokes[ibin] += S;
-      stokes_squared[ibin] += outer(S,S);
+      for (unsigned ibin=0; ibin < nbin; ibin++)
+      {
+	Stokes<double> S = profile->get_Stokes (ibin);
+
+	results[ichan].stokes[ibin] += S;
+	results[ichan].stokes_squared[ibin] += outer(S,S);
+      }
+
+      results[ichan].count ++;
     }
-
-    count ++;
   }
 }
 
 void psr4th::finalize()
 {
-  unsigned nbin = stokes.size();
+  unsigned nbin = output->get_nbin();
+  unsigned nchan = output->get_nchan();
+  unsigned nmoment = 10;
 
-  for (unsigned ibin = 0; ibin < nbin ; ibin ++)
+  for (unsigned ichan=0; ichan < nchan; ichan++)
   {
-    stokes_squared [ibin] /= count;
-    stokes [ibin] /= count;
+    Pulsar::Integration* subint = output->get_Integration (0);
+    Pulsar::PolnProfile* profile = subint->new_PolnProfile (ichan);
 
-    Matrix<4,4,double> covar = stokes_squared [ibin] 
-      - outer(stokes[ibin], stokes[ibin]);
+    Reference::To<Pulsar::MoreProfiles> more = new Pulsar::FourthMoments;
+    more->resize( nmoment, nbin );
 
-    cout << ibin << " ";
-    for (unsigned i=0; i<4; i++)
-      for (unsigned j=i; j<4; j++)
-	cout << covar[i][j] << " ";
-    cout << endl;
+    subint->get_Profile(0,ichan)->add_extension(more);
+
+    for (unsigned ibin = 0; ibin < nbin ; ibin ++)
+    {
+      Matrix<4,4,double> covar = results[ichan].get_covariance (ibin);
+      Stokes<double> mean = results[ichan].get_mean (ibin);
+
+      unsigned index=0;
+      for (unsigned i=0; i<4; i++)
+      {
+	profile->get_Profile(i)->get_amps()[ibin] = mean[i];
+	for (unsigned j=i; j<4; j++)
+	{
+	  more->get_Profile(index)->get_amps()[ibin] = covar[i][j];
+	  index ++;
+	}
+      }
+    }
   }
+
+  output->unload ("psr4th.ar");
+}
+
+void psr4th::result::resize (unsigned nbin)
+{
+  stokes.resize (nbin);
+  stokes_squared.resize (nbin);
+
+  for (unsigned ibin=0; ibin < nbin; ibin++)
+  {
+    stokes[ibin] = 0.0;
+    stokes_squared[ibin] = 0.0;
+  }
+  
+  count = 0;
+}
+
+Matrix<4,4,double> psr4th::result::get_covariance (unsigned ibin)
+{
+  Matrix<4,4,double> meansq = stokes_squared [ibin];
+  meansq /= count;
+
+  Stokes<double> mean = get_mean(ibin);
+
+  return meansq - outer(mean,mean);
+}
+
+Stokes<double> psr4th::result::get_mean (unsigned ibin)
+{
+  Stokes<double> mean = stokes [ibin];
+  mean /= count;
+  return mean;
 }
 
 /*!
