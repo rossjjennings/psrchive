@@ -118,6 +118,8 @@ void usage ()
     "Fourier method search options: \n"
     "  -m min,max,steps  Specify the bounds and number of steps \n"
     "  -t                Use the default bounds and resolution \n"
+    "  -a radians        Set RM step size according to delta-Psi across band \n"
+    "  -A radians        Set maximum RM according to delta-Psi across channel \n"
     "  -i nchannels      Subdivide the band (fscrunch-x2) until \"nchannels\" channels are left (incorporates systematics) \n"
     "  -j ntimes         Subdivide the pulse profile (bscrunch-x2) ntimes (incorporates systematics) \n"
     "  -u max            Set the upper bound on the default maximum RM \n"
@@ -154,7 +156,9 @@ static bool auto_maxmthd = false;
 static float auto_maxrm_dm = 0.0;
 static float auto_maxrm = 1500.0;
 static float auto_minrm = 0.0;
+
 static float auto_step_rad = 0.0;
+static float auto_max_rad = 1.0;
 
 static unsigned auto_minsteps = 10;
 static float refine_threshold = 0;
@@ -219,12 +223,21 @@ int main (int argc, char** argv)
   // estimate the RM using MTM
   Reference::To<Pulsar::Archive> mtm_std;
 
-  const char* args = "b:B:DeF:i:j:hJK:Lm:M:p:PrR:S:T:tu:U:vVw:W:Yz:";
+  const char* args = "a:A:b:B:DeF:i:j:hJK:Lm:M:p:PrR:S:T:tu:U:vVw:W:Yz:";
 
   int gotc = 0;
 
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
+
+    case 'a':
+      auto_step_rad = atof (optarg);
+      break;
+
+    case 'A':
+      auto_max_rad = atof (optarg);
+      auto_maxrm = 0.0;
+      break;
 
     case 'b':
       switch (optarg[0])
@@ -1012,67 +1025,71 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
 		   Reference::To<Pulsar::Archive> data)
 {
   if (auto_maxmthd)
-    {
-      // compute the maximum (and minimum) measurable rotation measure ...
+  {
+    // compute the maximum (and minimum) measurable rotation measure ...
 
-      // frequency in Hz
-      double nu = data->get_centre_frequency () * 1e6;
-      // wavelength in metres
-      double lambda = Pulsar::speed_of_light / nu;
-      // channel bandwidth in Hz
-      double dnu = fabs(data->get_bandwidth()) * 1e6 / data->get_nchan();
+    // centre frequency in Hz
+    double nu = data->get_centre_frequency () * 1e6;
+    // bandwidth in Hz
+    double bw = fabs(data->get_bandwidth()) * 1e6;
+    // wavelength in metres
+    double lambda = Pulsar::speed_of_light / nu;
+    // channel bandwidth in Hz
+    double dnu = bw / data->get_nchan();
 
-      double RM_max = 0.5 / (lambda*lambda) * nu / dnu;
+    double RM_max = auto_max_rad * 0.5 / (lambda*lambda) * nu / dnu;
 
-      rmsteps = 2 * data->get_nchan();
+    rmsteps = 2 * data->get_nchan();
+    double step_size = 2 * RM_max / rmsteps;
 
-      double step_size = 2 * RM_max / rmsteps;
-
-      cerr << "rmfit: default auto maximum RM=" << RM_max << " steps=" << rmsteps
+    cerr << "rmfit: default auto maximum RM=" << RM_max << " steps=" << rmsteps
 	   << " (step size=" << step_size << ")" << endl;
 
-      if (auto_maxrm_dm > 0) {
-	double dm = data->get_dispersion_measure();
-	float dm_auto_maxrm = auto_maxrm_dm * dm;
+    if (auto_maxrm_dm > 0)
+    {
+      double dm = data->get_dispersion_measure();
+      float dm_auto_maxrm = auto_maxrm_dm * dm;
 	cerr << "rmfit: maximum RM = (" << auto_maxrm_dm << " * DM=" << dm
 	     << ") = " << dm_auto_maxrm << endl;
 	auto_maxrm = std::min (auto_maxrm, dm_auto_maxrm);
-      }
+    }
 
-      bool override = false;
+    bool override = false;
 
-      if (auto_maxrm > 0 && RM_max > auto_maxrm) {
-	cerr << "rmfit: default auto maximum RM over limit = " << auto_maxrm 
-	     << endl;
-	RM_max = auto_maxrm;
-	override = true; 
-      }
+    if (auto_maxrm > 0 && RM_max > auto_maxrm)
+    {
+      cerr << "rmfit: default auto maximum RM over limit = " << auto_maxrm 
+	   << endl;
+      RM_max = auto_maxrm;
+      override = true; 
+    }
 
-      if (auto_minrm > 0 && RM_max < auto_minrm) {
-	cerr << "rmfit: default auto maximum RM under limit = " << auto_minrm 
+    if (auto_minrm > 0 && RM_max < auto_minrm)
+    {
+      cerr << "rmfit: default auto maximum RM under limit = " << auto_minrm 
 	     << endl;
 	RM_max = auto_minrm;
 	override = true;
-      }
+    }
 
-      if (auto_step_rad > 0)
-	{
-	  double centre_0 = nu - data->get_nchan() * dnu;
-	  double lambda_0 = Pulsar::speed_of_light / centre_0;
+    if (auto_step_rad > 0)
+    {
+      double centre_0 = nu - 0.5 * bw;
+      double lambda_0 = Pulsar::speed_of_light / centre_0;
 
-	  double centre_1 = nu + data->get_nchan() * dnu;
-	  double lambda_1 = Pulsar::speed_of_light / centre_1;
+      double centre_1 = nu + 0.5 * bw;
+      double lambda_1 = Pulsar::speed_of_light / centre_1;
 
-	  // cerr << "lambda_0=" << lambda_0 << " lambda_1=" << lambda_1 << endl;
+      // cerr << "lambda_0=" << lambda_0 << " lambda_1=" << lambda_1 << endl;
 
-	  step_size = auto_step_rad / (lambda_0*lambda_0 - lambda_1*lambda_1);
+      step_size = auto_step_rad / (lambda_0*lambda_0 - lambda_1*lambda_1);
 
-	  cerr << "rmfit: setting step size = " << step_size 
-	       << " (" << auto_step_rad << " radians between two halves of band)"
-	       << endl;
+      cerr << "rmfit: setting step size = " << step_size 
+           << " (" << auto_step_rad << " radians between two halves of band)"
+           << endl;
 
-	  override = true;
-	}
+      override = true;
+    }
 
       if (override)
 	{
