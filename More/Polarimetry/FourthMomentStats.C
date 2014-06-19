@@ -39,9 +39,19 @@ void Pulsar::FourthMomentStats::set_profile (const PolnProfile* _profile)
     covariance = profile->get_covariance();
 }
 
-void Pulsar::FourthMomentStats::eigen (PolnProfile& v1,
-				       PolnProfile& v2,
-				       PolnProfile& v3)
+void sort (Vector<3,double>& v)
+{
+  if (v[0] < v[1])
+    std::swap (v[0], v[1]);
+  if (v[1] < v[2])
+    std::swap (v[1], v[2]);
+  if (v[0] < v[1])
+    std::swap (v[0], v[1]);
+}
+
+void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
+				       PolnProfile* v2,
+				       PolnProfile* v3)
 {
   if (!covariance)
     throw Error (InvalidState, "Pulsar::FourthMomentStats::eigen",
@@ -56,12 +66,21 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile& v1,
   }
   covariance = clone;
 
-  PolnProfile* v[3] = { &v1, &v2, &v3 };
+  PolnProfile* v[3] = { v1, v2, v3 };
 
   const unsigned nbin = profile->get_nbin();
 
+  eigen_value.resize(3);
+  regression_coefficient.resize(3);
+
   for (unsigned i=0; i<3; i++)
-    v[i]->resize( nbin );
+  {
+    if (v[i])
+      v[i]->resize( nbin );
+
+    eigen_value[i] = new Profile (nbin);
+    regression_coefficient[i] = new Profile (nbin);
+  }
 
   for (unsigned ibin=0; ibin < nbin; ibin++)
   {
@@ -90,14 +109,24 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile& v1,
     partition (C, Ivar, Icovar, pcovar);
 
     Vector<3,double> regression = inv(pcovar) * Icovar;
-    double Rvar = regression * Icovar;
-    regression /= norm(regression);
 
     Matrix<3,3,double> peigen;
     Vector<3,double> pvar;
 
     // compute the eigen vector matrix (a 3D rotation)
     Jacobi (pcovar, peigen, pvar);
+
+    sort (pvar);
+
+    for (unsigned i=0; i < 3; i++)
+    {
+      eigen_value[i]->get_amps()[ibin] = pvar[i];
+      regression_coefficient[i]->get_amps()[ibin] = regression[i];
+    }
+
+    double Rvar = regression * Icovar;
+    regression /= norm(regression);
+
 
     unsigned imax = 0;
     unsigned imin = 0;
@@ -159,7 +188,7 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile& v1,
 
     Stokes<double> Rstokes (Ivar, Rvar*regression);
 
-    v[0]->set_Stokes (ibin, R*Rstokes);
+    // v[0]->set_Stokes (ibin, R*Rstokes);
 
     //v[0]->set_Stokes (ibin, Stokes<double>(Ivar, peigen[imax]));
     //v[0]->set_Stokes (ibin, Stokes<double>(Ivar, peigen[imax]*pvar[imax]));
