@@ -15,9 +15,12 @@
 #include "Pulsar/SmoothMedian.h"
 #include "Pulsar/SmoothSinc.h"
 
+#include "Pulsar/Extract.h"
 #include "Pulsar/Subtract.h"
 #include "Pulsar/Convolve.h"
 #include "Pulsar/Correlate.h"
+
+#include "pairutil.h"
 
 using namespace std;
 
@@ -71,6 +74,11 @@ Pulsar::ProfileInterpreter::ProfileInterpreter ()
     ( &ProfileInterpreter::subtract,
       "subtract", "subtract the named archive from the current",
       "usage: subtract <name>\n" );
+
+  add_command
+    ( &ProfileInterpreter::extract,
+      "extract", "extract (and keep) the specified phase bin range",
+      "usage: extract <first:last>\n" );
 
   add_command
     ( &ProfileInterpreter::convolve,
@@ -145,6 +153,23 @@ try {
   foreach( get(), smooth );
   return response (Good);
 
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::ProfileInterpreter::extract (const string& args) try
+{
+  typedef std::pair<unsigned,unsigned> range;
+  range bins = setup<range> (args);
+
+  Archive* data = get();
+  foreach( data, new Extract(bins) );
+
+  data->resize( data->get_nsubint(), data->get_npol(), data->get_nchan(),
+                bins.second - bins.first );
+
+  return response (Good);
 }
 catch (Error& error) {
   return response (Fail, error.get_message());
