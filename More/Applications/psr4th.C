@@ -57,6 +57,8 @@ protected:
 
   Reference::To<Pulsar::Archive> output;
 
+  double integration_length;
+
   //! Add command line options
   void add_options (CommandLine::Menu&);
 };
@@ -85,8 +87,7 @@ psr4th::psr4th ()
   : Application ("psr4th", "psr4th psrchive program")
 {
   add( new Pulsar::StandardOptions );
-  // add( new Pulsar::UnloadOptions );
-
+  integration_length = 0;
 }
 
 
@@ -151,9 +152,14 @@ void psr4th::process (Pulsar::Archive* archive)
 
   for (unsigned isub=0; isub < nsub; isub++)
   {
+    Reference::To<Pulsar::Integration> subint = archive->get_Integration (isub);
+    integration_length += subint->get_duration ();
+
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
-      Reference::To<Pulsar::Integration> subint = archive->get_Integration (isub);
+      if (subint->get_weight(ichan) == 0)
+        continue;
+
       Reference::To<Pulsar::PolnProfile> profile = subint->new_PolnProfile (ichan);
 
       for (unsigned ibin=0; ibin < nbin; ibin++)
@@ -175,15 +181,20 @@ void psr4th::finalize()
   unsigned nchan = output->get_nchan();
   unsigned nmoment = 10;
 
+  Pulsar::Integration* subint = output->get_Integration (0);
+  subint->set_duration( integration_length );
+
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
-    Pulsar::Integration* subint = output->get_Integration (0);
     Pulsar::PolnProfile* profile = subint->new_PolnProfile (ichan);
 
     Reference::To<Pulsar::MoreProfiles> more = new Pulsar::FourthMoments;
     more->resize( nmoment, nbin );
 
     subint->get_Profile(0,ichan)->add_extension(more);
+
+    if (results[ichan].count == 0)
+      subint->set_weight (ichan, 0.0);
 
     for (unsigned ibin = 0; ibin < nbin ; ibin ++)
     {
