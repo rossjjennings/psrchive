@@ -33,6 +33,6 @@ Pulsar::DynamicSpectrumPlot::Interface::Interface (
       &DynamicSpectrumPlot::get_colour_map);
 
   import ("x", TimeScale::Interface(), &DynamicSpectrumPlot::get_x_scale);
-// import ("y", FrequencyScale::Interface(), &DynamicSpectrumPlot::get_y_scale);
-
+  import ("y", FrequencyScale::Interface(), &DynamicSpectrumPlot::get_y_scale);
 }
+

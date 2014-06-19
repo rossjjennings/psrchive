@@ -20,7 +20,7 @@ Pulsar::DynamicSpectrumPlot::DynamicSpectrumPlot ()
 {
   colour_map.set_name( pgplot::ColourMap::Heat );
 
-  get_frame()->set_y_scale( new FrequencyScale );
+  get_frame()->set_y_scale( y_scale = new FrequencyScale );
   get_frame()->set_x_scale( x_scale = new TimeScale );
 
   // default is to invert the axis tick marks
