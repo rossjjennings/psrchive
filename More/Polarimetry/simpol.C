@@ -576,21 +576,20 @@ int main (int argc, char** argv)
 
       Matrix<4,4, double> covB = outer(modeB, modeB) - eta;
       expected += covB;
-
+      /*
       if (nint == 0)
 	{
 	  expected += outer(stokes,stokes);
 	  expected += outer(modeB,modeB);
 	}
-
+      */
       expected /= 2;
       
       if (nint == 0)
 	{
-	  // at this point, epected is the mean outer product
 	  // subtract outer product of mean to produce covariance
-	  Vector<4,double> mean = 0.5*(stokes+modeB);
-	  expected -= outer(mean,mean);
+	  Vector<4,double> mean = 0.5*(stokes-modeB);
+	  expected += outer(mean,mean);
 	}
 
     }
