@@ -194,7 +194,10 @@ void psr4th::finalize()
     subint->get_Profile(0,ichan)->add_extension(more);
 
     if (results[ichan].count == 0)
+    {
       subint->set_weight (ichan, 0.0);
+      subint->get_Profile(0,ichan)->zero();
+    }
 
     for (unsigned ibin = 0; ibin < nbin ; ibin ++)
     {
