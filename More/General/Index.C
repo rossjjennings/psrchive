@@ -9,6 +9,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/PolnProfile.h"
+#include "Pulsar/MoreProfiles.h"
 
 using namespace std;
 
@@ -16,6 +17,7 @@ Pulsar::Index::Index (unsigned value, bool flag)
 {
   index = value;
   integrate = flag;
+  extension = false;
 }
 
 const Pulsar::Profile* 
@@ -88,6 +90,14 @@ Pulsar::get_Profile (const Integration* data, Index pol, Index chan)
       temp -> sum( integration -> get_Profile (1, chan.get_value()) );
 
       profile = temp;
+    }
+    else if (pol.get_extension())
+    {
+      Reference::To<const MoreProfiles> more;
+
+      profile = integration -> get_Profile (0, chan.get_value());
+      more = profile->get<const MoreProfiles> ();
+      profile = more->get_Profile (pol.get_value());
     }
     else
       profile = integration -> get_Profile (pol.get_value(), chan.get_value());
@@ -219,8 +229,9 @@ std::ostream& Pulsar::operator << (std::ostream& os, const Index& i)
 {
   if (i.get_integrate())
     return os << "I";
-  else
-    return os << i.get_value();
+  if (i.get_extension())
+    os << "e:";
+  return os << i.get_value();
 }
 
 std::istream& Pulsar::operator >> (std::istream& is, Index& i)
@@ -229,13 +240,24 @@ std::istream& Pulsar::operator >> (std::istream& is, Index& i)
   {
     is.get();
     i.set_integrate(true);
+    return is;
   }
-  else
+
+  if (is.peek() == 'e')
   {
-    unsigned val;
-    is >> val;
-    i.set_value(val);
+    is.get();
+    char colon = is.get();
+    if (colon != ':')
+    {
+      is.setstate(std::istream::failbit);
+      return is;
+    }
+    i.set_extension(true);
   }
+
+  unsigned val;
+  is >> val;
+  i.set_value(val);
 
   return is;
 }
