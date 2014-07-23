@@ -18,7 +18,7 @@ void Pulsar::FITSArchive::load_ObsDescription (fitsfile* fptr) try
 
   Reference::To<ObsDescription> description = new ObsDescription;
 
-  load_text (fptr, "OBSDESCR", "DESCR", description.get(), verbose);
+  load_text (fptr, "OBSDESCR", "DESCR", description.get(), verbose>2);
 
   add_extension( description );
 }
