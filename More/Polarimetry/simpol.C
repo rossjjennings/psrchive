@@ -12,6 +12,7 @@
 */
 
 #include "JenetAnderson98.h"
+#include "Minkowski.h"
 #include "Stokes.h"
 #include "Jones.h"
 #include "Pauli.h"
@@ -561,20 +562,14 @@ int main (int argc, char** argv)
 
   cerr << "covar=\n" << totsq << endl;
 
-  Matrix<4,4, double> eta;
-  double inv = 0.5 * stokes.invariant();
-  eta[0][0] = inv;
-  for (unsigned j=1; j<4; j++)
-    eta[j][j] = -inv;
-
-  Matrix<4,4, double> expected = outer(stokes, stokes) - eta;
+  Matrix<4,4, double> expected = Minkowski::outer(stokes, stokes);
 
   if (opm)
     {
       Vector<4,double> modeB = - stokes;
       modeB[0] = stokes[0];
 
-      Matrix<4,4, double> covB = outer(modeB, modeB) - eta;
+      Matrix<4,4, double> covB = Minkowski::outer(modeB, modeB);
       expected += covB;
       /*
       if (nint == 0)
