@@ -12,6 +12,7 @@
 
 #include "Pauli.h"
 #include "Jacobi.h"
+#include "Minkowski.h"
 
 using namespace std;
 
@@ -59,12 +60,51 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 
   PhaseWeight* baseline = stats->get_baseline ();
   Reference::To<StokesCovariance> clone = covariance->clone();
+
+  vector<double> baseline_mean_moment (StokesCovariance::nmoment);
+
   for (unsigned imoment=0; imoment < StokesCovariance::nmoment; imoment++)
   {
-    baseline->set_Profile( clone->get_Profile(imoment) );
-    clone->get_Profile(imoment)->offset( -baseline->get_avg() );
+    Profile* profile = clone->get_Profile(imoment);
+    baseline->set_Profile( profile );
+
+    double mean, variance;
+    baseline->stats (profile, &mean, &variance);
+    
+    baseline_mean_moment[imoment] = mean;
+
+    profile->offset( -mean );
   }
   covariance = clone;
+
+  const unsigned npol = 4;
+  unsigned diagonal [npol] = { 0, 4, 7, 9 };
+
+  Vector<npol,double> baseline_mean_pol;
+  for (unsigned ipol=0; ipol < npol; ipol++)
+  {
+    const Profile* prof = profile->get_Profile(ipol);
+    baseline->set_Profile( prof );
+
+    double mean, variance;
+    baseline->stats (prof, &mean, &variance);
+    
+    baseline_mean_pol[ipol] = mean;
+
+    cout << "baseline mean=" << mean << " var=" << variance << " vs " 
+	 << baseline_mean_moment[ diagonal[ipol] ] << endl;
+  }
+
+  Matrix<4,4,double> expected = Minkowski::outer(baseline_mean_pol,baseline_mean_pol);
+
+  unsigned k=0;
+  for (unsigned i=0; i<4; i++)
+    for (unsigned j=i; j<4; j++)
+      {
+	cerr << "expected[" << i << "][" << j << "]=" << expected[i][j] << endl;
+	cerr << "dof=" << expected[i][j] / baseline_mean_moment[k] << endl;
+	k++;
+      }
 
   PolnProfile* v[3] = { v1, v2, v3 };
 
@@ -108,7 +148,7 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
     // extract the 3x3 covariance matrix of the polarization vector
     partition (C, Ivar, Icovar, pcovar);
 
-    Vector<3,double> regression = inv(pcovar) * Icovar;
+    Vector<3,double> regression = Icovar; //inv(pcovar) * Icovar;
 
     Matrix<3,3,double> peigen;
     Vector<3,double> pvar;
@@ -167,11 +207,11 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
     }
 #endif
 
-#if 1
+#if 0
     cout << ibin << " " << theta*180/M_PI 
 	 << " " << Pell << " " << Cell
 	 << " " << P << " " << CP << endl;
-#else
+//#else
     cout << ibin;
     for (unsigned i=0; i<3; i++)
       cout << " " << sqrt(pvar[i])/mean.get_scalar();
