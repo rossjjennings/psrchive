@@ -29,6 +29,7 @@ include_HEADERS = \
         Jones.h \
 	lazy.h \
         Matrix.h \
+	Minkowski.h \
         ModifyRestore.h \
 	NestedTextInterface.h \
 	OwnStream.h \
