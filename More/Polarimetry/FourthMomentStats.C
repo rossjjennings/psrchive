@@ -50,6 +50,88 @@ void sort (Vector<3,double>& v)
     std::swap (v[0], v[1]);
 }
 
+Reference::To<Pulsar::Profile> Pulsar::FourthMomentStats::get_modulation_index()
+{
+  const unsigned nbin = covariance->get_nbin();
+
+  Reference::To<Profile> result = covariance->get_Profile(0)->clone();
+
+  PhaseWeight* baseline = stats->get_baseline ();
+  double off_pulse_variance;
+  baseline->stats (result, &off_pulse_variance);
+
+  const Profile* intensity = profile->get_Profile(0);
+  double off_pulse_mean, var;
+  baseline->stats (intensity, &off_pulse_mean, &var);
+
+  double dof = off_pulse_mean * off_pulse_mean / off_pulse_variance;
+  cerr << "dof=" << dof << endl;
+  
+  const float* I = intensity->get_amps();
+
+  double duration = 1893.42803456;
+  double period = 0.0893800997072938;
+
+  double npulse = duration / period;
+
+  double bandwidth = 400e6 / 512;
+  double bin_samples = period * bandwidth / nbin;
+
+  cerr << "bin_samples*2=" << bin_samples*2 << endl;
+  cerr << "npulse=" << npulse << endl;
+  cerr << "dof/npulse=" << dof / npulse << endl;
+ 
+
+  double weight = 1.0;
+
+  double ratio = var / off_pulse_variance;
+  if (ratio > 4 || ratio < 0.25)
+  {
+    // this is approx. the normalization factor that psr4th should have applied
+    cerr << "correcting psr4th bug" << endl;
+    weight = npulse / intensity->get_weight();
+  }
+
+  cerr << "mean=" << off_pulse_mean << " var=" << var 
+       << " moment=" << off_pulse_variance
+       << " normalized moment=" << off_pulse_variance / weight << endl;
+
+  cerr << "missing factor=" << var / (off_pulse_variance / weight) << endl;
+
+  dof = bin_samples*2;
+
+  cerr << "applied dof=" << dof << endl;
+
+  cerr << "predicted variance=" << sqrt(off_pulse_mean*off_pulse_mean/dof) << endl
+       << "measured variance=" << sqrt(off_pulse_variance*npulse/weight) << endl;
+
+  //return result;
+
+  float* M = result->get_amps();
+
+  for (unsigned i=0; i<nbin; i++)
+  {
+    float Ival = I[i] - off_pulse_mean;
+    double Isq = Ival * Ival;
+
+    if (Isq < 100 * var)
+      M[i] = 0;
+    else
+    {
+      Stokes<double> S = profile->get_Stokes(i);
+
+      double bias = normsq(S) / dof;
+
+      M[i] = (M[i]*npulse/weight - bias) / Isq;
+    }
+
+ 
+  }
+
+  return result;
+}
+
+
 void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 				       PolnProfile* v2,
 				       PolnProfile* v3)
@@ -197,9 +279,9 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
     Vector<3,double> pmean = mean.get_vector();
 
     double cos_theta = regression * pmean / norm(pmean);
+#if 0
     double theta = acos (cos_theta);
 
-#if 0
     if (theta > M_PI/2)
     {
       regression *= -1;
