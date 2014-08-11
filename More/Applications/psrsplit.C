@@ -117,6 +117,11 @@ void psrsplit::process (Pulsar::Archive* archive)
   unsigned isub=0;
   unsigned ichan=0;
 
+  Pulsar::Dispersion correction;
+  bool was_dedispersed = archive->get_dedispersed () ;
+  if ( was_dedispersed )
+    correction.revert (archive);
+
   while( isub < nsub )
   {
     cerr << "psrsplit: extracting";
@@ -148,10 +153,6 @@ void psrsplit::process (Pulsar::Archive* archive)
 
       if ( nchannel > 0 )
       {
-	Pulsar::Dispersion correction;
-	bool was_dedispersed = sub_chan_archive->get_dedispersed () ;
-	if ( was_dedispersed )
-	  correction.revert (sub_chan_archive);
 
 	ichan += nchannel ;
 

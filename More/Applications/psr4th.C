@@ -99,7 +99,7 @@ psr4th::psr4th ()
 
 void psr4th::add_options (CommandLine::Menu& menu)
 {
-  CommandLine::Argument* arg;
+  // CommandLine::Argument* arg;
 
   // add a blank line and a header to the output of -h
   menu.add ("\n" "General options:");
@@ -203,6 +203,16 @@ void psr4th::finalize()
     {
       Matrix<4,4,double> covar = results[ichan].get_covariance (ibin);
       Stokes<double> mean = results[ichan].get_mean (ibin);
+
+      /*
+	Normalize the covariance matrix so that it represents the
+	covariances of the mean Stokes parameters (as opposed to the
+	covariances of the single-pulse Stokes parameters).  This is
+	done so that the variances of the off-pulse baselines of the
+	mean Stokes parameters will be equal to the mean of the
+	off-pulse baselines of the variances of the Stokes parameters.
+      */
+      covar /= results[ichan].count;
 
       unsigned index=0;
       for (unsigned i=0; i<4; i++)

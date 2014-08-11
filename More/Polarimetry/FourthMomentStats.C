@@ -12,6 +12,7 @@
 
 #include "Pauli.h"
 #include "Jacobi.h"
+#include "Minkowski.h"
 
 using namespace std;
 
@@ -49,6 +50,88 @@ void sort (Vector<3,double>& v)
     std::swap (v[0], v[1]);
 }
 
+Reference::To<Pulsar::Profile> Pulsar::FourthMomentStats::get_modulation_index()
+{
+  const unsigned nbin = covariance->get_nbin();
+
+  Reference::To<Profile> result = covariance->get_Profile(0)->clone();
+
+  PhaseWeight* baseline = stats->get_baseline ();
+  double off_pulse_variance;
+  baseline->stats (result, &off_pulse_variance);
+
+  const Profile* intensity = profile->get_Profile(0);
+  double off_pulse_mean, var;
+  baseline->stats (intensity, &off_pulse_mean, &var);
+
+  double dof = off_pulse_mean * off_pulse_mean / off_pulse_variance;
+  cerr << "dof=" << dof << endl;
+  
+  const float* I = intensity->get_amps();
+
+  double duration = 1893.42803456;
+  double period = 0.0893800997072938;
+
+  double npulse = duration / period;
+
+  double bandwidth = 400e6 / 512;
+  double bin_samples = period * bandwidth / nbin;
+
+  cerr << "bin_samples*2=" << bin_samples*2 << endl;
+  cerr << "npulse=" << npulse << endl;
+  cerr << "dof/npulse=" << dof / npulse << endl;
+ 
+
+  double weight = 1.0;
+
+  double ratio = var / off_pulse_variance;
+  if (ratio > 4 || ratio < 0.25)
+  {
+    // this is approx. the normalization factor that psr4th should have applied
+    cerr << "correcting psr4th bug" << endl;
+    weight = npulse / intensity->get_weight();
+  }
+
+  cerr << "mean=" << off_pulse_mean << " var=" << var 
+       << " moment=" << off_pulse_variance
+       << " normalized moment=" << off_pulse_variance / weight << endl;
+
+  cerr << "missing factor=" << var / (off_pulse_variance / weight) << endl;
+
+  dof = bin_samples*2;
+
+  cerr << "applied dof=" << dof << endl;
+
+  cerr << "predicted variance=" << sqrt(off_pulse_mean*off_pulse_mean/dof) << endl
+       << "measured variance=" << sqrt(off_pulse_variance*npulse/weight) << endl;
+
+  //return result;
+
+  float* M = result->get_amps();
+
+  for (unsigned i=0; i<nbin; i++)
+  {
+    float Ival = I[i] - off_pulse_mean;
+    double Isq = Ival * Ival;
+
+    if (Isq < 100 * var)
+      M[i] = 0;
+    else
+    {
+      Stokes<double> S = profile->get_Stokes(i);
+
+      double bias = normsq(S) / dof;
+
+      M[i] = (M[i]*npulse/weight - bias) / Isq;
+    }
+
+ 
+  }
+
+  return result;
+}
+
+
 void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 				       PolnProfile* v2,
 				       PolnProfile* v3)
@@ -59,12 +142,51 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
 
   PhaseWeight* baseline = stats->get_baseline ();
   Reference::To<StokesCovariance> clone = covariance->clone();
+
+  vector<double> baseline_mean_moment (StokesCovariance::nmoment);
+
   for (unsigned imoment=0; imoment < StokesCovariance::nmoment; imoment++)
   {
-    baseline->set_Profile( clone->get_Profile(imoment) );
-    clone->get_Profile(imoment)->offset( -baseline->get_avg() );
+    Profile* profile = clone->get_Profile(imoment);
+    baseline->set_Profile( profile );
+
+    double mean, variance;
+    baseline->stats (profile, &mean, &variance);
+    
+    baseline_mean_moment[imoment] = mean;
+
+    profile->offset( -mean );
   }
   covariance = clone;
+
+  const unsigned npol = 4;
+  unsigned diagonal [npol] = { 0, 4, 7, 9 };
+
+  Vector<npol,double> baseline_mean_pol;
+  for (unsigned ipol=0; ipol < npol; ipol++)
+  {
+    const Profile* prof = profile->get_Profile(ipol);
+    baseline->set_Profile( prof );
+
+    double mean, variance;
+    baseline->stats (prof, &mean, &variance);
+    
+    baseline_mean_pol[ipol] = mean;
+
+    cout << "baseline mean=" << mean << " var=" << variance << " vs " 
+	 << baseline_mean_moment[ diagonal[ipol] ] << endl;
+  }
+
+  Matrix<4,4,double> expected = Minkowski::outer(baseline_mean_pol,baseline_mean_pol);
+
+  unsigned k=0;
+  for (unsigned i=0; i<4; i++)
+    for (unsigned j=i; j<4; j++)
+      {
+	cerr << "expected[" << i << "][" << j << "]=" << expected[i][j] << endl;
+	cerr << "dof=" << expected[i][j] / baseline_mean_moment[k] << endl;
+	k++;
+      }
 
   PolnProfile* v[3] = { v1, v2, v3 };
 
@@ -108,7 +230,7 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
     // extract the 3x3 covariance matrix of the polarization vector
     partition (C, Ivar, Icovar, pcovar);
 
-    Vector<3,double> regression = inv(pcovar) * Icovar;
+    Vector<3,double> regression = Icovar; //inv(pcovar) * Icovar;
 
     Matrix<3,3,double> peigen;
     Vector<3,double> pvar;
@@ -157,9 +279,9 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
     Vector<3,double> pmean = mean.get_vector();
 
     double cos_theta = regression * pmean / norm(pmean);
+#if 0
     double theta = acos (cos_theta);
 
-#if 0
     if (theta > M_PI/2)
     {
       regression *= -1;
@@ -167,11 +289,11 @@ void Pulsar::FourthMomentStats::eigen (PolnProfile* v1,
     }
 #endif
 
-#if 1
+#if 0
     cout << ibin << " " << theta*180/M_PI 
 	 << " " << Pell << " " << Cell
 	 << " " << P << " " << CP << endl;
-#else
+//#else
     cout << ibin;
     for (unsigned i=0; i<3; i++)
       cout << " " << sqrt(pvar[i])/mean.get_scalar();

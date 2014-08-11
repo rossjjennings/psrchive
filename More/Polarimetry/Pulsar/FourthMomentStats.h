@@ -49,6 +49,9 @@ namespace Pulsar {
     //! Get the mode-separated profiles
     void separate (PolnProfile& modeA, PolnProfile& modeB);
 
+    //! Return the phase-resolved modulation index
+    Reference::To<Profile> get_modulation_index();
+
     //! Returns the variance of the baseline for the specified moment
     Estimate<double> get_moment_variance (unsigned) const;
 
