@@ -184,6 +184,8 @@ Pulsar::TimeScale::Interface::Interface (TimeScale* instance)
   if (instance)
     set_instance (instance);
 
+  import( PlotScale::Interface() );
+
   add( &PlotScale::get_index_range,
        &PlotScale::set_index_range,
        "subint", "Sub-integration index range" );
