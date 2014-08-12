@@ -65,14 +65,16 @@ void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data,
 
   if (!expression.empty())
   {
-    cout << ">> Using user-specified expression" << endl;
+    if (verbose)
+      cout << ">> Using user-specified expression" << endl;
 
     stats = new ProfileStats;
     parser = stats->get_interface ();
   }
   if (method==false)
   {
-    cout << ">> Using baseline method" << endl;
+    if (verbose)
+      cout << ">> Using baseline method" << endl;
 
     // Only recalc baseline if needed 
     if (!base || !reuse_baseline)
@@ -82,7 +84,8 @@ void Pulsar::DynamicBaselineSpectrumPlot::get_plot_array( const Archive *data,
   }
   else
   {
-    cout << ">> Using full profile method" << endl;
+    if (verbose)
+      cout << ">> Using full profile method" << endl;
 
     window = new PhaseWeight (data->get_nbin());
     window -> set_all (1.0);
