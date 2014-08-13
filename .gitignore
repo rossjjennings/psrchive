@@ -28,6 +28,7 @@ Management/release.csh
 More/Applications/calavg
 More/Applications/distortion
 More/Applications/drifting_subpulses
+More/Applications/dynamic_spectra
 More/Applications/example
 More/Applications/fix_single
 More/Applications/fluxcal
