@@ -27,6 +27,15 @@ LDADD = $(top_builddir)/More/libpsrmore.la \
 	$(top_builddir)/Base/libpsrbase.la \
 	$(top_builddir)/Util/libpsrutil.la
 
+LDPLOT = $(top_builddir)/More/Plotting/libpsrplot.la $(LDADD) @PGPLOT_LIBS@
+
+if HAVE_PGPLOT
+psrchive_config_LDADD = $(LDPLOT)
+else
+psrchive_config_LDADD = $(LDADD)
+endif
+
+
 include $(top_srcdir)/config/Makefile.include
 
 dist-hook:

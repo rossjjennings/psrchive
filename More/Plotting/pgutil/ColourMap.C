@@ -379,3 +379,16 @@ std::istream& pgplot::operator >> (std::istream& is, ColourMap::Name& name)
 
   return is;
 }
+
+void ensure_ColourMap_linkage ()
+{
+}
+
+Pulsar::Option<std::string> pgplot::ColourMap::default_colour_map
+(
+  "ColourMap::colour_map",
+  "heat",
+  "Default colour map for various plots",
+  "This controls which colour map will be used by default. \n"
+  "Possible values: grey, inv, heat, cold, plasma, forest, alien, cubehelix."
+);

@@ -973,7 +973,10 @@ int main (int argc, char** argv)
 	string option;
 	string bestfilename = "";
 
-	pgplot::ColourMap::Name colour_map = pgplot::ColourMap::Heat;
+	stringstream ss;
+	ss << pgplot::ColourMap::default_colour_map;
+	pgplot::ColourMap::Name colour_map;
+	ss >> colour_map;
 
 
 

@@ -17,12 +17,17 @@
 #include <algorithm>
 
 #include <float.h>
+#include "strutil.h"
 
 using namespace std;
 
 Pulsar::PhaseVsPlot::PhaseVsPlot ()
 {
-  colour_map.set_name( pgplot::ColourMap::Heat );
+  stringstream ss;
+  ss << pgplot::ColourMap::default_colour_map;
+  pgplot::ColourMap::Name _name;
+  ss >> _name;
+  colour_map.set_name( _name );
 
   // default is to invert the axis tick marks
   get_frame()->get_x_axis()->set_opt ("BCINTS");
