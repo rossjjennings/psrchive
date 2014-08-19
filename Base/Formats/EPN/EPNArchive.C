@@ -403,13 +403,16 @@ void Pulsar::EPNArchive::load_header (const char* filename)
 
 double MHz_scale (const char* units)
 {
-  if (strcasecmp (units, "GHz"))
+
+  if(strlen(units) > 3)
+	 return MHz_scale(units+1);
+  if (strcasecmp (units, "GHz")==0)
     return 1e3;
-  if (strcasecmp (units, "MHz"))
+  if (strcasecmp (units, "MHz")==0)
     return 1.0;
-  if (strcasecmp (units, "kHz"))
+  if (strcasecmp (units, "kHz")==0)
     return 1e-3;
-  if (strcasecmp (units, "Hz"))
+  if (strcasecmp (units, "Hz")==0)
     return 1e-6;
   
   throw Error (InvalidParam, "MHz_scale", "unrecognized units '%s'", units);
@@ -447,7 +450,7 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
 
       if (verbose == 3) {
 	cerr << "cf=" << sub_line1.f0[iblock] << sub_line1.f0u[iblock] << endl;
-	cerr << "bw=" << sub_line1.df[iblock] << sub_line1.dfu[iblock] << endl;
+	cerr << "bw=" << sub_line1.df[iblock] << sub_line1.dfu[iblock] <<  MHz_scale (sub_line1.dfu[iblock]) << endl;
 	cerr << "state=" << sub_line1.idfield[iblock] << endl;
       }
       
@@ -477,6 +480,8 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
 
       set_centre_frequency (avg_freq);
       set_bandwidth (total_bw);
+	  cout << get_bandwidth() << endl;
+	  cout << get_centre_frequency() << endl;
 
     }
     else {

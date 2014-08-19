@@ -336,6 +336,9 @@ c
      &              nbin, tbin, nint, ncal, lcal, fcal
             endif
          endif
+         if (nfreq.eq.0) then
+            nfreq = 1
+         endif
       else
        write(line(lct),57) cdd, cdm, cdy, scanno, subscan, npol, nfreq, 
      &        nbin, tbin, tres, nint, ncal, lcal, fluxflag
