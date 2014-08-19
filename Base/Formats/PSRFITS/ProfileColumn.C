@@ -7,6 +7,7 @@
 
 #include "Pulsar/ProfileColumn.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Pulsar.h"
 
 #include "psrfitsio.h"
 #include "templates.h"
@@ -431,12 +432,33 @@ void Pulsar::ProfileColumn::load_amps (int row, C& prof) try
       if (scale == 0.0)
 	scale = 1.0;
 
+      if ( !isfinite(scale) || !isfinite(offset) )
+      {
+	warning << "Pulsar::ProfileColumn::load_amps"
+	  " SCALE or OFFSET NaN in row=" << row << endl;
+	scale = offset = 0.0;
+      }
+
       prof[index]->resize (nbin);
       float* amps = prof[index]->get_amps();
       index ++;
 
+      unsigned nans = 0;
+
       for (unsigned ibin = 0; ibin < nbin; ibin++)
+      {
 	amps[ibin] = temparray[ibin] * scale + offset;
+	if (!isfinite(amps[ibin]))
+	{
+	  nans ++;
+	  amps[ibin] = 0.0;
+	}
+      }
+
+      if (nans)
+	warning << "Pulsar::ProfileColumn::load_amps"
+	  " data NaN in row=" << row << endl;
+
     }  
   }
 }

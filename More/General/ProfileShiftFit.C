@@ -482,3 +482,12 @@ double Pulsar::ProfileShiftFit::get_reduced_chisq () const
   return chi2/dof;
 }
 
+//! Convenience function to determine, then apply, scale and shift
+void Pulsar::ProfileShiftFit::apply_scale_and_shift(Profile *p)
+{
+  set_Profile(p);
+  compute();
+  p->rotate_phase(shift);
+  p->scale(1.0/scale);
+}
+

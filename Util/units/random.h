@@ -6,21 +6,23 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Util/units/random.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:13:55 $
-   $Author: straten $ */
+// psrchive/Util/units/random.h
 
 #ifndef __random_H
 #define __random_H
 
 #include <complex>
-#include <stdlib.h>
+
+// seeds the random number generator with the current microsecond
+void random_init ();
+
+// uniformly distributed on 0,1
+double random_double ();
 
 template <class T, class U>
 void random_value (T& value, U scale)
 {
-  value = ( double(rand()) - 0.5*double(RAND_MAX) ) * 2.0 * scale / RAND_MAX;
+  value = (random_double() - 0.5) * 2.0 * scale;
 }
 
 template <class T, class U>

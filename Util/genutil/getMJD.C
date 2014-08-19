@@ -25,7 +25,7 @@ int main (int argc, char* argv[])
   bool mjdgiven = false;
 
   int c;
-  while ((c = getopt(argc, argv, "hm:v")) != -1)
+  while ((c = getopt(argc, argv, "f:hm:v")) != -1)
   {
     switch (c)
     {

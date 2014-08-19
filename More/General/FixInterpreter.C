@@ -141,8 +141,8 @@ string Pulsar::FixInterpreter::freq (const string& args) try
       for (ichan = 0; ichan < nchan; ichan++)
 	subint->set_centre_frequency( ichan, labels[nchan-1-ichan] );
 
-      archive->set_bandwidth( - archive->get_bandwidth() );
     }
+    archive->set_bandwidth( - archive->get_bandwidth() );
   }
 
   else if (arguments[0] == "offset" && arguments.size() == 2)

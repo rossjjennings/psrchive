@@ -12,12 +12,16 @@
 */
 
 #include "JenetAnderson98.h"
+#include "Minkowski.h"
 #include "Stokes.h"
 #include "Jones.h"
 #include "Pauli.h"
+#include "Dirac.h"
+#include "Jacobi.h"
 
 #include "NormalDistribution.h"
 #include "BoxMuller.h"
+#include "random.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -38,10 +42,14 @@ void usage ()
     " -b nbit     digitize using nbit bits \n"
     " -d space    spacing between digitizer levels \n"
     " -n Msamp    simulate Msamp mega samples \n"
+    " -N Nint     integrate Nint samples before further processing \n"
     " -l factor   simulate non-linearity \n"
+    " -L q,u,v    simulate log-normal statistics in specified basis \n"
     " -f gain     simulate digitizer sign-bit feedback \n"
-    " -s i,q,u,v  specify the Stokes parameters of the input signal \n"
+    " -o          every other sample in orthogonally polarized mode (OPM) \n"
     " -p rad      apply differential phase (in radians) to input \n"
+    " -P min      simulate a power law distribution over min to infinity \n"
+    " -s i,q,u,v  specify the Stokes parameters of the input signal \n"
        << endl;
 }
 
@@ -59,6 +67,21 @@ void transform (Jones<double>& jones, double* ex, double* ey)
   t = jones(1,0) * x + jones(1,1) * y;
   ey[0] = t.real();
   ey[1] = t.imag();
+}
+
+void compute_stokes (Vector<4,double>& stokes,
+		     const complex<double>& ex,
+		     const complex<double>& ey)
+{
+  double var_x = norm(ex);
+  double var_y = norm(ey);
+
+  complex<double> c_xy = ex * conj(ey);
+  
+  stokes[0] = var_x + var_y;
+  stokes[1] = var_x - var_y;
+  stokes[2] = 2.0*c_xy.real();
+  stokes[3] = 2.0*c_xy.imag();
 }
 
 void nonlinear (double& value, double factor)
@@ -91,25 +114,97 @@ void digitize (double& volts, double scale, double max, double rescale)
     volts = value;
 }
 
+void powerlaw_polar (double* v, double min)
+{
+  double y = random_double(); 
+
+  double index = -4;
+  double r = pow( pow(min,index+1) * (1.0 - y), 1.0/(index+1) );
+
+  // cout << y << " " << r << endl;
+
+  double theta = 0;
+  random_value (theta, M_PI);
+  v[0] = r * cos(theta);
+  v[1] = r * sin(theta);
+
+  // cout << v[0] << " " << v[1] << endl;
+}
+
+void lognormal_polar (double* v, double sigma, BoxMuller& gasdev)
+{
+  double r = exp ( sigma * gasdev() );
+  double theta = 0;
+  random_value (theta, M_PI);
+  v[0] = r * cos(theta);
+  v[1] = r * sin(theta);
+
+  // cout << v[0] << " " << v[1] << endl;
+}
+
+void uniform_polar (double* v)
+{
+  double r = random_double();
+  double theta = 0;
+  random_value (theta, M_PI);
+  v[0] = r * cos(theta);
+  v[1] = r * sin(theta);
+
+  // cout << v[0] << " " << v[1] << endl;
+}
+
+
+template<typename T>
+class spinor {
+public:
+  spinor (const std::complex<T>& _x, const std::complex<T>& _y) : x(_x), y(_y){}
+  
+  std::complex<T> x;
+  std::complex<T> y;
+};
+
+//! Returns the inverse
+template<typename T>
+spinor<T> operator * (const Jones<T>& j, const spinor<T>& in)
+{
+  return spinor<T> ( j.j00 * in.x + j.j01 * in.y,
+		     j.j10 * in.x + j.j11 * in.y );
+}
+
 int main (int argc, char** argv)
 {
   uint64_t ndat = 1024 * 1024;       // 1Mpt set of random samples
+
+  unsigned nint = 0;
+  unsigned jint = 0;
 
   unsigned nbit = 0;               // number of bits per sample in digitizer
   double digitizer_spacing = 0;    // spacing between digitizer levels
 
   bool maintain_thresholds = true; // do not reset sampling thresholds
   bool polarized = false;
+  bool opm = false;
+  double opm_coherence = 0.0;
+
+  bool lognormal = false;
+  Jones<double> logbasis;
+  double ln_sigma = 0.5;
+
+  bool uniform = false;
+  Jones<double> unibasis;
+
+  double power_law = 0.0;
 
   Stokes<double> stokes (1,0,0,0);
   double phase = 0;
 
   double non_linearity = 0.0;
   double adc_feedback = 0.0;
-
+  
   bool verbose = false;
+
   int c;
-  while ((c = getopt(argc, argv, "hb:d:f:l:n:p:s:")) != -1) {
+  while ((c = getopt(argc, argv, "hb:c:d:f:l:L:n:N:op:P:s:U")) != -1) {
     switch (c)  {
 
     case 'h':
@@ -118,6 +213,11 @@ int main (int argc, char** argv)
 
     case 'b':
       nbit = atoi (optarg);
+      break;
+
+    case 'c':
+      opm_coherence = atof (optarg);
+      opm = true;
       break;
 
     case 'd':
@@ -144,6 +244,7 @@ int main (int argc, char** argv)
 	return -1;
       }
 
+      cerr << "Input mean Stokes = " << stokes << endl;
       break;
     }
 
@@ -152,12 +253,55 @@ int main (int argc, char** argv)
       cerr << "simpol: non-linearity factor=" << non_linearity << endl;
       break;
 
+    case 'L':
+    {
+      double q,u,v;
+      if (sscanf (optarg, "%lf,%lf,%lf", &q,&u,&v) != 3)
+      {
+	cerr << "Error parsing " << optarg << " as Stokes 3-vector" << endl;
+	return -1;
+      }
+
+      Vector<3,double> vect;
+      vect[0] = q;
+      vect[1] = u;
+      vect[2] = v;
+      
+      Quaternion<double,Hermitian> rho (norm(vect), vect);
+      logbasis = convert (eigen(rho));
+
+      lognormal = true;
+
+      cerr << logbasis << endl;
+
+      cerr << "simpol: lognormal electric field amplitude" << endl;
+      break;
+    }
+
     case 'n':
-      ndat *= atoi (optarg);
+      ndat = ndat * atof (optarg);
+      break;
+
+    case 'N':
+      nint = atoi (optarg);
+      break;
+
+    case 'o':
+      opm = true;
       break;
 
     case 'p':
       phase = atof (optarg);
+      break;
+
+    case 'P':
+      power_law = atof (optarg);
+      cerr << "simpol: powerlaw min = " << power_law << endl;
+      break;
+
+    case 'U':
+      cerr << "simpol: uniformly distributed" << endl;
+      uniform = true;
       break;
 
     case 'v':
@@ -183,6 +327,9 @@ int main (int argc, char** argv)
 
   Quaternion<double,Hermitian> root = sqrt (natural(stokes));
   Jones<double> polarizer = convert (root);
+
+  random_init ();
+  BoxMuller gasdev (time(NULL));
 
   double input_rms = 0.5;
 
@@ -255,17 +402,46 @@ int main (int argc, char** argv)
   double e_x [2];
   double e_y [2];
 
-  BoxMuller gasdev (time(NULL));
-
+  Vector<4, double> tot_stokes;
+  uint64_t ntot = 0;
   Vector<4, double> tot;
   Matrix<4,4, double> totsq;
 
+  Matrix<2,2, complex<double> > tot_rho;
+  Matrix<4,4, complex<double> > totsq_rho;
+
+  Vector<3, complex<double> > tot_3;
+  Matrix<3,3, complex<double> > totsq_3;
+
+  complex<double> last_ex;
+  complex<double> last_ey;
+
   for (uint64_t idat=0; idat<ndat; idat++)
   {
-    e_x[0] = input_rms * gasdev ();
-    e_y[0] = input_rms * gasdev ();
-    e_x[1] = input_rms * gasdev ();
-    e_y[1] = input_rms * gasdev ();
+    if (uniform)
+    {
+      uniform_polar (e_x);
+      uniform_polar (e_y);
+    }
+    else if (power_law)
+    {
+      powerlaw_polar (e_x, power_law);
+      powerlaw_polar (e_y, power_law);
+    }
+    else if (lognormal)
+    {
+      lognormal_polar (e_x, ln_sigma, gasdev);
+      lognormal_polar (e_y, ln_sigma, gasdev);
+
+      transform (logbasis, e_x, e_y);
+    }
+    else
+    {
+      e_x[0] = input_rms * gasdev ();
+      e_y[0] = input_rms * gasdev ();
+      e_x[1] = input_rms * gasdev ();
+      e_y[1] = input_rms * gasdev ();
+    }
 
     if (polarized)
       transform (polarizer, e_x, e_y);
@@ -294,27 +470,89 @@ int main (int argc, char** argv)
       digitize (e_y[1], scale1, saturation, rescale);
     }
 
-    double ex_r = e_x[0];
-    double ex_i = e_x[1];
-    double ey_r = e_y[0];
-    double ey_i = e_y[1];
+    complex<double> ex (e_x[0], e_x[1]);
+    complex<double> ey (e_y[0], e_y[1]);
  
-    double var_x = ex_r * ex_r + ex_i * ex_i;
-    double var_y = ey_r * ey_r + ey_i * ey_i;
+    if (opm_coherence)
+    {
+      if (idat % 2 == 0)
+      {
+	last_ex = ex;
+	last_ey = ey;
+	continue;
+      }
+      else
+      {
+	complex<double> e0x = last_ex + opm_coherence * ex;
+	complex<double> e0y = last_ey + opm_coherence * ey;
+	Vector<4, double> stokes0;
+	compute_stokes (stokes0, e0x, e0y);
 
-    Vector<4, double> stokes;
+	if (!nint)
+	{
+	  tot += stokes0;
+	  totsq += outer(stokes0, stokes0);
+	  ntot ++;
+	}
 
-    stokes[0] = var_x + var_y;
-    stokes[1] = var_x - var_y;
-    stokes[2] = 2.0*(ex_r * ey_r + ex_i * ey_i);
-    stokes[3] = 2.0*(ex_r * ey_i - ex_i * ey_r);
+	complex<double> e1x = ex + opm_coherence * last_ex;
+	complex<double> e1y = ey + opm_coherence * last_ey;	
+	Vector<4, double> stokes1;
+	compute_stokes (stokes1, e1x, e1y);
+	for (unsigned i=1; i<4; i++)
+	  stokes1[i] *= -1.0;
 
-    tot += stokes;
-    totsq += outer(stokes, stokes);
+	if (!nint)
+	{
+	  tot += stokes1;
+	  totsq += outer(stokes1, stokes1);
+	  ntot ++;
+	}
+
+	if (nint == 2)
+	{
+	  Vector<4, double> stokes = stokes0 + stokes1;
+	  tot += stokes;
+	  totsq += outer(stokes, stokes);
+	  ntot ++;
+	}
+      }
+    }
+
+    Vector<4, double> temp_stokes;
+    compute_stokes (temp_stokes, ex, ey);
+
+    if (opm && (idat % 2))
+      for (unsigned i=1; i<4; i++)
+	temp_stokes[i] *= -1.0;
+
+    if (nint == 0)
+      tot_stokes = temp_stokes;
+    else
+    {
+      if (jint == 0)
+	tot_stokes = temp_stokes;
+      else
+	tot_stokes += temp_stokes;
+
+      jint ++;
+      // cerr << jint << endl;
+
+      if (jint < nint)
+	continue;
+
+      // cerr << "add" << endl;
+      tot_stokes /= nint;
+      jint = 0;
+    }
+
+    tot += tot_stokes;
+    totsq += outer(tot_stokes, tot_stokes);
+    ntot ++;
   }
 
-  tot /= ndat;
-  totsq /= ndat;
+  tot /= ntot;
+  totsq /= ntot;
   totsq -= outer(tot,tot);
 
   cerr << "mean=" << tot << endl;
@@ -323,6 +561,102 @@ int main (int argc, char** argv)
     cerr << "phase=" << atan2(tot[3],tot[2]) << endl;
 
   cerr << "covar=\n" << totsq << endl;
+
+  Matrix<4,4, double> expected = Minkowski::outer(stokes, stokes);
+
+  if (opm)
+    {
+      Vector<4,double> modeB = - stokes;
+      modeB[0] = stokes[0];
+
+      Matrix<4,4, double> covB = Minkowski::outer(modeB, modeB);
+      expected += covB;
+      /*
+      if (nint == 0)
+	{
+	  expected += outer(stokes,stokes);
+	  expected += outer(modeB,modeB);
+	}
+      */
+      expected /= 2;
+      
+      if (nint == 0)
+	{
+	  // subtract outer product of mean to produce covariance
+	  Vector<4,double> mean = 0.5*(stokes-modeB);
+	  expected += outer(mean,mean);
+	}
+
+    }
+
+  if (nint)
+    expected /= nint;
+
+  cerr << "expected=\n" << expected << endl;
+
+  return 0;
+
+  tot_rho /= ndat;
+  totsq_rho /= ndat;
+  totsq_rho -= direct(tot_rho,tot_rho);
+
+  cerr << "rho mean=\n" << tot_rho << endl;
+  cerr << "rho covar=\n" << totsq_rho << endl;
+
+  Matrix<4,4, complex<double> > candidate;
+  for (unsigned i=0; i<4; i++)
+    for (unsigned j=0; j<4; j++)
+      {
+	Matrix<4,4,complex<double> > temp = Dirac::matrix (i,j);
+	temp *= expected[i][j] * 0.25;
+
+	candidate += temp;
+      }
+
+  cerr << "candidate=\n" << candidate << endl;
+
+  Matrix<4, 4, complex<double> > eigenvectors;
+  Vector<4, double> eigenvalues;
+
+  Matrix<4, 4, complex<double> > temp = candidate;
+  Jacobi (temp, eigenvectors, eigenvalues);
+
+  for (unsigned i=0; i<4; i++)
+    cerr << "e_" << i << "=" << eigenvalues[i] << "  v=" << eigenvectors[i] << endl;
+
+
+
+
+
+
+
+  {
+
+  tot_3 /= ndat;
+  totsq_3 /= ndat;
+
+
+  totsq_3 -= outer(tot_3,conj(tot_3));
+
+  cerr << "3 mean=\n" << tot_3 << endl;
+  cerr << "3 covar=\n" << totsq_3 << endl;
+
+  Matrix<3, 3, complex<double> > eigenvectors;
+  Vector<3, double> eigenvalues;
+
+  Matrix<3, 3, complex<double> > temp = totsq_3;
+  Jacobi (temp, eigenvectors, eigenvalues);
+
+  for (unsigned i=0; i<3; i++)
+    cerr << "e_" << i << "=" << eigenvalues[i] << "  v=" << eigenvectors[i] << endl;
+
+  }
+
+
+
+
+
+
 
   return 0;
 }

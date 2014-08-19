@@ -333,7 +333,7 @@ int Tempo::toa::Tempo2_unload (char* outstring) const
   if (auxinfo.find(" ")!=string::npos) 
 	  flags = auxinfo.substr(auxinfo.find(" "));
 
-  sprintf(outstring, "%s %8.3f %s %7.3f ", fname.c_str(), frequency,
+  sprintf(outstring, "%s %8.6f %s %7.3f ", fname.c_str(), frequency,
           arrival.printdays(15).c_str(), error);
 
   if (phase_info)

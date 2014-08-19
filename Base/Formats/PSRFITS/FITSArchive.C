@@ -16,6 +16,7 @@
 #include "Pulsar/ProfileColumn.h"
 #include "Pulsar/FITSHdrExtension.h"
 #include "Pulsar/FITSSUBHdrExtension.h"
+#include "Pulsar/ObsDescription.h"
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/ITRFExtension.h"
 #include "Pulsar/CalInfoExtension.h"
@@ -701,6 +702,9 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   // Load the processing history
   load_ProcHistory (read_fptr);
 
+  // Load the observation description
+  load_ObsDescription (read_fptr);
+
   // Load the digitiser statistics
   load_DigitiserStatistics (read_fptr);
   
@@ -1062,6 +1066,19 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const try
   unload_Predictor (fptr);
 
   // Unload some of the other HDU's
+
+  try
+  {
+    const ObsDescription* description = get<ObsDescription>();
+    if (description)
+      unload (fptr, description);
+    else
+      delete_hdu (fptr, "OBSDESCR");
+  }
+  catch( Error& e )
+  {
+    cerr << e << endl;
+  }
 
   try
   {

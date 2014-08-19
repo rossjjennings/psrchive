@@ -55,6 +55,9 @@ namespace Pulsar {
 
     //! Initialize the Telescope Extension with SHAO info
     void SHAO (Telescope* t);
+
+    //! Initialize the Telescope Extension with LWA info
+    void LWA (Telescope* t);
   } 
 
 }

@@ -29,19 +29,21 @@ TextInterface::Parser* Pulsar::DynamicCalSpectrumPlot::get_interface ()
 void Pulsar::DynamicCalSpectrumPlot::get_plot_array( const Archive *data, 
     float *array )
 {
+  std::pair<unsigned,unsigned> srange = get_subint_range (data);
+  std::pair<unsigned,unsigned> crange = get_chan_range (data);
 
-  int nsub = srange.second - srange.first + 1;
-  int nchan = crange.second - crange.first + 1;
+  int nsub = srange.second - srange.first;
+  int nchan = crange.second - crange.first;
 
   // Cal levels
   std::vector< std::vector< Estimate<double> > > hi;
   std::vector< std::vector< Estimate<double> > > lo;
 
-  for (int isub=srange.first; isub<=srange.second; isub++) {
+  for (int isub=srange.first; isub<srange.second; isub++) {
 
     data->get_Integration(isub)->cal_levels(hi, lo);
 
-    for (int ichan=crange.first; ichan<=crange.second; ichan++) {
+    for (int ichan=crange.first; ichan<crange.second; ichan++) {
 
       double val = 0.0;
 

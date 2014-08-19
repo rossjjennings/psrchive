@@ -103,7 +103,10 @@ PavApp::PavApp()
   y_max = 1.0;
   y_min = 0.0;
   truncate_amp = 0.0;
-  colour_map = pgplot::ColourMap::Heat;
+
+  std::stringstream ss;
+  ss << pgplot::ColourMap::default_colour_map;
+  ss >> colour_map;
   centre_profile = false;
 
   plot_error_box = false;

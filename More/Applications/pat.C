@@ -185,6 +185,7 @@ void usage ()
     "                   For tempo2, <flags> include i = display instrument \n"
     "                                               r = display receiver   \n"
     "                                            IPTA = all IPTA-format flags\n"
+    "  -G char          Format/flag separator char for -f [default: space]\n"   
     "  -C \"<options>\"   Select vap-like options to be displayed on output \n"
     "  -C \"<subint> <chan>\" Print subint and/or channel                    \n"
     "  -r               Print reference phase and dt \n"
@@ -239,6 +240,7 @@ int main (int argc, char** argv) try
 
   string std,gaussFile;
   string outFormat(""),outFormatFlags;
+  string flagsep(" ");
   string tname;
 
   double min_phase = 0.0;
@@ -262,7 +264,7 @@ int main (int argc, char** argv) try
 #define PLOT_ARGS
 #endif
 
-  const char* args = "a:A:bcC:Dde:E:f:Fg:hij:J:K:m:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
+  const char* args = "a:A:bcC:Dde:E:f:Fg:G:hij:J:K:m:M:n:pPqRrS:s:TuvVx:z:" PLOT_ARGS;
 
   int gotc = 0;
 
@@ -338,11 +340,15 @@ int main (int argc, char** argv) try
     case 'f':
       {
 	/* Set the output format */
-	outFormat = string(optarg).substr(0,string(optarg).find(" "));
-	if (string(optarg).find(" ")!=string::npos)
-	  outFormatFlags = string(optarg).substr(string(optarg).find(" "));
+	outFormat = string(optarg).substr(0,string(optarg).find(flagsep));
+	if (string(optarg).find(flagsep)!=string::npos)
+	  outFormatFlags = string(optarg).substr(string(optarg).find(flagsep));
 	break;
       }
+
+    case 'G':
+      flagsep = optarg;
+      break;
 
     case 'g':
       gaussian  = true;

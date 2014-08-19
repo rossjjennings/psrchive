@@ -15,6 +15,8 @@
 #define __ColourMap_H
 
 #include "TextInterface.h"
+#include "Pulsar/Config.h"
+#include <string>
 
 namespace pgplot {
 
@@ -76,6 +78,9 @@ namespace pgplot {
     //! Logarithmic image transfer function
     bool logarithmic;
 
+  public:
+
+    static Pulsar::Option<std::string> default_colour_map;
   };
 
   class ColourMap::Interface : public TextInterface::To<ColourMap> {
@@ -91,5 +96,4 @@ namespace pgplot {
 
 
 }
-
 #endif

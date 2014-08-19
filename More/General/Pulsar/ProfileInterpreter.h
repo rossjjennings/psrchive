@@ -48,6 +48,9 @@ namespace Pulsar {
     //! Form the low-pass filtered profile
     std::string sinc (const std::string& args);
 
+    //! Extract the specified phase bin range
+    std::string extract (const std::string& args);
+
     //! Subtract the named archive from the current
     std::string subtract (const std::string& args);
 

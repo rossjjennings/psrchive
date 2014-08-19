@@ -63,6 +63,10 @@ Pulsar::Backend::Interface::Interface (Backend *s_instance)
        &Backend::set_corrected,
        "phc", "Phase convention corrected" );
 
+  add( &Backend::get_delay,
+       &Backend::set_delay,
+       "delay", "Backend propn delay from digi. input." );
+
 }
 
 //! Return a text interfaces that can be used to access this instance

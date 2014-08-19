@@ -66,6 +66,9 @@ static int default_aliases ()
   add_alias ("SH", "shao");
   add_alias ("SH", "shao65");
 
+  add_alias ("LW", "lwa");
+  add_alias ("LW", "lwa1");
+
   return 1;
 }
 

@@ -291,6 +291,7 @@ int main(int argc, char *argv[]) {
   else
     dsplot->configure("var=1");
 
+  dsplot->configure("x:unit=subint");
   dsplot->set_reuse_baseline();
   int dsplot_id = cpgopen("/xs");
   if (dsplot_id<=0) {
@@ -560,7 +561,7 @@ int main(int argc, char *argv[]) {
 
     /* Unset zoom */
     if (ch==CMD_UNZOOM) {
-      dsplot->configure("srange=(-1,-1)");
+      dsplot->configure("srange=(0,0)");
       dsplot->configure("y:win=(0,0)");
       pfplot->configure("y:win=(0,0)");
       ptplot->configure("y:win=(0,0)");

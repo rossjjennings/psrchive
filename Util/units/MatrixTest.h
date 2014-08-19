@@ -14,8 +14,8 @@ class MatrixTest {
   
  public:
   
-  MatrixTest (unsigned int seed=13)
-    { verbose = false; if (seed) srand(seed); scale=1e3; tolerance = 1e-12; }
+  MatrixTest ()
+    { verbose = false; scale=1e3; tolerance = 1e-12; }
 
   virtual ~MatrixTest () {}
   

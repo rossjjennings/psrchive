@@ -1,13 +1,14 @@
 /***************************************************************************
  *
- *   Copyright (C) 2011 by Stefan Oslowski, Tim Dolley and Aidan Hotan
+ *   Copyright (C) 2011 by Stefan Oslowski, Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-// Singla Pulse Analysis - reimplementation and extension of Tim Dolley and Aidan Hotan's spa as an application along with new features.
-// Parts of the code corresponding to the functionality of spa are taken directly out of the spa.C, hence I included Tim and Aidan in the note above.
+// Single Pulse Analysis - identification of pulses, phase resolved histograms of polarised profiles
+// TODO implement dynamic histogram range
 // TODO scan_pulses could be extended to fit the pulses with Gaussian / von Mises / Triangle / etc and use this to determine pulse width
+// TODO make scan_pulses use the polarisation information, when requested
 // TODO range setting for flux / PA / polarisation degree histograms
 
 #include "Pulsar/Application.h"
@@ -37,6 +38,8 @@
 #include <vector>
 #include <string>
 #include <sstream>
+
+#include <complex>
 
 #include <cpgplot.h>
 
@@ -77,6 +80,17 @@ public:
     unsigned bscrunch_factor;		//widht of one bin
   } pulse;
 
+/*  typedef struct polarised_pulse
+  {
+    //Stokes params:
+    float Q;
+    float U;
+    float V; // = circular
+    float linear;
+    float PA;
+    float pol_degree;
+  } polarised_pulse;*/
+
   typedef struct identifier
   {
     string file;
@@ -94,10 +108,8 @@ protected:
   void add_options ( CommandLine::Menu& );
 
   unsigned nbin;
-  bool  gaussian;// TODO what's that for?
   float factor;
   bool  log;
-  bool  shownoise;// TODO what's that for?
   int   method;
   unsigned bins;
   float cphs;
@@ -105,19 +117,7 @@ protected:
   float norm;
 
   vector<pulse>  pulses;
-
-  //! phase resolved histograms
-  unsigned hist_count;
-  vector<float> phase_range;
-  vector<gsl_histogram*> h_polar_degree_vec;
-  vector<gsl_histogram*> h_polar_angle_vec;
-  vector<gsl_histogram*> h_flux_pr_vec; // pr = phase resolved as opposed to the one calculated in the "traditional" spa
-
-  unsigned polar_degree_bins;
-  unsigned polar_angle_bins;
-  unsigned flux_pr_bins;
-
-  bool dynamic_histogram;
+//  vector<polarised_pulse>  pulses_polarisation;
 
   //! maximal amplitude (and the corresponding bin) in given range:
   vector < identifier > max_amp_info;
@@ -125,21 +125,61 @@ protected:
   //! Vector of bins corresponding to given histogram
   vector<unsigned> h_bin;
 
-  bool create_flux;
-  bool create_polar_degree;
-  bool create_polar_angle;
-
+  //! Max amp in range
   bool find_max_amp_in_range;
   bool perform_bscrunch_loop;
   unsigned max_bscrunch;
   unsigned current_bscrunch;
 
+  //! phase resolved histograms and scatter
+  unsigned hist_count;
+  vector<float> phase_range;
+  vector<gsl_histogram*> h_polar_degree_vec; // polarisation degree histogram
+  vector<gsl_histogram*> h_polar_angle_vec; // polarisation angle histogram
+  vector<gsl_histogram*> h_polar_linear_vec; // linear polarisation histogram
+  vector<gsl_histogram*> h_polar_circular_vec; // circular polarisation histogram
+  vector<gsl_histogram*> h_flux_pr_vec; // pr = phase resolved as opposed to the one calculated in the "traditional" spa
+  vector<vector< complex<double> > > s_linear_vs_PA_pr; // data for linear polarisation vs PA scatter plots, represented internally as complex numbers with real part corresponding to the linear and imaginary to PA
+  //vector<vector<polarised_pulse> > pules_polarisation_pr; // alternative way of generating the histograms, useful when e.g. linear versus PA is requried.
+
+  //! Create histograms?
+  bool create_flux;
+  bool create_polar_degree;
+  bool create_polar_angle;
+  bool create_polar_linear;
+  bool create_polar_circular;
+  bool create_linear_vs_angle;
+
+  //! Phase resolved histograms configuration
   bool not_initialised; 
 
+  //bins:
+  unsigned polar_degree_bins;
+  unsigned polar_angle_bins;
+  unsigned polar_linear_bins;
+  unsigned polar_circular_bins;
+  unsigned flux_pr_bins;
+  //range:
+/*  vector<float> polar_degree_range;
+  vector<float> polar_angle_range;
+  vector<float> polar_linear_range;
+  vector<float> polar_circular_range;
+  vector<float> flux_pr_range;*/
+  double flux_max;
+  // threshold
+  float polar_threshold;
+
+  // parse the range setting
+  void parse_range ( vector<float>, string );
+
+  //! Template variables
+  string std_file;
+  Reference::To<Archive> std_arch;
   float mean_to_recover;
 
+
   void choose_phase ( float );
-  void choose_range ( string );
+  void choose_phase_range ( string );
   void choose_bscrunch ( unsigned );
 
   //! ProfileStats
@@ -153,6 +193,7 @@ protected:
   void create_histograms ( Reference::To<Archive> );
   //! Dynamic range of histograms:
   gsl_histogram* update_histogram_range ( gsl_histogram*, float );
+  bool dynamic_histogram;
 
   //! convenience function to perform all of the "traditional" functions of spa
   void traditional_spa ();
@@ -171,9 +212,11 @@ protected:
   Reference::To<Pulsar::ProfileWeightFunction> finder;
   //! Set and configure the algorithm used to find pulses
   void set_finder (const std::string& name);
+  //! Should finder store the polarisation information?
+  bool polarized_finder;
   //! Use the finder to list pulse information
   void matched_finder (const Archive*);
-  void matched_report (string name, unsigned isub, const PhaseWeight& weight, const Profile& profile);
+  void matched_populate_I (string name, unsigned isub, const PhaseWeight& weight, const Profile& profile);
 };
 
 
@@ -182,16 +225,22 @@ psrspa::psrspa ()
 	: Application ( "psrspa", "Single Pulse Analysis" )
 {
   add ( new StandardOptions );
-  polar_degree_bins = polar_angle_bins = flux_pr_bins = bins = 30;
+  polar_degree_bins = polar_angle_bins = polar_linear_bins = polar_circular_bins = flux_pr_bins = bins = 30;
   nbin = 0;
 
   create_flux = false;
   create_polar_degree = false;
   create_polar_angle = false;
+  create_polar_linear = false;
+  create_polar_circular = false;
+  create_linear_vs_angle = false;
 
+  polar_threshold = 3.0;
   hist_count = 0;
 
   dynamic_histogram = false;
+
+  flux_max = 100000.0;
 
   log = false;
 
@@ -208,16 +257,27 @@ psrspa::psrspa ()
   path = "./";
   binary_output = false;
 
+  dynamic_histogram = false;
+
   b_sigma = -1.0;
+
+  polarized_finder = false;
+
+  std_file = "";
   mean_to_recover = 0.0;
 }
 
 void psrspa::setup ()
 {
   if ( bins != 30 )
-    polar_degree_bins = polar_angle_bins = flux_pr_bins = bins ;
-  if ( ! finder &&  ! create_flux && ! create_polar_degree && ! create_polar_angle && ! find_max_amp_in_range )
-    throw Error ( InvalidState, "psrspa::setup", "at least one of -a, -hf, -hd, -ha or -fm needs to be used" );
+    polar_circular_bins = polar_linear_bins = polar_degree_bins = polar_angle_bins = flux_pr_bins = bins ;
+  if ( ! finder &&  ! create_flux && ! create_polar_degree && ! create_polar_angle && ! find_max_amp_in_range && ! create_polar_linear && ! create_polar_circular && !create_linear_vs_angle )
+    throw Error ( InvalidState, "psrspa::setup", "at least one of -a, -hf, -hd, -ha, -hl, -hc, -sla or -fm needs to be used" );
+
+  if ( !std_file.empty() )
+  {
+    // TODO calculate mean flux of data
+  }
 }
 
 void psrspa::process ( Archive* arch )
@@ -229,7 +289,10 @@ void psrspa::process ( Archive* arch )
   if ( ( create_flux || create_polar_degree || create_polar_angle || find_max_amp_in_range ) && ( not_initialised ) )
     initialise_histograms ();
   arch->fscrunch();        // remove frequency and polarisation resolution
-  if ( !create_polar_degree && !create_polar_angle )
+  if (
+		  !create_polar_degree && !create_polar_angle && !create_polar_linear &&
+		  !create_polar_circular && !create_linear_vs_angle && !polarized_finder 
+     )
   {
     if ( verbose )
       cerr << "psrspa::process polarisation histograms not requested, removing polarisation resolution" << endl;
@@ -244,7 +307,7 @@ void psrspa::process ( Archive* arch )
     return;
   }
 
-  if ( create_flux || create_polar_degree || create_polar_angle || find_max_amp_in_range )
+  if ( create_flux || create_polar_degree || create_polar_angle || create_polar_linear || create_polar_circular || create_linear_vs_angle || find_max_amp_in_range )
   {
     create_histograms ( arch );
   }
@@ -264,14 +327,14 @@ void psrspa::matched_finder ( const Archive* arch )
       PhaseWeight weight;
       finder->get_weight( &weight );
 
-      matched_report (name, isub, weight, *profile);
+      matched_populate_I (name, isub, weight, *profile);
 
       profile->bscrunch (2);
     }
   }
 }
 
-void psrspa::matched_report (string name, unsigned isub, const PhaseWeight& weight, const Profile& profile)
+void psrspa::matched_populate_I (string name, unsigned isub, const PhaseWeight& weight, const Profile& profile)
 {
   pulse newentry;
   const unsigned _nbin = weight.get_nbin();
@@ -314,9 +377,18 @@ void psrspa::matched_report (string name, unsigned isub, const PhaseWeight& weig
   }
 }
 
+/*void psrspa::matched_populate_pol ( string name, unsigned isub, const PhaseWeight& weight, const PolnProfile& profile )
+{
+  polarised_pulse newentry;
+  const unsigned _nbin = weight.get_nbin ();
+  assert ( _nbin == profile.get_nbin() );
+
+  unsigned ibin = 0;
+}*/
+
 void psrspa::finalize ()
 {
-  if ( create_flux || create_polar_degree || create_polar_angle || find_max_amp_in_range )
+  if ( create_flux || create_polar_degree || create_polar_angle || create_polar_linear || create_polar_circular || create_linear_vs_angle || find_max_amp_in_range )
     write_histograms ();
   if ( finder )
     write_pulses ();
@@ -340,7 +412,7 @@ void psrspa::choose_phase ( float _cphs )
   }
 }
 
-void psrspa::choose_range ( string _range )
+void psrspa::choose_phase_range ( string _range )
 {
   if ( verbose )
     cerr << "psrspa::chose_range parsing " << _range << " as a list of phase ranges" << endl;
@@ -351,7 +423,40 @@ void psrspa::choose_range ( string _range )
   if ( phase_range.size()%2 != 0 )
     throw Error ( InvalidParam, "psrspa::chose_range", "Minimum and maximum needs to be provided" );
 }
+/*
+void psrspa::choose_polar_degree_range ( string _range )
+{
+  parse_range ( polar_degree_range, _range );
+}
 
+void psrspa::choose_polar_angle_range ( string _range )
+{
+  parse_range ( polar_angle_range, _range );
+}
+
+void psrspa::choose_polar_linear_range ( string _range )
+{
+  parse_range ( polar_linear_range, _range );
+}
+
+void psrspa::choose_polar_circular_range ( string _range )
+{
+  parse_range ( polar_circular_range, _range );
+}
+
+void psrspa::choose_polar_degree_range ( string _range )
+{
+  parse_range ( polar_degree_range, _range );
+}
+
+void psrspa::parse_range (vector<float> vector, string _range)
+{
+  for  string sub = stringtok (_range, "," ); !sub.empty(); sub = stringtok ( _range, "," ) )
+  {
+    vector.push_back(fromstring<float>(sub));
+  }
+}
+*/
 
 int main (int argc, char** argv)
 {
@@ -372,8 +477,12 @@ void psrspa::add_options ( CommandLine::Menu& menu )
   arg = menu.add ( bins, 'b', "bins" );
   arg->set_help ( "Set the number of all bins" );
 
-  arg = menu.add ( dynamic_histogram, 'd' );
-  arg->set_help ( "Allow dynamic setting of range of histograms" );
+  // TODO implement this:
+  //arg = menu.add ( dynamic_histogram, 'd' );
+  //arg->set_help ( "Allow dynamic setting of range of histograms" );
+
+  arg = menu.add ( std_file, 's', "template" );
+  arg->set_help ( "The template for the analysed data" );
 
   arg = menu.add ( mean_to_recover, 'm', "mean" );
   arg->set_help ( "Flux offset" );
@@ -391,12 +500,16 @@ void psrspa::add_options ( CommandLine::Menu& menu )
 		"\t\t - ProfileWeightStatic (set)\n" 
 		"\t\t - ExponentialBaseline (exponential)\n"
 		"\t\t - GaussianBaseline (normal)\n"
-		"\t\t - BaselineWindow (minimum)\n" );
+		"\t\t - BaselineWindow (minimum)\n"
+		"\t\t The name can be followed by configuration options, e.g.:\n"
+		"\t\t -a consecutive:treshold=4\n" );
+/*  arg = menu.add ( polarized_finder, "sp" );
+  arg->set_help ( "Output the polarisation properties" );*/
 
   menu.add ( "" );
   menu.add ( "Phased resolved histograms" );
 
-  arg = menu.add ( this, &psrspa::choose_range, "pr","min,max(,min,max...)" );
+  arg = menu.add ( this, &psrspa::choose_phase_range, "pr","min,max(,min,max...)" );
   arg->set_help ( "Specify phase range (in turns) for the phase resolved algorithms and max amplitude algorithm" );
   arg->set_long_help ( "Multiple ranges can be provided, e.g., '0.0,0.1,0.3,0.35' will create two ranges 0.0-0.1 and 0.3-0.35" );
 
@@ -409,8 +522,27 @@ void psrspa::add_options ( CommandLine::Menu& menu )
   arg = menu.add ( create_polar_angle, "ha");
   arg->set_help ( "Create phase resolved histogram of polarisation angle" );
 
+  arg = menu.add ( create_polar_linear, "hl");
+  arg->set_help ( "Create phase resolved histogram of linear polarisation" );
+
+  arg = menu.add ( create_polar_circular, "hc");
+  arg->set_help ( "Create phase resolved histogram of circular polarisation" );
+
   arg = menu.add ( find_max_amp_in_range, "fm");
   arg->set_help ( "Find maximum amplitude in the given phase range as provided by -pr" );
+
+  arg = menu.add ( create_linear_vs_angle, "sla" );
+  arg->set_help ( "Generate data for scatter plots of linear vs PA" );
+
+  menu.add ( "" );
+  menu.add ( "Phase resolved histograms configuration" );
+
+  arg = menu.add ( flux_max, 'F', "maximum_flux" );
+  arg->set_help ( "Choose the maximum value for flux histogram" );
+
+  arg = menu.add ( polar_threshold, "pt", "threshold" );
+  arg->set_help  ( "Treshold for inclusion of polarisation information\n"
+		  "Polar degree will be set to zero, rest will be not included" );
 
   arg = menu.add ( flux_pr_bins, "hfb", "bins" );
   arg->set_help ( "Set the number of phase resolved flux bins" );
@@ -421,9 +553,30 @@ void psrspa::add_options ( CommandLine::Menu& menu )
   arg = menu.add ( polar_angle_bins, "hab", "bins" );
   arg->set_help ( "Set the number of polarisation angle bins" );
 
+  arg = menu.add ( polar_linear_bins, "hcb", "bins" );
+  arg->set_help ( "Set the number of linear polarisation bins" );
+
+  arg = menu.add ( polar_circular_bins, "hlb", "bins" );
+  arg->set_help ( "Set the number of circular polarisation bins" );
+
   arg = menu.add ( this, &psrspa::choose_bscrunch, "bl", "max_bscrunch" );
   arg->set_help ( "When searching for maximum amplitude in the given phase range, perform calculations\n"
 		  "also for bscrunched profiles, with the given maximum bscrunch factor" );
+
+/*  arg = menu.add ( flux_pr_range, "hfr", "bins" );
+  arg->set_help ( "Set the range of phase resolved flux" );
+
+  arg = menu.add ( polar_degree_range, "hdr", "bins" );
+  arg->set_help ( "Set the range of polarisation degree" );
+
+  arg = menu.add ( polar_angle_range, "har", "bins" );
+  arg->set_help ( "Set the range of polarisation angle" );
+
+  arg = menu.add ( polar_linear_range, "hcr", "bins" );
+  arg->set_help ( "Set the range of linear polarisation" );
+
+  arg = menu.add ( polar_circlar_range, "hlr", "bins" );
+  arg->set_help ( "Set the range of circular polarisation" );*/
 
   menu.add ( "" );
   menu.add ( "Output of the histograms" );
@@ -492,22 +645,48 @@ void psrspa::initialise_histograms ()
   if ( create_polar_degree )
   {
     if ( verbose ) 
-      cerr << "psrspa::initialise_histograms initialising " << hist_count << " polar degree histograms" << endl;
+      cerr << "psrspa::initialise_histograms initialising " << hist_count << " polarisation degree histograms" << endl;
     for ( unsigned ihist = 0; ihist < hist_count ; ihist++ )
     {
       h_polar_degree_vec.push_back ( gsl_histogram_alloc ( polar_degree_bins ) );
       gsl_histogram_set_ranges_uniform ( h_polar_degree_vec[ihist], 0.0, 1.0 );
     }
   }
+  if ( create_polar_linear )
+  {
+    if ( verbose ) 
+      cerr << "psrspa::initialise_histograms initialising " << hist_count << " linear polarisation histograms" << endl;
+    for ( unsigned ihist = 0; ihist < hist_count ; ihist++ )
+    {
+      h_polar_linear_vec.push_back ( gsl_histogram_alloc ( polar_degree_bins ) );
+      gsl_histogram_set_ranges_uniform ( h_polar_linear_vec[ihist], 0.0, 1.0 );
+    }
+  }
+  if ( create_polar_circular )
+  {
+    if ( verbose ) 
+      cerr << "psrspa::initialise_histograms initialising " << hist_count << " circular polarisation histograms" << endl;
+    for ( unsigned ihist = 0; ihist < hist_count ; ihist++ )
+    {
+      h_polar_circular_vec.push_back ( gsl_histogram_alloc ( polar_degree_bins ) );
+      gsl_histogram_set_ranges_uniform ( h_polar_circular_vec[ihist], 0.0, 1.0 );
+    }
+  }
   if ( create_polar_angle )
   {
     if ( verbose ) 
-      cerr << "psrspa::initialise_histograms initialising " << hist_count << " polar angle histograms" << endl;
+      cerr << "psrspa::initialise_histograms initialising " << hist_count << " polarisation angle histograms" << endl;
     for ( unsigned ihist = 0; ihist < hist_count ; ihist++ )
     {
       h_polar_angle_vec.push_back ( gsl_histogram_alloc ( polar_angle_bins ) );
-      gsl_histogram_set_ranges_uniform ( h_polar_angle_vec[ihist], -2.0 * M_PI, 2.0 * M_PI );
+      gsl_histogram_set_ranges_uniform ( h_polar_angle_vec[ihist], -1.0 * M_PI, 1.0 * M_PI );
     }
+  }
+  if ( create_linear_vs_angle )
+  {
+    if ( verbose )
+      cerr << "psrspa::initialise_histograms initialising " << hist_count << " scatter plots of linear polarisation vs PA" << endl;
+    s_linear_vs_PA_pr.resize ( hist_count );
   }
   if ( create_flux )
   {
@@ -517,9 +696,9 @@ void psrspa::initialise_histograms ()
     {
       h_flux_pr_vec.push_back ( gsl_histogram_alloc ( flux_pr_bins ) );
       if ( log )
-	gsl_histogram_set_ranges_uniform ( h_flux_pr_vec[ihist], 0.0, 5.0 );
+	gsl_histogram_set_ranges_uniform ( h_flux_pr_vec[ihist], 0.0, log10(flux_max) );
       else 
-	gsl_histogram_set_ranges_uniform ( h_flux_pr_vec[ihist], 0.0, 100000.0 );
+	gsl_histogram_set_ranges_uniform ( h_flux_pr_vec[ihist], 0.0, flux_max );
     }
   }
   not_initialised = false;
@@ -532,7 +711,10 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
   if ( verbose )
     cerr << "psrspa::create_histograms entered" << endl;
   // ensure Stokes parameters if creating polarisation histograms
-  if ( create_polar_degree || create_polar_angle )
+  if ( 
+		  create_polar_degree || create_polar_angle || create_polar_linear ||
+		  create_polar_circular || create_linear_vs_angle || polarized_finder
+     )
   {
     archive->convert_state ( Signal::Stokes );
     if ( verbose )
@@ -540,17 +722,20 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
   }
 
   // auxillary vectors
-  //vector< Estimate<float > > aux_vec_f;
   vector< Estimate<double > > aux_vec_d;
 
   // Full Stokes profile
   Reference::To<PolnProfile> profile;
   // Polarized flux
   Reference::To<Profile> P;
+  Reference::To<Profile> L;
   P = new Profile;
-  // Total flux
+  // Total, polarised, linear and circular fluxes
   float *T_amps = new float [ nbin ];
   float *P_amps = new float [ nbin ];
+  vector<complex<Estimate<double> > > L_estimate;
+  double *L_amps = new double [ nbin ];
+  float *V_amps = new float [ nbin ];
 
   unsigned bin_min, bin_max;
 
@@ -573,23 +758,47 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
     {
       if ( verbose )
 	cerr << "psrspa::create_histograms creating necessary profiles for subint " << isub << " of " << archive->get_filename () << endl;
-      if ( create_polar_angle || create_polar_degree && current_bscrunch == 1 )
+      if ( (create_polar_angle || create_polar_degree || create_polar_linear || create_polar_circular || create_linear_vs_angle) && current_bscrunch == 1 )
       {
 	profile = archive->get_Integration(isub)->new_PolnProfile(0);
 	if ( verbose )
 	  cerr << "psrspa::create_histograms retrieved PolnProfile for subint " << isub << " of " << archive->get_filename () << endl;
       }
-      if ( create_polar_angle && current_bscrunch == 1 )
+      if ( create_polar_linear )
       {
-	profile->get_orientation ( aux_vec_d, 0 );
+	profile->get_linear ( L_estimate, polar_threshold );
+	if ( verbose )
+	  cerr << "psrspa::create_histograms retrieved linear polarisation for subint " << isub << " of " << archive->get_filename () << endl;
+      }
+      if ( create_polar_circular )
+      {
+	V_amps = profile->get_amps ( 3 );
+	if ( verbose )
+	  cerr << "psrspa::create_histograms retrieved circular polarisation for subint " << isub << " of " << archive->get_filename () << endl;
+      }
+      if ( create_linear_vs_angle || create_polar_angle && current_bscrunch == 1 )
+      {
+	if ( ! create_polar_linear )
+	{
+	  profile->get_linear ( L_estimate, polar_threshold );
+	}
+	profile->get_orientation ( aux_vec_d, polar_threshold );
 	if ( verbose )
 	  cerr << "psrspa::create_histograms retrieved polarisation angle for subint " << isub << " of " << archive->get_filename () << endl;
       }
-      if ( create_polar_degree || create_flux || find_max_amp_in_range )
+      if ( create_polar_linear || create_polar_circular || create_polar_degree || create_flux || find_max_amp_in_range )
       {
 	stats.set_profile ( archive->get_Profile ( isub, 0, 0 ) );
 	b_sigma = sqrt ( stats.get_baseline_variance ().get_value () );
 	T_amps = archive->get_Profile ( isub, 0, 0 )->get_amps (); 
+	if ( create_polar_linear )
+	{
+	  profile->get_linear ( L_estimate, polar_threshold );
+	}
+	if ( create_polar_circular )
+	{
+	  V_amps = profile->get_amps ( 3 );
+	}
 	if ( verbose )
 	  cerr << "psrspa::create_histograms retrieved total flux amps for subint " << isub << " of " << archive->get_filename () << endl;
 	if ( create_polar_degree && current_bscrunch == 1 )
@@ -602,6 +811,12 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
 	    cerr << "psrspa::create_histograms retrieved polarized flux amps for subint " << isub << " of " << archive->get_filename () << endl;
 	}
       }
+      if ( create_polar_degree || create_linear_vs_angle || create_polar_linear )
+      {
+	//convert the linear estimate into linear amps
+	for ( unsigned ibin = 0; ibin < nbin; ibin++ )
+	      L_amps[ibin] = sqrt( pow ( L_estimate[ibin].real().get_value(), 2 ) + pow ( L_estimate[ibin].imag().get_value(), 2 ) );
+      }
 
       if ( verbose )
 	cerr << "psrspa::create_histograms looping through the provided phase ranges for subint " << isub << " of " << archive->get_filename () << endl;
@@ -613,7 +828,7 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
 	{
 	  bin_min = unsigned( floor ( phase_range[irange] * float(nbin / current_bscrunch ) + 0.5 ) );
 	  if ( verbose ) 
-	    cerr << "psrspa::create_histograms set minimal bin to " << bin_min << endl;
+	    cerr << "psrspa::create_histograms set minimum bin to " << bin_min << endl;
 	}
 	else
 	{
@@ -627,33 +842,43 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
 	  {
 	    if ( create_polar_angle && current_bscrunch == 1 )
 	    {
-	      int result = gsl_histogram_increment ( h_polar_angle_vec[curr_hist], aux_vec_d[ibin].get_value () / 180.0 * M_PI );
-	      if ( result == GSL_EDOM )
+	      if ( aux_vec_d[ibin].get_value() != 0.0 )
 	      {
-		if ( dynamic_histogram )
-		{
-		  gsl_histogram *temp_hist = gsl_histogram_clone ( h_polar_angle_vec[curr_hist] );
-		  h_flux_pr_vec[curr_hist] = update_histogram_range ( temp_hist, aux_vec_d[ibin].get_value () / 180.0 * M_PI );
-		}
-		else {
+		int result = gsl_histogram_increment ( h_polar_angle_vec[curr_hist], aux_vec_d[ibin].get_value () / 180.0 * M_PI );
+		if ( result == GSL_EDOM )
 		  warn << "WARNING psrspa::create_histograms polarisation angle the histogram range for the bin " << ibin << " in the subint " << isub << " of archive " << archive->get_filename () << endl;
-		}
 	      }
 	    }
 	    if ( create_polar_degree && current_bscrunch == 1 )
 	    {
 	      // if P_amps[ibin] or T_amps[ibin] < 3 sigma, set polar degree to zero
-	      int result = gsl_histogram_increment ( h_polar_degree_vec[curr_hist], ( fabs ( P_amps[ibin] ) < 3.0 * b_sigma || fabs ( T_amps[ibin] ) < 3.0 * b_sigma ) ? 0.0 : P_amps[ibin] / T_amps[ibin] );
+	      int result = gsl_histogram_increment ( h_polar_degree_vec[curr_hist], ( fabs ( P_amps[ibin] ) < polar_threshold * b_sigma || fabs ( T_amps[ibin] ) < polar_threshold * b_sigma ) ? 0.0 : P_amps[ibin] / T_amps[ibin] );
 	      if ( result == GSL_EDOM )
+		warn << "WARNING psrspa::create_histograms polarisation degree outside the histogram range for the bin " << ibin << " in the subint " << isub << " of archive " << archive->get_filename () << " poldeg=" << P_amps[ibin] / T_amps[ibin] << endl;
+	    }
+	    if ( create_polar_linear && current_bscrunch == 1 )
+	    {
+	      if ( L_amps[ibin] != 0.0 )
 	      {
-		if ( dynamic_histogram )
-		{
-		  gsl_histogram *temp_hist = gsl_histogram_clone ( h_polar_degree_vec[curr_hist] );
-		  h_flux_pr_vec[curr_hist] = update_histogram_range ( temp_hist, ( fabs ( P_amps[ibin] ) < 3.0 * b_sigma || fabs ( T_amps[ibin] ) < 3.0 * b_sigma ) ? 0.0 : P_amps[ibin] / T_amps[ibin] );
-		}
-		else {
-		warn << "WARNING psrspa::create_histograms polarisation degree outside the histogram range for the bin " << ibin << " in the subint " << isub << " of archive " << archive->get_filename () << endl;
-		}
+		int result = gsl_histogram_increment ( h_polar_linear_vec[curr_hist], L_amps[ibin] / T_amps[ibin] );
+		if ( result == GSL_EDOM )
+		  warn << "WARNING psrspa::create_histograms linear polarisation outside the histogram range for the bin " << ibin << " in the subint " << isub << " of archive " << archive->get_filename () << endl;
+	      }
+	    }
+	    if ( create_polar_circular && current_bscrunch == 1 )
+	    {
+	      if ( V_amps[ibin] != 0.0 )
+	      {
+		int result = gsl_histogram_increment ( h_polar_circular_vec[curr_hist], fabs ( V_amps[ibin] ) / T_amps[ibin] );
+		if ( result == GSL_EDOM )
+		  warn << "WARNING psrspa::create_histograms circular polarisation outside the histogram range for the bin " << ibin << " in the subint " << isub << " of archive " << archive->get_filename () << endl;
+	      }
+	    }
+	    if ( create_linear_vs_angle && current_bscrunch == 1 )
+	    {
+	      if ( L_amps[ibin] != 0.0 )
+	      {
+		s_linear_vs_PA_pr[curr_hist].push_back ( complex<double>( L_amps[ibin], aux_vec_d[ibin].get_value() ) );
 	      }
 	    }
 	    if ( create_flux && current_bscrunch == 1 )
@@ -668,16 +893,7 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
 		result = gsl_histogram_increment ( h_flux_pr_vec[curr_hist], T_amps[ibin] + mean_to_recover );
 	      }
 	      if ( result == GSL_EDOM )
-	      {
-		if ( dynamic_histogram )
-		{
-		  gsl_histogram *temp_hist = gsl_histogram_clone ( h_flux_pr_vec[curr_hist] );
-		  h_flux_pr_vec[curr_hist] = update_histogram_range ( temp_hist, log ? log10f ( T_amps[ibin] ) : T_amps[ibin] );
-		}
-		else {
-		  warn << "WARNING psrspa::create_histograms phase resolved flux outside the histogram range for the bin " << ibin << " in the subint " << isub << " of archive " << archive->get_filename () << " flux = " << T_amps[ibin] << endl;
-		}
-	      }
+		warn << "WARNING psrspa::create_histograms phase resolved flux outside the histogram range for the bin " << ibin << " in the subint " << isub << " of archive " << archive->get_filename () << " flux = " << T_amps[ibin] << " flux range: " << h_flux_pr_vec[curr_hist]->range[0] << " - " << h_flux_pr_vec[curr_hist]->range[h_flux_pr_vec[curr_hist]->n] << endl;
 	    }
 	    // increment the histogram id
 	    curr_hist ++;
@@ -755,6 +971,58 @@ void psrspa::write_histograms ()
       ss.str( "" );
     }
   }
+  if ( create_polar_linear )
+  {
+    if ( verbose )
+      cerr << "psrspa::write_histograms writing linear polarisation histograms" << endl;
+    for ( unsigned ihist = 0; ihist < hist_count; ihist++ )
+    {
+      ss << path+"/"+prefix+"_linpol_" << h_bin[ihist] << "." << ext;
+      out = fopen ( ss.str().c_str(), "w" );
+      if ( ! binary_output )
+	gsl_histogram_fprintf ( out, h_polar_linear_vec[ihist], "%g", "%g" );
+      else
+	gsl_histogram_fwrite ( out, h_polar_linear_vec[ihist] );
+      fclose ( out );
+      ss.str( "" );
+    }
+  }
+  if ( create_polar_circular )
+  {
+    if ( verbose )
+      cerr << "psrspa::write_histograms writing circular polarisation histograms" << endl;
+    for ( unsigned ihist = 0; ihist < hist_count; ihist++ )
+    {
+      ss << path+"/"+prefix+"_cirpol_" << h_bin[ihist] << "." << ext;
+      out = fopen ( ss.str().c_str(), "w" );
+      if ( ! binary_output )
+	gsl_histogram_fprintf ( out, h_polar_circular_vec[ihist], "%g", "%g" );
+      else
+	gsl_histogram_fwrite ( out, h_polar_circular_vec[ihist] );
+      fclose ( out );
+      ss.str( "" );
+    }
+  }
+  if ( create_linear_vs_angle )
+  {
+    if ( verbose )
+      cerr << "psrspa::write_histograms writing linear polarisation vs polarisation angle data" << endl;
+    for ( unsigned ihist = 0; ihist < hist_count; ihist++ )
+    {
+      ss << path+"/"+prefix+"_linvsang_" << h_bin[ihist] << "." << ext;
+      out = fopen ( ss.str().c_str(), "w" );
+      for ( unsigned i = 0; i < s_linear_vs_PA_pr[ihist].size(); i++)
+      {
+	if ( ! binary_output )
+	  fprintf ( out, "%g %g\n", s_linear_vs_PA_pr[ihist].at(i).real(), s_linear_vs_PA_pr[ihist].at(i).imag() );
+//	else
+//	  fwrite ( out, s_linear_vs_PA_pr[ihist].at(i).real(), s_linear_vs_PA_pr[ihist].at(i).imag() );
+      }
+      fclose ( out );
+      ss.str( "" );
+    }
+  }
+
   if ( find_max_amp_in_range )
   {
     ss << path+"/"+prefix+"_maxamp" << "." << ext;
