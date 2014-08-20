@@ -480,8 +480,6 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
 
       set_centre_frequency (avg_freq);
       set_bandwidth (total_bw);
-	  cout << get_bandwidth() << endl;
-	  cout << get_centre_frequency() << endl;
 
     }
     else {
