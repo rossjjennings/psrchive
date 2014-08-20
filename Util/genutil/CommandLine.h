@@ -94,7 +94,10 @@ namespace CommandLine {
 
     Argument () { val = 0; has_arg = no_argument; handled = 0; }
 
-    void set_short_name (char c) { short_name = std::string(1,c); }
+    void set_short_name (char c) { 
+      if (c=='\0') short_name = "";
+      else short_name = std::string(1,c); 
+    }
     void set_long_name (const std::string& s) { long_name = s; }
     void set_type (const std::string& s) { type = s; }
     void set_help (const std::string& s) { help = s; }
