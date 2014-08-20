@@ -420,6 +420,12 @@ double MHz_scale (const char* units)
 	 return 299792458.0;
   if (strcasecmp (units, " mm")==0)
 	 return 299792458e-3;
+  if (strcasecmp (units, "MeV")==0)
+	 return 2.41798935e14;
+  if (strcasecmp (units, "keV")==0)
+	 return 2.41798935e11;
+  if (strcasecmp (units, " eV")==0)
+	 return 2.41798935e8;
   
   throw Error (InvalidParam, "MHz_scale", "unrecognized units '%s'", units);
 }
