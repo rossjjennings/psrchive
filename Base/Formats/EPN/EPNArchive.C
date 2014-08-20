@@ -414,6 +414,8 @@ double MHz_scale (const char* units)
     return 1e-3;
   if (strcasecmp (units, "Hz")==0)
     return 1e-6;
+  if (strcasecmp (units, " nm")==0)
+	 return 299792458000.0;
   
   throw Error (InvalidParam, "MHz_scale", "unrecognized units '%s'", units);
 }
