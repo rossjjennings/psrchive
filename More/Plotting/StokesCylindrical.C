@@ -25,7 +25,7 @@ Pulsar::StokesCylindrical::StokesCylindrical ()
   // shorten the y label
   orientation.get_frame()->get_y_axis()->set_label("P.A. (deg.)");
   // remove the x label
-  orientation.get_frame()->get_x_axis()->set_label("");
+  orientation.get_frame()->get_x_axis()->set_label(" ");
   // remove the x enumeration
   orientation.get_frame()->get_x_axis()->rem_opt('N');
   // remove the below frame labels
