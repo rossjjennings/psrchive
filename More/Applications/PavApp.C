@@ -787,7 +787,7 @@ int PavApp::run( int argc, char *argv[] )
     case 'f':
       {
         ostringstream s_job;
-        s_job << "fscrunch " << optarg;
+        s_job << "fscrunch x" << optarg;
         jobs.push_back( s_job.str() );
         break;
       }
@@ -797,7 +797,7 @@ int PavApp::run( int argc, char *argv[] )
     case 't':
       {
         ostringstream s_job;
-        s_job << "tscrunch " << optarg;
+        s_job << "tscrunch x" << optarg;
         jobs.push_back( s_job.str() );
         break;
       }

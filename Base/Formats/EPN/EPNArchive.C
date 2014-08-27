@@ -97,13 +97,14 @@ Pulsar::EPNArchive* Pulsar::EPNArchive::clone () const
 
 std::string Pulsar::EPNArchive::get_telescope () const
 {
-  return "7";
+  return std::string(line3.telname,8);
 }
 
 void Pulsar::EPNArchive::set_telescope (const std::string& code)
 {
 
 }
+
 
 Signal::Source Pulsar::EPNArchive::get_type () const
 {
@@ -441,6 +442,8 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
 
   BasicIntegration* integration = new BasicIntegration;
   resize_Integration (integration);
+
+
 
   MJD epoch (line3.epoch);
   epoch += sub_line1.tstart[0] * 1e-6;
