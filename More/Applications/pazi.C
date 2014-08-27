@@ -184,6 +184,8 @@ Reference::To<ProfilePlot> subint_orig_plot;
 Reference::To<ProfilePlot> subint_mod_plot;
 Reference::To<TextInterface::Parser> subint_fui;
 
+Signal::State original_state;
+
 int main(int argc, char* argv[]) try
 {
   if (argc < 2) {
@@ -229,7 +231,10 @@ int main(int argc, char* argv[]) try
   base_archive = Archive::load(filename);
   
   if (base_archive->get_npol() == 4)
+  {
+    original_state = base_archive->get_state();
     base_archive->convert_state( Signal::Stokes );
+  }
   
   backup_archive = base_archive->clone();
   
@@ -529,7 +534,11 @@ int main(int argc, char* argv[]) try
 	  ext->set_command_str("pazi");
 	}
 
+	if ( base_archive->get_npol() == 4 )
+	  base_archive->convert_state( original_state );
 	base_archive->unload(write_filename);
+	if ( base_archive->get_npol() == 4 )
+	  base_archive->convert_state( Signal::Stokes );
 	break;
       }
 
