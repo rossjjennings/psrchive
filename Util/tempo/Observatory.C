@@ -138,7 +138,7 @@ Tempo::observatory (const string& telescope_name)
 
   // if there is an exact name match, use it
   for (unsigned i=0; i < antennae.size(); i++)
-    if (!strcasecmp( antennae[i]->get_name().c_str(), telescope_name.c_str() ))
+    if ( telescope_name.compare(antennae[i]->get_name()) == 0 )
       return antennae[i];
 
   // otherwise, if there is a sub-string name match, use it
