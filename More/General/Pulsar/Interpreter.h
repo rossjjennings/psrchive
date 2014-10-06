@@ -173,6 +173,9 @@ namespace Pulsar {
     //! rotate each profile by the specified value
     std::string rotate (const std::string& args);
 
+    //! compute dynamic spectrum of archive on stack
+    std::string dynspec (const std::string& args);
+
     //! correct for parallactic angle effects
     std::string correct_instrument (const std::string& args);
     
