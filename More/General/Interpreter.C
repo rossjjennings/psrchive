@@ -1220,7 +1220,7 @@ string Pulsar::Interpreter::dynspec(const string& args) try {
   vector<string> arguments = setup (args);
 
   // make total intensity copy of original archive
-  Reference::To<Archive> arch_copy = get();
+  Reference::To<Archive> arch_copy = get()->clone();
   arch_copy->convert_state(Signal::Intensity);
   arch_copy->dedisperse();
   Reference::To<Archive> arch_total = arch_copy->total();
