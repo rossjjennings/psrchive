@@ -1268,6 +1268,29 @@ string Pulsar::Interpreter::dynspec(const string& args) try {
     Reference::To<Archive> temp = Archive::load(arguments[1]);
     standard = temp->total();
     standard->convert_state(Signal::Intensity);
+    // check for commensurate binning
+    unsigned std_nbin = standard->get_nbin();
+    unsigned arch_nbin = arch_total->get_nbin();
+    if (std_nbin != arch_nbin) {
+      if (std_nbin > arch_nbin) {
+        if (std_nbin % arch_nbin) {
+          throw Error (InvalidState, 
+            "Pulsar::Interpreter::dynspec", 
+            "profile_nbin=%d standard nbin=%d", arch_nbin, std_nbin);
+        }
+        standard->bscrunch(std_nbin/arch_nbin);
+      }
+      else {
+        if (arch_nbin % std_nbin) {
+          throw Error (InvalidState, 
+            "Pulsar::Interpreter::dynspec",
+            "profile_nbin=%d standard nbin=%d", arch_nbin, std_nbin);
+        }
+        arch_total->bscrunch(arch_nbin/std_nbin);
+        arch_copy->bscrunch(arch_nbin/std_nbin);
+      }
+    }
+      
   }
   // otherwise, use scrunched archive
   else {
