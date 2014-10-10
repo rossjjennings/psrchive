@@ -34,12 +34,20 @@
 #include "Pulsar/PatchTime.h"
 #include "Pulsar/Contemporaneity.h"
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #ifdef HAVE_CFITSIO
 #include <fitsio.h>
 #endif
 
 %}
 
+#ifdef HAVE_CONFIG_H
+%include <config.h>
+#endif
+ 
 // Language independent exception handler
 %include exception.i       
 %include std_string.i
@@ -187,9 +195,9 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 
 // Some useful free functions 
 
+#ifdef HAVE_CFITSIO
 %inline %{
 
-#ifdef HAVE_CFITSIO
 // Least I/O intensive way to grab observation time
 double get_tobs(const char* filename) {
     int status=0,colnum=0;
@@ -213,8 +221,8 @@ double get_tobs(const char* filename) {
     }
     return tobs;
 }
-#endif
 %}
+#endif
 
 
 // Python-specific extensions to the classes:

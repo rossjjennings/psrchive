@@ -13,10 +13,10 @@ _psrchive_la_LIBADD = $(top_builddir)/More/libpsrmore.la \
                       $(top_builddir)/Base/libpsrbase.la \
                       $(top_builddir)/Util/libpsrutil.la @PYTHON_LDFLAGS@ 
 
-SWIG_FLAGS = -Wall -python -I$(top_builddir)/local_include
+SWIG_FLAGS = -Wall -python -I$(top_builddir)/local_include -I$(top_builddir)
 
 ./psrchive_wrap.cxx: $(srcdir)/psrchive.i
-	$(SWIG) $(SWIG_FLAGS) -outcurrentdir $(srcdir)/psrchive.i
+	$(SWIG) $(SWIG_FLAGS) $(DEFS) -outcurrentdir $(srcdir)/psrchive.i
 
 CLEANFILES = psrchive.py psrchive.pyc ./psrchive_wrap.cxx
 
