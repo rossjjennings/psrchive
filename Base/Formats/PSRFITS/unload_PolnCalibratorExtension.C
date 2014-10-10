@@ -198,12 +198,13 @@ void unload_covariances (fitsfile* fptr,
 
     for (int icovar = 0; icovar < ncovar; icovar++)
     {
-      if (zero)
-	data[count] = 0;
-      else {
-	data[count] = covar[icovar];
-      count++;
+      if (zero) {
+	    data[count] = 0;
       }
+      else {
+	    data[count] = covar[icovar];
+      }
+      count++;
     }
   }
 
