@@ -33,6 +33,7 @@
 #include "Pulsar/FrequencyAppend.h"
 #include "Pulsar/PatchTime.h"
 #include "Pulsar/Contemporaneity.h"
+#include "Pulsar/Predictor.h"
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -82,6 +83,7 @@ using namespace std;
 %newobject Pulsar::Integration::clone;
 %newobject Pulsar::Integration::total;
 %newobject Pulsar::Profile::clone;
+%newobject Pulsar::Predictor::clone;
 
 // Track any pointers handed off to python with a global list
 // of Reference::To objects.  Prevents the C++ routines from
@@ -174,6 +176,27 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %map_enum(Scale)
 %map_enum(Source)
 
+// return long doubles as  numpy scalars
+// implementation left in case wanted later
+//%typemap(out) (long double) {
+//  npy_intp size[1];
+//  size[0] = 1;
+//  PyArrayObject *rval;
+//  rval = (PyArrayObject *)PyArray_SimpleNew(0, size, NPY_LONGDOUBLE);
+//  *((long double *)(rval->data)) = $1;
+//  $result = (PyObject *) rval;
+//}
+
+// return long doubles as Python floats
+%typemap(out) (long double) {
+  $result = PyFloat_FromDouble(double($1));
+}
+
+// read Python floats as long doubles when necessary
+%typemap(in) (long double) {
+  $1 = (long double)(PyFloat_AsDouble($input));
+}
+
 // Header files included here will be wrapped
 %include "ReferenceAble.h"
 %include "Pulsar/Container.h"
@@ -192,6 +215,8 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Angle.h"
 %include "sky_coord.h"
 %include "MJD.h"
+%include "Pulsar/Predictor.h"
+%include "Phase.h"
 
 // Some useful free functions 
 
@@ -224,7 +249,6 @@ double get_tobs(const char* filename) {
 %}
 #endif
 
-
 // Python-specific extensions to the classes:
 
 %extend MJD
@@ -234,6 +258,8 @@ double get_tobs(const char* filename) {
     // try this for now.
     MJD operator + (const MJD & right) { return operator + (*self,right); }
     MJD operator - (const MJD & right) { return operator - (*self,right); }
+    MJD operator + (double right) { return operator + (*self,right); }
+    MJD operator - (double right) { return operator - (*self,right); }
 
     std::string __str__()
     {
@@ -258,6 +284,20 @@ double get_tobs(const char* filename) {
     }
 
   }
+}
+
+%extend Phase
+{
+    // see MJD extension
+    Phase operator + (const Phase & right) { return operator + (*self,right); }
+    Phase operator - (const Phase & right) { return operator - (*self,right); }
+    Phase operator + (double right) { return operator + (*self,right); }
+    Phase operator - (double right) { return operator - (*self,right); }
+
+  long intturns() {
+    return self->intturns();
+  }
+
 }
 
 %extend Pulsar::Profile
@@ -507,5 +547,10 @@ def rotate_phase(self,phase): return self._rotate_phase_swig(phase)
                 ((float *)arr->data)[ii*ndims[1]+jj] = \
                     self->get_Integration(ii)->get_weight(jj);
         return (PyObject *)arr;
+    }
+
+    // Return a copy of the predictor
+    Pulsar::Predictor* get_predictor() {
+      return self->get_model()->clone();
     }
 }
