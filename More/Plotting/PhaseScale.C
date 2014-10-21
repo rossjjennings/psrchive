@@ -19,6 +19,9 @@ Pulsar::PhaseScale::PhaseScale ()
 
 void Pulsar::PhaseScale::init (const Archive* data)
 {
+  if (!data)
+    return;
+
   // PlotScale::num_indeces
   num_indeces = data->get_nbin();
 
