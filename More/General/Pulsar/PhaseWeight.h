@@ -89,7 +89,7 @@ namespace Pulsar {
     void weight_Profile (Profile* profile) const;
 
     //! Set the Profile from which statistics are calculated
-    void set_Profile (const Profile* profile);
+    void set_Profile (const Profile* profile) const;
 
     //! Get the weighted total of the amplitudes
     double get_weighted_sum () const;
@@ -141,10 +141,10 @@ namespace Pulsar {
     std::vector<float> weight;
 
     //! The Profile to which the weights apply
-    Reference::To<const Profile> profile;
+    mutable Reference::To<const Profile> profile;
 
     //! Flag set when the statistics have been calculated
-    bool built;
+    mutable bool built;
 
     //! The weighted mean of the Profile
     Estimate<double> mean;

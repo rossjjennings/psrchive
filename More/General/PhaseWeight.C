@@ -233,7 +233,7 @@ float Pulsar::PhaseWeight::get_median_difference () const
 }
 
 //! Set the Profile to which the weights apply
-void Pulsar::PhaseWeight::set_Profile (const Profile* _profile)
+void Pulsar::PhaseWeight::set_Profile (const Profile* _profile) const
 {
   profile = _profile;
   built = false;
