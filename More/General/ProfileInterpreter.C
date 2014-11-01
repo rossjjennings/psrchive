@@ -9,6 +9,8 @@
 #include "Pulsar/ArchiveTemplates.h"
 #include "Pulsar/Archive.h"
 
+#include "Pulsar/RemoveBaseline.h"
+
 #include "Pulsar/Accumulate.h"
 #include "Pulsar/Differentiate.h"
 #include "Pulsar/SmoothMean.h"
@@ -35,6 +37,8 @@ string help_smooth (const string& method)
 
 Pulsar::ProfileInterpreter::ProfileInterpreter ()
 {
+  remove_baseline = new RemoveBaseline::Total;
+
   add_command 
     ( &ProfileInterpreter::baseline,
       "baseline", "remove the profile baseline",
@@ -98,7 +102,11 @@ Pulsar::ProfileInterpreter::~ProfileInterpreter ()
 
 string Pulsar::ProfileInterpreter::baseline (const string& args) try
 {
-  get()->remove_baseline();
+  if (args.empty())
+    remove_baseline->transform( get() );
+  else
+    remove_baseline->set_operation( RemoveBaseline::Operation::factory(args) );
+
   return response (Good);
 }
 catch (Error& error) {

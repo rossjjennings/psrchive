@@ -19,6 +19,7 @@
 namespace Pulsar {
 
   class Smooth;
+  class RemoveBaseline;
 
   class ProfileInterpreter : public Interpreter::Extension {
 
@@ -67,6 +68,7 @@ namespace Pulsar {
 
     std::string smooth (Smooth*, const std::string& args);
 
+    Reference::To<RemoveBaseline> remove_baseline;
   };
 
 }
