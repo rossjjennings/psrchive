@@ -48,7 +48,7 @@ while test $# -gt 0; do
         ;;
 
     --version)
-        echo @PACKAGE_STRING@
+        echo @PACKAGE_STRING@ 'PSRCHIVEGITHASH'
         exit 0
         ;;
 
