@@ -6,6 +6,8 @@
  ***************************************************************************/
 
 #include "Pulsar/ProfileInterpreter.h"
+
+#include "Pulsar/DeleteInterpreter.h"
 #include "Pulsar/FixInterpreter.h"
 #include "Pulsar/ZapInterpreter.h"
 #include "Pulsar/CalInterpreter.h"
@@ -35,6 +37,9 @@ Pulsar::Interpreter* standard_shell ()
 
   interpreter->import( new Pulsar::ZapInterpreter,
 		       "zap", "zap data using the specified method" );
+
+  interpreter->import( new Pulsar::DeleteInterpreter,
+                       "delete", "delete data using the specified method");
 
   interpreter->import( new Pulsar::CalInterpreter,
 		       "cal", "polarimetric calibration" );
