@@ -7,8 +7,8 @@
 
 #include "Pulsar/DeleteInterpreter.h"
 
-#include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/ArchiveExpert.h"
+#include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Profile.h"
 
 #include "TextInterface.h"
@@ -53,13 +53,9 @@ string Pulsar::DeleteInterpreter::empty ()
   return response (Fail, help());
 }
 
-void parse_indeces (vector<unsigned>& indeces,
+extern void parse_indeces (vector<unsigned>& indeces,
 		    const vector<string>& arguments,
-		    unsigned limit)
-{
-  for (unsigned i=0; i<arguments.size(); i++)
-    TextInterface::parse_indeces (indeces, "[" + arguments[i] + "]", limit);
-}
+		    unsigned limit);
 
 string Pulsar::DeleteInterpreter::chan (const string& args) try 
 {
@@ -68,14 +64,20 @@ string Pulsar::DeleteInterpreter::chan (const string& args) try
   vector<unsigned> channels;
   parse_indeces (channels, arguments, get()->get_nchan());
 
+  std::sort (channels.begin(), channels.end(), std::greater<unsigned>());
+
   // delete selected channels in all sub-integrations
   unsigned nsubint = get()->get_nsubint();
-  for (unsigned isub=0; isub<nsubint; isub++) {
+  for (unsigned isub=0; isub<nsubint; isub++)
+  {
     Integration* subint = get()->get_Integration(isub);
     for (unsigned i=0; i<channels.size(); i++)
-      subint->set_weight( channels[i], 0.0 );
+      subint->expert()->remove( channels[i] );
   }
-  
+
+  if (get()->get_nsubint() > 0)
+    get()->expert()->set_nchan( get()->get_Integration(0)->get_nchan() );
+ 
   return response (Good);
 }
 catch (Error& error) {
@@ -92,13 +94,10 @@ string Pulsar::DeleteInterpreter::subint (const string& args) try
 
   std::sort (subints.begin(), subints.end(), std::greater<unsigned>());
 
-  // delete all channels in selected sub-integrations
-  unsigned nchan = get()->get_nchan();
-  for (unsigned i=0; i<subints.size(); i++) {
-    Integration* subint = get()->get_Integration( subints[i] );
-    for (unsigned ichan=0; ichan<nchan; ichan++)
-      subint->set_weight( ichan, 0.0 );
-  }
+  // delete all selected sub-integrations
+  for (unsigned i=0; i<subints.size(); i++)
+    get()->erase (subints[i]);
+
   return response (Good);
 }
 catch (Error& error) {
@@ -125,11 +124,16 @@ string Pulsar::DeleteInterpreter::freq (const string& args) try
     for (isub=0; isub < nsub; isub++)
     {
       Integration* subint = archive->get_Integration (isub);
-      for (ichan=0; ichan < nchan; ichan++)
+      for (ichan=0; ichan < subint->get_nchan(); )
 	if (r.within( subint->get_centre_frequency(ichan) ))
-	  subint->set_weight (ichan, 0.0);
+	  subint->expert()->remove (ichan);
+        else
+          ichan ++;
     }
   }
+
+  if (get()->get_nsubint() > 0)
+    get()->expert()->set_nchan( get()->get_Integration(0)->get_nchan() );
 
   return response (Good);
 }
