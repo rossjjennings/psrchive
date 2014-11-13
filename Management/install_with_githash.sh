@@ -10,3 +10,4 @@ then
 fi
 ID=`git log -1 --format='(%cd %h)' --date=short 2>/dev/null || echo ''`
 cat $1 | sed "s/PSRCHIVEGITHASH/$ID/" > $2/$1
+chmod 755 $2/$1

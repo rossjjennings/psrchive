@@ -13,6 +13,7 @@ noinst_SCRIPTS = release.csh
 dist_bin_SCRIPTS = psrchive_install
 
 INSTALL_SCRIPT = ./install_with_githash.sh
+EXTRA_DIST = install_with_githash.sh
 
 dist_data_DATA = psrchive_version
 
