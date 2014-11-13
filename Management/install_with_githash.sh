@@ -8,6 +8,7 @@ then
 	echo "Usage: $0 SOURCE DEST"
 	exit 1
 fi
+FILE=`basename $1`
 ID=`git log -1 --format='(%cd %h)' --date=short 2>/dev/null || echo ''`
-cat $1 | sed "s/PSRCHIVEGITHASH/$ID/" > $2/$1
-chmod 755 $2/$1
+sed "s/PSRCHIVEGITHASH/$ID/" $1 > $2/$FILE
+chmod 755 $2/$FILE
