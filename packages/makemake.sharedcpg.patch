@@ -1,5 +1,23 @@
---- makemake.orig	2013-07-02 11:20:02.848458671 -0400
-+++ makemake	2013-07-02 11:21:14.910707415 -0400
+--- makemake.orig	2014-11-25 14:26:28.468283898 +0100
++++ makemake	2014-11-25 14:26:49.832283851 +0100
+@@ -622,7 +622,7 @@
+ # Fortran compiler and compilation flags
+ #
+ FCOMPL=$FCOMPL
+-FFLAGC=$FFLAGC
++FFLAGC=$FFLAGC -fPIC
+ FFLAGD=$FFLAGD
+ #
+ # C compiler and compilation flags
+@@ -633,7 +633,7 @@
+ TK_INCL=$TK_INCL
+ RV_INCL=$RV_INCL
+ CCOMPL=$CCOMPL
+-CFLAGC=$CFLAGC -I.
++CFLAGC=$CFLAGC -I. -fPIC
+ CFLAGD=$CFLAGD
+ MCOMPL=$MCOMPL
+ MFLAGC=$MFLAGC
 @@ -1042,12 +1042,13 @@
  pgbind: $(SRC)/cpg/pgbind.c
  	$(CCOMPL) $(CFLAGC) $(SRC)/cpg/pgbind.c -o pgbind
