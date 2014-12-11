@@ -13,7 +13,6 @@
 
 #include "Pulsar/Application.h"
 #include "Pulsar/StandardOptions.h"
-#include "Pulsar/PlotOptions.h"
 #include "Pulsar/ProfileWeightFunction.h"
 
 #include "MEAL/LevenbergMarquardt.h"
@@ -40,8 +39,6 @@
 #include <sstream>
 
 #include <complex>
-
-#include <cpgplot.h>
 
 #include "strutil.h"
 #include "dirutil.h"

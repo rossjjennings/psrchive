@@ -11,7 +11,9 @@
 #include "Pulsar/SimPolnTiming.h"
 #include "Pulsar/Archive.h"
 #include "MEAL/ScalarParameter.h"
+#ifdef HAVE_PGPLOT
 #include <cpgplot.h>
+#endif
 
 #include <fstream>
 #include <unistd.h>
@@ -52,10 +54,12 @@ void usage ()
     "  -N noise               r.m.s. of measurement noise\n"
     "  -n noise               r.m.s. of noise in standard\n"
     "\n"
+#if HAVE_PGPLOT
     "Plot options:\n"
     "  -t                     no title along top\n"
     "  -d device              pgplot device\n"
        << endl;
+#endif
 }
 
 

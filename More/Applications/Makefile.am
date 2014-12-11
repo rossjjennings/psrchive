@@ -89,11 +89,8 @@ psrsmooth_LDADD = $(LDADD) @GSL_LIBS@
 psrpca_SOURCES = psrpca.C
 psrpca_LDADD = $(LDADD) @GSL_LIBS@ @CULA_LIBS@
 
-if HAVE_PGPLOT
-bin_PROGRAMS += psrspa
 psrspa_SOURCES = psrspa.C
-psrspa_LDADD = $(LDADD) @GSL_LIBS@ @PGPLOT_LIBS@
-endif
+psrspa_LDADD = $(LDADD) @GSL_LIBS@
 
 endif
 
