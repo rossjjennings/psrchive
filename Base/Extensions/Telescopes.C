@@ -60,6 +60,10 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
   case 'g':
     Telescopes::Effelsberg(t);
     break;
+
+  case 't':
+    Telescopes::LOFAR(t);
+    break;
     
   case 'i':
     Telescopes::WSRT(t);
@@ -143,6 +147,12 @@ void Pulsar::Telescopes::Effelsberg(Telescope *t)
   t->set_mount(Telescope::Horizon);
   t->set_primary(Telescope::Parabolic);
   t->set_focus(Telescope::Gregorian); // XXX also varies by receiver
+}
+
+void Pulsar::Telescopes::LOFAR(Telescope *t)
+{
+  t->set_name ("LOFAR");
+  // XXX what about other settings? mount, focus,...
 }
 
 void Pulsar::Telescopes::MtPleasant26(Telescope *t)
