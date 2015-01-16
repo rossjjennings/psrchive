@@ -153,6 +153,9 @@ namespace Pulsar
     //! Get the offs_sub value (only present in fits files)
     double get_offs_sub( unsigned int isub ) const;
 
+    // Correct error due to REF_MJD precision
+    void refmjd_rounding_correction();
+
   protected:
 
     class SKLoader;

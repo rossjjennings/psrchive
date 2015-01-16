@@ -44,6 +44,9 @@ namespace Pulsar
     //! fix the Pointing extension info
     std::string pointing (const std::string& args);
 
+    //! fix epoch error due to polyco REF_MJD in PSRFITS
+    std::string psrfits_refmjd (const std::string& args);
+
     //! no empty commands
     std::string empty ();
 

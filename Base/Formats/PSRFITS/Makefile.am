@@ -36,6 +36,7 @@ libpsrfits_la_SOURCES = setup_io.C setup_profiles.h \
 	unload_integrations.C load_integration_state.C \
 	CalibratorExtensionIO.C FITSAgent.C \
 	P236_reference_epoch_correction.C \
+	refmjd_rounding_correction.C \
 	fitsio_psrephem.C fitsio_polyco.C fitsio_tempo.h
 
 if HAVE_TEMPO2
