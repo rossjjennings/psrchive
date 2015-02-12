@@ -133,6 +133,9 @@ protected:
   vector<float> phase_range;
   vector<gsl_histogram*> h_polar_degree_vec; // polarisation degree histogram
   vector<gsl_histogram*> h_polar_angle_vec; // polarisation angle histogram
+  vector<gsl_histogram*> h_polar_angle_wtI_vec; // polarisation angle weighted by I
+  vector<gsl_histogram*> h_polar_angle_wtL_vec; // polarisation angle weighted by L
+  vector<gsl_histogram*> h_polar_angle_wtLI_vec; // polarisation angle weighted by L/I
   vector<gsl_histogram*> h_polar_linear_vec; // linear polarisation histogram
   vector<gsl_histogram*> h_polar_circular_vec; // circular polarisation histogram
   vector<gsl_histogram*> h_flux_pr_vec; // pr = phase resolved as opposed to the one calculated in the "traditional" spa
@@ -676,7 +679,13 @@ void psrspa::initialise_histograms ()
     for ( unsigned ihist = 0; ihist < hist_count ; ihist++ )
     {
       h_polar_angle_vec.push_back ( gsl_histogram_alloc ( polar_angle_bins ) );
-      gsl_histogram_set_ranges_uniform ( h_polar_angle_vec[ihist], -1.0 * M_PI, 1.0 * M_PI );
+      h_polar_angle_wtI_vec.push_back ( gsl_histogram_alloc ( polar_angle_bins ) );
+      h_polar_angle_wtL_vec.push_back ( gsl_histogram_alloc ( polar_angle_bins ) );
+      h_polar_angle_wtLI_vec.push_back ( gsl_histogram_alloc ( polar_angle_bins ) );
+      gsl_histogram_set_ranges_uniform ( h_polar_angle_vec[ihist], -0.5 * M_PI, 0.5 * M_PI );
+      gsl_histogram_set_ranges_uniform ( h_polar_angle_wtI_vec[ihist], -0.5 * M_PI, 0.5 * M_PI );
+      gsl_histogram_set_ranges_uniform ( h_polar_angle_wtL_vec[ihist], -0.5 * M_PI, 0.5 * M_PI );
+      gsl_histogram_set_ranges_uniform ( h_polar_angle_wtLI_vec[ihist], -0.5 * M_PI, 0.5 * M_PI );
     }
   }
   if ( create_linear_vs_angle )
@@ -719,7 +728,7 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
   }
 
   // auxillary vectors
-  vector< Estimate<double > > aux_vec_d;
+  vector< Estimate<double > > pol_angle;
 
   // Full Stokes profile
   Reference::To<PolnProfile> profile;
@@ -773,17 +782,17 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
 	if ( verbose )
 	  cerr << "psrspa::create_histograms retrieved circular polarisation for subint " << isub << " of " << archive->get_filename () << endl;
       }
-      if ( create_linear_vs_angle || create_polar_angle && current_bscrunch == 1 )
+      if ( (create_linear_vs_angle || create_polar_angle) && current_bscrunch == 1 )
       {
 	if ( ! create_polar_linear )
 	{
 	  profile->get_linear ( L_estimate, polar_threshold );
 	}
-	profile->get_orientation ( aux_vec_d, polar_threshold );
+	profile->get_orientation ( pol_angle, polar_threshold );
 	if ( verbose )
 	  cerr << "psrspa::create_histograms retrieved polarisation angle for subint " << isub << " of " << archive->get_filename () << endl;
       }
-      if ( create_polar_linear || create_polar_circular || create_polar_degree || create_flux || find_max_amp_in_range )
+      if ( create_polar_linear || create_polar_angle || create_polar_circular || create_polar_degree || create_flux || find_max_amp_in_range )
       {
 	stats.set_profile ( archive->get_Profile ( isub, 0, 0 ) );
 	b_sigma = sqrt ( stats.get_baseline_variance ().get_value () );
@@ -839,11 +848,14 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
 	  {
 	    if ( create_polar_angle && current_bscrunch == 1 )
 	    {
-	      if ( aux_vec_d[ibin].get_value() != 0.0 )
+	      if ( pol_angle[ibin].get_value() != 0.0 )
 	      {
-		int result = gsl_histogram_increment ( h_polar_angle_vec[curr_hist], aux_vec_d[ibin].get_value () / 180.0 * M_PI );
+		int result = gsl_histogram_increment ( h_polar_angle_vec[curr_hist], pol_angle[ibin].get_value () / 180.0 * M_PI );
 		if ( result == GSL_EDOM )
 		  warn << "WARNING psrspa::create_histograms polarisation angle the histogram range for the bin " << ibin << " in the subint " << isub << " of archive " << archive->get_filename () << endl;
+		gsl_histogram_accumulate( h_polar_angle_wtI_vec[curr_hist], pol_angle[ibin].get_value () / 180.0 * M_PI, T_amps[ibin] );
+		gsl_histogram_accumulate( h_polar_angle_wtL_vec[curr_hist], pol_angle[ibin].get_value () / 180.0 * M_PI, L_amps[ibin] );
+		gsl_histogram_accumulate( h_polar_angle_wtLI_vec[curr_hist], pol_angle[ibin].get_value () / 180.0 * M_PI, L_amps[ibin] / T_amps[ibin] );
 	      }
 	    }
 	    if ( create_polar_degree && current_bscrunch == 1 )
@@ -875,7 +887,7 @@ void psrspa::create_histograms ( Reference::To<Archive> archive )
 	    {
 	      if ( L_amps[ibin] != 0.0 )
 	      {
-		s_linear_vs_PA_pr[curr_hist].push_back ( complex<double>( L_amps[ibin], aux_vec_d[ibin].get_value() ) );
+		s_linear_vs_PA_pr[curr_hist].push_back ( complex<double>( L_amps[ibin], pol_angle[ibin].get_value() ) );
 	      }
 	    }
 	    if ( create_flux && current_bscrunch == 1 )
@@ -959,12 +971,23 @@ void psrspa::write_histograms ()
     for ( unsigned ihist = 0; ihist < hist_count; ihist++ )
     {
       ss << path+"/"+prefix+"_polang_" << h_bin[ihist] << "." << ext;
-      out = fopen ( ss.str().c_str(), "w" );
-      if ( ! binary_output )
-	gsl_histogram_fprintf ( out, h_polar_angle_vec[ihist], "%g", "%g" );
+      if ( ! binary_output ) {
+        ofstream out_stream;
+        out_stream.open ( ss.str().c_str(), ios::out | ios::trunc );
+        double hist_bin_min = gsl_histogram_min( h_polar_angle_vec[ihist] );
+        double step_size = (gsl_histogram_max( h_polar_angle_vec[ihist] ) - hist_bin_min) / (double)polar_angle_bins;
+        for (unsigned ihist_bin = 0; ihist_bin < polar_angle_bins; ihist_bin++ ) {
+          out_stream << hist_bin_min+(double)ihist_bin * step_size << " " << gsl_histogram_get( h_polar_angle_vec[ihist], ihist_bin );
+          out_stream << " " << gsl_histogram_get( h_polar_angle_wtI_vec[ihist], ihist_bin );
+          out_stream << " " << gsl_histogram_get( h_polar_angle_wtL_vec[ihist], ihist_bin );
+          out_stream << " " << gsl_histogram_get( h_polar_angle_wtLI_vec[ihist], ihist_bin );
+          out_stream << endl;
+        }
+        //gsl_histogram_fprintf ( out, h_polar_angle_vec[ihist], "%g", "%g" );
+        out_stream.close ();
+      }
       else
 	gsl_histogram_fwrite ( out, h_polar_angle_vec[ihist] );
-      fclose ( out );
       ss.str( "" );
     }
   }
