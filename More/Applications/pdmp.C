@@ -2859,7 +2859,7 @@ void plotPhaseFreq (const Archive * archive,
 	phase_freq_copy->remove_baseline();
 
 	fui->set_value("x:view", "(0.55, 0.95)");
-	fui->set_value("y:view", "(0.33, 0.56)");
+	fui->set_value("y:view", "(0.35, 0.57)");
 	fui->set_value("x:range", "(0, 1.2)");
 	fui->set_value("ch", "0.8");
 	fui->set_value("above:c", "");
@@ -2893,7 +2893,7 @@ void plotPhaseTime(const Archive * archive, Plot* plot, TextInterface::Parser* t
 
 
 	tui->set_value("x:view", "(0.05, 0.45)");
-	tui->set_value("y:view", "(0.33, 0.56)");
+	tui->set_value("y:view", "(0.35, 0.57)");
 	tui->set_value("x:range", "(0, 1.2)");
 	tui->set_value("ch", "0.8");
 	tui->set_value("above:c", "");
