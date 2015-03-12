@@ -92,11 +92,7 @@ namespace Pulsar
     class van04_Eq13 : public CompleteJones
     {
     public:
-      CALIBRATOR_TYPE(van04_Eq13)
-      {
-	set_identity ("van04e13");
-	add_alias ("Britton");
-      }
+      CALIBRATOR_TYPE_INIT(van04_Eq13, "van04e13");
       bool is_a (const Type* that) const { return Type::is_a (that); }
     };
 
@@ -125,7 +121,12 @@ namespace Pulsar
     class bri00_Eq19 : public Phenomenological
     {
     public:
-      CALIBRATOR_TYPE_INIT(bri00_Eq19,"bri00e19")
+      CALIBRATOR_TYPE(bri00_Eq19)
+      {
+        set_identity ("bri00e19");
+        add_alias ("Britton");
+      }
+
       bool is_a (const Type* that) const { return Type::is_a (that); }
     };
     

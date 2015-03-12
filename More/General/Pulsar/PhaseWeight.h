@@ -79,6 +79,12 @@ namespace Pulsar {
     //! Retrieve the sum of all weights
     double get_weight_sum () const;
 
+    //! Retrieve the beginning of the phase region with non-zero weight
+    std::string get_start_index () const;
+
+    //! Retrieve the end of the phase region with non-zero weight
+    std::string get_end_index () const;
+
     //! Retrieve the max of all weights
     double get_weight_max () const;
 
