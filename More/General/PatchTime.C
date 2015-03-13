@@ -62,6 +62,10 @@ void Pulsar::PatchTime::operate (Archive* A, Archive* B) try
   A->expert()->sort();
   B->expert()->sort();
 
+  // If policy has not been set, default to "time"
+  if (!contemporaneity_policy)
+    contemporaneity_policy = new Pulsar::Contemporaneity::AtEarth;
+
   contemporaneity_policy->set_archives (A, B);
 
   unsigned isubA = 0;
