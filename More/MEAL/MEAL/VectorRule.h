@@ -1,15 +1,12 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2005 - 2015 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/VectorRule.h,v $
-   $Revision: 1.10 $
-   $Date: 2009/06/13 05:09:24 $
-   $Author: straten $ */
+// psrchive/More/MEAL/MEAL/VectorRule.h
 
 #ifndef __MEAL_VectorRule_H
 #define __MEAL_VectorRule_H
@@ -235,6 +232,9 @@ void MEAL::VectorRule<T>::calculate (Result& result,
   unsigned nmodel = model.size();
   if (T::very_verbose)
     std::cerr << get_name() + "calculate nmodel=" << nmodel << std::endl;
+
+  if (nmodel == 0)
+    throw Error (InvalidState, "MEAL::"+get_name()+"::calculate", "nmodel = 0");
 
   // the gradient of each component
   std::vector<Result> comp_gradient;
