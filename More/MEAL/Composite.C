@@ -126,6 +126,22 @@ unsigned MEAL::Composite::get_nmodel () const
 }
 
 
+MEAL::Function* unwrap (MEAL::Function* model)
+{
+  if (!model)
+    return 0;
+
+  if (!model->has_parameter_policy())
+    return model;
+
+  MEAL::Function* context = model->get_parameter_policy()->get_context();
+
+  if (!context)
+    return model;
+
+  return context;
+}
+
 void MEAL::Composite::map (Projection* modelmap)
 {
 #ifdef _DEBUG
@@ -153,7 +169,7 @@ void MEAL::Composite::map (Projection* modelmap)
   
   try
   {
-    Function* model = modelmap->get_Function();
+    Function* model = unwrap( modelmap->get_Function() );
 
     modelmap->imap.resize(0);
     add_component (model, modelmap->imap);
@@ -202,22 +218,6 @@ const T* get (const MEAL::Function* model)
   if (model->has_parameter_policy())
     return dynamic_cast<const T*>(model->get_parameter_policy());
   return 0;
-}
-
-MEAL::Function* unwrap (MEAL::Function* model)
-{
-  if (!model)
-    return 0;
-
-  if (!model->has_parameter_policy())
-    return model;
-
-  MEAL::Function* context = model->get_parameter_policy()->get_context();
-
-  if (!context)
-    return model;
-
-  return context;
 }
 
 //! Map the Function indeces
