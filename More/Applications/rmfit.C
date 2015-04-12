@@ -1148,6 +1148,7 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
       data = backup->clone();
     }
 
+
 #if HAVE_PGPLOT
 
   float ymin = fluxes[0];
@@ -1165,40 +1166,45 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
     }
 
     float yrange = ymax-ymin;
-    ymin -= 0.1*yrange;
-    ymax += 0.1*yrange;
 
-    float buffer = fabs((maxrm-minrm)/float(rmsteps));
-    cpgswin(minrm-buffer, maxrm+buffer, ymin, ymax);
-    cpgbox("BCINTS", 0.0, 0, "BCINTS", 0.0, 0);
-    cpglab("Rotation Measure", "Polarised Flux", "");
-    for (unsigned k = 0; k < rms.size(); k++) {
-      cpgpt1(rms[k], fluxes[k], 0);
-      cpgerr1(6, rms[k], fluxes[k], err[k], 1.0);
-      cpgsci(1);
+    if (yrange == 0)
+    {
+      cerr << "minimum and maximum L = " << ymin << endl;
+    }
+    else
+    {
+      ymin -= 0.1*yrange;
+      ymax += 0.1*yrange;
+
+      float buffer = fabs((maxrm-minrm)/float(rmsteps));
+      cpgswin(minrm-buffer, maxrm+buffer, ymin, ymax);
+      cpgbox("BCINTS", 0.0, 0, "BCINTS", 0.0, 0);
+      cpglab("Rotation Measure", "Polarised Flux", "");
+      for (unsigned k = 0; k < rms.size(); k++) {
+        cpgpt1(rms[k], fluxes[k], 0);
+        cpgerr1(6, rms[k], fluxes[k], err[k], 1.0);
+        cpgsci(1);
+      }
     }
 
   }
 
 #endif
 
+
   unsigned index = max_element(fluxes.begin(), fluxes.end()) - fluxes.begin();
+  assert (index < fluxes.size());
+  
   float max = fluxes[index];
 
   // fit data only to the first set of minima
-  unsigned index_min = 0;
-  for (index_min = index -1; index_min > 1; index_min --)
-    if (fluxes[index_min] > fluxes[index_min+1]) {
-      index_min ++;
-      break;
-    }
+  unsigned index_min = index;
+  while (index_min > 0 && (fluxes[index_min] > fluxes[index_min-1]))
+    index_min --;
 
   unsigned index_max = index;
-  for (index_max = index +1; index_max < rmsteps; index_max ++)
-    if (fluxes[index_max] > fluxes[index_max-1]) {
-      index_max --;
-      break;
-    }
+  while (index_max +1 < rmsteps && (fluxes[index_max] > fluxes[index_max+1]))
+    index_max ++;
 
   double bestrm = rms[index];
 
