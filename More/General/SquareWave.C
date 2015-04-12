@@ -96,20 +96,17 @@ void Pulsar::SquareWave::get_transitions (const Profile* profile,
 					  vector<unsigned>& down)
 {
   unsigned nbin = profile->get_nbin();
-  unsigned scrunch = 1;
 
   Reference::To<Profile> clone;
-  if (use_nbin && nbin > use_nbin) {
+  if (use_nbin && nbin/use_nbin > 1)
+  {
     clone = profile->clone();
-    scrunch = nbin/use_nbin;
-    clone->bscrunch(scrunch);
+    clone->bscrunch(nbin/use_nbin);
     profile = clone;
     nbin = profile->get_nbin();
   }
 
   unsigned offset = (unsigned) (risetime * nbin);
-
-cerr << "nbin=" << nbin << " offset=" << offset << endl;
 
   // differentiate the profile
   Reference::To<Profile> difference = differentiate (profile, offset);
