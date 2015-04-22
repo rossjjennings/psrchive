@@ -119,7 +119,7 @@ void psrsplit::process (Pulsar::Archive* archive)
 
   Pulsar::Dispersion correction;
   bool was_dedispersed = archive->get_dedispersed () ;
-  if ( was_dedispersed )
+  if ( was_dedispersed && nchannel > 0 )
     correction.revert (archive);
 
   while( isub < nsub )
