@@ -9,6 +9,7 @@
 #include "Pulsar/CalibratorType.h"
 //#include "Pulsar/CalibratorTypes.h"
 #include "Pulsar/CalibratorStokes.h"
+#include "Pulsar/PolnProfile.h"
 
 #include "Pulsar/Database.h"
 
@@ -63,6 +64,10 @@ Pulsar::CalInterpreter::CalInterpreter ()
   add_command 
     ( &CalInterpreter::fluxcal,
       "flux", "perform flux calibration using the current setting" );
+
+  add_command 
+    ( &CalInterpreter::set_gain,
+      "gain", "normalize profile by absolute gain (ruins flux cal)" );
 
 }
 
@@ -261,6 +266,16 @@ string Pulsar::CalInterpreter::frontend (const string& args) try
   Pulsar::FrontendCorrection correct;
   correct.calibrate( get() );
 
+  return response (Good);
+}
+catch (Error& error)
+{
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::CalInterpreter::set_gain (const string& args) try
+{
+  Pulsar::PolnProfile::normalize_weight_by_absolute_gain = true;
   return response (Good);
 }
 catch (Error& error)
