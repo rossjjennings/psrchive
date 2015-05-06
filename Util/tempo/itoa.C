@@ -23,6 +23,7 @@ static int default_aliases ()
 
   add_alias ("G1", "gb43m");
   add_alias ("G1", "gb 140ft");
+  add_alias ("G1", "gb140ft");
 
   add_alias ("G8", "gb85-3");
   add_alias ("G8", "gb853");
@@ -47,6 +48,7 @@ static int default_aliases ()
 
   add_alias ("JB", "jodrell");
   add_alias ("JB", "jodrell bank");
+  add_alias ("JB", "lovell");
 
   add_alias ("VL", "vla");
 
