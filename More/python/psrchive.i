@@ -26,6 +26,12 @@
 
 #include "Pulsar/ProfileShiftFit.h"
 
+#include "Pulsar/Append.h"
+#include "Pulsar/TimeAppend.h"
+#include "Pulsar/FrequencyAppend.h"
+#include "Pulsar/PatchTime.h"
+#include "Pulsar/Contemporaneity.h"
+
 #ifdef HAVE_CFITSIO
 #include <fitsio.h>
 #endif
@@ -119,12 +125,16 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %ignore Pulsar::Profile::rotate_in_phase_domain;
 %ignore Pulsar::Profile::transition_duty_cycle;
 %ignore Pulsar::Profile::default_duty_cycle;
+%ignore Pulsar::FrequencyAppend::weight_strategy;
 
 // Also Functor
 %ignore Pulsar::Profile::peak_edges_strategy;
 %ignore Pulsar::Profile::baseline_strategy;
 %ignore Pulsar::Profile::onpulse_strategy;
 %ignore Pulsar::Profile::snr_strategy;
+
+// Also Contemporaneity
+%ignore Pulsar::PatchTime::set_contemporaneity_policy(Contemporaneity*);
 
 // Return psrchive's Estimate class as a Python tuple
 %typemap(out) Estimate<double> {
@@ -163,6 +173,10 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/Profile.h"
 %include "Pulsar/Parameters.h"
 %include "Pulsar/ProfileShiftFit.h"
+%include "Pulsar/Append.h"
+%include "Pulsar/TimeAppend.h"
+%include "Pulsar/FrequencyAppend.h"
+%include "Pulsar/PatchTime.h"
 %include "Angle.h"
 %include "sky_coord.h"
 %include "MJD.h"

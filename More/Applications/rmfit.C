@@ -103,6 +103,9 @@ Reference::To<Pulsar::Archive> get_data (string archive_filename);
 double do_maxmthd(double minrm,double maxrm,unsigned rmsteps,
 		  Reference::To<Pulsar::Archive> data);
 
+// The polarization statistics estimator used by do_maxmthd
+Pulsar::PolnProfileStats poln_stats;
+
 // prints various numbers out to file
 void
 rmresult (Pulsar::Archive* archive, const Estimate<double>& rm, unsigned used);
@@ -223,7 +226,7 @@ int main (int argc, char** argv)
   // estimate the RM using MTM
   Reference::To<Pulsar::Archive> mtm_std;
 
-  const char* args = "a:A:b:B:DeF:i:j:hJK:Lm:M:p:PrR:S:T:tu:U:vVw:W:Yz:";
+  const char* args = "a:A:b:B:c:DeF:i:j:hJK:Lm:M:p:PrR:S:T:tu:U:vVw:W:Yz:";
 
   int gotc = 0;
 
@@ -264,6 +267,13 @@ int main (int argc, char** argv)
 	return -1;
       }
       break;
+
+    case 'c':
+      {
+	TextInterface::Parser* interface = poln_stats.get_interface();
+	cerr << interface->process (optarg) << endl;
+	break;
+      }
 
     case 'p':
       singlebin = true;
@@ -844,8 +854,7 @@ void rmresult (Pulsar::Archive* archive,
 
   fprintf (stderr, "Setting up PolnProfileStats\n");
 
-  Pulsar::PolnProfileStats stats;
-  stats.set_profile( archive->get_Integration(0)->new_PolnProfile(0) );
+  poln_stats.set_profile( archive->get_Integration(0)->new_PolnProfile(0) );
   unsigned nbin = archive->get_nbin();
 
   fprintf (stderr, "Writing title\n");
@@ -875,27 +884,27 @@ void rmresult (Pulsar::Archive* archive,
 
   fprintf (fptr, FORMAT1, archive->get_source().c_str());
 
-  Estimate<double> intensity = stats.get_total_intensity () / nbin;
+  Estimate<double> intensity = poln_stats.get_total_intensity () / nbin;
   fprintf (stderr, "flux       %lf mJy\n", intensity.get_value());
   fprintf (stderr, "flux_err   %lf\n\n",   intensity.get_error());
 
 
   fprintf (fptr, FORMAT2, intensity.get_value());
 
-  Estimate<double> polarization = stats.get_total_polarized () / nbin;
+  Estimate<double> polarization = poln_stats.get_total_polarized () / nbin;
   fprintf (stderr, "poln       %lf mJy\n", polarization.get_value());
   fprintf (stderr, "poln_err   %lf\n\n",   polarization.get_error());
 
   fprintf (fptr, FORMAT2, polarization.get_value());
 
-  Estimate<double> linear = stats.get_total_linear () / nbin;
+  Estimate<double> linear = poln_stats.get_total_linear () / nbin;
   fprintf (stderr, "linear     %lf mJy\n", linear.get_value());
   fprintf (stderr, "linear_err %lf\n\n",   linear.get_error());
 
   fprintf (fptr, FORMAT2, linear.get_value());
 
-  Estimate<double> circular     = stats.get_total_circular () / nbin;
-  Estimate<double> abs_circular = stats.get_total_abs_circular () / nbin;
+  Estimate<double> circular     = poln_stats.get_total_circular () / nbin;
+  Estimate<double> abs_circular = poln_stats.get_total_abs_circular () / nbin;
   fprintf (stderr, "circ       %lf mJy\n", circular.get_value());
   fprintf (stderr, "abs(circ)  %lf\n",     abs_circular.get_value());
   fprintf (stderr, "circ_err   %lf\n\n",   circular.get_error());
@@ -904,7 +913,7 @@ void rmresult (Pulsar::Archive* archive,
   fprintf (fptr, FORMAT2, abs_circular.get_value());
 
   // sigma
-  Estimate<double> rms = sqrt( stats.get_baseline_variance(0) );
+  Estimate<double> rms = sqrt( poln_stats.get_baseline_variance(0) );
 
   fprintf (fptr, FORMAT2, rms.get_value() );
 
@@ -1137,9 +1146,8 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
       useful->fscrunch();
       useful->remove_baseline();
 
-      Pulsar::PolnProfileStats stats;
-      stats.set_profile( useful->get_Integration(0)->new_PolnProfile(0) );
-      Estimate<float> rval = stats.get_total_linear ();
+      poln_stats.set_profile( useful->get_Integration(0)->new_PolnProfile(0) );
+      Estimate<float> rval = poln_stats.get_total_linear ();
 
       fluxes[step] = rval.get_value();
       err[step] = rval.get_error();
@@ -1147,6 +1155,7 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
 
       data = backup->clone();
     }
+
 
 #if HAVE_PGPLOT
 
@@ -1165,40 +1174,45 @@ double do_maxmthd (double minrm, double maxrm, unsigned rmsteps,
     }
 
     float yrange = ymax-ymin;
-    ymin -= 0.1*yrange;
-    ymax += 0.1*yrange;
 
-    float buffer = fabs((maxrm-minrm)/float(rmsteps));
-    cpgswin(minrm-buffer, maxrm+buffer, ymin, ymax);
-    cpgbox("BCINTS", 0.0, 0, "BCINTS", 0.0, 0);
-    cpglab("Rotation Measure", "Polarised Flux", "");
-    for (unsigned k = 0; k < rms.size(); k++) {
-      cpgpt1(rms[k], fluxes[k], 0);
-      cpgerr1(6, rms[k], fluxes[k], err[k], 1.0);
-      cpgsci(1);
+    if (yrange == 0)
+    {
+      cerr << "minimum and maximum L = " << ymin << endl;
+    }
+    else
+    {
+      ymin -= 0.1*yrange;
+      ymax += 0.1*yrange;
+
+      float buffer = fabs((maxrm-minrm)/float(rmsteps));
+      cpgswin(minrm-buffer, maxrm+buffer, ymin, ymax);
+      cpgbox("BCINTS", 0.0, 0, "BCINTS", 0.0, 0);
+      cpglab("Rotation Measure", "Polarised Flux", "");
+      for (unsigned k = 0; k < rms.size(); k++) {
+        cpgpt1(rms[k], fluxes[k], 0);
+        cpgerr1(6, rms[k], fluxes[k], err[k], 1.0);
+        cpgsci(1);
+      }
     }
 
   }
 
 #endif
 
+
   unsigned index = max_element(fluxes.begin(), fluxes.end()) - fluxes.begin();
+  assert (index < fluxes.size());
+  
   float max = fluxes[index];
 
   // fit data only to the first set of minima
-  unsigned index_min = 0;
-  for (index_min = index -1; index_min > 1; index_min --)
-    if (fluxes[index_min] > fluxes[index_min+1]) {
-      index_min ++;
-      break;
-    }
+  unsigned index_min = index;
+  while (index_min > 0 && (fluxes[index_min] > fluxes[index_min-1]))
+    index_min --;
 
   unsigned index_max = index;
-  for (index_max = index +1; index_max < rmsteps; index_max ++)
-    if (fluxes[index_max] > fluxes[index_max-1]) {
-      index_max --;
-      break;
-    }
+  while (index_max +1 < rmsteps && (fluxes[index_max] > fluxes[index_max+1]))
+    index_max ++;
 
   double bestrm = rms[index];
 

@@ -8,6 +8,7 @@
 #include "Pulsar/FixInterpreter.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Pointing.h"
+#include "Pulsar/FITSArchive.h"
 
 using namespace std;
 
@@ -38,6 +39,10 @@ Pulsar::FixInterpreter::FixInterpreter ()
   add_command
     ( &FixInterpreter::pointing,
       "pointing", "fix the Pointing extension info\n");
+
+  add_command
+    ( &FixInterpreter::psrfits_refmjd,
+      "refmjd", "fix epoch error due to polyco REF_MJD precision in PSRFITS\n");
 }
 
 Pulsar::FixInterpreter::~FixInterpreter ()
@@ -185,6 +190,20 @@ string Pulsar::FixInterpreter::pointing (const string& args) try
   return response (Good);
 }
 catch (Error& error)
+{
+  return response (Fail, error.get_message());
+}
+
+string Pulsar::FixInterpreter::psrfits_refmjd (const string& args) try
+{
+  FITSArchive* archive = dynamic_cast<FITSArchive*>(get());
+  if (archive)
+  {
+    archive->refmjd_rounding_correction();
+  }
+  return response (Good);
+}
+catch (Error &error)
 {
   return response (Fail, error.get_message());
 }

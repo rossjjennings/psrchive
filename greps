@@ -22,9 +22,9 @@ else
   endif
 endif
 
-$GREP_COMMAND $* `find Util Base More -name "*.[hcC]"`
+$GREP_COMMAND "$*" `find Util Base More -name "*.[hcC]"`
 
-$GREP_COMMAND $* `find Util Base More -name Makefile.am`
+$GREP_COMMAND "$*" `find Util Base More -name Makefile.am`
 
-$GREP_COMMAND $* `find Util Base More -name "*.tex"`
+$GREP_COMMAND "$*" `find Util Base More -name "*.tex"`
 

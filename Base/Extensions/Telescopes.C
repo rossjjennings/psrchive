@@ -19,98 +19,103 @@
 
 void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
 {
-  std::string emsg;
+    std::string emsg;
 
-  char oldcode; // should replace with new codes , before we run out of letters!
+    char oldcode; // should replace with new codes , before we run out of letters!
 #ifdef HAVE_TEMPO2
-  try {
-      oldcode = Tempo2::observatory (a->get_telescope())->get_code();
-  }
-  catch (Error& error)
-  {
-      oldcode = Tempo::code( a->get_telescope() );
-  }
+    try {
+        oldcode = Tempo2::observatory (a->get_telescope())->get_code();
+    }
+    catch (Error& error)
+    {
+        oldcode = Tempo::code( a->get_telescope() );
+    }
 #else
 
-  oldcode=Tempo::code( a->get_telescope() );
+    oldcode=Tempo::code( a->get_telescope() );
 #endif
 
 
-  switch ( oldcode )
-  {
+    switch ( oldcode )
+    {
 
-      case '1':
-          Telescopes::GBT(t);
-          // Hack to pick correct focus type for GBT
-          if (a->get_centre_frequency()<1200.0)
-              t->set_focus(Telescope::PrimeFocus);
-          break;
 
-      case '3':
-          Telescopes::Arecibo(t);
-          break;
+        case '1':
+            Telescopes::GBT(t);
+            // Hack to pick correct focus type for GBT
+            if (a->get_centre_frequency()<1200.0)
+                t->set_focus(Telescope::PrimeFocus);
+            break;
 
-      case '4':
-          Telescopes::MtPleasant26(t);
-          break;
+        case '3':
+            Telescopes::Arecibo(t);
+            break;
 
-      case '6':
-          Telescopes::VLA(t);
-          break;
+        case '4':
+            Telescopes::MtPleasant26(t);
+            break;
 
-      case '7':
-          Telescopes::Parkes(t);
-          break;
+        case '6':
+            Telescopes::VLA(t);
+            break;
 
-      case '8':
-          Telescopes::Jodrell(t);
-          break;
+        case '7':
+            Telescopes::Parkes(t);
+            break;
 
-      case 'a':
-          Telescopes::GB140(t);
-          break;
+        case '8':
+            Telescopes::Jodrell(t);
+            break;
 
-      case 'b':
-          Telescopes::GB85_3(t);
-          break;
+        case 'a':
+            Telescopes::GB140(t);
+            break;
 
-      case 'f':
-          Telescopes::Nancay(t);
-          break;
+        case 'b':
+            Telescopes::GB85_3(t);
+            break;
 
-      case 'g':
-          Telescopes::Effelsberg(t);
-          break;
+        case 'f':
+            Telescopes::Nancay(t);
+            break;
 
-      case 'i':
-          Telescopes::WSRT(t);
-          break;
+        case 'g':
+            Telescopes::Effelsberg(t);
+            break;
 
-      case 's':
-          Telescopes::SHAO(t);
-          break;
+        case 't':
+            Telescopes::LOFAR(t);
+            break;
 
-      case 'x':
-          Telescopes::LWA(t);
-          break;
+        case 'i':
+            Telescopes::WSRT(t);
+            break;
 
-      default: 
-          // Unknown code, throw error after calling Telecope::set_coordinates
-          emsg = "Unrecognized telescope code (" + a->get_telescope() + ")";
-          break;
-  }
+        case 's':
+            Telescopes::SHAO(t);
+            break;
 
-  try
-  {
-      t->set_coordinates();
-  }
-  catch (Error& error)
-  {
-      throw error += "Pulsar::Telescopes::set_telescope_info";
-  }
+        case 'x':
+            Telescopes::LWA(t);
+            break;
 
-  if (!emsg.empty())
-      throw Error (InvalidParam, "Pulsar::Telescopes::set_telescope_info", emsg);
+        default: 
+            // Unknown code, throw error after calling Telecope::set_coordinates
+            emsg = "Unrecognized telescope code (" + a->get_telescope() + ")";
+            break;
+    }
+
+    try
+    {
+        t->set_coordinates();
+    }
+    catch (Error& error)
+    {
+        throw error += "Pulsar::Telescopes::set_telescope_info";
+    }
+
+    if (!emsg.empty())
+        throw Error (InvalidParam, "Pulsar::Telescopes::set_telescope_info", emsg);
 }
 
 // Info for each telescope below.  Maybe the coordinate setting
@@ -164,6 +169,12 @@ void Pulsar::Telescopes::Effelsberg(Telescope *t)
     t->set_mount(Telescope::Horizon);
     t->set_primary(Telescope::Parabolic);
     t->set_focus(Telescope::Gregorian); // XXX also varies by receiver
+}
+
+void Pulsar::Telescopes::LOFAR(Telescope *t)
+{
+    t->set_name ("LOFAR");
+    // XXX what about other settings? mount, focus,...
 }
 
 void Pulsar::Telescopes::MtPleasant26(Telescope *t)

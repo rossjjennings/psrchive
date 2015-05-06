@@ -36,7 +36,7 @@ unsigned MEAL::Projection::get_imap (unsigned index) const
 
   if (model->get_nparam() != imap.size())
     throw Error (InvalidRange, "MEAL::Projection::get_imap",
-                 "%s.nparam=%d >= nmap=%d", model->get_name().c_str(),
+                 "%s.nparam=%d != nmap=%d", model->get_name().c_str(),
 		 model->get_nparam(), imap.size());
 
   if (index >= imap.size())

@@ -60,6 +60,12 @@ static int default_aliases ()
 
   add_alias ("EF", "effelsberg");
 
+  add_alias ("LF", "LOFAR");
+  add_alias ("LF", "lofar");
+  add_alias ("FL", "FR606");
+  add_alias ("DL", "DE601");
+  add_alias ("UL", "UK608");
+
   add_alias ("WT", "wsrt");
   add_alias ("WT", "westerbork");
 
