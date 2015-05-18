@@ -89,6 +89,9 @@ namespace Pulsar
     //! Get the resulting Mean Squared Error (per fit DOF)
     double get_mse();
 
+    //! Get the resulting noise per harmonic
+    double get_sigma2();
+
     //! Get the resulting SNR
     double get_snr();
 

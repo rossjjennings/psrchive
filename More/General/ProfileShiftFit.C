@@ -453,6 +453,12 @@ double Pulsar::ProfileShiftFit::get_snr()
   return(snr);
 }
 
+double Pulsar::ProfileShiftFit::get_sigma2()
+{
+  if (!computed) compute();
+  return(sigma2);
+}
+
 double Pulsar::ProfileShiftFit::get_effective_duty_cycle () const
 {
   if (!std)
