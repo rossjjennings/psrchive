@@ -26,6 +26,8 @@
 
 #include "Pulsar/ProfileShiftFit.h"
 
+#include "Pulsar/WaveletSmooth.h"
+
 #include "Pulsar/Append.h"
 #include "Pulsar/TimeAppend.h"
 #include "Pulsar/FrequencyAppend.h"
@@ -173,6 +175,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %include "Pulsar/Profile.h"
 %include "Pulsar/Parameters.h"
 %include "Pulsar/ProfileShiftFit.h"
+%include "Pulsar/WaveletSmooth.h"
 %include "Pulsar/Append.h"
 %include "Pulsar/TimeAppend.h"
 %include "Pulsar/FrequencyAppend.h"
