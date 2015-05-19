@@ -361,12 +361,21 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 
 	    vector< Estimate<double> > PAs;
 	    vector< Estimate<double> > ELLs;
-	    if( show_pa || show_ell )
-	    {
-	      Reference::To<Pulsar::PolnProfile> profile;
+
+		float* stokesIprof = intg->get_Profile(0,c)->get_amps();
+        Pulsar::Profile linear;
+        Pulsar::Profile polarized;
+        linear.resize(archive->get_nbin());
+        polarized.resize(archive->get_nbin());
+
+
+		if ( show_pol_frac ||  show_ell | show_pa || show_lin_frac){
+            Reference::To<Pulsar::PolnProfile> profile;
 	      profile = intg->new_PolnProfile(c);
 	      profile->get_orientation (PAs, pa_threshold);
 	      profile->get_ellipticity (ELLs, pa_threshold);
+          profile->get_linear(&linear);
+          profile->get_polarized(&polarized);
 	    }
 
 	    if( per_channel_headers )
@@ -376,34 +385,6 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 	      cout << " BW: " << intg->get_bandwidth() / nchn;
 	      cout << endl;
 		}
-
-		float* stokesIprof = intg->get_Profile(0,c)->get_amps();
-		float*stokesQprof,*stokesUprof,*stokesVprof;
-		float Lprof[archive->get_nbin()];
-		float Pprof[archive->get_nbin()];
-		if ( show_pol_frac ||  show_ell | show_pa || show_lin_frac){
-		   stokesQprof = intg->get_Profile(1,c)->get_amps();
-		   stokesUprof = intg->get_Profile(2,c)->get_amps();
-		   stokesVprof = intg->get_Profile(3,c)->get_amps();
-
-		   const float I_rms =intg->get_Profile(0,c)->baseline()->get_rms();
-		   const float Q_rms =intg->get_Profile(1,c)->baseline()->get_rms();
-		   const float U_rms =intg->get_Profile(2,c)->baseline()->get_rms();
-		   const float V_rms =intg->get_Profile(3,c)->baseline()->get_rms();
-		   const float Pbias = sqrt(U_rms*U_rms + Q_rms*Q_rms+ V_rms*V_rms);
-		   const float Lbias = sqrt(U_rms*U_rms + Q_rms*Q_rms);
-
-		   for (int b = fbin; b <= lbin; b++){
-			  // L = linear poln intensity = (U*U + Q*Q)^(1/2)
-			  const float L = sqrt(pow(stokesQprof[b], 2) + pow(stokesUprof[b], 2));
-			  const float P = sqrt(pow(stokesQprof[b], 2) + pow(stokesUprof[b], 2)+pow(stokesVprof[b], 2));
-			  //Lprof[b] = I_rms * sqrt(pow(L/I_rms, 2) - 1);
-			  Lprof[b] = L-Lbias;
-			  Pprof[b] = P-Pbias;
-		   }
-
-		}
-
 
 		for (int b = fbin; b <= lbin; b++)
 		{
@@ -417,12 +398,9 @@ void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 		   {
 
 			  float stokesI=stokesIprof[b];
-			  float stokesQ=stokesQprof[b];
-			  float stokesU=stokesUprof[b];
-			  float stokesV=stokesVprof[b];
 
-			  float frac_pol  = Pprof[b]/stokesI; //sqrt(stokesQ*stokesQ + stokesU*stokesU + stokesV*stokesV)/stokesI;
-			  float frac_lin  = Lprof[b]/stokesI;
+			  float frac_pol  = polarized.get_amps()[b]/stokesI; //sqrt(stokesQ*stokesQ + stokesU*stokesU + stokesV*stokesV)/stokesI;
+			  float frac_lin  = linear.get_amps()[b]/stokesI;
 
 			  if( show_pol_frac )  cout << " " << frac_pol;
 			  if( show_lin_frac )  cout << " " << frac_lin;
