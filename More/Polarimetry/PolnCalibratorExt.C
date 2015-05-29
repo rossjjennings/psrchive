@@ -12,6 +12,7 @@
 #include "Pulsar/Britton2000.h"
 #include "Pulsar/SingleAxis.h"
 #include "Pulsar/Instrument.h"
+#include "Pulsar/ManualPolnCalibrator.h"
 #include "MEAL/Polar.h"
 
 using namespace std;
@@ -164,6 +165,9 @@ MEAL::Complex2* Pulsar::new_transformation( const Calibrator::Type* type )
 
   if (type->is_a<CalibratorTypes::bri00_Eq19>())
     return new Calibration::Britton2000;
+
+  //if (type->is_a<CalibratorTypes::ManualPoln>())
+  //  return new Pulsar::ManualPolnCalibrator;
 
   throw Error (InvalidState,
                "Pulsar::PolnCalibrator::new_transformation",

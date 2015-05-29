@@ -23,6 +23,7 @@
 
 #include "Pulsar/Database.h"
 #include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/ManualPolnCalibrator.h"
 #include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/ReferenceCalibrator.h"
 #include "Pulsar/PolnCalibratorExtension.h"
@@ -49,7 +50,7 @@ using namespace std;
 using namespace Pulsar;
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:aBbC:cDd:Ee:fFGhiIJ:j:k:lLM:m:n:O:op:PqRr:sSt:Tu:UvVwWxyZ";
+const char* args = "A:aBbC:cDd:Ee:fFGhiIJ:j:k:lL:M:m:n:O:op:PqRr:sSt:Tu:UvVwWxyZ";
 
 void usage ()
 {
@@ -72,6 +73,7 @@ void usage ()
     "\n"
     "Calibrator options: \n"
     "  -A filename    Use the calibrator in filename, as output by pcm/pacv \n"
+    "  -L filename    Use the Jones calibrator in filename \n"
     "  -C model       Use the specified model of the calibrator solution \n"
     "  -P             Calibrate polarisation only (not flux)\n"
     "  -R             Calibrate the receiver (feed) only \n"
@@ -95,7 +97,7 @@ void usage ()
     "  -b             Do not try to match bandwidths\n"
     "  -o             Allow opposite sidebands\n"
     "  -a             Per-channel matching\n"
-    "  -L             Print verbose matching information \n"
+    //"  -L             Print verbose matching information \n"
     "\n"
     "Expert options: \n"
     "  -f             Override flux calibration flag\n"
@@ -166,6 +168,7 @@ int main (int argc, char *argv[]) try
 
   // filename from which calibrator solution to be applied will be loaded
   string model_file;
+  string ascii_model_file;
   // strip down the above-named calibrator solution to keep only the feed
   bool apply_only_feed = false;
 
@@ -304,6 +307,24 @@ int main (int argc, char *argv[]) try
     case 'l':
       Pulsar::Database::cache_last_cal = true;
       command += " -l";
+      break;
+
+    case 'L':
+      ascii_model_file = optarg;
+      command += " -L ";
+
+      // Just take the filename, not the full path
+      optarg_str = optarg;
+      index = optarg_str.rfind("/", optarg_str.length()-2);
+
+      if (index == string::npos)
+      	command += optarg_str;      
+      else
+      {
+        // Larger than last index but doesn't matter. String class will 
+	// just take the rest of the string safely
+        command += optarg_str.substr(index+1, optarg_str.length()); 
+      }
       break;
 
     case 'M':
@@ -539,6 +560,20 @@ int main (int argc, char *argv[]) try
     return -1;
   }
 
+  // Manual calibration
+  if ( !ascii_model_file.empty() ) try
+  {
+    cerr << "pac: Loading ascii Jones calibrator from " << ascii_model_file << endl;
+    model_calibrator = new Pulsar::ManualPolnCalibrator(ascii_model_file);
+    pcal_type = model_calibrator->get_type();
+  }
+  catch (Error& error)
+  {
+    cerr << "pac: Could not load calibrator from " << ascii_model_file << endl;
+    cerr << error << endl;
+    return -1;
+  }
+
   if ( use_fluxcal_stokes && 
        ! pcal_type->is_a<Pulsar::CalibratorTypes::SingleAxis>() )
   {
@@ -564,7 +599,7 @@ int main (int argc, char *argv[]) try
     return -1;
   }
 
-  else if ( model_file.empty() ) try
+  else if ( model_file.empty() && ascii_model_file.empty()) try
   {   
     // Generate the CAL file database
     cout << "pac: Generating new calibrator database" << endl;
