@@ -126,7 +126,7 @@ T f_pseudosigma ( T f_spread )
  * @param[in] Tukey_tune is the tuning constant for the influence function (Tukey's biweight in this case). This affects the efficiency of the estimator. The optimal value is 6.0 (i.e. include data up to 4 sigma away from the mean (Data analysis and regression, Mosteller and Tukey 1977)
 */
 template<typename T>
-T robust_stddev ( T * data, unsigned size, T initial_guess, T initial_guess_scale = 1.4826, T Tukey_tune = 6.0 )
+T robust_stddev ( T * data, unsigned size, T initial_guess, T initial_guess_scale, T Tukey_tune )
 {
   vector<T> input;
   input.resize ( size );
