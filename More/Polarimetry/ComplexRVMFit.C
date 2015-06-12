@@ -386,6 +386,10 @@ void Pulsar::ComplexRVMFit::solve ()
 
   chisq = fit.init (data_x, data_y, *model);
 
+  if (!isfinite(chisq))
+    throw Error (InvalidState, "Pulsar::ComplexRVMFit::solve",
+		 "non-finite chisq");
+
   // if (verbose)
     cerr << "Pulsar::ComplexRVMFit::solve initial chisq = " << chisq << endl;
 
