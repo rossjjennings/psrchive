@@ -39,6 +39,8 @@
 #include "toa.h"
 
 #include "Pulsar/TimeDomainCovariance.h"
+#include "Pulsar/CovarianceMatrix.h"
+
 #include<gsl/gsl_blas.h>
 #include<gsl/gsl_eigen.h>
 #include<gsl/gsl_linalg.h>
@@ -163,6 +165,10 @@ protected:
   unsigned which_pol;
   bool full_stokes_pca;
 
+  //! Unloading Covariance Matrix Data
+  Reference::To<Archive> psrfits;
+  CovarianceMatrix* covar;
+
   struct CastToDouble
   {
     double operator () (float value) const { return static_cast<double>(value);}
@@ -204,6 +210,9 @@ psrpca::psrpca ()
 
   which_pol = 0;
   full_stokes_pca = false;
+
+  covar = new CovarianceMatrix(t_cov);
+
 }
 
 void psrpca::setup ()
@@ -335,6 +344,7 @@ void psrpca::process (Archive* archive)
 {
   if ( verbose )
     cerr << "psrpca::process () entered" << endl;
+  psrfits = Archive::new_Archive("PSRFITS");
   archive->fscrunch();
   if ( which_pol == 0 && !full_stokes_pca )
   {
@@ -363,6 +373,8 @@ void psrpca::process (Archive* archive)
 void psrpca::finalize ()
 {
   evecs_archive = total->clone();
+  psrfits-> copy(evecs_archive);
+
   if ( verbose )
     cerr << "psrpca::finalize () entered" << endl;
   arrival->set_observation( total );
@@ -393,10 +405,14 @@ void psrpca::finalize ()
   out = fopen( (prefix+"_profiles.dat").c_str(), "w" );
   gsl_matrix_fprintf( out, profiles, "%g" );
   fclose( out );
+  
+  // Unloading Covariance Data in PSRFITS Format  
+  psrfits-> add_extension(covar);
+  psrfits-> unload("covariance.rf");
 
   if ( full_stokes_pca )
     nbin = 4 * nbin;
-  get_covariance_matrix();
+  get_covariance_matrix(); // assuming that this calls the function in TimeDomainCovariance.C - row vector
 
   // write the covariance matrix and difference profiles
   if ( save_covariance_matrix )

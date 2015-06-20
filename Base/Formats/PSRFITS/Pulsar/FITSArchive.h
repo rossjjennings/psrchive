@@ -39,6 +39,7 @@ namespace Pulsar
   class CoherentDedispersion;
   class SpectralKurtosis;
   class ObsDescription;
+  class CovarianceMatrix;
 
   class Pointing;
   class AuxColdPlasmaMeasures;
@@ -150,6 +151,9 @@ namespace Pulsar
     //! Unload the observation description
     static void unload (fitsfile* fptr, const ObsDescription*);
 
+    //! Unload the Covariance Matrix Data
+    static void unload (fitsfile* fptr, const CovarianceMatrix*);
+
     //! Get the offs_sub value (only present in fits files)
     double get_offs_sub( unsigned int isub ) const;
 
@@ -255,6 +259,7 @@ namespace Pulsar
     void load_FITSSUBHdrExtension ( fitsfile * );
     void load_CoherentDedispersion (fitsfile*);
     void load_ObsDescription (fitsfile*);
+    void load_CovarianceMatrix (fitsfile*);
 
     void load_integration_state ( fitsfile * );
     void load_state ( fitsfile * );

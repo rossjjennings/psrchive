@@ -55,9 +55,6 @@ protected:
   //! Number of Pulse Profiles to be output 
   int profile_number;
 
-  int check;
-
-
 };
 
 int main (int argc, char** argv)
@@ -75,7 +72,7 @@ psrsim::psrsim () :
   sim = new SimplePolnProfile;
   rotation_measure = 0;
 
-  check=0;
+  profile_number = 0;
 }
 
 // defined in RotatingVectorModelOptions.C
@@ -163,7 +160,7 @@ for (int i=1;i<=profile_number;i++) // for for multiple outputs from single file
   
   data->unload (unload);
 } //end of for
-check++;
+
 }
 
 
