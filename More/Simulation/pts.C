@@ -53,7 +53,7 @@ void usage ()
     "  -G diff_gain           differential gain of receiver\n"
     "  -N noise               r.m.s. of measurement noise\n"
     "  -n noise               r.m.s. of noise in standard\n"
-    "\n"
+    "\n";
 #if HAVE_PGPLOT
     "Plot options:\n"
     "  -t                     no title along top\n"
