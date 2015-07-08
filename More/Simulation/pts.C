@@ -55,6 +55,7 @@ void usage ()
     "  -n noise               r.m.s. of noise in standard\n"
     "\n";
 #if HAVE_PGPLOT
+    cout <<
     "Plot options:\n"
     "  -t                     no title along top\n"
     "  -d device              pgplot device\n"
