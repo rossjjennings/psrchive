@@ -15,6 +15,7 @@
 #define __Tempo2_Observatory_h
 
 #include "Pulsar/Site.h"
+#include <vector>
 
 namespace Tempo2
 {
@@ -26,6 +27,14 @@ namespace Tempo2
 
     //! Default constructor
     Observatory ();
+
+    bool is_alias_of(const std::string& name) const;
+    inline bool is_alias_of(const Observatory &obs) const{
+        return this->is_alias_of(obs.get_name());
+    }
+    inline bool is_alias_of(const char c) const{
+        return this->is_alias_of(std::string(1,c));
+    }
 
     //! Get the observatory name
     std::string get_name () const;
@@ -46,6 +55,7 @@ namespace Tempo2
     char get_code () const;
     void set_code (char);
 
+    std::vector<std::string> aliases;
   protected:
 
     std::string name;

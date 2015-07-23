@@ -16,15 +16,23 @@
 #include "T2Observatory.h"
 #endif
 
+#include <ostream>
 
 void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
 {
     std::string emsg;
 
-    char oldcode; // should replace with new codes , before we run out of letters!
+    char oldcode = ' '; // should replace with new codes , before we run out of letters!
 #ifdef HAVE_TEMPO2
     try {
-        oldcode = Tempo2::observatory (a->get_telescope())->get_code();
+        std::string newcode = Tempo2::observatory (a->get_telescope())->get_name();
+        if (newcode.compare("JB_42ft")==0){
+            Telescopes::Jodrell(t);
+            t->set_name("JB_42ft");
+            oldcode=0;
+        }
+
+        if(oldcode != -1) oldcode = Tempo2::observatory (a->get_telescope())->get_code();
     }
     catch (Error& error)
     {
@@ -39,6 +47,9 @@ void Pulsar::Telescopes::set_telescope_info (Telescope *t, Archive *a)
     switch ( oldcode )
     {
 
+        case 0:
+            // code was set by tempo2
+            break;
 
         case '1':
             Telescopes::GBT(t);
