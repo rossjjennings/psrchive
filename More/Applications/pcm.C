@@ -65,6 +65,8 @@ void usage ()
     "  -V level   set verbosity level [0->4] \n"
     "\n"
     "  -A archive set the output archive class name \n"
+    "  -O fname   set cal solution output filename (default=pcm.fits)\n"
+    "  -N         do not unload calibrated data files\n"
     "  -D name    enable diagnostic: name=report,guess,residual,result,total\n"
     "  -m model   receiver model name: van09, bri00e19 or van04e18 [default]\n"
     "  -l solver  solver: MEAL [default] of GSL \n"
