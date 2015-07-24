@@ -616,7 +616,7 @@ int actual_main (int argc, char *argv[]) try
 
   const char* args =
     "1A:a:B:b:C:c:D:d:E:e:fF:gHhI:i:j:J:kL:l:"
-    "M:m:Nn:o:Pp:qR:rS:st:T:u:U:vV:X:yzZ";
+    "M:m:Nn:O:o:Pp:qR:rS:st:T:u:U:vV:X:yzZ";
 
   while ((gotc = getopt(argc, argv, args)) != -1)
   {
@@ -751,6 +751,10 @@ int actual_main (int argc, char *argv[]) try
 
     case 'N':
       unload_each_calibrated = false;
+      break;
+
+    case 'O':
+      unloader.set_filename(optarg);
       break;
 
     case 'o': {
