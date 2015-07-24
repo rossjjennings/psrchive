@@ -110,6 +110,7 @@ class psrover : public Pulsar::Application
   bool got_nbins;
   bool data_reset;
 
+  bool draw_phase;
   bool draw_amplitude;
   bool draw_lognormal;
   bool use_mises;
@@ -127,7 +128,7 @@ psrover::psrover()
 
   number_of_pulses = 1;
 
-  use_input_as_base = data_reset = use_mises = draw_amplitude = draw_lognormal = got_nbins = got_ascii_file = got_noises = got_fwhms = got_bins = false;
+  use_input_as_base = data_reset = use_mises = draw_phase = draw_amplitude = draw_lognormal = got_nbins = got_ascii_file = got_noises = got_fwhms = got_bins = false;
 
   i_pol = 0;
   i_chan = 0;
@@ -155,10 +156,14 @@ void psrover::add_options ( CommandLine::Menu& menu)
   arg = menu.add( use_mises, "vM");
   arg->set_help( "Force psrover to use van Mises distribution, instead of Gaussian function");
 
-  arg = menu.add( draw_lognormal, "fl", "draw log-normally distributed amplitude");
+  arg = menu.add( draw_lognormal, "lr");
+  arg->set_help("draw log-normally distributed amplitude");
 
   arg = menu.add( draw_amplitude, "fr");
-  arg->set_long_help( "draw normally-distributed amplitude with standard deviation specified with the -f switch");
+  arg->set_long_help( "draw normally-distributed amplitude with standard deviation specified with the -r switch");
+
+  arg = menu.add( draw_phase, "fb");
+  arg->set_long_help( "draw normally-distributed phase with standard deviation specified by -f switch");
 
   arg = menu.add( this, &psrover::set_fwhms,'f',"FWHMs");
   arg->set_help( "coma-separated list of FWHM for Gaussian / von Mises components");
@@ -384,6 +389,11 @@ for ( unsigned i_file = 0; i_file < number_of_pulses; i_file++ )
       for (unsigned jcomp = 0; jcomp < fwhms.size(); jcomp++ ) {
 	if (fwhms[jcomp] >= 0 && bins[jcomp] >= 0)
 	{
+	  int use_bins = bins[jcomp];
+	  if (draw_phase)
+	  {
+	    use_bins += fwhms[jcomp] * gasdev();
+	  }
 	  if (draw_amplitude)
 	  {
 	    tmp_rand = gasdev();
@@ -391,7 +401,6 @@ for ( unsigned i_file = 0; i_file < number_of_pulses; i_file++ )
 	  }
 	  else if (draw_lognormal)
 	  {
-	    cerr << "log normalification" << endl;
 	    tmp_rand = gasdev();
 	    amplitude = exp(tmp_rand * noise_to_add[jcomp]);
 	  }
@@ -403,16 +412,16 @@ for ( unsigned i_file = 0; i_file < number_of_pulses; i_file++ )
 	    if (verbose)
 	    { 
 	      cerr << "Adding a von Mises component:" << endl;
-	      cerr << "maximum: " << noise_to_add[jcomp] << " peak at the bin: " << bins[jcomp] << " FWHM: " << fwhms[jcomp] << endl;
+	      cerr << "maximum: " << noise_to_add[jcomp] << " peak at the bin: " << use_bins << " FWHM: " << fwhms[jcomp] << endl;
 	    }
-	    model.add_component(bins[jcomp]/nbin, 1.0/fwhms[jcomp]/fwhms[jcomp] * 2.35482 * 2.35482 * nbin * nbin / 4 / M_PI / M_PI, amplitude, "");
+	    model.add_component(use_bins/nbin, 1.0/fwhms[jcomp]/fwhms[jcomp] * 2.35482 * 2.35482 * nbin * nbin / 4 / M_PI / M_PI, amplitude, "");
 	  }
 	  else 
 	  {
 	    if (verbose)
 	    {
 	      cerr << "Adding a Gaussian:" << endl;
-	      cerr << "maximum: " << amplitude << " peak at the bin: " << bins[jcomp] << " FWHM: " << fwhms[jcomp] << endl;
+	      cerr << "maximum: " << amplitude << " peak at the bin: " << use_bins << " FWHM: " << fwhms[jcomp] << endl;
 	    }
 	    for (unsigned ibin = 0; ibin < nbin; ++ibin) {
 	      if (!data_reset)
@@ -426,9 +435,9 @@ for ( unsigned i_file = 0; i_file < number_of_pulses; i_file++ )
 	      // resolve the Gaussian with sub_bin resolution:
 	      for (unsigned ksubbin = 0; ksubbin < sub_bin; ksubbin++ ) {
 		current_bin = (float)((signed)ibin) + 1.0 / sub_bin * (float)ksubbin;
-		*data += amplitude / sub_bin * exp( -pow((signed)current_bin - bins[jcomp],2) / 2 / pow(fwhms[jcomp] / 2.35482, 2)) ;
+		*data += amplitude / sub_bin * exp( -pow((signed)current_bin - use_bins,2) / 2 / pow(fwhms[jcomp] / 2.35482, 2)) ;
 		//wrap the Gaussian around
-		*data += amplitude / sub_bin * exp( -pow((signed)(current_bin - 1024)-bins[jcomp],2) / 2 / pow(fwhms[jcomp] / 2.35482, 2)) ;
+		*data += amplitude / sub_bin * exp( -pow((signed)(current_bin - 1024)-use_bins,2) / 2 / pow(fwhms[jcomp] / 2.35482, 2)) ;
 	      }
 	      ++data;
 	    }
