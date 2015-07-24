@@ -68,6 +68,8 @@ class psrover : public Pulsar::Application
 
   void initialise_basis ( float*, int );
 
+  unsigned number_of_pulses;
+
   time_t seconds;
   long seed;
   BoxMuller gasdev;
@@ -109,6 +111,7 @@ class psrover : public Pulsar::Application
   bool data_reset;
 
   bool draw_amplitude;
+  bool draw_lognormal;
   bool use_mises;
 
   bool use_input_as_base;
@@ -122,7 +125,9 @@ psrover::psrover()
 
   seed = 0;
 
-  use_input_as_base = data_reset = use_mises = draw_amplitude = got_nbins = got_ascii_file = got_noises = got_fwhms = got_bins = false;
+  number_of_pulses = 1;
+
+  use_input_as_base = data_reset = use_mises = draw_amplitude = draw_lognormal = got_nbins = got_ascii_file = got_noises = got_fwhms = got_bins = false;
 
   i_pol = 0;
   i_chan = 0;
@@ -149,6 +154,8 @@ void psrover::add_options ( CommandLine::Menu& menu)
 
   arg = menu.add( use_mises, "vM");
   arg->set_help( "Force psrover to use van Mises distribution, instead of Gaussian function");
+
+  arg = menu.add( draw_lognormal, "fl", "draw log-normally distributed amplitude");
 
   arg = menu.add( draw_amplitude, "fr");
   arg->set_long_help( "draw normally-distributed amplitude with standard deviation specified with the -f switch");
@@ -185,6 +192,9 @@ void psrover::add_options ( CommandLine::Menu& menu)
   arg = menu.add( output_filename,'o',"output file");
   arg->set_help( "name of the output, defaults to temp_archive.ar");
 
+  arg = menu.add( number_of_pulses, 'p', "npulses");
+  arg->set_help( "Produce npulses simulated pulses" );
+  
   arg = menu.add( sequential_files, 'O' );
   arg->set_help( "Use a sequence of numbers as the output filename" );
 
@@ -342,8 +352,21 @@ void psrover::process (Pulsar::Archive* archive)
   if (verbose)
     cerr << "psrover::process getting the amps from " << archive->get_filename() << endl;
 
-  float* data = new float[nbin];
+  float* data = 0;
   float* data_vM = new float[nbin];
+
+  sequential_files = (number_of_pulses > 1);
+
+  Reference::To<Archive> backup = archive;
+
+for ( unsigned i_file = 0; i_file < number_of_pulses; i_file++ )
+{
+  if (use_mises)
+    // start with a fresh model for each output pulse (i_file)
+    model = Pulsar::ComponentModel();
+
+  archive = backup->clone();
+
   for ( unsigned i_sub = 0; i_sub < archive->get_nsubint() ;i_sub ++ )
   {
     data = archive->get_Integration(i_sub)->get_Profile(i_pol, i_chan)->get_amps();
@@ -365,6 +388,12 @@ void psrover::process (Pulsar::Archive* archive)
 	  {
 	    tmp_rand = gasdev();
 	    amplitude = tmp_rand * noise_to_add[jcomp];
+	  }
+	  else if (draw_lognormal)
+	  {
+	    cerr << "log normalification" << endl;
+	    tmp_rand = gasdev();
+	    amplitude = exp(tmp_rand * noise_to_add[jcomp]);
 	  }
 	  else
 	    amplitude = noise_to_add[jcomp];
@@ -510,6 +539,7 @@ void psrover::process (Pulsar::Archive* archive)
     ss.str("");
   }
   file_count++;
+ }
 }
 
 void psrover::initialise_basis( float* data, int nbin )
