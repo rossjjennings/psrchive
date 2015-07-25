@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2009,2010,2011,2013 by Stefan Oslowski,Jonathan Khoo
+ *   Copyright (C) 2009 - 2013 by Stefan Oslowski,Jonathan Khoo
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -17,6 +17,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 #include "BoxMuller.h"
 #include "Pulsar/ComponentModel.h"
@@ -29,15 +30,8 @@
 
 #define sub_bin 10
 
-using std::cerr;
-using std::cout;
-using std::endl;
-using std::ifstream;
-using std::ofstream;
-using std::string;
-using std::vector;
-
-using Pulsar::Archive;
+using namespace std;
+using namespace Pulsar;
 
 class psrover : public Pulsar::Application
 {
@@ -50,6 +44,9 @@ class psrover : public Pulsar::Application
 
   //! Process the given archive
   void process (Pulsar::Archive*);
+
+  //! Over-write the input archive with simulated data
+  void over (Pulsar::Archive*);
 
   //! Initial setup
   void setup ();
@@ -66,9 +63,9 @@ class psrover : public Pulsar::Application
   void set_ascii_file (string);
   void set_nbins (int);
 
-  void initialise_basis ( float*, int );
+  void initialise_basis ( float*, unsigned );
 
-  unsigned number_of_pulses;
+  unsigned nfiles;
 
   time_t seconds;
   long seed;
@@ -126,7 +123,7 @@ psrover::psrover()
 
   seed = 0;
 
-  number_of_pulses = 1;
+  nfiles = 1;
 
   use_input_as_base = data_reset = use_mises = draw_phase = draw_amplitude = draw_lognormal = got_nbins = got_ascii_file = got_noises = got_fwhms = got_bins = false;
 
@@ -147,34 +144,36 @@ void psrover::add_options ( CommandLine::Menu& menu)
 
   menu.add("");
 
-  arg = menu.add( this, &psrover::set_noise,'r',"noise amplitudes");
-  arg->set_help( "coma-separated list of noise amplitudes to be added");
-
   arg = menu.add( seed, 's',"seed");
   arg->set_help( "set the seed used for generating random numbers");
 
   arg = menu.add( use_mises, "vM");
-  arg->set_help( "Force psrover to use van Mises distribution, instead of Gaussian function");
+  arg->set_help( "use van Mises instead of Gaussian components");
 
-  arg = menu.add( draw_lognormal, "lr");
-  arg->set_help("draw log-normally distributed amplitude");
+  arg = menu.add( this, &psrover::set_noise,'r',"noise amplitudes");
+  arg->set_help( "comma-separated list of noise amplitudes to be added");
 
   arg = menu.add( draw_amplitude, "fr");
-  arg->set_long_help( "draw normally-distributed amplitude with standard deviation specified with the -r switch");
+  arg->set_help( "draw normally distributed component amplitude");
+  arg->set_long_help ( "the component amplitude specified with -r will be the standard deviation");
 
-  arg = menu.add( draw_phase, "fb");
-  arg->set_long_help( "draw normally-distributed phase with standard deviation specified by -f switch");
+  arg = menu.add( draw_lognormal, "lr");
+  arg->set_help( "draw log-normally distributed component amplitude");
+  arg->set_long_help ( "the component amplitude specified with -r will be the standard deviation of the logarithm");
 
   arg = menu.add( this, &psrover::set_fwhms,'f',"FWHMs");
-  arg->set_help( "coma-separated list of FWHM for Gaussian / von Mises components");
+  arg->set_help( "comma-separated list of component widths");
   arg->set_long_help( "This option will require also to set the centre bins\n"
 		  "Negative value means that the corresponding noise amplitude will be the value of delta function\n"
 		  "at the corresponding bin, or Gaussian noise, if the corresponding bin is negative as well\n");
 
   arg = menu.add( this, &psrover::set_bins,'b',"bins");
-  arg->set_help ("Coma-separated list of centre bins for Gaussian / von Mises components");
-  arg->set_help ("Negative value means that the corresponding noise amplitude is the standard deviation of random noise");
+  arg->set_help ("comma-separated list of component centre bins");
+  arg->set_long_help ("Negative value means that the corresponding noise amplitude is the standard deviation of random noise");
 
+  arg = menu.add( draw_phase, "fb");
+  arg->set_help( "draw normally distributed component phases (centre bins)");
+  arg->set_long_help ( "the component width specified with -f will be the standard deviation");
 
   menu.add("");
   menu.add("Input / output options");
@@ -197,7 +196,7 @@ void psrover::add_options ( CommandLine::Menu& menu)
   arg = menu.add( output_filename,'o',"output file");
   arg->set_help( "name of the output, defaults to temp_archive.ar");
 
-  arg = menu.add( number_of_pulses, 'p', "npulses");
+  arg = menu.add( nfiles, 'p', "npulses");
   arg->set_help( "Produce npulses simulated pulses" );
   
   arg = menu.add( sequential_files, 'O' );
@@ -211,7 +210,7 @@ void psrover::add_options ( CommandLine::Menu& menu)
   arg->set_help("Save the noise added to each bin in ASCII file");
 
   arg = menu.add(save_added_gauss_filename, "Sgauss", "filename");
-  arg->set_help("Save the Gaussian / von Misses amplitude in ASCII file");
+  arg->set_help("Save the component amplitude in ASCII file");
 
   arg = menu.add(save_profile_ascii, "Sascii", "filename");
   arg->set_help("Save the resulting profile in ASCII file");
@@ -355,22 +354,27 @@ void psrover::process (Pulsar::Archive* archive)
   nbin = archive-> get_nbin();
 
   if (verbose)
-    cerr << "psrover::process getting the amps from " << archive->get_filename() << endl;
+    cerr << "psrover::process getting the amps from "
+	 << archive->get_filename() << endl;
 
+  sequential_files = (nfiles > 1);
+
+  for ( unsigned i_file = 0; i_file < nfiles; i_file++ )
+  {
+    if (use_mises)
+      // start with a fresh model for each output pulse (i_file)
+      model = Pulsar::ComponentModel();
+
+    Reference::To<Archive> clone = archive->clone();
+
+    over (clone);
+  }
+}
+
+void psrover::over (Archive* archive)
+{
   float* data = 0;
   float* data_vM = new float[nbin];
-
-  sequential_files = (number_of_pulses > 1);
-
-  Reference::To<Archive> backup = archive;
-
-for ( unsigned i_file = 0; i_file < number_of_pulses; i_file++ )
-{
-  if (use_mises)
-    // start with a fresh model for each output pulse (i_file)
-    model = Pulsar::ComponentModel();
-
-  archive = backup->clone();
 
   for ( unsigned i_sub = 0; i_sub < archive->get_nsubint() ;i_sub ++ )
   {
@@ -435,9 +439,9 @@ for ( unsigned i_file = 0; i_file < number_of_pulses; i_file++ )
 	      // resolve the Gaussian with sub_bin resolution:
 	      for (unsigned ksubbin = 0; ksubbin < sub_bin; ksubbin++ ) {
 		current_bin = (float)((signed)ibin) + 1.0 / sub_bin * (float)ksubbin;
-		*data += amplitude / sub_bin * exp( -pow((signed)current_bin - use_bins,2) / 2 / pow(fwhms[jcomp] / 2.35482, 2)) ;
+		*data += amplitude / sub_bin * exp( -std::pow((double)current_bin - use_bins,2) / 2 / std::pow(fwhms[jcomp] / 2.35482, 2)) ;
 		//wrap the Gaussian around
-		*data += amplitude / sub_bin * exp( -pow((signed)(current_bin - 1024)-use_bins,2) / 2 / pow(fwhms[jcomp] / 2.35482, 2)) ;
+		*data += amplitude / sub_bin * exp( -std::pow((double)(current_bin - 1024)-use_bins,2) / 2 / std::pow(fwhms[jcomp] / 2.35482, 2)) ;
 	      }
 	      ++data;
 	    }
@@ -543,15 +547,15 @@ for ( unsigned i_file = 0; i_file < number_of_pulses; i_file++ )
     archive->unload(out_path+"/"+output_filename);
   else
   {
-    ss << out_path << "/" << file_count << ".ar";
+    ss << out_path << "/" << setfill('0') << setw(12) << file_count << ".ar";
     archive->unload( ss.str() );
     ss.str("");
   }
   file_count++;
- }
 }
 
-void psrover::initialise_basis( float* data, int nbin )
+
+void psrover::initialise_basis( float* data, unsigned nbin )
 {
   if ( verbose )
     cerr << "psrover::initialise_basis entered" << endl;
