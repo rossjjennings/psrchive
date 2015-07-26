@@ -70,7 +70,7 @@ class psrover : public Pulsar::Application
   time_t seconds;
   long seed;
   BoxMuller gasdev;
-  Pulsar::ComponentModel model;
+  Reference::To<ComponentModel> model;
 
   string ascii_filename;
   string output_filename;
@@ -363,7 +363,7 @@ void psrover::process (Pulsar::Archive* archive)
   {
     if (use_mises)
       // start with a fresh model for each output pulse (i_file)
-      model = Pulsar::ComponentModel();
+      model = new Pulsar::ComponentModel;
 
     Reference::To<Archive> clone = archive->clone();
 
@@ -418,7 +418,7 @@ void psrover::over (Archive* archive)
 	      cerr << "Adding a von Mises component:" << endl;
 	      cerr << "maximum: " << noise_to_add[jcomp] << " peak at the bin: " << use_bins << " FWHM: " << fwhms[jcomp] << endl;
 	    }
-	    model.add_component(use_bins/nbin, 1.0/fwhms[jcomp]/fwhms[jcomp] * 2.35482 * 2.35482 * nbin * nbin / 4 / M_PI / M_PI, amplitude, "");
+	    model->add_component(use_bins/nbin, 1.0/fwhms[jcomp]/fwhms[jcomp] * 2.35482 * 2.35482 * nbin * nbin / 4 / M_PI / M_PI, amplitude, "");
 	  }
 	  else 
 	  {
@@ -449,11 +449,11 @@ void psrover::over (Archive* archive)
 	  if (use_mises)
 	  {
 	    if ( !data_reset ) {
-	      model.evaluate(data, archive->get_nbin());
+	      model->evaluate(data, archive->get_nbin());
 	      data_reset = true;
 	    }
 	    else {
-	      model.evaluate(data_vM, archive->get_nbin());
+	      model->evaluate(data_vM, archive->get_nbin());
 	      for (unsigned ibin = 0; ibin < nbin; ++ibin)
 		data[ibin] += data_vM[ibin];
 	    }
