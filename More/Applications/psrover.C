@@ -109,10 +109,12 @@ class psrover : public Pulsar::Application
 
   bool draw_phase;
   bool draw_amplitude;
-  bool draw_lognormal;
+
   bool use_mises;
 
   bool use_input_as_base;
+
+  double log_sigma;
 };
 
 psrover::psrover()
@@ -125,7 +127,9 @@ psrover::psrover()
 
   nfiles = 1;
 
-  use_input_as_base = data_reset = use_mises = draw_phase = draw_amplitude = draw_lognormal = got_nbins = got_ascii_file = got_noises = got_fwhms = got_bins = false;
+  use_input_as_base = data_reset = use_mises = draw_phase = draw_amplitude = got_nbins = got_ascii_file = got_noises = got_fwhms = got_bins = false;
+
+  log_sigma = 0.0;
 
   i_pol = 0;
   i_chan = 0;
@@ -157,11 +161,11 @@ void psrover::add_options ( CommandLine::Menu& menu)
   arg->set_help( "draw normally distributed component amplitude");
   arg->set_long_help ( "the component amplitude specified with -r will be the standard deviation");
 
-  arg = menu.add( draw_lognormal, "lr");
+  arg = menu.add( log_sigma, "lr", "log_sigma");
   arg->set_help( "draw log-normally distributed component amplitude");
-  arg->set_long_help ( "the component amplitude specified with -r will be the standard deviation of the logarithm");
+  arg->set_long_help ( "the component amplitude specified with -r will be the mean");
 
-  arg = menu.add( this, &psrover::set_fwhms,'f',"FWHMs");
+  arg = menu.add( this, &psrover::set_fwhms,'f',"bins");
   arg->set_help( "comma-separated list of component widths");
   arg->set_long_help( "This option will require also to set the centre bins\n"
 		  "Negative value means that the corresponding noise amplitude will be the value of delta function\n"
@@ -403,10 +407,10 @@ void psrover::over (Archive* archive)
 	    tmp_rand = gasdev();
 	    amplitude = tmp_rand * noise_to_add[jcomp];
 	  }
-	  else if (draw_lognormal)
+	  else if (log_sigma)
 	  {
 	    tmp_rand = gasdev();
-	    amplitude = exp(tmp_rand * noise_to_add[jcomp]);
+	    amplitude = noise_to_add[jcomp] * exp(log_sigma * (tmp_rand - log_sigma));
 	  }
 	  else
 	    amplitude = noise_to_add[jcomp];
