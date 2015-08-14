@@ -21,7 +21,7 @@ void Pulsar::Editor::add_extension (Archive* archive, const std::string& ext)
 void Pulsar::Editor::remove_extension (Archive* archive, const std::string& ext)
 {
   if (Archive::verbose > 1)
-    cerr << "Pulsar::Editor::add_extension " << ext << endl;
+    cerr << "Pulsar::Editor::remove_extension " << ext << endl;
 
   unsigned next = archive->get_nextension();
 
