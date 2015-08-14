@@ -237,6 +237,9 @@ namespace Pulsar {
     //! unload the timer header to an open file
     void hdr_unload (FILE* fptr) const;
 
+    //! set the backend data size
+    virtual void set_be_data_size ();
+
     //! unload the backend-specific information to an open file
     virtual void backend_unload (FILE* fptr) const;
 
