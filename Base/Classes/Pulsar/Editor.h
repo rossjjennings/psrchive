@@ -24,6 +24,9 @@ namespace Pulsar {
     //! Add the named extension to the given archive
     void add_extension (Archive*, const std::string& name);
 
+    //! Remove the named extension from the given archive
+    void remove_extension (Archive*, const std::string& name);
+
     //! Return the archive filename
     std::string get_identifier (const Archive*);
 
