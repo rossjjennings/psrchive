@@ -10,6 +10,7 @@
 #include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/CalibratorExtension.h"
 
 #include "TextInterface.h"
 #include "pairutil.h"
@@ -42,6 +43,11 @@ Pulsar::DeleteInterpreter::DeleteInterpreter ()
       "  float pair <MHz0:MHz1> range of frequencies to delete \n"
       "  float [>MHz] delete everything above frequency \n"
       "  float [<MHz] delete everything below frequency \n");
+
+  add_command
+    ( &DeleteInterpreter::cal,
+      "cal", "delete specified channels from CalibratorExtenstion",
+      index_help("cal") );
 }
 
 Pulsar::DeleteInterpreter::~DeleteInterpreter ()
@@ -118,13 +124,12 @@ string Pulsar::DeleteInterpreter::freq (const string& args) try
 
     Archive* archive = get();
 
-    unsigned isub,  nsub = archive->get_nsubint();
-    unsigned ichan, nchan = archive->get_nchan();
+    unsigned nsub = archive->get_nsubint();
 
-    for (isub=0; isub < nsub; isub++)
+    for (unsigned isub=0; isub < nsub; isub++)
     {
       Integration* subint = archive->get_Integration (isub);
-      for (ichan=0; ichan < subint->get_nchan(); )
+      for (unsigned ichan=0; ichan < subint->get_nchan(); )
 	if (r.within( subint->get_centre_frequency(ichan) ))
 	  subint->expert()->remove (ichan);
         else
@@ -142,3 +147,32 @@ catch (Error& error)
   return response (Fail, error.get_message());
 }
 
+
+string Pulsar::DeleteInterpreter::cal (const string& args) try 
+{
+  // cerr << "Pulsar::DeleteInterpreter::cal args='" << args << "'" << endl;
+
+  Reference::To<CalibratorExtension> ext = get()->get<CalibratorExtension>();
+  if (!ext)
+    return response (Fail, "archive does not contain CalibratorExtension");
+
+  vector<string> arguments = setup (args);
+
+  vector<unsigned> channels;
+  parse_indeces (channels, arguments, ext->get_nchan());
+
+  std::sort (channels.begin(), channels.end(), std::greater<unsigned>());
+
+  // delete selected channels in CalibratorExtension
+  for (unsigned i=0; i<channels.size(); i++)
+  {
+    // cerr << "delete cal " << channels[i] << endl;
+    ext->remove_chan( channels[i], channels[i] );
+  }
+ 
+  return response (Good);
+}
+catch (Error& error)
+{
+  return response (Fail, error.get_message());
+}

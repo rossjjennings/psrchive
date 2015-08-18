@@ -34,6 +34,9 @@ namespace Pulsar {
     //! delete the specified ranges of frequencies
     std::string freq (const std::string& args);
 
+    //! delete the specified channels from the CalibratorExtension
+    std::string cal (const std::string& args);
+
     //! no empty commands
     std::string empty ();
 
