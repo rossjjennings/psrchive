@@ -46,11 +46,7 @@ void Pulsar::Archive::remove_chan (unsigned first, unsigned last)
   set_bandwidth(bw - (double)nchan_to_remove * chan_bw);
   // Do we always want to reset center freq?
   if (new_nchan>0) {
-    double new_center_freq=0.0;
-    for (unsigned ichan=0; ichan<new_nchan; ichan++) 
-      new_center_freq += get_Integration(0)->get_centre_frequency(ichan);
-    new_center_freq /= (double)new_nchan;
-    set_centre_frequency(new_center_freq);
+    update_centre_frequency();
   }
 
   if (verbose == 3)

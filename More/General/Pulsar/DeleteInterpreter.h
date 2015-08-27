@@ -12,6 +12,7 @@
 #define __Pulsar_DeleteInterpreter_h
 
 #include "Pulsar/InterpreterExtension.h"
+#include "Pulsar/Config.h"
 
 namespace Pulsar {
 
@@ -40,6 +41,9 @@ namespace Pulsar {
     //! no empty commands
     std::string empty ();
 
+  protected:
+
+    static Option<bool> adjust_metadata_while_deleting_channels;
   };
 
 }
