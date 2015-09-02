@@ -1,12 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2007 by Jonathan Khoo
+ *   Copyright (C) 2007 by Jonathan Khoo - 2015 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 #include "Pulsar/FortranSNR.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/PhaseWeight.h"
 
 #include <math.h>
 #include <config.h>
@@ -48,20 +49,24 @@ float FortranSNR::get_snr (const Profile* profile)
 
   float snrmax,smmax;
 
-  float * workspace = new float[nb];
+  float* workspace = new float[nb];
 
   float* amps = const_cast<float*>( profile->get_amps() );
 
-  if (minwidthbins == 0) {
+  if (!rms_set)
+    rms = profile->baseline()->get_rms();
+
+  if (minwidthbins == 0)
+  {
     F77_smooth_mw(amps,&nb,&maxw,&rms,&kwmax,&snrmax,&smmax,workspace);
     set_bestwidth(kwmax);
   }
   else
-    {
-      //      cerr << "calling mmw " << minwidthbins <<" " <<maxwidthbins << endl;
+  {
     F77_smooth_mmw(amps,&nb,&minwidthbins,&maxw,&rms,&kwmax,&snrmax,&smmax,workspace);
     set_bestwidth(kwmax);
-    }
+  }
+
   delete [] workspace;
   return snrmax;
 }
