@@ -49,7 +49,7 @@ float FortranSNR::get_snr (const Profile* profile)
 
   float snrmax,smmax;
 
-  float* workspace = new float[nb];
+  work.resize (nb);
 
   float* amps = const_cast<float*>( profile->get_amps() );
 
@@ -58,16 +58,15 @@ float FortranSNR::get_snr (const Profile* profile)
 
   if (minwidthbins == 0)
   {
-    F77_smooth_mw(amps,&nb,&maxw,&rms,&kwmax,&snrmax,&smmax,workspace);
+    F77_smooth_mw(amps,&nb,&maxw,&rms,&kwmax,&snrmax,&smmax,&(work[0]));
     set_bestwidth(kwmax);
   }
   else
   {
-    F77_smooth_mmw(amps,&nb,&minwidthbins,&maxw,&rms,&kwmax,&snrmax,&smmax,workspace);
+    F77_smooth_mmw(amps,&nb,&minwidthbins,&maxw,&rms,&kwmax,&snrmax,&smmax,&(work[0]));
     set_bestwidth(kwmax);
   }
 
-  delete [] workspace;
   return snrmax;
 }
 
