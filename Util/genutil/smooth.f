@@ -1,11 +1,11 @@
 
-      subroutine smooth_mw(pr,nbin,maxwidth, rmsp,kwmax,snrmax,smmax)
-        call smooth_mmw(pr,nbin,1,maxwidth,rmsp,kwmax,snrmax,smmax)
+      subroutine smooth_mw(pr,nbin,maxwidth,rmsp,kwmax,snrmax,smmax,wk)
+        call smooth_mmw(pr,nbin,1,maxwidth,rmsp,kwmax,snrmax,smmax,wk)
       end
 
       subroutine smooth_mmw(pr,nbin,minwidth,maxwidth, rmsp,kwmax,
      &   snrmax
-     &   ,smmax)
+     &   ,smmax,wrk)
 c******************************************************************
 c
 c  convolves profile pr(nbin) with a boxcar of width kw.  it returns
@@ -21,7 +21,7 @@ c
       real*4 pr(*),rmsp,snrmax,smmax
 c
       integer ksm,j,k,kw,nn,ja,jj,nvalid
-      real*4 s,wrk(2048),al,an,sn,smax
+      real*4 s,wrk(*),al,an,sn,smax
       logical bail
 c
 c      write(*,*) 'Using new version of smooth_mw'
@@ -40,7 +40,6 @@ c      sanity check
       endif
 
       snrmax=0.
-      if (nbin.gt.1024) stop 'smooth.f Increase dim of wrk in smooth_mw'
 c---------------------------------------
 c  remove baseline
       ksm=nbin/2.5+0.5
