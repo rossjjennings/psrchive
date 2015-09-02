@@ -17,6 +17,18 @@
 
 using namespace std;
 
+Pulsar::Option<bool> Pulsar::DeleteInterpreter::adjust_metadata_while_deleting_channels
+(
+ "DeleteInterpreter::adjust_metadata_while_deleting_channels", false,
+
+ "Adjust bandwidth and centre frequency after deleting channels [boolean]",
+
+ "If true, after using either delete freq or delete chan the bandwidth\n"
+ "of the archive as well as its centre frequency will be updated to\n"
+ "reflect the changes to the archive.\n\n"
+ "Will only work on not de-dispersed archives."
+);
+
 static string index_help (const string& cmd)
 {
   return
@@ -65,10 +77,13 @@ extern void parse_indeces (vector<unsigned>& indeces,
 
 string Pulsar::DeleteInterpreter::chan (const string& args) try 
 {
+  double org_bw = get()->get_bandwidth();
+  unsigned org_nchan = get()->get_nchan();
+  double chan_bw = org_bw / (double)org_nchan;
   vector<string> arguments = setup (args);
 
   vector<unsigned> channels;
-  parse_indeces (channels, arguments, get()->get_nchan());
+  parse_indeces (channels, arguments, org_nchan);
 
   std::sort (channels.begin(), channels.end(), std::greater<unsigned>());
 
@@ -81,9 +96,19 @@ string Pulsar::DeleteInterpreter::chan (const string& args) try
       subint->expert()->remove( channels[i] );
   }
 
+  unsigned new_nchan = get()->get_Integration(0)->get_nchan();
   if (get()->get_nsubint() > 0)
-    get()->expert()->set_nchan( get()->get_Integration(0)->get_nchan() );
- 
+    get()->expert()->set_nchan( new_nchan );
+
+  if (adjust_metadata_while_deleting_channels)
+  {
+    get()->set_bandwidth(org_bw - (double)channels.size() * chan_bw);
+    // Do we always want to reset center freq?
+    if (new_nchan>0) {
+      get()->update_centre_frequency();
+    }
+  }
+
   return response (Good);
 }
 catch (Error& error) {
@@ -116,6 +141,10 @@ catch (Error& error) {
 //
 string Pulsar::DeleteInterpreter::freq (const string& args) try
 {
+  double org_bw = get()->get_bandwidth();
+  unsigned org_nchan = get()->get_nchan();
+  double chan_bw = org_bw / (double)org_nchan;
+  unsigned removed_channels_count = 0;
   vector<string> arguments = setup (args);
 
   for (unsigned iarg=0; iarg < arguments.size(); iarg++)
@@ -130,15 +159,27 @@ string Pulsar::DeleteInterpreter::freq (const string& args) try
     {
       Integration* subint = archive->get_Integration (isub);
       for (unsigned ichan=0; ichan < subint->get_nchan(); )
-	if (r.within( subint->get_centre_frequency(ichan) ))
-	  subint->expert()->remove (ichan);
+        if (r.within( subint->get_centre_frequency(ichan) )) {
+          subint->expert()->remove (ichan);
+          removed_channels_count++;
+        }
         else
           ichan ++;
     }
   }
 
+  unsigned new_nchan = get()->get_Integration(0)->get_nchan();
   if (get()->get_nsubint() > 0)
-    get()->expert()->set_nchan( get()->get_Integration(0)->get_nchan() );
+    get()->expert()->set_nchan( new_nchan );
+
+  if (adjust_metadata_while_deleting_channels)
+  {
+    get()->set_bandwidth(org_bw - (double)removed_channels_count * chan_bw);
+    // Do we always want to reset center freq?
+    if (new_nchan>0) {
+      get()->update_centre_frequency();
+    }
+  }
 
   return response (Good);
 }
