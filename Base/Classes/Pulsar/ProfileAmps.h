@@ -60,6 +60,10 @@ namespace Pulsar {
     //! set the amplitudes array equal to the contents of the data array
     template <typename T> void get_amps (std::vector<T>& data) const;
 
+    //! remove the elements specified in the array of indeces
+    /*! the indeces must be sorted and there must be no repeats */
+    void remove (const std::vector<unsigned>& indeces);
+
     //! expert interface
     class Expert;
 

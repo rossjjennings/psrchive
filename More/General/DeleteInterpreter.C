@@ -15,6 +15,8 @@
 #include "TextInterface.h"
 #include "pairutil.h"
 
+#include <cassert>
+
 using namespace std;
 
 Pulsar::Option<bool> Pulsar::DeleteInterpreter::adjust_metadata_while_deleting_channels
@@ -60,6 +62,11 @@ Pulsar::DeleteInterpreter::DeleteInterpreter ()
     ( &DeleteInterpreter::cal,
       "cal", "delete specified channels from CalibratorExtenstion",
       index_help("cal") );
+
+  add_command
+    ( &DeleteInterpreter::bin,
+      "bin", "delete specified phase bins",
+      index_help("bin") );
 }
 
 Pulsar::DeleteInterpreter::~DeleteInterpreter ()
@@ -215,5 +222,72 @@ string Pulsar::DeleteInterpreter::cal (const string& args) try
 }
 catch (Error& error)
 {
+  return response (Fail, error.get_message());
+}
+
+
+string Pulsar::DeleteInterpreter::bin (const string& args) try 
+{
+  vector<string> arguments = setup (args);
+
+  Archive* archive = get();
+  unsigned nsub = archive->get_nsubint();
+  unsigned nchan = archive->get_nchan();
+  unsigned npol = archive->get_npol();
+  unsigned nbin = archive->get_nbin();
+
+  vector<unsigned> bins;
+  parse_indeces (bins, arguments, archive->get_nbin());
+
+  std::sort (bins.begin(), bins.end());
+
+  // find the number of contiguous bins deleted from the start of the profile
+  unsigned ioffset = 0;
+  while (ioffset < bins.size() && bins[ioffset] == ioffset) ioffset++;
+
+  if (ioffset < bins.size())
+  {
+    // ensure that the remaining bins deleted are contiguous to the end
+    unsigned iend = ioffset;
+    while (iend+1 < bins.size() && bins[iend]+1 == bins[iend+1]) iend++;
+
+    if (bins[iend] != nbin-1)
+      return response (Fail, "bins do not contiguously span phase zero");
+  }
+
+  unsigned new_nbin = nbin - bins.size();
+
+  for (unsigned isub=0; isub < nsub; isub++)
+  {
+    Integration* subint = archive->get_Integration (isub);
+    double period = subint->get_folding_period ();
+
+    if (ioffset)
+    {
+      double offset = (period * ioffset) / nbin;
+      cerr << "adjusting start time by " << offset << " seconds" << endl;
+      subint->set_epoch( subint->get_epoch() + offset );
+    }
+
+    double new_period = (period * new_nbin) / nbin;
+    cerr << "setting new folding period = " << new_period;
+    subint->set_folding_period (new_period);
+
+    for (unsigned ipol=0; ipol < npol; ipol++)
+      for (unsigned ichan=0; ichan < nchan; ichan++)
+      {
+	Profile* profile = subint->get_Profile (ipol, ichan);
+	profile->remove (bins);
+	assert (profile->get_nbin() == new_nbin);
+      }
+
+    subint->expert()->set_nbin(new_nbin);
+  }
+
+  archive->expert()->set_nbin(new_nbin);
+
+  return response (Good);
+}
+catch (Error& error) {
   return response (Fail, error.get_message());
 }
