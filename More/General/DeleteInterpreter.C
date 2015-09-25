@@ -168,7 +168,9 @@ string Pulsar::DeleteInterpreter::freq (const string& args) try
       for (unsigned ichan=0; ichan < subint->get_nchan(); )
         if (r.within( subint->get_centre_frequency(ichan) )) {
           subint->expert()->remove (ichan);
-          removed_channels_count++;
+          if (isub == 0)
+            // only count the removed channels once
+            removed_channels_count++;
         }
         else
           ichan ++;
