@@ -12,6 +12,7 @@
 #define __Pulsar_DeleteInterpreter_h
 
 #include "Pulsar/InterpreterExtension.h"
+#include "Pulsar/Config.h"
 
 namespace Pulsar {
 
@@ -34,9 +35,18 @@ namespace Pulsar {
     //! delete the specified ranges of frequencies
     std::string freq (const std::string& args);
 
+    //! delete the specified channels from the CalibratorExtension
+    std::string cal (const std::string& args);
+
+    //! delete the specified phase bins
+    std::string bin (const std::string& args);
+
     //! no empty commands
     std::string empty ();
 
+  protected:
+
+    static Option<bool> adjust_metadata_while_deleting_channels;
   };
 
 }

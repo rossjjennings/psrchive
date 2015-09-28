@@ -44,6 +44,9 @@ namespace Pulsar {
     //! Install the default S/N algorithm
     std::string phase (const std::string& args);
 
+    //! Install the pdmp S/N algorithm
+    std::string pdmp (const std::string& args);
+
     //! No empty arguments
     std::string empty ();
 
@@ -56,6 +59,7 @@ namespace Pulsar {
     Functor< float (const Profile*) > square_functor;
     Functor< float (const Profile*) > standard_functor;
     Functor< float (const Profile*) > phase_functor;
+    Functor< float (const Profile*) > pdmp_functor;
 
   };
 

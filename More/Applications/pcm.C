@@ -689,6 +689,7 @@ int actual_main (int argc, char *argv[]) try
       break;
 
     case 'I':
+      cerr << "pcm: loading impurity transformation from " << optarg << endl;
       impurity = MEAL::Function::load<MEAL::Real4> (optarg);
       break;
 

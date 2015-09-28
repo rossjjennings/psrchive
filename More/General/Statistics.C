@@ -10,6 +10,7 @@
 
 #include "Pulsar/ProfileStats.h"
 #include "Pulsar/ProfileShiftFit.h"
+#include "Pulsar/SNRatioInterpreter.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/TwoBitStats.h"
@@ -91,6 +92,17 @@ void Pulsar::Statistics::set_pol (Index _ipol)
 Pulsar::Index Pulsar::Statistics::get_pol () const
 {
   return ipol;
+}
+
+//! Set the signal-to-noise ratio estimator
+void Pulsar::Statistics::set_snr_estimator (const std::string& name)
+{
+  if (!snr_estimator_interpreter)
+    snr_estimator_interpreter = new SNRatioInterpreter;
+
+  string result = snr_estimator_interpreter->parse (name);
+  if (result != "")
+    cout << result << endl;
 }
 
 //! Get the signal-to-noise ratio

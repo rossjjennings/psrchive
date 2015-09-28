@@ -10,6 +10,7 @@
 #include "Pulsar/StandardSNR.h"
 #include "Pulsar/AdaptiveSNR.h"
 #include "Pulsar/SquareWave.h"
+#include "Pulsar/FortranSNR.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
@@ -27,6 +28,11 @@ Pulsar::SNRatioInterpreter::SNRatioInterpreter ()
     ( &SNRatioInterpreter::fourier,
       "fourier", "install FourierSNR algorithm",
       "usage: fourier \n" );
+
+  add_command 
+    ( &SNRatioInterpreter::pdmp,
+      "pdmp", "install FortranSNR algorithm",
+      "usage: pdmp \n" );
 
   add_command 
     ( &SNRatioInterpreter::square,
@@ -63,6 +69,18 @@ string Pulsar::SNRatioInterpreter::fourier (const string& args) try
     fourier_functor.set( new FourierSNR, &FourierSNR::get_snr );
 
   Profile::snr_strategy = fourier_functor;
+  return "";
+}
+catch (Error& error) {
+  return error.get_message();
+}
+
+string Pulsar::SNRatioInterpreter::pdmp (const string& args) try
+{
+  if (!pdmp_functor)
+    pdmp_functor.set( new FortranSNR, &FortranSNR::get_snr );
+
+  Profile::snr_strategy = pdmp_functor;
   return "";
 }
 catch (Error& error) {

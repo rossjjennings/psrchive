@@ -14,11 +14,10 @@
 #ifndef __Pulsar_FortranSNR_h
 #define __Pulsar_FortranSNR_h
 
-#include "ReferenceAble.h"
-#include <Pulsar/Profile.h>
+#include "Pulsar/Profile.h"
+#include <vector>
 
 namespace Pulsar {
-
 
   //! Calculates the signal-to-noise ratio by fitting against a standard
   class FortranSNR : public Reference::Able {
@@ -42,6 +41,8 @@ namespace Pulsar {
     int maxwidthbins;
     int bestwidth;
     bool rms_set;
+
+    std::vector<float> work;
   };
 
 }
