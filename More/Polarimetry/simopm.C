@@ -39,6 +39,8 @@ void usage ()
     " \n"
     " -N Msamp    simulate Msamp mega samples \n"
     " -n Nint     integrate Nint samples before further processing \n"
+    " -m smooth   box-car smooth over smooth samples before detection \n"
+    " -M smooth   box-car smooth over smooth samples after detection \n"
     " -s i,q,u,v  single source with specified Stokes parameters \n"
     " -S          superposed modes \n"
     " -C f_A      composite modes with fraction of instances in mode A \n"
@@ -68,6 +70,7 @@ public:
   std::complex<T> y;
 
   const spinor& operator *= (T scale) { x *= scale; y *= scale; return *this; }
+  const spinor& operator /= (T norm) { x /= norm; y /= norm; return *this; }
   const spinor& operator += (const spinor& e) { x+=e.x; y+=e.y; return *this; }
 };
 
@@ -92,6 +95,8 @@ const spinor<T> operator * (const Jones<T>& j, const spinor<T>& in)
 		     j.j10 * in.x + j.j11 * in.y );
 }
 
+
+
 /***************************************************************************
  *
  *  a single source of electromagnetic radiation
@@ -102,10 +107,11 @@ class mode
 {
 public:
   mode ();
-  void set_Stokes (const Stokes<double>& mean);
-  Stokes<double> get_Stokes () { return mean; }
+  virtual ~mode () { }
 
-  spinor<double> get_field ();
+  virtual void set_Stokes (const Stokes<double>& mean);
+  virtual Stokes<double> get_Stokes () { return mean; }
+  virtual spinor<double> get_field ();
 
   void set_normal (BoxMuller* n) { normal = n; }
   void set_power_law (double _inner_scale) { inner_scale = _inner_scale; }
@@ -194,28 +200,128 @@ void compute_stokes (Vector<4,T>& stokes, const spinor<U>& e)
 
 /***************************************************************************
  *
+ *  a boxcar-smoothed single source of electromagnetic radiation
+ *
+ ***************************************************************************/
+
+class boxcar_mode : public mode
+{
+  mode* source;
+  vector< spinor<double> > instances;
+  unsigned smooth;
+  unsigned current;
+
+  void setup()
+  {
+    current = 0;
+    instances.resize (smooth);
+    for (unsigned i=1; i<smooth; i++)
+      instances[i] = source->get_field();
+  }
+
+public:
+
+  boxcar_mode (mode* s, unsigned n) { source = s; smooth = n; }
+
+  void set_Stokes (const Stokes<double>& mean) { source->set_Stokes(mean); }
+  Stokes<double> get_Stokes () { return source->get_Stokes(); }
+
+  spinor<double> get_field ()
+  {
+    if (instances.size() < smooth)
+      setup ();
+
+    instances[current] = source->get_field();
+    current = (current + 1) % smooth;
+
+    spinor<double> result;
+    for (unsigned i=0; i<smooth; i++)
+      result += instances[i];
+
+    result /= sqrt(smooth);
+    return result;
+  }
+};
+
+/***************************************************************************
+ *
+ *  a Stokes sample
+ *
+ ***************************************************************************/
+
+class sample
+{
+public:
+
+  unsigned sample_size;
+
+  sample() { sample_size = 1; }
+
+  virtual ~sample () {}
+
+  virtual Stokes<double> get_Stokes () = 0;
+  virtual Vector<4, double> get_expected_mean () = 0;
+  virtual Matrix<4,4, double> get_expected_covariance () = 0;
+};
+
+/***************************************************************************
+ *
+ *  a single source of electromagnetic radiation
+ *
+ ***************************************************************************/
+
+class single : public sample
+{
+public:
+  mode* source;
+
+  single (mode* s) { source = s; }
+
+  virtual Stokes<double> get_Stokes_instance ()
+  {
+    spinor<double> e = source->get_field();
+    Vector<4, double> tmp;
+    compute_stokes (tmp, e);
+    return tmp;
+  }
+
+  Stokes<double> get_Stokes ()
+  {
+    Stokes<double> result;
+    for (unsigned i=0; i<sample_size; i++)
+      result += get_Stokes_instance();
+    result /= sample_size;
+    return result;
+  }
+
+  Vector<4, double> get_expected_mean ()
+  {
+    return source->get_Stokes();
+  }
+
+  Matrix<4,4, double> get_expected_covariance ()
+  {
+    Stokes<double> stokes = source->get_Stokes();
+    Matrix<4,4, double> result = Minkowski::outer(stokes, stokes);
+    result /= sample_size;
+    return result;
+  }
+};
+
+
+/***************************************************************************
+ *
  *  a combination of two sources of electromagnetic radiation
  *
  ***************************************************************************/
 
-class combination
+class combination : public sample
 {
 public:
   mode A;
   mode B;
 
-  unsigned sample_size;
-
-  combination() { sample_size = 1; }
-
-  virtual ~combination () {}
-
   void set_normal (BoxMuller* n) { A.set_normal(n); B.set_normal(n); }
-
-  virtual Stokes<double> get_Stokes () = 0;
-
-  virtual Vector<4, double> get_expected_mean () = 0;
-  virtual Matrix<4,4, double> get_expected_covariance () = 0;
 };
 
 /***************************************************************************
@@ -372,23 +478,71 @@ public:
 };
 
 
+/***************************************************************************
+ *
+ *  a post-detection boxcar-smoothed source of electromagnetic radiation
+ *
+ ***************************************************************************/
+
+class boxcar_sample : public single
+{
+  vector< Stokes<double> > instances;
+  unsigned smooth;
+  unsigned current;
+
+  void setup()
+  {
+    current = 0;
+    instances.resize (smooth);
+    for (unsigned i=1; i<smooth; i++)
+      instances[i] = single::get_Stokes_instance();
+  }
+
+public:
+
+  boxcar_sample (mode* s, unsigned n) : single(s) { smooth = n; }
+
+  Stokes<double> get_Stokes_instance ()
+  {
+    if (instances.size() < smooth)
+      setup ();
+
+    instances[current] = single::get_Stokes_instance();
+    current = (current + 1) % smooth;
+
+    Stokes<double> result;
+    for (unsigned i=0; i<smooth; i++)
+      result += instances[i];
+
+    result /= smooth;
+    return result;
+  }
+};
+
+
+
 int main (int argc, char** argv)
 {
   uint64_t ndat = 1024 * 1024;     // number of Stokes samples
   unsigned nint = 1;               // number of instances in Stokes sample
 
+  unsigned smooth_before = 0;      // box-car smoothing width pre-detection
+  unsigned smooth_after = 0;       // box-car smoothing width post-detection
+
   bool verbose = false;
 
   Stokes<double> stokes = 1.0;
   bool subtract_outer_population_mean = false;
-  mode single;
+  mode source;
+
   combination* dual = NULL;
+  sample* stokes_sample = NULL;
 
   bool print = false;
   bool rho_stats = false;
 
   int c;
-  while ((c = getopt(argc, argv, "hn:N:s:SC:D:A:B:l:opr")) != -1)
+  while ((c = getopt(argc, argv, "hn:N:m:M:s:SC:D:A:B:l:opr")) != -1)
   {
     switch (c)
     {
@@ -428,7 +582,7 @@ int main (int argc, char** argv)
 	if (dual)
 	  dual->A.set_log_normal (log_sigma);
 	else
-	  single.set_log_normal (log_sigma);
+	  source.set_log_normal (log_sigma);
 	break;
       }
 
@@ -438,6 +592,14 @@ int main (int argc, char** argv)
 
     case 'n':
       nint = atoi (optarg);
+      break;
+
+    case 'M':
+      smooth_after = atoi (optarg);
+      break;
+
+    case 'm':
+      smooth_before = atoi (optarg);
       break;
 
     case 'o':
@@ -470,6 +632,12 @@ int main (int argc, char** argv)
     }
   }
 
+  if ((smooth_before || smooth_after) && dual)
+    {
+      cerr << "Cannot currently box-car smooth when combining modes" << endl;
+      return -1;
+    }
+
   cerr << "Simulating " << ndat << " Stokes samples" << endl;
 
   random_init ();
@@ -482,39 +650,35 @@ int main (int argc, char** argv)
   Matrix<2,2, complex<double> > tot_rho;
   Matrix<4,4, complex<double> > totsq_rho;
 
-  single.set_Stokes (stokes);
+  source.set_Stokes (stokes);
 
   if (dual)
   {
     dual->set_normal (&gasdev);
-    dual->sample_size = nint;
+    stokes_sample = dual;
   }
   else
-    single.set_normal (&gasdev);
+  {
+    source.set_normal (&gasdev);
+
+    mode* s = &source;
+
+    if (smooth_before > 1)
+      s = new boxcar_mode (s, smooth_before);
+
+    if (smooth_after > 1)
+      stokes_sample = new boxcar_sample (s, smooth_after);
+    else
+      stokes_sample = new single(s);
+  }
+
+  stokes_sample->sample_size = nint;
 
   for (uint64_t idat=0; idat<ndat; idat++)
   {
     Vector<4, double> mean_stokes;
 
-    if (dual)
-      mean_stokes = dual->get_Stokes();
-
-    else
-    {
-      for (unsigned i=0; i < nint; i++)
-      {
-	spinor<double> e = single.get_field();
-
-	if (print)
-	  cout << e.x.real() << " " << e.x.imag() << " " 
-	       << e.y.real() << " " << e.y.imag() << endl;
-
-	Vector<4, double> tmp_stokes;
-	compute_stokes (tmp_stokes, e);
-	mean_stokes += tmp_stokes;
-      }
-      mean_stokes /= nint;
-    }
+    mean_stokes = stokes_sample->get_Stokes();
 
     tot += mean_stokes;
     totsq += outer(mean_stokes, mean_stokes);
@@ -549,17 +713,8 @@ int main (int argc, char** argv)
   Vector<4, double> expected_mean;
   Matrix<4,4, double> expected_covariance;
 
-  if (dual)
-  {
-    expected_mean = dual->get_expected_mean ();
-    expected_covariance = dual->get_expected_covariance();
-  }
-  else
-  {
-    expected_mean = stokes;
-    expected_covariance = Minkowski::outer(stokes, stokes);
-    expected_covariance /= nint;
-  }
+  expected_mean = stokes_sample->get_expected_mean ();
+  expected_covariance = stokes_sample->get_expected_covariance();
 
   cerr << "mean=" << tot << endl;
   cerr << "expected=" << expected_mean << endl;
