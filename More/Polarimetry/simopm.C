@@ -39,8 +39,8 @@ void usage ()
     " \n"
     " -N Msamp    simulate Msamp mega samples \n"
     " -n Nint     integrate Nint samples before further processing \n"
-    " -m smooth   box-car smooth over smooth samples before detection \n"
-    " -M smooth   box-car smooth over smooth samples after detection \n"
+    " -m Nsamp    box-car smooth over Nsamp samples before detection \n"
+    " -M Nsamp    box-car smooth over Nsamp samples after detection \n"
     " -s i,q,u,v  single source with specified Stokes parameters \n"
     " -S          superposed modes \n"
     " -C f_A      composite modes with fraction of instances in mode A \n"
@@ -48,6 +48,7 @@ void usage ()
     " -A i,q,u,v  set the Stokes parameters of mode A \n"
     " -B i,q,u,v  set the Stokes parameters of mode B \n"
     " -l sigma    modulate mode A using a log-normal variate \n"
+    " -a Nsamp    box-car smooth the amplitude modulation function \n"
     " -p          print real part of x and y, plus diff. phase \n"
     " -r          print the statistics of the coherency matrix \n"
        << endl;
@@ -95,7 +96,17 @@ const spinor<T> operator * (const Jones<T>& j, const spinor<T>& in)
 		     j.j10 * in.x + j.j11 * in.y );
 }
 
+template<typename T>
+const spinor<T> operator * (double a, spinor<T> in)
+{
+  return in *= a;
+}
 
+template<typename T>
+const spinor<T> operator * (spinor<T> in, double a)
+{
+  return in *= a;
+}
 
 /***************************************************************************
  *
@@ -112,13 +123,11 @@ public:
   virtual void set_Stokes (const Stokes<double>& mean);
   virtual Stokes<double> get_Stokes () { return mean; }
   virtual spinor<double> get_field ();
+  virtual BoxMuller* get_normal () { return normal; }
+  virtual void set_normal (BoxMuller* n) { normal = n; }
 
-  void set_normal (BoxMuller* n) { normal = n; }
   void set_power_law (double _inner_scale) { inner_scale = _inner_scale; }
-  void set_log_normal (double _log_sigma) { log_sigma = _log_sigma; }
-
   void powerlaw (spinor<double>&);
-  void lognormal (spinor<double>&);
 
 private:
   Stokes<double> mean;
@@ -128,7 +137,6 @@ private:
   double rms;
 
   double inner_scale;
-  double log_sigma;
 };
   
 mode::mode ()
@@ -137,7 +145,6 @@ mode::mode ()
   rms = 0.5;
 
   inner_scale = 0.0;
-  log_sigma = 0.0;
 
   set_Stokes (Stokes<double>(1.0));
 }
@@ -165,15 +172,7 @@ spinor<double> mode::get_field ()
   if (inner_scale)
     powerlaw (e);
 
-  else if (log_sigma)
-    lognormal (e);
-  
   return polarizer * e;
-}
-
-void mode::lognormal (spinor<double>& e)
-{
-  e *= exp ( log_sigma * (normal->evaluate() - log_sigma) ) ;
 }
 
 void mode::powerlaw (spinor<double>& e)
@@ -198,15 +197,30 @@ void compute_stokes (Vector<4,T>& stokes, const spinor<U>& e)
   stokes[3] = 2.0*c_xy.imag();
 }
 
+class mode_decorator : public mode
+{
+protected:
+  mode* source;
+
+public:
+  mode_decorator (mode* s) { source = s; }
+  mode* get_source () { return source; }
+
+  void set_Stokes (const Stokes<double>& mean) { source->set_Stokes(mean); }
+  Stokes<double> get_Stokes () { return source->get_Stokes(); }
+  spinor<double> get_field () { return source->get_field(); }
+  BoxMuller* get_normal () { return source->get_normal(); }
+  void set_normal (BoxMuller* n) { source->set_normal(n); }
+};
+
 /***************************************************************************
  *
- *  a boxcar-smoothed single source of electromagnetic radiation
+ *  a boxcar-smoothed mode of electromagnetic radiation
  *
  ***************************************************************************/
 
-class boxcar_mode : public mode
+class boxcar_mode : public mode_decorator
 {
-  mode* source;
   vector< spinor<double> > instances;
   unsigned smooth;
   unsigned current;
@@ -221,10 +235,7 @@ class boxcar_mode : public mode
 
 public:
 
-  boxcar_mode (mode* s, unsigned n) { source = s; smooth = n; }
-
-  void set_Stokes (const Stokes<double>& mean) { source->set_Stokes(mean); }
-  Stokes<double> get_Stokes () { return source->get_Stokes(); }
+  boxcar_mode (mode* s, unsigned n) : mode_decorator(s) { smooth = n; }
 
   spinor<double> get_field ()
   {
@@ -242,6 +253,83 @@ public:
     return result;
   }
 };
+
+/***************************************************************************
+ *
+ *  an amplitude modulated mode of electromagnetic radiation
+ *
+ ***************************************************************************/
+
+class modulated_mode : public mode_decorator
+{
+public:
+
+  modulated_mode (mode* s) : mode_decorator(s) { }
+
+  // return a random scalar modulation factor
+  virtual double modulation () = 0;
+
+  spinor<double> get_field ()
+  {
+    return modulation() * source->get_field();
+  }
+};
+
+class lognormal_mode : public modulated_mode
+{
+  double log_sigma;
+
+public:
+
+  lognormal_mode (mode* s, double ls) : modulated_mode (s) { log_sigma = ls;}
+
+  // return a random scalar modulation factor
+  double modulation ()
+  {
+    return exp ( log_sigma * (get_normal()->evaluate() - log_sigma) ) ;
+  }
+};
+
+
+class boxcar_modulated_mode : public modulated_mode
+{
+  vector< double > instances;
+  unsigned smooth;
+  unsigned current;
+
+  void setup()
+  {
+    current = 0;
+    instances.resize (smooth);
+    for (unsigned i=1; i<smooth; i++)
+      instances[i] = mod->modulation();
+  }
+
+  modulated_mode* mod;
+
+public:
+
+  boxcar_modulated_mode (modulated_mode* s, unsigned n)
+    : modulated_mode(s->get_source()) { smooth = n; mod = s; }
+
+  double modulation ()
+  {
+    if (instances.size() < smooth)
+      setup ();
+
+    instances[current] = mod->modulation();
+    current = (current + 1) % smooth;
+
+    double result;
+    for (unsigned i=0; i<smooth; i++)
+      result += instances[i];
+
+    result /= smooth;
+    return result;
+  }
+};
+
+
 
 /***************************************************************************
  *
@@ -528,6 +616,7 @@ int main (int argc, char** argv)
 
   unsigned smooth_before = 0;      // box-car smoothing width pre-detection
   unsigned smooth_after = 0;       // box-car smoothing width post-detection
+  unsigned smooth_modulator = 0;
 
   bool verbose = false;
 
@@ -541,8 +630,10 @@ int main (int argc, char** argv)
   bool print = false;
   bool rho_stats = false;
 
+  double log_sigma = 0.0;
+
   int c;
-  while ((c = getopt(argc, argv, "hn:N:m:M:s:SC:D:A:B:l:opr")) != -1)
+  while ((c = getopt(argc, argv, "a:hn:N:m:M:s:SC:D:A:B:l:opr")) != -1)
   {
     switch (c)
     {
@@ -577,15 +668,9 @@ int main (int argc, char** argv)
     }
 
     case 'l':
-      {
-	float log_sigma = atof (optarg);
-	if (dual)
-	  dual->A.set_log_normal (log_sigma);
-	else
-	  source.set_log_normal (log_sigma);
-	break;
-      }
-
+      log_sigma = atof (optarg);
+      break;
+      
     case 'N':
       ndat = ndat * atof (optarg);
       break;
@@ -600,6 +685,10 @@ int main (int argc, char** argv)
 
     case 'm':
       smooth_before = atoi (optarg);
+      break;
+
+    case 'a':
+      smooth_modulator = atoi (optarg);
       break;
 
     case 'o':
@@ -662,6 +751,14 @@ int main (int argc, char** argv)
     source.set_normal (&gasdev);
 
     mode* s = &source;
+
+    modulated_mode* mod = 0;
+
+    if (log_sigma)
+      s = mod = new lognormal_mode (s, log_sigma);
+
+    if (smooth_modulator > 1 && mod)
+      s = new boxcar_modulated_mode (mod, smooth_modulator);
 
     if (smooth_before > 1)
       s = new boxcar_mode (s, smooth_before);
