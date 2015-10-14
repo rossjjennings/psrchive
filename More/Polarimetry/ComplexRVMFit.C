@@ -377,12 +377,19 @@ void Pulsar::ComplexRVMFit::solve ()
   MEAL::LevenbergMarquardt< complex<double> > fit;
   fit.verbose = MEAL::Function::verbose;
 
+#if FIX_THIS_LATER
+  /*
+    I can't remember why it was necessary to normalize the data, but
+    this is a bad idea when performing a global fit (e.g. chi-squared map)
+  */
+
   double renorm = 1/max_L;
 
   for (unsigned i=0; i < data_y.size(); i++)
     data_y[i] *= renorm;
 
   model->renormalize( renorm );
+#endif
 
   chisq = fit.init (data_x, data_y, *model);
 
@@ -390,7 +397,7 @@ void Pulsar::ComplexRVMFit::solve ()
     throw Error (InvalidState, "Pulsar::ComplexRVMFit::solve",
 		 "non-finite chisq");
 
-  // if (verbose)
+  if (verbose)
     cerr << "Pulsar::ComplexRVMFit::solve initial chisq = " << chisq << endl;
 
   float close = 1e-3;
@@ -425,7 +432,7 @@ void Pulsar::ComplexRVMFit::solve ()
     iter ++;
   }
 
- // if (verbose)
+  if (verbose)
     cerr << "Pulsar::ComplexRVMFit::solve iterations = " << iter << endl;
 
   check_parameters ();
@@ -613,9 +620,11 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
 		 "no data");
 
   vector<double> linear (nstate);
-  for (unsigned i=0; i<nstate; i++)
-    linear[i] = cRVM->get_linear(i).get_value();
+  vector<double> best_linear (nstate);
 
+  for (unsigned i=0; i<nstate; i++)
+    best_linear[i] = linear[i] = cRVM->get_linear(i).get_value();
+  
   bool map_beta = range_beta.first != range_beta.second;
   if (map_beta)
     range_zeta = range_beta;
@@ -653,39 +662,62 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
   float best_alpha = 0.0;
   float best_zeta = 0.0;
   
+  float best_phi0 = peak_phase;
+  float best_psi0 = peak_pa;
+  
   vector<double> chisq_surface;
   unsigned chisq_index = 0;
 
   if (chisq_map)
   {
+    // disable fits for alpha and zeta/beta
     RVM->magnetic_axis->set_infit (0, false);
     if (RVM->impact)
       RVM->impact->set_infit (0, false);
     else
       RVM->line_of_sight->set_infit (0, false);
+
     chisq_surface.resize (nalpha * nzeta);
   }
 
   for (double alpha=range_alpha.first; 
-       alpha < range_alpha.second; 
+       alpha <= range_alpha.second; 
        alpha += step_alpha)
   {
     for (double zeta=range_zeta.first; 
-	 zeta < range_zeta.second;
+	 zeta <= range_zeta.second;
 	 zeta += step_zeta) try
     {
+      if (alpha == zeta)
+	continue;
+
+      cerr << "alpha=" << alpha;
       RVM->magnetic_axis->set_value (alpha);
 
       if (map_beta)
+      {
+	cerr << " beta=" << zeta << endl;
 	RVM->impact->set_value (zeta);
+      }
       else
+      {
+	cerr << " zeta=" << zeta << endl;
 	RVM->line_of_sight->set_value (zeta);
+      }
 
       // ensure that each attempt starts with the same guess
+#if 1
       RVM->magnetic_meridian->set_value (peak_phase);
       RVM->reference_position_angle->set_value (peak_pa);
       for (unsigned i=0; i<nstate; i++)
 	cRVM->set_linear(i, linear[i]);
+#else
+      // start each attempt with the values from the best fit
+      RVM->magnetic_meridian->set_value (best_phi0);
+      RVM->reference_position_angle->set_value (best_psi0);
+      for (unsigned i=0; i<nstate; i++)
+	cRVM->set_linear(i, best_linear[i]);
+#endif
 
       solve ();
 
@@ -701,15 +733,20 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
 	best_chisq = chisq;
 	best_alpha = alpha;
 	best_zeta = zeta;
+
+	best_phi0 = RVM->magnetic_meridian->get_value ().val;
+	best_psi0 = RVM->reference_position_angle->get_value ().val;
+	for (unsigned i=0; i<nstate; i++)
+	  best_linear[i] = cRVM->get_linear(i).get_value();
       }
 
       chisq_index ++;
     }
     catch (Error& error)
     {
+      cerr << "fit failed on alpha=" << alpha << " zeta=" << zeta << endl;
       if (verbose)
-	cerr << "exception thrown alpha=" << alpha << " zeta=" << zeta << endl
-	     << error.get_message() << endl;
+	cerr << error.get_message() << endl;
 
       chisq_index ++;
     }
@@ -742,7 +779,7 @@ void Pulsar::ComplexRVMFit::global_search (unsigned nalpha, unsigned nzeta)
     }
   }
 
-  // cerr << "BEST chisq=" << best_chisq << endl;
+  cerr << "BEST chisq=" << best_chisq << endl;
 
   RVM->magnetic_axis->set_value (best_alpha);
 
