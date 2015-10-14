@@ -163,7 +163,7 @@ void Pulsar::ArrivalTime::get_toas (unsigned isub,
 
     const Profile* profile = subint->get_Profile (0, ichan);
 
-    if (skip_bad && profile->get_weight() == 0)
+    if (skip_bad && (profile->get_weight() == 0) || (shift && standard->get_Profile (0,0,ichan)->get_weight() == 0))
       continue;
     
     try
