@@ -36,6 +36,9 @@ namespace Pulsar {
     //! The policy used to weight each profile during combine
     static Option< Weight > weight_strategy;
 
+    //! Should a new predictor be always generated?
+    static Option< bool > force_new_predictor;
+
   protected:
 
     //! Return true if there is a benign reason to stop
@@ -55,6 +58,8 @@ namespace Pulsar {
 
     //! Return the policy used to verify that data are mixable
     virtual const Archive::Match* get_mixable_policy (const Archive* into);
+
+    void generate_new_predictor( Archive* into, Archive* from );
 
   };
   
