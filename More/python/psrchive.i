@@ -128,6 +128,7 @@ void pointer_tracker_remove(Reference::Able *ptr) {
 %ignore Pulsar::Profile::transition_duty_cycle;
 %ignore Pulsar::Profile::default_duty_cycle;
 %ignore Pulsar::FrequencyAppend::weight_strategy;
+%ignore Pulsar::FrequencyAppend::force_new_predictor;
 
 // Also Functor
 %ignore Pulsar::Profile::peak_edges_strategy;
