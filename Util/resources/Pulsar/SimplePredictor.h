@@ -90,6 +90,13 @@ namespace Pulsar {
     //! Get the reference epoch
     MJD get_reference_epoch () const { return reference_epoch; }
 
+    //! alias for reference epoch used by Pulsar::inverse_phase
+    MJD    get_reftime       () const { return reference_epoch; }
+    //! reference phase is always zero; used by Pulsar::inverse_phase
+    Phase  get_refphase      () const { return 0.0; }
+    //! spin frequency at reference epoch; used by Pulsar::inverse phase
+    double get_reffrequency  () const { return coefs.at(0); }
+    
   private:
 
     //! Polynomial coefficients
