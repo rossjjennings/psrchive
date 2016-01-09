@@ -43,6 +43,7 @@ void usage ()
     " -M Nsamp    box-car smooth over Nsamp samples after detection \n"
     " -s i,q,u,v  single source with specified Stokes parameters \n"
     " -S          superposed modes \n"
+    " -X          cross-correlate the modes after detection \n"
     " -C f_A      composite modes with fraction of instances in mode A \n"
     " -D F_A      disjoint modes with fraction of samples in mode A \n"
     " -A i,q,u,v  set the Stokes parameters of mode A \n"
@@ -51,6 +52,7 @@ void usage ()
     " -a Nsamp    box-car smooth the amplitude modulation function \n"
     " -p          print real part of x and y, plus diff. phase \n"
     " -r          print the statistics of the coherency matrix \n"
+    " -d          print only the variances of each Stokes parameter \n"
        << endl;
 }
 
@@ -122,6 +124,11 @@ public:
 
   virtual void set_Stokes (const Stokes<double>& mean);
   virtual Stokes<double> get_Stokes () { return mean; }
+
+  virtual Matrix<4,4, double> get_covariance ()
+  { return Minkowski::outer (mean, mean); }
+  virtual Stokes<double> get_mean () { return mean; }
+
   virtual spinor<double> get_field ();
   virtual BoxMuller* get_normal () { return normal; }
   virtual void set_normal (BoxMuller* n) { normal = n; }
@@ -208,6 +215,10 @@ public:
 
   void set_Stokes (const Stokes<double>& mean) { source->set_Stokes(mean); }
   Stokes<double> get_Stokes () { return source->get_Stokes(); }
+
+  Matrix<4,4, double> get_covariance () { return source->get_covariance(); }
+  Stokes<double> get_mean () { return source->get_mean(); }
+
   spinor<double> get_field () { return source->get_field(); }
   BoxMuller* get_normal () { return source->get_normal(); }
   void set_normal (BoxMuller* n) { source->set_normal(n); }
@@ -262,21 +273,61 @@ public:
 
 class modulated_mode : public mode_decorator
 {
+  double tot, totsq;
+  uint64_t count;
+
 public:
 
-  modulated_mode (mode* s) : mode_decorator(s) { }
+  modulated_mode (mode* s) : mode_decorator(s) { tot=0; totsq=0; count=0; }
+
+  ~modulated_mode ()
+  {
+    tot /= count;
+    totsq /= count;
+    totsq -= tot*tot;
+    cerr << "modulated_mode mean=" << tot << " var=" << totsq << endl;
+  }
 
   // return a random scalar modulation factor
   virtual double modulation () = 0;
 
+  // return the mean of the scalar modulation factor
+  virtual double get_mod_mean () = 0;
+
+  // return the variance of the scalar modulation factor
+  virtual double get_mod_variance () = 0;
+
   spinor<double> get_field ()
   {
-    return modulation() * source->get_field();
+    double mod = modulation();
+    tot+=mod;
+    totsq+=mod*mod;
+    count+=1;
+    return sqrt(mod) * source->get_field();
   }
+
+  Matrix<4,4,double> get_covariance ()
+  {
+    double mean = get_mod_mean();
+    double var = get_mod_variance();
+
+    Matrix<4,4,double> C = source->get_covariance();
+    C *= (mean*mean + var);
+    Matrix<4,4,double> o = outer (get_Stokes(), get_Stokes());
+    o *= var;
+    return C + o;
+  }
+
+  Stokes<double> get_mean ()
+  {
+    return get_mod_mean () * source->get_mean();
+  }
+
 };
 
 class lognormal_mode : public modulated_mode
 {
+  // standard deviation of the logarithm of the random variate
   double log_sigma;
 
 public:
@@ -288,6 +339,11 @@ public:
   {
     return exp ( log_sigma * (get_normal()->evaluate() - log_sigma) ) ;
   }
+
+  double get_mod_mean () { return exp (-0.5*log_sigma*log_sigma); }
+  
+  double get_mod_variance () { return 1.0 - exp(-log_sigma*log_sigma); }
+
 };
 
 
@@ -307,10 +363,12 @@ class boxcar_modulated_mode : public modulated_mode
 
   modulated_mode* mod;
 
+  unsigned count;
+
 public:
 
   boxcar_modulated_mode (modulated_mode* s, unsigned n)
-    : modulated_mode(s->get_source()) { smooth = n; mod = s; }
+    : modulated_mode(s->get_source()) { smooth = n; mod = s; count = 0; }
 
   double modulation ()
   {
@@ -325,7 +383,24 @@ public:
       result += instances[i];
 
     result /= smooth;
+#if 0
+    if (count < 1024*128)
+    {
+      cerr << "mod " <<  result << endl;
+      count ++;
+    }
+#endif
     return result;
+  }
+
+  double get_mod_variance ()
+  {
+    return mod->get_mod_variance() / smooth;
+  }
+
+  double get_mod_mean ()
+  {
+    return mod->get_mod_mean () / smooth;
   }
 };
 
@@ -348,8 +423,8 @@ public:
   virtual ~sample () {}
 
   virtual Stokes<double> get_Stokes () = 0;
-  virtual Vector<4, double> get_expected_mean () = 0;
-  virtual Matrix<4,4, double> get_expected_covariance () = 0;
+  virtual Vector<4, double> get_mean () = 0;
+  virtual Matrix<4,4, double> get_covariance () = 0;
 };
 
 /***************************************************************************
@@ -364,6 +439,8 @@ public:
   mode* source;
 
   single (mode* s) { source = s; }
+
+  ~single () { delete source; }
 
   virtual Stokes<double> get_Stokes_instance ()
   {
@@ -382,15 +459,14 @@ public:
     return result;
   }
 
-  Vector<4, double> get_expected_mean ()
+  Vector<4, double> get_mean ()
   {
-    return source->get_Stokes();
+    return source->get_mean();
   }
 
-  Matrix<4,4, double> get_expected_covariance ()
+  Matrix<4,4, double> get_covariance ()
   {
-    Stokes<double> stokes = source->get_Stokes();
-    Matrix<4,4, double> result = Minkowski::outer(stokes, stokes);
+    Matrix<4,4, double> result = source->get_covariance ();
     result /= sample_size;
     return result;
   }
@@ -436,12 +512,12 @@ class superposed : public combination
     return result;
   }
 
-  Vector<4, double> get_expected_mean ()
+  Vector<4, double> get_mean ()
   {
-    return A.get_Stokes() + B.get_Stokes();
+    return A.get_mean() + B.get_mean();
   }
 
-  Matrix<4,4, double> get_expected_covariance ()
+  Matrix<4,4, double> get_covariance ()
   {
     Stokes<double> stokes = A.get_Stokes() + B.get_Stokes();
     Matrix<4,4, double> result = Minkowski::outer(stokes, stokes);
@@ -487,18 +563,18 @@ public:
     return result;
   }
 
-  Vector<4, double> get_expected_mean ()
+  Vector<4, double> get_mean ()
   {
     unsigned A_sample_size = A_fraction * sample_size;
     unsigned B_sample_size = sample_size - A_sample_size;
     Vector<4,double> result 
-      = A_sample_size * A.get_Stokes()
-      + B_sample_size * B.get_Stokes();
+      = A_sample_size * A.get_mean()
+      + B_sample_size * B.get_mean();
     result /= sample_size;
     return result;
   }
 
-  Matrix<4,4, double> get_expected_covariance ()
+  Matrix<4,4, double> get_covariance ()
   {
     unsigned A_sample_size = A_fraction * sample_size;
     unsigned B_sample_size = sample_size - A_sample_size;
@@ -545,12 +621,12 @@ public:
     return result;
   }
 
-  Vector<4, double> get_expected_mean ()
+  Vector<4, double> get_mean ()
   {
-    return A_fraction * A.get_Stokes() + (1-A_fraction) * B.get_Stokes();
+    return A_fraction * A.get_mean() + (1-A_fraction) * B.get_mean();
   }
 
-  Matrix<4,4, double> get_expected_covariance ()
+  Matrix<4,4, double> get_covariance ()
   {
     Matrix<4,4,double> C_A = Minkowski::outer (A.get_Stokes(), A.get_Stokes());
     Matrix<4,4,double> C_B = Minkowski::outer (B.get_Stokes(), B.get_Stokes());
@@ -622,18 +698,21 @@ int main (int argc, char** argv)
 
   Stokes<double> stokes = 1.0;
   bool subtract_outer_population_mean = false;
-  mode source;
 
+  mode source;
   combination* dual = NULL;
   sample* stokes_sample = NULL;
 
+  bool cross_correlate = false;
+
   bool print = false;
   bool rho_stats = false;
+  bool variances_only = false;
 
   double log_sigma = 0.0;
 
   int c;
-  while ((c = getopt(argc, argv, "a:hn:N:m:M:s:SC:D:A:B:l:opr")) != -1)
+  while ((c = getopt(argc, argv, "a:dhn:N:m:M:s:SC:D:A:B:l:oprX")) != -1)
   {
     switch (c)
     {
@@ -703,6 +782,11 @@ int main (int argc, char** argv)
       dual = new superposed;
       break;
 
+    case 'X':
+      dual = new superposed;
+      cross_correlate = true;
+      break;
+
     case 'C':
       dual = new composite( atof(optarg) );
       break;
@@ -713,6 +797,10 @@ int main (int argc, char** argv)
 
     case 'r':
       rho_stats = true;
+      break;
+
+    case 'd':
+      variances_only = true;
       break;
 
     case 'v':
@@ -771,6 +859,41 @@ int main (int argc, char** argv)
 
   stokes_sample->sample_size = nint;
 
+  if (cross_correlate)
+  {
+    sample* A = new single (&(dual->A));
+    A->sample_size = nint;
+
+    sample* B = new single (&(dual->B));
+    B->sample_size = nint;
+
+    Vector<4, double> tot_A;
+    Vector<4, double> tot_B;
+    Matrix<4,4, double> tot_AB;
+
+    for (uint64_t idat=0; idat<ndat; idat++)
+    {
+      Vector<4, double> S_A = A->get_Stokes();
+      Vector<4, double> S_B = B->get_Stokes();
+
+      tot_A += S_A;
+      tot_B += S_B;
+      tot_AB += outer(S_A, S_B);
+
+      ntot ++;
+    }
+
+    tot_A /= ntot;
+    tot_B /= ntot;
+    tot_AB /= ntot;
+    tot_AB -= outer(tot_A,tot_B);
+
+    cerr << "\nAmean=" << tot_A << endl;
+    cerr << "\nBmean=" << tot_B << endl;
+    cerr << "\nXcovar=\n" << tot_AB << endl;
+    return 0;
+  }
+
   for (uint64_t idat=0; idat<ndat; idat++)
   {
     Vector<4, double> mean_stokes;
@@ -794,6 +917,25 @@ int main (int argc, char** argv)
   tot /= ntot;
   totsq /= ntot;
 
+  if (subtract_outer_population_mean)
+    totsq -= outer(stokes,stokes);
+  else
+    totsq -= outer(tot,tot);
+
+  if (variances_only)
+  {
+    for (unsigned i=0; i<4; i++)
+      cout << "var[" << i << "] = " << totsq[i][i] << endl;
+    
+    return 0;
+  }
+
+  Vector<4, double> expected_mean;
+  Matrix<4,4, double> expected_covariance;
+
+  expected_mean = stokes_sample->get_mean ();
+  expected_covariance = stokes_sample->get_covariance();
+
   cerr << "\n"
     " ******************************************************************* \n"
     "\n"
@@ -802,22 +944,13 @@ int main (int argc, char** argv)
     " ******************************************************************* \n"
        << endl;
 
-  if (subtract_outer_population_mean)
-    totsq -= outer(stokes,stokes);
-  else
-    totsq -= outer(tot,tot);
-
-  Vector<4, double> expected_mean;
-  Matrix<4,4, double> expected_covariance;
-
-  expected_mean = stokes_sample->get_expected_mean ();
-  expected_covariance = stokes_sample->get_expected_covariance();
-
   cerr << "mean=" << tot << endl;
   cerr << "expected=" << expected_mean << endl;
 
   cerr << "\ncovar=\n" << totsq << endl;
   cerr << "expected=\n" << expected_covariance << endl;
+
+  delete stokes_sample;
 
   if (!rho_stats)
     return 0;
