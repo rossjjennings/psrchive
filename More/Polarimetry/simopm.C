@@ -27,6 +27,8 @@
 #include <time.h>
 #include <inttypes.h>
 
+// #define _DEBUG 1
+
 using namespace std;
 
 void usage ()
@@ -125,11 +127,20 @@ public:
   virtual void set_Stokes (const Stokes<double>& mean);
   virtual Stokes<double> get_Stokes () { return mean; }
 
-  virtual Matrix<4,4, double> get_covariance ()
-  { return Minkowski::outer (mean, mean); }
+  //! Return the expected mean Stokes parameters
   virtual Stokes<double> get_mean () { return mean; }
 
+  //! Return the expected covariances between the Stokes parameters
+  virtual Matrix<4,4, double> get_covariance ()
+  { return Minkowski::outer (mean, mean); }
+
+  //! Return the sum of the intensity autocorrelation function
+  virtual double get_autocorrelation (unsigned nsample) { return 0; }
+
+  //! Return a random instance of the electric field vector
   virtual spinor<double> get_field ();
+
+  //! Return BoxMuller object used to generate normally distributed numbers
   virtual BoxMuller* get_normal () { return normal; }
   virtual void set_normal (BoxMuller* n) { normal = n; }
 
@@ -273,20 +284,18 @@ public:
 
 class modulated_mode : public mode_decorator
 {
+#if _DEBUG
   double tot, totsq;
   uint64_t count;
+#endif
 
 public:
 
-  modulated_mode (mode* s) : mode_decorator(s) { tot=0; totsq=0; count=0; }
-
-  ~modulated_mode ()
-  {
-    tot /= count;
-    totsq /= count;
-    totsq -= tot*tot;
-    cerr << "modulated_mode mean=" << tot << " var=" << totsq << endl;
-  }
+  modulated_mode (mode* s) : mode_decorator(s) { 
+#if -DEBUG
+    tot=0; totsq=0; count=0; 
+#endif
+}
 
   // return a random scalar modulation factor
   virtual double modulation () = 0;
@@ -300,9 +309,11 @@ public:
   spinor<double> get_field ()
   {
     double mod = modulation();
+#if _DEBUG
     tot+=mod;
     totsq+=mod*mod;
     count+=1;
+#endif
     return sqrt(mod) * source->get_field();
   }
 
@@ -310,6 +321,15 @@ public:
   {
     double mean = get_mod_mean();
     double var = get_mod_variance();
+
+#if _DEBUG
+    cerr << "modulated_mode::get_covariance expected mean=" << mean
+	 << " var=" << var << endl;
+    tot /= count;
+    totsq /= count;
+    totsq -= tot*tot;
+    cerr << " measured mean=" << tot << " var=" << totsq << endl;
+#endif
 
     Matrix<4,4,double> C = source->get_covariance();
     C *= (mean*mean + var);
@@ -337,12 +357,12 @@ public:
   // return a random scalar modulation factor
   double modulation ()
   {
-    return exp ( log_sigma * (get_normal()->evaluate() - log_sigma) ) ;
+    return exp ( log_sigma * (get_normal()->evaluate() - 0.5*log_sigma) ) ;
   }
 
-  double get_mod_mean () { return exp (-0.5*log_sigma*log_sigma); }
+  double get_mod_mean () { return 1.0; }
   
-  double get_mod_variance () { return 1.0 - exp(-log_sigma*log_sigma); }
+  double get_mod_variance () { return exp(log_sigma*log_sigma) - 1.0; }
 
 };
 
@@ -363,12 +383,10 @@ class boxcar_modulated_mode : public modulated_mode
 
   modulated_mode* mod;
 
-  unsigned count;
-
 public:
 
   boxcar_modulated_mode (modulated_mode* s, unsigned n)
-    : modulated_mode(s->get_source()) { smooth = n; mod = s; count = 0; }
+    : modulated_mode(s->get_source()) { smooth = n; mod = s; }
 
   double modulation ()
   {
@@ -378,18 +396,12 @@ public:
     instances[current] = mod->modulation();
     current = (current + 1) % smooth;
 
-    double result;
+    double result = 0.0;
     for (unsigned i=0; i<smooth; i++)
       result += instances[i];
 
     result /= smooth;
-#if 0
-    if (count < 1024*128)
-    {
-      cerr << "mod " <<  result << endl;
-      count ++;
-    }
-#endif
+
     return result;
   }
 
@@ -400,7 +412,24 @@ public:
 
   double get_mod_mean ()
   {
-    return mod->get_mod_mean () / smooth;
+    return mod->get_mod_mean ();
+  }
+
+  //! Return the sum of the intensity autocorrelation function
+  double get_autocorrelation (unsigned nsample) 
+  {
+    double nsum = std::min (smooth, nsample);
+    double result = 0;
+
+    // sum all of the elements in the upper triangle of the covariance matrix
+    for (unsigned offset=1; offset < nsum; offset++)
+    {
+      double acf = (smooth - offset) / double (smooth * smooth);
+      result += (nsample - offset) * acf;
+    }
+
+    // multiply by two to also sum the symmetric lower triangle
+    return 2.0 * result * mod->get_mod_variance();
   }
 };
 
@@ -467,6 +496,13 @@ public:
   Matrix<4,4, double> get_covariance ()
   {
     Matrix<4,4, double> result = source->get_covariance ();
+
+    double acf = source->get_autocorrelation (sample_size);
+    Matrix<4,4, double> o = outer( get_mean(), get_mean() );
+    o *= acf / sample_size;
+
+    result += o;
+
     result /= sample_size;
     return result;
   }
