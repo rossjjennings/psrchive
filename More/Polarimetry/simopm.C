@@ -454,6 +454,19 @@ public:
   virtual Stokes<double> get_Stokes () = 0;
   virtual Vector<4, double> get_mean () = 0;
   virtual Matrix<4,4, double> get_covariance () = 0;
+
+  // worker function for sub-classes
+  Matrix<4,4, double> get_covariance (mode* s, unsigned n)
+  {
+    Matrix<4,4, double> result = s->get_covariance ();
+
+    double acf = s->get_autocorrelation (n);
+    Matrix<4,4, double> out = outer( s->get_mean(), s->get_mean() );
+    out *= acf / n;
+    result += out;
+    result /= n;
+    return result;
+  }
 };
 
 /***************************************************************************
@@ -495,16 +508,7 @@ public:
 
   Matrix<4,4, double> get_covariance ()
   {
-    Matrix<4,4, double> result = source->get_covariance ();
-
-    double acf = source->get_autocorrelation (sample_size);
-    Matrix<4,4, double> o = outer( get_mean(), get_mean() );
-    o *= acf / sample_size;
-
-    result += o;
-
-    result /= sample_size;
-    return result;
+    return sample::get_covariance (source, sample_size);
   }
 };
 
@@ -557,15 +561,15 @@ class superposed : public combination
 
   Matrix<4,4, double> get_covariance ()
   {
-    Matrix<4,4, double> result = A->get_covariance();
-    result += B->get_covariance();
+    Matrix<4,4, double> result = sample::get_covariance (A, sample_size);
+    result += sample::get_covariance (B, sample_size);
 
     Stokes<double> mean_A = A->get_mean();
     Stokes<double> mean_B = B->get_mean();
     Matrix<4,4, double> xcovar = Minkowski::outer(mean_A, mean_B);
+    xcovar /= sample_size;
     result += xcovar + transpose(xcovar);
     
-    result /= sample_size;
     return result;
   }
 };
@@ -622,11 +626,15 @@ public:
     unsigned A_sample_size = A_fraction * sample_size;
     unsigned B_sample_size = sample_size - A_sample_size;
 
-    Matrix<4,4,double> C_A = A->get_covariance();
-    Matrix<4,4,double> C_B = B->get_covariance();
+    Matrix<4,4,double> C_A = sample::get_covariance (A, A_sample_size);
+    Matrix<4,4,double> C_B = sample::get_covariance (B, B_sample_size);
 
-    C_A *= A_sample_size / double(sample_size * sample_size);
-    C_B *= B_sample_size / double(sample_size * sample_size);
+    // A_fraction * sample_size may not be an integer number of instances
+    double f_A = A_sample_size / double(sample_size);
+    double f_B = B_sample_size / double(sample_size);
+
+    C_A *= f_A * f_A;
+    C_B *= f_B * f_B;
 
     return C_A + C_B;
   }
@@ -671,14 +679,14 @@ public:
 
   Matrix<4,4, double> get_covariance ()
   {
-    Matrix<4,4,double> C_A = A->get_covariance();
-    Matrix<4,4,double> C_B = B->get_covariance();
+    Matrix<4,4,double> C_A = sample::get_covariance (A, sample_size);
+    Matrix<4,4,double> C_B = sample::get_covariance (B, sample_size);
 
     Vector<4,double> diff = A->get_mean() - B->get_mean();
     Matrix<4,4,double> D = outer (diff, diff);
 
-    C_A *= A_fraction / sample_size;
-    C_B *= (1-A_fraction) / sample_size;
+    C_A *= A_fraction;
+    C_B *= (1-A_fraction);
     D *= A_fraction * (1-A_fraction);
 
     return C_A + C_B + D;
@@ -727,26 +735,39 @@ public:
   }
 };
 
-
-unsigned smooth_before = 0;     // box-car smoothing width pre-detection
-unsigned smooth_modulator = 0;  // box-car smoothing of modulation function
-double log_sigma = 0.0;         // variance of logarithm of modulation function
-
-mode* setup_mode (mode* s)
+class mode_setup
 {
-  modulated_mode* mod = 0;
+public:
+  // box-car smoothing width pre-detection
+  unsigned smooth_before;
+  // box-car smoothing of modulation function
+  unsigned smooth_modulator;
+  // variance of logarithm of modulation function
+  double log_sigma;
 
-  if (log_sigma)
-    s = mod = new lognormal_mode (s, log_sigma);
+  mode_setup ()
+  {
+    smooth_before = 0;
+    smooth_modulator = 0;
+    log_sigma = 0;
+  }
 
-  if (smooth_modulator > 1 && mod)
-    s = new boxcar_modulated_mode (mod, smooth_modulator);
+  mode* setup_mode (mode* s)
+  {
+    modulated_mode* mod = 0;
+
+    if (log_sigma)
+      s = mod = new lognormal_mode (s, log_sigma);
+
+    if (smooth_modulator > 1 && mod)
+      s = new boxcar_modulated_mode (mod, smooth_modulator);
   
-  if (smooth_before > 1)
-    s = new boxcar_mode (s, smooth_before);
+    if (smooth_before > 1)
+      s = new boxcar_mode (s, smooth_before);
 
-  return s;
-}
+    return s;
+  }
+};
 
 int main (int argc, char** argv)
 {
@@ -763,6 +784,9 @@ int main (int argc, char** argv)
   mode source;
   combination* dual = NULL;
   sample* stokes_sample = NULL;
+
+  mode_setup setup_A;
+  mode_setup setup_B;
 
   bool cross_correlate = false;
 
@@ -806,7 +830,10 @@ int main (int argc, char** argv)
     }
 
     case 'l':
-      log_sigma = atof (optarg);
+      if (optarg[0]=='B')
+	setup_B.log_sigma = atof (optarg+1);
+      else
+	setup_A.log_sigma = atof (optarg);
       break;
       
     case 'N':
@@ -822,11 +849,17 @@ int main (int argc, char** argv)
       break;
 
     case 'm':
-      smooth_before = atoi (optarg);
+      if (optarg[0]=='B')
+	setup_B.smooth_before = atoi (optarg+1);
+      else
+	setup_A.smooth_before = atoi (optarg);
       break;
 
     case 'a':
-      smooth_modulator = atoi (optarg);
+      if (optarg[0]=='B')
+	setup_B.smooth_modulator = atoi (optarg+1);
+      else
+	setup_A.smooth_modulator = atoi (optarg);
       break;
 
     case 'o':
@@ -868,12 +901,6 @@ int main (int argc, char** argv)
     }
   }
 
-  if ((smooth_before || smooth_after) && dual)
-    {
-      cerr << "Cannot currently box-car smooth when combining modes" << endl;
-      return -1;
-    }
-
   cerr << "Simulating " << ndat << " Stokes samples" << endl;
 
   random_init ();
@@ -893,16 +920,18 @@ int main (int argc, char** argv)
     dual->set_normal (&gasdev);
     stokes_sample = dual;
 
-    dual->A = setup_mode (dual->A);
+    dual->A = setup_A.setup_mode (dual->A);
+    dual->B = setup_B.setup_mode (dual->B);
   }
   else
   {
     source.set_normal (&gasdev);
+    mode* s = setup_A.setup_mode(&source);
 
     if (smooth_after > 1)
-      stokes_sample = new boxcar_sample (setup_mode(&source), smooth_after);
+      stokes_sample = new boxcar_sample (s, smooth_after);
     else
-      stokes_sample = new single(setup_mode(&source));
+      stokes_sample = new single(s);
   }
 
   stokes_sample->sample_size = nint;
