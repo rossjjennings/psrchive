@@ -518,10 +518,12 @@ public:
 class combination : public sample
 {
 public:
-  mode A;
-  mode B;
+  mode* A;
+  mode* B;
 
-  void set_normal (BoxMuller* n) { A.set_normal(n); B.set_normal(n); }
+  combination () { A = new mode; B = new mode; }
+
+  void set_normal (BoxMuller* n) { A->set_normal(n); B->set_normal(n); }
 };
 
 /***************************************************************************
@@ -537,8 +539,8 @@ class superposed : public combination
     Stokes<double> result;
     for (unsigned i=0; i<sample_size; i++)
     {
-      spinor<double> e_A = A.get_field();
-      spinor<double> e_B = B.get_field();
+      spinor<double> e_A = A->get_field();
+      spinor<double> e_B = B->get_field();
 
       Vector<4, double> tmp;
       compute_stokes (tmp, e_A + e_B);
@@ -550,13 +552,19 @@ class superposed : public combination
 
   Vector<4, double> get_mean ()
   {
-    return A.get_mean() + B.get_mean();
+    return A->get_mean() + B->get_mean();
   }
 
   Matrix<4,4, double> get_covariance ()
   {
-    Stokes<double> stokes = A.get_Stokes() + B.get_Stokes();
-    Matrix<4,4, double> result = Minkowski::outer(stokes, stokes);
+    Matrix<4,4, double> result = A->get_covariance();
+    result += B->get_covariance();
+
+    Stokes<double> mean_A = A->get_mean();
+    Stokes<double> mean_B = B->get_mean();
+    Matrix<4,4, double> xcovar = Minkowski::outer(mean_A, mean_B);
+    result += xcovar + transpose(xcovar);
+    
     result /= sample_size;
     return result;
   }
@@ -586,9 +594,9 @@ public:
     {
       spinor<double> e;
       if (i < A_sample_size)
-	e = A.get_field();
+	e = A->get_field();
       else
-	e = B.get_field();
+	e = B->get_field();
 
       Vector<4, double> tmp;
       compute_stokes (tmp, e);
@@ -604,8 +612,7 @@ public:
     unsigned A_sample_size = A_fraction * sample_size;
     unsigned B_sample_size = sample_size - A_sample_size;
     Vector<4,double> result 
-      = A_sample_size * A.get_mean()
-      + B_sample_size * B.get_mean();
+      = A_sample_size * A->get_mean() + B_sample_size * B->get_mean();
     result /= sample_size;
     return result;
   }
@@ -615,8 +622,8 @@ public:
     unsigned A_sample_size = A_fraction * sample_size;
     unsigned B_sample_size = sample_size - A_sample_size;
 
-    Matrix<4,4,double> C_A = Minkowski::outer (A.get_Stokes(), A.get_Stokes());
-    Matrix<4,4,double> C_B = Minkowski::outer (B.get_Stokes(), B.get_Stokes());
+    Matrix<4,4,double> C_A = A->get_covariance();
+    Matrix<4,4,double> C_B = B->get_covariance();
 
     C_A *= A_sample_size / double(sample_size * sample_size);
     C_B *= B_sample_size / double(sample_size * sample_size);
@@ -642,7 +649,7 @@ public:
   Stokes<double> get_Stokes ()
   {
     bool mode_A = random_double() < A_fraction;
-    mode* e = (mode_A) ? &A : &B;
+    mode* e = (mode_A) ? A : B;
 
     Stokes<double> result;
 
@@ -659,14 +666,15 @@ public:
 
   Vector<4, double> get_mean ()
   {
-    return A_fraction * A.get_mean() + (1-A_fraction) * B.get_mean();
+    return A_fraction * A->get_mean() + (1-A_fraction) * B->get_mean();
   }
 
   Matrix<4,4, double> get_covariance ()
   {
-    Matrix<4,4,double> C_A = Minkowski::outer (A.get_Stokes(), A.get_Stokes());
-    Matrix<4,4,double> C_B = Minkowski::outer (B.get_Stokes(), B.get_Stokes());
-    Vector<4,double> diff = A.get_Stokes() - B.get_Stokes();
+    Matrix<4,4,double> C_A = A->get_covariance();
+    Matrix<4,4,double> C_B = B->get_covariance();
+
+    Vector<4,double> diff = A->get_mean() - B->get_mean();
     Matrix<4,4,double> D = outer (diff, diff);
 
     C_A *= A_fraction / sample_size;
@@ -720,15 +728,32 @@ public:
 };
 
 
+unsigned smooth_before = 0;     // box-car smoothing width pre-detection
+unsigned smooth_modulator = 0;  // box-car smoothing of modulation function
+double log_sigma = 0.0;         // variance of logarithm of modulation function
+
+mode* setup_mode (mode* s)
+{
+  modulated_mode* mod = 0;
+
+  if (log_sigma)
+    s = mod = new lognormal_mode (s, log_sigma);
+
+  if (smooth_modulator > 1 && mod)
+    s = new boxcar_modulated_mode (mod, smooth_modulator);
+  
+  if (smooth_before > 1)
+    s = new boxcar_mode (s, smooth_before);
+
+  return s;
+}
 
 int main (int argc, char** argv)
 {
   uint64_t ndat = 1024 * 1024;     // number of Stokes samples
   unsigned nint = 1;               // number of instances in Stokes sample
 
-  unsigned smooth_before = 0;      // box-car smoothing width pre-detection
   unsigned smooth_after = 0;       // box-car smoothing width post-detection
-  unsigned smooth_modulator = 0;
 
   bool verbose = false;
 
@@ -744,8 +769,6 @@ int main (int argc, char** argv)
   bool print = false;
   bool rho_stats = false;
   bool variances_only = false;
-
-  double log_sigma = 0.0;
 
   int c;
   while ((c = getopt(argc, argv, "a:dhn:N:m:M:s:SC:D:A:B:l:oprX")) != -1)
@@ -775,9 +798,9 @@ int main (int argc, char** argv)
       }
 
       if (dual && c=='A')
-	dual->A.set_Stokes( stokes );
+	dual->A->set_Stokes( stokes );
       if (dual && c=='B')
-	dual->B.set_Stokes( stokes );
+	dual->B->set_Stokes( stokes );
 
       break;
     }
@@ -869,66 +892,20 @@ int main (int argc, char** argv)
   {
     dual->set_normal (&gasdev);
     stokes_sample = dual;
+
+    dual->A = setup_mode (dual->A);
   }
   else
   {
     source.set_normal (&gasdev);
 
-    mode* s = &source;
-
-    modulated_mode* mod = 0;
-
-    if (log_sigma)
-      s = mod = new lognormal_mode (s, log_sigma);
-
-    if (smooth_modulator > 1 && mod)
-      s = new boxcar_modulated_mode (mod, smooth_modulator);
-
-    if (smooth_before > 1)
-      s = new boxcar_mode (s, smooth_before);
-
     if (smooth_after > 1)
-      stokes_sample = new boxcar_sample (s, smooth_after);
+      stokes_sample = new boxcar_sample (setup_mode(&source), smooth_after);
     else
-      stokes_sample = new single(s);
+      stokes_sample = new single(setup_mode(&source));
   }
 
   stokes_sample->sample_size = nint;
-
-  if (cross_correlate)
-  {
-    sample* A = new single (&(dual->A));
-    A->sample_size = nint;
-
-    sample* B = new single (&(dual->B));
-    B->sample_size = nint;
-
-    Vector<4, double> tot_A;
-    Vector<4, double> tot_B;
-    Matrix<4,4, double> tot_AB;
-
-    for (uint64_t idat=0; idat<ndat; idat++)
-    {
-      Vector<4, double> S_A = A->get_Stokes();
-      Vector<4, double> S_B = B->get_Stokes();
-
-      tot_A += S_A;
-      tot_B += S_B;
-      tot_AB += outer(S_A, S_B);
-
-      ntot ++;
-    }
-
-    tot_A /= ntot;
-    tot_B /= ntot;
-    tot_AB /= ntot;
-    tot_AB -= outer(tot_A,tot_B);
-
-    cerr << "\nAmean=" << tot_A << endl;
-    cerr << "\nBmean=" << tot_B << endl;
-    cerr << "\nXcovar=\n" << tot_AB << endl;
-    return 0;
-  }
 
   for (uint64_t idat=0; idat<ndat; idat++)
   {
@@ -985,8 +962,6 @@ int main (int argc, char** argv)
 
   cerr << "\ncovar=\n" << totsq << endl;
   cerr << "expected=\n" << expected_covariance << endl;
-
-  delete stokes_sample;
 
   if (!rho_stats)
     return 0;
