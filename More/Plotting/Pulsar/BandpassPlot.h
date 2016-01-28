@@ -48,6 +48,9 @@ namespace Pulsar
             //! Get the crop level
             float get_crop() const { return crop; }
 
+            //! Get the passbands vector
+            std::vector<std::vector<float> > get_passbands() { return passbands; }
+
         private:
 
             std::vector<std::vector<float> > means;
