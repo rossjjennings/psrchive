@@ -11,7 +11,7 @@ EXTRA_DIST = psrhelp
 bin_PROGRAMS = pam pat paz psradd psrsh psrstat psrmodel psrwt \
 	fluxcal pac pcm pdv rmfit mtm sesdiv psrstability psrflux \
 	psrover psrcull calavg pcmavg fix_single psrsplit distortion \
-	drifting_subpulses dynamic_spectra psr4th
+	drifting_subpulses dynamic_spectra psr4th psrtxt2
 
 pam_SOURCES = pam.C
 
@@ -74,6 +74,7 @@ psrcull_SOURCES = psrcull.C
 
 psr4th_SOURCES = psr4th.C
 
+psrtxt2_SOURCES = psrtxt2.C
 
 # ######################################################################
 #
@@ -101,7 +102,7 @@ endif
 if HAVE_PGPLOT
 
 bin_PROGRAMS += pdmp psrplot paas pas psrdiff pacv pazi psrzap pav \
-	psrsp psrtrash spa lmfit pafit
+	psrsp psrtrash spa lmfit pafit pcmdiff
 
 lmfit_SOURCES = lmfit.C
 lmfit_LDADD = $(LDPLOT)
@@ -144,6 +145,9 @@ psrsp_LDADD = $(LDPLOT)
 
 psrtrash_SOURCES = psrtrash.C
 psrtrash_LDADD = $(LDPLOT)
+
+pcmdiff_SOURCES = pcmdiff.C
+pcmdiff_LDADD = $(LDPLOT)
 
 LDPLOT = $(top_builddir)/More/Plotting/libpsrplot.la $(LDADD) @PGPLOT_LIBS@
 
