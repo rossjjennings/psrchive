@@ -6,16 +6,7 @@
  *
  ***************************************************************************/
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.101 $
-   $Date: 2010/09/22 02:18:38 $
-   $Author: straten $ */
-
-/*
-  
-  Pulsar::Integration - base class for pulsar observations
-
-*/
+// /psrchive/Base/Classes/Pulsar/Integration.h
 
 #ifndef __Pulsar_Integration_h
 #define __Pulsar_Integration_h
@@ -116,9 +107,12 @@ namespace Pulsar {
     void cal_levels (std::vector< std::vector< Estimate<double> > >& hi,
                      std::vector< std::vector< Estimate<double> > >& lo) const;
 
-    //! Computes the weighted centre frequency of an interval of sub-chans.
+    //! Computes the weighted centre frequency of an interval of sub-channels
     double weighted_frequency (unsigned ch_start=0, unsigned ch_end=0) const;
-        
+
+    //! Computes the effective bandwidth of an interval of sub-channels
+    double effective_bandwidth (unsigned ch_start=0, unsigned ch_end=0) const;
+
     //! Set the weight of each profile to the given number
     void uniform_weight (float new_weight = 1.0);
     
