@@ -30,6 +30,9 @@ namespace Pulsar {
     ~FourthMomentStats();
 
     void set_profile (const PolnProfile* _profile);
+    void set_bandwidth (double bw);
+    void set_duration (double T) { duration = T; }
+    void set_folding_period (double P) { folding_period = P; }
 
     //! Get the estimated covariance matrix for the specified phase bin
     Matrix< 4,4,Estimate<double> > get_covariance (unsigned ibin) const;
@@ -58,6 +61,15 @@ namespace Pulsar {
   protected:
 
     Reference::To<const StokesCovariance> covariance;
+
+    //! The integration length
+    double duration;
+
+    //! The folding period
+    double folding_period;
+
+    //! The bandwidth in MHz
+    double bandwidth;
 
     std::vector< Reference::To<Profile> > eigen_value;
     std::vector< Reference::To<Profile> > regression_coefficient;
