@@ -43,6 +43,10 @@ using Pulsar::FITSArchive;
 #include "dirutil.h"
 #include "tostring.h"
 
+#ifdef HAVE_PGPLOT
+#include "Pulsar/BandpassPlot.h"
+#endif
+
 #include <algorithm>
 #include <functional>
 #include <iostream>
@@ -68,6 +72,9 @@ const char HDR_MARKER_KEY       = 'K';
 const char PA_THRESHOLD_KEY     = 'L';
 const char MINMAX_KEY           = 'm';
 const char ICHAN_KEY            = 'n';
+#ifdef HAVE_PGPLOT
+const char BANDPASS_KEY         = 'o';
+#endif
 const char PSCRUNCH_KEY         = 'p';
 const char BASELINE_KEY         = 'R';
 const char PHASE_KEY            = 'r';
@@ -102,8 +109,9 @@ using Pulsar::WidebandCorrelator;
 using Pulsar::AuxColdPlasmaMeasures;
 
 
-
-
+#ifdef HAVE_PGPLOT
+bool bandpass_text = false;
+#endif
 bool cmd_text = false;
 bool cmd_flux = false;
 bool cmd_flux2 = false;
@@ -173,6 +181,9 @@ void Usage( void )
   "   -" << BASELINE_KEY <<       "          Do not remove baseline \n"
   "   -" << TEXT_KEY <<           "          Print out profiles as ASCII text \n"
   "   -" << TEXT_HEADERS_KEY <<   "          Print out profiles as ASCII text (with per channel headers) \n"
+#ifdef HAVE_PGPLOT
+  "   -" << BANDPASS_KEY <<       "          Print out the original bandpass as ASCII text \n"
+#endif
   "   -" << HDR_MARKER_KEY <<     "          Start header lines with #\n"
   "   -" << PER_SUBINT_KEY <<     " params   Print out per subint data \n"
   "   -" << HISTORY_KEY <<        " params   Print out the history table for the archive \n"
@@ -297,6 +308,30 @@ void IntegrationHeader( Reference::To< Pulsar::Integration > intg )
   tostring_precision = 3;
   cout << " Tsub: " << tostring<double>( intg->get_duration() );
 }
+
+#ifdef HAVE_PGPLOT
+void OutputBandpassAsText( Reference::To< Pulsar::Archive > archive )
+{
+  Pulsar::BandpassPlot *bandpass = new Pulsar::BandpassPlot;
+  bandpass->prepare( archive );
+  vector<vector<float> > passbands = bandpass->get_passbands();
+
+  const float freq = archive->get_centre_frequency();
+  const float bw = fabs(archive->get_bandwidth()); // not sure this is always correct
+  float nextX = freq - bw /2;
+  const float stepX = bw / (passbands[0].size() - 1);
+
+  Header( archive );
+  for ( unsigned ichan = 1; ichan < passbands[0].size(); ++ichan) // skip the first channel
+  {
+    cout << ichan << " " << nextX << " ";
+    for (unsigned ipol = 0; ipol < passbands.size(); ++ipol)
+      cout << passbands[ipol][ichan] << " ";
+    nextX += stepX;
+    cout << endl;
+  }
+}
+#endif
 
 void OutputDataAsText( Reference::To< Pulsar::Archive > archive )
 {
@@ -1074,6 +1109,11 @@ void ProcessArchive( string filename )
    {
 	  if( cal_parameters )
 		 CalParameters( archive );
+#ifdef HAVE_PGPLOT
+          if ( bandpass_text ) {
+                 OutputBandpassAsText ( archive );
+          }
+#endif
 	  if( cmd_text || show_min_max )
 		 OutputDataAsText( archive );
 	  if( cmd_flux )
@@ -1150,6 +1190,9 @@ int main( int argc, char *argv[] ) try
    args += PULSE_FLUX_KEY;
    args += TEXT_KEY;
    args += TEXT_HEADERS_KEY;
+#ifdef HAVE_PGPLOT
+   args += BANDPASS_KEY;
+#endif
    args += PER_SUBINT_KEY; args += ":";
    args += HISTORY_KEY; args += ":";
    args += MINMAX_KEY;
@@ -1189,6 +1232,11 @@ int main( int argc, char *argv[] ) try
 			cmd_text = true;
 			per_channel_headers = true;
 			break;
+#ifdef HAVE_PGPLOT
+                 case BANDPASS_KEY:
+                        bandpass_text = true;
+                        break;
+#endif
 		 case PULSE_WIDTHS_KEY:
 			cmd_flux = true;
 			break;
@@ -1301,7 +1349,7 @@ int main( int argc, char *argv[] ) try
 
    vector< string > filenames = GetFilenames( argc, argv );
 
-   if( cal_parameters || cmd_text || cmd_flux || cmd_flux2 || show_min_max ||
+   if( bandpass_text || cal_parameters || cmd_text || cmd_flux || cmd_flux2 || show_min_max ||
 		 show_pol_frac )
    {
 	  for_each( filenames.begin(), filenames.end(), ProcessArchive );
